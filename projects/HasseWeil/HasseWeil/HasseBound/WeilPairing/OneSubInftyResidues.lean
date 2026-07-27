@@ -46,7 +46,8 @@ orders reduce to the single **base-change order-transport at the place at infini
 — the statement that the rational point `O` stays rational with ramification index `e = 1` under
 `K → K̄`.  This is the infinity twin of the affine `pointValuation` base-change.  It is now
 **DISCHARGED** (`ordAtInftyBaseChange_holds`) via the general curve transport
-`HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_functionFieldMap` (`Curves/OrdAtInftyBaseChange.lean`):
+`HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_functionFieldMap`
+(`Curves/OrdAtInftyBaseChange.lean`):
 `ord_∞(f) = -intDegree (N(f))`, the algebra norm transports under base change by the explicit
 coordinate-ring norm formula `norm_smul_basis` (a polynomial identity commuting with `K[X] → L[X]`)
 and `natDegree`-preservation under the injective `K → L`.  Every declaration of this file is then
@@ -79,9 +80,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil IsogenyBaseChangeConcrete
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
-set_option linter.style.longLine false
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
@@ -91,22 +89,27 @@ noncomputable local instance instDecEqACOSIR : DecidableEq (AlgebraicClosure K) 
 
 variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
 
-/-- **`ord_∞^K((1 − π)^K^* x_gen) = -2`** (the `K`-level pole at `O`, Silverman IV.1).  Composition of
+/-- **`ord_∞^K((1 − π)^K^* x_gen) = -2`** (the `K`-level pole at `O`, Silverman IV.1). 
+Composition of
 `isogOneSub_negFrobenius_pullback`, `addPullbackAlgHom_negFrobenius_x_gen_eq`
 (`(1 − π)^K^* x_gen = addPullback_x (−π)`), and `ord_addPullback_x_negFrobenius`. -/
 theorem ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen_K (hq : 2 ≤ Fintype.card K) :
-    (W_smooth W).ordAtInfty ((HasseWeil.isogOneSub_negFrobenius W hq).pullback (HasseWeil.x_gen W)) =
+    (W_smooth W).ordAtInfty ((HasseWeil.isogOneSub_negFrobenius W hq).pullback
+      (HasseWeil.x_gen W)) =
       ((-2 : ℤ) : WithTop ℤ) := by
-  rw [HasseWeil.isogOneSub_negFrobenius_pullback, HasseWeil.addPullbackAlgHom_negFrobenius_x_gen_eq W hq]
+  rw [HasseWeil.isogOneSub_negFrobenius_pullback,
+    HasseWeil.addPullbackAlgHom_negFrobenius_x_gen_eq W hq]
   exact HasseWeil.ord_addPullback_x_negFrobenius W hq
 
 /-- **`ord_∞^K((1 − π)^K^* y_gen) = -3`** (the `K`-level pole at `O`, Silverman IV.1).  The
 `y`-analogue of `ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen_K`, via
 `ord_addPullback_y_negFrobenius`. -/
 theorem ordAtInfty_isogOneSub_negFrobenius_pullback_y_gen_K (hq : 2 ≤ Fintype.card K) :
-    (W_smooth W).ordAtInfty ((HasseWeil.isogOneSub_negFrobenius W hq).pullback (HasseWeil.y_gen W)) =
+    (W_smooth W).ordAtInfty ((HasseWeil.isogOneSub_negFrobenius W hq).pullback
+      (HasseWeil.y_gen W)) =
       ((-3 : ℤ) : WithTop ℤ) := by
-  rw [HasseWeil.isogOneSub_negFrobenius_pullback, HasseWeil.addPullbackAlgHom_negFrobenius_y_gen_eq W hq]
+  rw [HasseWeil.isogOneSub_negFrobenius_pullback,
+    HasseWeil.addPullbackAlgHom_negFrobenius_y_gen_eq W hq]
   exact HasseWeil.ord_addPullback_y_negFrobenius W hq
 
 /-- **Base-change order-transport at infinity, as a `Prop`** (Silverman I.2 + IV.1): for nonzero
@@ -132,7 +135,8 @@ theorem ordAtInftyBaseChange_holds (L : Type*) [Field L] [Algebra K L]
   fun z hz ↦ HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_functionFieldMap
     (⟨W.toAffine⟩ : SmoothPlaneCurve K) L z hz
 
-/-- **`ord_∞^{K̄}((1 − π)_{K̄}^* x_gen) = -2`** — the pole of order `2` at `O` over `K̄`.  Chains the
+/-- **`ord_∞^{K̄}((1 − π)_{K̄}^* x_gen) = -2`** — the pole of order `2` at `O` over
+`K̄`.  Chains the
 Wall A base-change realisation `oneSubFrobeniusPullback_L_x_gen`
 (`(1 − π)_{K̄}^* x_gen = functionFieldMap((1 − π)^K^* x_gen)`), the *discharged* order-transport
 `ordAtInftyBaseChange_holds`, and the `K`-level order
@@ -176,9 +180,11 @@ section FieldGeneral
 
 variable {F : Type*} [Field F] [DecidableEq F]
 
-/-- **`InftyOrdTransport φ` from the two infinity orders** (field-general).  For any isogeny `φ` of an
+/-- **`InftyOrdTransport φ` from the two infinity orders** (field-general).  For any
+isogeny `φ` of an
 elliptic curve `E / F` with `ord_∞(φ^* x_gen) = -2` and `ord_∞(φ^* y_gen) = -3`, the order-transport
-at infinity `ord_∞(φ^* h) = ord_∞ h` holds.  Verbatim generalisation of `inftyOrdTransport_mulByInt`:
+at infinity `ord_∞(φ^* h) = ord_∞ h` holds.  Verbatim generalisation of
+`inftyOrdTransport_mulByInt`:
 the comap `w = ordAtInftyValuation ∘ φ^*` sends `x_gen ↦ exp 2`, `y_gen ↦ exp 3`, fixes `F^×`, so
 `w = ordAtInftyValuation` by the master pinning `eq_ordAtInftyValuation_of_x_y`; reading off `ord_∞`
 gives the transport. -/
@@ -242,7 +248,8 @@ theorem neg_mem_kernel_of_image_zero (W' : WeierstrassCurve F) [W'.toAffine.IsEl
     (-Q : W'.toAffine.Point) ∈ φ.kernel := by
   rw [HasseWeil.Isogeny.mem_kernel_iff, map_neg, hQ, neg_zero]
 
-/-- **The infinity comap identity from the two infinity orders + kernel-invariance** (field-general).
+/-- **The infinity comap identity from the two infinity orders + kernel-invariance**
+(field-general).
 For any isogeny `φ` of an elliptic curve and a smooth point `P` with `φ(P) = O`,
 `(pointValuation P).comap φ^* = ordAtInftyValuation`, provided
 * `ord_∞(φ^* x_gen) = -2`, `ord_∞(φ^* y_gen) = -3` (the two infinity orders), and
@@ -302,7 +309,8 @@ end FieldGeneral
 
 /-- **`InftyOrdTransport (1 − π)_{K̄}`** — the `infinity` field (Silverman III.8, `φ(O) = O`).  The
 field-general pinning `inftyOrdTransport_of_ordAtInfty_x_y` applied to the two `K̄` infinity orders
-`ordAtInfty_oneSub_pullback_x_gen` (`= -2`), `ordAtInfty_oneSub_pullback_y_gen` (`= -3`).  This is the
+`ordAtInfty_oneSub_pullback_x_gen` (`= -2`), `ordAtInfty_oneSub_pullback_y_gen` (`= -3`).
+ This is the
 `(1 − π)` analogue of the proven `inftyOrdTransport_mulByInt`. -/
 theorem inftyOrdTransport_oneSub
     (hq : 2 ≤ Fintype.card K) :
@@ -314,10 +322,12 @@ theorem inftyOrdTransport_oneSub
       (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq))
     (ordAtInfty_oneSub_pullback_x_gen W p r hq) (ordAtInfty_oneSub_pullback_y_gen W p r hq)
 
-/-- **Kernel-translation invariance for `(1 − π)_{K̄}`** (Silverman III.4.10c): for `k ∈ ker(1 − π)`,
+/-- **Kernel-translation invariance for `(1 − π)_{K̄}`** (Silverman III.4.10c): for
+`k ∈ ker(1 − π)`,
 the function-field translation `τ_k` fixes the pullback range: `τ_k((1 − π)^* z) = (1 − π)^* z`.
 
-This is the `(1 − π)` analogue of `hxy_mulByInt` — the input of the translation-invariance trick.  It
+This is the `(1 − π)` analogue of `hxy_mulByInt` — the input of the
+translation-invariance trick.  It
 is `hcov_of_mapTranslateGenericPoint_canonical` (the kernel specialisation `S = k`, `φ(k) = 0` ⟹
 `τ_{φ k} = τ_0 = id`) fed the Wall A generic-point covariance
 `mapTranslateGenericPoint_oneSub_canonical` (proved CoordHom-free). -/
@@ -336,12 +346,15 @@ theorem oneSub_hcov_kernel (hq : 2 ≤ Fintype.card K)
     (mapTranslateGenericPoint_oneSub_canonical W p r hq) k z
 
 /-- **The infinity comap identity for `(1 − π)_{K̄}`** — the `affineToInfty` field (Silverman
-III.4.10c).  For an affine smooth point `P` of `E_{K̄}` whose image `(1 − π)(P) = O` (a kernel point),
+III.4.10c).  For an affine smooth point `P` of `E_{K̄}` whose image `(1 − π)(P) = O` (a
+kernel point),
 `(pointValuation P).comap (1 − π)^* = ordAtInftyValuation`.
 
-The field-general translation-invariance trick `comap_pointValuation_eq_infty_of_ordAtInfty_x_y_of_kernelInvariant`
+The field-general translation-invariance trick
+`comap_pointValuation_eq_infty_of_ordAtInfty_x_y_of_kernelInvariant`
 fed the two `K̄` infinity orders (`ordAtInfty_oneSub_pullback_x_gen` = `-2`,
-`ordAtInfty_oneSub_pullback_y_gen` = `-3`) and the kernel-translation invariance `oneSub_hcov_kernel`.
+`ordAtInfty_oneSub_pullback_y_gen` = `-3`) and the kernel-translation invariance
+`oneSub_hcov_kernel`.
 This is the `(1 − π)` analogue of the proven `comap_pointValuation_mulByInt_eq_infty`. -/
 theorem comap_pointValuation_oneSub_eq_infty
     (hq : 2 ≤ Fintype.card K)
@@ -349,7 +362,8 @@ theorem comap_pointValuation_oneSub_eq_infty
       SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint)
     (hQ : (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
         (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom
-        (Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint P) = (0 : (W.baseChange (AlgebraicClosure K)).toAffine.Point)) :
+        (Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint P) = (0 : (W.baseChange
+          (AlgebraicClosure K)).toAffine.Point)) :
     ((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P).comap
         (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.Incidence
 import ModularCurves.GroupScheme.CyclicSubgroup
 
@@ -26,23 +31,23 @@ universe u
 
 namespace ModularCurves
 
-variable {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+variable {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) [NeZero N]
 
 /-! ### `U_{Γ₁(N)}` — exact-order-`N` level structures -/
 
 /-- **(T-W8, `U_{Γ₁(N)}`)** The `Γ₁(N)` level space: the closed subscheme of `E[N]` where the
 tautological torsion point has exact order `N`, cut out by `exists_exactOrderLocus`. -/
-noncomputable def levelSpaceΓ₁ [NeZero N] : Scheme.{u} :=
+noncomputable def levelSpaceΓ₁ : Scheme.{u} :=
   (exists_exactOrderLocus E N).choose.subscheme
 
 /-- The closed immersion `U_{Γ₁(N)} ↪ E[N]`. -/
-noncomputable def levelSpaceΓ₁ι [NeZero N] : levelSpaceΓ₁ E N ⟶ E.torsion N :=
+noncomputable def levelSpaceΓ₁ι : levelSpaceΓ₁ E N ⟶ E.torsion N :=
   (exists_exactOrderLocus E N).choose.subschemeι
 
 /-- **Opaque interface (v10.24(b))** — the universal property of `U_{Γ₁(N)}`: a point of `E`
 killed by `N` over `t` factors (via its classifying map to `E[N]`) through `U_{Γ₁(N)}` iff it has
 exact order `N` on the base-changed curve. -/
-theorem levelSpaceΓ₁_spec [NeZero N] :
+theorem levelSpaceΓ₁_spec :
     ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S) (P : E.Point t)
       (hP : P.1 ≫ E.mulByHom N = t ≫ E.zero),
       (∃ h : T ⟶ levelSpaceΓ₁ E N, h ≫ levelSpaceΓ₁ι E N = E.pointToTorsion P hP) ↔
@@ -54,18 +59,18 @@ theorem levelSpaceΓ₁_spec [NeZero N] :
 
 /-- **(T-W8, `U_{Γ(N)}`)** The `Γ(N)` level space: the closed subscheme of `E[N] ×_S E[N]` where
 the tautological pair is a Drinfeld full level-`N` structure, cut out by `exists_fullLevelLocus`. -/
-noncomputable def levelSpaceΓ [NeZero N] : Scheme.{u} :=
+noncomputable def levelSpaceΓ : Scheme.{u} :=
   (exists_fullLevelLocus E N).choose.subscheme
 
 /-- The closed immersion `U_{Γ(N)} ↪ E[N] ×_S E[N]`. -/
-noncomputable def levelSpaceΓι [NeZero N] :
+noncomputable def levelSpaceΓι :
     levelSpaceΓ E N ⟶ pullback (E.torsionπ N) (E.torsionπ N) :=
   (exists_fullLevelLocus E N).choose.subschemeι
 
 /-- **Opaque interface (v10.24(b))** — the universal property of `U_{Γ(N)}`: a pair of points of
 `E` killed by `N` over `t` factors (via its classifying map to `E[N] ×_S E[N]`) through
 `U_{Γ(N)}` iff it is a Drinfeld full level-`N` structure. -/
-theorem levelSpaceΓ_spec [NeZero N] :
+theorem levelSpaceΓ_spec :
     ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S) (P Q : E.Point t)
       (hP : P.1 ≫ E.mulByHom N = t ≫ E.zero)
       (hQ : Q.1 ≫ E.mulByHom N = t ≫ E.zero),
@@ -89,6 +94,6 @@ the three level types share a uniform entry point. -/
 finite locally free rank-`N` subgroup scheme of `E` (`GammaZeroStructure`, T-SG2's def-of-record).
 It is a *structure* on `E/S`, not a torsion-point locus, so it has no closed-subscheme
 presentation of the `Γ₁`/`Γ` shape; its representability is the separate SG3 GATE. -/
-abbrev levelStructureΓ₀ [NeZero N] := EllipticCurve.GammaZeroStructure E N
+abbrev levelStructureΓ₀ := EllipticCurve.GammaZeroStructure E N
 
 end ModularCurves

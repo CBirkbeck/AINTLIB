@@ -46,6 +46,49 @@ noncomputable def x_gen : KE :=
 noncomputable def y_gen : KE :=
   algebraMap R KE (AdjoinRoot.root W.toAffine.polynomial)
 
+omit [W.toAffine.IsElliptic] in
+/-- `x_gen W ≠ 0` in `K(E)`: the class of `C X` in `R = F[X][Y]/(W.polynomial)` is nonzero
+(`natDegree` in the outer variable is `0 < 2`), and `R → K(E)` is injective. -/
+theorem x_gen_ne_zero : x_gen W ≠ 0 := by
+  intro h
+  have hinj_R : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
+    IsFractionRing.injective _ _
+  have h_poly_zero : algebraMap (Polynomial F) W.toAffine.CoordinateRing
+      Polynomial.X = (0 : W.toAffine.CoordinateRing) := by
+    apply hinj_R
+    rw [map_zero]
+    exact h
+  have h_poly_ne : algebraMap (Polynomial F) W.toAffine.CoordinateRing
+      Polynomial.X ≠ (0 : W.toAffine.CoordinateRing) := by
+    change (Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X)) ≠ 0
+    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
+    · exact Polynomial.C_ne_zero.mpr Polynomial.X_ne_zero
+    · rw [Polynomial.natDegree_C, Affine.natDegree_polynomial]; decide
+  exact h_poly_ne h_poly_zero
+
+omit [W.toAffine.IsElliptic] in
+/-- `y_gen W ≠ 0` in `K(E)`: the class of `Y` in `R = F[X][Y]/(W.polynomial)` is nonzero
+(`natDegree 1 < 2`, Silverman III.3), and `R → K(E)` is injective. -/
+theorem y_gen_ne_zero : y_gen W ≠ 0 := by
+  intro h
+  have hinj : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
+    IsFractionRing.injective _ _
+  have h_root_zero : AdjoinRoot.root W.toAffine.polynomial =
+      (0 : W.toAffine.CoordinateRing) := by
+    apply hinj
+    show algebraMap W.toAffine.CoordinateRing KE
+        (AdjoinRoot.root W.toAffine.polynomial) = algebraMap _ _ 0
+    rw [map_zero]
+    exact h
+  have h_root_ne : AdjoinRoot.root W.toAffine.polynomial ≠
+      (0 : W.toAffine.CoordinateRing) := by
+    change AdjoinRoot.mk W.toAffine.polynomial Polynomial.X ≠ 0
+    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
+      Polynomial.X_ne_zero
+    rw [Polynomial.natDegree_X, Affine.natDegree_polynomial]
+    decide
+  exact h_root_ne h_root_zero
+
 /-- The base change of `W` to `K(E)`. The generic point `(x_gen, y_gen)` is a
 `K(E)`-rational point on it. -/
 noncomputable def W_KE : WeierstrassCurve KE := W.map (algebraMap F KE)
@@ -54,15 +97,19 @@ noncomputable def W_KE : WeierstrassCurve KE := W.map (algebraMap F KE)
 instance W_KE_isElliptic : (W_KE W).IsElliptic :=
   show (W.map (algebraMap F KE)).IsElliptic from inferInstance
 
+/-- The division polynomial numerator `Φ n`, pushed into the function field `KE`. -/
 noncomputable def Φ_ff (n : ℤ) : KE :=
   algebraMap R KE (algebraMap (Polynomial F) R (W.Φ n))
 
+/-- The squared division polynomial `Ψ² n`, pushed into `KE`. -/
 noncomputable def ΨSq_ff (n : ℤ) : KE :=
   algebraMap R KE (algebraMap (Polynomial F) R (W.ΨSq n))
 
+/-- The division polynomial `ψ n`, pushed into `KE`. -/
 noncomputable def ψ_ff (n : ℤ) : KE :=
   algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.ψ n))
 
+/-- The `ω n` division polynomial, pushed into `KE`. -/
 noncomputable def ω_ff (n : ℤ) : KE :=
   algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.ω n))
 
@@ -95,7 +142,7 @@ lemma generic_equation : (W_KE W).toAffine.Equation (x_gen W) (y_gen W) := by
   have hinner : Polynomial.eval₂RingHom (algebraMap F R)
       (algebraMap (Polynomial F) R Polynomial.X) = algebraMap (Polynomial F) R := by
     ext x
-    · simp [Polynomial.eval₂_C, IsScalarTower.algebraMap_apply F (Polynomial F) R]
+    · simp [IsScalarTower.algebraMap_apply F (Polynomial F) R]
     · simp
   rw [hinner]
   exact AdjoinRoot.eval₂_root W.toAffine.polynomial
@@ -221,7 +268,7 @@ private lemma evalEval_generic_eq_mk (p : (Polynomial F)[X]) :
   have hinner : Polynomial.eval₂RingHom (algebraMap F R)
       (algebraMap (Polynomial F) R Polynomial.X) = algebraMap (Polynomial F) R := by
     ext x
-    · simp [Polynomial.eval₂_C, IsScalarTower.algebraMap_apply F (Polynomial F) R]
+    · simp [IsScalarTower.algebraMap_apply F (Polynomial F) R]
     · simp
   rw [hinner, ← Polynomial.aeval_def]
   exact AdjoinRoot.aeval_eq p
@@ -265,6 +312,7 @@ private lemma jacobian_equation_smulEval (n : ℤ) :
       (Affine.Point.some _ _ hns)).nonsingular
   exact hJ.1
 
+/-- The `[n]`-pullback coordinates satisfy the Weierstrass equation. -/
 theorem mulByInt_weierstrass (n : ℤ) (hn : n ≠ 0) :
     Polynomial.eval₂ (mulByInt_xHom W n) (mulByInt_y W n) W.toAffine.polynomial = 0 := by
   change Polynomial.eval₂ (Polynomial.eval₂RingHom (algebraMap F KE) (mulByInt_x W n))
@@ -321,7 +369,6 @@ private lemma aeval_x_gen (p : Polynomial F) :
 
 -- The `Subalgebra F KE` scalar-tower instances and the `aeval` defeq steps below need the
 -- relaxed transparency; this is a defeq setting, not a heartbeat budget.
-set_option backward.isDefEq.respectTransparency false in
 /- `mulByInt_x W n = Φ_n(x_gen) / ΨSq_n(x_gen)` is transcendental over `F` for `n ≠ 0`.
 
 The proof uses the integral closure approach: if `mulByInt_x` were algebraic over `F`,
@@ -400,6 +447,26 @@ private lemma norm_smul_basis_ne_zero (p q : Polynomial F) (hq : q ≠ 0) :
   exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
     (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr this))
 
+omit [W.toAffine.IsElliptic] in
+/-- The image in `R = F[C]` of the `F[X]`-norm of the basis element `r' = p•1 + q•Y`
+factors as `r' * conj_r`, where `conj_r` is the `F[X]`-conjugate class.  Extracted as its
+own lemma so it elaborates in a light context (the `coe_norm_smul_basis` rewrite and the
+ring-hom bookkeeping are heartbeat-heavy inside the main injectivity proof). -/
+private lemma algebraMap_norm_smul_basis_eq (p q : Polynomial F) :
+    algebraMap (Polynomial F) R (Algebra.norm (Polynomial F)
+        (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) =
+      (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) *
+        Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C p + Polynomial.C q *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
+/-- The `[n]`-coordinate ring hom is injective for `n ≠ 0`. -/
 theorem mulByInt_coordHom_injective (n : ℤ) (hn : n ≠ 0) :
     Function.Injective (mulByInt_coordHom W n hn) := by
   rw [injective_iff_map_eq_zero]
@@ -443,12 +510,7 @@ theorem mulByInt_coordHom_injective (n : ℤ) (hn : n ≠ 0) :
           (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) with hconj_def
     have h_factor : algebraMap (Polynomial F) R (Algebra.norm (Polynomial F) r') =
         r' * conj_r := by
-      rw [hr'_def, hconj_def]
-      change AdjoinRoot.of _ _ = _
-      rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-      congr 1
-      rw [map_add, map_mul]
-      simp [Algebra.smul_def]
+      rw [hr'_def, hconj_def]; exact algebraMap_norm_smul_basis_eq W p q
     have hr'_zero : mulByInt_coordHom W n hn r' = 0 := by
       rw [show r' = r from hpq]; exact h_image.trans hr
     have h_norm_zero : mulByInt_xHom W n (Algebra.norm (Polynomial F) r') = 0 := by
@@ -458,6 +520,7 @@ theorem mulByInt_coordHom_injective (n : ℤ) (hn : n ≠ 0) :
     rw [hr'_def] at h_norm_eq
     exact norm_smul_basis_ne_zero W p q hq h_norm_eq
 
+/-- It sends non-zero-divisors to units. -/
 theorem mulByInt_coordHom_map_nonZeroDivisors (n : ℤ) (hn : n ≠ 0)
     (s : R) (hs : s ∈ nonZeroDivisors R) :
     IsUnit (mulByInt_coordHom W n hn s) := by

@@ -3,7 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib
+import Mathlib.LinearAlgebra.DirectSum.Finite
+import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.OrderOfVanishing.Basic
+import Mathlib.RingTheory.Polynomial.DegreeLT
 import HasseWeil.Foundation.Ramification
 
 /-!
@@ -359,7 +362,7 @@ omit [DecidableEq F] in
 /-- `idealNatDegree ⟨g⟩ = g.natDegree`: the generator of `⟨g⟩` is associated to `g`, hence has the
 same degree. -/
 theorem idealNatDegree_span (g : F[X]) : idealNatDegree (Ideal.span {g}) = g.natDegree := by
-  unfold idealNatDegree
+  simp only [idealNatDegree]
   have h : Associated (Submodule.IsPrincipal.generator (Ideal.span ({g} : Set F[X]))) g := by
     rw [← Ideal.span_singleton_eq_span_singleton, Ideal.span_singleton_generator]
   exact natDegree_eq_of_degree_eq (degree_eq_degree_of_associated h)

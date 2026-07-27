@@ -1,6 +1,8 @@
-import Mathlib.RingTheory.PrincipalIdealDomain
-import Mathlib.RingTheory.Coprime.Basic
-import Mathlib.RingTheory.Ideal.Quotient.Operations
+module
+
+public import Mathlib.RingTheory.PrincipalIdealDomain
+public import Mathlib.RingTheory.Coprime.Basic
+public import Mathlib.RingTheory.Ideal.Quotient.Operations
 
 /-!
 # T-Q1-RANK-ONE: Rank-one component lemma
@@ -40,6 +42,32 @@ noncomputable section
 
 namespace BernoulliRegular.Thaine
 
+/-- A class in `R ⧸ (a)` vanishes exactly when `a` divides the representative. -/
+private theorem quotient_mk_eq_zero_iff {R : Type*} [CommRing R] (a y : R) :
+    (Submodule.Quotient.mk y : R ⧸ Submodule.span R ({a} : Set R)) = 0 ↔ a ∣ y := by
+  rw [Submodule.Quotient.mk_eq_zero, Ideal.submodule_span_eq, Ideal.mem_span_singleton]
+
+/-- Being `p`-torsion-free transfers across a `Λ`-linear isomorphism. -/
+private theorem forall_smul_eq_zero_congr {Λ M N : Type*} [CommRing Λ]
+    [AddCommGroup M] [Module Λ M] [AddCommGroup N] [Module Λ N]
+    (p : Λ) (q : M ≃ₗ[Λ] N) :
+    (∀ x : M, p • x = 0 → x = 0) ↔ (∀ y : N, p • y = 0 → y = 0) := by
+  constructor
+  · intro h y hpy
+    have : q.symm y = 0 := h _ (by rw [← q.symm.map_smul, hpy, q.symm.map_zero])
+    simpa [this] using (q.apply_symm_apply y).symm
+  · intro h x hpx
+    have : q x = 0 := h _ (by rw [← q.map_smul, hpx, q.map_zero])
+    simpa [this] using (q.symm_apply_apply x).symm
+
+/-- The rank-one identification `φ : E ≃ₗ[Λ] Λ` carries `E ⧸ Λ·c` to `Λ ⧸ (φ c)`. -/
+private def quotientSpanEquiv {Λ E : Type*} [CommRing Λ] [AddCommGroup E] [Module Λ E]
+    (φ : E ≃ₗ[Λ] Λ) (c : E) :
+    (E ⧸ Submodule.span Λ ({c} : Set E)) ≃ₗ[Λ]
+      (Λ ⧸ Submodule.span Λ ({φ c} : Set Λ)) :=
+  Submodule.Quotient.equiv (Submodule.span Λ ({c} : Set E))
+    (Submodule.span Λ ({φ c} : Set Λ)) φ (by rw [Submodule.map_span]; simp)
+
 /-- **Abstract rank-one quotient is `p`-torsion-free under coprimeness**
 (forward direction, general rings).
 
@@ -55,22 +83,12 @@ theorem rankOne_quotient_p_torsion_free_of_isCoprime
     {R : Type*} [CommRing R]
     {p a : R} (h : IsCoprime p a) :
     ∀ x : R ⧸ Submodule.span R ({a} : Set R), p • x = 0 → x = 0 := by
-  set I : Submodule R R := Submodule.span R ({a} : Set R) with hI_def
   intro x
   induction x using Submodule.Quotient.induction_on with
   | _ y =>
     intro hpy
-    have hpy' : a ∣ p * y := by
-      have hk : (Submodule.Quotient.mk (p * y) : R ⧸ I) = 0 := hpy
-      rw [Submodule.Quotient.mk_eq_zero, hI_def, Ideal.submodule_span_eq,
-          Ideal.mem_span_singleton] at hk
-      exact hk
-    -- IsCoprime a p (by symmetry), applied to a ∣ p * y, gives a ∣ y.
-    have hcop_ap : IsCoprime a p := h.symm
-    have hady : a ∣ y := hcop_ap.dvd_of_dvd_mul_left hpy'
-    rw [Submodule.Quotient.mk_eq_zero, hI_def, Ideal.submodule_span_eq,
-        Ideal.mem_span_singleton]
-    exact hady
+    have hpy' : a ∣ p * y := (quotient_mk_eq_zero_iff a (p * y)).mp hpy
+    exact (quotient_mk_eq_zero_iff a y).mpr (h.symm.dvd_of_dvd_mul_left hpy')
 
 /-- **Abstract atomic rank-one lemma.** For a PID `R`, prime `p ∈ R`,
 nonzero `a ∈ R`: the quotient `R/(a)` has trivial `p`-torsion if and only
@@ -86,49 +104,21 @@ theorem rankOne_quotient_no_p_torsion_iff_generator_not_divisible
     {p : R} (hp : Prime p) {a : R} (ha : a ≠ 0) :
     (¬ p ∣ a) ↔
     ∀ x : R ⧸ Submodule.span R ({a} : Set R), p • x = 0 → x = 0 := by
-  set I : Submodule R R := Submodule.span R ({a} : Set R) with hI_def
-  refine ⟨?_, ?_⟩
-  · -- Forward: ¬ p ∣ a → R/(a) is p-torsion-free.
-    intro hp_not_dvd x
-    induction x using Submodule.Quotient.induction_on with
-    | _ y =>
-      intro hpy
-      -- hpy : p • Submodule.Quotient.mk y = 0, i.e., a ∣ p * y.
-      have hpy' : a ∣ p * y := by
-        have hk : (Submodule.Quotient.mk (p * y) : R ⧸ I) = 0 := hpy
-        rw [Submodule.Quotient.mk_eq_zero, hI_def, Ideal.submodule_span_eq,
-            Ideal.mem_span_singleton] at hk
-        exact hk
-      -- IsCoprime a p, applied to a ∣ p * y, gives a ∣ y.
-      have hcop_ap : IsCoprime a p := (hp.coprime_iff_not_dvd.mpr hp_not_dvd).symm
-      have hady : a ∣ y := hcop_ap.dvd_of_dvd_mul_left hpy'
-      rw [Submodule.Quotient.mk_eq_zero, hI_def, Ideal.submodule_span_eq,
-          Ideal.mem_span_singleton]
-      exact hady
-  · -- Reverse: R/(a) p-torsion-free → ¬ p ∣ a (contrapositive).
-    rintro h_tf ⟨a', rfl⟩
-    -- a = p * a'; need contradiction.
-    have ha' : a' ≠ 0 := fun h => ha (by rw [h, mul_zero])
-    -- Take x = ⟦a'⟧ ∈ R ⧸ (p * a').
-    have hpx_zero :
-        (p • (Submodule.Quotient.mk a' : R ⧸ I) : R ⧸ I) = 0 := by
-      change (Submodule.Quotient.mk (p * a') : R ⧸ I) = 0
-      rw [Submodule.Quotient.mk_eq_zero, hI_def, Ideal.submodule_span_eq,
-          Ideal.mem_span_singleton]
-    have hx_zero : (Submodule.Quotient.mk a' : R ⧸ I) = 0 := h_tf _ hpx_zero
-    rw [Submodule.Quotient.mk_eq_zero, hI_def, Ideal.submodule_span_eq,
-        Ideal.mem_span_singleton] at hx_zero
-    -- hx_zero : p * a' ∣ a'.
-    obtain ⟨k, hk⟩ := hx_zero
-    -- a' = p * a' * k, so a' * (1 - p * k) = 0.
-    have hzero : a' * (1 - p * k) = 0 := by
-      have hexpand : a' * (1 - p * k) = a' - p * a' * k := by ring
-      rw [hexpand, ← hk, sub_self]
-    rcases mul_eq_zero.mp hzero with h | h
-    · exact ha' h
-    · -- 1 - p * k = 0, so p * k = 1, so p is a unit; contradicts hp.not_unit.
-      have hpk : p * k = 1 := (sub_eq_zero.mp h).symm
-      exact hp.not_unit (IsUnit.of_mul_eq_one k hpk)
+  refine ⟨fun hp_not_dvd ↦
+    rankOne_quotient_p_torsion_free_of_isCoprime (hp.coprime_iff_not_dvd.mpr hp_not_dvd), ?_⟩
+  rintro h_tf ⟨a', rfl⟩
+  have ha' : a' ≠ 0 := fun h ↦ ha (by rw [h, mul_zero])
+  have hpx_zero : (p • (Submodule.Quotient.mk a' :
+      R ⧸ Submodule.span R ({p * a'} : Set R))) = 0 :=
+    (quotient_mk_eq_zero_iff (p * a') (p * a')).mpr dvd_rfl
+  obtain ⟨k, hk⟩ := (quotient_mk_eq_zero_iff (p * a') a').mp (h_tf _ hpx_zero)
+  -- `a' = p * a' * k` forces `p * k = 1`, contradicting primality of `p`.
+  have hzero : a' * (1 - p * k) = 0 := by
+    have hexpand : a' * (1 - p * k) = a' - p * a' * k := by ring
+    rw [hexpand, ← hk, sub_self]
+  rcases mul_eq_zero.mp hzero with h | h
+  · exact ha' h
+  · exact hp.not_unit (IsUnit.of_mul_eq_one k (sub_eq_zero.mp h).symm)
 
 /-- **Module-theoretic rank-one component lemma.** For a PID `Λ`, prime
 `p ∈ Λ`, and a free rank-one Λ-module `E` (specified via a Λ-linear
@@ -149,57 +139,17 @@ theorem rankOne_module_quotient_no_p_torsion_iff_generator_not_p_divisible
     (¬ ∃ y : E, c = p • y) ↔
     ∀ x : E ⧸ Submodule.span Λ ({c} : Set E),
       p • x = 0 → x = 0 := by
-  set a : Λ := φ c with ha_def
-  have ha_ne : a ≠ 0 := by
-    intro h
-    apply hc
-    apply φ.injective
-    rw [φ.map_zero]
-    exact h
-  -- Step 1: relate ∃ y, c = p • y with p ∣ a (via φ).
-  have h_dvd_iff : (∃ y : E, c = p • y) ↔ p ∣ a := by
+  have ha_ne : φ c ≠ 0 := fun h ↦ hc (φ.injective (by rw [φ.map_zero]; exact h))
+  have h_dvd_iff : (∃ y : E, c = p • y) ↔ p ∣ φ c := by
     refine ⟨?_, ?_⟩
     · rintro ⟨y, hy⟩
-      refine ⟨φ y, ?_⟩
-      rw [ha_def, hy, map_smul]
-      rfl
+      exact ⟨φ y, by rw [hy, map_smul]; rfl⟩
     · rintro ⟨b, hb⟩
       refine ⟨φ.symm b, ?_⟩
-      have hc_eq : c = φ.symm a := (φ.symm_apply_apply c).symm
-      rw [hc_eq, hb, ← smul_eq_mul, map_smul]
-  -- Step 2: build the quotient iso E ⧸ span {c} ≃ₗ[Λ] Λ ⧸ span {a}.
-  have h_map :
-      Submodule.map (φ : E →ₗ[Λ] Λ) (Submodule.span Λ ({c} : Set E)) =
-        Submodule.span Λ ({a} : Set Λ) := by
-    rw [Submodule.map_span]
-    simp [ha_def]
-  set q : (E ⧸ Submodule.span Λ ({c} : Set E)) ≃ₗ[Λ]
-            (Λ ⧸ Submodule.span Λ ({a} : Set Λ)) :=
-    Submodule.Quotient.equiv (Submodule.span Λ ({c} : Set E))
-      (Submodule.span Λ ({a} : Set Λ)) φ h_map with hq_def
-  -- Step 3: transfer the torsion-vanishing predicate via q.
-  have h_torsion_iff :
-      (∀ x : E ⧸ Submodule.span Λ ({c} : Set E), p • x = 0 → x = 0) ↔
-      (∀ y : Λ ⧸ Submodule.span Λ ({a} : Set Λ), p • y = 0 → y = 0) := by
-    refine ⟨?_, ?_⟩
-    · intro h y hpy
-      have h1 : p • q.symm y = 0 := by
-        rw [← q.symm.map_smul, hpy, q.symm.map_zero]
-      have h2 : q.symm y = 0 := h _ h1
-      calc y = q (q.symm y) := (q.apply_symm_apply y).symm
-        _ = q 0 := by rw [h2]
-        _ = 0 := q.map_zero
-    · intro h x hpx
-      have h1 : p • q x = 0 := by
-        rw [← q.map_smul, hpx, q.map_zero]
-      have h2 : q x = 0 := h _ h1
-      calc x = q.symm (q x) := (q.symm_apply_apply x).symm
-        _ = q.symm 0 := by rw [h2]
-        _ = 0 := q.symm.map_zero
-  -- Step 4: combine via the abstract atomic lemma.
-  rw [h_torsion_iff,
-      ← rankOne_quotient_no_p_torsion_iff_generator_not_divisible hp ha_ne,
-      not_iff_not, h_dvd_iff]
+      rw [(φ.symm_apply_apply c).symm, hb, ← smul_eq_mul, map_smul]
+  rw [forall_smul_eq_zero_congr p (quotientSpanEquiv φ c),
+    ← rankOne_quotient_no_p_torsion_iff_generator_not_divisible hp ha_ne,
+    not_iff_not, h_dvd_iff]
 
 /-- **Module-theoretic rank-one is `p`-torsion-free under coprimeness**
 (forward direction, general rings).
@@ -216,23 +166,9 @@ theorem rankOne_module_quotient_p_torsion_free_of_isCoprime
     {p : Λ}
     {E : Type*} [AddCommGroup E] [Module Λ E]
     (φ : E ≃ₗ[Λ] Λ) {c : E} (h_cop : IsCoprime p (φ c)) :
-    ∀ x : E ⧸ Submodule.span Λ ({c} : Set E), p • x = 0 → x = 0 := by
-  set a : Λ := φ c
-  have h_map :
-      Submodule.map (φ : E →ₗ[Λ] Λ) (Submodule.span Λ ({c} : Set E)) =
-        Submodule.span Λ ({a} : Set Λ) := by
-    rw [Submodule.map_span]; simp [a]
-  set q : (E ⧸ Submodule.span Λ ({c} : Set E)) ≃ₗ[Λ]
-            (Λ ⧸ Submodule.span Λ ({a} : Set Λ)) :=
-    Submodule.Quotient.equiv (Submodule.span Λ ({c} : Set E))
-      (Submodule.span Λ ({a} : Set Λ)) φ h_map
-  intro x hpx
-  have h1 : p • q x = 0 := by rw [← q.map_smul, hpx, q.map_zero]
-  have h2 : q x = 0 :=
-    rankOne_quotient_p_torsion_free_of_isCoprime h_cop _ h1
-  calc x = q.symm (q x) := (q.symm_apply_apply x).symm
-    _ = q.symm 0 := by rw [h2]
-    _ = 0 := q.symm.map_zero
+    ∀ x : E ⧸ Submodule.span Λ ({c} : Set E), p • x = 0 → x = 0 :=
+  (forall_smul_eq_zero_congr p (quotientSpanEquiv φ c)).mpr
+    (rankOne_quotient_p_torsion_free_of_isCoprime h_cop)
 
 end BernoulliRegular.Thaine
 

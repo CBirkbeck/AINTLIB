@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceFormSetup
@@ -177,6 +182,7 @@ theorem teichUnitFullOfRootsOfUnityBijective_residue
       (x : k)
   rw [ht_val, hxQ]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The same Teichmüller section also satisfies the power convention used by
 `FullTeichStickelbergerSetup`: the integral residue character is its
 `(#k - 1) / p` power. -/
@@ -309,7 +315,7 @@ theorem rootsOfUnityMapQuot_bijective_of_card_roots
   letI : NeZero (Fintype.card k - 1) := ⟨hn_ne⟩
   letI : DecidableEq k := Classical.decEq k
   letI : Fintype (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) :=
-    inferInstance
+    Fintype.ofFinite _
   letI : Fintype (𝓞 R' ⧸ S.Q)ˣ :=
     Fintype.ofEquiv kˣ
       ((S.residueUnitEquiv : (𝓞 R' ⧸ S.Q)ˣ ≃* kˣ).symm.toEquiv)
@@ -340,12 +346,11 @@ theorem rootsOfUnityMapQuot_bijective_of_isPrimitiveRoot
     omega
   letI : NeZero (Fintype.card k - 1) := ⟨hn_ne⟩
   letI : Fintype (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) :=
-    inferInstance
+    Fintype.ofFinite _
   have hroots :
       Nat.card (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) =
-        Fintype.card k - 1 := by
-    rw [Nat.card_eq_fintype_card]
-    exact hζ.card_rootsOfUnity
+        Fintype.card k - 1 :=
+    hζ.card_rootsOfUnity
   exact S.rootsOfUnityMapQuot_bijective_of_card_roots
     S.absNorm_Q_ne_one S.absNorm_Q_coprime_card_sub_one hroots
 
@@ -463,14 +468,14 @@ def teichUnitFullVal (x : kˣ) : 𝓞 R' := (S.teichUnitFull x : 𝓞 R')
 theorem teichUnitFullVal_mul (x y : kˣ) :
     S.teichUnitFullVal (x * y) =
       S.teichUnitFullVal x * S.teichUnitFullVal y := by
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   rw [map_mul]
   rfl
 
 /-- The Teichmüller value at `1` is `1`. -/
 @[simp]
 theorem teichUnitFullVal_one : S.teichUnitFullVal 1 = 1 := by
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   rw [map_one]
   rfl
 
@@ -478,7 +483,7 @@ theorem teichUnitFullVal_one : S.teichUnitFullVal 1 = 1 := by
 @[simp]
 theorem teichUnitFullVal_pow (x : kˣ) (n : ℕ) :
     S.teichUnitFullVal (x ^ n) = S.teichUnitFullVal x ^ n := by
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   rw [map_pow]
   rfl
 
@@ -498,7 +503,7 @@ theorem teichUnitFullVal_not_mem_Q (x : kˣ) :
 `residueMap` to `teichUnitFullVal x` yields `x` (as an element of `k`). -/
 theorem residueMap_teichUnitFullVal (x : kˣ) :
     S.residueMap (S.teichUnitFullVal x) = (x : k) := by
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   -- residueMap factors as `Quotient.mk` then `residueQuotientEquiv`.
   have h := S.teichUnitFull_residue x
   rw [← S.toConcreteStickelbergerSetup.residueQuotientEquiv_mk]
@@ -520,7 +525,7 @@ This follows from `teichUnitFull` being a `MonoidHom` from `kˣ` and
 theorem teichUnitFullVal_pow_card_sub_one (x : kˣ) :
     S.teichUnitFullVal x ^ (Fintype.card k - 1) = 1 := by
   haveI : DecidableEq k := Classical.decEq _
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   -- Reduce via Units.val_pow and map_pow.
   rw [show (Fintype.card k - 1) = Fintype.card kˣ from
     (Fintype.card_units (α := k)).symm]
@@ -554,6 +559,69 @@ theorem exists_isPrimitiveRoot_teichUnitFullVal_cardSubOne
   have hdvd : orderOf y ∣ n := orderOf_dvd_of_pow_eq_one hy_pow
   rwa [h_order, Fintype.card_units] at hdvd
 
+/-- Multiplying the Teichmüller power sum by `ω(y)^r` for any `y : kˣ` leaves it
+invariant (reindex `x ↦ y * x`). -/
+private theorem teichUnitFullVal_pow_mul_sum_eq_sum (y : kˣ) (r : ℕ) :
+    S.teichUnitFullVal y ^ r * (∑ x : kˣ, S.teichUnitFullVal x ^ r) =
+      ∑ x : kˣ, S.teichUnitFullVal x ^ r := by
+  classical
+  rw [Finset.mul_sum]
+  -- Term-wise: ω(y)^r * ω(x)^r = ω(y*x)^r.
+  have h_term_mul : ∀ x : kˣ,
+      S.teichUnitFullVal y ^ r * S.teichUnitFullVal x ^ r =
+        S.teichUnitFullVal (y * x) ^ r := by
+    intro x
+    rw [← mul_pow, ← S.teichUnitFullVal_mul]
+  rw [Finset.sum_congr rfl fun x _ => h_term_mul x]
+  -- Reindex via the bijection `x ↦ y * x` on `kˣ`.
+  let e : kˣ ≃ kˣ := Equiv.mulLeft y
+  have : (∑ x : kˣ, S.teichUnitFullVal (y * x) ^ r) =
+          ∑ x : kˣ, S.teichUnitFullVal (e x) ^ r := rfl
+  rw [this]
+  exact Finset.sum_equiv e (by simp) (by intros; rfl)
+
+/-- The Teichmüller power sum over `kˣ` vanishes when `#k - 1 ∤ r`. -/
+private theorem teichUnitFull_sum_pow_units_eq_zero_of_not_dvd (r : ℕ)
+    (hndvd : ¬ (Fintype.card k - 1) ∣ r) :
+    (∑ x : kˣ, S.teichUnitFullVal x ^ r) = 0 := by
+  classical
+  -- Choose generator y of kˣ.
+  obtain ⟨y, hy⟩ : ∃ y : kˣ, ∀ z : kˣ, z ∈ Subgroup.zpowers y :=
+    IsCyclic.exists_generator
+  set t := S.teichUnitFullVal y with ht_def
+  have h_t_mul_sum :
+      t ^ r * (∑ x : kˣ, S.teichUnitFullVal x ^ r) =
+        ∑ x : kˣ, S.teichUnitFullVal x ^ r :=
+    S.teichUnitFullVal_pow_mul_sum_eq_sum y r
+  have h_factor :
+      (t ^ r - 1) * (∑ x : kˣ, S.teichUnitFullVal x ^ r) = 0 := by
+    rw [sub_mul, one_mul, sub_eq_zero, h_t_mul_sum]
+  -- t^r ≠ 1 because residueMap(t^r) = y^r ≠ 1 in k.
+  have h_t_ne : t ^ r ≠ 1 := by
+    intro hcontra
+    have hres : S.residueMap (t ^ r) = 1 := by
+      rw [hcontra]; exact map_one _
+    rw [ht_def, map_pow, S.residueMap_teichUnitFullVal] at hres
+    -- y^r = 1 in k means (q-1) ∣ r since y has order q-1.
+    have h_y_unit_pow : ((y : k) ^ r) = 1 := hres
+    -- Lift to kˣ.
+    have h_y_pow_unit : (y : kˣ) ^ r = 1 := by
+      ext
+      rw [Units.val_pow_eq_pow_val, Units.val_one]
+      exact h_y_unit_pow
+    -- Order of y divides r ⇒ (#kˣ) ∣ r ⇒ (q-1) ∣ r.
+    have h_ord_dvd : orderOf y ∣ r := orderOf_dvd_of_pow_eq_one h_y_pow_unit
+    have h_y_gen : orderOf y = Fintype.card kˣ := by
+      rw [orderOf_eq_card_of_forall_mem_zpowers hy, Nat.card_eq_fintype_card]
+    rw [h_y_gen, Fintype.card_units] at h_ord_dvd
+    exact hndvd h_ord_dvd
+  -- (t^r - 1) ≠ 0.
+  have h_t_sub_ne : t ^ r - 1 ≠ 0 := sub_ne_zero.mpr h_t_ne
+  -- Integral domain: (a - 1) * b = 0 and (a - 1) ≠ 0 ⇒ b = 0.
+  rcases mul_eq_zero.mp h_factor with h | h
+  · exact absurd h h_t_sub_ne
+  · exact h
+
 /-- **L2c3d-1: full Teichmüller power-sum orthogonality.** -/
 theorem teichUnitFull_sum_pow_units (r : ℕ) :
     (∑ x : kˣ, S.teichUnitFullVal x ^ r) =
@@ -576,57 +644,7 @@ theorem teichUnitFull_sum_pow_units (r : ℕ) :
     rw [Nat.cast_sub hpos, Nat.cast_one]
   · -- (q-1) ∤ r: sum is 0.
     rw [if_neg hndvd]
-    -- Choose generator y of kˣ.
-    obtain ⟨y, hy⟩ : ∃ y : kˣ, ∀ z : kˣ, z ∈ Subgroup.zpowers y :=
-      IsCyclic.exists_generator
-    -- t := teichUnitFullVal y. Show (t^r) * sum = sum.
-    set t := S.teichUnitFullVal y with ht_def
-    have h_t_mul_sum :
-        t ^ r * (∑ x : kˣ, S.teichUnitFullVal x ^ r) =
-          ∑ x : kˣ, S.teichUnitFullVal x ^ r := by
-      rw [Finset.mul_sum]
-      -- Term-wise: t^r * (teichUnitFullVal x)^r = teichUnitFullVal(y*x)^r.
-      have h_term_mul : ∀ x : kˣ,
-          t ^ r * S.teichUnitFullVal x ^ r =
-            S.teichUnitFullVal (y * x) ^ r := by
-        intro x
-        rw [ht_def, ← mul_pow, ← S.teichUnitFullVal_mul]
-      rw [Finset.sum_congr rfl fun x _ => h_term_mul x]
-      -- Reindex via the bijection `x ↦ y * x` on `kˣ`.
-      let e : kˣ ≃ kˣ := Equiv.mulLeft y
-      have : (∑ x : kˣ, S.teichUnitFullVal (y * x) ^ r) =
-              ∑ x : kˣ, S.teichUnitFullVal (e x) ^ r := rfl
-      rw [this]
-      exact Finset.sum_equiv e (by simp) (by intros; rfl)
-    -- (t^r - 1) * sum = 0.
-    have h_factor :
-        (t ^ r - 1) * (∑ x : kˣ, S.teichUnitFullVal x ^ r) = 0 := by
-      rw [sub_mul, one_mul, sub_eq_zero, h_t_mul_sum]
-    -- t^r ≠ 1 because residueMap(t^r) = y^r ≠ 1 in k.
-    have h_t_ne : t ^ r ≠ 1 := by
-      intro hcontra
-      have hres : S.residueMap (t ^ r) = 1 := by
-        rw [hcontra]; exact map_one _
-      rw [ht_def, map_pow, S.residueMap_teichUnitFullVal] at hres
-      -- y^r = 1 in k means (q-1) ∣ r since y has order q-1.
-      have h_y_unit_pow : ((y : k) ^ r) = 1 := hres
-      -- Lift to kˣ.
-      have h_y_pow_unit : (y : kˣ) ^ r = 1 := by
-        ext
-        rw [Units.val_pow_eq_pow_val, Units.val_one]
-        exact h_y_unit_pow
-      -- Order of y divides r ⇒ (#kˣ) ∣ r ⇒ (q-1) ∣ r.
-      have h_ord_dvd : orderOf y ∣ r := orderOf_dvd_of_pow_eq_one h_y_pow_unit
-      have h_y_gen : orderOf y = Fintype.card kˣ := by
-        rw [orderOf_eq_card_of_forall_mem_zpowers hy, Nat.card_eq_fintype_card]
-      rw [h_y_gen, Fintype.card_units] at h_ord_dvd
-      exact hndvd h_ord_dvd
-    -- (t^r - 1) ≠ 0.
-    have h_t_sub_ne : t ^ r - 1 ≠ 0 := sub_ne_zero.mpr h_t_ne
-    -- Integral domain: (a - 1) * b = 0 and (a - 1) ≠ 0 ⇒ b = 0.
-    rcases mul_eq_zero.mp h_factor with h | h
-    · exact absurd h h_t_sub_ne
-    · exact h
+    exact S.teichUnitFull_sum_pow_units_eq_zero_of_not_dvd r hndvd
 
 /-- **L2c3d-5: inner Teichmüller sum evaluation.** The inner sum in the
 denominator-cleared digit expansion factors via multiplicativity and

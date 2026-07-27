@@ -14,11 +14,11 @@ blocks the `RealCaseIIData37` frame.
 Every `RealCaseIIData37 m` has equation `x³⁷ + y³⁷ = ε·((ζ−1)^{m+1}·z)³⁷`, so its `(ζ−1)`-content is
 exactly `37·(m+1) ≡ 0 (mod 37)` (the proven certificate
 `caseII_realCaseIIData37_lambda_content_mul_p`).  Washington's conjugate-norm descent equation
-`ω₁³⁷ + θ₁³⁷ = δ·λ^{2m−37}·ξ₁³⁷` (GTM 83, 2nd ed., p. 172, `λ = ζ−1`) sits at the **doubled** measure
-`2m − 37 ≢ 0 (mod 37)`, with the `λ`-factor **outside** the `³⁷`-power.  So `ξ₁` — real,
+`ω₁³⁷ + θ₁³⁷ = δ·λ^{2m−37}·ξ₁³⁷` (GTM 83, 2nd ed., p. 172, `λ = ζ−1`) sits at the **doubled**
+measure `2m − 37 ≢ 0 (mod 37)`, with the `λ`-factor **outside** the `³⁷`-power.  So `ξ₁` — real,
 `𝔭`-coprime, `(ξ₁) = 𝔞₀^{2k'}`, with strictly fewer distinct prime factors than `z`
-(`caseII_anchorPow_conjNorm_real_span`, `caseII_conjNorm_factorCount_strict`) — cannot be packaged as
-the Fermat variable of a `RealCaseIIData37`.  This is the precise reason the chain of residuals
+(`caseII_anchorPow_conjNorm_real_span`, `caseII_conjNorm_factorCount_strict`) — cannot be packaged
+as the Fermat variable of a `RealCaseIIData37`.  This is the precise reason the chain of residuals
 `CaseIIWashingtonAnchorSquareDatum37` / `CaseIIRealAnchorDatumAssembly37` is undischargeable *as
 stated* (b2 verdict, 2026-05-31).
 
@@ -156,7 +156,8 @@ def caseIIFreeFactorCount {n : ℕ} (D : FreeContentCaseIIData37 K n) : ℕ :=
 The corrected radical `α = (−ζ)⁻¹·(x+yζ)/(x+yζ³⁶)` of Washington's first layer is a **pure ratio of
 the Fermat variables `x, y`** (with the `−ζ` correction unit); it does **not** invoke the root-ideal
 `m`-machinery.  So it ports verbatim to the free-content datum, where the adjacent root is `η = ζ`
-(for real / σ-conjugate base data the anchor root is `η₀ = 1`, so the first adjacent root is `ζ`). -/
+(for real / σ-conjugate base data the anchor root is `η₀ = 1`, so the first adjacent root is `ζ`).
+-/
 
 namespace FreeContentCaseIIData37
 
@@ -379,12 +380,13 @@ theorem caseIIFree_correctedRadical_unit_primary
 
 end FreeContentCaseIIData37
 
-/-- **Embedding `RealCaseIIData37 m ↪ FreeContentCaseIIData37 (37·(m+1))`.**  A real Case-II datum is
-a free-content datum at content `n = 37·(m+1)` (its equation `((ζ−1)^{m+1}·z)³⁷ = (ζ−1)^{37(m+1)}·z³⁷`
-puts the `λ`-factor outside the `³⁷`-power).  The anchor absorption `(ζ−1)³ ∣ x+y` is the proven
-`caseII_K_zeta_sub_one_pow_dvd_x_add_y` (`(ζ−1)^{37m+1} ∣ x+y`, `37m+1 ≥ 3`); the sharp denominator
-is `caseII_etaInv_denom_factor` at `η = etaOne = ζ`.  So the base producer
-(`exists_realCaseIIData37_of_caseII_int_solution`) inhabits the free-content frame. -/
+/-- **Embedding `RealCaseIIData37 m ↪ FreeContentCaseIIData37 (37·(m+1))`.**  A real Case-II datum
+is a free-content datum at content `n = 37·(m+1)` (its equation
+`((ζ−1)^{m+1}·z)³⁷ = (ζ−1)^{37(m+1)}·z³⁷` puts the `λ`-factor outside the `³⁷`-power).  The anchor
+absorption `(ζ−1)³ ∣ x+y` is the proven `caseII_K_zeta_sub_one_pow_dvd_x_add_y`
+(`(ζ−1)^{37m+1} ∣ x+y`, `37m+1 ≥ 3`); the sharp denominator is `caseII_etaInv_denom_factor` at
+`η = etaOne = ζ`.  So the base producer (`exists_realCaseIIData37_of_caseII_int_solution`) inhabits
+the free-content frame. -/
 noncomputable def FreeContentCaseIIData37.ofRealCaseIIData37
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     {m : ℕ} (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) :
@@ -449,7 +451,8 @@ theorem caseIIFreeFirstLayer_false
     {n : ℕ} (D : FreeContentCaseIIData37 (CyclotomicField 37 ℚ) n)
     (αU : (𝓞 (CyclotomicField 37 ℚ))ˣ)
     (hαU : D.caseIIFree_correctedRadical =
-      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ) (αU : 𝓞 (CyclotomicField 37 ℚ))) :
+      algebraMap (𝓞 (CyclotomicField 37 ℚ)) (CyclotomicField 37 ℚ)
+        (αU : 𝓞 (CyclotomicField 37 ℚ))) :
     False := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   set K := CyclotomicField 37 ℚ
@@ -476,7 +479,7 @@ theorem caseIIFreeFirstLayer_false
       have hne : D.hζ.toInteger ≠ (1 : 𝓞 K) := fun h ↦
         D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h
       have hpair := (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
-        |>.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+        |>.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
           (by decide : Nat.Prime 37) hmem_dζ hmem_one hne
       simpa using hpair
     exact (hassoc.pow_pow.dvd).trans hprim2
@@ -584,8 +587,8 @@ def FreeContentCaseIIDescentStep37 : Prop :=
 
 Well-founded minimality on `caseIIFreeFactorCount`: take the minimal achieved factor count over all
 free-content data, realised by `Dmin`.  At `Dmin`, either the corrected radical at `η = ζ` is a unit
-— then the **proven** `caseIIFreeFirstLayer_false` gives `False` — or it is not, and the descent step
-produces a strictly smaller datum, contradicting minimality.  Either way, `False`.
+— then the **proven** `caseIIFreeFirstLayer_false` gives `False` — or it is not, and the descent
+step produces a strictly smaller datum, contradicting minimality.  Either way, `False`.
 
 This mirrors `no_realCaseIIData37_of_factorDescent`, but on the **content-free** frame, so the
 descent step's output is *not* obstructed by the `RealCaseIIData37` λ-content constraint. -/
@@ -631,16 +634,18 @@ theorem no_realCaseIIData37_of_freeContentDescent
 `FreeContentCaseIIDescentStep37` is a genuine implication, not vacuously satisfiable nor with a
 `False`/degenerate conclusion:
 
-* **the hypothesis is the genuine descent regime** — its complement (the corrected radical at `η = ζ`
-  being a unit) is precisely the *proven* terminal contradiction `caseIIFreeFirstLayer_false`, so
+* **the hypothesis is the genuine descent regime** — its complement (the corrected radical at
+  `η = ζ` being a unit) is precisely the *proven* terminal contradiction
+  `caseIIFreeFirstLayer_false`, so the non-terminal branch is exactly where no first-layer collapse
+  occurs;
   the non-terminal branch is exactly where no first-layer collapse occurs;
 * **the conclusion is genuine existence** — free-content data *exist* (every `RealCaseIIData37`
   embeds, `FreeContentCaseIIData37.ofRealCaseIIData37`), and "strictly fewer factors" is a real,
   reachable target (`caseIIFreeFactorCount` is a genuine `ℕ`-measure; the conjugate norm `ξ₁` of
   `caseII_conjNorm_factorCount_strict` achieves a strict drop on the embedded data). -/
 
-/-- **Non-vacuity (regime).**  The non-terminal hypothesis of `FreeContentCaseIIDescentStep37` is the
-genuine descent regime: the complementary unit branch is the proven first-layer contradiction
+/-- **Non-vacuity (regime).**  The non-terminal hypothesis of `FreeContentCaseIIDescentStep37` is
+the genuine descent regime: the complementary unit branch is the proven first-layer contradiction
 `caseIIFreeFirstLayer_false`.  So the hypothesis is *not* vacuously excluded. -/
 theorem freeContentCaseIIDescentStep37_nonvacuous_regime
     {n : ℕ} (D : FreeContentCaseIIData37 (CyclotomicField 37 ℚ) n) :

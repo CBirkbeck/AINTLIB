@@ -269,7 +269,7 @@ private theorem factorRoot_mem (i : ℕ) :
       ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger) 37 :=
     (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot
   rw [Polynomial.mem_nthRootsFinset (by norm_num)]
-  unfold factorRoot
+  simp only [factorRoot]
   rw [← pow_mul, mul_comm, pow_mul, hμ.pow_eq_one, one_pow]
 
 private def factorIdealData
@@ -491,7 +491,7 @@ private theorem mk0_factorProdNZ
     (hcaseI : ¬ (37 : ℤ) ∣ a * b * c) (n : Fin 5 → ℕ) :
     ClassGroup.mk0 (factorProdNZ heq hgcd hcaseI n) =
       ∏ i : Fin 5, factorClass heq hgcd hcaseI (i.1 + 1) ^ (n i) := by
-  unfold factorProdNZ
+  simp only [factorProdNZ]
   rw [map_prod]
   exact Finset.prod_congr rfl (fun i _ ↦ by rw [map_pow, factorClass_eq_mk0])
 
@@ -526,7 +526,7 @@ private theorem factorProdNZ_pow_val
     (hcaseI : ¬ (37 : ℤ) ∣ a * b * c) (n : Fin 5 → ℕ) :
     ((factorProdNZ heq hgcd hcaseI n : Ideal (𝓞 (CyclotomicField 37 ℚ))) ^ 37) =
       ∏ i : Fin 5, Ideal.span ({factorElt a b (i.1 + 1)} : Set _) ^ (n i) := by
-  unfold factorProdNZ factorElt
+  simp only [factorProdNZ, factorElt]
   rw [Submonoid.coe_finsetProd, ← Finset.prod_pow]
   refine Finset.prod_congr rfl (fun i _ ↦ ?_)
   rw [SubmonoidClass.coe_pow, ← pow_mul, mul_comm, pow_mul, ← factorNZ_span]
@@ -586,7 +586,7 @@ private theorem conj_factorRoot (k : ℕ) :
     ringOfIntegersComplexConj (CyclotomicField 37 ℚ) (factorRoot k) =
       (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ (36 * k) := by
   haveI := eichlerCM
-  unfold factorRoot
+  simp only [factorRoot]
   rw [map_pow, conj_zeta_eq, ← pow_mul, mul_comm]
 
 private theorem conj_factorElt (a b : ℤ) (k : ℕ) :
@@ -596,7 +596,7 @@ private theorem conj_factorElt (a b : ℤ) (k : ℕ) :
         (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ (36 * k) *
           (b : 𝓞 (CyclotomicField 37 ℚ)) := by
   haveI := eichlerCM
-  unfold factorElt
+  simp only [factorElt]
   rw [map_add, map_mul, conj_factorRoot]
   congr 1 <;> [exact map_intCast _ a; rw [map_intCast]]
 
@@ -1424,10 +1424,11 @@ private theorem caseI_evZ_Ltil_mem
   have hclF : DT * evZ (derivative (FpolyTot a b nPos nNeg)) = FT * NF := by
     rw [hDT, hFT, hNF, ← map_mul, ← map_mul, Dpoly_mul_derivative_FpolyTot]
   have hclG : DT * evZ (derivative (GpolyTot a b nPos nNeg)) = GT * NG := by
-    rw [hDT, hGT, hNG, ← map_mul, ← map_mul]
-    congr 1
-    rw [show GpolyTot a b nPos nNeg = FpolyTot a b nNeg nPos from rfl,
-      Dpoly_mul_derivative_FpolyTot]
+    have hpoly : Dpoly a b * derivative (GpolyTot a b nPos nNeg) =
+        GpolyTot a b nPos nNeg * NPoly a b nNeg nPos := by
+      rw [show GpolyTot a b nPos nNeg = FpolyTot a b nNeg nPos from rfl,
+        Dpoly_mul_derivative_FpolyTot]
+    rw [hDT, hGT, hNG, ← map_mul, ← map_mul, hpoly]
   have hderivP : evZ (derivative P) =
       evZ (derivative (FpolyTot a b nPos nNeg)) -
         (v : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ (v - 1) * GT -

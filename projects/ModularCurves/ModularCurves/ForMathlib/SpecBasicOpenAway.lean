@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import Mathlib.AlgebraicGeometry.AffineScheme
 
 /-!
@@ -138,6 +143,7 @@ lemma homOfLE_morphismRestrict_agree {X Y : Scheme} (A : CommRingCat) (f : X ⟶
   simp only [Category.assoc]
   rw [homOfLE_specBasicOpenIsoAway_inv_assoc, homOfLE_specBasicOpenIsoAway_inv'_assoc, h]
 
+set_option backward.isDefEq.respectTransparency.types false in
 open CategoryTheory.Limits in
 /-- **(gluing along an `iSup` cover)** The `hf` obligation of `Scheme.OpenCover.glueMorphisms` for
 the cover `Scheme.Opens.iSupOpenCover U` is exactly pairwise agreement on the intersections
@@ -163,7 +169,7 @@ to the `k`-th image piece gives `(f.isoImage (U k)).inv` composed with the `k`-t
 
 Stated over variable schemes on purpose: instantiated at a concrete `Proj` chart-product, the
 `isoImage` naturality rewrites (`isoImage_hom_homOfLE`) drive `whnf` into the pullback carrier and
-blow the heartbeat budget. As a general lemma it is applied, never unfolded (v10.24). -/
+blow the heartbeat budget. As a general lemma it is applied, never unfolded. -/
 lemma homOfLE_isoImage_inv_iSup {X Y : Scheme} (f : X ⟶ Y) [IsOpenImmersion f] {J : Type*}
     (U : J → X.Opens) (k : J) {Z : Scheme} (g : (⨆ i, U i).toScheme ⟶ Z) :
     Y.homOfLE (f.image_mono (le_iSup U k)) ≫ (f.isoImage (⨆ i, U i)).inv ≫ g =
@@ -176,7 +182,7 @@ lemma homOfLE_isoImage_inv_iSup {X Y : Scheme} (f : X ⟶ Y) [IsOpenImmersion f]
 /-- **(variable-scheme σ-immersion identity)** For an open immersion `p : X ⟶ Z`, an iso `e : X ≅ Y`
 and an open `U : Y.Opens`, the chain `isoImage.inv ≫ (e.hom ∣_ U) ≫ U.ι ≫ e.inv ≫ p` collapses to
 the image inclusion `(p ''ᵁ (e.hom ⁻¹ᵁ U)).ι`. Stated over variable schemes so instantiation at a
-concrete `Proj` chart-product never drives `whnf` into the pullback carrier (v10.24). -/
+concrete `Proj` chart-product never drives `whnf` into the pullback carrier. -/
 lemma isoImage_inv_morphismRestrict_ι {X Y Z : Scheme} (p : X ⟶ Z) [IsOpenImmersion p]
     (e : X ≅ Y) (U : Y.Opens) :
     (p.isoImage (e.hom ⁻¹ᵁ U)).inv ≫ (e.hom ∣_ U) ≫ U.ι ≫ e.inv ≫ p =
@@ -186,12 +192,12 @@ lemma isoImage_inv_morphismRestrict_ι {X Y Z : Scheme} (p : X ⟶ Z) [IsOpenImm
 
 /-- Two `Spec.map`-factorizations that agree on the composite base map agree as morphisms.
 
-The barrier around the composite (v10.24): stated over **variable** rings `A B D E`, the only unfold
+The barrier around the composite: stated over **variable** rings `A B D E`, the only unfold
 the elaborator sees is the trivial `Spec.map (a ≫ b) = Spec.map b ≫ Spec.map a`. Instantiated at a
 concrete localization tower (`E` a triple `Localization.Away`), the conclusion still matches by
 structure — `Spec.map ?b ≫ Spec.map ?a ≫ ?rest` — so `isDefEq` never unfolds `E`. Combining the two
-`Spec.map`s *at the concrete tower* instead (`rw [← Spec.map_comp_assoc]` on the goal) forces a defeq
-through `E` and blows the heartbeat budget; routing through this lemma keeps it under 5k. -/
+`Spec.map`s *at the concrete tower* instead (`rw [← Spec.map_comp_assoc]` on the goal) forces a
+defeq through `E` and blows the heartbeat budget; routing through this lemma keeps it under 5k. -/
 lemma spec_map_comp_congr {A B D E : CommRingCat} {X : Scheme}
     (a : A ⟶ B) (b : B ⟶ E) (a' : A ⟶ D) (b' : D ⟶ E)
     (rest : Spec A ⟶ X) (h : a ≫ b = a' ≫ b') :

@@ -5,7 +5,8 @@ Authors: Chris Birkbeck
 -/
 import LeanModularForms.ForMathlib.ContourIntegral.PVSplit
 import LeanModularForms.ForMathlib.ContourIntegral.SegmentFTC
-import Mathlib
+import Mathlib.Data.Complex.Basic
+import Mathlib.Order.Filter.Defs
 
 /-!
 # Crossing Limit Theorem

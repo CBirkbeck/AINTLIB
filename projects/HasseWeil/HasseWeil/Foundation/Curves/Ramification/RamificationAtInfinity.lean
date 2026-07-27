@@ -50,15 +50,15 @@ point lemma) to discharge the project's `pc_sepDeg_eq_pointCount` witness.
   `LinfAt f`": the carrier plus every typeclass instance the closing theorem
   needs as an honest field.
 * `xIdeal`, `Sinf.ordAt`, `Sinf.kappa` — the prime `(X)` at infinity, the order
-  `-(ramificationIdx …)`, and the residue field `carrier ⧸ P`.
+  `-(ramificationIdx' …)`, and the residue field `carrier ⧸ P`.
 
 ## Main results
 
 * `finrank_eq_sum_ramificationIdx_mul_inertiaDeg` — the abstract fundamental
   identity `Σ e(P) · f(P) = [LinfAt f : k(f)]` from `Ideal.sum_ramification_inertia`.
 * `finrank_eq_weighted_poleDegree_of_nonconstant` — the closing corollary
-  `[L : k(f)] = Σ_P (−ord_P f) · inertiaDeg P`.
-* `Sinf.inertiaDeg_eq_one_of_algebraMap_surjective` — `inertiaDeg (X) P = 1`
+  `[L : k(f)] = Σ_P (−ord_P f) · inertiaDeg' P`.
+* `Sinf.inertiaDeg_eq_one_of_algebraMap_surjective` — `inertiaDeg' (X) P = 1`
   when the residue map `k → κ(P)` is surjective.
 
 ## Implementation notes
@@ -269,18 +269,11 @@ structure Sinf.{u} {L : Type*} [Field L] [Algebra k L] (f : L) where
 
 section SinfConstruction
 
-set_option backward.isDefEq.respectTransparency false
 
 /-- Canonical construction of `Sinf` from Mathlib's `integralClosure`
 Subalgebra. Given the ambient finite-separability hypotheses, all the
 required instances are synthesised once here; downstream code consumes
-them only by field projection.
-
-The local `set_option backward.isDefEq.respectTransparency false` matches
-Mathlib's `NormalClosure` pattern (see `Mathlib/RingTheory/NormalClosure.lean`
-line 79) for the `Algebra ↥(integralClosure …) _` instance synthesis —
-without this option the `Meta.SynthInstance.tryResolve` metavariable wall
-hits us exactly here. -/
+them only by field projection. -/
 noncomputable def Sinf.ofIntegralClosure
     {L : Type*} [Field L] [Algebra k L] (f : L) [Fact (Transcendental k f⁻¹)]
     [Module.Finite (FractionRing (Polynomial k)) (LinfAt (k := k) f)]
@@ -338,8 +331,8 @@ theorem finrank_eq_sum_ramificationIdx_mul_inertiaDeg
     letI := data.isDedekindDomain
     letI := data.algPoly
     ∑ P ∈ IsDedekindDomain.primesOverFinset (xIdeal (k := k)) data.carrier,
-        Ideal.ramificationIdx (xIdeal (k := k)) P *
-        Ideal.inertiaDeg (xIdeal (k := k)) P =
+        Ideal.ramificationIdx' (xIdeal (k := k)) P *
+        Ideal.inertiaDeg' (xIdeal (k := k)) P =
       Module.finrank (FractionRing (Polynomial k)) (LinfAt (k := k) f) := by
   letI := data.commRing
   letI := data.isDomain
@@ -370,7 +363,7 @@ noncomputable def Sinf.ordAt {L : Type*} [Field L] [Algebra k L] {f : L}
     Ideal data.carrier → ℤ :=
   letI := data.commRing
   letI := data.algPoly
-  fun P ↦ -(Ideal.ramificationIdx (xIdeal (k := k)) P : ℤ)
+  fun P ↦ -(Ideal.ramificationIdx' (xIdeal (k := k)) P : ℤ)
 
 /-- The natural-number coercion: `(−ord_P f).toNat = e_P`. -/
 theorem Sinf.toNat_neg_ordAt_eq_ramificationIdx
@@ -380,7 +373,7 @@ theorem Sinf.toNat_neg_ordAt_eq_ramificationIdx
     letI := data.algPoly
     ∀ P : Ideal data.carrier,
       (-(data.ordAt P)).toNat =
-        Ideal.ramificationIdx (xIdeal (k := k)) P := by
+        Ideal.ramificationIdx' (xIdeal (k := k)) P := by
   letI := data.commRing
   letI := data.algPoly
   intro P
@@ -422,12 +415,12 @@ theorem Sinf.inertiaDeg_eq_finrank_kappa
     letI := data.commRing
     letI := data.algPoly
     ∀ (P : Ideal data.carrier) [P.LiesOver (xIdeal (k := k))],
-      Ideal.inertiaDeg (xIdeal (k := k)) P =
+      Ideal.inertiaDeg' (xIdeal (k := k)) P =
         Module.finrank (Polynomial k ⧸ xIdeal (k := k)) (data.kappa P) := by
   letI := data.commRing
   letI := data.algPoly
   intro P _
-  exact Ideal.inertiaDeg_algebraMap _ _
+  exact Ideal.inertiaDeg'_algebraMap _ _
 
 /-- The `Polynomial k ⧸ xIdeal`-finrank of a module agrees with its
 `k`-finrank, given a compatible scalar tower `k → (Polynomial k ⧸ xIdeal)
@@ -446,7 +439,7 @@ theorem finrank_residue_eq_finrank_k
 /-- **Abstract inertia-degree-one criterion at `(X)`.** For an *arbitrary* prime `P` of the
 `Sinf` carrier lying over `xIdeal := (X)`, if the structure algebra map
 `(Polynomial k ⧸ (X)) → (carrier ⧸ P)` (`≅ k → κ(P)`) is surjective, then the inertia
-degree `inertiaDeg (X) P` equals `1`. This is the field-agnostic, `CoordinateRing`-free,
+degree `inertiaDeg' (X) P` equals `1`. This is the field-agnostic, `CoordinateRing`-free,
 `IsAlgClosed`-free criterion for any prime over `(X)`. -/
 theorem Sinf.inertiaDeg_eq_one_of_algebraMap_surjective
     {L : Type*} [Field L] [Algebra k L] {f : L}
@@ -462,7 +455,7 @@ theorem Sinf.inertiaDeg_eq_one_of_algebraMap_surjective
         (algebraMap (Polynomial k ⧸ xIdeal (k := k)) (data.carrier ⧸ P))) :
     letI := data.commRing
     letI := data.algPoly
-    Ideal.inertiaDeg (xIdeal (k := k)) P = 1 := by
+    Ideal.inertiaDeg' (xIdeal (k := k)) P = 1 := by
   letI := data.commRing
   letI := data.algPoly
   letI := data.isDomain
@@ -471,20 +464,20 @@ theorem Sinf.inertiaDeg_eq_one_of_algebraMap_surjective
   letI : Algebra (Polynomial k ⧸ xIdeal (k := k)) (data.carrier ⧸ P) :=
     Ideal.Quotient.algebraQuotientOfLEComap
       (Ideal.LiesOver.over (p := xIdeal (k := k)) (P := P)).le
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   refine le_antisymm ?_ ?_
   · refine finrank_le_one (1 : data.carrier ⧸ P) fun w ↦ ?_
     obtain ⟨c, hc⟩ := h_surj w
     exact ⟨c, by rwa [Algebra.algebraMap_eq_smul_one] at hc⟩
-  · have hpos := Ideal.inertiaDeg_pos (xIdeal (k := k)) P
-    rwa [Ideal.inertiaDeg_algebraMap] at hpos
+  · have hpos := Ideal.inertiaDeg'_pos (xIdeal (k := k)) P
+    rwa [Ideal.inertiaDeg'_algebraMap] at hpos
 
 /-- **Closing corollary (abstract form).** The function-field degree
 `[L : k(f)]` over the Sinf data equals the weighted pole-divisor degree
-`Σ_P (−ord_P f) · f_P` (with `f_P = inertiaDeg xIdeal P`). This is the
+`Σ_P (−ord_P f) · f_P` (with `f_P = inertiaDeg' xIdeal P`). This is the
 abstract form of the `[K(C) : k(f)] = Σ_{P pole of f} (−ord_P f) · [κ(P) :
 k]` identity; Worker B's PoleDivisorFallback specialisation substitutes
-`L = K(E)`, `f = γ*x_gen`, and converts `inertiaDeg` to `[κ(P) : k]`
+`L = K(E)`, `f = γ*x_gen`, and converts `inertiaDeg'` to `[κ(P) : k]`
 using `inertiaDeg_eq_finrank_kappa` plus the `quotientXAlgEquiv`
 `Polynomial k ⧸ xIdeal ≃ k`. -/
 theorem finrank_eq_weighted_poleDegree_of_nonconstant
@@ -497,7 +490,7 @@ theorem finrank_eq_weighted_poleDegree_of_nonconstant
     Module.finrank (FractionRing (Polynomial k)) (LinfAt (k := k) f) =
     ∑ P ∈ IsDedekindDomain.primesOverFinset (xIdeal (k := k)) data.carrier,
       (-(data.ordAt P)).toNat *
-        Ideal.inertiaDeg (xIdeal (k := k)) P := by
+        Ideal.inertiaDeg' (xIdeal (k := k)) P := by
   letI := data.commRing
   letI := data.algPoly
   letI := data.isDomain

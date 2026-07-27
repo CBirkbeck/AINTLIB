@@ -171,25 +171,10 @@ theorem continuous_periodIntegrand (k : ℤ) (f : CuspForm ((Gamma1 N).map (mapG
   (ModularFormClass.continuous f).mul
     ((continuous_evalSym1 _ P).comp continuous_coe)
 
-/-! ## The parametrised integrand on the imaginary axis
+/-! ## Shared analytic input: exponential cusp decay and the slash-`S` relation
 
-We integrate the geodesic from `0` to `∞`, i.e. the positive imaginary axis `z = it`, `t ∈ (0, ∞)`,
-along which `dz = i\,dt`.  The parametrised integrand is `t ↦ (periodIntegrand)(it) · i`,
-extended by `0` for `t ≤ 0` (via `ResToImagAxis`). -/
-
-/-- The integrand of the period integral, parametrised along the positive imaginary axis:
-`t ↦ f(it) · P(it, 1) · i`.  (The factor `i = dz/dt`.) -/
-def imagAxisPeriodIntegrand (k : ℤ) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
-    (P : SymPow ℂ (k - 2).toNat) : ℝ → ℂ :=
-  fun t => ResToImagAxis (periodIntegrand k f P) t * Complex.I
-
-omit [NeZero N] in
-theorem imagAxisPeriodIntegrand_apply_of_pos (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat)
-    {t : ℝ} (ht : 0 < t) :
-    imagAxisPeriodIntegrand k f P t =
-      periodIntegrand k f P ⟨Complex.I * t, by simp [ht]⟩ * Complex.I := by
-  simp only [imagAxisPeriodIntegrand, ResToImagAxis, ht, ↓reduceDIte]
+These facts feed both the polymorphic integrand below and its `CuspForm`-specific
+specialisation. -/
 
 /-- **Exponential cusp decay, pointwise form.**  A cusp form (for any arithmetic group with `∞` a
 cusp) has a bound `‖f z‖ ≤ C·exp(-c·Im z)` for all `z` with `Im z` above some threshold `A`, with
@@ -204,88 +189,6 @@ theorem exists_exp_decay_bound {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (G
   rw [atImInfty, Filter.eventually_comap, Filter.eventually_atTop] at hC
   obtain ⟨A, hA⟩ := hC
   exact ⟨c, hc, C, A, fun z hz => by simpa using hA z.im hz z rfl⟩
-
-/-- **The decay of the period integrand along the imaginary axis.**  The exponential cusp decay of
-`f` dominates the polynomial growth of `P(it, 1)`, giving an exponential bound at `t → +∞`.  This is
-the analytic crux of the convergence at the cusp `∞`. -/
-theorem imagAxisPeriodIntegrand_isBigO_atTop (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
-    ∃ b > 0, imagAxisPeriodIntegrand k f P =O[atTop] fun t : ℝ => Real.exp (-b * t) := by
-  obtain ⟨c, hc, C, A, hbound⟩ := exists_exp_decay_bound f
-  set D := (P : MvPolynomial (Fin 2) ℂ).totalDegree with hD
-  set K := ∑ d ∈ (P : MvPolynomial (Fin 2) ℂ).support,
-    ‖(P : MvPolynomial (Fin 2) ℂ).coeff d‖ with hK
-  refine ⟨c / 2, by positivity, ?_⟩
-  -- Step 1: bound the integrand by  `C·K · t^D · exp(-c·t)`  for large `t`.
-  have hstep1 : imagAxisPeriodIntegrand k f P =O[atTop]
-      fun t : ℝ => (t ^ D) * Real.exp (-c * t) := by
-    rw [Asymptotics.isBigO_iff]
-    refine ⟨C * K, ?_⟩
-    filter_upwards [Filter.eventually_ge_atTop (max A 1)] with t ht
-    have htpos : (0 : ℝ) < t := lt_of_lt_of_le one_pos (le_trans (le_max_right A 1) ht)
-    have htA : A ≤ t := le_trans (le_max_left A 1) ht
-    have ht1 : (1 : ℝ) ≤ t := le_trans (le_max_right A 1) ht
-    rw [imagAxisPeriodIntegrand_apply_of_pos k f P htpos]
-    set z : ℍ := ⟨Complex.I * t, by simp [htpos]⟩ with hz
-    have hzim : z.im = t := by simp [hz, UpperHalfPlane.im]
-    rw [periodIntegrand_apply, norm_mul, norm_mul, Complex.norm_I, mul_one]
-    have hfb : ‖f z‖ ≤ C * Real.exp (-c * t) := by
-      have := hbound z (by rw [hzim]; exact htA); rwa [hzim] at this
-    have hKnn : 0 ≤ K := Finset.sum_nonneg fun _ _ => norm_nonneg _
-    have hPb : ‖evalSym1 (k - 2).toNat P (z : ℂ)‖ ≤ K * t ^ D := by
-      have h := norm_evalSym1_le (k - 2).toNat P (z : ℂ)
-      rw [← hK, ← hD] at h
-      have hzn : ‖(z : ℂ)‖ = t := by rw [hz]; simp [abs_of_pos htpos]
-      rw [hzn, max_eq_right ht1] at h
-      exact h
-    have hCexp : 0 ≤ C * Real.exp (-c * t) := (norm_nonneg (f z)).trans hfb
-    calc ‖f z‖ * ‖evalSym1 (k - 2).toNat P (z : ℂ)‖
-        ≤ (C * Real.exp (-c * t)) * (K * t ^ D) :=
-          mul_le_mul hfb hPb (norm_nonneg _) hCexp
-      _ = C * K * (t ^ D * Real.exp (-c * t)) := by ring
-      _ = C * K * ‖t ^ D * Real.exp (-c * t)‖ := by
-          rw [Real.norm_of_nonneg (by positivity)]
-  -- Step 2:  t^D · exp(-c·t)  =O  exp(-(c/2)·t).
-  have hstep2 : (fun t : ℝ => (t ^ D) * Real.exp (-c * t)) =O[atTop]
-      fun t : ℝ => Real.exp (-(c / 2) * t) := by
-    have h := (isLittleO_pow_exp_pos_mul_atTop D (show (0 : ℝ) < c / 2 by positivity)).mul_isBigO
-      (Asymptotics.isBigO_refl (fun t : ℝ => Real.exp (-c * t)) atTop)
-    refine h.isBigO.congr_right ?_
-    intro t; rw [← Real.exp_add]; ring_nf
-  exact hstep1.trans hstep2
-
-omit [NeZero N] in
-/-- The parametrised integrand is continuous on the open ray `(0, ∞)`. -/
-theorem continuousOn_imagAxisPeriodIntegrand (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
-    ContinuousOn (imagAxisPeriodIntegrand k f P) (Set.Ioi 0) := by
-  intro t ht
-  rw [Set.mem_Ioi] at ht
-  apply ContinuousAt.continuousWithinAt
-  have hofc : ContinuousAt UpperHalfPlane.ofComplex (Complex.I * (t : ℂ)) :=
-    (contMDiffAt_ofComplex (n := ⊤) (by simp [ht])).continuousAt
-  have hg : ContinuousAt (fun s : ℝ => Complex.I * (s : ℂ)) t := by fun_prop
-  have hcomp : ContinuousAt (fun s : ℝ => UpperHalfPlane.ofComplex (Complex.I * (s : ℂ))) t :=
-    ContinuousAt.comp hofc hg
-  have hfull : ContinuousAt (fun s : ℝ =>
-      periodIntegrand k f P (UpperHalfPlane.ofComplex (Complex.I * (s : ℂ))) * Complex.I) t :=
-    ((continuous_periodIntegrand k f P).continuousAt.comp hcomp).mul continuousAt_const
-  apply hfull.congr
-  filter_upwards [lt_mem_nhds ht] with s hs
-  simp only [imagAxisPeriodIntegrand, ResToImagAxis, hs, ↓reduceDIte]
-  rw [UpperHalfPlane.ofComplex_apply_of_im_pos (by simp [hs])]
-
-/-- **Integrability at the cusp `∞`.**  The period integrand is integrable on `[1, ∞)`: the
-exponential cusp decay makes the improper integral converge at the upper cusp. -/
-theorem integrableOn_imagAxisPeriodIntegrand_Ici_one (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
-    IntegrableOn (imagAxisPeriodIntegrand k f P) (Set.Ici 1) := by
-  obtain ⟨b, hb, hO⟩ := imagAxisPeriodIntegrand_isBigO_atTop k f P
-  have hloc : MeasureTheory.LocallyIntegrableOn (imagAxisPeriodIntegrand k f P) (Set.Ici 1) := by
-    refine ContinuousOn.locallyIntegrableOn ?_ measurableSet_Ici
-    exact (continuousOn_imagAxisPeriodIntegrand k f P).mono
-      (fun x hx => by simp only [Set.mem_Ici] at hx; simp only [Set.mem_Ioi]; linarith)
-  exact hloc.integrableOn_of_isBigO_atTop hO ⟨Set.Ioi b, Ioi_mem_atTop b, exp_neg_integrableOn_Ioi b hb⟩
 
 /-! ### Convergence at the cusp `0` (bottom end)
 
@@ -309,13 +212,19 @@ theorem coe_translate_S (k : ℤ) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) 
     ⇑(CuspForm.translate f (mapGL ℝ ModularGroup.S)) = ⇑f ∣[k] ModularGroup.S :=
   rfl
 
-/-- The `S`-conjugate of the level group is arithmetic, so `f ∣ S` enjoys exponential decay too. -/
-theorem isArithmetic_conj_S :
-    (ConjAct.toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • ((Gamma1 N).map (mapGL ℝ))).IsArithmetic := by
+/-- The `S`-conjugate of an arithmetic group is arithmetic, so `f ∣ S` enjoys exponential decay
+too. -/
+theorem isArithmetic_conj_S' {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.IsArithmetic] :
+    (ConjAct.toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • Γ).IsArithmetic := by
   have h : (mapGL ℝ ModularGroup.S)⁻¹ = ((mapGL ℚ ModularGroup.S)⁻¹).map (algebraMap ℚ ℝ) := by
     rw [map_inv, map_mapGL]
   rw [h]
-  exact Subgroup.IsArithmetic.conj ((Gamma1 N).map (mapGL ℝ)) (mapGL ℚ ModularGroup.S)⁻¹
+  exact Subgroup.IsArithmetic.conj Γ (mapGL ℚ ModularGroup.S)⁻¹
+
+/-- The `S`-conjugate of the level group is arithmetic, so `f ∣ S` enjoys exponential decay too. -/
+theorem isArithmetic_conj_S :
+    (ConjAct.toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • ((Gamma1 N).map (mapGL ℝ))).IsArithmetic :=
+  isArithmetic_conj_S'
 
 omit [NeZero N] in
 /-- The relation `f(it) = i^k (1/t)^k (f∣S)(i/t)` along the imaginary axis (from the slash action
@@ -337,14 +246,122 @@ theorem resToImagAxis_eq_slash_S (k : ℤ) (f : CuspForm ((Gamma1 N).map (mapGL 
   rw [← zpow_add₀ Complex.I_ne_zero, ← zpow_add₀ hne]
   simp
 
-/-- **Convergence at the cusp `0`.**  The period integrand tends to `0` as `t → 0⁺`: applying the
-slash action of `S`, the exponential decay of `f ∣ S` at `i∞` (translated to `t → 0`) beats the
-polynomial factors `t^{-k}` and `P(it,1)`. -/
-theorem tendsto_imagAxisPeriodIntegrand_nhdsGT_zero (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
-    Tendsto (imagAxisPeriodIntegrand k f P) (𝓝[>] 0) (𝓝 0) := by
-  haveI : (toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • ((Gamma1 N).map (mapGL ℝ))).IsArithmetic :=
-    isArithmetic_conj_S
+/-! ## Polymorphic period integral for an arbitrary arithmetic cusp form
+
+To handle the integral up a *vertical line* `{q + it}` from a finite cusp `q ∈ ℚ` to `i∞`, we reduce
+to the imaginary axis by the horizontal translation `z ↦ z + q`.  This turns the cusp form `f` into
+its translate `f ∣ T_q` — a cusp form for the conjugate (still arithmetic) group.  We therefore
+generalise the ES-3a integrand and its integrability to **any** cusp form for an arithmetic group.
+-/
+
+section Generic
+
+variable {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (GL (Fin 2) ℝ)} {k : ℤ}
+
+/-- The ES-3a period integrand for an arbitrary function `F : ℍ → ℂ` and polynomial `P`,
+parametrised along the positive imaginary axis: `t ↦ F(it) · P(it, 1) · i`, extended by `0` for
+`t ≤ 0`. -/
+def genIntegrand (F : ℍ → ℂ) {m : ℕ} (P : SymPow ℂ m) : ℝ → ℂ :=
+  fun t => ResToImagAxis (fun τ => F τ * evalSym1 m P (τ : ℂ)) t * Complex.I
+
+theorem genIntegrand_apply_of_pos (F : ℍ → ℂ) {m : ℕ} (P : SymPow ℂ m) {t : ℝ} (ht : 0 < t) :
+    genIntegrand F P t =
+      F ⟨Complex.I * t, by simp [ht]⟩ *
+        evalSym1 m P (⟨Complex.I * t, by simp [ht]⟩ : ℍ) * Complex.I := by
+  simp only [genIntegrand, ResToImagAxis, ht, ↓reduceDIte]
+
+@[simp]
+theorem genIntegrand_zero (F : ℍ → ℂ) {m : ℕ} (P : SymPow ℂ m) :
+    genIntegrand F P 0 = 0 := by
+  simp [genIntegrand, ResToImagAxis]
+
+/-- The polymorphic integrand is continuous on the open ray `(0, ∞)` when `F` is continuous. -/
+theorem continuousOn_genIntegrand {F : ℍ → ℂ} (hF : Continuous F) {m : ℕ} (P : SymPow ℂ m) :
+    ContinuousOn (genIntegrand F P) (Set.Ioi 0) := by
+  intro t ht
+  rw [Set.mem_Ioi] at ht
+  apply ContinuousAt.continuousWithinAt
+  have hofc : ContinuousAt UpperHalfPlane.ofComplex (Complex.I * (t : ℂ)) :=
+    (contMDiffAt_ofComplex (n := ⊤) (by simp [ht])).continuousAt
+  have hg : ContinuousAt (fun s : ℝ => Complex.I * (s : ℂ)) t := by fun_prop
+  have hcomp : ContinuousAt (fun s : ℝ => UpperHalfPlane.ofComplex (Complex.I * (s : ℂ))) t :=
+    ContinuousAt.comp hofc hg
+  have hfull : ContinuousAt (fun s : ℝ =>
+      (fun τ => F τ * evalSym1 m P (τ : ℂ)) (UpperHalfPlane.ofComplex (Complex.I * (s : ℂ)))
+        * Complex.I) t :=
+    ((hF.mul ((continuous_evalSym1 m P).comp continuous_coe)).continuousAt.comp hcomp).mul
+      continuousAt_const
+  apply hfull.congr
+  filter_upwards [lt_mem_nhds ht] with s hs
+  simp only [genIntegrand, ResToImagAxis, hs, ↓reduceDIte]
+  rw [UpperHalfPlane.ofComplex_apply_of_im_pos (by simp [hs])]
+
+/-- **Decay at the cusp `∞`.**  For a cusp form `F` of an arithmetic group, the polymorphic
+integrand decays exponentially at `t → +∞` (the cusp decay of `F` beats the polynomial growth of
+`P`). -/
+theorem genIntegrand_isBigO_atTop [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ}
+    (P : SymPow ℂ m) :
+    ∃ b > 0, genIntegrand (⇑f) P =O[atTop] fun t : ℝ => Real.exp (-b * t) := by
+  obtain ⟨c, hc, C, A, hbound⟩ := exists_exp_decay_bound f
+  set D := (P : MvPolynomial (Fin 2) ℂ).totalDegree with hD
+  set K := ∑ d ∈ (P : MvPolynomial (Fin 2) ℂ).support,
+    ‖(P : MvPolynomial (Fin 2) ℂ).coeff d‖ with hK
+  refine ⟨c / 2, by positivity, ?_⟩
+  have hstep1 : genIntegrand (⇑f) P =O[atTop]
+      fun t : ℝ => (t ^ D) * Real.exp (-c * t) := by
+    rw [Asymptotics.isBigO_iff]
+    refine ⟨C * K, ?_⟩
+    filter_upwards [Filter.eventually_ge_atTop (max A 1)] with t ht
+    have htpos : (0 : ℝ) < t := lt_of_lt_of_le one_pos (le_trans (le_max_right A 1) ht)
+    have htA : A ≤ t := le_trans (le_max_left A 1) ht
+    have ht1 : (1 : ℝ) ≤ t := le_trans (le_max_right A 1) ht
+    rw [genIntegrand_apply_of_pos (⇑f) P htpos]
+    set z : ℍ := ⟨Complex.I * t, by simp [htpos]⟩ with hz
+    have hzim : z.im = t := by simp [hz, UpperHalfPlane.im]
+    rw [norm_mul, norm_mul, Complex.norm_I, mul_one]
+    have hfb : ‖f z‖ ≤ C * Real.exp (-c * t) := by
+      have := hbound z (by rw [hzim]; exact htA); rwa [hzim] at this
+    have hKnn : 0 ≤ K := Finset.sum_nonneg fun _ _ => norm_nonneg _
+    have hPb : ‖evalSym1 m P (z : ℂ)‖ ≤ K * t ^ D := by
+      have h := norm_evalSym1_le m P (z : ℂ)
+      rw [← hK, ← hD] at h
+      have hzn : ‖(z : ℂ)‖ = t := by rw [hz]; simp [abs_of_pos htpos]
+      rw [hzn, max_eq_right ht1] at h
+      exact h
+    have hCexp : 0 ≤ C * Real.exp (-c * t) := (norm_nonneg (f z)).trans hfb
+    calc ‖f z‖ * ‖evalSym1 m P (z : ℂ)‖
+        ≤ (C * Real.exp (-c * t)) * (K * t ^ D) :=
+          mul_le_mul hfb hPb (norm_nonneg _) hCexp
+      _ = C * K * (t ^ D * Real.exp (-c * t)) := by ring
+      _ = C * K * ‖t ^ D * Real.exp (-c * t)‖ := by
+          rw [Real.norm_of_nonneg (by positivity)]
+  have hstep2 : (fun t : ℝ => (t ^ D) * Real.exp (-c * t)) =O[atTop]
+      fun t : ℝ => Real.exp (-(c / 2) * t) := by
+    have h := (isLittleO_pow_exp_pos_mul_atTop D (show (0 : ℝ) < c / 2 by positivity)).mul_isBigO
+      (Asymptotics.isBigO_refl (fun t : ℝ => Real.exp (-c * t)) atTop)
+    refine h.isBigO.congr_right ?_
+    intro t; rw [← Real.exp_add]; ring_nf
+  exact hstep1.trans hstep2
+
+/-- **Integrability at the cusp `∞`.**  The polymorphic integrand is integrable on `[1, ∞)`. -/
+theorem genIntegrableOn_Ici_one [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ}
+    (P : SymPow ℂ m) :
+    IntegrableOn (genIntegrand (⇑f) P) (Set.Ici 1) := by
+  obtain ⟨b, hb, hO⟩ := genIntegrand_isBigO_atTop f P
+  have hloc : MeasureTheory.LocallyIntegrableOn (genIntegrand (⇑f) P) (Set.Ici 1) := by
+    refine ContinuousOn.locallyIntegrableOn ?_ measurableSet_Ici
+    exact (continuousOn_genIntegrand (ModularFormClass.continuous f) P).mono
+      (fun x hx => by simp only [Set.mem_Ici] at hx; simp only [Set.mem_Ioi]; linarith)
+  exact hloc.integrableOn_of_isBigO_atTop hO
+    ⟨Set.Ioi b, Ioi_mem_atTop b, exp_neg_integrableOn_Ioi b hb⟩
+
+/-- **Convergence at the cusp `0`.**  For a cusp form `F` of an arithmetic group, the polymorphic
+integrand tends to `0` as `t → 0⁺`: applying the slash action of `S`, the exponential decay of
+`F ∣ S` at `i∞` beats the polynomial factors. -/
+theorem tendsto_genIntegrand_nhdsGT_zero [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ}
+    (P : SymPow ℂ m) :
+    Tendsto (genIntegrand (⇑f) P) (𝓝[>] 0) (𝓝 0) := by
+  haveI : (toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • Γ).IsArithmetic := isArithmetic_conj_S'
   obtain ⟨c, hc, C, A, hbound⟩ :=
     exists_exp_decay_bound (CuspForm.translate f (mapGL ℝ ModularGroup.S))
   set A' := max A 1 with hA'
@@ -368,29 +385,37 @@ theorem tendsto_imagAxisPeriodIntegrand_nhdsGT_zero (k : ℤ)
     with t htpos htle
   rw [Set.mem_Ioi] at htpos
   rw [Set.mem_Iic] at htle
-  -- `1/t ≥ A'`
   have hst : A' ≤ 1 / t := by
     rw [le_div_iff₀ htpos]
     have := (le_div_iff₀ hA'0).mp htle
     linarith [this]
-  -- bound the integrand
-  rw [imagAxisPeriodIntegrand_apply_of_pos k f P htpos, periodIntegrand_apply, norm_mul, norm_mul,
-    Complex.norm_I, mul_one]
+  rw [genIntegrand_apply_of_pos (⇑f) P htpos, norm_mul, norm_mul, Complex.norm_I, mul_one]
   set z : ℍ := ⟨Complex.I * t, by simp [htpos]⟩ with hz
   have hzc : (z : ℂ) = Complex.I * t := rfl
-  -- bound ‖f z‖ via slash-S
   have hzf : f z = ResToImagAxis (⇑f) t := by
     simp only [ResToImagAxis, htpos, ↓reduceDIte]; rfl
-  have hslash := resToImagAxis_eq_slash_S k f htpos
+  have hslash : ResToImagAxis (⇑f) t =
+      Complex.I ^ k * ((1 / t : ℝ) : ℂ) ^ k *
+        ResToImagAxis (⇑f ∣[k] ModularGroup.S) (1 / t) := by
+    have h := ResToImagAxis.SlashActionS (⇑f) k (show (0 : ℝ) < 1 / t by positivity)
+    rw [one_div_one_div] at h
+    rw [Function.resToImagAxis_apply, Function.resToImagAxis_apply] at h
+    rw [h, ← mul_assoc, ← mul_assoc]
+    rw [show Complex.I ^ k * ((1 / t : ℝ) : ℂ) ^ k * Complex.I ^ (-k) * ((1 / t : ℝ) : ℂ) ^ (-k)
+        = (Complex.I ^ k * Complex.I ^ (-k)) *
+          (((1 / t : ℝ) : ℂ) ^ k * ((1 / t : ℝ) : ℂ) ^ (-k)) by ring]
+    have hne : ((1 / t : ℝ) : ℂ) ≠ 0 := by rw [Ne, Complex.ofReal_eq_zero]; positivity
+    rw [← zpow_add₀ Complex.I_ne_zero, ← zpow_add₀ hne]
+    simp
   set w : ℍ := ⟨Complex.I * (1 / t), by simp [htpos]⟩ with hw
   have hwim : w.im = 1 / t := by simp [hw, UpperHalfPlane.im]
   have hfSval : ResToImagAxis (⇑f ∣[k] ModularGroup.S) (1 / t) =
       (CuspForm.translate f (mapGL ℝ ModularGroup.S)) w := by
-    rw [← coe_translate_S, hw]
+    rw [show (⇑f ∣[k] ModularGroup.S) = ⇑(CuspForm.translate f (mapGL ℝ ModularGroup.S)) from rfl,
+      hw]
     simp only [ResToImagAxis, show (0 : ℝ) < 1 / t by positivity, ↓reduceDIte]
     congr 2
-    push_cast
-    ring
+    push_cast; ring
   have hfSbound : ‖(CuspForm.translate f (mapGL ℝ ModularGroup.S)) w‖ ≤
       C * Real.exp (-c * (1 / t)) := by
     have := hbound w (by rw [hwim]; exact le_trans (le_max_left A 1) hst)
@@ -406,54 +431,43 @@ theorem tendsto_imagAxisPeriodIntegrand_nhdsGT_zero (k : ℤ)
           mul_le_mul_of_nonneg_left
             (mul_le_mul_of_nonneg_right (le_max_left _ _) (Real.exp_pos _).le) (by positivity)
       _ = max C 0 * Real.exp (-c * (1 / t)) * (1 / t) ^ k := by ring
-  -- bound ‖evalSym1 z‖ ≤ K (since ‖z‖ = t ≤ 1)
   have hzn : ‖(z : ℂ)‖ = t := by rw [hzc]; simp [abs_of_pos htpos]
   have ht1 : t ≤ 1 := le_trans htle (by rw [div_le_one hA'0]; linarith)
-  have hPz : ‖evalSym1 (k - 2).toNat P (z : ℂ)‖ ≤ K := by
-    have h := norm_evalSym1_le (k - 2).toNat P (z : ℂ)
+  have hPz : ‖evalSym1 m P (z : ℂ)‖ ≤ K := by
+    have h := norm_evalSym1_le m P (z : ℂ)
     rw [← hK, ← hD, hzn, max_eq_left ht1, one_pow, mul_one] at h
     exact h
-  -- combine
-  calc ‖f z‖ * ‖evalSym1 (k - 2).toNat P (z : ℂ)‖
+  calc ‖f z‖ * ‖evalSym1 m P (z : ℂ)‖
       ≤ (max C 0 * Real.exp (-c * (1 / t)) * (1 / t) ^ k) * K :=
         mul_le_mul hfz hPz (norm_nonneg _) (by positivity)
     _ = g t := by rw [hg]; ring
 
-/-- The period integrand is continuous on `[0, 1]` (taking the value `0` at the cusp `0`). -/
-theorem continuousOn_imagAxisPeriodIntegrand_Icc (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
-    ContinuousOn (imagAxisPeriodIntegrand k f P) (Set.Icc 0 1) := by
+/-- The polymorphic integrand is continuous on `[0, 1]` (value `0` at the cusp `0`). -/
+theorem continuousOn_genIntegrand_Icc [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ}
+    (P : SymPow ℂ m) :
+    ContinuousOn (genIntegrand (⇑f) P) (Set.Icc 0 1) := by
   intro x hx
   rcases eq_or_lt_of_le hx.1 with hx0 | hx0
   · subst hx0
-    have h0 : imagAxisPeriodIntegrand k f P 0 = 0 := by
-      simp [imagAxisPeriodIntegrand, ResToImagAxis]
-    rw [ContinuousWithinAt, h0]
+    rw [ContinuousWithinAt, genIntegrand_zero]
     refine Tendsto.mono_left ?_ (nhdsWithin_mono _ Set.Icc_subset_Ici_self)
     rw [show (Set.Ici (0 : ℝ)) = {0} ∪ Set.Ioi 0 from by
         rw [Set.union_comm]; exact Set.Ioi_union_left.symm, nhdsWithin_union]
-    refine Tendsto.sup ?_ (tendsto_imagAxisPeriodIntegrand_nhdsGT_zero k f P)
+    refine Tendsto.sup ?_ (tendsto_genIntegrand_nhdsGT_zero f P)
     rw [nhdsWithin_singleton, tendsto_pure_left]
-    intro s hs; rw [h0]; exact mem_of_mem_nhds hs
-  · exact ((continuousOn_imagAxisPeriodIntegrand k f P).continuousAt
+    intro s hs; rw [genIntegrand_zero]; exact mem_of_mem_nhds hs
+  · exact ((continuousOn_genIntegrand (ModularFormClass.continuous f) P).continuousAt
       (Ioi_mem_nhds hx0)).continuousWithinAt
 
-/-- **Integrability at the cusp `0`.**  The period integrand is integrable on `(0, 1]`. -/
-theorem integrableOn_imagAxisPeriodIntegrand_Ioc_zero_one (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
-    IntegrableOn (imagAxisPeriodIntegrand k f P) (Set.Ioc 0 1) :=
-  ((continuousOn_imagAxisPeriodIntegrand_Icc k f P).integrableOn_Icc).mono_set
-    Set.Ioc_subset_Icc_self
+/-- **Integrability at the cusp `0`.**  The polymorphic integrand is integrable on `(0, 1]`. -/
+theorem genIntegrableOn_Ioc_zero_one [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ}
+    (P : SymPow ℂ m) :
+    IntegrableOn (genIntegrand (⇑f) P) (Set.Ioc 0 1) :=
+  ((continuousOn_genIntegrand_Icc f P).integrableOn_Icc).mono_set Set.Ioc_subset_Icc_self
 
-/-! ## The period integral and its convergence -/
-
-/-- **Convergence of the period integral.**  The integrand `t ↦ f(it)·P(it,1)·i` is integrable on
-the whole improper contour `(0, ∞)` from the cusp `0` to the cusp `∞`.  This is the analytic heart
-of the modular-symbol period: the exponential cusp decay of `f` dominates the polynomial growth of
-`P(it,1)` at *both* cusps. -/
-theorem integrableOn_imagAxisPeriodIntegrand (k : ℤ)
-    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
-    IntegrableOn (imagAxisPeriodIntegrand k f P) (Set.Ioi 0) := by
+/-- **Convergence of the polymorphic period integral** on the whole improper contour `(0, ∞)`. -/
+theorem genIntegrableOn [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ} (P : SymPow ℂ m) :
+    IntegrableOn (genIntegrand (⇑f) P) (Set.Ioi 0) := by
   have hsplit : Set.Ioi (0 : ℝ) = Set.Ioc 0 1 ∪ Set.Ici 1 := by
     ext x; simp only [Set.mem_Ioi, Set.mem_union, Set.mem_Ioc, Set.mem_Ici]
     constructor
@@ -464,8 +478,129 @@ theorem integrableOn_imagAxisPeriodIntegrand (k : ℤ)
       · exact hx
       · linarith
   rw [hsplit]
-  exact (integrableOn_imagAxisPeriodIntegrand_Ioc_zero_one k f P).union
-    (integrableOn_imagAxisPeriodIntegrand_Ici_one k f P)
+  exact (genIntegrableOn_Ioc_zero_one f P).union (genIntegrableOn_Ici_one f P)
+
+/-- The polymorphic period integral `∫₀^∞ F(it) · P(it,1) · i \, dt` of an arithmetic cusp form
+`F` against `P`.  Finite by `genIntegrableOn`. -/
+def genPeriodIntegral [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ} (P : SymPow ℂ m) : ℂ :=
+  ∫ t in Set.Ioi (0 : ℝ), genIntegrand (⇑f) P t
+
+/-! ### Linearity of the polymorphic period integral in the polynomial slot
+
+We record `ℂ`-linearity in `P`.  (Linearity in the cusp form is handled at the level of the cusp
+integral below, where the form is directly evaluated as a function, avoiding any reliance on the
+`ℂ`-module structure of `CuspForm Γ k` for the conjugate group.) -/
+
+theorem genIntegrand_add_right (F : ℍ → ℂ) {m : ℕ} (P Q : SymPow ℂ m) (t : ℝ) :
+    genIntegrand F (P + Q) t = genIntegrand F P t + genIntegrand F Q t := by
+  simp only [genIntegrand, ResToImagAxis]
+  split_ifs with h
+  · simp only [evalSym1_add]; ring
+  · ring
+
+theorem genIntegrand_smul_right (c : ℂ) (F : ℍ → ℂ) {m : ℕ} (P : SymPow ℂ m) (t : ℝ) :
+    genIntegrand F (c • P) t = c • genIntegrand F P t := by
+  simp only [genIntegrand, ResToImagAxis]
+  split_ifs with h
+  · simp only [evalSym1_smul, smul_eq_mul]; ring
+  · simp
+
+theorem genPeriodIntegral_add_right [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F) {m : ℕ}
+    (P Q : SymPow ℂ m) :
+    genPeriodIntegral f (P + Q) = genPeriodIntegral f P + genPeriodIntegral f Q := by
+  simp only [genPeriodIntegral]
+  rw [← MeasureTheory.integral_add (genIntegrableOn f P) (genIntegrableOn f Q)]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+  exact genIntegrand_add_right (⇑f) P Q t
+
+theorem genPeriodIntegral_smul_right [CuspFormClass F Γ k] [Γ.IsArithmetic] (c : ℂ) (f : F)
+    {m : ℕ} (P : SymPow ℂ m) :
+    genPeriodIntegral f (c • P) = c • genPeriodIntegral f P := by
+  simp only [genPeriodIntegral]
+  rw [← MeasureTheory.integral_smul]
+  refine MeasureTheory.setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
+  exact genIntegrand_smul_right c (⇑f) P t
+
+end Generic
+
+/-! ## The parametrised integrand on the imaginary axis
+
+We integrate the geodesic from `0` to `∞`, i.e. the positive imaginary axis `z = it`, `t ∈ (0, ∞)`,
+along which `dz = i\,dt`.  The parametrised integrand is `t ↦ (periodIntegrand)(it) · i`,
+extended by `0` for `t ≤ 0` (via `ResToImagAxis`). -/
+
+/-- The integrand of the period integral, parametrised along the positive imaginary axis:
+`t ↦ f(it) · P(it, 1) · i`.  (The factor `i = dz/dt`.) -/
+def imagAxisPeriodIntegrand (k : ℤ) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
+    (P : SymPow ℂ (k - 2).toNat) : ℝ → ℂ :=
+  fun t => ResToImagAxis (periodIntegrand k f P) t * Complex.I
+
+omit [NeZero N] in
+/-- The `CuspForm`-specific integrand *is* the polymorphic one, applied to `⇑f` (`rfl`, since
+`periodIntegrand k f P = fun τ ↦ f τ * evalSym1 _ P τ`). -/
+theorem imagAxisPeriodIntegrand_eq_genIntegrand (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    imagAxisPeriodIntegrand k f P = genIntegrand (⇑f) P :=
+  rfl
+
+omit [NeZero N] in
+theorem imagAxisPeriodIntegrand_apply_of_pos (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat)
+    {t : ℝ} (ht : 0 < t) :
+    imagAxisPeriodIntegrand k f P t =
+      periodIntegrand k f P ⟨Complex.I * t, by simp [ht]⟩ * Complex.I :=
+  genIntegrand_apply_of_pos (⇑f) P ht
+
+/-- **The decay of the period integrand along the imaginary axis.**  The exponential cusp decay of
+`f` dominates the polynomial growth of `P(it, 1)`, giving an exponential bound at `t → +∞`.  This is
+the analytic crux of the convergence at the cusp `∞`. -/
+theorem imagAxisPeriodIntegrand_isBigO_atTop (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    ∃ b > 0, imagAxisPeriodIntegrand k f P =O[atTop] fun t : ℝ => Real.exp (-b * t) :=
+  genIntegrand_isBigO_atTop f P
+
+omit [NeZero N] in
+/-- The parametrised integrand is continuous on the open ray `(0, ∞)`. -/
+theorem continuousOn_imagAxisPeriodIntegrand (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    ContinuousOn (imagAxisPeriodIntegrand k f P) (Set.Ioi 0) :=
+  continuousOn_genIntegrand (ModularFormClass.continuous f) P
+
+/-- **Integrability at the cusp `∞`.**  The period integrand is integrable on `[1, ∞)`: the
+exponential cusp decay makes the improper integral converge at the upper cusp. -/
+theorem integrableOn_imagAxisPeriodIntegrand_Ici_one (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    IntegrableOn (imagAxisPeriodIntegrand k f P) (Set.Ici 1) :=
+  genIntegrableOn_Ici_one f P
+
+/-- **Convergence at the cusp `0`.**  The period integrand tends to `0` as `t → 0⁺`: applying the
+slash action of `S`, the exponential decay of `f ∣ S` at `i∞` (translated to `t → 0`) beats the
+polynomial factors `t^{-k}` and `P(it,1)`. -/
+theorem tendsto_imagAxisPeriodIntegrand_nhdsGT_zero (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    Tendsto (imagAxisPeriodIntegrand k f P) (𝓝[>] 0) (𝓝 0) :=
+  tendsto_genIntegrand_nhdsGT_zero f P
+
+/-- The period integrand is continuous on `[0, 1]` (taking the value `0` at the cusp `0`). -/
+theorem continuousOn_imagAxisPeriodIntegrand_Icc (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    ContinuousOn (imagAxisPeriodIntegrand k f P) (Set.Icc 0 1) :=
+  continuousOn_genIntegrand_Icc f P
+
+/-- **Integrability at the cusp `0`.**  The period integrand is integrable on `(0, 1]`. -/
+theorem integrableOn_imagAxisPeriodIntegrand_Ioc_zero_one (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    IntegrableOn (imagAxisPeriodIntegrand k f P) (Set.Ioc 0 1) :=
+  genIntegrableOn_Ioc_zero_one f P
+
+/-- **Convergence of the period integral.**  The integrand `t ↦ f(it)·P(it,1)·i` is integrable on
+the whole improper contour `(0, ∞)` from the cusp `0` to the cusp `∞`.  This is the analytic heart
+of the modular-symbol period: the exponential cusp decay of `f` dominates the polynomial growth of
+`P(it,1)` at *both* cusps. -/
+theorem integrableOn_imagAxisPeriodIntegrand (k : ℤ)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) :
+    IntegrableOn (imagAxisPeriodIntegrand k f P) (Set.Ioi 0) :=
+  genIntegrableOn f P
 
 /-- **The period integral** `⟨f, {0,∞}⊗P⟩ = ∫₀^∞ f(it)·P(it,1)·i\,dt`, the canonical generator of
 the modular-symbol period pairing (Shimura §8.2).  It is a well-defined finite complex number by
@@ -504,20 +639,14 @@ omit [NeZero N] in
 theorem imagAxisPeriodIntegrand_add_right (k : ℤ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P Q : SymPow ℂ (k - 2).toNat) (t : ℝ) :
     imagAxisPeriodIntegrand k f (P + Q) t =
-      imagAxisPeriodIntegrand k f P t + imagAxisPeriodIntegrand k f Q t := by
-  simp only [imagAxisPeriodIntegrand, ResToImagAxis]
-  split_ifs with h
-  · simp only [periodIntegrand_apply, evalSym1_add]; ring
-  · ring
+      imagAxisPeriodIntegrand k f P t + imagAxisPeriodIntegrand k f Q t :=
+  genIntegrand_add_right (⇑f) P Q t
 
 omit [NeZero N] in
 theorem imagAxisPeriodIntegrand_smul_right (k : ℤ) (c : ℂ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (P : SymPow ℂ (k - 2).toNat) (t : ℝ) :
-    imagAxisPeriodIntegrand k f (c • P) t = c • imagAxisPeriodIntegrand k f P t := by
-  simp only [imagAxisPeriodIntegrand, ResToImagAxis]
-  split_ifs with h
-  · simp only [periodIntegrand_apply, evalSym1_smul, smul_eq_mul]; ring
-  · simp
+    imagAxisPeriodIntegrand k f (c • P) t = c • imagAxisPeriodIntegrand k f P t :=
+  genIntegrand_smul_right c (⇑f) P t
 
 /-- The period integral is additive in the cusp form `f`. -/
 theorem periodIntegral_add_left (k : ℤ)

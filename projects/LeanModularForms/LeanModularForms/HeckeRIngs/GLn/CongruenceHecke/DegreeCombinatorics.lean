@@ -142,8 +142,8 @@ private lemma Gamma0_mN_mul_GammaN_eq_Gamma0 (N m : ℕ) [NeZero N] [NeZero (m *
   clear hγ γ
   intro a b c d hdet hγ
   have hNc : (↑N : ℤ) ∣ c := by
-    rw [Gamma0_mem, ZMod.intCast_zmod_eq_zero_iff_dvd] at hγ
-    simpa [Matrix.cons_val_one, Matrix.head_cons] using hγ
+    have hγ0 : ((c : ℤ) : ZMod N) = 0 := Gamma0_mem.mp hγ
+    exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp hγ0
   obtain ⟨s, hs⟩ := hNc
   have hd_N : IsCoprime d (↑N : ℤ) := ⟨a, -b * s, by linarith [hs ▸ hdet]⟩
   have hd_s : IsCoprime d s := ⟨a, -b * ↑N, by linarith [hs ▸ hdet]⟩
@@ -171,10 +171,27 @@ private lemma Gamma0_mN_mul_GammaN_eq_Gamma0 (N m : ℕ) [NeZero N] [NeZero (m *
         (Matrix.SpecialLinearGroup.map (Int.castRingHom (ZMod N)))
           ⟨!![a, b; c, d], by rwa [Matrix.det_fin_two_of]⟩ := by
       ext i j
-      simp only [σ, σ₀₀, σ₀₁, σ₁₀, σ₁₁, SL_reduction_mod_hom_val,
-        Matrix.of_apply, Matrix.cons_val', Matrix.empty_val']
-      fin_cases i <;> fin_cases j <;> push_cast <;> simp [hc_cast]
-    rw [map_mul, map_inv, hmod, inv_mul_cancel]
+      refine ((SL_reduction_mod_hom_val N σ i j).trans ?_).trans
+        (SL_reduction_mod_hom_val N _ i j).symm
+      fin_cases i <;> fin_cases j
+      · show ((σ₀₀ : ℤ) : ZMod N) = ((a : ℤ) : ZMod N)
+        simp only [σ₀₀]
+        push_cast
+        simp
+      · show ((σ₀₁ : ℤ) : ZMod N) = ((b : ℤ) : ZMod N)
+        simp only [σ₀₁]
+        push_cast
+        simp
+      · show ((σ₁₀ : ℤ) : ZMod N) = ((c : ℤ) : ZMod N)
+        simp only [σ₁₀]
+        push_cast
+        simp [hc_cast]
+      · show ((σ₁₁ : ℤ) : ZMod N) = ((d : ℤ) : ZMod N)
+        simp only [σ₁₁]
+        push_cast
+        simp
+    refine Eq.trans (map_mul _ σ⁻¹ _) ?_
+    rw [map_inv, hmod, inv_mul_cancel]
 
 private lemma diagConj_entry (k : ℕ) (hk : 0 < k) (σ : GL (Fin 2) ℚ) (i j : Fin 2) :
     ((diagMat 2 (![1, k] : Fin 2 → ℕ) : GL (Fin 2) ℚ)⁻¹ * σ *
@@ -249,19 +266,21 @@ private lemma exists_conj_mem_Gamma0_N_of_mem_Gamma0_kN (N : ℕ) [NeZero N] (k 
     linear_combination hdet + σ.1 0 1 * hq'
   refine ⟨⟨!![σ.1 0 0, k * σ.1 0 1; q, σ.1 1 1], by
       rw [Matrix.det_fin_two_of]; linarith [h_det]⟩, ?_, ?_⟩
-  · rw [CongruenceSubgroup.Gamma0_mem, ZMod.intCast_zmod_eq_zero_iff_dvd]
-    simpa using hN_q
+  · exact CongruenceSubgroup.Gamma0_mem.mpr (by
+      show ((q : ℤ) : ZMod N) = 0
+      exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mpr hN_q)
   · apply Units.ext
     ext i j
     rw [diagConj_entry k hk]
     have hq_q : ((σ.1 1 0 : ℤ) : ℚ) = (k : ℚ) * ((q : ℤ) : ℚ) := by exact_mod_cast hq
-    have h_τ_val : ∀ a b, ((mapGL ℚ ⟨!![σ.1 0 0, k * σ.1 0 1; q, σ.1 1 1], by
-        rw [Matrix.det_fin_two_of]; linarith [h_det]⟩).val a b : ℚ) =
-        ((!![σ.1 0 0, k * σ.1 0 1; q, σ.1 1 1] a b : ℤ) : ℚ) := by
-      intros; simp [mapGL_coe_matrix, Matrix.map_apply, algebraMap_int_eq]
-    have h_σ_val : ∀ a b, ((mapGL ℚ σ).val a b : ℚ) = ((σ.val a b : ℤ) : ℚ) := by
-      intros; simp [mapGL_coe_matrix, Matrix.map_apply, algebraMap_int_eq]
-    simp only [h_τ_val, h_σ_val]
+    have h_τ_val : (↑(mapGL ℚ (⟨!![σ.1 0 0, k * σ.1 0 1; q, σ.1 1 1], by
+        rw [Matrix.det_fin_two_of]; linarith [h_det]⟩ : SL(2, ℤ))) :
+        Matrix (Fin 2) (Fin 2) ℚ) = (!![σ.1 0 0, k * σ.1 0 1; q, σ.1 1 1]).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+    have h_σ_val : (↑(mapGL ℚ σ) : Matrix (Fin 2) (Fin 2) ℚ) =
+        (↑σ : Matrix (Fin 2) (Fin 2) ℤ).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+    simp only [h_τ_val, h_σ_val, Matrix.map_apply]
     have h_div : ((σ.val 1 0 : ℤ) : ℚ) / (k : ℚ) = (q : ℚ) := by rw [hq_q]; field_simp
     fin_cases i <;> fin_cases j <;> simp
     · exact h_div.symm

@@ -87,10 +87,12 @@ private lemma qExpansion_one_coeff_one_smul_local
       c * (UpperHalfPlane.qExpansion (1 : ℝ) (⇑f)).coeff 1
   rw [show (⇑(c • f : CuspForm _ k) : UpperHalfPlane → ℂ) = c • ⇑f from rfl,
     show (⇑f : UpperHalfPlane → ℂ) = ⇑f.toModularForm' from rfl,
-    ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N), PowerSeries.coeff_smul,
+    ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N),
+    PowerSeries.coeff_smul,
     smul_eq_mul]
 
-/-- Membership in the Nebentypus space transfers from `g.toModularForm'` (the `CuspForm`→`ModularForm`
+/-- Membership in the Nebentypus space transfers from `g.toModularForm'`
+(the `CuspForm`→`ModularForm`
 coercion used throughout the eigenform API) to `cuspFormCharSpace`, bridging the defeq mismatch
 between `toModularForm'` and `cuspFormToModularForm`. -/
 private theorem mem_cuspFormCharSpace_of_toModularForm'_mem (χ : (ZMod N)ˣ →* ℂˣ)
@@ -700,7 +702,8 @@ private theorem coeff_smul_inv_eq_eigenvalue
           b₁⁻¹ • ⇑g_new.toCuspForm from rfl,
       show (⇑g_new.toCuspForm : UpperHalfPlane → ℂ) =
         ⇑g_new.toCuspForm.toModularForm' from rfl,
-      ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N), PowerSeries.coeff_smul,
+      ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N),
+      PowerSeries.coeff_smul,
       smul_eq_mul]
   rw [h_smul_coeff, Eigenform.coeff_eq_coeff_one_mul_eigenvalue g_new χ hgχ n hn, ← hb₁_def,
     ← mul_assoc, inv_mul_cancel₀ hb₁_ne, one_mul]
@@ -954,7 +957,8 @@ theorem newPart_eq_smul_of_shared_eigenvalues
       intro n hn
       show (UpperHalfPlane.qExpansion (1 : ℝ)
           (⇑g₁.toModularForm' - ⇑f.toCuspForm.toModularForm')).coeff n = 0
-      rw [ModularForm.qExpansion_sub one_pos (one_mem_strictPeriods_Gamma1_map N), map_sub, sub_eq_zero]
+      rw [ModularForm.qExpansion_sub one_pos (one_mem_strictPeriods_Gamma1_map N),
+        map_sub, sub_eq_zero]
       by_cases hn0 : n = 0
       · subst hn0
         rw [show (⇑g₁.toModularForm' : UpperHalfPlane → ℂ) = ⇑g₁ from rfl,
@@ -1183,7 +1187,8 @@ private theorem oldPart_diff_qExpansion_coeff_eq_zero
         (⇑(c₁' • f.toCuspForm).toModularForm')).coeff n = c₁' * f.eigenvalue np := by
       rw [show (⇑(c₁' • f.toCuspForm).toModularForm' : UpperHalfPlane → ℂ) =
             c₁' • ⇑f.toCuspForm.toModularForm' from rfl,
-        ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N), PowerSeries.coeff_smul,
+        ModularForm.qExpansion_smul one_pos (one_mem_strictPeriods_Gamma1_map N),
+        PowerSeries.coeff_smul,
         smul_eq_mul, ← hnp_val, Newform.eigenvalue_eq_coeff f np hn χ hfχ]
       congr 1
     rw [hL, hR]

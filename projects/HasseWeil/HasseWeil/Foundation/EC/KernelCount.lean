@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.Curves.Fiber.GoodFiber
 import HasseWeil.Foundation.EC.GenericCovarianceGeneral
 import HasseWeil.Isogeny.Kernel
-import HasseWeil.Foundation.Curves.Differentials
 
 /-!
 # `#ker β = deg β` for a separable isogeny with a coordinate witness (ROUTE-W, W-3)
@@ -67,16 +67,12 @@ theorem Isogeny.endCurveMap_degree (β : Isogeny W.toAffine W.toAffine) :
   rfl
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
-/-- `toAffinePoint` is injective on smooth points (same proof as the private lemma in
-`GenericCovarianceGeneral`). -/
+/-- `toAffinePoint` is injective on smooth points — the `(W)`-explicit form of
+`WeilPairing.toAffinePoint_injective` (`GenericCovarianceGeneral`). -/
 theorem smoothPoint_toAffinePoint_injective :
     Function.Injective
-      (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) := by
-  intro P Q h
-  simp only [Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at h
-  obtain ⟨hx, hy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp h
-  cases P; cases Q
-  simp_all
+      (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) :=
+  WeilPairing.toAffinePoint_injective
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A coordinate-ring element evaluates (in the `EvaluatesTo` valuation idiom) to its
@@ -103,6 +99,7 @@ theorem evaluatesTo_algebraMap_evalAt (P : (W_smooth W).SmoothPoint)
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := W_smooth W) _ P).mpr hmem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The values at `P` of the coordinate functions pulled back through `cd` are the
 coordinates of `toPointMap cd P` (the `hvalx`/`hvaly` step of `stored_eq_toPointMap`). -/
 private theorem coordHom_evalAt_eq_toPointMap_coords
@@ -114,7 +111,7 @@ private theorem coordHom_evalAt_eq_toPointMap_coords
       (Curves.CurveMap.toPointMap cd P).x ∧
     (W_smooth W).evalAt P (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) =
       (Curves.CurveMap.toPointMap cd P).y := by
-  haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   set Q := Curves.CurveMap.toPointMap cd P
   refine ⟨?_, ?_⟩
   · have h1 := (Curves.CurveMap.evalAt_toPointMap cd P
@@ -146,7 +143,7 @@ theorem PullbackEvaluation.stored_eq_toPointMap {β : Isogeny W.toAffine W.toAff
     haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
     β.toAddMonoidHom P.toAffinePoint =
       (Curves.CurveMap.toPointMap cd P).toAffinePoint := by
-  haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   obtain ⟨x', y', h', heq, hx, hy⟩ := hw P hP
   obtain ⟨hvalx, hvaly⟩ := coordHom_evalAt_eq_toPointMap_coords W cd P
   set Q := Curves.CurveMap.toPointMap cd P with hQdef
@@ -256,8 +253,8 @@ theorem card_kernel_eq_degree_of_separable_coordHom [IsAlgClosed F]
     (hw : WeilPairing.PullbackEvaluation W β bad) :
     Nat.card β.kernel = β.degree := by
   classical
-  haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
-  haveI hIC : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
+  have : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
     ‹IsIntegrallyClosed W.toAffine.CoordinateRing›
   -- separability in the `Algebra.IsSeparable` form consumed by the layer-1 engine
   have hsepAlg : @Algebra.IsSeparable (W_smooth W).FunctionField (W_smooth W).FunctionField

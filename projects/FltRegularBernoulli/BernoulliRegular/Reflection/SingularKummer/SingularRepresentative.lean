@@ -21,13 +21,12 @@ namespace BernoulliRegular
 namespace Reflection
 namespace SingularKummer
 
-set_option linter.unusedSectionVars false
-
 namespace SingularPair
 
 variable (R K : Type*) [CommRing R] [IsDomain R]
 variable [Field K] [Algebra R K] [IsFractionRing R K]
 
+omit [IsDomain R] in
 /-- Every singular quotient class has a singular-pair representative. -/
 theorem exists_representative (p : ℕ)
     (x : SingularGroup (R := R) (K := K) p) :

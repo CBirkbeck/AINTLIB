@@ -85,7 +85,7 @@ private theorem stalkDVRAux_exists_coord_notMem {K B : Type u} [CommRing K] [Com
     (q : Ideal B) [q.IsPrime] :
     ∃ g : B, b.repr (KaehlerDifferential.D K B g) default ∉ q := by
   by_contra hall
-  push_neg at hall
+  push Not at hall
   have hmem : (b default : Ω[B⁄K])
       ∈ Submodule.span B (Set.range (KaehlerDifferential.D K B)) := by
     rw [KaehlerDifferential.span_range_derivation]; trivial
@@ -253,8 +253,109 @@ private theorem stalkDVRAux_finite_quotient_le {K B : Type u} [Field K] [CommRin
   have hs : Function.Surjective (Ideal.quotientMapₐ J (AlgHom.id K B) hle) := by
     intro z
     obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective z
-    exact ⟨Ideal.Quotient.mk I y, by simp [Ideal.quotientMap_mk]⟩
+    exact ⟨Ideal.Quotient.mk I y, by simp⟩
   exact Module.Finite.of_surjective (Ideal.quotientMapₐ J (AlgHom.id K B) hle).toLinearMap hs
+
+/-- The localization of a ring away from an element lying outside a prime ideal is
+nontrivial (the element is non-nilpotent, so no power of it vanishes). -/
+private theorem stalkDVRAux_nontrivial_localizationAway {A : Type u} [CommRing A] {r : A}
+    (q : Ideal A) [q.IsPrime] (hr : r ∉ q) : Nontrivial (Localization.Away r) := by
+  rcases subsingleton_or_nontrivial (Localization.Away r) with hsub | h
+  · exfalso
+    have h0 : algebraMap A (Localization.Away r) 1 = 0 := Subsingleton.elim _ _
+    rw [IsLocalization.map_eq_zero_iff (Submonoid.powers r)] at h0
+    obtain ⟨m, hm⟩ := h0
+    obtain ⟨n, hn⟩ := m.2
+    refine hr (‹q.IsPrime›.mem_of_pow_mem n ?_)
+    have hrn0 : r ^ n = 0 := by
+      have hm0 : (m : A) = 0 := by simpa using hm
+      simpa [hm0] using hn
+    rw [hrn0]; exact q.zero_mem
+  · exact h
+
+/-- **Kähler generator on an away-localization.** If `b` is a singleton basis of the
+rank-one module `Ω[A⁄k]` and `A'` is the localization of `A` inverting the coordinate
+`r = b.repr (dg)` of `dg`, then every differential in `Ω[A'⁄k]` is an `A'`-multiple of
+`d(g)` (the image of `g` in `A'`). -/
+private theorem stalkDVRAux_kaehler_gen {k A A' : Type u} [CommRing k] [CommRing A]
+    [Algebra k A] [CommRing A'] [Algebra A A'] [Algebra k A'] [IsScalarTower k A A']
+    {ι : Type*} [Unique ι] (b : Module.Basis ι A (Ω[A⁄k])) (g : A)
+    [IsLocalization (Submonoid.powers (b.repr (KaehlerDifferential.D k A g) default)) A'] :
+    ∀ m : Ω[A'⁄k], ∃ a : A',
+      m = a • KaehlerDifferential.D k A' (algebraMap A A' g) := by
+  set r : A := b.repr (KaehlerDifferential.D k A g) default with hrdef
+  have hgu : IsUnit (algebraMap A A' r) :=
+    IsLocalization.map_units A' (⟨r, Submonoid.mem_powers r⟩ : Submonoid.powers r)
+  have hDt : KaehlerDifferential.D k A' (algebraMap A A' g)
+      = algebraMap A A' r • KaehlerDifferential.map k k A A' (b default) := by
+    rw [← KaehlerDifferential.map_D k k A A' g]
+    conv_lhs => rw [stalkDVRAux_basis_expand b (KaehlerDifferential.D k A g)]
+    rw [map_smul, algebraMap_smul]
+  obtain ⟨u, hu⟩ := hgu
+  have hb0 : KaehlerDifferential.map k k A A' (b default)
+      = (↑u⁻¹ : A') • KaehlerDifferential.D k A' (algebraMap A A' g) := by
+    rw [hDt, ← hu, smul_smul, Units.inv_mul, one_smul]
+  intro m
+  have hm : m ∈ Submodule.span A'
+      (Set.range (KaehlerDifferential.map k k A A' ∘ KaehlerDifferential.D k A)) := by
+    rw [KaehlerDifferential.span_range_map_derivation_of_isLocalization
+      (R := k) (S := A) (T := A') (Submonoid.powers r)]
+    trivial
+  induction hm using Submodule.span_induction with
+  | mem m hm =>
+    obtain ⟨x, rfl⟩ := hm
+    refine ⟨algebraMap A A' (b.repr (KaehlerDifferential.D k A x) default) * ↑u⁻¹, ?_⟩
+    show KaehlerDifferential.map k k A A' (KaehlerDifferential.D k A x) = _
+    conv_lhs => rw [stalkDVRAux_basis_expand b (KaehlerDifferential.D k A x)]
+    rw [map_smul,
+      show (b.repr (KaehlerDifferential.D k A x) default)
+          • KaehlerDifferential.map k k A A' (b default)
+        = algebraMap A A' (b.repr (KaehlerDifferential.D k A x) default)
+          • KaehlerDifferential.map k k A A' (b default) from
+        (algebraMap_smul A' _ _).symm,
+      hb0, smul_smul]
+  | zero => exact ⟨0, by simp⟩
+  | add m₁ m₂ _ _ ih₁ ih₂ =>
+    obtain ⟨a₁, rfl⟩ := ih₁
+    obtain ⟨a₂, rfl⟩ := ih₂
+    exact ⟨a₁ + a₂, by rw [add_smul]⟩
+  | smul a m _ ih =>
+    obtain ⟨a₀, rfl⟩ := ih
+    exact ⟨a * a₀, by rw [smul_smul]⟩
+
+/-- There is no injective `k`-algebra homomorphism from the polynomial ring `k[X]` into a
+finite-dimensional `k`-algebra (`k[X]` is not module-finite over `k`). -/
+private theorem stalkDVRAux_not_injective_algHom_polynomial {k C : Type u} [Field k]
+    [CommRing C] [Algebra k C] [Module.Finite k C] (φ : Polynomial k →ₐ[k] C) :
+    ¬ Function.Injective φ := fun hinj =>
+  Polynomial.not_finite (FiniteDimensional.of_injective φ.toLinearMap hinj)
+
+/-- Over a flat algebra, the image of a nonzerodivisor under the structure map is again a
+nonzerodivisor. -/
+private theorem stalkDVRAux_algebraMap_mem_nonZeroDivisors {R O : Type u} [CommRing R]
+    [CommRing O] [Algebra R O] [Module.Flat R O] {p : R} (hp : p ∈ nonZeroDivisors R) :
+    algebraMap R O p ∈ nonZeroDivisors O := by
+  have hreg : IsSMulRegular O p := Module.Flat.isSMulRegular_of_nonZeroDivisors hp
+  rw [mem_nonZeroDivisors_iff]
+  constructor
+  · intro x hx
+    apply hreg
+    show p • x = p • 0
+    rw [smul_zero, Algebra.smul_def, hx]
+  · intro x hx
+    apply hreg
+    show p • x = p • 0
+    rw [smul_zero, Algebra.smul_def, mul_comm, hx]
+
+/-- A discrete valuation ring is never module-finite over a field: it would be Artinian,
+hence (being a domain) a field, contradicting that a DVR is not a field. -/
+private theorem stalkDVRAux_not_finite_of_isDiscreteValuationRing {k O : Type u} [Field k]
+    [CommRing O] [IsDomain O] [IsDiscreteValuationRing O] [Algebra k O] :
+    ¬ Module.Finite k O := by
+  intro h
+  haveI := h
+  haveI : IsArtinianRing O := IsArtinianRing.of_finite k O
+  exact IsDiscreteValuationRing.not_isField O (IsArtinianRing.isField_of_isDomain O)
 
 variable (k A : Type u) [Field k] [CommRing A] [Algebra k A]
   [Algebra.IsStandardSmoothOfRelativeDimension 1 k A]
@@ -280,19 +381,7 @@ theorem exists_span_nonZeroDivisor_map_localizationAtPrime (q : Ideal A) [q.IsPr
   set r : A := b.repr (KaehlerDifferential.D k A g) default with hrdef
   -- the away-localization inverting `r`
   set A' := Localization.Away r with hA'def
-  haveI : Nontrivial A' := by
-    rcases subsingleton_or_nontrivial A' with hsub | h
-    · exfalso
-      have h0 : algebraMap A A' 1 = 0 := Subsingleton.elim _ _
-      rw [IsLocalization.map_eq_zero_iff (Submonoid.powers r)] at h0
-      obtain ⟨m, hm⟩ := h0
-      obtain ⟨n, hn⟩ := m.2
-      refine hg (‹q.IsPrime›.mem_of_pow_mem n ?_)
-      have hrn0 : r ^ n = 0 := by
-        have hm0 : (m : A) = 0 := by simpa using hm
-        simpa [hm0] using hn
-      rw [hrn0]; exact q.zero_mem
-    · exact h
+  haveI : Nontrivial A' := stalkDVRAux_nontrivial_localizationAway q hg
   haveI hstdA' : Algebra.IsStandardSmoothOfRelativeDimension 1 k A' := by
     haveI h0 : Algebra.IsStandardSmoothOfRelativeDimension 0 A A' :=
       Algebra.IsStandardSmoothOfRelativeDimension.localization_away r
@@ -348,45 +437,8 @@ theorem exists_span_nonZeroDivisor_map_localizationAtPrime (q : Ideal A) [q.IsPr
       exact Submonoid.mem_map.mpr ⟨a, ha, by rw [mul_comm] at e; exact e.symm⟩
   -- the Kähler generator downstairs
   set t : A' := algebraMap A A' g with htdef
-  have hgu : IsUnit (algebraMap A A' r) :=
-    IsLocalization.map_units A' (⟨r, Submonoid.mem_powers r⟩ : Submonoid.powers r)
   have hgen : ∀ m : Ω[A'⁄k], ∃ a : A', m = a • KaehlerDifferential.D k A' t := by
-    have hDt : KaehlerDifferential.D k A' t
-        = algebraMap A A' r • KaehlerDifferential.map k k A A' (b default) := by
-      rw [htdef, ← KaehlerDifferential.map_D k k A A' g]
-      conv_lhs => rw [stalkDVRAux_basis_expand b (KaehlerDifferential.D k A g)]
-      rw [map_smul, algebraMap_smul]
-    obtain ⟨u, hu⟩ := hgu
-    have hb0 : KaehlerDifferential.map k k A A' (b default)
-        = (↑u⁻¹ : A') • KaehlerDifferential.D k A' t := by
-      rw [hDt, ← hu, smul_smul, Units.inv_mul, one_smul]
-    intro m
-    have hm : m ∈ Submodule.span A'
-        (Set.range (KaehlerDifferential.map k k A A' ∘ KaehlerDifferential.D k A)) := by
-      rw [KaehlerDifferential.span_range_map_derivation_of_isLocalization
-        (R := k) (S := A) (T := A') (Submonoid.powers r)]
-      trivial
-    induction hm using Submodule.span_induction with
-    | mem m hm =>
-      obtain ⟨x, rfl⟩ := hm
-      refine ⟨algebraMap A A' (b.repr (KaehlerDifferential.D k A x) default) * ↑u⁻¹, ?_⟩
-      show KaehlerDifferential.map k k A A' (KaehlerDifferential.D k A x) = _
-      conv_lhs => rw [stalkDVRAux_basis_expand b (KaehlerDifferential.D k A x)]
-      rw [map_smul,
-        show (b.repr (KaehlerDifferential.D k A x) default)
-            • KaehlerDifferential.map k k A A' (b default)
-          = algebraMap A A' (b.repr (KaehlerDifferential.D k A x) default)
-            • KaehlerDifferential.map k k A A' (b default) from
-          (algebraMap_smul A' _ _).symm,
-        hb0, smul_smul]
-    | zero => exact ⟨0, by simp⟩
-    | add m₁ m₂ _ _ ih₁ ih₂ =>
-      obtain ⟨a₁, rfl⟩ := ih₁
-      obtain ⟨a₂, rfl⟩ := ih₂
-      exact ⟨a₁ + a₂, by rw [add_smul]⟩
-    | smul a m _ ih =>
-      obtain ⟨a₀, rfl⟩ := ih
-      exact ⟨a * a₀, by rw [smul_smul]⟩
+    rw [htdef]; exact stalkDVRAux_kaehler_gen b g
   -- the polynomial algebra `k[X] → A'`, `X ↦ t`
   letI : Algebra (Polynomial k) A' := (Polynomial.aeval t).toRingHom.toAlgebra
   haveI : IsScalarTower k (Polynomial k) A' :=
@@ -411,27 +463,17 @@ theorem exists_span_nonZeroDivisor_map_localizationAtPrime (q : Ideal A) [q.IsPr
     have hfinI' : Module.Finite k (A' ⧸ I.map (algebraMap A A')) :=
       stalkDVRAux_finite_quotient_loc (Submonoid.powers r) A' I hfin
     have hIq' : I.map (algebraMap A A') ≤ q' := Ideal.map_mono hIq
-    have hfinq' : Module.Finite k (A' ⧸ q') :=
+    haveI hfinq' : Module.Finite k (A' ⧸ q') :=
       stalkDVRAux_finite_quotient_le hIq' hfinI'
-    set φ : Polynomial k →ₐ[k] A' ⧸ q' :=
-      (Ideal.Quotient.mkₐ k q').comp (IsScalarTower.toAlgHom k (Polynomial k) A')
-      with hφdef
-    have hφinj : Function.Injective φ := by
-      rw [injective_iff_map_eq_zero]
-      intro p hp
-      have h1 : algebraMap (Polynomial k) A' p ∈ q' := by
-        rwa [← Ideal.Quotient.eq_zero_iff_mem]
-      have h2 : p ∈ q₀ := Ideal.mem_comap.mpr h1
-      rw [hbot] at h2
-      exact h2
-    haveI := Algebra.IsIntegral.of_finite k (A' ⧸ q')
-    obtain ⟨h, hh0, hha⟩ :=
-      ((Algebra.IsIntegral.isIntegral (R := k) (φ Polynomial.X)).isAlgebraic)
-    apply hh0
-    have key : (Polynomial.aeval (φ Polynomial.X)) h = φ h := by
-      simp [Polynomial.aeval_algHom_apply]
-    rw [key] at hha
-    exact hφinj (by rw [map_zero]; exact hha)
+    refine stalkDVRAux_not_injective_algHom_polynomial
+      ((Ideal.Quotient.mkₐ k q').comp (IsScalarTower.toAlgHom k (Polynomial k) A')) ?_
+    rw [injective_iff_map_eq_zero]
+    intro p hp
+    have h1 : algebraMap (Polynomial k) A' p ∈ q' := by
+      rwa [← Ideal.Quotient.eq_zero_iff_mem]
+    have h2 : p ∈ q₀ := Ideal.mem_comap.mpr h1
+    rw [hbot] at h2
+    exact h2
   · -- `q₀` is a nonzero prime of the PID `k[X]`: maximal, with generator `p`
     haveI hq₀max : q₀.IsMaximal := IsPrime.to_maximal_ideal hbot
     haveI hprin : Submodule.IsPrincipal q₀ := IsPrincipalIdealRing.principal q₀
@@ -492,20 +534,8 @@ theorem exists_span_nonZeroDivisor_map_localizationAtPrime (q : Ideal A) [q.IsPr
     haveI : Module.Flat (Polynomial k) A' := Algebra.Smooth.flat _ _
     haveI : Module.Flat A' O := IsLocalization.flat O q'.primeCompl
     haveI : Module.Flat (Polynomial k) O := Module.Flat.trans (Polynomial k) A' O
-    have hπnzd : π ∈ nonZeroDivisors O := by
-      have hreg : IsSMulRegular O p :=
-        Module.Flat.isSMulRegular_of_nonZeroDivisors
-          (mem_nonZeroDivisors_of_ne_zero hp0)
-      rw [mem_nonZeroDivisors_iff]
-      constructor
-      · intro x hx
-        apply hreg
-        show p • x = p • 0
-        rw [smul_zero, Algebra.smul_def, ← hπdef, hx]
-      · intro x hx
-        apply hreg
-        show p • x = p • 0
-        rw [smul_zero, Algebra.smul_def, ← hπdef, mul_comm, hx]
+    have hπnzd : π ∈ nonZeroDivisors O :=
+      stalkDVRAux_algebraMap_mem_nonZeroDivisors (mem_nonZeroDivisors_of_ne_zero hp0)
     -- `O` is a noetherian local ring
     haveI : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing k A
     haveI : IsNoetherianRing O :=
@@ -529,8 +559,7 @@ theorem exists_span_nonZeroDivisor_map_localizationAtPrime (q : Ideal A) [q.IsPr
         · exact Ideal.Quotient.mkₐ_surjective k _
       haveI : Module.Finite k O := Module.Finite.equiv
         (LinearEquiv.ofBijective (Ideal.Quotient.mkₐ k _).toLinearMap hmk).symm
-      haveI : IsArtinianRing O := IsArtinianRing.of_finite k O
-      exact IsDiscreteValuationRing.not_isField O (IsArtinianRing.isField_of_isDomain O)
+      exact stalkDVRAux_not_finite_of_isDiscreteValuationRing ‹Module.Finite k O›
     -- classification of ideals in the DVR `O`
     have hirr : Irreducible π :=
       (IsDiscreteValuationRing.irreducible_iff_uniformizer π).mpr hmO

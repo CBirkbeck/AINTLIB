@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.Theorem1.CanonicalPrimeSourceData
@@ -37,7 +42,7 @@ theorem canonicalZetaPIntFlexible_isPrimitiveRoot
   haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   haveI : FaithfulSMul (𝓞 K) (𝓞 R') :=
     FaithfulSMul.of_field_isFractionRing (𝓞 K) (𝓞 R') K R'
-  unfold canonicalZetaPIntFlexible
+  simp only [canonicalZetaPIntFlexible]
   exact (cyclotomicZetaInteger_isPrimitiveRoot (p := p) (K := K)).map_of_injective
     (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 R'))
 
@@ -52,6 +57,7 @@ noncomputable def canonicalZetaPFlexible
     (FaithfulSMul.algebraMap_injective (𝓞 R') R')).isUnit
     (Fact.out : Nat.Prime p).ne_zero).unit
 
+/-- The integral primitive root maps to the unit primitive root in `R'`. -/
 @[simp]
 theorem algebraMap_canonicalZetaPIntFlexible
     (p : ℕ) [Fact p.Prime]
@@ -97,7 +103,7 @@ theorem canonicalZetaPIntFlexible_residue_of_kAlgebraCompat
           (𝓞 K ⧸ P)ˣ) : 𝓞 K ⧸ P) := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  unfold canonicalZetaPIntFlexible
+  simp only [canonicalZetaPIntFlexible]
   rw [CyclotomicLocalSetup.residueMap_of_split_algebraMap
     (K₀ := K) Q P iso h_compat]
   rfl
@@ -138,7 +144,7 @@ noncomputable def flexibleTraceFormOfSplitPrimeCanonical
     hzeta_ell_int.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 R') R')
   have card_k :
       Fintype.card (𝓞 K ⧸ P) =
-        ℓ ^ ((Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P) :=
+        ℓ ^ ((Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P) :=
     CyclotomicLocalSetup.cardResidueField_eq_pow_ell_inertiaDeg P hℓ_in_P
   have hdiv : p ∣ Fintype.card (𝓞 K ⧸ P) - 1 :=
     CyclotomicLocalSetup.p_dvd_card_residueField_sub_one P hP_ne_bot hp_notin_P
@@ -246,18 +252,18 @@ noncomputable def canonicalPrimeSourceData
       (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
   letI : P.LiesOver q := ⟨hP_under.symm⟩
   have h_card :
-      Fintype.card (𝓞 K ⧸ P) = ℓ ^ q.inertiaDeg P := by
+      Fintype.card (𝓞 K ⧸ P) = ℓ ^ q.inertiaDeg' P := by
     simpa [q] using
       CyclotomicLocalSetup.cardResidueField_eq_pow_ell_inertiaDeg
         (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
-  have hf_pos : 0 < q.inertiaDeg P :=
-    Ideal.inertiaDeg_pos q P
+  have hf_pos : 0 < q.inertiaDeg' P :=
+    Ideal.inertiaDeg'_pos' q P
   let m : ℕ := Fintype.card (𝓞 K ⧸ P) - 1
   have hm_coprime : ℓ.Coprime m := by
     simpa [m] using
       prime_coprime_card_sub_one_of_card_eq_pow
         (ℓ := ℓ) (q := Fintype.card (𝓞 K ⧸ P))
-        (f := q.inertiaDeg P) hℓ_prime_nat hf_pos h_card
+        (f := q.inertiaDeg' P) hℓ_prime_nat hf_pos h_card
   have hm_not_dvd_ell : ¬ ℓ ∣ m :=
     prime_not_dvd_of_coprime hℓ_prime_nat hm_coprime
   have hp_dvd_m : p ∣ m := by
@@ -324,53 +330,53 @@ noncomputable def canonicalPrimeSourceData
   have hq_ne : q ≠ ⊥ := by simp [q, hℓ_prime_nat.ne_zero]
   haveI hP_max : P.IsMaximal := inferInstance
   have h_abs_inertia :
-      q.inertiaDeg Q = orderOf (ℓ : ZMod m) := by
+      q.inertiaDeg' Q = orderOf (ℓ : ZMod m) := by
     have hn : ℓ * m = ℓ ^ (0 + 1) * m := by
       simp
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq
         (n := ℓ * m) (p := ℓ) (k := 0) (m := m)
         (K := R') (P := Q) hn hm_not_dvd_ell)
   have h_order_m :
-      orderOf (ℓ : ZMod m) = q.inertiaDeg P := by
-    have hm_eq : m = ℓ ^ q.inertiaDeg P - 1 := by
+      orderOf (ℓ : ZMod m) = q.inertiaDeg' P := by
+    have hm_eq : m = ℓ ^ q.inertiaDeg' P - 1 := by
       simp [m, h_card]
     rw [hm_eq]
     exact orderOf_natCast_zmod_pow_sub_one
-      (ℓ := ℓ) (f := q.inertiaDeg P) hℓ_prime_nat.two_le hf_pos
+      (ℓ := ℓ) (f := q.inertiaDeg' P) hℓ_prime_nat.two_le hf_pos
   have h_inertia_tower :
-      q.inertiaDeg Q = q.inertiaDeg P * P.inertiaDeg Q :=
-    Ideal.inertiaDeg_algebra_tower q P Q
-  have h_inertia_one : P.inertiaDeg Q = 1 := by
-    have hmul : q.inertiaDeg P * P.inertiaDeg Q = q.inertiaDeg P * 1 := by
+      q.inertiaDeg' Q = q.inertiaDeg' P * P.inertiaDeg' Q :=
+    Ideal.inertiaDeg'_algebra_tower q P Q
+  have h_inertia_one : P.inertiaDeg' Q = 1 := by
+    have hmul : q.inertiaDeg' P * P.inertiaDeg' Q = q.inertiaDeg' P * 1 := by
       rw [← h_inertia_tower, h_abs_inertia, h_order_m, mul_one]
     exact Nat.eq_of_mul_eq_mul_left hf_pos hmul
   have h_abs_ram :
-      q.ramificationIdx Q = ℓ - 1 := by
+      q.ramificationIdx' Q = ℓ - 1 := by
     have hn : ℓ * m = ℓ ^ (0 + 1) * m := by
       simp
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' q Q hq_ne]
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx q Q hq_ne]
     simpa [q] using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq
         (n := ℓ * m) (p := ℓ) (k := 0) (m := m)
         (K := R') (P := Q) hn hm_not_dvd_ell)
   have h_base_ram :
-      q.ramificationIdx P = 1 := by
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' q P hq_ne]
+      q.ramificationIdx' P = 1 := by
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx q P hq_ne]
     simpa [q] using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P)
         (prime_not_dvd_of_coprime hℓ_prime_nat hℓp))
   have h_ram_tower :
-      q.ramificationIdx Q = q.ramificationIdx P * P.ramificationIdx Q :=
-    Ideal.ramificationIdx_algebra_tower' (p := q) (P := P) (Q := Q)
-  have h_rel_ram : P.ramificationIdx Q = ℓ - 1 := by
+      q.ramificationIdx' Q = q.ramificationIdx' P * P.ramificationIdx' Q :=
+    Ideal.ramificationIdx'_algebra_tower' (p := q) (P := P) (Q := Q)
+  have h_rel_ram : P.ramificationIdx' Q = ℓ - 1 := by
     rw [h_base_ram, one_mul] at h_ram_tower
     rw [← h_ram_tower, h_abs_ram]
   have h_base_inertia :
-      q.inertiaDeg P = orderOf (ℓ : ZMod p) := by
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+      q.inertiaDeg' P = orderOf (ℓ : ZMod p) := by
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P)
@@ -442,7 +448,7 @@ noncomputable def canonicalPrimeSourceData
       (S.concrete.gaussSumInt_ne_zero_of_not_mem_Q_pow_succ
         (a := p - 1) (d := S.stickOrdOrd (p - 1)) h_gauss_not_mem)
   have hf : S.f = orderOf (ZMod.unitOfCoprime ℓ hℓp : CyclotomicUnitDelta p) := by
-    change q.inertiaDeg P = orderOf (ZMod.unitOfCoprime ℓ hℓp : CyclotomicUnitDelta p)
+    change q.inertiaDeg' P = orderOf (ZMod.unitOfCoprime ℓ hℓp : CyclotomicUnitDelta p)
     rw [orderOf_unitOfCoprime_eq_orderOf hℓp, h_base_inertia]
   have he : S.concrete.descentRamificationIdx = ℓ - 1 := by
     rw [ConductorFlexibleConcreteStickelbergerSetup.descentRamificationIdx,

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ForMathlib.HopfGalois
 import Mathlib.RingTheory.Flat.Equalizer
 
@@ -84,11 +89,40 @@ theorem coactionBaseChange_eq_includeLeft_iff (x : C' ⊗[coinvariants ρ] B) :
       (baseChangeAssoc R A ρ C').apply_symm_apply _, baseChangeAssoc_tmul_one] at h2
   · intro h
     have h2 := congrArg (baseChangeAssoc R A ρ C').symm h
-    rw [show (baseChangeAssoc R A ρ C').symm
+    rwa [show (baseChangeAssoc R A ρ C').symm
         ((Algebra.TensorProduct.map (AlgHom.id C' C') (coactionOverCoinvariants ρ)) x)
         = coactionBaseChange R A ρ C' x from rfl, ← baseChangeAssoc_tmul_one,
       AlgEquiv.symm_apply_apply] at h2
-    exact h2
+
+omit [Algebra R C'] [IsScalarTower R (↥(coinvariants ρ)) C'] in
+/-- Every element of `C' ⊗_{C^ρ} (equalizer of the two coactions)` has the form `c' ⊗ₜ 1`
+(the equalizer of `coactionOverCoinvariants`/`includeLeftOverCoinvariants` is the scalars
+`C^ρ`, so its tensor entries are absorbed into the `C'` factor). The induction core of the
+forward direction of `mem_coinvariants_coactionBaseChange_iff`. -/
+private theorem exists_tmul_one_eq_map_equalizer_val
+    (y : C' ⊗[coinvariants ρ] (AlgHom.equalizer (coactionOverCoinvariants ρ)
+      (includeLeftOverCoinvariants ρ))) :
+    ∃ c' : C', c' ⊗ₜ[coinvariants ρ] (1 : B)
+      = (Algebra.TensorProduct.map (AlgHom.id C' C')
+          (AlgHom.equalizer (coactionOverCoinvariants ρ)
+            (includeLeftOverCoinvariants ρ)).val) y := by
+  induction y with
+  | zero => exact ⟨0, by rw [map_zero, TensorProduct.zero_tmul]⟩
+  | tmul c' e =>
+    have he : (e : B) ∈ coinvariants ρ := by
+      have h2 := e.2
+      rw [AlgHom.mem_equalizer] at h2
+      rw [mem_coinvariants]
+      exact h2
+    refine ⟨(⟨(e : B), he⟩ : coinvariants ρ) • c', ?_⟩
+    rw [Algebra.TensorProduct.map_tmul, TensorProduct.smul_tmul]
+    congr 1
+    rw [Algebra.smul_def, mul_one]
+    rfl
+  | add y z ihy ihz =>
+    obtain ⟨cy, hcy⟩ := ihy
+    obtain ⟨cz, hcz⟩ := ihz
+    exact ⟨cy + cz, by rw [map_add, ← hcy, ← hcz, TensorProduct.add_tmul]⟩
 
 /-- **03BK(3), comodule form**: for a *flat* base change `C → C'` of the co-invariants, the
 co-invariants of the base-changed co-action are exactly the scalars `C'`. -/
@@ -113,31 +147,7 @@ theorem mem_coinvariants_coactionBaseChange_iff [Module.Flat (coinvariants ρ) C
       have := congrArg Subtype.val hy
       rwa [AlgHom.tensorEqualizerEquiv_apply, AlgHom.coe_tensorEqualizer] at this
     clear hy
-    have key : ∀ y : C' ⊗[coinvariants ρ] (AlgHom.equalizer (coactionOverCoinvariants ρ)
-        (includeLeftOverCoinvariants ρ)),
-        ∃ c' : C', c' ⊗ₜ[coinvariants ρ] (1 : B)
-          = (Algebra.TensorProduct.map (AlgHom.id C' C')
-              (AlgHom.equalizer (coactionOverCoinvariants ρ)
-                (includeLeftOverCoinvariants ρ)).val) y := by
-      intro y
-      induction y with
-      | zero => exact ⟨0, by rw [map_zero, TensorProduct.zero_tmul]⟩
-      | tmul c' e =>
-        have he : (e : B) ∈ coinvariants ρ := by
-          have h2 := e.2
-          rw [AlgHom.mem_equalizer] at h2
-          rw [mem_coinvariants]
-          exact h2
-        refine ⟨(⟨(e : B), he⟩ : coinvariants ρ) • c', ?_⟩
-        rw [Algebra.TensorProduct.map_tmul, TensorProduct.smul_tmul]
-        congr 1
-        rw [Algebra.smul_def, mul_one]
-        rfl
-      | add y z ihy ihz =>
-        obtain ⟨cy, hcy⟩ := ihy
-        obtain ⟨cz, hcz⟩ := ihz
-        exact ⟨cy + cz, by rw [map_add, ← hcy, ← hcz, TensorProduct.add_tmul]⟩
-    obtain ⟨c', hc'⟩ := key y
+    obtain ⟨c', hc'⟩ := exists_tmul_one_eq_map_equalizer_val R A ρ C' y
     exact ⟨c', hc'.trans hyx⟩
   · rintro ⟨c', rfl⟩
     rw [mem_coinvariants]

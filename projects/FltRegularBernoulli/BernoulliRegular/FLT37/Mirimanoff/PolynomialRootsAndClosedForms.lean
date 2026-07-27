@@ -85,7 +85,7 @@ theorem mirimanoffPolynomial_aeval (p : ℕ) [Fact p.Prime] (n : ℕ)
     (mirimanoffPolynomial p n).aeval t =
       ∑ k ∈ Finset.Ico 1 p,
         algebraMap (ZMod p) R ((k : ZMod p) ^ (n - 1)) * t ^ k := by
-  unfold mirimanoffPolynomial
+  simp only [mirimanoffPolynomial]
   rw [map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_mul, Polynomial.aeval_C, map_pow, Polynomial.aeval_X_pow]

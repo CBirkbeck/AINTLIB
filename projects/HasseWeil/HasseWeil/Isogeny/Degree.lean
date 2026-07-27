@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Isogeny.FunctionField
 import Mathlib.FieldTheory.SeparableDegree
 
@@ -47,14 +52,14 @@ def IsSeparable (φ : PullbackIsogeny F W₁ W₂) : Prop :=
 /-- The separable degree divides the total degree. -/
 theorem sepDegree_dvd_degree (φ : PullbackIsogeny F W₁ W₂) :
     φ.sepDegree ∣ φ.degree := by
-  unfold sepDegree degree
+  simp only [sepDegree, degree]
   exact @Field.finSepDegree_dvd_finrank W₂.FunctionField W₁.FunctionField _ _ φ.toAlgebra
 
 /-- For a finite extension, the separable degree is at most the total degree. -/
 theorem sepDegree_le_degree (φ : PullbackIsogeny F W₁ W₂)
     (hfin : @FiniteDimensional W₂.FunctionField W₁.FunctionField _ _ φ.toAlgebra.toModule) :
     φ.sepDegree ≤ φ.degree := by
-  unfold sepDegree degree
+  simp only [sepDegree, degree]
   exact @Field.finSepDegree_le_finrank W₂.FunctionField W₁.FunctionField _ _ φ.toAlgebra hfin
 
 end PullbackIsogeny

@@ -136,21 +136,6 @@ We recover the `a`- and `x`-components by parsing the dot-separated string, usin
 letter labels are dot-free.  This carries the same `χ`-eigenspace hypotheses as Phase 2's
 injectivity `newformOrbitLabel_injOn_orbits`. -/
 
-/-- The dot character `'.'` never occurs in an LMFDB letter label `letterEncode n` (whose
-characters are exactly the lowercase letters `'a' = 97, …, 'z' = 122`). -/
-lemma letterEncode_dot_not_mem (n : ℕ) : '.' ∉ (letterEncode n).toList := by
-  intro hmem
-  unfold letterEncode at hmem
-  rw [String.toList_ofList, List.mem_map] at hmem
-  obtain ⟨d, hd, heq⟩ := hmem
-  have hd26 : d < 26 := Nat.toLetterDigits_lt_26 hd
-  have hv : (97 + d).isValidChar := Or.inl (by omega)
-  have hval : (digitToLetter d).toNat = 97 + d := by
-    unfold digitToLetter; rw [Char.ofNat, dif_pos hv]; rfl
-  rw [heq] at hval
-  simp only [show ('.').toNat = 46 from rfl] at hval
-  omega
-
 /-- If two lists over `α` are split by a separator `c` that occurs in neither prefix, the
 prefixes and suffixes agree.  (A list-level "split at the first separator" lemma.) -/
 private theorem list_split_at_sep {α : Type*} (c : α) (a₁ a₂ x₁ x₂ : List α)

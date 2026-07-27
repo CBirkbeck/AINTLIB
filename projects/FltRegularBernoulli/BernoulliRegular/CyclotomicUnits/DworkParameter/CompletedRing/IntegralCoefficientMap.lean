@@ -96,7 +96,7 @@ theorem rIntegralRatToValuedCompletion_mem_integers
         (algebraMap ℚ K (q : ℚ)) =
       ((algebraMap ℚ K (q : ℚ) : K) :
         (Furtwaengler.KummerArtinHasse.lambdaHeightOneSpectrum p K).adicCompletion K) from rfl]
-  rw [Valued.valuedCompletion_apply]
+  rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation']
   exact rIntegralRat_lambdaValuation_le_one (p := p) (K := K) q
 
 /-- The CU-09b coefficient map from `p`-integral rational coefficients into
@@ -107,18 +107,14 @@ def rIntegralRatToValuedInteger :
   toFun q :=
     ⟨rIntegralRatToValuedCompletion p K q,
       rIntegralRatToValuedCompletion_mem_integers (p := p) (K := K) q⟩
-  map_zero' := by
-    ext
-    exact map_zero (rIntegralRatToValuedCompletion p K)
-  map_one' := by
-    ext
-    exact map_one (rIntegralRatToValuedCompletion p K)
-  map_add' q₁ q₂ := by
-    ext
-    exact map_add (rIntegralRatToValuedCompletion p K) q₁ q₂
-  map_mul' q₁ q₂ := by
-    ext
-    exact map_mul (rIntegralRatToValuedCompletion p K) q₁ q₂
+  map_zero' :=
+    Subtype.ext (map_zero (rIntegralRatToValuedCompletion p K))
+  map_one' :=
+    Subtype.ext (map_one (rIntegralRatToValuedCompletion p K))
+  map_add' q₁ q₂ :=
+    Subtype.ext (map_add (rIntegralRatToValuedCompletion p K) q₁ q₂)
+  map_mul' q₁ q₂ :=
+    Subtype.ext (map_mul (rIntegralRatToValuedCompletion p K) q₁ q₂)
 
 @[simp]
 theorem rIntegralRatToValuedInteger_coe
@@ -334,7 +330,7 @@ def dworkParameterApprox (N : ℕ) : ValuedIntegerRing p K :=
 @[simp]
 theorem dworkParameterApprox_two :
     dworkParameterApprox p K 2 = valuedCyclotomicLambdaInteger p K := by
-  unfold dworkParameterApprox
+  simp only [dworkParameterApprox]
   rw [integralInverseSeries_trunc_two]
   simp
 
@@ -412,13 +408,10 @@ theorem natCast_prime_ne_zero_valuedInteger :
           exact (map_natCast (algebraMap K (ValuedCompletion p K)) p).symm]
     rw [show algebraMap K (ValuedCompletion p K) (p : K) =
         ((p : K) : ValuedCompletion p K) from rfl]
-    rw [Valued.valuedCompletion_apply]
+    rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation']
     have hpK : (p : K) ≠ 0 := by
       exact_mod_cast (Fact.out : Nat.Prime p).ne_zero
-    let vK := (Furtwaengler.KummerArtinHasse.lambdaHeightOneSpectrum p K).valuation K
-    have hpWithVal : (WithVal.equiv vK).symm (p : K) ≠ 0 := fun h ↦
-      hpK (by simpa [vK] using congrArg (WithVal.equiv vK) h)
-    exact (Valuation.ne_zero_iff _).2 hpWithVal
+    exact (Valuation.ne_zero_iff _).2 hpK
   have hp_val_zero :
       Valued.v (((p : ValuedIntegerRing p K) : ValuedCompletion p K)) = 0 := by
     simp [hp_zero]

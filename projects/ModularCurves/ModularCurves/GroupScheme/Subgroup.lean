@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.EllipticCurve.TorsionFibre
 import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
@@ -78,7 +83,7 @@ SG3 states closedness of the cyclicity condition.
 * `torsionSubgroup` introduces **no new sorries**: the closed immersion is T-B3
   (`torsionι_isClosedImmersion`, proved), finiteness/flatness/rank are T-B4 (proved in
   Torsion.lean modulo the registered boxes BB-QF/BB-FLAT/BB-DEG), local finite
-  presentation is `mulByHom_locallyOfFinitePresentation` (proved), and the subgroup
+  presentation is `MulByHom.locallyOfFinitePresentation` (proved), and the subgroup
   condition is proved outright below (`torsionι_factors_iff`, from the kernel universal
   property `pointToTorsion` + `smul_eq_zero_iff_comp_mulByHom`).
 -/
@@ -217,12 +222,17 @@ def HasRank (G : FiniteLocallyFreeSubgroup E) (r : ℕ) : Prop :=
 (KM 1.3.6). This is the interface SG2 uses to say "the divisor `Σₐ [aP₀]` equals `G`"
 and the route by which the Deligne/Oort–Tate box is consumed. -/
 
+/-- The subscheme of `ι.ker` is `G.G` transported along the iso `ι.toImage` (`ι` is a closed
+immersion). Every property and degree comparison between `G` and its divisor goes through
+this identity. -/
+private theorem ker_subschemeι_eq (G : FiniteLocallyFreeSubgroup E) :
+    G.ι.ker.subschemeι = inv G.ι.toImage ≫ G.ι := by
+  rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
+
 private theorem ker_prop (P : MorphismProperty Scheme.{u}) [P.RespectsIso]
     (G : FiniteLocallyFreeSubgroup E) (hG : P (G.ι ≫ E.π)) :
     P (G.ι.ker.subschemeι ≫ E.π) := by
-  have hι : G.ι.ker.subschemeι = inv G.ι.toImage ≫ G.ι := by
-    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
-  rw [hι, Category.assoc]
+  rw [G.ker_subschemeι_eq, Category.assoc]
   exact (MorphismProperty.cancel_left_of_respectsIso P _ _).mpr hG
 
 -- ATTACK (toRelEffCartierDiv): (1) the subscheme of `ι.ker` is NOT `G.G` itself, only
@@ -233,6 +243,7 @@ private theorem ker_prop (P : MorphismProperty Scheme.{u}) [P.RespectsIso]
 -- retraction, not an equivalence of types: `ofRelEffCartierDiv ∘ toRelEffCartierDiv`
 -- rebuilds the subscheme-of-the-kernel, an isomorphic but distinct total space; only
 -- the ideal-level roundtrip (`toRelEffCartierDiv_ofRelEffCartierDiv`) is an identity.
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The relative effective Cartier divisor underlying a finite locally free subgroup:
 the closed subscheme cut out by `ι.ker` (KM 1.3.6 packages subgroups as divisors).
 Properties transport along the canonical iso `G.G ≅ (ι.ker).subscheme`. -/
@@ -255,9 +266,7 @@ theorem toRelEffCartierDiv_isSubgroup (G : FiniteLocallyFreeSubgroup E) :
     G.toRelEffCartierDiv.IsSubgroup E := by
   intro T g
   obtain ⟨H, hH⟩ := G.subgroup g
-  set j := inv G.ι.toImage with hj
-  have hjeq : j ≫ G.ι = G.ι.ker.subschemeι := by
-    rw [hj, IsIso.inv_comp_eq, Scheme.Hom.toImage_imageι]
+  have hjeq : inv G.ι.toImage ≫ G.ι = G.ι.ker.subschemeι := G.ker_subschemeι_eq.symm
   refine ⟨H, fun P => (hH P).trans ?_⟩
   simp only [toRelEffCartierDiv_ideal]
   constructor
@@ -266,7 +275,7 @@ theorem toRelEffCartierDiv_isSubgroup (G : FiniteLocallyFreeSubgroup E) :
     rw [Category.assoc, Scheme.Hom.toImage_imageι]
     exact hh
   · rintro ⟨k, hk⟩
-    refine ⟨k ≫ j, ?_⟩
+    refine ⟨k ≫ inv G.ι.toImage, ?_⟩
     rw [Category.assoc, hjeq]
     exact hk
 
@@ -274,10 +283,8 @@ theorem toRelEffCartierDiv_isSubgroup (G : FiniteLocallyFreeSubgroup E) :
 `finrank` along the iso `ι.toImage`). -/
 theorem toRelEffCartierDiv_degree (G : FiniteLocallyFreeSubgroup E) (s : S) :
     G.toRelEffCartierDiv.degree s = G.rank s := by
-  have hι : G.ι.ker.subschemeι = inv G.ι.toImage ≫ G.ι := by
-    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
   show (G.ι.ker.subschemeι ≫ E.π).finrank s = (G.ι ≫ E.π).finrank s
-  rw [hι, Category.assoc, Scheme.Hom.finrank_comp_left_of_isIso]
+  rw [G.ker_subschemeι_eq, Category.assoc, Scheme.Hom.finrank_comp_left_of_isIso]
 
 -- ATTACK (ofRelEffCartierDiv): (1) the `subgroup` field is `hD` VERBATIM — the KM 1.3.6
 -- predicate `RelEffCartierDiv.IsSubgroup` was mirrored exactly so that this bridge is
@@ -349,6 +356,7 @@ private theorem baseChange_prop (P : MorphismProperty Scheme.{u})
 -- (3) iterated base change agrees with base change along the composite only up to
 -- canonical isomorphism (as for divisors, `baseChange_baseChange_ideal`) — no
 -- `baseChange_baseChange` identity is stated.
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Base change of a finite locally free subgroup scheme along `g : T ⟶ S`: the total
 space is `G ×_E (E ×_S T) = G ×_S T`, included in `(E.baseChange g).E = E ×_S T` by the
 second projection. Finiteness, flatness and finite presentation descend through the
@@ -421,12 +429,13 @@ characteristic `p`) will follow the same recipe once their sources exist; the
 
 variable (E : EllipticCurve S)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `E[N] ⟶ S` is locally of finite presentation: base change of
-`mulByHom_locallyOfFinitePresentation` (the `lfp` sibling of `torsionπ_isFinite` /
+`MulByHom.locallyOfFinitePresentation` (the `lfp` sibling of `torsionπ_isFinite` /
 `torsionπ_flat`, T-B4). -/
 theorem torsionπ_locallyOfFinitePresentation (N : ℕ) :
     LocallyOfFinitePresentation (E.torsionπ N) := by
-  have h := E.mulByHom_locallyOfFinitePresentation N
+  have h := MulByHom.locallyOfFinitePresentation E N
   exact MorphismProperty.pullback_snd _ _ h
 
 /-- A point of `E` factors through `E[N] ⟶ E` iff it is killed by `N` — the kernel

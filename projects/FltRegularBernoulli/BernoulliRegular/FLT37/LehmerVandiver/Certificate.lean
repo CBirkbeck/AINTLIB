@@ -123,7 +123,7 @@ convention used by `bernoulli_decide` in this project). This avoids any
 `[propext, Classical.choice, Quot.sound]`. -/
 theorem lehmerVandiverNonTrivial_thirtyseven :
     lehmerVandiverNonTrivial 37 32 149 2 4 := by
-  unfold lehmerVandiverNonTrivial
+  simp only [lehmerVandiverNonTrivial]
   decide
 
 end CertificateProof

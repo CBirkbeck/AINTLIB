@@ -217,7 +217,7 @@ theorem nthRootsFinset_pairwise_associated_sub (p : ℕ) [hp : Fact p.Prime]
     (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K] :
     Set.Pairwise (Polynomial.nthRootsFinset p (1 : K))
       (fun η₁ η₂ => Associated (IsCyclotomicExtension.zeta p ℚ K - 1) (η₁ - η₂)) :=
-  (IsCyclotomicExtension.zeta_spec p ℚ K).ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  (IsCyclotomicExtension.zeta_spec p ℚ K).nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     hp.1
 
 /-- 𝓞 K-level: distinct integer-form p-th roots of unity differ by an
@@ -227,7 +227,7 @@ theorem nthRootsFinset_pairwise_associated_sub_intForm (p : ℕ) [hp : Fact p.Pr
     Set.Pairwise (Polynomial.nthRootsFinset p (1 : 𝓞 K))
       (fun η₁ η₂ => Associated
         ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1) (η₁ - η₂)) :=
-  IsPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  IsPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger_isPrimitiveRoot hp.1
 
 /-- For two FLT factors `(a + η₁ b)` and `(a + η₂ b)` with η₁ ≠ η₂ p-th
@@ -680,7 +680,7 @@ noncomputable def partialPowerSumPolynomial (p e : ℕ) : Polynomial (ZMod p) :=
 theorem partialPowerSumPolynomial_coeff (p : ℕ) [Fact p.Prime] (e m : ℕ) :
     (partialPowerSumPolynomial p e).coeff m =
       if m ∈ Finset.Ico 1 p then partialPowerSum p e m else 0 := by
-  unfold partialPowerSumPolynomial
+  simp only [partialPowerSumPolynomial]
   rw [Polynomial.finsetSum_coeff]
   by_cases hm : m ∈ Finset.Ico 1 p
   · rw [if_pos hm, Finset.sum_eq_single m]
@@ -698,6 +698,30 @@ theorem partialPowerSumPolynomial_coeff (p : ℕ) [Fact p.Prime] (e m : ℕ) :
     · subst hkm
       exact absurd hk hm
     · simp [hkm]
+
+/-- For a polynomial `P` over a commutative ring, the coefficient of `(1 - X) * P`
+at index `m` is the difference of the coefficient of `P` and the coefficient of
+`X * P`. This is just `(1 - X) * P = P - X * P` followed by `Polynomial.coeff_sub`. -/
+theorem one_sub_X_mul_coeff {R : Type*} [CommRing R] (P : Polynomial R) (m : ℕ) :
+    ((1 - Polynomial.X) * P).coeff m =
+      P.coeff m - (Polynomial.X * P).coeff m := by
+  rw [show (1 - Polynomial.X : Polynomial R) * P = P - Polynomial.X * P from by ring,
+    Polynomial.coeff_sub]
+
+/-- Coefficient of `X * partialPowerSumPolynomial p e` at index `m`:
+`partialPowerSum p e (m - 1)` when `1 ≤ m` and `m - 1 ∈ [1, p)`, else `0`. -/
+theorem X_mul_partialPowerSumPolynomial_coeff (p : ℕ) [Fact p.Prime] (e m : ℕ) :
+    (Polynomial.X * partialPowerSumPolynomial p e).coeff m =
+      if _h : 1 ≤ m then
+        if m - 1 ∈ Finset.Ico 1 p then partialPowerSum p e (m - 1) else 0
+      else 0 := by
+  rcases Nat.eq_zero_or_pos m with hm0 | hm_pos
+  · subst hm0
+    rw [Polynomial.coeff_X_mul_zero]
+    simp
+  · obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : m ≠ 0)
+    rw [Polynomial.coeff_X_mul, partialPowerSumPolynomial_coeff]
+    simp
 
 /-- **Ribenboim polynomial identity (1.32)** in `(ZMod p)[X]`.
 
@@ -717,29 +741,9 @@ theorem mirimanoffPolynomial_eq_one_sub_X_mul_partialPowerSumPolynomial
   have hp_two : 2 ≤ p := hp.out.two_le
   apply Polynomial.ext
   intro m
-  have h_coeff_X_mul :
-      (Polynomial.X * partialPowerSumPolynomial p e).coeff m =
-        if h : 1 ≤ m then
-          if m - 1 ∈ Finset.Ico 1 p then partialPowerSum p e (m - 1) else 0
-        else 0 := by
-    rcases Nat.eq_zero_or_pos m with hm0 | hm_pos
-    · subst hm0
-      rw [Polynomial.coeff_X_mul_zero]
-      simp
-    · obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : m ≠ 0)
-      rw [Polynomial.coeff_X_mul, partialPowerSumPolynomial_coeff]
-      simp
-  have h_lhs : ((1 - Polynomial.X) * partialPowerSumPolynomial p e).coeff m =
-      (partialPowerSumPolynomial p e).coeff m -
-        (Polynomial.X * partialPowerSumPolynomial p e).coeff m := by
-    rw [show (1 - Polynomial.X : Polynomial (ZMod p)) *
-        partialPowerSumPolynomial p e =
-        partialPowerSumPolynomial p e -
-          Polynomial.X * partialPowerSumPolynomial p e from by ring,
-      Polynomial.coeff_sub]
-  rw [h_lhs, h_coeff_X_mul, partialPowerSumPolynomial_coeff,
-      Polynomial.coeff_sub, mirimanoffPolynomial_coeff,
-      Polynomial.coeff_C_mul, Polynomial.coeff_X_pow]
+  rw [one_sub_X_mul_coeff, X_mul_partialPowerSumPolynomial_coeff,
+      partialPowerSumPolynomial_coeff, Polynomial.coeff_sub,
+      mirimanoffPolynomial_coeff, Polynomial.coeff_C_mul, Polynomial.coeff_X_pow]
   by_cases hm0 : m = 0
   · subst hm0
     have h0_notin : (0 : ℕ) ∉ Finset.Ico 1 p := by simp [Finset.mem_Ico]

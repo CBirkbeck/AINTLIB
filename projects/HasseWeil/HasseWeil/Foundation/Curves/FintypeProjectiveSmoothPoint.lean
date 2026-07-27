@@ -82,7 +82,7 @@ theorem Fintype.card_projectiveSmoothPoint_eq_pointCount
     [Fintype W.toAffine.Point] :
     Fintype.card (ProjectiveSmoothPoint (⟨W.toAffine⟩ : SmoothPlaneCurve F)) =
       pointCount W.toAffine := by
-  unfold pointCount
+  simp only [pointCount]
   exact Fintype.card_congr (Affine.Point.equivProjectiveSmoothPoint W).symm
 
 end HasseWeil

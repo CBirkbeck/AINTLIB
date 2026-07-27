@@ -76,7 +76,6 @@ private lemma pi_y_gen_ne_zero_aux (hq : 2 ≤ Fintype.card K) :
   rw [ordAtInfty_negFrobeniusIsog_pullback_y_gen W hq] at h_top
   exact WithTop.coe_ne_top h_top
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **`ord_P (x_gen − xk) ≥ 2` at smooth 2-torsion `T`** via the curve
 identity `(y − yk)·A = (x − xk)·(B − a₁·yk)` and the ord facts at
@@ -144,7 +143,6 @@ theorem ord_P_x_gen_sub_const_ge_two_at_2tor (xk yk : K)
   rw [h_mul_eq, h_Bma_ord, add_zero] at h_RHS_ord
   exact h_RHS_ord
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **`ord_P A = 1` exactly at smooth 2-torsion `T`** via strict comparison
 `ord_P (y − yk) = 1 < 2 ≤ ord_P (a₁·(x − xk))` in the factorisation
@@ -187,7 +185,6 @@ theorem ord_P_A_eq_one_at_2tor (xk yk : K)
   have h_add := SmoothPlaneCurve.ord_P_add_eq_of_lt h_strict
   exact h_add.trans h_yd_ord
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **`ord_P slope = -1` exactly at smooth 2-torsion `T`** via
 `slope = (B − a₁·yk) / A` with `ord = 0 − 1 = −1` (using the
@@ -236,7 +233,6 @@ theorem ord_P_translateSlope_xy_eq_neg_one_at_2tor (xk yk : K)
   rw [h_mul, h_inv, h_Bma_ord, h_A_ord, zero_add]
   rfl
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **`ord_P (translateX_xy) = -2` exactly at smooth 2-torsion `T`**:
 `translateX_xy = slope² + (a₁·slope − a₂ − x_gen − xk)`. With
@@ -336,14 +332,13 @@ theorem ord_P_translateX_xy_eq_neg_two_at_2tor (xk yk : K)
     change translateX_xy W xk yk = s * s +
       ((W_KE W).a₁ * s + (-(W_KE W).a₂ +
         -x_gen W + -algebraMap K KE xk))
-    unfold translateX_xy
+    simp only [translateX_xy]
     rw [WeierstrassCurve.Affine.addX]
     ring
   rw [h_unfold]
   have h_add := SmoothPlaneCurve.ord_P_add_eq_of_lt h_lt
   exact h_add.trans h_sq_ord
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **Bridge at `x_gen` for 2-torsion `T`** (the y-side analogue of
 `ord_T_translateAlgEquivOfPoint_neg_x_gen_eq_neg_two` for non-2-torsion):
@@ -568,7 +563,6 @@ theorem bridge_at_x_gen_mul_negFrobeniusIsog_pullback_x_gen_of_2_tor (xT yT : K)
     (bridge_at_x_gen_of_2_tor W xT yT h_ns h_2_tor)
     (bridge_at_negFrobeniusIsog_pullback_x_gen_of_2_tor W xT yT h_ns h_2_tor)
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **`ord_P (x_gen − xk) = 2` EXACTLY at smooth 2-torsion `T`** via the curve
 identity `(y − yk)·A = (x − xk)·(B − a₁·yk)` with the EXACT `ord_P A = 1`
@@ -799,7 +793,7 @@ private theorem ord_P_y_gen_nonneg {P : (W_smooth W).SmoothPoint} :
       pointValuation_y_gen_le_one W P
     have hv : (W_smooth W).pointValuation P (y_gen W) ≠ 0 :=
       ((W_smooth W).pointValuation P).ne_zero_iff.mpr hf
-    unfold SmoothPlaneCurve.ord_P
+    simp only [SmoothPlaneCurve.ord_P]
     rw [dif_neg hv]
     rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
         WithTop.coe_le_coe]
@@ -814,8 +808,8 @@ private theorem ord_P_y_gen_nonneg {P : (W_smooth W).SmoothPoint} :
     omega
 
 omit [Fintype K] in
-/-- The `T2` term `-(2·a₁·yd²·xd)` has `ord_P ≥ 4` at 2-torsion, given `ord_P yd = 1`, `ord_P xd = 2`
-and `ord_P a₁ ≥ 0`.  Extracted from `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
+/-- The `T2` term `-(2·a₁·yd²·xd)` has `ord_P ≥ 4` at 2-torsion, given `ord_P yd = 1`,
+`ord_P xd = 2` and `ord_P a₁ ≥ 0`.  Extracted from `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
 private theorem ord_P_translateY_T2_term_ge_four
     {P : (W_smooth W).SmoothPoint} {a1 yd xd : KE}
     (h_yd_sq : (W_smooth W).ord_P P (yd ^ 2) = ((2 : ℤ) : WithTop ℤ))
@@ -864,8 +858,8 @@ private theorem ord_P_translateY_T2_term_ge_four
         add_le_add h_2a1_nn (le_refl _)
 
 omit [Fintype K] in
-/-- The `T3` term `(yd·(a₂ + 2x + xk') - a₁²·yd)·xd²` has `ord_P ≥ 4` at 2-torsion: the coefficient is
-nonnegative (`ord_P_translateY_T3_coef_nonneg`) and `ord_P xd² = 4`.  Extracted from
+/-- The `T3` term `(yd·(a₂ + 2x + xk') - a₁²·yd)·xd²` has `ord_P ≥ 4` at 2-torsion: the
+coefficient is nonnegative (`ord_P_translateY_T3_coef_nonneg`) and `ord_P xd² = 4`.  Extracted from
 `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
 private theorem ord_P_translateY_T3_term_ge_four
     {P : (W_smooth W).SmoothPoint} {a1 a2 yd xd xk' : KE}
@@ -894,8 +888,8 @@ private theorem ord_P_translateY_T3_term_ge_four
         add_le_add h_T3_coef_nn (le_refl _)
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
-/-- The `T4` term `(-y + a₁·(a₂ + x + xk') - a₃)·xd³` has `ord_P ≥ 6` at 2-torsion: the coefficient is
-nonnegative (`ord_P_translateY_T4_coef_nonneg`) and `ord_P xd³ = 6`.  Extracted from
+/-- The `T4` term `(-y + a₁·(a₂ + x + xk') - a₃)·xd³` has `ord_P ≥ 6` at 2-torsion: the
+coefficient is nonnegative (`ord_P_translateY_T4_coef_nonneg`) and `ord_P xd³ = 6`.  Extracted from
 `ord_P_translateY_xy_eq_neg_three_at_2tor`. -/
 private theorem ord_P_translateY_T4_term_ge_six
     {P : (W_smooth W).SmoothPoint} {a1 a2 a3 xd xk' : KE}
@@ -925,8 +919,8 @@ private theorem ord_P_translateY_T4_term_ge_six
         add_le_add h_T4_coef_nn (le_refl _)
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
-/-- Extract `ord_P f = -3` from `ord_P (f · g) = 3` and `ord_P g = 6`: since `f · g` has finite order,
-`f ≠ 0`, so `ord_P f` is a finite integer `k` with `k + 6 = 3`.  Extracted from
+/-- Extract `ord_P f = -3` from `ord_P (f · g) = 3` and `ord_P g = 6`: since `f · g` has finite
+order, `f ≠ 0`, so `ord_P f` is a finite integer `k` with `k + 6 = 3`.  Extracted from
 `ord_P_translateY_xy_eq_neg_three_at_2tor` (with `g = xd³`). -/
 private theorem ord_P_eq_neg_three_of_mul_eq_three
     {P : (W_smooth W).SmoothPoint} {f g : KE}
@@ -975,7 +969,6 @@ private theorem ord_P_dominant_sum_eq_three
     exact lt_of_lt_of_le (by exact_mod_cast (show (3 : ℤ) < 4 by norm_num)) h_ABC
   exact (SmoothPlaneCurve.ord_P_add_eq_of_lt h_strict).trans h_d
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **`ord_P (translateY_xy) = -3` at smooth 2-torsion `T`** via the algebraic
 identity `translateY_xy_mul_cube_eq` and the 2-tor ord values
@@ -1091,7 +1084,6 @@ abbrev TwoTorYValueWitness (xT yT : K) (h_ns : W.toAffine.Nonsingular xT yT) : P
       (translateY_xy W xT (W.toAffine.negY xT yT)) =
     ((-3 : ℤ) : WithTop ℤ)
 
-set_option linter.unusedDecidableInType false in
 omit [Fintype K] in
 /-- **Discharge `TwoTorYValueWitness` from the substantive y-side lemma**: at smooth
 2-torsion `T`, the y-side ord = -3 value follows directly from
@@ -1739,7 +1731,7 @@ theorem bridge_at_addPullbackNumerator_negFrobenius_of_2_tor (xT yT : K)
       (W_smooth W).ordAtInfty
         (addPullbackNumerator_negFrobenius W) := by
   rw [addPullbackNumerator_negFrobenius_eq_reduced]
-  unfold addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_reduced_negFrobenius]
   rw [Conditional.reduced_form_eq_dom_plus_list W]
   have hq' : (2 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
   apply ord_P_translateAlgEquivOfPoint_sum_dominant
@@ -1876,7 +1868,7 @@ theorem lemma3_pole_at_T_at_2tor (xT yT : K)
     (W_smooth W).ord_P (⟨xT, yT, h_ns⟩ : (W_smooth W).SmoothPoint)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) =
       ((-2 : ℤ) : WithTop ℤ) := by
-  apply Conditional.Conditional.lemma3_pole_at_T_of_bridge_and_invariance
+  apply Conditional.lemma3_pole_at_T_of_bridge_and_invariance
     W xT yT h_ns hq
   · exact bridge_at_addPullback_x_negFrobenius_of_2_tor
       W xT yT h_ns h_2_tor hq

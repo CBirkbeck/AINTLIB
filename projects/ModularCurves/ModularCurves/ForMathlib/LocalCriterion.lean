@@ -39,7 +39,7 @@ The prime-localised form ("`M` finite `S`-module, `𝔮 ⊂ S` prime over `𝔭 
 `M_𝔮/𝔭M_𝔮` free over `S_𝔮/𝔭S_𝔮` ⟹ `M_𝔮` free over `S_𝔮`") is the special case obtained by
 applying this local theorem to `R_𝔭 → S_𝔮`; that reduction is pure localisation bookkeeping.
 -/
-import Mathlib
+import Mathlib.RingTheory.LocalRing.Module
 
 open TensorProduct IsLocalRing Function Module LinearMap
 
@@ -49,6 +49,40 @@ variable {R S M : Type*} [CommRing R] [CommRing S] [Algebra R S]
   [IsLocalRing R] [IsLocalRing S] [IsLocalHom (algebraMap R S)]
   [AddCommGroup M] [Module S M] [Module R M] [IsScalarTower R S M]
   [Module.Finite S M] [IsNoetherianRing S]
+
+section FibreBaseChange
+
+variable (N : Type*) [AddCommGroup N] [Module S N] [Module R N] [IsScalarTower R S N]
+
+omit [IsLocalRing R] [IsLocalRing S] [IsLocalHom (algebraMap R S)] [IsNoetherianRing S]
+
+/-- For an `S`-module `N`, restricting the `S`-submodule `𝔞S·N` (generated over `S` by an ideal
+`𝔞` of `R`) back to `R` recovers the `R`-submodule `𝔞·N`.  Combines `Ideal.smul_restrictScalars`
+with `Submodule.restrictScalars_top`. -/
+theorem restrictScalars_map_smul_top (𝔞 : Ideal R) :
+    (𝔞.map (algebraMap R S) • (⊤ : Submodule S N)).restrictScalars R
+      = 𝔞 • (⊤ : Submodule R N) := by
+  rw [Ideal.smul_restrictScalars, Submodule.restrictScalars_top]
+
+/-- **Fibre base change.** For an ideal `𝔞` of `R` and an `S`-module `N`, the base change
+`(R ⧸ 𝔞) ⊗[R] N` is `R`-linearly identified with the fibre quotient `N ⧸ 𝔞S·N`.  It is
+`TensorProduct.quotTensorEquivQuotSMul` (which lands in the `R`-submodule quotient `N ⧸ 𝔞·N`)
+composed with the identification `𝔞·N = (𝔞S·N)↾R` of `restrictScalars_map_smul_top`. -/
+noncomputable def quotTensorEquivQuotMapSMul (𝔞 : Ideal R) :
+    (R ⧸ 𝔞) ⊗[R] N ≃ₗ[R] N ⧸ (𝔞.map (algebraMap R S) • (⊤ : Submodule S N)) :=
+  TensorProduct.quotTensorEquivQuotSMul N 𝔞 ≪≫ₗ
+    Submodule.quotEquivOfEq _ _ (restrictScalars_map_smul_top N 𝔞).symm ≪≫ₗ
+    Submodule.Quotient.restrictScalarsEquiv R _
+
+theorem quotTensorEquivQuotMapSMul_mk_tmul (𝔞 : Ideal R) (a : R) (v : N) :
+    quotTensorEquivQuotMapSMul N 𝔞 (Ideal.Quotient.mk 𝔞 a ⊗ₜ[R] v)
+      = (Submodule.Quotient.mk (a • v) :
+          N ⧸ (𝔞.map (algebraMap R S) • (⊤ : Submodule S N))) := by
+  simp only [quotTensorEquivQuotMapSMul, LinearEquiv.trans_apply,
+    TensorProduct.quotTensorEquivQuotSMul_mk_tmul, Submodule.quotEquivOfEq_mk,
+    Submodule.Quotient.restrictScalarsEquiv_mk]
+
+end FibreBaseChange
 
 omit [IsNoetherianRing S] in
 /-- **Fibre datum (pure linear algebra over the fibre ring; no flatness).**
@@ -73,10 +107,6 @@ private theorem exists_fibre_adapted_surjection
   -- surjectivity of the residue map `S → S ⧸ I`
   have hSsurj : Function.Surjective (algebraMap S (S ⧸ I)) := by
     rw [Ideal.Quotient.algebraMap_eq]; exact Ideal.Quotient.mk_surjective
-  -- `(𝔪S)·M ↾R = 𝔪·M`
-  have hsmulM : (I • (⊤ : Submodule S M)).restrictScalars R
-      = (maximalIdeal R) • (⊤ : Submodule R M) := by
-    rw [hI, Ideal.smul_restrictScalars, Submodule.restrictScalars_top]
   -- fibre basis, reindexed to `Fin r`
   obtain ⟨r, b⟩ : Σ' (r : ℕ), Basis (Fin r) (S ⧸ I) (M ⧸ (I • (⊤ : Submodule S M))) :=
     ⟨_, (Module.Free.chooseBasis (S ⧸ I) (M ⧸ (I • (⊤ : Submodule S M)))).reindex
@@ -93,7 +123,8 @@ private theorem exists_fibre_adapted_surjection
   · -- `φ` surjective, by Nakayama at `I` (the lifted basis generates `M ⧸ IM`)
     rw [← LinearMap.range_eq_top, hφ_def, Fintype.range_linearCombination]
     have hfeq : ⇑(I • (⊤ : Submodule S M)).mkQ ∘ x = ⇑b := funext (fun i => hx i)
-    have hgenI : Submodule.map (I • (⊤ : Submodule S M)).mkQ (Submodule.span S (Set.range x)) = ⊤ := by
+    have hgenI : Submodule.map (I • (⊤ : Submodule S M)).mkQ
+        (Submodule.span S (Set.range x)) = ⊤ := by
       rw [Submodule.map_span, ← Set.range_comp, hfeq]; exact hb_span
     have hNN : (⊤ : Submodule S M) ≤ Submodule.span S (Set.range x) ⊔ I • (⊤ : Submodule S M) := by
       have h2 : (I • (⊤ : Submodule S M)) ⊔ Submodule.span S (Set.range x) = ⊤ :=
@@ -107,19 +138,12 @@ private theorem exists_fibre_adapted_surjection
           exact IsLocalRing.map_maximalIdeal_le (algebraMap R S)) hNN
     exact top_le_iff.mp hnak
   · -- `φ ⊗_R (R/𝔪)` injective: it is conjugate to the fibre reduction `ψ`, which is an iso.
-    have hsmulN : (I • (⊤ : Submodule S (Fin r → S))).restrictScalars R
-        = (maximalIdeal R) • (⊤ : Submodule R (Fin r → S)) := by
-      rw [hI, Ideal.smul_restrictScalars, Submodule.restrictScalars_top]
-    -- `R`-linear identifications  `(R/𝔪) ⊗[R] N ≃ N ⧸ IN`
+    -- `R`-linear identifications  `(R/𝔪) ⊗[R] N ≃ N ⧸ IN` (fibre base change)
     set eM : (R ⧸ maximalIdeal R) ⊗[R] M ≃ₗ[R] M ⧸ (I • (⊤ : Submodule S M)) :=
-      (quotTensorEquivQuotSMul M (maximalIdeal R)) ≪≫ₗ
-        (Submodule.quotEquivOfEq _ _ hsmulM.symm) ≪≫ₗ
-        (Submodule.Quotient.restrictScalarsEquiv R (I • (⊤ : Submodule S M))) with heM
+      quotTensorEquivQuotMapSMul M (maximalIdeal R) with heM
     set eN : (R ⧸ maximalIdeal R) ⊗[R] (Fin r → S) ≃ₗ[R]
         (Fin r → S) ⧸ (I • (⊤ : Submodule S (Fin r → S))) :=
-      (quotTensorEquivQuotSMul (Fin r → S) (maximalIdeal R)) ≪≫ₗ
-        (Submodule.quotEquivOfEq _ _ hsmulN.symm) ≪≫ₗ
-        (Submodule.Quotient.restrictScalarsEquiv R (I • (⊤ : Submodule S (Fin r → S)))) with heN
+      quotTensorEquivQuotMapSMul (Fin r → S) (maximalIdeal R) with heN
     -- the descended `S`-linear reduction `ψ`
     have hφle : (I • (⊤ : Submodule S (Fin r → S))) ≤
         Submodule.comap φ (I • (⊤ : Submodule S M)) := by
@@ -137,10 +161,8 @@ private theorem exists_fibre_adapted_surjection
       | zero => simp
       | tmul a v =>
           obtain ⟨a', rfl⟩ := Ideal.Quotient.mk_surjective a
-          rw [heM, heN, hψ_def]
-          simp only [LinearMap.lTensor_tmul, LinearMap.restrictScalars_apply,
-            LinearEquiv.trans_apply, quotTensorEquivQuotSMul_mk_tmul,
-            Submodule.quotEquivOfEq_mk, Submodule.Quotient.restrictScalarsEquiv_mk,
+          rw [heM, heN, hψ_def, LinearMap.lTensor_tmul, LinearMap.restrictScalars_apply,
+            quotTensorEquivQuotMapSMul_mk_tmul, quotTensorEquivQuotMapSMul_mk_tmul,
             Submodule.mapQ_apply]
           rw [φ.map_smul_of_tower a' v]
       | add z1 z2 h1 h2 => simp only [map_add, h1, h2]
@@ -206,7 +228,8 @@ theorem Module.free_of_flat_of_fibre_free [Module.Flat R M]
       (Module.Flat.lTensor_preserves_injective_linearMap _ Subtype.val_injective)
   have hcomp : φR ∘ₗ (LinearMap.restrictScalars R Ksub.subtype) = 0 := by
     ext w; exact LinearMap.mem_ker.mp w.2
-  -- `k ⊗_R K = 0`: `ι ⊗ k` is injective (A) and lands in `ker (φ ⊗ k) = 0` (as `φ ⊗ k` is injective).
+  -- `k ⊗_R K = 0`: `ι ⊗ k` is injective (A) and lands in `ker (φ ⊗ k) = 0`
+  -- (as `φ ⊗ k` is injective).
   have hkK : Subsingleton (k ⊗[R] Ksub) := by
     refine (subsingleton_iff_forall_eq 0).mpr fun z => ?_
     have hz : LinearMap.lTensor k (LinearMap.restrictScalars R Ksub.subtype) z = 0 := by

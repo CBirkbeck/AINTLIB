@@ -22,7 +22,7 @@ action properties, culminating in `descendCosetList_action`.
 
 ## Main results
 
-* `miyake_4_6_4_dichotomy_strong` — the strengthened Miyake dichotomy (Lemma 4.6.4).
+* `cuspForm_dichotomy_strong` — the strengthened Miyake dichotomy (Lemma 4.6.4).
 * `descendCosetList_det` — every descent coset representative has determinant `p`.
 * `descendCosetList_action` — the action of the descent coset list (the culmination).
 -/
@@ -70,7 +70,7 @@ theorem miyake_g_p_supported
 cuspFormCharSpace`, with `p ∣ M` and `NeZero (M / p)`, either `g = 0`, or there
 is `g_p` at level `Γ_1(M/p)` in the character space of the factored Dirichlet
 character `χ_M`, with `V_p g_p = g` as functions on `ℍ`. -/
-theorem miyake_4_6_4_dichotomy_strong
+theorem cuspForm_dichotomy_strong
     {M : ℕ} [NeZero M] {k : ℤ}
     (χ_M : DirichletCharacter ℂ M)
     (p : ℕ) [NeZero p] [NeZero (M / p)]

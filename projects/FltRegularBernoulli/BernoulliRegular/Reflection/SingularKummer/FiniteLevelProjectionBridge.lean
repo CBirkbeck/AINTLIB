@@ -124,8 +124,7 @@ theorem primaryComponent_elementaryQuotientLinearMap_surjective
       q • x ∈ AddCommGroup.primaryComponent A p := by
     simpa [q] using nsmul_ordCompl_mem_primaryComponent (p := p) x
   let z : AddCommGroup.primaryComponent A p := ⟨q • x, hq_mem⟩
-  have hx_order_ne : addOrderOf x ≠ 0 :=
-    ne_of_gt (addOrderOf_pos x)
+  have hx_order_ne : addOrderOf x ≠ 0 := (addOrderOf_pos x).ne'
   have hq_coprime : q.Coprime p := by
     simpa [q] using (Nat.coprime_ordCompl (Fact.out : Nat.Prime p) hx_order_ne).symm
   have hq_unit : IsUnit (q : ZMod p) :=
@@ -153,8 +152,7 @@ theorem primaryComponent_elementaryQuotientLinearMap_surjective
     _ = ((↑u⁻¹ : ZMod p) * (q : ZMod p)) • quotientMap A p x := by
           rw [mul_smul]
     _ = quotientMap A p x := by
-          have huq : (q : ZMod p) = u := hu.symm
-          rw [huq]
+          rw [← hu]
           simp
 
 /-- If the image of `B / pB` contains the projected component `V_i`, then
@@ -170,7 +168,7 @@ theorem elementaryQuotient_nontrivial_of_component_le_subgroup_image
   obtain ⟨x, hxne, hxmem⟩ :=
     exists_ne_zero_mem_elementaryComponent (p := p) (A := A) hV
   obtain ⟨y, hy⟩ := hcover hxmem
-  exact ⟨⟨y, 0, fun hyzero => hxne (by simpa [hyzero] using hy.symm)⟩⟩
+  exact ⟨⟨y, 0, fun hyzero ↦ hxne (by simpa [hyzero] using hy.symm)⟩⟩
 
 /-- Finite-level component comparison.  The hypotheses are precisely the two
 facts supplied by an exact finite-level character component `B`: it covers

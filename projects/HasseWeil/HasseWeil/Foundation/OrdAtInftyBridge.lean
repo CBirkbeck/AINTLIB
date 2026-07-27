@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.MulByIntPullback
+import HasseWeil.Foundation.OmegaPullbackCoeff
 import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
@@ -49,6 +50,7 @@ local notation "KE" => W.toAffine.FunctionField
 noncomputable def W_smooth : SmoothPlaneCurve F :=
   ⟨W.toAffine⟩
 
+/-- The affine curve underlying the `SmoothPlaneCurve` wrapper is `W`. -/
 @[simp] theorem W_smooth_toAffine : (W_smooth W).toAffine = W.toAffine := rfl
 
 /-- The function field of the SmoothPlaneCurve wrapper equals `KE`
@@ -76,7 +78,7 @@ level. Both are the image of `AdjoinRoot.root W.polynomial` under the
 algebraMap to `KE`. The `basis_one` lemma identifies
 `basis 1 = AdjoinRoot.mk _ X = AdjoinRoot.root _`. -/
 theorem coordY_W_smooth_eq_y_gen : (W_smooth W).coordY = y_gen W := by
-  unfold SmoothPlaneCurve.coordY y_gen
+  simp only [SmoothPlaneCurve.coordY, y_gen]
   rw [Affine.CoordinateRing.basis_one]
   rfl
 
@@ -94,13 +96,25 @@ theorem ordAtInfty_algebraMap_F_nonzero {c : F} (hc : c ≠ 0) :
 
 /-! ### Powers of generators -/
 
-/-- `x_gen W ≠ 0` follows from `(W_smooth W).coordX_ne_zero` via the bridge. -/
-theorem x_gen_ne_zero : x_gen W ≠ 0 := by
-  rw [← coordX_W_smooth_eq_x_gen]; exact (W_smooth W).coordX_ne_zero
+/- `x_gen_ne_zero` / `y_gen_ne_zero` HOISTED to `Foundation/MulByIntPullback.lean` next to
+the defs (#7621) — they were declared BOTH here and in `LocalExpansion.lean` (same names,
+same namespace), so no module could import both files without an environment clash. -/
 
-/-- `y_gen W ≠ 0` follows from `(W_smooth W).coordY_ne_zero` via the bridge. -/
-theorem y_gen_ne_zero : y_gen W ≠ 0 := by
-  rw [← coordY_W_smooth_eq_y_gen]; exact (W_smooth W).coordY_ne_zero
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- `y_gen W` and `(W_smooth W).coordYInFunctionField` are the same element of
+`KE`: both are `algebraMap R KE (AdjoinRoot.root W.polynomial)` (the curve of
+`W_smooth W` is `W.toAffine` definitionally). -/
+theorem y_gen_eq_coordYInFunctionField :
+    y_gen W = (W_smooth W).coordYInFunctionField := rfl
+
+/-- `mulByInt_y W n ≠ 0` for `n ≠ 0`: it is the image of `y_gen ≠ 0` under the
+field embedding `[n]^*`. -/
+theorem mulByInt_y_ne_zero (n : ℤ) (hn : n ≠ 0) : mulByInt_y W n ≠ 0 := by
+  have hpb : (mulByInt W.toAffine n).pullback = mulByInt_pullbackAlgHom W n hn := dif_neg hn
+  have h : mulByInt_pullbackAlgHom W n hn (y_gen W) = mulByInt_y W n :=
+    hpb ▸ mulByInt_pullback_y W n hn
+  rw [← h]
+  exact (map_ne_zero (mulByInt_pullbackAlgHom W n hn)).mpr (y_gen_ne_zero W)
 
 /-- `ord_∞(x_gen^n) = n • (-2)`. -/
 theorem ordAtInfty_x_gen_pow (n : ℕ) :
@@ -177,6 +191,7 @@ theorem ordAtInfty_ΨSq_ff (n : ℤ) (hnF : (n : F) ≠ 0) :
   push_cast [Nat.cast_sub h_pos]
   ring_nf
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The composition `algebraMap (Polynomial F) → CoordinateRing → FunctionField`
 is injective. Composes `Affine.CoordinateRing.algebraMap_poly_injective` with
 `IsFractionRing.injective`. -/
@@ -199,7 +214,7 @@ theorem Φ_ff_ne_zero (n : ℤ) : Φ_ff W n ≠ 0 := by
 /-- `mulByInt_x W n ≠ 0` for `n ≠ 0`. Direct from `Φ_ff_ne_zero` and
 `ΨSq_ff_ne_zero`. -/
 theorem mulByInt_x_ne_zero (n : ℤ) (hn : n ≠ 0) : mulByInt_x W n ≠ 0 := by
-  unfold mulByInt_x
+  simp only [mulByInt_x]
   exact div_ne_zero (Φ_ff_ne_zero W n) (ΨSq_ff_ne_zero W hn)
 
 /-- `ord_∞(mulByInt_x W n) = -2` for `n ≠ 0` and `(n : F) ≠ 0`.
@@ -208,7 +223,7 @@ Direct from `ordAtInfty_Φ_ff`, `ordAtInfty_ΨSq_ff`, and division: the
 `-2 · n.natAbs²` and `-2 · (n.natAbs² - 1)` cancel down to `-2`. -/
 theorem ordAtInfty_mulByInt_x (n : ℤ) (hn : n ≠ 0) (hnF : (n : F) ≠ 0) :
     (W_smooth W).ordAtInfty (mulByInt_x W n) = ((-2 : ℤ) : WithTop ℤ) := by
-  unfold mulByInt_x
+  simp only [mulByInt_x]
   have hΦ_ne := Φ_ff_ne_zero W n
   have hΨ_ne := ΨSq_ff_ne_zero W hn
   have h_inv_ne : (ΨSq_ff W n)⁻¹ ≠ 0 := inv_ne_zero hΨ_ne
@@ -216,7 +231,10 @@ theorem ordAtInfty_mulByInt_x (n : ℤ) (hn : n ≠ 0) (hnF : (n : F) ≠ 0) :
   have h_mul : (W_smooth W).ordAtInfty (Φ_ff W n * (ΨSq_ff W n)⁻¹) =
       (W_smooth W).ordAtInfty (Φ_ff W n) + (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) :=
     (W_smooth W).ordAtInfty_mul hΦ_ne h_inv_ne
-  rw [h_div_eq, h_mul, (W_smooth W).ordAtInfty_inv,
+  have h_inv_ord : (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) =
+      -(W_smooth W).ordAtInfty (ΨSq_ff W n) :=
+    (W_smooth W).ordAtInfty_inv (ΨSq_ff W n)
+  rw [h_div_eq, h_mul, h_inv_ord,
       ordAtInfty_Φ_ff W n, ordAtInfty_ΨSq_ff W n hnF]
   rw [show ((-2 * (n.natAbs : ℤ) ^ 2 : ℤ) : WithTop ℤ) +
           -(((-2 * ((n.natAbs : ℤ) ^ 2 - 1) : ℤ) : WithTop ℤ)) =
@@ -257,8 +275,11 @@ theorem ordAtInfty_mulByInt_x_neg (n : ℤ) (hn : n ≠ 0) :
   have h_mul : (W_smooth W).ordAtInfty (Φ_ff W n * (ΨSq_ff W n)⁻¹) =
       (W_smooth W).ordAtInfty (Φ_ff W n) + (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) :=
     (W_smooth W).ordAtInfty_mul hΦ_ne h_inv_ne
-  unfold mulByInt_x
-  rw [h_div_eq, h_mul, (W_smooth W).ordAtInfty_inv]
+  have h_inv_ord : (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) =
+      -(W_smooth W).ordAtInfty (ΨSq_ff W n) :=
+    (W_smooth W).ordAtInfty_inv (ΨSq_ff W n)
+  simp only [mulByInt_x]
+  rw [h_div_eq, h_mul, h_inv_ord]
   -- `ord Φ_ff = -2·natAbs n²` (unconditional).
   rw [ordAtInfty_Φ_ff W n]
   -- `ord ΨSq_ff = -2·natDegree (ΨSq n)` (unconditional polynomial-ord lemma).
@@ -310,9 +331,12 @@ theorem exists_ordAtInfty_mulByInt_x_eq_even_le_neg_two (n : ℤ) (hn : n ≠ 0)
       ((-2 * (W.ΨSq n).natDegree : ℤ) : WithTop ℤ) := by
     rw [ΨSq_ff_eq_algebraMap_polynomial]
     exact (W_smooth W).ordAtInfty_algebraMap_polynomial_of_ne_zero (ΨSq_poly_ne_zero W hn)
+  have h_inv_ord : (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) =
+      -(W_smooth W).ordAtInfty (ΨSq_ff W n) :=
+    (W_smooth W).ordAtInfty_inv (ΨSq_ff W n)
   refine ⟨-2 * ((n.natAbs : ℤ) ^ 2 - (W.ΨSq n).natDegree), ?_, ?_, ?_⟩
   · unfold mulByInt_x
-    rw [h_div_eq, h_mul, (W_smooth W).ordAtInfty_inv, ordAtInfty_Φ_ff W n, h_ΨSq_ord]
+    rw [h_div_eq, h_mul, h_inv_ord, ordAtInfty_Φ_ff W n, h_ΨSq_ord]
     rw [show -(((-2 * ((W.ΨSq n).natDegree : ℤ)) : ℤ) : WithTop ℤ) =
           (((-(-2 * ((W.ΨSq n).natDegree : ℤ))) : ℤ) : WithTop ℤ) from by push_cast; rfl]
     rw [show ((-2 * (n.natAbs : ℤ) ^ 2 : ℤ) : WithTop ℤ) +

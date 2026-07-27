@@ -108,7 +108,7 @@ lemma sqPlusPrime_natDegree : (sqPlusPrime p).natDegree = 2 := by
 /-- `X² + p` has no rational root for `p > 0` (since `-p` is not a rational square). -/
 lemma sqPlusPrime_no_root (q : ℚ) : ¬ (sqPlusPrime p).IsRoot q := by
   intro h_root
-  unfold sqPlusPrime at h_root
+  simp only [sqPlusPrime] at h_root
   simp only [Polynomial.IsRoot, Polynomial.eval_add, Polynomial.eval_pow, Polynomial.eval_X,
     Polynomial.eval_C] at h_root
   -- q^2 + p = 0 ⟹ q^2 = -p. But q^2 ≥ 0 and -p < 0. Contradiction.
@@ -149,7 +149,7 @@ theorem finrank_Kminus : Module.finrank ℚ (Kminus p) = 2 := by
 /-- For `p > 0` prime, `X² + p` has no real roots. -/
 lemma sqPlusPrime_no_real_root (x : ℝ) : ¬ (Polynomial.aeval x (sqPlusPrime p) = 0) := by
   intro h
-  unfold sqPlusPrime at h
+  simp only [sqPlusPrime] at h
   simp only [map_add, map_pow, Polynomial.aeval_X, Polynomial.aeval_C,
     eq_ratCast, Rat.cast_natCast] at h
   have hp_pos : (0 : ℝ) < (p : ℝ) := by exact_mod_cast hp.out.pos
@@ -438,6 +438,21 @@ lemma alphaPowerBasis_basis_isIntegral (hp3 : p % 4 = 3) :
   rw [this]
   exact hα.pow _
 
+/-- The discriminant of the `α`-power basis of `Kminus p`, reindexed to `Fin 2`, equals `-p`. -/
+lemma discr_alphaPowerBasis_reindex (hp3 : p % 4 = 3) :
+    Algebra.discr ℚ ((alphaPowerBasis p hp3).basis.reindex
+      (finCongr (alphaPowerBasis_dim p hp3))) = -(p : ℚ) := by
+  rw [Module.Basis.coe_reindex, Algebra.discr_reindex]
+  exact discr_alphaPowerBasis p hp3
+
+/-- The discriminant of the integral basis of `Kminus p`, reindexed by any equivalence,
+equals the number-field discriminant of `Kminus p`. -/
+lemma discr_integralBasis_reindex {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (f : Module.Free.ChooseBasisIndex ℤ (𝓞 (Kminus p)) ≃ ι) :
+    Algebra.discr ℚ ((NumberField.integralBasis (Kminus p)).reindex f) =
+      (NumberField.discr (Kminus p) : ℚ) := by
+  rw [Module.Basis.coe_reindex, Algebra.discr_reindex, ← NumberField.coe_discr]
+
 /-- **CN-03**: the absolute discriminant of `Kminus p` has `natAbs = p`, for
 `p ≡ 3 (mod 4)` prime.
 
@@ -461,21 +476,10 @@ theorem discr_Kminus_natAbs_eq (hp3 : p % 4 = 3) :
   let iB : Module.Basis (Fin 2) ℚ (Kminus p) :=
     (NumberField.integralBasis (Kminus p)).reindex e.symm
   -- Discriminants of the reindexed bases.
-  have h_pbBas_disc : Algebra.discr ℚ pbBas = -(p : ℚ) := by
-    have h1 : (pbBas : Fin 2 → Kminus p) = pb.basis ∘ (finCongr hdim).symm := by
-      funext j; simp [pbBas]
-    rw [h1, Algebra.discr_reindex]
-    exact discr_alphaPowerBasis p hp3
-  have h_iB_disc : Algebra.discr ℚ iB = (NumberField.discr (Kminus p) : ℚ) := by
-    have h1 : (iB : Fin 2 → Kminus p) = NumberField.integralBasis (Kminus p) ∘ e := by
-      funext i; simp [iB]
-    rw [h1]
-    have h2 : Algebra.discr ℚ (NumberField.integralBasis (Kminus p) ∘ e) =
-        Algebra.discr ℚ (NumberField.integralBasis (Kminus p)) := by
-      have := Algebra.discr_reindex ℚ (NumberField.integralBasis (Kminus p)) e.symm
-      rw [show ((e.symm : _ ≃ _).symm : _ → _) = (e : _ → _) from rfl] at this
-      exact this
-    rw [h2, ← NumberField.coe_discr]
+  have h_pbBas_disc : Algebra.discr ℚ pbBas = -(p : ℚ) :=
+    discr_alphaPowerBasis_reindex p hp3
+  have h_iB_disc : Algebra.discr ℚ iB = (NumberField.discr (Kminus p) : ℚ) :=
+    discr_integralBasis_reindex p e.symm
   -- pb.basis elements are integral.
   have h_pbBas_int : ∀ j : Fin 2, IsIntegral ℤ (pbBas j) := fun j ↦ by
     have : pbBas j = pb.basis ((finCongr hdim).symm j) := by simp [pbBas]

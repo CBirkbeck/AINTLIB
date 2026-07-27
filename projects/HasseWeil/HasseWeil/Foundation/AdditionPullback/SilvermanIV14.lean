@@ -124,7 +124,7 @@ theorem ord_neg_addPullback_x_div_y_negFrobenius_unconditional
 theorem negFrobeniusIsog_pullback_localParam_eq_pow :
     (negFrobeniusIsog W).pullback (localParam W) =
       ((mulByInt W.toAffine (-1)).pullback (localParam W)) ^ Fintype.card K := by
-  unfold negFrobeniusIsog
+  simp only [negFrobeniusIsog]
   rw [Isogeny.comp_algebraMap_eq, frobeniusIsog_pullback_apply]
 
 /-- **Closed form for `(mulByInt(-1)).pullback localParam`** (axiom-clean).
@@ -136,7 +136,7 @@ theorem mulByInt_neg_one_pullback_localParam :
     (mulByInt W.toAffine (-1)).pullback (localParam W) =
       x_gen W / (y_gen W + algebraMap K KE W.a₁ * x_gen W +
         algebraMap K KE W.a₃) := by
-  unfold localParam
+  simp only [localParam]
   rw [map_div₀, map_neg, mulByInt_pullback_x_neg_one, mulByInt_pullback_y_neg_one]
   -- Goal: -x_gen / (-y_gen - a₁·x_gen - a₃) = x_gen / (y_gen + a₁·x_gen + a₃)
   rw [show -y_gen W - algebraMap K KE W.a₁ * x_gen W -
@@ -167,7 +167,7 @@ theorem ord_negFrobeniusIsog_pullback_localParam (hq : 2 ≤ Fintype.card K) :
   have h_eq : (negFrobeniusIsog W).pullback (localParam W) =
       -((negFrobeniusIsog W).pullback (x_gen W)) /
       (negFrobeniusIsog W).pullback (y_gen W) := by
-    unfold localParam
+    simp only [localParam]
     rw [map_div₀, map_neg]
   rw [h_eq]
   have hY_ne : (negFrobeniusIsog W).pullback (y_gen W) ≠ 0 := by
@@ -184,6 +184,7 @@ theorem ord_negFrobeniusIsog_pullback_localParam (hq : 2 ≤ Fintype.card K) :
   congr 1
   ring
 
+omit [Fintype K] in
 /-- **`constantCoeff (formal id) = 0` (axiom-clean, scaffold extraction)**:
 direct from `formalIsogenySeries_id = X`. -/
 @[simp] theorem constantCoeff_formalIsogenySeries_id :
@@ -199,6 +200,7 @@ direct from `formalIsogenySeries_frobenius = X^q` for `q ≥ 1`. -/
     PowerSeries.coeff_X_pow]
   exact if_neg (by omega)
 
+omit [Fintype K] in
 /-- **Orderbound for denominator's lower terms**: the orderTop of
 `HahnSeries.C a₁ * formalX + HahnSeries.C a₃` is ≥ -2 in `LaurentSeries K`
 (since each term has orderTop ≥ -2). -/
@@ -223,6 +225,7 @@ private theorem orderTop_a₁_formalX_plus_a₃_ge_neg_two :
     · rw [HahnSeries.C_apply, HahnSeries.orderTop_single ha₃]
       exact_mod_cast (by norm_num : (-2 : ℤ) ≤ 0)
 
+omit [Fintype K] in
 /-- **orderTop of the localExpand of the denominator = -3**: in
 `LaurentSeries K`, `formalY + C a₁ * formalX + C a₃` has orderTop = -3,
 since `formalY` (orderTop = -3) strictly dominates the other terms
@@ -679,6 +682,7 @@ theorem leadingCoeff_localExpand_x_gen_mul_frob_pullback_x_gen_sq :
   rw [localExpand_x_gen_mul_frob_pullback_x_gen_sq W]
   exact leadingCoeff_formalX_pow_two_q_plus_one W
 
+omit [Fintype K] in
 /-- **Sub-helper 10**: `(formalY^n).orderTop = -3 * n`.
 Mirror of `formalX_pow_orderTop`. -/
 theorem formalY_pow_orderTop (n : ℕ) :
@@ -836,6 +840,7 @@ theorem orderTop_formalX_mul_formalY_pow_plus_formalX_pow_mul_formalY_ge
     refine WithTop.coe_le_coe.mpr ?_
     nlinarith
 
+omit [Fintype K] in
 /-- **Sub-helper 26**: `(HahnSeries.C c).orderTop ≥ 0` for any `c : K`.
 Helper for term 2 (`2·a₆`) and similar constant-coefficient bounds. -/
 theorem orderTop_HahnSeries_C_ge_zero (c : K) :
@@ -846,6 +851,7 @@ theorem orderTop_HahnSeries_C_ge_zero (c : K) :
   · rw [HahnSeries.C_apply, HahnSeries.orderTop_single hc]
     rfl
 
+omit [Fintype K] in
 /-- **Sub-helper 27**: `localExpand W (algebraMap K KE c) = HahnSeries.C c`.
 Direct from `localExpand_algebraMap` + `HahnSeries.ofPowerSeries_C`. The
 constant-coefficient bridge: `algebraMap K KE` factors through `localExpand`
@@ -855,6 +861,7 @@ theorem localExpand_algebraMap_eq_C (c : K) :
   rw [localExpand_algebraMap]
   exact HahnSeries.ofPowerSeries_C c
 
+omit [Fintype K] in
 /-- **Sub-helper 28**: `(localExpand W (algebraMap K KE c * f)).orderTop ≥
 (localExpand W f).orderTop`. The constant factor `algebraMap K KE c` has
 orderTop ≥ 0 in the local expansion (it's a constant Hahn series), so
@@ -870,6 +877,7 @@ theorem orderTop_localExpand_algebraMap_mul_ge (c : K) (f : KE) :
     _ ≤ (HahnSeries.C c : LaurentSeries K).orderTop + (localExpand W f).orderTop := by
         gcongr
 
+omit [Fintype K] in
 /-- **Sub-helper 29**: `(localExpand W (2 * f)).orderTop ≥ (localExpand W f).orderTop`.
 Bridge for terms 4, 7 of `addPullbackNumerator_reduced_negFrobenius` (the `2·...`
 terms). Uses `2 * f = f + f` to dodge characteristic-2 considerations. -/
@@ -879,6 +887,7 @@ theorem orderTop_localExpand_two_mul_ge (f : KE) :
   refine le_trans ?_ HahnSeries.min_orderTop_le_orderTop_add
   exact le_min (le_refl _) (le_refl _)
 
+omit [Fintype K] in
 /-- **Sub-helper 30**: `(localExpand W (-f)).orderTop = (localExpand W f).orderTop`.
 Negation preserves orderTop. -/
 theorem orderTop_localExpand_neg (f : KE) :
@@ -953,6 +962,7 @@ theorem orderTop_localExpand_negFrobeniusIsog_pullback_y_gen
     nlinarith
   rw [HahnSeries.orderTop_add_eq_left h_lt, h_neg_y_pow]
 
+omit [Fintype K] in
 /-- **Sub-helper 34**: `(C(a₃) · formalY).orderTop ≥ -3` for q ≥ 1. -/
 theorem orderTop_C_a₃_mul_formalY_ge :
     (((-3 : ℤ)) : WithTop ℤ) ≤
@@ -1081,6 +1091,7 @@ theorem orderTop_localExpand_a₄_mul_x_gen_add_negFrobeniusIsog_pullback_x_gen_
   refine le_trans ?_ (orderTop_localExpand_algebraMap_mul_ge W W.a₄ _)
   exact orderTop_localExpand_x_gen_add_negFrobeniusIsog_pullback_x_gen_ge W hq
 
+omit [Fintype K] in
 /-- **Sub-helper 42**: `(localExpand(2·a₆)).orderTop ≥ 0`. -/
 theorem orderTop_localExpand_two_mul_a₆_ge :
     (0 : WithTop ℤ) ≤
@@ -1245,12 +1256,14 @@ theorem orderTop_localExpand_two_a₂_x_negFrob_π_x_promoted
   refine WithTop.coe_le_coe.mpr ?_
   linarith
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Sub-helper 56**: `add_ge_of_both_ge` — addition preserves orderTop bounds. -/
 theorem orderTop_add_ge_of_both_ge {a b : LaurentSeries K} {n : WithTop ℤ}
     (ha : n ≤ a.orderTop) (hb : n ≤ b.orderTop) :
     n ≤ (a + b).orderTop :=
   le_trans (le_min ha hb) HahnSeries.min_orderTop_le_orderTop_add
 
+omit [Fintype K] [DecidableEq K] in
 /-- **Sub-helper 57**: `sub_ge_of_both_ge` — subtraction preserves orderTop bounds.
 Uses `HahnSeries.orderTop_neg` to convert `b` ↔ `-b`. -/
 theorem orderTop_sub_ge_of_both_ge {a b : LaurentSeries K} {n : WithTop ℤ}
@@ -1321,7 +1334,7 @@ private theorem addPullbackNumerator_reduced_negFrobenius_split_eq :
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W)) +
       (x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2) := by
-  unfold addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_reduced_negFrobenius]
   ring
 
 /-- The dominant term `localExpand(x_gen · (negFrob.π·x)²)` has strictly smaller
@@ -1395,7 +1408,7 @@ private lemma addPullbackNumerator_reduced_negFrobenius_split :
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W)) +
       (x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2) := by
-  unfold addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_reduced_negFrobenius]
   ring
 
 /-- The dominant term `x_gen · (negFrob.π·x)²` has strictly smaller `orderTop` than the
@@ -2091,7 +2104,8 @@ theorem addPullbackAlgHom_negFrobenius_x_gen_eq
     (hq : 2 ≤ Fintype.card K) :
     addPullbackAlgHom_negFrobenius W hq (x_gen W) =
       addPullback_x W (negFrobeniusIsog W) := by
-  unfold addPullbackAlgHom_negFrobenius addPullbackAlgHom_negFrobenius_of_inj addPullbackAlgHom
+  simp only [addPullbackAlgHom_negFrobenius, addPullbackAlgHom_negFrobenius_of_inj,
+    addPullbackAlgHom]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -2099,7 +2113,7 @@ theorem addPullbackAlgHom_negFrobenius_x_gen_eq
     (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X) =
     addPullback_x W (negFrobeniusIsog W)
   change addCoordRingHom (negFrobeniusIsog_addNonInverse W) _ = _
-  unfold addCoordRingHom
+  simp only [addCoordRingHom]
   rw [show algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X =
       Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X) from rfl]
   rw [AdjoinRoot.lift_mk]
@@ -2110,7 +2124,8 @@ theorem addPullbackAlgHom_negFrobenius_y_gen_eq
     (hq : 2 ≤ Fintype.card K) :
     addPullbackAlgHom_negFrobenius W hq (y_gen W) =
       addPullback_y W (negFrobeniusIsog W) := by
-  unfold addPullbackAlgHom_negFrobenius addPullbackAlgHom_negFrobenius_of_inj addPullbackAlgHom
+  simp only [addPullbackAlgHom_negFrobenius, addPullbackAlgHom_negFrobenius_of_inj,
+    addPullbackAlgHom]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (y_gen W) = _
   rw [show y_gen W = algebraMap _ _ (AdjoinRoot.root W.toAffine.polynomial)
@@ -2120,7 +2135,7 @@ theorem addPullbackAlgHom_negFrobenius_y_gen_eq
     (AdjoinRoot.root W.toAffine.polynomial) = addPullback_y W (negFrobeniusIsog W)
   change addCoordRingHom (negFrobeniusIsog_addNonInverse W)
     (AdjoinRoot.root W.toAffine.polynomial) = _
-  unfold addCoordRingHom
+  simp only [addCoordRingHom]
   rw [show AdjoinRoot.root W.toAffine.polynomial =
       AdjoinRoot.mk W.toAffine.polynomial Polynomial.X from AdjoinRoot.mk_X.symm]
   rw [AdjoinRoot.lift_mk]
@@ -2135,7 +2150,7 @@ theorem localExpand_isogOneSub_negFrobenius_pullback_localParam
       -(localExpand W (addPullback_x W (negFrobeniusIsog W))) /
         localExpand W (addPullback_y W (negFrobeniusIsog W)) := by
   rw [isogOneSub_negFrobenius_pullback]
-  unfold localParam
+  simp only [localParam]
   rw [map_div₀, map_neg, map_div₀, map_neg,
     addPullbackAlgHom_negFrobenius_x_gen_eq W hq,
     addPullbackAlgHom_negFrobenius_y_gen_eq W hq]
@@ -2320,6 +2335,7 @@ theorem bridge_001_γ_isogOneSub_negFrobenius_char_two
     (leadingCoeff_localExpand_addPullback_y_negFrobenius_eq_neg_one_char_two W hq)]
   exact (map_one _).symm
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 104** (Frobenius D vanishing): for finite K with characteristic
 p (and `q = #K` a power of p), the Kähler differential of `x_gen^q` vanishes.
 
@@ -2402,6 +2418,7 @@ theorem kaehler_D_negFrobeniusIsog_pullback_y_gen
       (KaehlerDifferential.D K W.toAffine.FunctionField).map_algebraMap W.a₃]
   simp
 
+omit [Fintype K] in
 /-- **Sub-helper 109** (D(addPullback_x) formula via slope).
 
 For any α : Isogeny W W with `D((α).pullback x_gen) = 0` (i.e., α has its
@@ -2419,7 +2436,7 @@ theorem kaehler_D_addPullback_x_via_slope_witness
       (2 * addSlope W α + algebraMap K KE W.a₁) •
         KaehlerDifferential.D K W.toAffine.FunctionField (addSlope W α) -
       KaehlerDifferential.D K W.toAffine.FunctionField (x_gen W) := by
-  unfold addPullback_x W_KE
+  simp only [addPullback_x, W_KE]
   set D := KaehlerDifferential.D K W.toAffine.FunctionField
   set ℓ := addSlope W α
   change D ((ℓ) ^ 2 + (algebraMap K KE) W.a₁ * ℓ
@@ -2455,6 +2472,7 @@ theorem kaehler_D_addPullback_x_negFrobenius
   kaehler_D_addPullback_x_via_slope_witness W (negFrobeniusIsog W)
     (kaehler_D_negFrobeniusIsog_pullback_x_gen W p)
 
+omit [Fintype K] in
 /-- **Route B core (III.5.2), general slope-differential formula** (no `D(α*x)=0`
 hypothesis): for any `α`, the Kähler differential of the `id + α` addition-pullback
 x-coordinate is the slope term minus `D(x_gen)` minus `D(α*x)`. Generalizes
@@ -2468,7 +2486,7 @@ theorem kaehler_D_addPullback_x_general
         KaehlerDifferential.D K W.toAffine.FunctionField (addSlope W α) -
       KaehlerDifferential.D K W.toAffine.FunctionField (x_gen W) -
       KaehlerDifferential.D K W.toAffine.FunctionField (α.pullback (x_gen W)) := by
-  unfold addPullback_x W_KE
+  simp only [addPullback_x, W_KE]
   set D := KaehlerDifferential.D K W.toAffine.FunctionField
   set ℓ := addSlope W α
   change D ((ℓ) ^ 2 + (algebraMap K KE) W.a₁ * ℓ
@@ -2507,7 +2525,7 @@ theorem omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one_via_kaehler_witness
     omegaPullbackCoeff W (isogOneSub_negFrobenius W hq) = 1 := by
   apply omegaPullbackCoeff_unique
   rw [omegaPullbackCoeff_spec, one_smul]
-  unfold x_gen at h_kaehler
+  simp only [x_gen] at h_kaehler
   exact h_kaehler
 
 /-- **Sub-helper 113** (Kähler ω(γ) = 1 via pullbackKaehler witness — closing-arc).
@@ -2525,6 +2543,7 @@ theorem omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one_via_pullbackKaehler_wi
   rw [one_smul, ← Isogeny.pullbackKaehler_invariantDifferential]
   exact h_pK
 
+omit [Fintype K] in
 /-- **Sub-helper 114** (id.pullbackKaehler ω = ω, axiom-clean).
 
 The identity isogeny acts trivially on the invariant differential. Direct
@@ -2645,6 +2664,7 @@ theorem kaehler_witness_via_slope_deriv_witness
   field_simp [h_alphau_ne, u_gen_ne_zero W]
   linear_combination h_KE_identity
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 120** (Weierstrass equation in K(E), axiom-clean):
 `y_gen² + a₁·x_gen·y_gen + a₃·y_gen = x_gen³ + a₂·x_gen² + a₄·x_gen + a₆`
 in K(E). Direct from the affine equation `Affine.Equation` for the generic
@@ -2663,6 +2683,7 @@ theorem weierstrass_equation_in_KE :
   rw [(W_KE W).toAffine.equation_iff] at h_gen
   exact h_gen
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 121** (Kähler form of curve equation, axiom-clean foundation):
 literal D-application of the Weierstrass equation in K(E):
 `D(y² + a₁xy + a₃y) = D(x³ + a₂x² + a₄x + a₆)` in `Ω[K(E)/K]`.
@@ -2684,6 +2705,7 @@ theorem kaehler_D_weierstrass_equation_K_E :
   congrArg (KaehlerDifferential.D K W.toAffine.FunctionField)
     (weierstrass_equation_in_KE W)
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 122** (D(y²) via pow_two — axiom-clean KE-smul-only):
 `D(y_gen²) = y_gen • D(y_gen) + y_gen • D(y_gen)`. Wall-break: avoids
 `Derivation.leibniz_pow`'s ℕ-smul. -/
@@ -2694,6 +2716,7 @@ theorem kaehler_D_y_gen_sq :
   rw [pow_two,
     (KaehlerDifferential.D K W.toAffine.FunctionField).leibniz (y_gen W) (y_gen W)]
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 123** (D(x²) via pow_two — axiom-clean):
 `D(x_gen²) = x_gen • D(x_gen) + x_gen • D(x_gen)`. -/
 theorem kaehler_D_x_gen_sq :
@@ -2703,6 +2726,7 @@ theorem kaehler_D_x_gen_sq :
   rw [pow_two,
     (KaehlerDifferential.D K W.toAffine.FunctionField).leibniz (x_gen W) (x_gen W)]
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 124** (D(x³) via pow expansion + leibniz — axiom-clean):
 `D(x_gen³) = x_gen² • D(x_gen) + x_gen • D(x_gen²)`. -/
 theorem kaehler_D_x_gen_cube :
@@ -2714,6 +2738,7 @@ theorem kaehler_D_x_gen_cube :
   rw [show (x_gen W) ^ 3 = (x_gen W) ^ 2 * x_gen W from by ring,
     (KaehlerDifferential.D K W.toAffine.FunctionField).leibniz (x_gen W ^ 2) (x_gen W)]
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 125** (D-distribution of Weierstrass equation LHS, axiom-clean):
 fully Leibniz-expanded LHS in KE-smul-only form. Uses sub-helper 122 (D(y²)
 bypass) + Derivation.leibniz + D.map_algebraMap. -/
@@ -2744,6 +2769,7 @@ theorem kaehler_D_weierstrass_LHS_expanded :
       (KaehlerDifferential.D K W.toAffine.FunctionField).map_algebraMap W.a₃]
   simp only [smul_zero, add_zero]
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Sub-helper 126** (D-distribution of Weierstrass equation RHS, axiom-clean):
 fully Leibniz-expanded RHS. Uses sub-helpers 123, 124. -/
 theorem kaehler_D_weierstrass_RHS_expanded :
@@ -2875,6 +2901,7 @@ theorem kaehler_D_addSlope_negFrobenius
     rw [← mul_pow, mul_inv_cancel₀ hDen_ne, one_pow]]
   rw [one_smul]
 
+omit [Fintype K] in
 /-- **Route B core (III.5.2), general slope differential** (no Frobenius flatness): for any `α`
 with `x_gen ≠ α*x_gen` (non-doubling), the Kähler derivative of `addSlope = (y−α*y)/(x−α*x)`
 satisfies `Den²·D(addSlope) = Den·(D(y)−D(α*y)) − N·(D(x)−D(α*x))` where `N = y−α*y`,
@@ -2942,6 +2969,7 @@ theorem kaehler_D_addPullback_x_negFrobenius_cleared
       (2 * addSlope W (negFrobeniusIsog W) + algebraMap K KE W.a₁)]
   rw [← smul_smul, kaehler_D_addSlope_negFrobenius W p, smul_sub]
 
+omit [Fintype K] in
 /-- **Route B core (III.5.2), general cleared form**: combines `kaehler_D_addPullback_x_general`
 with `kaehler_D_addSlope_general` to clear the `Den²` denominator from `D(addPullback_x)` for
 arbitrary `α` (non-doubling). Generalizes `kaehler_D_addPullback_x_negFrobenius_cleared`. -/
@@ -2967,6 +2995,7 @@ theorem kaehler_D_addPullback_x_general_cleared
       (2 * addSlope W α + algebraMap K KE W.a₁),
     ← smul_smul, kaehler_D_addSlope_general W α h_ne, smul_sub]
 
+omit [Fintype K] [DecidableEq K] in
 /-- **RB-ω1**: `D(x_gen) = u_gen • ω` (immediate from `ω = u_gen⁻¹ • D(x_gen)`). -/
 theorem kaehler_D_x_gen_eq_u_smul_omega :
     KaehlerDifferential.D K W.toAffine.FunctionField (x_gen W) =
@@ -2999,6 +3028,7 @@ theorem kaehler_D_y_gen_eq_num_smul_omega :
     rw [h127, kaehler_D_x_gen_eq_u_smul_omega, smul_comm]
   exact smul_right_injective _ (u_gen_ne_zero W) h2
 
+omit [Fintype K] in
 /-- **RB-ω3 leaf** (α-image differentials): for the omega coefficient
 `a_α = omegaPullbackCoeff W α`, `D(α*x) = (α*u)·a_α·ω` and `D(α*y) = (α*num)·a_α·ω`. From
 `omegaPullbackCoeff_spec` (`a_α•ω = (α*u)⁻¹•D(α*x)`) and the α-image curve-equation differential
@@ -3188,7 +3218,7 @@ theorem alpha_star_u_isogOneSub_negFrobenius
         algebraMap K KE W.a₃ := by
   rw [alpha_star_u_eq]
   show (isogOneSub_negFrobenius W hq).pullback (u_gen W) = _
-  unfold u_gen
+  simp only [u_gen]
   rw [map_add, map_add, map_mul, map_mul, map_ofNat]
   rw [show (isogOneSub_negFrobenius W hq).pullback
         (algebraMap (Affine.CoordinateRing W.toAffine) KE
@@ -3226,7 +3256,7 @@ theorem alpha_star_u_plus_u_gen_negFrobenius
           algebraMap K KE W.a₁) *
         (addPullback_x W (negFrobeniusIsog W) - x_gen W)) := by
   rw [alpha_star_u_isogOneSub_negFrobenius W hq]
-  unfold u_gen addPullback_y addPullback_x x_gen y_gen
+  simp only [u_gen, addPullback_y, addPullback_x, x_gen, y_gen]
   simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
     WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.addX]
   -- Unfold W_KE coefficients to algebraMap-images of W coefficients.
@@ -3337,7 +3367,7 @@ theorem addPullback_x_sub_x_gen_mul_Den_sq_negFrobenius :
           (x_gen W - (negFrobeniusIsog W).pullback (x_gen W)) ^ 2 -
         ((2 : KE) * x_gen W + (negFrobeniusIsog W).pullback (x_gen W)) *
           (x_gen W - (negFrobeniusIsog W).pullback (x_gen W)) ^ 2 := by
-  unfold addPullback_x
+  simp only [addPullback_x]
   simp only [WeierstrassCurve.Affine.addX]
   have h_a1 : (W_KE W).toAffine.a₁ = algebraMap K KE W.a₁ := rfl
   have h_a2 : (W_KE W).toAffine.a₂ = algebraMap K KE W.a₂ := rfl
@@ -3449,7 +3479,7 @@ theorem omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one
   have hu_eq : u = u_gen W := by
     change algebraMap K KE W.a₃ + (2 : KE) * y_gen W +
          algebraMap K KE W.a₁ * x_gen W = u_gen W
-    unfold u_gen y_gen x_gen
+    simp only [u_gen, y_gen, x_gen]
     ring
   have hu_ne : u ≠ 0 := hu_eq ▸ u_gen_ne_zero W
   have huDen_ne : u * Den ^ 2 ≠ 0 := mul_ne_zero hu_ne hDen_sq_ne
@@ -3556,7 +3586,7 @@ private theorem kaehler_D_addPullback_x_pair_via_slope
   set D := KaehlerDifferential.D K W.toAffine.FunctionField
   set X₁ := α₁.pullback (x_gen W)
   set X₂ := α₂.pullback (x_gen W)
-  unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+  simp only [addPullback_x_pair, WeierstrassCurve.Affine.addX]
   set ℓ := addSlopePair α₁ α₂
   change D ((ℓ) ^ 2 + (W_KE W).toAffine.a₁ * ℓ
           - (W_KE W).toAffine.a₂ - X₁ - X₂) = _
@@ -3683,11 +3713,9 @@ theorem kaehler_D_addPullback_x_pair_eq_smul_omega
   set Y₂ := α₂.pullback (y_gen W) with hY₂
   have hDen_ne : X₁ - X₂ ≠ 0 := sub_ne_zero.mpr h_ne
   have hDen2_ne : (X₁ - X₂) ^ 2 ≠ 0 := pow_ne_zero 2 hDen_ne
-  -- STEP 1: the `(X₁ - X₂)²`-cleared differential of the pair `x`-coordinate (Leibniz on the slope
   -- quotient + on the `addX` formula), assembled in `kaehler_D_addPullback_x_pair_clearDenomSq`.
   have hcleared := kaehler_D_addPullback_x_pair_clearDenomSq W α₁ α₂ h_ne
   simp only [← hX₁, ← hX₂, ← hY₁, ← hY₂] at hcleared
-  -- STEP 2: substitute the four image-differential leaves `D(αᵢ*x)`, `D(αᵢ*y)`.
   rw [show D X₁ = (alpha_star_u W α₁ * omegaPullbackCoeff W α₁) •
         invariantDifferential W.toAffine from kaehler_D_alpha_pullback_x_eq_smul_omega W α₁,
       show D Y₁ = ((3 * X₁ ^ 2 + 2 * algebraMap K KE W.a₂ * X₁ + algebraMap K KE W.a₄ -
@@ -3703,7 +3731,6 @@ theorem kaehler_D_addPullback_x_pair_eq_smul_omega
     (X₁ - X₂) ^ 2 • _ = (X₁ - X₂) ^ 2 • _)
   rw [hcleared]
   simp only [smul_smul, ← sub_smul]
-  -- STEP 3: both sides are now `(scalar) • ω`; the scalar identity is the pullback-equation collapse.
   congr 1
   exact kaehler_D_addPullback_x_pair_coeff_collapse W α₁ α₂ h_ne
 

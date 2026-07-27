@@ -70,12 +70,12 @@ theorem IsRIntegralRat.natCast (r : ℕ) (n : ℕ) : IsRIntegralRat r (n : ℚ) 
 theorem IsRIntegralRat.add {r : ℕ} {q₁ q₂ : ℚ}
     (h₁ : IsRIntegralRat r q₁) (h₂ : IsRIntegralRat r q₂) :
     IsRIntegralRat r (q₁ + q₂) := by
-  unfold IsRIntegralRat at h₁ h₂ ⊢
+  simp only [IsRIntegralRat] at h₁ h₂ ⊢
   exact (h₁.mul_left h₂).coprime_dvd_left (Rat.add_den_dvd q₁ q₂)
 
 theorem IsRIntegralRat.neg {r : ℕ} {q : ℚ} (h : IsRIntegralRat r q) :
     IsRIntegralRat r (-q) := by
-  unfold IsRIntegralRat at h ⊢
+  simp only [IsRIntegralRat] at h ⊢
   rwa [Rat.neg_den]
 
 theorem IsRIntegralRat.sub {r : ℕ} {q₁ q₂ : ℚ}
@@ -87,7 +87,7 @@ theorem IsRIntegralRat.sub {r : ℕ} {q₁ q₂ : ℚ}
 theorem IsRIntegralRat.mul {r : ℕ} {q₁ q₂ : ℚ}
     (h₁ : IsRIntegralRat r q₁) (h₂ : IsRIntegralRat r q₂) :
     IsRIntegralRat r (q₁ * q₂) := by
-  unfold IsRIntegralRat at h₁ h₂ ⊢
+  simp only [IsRIntegralRat] at h₁ h₂ ⊢
   exact (h₁.mul_left h₂).coprime_dvd_left (Rat.mul_den_dvd q₁ q₂)
 
 theorem IsRIntegralRat.pow {r : ℕ} {q : ℚ} (h : IsRIntegralRat r q) (n : ℕ) :
@@ -135,7 +135,7 @@ theorem isUnit_den_zmod {r : ℕ} (q : ℚ) (h : IsRIntegralRat r q) :
 
 theorem den_mul_toZMod {r : ℕ} (q : ℚ) (h : IsRIntegralRat r q) :
     (q.den : ZMod r) * toZMod q h = (q.num : ZMod r) := by
-  unfold toZMod
+  simp only [toZMod]
   calc
     (q.den : ZMod r) * ((q.num : ZMod r) * (q.den : ZMod r)⁻¹)
         = (q.num : ZMod r) * ((q.den : ZMod r) * (q.den : ZMod r)⁻¹) := by ring

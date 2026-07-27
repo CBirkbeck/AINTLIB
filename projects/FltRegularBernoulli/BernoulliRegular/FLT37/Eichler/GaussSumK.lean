@@ -83,7 +83,7 @@ cyclotomic level `m = p` and residue prime `ℓ`, using `ℓ ∤ p` (both prime,
 `ℓ ≠ p`). -/
 theorem ramificationIdx_eq_one_of_ne
     (hne : ℓ ≠ p) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
-    Ideal.ramificationIdx 𝓵 𝔮 = 1 := by
+    Ideal.ramificationIdx' 𝓵 𝔮 = 1 := by
   have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
@@ -100,7 +100,7 @@ Specialises `IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd` with cyclotomic
 level `m = p` and residue prime `ℓ`. -/
 theorem inertiaDeg_eq_orderOf
     (hne : ℓ ≠ p) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
-    Ideal.inertiaDeg 𝓵 𝔮 = orderOf (ℓ : ZMod p) := by
+    Ideal.inertiaDeg' 𝓵 𝔮 = orderOf (ℓ : ZMod p) := by
   have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
@@ -130,7 +130,7 @@ theorem ne_of_natCast_eq_one_mod (hℓ1 : (ℓ : ZMod p) = 1) : ℓ ≠ p := by
 analyses. -/
 theorem inertiaDeg_eq_one_of_natCast_eq_one
     (hℓ1 : (ℓ : ZMod p) = 1) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
-    Ideal.inertiaDeg 𝓵 𝔮 = 1 := by
+    Ideal.inertiaDeg' 𝓵 𝔮 = 1 := by
   have hne : ℓ ≠ p := ne_of_natCast_eq_one_mod hℓ1
   rw [inertiaDeg_eq_orderOf (K := K) hne 𝔮, hℓ1, orderOf_one]
 
@@ -406,11 +406,11 @@ lemma charP_quotient_of_liesOver_ell (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
     CharP (𝓞 L ⧸ 𝔓) ℓ := by
   have hℓ0 : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     simpa using hℓ.out.ne_zero
-  haveI : NeZero (Ideal.ramificationIdx (Ideal.span {(ℓ : ℤ)}) 𝔓) :=
-    ⟨Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
+  haveI : NeZero (Ideal.ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓) :=
+    ⟨Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
       (R := ℤ) (S := 𝓞 L) (p := Ideal.span {(ℓ : ℤ)}) 𝔓 hℓ0⟩
   letI : Algebra (ℤ ⧸ (Ideal.span {(ℓ : ℤ)})) (𝓞 L ⧸ 𝔓) :=
-    Ideal.Quotient.algebraQuotientOfRamificationIdxNeZero (Ideal.span {(ℓ : ℤ)}) 𝔓
+    Ideal.Quotient.algebraQuotientOfLEComap (le_of_eq (𝔓.over_def (Ideal.span {(ℓ : ℤ)})))
   haveI : CharP (ℤ ⧸ (Ideal.span {(ℓ : ℤ)})) ℓ :=
     charP_of_injective_ringHom
       (f := (Int.quotientSpanNatEquivZMod ℓ).symm.toRingHom)
@@ -547,7 +547,7 @@ lemma gaussSumL_count_add_inv_eq_sub_one
     have hℓ0 : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by simpa using hℓ.out.ne_zero
     exact ne_bot_of_liesOver_of_ne_bot hℓ0 𝔓
   -- `e(𝔓|ℓ) = ℓ - 1` for `L = ℚ(ζ_{pℓ})`: write `pℓ = ℓ^1 · p`, `ℓ ∤ p`.
-  have hram : Ideal.ramificationIdx (Ideal.span {(ℓ : ℤ)}) 𝔓 = ℓ - 1 := by
+  have hram : Ideal.ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓 = ℓ - 1 := by
     rw [ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓
       (by simpa using hℓ.out.ne_zero)]
     have := IsCyclotomicExtension.Rat.ramificationIdx_eq
@@ -556,8 +556,8 @@ lemma gaussSumL_count_add_inv_eq_sub_one
   have hcount_ell :
       (UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({(ℓ : 𝓞 L)} : Set (𝓞 L)))).count 𝔓 = ℓ - 1 := by
-    rw [Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count
-        (R := ℤ) (S := 𝓞 L) (p := Ideal.span {(ℓ : ℤ)}) (P := 𝔓)
+    rw [Ideal.IsDedekindDomain.ramificationIdx'_eq_normalizedFactors_count
+        (p := Ideal.span {(ℓ : ℤ)}) (P := 𝔓)
         hℓmap_ne_bot inferInstance h𝔓_ne_bot, hℓmap] at hram
     exact hram
   have hmuleq : Iχ * Iχinv = Ideal.span ({(ℓ : 𝓞 L)} : Set (𝓞 L)) :=

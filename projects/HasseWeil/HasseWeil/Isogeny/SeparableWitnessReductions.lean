@@ -99,7 +99,6 @@ open HasseWeil HasseWeil.WeilPairing.DivisorPullback HasseWeil.WeilPairing.Torsi
 
 -- `oneSub_hsurj_of_self_comp_dual` carries `[Fintype W.toAffine.Point]` for the underlying
 -- `OneSubWitnesses.lean` reduction, where it is structurally required though absent from this type.
-set_option linter.unusedFintypeInType false
 
 section CovarianceGeneral
 
@@ -349,8 +348,8 @@ theorem pencil_hkerdeg_of_hgcomm_separable (r' s' : ℤ)
       (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L).degree :=
   HasseWeil.card_kernel_eq_degree_of_separable_concrete (W.baseChange (AlgebraicClosure K))
     (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L) hsep
-    (fun k z ↦ hcov_of_mapTranslateGenericPoint_canonical (W.baseChange (AlgebraicClosure K))
-      (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L) hgcomm k z)
+    (hcov_of_mapTranslateGenericPoint_canonical (W.baseChange (AlgebraicClosure K))
+      (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s' pullback_L) hgcomm)
     h_normal hdesc
 
 /-- **Witness 2 for `(1 − π)_{K̄}` — `#ker = deg` (re-export)**, CoordHom-free.  Already proved in

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.GroupScheme.TranslationAction
 import Mathlib.AlgebraicGeometry.Pullbacks
 
@@ -166,16 +171,18 @@ theorem isAffineOpen_groupOpen : IsAffineOpen P.groupOpen := by
   haveI : IsFinite G.π := G.finite
   exact P.hV.preimage G.π
 
-/-- The three patch pieces are affine, so their `toSpecΓ` maps are isomorphisms. -/
-theorem isIso_toSpecΓ_V : IsIso P.V.toSpecΓ :=
-  P.hV.isoSpec_hom ▸ inferInstanceAs (IsIso P.hV.isoSpec.hom)
+/-- On an affine open, `toSpecΓ` is the `isoSpec` isomorphism. -/
+private theorem isIso_toSpecΓ_of_isAffineOpen {X : Scheme.{u}} {W : X.Opens}
+    (hW : IsAffineOpen W) : IsIso W.toSpecΓ :=
+  hW.isoSpec_hom ▸ inferInstanceAs (IsIso hW.isoSpec.hom)
 
-theorem isIso_toSpecΓ_U : IsIso P.U.toSpecΓ :=
-  P.hU.isoSpec_hom ▸ inferInstanceAs (IsIso P.hU.isoSpec.hom)
+/-- The three patch pieces are affine, so their `toSpecΓ` maps are isomorphisms. -/
+theorem isIso_toSpecΓ_V : IsIso P.V.toSpecΓ := isIso_toSpecΓ_of_isAffineOpen P.hV
+
+theorem isIso_toSpecΓ_U : IsIso P.U.toSpecΓ := isIso_toSpecΓ_of_isAffineOpen P.hU
 
 theorem isIso_toSpecΓ_groupOpen : IsIso P.groupOpen.toSpecΓ :=
-  P.isAffineOpen_groupOpen.isoSpec_hom ▸
-    inferInstanceAs (IsIso P.isAffineOpen_groupOpen.isoSpec.hom)
+  isIso_toSpecΓ_of_isAffineOpen P.isAffineOpen_groupOpen
 
 /-- **Step 4a of the chart Künneth**: write the patch-level fibre product with
 `Spec`-legs, via the `toSpecΓ` isomorphisms and the `appLE`-naturality squares. -/
@@ -230,24 +237,28 @@ noncomputable def prOpenToBase :
   ((Over.mk G.π ⊗ E.asOver).hom).resLE P.V (G.actionProj.left ⁻¹ᵁ P.U)
     P.prOpen_le_preimage
 
+/-- Both legs of the action restrict to the *same* morphism over the base patch: each is
+`resLE` of a morphism lying over `S` (`translationAction_left_π` / `actionProj_left_π`), so
+`resLE_comp_resLE` collapses it against `chartToBase` to `prOpenToBase`. -/
+private theorem resLE_comp_chartToBase (f : ((Over.mk G.π) ⊗ E.asOver).left ⟶ E.E)
+    (hf : f ≫ E.π = ((Over.mk G.π) ⊗ E.asOver).hom)
+    (e : G.actionProj.left ⁻¹ᵁ P.U ≤ f ⁻¹ᵁ P.U) :
+    f.resLE P.U (G.actionProj.left ⁻¹ᵁ P.U) e ≫ P.chartToBase = P.prOpenToBase := by
+  rw [chartToBase]
+  refine (Scheme.Hom.resLE_comp_resLE (f := f)
+    (U := P.U) (V := G.actionProj.left ⁻¹ᵁ P.U) (e := e) E.π (W := P.V) P.hover).trans ?_
+  simp only [hf, prOpenToBase]
+
 /-- **The restricted action is a morphism over the base patch** (`[HG-C1c]` piece (i)):
 the source of the R-linearity square. -/
 theorem restrictedAction_comp_chartToBase :
-    G.restrictedAction P.hstable ≫ P.chartToBase = P.prOpenToBase := by
-  rw [restrictedAction, chartToBase]
-  refine (Scheme.Hom.resLE_comp_resLE (f := G.translationAction.left)
-    (U := P.U) (V := G.actionProj.left ⁻¹ᵁ P.U) (e := P.hstable) E.π
-    (W := P.V) P.hover).trans ?_
-  simp only [G.translationAction_left_π, prOpenToBase]
+    G.restrictedAction P.hstable ≫ P.chartToBase = P.prOpenToBase :=
+  P.resLE_comp_chartToBase _ (G.translationAction_left_π) P.hstable
 
 /-- The restricted projection is likewise over the base patch. -/
 theorem restrictedProj_comp_chartToBase :
-    G.restrictedProj P.U ≫ P.chartToBase = P.prOpenToBase := by
-  rw [restrictedProj, chartToBase]
-  refine (Scheme.Hom.resLE_comp_resLE (f := G.actionProj.left)
-    (U := P.U) (V := G.actionProj.left ⁻¹ᵁ P.U) (e := le_rfl) E.π
-    (W := P.V) P.hover).trans ?_
-  simp only [G.actionProj_left_π, prOpenToBase]
+    G.restrictedProj P.U ≫ P.chartToBase = P.prOpenToBase :=
+  P.resLE_comp_chartToBase _ (G.actionProj_left_π) le_rfl
 
 /-- The chart co-action as a single scheme morphism `Spec (A ⊗[R] B) ⟶ U` (the
 `Spec`-side composite of the whole Künneth chain with the restricted action). Its
@@ -263,6 +274,7 @@ theorem coactionRing_eq_appTop :
   rw [coactionRing, coactionToPullback, chartCoactionSpec]
   simp only [Scheme.Hom.comp_appTop, Category.assoc]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(L2)**: the Künneth identification carries the patch structure map to the
 second-projection-side structure map — compared after the mono `V.ι`, where everything
 is `pullback.condition` algebra. -/

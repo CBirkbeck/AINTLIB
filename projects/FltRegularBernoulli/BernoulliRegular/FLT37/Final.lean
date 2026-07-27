@@ -1,12 +1,12 @@
-import BernoulliRegular.FLT37.Arithmetic
-import BernoulliRegular.FLT37.Principalization
-import BernoulliRegular.FLT37.PrimaryConj
-import BernoulliRegular.FLT37.CaseI
-import BernoulliRegular.FLT37.MirimanoffDescent
-import BernoulliRegular.FLT37.CaseII
 import BernoulliRegular.BernoulliFast.PrimesUpTo100
-import Mathlib.NumberTheory.FLT.Basic
+import BernoulliRegular.FLT37.Arithmetic
+import BernoulliRegular.FLT37.CaseI
+import BernoulliRegular.FLT37.CaseII
+import BernoulliRegular.FLT37.MirimanoffDescent
+import BernoulliRegular.FLT37.PrimaryConj
+import BernoulliRegular.FLT37.Principalization
 import FltRegular.MayAssume.Lemmas
+import Mathlib.NumberTheory.FLT.Basic
 
 /-!
 # FLT for `p = 37` from Vandiver Theorem III (ticket FLT37h, conditional)
@@ -97,7 +97,7 @@ has even `k`. -/
 theorem VandiverIIIHypothesis_iff_isIrregularIndex (ℓ : ℕ) :
     VandiverIIIHypothesis ℓ ↔
       ℓ % 4 = 1 ∧ ∀ k, IsIrregularIndex ℓ k → Even k := by
-  unfold VandiverIIIHypothesis IsIrregularIndex
+  simp only [VandiverIIIHypothesis, IsIrregularIndex]
   refine ⟨?_, ?_⟩
   · rintro ⟨h4, h⟩
     exact ⟨h4, fun k ⟨h1, h2, hd⟩ ↦ h k h1 h2 hd⟩
@@ -134,7 +134,7 @@ theorem vandiverIII_of_caseI_caseII
     (hI : VandiverIIICaseI) (hII : VandiverIIICaseII) :
     VandiverIII := by
   intro ℓ hℓ hVH
-  haveI : Fact ℓ.Prime := ⟨hℓ⟩
+  have : Fact ℓ.Prime := ⟨hℓ⟩
   apply fermatLastTheoremFor_iff_int.mpr
   intro a b c ha hb hc heq
   have hprod := mul_ne_zero (mul_ne_zero ha hb) hc
@@ -180,7 +180,7 @@ theorem caseI_thirtyseven_of_bernoulli_conclusion
     (hMC : haveI : Fact (Nat.Prime 37) := ⟨by decide⟩;
       MirimanoffBernoulliConclusion 37 a b) :
     False := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   exact flt_caseI_contradiction_of_bernoulli_conclusion_strong
     (p := 37) (by omega) (by decide) (by decide)
     (fltCaseI_t_ne_one_of_p_not_dvd heq hc hb)
@@ -196,7 +196,7 @@ theorem fermatLastTheoremFor_thirtyseven_of_conclusion_and_caseII
       MirimanoffBernoulliConclusion 37 a b)
     (hII : VandiverIIICaseII) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   apply fermatLastTheoremFor_iff_int.mpr
   intro a b c ha hb hc heq
   have hprod := mul_ne_zero (mul_ne_zero ha hb) hc
@@ -219,7 +219,7 @@ theorem fermatLastTheoremFor_thirtyseven_of_conclusion_and_vandiverLemma1
       MirimanoffBernoulliConclusion 37 a b)
     (h_caseII : VandiverLemma1Thirtyseven) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   apply fermatLastTheoremFor_iff_int.mpr
   intro a b c ha hb hc heq
   have hprod := mul_ne_zero (mul_ne_zero ha hb) hc
@@ -242,7 +242,7 @@ theorem caseI_thirtyseven_a_eq_b_of_mbi
     (hMI : haveI : Fact (Nat.Prime 37) := ⟨by decide⟩;
       MirimanoffBernoulliIdentity 37 a b) :
     (a : ZMod 37) = (b : ZMod 37) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   exact fltCaseI_a_eq_b_mod_p_of_mbi_and_parity (p := 37)
     (by omega) (by decide) (by decide) heq ha hb hc hMI
     vandiverIIIHypothesis_thirtyseven.2
@@ -258,7 +258,7 @@ theorem caseI_thirtyseven_polynomialVanishing_of_mbi
       MirimanoffBernoulliIdentity 37 a b) :
     haveI : Fact (Nat.Prime 37) := ⟨by decide⟩;
     MirimanoffPolynomialVanishingOdd 37 a b := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   exact mirimanoffPolynomialVanishingOdd_of_mbi_and_parity (p := 37)
     (by omega) (by decide) (by decide) heq ha hb hc hMI
     vandiverIIIHypothesis_thirtyseven.2
@@ -270,7 +270,7 @@ theorem caseI_thirtyseven_wIntDescent_sum_eq_const_mul_phi_three
     (h : WIntDescentData 37 w C) :
     (∑ k ∈ Finset.Ico 1 37, w k * t ^ k) =
       C * (mirimanoffPolynomial 37 3).eval t := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   exact WIntDescentData.sum_eq_const_mul_mirimanoffPolynomial_three h
 
 /-- Vanishing form of the `ℓ = 37` descent sum bridge. -/
@@ -279,7 +279,7 @@ theorem caseI_thirtyseven_wIntDescent_sum_eq_zero_of_phi_three_eq_zero
     (h : WIntDescentData 37 w C)
     (hφ : (mirimanoffPolynomial 37 3).eval t = 0) :
     (∑ k ∈ Finset.Ico 1 37, w k * t ^ k) = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   exact WIntDescentData.sum_eq_zero_of_phi_three_eq_zero h hφ
 
 instance fact_prime_thirtyseven : Fact (Nat.Prime 37) :=

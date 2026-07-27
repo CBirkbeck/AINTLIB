@@ -340,7 +340,6 @@ theorem samePrime_rIntegralRatToQuotient_factorialWeightedLogCoeff
               ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) ^ (n + 1)) * y)
           hcoeff
 
-set_option linter.style.longLine false in
 /-- The factorial-weighted homogeneous numerator sum is the quotient image of the corresponding
 formal logarithm coefficient sum. -/
 theorem quotient_mk_samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
@@ -480,7 +479,6 @@ theorem quotient_mk_samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_w
             (Finset.Icc 1 d)).symm
         rw [hmapsum]
 
-set_option linter.style.longLine false in
 /-- Increasing the precision from `N` to `M` changes a weighted homogeneous numerator only in a
 high power of `lambdaIdeal`. -/
 theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_precision_mem_lambdaIdeal_pow
@@ -560,7 +558,6 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
     lia
   exact Ideal.pow_le_pow_right htarget hweighted
 
-set_option linter.style.longLine false in
 /-- A convenient high-precision specialization of the weighted numerator precision estimate. -/
 theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_highPrecision_mem_lambdaIdeal_pow
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
@@ -576,10 +573,9 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
     (p := p) (K := K) N (N + d.factorial.factorization p * (p - 1)) n d hx
     (Nat.le_add_right N (d.factorial.factorization p * (p - 1))) hn1 hnd
 
-set_option linter.style.longLine false in
 /-- If the degree is not a power of `p`, the factorial-weighted homogeneous numerator sum lies in
 the predicted high power of `lambdaIdeal`. -/
-theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_not_pow
+theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_weighted_sum_mem_lambdaIdeal_pow_of_not_pow
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hd : ¬ ∃ r : ℕ, d = p ^ r) :
     (∑ n ∈ Finset.Icc 1 d,
@@ -658,11 +654,9 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_
   rw [hsplit]
   exact I.add_mem hdiff hsumM
 
-set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
 /-- For degrees `p ^ r`, subtracting the surviving monomial gives the same high-power
 `lambdaIdeal` divisibility. -/
-theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_lambdaIdeal_pow
+theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_weighted_sub_pow_mem_lambdaIdeal_pow
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     (∑ n ∈ Finset.Icc 1 (p ^ r),
       (((p ^ r).factorial / n : ℕ) : ValuedIntegerRing p K) *

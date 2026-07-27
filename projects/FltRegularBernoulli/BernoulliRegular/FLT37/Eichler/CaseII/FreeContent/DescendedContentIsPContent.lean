@@ -185,7 +185,7 @@ omit [NumberField.IsCMField K] in
 
 The real prime `λ = (1−ζ')(1−ζ'³⁶)` has `v_𝔭(λ) = 2` measured against the uniformizer `ζ−1` of
 *any* primitive root `ζ` (all `1−ζ'^j`, `j ≢ 0`, are associates of `ζ−1` via
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime` based at `ζ`).  This two-root form is what
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime` based at `ζ`).  This two-root form is what
 lets the §9.1 anchor — stated with the canonical `zeta_spec` lambda — feed the sharp valuation,
 which is stated with the datum's own root `D.hζ`. -/
 theorem caseII_lambda_emultiplicity {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
@@ -204,7 +204,7 @@ theorem caseII_lambda_emultiplicity {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
   have h1 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger) := by
     have hne : (1 : 𝓞 K) ≠ hζ'.toInteger :=
       fun h ↦ hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h.symm
-    exact hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    exact hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmemζ' hne
   -- `1 − ζ'³⁶`: associate of `ζ − 1` (members `1`, `ζ'³⁶`, base `ζ`).
   have h2 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger ^ 36) := by
@@ -215,7 +215,7 @@ theorem caseII_lambda_emultiplicity {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
         have hps : hζ'.toInteger ^ 37 = hζ'.toInteger ^ 36 * hζ'.toInteger := pow_succ _ _
         rw [h37, ← h, one_mul] at hps; exact hps.symm
       exact hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) this
-    exact hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    exact hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmem36 hne
   -- additivity of `emultiplicity` over the product, transferred via the associates.
   rw [emultiplicity_mul hπ_prime, ← emultiplicity_eq_of_associated_right h1,

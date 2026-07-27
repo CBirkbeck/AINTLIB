@@ -61,7 +61,7 @@ theorem addSlope_frobenius_eq :
     addSlope W (frobeniusIsog W) =
       (y_gen W - (frobeniusIsog W).pullback (y_gen W)) /
       (x_gen W - (frobeniusIsog W).pullback (x_gen W)) := by
-  unfold addSlope
+  simp only [addSlope]
   exact Affine.slope_of_X_ne (x_gen_ne_frobeniusIsog_pullback_x_gen W)
 
 /-- `ord_∞(x_gen − π·x) = -2q` (sign-flipped form of the previously-shipped
@@ -202,6 +202,7 @@ theorem ordAtInfty_a1L_minus_a2_minus_xgen_frobenius
   exact (W_smooth W).ord_sub_lt_concrete (-(Fintype.card K : ℤ)) (-2) h_neg_q_lt_neg2
     h_ord_a1L_minus_a2 h_ord_x_gen
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- **Strict non-archimedean pole bound**: if `ord B = -q` and `ord A ≠ -q`
 (with `3 ≤ |K|`), then `ord(A + B) ≤ -2`. Either `ord A < -q` (so `ord(A+B) =
 ord A < -q ≤ -2`) or `ord A > -q` (so `ord(A+B) = ord B = -q ≤ -2`). -/
@@ -268,7 +269,7 @@ theorem addPullback_x_pole_frobenius_of_lc_witness
   have h_eq : addPullback_x W (frobeniusIsog W) = A + B := by
     show (W_KE W).toAffine.addX (x_gen W)
       ((frobeniusIsog W).pullback (x_gen W)) L = A + B
-    unfold WeierstrassCurve.Affine.addX
+    simp only [WeierstrassCurve.Affine.addX]
     show L ^ 2 + (W_KE W).toAffine.a₁ * L - (W_KE W).toAffine.a₂ -
       x_gen W - (frobeniusIsog W).pullback (x_gen W) = A + B
     have h_a1_lift : (W_KE W).toAffine.a₁ = algebraMap K KE W.toAffine.a₁ := rfl
@@ -375,13 +376,13 @@ theorem addPullbackNumerator_frobenius_eq :
   set n := y_gen W - (frobeniusIsog W).pullback (y_gen W)
   have hd_ne : d ≠ 0 := x_gen_sub_frobeniusIsog_pullback_x_gen_ne_zero W
   have hL : addSlope W (frobeniusIsog W) = n / d := addSlope_frobenius_eq W
-  unfold addPullbackNumerator_frobenius addPullback_x
+  simp only [addPullbackNumerator_frobenius, addPullback_x]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ + x_gen W +
             (frobeniusIsog W).pullback (x_gen W)) =
       d ^ 2 * (W_KE W).toAffine.addX (x_gen W)
         ((frobeniusIsog W).pullback (x_gen W)) (addSlope W (frobeniusIsog W))
-  unfold WeierstrassCurve.Affine.addX
+  simp only [WeierstrassCurve.Affine.addX]
   rw [hL]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ + x_gen W +
@@ -580,6 +581,7 @@ noncomputable def addPullbackNumerator_reduced_frobenius : KE :=
     + 2 * algebraMap K KE W.toAffine.a₂ *
         x_gen W * (frobeniusIsog W).pullback (x_gen W)
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- Weierstrass relation at the generic point `(x_gen, y_gen)`, in
 `algebraMap K KE`-coefficient form. -/
 private theorem weierstrass_relation_x_gen_y_gen :
@@ -639,7 +641,7 @@ theorem addPullbackNumerator_frobenius_eq_reduced :
       addPullbackNumerator_reduced_frobenius W := by
   have h_y_sq := weierstrass_relation_x_gen_y_gen W
   have h_Y_sq := weierstrass_relation_frobenius_pullback W
-  unfold addPullbackNumerator_frobenius addPullbackNumerator_reduced_frobenius
+  simp only [addPullbackNumerator_frobenius, addPullbackNumerator_reduced_frobenius]
   linear_combination h_y_sq + h_Y_sq
 
 /-! ### `ord_∞` of the reduced numerator
@@ -649,6 +651,7 @@ than `x_gen · (π·x)²` has `ord_∞ ≥ -3 - 3q`. The dominant term has
 `ord_∞ = -2 - 4q`. Since `-3 - 3q > -2 - 4q` for `q ≥ 2`, strict
 non-archimedean additivity gives `ord(reduced) = -2 - 4q`. -/
 
+omit [Fintype K] in
 /-- Helper: `ord(algebraMap c · f) ≥ ord(f)`. The `algebraMap K KE c`
 factor never makes the order more negative — when `c = 0` the product
 is zero (ord `⊤`), and when `c ≠ 0` the algebraMap value has ord 0. -/
@@ -669,6 +672,7 @@ private lemma ord_algebraMap_mul_ge {f : KE} (c : K) {n : WithTop ℤ}
     _ = (W_smooth W).ordAtInfty (algebraMap K KE c * f) :=
         ((W_smooth W).ordAtInfty_mul h_alg_ne hf_ne).symm
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- Helper: `ord(2 · f) ≥ ord(f)`. Uses the algebraic identity `2 · f = f + f`
 to dodge the question of whether `(2 : KE)` is zero (char 2). -/
 private lemma ord_two_mul_ge {f : KE} {n : WithTop ℤ}
@@ -821,6 +825,7 @@ private lemma ord_x_pi_y_plus_pi_x_y_ge (hq : 2 ≤ Fintype.card K) :
     linarith
   exact_mod_cast h_ineq
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- Helper: `ord(f + g) ≥ n` when both have ord `≥ n`. Direct from
 `ordAtInfty_add_ge_min`. -/
 private lemma ord_add_ge_of_both_ge {f g : KE} {n : WithTop ℤ}
@@ -828,12 +833,14 @@ private lemma ord_add_ge_of_both_ge {f g : KE} {n : WithTop ℤ}
     n ≤ (W_smooth W).ordAtInfty (f + g) :=
   (le_min hf hg).trans ((W_smooth W).ordAtInfty_add_ge_min f g)
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- Helper: `ord(-f) ≥ n` iff `ord(f) ≥ n` (by `ordAtInfty_neg`). -/
 private lemma ord_neg_ge {f : KE} {n : WithTop ℤ}
     (hf : n ≤ (W_smooth W).ordAtInfty f) :
     n ≤ (W_smooth W).ordAtInfty (-f) :=
   ((W_smooth W).ordAtInfty_neg f).symm ▸ hf
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- Helper: `ord(f - g) ≥ n` when both have ord `≥ n`. -/
 private lemma ord_sub_ge_of_both_ge {f g : KE} {n : WithTop ℤ}
     (hf : n ≤ (W_smooth W).ordAtInfty f) (hg : n ≤ (W_smooth W).ordAtInfty g) :
@@ -969,7 +976,7 @@ private lemma addPullbackNumerator_reduced_frobenius_eq_dom_add_rest :
           + x_gen W ^ 2 * (frobeniusIsog W).pullback (x_gen W)
           + (2 : KE) * algebraMap K KE W.toAffine.a₂ *
               x_gen W * (frobeniusIsog W).pullback (x_gen W)) := by
-  unfold addPullbackNumerator_reduced_frobenius
+  simp only [addPullbackNumerator_reduced_frobenius]
   ring
 
 /-- Helper: the dominant term has strictly smaller `ord_∞` than the rest sum
@@ -1117,7 +1124,7 @@ noncomputable def negFrobeniusIsog : Isogeny W.toAffine W.toAffine :=
 abelian group is `P ↦ -P`). -/
 theorem negFrobeniusIsog_toAddMonoidHom_apply (P : W.toAffine.Point) :
     (negFrobeniusIsog W).toAddMonoidHom P = -((frobeniusIsog W).toAddMonoidHom P) := by
-  unfold negFrobeniusIsog
+  simp only [negFrobeniusIsog]
   rw [Isogeny.comp_toAddMonoidHom]
   show ((mulByInt W.toAffine (-1)).toAddMonoidHom)
       ((frobeniusIsog W).toAddMonoidHom P) = -_
@@ -1158,7 +1165,7 @@ to `x_gen`. -/
 theorem negFrobeniusIsog_pullback_x_gen :
     (negFrobeniusIsog W).pullback (x_gen W) =
       (frobeniusIsog W).pullback (x_gen W) := by
-  unfold negFrobeniusIsog
+  simp only [negFrobeniusIsog]
   rw [Isogeny.comp_algebraMap_eq, mulByInt_pullback_x_neg_one]
 
 /-- **`(negFrobeniusIsog W).pullback (y_gen W) = -π·y_gen − a₁·π·x_gen − a₃`.**
@@ -1173,7 +1180,7 @@ theorem negFrobeniusIsog_pullback_y_gen :
       -((frobeniusIsog W).pullback (y_gen W))
         - algebraMap K KE W.toAffine.a₁ * (frobeniusIsog W).pullback (x_gen W)
         - algebraMap K KE W.toAffine.a₃ := by
-  unfold negFrobeniusIsog
+  simp only [negFrobeniusIsog]
   rw [Isogeny.comp_algebraMap_eq, mulByInt_pullback_y_neg_one]
   -- LHS: frobeniusIsog.pullback (-y_gen W - a₁·x_gen - a₃).
   -- frobeniusIsog.pullback is a K-algebra hom, so it preserves -, *, +,
@@ -1217,6 +1224,7 @@ private lemma a1_pi_x_plus_a3_ge_neg_two_q (hq : 2 ≤ Fintype.card K) :
     · rw [ordAtInfty_algebraMap_F_nonzero W ha₃]
       exact WithTop.coe_le_coe.mpr (by linarith)
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- Strict non-archimedean subtraction via integer bounds: if `ord A = m`,
 `n ≤ ord B`, and `m < n`, then `ord(A - B) = m`. -/
 private lemma ordAtInfty_sub_eq_of_coe_lt_le {A B : KE} {m n : ℤ} (hmn : m < n)
@@ -1351,7 +1359,7 @@ theorem addPullbackNumerator_negFrobenius_eq_reduced :
     have h_a4 : (W_KE W).toAffine.a₄ = algebraMap K KE W.toAffine.a₄ := rfl
     have h_a6 : (W_KE W).toAffine.a₆ = algebraMap K KE W.toAffine.a₆ := rfl
     rwa [h_a1, h_a2, h_a3, h_a4, h_a6] at h
-  unfold addPullbackNumerator_negFrobenius addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_negFrobenius, addPullbackNumerator_reduced_negFrobenius]
   linear_combination h_xy + h_uv
 
 /-! ### Term-ord helpers for negFrobenius (mirror of Frobenius helpers) -/
@@ -1589,7 +1597,7 @@ private lemma addPullbackNumerator_reduced_negFrobenius_eq_dom_add_rest :
           + x_gen W ^ 2 * (negFrobeniusIsog W).pullback (x_gen W)
           + (2 : KE) * algebraMap K KE W.toAffine.a₂ *
               x_gen W * (negFrobeniusIsog W).pullback (x_gen W)) := by
-  unfold addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_reduced_negFrobenius]
   ring
 
 /-- Helper: the dominant term has strictly smaller `ord_∞` than the rest sum
@@ -1665,7 +1673,7 @@ theorem addSlope_negFrobeniusIsog_eq :
     addSlope W (negFrobeniusIsog W) =
       (y_gen W - (negFrobeniusIsog W).pullback (y_gen W)) /
       (x_gen W - (negFrobeniusIsog W).pullback (x_gen W)) := by
-  unfold addSlope
+  simp only [addSlope]
   exact Affine.slope_of_X_ne (x_gen_ne_negFrobeniusIsog_pullback_x_gen W)
 
 /-- The numerator equation: `addPullbackNumerator_negFrobenius = (x_gen
@@ -1679,13 +1687,13 @@ theorem addPullbackNumerator_negFrobenius_eq :
   set n := y_gen W - (negFrobeniusIsog W).pullback (y_gen W)
   have hd_ne : d ≠ 0 := x_gen_sub_negFrobeniusIsog_pullback_x_gen_ne_zero W
   have hL : addSlope W (negFrobeniusIsog W) = n / d := addSlope_negFrobeniusIsog_eq W
-  unfold addPullbackNumerator_negFrobenius addPullback_x
+  simp only [addPullbackNumerator_negFrobenius, addPullback_x]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ + x_gen W +
             (negFrobeniusIsog W).pullback (x_gen W)) =
       d ^ 2 * (W_KE W).toAffine.addX (x_gen W)
         ((negFrobeniusIsog W).pullback (x_gen W)) (addSlope W (negFrobeniusIsog W))
-  unfold WeierstrassCurve.Affine.addX
+  simp only [WeierstrassCurve.Affine.addX]
   rw [hL]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ + x_gen W +
@@ -1830,6 +1838,7 @@ private theorem ord_RHS_lower_ge_neg_four_negFrobenius
   exact ord_add_ge_of_both_ge W
     (ord_add_ge_of_both_ge W h_a₂_term h_a₄_term) h_a₆_term
 
+omit [Fintype K] in
 /-- Helper: `ord(a₆) ≥ 0` (where `a₆` is a constant in K, viewed in KE). -/
 private theorem ord_a₆_ge_zero :
     (0 : WithTop ℤ) ≤ (W_smooth W).ordAtInfty
@@ -2331,7 +2340,7 @@ addX formula). Apply σ:
 theorem addPullback_x_negFrobenius_sigma_invariant :
     (mulByInt W.toAffine (-1)).pullback (addPullback_x W (negFrobeniusIsog W)) =
       addPullback_x W (negFrobeniusIsog W) := by
-  unfold addPullback_x WeierstrassCurve.Affine.addX
+  simp only [addPullback_x, WeierstrassCurve.Affine.addX]
   -- Lift `(W_KE W).toAffine.a_i` to `algebraMap K KE W.toAffine.a_i` form
   -- so AlgHom.commutes fires consistently in the simp set below.
   have h_a1 : (W_KE W).toAffine.a₁ = algebraMap K KE W.toAffine.a₁ := rfl
@@ -2447,6 +2456,7 @@ theorem mulByInt_neg_one_pullback_y_gen_ne_y_gen_char_two
     rw [WeierstrassCurve.Δ_of_char_two, h_a1, h_a3]; ring
   exact W.toAffine.isUnit_Δ.ne_zero h_delta
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The image of `C a₁ * X + C a₃` under `K[X] → KE` is `a₁ · x_gen + a₃`. -/
 private lemma algebraMap_C_a1_X_plus_C_a3 :
     algebraMap (Polynomial K) KE
@@ -2461,6 +2471,7 @@ private lemma algebraMap_C_a1_X_plus_C_a3 :
     intro a; rw [Polynomial.C_eq_algebraMap, ← IsScalarTower.algebraMap_apply]
   rw [map_add, map_mul, ← h_x_alg, h_C, h_C]
 
+omit [Fintype K] [DecidableEq K] in
 /-- Injectivity of `K → Frac(K[X])` on `2`: if `(2 : Frac(K[X])) = 0` then `(2 : K) = 0`. -/
 private lemma two_K_eq_zero_of_two_fractionRing
     (h : (2 : FractionRing (Polynomial K)) = 0) : (2 : K) = 0 := by
@@ -2643,6 +2654,7 @@ private lemma algebraMap_fractionRing_a₁X_plus_a₃ :
     (FractionRing (Polynomial K)) KE]
   exact algebraMap_a₁X_plus_a₃ W
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- A `Frac(K[X])`-basis `{1, Y}` smul-decomposition rewritten with `algebraMap`:
 `a • 1 + b • y_gen = algebraMap a + (algebraMap b) · y_gen` in `KE`. Direct from
 `Algebra.smul_def`. -/
@@ -2987,6 +2999,7 @@ private theorem zsmul_frobenius_pullback_x_gen (r : ℤ) (hr : r ≠ 0) :
     exact mulByInt_pullback_x W r hr
   rw [h_inner, frobeniusIsog_pullback_apply]
 
+omit [Fintype K] in
 /-- The `x_gen` pullback of `mulByInt W (-s)` is `mulByInt_x W (-s)`. -/
 private theorem mulByInt_neg_pullback_x_gen (s : ℤ) (hs : s ≠ 0) :
     (mulByInt W.toAffine (-s)).pullback (x_gen W) = mulByInt_x W (-s) := by
@@ -3039,6 +3052,7 @@ and on `y_gen` is the negY of the original.
 Combines `mulByInt_comp_eq_mul` (commutativity at isogeny level) with the
 explicit `mulByInt_x_neg` / `mulByInt_y_neg` symmetries. -/
 
+omit [Fintype K] in
 /-- **[n] ∘ σ = [-n]** at the isogeny level for `n ≠ 0`. The composition
 ordering needed for `σ.pullback ∘ [n].pullback` (since
 `(ψ.comp φ).pullback = φ.pullback.comp ψ.pullback`). -/
@@ -3100,7 +3114,7 @@ theorem sigma_mulByInt_pullback_y_eq (n : ℤ) (hn : n ≠ 0) :
     exact mulByInt_pullback_y W (-n) (neg_ne_zero.mpr hn)]
   rw [mulByInt_y_neg W n hn]
   show (W_KE W).toAffine.negY (mulByInt_x W n) (mulByInt_y W n) = _
-  unfold WeierstrassCurve.Affine.negY
+  simp only [WeierstrassCurve.Affine.negY]
   rfl
 
 /-! ### D3c step 2: σ-action on `(zsmul r π).pb`
@@ -3311,6 +3325,7 @@ For the inseparable summand `r·π` of the pencil `r·π − s` when `p ∣ r` (
 curve-equation halving gives `ord_∞(mulByInt_y W r) = 3M/2`.  These mirror
 `ordAtInfty_mulByInt_y_eq_neg_three` but parametric in `M`, with **no** `(r : K) ≠ 0` hypothesis. -/
 
+omit [Fintype K] in
 /-- The curve point `(mulByInt_x W r, mulByInt_y W r)` satisfies the (expanded) Weierstrass
 equation `Y² + a₁·X·Y + a₃·Y = X³ + a₂·X² + a₄·X + a₆` over `K(E)`.  Obtained by pulling back the
 generic Weierstrass equation along `[r]` and rewriting the `x`/`y` pullbacks (`mulByInt_pullback_x`,
@@ -3336,6 +3351,7 @@ private lemma mulByInt_weierstrass_equation (r : ℤ) (hr : r ≠ 0) :
     exact mulByInt_pullback_y W r hr
   rwa [hx_pb, hy_pb, WeierstrassCurve.Affine.equation_iff] at h_alg
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- `ord_∞(mulByInt_x W r · mulByInt_y W r) = M + m` from the orders `M, m` of the two factors. -/
 private lemma ordAtInfty_mulByInt_x_mul_y (r : ℤ) {M m : ℤ}
     (hX_ne : mulByInt_x W r ≠ 0) (hY_ne : mulByInt_y W r ≠ 0)
@@ -3345,6 +3361,7 @@ private lemma ordAtInfty_mulByInt_x_mul_y (r : ℤ) {M m : ℤ}
   refine ((W_smooth W).ordAtInfty_mul hX_ne hY_ne).trans ?_
   rw [hX_ord, hm]; push_cast; rfl
 
+omit [Fintype K] in
 /-- For `M < 0` the right-hand side of the Weierstrass equation is dominated by `X³`, so
 `ord_∞(X³ + a₂·X² + a₄·X + a₆) = 3M` where `M = ord_∞(mulByInt_x W r)`.  Repeated strict
 non-archimedean additivity: `3M < 2M < M < 0`, so each successive `aᵢ·Xⁱ` term has strictly larger
@@ -3397,6 +3414,7 @@ private lemma ordAtInfty_mulByInt_weierstrass_rhs_eq (r : ℤ) {M : ℤ}
     exact_mod_cast (by linarith : (3 * M : ℤ) < 0)
   exact ((W_smooth W).ordAtInfty_add_eq_of_lt h_lt).trans step2
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- `mulByInt_y W r ≠ 0`: were `Y = 0` the Weierstrass LHS would vanish (order `⊤`), but the LHS
 order equals the finite value `3M`. -/
 private lemma mulByInt_y_ne_zero_of_weierstrass_lhs_ord (r : ℤ) {M : ℤ}
@@ -3416,6 +3434,7 @@ private lemma mulByInt_y_ne_zero_of_weierstrass_lhs_ord (r : ℤ) {M : ℤ}
     (congrArg (W_smooth W).ordAtInfty h_zero).trans (W_smooth W).ordAtInfty_zero
   exact WithTop.top_ne_coe (h_ord_eq.symm.trans h_lhs_ord)
 
+omit [Fintype K] in
 /-- The halving lower bound `2m ≤ 3M`, where `m = ord_∞(mulByInt_y W r)` and `M = ord_∞(mulByInt_x W
 r)`.  If instead `2m ≥ 3M + 1`, every Weierstrass LHS term (`Y²`, `a₁·X·Y`, `a₃·Y`) would have order
 `≥ 3M + 1`, so the LHS order would be `≥ 3M + 1`, contradicting `ord(LHS) = 3M`. -/
@@ -3458,6 +3477,7 @@ private lemma two_mul_ordAtInfty_mulByInt_y_le (r : ℤ) {M m : ℤ} (hM_neg : M
   have : (3 * M + 1 : ℤ) ≤ 3 * M := by exact_mod_cast h_lhs_ge
   omega
 
+omit [Fintype K] in
 /-- When `m < M` and `m < 0` (which hold once `2m ≤ 3M` with `M < 0`), the term `Y²` strictly
 dominates the other two Weierstrass LHS terms, so `ord_∞(Y² + a₁·X·Y + a₃·Y) = 2m`, where `m =
 ord_∞(mulByInt_y W r)`. -/
@@ -3503,11 +3523,13 @@ private lemma ordAtInfty_mulByInt_weierstrass_lhs_eq (r : ℤ) {M m : ℤ}
 /-- **`ord_∞(mulByInt_y W r) = 3M/2`** for `r ≠ 0`, where `M = ord_∞(mulByInt_x W r)` is the
 (even, `≤ -2`) `x`-order — **no** `(r : K) ≠ 0` hypothesis.  The curve point
 `(mulByInt_x W r, mulByInt_y W r)` satisfies the Weierstrass equation
-`Y² + a₁·X·Y + a₃·Y = X³ + a₂·X² + a₄·X + a₆`; with `ord(X) = M < 0` the RHS is dominated by `ord(X³) =
-3M`, and the LHS by `ord(Y²) = 2·ord(Y)` (once `ord(Y) ≤ 3M/2`), forcing `2·ord(Y) = 3M`.  Generalises
+`Y² + a₁·X·Y + a₃·Y = X³ + a₂·X² + a₄·X + a₆`; with `ord(X) = M < 0` the RHS is
+dominated by `ord(X³) = 3M`, and the LHS by `ord(Y²) = 2·ord(Y)` (once
+`ord(Y) ≤ 3M/2`), forcing `2·ord(Y) = 3M`.  Generalises
 `ordAtInfty_mulByInt_y_eq_neg_three` (the `M = -2` case) to the inseparable regime. -/
 theorem ordAtInfty_mulByInt_y_eq_of_x
-    (r : ℤ) (hr : r ≠ 0) {M : ℤ} (hM : (W_smooth W).ordAtInfty (mulByInt_x W r) = ((M : ℤ) : WithTop ℤ))
+    (r : ℤ) (hr : r ≠ 0) {M : ℤ}
+    (hM : (W_smooth W).ordAtInfty (mulByInt_x W r) = ((M : ℤ) : WithTop ℤ))
     (hM_le : M ≤ -2) (hM_even : Even M) :
     (W_smooth W).ordAtInfty (mulByInt_y W r) = (((3 * M) / 2 : ℤ) : WithTop ℤ) := by
   obtain ⟨M₂, hM₂⟩ := hM_even
@@ -3520,7 +3542,8 @@ theorem ordAtInfty_mulByInt_y_eq_of_x
       (mulByInt_y W r ^ 2 +
         algebraMap K KE W.toAffine.a₁ * mulByInt_x W r * mulByInt_y W r +
         algebraMap K KE W.toAffine.a₃ * mulByInt_y W r) = ((3 * M : ℤ) : WithTop ℤ) :=
-    (mulByInt_weierstrass_equation W r hr) ▸ ordAtInfty_mulByInt_weierstrass_rhs_eq W r hX_ne hM_neg hM
+    (mulByInt_weierstrass_equation W r hr) ▸
+      ordAtInfty_mulByInt_weierstrass_rhs_eq W r hX_ne hM_neg hM
   -- Extract `m = ord(Y)` as an integer (`Y ≠ 0` since the finite-order LHS would otherwise vanish).
   have hY_ne : mulByInt_y W r ≠ 0 := mulByInt_y_ne_zero_of_weierstrass_lhs_ord W r h_lhs_ord
   obtain ⟨m, hm⟩ : ∃ m : ℤ,
@@ -3620,7 +3643,8 @@ theorem ordAtInfty_mulByInt_neg_pullback_y_gen
 /-! ### Inseparable summand `x`/`y`-pullback orders (`p ∣ r` pencil case)
 
 For `p ∣ r` (so `(r : K) = 0`, no separable `-2q`/`-3q`), the `r·π` summand pullbacks are
-`((frobeniusIsog).zsmul r)^* x_gen = (mulByInt_x r)^q` and `^* y_gen = (mulByInt_y r)^q`, with orders
+`((frobeniusIsog).zsmul r)^* x_gen = (mulByInt_x r)^q` and
+`^* y_gen = (mulByInt_y r)^q`, with orders
 `q·M` and `q·(3M/2)` where `M = ord_∞(mulByInt_x r) ≤ -2` is the inseparable `x`-order
 (`exists_ordAtInfty_mulByInt_x_eq_even_le_neg_two`).  These mirror
 `ordAtInfty_zsmul_frobenius_pullback_x_gen`/`_y_gen` but parametric in `M`. -/
@@ -3781,6 +3805,7 @@ noncomputable def addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg
         ((frobeniusIsog W).zsmul r).pullback (x_gen W) *
         (mulByInt W.toAffine (-s)).pullback (x_gen W)
 
+omit [Fintype K] in
 /-- Weierstrass relation at the pullback of an arbitrary isogeny `α`, in
 `algebraMap K KE`-coefficient form (via `pullback_equation`). -/
 private theorem weierstrass_relation_pullback (α : Isogeny W.toAffine W.toAffine) :
@@ -3810,8 +3835,8 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq_reduced
       addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg W r s := by
   have h_α₁ := weierstrass_relation_pullback W ((frobeniusIsog W).zsmul r)
   have h_α₂ := weierstrass_relation_pullback W (mulByInt W.toAffine (-s))
-  unfold addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg
-    addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg
+  simp only [addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg,
+    addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg]
   linear_combination h_α₁ + h_α₂
 
 /-- **Numerator clears the denominator**:
@@ -3834,9 +3859,9 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq
     zsmul_frobenius_sub_mulByInt_neg_x_ne_zero W r s hr hs hrK hsK
   have hL : addSlopePair ((frobeniusIsog W).zsmul r)
         (mulByInt W.toAffine (-s)) = n / d := by
-    unfold addSlopePair
+    simp only [addSlopePair]
     exact Affine.slope_of_X_ne (sub_ne_zero.mp hd_ne)
-  unfold addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg addPullback_x_pair
+  simp only [addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg, addPullback_x_pair]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ +
             ((frobeniusIsog W).zsmul r).pullback (x_gen W) +
@@ -3844,7 +3869,7 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq
       d ^ 2 * (W_KE W).toAffine.addX (((frobeniusIsog W).zsmul r).pullback (x_gen W))
         ((mulByInt W.toAffine (-s)).pullback (x_gen W))
         (addSlopePair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)))
-  unfold WeierstrassCurve.Affine.addX
+  simp only [WeierstrassCurve.Affine.addX]
   rw [hL]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ +
@@ -4262,7 +4287,7 @@ private lemma addPullbackNumerator_reduced_pair_eq_dom_add_rest (r s : ℤ) :
           + (2 : KE) * algebraMap K KE W.toAffine.a₂ *
               ((frobeniusIsog W).zsmul r).pullback (x_gen W) *
               (mulByInt W.toAffine (-s)).pullback (x_gen W)) := by
-  unfold addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg
+  simp only [addPullbackNumerator_reduced_pair_zsmul_frobenius_mulByInt_neg]
   ring
 
 /-- The dominant term `X₁² · X₂` has strictly smaller `ord_∞` than the rest sum
@@ -4497,8 +4522,10 @@ private theorem addPullback_y_pair_zsmul_frobenius_mulByInt_neg_ne_zero
       (Y ^ 2 + algebraMap K KE W.toAffine.a₁ * X * Y + algebraMap K KE W.toAffine.a₃ * Y) = ⊤ :=
     (congrArg (W_smooth W).ordAtInfty h_zero).trans (W_smooth W).ordAtInfty_zero
   exact WithTop.top_ne_coe
-    (h_ord_eq.symm.trans (ord_weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK))
+    (h_ord_eq.symm.trans
+      (ord_weierstrass_lhs_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK))
 
+omit [Fintype K] in
 /-- Order-arithmetic helper (step (a)): if `ord(LHS) = -6`, the y-order `m` of the Weierstrass LHS
 satisfies `m ≤ -3`. Otherwise all three summands would have order `≥ -4`, forcing `ord(LHS) ≥ -4`,
 contradicting `-6`. Purely generic in `X`, `Y`, `m` and the per-term order data. -/
@@ -4531,6 +4558,7 @@ private theorem ord_y_le_neg_three_of_weierstrass_lhs_ord {X Y : KE} {m : ℤ}
   have h46 : (-4 : ℤ) ≤ -6 := by exact_mod_cast h_lhs_ge
   omega
 
+omit [Fintype K] in
 /-- Order-arithmetic helper (step (b)): when `m ≤ -3`, the `Y²` term strictly dominates both the
 `a₁·X·Y` and `a₃·Y` terms (`2m < -2 + m` and `2m < m`), so the order of the Weierstrass LHS equals
 `ord(Y²)`. Purely generic in `X`, `Y`, `m` and the per-term order data. -/
@@ -4567,8 +4595,9 @@ private theorem ord_weierstrass_lhs_eq_ord_y_sq_of_y_dominates {X Y : KE} {m : �
 /-- **`ord_∞(addPullback_y_pair (zsmul r π) (mulByInt -s)) = -3`** — the pole of order `3` at `O`
 for the genuine pencil `rπ − s`.  Pair analogue of `ord_addPullback_y_negFrobenius`.  From the curve
 equation (`addPullback_pair_equation`), `ord_∞ X = -2`, and the dominant `ord(X³) = -6`: writing
-`m = ord(Y)`, the equation gives `ord(Y² + a₁XY + a₃Y) = -6`; one shows `m ≤ -3` (else `Y²` would not
-reach `-6`), then `Y²` strictly dominates, forcing `2m = -6`, i.e. `m = -3`. -/
+`m = ord(Y)`, the equation gives `ord(Y² + a₁XY + a₃Y) = -6`; one shows `m ≤ -3`
+(else `Y²` would not reach `-6`), then `Y²` strictly dominates, forcing
+`2m = -6`, i.e. `m = -3`. -/
 theorem ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg
     (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
     (W_smooth W).ordAtInfty
@@ -4759,18 +4788,21 @@ noncomputable def genuineIsogSmulSub
 /-! ### D4 inseparable: the `p ∣ r` pole bound `ord_∞(addPullback_x_pair) = -2`
 
 For the **inseparable** pencil summand `r·π` (when `p ∣ r`, so `(r : K) = 0`), the `x`-pole of
-`α₁ = (frobeniusIsog).zsmul r` is `ord_∞(α₁^* x_gen) = q·M` with `M = ord_∞(mulByInt_x r) ≤ -2` (even),
-which is **strictly deeper** than the `x`-pole `ord_∞(α₂^* x_gen) = -2` of `α₂ = mulByInt (-s)`
-(`p ∤ s`).  This *asymmetry* — `q·M ≤ -4 < -2` — makes the Weierstrass-reduced addition numerator have a
-**unique strictly-dominant** term `X₁²·X₂` (order `2qM − 2`), avoiding the symmetric 3-way tie of
-`addPullback_x_pair_x_ord_neg` (which needs the formal group).  The result `ord_∞(addPullback_x_pair) =
-(2qM − 2) − 2qM = −2` is **independent** of the exact `M`.  This is the genuine new content for the
+`α₁ = (frobeniusIsog).zsmul r` is `ord_∞(α₁^* x_gen) = q·M` with
+`M = ord_∞(mulByInt_x r) ≤ -2` (even), which is **strictly deeper** than the
+`x`-pole `ord_∞(α₂^* x_gen) = -2` of `α₂ = mulByInt (-s)` (`p ∤ s`).  This
+*asymmetry* — `q·M ≤ -4 < -2` — makes the Weierstrass-reduced addition numerator
+have a **unique strictly-dominant** term `X₁²·X₂` (order `2qM − 2`), avoiding the
+symmetric 3-way tie of `addPullback_x_pair_x_ord_neg` (which needs the formal
+group).  The result `ord_∞(addPullback_x_pair) = (2qM − 2) − 2qM = −2` is
+**independent** of the exact `M`.  This is the genuine new content for the
 `p ∣ r` member of the pencil; the value `−2` matches the separable
 `ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg`. -/
 
-/-- **`ord_∞(α₁^* x_gen − α₂^* x_gen) = q·M`** (inseparable): `α₁^* x_gen` (order `qM ≤ -4`) strictly
-dominates `α₂^* x_gen` (order `-2`).  Mirror of `ordAtInfty_zsmul_frobenius_sub_mulByInt_neg_x` with the
-inseparable `qM` in place of `-2q`. -/
+/-- **`ord_∞(α₁^* x_gen − α₂^* x_gen) = q·M`** (inseparable): `α₁^* x_gen`
+(order `qM ≤ -4`) strictly dominates `α₂^* x_gen` (order `-2`).  Mirror of
+`ordAtInfty_zsmul_frobenius_sub_mulByInt_neg_x` with the inseparable `qM` in
+place of `-2q`. -/
 theorem ordAtInfty_zsmul_frobenius_sub_mulByInt_neg_x_of_x
     (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hsK : (s : K) ≠ 0) {M : ℤ}
     (hM : (W_smooth W).ordAtInfty (mulByInt_x W r) = ((M : ℤ) : WithTop ℤ)) (hM_le : M ≤ -2) :
@@ -4799,8 +4831,9 @@ theorem zsmul_frobenius_sub_mulByInt_neg_x_ne_zero_of_x
   rw [ordAtInfty_zsmul_frobenius_sub_mulByInt_neg_x_of_x W r s hr hs hsK hM hM_le] at h_top
   exact WithTop.coe_ne_top h_top
 
-/-- **`AddNonInversePair (α₁ := (frobeniusIsog).zsmul r) (α₂ := mulByInt (-s))`** (inseparable case):
-the two `x`-pullbacks differ (different `∞`-orders `qM ≠ -2`).  Mirror of
+/-- **`AddNonInversePair (α₁ := (frobeniusIsog).zsmul r) (α₂ := mulByInt (-s))`**
+(inseparable case): the two `x`-pullbacks differ (different `∞`-orders
+`qM ≠ -2`).  Mirror of
 `AddNonInversePair_zsmul_frobenius_mulByInt_neg` valid for `(r : K) = 0`. -/
 theorem AddNonInversePair_zsmul_frobenius_mulByInt_neg_of_x
     (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0) (hsK : (s : K) ≠ 0) {M : ℤ}
@@ -4828,9 +4861,9 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq_of_hd_ne
     (mulByInt W.toAffine (-s)).pullback (y_gen W)
   have hL : addSlopePair ((frobeniusIsog W).zsmul r)
         (mulByInt W.toAffine (-s)) = n / d := by
-    unfold addSlopePair
+    simp only [addSlopePair]
     exact Affine.slope_of_X_ne (sub_ne_zero.mp hd_ne)
-  unfold addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg addPullback_x_pair
+  simp only [addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg, addPullback_x_pair]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ +
             ((frobeniusIsog W).zsmul r).pullback (x_gen W) +
@@ -4838,7 +4871,7 @@ theorem addPullbackNumerator_pair_zsmul_frobenius_mulByInt_neg_eq_of_hd_ne
       d ^ 2 * (W_KE W).toAffine.addX (((frobeniusIsog W).zsmul r).pullback (x_gen W))
         ((mulByInt W.toAffine (-s)).pullback (x_gen W))
         (addSlopePair ((frobeniusIsog W).zsmul r) (mulByInt W.toAffine (-s)))
-  unfold WeierstrassCurve.Affine.addX
+  simp only [WeierstrassCurve.Affine.addX]
   rw [hL]
   show n ^ 2 + algebraMap K KE W.toAffine.a₁ * d * n
         - d ^ 2 * (algebraMap K KE W.toAffine.a₂ +

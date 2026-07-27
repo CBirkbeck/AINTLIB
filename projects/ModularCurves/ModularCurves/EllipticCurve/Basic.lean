@@ -1,5 +1,11 @@
-import ModularCurves.EllipticCurve.WeierstrassModel
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.Fiber
+
+import ModularCurves.EllipticCurve.WeierstrassModel
 
 /-!
 # Elliptic curves over a base scheme: the geometric record
@@ -53,13 +59,8 @@ noncomputable def sectionFiberPoint {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶
   pullback.lift (S.fromSpecResidueField s ≫ z) (𝟙 _)
     (by simp [Category.assoc, hz])
 
-/-- **The fibre condition** (bridge form, per expert review Q2): every fibre of `π`,
-pointed by the zero section, is *pointed-isomorphic as a `κ(s)`-scheme* to the
-projective Weierstrass model of some elliptic (unit-discriminant) Weierstrass curve
-over the residue field. By Riemann–Roch over a field (black box BB-RR) this is
-equivalent to: every fibre is a smooth proper geometrically connected genus-1 curve.
-Source: Loeffler Def 3.3.1; KM 2.1.1; phrasing per reviewer (scheme isomorphism, not
-functor of points). -/
+/-- A family is fibrewise elliptic if every pointed fibre is isomorphic to the projective model
+of an elliptic Weierstrass curve. -/
 def FibrewiseElliptic {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) :
     Prop :=
   ∀ s : S, ∃ W : WeierstrassCurve (S.residueField s), W.IsElliptic ∧
@@ -68,9 +69,7 @@ def FibrewiseElliptic {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z �
       sectionFiberPoint π z hz s ≫ e.hom = projModelZero W
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **(T-A5b)** Fibrewise ellipticity is stable under base change: the fibre of the
-pulled-back family at `t` is the fibre at `g t` extended to `κ(t)`, and the projective
-Weierstrass model base-changes accordingly (`isPullback_projModelBaseChange`). -/
+/-- Fibrewise ellipticity is preserved by base change. -/
 lemma FibrewiseElliptic.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S ⟶ E}
     {hz : z ≫ π = 𝟙 S} (h : FibrewiseElliptic π z hz) (g : T ⟶ S) :
     FibrewiseElliptic (pullback.snd π g)
@@ -93,7 +92,7 @@ lemma FibrewiseElliptic.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
     refine (isPullback_fiberToSpecResidueField_of_isPullback
       (IsPullback.of_hasPullback π g) t).of_iso (Iso.refl _) e_s (Iso.refl _) (Iso.refl _)
       (by simp) (by simp)
-      (by rw [Iso.refl_hom, Category.comp_id]; exact heπ.symm) (by simp)
+      (by simpa only [Iso.refl_hom, Category.comp_id] using heπ.symm) (by simp)
   have hB : IsPullback
       (projModelBaseChange (algebraMap (S.residueField (g t)) (T.residueField t)) W)
       (projModelπ (W.map (algebraMap (S.residueField (g t)) (T.residueField t))))
@@ -132,14 +131,8 @@ lemma FibrewiseElliptic.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       rw [hA.isoPullback_hom_snd, hB.isoPullback_hom_snd, projModelZero_projModelπ]
       exact pullback.lift_snd _ _ _
 
-/-- **The local-model condition** (v2, owner-directed 2026-07-06): every point of `S`
-has an affine open neighbourhood `U` over which `E`, pointed by the zero section, is
-isomorphic — as a scheme over `Γ(S, U)` (via `U ≅ Spec Γ(S, U)`), compatibly with `π`
-and the section — to the projective Weierstrass model of some elliptic Weierstrass curve
-`W / Γ(S, U)`. A-priori stronger than `FibrewiseElliptic`, which it implies
-(`EllipticCurveGeom.fibrewiseElliptic`); the converse is the Chain-A7 comparison
-(`T-A7-cmp`, gated on coherent cohomology + BB-RR). Source: KM 2.2.5–2.2.6; GME 2.2.4;
-owner directive 2026-07-06. -/
+/-- A family is locally Weierstrass if it is locally isomorphic, compatibly with its section,
+to the projective model of an elliptic Weierstrass curve. -/
 def LocallyWeierstrass {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) :
     Prop :=
   ∀ s : S, ∃ (U : S.affineOpens) (_ : s ∈ U.1) (W : WeierstrassCurve Γ(S, U.1)),
@@ -150,9 +143,21 @@ def LocallyWeierstrass {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z �
           (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e.hom =
         projModelZero W
 
-/-- **(T-A8a)** The local-model condition is stable under base change: shrink the model's
-affine open `U ∋ g t` to an affine `V ∋ t` inside `g⁻¹ U`, transport the Weierstrass
-curve `W` along `Γ(S, U) → Γ(T, V)` (`g.appLE`), and paste the pullbacks. -/
+/-- Conjugating `g.appLE U V` by the affine-open `isoSpec` isomorphisms recovers the induced
+scheme morphism from `V` to `U`. -/
+lemma isoSpec_appLE_bridge {S T : Scheme.{u}} (g : T ⟶ S) (U : S.affineOpens)
+    (V : T.affineOpens) (hVle : V.1 ≤ g ⁻¹ᵁ U.1) :
+    V.2.isoSpec.hom ≫ Spec.map (g.appLE U.1 V.1 hVle) =
+      (T.homOfLE hVle ≫ (g ∣_ U.1)) ≫ U.2.isoSpec.hom := by
+  have hgVfac : (T.homOfLE hVle ≫ (g ∣_ U.1)) ≫ U.1.ι = V.1.ι ≫ g := by
+    rw [Category.assoc, morphismRestrict_ι, ← Category.assoc, Scheme.homOfLE_ι]
+  have hsp := IsAffineOpen.SpecMap_appLE_fromSpec g U.2 V.2 hVle
+  rw [← IsAffineOpen.isoSpec_inv_ι U.2, ← IsAffineOpen.isoSpec_inv_ι V.2, ← Category.assoc,
+    Category.assoc V.2.isoSpec.inv, ← hgVfac, ← Category.assoc] at hsp
+  rw [← Iso.comp_inv_eq, Category.assoc, (cancel_mono U.1.ι).mp hsp, ← Category.assoc,
+    Iso.hom_inv_id, Category.id_comp]
+
+/-- The locally Weierstrass condition is preserved by base change. -/
 lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S ⟶ E}
     {hz : z ≫ π = 𝟙 S} (h : LocallyWeierstrass π z hz) (g : T ⟶ S) :
     LocallyWeierstrass (pullback.snd π g)
@@ -166,8 +171,7 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
   replace hVaff : IsAffineOpen V := hVaff
   letI : Algebra ↑Γ(S, U.1) ↑Γ(T, V) := ((g.appLE U.1 V hVle).hom).toAlgebra
   refine ⟨⟨V, hVaff⟩, htV, W.map (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)), inferInstance, ?_⟩
-  -- `gV : V ⟶ U` factoring `V.ι ≫ g` through the open immersion `U.ι`
-  set Vι := (⟨V, hVaff⟩ : T.affineOpens).1.ι with hVι
+  set Vι := (⟨V, hVaff⟩ : T.affineOpens).1.ι
   set gV := T.homOfLE hVle ≫ (g ∣_ U.1) with hgV
   have hgVfac : gV ≫ U.1.ι = Vι ≫ g := by
     rw [hgV, Category.assoc, morphismRestrict_ι, ← Category.assoc, Scheme.homOfLE_ι]
@@ -175,26 +179,19 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) (projModelπ W)
       (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) :=
     isPullback_projModelBaseChange W
-  -- the restriction is a pullback of `π` along `Vι ≫ g` (paste the two base squares)
   have hP1 : IsPullback (pullback.fst (pullback.snd π g) Vι ≫ pullback.fst π g)
       (pullback.snd (pullback.snd π g) Vι) π (Vι ≫ g) :=
     (IsPullback.of_hasPullback (pullback.snd π g) Vι).paste_horiz
       (IsPullback.of_hasPullback π g)
   have hP1' : IsPullback (pullback.fst (pullback.snd π g) Vι ≫ pullback.fst π g)
-      (pullback.snd (pullback.snd π g) Vι) π (gV ≫ U.1.ι) := by rw [hgVfac]; exact hP1
-  -- cancel the U-square: the restriction is a pullback of `pullback.snd π U.1.ι` along `gV`
+      (pullback.snd (pullback.snd π g) Vι) π (gV ≫ U.1.ι) := by
+    simpa only [hgVfac] using hP1
   have hP2 := hP1'.of_right' (IsPullback.of_hasPullback π U.1.ι)
-  -- the isoSpec ↔ appLE bridge (comm₄): `Spec.map φ` conjugated by the two `isoSpec`s is `gV`
-  have hbridge : hVaff.isoSpec.hom ≫
-      Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V))) = gV ≫ U.2.isoSpec.hom := by
-    have hsp := IsAffineOpen.SpecMap_appLE_fromSpec g U.2 hVaff hVle
-    rw [← IsAffineOpen.isoSpec_inv_ι U.2, ← IsAffineOpen.isoSpec_inv_ι hVaff, ← Category.assoc,
-      Category.assoc hVaff.isoSpec.inv, ← hVι, ← hgVfac, ← Category.assoc] at hsp
-    have hsp2 := (cancel_mono U.1.ι).mp hsp
-    rw [show CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)) = g.appLE U.1 V hVle from rfl,
-      ← Iso.comp_inv_eq, Category.assoc, hsp2, ← Category.assoc, Iso.hom_inv_id,
-      Category.id_comp]
-  -- `e' := restriction ≅ pullback(snd π U.1.ι, gV) ≅ pullback(projModelπ W, Spec.map φ) ≅ projModel W'`
+  have hbridge :
+      hVaff.isoSpec.hom ≫
+          Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V))) =
+        gV ≫ U.2.isoSpec.hom :=
+    isoSpec_appLE_bridge g U ⟨V, hVaff⟩ hVle
   refine ⟨hP2.isoPullback ≪≫ asIso (pullback.map (pullback.snd π U.1.ι) gV (projModelπ W)
       (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) e.hom hVaff.isoSpec.hom
       U.2.isoSpec.hom heπ.symm hbridge.symm) ≪≫ hB.isoPullback.symm, ?_, ?_⟩
@@ -205,16 +202,7 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
     simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc, Iso.inv_hom_id,
       Category.comp_id]
     apply pullback.hom_ext
-    · -- h₀ (fst / section). After `simp only [Category.assoc, pullback.lift_fst,
-      -- hB.isoPullback_hom_fst]` the goal is
-      --   `isoSpecV.inv ≫ sVlift ≫ hP2top ≫ e.hom = projModelZero W' ≫ projModelBaseChange`.
-      -- FINAL STEP (T-A8a, fully derived): the section naturality
-      --   `hnat : sVlift ≫ hP2top = gV ≫ sU`  (sU := pullback.lift (U.1.ι ≫ z) (𝟙 ↑U) …),
-      -- proven by `pullback.hom_ext` on `pullback π U.1.ι`:
-      --   · fst: sVlift≫hP2top≫fst(π,U.1.ι) = Vι≫g≫z = gV≫U.1.ι≫z = (gV≫sU)≫fst  [lift_fst ×3 + hgVfac];
-      --   · snd: sVlift≫hP2top≫snd(π,U.1.ι) = 𝟙≫gV = gV = (gV≫sU)≫snd            [lift_snd ×2].
-      -- Then rw hnat; from hez, `sU ≫ e.hom = isoSpecU.hom ≫ projModelZero W`; from hbridge,
-      -- `isoSpecV.inv ≫ gV ≫ isoSpecU.hom = Spec.map φ`; finish with `projModelZero_baseChange`.
+    ·
       simp only [Category.assoc, pullback.lift_fst, hB.isoPullback_hom_fst]
       have hnat : pullback.lift (Vι ≫ pullback.lift (g ≫ z) (𝟙 T)
             (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) (𝟙 _)
@@ -231,7 +219,8 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       have hsU : pullback.lift (U.1.ι ≫ z) (𝟙 _)
             (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) ≫ e.hom =
           U.2.isoSpec.hom ≫ projModelZero W := by
-        rw [← hez]; simp
+        rw [← hez]
+        simp
       rw [reassoc_of% hnat, hsU, ← reassoc_of% hbridge, Iso.inv_hom_id_assoc,
         projModelZero_baseChange]
     · simp only [Category.assoc, hB.isoPullback_hom_snd, pullback.lift_snd]
@@ -239,8 +228,8 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
         Iso.inv_hom_id]
       exact (projModelZero_projModelπ _).symm
 
-/-- `LocallyWeierstrass` respects isomorphisms of the total space over the same base: transport
-the chart isos through the induced pullback comparison (`IsPullback.of_iso` + `isoIsPullback`). -/
+/-- The locally Weierstrass condition is preserved by isomorphisms of the total space over a
+fixed base. -/
 theorem LocallyWeierstrass.of_iso_over {E₁ E₂ S : Scheme.{u}}
     {π₁ : E₁ ⟶ S} {z₁ : S ⟶ E₁} {hz₁ : z₁ ≫ π₁ = 𝟙 S}
     {π₂ : E₂ ⟶ S} {z₂ : S ⟶ E₂} {hz₂ : z₂ ≫ π₂ = 𝟙 S}
@@ -249,7 +238,9 @@ theorem LocallyWeierstrass.of_iso_over {E₁ E₂ S : Scheme.{u}}
     LocallyWeierstrass π₂ z₂ hz₂ := by
   intro s
   obtain ⟨U, hsU, W, hell, e₁, heπ, hez⟩ := h s
-  have hP₂ : IsPullback (pullback.fst π₂ U.1.ι ≫ e.hom) (pullback.snd π₂ U.1.ι) π₁ U.1.ι := by
+  have hP₂ :
+      IsPullback (pullback.fst π₂ U.1.ι ≫ e.hom) (pullback.snd π₂ U.1.ι)
+        π₁ U.1.ι := by
     refine (IsPullback.of_hasPullback π₂ U.1.ι).of_iso (Iso.refl _) e (Iso.refl _) (Iso.refl _)
       ?_ ?_ ?_ ?_
     · rw [Iso.refl_hom, Category.id_comp]
@@ -269,10 +260,8 @@ theorem LocallyWeierstrass.of_iso_over {E₁ E₂ S : Scheme.{u}}
         pullback.lift_fst, Category.assoc, hzc]
     · rw [Category.assoc, IsPullback.isoIsPullback_hom_snd, pullback.lift_snd, pullback.lift_snd]
 
-/-- `LocallyWeierstrass` respects isomorphisms of the whole triple (total space AND base):
-base-change along `eS.hom` (`LocallyWeierstrass.baseChange`) + the canonical iso
-`E₂ ≅ pullback π₁ eS.hom` (`of_horiz_isIso`) + `of_iso_over`. Used to transport the quotient
-curve's local model from `Spec Γ(X,⊤)ᴳ` back to `X/G` in `[a5]`. -/
+/-- The locally Weierstrass condition is preserved by compatible isomorphisms of the total and
+base schemes. -/
 theorem LocallyWeierstrass.of_iso {E₁ S₁ E₂ S₂ : Scheme.{u}}
     {π₁ : E₁ ⟶ S₁} {z₁ : S₁ ⟶ E₁} {hz₁ : z₁ ≫ π₁ = 𝟙 S₁}
     {π₂ : E₂ ⟶ S₂} {z₂ : S₂ ⟶ E₂} {hz₂ : z₂ ≫ π₂ = 𝟙 S₂}
@@ -285,27 +274,23 @@ theorem LocallyWeierstrass.of_iso {E₁ S₁ E₂ S₂ : Scheme.{u}}
   · rw [Category.assoc, hsq.isoPullback_hom_fst, pullback.lift_fst, ← hzc]
   · rw [Category.assoc, hsq.isoPullback_hom_snd, pullback.lift_snd, hz₂]
 
-/-- On the spectrum of a ring, the canonical map from the residue field at a point is
-`Spec` of the ring-level residue composite. -/
+/-- The residue-field map into an affine spectrum is induced by the ring-level residue
+composite. -/
 lemma Spec_fromSpecResidueField_eq (R : Type u) [CommRing R] (p : ↥(Spec (CommRingCat.of R))) :
     (Spec (CommRingCat.of R)).fromSpecResidueField p
       = Spec.map (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p) := by
-  show Spec.map ((Spec (CommRingCat.of R)).residue p)
+  change Spec.map ((Spec (CommRingCat.of R)).residue p)
       ≫ (Spec (CommRingCat.of R)).fromSpecStalk p = _
   rw [Spec.fromSpecStalk_eq']
   exact (Spec.map_comp _ _).symm
 
-/-- **(T-A8-4, sub-lemma)** The fibres of a projective Weierstrass model over any ring are
-elliptic: the fibre at `p` is the model of `W` extended to the residue field `κ(p)`
-(`isPullback_projModelBaseChange` against the fibre square, both over
-`Spec κ(p) ⟶ Spec R`). -/
+/-- Every fibre of a projective elliptic Weierstrass model is fibrewise elliptic. -/
 theorem fibrewiseElliptic_projModel {R : Type u} [CommRing R] (W : WeierstrassCurve R)
     [W.IsElliptic] :
     FibrewiseElliptic (projModelπ W) (projModelZero W) (projModelZero_projModelπ W) := by
   intro p
   letI : Algebra R ↑((Spec (CommRingCat.of R)).residueField p) :=
     (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p).hom.toAlgebra
-  -- everything below is stated over the single canonical morphism `ψ`
   have hfib : IsPullback ((projModelπ W).fiberι p)
       ((projModelπ W).fiberToSpecResidueField p) (projModelπ W)
       (Spec.map (StructureSheaf.toStalk R p ≫ (Spec (CommRingCat.of R)).residue p)) :=
@@ -326,7 +311,7 @@ theorem fibrewiseElliptic_projModel {R : Type u} [CommRing R] (W : WeierstrassCu
   · simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
     rw [(Iso.inv_comp_eq _).mpr hbc.isoPullback_hom_snd.symm, hfib.isoPullback_hom_snd]
   · rw [← cancel_mono hbc.isoPullback.hom]
-    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.inv_hom_id_assoc,
+    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc,
       Iso.inv_hom_id, Category.comp_id]
     apply pullback.hom_ext
     · simp only [Category.assoc]
@@ -344,18 +329,13 @@ theorem fibrewiseElliptic_projModel {R : Type u} [CommRing R] (W : WeierstrassCu
       exact pullback.lift_snd _ _ _
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **(T-A8-4)** The definition of record implies the abstract fibre condition: a locally
-Weierstrass family is fibrewise elliptic. The fibre at `s` is the fibre of the local model
-at the corresponding point of `Spec Γ(S, U)` (two pastes of cartesian squares; the residue
-fields agree since the chart inclusion is an open immersion through an isomorphism), and
-model fibres are elliptic by `fibrewiseElliptic_projModel`. -/
+/-- A locally Weierstrass family is fibrewise elliptic. -/
 theorem LocallyWeierstrass.fibrewiseElliptic {E S : Scheme.{u}} {π : E ⟶ S} {z : S ⟶ E}
     {hz : z ≫ π = 𝟙 S} (h : LocallyWeierstrass π z hz) :
     FibrewiseElliptic π z hz := by
   intro s
   obtain ⟨U, hsU, W, hell, e, heπ, hez⟩ := h s
   haveI := hell
-  -- the local model as a cartesian square over `S`
   have hsq : IsPullback (e.inv ≫ pullback.fst π U.1.ι) (projModelπ W) π
       (U.2.isoSpec.inv ≫ U.1.ι) := by
     refine (IsPullback.of_hasPullback π U.1.ι).of_iso e (Iso.refl _) U.2.isoSpec
@@ -364,20 +344,16 @@ theorem LocallyWeierstrass.fibrewiseElliptic {E S : Scheme.{u}} {π : E ⟶ S} {
     · exact heπ.symm
     · simp
     · simp
-  -- the corresponding point of the chart
   set q : ↥(Spec (CommRingCat.of Γ(S, U.1))) := U.2.isoSpec.hom.base ⟨s, hsU⟩ with hqdef
   have hq : (U.2.isoSpec.inv ≫ U.1.ι).base q = s := by
     rw [hqdef, ← Scheme.Hom.comp_apply, Iso.hom_inv_id_assoc]
     simp
   haveI : IsOpenImmersion (U.2.isoSpec.inv ≫ U.1.ι) := inferInstance
   haveI : IsIso ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q) := inferInstance
-  -- the residue transport `Γ(S, U) ⟶ κ(s)` through the chart point
   letI : Algebra ↑Γ(S, U.1) ↑(S.residueField s) :=
     ((StructureSheaf.toStalk ↑Γ(S, U.1) q ≫ (Spec (CommRingCat.of ↑Γ(S, U.1))).residue q)
       ≫ inv ((U.2.isoSpec.inv ≫ U.1.ι).residueFieldMap q)
       ≫ (S.residueFieldCongr hq).hom).hom.toAlgebra
-  -- the model of `W` over `κ(s)` is the fibre: paste the base-change square onto the
-  -- family square, and identify the resulting bottom with `fromSpecResidueField s`
   have hbc : IsPullback
       (projModelBaseChange (algebraMap ↑Γ(S, U.1) ↑(S.residueField s)) W)
       (projModelπ (W.map (algebraMap ↑Γ(S, U.1) ↑(S.residueField s))))
@@ -401,10 +377,8 @@ theorem LocallyWeierstrass.fibrewiseElliptic {E S : Scheme.{u}} {π : E ⟶ S} {
       ← Scheme.Hom.SpecMap_residueFieldMap_fromSpecResidueField, ← Spec.map_comp_assoc]
     simp only [IsIso.hom_inv_id_assoc]
     exact Scheme.residueFieldCongr_fromSpecResidueField hq
-  -- pasted: the model of `W` over `κ(s)` IS the fibre of `π` at `s`
   have hgrand := hbc.paste_horiz hsq
   rw [hbot] at hgrand
-  -- the zero-leg of the base-change square, in the transported spelling
   have hzbc : projModelZero (W.map (algebraMap ↑Γ(S, U.1) ↑(S.residueField s)))
       ≫ projModelBaseChange (algebraMap ↑Γ(S, U.1) ↑(S.residueField s)) W
       = Spec.map ((StructureSheaf.toStalk ↑Γ(S, U.1) q
@@ -425,23 +399,16 @@ theorem LocallyWeierstrass.fibrewiseElliptic {E S : Scheme.{u}} {π : E ⟶ S} {
     · rw [Category.assoc, hgrand.isoPullback_hom_fst, reassoc_of% hzbc,
         reassoc_of% (show projModelZero W ≫ e.inv
           = U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
-            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) from
-          by rw [← hez, Category.assoc, Iso.hom_inv_id, Category.comp_id])]
-      simp only [sectionFiberPoint, pullback.lift_fst, Category.assoc,
-        pullback.lift_fst_assoc]
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) by
+          rw [← hez, Category.assoc, Iso.hom_inv_id, Category.comp_id])]
+      simp only [sectionFiberPoint, pullback.lift_fst]
       rw [← hbot]
       simp only [Category.assoc]
     · rw [Category.assoc, hgrand.isoPullback_hom_snd]
       simp only [sectionFiberPoint, pullback.lift_snd, projModelZero_projModelπ]
       rfl
 
-/-- The **geometric record** of an elliptic curve over the scheme `S`: a smooth proper
-relative curve with a section whose fibres are (pointed) genus-1 curves, the latter
-expressed via `FibrewiseElliptic`.
-
-This record carries *no group structure*; the working record `EllipticCurve`
-(`GroupLaw.lean`) extends it with the (canonically unique) commutative group-scheme
-datum. Source: KM 2.1.1; Deligne–Rapoport II.1.1; Loeffler Def 3.3.1. -/
+/-- The geometric data of an elliptic curve over a scheme, without its group structure. -/
 structure EllipticCurveGeom (S : Scheme.{u}) where
   /-- The total space. -/
   E : Scheme.{u}
@@ -452,22 +419,14 @@ structure EllipticCurveGeom (S : Scheme.{u}) where
   zero_π : zero ≫ π = 𝟙 S
   smooth : SmoothOfRelativeDimension 1 π
   proper : IsProper π
-  /-- **The local-model condition** (v2 definition of record, owner-directed + expert-review
-  v8): `E` is Zariski-locally on `S` the projective Weierstrass model of an elliptic
-  Weierstrass curve. This *implies* the fibrewise genus-1 condition
-  (`EllipticCurveGeom.fibrewiseElliptic`, T-A8 step 4); the converse is the deferred Chain-A7
-  comparison (`T-W-cmp`, coherent-cohomology stream). `smooth`/`proper` are kept as fields
-  (derivable from `localModel` via T-A3 + `projModelπ_isProper`, the deliberate `grp`-pattern). -/
+  /-- The total space is locally a projective elliptic Weierstrass model. -/
   localModel : LocallyWeierstrass π zero zero_π
 
 namespace EllipticCurveGeom
 
 attribute [instance] EllipticCurveGeom.smooth EllipticCurveGeom.proper
 
-/-- **(T-A8 step 4, closing the derived-fibre-condition gap)** The record's local-model
-field implies the abstract fibrewise genus-1 condition: the definition of record is at
-least as strong as the sources' class (DR II.1.1 / KM 2.1.1 / Loeffler 3.3.1). The
-converse is the deferred coherent-cohomology comparison `T-A7-cmp`/`T-W-cmp`. -/
+/-- The local model of an elliptic curve gives fibrewise ellipticity. -/
 theorem fibrewiseElliptic {S : Scheme.{u}} (G : EllipticCurveGeom S) :
     FibrewiseElliptic G.π G.zero G.zero_π :=
   G.localModel.fibrewiseElliptic

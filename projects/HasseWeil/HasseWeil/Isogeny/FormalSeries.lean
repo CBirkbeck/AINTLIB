@@ -115,7 +115,7 @@ theorem constantCoeff_formalIsogenySeries_of_orderTop_pos (α : Isogeny W.toAffi
     PowerSeries.constantCoeff (formalIsogenySeries W α) = 0 := by
   rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, formalIsogenySeries_coeff]
   refine HahnSeries.coeff_eq_zero_of_lt_orderTop ?_
-  rw [show ((0 : ℕ) : ℤ) = (0 : ℤ) from rfl]
+  rw [Nat.cast_zero]
   exact_mod_cast h_orderTop
 
 /-- **Positive order of `formalIsogenySeries W α` for a genuine isogeny**
@@ -689,7 +689,7 @@ theorem formalIsogenySeries_id :
   rw [AlgHom.id_apply, localExpand_localParam, PowerSeries.coeff_X]
   by_cases hn : n = 1
   · subst hn
-    rw [show ((1 : ℕ) : ℤ) = (1 : ℤ) from rfl,
+    rw [Nat.cast_one,
       HahnSeries.coeff_single_same, if_pos rfl]
   · have hn' : (n : ℤ) ≠ (1 : ℤ) := by exact_mod_cast hn
     rw [HahnSeries.coeff_single_of_ne hn', if_neg hn]
@@ -734,7 +734,7 @@ theorem formalIsogenySeries_mulByInt_one :
   rw [h_pb, localExpand_localParam, PowerSeries.coeff_X]
   by_cases hn : n = 1
   · subst hn
-    rw [show ((1 : ℕ) : ℤ) = (1 : ℤ) from rfl,
+    rw [Nat.cast_one,
       HahnSeries.coeff_single_same, if_pos rfl]
   · have hn' : (n : ℤ) ≠ (1 : ℤ) := by exact_mod_cast hn
     rw [HahnSeries.coeff_single_of_ne hn', if_neg hn]
@@ -781,7 +781,7 @@ theorem constantCoeff_formalIsogenySeries_mulByInt_via_bridge_003 (h_bridge_003 
   | succ k ih =>
     by_cases hk : k = 0
     · subst hk
-      rw [show ((0 : ℕ).succ : ℤ) = 1 from rfl, formalIsogenySeries_mulByInt_one]
+      rw [Nat.cast_one, formalIsogenySeries_mulByInt_one]
       exact PowerSeries.constantCoeff_X
     · have hk_pos : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr hk
       have ih' := ih hk_pos
@@ -831,7 +831,7 @@ theorem coeff_one_formalIsogenySeries_mulByInt_via_bridge_003 (h_bridge_003 : �
   | succ k ih =>
     by_cases hk : k = 0
     · subst hk
-      rw [show ((0 : ℕ).succ : ℤ) = 1 from rfl, formalIsogenySeries_mulByInt_one]
+      rw [Nat.cast_one, formalIsogenySeries_mulByInt_one]
       simp [PowerSeries.coeff_one_X]
     · have hk_pos : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr hk
       have ih' := ih hk_pos
@@ -1537,13 +1537,6 @@ theorem orderTop_localExpand_algebraMap_fracPolyX
   rw [hk, h_intDeg, WithTop.coe_inj]
   linarith [h_ord]
 
-omit [DecidableEq F] [W.toAffine.IsElliptic] in
-/-- `y_gen W` and `(W_smooth W).coordYInFunctionField` are the same element of
-`KE`: both are `algebraMap R KE (AdjoinRoot.root W.polynomial)` (the curve of
-`W_smooth W` is `W.toAffine` definitionally). -/
-theorem y_gen_eq_coordYInFunctionField :
-    y_gen W = (W_smooth W).coordYInFunctionField := rfl
-
 /-- `orderTop (localExpand (y_gen W)) = -3`, matching `ordAtInfty (y_gen W) = -3`. -/
 theorem orderTop_localExpand_y_gen :
     (localExpand W (y_gen W)).orderTop = ((-3 : ℤ) : WithTop ℤ) := by
@@ -1766,7 +1759,7 @@ theorem orderTop_ofPowerSeries_pos_of_order_pos {P : PowerSeries F} (hP : 0 < P.
       rw [HahnSeries.ofPowerSeries_apply]
       exact HahnSeries.embDomain_notin_range hnr
     · subst hjeq
-      rw [show (0 : ℤ) = ((0 : ℕ) : ℤ) from rfl, HahnSeries.ofPowerSeries_apply_coeff,
+      rw [← Nat.cast_zero, HahnSeries.ofPowerSeries_apply_coeff,
         PowerSeries.coeff_zero_eq_constantCoeff_apply]
       exact hcc
   exact lt_of_lt_of_le (by exact_mod_cast (by norm_num : (0 : ℤ) < 1)) h1

@@ -127,6 +127,7 @@ theorem hcomm_point_of_isGenuineWith
     exact hV.symm
   rw [hLHS, hRHS]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The translation–isogeny commutation, alg-hom form** (Silverman III.8.2): for `φ` genuine with
 action `g` and the geometric point-commutation `hgcomm`, `τ_S ∘ φ* = φ* ∘ τ_{φS}` as `F`-algebra
 endomorphisms of `K(E)`. By `algHom_ext_x_y_gen` this reduces to agreement on `x_gen, y_gen`, which

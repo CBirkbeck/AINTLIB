@@ -24,7 +24,8 @@ import Mathlib.AlgebraicGeometry.Sites.Fpqc
   the `torsorCompare` presentation reduces the kernel-pair coequalizing condition to invariance,
   and a quasi-compact + surjective + flat morphism is an fpqc effective epimorphism.
 * `isIso_torsorCompare_pullback`, `isIso_sigmaDesc_of_isPullback`, `isIso_sigmaDesc_section` —
-  the base-change/trivialization helpers (also used by the KM 4.7.0 bijection's curve-level descent).
+  the base-change/trivialization helpers (also used by the KM 4.7.0 bijection's curve-level
+  descent).
 
 These are the torsor facts of the KM 4.7.0 representability argument.
 -/
@@ -184,6 +185,7 @@ theorem isIso_sigmaDesc_section {Z P : Scheme.{u}} {G : Type u} [Group G] [Finit
   exact isIso_sigmaDesc_of_isPullback (torsorCompare fP σP hPover)
     (pullback.lift (𝟙 P) (fP ≫ s) hq) s _ hsq
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([B2b], KM p. 116)** A `G`-equivariant `S`-morphism between finite étale `G`-torsors is an
 isomorphism. -/
 theorem isIso_of_equivariant_of_torsor {S Z W : Scheme.{u}} {G : Type u} [Group G] [Finite G]
@@ -307,6 +309,7 @@ theorem existsUnique_descent_of_torsor {S Z Y : Scheme.{u}} {G : Type u} [Group 
 
 /-! ### fppf descent of a cartesian square (KM 4.7.0 bijection, curve-square) -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **fppf descent of a cartesian square**: a commuting square whose base change along an fppf
 cover `c` of the bottom-right is a pullback is itself a pullback. (The comparison to the pullback
 is iso after fppf base change, hence iso by `isIso_of_isPullback_of_fppf`.) -/

@@ -1,13 +1,18 @@
-import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
-import Mathlib.RingTheory.Flat.Equalizer
-import Mathlib.RingTheory.TensorProduct.Finite
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import Mathlib.Algebra.Module.FinitePresentation
+import Mathlib.RingTheory.Flat.Equalizer
+import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+import Mathlib.RingTheory.TensorProduct.Finite
 
 /-!
 # Faithfully flat descent of module finiteness and finite presentation
 
 Construction support for `[CHARTER-HOPF]` / `T-G3d-infra` Piece 3
-(`.mathlib-quality/decomposition-hopf-crux.md`, leaf `[HG-A2]`; Stacks
+(leaf `[HG-A2]`; Stacks
 `algebra-lemma-descend-properties-modules`, tag 03C4, parts (1)–(2)): if `S` is a faithfully
 flat `R`-algebra and the base change `S ⊗[R] M` is finite (resp. finitely presented) over
 `S`, then `M` is finite (resp. finitely presented) over `R`.

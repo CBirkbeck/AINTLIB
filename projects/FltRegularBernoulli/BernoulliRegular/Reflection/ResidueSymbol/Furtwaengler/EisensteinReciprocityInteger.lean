@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.EisensteinReciprocityBasic
@@ -48,7 +53,7 @@ theorem idealNormPrincipalIdeal_rationalIntIdeal_natCast
     have hcast : algebraMap ℤ (𝓞 K) (n : ℤ) = (n : 𝓞 K) := by norm_num
     rw [hcast, Ideal.absNorm_span_natCast,
       cyclotomicRingOfIntegers_finrank_eq (p := p) (K := K)]
-  unfold idealNormPrincipalIdeal rationalIntIdeal
+  simp only [idealNormPrincipalIdeal, rationalIntIdeal]
   rw [hnorm]
   have hcast_n :
       algebraMap ℤ (𝓞 K) (n : ℤ) = (n : 𝓞 K) := by norm_num
@@ -230,7 +235,7 @@ theorem eisensteinReciprocityInt_of_idealNormReciprocity
     have hrat_neg :
         rationalIntIdeal (K := K) (-(n : ℤ)) =
           rationalIntIdeal (K := K) (n : ℤ) := by
-      unfold rationalIntIdeal
+      simp only [rationalIntIdeal]
       have hcast_neg :
           algebraMap ℤ (𝓞 K) (-(n : ℤ)) = -(n : 𝓞 K) := by norm_num
       have hcast :

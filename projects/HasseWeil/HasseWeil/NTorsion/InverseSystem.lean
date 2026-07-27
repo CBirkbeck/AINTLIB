@@ -55,6 +55,7 @@ noncomputable def tateConn (n : ℕ) :
       rw [hcast, hP])
 
 omit [IsAlgClosed F] [Fact ℓ.Prime] in
+/-- The connecting map `E[ℓⁿ⁺¹] → E[ℓⁿ]` is `[ℓ]` on the underlying points. -/
 @[simp] theorem tateConn_coe (n : ℕ) (P : W.toAffine[((ℓ ^ (n + 1) : ℕ) : ℤ)]) :
     (tateConn W ℓ n P : W.toAffine.Point) = (ℓ : ℤ) • (P : W.toAffine.Point) :=
   rfl

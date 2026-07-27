@@ -33,7 +33,8 @@ chain, transcribed from the source, is:
 plus a reduction `Spec S ↪ Spec P = Spec R[x₁..xₙ]` so the resolution terms are `R`-flat
 [T-REDUCEP], and the final assembly [T-FINAL].
 
-## Route decision: FULL Buchsbaum–Eisenbud (00N1) is REQUIRED; "lean via Ext-support" does NOT remove it.
+## Route decision: FULL Buchsbaum–Eisenbud (00N1) is REQUIRED; "lean via Ext-support" does NOT
+remove it.
 
 The full 00RB proof (10.129.3) invokes 00N1 as an **iff** over the fibres: it forms the ideals `Iᵢ`
 of `rᵢ×rᵢ` minors of `φᵢ` and uses 00N1 to characterise fibre-exactness as `(Iᵢ)_𝔮 = S_𝔮` OR
@@ -65,7 +66,8 @@ open TensorProduct
 noncomputable section
 
 /-! [T-FIT] `LinearMap.idealOfMinors` (+ antitone, McCoy) is now in `ForMathlib.FittingIdeals`;
-[T-GRADE] `Ideal.gradeGE` (+ localize, openness) is now in `ForMathlib.Grade`.  Both imported above. -/
+[T-GRADE] `Ideal.gradeGE` (+ localize, openness) is now in `ForMathlib.Grade`.  Both imported above.
+-/
 
 /-! ## [T-DEVISSAGE] 00HM (Lemma 10.39.13): two-of-three flatness in a short exact sequence
 
@@ -102,7 +104,8 @@ theorem Module.Flat.of_shortExact_of_flat_flat {R A B C : Type*} [CommRing R]
 /-! ## [T-ME] 00ME (Lemma 10.99.1): two-term local criterion (base case of 00MI)
 
 `R → S` local hom of local rings, `S` Noetherian; `M` `R`-flat, `N` finite `S`-module, `u : N → M`
-`R`-linear with `ū : N/𝔪N → M/𝔪M` injective ⟹ `u` injective and `M/u(N)` `R`-flat.  Krull-intersection
+`R`-linear with `ū : N/𝔪N → M/𝔪M` injective ⟹ `u` injective and `M/u(N)` `R`-flat. 
+Krull-intersection
 lifting of injectivity + Tor-vanishing for the cokernel; close to
 `LocalCriterion.exists_fibre_adapted_surjection`. -/
 
@@ -146,7 +149,8 @@ def SpecialFibreExact (R : Type*) [CommRing R] [IsLocalRing R] {S : Type*} [Comm
     ((φ (j + 1)).baseChange (S ⧸ (IsLocalRing.maximalIdeal R).map (algebraMap R S)))
     ((φ j).baseChange (S ⧸ (IsLocalRing.maximalIdeal R).map (algebraMap R S)))
 
-/-! ## [T-BE] 00N1 (Proposition 10.102.9): the Buchsbaum–Eisenbud acyclicity criterion — MAKE-OR-BREAK
+/-! ## [T-BE] 00N1 (Proposition 10.102.9): the Buchsbaum–Eisenbud acyclicity criterion —
+MAKE-OR-BREAK
 
 Over a local Noetherian ring, the complex is exact iff for each `i` in range `rankᵢ = rᵢ` and the
 minor ideal `I_{rᵢ}(φᵢ)` is the whole ring or contains a regular sequence of length `i`.  Stated in
@@ -156,7 +160,8 @@ depth half).  The rank relation `rnk i + rnk (i+1) = rk i` on the resolution ran
 theorem.
 
 INDEXING (corrected 2026-07-08 — the original skeleton had an off-by-one, machine-refuted):
-Lean `φ j : F_{j+1} → F_j`, so Stacks' `φᵢ` (the `i`-th differential `F_i → F_{i-1}`) is Lean `φ (i-1)`.
+Lean `φ j : F_{j+1} → F_j`, so Stacks' `φᵢ` (the `i`-th differential `F_i → F_{i-1}`) is Lean `φ
+(i-1)`.
 The `i`-th condition (`1 ≤ i ≤ e`) is therefore on `φ (i-1)`, with minor size `rnk i = rank φᵢ` and
 grade `≥ i`.  (Writing `(φ i)` here is FALSE: `hrnk`+`hrnk_top` force `F_e = 0`, so `φ (e-1)` is out
 of the zero module and `idealOfMinors (rnk(e-1)) (φ(e-1))` would be `⊥`, making the RHS false for
@@ -208,7 +213,8 @@ private theorem exists_isSMulRegular_of_forall_not_le_associatedPrimes {S : Type
 /-! ### Assembly of `be_forward_core` via the Stacks 00N1 `(1)⟹(2)` induction.
 
 The forward core is proved with **NO depth invariant and NO Auslander–Buchsbaum** (contrary to the
-old plan): the Stacks 00N1 `(1)⟹(2)` proof localises at each associated prime, uses that the depth-`0`
+old plan): the Stacks 00N1 `(1)⟹(2)` proof localises at each associated prime, uses that the
+depth-`0`
 splitting forces `I(φᵢ)_𝔮 = S_𝔮` (00MY+00MW, `idealOfMinors_eq_top_of_exact_of_isAssociatedPrime`),
 picks a nonzerodivisor `x` in `I(φᵢ)` avoiding every associated prime (prime avoidance), reduces the
 complex modulo `x` (00MZ, `exact_baseChange_quotient_of_isSMulRegular`, which stays exact at spots
@@ -256,7 +262,8 @@ private def reducePiEquiv (n : ℕ) : S' ⊗[S] (Fin n → S) ≃ₗ[S'] (Fin n 
 @[simp] private lemma piEquiv_tmul (n : ℕ) (s : S') (y : Fin n → S) :
     reducePiEquiv S' n (s ⊗ₜ[S] y) = fun i => y i • s := rfl
 
-/-- `reduceMap` is the base change conjugated by the pi–tensor equivalence: this is the ladder square
+/-- `reduceMap` is the base change conjugated by the pi–tensor equivalence: this is the ladder
+square
 that transfers exactness between the two spellings of the reduced complex. -/
 private lemma reduceMap_naturality (φ : (Fin a → S) →ₗ[S] (Fin b → S)) :
     (reduceMap S' φ) ∘ₗ (reducePiEquiv S' a).toLinearMap
@@ -321,7 +328,8 @@ private theorem idealOfMinors_not_le_of_mem_associatedPrimes
   have hexactψ : ∀ j, Function.Exact (ψ (j + 1)) (ψ j) := fun j =>
     exact_reduceMap_of_flat Sq _ _ (hexact j)
   have hdepth0 : IsLocalRing.maximalIdeal Sq ∈ associatedPrimes Sq Sq := by
-    apply Module.associatedPrimes.mem_associatedPrimes_of_comap_mem_associatedPrimes_of_isLocalizedModule
+    apply
+    Module.associatedPrimes.mem_associatedPrimes_of_comap_mem_associatedPrimes_of_isLocalizedModule
       q.primeCompl (Algebra.linearMap S Sq)
     have hcomap : (IsLocalRing.maximalIdeal Sq).comap (algebraMap S Sq) = q :=
       Localization.AtPrime.under_maximalIdeal
@@ -374,9 +382,11 @@ private theorem gradeGE_cons_of_isSMulRegular {S : Type*} [CommRing S] (I : Idea
     · exact hymem y hy
 
 /-- **The Stacks 00N1 `(1)⟹(2)` induction.**  Over a local Noetherian ring, an exact finite free
-complex has `I(φᵢ)` of grade `≥ i` (or `= ⊤`), for each interior index `1 ≤ i < e`.  Induction on `i`:
+complex has `I(φᵢ)` of grade `≥ i` (or `= ⊤`), for each interior index `1 ≤ i < e`.  Induction on
+`i`:
 pick a nonzerodivisor `x ∈ I(φᵢ)` avoiding the associated primes (Piece A + prime avoidance), reduce
-the complex modulo `x` (00MZ) to the shifted complex over `S/x`, and prepend `x` to the grade-`(i-1)`
+the complex modulo `x` (00MZ) to the shifted complex over `S/x`, and prepend `x` to the
+grade-`(i-1)`
 regular sequence obtained from the induction hypothesis (`gradeGE_cons_of_isSMulRegular`). -/
 private theorem be_forward_gradeGE_aux :
     ∀ (i : ℕ) {S : Type u} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
@@ -457,7 +467,8 @@ depth-`0` splitting (00MY+00MW, `idealOfMinors_eq_top_of_exact_of_isAssociatedPr
 `I(φᵢ)_𝔮 = S_𝔮`, so `I(φᵢ)` avoids every associated prime.  Prime avoidance then yields a
 nonzerodivisor `x ∈ I(φᵢ)`; quotienting by `x` keeps the complex exact at spots `≥ 2` (00MZ,
 `exact_baseChange_quotient_of_isSMulRegular`), and induction on the target index builds a length-`i`
-regular sequence in `I(φᵢ)` (`gradeGE_cons_of_isSMulRegular` + `be_forward_gradeGE_aux`).  The `∨ = ⊤`
+regular sequence in `I(φᵢ)` (`gradeGE_cons_of_isSMulRegular` + `be_forward_gradeGE_aux`).  The `∨ =
+⊤`
 disjunct handles the unit-ideal case (matching the `gradeGE` convention). -/
 private theorem be_forward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
     (e : ℕ) (rk rnk : ℕ → ℕ)
@@ -686,7 +697,8 @@ private noncomputable def localizedHomologyTransport
   let π := Submodule.toLocalizedQuotient' (Localization p) p Lker
     ((range φi1).comap (ker φi).subtype)
   have e0 := IsLocalizedModule.iso p π
-  exact ((e0 ≪≫ₗ (Submodule.quotEquivOfEq _ _ hcrux).restrictScalars R).extendScalarsOfIsLocalization
+  exact ((e0 ≪≫ₗ (Submodule.quotEquivOfEq _ _ hcrux).restrictScalars
+  R).extendScalarsOfIsLocalization
     p (Localization p))
 
 variable {S : Type*} [CommRing S]
@@ -712,7 +724,8 @@ private lemma reduceMap_freeLocMap_naturality {a b : ℕ} (q : Ideal S) [q.IsPri
   rfl
 
 /-- **[Transport lemma — the localised homology is the `reduceMap`-homology].**  For the finite free
-complex `φ` and any prime `𝔮`, the abstract homology `(ker (φ i) / im (φ (i+1)))` localised at `𝔮` is
+complex `φ` and any prime `𝔮`, the abstract homology `(ker (φ i) / im (φ (i+1)))` localised at `𝔮`
+is
 `Localization.AtPrime 𝔮`-linearly isomorphic to the homology of the *localised* complex
 `ψ j = reduceMap (Localization.AtPrime 𝔮) (φ j)` at the same spot.  This is the make-or-break
 connective that lets the acyclicity wrapper `localAcyclicity_shift` (phrased over `reduceMap`) serve
@@ -742,7 +755,8 @@ end LocalizedHomologyTransport
 universe u
 
 /-- A grade-`≥ k` ideal contained in the maximal ideal of a local ring witnesses `depth ≥ k`: its
-regular sequence lies in `𝔪`.  (The already-localised analogue of `hasDepthGE_localization_of_gradeGE`,
+regular sequence lies in `𝔪`.  (The already-localised analogue of
+`hasDepthGE_localization_of_gradeGE`,
 consuming the grade condition *after* it has been transported to the local ring `L = S_𝔮`.) -/
 private theorem hasDepthGE_of_gradeGE_le_maximalIdeal {L : Type*} [CommRing L] [IsLocalRing L]
     {I : Ideal L} {k : ℕ} (h : I.gradeGE k) (hI : I ≤ IsLocalRing.maximalIdeal L) :
@@ -750,8 +764,10 @@ private theorem hasDepthGE_of_gradeGE_le_maximalIdeal {L : Type*} [CommRing L] [
   obtain ⟨rs, hlen, hreg, hmem⟩ := h
   exact ⟨rs, hlen, hreg, fun x hx => hI (hmem x hx)⟩
 
-/-- Depth is a linear-equivalence invariant (a non-`private`-scoped copy of the transport used inside
-`ForMathlib.Acyclicity`): a regular sequence moves along `e : M ≃ₗ[L] N` (`LinearEquiv.isRegular_congr`)
+/-- Depth is a linear-equivalence invariant (a non-`private`-scoped copy of the transport used
+inside
+`ForMathlib.Acyclicity`): a regular sequence moves along `e : M ≃ₗ[L] N`
+(`LinearEquiv.isRegular_congr`)
 and membership in `𝔪` is unchanged.  Used to transport the depth disjunct across the
 `be_localizedHomology_reduceMapEquiv` transport. -/
 private theorem hasDepthGE_congr {L : Type u} [CommRing L] [IsLocalRing L]
@@ -878,11 +894,13 @@ private theorem exact_or_depth_of_ladder {L : Type u} [CommRing L] [IsLocalRing 
   · exact Or.inr (hasDepthGE_congr E hd)
 
 /-- **[Core over the local ring `L` — the acyclicity disjunction].**  For the standard-free complex
-`ψ` over a local Noetherian ring `L` with the (already localised) grade conditions `hcondL`, exact at
+`ψ` over a local Noetherian ring `L` with the (already localised) grade conditions `hcondL`, exact
+at
 every spot `> i`: either `ψ` is exact at `F_{i+1}` too, or the homology `ker(ψ i)/im(ψ (i+1))` has
 `depth ≥ 1`.  This is Stacks 00N1 `(2)⟹(1)` over `L`, packaged so that
 `be_backward_localizedHomology_depth` obtains it (over `L = S_𝔮`) and transports it back to the
-abstract localised homology.  The interior no-gap block goes through `localAcyclicity_shift` with the
+abstract localised homology.  The interior no-gap block goes through `localAcyclicity_shift` with
+the
 depth supplied by the top proper minor ideal; the split (`= ⊤`) top differentials are peeled by the
 00MW direct-summand argument. -/
 private theorem localBE_homology_disjunction {L : Type*} [CommRing L] [IsLocalRing L]
@@ -938,7 +956,8 @@ private theorem localBE_homology_disjunction {L : Type*} [CommRing L] [IsLocalRi
       rw [LinearMap.range_eq_bot]
       exact Subsingleton.elim _ _
     · -- `rk (i+2) ≠ 0`.
-      -- **Trailing-zero reduction.**  If `rk (e-1) = 0`, the same complex has effective length `e-1`
+      -- **Trailing-zero reduction.**  If `rk (e-1) = 0`, the same complex has effective length
+      -- `e-1`
       -- (its homology at `i` is unchanged), so the strong-induction hypothesis at `e-1` closes it.
       by_cases htz : rk (e - 1) = 0
       · have he1 : e - 1 + 1 = e := by omega
@@ -971,7 +990,8 @@ private theorem localBE_homology_disjunction {L : Type*} [CommRing L] [IsLocalRi
             -- the factoring `ψ (e-3) = χ (e-3) ∘ π` (`π : F_{e-2} ↠ C`).
             sorry
           · -- **Proper top minor ideal** ⟹ `depth L ≥ e-1 ≥ e-i-1`, then `localAcyclicity_shift`.
-            have hgrade : (LinearMap.idealOfMinors (rnk (e - 1)) (ψ (e - 1 - 1))).gradeGE (e - 1) := by
+            have hgrade : (LinearMap.idealOfMinors (rnk (e - 1)) (ψ (e - 1 - 1))).gradeGE (e - 1) :=
+            by
               rcases hcondL (e - 1) (by omega) (by omega) with hg | ht
               · exact hg
               · exact absurd ht htop
@@ -1197,13 +1217,15 @@ private theorem be_backward_localizedHomology_depth {S : Type*} [CommRing S] [Is
 spot, *given exactness at every higher spot* (`habove`).  This is the genuine acyclicity content:
 the complex, exact above `F_{i+1}`, is exact at `F_{i+1}` too.
 
-PROOF ROUTE (Stacks 00N1 `(2)⟹(1)`, via the acyclicity lemma 00N0 = `acyclicityLemma_hasDepthGE_homology`,
+PROOF ROUTE (Stacks 00N1 `(2)⟹(1)`, via the acyclicity lemma 00N0 =
+`acyclicityLemma_hasDepthGE_homology`,
 NOT the stale "0AVQ / depth-invariant" route): write `H = ker(φ i)/im(φ (i+1))` for the homology at
 `F_{i+1}`.  If `H ≠ 0`, pick an associated prime `𝔮 ∈ Ass_S H`; localise at `𝔮` (flat, keeps the
 complex exact above `i` and keeps `H_𝔮 ≠ 0` with `𝔪(S_𝔮) ∈ Ass H_𝔮`, i.e. `depth H_𝔮 = 0`).  The
 acyclicity lemma 00N0 over `S_𝔮` — whose free-module depth hypothesis `depth(S_𝔮^{rk j}) ≥ j` is
 supplied by the grade conditions localised to `𝔮` (`Ideal.gradeGE_localize`), the **grade-via-primes
-depth bridge** (Stacks 00N1 last paragraph: `I(φⱼ) ⊆ 𝔪` proper of grade `≥ j` ⟹ `depth ≥ j`) — forces
+depth bridge** (Stacks 00N1 last paragraph: `I(φⱼ) ⊆ 𝔪` proper of grade `≥ j` ⟹ `depth ≥ j`) —
+forces
 `depth H_𝔮 ≥ 1`, contradicting `depth H_𝔮 = 0`.  Hence `H = 0`, i.e. exactness at `F_{i+1}`. -/
 private theorem be_backward_exact_of_habove {S : Type*} [CommRing S] [IsLocalRing S]
     [IsNoetherianRing S] (e : ℕ) (rk rnk : ℕ → ℕ)
@@ -1255,8 +1277,10 @@ private theorem be_backward_exact_of_habove {S : Type*} [CommRing S] [IsLocalRin
   · exact absurd hsub (not_subsingleton_iff_nontrivial.mpr hH𝔮nt)
   · exact hnodepth hdepth
 
-/-- **[BE backward, all spots]** The backward direction at *every* spot, by strong downward induction
-on the spot index: exactness above `F_{i+1}` (the induction hypothesis, trivial once the free modules
+/-- **[BE backward, all spots]** The backward direction at *every* spot, by strong downward
+induction
+on the spot index: exactness above `F_{i+1}` (the induction hypothesis, trivial once the free
+modules
 vanish) feeds `be_backward_exact_of_habove`. -/
 private theorem be_backward_exact_all {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
     (e : ℕ) (rk rnk : ℕ → ℕ)
@@ -1298,7 +1322,7 @@ private theorem be_backward_core {S : Type*} [CommRing S] [IsLocalRing S] [IsNoe
     (hcond : ∀ i, 1 ≤ i → i ≤ e →
         (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
           LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤)
-    (i : ℕ) (hi : rk (i + 1) ≠ 0) (htop : rk (i + 2) ≠ 0) :
+    (i : ℕ) (_hi : rk (i + 1) ≠ 0) (_htop : rk (i + 2) ≠ 0) :
     Function.Exact (φ (i + 1)) (φ i) :=
   be_backward_exact_all e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i
 
@@ -1311,7 +1335,7 @@ private theorem be_forward {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetheria
     (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))
     (hcomplex : ∀ i, (φ i) ∘ₗ (φ (i + 1)) = 0)
     (hexact : ∀ i, Function.Exact (φ (i + 1)) (φ i))
-    (i : ℕ) (hi1 : 1 ≤ i) (hie : i ≤ e) :
+    (i : ℕ) (hi1 : 1 ≤ i) (_hie : i ≤ e) :
     (LinearMap.idealOfMinors (rnk i) (φ (i - 1))).gradeGE i ∨
       LinearMap.idealOfMinors (rnk i) (φ (i - 1)) = ⊤ := by
   by_cases h0 : rnk i = 0
@@ -1371,7 +1395,8 @@ private theorem be_backward {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetheri
       exact Subsingleton.elim _ _
     · exact be_backward_core e rk rnk hrk hrnk_top hrnk φ hcomplex hcond i h0 htop
 
-/-- [T-BE] Buchsbaum–Eisenbud (Stacks 00N1), depth half in ranks-given form (Lean `φ (i-1)` = Stacks `φᵢ`). -/
+/-- [T-BE] Buchsbaum–Eisenbud (Stacks 00N1), depth half in ranks-given form (Lean `φ (i-1)` = Stacks
+`φᵢ`). -/
 theorem buchsbaumEisenbud_acyclic {S : Type*} [CommRing S] [IsLocalRing S] [IsNoetherianRing S]
     (e : ℕ) (rk rnk : ℕ → ℕ)
     (hrk : ∀ i, e ≤ i → rk i = 0)
@@ -1406,7 +1431,8 @@ theorem fibreExact_spreads {R S : Type*} [CommRing R] [IsNoetherianRing R] [Comm
       ∀ q' : PrimeSpectrum S, q' ∈ PrimeSpectrum.basicOpen g → FibreExactAt R φ q' := by
   sorry
 
-/-! ## [T-MI] 00MI (Lemma 10.99.5): flatness of the cokernel from fibre-exactness — NO Buchsbaum–Eisenbud
+/-! ## [T-MI] 00MI (Lemma 10.99.5): flatness of the cokernel from fibre-exactness — NO
+Buchsbaum–Eisenbud
 
 `0 → F_e → ⋯ → F₀` a finite complex of `R`-flat finite `S`-modules whose special fibre is exact ⟹
 the complex is exact and `coker(F₁ → F₀)` is `R`-flat.  Induction on `e` from [T-ME] (00ME).  Stated
@@ -1415,7 +1441,8 @@ module), presented by `π : F₀ ↠ M` with `Function.Exact (φ 0) π`. -/
 
 /-- [T-MI] Stacks 00MI: special-fibre-exact ⟹ the cokernel `M` of `φ 0 : F₁ → F₀` is `R`-flat. -/
 theorem coker_flat_of_specialFibreExact {R S M : Type*} [CommRing R] [IsLocalRing R] [CommRing S]
-    [IsLocalRing S] [Algebra R S] [IsLocalHom (algebraMap R S)] [IsNoetherianRing S] [Module.Flat R S]
+    [IsLocalRing S] [Algebra R S] [IsLocalHom (algebraMap R S)] [IsNoetherianRing S] [Module.Flat R
+    S]
     [AddCommGroup M] [Module S M] [Module R M] [IsScalarTower R S M]
     {rk : ℕ → ℕ} (e : ℕ) (hrk : ∀ i, e ≤ i → rk i = 0)
     (φ : (i : ℕ) → (Fin (rk (i + 1)) → S) →ₗ[S] (Fin (rk i) → S))

@@ -1,6 +1,8 @@
-import BernoulliRegular.KummerCongruence.Bridge
-import BernoulliRegular.IrregularPrimes.VonStaudtConsequences
-import Mathlib.Data.Nat.Factorization.Basic
+module
+
+public import BernoulliRegular.KummerCongruence.Bridge
+public import BernoulliRegular.IrregularPrimes.VonStaudtConsequences
+public import Mathlib.Data.Nat.Factorization.Basic
 
 /-!
 # Kummer congruence interface for the Carlitz route
@@ -18,6 +20,7 @@ Staudt-Clausen integrality controls Bernoulli denominators, the strong
 Faulhaber power-sum congruence feeds a strong Voronoi congruence, and the
 primitive-root comparison removes the auxiliary side conditions.
 -/
+@[expose] public section
 
 noncomputable section
 
@@ -2036,7 +2039,7 @@ theorem bernoulli_pr_plus_one_sModEq_div_of_kummerCongruence
     have hpr : (p - 1) * r = p * r - r := by
       rw [Nat.sub_mul, Nat.one_mul]
     have h_eq : p * r + 1 = (r + 1) + (p - 1) * r := by omega
-    unfold Nat.ModEq
+    simp only [Nat.ModEq]
     rw [h_eq, Nat.add_mul_mod_self_left]
   have hnot_m : ¬ (p - 1) ∣ p * r + 1 := by
     intro hdvd
@@ -2136,7 +2139,7 @@ theorem bernoulli_pr_plus_one_sModEq_div_clean
     have hpr : (p - 1) * r = p * r - r := by
       rw [Nat.sub_mul, Nat.one_mul]
     have h_eq : p * r + 1 = (r + 1) + (p - 1) * r := by omega
-    unfold Nat.ModEq
+    simp only [Nat.ModEq]
     rw [h_eq, Nat.add_mul_mod_self_left]
   have hnot_m : ¬ (p - 1) ∣ p * r + 1 := by
     intro hdvd
@@ -2581,7 +2584,7 @@ theorem bernoulliGen_teichmuller_pow_sModEq_div_voronoiNoBound
         have hn_le : n ≤ p * n := Nat.le_mul_of_pos_left n (by omega)
         have hpn : (p - 1) * n = p * n - n := by rw [Nat.sub_mul, Nat.one_mul]
         omega
-      unfold Nat.ModEq
+      simp only [Nat.ModEq]
       rw [h_eq, Nat.add_mul_mod_self_left]
     have ht_coprime : ¬ (p : ℕ) ∣ t := fun h ↦ by
       have h_pn : p ∣ p * n := ⟨n, rfl⟩

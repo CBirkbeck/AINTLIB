@@ -27,7 +27,8 @@ modular-symbol module.
 The diagonal tensor representation is built **manually** as a `MonoidHom`, rather than via
 `Representation.tprod`, to avoid an instance diamond: `Representation.tprod` lands in a tensor type
 carrying `TensorProduct.addCommMonoid`, whereas `Representation.Coinvariants` requires an
-`AddCommGroup` on the underlying module. By packaging the action `g ↦ TensorProduct.map (div0Rep R g)
+`AddCommGroup` on the underlying module. By packaging the action
+`g ↦ TensorProduct.map (div0Rep R g)
 (symRep R m g)` directly into the literal tensor type `Div0 R ⊗[R] SymPow R m`, the canonical
 `AddCommGroup`/`Module R` instances (the tensor product of two submodules of `AddCommGroup`s) are
 found by instance resolution and `Coinvariants` elaborates cleanly.

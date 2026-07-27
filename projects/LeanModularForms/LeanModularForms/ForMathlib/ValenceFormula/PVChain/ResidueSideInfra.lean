@@ -218,8 +218,9 @@ lemma residueSimplePole_logDeriv_eq_zero_at_nonzero (z : ℂ) (hz_im : 0 < z.im)
     residueSimplePole (logDeriv (modularFormCompOfComplex f)) z = 0 := by
   have h_prod : Tendsto (fun w ↦ (w - z) * logDeriv (modularFormCompOfComplex f) w)
       (𝓝[≠] z) (𝓝 (0 * logDeriv (modularFormCompOfComplex f) z)) := by
-    refine Tendsto.mul ?_ ((analyticAt_logDeriv_off_zeros' f z hz_im hz_nz).continuousAt.tendsto.mono_left
-      nhdsWithin_le_nhds)
+    refine Tendsto.mul ?_
+      ((analyticAt_logDeriv_off_zeros' f z hz_im hz_nz).continuousAt.tendsto.mono_left
+        nhdsWithin_le_nhds)
     rw [show (0 : ℂ) = z - z from (sub_self z).symm]
     exact (continuous_id.sub continuous_const).continuousAt.tendsto.mono_left nhdsWithin_le_nhds
   rw [zero_mul] at h_prod
@@ -540,7 +541,8 @@ lemma winding_zero_for_non_fd_point_H_geo (S : Finset UpperHalfPlane)
       tauto))
   have hγ_deriv_cont := (fdBoundary_HCurve H).deriv_continuous_off_partition
   have hγ_deriv_bdd := piecewiseC1Immersion_deriv_bounded (fdBoundary_HImmersion H hH_sqrt3)
-  have go : ∀ {ω : ℂ}, ω ≠ 0 → (∀ t ∈ Icc (0:ℝ) 5, ω * (fdBoundary_H H t - z₀) ∈ Complex.slitPlane) →
+  have go : ∀ {ω : ℂ}, ω ≠ 0 →
+      (∀ t ∈ Icc (0:ℝ) 5, ω * (fdBoundary_H H t - z₀) ∈ Complex.slitPlane) →
       ∫ t in (0:ℝ)..5, (fdBoundary_H H t - z₀)⁻¹ * deriv (fdBoundary_H H) t = 0 := fun hω hslit ↦
     ftc_integral_zero_of_closed_slit hω (fdBoundary_H_continuous H) (fdBoundary_H_closed H)
       h_off hslit hγ_diff hγ_deriv_cont hγ_deriv_bdd

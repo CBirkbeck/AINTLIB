@@ -32,7 +32,7 @@ theorem oddLProduct_one_eq_prod_oddLValueRhs :
     oddLProduct p (1 : ℂ) =
       Finset.prod (oddCharacters (p := p)) fun χ ↦ oddLValueRhs p χ := by
   classical
-  unfold oddLProduct
+  simp only [oddLProduct]
   refine Finset.prod_congr rfl fun χ hχ ↦ ?_
   have hχ_odd : χ.Odd := (Finset.mem_filter.mp hχ).2
   have hχ_ne_one : χ ≠ 1 := by
@@ -50,7 +50,7 @@ theorem evenLProduct_one_eq_prod_evenLValueRhs :
     evenLProduct p (1 : ℂ) =
       Finset.prod (evenNontrivialCharacters (p := p)) fun χ ↦ evenLValueRhs p χ := by
   classical
-  unfold evenLProduct
+  simp only [evenLProduct]
   refine Finset.prod_congr rfl fun χ hχ ↦ ?_
   have hχ_mem := Finset.mem_filter.mp hχ
   have hχ_even : χ.Even := hχ_mem.2.1
@@ -254,15 +254,14 @@ theorem hPlus_formula_of_evenLValues (hp_odd' : p ≠ 2) :
         Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) :=
   hPlus_formula_of_evenLValues_cyclotomicFactor (p := p) (K := K) hp_odd'
 
-set_option linter.unusedSectionVars false
-
+omit [IsCMField K] in
 /-- The residue formula for `ζ_K` at `s = 1`, rewritten using the explicit odd
 and even evaluations of the character `L`-values. -/
 theorem residue_ready_factorization_explicit_LValues :
     NumberField.dedekindZeta_residue K =
       ((Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
           Finset.prod (oddCharacters (p := p)) (fun χ ↦ oddLValueRhs p χ)).re) := by
-  rw [residue_ready_factorization_even_odd (p := p) (K := K),
+  rw [dedekindZeta_residue_eq_re_evenLProduct_mul_oddLProduct (p := p) (K := K),
     evenLProduct_one_eq_prod_evenLValueRhs (p := p),
     oddLProduct_one_eq_prod_oddLValueRhs (p := p)]
 
@@ -274,7 +273,7 @@ theorem oddLValueRhs_product_eq_gauss_product_mul_bernoulli_product :
         ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) *
         Finset.prod (oddCharacters (p := p)) (fun χ ↦ BernoulliGen χ⁻¹ 1) := by
   classical
-  unfold oddLValueRhs
+  simp only [oddLValueRhs]
   rw [Finset.prod_mul_distrib]
 
 end LValues

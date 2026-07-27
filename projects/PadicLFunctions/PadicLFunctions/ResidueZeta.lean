@@ -557,7 +557,7 @@ theorem one_add_mul_derivative_FtildeA {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (ha0 
     PowerSeries.derivative_X
   have hDpow : PowerSeries.derivativeFun ((1 + PowerSeries.X) ^ a : PowerSeries K)
       = (a : PowerSeries K) * (1 + PowerSeries.X) ^ (a - 1)
-        * PowerSeries.derivativeFun (1 + PowerSeries.X) := PowerSeries.derivative_pow K _ a
+        * PowerSeries.derivativeFun (1 + PowerSeries.X) := PowerSeries.derivative_pow _ a
   -- `α·(u_a·X) = (1+X)^a − 1`
   have hαuAX : ((a : ℕ) : PowerSeries K) * (uA K a * PowerSeries.X)
       = (1 + PowerSeries.X) ^ a - 1 := by
@@ -578,7 +578,9 @@ theorem one_add_mul_derivative_FtildeA {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (ha0 
             = (1 + PowerSeries.X) ^ a + (-1 : PowerSeries K) by ring,
         PowerSeries.derivativeFun_add]
       rw [show (-1 : PowerSeries K) = PowerSeries.C (-1 : K) by simp,
-        PowerSeries.derivativeFun_C, add_zero]
+        show PowerSeries.derivativeFun (PowerSeries.C (-1 : K)) = 0 from
+          PowerSeries.derivative_C,
+        add_zero]
     rw [← hlhs, hαuAX, hrhs]
   -- `(1+X)·∂((1+X)^a) = α·(1+X)^a`
   have hQ : (1 + PowerSeries.X)
@@ -613,11 +615,14 @@ theorem one_add_mul_derivative_FtildeA {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (ha0 
       have dsubst : PowerSeries.derivativeFun ((formalLog (K := K)).subst (uA K a - 1))
           = (PowerSeries.derivativeFun (formalLog (K := K))).subst (uA K a - 1)
             * PowerSeries.derivativeFun (uA K a - 1) :=
-        PowerSeries.derivative_subst (A := K) (hasSubst_uA_sub_one K ha0)
+        PowerSeries.derivative_subst (hasSubst_uA_sub_one K ha0)
       have hsub : PowerSeries.derivativeFun ((formalLog (K := K)).subst (uA K a - 1))
           = P * DuA := by
         rw [dsubst, hP, hDuA, hsubF, PowerSeries.derivativeFun_one, sub_zero]
-      rw [FtildeA, PowerSeries.derivativeFun_add, hsubF, PowerSeries.derivativeFun_C, hsub,
+      rw [FtildeA, PowerSeries.derivativeFun_add, hsubF,
+        show ∀ r : K, PowerSeries.derivativeFun (PowerSeries.C r) = 0 from
+          fun _ => PowerSeries.derivative_C,
+        hsub,
         hnsmul, zero_sub]
     rw [hDF, mul_add, mul_neg, ← mul_assoc, mul_smul_comm,
       one_add_mul_derivative_formalLog (p := p) (K := K), nsmul_eq_mul, mul_one,

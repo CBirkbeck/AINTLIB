@@ -263,7 +263,6 @@ variable (W : Affine K) [W.IsElliptic]
 
 -- `[DecidableEq K]` enters through the Frobenius `[q]`-witness
 -- (`frobeniusMulByIntDualWitness`), used in the proof; the linter only inspects the type.
-set_option linter.unusedDecidableInType false in
 /-- **The faithful `[qʳ]`-dual witness for the iterated Frobenius `πʳ`** (Silverman III.6.1
 Case 2, iterated) — every field a theorem. Induction on `r`: the base case is the identity
 witness, the step composes the inductive witness with the Frobenius `[q]`-witness
@@ -280,14 +279,12 @@ theorem frobeniusPowerMulByIntDualWitness (r : ℕ) :
           (pow_ne_zero r intCardK_ne_zero))).congrInt
       (pow_succ' _ r).symm
 
-set_option linter.unusedDecidableInType false in
 /-- **`HasDualWitness` for `πʳ`**: the iterated Frobenius admits a dual witness with every
 field a theorem. -/
 noncomputable def hasDualWitness_frobeniusPower (r : ℕ) :
     (Isogeny.frobeniusPower W r).HasDualWitness :=
   (frobeniusPowerMulByIntDualWitness W r).toHasDualWitness
 
-set_option linter.unusedDecidableInType false in
 /-- **The iterated Verschiebung** `Vᵣ = (πʳ)^ : E → E` — the dual of `πʳ` built from the
 fully-discharged faithful `[qʳ]`-witness. Satisfies `Vᵣ ∘ πʳ = [qʳ]`
 (`frobeniusPower_mulByIntDual_compose`). -/
@@ -296,7 +293,6 @@ noncomputable def dualFrobeniusPower (r : ℕ) : Isogeny W W :=
 
 -- `[DecidableEq K]` is genuinely required: the statement names `dualFrobeniusPower`
 -- (which carries it through the Frobenius witness), in a position the linter cannot see.
-set_option linter.unusedDecidableInType false in
 /-- **`Vᵣ ∘ πʳ = [qʳ]` as `EC.Isogeny`s** (Silverman III.6.1 defining identity, iterated):
 the composite of the iterated Verschiebung with `πʳ` *is* multiplication by `qʳ`. -/
 theorem frobeniusPower_mulByIntDual_compose (r : ℕ) :
@@ -306,8 +302,6 @@ theorem frobeniusPower_mulByIntDual_compose (r : ℕ) :
 
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the inhabitant is the iterated
 -- Verschiebung, but the linter only inspects the type `Nonempty (Isogeny W W)`.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **`exists_dual` for `πʳ`**: the iterated Frobenius admits a reverse isogeny. -/
 theorem exists_dual_frobeniusPower (r : ℕ) : Nonempty (Isogeny W W) :=
   (Isogeny.frobeniusPower W r).exists_dual_of_witness (hasDualWitness_frobeniusPower W r)
@@ -435,7 +429,6 @@ variable {W : Affine K} [W.IsElliptic]
 
 -- `[DecidableEq K]` enters through the `[qʳ]`-witness for `πʳ` used in the proof; the
 -- linter only inspects the type.
-set_option linter.unusedDecidableInType false in
 /-- **The capstone reduction** (Silverman III.6.1 via II.2.12): a faithful `[n]`-dual
 witness for the separable part `φ_sep` yields the faithful `[qʳ·n]`-dual witness for `φ`
 itself. The composition runs along `φ = φ_sep ∘ πʳ` with the `[qʳ]`-witness for `πʳ`
@@ -453,7 +446,6 @@ theorem Isogeny.mulByIntDualWitness_of_separablePart (φ : Isogeny W W) (r : ℕ
       (Isogeny.frobeniusPower_mulByIntPullbackCovariant W r n hn)).congrIsog
     (φ.separablePart_compose r hincl)
 
-set_option linter.unusedDecidableInType false in
 /-- **The faithful `[deg φ]`-witness from the separable part** (Silverman III.6.1's exact
 bookkeeping): with `n = deg φ_sep`, the reduction produces the witness at
 `qʳ · deg φ_sep = deg φ` (`compose_degree` order), i.e. the dual satisfies
@@ -471,7 +463,6 @@ theorem Isogeny.mulByIntDualWitness_degree_of_separablePart (φ : Isogeny W W)
   (φ.mulByIntDualWitness_of_separablePart r hincl wsep).congrInt
     (φ.pow_mul_separablePart_degree_intCast r hincl)
 
-set_option linter.unusedDecidableInType false in
 /-- **`(φ̂ ∘ φ) = [qʳ·n]` in fully bundled form** for the reduced witness: the defining
 identity of the dual produced by the capstone reduction. -/
 theorem Isogeny.separablePart_mulByIntDual_compose (φ : Isogeny W W) (r : ℕ)
@@ -483,7 +474,6 @@ theorem Isogeny.separablePart_mulByIntDual_compose (φ : Isogeny W W) (r : ℕ)
       Isogeny.mulByInt W (mul_ne_zero (pow_ne_zero r (intCardK_ne_zero (K := K))) hn) :=
   Isogeny.mulByIntDual_compose _
 
-set_option linter.unusedDecidableInType false in
 /-- **`exists_dual` from the separable part's witness**: every isogeny equipped with the
 II.2.12 inseparability data and a faithful witness for its separable part admits a reverse
 isogeny. -/
@@ -496,11 +486,10 @@ theorem Isogeny.exists_dual_of_separablePart_witness (φ : Isogeny W W) (r : ℕ
   φ.exists_dual_of_witness
     (φ.mulByIntDualWitness_of_separablePart r hincl wsep).toHasDualWitness
 
-set_option linter.unusedDecidableInType false in
 /-- **The conjugation-form reduction**: a *generic* dual witness for the separable part
 yields one for `φ`, via `HasDualWitness.compose` (no integer bookkeeping, no covariance).
 Pairs with the separable-side `DualGaloisData` capstones
-(`EC/IsogenyAG/DualGaloisClosed.lean`), whose output is a `HasDualWitness`. -/
+(`Isogeny/Dual/GaloisClosed.lean`), whose output is a `HasDualWitness`. -/
 noncomputable def Isogeny.hasDualWitness_of_separablePart (φ : Isogeny W W) (r : ℕ)
     (hincl : φ.toCurveMap.pullback.range ≤
       (Isogeny.frobeniusPower W r).toCurveMap.pullback.range)
@@ -517,7 +506,6 @@ section Stress
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : Affine K) [W.IsElliptic]
 
-set_option linter.unusedDecidableInType false in
 /-- **The faithful `[qʳ·ℓ²]`-witness for `[ℓ] ∘ πʳ`** — the `r`-fold generalization of
 `mulByIntCompFrobeniusDualWitness`, stressing the `[qʳ]`-witness and the theorem-level
 `πʳ` covariance. Every field a theorem. -/
@@ -528,7 +516,6 @@ theorem mulByIntCompFrobeniusPowerDualWitness (r : ℕ) {ℓ : ℤ} (hℓ : ℓ 
   (mulByIntSelfDualWitness W hℓ).compose (frobeniusPowerMulByIntDualWitness W r)
     (Isogeny.frobeniusPower_mulByIntPullbackCovariant W r _ (mul_ne_zero hℓ hℓ))
 
-set_option linter.unusedDecidableInType false in
 /-- **The faithful `[ℓ²·qʳ]`-witness for `πʳ ∘ [ℓ]`** — the opposite composition order,
 exercising the `[m]`-covariance leg. Every field a theorem. -/
 theorem frobeniusPowerCompMulByIntDualWitness (r : ℕ) {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
@@ -586,13 +573,12 @@ def FrobeniusFactorization (W : Affine K) [W.IsElliptic] : Prop :=
 
 -- `[DecidableEq K]` enters through the `[qʳ]`-witness for `πʳ` used in the proof; the
 -- linter only inspects the type.
-set_option linter.unusedDecidableInType false in
 /-- **The universal capstone** (Silverman III.6.1 over `𝔽_q`, assembled): if every isogeny
 factors through a power of Frobenius with separable quotient (`FrobeniusFactorization`,
 the II.2.12 gap) and every *separable* isogeny carries a faithful dual witness (the
 separable-side gap, cf. the `DualGaloisData` capstones in
-`EC/IsogenyAG/DualGaloisClosed.lean`), then **every** isogeny carries a dual witness —
-the `universal_dual_witness` shape of `EC/IsogenyAG/Dual.lean`, reduced over a finite
+`Isogeny/Dual/GaloisClosed.lean`), then **every** isogeny carries a dual witness —
+the `universal_dual_witness` shape of `Isogeny/Dual/Morphism.lean`, reduced over a finite
 field to its two honest inputs. -/
 theorem nonempty_hasDualWitness_of_frobeniusFactorization (W : Affine K) [W.IsElliptic]
     (hfact : FrobeniusFactorization W)

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.PrimaryUnits
-import BernoulliRegular.FLT37.CaseI
+module
+
+public import BernoulliRegular.FLT37.PrimaryUnits
+public import BernoulliRegular.FLT37.CaseI
 
 /-!
 # LV010 Stage 1: weak-primary normalization of case-I factor

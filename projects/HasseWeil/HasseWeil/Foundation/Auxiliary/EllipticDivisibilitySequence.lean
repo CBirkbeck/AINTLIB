@@ -18,8 +18,8 @@ This file provides definitions and lemmas about normalised elliptic divisibility
 that are not yet in mathlib. These are needed for the division polynomial / ZSMul development.
 
 The key results are:
-* `IsEllSequence.normEDS`: a normalised EDS is an elliptic sequence.
-* `IsEllSequence.ext`: two elliptic sequences with the same first four terms are equal.
+* `IsEllipticSequence.normEDS`: a normalised EDS is an elliptic sequence.
+* `IsEllipticSequence.ext`: two elliptic sequences with the same first four terms are equal.
 * `normEDS_two_three_two`: when `b = 2, c = 3, d = 2`, the normalised EDS is the identity.
 * `complEDSAux₂`: auxiliary complement used in the `ω` definition.
 * `redInvarDenom`, `redInvarNum`: reduced invariant decomposition.
@@ -76,8 +76,17 @@ def Rel₃ (m n r : ℤ) : Prop :=
   W (m + n) * W (m - n) * W r ^ 2 =
     W (m + r) * W (m - r) * W n ^ 2 - W (n + r) * W (n - r) * W m ^ 2
 
-/-- `IsEllSequence` is equivalent to the universal `Rel₃` property. -/
-lemma isEllSequence_iff_rel₃ : IsEllSequence W ↔ ∀ m n r : ℤ, Rel₃ W m n r := Iff.rfl
+/-- The mathlib elliptic relator at `s = 0` is equivalent to `Rel₃`. -/
+lemma rel_zero_iff_rel₃ (m n r : ℤ) :
+    IsEllipticNet.rel W m n r 0 = 0 ↔ Rel₃ W m n r := by
+  rw [IsEllipticNet.rel, Rel₃]; simp only [add_zero]
+  constructor <;> intro h <;> linear_combination h
+
+/-- `IsEllipticSequence` is equivalent to the universal `Rel₃` property. -/
+lemma isEllipticSequence_iff_rel₃ : IsEllipticSequence W ↔ ∀ m n r : ℤ, Rel₃ W m n r := by
+  simp only [IsEllipticSequence, IsEllipticSequence]
+  exact forall_congr' fun m => forall_congr' fun n => forall_congr' fun r =>
+    rel_zero_iff_rel₃ W m n r
 
 /-- The numerator of an invariant of an elliptic sequence, such that for each `s`,
 `invarNum s n / invarDenom s n` is a constant independent of `n`. -/
@@ -504,8 +513,8 @@ theorem rel₄_of_oddRec_evenRec {a b c d : ℤ} (same : HaveSameParity₄ a b c
 /-- An ℕ-indexed sequence satisfying the even-odd recurrence, after extension to all integers
 by symmetry (to make an odd function), is an elliptic sequence, provided its first two terms
 are not zero divisors. -/
-theorem _root_.IsEllSequence.of_oddRec_evenRec : IsEllSequence W := fun m n r ↦ by
-  change Rel₃ W m n r
+theorem _root_.IsEllipticSequence.of_oddRec_evenRec : IsEllipticSequence W :=
+    (isEllipticSequence_iff_rel₃ W).mpr fun m n r ↦ by
   rw [rel₃_iff₄, rel₄_of_oddRec_evenRec neg zero one two oddRec evenRec]
   refine ⟨?_, ?_, ?_⟩ <;> simp only [negOnePow_two_mul, negOnePow_zero]
 
@@ -515,26 +524,29 @@ end EllSequence
 
 open EllSequence
 
-namespace IsEllSequence
+namespace IsEllipticSequence
 
-variable {R : Type*} [CommRing R] {W : ℤ → R} (ell : IsEllSequence W)
+variable {R : Type*} [CommRing R] {W : ℤ → R} (ell : IsEllipticSequence W)
 include ell
 
-lemma oddRec (m : ℤ) : OddRec W m := (rel₃_iff_oddRec W m).mp (ell _ _ _)
-lemma evenRec (m : ℤ) : EvenRec W m := (rel₃_iff_evenRec W m).mp (ell _ _ _)
+lemma oddRec (m : ℤ) : OddRec W m :=
+  (rel₃_iff_oddRec W m).mp ((isEllipticSequence_iff_rel₃ W).mp ell _ _ _)
+lemma evenRec (m : ℤ) : EvenRec W m :=
+  (rel₃_iff_evenRec W m).mp ((isEllipticSequence_iff_rel₃ W).mp ell _ _ _)
 
 /-- The zeroth term of an elliptic sequence is zero,
 provided some even term is not a zero divisor. -/
 lemma zero (m : ℤ) (mem : W (2 * m) ∈ R⁰) : W 0 = 0 := by
-  have h := ell m m (2 * m)
-  rw [show m + m = 2 * m by ring, sub_self] at h
+  have h := (isEllipticSequence_iff_rel₃ W).mp ell m m (2 * m)
+  rw [Rel₃, show m + m = 2 * m by ring, sub_self] at h
   -- the RHS of `h` is `X - X = 0`, leaving `W 0 * W (2 * m) ^ 3 = 0`
   have h'' : W 0 * W (2 * m) ^ 3 = 0 := by linear_combination h
   exact (pow_mem mem 3).2 _ h''
 
 lemma sub_add_neg_sub_mul_eq_zero (m n r : ℤ) :
     (W (m - n) + W (-(m - n))) * W (m + n) * W r ^ 2 = 0 := by
-  have := congr($(ell m n r) + $(ell n m r))
+  have := congr($((isEllipticSequence_iff_rel₃ W).mp ell m n r)
+    + $((isEllipticSequence_iff_rel₃ W).mp ell n m r))
   rw [add_comm n, ← right_distrib, ← left_distrib, mul_comm (W _)] at this
   rw [show (-(m - n) : ℤ) = n - m by ring]
   convert this using 1; ring
@@ -571,15 +583,15 @@ lemma invar (s m n : ℤ) :
     invarNum W s m * invarDenom W s n = invarNum W s n * invarDenom W s m :=
   invar_of_net _ (ell.net one two) _ _ _
 
-end IsEllSequence
+end IsEllipticSequence
 
 section NormEDSOfMem
 
 variable {R : Type*} [CommRing R] (b c d : R)
 
 private theorem normEDS_of_mem_nonZeroDivisors (hb : b ∈ R⁰) :
-    IsEllSequence (normEDS b c d) := by
-  refine IsEllSequence.of_oddRec_evenRec (normEDS_neg _ _ _) (normEDS_zero _ _ _)
+    IsEllipticSequence (normEDS b c d) := by
+  refine IsEllipticSequence.of_oddRec_evenRec (normEDS_neg _ _ _) (normEDS_zero _ _ _)
     (by rw [normEDS_one]; exact one_mem _) (by rwa [normEDS_two]) ?_ ?_ <;>
     intro m hm <;> rw [← sub_nonneg] at hm
   · lift m - 2 to ℕ using hm with k hk
@@ -633,7 +645,7 @@ noncomputable def universalNormEDS : ℤ → MvPolynomial Param ℤ := normEDS (
 lemma normEDS_eq_aeval :
     normEDS b c d = (MvPolynomial.aeval (Param.rec b c d) <| universalNormEDS ·) := by
   funext n
-  unfold universalNormEDS
+  simp only [universalNormEDS]
   simp [MvPolynomial.aeval]
 
 lemma complEDS₂_eq_aeval :
@@ -655,13 +667,14 @@ section NormEDSIsEll
 variable {R : Type*} [CommRing R] (b c d : R)
 open Param MvPolynomial
 
-private lemma IsEllSequence.map' {S : Type*} [CommRing S] {W : ℤ → R} (h : IsEllSequence W)
-    (f : R →+* S) : IsEllSequence (f ∘ W) := by
-  intro m n r
-  simpa [Function.comp] using congr_arg f (h m n r)
+private lemma IsEllipticSequence.map' {S : Type*} [CommRing S] {W : ℤ → R}
+    (h : IsEllipticSequence W)
+    (f : R →+* S) : IsEllipticSequence (f ∘ W) :=
+    (isEllipticSequence_iff_rel₃ (f ∘ W)).mpr fun m n r ↦ by
+  simpa [Rel₃, Function.comp] using congr_arg f ((isEllipticSequence_iff_rel₃ W).mp h m n r)
 
 /-- A normalised EDS is an elliptic sequence. -/
-protected theorem IsEllSequence.normEDS : IsEllSequence (normEDS b c d) := by
+protected theorem IsEllipticSequence.normEDS : IsEllipticSequence (normEDS b c d) := by
   rw [normEDS_eq_aeval]
   exact map' (normEDS_of_mem_nonZeroDivisors _ _ _
     (mem_nonZeroDivisors_of_ne_zero <| X_ne_zero _)) _
@@ -674,7 +687,7 @@ variable {R : Type*} [CommRing R] {W U : ℤ → R}
 
 /-- Two elliptic sequences with the same first four terms are equal,
 provided the first two terms are non-zero-divisors. -/
-protected theorem IsEllSequence.ext (ellW : IsEllSequence W) (ellU : IsEllSequence U)
+protected theorem IsEllipticSequence.ext (ellW : IsEllipticSequence W) (ellU : IsEllipticSequence U)
     (one : W 1 ∈ R⁰) (two : W 2 ∈ R⁰)
     (h1 : W 1 = U 1) (h2 : W 2 = U 2) (h3 : W 3 = U 3) (h4 : W 4 = U 4) : W = U :=
   funext fun n ↦ by
@@ -699,7 +712,7 @@ section CuspEval
 
 /-- When `b = 2, c = 3, d = 2`, the normalised EDS is the identity. -/
 lemma normEDS_two_three_two : normEDS (2 : ℤ) 3 2 = id := by
-  apply IsEllSequence.ext (IsEllSequence.normEDS 2 3 2) isEllSequence_id <;>
+  apply IsEllipticSequence.ext (IsEllipticSequence.normEDS 2 3 2) IsEllipticSequence.id <;>
     simp only [normEDS_one, normEDS_two, normEDS_three, normEDS_four]
   exacts [mem_nonZeroDivisors_of_ne_zero one_ne_zero,
     mem_nonZeroDivisors_of_ne_zero two_ne_zero, rfl, rfl, rfl, rfl]
@@ -735,7 +748,8 @@ variable {R : Type*} [CommRing R] (b c d : R)
 private lemma normEDS_mul_complEDS_of_mem (hb : b ∈ R⁰) {m : ℤ}
     (hm : normEDS b c d m ∈ R⁰) (n : ℤ) :
     normEDS b c d m * complEDS b c d m n = normEDS b c d (n * m) := by
-  have ellW := IsEllSequence.normEDS b c d
+  have ellW := IsEllipticSequence.normEDS b c d
+  have relW := (isEllipticSequence_iff_rel₃ _).mp ellW
   have hmem1 : normEDS b c d 1 ∈ R⁰ := by rw [normEDS_one]; exact one_mem _
   have hmem2 : normEDS b c d 2 ∈ R⁰ := by rw [normEDS_two]; exact hb
   induction n using Int.negInduction with
@@ -761,7 +775,7 @@ private lemma normEDS_mul_complEDS_of_mem (hb : b ∈ R⁰) {m : ℤ}
         _ = normEDS b c d (↑(2 * (k + 1)) * m) := by push_cast; ring_nf
     · rw [show 2 * k + 1 + 1 + 1 = 2 * (k + 1) + 1 by lia, complEDS'_odd]
       rw [← mul_cancel_right_mem_nonZeroDivisors (mul_mem hm (pow_mem hmem1 2))]
-      have h := (ellW ((↑k + 2) * m) ((↑k + 1) * m) 1).symm
+      have h := (relW ((↑k + 2) * m) ((↑k + 1) * m) 1).symm
       have ih1 : normEDS b c d m * complEDS' b c d m (k + 1) =
           normEDS b c d ((↑k + 1) * m) := by
         have := ih (k + 1) (by lia); rwa [complEDS_ofNat, Nat.cast_succ] at this
@@ -929,7 +943,7 @@ open Param MvPolynomial
 
 /-- The net relation holds for normalised EDS. -/
 lemma net_normEDS (p q r s : ℤ) : EllSequence.net (normEDS b c d) p q r s = 0 := by
-  have ellU := IsEllSequence.normEDS (X (R := ℤ) B) (X C) (X D)
+  have ellU := IsEllipticSequence.normEDS (X (R := ℤ) B) (X C) (X D)
   have one : normEDS (X (R := ℤ) B) (X C) (X D) 1 ∈ _ ⁰ := by
     rw [normEDS_one]; exact one_mem _
   have two : normEDS (X (R := ℤ) B) (X C) (X D) 2 ∈ _ ⁰ :=
@@ -997,13 +1011,13 @@ section Divisibility
 variable {R : Type*} [CommRing R] (b c d : R)
 
 /-- A normalised EDS is a divisibility sequence. -/
-protected theorem IsDivSequence.normEDS : IsDivSequence (normEDS b c d) := by
+protected theorem IsDvdSequence.normEDS : IsDvdSequence (normEDS b c d) := by
   intro m n ⟨k, hk⟩
   rw [hk, mul_comm m k]
   exact ⟨_, (normEDS_mul_complEDS b c d m k).symm⟩
 
 /-- A normalised EDS is an EDS. -/
-protected theorem IsEllDivSequence.normEDS : IsEllDivSequence (normEDS b c d) :=
-  ⟨IsEllSequence.normEDS b c d, IsDivSequence.normEDS b c d⟩
+protected theorem IsEllipticDvdSequence.normEDS : IsEllipticDvdSequence (normEDS b c d) :=
+  ⟨IsEllipticSequence.normEDS b c d, IsDvdSequence.normEDS b c d⟩
 
 end Divisibility

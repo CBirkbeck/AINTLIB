@@ -14,7 +14,8 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 ## The mechanism, one `37`-adic digit deeper
 
 The mod-`37³` Dwork coordinate `valuedLambdaQuotientDworkCoeffModCube`
-(`CaseIICor823ThirdOrderCoeff.lean`) reads the `varpi^{32}` coordinate of the degree-`68` slice at the
+(`CaseIICor823ThirdOrderCoeff.lean`) reads the `varpi^{32}` coordinate of the degree-`68` slice
+at the
 **level-`107`** precision (`3(p−1) = 108`).  The all-degrees factorial identity
 `natCast_factorial_mul_…_eq_formal` (`N`-generic) at `N = 107`, `d = 68` gives, in
 `⧸ (lambdaIdeal)^{108} = mod 37³`:
@@ -53,7 +54,6 @@ tissue beyond the mod-`37²` ↔ mod-`37³` parallel) is isolated as the single 
 
 noncomputable section
 
-set_option maxRecDepth 100000
 
 open NumberField
 
@@ -65,18 +65,17 @@ open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
-variable [NumberField.IsCMField K]
 
 /-! ## 1. The factorial-`37` extraction carried into the mod-`37³` coordinate (level-`107`) -/
 
-omit [NumberField.IsCMField K] in
 /-- **The factorial-`37` second-order extraction at degree `68`, mod `37³`** (proven, axiom-clean):
 
   `(68! : ZMod 37³) · coordCube(deg-68 slice at level 107) = coordCube(quotMap(x^68)·formalSum_68)`,
 
 where `x = dworkParameterApprox 108`, the `deg-68 slice` is
 `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum 107 68 x hx`, and `formalSum_68` is
-the same degree-`68` Artin-Hasse weighted-log coefficient sum.  The mod-`37³` coordinate image of the
+the same degree-`68` Artin-Hasse weighted-log coefficient sum.
+The mod-`37³` coordinate image of the
 **all-degrees** factorial identity `natCast_factorial_mul_…_eq_formal` (`N`-generic, here at
 `N = 107`), via `congrArg` of the mod-`37³` coordinate functional and the proven scalar law
 `valuedLambdaQuotientDworkCoeffModCube_natCast_mul`.  Mod-`37³` parallel of
@@ -104,7 +103,6 @@ Reusing the proven Dwork-ring identities `dworkParameter_pow_sixtyeight_eq` (the
 `dworkParameter^68 = −37·tailUnit·dworkParameter^32`) and the proven mod-`37²` coordinate of
 `tailUnit·dworkParameter^32` (`= 1`), the `varpi^32` mod-`37³` coordinate of `x^68` is `−37`. -/
 
-omit [NumberField.IsCMField K] in
 /-- **The quotient image of `x^68` is the completed evaluation of `dworkParameter^68`** (proven,
 level-`108` precision): `mk(dworkParameterApprox 108 ^ 68) = evalₐ 108 (dworkParameter^68)`. -/
 theorem mk_dworkParameterApprox_pow_sixtyeight_modCube_eq :
@@ -114,7 +112,6 @@ theorem mk_dworkParameterApprox_pow_sixtyeight_modCube_eq :
         (dworkParameter 37 K ^ 68) := by
   rw [map_pow, map_pow, dworkParameter_evalₐ]
 
-omit [NumberField.IsCMField K] in
 /-- **The `tailUnit·dworkParameter^32` tail part vanishes mod `37³` after the `−37` fold** (proven):
 `rationalPadicIntegerToZModCube(−37·repr(artinHasseTail·dworkParameter^32) 32) = 0`, since
 `repr(artinHasseTail·dworkParameter^32) 32 ∈ (rationalPadicPrimeIdeal)^2`
@@ -141,8 +138,8 @@ theorem neg_thirtyseven_artinHasseTail_mul_dworkParameter_pow_thirtytwo_coordMod
       (rationalPadicPrimeIdeal 37) ^ 3 by ring] at hprod
   exact hprod
 
-omit [NumberField.IsCMField K] in
-/-- **The `varpi^32` mod-`37³` coordinate of `dworkParameter^68` is exactly `−37`** (proven): for the
+/-- **The `varpi^32` mod-`37³` coordinate of `dworkParameter^68` is exactly `−37`** (proven):
+for the
 basis index `k` with `(k : ℕ) = 32`,
 
   `coordCube(evalₐ(dworkParameter^68)) = −37`   (in `ZMod 37³`).
@@ -188,9 +185,9 @@ theorem dworkParameter_pow_sixtyeight_coordModCube_eq_neg_thirtyseven
   push_cast
   ring
 
-omit [NumberField.IsCMField K] in
 /-- **The `varpi^32` coordinate of `samePrimeQuotientMap 107 (x^68)` is `−37` mod `37³`** (proven):
-the same `−37` value as `dworkParameter_pow_sixtyeight_coordModCube_eq_neg_thirtyseven`, displayed on
+the same `−37` value as `dworkParameter_pow_sixtyeight_coordModCube_eq_neg_thirtyseven`,
+displayed on
 the `samePrimeQuotientMap 107` form (precision `107+1 = 108 = 3(p−1)`), reconciled by
 `mk_dworkParameterApprox_pow_sixtyeight_modCube_eq`. -/
 theorem samePrimeQuotientMap_x68_coordModCube_eq_neg_thirtyseven

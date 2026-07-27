@@ -2,30 +2,25 @@
 Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
-
-Ticket T-W3 (quotient-stack core; reviewer v8).
 -/
-import ModularCurves.ForMathlib.SchemeQuotient
-import Mathlib.CategoryTheory.Category.Cat
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.CategoryTheory.Category.Cat
+import ModularCurves.ForMathlib.TorsorMap
 
 /-!
-# The quotient prestack `[X/G]` of a scheme by a finite group action (T-W3)
+# Quotient prestacks and torsor pairs
 
-For a (constant) group `G` acting on a scheme `X` via
-`σ : AlgebraicGeometry.SchemeAction G X` (the T-W3 `GroupAction` vocabulary of
-record — alias decision on the board), this file provides the minimal
-quotient-stack API of reviewer v8:
+This file defines the action groupoid and quotient prestack associated to a finite group action
+on a scheme. It also develops finite etale torsor pairs, their trivialization, and base change.
 
-* `ActionGroupoid σ S` — the value groupoid of `[X/G]` on `S`: objects are
-  `S`-points `t : S ⟶ X`, morphisms `t ⟶ t'` are group elements `g` with
-  `t ≫ σ.hom g = t'`.
-* `QuotientStack σ : Schemeᵒᵖ ⥤ Cat` — the (strict) presheaf of groupoids
-  `S ↦ [X/G](S)`, restriction by precomposition.
+## Main definitions
 
-No algebraic-stack properties are claimed (the fppf-stack condition is T-E8
-territory); the torsor description of `[X/G](S)` is stated separately.
+* `ActionGroupoid`: the action groupoid on the `S`-points of a scheme.
+* `QuotientStack`: the resulting presheaf of groupoids.
+* `TorsorPair`: a finite etale torsor equipped with an equivariant map.
+* `trivialTorsorPair`: the torsor pair associated to a point.
+* `TorsorPair.pullback`: base change of a torsor pair.
 -/
 
 universe u
@@ -36,8 +31,7 @@ namespace ModularCurves
 
 variable {G : Type u} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
 
-/-- The value of the quotient prestack `[X/G]` on `S`: the action groupoid of
-`G` on the `S`-points of `X`. Objects are morphisms `S ⟶ X`. -/
+/-- The action groupoid of `G` on the `S`-points of `X`. -/
 def ActionGroupoid (_σ : SchemeAction G X) (S : Scheme.{u}) : Type u := S ⟶ X
 
 namespace ActionGroupoid
@@ -77,7 +71,8 @@ theorem id_val (a : ActionGroupoid σ S) : (𝟙 a : a ⟶ a).1 = 1 := rfl
 
 theorem eqToHom_val {a b : ActionGroupoid σ S} (h : a = b) :
     (eqToHom h).1 = 1 := by
-  subst h; rfl
+  subst h
+  rfl
 
 /-- Restriction of the action groupoid along `u : S' ⟶ S` (precomposition). -/
 def restrict (σ : SchemeAction G X) {S S' : Scheme.{u}} (u : S' ⟶ S) :
@@ -104,8 +99,6 @@ namespace ActionGroupoid
 
 variable {σ}
 
-/-- Functors between action groupoids are determined by their object maps and
-the group-element labels of their morphism maps. -/
 private theorem functor_ext {S S' : Scheme.{u}}
     {F F' : ActionGroupoid σ S ⥤ ActionGroupoid σ S'}
     (hobj : ∀ t, F.obj t = F'.obj t)
@@ -120,9 +113,7 @@ private theorem functor_ext {S S' : Scheme.{u}}
 end ActionGroupoid
 
 open ActionGroupoid in
-/-- **The quotient prestack `[X/G]`** (T-W3): the strict presheaf of groupoids
-sending `S` to the action groupoid of `G` on `X(S)`, with restriction by
-precomposition. (Stack properties are out of scope here.) -/
+/-- The quotient prestack sending `S` to the action groupoid of `G` on `X(S)`. -/
 def QuotientStack (σ : SchemeAction G X) : Schemeᵒᵖ ⥤ Cat.{u, u} where
   obj S := Cat.of (ActionGroupoid σ S.unop)
   map u := (restrict σ u.unop).toCatHom
@@ -149,10 +140,7 @@ variable [Finite G]
 variable (V : ↥X → X.Opens) (hVs : ∀ x : ↥X, σ.IsStableOpen (V x))
   (hVa : ∀ x : ↥X, IsAffineOpen (V x)) (hVmem : ∀ x : ↥X, x ∈ V x)
 
-/-- **The coarse comparison** `[X/G](S) ⟶ (X/G)(S)`: composing an `S`-point with
-the T-Q5 quotient projection collapses the groupoid (every morphism goes to an
-identity, by the invariance `hom_quotientπ`). This is the prestack-level
-`[X/G] → X/G` map feeding the T-Q7 coarse statements. -/
+/-- The comparison from the action groupoid to points of the coarse quotient. -/
 noncomputable def ActionGroupoid.toQuotient (S : Scheme.{u}) :
     ActionGroupoid σ S ⥤ Discrete (S ⟶ σ.quotient V hVs hVa) where
   obj t := ⟨t.pt ≫ σ.quotientπ V hVs hVa hVmem⟩
@@ -171,11 +159,7 @@ open AlgebraicGeometry
 
 variable [Finite G]
 
-/-- **A `G`-torsor pair over `S`** (T-W3b vocabulary): a finite étale `G`-torsor
-`p : P ⟶ S` (in the `∐`-comparison sense of record — `TorsorData`/Stack.lean
-shape) together with a `G`-equivariant map to `X`. These are the objects of the
-honest (stacky) value groupoid of `[X/G]` at `S`; the prestack `ActionGroupoid`
-embeds as the trivial-torsor pairs (T-W3b). -/
+/-- A finite etale `G`-torsor over `S` equipped with an equivariant map to `X`. -/
 structure TorsorPair (σ : SchemeAction G X) (S : Scheme.{u}) where
   /-- The total space of the torsor. -/
   P : Scheme.{u}
@@ -206,9 +190,7 @@ namespace TorsorPair
 
 variable {σ} {S : Scheme.{u}}
 
-/-- Morphisms of `G`-torsor pairs: equivariant maps over `S` compatible with the
-maps to `X`. (Any such map is automatically an isomorphism — torsor pairs form a
-groupoid — but that is a theorem, not part of the data.) -/
+/-- An equivariant map of torsor pairs over `S` compatible with their maps to `X`. -/
 @[ext]
 structure Hom (A B : TorsorPair σ S) where
   /-- The underlying map of total spaces. -/
@@ -246,16 +228,8 @@ theorem id_hom (A : TorsorPair σ S) : (𝟙 A : A ⟶ A).hom = 𝟙 A.P := rfl
 
 end TorsorPair
 
-/-! ### The trivial torsor (T-W3b, trivialization data)
-
-The underlying data of the trivial `G`-torsor `∐_G S → S`: the translation
-action and the equivariant map attached to an `S`-point of `X`. The
-morphism-property fields (`finite`/`etale`/`surjective`/`torsor`) of the
-corresponding `TorsorPair` are the T-W3b remainder. -/
-
 variable (G) in
-/-- The translation action of `G` on `∐_G S`: `g` maps the `h`-summand
-identically onto the `h * g`-summand. -/
+/-- The right translation action of `G` on `∐_G S`. -/
 noncomputable def trivialTorsorAction (S : Scheme.{u}) :
     SchemeAction G (∐ fun _ : G => S) where
   hom g := Limits.Sigma.desc fun h => Limits.Sigma.ι (fun _ : G => S) (h * g)
@@ -292,8 +266,7 @@ theorem trivialTorsorAction_over_base (S : Scheme.{u}) (g : G) :
   rw [← Category.assoc, ι_trivialTorsorAction_hom, ι_trivialTorsorπ,
     ι_trivialTorsorπ]
 
-/-- The equivariant map of the trivial torsor pair attached to an `S`-point
-`t : S ⟶ X`: on the `g`-summand it is `t` translated by `g`. -/
+/-- The equivariant map of the trivial torsor pair attached to an `S`-point. -/
 noncomputable def trivialTorsorMap (S : Scheme.{u}) (t : S ⟶ X) :
     (∐ fun _ : G => S) ⟶ X :=
   Limits.Sigma.desc fun g => t ≫ σ.hom g
@@ -314,9 +287,7 @@ theorem trivialTorsorMap_equivariant (S : Scheme.{u}) (t : S ⟶ X) (g : G) :
     ← Category.assoc, ι_trivialTorsorMap, Category.assoc, ← σ.hom_mul]
 
 variable (G) in
-/-- Left translation on the trivial torsor: the `h`-summand maps identically to
-the `g * h`-summand. Left translations are the torsor-pair endomorphisms of the
-trivial torsor (they commute with the right-translation action). -/
+/-- Left translation by `g` on the trivial torsor. -/
 noncomputable def trivialTorsorLeft (S : Scheme.{u}) (g : G) :
     (∐ fun _ : G => S) ⟶ (∐ fun _ : G => S) :=
   Limits.Sigma.desc fun h => Limits.Sigma.ι (fun _ : G => S) (g * h)
@@ -346,9 +317,7 @@ theorem trivialTorsorLeft_over_base (S : Scheme.{u}) (g : G) :
   rw [← Category.assoc, ι_trivialTorsorLeft, ι_trivialTorsorπ, ι_trivialTorsorπ]
 
 omit [Finite G] in
-/-- The compatibility of left translation with the equivariant maps: if
-`t ≫ σ.hom g = t'`, left translation by `g⁻¹` carries the trivial pair of `t'`
-to that of `t`. -/
+/-- Left translation by `g⁻¹` identifies the trivial pairs of `t` and `t'`. -/
 theorem trivialTorsorLeft_map (S : Scheme.{u}) {t t' : S ⟶ X} {g : G}
     (hg : t ≫ σ.hom g = t') :
     trivialTorsorLeft G S g⁻¹ ≫ trivialTorsorMap σ S t' =
@@ -366,6 +335,7 @@ theorem trivialTorsorLeft_one (S : Scheme.{u}) :
   rw [ι_trivialTorsorLeft, one_mul, Category.comp_id]
 
 omit [Group G] [Finite G] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The trivial-torsor projection is étale (a coproduct of identities;
 `Etale` is Zariski-local at the source). -/
 theorem trivialTorsorπ_etale (S : Scheme.{u}) :
@@ -382,9 +352,7 @@ theorem trivialTorsorπ_surjective (S : Scheme.{u}) :
   intro x _
   exact Set.mem_iUnion.mpr ⟨1, x, rfl⟩
 
-/-- **The fold of a finite coproduct of copies of an affine scheme is finite**
-(T-W3b-i, model case): conjugating by `sigmaSpec`, the fold is `Spec` of the
-diagonal `R →+* Π_ι R`, which is module-finite for finite `ι`. -/
+/-- The fold map from finitely many copies of an affine scheme is finite. -/
 theorem isFinite_sigmaDesc_id_spec {ι : Type u} [Finite ι]
     (R : CommRingCat.{u}) :
     AlgebraicGeometry.IsFinite
@@ -406,10 +374,7 @@ theorem isFinite_sigmaDesc_id_spec {ι : Type u} [Finite ι]
     exact Module.Finite.pi
   infer_instance
 
-/-- **The fold of a finite coproduct of copies of any scheme is a finite
-morphism** (T-W3b-i): it is the base change of the affine model
-(`isFinite_sigmaDesc_id_spec` over `Spec ℤ`) along `S ⟶ Spec ℤ`, via the
-extensivity of `Scheme` (pullbacks distribute over finite coproducts). -/
+/-- The fold map from finitely many copies of a scheme is finite. -/
 theorem isFinite_sigmaDesc_id {ι : Type u} [Finite ι] (S : Scheme.{u}) :
     AlgebraicGeometry.IsFinite (Limits.Sigma.desc fun _ : ι => 𝟙 S) := by
   have hsq := (FinitaryPreExtensive.isUniversal_finiteCoproducts
@@ -445,9 +410,6 @@ section TorsorComparison
 variable (S : Scheme.{u})
 
 omit [Group G] in
-/-- Stage A of the trivial-torsor comparison: distributing the pullback of the
-trivial projection over the second coproduct factor. The square exhibits
-`∐_k (∐_G S)` as `(∐_G S) ×_S (∐_G S)` via `(k, x) ↦ (x, π(x)-in-k-copy)`. -/
 private theorem trivialTorsor_distrib :
     IsPullback
       (Limits.Cofan.IsColimit.desc
@@ -472,14 +434,12 @@ private theorem trivialTorsor_distrib :
     (Limits.coproductIsCoproduct (fun _ : G => ∐ fun _ : G => S))
     (fun i => Limits.Sigma.ι_desc _ _)
 
-/-- The reindexing `(γ, h) ↦ (h, h·γ)` of the double coproduct. -/
 private noncomputable def trivialTorsorReindex :
     (∐ fun _ : G => (∐ fun _ : G => S)) ⟶ (∐ fun _ : G => (∐ fun _ : G => S)) :=
   Limits.Sigma.desc fun γ => Limits.Sigma.desc fun h =>
     Limits.Sigma.ι (fun _ : G => S) (h * γ) ≫
       Limits.Sigma.ι (fun _ : G => ∐ fun _ : G => S) h
 
-/-- The inverse reindexing `(k, m) ↦ (k⁻¹·m, k)`. -/
 private noncomputable def trivialTorsorReindexInv :
     (∐ fun _ : G => (∐ fun _ : G => S)) ⟶ (∐ fun _ : G => (∐ fun _ : G => S)) :=
   Limits.Sigma.desc fun k => Limits.Sigma.desc fun m =>
@@ -502,8 +462,6 @@ private instance : IsIso (trivialTorsorReindex (G := G) S) := by
     rw [← Category.assoc, Limits.Sigma.ι_desc, Category.assoc,
       Limits.Sigma.ι_desc, Limits.Sigma.ι_desc, mul_inv_cancel_left]
 
-/-- The trivial-torsor comparison map factors as the reindexing followed by the
-distributivity identification. -/
 private theorem trivialTorsor_comparison_eq :
     (Limits.Sigma.desc fun γ : G =>
       Limits.pullback.lift ((trivialTorsorAction G S).hom γ)
@@ -526,23 +484,21 @@ private theorem trivialTorsor_comparison_eq :
   rw [trivialTorsorReindex]
   refine Limits.Sigma.hom_ext _ _ fun γ => ?_
   rw [Limits.Sigma.ι_desc]
-  erw [Limits.Sigma.ι_desc_assoc]
+  rw [Limits.Sigma.ι_desc_assoc]
   refine Limits.Sigma.hom_ext _ _ fun h => ?_
-  erw [Limits.Sigma.ι_desc_assoc]
+  rw [Limits.Sigma.ι_desc_assoc]
   refine Limits.pullback.hom_ext ?_ ?_
   · rw [Category.assoc, Limits.pullback.lift_fst, ι_trivialTorsorAction_hom,
       Category.assoc, Category.assoc]
-    erw [(trivialTorsor_distrib S).isoPullback_hom_fst]
+    rw [(trivialTorsor_distrib S).isoPullback_hom_fst]
     rw [hfac1, Category.comp_id]
   · rw [Category.assoc, Limits.pullback.lift_snd, Category.comp_id,
       Category.assoc, Category.assoc]
-    erw [(trivialTorsor_distrib S).isoPullback_hom_snd]
-    erw [hfac2]
+    rw [(trivialTorsor_distrib S).isoPullback_hom_snd]
+    rw [hfac2]
     rw [ι_trivialTorsorπ_assoc]
 
-/-- **The trivial torsor satisfies the torsor condition** (the last property
-field of the trivial `TorsorPair`): `(γ, x) ↦ (γ·x, x)` identifies
-`∐_G (∐_G S)` with `(∐_G S) ×_S (∐_G S)`. -/
+/-- The trivial torsor satisfies the torsor condition. -/
 theorem trivialTorsor_torsor :
     IsIso ((Limits.Sigma.desc fun γ : G =>
       Limits.pullback.lift ((trivialTorsorAction G S).hom γ)
@@ -556,6 +512,7 @@ theorem trivialTorsor_torsor :
 end TorsorComparison
 
 omit [Finite G] in
+/-- Left translation reverses multiplication under composition. -/
 theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
     trivialTorsorLeft G S (g * g') =
       trivialTorsorLeft G S g' ≫ trivialTorsorLeft G S g := by
@@ -565,9 +522,7 @@ theorem trivialTorsorLeft_mul (S : Scheme.{u}) (g g' : G) :
 
 section Trivialize
 
-/-- **The trivial torsor pair** attached to an `S`-point `t : S ⟶ X`: the
-split torsor `∐_G S → S` with the translation action and the equivariant map
-`(g, s) ↦ σ(g)(t(s))`. -/
+/-- The trivial torsor pair attached to an `S`-point of `X`. -/
 noncomputable def trivialTorsorPair (S : Scheme.{u}) (t : S ⟶ X) :
     TorsorPair σ S where
   P := ∐ fun _ : G => S
@@ -581,11 +536,7 @@ noncomputable def trivialTorsorPair (S : Scheme.{u}) (t : S ⟶ X) :
   u := trivialTorsorMap σ S t
   equivariant := trivialTorsorMap_equivariant σ S t
 
-/-- **The trivialization functor** (T-W3b): the prestack `[X/G](S)` maps to the
-groupoid of `G`-torsor pairs by sending an `S`-point to its trivial torsor pair
-and a group element `f : t ⟶ t'` to left translation by `f⁻¹`. Fully faithful
-for connected nonempty `S` (see the attack log — NOT in general); the essential
-image is the locally trivial pairs (descent-gated). -/
+/-- The functor from the action groupoid to trivial torsor pairs. -/
 noncomputable def trivialize (S : Scheme.{u}) :
     ActionGroupoid σ S ⥤ TorsorPair σ S where
   obj t := trivialTorsorPair σ S t.pt
@@ -604,43 +555,17 @@ noncomputable def trivialize (S : Scheme.{u}) :
       trivialTorsorLeft G S f.1⁻¹ ≫ trivialTorsorLeft G S g.1⁻¹
     rw [mul_inv_rev, trivialTorsorLeft_mul]
 
-/-- The range of a coproduct component is clopen: open as an open immersion,
-closed because the complement is the (open) union of the other components.
-(T-W3b fullness ingredient: the clopen pieces a pair-endomorphism cuts out of a
-connected base.) -/
+/-- The range of a coproduct component is clopen. -/
 theorem isClopen_range_sigmaι {σ' : Type u} (g : σ' → Scheme.{u}) (i : σ') :
     IsClopen (Set.range (Limits.Sigma.ι g i).base) := by
-  haveI him : ∀ j : σ', IsOpenImmersion (Limits.Sigma.ι g j) := fun j =>
-    inferInstanceAs (IsOpenImmersion (Limits.colimit.ι (Discrete.functor g) ⟨j⟩))
-  constructor
-  · rw [← isOpen_compl_iff]
-    have hcompl : (Set.range (Limits.Sigma.ι g i).base)ᶜ =
-        ⋃ j : σ', ⋃ (_ : j ≠ i), Set.range (Limits.Sigma.ι g j).base := by
-      ext x
-      simp only [Set.mem_compl_iff, Set.mem_iUnion]
-      constructor
-      · intro hx
-        obtain ⟨y, hy⟩ := (sigmaOpenCover g).covers x
-        have hy' : (Limits.Sigma.ι g ((sigmaOpenCover g).idx x)).base y = x := hy
-        refine ⟨(sigmaOpenCover g).idx x, fun hji => hx ?_, y, hy'⟩
-        rw [← hji]
-        exact ⟨y, hy'⟩
-      · rintro ⟨j, hji, y, rfl⟩ hmem
-        have hd := (disjoint_opensRange_sigmaι g i j (Ne.symm hji)).eq_bot
-        have hin : (Limits.Sigma.ι g j).base y ∈
-            ((Limits.Sigma.ι g i).opensRange ⊓
-              (Limits.Sigma.ι g j).opensRange : Scheme.Opens _) :=
-          ⟨hmem, ⟨y, rfl⟩⟩
-        rw [hd] at hin
-        exact hin
-    rw [hcompl]
-    exact isOpen_iUnion fun j => isOpen_iUnion fun _ =>
-      (Limits.Sigma.ι g j).opensRange.2
-  · exact (Limits.Sigma.ι g i).opensRange.2
+  have hrange : Set.range (Limits.Sigma.ι g i).base = sigmaMk g '' Set.range (Sigma.mk i) := by
+    rw [← Set.range_comp]
+    exact congrArg Set.range (funext fun x => (sigmaMk_mk g i x).symm)
+  rw [hrange]
+  exact ⟨(sigmaMk g).isClosed_image.mpr isClopen_range_sigmaMk.1,
+    (sigmaMk g).isOpen_image.mpr isClopen_range_sigmaMk.2⟩
 
-/-- **The trivialization functor is faithful over a nonempty base** (the
-`S = ∅` counterexample in the attack log is the only obstruction; fullness
-additionally needs `S` connected). -/
+/-- The trivialization functor is faithful over a nonempty base. -/
 theorem trivialize_faithful (S : Scheme.{u}) [Nonempty S] :
     (trivialize σ S).Faithful where
   map_injective {t t'} {f g} hfg := by
@@ -657,73 +582,85 @@ theorem trivialize_faithful (S : Scheme.{u}) [Nonempty S] :
     have hmk := (sigmaι_eq_iff _ _ _ _ _).mp hpt
     exact Subtype.ext (inv_injective (congrArg Sigma.fst hmk))
 
-/-- **The trivialization functor is full over a connected base** (T-W3b): a
-torsor-pair morphism between trivial pairs restricts on the identity summand to
-a map into a single summand (the clopen pieces it cuts out of the connected
-base collapse to one), and equivariance then forces it to be a left
-translation. -/
+omit [Finite G] in
+private theorem exists_sigmaι_one_comp_eq {S : Scheme.{u}} [ConnectedSpace S]
+    {f : (∐ fun _ : G => S) ⟶ (∐ fun _ : G => S)}
+    (hover : f ≫ trivialTorsorπ S = trivialTorsorπ S) :
+    ∃ γ₀ : G, Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f =
+      Limits.Sigma.ι (fun _ : G => S) γ₀ := by
+  haveI him : ∀ j : G, IsOpenImmersion (Limits.Sigma.ι (fun _ : G => S) j) :=
+    fun j => inferInstanceAs
+      (IsOpenImmersion (Limits.colimit.ι (Discrete.functor fun _ : G => S) ⟨j⟩))
+  obtain ⟨x₀⟩ : Nonempty S := inferInstance
+  obtain ⟨γ₀, y₀, hy₀'⟩ : ∃ (γ₀ : G) (y₀ : S),
+      (Limits.Sigma.ι (fun _ : G => S) γ₀).base y₀ =
+      (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f).base x₀ := by
+    obtain ⟨y₀, hy₀⟩ := (sigmaOpenCover (fun _ : G => S)).covers
+      ((Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f).base x₀)
+    exact ⟨_, y₀, hy₀⟩
+  refine ⟨γ₀, ?_⟩
+  have hrange : Set.range ⇑(Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f) ⊆
+      Set.range ⇑(Limits.Sigma.ι (fun _ : G => S) γ₀) := by
+    rcases isClopen_iff.mp
+      ((isClopen_range_sigmaι (fun _ : G => S) γ₀).preimage
+        (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f).continuous) with h | h
+    · exfalso
+      exact Set.eq_empty_iff_forall_notMem.mp h x₀ ⟨y₀, hy₀'⟩
+    · rintro _ ⟨x, rfl⟩
+      exact Set.eq_univ_iff_forall.mp h x
+  have hfac := IsOpenImmersion.lift_fac
+    (Limits.Sigma.ι (fun _ : G => S) γ₀)
+    (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f) hrange
+  have h1 := congrArg (fun k => k ≫ trivialTorsorπ S) hfac
+  rw [Category.assoc, ι_trivialTorsorπ, Category.comp_id, Category.assoc]
+    at h1
+  rw [hover] at h1
+  rw [ι_trivialTorsorπ] at h1
+  rw [← hfac]
+  rw [h1, Category.id_comp]
+
+omit [Finite G] in
+private theorem eq_trivialTorsorLeft_of_ι_one {S : Scheme.{u}}
+    {f : (∐ fun _ : G => S) ⟶ (∐ fun _ : G => S)} {γ₀ : G}
+    (hequiv : ∀ h : G, (trivialTorsorAction G S).hom h ≫ f =
+      f ≫ (trivialTorsorAction G S).hom h)
+    (hι1 : Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f =
+      Limits.Sigma.ι (fun _ : G => S) γ₀) :
+    f = trivialTorsorLeft G S γ₀ := by
+  refine Limits.Sigma.hom_ext _ _ fun h => ?_
+  have h2 : Limits.Sigma.ι (fun _ : G => S) h =
+      Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫
+        (trivialTorsorAction G S).hom h := by
+    rw [ι_trivialTorsorAction_hom, one_mul]
+  rw [ι_trivialTorsorLeft]
+  rw [h2, Category.assoc, hequiv h]
+  rw [reassoc_of% hι1]
+  rw [ι_trivialTorsorAction_hom]
+
+omit [Finite G] in
+private theorem trivialTorsorMap_pt_eq {S : Scheme.{u}}
+    {f : (∐ fun _ : G => S) ⟶ (∐ fun _ : G => S)} {t t' : S ⟶ X} {γ₀ : G}
+    (hcompat : f ≫ trivialTorsorMap σ S t' = trivialTorsorMap σ S t)
+    (hι1 : Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ f =
+      Limits.Sigma.ι (fun _ : G => S) γ₀) :
+    t ≫ σ.hom γ₀⁻¹ = t' := by
+  have h3 := congrArg
+    (fun k => Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ k) hcompat
+  rw [reassoc_of% hι1] at h3
+  rw [ι_trivialTorsorMap] at h3
+  rw [ι_trivialTorsorMap, σ.hom_one, Category.comp_id] at h3
+  rw [← h3, Category.assoc, ← σ.hom_mul, mul_inv_cancel, σ.hom_one,
+    Category.comp_id]
+
+/-- The trivialization functor is full over a connected base. -/
 theorem trivialize_full (S : Scheme.{u}) [ConnectedSpace S] :
     (trivialize σ S).Full where
   map_surjective {t t'} m := by
-    -- restated fields at the trivial-torsor spelling
-    have hover : m.hom ≫ trivialTorsorπ S = trivialTorsorπ S := m.over
-    have hequiv : ∀ h : G, (trivialTorsorAction G S).hom h ≫ m.hom =
-        m.hom ≫ (trivialTorsorAction G S).hom h := m.equiv
-    have hcompat : m.hom ≫ trivialTorsorMap σ S t'.pt =
-        trivialTorsorMap σ S t.pt := m.compat
-    haveI him : ∀ j : G, IsOpenImmersion (Limits.Sigma.ι (fun _ : G => S) j) :=
-      fun j => inferInstanceAs
-        (IsOpenImmersion (Limits.colimit.ι (Discrete.functor fun _ : G => S) ⟨j⟩))
-    -- the clopen decomposition of S cut out by the restricted morphism
-    obtain ⟨x₀⟩ : Nonempty S := inferInstance
-    obtain ⟨γ₀, y₀, hy₀'⟩ : ∃ (γ₀ : G) (y₀ : S),
-        (Limits.Sigma.ι (fun _ : G => S) γ₀).base y₀ =
-        (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom).base x₀ := by
-      obtain ⟨y₀, hy₀⟩ := (sigmaOpenCover (fun _ : G => S)).covers
-        ((Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom).base x₀)
-      exact ⟨_, y₀, hy₀⟩
-    -- factor the restriction through that single summand
-    have hrange : Set.range ⇑(Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom) ⊆
-        Set.range ⇑(Limits.Sigma.ι (fun _ : G => S) γ₀) := by
-      rcases isClopen_iff.mp
-        ((isClopen_range_sigmaι (fun _ : G => S) γ₀).preimage
-          (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom).continuous) with h | h
-      · exfalso
-        exact Set.eq_empty_iff_forall_notMem.mp h x₀ ⟨y₀, hy₀'⟩
-      · rintro _ ⟨x, rfl⟩
-        exact Set.eq_univ_iff_forall.mp h x
-    have hfac := IsOpenImmersion.lift_fac
-      (Limits.Sigma.ι (fun _ : G => S) γ₀)
-      (Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom) hrange
-    have h1 := congrArg (fun k => k ≫ trivialTorsorπ S) hfac
-    rw [Category.assoc, ι_trivialTorsorπ, Category.comp_id, Category.assoc]
-      at h1
-    erw [hover] at h1
-    rw [ι_trivialTorsorπ] at h1
-    have hι1 : Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ m.hom =
-        Limits.Sigma.ι (fun _ : G => S) γ₀ := by
-      erw [← hfac]
-      rw [h1, Category.id_comp]
-    -- equivariance propagates the identification to every summand
-    have hall : m.hom = trivialTorsorLeft G S γ₀ := by
-      refine Limits.Sigma.hom_ext _ _ fun h => ?_
-      have h2 : Limits.Sigma.ι (fun _ : G => S) h =
-          Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫
-            (trivialTorsorAction G S).hom h := by
-        rw [ι_trivialTorsorAction_hom, one_mul]
-      erw [ι_trivialTorsorLeft]
-      rw [h2, Category.assoc, hequiv h]
-      erw [reassoc_of% hι1]
-      erw [ι_trivialTorsorAction_hom]
-    -- the compatibility with the maps to X yields the groupoid morphism
-    have hpt : t.pt ≫ σ.hom γ₀⁻¹ = t'.pt := by
-      have h3 := congrArg
-        (fun k => Limits.Sigma.ι (fun _ : G => S) (1 : G) ≫ k) hcompat
-      erw [reassoc_of% hι1] at h3
-      rw [ι_trivialTorsorMap, σ.hom_one, Category.comp_id] at h3
-      erw [ι_trivialTorsorMap] at h3
-      rw [← h3, Category.assoc, ← σ.hom_mul, mul_inv_cancel, σ.hom_one,
-        Category.comp_id]
+    obtain ⟨γ₀, hι1⟩ := exists_sigmaι_one_comp_eq (f := m.hom) m.over
+    have hall : m.hom = trivialTorsorLeft G S γ₀ :=
+      eq_trivialTorsorLeft_of_ι_one (f := m.hom) m.equiv hι1
+    have hpt : t.pt ≫ σ.hom γ₀⁻¹ = t'.pt :=
+      trivialTorsorMap_pt_eq (σ := σ) (f := m.hom) m.compat hι1
     refine ⟨⟨γ₀⁻¹, hpt⟩, ?_⟩
     refine TorsorPair.Hom.ext ?_
     show trivialTorsorLeft G S γ₀⁻¹⁻¹ = m.hom
@@ -733,30 +670,10 @@ section PullbackTorsor
 
 variable {σ} {S S' : Scheme.{u}} (q : S' ⟶ S)
 
-/-- The base-changed action on the pulled-back torsor total space (T-W3c). -/
+/-- The base-changed action on the pulled-back torsor total space. -/
 noncomputable def TorsorPair.pullbackAction (A : TorsorPair σ S) :
-    SchemeAction G (Limits.pullback A.p q) where
-  hom g := Limits.pullback.map A.p q A.p q (A.τ.hom g) (𝟙 S') (𝟙 S)
-    (by rw [A.over_base, Category.comp_id])
-    (by rw [Category.id_comp, Category.comp_id])
-  hom_one := by
-    refine Limits.pullback.hom_ext ?_ ?_
-    · rw [Limits.pullback.lift_fst, A.τ.hom_one, Category.comp_id,
-        Category.id_comp]
-    · rw [Limits.pullback.lift_snd, Category.comp_id, Category.id_comp]
-  hom_mul g h := by
-    refine Limits.pullback.hom_ext ?_ ?_
-    · rw [Limits.pullback.lift_fst, A.τ.hom_mul, Category.assoc]
-      erw [Limits.pullback.lift_fst]
-      conv_rhs => rw [← Category.assoc]
-      erw [Limits.pullback.lift_fst]
-      rw [Category.assoc]
-    · rw [Limits.pullback.lift_snd,
-        Category.comp_id (Limits.pullback.snd A.p q), Category.assoc]
-      erw [Limits.pullback.lift_snd]
-      rw [Category.comp_id (Limits.pullback.snd A.p q)]
-      erw [Limits.pullback.lift_snd]
-      rw [Category.comp_id (Limits.pullback.snd A.p q)]
+    SchemeAction G (Limits.pullback A.p q) :=
+  pullbackTorsorAction A.τ A.over_base q
 
 omit [Finite G] in
 @[reassoc (attr := simp)]
@@ -769,10 +686,8 @@ omit [Finite G] in
 @[reassoc (attr := simp)]
 theorem TorsorPair.pullbackAction_hom_snd (A : TorsorPair σ S) (g : G) :
     (A.pullbackAction q).hom g ≫ Limits.pullback.snd A.p q =
-      Limits.pullback.snd A.p q := by
-  rw [show (A.pullbackAction q).hom g ≫ Limits.pullback.snd A.p q =
-      Limits.pullback.snd A.p q ≫ 𝟙 S' from Limits.pullback.lift_snd _ _ _,
-    Category.comp_id (Limits.pullback.snd A.p q)]
+      Limits.pullback.snd A.p q :=
+  pullbackTorsorAction_over A.τ A.over_base q g
 
 omit [Finite G] in
 /-- The base-changed action lies over the new base. -/
@@ -781,139 +696,18 @@ theorem TorsorPair.pullbackAction_over_base (A : TorsorPair σ S) (g : G) :
       Limits.pullback.snd A.p q :=
   A.pullbackAction_hom_snd q g
 
-/-! ### Pullback-juggling for the base-changed torsor field (T-W3c-i)
-
-The `torsor` field of `A.pullback q` is `A.torsor` base-changed along `q`. Two
-geometric identifications carry it there: the *pasting* iso
-`(P ×_S S') ×_{S'} (P ×_S S') ≅ (P ×_S P) ×_S S'` (`isPullback_pullbackSnd_map`)
-and the *distributivity* iso `∐_G (P ×_S S') ≅ (∐_G P) ×_S S'`
-(`isPullback_sigma_pullbackSnd`, via extensivity). Composed by pasting-cancellation
-they exhibit the base-changed shear map as the base change of the original, hence an
-isomorphism. -/
-
-/-- **Pasting identification.** The double pullback
-`(P ×_S S') ×_{S'} (P ×_S S')` is the base change of `(P ×_S P) → S` along `q`:
-the square with `pullback (pullback.snd p q) (pullback.snd p q)` as apex,
-`pullback.map …` to `P ×_S P`, and `pullback.fst p p ≫ p` / `q` as the cospan. -/
-private theorem isPullback_pullbackSnd_map {P : Scheme.{u}} (p : P ⟶ S) :
-    IsPullback
-      (Limits.pullback.fst (Limits.pullback.snd p q) (Limits.pullback.snd p q) ≫
-        Limits.pullback.snd p q)
-      (Limits.pullback.map (Limits.pullback.snd p q) (Limits.pullback.snd p q) p p
-        (Limits.pullback.fst p q) (Limits.pullback.fst p q) q
-        Limits.pullback.condition.symm Limits.pullback.condition.symm)
-      q (Limits.pullback.fst p p ≫ p) := by
-  refine IsPullback.of_iso_pullback ⟨?_⟩
-    { hom := Limits.pullback.lift
-        (Limits.pullback.fst (Limits.pullback.snd p q) (Limits.pullback.snd p q) ≫
-          Limits.pullback.snd p q)
-        (Limits.pullback.map (Limits.pullback.snd p q) (Limits.pullback.snd p q) p p
-          (Limits.pullback.fst p q) (Limits.pullback.fst p q) q
-          Limits.pullback.condition.symm Limits.pullback.condition.symm) ?_
-      inv := Limits.pullback.lift
-        (Limits.pullback.lift
-          (Limits.pullback.snd q (Limits.pullback.fst p p ≫ p) ≫ Limits.pullback.fst p p)
-          (Limits.pullback.fst q (Limits.pullback.fst p p ≫ p)) ?_)
-        (Limits.pullback.lift
-          (Limits.pullback.snd q (Limits.pullback.fst p p ≫ p) ≫ Limits.pullback.snd p p)
-          (Limits.pullback.fst q (Limits.pullback.fst p p ≫ p)) ?_) ?_
-      hom_inv_id := ?_
-      inv_hom_id := ?_ } ?_ ?_
-  · -- CommSq: (fst ≫ p') ≫ q = map ≫ (fst_pp ≫ p)
-    simp only [Limits.pullback.map, Category.assoc, Limits.pullback.lift_fst_assoc]
-    rw [← Limits.pullback.condition]
-  · -- forward CommSq of the lift (same identity)
-    simp only [Limits.pullback.map, Category.assoc, Limits.pullback.lift_fst_assoc]
-    rw [← Limits.pullback.condition]
-  · -- cond1
-    rw [Category.assoc, ← Limits.pullback.condition]
-  · -- cond2
-    rw [Category.assoc, ← Limits.pullback.condition, ← Limits.pullback.condition]
-  · -- hlegs: both legs equal on p' = snd p q
-    rw [Limits.pullback.lift_snd, Limits.pullback.lift_snd]
-  · -- hom_inv_id
-    ext <;>
-      simp only [Limits.pullback.map, Limits.pullback.lift_fst, Limits.pullback.lift_snd,
-        Limits.pullback.lift_snd_assoc,
-        Limits.pullback.condition, Category.assoc, Category.id_comp]
-  · -- inv_hom_id
-    ext <;>
-      simp only [Limits.pullback.map, Limits.pullback.lift_fst, Limits.pullback.lift_snd,
-        Limits.pullback.lift_fst_assoc, Limits.pullback.lift_snd_assoc,
-        Limits.pullback.condition, Category.assoc, Category.id_comp]
-  · exact Limits.pullback.lift_fst _ _ _
-  · exact Limits.pullback.lift_snd _ _ _
-
-omit [Group G] in
-/-- **Distributivity identification.** Finite coproducts distribute over the base
-change: `∐_G (P ×_S S')` is the base change of `∐_G P → S` along `q`, via the
-extensivity of `Scheme` (`FinitaryPreExtensive`). -/
-private theorem isPullback_sigma_pullbackSnd {P : Scheme.{u}} (p : P ⟶ S) :
-    IsPullback
-      (Limits.Sigma.desc (fun _ : G => Limits.pullback.snd p q))
-      (Limits.Sigma.desc (fun g : G =>
-        Limits.pullback.fst p q ≫ Limits.Sigma.ι (fun _ : G => P) g))
-      q (Limits.Sigma.desc (fun _ : G => p)) := by
-  have key := (FinitaryPreExtensive.isUniversal_finiteCoproducts
-      (Limits.coproductIsCoproduct (fun _ : G => P))).isPullback_of_isColimit_left
-    (f := fun _ : G => p) (u := Limits.Sigma.desc fun _ : G => p) (v := q)
-    (q₁ := fun _ : G => Limits.pullback.snd p q)
-    (q₂ := fun _ : G => Limits.pullback.fst p q)
-    (fun _ => (IsPullback.of_hasPullback p q).flip)
-    (Limits.coproductIsCoproduct (fun _ : G => Limits.pullback p q))
-    (fun i => Limits.Sigma.ι_desc _ _)
-  exact key
-
-/-- **The base-changed shear map is an isomorphism** (T-W3c-i, the `torsor` field of
-`A.pullback q`). The shear of the base-changed action is the base change of `A`'s
-shear map (`A.torsor`) along `q`: the pasting (`isPullback_pullbackSnd_map`) and
-distributivity (`isPullback_sigma_pullbackSnd`) squares cancel to exhibit it as such,
-and isomorphisms are stable under base change. -/
+/-- The base-changed shear map is an isomorphism. -/
 theorem TorsorPair.pullback_shear_isIso (A : TorsorPair σ S) :
     IsIso (Limits.Sigma.desc fun g : G => Limits.pullback.lift ((A.pullbackAction q).hom g)
         (𝟙 (Limits.pullback A.p q))
         (by rw [Category.id_comp]; exact A.pullbackAction_over_base q g) :
       (∐ fun _ : G => Limits.pullback A.p q) ⟶
         Limits.pullback (Limits.pullback.snd A.p q) (Limits.pullback.snd A.p q)) := by
-  set Φ' := Limits.Sigma.desc (fun g : G => Limits.pullback.lift ((A.pullbackAction q).hom g)
-      (𝟙 (Limits.pullback A.p q))
-      (by rw [Category.id_comp]; exact A.pullbackAction_over_base q g)) with hΦ'
-  set Φ := Limits.Sigma.desc (fun g : G => Limits.pullback.lift (A.τ.hom g) (𝟙 A.P)
-      (by rw [Category.id_comp]; exact A.over_base g)) with hΦ
-  have hπ : Φ' ≫ (Limits.pullback.fst (Limits.pullback.snd A.p q) (Limits.pullback.snd A.p q) ≫
-        Limits.pullback.snd A.p q) = Limits.Sigma.desc fun _ : G => Limits.pullback.snd A.p q := by
-    refine Limits.Sigma.hom_ext _ _ fun g => ?_
-    simp only [hΦ', Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc,
-      Limits.pullback.lift_fst_assoc, TorsorPair.pullbackAction_hom_snd]
-  have hpp : Φ ≫ (Limits.pullback.fst A.p A.p ≫ A.p) = Limits.Sigma.desc fun _ : G => A.p := by
-    refine Limits.Sigma.hom_ext _ _ fun g => ?_
-    simp only [hΦ, Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc,
-      Limits.pullback.lift_fst_assoc, A.over_base]
-  have hcomm : Φ' ≫ Limits.pullback.map (Limits.pullback.snd A.p q) (Limits.pullback.snd A.p q)
-        A.p A.p (Limits.pullback.fst A.p q) (Limits.pullback.fst A.p q) q
-        Limits.pullback.condition.symm Limits.pullback.condition.symm =
-      (Limits.Sigma.desc fun g : G =>
-        Limits.pullback.fst A.p q ≫ Limits.Sigma.ι (fun _ : G => A.P) g) ≫ Φ := by
-    refine Limits.Sigma.hom_ext _ _ fun g => ?_
-    refine Limits.pullback.hom_ext ?_ ?_ <;>
-      simp only [hΦ', hΦ, Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc, Category.assoc,
-        Limits.pullback.map, Limits.pullback.lift_fst, Limits.pullback.lift_fst_assoc,
-        Limits.pullback.lift_snd, Limits.pullback.lift_snd_assoc,
-        TorsorPair.pullbackAction_hom_fst, Category.id_comp, Category.comp_id]
-  have s : IsPullback (Φ' ≫ (Limits.pullback.fst (Limits.pullback.snd A.p q)
-        (Limits.pullback.snd A.p q) ≫ Limits.pullback.snd A.p q))
-      (Limits.Sigma.desc fun g : G =>
-        Limits.pullback.fst A.p q ≫ Limits.Sigma.ι (fun _ : G => A.P) g)
-      q (Φ ≫ (Limits.pullback.fst A.p A.p ≫ A.p)) := by
-    rw [hπ, hpp]; exact isPullback_sigma_pullbackSnd q A.p
-  have hLeft := s.of_right hcomm (isPullback_pullbackSnd_map q A.p)
-  exact MorphismProperty.of_isPullback (P := MorphismProperty.isomorphisms Scheme)
-    hLeft.flip A.torsor
+  simpa only [torsorCompare, TorsorPair.pullbackAction] using
+    isIso_torsorCompare_pullback A.τ A.over_base A.torsor q
 
-/-- **Base change of a torsor pair** (T-W3c-i): pull `A : TorsorPair σ S` back along
-`q : S' ⟶ S`. Total space `P ×_S S'`, projection `pullback.snd`, action by
-functoriality (`pullbackAction`); the property fields are base-change stability and
-`pullback_shear_isIso`, and the equivariant map factors through `A.u`. -/
+set_option backward.isDefEq.respectTransparency false in
+/-- Base change of a torsor pair. -/
 noncomputable def TorsorPair.pullback (A : TorsorPair σ S) : TorsorPair σ S' where
   P := Limits.pullback A.p q
   p := Limits.pullback.snd A.p q
@@ -927,12 +721,6 @@ noncomputable def TorsorPair.pullback (A : TorsorPair σ S) : TorsorPair σ S' w
   equivariant := fun g => by
     rw [← Category.assoc, TorsorPair.pullbackAction_hom_fst, Category.assoc,
       A.equivariant g, Category.assoc]
-
-/-! ### Self-trivialization (T-W3c-ii)
-
-Pulling a torsor pair back along its own projection trivializes it: the comparison
-`∐_G P ≅ P ×_S P` (`A.torsor`) *is* the trivialization. This is NOT descent-gated —
-the `torsor` field already witnesses local triviality along `p`. -/
 
 /-- A torsor-pair morphism whose underlying scheme map is an isomorphism has an
 inverse morphism of torsor pairs (torsor pairs form a groupoid). -/
@@ -958,10 +746,7 @@ noncomputable def TorsorPair.isoOfHom {T : Scheme.{u}} {A' B' : TorsorPair σ T}
     show inv f.hom ≫ f.hom = 𝟙 _
     exact IsIso.inv_hom_id _
 
-/-- **Self-trivialization** (T-W3c-ii): the base change of a torsor pair `A` along
-its own projection `A.p` is the trivial torsor pair over the total space `A.P`
-(attached to the equivariant map `A.u`). The comparison is `A.torsor`'s shear
-`∐_G A.P ≅ A.P ×_S A.P`, read as a morphism of torsor pairs. -/
+/-- Pulling a torsor pair back along its projection gives the associated trivial torsor pair. -/
 noncomputable def TorsorPair.selfTrivialization (A : TorsorPair σ S) :
     A.pullback A.p ≅ trivialTorsorPair σ A.P A.u := by
   let f : trivialTorsorPair σ A.P A.u ⟶ A.pullback A.p :=

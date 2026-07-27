@@ -1,5 +1,12 @@
-import Mathlib.GroupTheory.Index
-import Mathlib.Data.Nat.Prime.Basic
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import Mathlib.GroupTheory.Index
+public import Mathlib.Data.Nat.Prime.Basic
 
 /-!
 # Odd-primary subgroup index comparison

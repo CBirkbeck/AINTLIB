@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
 import HasseWeil.Foundation.Curves.Map.PointFunctor
 
@@ -80,7 +85,7 @@ noncomputable def projectiveDivisorSum
 @[simp] theorem projectiveDivisorSum_single
     (P : ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (n : ℤ) :
     projectiveDivisorSum W (Finsupp.single P n) = n • P.toAffinePoint := by
-  unfold projectiveDivisorSum
+  simp only [projectiveDivisorSum]
   rw [Finsupp.sum_single_index]
   exact zero_zsmul _
 
@@ -88,7 +93,7 @@ noncomputable def projectiveDivisorSum
     (D₁ D₂ : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) :
     projectiveDivisorSum W (D₁ + D₂) =
       projectiveDivisorSum W D₁ + projectiveDivisorSum W D₂ := by
-  unfold projectiveDivisorSum
+  simp only [projectiveDivisorSum]
   rw [Finsupp.sum_add_index']
   · intro P; exact zero_zsmul _
   · intro P m n; exact add_zsmul P.toAffinePoint m n
@@ -231,7 +236,7 @@ noncomputable def kappaDivisor
 
 theorem kappaDivisor_degree (P : W.Point) :
     ProjectiveDivisor.degree (kappaDivisor W P) = 0 := by
-  unfold kappaDivisor
+  simp only [kappaDivisor]
   rw [ProjectiveDivisor.degree_sub]
   -- Both single-divisors have degree 1, so the difference is 0.
   show ProjectiveDivisor.degree
@@ -239,7 +244,7 @@ theorem kappaDivisor_degree (P : W.Point) :
     ProjectiveDivisor.degree
       (Finsupp.single (ProjectiveSmoothPoint.infinity :
         ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (1 : ℤ)) = 0
-  unfold ProjectiveDivisor.degree
+  simp only [ProjectiveDivisor.degree]
   rw [Finsupp.sum_single_index rfl, Finsupp.sum_single_index rfl]
   ring
 
@@ -254,10 +259,10 @@ noncomputable def picZeroOfPoint (P : W.Point) :
 /-- `κ` sends the basepoint to the zero class: `(O) − (O) = 0`. -/
 @[simp] theorem picZeroOfPoint_zero :
     picZeroOfPoint W (0 : W.Point) = 0 := by
-  unfold picZeroOfPoint
+  simp only [picZeroOfPoint]
   -- The underlying divisor is 0.
   have h_zero : kappaDivisor W (0 : W.Point) = 0 := by
-    unfold kappaDivisor
+    simp only [kappaDivisor]
     show Finsupp.single ProjectiveSmoothPoint.infinity (1 : ℤ) -
         Finsupp.single ProjectiveSmoothPoint.infinity (1 : ℤ) = 0
     exact sub_self _
@@ -278,7 +283,7 @@ bijection; the reverse direction `κ ∘ σ̄ = id` is gated on T-III-3-003
 (see `T-PIC-F-001`). -/
 @[simp] theorem projectiveDivisorSum_kappaDivisor (P : W.Point) :
     projectiveDivisorSum W (kappaDivisor W P) = P := by
-  unfold kappaDivisor
+  simp only [kappaDivisor]
   rw [projectiveDivisorSum_sub, projectiveDivisorSum_single,
     projectiveDivisorSum_single, one_zsmul, one_zsmul]
   show P.toProjectiveSmoothPoint.toAffinePoint -

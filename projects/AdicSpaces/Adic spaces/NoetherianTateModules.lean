@@ -59,6 +59,7 @@ def IsStrictLinearMap {R : Type*} [Semiring R] {M N : Type*}
     [TopologicalSpace M] [TopologicalSpace N] (f : M →ₗ[R] N) : Prop :=
   IsStrictMap f
 
+set_option backward.isDefEq.respectTransparency false in
 /-- An open map is strict. -/
 theorem isStrictMap_of_isOpenMap {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
     {f : X → Y} (hf : IsOpenMap f) : IsStrictMap f := by

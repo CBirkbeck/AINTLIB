@@ -88,15 +88,15 @@ lemma count_primeAboveP_span_p {P : Ideal (𝓞 L)} [P.IsPrime] [P.LiesOver 𝔭
     exact Ideal.span_singleton_eq_bot.not.mpr
       (show (p : 𝓞 L) ≠ 0 by exact_mod_cast hp.out.ne_zero)
   have hram :
-      Ideal.ramificationIdx 𝔭 P = p - 1 := by
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' (q := P) (p := 𝔭)
+      Ideal.ramificationIdx' 𝔭 P = p - 1 := by
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx (q := P) (p := 𝔭)
       (hp := by simp [hp.out.ne_zero])]
     simpa using
       (Rat.ramificationIdx_eq
         (p := p) (n := N) (k := 0) (m := p - 1) (K := L) (P := P) (by simp)
         (Nat.not_dvd_of_pos_of_lt (Nat.sub_pos_of_lt hp.out.one_lt)
           (Nat.pred_lt hp.out.ne_zero)))
-  rwa [Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count
+  rwa [Ideal.IsDedekindDomain.ramificationIdx'_eq_normalizedFactors_count
       (R := ℤ) (S := 𝓞 L) (p := 𝔭) (P := P) hmap_ne_bot inferInstance
       (primeAboveP_ne_bot (p := p) (L := L) (P := P)), hmap] at hram
 

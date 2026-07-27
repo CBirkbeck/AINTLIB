@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModCube
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModCube
 
 /-!
 # Precision compatibility of the mod-`p³` and mod-`p²` Dwork-coordinate functionals
@@ -65,7 +67,8 @@ Pick a representative `x` of `Q` (`mk_{3(p-1)} x = Q`).  Then `coordCube i Q =
 toZModCube(repr(algebraMap x) i)` (`_mk`) and `castHom ∘ toZModCube = toZModSq`
 (`castHom_rationalPadicIntegerToZModCube`); and `factorPow Q = mk_{2(p-1)} x`
 (`factorPow_three_to_two_mk`), so `coordModSq i (factorPow Q) = toZModSq(repr(algebraMap x) i)`
-(`_mk`).  Both sides are `toZModSq(repr(algebraMap x) i)`.  No slice agreement is needed; this is the
+(`_mk`).  Both sides are `toZModSq(repr(algebraMap x) i)`.  No slice agreement is needed;
+this is the
 pure functional precision compatibility. -/
 theorem castHom_valuedLambdaQuotientDworkCoeffModCube_eq_coeffModSq_factorPow
     (i : Fin (p - 1))

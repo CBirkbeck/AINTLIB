@@ -28,8 +28,8 @@ keeps `δ/37^v ∈ (λ)^{108−36v} ⊆ (λ)^{72}`, which dies under `mk_{72}`
 
 The `a = 37` Frobenius term — the only `a ∈ [1,68]` divisible by `37`, where the `/37` lowers the
 ideal — is exactly the one the `(λ)^{108}` numerator agreement is engineered to survive (`108 − 36 =
-72`).  This is why the level-`107` slice (a faithful mod-`37³` representative) folds **exactly** onto
-the level-`71` slice mod `37²`, pinning the genuine deg-`68` second digit.
+72`).  This is why the level-`107` slice (a faithful mod-`37³` representative) folds **exactly**
+onto the level-`71` slice mod `37²`, pinning the genuine deg-`68` second digit.
 
 It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
 
@@ -53,15 +53,13 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 private instance instFact37Deg68SLA : Fact (Nat.Prime 37) := ⟨by norm_num⟩
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
-variable [NumberField.IsCMField K]
 
-omit [NumberField.IsCMField K] in
 /-- **The perturbed deg-`68` evaluation vanishes for `a ∈ [1,68]`** (proven, axiom-clean): for
 `δ ∈ (λ)^{108}` and `a ∈ [1,68]` (so `a.factorization 37 ≤ 1`), `samePrimeNatDivEval 71 a 0 δ = 0`.
 
-`samePrimeNatDivEval 71 a 0 δ` divides `δ` by `37^{v}` (`v = a.factorization 37 ≤ 1`) then reduces mod
-`(λ)^{72}`.  Since `δ ∈ (λ)^{108} = (λ)^{36v + (108 − 36v)}` with `108 − 36v ≥ 72`, the `s`-slot can be
-switched to `108 − 36v` (`samePrimeNatDivEval_eq_of_mem`), and then
+`samePrimeNatDivEval 71 a 0 δ` divides `δ` by `37^{v}` (`v = a.factorization 37 ≤ 1`) then reduces
+mod `(λ)^{72}`.  Since `δ ∈ (λ)^{108} = (λ)^{36v + (108 − 36v)}` with `108 − 36v ≥ 72`, the `s`-slot
+can be switched to `108 − 36v` (`samePrimeNatDivEval_eq_of_mem`), and then
 `samePrimeNatDivEval_eq_zero_of_succ_le` (`72 ≤ 108 − 36v`) gives `0`. -/
 theorem samePrimeNatDivEval_deg68_perturbation_eq_zero
     (a : ℕ) (ha1 : 1 ≤ a) (ha68 : a ≤ 68) {δ : ValuedIntegerRing 37 K}
@@ -88,11 +86,10 @@ theorem samePrimeNatDivEval_deg68_perturbation_eq_zero
   exact samePrimeNatDivEval_eq_zero_of_succ_le (p := 37) (K := K)
     (Nat.ne_zero_of_lt ha1) hmem' (by omega)
 
-omit [NumberField.IsCMField K] in
 /-- **The numerator lies in `(λ)^{v·36}`** (proven): for `a ∈ [1,68]`,
 `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator N a 68 x ∈ (λ)^{a.factorization 37·
-(37-1) + 0}`.  The numerator is in `(λ)^{68}` (`…_mem_lambdaIdeal_pow`), and `a.factorization 37·36 ≤
-36 ≤ 68` for `a ≤ 68`. -/
+(37-1) + 0}`.  The numerator is in `(λ)^{68}` (`…_mem_lambdaIdeal_pow`), and
+`a.factorization 37·36 ≤ 36 ≤ 68` for `a ≤ 68`. -/
 theorem deg68_numerator_mem (N a : ℕ) (ha68 : a ≤ 68) (x : ValuedIntegerRing 37 K)
     (hx : x ∈ lambdaIdeal 37 K) :
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator (p := 37) (K := K) N a 68 x ∈
@@ -114,10 +111,9 @@ theorem deg68_numerator_mem (N a : ℕ) (ha68 : a ≤ 68) (x : ValuedIntegerRing
     N a 68 x = w at hmem68 ⊢
   exact hle hmem68
 
-omit [NumberField.IsCMField K] in
-/-- **Abstract level-`72` evaluation agreement from a `(λ)^{108}` difference** (proven, axiom-clean):
-for abstract `z₁ z₂` and `a ∈ [1,68]` (so `a.factorization 37 ≤ 1`), if `z₁ − z₂ ∈ (λ)^{108}` then
-`samePrimeNatDivEval 71 a 0 z₁ = samePrimeNatDivEval 71 a 0 z₂`.
+/-- **Abstract level-`72` evaluation agreement from a `(λ)^{108}` difference** (proven,
+axiom-clean): for abstract `z₁ z₂` and `a ∈ [1,68]` (so `a.factorization 37 ≤ 1`), if
+`z₁ − z₂ ∈ (λ)^{108}` then `samePrimeNatDivEval 71 a 0 z₁ = samePrimeNatDivEval 71 a 0 z₂`.
 
 Both evaluations are `mk_{72}(yᵢ)·invCast` with `37^{v}·yᵢ = zᵢ`
 (`samePrimeNatDivEval_eq_of_spec`, `samePrimeNatDivNumerator_mul_spec`).  The difference `z₁ − z₂ ∈
@@ -157,8 +153,8 @@ theorem samePrimeNatDivEval_level72_eq_of_sub_mem
   rw [Ideal.Quotient.eq]
   exact hydiff72
 
-omit [NumberField.IsCMField K] in
-/-- **`a.factorization 37 ≤ 1` for `a ≤ 68`** (proven): the only multiple of `37²` would exceed `68`. -/
+/-- **`a.factorization 37 ≤ 1` for `a ≤ 68`** (proven): the only multiple of `37²` would exceed
+`68`. -/
 theorem factorization_le_one_of_le_sixtyeight (a : ℕ) (ha68 : a ≤ 68) : a.factorization 37 ≤ 1 := by
   rcases Nat.eq_zero_or_pos a with h0 | hpos
   · simp [h0]
@@ -172,21 +168,21 @@ theorem factorization_le_one_of_le_sixtyeight (a : ℕ) (ha68 : a ≤ 68) : a.fa
 
 The abstract `samePrimeNatDivEval_level72_eq_of_sub_mem` (proven above) is the full content of the
 deg-`68` slice-level term agreement: instantiated at `z₁ = numerator 107 a 68 (dworkParameterApprox
-108)`, `z₂ = numerator 71 a 68 (dworkParameterApprox 72)` — with the `(λ)^{108}` difference supplied by
-`deg68_numerator_level_diff_mem` and `a.factorization 37 ≤ 1` by
+108)`, `z₂ = numerator 71 a 68 (dworkParameterApprox 72)` — with the `(λ)^{108}` difference
+supplied by `deg68_numerator_level_diff_mem` and `a.factorization 37 ≤ 1` by
 `factorization_le_one_of_le_sixtyeight` — it yields, for `a ∈ [1,68]`,
 
   `samePrimeNatDivEval 71 a 0 (num₁₀₇ₐ) = samePrimeNatDivEval 71 a 0 (num₇₁ₐ)`.
 
 The instantiation is **mathematically complete** (all three inputs are proven, axiom-clean), and the
-slice-level agreement `factorPow (deg-68 slice @ 107) = deg-68 slice @ 71` follows by summing over `a ∈
-Icc 1 68` (`…_eq_eval_sum`, `samePrimeNatDivEval_factorPow`).  The concrete instantiation is **not
-emitted as a separate `theorem`** because the final `isDefEq` type-check of a concrete
-`samePrimeNatDivEval` over the heavy `adicCompletionIntegers` representation hits the documented Lean
-elaboration wall (the `Classical.choose` numerator descends in `whnf`); the abstract form sidesteps it
-by keeping `z₁ z₂` opaque, and is the usable interface.  Downstream, the bridge residual
-`CaseIICor823Level71Deg68SliceCoordAgreement37` (a clean same-level `ZMod 37²` equation) carries this
-content with the precision-compatibility reduction proven.
+slice-level agreement `factorPow (deg-68 slice @ 107) = deg-68 slice @ 71` follows by summing over
+`a ∈ Icc 1 68` (`…_eq_eval_sum`, `samePrimeNatDivEval_factorPow`).  The concrete instantiation is
+**not emitted as a separate `theorem`** because the final `isDefEq` type-check of a concrete
+`samePrimeNatDivEval` over the heavy `adicCompletionIntegers` representation hits the documented
+Lean elaboration wall (the `Classical.choose` numerator descends in `whnf`); the abstract form
+sidesteps it by keeping `z₁ z₂` opaque, and is the usable interface.  Downstream, the bridge
+residual `CaseIICor823Level71Deg68SliceCoordAgreement37` (a clean same-level `ZMod 37²` equation)
+carries this content with the precision-compatibility reduction proven.
 -/
 
 end CyclotomicUnits

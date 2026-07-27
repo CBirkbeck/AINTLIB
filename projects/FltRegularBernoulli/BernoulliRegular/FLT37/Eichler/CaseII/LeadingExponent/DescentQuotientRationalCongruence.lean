@@ -1,4 +1,7 @@
-import FltRegular.CaseII.InductionStep
+module
+
+public import FltRegular.CaseII.InductionStep
+import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
 
 /-!
 # Case-II descent quotient is congruent to a rational integer mod `37`
@@ -59,11 +62,13 @@ It imports only from `flt-regular` and `mathlib`; it does **not** depend on any 
 The lemma is stated for a general `K` with `[IsCyclotomicExtension {37} ℚ K]` (so it applies to
 `CyclotomicField 37 ℚ` and to any concrete `ℚ(ζ₃₇)`).
 -/
+@[expose] public section
 
 open scoped NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The Case-II descent quotient is congruent to a rational integer mod `37`.**
 
 In the Case-II Fermat configuration `ε₁ x'^37 + ε₂ y'^37 = ε₃ ((ζ-1)^m z')^37` with

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.GaussSum.SignInvariant.VandermondeScalar
@@ -87,6 +92,13 @@ theorem one_sub_fourierPow_complement_pow_order_eq_negI_pow_mul_negOnePow_mul_do
         (x * (((2 * Real.sin (Real.pi * (k : ℝ) / p) : ℝ) : ℂ) ^ p))) hexp
   simpa [a, mul_assoc, mul_left_comm, mul_comm] using hfinal
 
+/-- Factorisation of `ζ ^ k - 1` for an `n`-th root of unity: if `ζ ^ n = 1` and `k ≤ n`,
+then `ζ ^ k - 1 = ζ ^ k * (1 - ζ ^ (n - k))`. -/
+theorem pow_sub_one_eq_pow_mul_one_sub_pow {R : Type*} [Ring R] {ζ : R} {n : ℕ}
+    (hζ : ζ ^ n = 1) {k : ℕ} (hk : k ≤ n) :
+    ζ ^ k - 1 = ζ ^ k * (1 - ζ ^ (n - k)) := by
+  rw [mul_sub, mul_one, ← pow_add, Nat.add_sub_cancel' hk, hζ]
+
 theorem weightedPairFactor_eq_negI_pow_mul_root_mul_doubleSin_pow
     {k : ℕ} (hk0 : 0 < k) (hkp : k < p) :
     ((fourierBaseRoot (p := p)) ^ k - 1) ^ (p - k) *
@@ -96,20 +108,9 @@ theorem weightedPairFactor_eq_negI_pow_mul_root_mul_doubleSin_pow
           (((2 * Real.sin (Real.pi * (k : ℝ) / p) : ℝ) : ℂ) ^ p) := by
   let z : ℂ := fourierBaseRoot (p := p) ^ (p - k)
   have hfirst : fourierBaseRoot (p := p) ^ k - 1 =
-      fourierBaseRoot (p := p) ^ k * (1 - z) := by
-    dsimp [z]
-    calc
-      fourierBaseRoot (p := p) ^ k - 1 =
-          fourierBaseRoot (p := p) ^ k - fourierBaseRoot (p := p) ^ p := by
-            rw [(BernoulliRegular.fourierBaseRoot_isPrimitiveRoot (p := p)).pow_eq_one]
-      _ = fourierBaseRoot (p := p) ^ k -
-            fourierBaseRoot (p := p) ^ k * fourierBaseRoot (p := p) ^ (p - k) := by
-            congr 1
-            rw [← pow_add]
-            congr 1
-            omega
-      _ = fourierBaseRoot (p := p) ^ k * (1 - fourierBaseRoot (p := p) ^ (p - k)) := by
-            ring
+      fourierBaseRoot (p := p) ^ k * (1 - z) :=
+    pow_sub_one_eq_pow_mul_one_sub_pow
+      (fourierBaseRoot_isPrimitiveRoot (p := p)).pow_eq_one (Nat.le_of_lt hkp)
   have hsecond : (fourierBaseRoot (p := p) ^ (p - k) - 1) ^ k =
       (-1 : ℂ) ^ k * (1 - z) ^ k := by
     dsimp [z]

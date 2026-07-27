@@ -192,17 +192,21 @@ theorem one_add_mul_derivative_logSeriesAt {u : K} (hu : IsUnit (u - 1)) :
   cases n with
   | zero =>
     rw [if_pos rfl, hsplit, map_add, PowerSeries.coeff_zero_X_mul, add_zero,
-      PowerSeries.coeff_derivativeFun, logSeriesAt, PowerSeries.coeff_mk,
+      show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative K G
+        from fun _ => rfl,
+      PowerSeries.coeff_derivative, logSeriesAt, PowerSeries.coeff_mk,
       if_neg (Nat.succ_ne_zero 0), PowerSeries.coeff_C_mul, PowerSeries.coeff_mk, ha]
     simp only [pow_zero, pow_one, mul_one, Nat.cast_zero, zero_add, Nat.cast_one]
     field_simp
     ring
   | succ m =>
     rw [if_neg (Nat.succ_ne_zero m), zero_add, hsplit, map_add,
-      PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivativeFun,
-      PowerSeries.coeff_derivativeFun, logSeriesAt, PowerSeries.coeff_mk,
-      PowerSeries.coeff_mk, if_neg (Nat.succ_ne_zero (m + 1)), if_neg (Nat.succ_ne_zero m),
-      PowerSeries.coeff_C_mul, PowerSeries.coeff_mk]
+      PowerSeries.coeff_succ_X_mul,
+      show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative K G
+        from fun _ => rfl,
+      PowerSeries.coeff_derivative, PowerSeries.coeff_derivative, logSeriesAt,
+      PowerSeries.coeff_mk, PowerSeries.coeff_mk, if_neg (Nat.succ_ne_zero (m + 1)),
+      if_neg (Nat.succ_ne_zero m), PowerSeries.coeff_C_mul, PowerSeries.coeff_mk]
     simp only [Nat.add_sub_cancel]
     have hm1 : ((m : K) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero m
     have hm2 : ((m : K) + 1 + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero (m + 1)
@@ -660,7 +664,9 @@ theorem exists_antideriv_bounded (B : PowerSeries K)
   · have hDC : PowerSeries.derivativeFun
         (PowerSeries.mk fun n => if n = 0 then 0 else PowerSeries.coeff (n - 1) E / n) = E := by
       refine PowerSeries.ext fun n => ?_
-      rw [PowerSeries.coeff_derivativeFun, PowerSeries.coeff_mk, if_neg (Nat.succ_ne_zero n),
+      rw [show ∀ G : PowerSeries K, G.derivativeFun = PowerSeries.derivative K G
+          from fun _ => rfl,
+        PowerSeries.coeff_derivative, PowerSeries.coeff_mk, if_neg (Nat.succ_ne_zero n),
         Nat.add_sub_cancel]
       have hne : ((n : K) + 1) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
       rw [Nat.cast_succ, div_mul_cancel₀ _ hne]
@@ -738,7 +744,6 @@ private theorem summable_seriesEval_Ftilde {N : ℕ} [NeZero N] (_hN : 1 < N)
     refine le_trans hbd (le_trans ?_ (le_mul_of_one_le_left (by positivity) (le_max_right _ _)))
     linarith
 
-set_option maxHeartbeats 800000 in
 -- The c₀-design proof chains many `rw`s over `PowerSeries.coeff`/`derivativeFun`
 -- through the heavy `rhoTheta`/`twist` measure terms; the elaboration is heartbeat-heavy.
 /-- P6-p6' (the constant pin, c₀-design — replan R6.6; Lem 6.3 made

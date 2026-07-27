@@ -1,7 +1,9 @@
-import BernoulliRegular.CyclotomicUnits.ClassNumber
-import BernoulliRegular.CyclotomicUnits.KummerLogDeterminant
-import BernoulliRegular.CyclotomicUnits.LogDomain
-import BernoulliRegular.CyclotomicUnits.SaturationIndex
+module
+
+public import BernoulliRegular.CyclotomicUnits.ClassNumber
+public import BernoulliRegular.CyclotomicUnits.KummerLogDeterminant
+public import BernoulliRegular.CyclotomicUnits.LogDomain
+public import BernoulliRegular.CyclotomicUnits.SaturationIndex
 
 /-!
 # Cyclotomic-unit route to weak reflection

@@ -1,6 +1,8 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator
-import BernoulliRegular.CyclotomicUnits.KummerLogLinearAlgebra
-import BernoulliRegular.CyclotomicUnits.Vandermonde
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator
+public import BernoulliRegular.CyclotomicUnits.KummerLogLinearAlgebra
+public import BernoulliRegular.CyclotomicUnits.Vandermonde
 
 /-!
 # Kummer logarithm determinant
@@ -80,7 +82,7 @@ theorem kummerLogDetRowFactor_ne_zero_iff_bernoulliFactor_ne_zero
     (hp_five : 5 ≤ p) (j : Fin (kummerLogRank p)) :
     kummerLogDetRowFactor (p := p) j ≠ 0 ↔
       bernoulliFactor p (kummerLogRowIndex (p := p) j) ≠ 0 := by
-  unfold kummerLogDetRowFactor
+  simp only [kummerLogDetRowFactor]
   constructor
   · intro h hB
     exact h (mul_eq_zero.mpr (Or.inr hB))
@@ -165,7 +167,7 @@ theorem bernoulliFactor_ne_zero_iff_not_dvd_bernoulli_num
     · intro hB hq
       exact hB (by rw [hcnum_zmod, hq, mul_zero])
   have hred_ne_iff : ratReductionZMod p q ≠ 0 ↔ (q.num : ZMod p) ≠ 0 := by
-    unfold ratReductionZMod
+    simp only [ratReductionZMod]
     rw [div_eq_mul_inv]
     constructor
     · intro h hq

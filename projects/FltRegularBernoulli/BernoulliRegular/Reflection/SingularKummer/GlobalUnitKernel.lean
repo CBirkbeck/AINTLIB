@@ -25,7 +25,6 @@ namespace BernoulliRegular
 namespace Reflection
 namespace SingularKummer
 
-set_option linter.unusedSectionVars false
 
 namespace SingularPair
 
@@ -78,7 +77,7 @@ theorem globalUnitToFractionalUnit_injective :
   apply Units.ext
   apply FaithfulSMul.algebraMap_injective (𝓞 K) K
   have h :=
-    congrArg (fun w : fractionalUnitSubgroup (R := 𝓞 K) (K := K) =>
+    congrArg (fun w : fractionalUnitSubgroup (R := 𝓞 K) (K := K) ↦
       ((w.1 : Kˣ) : K)) huv
   simpa [globalUnitToFractionalUnit_apply_coe] using h
 
@@ -140,7 +139,7 @@ def globalUnitEquivFractionalUnit :
       (globalUnitToFractionalUnit_surjective K (globalUnitToFractionalUnit K u))
   right_inv u :=
     Classical.choose_spec (globalUnitToFractionalUnit_surjective K u)
-  map_mul' := fun u v =>
+  map_mul' := fun u v ↦
     map_mul (globalUnitToFractionalUnit K) u v
 
 /-- The map from global units to the singular group. -/
@@ -295,19 +294,17 @@ theorem exists_globalUnit_pow_eq_of_globalUnitToSingularGroup_eq_one (p : ℕ)
         (globalUnitToFractionalUnit K u))).1 hquot
   have hgammaIdeal : toPrincipalIdeal (𝓞 K) K gamma = 1 := by
     have h :=
-      congrArg (fun s : SingularPair (𝓞 K) K p => ideal s) hgammaPair
+      congrArg (fun s : SingularPair (𝓞 K) K p ↦ ideal s) hgammaPair
     simpa [ideal, unitPair, principalPair] using h
   let gammaUnit : fractionalUnitSubgroup (R := 𝓞 K) (K := K) :=
     ⟨gamma, hgammaIdeal⟩
   obtain ⟨v, hv⟩ := globalUnitToFractionalUnit_surjective K gammaUnit
   have hgammaGenerator : gamma ^ p = (globalUnitToFractionalUnit K u).1 := by
     have h :=
-      congrArg (fun s : SingularPair (𝓞 K) K p => generator s) hgammaPair
+      congrArg (fun s : SingularPair (𝓞 K) K p ↦ generator s) hgammaPair
     simpa [generator, unitPair, principalPair] using h
   refine ⟨v, globalUnitToFractionalUnit_injective K ?_⟩
   apply Subtype.ext
-  change (globalUnitToFractionalUnit K u).1 =
-    (globalUnitToFractionalUnit K (v ^ p)).1
   rw [map_pow, hv]
   exact hgammaGenerator.symm
 

@@ -196,7 +196,7 @@ private theorem petN_heckeT_p_LHS_eq_aggregate :
 open UpperHalfPlane ModularGroup MeasureTheory in
 /-- The `β • Γ₁`-PSL-FD set is null-measurable whenever `β` has positive `GL(2,ℝ)`
 determinant, via the `β⁻¹`-pullback of the `Γ₁(N)` FD (a measure-preserving map). -/
-private lemma nullMeasurableSet_glPos_smul_Gamma1_fundDomain_PSL
+lemma nullMeasurableSet_glPos_smul_Gamma1_fundDomain_PSL
     {β : GL (Fin 2) ℝ} (hβ : 0 < β.det.val) :
     NullMeasurableSet (β • (Gamma1_fundDomain_PSL N : Set ℍ)) μ_hyp := by
   have hinv : 0 < (β⁻¹).det.val := by
@@ -387,7 +387,7 @@ private theorem center_mem_Gamma_p_α_T_p_lower_iff_mem_Gamma1
 /-- Fiber-membership characterization at `[1]` (uniform across any congruence subgroup
 `H ≤ SL(2,ℤ)`): the double PSL-quotient lands at the identity iff there is a central
 representative `z` with `g * z ∈ H`. -/
-private theorem pslQuot_eq_one_iff_exists_center_mem
+theorem pslQuot_eq_one_iff_exists_center_mem
     (H : Subgroup SL(2, ℤ)) (g : SL(2, ℤ)) :
     (QuotientGroup.mk (QuotientGroup.mk g : PSL(2, ℤ)) :
         PSL(2, ℤ) ⧸ (H.map (QuotientGroup.mk' (Subgroup.center SL(2, ℤ))))) =

@@ -99,7 +99,7 @@ noncomputable def SmoothPlaneCurve.residueFieldsAlgEquiv
   letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
   (C₂.quotientAlgEquivBase hQ).symm.trans (C₁.quotientAlgEquivBase hP)
 
-/-! ### LinearEquiv transport + inertiaDeg closure -/
+/-! ### LinearEquiv transport + inertiaDeg' closure -/
 
 variable {C₁ C₂ : SmoothPlaneCurve F}
 
@@ -176,7 +176,7 @@ noncomputable def CurveMap.CoordHom.residueLinearEquiv
   exact LinearEquiv.ofBijectiveAlgebraMap
     ⟨algebraMap_residueField_injective hQ hP φ coordHom hLies, h_surj⟩
 
-/-- **Full Piece 9 closure via LinearEquiv transport**: `inertiaDeg = 1`
+/-- **Full Piece 9 closure via LinearEquiv transport**: `inertiaDeg' = 1`
 for any `CurveMap.CoordHom` lying-over pair under `[IsAlgClosed F]`.
 
 Uses `residueLinearEquiv` above to transport `finrank_self = 1` from
@@ -194,13 +194,13 @@ theorem CurveMap.CoordHom.inertiaDeg_eq_one_of_isAlgClosed
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       IsScalarTower F (C₂.CoordinateRing ⧸ Q) (C₁.CoordinateRing ⧸ P)) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    Ideal.inertiaDeg Q P = 1 := by
+    Ideal.inertiaDeg' Q P = 1 := by
   letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
   haveI := hLies
   letI : Field (C₂.CoordinateRing ⧸ Q) := Ideal.Quotient.field Q
   letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
   haveI := hScalarTower
-  rw [Ideal.inertiaDeg_algebraMap,
+  rw [Ideal.inertiaDeg'_algebraMap,
     ← (CurveMap.CoordHom.residueLinearEquiv φ coordHom hQ hP hLies hScalarTower).finrank_eq]
   exact CommSemiring.finrank_self _
 
@@ -208,10 +208,10 @@ theorem CurveMap.CoordHom.inertiaDeg_eq_one_of_isAlgClosed
 
 The `h_ef_one_Q` hypothesis of Piece 8
 (`primesOverFinset_card_eq_degree_of_unramified`) requires
-`ramificationIdx · inertiaDeg = 1` for each prime P above Q. Over
+`ramificationIdx' · inertiaDeg' = 1` for each prime P above Q. Over
 `[IsAlgClosed F]`, this decomposes as:
-* `ramificationIdx = 1` via unramification (Piece 3).
-* `inertiaDeg = 1` via `inertiaDeg_eq_one_of_isAlgClosed` above
+* `ramificationIdx' = 1` via unramification (Piece 3).
+* `inertiaDeg' = 1` via `inertiaDeg_eq_one_of_isAlgClosed` above
   (Piece 9).
 
 The atomic version below does the composition at a single P. Stream A's
@@ -221,7 +221,7 @@ final assembly theorem (Deliverable 1) quantifies over the whole finset. -/
 with Piece 9's inertia output. For a single P above Q, given the
 ramification-is-1 witness (Piece 3's output on P) plus the scalar-tower
 witness for the residue fields (Piece 9's input under alg-closed), we
-get `ramificationIdx · inertiaDeg = 1`.
+get `ramificationIdx' · inertiaDeg' = 1`.
 
 Takes the ramification = 1 fact as a hypothesis rather than re-deriving
 it — stream A's assembly theorem will supply it from the unramified
@@ -236,17 +236,17 @@ theorem CurveMap.CoordHom.ef_one_of_ram_one_and_algClosed
       P.LiesOver Q)
     (hRamOne :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-      Ideal.ramificationIdx Q P = 1)
+      Ideal.ramificationIdx' Q P = 1)
     (hScalarTower :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       letI : Field (C₂.CoordinateRing ⧸ Q) := Ideal.Quotient.field Q
       letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
       IsScalarTower F (C₂.CoordinateRing ⧸ Q) (C₁.CoordinateRing ⧸ P)) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    Ideal.ramificationIdx Q P *
-      Ideal.inertiaDeg Q P = 1 := by
+    Ideal.ramificationIdx' Q P *
+      Ideal.inertiaDeg' Q P = 1 := by
   letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-  have h_f : Ideal.inertiaDeg Q P = 1 :=
+  have h_f : Ideal.inertiaDeg' Q P = 1 :=
     CurveMap.CoordHom.inertiaDeg_eq_one_of_isAlgClosed φ coordHom hQ hP hLies hScalarTower
   rw [hRamOne, h_f, one_mul]
 
@@ -378,7 +378,7 @@ private theorem CurveMap.ramificationIdx_eq_one_of_not_dvd_differentIdeal
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       ¬ P ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
-    Ideal.ramificationIdx Q.asIdeal P = 1 := by
+    Ideal.ramificationIdx' Q.asIdeal P = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
   haveI := hP_prime
   haveI := hP_lies
@@ -390,7 +390,7 @@ private theorem CurveMap.ramificationIdx_eq_one_of_not_dvd_differentIdeal
 
 /-- **Per-prime `e · f = 1`** (Pieces 2/3 + Piece 9): for a height-one prime
 `Q` of `C₂.CoordinateRing` whose fiber avoids the ramified locus, every prime
-`P` in that fiber has `ramificationIdx Q P * inertiaDeg Q P = 1`. The
+`P` in that fiber has `ramificationIdx' Q P * inertiaDeg' Q P = 1`. The
 ramification side `e = 1` is Pieces 2/3 (unramified at `P` ⇒ `e = 1`); the
 inertia side `f = 1` is Piece 9 over the algebraically closed base. This is
 exactly the witness consumed by
@@ -421,8 +421,8 @@ private theorem CurveMap.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_
         P.under C₂.CoordinateRing ≠ Q) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∀ P ∈ IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing,
-      Ideal.ramificationIdx Q.asIdeal P *
-        Ideal.inertiaDeg Q.asIdeal P = 1 := by
+      Ideal.ramificationIdx' Q.asIdeal P *
+        Ideal.inertiaDeg' Q.asIdeal P = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
   haveI : IsScalarTower F C₂.CoordinateRing C₁.CoordinateRing :=
     IsScalarTower.of_algHom coordHom.toAlgHom
@@ -436,7 +436,7 @@ private theorem CurveMap.ramificationIdx_mul_inertiaDeg_eq_one_of_not_liesUnder_
   have hP_nd : ¬ P ∣ differentIdeal C₂.CoordinateRing C₁.CoordinateRing :=
     φ.not_dvd_differentIdeal_of_liesOver_good coordHom hfin htorsion Q hQ_good hP_prime hP_ne
       hP_lies
-  have hram : Ideal.ramificationIdx Q.asIdeal P = 1 :=
+  have hram : Ideal.ramificationIdx' Q.asIdeal P = 1 :=
     φ.ramificationIdx_eq_one_of_not_dvd_differentIdeal coordHom hfin htorsion hfaithful
       hessfin hsepFF Q hP_prime hP_ne hP_lies hP_nd
   haveI hPmax : P.IsMaximal := Ideal.IsMaximal.of_liesOver_isMaximal P Q.asIdeal

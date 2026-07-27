@@ -1,19 +1,24 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
-public import CebotarevDensity.Density
+public import CebotarevDensity.Abelian
+public import CebotarevDensity.Cyclotomic
 public import CebotarevDensity.CyclotomicNormResidue
+public import CebotarevDensity.Density
+public import CebotarevDensity.FixedFieldDensity
 public import CebotarevDensity.ForMathlib.CharacterOrthogonality
 public import CebotarevDensity.ForMathlib.IdealCongruenceCount
 public import CebotarevDensity.ForMathlib.LatticePointCount
 public import CebotarevDensity.ForMathlib.LogOneDivSubOne
 public import CebotarevDensity.ForMathlib.NormLeOneLipschitz
-public import CebotarevDensity.FixedFieldDensity
 public import CebotarevDensity.Frobenius
-public import CebotarevDensity.ZetaProduct
-public import CebotarevDensity.Cyclotomic
-public import CebotarevDensity.Abelian
 public import CebotarevDensity.Main
 public import CebotarevDensity.NumberFieldEulerProduct
+public import CebotarevDensity.ZetaProduct
 
 /-!
 # Chebotarev density theorem

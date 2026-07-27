@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
-import BernoulliRegular.LValueAtOne.Defs
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
+public import BernoulliRegular.LValueAtOne.Defs
 
 /-!
 # LV-SIN-D: Composition into `SinnottAnalyticIdentity`
@@ -79,7 +81,7 @@ theorem dirichletCharacter_inv_matrix_eigenvalue_evenLValueLogSum
         ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) (a * (↑k : ZMod p))‖ : ℝ) -
           (Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ) =
       (χ (↑k : ZMod p) - 1) * BernoulliRegular.evenLValueLogSum p χ := by
-  set g : ZMod p → ℂ := fun a =>
+  set g : ZMod p → ℂ := fun a ↦
     ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ)
   have h_abs := dirichletCharacter_sum_matrix_eigenvalue χ⁻¹ k g
   have h_lhs_eq : ∀ a : ZMod p,
@@ -90,7 +92,7 @@ theorem dirichletCharacter_inv_matrix_eigenvalue_evenLValueLogSum
     intro a
     push_cast [g]
     ring
-  rw [Finset.sum_congr rfl (fun a _ => h_lhs_eq a), h_abs]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_lhs_eq a), h_abs]
   have h_inv : χ⁻¹ (↑(k⁻¹ : (ZMod p)ˣ) : ZMod p) = χ ((↑k : ZMod p)) := by
     rw [MulChar.inv_apply, Ring.inverse_unit (k⁻¹)]
     simp [inv_inv]

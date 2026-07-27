@@ -43,7 +43,6 @@ variable (p : ℕ) [hp : Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K]
   [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K]
 
-
 /-- **PUP image in mod-p free part is non-zero (multiplicative form)**:
 the image of `[PUP]_{E/E^37}` under the canonical map to mod-p free part
 is not the identity. -/
@@ -97,7 +96,7 @@ theorem pollaczekUnitPlus_class_eq_two_smul_pollaczekUnit_class_in_modp_freepart
         (Additive.ofMul (pollaczekUnitPlus 37 K 32)) =
       (2 : ℕ) • cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (pollaczekUnit 37 K 32)) := by
-  unfold pollaczekUnitPlus
+  simp only [pollaczekUnitPlus]
   rw [ofMul_mul]
   rw [map_add]
   -- Goal: ... K (ofMul PU) + ... K (ofMul (unitsComplexConj K PU)) = 2 • ... K (ofMul PU).
@@ -183,7 +182,7 @@ theorem flt37_pollaczekUnit_class_in_modp_freepart_ne_zero_iff_cert
       cyclotomicUnitToFreePartModPAdd (p := 37) (CyclotomicField 37 ℚ)
         (Additive.ofMul (pollaczekUnit 37 (CyclotomicField 37 ℚ) 32))
     -- Use the existing project pattern: 2 invertible in ZMod 37 via twoInvertibleZModOfPrimeGtTwo.
-    letI : Invertible ((2 : ZMod 37)) :=
+    let : Invertible ((2 : ZMod 37)) :=
       twoInvertibleZModOfPrimeGtTwo (p := 37) (by omega)
     have h_two_smul_zmod : ((2 : ZMod 37)) • y = 0 := by
       have h_cast : (((2 : ℕ) : ZMod 37)) • y = ((2 : ℕ) : ℕ) • y :=
@@ -236,7 +235,7 @@ eigenspace lemmas requiring `IsEvenDeltaCharacter`. Since `32` is even,
 `(-1)^32 = 1`, and the character `ω^32` sends `-1 ↦ 1`. -/
 theorem cyclotomicOmegaChar_even_of_even (k : ℕ) (hk : Even k) :
     IsEvenDeltaCharacter (p := p) (cyclotomicOmegaChar (p := p) k) := by
-  unfold IsEvenDeltaCharacter
+  simp only [IsEvenDeltaCharacter]
   rw [cyclotomicOmegaChar_apply]
   -- Goal: ((-1 : CyclotomicUnitDelta p) : ZMod p)^k = 1.
   -- (-1 : CyclotomicUnitDelta p) corresponds to (-1 : ZMod p), and (-1)^k = 1 for k even.
@@ -286,11 +285,11 @@ theorem flt37_pollaczekUnit_image_spans_omegaChar32_eigenspace
             pollaczekUnit_image_in_omegaChar32_eigenspace_FLT37⟩} :
           Set (cyclotomicUnitFreePartModPDeltaCharacterEigenspace (p := 37)
             (CyclotomicField 37 ℚ) (cyclotomicOmegaChar (p := 37) 32))) = ⊤ := by
-  letI : Fintype {w : InfinitePlace (CyclotomicField 37 ℚ) //
+  let : Fintype {w : InfinitePlace (CyclotomicField 37 ℚ) //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := Fintype.ofFinite _
-  letI : DiscreteTopology (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) :=
+  let : DiscreteTopology (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) :=
     NumberField.Units.instDiscrete_unitLattice (CyclotomicField 37 ℚ)
-  letI : IsZLattice ℝ (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) := by
+  let : IsZLattice ℝ (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) := by
     refine ⟨?_⟩
     convert NumberField.Units.dirichletUnitTheorem.unitLattice_span_eq_top (CyclotomicField 37 ℚ)
   have h_finrank :

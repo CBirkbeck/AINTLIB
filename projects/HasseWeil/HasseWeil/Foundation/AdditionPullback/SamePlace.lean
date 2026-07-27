@@ -63,8 +63,6 @@ open WeierstrassCurve HasseWeil.Curves
 namespace HasseWeil
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve F} [W.toAffine.IsElliptic]
 
@@ -75,7 +73,8 @@ local notation "KE" => W.toAffine.FunctionField
 The residue bridges of `MulByIntSamePlace.lean` (`pointValuation_aeval_sub_eval_lt_one`,
 `pointValuation_algebraMap_sub_evalAt_lt_one`, `algebraMap_polynomial_eq_aeval_x_gen`,
 `pointValuation_bivariate_bridge`) are `private` to that file.  They are entirely isogeny-agnostic —
-pure residue facts in `K(E)` — so we re-state them here.  These are verbatim copies (no `[ℓ]` content).
+pure residue facts in `K(E)` — so we re-state them here.  These are verbatim copies (no `[ℓ]`
+content).
 -/
 
 /-- **Univariate value bridge** (verbatim copy of the `private` `MulByIntSamePlace` lemma):
@@ -137,7 +136,8 @@ private theorem pV_algebraMap_sub_evalAt_lt_one
     (C := (⟨W.toAffine⟩ : SmoothPlaneCurve F))
     (r - algebraMap F (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing
       ((⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt P r)) P).mpr hmem
-  rwa [map_sub, ← IsScalarTower.algebraMap_apply F (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing
+  rwa [map_sub, ← IsScalarTower.algebraMap_apply F (⟨W.toAffine⟩ : SmoothPlaneCurve
+      F).CoordinateRing
     (⟨W.toAffine⟩ : SmoothPlaneCurve F).FunctionField] at hlt
 
 /-- One monomial step of `pV_bivariate_bridge`: multiplying by `X` (degree `n → n+1`)
@@ -221,7 +221,8 @@ the addition-formula residue matching to the four generator residues, exactly as
 `pV P := pointValuation P`. -/
 
 /-- Abbreviation: `resid P u a` means `u ≡ a` modulo `m_P`, i.e. `pV P (u − a) < 1`. -/
-private abbrev resid (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) (u : KE) (a : F) : Prop :=
+private abbrev resid (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) (u : KE) (a : F) : Prop
+    :=
   (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P (u - algebraMap F KE a) < 1
 
 /-- A residue `u ≡ a` makes `u` regular at `P`. -/
@@ -266,7 +267,7 @@ private theorem resid_mul {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
 /-- A scalar `algebraMap F KE c` residues to `c`. -/
 private theorem resid_const (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) (c : F) :
     resid P (algebraMap F KE c) c := by
-  unfold resid; rw [sub_self, map_zero]; exact zero_lt_one
+  simp only [resid]; rw [sub_self, map_zero]; exact zero_lt_one
 
 /-- A residue `u ≡ a` with `a ≠ 0` makes `u` a unit at `P` (`pV P u = 1`). -/
 private theorem resid_unit {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint} {u : KE} {a : F}
@@ -293,7 +294,7 @@ private theorem resid_div {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
   have hnum' : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P
       (u * algebraMap F KE c - algebraMap F KE a * d) < 1 := by
     have := resid_sub (resid_mul hu (resid_const P c)) (resid_mul (resid_const P a) hd)
-    unfold resid at this
+    simp only [resid] at this
     rwa [show a * c - a * c = (0 : F) from by ring, map_zero, sub_zero] at this
   have hid : u / d - algebraMap F KE (a / c) =
       (u * algebraMap F KE c - algebraMap F KE a * d) * (d * algebraMap F KE c)⁻¹ := by
@@ -326,7 +327,7 @@ private theorem resid_pow {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
 /-- The generic `x`-coordinate residues to `P.x`: `x_gen ≡ P.x` modulo `m_P`. -/
 private theorem resid_x_gen (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) :
     resid P (x_gen W) P.x := by
-  unfold resid
+  simp only [resid]
   rw [x_gen_sub_const_eq_algebraMap_XClass]
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := (⟨W.toAffine⟩ : SmoothPlaneCurve F)) _ P).mpr (XClass_mem_maximalIdealAt W P P.x rfl)
@@ -337,7 +338,8 @@ private theorem resid_y_gen (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothP
   have h := pV_algebraMap_sub_evalAt_lt_one P (Affine.CoordinateRing.mk W.toAffine Polynomial.X)
   -- `mk X = y_gen` and `evalAt P (mk X) = P.y`.
   rw [Curves.SmoothPlaneCurve.evalAt_mk] at h
-  have hgen : algebraMap W.toAffine.CoordinateRing KE (Affine.CoordinateRing.mk W.toAffine Polynomial.X)
+  have hgen : algebraMap W.toAffine.CoordinateRing KE (Affine.CoordinateRing.mk W.toAffine
+      Polynomial.X)
       = y_gen W := rfl
   have hval : (Polynomial.X : Polynomial (Polynomial F)).evalEval P.x P.y = P.y := by
     simp [Polynomial.evalEval]
@@ -402,7 +404,7 @@ private theorem resid_addPullback_x_pair
   rw [show addPullback_x_pair α₁ α₂ =
       (addSlopePair α₁ α₂) ^ 2 + algebraMap F KE W.toAffine.a₁ * (addSlopePair α₁ α₂)
         - algebraMap F KE W.toAffine.a₂ - α₁.pullback (x_gen W) - α₂.pullback (x_gen W) from by
-    unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+    simp only [addPullback_x_pair, WeierstrassCurve.Affine.addX]
     rw [ha₁, ha₂]]
   rw [show W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂) =
       (W.toAffine.slope x₁ x₂ y₁ y₂) ^ 2 + W.toAffine.a₁ * (W.toAffine.slope x₁ x₂ y₁ y₂)
@@ -422,7 +424,7 @@ private lemma addPullback_y_pair_eq_negY_form :
       (W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂)
         ((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
           + α₁.pullback (y_gen W)) from rfl]
-  unfold WeierstrassCurve.Affine.negY
+  simp only [WeierstrassCurve.Affine.negY]
   have ha₁ : (W_KE W).toAffine.a₁ = algebraMap F KE W.toAffine.a₁ := rfl
   have ha₃ : (W_KE W).toAffine.a₃ = algebraMap F KE W.toAffine.a₃ := rfl
   rw [ha₁, ha₃]
@@ -466,7 +468,8 @@ private theorem resid_addPullback_y_pair
 
 The two lemmas above derive the slope residue internally via the *secant* formula
 (`resid_addSlopePair`, requiring `x₁ ≠ x₂`).  In the **doubling case** `x₁ = x₂` the `K(E)`-element
-`addSlopePair α₁ α₂` is still the secant `(α₁^*y − α₂^*y)/(α₁^*x − α₂^*x)` (the pullbacks are distinct
+`addSlopePair α₁ α₂` is still the secant `(α₁^*y − α₂^*y)/(α₁^*x − α₂^*x)` (the pullbacks are
+distinct
 in `K(E)`) but it residues to the *tangent* slope (an `L'Hôpital` limit), supplied externally.  We
 therefore restate the `addX`/`addY` residue arithmetic taking the slope residue
 `resid P (addSlopePair α₁ α₂) ℓ` as a hypothesis for an *arbitrary* `ℓ` — the residue arithmetic of
@@ -485,7 +488,7 @@ private theorem resid_addPullback_x_pair_of_slope
   rw [show addPullback_x_pair α₁ α₂ =
       (addSlopePair α₁ α₂) ^ 2 + algebraMap F KE W.toAffine.a₁ * (addSlopePair α₁ α₂)
         - algebraMap F KE W.toAffine.a₂ - α₁.pullback (x_gen W) - α₂.pullback (x_gen W) from by
-    unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+    simp only [addPullback_x_pair, WeierstrassCurve.Affine.addX]
     rw [ha₁, ha₂]]
   rw [show W.toAffine.addX x₁ x₂ ℓ =
       ℓ ^ 2 + W.toAffine.a₁ * ℓ - W.toAffine.a₂ - x₁ - x₂ from by
@@ -514,7 +517,7 @@ private theorem resid_addPullback_y_pair_of_slope
         (W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂)
           ((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
             + α₁.pullback (y_gen W)) from rfl]
-    unfold WeierstrassCurve.Affine.negY
+    simp only [WeierstrassCurve.Affine.negY]
     rw [ha₁, ha₃]]
   rw [show W.toAffine.addY x₁ x₂ y₁ ℓ =
       -(ℓ * (W.toAffine.addX x₁ x₂ ℓ - x₁) + y₁)
@@ -532,19 +535,23 @@ private theorem resid_addPullback_y_pair_of_slope
     rwa [map_zero, zero_sub, zero_sub] at this
   exact resid_sub (resid_sub hnegAddY (resid_mul (resid_a₁ P) hX)) (resid_const P _)
 
-/-- **The addition-formula closed-point specialisation** (`oneSub_coords_at_affine`, the centerpiece;
+/-- **The addition-formula closed-point specialisation** (`oneSub_coords_at_affine`, the
+centerpiece;
 the analogue of `mulByInt_coords_at_affine`).
 
 For the addition-formula isogeny `addIsog hxy hinj` (the rational map `P ↦ α₁(P) + α₂(P)` with the
 explicit Weierstrass-addition comorphism), a smooth point `P` whose summand images are the finite
 points `α₁(P) = some x₁ y₁`, `α₂(P) = some x₂ y₂` *in the non-doubling case* `x₁ ≠ x₂`, and the
-**per-summand closed-point residue witnesses** `α_i^* x_gen ≡ x_i`, `α_i^* y_gen ≡ y_i` modulo `m_P`:
-the addition-formula comorphism coordinates `addPullback_x_pair`, `addPullback_y_pair` are congruent,
+**per-summand closed-point residue witnesses** `α_i^* x_gen ≡ x_i`, `α_i^* y_gen ≡ y_i`
+modulo `m_P`:
+the addition-formula comorphism coordinates `addPullback_x_pair`, `addPullback_y_pair` are
+congruent,
 modulo `m_P`, to the coordinates `(x, y)` of the image `(addIsog hxy hinj)(P) = α₁(P) + α₂(P)`.
 
 This is the addition-formula replacement for the division-polynomial coordinate specialisation
 `[ℓ]P = (φ_ℓ/ψ_ℓ², …)`: the image coordinates come from mathlib's `Affine.Point.add_some`
-(`addX`/`addY` of the summand coordinates), and the comorphism coordinates residue to *exactly* those
+(`addX`/`addY` of the summand coordinates), and the comorphism coordinates residue to
+*exactly* those
 `addX`/`addY` by the residue toolkit. -/
 theorem oneSub_coords_at_affine
     {hxy : AddNonInversePair α₁ α₂} {hinj : Function.Injective (addCoordAlgHomPair hxy)}
@@ -577,7 +584,8 @@ theorem oneSub_coords_at_affine
 
 /-! ### Residue matching for `(α₁+α₂)^*` on coordinate-ring elements
 
-The verbatim transcription of `MulByIntSamePlace.lean`'s `pointValuation_mulByInt_pullback_algebraMap_*`
+The verbatim transcription of `MulByIntSamePlace.lean`'s
+`pointValuation_mulByInt_pullback_algebraMap_*`
 chain with the division coordinate functions replaced by `addPullback_x_pair`, `addPullback_y_pair`.
 Throughout we *take as hypotheses* the two coordinate residues `addPullback_x_pair ≡ x`,
 `addPullback_y_pair ≡ y` — these are the output of `oneSub_coords_at_affine`, the addition-formula
@@ -588,7 +596,8 @@ section Transfer
 
 variable {hxy : AddNonInversePair α₁ α₂} {hinj : Function.Injective (addCoordAlgHomPair hxy)}
 
-/-- `(addIsog).pullback (algebraMap (mk p)) = p(addPullback_x_pair, addPullback_y_pair)` (coefficients
+/-- `(addIsog).pullback (algebraMap (mk p)) = p(addPullback_x_pair, addPullback_y_pair)`
+(coefficients
 pushed through `algebraMap F K(E)`).  The coordinate-ring comorphism of `addIsog` substitutes the
 addition-formula coordinate functions for `(x_gen, y_gen)` — the analogue of
 `mulByInt_pullback_algebraMap_mk_eq`. -/
@@ -598,11 +607,11 @@ private theorem addIsog_pullback_algebraMap_mk_eq (p : Polynomial (Polynomial F)
       (p.map (Polynomial.mapRingHom (algebraMap F KE))).evalEval
         (addPullback_x_pair α₁ α₂) (addPullback_y_pair α₁ α₂) := by
   rw [addIsog_pullback]
-  unfold addPullbackAlgHomPair
+  simp only [addPullbackAlgHomPair]
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
   change (addCoordAlgHomPair hxy).toRingHom (Affine.CoordinateRing.mk W.toAffine p) = _
   change addCoordRingHomPair hxy (Affine.CoordinateRing.mk W.toAffine p) = _
-  unfold addCoordRingHomPair
+  simp only [addCoordRingHomPair]
   rw [AdjoinRoot.lift_mk]
   change p.eval₂ (Polynomial.eval₂RingHom (algebraMap F KE) (addPullback_x_pair α₁ α₂))
       (addPullback_y_pair α₁ α₂) = _
@@ -610,7 +619,8 @@ private theorem addIsog_pullback_algebraMap_mk_eq (p : Polynomial (Polynomial F)
 
 /-- **Residue matching for coordinate-ring elements (affine image).** Given the coordinate residues
 `addPullback_x_pair ≡ x`, `addPullback_y_pair ≡ y` (the `oneSub_coords_at_affine` output), for any
-coordinate-ring element `r`, `(α₁+α₂)^*(algebraMap r) ≡ r(Q)` modulo `m_P`, where `Q = ⟨x, y, h_ns⟩`.
+coordinate-ring element `r`, `(α₁+α₂)^*(algebraMap r) ≡ r(Q)` modulo `m_P`, where `Q = ⟨x,
+y, h_ns⟩`.
 Built from the bivariate value bridge with the two coordinate residues. -/
 private theorem pV_addIsog_pullback_algebraMap_sub_evalAt_lt_one
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
@@ -623,7 +633,8 @@ private theorem pV_addIsog_pullback_algebraMap_sub_evalAt_lt_one
           algebraMap F KE ((⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r)) < 1 := by
   obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective r
   rw [addIsog_pullback_algebraMap_mk_eq p,
-    show (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ (Affine.CoordinateRing.mk W.toAffine p)
+    show (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ (Affine.CoordinateRing.mk
+        W.toAffine p)
         = p.evalEval x y from Curves.SmoothPlaneCurve.evalAt_mk _ _ _]
   exact pV_bivariate_bridge P (resid_le_one hx) hx (resid_le_one hy) hy p
 
@@ -778,7 +789,8 @@ private theorem pV_addIsog_pullback_lt_one_of_lt_one
 /-- **Same-place regularity transfer, affine-image case** (the `MulByIntSamePlace` analogue
 `mulByInt_samePlace_le_one_iff_affine`).  For the addition-formula isogeny `addIsog hxy hinj` and a
 smooth point `P` whose image `(α₁+α₂)(P)` is the finite point `some x y h_ns`, *given* the two
-coordinate residues (the `oneSub_coords_at_affine` output), `(α₁+α₂).pullback g` is regular at `P` iff
+coordinate residues (the `oneSub_coords_at_affine` output), `(α₁+α₂).pullback g` is regular
+at `P` iff
 `g` is regular at `⟨x, y, h_ns⟩`. -/
 theorem addIsog_samePlace_le_one_iff_affine
     {hxy : AddNonInversePair α₁ α₂} {hinj : Function.Injective (addCoordAlgHomPair hxy)}
@@ -798,16 +810,21 @@ theorem addIsog_samePlace_le_one_iff_affine
   have hinvQ : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ g⁻¹ < 1 := by
     rw [map_inv₀]
     exact (inv_lt_one₀ (lt_trans one_pos hQng)).mpr hQng
-  have hPinv : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹)
+  have hPinv : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback
+      g⁻¹)
       < 1 := pV_addIsog_pullback_lt_one_of_lt_one (hxy := hxy) (hinj := hinj) P h_ns hx hy hinvQ
   have hmul : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g) *
-      (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹) = 1 := by
+      (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹) = 1 :=
+          by
     rw [← map_mul, ← map_mul, mul_inv_cancel₀ hg_ne, map_one, map_one]
   have hlt1 : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g) *
-      (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹) < 1 := by
-    have hstep : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g) *
+      (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹) < 1 :=
+          by
+    have hstep : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback
+        g) *
         (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹) ≤
-        1 * (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹) := by
+        1 * (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P ((addIsog hxy hinj).pullback g⁻¹)
+            := by
       gcongr
     exact lt_of_le_of_lt hstep (by rw [one_mul]; exact hPinv)
   rw [hmul] at hlt1
@@ -843,7 +860,8 @@ uniformizer-order fact, the genuinely-deep local residual). -/
 `comap_pointValuation_mulByInt_eq_affine`.  Given the two coordinate residues (the
 `oneSub_coords_at_affine` output) **and** the single `e = 1` uniformizer datum `he1`
 (`ord_P ((α₁+α₂)^* (x_gen − x_Q)) = 1`, the unramifiedness of the separable isogeny), the comap
-valuation `(pointValuation P).comap (α₁+α₂).pullback` equals `pointValuation ⟨x, y, h_ns⟩` outright. -/
+valuation `(pointValuation P).comap (α₁+α₂).pullback` equals `pointValuation ⟨x, y, h_ns⟩`
+outright. -/
 theorem comap_pointValuation_addIsog_eq_affine_of_e_eq_one
     {hxy : AddNonInversePair α₁ α₂} {hinj : Function.Injective (addCoordAlgHomPair hxy)}
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
@@ -865,23 +883,30 @@ end Transfer
 /-! ### The same-place transfer + `e = 1` comap identity for a *general* isogeny
 
 The `addIsog`-keyed transfer above is, at bottom, a fact about the two **generator pullbacks**
-`α^*x_gen`, `α^*y_gen` of an isogeny `α` (since `addPullback_x_pair α₁ α₂ = (addIsog).pullback x_gen`,
+`α^*x_gen`, `α^*y_gen` of an isogeny `α` (since `addPullback_x_pair α₁ α₂ =
+(addIsog).pullback x_gen`,
 `addPullbackAlgHomPair_x_gen_eq`).  This section restates it for an **arbitrary** isogeny `α`, keyed
 on the two **generator residues** `α^*x_gen ≡ x`, `α^*y_gen ≡ y` modulo `m_P` — the form the
 *concrete* base-changed `1 − π` over `K̄` needs (its pullback is opaque, not literally an `addIsog`
-comorphism).  The companion `e = 1` datum is assembled from the residue (`ord_P ≥ 1`) and the general
-differential bound `ord_P_isog_pullback_x_sub_const_le_one` (`ord_P ≤ 1`), so the final comap identity
+comorphism).  The companion `e = 1` datum is assembled from the residue (`ord_P ≥ 1`) and
+the general
+differential bound `ord_P_isog_pullback_x_sub_const_le_one` (`ord_P ≤ 1`), so the final comap
+identity
 carries **no** `he1`. -/
 
 section IsogGeneral
 
 variable {α : Isogeny W.toAffine W.toAffine}
 
-/-- **Closed-point residue production for a general isogeny `α` from an addition decomposition** (the
+/-- **Closed-point residue production for a general isogeny `α` from an addition
+decomposition** (the
 `oneSub_coords_at_affine` bridge to a non-`addIsog` isogeny).  If `α`'s generator pullbacks coincide
-with the addition-formula coordinates `addPullback_x_pair α₁ α₂`, `addPullback_y_pair α₁ α₂` of a pair
-`(α₁, α₂)` (`hpb_x`, `hpb_y`) and `α`'s point-map image at `P` is the sum `α₁(P) + α₂(P)` (`hsum_pt`),
-then — given the per-summand residues and the non-doubling `x₁ ≠ x₂` — the generator pullbacks of `α`
+with the addition-formula coordinates `addPullback_x_pair α₁ α₂`, `addPullback_y_pair α₁ α₂`
+of a pair
+`(α₁, α₂)` (`hpb_x`, `hpb_y`) and `α`'s point-map image at `P` is the sum `α₁(P) + α₂(P)`
+(`hsum_pt`),
+then — given the per-summand residues and the non-doubling `x₁ ≠ x₂` — the generator
+pullbacks of `α`
 residue to the image coordinates `x`, `y`.
 
 This is the form needed for the *concrete* base-changed `1 − π` over `K̄` (whose pullback is opaque,
@@ -893,8 +918,8 @@ theorem isog_coords_at_affine_of_decomp {α₁ α₂ : Isogeny W.toAffine W.toAf
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
     (h_ns : W.toAffine.Nonsingular x y)
     {x₁ y₁ x₂ y₂ : F} {h₁ : W.toAffine.Nonsingular x₁ y₁} {h₂ : W.toAffine.Nonsingular x₂ y₂}
-    (hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
-    (hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
+    (_hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
+    (_hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
     (hx₁ : resid P (α₁.pullback (x_gen W)) x₁) (hx₂ : resid P (α₂.pullback (x_gen W)) x₂)
     (hy₁ : resid P (α₁.pullback (y_gen W)) y₁) (hy₂ : resid P (α₂.pullback (y_gen W)) y₂)
     (hx_ne : x₁ ≠ x₂)
@@ -916,7 +941,8 @@ theorem isog_coords_at_affine_of_decomp {α₁ α₂ : Isogeny W.toAffine W.toAf
 /-- **Closed-point residue production for a general isogeny `α` from an addition decomposition,
 slope-parametric (covers the doubling case).**  Identical to `isog_coords_at_affine_of_decomp` but
 takes the slope residue `addSlopePair α₁ α₂ ≡ slope x₁ x₂ y₁ y₂` as an explicit hypothesis `hL` and
-only the *non-inverse* condition `¬(x₁ = x₂ ∧ y₁ = negY x₂ y₂)` (not `x₁ ≠ x₂`).  This is the form the
+only the *non-inverse* condition `¬(x₁ = x₂ ∧ y₁ = negY x₂ y₂)` (not `x₁ ≠ x₂`).  This is the
+form the
 *doubling* case `x₁ = x₂` of the concrete base-changed `1 − π` needs, where the `K(E)`-secant
 `addSlopePair` residues to the *tangent* slope (supplied via `hL` from the invariant-differential
 `L'Hôpital` argument). -/
@@ -926,8 +952,8 @@ theorem isog_coords_at_affine_of_decomp_slope {α₁ α₂ : Isogeny W.toAffine 
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
     (h_ns : W.toAffine.Nonsingular x y)
     {x₁ y₁ x₂ y₂ : F} {h₁ : W.toAffine.Nonsingular x₁ y₁} {h₂ : W.toAffine.Nonsingular x₂ y₂}
-    (hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
-    (hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
+    (_hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
+    (_hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
     (hx₁ : resid P (α₁.pullback (x_gen W)) x₁) (hx₂ : resid P (α₂.pullback (x_gen W)) x₂)
     (hy₁ : resid P (α₁.pullback (y_gen W)) y₁)
     (hL : resid P (addSlopePair α₁ α₂) (W.toAffine.slope x₁ x₂ y₁ y₂))
@@ -968,7 +994,8 @@ theorem isog_pullback_algebraMap_mk_eq (p : Polynomial (Polynomial F)) :
   rw [hqmap] at key
   exact key.symm
 
-/-- **Residue matching for coordinate-ring elements** (general isogeny, affine image).  Given the two
+/-- **Residue matching for coordinate-ring elements** (general isogeny, affine image). 
+Given the two
 generator residues `α^*x_gen ≡ x`, `α^*y_gen ≡ y`, for any coordinate-ring `r`,
 `α^*(algebraMap r) ≡ r(Q)` modulo `m_P` with `Q = ⟨x, y, h_ns⟩`.  Built from the bivariate value
 bridge with the two generator residues. -/
@@ -982,7 +1009,8 @@ private theorem pV_isog_pullback_algebraMap_sub_evalAt_lt_one
           algebraMap F KE ((⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ r)) < 1 := by
   obtain ⟨p, rfl⟩ := AdjoinRoot.mk_surjective r
   rw [isog_pullback_algebraMap_mk_eq p,
-    show (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ (Affine.CoordinateRing.mk W.toAffine p)
+    show (⟨W.toAffine⟩ : SmoothPlaneCurve F).evalAt ⟨x, y, h_ns⟩ (Affine.CoordinateRing.mk
+        W.toAffine p)
         = p.evalEval x y from Curves.SmoothPlaneCurve.evalAt_mk _ _ _]
   exact pV_bivariate_bridge P (resid_le_one hx) hx (resid_le_one hy) hy p
 
@@ -1153,7 +1181,8 @@ theorem isog_samePlace_le_one_iff_affine
   exact absurd hlt1 (lt_irrefl 1)
 
 /-- **(SamePlace), general isogeny, affine-image case.** The comap valuation
-`(pointValuation P).comap α.pullback` is `Valuation.IsEquiv` to `pointValuation ⟨x,y,h_ns⟩`, given the
+`(pointValuation P).comap α.pullback` is `Valuation.IsEquiv` to `pointValuation ⟨x,y,h_ns⟩`,
+given the
 two generator residues.  Feeds `comap_pointValuation_eq_of_isEquiv_of_ord_eq_one`. -/
 theorem isog_comap_pointValuation_isEquiv_affine
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
@@ -1169,18 +1198,21 @@ theorem isog_comap_pointValuation_isEquiv_affine
 
 /-! #### The general `e = 1` datum and the assembled affine comap identity (no `he1`)
 
-The `e = 1` uniformizer-order fact `ord_P (α^*(x_gen − x_Q)) = 1` is now *derived* (not carried): the
+The `e = 1` uniformizer-order fact `ord_P (α^*(x_gen − x_Q)) = 1` is now *derived* (not
+carried): the
 two inequalities come from the residue (`ord_P ≥ 1`, the function vanishes at `P`) and the general
 differential bound `ord_P_isog_pullback_x_sub_const_le_one` (`ord_P ≤ 1`, the characteristic-free
 unramifiedness from `a_α ≠ 0` and `α^*u` a unit at `P`). -/
 
 /-- **General `e = 1` (x-coordinate).**  For an isogeny `α` with separable invariant-differential
 coefficient `a_α = omegaPullbackCoeff W α ≠ 0`, a smooth point `P` whose `x`-coordinate pullback
-residues to `x` (`α^*x_gen ≡ x`), and `α^*u = alpha_star_u W α` a unit at `P` (the non-2-torsion-image
+residues to `x` (`α^*x_gen ≡ x`), and `α^*u = alpha_star_u W α` a unit at `P` (the
+non-2-torsion-image
 condition), the uniformizer pullback `α^*(x_gen − x_Q) = α^*x_gen − x_Q` has order exactly `1` at
 `P`. -/
 theorem ord_P_isog_pullback_x_sub_const_eq_one
-    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α ≠ 0)
+    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α
+        ≠ 0)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x : F}
     (hx : resid P (α.pullback (x_gen W)) x)
     (h_u : (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P (alpha_star_u W α) = 0) :
@@ -1220,7 +1252,8 @@ This is the general form of the `affine` field of `ComapPointValuationWitness`, 
 unramifiedness `e = 1` *proved* from the invariant differential (Silverman III.4.10c / III.5.5), not
 carried as a hypothesis. -/
 theorem comap_pointValuation_isog_eq_affine
-    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α ≠ 0)
+    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α
+        ≠ 0)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
     (h_ns : W.toAffine.Nonsingular x y)
     (hx : resid P (α.pullback (x_gen W)) x) (hy : resid P (α.pullback (y_gen W)) y)
@@ -1253,18 +1286,22 @@ smooth point `P` whose `y`-coordinate pullback residues to `y` (`α^*y_gen ≡ y
 `y`-numerator `α^*ν = 3(α^*x)²+2a₂(α^*x)+a₄−a₁(α^*y)` a unit at `P` (the 2-torsion-image condition),
 the uniformizer pullback `α^*y_gen − y` has order exactly `1` at `P`. -/
 theorem ord_P_isog_pullback_y_sub_const_eq_one
-    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α ≠ 0)
+    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α
+        ≠ 0)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {y : F}
     (hy : resid P (α.pullback (y_gen W)) y)
     (h_ν : (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P
-        (3 * (α.pullback (x_gen W)) ^ 2 + 2 * algebraMap F KE W.toAffine.a₂ * (α.pullback (x_gen W)) +
-          algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W))) = 0) :
+        (3 * (α.pullback (x_gen W)) ^ 2 + 2 * algebraMap F KE W.toAffine.a₂ * (α.pullback (x_gen W))
+            +
+          algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W))) =
+              0) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P
       (α.pullback (y_gen W) - algebraMap F KE y) = ((1 : ℤ) : WithTop ℤ) := by
   -- the `y`-numerator is nonzero (a unit at `P`, `ord_P = 0`).
   have hν_ne : (3 * (α.pullback (x_gen W)) ^ 2 +
       2 * algebraMap F KE W.toAffine.a₂ * (α.pullback (x_gen W)) +
-      algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W))) ≠ 0 := by
+      algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W))) ≠ 0 :=
+          by
     intro h
     rw [h, (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P_zero] at h_ν
     exact (by simp : (⊤ : WithTop ℤ) ≠ 0) h_ν
@@ -1275,7 +1312,8 @@ theorem ord_P_isog_pullback_y_sub_const_eq_one
     have hzero : (0 : KE) =
         (3 * (α.pullback (x_gen W)) ^ 2 +
             2 * algebraMap F KE W.toAffine.a₂ * (α.pullback (x_gen W)) +
-            algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W))) *
+            algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W)))
+                *
           omegaPullbackCoeff W α := by
       rw [← Dω_algebraMap (a := y) W, ← h0]; exact Dω_isog_pullback_y_gen W α
     exact (mul_ne_zero hν_ne hcoeff_ne) hzero.symm
@@ -1291,7 +1329,8 @@ theorem ord_P_isog_pullback_y_sub_const_eq_one
     ord_P_isog_pullback_y_sub_const_le_one W α hcoeff hcoeff_ne P y hf_ne h_ν
   exact le_antisymm h_le h_ge
 
-/-- **The assembled affine comap identity for a general isogeny `α` via the `y`-uniformizer (2-torsion
+/-- **The assembled affine comap identity for a general isogeny `α` via the `y`-uniformizer
+(2-torsion
 image), with `e = 1` derived.**  For an isogeny `α` with separable coefficient `a_α ≠ 0`, given the
 two generator residues and the pulled-back `y`-numerator `α^*ν` a unit at `P` (the 2-torsion-image
 condition — automatic when `u(α(P)) = 0`), the comap valuation `(pointValuation P).comap α.pullback`
@@ -1300,13 +1339,16 @@ equals `pointValuation ⟨x, y, h_ns⟩` outright.
 The `IsEquiv` (same-place) input is *identical* to the `x`-route; only the unramified uniformizer is
 swapped from `x_gen − x` to `y_gen − y`. -/
 theorem comap_pointValuation_isog_eq_affine_y
-    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α ≠ 0)
+    (hcoeff : omegaPullbackCoeff W α ∈ (algebraMap F KE).range) (hcoeff_ne : omegaPullbackCoeff W α
+        ≠ 0)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
     (h_ns : W.toAffine.Nonsingular x y)
     (hx : resid P (α.pullback (x_gen W)) x) (hy : resid P (α.pullback (y_gen W)) y)
     (h_ν : (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P
-        (3 * (α.pullback (x_gen W)) ^ 2 + 2 * algebraMap F KE W.toAffine.a₂ * (α.pullback (x_gen W)) +
-          algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W))) = 0) :
+        (3 * (α.pullback (x_gen W)) ^ 2 + 2 * algebraMap F KE W.toAffine.a₂ * (α.pullback (x_gen W))
+            +
+          algebraMap F KE W.toAffine.a₄ - algebraMap F KE W.toAffine.a₁ * (α.pullback (y_gen W))) =
+              0) :
     ((⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P).comap α.pullback.toRingHom =
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩ :=
   Curves.SmoothPlaneCurve.comap_pointValuation_eq_of_isEquiv_of_ord_eq_one

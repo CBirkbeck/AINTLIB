@@ -224,12 +224,6 @@ theorem evalPi_binomialSeries (a : ℤ_[p]) {n : ℕ} (hn : 1 ≤ n) :
   rw [evalPi, seriesEval_map_binomialSeries p a (norm_pi_lt_one p hn),
     show (1 : ℂ_[p]) + pi p n = zetaSys p n from by rw [pi]; ring]
 
-set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (cf. Tower.lean)
-set_option maxHeartbeats 1000000 in
--- the `adjoin.powerBasis`/`norm_eq_norm_adjoin` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer; both instance synthesis and the
--- power-basis term elaboration exceed the defaults (mirrors `minpoly_extendScalars_of_pow`)
 /-- **The cyclotomic norm of `ξ_{n+1}`** (RJW TeX 2581–2585, the `b = 1` un-translated
 analogue of `levelNorm_zetaSys_pow_sub_one`): for `n ≥ 1` and `p` odd,
 `N_{n+1,n}(ξ_{n+1}) = ξ_n`. The generator `ξ_{n+1}` is a primitive `p^{n+1}`-th root not in
@@ -550,7 +544,8 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
   ext n
   rw [add_mul, one_mul, map_add, PowerSeries.smul_eq_C_mul, PowerSeries.coeff_C_mul,
     coeff_binomialSeries']
-  rw [PowerSeries.coeff_derivativeFun, hB, coeff_binomialSeries']
+  rw [show B.derivativeFun = PowerSeries.derivative ℤ_[p] B from rfl,
+    PowerSeries.coeff_derivative, hB, coeff_binomialSeries']
   cases n with
   | zero =>
     rw [PowerSeries.coeff_zero_X_mul, add_zero, Ring.choose_one_right, Ring.choose_zero_right,
@@ -558,7 +553,7 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
     push_cast
     ring
   | succ m =>
-    rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivativeFun, coeff_binomialSeries']
+    rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivative, coeff_binomialSeries']
     have h : ((m : ℤ_[p]) + 1 + 1) * Ring.choose r (m + 1 + 1)
         = (r - ((m : ℤ_[p]) + 1)) * Ring.choose r (m + 1) := by
       have := succ_mul_ringChoose p r (m + 1)
@@ -623,7 +618,8 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero {g : PowerSeries ℤ_[p
   | succ m =>
     rw [PowerSeries.coeff_C, if_neg (Nat.succ_ne_zero m)]
     have hcoeff := congrArg (PowerSeries.coeff m) h
-    rw [PowerSeries.coeff_derivativeFun, map_zero] at hcoeff
+    rw [show g.derivativeFun = PowerSeries.derivative ℤ_[p] g from rfl,
+      PowerSeries.coeff_derivative, map_zero] at hcoeff
     have hne : ((m : ℤ_[p]) + 1) ≠ 0 := by
       exact_mod_cast Nat.succ_ne_zero m
     exact (mul_eq_zero.1 hcoeff).resolve_right hne
@@ -839,7 +835,8 @@ theorem mem_ker_Col_iff_mem_ZpOne (hp2 : p ≠ 2) {u : NormCompatUnits p}
     have hg0u : IsUnit g₀ := by
       rw [show g₀ = 1 - (1 - g₀) by ring]
       refine IsLocalRing.isUnit_one_sub_self_of_mem_nonunits _ ?_
-      rw [mem_nonunits_iff, PadicInt.isUnit_iff, show (1 : ℤ_[p]) - g₀ = -(g₀ - 1) by ring, norm_neg]
+      rw [mem_nonunits_iff, PadicInt.isUnit_iff,
+        show (1 : ℤ_[p]) - g₀ = -(g₀ - 1) by ring, norm_neg]
       exact hg0unit.ne
     -- `𝒩`-fixedness forces `g₀^p = g₀`
     have hg0pow : g₀ ^ p = g₀ := by

@@ -199,7 +199,7 @@ lemma derivativeFun_subst_exp (F : PowerSeries ℚ_[p]) :
   calc PowerSeries.derivativeFun (F.subst (exp ℚ_[p] - 1))
       = d⁄dX ℚ_[p] (F.subst (exp ℚ_[p] - 1)) := rfl
     _ = (d⁄dX ℚ_[p] F).subst (exp ℚ_[p] - 1) * d⁄dX ℚ_[p] (exp ℚ_[p] - 1) :=
-        derivative_subst ℚ_[p] hg
+        derivative_subst hg
     _ = (delQ p F).subst (exp ℚ_[p] - 1) := by
         rw [hder, delQ, PadicLFunctions.del_def, subst_mul hg, subst_add hg, subst_X hg, hone]
         ring_nf
@@ -222,7 +222,8 @@ lemma constantCoeff_iterate_derivativeFun (k : ℕ) (G : PowerSeries ℚ_[p]) :
   induction k generalizing G with
   | zero => simp [PowerSeries.coeff_zero_eq_constantCoeff]
   | succ k ih =>
-    rw [Function.iterate_succ_apply, ih, coeff_derivativeFun, Nat.factorial_succ]
+    rw [Function.iterate_succ_apply, ih,
+      show G.derivativeFun = d⁄dX ℚ_[p] G from rfl, coeff_derivative, Nat.factorial_succ]
     push_cast
     ring
 
@@ -236,7 +237,9 @@ lemma constantCoeff_iterate_delQ (k : ℕ) (F : PowerSeries ℚ_[p]) :
   | zero => simp [constantCoeff_subst_exp, PowerSeries.coeff_zero_eq_constantCoeff]
   | succ k ih =>
     rw [Function.iterate_succ_apply, ih (delQ p F), ← derivativeFun_subst_exp,
-      coeff_derivativeFun, Nat.factorial_succ]
+      show PowerSeries.derivativeFun (F.subst (exp ℚ_[p] - 1))
+        = d⁄dX ℚ_[p] (F.subst (exp ℚ_[p] - 1)) from rfl,
+      coeff_derivative, Nat.factorial_succ]
     push_cast
     ring
 

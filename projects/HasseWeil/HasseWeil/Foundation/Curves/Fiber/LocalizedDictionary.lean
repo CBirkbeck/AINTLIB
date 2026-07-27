@@ -3,11 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
 import HasseWeil.Foundation.Curves.Fiber.GenericFiber
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Foundation.Curves.Valuation.Infinity
+import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
 import HasseWeil.Foundation.Curves.Map.PointFunctor
+import HasseWeil.Foundation.Curves.Valuation.Infinity
+import HasseWeil.Foundation.Curves.Valuation.NormValuation
 import Mathlib.Algebra.Polynomial.Lifts
 
 /-!
@@ -273,7 +273,6 @@ variable [algKL : Algebra C₂.FunctionField C₁.FunctionField]
 -- Instance resolution on the subalgebra `integralClosure Af C₁.FunctionField` needs to
 -- identify `Module`/`Algebra` structures along different projection paths, exactly as in
 -- `HasseWeil/Curves/GoodAffineLocus.lean` (same idiom).
-set_option backward.isDefEq.respectTransparency false
 
 include C₂ in
 omit finKL in
@@ -438,10 +437,8 @@ theorem algebraMap_quotient_residueAway (hPq : P.under Af = awayIdealAt Af Q) (c
   change Ideal.Quotient.mk P _ = Ideal.Quotient.mk P (scalarsToClosure C₂ Af c)
   rw [scalarsToClosure_eq_algebraMap C₂ Af c]
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Typeclass search through the quotient of the subalgebra `integralClosure Af K(C₁)` is
 -- heartbeat-heavy, exactly as in `HasseWeil/Curves/GoodFiber.lean` (same bumps).
-set_option maxHeartbeats 1600000 in
 -- The module-finiteness chain through the quotient needs the matching elaboration budget.
 /-- **Residue triviality for `D` over `K̄`**: for a prime `P` of `D` lying over the good
 maximal ideal `q = awayIdealAt f Q`, the residue map `F → D⧸P` is bijective.  `D⧸P` is a
@@ -490,7 +487,7 @@ theorem inertiaDeg_eq_one_of_under_eq [IsAlgClosed F] [IsIntegrallyClosed C₂.C
     [Algebra.IsSeparable C₂.FunctionField C₁.FunctionField]
     (hf : f ≠ 0) (hfQ : f ∉ C₂.maximalIdealAt Q)
     (hPp : P.IsPrime) (hPq : P.under Af = awayIdealAt Af Q) :
-    Ideal.inertiaDeg (awayIdealAt Af Q) P = 1 := by
+    Ideal.inertiaDeg' (awayIdealAt Af Q) P = 1 := by
   classical
   haveI := hPp
   haveI hPover : P.LiesOver (awayIdealAt Af Q) := ⟨hPq.symm⟩
@@ -509,7 +506,7 @@ theorem inertiaDeg_eq_one_of_under_eq [IsAlgClosed F] [IsIntegrallyClosed C₂.C
       obtain ⟨c, hc⟩ := hbijP.2 w
       exact ⟨residueAway Af Q c,
         (algebraMap_quotient_residueAway C₂ Af hPq c).trans hc⟩
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   have he := (AlgEquiv.ofBijective (Algebra.ofId (Af ⧸ awayIdealAt Af Q)
       ((integralClosure Af C₁.FunctionField) ⧸ P)) hbij').toLinearEquiv.finrank_eq
   rw [← he, Module.finrank_self]
@@ -534,7 +531,6 @@ theorem residueClosure_residueValue (hbij : Function.Bijective (residueClosure C
   (RingEquiv.ofBijective (residueClosure C₂ Af P) hbij).apply_symm_apply
     (Ideal.Quotient.mk P d)
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- `map_sub` instance search through the subalgebra quotient exceeds the default
 -- typeclass budget (same situation as `HasseWeil/Curves/GoodFiber.lean`).
 /-- `d − residueValue d` lies in `P`. -/
@@ -836,6 +832,7 @@ section Headline
 variable [ellC₁ : C₁.toAffine.IsElliptic] [ellC₂ : C₂.toAffine.IsElliptic]
 variable [sepKL : Algebra.IsSeparable C₂.FunctionField C₁.FunctionField]
 
+omit algAfK twAfK in
 /-- **The good target point** (avoidance + genericity step of the headline).  Given the
 finite ramification locus `Sram` of `(Af, D)`, off any prescribed finite set `avoid` there
 is a smooth point `Q` of `C₂` that also avoids the zeros of `f` and the pullback of `Sram`.
@@ -878,6 +875,7 @@ private theorem exists_good_target_point [IsAlgClosed F]
   obtain ⟨⟨hQavoid, hQf⟩, hQram⟩ := hQ
   exact ⟨Q, hQavoid, hQf, fun hmem ↦ hQram ⟨hQf, hmem⟩⟩
 
+omit ellC₁ ellC₂ in
 /-- **The fibre count** (`Σ e·f = [K(C₁):K(C₂)]` step of the headline).  For a good target
 point `Q` — off the zeros of `f` (`hfQ`) and off the ramification locus `Sram` (`hQS`) — the
 number of primes of `D = integralClosure Af K(C₁)` over `q = awayIdealAt Af Q` equals
@@ -892,7 +890,7 @@ private theorem card_primesOver_eq_finrank [IsAlgClosed F]
     (Sram : Set (Ideal Af))
     (hSram : ∀ q : Ideal Af, q ∉ Sram →
       ∀ P : Ideal (integralClosure Af C₁.FunctionField), P.IsPrime → P.under Af = q →
-        Ideal.ramificationIdx q P = 1)
+        Ideal.ramificationIdx' q P = 1)
     (hQS : awayIdealAt Af Q ∉ Sram) :
     (IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
         (integralClosure Af C₁.FunctionField)).card =

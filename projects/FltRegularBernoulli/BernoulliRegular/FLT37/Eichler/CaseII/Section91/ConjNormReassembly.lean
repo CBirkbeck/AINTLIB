@@ -313,7 +313,8 @@ theorem washington_L_associated {η : 𝓞 K} (hη : η ^ 37 = 1) (hη1 : η ≠
     have : η * η ^ 36 = 1 := by rw [mul_comm, ← pow_succ]; exact hη
     linear_combination this
   rw [hExpand]
-  exact caseII_eta_trace_diff_associated_zeta_sub_one_sq (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
+  exact caseII_eta_trace_diff_associated_zeta_sub_one_sq
+    (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
     (one_pow 37) hη (fun h ↦ hη1 h.symm) (by simpa using hη1)
 
 /-- **Washington §9.1 step 5 — the crux unit identity** (for `K` cyclotomic of conductor `37`).
@@ -350,7 +351,8 @@ theorem washington_section91_crux_unit
   obtain ⟨uL, hLeq⟩ := washington_L_associated hζpow hζ1
   -- `L_{ηB} − L_{ηA} = γ_{ηA} − γ_{ηB} ~ (ζ-1)²`.
   obtain ⟨uD, hDeq⟩ :=
-    caseII_eta_trace_diff_associated_zeta_sub_one_sq (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot hA hB hAB hABp
+    caseII_eta_trace_diff_associated_zeta_sub_one_sq
+      (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot hA hB hAB hABp
   -- Rewrite `γ_{ηA} − γ_{ηB} = L_{ηB} − L_{ηA}` (both equal `(2−γ_{ηA})−(2−γ_{ηB})`... = swap).
   have hLBA : (ηA + ηA ^ 36) - (ηB + ηB ^ 36) =
       (1 - ηB) * (1 - ηB ^ 36) - (1 - ηA) * (1 - ηA ^ 36) := by
@@ -367,7 +369,8 @@ theorem washington_section91_crux_unit
   set θ'_int : (𝓞 K)ˣ := uA * uB * uD⁻¹ * uL⁻¹ with hθ'_def
   have hpne : p ≠ 0 := by
     rw [hp_def, Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 K) K)]
-    exact pow_ne_zero 2 ((zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot.sub_one_ne_zero (by decide : 1 < 37))
+    exact pow_ne_zero 2
+      ((zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot.sub_one_ne_zero (by decide : 1 < 37))
   -- `washington_unit_quotient_core` with field witnesses `Units.map _ u…`.  Each content equation
   -- is the `algebraMap`-image of the corresponding `𝓞 K`-level `Associated` equation.
   have hCore := washington_unit_quotient_core (LA := LA) (LB := LB) (L := Lζ) (p := p)

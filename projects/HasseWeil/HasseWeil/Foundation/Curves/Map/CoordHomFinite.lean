@@ -14,7 +14,7 @@ For a curve map `φ : C₁ → C₂` with a coordinate-ring pullback witness
 `Module.Finite` hypothesis (`hfin`) carried throughout the isogeny theory by
 `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`,
 `EC.Isogeny.addHomProperty` / `toBasicIsogeny` (K̄-level),
-`EC.Isogeny.addHomProperty_descend_of_finite` / `toBasicIsogenyDescend`
+`EC.Isogeny.addHomProperty_descend` / `toBasicIsogenyDescend`
 (K-level), `Isogeny.pushforward` (`Curves/PushforwardDivisor.lean`),
 `EC/KernelCount.lean`, and friends.
 
@@ -268,8 +268,6 @@ private theorem degree_trace_lt_degree_norm {p q s n : Polynomial F}
   ⟨pos_degree_of_degree_eq_max hq hndeg,
     degree_lt_of_le_max_degree_eq_max hq (degree_trace_le_max hsle) hndeg⟩
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -301,8 +299,6 @@ private theorem nondegenerate_smul_basis_of_injective
   exact Polynomial.X_ne_C _
     (FaithfulSMul.algebraMap_injective (Polynomial F) C₂.CoordinateRing hX)
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -399,7 +395,6 @@ private theorem module_finite_of_adjoin_singleton_mul_span
   Module.finite_def.mpr (top_le_iff.mp hspan ▸
     Submodule.FG.mul hx.fg_adjoin_singleton (Submodule.fg_span hs))
 
-set_option synthInstance.maxHeartbeats 200000 in
 set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
@@ -467,8 +462,6 @@ theorem toAlgHom_injective (cd : φ.CoordHom) : Function.Injective cd.toAlgHom :
   exact IsFractionRing.injective C₂.CoordinateRing C₂.FunctionField
     (φ.pullback_injective h)
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -481,7 +474,7 @@ Unconditional: no separability, no integral closedness, and no algebraically
 closed base are required.  This discharges the `hfin` arguments of
 `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`,
 `EC.Isogeny.addHomProperty`, `EC.Isogeny.toBasicIsogeny`,
-`EC.Isogeny.addHomProperty_descend_of_finite`, `Isogeny.pushforward`, and
+`EC.Isogeny.addHomProperty_descend`, `Isogeny.pushforward`, and
 the `KernelCount` chain. -/
 theorem module_finite (cd : φ.CoordHom) :
     @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ cd.toAlgebra.toModule :=
@@ -491,8 +484,6 @@ end CurveMap.CoordHom
 
 namespace CurveMap
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -510,8 +501,8 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree'
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∑ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-        Ideal.ramificationIdx p P *
-        Ideal.inertiaDeg p P = φ.degree :=
+        Ideal.ramificationIdx' p P *
+        Ideal.inertiaDeg' p P = φ.degree :=
   φ.sum_ramificationIdx_mul_inertiaDeg_eq_degree coordHom
     coordHom.module_finite hpMax hp0
 

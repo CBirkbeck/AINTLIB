@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.GaussSumValuation
 import Mathlib.RingTheory.DiscreteValuationRing.Basic
 import Mathlib.Data.Nat.Choose.Sum
@@ -102,15 +107,17 @@ substitution). -/
 noncomputable def leadingPoly (i : ℕ) : Polynomial (ZMod p) :=
   ∏ t ∈ Finset.range i, (Polynomial.C 1 - Polynomial.C (t : ZMod p) * Polynomial.X)
 
+/-- Evaluating `leadingPoly` gives the product `∏_{t < i} (1 - t·b)`. -/
 theorem leadingPoly_eval (i : ℕ) (b : ZMod p) :
     (leadingPoly (p := p) i).eval b = ∏ t ∈ Finset.range i, (1 - (t : ZMod p) * b) := by
-  unfold leadingPoly
+  simp only [leadingPoly]
   rw [Polynomial.eval_prod]
   refine Finset.prod_congr rfl fun t _ ↦ ?_
   simp [Polynomial.eval_sub, Polynomial.eval_mul]
 
+/-- Its degree is at most `i`. -/
 theorem leadingPoly_natDegree_le (i : ℕ) : (leadingPoly (p := p) i).natDegree ≤ i := by
-  unfold leadingPoly
+  simp only [leadingPoly]
   refine (Polynomial.natDegree_prod_le _ _).trans ?_
   calc
     ∑ t ∈ Finset.range i,
@@ -172,7 +179,7 @@ factorisation `C(a.val, i)·i! = ∏_{t<i}(a - t)` plus the inversion substituti
 the sum collapses to `-1`, so `leadingFiniteFieldSum i = -(i!)⁻¹`. -/
 theorem leadingFiniteFieldSum_mul_factorial {i : ℕ} (hip : i < p - 1) :
     leadingFiniteFieldSum (p := p) i * ((Nat.factorial i : ℕ) : ZMod p) = -1 := by
-  unfold leadingFiniteFieldSum
+  simp only [leadingFiniteFieldSum]
   rw [Finset.sum_mul]
   -- Per-term: a^{-i} · C(a.val,i) · i! = a^{-i} · ∏_{t<i}(a - t) = ∏_{t<i}(1 - t·a⁻¹).
   have hterm : ∀ a : (ZMod p)ˣ,
@@ -307,7 +314,7 @@ theorem teichRep_lt (a : (ZMod p)ˣ) : teichRep a < p :=
 `C(n, j) = 0` for `j > n`) and swapping the order of summation. -/
 theorem gaussSum_eq_sum_pi_pow_coeff (i : ℕ) :
     S.gaussSum i = ∑ j ∈ Finset.range p, S.π ^ j * S.gaussSumCoeff i j := by
-  unfold gaussSum gaussSumCoeff
+  simp only [gaussSum, gaussSumCoeff]
   -- Expand each `(1 + π)^{rep a}` binomially over `range p`.
   have hbin : ∀ a : (ZMod p)ˣ,
       (1 + S.π) ^ teichRep a =
@@ -415,7 +422,7 @@ reduces to `a⁻¹` (by `omega_residue`) and the binomial natCast reduces to its
 giving `residue(c_i) = leadingFiniteFieldSum i`. -/
 theorem residue_gaussSumCoeff_self (i : ℕ) :
     S.residue (S.gaussSumCoeff i i) = leadingFiniteFieldSum i := by
-  unfold gaussSumCoeff leadingFiniteFieldSum
+  simp only [gaussSumCoeff, leadingFiniteFieldSum]
   rw [map_sum]
   refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Units.val_pow_eq_pow_val, map_mul, map_pow]
@@ -433,7 +440,7 @@ This reduces the leading non-degeneracy to a self-contained `ZMod p` statement
 (no DVR, no Teichmüller lift): `leadingFiniteFieldSum i ≠ 0`. -/
 theorem gaussSumLeadingUnit_of_finiteFieldSum_ne_zero {i : ℕ}
     (h : leadingFiniteFieldSum (p := p) i ≠ 0) : S.GaussSumLeadingUnit i := by
-  unfold GaussSumLeadingUnit
+  simp only [GaussSumLeadingUnit]
   intro hdvd
   apply h
   rw [← residue_gaussSumCoeff_self S i]
@@ -476,7 +483,7 @@ theorem gaussSumCoeff_zero_eq_zero {i : ℕ} (hi0 : 0 < i) (hip : i < p - 1) :
     S.gaussSumCoeff i 0 = 0 := by
   -- c i 0 = ∑_a (ω a)⁻¹^i (since C(a,0)=1).
   have hc0 : S.gaussSumCoeff i 0 = ∑ a : (ZMod p)ˣ, (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) := by
-    unfold gaussSumCoeff
+    simp only [gaussSumCoeff]
     refine Finset.sum_congr rfl fun a _ ↦ ?_
     rw [Nat.choose_zero_right, Nat.cast_one, mul_one]
   rw [hc0]

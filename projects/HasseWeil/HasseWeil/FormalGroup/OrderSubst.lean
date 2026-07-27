@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.RingTheory.PowerSeries.Substitution
 import Mathlib.RingTheory.PowerSeries.Order
 
@@ -50,10 +55,8 @@ private lemma constantCoeff_subst_univariate
 /-- A power series with nonzero constant coefficient has order `0`. -/
 private lemma order_eq_zero_of_constantCoeff_ne_zero {φ : PowerSeries R}
     (h : PowerSeries.constantCoeff φ ≠ 0) : PowerSeries.order φ = 0 := by
-  refine le_antisymm ?_ (zero_le)
-  have := PowerSeries.order_le (φ := φ) 0
-    (by rwa [PowerSeries.coeff_zero_eq_constantCoeff])
-  exact_mod_cast this
+  rw [← not_ne_iff, PowerSeries.order_ne_zero_iff_constCoeff_eq_zero]
+  exact h
 
 /-- Over a trivial ring, the substitution order identity holds because every
 power series equals `0`, so both sides are `⊤`. -/
@@ -75,8 +78,7 @@ private lemma order_subst_of_eq_zero {f : PowerSeries R}
   have hsub : PowerSeries.HasSubst f := PowerSeries.HasSubst.of_constantCoeff_zero' hf
   have hz : PowerSeries.subst f (0 : PowerSeries R) = 0 := by
     rw [← PowerSeries.coe_substAlgHom hsub]; exact map_zero _
-  rw [show ((PowerSeries.subst f (0 : PowerSeries R)) : PowerSeries R) = 0 from hz,
-      PowerSeries.order_zero]
+  rw [hz, PowerSeries.order_zero]
   have hf_ord_ne_zero : PowerSeries.order f ≠ 0 := by
     rw [PowerSeries.order_ne_zero_iff_constCoeff_eq_zero]; exact hf
   exact (ENat.top_mul hf_ord_ne_zero).symm
@@ -94,7 +96,7 @@ private lemma order_subst_of_ne_zero [NoZeroDivisors R] {f g : PowerSeries R}
     refine not_subsingleton_iff_nontrivial.mp fun hs ↦ hg0 ?_
     ext n; exact Subsingleton.elim _ _
   have hsub : PowerSeries.HasSubst f := PowerSeries.HasSubst.of_constantCoeff_zero' hf
-  set n : ℕ := g.order.toNat with hn_def
+  set n : ℕ := g.order.toNat
   have hn_cast : (n : ℕ∞) = g.order := PowerSeries.coe_toNat_order hg0
   -- Decompose `subst f g` using `subst_mul`, `subst_pow`, `subst_X`.
   have h_decomp : (PowerSeries.subst f g : PowerSeries R) =

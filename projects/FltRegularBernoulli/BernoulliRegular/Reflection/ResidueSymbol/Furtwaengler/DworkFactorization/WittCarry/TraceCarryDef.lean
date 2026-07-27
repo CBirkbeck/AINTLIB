@@ -42,7 +42,7 @@ theorem artinHasseExp_wittTeich_correction_pow_mul_frobenius_eq_pow_succ
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -60,7 +60,7 @@ theorem artinHasseExp_wittTeich_correction_pow_mul_frobenius_eq_pow_succ
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -91,7 +91,7 @@ theorem artinHasseExp_wittTeich_correction_product_mul_frobenius_tail_eq_tail_po
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -121,12 +121,12 @@ theorem artinHasseExp_wittTeich_correction_product_mul_frobenius_tail_eq_tail_po
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
       (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  let coord : ℕ → k := fun r =>
+  let coord : ℕ → k := fun r ↦
     ((_root_.frobeniusEquiv k ℓ).symm ^ r) (c.coeff r)
   rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl ?_
@@ -146,7 +146,7 @@ theorem artinHasseExp_wittTeich_frobenius_tail_eq_coeff_zero_mul_shift
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     (∏ r ∈ Finset.Iic N,
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -170,9 +170,9 @@ theorem artinHasseExp_wittTeich_frobenius_tail_eq_coeff_zero_mul_shift
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  let g : ℕ → A := fun r =>
+  let g : ℕ → A := fun r ↦
     ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
       (ε *
         θ (WittVector.teichmuller ℓ
@@ -207,7 +207,7 @@ theorem artinHasseExp_wittTeich_frobenius_tail_depth_eq_coeff_zero_mul_shift
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     (∏ r ∈ Finset.Iic D,
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -231,9 +231,9 @@ theorem artinHasseExp_wittTeich_frobenius_tail_depth_eq_coeff_zero_mul_shift
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
-  let g : ℕ → A := fun r =>
+  let g : ℕ → A := fun r ↦
     ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
       (ε *
         θ (WittVector.teichmuller ℓ
@@ -266,10 +266,10 @@ theorem artinHasseExp_wittTeich_tail_depth_eq_frobenius_root_tail_pow
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let cRoot : WittVector ℓ k :=
-      WittVector.mk ℓ (fun r => (_root_.frobeniusEquiv k ℓ).symm (c.coeff r))
+      WittVector.mk ℓ (fun r ↦ (_root_.frobeniusEquiv k ℓ).symm (c.coeff r))
     (∏ r ∈ Finset.Iic D,
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
           (ε *
@@ -290,10 +290,10 @@ theorem artinHasseExp_wittTeich_tail_depth_eq_frobenius_root_tail_pow
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let cRoot : WittVector ℓ k :=
-    WittVector.mk ℓ (fun r => (_root_.frobeniusEquiv k ℓ).symm (c.coeff r))
+    WittVector.mk ℓ (fun r ↦ (_root_.frobeniusEquiv k ℓ).symm (c.coeff r))
   rw [← Finset.prod_pow]
   refine Finset.prod_congr rfl ?_
   intro r _hr
@@ -572,7 +572,7 @@ theorem wittFrobeniusTrace_teichmuller_traceScale_mul_frobenius_fixed
   let x : k := (F.traceScale : k) * (y : k)
   let w : WittVector ℓ k := WittVector.teichmuller ℓ x
   let f : ℕ := F.toConcreteStickelbergerSetup.f
-  let g : ℕ → WittVector ℓ k := fun n => (WittVector.frobenius^[n]) w
+  let g : ℕ → WittVector ℓ k := fun n ↦ (WittVector.frobenius^[n]) w
   have hxperiod : x ^ (ℓ ^ f) = x := by
     simpa [x, f] using F.finiteField_pow_ell_f_eq_self x
   have hperiod : ∀ n : ℕ, g (n + f) = g n := by
@@ -591,11 +591,11 @@ theorem wittFrobeniusTrace_teichmuller_traceScale_mul_frobenius_fixed
   have hleft :
       (∑ i : Fin f, g ((i : ℕ) + 1)) =
         ∑ i ∈ Finset.range f, g (i + 1) :=
-    (Finset.sum_range (f := fun i : ℕ => g (i + 1))).symm
+    (Finset.sum_range (f := fun i : ℕ ↦ g (i + 1))).symm
   have hright :
       (∑ i : Fin f, g (i : ℕ)) =
         ∑ i ∈ Finset.range f, g i :=
-    (Finset.sum_range (f := fun i : ℕ => g i)).symm
+    (Finset.sum_range (f := fun i : ℕ ↦ g i)).symm
   calc
     WittVector.frobenius
         (ConcreteStickelbergerSetup.wittFrobeniusTrace (ℓ := ℓ) (k := k)
@@ -669,7 +669,7 @@ itself. -/
 theorem traceCarry_root_eq_self
     [ExpChar k ℓ] [PerfectRing k ℓ] (y : kˣ) :
     WittVector.mk ℓ
-        (fun r => (_root_.frobeniusEquiv k ℓ).symm ((F.traceCarry y).coeff r)) =
+        (fun r ↦ (_root_.frobeniusEquiv k ℓ).symm ((F.traceCarry y).coeff r)) =
       F.traceCarry y := by
   haveI : CharP k ℓ := by
     rw [← Algebra.charP_iff (ZMod ℓ) k ℓ]
@@ -677,7 +677,7 @@ theorem traceCarry_root_eq_self
   ext r
   have hcoeff :
       (F.traceCarry y).coeff r ^ ℓ = (F.traceCarry y).coeff r := by
-    have h := congrArg (fun x => x.coeff r) (F.traceCarry_frobenius_fixed y)
+    have h := congrArg (fun x ↦ x.coeff r) (F.traceCarry_frobenius_fixed y)
     simpa [WittVector.coeff_frobenius_charP] using h
   calc
     (_root_.frobeniusEquiv k ℓ).symm ((F.traceCarry y).coeff r)
@@ -697,7 +697,7 @@ theorem traceCarry_coeff_mem_primeSubfield
     rw [← Algebra.charP_iff (ZMod ℓ) k ℓ]
     exact ZMod.charP ℓ
   rw [Subfield.mem_bot_iff_pow_eq_self (F := k) (p := ℓ)]
-  have h := congrArg (fun x => x.coeff r) (F.traceCarry_frobenius_fixed y)
+  have h := congrArg (fun x ↦ x.coeff r) (F.traceCarry_frobenius_fixed y)
   simpa [WittVector.coeff_frobenius_charP] using h
 
 /-- Prime-field coordinates of the canonical trace carry, represented as
@@ -731,7 +731,7 @@ theorem traceCarry_coeff_frobeniusEquiv_symm_iterate_eq_self
     exact ZMod.charP ℓ
   have hcoeff :
       (F.traceCarry y).coeff r ^ ℓ = (F.traceCarry y).coeff r := by
-    have h := congrArg (fun x => x.coeff r) (F.traceCarry_frobenius_fixed y)
+    have h := congrArg (fun x ↦ x.coeff r) (F.traceCarry_frobenius_fixed y)
     simpa [WittVector.coeff_frobenius_charP] using h
   have hroot :
       (_root_.frobeniusEquiv k ℓ).symm ((F.traceCarry y).coeff r) =
@@ -802,7 +802,7 @@ theorem traceCarryCoeffZMod_pow_prime_spec
     exact ZMod.charP ℓ
   have hcoeff :
       (F.traceCarry y).coeff r ^ ℓ = (F.traceCarry y).coeff r := by
-    have h := congrArg (fun x => x.coeff r) (F.traceCarry_frobenius_fixed y)
+    have h := congrArg (fun x ↦ x.coeff r) (F.traceCarry_frobenius_fixed y)
     simpa [WittVector.coeff_frobenius_charP] using h
   rw [hcoeff]
   exact F.traceCarryCoeffZMod_spec y r

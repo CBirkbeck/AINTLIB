@@ -11,36 +11,19 @@ import HasseWeil.Isogeny.SeparableWitnessReductions
 import Mathlib.FieldTheory.Fixed
 
 /-!
-# `#ker β = deg β` for general separable isogenies (ROUTE-W, ticket W-3b)
+# Kernels of general separable isogenies
 
-**Silverman III.4.10(c) without a global coordinate-ring witness.**  A separable isogeny of
-degree `> 1` has affine kernel points, where its pullback has poles — so no global
-`CoordHom` exists and `EC/KernelCount.lean` does not apply.  This file closes the count for
-the *general* separable class: the only witnesses are the finite coherence set `bad` and
-the cofinite pullback-evaluation coherence `PullbackEvaluation β bad` between the stored
-point map and the stored pullback (the irreducible tie between the two independent fields
-of the abstract `Isogeny`).
+This file proves that the cardinality of the kernel of a separable isogeny equals its degree from
+a cofinite pullback-evaluation witness. It also derives normality, translation descent, and dual
+isogeny data from the same witness.
 
-* `≥` (the localized dictionary, `Curves/LocalizedDictionary.lean`): localizing the target
-  coordinate ring away from a denominator `f₀` of the minimal polynomials of `x, y` over
-  `β^*K(E)` produces a Dedekind pair `(Af, D)` with `Σ e·f = deg β`, `e = 1` off the
-  finite different-ideal locus and `f = 1` over `K̄`; each maximal ideal of `D` over a
-  good point `Q` *is* a smooth point evaluating the pulled-back coordinates to the
-  coordinates of `Q`, distinct primes giving distinct points.  Through the coherence
-  witness these are `deg β` distinct points of the *stored* fibre over `Q`.
-* `≤` (the kernel-translation torsor): the same witness yields the generic-point
-  covariance (`mapTranslateGenericPoint_of_pullbackEvaluation`), hence the kernel
-  translation action `ker β ↪ Aut(K(E)/β^*K(E))` (`kernelTranslateForwardAut`), and
-  `#Aut ≤ [K(E) : β^*K(E)] = deg β` (mathlib's `AlgEquiv.card_le`).
-* Fibres are kernel cosets (`Isogeny.fiber_card_eq_kernel_card`), so
-  `deg β ≤ #fibre = #ker β ≤ deg β`.
+## Main results
 
-## Main statements
-
-* `card_kernel_eq_degree_of_separable` — **the W-3b headline**: over an algebraically
-  closed field, a separable `β` with the cofinite pullback-evaluation coherence has
-  `Nat.card β.kernel = β.degree`.
-* `finite_kernel_of_separable` — kernel finiteness, restated in the same witness shape.
+* `card_kernel_eq_degree_of_separable`: the kernel cardinality equals the degree.
+* `finite_kernel_of_separable`: the kernel is finite.
+* `normal_of_separable_general`: the induced function-field extension is normal.
+* `hdesc_of_separable_general`: function-field automorphisms arise from kernel translations.
+* `exists_dual_of_pullbackEvaluation_general`: a reverse isogeny exists.
 
 ## References
 
@@ -56,37 +39,23 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
-/-- **The `≤` direction of the kernel count, from the kernel-translation covariance.**
-The forward map `kernelTranslateForwardAut` embeds `ker β` injectively into
-`Aut(K(E)/β^*K(E))`, and `K(E)/β^*K(E)` is finite-dimensional for any isogeny
-(`isogeny_finiteDimensional`), so mathlib's `AlgEquiv.card_le` bounds that automorphism
-group by `[K(E) : β^*K(E)] = β.degree`.  Composing the two inequalities gives
-`#ker β ≤ deg β` from the covariance witness `hcov` alone — no separability or algebraic
-closure needed (Silverman III.4.10c, the `≤` half). -/
 private theorem kernel_card_le_degree_of_hcov
     (β : Isogeny W.toAffine W.toAffine)
     (hcov : ∀ k : β.kernel, ∀ z : KE,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z) :
     Nat.card β.kernel ≤ β.degree := by
-  letI βAlg : Algebra KE KE := β.toAlgebra
-  haveI hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
+  let βAlg : Algebra KE KE := β.toAlgebra
+  have hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
     isogeny_finiteDimensional W β
-  haveI hAutFin : Finite (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
+  have hAutFin : Finite (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
     Finite.of_fintype _
-  have hle1 : Nat.card β.kernel ≤
-      Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
-    Nat.card_le_card_of_injective _ (kernelTranslateForwardAut_injective W β hcov)
-  have hle2 : Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) ≤ β.degree := by
-    have h := @AlgEquiv.card_le KE KE _ _ β.toAlgebra hfd
-    rwa [← Nat.card_eq_fintype_card] at h
-  exact le_trans hle1 hle2
+  calc
+    Nat.card β.kernel ≤ Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
+      Nat.card_le_card_of_injective _ (kernelTranslateForwardAut_injective W β hcov)
+    _ ≤ β.degree := by
+      have h := @AlgEquiv.card_le KE KE _ _ β.toAlgebra hfd
+      rwa [← Nat.card_eq_fintype_card] at h
 
-/-- **Finiteness of the target points to avoid.** The set of target smooth points `Q'`
-whose coordinates are evaluations of the two pulled-back generators along some `p` in the
-finite coherence set `bad` is finite: it is contained in a finite union (indexed by `bad`)
-of subsingleton fibres, each subsingleton because a smooth point is determined by its two
-coordinates (`SmoothPoint.ext`) and an evaluation pins each coordinate uniquely
-(`EvaluatesTo.unique`). -/
 private theorem badTarget_finite (β : Isogeny W.toAffine W.toAffine)
     {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite) :
     {Q' : (W_smooth W).SmoothPoint | ∃ p ∈ bad,
@@ -100,18 +69,11 @@ private theorem badTarget_finite (β : Isogeny W.toAffine W.toAffine)
         WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y} := by
     rintro Q' ⟨p, hp, h1, h2⟩
     exact Set.mem_biUnion hp ⟨h1, h2⟩
-  refine Set.Finite.subset (Set.Finite.biUnion hbad fun p _ ↦ ?_) hsub
+  refine Set.Finite.subset (Set.Finite.biUnion hbad fun p _ => ?_) hsub
   refine Set.Subsingleton.finite ?_
   rintro Q₁ ⟨hx₁, hy₁⟩ Q₂ ⟨hx₂, hy₂⟩
   exact Curves.SmoothPlaneCurve.SmoothPoint.ext (hx₁.unique hx₂) (hy₁.unique hy₂)
 
-/-- **Each good fibre point lands in the stored fibre over `Q`.** If a smooth point `pt`
-outside the coherence set `bad` evaluates the two pulled-back generators to the
-coordinates of `Q`, then the *stored* image `β.toAddMonoidHom pt.toAffinePoint` is
-`Q.toAffinePoint`.  The coherence witness `hw` supplies the stored image as
-`Affine.Point.some x' y'` with `x', y'` the same evaluations, so `EvaluatesTo.unique`
-identifies `(x', y') = (Q.x, Q.y)` — the irreducible tie between the stored point map and
-the stored pullback. -/
 private theorem mapAddMonoidHom_toAffinePoint_of_evaluatesTo
     (β : Isogeny W.toAffine W.toAffine)
     {bad : Set (W_smooth W).SmoothPoint}
@@ -121,80 +83,25 @@ private theorem mapAddMonoidHom_toAffinePoint_of_evaluatesTo
     (hey : WeilPairing.EvaluatesTo W pt (β.pullback (y_gen W)) Q.y) :
     β.toAddMonoidHom pt.toAffinePoint = Q.toAffinePoint := by
   obtain ⟨x', y', h', heq, hx, hy⟩ := hw pt hpt
-  have hxx : x' = Q.x := hx.unique hex
-  have hyy : y' = Q.y := hy.unique hey
   rw [heq, Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def]
-  exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨hxx, hyy⟩
+  exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr
+    ⟨hx.unique hex, hy.unique hey⟩
 
-set_option backward.isDefEq.respectTransparency false in
--- Instance resolution must identify `Module`/`Algebra` structures along different paths
--- (`FractionRing` vs `OreLocalization`), as in `HasseWeil/Curves/GoodAffineLocus.lean`.
-set_option synthInstance.maxHeartbeats 400000 in
--- Typeclass search through the pinned `β.toAlgebra` structures is heartbeat-heavy,
--- exactly as in `HasseWeil/Curves/GoodFiber.lean` (same bumps).
-set_option maxHeartbeats 1600000 in
--- The instantiation of the localized dictionary needs the matching elaboration budget.
-/-- **III.4.10(c) for the general separable class — the W-3b headline**: a separable
-isogeny `β` over an algebraically closed field, with only the cofinite
-pullback-evaluation coherence `hw` for its stored point map (no global `CoordHom`), has
-`Nat.card β.kernel = β.degree`. -/
-theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
-    [IsIntegrallyClosed W.toAffine.CoordinateRing]
-    (β : Isogeny W.toAffine W.toAffine) (hsep : β.IsSeparable)
+private theorem hcov_of_pullbackEvaluation_aux [IsAlgClosed F]
+    (β : Isogeny W.toAffine W.toAffine)
     {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
     (hw : WeilPairing.PullbackEvaluation W β bad) :
-    Nat.card β.kernel = β.degree := by
-  classical
-  haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
-  haveI hIC : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
-    ‹IsIntegrallyClosed W.toAffine.CoordinateRing›
-  -- ===== the `≤` direction: kernel ↪ Aut(K(E)/β^*K(E)), #Aut ≤ deg =====
-  have hgcomm := WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw
-  have hcov : ∀ k : β.kernel, ∀ z : KE,
+    ∀ k : β.kernel, ∀ z : KE,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z ↦ WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β hgcomm k z
-  have hker_fin : Finite β.kernel := finite_kernel_of_hcov W β hcov
-  have hle : Nat.card β.kernel ≤ β.degree := kernel_card_le_degree_of_hcov W β hcov
-  -- ===== the `≥` direction: the localized fibre dictionary =====
-  letI βAlg : Algebra KE KE := β.toAlgebra
-  haveI hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
-    isogeny_finiteDimensional W β
-  haveI hsepAlg : @Algebra.IsSeparable (W_smooth W).FunctionField (W_smooth W).FunctionField
-      _ _ β.toAlgebra := hsep
-  haveI twFKL : @IsScalarTower F KE KE _ β.toAlgebra.toSMul _ :=
-    @IsScalarTower.of_algebraMap_eq F KE KE _ _ _ _ β.toAlgebra _
-      fun c ↦ (β.pullback.commutes c).symm
-  -- the denominator of the minimal polynomials of `x, y` over `β^*K(E)`
-  obtain ⟨f₀, hf₀, hdx, hdy⟩ := @Curves.LocalizedDictionary.exists_denominator F _
-    (W_smooth W) (W_smooth W) β.toAlgebra
-  -- the good affine localization
-  set Af := Localization.Away f₀ with hAf_def
-  letI algAfK : Algebra Af (W_smooth W).FunctionField :=
-    Curves.GoodAffineLocus.awayAlgebra (W_smooth W) f₀ hf₀
-  haveI twAfK : letI := algAfK
-      IsScalarTower (W_smooth W).CoordinateRing Af (W_smooth W).FunctionField :=
-    Curves.GoodAffineLocus.awayAlgebra_isScalarTower (W_smooth W) f₀ hf₀
-  letI algAfL : Algebra Af KE :=
-    ((β.pullback.toRingHom).comp (algebraMap Af (W_smooth W).FunctionField)).toAlgebra
-  haveI twAfKL : @IsScalarTower Af KE KE algAfK.toSMul β.toAlgebra.toSMul algAfL.toSMul :=
-    @IsScalarTower.of_algebraMap_eq Af KE KE _ _ _ algAfK β.toAlgebra algAfL fun _ ↦ rfl
-  -- the finite set of target points to avoid: possible images of the coherence bad set
-  set badT : Set (W_smooth W).SmoothPoint := {Q' | ∃ p ∈ bad,
-    WeilPairing.EvaluatesTo W p (β.pullback (x_gen W)) Q'.x ∧
-    WeilPairing.EvaluatesTo W p (β.pullback (y_gen W)) Q'.y} with hbadT_def
-  have hbadTfin : badT.Finite := hbadT_def ▸ badTarget_finite W β hbad
-  -- the localized good fibre
-  obtain ⟨Q, hQbadT, S, hScard, hSpts⟩ :=
-    @Curves.LocalizedDictionary.exists_good_fiber_points F _ (W_smooth W) f₀ Af _ _ _
-      (W_smooth W) β.toAlgebra hfd algAfK twAfK algAfL twAfKL twFKL hEll hEll hsepAlg
-      _ hIC hf₀ hdx hdy badT hbadTfin
-  -- each produced point is in the *stored* fibre over `Q`
-  have hfibmem : ∀ pt ∈ S, β.toAddMonoidHom pt.toAffinePoint = Q.toAffinePoint := by
-    intro pt hpt
-    obtain ⟨hex, hey⟩ := hSpts pt hpt
-    have hptgood : pt ∉ bad := fun hmem ↦ hQbadT ⟨pt, hmem, hex, hey⟩
-    exact mapAddMonoidHom_toAffinePoint_of_evaluatesTo W β hw Q pt hptgood hex hey
-  -- the fibre has at least `deg β` elements
+  fun k z => WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β
+    (WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw) k z
+
+private theorem degree_le_card_kernel_of_good_fiber_aux
+    (β : Isogeny W.toAffine W.toAffine) (hker_fin : Finite β.kernel)
+    (Q : (W_smooth W).SmoothPoint) (S : Finset (W_smooth W).SmoothPoint)
+    (hScard : S.card = β.degree)
+    (hfibmem : ∀ pt ∈ S, β.toAddMonoidHom pt.toAffinePoint = Q.toAffinePoint) :
+    β.degree ≤ Nat.card β.kernel := by
   have hSne : S.Nonempty := by
     rw [← Finset.card_pos, hScard]
     exact isogeny_degree_pos W β
@@ -202,47 +109,88 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
   haveI hfib_fin : Finite {R : W.toAffine.Point //
       β.toAddMonoidHom R = Q.toAffinePoint} :=
     Isogeny.fiber_finite_of_kernel_finite β hker_fin
-  have hinj : Function.Injective (fun p : {x // x ∈ S} ↦
+  have hinj : Function.Injective (fun p : {x // x ∈ S} =>
       (⟨p.1.toAffinePoint, hfibmem p.1 p.2⟩ :
         {R : W.toAffine.Point // β.toAddMonoidHom R = Q.toAffinePoint})) := by
     intro p₁ p₂ h
     exact Subtype.ext (smoothPoint_toAffinePoint_injective W (congrArg Subtype.val h))
-  have hge : β.degree ≤ Nat.card {R : W.toAffine.Point //
-      β.toAddMonoidHom R = Q.toAffinePoint} := by
-    have h1 := Nat.card_le_card_of_injective _ hinj
-    rwa [Nat.card_eq_fintype_card, Fintype.card_coe, hScard] at h1
-  -- close: fibres are kernel cosets
-  have hkereq : Nat.card {R : W.toAffine.Point //
-      β.toAddMonoidHom R = Q.toAffinePoint} = Nat.card β.kernel :=
-    Isogeny.fiber_card_eq_kernel_card β (hfibmem pt₀ hpt₀)
-  rw [hkereq] at hge
-  exact le_antisymm hle hge
+  calc
+    β.degree = S.card := hScard.symm
+    _ = Nat.card {x // x ∈ S} := by
+      rw [Nat.card_eq_fintype_card, Fintype.card_coe]
+    _ ≤ Nat.card {R : W.toAffine.Point // β.toAddMonoidHom R = Q.toAffinePoint} :=
+      Nat.card_le_card_of_injective _ hinj
+    _ = Nat.card β.kernel :=
+      Isogeny.fiber_card_eq_kernel_card β (hfibmem pt₀ hpt₀)
 
-/-- Kernel finiteness for the general separable class, a byproduct (in fact it needs
-neither separability nor algebraic closure of the count — only the coherence witness;
-recorded in the W-3b witness shape for symmetry with `KernelCount`). -/
+private theorem degree_le_card_kernel_of_separable_aux [IsAlgClosed F]
+    [IsIntegrallyClosed W.toAffine.CoordinateRing]
+    (β : Isogeny W.toAffine W.toAffine) (hsep : β.IsSeparable)
+    {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
+    (hw : WeilPairing.PullbackEvaluation W β bad)
+    (hker_fin : Finite β.kernel) : β.degree ≤ Nat.card β.kernel := by
+  classical
+  have hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have hIC : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
+    ‹IsIntegrallyClosed W.toAffine.CoordinateRing›
+  let βAlg : Algebra KE KE := β.toAlgebra
+  have hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
+    isogeny_finiteDimensional W β
+  have hsepAlg : @Algebra.IsSeparable (W_smooth W).FunctionField
+      (W_smooth W).FunctionField _ _ β.toAlgebra := hsep
+  have twFKL : @IsScalarTower F KE KE _ β.toAlgebra.toSMul _ :=
+    @IsScalarTower.of_algebraMap_eq F KE KE _ _ _ _ β.toAlgebra _
+      fun c => (β.pullback.commutes c).symm
+  obtain ⟨f₀, hf₀, hdx, hdy⟩ := @Curves.LocalizedDictionary.exists_denominator F _
+    (W_smooth W) (W_smooth W) β.toAlgebra
+  set Af := Localization.Away f₀
+  let algAfK : Algebra Af (W_smooth W).FunctionField :=
+    Curves.GoodAffineLocus.awayAlgebra (W_smooth W) f₀ hf₀
+  have twAfK : letI := algAfK
+      IsScalarTower (W_smooth W).CoordinateRing Af (W_smooth W).FunctionField :=
+    Curves.GoodAffineLocus.awayAlgebra_isScalarTower (W_smooth W) f₀ hf₀
+  let algAfL : Algebra Af KE :=
+    ((β.pullback.toRingHom).comp (algebraMap Af (W_smooth W).FunctionField)).toAlgebra
+  have twAfKL : @IsScalarTower Af KE KE algAfK.toSMul β.toAlgebra.toSMul algAfL.toSMul :=
+    @IsScalarTower.of_algebraMap_eq Af KE KE _ _ _ algAfK β.toAlgebra algAfL fun _ => rfl
+  obtain ⟨Q, hQbadT, S, hScard, hSpts⟩ :=
+    @Curves.LocalizedDictionary.exists_good_fiber_points F _ (W_smooth W) f₀ Af _ _ _
+      (W_smooth W) β.toAlgebra hfd algAfK twAfK algAfL twAfKL twFKL hEll hEll hsepAlg
+      _ hIC hf₀ hdx hdy _ (badTarget_finite W β hbad)
+  refine degree_le_card_kernel_of_good_fiber_aux W β hker_fin Q S hScard ?_
+  intro pt hpt
+  exact mapAddMonoidHom_toAffinePoint_of_evaluatesTo W β hw Q pt
+    (fun hmem => hQbadT ⟨pt, hmem, (hSpts pt hpt).1, (hSpts pt hpt).2⟩)
+    (hSpts pt hpt).1 (hSpts pt hpt).2
+
+/-- The cardinality of the kernel of a separable isogeny equals its degree. -/
+theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
+    [IsIntegrallyClosed W.toAffine.CoordinateRing]
+    (β : Isogeny W.toAffine W.toAffine) (hsep : β.IsSeparable)
+    {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
+    (hw : WeilPairing.PullbackEvaluation W β bad) :
+    Nat.card β.kernel = β.degree := by
+  have hcov : ∀ k : β.kernel, ∀ z : KE,
+      translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
+    hcov_of_pullbackEvaluation_aux W β hbad hw
+  have hker_fin : Finite β.kernel := finite_kernel_of_hcov W β hcov
+  exact le_antisymm (kernel_card_le_degree_of_hcov W β hcov)
+    (degree_le_card_kernel_of_separable_aux W β hsep hbad hw hker_fin)
+
+/-- The kernel is finite when the pullback evaluation is coherent away from a finite set. -/
 theorem finite_kernel_of_separable [IsAlgClosed F]
     (β : Isogeny W.toAffine W.toAffine)
     {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
     (hw : WeilPairing.PullbackEvaluation W β bad) :
     Finite β.kernel :=
-  finite_kernel_of_hcov W β fun k z ↦
-    WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β
-      (WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw) k z
-
-/-! ## The wall cascade for the general separable class
-
-With `#ker β = deg β` now a theorem for any separable `β` carrying only the cofinite
-coherence witness, the field-general W-4 cores make the Galois package unconditional
-for the whole class: no `CoordHom`, no module-finiteness, no carried `h_normal`/`hdesc`. -/
+  finite_kernel_of_hcov W β (hcov_of_pullbackEvaluation_aux W β hbad hw)
 
 section Cascade
 
 variable [IsAlgClosed F] [IsIntegrallyClosed W.toAffine.CoordinateRing]
 
 omit [IsIntegrallyClosed W.toAffine.CoordinateRing] in
-/-- The kernel-translation covariance `xy_family` for the class (the generic-point engine
-applied at the two generators). -/
+/-- Kernel translations fix the pullbacks of the coordinate generators. -/
 theorem xy_family_of_pullbackEvaluation (β : Isogeny W.toAffine W.toAffine)
     {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
     (hw : WeilPairing.PullbackEvaluation W β bad) :
@@ -251,14 +199,9 @@ theorem xy_family_of_pullbackEvaluation (β : Isogeny W.toAffine W.toAffine)
         β.pullback (x_gen W)) ∧
       (translateAlgEquivOfPoint W k.val (β.pullback (y_gen W)) =
         β.pullback (y_gen W)) :=
-  fun k ↦
-    ⟨WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β
-      (WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw) k _,
-     WeilPairing.hcov_of_mapTranslateGenericPoint_canonical W β
-      (WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw) k _⟩
+  WeilPairing.xy_family_of_pullbackEvaluation W β hbad hw
 
-/-- **`h_normal` is a theorem for the general separable class** (Silverman III.4.10c):
-`K(E)/β^*K(E)` is normal for any separable `β` with the coherence witness. -/
+/-- The function-field extension induced by a separable isogeny is normal. -/
 theorem normal_of_separable_general (β : Isogeny W.toAffine W.toAffine)
     (hsep : β.IsSeparable)
     {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
@@ -268,9 +211,7 @@ theorem normal_of_separable_general (β : Isogeny W.toAffine W.toAffine)
   normal_of_xy_family_card W β (xy_family_of_pullbackEvaluation W β hbad hw)
     (card_kernel_eq_degree_of_separable W β hsep hbad hw)
 
-/-- **`hdesc` is a theorem for the general separable class** (Silverman III.4.10c, the
-generic-point translation torsor): every `σ ∈ Aut(K(E)/β^*K(E))` translates the generic
-point by an `F`-rational kernel point. -/
+/-- Every automorphism of the induced function-field extension is a kernel translation. -/
 theorem hdesc_of_separable_general (β : Isogeny W.toAffine W.toAffine)
     (hsep : β.IsSeparable)
     {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
@@ -282,10 +223,7 @@ theorem hdesc_of_separable_general (β : Isogeny W.toAffine W.toAffine)
   hdesc_of_xy_family_card W β (xy_family_of_pullbackEvaluation W β hbad hw)
     (card_kernel_eq_degree_of_separable W β hsep hbad hw)
 
-/-- **`DualGaloisData φ` for the general separable class — fully unconditional**
-(Silverman III.4.10–4.11, III.6.1): compared to the W-4
-`dualGaloisData_of_pullbackEvaluation_unconditional`, the `CoordHom` and its
-module-finiteness are gone.  Residuals: only `{h_pb, hsep, bad, hw}`. -/
+/-- Galois data for a separable isogeny with coherent pullback evaluation. -/
 noncomputable def dualGaloisData_of_pullbackEvaluation_general
     (φ : EC.Isogeny W.toAffine W.toAffine)
     (β : Isogeny W.toAffine W.toAffine)
@@ -301,9 +239,7 @@ noncomputable def dualGaloisData_of_pullbackEvaluation_general
     (hν_mulByInt W (β.degree : ℤ)
       (by exact_mod_cast (isogeny_degree_pos W β).ne'))
 
-/-- **`exists_dual` for the general separable class** (Silverman III.6.1): a separable
-isogeny with only the cofinite pullback-evaluation coherence over `K̄` admits a reverse
-isogeny — no `CoordHom`, no carried Galois witnesses. -/
+/-- A separable isogeny with coherent pullback evaluation admits a reverse isogeny. -/
 theorem exists_dual_of_pullbackEvaluation_general
     (φ : EC.Isogeny W.toAffine W.toAffine)
     (β : Isogeny W.toAffine W.toAffine)

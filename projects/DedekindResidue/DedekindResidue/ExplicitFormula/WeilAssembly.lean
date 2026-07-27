@@ -1,10 +1,7 @@
 /-
-DedekindResidue: assembly of Weil's explicit formula (Poitou's formula (6)).
-
-This file combines the zero-capture contour (Prop 1, `ZeroCapture.lean`), the
-prime side (Prop 2, `PrimeSide.lean`/`FourierJordan.lean`) and the Γ-side
-(Prop 3 + I_G, `GammaSide.lean`) into Poitou's explicit formula, following
-"Sur les petits discriminants" (Séminaire DPP 1976/77, exposé 6).
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
 -/
 module
 
@@ -12,6 +9,20 @@ public import Mathlib
 public import DedekindResidue.ExplicitFormula.ZeroCapture
 public import DedekindResidue.ExplicitFormula.GammaSide
 public import DedekindResidue.ExplicitFormula.AuxAdmissible
+
+/-!
+# Assembly of Weil's explicit formula (Poitou's formula (6))
+
+This file combines the zero-capture contour (Prop 1, `ZeroCapture.lean`), the
+prime side (Prop 2, `PrimeSide.lean`/`FourierJordan.lean`) and the Γ-side
+(Prop 3 + I_G, `GammaSide.lean`) into Poitou's explicit formula, following
+"Sur les petits discriminants" (Séminaire DPP 1976/77, exposé 6).
+
+## Main declarations
+* `weil_explicit_formula` — Poitou's explicit formula (formula (6)), the assembled
+  identity combining the zero, prime, and archimedean sides.
+* `logDeriv_completedDedekindZetaEntire_split` — the right-edge split of `Λ_ent'/Λ_ent`.
+-/
 
 @[expose] public section
 

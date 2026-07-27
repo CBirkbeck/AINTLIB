@@ -129,7 +129,6 @@ theorem map_addSlope_K_algHom (f : W.toAffine.FunctionField →ₐ[K] W.toAffine
     f (addSlope W α) =
       (W_KE W).toAffine.slope (f (x_gen W)) (f (α.pullback (x_gen W)))
         (f (y_gen W)) (f (α.pullback (y_gen W))) := by
-  unfold addSlope
   exact map_slope_K_algHom W f (x_gen W) (α.pullback (x_gen W))
     (y_gen W) (α.pullback (y_gen W))
 
@@ -141,7 +140,6 @@ theorem map_addPullback_x_K_algHom (f : W.toAffine.FunctionField →ₐ[K] W.toA
     f (addPullback_x W α) =
       (W_KE W).toAffine.addX (f (x_gen W)) (f (α.pullback (x_gen W)))
         (f (addSlope W α)) := by
-  unfold addPullback_x
   exact map_addX_K_algHom W f (x_gen W) (α.pullback (x_gen W)) (addSlope W α)
 
 omit [Fintype K] in
@@ -152,7 +150,6 @@ theorem map_addPullback_y_K_algHom (f : W.toAffine.FunctionField →ₐ[K] W.toA
     f (addPullback_y W α) =
       (W_KE W).toAffine.addY (f (x_gen W)) (f (α.pullback (x_gen W)))
         (f (y_gen W)) (f (addSlope W α)) := by
-  unfold addPullback_y
   exact map_addY_K_algHom W f (x_gen W) (α.pullback (x_gen W)) (y_gen W) (addSlope W α)
 
 /-- **σ-commutation (x-coord)**: `f ((negFrobeniusIsog W).pullback x_gen) =
@@ -299,6 +296,7 @@ theorem frobeniusAlgHom_comp_algebraMap :
     Algebra.ofId K W.toAffine.FunctionField :=
   Subsingleton.elim _ _
 
+set_option backward.isDefEq.respectTransparency.types false in
 omit [W.toAffine.IsElliptic] in
 /-- **Frobenius fixes lifted K-rational points at `W_KE`**: applying the
 `Affine.Point.map` of the Frobenius K-AlgHom to `liftPointToKE W k`
@@ -308,7 +306,7 @@ theorem frobenius_KE_lift_eq_lift (k : W.toAffine.Point) :
     WeierstrassCurve.Affine.Point.map (W' := W)
       (FiniteField.frobeniusAlgHom K W.toAffine.FunctionField)
       (liftPointToKE W k) = liftPointToKE W k := by
-  unfold liftPointToKE
+  simp only [liftPointToKE]
   change WeierstrassCurve.Affine.Point.map (W' := W)
         (FiniteField.frobeniusAlgHom K W.toAffine.FunctionField)
         (WeierstrassCurve.Affine.Point.map (W' := W)
@@ -363,7 +361,6 @@ theorem frobeniusW_KE_some (x y : W.toAffine.FunctionField)
         ((WeierstrassCurve.Affine.baseChange_nonsingular _
           (RingHom.injective
             (FiniteField.frobeniusAlgHom K W.toAffine.FunctionField).toRingHom) x y).mpr h) := by
-  unfold frobeniusW_KE
   exact WeierstrassCurve.Affine.Point.map_some
     (f := FiniteField.frobeniusAlgHom K W.toAffine.FunctionField) h
 
@@ -377,7 +374,6 @@ theorem negY_frob_x_gen_frob_y_gen_eq_negFrob_pullback_y :
       (negFrobeniusIsog W).pullback (y_gen W) := by
   rw [negFrobeniusIsog_pullback_y_gen, frobeniusIsog_pullback_apply,
       frobeniusIsog_pullback_apply, FiniteField.coe_frobeniusAlgHom]
-  unfold WeierstrassCurve.Affine.negY
   rfl
 
 /-- **`frob (x_gen W) = (negFrobeniusIsog W).pullback (x_gen W)`**: the
@@ -414,7 +410,7 @@ theorem addPullback_x_negFrobenius_eq_curve_addX :
           ((W_KE W).toAffine.negY
             (FiniteField.frobeniusAlgHom K W.toAffine.FunctionField (x_gen W))
             (FiniteField.frobeniusAlgHom K W.toAffine.FunctionField (y_gen W)))) := by
-  unfold addPullback_x addSlope
+  simp only [addPullback_x, addSlope]
   rw [← frob_x_gen_eq_negFrob_pullback_x W,
       ← negY_frob_x_gen_frob_y_gen_eq_negFrob_pullback_y W]
 
@@ -431,7 +427,7 @@ theorem addPullback_y_negFrobenius_eq_curve_addY :
           ((W_KE W).toAffine.negY
             (FiniteField.frobeniusAlgHom K W.toAffine.FunctionField (x_gen W))
             (FiniteField.frobeniusAlgHom K W.toAffine.FunctionField (y_gen W)))) := by
-  unfold addPullback_y addSlope
+  simp only [addPullback_y, addSlope]
   rw [← frob_x_gen_eq_negFrob_pullback_x W,
       ← negY_frob_x_gen_frob_y_gen_eq_negFrob_pullback_y W]
 
@@ -454,7 +450,7 @@ theorem genericPoint_sub_frobeniusW_KE_apply :
                 (generic_nonsingular W)))
             (fun h ↦ x_gen_ne_frob_x_gen W h.1))) := by
   change genericPoint W + (-frobeniusW_KE W (genericPoint W)) = _
-  unfold genericPoint
+  simp only [genericPoint]
   rw [frobeniusW_KE_some]
   change Affine.Point.some (x_gen W) (y_gen W) (generic_nonsingular W) +
       Affine.Point.some

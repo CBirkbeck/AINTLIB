@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.NormalizedUnitLog
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.NormalizedUnitLog
 
 /-!
 # The degree-`68` Artin-Hasse exponential structure: `E₃₇ ≡ exp(T)·(1 + T³⁷/37) mod T⁷⁴`,
@@ -70,7 +72,7 @@ theorem derivative_E37 :
     Furtwaengler.artinHasseLogSeries_hasSubst 37
   have hE : Furtwaengler.artinHasseExpSeries 37 =
       (PowerSeries.exp ℚ).subst (Furtwaengler.artinHasseLogSeries 37) := rfl
-  rw [hE, derivative_subst ℚ hsub, derivative_exp ℚ]
+  rw [hE, derivative_subst hsub, derivative_exp ℚ]
 
 /-! ## 2. The coefficients of `L₃₇′` below degree `73` -/
 

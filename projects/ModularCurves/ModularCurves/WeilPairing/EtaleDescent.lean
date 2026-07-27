@@ -1,5 +1,11 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.EllipticCurve.MulByHomUnramified
 import ModularCurves.ForMathlib.FiniteEtaleGalois
 import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
 
@@ -62,9 +68,9 @@ section satisfies — it was neither the field-valued-points theorem (that is th
 above) nor the moduli pairing (that is `weilPairingCharZero`).
 
 The torsion side consumes the registered T-B4/T-B5 finiteness/étaleness boxes
-(`torsionπ_isFinite`/`torsionπ_etale`); axiom profiles record `sorryAx` through
+(`torsionπ_isFinite`/`Torsionπ.etale`); axiom profiles record `sorryAx` through
 those gates until the boxes are discharged. The T-C0d-i transport layer itself is
-gate-free: `muNAlgebra`, `muNAlgebraPointsEquiv`, `algHomEquivSpecOver`,
+gate-free: `finiteEtaleOfπ`, `muNAlgebra`, `muNAlgebraPointsEquiv`, `algHomEquivSpecOver`,
 `tensorAlgHomPairEquiv` and `exists_finiteEtaleHom_of_galoisEquivariant` are
 axiom-clean (`propext`/`Classical.choice`/`Quot.sound` only); `sorryAx` enters
 `torsionPairAlgebra`/`torsionPairAlgebraPointsEquiv`/
@@ -79,166 +85,41 @@ universe u
 
 namespace ModularCurves
 
-namespace EllipticCurve
-
-/-- **(T-C0a)** The `N`-torsion of an elliptic curve over a field, as a finite étale
-`k`-algebra: `E[N] → Spec k` is finite (T-B4 box) hence affine, and étale when `N` is
-invertible (T-B5 box); its global sections carry the corresponding
-`CommAlgCat.FiniteEtale k` structure. -/
-noncomputable def torsionAlgebra (k : Type u) [Field k]
-    (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
-    (hk : (N : k) ≠ 0) : CommAlgCat.FiniteEtale.{u} k := by
-  -- `E[N] → Spec k` is finite (T-B4 box), hence an affine morphism with affine source.
-  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
-  haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
-  -- Global sections of `E[N]` as a `k`-algebra, through `k ≅ Γ(Spec k, ⊤)`.
-  letI : Algebra k Γ(E.torsion N, ⊤) :=
-    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom.toAlgebra
-  -- Finiteness of the algebra, from finiteness of `torsionπ`.
-  haveI : Module.Finite k Γ(E.torsion N, ⊤) := by
+/-- Package a finite étale morphism to an affine base as a finite étale algebra: if
+`π : X ⟶ Spec k` is finite (hence `X` affine) and étale, then `Γ(X, ⊤)` is a finite étale
+`k`-algebra for the structure map induced by `π`. Both `torsionAlgebra` (T-C0a) and
+`muNAlgebra` (T-C0d-i) are instances; the only difference between them is which
+finiteness/étaleness inputs discharge the two hypotheses. -/
+noncomputable def finiteEtaleOfπ {k : Type u} [Field k] {X : Scheme.{u}}
+    (π : X ⟶ Spec (CommRingCat.of k)) (hfin : IsFinite π) (het : Etale π) :
+    CommAlgCat.FiniteEtale.{u} k := by
+  haveI : IsFinite π := hfin
+  haveI : IsAffine X := isAffine_of_isAffineHom π
+  letI : Algebra k Γ(X, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ π.appTop).hom.toAlgebra
+  haveI : Module.Finite k Γ(X, ⊤) := by
     have h : RingHom.Finite
-        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom := by
+        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ π.appTop).hom := by
       rw [CommRingCat.hom_comp]
       exact (RingHom.finite_respectsIso.cancel_left_isIso _ _).mpr
-        ((E.torsionπ N).finite_app ⊤ (isAffineOpen_top _))
+        (π.finite_app ⊤ (isAffineOpen_top _))
     exact h
-  -- Étaleness of the algebra, from étaleness of `torsionπ` (T-B5 box, `N` invertible).
-  haveI : Algebra.Etale k Γ(E.torsion N, ⊤) := by
-    have het : Etale (E.torsionπ N) :=
-      E.torsionπ_etale N ((nIsInvertible_spec_iff k N).mpr hk)
+  haveI : Algebra.Etale k Γ(X, ⊤) := by
     have h : RingHom.Etale
-        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom := by
+        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ π.appTop).hom := by
       rw [CommRingCat.hom_comp]
       exact (RingHom.Etale.respectsIso.cancel_left_isIso _ _).mpr
         ((HasRingHomProperty.iff_of_isAffine (P := @AlgebraicGeometry.Etale)).mp het)
     exact h
-  exact CommAlgCat.FiniteEtale.of k Γ(E.torsion N, ⊤)
+  exact CommAlgCat.FiniteEtale.of k Γ(X, ⊤)
 
-/-- **(T-C0b)** The `k̄`-points of the torsion algebra are the `N`-torsion of the
-geometric point group: the fibre functor applied to `torsionAlgebra` is
-`Submodule.torsionBy ℤ (E.Point t) N`, compatibly with the `Gal(k̄/k)`-actions
-(the algebra side acts through the fibre functor, the point side through
-composition with `Spec`-maps of field automorphisms). -/
-theorem torsionAlgebraPointsEquiv (k : Type u) [Field k]
-    (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
-    (hk : (N : k) ≠ 0) :
-    Nonempty (((torsionAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k) ≃
-      Submodule.torsionBy ℤ
-        (E.Point (Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k)))))
-        (N : ℤ)) := by
-  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
-  haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
-  letI : Algebra k Γ(E.torsion N, ⊤) :=
-    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom.toAlgebra
-  -- The structure map of the torsion algebra, in `CommRingCat` form (definitional).
-  have halg : CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤)) =
-      (Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop := rfl
-  -- Compose the affine `Γ ⊣ Spec` correspondence with the kernel universal property
-  -- of `E.torsion N` (`torsionPointsEquiv`).
-  refine ⟨Equiv.trans ?_ (E.torsionPointsEquiv N _)⟩
-  -- The carrier of `torsionAlgebra` is (definitionally) `Γ(E.torsion N, ⊤)`.
-  show (Γ(E.torsion N, ⊤) →ₐ[k] AlgebraicClosure k) ≃
-    { h : Spec (CommRingCat.of (AlgebraicClosure k)) ⟶ E.torsion N //
-      h ≫ E.torsionπ N = Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) }
-  -- `k`-algebra maps `Γ(E[N], ⊤) →ₐ[k] k̄` are scheme maps `Spec k̄ ⟶ E[N]` over `Spec k`,
-  -- since `E[N]` is affine: `Spec`-transport one way, global sections the other.
-  refine
-    { toFun := fun f =>
-        ⟨Spec.map (CommRingCat.ofHom f.toRingHom :
-            Γ(E.torsion N, ⊤) ⟶ CommRingCat.of (AlgebraicClosure k)) ≫
-          (E.torsion N).isoSpec.inv, ?_⟩
-      invFun := fun h =>
-        ⟨(h.1.appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom).hom,
-          fun c => ?_⟩
-      left_inv := fun f => ?_
-      right_inv := fun h => ?_ }
-  · -- the transported morphism lies over `Spec k`
-    have hcomp : CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤)) ≫
-        (CommRingCat.ofHom f.toRingHom :
-          Γ(E.torsion N, ⊤) ⟶ CommRingCat.of (AlgebraicClosure k)) =
-        CommRingCat.ofHom (algebraMap k (AlgebraicClosure k)) :=
-      CommRingCat.hom_ext (RingHom.ext fun c => f.commutes c)
-    rw [Category.assoc, ← Scheme.isoSpec_inv_naturality, Scheme.isoSpec_Spec_inv,
-      ← Spec.map_comp, ← Spec.map_comp, ← halg, hcomp]
-  · -- the global-sections map of a morphism over `Spec k` is a `k`-algebra map
-    have key : CommRingCat.ofHom (algebraMap k Γ(E.torsion N, ⊤)) ≫
-        (h.1.appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom) =
-        CommRingCat.ofHom (algebraMap k (AlgebraicClosure k)) := by
-      rw [halg, Category.assoc, ← Scheme.Hom.comp_appTop_assoc, h.2,
-        Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
-    exact RingHom.congr_fun (congrArg CommRingCat.Hom.hom key) c
-  · -- left inverse: global sections of the `Spec`-transport recovers the algebra map
-    have key : (Spec.map (CommRingCat.ofHom f.toRingHom :
-          Γ(E.torsion N, ⊤) ⟶ CommRingCat.of (AlgebraicClosure k)) ≫
-          (E.torsion N).isoSpec.inv).appTop ≫
-        (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom =
-        CommRingCat.ofHom f.toRingHom := by
-      rw [Scheme.Hom.comp_appTop, Category.assoc, Scheme.ΓSpecIso_naturality,
-        ← Scheme.toSpecΓ_appTop, ← Scheme.Hom.comp_appTop_assoc, Scheme.toSpecΓ_isoSpec_inv,
-        Scheme.Hom.id_appTop, Category.id_comp]
-    ext x
-    exact RingHom.congr_fun (congrArg CommRingCat.Hom.hom key) x
-  · -- right inverse: `Spec`-transport of the global-sections map recovers the morphism
-    apply Subtype.ext
-    show Spec.map (CommRingCat.ofHom
-        ((h.1.appTop ≫ (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure k))).hom).hom)) ≫
-        (E.torsion N).isoSpec.inv = h.1
-    rw [CommRingCat.ofHom_hom, Spec.map_comp, Category.assoc, Scheme.isoSpec_inv_naturality,
-      Scheme.isoSpec_Spec_inv, ← Spec.map_comp_assoc, Iso.inv_hom_id, Spec.map_id,
-      Category.id_comp]
-
-end EllipticCurve
-
-/-! ### The T-C0d-i transport layer: `μ_N`, the torsion pair, and Galois descent
-
-Gate-free infrastructure for T-C0d: `μ_N` and the torsion tensor square as objects of
-`CommAlgCat.FiniteEtale k` with pinned fibre-functor values, and the descent theorem
-turning a Galois-equivariant map of fibre values into an algebra morphism (fullness of
-`PreGaloisCategory.functorToContAction` for the fibre functor at `SeparableClosure k`,
-bridged to `AlgebraicClosure k`-fibres in characteristic zero). -/
-
-section MuNAlgebra
-
-/-- **(T-C0d-i, μ side)** `μ_N` over `Spec k` as a finite étale `k`-algebra, for `N`
-invertible in `k`: `μ_N → Spec k` is finite (`muNπ_isFinite`) hence affine, and étale
-exactly when `N` is invertible (`muNπ_etale_iff`, i.e. `X^N − 1` separable); its global
-sections carry the corresponding `CommAlgCat.FiniteEtale k` structure. Unlike
-`torsionAlgebra`, this consumes no boxes — both inputs are proven in
-`GroupScheme/MuN.lean`. Source: KM 1.12. -/
-noncomputable def muNAlgebra (k : Type u) [Field k] (N : ℕ) [NeZero N]
-    (hk : (N : k) ≠ 0) : CommAlgCat.FiniteEtale.{u} k := by
-  haveI : IsFinite (muNπ (Spec (CommRingCat.of k)) N) := muNπ_isFinite _ N
-  haveI : IsAffine (muN (Spec (CommRingCat.of k)) N) :=
-    isAffine_of_isAffineHom (muNπ (Spec (CommRingCat.of k)) N)
-  letI : Algebra k Γ(muN (Spec (CommRingCat.of k)) N, ⊤) :=
-    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫
-      (muNπ (Spec (CommRingCat.of k)) N).appTop).hom.toAlgebra
-  haveI : Module.Finite k Γ(muN (Spec (CommRingCat.of k)) N, ⊤) := by
-    have h : RingHom.Finite
-        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫
-          (muNπ (Spec (CommRingCat.of k)) N).appTop).hom := by
-      rw [CommRingCat.hom_comp]
-      exact (RingHom.finite_respectsIso.cancel_left_isIso _ _).mpr
-        ((muNπ (Spec (CommRingCat.of k)) N).finite_app ⊤ (isAffineOpen_top _))
-    exact h
-  haveI : Algebra.Etale k Γ(muN (Spec (CommRingCat.of k)) N, ⊤) := by
-    have het : Etale (muNπ (Spec (CommRingCat.of k)) N) :=
-      (muNπ_etale_iff (Spec (CommRingCat.of k)) N).mpr
-        ((nIsInvertible_spec_iff k N).mpr hk)
-    have h : RingHom.Etale
-        ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫
-          (muNπ (Spec (CommRingCat.of k)) N).appTop).hom := by
-      rw [CommRingCat.hom_comp]
-      exact (RingHom.Etale.respectsIso.cancel_left_isIso _ _).mpr
-        ((HasRingHomProperty.iff_of_isAffine (P := @AlgebraicGeometry.Etale)).mp het)
-    exact h
-  exact CommAlgCat.FiniteEtale.of k Γ(muN (Spec (CommRingCat.of k)) N, ⊤)
+section AffineFibre
 
 /-- The affine `Γ ⊣ Spec` fibre correspondence over `Spec k`: for an affine scheme `X`
 over `Spec k` whose global sections carry the induced `k`-algebra structure, `k`-algebra
 homomorphisms `Γ(X, ⊤) →ₐ[k] R` are exactly the `Spec R`-points of `X` over `Spec k`.
-This is the generic form of the transport inlined in `torsionAlgebraPointsEquiv`
-(T-C0b); `muNAlgebraPointsEquiv` composes it with `muNPointsEquiv`. -/
+Both fibre pins are instances of it: `torsionAlgebraPointsEquiv` (T-C0b) composes it
+with `torsionPointsEquiv`, and `muNAlgebraPointsEquiv` with `muNPointsEquiv`. -/
 noncomputable def algHomEquivSpecOver {k : Type u} [Field k] (R : Type u) [CommRing R]
     [Algebra k R] {X : Scheme.{u}} [IsAffine X] (π : X ⟶ Spec (CommRingCat.of k))
     [Algebra k Γ(X, ⊤)]
@@ -288,6 +169,67 @@ noncomputable def algHomEquivSpecOver {k : Type u} [Field k] (R : Type u) [CommR
     rw [CommRingCat.ofHom_hom, Spec.map_comp, Category.assoc, Scheme.isoSpec_inv_naturality,
       Scheme.isoSpec_Spec_inv, ← Spec.map_comp_assoc, Iso.inv_hom_id, Spec.map_id,
       Category.id_comp]
+
+end AffineFibre
+
+namespace EllipticCurve
+
+/-- **(T-C0a)** The `N`-torsion of an elliptic curve over a field, as a finite étale
+`k`-algebra: `E[N] → Spec k` is finite (T-B4 box) hence affine, and étale when `N` is
+invertible (T-B5 box); its global sections carry the corresponding
+`CommAlgCat.FiniteEtale k` structure. -/
+noncomputable def torsionAlgebra (k : Type u) [Field k]
+    (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
+    (hk : (N : k) ≠ 0) : CommAlgCat.FiniteEtale.{u} k :=
+  -- `E[N] → Spec k` is finite (T-B4 box) and étale for `N` invertible (T-B5 box).
+  finiteEtaleOfπ (E.torsionπ N) (E.torsionπ_isFinite N)
+    (Torsionπ.etale E N ((nIsInvertible_spec_iff k N).mpr hk))
+
+/-- **(T-C0b)** The `k̄`-points of the torsion algebra are the `N`-torsion of the
+geometric point group: the fibre functor applied to `torsionAlgebra` is
+`Submodule.torsionBy ℤ (E.Point t) N`, compatibly with the `Gal(k̄/k)`-actions
+(the algebra side acts through the fibre functor, the point side through
+composition with `Spec`-maps of field automorphisms). -/
+theorem torsionAlgebraPointsEquiv (k : Type u) [Field k]
+    (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
+    (hk : (N : k) ≠ 0) :
+    Nonempty (((torsionAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k) ≃
+      Submodule.torsionBy ℤ
+        (E.Point (Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k)))))
+        (N : ℤ)) := by
+  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
+  letI : Algebra k Γ(E.torsion N, ⊤) :=
+    ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ (E.torsionπ N).appTop).hom.toAlgebra
+  -- Compose the affine `Γ ⊣ Spec` correspondence (`algHomEquivSpecOver`) with the kernel
+  -- universal property of `E.torsion N` (`torsionPointsEquiv`).
+  refine ⟨Equiv.trans ?_ (E.torsionPointsEquiv N _)⟩
+  -- The carrier of `torsionAlgebra` is (definitionally) `Γ(E.torsion N, ⊤)`.
+  show (Γ(E.torsion N, ⊤) →ₐ[k] AlgebraicClosure k) ≃ _
+  exact algHomEquivSpecOver (AlgebraicClosure k) (E.torsionπ N) rfl
+
+end EllipticCurve
+
+/-! ### The T-C0d-i transport layer: `μ_N`, the torsion pair, and Galois descent
+
+Gate-free infrastructure for T-C0d: `μ_N` and the torsion tensor square as objects of
+`CommAlgCat.FiniteEtale k` with pinned fibre-functor values, and the descent theorem
+turning a Galois-equivariant map of fibre values into an algebra morphism (fullness of
+`PreGaloisCategory.functorToContAction` for the fibre functor at `SeparableClosure k`,
+bridged to `AlgebraicClosure k`-fibres in characteristic zero). -/
+
+section MuNAlgebra
+
+/-- **(T-C0d-i, μ side)** `μ_N` over `Spec k` as a finite étale `k`-algebra, for `N`
+invertible in `k`: `μ_N → Spec k` is finite (`muNπ_isFinite`) hence affine, and étale
+exactly when `N` is invertible (`muNπ_etale_iff`, i.e. `X^N − 1` separable); its global
+sections carry the corresponding `CommAlgCat.FiniteEtale k` structure. Unlike
+`torsionAlgebra`, this consumes no boxes — both inputs are proven in
+`GroupScheme/MuN.lean`. Source: KM 1.12. -/
+noncomputable def muNAlgebra (k : Type u) [Field k] (N : ℕ) [NeZero N]
+    (hk : (N : k) ≠ 0) : CommAlgCat.FiniteEtale.{u} k :=
+  finiteEtaleOfπ (muNπ (Spec (CommRingCat.of k)) N) (muNπ_isFinite _ N)
+    ((muNπ_etale_iff (Spec (CommRingCat.of k)) N).mpr ((nIsInvertible_spec_iff k N).mpr hk))
 
 /-- **(T-C0d-i, μ side, fibre pin)** The `k̄`-points of the `μ_N`-algebra are the `N`-th
 roots of unity of `k̄`: the fibre-functor value of `muNAlgebra` is

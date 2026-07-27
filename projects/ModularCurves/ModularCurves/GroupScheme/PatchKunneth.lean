@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.Pullbacks
 import Mathlib.AlgebraicGeometry.Restrict
 import Mathlib.AlgebraicGeometry.Morphisms.Affine
@@ -176,7 +181,7 @@ theorem topIso_inv_fst_appTop_patchKunnethΓ
       = (Scheme.ΓSpecIso Γ(X, W₁)).inv
         ≫ ((Scheme.ΓSpecIso Γ(X, W₁)).hom ≫ W₁.topIso.inv)
         ≫ (pullback.fst (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop from by
-    simp]
+    rw [Category.assoc, Iso.inv_hom_id_assoc]]
   rw [Category.assoc, Category.assoc, ← hleg]
   simp only [Category.assoc, Iso.inv_hom_id_assoc]
   rw [← Category.assoc ((patchKunneth f g hV hW₁ hW₂ h₁ h₂).hom.appTop),
@@ -214,7 +219,7 @@ theorem topIso_inv_snd_appTop_patchKunnethΓ
       = (Scheme.ΓSpecIso Γ(Y, W₂)).inv
         ≫ ((Scheme.ΓSpecIso Γ(Y, W₂)).hom ≫ W₂.topIso.inv)
         ≫ (pullback.snd (f.resLE V W₁ e₁) (g.resLE V W₂ e₂)).appTop from by
-    simp]
+    rw [Category.assoc, Iso.inv_hom_id_assoc]]
   rw [Category.assoc, Category.assoc, ← hleg]
   simp only [Category.assoc, Iso.inv_hom_id_assoc]
   rw [← Category.assoc ((patchKunneth f g hV hW₁ hW₂ h₁ h₂).hom.appTop),

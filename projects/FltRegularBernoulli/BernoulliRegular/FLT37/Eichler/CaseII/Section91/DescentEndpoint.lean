@@ -703,7 +703,7 @@ theorem caseIIWashingtonLemma96Witnesses37_of_lemma96Propagation
     · exact absurd heq ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.ne_one
         (by decide : 1 < 37))
     · have hpair :=
-        D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+        D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
           (by decide : Nat.Prime 37) hmem_zs hmem_one heq
       simpa using hpair
   have hz'_cop_dζ : ¬ (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) ∣ ρ0 ^ 2 := by

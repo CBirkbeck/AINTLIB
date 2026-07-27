@@ -49,10 +49,12 @@ private def lowerUniSL (m : ℤ) : SL(2, ℤ) :=
     ((lowerUniSL m : SL(2, ℤ)) : Matrix (Fin 2) (Fin 2) ℤ) = !![1, 0; m, 1] := rfl
 
 @[simp] private lemma lowerUniSL_mapQ_coe (m : ℤ) :
-    ((mapGL ℚ (lowerUniSL m) : GL (Fin 2) ℚ) : Matrix (Fin 2) (Fin 2) ℚ) = !![1, 0; (m : ℚ), 1] := by
-  ext i j; fin_cases i <;> fin_cases j <;>
-    simp [lowerUniSL, mapGL_coe_matrix, Matrix.SpecialLinearGroup.map_apply_coe,
-      RingHom.mapMatrix_apply, Matrix.map_apply]
+    ((mapGL ℚ (lowerUniSL m) : GL (Fin 2) ℚ) : Matrix (Fin 2) (Fin 2) ℚ) =
+      !![1, 0; (m : ℚ), 1] := by
+  rw [show ((mapGL ℚ (lowerUniSL m) : GL (Fin 2) ℚ) : Matrix (Fin 2) (Fin 2) ℚ) =
+      (!![1, 0; m, 1]).map Int.cast from
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)]
+  ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.map_apply, Matrix.of_apply]
 
 omit [NeZero N] in
 private lemma lowerUniSL_mem_Gamma1 (m : ℤ) (hm : (N : ℤ) ∣ m) :
@@ -92,6 +94,7 @@ condition is the *stronger* `pN ∣ γ₁₀` (the conjugate's lower-left entry 
 `≡ 0 mod N` to land in `Γ₁(N)`).  For `p ∣ N` these differ: `Γ₁` already gives `N ∣ γ₁₀ ⟹ p ∣ γ₁₀`,
 so `Γ₀(p)` is no obstruction; the real index drops to `p` via `pN ∣ γ₁₀`. -/
 
+omit [NeZero N] in
 /-- **Forward strong membership.** `γ ∈ Γ_p(diag(p,1)) ⟹ pN ∣ γ₁₀` (no coprimality): the
 conjugate `A·γ·A⁻¹` has lower-left `γ₁₀/p`, which is integral *and* `≡ 0 mod N` (since the
 conjugate lands in `Γ₁(N)`), so `pN ∣ γ₁₀`. -/
@@ -120,6 +123,7 @@ private lemma mem_Gamma_p_α_T_p_lower_pN (p : ℕ) (hp : 0 < p)
   obtain ⟨c, hc⟩ := hN_dvd_y
   exact ⟨c, by rw [hpk, hc]; ring⟩
 
+omit [NeZero N] in
 /-- **Reverse strong membership.** `γ ∈ Γ₁(N)` with `pN ∣ γ₁₀ ⟹ γ ∈ Γ_p(diag(p,1))`: the
 witness `y = [[a, p·b], [γ₁₀/p, d]]` lies in `Γ₁(N)` (its lower-left `γ₁₀/p ≡ 0 mod N`) and
 conjugates to `γ` under `diag(p,1)`. -/
@@ -158,10 +162,12 @@ private lemma mem_Gamma_p_α_T_p_lower_pN_mpr (p : ℕ) (hp : 0 < p)
   apply Units.ext
   rw [Matrix.GeneralLinearGroup.coe_mul, Matrix.GeneralLinearGroup.coe_mul,
     conj_T_p_lower_real_val p hp γ]
+  have hyval : Subtype.val y = !![γ.val 0 0, (p : ℤ) * γ.val 0 1; N * c, γ.val 1 1] := rfl
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [hy_def, Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
-      Matrix.map_apply, hk] <;> try field_simp
+    simp [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+      Matrix.map_apply, hyval, hk]
+  try field_simp
 
 /-! ### The bad-prime relative index `[Γ₁(N) : Γ_p(diag(p,1))] = p`
 

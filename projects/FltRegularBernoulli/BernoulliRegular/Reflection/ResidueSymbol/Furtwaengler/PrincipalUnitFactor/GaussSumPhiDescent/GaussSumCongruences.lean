@@ -125,16 +125,16 @@ theorem gaussSum_one_eq_neg_one_of_addChar_ne_one
   have hsum : ∑ x : F, ψ x = 0 :=
     AddChar.sum_eq_zero_of_ne_one hψ
   have hsum_erase :
-      (Finset.univ.erase (0 : F)).sum (fun x => ψ x) = -1 := by
+      (Finset.univ.erase (0 : F)).sum (fun x ↦ ψ x) = -1 := by
     rw [← Finset.sum_erase_add (Finset.univ : Finset F) ψ
         (Finset.mem_univ (0 : F))] at hsum
     simpa [add_eq_zero_iff_eq_neg] using hsum
   calc
     _root_.gaussSum (1 : MulChar F R) ψ =
-        (Finset.univ.erase (0 : F)).sum (fun x => ψ x) := by
-      unfold _root_.gaussSum
+        (Finset.univ.erase (0 : F)).sum (fun x ↦ ψ x) := by
+      simp only [_root_.gaussSum]
       rw [← Finset.sum_erase_add (Finset.univ : Finset F)
-        (fun x => (1 : MulChar F R) x * ψ x) (Finset.mem_univ (0 : F))]
+        (fun x ↦ (1 : MulChar F R) x * ψ x) (Finset.mem_univ (0 : F))]
       simp only [MulChar.map_zero, zero_mul, add_zero]
       refine Finset.sum_congr rfl fun x hx => ?_
       have hx_ne : x ≠ 0 := (Finset.mem_erase.mp hx).1
@@ -156,7 +156,7 @@ theorem gaussSum_add_one_mem_ideal_of_mulChar_sub_one_mem
   classical
   have hdiff :
       _root_.gaussSum χ ψ - _root_.gaussSum (1 : MulChar F R) ψ ∈ I := by
-    unfold _root_.gaussSum
+    simp only [_root_.gaussSum]
     rw [← Finset.sum_sub_distrib]
     refine Ideal.sum_mem _ fun x _ => ?_
     by_cases hx : x = 0
@@ -219,6 +219,52 @@ theorem pow_add_one_mem_ideal_sq_of_add_one_mem_of_natCast_mem_sq
     ring
   simpa using (I ^ 2).neg_mem hneg_mem
 
+/-! ### Shared cores of the four parallel Stickelberger setups
+
+The `Concrete`, `TraceForm` and their two conductor-flexible variants each carry the
+same congruences.  The mathematics of each depends only on the chosen root of unity, so
+it is stated once here and the four namespaces below merely feed in their own root. -/
+
+/-- An element of finite order `n` in a division monoid has inverse `x ^ (n - 1)`. -/
+private theorem pow_sub_one_eq_inv_of_pow_eq_one
+    {G : Type*} [DivisionMonoid G] {x : G} {n : ℕ} (hn : 1 ≤ n) (hx : x ^ n = 1) :
+    x ^ (n - 1) = x⁻¹ :=
+  eq_inv_of_mul_eq_one_left (by rw [← pow_succ, Nat.sub_add_cancel hn, hx])
+
+/-- For a primitive `p`-th root of unity `ζ` in a domain and odd `p`, the rational prime
+`p` lies in `(ζ - 1)^2`: the cyclotomic ramification input behind the square congruence
+`g(χ)^p ≡ -1 (mod (ζ_p - 1)^2)`. -/
+private theorem natCast_mem_span_sub_one_sq_of_isPrimitiveRoot
+    {R : Type*} [CommRing R] [IsDomain R] {ζ : R} (hζ : IsPrimitiveRoot ζ p)
+    (hp_three : 3 ≤ p) :
+    (p : R) ∈ (Ideal.span ({ζ - 1} : Set R)) ^ 2 :=
+  (associated_mem_ideal_iff (I := Ideal.span ({ζ - 1} : Set R) ^ 2)
+        (by simpa using associated_ell_zeta_sub_one_pow (ℓ := p) hζ)).2
+    (Ideal.pow_le_pow_right (by omega)
+      (Ideal.pow_mem_pow (Ideal.mem_span_singleton.mpr dvd_rfl) (p - 1)))
+
+/-- Negating an exponent in `ZMod ℓ` inverts a primitive `ℓ`-th root of unity.  This is the
+arithmetic behind the compatibility of a trace-form additive character with inversion. -/
+private theorem pow_sub_one_mul_val_eq_pow_neg_val
+    {ℓ : ℕ} [Fact (Nat.Prime ℓ)] {A : Type*} [CommMonoid A] {ζ : A}
+    (hζ : IsPrimitiveRoot ζ ℓ) (t : ZMod ℓ) :
+    ζ ^ ((ℓ - 1) * t.val) = ζ ^ ((-t).val) := by
+  have hcast :
+      (((ℓ - 1) * t.val : ℕ) : ZMod ℓ) = (((-t).val : ℕ) : ZMod ℓ) := by
+    calc
+      (((ℓ - 1) * t.val : ℕ) : ZMod ℓ)
+          = ((ℓ - 1 : ℕ) : ZMod ℓ) * (t.val : ZMod ℓ) := by
+              rw [Nat.cast_mul]
+      _ = (-1 : ZMod ℓ) * t := by
+              rw [Nat.cast_sub (Fact.out : Nat.Prime ℓ).one_le,
+                ZMod.natCast_self, zero_sub, ZMod.natCast_zmod_val]
+              norm_num
+      _ = -t := by simp
+      _ = (((-t).val : ℕ) : ZMod ℓ) := by
+              rw [ZMod.natCast_zmod_val]
+  exact pow_eq_pow_of_modEq
+    ((ZMod.natCast_eq_natCast_iff _ _ _).mp hcast) hζ.pow_eq_one
+
 namespace ConcreteStickelbergerSetup
 
 variable {ℓ : ℕ} [Fact (Nat.Prime ℓ)]
@@ -254,7 +300,7 @@ theorem residueCharInt_pow_apply_sub_one_mem_zeta_p_sub_one
     (S.residueCharInt ^ a) x - 1 ∈
       Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R')) := by
   classical
-  letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  let : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   let u : kˣ := Units.mk0 x hx
   change (S.residueCharInt ^ a) (u : k) - 1 ∈
     Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))
@@ -275,7 +321,7 @@ theorem gaussSumInt_add_one_mem_zeta_p_sub_one
     (hψ : S.psiInt ≠ 1) :
     S.gaussSumInt a + 1 ∈
       Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R')) := by
-  unfold ConcreteStickelbergerSetup.gaussSumInt
+  simp only [ConcreteStickelbergerSetup.gaussSumInt]
   exact gaussSum_add_one_mem_ideal_of_mulChar_sub_one_mem
     (S.residueCharInt ^ a) S.psiInt hψ
     (fun x hx => S.residueCharInt_pow_apply_sub_one_mem_zeta_p_sub_one a hx)
@@ -295,21 +341,8 @@ primitive `p`-th root: for `p ≥ 3`, the rational prime `p` lies in
 theorem natCast_p_mem_zeta_p_sub_one_sq
     (S : ConcreteStickelbergerSetup ℓ p k K R') (hp_three : 3 ≤ p) :
     (p : 𝓞 R') ∈
-      (Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))) ^ 2 := by
-  let I : Ideal (𝓞 R') :=
-    Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))
-  have hassoc :
-      Associated (p : 𝓞 R') ((S.zeta_p_int - 1) ^ (p - 1)) := by
-    simpa using
-      (associated_ell_zeta_sub_one_pow
-        (ℓ := p) (R := 𝓞 R') S.zeta_p_int_isPrimitiveRoot)
-  have hbase : S.zeta_p_int - 1 ∈ I :=
-    Ideal.mem_span_singleton.mpr dvd_rfl
-  have hpow : (S.zeta_p_int - 1) ^ (p - 1) ∈ I ^ (p - 1) :=
-    Ideal.pow_mem_pow hbase (p - 1)
-  have hle : I ^ (p - 1) ≤ I ^ 2 :=
-    Ideal.pow_le_pow_right (by omega)
-  exact (associated_mem_ideal_iff (I := I ^ 2) hassoc).2 (hle hpow)
+      (Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))) ^ 2 :=
+  natCast_mem_span_sub_one_sq_of_isPrimitiveRoot S.zeta_p_int_isPrimitiveRoot hp_three
 
 /-- The concrete square congruence `g(χ)^p ≡ -1 (mod (ζ_p - 1)^2)`, assuming
 the standard cyclotomic ramification input `p ∈ (ζ_p - 1)^2` for the setup's
@@ -345,7 +378,7 @@ theorem residueCharInt_ringHomComp_eq_inv_of_zeta_p_int_map_pow_sub_one
     (S : ConcreteStickelbergerSetup ℓ p k K R') (σ : 𝓞 R' →+* 𝓞 R')
     (hσζ : σ S.zeta_p_int = S.zeta_p_int ^ (p - 1)) :
     S.residueCharInt.ringHomComp σ = S.residueCharInt⁻¹ := by
-  letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  let : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   have hσ_unit :
       σ ((S.zeta_p_int_unit : (𝓞 R')ˣ) : 𝓞 R') =
         ((S.zeta_p_int_unit : (𝓞 R')ˣ) : 𝓞 R') ^ (p - 1) := by
@@ -356,11 +389,9 @@ theorem residueCharInt_ringHomComp_eq_inv_of_zeta_p_int_map_pow_sub_one
       (residueMulChar_ringHomComp_pow_eq
         S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
         S.zeta_p_int_unit_isPrimitiveRoot σ (p - 1) hσ_unit)
-  have hχp : S.residueCharInt ^ p = 1 :=
-    S.residueCharInt_pow_eq_one
-  have hmul : S.residueCharInt ^ (p - 1) * S.residueCharInt = 1 := by
-    rw [← pow_succ, Nat.sub_add_cancel (Fact.out : Nat.Prime p).one_le, hχp]
-  exact hcomp.trans (eq_inv_of_mul_eq_one_left hmul)
+  exact hcomp.trans
+    (pow_sub_one_eq_inv_of_pow_eq_one (Fact.out : Nat.Prime p).one_le
+      S.residueCharInt_pow_eq_one)
 
 /-- Power version of
 `residueCharInt_ringHomComp_eq_inv_of_zeta_p_int_map_pow_sub_one`. -/
@@ -379,36 +410,9 @@ theorem zeta_ell_int_complexConj_eq_pow_sub_one
     [IsCMField R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') :
     ringOfIntegersComplexConj R' S.zeta_ell_int =
-      S.zeta_ell_int ^ (ℓ - 1) := by
-  letI : NeZero ℓ := ⟨(Fact.out : Nat.Prime ℓ).ne_zero⟩
-  let u : (𝓞 R')ˣ :=
-    (S.zeta_ell_int_isPrimitiveRoot.isUnit
-      (Fact.out : Nat.Prime ℓ).ne_zero).unit
-  have hu : (u : 𝓞 R') = S.zeta_ell_int := by
-    simp [u]
-  have hu_pow : u ^ ℓ = 1 := by
-    apply Units.ext
-    simpa [hu] using S.zeta_ell_int_isPrimitiveRoot.pow_eq_one
-  have hu_torsion : u ∈ NumberField.Units.torsion R' :=
-    (CommGroup.mem_torsion _).2
-      (isOfFinOrder_iff_pow_eq_one.2
-        ⟨ℓ, (Fact.out : Nat.Prime ℓ).pos, by
-          exact hu_pow⟩)
-  have hconj_units :
-      unitsComplexConj R' u = (u⁻¹ : (𝓞 R')ˣ) := by
-    simpa using
-      (unitsComplexConj_torsion (K := R') ⟨u, hu_torsion⟩)
-  have h_inv_pow : (u⁻¹ : (𝓞 R')ˣ) = u ^ (ℓ - 1) := by
-    apply inv_eq_of_mul_eq_one_left
-    rw [← pow_succ, Nat.sub_one_add_one (Fact.out : Nat.Prime ℓ).ne_zero, hu_pow]
-  calc
-    ringOfIntegersComplexConj R' S.zeta_ell_int
-        = ringOfIntegersComplexConj R' (u : 𝓞 R') := by rw [hu]
-    _ = ((unitsComplexConj R' u : (𝓞 R')ˣ) : 𝓞 R') := rfl
-    _ = ((u⁻¹ : (𝓞 R')ˣ) : 𝓞 R') := by rw [hconj_units]
-    _ = ((u ^ (ℓ - 1) : (𝓞 R')ˣ) : 𝓞 R') := by rw [h_inv_pow]
-    _ = S.zeta_ell_int ^ (ℓ - 1) := by
-          rw [Units.val_pow_eq_pow_val, hu]
+      S.zeta_ell_int ^ (ℓ - 1) :=
+  ringOfIntegersComplexConj_primitiveRoot
+    (n := ℓ) (F := R') (Fact.out : Nat.Prime ℓ).pos S.zeta_ell_int_isPrimitiveRoot
 
 end ConcreteStickelbergerSetup
 
@@ -426,27 +430,12 @@ theorem zeta_ell_int_pow_sub_one_mul_psiExponent_eq_neg
     (S : TraceFormStickelbergerSetup ℓ p k K R') (x : k) :
     S.zeta_ell_int ^ ((ℓ - 1) * S.psiExponent x) =
       S.zeta_ell_int ^ S.psiExponent (-x) := by
-  let t : ZMod ℓ := Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)
   have ht_neg :
-      Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * (-x)) = -t := by
-    simp [t, mul_neg]
+      Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * (-x)) =
+        -Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x) := by
+    simp [mul_neg]
   rw [S.psiExponent_trace x, S.psiExponent_trace (-x), ht_neg]
-  have hcast :
-      (((ℓ - 1) * t.val : ℕ) : ZMod ℓ) = (((-t).val : ℕ) : ZMod ℓ) := by
-    calc
-      (((ℓ - 1) * t.val : ℕ) : ZMod ℓ)
-          = ((ℓ - 1 : ℕ) : ZMod ℓ) * (t.val : ZMod ℓ) := by
-              rw [Nat.cast_mul]
-      _ = (-1 : ZMod ℓ) * t := by
-              rw [Nat.cast_sub (Fact.out : Nat.Prime ℓ).one_le,
-                ZMod.natCast_self, zero_sub, ZMod.natCast_zmod_val]
-              norm_num
-      _ = -t := by simp
-      _ = (((-t).val : ℕ) : ZMod ℓ) := by
-              rw [ZMod.natCast_zmod_val]
-  exact pow_eq_pow_of_modEq
-    ((ZMod.natCast_eq_natCast_iff _ _ _).mp hcast)
-    S.zeta_ell_int_isPrimitiveRoot.pow_eq_one
+  exact pow_sub_one_mul_val_eq_pow_neg_val S.zeta_ell_int_isPrimitiveRoot _
 
 /-- If an upstairs endomorphism sends the chosen integral `ℓ`-th root to
 the inverse power `ζ_ℓ^(ℓ-1)`, then it sends the trace-form integral
@@ -494,8 +483,8 @@ theorem psiInt_ne_one
 theorem residueCharInt_pow_eq_one
     (S : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R') :
     S.residueCharInt ^ p = 1 := by
-  letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  unfold ConductorFlexibleConcreteStickelbergerSetup.residueCharInt
+  let : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.residueCharInt]
   exact residueMulChar_pow_eq_one_mulChar
     S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot
@@ -508,7 +497,7 @@ theorem residueCharInt_pow_apply_sub_one_mem_zeta_p_sub_one
     (S.residueCharInt ^ a) x - 1 ∈
       Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R')) := by
   classical
-  letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  let : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   let u : kˣ := Units.mk0 x hx
   change (S.residueCharInt ^ a) (u : k) - 1 ∈
     Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))
@@ -529,7 +518,7 @@ theorem gaussSumInt_add_one_mem_zeta_p_sub_one
     (hψ : S.psiInt ≠ 1) :
     S.gaussSumInt a + 1 ∈
       Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R')) := by
-  unfold ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt]
   exact gaussSum_add_one_mem_ideal_of_mulChar_sub_one_mem
     (S.residueCharInt ^ a) S.psiInt hψ
     (fun x hx => S.residueCharInt_pow_apply_sub_one_mem_zeta_p_sub_one a hx)
@@ -547,21 +536,8 @@ conductor-flexible chosen primitive `p`-th root. -/
 theorem natCast_p_mem_zeta_p_sub_one_sq
     (S : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R') (hp_three : 3 ≤ p) :
     (p : 𝓞 R') ∈
-      (Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))) ^ 2 := by
-  let I : Ideal (𝓞 R') :=
-    Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))
-  have hassoc :
-      Associated (p : 𝓞 R') ((S.zeta_p_int - 1) ^ (p - 1)) := by
-    simpa using
-      (associated_ell_zeta_sub_one_pow
-        (ℓ := p) (R := 𝓞 R') S.zeta_p_int_isPrimitiveRoot)
-  have hbase : S.zeta_p_int - 1 ∈ I :=
-    Ideal.mem_span_singleton.mpr dvd_rfl
-  have hpow : (S.zeta_p_int - 1) ^ (p - 1) ∈ I ^ (p - 1) :=
-    Ideal.pow_mem_pow hbase (p - 1)
-  have hle : I ^ (p - 1) ≤ I ^ 2 :=
-    Ideal.pow_le_pow_right (by omega)
-  exact (associated_mem_ideal_iff (I := I ^ 2) hassoc).2 (hle hpow)
+      (Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R'))) ^ 2 :=
+  natCast_mem_span_sub_one_sq_of_isPrimitiveRoot S.zeta_p_int_isPrimitiveRoot hp_three
 
 /-- The conductor-flexible square congruence
 `g(χ)^p ≡ -1 (mod (ζ_p - 1)^2)`. -/
@@ -594,7 +570,7 @@ theorem residueCharInt_ringHomComp_eq_inv_of_zeta_p_int_map_pow_sub_one
     (S : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R') (σ : 𝓞 R' →+* 𝓞 R')
     (hσζ : σ S.zeta_p_int = S.zeta_p_int ^ (p - 1)) :
     S.residueCharInt.ringHomComp σ = S.residueCharInt⁻¹ := by
-  letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  let : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   have hσ_unit :
       σ ((S.zeta_p_int_unit : (𝓞 R')ˣ) : 𝓞 R') =
         ((S.zeta_p_int_unit : (𝓞 R')ˣ) : 𝓞 R') ^ (p - 1) := by
@@ -605,11 +581,9 @@ theorem residueCharInt_ringHomComp_eq_inv_of_zeta_p_int_map_pow_sub_one
       (residueMulChar_ringHomComp_pow_eq
         S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
         S.zeta_p_int_unit_isPrimitiveRoot σ (p - 1) hσ_unit)
-  have hχp : S.residueCharInt ^ p = 1 :=
-    S.residueCharInt_pow_eq_one
-  have hmul : S.residueCharInt ^ (p - 1) * S.residueCharInt = 1 := by
-    rw [← pow_succ, Nat.sub_add_cancel (Fact.out : Nat.Prime p).one_le, hχp]
-  exact hcomp.trans (eq_inv_of_mul_eq_one_left hmul)
+  exact hcomp.trans
+    (pow_sub_one_eq_inv_of_pow_eq_one (Fact.out : Nat.Prime p).one_le
+      S.residueCharInt_pow_eq_one)
 
 /-- Power version of the conductor-flexible residue-character inverse
 compatibility. -/
@@ -646,27 +620,12 @@ theorem zeta_ell_int_pow_sub_one_mul_psiExponent_eq_neg
     (S : ConductorFlexibleTraceFormStickelbergerSetup ℓ p k K R') (x : k) :
     S.zeta_ell_int ^ ((ℓ - 1) * S.psiExponent x) =
       S.zeta_ell_int ^ S.psiExponent (-x) := by
-  let t : ZMod ℓ := Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)
   have ht_neg :
-      Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * (-x)) = -t := by
-    simp [t, mul_neg]
+      Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * (-x)) =
+        -Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x) := by
+    simp [mul_neg]
   rw [S.psiExponent_trace x, S.psiExponent_trace (-x), ht_neg]
-  have hcast :
-      (((ℓ - 1) * t.val : ℕ) : ZMod ℓ) = (((-t).val : ℕ) : ZMod ℓ) := by
-    calc
-      (((ℓ - 1) * t.val : ℕ) : ZMod ℓ)
-          = ((ℓ - 1 : ℕ) : ZMod ℓ) * (t.val : ZMod ℓ) := by
-              rw [Nat.cast_mul]
-      _ = (-1 : ZMod ℓ) * t := by
-              rw [Nat.cast_sub (Fact.out : Nat.Prime ℓ).one_le,
-                ZMod.natCast_self, zero_sub, ZMod.natCast_zmod_val]
-              norm_num
-      _ = -t := by simp
-      _ = (((-t).val : ℕ) : ZMod ℓ) := by
-              rw [ZMod.natCast_zmod_val]
-  exact pow_eq_pow_of_modEq
-    ((ZMod.natCast_eq_natCast_iff _ _ _).mp hcast)
-    S.zeta_ell_int_isPrimitiveRoot.pow_eq_one
+  exact pow_sub_one_mul_val_eq_pow_neg_val S.zeta_ell_int_isPrimitiveRoot _
 
 /-- If an upstairs endomorphism sends the conductor-flexible chosen integral
 `ℓ`-th root to `ζ_ℓ^(ℓ-1)`, it sends the trace-form integral additive

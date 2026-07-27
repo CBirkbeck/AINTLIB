@@ -97,7 +97,7 @@ theorem prod_sub_prod_mem_pow_sum_succ {ι A : Type*} [CommRing A]
 /-- A digit-vector entry is bounded by the total digit weight. -/
 theorem digitVec_entry_le_weight {ℓ f : ℕ} (m : digitVec ℓ f) (i : Fin f) :
     m.1 i ≤ digitWeight m := by
-  unfold digitWeight
+  simp only [digitWeight]
   exact Finset.single_le_sum (fun j _ => Nat.zero_le (m.1 j)) (Finset.mem_univ i)
 
 namespace FullTeichDworkSetup
@@ -129,7 +129,7 @@ theorem dworkLeadingUnit_not_mem_Q
     (a : ℕ) (_ha₁ : 1 ≤ a) (_ha₂ : a ≤ p - 1) :
     S.dworkLeadingUnit a ∉ S.Q := by
   classical
-  unfold dworkLeadingUnit
+  simp only [dworkLeadingUnit]
   intro hmem
   rcases (Ideal.IsPrime.mem_or_mem (hI := inferInstance)) hmem with hcard | hpow
   · exact S.toTraceFormStickelbergerSetup.natCast_card_k_sub_one_not_mem_Q hcard
@@ -317,7 +317,7 @@ theorem gaussSumIntRec_sub_dworkLeadingTerm_mem_Q_pow_succ
       rw [S.toFullTeichStickelbergerSetup.teichUnitFull_innerSum_eval
         ((p - a) * S.stickD) (multiIndexValue ℓ m₀) S.traceScale]
       rw [if_pos h_dvd_m₀]
-      unfold dworkLeadingUnit
+      simp only [dworkLeadingUnit]
       rw [hm₀_val]
       have hpos : 1 ≤ Fintype.card k := Fintype.card_pos
       rw [Nat.cast_sub hpos, Nat.cast_one]
@@ -405,8 +405,8 @@ theorem gaussSumInt_qadic_ord_at_prime_ord_dwork
   have h₁ : 1 ≤ p - a := by omega
   have h₂ : p - a ≤ p - 1 := by omega
   have hrec := S.gaussSumIntRec_qadic_ord_at_prime_dwork (p - a) h₁ h₂
-  unfold TraceFormStickelbergerSetup.gaussSumIntRec at hrec
-  unfold TraceFormStickelbergerSetup.stickOrdOrd
+  simp only [TraceFormStickelbergerSetup.gaussSumIntRec] at hrec
+  simp only [TraceFormStickelbergerSetup.stickOrdOrd]
   rwa [show p - (p - a) = a by omega] at hrec
 
 end FullTeichDworkSetup
@@ -554,7 +554,7 @@ theorem dworkLeadingUnit_not_mem_Q
     (a : ℕ) (_ha₁ : 1 ≤ a) (_ha₂ : a ≤ p - 1) :
     S.dworkLeadingUnit a ∉ S.Q := by
   classical
-  unfold dworkLeadingUnit
+  simp only [dworkLeadingUnit]
   intro hmem
   rcases (Ideal.IsPrime.mem_or_mem (hI := inferInstance)) hmem with hcard | hpow
   · exact
@@ -751,7 +751,7 @@ theorem gaussSumIntRec_sub_dworkLeadingTerm_mem_Q_pow_succ
       rw [S.toConductorFlexibleFullTeichStickelbergerSetup.teichUnitFull_innerSum_eval
         ((p - a) * S.stickD) (multiIndexValue ℓ m₀) S.traceScale]
       rw [if_pos h_dvd_m₀]
-      unfold dworkLeadingUnit
+      simp only [dworkLeadingUnit]
       rw [hm₀_val]
       have hpos : 1 ≤ Fintype.card k := Fintype.card_pos
       rw [Nat.cast_sub hpos, Nat.cast_one]
@@ -838,8 +838,8 @@ theorem gaussSumInt_qadic_ord_at_prime_ord_dwork
   have h₁ : 1 ≤ p - a := by omega
   have h₂ : p - a ≤ p - 1 := by omega
   have hrec := S.gaussSumIntRec_qadic_ord_at_prime_dwork (p - a) h₁ h₂
-  unfold ConductorFlexibleFullTeichDworkSetup.gaussSumIntRec at hrec
-  unfold ConductorFlexibleTraceFormStickelbergerSetup.stickOrdOrd
+  simp only [ConductorFlexibleFullTeichDworkSetup.gaussSumIntRec] at hrec
+  simp only [ConductorFlexibleTraceFormStickelbergerSetup.stickOrdOrd]
   rwa [show p - (p - a) = a by omega] at hrec
 
 end ConductorFlexibleFullTeichDworkSetup

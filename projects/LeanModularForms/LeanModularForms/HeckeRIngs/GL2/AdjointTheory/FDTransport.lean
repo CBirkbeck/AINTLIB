@@ -482,7 +482,8 @@ theorem sum_SL_tile_eq_fiberwise_PSL_tile_Gamma_p_α (α : GL (Fin 2) ℚ)
       = ∑ q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α,
           ∫ τ in ((slToPslQuot_Gamma_p_α (N := N) α q).out : PSL(2, ℤ))⁻¹ •
             (fdo : Set ℍ), h τ ∂μ_hyp :=
-        Finset.sum_congr rfl fun q _ ↦ setIntegral_SL_tile_eq_PSL_tile_Gamma_p_α (N := N) α h h_inv q
+        Finset.sum_congr rfl fun q _ ↦
+          setIntegral_SL_tile_eq_PSL_tile_Gamma_p_α (N := N) α h h_inv q
     _ = ∑ q' : PSL(2, ℤ) ⧸ image_Gamma_p_α_PSL (N := N) α,
           ∑ q ∈ Finset.univ.filter (fun q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α ↦
             slToPslQuot_Gamma_p_α (N := N) α q = q'),
@@ -1372,10 +1373,11 @@ private lemma mem_Gamma_p_α_T_p_lower_mpr
   apply Units.ext
   rw [Matrix.GeneralLinearGroup.coe_mul, Matrix.GeneralLinearGroup.coe_mul,
     conj_T_p_lower_real_val p hp γ]
+  have hyval : Subtype.val y = !![γ.val 0 0, (p : ℤ) * γ.val 0 1; k, γ.val 1 1] := rfl
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [hy_def, Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
-      Matrix.map_apply, hk]; field_simp
+    simp [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+      Matrix.map_apply, hyval, hk]; field_simp
 
 omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
@@ -1446,7 +1448,9 @@ theorem exists_Gamma1_mul_inv_mem_Gamma0 (p : ℕ) (hp : Nat.Prime p) (hpN : Nat
           (g.1 1 0) * (((Gamma1_S_corrector N p hpN)⁻¹).1 0 0) +
           (g.1 1 1) * (((Gamma1_S_corrector N p hpN)⁻¹).1 1 0)
         by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
-      simp only [Gamma1_S_corrector, Matrix.SpecialLinearGroup.coe_inv,
+      have hval : (Gamma1_S_corrector N p hpN).1 =
+          !![1, mIdxOfCoprime N p hpN; (N : ℤ), (aInvOfCoprime N p hpN : ℤ) * p] := rfl
+      simp only [Matrix.SpecialLinearGroup.coe_inv, hval,
         Matrix.adjugate_fin_two_of,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]
@@ -1468,7 +1472,8 @@ theorem exists_Gamma1_mul_inv_mem_Gamma0 (p : ℕ) (hp : Nat.Prime p) (hpN : Nat
             (g.1 1 0) * (((lowerUni (m : ℤ))⁻¹).1 0 0) +
             (g.1 1 1) * (((lowerUni (m : ℤ))⁻¹).1 1 0)
           by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
-        simp only [lowerUni, Matrix.SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two_of,
+        have hval : (lowerUni (m : ℤ)).1 = !![1, 0; (m : ℤ), 1] := rfl
+        simp only [Matrix.SpecialLinearGroup.coe_inv, hval, Matrix.adjugate_fin_two_of,
           Matrix.cons_val', Matrix.cons_val_zero,
           Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]
         ring
@@ -1646,7 +1651,10 @@ theorem exists_Gamma1_mul_inv_mem_Gamma_up (p : ℕ) (hp : Nat.Prime p) (hpN : N
           (g.1 0 0) * (((Gamma1_S_corrector_up N p hpN)⁻¹).1 0 1) +
           (g.1 0 1) * (((Gamma1_S_corrector_up N p hpN)⁻¹).1 1 1)
         by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
-      simp only [Gamma1_S_corrector_up, Matrix.SpecialLinearGroup.coe_inv,
+      have hval : (Gamma1_S_corrector_up N p hpN).1 =
+          !![(aInvOfCoprime N p hpN : ℤ) * p, -1;
+             -(N : ℤ) * mIdxOfCoprime N p hpN, 1] := rfl
+      simp only [Matrix.SpecialLinearGroup.coe_inv, hval,
         Matrix.adjugate_fin_two_of,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]

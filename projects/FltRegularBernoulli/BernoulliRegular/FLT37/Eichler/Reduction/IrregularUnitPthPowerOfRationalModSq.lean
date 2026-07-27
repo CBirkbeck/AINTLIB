@@ -10,12 +10,10 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealPthPower
 `Cor823PthPowerOfRationalModSq37`
 
 This file discharges the `R4` core `Cor823PthPowerOfRationalModSq37`
-(`CaseIICor823SecondOrder.lean`) — Washington *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83,
-Theorem 8.22 / Corollary 8.23 for `p = 37`: under the proven non-degeneracy `M ≤ 1`, **every** unit
-`η : (𝓞 K)ˣ` congruent to a rational integer modulo `37²` is a `37`-th power — down to a single,
-sharply-isolated **second-order** residual at the irregular index `i = 32`.
-
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+(`SquarePowerKernelAndAssumedII.lean`) — Washington *Introduction to Cyclotomic Fields*, 2nd ed.,
+GTM 83, Theorem 8.22 / Corollary 8.23 for `p = 37`: under the proven non-degeneracy `M ≤ 1`,
+**every** unit `η : (𝓞 K)ˣ` congruent to a rational integer modulo `37²` is a `37`-th power — down
+to a single, sharply-isolated **second-order** residual at the irregular index `i = 32`.
 
 ## The reduction (everything but the second-order `i = 32` collapse is proven here)
 
@@ -77,10 +75,8 @@ valuation `v₃₇(L_p(1,ω³²)) = 1` (`M = 1`), this is `c₃₂ = 16 + 18·1 
 
 noncomputable section
 
-set_option maxRecDepth 4000
-
 open NumberField IsCyclotomicExtension
-open scoped NumberField BigOperators
+open scoped NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -101,8 +97,7 @@ theorem caseIICor823_neg_one_mem_pPowerSubgroup
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
     (-1 : (𝓞 (NumberField.maximalRealSubfield (CyclotomicField 37 ℚ)))ˣ) ∈
       pPowerSubgroup (EPlus (K := CyclotomicField 37 ℚ)) 37 :=
-  ⟨-1, Subgroup.mem_top _, by rw [show (37 : ℕ) = 2 * 18 + 1 from rfl, pow_succ, pow_mul,
-    neg_one_sq, one_pow, one_mul]⟩
+  ⟨-1, Subgroup.mem_top _, (Odd.neg_one_pow ⟨18, by norm_num⟩)⟩
 
 /-- **A `37`-divisible-exponent `C⁺` product is a `37`-th power** (proven).  If `37 ∣ e a` for every
 `a` (as integers), then `CPlusExponentProduct 37 s e ∈ pPowerSubgroup (EPlus) 37`.
@@ -117,7 +112,7 @@ theorem caseIICor823_CPlusExponentProduct_mem_pPowerSubgroup_of_dvd
     CPlusExponentProduct (p := 37) (K := CyclotomicField 37 ℚ) (by decide) s e ∈
       pPowerSubgroup (EPlus (K := CyclotomicField 37 ℚ)) 37 := by
   classical
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   -- The sign factor `(−1)^s` is a `37`-th power.
   refine Subgroup.mul_mem _
     ((pPowerSubgroup (EPlus (K := CyclotomicField 37 ℚ)) 37).zpow_mem
@@ -424,8 +419,9 @@ theorem caseIICor823_exists_real_eq_of_dvd
   -- `σ(ζU) = ζU⁻¹`.
   have hζtor : ζU ∈ NumberField.Units.torsion (CyclotomicField 37 ℚ) :=
     (CommGroup.mem_torsion _).2 (isOfFinOrder_iff_pow_eq_one.2
-      ⟨37, by norm_num, ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.isUnit_unit
-        hp.1.ne_zero).pow_eq_one⟩)
+      ⟨37, by norm_num,
+        ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot.isUnit_unit
+          hp.1.ne_zero).pow_eq_one⟩)
   have hσζ : NumberField.IsCMField.unitsComplexConj (CyclotomicField 37 ℚ) ζU = ζU⁻¹ :=
     NumberField.IsCMField.unitsComplexConj_torsion (K := CyclotomicField 37 ℚ) ⟨ζU, hζtor⟩
   -- `σ(η) = ζU⁻ᵐ · mapv`, so `η · σ(η)⁻¹ = ζU^{2m}`.
@@ -551,7 +547,7 @@ theorem cor823PthPowerOfRationalModSq37_of_omega32Collapse
 
 /-! ## 6. The FLT37 endpoint with `R4` discharged down to the second-order residual
 
-`fermatLastTheoremFor_thirtyseven_of_cor823_firstOrder` (`CaseIICor823Endpoint.lean`) takes
+`fermatLastTheoremFor_thirtyseven_of_cor823_firstOrder` (`FermatLastTheoremThirtySeven.lean`) takes
 `Cor823PthPowerOfRationalModSq37` (R4) as a hypothesis; supplying it via
 `cor823PthPowerOfRationalModSq37_of_omega32Collapse` replaces R4 with the strictly-smaller
 second-order residual `Cor823Omega32SecondOrderCollapse37`, leaving FLT37 on R2 + the first-order

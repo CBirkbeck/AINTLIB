@@ -112,10 +112,9 @@ each Laurent piece.
 
 namespace ValuationSpectrum
 
-variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+variable {A : Type*} [CommRing A] [TopologicalSpace A]
   [IsTopologicalRing A]
 
-omit [PlusSubring A] in
 /-- **Named source-restricted denominator-clearing identity at the
 T065-produced σ_loc** (T082 named residual Prop predicate).
 
@@ -155,7 +154,6 @@ def Cor732SigmaDirectUpperBoundResidual
         ¬ v.vle t' 0 →
         v.vle t' D_s_loc ∧ ¬ v.vle D_s_loc 0
 
-omit [PlusSubring A] in
 /-- **σ-factored inequality at T065-produced σ_loc via direct upper
 bound residual** (T082 main ticket-named theorem).
 
@@ -216,7 +214,6 @@ theorem sigma_factored_inequality_at_localized_cor732_sigma
   simpa only [pow_zero, mul_one, zero_add, pow_one] using
     (per_t_inequality_via_sigma_factor v σ_loc t' D_s_loc).mpr h_clear
 
-omit [PlusSubring A] in
 /-- **End-to-end: σ-factored supplier output via the named direct
 upper bound residual** (T082 final consumer).
 

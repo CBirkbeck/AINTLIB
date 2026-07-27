@@ -1,12 +1,14 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
-import BernoulliRegular.LValueAtOne.Defs
-import BernoulliRegular.HMinus.KplusLocalCharacters
-import BernoulliRegular.HMinus.LValueReduction.LValues
-import BernoulliRegular.UnitQuotient.PermutationCharacters
-import BernoulliRegular.UnitQuotient.FreeCharacterProfile
-import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ConjugationTrace
-import Mathlib.NumberTheory.LSeries.DirichletContinuation
-import Mathlib.RingTheory.RootsOfUnity.Lemmas
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
+public import BernoulliRegular.LValueAtOne.Defs
+public import BernoulliRegular.HMinus.KplusLocalCharacters
+public import BernoulliRegular.HMinus.LValueReduction.LValues
+public import BernoulliRegular.UnitQuotient.PermutationCharacters
+public import BernoulliRegular.UnitQuotient.FreeCharacterProfile
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ConjugationTrace
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import Mathlib.RingTheory.RootsOfUnity.Lemmas
 
 /-!
 # LV-SIN-C: `L'(0, χ)` formula via cyclotomic-unit logs
@@ -92,7 +94,7 @@ full matrix. -/
 theorem DirichletLogSum_eq_zero_of_odd (hp_odd : p ≠ 2)
     (χ : DirichletCharacter ℂ p) (hχ : χ.Odd) :
     DirichletLogSum p χ = 0 := by
-  unfold DirichletLogSum
+  simp only [DirichletLogSum]
   rw [neg_eq_zero]
   have hp_prime : Nat.Prime p := hp.out
   have hp_pos : 0 < p := hp_prime.pos
@@ -557,7 +559,7 @@ theorem det_convolutionMatrixOnEven_sq_eq_prod_lambda_sq_unconditional
 theorem convolutionMatrixLogNormEven_symm
     (a b : BernoulliRegular.CyclotomicEvenDelta p) :
     convolutionMatrixLogNormEven p a b = convolutionMatrixLogNormEven p b a := by
-  unfold convolutionMatrixLogNormEven
+  simp only [convolutionMatrixLogNormEven]
   rw [Matrix.of_apply, Matrix.of_apply, mul_comm]
 
 /-- **Matrix dimension of `convolutionMatrixLogNormEven`**: the matrix has
@@ -582,7 +584,7 @@ theorem convolutionLogNormDescended_one :
     rw [BernoulliRegular.cyclotomicEvenDeltaQuotient_apply]
     rfl
   rw [h_one]
-  unfold convolutionLogNormDescended
+  simp only [convolutionLogNormDescended]
   rfl
 
 /-- **Diagonal entry of the quotient convolution matrix at identity**: the
@@ -591,7 +593,7 @@ in the abelian group `CyclotomicEvenDelta p`). -/
 @[simp]
 theorem convolutionMatrixLogNormEven_one_one :
     convolutionMatrixLogNormEven p 1 1 = convolutionLogNormDescended p 1 := by
-  unfold convolutionMatrixLogNormEven
+  simp only [convolutionMatrixLogNormEven]
   rw [Matrix.of_apply, mul_one]
 
 /-- **Quotient eigenvalue at character `ξ`**: for
@@ -739,7 +741,7 @@ theorem two_mul_quotientEigenvalue_eq_sum_full
   have h_quot_eq : quotientEigenvalue p ξ =
       ∑ b : BernoulliRegular.CyclotomicEvenDelta p,
         BernoulliRegular.evenFunctionDescend (p := p) f hf_even b := by
-    unfold quotientEigenvalue
+    simp only [quotientEigenvalue]
     refine Finset.sum_congr rfl (fun b _ ↦ ?_)
     obtain ⟨a, rfl⟩ : ∃ a : BernoulliRegular.CyclotomicUnitDelta p,
         BernoulliRegular.cyclotomicEvenDeltaQuotient p a = b :=
@@ -751,7 +753,7 @@ theorem two_mul_quotientEigenvalue_eq_sum_full
     simp only [hf_def]
     -- Goal: ξ ↑a * convolutionLogNormDescended ↑a =
     --       pullback ξ a * log-norm a
-    unfold convolutionLogNormDescended
+    simp only [convolutionLogNormDescended]
     rw [BernoulliRegular.evenFunctionDescend_apply_mk]
     -- Use pullback def: `ξ ↑a = pullback ξ a`.
     rfl
@@ -811,13 +813,13 @@ theorem convolutionMatrixLogNormEven_apply_quotient
         (BernoulliRegular.cyclotomicEvenDeltaQuotient p b) =
       ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p)
           (((a * b : BernoulliRegular.CyclotomicUnitDelta p) : ZMod p))‖ : ℝ) : ℂ) := by
-  unfold convolutionMatrixLogNormEven
+  simp only [convolutionMatrixLogNormEven]
   rw [Matrix.of_apply]
   rw [BernoulliRegular.cyclotomicEvenDeltaQuotient_apply,
       BernoulliRegular.cyclotomicEvenDeltaQuotient_apply]
   rw [show (QuotientGroup.mk a : BernoulliRegular.CyclotomicEvenDelta p) *
         QuotientGroup.mk b = QuotientGroup.mk (a * b) from rfl]
-  unfold convolutionLogNormDescended
+  simp only [convolutionLogNormDescended]
   rfl
 
 /-- **∏ over odd characters of DLS = 0** (when there exists at least one odd
@@ -833,7 +835,7 @@ theorem prod_oddCharacters_DirichletLogSum_eq_zero
   obtain ⟨χ, hχ_mem⟩ := hodd_nonempty
   refine Finset.prod_eq_zero hχ_mem ?_
   have hχ_odd : χ.Odd := by
-    unfold BernoulliRegular.oddCharacters at hχ_mem
+    simp only [BernoulliRegular.oddCharacters] at hχ_mem
     exact (Finset.mem_filter.mp hχ_mem).2
   exact DirichletLogSum_eq_zero_of_odd (p := p) hp_odd χ hχ_odd
 

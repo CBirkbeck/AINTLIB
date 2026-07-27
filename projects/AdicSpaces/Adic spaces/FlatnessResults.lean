@@ -6,6 +6,7 @@ import Mathlib.RingTheory.Flat.Basic
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Mathlib.RingTheory.Flat.Localization
 import Mathlib.RingTheory.Spectrum.Prime.RingHom
+import Common
 import «Adic spaces».Presheaf
 import «Adic spaces».TateAlgebra
 
@@ -17,7 +18,6 @@ and that the product restriction for a finite rational cover is faithfully flat.
 
 ## Main results
 
-* `Module.Flat.pi` : Finite products of flat modules are flat.
 * `canonicalMap_flat_discrete` : The canonical map `A → presheafValue D` is flat
   for discrete `A` (Prop 8.30, discrete case).
 * `productRestriction_flat_discrete` : The product restriction for a rational cover
@@ -29,18 +29,6 @@ and that the product restriction for a finite rational cover is faithfully flat.
 -/
 
 open ValuationSpectrum
-
-/-! ### Finite products of flat modules -/
-
-/-- Finite products of flat modules are flat.
-This follows from the equivalence `(ι → M) ≃ (ι →₀ M)` for finite `ι`
-and `Module.Flat.dfinsupp`. -/
-instance Module.Flat.pi {R : Type*} [CommSemiring R] {ι : Type*} [Finite ι]
-    {M : ι → Type*} [∀ i, AddCommMonoid (M i)] [∀ i, Module R (M i)]
-    [∀ i, Module.Flat R (M i)] : Module.Flat R (∀ i, M i) := by
-  cases nonempty_fintype ι
-  exact Module.Flat.of_linearEquiv
-    (DirectSum.linearEquivFunOnFintype R ι M).symm
 
 /-! ### Presheaf value flatness (discrete case) -/
 

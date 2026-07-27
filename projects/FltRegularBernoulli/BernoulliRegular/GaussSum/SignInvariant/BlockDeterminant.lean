@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.GroupTheory.Perm.Cycle.Type
@@ -44,6 +49,7 @@ omit hp in
   simp
 
 omit hp in
+/-- Away from the trivial character, the modified family is the character itself. -/
 theorem constOneDirichletCharacterFamily_eq_character {χ : DirichletCharacter ℂ p}
     (hχ : χ ≠ 1) :
     constOneDirichletCharacterFamily (p := p) χ = (χ : ZMod p → ℂ) := by
@@ -85,6 +91,7 @@ theorem linearIndependent_constOneDirichletCharacterFamily :
     (Fintype.linearIndependent_iff.mp
       (linearIndependent_dirichletCharactersOnUnits (p := p))) a h_units χ
 
+/-- `δ₀` is not in the span of the modified character family. -/
 theorem deltaZero_not_mem_span_constOneDirichletCharacterFamily :
     deltaZeroFunction (p := p) ∉
       Submodule.span ℂ
@@ -115,6 +122,7 @@ def deltaZeroConstOneDirichletCharacterFamily :
   fun o ↦ Option.casesOn' o (deltaZeroFunction (p := p))
     (constOneDirichletCharacterFamily (p := p))
 
+/-- Adjoining `δ₀` to the modified family keeps it linearly independent. -/
 theorem linearIndependent_deltaZeroConstOneDirichletCharacterFamily :
     LinearIndependent ℂ (deltaZeroConstOneDirichletCharacterFamily (p := p)) := by
   change LinearIndependent ℂ
@@ -156,6 +164,7 @@ def deltaZeroConstOneDirichletCharacterBasis :
       (fun _ : ZMod p ↦ (1 : ℂ)) := by
   simp [deltaZeroConstOneDirichletCharacterBasis_apply_some, constOneDirichletCharacterFamily_one]
 
+/-- On a nontrivial character, the adapted basis vector is that character. -/
 theorem deltaZeroConstOneDirichletCharacterBasis_apply_some_ne_one
     {χ : DirichletCharacter ℂ p} (hχ : χ ≠ 1) :
     deltaZeroConstOneDirichletCharacterBasis (p := p) (some χ) = (χ : ZMod p → ℂ) := by
@@ -212,6 +221,8 @@ def normalizedDftConstOneBasisScalar (i : Option (DirichletCharacter ℂ p)) : �
         else ((Real.sqrt p : ℂ)⁻¹) *
           (χ⁻¹ (-1) * gaussSum χ (ZMod.stdAddChar (N := p)))
 
+/-- The normalized DFT is monomial in the adapted basis: it permutes the basis
+vectors and rescales them. -/
 theorem normalizedDft_deltaZeroConstOneDirichletCharacterBasis_eq_smul_perm
     (i : Option (DirichletCharacter ℂ p)) :
     normalizedDft p (deltaZeroConstOneDirichletCharacterBasis (p := p) i) =
@@ -241,6 +252,7 @@ theorem normalizedDft_deltaZeroConstOneDirichletCharacterBasis_eq_smul_perm
           constOneDirichletCharacterFamily_eq_character, smul_eq_mul,
           mul_left_comm, mul_comm]
 
+/-- Hence its matrix in the adapted basis is a permutation matrix times a diagonal. -/
 theorem toMatrix_deltaZeroConstOneDirichletCharacterBasis_normalizedDft :
     LinearMap.toMatrix
         (deltaZeroConstOneDirichletCharacterBasis (p := p))
@@ -271,6 +283,8 @@ theorem toMatrix_deltaZeroConstOneDirichletCharacterBasis_normalizedDft :
       if_false]
       using hsingle
 
+/-- The determinant of that monomial matrix: the sign of the permutation times the
+product of the scalars. -/
 theorem det_normalizedDft_eq_sign_mul_prod_basisScalars :
     LinearMap.det (normalizedDft p) =
       (Equiv.Perm.sign (normalizedDftConstOneBasisPerm (p := p)) : ℂ) *
@@ -283,6 +297,7 @@ theorem det_normalizedDft_eq_sign_mul_prod_basisScalars :
   simp
 
 omit hp in
+/-- The index permutation is an involution — it is `χ ↦ χ⁻¹` on the character slots. -/
 theorem normalizedDftConstOneBasisPerm_sq :
     (normalizedDftConstOneBasisPerm (p := p)) ^ 2 = 1 := by
   ext i
@@ -298,6 +313,8 @@ theorem normalizedDftConstOneBasisPerm_sq :
         simp [pow_two, normalizedDftConstOneBasisPerm, normalizedDftConstOneBasisPermFun, hχ,
           hχinv]
 
+/-- Its fixed points are exactly the self-dual indices: `none`, `1` and the quadratic
+character. -/
 theorem mem_fixedPoints_normalizedDftConstOneBasisPerm_iff
     (hp₂ : p ≠ 2) (i : Option (DirichletCharacter ℂ p)) :
     i ∈ Function.fixedPoints (normalizedDftConstOneBasisPerm (p := p)) ↔
@@ -335,6 +352,7 @@ theorem mem_fixedPoints_normalizedDftConstOneBasisPerm_iff
           simp [Function.IsFixedPt, normalizedDftConstOneBasisPerm,
             normalizedDftConstOneBasisPermFun, hquad_ne, quadraticCharComplex_inv]
 
+/-- There are exactly three such fixed points. -/
 theorem card_fixedPoints_normalizedDftConstOneBasisPerm (hp₂ : p ≠ 2) :
     Fintype.card (Function.fixedPoints (normalizedDftConstOneBasisPerm (p := p))) = 1 := by
   classical
@@ -345,6 +363,8 @@ theorem card_fixedPoints_normalizedDftConstOneBasisPerm (hp₂ : p ≠ 2) :
     exact Subtype.ext <|
       (mem_fixedPoints_normalizedDftConstOneBasisPerm_iff (p := p) hp₂ x.1).1 x.2
 
+/-- The sign of an involution is `(-1)` to the number of its transpositions, i.e. to
+half the number of non-fixed points. -/
 theorem sign_normalizedDftConstOneBasisPerm (hp₂ : p ≠ 2) :
     (Equiv.Perm.sign (normalizedDftConstOneBasisPerm (p := p)) : ℂ) =
       (-1 : ℂ) ^ ((p - 1) / 2) := by
@@ -357,12 +377,15 @@ theorem sign_normalizedDftConstOneBasisPerm (hp₂ : p ≠ 2) :
   rw [Nat.sub_add_cancel hp.out.one_le]
   simp
 
+/-- The determinant with the permutation sign evaluated. -/
 theorem det_normalizedDft_eq_signContribution_mul_prod_basisScalars (hp₂ : p ≠ 2) :
     LinearMap.det (normalizedDft p) =
       (-1 : ℂ) ^ ((p - 1) / 2) * ∏ i, normalizedDftConstOneBasisScalar (p := p) i := by
   rw [det_normalizedDft_eq_sign_mul_prod_basisScalars (p := p),
     sign_normalizedDftConstOneBasisPerm (p := p) hp₂]
 
+/-- The two scalars of a `(χ, χ⁻¹)` block multiply to `χ(-1)`; this is the block
+determinant, up to sign. -/
 theorem normalizedDftConstOneBasisScalar_mul_inv_eq_eval_neg_one
     {χ : DirichletCharacter ℂ p} (hχ : χ ≠ 1) :
     normalizedDftConstOneBasisScalar (p := p) (some χ) *
@@ -417,89 +440,72 @@ these are exactly the non-self-dual characters. -/
 def nonselfdualCharacterFinset : Finset (DirichletCharacter ℂ p) :=
   (Finset.univ.erase (1 : DirichletCharacter ℂ p)).erase (quadraticCharComplex p)
 
+/-- The `δ₀` scalar times the trivial-character scalar is `1`: the normalisation
+`(√p)⁻¹ · ((√p)⁻¹ · p) = 1`, using `√p ^ 2 = p`. -/
+theorem normalizedDftConstOneBasisScalar_none_mul_some_one :
+    normalizedDftConstOneBasisScalar (p := p) none *
+      normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) = 1 := by
+  have hp_nonneg : (0 : ℝ) ≤ p := Nat.cast_nonneg p
+  have hsqrt_ne : (Real.sqrt p : ℂ) ≠ 0 := by
+    exact_mod_cast Real.sqrt_ne_zero'.2 (by exact_mod_cast hp.out.pos)
+  have hsq : ((Real.sqrt p : ℂ) ^ 2) = (p : ℂ) := by
+    exact_mod_cast (Real.sq_sqrt hp_nonneg)
+  simp [normalizedDftConstOneBasisScalar]
+  field_simp [hsqrt_ne]
+  simpa [pow_two, mul_assoc] using hsq.symm
+
+/-- The product of the DFT scalars over all Dirichlet characters (in the `some`
+slot), split off the trivial character `1` and the quadratic character: it equals
+the scalar at `1`, times the scalar at the quadratic character, times the product
+over the non-self-dual characters. Peels `χ = 1` and `χ = quadraticChar` off the
+full character product via `Finset.mul_prod_erase`. -/
+theorem prod_someBasisScalars_eq_trivialScalar_mul_quadraticScalar_mul_prod_nonselfdualScalars
+    (hp₂ : p ≠ 2) :
+    ∏ χ : DirichletCharacter ℂ p, normalizedDftConstOneBasisScalar (p := p) (some χ) =
+      normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
+        (normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
+          Finset.prod (nonselfdualCharacterFinset (p := p))
+            (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
+  let q : DirichletCharacter ℂ p := quadraticCharComplex p
+  have hq_ne : q ≠ (1 : DirichletCharacter ℂ p) := quadraticCharComplex_ne_one (p := p) hp₂
+  let f : DirichletCharacter ℂ p → ℂ :=
+    fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)
+  have h1 :
+      f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f = ∏ χ, f χ := by
+    simpa [f] using
+      (Finset.mul_prod_erase (Finset.univ : Finset (DirichletCharacter ℂ p)) f (by simp))
+  have hq :
+      f q * Finset.prod ((Finset.univ.erase (1 : DirichletCharacter ℂ p)).erase q) f =
+        Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
+    simpa [f] using
+      (Finset.mul_prod_erase
+        ((Finset.univ : Finset (DirichletCharacter ℂ p)).erase (1 : DirichletCharacter ℂ p))
+        f (by simp [hq_ne]))
+  calc
+    ∏ χ, f χ = f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
+      symm
+      exact h1
+    _ = f 1 * (f q * Finset.prod (nonselfdualCharacterFinset (p := p)) f) := by
+      rw [← hq]
+      simp [nonselfdualCharacterFinset, q]
+    _ = normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
+          (normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
+            Finset.prod (nonselfdualCharacterFinset (p := p))
+              (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
+        simp [f, q]
+
+/-- Splitting the scalar product off the trivial and quadratic lines. -/
 theorem prod_basisScalars_eq_quadraticScalar_mul_prod_nonselfdualScalars (hp₂ : p ≠ 2) :
     ∏ i, normalizedDftConstOneBasisScalar (p := p) i =
       normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
         Finset.prod (nonselfdualCharacterFinset (p := p))
           (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)) := by
-  rw [Fintype.prod_option]
-  let q : DirichletCharacter ℂ p := quadraticCharComplex p
-  have hq_ne : q ≠ (1 : DirichletCharacter ℂ p) := quadraticCharComplex_ne_one (p := p) hp₂
-  have htriv :
-      normalizedDftConstOneBasisScalar (p := p) none *
-        normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) = 1 := by
-    have hp_nonneg : (0 : ℝ) ≤ p := Nat.cast_nonneg p
-    have hsqrt_ne : (Real.sqrt p : ℂ) ≠ 0 := by
-      exact_mod_cast Real.sqrt_ne_zero'.2 (by exact_mod_cast hp.out.pos)
-    have hsq : ((Real.sqrt p : ℂ) ^ 2) = (p : ℂ) := by
-      exact_mod_cast (Real.sq_sqrt hp_nonneg)
-    simp [normalizedDftConstOneBasisScalar]
-    field_simp [hsqrt_ne]
-    simpa [pow_two, mul_assoc] using hsq.symm
-  have hprod_chars :
-      ∏ χ : DirichletCharacter ℂ p, normalizedDftConstOneBasisScalar (p := p) (some χ) =
-        normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-          (normalizedDftConstOneBasisScalar (p := p) (some q) *
-            Finset.prod (nonselfdualCharacterFinset (p := p))
-              (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
-    let f : DirichletCharacter ℂ p → ℂ :=
-      fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)
-    have h1 :
-        f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f = ∏ χ, f χ := by
-      simpa [f] using
-        (Finset.mul_prod_erase (Finset.univ : Finset (DirichletCharacter ℂ p)) f (by simp))
-    have hq :
-        f q * Finset.prod ((Finset.univ.erase (1 : DirichletCharacter ℂ p)).erase q) f =
-          Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
-      simpa [f] using
-        (Finset.mul_prod_erase
-          ((Finset.univ : Finset (DirichletCharacter ℂ p)).erase (1 : DirichletCharacter ℂ p))
-          f (by simp [hq_ne]))
-    calc
-      ∏ χ, f χ = f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
-        symm
-        exact h1
-      _ = f 1 * (f q * Finset.prod (nonselfdualCharacterFinset (p := p)) f) := by
-        rw [← hq]
-        simp [nonselfdualCharacterFinset, q]
-      _ = normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-            (normalizedDftConstOneBasisScalar (p := p) (some q) *
-              Finset.prod (nonselfdualCharacterFinset (p := p))
-                (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
-          simp [f]
-  have hstep1 :
-      normalizedDftConstOneBasisScalar (p := p) none *
-          ∏ i, normalizedDftConstOneBasisScalar (p := p) (some i) =
-        normalizedDftConstOneBasisScalar (p := p) none *
-          (normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-            (normalizedDftConstOneBasisScalar (p := p) (some q) *
-              Finset.prod (nonselfdualCharacterFinset (p := p))
-                (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)))) :=
-    congrArg (fun z ↦ normalizedDftConstOneBasisScalar (p := p) none * z) hprod_chars
-  calc
-    normalizedDftConstOneBasisScalar (p := p) none *
-        ∏ i, normalizedDftConstOneBasisScalar (p := p) (some i)
-        = normalizedDftConstOneBasisScalar (p := p) none *
-            (normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-              (normalizedDftConstOneBasisScalar (p := p) (some q) *
-                Finset.prod (nonselfdualCharacterFinset (p := p))
-                  (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)))) := hstep1
-    _ = (normalizedDftConstOneBasisScalar (p := p) none *
-          normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p))) *
-            (normalizedDftConstOneBasisScalar (p := p) (some q) *
-              Finset.prod (nonselfdualCharacterFinset (p := p))
-                (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
-            ring_nf
-    _ = normalizedDftConstOneBasisScalar (p := p) (some q) *
-          Finset.prod (nonselfdualCharacterFinset (p := p))
-            (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)) := by
-            rw [htriv]
-            simp
-    _ = normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
-          Finset.prod (nonselfdualCharacterFinset (p := p))
-            (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)) := by
-            simp [q]
+  rw [Fintype.prod_option,
+    prod_someBasisScalars_eq_trivialScalar_mul_quadraticScalar_mul_prod_nonselfdualScalars
+      (p := p) hp₂,
+    ← mul_assoc, normalizedDftConstOneBasisScalar_none_mul_some_one (p := p), one_mul]
 
+/-- The determinant after that split. -/
 theorem det_normalizedDft_eq_quadraticScalar_mul_prod_nonselfdualScalars (hp₂ : p ≠ 2) :
     LinearMap.det (normalizedDft p) =
       (-1 : ℂ) ^ ((p - 1) / 2) *
@@ -515,6 +521,7 @@ noncomputable def characterIndexEquiv :
     DirichletCharacter ℂ p ≃ Fin (Fintype.card (DirichletCharacter ℂ p)) :=
   Fintype.equivFin (DirichletCharacter ℂ p)
 
+/-- Membership in the non-self-dual characters. -/
 theorem mem_nonselfdualCharacterFinset_iff (χ : DirichletCharacter ℂ p) :
     χ ∈ nonselfdualCharacterFinset (p := p) ↔
       χ ≠ 1 ∧ χ ≠ quadraticCharComplex p := by
@@ -526,6 +533,7 @@ theorem mem_nonselfdualCharacterFinset_iff (χ : DirichletCharacter ℂ p) :
   · intro h
     simp [nonselfdualCharacterFinset, h.1, h.2]
 
+/-- The non-self-dual characters are stable under inversion. -/
 theorem inv_mem_nonselfdualCharacterFinset {χ : DirichletCharacter ℂ p}
     (hχ : χ ∈ nonselfdualCharacterFinset (p := p)) :
     χ⁻¹ ∈ nonselfdualCharacterFinset (p := p) := by
@@ -537,7 +545,8 @@ theorem inv_mem_nonselfdualCharacterFinset {χ : DirichletCharacter ℂ p}
     _ = (quadraticCharComplex p)⁻¹ := by rw [hχinvquad]
     _ = quadraticCharComplex p := by simp [quadraticCharComplex_inv (p := p)]
 
-theorem ne_inv_of_mem_nonselfdualCharacterFinset {hp₂ : p ≠ 2} {χ : DirichletCharacter ℂ p}
+/-- A non-self-dual character is, indeed, not its own inverse. -/
+theorem ne_inv_of_mem_nonselfdualCharacterFinset (hp₂ : p ≠ 2) {χ : DirichletCharacter ℂ p}
     (hχ : χ ∈ nonselfdualCharacterFinset (p := p)) :
     χ ≠ χ⁻¹ := by
   rcases (mem_nonselfdualCharacterFinset_iff (p := p) χ).1 hχ with ⟨hχ1, hχquad⟩
@@ -553,12 +562,14 @@ noncomputable def nonselfdualCharacterReps :
   (nonselfdualCharacterFinset (p := p)).filter
     fun χ ↦ characterIndexEquiv (p := p) χ < characterIndexEquiv (p := p) χ⁻¹
 
+/-- Membership in the chosen representatives. -/
 theorem mem_nonselfdualCharacterReps_iff (χ : DirichletCharacter ℂ p) :
     χ ∈ nonselfdualCharacterReps (p := p) ↔
       χ ∈ nonselfdualCharacterFinset (p := p) ∧
         characterIndexEquiv (p := p) χ < characterIndexEquiv (p := p) χ⁻¹ := by
   simp [nonselfdualCharacterReps]
 
+/-- At most one of `χ`, `χ⁻¹` is a representative. -/
 theorem inv_not_mem_nonselfdualCharacterReps {χ : DirichletCharacter ℂ p}
     (hχ : χ ∈ nonselfdualCharacterReps (p := p)) :
     χ⁻¹ ∉ nonselfdualCharacterReps (p := p) := by
@@ -569,11 +580,12 @@ theorem inv_not_mem_nonselfdualCharacterReps {χ : DirichletCharacter ℂ p}
     simpa using ((mem_nonselfdualCharacterReps_iff (p := p) χ⁻¹).1 hχinv).2
   exact lt_irrefl _ (lt_trans hlt hlt_inv)
 
-theorem mem_reps_or_inv_mem_reps {hp₂ : p ≠ 2} {χ : DirichletCharacter ℂ p}
+/-- …and at least one of them is. -/
+theorem mem_reps_or_inv_mem_reps (hp₂ : p ≠ 2) {χ : DirichletCharacter ℂ p}
     (hχ : χ ∈ nonselfdualCharacterFinset (p := p)) :
     χ ∈ nonselfdualCharacterReps (p := p) ∨ χ⁻¹ ∈ nonselfdualCharacterReps (p := p) := by
   have hne : χ ≠ χ⁻¹ :=
-    ne_inv_of_mem_nonselfdualCharacterFinset (p := p) (hp₂ := hp₂) hχ
+    ne_inv_of_mem_nonselfdualCharacterFinset (p := p) hp₂ hχ
   have hij :
       characterIndexEquiv (p := p) χ ≠ characterIndexEquiv (p := p) χ⁻¹ := fun hidx ↦
     hne <| (characterIndexEquiv (p := p)).injective hidx
@@ -584,6 +596,8 @@ theorem mem_reps_or_inv_mem_reps {hp₂ : p ≠ 2} {χ : DirichletCharacter ℂ 
     exact (mem_nonselfdualCharacterReps_iff (p := p) χ⁻¹).2
       ⟨inv_mem_nonselfdualCharacterFinset (p := p) hχ, by simpa using hgt⟩
 
+/-- So the non-self-dual characters are the representatives together with their
+inverses. -/
 theorem nonselfdualCharacterFinset_eq_union_reps_image_inv (hp₂ : p ≠ 2) :
     nonselfdualCharacterFinset (p := p) =
       nonselfdualCharacterReps (p := p) ∪
@@ -591,7 +605,7 @@ theorem nonselfdualCharacterFinset_eq_union_reps_image_inv (hp₂ : p ≠ 2) :
   ext χ
   constructor
   · intro hχ
-    rcases mem_reps_or_inv_mem_reps (p := p) (hp₂ := hp₂) hχ with hrep | hinvrep
+    rcases mem_reps_or_inv_mem_reps (p := p) hp₂ hχ with hrep | hinvrep
     · exact Finset.mem_union.mpr (Or.inl hrep)
     · exact Finset.mem_union.mpr (Or.inr (Finset.mem_image.mpr ⟨χ⁻¹, hinvrep, by simp⟩))
   · intro hχ
@@ -602,6 +616,7 @@ theorem nonselfdualCharacterFinset_eq_union_reps_image_inv (hp₂ : p ≠ 2) :
         (mem_nonselfdualCharacterReps_iff (p := p) ψ).1 hψrep |>.1
       simpa [← hψ] using inv_mem_nonselfdualCharacterFinset (p := p) hψnon
 
+/-- …and that union is disjoint. -/
 theorem disjoint_nonselfdualCharacterReps_image_inv :
     Disjoint (nonselfdualCharacterReps (p := p))
       ((nonselfdualCharacterReps (p := p)).image fun χ ↦ χ⁻¹) := by
@@ -612,6 +627,8 @@ theorem disjoint_nonselfdualCharacterReps_image_inv :
     simpa [hψ] using hχrep
   exact (inv_not_mem_nonselfdualCharacterReps (p := p) hψrep) hψinv
 
+/-- Pairing the scalars up: the product over all non-self-dual characters is the
+product of the pair block determinants `-χ(-1)` over the representatives. -/
 theorem prod_nonselfdualScalars_eq_prod_reps_eval_neg_one (hp₂ : p ≠ 2) :
     Finset.prod (nonselfdualCharacterFinset (p := p))
       (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)) =
@@ -640,6 +657,7 @@ theorem prod_nonselfdualScalars_eq_prod_reps_eval_neg_one (hp₂ : p ≠ 2) :
           exact normalizedDftConstOneBasisScalar_mul_inv_eq_eval_neg_one (p := p)
             ((mem_nonselfdualCharacterFinset_iff (p := p) χ).1 hχnon).1
 
+/-- The number of non-self-dual pairs. -/
 theorem card_nonselfdualCharacterReps (hp₂ : p ≠ 2) :
     (nonselfdualCharacterReps (p := p)).card = (p - 3) / 2 := by
   let reps := nonselfdualCharacterReps (p := p)
@@ -669,6 +687,9 @@ theorem card_nonselfdualCharacterReps (hp₂ : p ≠ 2) :
     omega
   exact (Nat.div_eq_of_eq_mul_left (by decide : 0 < 2) htwice).symm
 
+/-- **The block determinant formula**: the determinant of the normalized DFT is the
+trivial `δ₀/1` block determinant `-1`, times the quadratic-line scalar, times the
+product of the pair block determinants. -/
 theorem det_normalizedDft_eq_trivialBlock_mul_quadraticScalar_mul_prod_pairBlockDeterminants
     (hp₂ : p ≠ 2) :
     LinearMap.det (normalizedDft p) =

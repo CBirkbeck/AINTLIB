@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.Final
 import BernoulliRegular.UnitQuotient.Washington83UnitForward
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.BridgeAssembly
@@ -78,6 +83,7 @@ theorem fermatLastTheoremFor_thirtyseven_of_AK5a_caseIIDescent_noSecondOrder
   fermatLastTheoremFor_thirtyseven_of_vandiver37_AK5a_caseIIDescent_noSecondOrder
     vandiver37PlusCoprime_proven caseI_AK5a caseII_step noSecondOrderIrregular
 
+open FLT37.LehmerVandiver.CaseII in
 /-- **FLT37 from Case-I AK5a, the Case-II II1 real-ideal descent, the Case-II II2
 exact quotient-unit power, and the (user-owned) second-order input** — with `¬ 37 ∣ h⁺`
 discharged by the proven `Sinnott.flt37_not_dvd_hPlus`.
@@ -100,11 +106,12 @@ theorem fermatLastTheoremFor_thirtyseven_of_AK5a_realIdealDescent_exactUnit_noSe
     caseI_AK5a
     (fun hV hSO {_m} D ↦
       FLT37.LehmerVandiver.CaseII.caseII_descent_step_under_vandiver37
-        (FLT37.LehmerVandiver.CaseII.washingtonCaseIIAdjacentFixedGenerators37Source_of_realIdealDescent
+        (washingtonCaseIIAdjacentFixedGenerators37Source_of_realIdealDescent
           Sinnott.flt37_not_dvd_hPlus caseII_realDescent)
         caseII_exactUnit hV hSO D)
     noSecondOrderIrregular
 
+open FLT37.LehmerVandiver.CaseI in
 /-- **FLT37 from the source-faithful Case-I/Case-II inputs, with `¬ 37 ∣ h⁺` banked
 everywhere.** The remaining mathematical inputs are exactly:
 
@@ -129,7 +136,7 @@ theorem fermatLastTheoremFor_thirtyseven_of_caseIUnramified_realIdealDescent_exa
     (noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32) :
     FermatLastTheoremFor 37 :=
   fermatLastTheoremFor_thirtyseven_of_AK5a_realIdealDescent_exactUnit_noSecondOrder
-    (FLT37.LehmerVandiver.CaseI.AK5a_PrincipalMinusIdeals_of_CaseIAntiKummerLKUnramified_and_not_dvd_hPlus
+    (AK5a_PrincipalMinusIdeals_of_CaseIAntiKummerLKUnramified_and_not_dvd_hPlus
       Sinnott.flt37_not_dvd_hPlus caseI_LK)
     caseII_realDescent caseII_exactUnit noSecondOrderIrregular
 

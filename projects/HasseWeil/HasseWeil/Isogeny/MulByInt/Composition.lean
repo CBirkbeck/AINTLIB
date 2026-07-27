@@ -3,14 +3,14 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Frobenius.Dual
 import HasseWeil.Foundation.EC.GenericPointZsmul
 import HasseWeil.Foundation.EC.TranslationOrd
+import HasseWeil.Isogeny.Frobenius.Dual
 
 /-!
 # `[·]*`-multiplicativity and the faithful dual-of-composition (Silverman III.6.1)
 
-`EC/IsogenyAG/FrobeniusDual.lean` ships dual-of-composition at the witness level with the
+`Isogeny/Frobenius/Dual.lean` ships dual-of-composition at the witness level with the
 **conjugation** endomorphism `ν = φ̂ ∘ ν_ψ ∘ φ` and names the two facts blocking the
 faithful Silverman form `ν = [n·m]`:
 
@@ -29,13 +29,13 @@ actual bookkeeping (`m·n = deg φ · deg ψ = deg (ψ∘φ)`, matching `Isogeny
 ## Multiplicativity (field-general, no carried hypotheses)
 
 The heavy lifting already exists: `mulByInt_pullback_mulByInt_x_eq_mul` /
-`mulByInt_pullback_mulByInt_y_eq_mul` (`EC/GenericPointZsmul.lean`) compute
+`mulByInt_pullback_mulByInt_y_eq_mul` (`Foundation/EC/GenericPointZsmul.lean`) compute
 `[n]*(mulByInt_x W m) = mulByInt_x W (m·n)` via the **all-points** division-polynomial
 genuineness `zsmul_affine_point_eq` (the generic-point-only `IsGenuineWith` does *not* suffice:
 the composite needs `[n]`'s action at the point `m • P_gen`, and `zsmul_affine_point_eq` with
 the nonvanishing guard `ψ_m_evalEval_mulByInt_ne_zero` is exactly that action). The `AlgHom`
 identity then follows from the generator extensionality `algHom_ext_x_y_gen`
-(`EC/TranslationOrd.lean`).
+(`Foundation/EC/TranslationOrd.lean`).
 
 ## Covariance (per-isogeny; the honest hypothesis for abstract `φ`)
 
@@ -46,7 +46,7 @@ the pullback). It is packaged as `Isogeny.MulByIntPullbackCovariant` and:
 * **reduced to its weakest checkable form** — the two generator equations — by
   `Isogeny.mulByIntPullbackCovariant_of_x_y_gen` (via the field-general `Ω`-codomain
   extensionality `algHom_ext_x_y_gen_into`, the `[Fintype K]`-free re-base of
-  `GapSpines.algHom_ext_x_y_gen_omega`);
+  `algHom_ext_x_y_gen_omega`);
 * **proved outright** for the two concrete isogeny families of this development:
   the `q`-power Frobenius (`Isogeny.frobenius_mulByIntPullbackCovariant`: `[n]*` is a ring hom,
   so it commutes with `g ↦ g^q`) and `[m]` itself
@@ -92,7 +92,7 @@ contravariantly: `[m]*` is applied first). Field-general, no carried hypotheses.
 
 By generator extensionality (`algHom_ext_x_y_gen`) this reduces to the two division-polynomial
 composition identities `[n]*(mulByInt_x/y W m) = mulByInt_x/y W (m·n)`
-(`mulByInt_pullback_mulByInt_x/y_eq_mul`, `EC/GenericPointZsmul.lean`). -/
+(`mulByInt_pullback_mulByInt_x/y_eq_mul`, `Foundation/EC/GenericPointZsmul.lean`). -/
 theorem mulByInt_pullbackAlgHom_mul (m n : ℤ) (hm : m ≠ 0) (hn : n ≠ 0) :
     mulByInt_pullbackAlgHom W (m * n) (mul_ne_zero hm hn) =
       (mulByInt_pullbackAlgHom W n hn).comp (mulByInt_pullbackAlgHom W m hm) := by
@@ -122,7 +122,7 @@ theorem mulByInt_pullbackAlgHom_mul' (m n : ℤ) (hm : m ≠ 0) (hn : n ≠ 0) :
 
 omit [W.toAffine.IsElliptic] in
 /-- **Generator extensionality into an arbitrary codomain field** — the field-general re-base of
-`GapSpines.algHom_ext_x_y_gen_omega` (whose section carries `[Fintype K]`): two `F`-algebra homs
+`algHom_ext_x_y_gen_omega` (whose section carries `[Fintype K]`): two `F`-algebra homs
 `K(E) →ₐ[F] Ω` agreeing on `x_gen` and `y_gen` are equal. Same reduction chain as
 `algHom_ext_x_y_gen` (`IsLocalization.algHom_ext` → `AdjoinRoot.algHom_ext'` →
 `Polynomial.algHom_ext`); the codomain is irrelevant to it. -/
@@ -298,7 +298,7 @@ open DUAL-2 leaf for an abstract isogeny). The resulting dual satisfies
 `((ψ∘φ)^ ∘ (ψ∘φ))* = [m·n]*` (`mulByIntDual_comp_pullback`), with `m·n = deg(ψ∘φ)`
 when `m = deg φ`, `n = deg ψ` (`compose_degree`) — the faithful Silverman bookkeeping, upgrading the
 conjugation-form `HasDualWitness.compose`. -/
-noncomputable def compose {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
+theorem compose {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
     {n m : ℤ} {hn : n ≠ 0} {hm : m ≠ 0}
     (wψ : ψ.HasMulByIntDualWitness n hn) (wφ : φ.HasMulByIntDualWitness m hm)
     (hcov : φ.MulByIntPullbackCovariant n hn) :
@@ -332,7 +332,8 @@ end FaithfulComposition
 Silverman III.6.1 for `φ = [ℓ]` with `φ̂ = [ℓ]`: the range inclusion
 `Im([ℓ·ℓ]*) ⊆ Im([ℓ]*)` is *free* from multiplicativity (`[ℓ·ℓ]* = [ℓ]* ∘ [ℓ]*`), and the
 basepoint condition is the `MulByIntBasepoint` theorem. No `[IsAlgClosed F]` (contrast
-`dualMulByInt`, `DualGaloisClosed.lean`, whose Galois route needs the rational `ℓ`-torsion of
+`dualMulByInt`, `Isogeny/Dual/GaloisClosed.lean`, whose Galois route needs the rational `ℓ`-torsion
+of
 `K̄`): the dual
 *witness* here is faithful by construction rather than recovered from the fixed field. -/
 
@@ -354,7 +355,7 @@ theorem mulByInt_self_rangeIncl {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
 `[ℓ]^ = [ℓ]`), field-general, every field a theorem: `hincl` is free from multiplicativity
 (`mulByInt_self_rangeIncl`), `hbase` from the `[ℓ·ℓ]`-basepoint theorem and `∞`-regularity
 reflection. -/
-noncomputable def mulByIntSelfDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
+theorem mulByIntSelfDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
     (Isogeny.mulByInt W hℓ).HasMulByIntDualWitness (ℓ * ℓ) (mul_ne_zero hℓ hℓ) where
   hincl := mulByInt_self_rangeIncl W hℓ
   hbase := Isogeny.hbase_of_reflects (Isogeny.mulByInt W hℓ)
@@ -382,7 +383,7 @@ variable (W : Affine K) [W.IsElliptic]
 /-- **The faithful `[q·q]`-witness for `π ∘ π`** — the faithful upgrade of
 `hasDualWitness_frobenius_compose_frobenius` (whose conjugation `ν` is now the genuine
 `[q·q] = [deg (π∘π)]`). Every field a theorem. -/
-noncomputable def frobeniusSquareMulByIntDualWitness :
+theorem frobeniusSquareMulByIntDualWitness :
     ((Isogeny.frobenius W).compose (Isogeny.frobenius W)).HasMulByIntDualWitness
       (((Fintype.card K : ℕ) : ℤ) * ((Fintype.card K : ℕ) : ℤ))
       (mul_ne_zero intCardK_ne_zero intCardK_ne_zero) :=
@@ -392,7 +393,6 @@ noncomputable def frobeniusSquareMulByIntDualWitness :
 -- `[DecidableEq K]` is genuinely required: the statement names the composed witness
 -- `frobeniusSquareMulByIntDualWitness` (which carries it), but the witness sits in a
 -- proof-irrelevant position, so the linter cannot see the dependence.
-set_option linter.unusedDecidableInType false in
 /-- **`(π∘π)^ ∘ (π∘π) = [q·q]` as `EC.Isogeny`s** — Silverman III.6.1 for the composite
 `π ∘ π`, in fully bundled form, via the faithful composed witness. -/
 theorem frobeniusSquare_mulByIntDual_compose :
@@ -406,7 +406,7 @@ theorem frobeniusSquare_mulByIntDual_compose :
 `[ℓ·ℓ]`-witness for `[ℓ]` with the `[q]`-witness for `π` along the (free) Frobenius
 covariance. `q·(ℓ·ℓ) = deg π · deg [ℓ] = deg ([ℓ]∘π)` is Silverman's bookkeeping. Every
 field a theorem. -/
-noncomputable def mulByIntCompFrobeniusDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
+theorem mulByIntCompFrobeniusDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
     ((Isogeny.mulByInt W hℓ).compose (Isogeny.frobenius W)).HasMulByIntDualWitness
       (((Fintype.card K : ℕ) : ℤ) * (ℓ * ℓ))
       (mul_ne_zero intCardK_ne_zero (mul_ne_zero hℓ hℓ)) :=
@@ -415,7 +415,7 @@ noncomputable def mulByIntCompFrobeniusDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0
 
 /-- **The faithful `[ℓ²·q]`-witness for `π ∘ [ℓ]`** — the opposite composition order,
 exercising the `[m]`-covariance instance (from multiplicativity). Every field a theorem. -/
-noncomputable def frobeniusCompMulByIntDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
+theorem frobeniusCompMulByIntDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
     ((Isogeny.frobenius W).compose (Isogeny.mulByInt W hℓ)).HasMulByIntDualWitness
       ((ℓ * ℓ) * ((Fintype.card K : ℕ) : ℤ))
       (mul_ne_zero (mul_ne_zero hℓ hℓ) intCardK_ne_zero) :=

@@ -36,8 +36,8 @@ lemma awayCongr_rfl {s : A} :
 
 lemma awayCongr_mk {s t : A} (h : s = t) {i : ι} (hs : s ∈ 𝒜 i) (n : ℕ) (a : A)
     (ha : a ∈ 𝒜 (n • i)) :
-    awayCongr (𝒜 := 𝒜) h (HomogeneousLocalization.Away.mk 𝒜 hs n a ha) =
-      HomogeneousLocalization.Away.mk 𝒜 (h ▸ hs) n a ha := by
+    awayCongr (𝒜 := 𝒜) h (Away.mk 𝒜 hs n a ha) =
+      Away.mk 𝒜 (h ▸ hs) n a ha := by
   subst h
   rfl
 
@@ -46,9 +46,9 @@ variable {σ B S : Type*} [CommRing S] [CommRing B] [Algebra S B]
 
 /-- `awayCongr` is natural against the graded `Away.map`. -/
 lemma awayCongr_map {s t : A} (h : s = t) (g : GradedRingHom 𝒜 ℬ) (x : Away 𝒜 s) :
-    HomogeneousLocalization.Away.map g t (awayCongr (𝒜 := 𝒜) h x) =
+    Away.map g t (awayCongr (𝒜 := 𝒜) h x) =
       awayCongr (𝒜 := ℬ) (congrArg g h)
-        (HomogeneousLocalization.Away.map g s x) := by
+        (Away.map g s x) := by
   subst h
   rfl
 
@@ -65,25 +65,25 @@ lemma awayCongr_self {s : A} (h : s = s) (x : Away 𝒜 s) :
 /-- `Away.map` only depends on the graded hom up to propositional equality, through
 the transport. -/
 lemma awayMap_congr {g₁ g₂ : GradedRingHom 𝒜 ℬ} (h : g₁ = g₂) (s : A) (x : Away 𝒜 s) :
-    HomogeneousLocalization.Away.map g₂ s x =
+    Away.map g₂ s x =
       awayCongr (𝒜 := ℬ) (congrArg (fun g : GradedRingHom 𝒜 ℬ => g s) h)
-        (HomogeneousLocalization.Away.map g₁ s x) := by
+        (Away.map g₁ s x) := by
   subst h
   exact (awayCongr_self _ _).symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The graded `Away.map` commutes with the degree-zero inclusion `fromZeroRingHom`:
 `Away.map g s` sends `a/1` (for `a : 𝒜 0`) to `(g a)/1` in `Away ℬ (g s)`. This is the
 ring-hom heart of the naturality of `Proj.toSpecZero` under `Proj.map` — when `g` fixes the
 degree-zero part it exhibits `Proj.map g` as a morphism over `Spec (𝒜 0)`. -/
 lemma awayMap_fromZeroRingHom (g : GradedRingHom 𝒜 ℬ) (s : A) (a : 𝒜 0) :
-    HomogeneousLocalization.Away.map g s
-        (HomogeneousLocalization.fromZeroRingHom 𝒜 (Submonoid.powers s) a) =
-      HomogeneousLocalization.fromZeroRingHom ℬ (Submonoid.powers (g s))
+    Away.map g s
+        (fromZeroRingHom 𝒜 (Submonoid.powers s) a) =
+      fromZeroRingHom ℬ (Submonoid.powers (g s))
         ⟨g a, g.map_mem a.2⟩ := by
   ext
-  simp only [HomogeneousLocalization.fromZeroRingHom, RingHom.coe_mk, MonoidHom.coe_mk,
-    OneHom.coe_mk, HomogeneousLocalization.Away.map, HomogeneousLocalization.map_mk,
-    HomogeneousLocalization.val_mk]
+  simp only [fromZeroRingHom, RingHom.coe_mk, MonoidHom.coe_mk,
+    OneHom.coe_mk, Away.map, map_mk, val_mk]
   congr 1
   exact Subtype.ext (by simp)
 
@@ -93,10 +93,10 @@ variable {τ C T : Type*} [CommRing T] [CommRing C] [Algebra T C]
 /-- Applied form of `Away.map_comp`. -/
 lemma awayMap_map (f : GradedRingHom 𝒜 ℬ) (g : GradedRingHom ℬ 𝒞) (s : A)
     (x : Away 𝒜 s) :
-    HomogeneousLocalization.Away.map g (f s)
-        (HomogeneousLocalization.Away.map f s x) =
-      HomogeneousLocalization.Away.map (g.comp f) s x :=
-  (DFunLike.congr_fun (HomogeneousLocalization.Away.map_comp f g s) x).symm
+    Away.map g (f s)
+        (Away.map f s x) =
+      Away.map (g.comp f) s x :=
+  (DFunLike.congr_fun (Away.map_comp f g s) x).symm
 
 variable {S' B' : Type*} [CommRing S'] [CommRing B'] [Algebra S' B']
   {ℬ' : ι → Submodule S' B'} [GradedAlgebra ℬ']
@@ -108,16 +108,16 @@ lemma awayMap_square {f₁ : GradedRingHom 𝒜 ℬ} {g₁ : GradedRingHom ℬ �
     (hsq : g₁.comp f₁ = g₂.comp f₂) (s : A) (x : Away 𝒜 s)
     {t : C} (h₁ : g₁ (f₁ s) = t) (h₂ : g₂ (f₂ s) = t) :
     awayCongr (𝒜 := 𝒞) h₁
-        (HomogeneousLocalization.Away.map g₁ (f₁ s)
-          (HomogeneousLocalization.Away.map f₁ s x)) =
+        (Away.map g₁ (f₁ s)
+          (Away.map f₁ s x)) =
       awayCongr (𝒜 := 𝒞) h₂
-        (HomogeneousLocalization.Away.map g₂ (f₂ s)
-          (HomogeneousLocalization.Away.map f₂ s x)) := by
+        (Away.map g₂ (f₂ s)
+          (Away.map f₂ s x)) := by
   rw [awayMap_map, awayMap_map, awayMap_congr hsq s x]
   refine Eq.trans ?_ (awayCongr_trans (𝒜 := 𝒞)
     (congrArg (fun g : GradedRingHom 𝒜 𝒞 => g s) hsq) h₂
-    ((HomogeneousLocalization.Away.map (g₁.comp f₁) s) x)).symm
+    ((Away.map (g₁.comp f₁) s) x)).symm
   exact congrArg (fun hh => awayCongr (𝒜 := 𝒞) hh
-    ((HomogeneousLocalization.Away.map (g₁.comp f₁) s) x)) (Subsingleton.elim _ _)
+    ((Away.map (g₁.comp f₁) s) x)) (Subsingleton.elim _ _)
 
 end ModularCurves

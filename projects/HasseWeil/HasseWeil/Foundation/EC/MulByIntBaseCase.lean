@@ -1,7 +1,7 @@
 import HasseWeil.Foundation.OmegaPullbackCoeff
 
 /-!
-# Base case identities for `[1]` on division polynomials (T-III-4-020 prep)
+# Base case identities for `[1]` on division polynomials
 
 The `mulByInt W n` infrastructure (division polynomials `Φ_n, ΨSq_n, ψ_n, ω_n`,
 and the rational-map image `mulByInt_x W n = Φ_n/ΨSq_n`,
@@ -10,7 +10,7 @@ identities collapse to the generic point itself, establishing that `[1]` acts
 as the identity on the generic coordinates.
 
 These base-case lemmas are the foundation for the full `mulByInt_comp_eq_mul`
-development (T-III-4-020): closing `[1] = id_isogeny` as a Lean equality, and
+development: closing `[1] = id_isogeny` as a Lean equality, and
 eventually `[m]∘[n] = [m·n]`.
 
 ## Main results
@@ -73,7 +73,7 @@ theorem mulByInt_pullback_y_one :
         (AdjoinRoot.root W.toAffine.polynomial) := by
   rw [mulByInt_pullback_y W 1 one_ne_zero, mulByInt_y_one]
 
-/-! ### `[1] = id_isogeny` (T-III-4-020a)
+/-! ### `[1] = id_isogeny`
 
 The multiplication-by-one isogeny has identity pullback on the function field.
 Proved by the standard reduction chain for AlgHom equality on
@@ -133,13 +133,13 @@ theorem mulByInt_add_toAddMonoidHom (m n : ℤ) :
   exact add_zsmul P m n
 
 /-- **`[k+1] = [k] + [1]` at hom level**, the natural decomposition for inductive
-    arguments via BRIDGE-003. Direct corollary of `mulByInt_add_toAddMonoidHom`. -/
+    arguments. Direct corollary of `mulByInt_add_toAddMonoidHom`. -/
 theorem mulByInt_succ_toAddMonoidHom (k : ℤ) :
     (mulByInt W.toAffine (k + 1)).toAddMonoidHom =
       (mulByInt W.toAffine k).toAddMonoidHom + (mulByInt W.toAffine 1).toAddMonoidHom :=
   mulByInt_add_toAddMonoidHom W k 1
 
-/-! ### Consequences: `[1] ∘ [1] = [1]` and `[1]̂ = [1]` (T-III-6-006 for m=1) -/
+/-! ### Consequences: `[1] ∘ [1] = [1]` and `[1]̂ = [1]` -/
 
 /-- `[1].comp [1] = [1]` as isogenies: composing the identity isogeny with
     itself gives the identity isogeny. Uses `mulByInt_one_pullback_eq_id`. -/
@@ -156,18 +156,16 @@ theorem mulByInt_one_comp_mulByInt_one :
     simp only [one_zsmul]
   rw [mulByInt_one_pullback_eq_id, AlgHom.id_comp, hhom, ← mulByInt_one_pullback_eq_id W]
 
-/-- `[1] ∘ [1] = [[1].degree]` — the `IsDualOf`-conjunct shape (cf.
-    `EC.mulByInt_isDualOf_self`; the legacy `isogDual_mulByInt_of_comp` was
-    deleted with the refuted `exists_dual`). Combines
-    `mulByInt_one_comp_mulByInt_one` with `mulByInt_degree` (giving
-    `[1].degree = 1`). -/
+/-- `[1] ∘ [1] = [[1].degree]` — the `IsDualOf`-conjunct shape
+    (cf. `EC.mulByInt_isDualOf_self`). Combines `mulByInt_one_comp_mulByInt_one`
+    with `mulByInt_degree` (giving `[1].degree = 1`). -/
 theorem mulByInt_one_comp_eq_mulByInt_degree :
     (mulByInt W.toAffine 1).comp (mulByInt W.toAffine 1) =
       mulByInt W.toAffine ((mulByInt W.toAffine 1).degree : ℤ) := by
   rw [mulByInt_one_comp_mulByInt_one, mulByInt_degree W.toAffine 1 one_ne_zero]
   norm_num
 
-/-! ### Uniqueness of `mulByInt_pullbackAlgHom` (T-III-4-020b infrastructure)
+/-! ### Uniqueness of `mulByInt_pullbackAlgHom`
 
 Any F-algebra endomorphism of `K(E)` that sends the generic coordinates
 `x_gen → mulByInt_x W n` and `y_gen → mulByInt_y W n` must equal
@@ -243,7 +241,7 @@ theorem mulByInt_pullback_unique (n : ℤ) (hn : n ≠ 0)
   · simp only [RingHom.comp_apply, RingHom.coe_coe]
     rw [h_y, mulByInt_pullback_y W n hn]
 
-/-! ### Pullback of `Φ_ff` and `ΨSq_ff` via substitution (T-III-4-020b prep) -/
+/-! ### Pullback of `Φ_ff` and `ΨSq_ff` via substitution -/
 
 /-- The pullback along `[m]` of the polynomial generator `X` is `mulByInt_x W m`:
     `X` maps to `x_gen W` via the scalar tower, then `mulByInt_pullback_x` applies.
@@ -258,7 +256,8 @@ private theorem mulByInt_pullback_algebraMap_X (m : ℤ) (hm : m ≠ 0) :
       W.toAffine.FunctionField Polynomial.X
   rw [h]; exact mulByInt_pullback_x W m hm
 
-/-- The pullback along `[m]` of `Φ_ff W n` is `(W.Φ n).eval₂ (algebraMap F KE) (mulByInt_x W m)`.
+/-- The pullback along `[m]` of `Φ_ff W n` is
+    `(W.Φ n).eval₂ (algebraMap F KE) (mulByInt_x W m)`.
 
     Direct application of `algHom_apply_polynomial` after normalizing `Φ_ff` to
     `algebraMap (Poly F) KE (W.Φ n)` via the scalar tower. -/
@@ -301,16 +300,5 @@ theorem mulByInt_pullback_mulByInt_x (m n : ℤ) (hm : m ≠ 0) :
     show (mulByInt W.toAffine m).pullback (Φ_ff W n / ΨSq_ff W n) = _
     exact map_div₀ _ _ _
   rw [h, mulByInt_pullback_Φ_ff W m n hm, mulByInt_pullback_ΨSq_ff W m n hm]
-
-/-! ### T-III-4-020b witness form for `mulByInt_comp_eq_mul` at the x-coordinate
-
-The general-m `mulByInt_comp_eq_mul` reduces to two identities (one for each
-generic coordinate) via `mulByInt_pullback_unique`. Here we state the
-x-coordinate identity as a witness hypothesis — the caller must discharge
-Silverman's division polynomial composition formula.
-
-Once the composition formula is formalized, the corresponding y-coordinate
-identity, and then `mulByInt_comp_eq_mul` itself, follow from routine
-composition of `mulByInt_pullback_unique` with these substitution lemmas. -/
 
 end HasseWeil

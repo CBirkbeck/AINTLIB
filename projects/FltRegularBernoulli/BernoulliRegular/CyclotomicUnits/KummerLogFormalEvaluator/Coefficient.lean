@@ -1,9 +1,19 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator.Homogeneous
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator.Homogeneous
 
 /-!
 # Final Kummer logarithm evaluator coefficient bridge
 
 This file contains the final coefficient-level handoff theorems for the split formal evaluator.
+
+## Main results
+
+* `kummerLogFormalEvaluator_coeff_eq`: identifies the specialized finite logarithm coefficient
+  with the formal Kummer coefficient.
+* `kummerLogCoeff_congr`: gives the concrete Kummer logarithm coefficient congruence.
+* `concreteKummerLogMatrix_eq_squaredKummerLogCoeffCongrRhs_matrix`: gives the matrix-level
+  congruence.
 -/
 
 @[expose] public section
@@ -37,8 +47,8 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_homogeneousDegreeSums
               (dworkParameterApprox p K ((p - 2) + 1))
               (dworkParameterApprox_mem_lambdaIdeal
                 (p := p) (K := K) ((p - 2) + 1)))) := by
-  unfold dworkParameterNormalizedFiniteLogApprox
-  simp only [dworkParameterNormalizedCoordApprox_eq]
+  simp only [dworkParameterNormalizedFiniteLogApprox,
+    dworkParameterNormalizedCoordApprox_eq]
   exact valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normalizedCoord
     (p := p) (K := K) (kummerLogEvenPowerIndex (p := p) hp_five j).1
     (dworkParameterApprox_mem_lambdaIdeal (p := p) (K := K) ((p - 2) + 1))
@@ -108,9 +118,6 @@ theorem rIntegralToZMod_sum_rationalArtinHasseNormalizedFactorialWeightedLogCoef
     coeff_logOf_rationalArtinHasseNormalizedExpMinusOneSeries_eq_bernoulli
       (p := p) hj hjp
   have hS : (S : ℚ) = q := by
-    have hcoe :=
-      coe_sum_rationalArtinHasseNormalizedFactorialWeightedLogCoeff
-        (p := p) (2 * j)
     have hfac_ne : (Nat.factorial (2 * j) : ℚ) ≠ 0 := by
       exact_mod_cast Nat.factorial_ne_zero (2 * j)
     have hd_ne : ((2 * j : ℕ) : ℚ) ≠ 0 := by
@@ -122,7 +129,9 @@ theorem rIntegralToZMod_sum_rationalArtinHasseNormalizedFactorialWeightedLogCoef
             (PowerSeries.coeff (R := ℚ) (2 * j))
               (PowerSeries.logOf
                 (rationalArtinHasseNormalizedExpMinusOneSeries p)) := by
-          simpa [S] using hcoe
+          simpa [S] using
+            coe_sum_rationalArtinHasseNormalizedFactorialWeightedLogCoeff
+              (p := p) (2 * j)
       _ = (Nat.factorial (2 * j) : ℚ) *
             ((_root_.bernoulli (2 * j) : ℚ) /
               (((2 * j : ℕ) : ℚ) * (Nat.factorial (2 * j) : ℚ))) := by
@@ -133,14 +142,10 @@ theorem rIntegralToZMod_sum_rationalArtinHasseNormalizedFactorialWeightedLogCoef
           ring_nf
           norm_num [Nat.cast_mul]
           ring
-  have hres :
-      ((S : ℚ).num : ZMod p) * ((S : ℚ).den : ZMod p)⁻¹ =
-        (q.num : ZMod p) * (q.den : ZMod p)⁻¹ :=
-    congrArg (fun r : ℚ => (r.num : ZMod p) * (r.den : ZMod p)⁻¹) hS
   rw [Furtwaengler.DieudonneDwork.rIntegralToZMod_apply]
   change ((S : ℚ).num : ZMod p) * ((S : ℚ).den : ZMod p)⁻¹ =
     bernoulliFactor p j
-  rw [hres]
+  rw [congrArg (fun r : ℚ => (r.num : ZMod p) * (r.den : ZMod p)⁻¹) hS]
   simp [bernoulliFactor, ratReductionZMod, q, div_eq_mul_inv]
 
 omit [NumberField.IsCMField K] in
@@ -261,17 +266,16 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_lowHomogeneousDegreeSums
           rw [hterm_zero]
           change valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
               (0 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (p - 1)) = 0
-          have hzero := valuedLambdaQuotientDworkCoeffModP_add
+          simpa using valuedLambdaQuotientDworkCoeffModP_add
             (p := p) (K := K) i
             (0 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (p - 1)) 0
-          simpa using hzero
-        rw [← hsum, ← valuedLambdaQuotientDworkCoeffModP_sum, ← map_sum]
-        rw [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_sum_Icc
-          (p := p) (K := K) (N := p - 2) (d := d) hx]
+        rw [← hsum, ← valuedLambdaQuotientDworkCoeffModP_sum, ← map_sum,
+          samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_sum_Icc
+            (p := p) (K := K) (N := p - 2) (d := d) hx]
 
 omit [NumberField.IsCMField K] in
-/-- CU-11f2b2c4 source theorem: the unscaled normalized finite-log coefficient
-on an even Kummer row is the formal Bernoulli coefficient. -/
+/-- The unscaled normalized finite-log coefficient on an even Kummer row is the formal
+Bernoulli coefficient. -/
 theorem valuedLambdaQuotientDworkCoeffModP_unscaledNormalizedFiniteLog_even_eq_formal
     (hp_five : 5 ≤ p) (j : Fin (kummerLogRank p)) :
     valuedLambdaQuotientDworkCoeffModP (p := p) (K := K)
@@ -334,8 +338,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_unscaledNormalizedFiniteLog_even_eq_f
     exact False.elim (hnot (Finset.mem_range.mpr he_lt))
 
 omit [NumberField.IsCMField K] in
-/-- CU-11f2b2c4, folded-coordinate form: the finite specialized coefficient
-can be read from the folded representative. -/
+/-- The finite specialized coefficient can be read from the folded representative. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_folded
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -347,14 +350,13 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_folded
             p - 1 ≤ (p - 2) + 1)
           (kummerLogDworkArtinHasseSpecializedFoldedFiniteLog
             (p := p) (K := K) hp_three a)) := by
-  rw [kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq]
-  rw [← kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_folded
-    (p := p) (K := K) hp_three a]
+  rw [kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq,
+    ← kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_folded
+      (p := p) (K := K) hp_three a]
 
 omit [NumberField.IsCMField K] in
-/-- Even-row folded coefficient reduced to the unscaled normalized finite-log
-coordinate.  This is the coordinate-first C4 bridge; the remaining source
-calculation is the unscaled even-row normalized Artin-Hasse coefficient. -/
+/-- The even-row folded coefficient is the product of the column factor and the unscaled
+normalized finite-log coordinate. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_one_sub_pow_mul_unscaled
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -389,15 +391,15 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_formal_of_unsca
         (kummerLogColumnIndex (p := p) hp_three a : ZMod p)
         (formalKummerLogCoeffModP p (kummerLogRowIndex (p := p) j)) := by
   rw [kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_one_sub_pow_mul_unscaled
-    (p := p) (K := K) hp_three hp_five j a]
-  rw [hunscaled, formalKummerLogCoeffModP_eval, kummerLogEvenPowerIndex_val]
-  rw [show 2 * ((j : ℕ) + 1) = kummerLogRowIndex (p := p) j * 2 by
-    rw [kummerLogRowIndex, Nat.mul_comm]]
+      (p := p) (K := K) hp_three hp_five j a,
+    hunscaled, formalKummerLogCoeffModP_eval, kummerLogEvenPowerIndex_val,
+    show 2 * ((j : ℕ) + 1) = kummerLogRowIndex (p := p) j * 2 by
+      rw [kummerLogRowIndex, Nat.mul_comm]]
   ring
 
 omit [NumberField.IsCMField K] in
-/-- CU-11f2b2c4 endpoint: the specialized finite Artin-Hasse logarithm
-coefficient agrees with the formal Kummer coefficient on every even row. -/
+/-- The specialized finite Artin-Hasse logarithm coefficient agrees with the formal Kummer
+coefficient on every even row. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_formal
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -412,8 +414,8 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_formal
       (p := p) (K := K) hp_five j)
 
 omit [NumberField.IsCMField K] in
-/-- CU-11f2b3 endpoint: the folded finite same-prime evaluator gives the
-formal Kummer coefficient after specialization at the column residue. -/
+/-- The folded finite same-prime evaluator gives the formal Kummer coefficient after
+specialization at the column residue. -/
 theorem kummerLogFormalEvaluator_coeff_eq
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -426,8 +428,8 @@ theorem kummerLogFormalEvaluator_coeff_eq
     (p := p) (K := K) hp_three hp_five j a
 
 omit [NumberField.IsCMField K] in
-/-- CU-11f2b3 endpoint rewritten to the assembled Kummer congruence right-hand
-side.  This is the form intended for the concrete matrix-entry theorem. -/
+/-- The specialized finite-log coefficient equals the assembled Kummer congruence
+right-hand side. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_congrRhs
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -440,8 +442,7 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_congrRhs
       (p := p) (K := K) hp_three hp_five j a)
 
 /-- The concrete squared-family matrix entry is twice the normalized finite-log
-coefficient.  This is the coordinate form of the already-proved identity
-`concreteKummerLogVector = 2 • specializedFiniteLog` modulo `λ^(p - 1)`. -/
+coefficient modulo the `(p - 1)`st power of the lambda ideal. -/
 theorem concreteKummerLogMatrix_eq_two_mul_specializedFiniteLogCoeffModP
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -461,25 +462,23 @@ theorem concreteKummerLogMatrix_eq_two_mul_specializedFiniteLogCoeffModP
           (AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
             (concreteKummerLogVector (p := p) (K := K) hp_three a :
               DworkCompleteIntegerRing p K)) := by
-    have hrepr :=
-      dworkFixedEvenPowerBasis_repr_eq_powerBasis_repr
-        (p := p) (K := K) (by omega : 2 < p)
-        (concreteKummerLogVector (p := p) (K := K) hp_three a)
-        (kummerLogEvenPowerIndex (p := p) hp_five j)
     rw [concreteKummerLogMatrix_apply, concreteKummerLogCoeff_eq,
       valuedLambdaQuotientDworkCoeffModP_evalₐ]
     simpa [i, concreteKummerLogVector] using
-      congrArg (rationalPadicIntegerToZMod p) hrepr
-  have hvec :=
-    concreteKummerLogVector_evalₐ_pow_pred_eq_two_nsmul_dworkArtinHasseSpecializedFiniteLog
-      (p := p) (K := K) hp_three a
+      congrArg (rationalPadicIntegerToZMod p)
+        (dworkFixedEvenPowerBasis_repr_eq_powerBasis_repr
+          (p := p) (K := K) (by omega : 2 < p)
+          (concreteKummerLogVector (p := p) (K := K) hp_three a)
+          (kummerLogEvenPowerIndex (p := p) hp_five j))
   let hle : p - 1 ≤ (p - 2) + 1 := by omega
-  have hvec_factor :=
-    congrArg (Ideal.Quotient.factorPow (lambdaIdeal p K) hle) hvec
   have hvec' :
       AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
           (concreteKummerLogVector (p := p) (K := K) hp_three a :
             DworkCompleteIntegerRing p K) = 2 • z := by
+    have hvec_factor :=
+      congrArg (Ideal.Quotient.factorPow (lambdaIdeal p K) hle)
+        (concreteKummerLogVector_evalₐ_pow_pred_eq_two_nsmul_dworkArtinHasseSpecializedFiniteLog
+          (p := p) (K := K) hp_three a)
     rw [factor_evalₐ_eq_evalₐ (p := p) (K := K) hle, map_nsmul] at hvec_factor
     exact hvec_factor
   calc
@@ -491,24 +490,20 @@ theorem concreteKummerLogMatrix_eq_two_mul_specializedFiniteLogCoeffModP
     _ = valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i (2 • z) := by
           rw [hvec']
     _ = (2 : ZMod p) *
+        valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i z := by
+          rw [show (2 • z : ValuedIntegerRing p K ⧸
+              (lambdaIdeal p K) ^ (p - 1)) =
+                (2 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (p - 1)) * z by
+              norm_num]
+          simpa using
+            valuedLambdaQuotientDworkCoeffModP_natCast_mul
+              (p := p) (K := K) i 2 z
+    _ = (2 : ZMod p) *
         kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP
-          (p := p) (K := K) hp_three hp_five j a := by
-          have htwo :
-              valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i (2 • z) =
-                (2 : ZMod p) *
-                  valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i z := by
-            rw [show (2 • z : ValuedIntegerRing p K ⧸
-                (lambdaIdeal p K) ^ (p - 1)) =
-                  (2 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (p - 1)) * z by
-                norm_num]
-            simpa using
-              valuedLambdaQuotientDworkCoeffModP_natCast_mul
-                (p := p) (K := K) i 2 z
-          rw [htwo]
-          rfl
+          (p := p) (K := K) hp_three hp_five j a := rfl
 
-/-- CU-11f3: the concrete logarithm matrix entries satisfy the Kummer
-congruence in the squared-family normalization. -/
+/-- The concrete logarithm matrix entries satisfy the Kummer congruence in the
+squared-family normalization. -/
 theorem concreteKummerLogMatrix_eq_squaredKummerLogCoeffCongrRhs
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -531,8 +526,7 @@ theorem concreteKummerLogMatrix_eq_two_mul_kummerLogCoeffCongrRhs
       (p := p) (K := K) hp_three hp_five j a,
     squaredKummerLogCoeffCongrRhs_eq_two_mul]
 
-/-- Final concrete squared-family entry API, with the squared unit factor
-displayed explicitly. -/
+/-- The concrete squared-family entry with the squared unit factor displayed explicitly. -/
 theorem concreteSquaredKummerLogMatrixEntry_congr
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -545,11 +539,7 @@ theorem concreteSquaredKummerLogMatrixEntry_congr
       (p := p) (K := K) hp_three hp_five j a]
   rfl
 
-/-- CU-11 endpoint: the concrete Kummer logarithm coefficient congruence.
-
-The unit factor is the squared-family unit
-`squaredKummerLogUnitFactor = 2 * kummerLogUnitFactor`, which is nonzero by
-`squaredKummerLogUnitFactor_ne_zero`. -/
+/-- The concrete Kummer logarithm coefficient congruence. -/
 theorem kummerLogCoeff_congr
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :

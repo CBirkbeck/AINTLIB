@@ -232,7 +232,7 @@ sides are finite products that evaluate to `(1 - Y ^ f)⁻ᵍ` where `Y = N𝔭^
 is the residue degree and `g = |G| / f` is the number of primes above `𝔭`:
 
 * the left side has `g` factors (`card_primesAbove_mul_orderOf_eq`), each equal to `(1 - Y^f)⁻¹`
-  because `N𝔓 = N𝔭^f` (`absNorm_eq_pow_inertiaDeg_of_liesOver`, `inertiaDeg = f`);
+  because `N𝔓 = N𝔭^f` (`absNorm_eq_pow_inertiaDeg_of_liesOver`, `inertiaDeg' = f`);
 * the right side is `∏_{χ : G →* ℂˣ} (1 - χ(σ) Y)⁻¹`, and the evaluation map `χ ↦ χ(σ)`
   surjects `Ĝ` onto the `f`-th roots of unity with uniform fibres of size `g`, so
   `∏_χ (1 - χ(σ) Y) = (∏_{ζ ∈ μ_f} (1 - ζ Y))^g = (1 - Y^f)^g`.
@@ -349,6 +349,7 @@ private theorem cpow_neg_absNorm_eq_pow {a b : ℕ} (f : ℕ) (s : ℂ)
     (h : b = a ^ f) : ((b : ℂ)) ^ (-s) = ((a : ℂ) ^ (-s)) ^ f := by
   rw [h, Nat.cast_pow, ← Complex.natCast_cpow_natCast_mul, Complex.cpow_nat_mul]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Sharifi 7.1.16 (p. 141) local step: the local Euler factor at an
 unramified prime `𝔭` of `K` factors as a product over characters.
 Source quote (paraphrased identity): the local factor
@@ -394,15 +395,15 @@ theorem dedekindZeta_local_factor_eq_product_artin_local
     intro 𝔓
     haveI := 𝔓.2.1
     haveI hlo : 𝔓.1.LiesOver 𝔭 := 𝔓.2.2.1
-    have hdeg : (𝔓.1.under (𝓞 K)).inertiaDeg 𝔓.1 = f := by
-      rw [Ideal.inertiaDeg_algebraMap, hf]
+    have hdeg : (𝔓.1.under (𝓞 K)).inertiaDeg' 𝔓.1 = f := by
+      rw [Ideal.inertiaDeg'_algebraMap, hf]
       exact finrank_residue_eq_orderOf K L σ (frobeniusClass K L 𝔭) (Quotient.out_eq _)
         𝔭 _hunr rfl 𝔓.1 hlo
     haveI : 𝔓.1.LiesOver (𝔓.1.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := 𝔓.1)
     have hpubot : 𝔓.1.under (𝓞 K) ≠ ⊥ := hlo.over ▸ hpbot
     haveI : (𝔓.1.under (𝓞 K)).IsPrime := hlo.over ▸ ‹𝔭.IsPrime›
     have hnorm : Ideal.absNorm 𝔓.1 = Ideal.absNorm 𝔭 ^ f := by
-      rw [Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver 𝔓.1 (𝔓.1.under (𝓞 K)) inferInstance hpubot,
+      rw [Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver 𝔓.1 (𝔓.1.under (𝓞 K)) inferInstance hpubot,
         hdeg, ← hlo.over]
     rw [cpow_neg_absNorm_eq_pow f s hnorm, hY]
   rw [tprod_congr hterm, tprod_fintype, Finset.prod_const, Finset.card_univ,
@@ -573,7 +574,7 @@ theorem charFibre_mem_range {G : Type*} [CommGroup G] [Finite G] (χ : G →* �
       exact Subtype.ext (by simpa [Subgroup.coe_pow] using hpow g)
   have heq : MonoidHom.range χ = rootsOfUnity (orderOf χ) ℂ :=
     Subgroup.eq_of_le_of_card_ge hsub (by
-      rw [Nat.card_eq_fintype_card, Complex.card_rootsOfUnity, hoe,
+      rw [Complex.card_rootsOfUnity, hoe,
         IsCyclic.exponent_eq_card (α := MonoidHom.range χ)])
   exact χ.mem_range.mp (heq ▸ (mem_rootsOfUnity (orderOf χ) ζ).mpr hζ)
 
@@ -2630,6 +2631,7 @@ private def ramifiedFlattenEquiv
   left_inv _ := rfl
   right_inv _ := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The unramified part of the prime-ideal Euler product equals `∏_χ L_χ`. Regroup the unramified
 `L`-primes fibrewise over the `K`-prime below them (`Equiv.sigmaFiberEquiv` +
 `Multipliable.tprod_sigma`); each fibre product is `∏_χ (1 - χ(σ_𝔭) N𝔭^{-s})^{-1}`

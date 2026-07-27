@@ -44,7 +44,7 @@ theorem dworkThetaTrunc_artinHasseAtTo_eq_finiteArtinHasseExp_mul
         (dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup γ N) N u =
       F.finiteArtinHasseExp N (γ * u) := by
   classical
-  unfold finiteArtinHasseExp dworkThetaTrunc
+  simp only [finiteArtinHasseExp, dworkThetaTrunc]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   cases n with
@@ -76,7 +76,7 @@ theorem artinHasseThetaTruncProductAtTo_sub_one_eq_finsetProductCoord
           (γ * (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ)))) := by
   classical
   rw [F.artinHasseThetaTruncProductAtTo_eq_prod_finiteArtinHasseExp]
-  unfold finiteLogFinsetProductCoord
+  simp only [finiteLogFinsetProductCoord]
   congr 1
   refine Finset.prod_congr rfl ?_
   intro i _hi
@@ -581,7 +581,7 @@ theorem one_add_pi_pow_traceNatCast_mul_one_add_traceRootInverseCoord_eq_one
   have hcoord_eq :
       finiteLogProductCoord ((1 + F.π) ^ t - 1) (F.traceRootInverseCoord y) =
         (1 + F.π) ^ t * (1 + F.traceRootInverseCoord y) - 1 := by
-    unfold finiteLogProductCoord
+    simp only [finiteLogProductCoord]
     ring
   rw [hcoord_eq] at hcoord
   simpa [t] using sub_eq_zero.mp hcoord
@@ -706,7 +706,7 @@ theorem dworkProductApprox_mul_traceRootInverse_sub_one_mem_Q
       (by
         simpa [invCoord] using F.traceRootInverseCoord_mem_Q y)
   have heq : P * (1 + invCoord) - 1 = finiteLogProductCoord (P - 1) invCoord := by
-    unfold finiteLogProductCoord
+    simp only [finiteLogProductCoord]
     ring
   simpa [P, invCoord, heq] using hcoord
 
@@ -726,7 +726,7 @@ theorem finiteLog_dworkProductApprox_mul_traceRootInverse_sub_one_eq_zero
       (artinHasseDworkParameterApproxTo F.toConcreteStickelbergerSetup N) N y
   let invCoord : 𝓞 R' := F.traceRootInverseCoord y
   have heq : P * (1 + invCoord) - 1 = finiteLogProductCoord (P - 1) invCoord := by
-    unfold finiteLogProductCoord
+    simp only [finiteLogProductCoord]
     ring
   calc
     F.finiteLog N (P * (1 + invCoord) - 1)

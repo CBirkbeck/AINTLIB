@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.Infinity
 import HasseWeil.Foundation.Curves.Transcendence
+import HasseWeil.Foundation.Curves.Valuation.Infinity
 import Mathlib.FieldTheory.Minpoly.Field
 
 /-!
@@ -570,3 +570,30 @@ theorem exists_pos_ramificationIdx_ordAtInfty (φ : CurveMap C₁ C₂)
     φ.pullback.toRingHom hreg (φ.pos_ordAtInfty_pullback_coordX_div_coordY hreg)
 
 end HasseWeil.Curves.CurveMap
+
+namespace HasseWeil.EC
+
+/-! ### `nsmul` order-reflection in `WithTop ℤ`
+
+Pure `WithTop ℤ` arithmetic, hosted here because it is consumed by both
+`Isogeny/Ramification.lean` and `Isogeny/Dual/Morphism.lean` (which used to carry one copy each). -/
+
+/-- The coercion `ℤ → WithTop ℤ` commutes with `nsmul`. -/
+theorem withTop_coe_nsmul (q : ℕ) (k : ℤ) :
+    (q • (k : WithTop ℤ)) = (((q • k : ℤ)) : WithTop ℤ) := by
+  induction q with
+  | zero => simp
+  | succ n ih => rw [succ_nsmul, succ_nsmul, ih, ← WithTop.coe_add]
+
+/-- `0 ≤ q • x → 0 ≤ x` in `WithTop ℤ` for `q ≥ 1`. (Order-reflection of `nsmul`.) -/
+theorem nonneg_of_nsmul_nonneg {q : ℕ} (hq : 1 ≤ q) {x : WithTop ℤ}
+    (h : 0 ≤ q • x) : 0 ≤ x := by
+  induction x with
+  | top => exact le_top
+  | coe k =>
+    rw [withTop_coe_nsmul, ← WithTop.coe_zero, WithTop.coe_le_coe, nsmul_eq_mul] at h
+    rw [← WithTop.coe_zero, WithTop.coe_le_coe]
+    exact (mul_nonneg_iff_of_pos_left (by exact_mod_cast hq : (0 : ℤ) < q)).mp h
+
+end HasseWeil.EC
+

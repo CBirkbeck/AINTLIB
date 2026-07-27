@@ -276,6 +276,72 @@ private lemma singular_annulus_symmDiff_vol_via_ae
   rw [symmDiff_ae_version_null hh'_ae, zero_add]
   exact h_meas ε₁ ε₂ hε₂_pos hε₂_le hε₁_lt_δ_meas
 
+/-- Off the symmetric difference of the two localized annuli, the `γ`-indicator integrand and the
+linearized-model indicator integrand agree pointwise. This is the key cancellation step: at a point
+`t` that lies in `Set.Icc a b`, is outside the symmetric difference `S'`, and where the ae-modified
+integrand `f_γ'` agrees with `f_γ` (hypothesis `hfγ_eq`), the two indicator conditions define the
+same value. -/
+private lemma singular_annulus_f_γ_eq_f_lin_outside_symmDiff
+    {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ} {ε₁ ε₂ δ₀' δ₁ : ℝ} {h' : ℝ → ℝ}
+    (hL_pos : 0 < ‖L‖) (hε₁_lt_Lδ₀' : ε₁ < ‖L‖ * δ₀')
+    (h_localize : ∀ t ∈ Set.Icc a b, ‖γ t - γ t₀‖ ≤ ε₁ → |t - t₀| < δ₁)
+    (hδ₁_le_δ₀' : δ₁ ≤ δ₀') {t : ℝ} (ht_Icc : t ∈ Set.Icc a b)
+    (hfγ_eq :
+      (if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0) =
+      (if ε₂ < h' t ∧ h' t ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0))
+    (ht_S : t ∉ symmDiff
+      {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < δ₀' ∧ ε₂ < h' t ∧ h' t ≤ ε₁}
+      {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < δ₀' ∧
+        ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁}) :
+    (if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0) =
+    (if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0) := by
+  by_cases hδ : |t - t₀| < δ₀'
+  · rw [Set.mem_symmDiff] at ht_S
+    push Not at ht_S
+    have h'_iff_lin :
+        (ε₂ < h' t ∧ h' t ≤ ε₁) ↔ (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) :=
+      ⟨fun ⟨h1, h2⟩ ↦ (ht_S.1 ⟨ht_Icc, hδ, h1, h2⟩).2.2,
+       fun ⟨h1, h2⟩ ↦ (ht_S.2 ⟨ht_Icc, hδ, h1, h2⟩).2.2⟩
+    have h_agree :
+        (ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) ↔
+        (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := by
+      by_cases ht_eq : t = t₀
+      · subst ht_eq; simp
+      have hinv_ne : (↑(t - t₀) : ℂ)⁻¹ ≠ 0 :=
+        inv_ne_zero (Complex.ofReal_ne_zero.mpr (sub_ne_zero.mpr ht_eq))
+      refine ⟨fun hγ_cond ↦ ?_, fun hlin_cond ↦ ?_⟩
+      · by_contra h_neg
+        rw [if_pos hγ_cond, if_neg (mt h'_iff_lin.mp h_neg)] at hfγ_eq
+        exact hinv_ne hfγ_eq
+      · by_contra h_neg
+        rw [if_neg h_neg, if_pos (h'_iff_lin.mpr hlin_cond)] at hfγ_eq
+        exact hinv_ne hfγ_eq.symm
+    by_cases hcond : ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁
+    · rw [if_pos hcond, if_pos (h_agree.mp hcond)]
+    · rw [if_neg hcond, if_neg (mt h_agree.mpr hcond)]
+  · have hγ_fail : ¬(ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) :=
+      fun ⟨_, h_up⟩ ↦ hδ ((h_localize t ht_Icc h_up).trans_le hδ₁_le_δ₀')
+    have hlin_fail : ¬(ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := fun ⟨_, h_le⟩ ↦ by
+      linarith [mul_le_mul_of_nonneg_left (not_lt.mp hδ) hL_pos.le]
+    rw [if_neg hγ_fail, if_neg hlin_fail]
+
+/-- The closing arithmetic step of `singular_annulus_bound_explicit`: the product of the measure
+bound `Kmeas · ε₁² / ‖L‖³` and the pointwise bound `2‖L‖ / ε₂` is at most `Csing · ε₁` with
+`Csing = 4 Kmeas / ‖L‖²`, using `ε₁ ≤ 2 ε₂`. -/
+private lemma singular_annulus_bound_arith {Kmeas ε₁ ε₂ : ℝ} {L : ℂ}
+    (hKmeas_pos : 0 < Kmeas) (hL_pos : 0 < ‖L‖) (hε₂_pos : 0 < ε₂)
+    (hε₁_pos : 0 < ε₁) (h_ratio : ε₁ ≤ 2 * ε₂) :
+    Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3 * (2 * ‖L‖ / ε₂) ≤ 4 * Kmeas / ‖L‖ ^ 2 * ε₁ := by
+  rw [show 4 * Kmeas / ‖L‖ ^ 2 * ε₁ = 4 * Kmeas * ε₁ / ‖L‖ ^ 2 by ring,
+    show Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3 * (2 * ‖L‖ / ε₂) =
+        2 * Kmeas * ε₁ ^ 2 * ‖L‖ / (‖L‖ ^ 3 * ε₂) by ring,
+    div_le_div_iff₀ (by positivity : (0:ℝ) < ‖L‖ ^ 3 * ε₂)
+      (by positivity : (0:ℝ) < ‖L‖ ^ 2)]
+  have key : ε₁ ^ 2 ≤ ε₁ * (2 * ε₂) := by
+    rw [sq]; exact mul_le_mul_of_nonneg_left h_ratio hε₁_pos.le
+  nlinarith [mul_pos hKmeas_pos (pow_pos hL_pos 3),
+    show ‖L‖ ^ 3 = ‖L‖ * ‖L‖ ^ 2 from by ring]
+
 /-- Explicit `ε`-independent bound on the singular annular integral for `C²` curves with
 nonzero derivative: the integral `∫ a..b (1[ε₂ < ‖γ t − γ t₀‖ ≤ ε₁]) · (t − t₀)⁻¹` is at most
 `Csing · ε₁` for all sufficiently small `ε₁` with `ε₂ ≤ ε₁ ≤ 2 ε₂`. -/
@@ -338,12 +404,8 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     singular_annulus_diff_pointwise_bound hL_pos hε₂_pos h_localize
       ((min_le_right _ _).trans (min_le_right _ _)) h_upper t ht
   have hf_lin_meas : Measurable f_lin := singular_annulus_f_lin_measurable
-  have hf_lin_bound : ∀ t : ℝ, ‖f_lin t‖ ≤ bound :=
-    fun t ↦ singular_annulus_f_lin_bound hL_pos hε₂_pos t
-  have hf_lin_int : IntervalIntegrable f_lin volume a b := by
-    rw [intervalIntegrable_iff]
-    exact .of_bound measure_Ioc_lt_top
-      hf_lin_meas.aestronglyMeasurable.restrict bound (.of_forall hf_lin_bound)
+  have hf_lin_int : IntervalIntegrable f_lin volume a b :=
+    singular_annulus_f_lin_intervalIntegrable (t₀ := t₀) (ε₁ := ε₁) hL_pos hε₂_pos a b
   have hf_γ_eq : ∀ t, f_γ t = d t + f_lin t := fun _ ↦ by simp [d]
   have h_norm_aesm : AEStronglyMeasurable (fun t ↦ ‖γ t - γ t₀‖)
       (volume.restrict (Set.Icc a b)) :=
@@ -421,38 +483,9 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     suffices h_dt_zero : d t = 0 by rw [(ht ht_Icc).symm, h_dt_zero, norm_zero]
     show f_γ t - f_lin t = 0
     have hfγ_eq : f_γ t = f_γ' t := sub_left_inj.mp (ht ht_Icc)
-    by_cases hδ : |t - t₀| < δ₀'
-    · have h_not_sd := ht_S
-      rw [Set.mem_symmDiff] at h_not_sd
-      push Not at h_not_sd
-      have h'_iff_lin :
-          (ε₂ < h' t ∧ h' t ≤ ε₁) ↔ (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) :=
-        ⟨fun ⟨h1, h2⟩ ↦ (h_not_sd.1 ⟨ht_Icc, hδ, h1, h2⟩).2.2,
-         fun ⟨h1, h2⟩ ↦ (h_not_sd.2 ⟨ht_Icc, hδ, h1, h2⟩).2.2⟩
-      have h_agree :
-          (ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) ↔
-          (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := by
-        by_cases ht_eq : t = t₀
-        · subst ht_eq; simp
-        have hinv_ne : (↑(t - t₀) : ℂ)⁻¹ ≠ 0 :=
-          inv_ne_zero (Complex.ofReal_ne_zero.mpr (sub_ne_zero.mpr ht_eq))
-        refine ⟨fun hγ_cond ↦ ?_, fun hlin_cond ↦ ?_⟩
-        · by_contra h_neg
-          rw [show f_γ t = (↑(t - t₀) : ℂ)⁻¹ from if_pos hγ_cond,
-            show f_γ' t = 0 from if_neg (mt h'_iff_lin.mp h_neg)] at hfγ_eq
-          exact hinv_ne hfγ_eq
-        · by_contra h_neg
-          rw [show f_γ' t = (↑(t - t₀) : ℂ)⁻¹ from if_pos (h'_iff_lin.mpr hlin_cond),
-            show f_γ t = 0 from if_neg h_neg] at hfγ_eq
-          exact hinv_ne hfγ_eq.symm
-      by_cases hcond : ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁
-      · simp [f_γ, f_lin, hcond, h_agree.mp hcond]
-      · simp [f_γ, f_lin, hcond, mt h_agree.mpr hcond]
-    · have hγ_fail : ¬(ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) :=
-        fun ⟨_, h_up⟩ ↦ hδ ((h_localize t ht_Icc h_up).trans_le (min_le_left _ _))
-      have hlin_fail : ¬(ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := fun ⟨_, h_le⟩ ↦ by
-        linarith [mul_le_mul_of_nonneg_left (not_lt.mp hδ) hL_pos.le]
-      simp [f_γ, f_lin, hγ_fail, hlin_fail]
+    rw [sub_eq_zero]
+    exact singular_annulus_f_γ_eq_f_lin_outside_symmDiff hL_pos hε₁_lt_Lδ₀' h_localize
+      (min_le_left _ _) ht_Icc hfγ_eq ht_S
   calc ‖∫ t in Set.Ioc a b, d' t‖
       ≤ ∫ t in Set.Ioc a b, g_comp t :=
         MeasureTheory.norm_integral_le_of_norm_le hg_int_Ioc h_pw_le_restrict
@@ -466,16 +499,8 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     _ ≤ (Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3) * bound :=
         mul_le_mul_of_nonneg_right
           (ENNReal.toReal_le_of_le_ofReal (by positivity) hS'_vol_bound) hbound_pos.le
-    _ ≤ Csing * ε₁ := by
-        rw [show Csing * ε₁ = 4 * Kmeas * ε₁ / ‖L‖ ^ 2 by simp [Csing]; ring,
-          show Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3 * bound = 2 * Kmeas * ε₁ ^ 2 * ‖L‖ / (‖L‖ ^ 3 * ε₂) by
-            simp [bound]; ring,
-          div_le_div_iff₀ (by positivity : (0:ℝ) < ‖L‖ ^ 3 * ε₂)
-            (by positivity : (0:ℝ) < ‖L‖ ^ 2)]
-        have key : ε₁ ^ 2 ≤ ε₁ * (2 * ε₂) := by
-          rw [sq]; exact mul_le_mul_of_nonneg_left h_ratio hε₁_pos.le
-        nlinarith [mul_pos hKmeas_pos (pow_pos hL_pos 3),
-          show ‖L‖ ^ 3 = ‖L‖ * ‖L‖ ^ 2 from by ring]
+    _ ≤ Csing * ε₁ :=
+        singular_annulus_bound_arith hKmeas_pos hL_pos hε₂_pos hε₁_pos h_ratio
 
 
 end

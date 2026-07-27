@@ -49,25 +49,24 @@ def shiftSL (q : ℤ) : SL(2, ℤ) :=
 lemma shiftSL_mem_Gamma1 (M : ℕ) (q : ℤ) : shiftSL q ∈ Gamma1 M := by
   rw [Gamma1_mem]; refine ⟨?_, ?_, ?_⟩ <;> simp [shiftSL]
 
-private lemma glMap_mapGL_eq_R (s : SL(2, ℤ)) :
-    glMap (mapGL ℚ s) = (mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) s := by
-  apply Units.ext; ext i j
-  simp only [glMap, Matrix.GeneralLinearGroup.map]
-  exact (IsScalarTower.algebraMap_apply ℤ ℚ ℝ (s.1 i j)).symm
-
-private lemma slash_mapGL_Q_Gamma1 (M : ℕ) [NeZero M] (k : ℤ) (S : SL(2, ℤ))
+/-- Slashing by a `Γ₁(M)`-element of `SL₂(ℤ)`, viewed inside `GL₂(ℚ)`, fixes a level-`M` form. -/
+lemma slash_mapGL_Q_Gamma1 (M : ℕ) [NeZero M] (k : ℤ) (S : SL(2, ℤ))
     (hS : S ∈ Gamma1 M) (g : ModularForm ((Gamma1 M).map (mapGL ℝ)) k) :
     ⇑g ∣[k] (mapGL ℚ S : GL (Fin 2) ℚ) = ⇑g := by
   show ⇑g ∣[k] glMap (mapGL ℚ S) = ⇑g
-  rw [glMap_mapGL_eq_R]
+  rw [glMap_mapGL_eq]
   exact g.slash_action_eq' (mapGL ℝ S) (Subgroup.mem_map.mpr ⟨S, hS, rfl⟩)
 
 open Matrix in
-private lemma T_p_upper_mod (p : ℕ) (hp : 0 < p) (a : ℕ) :
+/-- The upper transversal rep `T_p_upper p a` differs from `T_p_upper p (a % p)` by a shear. -/
+lemma T_p_upper_mod (p : ℕ) (hp : 0 < p) (a : ℕ) :
     T_p_upper p hp a = mapGL ℚ (shiftSL (↑(a / p : ℕ) : ℤ)) * T_p_upper p hp (a % p) := by
   apply Units.ext
+  have hsh : (↑(mapGL ℚ (shiftSL (↑(a / p : ℕ) : ℤ))) : Matrix (Fin 2) (Fin 2) ℚ) =
+      (!![1, (↑(a / p : ℕ) : ℤ); 0, 1]).map Int.cast :=
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
   ext i j
-  simp only [T_p_upper, shiftSL, mapGL_coe_matrix, Matrix.GeneralLinearGroup.mkOfDetNeZero,
+  simp only [T_p_upper, hsh, Matrix.map_apply, Matrix.GeneralLinearGroup.mkOfDetNeZero,
     Matrix.mul_apply, Fin.sum_univ_two, Units.val_mul]
   fin_cases i <;> fin_cases j <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
   rw [← Int.natCast_ediv]
@@ -75,7 +74,8 @@ private lemma T_p_upper_mod (p : ℕ) (hp : 0 < p) (a : ℕ) :
   exact_mod_cast show (a : ℤ) = (a % p : ℤ) + (a / p : ℤ) * (p : ℤ) by
     have := Int.emod_add_mul_ediv (a : ℤ) (p : ℤ); linarith
 
-private lemma slash_T_p_upper_mod (M : ℕ) [NeZero M] (k : ℤ) (p : ℕ) (hp : 0 < p) (a : ℕ)
+/-- Slashing by `T_p_upper p a` depends only on `a % p`. -/
+lemma slash_T_p_upper_mod (M : ℕ) [NeZero M] (k : ℤ) (p : ℕ) (hp : 0 < p) (a : ℕ)
     (g : ModularForm ((Gamma1 M).map (mapGL ℝ)) k) :
     ⇑g ∣[k] (T_p_upper p hp a : GL (Fin 2) ℚ) =
       ⇑g ∣[k] (T_p_upper p hp (a % p) : GL (Fin 2) ℚ) := by
@@ -84,7 +84,8 @@ private lemma slash_T_p_upper_mod (M : ℕ) [NeZero M] (k : ℤ) (p : ℕ) (hp :
   exact slash_mapGL_Q_Gamma1 M k (shiftSL (↑(a / p : ℕ))) (shiftSL_mem_Gamma1 M _) g
 
 open Matrix in
-private lemma levelRaise_mul_T_p_upper (d : ℕ) [NeZero d] (p : ℕ) (hp : 0 < p) (b : ℕ) :
+/-- The level-raise matrix intertwines `T_p_upper p b` with `T_p_upper p (d * b)`. -/
+lemma levelRaise_mul_T_p_upper (d : ℕ) [NeZero d] (p : ℕ) (hp : 0 < p) (b : ℕ) :
     levelRaiseMatrix d * glMap (T_p_upper p hp b) =
       glMap (T_p_upper p hp (d * b)) * levelRaiseMatrix d := by
   apply Matrix.GeneralLinearGroup.ext
@@ -105,7 +106,8 @@ private lemma levelRaise_mul_T_p_lower (d : ℕ) [NeZero d] (p : ℕ) (hp : 0 < 
     Matrix.GeneralLinearGroup.mkOfDetNeZero]
   fin_cases i <;> fin_cases j <;> (simp; try ring)
 
-private lemma sum_reindex_mul_mod {α : Type*} [AddCommMonoid α] (d p : ℕ) (hp : Nat.Prime p)
+/-- For `d` coprime to a prime `p`, `b ↦ d * b % p` permutes `Finset.range p`. -/
+lemma sum_reindex_mul_mod {α : Type*} [AddCommMonoid α] (d p : ℕ) (hp : Nat.Prime p)
     (hd : Nat.Coprime d p) (f : ℕ → α) :
     ∑ b ∈ Finset.range p, f (d * b % p) = ∑ b ∈ Finset.range p, f b := by
   haveI : Fact p.Prime := ⟨hp⟩
@@ -132,7 +134,8 @@ private lemma sum_reindex_mul_mod {α : Type*} [AddCommMonoid α] (d p : ℕ) (h
       (by rw [Finset.card_image_of_injOn h_inj])
   exact Finset.mem_image.mp (by rw [h_img]; exact hb)
 
-private lemma sum_slash_R (k : ℤ) {ι : Type*} (s : Finset ι) (φ : ι → (UpperHalfPlane → ℂ))
+/-- The slash action distributes over a `Finset` sum. -/
+lemma sum_slash_R (k : ℤ) {ι : Type*} (s : Finset ι) (φ : ι → (UpperHalfPlane → ℂ))
     (g : GL (Fin 2) ℝ) :
     (∑ b ∈ s, φ b) ∣[k] g = ∑ b ∈ s, (φ b ∣[k] g) := by
   induction s using Finset.cons_induction with
@@ -188,7 +191,8 @@ lemma diamondOp_levelRaise_eq (a : (ZMod N)ˣ) (M : ℕ) (d : ℕ) [NeZero M] [N
         (Gamma0_dmul_lower_left_dvd d M (g₀ : SL(2, ℤ)) g₀.property)).symm,
     SlashAction.slash_mul, ← hh]
 
-private lemma heckeT_p_ut_levelRaise
+/-- The upper-triangular part of `T_p` applied to a level-raise `ι_d g`. -/
+lemma heckeT_p_ut_levelRaise
     (p : ℕ) (hp : Nat.Prime p) (M d : ℕ) [NeZero M] [NeZero d]
     (g : CuspForm ((Gamma1 M).map (mapGL ℝ)) k) :
     heckeT_p_ut k p hp.pos (⇑((levelRaise M d k g).toModularForm')) =
@@ -213,7 +217,8 @@ private lemma heckeT_p_ut_levelRaise
     ⇑g.toModularForm' ∣[k] (T_p_upper p hp.pos (d * b % p) : GL (Fin 2) ℚ) from
     fun b ↦ slash_T_p_upper_mod M k p hp.pos (d * b) g.toModularForm']
 
-private lemma heckeT_p_ut_levelRaise_reindex
+/-- Reindexed form of `heckeT_p_ut_levelRaise`, for `d` coprime to `p`. -/
+lemma heckeT_p_ut_levelRaise_reindex
     (p : ℕ) (hp : Nat.Prime p) (M d : ℕ) [NeZero M] [NeZero d]
     (hdp : Nat.Coprime d p) (g : CuspForm ((Gamma1 M).map (mapGL ℝ)) k) :
     (∑ b ∈ Finset.range p, ((d : ℂ) ^ (1 - k)) •
@@ -391,25 +396,6 @@ lemma cuspFormsNewExtended_le_cuspFormsNew {N : ℕ} [NeZero N] {k : ℤ} :
     cuspFormsNewExtended N k ≤ cuspFormsNew N k :=
   fun _ hf g hg ↦ hf g (cuspFormsOld_le_cuspFormsOldExtended hg)
 
-private lemma heckeT_n_cusp_decomp_of_mul {L : ℕ} [NeZero L] (k : ℤ) (a b m : ℕ) [NeZero a]
-    [NeZero b] [NeZero m] (h_mul : heckeT_n (N := L) k m = heckeT_n k a * heckeT_n k b)
-    (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k) :
-    heckeT_n_cusp k m f = heckeT_n_cusp k a (heckeT_n_cusp k b f) := by
-  apply CuspForm.ext
-  intro z
-  show ((heckeT_n (N := L) k m) f.toModularForm').toFun z =
-    ((heckeT_n k a) ((heckeT_n k b) f.toModularForm')).toFun z
-  simp only [ModularForm.toFun_eq_coe]
-  rw [h_mul]
-  rfl
-
-private lemma heckeT_n_cusp_one {L : ℕ} [NeZero L] (k : ℤ)
-    (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k) : heckeT_n_cusp k 1 f = f := by
-  apply CuspForm.ext
-  intro w
-  show (heckeT_n k 1 f.toModularForm').toFun w = f w
-  rw [heckeT_n_one]; rfl
-
 private lemma heckeT_n_cusp_ppow_succ_succ
     {L : ℕ} [NeZero L] (k : ℤ) {p : ℕ} (hp : Nat.Prime p) (hpL : Nat.Coprime p L)
     (r : ℕ) (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k) :
@@ -549,7 +535,7 @@ private lemma heckeT_n_levelRaise_comm_step
   by_cases hpv_lt : p ^ v < m
   · have hDecomp : ∀ {L : ℕ} [NeZero L] (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k),
         heckeT_n_cusp k m f = heckeT_n_cusp k (p ^ v) (heckeT_n_cusp k (m / p ^ v) f) :=
-      fun {L} _ f ↦ heckeT_n_cusp_decomp_of_mul k (p ^ v) (m / p ^ v) m
+      fun {L} _ f ↦ heckeT_n_cusp_decomp_of_mul (p ^ v) (m / p ^ v) m
         (heckeT_n_mul_ppow_quot (N := L) (k := k) m hle p hpp rfl v rfl hv_pos hdiv_pos) f
     rw [hDecomp, ih (m / p ^ v) (heckeT_n_unfold_lt m hle) hdiv_pos
         (Nat.Coprime.coprime_dvd_left (Nat.div_dvd_of_dvd (Nat.ordProj_dvd m p)) hcop) g',

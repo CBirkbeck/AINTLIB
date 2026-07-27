@@ -82,12 +82,23 @@ private lemma T_p_lower_factor_through_diag_1p (N : ℕ) [NeZero N] (p : ℕ) (h
   obtain ⟨u, v, h_bezout⟩ := hpN.isCoprime
   set σ : SL(2, ℤ) := ⟨!![(p : ℤ), -v; (N : ℤ), u], by grind [det_fin_two_of]⟩
   set τ : SL(2, ℤ) := ⟨!![u * p, v; -(N : ℤ), 1], by grind [det_fin_two_of]⟩
-  refine ⟨mapGL ℚ σ, Subgroup.mem_map_of_mem _ (by simp [Gamma0_mem, σ]),
-    mapGL ℚ τ, Subgroup.mem_map_of_mem _ (by simp [Gamma0_mem, τ]), ?_⟩
+  have hσQ : (↑(mapGL ℚ σ) : Matrix (Fin 2) (Fin 2) ℚ) =
+      (!![(p : ℤ), -v; (N : ℤ), u]).map Int.cast :=
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+  have hτQ : (↑(mapGL ℚ τ) : Matrix (Fin 2) (Fin 2) ℚ) =
+      (!![u * p, v; -(N : ℤ), 1]).map Int.cast :=
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+  refine ⟨mapGL ℚ σ, Subgroup.mem_map_of_mem _ (Gamma0_mem.mpr (by
+      show (((N : ℤ) : ℤ) : ZMod N) = 0
+      simp)),
+    mapGL ℚ τ, Subgroup.mem_map_of_mem _ (Gamma0_mem.mpr (by
+      show ((-(N : ℤ) : ℤ) : ZMod N) = 0
+      simp)), ?_⟩
   have h_bezout_Q : (u : ℚ) * p + (v : ℚ) * N = 1 := by exact_mod_cast h_bezout
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [σ, τ, Matrix.mul_apply, Fin.sum_univ_two, Fin.forall_fin_two, hp.pos] <;> grind
+    simp [hσQ, hτQ, Matrix.map_apply, Matrix.mul_apply, Fin.sum_univ_two,
+      Fin.forall_fin_two, hp.pos] <;> grind
 
 /-- Membership of `T_p_upper(b)` in the Γ₀(N)-double coset `D_p_Gamma0`, via the
 factorization `T_p_upper(b) = diag(1,p) · σ_b` with `σ_b = [[1,b],[0,1]] ∈ Γ₀(N)`. -/
@@ -95,11 +106,17 @@ lemma T_p_upper_mem_D_p_Gamma0 (N : ℕ) [NeZero N] (p : ℕ) (hp : Nat.Prime p)
     (T_p_upper p hp.pos b : GL (Fin 2) ℚ) ∈
       HeckeRing.HeckeCoset.toSet (D_p_Gamma0 N p hp.pos) := by
   set σ_b : SL(2, ℤ) := ⟨!![1, (b : ℤ); 0, 1], by simp [det_fin_two]⟩
+  have hσbQ : (↑(mapGL ℚ σ_b) : Matrix (Fin 2) (Fin 2) ℚ) =
+      (!![1, (b : ℤ); 0, 1]).map Int.cast :=
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
   refine mem_D_p_Gamma0_of_factor_through_diag N p hp.pos _ 1 (mapGL ℚ σ_b) (one_mem _)
-    (Subgroup.mem_map_of_mem _ (by simp [Gamma0_mem, σ_b])) ?_
+    (Subgroup.mem_map_of_mem _ (Gamma0_mem.mpr (by
+      show ((0 : ℤ) : ZMod N) = 0
+      simp))) ?_
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [σ_b, Matrix.mul_apply, Fin.sum_univ_two, Fin.forall_fin_two, hp.pos]
+    simp [hσbQ, Matrix.map_apply, Matrix.mul_apply, Fin.sum_univ_two,
+      Fin.forall_fin_two, hp.pos]
 
 /-- Membership of `T_p_lower` in the Γ₀(N)-double coset `D_p_Gamma0`, via the Bezout
 factorization `T_p_lower = σ · diag(1,p) · τ` with `σ, τ ∈ Γ₀(N)`. -/

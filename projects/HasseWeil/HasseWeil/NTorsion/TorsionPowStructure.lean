@@ -116,6 +116,7 @@ noncomputable def smulPow (n : ℕ) :
       rw [smul_smul, mul_comm, ← smul_smul, hP, smul_zero])
 
 omit [IsAlgClosed F] hℓ hℓF in
+/-- The point underlying `smulPow` is `[ℓⁿ]` applied to the underlying point. -/
 @[simp] theorem smulPow_coe (n : ℕ) (P : W.toAffine[((ℓ ^ (n + 1) : ℕ) : ℤ)]) :
     (smulPow W ℓ n P : W.toAffine.Point) = ((ℓ ^ n : ℕ) : ℤ) • (P : W.toAffine.Point) :=
   rfl
@@ -396,7 +397,8 @@ noncomputable def liftBasisData (n : ℕ)
 
 /-- **L4 (coherent).** A coherent sequence of `ZMod (ℓⁿ)`-bases of `E[ℓⁿ]`. The level-`0` basis is
 the (trivial) basis of `E[1] = ⊥`; the level-`1` basis is the field-theoretic basis
-`torsion_ell_basis`; and for `n ≥ 1` the level-`(n+1)` basis vectors are `[ℓ]`-lifts of the level-`n`
+`torsion_ell_basis`; and for `n ≥ 1` the level-`(n+1)` basis vectors are `[ℓ]`-lifts of the
+level-`n`
 ones (`liftBasisData`), so `tateConn (tateBasis (n+1) i) = tateBasis n i` holds by construction (see
 `tateConn_tateBasis`). This coherence is what the Tate-limit step (L10) needs. -/
 noncomputable def tateBasis :

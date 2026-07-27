@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartTensor
 import ModularCurves.EllipticCurve.WeierstrassModel
 
@@ -115,9 +120,9 @@ noncomputable def biChartRingAwayTensorEquiv :
 /-- **(β1)** The `(i,j)` chart-product piece of `E ×_R E` is `Spec` of the chart-product ring.
 
 This is the identification that lets `lawOneTriple`/`lawTwoTriple` — elements of
-`biChartRing W i j`, proven to satisfy the curve equation there (`equation_lawTwoTriple_of_isDomain`)
-— be read as regular functions on an open subscheme of `E ×_R E`, which is what the `addOnZ` /
-`addOnY` chart morphisms consume (β3). -/
+`biChartRing W i j`, proven to satisfy the curve equation there
+(`equation_lawTwoTriple_of_isDomain`) — be read as regular functions on an open subscheme of
+`E ×_R E`, which is what the `addOnZ` / `addOnY` chart morphisms consume (β3). -/
 noncomputable def chartPieceIso :
     pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W) ≅
       Spec (CommRingCat.of (biChartRing W i j)) :=
@@ -125,6 +130,7 @@ noncomputable def chartPieceIso :
     (Scheme.Spec.mapIso
       ((biChartRingAwayTensorEquiv W i j).toRingEquiv.toCommRingCatIso).op)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `chartPieceIso`'s inverse, in the two-step form its legs are computed from. -/
 lemma chartPieceIso_inv :
     (chartPieceIso W i j).inv =

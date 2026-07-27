@@ -225,6 +225,7 @@ private lemma _antidiag_cons {n : ℕ} (k : ℕ) (m : Fin n →₀ ℕ) :
     subst hε
     rw [← _finsupp_cons_add, hab, hβγ]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(L2.1.g)** Forward sends `*` to `*`. The substantive content. Uses
 `MvPowerSeries.coeff_mul` (convolution over `Fin (n+1) →₀ ℕ` antidiagonal) and
 `PowerSeries.coeff_mul` (convolution over `ℕ` antidiagonal of products in
@@ -1226,6 +1227,7 @@ theorem mvPowerSeriesEval_surjective_inductive_step [IsNoetherianRing R]
     I hn f hf hspan k r P _hP_approx
   exact ⟨P + δ, hδ⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(L4.2.support)**: strengthened inductive step. In addition to producing
 a power series `P'` that improves the approximation from `I^k` to `I^(k+1)`,
 the chosen `P'` agrees with the previous `P` on coefficients of total degree

@@ -395,7 +395,7 @@ theorem function_field_x_separable :
   -- `map_ofNat` is needed to rebridge `Polynomial.C (2 : K[X])` with
   -- `Polynomial.C (Polynomial.C (2 : K))` for `ring1` to close the gap.)
   have h_deriv_eq : W.toAffine.polynomial.derivative = W.toAffine.polynomialY := by
-    unfold Affine.polynomial Affine.polynomialY
+    simp only [Affine.polynomial, Affine.polynomialY]
     simp only [Polynomial.derivative_C, Polynomial.derivative_X,
       Polynomial.derivative_add, Polynomial.derivative_sub,
       Polynomial.derivative_mul, Polynomial.derivative_sq, map_ofNat]

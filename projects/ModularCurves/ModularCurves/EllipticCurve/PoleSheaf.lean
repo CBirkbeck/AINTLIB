@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.Picard.Dual
 import ModularCurves.Picard.Pic
@@ -20,6 +25,7 @@ open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
 
 universe u
 
+set_option backward.isDefEq.respectTransparency false in
 local instance (X : Scheme.{u}) :
     (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).IsLocalization
       (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj)) := by
@@ -133,6 +139,7 @@ noncomputable def idealModuleToUnit {X Y : Scheme.{u}} (f : X ⟶ Y) :
     idealModule f ⟶ Scheme.Modules.unitObj Y :=
   kernel.ι (SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Before adjunction, the base-change comparison for a section ideal is the map
 from the original kernel to the pushforward of the base-changed kernel. -/
 noncomputable def idealModuleToPushforwardBaseChangeRaw
@@ -294,6 +301,7 @@ noncomputable def restrictIdealModuleToUnit {X Y Y' : Scheme.{u}}
   (Scheme.Modules.restrictFunctor g).map (idealModuleToUnit f) ≫
     (Scheme.Modules.restrictUnitIso g).hom
 
+set_option backward.isDefEq.respectTransparency false in
 /-- If the kernel ideal of `f'` is the pullback of the kernel ideal of `f`, then
 the restricted ideal module maps into the ideal module of `f'`. -/
 theorem restrictIdealModuleToUnit_comp_zero {X X' Y Y' : Scheme.{u}}
@@ -362,6 +370,7 @@ theorem restrictIdealModuleHom_app_toUnit {X X' Y Y' : Scheme.{u}}
     (restrictIdealModuleHom_comp_toUnit f g f' hker)
   exact congr($(h) x)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The canonical ideal-module map is bijective on every affine open. -/
 theorem restrictIdealModuleHom_app_bijective {X X' Y Y' : Scheme.{u}}
     (f : X ⟶ Y) (g : Y' ⟶ Y) [IsOpenImmersion g] (f' : X' ⟶ Y')
@@ -467,6 +476,7 @@ theorem ideal_basicOpen_span_nzd {Y : Scheme.{u}} (I : Y.IdealSheafData)
   · exact IsLocalization.map_nonZeroDivisors_le (Submonoid.powers t)
       Γ(Y, (Y.affineBasicOpen t).1) ⟨r, hnzd, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The element of the kernel sheaf corresponding to an element of the affine kernel
 ideal. -/
 noncomputable def localIdealElement {X Y : Scheme.{u}} (f : X ⟶ Y)
@@ -474,6 +484,7 @@ noncomputable def localIdealElement {X Y : Scheme.{u}} (f : X ⟶ Y)
     Γ(idealModule f, U.1) :=
   (idealModuleAppIdealIso f U).inv ⟨r, hr⟩
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem idealModuleAppIdealIso_hom_localIdealElement {X Y : Scheme.{u}}
     (f : X ⟶ Y) [QuasiCompact f] (U : Y.affineOpens) (r : Γ(Y, U.1))
@@ -515,6 +526,7 @@ theorem idealModuleAppIdealIso_coe_map_localIdealElement {X Y : Scheme.{u}}
   change Y.presheaf.map i r = _
   congr
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A section over the top open determines the compatible family of all its
 restrictions. -/
 noncomputable def moduleSectionsOfTop {X : Scheme.{u}} (M : X.Modules)
@@ -687,6 +699,7 @@ theorem localIdealGeneratorHom_chartBasicOpen_formula {X Y : Scheme.{u}}
       (Subsingleton.elim _ _)).hom (localIdealElement f U r hr))
   · rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A Cartier generator makes the local ideal-generator morphism bijective on every
 basic open of its affine chart. -/
 theorem localIdealGeneratorHom_chartBasicOpen_bijective {X Y : Scheme.{u}}
@@ -772,8 +785,7 @@ theorem idealModule_isInvertible_of_locallyPrincipal {X Y : Scheme.{u}}
   · have hr : r y ∈ f.ker.ideal (U y) := by
       rw [hspan y]
       exact Ideal.mem_span_singleton_self (r y)
-    exact ⟨(Scheme.Modules.restrictFunctorIsoPullback (U y).1.ι).symm.app
-        (idealModule f) ≪≫
+    exact ⟨Scheme.Modules.pullbackIsoOfRestrictIso (idealModule f) (U y).1
       (localIdealGeneratorIso f (U y) (r y) hr (hspan y) (hnzd y)).symm⟩
 
 /-- Multiplication by a top-open section of the structure sheaf. -/
@@ -1593,6 +1605,7 @@ noncomputable def sectionIdealModule {C S : Scheme.{u}} (π : C ⟶ S)
   letI : QuasiCompact z := inferInstance
   exact idealModule z
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The zero-section ideal commutes with restriction to an open subscheme of the base. -/
 noncomputable def sectionIdealModuleRestrictIso
     {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
@@ -1626,6 +1639,7 @@ theorem sectionIdealModule_isInvertible {C S : Scheme.{u}} {π : C ⟶ S}
   exact idealModule_isInvertible_of_locallyPrincipal z
     (RelEffCartierDiv.sectionDivisor_isOfficial hsm z hz).locallyPrincipal
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The ideal module of the zero section commutes with arbitrary base change. -/
 theorem idealModuleBaseChangeHom_isIso
     {C S T : Scheme.{u}} {π : C ⟶ S}
@@ -1695,6 +1709,7 @@ theorem idealModuleBaseChangeHom_isIso
   exact @Functor.ReflectsIsomorphisms.reflects _ _ _ _ F hreflect _ _
     (idealModuleBaseChangeHom z hz t) hmap
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The canonical arbitrary-base-change isomorphism for the zero-section ideal. -/
 noncomputable def sectionIdealModuleBaseChangeIso
     {C S T : Scheme.{u}} {π : C ⟶ S}

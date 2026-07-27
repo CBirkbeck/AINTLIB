@@ -3,19 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Basic
-import HasseWeil.Foundation.OrdAtInftyBridge
-import HasseWeil.Foundation.OmegaPullbackCoeff
 import HasseWeil.Foundation.AdditionPullback
 import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
 import HasseWeil.Foundation.Curves.WithTopArith
+import HasseWeil.Foundation.OmegaPullbackCoeff
+import HasseWeil.Foundation.OrdAtInftyBridge
+import HasseWeil.Isogeny.Basic
 
 /-!
 # The basepoint condition for `[n]`: `MulByIntBasepoint` holds unconditionally
 
 This file discharges `HasseWeil.EC.MulByIntBasepoint W hn` (the
 `ord_∞`-regularity basepoint condition for the pullback of `[n]`,
-`IsogenyAG.lean`) for **every** `n ≠ 0`, with **no** separability hypothesis
+`Isogeny/Basic.lean`) for **every** `n ≠ 0`, with **no** separability hypothesis
 `(n : F) ≠ 0` — the inseparable case `char F ∣ n` is covered.
 
 ## The `{1, y}`-parity route
@@ -314,21 +314,6 @@ theorem mulByInt_pullbackAlgHom_y_gen (n : ℤ) (hn : n ≠ 0) :
     dif_neg hn
   exact hpb ▸ mulByInt_pullback_y W n hn
 
-/-- `mulByInt_y W n ≠ 0`: it is the image of `y_gen ≠ 0` under the field
-embedding `[n]^*`. -/
-theorem mulByInt_y_ne_zero' (n : ℤ) (hn : n ≠ 0) : mulByInt_y W n ≠ 0 := by
-  classical
-  rw [← mulByInt_pullbackAlgHom_y_gen W n hn]
-  exact (map_ne_zero (mulByInt_pullbackAlgHom W n hn)).mpr (y_gen_ne_zero W)
-
-/-- `y_gen W` and `(W_smooth W).coordYInFunctionField` are the same element of
-`KE`. -/
-theorem y_gen_eq_coordYInFunctionField' :
-    y_gen W = (W_smooth W).coordYInFunctionField := by
-  classical
-  exact (coordY_W_smooth_eq_y_gen W).symm.trans
-    ((W_smooth W).coordY_eq_coordYInFunctionField)
-
 /-- The pullback of a polynomial in `x`: `[n]^*(p(x)) = p(mulByInt_x W n)`.
 The algebraMap factors through the coordinate ring, where the pullback is
 `mulByInt_coordHom = AdjoinRoot.lift (mulByInt_xHom W n) …`, and on
@@ -408,18 +393,13 @@ theorem ord_mulByInt_pullback_algebraMap_fracPolyX (n : ℤ) (hn : n ≠ 0)
 
 /-! ### The one-sided `y`-order bound from the curve equation -/
 
-omit [W.toAffine.IsElliptic] in
-private theorem le_ordAtInfty_zero' (b : WithTop ℤ) :
-    b ≤ (W_smooth W).ordAtInfty (0 : KE) :=
-  le_of_le_of_eq le_top ((W_smooth W).ordAtInfty_zero).symm
-
 /-- **One-sided `y`-order bound**: if `ord_∞(mulByInt_x W n) = 2m` with
 `m ≤ -1`, then `ord_∞(mulByInt_y W n) ≥ 3m` — **no** `(n : F) ≠ 0` hypothesis.
 
 The pair `(mulByInt_x, mulByInt_y)` satisfies the Weierstrass equation
 (`pullback_equation` + `mulByInt_pullback_x/y`), so the abstract bound
 `le_ordAtInfty_y_of_weierstrass` applies. One-sided companion of
-`ordAtInfty_mulByInt_y_eq_of_x` (`AdditionPullback/Frobenius.lean`, which is
+`ordAtInfty_mulByInt_y_eq_of_x` (`Isogeny/Frobenius/OrdAtInfty.lean`, which is
 `[Fintype K]`-scoped). -/
 theorem le_ordAtInfty_mulByInt_y (n : ℤ) (hn : n ≠ 0) {m : ℤ} (hm : m ≤ -1)
     (hM : (W_smooth W).ordAtInfty (mulByInt_x W n) = ((2 * m : ℤ) : WithTop ℤ)) :
@@ -466,7 +446,7 @@ private theorem ordAtInfty_mulByInt_pullback_fracPolyX_nonneg (n : ℤ) (hn : n 
         (algebraMap (FractionRing (Polynomial F)) KE r)) := by
   rcases eq_or_ne r 0 with rfl | hr
   · rw [map_zero, map_zero]
-    exact le_ordAtInfty_zero' W _
+    exact le_of_le_of_eq le_top ((W_smooth W).ordAtInfty_zero).symm
   · obtain ⟨t, hsrc, himg⟩ :=
       ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr
     rw [hsrc] at hr_ord
@@ -495,10 +475,11 @@ private theorem ordAtInfty_mulByInt_pullback_y_term_nonneg (n : ℤ) (hn : n ≠
     0 ≤ (W_smooth W).ordAtInfty
       (mulByInt_pullbackAlgHom W n hn
         (algebraMap (FractionRing (Polynomial F)) KE r) * mulByInt_y W n) := by
+  classical
   have hMneg : 2 * m < 0 := by omega
   rcases eq_or_ne r 0 with rfl | hr
   · rw [map_zero, map_zero, zero_mul]
-    exact le_ordAtInfty_zero' W _
+    exact le_of_le_of_eq le_top ((W_smooth W).ordAtInfty_zero).symm
   · obtain ⟨t, hsrc, himg⟩ :=
       ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr
     rw [hsrc] at hr_ord
@@ -514,7 +495,7 @@ private theorem ordAtInfty_mulByInt_pullback_y_term_nonneg (n : ℤ) (hn : n ≠
       ((W_smooth W).ordAtInfty_eq_top_iff _).not.mp
         (ne_of_eq_of_ne himg WithTop.coe_ne_top)
     have hy_ne : mulByInt_y W n ≠ 0 :=
-      mulByInt_y_ne_zero' W n hn
+      mulByInt_y_ne_zero W n hn
     have hmul := (W_smooth W).ordAtInfty_mul himg_ne hy_ne
     rw [himg] at hmul
     calc (0 : WithTop ℤ) ≤ ((t * (2 * m) + 3 * m : ℤ) : WithTop ℤ) := by
@@ -558,7 +539,7 @@ theorem mulByInt_pullbackAlgHom_ordAtInfty_nonneg (n : ℤ) (hn : n ≠ 0)
   obtain ⟨r₁, r₂, hf_decomp⟩ := (W_smooth W).exists_decomp f
   have hf_eq : f = algebraMap (FractionRing (Polynomial F)) KE r₁ +
       algebraMap (FractionRing (Polynomial F)) KE r₂ * y_gen W := by
-    rw [hf_decomp, y_gen_eq_coordYInFunctionField' W, Algebra.smul_def, mul_one,
+    rw [hf_decomp, y_gen_eq_coordYInFunctionField W, Algebra.smul_def, mul_one,
       Algebra.smul_def]
     rfl
   -- split the hypothesis through the parity/min formula
@@ -592,7 +573,7 @@ namespace EC
 variable {F : Type*} [Field F]
 
 /-- **`MulByIntBasepoint W hn` holds for every `n ≠ 0`** — the keystone
-residual of `IsogenyAG.lean`. No separability hypothesis: the inseparable case
+residual of `Isogeny/Basic.lean`. No separability hypothesis: the inseparable case
 `char F ∣ n` is included (the even `x`-order is `2m ≤ -2` rather than `-2`,
 and all bounds are one-sided). -/
 theorem mulByIntBasepoint_holds (W : Affine F) [W.IsElliptic] {n : ℤ}

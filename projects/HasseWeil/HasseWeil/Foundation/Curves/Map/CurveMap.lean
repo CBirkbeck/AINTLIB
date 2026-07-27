@@ -109,7 +109,7 @@ theorem comp_algebraMap_eq (ψ : CurveMap C₂ C₃) (φ : CurveMap C₁ C₂)
     Reference: Silverman II.2 (after Theorem 2.4). -/
 theorem degree_comp (ψ : CurveMap C₂ C₃) (φ : CurveMap C₁ C₂) :
     (ψ.comp φ).degree = φ.degree * ψ.degree := by
-  unfold degree
+  simp only [degree]
   letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   letI : Algebra C₃.FunctionField C₂.FunctionField := ψ.toAlgebra
   letI : Algebra C₃.FunctionField C₁.FunctionField := (ψ.comp φ).toAlgebra
@@ -378,7 +378,6 @@ noncomputable def CoordHom.toAlgebra {φ : CurveMap C₁ C₂} (coordHom : φ.Co
     Algebra C₂.CoordinateRing C₁.CoordinateRing :=
   coordHom.toAlgHom.toRingHom.toAlgebra
 
-set_option synthInstance.maxHeartbeats 200000 in
 /-- **Silverman II.2.6(a), Σ e·f form** (T-II-2-008, generic `CurveMap`):
 for a `CurveMap φ : C₁ → C₂` with coordinate-ring pullback witness
 `coordHom` and finite-module structure, the sum `Σ_{P over p} e_P · f_P`
@@ -402,13 +401,16 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∑ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-        Ideal.ramificationIdx p P *
-        Ideal.inertiaDeg p P = φ.degree := by
+        Ideal.ramificationIdx' p P *
+        Ideal.inertiaDeg' p P = φ.degree := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing :=
     coordHom.toAlgebra
   letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   haveI : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing
-      C₁.FunctionField := inferInstance
+      C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
   haveI : IsScalarTower C₂.CoordinateRing C₂.FunctionField
       C₁.FunctionField := by
     refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_

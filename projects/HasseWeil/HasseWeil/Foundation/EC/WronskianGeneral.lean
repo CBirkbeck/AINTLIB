@@ -64,7 +64,6 @@ theorem algebraMap_polynomial_KE_injective :
       congrArg DFunLike.coe hfactor]
   exact (IsFractionRing.injective R KE).comp Affine.CoordinateRing.algebraMap_poly_injective
 
-set_option linter.unusedDecidableInType false in
 /-- **The division-polynomial Wronskian identity over a general field, axiom-clean.**
 
 `Φ_n' · ΨSq_n − Φ_n · ΨSq_n' = n · preΨ_{2n}` as polynomials in `F[X]` (Silverman Exercise III.3.7),

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseCoordPolyHomogeneity
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseCoordPolyHomogeneity
 
 /-!
 # Level comparison for the degree-`68` Artin-Hasse numerator
@@ -22,13 +24,11 @@ namespace CyclotomicUnits
 
 open PadicLogSetup PadicLogSetup.DworkParameter
 
-private instance instFact37Deg68NLD : Fact (Nat.Prime 37) := ⟨by norm_num⟩
+instance instFact37Deg68NLD : Fact (Nat.Prime 37) := ⟨by norm_num⟩
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
-variable [NumberField.IsCMField K]
 
 set_option maxRecDepth 4000 in
-omit [NumberField.IsCMField K] in
 /-- The degree-`68` powers of the level-`108` and level-`72` Dwork-parameter
 approximants differ by an element of `(λ)^{139}`. -/
 theorem dworkParameterApprox_pow_sixtyeight_sub_mem :
@@ -67,7 +67,6 @@ theorem dworkParameterApprox_pow_sixtyeight_sub_mem :
   exact hprod
 
 set_option maxRecDepth 4000 in
-omit [NumberField.IsCMField K] in
 /-- The level-`107` and level-`71` degree-`68` coordinate-polynomial coefficients
 differ by an element of `(λ)^{108}`. -/
 theorem deg68_coordPoly_pow_coeff_level_diff_mem (a : ℕ) :
@@ -133,7 +132,6 @@ theorem deg68_coordPoly_pow_coeff_level_diff_mem (a : ℕ) :
           dworkParameterApprox 37 K (2 * (37 - 1)) ^ 68) = w at hmem ⊢
     exact hle139 hmem
 
-omit [NumberField.IsCMField K] in
 /-- The level-`107` and level-`71` degree-`68` Artin-Hasse numerator terms
 differ by an element of `(λ)^{108}`. -/
 theorem deg68_numerator_level_diff_mem (a : ℕ) :

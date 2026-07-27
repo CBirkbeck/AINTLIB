@@ -139,7 +139,7 @@ theorem classicalGaussSum_eq_gaussSum_legendreDirichlet
   -- Key identity: ∑_n stdAddChar(n²) = ∑_t (1 + η(t)) · stdAddChar(t).
   have h_key : classicalGaussSum p = ∑ t : ZMod p,
       (1 + (legendreDirichlet p t)) * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) t := by
-    unfold classicalGaussSum
+    simp only [classicalGaussSum]
     -- Use sum_comp with g = (·^2) and f = stdAddChar.
     rw [Finset.sum_comp (fun b : ZMod p ↦ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) b)
         (fun n : ZMod p ↦ n ^ 2)]

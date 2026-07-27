@@ -1,6 +1,13 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogFormal
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization
-import BernoulliRegular.CyclotomicUnits.KummerLogTrace
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogFormal
+public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization
+public import BernoulliRegular.CyclotomicUnits.KummerLogTrace
 
 /-!
 # Kummer logarithm coefficient congruence

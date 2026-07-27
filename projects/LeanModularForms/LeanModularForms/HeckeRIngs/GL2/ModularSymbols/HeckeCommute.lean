@@ -479,7 +479,8 @@ theorem map_tpOp_apply_eq [NeZero N] {p : ℕ} (hp : Nat.Prime p) (hpN : Nat.Cop
     (x : Div0 ℤ ⊗[ℤ] SymPow ℤ m) :
     f (tpOp hp.pos hpN m x)
       = (∑ b : Fin p, f (actMat (upperMat p b.val) (upperMat_det_ne_zero hp.pos b.val) m x))
-        + f (actMat (lowerDiamondMat (N := N) hpN) (lowerDiamondMat_det_ne_zero hp.pos hpN) m x) := by
+        + f (actMat (lowerDiamondMat (N := N) hpN)
+            (lowerDiamondMat_det_ne_zero hp.pos hpN) m x) := by
   have hel : tpOp hp.pos hpN m x
       = (∑ b : Fin p, actMat (upperMat p b.val) (upperMat_det_ne_zero hp.pos b.val) m x)
         + actMat (lowerDiamondMat (N := N) hpN) (lowerDiamondMat_det_ne_zero hp.pos hpN) m x := by
@@ -652,7 +653,6 @@ theorem heckeSymb_p_all_commute_diamondSymb [NeZero N] (k : ℤ) {p : ℕ} (hp :
   show heckeSymb_p_all N k p hp * diamondSymbAux k γ = diamondSymbAux k γ * heckeSymb_p_all N k p hp
   rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
   refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-  simp only [LinearMap.comp_apply]
   show heckeSymb_p_all N k p hp (diamondSymbAux k γ (𝕄.mk N k x))
     = diamondSymbAux k γ (heckeSymb_p_all N k p hp (𝕄.mk N k x))
   rw [diamondSymbAux_mk]
@@ -718,7 +718,8 @@ theorem linearMap_comp_sum {M₀ : Type*} [AddCommGroup M₀] [Module ℤ M₀] 
 
 /-- The CRT bijection on `Fin`-products: `∑_{b<p} ∑_{c<q} f (c + b q) = ∑_{j < pq} f j`. -/
 theorem crt_fin_sum {α : Type*} [AddCommMonoid α] {p q : ℕ} (hq : 0 < q) (f : ℕ → α) :
-    (∑ b ∈ Finset.range p, ∑ c ∈ Finset.range q, f (c + b * q)) = ∑ j ∈ Finset.range (p * q), f j := by
+    (∑ b ∈ Finset.range p, ∑ c ∈ Finset.range q, f (c + b * q)) =
+      ∑ j ∈ Finset.range (p * q), f j := by
   rw [← Finset.sum_product']
   refine Finset.sum_nbij (fun bc => bc.2 + bc.1 * q) ?_ ?_ ?_ ?_
   · intro ⟨b, c⟩ hbc
@@ -779,7 +780,6 @@ theorem upperSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prime p) (h
   show upperSymb hp hpN k * upperSymb hq hqN k = upperSymb hq hqN k * upperSymb hp hpN k
   rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
   refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-  simp only [LinearMap.comp_apply]
   show upperSymb hp hpN k (upperSymb hq hqN k (𝕄.mk N k x))
     = upperSymb hq hqN k (upperSymb hp hpN k (𝕄.mk N k x))
   rw [upperSymb_mk, upperSymb_mk, upperSymb_mk, upperSymb_mk,
@@ -833,7 +833,7 @@ theorem lowerMat_mul_upperMat (p q b : ℕ) :
           * (upperMat p (q * b % p) * lowerMat q)) 0 1 := by
     simp only [shiftSL, lowerMat, upperMat, Matrix.mul_apply, Fin.sum_univ_two,
       Matrix.SpecialLinearGroup.coe_mk, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.of_apply,
-      Matrix.cons_val', Matrix.head_cons]
+      Matrix.cons_val']
     push_cast
     linarith [h3]
   have e10 : (lowerMat q * upperMat p b) 1 0
@@ -979,7 +979,8 @@ theorem mk_tpOp_tpOp_expand [NeZero N] {p q : ℕ} (hp : Nat.Prime p) (hq : Nat.
             (fullModSymRep ℤ (k - 2).toNat (diamondRep (N := N) hpN : SL(2, ℤ))
               (actMat (lowerMat p) (lowerMat_det_ne_zero hp.pos) (k - 2).toNat
                 (actMat (lowerMat q) (lowerMat_det_ne_zero hq.pos) (k - 2).toNat x)))) := by
-  -- helper: `mk(tpOp p y) = mk(U_p y) + mk(ρ_{γp}(L_p y))` (push `mk` in to dodge the tensor diamond)
+  -- helper: `mk(tpOp p y) = mk(U_p y) + mk(ρ_{γp}(L_p y))`
+  -- (push `mk` in to dodge the tensor diamond)
   have hmkp : ∀ (y : Div0 ℤ ⊗[ℤ] SymPow ℤ (k - 2).toNat),
       𝕄.mk N k (tpOp hp.pos hpN (k - 2).toNat y)
         = 𝕄.mk N k (upperOp p hp.pos (k - 2).toNat y)
@@ -1087,7 +1088,6 @@ theorem tpSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prime p) (hq :
     show tpSymb hp hpN k * tpSymb hq hqN k = tpSymb hq hqN k * tpSymb hp hpN k
     rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
     refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-    simp only [LinearMap.comp_apply]
     show tpSymb hp hpN k (tpSymb hq hqN k (𝕄.mk N k x))
       = tpSymb hq hqN k (tpSymb hp hpN k (𝕄.mk N k x))
     rw [tpSymb_mk, tpSymb_mk, tpSymb_mk, tpSymb_mk,
@@ -1100,7 +1100,8 @@ theorem tpSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prime p) (hq :
 
 /-- **Mixed cross-prime Hecke commutativity.** For a good prime `p` (`Coprime p N`) and a bad prime
 `q` (`q ∣ N`), `tpSymb p` and `upperSymb q` commute.  The upper-upper block is symmetric, and the
-single cross/lower term matches via the shift-reindex `mk_gamma0_lowerMat_upperOp_comm` after pulling
+single cross/lower term matches via the shift-reindex `mk_gamma0_lowerMat_upperOp_comm` after
+pulling
 `U_q` (bad) past the diamond via `mk_upperOp_fullModSymRep_gamma0_divN`. -/
 theorem tpSymb_upperSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prime p) (hq : Nat.Prime q)
     (hpN : Nat.Coprime p N) (hqN : ¬Nat.Coprime q N) :
@@ -1110,7 +1111,6 @@ theorem tpSymb_upperSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prim
   show tpSymb hp hpN k * upperSymb hq hqN k = upperSymb hq hqN k * tpSymb hp hpN k
   rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
   refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-  simp only [LinearMap.comp_apply]
   show tpSymb hp hpN k (upperSymb hq hqN k (𝕄.mk N k x))
     = upperSymb hq hqN k (tpSymb hp hpN k (𝕄.mk N k x))
   rw [tpSymb_mk, upperSymb_mk, upperSymb_mk, tpSymb_mk]
@@ -1191,7 +1191,8 @@ theorem commute_heckeSymb_aux [NeZero N] (k : ℤ) (C : Module.End ℤ (𝕄 N k
 theorem heckeSymb_p_all_commute_heckeSymb_aux [NeZero N] (k : ℤ) {q : ℕ} (hq : Nat.Prime q)
     (m : ℕ) : Commute (heckeSymb_p_all N k q hq) (heckeSymb_aux N k m) :=
   commute_heckeSymb_aux k (heckeSymb_p_all N k q hq)
-    (fun hp => heckeSymb_p_all_commute k hq hp) (fun n => heckeSymb_p_all_commute_diamondSymb_n k hq n)
+    (fun hp => heckeSymb_p_all_commute k hq hp)
+    (fun n => heckeSymb_p_all_commute_diamondSymb_n k hq n)
     m
 
 /-- An extended diamond `diamondSymb_n q` commutes with `heckeSymb_aux m` for every `m`. -/

@@ -40,7 +40,7 @@ lemma gaussSumIntegers_eq_rootSum
             gaussSumLiftAdditiveRoot (p := p) L ^
               ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p).val))
   rw [gaussSumLift_eq_gaussSumLiftRootSum (p := p) (L := L)]
-  unfold gaussSumLiftRootSum
+  simp only [gaussSumLiftRootSum]
   rw [map_sum]
   apply Finset.sum_congr rfl
   intro m hm
@@ -228,6 +228,35 @@ lemma inverseGeneratorRootSum_term_sub_coeff_sub_uniformizer_mem_normalizedBound
   rw [hrewrite]
   exact Ideal.add_mem _ hadd hcoeff
 
+/-- The rational prime `p`, viewed in `𝓞 L`, lies in the normalized boundary prime: the latter
+lies over the ideal `𝔭 = span {p}` of `ℤ`, and `p ∈ 𝔭`. -/
+lemma natCast_mem_normalizedBoundaryPrime :
+    (p : 𝓞 L) ∈ normalizedBoundaryPrime (p := p) (L := L) := by
+  have hnorm : normalizedBoundaryPrime (p := p) (L := L) ∈ primesAboveP p L := by
+    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
+    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
+  have hP_over :
+      normalizedBoundaryPrime (p := p) (L := L) ∈ Ideal.primesOver 𝔭 (𝓞 L) :=
+    (mem_primesAboveP_iff (p := p) (L := L)).1 hnorm
+  have hunder :
+      𝔭 = (normalizedBoundaryPrime (p := p) (L := L)).under ℤ :=
+    (Ideal.liesOver_iff _ _).mp hP_over.2
+  have hp_mem_under :
+      (p : ℤ) ∈ (normalizedBoundaryPrime (p := p) (L := L)).under ℤ := by
+    rw [← hunder]
+    exact Ideal.subset_span (by simp : (p : ℤ) ∈ ({(p : ℤ)} : Set ℤ))
+  rw [Ideal.mem_comap] at hp_mem_under
+  simpa using hp_mem_under
+
+/-- The product `p * (ζ - 1)`, where `ζ = gaussSumLiftAdditiveRoot`, lies in the square of the
+normalized boundary prime, since `p` and `ζ - 1` each lie in it. -/
+lemma natCast_mul_gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime_sq :
+    (p : 𝓞 L) * (gaussSumLiftAdditiveRoot (p := p) L - 1) ∈
+      normalizedBoundaryPrime (p := p) (L := L) ^ 2 := by
+  simpa [pow_two] using Ideal.mul_mem_mul
+    (natCast_mem_normalizedBoundaryPrime (p := p) (L := L))
+    (gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime (p := p) (L := L))
+
 lemma gaussSumIntegers_inverseGenerator_add_sub_one_mem_normalizedBoundaryPrime_sq
     (hp_odd : p ≠ 2) :
     gaussSumIntegers p L
@@ -274,27 +303,11 @@ lemma gaussSumIntegers_inverseGenerator_add_sub_one_mem_normalizedBoundaryPrime_
         normalizedBoundaryPrime (p := p) (L := L) ^ 2 := by
     rw [← hrewrite]
     exact hsum_mem
-  have hnorm : normalizedBoundaryPrime (p := p) (L := L) ∈ primesAboveP p L := by
-    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
-    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
-  have hp_mem :
-      (p : 𝓞 L) ∈ normalizedBoundaryPrime (p := p) (L := L) := by
-    have hP_over :
-        normalizedBoundaryPrime (p := p) (L := L) ∈ Ideal.primesOver 𝔭 (𝓞 L) :=
-      (mem_primesAboveP_iff (p := p) (L := L)).1 hnorm
-    have hunder :
-        𝔭 = (normalizedBoundaryPrime (p := p) (L := L)).under ℤ :=
-      (Ideal.liesOver_iff _ _).mp hP_over.2
-    have hp_mem_under :
-        (p : ℤ) ∈ (normalizedBoundaryPrime (p := p) (L := L)).under ℤ := by
-      rw [← hunder]
-      exact Ideal.subset_span (by simp : (p : ℤ) ∈ ({(p : ℤ)} : Set ℤ))
-    rw [Ideal.mem_comap] at hp_mem_under
-    simpa using hp_mem_under
   have hpζ_mem :
       (p : 𝓞 L) * (ζ - 1) ∈ normalizedBoundaryPrime (p := p) (L := L) ^ 2 := by
-    simpa [pow_two] using Ideal.mul_mem_mul hp_mem
-      (gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime (p := p) (L := L))
+    simpa [ζ] using
+      natCast_mul_gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime_sq
+        (p := p) (L := L)
   have hp_cast : ((p - 1 : ℕ) : 𝓞 L) + 1 = (p : 𝓞 L) := by
     exact_mod_cast Nat.sub_add_cancel hp.out.one_le
   have hrewrite' :
@@ -364,7 +377,7 @@ lemma primeAbovePExponent_normalizedBoundaryPrime_inverseGenerator_eq_one
     primeAbovePExponent (p := p) (L := L)
         (normalizedBoundaryPrime (p := p) (L := L))
         (stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2)) = 1 := by
-  unfold primeAbovePExponent gaussSumIdeal
+  simp only [primeAbovePExponent, gaussSumIdeal]
   apply Ideal.count_normalizedFactors_eq
   · rw [pow_one, Ideal.span_singleton_le_iff_mem]
     exact gaussSumIntegers_inverseGenerator_mem_normalizedBoundaryPrime

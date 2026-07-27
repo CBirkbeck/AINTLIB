@@ -20,7 +20,8 @@ It imports only — it does **not** modify any existing file.
 The second conjunct of `Lemma98ConjugateResidue37` asks, for every Case-II descent instance and for
 the canonical `K⁺`-descent `u` of `ε₁/ε₂` (`Units.map u = ε₁/ε₂`),
 
-  `∀ a : Fin 18, ∑_j (regularPart c)_j · ((a+1)⁻¹)^{2(j+1)} = 0`,   `c = caseIIResidueProvenance_decomp (realUnitToFreePartModP u)`,
+  `∀ a : Fin 18, ∑_j (regularPart c)_j · ((a+1)⁻¹)^{2(j+1)} = 0`,
+  `c = caseIIResidueProvenance_decomp (realUnitToFreePartModP u)`,
 
 i.e. the half-range residue system on the **regular** eigencomponents
 (`caseIIConjugateResidue_regularPart c j = if j = 15 then 0 else c j`).
@@ -34,11 +35,12 @@ This is **literally `0`**, because the regular eigencomponents `c j` (`j ≠ 15`
   from the flt-regular Kummer chain).  Since `Units.map u = ε₁/ε₂`, also `Units.map u ≡ n (mod 37)`.
 
 * **R3 (PROVEN, Washington Lemma 9.9 / Exercise 8.11).**  The proven local reduction
-  `caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred` upgrades `Units.map u ≡ n (mod 37)`
-  to the `λ`-adic membership `CompletedLogArgHighValuation37 u`, and the *proven* leading-exponent
-  collapse `caseII_leadingExponentEigenCollapse37_proven : LeadingExponentEigenCollapse37` then forces
-  `caseIIResidueProvenance_decomp (realUnitToFreePartModP u) j = 0` for every regular `j ≠ 15`
-  (a regular `E_{2(j+1)}` contributes a leading `λ`-coefficient `∝ B_{2(j+1)} mod 37` at level
+  `caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred` upgrades
+  `Units.map u ≡ n (mod 37)` to the `λ`-adic membership `CompletedLogArgHighValuation37 u`, and the
+  *proven* leading-exponent collapse
+  `caseII_leadingExponentEigenCollapse37_proven : LeadingExponentEigenCollapse37` then forces
+  `caseIIResidueProvenance_decomp (realUnitToFreePartModP u) j = 0` for every regular `j ≠ 15` (a
+  regular `E_{2(j+1)}` contributes a leading `λ`-coefficient `∝ B_{2(j+1)} mod 37` at level
   `2(j+1) ≤ 34 < 36`, which the high `λ`-valuation kills).
 
 Hence `caseIIConjugateResidue_regularPart c = 0` (the `j = 15` entry is `0` by definition, every
@@ -57,26 +59,26 @@ Both inputs are **independent of Assumption II** (`WashingtonCaseIIExactQuotient
   coincidence.
 
 In particular this derivation does **not** route through the circular consistency-only producer
-`caseIISigmaAntiDescent_residueEqns_of_exactUnit` (which assumes Assumption II to produce the residue
-equations).  See the `#print axioms` checks at the bottom: the residue-equation proof depends only on
-`[propext, Classical.choice, Quot.sound]` and not on the exact-quotient-unit source.
+`caseIISigmaAntiDescent_residueEqns_of_exactUnit` (which assumes Assumption II to produce the
+residue equations).  See the `#print axioms` checks at the bottom: the residue-equation proof
+depends only on `[propext, Classical.choice, Quot.sound]` and not on the exact-quotient-unit source.
 
 ## What is discharged, and the precise remaining residual
 
 * `caseIISigmaAntiDescent_residueEqns_proven` — the **second conjunct, PROVEN unconditionally**.
 
 * `lemma98ConjugateResidue37_of_localPower` — the consolidated input `Lemma98ConjugateResidue37`
-  **reduces to its first conjunct alone**, `Lemma98LocalPower37` (Washington Lemma 9.8's single-index
-  mod-`𝔩` Kummer congruence at the prime `𝔩 = lv149`).  The half-range conjugate residue system is no
-  longer an input.
+  **reduces to its first conjunct alone**, `Lemma98LocalPower37` (Washington Lemma 9.8's
+  single-index mod-`𝔩` Kummer congruence at the prime `𝔩 = lv149`).  The half-range conjugate
+  residue system is no longer an input.
 
 `Lemma98LocalPower37` over *free* units `ε₁, ε₂, ε₃` is over-general (B2
 `CASEII-LEMMA98-LOCALPOWER`: the descent never feeds free units — `ε₁/ε₂` is always a producer ratio
 of root-ideal generators); the **sound** consumer is the §9.1-identification + `ℓ ∣ z` route
 (`caseIIOmega32_assumptionII_of_section91Ident_dvdZ`).  Accordingly the FLT37 endpoint below is the
-sound `fermatLastTheoremFor_thirtyseven_of_caseII_postR3` shape — conditional on **R2 + R4(i) + R4(ii)
-+ carried Kellner** — restated to make explicit that the half-range conjugate residue equations
-(the second conjunct of `Lemma98ConjugateResidue37`) are now PROVEN, not assumed.
+sound `fermatLastTheoremFor_thirtyseven_of_caseII_postR3` shape — conditional on **R2 + R4(i) +
+R4(ii) + carried Kellner** — restated to make explicit that the half-range conjugate residue
+equations (the second conjunct of `Lemma98ConjugateResidue37`) are now PROVEN, not assumed.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §9.1 (descent unit `η_a`),
@@ -107,14 +109,15 @@ For every Case-II descent instance, the canonical `K⁺`-descent `u` of `ε₁/�
 free-part eigencomponents satisfying the half-range Vandermonde conjugate residue equations of
 Washington Lemma 9.8 / 9.9 over all conjugates:
 
-  `∀ a, ∑_j (regularPart c)_j · ((a+1)⁻¹)^{2(j+1)} = 0`,   `c = caseIIResidueProvenance_decomp (realUnitToFreePartModP u)`.
+  `∀ a, ∑_j (regularPart c)_j · ((a+1)⁻¹)^{2(j+1)} = 0`,
+  `c = caseIIResidueProvenance_decomp (realUnitToFreePartModP u)`.
 
 These sums are **identically `0`**: the regular eigencomponents `c j` (`j ≠ 15`) all vanish by the
 proven R3 collapse `caseIILeadingExponent_regular_components_zero`
-(`caseII_leadingExponentEigenCollapse37_proven`), once `Units.map u = ε₁/ε₂ ≡ n (mod 37)` is supplied
-by the *unconditional* free Case-II primarity `caseIISigmaAntiDescent_quotient_int_congr`; and the
-`regularPart` zeroes the `j = 15` entry by definition.  Thus `regularPart c = 0`, and the system
-holds term-by-term.
+(`caseII_leadingExponentEigenCollapse37_proven`), once `Units.map u = ε₁/ε₂ ≡ n (mod 37)` is
+supplied by the *unconditional* free Case-II primarity `caseIISigmaAntiDescent_quotient_int_congr`;
+and the `regularPart` zeroes the `j = 15` entry by definition.  Thus `regularPart c = 0`, and the
+system holds term-by-term.
 
 This is the **non-circular** discharge of the second conjunct: it is the conjugate-prime shadow of
 the descent unit's `≡` rational congruence, read off through the proven Galois-graded
@@ -197,8 +200,8 @@ itself **sound** (never the false bare free-unit local power), giving the FLT37 
 /-- **Assumption II from the Lemma-9.8 local power alone, half-range residue equations PROVEN**
 (proven, axiom-clean).
 
-`WashingtonCaseIIExactQuotientUnitPower37Source` (Assumption II: `ε₁/ε₂` is a `37`-th power) from the
-single input `Lemma98LocalPower37`, with the half-range conjugate residue equations (the second
+`WashingtonCaseIIExactQuotientUnitPower37Source` (Assumption II: `ε₁/ε₂` is a `37`-th power) from
+the single input `Lemma98LocalPower37`, with the half-range conjugate residue equations (the second
 conjunct of `Lemma98ConjugateResidue37`) supplied internally by the proven
 `caseIISigmaAntiDescent_residueEqns_proven` (R3 route).  Composes
 `lemma98ConjugateResidue37_of_localPower` with the proven
@@ -216,10 +219,10 @@ equations PROVEN** (proven, axiom-clean — the **sound** local-power route).
 
 `WashingtonCaseIIExactQuotientUnitPower37Source` from the two sound genuine R4 residuals — the §9.1
 residue identification `CaseIISection91DescentUnitIdentification37` (R4(i)) and the `ℓ ∣ z` datum
-`CaseIILehmerVandiverDvdZ37` (R4(ii)) — routing the Lemma-9.8 local power through the **proven** §9.1
-producer (`caseII_localPower_of_dvd_z`, never Assumption II), with the half-range conjugate residue
-equations supplied internally by the proven R3 route.  The bare free-unit local power is **not**
-used. -/
+`CaseIILehmerVandiverDvdZ37` (R4(ii)) — routing the Lemma-9.8 local power through the **proven**
+§9.1 producer (`caseII_localPower_of_dvd_z`, never Assumption II), with the half-range conjugate
+residue equations supplied internally by the proven R3 route.  The bare free-unit local power is
+**not** used. -/
 theorem caseIILemma98ResidueDischarge_assumptionII_of_section91Ident_dvdZ
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -241,8 +244,8 @@ Lemma 9.2), and **R3** (Washington Lemma 9.9 regular indices) are all proven and
 by `fermatLastTheoremFor_thirtyseven_of_caseII_postR3`.
 
 The point of this restatement is that the half-range conjugate residue equations — the second
-conjunct of the consolidated Washington Lemma-9.8 residue input `Lemma98ConjugateResidue37` — are now
-**proven unconditionally** (`caseIISigmaAntiDescent_residueEqns_proven`, R3 route), so the only
+conjunct of the consolidated Washington Lemma-9.8 residue input `Lemma98ConjugateResidue37` — are
+now **proven unconditionally** (`caseIISigmaAntiDescent_residueEqns_proven`, R3 route), so the only
 descent-unit residue content driving the endpoint is the single-index local power, supplied soundly
 by R4(i)+R4(ii). -/
 theorem fermatLastTheoremFor_thirtyseven_of_caseII_residueEqnsProven

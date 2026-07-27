@@ -26,7 +26,8 @@ This file proves the Frobenius component leaf **over `K̄`**, axiom-clean and Co
 
   `Point.map τ_S (frobₗ P_gen) = frobₗ P_gen + lift (π̄ S)`,
 
-where `frobₗ = Affine.Point.map (FiniteField.frobeniusAlgHom 𝔽_q (K̄(E)))` is the geometric action of
+where `frobₗ = Affine.Point.map (FiniteField.frobeniusAlgHom 𝔽_q (K̄(E)))` is the geometric action
+of
 the `q`-power Frobenius on the function-field points of `E_{K̄}`, and `π̄ = frobeniusHomBaseChange`
 (`= geomFrobeniusPoint`) is the `q`-power Frobenius point map.
 
@@ -35,9 +36,11 @@ the `q`-power Frobenius on the function-field points of `E_{K̄}`, and `π̄ = f
 `MapTranslateGenericPoint φ (Affine.Point.map φ.pullback)` (the **canonical** action) is **not**
 derivable from genuineness of the canonical action — which is free for *every* isogeny
 (`isogeny_isGenuineWith_pointMap`).  If it were, `hgcomm` would hold for **all** isogenies including
-`[ℓ]`, contradicting the shipped `[ℓ]` proof (`ScratchCov.comm_point_mulByInt`), which crucially uses
+`[ℓ]`, contradicting the shipped `[ℓ]` proof (`ScratchCov.comm_point_mulByInt`), which crucially
+uses
 the division-polynomial coordinate formula `map_pullback_genericPoint` (`[ℓ]^* P_gen = ℓ • P_gen`)
-*beyond* genuineness.  The genuine content is exactly the realization of the abstract pullback's value
+*beyond* genuineness.  The genuine content is exactly the realization of the abstract pullback's
+value
 at `P_gen` as a *translatable* geometric action.
 
 ## The arithmetic at the heart of the Frobenius leaf (the `K̄`-vs-`𝔽_q` dichotomy)
@@ -47,9 +50,11 @@ Over the base field `K = 𝔽_q` the leaf is **degenerate**: `π` acts as the id
 `Point.map τ_S (frobₗ P_gen) = frobₗ (P_gen + lift S) = frobₗ P_gen + lift S` already matches.
 
 Over `K̄` the leaf is **genuine** and the same computation now produces the correct twist:
-`frobₗ (lift S) = lift (π̄ S)` (`frobeniusGenericCovariance_lift_twist`), because the `q`-power on the
+`frobₗ (lift S) = lift (π̄ S)` (`frobeniusGenericCovariance_lift_twist`), because the `q`-power on
+the
 `algebraMap`'d coordinates of a `K̄`-point `S` is exactly the geometric Frobenius `π̄ S = (S_x^q,
-S_y^q)` (`geomFrobeniusPointFun_some`).  Crucially `frobₗ` is **only** `𝔽_q`-linear (the `q`-power is
+S_y^q)` (`geomFrobeniusPointFun_some`).  Crucially `frobₗ` is **only** `𝔽_q`-linear (the `q`-power
+is
 not `K̄`-linear), so it does *not* fix `lift S` for a general `K̄`-point — unlike over `𝔽_q`.
 
 So the Frobenius generic-point covariance is **formal for the `q`-power Frobenius specifically** (a
@@ -59,16 +64,19 @@ power and whose covariance is genuine geometric content needing the division-pol
 ## Scalar-tower note (the `Point.map` `W'` diamond)
 
 The `q`-power Frobenius `frobₗ` on `E_{K̄}` is the `𝔽_q`-algebra hom `frobeniusAlgHom 𝔽_q (K̄(E))`;
-it is **not** `K̄`-linear, so it is **not** expressible as `Affine.Point.map (W' := W.baseChange K̄)`
+it is **not** `K̄`-linear, so it is **not** expressible as `Affine.Point.map (W' := W.baseChange
+K̄)`
 (which demands `K̄`-linearity, triggering the spurious `Algebra K̄ 𝔽_q` synthesis).  We type it via
 `Affine.Point.map (W' := W)` over the *base* curve `W : WeierstrassCurve 𝔽_q`, whose codomain
-`W.baseChange (K̄(E))` is **definitionally** `(W.baseChange K̄).baseChange (K̄(E)) = W_KE (W.baseChange
+`W.baseChange (K̄(E))` is **definitionally** `(W.baseChange K̄).baseChange (K̄(E)) = W_KE
+(W.baseChange
 K̄)` by the scalar tower `𝔽_q → K̄ → K̄(E)`.  The bridge between the two `Point.map` typings of the
 `K̄`-linear translation `τ_S` is `frobeniusGenericCovariance_tau_mapW` (`cases <;> rfl`).
 
 ## References
 
-* Silverman, *The Arithmetic of Elliptic Curves*, III.8.2 (translation covariance), III.4 (Frobenius).
+* Silverman, *The Arithmetic of Elliptic Curves*, III.8.2 (translation covariance), III.4
+(Frobenius).
 -/
 
 open WeierstrassCurve HasseWeil.Curves
@@ -77,7 +85,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil
 
-set_option linter.style.longLine false
 
 section FrobeniusKbar
 
@@ -111,27 +118,32 @@ theorem frobeniusGenericCovariance_tau_mapW (S : (W.baseChange (AlgebraicClosure
     WeierstrassCurve.Affine.Point.map (W' := W.baseChange (AlgebraicClosure K))
         (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S).toAlgHom P =
       WeierstrassCurve.Affine.Point.map (W' := W)
-        ((HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K) P := by
+        ((HasseWeil.translateAlgEquivOfPoint
+          (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K) P := by
   cases P <;> rfl
 
 omit [W.toAffine.IsElliptic] in
 /-- **The lift-twist fact over `K̄`** (the heart of the `K̄`-vs-`𝔽_q` dichotomy; Silverman III.4).
-The `q`-power function-field Frobenius `frobFunctionFieldPointKbar` sends the lift of a `K̄`-point `S`
+The `q`-power function-field Frobenius `frobFunctionFieldPointKbar` sends the lift of a `K̄`-point
+`S`
 to the lift of its **geometric Frobenius** `π̄ S = geomFrobeniusPointFun S`:
 
   `frobₗ (lift S) = lift (π̄ S)`.
 
 Coordinate case split: `lift (some sx sy) = some (algebraMap sx) (algebraMap sy)`, and
-`frobₗ (some a b) = some (a^q) (b^q)`, so `frobₗ (lift S) = some ((algebraMap sx)^q, (algebraMap sy)^q)
+`frobₗ (some a b) = some (a^q) (b^q)`, so `frobₗ (lift S) = some ((algebraMap sx)^q, (algebraMap
+sy)^q)
 = some (algebraMap (sx^q), algebraMap (sy^q)) = lift (some (sx^q, sy^q)) = lift (π̄ S)`
-(`geomFrobeniusPointFun_some`).  This is **false** over `𝔽_q` only in the sense that there `π̄ = id`;
+(`geomFrobeniusPointFun_some`).  This is **false** over `𝔽_q` only in the sense that there `π̄ =
+id`;
 the identity itself holds for any base, but is *non-degenerate* (twisting) precisely over `K̄`. -/
 theorem frobeniusGenericCovariance_lift_twist
     (S : (W.baseChange (AlgebraicClosure K)).toAffine.Point) :
     frobFunctionFieldPointKbar W (HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K)) S) =
       HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K)) (geomFrobeniusPointFun W S) := by
   rcases S with _ | ⟨sx, sy, hns⟩
-  · show frobFunctionFieldPointKbar W (HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K)) 0) =
+  · show frobFunctionFieldPointKbar W
+          (HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K)) 0) =
         HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K)) (geomFrobeniusPointFun W 0)
     rw [geomFrobeniusPointFun_zero, map_zero, map_zero]
   · rw [geomFrobeniusPointFun_some, HasseWeil.liftPointToKE_some, HasseWeil.liftPointToKE_some,
@@ -143,6 +155,7 @@ theorem frobeniusGenericCovariance_lift_twist
       simp only [FiniteField.coe_frobeniusAlgHom] <;> rw [← map_pow]
 
 omit [DecidableEq K] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The `q`-power Frobenius commutes with translation on function-field points of `E_{K̄}`**
 (point-level form; the `K̄` analogue of `frobeniusIsog_pullback_universal_commute`).  For the
 `q`-power action `frobₗ` and the `𝔽_q`-restricted translation `τ_S` (both typed via `W' := W`):
@@ -155,31 +168,39 @@ theorem frobeniusGenericCovariance_frob_tau_comm
     (S : (W.baseChange (AlgebraicClosure K)).toAffine.Point)
     (P : (W_KE (W.baseChange (AlgebraicClosure K))).toAffine.Point) :
     WeierstrassCurve.Affine.Point.map (W' := W)
-        ((HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K)
+        ((HasseWeil.translateAlgEquivOfPoint
+          (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K)
         (frobFunctionFieldPointKbar W P) =
       frobFunctionFieldPointKbar W
         (WeierstrassCurve.Affine.Point.map (W' := W)
-          ((HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K) P) := by
+          ((HasseWeil.translateAlgEquivOfPoint
+            (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K) P) := by
   rcases P with _ | ⟨x, y, hns⟩
   · rfl
   · show WeierstrassCurve.Affine.Point.map (W' := W)
-          ((HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K)
+          ((HasseWeil.translateAlgEquivOfPoint
+            (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K)
           (WeierstrassCurve.Affine.Point.map (W' := W)
-            (FiniteField.frobeniusAlgHom K (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField)
+            (FiniteField.frobeniusAlgHom K
+              (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField)
             (Affine.Point.some x y hns)) =
         WeierstrassCurve.Affine.Point.map (W' := W)
           (FiniteField.frobeniusAlgHom K (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField)
           (WeierstrassCurve.Affine.Point.map (W' := W)
-            ((HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K)
+            ((HasseWeil.translateAlgEquivOfPoint
+              (W.baseChange (AlgebraicClosure K)) S).toAlgHom.restrictScalars K)
             (Affine.Point.some x y hns))
-    rw [WeierstrassCurve.Affine.Point.map_some (W' := W), WeierstrassCurve.Affine.Point.map_some (W' := W),
-      WeierstrassCurve.Affine.Point.map_some (W' := W), WeierstrassCurve.Affine.Point.map_some (W' := W)]
+    rw [WeierstrassCurve.Affine.Point.map_some (W' := W),
+      WeierstrassCurve.Affine.Point.map_some (W' := W),
+      WeierstrassCurve.Affine.Point.map_some (W' := W),
+      WeierstrassCurve.Affine.Point.map_some (W' := W)]
     refine (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨?_, ?_⟩ <;>
       · simp only [FiniteField.coe_frobeniusAlgHom]
         exact map_pow (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S) _ _
 
 omit [W.toAffine.IsElliptic] in
-/-- **The Frobenius generic-point covariance leaf over `K̄`** (Silverman III.8.2 for `π̄`), axiom-clean
+/-- **The Frobenius generic-point covariance leaf over `K̄`** (Silverman III.8.2 for `π̄`),
+axiom-clean
 and CoordHom-free — the round-21 "Wall B" residual, **proven** for the `q`-power Frobenius:
 
   `Point.map τ_S (frobₗ P_gen) = frobₗ P_gen + lift (π̄ S)`,
@@ -194,9 +215,11 @@ Proof: convert `τ_S` to the `W' := W` typing (`tau_mapW`), commute it past `fro
 theorem frobeniusGenericCovariance_Kbar (S : (W.baseChange (AlgebraicClosure K)).toAffine.Point) :
     WeierstrassCurve.Affine.Point.map (W' := W.baseChange (AlgebraicClosure K))
         (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S).toAlgHom
-        (frobFunctionFieldPointKbar W (HasseWeil.genericPoint (W.baseChange (AlgebraicClosure K)))) =
+        (frobFunctionFieldPointKbar W
+          (HasseWeil.genericPoint (W.baseChange (AlgebraicClosure K)))) =
       frobFunctionFieldPointKbar W (HasseWeil.genericPoint (W.baseChange (AlgebraicClosure K))) +
-        HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K)) (geomFrobeniusPointFun W S) := by
+        HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K))
+          (geomFrobeniusPointFun W S) := by
   rw [frobeniusGenericCovariance_tau_mapW, frobeniusGenericCovariance_frob_tau_comm,
     ← frobeniusGenericCovariance_tau_mapW,
     HasseWeil.translateAlgEquivOfPoint_map_genericPoint (W.baseChange (AlgebraicClosure K)) S]
@@ -222,7 +245,8 @@ theorem mapTranslateGenericPoint_frobenius_Kbar
       (frobFunctionFieldPointKbar W) := by
   intro S
   -- `φ.toAddMonoidHom S = π̄ S = geomFrobeniusPoint S = geomFrobeniusPointFun S`.
-  have hπ : (Isogeny.frobeniusIsog_baseChange_charP_pow p r W (AlgebraicClosure K)).toAddMonoidHom S =
+  have hπ : (Isogeny.frobeniusIsog_baseChange_charP_pow p r W
+      (AlgebraicClosure K)).toAddMonoidHom S =
       geomFrobeniusPointFun W S := by
     have := frobeniusHomBaseChange_eq_geomFrobeniusPoint W p r
     rw [frobeniusHomBaseChange] at this

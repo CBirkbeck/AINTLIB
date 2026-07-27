@@ -8,7 +8,7 @@ import LeanModularForms.StrongMultiplicityOne.DescentCosets
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Hecke descent map
 
-The `multipass_*` slash-sum machinery and the Hecke descent map — the slash sum
+The slash-sum machinery and the Hecke descent map — the slash sum
 `Σ_v f ∣[k] descendCosetList p N hp v` — together with its cusp, character, and
 invariance properties. Part of a multi-file split of `StrongMultiplicityOne.lean`.
 
@@ -29,12 +29,12 @@ namespace HeckeRing.GL2
 variable {N : ℕ} [NeZero N] {k : ℤ}
 
 /-- For `g : GL (Fin 2) ℝ` with positive determinant, `UpperHalfPlane.σ g` is the identity. -/
-lemma multipass_sigma_eq_id_of_det_pos (g : GL (Fin 2) ℝ)
+lemma sigma_eq_id_of_det_pos (g : GL (Fin 2) ℝ)
     (hg : 0 < g.det.val) : UpperHalfPlane.σ g = ContinuousAlgEquiv.refl ℝ ℂ := by
   simp only [UpperHalfPlane.σ, if_pos hg]
 
 /-- For `γ ∈ Γ₁(N)`, there exists `hγ' : γ ∈ Γ₀(N)` with `Gamma0MapUnits ⟨γ, hγ'⟩ = 1`. -/
-lemma multipass_char_trivial_on_Gamma1 {N : ℕ} [NeZero N]
+lemma char_trivial_on_Gamma1 {N : ℕ} [NeZero N]
     (γ : Matrix.SpecialLinearGroup (Fin 2) ℤ)
     (hγ : γ ∈ Gamma1 N) :
     ∃ hγ' : γ ∈ Gamma0 N,
@@ -44,7 +44,7 @@ lemma multipass_char_trivial_on_Gamma1 {N : ℕ} [NeZero N]
   exact ⟨Gamma0_mem.mpr h10, by ext; simpa [Gamma0MapUnits_val, Gamma0Map] using h11⟩
 
 /-- For `f ∈ modFormCharSpace k χ` and `α ∈ Γ₀(N)`, `f ∣[k] mapGL ℝ α = χ(α) • f`. -/
-lemma multipass_modFormCharSpace_slash_apply
+lemma modFormCharSpace_slash_apply
     {N : ℕ} [NeZero N] {k : ℤ} (χ : (ZMod N)ˣ →* ℂˣ)
     {f : ModularForm ((Gamma1 N).map (mapGL ℝ)) k} (hfχ : f ∈ modFormCharSpace k χ)
     (α : Matrix.SpecialLinearGroup (Fin 2) ℤ) (hα : α ∈ Gamma0 N) :
@@ -54,7 +54,7 @@ lemma multipass_modFormCharSpace_slash_apply
 
 /-- If the image of `α ∈ SL(2, ℤ)` under reduction mod `N` equals the identity, then
 `α ∈ Γ_1(N)`. -/
-lemma multipass_gamma1_conjugate_in_gamma1
+lemma gamma1_conjugate_in_gamma1
     {N : ℕ} [NeZero N]
     (α : Matrix.SpecialLinearGroup (Fin 2) ℤ)
     (h_α_mod_N : ((α : Matrix (Fin 2) (Fin 2) ℤ).map (Int.cast : ℤ → ZMod N) = 1)) :
@@ -67,7 +67,7 @@ lemma multipass_gamma1_conjugate_in_gamma1
 
 /-- When `l` is coprime to prime `p`, there exists a permutation `σ` of `Fin p`
 satisfying `(σ m).val = (l * m.val) % p` for all `m`. -/
-lemma multipass_mul_mod_p_perm_exists {p l : ℕ} [NeZero p] (hp : p.Prime) (hpl : Nat.Coprime p l) :
+lemma mul_mod_p_perm_exists {p l : ℕ} [NeZero p] (hp : p.Prime) (hpl : Nat.Coprime p l) :
     ∃ σ : Equiv.Perm (Fin p), ∀ m : Fin p, (σ m).val = (l * m.val) % p := by
   have : Fact p.Prime := ⟨hp⟩
   let f : Fin p → Fin p := fun m ↦ ⟨(l * m.val) % p, Nat.mod_lt _ hp.pos⟩
@@ -77,7 +77,8 @@ lemma multipass_mul_mod_p_perm_exists {p l : ℕ} [NeZero p] (hp : p.Prime) (hpl
     have hab_val : (l * a.val) % p = (l * b.val) % p := congr_arg Fin.val hab
     have h_zmod : ((l : ZMod p) * (a.val : ZMod p)) = ((l : ZMod p) * (b.val : ZMod p)) := by
       simpa [ZMod.natCast_mod] using congr_arg (Nat.cast : ℕ → ZMod p) hab_val
-    exact Fin.val_injective (by rw [← ZMod.val_natCast_of_lt a.isLt, ← ZMod.val_natCast_of_lt b.isLt,
+    exact Fin.val_injective (by rw [← ZMod.val_natCast_of_lt a.isLt,
+        ← ZMod.val_natCast_of_lt b.isLt,
         mul_left_cancel₀ hl_ne h_zmod])
   exact ⟨Equiv.ofBijective f (Finite.injective_iff_bijective.mp hf_inj), fun _ ↦ rfl⟩
 
@@ -265,7 +266,7 @@ private lemma exists_Gamma0_conj_of_delta_mod
   simp only [MonoidHom.comp_apply]
   rw [h_unitsMap_β, map_one]
 
-lemma m6_2_extra_rep_levelRaise_bridge
+lemma extra_rep_levelRaise_bridge
     {N : ℕ} [NeZero N] {k : ℤ}
     (p : ℕ) [NeZero p] (hp : p.Prime) (hpN : p ∣ N) (hp_sq : ¬ p ^ 2 ∣ N)
     [NeZero (N / p)]
@@ -318,10 +319,10 @@ lemma m6_2_extra_rep_levelRaise_bridge
   have h_γtilde_eq : mapGL ℝ γtilde = mapGL ℝ δ * mapGL ℝ γ_N := by simp [hδ_def]
   simp_rw [← SlashAction.slash_mul]
   rw [h_γtilde_eq, ← mul_assoc, hD_δ, mul_assoc, SlashAction.slash_mul,
-    multipass_modFormCharSpace_slash_apply χ hfχ β hβ_mem]
+    modFormCharSpace_slash_apply χ hfχ β hβ_mem]
   simp [h_chi_β]
 
-private lemma multipass_V_p_slash_upper_aux
+private lemma V_p_slash_upper_aux
     {N : ℕ} [NeZero N] {k : ℤ}
     (p : ℕ) [NeZero p] (hp : p.Prime) [NeZero (N / p)]
     (g_low : ModularForm ((Gamma1 (N / p)).map (mapGL ℝ)) k)
@@ -359,7 +360,7 @@ private lemma multipass_V_p_slash_upper_aux
 
 /-- For each `v` in the descent coset list, the slash of `V_p g_low` by the corresponding
 coset matrix equals `p⁻¹ * g_low(z)` pointwise. -/
-lemma multipass_V_p_slash_descendCoset
+lemma V_p_slash_descendCoset
     {N : ℕ} [NeZero N] {k : ℤ}
     (p : ℕ) [NeZero p] (hp : p.Prime) (hpN : p ∣ N) [NeZero (N / p)]
     (g_low : ModularForm ((Gamma1 (N / p)).map (mapGL ℝ)) k)
@@ -368,7 +369,7 @@ lemma multipass_V_p_slash_descendCoset
       (descendCosetList p N hp v)) z = (p : ℂ)⁻¹ * g_low z := by
   unfold descendCosetList
   split_ifs with h_v
-  · exact multipass_V_p_slash_upper_aux p hp g_low v.val z
+  · exact V_p_slash_upper_aux p hp g_low v.val z
   · rw [SlashAction.slash_mul]
     have h_inner_fun : ((⇑(HeckeRing.GL2.modularFormLevelRaise (N / p) p k g_low)) ∣[k]
         (Matrix.GeneralLinearGroup.mkOfDetNeZero
@@ -376,7 +377,7 @@ lemma multipass_V_p_slash_descendCoset
             (by simp [Matrix.det_fin_two]; exact_mod_cast hp.ne_zero)
           : GL (Fin 2) ℝ)) = ((p : ℂ)⁻¹ • ⇑g_low : UpperHalfPlane → ℂ) := by
       ext w
-      simpa using multipass_V_p_slash_upper_aux p hp g_low 0 w
+      simpa using V_p_slash_upper_aux p hp g_low 0 w
     have h_γ_in_Γ1 : descendExtraGamma p N ∈ Gamma1 (N / p) := by
       rw [Gamma1_mem]
       have h_spec := (descendExtraGamma_spec hp hpN (not_p_sq_dvd_of_not_lt h_v)).2.2
@@ -393,7 +394,7 @@ lemma multipass_V_p_slash_descendCoset
       g_low.slash_action_eq' _ ⟨descendExtraGamma p N, h_γ_in_Γ1, rfl⟩
     have h_σ : UpperHalfPlane.σ (mapGL ℝ (descendExtraGamma p N) : GL (Fin 2) ℝ) =
         ContinuousAlgEquiv.refl ℝ ℂ :=
-      multipass_sigma_eq_id_of_det_pos _ (by simp)
+      sigma_eq_id_of_det_pos _ (by simp)
     rw [h_inner_fun, ModularForm.smul_slash, h_σ, ContinuousAlgEquiv.refl_apply, h_g_low_inv]
     simp [Pi.smul_apply, smul_eq_mul]
 
@@ -517,8 +518,8 @@ theorem miyake_hecke_descend_char
     (Equiv.sum_comp σ (fun v ↦ (⇑f ∣[k] descendCosetList p N hp v) z)).symm, Finset.smul_sum]
   refine Finset.sum_congr rfl fun v _ ↦ ?_
   rw [(SlashAction.slash_mul k _ _ _).symm, h_action_eq v, SlashAction.slash_mul,
-      multipass_modFormCharSpace_slash_apply χ hfχ (α v) (h_α_mem v),
-      ModularForm.smul_slash, multipass_sigma_eq_id_of_det_pos _ (h_det_pos (σ v)),
+      modFormCharSpace_slash_apply χ hfχ (α v) (h_α_mem v),
+      ModularForm.smul_slash, sigma_eq_id_of_det_pos _ (h_det_pos (σ v)),
       ContinuousAlgEquiv.refl_apply]
   simp only [Pi.smul_apply, smul_eq_mul, h_chi_eq v]
 
@@ -533,7 +534,7 @@ lemma miyake_hecke_descend_Gamma1_inv
       (⇑f ∣[k] descendCosetList p N hp v) z) ∣[k] (mapGL ℝ γ' : GL (Fin 2) ℝ) =
     fun z ↦ ∑ v : Fin (descendCosetCount p N),
       (⇑f ∣[k] descendCosetList p N hp v) z := by
-  obtain ⟨h_γ'_Gamma0, h_units_one⟩ := multipass_char_trivial_on_Gamma1 γ' h_γ'
+  obtain ⟨h_γ'_Gamma0, h_units_one⟩ := char_trivial_on_Gamma1 γ' h_γ'
   have h_char := miyake_hecke_descend_char p hp hpN χ χ' hχ_eq hfχ ⟨γ', h_γ'_Gamma0⟩
   rw [h_units_one, map_one] at h_char
   simpa only [Units.val_one, one_smul] using h_char

@@ -822,7 +822,7 @@ the K⁺-trace difference algebraMap image satisfies
 in `𝓞 K`. This is the **first-step factorization** for absorbing the
 K⁺-trace-difference coefficient `γ_η₁ - γ_η₂` as a product of differences of
 roots of unity (each `Associated (ζ - 1)` by
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime`),
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime`),
 on the way to the Fermat sum identity with unit coefficients. -/
 theorem caseII_eta_trace_diff_factorization
     {η₁ η₂ : 𝓞 K} (hη₁ : η₁ ^ 37 = 1) (hη₂ : η₂ ^ 37 = 1) :
@@ -834,7 +834,7 @@ omit [NumberField.IsCMField K] in
 /-- **K⁺-trace difference Associated `(ζ - 1)²` in `𝓞 K`.** Combining
 `caseII_eta_trace_diff_factorization`
 `(γ_η₁ - γ_η₂) = (η₁ - η₂) · (1 - η₁^36·η₂^36)` with the mathlib lemma
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime` (applied to each factor as a
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime` (applied to each factor as a
 difference of `nthRootsFinset 37`-members), each factor is `Associated (ζ - 1)`, so the
 product is `Associated (ζ - 1)²`. Caveats: requires `η₁ ≠ η₂` (so first factor is nonzero
 diff) and `η₁·η₂ ≠ 1` (so second factor's other member is ≠ 1 — equivalently
@@ -850,7 +850,7 @@ theorem caseII_eta_trace_diff_associated_zeta_sub_one_sq
       (((zeta_spec 37 ℚ K).toInteger - 1) ^ 2) := by
   rw [caseII_eta_trace_diff_factorization hη₁ hη₂]
   have h1 : Associated ((zeta_spec 37 ℚ K).toInteger - 1) (η₁ - η₂) :=
-    hζ.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37)
       ((Polynomial.mem_nthRootsFinset (by norm_num) _).mpr hη₁)
       ((Polynomial.mem_nthRootsFinset (by norm_num) _).mpr hη₂) hne
@@ -871,7 +871,7 @@ theorem caseII_eta_trace_diff_associated_zeta_sub_one_sq
         pow_mul, pow_mul, hη₁, hη₂]
       simp)
   have h2 : Associated ((zeta_spec 37 ℚ K).toInteger - 1) (1 - η₁ ^ 36 * η₂ ^ 36) :=
-    hζ.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmem_prod hprod36.symm
   rw [sq]
   exact (h1.mul_mul h2).symm
@@ -1335,7 +1335,7 @@ noncomputable def caseII_data_pair_realGenerator_K {m : ℕ} (D : RealCaseIIData
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     caseII_data_pair_realGenerator_K D η =
       (D.x + D.y * (η : 𝓞 K)) * (D.x + D.y * (η : 𝓞 K) ^ 36) := by
-  unfold caseII_data_pair_realGenerator_K caseII_data_pair_realGenerator
+  simp only [caseII_data_pair_realGenerator_K, caseII_data_pair_realGenerator]
   exact (caseII_data_pair_product_descends D η).choose_spec
 
 /-- **The `𝓞 K`-pair-generator is σ-fixed (REAL).** -/
@@ -1506,7 +1506,6 @@ theorem caseII_p_pow_m_pow_37_dvd_a_etaZero_pow_37 {m : ℕ} (D : RealCaseIIData
       (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaZero) ^ 37 :=
   pow_dvd_pow_of_dvd (caseII_p_pow_dvd_a_etaZero D hp) 37
 
-set_option maxRecDepth 2000 in
 /-- **Step 3-4 (combined):** `(𝔭^m)^37 ∣ 𝔠(D.etaZero)`. Bumping `maxRecDepth` for this
 specific theorem to handle the elaboration of `root_div_zeta_sub_one_dvd_gcd_spec` at the
 long argument list (Subtype operations from RealCaseIIData37 + D.etaZero noncomputable def). -/
@@ -1893,7 +1892,7 @@ theorem caseII_LambdaCyc_pow_dvd_pair_realGenerator_at_etaZero {m : ℕ}
     (D : RealCaseIIData37 K m) (hp : (37 : ℕ) ≠ 2) :
     caseII_LambdaCyc D ^ (37 * m + 1) ∣ caseII_data_pair_realGenerator D D.etaZero := by
   obtain ⟨c, hc⟩ := caseII_LambdaCyc_algebraMap_pow_dvd_pair_realGenerator_K_at_etaZero D hp
-  unfold caseII_data_pair_realGenerator_K at hc
+  simp only [caseII_data_pair_realGenerator_K] at hc
   have h_alg_Lambda_pow_fixed :
       NumberField.IsCMField.ringOfIntegersComplexConj K
           ((algebraMap _ (𝓞 K) (caseII_LambdaCyc D)) ^ (37 * m + 1)) =
@@ -1976,7 +1975,7 @@ theorem caseII_LambdaCyc_dvd_pair_realGenerator {m : ℕ}
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     caseII_LambdaCyc D ∣ caseII_data_pair_realGenerator D η := by
   obtain ⟨c, hc⟩ := caseII_LambdaCyc_algebraMap_dvd_pair_realGenerator_K D hp η
-  unfold caseII_data_pair_realGenerator_K at hc
+  simp only [caseII_data_pair_realGenerator_K] at hc
   have h_alg_Lambda_fixed :
       NumberField.IsCMField.ringOfIntegersComplexConj K
           (algebraMap _ (𝓞 K) (caseII_LambdaCyc D)) =
@@ -2935,7 +2934,6 @@ theorem caseII_sigma_pair_anchored_cross_identity_exists {m : ℕ} (D : RealCase
   refine ⟨G.xPlus, G.yPlus, G.xPlus_ne_zero, G.yPlus_ne_zero, ?_⟩
   exact caseII_sigma_pair_anchored_fractional_ratio D hp η G
 
-set_option maxRecDepth 2000 in
 /-- **`span{P_K_η} = (𝔪·𝔭)² · (𝔞_pair_η)^37`.** The K⁺-pair-generator's principal ideal
 factors as the K-uniformizer/gcd part `(𝔪·𝔭)²` times the 37th power of the σ-stable
 pair-product `𝔞_pair_η = 𝔞(η)·𝔞(η⁻¹)`. Combines `caseII_data_pair_realGenerator_K_principal_eq`
@@ -3085,7 +3083,7 @@ theorem caseII_sigma_pair_pow37_cross_realGenerator_unit_fixed {m : ℕ}
   rw [h_x_fixed, h_P_fixed, h_y_fixed, h_P0_fixed] at h_σ
   rw [← hu] at h_σ
   have h_P_K_ne_zero : caseII_data_pair_realGenerator_K D η ≠ 0 := by
-    unfold caseII_data_pair_realGenerator_K
+    simp only [caseII_data_pair_realGenerator_K]
     rw [Ne, map_eq_zero_iff _
       (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
     exact caseII_data_pair_realGenerator_ne_zero D hp η
@@ -3419,7 +3417,7 @@ theorem caseII_K_symmetric_at_etaTwo_ne_zero {m : ℕ} (D : RealCaseIIData37 K m
     D.x ^ 2 + D.x * D.y * ((D.etaTwo : 𝓞 K) + (D.etaTwo : 𝓞 K) ^ 36) + D.y ^ 2 ≠ 0 := by
   rw [← caseII_pair_product_symmetric_expansion D D.etaTwo,
     ← caseII_data_pair_realGenerator_K_eq D D.etaTwo]
-  unfold caseII_data_pair_realGenerator_K
+  simp only [caseII_data_pair_realGenerator_K]
   rw [Ne, map_eq_zero_iff _
     (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
   exact caseII_data_pair_realGenerator_ne_zero D hp D.etaTwo
@@ -3431,7 +3429,7 @@ theorem caseII_K_symmetric_at_etaOne_ne_zero {m : ℕ} (D : RealCaseIIData37 K m
     D.x ^ 2 + D.x * D.y * ((D.etaOne : 𝓞 K) + (D.etaOne : 𝓞 K) ^ 36) + D.y ^ 2 ≠ 0 := by
   rw [← caseII_pair_product_symmetric_expansion D D.etaOne,
     ← caseII_data_pair_realGenerator_K_eq D D.etaOne]
-  unfold caseII_data_pair_realGenerator_K
+  simp only [caseII_data_pair_realGenerator_K]
   rw [Ne, map_eq_zero_iff _
     (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
   exact caseII_data_pair_realGenerator_ne_zero D hp D.etaOne
@@ -4507,14 +4505,15 @@ theorem caseII_K_trace_sub_two_eq {m : ℕ} (_D : RealCaseIIData37 K m)
   ring
 
 /-- **`Associated (η - 1) (ζ - 1)`** for a 37th root `η ≠ 1`. Instance of mathlib's
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime` (associate of `ζ-1` with any
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime` (associate of `ζ-1` with any
 difference `η₁ - η₂` of distinct 37th roots), taking `η₁ = η`, `η₂ = 1`. -/
 theorem caseII_root_sub_one_associated {m : ℕ} (D : RealCaseIIData37 K m)
     (η : nthRootsFinset 37 (1 : 𝓞 K)) (hη_ne : (η : 𝓞 K) ≠ 1) :
     Associated ((η : 𝓞 K) - 1) (D.hζ.toInteger - 1) := by
   have h1mem : (1 : 𝓞 K) ∈ nthRootsFinset 37 (1 : 𝓞 K) :=
     one_mem_nthRootsFinset (by norm_num)
-  have hpair := D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  have hpair :=
+    D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     (by decide : Nat.Prime 37) η.2 h1mem hη_ne
   exact hpair.symm
 

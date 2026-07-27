@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -212,38 +217,127 @@ theorem completedDedekindZeta_real {x : ℝ} (hx : 1 < x) :
   rw [one_mul]
 
 open scoped Classical in
+/-- The completed Dedekind zeta is analytic on the half-plane `Re s > 1`: there it is a
+scalar multiple of `Λ(s/2)` for the Hecke functional-equation pair, avoiding the poles. -/
+theorem analyticOnNhd_completedDedekindZeta :
+    AnalyticOnNhd ℂ (completedDedekindZeta K) {z : ℂ | 1 < z.re} := by
+  have hUopen : IsOpen {z : ℂ | 1 < z.re} :=
+    isOpen_lt continuous_const Complex.continuous_re
+  refine DifferentiableOn.analyticOnNhd ?_ hUopen
+  intro z hz
+  refine DifferentiableAt.differentiableWithinAt ?_
+  refine DifferentiableAt.const_mul ?_ _
+  have hz2 : z / 2 ≠ 0 := by
+    intro h
+    have : z = 0 := by linear_combination (2:ℂ) * h
+    rw [this] at hz
+    norm_num [Set.mem_setOf_eq] at hz
+  have hzk : z / 2 ≠ (((heckeFEPair K).k : ℝ) : ℂ) := by
+    intro h
+    rw [show (heckeFEPair K).k = 1/2 from rfl] at h
+    have : z = 1 := by
+      push_cast at h
+      linear_combination (2:ℂ) * h
+    rw [this] at hz
+    norm_num [Set.mem_setOf_eq] at hz
+  have hd := (heckeFEPair K).differentiableAt_Λ (Or.inl hz2) (Or.inl hzk)
+  have hhalf : DifferentiableAt ℂ (fun w : ℂ => w / 2) z := by fun_prop
+  exact DifferentiableAt.comp (𝕜 := ℂ) (g := (heckeFEPair K).Λ)
+    (f := fun w : ℂ => w / 2) z hd hhalf
+
+open scoped Classical in
+/-- The right-hand side `completedZetaPrefactor · dedekindZeta` is analytic on `Re s > 1`,
+given differentiability of `dedekindZeta` there: the prefactor is a `const_cpow` times a
+product of Gamma factors, each differentiable off its poles on the half-plane. -/
+theorem analyticOnNhd_completedZetaPrefactor_mul_dedekindZeta
+    (hζat : ∀ z : ℂ, z ∈ {z : ℂ | 1 < z.re} → DifferentiableAt ℂ (dedekindZeta K) z) :
+    AnalyticOnNhd ℂ
+      (fun z => completedZetaPrefactor K z * dedekindZeta K z) {z : ℂ | 1 < z.re} := by
+  have hUopen : IsOpen {z : ℂ | 1 < z.re} :=
+    isOpen_lt continuous_const Complex.continuous_re
+  refine DifferentiableOn.analyticOnNhd ?_ hUopen
+  intro z hz
+  refine DifferentiableAt.differentiableWithinAt ?_
+  refine DifferentiableAt.mul ?_ (hζat z hz)
+  -- the prefactor
+  have hzre : (0:ℝ) < z.re := lt_trans one_pos hz
+  have hD0 : ((|discr K| : ℝ) : ℂ) ≠ 0 := by
+    simp only [ne_eq, Complex.ofReal_eq_zero]
+    have := discr_ne_zero K
+    positivity
+  refine DifferentiableAt.mul ?_ ?_
+  · exact (differentiableAt_id.div_const 2).const_cpow (Or.inl hD0)
+  · -- the Gamma factor
+    show DifferentiableAt ℂ (fun z => Complex.Gammaℝ z ^ (nrRealPlaces K)
+      * Complex.Gammaℂ z ^ (nrComplexPlaces K)) z
+    have hΓℝ : DifferentiableAt ℂ Complex.Gammaℝ z := by
+      show DifferentiableAt ℂ (fun z => (π : ℂ) ^ (-z / 2) * Complex.Gamma (z / 2)) z
+      refine DifferentiableAt.mul ?_ ?_
+      · refine DifferentiableAt.const_cpow (by fun_prop) (Or.inl ?_)
+        simp only [ne_eq, Complex.ofReal_eq_zero]
+        exact Real.pi_ne_zero
+      · refine DifferentiableAt.comp (𝕜 := ℂ) (g := Complex.Gamma)
+          (f := fun w : ℂ => w / 2) z ?_ (by fun_prop)
+        refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+        intro h
+        have hz2 : z = (-(2 * (m : ℂ))) := by linear_combination (2:ℂ) * h
+        rw [hz2] at hzre
+        rw [show (-(2 * (m : ℂ))).re = -(2 * (m : ℝ)) by simp] at hzre
+        nlinarith [Nat.cast_nonneg (α := ℝ) m]
+    have hΓℂ : DifferentiableAt ℂ Complex.Gammaℂ z := by
+      show DifferentiableAt ℂ (fun z => 2 * (2 * π : ℂ) ^ (-z) * Complex.Gamma z) z
+      refine DifferentiableAt.mul ?_ ?_
+      · refine DifferentiableAt.const_mul ?_ _
+        refine DifferentiableAt.const_cpow (by fun_prop) (Or.inl ?_)
+        refine mul_ne_zero two_ne_zero ?_
+        simp only [ne_eq, Complex.ofReal_eq_zero]
+        exact Real.pi_ne_zero
+      · refine Complex.differentiableAt_Gamma _ (fun m => ?_)
+        intro h
+        rw [h] at hzre
+        simp only [Complex.neg_re, Complex.natCast_re] at hzre
+        have hm : (0:ℝ) ≤ (m:ℝ) := Nat.cast_nonneg m
+        linarith
+    exact (hΓℝ.pow _).mul (hΓℂ.pow _)
+
+open scoped Classical in
+/-- Frequent agreement of the two sides in `𝓝[≠] 2`: along the real sequence
+`2 + 1/(n+1) → 2` (each term in `Re s > 1`), `completedDedekindZeta_real` gives equality. -/
+theorem frequently_completedDedekindZeta_eq :
+    ∃ᶠ z in nhdsWithin (2:ℂ) {(2:ℂ)}ᶜ,
+      completedDedekindZeta K z = completedZetaPrefactor K z * dedekindZeta K z := by
+  have htend : Filter.Tendsto (fun n : ℕ => (((2 + (1:ℝ)/(n+1) : ℝ)) : ℂ))
+      Filter.atTop (nhdsWithin (2:ℂ) {(2:ℂ)}ᶜ) := by
+    refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
+    · have hre : Filter.Tendsto (fun n : ℕ => (2 + (1:ℝ)/(n+1) : ℝ))
+          Filter.atTop (𝓝 (2:ℝ)) := by
+        have h0 : Filter.Tendsto (fun n : ℕ => (1:ℝ)/(n+1)) Filter.atTop (𝓝 0) :=
+          tendsto_one_div_add_atTop_nhds_zero_nat
+        have := Filter.Tendsto.const_add (2:ℝ) h0
+        simpa using this
+      have hcomp := (Complex.continuous_ofReal.tendsto (2:ℝ)).comp hre
+      refine hcomp.congr (fun n => rfl) |>.mono_right ?_
+      rw [show ((2:ℝ) : ℂ) = (2:ℂ) by norm_cast]
+    · refine Filter.Eventually.of_forall (fun n => ?_)
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+      intro h
+      have hreal : (2 + (1:ℝ)/(n+1) : ℝ) = 2 := by exact_mod_cast h
+      have hpos : (0:ℝ) < (1:ℝ)/(n+1) := by positivity
+      linarith
+  refine htend.frequently (Filter.Frequently.of_forall (fun n => ?_))
+  have hgt : (1:ℝ) < 2 + (1:ℝ)/(n+1) := by
+    have hpos : (0:ℝ) < (1:ℝ)/(n+1) := by positivity
+    linarith
+  exact completedDedekindZeta_real K hgt
+
+open scoped Classical in
 /-- **The agreement on the half-plane** `Re s > 1`, by the identity theorem from the real
 ray. -/
 theorem completedDedekindZeta_eq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
     completedDedekindZeta K s = completedZetaPrefactor K s * dedekindZeta K s := by
-  have hUopen : IsOpen {z : ℂ | 1 < z.re} :=
-    isOpen_lt continuous_const Complex.continuous_re
   have hUconn : IsPreconnected {z : ℂ | 1 < z.re} :=
     (convex_halfSpace_re_gt 1).isPreconnected
-  -- the left side is analytic on the half-plane
-  have hF₁ : AnalyticOnNhd ℂ (completedDedekindZeta K) {z : ℂ | 1 < z.re} := by
-    refine DifferentiableOn.analyticOnNhd ?_ hUopen
-    intro z hz
-    refine DifferentiableAt.differentiableWithinAt ?_
-    refine DifferentiableAt.const_mul ?_ _
-    have hz2 : z / 2 ≠ 0 := by
-      intro h
-      have : z = 0 := by linear_combination (2:ℂ) * h
-      rw [this] at hz
-      norm_num [Set.mem_setOf_eq] at hz
-    have hzk : z / 2 ≠ (((heckeFEPair K).k : ℝ) : ℂ) := by
-      intro h
-      rw [show (heckeFEPair K).k = 1/2 from rfl] at h
-      have : z = 1 := by
-        push_cast at h
-        linear_combination (2:ℂ) * h
-      rw [this] at hz
-      norm_num [Set.mem_setOf_eq] at hz
-    have hd := (heckeFEPair K).differentiableAt_Λ (Or.inl hz2) (Or.inl hzk)
-    have hhalf : DifferentiableAt ℂ (fun w : ℂ => w / 2) z := by fun_prop
-    exact DifferentiableAt.comp (𝕜 := ℂ) (g := (heckeFEPair K).Λ)
-      (f := fun w : ℂ => w / 2) z hd hhalf
-  -- the right side is analytic on the half-plane
+  have hF₁ := analyticOnNhd_completedDedekindZeta K
   have hcoef : (fun n : ℕ => ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℕ) : ℂ))
       = (fun n : ℕ => ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℝ) : ℂ)) := by
     funext n
@@ -262,80 +356,10 @@ theorem completedDedekindZeta_eq_of_one_lt_re {s : ℂ} (hs : 1 < s.re) :
     show DifferentiableAt ℂ (LSeries (fun n : ℕ =>
       ((Nat.card {I : Ideal (𝓞 K) // Ideal.absNorm I = n} : ℕ) : ℂ))) z
     exact (LSeries_hasDerivAt hz').differentiableAt
-  have hF₂ : AnalyticOnNhd ℂ
-      (fun z => completedZetaPrefactor K z * dedekindZeta K z) {z : ℂ | 1 < z.re} := by
-    refine DifferentiableOn.analyticOnNhd ?_ hUopen
-    intro z hz
-    refine DifferentiableAt.differentiableWithinAt ?_
-    refine DifferentiableAt.mul ?_ (hζat z hz)
-    -- the prefactor
-    have hzre : (0:ℝ) < z.re := lt_trans one_pos hz
-    have hD0 : ((|discr K| : ℝ) : ℂ) ≠ 0 := by
-      simp only [ne_eq, Complex.ofReal_eq_zero]
-      have := discr_ne_zero K
-      positivity
-    refine DifferentiableAt.mul ?_ ?_
-    · exact (differentiableAt_id.div_const 2).const_cpow (Or.inl hD0)
-    · -- the Gamma factor
-      show DifferentiableAt ℂ (fun z => Complex.Gammaℝ z ^ (nrRealPlaces K)
-        * Complex.Gammaℂ z ^ (nrComplexPlaces K)) z
-      have hΓℝ : DifferentiableAt ℂ Complex.Gammaℝ z := by
-        show DifferentiableAt ℂ (fun z => (π : ℂ) ^ (-z / 2) * Complex.Gamma (z / 2)) z
-        refine DifferentiableAt.mul ?_ ?_
-        · refine DifferentiableAt.const_cpow (by fun_prop) (Or.inl ?_)
-          simp only [ne_eq, Complex.ofReal_eq_zero]
-          exact Real.pi_ne_zero
-        · refine DifferentiableAt.comp (𝕜 := ℂ) (g := Complex.Gamma)
-            (f := fun w : ℂ => w / 2) z ?_ (by fun_prop)
-          refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-          intro h
-          have hz2 : z = (-(2 * (m : ℂ))) := by linear_combination (2:ℂ) * h
-          rw [hz2] at hzre
-          rw [show (-(2 * (m : ℂ))).re = -(2 * (m : ℝ)) by simp] at hzre
-          nlinarith [Nat.cast_nonneg (α := ℝ) m]
-      have hΓℂ : DifferentiableAt ℂ Complex.Gammaℂ z := by
-        show DifferentiableAt ℂ (fun z => 2 * (2 * π : ℂ) ^ (-z) * Complex.Gamma z) z
-        refine DifferentiableAt.mul ?_ ?_
-        · refine DifferentiableAt.const_mul ?_ _
-          refine DifferentiableAt.const_cpow (by fun_prop) (Or.inl ?_)
-          refine mul_ne_zero two_ne_zero ?_
-          simp only [ne_eq, Complex.ofReal_eq_zero]
-          exact Real.pi_ne_zero
-        · refine Complex.differentiableAt_Gamma _ (fun m => ?_)
-          intro h
-          rw [h] at hzre
-          simp only [Complex.neg_re, Complex.natCast_re] at hzre
-          have hm : (0:ℝ) ≤ (m:ℝ) := Nat.cast_nonneg m
-          linarith
-      exact (hΓℝ.pow _).mul (hΓℂ.pow _)
-  -- frequently-agreement at 2 along the real sequence 2 + 1/(n+1)
+  have hF₂ := analyticOnNhd_completedZetaPrefactor_mul_dedekindZeta K hζat
   have h2mem : (2:ℂ) ∈ {z : ℂ | 1 < z.re} := by
     norm_num [Set.mem_setOf_eq]
-  have hfreq : ∃ᶠ z in nhdsWithin (2:ℂ) {(2:ℂ)}ᶜ,
-      completedDedekindZeta K z = completedZetaPrefactor K z * dedekindZeta K z := by
-    have htend : Filter.Tendsto (fun n : ℕ => (((2 + (1:ℝ)/(n+1) : ℝ)) : ℂ))
-        Filter.atTop (nhdsWithin (2:ℂ) {(2:ℂ)}ᶜ) := by
-      refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
-      · have hre : Filter.Tendsto (fun n : ℕ => (2 + (1:ℝ)/(n+1) : ℝ))
-            Filter.atTop (𝓝 (2:ℝ)) := by
-          have h0 : Filter.Tendsto (fun n : ℕ => (1:ℝ)/(n+1)) Filter.atTop (𝓝 0) :=
-            tendsto_one_div_add_atTop_nhds_zero_nat
-          have := Filter.Tendsto.const_add (2:ℝ) h0
-          simpa using this
-        have hcomp := (Complex.continuous_ofReal.tendsto (2:ℝ)).comp hre
-        refine hcomp.congr (fun n => rfl) |>.mono_right ?_
-        rw [show ((2:ℝ) : ℂ) = (2:ℂ) by norm_cast]
-      · refine Filter.Eventually.of_forall (fun n => ?_)
-        simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-        intro h
-        have hreal : (2 + (1:ℝ)/(n+1) : ℝ) = 2 := by exact_mod_cast h
-        have hpos : (0:ℝ) < (1:ℝ)/(n+1) := by positivity
-        linarith
-    refine htend.frequently (Filter.Frequently.of_forall (fun n => ?_))
-    have hgt : (1:ℝ) < 2 + (1:ℝ)/(n+1) := by
-      have hpos : (0:ℝ) < (1:ℝ)/(n+1) := by positivity
-      linarith
-    exact completedDedekindZeta_real K hgt
+  have hfreq := frequently_completedDedekindZeta_eq K
   have hEq := hF₁.eqOn_of_preconnected_of_frequently_eq hF₂ hUconn h2mem hfreq
   exact hEq hs
 

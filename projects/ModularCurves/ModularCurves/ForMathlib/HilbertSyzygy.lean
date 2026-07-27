@@ -2,7 +2,10 @@
 Copyright (c) 2026 AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib
+import Mathlib.Algebra.Category.ModuleCat.Descent
+import Mathlib.Algebra.Category.ModuleCat.ProjectiveDimension
+import Mathlib.Algebra.Polynomial.Module.TensorProduct
+import Mathlib.CategoryTheory.Preadditive.Projective.Preserves
 
 /-!
 # Hilbert's syzygy theorem
@@ -198,7 +201,8 @@ lemma Lequiv_Xpow_tmul (i : ℕ) (m : Mr R M) :
   rw [PolynomialModule.monomial_smul_single, one_smul, Nat.add_zero]
 
 lemma eLin_single (i : ℕ) (m : Mr R M) :
-    eLin R M (PolynomialModule.single R i m) = (((X:Polynomial R)^i) ⊗ₜ[R, polyAlg R] m : X2 R M) := by
+    eLin R M (PolynomialModule.single R i m)
+      = (((X:Polynomial R)^i) ⊗ₜ[R, polyAlg R] m : X2 R M) := by
   rw [eLin, LinearEquiv.trans_apply, ← Lequiv_Xpow_tmul, LinearEquiv.symm_apply_apply]
   exact bridgeR_tmul R M _ m
 
@@ -216,7 +220,8 @@ def epsP : P R M →ₗ[Polynomial R] (M : Type u) :=
 
 lemma epsP_single (i : ℕ) (m : Mr R M) :
     epsP R M (PolynomialModule.single R i m) = ((X:Polynomial R)^i) • m := by
-  show (ExtendRestrictScalarsAdj.Counit.map (polyAlg R)).hom (eLin R M (PolynomialModule.single R i m)) = _
+  show (ExtendRestrictScalarsAdj.Counit.map (polyAlg R)).hom
+    (eLin R M (PolynomialModule.single R i m)) = _
   rw [eLin_single, counit_tmul]
 
 /-! ### The injection `φ` -/
@@ -239,7 +244,8 @@ def mapPsi : P R M →ₗ[Polynomial R] P R M where
     rw [PolynomialModule.map_smul, Algebra.algebraMap_self, Polynomial.map_id]
 
 @[simp] lemma mapPsi_single (i : ℕ) (m : Mr R M) :
-    mapPsi R M (PolynomialModule.single R i m) = PolynomialModule.single R i ((X:Polynomial R) • m) := by
+    mapPsi R M (PolynomialModule.single R i m)
+      = PolynomialModule.single R i ((X:Polynomial R) • m) := by
   show PolynomialModule.map R (xAction R M) (PolynomialModule.single R i m) = _
   rw [PolynomialModule.map_single, xAction_apply]
 
@@ -259,6 +265,7 @@ def phiP : P R M →ₗ[Polynomial R] P R M :=
 
 /-! ### Exactness -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `ε ∘ φ = 0`. -/
 lemma epsP_phiP (q : P R M) : epsP R M (phiP R M q) = 0 := by
   induction q using PolynomialModule.induction_linear with
@@ -267,68 +274,75 @@ lemma epsP_phiP (q : P R M) : epsP R M (phiP R M q) = 0 := by
   | single i m =>
     rw [phiP_single, map_sub, epsP_single, epsP_single, smul_smul, ← pow_succ, sub_self]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `ε` is surjective. -/
 lemma epsP_surjective : Function.Surjective (epsP R M) :=
   fun m => ⟨PolynomialModule.single R 0 m, by rw [epsP_single, pow_zero, one_smul]⟩
 
 /-- The `(n+1)`-coefficient of `φ q`. -/
 lemma phiP_coeff_succ (q : P R M) (n : ℕ) :
-    (phiP R M q) (n+1) = q n - (X:Polynomial R) • (q (n+1)) := by
-  show (LinearMap.lsmul (Polynomial R) (P R M) (X:Polynomial R) - mapPsi R M) q (n+1) = _
+    (phiP R M q).coeff (n+1) = q.coeff n - (X:Polynomial R) • (q.coeff (n+1)) := by
+  show ((LinearMap.lsmul (Polynomial R) (P R M) (X:Polynomial R) - mapPsi R M) q).coeff (n+1) = _
   rw [LinearMap.sub_apply, LinearMap.lsmul_apply]
-  change ((X:Polynomial R) • q) (n+1) - (mapPsi R M q) (n+1) = q n - (X:Polynomial R) • (q (n+1))
+  change ((X:Polynomial R) • q).coeff (n+1) - (mapPsi R M q).coeff (n+1)
+    = q.coeff n - (X:Polynomial R) • (q.coeff (n+1))
   congr 1
   rw [← Polynomial.monomial_one_one_eq_X, PolynomialModule.monomial_smul_apply]
   simp
 
-lemma Pcoe_sub (a b : P R M) (i : ℕ) : (a - b) i = a i - b i := Finsupp.sub_apply a b i
+lemma Pcoe_sub (a b : P R M) (i : ℕ) : (a - b).coeff i = a.coeff i - b.coeff i := by
+  have : (a - b).coeff = a.coeff - b.coeff := map_sub PolynomialModule.coeffAddEquiv a b
+  rw [this, Finsupp.sub_apply]
 lemma Pcoe_single (k : ℕ) (a : Mr R M) (i : ℕ) :
-    (PolynomialModule.single R k a) i = if k = i then a else 0 := PolynomialModule.single_apply R k a i
+    (PolynomialModule.single R k a).coeff i = if k = i then a else 0 := by
+  rw [PolynomialModule.coeff_single, Finsupp.single_apply]
 
 /-- `φ` is injective. -/
 lemma phiP_injective : Function.Injective (phiP R M) := by
   rw [injective_iff_map_eq_zero]
   intro q hq
   by_contra h
-  have hne : q.support.Nonempty := Finsupp.support_nonempty_iff.mpr h
-  set N := q.support.max' hne with hN
-  have hNmem : N ∈ q.support := q.support.max'_mem hne
-  have hqN : q N ≠ 0 := Finsupp.mem_support_iff.mp hNmem
-  have hqN1 : q (N+1) = 0 := by
+  have hcne : q.coeff ≠ 0 := fun hc => h (PolynomialModule.coeff_injective (by simp [hc]))
+  have hne : q.coeff.support.Nonempty := Finsupp.support_nonempty_iff.mpr hcne
+  set N := q.coeff.support.max' hne with hN
+  have hNmem : N ∈ q.coeff.support := q.coeff.support.max'_mem hne
+  have hqN : q.coeff N ≠ 0 := Finsupp.mem_support_iff.mp hNmem
+  have hqN1 : q.coeff (N+1) = 0 := by
     by_contra hc
-    have : N+1 ∈ q.support := Finsupp.mem_support_iff.mpr hc
-    have := q.support.le_max' _ this
+    have : N+1 ∈ q.coeff.support := Finsupp.mem_support_iff.mpr hc
+    have := q.coeff.support.le_max' _ this
     omega
-  have : (phiP R M q) (N+1) = q N := by
+  have : (phiP R M q).coeff (N+1) = q.coeff N := by
     rw [phiP_coeff_succ, hqN1, smul_zero, sub_zero]
   rw [hq] at this
   exact hqN this.symm
 
 /-- `ker ε ⊆ range φ`, by downward induction on the degree bound `n`. -/
 lemma ker_le_range_aux : ∀ (n : ℕ) (q : P R M),
-    (∀ i, n < i → q i = 0) → epsP R M q = 0 → q ∈ LinearMap.range (phiP R M) := by
+    (∀ i, n < i → q.coeff i = 0) → epsP R M q = 0 → q ∈ LinearMap.range (phiP R M) := by
   intro n
   induction n with
   | zero =>
     intro q hq he
-    have hq0 : q = PolynomialModule.single R 0 (q 0) := by
-      refine DFunLike.ext _ _ fun j => ?_
+    have hq0 : q = PolynomialModule.single R 0 (q.coeff 0) := by
+      refine PolynomialModule.ext ?_
+      refine Finsupp.ext fun j => ?_
       rw [Pcoe_single]
       rcases Nat.eq_zero_or_pos j with hj | hj
       · subst hj; simp
       · rw [hq j hj, if_neg (by omega)]
-    have hval : epsP R M q = q 0 := by
+    have hval : epsP R M q = q.coeff 0 := by
       conv_lhs => rw [hq0]
       rw [epsP_single, pow_zero, one_smul]
     rw [hval] at he
     refine ⟨0, ?_⟩
     rw [map_zero, hq0, he]
-    exact (map_zero (PolynomialModule.single R 0)).symm
+    exact (PolynomialModule.single_zero (R := R) 0).symm
   | succ n ih =>
     intro q hq he
-    set m := q (n+1) with hm
+    set m := q.coeff (n+1) with hm
     set q' := q - phiP R M (PolynomialModule.single R n m) with hq'
-    have hbound : ∀ i, n < i → q' i = 0 := by
+    have hbound : ∀ i, n < i → q'.coeff i = 0 := by
       intro i hi
       rw [hq', Pcoe_sub, phiP_single, Pcoe_sub, Pcoe_single, Pcoe_single]
       rcases Nat.lt_or_ge (n+1) i with h1 | h1
@@ -347,7 +361,7 @@ lemma phiP_epsP_exact : Function.Exact (phiP R M) (epsP R M) := by
   intro q
   constructor
   · intro he
-    refine ker_le_range_aux R M (q.support.sup id) q (fun i hi => ?_) he
+    refine ker_le_range_aux R M (q.coeff.support.sup id) q (fun i hi => ?_) he
     by_contra hc
     have hle := Finset.le_sup (f := id) (Finsupp.mem_support_iff.mpr hc)
     simp only [id_eq] at hle

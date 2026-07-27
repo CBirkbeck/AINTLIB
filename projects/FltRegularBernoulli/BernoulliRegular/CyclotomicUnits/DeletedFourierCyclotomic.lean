@@ -1,5 +1,7 @@
-import BernoulliRegular.CyclotomicUnits.AnalyticCore
-import BernoulliRegular.CyclotomicUnits.DeletedFourier
+module
+
+public import BernoulliRegular.CyclotomicUnits.AnalyticCore
+public import BernoulliRegular.CyclotomicUnits.DeletedFourier
 
 /-!
 # Deleted Fourier determinant on the even cyclotomic quotient
@@ -8,6 +10,7 @@ This file specializes the abstract deleted Fourier determinant identity to
 `CyclotomicEvenDelta p = (ZMod p)ˣ / {±1}` and identifies the `hk` convention
 with the existing `FLT37.Sinnott.quotientEigenvalue` normalization.
 -/
+@[expose] public section
 
 noncomputable section
 

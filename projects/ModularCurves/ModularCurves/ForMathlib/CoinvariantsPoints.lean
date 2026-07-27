@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ForMathlib.CoactionCharpoly
 import ModularCurves.ForMathlib.CoinvariantsBaseChange
 import Mathlib.RingTheory.Ideal.GoingUp
@@ -323,6 +328,87 @@ theorem not_isUnit_det_mulMatrix_coaction {ρ : B →ₐ[R] B ⊗[R] A} (hρ : I
   exact hf (isUnit_of_isUnit_coaction R A hρ
     (isUnit_of_isUnit_mulMatrix R A ((Matrix.isUnit_iff_isUnit_det _).mpr hdet)))
 
+omit [Module.Free R A] [Module.Finite R A] in
+/-- **Compatibility of the base-changed co-action with the right inclusion**:
+`coactionBaseChange` applied to `1 ⊗ b` is the image of `ρ b` under `includeRight ⊗ id` —
+the bridge that lets a point of `B` be read off from a point of the base change. -/
+theorem coactionBaseChange_one_tmul (ρ : B →ₐ[R] B ⊗[R] A) (C' : Type*) [CommRing C']
+    [Algebra R C'] [Algebra (coinvariants ρ) C'] [IsScalarTower R (coinvariants ρ) C']
+    (b : B) :
+    coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b)
+      = Algebra.TensorProduct.map
+          ((Algebra.TensorProduct.includeRight :
+            B →ₐ[coinvariants ρ] C' ⊗[coinvariants ρ] B).restrictScalars R)
+          (AlgHom.id R A) (ρ b) := by
+  rw [coactionBaseChange_tmul]
+  induction ρ b with
+  | zero => simp
+  | tmul b₀ a =>
+    rw [show (baseChangeAssoc R A ρ C').symm
+        ((1 : C') ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
+        = ((1 : C') ⊗ₜ[coinvariants ρ] b₀) ⊗ₜ[R] a from
+      Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _]
+    rfl
+  | add z w ihz ihw =>
+    rw [TensorProduct.tmul_add, map_add, map_add, ihz, ihw]
+
+omit [Module.Free R A] [Module.Finite R A] in
+/-- **The scalar leg is co-action-invariant**: `coactionBaseChange` sends `c ⊗ 1` to
+`includeLeft (c ⊗ 1)`, since the scalars `C' ⊗ 1` carry the trivial co-action. -/
+theorem coactionBaseChange_scalar_tmul (ρ : B →ₐ[R] B ⊗[R] A) (C' : Type*) [CommRing C']
+    [Algebra R C'] [Algebra (coinvariants ρ) C'] [IsScalarTower R (coinvariants ρ) C']
+    (c : C') :
+    coactionBaseChange R A ρ C' (c ⊗ₜ[coinvariants ρ] (1 : B))
+      = Algebra.TensorProduct.includeLeft (S := R) (c ⊗ₜ[coinvariants ρ] (1 : B)) := by
+  rw [coactionBaseChange_tmul, map_one]
+  rw [show ((1 : B ⊗[R] A)) = (1 : B) ⊗ₜ[R] (1 : A) from Algebra.TensorProduct.one_def]
+  rw [show (baseChangeAssoc R A ρ C').symm
+      (c ⊗ₜ[coinvariants ρ] ((1 : B) ⊗ₜ[R] (1 : A)))
+      = (c ⊗ₜ[coinvariants ρ] (1 : B)) ⊗ₜ[R] (1 : A) from
+    Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _]
+  rfl
+
+/-- **Step (iii) of the orbit argument (the norm is a co-invariant)**: the determinant of
+the multiplication matrix of `ρ f` — the norm of `f` — is a co-invariant, being (a sign
+times) the constant coefficient of the co-action characteristic polynomial
+(`coactionCharpoly_coeff_mem`). -/
+theorem det_mulMatrix_coaction_mem_coinvariants {B' : Type*} [CommRing B'] [Algebra R B']
+    {ρ' : B' →ₐ[R] B' ⊗[R] A} (hρ' : IsCoaction ρ') (f : B') :
+    (mulMatrix R A (ρ' f)).det ∈ coinvariants ρ' := by
+  rw [Matrix.det_eq_sign_charpoly_coeff (mulMatrix R A (ρ' f))]
+  exact mul_mem (pow_mem (neg_mem (one_mem _)) _)
+    (coactionCharpoly_coeff_mem R A ρ' hρ' f 0)
+
+/-- **Step (vi) of the orbit argument (the power-witness contradiction)**: a co-invariant
+`g` of the base-changed co-action that some `k`-point `φ` sends to a nonzero value must be a
+unit. Its `card`-th power lies in the image of `k`
+(`pow_card_mem_range_algebraMap_of_mem_coinvariants`) and is nonzero, hence a unit, and one
+factor of that power is `g` itself. -/
+theorem isUnit_of_algHom_ne_zero_of_mem_coinvariants (ρ : B →ₐ[R] B ⊗[R] A)
+    [Algebra (coinvariants ρ) k] [IsScalarTower R (coinvariants ρ) k] (hρ : IsCoaction ρ)
+    (φ : (k ⊗[coinvariants ρ] B) →ₐ[k] k) {g : k ⊗[coinvariants ρ] B}
+    (hgmem : g ∈ coinvariants (coactionBaseChange R A ρ k)) (hφg : φ g ≠ 0) :
+    IsUnit g := by
+  haveI : Nontrivial R := ⟨1, 0, fun h01 => one_ne_zero (α := k) (by
+    rw [← map_one (algebraMap R k), h01, map_zero])⟩
+  haveI : Nontrivial A := ⟨1, 0, fun h01 => one_ne_zero (α := R) (by
+    have h2 := congrArg (Bialgebra.counitAlgHom R A) h01
+    rwa [map_one, map_zero] at h2)⟩
+  haveI : Nonempty (hopfBasisIndex R A) := (hopfBasis R A).index_nonempty
+  obtain ⟨c, hc⟩ := pow_card_mem_range_algebraMap_of_mem_coinvariants R A ρ k hρ g hgmem
+  have hcval : φ (g ^ Fintype.card (hopfBasisIndex R A)) = c := by
+    rw [← hc, AlgHom.commutes, Algebra.algebraMap_self_apply]
+  have hcne : c ≠ 0 := by
+    rw [← hcval, map_pow]
+    exact pow_ne_zero _ hφg
+  have hgpow : IsUnit (g ^ Fintype.card (hopfBasisIndex R A)) := by
+    rw [← hc]
+    exact (isUnit_iff_ne_zero.mpr hcne).map (algebraMap k (k ⊗[coinvariants ρ] B))
+  have hcard : Fintype.card (hopfBasisIndex R A) ≠ 0 := Fintype.card_ne_zero
+  obtain ⟨n, hn⟩ := Nat.exists_eq_succ_of_ne_zero hcard
+  rw [hn, pow_succ] at hgpow
+  exact isUnit_of_mul_isUnit_right hgpow
+
 /-- **The orbit theorem (Stacks 03BL(2), comodule form)**: over an algebraically closed
 field `k`, two `k`-points of `B` agreeing on the co-invariants are connected by a
 `k`-point of `B ⊗ A` through the groupoid legs `(ρ, includeLeft)`. -/
@@ -357,19 +443,8 @@ theorem exists_algHom_comp_eq [IsAlgClosed k] (ρ : B →ₐ[R] B ⊗[R] A) (hρ
         B →ₐ[coinvariants ρ] k ⊗[coinvariants ρ] B).restrictScalars R)
       (AlgHom.id R A)
   have hj_coaction : ∀ b : B,
-      j (ρ b) = coactionBaseChange R A ρ k ((1 : k) ⊗ₜ[coinvariants ρ] b) := by
-    intro b
-    rw [coactionBaseChange_tmul]
-    induction ρ b with
-    | zero => simp [j]
-    | tmul b₀ a =>
-      rw [show (baseChangeAssoc R A ρ k).symm
-          ((1 : k) ⊗ₜ[coinvariants ρ] (b₀ ⊗ₜ[R] a))
-          = ((1 : k) ⊗ₜ[coinvariants ρ] b₀) ⊗ₜ[R] a from
-        Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _]
-      rfl
-    | add z w ihz ihw =>
-      rw [TensorProduct.tmul_add, map_add, map_add, ihz, ihw]
+      j (ρ b) = coactionBaseChange R A ρ k ((1 : k) ⊗ₜ[coinvariants ρ] b) := fun b =>
+    (coactionBaseChange_one_tmul R A ρ k b).symm
   -- reduce to producing a point upstairs
   by_contra hcon
   push Not at hcon
@@ -390,15 +465,8 @@ theorem exists_algHom_comp_eq [IsAlgClosed k] (ρ : B →ₐ[R] B ⊗[R] A) (hρ
         hΧι ((1 : k) ⊗ₜ[coinvariants ρ] b), hā₁_tmul, one_mul]
   -- the k-points of B_k ⊗ A over ā₁, with their ρ_k-restrictions upgraded to k-points
   have hρk_scalar : ∀ c : k, coactionBaseChange R A ρ k (c ⊗ₜ[coinvariants ρ] (1 : B))
-      = Algebra.TensorProduct.includeLeft (S := R) (c ⊗ₜ[coinvariants ρ] (1 : B)) := by
-    intro c
-    rw [coactionBaseChange_tmul, map_one]
-    rw [show ((1 : B ⊗[R] A)) = (1 : B) ⊗ₜ[R] (1 : A) from Algebra.TensorProduct.one_def]
-    rw [show (baseChangeAssoc R A ρ k).symm
-        (c ⊗ₜ[coinvariants ρ] ((1 : B) ⊗ₜ[R] (1 : A)))
-        = (c ⊗ₜ[coinvariants ρ] (1 : B)) ⊗ₜ[R] (1 : A) from
-      Algebra.TensorProduct.assoc_symm_tmul _ _ _ _ _ _]
-    rfl
+      = Algebra.TensorProduct.includeLeft (S := R) (c ⊗ₜ[coinvariants ρ] (1 : B)) :=
+    fun c => coactionBaseChange_scalar_tmul R A ρ k c
   -- the set of k-points over ā₁ is finite (via the R-linear finiteness + upgrade)
   set SR : Set (((k ⊗[coinvariants ρ] B) ⊗[R] A) →ₐ[R] k) :=
     {χ | χ.comp (Algebra.TensorProduct.includeLeft (S := R)) = ā₁.restrictScalars R}
@@ -443,22 +511,12 @@ theorem exists_algHom_comp_eq [IsAlgClosed k] (ρ : B →ₐ[R] B ⊗[R] A) (hρ
     exact AlgHom.congr_fun hχ x
   -- avoidance: an element of ker ā₀ outside every restricted kernel
   obtain ⟨ft, hft₀, hftT⟩ := exists_mem_ker_notMem_ker ā₀ T hā₀T
-  -- nontriviality bookkeeping: the basis index is nonempty
-  haveI : Nontrivial R := ⟨1, 0, fun h01 => one_ne_zero (α := k) (by
-    rw [← map_one (algebraMap R k), h01, map_zero])⟩
-  haveI : Nontrivial A := ⟨1, 0, fun h01 => one_ne_zero (α := R) (by
-    have h2 := congrArg (Bialgebra.counitAlgHom R A) h01
-    rwa [map_one, map_zero] at h2)⟩
-  haveI : Nonempty (hopfBasisIndex R A) := (hopfBasis R A).index_nonempty
   -- (iii): the norm g of ρ_k(ft) is a co-invariant
   have hρk := isCoaction_coactionBaseChange R A ρ k hρ
   set g := (mulMatrix R A (coactionBaseChange R A ρ k ft)).det with hg
   have hgmem : g ∈ coinvariants (coactionBaseChange R A ρ k) := by
-    have hdet := Matrix.det_eq_sign_charpoly_coeff
-      (mulMatrix R A (coactionBaseChange R A ρ k ft))
-    rw [hg, hdet]
-    exact mul_mem (pow_mem (neg_mem (one_mem _)) _)
-      (coactionCharpoly_coeff_mem R A (coactionBaseChange R A ρ k) hρk ft 0)
+    rw [hg]
+    exact det_mulMatrix_coaction_mem_coinvariants R A hρk ft
   -- (iv): g is not a unit
   have hftnu : ¬ IsUnit ft := fun hunit => by
     have := hunit.map ā₀
@@ -504,21 +562,8 @@ theorem exists_algHom_comp_eq [IsAlgClosed k] (ρ : B →ₐ[R] B ⊗[R] A) (hρ
         exact h0)
     rw [hmapdet, hmm]
     exact ((Matrix.isUnit_iff_isUnit_det _).mp (hu.map (mulMatrixHom R A))).ne_zero
-  -- (vi): the power witness forces g to be a unit — contradiction
-  obtain ⟨c, hc⟩ := pow_card_mem_range_algebraMap_of_mem_coinvariants R A ρ k hρ g hgmem
-  have hcval : ā₁ (g ^ Fintype.card (hopfBasisIndex R A)) = c := by
-    rw [← hc, AlgHom.commutes, Algebra.algebraMap_self_apply]
-  have hcne : c ≠ 0 := by
-    rw [← hcval, map_pow]
-    exact pow_ne_zero _ hā₁g
-  have hgpow : IsUnit (g ^ Fintype.card (hopfBasisIndex R A)) := by
-    rw [← hc]
-    exact (isUnit_iff_ne_zero.mpr hcne).map (algebraMap k (k ⊗[coinvariants ρ] B))
-  have hcard : Fintype.card (hopfBasisIndex R A) ≠ 0 :=
-    Fintype.card_ne_zero
-  obtain ⟨n, hn⟩ := Nat.exists_eq_succ_of_ne_zero hcard
-  rw [hn, pow_succ] at hgpow
-  exact hgnu (isUnit_of_mul_isUnit_right hgpow)
+  -- (vi): the power witness forces g to be a unit — contradiction with (iv)
+  exact hgnu (isUnit_of_algHom_ne_zero_of_mem_coinvariants R A ρ hρ ā₁ hgmem hā₁g)
 
 /-- **GAP-6 (semi-locality, Stacks 03BM's semi-local step)**: when the co-invariants form
 a local ring, `B` has only finitely many maximal ideals. Each maximal ideal is the kernel

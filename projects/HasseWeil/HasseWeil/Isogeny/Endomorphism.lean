@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Basic
 
 /-!
@@ -22,7 +27,8 @@ The degree of `mulByInt E n` is `(n²).toNat` (Sutherland Theorem 6.9).
 ## Key Definitions
 
 - `isogTrace`: The trace of an endomorphism, `tr(α) = 1 + deg(α) - deg(1-α)`.
-- `isogOneSub`: The isogeny `1 - α`.
+- `isogOneSub_mulByInt`, `isogSmulSub_mulByInt`: the concrete scalar isogenies
+  `[1 - n]` and `[r·m - s]`, with genuine division-polynomial pullbacks.
 
 ## References
 
@@ -34,23 +40,6 @@ open WeierstrassCurve
 namespace HasseWeil
 
 variable {F : Type*} [Field F] [DecidableEq F]
-
-/-! ### Isogeny arithmetic -/
-
-section IsogArith
-
-variable {E : Affine F} [E.IsElliptic]
-
-/-! **[2026-05-28 placeholder grind]** The general-`α` placeholders `isogOneSub α`
-and `isogSmulSub α r s` (both `pullback := AlgHom.id`, giving a false degree 1)
-were deleted, along with their lemmas `isogOneSub_toAddMonoidHom`,
-`isogOneSub_mulByInt_hom`, `isogSmulSub_toAddMonoidHom`. There is no genuine
-function-field pullback for a general `1 − α` / `r·α − s` in the project, so
-these are kept witness-parametric at use sites instead. The concrete scalar
-cases `isogOneSub_mulByInt` (= `[1−n]`) and `isogSmulSub_mulByInt` (= `[rm−s]`)
-below ARE genuine (real division-polynomial pullback via `mulByInt`). -/
-
-end IsogArith
 
 /-! ### Concrete pullbacks for scalar isogenies
 
@@ -121,7 +110,7 @@ noncomputable def isogTrace (α : Isogeny E E) (one_sub_α : Isogeny E E) : ℤ 
 /-- The trace of `[n]` is `2n` (for `n ≠ 0` and `1-n ≠ 0`). -/
 theorem isogTrace_mulByInt (n : ℤ) (hn : n ≠ 0) (hn1 : 1 - n ≠ 0) :
     isogTrace (mulByInt E n) (mulByInt E (1 - n)) = 2 * n := by
-  unfold isogTrace
+  simp only [isogTrace]
   rw [mulByInt_degree _ _ hn, mulByInt_degree _ _ hn1]
   have h1 : 0 ≤ n ^ 2 := sq_nonneg n
   have h2 : 0 ≤ (1 - n) ^ 2 := sq_nonneg (1 - n)

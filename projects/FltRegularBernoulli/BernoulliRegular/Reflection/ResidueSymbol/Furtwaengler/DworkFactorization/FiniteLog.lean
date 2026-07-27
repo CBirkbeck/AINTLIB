@@ -116,7 +116,7 @@ theorem finiteLogTermNumerator_spec {n : ℕ} (hn : n ≠ 0)
         F.finiteLogTermNumerator n x hx =
       (F.finiteLogTermDenom n x hx : 𝓞 R') * x ^ n ∧
     F.finiteLogTermNumerator n x hx ∈ F.Q ^ finiteLogTermOrder (ℓ := ℓ) n := by
-  unfold finiteLogTermNumerator finiteLogTermDenom
+  simp only [finiteLogTermNumerator, finiteLogTermDenom]
   rw [dif_neg hn, dif_neg hn]
   exact Classical.choose_spec
     (Classical.choose_spec (finiteLogTermData_exists (F := F) hn hx))
@@ -162,6 +162,7 @@ noncomputable def finiteLog (N : ℕ) (x : 𝓞 R') (hx : x ∈ F.Q) :
     𝓞 R' ⧸ F.Q ^ (N + 1) :=
   ∑ n ∈ Finset.range (finiteLogCutoff (ℓ := ℓ) N), F.finiteLogTerm N n x hx
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A local fraction with numerator in `Q^s` lands in `Q^s / Q^(N+1)`. -/
 theorem quotientFractionEvalPrimeCompl_mem_map_Q_pow_of_mem
     (N s : ℕ) {y : 𝓞 R'} (d : F.Q.primeCompl) (hy : y ∈ F.Q ^ s) :
@@ -351,7 +352,7 @@ theorem finiteLog_eq_of_sub_mem {N : ℕ}
     (hxy : x - y ∈ F.Q ^ (N + 1)) :
     F.finiteLog N x hx = F.finiteLog N y hy := by
   classical
-  unfold finiteLog
+  simp only [finiteLog]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   exact F.finiteLogTerm_eq_of_sub_mem hx hy hxy

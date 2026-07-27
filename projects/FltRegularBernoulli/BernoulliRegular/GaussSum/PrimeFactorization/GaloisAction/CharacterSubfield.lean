@@ -116,7 +116,7 @@ variable {Pchar : Ideal (𝓞 (characterSubfield (L := L) (p := p)))}
   [Pchar.IsPrime] [Pchar.LiesOver (Ideal.span ({(p : ℤ)} : Set ℤ))]
 
 lemma characterSubfieldPrime_inertiaDeg_eq_one :
-    Ideal.inertiaDeg 𝔭 Pchar = 1 := by
+    Ideal.inertiaDeg' 𝔭 Pchar = 1 := by
   have hm : ¬ p ∣ p - 1 :=
     (hp.out.coprime_iff_not_dvd).mp (prime_coprime_pred (p := p))
   have hp_cast : (p : ZMod (p - 1)) = 1 := by
@@ -126,7 +126,7 @@ lemma characterSubfieldPrime_inertiaDeg_eq_one :
   haveI : (𝔭 : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
   haveI : Pchar.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := 𝔭) (P := Pchar)
-  rw [Ideal.inertiaDeg_eq_inertiaDeg',
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
       IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
         (p := p) (m := p - 1)
         (K := characterSubfield (L := L) (p := p)) (P := Pchar) hm]
@@ -144,7 +144,7 @@ lemma characterSubfieldPrime_quotient_finrank_eq_one :
       (𝓞 (characterSubfield (L := L) (p := p)) ⧸ Pchar) = 1 := by
   letI : (𝔭 : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
   letI : Field (ℤ ⧸ 𝔭) := Ideal.Quotient.field 𝔭
-  rw [← Ideal.inertiaDeg_algebraMap (R := ℤ)
+  rw [← Ideal.inertiaDeg'_algebraMap (R := ℤ)
     (S := 𝓞 (characterSubfield (L := L) (p := p))) (p := 𝔭) (P := Pchar),
     characterSubfieldPrime_inertiaDeg_eq_one (p := p) (L := L) (Pchar := Pchar)]
 
@@ -234,7 +234,7 @@ lemma characterSubfieldPrimeGenerator_isPrimitiveRoot :
     IsPrimitiveRoot
       (characterSubfieldPrimeGenerator (p := p) (L := L) (Pchar := Pchar))
       (p - 1) := by
-  unfold characterSubfieldPrimeGenerator
+  simp only [characterSubfieldPrimeGenerator]
   exact
     (quotient_mk_gaussSumLiftCharacterRootCharacterSubfieldInteger_isPrimitiveRoot
       (p := p) (L := L) (Pchar := Pchar)).map_of_injective
@@ -548,6 +548,21 @@ lemma normalizedCharacterPrimeIndex_val :
   rw [normalizedCharacterPrimeIndex, ZMod.coe_unitOfCoprime, ZMod.val_natCast_of_lt]
   exact (distinguishedCharacterPrimeUnitExponent (p := p) (L := L)).is_lt
 
+/-- Modular cancellation of a coprime exponent for a group element of known order.
+If `g` has order `n` and `g ^ (k * d) = g ^ d` with `d` coprime to `n`, then the
+factor `d` may be cancelled modulo `n`, yielding `g ^ k = g`. -/
+theorem pow_eq_self_of_pow_mul_eq_pow_of_coprime {G : Type*} [Group G] {g : G}
+    {n k d : ℕ} (hg : orderOf g = n) (hpow : g ^ (k * d) = g ^ d)
+    (hd : Nat.Coprime d n) : g ^ k = g := by
+  have hmod : k * d ≡ d [MOD n] := by
+    have h := (pow_eq_pow_iff_modEq (x := g)).mp hpow
+    rwa [hg] at h
+  have hkmod : k ≡ 1 [MOD n] :=
+    Nat.ModEq.cancel_right_of_coprime hd.symm (by simpa [one_mul] using hmod)
+  calc
+    g ^ k = g ^ 1 := pow_eq_pow_of_modEq hkmod (hg ▸ pow_orderOf_eq_one g)
+    _ = g := pow_one g
+
 lemma characterSubfieldPrimeUnitGenerator_normalizedCharacterPrime :
     characterSubfieldPrimeUnitGenerator (p := p) (L := L)
         (Pchar := normalizedCharacterPrime (p := p) (L := L)) =
@@ -594,42 +609,16 @@ lemma characterSubfieldPrimeUnitGenerator_normalizedCharacterPrime :
           (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ) := by
             rw [characterUnitGenerator_pow_distinguishedCharacterPrimeUnitExponent
               (p := p) (L := L)]
-  have hmod :
-      k * (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ) ≡
-        (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ)
-          [MOD p - 1] := by
-    have hmod' :
-        k * (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ) ≡
-          (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ)
-            [MOD orderOf (characterUnitGenerator (p := p))] := by
-      simpa using
-        (pow_eq_pow_iff_modEq (x := characterUnitGenerator (p := p))
-          (n := k * (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ))
-          (m := (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ))).mp hEqPow
-    simpa [orderOf_characterUnitGenerator (p := p)] using hmod'
-  have hkmod : k ≡ 1 [MOD p - 1] := by
-    have hcoprime_gcd :
-        Nat.gcd (p - 1)
-          (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ) = 1 := by
-      simpa [Nat.coprime_iff_gcd_eq_one, Nat.gcd_comm] using
-        distinguishedCharacterPrimeUnitExponent_coprime (p := p) (L := L)
-    have hmod' :
-        k * (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ) ≡
-          1 * (distinguishedCharacterPrimeUnitExponent (p := p) (L := L) : ℕ)
-            [MOD p - 1] := by
-      simpa [one_mul] using hmod
-    exact Nat.ModEq.cancel_right_of_coprime hcoprime_gcd hmod'
   have hkpow :
-      characterUnitGenerator (p := p) ^ k = characterUnitGenerator (p := p) ^ 1 := by
-    apply pow_eq_pow_of_modEq hkmod
-    simpa [orderOf_characterUnitGenerator (p := p)] using
-      (characterUnitGenerator_isPrimitiveRoot (p := p)).pow_eq_one
+      characterUnitGenerator (p := p) ^ k = characterUnitGenerator (p := p) :=
+    pow_eq_self_of_pow_mul_eq_pow_of_coprime
+      (orderOf_characterUnitGenerator (p := p)) hEqPow
+      (distinguishedCharacterPrimeUnitExponent_coprime (p := p) (L := L))
   calc
     characterSubfieldPrimeUnitGenerator (p := p) (L := L) (Pchar := Qchar) =
       characterUnitGenerator (p := p) ^ k := by
         simp [k, characterUnitGenerator_pow_characterUnitGeneratorExponent]
-    _ = characterUnitGenerator (p := p) ^ 1 := hkpow
-    _ = characterUnitGenerator (p := p) := by simp
+    _ = characterUnitGenerator (p := p) := hkpow
 
 lemma characterSubfieldPrimeGenerator_normalizedCharacterPrime :
     characterSubfieldPrimeGenerator (p := p) (L := L)

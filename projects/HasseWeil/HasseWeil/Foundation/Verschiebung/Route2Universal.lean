@@ -337,7 +337,7 @@ def universalCharIdentity (p : ℕ) [Fact p.Prime] : Prop :=
     (from `CharP R p`), giving `(p : URing p) = 0` via `CharP.cast_eq_zero`. -/
 theorem universalCharIdentity_holds (p : ℕ) [Fact p.Prime] :
     universalCharIdentity p := by
-  unfold universalCharIdentity
+  simp only [universalCharIdentity]
   rw [CharP.cast_eq_zero (URing p) p, zero_mul, zero_mul]
 
 /-! ### K-level specialisation (q=2 char-2)
@@ -693,7 +693,7 @@ theorem expand_pow_eq_expand_iterate (p : ℕ) (k : ℕ) (f : Polynomial R) :
     blocker for the unconditional discharge. -/
 theorem Φ_p_pow_mem_expand_p_of_base
     (p : ℕ) [Fact p.Prime] [CharP R p] (n : ℕ) (W : WeierstrassCurve R)
-    (h_base : W.Φ p ∈ Set.range (⇑(Polynomial.expand R p))) :
+    (_h_base : W.Φ p ∈ Set.range (⇑(Polynomial.expand R p))) :
     (W.Φ p) ^ (p ^ n) ∈ Set.range (⇑(Polynomial.expand R (p ^ n))) :=
   pow_pow_mem_expand_pow_charP p n (W.Φ p)
 
@@ -806,7 +806,7 @@ theorem mulByInt_pow_zero_pullback_x_gen_mem_adjoin_pow
   rw [pow_zero]
   show (mulByInt W.toAffine ((1 : ℕ) : ℤ)).pullback (x_gen W) ∈
     IntermediateField.adjoin K ({x_gen W ^ 1} : Set _)
-  rw [pow_one, show ((1 : ℕ) : ℤ) = 1 from rfl, mulByInt_one_pullback_eq_id]
+  rw [pow_one, Nat.cast_one, mulByInt_one_pullback_eq_id]
   exact IntermediateField.subset_adjoin K _ (Set.mem_singleton _)
 
 /-- **Key technical lemma**: in a field `L` of characteristic `p`, the
@@ -1209,9 +1209,9 @@ threading through `IsLocalization` / `FractionRing` of `CoordinateRing`).
     fact). This step is documented as the next concrete piece. -/
 theorem mem_expand_range_of_isCoprime_witness
     {R : Type*} [CommRing R] [IsDomain R] (n : ℕ) (hn : 0 < n)
-    {Φ Ψ : Polynomial R} (hΨ_ne : Ψ ≠ 0) (h_coprime : IsCoprime Φ Ψ)
+    {Φ Ψ : Polynomial R} (_hΨ_ne : Ψ ≠ 0) (_h_coprime : IsCoprime Φ Ψ)
     {f g : Polynomial R}
-    (h_eq : Φ * (Polynomial.expand R n g) = Ψ * (Polynomial.expand R n f))
+    (_h_eq : Φ * (Polynomial.expand R n g) = Ψ * (Polynomial.expand R n f))
     (h_h_witness : ∃ h : Polynomial R,
       h ≠ 0 ∧ h ∈ Set.range (⇑(Polynomial.expand R n)) ∧
       Polynomial.expand R n f = Φ * h ∧
@@ -1445,7 +1445,8 @@ The polynomial-side propagation building blocks are in place:
 * `pow_pow_mem_expand_pow_succ_of_expand_charP` — `f ∈ expand p` →
   `f^(p^k) ∈ expand (p^(k+1))`. Used in the inductive step's
   Frobenius-cycle argument.
-* `expand_pow_map_iterateFrobenius` — equational form `expand (p^n) (f.map iterateFrobenius) = f^(p^n)`.
+* `expand_pow_map_iterateFrobenius` — equational form
+  `expand (p^n) (f.map iterateFrobenius) = f^(p^n)`.
 
 The next concrete sub-piece (deferred to the multiplication-by-p recurrence
 port): the full propagation theorem

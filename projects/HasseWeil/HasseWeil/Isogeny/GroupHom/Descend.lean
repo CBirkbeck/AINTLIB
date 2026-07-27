@@ -4,15 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Map.CoordHomFinite
-import HasseWeil.Isogeny.BaseChange.Morphism
-import HasseWeil.Isogeny.GroupHom.Basic
 import HasseWeil.Foundation.EC.AffinePointMap
 import HasseWeil.Foundation.Ramification
+import HasseWeil.Isogeny.BaseChange.Morphism
+import HasseWeil.Isogeny.GroupHom.Basic
 
 /-!
 # ISO-L7: descent of Silverman III.4.8 to a general base field
 
-`EC.Isogeny.addHomProperty` (`GroupHom.lean`) proves Silverman III.4.8 — every
+`EC.Isogeny.addHomProperty` (`GroupHom/Basic.lean`) proves Silverman III.4.8 — every
 isogeny `φ : E₁ → E₂` is a group homomorphism on rational points — over an
 **algebraically closed** base field `F`.  Silverman's theorem is geometric
 (`P, Q ∈ E(K̄)`); the statement over a general base field `K` (e.g. a finite
@@ -30,7 +30,7 @@ This file performs that descent.  The mathematical content splits in two:
   `addHomProperty` to `φ_F` and pulling the conclusion back along the injective
   additive map `Affine.Point.map (algebraMap K F) : E(K) ↪ E(K̄)`.
 
-* **The base-change construction** (`EC/IsogenyAG/BaseChange.lean`, ISO-BC):
+* **The base-change construction** (`Isogeny/BaseChange/Morphism.lean`, ISO-BC):
   the base-changed isogeny `baseChangeIsogeny` (via the `ofEquation` builder),
   the base-changed coordinate-ring witness `baseChangeCoordHom`, the point-map
   compatibility `baseChange_toPointMap_compat`, and the `Module.Finite`
@@ -42,16 +42,14 @@ This file performs that descent.  The mathematical content splits in two:
 
 * `EC.Isogeny.addHomProperty_descend_of_baseChange` — the descent engine
   (axiom-clean; the reusable part).
-* `EC.Isogeny.addHomProperty_descend_of_finite` — Silverman III.4.8 over a
-  general base field `K` (**axiom-clean**; the `K`-level module-finiteness
-  witness is supplied by `CurveMap.CoordHom.module_finite`).
+* `EC.Isogeny.addHomProperty_descend` — Silverman III.4.8 over a general base
+  field `K`, hypothesis-free (**fully proven, axiom-clean**): the `K`-level
+  `Module.Finite` witness is *derived* from `(φ, cd)` alone by
+  `CurveMap.CoordHom.module_finite` (`Curves/Map/CoordHomFinite.lean`), with no
+  separability assumption — the conjugate-pair/parity argument works for
+  inseparable isogenies as well.
 * `EC.Isogeny.toBasicIsogenyDescend` — the `K`-rational
   `EC.Isogeny → HasseWeil.Isogeny` promotion (no `IsAlgClosed` hypothesis).
-* `EC.Isogeny.addHomProperty_descend` — the hypothesis-free form
-  (**fully proven, axiom-clean**): the `K`-level `Module.Finite` witness is
-  *derived* from `(φ, cd)` alone by `CurveMap.CoordHom.module_finite`
-  (`Curves/CoordHomFinite.lean`), with no separability assumption — the
-  conjugate-pair/parity argument works for inseparable isogenies as well.
 
 ## References
 
@@ -144,20 +142,27 @@ theorem addHomProperty_descend_of_baseChange
           (hδ_add (φ.toPointMap cd P) (φ.toPointMap cd Q)).symm
 
 /-- **Silverman III.4.8 over a general base field `K`** (ISO-L7 + ISO-BC,
-**axiom-clean**).
+**fully proven, axiom-clean**).
 
 For an isogeny `φ : EC.Isogeny W W` over `K` with a coordinate-ring witness `cd`,
-the induced point map `φ.toPointMap cd : E(K) → E(K)` is a group homomorphism
-(the `K`-level module-finiteness, the finite-map hypothesis of Silverman
-II.2/II.3, is supplied by `CurveMap.CoordHom.module_finite`).
+the induced point map `φ.toPointMap cd : E(K) → E(K)` is a group homomorphism —
+with **no** carried hypotheses.
 
 The proof base-changes to `F := AlgebraicClosure K` with the ISO-BC
-infrastructure (`EC/IsogenyAG/BaseChange.lean`): `baseChangeIsogeny` (via the
+infrastructure (`Isogeny/BaseChange/Morphism.lean`): `baseChangeIsogeny` (via the
 `ofEquation` builder), `baseChangeCoordHom`, the `Module.Finite` transport
 `baseChange_module_finite`, and the point-map compatibility
 `baseChange_toPointMap_compat` — then descends along the injective
-`Affine.Point.map (algebraMap K F)` via `addHomProperty_descend_of_baseChange`. -/
-theorem addHomProperty_descend_of_finite
+`Affine.Point.map (algebraMap K F)` via `addHomProperty_descend_of_baseChange`.
+
+The `K`-level finiteness witness `Module.Finite K[E] K[E]` (via `cd.toAlgebra`,
+the finite-map hypothesis of Silverman II.2/II.3) is *derived* from `(φ, cd)`
+alone by `CurveMap.CoordHom.module_finite` (`Curves/Map/CoordHomFinite.lean`): the
+coordinate generator `x` is integral over `cd`'s image via the explicit
+conjugate-pair relation in the `{1, Y}` basis, whose leading coefficient is a
+unit of `K` by the even/odd degree parity `max(2 deg p, 2 deg q + 3)` — no
+separability, no places classification, valid for inseparable isogenies. -/
+theorem addHomProperty_descend
     (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom) :
     ∀ P Q : W.toAffine.Point,
       φ.toPointMap cd (P + Q) =
@@ -171,12 +176,12 @@ theorem addHomProperty_descend_of_finite
 /-- **The `K`-rational `EC.Isogeny → HasseWeil.Isogeny` promotion** (Silverman
 III.4.8 over a general base field, bundled; the `K`-rational counterpart of
 `toBasicIsogeny`, with no `IsAlgClosed` hypothesis).  The group-homomorphism
-property on `E(K)` is supplied by `addHomProperty_descend_of_finite`. -/
+property on `E(K)` is supplied by `addHomProperty_descend`. -/
 noncomputable def toBasicIsogenyDescend
     (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom) :
     HasseWeil.Isogeny W.toAffine W.toAffine where
   pullback := φ.toCurveMap.pullback
-  toAddMonoidHom := φ.toAddMonoidHomOfWitness cd (addHomProperty_descend_of_finite W φ cd)
+  toAddMonoidHom := φ.toAddMonoidHomOfWitness cd (addHomProperty_descend W φ cd)
 
 @[simp] theorem toBasicIsogenyDescend_pullback
     (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom) :
@@ -186,45 +191,5 @@ noncomputable def toBasicIsogenyDescend
     (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom)
     (P : W.toAffine.Point) :
     (φ.toBasicIsogenyDescend W cd).toAddMonoidHom P = φ.toPointMap cd P := rfl
-
-/-- **The hypothesis-free `K`-rational `EC.Isogeny → HasseWeil.Isogeny`
-promotion**: `toBasicIsogenyDescend` with the module-finiteness witness
-supplied by `CurveMap.CoordHom.module_finite` — no carried hypotheses, over
-any base field, for any (possibly inseparable) isogeny-with-`CoordHom`. -/
-noncomputable def toBasicIsogenyOfCoordHom
-    (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom) :
-    HasseWeil.Isogeny W.toAffine W.toAffine :=
-  φ.toBasicIsogenyDescend W cd
-
-@[simp] theorem toBasicIsogenyOfCoordHom_pullback
-    (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom) :
-    (φ.toBasicIsogenyOfCoordHom W cd).pullback = φ.toCurveMap.pullback := rfl
-
-@[simp] theorem toBasicIsogenyOfCoordHom_toAddMonoidHom_apply
-    (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom)
-    (P : W.toAffine.Point) :
-    (φ.toBasicIsogenyOfCoordHom W cd).toAddMonoidHom P = φ.toPointMap cd P := rfl
-
-/-- **Silverman III.4.8 over a general base field `K`** (ISO-L7,
-hypothesis-free form, **fully proven, axiom-clean**).
-
-For an isogeny `φ : EC.Isogeny W W` with a coordinate-ring witness `cd`, the
-induced point map `φ.toPointMap cd : E(K) → E(K)` is a group homomorphism —
-with **no** carried hypotheses.
-
-The `K`-level finiteness witness `Module.Finite K[E] K[E]` (via
-`cd.toAlgebra`) is now *derived* from `(φ, cd)` alone by
-`CurveMap.CoordHom.module_finite` (`Curves/CoordHomFinite.lean`): the
-coordinate generator `x` is integral over `cd`'s image via the explicit
-conjugate-pair relation in the `{1, Y}` basis, whose leading coefficient is a
-unit of `K` by the even/odd degree parity `max(2 deg p, 2 deg q + 3)` — no
-separability, no places classification, valid for inseparable isogenies. -/
-theorem addHomProperty_descend
-    (φ : EC.Isogeny W.toAffine W.toAffine) (cd : φ.toCurveMap.CoordHom) :
-    ∀ P Q : W.toAffine.Point,
-      φ.toPointMap cd (P + Q) =
-        φ.toPointMap cd P + φ.toPointMap cd Q := by
-  classical
-  exact addHomProperty_descend_of_finite W φ cd
 
 end HasseWeil.EC.Isogeny

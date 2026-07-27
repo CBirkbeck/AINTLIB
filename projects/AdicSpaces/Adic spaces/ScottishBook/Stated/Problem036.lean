@@ -25,18 +25,18 @@ Open.
 
 ## Mathematical Background
 
-Let `K` denote the completed algebraic closure of `F_p((t))`.  A
+Let `K` denote the completed algebraic closure of `F_p((t))`. A
 continuous endomorphism `f : K → K` is a ring homomorphism that is
 continuous with respect to the nonarchimedean topology.
 
 The problem asks for a characterization of which continuous
 endomorphisms are isomorphisms (i.e., bijective with continuous
-inverse).  This is related to Problem 23, which gives a sufficient
+inverse). This is related to Problem 23, which gives a sufficient
 condition for non-surjectivity.
 
 One natural question is whether bijectivity alone suffices: if `f` is
 a bijective continuous endomorphism, is the inverse automatically
-continuous?  This is an automatic continuity / open mapping question
+continuous? This is an automatic continuity / open mapping question
 for nonarchimedean fields.
 
 More broadly, the problem asks for intrinsic conditions on `f` (or on
@@ -53,8 +53,6 @@ More broadly, the problem asks for intrinsic conditions on `f` (or on
 
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 36
 -/
-
-open ScottishBook
 
 namespace ScottishBook
 

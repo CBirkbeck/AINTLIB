@@ -41,18 +41,23 @@ variable {F : Type*} [Field F]
 def legendreCurve (l : F) : WeierstrassCurve F :=
   { a₁ := 0, a₂ := -(1 + l), a₃ := 0, a₄ := l, a₆ := 0 }
 
+/-- The `a₁` coefficient of the Legendre curve: `a₁ = 0`. -/
 @[simp]
 theorem legendreCurve_a₁ (l : F) : (legendreCurve l).a₁ = 0 := rfl
 
+/-- The `a₂` coefficient of the Legendre curve: `a₂ = -(1 + l)`. -/
 @[simp]
 theorem legendreCurve_a₂ (l : F) : (legendreCurve l).a₂ = -(1 + l) := rfl
 
+/-- The `a₃` coefficient of the Legendre curve: `a₃ = 0`. -/
 @[simp]
 theorem legendreCurve_a₃ (l : F) : (legendreCurve l).a₃ = 0 := rfl
 
+/-- The `a₄` coefficient of the Legendre curve: `a₄ = l`. -/
 @[simp]
 theorem legendreCurve_a₄ (l : F) : (legendreCurve l).a₄ = l := rfl
 
+/-- The `a₆` coefficient of the Legendre curve: `a₆ = 0`. -/
 @[simp]
 theorem legendreCurve_a₆ (l : F) : (legendreCurve l).a₆ = 0 := rfl
 

@@ -5,11 +5,9 @@ import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DescentEigencomponentCo
 # The single-column second-order (mod `37²`) Dwork-coefficient identity at the irregular row
 
 This file discharges the single-cyclotomic-**column-sum** second-order leading-coefficient residual
-`Prop812SecondOrderCoeff37` (`CaseIICor823SecondOrderMatrix.lean`) — Washington Proposition 8.12 at
+`Prop812SecondOrderCoeff37` (`KummerLogDetectorModSq.lean`) — Washington Proposition 8.12 at
 the irregular index `i = 32`, mod `37²`, on the cyclotomic columns — **down to the
 per-single-column** mod-`37²` Dwork-coefficient identity `CaseIICor823SecondOrderColumnCoeff37`.
-
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
 
 ## The reduction (the entire `e`-linearity is proven here)
 
@@ -67,8 +65,6 @@ coefficient, not the vanishing of any eigencomponent), and non-vacuous.
 
 noncomputable section
 
-set_option maxRecDepth 4000
-
 open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
@@ -85,7 +81,6 @@ second-order Bernoulli factor `B₃₂/32 mod 37²` times the column's Teichmül
 `((a+2)²)^{16} − 1`.  This is the mod-`37²` analog of the proven first-order single-column
 factorization. -/
 
-open BernoulliRegular (CPlusGenerator) in
 /-- **The single-column second-order Dwork-coefficient identity: Proposition 8.12 at `i = 32`, per
 column** (a `def … : Prop`, **not** an axiom — the genuine `p`-adic-`L` content).
 
@@ -122,7 +117,6 @@ def CaseIICor823SecondOrderColumnCoeff37
       caseIICor823SecondOrderBernoulliFactorModSq *
         (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1)
 
-open BernoulliRegular (CPlusGenerator) in
 /-- **`CaseIICor823SecondOrderColumnCoeff37` is non-vacuous** (proven): for the zero column index
 `a = 0` the identity is a genuine equality of two specific `ZMod 37²` values — the left side is the
 mod-`37²` reduction of a definite Dwork coordinate, the right side is
@@ -152,7 +146,6 @@ per-column identity rewrites each per-column coordinate as `factor · (((a+2)²)
 pulling the common `factor` out of the finite sum produces exactly the right-hand side of
 `Prop812SecondOrderCoeff37`. -/
 
-open BernoulliRegular (CPlusGenerator) in
 /-- **The single-column `ϖ ↔ λ` bridge** (proven, axiom-clean): the mod-`37²` even-power-`32` Dwork
 coefficient of `concreteKummerLogVector a` (the `Prop812SecondOrderCoeff37` per-column left side)
 equals the `λ`-adic level-`72` coordinate `valuedLambdaQuotientDworkCoeffModSq (idx 15).1 (evalₐ 72
@@ -178,12 +171,10 @@ theorem caseIICor823SecondOrder_columnCoeffModSq_eq_evalₐ
     (15 : Fin (kummerLogRank 37))]
   rfl
 
-set_option maxHeartbeats 3200000 in
 -- Threads the `ϖ ↔ λ` bridge and the `λ`-adic linearity (the proven coordinate laws) through the
--- heavy `DworkCompleteIntegerRing` `evalₐ` of the column sum; well above the default heartbeat
--- budget (still below the `adicCompletionIntegers` `whnf` wall — every step is a finite `evalₐ`-laws
--- rewrite, not a Dwork power-basis `repr` comparison).
-open BernoulliRegular (CPlusGenerator) in
+-- heavy `DworkCompleteIntegerRing` `evalₐ` of the column sum, staying below the
+-- `adicCompletionIntegers` `whnf` wall — every step is a finite `evalₐ`-laws rewrite, not a Dwork
+-- power-basis `repr` comparison.
 /-- **`Prop812SecondOrderCoeff37` from the per-column identity** (proven, axiom-clean given
 `CaseIICor823SecondOrderColumnCoeff37`).
 

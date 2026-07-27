@@ -167,6 +167,7 @@ This identification unlocks Mathlib's adic-completion theorems
 theorem when it lands) for the concrete Tate setting. -/
 
 omit [PlusSubring A] [HasLocLiftPowerBounded A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Subring equality** (upgrade of the set equality from `Cor832.lean`):
 `D.completedLocSubring = presheafValue_ringOfDef D` as Subrings of
 `presheafValue D`. Both are topological closures of the same dense image

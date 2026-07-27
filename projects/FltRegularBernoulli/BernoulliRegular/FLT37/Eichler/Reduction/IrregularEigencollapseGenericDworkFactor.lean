@@ -12,21 +12,22 @@ factor `F`.
 
 The proven downstream collapse `cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff`
 (`CaseIICor823SecondOrderDescentReduction.lean`) consumes the second-order leading factor *only*
-through its `37·(unit)` decomposition `caseIICor823SecondOrderBernoulliFactorModSq_eq_thirtyseven_mul`
-(`factor = 37·r`, `r` reducing to a unit mod `37`): it pulls out the `37`, applies the
-`37·x = 0 ⟹ castHom x = 0` precision step, and cancels the `castHom r` unit.  The *specific* value of
-the factor never enters.  So **any** `37·unit` per-column factor `F` drives the same collapse.
+through its `37·(unit)` decomposition
+`caseIICor823SecondOrderBernoulliFactorModSq_eq_thirtyseven_mul` (`factor = 37·r`, `r` reducing to a
+unit mod `37`): it pulls out the `37`, applies the `37·x = 0 ⟹ castHom x = 0` precision step, and
+cancels the `castHom r` unit.  The *specific* value of the factor never enters.  So **any**
+`37·unit` per-column factor `F` drives the same collapse.
 
 This matters because the hard-coded `caseIICor823SecondOrderBernoulliFactorModSq = B₃₂.num·32⁻¹`
 (`= 1073 = 37·29` mod `37²`, `caseIICor823SecondOrderBernoulliFactorModSq_eq_val`) is a *chosen*
 `37·unit` representative, **not** the actual level-`72` column-coordinate factor.  The level-`72`
 Dwork evaluator's first-order structure lift is `firstOrderStructureLiftFactor = 407 = 37·11`
 (`firstOrderStructureLiftFactor_eq`), which **differs** from `1073`
-(`firstOrderStructureLiftFactor_ne_bernoulliFactor`); the genuine level-`72` factor is that lift plus
-a possible degree-`37..72` truncation correction, and is established to be `37·unit` by the proven
-`v₃₇(L₃₇(1,ω³²)) = 1` (the `M ≤ 1` non-degeneracy `caseII_cor823_valuation_input_proven`).  Stating
-the collapse over a generic `F = 37·r` lets the *actual* coordinate value feed it directly, with no
-need to match the wrong `1073`.
+(`firstOrderStructureLiftFactor_ne_bernoulliFactor`); the genuine level-`72` factor is that lift
+plus a possible degree-`37..72` truncation correction, and is established to be `37·unit` by the
+proven `v₃₇(L₃₇(1,ω³²)) = 1` (the `M ≤ 1` non-degeneracy
+`caseII_cor823_valuation_input_proven`).  Stating the collapse over a generic `F = 37·r` lets the
+*actual* coordinate value feed it directly, with no need to match the wrong `1073`.
 
 ## What is proven here (the generic collapse, fully)
 
@@ -38,24 +39,26 @@ need to match the wrong `1073`.
 
 * **§2** — `genericColumnSumCoord_eq`: the **`e`-linearity**, carried in the `λ`-adic `evalₐ`
   coordinate (the proven `valuedLambdaQuotientDworkCoeffModSq_sum` / `_intCast_mul`, wall-free),
-  lifting the per-column value to the column-sum coordinate `D_vC = F · (∑_a (((a+2)²)^{16} − 1)·e_a)`.
-  Mirrors the proven `prop812SecondOrderCoeff37_of_columnCoeff`, with `F` generic.
+  lifting the per-column value to the column-sum coordinate
+  `D_vC = F · (∑_a (((a+2)²)^{16} − 1)·e_a)`. Mirrors the proven
+  `prop812SecondOrderCoeff37_of_columnCoeff`, with `F` generic.
 
 * **§3** — `cor823Omega32SecondOrderCollapse37_of_genericColumnCoord`: the **generic collapse**,
   mirroring `cor823Omega32SecondOrderCollapse37_of_secondOrderCoeff` with `F = 37·r` in place of the
   hard-coded factor: `p`-saturate `u = w³⁷·v`, the detector splits as `D_vC + 37·coeff_Y` and
   vanishes (proven detector vanishing), `D_vC = 37·r·V₁₅` (§2), so `castHom(r·V₁₅ + coeff_Y) = 0`;
   `castHom coeff_Y = 0` (proven first-order `j = 15` vanishing + level compatibility) and
-  `castHom V₁₅ = (V·ē)_15 = 9·c₁₅` (proven inversion) give `9·(castHom r)·c₁₅ = 0`, whence `c₁₅ = 0`.
+  `castHom V₁₅ = (V·ē)_15 = 9·c₁₅` (proven inversion) give `9·(castHom r)·c₁₅ = 0`, whence
+  `c₁₅ = 0`.
 
 * **§4** — R4 (`Cor823PthPowerOfRationalModSq37`) and the FLT37 endpoint
   `fermatLastTheoremFor_thirtyseven_of_genericColumnCoord`, from the generic per-column coordinate
   value, via the proven `cor823PthPowerOfRationalModSq37_of_omega32Collapse` /
   `fermatLastTheoremFor_thirtyseven_of_omega32Collapse`.
 
-This is the factor-agnostic R4 engine: feed it the *actual* level-`72` coordinate value (whatever its
-exact `37·unit` factor) and R4 collapses, leaving FLT37 on R2 (the descent) + the carried Kellner
-boundary alone.
+This is the factor-agnostic R4 engine: feed it the *actual* level-`72` coordinate value (whatever
+its exact `37·unit` factor) and R4 collapses, leaving FLT37 on R2 (the descent) + the carried
+Kellner boundary alone.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4 (Proposition 8.12, Theorem
@@ -66,7 +69,6 @@ boundary alone.
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 open NumberField
 
@@ -94,7 +96,8 @@ def genericColumnCoordLHS37
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The generic per-single-column level-`72` Dwork coordinate residual** (a `def … : Prop`,
-**not** an axiom — the factor-agnostic genuine `p`-adic-`L` content of Proposition 8.12 at `i = 32`).
+**not** an axiom — the factor-agnostic genuine `p`-adic-`L` content of Proposition 8.12 at
+`i = 32`).
 
 There is a leading factor `F : ZMod 37²` of the form `F = 37·r` with `r` reducing to a *unit* mod
 `37` (`castHom r ≠ 0` — the `M ≤ 1` second-order non-degeneracy), such that for every cyclotomic
@@ -105,13 +108,13 @@ column `a`, the `λ`-adic level-`72` even-degree-`32` Dwork coordinate
 
   `genericColumnCoordLHS37 a = F · ((((a+2)²)^{16} − 1) : ZMod 37²)`.
 
-This is the *actual* level-`72` coordinate value of the second-order analog of the proven first-order
-single-column factorization
+This is the *actual* level-`72` coordinate value of the second-order analog of the proven
+first-order single-column factorization
 `valuedLambdaQuotientDworkCoeffModP_unscaledNormalizedFiniteLog_even_eq_formal`, with the leading
 factor abstract: the downstream collapse uses only that `F` is `37·unit`, *never* its specific value
-(so the wrong hard-coded `1073` is avoided entirely — the genuine factor is the first-order-structure
-lift `407 = 37·11` plus a level-`72` correction, both `37·unit`).  Strictly the single-scalar
-`evalₐ` coordinate core (no `repr`, no `dworkFixedEvenPowerBasis`). -/
+(so the wrong hard-coded `1073` is avoided entirely — the genuine factor is the
+first-order-structure lift `407 = 37·11` plus a level-`72` correction, both `37·unit`).  Strictly
+the single-scalar `evalₐ` coordinate core (no `repr`, no `dworkFixedEvenPowerBasis`). -/
 def CaseIICor823GenericColumnCoord37
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] : Prop :=

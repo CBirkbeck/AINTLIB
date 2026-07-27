@@ -5,7 +5,6 @@ public import BernoulliRegular.Reflection.WeakSplitting.RationalPrimeFactor
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 public import Mathlib.RingTheory.Ideal.Int
 
-
 /-!
 # Kummer comparison of local Euler factors at split rational primes
 
@@ -69,9 +68,9 @@ primes above `q` decomposes as the disjoint union over `K`-primes above
 theorem primesOverFinset_rat_eq_biUnion (q : ℕ) (hq : q.Prime) :
     IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L) =
       (IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 K)).biUnion
-        (fun P => IsDedekindDomain.primesOverFinset P (𝓞 L)) := by
+        (fun P ↦ IsDedekindDomain.primesOverFinset P (𝓞 L)) := by
   classical
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hq_ne := span_int_q_ne_bot hq
   ext Q
   simp only [Finset.mem_biUnion]
@@ -79,16 +78,16 @@ theorem primesOverFinset_rat_eq_biUnion (q : ℕ) (hq : q.Prime) :
   · intro hQ
     have hQ_mem : Q ∈ (Ideal.span ({(q : ℤ)} : Set ℤ)).primesOver (𝓞 L) :=
       (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mp hQ
-    haveI hQ_prime : Q.IsPrime := hQ_mem.1
-    haveI : Q.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hQ_mem.2
+    have hQ_prime : Q.IsPrime := hQ_mem.1
+    have : Q.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hQ_mem.2
     let P : Ideal (𝓞 K) := Q.under (𝓞 K)
-    haveI hP_prime : P.IsPrime := Ideal.IsPrime.under (𝓞 K) Q
-    haveI hQ_lies_P : Q.LiesOver P := ⟨rfl⟩
-    haveI hP_lies_q : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) :=
+    have hP_prime : P.IsPrime := Ideal.IsPrime.under (𝓞 K) Q
+    have hQ_lies_P : Q.LiesOver P := ⟨rfl⟩
+    have hP_lies_q : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) :=
       Ideal.LiesOver.tower_bot (𝔓 := Q) (P := P)
         (p := (Ideal.span ({(q : ℤ)} : Set ℤ)))
     have hP_ne : P ≠ ⊥ := ne_bot_of_liesOver_span_int_q hq K P
-    haveI : P.IsMaximal := hP_prime.isMaximal hP_ne
+    have : P.IsMaximal := hP_prime.isMaximal hP_ne
     refine ⟨P,
       (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 K)).mpr
         ⟨hP_prime, hP_lies_q⟩,
@@ -97,15 +96,15 @@ theorem primesOverFinset_rat_eq_biUnion (q : ℕ) (hq : q.Prime) :
   · rintro ⟨P, hP_mem, hQ_mem⟩
     have hP_in : P ∈ (Ideal.span ({(q : ℤ)} : Set ℤ)).primesOver (𝓞 K) :=
       (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 K)).mp hP_mem
-    haveI hP_prime : P.IsPrime := hP_in.1
-    haveI : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP_in.2
+    have hP_prime : P.IsPrime := hP_in.1
+    have : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP_in.2
     have hP_ne : P ≠ ⊥ := ne_bot_of_liesOver_span_int_q hq K P
-    haveI : P.IsMaximal := hP_prime.isMaximal hP_ne
+    have : P.IsMaximal := hP_prime.isMaximal hP_ne
     have hQ_in : Q ∈ P.primesOver (𝓞 L) :=
       (_root_.IsDedekindDomain.mem_primesOverFinset_iff hP_ne (𝓞 L)).mp hQ_mem
-    haveI : Q.IsPrime := hQ_in.1
-    haveI : Q.LiesOver P := hQ_in.2
-    haveI : Q.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) :=
+    have : Q.IsPrime := hQ_in.1
+    have : Q.LiesOver P := hQ_in.2
+    have : Q.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) :=
       Ideal.LiesOver.trans (𝔓 := Q) (P := P) (p := (Ideal.span ({(q : ℤ)} : Set ℤ)))
     exact (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mpr
       ⟨‹_›, ‹_›⟩
@@ -124,7 +123,7 @@ theorem primesOverFinset_disjoint_of_ne (q : ℕ) (hq : q.Prime)
     Disjoint (IsDedekindDomain.primesOverFinset P (𝓞 L))
       (IsDedekindDomain.primesOverFinset P' (𝓞 L)) := by
   classical
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   rw [Finset.disjoint_left]
   intro Q hQ_in_P hQ_in_P'
   have hq_ne := span_int_q_ne_bot hq
@@ -132,12 +131,12 @@ theorem primesOverFinset_disjoint_of_ne (q : ℕ) (hq : q.Prime)
     (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 K)).mp hP
   have hP'_in : P' ∈ (Ideal.span ({(q : ℤ)} : Set ℤ)).primesOver (𝓞 K) :=
     (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 K)).mp hP'
-  haveI : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP_in.2
-  haveI : P'.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP'_in.2
+  have : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP_in.2
+  have : P'.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP'_in.2
   have hP_ne : P ≠ ⊥ := ne_bot_of_liesOver_span_int_q hq K P
   have hP'_ne : P' ≠ ⊥ := ne_bot_of_liesOver_span_int_q hq K P'
-  haveI : P.IsMaximal := hP_in.1.isMaximal hP_ne
-  haveI : P'.IsMaximal := hP'_in.1.isMaximal hP'_ne
+  have : P.IsMaximal := hP_in.1.isMaximal hP_ne
+  have : P'.IsMaximal := hP'_in.1.isMaximal hP'_ne
   have hQ_lies_P : Q.LiesOver P :=
     ((_root_.IsDedekindDomain.mem_primesOverFinset_iff hP_ne (𝓞 L)).mp hQ_in_P).2
   have hQ_lies_P' : Q.LiesOver P' :=
@@ -158,13 +157,13 @@ private lemma inner_prod_localFactor_eq_pow
     ∏ Q ∈ IsDedekindDomain.primesOverFinset P (𝓞 L),
       ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)) =
       ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-s)) ^ Module.finrank K L := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hq_ne := span_int_q_ne_bot hq
   have hP_in : P ∈ (Ideal.span ({(q : ℤ)} : Set ℤ)).primesOver (𝓞 K) :=
     (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 K)).mp hP
-  haveI : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP_in.2
+  have : P.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hP_in.2
   have hP_ne : P ≠ ⊥ := ne_bot_of_liesOver_span_int_q hq K P
-  haveI : P.IsMaximal := hP_in.1.isMaximal hP_ne
+  have : P.IsMaximal := hP_in.1.isMaximal hP_ne
   exact BernoulliRegular.Ideal.SplitsCompletely.prod_localFactor_eq_pow
     (𝓞 L) K L hP_ne hsplitsP s
 
@@ -190,9 +189,9 @@ theorem dedekindLocalFactorRat_eq_pow_of_splits {q : ℕ} (hq : q.Prime)
   change ∏ Q ∈ T_L, ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)) =
     (∏ P ∈ T_K, ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-s))) ^ Module.finrank K L
   rw [hT_L, primesOverFinset_rat_eq_biUnion K L q hq, ← hT_K,
-    Finset.prod_biUnion (fun _ hP _ hP' hne =>
+    Finset.prod_biUnion (fun _ hP _ hP' hne ↦
       primesOverFinset_disjoint_of_ne K L q hq hP hP' hne),
-    Finset.prod_congr rfl (fun P hP =>
+    Finset.prod_congr rfl (fun P hP ↦
       inner_prod_localFactor_eq_pow K L hq hP (hsplits P hP) s),
     ← Finset.prod_pow]
 

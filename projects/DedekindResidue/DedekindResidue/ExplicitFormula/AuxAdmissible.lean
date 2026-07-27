@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -115,7 +120,7 @@ theorem tailExponent_re_pos (hs : 1 < s.re) :
     0 < (-((((1/2 + (s.re - 1)/2 : ℝ)) : ℂ) - (s - 1/2))).re := by
   have : (-((((1/2 + (s.re - 1)/2 : ℝ)) : ℂ) - (s - 1/2))).re
       = -(1/2 + (s.re - 1)/2) + (s.re - 1/2) := by
-    simp [Complex.sub_re]
+    norm_num [Complex.sub_re]
     ring
   rw [this]
   linarith
@@ -155,7 +160,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
   have hmre : 0 < (-m).re := by
     have h1 : (-m).re = -c + (s.re - 1/2) := by
       rw [hm]
-      simp [Complex.sub_re]
+      norm_num [Complex.sub_re]
       ring
     rw [h1]
     linarith
@@ -168,7 +173,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
       else ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
         * (-(-m + 1/x) * (Complex.exp (-(-m) * x) / x)))
     ?_ ?_ ?_
-  · -- plateau derivative
+  ·
     intro x hx
     rw [if_pos hx.2]
     have hev : (fun y : ℝ => auxF s X y * ((Real.exp (c * y) : ℝ) : ℂ))
@@ -187,7 +192,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
       push_cast
       ring
     exact hbase.congr_of_eventuallyEq hev
-  · -- tail derivative
+  ·
     intro x hx
     rw [if_neg (not_lt.mpr (le_of_lt hx))]
     have hev : (fun y : ℝ => auxF s X y * ((Real.exp (c * y) : ℝ) : ℂ))
@@ -199,7 +204,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
     exact (((hasDerivAt_gAux_core (-m) (hT0.trans hx)).const_mul
       (((Real.log X : ℝ) : ℂ)
         * Complex.exp ((s - 1/2) * (Real.log X : ℂ)))).congr_of_eventuallyEq hev)
-  · -- integrability of the derivative
+  ·
     rw [show Set.Ici (0:ℝ) = Set.Icc 0 (Real.log X) ∪ Set.Ioi (Real.log X) from
       (Set.Icc_union_Ioi_eq_Ici hT0.le).symm]
     refine MeasureTheory.IntegrableOn.union ?_ ?_
@@ -268,15 +273,15 @@ theorem boundedVariationOn_auxF_mul_exp (hX : 1 < X) {c : ℝ}
 
 /-- The real-part projection is `1`-Lipschitz. -/
 theorem lipschitzWith_complex_re : LipschitzWith 1 Complex.re := by
-  refine LipschitzWith.of_dist_le_mul (fun z w => ?_)
-  rw [NNReal.coe_one, one_mul, Real.dist_eq, Complex.dist_eq, ← Complex.sub_re]
-  exact Complex.abs_re_le_norm _
+  convert (RCLike.lipschitzWith_re (K := ℂ)) using 1
+  ext z
+  rfl
 
 /-- The imaginary-part projection is `1`-Lipschitz. -/
 theorem lipschitzWith_complex_im : LipschitzWith 1 Complex.im := by
-  refine LipschitzWith.of_dist_le_mul (fun z w => ?_)
-  rw [NNReal.coe_one, one_mul, Real.dist_eq, Complex.dist_eq, ← Complex.sub_im]
-  exact Complex.abs_im_le_norm _
+  convert (RCLike.lipschitzWith_im (K := ℂ)) using 1
+  ext z
+  rfl
 
 /-- **Bounded variation of `F_{s,X}` on the whole line** (for `Re s > 1/2`): the `c = 0`
 case of `boundedVariationOn_auxF_mul_exp`, with the trivial `e^{0·x} = 1` weight removed. -/
@@ -362,13 +367,13 @@ theorem auxF_diffQuot_tail_eq (hX : 1 < X) :
   have hxpos : 0 < x := lt_of_lt_of_le hT0 hx
   have hxc : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hxpos.ne'
   rcases eq_or_lt_of_le (Set.mem_Ici.mp hx) with heq | hlt
-  · -- at the kink both sides vanish
+  ·
     rw [auxF_of_le s X (by rw [abs_of_pos hxpos]; exact le_of_eq heq.symm)]
     rw [← heq]
     rw [show (s - 1/2) * (Real.log X : ℂ) = -(-(s - 1/2) * (Real.log X : ℂ)) by ring,
       Complex.exp_neg]
     field_simp
-  · -- on the open tail, expand the branch
+  ·
     have hnot : ¬ |x| ≤ Real.log X := by
       rw [abs_of_pos hxpos]
       exact not_le.mpr hlt
@@ -378,16 +383,11 @@ theorem auxF_diffQuot_tail_eq (hX : 1 < X) :
         = (s - 1/2) * (Real.log X : ℂ) + -(s - 1/2) * (x:ℂ) by ring, Complex.exp_add]
     field_simp
 
-/-- **Bounded variation of the difference quotient** `(1 - F_{s,X}(x))/x` on `[0,∞)`:
-zero on the plateau, explicitly differentiable with integrable derivative on the tail. -/
-theorem auxF_diffQuot_bv (hX : 1 < X) (hs : 1 < s.re) :
-    BoundedVariationOn (fun x : ℝ => (1 - auxF s X x) / (x : ℂ)) (Set.Ici 0) := by
+/-- Continuity of the difference quotient `(1 - F_{s,X}(x))/x` on `[0,∞)`: zero on the
+plateau `[0, log X]`, the explicit tail formula beyond. -/
+theorem continuousOn_auxF_diffQuot (hX : 1 < X) :
+    ContinuousOn (fun x : ℝ => (1 - auxF s X x) / (x : ℂ)) (Set.Ici 0) := by
   have hT0 : 0 < Real.log X := Real.log_pos hX
-  have hh : 0 < (s - 1/2 : ℂ).re := by
-    have hre : (s - 1/2 : ℂ).re = s.re - 1/2 := by
-      simp [Complex.sub_re]
-    rw [hre]
-    linarith
   have hplateau : ∀ y ∈ Set.Icc (0:ℝ) (Real.log X), (1 - auxF s X y) / (y : ℂ) = 0 := by
     intro y hy
     rw [auxF_of_le s X (by rw [abs_of_nonneg hy.1]; exact hy.2), sub_self, zero_div]
@@ -403,35 +403,157 @@ theorem auxF_diffQuot_bv (hX : 1 < X) (hs : 1 < s.re) :
     refine ContinuousOn.div (continuousOn_const.mul ?_) (by fun_prop) ?_
     · exact (Complex.continuous_exp.comp (by fun_prop)).continuousOn
     · exact fun y hy => pow_ne_zero 2 (hne y hy)
-  have hcont : ContinuousOn (fun x : ℝ => (1 - auxF s X x) / (x : ℂ)) (Set.Ici 0) := by
-    rw [show Set.Ici (0:ℝ) = Set.Icc 0 (Real.log X) ∪ Set.Ici (Real.log X) from
-      (Set.Icc_union_Ici_eq_Ici hT0.le).symm]
+  rw [show Set.Ici (0:ℝ) = Set.Icc 0 (Real.log X) ∪ Set.Ici (Real.log X) from
+    (Set.Icc_union_Ici_eq_Ici hT0.le).symm]
+  intro x hx
+  have hx0 : 0 ≤ x := by
+    rcases hx with hx | hx
+    · exact hx.1
+    · exact le_trans hT0.le hx
+  rcases lt_or_ge x (Real.log X) with hxT | hxT
+  · refine ContinuousWithinAt.union ?_ ?_
+    · exact continuousWithinAt_const.congr hplateau (hplateau x ⟨hx0, le_of_lt hxT⟩)
+    · exact continuousWithinAt_of_notMem_closure
+        (by rwa [closure_Ici, Set.mem_Ici, not_le])
+  · refine ContinuousWithinAt.union ?_ ?_
+    · rcases eq_or_lt_of_le hxT with heq | hlt
+      · exact continuousWithinAt_const.congr hplateau
+          (hplateau x ⟨hx0, le_of_eq heq.symm⟩)
+      · refine continuousWithinAt_of_notMem_closure ?_
+        rw [closure_Icc]
+        exact fun hmem => absurd hmem.2 (not_le.mpr hlt)
+    · exact ((hQf x hxT).congr (fun y hy => auxF_diffQuot_tail_eq s hX y hy)
+        (auxF_diffQuot_tail_eq s hX x hxT))
+
+/-- The difference quotient is differentiable on the tail `(log X, ∞)`, with the explicit
+derivative of `1/x - c·exp(-(s-1/2)x)/x²`. -/
+theorem hasDerivAt_auxF_diffQuot_tail (hX : 1 < X) :
+    ∀ x ∈ Set.Ioi (Real.log X),
+      HasDerivAt (fun x : ℝ => (1 - auxF s X x) / (x : ℂ))
+        (-(1/(x:ℂ)^2)
+          + ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+            * (((s - 1/2) * x + 2) * Complex.exp (-(s - 1/2) * x)) / (x:ℂ)^3) x := by
+  intro x hx
+  have hxpos : 0 < x := (Real.log_pos hX).trans hx
+  have hxc : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hxpos.ne'
+  have h1 : HasDerivAt (fun w : ℂ => 1/w) (-(((x:ℝ):ℂ)^2)⁻¹) ((x:ℝ):ℂ) := by
+    simpa [one_div] using hasDerivAt_inv hxc
+  have hnum : HasDerivAt (fun w : ℂ => Complex.exp (-(s - 1/2) * w))
+      (Complex.exp (-(s - 1/2) * ((x:ℝ):ℂ)) * (-(s - 1/2) * 1)) ((x:ℝ):ℂ) :=
+    ((hasDerivAt_id ((x:ℝ):ℂ)).const_mul (-(s - 1/2))).cexp
+  have hden : HasDerivAt (fun w : ℂ => w^2)
+      ((2:ℕ) * ((x:ℝ):ℂ)^(2-1)) ((x:ℝ):ℂ) := hasDerivAt_pow 2 _
+  have hq := hnum.div hden (pow_ne_zero 2 hxc)
+  have hC := (h1.sub ((hq.const_mul
+    (((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ)))))).comp_ofReal
+  have hev : (fun y : ℝ => (1 - auxF s X y) / (y : ℂ)) =ᶠ[nhds x]
+      fun y : ℝ => 1/(y:ℂ)
+        - ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+            * (Complex.exp (-(s - 1/2) * y) / (y:ℂ)^2) := by
+    filter_upwards [eventually_gt_nhds hx] with y hy
+    rw [auxF_diffQuot_tail_eq s hX y (le_of_lt hy)]
+    ring
+  refine (hC.congr_of_eventuallyEq hev).congr_deriv ?_
+  field_simp
+  ring
+
+/-- Integrability on the tail of the exponentially-decaying part of the derivative. -/
+theorem integrableOn_auxF_diffQuot_tail (hX : 1 < X) (hs : 1 < s.re) :
+    IntegrableOn (fun x : ℝ =>
+        ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+          * (((s - 1/2) * x + 2) * Complex.exp (-(s - 1/2) * x)) / (x:ℂ)^3)
+        (Set.Ioi (Real.log X)) := by
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  have hh : 0 < (s - 1/2 : ℂ).re := by
+    have hre : (s - 1/2 : ℂ).re = s.re - 1/2 := by
+      norm_num [Complex.sub_re]
+    rw [hre]
+    linarith
+  have hbase := integrableOn_bounded_mul_exp_div (h := s - 1/2) hh hT0
+    (φ := fun x : ℝ =>
+      ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+        * (((s - 1/2) * x + 2) / (x:ℂ)^2))
+    (C := ‖((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))‖
+      * (‖(s - 1/2 : ℂ)‖/Real.log X + 2/(Real.log X)^2)) ?_ ?_
+  · refine hbase.congr_fun (fun x hx => ?_) measurableSet_Ioi
+    have hxc : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT0.trans hx).ne'
+    field_simp
+  · refine ContinuousOn.mul continuousOn_const
+      (ContinuousOn.div (by fun_prop) (by fun_prop) ?_)
     intro x hx
-    have hx0 : 0 ≤ x := by
-      rcases hx with hx | hx
-      · exact hx.1
-      · exact le_trans hT0.le hx
-    rcases lt_or_ge x (Real.log X) with hxT | hxT
-    · refine ContinuousWithinAt.union ?_ ?_
-      · exact continuousWithinAt_const.congr hplateau (hplateau x ⟨hx0, le_of_lt hxT⟩)
-      · exact continuousWithinAt_of_notMem_closure
-          (by rwa [closure_Ici, Set.mem_Ici, not_le])
-    · refine ContinuousWithinAt.union ?_ ?_
-      · rcases eq_or_lt_of_le hxT with heq | hlt
-        · exact continuousWithinAt_const.congr hplateau
-            (hplateau x ⟨hx0, le_of_eq heq.symm⟩)
-        · refine continuousWithinAt_of_notMem_closure ?_
-          rw [closure_Icc]
-          exact fun hmem => absurd hmem.2 (not_le.mpr hlt)
-      · exact ((hQf x hxT).congr (fun y hy => auxF_diffQuot_tail_eq s hX y hy)
-          (auxF_diffQuot_tail_eq s hX x hxT))
-  refine boundedVariationOn_Ici_of_piecewise_deriv (b := Real.log X) hT0.le hcont
+    have : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT0.trans hx).ne'
+    exact pow_ne_zero 2 this
+  · intro x hx
+    have hxpos : 0 < x := hT0.trans hx
+    rw [norm_mul]
+    refine mul_le_mul le_rfl ?_ (norm_nonneg _) (norm_nonneg _)
+    rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hxpos]
+    have hnum : ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖ ≤ ‖(s - 1/2 : ℂ)‖ * x + 2 := by
+      have hht : ‖(s - 1/2) * ((x:ℝ):ℂ)‖ = ‖(s - 1/2 : ℂ)‖ * x := by
+        norm_num [Complex.norm_real, abs_of_pos hxpos]
+      have h2 : ‖(2 : ℂ)‖ = 2 := by norm_num
+      calc ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖
+          ≤ ‖(s - 1/2) * ((x:ℝ):ℂ)‖ + ‖(2:ℂ)‖ := norm_add_le _ _
+        _ = ‖(s - 1/2 : ℂ)‖ * x + 2 := by rw [hht, h2]
+    calc ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖ / x^2
+        ≤ (‖(s - 1/2 : ℂ)‖ * x + 2) / x^2 := by gcongr
+      _ = ‖(s - 1/2 : ℂ)‖/x + 2/x^2 := by field_simp
+      _ ≤ ‖(s - 1/2 : ℂ)‖/Real.log X + 2/(Real.log X)^2 := by
+          gcongr <;> exact le_of_lt hx
+
+/-- Integrability of the piecewise derivative `f'` on `[0,∞)`: zero on the plateau,
+`1/x²`-plus-exponential-decay on the tail. -/
+theorem integrableOn_auxF_diffQuot_deriv (hX : 1 < X) (hs : 1 < s.re) :
+    IntegrableOn (fun x : ℝ => if x < Real.log X then 0
+      else -(1/(x:ℂ)^2)
+        + ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
+          * (((s - 1/2) * x + 2) * Complex.exp (-(s - 1/2) * x)) / (x:ℂ)^3)
+      (Set.Ici 0) := by
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  rw [show Set.Ici (0:ℝ) = Set.Icc 0 (Real.log X) ∪ Set.Ioi (Real.log X) from
+    (Set.Icc_union_Ioi_eq_Ici hT0.le).symm]
+  refine MeasureTheory.IntegrableOn.union ?_ ?_
+  · refine (integrableOn_zero :
+      IntegrableOn (fun _ : ℝ => (0:ℂ)) (Set.Icc 0 (Real.log X)) volume).congr ?_
+    have hae : ∀ᵐ x : ℝ ∂(volume.restrict (Set.Icc 0 (Real.log X))), x ≠ Real.log X := by
+      refine ae_restrict_of_ae ?_
+      rw [MeasureTheory.ae_iff]
+      simp only [not_not, Set.setOf_eq_eq_singleton]
+      exact measure_singleton _
+    filter_upwards [ae_restrict_mem measurableSet_Icc, hae] with x hx hxne
+    rw [if_pos (lt_of_le_of_ne hx.2 hxne)]
+  · have hi1 : IntegrableOn (fun x : ℝ => 1/((x:ℝ):ℂ)^2) (Set.Ioi (Real.log X)) := by
+      have hreal : IntegrableOn (fun x : ℝ => x ^ (-2 : ℝ)) (Set.Ioi (Real.log X)) :=
+        integrableOn_Ioi_rpow_of_lt (by norm_num) hT0
+      have hcast : IntegrableOn (fun x : ℝ => ((x ^ (-2:ℝ) : ℝ) : ℂ))
+          (Set.Ioi (Real.log X)) := hreal.ofReal
+      refine hcast.congr_fun (fun x hx => ?_) measurableSet_Ioi
+      have hxpos : 0 < x := hT0.trans hx
+      have h2 : x ^ (-2 : ℝ) = (x^2)⁻¹ := by
+        rw [show (-2 : ℝ) = -((2:ℕ):ℝ) by norm_num, Real.rpow_neg hxpos.le,
+          Real.rpow_natCast]
+      show ((x ^ (-2:ℝ) : ℝ) : ℂ) = 1/((x:ℝ):ℂ)^2
+      rw [h2]
+      push_cast
+      ring
+    have hi2 := integrableOn_auxF_diffQuot_tail s hX hs
+    refine ((hi1.neg).add hi2).congr_fun (fun x hx => ?_) measurableSet_Ioi
+    rw [if_neg (not_lt.mpr (le_of_lt hx))]
+    simp only [Pi.add_apply, Pi.neg_apply]
+
+/-- **Bounded variation of the difference quotient** `(1 - F_{s,X}(x))/x` on `[0,∞)`:
+zero on the plateau, explicitly differentiable with integrable derivative on the tail. -/
+theorem auxF_diffQuot_bv (hX : 1 < X) (hs : 1 < s.re) :
+    BoundedVariationOn (fun x : ℝ => (1 - auxF s X x) / (x : ℂ)) (Set.Ici 0) := by
+  have hT0 : 0 < Real.log X := Real.log_pos hX
+  refine boundedVariationOn_Ici_of_piecewise_deriv (b := Real.log X) hT0.le
+    (continuousOn_auxF_diffQuot s hX)
     (f' := fun x : ℝ => if x < Real.log X then 0
       else -(1/(x:ℂ)^2)
         + ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
           * (((s - 1/2) * x + 2) * Complex.exp (-(s - 1/2) * x)) / (x:ℂ)^3)
-    ?_ ?_ ?_
-  · -- plateau derivative: locally zero
+    ?_ ?_ (integrableOn_auxF_diffQuot_deriv s hX hs)
+  ·
     intro x hx
     rw [if_pos hx.2]
     have hev : (fun y : ℝ => (1 - auxF s X y) / (y : ℂ)) =ᶠ[nhds x]
@@ -443,97 +565,9 @@ theorem auxF_diffQuot_bv (hX : 1 < X) (hs : 1 < s.re) :
         linarith [abs_sub_comm y x ▸ hy]
       rw [auxF_of_le s X hyle, sub_self, zero_div]
     exact (hasDerivAt_const x (0:ℂ)).congr_of_eventuallyEq hev
-  · -- tail derivative: differentiate the explicit formula, all in ℂ
-    intro x hx
+  · intro x hx
     rw [if_neg (not_lt.mpr (le_of_lt hx))]
-    have hxpos : 0 < x := hT0.trans hx
-    have hxc : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hxpos.ne'
-    have h1 : HasDerivAt (fun w : ℂ => 1/w) (-(((x:ℝ):ℂ)^2)⁻¹) ((x:ℝ):ℂ) := by
-      simpa [one_div] using hasDerivAt_inv hxc
-    have hnum : HasDerivAt (fun w : ℂ => Complex.exp (-(s - 1/2) * w))
-        (Complex.exp (-(s - 1/2) * ((x:ℝ):ℂ)) * (-(s - 1/2) * 1)) ((x:ℝ):ℂ) :=
-      ((hasDerivAt_id ((x:ℝ):ℂ)).const_mul (-(s - 1/2))).cexp
-    have hden : HasDerivAt (fun w : ℂ => w^2)
-        ((2:ℕ) * ((x:ℝ):ℂ)^(2-1)) ((x:ℝ):ℂ) := hasDerivAt_pow 2 _
-    have hq := hnum.div hden (pow_ne_zero 2 hxc)
-    have hC := (h1.sub ((hq.const_mul
-      (((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ)))))).comp_ofReal
-    have hev : (fun y : ℝ => (1 - auxF s X y) / (y : ℂ)) =ᶠ[nhds x]
-        fun y : ℝ => 1/(y:ℂ)
-          - ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-              * (Complex.exp (-(s - 1/2) * y) / (y:ℂ)^2) := by
-      filter_upwards [eventually_gt_nhds hx] with y hy
-      rw [auxF_diffQuot_tail_eq s hX y (le_of_lt hy)]
-      ring
-    refine (hC.congr_of_eventuallyEq hev).congr_deriv ?_
-    field_simp
-    ring
-  · -- derivative integrability
-    rw [show Set.Ici (0:ℝ) = Set.Icc 0 (Real.log X) ∪ Set.Ioi (Real.log X) from
-      (Set.Icc_union_Ioi_eq_Ici hT0.le).symm]
-    refine MeasureTheory.IntegrableOn.union ?_ ?_
-    · refine (integrableOn_zero :
-        IntegrableOn (fun _ : ℝ => (0:ℂ)) (Set.Icc 0 (Real.log X)) volume).congr ?_
-      have hae : ∀ᵐ x : ℝ ∂(volume.restrict (Set.Icc 0 (Real.log X))), x ≠ Real.log X := by
-        refine ae_restrict_of_ae ?_
-        rw [MeasureTheory.ae_iff]
-        simp only [not_not, Set.setOf_eq_eq_singleton]
-        exact measure_singleton _
-      filter_upwards [ae_restrict_mem measurableSet_Icc, hae] with x hx hxne
-      rw [if_pos (lt_of_le_of_ne hx.2 hxne)]
-    · -- tail: 1/x² plus the exponentially decaying part
-      have hi1 : IntegrableOn (fun x : ℝ => 1/((x:ℝ):ℂ)^2) (Set.Ioi (Real.log X)) := by
-        have hreal : IntegrableOn (fun x : ℝ => x ^ (-2 : ℝ)) (Set.Ioi (Real.log X)) :=
-          integrableOn_Ioi_rpow_of_lt (by norm_num) hT0
-        have hcast : IntegrableOn (fun x : ℝ => ((x ^ (-2:ℝ) : ℝ) : ℂ))
-            (Set.Ioi (Real.log X)) := hreal.ofReal
-        refine hcast.congr_fun (fun x hx => ?_) measurableSet_Ioi
-        have hxpos : 0 < x := hT0.trans hx
-        have h2 : x ^ (-2 : ℝ) = (x^2)⁻¹ := by
-          rw [show (-2 : ℝ) = -((2:ℕ):ℝ) by norm_num, Real.rpow_neg hxpos.le,
-            Real.rpow_natCast]
-        show ((x ^ (-2:ℝ) : ℝ) : ℂ) = 1/((x:ℝ):ℂ)^2
-        rw [h2]
-        push_cast
-        ring
-      have hi2 : IntegrableOn (fun x : ℝ =>
-          ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-            * (((s - 1/2) * x + 2) * Complex.exp (-(s - 1/2) * x)) / (x:ℂ)^3)
-          (Set.Ioi (Real.log X)) := by
-        have hbase := integrableOn_bounded_mul_exp_div (h := s - 1/2) hh hT0
-          (φ := fun x : ℝ =>
-            ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
-              * (((s - 1/2) * x + 2) / (x:ℂ)^2))
-          (C := ‖((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))‖
-            * (‖(s - 1/2 : ℂ)‖/Real.log X + 2/(Real.log X)^2)) ?_ ?_
-        · refine hbase.congr_fun (fun x hx => ?_) measurableSet_Ioi
-          have hxc : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT0.trans hx).ne'
-          field_simp
-        · refine ContinuousOn.mul continuousOn_const
-            (ContinuousOn.div (by fun_prop) (by fun_prop) ?_)
-          intro x hx
-          have : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (hT0.trans hx).ne'
-          exact pow_ne_zero 2 this
-        · intro x hx
-          have hxpos : 0 < x := hT0.trans hx
-          rw [norm_mul]
-          refine mul_le_mul le_rfl ?_ (norm_nonneg _) (norm_nonneg _)
-          rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hxpos]
-          have hnum : ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖ ≤ ‖(s - 1/2 : ℂ)‖ * x + 2 := by
-            have hht : ‖(s - 1/2) * ((x:ℝ):ℂ)‖ = ‖(s - 1/2 : ℂ)‖ * x := by
-              simp [Complex.norm_real, abs_of_pos hxpos]
-            have h2 : ‖(2 : ℂ)‖ = 2 := by norm_num
-            calc ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖
-                ≤ ‖(s - 1/2) * ((x:ℝ):ℂ)‖ + ‖(2:ℂ)‖ := norm_add_le _ _
-              _ = ‖(s - 1/2 : ℂ)‖ * x + 2 := by rw [hht, h2]
-          calc ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖ / x^2
-              ≤ (‖(s - 1/2 : ℂ)‖ * x + 2) / x^2 := by gcongr
-            _ = ‖(s - 1/2 : ℂ)‖/x + 2/x^2 := by field_simp
-            _ ≤ ‖(s - 1/2 : ℂ)‖/Real.log X + 2/(Real.log X)^2 := by
-                gcongr <;> exact le_of_lt hx
-      refine ((hi1.neg).add hi2).congr_fun (fun x hx => ?_) measurableSet_Ioi
-      rw [if_neg (not_lt.mpr (le_of_lt hx))]
-      simp only [Pi.add_apply, Pi.neg_apply]
+    exact hasDerivAt_auxF_diffQuot_tail s hX x hx
 
 /-- **`F_{s,X}` is an admissible test function** for the Weil–Poitou explicit formula,
 for `Re s > 1` and `X > 1` — exactly the regime in which the paper first applies the

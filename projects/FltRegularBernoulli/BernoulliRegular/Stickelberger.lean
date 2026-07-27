@@ -59,21 +59,12 @@ def stickelbergerCoefficientPackage (c : (ZMod p)ˣ → ℤ) :
 /-- The coefficient at `a⁻¹` in the Stickelberger coefficient package. -/
 @[simp] lemma stickelbergerCoefficientPackage_apply_inv
     (c : (ZMod p)ˣ → ℤ) (a : (ZMod p)ˣ) :
-    stickelbergerCoefficientPackage (p := p) c a⁻¹ = c a := by
-  classical
-  rw [stickelbergerCoefficientPackage]
-  calc
-    (∑ b : (ZMod p)ˣ, MonoidAlgebra.single b⁻¹ (c b)) a⁻¹ =
-        ∑ b : (ZMod p)ˣ, MonoidAlgebra.single b⁻¹ (c b) a⁻¹ :=
-          Finsupp.finsetSum_apply
-            (S := (Finset.univ : Finset (ZMod p)ˣ))
-            (f := fun b : (ZMod p)ˣ => MonoidAlgebra.single b⁻¹ (c b))
-            (a := a⁻¹)
-    _ = c a := by
-        rw [Fintype.sum_eq_single a]
-        · simp
-        · intro b hb
-          simp [hb, inv_inj]
+    (stickelbergerCoefficientPackage (p := p) c).coeff a⁻¹ = c a := by
+  rw [stickelbergerCoefficientPackage, MonoidAlgebra.coeff_sum, Finset.sum_apply']
+  rw [Fintype.sum_eq_single a]
+  · simp
+  · intro b hb
+    simp [hb, inv_inj]
 
 /-- The Stickelberger element `θ_p ∈ ℚ[(ZMod p)ˣ]`:
 `θ_p := (1/p) · ∑_{a ∈ (ZMod p)ˣ} (a.val : ℚ) • single a⁻¹ 1`. -/
@@ -104,28 +95,13 @@ the canonical integer lifts of units. -/
 lemma stickelbergerScaled_eq_stickelbergerCoefficientPackage :
     stickelbergerScaled p =
       stickelbergerCoefficientPackage (p := p)
-        (fun a : (ZMod p)ˣ => ((a : ZMod p).val : ℤ)) := by
-  classical
-  unfold stickelbergerScaled stickelbergerCoefficientPackage
-  refine Finset.sum_congr rfl ?_
-  intro a _
-  ext g
-  by_cases hg : g = a⁻¹
-  · subst hg
-    change
-      (((a : ZMod p).val : ℤ) •
-          (MonoidAlgebra.single a⁻¹ (1 : ℤ) a⁻¹)) =
-        MonoidAlgebra.single a⁻¹ ((a : ZMod p).val : ℤ) a⁻¹
-    simp
-  · change
-      (((a : ZMod p).val : ℤ) •
-          (MonoidAlgebra.single a⁻¹ (1 : ℤ) g)) =
-        MonoidAlgebra.single a⁻¹ ((a : ZMod p).val : ℤ) g
-    simp [hg]
+        (fun a : (ZMod p)ˣ ↦ ((a : ZMod p).val : ℤ)) := by
+  simp only [stickelbergerScaled, stickelbergerCoefficientPackage]
+  exact Finset.sum_congr rfl fun a _ ↦ by rw [MonoidAlgebra.smul_single]; simp
 
 /-- The coefficient at `a⁻¹` in `p · θ_p`. -/
 @[simp] lemma stickelbergerScaled_apply_inv (a : (ZMod p)ˣ) :
-    stickelbergerScaled p a⁻¹ = ((a : ZMod p).val : ℤ) := by
+    (stickelbergerScaled p).coeff a⁻¹ = ((a : ZMod p).val : ℤ) := by
   rw [stickelbergerScaled_eq_stickelbergerCoefficientPackage]
   simp
 
@@ -135,7 +111,7 @@ theorem smul_stickelbergerElement :
     (p : ℚ) • stickelbergerElement p =
       ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) • MonoidAlgebra.single a⁻¹ (1 : ℚ) := by
   rw [stickelbergerElement_def, smul_smul,
-    mul_inv_cancel₀ (show (p : ℚ) ≠ 0 by exact_mod_cast hp.out.ne_zero), one_smul]
+    mul_inv_cancel₀ (mod_cast hp.out.ne_zero : (p : ℚ) ≠ 0), one_smul]
 
 end Stickelberger
 

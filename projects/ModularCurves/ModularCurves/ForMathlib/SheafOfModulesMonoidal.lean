@@ -99,6 +99,7 @@ section Tensor
 variable {S : Cᵒᵖ ⥤ CommRingCat.{u}}
   {M₁ M₂ N₁ N₂ : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
 
+omit [J.WEqualsLocallyBijective AddCommGrpCat] [HasWeakSheafify J AddCommGrpCat] in
 /-- The locally-surjective half of the [GAP1-W-MONO] tensor-stability leaf: the tensor
 product of locally surjective morphisms of presheaves of modules is locally surjective.
 Sections of the tensor presheaf are finite sums of simple tensors; each factor is
@@ -138,6 +139,8 @@ lemma isLocallySurjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
       rw [hx₁', hx₂']
       rfl
 
+omit [J.WEqualsLocallyBijective AddCommGrpCat] [HasWeakSheafify J AddCommGrpCat] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([W-MONO-inj])** Precomposition with the tensor of locally surjective morphisms
 is injective on morphisms into a presheaf of modules whose underlying presheaf is a
 sheaf: two maps out of the tensor agreeing after `f ⊗ₘ g` agree on simple tensors
@@ -207,6 +210,8 @@ variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
   (hP : Presheaf.IsSheaf J P.presheaf) (χ : M₁ ⊗ N₁ ⟶ P)
 
 include hP in
+omit [Presheaf.IsLocallySurjective J ((toPresheaf _).map f)]
+  [Presheaf.IsLocallySurjective J ((toPresheaf _).map g)] in
 /-- Any two preimage-pairs of the same sections give the same `χ`-value: locally the
 pairs agree (local injectivity), so the values agree locally, so they agree
 (separatedness). The workhorse of the [W-MONO-glue] construction. -/
@@ -242,6 +247,55 @@ private def IsPairingSection {U : Cᵒᵖ} (m : M₂.obj U) (n : N₂.obj U)
     f.app (Opposite.op V) a = M₂.map p.op m → g.app (Opposite.op V) b = N₂.map p.op n →
     P.map p.op s = χ.app (Opposite.op V) (a ⊗ₜ b)
 
+private lemma pom_map_comp (M : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
+    {X : Cᵒᵖ} {V W : C} (q : W ⟶ V) (p : V ⟶ X.unop) (x : M.obj X) :
+    M.map (q ≫ p).op x = M.map q.op (M.map p.op x) :=
+  show M.presheaf.map (q ≫ p).op x = M.presheaf.map q.op (M.presheaf.map p.op x) by
+    rw [op_comp, M.presheaf.map_comp]
+    rfl
+
+private lemma pom_napp_map {A B : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
+    (φ : A ⟶ B) {V W : C} (q : W ⟶ V) (x : A.obj (Opposite.op V)) :
+    φ.app (Opposite.op W) (A.map q.op x) = B.map q.op (φ.app (Opposite.op V) x) :=
+  CategoryTheory.congr_fun (φ.naturality q.op) x
+
+variable {f g} in
+private lemma chi_value {V W : C} (q : W ⟶ V) (a : M₁.obj (Opposite.op V))
+    (b : N₁.obj (Opposite.op V)) :
+    P.presheaf.map q.op (χ.app (Opposite.op V) (a ⊗ₜ b)) =
+      χ.app (Opposite.op W) (M₁.map q.op a ⊗ₜ N₁.map q.op b) := by
+  refine ((CategoryTheory.congr_fun (χ.naturality q.op) (a ⊗ₜ b)).symm).trans ?_
+  exact congrArg (χ.app (Opposite.op W)) (by erw [Monoidal.tensorObj_map_tmul]; rfl)
+
+variable {f g} in
+/-- Restricting a local preimage-pair of `(m, n)` over `p` along `q` gives a local
+preimage-pair over `q ≫ p`: naturality of `f`, `g` moves the restriction across the
+morphisms, then functoriality of the restriction maps recombines it. -/
+private lemma isPreimagePair_restrict {X : Cᵒᵖ} {m : M₂.obj X} {n : N₂.obj X}
+    {V W : C} (q : W ⟶ V) (p : V ⟶ X.unop)
+    (a : M₁.obj (Opposite.op V)) (b : N₁.obj (Opposite.op V))
+    (ha : f.app (Opposite.op V) a = M₂.map p.op m)
+    (hb : g.app (Opposite.op V) b = N₂.map p.op n) :
+    f.app (Opposite.op W) (M₁.map q.op a) = M₂.map (q ≫ p).op m ∧
+      g.app (Opposite.op W) (N₁.map q.op b) = N₂.map (q ≫ p).op n :=
+  ⟨by rw [pom_napp_map f q a, ha, ← pom_map_comp],
+    by rw [pom_napp_map g q b, hb, ← pom_map_comp]⟩
+
+variable {f g} in
+include hP in
+omit [Presheaf.IsLocallyInjective J ((toPresheaf _).map f)]
+  [Presheaf.IsLocallyInjective J ((toPresheaf _).map g)] in
+private lemma isPairingSection_unique {U : Cᵒᵖ} {m : M₂.obj U} {n : N₂.obj U}
+    {s s' : P.obj U} (hs : IsPairingSection f g χ m n s)
+    (hs' : IsPairingSection f g χ m n s') : s = s' := by
+  apply hP.isSeparated _ _ (J.intersection_covering
+    (Presheaf.imageSieve_mem J ((toPresheaf _).map f) m)
+    (Presheaf.imageSieve_mem J ((toPresheaf _).map g) n))
+  rintro V p ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
+  have ha' : f.app (Opposite.op V) a = M₂.map p.op m := ha
+  have hb' : g.app (Opposite.op V) b = N₂.map p.op n := hb
+  exact (hs p a b ha' hb').trans (hs' p a b ha' hb').symm
+
 include hP in
 /-- Existence and uniqueness of the glued pairing section: amalgamate the `χ`-values
 of chosen local preimage-pairs over the intersection of the two image sieves
@@ -265,113 +319,33 @@ private lemma existsUnique_isPairingSection {U : Cᵒᵖ} (m : M₂.obj U) (n : 
       f.app (Opposite.op V) hp.1.choose = M₂.map p.op m ∧
         g.app (Opposite.op V) hp.2.choose = N₂.map p.op n :=
     fun p hp => ⟨hp.1.choose_spec, hp.2.choose_spec⟩
-  -- naturality helper at Type level
-  have hnat : ∀ {V W : C} (q : W ⟶ V) (t : (M₁ ⊗ N₁).obj (Opposite.op V)),
-      P.presheaf.map q.op (χ.app (Opposite.op V) t) =
-        χ.app (Opposite.op W) ((M₁ ⊗ N₁).map q.op t) :=
-    fun q t => (CategoryTheory.congr_fun (χ.naturality q.op) t).symm
-  -- restriction of a preimage-pair is a preimage-pair
-  have hres : ∀ {V W : C} (q : W ⟶ V) (p : V ⟶ U.unop)
-      (a : M₁.obj (Opposite.op V)) (b : N₁.obj (Opposite.op V))
-      (ha : f.app (Opposite.op V) a = M₂.map p.op m)
-      (hb : g.app (Opposite.op V) b = N₂.map p.op n),
-      f.app (Opposite.op W) (M₁.map q.op a) = M₂.map (q ≫ p).op m ∧
-        g.app (Opposite.op W) (N₁.map q.op b) = N₂.map (q ≫ p).op n := by
-    intro V W q p a b ha hb
-    constructor
-    · have h1 : f.app (Opposite.op W) (M₁.map q.op a) =
-          M₂.map q.op (f.app (Opposite.op V) a) :=
-        (CategoryTheory.congr_fun (f.naturality q.op) a)
-      rw [h1, ha]
-      exact (show M₂.presheaf.map (q ≫ p).op m =
-          M₂.presheaf.map q.op (M₂.presheaf.map p.op m) by
-        rw [op_comp, M₂.presheaf.map_comp]
-        rfl).symm
-    · have h1 : g.app (Opposite.op W) (N₁.map q.op b) =
-          N₂.map q.op (g.app (Opposite.op V) b) :=
-        (CategoryTheory.congr_fun (g.naturality q.op) b)
-      rw [h1, hb]
-      exact (show N₂.presheaf.map (q ≫ p).op n =
-          N₂.presheaf.map q.op (N₂.presheaf.map p.op n) by
-        rw [op_comp, N₂.presheaf.map_comp]
-        rfl).symm
-  -- value of χ on restricted pairs, as needed below
-  have hvalue : ∀ {V W : C} (q : W ⟶ V) (a : M₁.obj (Opposite.op V))
-      (b : N₁.obj (Opposite.op V)),
-      P.presheaf.map q.op (χ.app (Opposite.op V) (a ⊗ₜ b)) =
-        χ.app (Opposite.op W) (M₁.map q.op a ⊗ₜ N₁.map q.op b) := by
-    intro V W q a b
-    rw [hnat]
-    exact congrArg (χ.app (Opposite.op W)) (by erw [Monoidal.tensorObj_map_tmul]; rfl)
   -- compatibility of the choice family
   have hx : x.Compatible := by
     intro V₁ V₂ W g₁ g₂ p₁ p₂ h₁ h₂ hcomm
     rw [hxdef]
     dsimp only
-    erw [hvalue, hvalue]
+    erw [chi_value, chi_value]
     have hp₁ := hchoice p₁ h₁
     have hp₂ := hchoice p₂ h₂
-    have hr₁ := hres g₁ p₁ _ _ hp₁.1 hp₁.2
-    have hr₂ := hres g₂ p₂ _ _ hp₂.1 hp₂.2
+    have hr₁ := isPreimagePair_restrict g₁ p₁ _ _ hp₁.1 hp₁.2
+    have hr₂ := isPreimagePair_restrict g₂ p₂ _ _ hp₂.1 hp₂.2
     exact chi_app_congr f g hP χ _ _ _ _
       (hr₁.1.trans (by rw [hcomm]; exact hr₂.1.symm))
       (hr₁.2.trans (by rw [hcomm]; exact hr₂.2.symm))
-  -- the amalgam
-  refine ⟨(hT Sv hSv).amalgamate x hx, ?_, ?_⟩
-  · intro V p a b ha hb
+  -- the amalgam is a pairing section
+  have hamalg : IsPairingSection f g χ m n ((hT Sv hSv).amalgamate x hx) := by
+    intro V p a b ha hb
     apply hP.isSeparated _ _ (J.pullback_stable p hSv)
     intro W q hq
     have hglue := (hT Sv hSv).valid_glue hx (q ≫ p) hq
-    have hcomp : P.presheaf.map q.op (P.presheaf.map p.op ((hT Sv hSv).amalgamate x hx)) =
-        P.presheaf.map (q ≫ p).op ((hT Sv hSv).amalgamate x hx) := by
-      rw [op_comp, P.presheaf.map_comp]
-      rfl
-    erw [hcomp, hglue, hxdef]
+    erw [(pom_map_comp P q p _).symm, hglue, hxdef]
     dsimp only
-    erw [hvalue]
+    erw [chi_value]
     have hc := hchoice (q ≫ p) hq
-    have hr := hres q p a b ha hb
+    have hr := isPreimagePair_restrict q p a b ha hb
     exact chi_app_congr f g hP χ _ _ _ _ (hc.1.trans hr.1.symm) (hc.2.trans hr.2.symm)
-  · intro s hs
-    apply hP.isSeparated _ _ hSv
-    intro V p hp
-    have hc := hchoice p hp
-    have h1 := hs p _ _ hc.1 hc.2
-    have h2 := (hT Sv hSv).valid_glue hx p hp
-    erw [h1, h2, hxdef]
-
-private lemma pom_map_comp (M : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
-    {X : Cᵒᵖ} {V W : C} (q : W ⟶ V) (p : V ⟶ X.unop) (x : M.obj X) :
-    M.map (q ≫ p).op x = M.map q.op (M.map p.op x) :=
-  show M.presheaf.map (q ≫ p).op x = M.presheaf.map q.op (M.presheaf.map p.op x) by
-    rw [op_comp, M.presheaf.map_comp]
-    rfl
-
-private lemma pom_napp_map {A B : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
-    (φ : A ⟶ B) {V W : C} (q : W ⟶ V) (x : A.obj (Opposite.op V)) :
-    φ.app (Opposite.op W) (A.map q.op x) = B.map q.op (φ.app (Opposite.op V) x) :=
-  CategoryTheory.congr_fun (φ.naturality q.op) x
-
-variable {f g} in
-private lemma chi_value {V W : C} (q : W ⟶ V) (a : M₁.obj (Opposite.op V))
-    (b : N₁.obj (Opposite.op V)) :
-    P.presheaf.map q.op (χ.app (Opposite.op V) (a ⊗ₜ b)) =
-      χ.app (Opposite.op W) (M₁.map q.op a ⊗ₜ N₁.map q.op b) := by
-  refine ((CategoryTheory.congr_fun (χ.naturality q.op) (a ⊗ₜ b)).symm).trans ?_
-  exact congrArg (χ.app (Opposite.op W)) (by erw [Monoidal.tensorObj_map_tmul]; rfl)
-
-variable {f g} in
-include hP in
-private lemma isPairingSection_unique {U : Cᵒᵖ} {m : M₂.obj U} {n : N₂.obj U}
-    {s s' : P.obj U} (hs : IsPairingSection f g χ m n s)
-    (hs' : IsPairingSection f g χ m n s') : s = s' := by
-  apply hP.isSeparated _ _ (J.intersection_covering
-    (Presheaf.imageSieve_mem J ((toPresheaf _).map f) m)
-    (Presheaf.imageSieve_mem J ((toPresheaf _).map g) n))
-  rintro V p ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
-  have ha' : f.app (Opposite.op V) a = M₂.map p.op m := ha
-  have hb' : g.app (Opposite.op V) b = N₂.map p.op n := hb
-  exact (hs p a b ha' hb').trans (hs' p a b ha' hb').symm
+  exact ⟨(hT Sv hSv).amalgamate x hx, hamalg,
+    fun s hs => isPairingSection_unique hP χ hs hamalg⟩
 
 /-- The glued pairing section itself. -/
 private noncomputable def pairingSection {U : Cᵒᵖ} (m : M₂.obj U) (n : N₂.obj U) :
@@ -725,10 +699,10 @@ instance instSheafificationW_isMonoidal_commRingSheaf :
 two registrations above (the reflective localization and the monoidality of the localizing
 class — this file's leaf), mathlib's `LocalizedMonoidal` equips the localization of
 presheaves of modules over a sheaf of commutative rings with a `MonoidalCategory` structure.
-That localized category is definitionally `SheafOfModules ⟨S ⋙ forget₂ _ _, hS⟩` — so sheaves
-of modules over a sheaf of commutative rings form a monoidal category, monoidally under
-sheafification. This is the GAP-1 payoff; downstream consumers name the localized category
-and read off the tensor product, unit, and Pic coherences. -/
+That localized category is definitionally `SheafOfModules ⟨S ⋙ forget₂ _ _, hS⟩` — so
+sheaves of modules over a sheaf of commutative rings form a monoidal category,
+monoidally under sheafification. This is the GAP-1 payoff; downstream consumers name the
+localized category and read off the tensor product, unit, and Pic coherences. -/
 theorem sheafOfModules_monoidalCategory_nonempty : Nonempty (MonoidalCategory
     (LocalizedMonoidal
       (sheafification.{u} (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))

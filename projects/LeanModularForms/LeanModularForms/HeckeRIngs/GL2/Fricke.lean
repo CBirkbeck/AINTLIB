@@ -422,7 +422,8 @@ theorem frickeOperator_frickeOperator (k : ℤ) :
   rfl
 
 /-- `W_N² = frickeScalar` on **cusp** forms (cusp version of `frickeOperator_frickeOperator`).
-This makes `W_N` invertible (`W_N⁻¹ = frickeScalar⁻¹ · W_N`), used to define the bad-prime adjoint. -/
+This makes `W_N` invertible (`W_N⁻¹ = frickeScalar⁻¹ · W_N`), used to define
+the bad-prime adjoint. -/
 theorem frickeOperatorCusp_frickeOperatorCusp (k : ℤ) :
     (frickeOperatorCusp (N := N) k).comp (frickeOperatorCusp (N := N) k) =
       frickeScalar N k • LinearMap.id := by

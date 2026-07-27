@@ -590,6 +590,7 @@ theorem laurentFSubZetaIdeal_isClosed
   exact hcomap_closed
 
 omit [IsNoetherianRing A] [IsDomain A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- T2 of `B₁₂_gen f = LaurentTateAlgebra A ⧸ laurentFSubZetaIdeal f` under
 the canonical two-stage quotient topology. -/
 theorem B₁₂_gen_t2Space

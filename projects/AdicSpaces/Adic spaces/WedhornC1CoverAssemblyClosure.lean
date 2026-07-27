@@ -80,9 +80,7 @@ Secondary's lane.
 namespace ValuationSpectrum
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
-  [IsTopologicalRing A]
 
-omit [IsTopologicalRing A] in
 /-- **`CoverLevelAssemblyResidual` from `LaurentCoverPresheafLemma833Assembly`**
 (T060 main bridge theorem).
 
@@ -115,7 +113,6 @@ theorem coverLevelAssemblyResidual_via_lemma833_assembly
   exact rationalOpen_global_subset_via_lemma833_assembly T_test T_base D_T
     s D_s f h_lemma833 h_per_piece_subset h_cover_source
 
-omit [IsTopologicalRing A] in
 /-- **C1 supplier clause 2 subset clause via `LaurentCoverPresheafLemma833Assembly`**
 (T060 substantive C1 closure theorem).
 
@@ -167,7 +164,6 @@ theorem C1SupplierStrong_local_clause2_via_lemma833_assembly
   rationalOpen_global_subset_via_lemma833_assembly T_test T_base D_T s
     D_s f h_lemma833 h_per_piece_subset h_cover
 
-omit [IsTopologicalRing A] in
 /-- **Complete cover-assembly chain closure** (T060 final substantive
 theorem).
 

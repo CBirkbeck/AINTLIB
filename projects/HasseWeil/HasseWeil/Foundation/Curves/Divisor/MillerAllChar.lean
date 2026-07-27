@@ -98,7 +98,7 @@ theorem projectiveDivisorOf_coordX_sub_const_allChar
       Finsupp.single (ProjectiveSmoothPoint.affine P) (1 : ℤ)
         + Finsupp.single (ProjectiveSmoothPoint.affine P.neg) 1
         - (2 : ℤ) • Finsupp.single ProjectiveSmoothPoint.infinity 1 := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [C.divisorOf_coordX_sub_const_allChar P, C.ordAtInfty_coordX_sub_const P.x,
     WithTop.untopD_coe, Divisor.toProjective_add, Divisor.toProjective_single,
     Divisor.toProjective_single, Finsupp.smul_single, smul_eq_mul, mul_one,
@@ -329,7 +329,7 @@ theorem projectiveDivisorOf_coordY_sub_algMap_linePolynomial_allChar
         + Finsupp.single (ProjectiveSmoothPoint.affine
             (C.addSmoothPoint SP SQ hxy).neg) 1
         - (3 : ℤ) • Finsupp.single ProjectiveSmoothPoint.infinity 1 := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [C.divisorOf_coordY_sub_algMap_linePolynomial_allChar SP SQ hxy,
     C.ordAtInfty_coordY_sub_algMap_linePolynomial SP.x SP.y _,
     WithTop.untopD_coe, Divisor.toProjective_add, Divisor.toProjective_add,
@@ -511,7 +511,7 @@ private lemma degree_single_eq_allChar
     (P : ProjectiveSmoothPoint (⟨W⟩ : SmoothPlaneCurve F)) (n : ℤ) :
     ProjectiveDivisor.degree (Finsupp.single P n :
         ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F)) = n := by
-  unfold ProjectiveDivisor.degree
+  simp only [ProjectiveDivisor.degree]
   exact Finsupp.sum_single_index rfl
 
 omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in

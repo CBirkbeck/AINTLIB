@@ -18,7 +18,8 @@ import Mathlib.RingTheory.Unramified.Basic
 
 Unlike the smooth analogue (`AlgebraicGeometry.Smooth.of_smooth_fiberToSpecResidueField`), formal
 unramifiedness is a *fibrewise* condition that needs **no flatness**: the module of Kähler
-differentials commutes with base change unconditionally (`KaehlerDifferential.tensorKaehlerEquivBase`),
+differentials commutes with base change unconditionally
+(`KaehlerDifferential.tensorKaehlerEquivBase`),
 so a finite morphism whose fibres are all formally unramified is itself formally unramified.
 
 ## Main results
@@ -29,7 +30,7 @@ so a finite morphism whose fibres are all formally unramified is itself formally
 * `AlgebraicGeometry.FormallyUnramified.of_finite_fiberToSpecResidueField`: a finite morphism of
   schemes all of whose fibres over residue fields are formally unramified is formally unramified.
 
-The intended consumer is `ModularCurves.EllipticCurve.formallyUnramified_torsionπ` (leaf T-DISC of
+The intended consumer is `ModularCurves.EllipticCurve.Torsionπ.formallyUnramified` (leaf T-DISC of
 BB-DIFF): `E[N] → S` is finite and — after transporting the HasseWeil separability of `[N]` through
 a geometric-fibre comparison — has formally unramified geometric fibres, hence is unramified.
 -/
@@ -41,7 +42,8 @@ open scoped TensorProduct
 /-- If `A` is a module-finite `R`-algebra whose fibre `κ(p) ⊗[R] A` over every prime `p` is formally
 unramified over the residue field `κ(p)`, then `A` is formally unramified over `R`.
 
-The proof needs no flatness: `Ω[A⁄R]` is a finite `R`-module, and `κ(p) ⊗[R] Ω[A⁄R] ≃ Ω[(κ(p) ⊗ A)⁄κ(p)]`
+The proof needs no flatness: `Ω[A⁄R]` is a finite `R`-module, and `κ(p) ⊗[R] Ω[A⁄R] ≃ Ω[(κ(p) ⊗
+A)⁄κ(p)]`
 (`KaehlerDifferential.tensorKaehlerEquivBase`) vanishes for every `p`, so `Ω[A⁄R]` has empty support
 and is therefore trivial. -/
 lemma Algebra.FormallyUnramified.of_forall_residueField_fiber
@@ -68,6 +70,7 @@ universe u
 
 variable {X Y : Scheme.{u}} (f : X ⟶ Y)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- A finite morphism of schemes all of whose fibres (over residue fields of points of the base) are
 formally unramified is itself formally unramified.
 

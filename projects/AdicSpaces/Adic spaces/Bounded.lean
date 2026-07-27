@@ -473,8 +473,11 @@ def topNilpIdeal : Ideal (powerBoundedSubring.toSubring A) where
     exact (c.2 : IsPowerBounded (c : A)).isTopologicallyNilpotent_mul hx
 
 open TopologicalRing in
+set_option backward.isDefEq.respectTransparency false in
+omit [T2Space A] [CompleteSpace A] [IsUniformAddGroup A] in
 /-- `1 - det (1 - B)` is topologically nilpotent when every entry of `B` is. -/
-theorem IsTopologicallyNilpotent.one_sub_det_one_sub_matrix    {n : Type*} [Fintype n] [DecidableEq n] (B : Matrix n n A)
+theorem IsTopologicallyNilpotent.one_sub_det_one_sub_matrix {n : Type*} [Fintype n]
+    [DecidableEq n] (B : Matrix n n A)
     (hB : ∀ i j, IsTopologicallyNilpotent (B i j)) :
     IsTopologicallyNilpotent (1 - (1 - B).det) := by
   let B' : Matrix n n (powerBoundedSubring.toSubring A) :=
@@ -511,7 +514,8 @@ theorem IsTopologicallyNilpotent.one_sub_det_one_sub_matrix    {n : Type*} [Fint
 /-- **Matrix Nakayama** (BGR Lemma 1.2.4/6, the form used in §3.7.2/1): if every entry of an
 `n × n` matrix `B` over a complete Hausdorff nonarchimedean commutative ring `A` is topologically
 nilpotent then `1 - B` is invertible. -/
-theorem IsTopologicallyNilpotent.isUnit_one_sub_matrix    {n : Type*} [Fintype n] [DecidableEq n] (B : Matrix n n A)
+theorem IsTopologicallyNilpotent.isUnit_one_sub_matrix {n : Type*} [Fintype n]
+    [DecidableEq n] (B : Matrix n n A)
     (hB : ∀ i j, IsTopologicallyNilpotent (B i j)) :
     IsUnit (1 - B) := by
   rw [Matrix.isUnit_iff_isUnit_det]

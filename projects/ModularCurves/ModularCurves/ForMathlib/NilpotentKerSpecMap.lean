@@ -15,13 +15,15 @@ scheme-theoretic kernel `(Spec.map φ).ker : IdealSheafData (Spec R)` is nilpote
 This is the bridge that lets `AlgebraicGeometry.FormallyUnramified.hom_ext` — whose thickening
 hypothesis is `IsNilpotent i.ker` — be applied to the affine square-zero thickening `Spec.map φ`
 produced by `AlgebraicGeometry.FormallyUnramified.of_hom_ext`, which supplies only the ring-level
-`RingHom.ker φ ^ 2 = ⊥`. Used by `ModularCurves.EllipticCurve.formallyUnramified_mulByHom_of_torsionπ`.
+`RingHom.ker φ ^ 2 = ⊥`. Used by
+`ModularCurves.EllipticCurve.MulByHom.formallyUnramified_of_torsionπ`.
 
 ## Main results
 
 * `AlgebraicGeometry.ideal_ker_SpecMap_top`: the top-affine-open component of `(Spec.map φ).ker`
   is `(RingHom.ker φ).comap (ΓSpecIso R).hom`.
-* `AlgebraicGeometry.isNilpotent_ker_SpecMap`: `RingHom.ker φ ^ 2 = ⊥ → IsNilpotent (Spec.map φ).ker`.
+* `AlgebraicGeometry.isNilpotent_ker_SpecMap`:
+  `RingHom.ker φ ^ 2 = ⊥ → IsNilpotent (Spec.map φ).ker`.
 -/
 
 open AlgebraicGeometry CategoryTheory

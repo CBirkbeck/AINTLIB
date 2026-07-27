@@ -1,6 +1,8 @@
-import BernoulliRegular.Reflection.ClassGroupModP.AtomC
-import BernoulliRegular.Reflection.ClassGroupModP.Plus
-import BernoulliRegular.Reflection.ClassGroupModP.PlusMinusInstance
+module
+
+public import BernoulliRegular.Reflection.ClassGroupModP.AtomC
+public import BernoulliRegular.Reflection.ClassGroupModP.Plus
+public import BernoulliRegular.Reflection.ClassGroupModP.PlusMinusInstance
 
 /-!
 # SP-2: Plus-side identification (Cl(K⁺)/p nontrivial ⟹ even-eigenspace nontrivial)
@@ -26,7 +28,6 @@ otherwise allow `i = 0` and break `IsReflectionComponentIndex p i`'s
 ## References
 
 * [Wash97] §10.1.
-* Reviewer guidance 2026-05-22 (Q5 / SP-2 chain).
 -/
 
 @[expose] public section
@@ -58,24 +59,8 @@ theorem even_eigenspace_nontrivial_of_dvd_hPlus
       eigenspaceComponentNontrivial p K i := by
   classical
   set Kplus := NumberField.maximalRealSubfield K
-  have h_Kplus_modP_nontrivial : Nontrivial (ClassGroupModP Kplus p) := by
-    rw [nontrivial_iff_exists_ne (1 : ClassGroupModP Kplus p)]
-    by_contra! h_triv
-    have h_subsing : Subsingleton (ClassGroupModP Kplus p) :=
-      ⟨fun a b => by rw [h_triv a, h_triv b]⟩
-    have h_surj : Function.Surjective
-        (powMonoidHom p : ClassGroup (𝓞 Kplus) →* ClassGroup (𝓞 Kplus)) := by
-      rw [← MonoidHom.range_eq_top, Subgroup.eq_top_iff']
-      exact fun x => (QuotientGroup.eq_one_iff x).mp (Subsingleton.elim _ _)
-    have h_inj : Function.Injective
-        (powMonoidHom p : ClassGroup (𝓞 Kplus) →* ClassGroup (𝓞 Kplus)) :=
-      Finite.injective_iff_surjective.mpr h_surj
-    have h_no_p_tors : ∀ x : ClassGroup (𝓞 Kplus), x ^ p = 1 → x = 1 := fun x hx =>
-      h_inj (by simpa [powMonoidHom] using hx)
-    obtain ⟨x, hx_ord⟩ := exists_prime_orderOf_dvd_card (G := ClassGroup (𝓞 Kplus)) p h_dvd
-    rw [h_no_p_tors x (orderOf_dvd_iff_pow_eq_one.mp (hx_ord ▸ dvd_refl p)), orderOf_one]
-      at hx_ord
-    exact (Fact.out : Nat.Prime p).one_lt.ne hx_ord
+  letI : Nontrivial (ClassGroupModP Kplus p) :=
+    nontrivial_classGroupModP_of_dvd_card p Kplus h_dvd
   obtain ⟨cPlus, hcPlus_ne⟩ := exists_ne (1 : ClassGroupModP Kplus p)
   set v : Additive (ClassGroupModP K p) :=
     Additive.ofMul (FLT37.classGroupMap_modP p K cPlus)

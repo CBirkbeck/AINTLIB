@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
-import FltRegular.CaseII.InductionStep
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
+public import FltRegular.CaseII.InductionStep
 
 /-!
 # LV010-CTOR-a: case II auxiliary ideal `𝔠 η = (x+yη)/((ζ-1)·𝔪)` is a p-th power
@@ -44,7 +46,6 @@ namespace LehmerVandiver
 
 namespace CaseII
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Case II auxiliary ideal is a p-th power** (wrapper of
 flt-regular's `exists_ideal_pow_eq_c`). Under the Kummer-form case II
 decomposition `x^p + y^p = ε · ((ζ-1)^{m+1} · z)^p` with `p ∤ y` and

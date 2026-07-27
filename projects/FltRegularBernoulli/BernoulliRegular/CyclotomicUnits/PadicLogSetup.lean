@@ -167,8 +167,8 @@ theorem logOf_expSeries_eq_logSeries :
       (PowerSeries.derivative ℚ) E =
         E * (PowerSeries.derivative ℚ) L := by
     simp only [E, L, expSeries]
-    unfold Furtwaengler.artinHasseExpSeries
-    rw [PowerSeries.derivative_subst ℚ (logSeries_hasSubst p), PowerSeries.derivative_exp]
+    simp only [Furtwaengler.artinHasseExpSeries]
+    rw [PowerSeries.derivative_subst (logSeries_hasSubst p), PowerSeries.derivative_exp]
   have hgeom :
       PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
           E = 1 := by
@@ -201,7 +201,7 @@ theorem logOf_expSeries_eq_logSeries :
     rw [hsubst_one] at hsubst
     simpa [hE_sub_const, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsubst
   apply PowerSeries.derivative.ext
-  · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ℚ hE_subst, map_sub,
+  · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst hE_subst, map_sub,
       Derivation.map_one_eq_zero, sub_zero, hE_deriv]
     calc
       PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
@@ -344,7 +344,7 @@ theorem expSeries_rescale_neg_mul_self (hp_two : 2 < p) :
         PowerSeries.subst (-(logSeries p)) (PowerSeries.exp ℚ) := by
     change PowerSeries.rescale (-1 : ℚ) (Furtwaengler.artinHasseExpSeries p) =
       PowerSeries.subst (-(logSeries p)) (PowerSeries.exp ℚ)
-    unfold Furtwaengler.artinHasseExpSeries
+    simp only [Furtwaengler.artinHasseExpSeries]
     rw [PowerSeries.rescale_eq_subst, PowerSeries.subst_comp_subst_apply]
     · have h := logSeries_rescale_neg p hp_two
       rw [PowerSeries.rescale_eq_subst] at h
@@ -723,7 +723,7 @@ omit [Fact p.Prime] in
 /-- The predicted valuation of the second tail term is `(p - 1)^2`. -/
 theorem artinHasseTailValuationIndex_two :
     artinHasseTailValuationIndex p 2 = ((p : ℤ) - 1) ^ 2 := by
-  unfold artinHasseTailValuationIndex
+  simp only [artinHasseTailValuationIndex]
   ring
 
 omit [Fact p.Prime] in
@@ -732,7 +732,7 @@ theorem artinHasseTailValuationIndex_succ_sub (n : ℕ) :
     artinHasseTailValuationIndex p (n + 1) -
         artinHasseTailValuationIndex p n =
       ((p : ℤ) - 1) * ((p : ℤ) ^ n - 1) := by
-  unfold artinHasseTailValuationIndex
+  simp only [artinHasseTailValuationIndex]
   push_cast
   ring
 
@@ -928,7 +928,7 @@ theorem valuedCyclotomicLambda_valuation :
   rw [show algebraMap K (ValuedCompletion p K)
       (globalCyclotomicLambdaFieldUnit p K : K) =
         ((globalCyclotomicLambdaFieldUnit p K : K) : ValuedCompletion p K) from rfl]
-  rw [Valued.valuedCompletion_apply]
+  rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation']
   exact globalCyclotomicLambdaFieldUnit_valuation (p := p) (K := K)
 
 /-- The element `zeta_p - 1` is topologically nilpotent in the valuation

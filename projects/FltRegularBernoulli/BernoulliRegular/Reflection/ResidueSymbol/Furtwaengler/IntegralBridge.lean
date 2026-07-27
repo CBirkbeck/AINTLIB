@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.ConcreteSetup
@@ -39,6 +44,7 @@ characters valued in `𝓞 R'`. -/
 noncomputable def zeta_p_int_unit : (𝓞 R')ˣ :=
   (S.zeta_p_int_isPrimitiveRoot.isUnit (Fact.out : Nat.Prime p).ne_zero).unit
 
+/-- The underlying ring element of the integral root-of-unity unit. -/
 @[simp]
 theorem zeta_p_int_unit_coe : (S.zeta_p_int_unit : 𝓞 R') = S.zeta_p_int := by
   simp [zeta_p_int_unit]
@@ -73,6 +79,7 @@ noncomputable def residueCharIntUnitHom : kˣ →* (𝓞 R')ˣ :=
   residueUnitHom S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot
 
+/-- On units, the integral residue character is the unit-group hom. -/
 @[simp]
 theorem residueCharInt_apply_unit (x : kˣ) :
     S.residueCharInt (x : k) = (S.residueCharIntUnitHom x : 𝓞 R') := by
@@ -86,7 +93,7 @@ theorem residueCharIntUnitHom_pow_p (x : kˣ) :
   change ((S.residueCharIntUnitHom x : (𝓞 R')ˣ) : 𝓞 R') ^ p = (1 : 𝓞 R')
   rw [← S.residueCharInt_apply_unit x]
   letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  unfold ConcreteStickelbergerSetup.residueCharInt
+  simp only [ConcreteStickelbergerSetup.residueCharInt]
   exact residueMulChar_pow_eq_one S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot x
 
@@ -174,7 +181,7 @@ field-valued Gauss sum used in the abstract Stickelberger setup. -/
 theorem algebraMap_gaussSumInt (a : ℕ) :
     algebraMap (𝓞 R') R' (S.gaussSumInt a) =
       _root_.gaussSum (S.residueChar ^ a) S.psi := by
-  unfold gaussSumInt
+  simp only [gaussSumInt]
   rw [gaussSum_ringHomComp]
   have hχ :
       (S.residueCharInt ^ a).ringHomComp (algebraMap (𝓞 R') R') =

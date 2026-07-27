@@ -359,10 +359,6 @@ local instance instComplete_K (n : ℕ) : CompleteSpace (K p n) := by
     IsCyclotomicExtension.finiteDimensional {p ^ n} ℚ_[p] (K p n)
   exact FiniteDimensional.complete ℚ_[p] (K p n)
 
-set_option synthInstance.maxHeartbeats 1000000 in
--- the `det ∘ lmul` continuity runs through the nested `IntermediateField (K p n) (extendScalars …)`
--- layer (`finrank`/instance synthesis on the relative extension); both bumps exceed the defaults
-set_option maxHeartbeats 1000000 in
 /-- **ST3a — the level norm is continuous** (RJW §12.5 tower-descent gateway): the map
 `x ↦ (N_{n+1,n}(x) : ℂ_[p])` is continuous on `K_{n+1}` (with the `ℂ_[p]`-subspace topology).
 `N_{n+1,n} = Algebra.norm (K_n) = det ∘ lmul` on the finite extension `K_{n+1}/K_n`; both
@@ -512,7 +508,8 @@ constrained level (`exists_delta_descent` propagates down the tower). -/
 theorem mem_closure_of_levelwise {S : Subgroup (NormCompatUnits p)} {u : NormCompatUnits p}
     (h0 : ∀ s ∈ S, (s.elems 0 : ℂ_[p]) = (u.elems 0 : ℂ_[p]))
     (h : ∀ n, 1 ≤ n → (u.elems n : ℂ_[p]) ∈
-      closure ((fun s : NormCompatUnits p => (s.elems n : ℂ_[p])) '' (S : Set (NormCompatUnits p)))) :
+      closure ((fun s : NormCompatUnits p => (s.elems n : ℂ_[p])) ''
+        (S : Set (NormCompatUnits p)))) :
     u ∈ closure (S : Set (NormCompatUnits p)) := by
   rw [mem_closure_iff_elemsCoe, mem_closure_iff_nhds]
   intro t ht
@@ -628,7 +625,9 @@ theorem continuous_colemanPipe2 :
       (1 + PowerSeries.X) * PowerSeries.derivativeFun q.1 * q.2) := by
     refine (continuous_const.mul ?_).mul continuous_snd
     refine continuous_of_coeff _ (fun n => ?_)
-    simp only [PowerSeries.coeff_derivativeFun]
+    simp only [show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
+        = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+      PowerSeries.coeff_derivative]
     exact (PowerSeries.WithPiTopology.continuous_coeff ℤ_[p] (n + 1)).comp continuous_fst |>.mul
       continuous_const
   exact (continuous_ofPowerSeries_apply p _).comp hseries
@@ -1016,7 +1015,8 @@ matching `u` only on levels `≥ 1` (found by `exists_delta_descent`) can be re-
 theorem Col_mem_closure_image_of_levelwise {S : Subgroup (NormCompatUnits p)}
     {u : NormCompatUnits p}
     (h : ∀ n, 1 ≤ n → (u.elems n : ℂ_[p]) ∈
-      closure ((fun s : NormCompatUnits p => (s.elems n : ℂ_[p])) '' (S : Set (NormCompatUnits p)))) :
+      closure ((fun s : NormCompatUnits p => (s.elems n : ℂ_[p])) ''
+        (S : Set (NormCompatUnits p)))) :
     Col p u ∈ closure (Col p '' (S : Set (NormCompatUnits p))) := by
   rw [mem_closure_iff_nhds]
   intro W hW

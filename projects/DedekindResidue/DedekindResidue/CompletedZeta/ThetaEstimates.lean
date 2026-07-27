@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -280,6 +285,65 @@ theorem exp_weighted_le_exp_iso {c : ι → ℝ} {a : ℝ} (hca : ∀ i, a ≤ c
   nlinarith [Real.pi_pos]
 
 open scoped Classical in
+/-- `fun u ↦ fullLog K u w` is continuous: on `w = w₀` it is the negated sum of the other
+coordinates, otherwise a coordinate projection. -/
+lemma continuous_fullLog (w : InfinitePlace K) :
+    Continuous (fun u : logSpace K => fullLog K u w) := by
+  rw [show (fun u : logSpace K => fullLog K u w)
+    = fun u : logSpace K => if h : w = (w₀ : InfinitePlace K) then
+        -∑ w' : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)}, u w'
+      else u ⟨w, h⟩ from rfl]
+  split_ifs with h
+  · exact (continuous_finsetSum Finset.univ (fun i _ => continuous_apply i)).neg
+  · exact continuous_apply _
+
+open scoped Classical in
+/-- Each place-weight `heckeWeights K q.1 q.2 w` is continuous in `q` on the box
+`Ioi a ×ˢ ball 0 R` (`a > 0` keeps the `rpow` base positive). -/
+lemma continuousOn_heckeWeights_apply (a R : ℝ) (ha : 0 < a) (w : InfinitePlace K) :
+    ContinuousOn (fun q : ℝ × logSpace K => heckeWeights K q.1 q.2 w)
+      (Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R) := by
+  show ContinuousOn (fun q : ℝ × logSpace K =>
+    q.1 ^ ((1 : ℝ) / (Module.finrank ℚ K))
+      * Real.exp (2 * fullLog K q.2 w / mult w)) _
+  refine ContinuousOn.mul ?_ ?_
+  · refine ContinuousOn.rpow_const (continuous_fst.continuousOn) ?_
+    rintro q ⟨hq1, -⟩
+    exact Or.inl (ne_of_gt (lt_trans ha hq1))
+  · refine Continuous.continuousOn ?_
+    refine Real.continuous_exp.comp ?_
+    refine Continuous.div_const ?_ _
+    refine Continuous.mul continuous_const ?_
+    exact (continuous_fullLog K w).comp continuous_snd
+
+open scoped Classical in
+/-- On the box `Ioi a ×ˢ ball 0 R`, every place-weight of `heckeWeights K q.1 q.2` is
+bounded below by `a' = m · a ^ (1/[K:ℚ])`, with `m = exp(-2·#places·R)`. -/
+lemma le_placeWeights_heckeWeights_on_box (a m R a' : ℝ) (ha : 0 < a) (hR : 0 ≤ R)
+    (ha'_def : a' = m * a ^ ((1 : ℝ) / (Module.finrank ℚ K)))
+    (hm_def : m = Real.exp (-(2 * (Fintype.card (InfinitePlace K)) * R))) :
+    ∀ q : ℝ × logSpace K, q ∈ Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R →
+      ∀ i, a' ≤ placeWeights K (heckeWeights K q.1 q.2) i := by
+  rintro q ⟨hq1, hq2⟩ i
+  have hcoord : ∀ j, |q.2 j| ≤ R := by
+    intro j
+    calc |q.2 j| = ‖q.2 j‖ := (Real.norm_eq_abs _).symm
+      _ ≤ ‖q.2‖ := norm_le_pi_norm q.2 j
+      _ ≤ R := by
+          have := Metric.mem_ball.mp hq2
+          rw [dist_zero_right] at this
+          exact this.le
+  have hq1' : (0:ℝ) < q.1 := lt_trans ha hq1
+  have hbase := le_heckeWeights_of_bounded K hR hcoord hq1'.le
+  have hple : ∀ w : InfinitePlace K, a' ≤ heckeWeights K q.1 q.2 w := by
+    intro w
+    refine le_trans ?_ (hbase w)
+    rw [ha'_def, hm_def]
+    refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le
+    exact Real.rpow_le_rpow ha.le (Set.mem_Ioi.mp hq1).le (by positivity)
+  rcases i with (w | ⟨w, j⟩) <;> exact hple _
+
+open scoped Classical in
 /-- **Joint continuity of the Hecke theta** in the ray parameter and the log-torus
 variable, at every positive `t`. -/
 theorem continuousAt_heckeTheta_heckeWeights (I : (FractionalIdeal (𝓞 K)⁰ K)ˣ)
@@ -296,26 +360,7 @@ theorem continuousAt_heckeTheta_heckeWeights (I : (FractionalIdeal (𝓞 K)⁰ K
   have ha' : 0 < a' := by
     have : (0:ℝ) < a ^ ((1 : ℝ) / (Module.finrank ℚ K)) := Real.rpow_pos_of_pos ha _
     positivity
-  have hsub : ∀ q : ℝ × logSpace K, q ∈ Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R →
-      ∀ i, a' ≤ placeWeights K (heckeWeights K q.1 q.2) i := by
-    rintro q ⟨hq1, hq2⟩ i
-    have hcoord : ∀ j, |q.2 j| ≤ R := by
-      intro j
-      calc |q.2 j| = ‖q.2 j‖ := (Real.norm_eq_abs _).symm
-        _ ≤ ‖q.2‖ := norm_le_pi_norm q.2 j
-        _ ≤ R := by
-            have := Metric.mem_ball.mp hq2
-            rw [dist_zero_right] at this
-            exact this.le
-    have hq1' : (0:ℝ) < q.1 := lt_trans ha hq1
-    have hbase := le_heckeWeights_of_bounded K hR hcoord hq1'.le
-    have hple : ∀ w : InfinitePlace K, a' ≤ heckeWeights K q.1 q.2 w := by
-      intro w
-      refine le_trans ?_ (hbase w)
-      rw [ha'_def, hm_def]
-      refine mul_le_mul_of_nonneg_left ?_ (Real.exp_pos _).le
-      exact Real.rpow_le_rpow ha.le (Set.mem_Ioi.mp hq1).le (by positivity)
-    rcases i with (w | ⟨w, j⟩) <;> exact hple _
+  have hsub := le_placeWeights_heckeWeights_on_box K a m R a' ha hR ha'_def hm_def
   refine ContinuousOn.continuousAt (s := Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R) ?_ ?_
   · show ContinuousOn (fun q : ℝ × logSpace K => ∑' v : idealZLattice K I,
       Real.exp (-π * ∑ i : index K, placeWeights K (heckeWeights K q.1 q.2) i
@@ -329,34 +374,9 @@ theorem continuousAt_heckeTheta_heckeWeights (I : (FractionalIdeal (𝓞 K)⁰ K
       refine ContinuousOn.mul continuousOn_const ?_
       refine continuousOn_finsetSum _ (fun i _ => ContinuousOn.mul ?_ continuousOn_const)
       -- placeWeights (heckeWeights q.1 q.2) i continuous in q on the set
-      have hw : ∀ w : InfinitePlace K, ContinuousOn
-          (fun q : ℝ × logSpace K => heckeWeights K q.1 q.2 w)
-          (Set.Ioi a ×ˢ Metric.ball (0 : logSpace K) R) := by
-        intro w
-        show ContinuousOn (fun q : ℝ × logSpace K =>
-          q.1 ^ ((1 : ℝ) / (Module.finrank ℚ K))
-            * Real.exp (2 * fullLog K q.2 w / mult w)) _
-        refine ContinuousOn.mul ?_ ?_
-        · refine ContinuousOn.rpow_const (continuous_fst.continuousOn) ?_
-          rintro q ⟨hq1, -⟩
-          exact Or.inl (ne_of_gt (lt_trans ha hq1))
-        · refine Continuous.continuousOn ?_
-          refine Real.continuous_exp.comp ?_
-          refine Continuous.div_const ?_ _
-          refine Continuous.mul continuous_const ?_
-          -- fullLog continuous in u; compose with snd
-          have hfl : Continuous (fun u : logSpace K => fullLog K u w) := by
-            rw [show (fun u : logSpace K => fullLog K u w)
-              = fun u : logSpace K => if h : w = (w₀ : InfinitePlace K) then
-                  -∑ w' : {w : InfinitePlace K // w ≠ (w₀ : InfinitePlace K)}, u w'
-                else u ⟨w, h⟩ from rfl]
-            split_ifs with h
-            · exact (continuous_finsetSum Finset.univ (fun i _ => continuous_apply i)).neg
-            · exact continuous_apply _
-          exact hfl.comp continuous_snd
       rcases i with (w | ⟨w, j⟩) <;>
         · show ContinuousOn (fun q : ℝ × logSpace K => heckeWeights K q.1 q.2 _) _
-          exact hw _
+          exact continuousOn_heckeWeights_apply K a R ha _
     · -- the uniform bound on the set
       rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
       exact exp_weighted_le_exp_iso (hsub q hq) (v : EuclideanSpace ℝ (index K))

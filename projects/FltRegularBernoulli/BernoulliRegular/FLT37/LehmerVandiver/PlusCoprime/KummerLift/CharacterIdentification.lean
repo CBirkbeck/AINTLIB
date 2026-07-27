@@ -64,7 +64,7 @@ theorem pollaczekUnit_val_eq_prod (i : ℕ) :
     ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) =
       ∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
         cyclotomicUnit p K b ^ (b ^ (p - 1 - i)) := by
-  unfold pollaczekUnit
+  simp only [pollaczekUnit]
   rw [Units.coe_prod]
   rw [show (∏ b ∈ (Finset.Ico 1 ((p - 1) / 2 + 1)).attach,
         ((pollaczekFactor p K b.2 ^ (b.1 : ℕ) ^ (p - 1 - i) :
@@ -345,7 +345,7 @@ theorem halfReduce_mem_half_range (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
     exact ZMod.val_pos.mpr h_ne_zero
   have h_ab_val_lt : ((a : ZMod p) * (b : ZMod p)).val < p :=
     ((a : ZMod p) * (b : ZMod p)).val_lt
-  unfold halfReduce
+  simp only [halfReduce]
   split_ifs with h
   · exact ⟨h_ab_val_pos, by omega⟩
   · refine ⟨by omega, ?_⟩
@@ -405,7 +405,7 @@ theorem halfReduce_round_trip (hp_odd : p ≠ 2) (a : (ZMod p)ˣ) {b : ℕ}
       (((p - ((a : ZMod p) * (b : ZMod p)).val) : ℕ) : ZMod p)).val = p - b := by
     rw [h_simplify_β, ZMod.neg_val]
     simp [hb_zmod_ne_zero, hb_val]
-  unfold halfReduce
+  simp only [halfReduce]
   split_ifs with h_outer h_inner h_inner
   · -- Case α (lower-half) → if-branch: result = (a⁻¹ · h).val = b. ✓
     rw [h_simplify_α]; exact hb_val
@@ -462,7 +462,7 @@ theorem cyclotomicUnit_eq_if_upper_pair_up (a : (ZMod p)ˣ) (b : ℕ) :
        else -((zeta_spec p ℚ K).toInteger : 𝓞 K) ^
               (((a : ZMod p) * (b : ZMod p)).val)) *
         cyclotomicUnit p K (halfReduce p a b) := by
-  unfold halfReduce
+  simp only [halfReduce]
   by_cases h : ((a : ZMod p) * (b : ZMod p)).val ≤ (p - 1) / 2
   · simp [h]
   · simp only [h, if_false]
@@ -567,7 +567,7 @@ theorem halfReduce_pow_mod_eq (a : (ZMod p)ˣ) (b' E : ℕ) :
       (if (((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p)).val ≤ (p - 1) / 2 then
           (((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p)) ^ E
         else (-(((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (b' : ZMod p))) ^ E) := by
-  unfold halfReduce
+  simp only [halfReduce]
   split_ifs with h
   · rw [ZMod.natCast_val, ZMod.cast_id]
   · -- Goal: (((p - ((a⁻¹) · b').val) : ℕ) : ZMod p)^E = (-(...))^E.

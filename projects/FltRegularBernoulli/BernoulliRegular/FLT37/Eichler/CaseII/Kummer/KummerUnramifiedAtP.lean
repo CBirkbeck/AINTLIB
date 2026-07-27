@@ -244,7 +244,6 @@ variable {K : Type} {p : ℕ} [hpri : Fact p.Prime] [Field K] [NumberField K]
 
 omit [NumberField.IsCMField K] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 -- The `antiKummerLift` splitting-field whnf and the `IsUnramifiedAt`/different-ideal coercions make
 -- this assembly heavier than the default heartbeat budget.
 /-- **The per-prime "at-`p`" unramifiedness from a field-level primary witness.**  For a primary
@@ -323,7 +322,7 @@ lemma isUnramifiedAt_of_primary_witness (hp : p ≠ 2) (α : K) (hα : α ≠ 0)
     haveI hImax : (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}).IsMaximal :=
       isMaximal_span_zeta_sub_one hζ
     have hloc : ∀ Q ∈ (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}).primesOver (𝓞 L),
-        Ideal.ramificationIdx (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) Q = 1 :=
+        Ideal.ramificationIdx' (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) Q = 1 :=
       NonUnitKummer.isUnramifiedAt_local hp hζ a ha_cong hu L ha_ne
         (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) (span_zeta_sub_one_ne_bot hζ) haI
     -- Transport to `Algebra.IsUnramifiedAt (𝓞 K) P` via the per-prime bridge.
@@ -340,14 +339,19 @@ lemma isUnramifiedAt_of_primary_witness (hp : p ≠ 2) (α : K) (hα : α ≠ 0)
         ((Polynomial.IsSplittingField.splits_iff L (Polynomial.X ^ p - Polynomial.C α)).mp
           hsplits).symm
     -- `e(P) = 1` from `e(P) ≤ finrank = 1` and `e(P) ≠ 0`.
-    have hle : Ideal.ramificationIdx (P.under (𝓞 K)) P ≤ Module.finrank K L :=
+    have hle : Ideal.ramificationIdx' (P.under (𝓞 K)) P ≤ Module.finrank K L :=
       Ideal.ramificationIdx_le_finrank (R := 𝓞 K) (S := 𝓞 L) (K := K) (L := L)
         (p := P.under (𝓞 K)) P
-    have hne : Ideal.ramificationIdx (P.under (𝓞 K)) P ≠ 0 :=
-      Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P hUnderBot
-    refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mpr ?_
-    rw [hfinrank1] at hle
-    lia
+    have hne : Ideal.ramificationIdx' (P.under (𝓞 K)) P ≠ 0 :=
+      Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver P hUnderBot
+    have he1 : Ideal.ramificationIdx' (P.under (𝓞 K)) P = 1 := by
+      rw [hfinrank1] at hle
+      lia
+    haveI : Module.IsTorsionFree (𝓞 K) (𝓞 L) :=
+      Module.isTorsionFree_iff_algebraMap_injective.mpr
+        (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L))
+    exact Ideal.ramificationIdx_eq_one_iff.mp
+      ((Ideal.ramificationIdx'_eq_ramificationIdx _ P hUnderBot).symm.trans he1)
 
 end Assembly
 
@@ -364,7 +368,6 @@ namespace BernoulliRegular.FLT37.Eichler
 open FLT37.LehmerVandiver.CaseI.AntiKummer
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 -- The `antiKummerLift` splitting-field whnf at `p = 37` makes elaboration heavier than the default.
 /-- **[FLT37-CASEII-LEMMA-9.1-AT37] The "at 37" half of Washington Lemma 9.1, proved.**
 

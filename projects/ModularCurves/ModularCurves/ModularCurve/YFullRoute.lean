@@ -4,9 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.SmoothDescent
+import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.LevelStructure.FullLevelDictionary
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # STREAM-YFULL: the Y(N) representability route (T-E9)
@@ -150,33 +152,39 @@ noncomputable def fullLevelSpaceStruct : fullLevelSpace X N ⟶ X.base :=
   levelSpaceΓι X.curve N ≫
     pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-AFF], KM 4.7.0's standing hypothesis for `[Γ(N)]`)** The Γ(N)-presentation is
 an affine morphism: closed immersion (affine) into `E[N] ×_S E[N]`, which is finite
 (hence affine) over `S` by `torsionπ_isFinite` (PROVEN) and base-change/composition
 stability. Provable now — no gates. -/
-theorem isAffineHom_fullLevelSpaceStruct : IsAffineHom (fullLevelSpaceStruct X N) := by
+theorem isAffineHom_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
+    IsAffineHom (fullLevelSpaceStruct X N) := by
   show IsAffineHom (levelSpaceΓι X.curve N ≫
     pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
   have hι : IsClosedImmersion (levelSpaceΓι X.curve N) :=
     inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
-  have hπ : IsFinite (X.curve.torsionπ N) := X.curve.torsionπ_isFinite N
+  have hπ : IsFinite (X.curve.torsionπ N) :=
+    EllipticCurve.Torsionπ.isFinite_of_nIsInvertible X.curve N hinv
   have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-FIN] = the finiteness half of KM 3.6.0 / 5.1.1 for `[Γ(N)]`)** The
 Γ(N)-presentation is finite over the base: KM 3.6.0 (p. 102) *"Each of these functors is
 represented by a finite S-scheme"*; KM 5.1.1 (p. 129) *"Each is finite and flat over
 (Ell)"* (the Γ(N) case, `N` invertible). Closed immersion ≫ finite ≫ finite. Provable
 now — no gates. -/
-theorem isFinite_fullLevelSpaceStruct : IsFinite (fullLevelSpaceStruct X N) := by
+theorem isFinite_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
+    IsFinite (fullLevelSpaceStruct X N) := by
   show IsFinite (levelSpaceΓι X.curve N ≫
     pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
   have hι : IsFinite (levelSpaceΓι X.curve N) := by
     have h : IsClosedImmersion (levelSpaceΓι X.curve N) :=
       inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
     infer_instance
-  have hπ : IsFinite (X.curve.torsionπ N) := X.curve.torsionπ_isFinite N
+  have hπ : IsFinite (X.curve.torsionπ N) :=
+    EllipticCurve.Torsionπ.isFinite_of_nIsInvertible X.curve N hinv
   have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
@@ -192,7 +200,7 @@ CHARTER-P2 phase 2);
 (β) KM 3.7.1 (p. 104–105): étale-locally on `S`, `E[N] ≅ (ℤ/N)²` is constant
 (*"reduce to the case when E[N] is the constant group-scheme (ℤ/NZ)²"*), the locus is a
 union of connected components of the constant scheme (indexed by the bases of `(ℤ/N)²`),
-hence clopen; clopen-ness descends along the étale cover — consumes `torsionπ_etale`
+hence clopen; clopen-ness descends along the étale cover — consumes `Torsionπ.etale`
 (BB-DIFF, CHARTER-P3B3) + étale-local trivialization of `E[N]` (T-B6 family).
 GATE: [YF-CLOPEN] — T-C1 or the CHARTER-P3B3 étale toolkit; not buildable from the
 current sorry-free layer alone. -/
@@ -201,14 +209,25 @@ theorem isOpenImmersion_levelSpaceΓι {S : Scheme.{u}} (E : EllipticCurve S) (N
     IsOpenImmersion (levelSpaceΓι E N) := by
   sorry
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-ETALE] = the étale half of KM 3.7.1 / [Loe] 3.8.2 for `[Γ(N)]`)** For `N`
 invertible in `R`, the Γ(N)-presentation is étale over the base: open immersion
 ([YF-CLOPEN]) ≫ pullback of finite étale ≫ finite étale, with `E[N] → S` étale from
-`torsionπ_etale` (GATE: BB-DIFF `mulByHom_formallyUnramified`, CHARTER-P3B3 items 1–2).
+`Torsionπ.etale` (GATE: BB-DIFF `MulByHom.formallyUnramified`, CHARTER-P3B3 items 1–2).
 KM 3.7.1 (verbatim, p. 104): *"Each is represented by a finite etale S-scheme."* -/
 theorem etale_fullLevelSpaceStruct (X : EllObj R) (N : ℕ) [NeZero N]
     (hinv : IsUnit (N : R)) : Etale (fullLevelSpaceStruct X N) := by
-  sorry
+  show Etale (levelSpaceΓι X.curve N ≫
+    pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
+  have hinvS : NIsInvertible X.base N := nIsInvertible_over_spec R X.structMap hinv
+  have hι : Etale (levelSpaceΓι X.curve N) := by
+    have hoi : IsOpenImmersion (levelSpaceΓι X.curve N) :=
+      isOpenImmersion_levelSpaceΓι X.curve N hinvS
+    infer_instance
+  have hπ : Etale (X.curve.torsionπ N) := EllipticCurve.Torsionπ.etale' X.curve N hinvS
+  have hfst : Etale (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
+    MorphismProperty.pullback_fst _ _ hπ
+  infer_instance
 
 /-! ### The points dictionary: factorizations through `U_{Γ(N)}` are level structures -/
 
@@ -265,6 +284,7 @@ private theorem dictPoint₂_killed (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
   simp only [Category.assoc, hcond]
   exact hbase
 
+omit [NeZero N] in
 /-- Morphisms into `E[N]` agree once they agree into `E` and over `S` (the kernel
 pullback's ext principle, stated at the `torsionι`/`torsionπ` spelling so rewriting
 never crosses the `torsion` definitional fold). -/
@@ -389,7 +409,7 @@ private theorem dictPoint₂_of_lift (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
 /-- Section-pullback along the base-change comparison morphism restricts the point:
 the naturality bridge between the moduli functor's `map` (`EllHom.pullSection`) and
 the dictionary's tautological pairs (`Point.restrict`). -/
-private theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
+theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
     {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) (P : X.curve.Point g) :
     EllHom.pullSection R (X.pullbackAlongMap g k)
         (EllipticCurve.Point.asSection X.curve g P) =
@@ -403,7 +423,8 @@ private theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
   refine Subtype.ext (pullback.hom_ext ?_ ?_)
   · refine ((congrArg ((EllHom.pullSection R (X.pullbackAlongMap g k)
         (EllipticCurve.Point.asSection X.curve g P)).1 ≫ ·) htop.symm).trans ?_).trans
-      (EllipticCurve.Point.asSection_val_fst X.curve (k ≫ g) (EllipticCurve.Point.restrict X.curve k P)).symm
+      (EllipticCurve.Point.asSection_val_fst X.curve (k ≫ g)
+        (EllipticCurve.Point.restrict X.curve k P)).symm
     refine (Category.assoc _ _ _).symm.trans ?_
     refine (congrArg (· ≫ pullback.fst X.curve.π g)
       ((X.pullbackAlongMap g k).isPullback.lift_fst _ _ _)).trans ?_
@@ -411,7 +432,8 @@ private theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
       (congrArg (k ≫ ·) (EllipticCurve.Point.asSection_val_fst X.curve g P))
   · exact (EllHom.pullSection R (X.pullbackAlongMap g k)
       (EllipticCurve.Point.asSection X.curve g P)).2.trans
-      (EllipticCurve.Point.asSection_val_snd X.curve (k ≫ g) (EllipticCurve.Point.restrict X.curve k P)).symm
+      (EllipticCurve.Point.asSection_val_snd X.curve (k ≫ g)
+        (EllipticCurve.Point.restrict X.curve k P)).symm
 
 end Dictionary
 
@@ -620,7 +642,8 @@ theorem gammaFullNaive_affineOverEll (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)
   intro X
   obtain ⟨eqv, hnat⟩ := exists_pointsEquiv_family R X N hinv
   exact ⟨fullLevelSpace X N, fullLevelSpaceStruct X N,
-    isAffineHom_fullLevelSpaceStruct X N, ⟨@eqv, @hnat⟩⟩
+    isAffineHom_fullLevelSpaceStruct X N (nIsInvertible_over_spec R X.structMap hinv),
+    ⟨@eqv, @hnat⟩⟩
 
 /-- **(KM First Main Theorem 5.1.1, the `[Γ(N)]` relative-representability clause —
 p. 129: "Each of the four moduli problems … is relatively representable over (Ell)")**
@@ -711,6 +734,7 @@ theorem gammaFullNaive_representable_of_engine (N : ℕ) [NeZero N] (hN : 3 ≤ 
     (gammaFullNaive_affineOverEll R N hinv)).mpr
     ⟨gammaFullNaive_relativelyRepresentable R N hinv, gammaFullNaive_rigid R N hN hinv⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-TRANS], smooth-affineness transports across representing objects)** Any two
 objects representing the same moduli problem are canonically isomorphic in `Ell/R`
 (Yoneda: `Functor.RepresentableBy.uniqueUpToIso`), the isomorphism's `baseHom` is an

@@ -54,8 +54,8 @@ explicit.
 
 This file proves the factorial-`37` engine end-to-end — the `68! = 37·u` arithmetic, the all-degrees
 factorial extraction at `d = 68` carried into the mod-`37²` coordinate, the `x^68` ramification-fold
-coordinate (exactly `-37`), the formal-scalar denominator clearing, the **Frobenius collapse** of the
-formal degree-`68` source to a single coefficient, and — crucially — the **vanishing** of that
+coordinate (exactly `-37`), the formal-scalar denominator clearing, the **Frobenius collapse** of
+the formal degree-`68` source to a single coefficient, and — crucially — the **vanishing** of that
 coefficient mod `37`.  The upshot (`deg68_slice_coordMod37_eq_zero`) is that the degree-`68`
 homogeneous slice's `varpi^32` mod-`37` coordinate is `0`: the **degree-`68` slice does not
 contribute to `secondOrderPart37` at the mod-`37` order**.  This resolves the degree-`68` slice's
@@ -63,17 +63,18 @@ contribution to the irregular `varpi^32` coordinate.
 
 The vanishing is genuine arithmetic, not an accident: `formalSum68 mod 37` collapses to the single
 `n = 37` term (`factorial_div_mod37_eq_zero`: `68!/n ≡ 0` for `n ≠ 37` since `68! = 37·u`,
-`37 ∤ n`), whose coefficient `ahCoeff37 = [λ^{68}` of `(AH−1)^{37}]` is `≡ 0 (mod 37)` by **Frobenius
-in characteristic `37`** (`coeff_sixtyeight_pow37_eq_zero`: `f^{37}` is supported on degrees divisible
-by `37`, and `37 ∤ 68`).  So the slice coordinate is itself divisible by `37` (a higher-order effect).
+`37 ∤ n`), whose coefficient `ahCoeff37 = [λ^{68}` of `(AH−1)^{37}]` is `≡ 0 (mod 37)` by
+**Frobenius in characteristic `37`** (`coeff_sixtyeight_pow37_eq_zero`: `f^{37}` is supported on
+degrees divisible by `37`, and `37 ∤ 68`).  So the slice coordinate is itself divisible by `37` (a
+higher-order effect).
 
 What this file does **not** do is assemble the full level-`71` finite-log coordinate `W(a)` (the
-genuine `secondOrderPart37 a := (W(a).val/37 : ZMod 37)`) out of *all* its homogeneous slices: `W(a)`
-is the coordinate of `samePrimeFiniteLog 71 ((normalizedUnit)^{p-1} - 1)`, whose full slice
+genuine `secondOrderPart37 a := (W(a).val/37 : ZMod 37)`) out of *all* its homogeneous slices:
+`W(a)` is the coordinate of `samePrimeFiniteLog 71 ((normalizedUnit)^{p-1} - 1)`, whose full slice
 decomposition (and the lower slices' contributions) requires the second-order normalized-unit ↔
-Dwork-parameter bridge (the first-order bridge `ε^{p-1} ≡ a(1−ζ)/(1−ζ^a)` holds only mod `(λ)^{p-1} =
-(p)`; see `CaseIICor823Level72ColumnScaling.lean`).  This file settles the **degree-`68`** slice — the
-deepest, factorial-`37`-obstructed one — completely.
+Dwork-parameter bridge (the first-order bridge `ε^{p-1} ≡ a(1−ζ)/(1−ζ^a)` holds only mod
+`(λ)^{p-1} = (p)`; see `CaseIICor823Level72ColumnScaling.lean`).  This file settles the
+**degree-`68`** slice — the deepest, factorial-`37`-obstructed one — completely.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4 (Proposition 8.12, Theorem
@@ -94,7 +95,8 @@ open BernoulliRegular.CyclotomicUnits
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 
-/-! ## 1. The factorial-`37` arithmetic: `padicValNat 37 (68!) = 1`, `68! = 37·u`, `u` a `37`-unit -/
+/-! ## 1. The factorial-`37` arithmetic: `padicValNat 37 (68!) = 1`, `68! = 37·u`, `u` a `37`-unit
+-/
 
 /-- **Legendre's formula at `(37, 68)`**: `padicValNat 37 (68!) = 1`.  The only multiple of `37` in
 `{1,…,68}` is `37` itself (`2·37 = 74 > 68`), so the `37`-adic valuation of `68!` is exactly `1`.
@@ -161,10 +163,11 @@ RIntegralRatToQuotient(∑ rationalArtinHasseNormalizedFactorialWeightedLogCoeff
 
 This is the mod-`37²` coordinate image of the **all-degrees** factorial identity
 `natCast_factorial_mul_…_eq_formal` (proven, no `d < p - 1` constraint), obtained by `congrArg` of
-the coordinate functional and the proven scalar law `valuedLambdaQuotientDworkCoeffModSq_natCast_mul`
-(which factors the `(68! : ZMod 37²)` cast out of the coordinate).  Combined with
-`factorial_sixtyeight_cast_modSq` (`(68! : ZMod 37²) = 37·u`), the left side is `37·u·coordModSq(deg-68
-slice)`: the **first** `37` of the factorial-`37` cancellation. -/
+the coordinate functional and the proven scalar law
+`valuedLambdaQuotientDworkCoeffModSq_natCast_mul` (which factors the `(68! : ZMod 37²)` cast out of
+the coordinate).  Combined with `factorial_sixtyeight_cast_modSq` (`(68! : ZMod 37²) = 37·u`), the
+left side is `37·u·coordModSq(deg-68 slice)`: the **first** `37` of the factorial-`37` cancellation.
+-/
 theorem factorial37_deg68_coordModSq_extraction
     (i : Fin (37 - 1)) {x : ValuedIntegerRing 37 K} (hx : x ∈ lambdaIdeal 37 K) :
     ((Nat.factorial 68 : ℕ) : ZMod (37 ^ 2)) *
@@ -200,8 +203,8 @@ omit [NumberField.IsCMField K] in
 
 from `dworkParameter^36 = -37·tailUnit` (`dworkParameter_pow_pred_eq_neg_p_mul_tailUnit`, the
 ramification `varpi^{p-1} = -p·tailUnit`) and `68 = 36 + 32`.  This converts the degree-`68` Dwork
-power into a `37·(unit)` multiple of the degree-`32` (basis) power: the source of the **second** `37`
-in the factorial-`37` cancellation. -/
+power into a `37·(unit)` multiple of the degree-`32` (basis) power: the source of the **second**
+`37` in the factorial-`37` cancellation. -/
 theorem dworkParameter_pow_sixtyeight_eq (hp2 : 2 < 37) :
     dworkParameter 37 K ^ 68 =
       -(37 : DworkCompleteIntegerRing 37 K) *
@@ -260,10 +263,10 @@ theorem x68_coordModSq_eq (hp2 : 2 < 37) (k : Fin (37 - 1)) :
   rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
 
 omit [NumberField.IsCMField K] in
-/-- **The degree-`32` Dwork power is the basis element of index `32`** (proven): `repr(dworkParameter
-^32) 32 = 1`, since `32 < 36 = p - 1` so `dworkParameter^32 = dworkParameterPowerBasis 32`.  This is
-the column-carrying basis term `varpi^32`, the same `varpi^32` coordinate the level-`72` evaluator
-reads. -/
+/-- **The degree-`32` Dwork power is the basis element of index `32`** (proven):
+`repr(dworkParameter ^32) 32 = 1`, since `32 < 36 = p - 1` so
+`dworkParameter^32 = dworkParameterPowerBasis 32`.  This is the column-carrying basis term
+`varpi^32`, the same `varpi^32` coordinate the level-`72` evaluator reads. -/
 theorem repr_dworkParameter_pow_thirtytwo_eq_one (k : Fin (37 - 1)) (hk : (k : ℕ) = 32) :
     (dworkParameterPowerBasis 37 K).repr (dworkParameter 37 K ^ 32) k = 1 := by
   have hbasis : dworkParameter 37 K ^ 32 = dworkParameterPowerBasis 37 K k := by
@@ -308,8 +311,8 @@ omit [NumberField.IsCMField K] in
 /-- **`tailUnit·dworkParameter^32` has `varpi^32` coordinate `1` mod `37²`** (proven): for the basis
 index `k` with `(k : ℕ) = 32`,
 `rationalPadicIntegerToZModSq(repr(tailUnit·dworkParameter^32) 32) = 1`.  Splitting `tailUnit = 1 +
-tail`, the `dworkParameter^32` part gives `repr = 1` (`repr_dworkParameter_pow_thirtytwo_eq_one`) and
-the `tail` part vanishes mod `37²`
+tail`, the `dworkParameter^32` part gives `repr = 1` (`repr_dworkParameter_pow_thirtytwo_eq_one`)
+and the `tail` part vanishes mod `37²`
 (`artinHasseTail_mul_dworkParameter_pow_thirtytwo_repr_mem`). -/
 theorem tailUnit_mul_dworkParameter_pow_thirtytwo_coordModSq_eq_one
     (hp2 : 2 < 37) (k : Fin (37 - 1)) (hk : (k : ℕ) = 32) :
@@ -329,9 +332,9 @@ dworkParameterApprox 72` and the basis index `k` with `(k : ℕ) = 32`,
 
   `coordModSq(quotMap(x^68)) = -37`   (in `ZMod 37²`).
 
-This is the **second** `37` of the factorial-`37` cancellation, made fully explicit (value `-37`, the
-ramification sign `varpi^{36} = -37·tailUnit` times the `varpi^32`-coordinate `1`).  Assembled from
-`mk_dworkParameterApprox_pow_sixtyeight_eq`, `x68_coordModSq_eq`,
+This is the **second** `37` of the factorial-`37` cancellation, made fully explicit (value `-37`,
+the ramification sign `varpi^{36} = -37·tailUnit` times the `varpi^32`-coordinate `1`).  Assembled
+from `mk_dworkParameterApprox_pow_sixtyeight_eq`, `x68_coordModSq_eq`,
 `tailUnit_mul_dworkParameter_pow_thirtytwo_coordModSq_eq_one`, and the `RingHom`-naturality of
 `rationalPadicIntegerToZModSq` on the `-37·(·)` scalar. -/
 theorem x68_coordModSq_eq_neg_thirtyseven (hp2 : 2 < 37) (k : Fin (37 - 1)) (hk : (k : ℕ) = 32) :
@@ -351,8 +354,8 @@ theorem x68_coordModSq_eq_neg_thirtyseven (hp2 : 2 < 37) (k : Fin (37 - 1)) (hk 
 
 omit [NumberField.IsCMField K] in
 /-- **The `varpi^32` coordinate of `samePrimeQuotientMap 71 (x^68)` is `-37`** (proven): the same
-`-37` value as `x68_coordModSq_eq_neg_thirtyseven`, displayed on the `samePrimeQuotientMap 71` form in
-which the factorial-`37` extraction produces it (the precision indices `71+1` and `2(p-1) = 72`
+`-37` value as `x68_coordModSq_eq_neg_thirtyseven`, displayed on the `samePrimeQuotientMap 71` form
+in which the factorial-`37` extraction produces it (the precision indices `71+1` and `2(p-1) = 72`
 coincide, reconciled by `mk_dworkParameterApprox_pow_sixtyeight_eq` without forcing the heavy
 `adicCompletionIntegers` quotient transport). -/
 theorem samePrimeQuotientMap_x68_coordModSq_eq_neg_thirtyseven
@@ -371,9 +374,9 @@ theorem samePrimeQuotientMap_x68_coordModSq_eq_neg_thirtyseven
 den-clearing), and the degree-`68` slice value mod `37`
 
 The right side of the factorial-`37` extraction is `coordModSq(quotMap(x^68)·formalSum_68)` with
-`formalSum_68 = samePrimeRIntegralRatToQuotient 71 (formalSum_rat)` a *ring constant* (a `37`-integral
-rational embedded in the quotient).  We factor that scalar out of the coordinate by clearing its
-denominator (a `37`-unit, hence a `ZMod 37²`-unit), mirroring the first-order template
+`formalSum_68 = samePrimeRIntegralRatToQuotient 71 (formalSum_rat)` a *ring constant* (a
+`37`-integral rational embedded in the quotient).  We factor that scalar out of the coordinate by
+clearing its denominator (a `37`-unit, hence a `ZMod 37²`-unit), mirroring the first-order template
 `valuedLambdaQuotientDworkCoeffModP_mk_rIntegralRat_mul_dworkParameterApprox_pow_of_lt`.  Combined
 with `samePrimeQuotientMap_x68_coordModSq_eq_neg_thirtyseven` (`coordModSq(x^68) = -37`), the whole
 right side is `-37·(formalSum_68's mod-`37²` residue)`. -/
@@ -386,11 +389,11 @@ omit [NumberField.IsCMField K] in
      (q.num · q.den⁻¹ : ZMod 37²) · coordModSq(quotMap(x^68))`.
 
 The second-order denominator clearing: multiply by the `37`-unit `q.den`, use
-`den_mul_rIntegralRatToValuedInteger` to collapse `q.den·rIntegralRat(q) = q.num`, factor the integer
-`q.num` out of the coordinate (`valuedLambdaQuotientDworkCoeffModSq_intCast_mul`), then divide by the
-unit `q.den` (`ZMod.isUnit_iff_coprime`, `q.den` coprime to `37` hence to `37²`).  The whole
-computation stays at the `samePrimeQuotientMap 71` precision, dodging the `adicCompletionIntegers`
-quotient-transport `whnf` wall. -/
+`den_mul_rIntegralRatToValuedInteger` to collapse `q.den·rIntegralRat(q) = q.num`, factor the
+integer `q.num` out of the coordinate (`valuedLambdaQuotientDworkCoeffModSq_intCast_mul`), then
+divide by the unit `q.den` (`ZMod.isUnit_iff_coprime`, `q.den` coprime to `37` hence to `37²`).  The
+whole computation stays at the `samePrimeQuotientMap 71` precision, dodging the
+`adicCompletionIntegers` quotient-transport `whnf` wall. -/
 theorem rIntegralRat_scalar_factors_through_coordModSq_x68
     (q : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) (k : Fin (37 - 1)) :
     valuedLambdaQuotientDworkCoeffModSq (p := 37) (K := K) k
@@ -512,8 +515,9 @@ theorem castHom_eq_of_thirtyseven_mul_eq {x y : ZMod (37 ^ 2)}
   omega
 
 omit [NumberField.IsCMField K] in
-/-- **The degree-`68` homogeneous slice coordinate, mod `37`, with both `37`'s divided out** (proven,
-axiom-clean): for `x = dworkParameterApprox 72` and the column index `i` with `(i : ℕ) = 32`,
+/-- **The degree-`68` homogeneous slice coordinate, mod `37`, with both `37`'s divided out**
+(proven, axiom-clean): for `x = dworkParameterApprox 72` and the column index `i` with
+`(i : ℕ) = 32`,
 
   `(u mod 37) · (coordModSq(deg-68 slice) mod 37) = -(formalSum68 residue mod 37)`   (in `ZMod 37`),
 
@@ -595,8 +599,8 @@ theorem factorial_div_mod37_eq_zero (n : ℕ) (hn1 : 1 ≤ n) (hn : n ≤ 68) (h
   omega
 
 /-- **The Frobenius-power Artin-Hasse coefficient** `ahCoeff37`: the `λ^{68}` coefficient of
-`(rationalArtinHasseNormalizedExpMinusOneSeries 37 − 1)^{37}`, a `37`-integral rational.  This single
-coefficient mod `37` is the entire degree-`68` formal source after the factorial collapse
+`(rationalArtinHasseNormalizedExpMinusOneSeries 37 − 1)^{37}`, a `37`-integral rational.  This
+single coefficient mod `37` is the entire degree-`68` formal source after the factorial collapse
 (`formalSum68_rIntegralToZMod_eq`); it is the genuine remaining `p`-adic / Kellner `α₁` content of
 the degree-`68` slice. -/
 noncomputable def ahCoeff37 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37 :=
@@ -613,7 +617,8 @@ where `u = 68!/37`.  `rIntegralToZMod 37` is a `RingHom`, so it distributes over
 `formalSum68 = ∑_n (68!/n)·(−1)^{n+1}·[λ^{68} of (AH−1)^n]`; for `n ≠ 37` the factor `68!/n ≡ 0
 (mod 37)` (`factorial_div_mod37_eq_zero`) kills the term, and the surviving `n = 37` term is
 `(68!/37)·(−1)^{38}·ahCoeff37 = u·ahCoeff37` (mod `37`).  This is the **Frobenius collapse**: the
-degree-`68` formal source mod `37` is `u` times the single Frobenius-power coefficient `ahCoeff37`. -/
+degree-`68` formal source mod `37` is `u` times the single Frobenius-power coefficient `ahCoeff37`.
+-/
 theorem formalSum68_rIntegralToZMod_eq :
     Furtwaengler.DieudonneDwork.rIntegralToZMod 37
         (formalSum68 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) =
@@ -645,9 +650,9 @@ coefficient of `f^{37}` is `0` (since `37 ∤ 68`).  Reducing `(AH−1)^{37}` co
 
 Consequently `formalSum68 mod 37 = u·0 = 0` (`formalSum68_rIntegralToZMod_eq`), and the degree-`68`
 homogeneous slice's `varpi^32` mod-`37` coordinate is `0` (`deg68_slice_coordMod37_eq_zero`): the
-degree-`68` slice does **not** contribute to `secondOrderPart37` at the mod-`37` order — it is itself
-divisible by `37` (a higher-order effect).  This *resolves* the degree-`68` slice's contribution to
-the irregular `varpi^32` coordinate. -/
+degree-`68` slice does **not** contribute to `secondOrderPart37` at the mod-`37` order — it is
+itself divisible by `37` (a higher-order effect).  This *resolves* the degree-`68` slice's
+contribution to the irregular `varpi^32` coordinate. -/
 
 /-- **Frobenius vanishing in `PowerSeries (ZMod 37)`**: for any `f`, `coeff_{68}(f^{37}) = 0`
 (proven).  Since `ZMod 37` has expchar `37`, `f^{37} = (expand 37 f).map(frobenius)` (the
@@ -668,9 +673,10 @@ theorem coeff_sixtyeight_pow37_eq_zero (f : PowerSeries (ZMod 37)) :
 `rIntegralToZMod 37 (ahCoeff37) = 0`.
 
 `rIntegralToZMod 37 (ahCoeff37) = toZMod([λ^{68} of (AH−1)^{37}])`, which by the coefficientwise
-reduction `toZModPS` (`coeff_toZModPS`) equals `coeff_{68}` of the mod-`37` reduction of `(AH−1)^{37}
-= ((AH−1) reduced)^{37}` (`toZModPS_pow`), and that is `0` by `coeff_sixtyeight_pow37_eq_zero` (the
-Frobenius vanishing, `37 ∤ 68`).  So the entire degree-`68` formal source vanishes mod `37`. -/
+reduction `toZModPS` (`coeff_toZModPS`) equals `coeff_{68}` of the mod-`37` reduction of
+`(AH−1)^{37} = ((AH−1) reduced)^{37}` (`toZModPS_pow`), and that is `0` by
+`coeff_sixtyeight_pow37_eq_zero` (the Frobenius vanishing, `37 ∤ 68`).  So the entire degree-`68`
+formal source vanishes mod `37`. -/
 theorem ahCoeff37_rIntegralToZMod_eq_zero :
     Furtwaengler.DieudonneDwork.rIntegralToZMod 37 ahCoeff37 = 0 := by
   have hpI : Furtwaengler.DieudonneDwork.IsRIntegralPS 37
@@ -690,9 +696,10 @@ theorem ahCoeff37_rIntegralToZMod_eq_zero :
   rw [hval]
   exact key
 
-/-- **The formal degree-`68` source vanishes mod `37`** (proven): `rIntegralToZMod 37 (formalSum68) =
-0`.  Combines the Frobenius collapse `formalSum68_rIntegralToZMod_eq` (`= u · rIntegralToZMod 37
-ahCoeff37`) with `ahCoeff37_rIntegralToZMod_eq_zero` (`= 0`). -/
+/-- **The formal degree-`68` source vanishes mod `37`** (proven):
+`rIntegralToZMod 37 (formalSum68) = 0`.  Combines the Frobenius collapse
+`formalSum68_rIntegralToZMod_eq` (`= u · rIntegralToZMod 37 ahCoeff37`) with
+`ahCoeff37_rIntegralToZMod_eq_zero` (`= 0`). -/
 theorem formalSum68_rIntegralToZMod_eq_zero :
     Furtwaengler.DieudonneDwork.rIntegralToZMod 37
         (formalSum68 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) = 0 := by

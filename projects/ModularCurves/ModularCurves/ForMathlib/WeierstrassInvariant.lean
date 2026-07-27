@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 import Mathlib.AlgebraicGeometry.EllipticCurve.VariableChange
+import Mathlib.AlgebraicGeometry.EllipticCurve.Weierstrass
 import Mathlib.FieldTheory.Fixed
 import ModularCurves.ForMathlib.InvariantTorsor
 
@@ -69,7 +69,8 @@ model is expressed (via `pointedIso_exists_variableChange`, T-W7.1b) as a `1`-co
 group `VariableChange A`. The base action of `G` on `A` induces a coefficientwise action on
 `VariableChange A` **by group automorphisms** — this is what makes "cocycle" meaningful and is the
 foundation of the trivialization ([a5-iii]): the `u`-part is a multiplicative cocycle
-(`exists_unit_smul_eq_of_isLocalRing`), the `(r,s,t)`-part additive (`exists_sub_smul_eq_of_isCocycle`).
+(`exists_unit_smul_eq_of_isLocalRing`), the `(r,s,t)`-part additive
+(`exists_sub_smul_eq_of_isCocycle`).
 -/
 
 /-- The `G`-action on a unit of `A`, through the induced ring automorphism. -/
@@ -111,12 +112,12 @@ noncomputable instance : MulDistribMulAction G (VariableChange A) where
   smul := vcSMul
   one_smul C := by
     show vcSMul 1 C = C
-    cases C; simp only [vcSMul, one_smul, VariableChange.mk.injEq, and_true, true_and]
+    cases C; simp only [vcSMul, one_smul, VariableChange.mk.injEq, and_true]
     ext; simp [uSMul]
   mul_smul g h C := by
     show vcSMul (g * h) C = vcSMul g (vcSMul h C)
     cases C
-    simp only [vcSMul, mul_smul, VariableChange.mk.injEq, and_true, true_and]
+    simp only [vcSMul, mul_smul, VariableChange.mk.injEq, and_true]
     ext; simp [uSMul, mul_smul]
   smul_mul g := vcSMul_mul g
   smul_one := vcSMul_one
@@ -139,7 +140,9 @@ theorem map_toRingHom_mul (W : WeierstrassCurve A) (g h : G) :
       = (W.map (MulSemiringAction.toRingHom G A h)).map (MulSemiringAction.toRingHom G A g) := by
   rw [map_map]
   congr 1
-  ext a; simp [MulSemiringAction.toRingHom, mul_smul]
+  ext a
+  show (g * h) • a = g • h • a
+  exact mul_smul g h a
 
 /-- **([a5-iii], step 1 — the `u`-part trivializes)** For a free action with `Aᴳ` local, the
 `u`-component of a `VariableChange` cocycle is a coboundary: there is a unit `d : Aˣ` with
@@ -234,8 +237,9 @@ theorem conj_s_component (σ : A) {C : G → VariableChange A} (hu : ∀ g, (C g
   ring
 
 /-- **([a5-iii], step 3 — kill `s`)** A `u = 1` `VariableChange` cocycle is cohomologous to one with
-`u = 1` *and* `s = 0`: conjugate by `(1, 0, -d, 0)`, where `d` is the additive Hilbert 90 witness for
-the `s`-cocycle (`(C g).s = d - g•d`). The residual cocycle now lives in the `(r, t)` subgroup. -/
+`u = 1` *and* `s = 0`: conjugate by `(1, 0, -d, 0)`, where `d` is the additive Hilbert 90
+witness for the `s`-cocycle (`(C g).s = d - g•d`). The residual cocycle now lives in the
+`(r, t)` subgroup. -/
 theorem exists_conj_s_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
     {C : G → VariableChange A} (hC : IsVCocycle C) (hu : ∀ g, (C g).u = 1) :
     ∃ D : VariableChange A, IsVCocycle (fun g => D * C g * (g • D)⁻¹) ∧
@@ -281,10 +285,10 @@ theorem exists_conj_r_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
     simp [VariableChange.mul_def, VariableChange.inv_def, hu g]
   · rw [vcSMul_mk_r]
     simp only [VariableChange.mul_def, VariableChange.inv_def, hu g, hs g, Units.val_one,
-      inv_one, mul_one, one_mul, mul_zero, zero_mul, add_zero, zero_add, neg_zero]
+      inv_one, mul_one, mul_zero, zero_mul, add_zero, zero_add, neg_zero]
   · rw [vcSMul_mk_r]
     simp only [VariableChange.mul_def, VariableChange.inv_def, hu g, hs g, Units.val_one,
-      inv_one, mul_one, one_mul, mul_zero, zero_mul, add_zero, zero_add]
+      inv_one, mul_one, mul_zero, zero_mul, add_zero, zero_add]
     rw [hd g, smul_neg]; ring
 
 /-- `g • (1, 0, 0, τ) = (1, 0, 0, g • τ)`. -/
@@ -298,17 +302,17 @@ theorem vcSMul_mk_t (g : G) (τ : A) :
 
 /-- With `r = s = 0` the `t`-component of a `u = 1` cocycle is a *central* additive cocycle. -/
 theorem t_isCocycle {C : G → VariableChange A} (hC : IsVCocycle C)
-    (hu : ∀ g, (C g).u = 1) (hs : ∀ g, (C g).s = 0) (hr : ∀ g, (C g).r = 0) (g h : G) :
+    (hu : ∀ g, (C g).u = 1) (_hs : ∀ g, (C g).s = 0) (hr : ∀ g, (C g).r = 0) (g h : G) :
     (C (g * h)).t = (C g).t + g • (C h).t := by
   have h1 := congrArg WeierstrassCurve.VariableChange.t (hC g h)
   simp only [VariableChange.mul_def, vcSMul_smul_def, vcSMul_u, vcSMul_r, vcSMul_s, vcSMul_t,
     hr g, hu h] at h1
   rw [h1]
-  simp only [uSMul_coe, hu h, Units.val_one, smul_one, one_pow, mul_one, smul_zero, mul_zero,
-    zero_mul, add_zero, zero_add]
+  simp only [uSMul_coe, Units.val_one, smul_one, one_pow, mul_one,
+    zero_mul, add_zero]
 
-/-- **([a5-iii], step 5 — kill `t`)** With `u = 1, r = s = 0` the `t`-cocycle is killed by conjugating
-with `(1, 0, 0, -d)`, leaving the trivial cocycle `1`. -/
+/-- **([a5-iii], step 5 — kill `t`)** With `u = 1, r = s = 0` the `t`-cocycle is killed by
+conjugating with `(1, 0, 0, -d)`, leaving the trivial cocycle `1`. -/
 theorem exists_conj_t_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
     {C : G → VariableChange A} (hC : IsVCocycle C) (hu : ∀ g, (C g).u = 1)
     (hs : ∀ g, (C g).s = 0) (hr : ∀ g, (C g).r = 0) :
@@ -330,7 +334,8 @@ theorem exists_conj_t_zero [Fintype G] (hfree : IsFreeAlgebraAction G ℤ A)
 `Aᴳ` local, every `VariableChange` cocycle is a **coboundary**: there is `E : VariableChange A` with
 `C g = E * (g • E)⁻¹` for all `g`. Chain the four layer-trivializations
 `exists_conj_u_one → exists_conj_s_zero → exists_conj_r_zero → exists_conj_t_zero`; the composite
-conjugator `D = Dₜ·Dᵣ·D_s·D_u` satisfies `D · C g · (g•D)⁻¹ = 1`, i.e. `C g = D⁻¹ · (g•D) = E · (g•E)⁻¹`
+conjugator `D = Dₜ·Dᵣ·D_s·D_u` satisfies `D · C g · (g•D)⁻¹ = 1`, i.e.
+`C g = D⁻¹ · (g•D) = E · (g•E)⁻¹`
 with `E = D⁻¹`.
 
 Geometrically: the `VariableChange` cocycle of the `G`-action on the universal curve's Weierstrass
@@ -347,8 +352,8 @@ theorem exists_coboundary [Fintype G] [DecidableEq G] [Nontrivial A]
   refine ⟨(Dt * Dr * Ds * Du)⁻¹, fun g => ?_⟩
   have hflat : (Dt * Dr * Ds * Du) * C g * (g • (Dt * Dr * Ds * Du))⁻¹ = 1 := by
     have := hDt g
-    simp only [smul_mul', smul_inv', mul_inv_rev, mul_assoc] at this ⊢
-    convert this using 3 <;> group
+    simp only [smul_mul', mul_inv_rev, mul_assoc] at this ⊢
+    convert this using 3
   have h2 : (Dt * Dr * Ds * Du) * C g = g • (Dt * Dr * Ds * Du) := mul_inv_eq_one.mp hflat
   rw [smul_inv', inv_inv]
   exact eq_inv_mul_iff_mul_eq.mpr h2
@@ -379,13 +384,14 @@ coefficientwise action). Then there is `E : VariableChange A` and a `Weierstrass
 `W₁.map (Aᴳ ↪ A) = E⁻¹ • W₀`.
 
 `E` comes from `exists_coboundary` (`C_g = E·(g•E)⁻¹`); `E⁻¹ • W₀` is then `G`-invariant
-(`g • (E⁻¹•W₀) = (g•E)⁻¹•(g•W₀) = E⁻¹•W₀`, using `map_variableChange` and the cocycle relation), so its
-coefficients lie in `Aᴳ` and `descendFixed` produces `W₁`.
+(`g • (E⁻¹•W₀) = (g•E)⁻¹•(g•W₀) = E⁻¹•W₀`, using `map_variableChange` and the cocycle relation),
+so its coefficients lie in `Aᴳ` and `descendFixed` produces `W₁`.
 
 Geometrically: `W₀` is the (global) Weierstrass model of the universal curve `E`, the cocycle is the
 `G`-action's change-of-variables datum (`a5-ii`), and `W₁` is the Weierstrass model of the quotient
-curve `E/G` over `X/G = Spec Aᴳ`. Together with `isPullback_projModelBaseChange`, `projModelVCIso` and
-`isPullback_quotientπ` this yields the `LocallyWeierstrass` iso — the remaining geometric `a5-iv`. -/
+curve `E/G` over `X/G = Spec Aᴳ`. Together with `isPullback_projModelBaseChange`,
+`projModelVCIso` and `isPullback_quotientπ` this yields the `LocallyWeierstrass` iso — the
+remaining geometric `a5-iv`. -/
 theorem exists_invariant_descent [Fintype G] [DecidableEq G] [Nontrivial A]
     [IsLocalRing (FixedPoints.subalgebra ℤ A G)] (hfree : IsFreeAlgebraAction G ℤ A)
     (W₀ : WeierstrassCurve A) {C : G → VariableChange A} (hC : IsVCocycle C)
@@ -408,7 +414,6 @@ theorem exists_invariant_descent [Fintype G] [DecidableEq G] [Nontrivial A]
   · exact congrArg WeierstrassCurve.a₄ (hinv g)
   · exact congrArg WeierstrassCurve.a₆ (hinv g)
 
-
 /-- A `G`-fixed element that is a unit in `A` is a unit in the fixed subring: its inverse is
 automatically fixed (`g • x⁻¹ = (g • x)⁻¹`). No integrality or finiteness needed. -/
 theorem isUnit_subring_of_isUnit {x : FixedPoints.subring A G}
@@ -428,7 +433,6 @@ theorem isUnit_subring_of_isUnit {x : FixedPoints.subring A G}
   push_cast
   rw [← hu, u.mul_inv]
 
-open scoped Pointwise in
 /-- **Ellipticity descends**: the invariant model produced by `exists_invariant_descent` is
 elliptic whenever `W₀` is — its discriminant is a fixed element mapping to the unit
 `Δ(E⁻¹ • W₀) = (E.u⁻¹)¹² • Δ(W₀)` of `A`, hence a unit of the fixed subring

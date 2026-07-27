@@ -513,7 +513,7 @@ theorem exp_subst_log (A : Type*) [CommRing A] [Algebra ℚ A] :
     exact (isUnit_iff_ne_zero.mpr (by exact_mod_cast hn)).map _
   set F := (exp A).subst (PowerSeries.log A) with hF
   have hDF : d⁄dX A F = F * d⁄dX A (PowerSeries.log A) := by
-    rw [hF, derivative_subst A hg, derivative_exp]
+    rw [hF, derivative_subst hg, derivative_exp]
   have hrec : (1 + PowerSeries.X) * d⁄dX A F = F := by
     rw [hDF, ← mul_assoc, mul_comm (1 + PowerSeries.X) F, mul_assoc,
       oneAddX_mul_derivative_log, mul_one]
@@ -568,7 +568,7 @@ theorem log_subst_exp_sub_one (A : Type*) [CommRing A] [Algebra ℚ A] :
   have hg : HasSubst (exp A - 1) := HasSubst.exp_sub_one
   haveI : IsAddTorsionFree A := IsAddTorsionFree.of_module_rat A
   refine PowerSeries.derivative.ext ?_ ?_
-  · rw [derivative_subst A hg, map_sub, derivative_exp, Derivation.map_one_eq_zero,
+  · rw [derivative_subst hg, map_sub, derivative_exp, Derivation.map_one_eq_zero,
       sub_zero, derivative_X]
     have key : ((1 + PowerSeries.X) * d⁄dX A (PowerSeries.log A)).subst
         (exp A - 1) = 1 := by
@@ -1075,6 +1075,7 @@ noncomputable def pZpExp (x : ℤ_[p]) : ℤ_[p] :=
   if h : ‖padicExp p ((x : ℚ_[p]))‖ ≤ 1 then ⟨padicExp p ((x : ℚ_[p])), h⟩ else 1
 
 omit [NormedAlgebra ℚ_[p] L] [IsUltrametricDist L] [CompleteSpace L] in
+set_option backward.isDefEq.respectTransparency false in
 /-- E5: on `pℤ_p` (odd `p`) the analytic exponential is integral, so `pZpExp`
 takes its true branch: `(pZpExp x : ℚ_[p]) = exp x`. -/
 theorem pZpExp_coe (hp2 : p ≠ 2) {x : ℤ_[p]} (hx : x ∈ Ideal.span {(p : ℤ_[p])}) :
@@ -1110,6 +1111,7 @@ noncomputable def pZpLog (x : ℤ_[p]) : ℤ_[p] :=
   if h : ‖padicLog p ((x : ℚ_[p]))‖ ≤ 1 then ⟨padicLog p ((x : ℚ_[p])), h⟩ else 0
 
 omit [NormedAlgebra ℚ_[p] L] [IsUltrametricDist L] [CompleteSpace L] in
+set_option backward.isDefEq.respectTransparency false in
 /-- E5: on `1 + pℤ_p` (odd `p`) the analytic logarithm is integral, so `pZpLog`
 takes its true branch: `(pZpLog x : ℚ_[p]) = log x`. -/
 theorem pZpLog_coe (hp2 : p ≠ 2) {x : ℤ_[p]}

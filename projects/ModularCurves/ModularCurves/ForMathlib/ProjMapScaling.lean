@@ -45,7 +45,6 @@ variable (ρ : 𝒜 →+*ᵍ 𝒜) (u : Aˣ)
 
 include hscale
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Γ-level step: `Away.map ρ t` composed with `awayToSection` at `ρ t` equals `awayToSection`
 at `t` composed with the restriction to `D₊(ρ t) ⊆ D₊(t)`. -/
 lemma map_awayToSection_rescale {d : ℕ} {t : A} (ht : t ∈ 𝒜 d)
@@ -59,7 +58,8 @@ lemma map_awayToSection_rescale {d : ℕ} {t : A} (ht : t ∈ 𝒜 d)
   simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply, CommRingCat.hom_ofHom]
   erw [ProjectiveSpectrum.Proj.awayToSection_apply, ProjectiveSpectrum.Proj.awayToSection_apply]
   rw [Away.map_mk, Away.val_mk, Away.val_mk, Localization.mk_eq_mk', Localization.mk_eq_mk',
-    IsLocalization.map_mk', IsLocalization.map_mk', ← Localization.mk_eq_mk', ← Localization.mk_eq_mk',
+    IsLocalization.map_mk', IsLocalization.map_mk', ← Localization.mk_eq_mk',
+    ← Localization.mk_eq_mk',
     Localization.mk_eq_mk_iff, Localization.r_iff_exists]
   refine ⟨1, ?_⟩
   simp only [OneMemClass.coe_one, one_mul, RingHom.id_apply]
@@ -77,7 +77,6 @@ lemma basicOpenToSpec_SpecMap_map_rescale {d : ℕ} {t : A} (ht : t ∈ 𝒜 d)
     Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_assoc]
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 /-- On the chart `D₊(t)`, precomposing the inclusion `awayι 𝒜 t` by `Spec.map (Away.map ρ t)`
 lands on the inclusion `awayι 𝒜 (ρ t)` — the rescaled chart is the same chart. -/
 lemma SpecMap_map_awayι_rescale {d : ℕ} {t : A} (ht : t ∈ 𝒜 d) (hi : 0 < d)

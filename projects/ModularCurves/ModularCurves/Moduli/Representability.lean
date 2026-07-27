@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.ForMathlib.TateNormalForm
@@ -17,11 +22,13 @@ provable (not merely stateable) targets of the project:
 * **The universal Tate curve** (Loeffler Cor 3.3.5): `Spec ℤ[A,B][Δ⁻¹]` "represents the
   functor `S ↦ {eq. classes of pairs (E,P), E/S elliptic curve, P ∈ E(S) not of order
   1, 2, 3 in any fibre}`."
-* **`Y₁(N)`** (Loeffler Def 3.3.6 & Thm 3.4.4): for `N ≥ 4` (representability needs
-  rigidity, which fails for small `N`) the naive-Γ₁(N) moduli problem over `ℤ[1/N]` is
-  representable by a scheme, smooth and affine over `ℤ[1/N]`.
+* **`Y₁(N)`** (Loeffler Def 3.3.6 & Thm 3.4.4): for `N ≥ 4` the naive-`Γ₁(N)` moduli
+  problem over `ℤ[1/N]` is representable, smooth and affine. Built on the spine below; the
+  representability theorem `gammaOneNaive_representable` now lives in
+  `Moduli/NaiveProblems.lean` (assembled in `ModularCurve/YOneAssembly.lean`).
 * **`Y(N)`** (Loeffler Fact 3.8.1–3.8.3; KM 3.1, 4.7, 5.1): for `N ≥ 3`, `[Γ(N)]` is
-  rigid and representable; over `ℤ[1/N]` the representing scheme is smooth affine.
+  rigid and representable, smooth affine over `ℤ[1/N]`; `gammaFullNaive_representable`
+  likewise now lives in `Moduli/NaiveProblems.lean`.
 
 The nowhere-order-≤3 condition is expressed ring-theoretically through the division
 polynomials (`ψ₂`, `ψ₃` — mathlib `WeierstrassCurve.Ψ`): a function on `Spec R` is nowhere
@@ -91,7 +98,8 @@ noncomputable def tateCurve : WeierstrassCurve (MvPolynomial (Fin 2) ℤ) :=
     a₄ := 0
     a₆ := 0 }
 
-/-- The universal Tate curve is in Tate normal form (sanity pin). -/
+/-- The universal Tate curve is in Tate normal form. Sanity pin with no downstream
+consumer: it certifies `tateCurve` matches `IsTateNormal` by construction. -/
 theorem tateCurve_isTateNormal : tateCurve.IsTateNormal := ⟨rfl, rfl, rfl⟩
 
 /-- The coordinate ring `ℤ[A, B][Δ(A,B)⁻¹]` of the universal Tate curve — the affine ring
@@ -117,12 +125,17 @@ pairs (E,P) … P ∈ E(S) not of order 1,2,3 in any fibre}`".)
 ADVERSARIAL FIX (2026-07-06): the bare `Nonempty (≃)` form was a cardinality-only
 claim (dischargeable for e.g. `A = ℂ` by counting); the equivalence is now PINNED to
 the canonical evaluation map `φ ↦ (φ A, φ B)` — naturality in `A` follows from the
-pin. -/
+pin.
+
+Proven register item: this is the **absolute (ℤ-base)** form of Loeffler Cor 3.3.5,
+kept as the register anchor, and has no direct code consumer project-wide. The Y₁ tower
+instead uses the `R`-relative analogue `TateAtlas.ringOverLift` (and its `→ₐ[R]` form
+`TateAtlas.ringOverAlgLift`) in `ModularCurve/YOneAtlasClassify.lean`. -/
 theorem tateRing_homEquiv (A : Type u) [CommRing A] :
     ∃ e : (tateRing →+* A) ≃
         { c : A × A //
           IsUnit ((tateCurve.map (MvPolynomial.eval₂Hom (Int.castRingHom A)
-            (fun i => if i = 0 then c.1 else c.2))).Δ) },
+            (fun i ↦ if i = 0 then c.1 else c.2))).Δ) },
       ∀ φ : tateRing →+* A,
         ((e φ).1 : A × A) =
           (φ (algebraMap (MvPolynomial (Fin 2) ℤ) tateRing (MvPolynomial.X 0)),

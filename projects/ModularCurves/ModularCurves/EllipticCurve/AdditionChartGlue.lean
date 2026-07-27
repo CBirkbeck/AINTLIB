@@ -1,5 +1,10 @@
-import ModularCurves.EllipticCurve.AdditionChartHom
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartAgree
+import ModularCurves.EllipticCurve.AdditionChartHom
 
 /-!
 # Proportional triples define the same chart morphism (T-W7.0c-c5β, β4(b))
@@ -77,10 +82,11 @@ theorem chartHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
   exact congrArg φ (lawOneTriple_mul_lawTwoTriple W i j m k)
 
 /-- **(β4(b), the two laws glue — `Away`-chart form)** The `chartAway` presentation of
-`chartHomOfTriple_lawOne_eq_lawTwo`: wherever both laws are regular at index `k`, they induce the same
-`chartAway W k`-algebra map. Post-composing the `chartHomOfTriple` agreement with `chartCoordAlgEquiv⁻¹`
-(the presentation `Proj.awayι` consumes). This is the ring-level input the scheme-level `addOn_agree`
-(the two Bosma–Lenstra laws agree on `blOpenZ ⊓ blOpenY`) consumes on each same-index overlap piece. -/
+`chartHomOfTriple_lawOne_eq_lawTwo`: wherever both laws are regular at index `k`, they induce the
+same `chartAway W k`-algebra map. Post-composing the `chartHomOfTriple` agreement with
+`chartCoordAlgEquiv⁻¹` (the presentation `Proj.awayι` consumes). This is the ring-level input the
+scheme-level `addOn_agree` (the two Bosma–Lenstra laws agree on `blOpenZ ⊓ blOpenY`) consumes on
+each same-index overlap piece. -/
 theorem chartAwayHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
     (φ : biChartRing W i j →+* S)
     (t s : Fin 3 → S) (hts : ∀ m, t m = φ (lawTwoTriple W i j m))
@@ -92,10 +98,10 @@ theorem chartAwayHomOfTriple_lawOne_eq_lawTwo (i j k : Fin 3) (u v : S)
   congrArg (·.comp (chartCoordAlgEquiv W k).symm.toAlgHom)
     (chartHomOfTriple_lawOne_eq_lawTwo W i j k u v φ t s hts hss hu hv ht hs)
 
-/-- **(β4(b), general form)** Two triples `s`, `t` in `S`, regular at index `k` (witnesses `v`, `u`),
-whose `2×2` minors vanish (`s m * t k = s k * t m` for all `m`), induce the same chart morphism. The
-minor hypothesis is exactly what `ratio_eq_of_minor` needs; `chartHomOfTriple_lawOne_eq_lawTwo` is the
-`lawOne`/`lawTwo` instance. -/
+/-- **(β4(b), general form)** Two triples `s`, `t` in `S`, regular at index `k` (witnesses `v`,
+`u`), whose `2×2` minors vanish (`s m * t k = s k * t m` for all `m`), induce the same chart
+morphism. The minor hypothesis is exactly what `ratio_eq_of_minor` needs;
+`chartHomOfTriple_lawOne_eq_lawTwo` is the `lawOne`/`lawTwo` instance. -/
 theorem chartHomOfTriple_cross_eq (k : Fin 3) (u v : S) (t s : Fin 3 → S)
     (hmin : ∀ m, s m * t k = s k * t m) (hu : t k * u = 1) (hv : s k * v = 1)
     (ht : (W.map (algebraMap R S)).toProjective.Equation t)

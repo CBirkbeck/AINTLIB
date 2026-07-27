@@ -1,45 +1,45 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModSquare
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModSquare
 
 /-!
 # The third-order (mod `p³`) Dwork-coordinate coefficient machinery
 
 This file builds the **third-order** Dwork power-basis coordinate coefficient
 `valuedLambdaQuotientDworkCoeffModCube`, the mod-`p³` analog of the proven second-order
-`valuedLambdaQuotientDworkCoeffModSq` (`CaseIICor823SecondOrderCoeff.lean`).  It is needed to recover
-the **second `37`-adic digit** `c₆₈` of the degree-`68` Dwork slice's `varpi^{32}` coordinate, which
-the mod-`p²` coordinate cannot see (the `−37` ramification fold annihilates the source's second digit
-at mod-`p²`).
-
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+`valuedLambdaQuotientDworkCoeffModSq` (`DworkCoeffModSquare.lean`).  It is needed to recover the
+**second `37`-adic digit** `c₆₈` of the degree-`68` Dwork slice's `varpi^{32}` coordinate, which the
+mod-`p²` coordinate cannot see (the `−37` ramification fold annihilates the source's second digit at
+mod-`p²`).
 
 ## The third order
 
-`valuedLambdaQuotientDworkCoeffModCube i` takes an element of
-`ValuedIntegerRing p K ⧸ (lambdaIdeal p K)^(3*(p-1))` (`= mod (p³)`, since `(p³) = (λ)^{3(p-1)}`),
-maps it into the completed Dwork ring, reads the `i`-th Dwork power-basis coordinate (an element of
-`RationalPadicIntegerRing p ≅ ℤ_[p]`), and reduces it modulo `p³` via `rationalPadicIntegerToZModCube`
-(`= PadicInt.toZModPow 3` through the ring equiv).  It is well-defined modulo `(λ)^{3(p-1)} = (p³)`
-because changing the representative by `(p³)` changes each Dwork coordinate by `p³·(coord)`, which
-dies mod `p³`.  This is the **exact mod-`p³` analog** of the second-order construction, built in
-parallel here, reusing the `p`-generic Dwork local-algebra API
+`valuedLambdaQuotientDworkCoeffModCube i` takes an element of `ValuedIntegerRing p K ⧸ (lambdaIdeal
+p K)^(3*(p-1))` (`= mod (p³)`, since `(p³) = (λ)^{3(p-1)}`), maps it into the completed Dwork ring,
+reads the `i`-th Dwork power-basis coordinate (an element of `RationalPadicIntegerRing p ≅ ℤ_[p]`),
+and reduces it modulo `p³` via `rationalPadicIntegerToZModCube` (`= PadicInt.toZModPow 3` through
+the ring equiv).  It is well-defined modulo `(λ)^{3(p-1)} = (p³)` because changing the
+representative by `(p³)` changes each Dwork coordinate by `p³·(coord)`, which dies mod `p³`.  This
+is the **exact mod-`p³` analog** of the second-order construction, built in parallel here, reusing
+the `p`-generic Dwork local-algebra API
 (`span_natCast_prime_dworkComplete_eq_parameterIdeal_pow_pred`,
 `dworkParameterPowerLinearMap_injective`).
 
 ## What is built
 
-* **§0** — `rationalPadicIntegerToZModCube : RationalPadicIntegerRing p →+* ZMod (p^3)`, the mod-`p³`
-  residue map, and `rationalPadicIntegerToZModCube_eq_zero_iff_mem_primeIdeal_pow`: its kernel is
-  `(rationalPadicPrimeIdeal p)^3 = (p³)`.  Also the compatibility
+* **§0** — `rationalPadicIntegerToZModCube : RationalPadicIntegerRing p →+* ZMod (p^3)`, the
+  mod-`p³` residue map, and `rationalPadicIntegerToZModCube_eq_zero_iff_mem_primeIdeal_pow`: its
+  kernel is `(rationalPadicPrimeIdeal p)^3 = (p³)`.  Also the compatibility
   `rationalPadicIntegerToZModSq_comp_castHom`: reducing mod-`p³` then casting to `ZMod p²` is the
   mod-`p²` residue.
 
-* **§1** — the mod-`p³` coordinate congruence:
-  `x - y ∈ (dworkParameterIdeal p K)^(3(p-1))` (`= (p³)`) forces every Dwork power-basis coordinate to
-  agree mod `p³` (`dworkParameterPowerBasis_coeff_zmodCube_eq_of_sub_mem_parameterIdeal_pow_three_pred`).
+* **§1** — the mod-`p³` coordinate congruence: `x - y ∈ (dworkParameterIdeal p K)^(3(p-1))` (`=
+  (p³)`) forces every Dwork power-basis coordinate to agree mod `p³`
+  (`dworkParameterPowerBasis_coeff_zmodCube_eq_of_sub_mem_parameterIdeal_pow_three_pred`).
 
-* **§2** — the third-order coefficient `valuedLambdaQuotientDworkCoeffModCube` and its evaluation API
-  (`_mk`, `_evalₐ`) plus `_natCast_mul`, `_intCast_mul`, the parallel of the second-order API used by
-  the deg-`68` factorial extraction.
+* **§2** — the third-order coefficient `valuedLambdaQuotientDworkCoeffModCube` and its evaluation
+  API (`_mk`, `_evalₐ`) plus `_natCast_mul`, `_intCast_mul`, the parallel of the second-order API
+  used by the deg-`68` factorial extraction.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4 (Proposition 8.12, Theorem
@@ -53,7 +53,7 @@ noncomputable section
 open NumberField
 open NumberField.IsCMField
 open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField
+open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -67,7 +67,8 @@ variable [NumberField.IsCMField K]
 
 /-! ## 0. The mod-`p³` residue map on the rational completed integer ring -/
 
-/-- **The mod-`p³` residue map** on the rational completed integer coefficient ring, transported from
+/-- **The mod-`p³` residue map** on the rational completed integer coefficient ring, transported
+from
 mathlib's `PadicInt.toZModPow 3`.  Third-order analog of `rationalPadicIntegerToZModSq`. -/
 noncomputable def rationalPadicIntegerToZModCube :
     RationalPadicIntegerRing p →+* ZMod (p ^ 3) :=
@@ -121,7 +122,8 @@ theorem rationalPadicIntegerToZModCube_eq_zero_iff_mem_primeIdeal_pow
 /-- **Mod-`p³` then cast to `ZMod p²` is the mod-`p²` residue** (proven): `castHom (p²∣p³) ∘
 rationalPadicIntegerToZModCube = rationalPadicIntegerToZModSq`.  Both sides are `PadicInt.toZModPow`
 through the same equiv, and `toZModPow 3` followed by the `ZMod p³ → ZMod p²` cast is `toZModPow 2`
-(`PadicInt.zmod_cast_comp_toZModPow`).  Lets the mod-`p³` coordinate recover the mod-`p²` coordinate. -/
+(`PadicInt.zmod_cast_comp_toZModPow`).  Lets the mod-`p³` coordinate recover the mod-`p²`
+coordinate. -/
 theorem castHom_rationalPadicIntegerToZModCube (x : RationalPadicIntegerRing p) :
     (ZMod.castHom (pow_dvd_pow p (by norm_num : 2 ≤ 3)) (ZMod (p ^ 2)))
         (rationalPadicIntegerToZModCube p x) =
@@ -144,11 +146,11 @@ theorem castHom_rationalPadicIntegerToZModCube (x : RationalPadicIntegerRing p) 
 
 /-! ## 1. The mod-`p³` Dwork power-basis coordinate congruence
 
-If `x - y ∈ (dworkParameterIdeal p K)^(3(p-1)) = (p³)`, then every Dwork power-basis coordinate agrees
-mod `p³`.  Third-order analog of `dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_sq_…`; the proof
+If `x - y ∈ (dworkParameterIdeal p K)^(3(p-1)) = (p³)`, then every Dwork power-basis coordinate
+agrees mod `p³`.  Third-order analog of `dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_sq_…`;
+the proof
 is the exact parallel with `p³` in place of `p²`. -/
 
-set_option maxHeartbeats 800000 in
 -- The proof compares two full Dwork power-basis expansions through the completed ramification
 -- identity `(p³) = (varpi)^(3(p-1))`; elaborating the basis and scalar-action coercions is slower
 -- than the default budget (as in the second-order analog).
@@ -164,69 +166,8 @@ theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_cube_of_mem_parameterI
     (dworkParameterPowerBasis p K).repr x i -
         (dworkParameterPowerBasis p K).repr y i ∈
       (rationalPadicPrimeIdeal p) ^ 3 := by
-  classical
-  let R₀ : Type := RationalPadicIntegerRing p
-  let S : Type _ := DworkCompleteIntegerRing p K
-  have hspan : x - y ∈ Ideal.span ({(p : S) ^ 3} : Set S) := by
-    rw [← Ideal.span_singleton_pow,
-      span_natCast_prime_dworkComplete_eq_parameterIdeal_pow_pred (p := p) (K := K),
-      ← pow_mul, Nat.mul_comm]
-    exact hxy
-  rcases Ideal.mem_span_singleton'.mp hspan with ⟨z, hz⟩
-  let a : Fin (p - 1) → R₀ :=
-    (dworkParameterPowerBasis p K).repr x -
-      (dworkParameterPowerBasis p K).repr y
-  let b : Fin (p - 1) → R₀ :=
-    (dworkParameterPowerBasis p K).repr z
-  have hmap_a :
-      dworkParameterPowerLinearMap p K a = x - y := by
-    calc
-      dworkParameterPowerLinearMap p K a =
-          dworkParameterPowerLinearMap p K
-            ((dworkParameterPowerBasis p K).repr x -
-              (dworkParameterPowerBasis p K).repr y) := rfl
-      _ =
-          dworkParameterPowerLinearMap p K ((dworkParameterPowerBasis p K).repr x) -
-            dworkParameterPowerLinearMap p K ((dworkParameterPowerBasis p K).repr y) :=
-            (dworkParameterPowerLinearMap p K).map_sub
-              ((dworkParameterPowerBasis p K).repr x)
-              ((dworkParameterPowerBasis p K).repr y)
-      _ = x - y := by
-            rw [KummerLogTrace.dworkParameterPowerLinearMap_repr
-                (p := p) (K := K) x,
-              KummerLogTrace.dworkParameterPowerLinearMap_repr
-                (p := p) (K := K) y]
-  have hmap_b :
-      dworkParameterPowerLinearMap p K (((p : R₀) ^ 3) • b) = x - y := by
-    have hbmap : dworkParameterPowerLinearMap p K b = z := by
-      change dworkParameterPowerLinearMap p K
-        ((dworkParameterPowerBasis p K).repr z) = z
-      exact KummerLogTrace.dworkParameterPowerLinearMap_repr
-        (p := p) (K := K) z
-    calc
-      dworkParameterPowerLinearMap p K (((p : R₀) ^ 3) • b)
-          = ((p : R₀) ^ 3) • dworkParameterPowerLinearMap p K b :=
-            (dworkParameterPowerLinearMap p K).map_smul ((p : R₀) ^ 3) b
-      _ = ((p : R₀) ^ 3) • z := by rw [hbmap]
-      _ = (p : S) ^ 3 * z := by
-            change algebraMap R₀ S ((p : R₀) ^ 3) * z = (p : S) ^ 3 * z
-            simp [R₀, S]
-      _ = x - y := by simpa [S, mul_comm] using hz
-  have hcoeff : a = ((p : R₀) ^ 3) • b :=
-    dworkParameterPowerLinearMap_injective (p := p) (K := K)
-      (hmap_a.trans hmap_b.symm)
-  have hi := congrFun hcoeff i
-  change a i ∈ (rationalPadicPrimeIdeal p) ^ 3
-  rw [hi]
-  have hp3_mem : (p : R₀) ^ 3 ∈ (rationalPadicPrimeIdeal p) ^ 3 := by
-    rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow]
-    exact Ideal.mem_span_singleton_self ((p : R₀) ^ 3)
-  have hmul_mem : (p : R₀) ^ 3 * b i ∈ (rationalPadicPrimeIdeal p) ^ 3 :=
-    ((rationalPadicPrimeIdeal p) ^ 3).mul_mem_right (b i) hp3_mem
-  have hi' : (((p : R₀) ^ 3) • b) i = (p : R₀) ^ 3 * b i := by
-    simp [Pi.smul_apply, smul_eq_mul]
-  rw [hi']
-  exact hmul_mem
+  exact dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_pow_of_mem_parameterIdeal_pow_mul
+    (p := p) (K := K) (k := 3) hxy i
 
 omit [NumberField.IsCMField K] in
 /-- **The mod-`p³` Dwork-coordinate congruence (residue form)** (proven): `x - y ∈
@@ -254,8 +195,9 @@ theorem dworkParameterPowerBasis_coeff_zmodCube_eq_of_sub_mem_parameterIdeal_pow
 
 /-! ## 2. The third-order Dwork-coordinate coefficient
 
-`valuedLambdaQuotientDworkCoeffModCube i` reads the `varpi^i` Dwork coordinate modulo `p³` of a valued
-`λ`-quotient at precision `3*(p-1)` (`= mod (p³)`), through the completed Dwork ring.  Full mod-`p³`
+`valuedLambdaQuotientDworkCoeffModCube i` reads the `varpi^i` Dwork coordinate modulo `p³` of a
+valued `λ`-quotient at precision `3*(p-1)` (`= mod (p³)`), through the completed Dwork ring.  Full
+mod-`p³`
 analog of `valuedLambdaQuotientDworkCoeffModSq`. -/
 
 omit [NumberField.IsCMField K] in

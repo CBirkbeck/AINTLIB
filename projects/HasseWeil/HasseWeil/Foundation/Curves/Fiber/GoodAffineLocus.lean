@@ -132,13 +132,6 @@ variable [Algebra C₂.FunctionField C₁.FunctionField]
 
 variable [IsIntegrallyClosed C₂.CoordinateRing]
 
--- In the four declarations below, `backward.isDefEq.respectTransparency false` lets
--- instance resolution identify the `Module`/`Algebra` structures on the subalgebra
--- `integralClosure Af C₁.FunctionField` along different projection paths, exactly as in
--- `Mathlib/RingTheory/DedekindDomain/IntegralClosure.lean` (same idiom as
--- `HasseWeil/Basic.lean`).
-
-set_option backward.isDefEq.respectTransparency false in
 /-- The integral closure of the good affine coordinate ring `Af` in `C₁.FunctionField`
 is a Dedekind domain (Krull–Akizuki via the pure layer). -/
 theorem isDedekindDomain_integralClosure (hf : f ≠ 0) :
@@ -148,7 +141,6 @@ theorem isDedekindDomain_integralClosure (hf : f ≠ 0) :
   exact RamificationFinite.isDedekindDomain Af C₂.FunctionField C₁.FunctionField
     (integralClosure Af C₁.FunctionField)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The integral closure of `Af` in `C₁.FunctionField` is module-finite over `Af`
 (separable case of Krull–Akizuki). -/
 theorem module_finite_integralClosure (hf : f ≠ 0) :
@@ -159,7 +151,6 @@ theorem module_finite_integralClosure (hf : f ≠ 0) :
     (integralClosure Af C₁.FunctionField)
 
 omit [Algebra.IsSeparable C₂.FunctionField C₁.FunctionField] in
-set_option backward.isDefEq.respectTransparency false in
 /-- The integral closure of `Af` in `C₁.FunctionField` has fraction field
 `C₁.FunctionField`. -/
 theorem isFractionRing_integralClosure (hf : f ≠ 0) :
@@ -169,20 +160,18 @@ theorem isFractionRing_integralClosure (hf : f ≠ 0) :
   exact RamificationFinite.isFractionRing Af C₂.FunctionField C₁.FunctionField
     (integralClosure Af C₁.FunctionField)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **The finite-ramified-locus statement for the curve extension** (W-1 + W-2): for a
 good affine open of `C₂` with coordinate ring `Af` and a finite separable extension
 `C₁.FunctionField / C₂.FunctionField` (e.g. the pullback of a separable curve map
 `φ : C₁ → C₂`), all but finitely many primes of `Af` are unramified in the integral
 closure `B` of `Af` in `C₁.FunctionField`: there is a finite set `S` of ideals of `Af`
 such that every prime `P` of `B` lying over a prime `q ∉ S` has
-`Ideal.ramificationIdx q P = 1`. -/
+`Ideal.ramificationIdx' q P = 1`. -/
 theorem exists_finite_ramification_locus (hf : f ≠ 0) :
     ∃ S : Set (Ideal Af), S.Finite ∧
       ∀ q : Ideal Af, q ∉ S →
         ∀ P : Ideal (integralClosure Af C₁.FunctionField), P.IsPrime → P.under Af = q →
-          Ideal.ramificationIdx q P
-            = 1 := by
+          Ideal.ramificationIdx' q P = 1 := by
   haveI := isDedekindDomain_away C₂ f Af hf
   haveI := isFractionRing_away C₂ f Af
   exact RamificationFinite.exists_finite_ramification_locus Af C₂.FunctionField

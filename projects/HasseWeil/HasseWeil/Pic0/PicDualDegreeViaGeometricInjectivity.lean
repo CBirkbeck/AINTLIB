@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
 import HasseWeil.Isogeny.BaseChange.Basic
 import HasseWeil.Pic0.ToClassFunctorial
@@ -393,7 +398,8 @@ additivity output).  **No genuineness, no `β`-surjectivity, no Wall C.** -/
 
 The residual `hpoint` carried by `degree_eq_N_via_picDual_geometric_v2` is the per-point agreement
 `κ(α P) = mk0(comap α* 𝔪_P)` for the **actual** `Isogeny` point map `α.toAddMonoidHom`.  The shipped
-`HasseWeil.Curves.CurveMap.toClass_toPointMap` proves *exactly* this `comap`-form agreement — but for
+`HasseWeil.Curves.CurveMap.toClass_toPointMap` proves *exactly* this `comap`-form agreement — but
+for
 the **geometric** point map `φ.toPointMap coordHom` of a `CurveMap φ`, which is *computed from the
 comorphism* (`evalAtPullback`).  An `Isogeny` stores its `pullback` and `toAddMonoidHom` as
 **independent** fields (`HasseWeil/Basic.lean`), so the only genuine residual is the *per-isogeny*
@@ -405,13 +411,16 @@ identification of the two point maps:
 
 This holds for genuine isogenies (Frobenius, mult-by-`n`, and their `addIsog` combinations) by their
 explicit construction, where the additive point action *is* the comorphism's set-theoretic image.
-The bridge below threads `toClass_toPointMap` through that identification (`hcompat`), discharging the
-*full* `hpoint` hypothesis from it.  The `comap`-nonzero side condition `hne` of `toClass_toPointMap`
+The bridge below threads `toClass_toPointMap` through that identification (`hcompat`), discharging
+the
+*full* `hpoint` hypothesis from it.  The `comap`-nonzero side condition `hne` of
+`toClass_toPointMap`
 is supplied by `hpoint`'s own `hcomap` argument (so no extra obligation is introduced).
 
 `coordHom.toAlgHom = ch.toAlgHom` ties the `Isogeny.CoordHom` `ch` (consumed by the `Naturality`
 machinery) to the `CurveMap.CoordHom` `coordHom` (consumed by `toPointMap`); both carry the same
-algebra hom `R →ₐ[F] R`, so this is `rfl` for the intended deployment (one builds `coordHom` and `ch`
+algebra hom `R →ₐ[F] R`, so this is `rfl` for the intended deployment (one builds `coordHom` and
+`ch`
 from the same restriction). -/
 theorem hpoint_of_toPointMap_compat
     {F : Type*} [Field F] [DecidableEq F]
@@ -436,7 +445,8 @@ theorem hpoint_of_toPointMap_compat
   intro x y h hcomap
   set P : (⟨E⟩ : HasseWeil.Curves.SmoothPlaneCurve F).SmoothPoint := ⟨x, y, h⟩ with hP
   -- The `comap`-nonzero side condition of `toClass_toPointMap`, from `hcomap` (`hcoord` rewrites
-  -- `coordHom.toAlgHom` to `ch.toAlgHom`; `maximalIdealAt P` is `XYIdeal E x (C y)` definitionally).
+  -- `coordHom.toAlgHom` to `ch.toAlgHom`; `maximalIdealAt P` is `XYIdeal E x (C y)`
+  -- definitionally).
   have hne : Ideal.comap coordHom.toAlgHom.toRingHom
       ((⟨E⟩ : HasseWeil.Curves.SmoothPlaneCurve F).maximalIdealAt P) ≠ ⊥ := by
     rw [hcoord]
@@ -544,7 +554,8 @@ This is the genuine content the `Isogeny`↔`CurveMap` correspondence carries (t
 its point map and pullback independently); it holds for genuine isogenies — Frobenius, mult-by-`n`,
 and their `addIsog` combinations such as `genuineIsogSmulSub` — by their explicit construction (the
 additive point action *is* the comorphism's set-theoretic image).  The `comap`-nonzero side
-condition of `toClass_toPointMap` is supplied internally from the carried `hcomap` data, so `hcompat`
+condition of `toClass_toPointMap` is supplied internally from the carried `hcomap` data, so
+`hcompat`
 is the *only* added residual replacing `hpoint`.
 
 Residuals (named): `hcompat` (the `Isogeny`↔`CurveMap` point-map identification, in place of
@@ -742,7 +753,7 @@ theorem hgeom_of_infinite_point
       (∀ P : W.toAffine.Point,
         (mulByInt W.toAffine m).toAddMonoidHom P = (mulByInt W.toAffine n).toAddMonoidHom P) →
       m = n :=
-  fun {m n} h ↦ mulByInt_pointMap_injective_of_infinite_point W.toAffine htor h
+  fun {_m _n} h ↦ mulByInt_pointMap_injective_of_infinite_point W.toAffine htor h
 
 /-! ### Part (B) v3: discharge `hpicval` to the SINGLE precise III.6.2(c)/III.8 residual
 
@@ -756,7 +767,8 @@ opaque residual.  Part (B) v3 **discharges** it via the generic PicDual reducer
 This is the irreducible content (any uniqueness route is circular with `deg(rπ − s) = N`; III.8 for
 `α` is equivalent to III.6.2(c) additivity since `tr(rπ − s) = r·t − 2s`).  The candidate trace half
 `(rπ − s) + (rV − s) = [r·t − 2s]` is derived **non-circularly** from the shipped `π + V = [t]`
-(`h_sum_trace`), inside the generic reducer.  The per-piece `picDual` values `htrace_dual` decomposes
+(`h_sum_trace`), inside the generic reducer.  The per-piece `picDual` values `htrace_dual`
+decomposes
 into are the shipped non-circular seeds `picDual π = V` (`picDual_frobenius_eq_verschiebung`),
 `picDual(rπ) = rV` (`Isogeny.picDual_zsmul_eq_zsmul_of_isDual`), `picDual [n] = [n]`
 (`picDual_mulByInt_eq_self`). -/

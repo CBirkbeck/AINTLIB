@@ -2,40 +2,39 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».AdicCompletionNoetherian
-import «Adic spaces».LaurentRefinement
-import «Adic spaces».LaurentRefinementTree
-import «Adic spaces».EmbeddingTopo
-import «Adic spaces».StandardCover
-import «Adic spaces».LocalBasis
-import «Adic spaces».StructureSheaf
-import «Adic spaces».RelativeRationalLocData
-import «Adic spaces».Cor832
-import «Adic spaces».WedhornCoverNormalization
-import «Adic spaces».SpvCompletionExtension
-import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
-import «Adic spaces».SpaCompactNoHArch
 import Mathlib.Combinatorics.Pigeonhole
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+
+import «Adic spaces».AdicCompletionNoetherian
+import «Adic spaces».Cor832
+import «Adic spaces».EmbeddingTopo
+import «Adic spaces».LaurentRefinement
+import «Adic spaces».LaurentRefinementTree
+import «Adic spaces».LocalBasis
+import «Adic spaces».RelativeRationalLocData
+import «Adic spaces».SpaCompactNoHArch
+import «Adic spaces».SpvCompletionExtension
+import «Adic spaces».StandardCover
+import «Adic spaces».StructureSheaf
+import «Adic spaces».WedhornCoverNormalization
+import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
 
 /-!
 # Residual mathematical statements for completing Tate acyclicity
 
-This file collects, **as Lean theorem statements with `sorry` bodies**,
-the remaining mathematical results needed to close Wedhorn Theorem
-8.28(b) and its `IsSheafy` upgrade unconditionally.
+This file develops the remaining inputs for Wedhorn's Tate acyclicity theorem and its
+`IsSheafy` consequence. Producer-WIP declarations remain explicitly isolated.
 
-## Critical-path structure
+## Main definitions
 
-* **Group I** — closes the topological-inducing side of `IsSheafy`
-  via the Laurent-refinement-tree route (round-5 reviewer-confirmed).
-* **Group II** — closes the algebraic separation + gluing.
-* **Group III** — foundational analytic transitivity bridge.
-* **Group IV** — Spa-point existence input (adic Nullstellensatz).
-* **Group V** — Mathlib gaps (external dependencies).
+* `RatioNodeData`: validity data for a ratio split of a rational locality.
+* `RatioTreeRealization`: coherent realizations of ratio Laurent trees.
 
-Each statement is given the natural Lean signature; the body is
-`:= by sorry` so the file compiles (with `sorry`-warnings).
+## Main results
+
+* `exists_wedhorn_laurent_refinement_tree`: the Laurent refinement used for sheafiness.
+* `tateAcyclicityComplete`: closure of the algebraic acyclicity argument.
+* `isSheafyComplete`: closure of the sheafiness argument.
 -/
 
 namespace ValuationSpectrum
@@ -259,33 +258,23 @@ theorem exists_per_D_finite_cover_of_localBasisHyp
       (∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
         ∃ f ∈ mk_S_D D, v ∈ rationalOpen (insert f C.base.T) C.base.s) := by
   classical
-  -- For each `D`, the set `W D := {f : A | R(insert f base.T, base.s) ⊆ R(D.T, D.s)}`
-  -- indexes the plus-pieces that fit inside `D`. `LocalBasisHyp` says every point
-  -- of `R(D.T, D.s)` lies in some `f ∈ W D` plus-piece.
   set W : RationalLocData A → Set A := fun D =>
     {f | rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s} with hW_def
-  -- The W-indexed family covers `K_D = Subtype.val ⁻¹' R(D.T, D.s)` in `↥(Spa A A⁺)`.
   have h_cover : ∀ D ∈ C.covers,
       (Subtype.val ⁻¹' rationalOpen D.T D.s : Set ↥(Spa A A⁺)) ⊆
         ⋃ f ∈ W D, (Subtype.val ⁻¹' rationalOpen (insert f C.base.T) C.base.s :
           Set ↥(Spa A A⁺)) := by
     rintro D hD ⟨v, _⟩ hv_D
     simp only [Set.mem_preimage] at hv_D
-    -- Strengthened `LocalBasisHyp` (2026-05-23) returns 3 conjuncts:
-    -- (hv_plus, hv_nonvanish, h_sub). C2 only consumes hv_plus + h_sub here;
-    -- the L4 replacement (task #114) will use hv_nonvanish via a separate
-    -- strengthened C2 (`exists_per_D_finite_nonvanishing_cover_of_localBasisHyp`).
     obtain ⟨f, hv_plus, _hv_nonvanish, h_sub⟩ := h_basis D hD v hv_D
     refine Set.mem_iUnion.mpr ⟨f, Set.mem_iUnion.mpr ⟨h_sub, ?_⟩⟩
     exact hv_plus
-  -- Quasi-compactness of `R(D.T, D.s)` extracts a finite subfamily.
   choose mk_S_D h_subset hW_fin _h_cover_fin using fun D (hD : D ∈ C.covers) =>
     (isCompact_preimage_rationalOpen_noHArch D).elim_finite_subcover_image
       (b := W D)
       (c := fun f => Subtype.val ⁻¹' rationalOpen (insert f C.base.T) C.base.s)
       (fun f _ => rationalOpen_isOpen _ _)
       (h_cover D hD)
-  -- Convert to `Finset A`, returning `∅` outside `C.covers`.
   refine ⟨fun D => if hD : D ∈ C.covers then (hW_fin D hD).toFinset else ∅, ?_, ?_⟩
   · intro D hD f hf
     simp only [dif_pos hD, Set.Finite.mem_toFinset] at hf
@@ -335,8 +324,6 @@ theorem principalPair_A₀_completeSpace_of_stronglyNoetherianTate
     letI : UniformSpace ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
       UniformSpace.comap Subtype.val ‹UniformSpace A›
     CompleteSpace ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ := by
-  -- Per round-2 reviewer Q1 + B2 #24: `[CompleteSpace A]` (right-uniform structure)
-  -- is now a standing assumption.
   letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
   set P := (IsTateRing.principalPair A).toPairOfDefinition
@@ -367,21 +354,14 @@ theorem principalPair_isAdicComplete_of_stronglyNoetherianTate
     IsAdicComplete
       (IsTateRing.principalPair A).toPairOfDefinition.I
       (IsTateRing.principalPair A).toPairOfDefinition.A₀ := by
-  -- Equip the ambient `A` with its canonical (right) uniform structure as a
-  -- topological additive group; on an additive _commutative_ topological
-  -- group this canonical uniformity makes `A` an `IsUniformAddGroup`.
   letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI : IsUniformAddGroup A := isUniformAddGroup_of_addCommGroup
-  -- `A₀` inherits the subspace uniformity via `Subtype.val`.
   letI : UniformSpace ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     UniformSpace.comap Subtype.val ‹UniformSpace A›
-  -- Inherit `IsUniformAddGroup` via the canonical subring/addsubgroup inclusion.
   haveI : IsUniformAddGroup
       ↥(IsTateRing.principalPair A).toPairOfDefinition.A₀ :=
     AddSubgroup.isUniformAddGroup
       (IsTateRing.principalPair A).toPairOfDefinition.A₀.toAddSubgroup
-  -- Apply the `IsAdic.isAdicComplete_iff` equivalence; `T2Space` is automatic
-  -- as a subspace of `T2Space A`, `CompleteSpace` is the named sub-atom.
   exact ((IsTateRing.principalPair A).toPairOfDefinition.isAdic.isAdicComplete_iff).mpr
     ⟨principalPair_A₀_completeSpace_of_stronglyNoetherianTate,
      inferInstance⟩
@@ -396,10 +376,6 @@ theorem aplus_le_A₀_of_stronglyNoetherianTate_principal
     [NonarchimedeanRing A] [CompatiblePlusSubring A]
     (P : PairOfDefinition A) :
     (A⁺ : Set A) ⊆ P.A₀ := by
-  -- Per round-2 reviewer Q1 + B2 #25: `[CompatiblePlusSubring A]` is now a
-  -- standing assumption. The typeclass provides `A⁺ ⊆ D.P.A₀` for any
-  -- RationalLocData D; specialise to a trivial D with `D.P := P`,
-  -- `T := {1}`, `s := 1`.
   let D : RationalLocData A :=
     { P := P
       T := {1}
@@ -486,26 +462,21 @@ theorem span_top_of_per_D_finite_cover
     (h_cover_D : ∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
       ∃ f ∈ mk_S_D D, v ∈ rationalOpen (insert f C.base.T) C.base.s) :
     Ideal.span ((C.covers.biUnion mk_S_D : Finset A) : Set A) = ⊤ := by
-  -- Materialise the canonical principal pair and its supporting data.
   let P : PairOfDefinition A :=
     (IsTateRing.principalPair A).toPairOfDefinition
   haveI : IsAdicComplete P.I P.A₀ :=
     principalPair_isAdicComplete_of_stronglyNoetherianTate
   have hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀ :=
     principalPair_aplus_le_A₀_of_stronglyNoetherianTate
-  -- Strengthen the per-D cover so each `f` has `v(f) ≠ 0`.
   have h_cover_D_nonzero :
       ∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
         ∃ f ∈ mk_S_D D,
           v ∈ rationalOpen (insert f C.base.T) C.base.s ∧ ¬ v.vle f 0 :=
     strengthened_cover_of_basic_cover C mk_S_D h_cover_D
-  -- Outside-base rescue.
   have h_outside :
       ∀ v ∈ Spa A A⁺, v ∉ rationalOpen C.base.T C.base.s →
         ∃ f ∈ C.covers.biUnion mk_S_D, ¬ v.vle f 0 :=
     outside_rescue_of_per_D_cover C mk_S_D h_in_D h_cover_D
-  -- Reduce to no-common-zero on Spa via Prop 7.14 and case-split on
-  -- membership in the base rational open.
   refine (spanTop_iff_noCommonZero_spa P hAplus_le_A₀ _).mpr ?_
   intro v hv_spa
   by_cases hv_base : v ∈ rationalOpen C.base.T C.base.s
@@ -532,15 +503,11 @@ theorem exists_standard_cover_refining
       refines_cover C S ∧
       refines_contain C S ∧
       refines_span_top S := by
-  -- Lane C C1: local basis hypothesis
   have h_basis : LocalBasisHyp C := localBasisHyp_of_strongly_noetherian C
-  -- Lane C C2: per-D finite families from quasi-compactness
   obtain ⟨mk_S_D, h_in_D, h_cover_D⟩ :=
     exists_per_D_finite_cover_of_localBasisHyp C h_basis
-  -- Lane C C3: span-top on the combined family via Cor 7.32
   have h_span : Ideal.span ((C.covers.biUnion mk_S_D : Finset A) : Set A) = ⊤ :=
     span_top_of_per_D_finite_cover C mk_S_D h_in_D h_cover_D
-  -- Assemble via the existing per-D → per-E bridge
   obtain ⟨S, hS_per_E, hS_contain, hS_span⟩ :=
     exists_refines_cover_per_E_of_localBasisHyp C h_basis mk_S_D h_in_D h_cover_D h_span
   exact ⟨S, refines_cover_of_refines_cover_per_E C S hS_per_E, hS_contain, hS_span⟩
@@ -574,12 +541,8 @@ def restricted_standard_cover_generated_by_units
     (s : Aˣ) (I_units : Finset A) : Prop :=
   I_units ⊆ S ∧
   (∀ f ∈ I_units, IsUnit (L.canonicalMap (((s⁻¹ : Aˣ) : A) * f))) ∧
-  -- (c) pointwise cover: I_units' plus-pieces cover L's rational open
   (∀ v ∈ rationalOpen L.T L.s, ∃ f ∈ I_units,
     v ∈ rationalOpen (insert f C.base.T) C.base.s) ∧
-  -- (d) piecewise containment: the f-th unit-piece (the A-level
-  --     reading of the relative R(image_L(s⁻¹·f)/1)) is contained in
-  --     L ∩ (f's plus-piece in S over C.base).
   (∀ f ∈ I_units,
     {v ∈ rationalOpen L.T L.s | v.vle f C.base.s} ⊆
       rationalOpen (insert f C.base.T) C.base.s ∩ rationalOpen L.T L.s)
@@ -654,10 +617,8 @@ def IsRelativeUnitPieceFor
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
     (piece : RationalLocData (presheafValue L)) : Prop :=
-  -- (i) Algebraic identification: piece is R({u_f}/1)
   piece.T = {relativeUnitGenerator L C f h_unit_base} ∧
   piece.s = 1 ∧
-  -- (ii) Transport equality
   Set.image (fun v : Spv (presheafValue L) => comap L.canonicalMap v)
     (rationalOpen piece.T piece.s)
   = {v ∈ rationalOpen L.T L.s | v.vle f C.base.s}
@@ -686,13 +647,10 @@ def IsUnitGeneratedCoverFrom
     (L_rel : RationalLocData (presheafValue L))
     (unitCover : RationalCovering (presheafValue L)) : Prop :=
   unitCover.base = L_rel ∧
-  -- (2) each piece corresponds to some f ∈ I_units
   (∀ piece ∈ unitCover.covers, ∃ f ∈ I_units,
     IsRelativeUnitPieceFor L C f h_unit_base piece) ∧
-  -- (3) every f ∈ I_units has a corresponding piece
   (∀ f ∈ I_units, ∃ piece ∈ unitCover.covers,
     IsRelativeUnitPieceFor L C f h_unit_base piece) ∧
-  -- (4) ROUND-10: every relative unit generator is actually a unit
   (∀ f ∈ I_units, IsUnit (relativeUnitGenerator L C f h_unit_base))
 
 /-- **Canonical ratio-Laurent tree from `I_units` (round-11
@@ -738,7 +696,7 @@ the unitness of `L.canonicalMap s` (from `s : Aˣ`) and
 `L.canonicalMap C.base.s` (= `h_unit_base`) — neither side affects
 the unit-up-to-multiplication structure.
 
-Concretely: $f / C.\mathrm{base}.s = (s^{-1} \cdot f) \cdot (s / C.\mathrm{base}.s)$,
+Concretely, `f / C.base.s = (s⁻¹ * f) * (s / C.base.s)`,
 and the right factor `s / C.base.s` is a unit (product of units). -/
 theorem isUnit_relativeUnitGenerator_from_W2_unit
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
@@ -751,13 +709,8 @@ theorem isUnit_relativeUnitGenerator_from_W2_unit
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
     (h_unit_W2 : IsUnit (L.canonicalMap (((s⁻¹ : Aˣ) : A) * f))) :
     IsUnit (relativeUnitGenerator L C f h_unit_base) := by
-  -- relativeUnitGenerator = L.canonicalMap f * (h_unit_base.unit⁻¹).
-  -- Show each factor is a unit. The second factor is a unit by Units.isUnit.
-  -- For the first, decompose f = s * (s⁻¹ * f) and use that ring homs
-  -- preserve units.
   unfold relativeUnitGenerator
   refine IsUnit.mul ?_ (Units.isUnit _)
-  -- Goal: IsUnit (L.canonicalMap f)
   have hf : ((s : A)) * (((s⁻¹ : Aˣ) : A) * f) = f := by
     rw [← mul_assoc, ← Units.val_mul, mul_inv_cancel, Units.val_one, one_mul]
   rw [← hf, map_mul]
@@ -783,9 +736,6 @@ theorem isUnit_base_s_in_presheafValue_of_subset
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (hL_subset : rationalOpen L.T L.s ⊆ rationalOpen C.base.T C.base.s) :
     IsUnit (L.canonicalMap C.base.s) :=
-  -- `isUnit_canonicalMap_s` (Presheaf.lean) — Wedhorn Prop 8.2 — gives this
-  -- directly: when `R(D'.T/D'.s) ⊆ R(D.T/D.s)`, `D'.canonicalMap D.s` is a
-  -- unit. Apply with `D = C.base`, `D' = L`.
   isUnit_canonicalMap_s C.base L hL_subset
 
 /-! ### Round-13: Denominator-cleared ratio data + `RatioLaurentTree A` predicates
@@ -929,7 +879,6 @@ private theorem comap_canonicalMap_not_vle_zero_of_isUnit_via_locLift
   set ν : Valuation (Localization.Away D.s) _ :=
     ValuativeRel.valuation (Localization.Away D.s) with hν_def
   have hν_cont : ν.IsContinuous := hw_loc_spa.1
-  -- Bring the `WithZeroTopology` instances on the value group into scope.
   open WithZeroTopology in
   have hν_at_one : ContinuousAt ν 1 := hν_cont.continuousAt_one
   have hg_unit_completion :
@@ -968,9 +917,6 @@ private theorem relativeUnitGenerator_vle_transport_aux
     w.vle (relativeUnitGenerator L C g h_unit_base)
         (relativeUnitGenerator L C h h_unit_base)
       ↔ (comap L.canonicalMap w).vle g h := by
-  -- `relativeUnitGenerator L C f h_unit_base = L.canonicalMap f * (h_unit_base.unit⁻¹)`.
-  -- Cancel the common right factor `h_unit_base.unit⁻¹` (a unit, hence nonzero),
-  -- then translate `w.vle (L.canonicalMap g) (L.canonicalMap h)` via `comap_vle`.
   unfold relativeUnitGenerator
   letI : ValuativeRel (presheafValue L) := w.toValuativeRel
   have h_ne : ¬ w.vle ((h_unit_base.unit⁻¹ : (presheafValue L)ˣ) : presheafValue L) 0 :=
@@ -1007,35 +953,15 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
       Ideal.span ((B : Finset L.P.A₀) : Set L.P.A₀) = L.P.I ^ N ∧
       ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle x y},
         ∀ b ∈ B, v.vle (L.P.A₀.subtype b) a := by
-  -- Round-22 closure plan (uses `exists_uniform_pow_vle_on_compact` from
-  -- `SpaCompactNoHArch.lean`):
-  --
-  -- 1. Extract FG generators S of L.P.I (from `L.P.fg`).
-  -- 2. Compactness of the half-space K via
-  --    `isCompact_rationalOpen_inter_vle_noHArch` (the no-hArch sorry).
-  -- 3. For each c ∈ S, c is top.nilp. in A
-  --    (`isTopologicallyNilpotent_of_mem`); apply
-  --    `exists_uniform_pow_vle_on_compact` to get uniform N_c over K with
-  --    v(c^{N_c}) ≤ v(a).
-  -- 4. Take N_max := max N_c, N₀ := S.card * N_max + 1 (extra +1 handles
-  --    edge case of N_max = 0 etc.).
-  -- 5. B := S^N₀ (via `Pointwise.Finset.pow`); span B = L.P.I^N₀
-  --    (via `Submodule.span_pow`).
-  -- 6. For b ∈ B, b = ∏ (f i) for some f : Fin N₀ → S
-  --    (`Finset.mem_pow`); pigeonhole gives c ∈ S with multiplicity
-  --    ≥ N_max; valuation bound: v(b) ≤ v(c)^{multiplicity} ≤ v(c)^{N_c} ≤ v(a).
   classical
   open Pointwise in
-  -- Step 1: FG generators of L.P.I.
   obtain ⟨S, hS_span⟩ := L.P.fg
-  -- Step 2: compactness of the half-space.
   let K_Spa : Set ↥(Spa A A⁺) :=
     Subtype.val ⁻¹' (rationalOpen L.T L.s ∩ {v | v.vle x y})
   have hK_compact : IsCompact K_Spa :=
     isCompact_rationalOpen_inter_vle_noHArch L x y
   have hK_ne_zero : ∀ w ∈ K_Spa, ¬ (w.1 : Spv A).vle a 0 := fun w hw =>
     ha_nonzero w.1 hw
-  -- Step 3: per-c uniform N over K.
   have h_per_c : ∀ c ∈ S, ∃ N : ℕ, ∀ w ∈ K_Spa,
       (w.1 : Spv A).vle ((L.P.A₀.subtype c) ^ N) a := by
     intro c hc
@@ -1043,58 +969,40 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
       L.P.isTopologicallyNilpotent_of_mem (hS_span ▸ Ideal.subset_span hc)
     exact exists_uniform_pow_vle_on_compact hK_compact hc_topnilp hK_ne_zero
   choose N_c hN_c using h_per_c
-  -- Step 4: take max + 1 to get a uniform N_max over S.
-  -- (Empty S: L.P.I = ⊤ has zero generators; falls back via Finset.sup empty = 0.)
   let N_max : ℕ := (S.attach.image (fun ⟨c, hc⟩ => N_c c hc)).sup id + 1
-  -- N₀ such that any degree-N₀ monomial has some generator with exponent ≥ N_max.
   let N₀ : ℕ := (S.card + 1) * N_max
-  -- Step 5: B := S^N₀ as Finset, generates L.P.I^N₀.
   let B : Finset L.P.A₀ := S ^ N₀
   have hB_span : Ideal.span ((B : Finset L.P.A₀) : Set L.P.A₀) = L.P.I ^ N₀ := by
     change Ideal.span ((S ^ N₀ : Finset L.P.A₀) : Set L.P.A₀) = L.P.I ^ N₀
     rw [Finset.coe_pow, ← hS_span]
     exact (Submodule.span_pow (R := L.P.A₀) (A := L.P.A₀) (↑S) N₀).symm
   refine ⟨N₀, B, hB_span, ?_⟩
-  -- Step 6: pigeonhole + valuation bound.
   intro v hv b hb
-  -- b ∈ B = S^N₀, so b = (List.ofFn fun i => ↑(f i)).prod for some f : Fin N₀ → S.
   rw [show B = S ^ N₀ from rfl, Finset.mem_pow] at hb
   obtain ⟨f, hf⟩ := hb
-  -- Build w_Spa : K_Spa from v.
   have hv_spa : v ∈ Spa A A⁺ := hv.1.1
   let w : ↥(Spa A A⁺) := ⟨v, hv_spa⟩
   have hw_K : w ∈ K_Spa := hv
-  -- Pigeonhole: ∃ c ∈ S with #{i : f i = c} ≥ N_max.
-  -- We sidestep an explicit fiber-count by reducing to: there is i₀ with
-  -- N_c (f i₀) ≤ N₀, which we strengthen via Finset.sup ≥ N_c.
-  -- More direct: f has codomain S; for each i, f i ∈ S; thus N_c (f i) appears
-  -- in `S.attach.image (fun ⟨c, hc⟩ => N_c c hc)`; so N_c (f i) ≤ N_max - 1.
-  -- Build the bound on the monomial directly using v(c) ≤ 1.
   letI : ValuativeRel A := v.toValuativeRel
   set wv := ValuativeRel.valuation A with hwv_def
-  -- v(c) ≤ 1 for each c ∈ S (since c top.nilp. + v ∈ Spa).
   have h_v_le_one : ∀ c ∈ S, wv (L.P.A₀.subtype c) ≤ 1 := by
     intro c hc
     have hc_topnilp : IsTopologicallyNilpotent (L.P.A₀.subtype c) :=
       L.P.isTopologicallyNilpotent_of_mem (hS_span ▸ Ideal.subset_span hc)
     have h_not : ¬ v.vle 1 (L.P.A₀.subtype c) :=
       not_vle_one_of_mem_spa_of_topologicallyNilpotent hv_spa hc_topnilp
-    -- Translate.
     by_contra h_gt
     push Not at h_gt
     apply h_not
     refine (Valuation.Compatible.vle_iff_le (v := wv) _ _).mpr ?_
     rw [map_one]
     exact h_gt.le
-  -- v(a) ≠ 0.
   have h_v_a_ne : wv a ≠ 0 := by
     intro h_eq
     apply hK_ne_zero w hw_K
     refine (Valuation.Compatible.vle_iff_le (v := wv) a 0).mpr ?_
     rw [h_eq, map_zero]
-  -- Reduce to wv via Valuation.Compatible.vle_iff_le.
   refine (Valuation.Compatible.vle_iff_le (v := wv) _ _).mpr ?_
-  -- Express L.P.A₀.subtype b as a Finset.prod over Fin N₀ via hf.
   have hb_eq : (L.P.A₀.subtype b : A) =
       ∏ i : Fin N₀, (L.P.A₀.subtype (↑(f i) : L.P.A₀) : A) := by
     have h_map : (L.P.A₀.subtype : L.P.A₀ →+* A)
@@ -1104,12 +1012,8 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
     rw [← hf, h_map, List.map_ofFn, List.prod_ofFn]
     rfl
   rw [hb_eq, map_prod]
-  -- Goal: ∏ i, wv (L.P.A₀.subtype ↑(f i)) ≤ wv a
-  -- Empty-S case: f vacuous, contradiction.
   by_cases hS_ne : S.Nonempty
-  · -- S nonempty: pigeonhole.
-    -- Pigeonhole inputs: f : Fin N₀ → ↥S, with N₀ ≥ S.card * N_max.
-    -- Some c : ↥S has #{i | f i = c} ≥ N_max.
+  ·
     haveI : Nonempty ↥S := hS_ne.coe_sort
     have h_card_le : Fintype.card ↥S * N_max ≤ Fintype.card (Fin N₀) := by
       simp only [Fintype.card_fin, Fintype.card_coe]
@@ -1118,36 +1022,24 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
         _ = (S.card + 1) * N_max := by ring
     obtain ⟨c_star, hc_count⟩ :=
       Fintype.exists_le_card_fiber_of_mul_le_card (f := f) (n := N_max) h_card_le
-    -- c_star : ↥S, hc_count : N_max ≤ #{i | f i = c_star}.
-    -- Group the product by fiber via `prod_fiberwise'`.
     rw [show (∏ i : Fin N₀, wv (L.P.A₀.subtype (↑(f i) : L.P.A₀))) =
         ∏ c : ↥S, ∏ i : Fin N₀ with f i = c,
           wv (L.P.A₀.subtype (↑c : L.P.A₀)) by
       rw [Finset.prod_fiberwise' (s := Finset.univ) (g := f)
         (f := fun c : ↥S => wv (L.P.A₀.subtype (↑c : L.P.A₀)))]]
-    -- Now ∏ c : ↥S, [constant factor on fiber count]
-    -- = ∏ c : ↥S, wv (L.P.A₀.subtype c)^(count of c).
-    -- Bound: split into c = c_star (contributing ≤ wv a) and c ≠ c_star (each ≤ 1).
-    -- First, simplify the inner ∏ over fiber to a power.
     have h_inner : ∀ c : ↥S, (∏ i ∈ Finset.univ.filter (fun i => f i = c),
         wv (L.P.A₀.subtype (↑c : L.P.A₀))) =
         wv (L.P.A₀.subtype (↑c : L.P.A₀)) ^
         (Finset.univ.filter (fun i : Fin N₀ => f i = c)).card := by
       intro c
       rw [Finset.prod_const]
-    -- Apply per-c.
     have h_prod_eq : (∏ c : ↥S, ∏ i ∈ Finset.univ.filter (fun i => f i = c),
         wv (L.P.A₀.subtype (↑c : L.P.A₀))) =
         ∏ c : ↥S, wv (L.P.A₀.subtype (↑c : L.P.A₀)) ^
           (Finset.univ.filter (fun i : Fin N₀ => f i = c)).card := by
       exact Finset.prod_congr rfl fun c _ => h_inner c
     rw [h_prod_eq]
-    -- Now: ∏ c, wv(c)^count(c) ≤ wv a.
-    -- Split off c_star.
     rw [← Finset.prod_erase_mul (Finset.univ : Finset ↥S) _ (Finset.mem_univ c_star)]
-    -- (∏ c ∈ erase univ c_star, wv(c)^count(c)) * wv(c_star)^count(c_star) ≤ wv a
-    -- Bound the first factor by 1, second by wv a.
-    -- General fact: a * b ≤ 1 * (wv a) = wv a if a ≤ 1 and b ≤ wv a.
     have h_others_le_one : (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
         wv (L.P.A₀.subtype (↑c : L.P.A₀)) ^
         (Finset.univ.filter (fun i : Fin N₀ => f i = c)).card) ≤ 1 := by
@@ -1156,7 +1048,6 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
       exact Left.pow_le_one_of_le (h_v_le_one (↑c : L.P.A₀) c.2) _
     have h_c_star_le : wv (L.P.A₀.subtype (↑c_star : L.P.A₀)) ^
         (Finset.univ.filter (fun i : Fin N₀ => f i = c_star)).card ≤ wv a := by
-      -- count(c_star) ≥ N_max ≥ N_c c_star.val c_star.2 (since N_max = sup + 1).
       set count := (Finset.univ.filter (fun i : Fin N₀ => f i = c_star)).card
       set N_star := N_c (↑c_star : L.P.A₀) c_star.2
       have h_N_max_ge : N_max ≥ N_star + 1 := by
@@ -1170,7 +1061,6 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
         calc count ≥ N_max := hc_count
           _ ≥ N_star + 1 := h_N_max_ge
           _ ≥ N_star := Nat.le_succ _
-      -- wv(c_star) ≤ 1 → (wv c_star)^count ≤ (wv c_star)^N_star.
       have h_wv_c_le_one : wv (L.P.A₀.subtype (↑c_star : L.P.A₀)) ≤ 1 :=
         h_v_le_one (↑c_star : L.P.A₀) c_star.2
       have h_pow_mono :
@@ -1180,7 +1070,6 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
         rw [hk, pow_add]
         conv_rhs => rw [← mul_one (wv (L.P.A₀.subtype (↑c_star : L.P.A₀)) ^ N_star)]
         exact mul_le_mul_right (Left.pow_le_one_of_le h_wv_c_le_one k) _
-      -- (wv c_star)^N_star = wv (c_star^N_star) ≤ wv a from hN_c.
       have h_pow_eq : wv (L.P.A₀.subtype (↑c_star : L.P.A₀)) ^ N_star =
           wv ((L.P.A₀.subtype (↑c_star : L.P.A₀)) ^ N_star) := (map_pow _ _ _).symm
       have h_N_c_dom : wv ((L.P.A₀.subtype (↑c_star : L.P.A₀)) ^ N_star) ≤ wv a := by
@@ -1190,7 +1079,6 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
           ≤ wv (L.P.A₀.subtype (↑c_star : L.P.A₀)) ^ N_star := h_pow_mono
         _ = wv ((L.P.A₀.subtype (↑c_star : L.P.A₀)) ^ N_star) := h_pow_eq
         _ ≤ wv a := h_N_c_dom
-    -- Combine: others_factor * c_star_factor ≤ 1 * wv a = wv a.
     calc (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
             wv (L.P.A₀.subtype (↑c : L.P.A₀)) ^
             (Finset.univ.filter (fun i : Fin N₀ => f i = c)).card) *
@@ -1199,7 +1087,7 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
         ≤ 1 * wv a := by
           exact mul_le_mul' h_others_le_one h_c_star_le
       _ = wv a := one_mul _
-  · -- S empty: contradiction from f.
+  ·
     exfalso
     rw [Finset.not_nonempty_iff_eq_empty] at hS_ne
     have hN₀_pos : 0 < N₀ := by
@@ -1208,46 +1096,31 @@ private theorem exists_ideal_pow_generators_dominated_for_half_space
       · exact Nat.succ_pos _
       · change 0 < (S.attach.image _).sup id + 1
         exact Nat.succ_pos _
-    -- f ⟨0, hN₀_pos⟩ : ↥S, but ↥S is empty when S = ∅.
     exact (Finset.eq_empty_iff_forall_notMem.mp hS_ne) _ (f ⟨0, hN₀_pos⟩).2
 
-/-- **(Decomposition helper for `exists_absolute_ratio_rationalLocData_aux`.)**
-The `hopen` content for the denominator-cleared datum, consolidated across the
-symmetric plus/minus cases. If a finite set `B ⊆ P.A₀` spans `P.I ^ N` and every
-`(b : A)` for `b ∈ B` already lies in `T`, then `(b : A)/s ∈ locSubring P T s`
-for every `b ∈ P.I ^ N`.
-
-Proof: `b ∈ P.I^N = span B`, so `Submodule.span_induction` reduces to:
-generators `b ∈ B` (`divByS (b:A) s ∈ locSubring` since `(b:A) ∈ T`), zero,
-additivity of `divByS`, and `A₀`-smul (which becomes multiplication by an
-`algebraMap`-image, also in `locSubring`). -/
 private theorem divByS_mem_locSubring_of_span_ideal_pow
     {A : Type*} [CommRing A] [TopologicalSpace A]
     (P : PairOfDefinition A) (T : Finset A) (s : A) {N : ℕ} {B : Finset P.A₀}
     (hB_span : Ideal.span ((B : Finset P.A₀) : Set P.A₀) = P.I ^ N)
     (hB_sub : ∀ b ∈ B, (P.A₀.subtype b : A) ∈ T) :
     ∀ b : P.A₀, b ∈ P.I ^ N → divByS (↑b : A) s ∈ locSubring P T s := by
-  -- For `b ∈ P.I^N`, `b` is in the span of `B`. So `b = ∑ cᵢ · bᵢ` in `P.A₀`
-  -- for `cᵢ ∈ P.A₀`, `bᵢ ∈ B`. Hence `(b:A)/s = ∑ (cᵢ:A) · (bᵢ:A)/s`. Each
-  -- `(bᵢ:A)` is in `T`, so `divByS (bᵢ:A) s ∈ locSubring`; each `algebraMap (cᵢ:A)`
-  -- is in `locSubring` (`cᵢ ∈ P.A₀`). Closure under add+mul gives the conclusion.
   intro b hb
   rw [← hB_span] at hb
   refine Submodule.span_induction (M := P.A₀) (R := P.A₀)
     (s := (B : Set P.A₀))
     (p := fun x _ => divByS ((↑x : A)) s ∈ locSubring P T s)
     ?_ ?_ ?_ ?_ hb
-  · -- generators b ∈ B: `(b : A) ∈ T`, so `divByS (b:A) s ∈ locSubring`.
+  ·
     intro x hx
     exact divByS_mem_locSubring P T s (hB_sub x hx)
-  · -- zero
+  ·
     change divByS ((0 : P.A₀) : A) s ∈ _
     change divByS (0 : A) s ∈ _
     have h0 : divByS (0 : A) s = 0 := by
       unfold divByS
       exact (IsLocalization.mk'_zero _).trans rfl
     rw [h0]; exact (locSubring P T s).zero_mem
-  · -- additive: divByS (x + y) s = divByS x s + divByS y s
+  ·
     intro x y _ _ hx hy
     change divByS ((↑(x + y) : A)) s ∈ _
     rw [show ((x + y : P.A₀) : A) = (↑x : A) + (↑y : A) from rfl]
@@ -1255,10 +1128,10 @@ private theorem divByS_mem_locSubring_of_span_ideal_pow
         divByS (↑x : A) s + divByS (↑y : A) s := by
       unfold divByS
       rw [← IsLocalization.mk'_add]
-      exact IsLocalization.mk'_eq_of_eq (by simp [Submonoid.coe_mul]; ring)
+      exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
     rw [hadd]
     exact (locSubring P T s).add_mem hx hy
-  · -- smul by c ∈ P.A₀: divByS (c·b) s = algebraMap c · divByS b s
+  ·
     intro c x _ hx
     change divByS ((↑(c • x) : A)) s ∈ _
     rw [show ((c • x : P.A₀) : A) = (↑c : A) * (↑x : A) from rfl]
@@ -1275,10 +1148,6 @@ private theorem divByS_mem_locSubring_of_span_ideal_pow
     exact (locSubring P T s).mul_mem
       (algebraMap_mem_locSubring P T s c.2) hx
 
-/-- Forward inclusion of `rationalOpen_augmented_eq_inter_vle`: a point of the
-rational open of the augmented numerator set with denominator `L.s * y` lies in
-`R(L)` and satisfies `v.vle x y`. Non-archimedean valuation cancellation by the
-common factors `y` (for `L.T` numerators) and `L.s` (for the `L.s * x` generator). -/
 private theorem mem_inter_vle_of_mem_rationalOpen_augmented
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
@@ -1288,12 +1157,9 @@ private theorem mem_inter_vle_of_mem_rationalOpen_augmented
         (L.s * y)) :
     v ∈ rationalOpen L.T L.s ∧ v.vle x y := by
   obtain ⟨hv_spa, hvT, hvs⟩ := hv
-  -- v ∈ Spa A A⁺, v(t) ≤ v(L.s*y) for all t ∈ T, v(L.s*y) ≠ 0.
   letI : ValuativeRel A := v.toValuativeRel
-  -- Extract v(L.s) ≠ 0 and v(y) ≠ 0 from v(L.s*y) ≠ 0.
   have hvLs : ¬ v.vle L.s 0 := ValuationSpectrum.not_vle_zero_left_of_mul hvs
   have hvy : ¬ v.vle y 0 := ValuationSpectrum.not_vle_zero_right_of_mul hvs
-  -- v ∈ R(L): need v(t) ≤ v(L.s) for t ∈ L.T.
   have hvL_mem : v ∈ rationalOpen L.T L.s := by
     refine ⟨hv_spa, ?_, hvLs⟩
     intro t ht
@@ -1309,11 +1175,6 @@ private theorem mem_inter_vle_of_mem_rationalOpen_augmented
     rwa [ValuativeRel.mul_vle_mul_iff_left hvLs] at hle
   exact ⟨hvL_mem, hvxy⟩
 
-/-- Backward inclusion of `rationalOpen_augmented_eq_inter_vle`: a point of
-`R(L) ∩ {v.vle x y}` lies in the rational open of the augmented numerator set.
-The `L.T`-image numerators reduce by cancelling `y`; the `{L.s * x, L.s * y}`
-generators by cancelling `L.s` (resp. reflexivity); the `B`-image generators by
-the half-space domination hypothesis `hB_dom`. -/
 private theorem mem_rationalOpen_augmented_of_mem_inter_vle
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
@@ -1334,32 +1195,23 @@ private theorem mem_rationalOpen_augmented_of_mem_inter_vle
   intro t ht
   rcases Finset.mem_union.mp ht with htAB | htB
   · rcases Finset.mem_union.mp htAB with htA | htBset
-    · -- t ∈ L.T.image (·*y)
+    ·
       obtain ⟨t', ht', rfl⟩ := Finset.mem_image.mp htA
-      change v.vle (t' * y) (L.s * y)
       rw [ValuativeRel.mul_vle_mul_iff_left hvy]
       exact hvT_L t' ht'
-    · -- t ∈ {L.s*x, L.s*y}
+    ·
       rcases Finset.mem_insert.mp htBset with rfl | hh'
-      · -- t = L.s * x
-        change v.vle (L.s * x) (L.s * y)
+      ·
         rw [mul_comm L.s x, mul_comm L.s y]
         rw [ValuativeRel.mul_vle_mul_iff_left hvLs]
         exact hvxy
-      · -- t = L.s * y
+      ·
         rcases Finset.mem_singleton.mp hh' with rfl
-        change v.vle (L.s * y) (L.s * y)
         exact v.vle_refl _
-  · -- t ∈ B.image L.P.A₀.subtype
+  ·
     obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp htB
-    change v.vle ((L.P.A₀.subtype b : A)) (L.s * y)
     exact hB_dom v ⟨⟨hv_spa, hvT_L, hvLs⟩, hvxy⟩ b hb
 
-/-- **(Decomposition helper for `exists_absolute_ratio_rationalLocData_aux`.)**
-The `rationalOpen` set-equality for the denominator-cleared datum, consolidated
-across the symmetric plus/minus cases, assembled from the two inclusions
-`mem_inter_vle_of_mem_rationalOpen_augmented` and
-`mem_rationalOpen_augmented_of_mem_inter_vle`. -/
 private theorem rationalOpen_augmented_eq_inter_vle
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
@@ -1377,20 +1229,6 @@ private theorem rationalOpen_augmented_eq_inter_vle
     fun hv => mem_rationalOpen_augmented_of_mem_inter_vle L x y hy_ne B hB_dom
       hv.1 hv.2⟩
 
-/-- **(Decomposition helper for `exists_absolute_ratio_rationalLocData_aux`.)**
-The single-orientation absolute ratio datum, consolidating the symmetric
-plus/minus halves into one builder. Given `x y : A` with `y` nonvanishing on
-`R(L)`, there is a `RationalLocData A` whose rational open is exactly the
-half-space `R(L) ∩ {v.vle x y}`.
-
-The datum is `{ P := L.P, T := L.T.image (· * y) ∪ {L.s * x, L.s * y} ∪
-B.image P.A₀.subtype, s := L.s * y }`, where `B` is the ideal-power generating
-set supplied by `exists_ideal_pow_generators_dominated_for_half_space` (its
-domination is what makes the augmented numerators valuation-bounded). The
-`hopen` field is `divByS_mem_locSubring_of_span_ideal_pow`; the rationalOpen
-equality is `rationalOpen_augmented_eq_inter_vle`.
-
-Specialising at `(x, y) = (g, h)` gives plus, at `(x, y) = (h, g)` minus. -/
 private theorem exists_rationalLocData_rationalOpen_eq_half_space
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A]
@@ -1401,17 +1239,14 @@ private theorem exists_rationalLocData_rationalOpen_eq_half_space
     ∃ D : RationalLocData A,
       rationalOpen D.T D.s = {v ∈ rationalOpen L.T L.s | v.vle x y} := by
   classical
-  -- Nonvanishing of `s = L.s * y` on the half-space `R(L) ∩ {v.vle x y}`.
   have hs_ne : ∀ v ∈ rationalOpen L.T L.s ∩ {v | v.vle x y},
       ¬ v.vle (L.s * y) 0 := by
     intro v hv
     have hvL : v ∈ rationalOpen L.T L.s := hv.1
     letI : ValuativeRel A := v.toValuativeRel
     exact ValuativeRel.zero_vlt_mul hvL.2.2 (hy_ne v hvL)
-  -- Half-space domination lemma supplies the ideal-power generators `B`.
   obtain ⟨N, B, hB_span, hB_dom⟩ :=
     exists_ideal_pow_generators_dominated_for_half_space L x y (L.s * y) hs_ne
-  -- Assemble the augmented numerator set and the datum.
   set T : Finset A :=
     L.T.image (· * y) ∪ {L.s * x, L.s * y} ∪ B.image L.P.A₀.subtype with hT
   have hopen : ∃ M : ℕ, ∀ b : L.P.A₀, b ∈ L.P.I ^ M →
@@ -1440,35 +1275,21 @@ private theorem exists_absolute_ratio_rationalLocData_aux
         {v ∈ rationalOpen L.T L.s | v.vle g h} ∧
       rationalOpen minus.T minus.s =
         {v ∈ rationalOpen L.T L.s | v.vle h g} := by
-  -- Round-20 reviewer (ChatGPT Pro) plan: construct plus/minus by adding
-  -- ideal-power generators B_N to the numerator set. The domination lemma
-  -- supplies the finite generating set whose valuation inequalities are
-  -- automatic on the target subset. Both halves are produced by the single
-  -- consolidated builder `exists_rationalLocData_rationalOpen_eq_half_space`,
-  -- one at `(x,y) = (g,h)` (plus) and one at `(x,y) = (h,g)` (minus).
   classical
-  -- Step 1: extract A-side units on g and h from completion-side hypotheses.
-  have hg_canonical : IsUnit (L.canonicalMap g) := by
-    have heq : relativeUnitGenerator L C g h_unit_base =
-        L.canonicalMap g * ((h_unit_base.unit⁻¹ : (presheafValue L)ˣ) :
-          presheafValue L) := rfl
-    rw [heq] at h_unit_ug
-    exact (IsUnit.mul_iff.mp h_unit_ug).1
-  have hh_canonical : IsUnit (L.canonicalMap h) := by
-    have heq : relativeUnitGenerator L C h h_unit_base =
-        L.canonicalMap h * ((h_unit_base.unit⁻¹ : (presheafValue L)ˣ) :
-          presheafValue L) := rfl
-    rw [heq] at h_unit_uh
-    exact (IsUnit.mul_iff.mp h_unit_uh).1
-  -- Step 2: bridge gives v(g), v(h) ≠ 0 on R(L).
+  have canonicalMap_isUnit (f : A)
+      (hf : IsUnit (relativeUnitGenerator L C f h_unit_base)) :
+      IsUnit (L.canonicalMap f) := by
+    change IsUnit (L.canonicalMap f *
+      ((h_unit_base.unit⁻¹ : (presheafValue L)ˣ) : presheafValue L)) at hf
+    exact (IsUnit.mul_iff.mp hf).1
+  have hg_canonical : IsUnit (L.canonicalMap g) := canonicalMap_isUnit g h_unit_ug
+  have hh_canonical : IsUnit (L.canonicalMap h) := canonicalMap_isUnit h h_unit_uh
   have hg_ne : ∀ v ∈ rationalOpen L.T L.s, ¬ v.vle g 0 :=
     fun v hv => comap_canonicalMap_not_vle_zero_of_isUnit_via_locLift L hA₀_le g
       hg_canonical hv
   have hh_ne : ∀ v ∈ rationalOpen L.T L.s, ¬ v.vle h 0 :=
     fun v hv => comap_canonicalMap_not_vle_zero_of_isUnit_via_locLift L hA₀_le h
       hh_canonical hv
-  -- Steps 3–7: build plus (denom `L.s * h`) and minus (denom `L.s * g`) via the
-  -- consolidated builder; its `rationalOpen` output is the required half-space.
   obtain ⟨plus, hplus⟩ :=
     exists_rationalLocData_rationalOpen_eq_half_space L g h hh_ne
   obtain ⟨minus, hminus⟩ :=
@@ -1549,11 +1370,8 @@ theorem relative_ratio_split_transports_to_RatioNodeData
     (h_unit_ug : IsUnit (relativeUnitGenerator L C g h_unit_base))
     (h_unit_uh : IsUnit (relativeUnitGenerator L C h h_unit_base)) :
     Nonempty (RatioNodeData L g h) := by
-  -- Step 1: Use the P3-specific absolute representation theorem to get
-  -- `plus, minus : RationalLocData A` with explicit rationalOpen equalities.
   obtain ⟨plus, minus, hplus_open, hminus_open⟩ :=
     exists_absolute_ratio_rationalLocData_aux L hA₀_le C g h h_unit_base h_unit_ug h_unit_uh
-  -- Step 2: Package these into a RatioNodeData L g h.
   refine ⟨{
     plus := plus,
     minus := minus,
@@ -1562,17 +1380,18 @@ theorem relative_ratio_split_transports_to_RatioNodeData
     cover_proof := ?_,
     plus_open_eq := hplus_open,
     minus_open_eq := hminus_open }⟩
-  -- plus_subset: rationalOpen plus ⊆ rationalOpen L. The rationalOpen equality
-  -- says rationalOpen plus = R(L) ∩ {v.vle g h}, which is contained in R(L).
-  · rw [hplus_open]; exact fun _ hv => hv.1
-  -- minus_subset: symmetric.
-  · rw [hminus_open]; exact fun _ hv => hv.1
-  -- cover_proof: ∀ v ∈ R(L), v ∈ rationalOpen plus ∨ v ∈ rationalOpen minus.
-  -- By valuation trichotomy on v.vle g h.
+  · rw [hplus_open]
+    exact fun _ hv => hv.1
+  · rw [hminus_open]
+    exact fun _ hv => hv.1
   · intro v hv
     rcases v.vle_total g h with hcase | hcase
-    · left; rw [hplus_open]; exact ⟨hv, hcase⟩
-    · right; rw [hminus_open]; exact ⟨hv, hcase⟩
+    · left
+      rw [hplus_open]
+      exact ⟨hv, hcase⟩
+    · right
+      rw [hminus_open]
+      exact ⟨hv, hcase⟩
 
 /-! ### Round-15: `RatioTreeRealization` for coherent recursion
 
@@ -1687,27 +1506,21 @@ theorem exists_first_stage_laurent_cover
           ∀ f ∈ I_units,
             IsUnit (L.canonicalMap (((s⁻¹ : Aˣ) : A) * f)) := by
   classical
-  -- Take s = 1 (trivial unit). Then s⁻¹ * f = f, so V is the balanced
-  -- Laurent tree on S.toList directly. At each leaf L (encoded by some
-  -- σ : Fin |S.toList| → Bool), the σ-minus subset of S consists of
-  -- units in L by `balancedLeafBase_isUnit_get_of_false`.
   refine ⟨1, LaurentTree.ofBalancedList ((S.toList).map (fun f => ((1⁻¹ : Aˣ) : A) * f)),
     rfl, ?_⟩
   intro L hL
-  -- Recover the sign-function σ from L.
   obtain ⟨σ, hσ⟩ :=
     LaurentTree.leaves_ofBalancedList_eq_image C.base _ L hL
-  -- I_units = {f ∈ S : σ at f's position = false}.
   let I_units : Finset A :=
     ((Finset.univ.filter (fun i : Fin S.toList.length => σ ⟨i.1, by
       rw [List.length_map]; exact i.2⟩ = false)).image
       (fun i => S.toList.get i))
   refine ⟨I_units, ?_, ?_⟩
-  · -- I_units ⊆ S.
+  ·
     intro f hf
     obtain ⟨i, _, rfl⟩ := Finset.mem_image.mp hf
     exact (Finset.mem_toList).mp (List.get_mem _ _)
-  · -- ∀ f ∈ I_units, IsUnit (L.canonicalMap (1⁻¹ * f)).
+  ·
     intro f hf
     obtain ⟨i, hi_filter, rfl⟩ := Finset.mem_image.mp hf
     have hσi : σ ⟨i.1, by rw [List.length_map]; exact i.2⟩ = false := by
@@ -1715,10 +1528,9 @@ theorem exists_first_stage_laurent_cover
     have h_unit := LaurentTree.balancedLeafBase_isUnit_get_of_false
       C.base ((S.toList).map (fun f => ((1⁻¹ : Aˣ) : A) * f)) σ
       ⟨i.1, by rw [List.length_map]; exact i.2⟩ hσi
-    -- L = balancedLeafBase ... σ (from hσ flipped).
     rw [← hσ]
     convert h_unit using 2
-    simp [List.get_eq_getElem]
+    simp only [List.get_eq_getElem, List.getElem_map, inv_one, Units.val_one, one_mul]
 
 -- DELETED (2026-05-24): L6 `cover_witness_in_I_units_at_balanced_leaf`,
 -- L7 `leaf_rationalOpen_subset_base_at_balanced_leaf`,
@@ -1988,77 +1800,47 @@ theorem unitGeneratedCover_has_relative_ratioLaurentRefinement
     (_hL_subset : rationalOpen L.T L.s ⊆ rationalOpen C.base.T C.base.s)
     (I_units : Finset A)
     (_h_unit_generated : restricted_standard_cover_generated_by_units L C S s I_units)
-    -- Typeclass hypotheses on the relative ring `presheafValue L`:
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     [IsTateRing (presheafValue L)] [IsNoetherianRing (presheafValue L)]
     [IsStronglyNoetherian (presheafValue L)] [T2Space (presheafValue L)]
     [NonarchimedeanRing (presheafValue L)] [IsDomain (presheafValue L)]
     [DecidableEq (presheafValue L)]
-    -- Round-10 reviewer addition: explicit unit witness for
-    -- `L.canonicalMap C.base.s` (needed to define
-    -- `relativeUnitGenerator`).
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
-    -- Canonical relative base (round-9):
     (L_rel : RationalLocData (presheafValue L))
     (_h_L_rel_canonical : IsCanonicalRelativeBase L L_rel)
-    -- Strong predicate on unitCover (round-9 + round-10
-    -- algebraic-identification + unit-generator clause):
     (unitCover : RationalCovering (presheafValue L))
     (_h_unitCover :
       IsUnitGeneratedCoverFrom L C s I_units h_unit_base L_rel unitCover) :
-    -- Output (round-11): the relative tree refines the relative
-    -- unit-generated cover (Wedhorn Step (iii)), has
-    -- `allSplitsInducing`, AND is the canonical ratio-Laurent tree
-    -- from `I_units` (= every split label is `u_g · u_h⁻¹`). The
-    -- last clause is what makes W3-transport's descent feasible:
-    -- a generic relative tree wouldn't have transportable labels.
     ∃ inner_rel : LaurentTree (presheafValue L),
       inner_rel.Refines L_rel unitCover ∧
       inner_rel.allSplitsInducing L_rel ∧
       IsRatioLaurentTreeFrom L C I_units h_unit_base inner_rel := by
-  -- **Construction (Wedhorn 8.34(iii)).** The Laurent cover generated
-  -- by `{u_g · u_h⁻¹ : g, h ∈ I_units}` is a refinement of the
-  -- unit-generated cover.
   classical
-  -- Step 1: unitness witness for u_h from `_h_unitCover.2.2.2`.
   have h_units_invertible : ∀ h ∈ I_units,
       IsUnit (relativeUnitGenerator L C h h_unit_base) :=
     _h_unitCover.2.2.2
-  -- Step 2: list of all ratio labels `u_g · u_h⁻¹` for (g, h) ∈ I_units × I_units.
-  -- Uses `Finset.attach` to carry the `h ∈ I_units` proof needed for `IsUnit u_h`.
   let ratio_list : List (presheafValue L) :=
     ((I_units.attach.toList) ×ˢ (I_units.attach.toList)).map fun ⟨gp, hp⟩ =>
       relativeUnitGenerator L C gp.val h_unit_base *
         ((h_units_invertible hp.val hp.property).unit⁻¹ : (presheafValue L)ˣ)
-  -- Step 3: balanced binary Laurent tree from this list.
   let inner_rel : LaurentTree (presheafValue L) :=
     LaurentTree.ofBalancedList ratio_list
-  -- Step 4: assemble the three properties.
   refine ⟨inner_rel, ?_, ?_, ?_⟩
-  · -- Refines L_rel unitCover — combinatorial: each leaf σ-vector
-    -- picks `f ∈ I_units` with maximal `v(u_f)`; that f's unit-piece
-    -- contains the leaf. Delegated to the named sub-lemma
-    -- `unitCover_refines_relative_balanced_ratio_tree_leaves` per the
-    -- CLAUDE.md sub-lemma-with-sorry rule.
+  ·
     change (LaurentTree.ofBalancedList ratio_list).Refines L_rel unitCover
     rw [LaurentTree.refines_iff_forall_mem_leaves]
     exact unitCover_refines_relative_balanced_ratio_tree_leaves
       L C I_units h_unit_base L_rel unitCover h_units_invertible
       _h_unitCover.2.2.1
-  · -- allSplitsInducing L_rel — Lane C topological inducing per node.
-    -- Reduce via `BalancedInducing` and delegate to the named sub-lemma
-    -- `balancedInducing_of_relative_unit_ratios` per the CLAUDE.md
-    -- sub-lemma-with-sorry rule.
+  ·
     change (LaurentTree.ofBalancedList ratio_list).allSplitsInducing L_rel
     apply LaurentTree.allSplitsInducing_ofBalancedList
     exact balancedInducing_of_relative_unit_ratios
       L C I_units h_unit_base L_rel h_units_invertible
-  · -- IsRatioLaurentTreeFrom — by construction every node label is
-    -- `u_g · u_h⁻¹` with g, h ∈ I_units.
+  ·
     change IsRatioLaurentTreeFrom L C I_units h_unit_base
       (LaurentTree.ofBalancedList ratio_list)
-    -- Induct on the underlying list of ratios.
     have hall : ∀ label ∈ ratio_list,
         ∃ g ∈ I_units, ∃ h ∈ I_units,
           ∃ h_unit_uh : IsUnit (relativeUnitGenerator L C h h_unit_base),
@@ -2070,7 +1852,6 @@ theorem unitGeneratedCover_has_relative_ratioLaurentRefinement
         Subtype.exists] at hlabel
       obtain ⟨g, hg, h, hh, _, _, rfl⟩ := hlabel
       exact ⟨g, hg, h, hh, h_units_invertible h hh, rfl⟩
-    -- Generic induction on the list.
     clear_value ratio_list
     induction ratio_list with
     | nil => exact trivial
@@ -2224,7 +2005,7 @@ theorem graftAt_allNodesDisjoint
   induction t_outer with
   | leaf =>
     intro D₀ _ h_inner_disj
-    simpa using h_inner_disj D₀ (by simp [LaurentTree.leaves])
+    simpa using h_inner_disj D₀ (by simp only [LaurentTree.leaves, List.mem_singleton])
   | node f L R ihL ihR =>
     intro D₀ h_outer_disj h_inner_disj
     obtain ⟨h_ne, h_disj_LR, h_disj_L, h_disj_R⟩ :=
@@ -2398,14 +2179,9 @@ theorem exists_wedhorn_laurent_refinement_tree
       t.Refines C.base C ∧
       t.allSplitsInducing C.base := by
   classical
-  -- Step 1: get standard cover S refining C.
   obtain ⟨S, hS_cover, hS_contain, hS_span⟩ := exists_standard_cover_refining C
-  -- Step 2: get first-stage Laurent tree t_outer + per-leaf restricted-
-  -- cover-by-units (W2). The outer tree is the balanced Laurent tree
-  -- on the unit-rescaled S.
   obtain ⟨s, t_outer, ht_outer_eq, h_outer_split, h_outer_unit_gen⟩ :=
     exists_first_stage_laurent_tree_unit_generated P C S hS_cover hS_contain hS_span
-  -- Step 3: extract per-leaf inner trees (I.1.a sub-lemma).
   obtain ⟨inner_of, h_inner⟩ : ∃ inner_of : RationalLocData A → LaurentTree A,
       ∀ L ∈ t_outer.leaves C.base,
         (inner_of L).Refines L C ∧ (inner_of L).allSplitsInducing L := by
@@ -2419,12 +2195,11 @@ theorem exists_wedhorn_laurent_refinement_tree
     intro L hL
     simp only [dif_pos hL]
     exact (h_per_leaf L hL).choose_spec
-  -- Step 4: graft, then apply preservation lemmas.
   refine ⟨t_outer.graftAt C.base inner_of, ?_, ?_⟩
-  · -- Refines via `LaurentTree.Refines_graftAt`.
+  ·
     exact LaurentTree.Refines_graftAt t_outer C.base inner_of C
       (fun L hL => (h_inner L hL).1)
-  · -- allSplitsInducing via `LaurentTree.allSplitsInducing_graftAt`.
+  ·
     exact LaurentTree.allSplitsInducing_graftAt t_outer C.base inner_of
       h_outer_split (fun L hL => (h_inner L hL).2)
 
@@ -2459,8 +2234,6 @@ theorem exists_wedhorn_ratio_laurent_refinement_tree_realized
     (C : RationalCovering A) :
     ∃ (t : RatioLaurentTree A) (ρ : RatioTreeRealization t C.base),
       ρ.Refines C ∧ ρ.allSplitsInducing := by
-  -- Promote the legacy `LaurentTree`-valued I.1 via the structural transfer
-  -- lemmas `refines_ofLaurentTree` and `allSplitsInducing_ofLaurentTree`.
   obtain ⟨t, hRefines, hSplits⟩ := exists_wedhorn_laurent_refinement_tree P C
   refine ⟨RatioLaurentTree.ofLaurentTree t,
     RatioTreeRealization.ofLaurentTree t C.base, ?_, ?_⟩
@@ -2490,16 +2263,11 @@ theorem exists_unit_generated_laurent_refinement
     (_h_units : ∀ f ∈ units, IsUnit (L.canonicalMap f))
     (h_covers : ∀ v ∈ rationalOpen L.T L.s, ∃ f ∈ units,
       v ∈ rationalOpen (insert f L.T) L.s) :
-    -- There exists a rational refinement of L (= a rational covering
-    -- of L) whose pieces are pairwise determined by valuation ordering
-    -- on the units, and where each piece is contained in some
-    -- unit-plus-piece `R(insert f L.T / L.s)` of the cover-by-units.
     ∃ refined : RationalCovering A,
       refined.base = L ∧
       ∀ E ∈ refined.covers, ∃ f ∈ units,
         rationalOpen E.T E.s ⊆ rationalOpen (insert f L.T) L.s := by
   classical
-  -- For each f ∈ units, define D_f = L with T = insert f L.T.
   let D_f : A → RationalLocData A := fun f =>
     { P := L.P
       T := insert f L.T
@@ -2513,16 +2281,16 @@ theorem exists_unit_generated_laurent_refinement
     covers := units.image D_f
     hsubset := ?_
     hcover := ?_ }, rfl, ?_⟩
-  · -- hsubset: each D_f's rationalOpen is a subset of L's rationalOpen
+  ·
     intro E hE
     obtain ⟨f, _, rfl⟩ := Finset.mem_image.mp hE
     rintro v ⟨hv_spa, hvT_insert, hvs⟩
     exact ⟨hv_spa, fun t ht => hvT_insert t (Finset.mem_insert_of_mem ht), hvs⟩
-  · -- hcover: pieces cover L via h_covers hypothesis
+  ·
     intro v hv
     obtain ⟨f, hf_units, hvf⟩ := h_covers v hv
     exact ⟨D_f f, Finset.mem_image.mpr ⟨f, hf_units, rfl⟩, hvf⟩
-  · -- refinement: each piece is contained in unit-piece R(insert f L.T / L.s)
+  ·
     intro E hE
     obtain ⟨f, hf_units, rfl⟩ := Finset.mem_image.mp hE
     exact ⟨f, hf_units, fun _ h => h⟩
@@ -2548,8 +2316,6 @@ theorem allNodesDisjoint_graftAt_prune
     ∃ t_pruned : LaurentTree A,
       t_pruned.toCovering D₀ = (t_outer.graftAt D₀ h).toCovering D₀ ∧
       t_pruned.allNodesDisjoint D₀ :=
-  -- Take t_pruned := t_outer.graftAt D₀ h (identity prune); allNodesDisjoint
-  -- preservation is supplied by W5 (`graftAt_allNodesDisjoint`).
   ⟨t_outer.graftAt D₀ h, rfl,
     graftAt_allNodesDisjoint t_outer D₀ h h_outer_disj h_inner_disj h_cross_disj⟩
 
@@ -2651,13 +2417,10 @@ theorem presheafValue_relative_equiv_isHomeomorph
   letI : IsTopologicalRing (Localization.Away D_at_E_data.s) :=
     D_at_E_data.isTopologicalRing
   refine ⟨?_, ?_⟩
-  · -- forward direction: relativeLaurentNormalized_equiv's forward map is
-    -- relativeLaurentNormalized_forwardHom, which is
-    -- UniformSpace.Completion.extensionHom forwardToCompletion (continuity proof).
-    -- Continuity follows from Completion.continuous_extension.
+  ·
     change Continuous (relativeLaurentNormalized_forwardHom E D hsub)
     exact UniformSpace.Completion.continuous_extension
-  · -- backward direction: similarly via backwardHom.
+  ·
     change Continuous (relativeLaurentNormalized_backwardHom E D hsub)
     exact UniformSpace.Completion.continuous_extension
 
@@ -2672,9 +2435,6 @@ theorem relativeRationalLocData_generators_powerBounded
     (E : RationalLocData A) [IsNoetherianRing (locSubring E.P E.T E.s)]
     (D : RationalLocData A) [LaurentNormalized D]
     (_hsub : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s) :
-    -- For every t ∈ D.T, the image of t/D.s in presheafValue D
-    -- (= the algebraic divByS composed with the canonical coeRingHom)
-    -- is power-bounded in presheafValue D.
     ∀ t ∈ D.T,
       TopologicalRing.IsPowerBounded (D.coeRingHom (divByS t D.s)) := by
   intro t ht
@@ -2713,8 +2473,6 @@ theorem exists_spa_point_dominating_prime
         (Ideal.map D₀.canonicalMap p : Ideal (presheafValue D₀)) ≠ ⊤)
     (p : Ideal A) (hp : p.IsPrime) (hs : D₀.s ∉ p) :
     ∃ v ∈ rationalOpen D₀.T D₀.s, p ≤ v.supp := by
-  -- Build a singleton rational covering with `C.base = D₀` and apply
-  -- the existing axiom-clean `hSpa_points_via_lifted_ideal_proper`.
   let C : RationalCovering A :=
     { base := D₀
       covers := {D₀}
@@ -2806,7 +2564,6 @@ theorem tateAcyclicityComplete
     [NonarchimedeanRing A] [IsDomain A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (C : RationalCovering A) (hne : C.covers.Nonempty)
-    -- IV.1's side conditions, threaded through:
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ C.base.P.A₀)
@@ -2814,27 +2571,25 @@ theorem tateAcyclicityComplete
     (h_lifted_ne_top_for_nonOpen :
       ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p → ¬IsOpen (p : Set A) →
         (Ideal.map C.base.canonicalMap p : Ideal (presheafValue C.base)) ≠ ⊤) :
-    -- Part 1: separation.
     (∀ x : presheafValue C.base,
       (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
         restrictionMap C.base D (C.hsubset D hD) x = 0) → x = 0) ∧
-    -- Part 2: gluing.
     (∀ (f : ∀ D : ↥C.covers, presheafValue D.1),
       (∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
         (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
         (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
-        restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂)) →
+        restrictionMap D₁.1 D₃ h₃₁ (f D₁) =
+          restrictionMap D₂.1 D₃ h₃₂ (f D₂)) →
       ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) := by
-  -- The Spa-point existence hypothesis is supplied by IV.1.
   have hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp :=
     fun p hp hs => exists_spa_point_dominating_prime C.base
       hAplus_le_A₀ hcanonicalMap_cont h_lifted_ne_top_for_nonOpen p hp hs
   refine ⟨?_, ?_⟩
-  · -- Part 1 via II.1.
+  ·
     exact tateAcyclicity_part1_separation_via_cor832 P C hne hSpa
-  · -- Part 2 via II.2.
+  ·
     intro f hcompat
     exact tateAcyclicity_part2_gluing_via_flat_descent P C hne hSpa f hcompat
 
@@ -2856,9 +2611,6 @@ theorem isSheafyComplete
     [NonarchimedeanRing A] [IsDomain A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    -- Per-cover instance/witness inputs for IV.1's side conditions.
-    -- (Universally quantified over all rational coverings since the
-    -- IsSheafy structure consumes hSpa on every C.)
     (hSpa_inputs : ∀ (C : RationalCovering A),
       IsNoetherianRing C.base.P.A₀ ∧
       IsNoetherianRing (locSubring C.base.P C.base.T C.base.s) ∧
@@ -2870,70 +2622,21 @@ theorem isSheafyComplete
     IsSheafy A := by
   refine isSheafy_ofStronglyNoetherianTate_flat_of_wedhorn_tree_existence
     P ?_ ?_
-  · -- Spa-point existence via IV.1.
+  ·
     intro C p hp hs
     obtain ⟨hA₀, hLoc, hAplus, hcont, hlifted⟩ := hSpa_inputs C
     haveI : IsNoetherianRing C.base.P.A₀ := hA₀
     haveI : IsNoetherianRing (locSubring C.base.P C.base.T C.base.s) := hLoc
     exact exists_spa_point_dominating_prime C.base hAplus hcont hlifted p hp hs
-  · -- Wedhorn 8.34 tree existence via I.1 (Wedhorn-faithful pair). Per
-    -- Route A (Wedhorn-faithful) refactor, both sides are now Wedhorn-
-    -- faithful: I.1 (`exists_wedhorn_laurent_refinement_tree`) produces
-    -- `(t, hRef, hSplits)` without `allNodesDisjoint`, and the downstream
-    -- `productRestrictionSub_isInducing_of_wedhorn_tree_existence` (in
-    -- `EmbeddingTopo.lean`, post 2026-05-22 refactor) consumes exactly
-    -- that bundle. The bridge sorry that previously stood here for the
-    -- `T-EMBEDDINGTOPO-WEDHORN-FAITHFUL` ticket is now discharged.
+  ·
     intro C
     exact exists_wedhorn_laurent_refinement_tree P C
 
-/-! ### Dependency-graph summary
-
-```
-                                    ┌─────────────────────────────┐
-                                    │  Group V (Mathlib)          │
-                                    │  V.1 Stacks 00MA            │
-                                    │  V.2 Stacks 023N            │
-                                    └──────────────┬──────────────┘
-                                                   │
-                ┌──────────────────────────────────┴──────────┐
-                │                                              │
-                ▼                                              ▼
-┌─────────────────────────────┐                ┌─────────────────────────────┐
-│  Group III (transitivity)   │                │  Group II (algebraic)        │
-│  III.1 presheafValue_rel    │                │  II.2 uses V.2               │
-│  III.2 isHomeo              │                └──────────────┬──────────────┘
-│  III.3 powerBounded         │                               │
-└──────────────┬──────────────┘                               │
-               │                                              │
-               ▼                                              ▼
-┌─────────────────────────────┐    ┌──────────────────────────────────────┐
-│  Group I (top-inducing)     │    │  Group IV (Spa-points)               │
-│  I.2 first stage            │    │  IV.1 Wedhorn 7.14 / Nullstellensatz │
-│  I.3 second stage (uses III)│    └──────────────────────┬───────────────┘
-│  I.4 prune                  │                           │
-│  I.1 assembled tree         │                           │
-└──────────────┬──────────────┘                           │
-               │                                          │
-               ▼                                          │
-    ┌──────────────────────────────┐                      │
-    │  isSheafyComplete            │                      │
-    │  (consumes I.1 + IV.1)       │◄─────────────────────┘
-    └──────────────────────────────┘
-                                                          │
-    ┌──────────────────────────────┐                      │
-    │  tateAcyclicityComplete      │                      │
-    │  (consumes II.1+II.2+IV.1)   │◄─────────────────────┘
-    └──────────────────────────────┘
-```
-
-**Conclusion**: every leaf of the residual DAG either is (a) one of
-the 12 stated theorems above, (b) an already-proved-axiom-clean
-piece of the project (`Cor832.lean`,
-`productRestrictionSub_isInducing_of_wedhorn_tree_existence`,
-`isSheafy_..._of_wedhorn_tree_existence`, etc.), or (c) a Mathlib
-external (V.1, V.2). The closure proofs `tateAcyclicityComplete` and
-`isSheafyComplete` show pure composition closes the goal. -/
+/-
+The closure dependency graph has two branches. Group III feeds the Group I refinement used by
+`isSheafyComplete`, while Group V feeds the Group II descent used by `tateAcyclicityComplete`.
+Group IV supplies the Spa-point input to both closure theorems.
+-/
 
 end Closure
 

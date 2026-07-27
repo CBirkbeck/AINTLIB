@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.Moduli.Stack
 
@@ -25,8 +30,8 @@ on a trivialising fppf cover together with its gluing (cocycle) datum. Concretel
   mathlib `EffectiveEpi` instance fires.
 
 **Labelled inputs (the gated content, isolated as hypotheses).** The cover `p` exists because
-`E[N]` is finite étale when `N` is invertible (`torsionπ_etale`, which rests on the T-B5 box
-`mulByHom_formallyUnramified`); the local pairing `ζ'` and its cocycle `hcocyc` come from
+`E[N]` is finite étale when `N` is invertible (`Torsionπ.etale`, which rests on the T-B5 box
+`MulByHom.formallyUnramified`); the local pairing `ζ'` and its cocycle `hcocyc` come from
 trivialising `E[N]` (and `μ_N`) on `p` and putting the standard symplectic determinant pairing
 there. Constructing those data from the trivialisation is the T-W7-scale step (the point-level
 `E[N] ≅ (ℤ/N)²` identification funnels into the group-law/atlas refactor); here they are the
@@ -184,6 +189,21 @@ variable {S : Scheme.{u}} (E : EllipticCurve S)
 noncomputable def torsionSqπ (N : ℕ) : pullback (E.torsionπ N) (E.torsionπ N) ⟶ S :=
   pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The pullback of a surjective cover along the Weil-pairing source is surjective. Registered
+as an instance so the descent proofs below need not re-derive it. -/
+private instance surjective_pullback_fst_torsionSqπ (N : ℕ) {S' : Scheme.{u}} (p : S' ⟶ S)
+    [Surjective p] : Surjective (pullback.fst (E.torsionSqπ N) p) :=
+  MorphismProperty.pullback_fst _ _ ‹Surjective p›
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The pullback of a locally-finitely-presented cover along the Weil-pairing source is again
+locally of finite presentation. Registered as an instance, as above. -/
+private instance lfp_pullback_fst_torsionSqπ (N : ℕ) {S' : Scheme.{u}} (p : S' ⟶ S)
+    [LocallyOfFinitePresentation p] :
+    LocallyOfFinitePresentation (pullback.fst (E.torsionSqπ N) p) :=
+  MorphismProperty.pullback_fst _ _ ‹LocallyOfFinitePresentation p›
+
 /-- **(T-C0e)** The char-0 Weil pairing `E[N] ×_S E[N] ⟶ μ_{N,S}`, constructed by fppf descent
 of a local pairing `ζ'` given on the base change of `E[N] ×_S E[N]` along a trivialising fppf
 cover `p : S' ⟶ S`. The pulled-back cover `pullback.fst (E.torsionSqπ N) p` is fppf (base change
@@ -197,10 +217,6 @@ noncomputable def weilPairingCharZero (N : ℕ) [NeZero N]
     (hcocyc : pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ'
         = pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ') :
     pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N :=
-  haveI : Surjective (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹Surjective p›
-  haveI : LocallyOfFinitePresentation (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹LocallyOfFinitePresentation p›
   (descend_hom_of_effectiveEpi (pullback.fst (E.torsionSqπ N) p) ζ' hcocyc).choose
 
 /-- **(T-C0e spec, restriction)** The char-0 Weil pairing restricts along the trivialising cover
@@ -212,10 +228,6 @@ theorem weilPairingCharZero_restrict (N : ℕ) [NeZero N]
     (hcocyc : pullback.fst (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ'
         = pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ') :
     pullback.fst (E.torsionSqπ N) p ≫ E.weilPairingCharZero N p ζ' hcocyc = ζ' :=
-  haveI : Surjective (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹Surjective p›
-  haveI : LocallyOfFinitePresentation (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹LocallyOfFinitePresentation p›
   (descend_hom_of_effectiveEpi (pullback.fst (E.torsionSqπ N) p) ζ' hcocyc).choose_spec.1
 
 /-- **(T-C0e spec, over `S` — cf. `weilPairing_over`)** If the local pairing `ζ'` is a morphism
@@ -229,10 +241,6 @@ theorem weilPairingCharZero_over (N : ℕ) [NeZero N]
         = pullback.snd (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p) ≫ ζ')
     (hover : ζ' ≫ muNπ S N = pullback.fst (E.torsionSqπ N) p ≫ E.torsionSqπ N) :
     E.weilPairingCharZero N p ζ' hcocyc ≫ muNπ S N = E.torsionSqπ N := by
-  haveI : Surjective (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹Surjective p›
-  haveI : LocallyOfFinitePresentation (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹LocallyOfFinitePresentation p›
   haveI : Epi (pullback.fst (E.torsionSqπ N) p) := inferInstance
   refine (cancel_epi (pullback.fst (E.torsionSqπ N) p)).mp ?_
   rw [← Category.assoc, E.weilPairingCharZero_restrict N p ζ' hcocyc, hover]
@@ -248,10 +256,6 @@ theorem weilPairingCharZero_unique (N : ℕ) [NeZero N]
     (e : pullback (E.torsionπ N) (E.torsionπ N) ⟶ muN S N)
     (he : pullback.fst (E.torsionSqπ N) p ≫ e = ζ') :
     e = E.weilPairingCharZero N p ζ' hcocyc := by
-  haveI : Surjective (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹Surjective p›
-  haveI : LocallyOfFinitePresentation (pullback.fst (E.torsionSqπ N) p) :=
-    MorphismProperty.pullback_fst _ _ ‹LocallyOfFinitePresentation p›
   exact (descend_hom_of_effectiveEpi (pullback.fst (E.torsionSqπ N) p) ζ' hcocyc).choose_spec.2 e he
 
 /-- The base change of the Weil-pairing source `E[N] ×_S E[N]` along `g : T ⟶ S`: the induced
@@ -286,8 +290,6 @@ theorem weilPairingCharZero_baseChange (N : ℕ) [NeZero N] {T : Scheme.{u}} (g 
           = ζ'_T ≫ muNBaseChange g N) :
     (E.baseChange g).weilPairingCharZero N p_T ζ'_T hcocyc_T ≫ muNBaseChange g N
       = E.weilPairingSourceBaseChange N g ≫ E.weilPairingCharZero N p ζ' hcocyc := by
-  haveI : Surjective (pullback.fst ((E.baseChange g).torsionSqπ N) p_T) :=
-    MorphismProperty.pullback_fst _ _ ‹Surjective p_T›
   haveI : Epi (pullback.fst ((E.baseChange g).torsionSqπ N) p_T) :=
     AlgebraicGeometry.Flat.epi_of_flat_of_surjective _
   refine (cancel_epi (pullback.fst ((E.baseChange g).torsionSqπ N) p_T)).mp ?_

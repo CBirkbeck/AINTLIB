@@ -81,8 +81,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback HasseWeil.WeilPairing.TorsionGeometric
 
-set_option linter.unusedSectionVars false
-set_option linter.style.longLine false
 
 /-- `Twist f` is the ring `B` carrying the `f`-twisted `B`-module structure (`b • x = f b * x`),
 for an algebra endomorphism `f : B →ₐ[R] B`.  A *type synonym* of `B` so the twisted module
@@ -109,7 +107,8 @@ noncomputable instance instModule : Module B (Twist f) :=
 @[simp] lemma toB_add (x y : Twist f) : toB f (x + y) = toB f x + toB f y := rfl
 @[simp] lemma ofB_add (x y : B) : ofB f (x + y) = ofB f x + ofB f y := rfl
 
-/-- The `S`-action on `Twist f` (for a scalar `s : S` acting through `S → B`), via the `B`-action. -/
+/-- The `S`-action on `Twist f` (for a scalar `s : S` acting through `S → B`), via the
+`B`-action. -/
 lemma smul_toB_of_algebra {S : Type*} [CommRing S] [Algebra S B] [Module S (Twist f)]
     [IsScalarTower S B (Twist f)] (s : S) (x : Twist f) :
     toB f (s • x) = f (algebraMap S B s) * toB f x := by
@@ -308,6 +307,7 @@ noncomputable def lTensorMap (f : C.toAffine.FunctionField →ₐ[F] C.toAffine.
     (L ⊗[F] C.toAffine.FunctionField) →ₐ[L] (L ⊗[F] C.toAffine.FunctionField) :=
   Algebra.TensorProduct.map (AlgHom.id L L) f
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem lTensorMap_tmul
     (f : C.toAffine.FunctionField →ₐ[F] C.toAffine.FunctionField) (l : L)
     (u : C.toAffine.FunctionField) :
@@ -334,7 +334,8 @@ theorem baseChangePullback_apply
         ((tensorFunctionFieldEquiv C L).symm z)) :=
   rfl
 
-/-- `Φ⁻¹ ∘ (baseChangePullback f) = (id_L ⊗ f) ∘ Φ⁻¹`: the conjugation identity at the function-field
+/-- `Φ⁻¹ ∘ (baseChangePullback f) = (id_L ⊗ f) ∘ Φ⁻¹`: the conjugation identity at the
+function-field
 level (the algebra-map compatibility square feeding `Algebra.finrank_eq_of_equiv_equiv`). -/
 theorem symm_comp_baseChangePullback
     (f : C.toAffine.FunctionField →ₐ[F] C.toAffine.FunctionField)
@@ -379,6 +380,7 @@ def FinrankBaseChange (f : C.toAffine.FunctionField →ₐ[F] C.toAffine.Functio
     @Module.finrank C.toAffine.FunctionField C.toAffine.FunctionField _ _
       f.toRingHom.toAlgebra.toModule
 
+set_option linter.unusedSectionVars false in
 /-- **The base-change-of-finrank fact, proved (curve-free).**  For an `F`-algebra endomorphism `f`
 of the field `K(C)`, base change along `F → L` preserves the degree of the (injective) field
 endomorphism: `[L ⊗ K(C) : (id_L ⊗ f)(L ⊗ K(C))] = [K(C) : f(K(C))]`. -/
@@ -387,7 +389,8 @@ theorem finrankBaseChange
     FinrankBaseChange C L f :=
   finrank_lTensorMap_eq_finrank f
 
-/-- **Degree preservation of `baseChangePullback`** (curve-free).  The conjugation step is the proved
+/-- **Degree preservation of `baseChangePullback`** (curve-free).  The conjugation step is the
+proved
 `finrank_baseChangePullback_eq_finrank_lTensorMap`; chaining with the now-proved `finrankBaseChange`
 gives the finrank equality `Isogeny.degree_eq_of_finrank_eq` consumes. -/
 theorem baseChangePullback_finrank_eq
@@ -434,7 +437,8 @@ variable [IsAlgClosed L]
 
 /-- **Assemble `OneSubScalingData` with concrete `pullback_L` and discharged `hdeg_bc`.**  The
 degree-preservation field `hdeg_bc` is discharged with **no** finrank hypothesis (the curve-free
-`finrankBaseChange` is proved); the only inputs are the genuinely-deep K̄-level residuals against the
+`finrankBaseChange` is proved); the only inputs are the genuinely-deep K̄-level residuals
+against the
 concrete pullback `oneSubFrobeniusPullback_L`.  Produces the full bundled `OneSubScalingData` that
 `oneSubFrobeniusScaling_of_data` consumes. -/
 noncomputable def mkOneSubScalingDataConcrete (hq : 2 ≤ Fintype.card K)

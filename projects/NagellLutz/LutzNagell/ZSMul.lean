@@ -340,6 +340,15 @@ open Affine.Point
 open WeierstrassCurve.Affine in
 instance : AddGroup ((curve.baseChange Universal.Field).toAffine.Point) := inferInstance
 
+/-- `z ↦ z - W.negY x z` is injective (it equals `2 * z + W.a₁ * x + W.a₃`). Stated over an opaque
+affine curve `W` so that the concrete universal curve's coefficients are never `whnf`-reduced. -/
+private lemma eq_of_sub_negY_eq {F : Type*} [Field F] (h2 : (2 : F) ≠ 0)
+    (W : WeierstrassCurve.Affine F) {x z₁ z₂ : F}
+    (h : z₁ - W.negY x z₁ = z₂ - W.negY x z₂) : z₁ = z₂ := by
+  simp only [Affine.negY] at h
+  have : (2 : F) * z₁ = 2 * z₂ := by linear_combination h
+  exact mul_left_cancel₀ h2 this
+
 /-- The affine coordinates of `n • Universal.Affine.point` is given by `(smulX n, smulY n)`. -/
 theorem zsmul_point_eq_smulX_smulY : n ≠ 0 →
     ∃ h : Affine.Nonsingular _ (smulX n) (smulY n), n • Affine.point = .some _ _ h := by
@@ -365,15 +374,15 @@ theorem zsmul_point_eq_smulX_smulY : n ≠ 0 →
     have X_eq : smulX (n2 + 1 : ℕ) = _U.addX (smulX n2) (smulX 1) L := by
       rw [Nat.cast_add, Nat.cast_one, smulX_add one_ne_zero (by omega) (by omega) (by omega),
         Affine.addX_eq_addX_negY_sub _ _ ne, sub_eq_add_neg (n2 : ℤ), ← eq1.1]; rfl
-    have Y_eq : smulY (n2 + 1 : ℕ) = _U.addY (smulX n2) (smulX 1) (smulY n2) L := by
-      rw [← mul_cancel_left_mem_nonZeroDivisors (mem_nonZeroDivisors_of_ne_zero Field.two_ne_zero),
-        ← add_right_cancel_iff (a := _U.a₁ * smulX (n2 + 1 : ℕ) + _U.a₃)]
-      convert smulY_add_sub_negY (n := n2) one_ne_zero (by omega) (by omega) (by omega) using 1
-      · simp_rw [Affine.negY, Nat.cast_add]; norm_cast
-        simp only [_U, two_mul]; abel
-      convert _U.addY_sub_negY_addY (smulY n2) (smulY 1) ne using 1
-      · rw [Affine.negY, ← X_eq]; ring
-      · rw [← X_eq]; rfl
+    have hfact₁ :=
+      smulY_add_sub_negY (n := n2) (m := 1) one_ne_zero (by omega) (by omega) (by omega)
+    have hfact₂ := _U.addY_sub_negY_addY (x₁ := smulX n2) (x₂ := smulX 1) (smulY n2) (smulY 1) ne
+    have Y_eq : smulY (n2 + 1 : ℕ) = _U.addY (smulX n2) (smulX 1) (smulY n2) L :=
+      eq_of_sub_negY_eq Field.two_ne_zero _U (x := _U.addX (smulX n2) (smulX 1) L) <| by
+        simp only at hfact₁ hfact₂
+        rw [show ((n2 : ℤ) + 1) = ↑(n2 + 1) by push_cast; ring] at hfact₁
+        rw [X_eq] at hfact₁
+        rw [hfact₁, hfact₂]
     rw [X_eq, Y_eq, n2.cast_add, add_zsmul, eq, eq2]
     exact ⟨Affine.nonsingular_add ns2 ns (fun h ↦ ne h.1), add_of_X_ne ne⟩
   | neg ih n =>
@@ -607,11 +616,13 @@ theorem zsmul_eq_smulEval {x y : F} (h : Affine.Nonsingular W x y) (n : ℤ) :
         push_cast
         simp only [add_sub_cancel_left, one_smul]
         exact Point.fromAffine_some_ne_zero h
+      have hnequiv : ¬ (smulEval W x y ↑(n + 1) ≈ smulEval W x y ↑(n + 1 + 1)) := by
+        intro hequiv
+        refine hne (Point.ext_iff.mpr ?_)
+        rw [ih (n + 1) (by omega), ih (n + 1 + 1) (by omega)]
+        exact Quotient.sound hequiv
       rw [Point.add_point, ih (n + 1) (by omega), ih (n + 1 + 1) (by omega), addMap_eq,
-        add_of_not_equiv (by
-          intro hequiv
-          exact hne (Point.ext_iff.mpr ((ih (n + 1) (by omega)) ▸ (ih (n + 1 + 1) (by omega)) ▸
-            Quotient.eq.mpr hequiv)))]
+        add_of_not_equiv hnequiv]
       have : (↑(n + 1 + 1) : ℤ) = ↑(n + 1) + 1 := by push_cast; omega
       rw [this, addXYZ_smulEval₁ h.1]
       congrm(⟦W.smulEval x y ↑(?_)⟧); omega

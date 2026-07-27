@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.RingTheory.PowerSeries.Derivative
 
 /-!
@@ -18,6 +23,11 @@ namespace PadicLFunctions
 
 variable {R : Type*} [CommRing R]
 
+/-- Bridge between the deprecated unbundled `PowerSeries.derivativeFun` (used in this file's
+statements) and the bundled derivation `PowerSeries.derivative` that carries mathlib's API. -/
+private lemma derivativeFun_eq (F : PowerSeries R) :
+    F.derivativeFun = PowerSeries.derivative R F := rfl
+
 /-- The operator `∂ = (1+T)·d/dT` on `R⟦T⟧` (RJW Lem. 3.24). -/
 noncomputable def del (F : PowerSeries R) : PowerSeries R :=
   (1 + PowerSeries.X) * F.derivativeFun
@@ -28,12 +38,12 @@ lemma del_def (F : PowerSeries R) : del F = (1 + PowerSeries.X) * F.derivativeFu
 lemma coeff_del (F : PowerSeries R) (n : ℕ) :
     PowerSeries.coeff n (del F)
       = (n + 1 : R) * PowerSeries.coeff (n + 1) F + (n : R) * PowerSeries.coeff n F := by
-  rw [del, one_add_mul, map_add, coeff_derivativeFun]
+  rw [del, one_add_mul, map_add, derivativeFun_eq, coeff_derivative]
   rcases n with - | m
   · rw [coeff_zero_X_mul]
     push_cast
     ring
-  · rw [coeff_succ_X_mul, coeff_derivativeFun]
+  · rw [coeff_succ_X_mul, coeff_derivative]
     push_cast
     ring
 
@@ -41,7 +51,8 @@ lemma coeff_del (F : PowerSeries R) (n : ℕ) :
 lemma map_derivativeFun {S : Type*} [CommRing S] (f : R →+* S) (F : PowerSeries R) :
     PowerSeries.map f F.derivativeFun = (PowerSeries.map f F).derivativeFun := by
   ext n
-  simp [coeff_derivativeFun]
+  simp only [derivativeFun_eq]
+  simp [coeff_derivative]
 
 /-- A ring map intertwines `∂`. -/
 lemma map_del {S : Type*} [CommRing S] (f : R →+* S) (F : PowerSeries R) :

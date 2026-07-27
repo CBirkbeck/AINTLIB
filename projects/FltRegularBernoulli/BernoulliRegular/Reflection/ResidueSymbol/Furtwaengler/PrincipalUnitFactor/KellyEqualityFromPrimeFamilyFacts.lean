@@ -9,7 +9,7 @@ public import BernoulliRegular.UnitQuotient.TorsionQuotient
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.SignUnitFactor
 
 /-!
-# Principal unit factor (REF-18 Phase 2, sub-piece U)
+# Principal unit factor (Phase 2, sub-piece U)
 
 For a nonzero principal ideal `(α)`, the actual multiplicative Φ element
 `Φ((α))` and the explicit Stickelberger principal generator
@@ -101,12 +101,12 @@ theorem kellyPrimeNegEquality_all_of_primary_primePhiFamilyFacts
       pthSymbolAtIdeal_canonical (p := p) (K := K)
           (stickelbergerPrincipalGen (p := p) (K := K) α) P' =
         -pthSymbolAtIdeal_canonical (p := p) (K := K)
-          ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := fun P' hP'_prime hP'_ne =>
+          ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := fun P' hP'_prime hP'_ne ↦
   kellyPrimeNegEquality_of_primary_primePhiFamilyFacts
     (p := p) (K := K) hp_odd hp_two hp_three hα_ne hαp_top primePhi
     hα_primary h_prime_semi h_prime_norm hP'_ne
     (hcop P' hP'_prime hP'_ne)
-    (fun P hP Q hQ => h_prime_symbol P hP P' hP'_prime hP'_ne Q hQ)
+    (fun P hP Q hQ ↦ h_prime_symbol P hP P' hP'_prime hP'_ne Q hQ)
     (h_coprime P' hP'_prime hP'_ne)
 
 /-- Universal positive Kelly equality from actual primary prime Φ-family
@@ -144,12 +144,12 @@ theorem kellyPrimeEquality_all_of_primary_primePhiFamilyFacts
       pthSymbolAtIdeal_canonical (p := p) (K := K)
           (stickelbergerPrincipalGen (p := p) (K := K) α) P' =
         pthSymbolAtIdeal_canonical (p := p) (K := K)
-          ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := fun P' hP'_prime hP'_ne =>
+          ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := fun P' hP'_prime hP'_ne ↦
   kellyPrimeEquality_of_primary_primePhiFamilyFacts
     (p := p) (K := K) hp_odd hp_two hp_three hα_ne hαp_top primePhi
     hα_primary h_prime_semi h_prime_norm hP'_ne
     (hcop P' hP'_prime hP'_ne)
-    (fun P hP Q hQ => h_prime_symbol P hP P' hP'_prime hP'_ne Q hQ)
+    (fun P hP Q hQ ↦ h_prime_symbol P hP P' hP'_prime hP'_ne Q hQ)
     (h_coprime P' hP'_prime hP'_ne)
 
 end Furtwaengler

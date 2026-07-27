@@ -25,11 +25,15 @@ function field.
 
 ## Construction
 
-* `e : K̄ ≃ₐ[K] K̄` — the `q`-power coefficient Frobenius (`frobeniusAlgEquivOfAlgebraic`), fixing `K`.
-* `CoordinateRing.map e : R[E] →+* R'[E.map e]` (mathlib) — but since `e` fixes `K`, the mapped curve
-  `(W.baseChange K̄).map e` *equals* `W.baseChange K̄` (`frobeniusGalois_baseChange_map_eq`).  We prove
+* `e : K̄ ≃ₐ[K] K̄` — the `q`-power coefficient Frobenius (`frobeniusAlgEquivOfAlgebraic`), fixing
+`K`.
+* `CoordinateRing.map e : R[E] →+* R'[E.map e]` (mathlib) — but since `e` fixes `K`, the mapped
+curve
+  `(W.baseChange K̄).map e` *equals* `W.baseChange K̄` (`frobeniusGalois_baseChange_map_eq`).  We
+  prove
   `CoordinateRing.map e` is **bijective** (`coordRingMap_bijective`: injective by `map_injective` of
-  the injective `e`; surjective by lifting `e.symm` through `AdjoinRoot.mk` and `Polynomial.map`), so
+  the injective `e`; surjective by lifting `e.symm` through `AdjoinRoot.mk` and `Polynomial.map`),
+  so
   it packages as a ring iso `crEquiv : R[E] ≃+* R'[E.map e]`.
 * `IsFractionRing.ringEquivOfRingEquiv crEquiv` lifts it to the fraction fields, and a
   `RingEquiv.cast` along the curve equality `(W.baseChange K̄).map e = W.baseChange K̄` returns the
@@ -59,9 +63,6 @@ open WeierstrassCurve Polynomial
 namespace HasseWeil.WeilPairing
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
-set_option linter.style.longLine false
 
 /-! ### Generic `CoordinateRing.map` facts (any base ring) -/
 
@@ -107,7 +108,8 @@ noncomputable abbrev coeffFrobEquiv : AlgebraicClosure K ≃+* AlgebraicClosure 
   show (FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)) a = a ^ Fintype.card K
   rw [FiniteField.coe_frobeniusAlgEquivOfAlgebraic]
 
-/-- **The `q`-power coefficient Frobenius fixes the curve** `W.baseChange K̄` (as a `WeierstrassCurve`):
+/-- **The `q`-power coefficient Frobenius fixes the curve** `W.baseChange K̄` (as a
+`WeierstrassCurve`):
 mapping `W.baseChange K̄` along `e = frobeniusAlgEquivOfAlgebraic K K̄` returns `W.baseChange K̄`,
 because `e` is a `K`-algebra hom and so fixes `algebraMap K K̄`.  Direct from `map_map` +
 `e.commutes`. -/
@@ -120,7 +122,7 @@ theorem frobeniusGalois_baseChange_map_eq :
   ext x
   change (FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).toAlgHom.toRingHom.comp
       (algebraMap K (AlgebraicClosure K)) x = algebraMap K (AlgebraicClosure K) x
-  simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_algHom]
+  simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_toAlgHom]
   exact (FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).commutes x
 
 /-- **`CoordinateRing.map e` is surjective** for a ring **equiv** `e` of the base field: every
@@ -161,10 +163,12 @@ theorem coordRingMap_bijective (e : AlgebraicClosure K ≃+* AlgebraicClosure K)
 noncomputable def crFrobEquiv :
     (W.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing ≃+*
       ((W.baseChange (AlgebraicClosure K)).map
-        (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.CoordinateRing :=
+        (coeffFrobEquiv (K := K) :
+          AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.CoordinateRing :=
   RingEquiv.ofBijective _ (coordRingMap_bijective W (coeffFrobEquiv (K := K)))
 
-@[simp] theorem crFrobEquiv_apply (z : (W.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing) :
+@[simp] theorem crFrobEquiv_apply
+    (z : (W.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing) :
     crFrobEquiv W z =
       WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange (AlgebraicClosure K)).toAffine
         (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K) z := rfl
@@ -174,7 +178,8 @@ to fraction fields via `IsFractionRing.ringEquivOfRingEquiv`. -/
 noncomputable def ffFrobEquivRaw :
     (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField ≃+*
       ((W.baseChange (AlgebraicClosure K)).map
-        (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField :=
+        (coeffFrobEquiv (K := K) :
+          AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField :=
   IsFractionRing.ringEquivOfRingEquiv (crFrobEquiv W)
 
 /-- **The curve equality** `(W.baseChange K̄).map e = W.baseChange K̄` for `e = coeffFrobEquiv`
@@ -191,7 +196,8 @@ theorem map_coeffFrobEquiv_eq :
 /-- **The codomain `RingEquiv.cast`** `K̄(E.map e) ≃+* K̄(E)` along `map_coeffFrobEquiv_eq`. -/
 noncomputable def ffFrobCast :
     ((W.baseChange (AlgebraicClosure K)).map
-        (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
+        (coeffFrobEquiv (K := K) :
+          AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       ≃+* (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField :=
   RingEquiv.cast (R := fun (V : WeierstrassCurve (AlgebraicClosure K)) ↦ V.toAffine.FunctionField)
     (map_coeffFrobEquiv_eq W)
@@ -209,7 +215,8 @@ noncomputable def frobeniusFunctionFieldEquiv :
 /-! ### The `q`-power on constants (the elementary leaf of `FrobeniusGaloisData`) -/
 
 /-- **`ffFrobEquivRaw` on a base constant**: `σ_raw(algebraMap a) = algebraMap (a ^ #K)` (into the
-mapped curve's function field).  Factor `algebraMap K̄ K̄(E) = (algebraMap R[E] K̄(E)) ∘ (algebraMap K̄
+mapped curve's function field).  Factor `algebraMap K̄ K̄(E) = (algebraMap R[E] K̄(E)) ∘ (algebraMap
+K̄
 R[E])` (`IsScalarTower`), push through `IsFractionRing.ringEquivOfRingEquiv_algebraMap` and
 `coordRingMap_algebraMap_base`, and use `coeffFrobEquiv a = a^#K`. -/
 theorem ffFrobEquivRaw_algebraMap (a : AlgebraicClosure K) :
@@ -217,7 +224,8 @@ theorem ffFrobEquivRaw_algebraMap (a : AlgebraicClosure K) :
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField a) =
       algebraMap (AlgebraicClosure K)
         ((W.baseChange (AlgebraicClosure K)).map
-          (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
+          (coeffFrobEquiv (K := K) :
+          AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
         (a ^ Fintype.card K) := by
   rw [show (algebraMap (AlgebraicClosure K)
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField a) =
@@ -228,7 +236,8 @@ theorem ffFrobEquivRaw_algebraMap (a : AlgebraicClosure K) :
     rw [← IsScalarTower.algebraMap_apply]]
   rw [ffFrobEquivRaw, IsFractionRing.ringEquivOfRingEquiv_algebraMap,
     crFrobEquiv_apply, coordRingMap_algebraMap_base,
-    show (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K) a = a ^ Fintype.card K
+    show (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K) a =
+        a ^ Fintype.card K
       from coeffFrobEquiv_apply a, ← IsScalarTower.algebraMap_apply]
 
 /-- **`ffFrobCast` commutes with the base `algebraMap`**: the codomain `RingEquiv.cast` along the
@@ -237,7 +246,8 @@ By `subst` on the curve equality (then the cast is `rfl`). -/
 theorem ffFrobCast_algebraMap (b : AlgebraicClosure K) :
     ffFrobCast W (algebraMap (AlgebraicClosure K)
         ((W.baseChange (AlgebraicClosure K)).map
-          (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField b) =
+          (coeffFrobEquiv (K := K) :
+          AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField b) =
       algebraMap (AlgebraicClosure K)
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField b := by
   rw [ffFrobCast]
@@ -246,11 +256,13 @@ theorem ffFrobCast_algebraMap (b : AlgebraicClosure K) :
       (RingEquiv.cast
           (R := fun (U : WeierstrassCurve (AlgebraicClosure K)) ↦ U.toAffine.FunctionField) h)
         (algebraMap (AlgebraicClosure K) V.toAffine.FunctionField b) =
-      algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField b := by
+      algebraMap (AlgebraicClosure K)
+        (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField b := by
     intro V h; subst h; rfl
   exact key _ (map_coeffFrobEquiv_eq W)
 
-/-- **The `q`-power on constants** (Silverman III.8.1, the elementary leaf of `FrobeniusGaloisData`):
+/-- **The `q`-power on constants** (Silverman III.8.1, the elementary leaf of
+`FrobeniusGaloisData`):
 the arithmetic Frobenius `σ = frobeniusFunctionFieldEquiv` `q`-powers the `K̄`-coefficients,
 `σ(algebraMap a) = algebraMap (a ^ #K)`.  Composition of `ffFrobEquivRaw_algebraMap` (the raw lift)
 and `ffFrobCast_algebraMap` (the codomain cast fixes constants). -/

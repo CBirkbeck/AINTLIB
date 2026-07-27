@@ -86,7 +86,7 @@ theorem finrank_class_le_ker_localization_of_leftKernel
     (hU_finrank_eq_W : Module.finrank F U = Module.finrank F W) :
     Module.finrank F A ≤ Module.finrank F (LinearMap.ker loc) := by
   let ιker : U →ₗ[F] LinearMap.ker π := {
-    toFun := fun u => ⟨ι u, hπι u⟩
+    toFun := fun u ↦ ⟨ι u, hπι u⟩
     map_add' := by
       intro u v
       apply Subtype.ext
@@ -95,7 +95,7 @@ theorem finrank_class_le_ker_localization_of_leftKernel
       intro c u
       apply Subtype.ext
       simp }
-  have hιker_inj : Function.Injective ιker := fun u v huv =>
+  have hιker_inj : Function.Injective ιker := fun u v huv ↦
     hι_inj <| congrArg Subtype.val huv
   have hU_le_kerπ :
       Module.finrank F U ≤ Module.finrank F (LinearMap.ker π) :=
@@ -121,7 +121,7 @@ theorem finiteDimensional_of_surjective_of_leftKernel
   obtain ⟨σ, hσ⟩ :=
     LinearMap.exists_rightInverse_of_surjective π (LinearMap.range_eq_top.mpr hπ_surj)
   let cover : U × A →ₗ[F] V := {
-    toFun := fun ua => ι ua.1 + σ ua.2
+    toFun := fun ua ↦ ι ua.1 + σ ua.2
     map_add' := by
       intro x y
       simp [add_assoc, add_left_comm, add_comm]
@@ -162,10 +162,10 @@ theorem localCyclotomicUnit_pow_primeSubOne_mem_principalUnitSubgroup_one
   let R := Local.localCyclotomicRing p K
   let M := Local.localCyclotomicMaximalIdeal p K
   let k := R ⧸ M
-  letI : M.IsMaximal := IsLocalRing.maximalIdeal.isMaximal R
+  have : M.IsMaximal := IsLocalRing.maximalIdeal.isMaximal R
   letI : Field k := Ideal.Quotient.field M
   have hcard : Nat.card k = p := Local.localCyclotomicResidueCard (p := p) (K := K)
-  haveI : Finite k := Nat.finite_of_card_ne_zero (by
+  have : Finite k := Nat.finite_of_card_ne_zero (by
     rw [hcard]
     exact (Fact.out : p.Prime).ne_zero)
   letI : Fintype k := Fintype.ofFinite k
@@ -304,9 +304,9 @@ theorem localCyclotomicRingToField_injective :
       (P := K)
       (g := algebraMap (𝓞 K) K)
       (hg := Localization.map_isUnit_of_le K S hS)).2
-      (fun a b =>
-        ⟨fun h => congr_arg _ (IsLocalization.injective _ hS h),
-          fun h => congr_arg _ (IsFractionRing.injective (𝓞 K) K h)⟩)
+      (fun a b ↦
+        ⟨fun h ↦ congr_arg _ (IsLocalization.injective _ hS h),
+          fun h ↦ congr_arg _ (IsFractionRing.injective (𝓞 K) K h)⟩)
       hxy
 
 /-- The embedding of the lambda-local ring into `K` intertwines the local
@@ -340,6 +340,7 @@ theorem localCyclotomicRingToField_localCyclotomicRingEquiv
         ((cyclotomicSigmaOfUnit (p := p) K a).toRingEquiv) r).symm
   exact RingHom.congr_fun hhom x
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The image of the lambda-local ring in `K` lies in the valuation subring at
 the lambda prime. -/
 theorem localCyclotomicRingToField_mem_valuationSubring
@@ -714,7 +715,7 @@ theorem fieldUnitToCyclotomicLocalUnitPowerQuotient_equivariant_generator
     let A := cyclotomicPrincipalIdealPreservingEquiv (K := K) (p := p) a
     have h := localUniformizerExponent_generator_dvd (R := 𝓞 K) (K := K) v p
       (A.singularPairEquiv p s)
-    simp only [A, σ, γ, v, cyclotomicPrincipalIdealPreservingEquiv] at h
+    simp only [A, v, cyclotomicPrincipalIdealPreservingEquiv] at h
     obtain ⟨n, hn'⟩ := h
     exact ⟨n, hn'⟩
   change localUnitPowerClassAt (R := 𝓞 K) (K := K) v p
@@ -793,10 +794,6 @@ theorem singularGroupLocalizationToCyclotomicLocalUnits_equivariant
     fieldUnitToCyclotomicLocalUnitPowerQuotient_equivariant_generator
       (p := p) (K := K) a s
 
-set_option maxHeartbeats 800000 in
--- `QuotientGroup.lift` unfolds the cyclotomic local-unit quotient and the
--- completed principal-unit quotient; keep the larger budget local to this
--- descent.
 /-- The induced bridge `U_lambda / U_lambda^p -> completed U_1 / completed U_1^p`. -/
 noncomputable def cyclotomicLocalUnitPowerQuotientToCompletedPrincipalUnitModP :
     (cyclotomicLocalUnitSubgroup (p := p) K ⧸

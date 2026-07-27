@@ -1,5 +1,5 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
+import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
 
 /-!
@@ -75,7 +75,7 @@ theorem intCast_add_zeta_mul_intCast_ne_zero
     (a : K) + ζ * (b : K) ≠ 0 := by
   intro h
   have hp_prime : p.Prime := Fact.out
-  haveI : NeZero (p : ℕ) := ⟨hp_prime.ne_zero⟩
+  have : NeZero (p : ℕ) := ⟨hp_prime.ne_zero⟩
   set f : Polynomial ℚ := C ((b : ℚ)) * X + C ((a : ℚ)) with hf_def
   have hb_rat : (b : ℚ) ≠ 0 := by exact_mod_cast hb
   have hf_ne : f ≠ 0 := by
@@ -196,7 +196,7 @@ theorem caseI_antiRadical_ne_zero
     (hab : ¬ (a = 0 ∧ b = 0)) :
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ 0 := by
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
   exact div_ne_zero
     (caseI_factor_K_ne_zero (K := K) hp_odd hcaseI hζ)
     (caseI_antiRadical_denom_K_ne_zero (K := K) hp_odd hcaseI hζ)
@@ -240,7 +240,7 @@ theorem caseI_antiRadical_ne_one
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ 1 := by
   intro h_eq_one
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical at h_eq_one
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical] at h_eq_one
   have h_denom_ne : NumberField.IsCMField.complexConj K
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) ≠ 0 :=
     caseI_antiRadical_denom_K_ne_zero (K := K) hp_odd hcaseI hζ
@@ -343,7 +343,7 @@ theorem caseI_antiRadical_ne_neg_one
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ -1 := by
   intro h_eq_neg_one
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical at h_eq_neg_one
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical] at h_eq_neg_one
   have h_denom_ne : NumberField.IsCMField.complexConj K
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) ≠ 0 :=
     caseI_antiRadical_denom_K_ne_zero (K := K) hp_odd hcaseI hζ
@@ -428,13 +428,13 @@ instance noZeroSMulDivisors_OK_Kplus_OK :
   · right
     exact hx
 
-/-- **`ramificationIdx(K/K⁺) ≤ 2` at every prime**. -/
+/-- **`ramificationIdx'(K/K⁺) ≤ 2` at every prime**. -/
 theorem ramificationIdx_K_over_Kplus_le_two
     (𝔭 : Ideal (𝓞 (NumberField.maximalRealSubfield K)))
     [hpm : 𝔭.IsMaximal]
     (𝔓 : Ideal (𝓞 K)) [h𝔓_prime : 𝔓.IsPrime] [h𝔓_over : 𝔓.LiesOver 𝔭] :
-    𝔭.ramificationIdx 𝔓 ≤ 2 := by
-  have h_le_finrank : 𝔭.ramificationIdx 𝔓 ≤
+    𝔭.ramificationIdx' 𝔓 ≤ 2 := by
+  have h_le_finrank : 𝔭.ramificationIdx' 𝔓 ≤
       Module.finrank (NumberField.maximalRealSubfield K) K :=
     Ideal.ramificationIdx_le_finrank
       (R := 𝓞 (NumberField.maximalRealSubfield K)) (S := 𝓞 K)
@@ -444,7 +444,7 @@ theorem ramificationIdx_K_over_Kplus_le_two
   omega
 
 omit hp [IsCyclotomicExtension {p} ℚ K] in
-/-- **`ramificationIdx(L/K⁺) ≤ 2`** for any prime `𝔓_L` of L = antiKummerLift α₀
+/-- **`ramificationIdx'(L/K⁺) ≤ 2`** for any prime `𝔓_L` of L = antiKummerLift α₀
 lying over a maximal prime `𝔭` of K⁺, given the K-side unramified hypothesis. -/
 theorem ramificationIdx_L_over_Kplus_le_two
     {α₀ : K} {hα₀ : α₀ ≠ 0}
@@ -456,21 +456,22 @@ theorem ramificationIdx_L_over_Kplus_le_two
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
         (p := p) K α₀ hα₀)))
     [h𝔓_L_prime : 𝔓_L.IsPrime] [h𝔓_L_over : 𝔓_L.LiesOver 𝔭_K]
-    (h_LK_unram : 𝔭_K.ramificationIdx 𝔓_L = 1) :
-    𝔭.ramificationIdx 𝔓_L ≤ 2 := by
-  have h_tower : Ideal.ramificationIdx 𝔭 𝔓_L =
-      Ideal.ramificationIdx 𝔭 𝔭_K * Ideal.ramificationIdx 𝔭_K 𝔓_L :=
-    Ideal.ramificationIdx_algebra_tower' 𝔭 𝔭_K 𝔓_L
+    (h_LK_unram : 𝔭_K.ramificationIdx' 𝔓_L = 1) :
+    𝔭.ramificationIdx' 𝔓_L ≤ 2 := by
+  have h_tower : Ideal.ramificationIdx' 𝔭 𝔓_L =
+      Ideal.ramificationIdx' 𝔭 𝔭_K * Ideal.ramificationIdx' 𝔭_K 𝔓_L :=
+    Ideal.ramificationIdx'_algebra_tower' 𝔭 𝔭_K 𝔓_L
   rw [h_tower, h_LK_unram, mul_one]
   exact ramificationIdx_K_over_Kplus_le_two (K := K) 𝔭 𝔭_K
 
-/-- **`ramificationIdx(L⁺/K⁺)` divides `ramificationIdx(L/K⁺)`** via the
+/-- **`ramificationIdx'(L⁺/K⁺)` divides `ramificationIdx'(L/K⁺)`** via the
 L⁺ ⊂ L tower formula. -/
 theorem ramificationIdx_Lplus_dvd_L_over_Kplus
     {α₀ : K} {hα₀ : α₀ ≠ 0}
     {h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹}
     {h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K)}
-    {h_irr_g : Irreducible (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
+    {h_irr_g : Irreducible
+      (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
       (p := p) K α₀ hα₀ h_anti)}
     {h_alpha_sq_ne : α₀ ^ 2 ≠ 1}
     (𝔭 : Ideal (𝓞 (NumberField.maximalRealSubfield K)))
@@ -482,17 +483,18 @@ theorem ramificationIdx_Lplus_dvd_L_over_Kplus
       (p := p) K α₀ hα₀)))
     [𝔓.IsPrime] [𝔓_L.IsPrime]
     [𝔓.LiesOver 𝔭] [𝔓_L.LiesOver 𝔓] :
-    Ideal.ramificationIdx 𝔭 𝔓 ∣ Ideal.ramificationIdx 𝔭 𝔓_L := by
-  have h_tower := Ideal.ramificationIdx_algebra_tower' 𝔭 𝔓 𝔓_L
+    Ideal.ramificationIdx' 𝔭 𝔓 ∣ Ideal.ramificationIdx' 𝔭 𝔓_L := by
+  have h_tower := Ideal.ramificationIdx'_algebra_tower' 𝔭 𝔓 𝔓_L
   rw [h_tower]
   exact ⟨_, rfl⟩
 
-/-- **`ramificationIdx(L⁺/K⁺) ≤ 2`** at every prime. -/
+/-- **`ramificationIdx'(L⁺/K⁺) ≤ 2`** at every prime. -/
 theorem ramificationIdx_Lplus_over_Kplus_le_two_of_LK_unram
     {α₀ : K} {hα₀ : α₀ ≠ 0}
     {h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹}
     {h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K)}
-    {h_irr_g : Irreducible (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
+    {h_irr_g : Irreducible
+      (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
       (p := p) K α₀ hα₀ h_anti)}
     {h_alpha_sq_ne : α₀ ^ 2 ≠ 1}
     (𝔭 : Ideal (𝓞 (NumberField.maximalRealSubfield K)))
@@ -509,24 +511,25 @@ theorem ramificationIdx_Lplus_over_Kplus_le_two_of_LK_unram
     [h𝔭_K_prime : 𝔭_K.IsPrime] [h𝔭_K_over : 𝔭_K.LiesOver 𝔭]
     [h𝔓_L_over_K : 𝔓_L.LiesOver 𝔭_K]
     (h𝔭_ne_bot : 𝔭 ≠ ⊥)
-    (h_LK_unram : 𝔭_K.ramificationIdx 𝔓_L = 1) :
-    𝔭.ramificationIdx 𝔓 ≤ 2 := by
-  have h_dvd : 𝔭.ramificationIdx 𝔓 ∣ 𝔭.ramificationIdx 𝔓_L :=
+    (h_LK_unram : 𝔭_K.ramificationIdx' 𝔓_L = 1) :
+    𝔭.ramificationIdx' 𝔓 ≤ 2 := by
+  have h_dvd : 𝔭.ramificationIdx' 𝔓 ∣ 𝔭.ramificationIdx' 𝔓_L :=
     ramificationIdx_Lplus_dvd_L_over_Kplus 𝔭 𝔓 𝔓_L
-  have h_le : 𝔭.ramificationIdx 𝔓_L ≤ 2 :=
+  have h_le : 𝔭.ramificationIdx' 𝔓_L ≤ 2 :=
     ramificationIdx_L_over_Kplus_le_two 𝔭 𝔭_K 𝔓_L h_LK_unram
-  haveI : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
-  have h_pos : 0 < 𝔭.ramificationIdx 𝔓_L :=
-    Nat.pos_of_ne_zero <| Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver _ h𝔭_ne_bot
+  have : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
+  have h_pos : 0 < 𝔭.ramificationIdx' 𝔓_L :=
+    Nat.pos_of_ne_zero <| Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver _ h𝔭_ne_bot
   exact (Nat.le_of_dvd h_pos h_dvd).trans h_le
 
-/-- **Galois divisibility for L⁺/K⁺**: ramificationIdx divides [L⁺ : K⁺] = p. -/
+/-- **Galois divisibility for L⁺/K⁺**: ramificationIdx' divides [L⁺ : K⁺] = p. -/
 theorem ramificationIdx_Lplus_over_Kplus_dvd_p
     (hp_odd : p ≠ 2)
     {α₀ : K} {hα₀ : α₀ ≠ 0}
     {h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹}
     {h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K)}
-    {h_irr_g : Irreducible (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
+    {h_irr_g : Irreducible
+      (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
       (p := p) K α₀ hα₀ h_anti)}
     {h_alpha_sq_ne : α₀ ^ 2 ≠ 1}
     (𝔭 : Ideal (𝓞 (NumberField.maximalRealSubfield K)))
@@ -536,8 +539,8 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
         (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))))
     [h𝔓_prime : 𝔓.IsPrime] [h𝔓_over : 𝔓.LiesOver 𝔭] :
-    𝔭.ramificationIdx 𝔓 ∣ p := by
-  haveI hg : IsGalois (NumberField.maximalRealSubfield K)
+    𝔭.ramificationIdx' 𝔓 ∣ p := by
+  have hg : IsGalois (NumberField.maximalRealSubfield K)
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
@@ -548,8 +551,8 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
           (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))) =
-      𝔭.ramificationIdx 𝔓 := by
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝔭 𝔓 h𝔭_ne_bot]
+      𝔭.ramificationIdx' 𝔓 := by
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx 𝔭 𝔓 h𝔭_ne_bot]
     exact Ideal.ramificationIdxIn_eq_ramificationIdx 𝔭 𝔓
       Gal((BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
@@ -567,7 +570,8 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
           (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))/
         (NumberField.maximalRealSubfield K)))
-  have h_card_eq_p : Nat.card Gal((BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
+  have h_card_eq_p :
+      Nat.card Gal((BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
           (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))/
@@ -584,13 +588,14 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
     Ideal.inertiaDegIn 𝔭 Lplus_OK, ?_⟩
   linarith [h_fund]
 
-/-- **`ramificationIdx(L⁺/K⁺) = 1` at every nonzero prime**, under `L/K` unramified. -/
+/-- **`ramificationIdx'(L⁺/K⁺) = 1` at every nonzero prime**, under `L/K` unramified. -/
 theorem ramificationIdx_Lplus_over_Kplus_eq_one
     (hp_odd : p ≠ 2)
     {α₀ : K} {hα₀ : α₀ ≠ 0}
     {h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹}
     {h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K)}
-    {h_irr_g : Irreducible (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
+    {h_irr_g : Irreducible
+      (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
       (p := p) K α₀ hα₀ h_anti)}
     {h_alpha_sq_ne : α₀ ^ 2 ≠ 1}
     (𝔭 : Ideal (𝓞 (NumberField.maximalRealSubfield K)))
@@ -606,11 +611,11 @@ theorem ramificationIdx_Lplus_over_Kplus_eq_one
     (𝔭_K : Ideal (𝓞 K))
     [h𝔭_K_prime : 𝔭_K.IsPrime] [h𝔭_K_over : 𝔭_K.LiesOver 𝔭]
     [h𝔓_L_over_K : 𝔓_L.LiesOver 𝔭_K]
-    (h_LK_unram : 𝔭_K.ramificationIdx 𝔓_L = 1) :
-    𝔭.ramificationIdx 𝔓 = 1 := by
-  have h_le : 𝔭.ramificationIdx 𝔓 ≤ 2 :=
+    (h_LK_unram : 𝔭_K.ramificationIdx' 𝔓_L = 1) :
+    𝔭.ramificationIdx' 𝔓 = 1 := by
+  have h_le : 𝔭.ramificationIdx' 𝔓 ≤ 2 :=
     ramificationIdx_Lplus_over_Kplus_le_two_of_LK_unram 𝔭 𝔓 𝔓_L 𝔭_K h𝔭_ne_bot h_LK_unram
-  have h_dvd : 𝔭.ramificationIdx 𝔓 ∣ p :=
+  have h_dvd : 𝔭.ramificationIdx' 𝔓 ∣ p :=
     ramificationIdx_Lplus_over_Kplus_dvd_p hp_odd 𝔭 h𝔭_ne_bot 𝔓
   have hp_prime : p.Prime := Fact.out
   have hp_ge_3 : 3 ≤ p := by
@@ -628,7 +633,8 @@ theorem antiKummerRealSubfield_isUnramified_from_K_unramified
     (α₀ : K) (hα₀ : α₀ ≠ 0)
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹)
     (h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K))
-    (h_irr_g : Irreducible (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
+    (h_irr_g : Irreducible
+      (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
       (p := p) K α₀ hα₀ h_anti))
     (h_alpha_sq_ne : α₀ ^ 2 ≠ 1)
     (h_LK_unram : Algebra.Unramified (𝓞 K)
@@ -642,37 +648,40 @@ theorem antiKummerRealSubfield_isUnramified_from_K_unramified
   apply antiKummerRealSubfield_isUnramified_of_ram_bound
     (p := p) hp_odd α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne
   intro 𝔭 𝔓 hp_prime h𝔓_prime hp_bot h𝔓_over
-  haveI := hp_prime
-  haveI := h𝔓_prime
-  haveI := h𝔓_over
-  haveI hpm : 𝔭.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hp_bot hp_prime
+  have := hp_prime
+  have := h𝔓_prime
+  have := h𝔓_over
+  have hpm : 𝔭.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hp_bot hp_prime
   obtain ⟨𝔓_L, _, h𝔓_L_prime, h𝔓_L_over_𝔓⟩ :=
-    Ideal.exists_ideal_over_prime_of_isIntegral (S := 𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
-      (p := p) K α₀ hα₀)) 𝔓 (⊥ : Ideal (𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
+    Ideal.exists_ideal_over_prime_of_isIntegral
+      (S := 𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
+      (p := p) K α₀ hα₀)) 𝔓
+        (⊥ : Ideal (𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
       (p := p) K α₀ hα₀))) (by simp)
-  haveI : 𝔓_L.IsPrime := h𝔓_L_prime
-  haveI : 𝔓_L.LiesOver 𝔓 := ⟨h𝔓_L_over_𝔓.symm⟩
+  have : 𝔓_L.IsPrime := h𝔓_L_prime
+  have : 𝔓_L.LiesOver 𝔓 := ⟨h𝔓_L_over_𝔓.symm⟩
   set 𝔭_K : Ideal (𝓞 K) := 𝔓_L.under (𝓞 K) with h𝔭_K_def
-  haveI h𝔭_K_prime : 𝔭_K.IsPrime := Ideal.IsPrime.under (𝓞 K) 𝔓_L
-  haveI h𝔓_L_over_K : 𝔓_L.LiesOver 𝔭_K := ⟨rfl⟩
-  haveI h𝔓_L_over_𝔭 : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
-  haveI h𝔭_K_over : 𝔭_K.LiesOver 𝔭 := Ideal.LiesOver.tower_bot (𝔓 := 𝔓_L) (P := 𝔭_K) (p := 𝔭)
+  have h𝔭_K_prime : 𝔭_K.IsPrime := Ideal.IsPrime.under (𝓞 K) 𝔓_L
+  have h𝔓_L_over_K : 𝔓_L.LiesOver 𝔭_K := ⟨rfl⟩
+  have h𝔓_L_over_𝔭 : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
+  have h𝔭_K_over : 𝔭_K.LiesOver 𝔭 := Ideal.LiesOver.tower_bot (𝔓 := 𝔓_L) (P := 𝔭_K) (p := 𝔭)
   have h𝔭_K_ne_bot : 𝔭_K ≠ ⊥ := by
     intro h
     apply hp_bot
     have h_under : 𝔭 = 𝔭_K.under (𝓞 (NumberField.maximalRealSubfield K)) :=
       h𝔭_K_over.over
     rw [h_under, h, Ideal.under_bot]
-  haveI h_unram_at : Algebra.IsUnramifiedAt (𝓞 K) 𝔓_L :=
+  have h_unram_at : Algebra.IsUnramifiedAt (𝓞 K) 𝔓_L :=
     (Algebra.unramified_iff_forall (R := 𝓞 K)
       (A := 𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
         (p := p) K α₀ hα₀))).mp h_LK_unram ⟨𝔓_L, h𝔓_L_prime⟩
   have h𝔓_L_ne_bot : 𝔓_L ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot h𝔭_K_ne_bot 𝔓_L
-  have h_LK_unram_at : 𝔭_K.ramificationIdx 𝔓_L = 1 := by
-    have h := Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K) (S := 𝓞
-      (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
-        (p := p) K α₀ hα₀)) (p := 𝔓_L) h𝔓_L_ne_bot
-    rwa [← h𝔭_K_def] at h
+  have h_LK_unram_at : 𝔭_K.ramificationIdx' 𝔓_L = 1 := by
+    have h : 𝔓_L.ramificationIdx (𝓞 K) = 1 :=
+      Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K) (S := 𝓞
+        (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
+          (p := p) K α₀ hα₀)) (p := 𝔓_L)
+    rwa [Ideal.ramificationIdx'_eq_ramificationIdx 𝔭_K 𝔓_L h𝔭_K_ne_bot]
   exact ramificationIdx_Lplus_over_Kplus_eq_one hp_odd 𝔭 hp_bot 𝔓 𝔓_L 𝔭_K h_LK_unram_at
 
 omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K] in
@@ -805,7 +814,8 @@ theorem antiKummerKplusPoly_natDegree
       (p := p) K α₀ hα₀ h_anti).natDegree = 2 * p := by
   have h_monic := BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly_monic
     (p := p) K α₀ hα₀ h_anti
-  have h_map_eq := BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly_map_eq_factor_product
+  have h_map_eq :=
+    BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly_map_eq_factor_product
     (p := p) K α₀ hα₀ h_anti
   have h_natDeg_map :
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
@@ -825,7 +835,8 @@ theorem antiKummerKplusPoly_natDegree
   · exact Polynomial.X_pow_sub_C_ne_zero hp_pos α₀⁻¹
 
 omit [IsCyclotomicExtension {p} ℚ K] in
-/-- **`antiKummerKplusPoly` has degree `2p`** (as a `WithBot ℕ`) — corollary of monic + natDegree. -/
+/-- **`antiKummerKplusPoly` has degree `2p`** (as a `WithBot ℕ`) —
+corollary of monic + natDegree. -/
 theorem antiKummerKplusPoly_degree
     (α₀ : K) (hα₀ : α₀ ≠ 0)
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹) :
@@ -854,7 +865,8 @@ theorem antiKummerKplusPoly_K_map_coeff_zero
     ((BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly
       (p := p) K α₀ hα₀ h_anti).map
         (algebraMap (NumberField.maximalRealSubfield K) K)).coeff 0 = 1 := by
-  rw [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly_map_eq_factor_product]
+  rw [
+  BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly_map_eq_factor_product]
   have hp_pos : 0 < p := (Fact.out : p.Prime).pos
   rw [Polynomial.mul_coeff_zero]
   rw [Polynomial.coeff_sub, Polynomial.coeff_X_pow,
@@ -955,7 +967,8 @@ theorem no_K_plus_poly_maps_to_X_pow_sub_C_alpha_inv
     rw [h_sq, mul_one] at this
     exact this
   have hα₀_inv_ne : α₀⁻¹ ≠ 0 := inv_ne_zero hα₀
-  exact no_K_plus_poly_maps_to_X_pow_sub_C_alpha (K := K) α₀⁻¹ hα₀_inv_ne h_anti' h_alpha_sq_ne' f hf
+  exact no_K_plus_poly_maps_to_X_pow_sub_C_alpha
+    (K := K) α₀⁻¹ hα₀_inv_ne h_anti' h_alpha_sq_ne' f hf
 
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **`antiKummerKplusPoly` is irreducible** in K⁺[X]. -/
@@ -978,7 +991,7 @@ theorem antiKummerKplusPoly_irreducible
       (Polynomial.X ^ p - Polynomial.C α₀) *
       (Polynomial.X ^ p - Polynomial.C α₀⁻¹) := by
     rw [← Polynomial.map_mul, h_eq,
-      BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly_map_eq_factor_product]
+  BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerKplusPoly_map_eq_factor_product]
   have h_X_prime : Prime (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K) :=
     h_X_irr.prime
   have hX_ne : (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K) ≠ 0 :=

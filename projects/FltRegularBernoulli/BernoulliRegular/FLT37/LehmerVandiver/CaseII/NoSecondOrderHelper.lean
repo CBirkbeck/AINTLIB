@@ -1,4 +1,11 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
 
 /-!
 # Decidability helper for `NoSecondOrderIrregularPair`
@@ -25,7 +32,7 @@ namespace BernoulliRegular
 underlying integer divisibility being decidable. -/
 instance NoSecondOrderIrregularPair.decidable (p i : ℕ) :
     Decidable (NoSecondOrderIrregularPair p i) := by
-  unfold NoSecondOrderIrregularPair
+  simp only [NoSecondOrderIrregularPair]
   infer_instance
 
 /-- **`NoSecondOrderIrregularPair` from explicit non-divisibility.**

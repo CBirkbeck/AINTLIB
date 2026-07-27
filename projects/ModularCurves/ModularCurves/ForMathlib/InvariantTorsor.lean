@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q2 (statements) +
-T-Q2-A711 / [A711-BC] / [A711-DESC] / [FP-B] (proofs). Sorry-free as of 2026-07-08:
-the last sorry ([A711-FP] gap) closed by `FinitePresentationOfFinite.lean`.
+T-Q2-A711 / [A711-BC] / [A711-DESC] / [FP-B] (proofs). Fully proved as of 2026-07-08:
+the last gap ([A711-FP]) was closed by `FinitePresentationOfFinite.lean`.
 -/
 import ModularCurves.ForMathlib.InvariantBaseChange
 import ModularCurves.ForMathlib.FinitePresentationOfFinite
@@ -14,34 +14,20 @@ import Mathlib.RingTheory.Smooth.Fiber
 import Mathlib.RingTheory.Finiteness.Nakayama
 
 /-!
-# Free actions and the étale-torsor theorem (Katz–Mazur A7.1.1/A7.1.2) — statements
+# Free actions and the étale-torsor theorem
 
-KM's freeness condition for a finite group `G` acting on an `R`-algebra `A`
-(A7.1.1): *"G acts freely on A in the sense that for any non-zero R-algebra R', and
-any element g ≠ id of G, g operates without fixed points on the set
-Hom_{R-alg}(A, R')."* Under this condition:
+This file proves Katz–Mazur A7.1.1/A7.1.2 for a finite group `G` acting on an
+`R`-algebra `A`. Its main constructions and results are:
 
-* `IsFreeAlgebraAction` — the freeness predicate;
-* `MulSemiringAction.torsorMul` — the multiplication comparison
-  `A ⊗[Aᴳ] A → (G → A)`, `x ⊗ y ↦ (x·(g•y))_g`;
-* `Module.Finite.of_isFreeAlgebraAction`, `Algebra.Etale.of_isFreeAlgebraAction`,
-  `torsorMul_bijective_of_isFreeAlgebraAction` — KM A7.1.1: `A` is a finite étale
-  `G`-torsor over `Aᴳ` (three single-conclusion statements; the torsor condition is
-  the bijectivity of `torsorMul`);
-* `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` — KM A7.1.2: free
-  actions satisfy the base-change property `∗(A, G, R)` for every `R'`.
+* `IsFreeAlgebraAction`, the pointwise freeness predicate;
+* `MulSemiringAction.torsorMul`, the comparison `A ⊗[Aᴳ] A → (G → A)`;
+* finiteness, projectivity, étaleness, and bijectivity of `torsorMul` for free actions;
+* base-change invariance of fixed points for free actions.
 
-Proofs: ALL PROVEN (2026-07-08, sorry-free). KM defers A7.1.1 to [SGA III, Exposé V,
-Thm 4.1] or [Demazure–Gabriel, III §2, 6.1] — *"In the absence of noetherian
-hypotheses, this is rather delicate."* Here the Chase–Harrison–Rosenberg route through
-Galois coordinates replaces SGA, A7.1.2 is proven by trace-averaging (no descent), and
-the "rather delicate" finite-presentation step is
-`Algebra.FinitePresentation.of_finite_of_projective`
-(`ForMathlib/FinitePresentationOfFinite.lean`, [A711-FP] — EGA IV₁ 1.4.7 + Stacks 00NX).
-
-The stabilizer dictionary: freeness in the above sense says exactly that no
-`g ≠ 1` fixes any point of `Spec A` valued in any ring — for modular curves this is
-the "no elliptic points" condition under which the level quotients stay schemes.
+The proofs use Chase–Harrison–Rosenberg Galois coordinates and trace averaging.
+The finite-presentation input is `Algebra.FinitePresentation.of_finite_of_projective`.
+See Katz–Mazur, Appendix A7; SGA III, Exposé V, Theorem 4.1; and
+Demazure–Gabriel, III §2, 6.1.
 -/
 
 universe u v
@@ -172,9 +158,10 @@ section GaloisCoordinates
 
 variable [Fintype G] [DecidableEq G]
 
-/-- **(T-Q2-A711, step 3)** For each `g ≠ 1` there is `w ∈ A ⊗_{Aᴳ} A` whose comparison
-image vanishes at `1` and is `1` at `g`. Built from `1 = ∑ cₐ · (g • a − a)`
-(`span_displacement_eq_top`) as `w = ∑ cₐ ⊗ a − cₐ·a ⊗ 1`. -/
+set_option linter.unusedSectionVars false in
+/-- For each `g ≠ 1`, there is a tensor whose image under `torsorMul` is zero at `1`
+and one at `g`. -/
+@[nolint unusedArguments]
 theorem exists_torsorMul_eq_zero_one (hfree : IsFreeAlgebraAction G R A) (g : G) (hg : g ≠ 1) :
     ∃ w : A ⊗[FixedPoints.subalgebra R A G] A,
       MulSemiringAction.torsorMul G R A w 1 = 0 ∧
@@ -188,7 +175,7 @@ theorem exists_torsorMul_eq_zero_one (hfree : IsFreeAlgebraAction G R A) (g : G)
   · rw [Finsupp.sum, map_sum]
     simp only [Finset.sum_apply, map_sub, Pi.sub_apply, MulSemiringAction.torsorMul_tmul,
       one_smul, mul_one]
-    simp
+    simp only [sub_self, Finset.sum_const_zero]
   · rw [Finsupp.sum, map_sum]
     simp only [Finset.sum_apply, map_sub, Pi.sub_apply, MulSemiringAction.torsorMul_tmul,
       smul_one, mul_one]
@@ -196,16 +183,8 @@ theorem exists_torsorMul_eq_zero_one (hfree : IsFreeAlgebraAction G R A) (g : G)
     refine Finset.sum_congr rfl fun a _ => ?_
     rw [smul_eq_mul, mul_sub]
 
-/-- **(T-Q2-A711, step 4 — the separability idempotent / Galois coordinates)** For a free
-action of a finite group there is a finite family `(aᵢ, bᵢ)` with
-`∑ᵢ aᵢ · (g • bᵢ) = δ_{g,1}` for every `g ∈ G`.
-
-Construction (Chase–Harrison–Rosenberg; the same content as SGA III Exp. V Thm 4.1 (iv),
-whose proof runs through semi-local rings and Lemme 4.2 — avoided here): with `w_g` from
-`exists_torsorMul_eq_zero_one`, the element `e = ∏_{g ≠ 1} (1 − w_g)` of the ring
-`A ⊗_{Aᴳ} A` has comparison image the indicator of `1 ∈ G`, because `torsorMul` is a ring
-homomorphism into the product ring `G → A`. Writing `e` as a finite sum of pure tensors
-(`TensorProduct.exists_finset`) reads off the coordinates. -/
+/-- A free finite-group action admits Galois coordinates: a finite family `(aᵢ, bᵢ)`
+with `∑ᵢ aᵢ * (g • bᵢ) = if g = 1 then 1 else 0` for every `g`. -/
 theorem exists_galoisCoords (hfree : IsFreeAlgebraAction G R A) :
     ∃ S : Finset (A × A), ∀ g : G,
       (∑ p ∈ S, p.1 * (g • p.2)) = if g = 1 then 1 else 0 := by
@@ -220,11 +199,11 @@ theorem exists_galoisCoords (hfree : IsFreeAlgebraAction G R A) :
         = ∏ h ∈ (Finset.univ.erase (1 : G)).attach,
             (1 - MulSemiringAction.torsorMul G R A (w h.1 (Finset.ne_of_mem_erase h.2)) g) := by
       rw [he, map_prod]
-      simp [Finset.prod_apply]
+      simp only [map_sub, map_one, Finset.prod_apply, Pi.sub_apply, Pi.one_apply]
     rw [hprod]
     by_cases hg : g = 1
     · subst hg
-      refine (Finset.prod_eq_one fun h _ => ?_).trans (by simp)
+      refine (Finset.prod_eq_one fun h _ => ?_).trans (by simp only [if_pos])
       rw [hw1 h.1 (Finset.ne_of_mem_erase h.2), sub_zero]
     · rw [if_neg hg]
       refine Finset.prod_eq_zero (i := ⟨g, Finset.mem_erase.mpr ⟨hg, Finset.mem_univ g⟩⟩)
@@ -234,7 +213,7 @@ theorem exists_galoisCoords (hfree : IsFreeAlgebraAction G R A) :
   refine ⟨S, fun g => ?_⟩
   have hg := hev g
   rw [hS, map_sum] at hg
-  simpa [Finset.sum_apply, MulSemiringAction.torsorMul_tmul] using hg
+  simpa only [Finset.sum_apply, MulSemiringAction.torsorMul_tmul] using hg
 
 end GaloisCoordinates
 
@@ -248,12 +227,10 @@ def traceInvariants [Fintype G] (a : A) : FixedPoints.subalgebra R A G :=
     simp only [hre]
     exact Fintype.sum_bijective (h * ·) (Group.mulLeft_bijective h) _ _ (fun _ => rfl)⟩
 
-/-- **(T-Q2-A711, step 6 — the dual-basis identity)** The Galois coordinates are a *dual
-basis* of `A` over `Aᴳ` with respect to the trace: `∑ᵢ aᵢ · tr(bᵢ · x) = x`.
-
-Indeed `∑ᵢ aᵢ · tr(bᵢx) = ∑_g (∑ᵢ aᵢ (g•bᵢ)) (g•x) = ∑_g δ_{g,1} (g•x) = x`. This is the
-classical statement that a Galois extension of commutative rings is finitely generated
-projective over its invariants (Chase–Harrison–Rosenberg). -/
+set_option linter.unusedSectionVars false in
+/-- Galois coordinates satisfy the trace dual-basis identity
+`∑ᵢ aᵢ * tr(bᵢ * x) = x`. -/
+@[nolint unusedArguments]
 theorem galoisCoords_dual [Fintype G] [DecidableEq G] {S : Finset (A × A)}
     (hS : ∀ g : G, (∑ p ∈ S, p.1 * (g • p.2)) = if g = 1 then 1 else 0) (x : A) :
     (∑ p ∈ S, p.1 * (traceInvariants G R A (p.2 * x) : A)) = x := by
@@ -270,16 +247,11 @@ theorem galoisCoords_dual [Fintype G] [DecidableEq G] {S : Finset (A × A)}
     rw [smul_mul', mul_assoc]
   simp only [hterm, hS]
   rw [Finset.sum_eq_single (1 : G)]
-  · simp
+  · simp only [if_pos, one_smul, one_mul]
   · intro g _ hg; rw [if_neg hg, zero_mul]
   · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
 
-/-- **KM A7.1.1, finiteness part; PROVEN** — for a free action of a finite group, `A` is a
-finite `Aᴳ`-module: the dual-basis identity `x = ∑ᵢ tr(bᵢ·x) • aᵢ` exhibits the finitely
-many `aᵢ` of `exists_galoisCoords` as generators.
-
-Note this is *derived*, not hypothesized — the flagged "finite locally free of rank `|G|`"
-content of SGA III Exp. V §5 comes out of the Galois coordinates. -/
+/-- For a free finite-group action, `A` is finite as a module over its invariants. -/
 theorem Module.Finite.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
     Module.Finite (FixedPoints.subalgebra R A G) A := by
   classical
@@ -305,7 +277,7 @@ noncomputable def traceLinear [Fintype G] :
   map_add' a b := by
     ext
     show (∑ g : G, g • (a + b)) = (∑ g : G, g • a) + ∑ g : G, g • b
-    simp [Finset.sum_add_distrib, smul_add]
+    simp only [smul_add, Finset.sum_add_distrib]
   map_smul' c a := by
     ext
     show (∑ g : G, g • ((c : A) * a)) = (c : A) * ∑ g : G, g • a
@@ -313,14 +285,7 @@ noncomputable def traceLinear [Fintype G] :
     refine Finset.sum_congr rfl fun g _ => ?_
     rw [smul_mul', c.2 g]
 
-/-- **(T-Q2-A711, step 9 — projectivity; PROVEN)** For a free action of a finite group, `A`
-is a projective `Aᴳ`-module: `galoisCoords_dual` *is* a dual basis, so
-`x ↦ ∑ᵢ single aᵢ (tr(bᵢ·x))` splits the canonical surjection `(A →₀ Aᴳ) ↠ A`.
-
-Together with `Module.Finite.of_isFreeAlgebraAction` this says `A` is **finitely generated
-projective** over `Aᴳ` (hence flat, hence faithfully flat) — the module-theoretic content of
-KM A7.1.1 / SGA III Exp. V Thm 4.1, obtained without either source's machinery. It is also
-the input for the remaining `Algebra.FinitePresentation` gap ([A711-FP], see below). -/
+/-- For a free finite-group action, `A` is projective as a module over its invariants. -/
 theorem Module.Projective.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G R A) :
     Module.Projective (FixedPoints.subalgebra R A G) A := by
   classical
@@ -339,17 +304,7 @@ theorem Module.Projective.of_isFreeAlgebraAction (hfree : IsFreeAlgebraAction G 
       = p.1 * (traceInvariants G R A (p.2 * x) : A)
   ring
 
-/-- **(T-Q2-A711, step 11 — surjectivity of the trace; PROVEN)** For a free action of a
-finite group there is `c : A` with `tr(c) = 1`; hence `Aᴳ ↪ A` splits as `Aᴳ`-modules via
-`a ↦ tr(c · a)`.
-
-Proof: the image of `tr` is an ideal `I` of `Aᴳ`; the dual-basis identity at `x` shows
-`x = ∑ᵢ tr(bᵢ x) • aᵢ`, so `⊤ ≤ I • ⊤` as `Aᴳ`-submodules of `A` whenever `I ⊆ 𝔪`; since `A`
-is a *finite* `Aᴳ`-module (`Module.Finite.of_isFreeAlgebraAction`), Nakayama produces
-`r ≡ 1 mod 𝔪` with `r · A = 0`, so `r = 0` and `1 ∈ 𝔪` — contradiction. Hence `I = ⊤`.
-
-This is the input for **[A711-BC]** (KM A7.1.2): averaging by `c` retracts `A ⊗_R R'` onto
-its `G`-invariants inside the image of `Aᴳ ⊗_R R'`. -/
+/-- For a free finite-group action, the trace onto the invariants is surjective. -/
 theorem exists_traceInvariants_eq_one [Fintype G] (hfree : IsFreeAlgebraAction G R A) :
     ∃ c : A, traceLinear G R A c = 1 := by
   classical
@@ -378,22 +333,16 @@ theorem exists_traceInvariants_eq_one [Fintype G] (hfree : IsFreeAlgebraAction G
       m ⊤ Module.Finite.fg_top hsub
     have hzero : (r : A) = 0 := by
       have hone := hr0 1 Submodule.mem_top
-      simpa [Algebra.smul_def] using hone
+      change (r : A) * 1 = 0 at hone
+      simpa only [mul_one] using hone
     have hr' : r = 0 := Subtype.ext hzero
     rw [hr', zero_sub] at hr
-    exact hm.ne_top (Ideal.eq_top_of_isUnit_mem m (by simpa using hr) isUnit_one.neg)
+    exact hm.ne_top (Ideal.eq_top_of_isUnit_mem m (by simpa only [zero_sub] using hr)
+      isUnit_one.neg)
   obtain ⟨c, hc⟩ := h1
   exact ⟨c, hc⟩
 
-/-- **(Additive Hilbert 90; PROVEN)** For a free action of a finite group, every additive
-`1`-cocycle `a : G → A` (i.e. `a(gh) = a(g) + g • a(h)`) is a coboundary: `a(g) = d − g • d`
-for `d = ∑_h a(h) · (h • c)` with `tr(c) = 1`. In other words `H¹(G, A⁺) = 0`.
-
-`(g • d) = ∑_h (a(gh) − a(g))·(gh • c) = d − a(g)·tr(c) = d − a(g)`.
-
-This is the additive half of the descent obstruction for Weierstrass models: the `(r, s, t)`
-part of a `VariableChange`-valued cocycle is always trivializable. (The multiplicative `u`
-part is *not* — its obstruction is an invertible module, see [T-E5c-ROUTE-A] on the board.) -/
+/-- Additive Hilbert 90 for a free action: every additive `1`-cocycle is a coboundary. -/
 theorem exists_sub_smul_eq_of_isCocycle [Fintype G] (hfree : IsFreeAlgebraAction G R A)
     (a : G → A) (hcocycle : ∀ g h : G, a (g * h) = a g + g • a h) :
     ∃ d : A, ∀ g : G, a g = d - g • d := by
@@ -418,16 +367,15 @@ theorem exists_sub_smul_eq_of_isCocycle [Fintype G] (hfree : IsFreeAlgebraAction
   rw [hgd]
   ring
 
-/-! ### [A711-DESC] Galois descent of twisted modules (route (a), step a5-ii)
+/-! ### Galois descent of twisted modules
 
-For a `1`-cocycle `w : G → Aˣ` (`w(gh) = w(g) · g•w(h)`), the **twisted invariants**
-`M_w = {a : A | ∀ g, g • a = w(g) · a}` form an `Aᴳ`-submodule of `A`. When the class of `w`
-is locally trivial, a generator of `M_w` is a unit `d` with `w(g) = (g•d)·d⁻¹`, which is
-exactly what trivializes the `u`-part of a `VariableChange` cocycle and hence descends the
-Weierstrass model (see `[T-E5c-ROUTE-A]` on the board). The Galois coordinates do the work
-a third time: `ρ(x) = ∑_g w(g)⁻¹ · (g • x)` retracts `A` onto `M_w`. -/
+For a `1`-cocycle `w : G → Aˣ`, the twisted invariants form an `Aᴳ`-submodule of `A`.
+Galois coordinates show that this module is finite projective and becomes free of rank one
+after base change to `A`. -/
 
+set_option linter.unusedSectionVars false in
 /-- Cocycle bookkeeping: `h • w(g)⁻¹ = w(hg)⁻¹ · w(h)`. -/
+@[nolint unusedArguments]
 theorem smul_cocycle_inv (w : G → Aˣ)
     (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) (g h : G) :
     h • (((w g)⁻¹ : Aˣ) : A) = (((w (h * g))⁻¹ : Aˣ) : A) * (w h : A) := by
@@ -446,7 +394,7 @@ theorem smul_cocycle_inv (w : G → Aˣ)
 /-- The `w`-twisted invariants, an `Aᴳ`-submodule of `A`. -/
 def twistedInvariants (w : G → Aˣ) : Submodule (FixedPoints.subalgebra R A G) A where
   carrier := {a : A | ∀ g : G, g • a = (w g : A) * a}
-  zero_mem' := by intro g; simp
+  zero_mem' := by intro g; simp only [smul_zero, mul_zero]
   add_mem' := by
     intro a b ha hb g
     rw [smul_add, ha g, hb g, mul_add]
@@ -456,7 +404,9 @@ def twistedInvariants (w : G → Aˣ) : Submodule (FixedPoints.subalgebra R A G)
     rw [smul_mul', b.2 g, ha g]
     ring
 
+set_option linter.unusedSectionVars false in
 /-- The twisted average `ρ(x) = ∑_g w(g)⁻¹ · (g • x)` lands in the twisted invariants. -/
+@[nolint unusedArguments]
 theorem twistedAvg_mem [Fintype G] (w : G → Aˣ)
     (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) (x : A) :
     (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x) ∈ twistedInvariants G R A w := by
@@ -481,8 +431,9 @@ noncomputable def twistedAvg [Fintype G] (w : G → Aˣ)
   map_add' x y := by
     ext
     show (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • (x + y))
-      = (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x) + ∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • y
-    simp [smul_add, mul_add, Finset.sum_add_distrib]
+      = (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • x) +
+        ∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • y
+    simp only [smul_add, mul_add, Finset.sum_add_distrib]
   map_smul' b x := by
     ext
     show (∑ g : G, (((w g)⁻¹ : Aˣ) : A) * g • ((b : A) * x))
@@ -492,12 +443,8 @@ noncomputable def twistedAvg [Fintype G] (w : G → Aˣ)
     rw [smul_mul', b.2 g]
     ring
 
-/-- **(A711-DESC, the retraction)** With `tr(c) = 1`, the twisted average retracts `A` onto
-`M_w` along `m ↦ c · m`: for `m ∈ M_w`, `ρ(c · m) = m`.
-
-`ρ(c·m) = ∑_g w(g)⁻¹ (g•c)(g•m) = ∑_g w(g)⁻¹ (g•c) w(g) m = tr(c)·m = m`. Hence `M_w` is a
-**direct summand of `A`** as an `Aᴳ`-module — in particular finitely generated (and
-projective, since `A` is). -/
+/-- If `tr(c) = 1`, the twisted average retracts `A` onto the twisted invariants along
+`m ↦ c * m`. -/
 theorem twistedAvg_smul_eq [Fintype G] (w : G → Aˣ)
     (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A))
     (c : A) (hc : (∑ g : G, g • c) = 1) (m : twistedInvariants G R A w) :
@@ -523,30 +470,16 @@ theorem twistedInvariants_finite [Fintype G] (hfree : IsFreeAlgebraAction G R A)
   refine Module.Finite.of_surjective (twistedAvg G R A w hw) fun m => ?_
   exact ⟨c * (m : A), twistedAvg_smul_eq G R A w hw c hc' m⟩
 
-/-- **(ForMathlib gap-filler)** A retract of a projective module is projective. Mathlib has
-`Module.Projective.of_basis` and `of_free` but no `of_split`/`of_retract` (2026-07-08). -/
+/-- A pointwise formulation of `Module.Projective.of_split`. -/
 theorem Module.Projective.of_retract {B : Type u} [CommRing B] {A' M' : Type u}
     [AddCommGroup A'] [Module B A'] [AddCommGroup M'] [Module B M'] [Module.Projective B A']
-    (j : M' →ₗ[B] A') (ρ : A' →ₗ[B] M') (h : ∀ m, ρ (j m) = m) : Module.Projective B M' := by
-  classical
-  rw [Module.projective_def'] at *
-  obtain ⟨sA, hsA⟩ := ‹∃ s : A' →ₗ[B] A' →₀ B, Finsupp.linearCombination B id ∘ₗ s = .id›
-  refine ⟨(Finsupp.lmapDomain B B (ρ : A' → M')).comp (sA.comp j), ?_⟩
+    (j : M' →ₗ[B] A') (ρ : A' →ₗ[B] M') (h : ∀ m, ρ (j m) = m) :
+    Module.Projective B M' := by
+  apply Module.Projective.of_split j ρ
   ext m
-  simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.id_apply]
-  rw [Finsupp.lmapDomain_apply, Finsupp.linearCombination_mapDomain]
-  have h1 : (Finsupp.linearCombination B ((id : M' → M') ∘ (ρ : A' → M'))) (sA (j m))
-      = ρ ((Finsupp.linearCombination B id) (sA (j m))) := by
-    rw [Finsupp.linearCombination_apply, Finsupp.linearCombination_apply, map_finsuppSum]
-    simp [Finsupp.sum]
-  rw [h1]
-  have h2 := congrArg (fun f => f (j m)) hsA
-  simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.id_apply] at h2
-  rw [h2, h m]
+  exact h m
 
-/-- **(A711-DESC)** The twisted invariants are a **projective** `Aᴳ`-module: they are a
-retract of `A` (which is projective by `Module.Projective.of_isFreeAlgebraAction`) along
-`m ↦ c · m` and the twisted average. -/
+/-- The twisted invariants are projective as a module over `Aᴳ`. -/
 theorem twistedInvariants_projective [Fintype G] (hfree : IsFreeAlgebraAction G R A)
     (w : G → Aˣ) (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
     Module.Projective (FixedPoints.subalgebra R A G) (twistedInvariants G R A w) := by
@@ -561,7 +494,9 @@ theorem twistedInvariants_projective [Fintype G] (hfree : IsFreeAlgebraAction G 
   show twistedAvg G R A w hw (c * (m : A)) = m
   exact twistedAvg_smul_eq G R A w hw c hc' m
 
+set_option linter.unusedSectionVars false in
 /-- A `1`-cocycle is normalised: `w(1) = 1`. -/
+@[nolint unusedArguments]
 theorem cocycle_one (w : G → Aˣ)
     (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) : ((w 1 : A)) = 1 := by
   have h := hw 1 1
@@ -577,23 +512,13 @@ noncomputable def twistedMul (w : G → Aˣ) :
   TensorProduct.lift ((LinearMap.mul (FixedPoints.subalgebra R A G) A).compl₂
     (twistedInvariants G R A w).subtype)
 
-@[simp] theorem twistedMul_tmul (w : G → Aˣ) (a : A) (m : twistedInvariants G R A w) :
+set_option linter.unusedSectionVars false in
+@[simp, nolint unusedArguments]
+theorem twistedMul_tmul (w : G → Aˣ) (a : A) (m : twistedInvariants G R A w) :
     twistedMul G R A w (a ⊗ₜ[FixedPoints.subalgebra R A G] m) = a * (m : A) := rfl
 
-/-- **(A711-DESC, the descent isomorphism; PROVEN)** For a free action of a finite group and
-a `1`-cocycle `w : G → Aˣ`, multiplication `A ⊗_{Aᴳ} M_w → A` is **bijective**: the twisted
-invariants are an *invertible* `Aᴳ`-module trivialised by `A`.
-
-This is Galois descent of (rank-one) modules, obtained from the Galois coordinates for the
-third time. The inverse is `x ↦ ∑ᵢ aᵢ ⊗ ρ(bᵢ · x)` with `ρ` the twisted average:
-* `mult ∘ inv = id` collapses `∑_g w(g)⁻¹ · δ_{g,1} · (g • x)` to `w(1)⁻¹ x = x`;
-* `inv ∘ mult = id` on `a ⊗ m` uses `ρ(bᵢ a m) = tr(bᵢ a) · m` (the `w(g)⁻¹ · w(g)` cancel
-  because `m` is twisted-invariant) and then the dual basis `∑ᵢ aᵢ · tr(bᵢ a) = a`.
-
-Consequence for `[T-E5c-ROUTE-A]`: `M_w` is finitely generated projective of rank one, so
-Zariski-locally on `Spec Aᴳ` it has a generator `d`, which multiplication forces to be a
-**unit** of `A`; then `g • d = w(g) · d`, i.e. the cocycle is locally a coboundary and the
-Weierstrass model descends. -/
+/-- Galois descent for rank-one modules: multiplication
+`A ⊗[Aᴳ] twistedInvariants G R A w → A` is bijective. -/
 theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraAction G R A)
     (w : G → Aˣ) (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
     Function.Bijective (twistedMul G R A w) := by
@@ -602,7 +527,6 @@ theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraA
   set inv : A → A ⊗[FixedPoints.subalgebra R A G] (twistedInvariants G R A w) :=
     fun x => ∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G] (twistedAvg G R A w hw (p.2 * x))
     with hinv
-  -- right inverse
   have hright : ∀ x : A, twistedMul G R A w (inv x) = x := by
     intro x
     rw [hinv, map_sum]
@@ -626,10 +550,9 @@ theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraA
     rw [Finset.sum_eq_single (1 : G)]
     · have hw1 : w 1 = 1 := Units.ext (cocycle_one (G := G) (A := A) w hw)
       rw [if_pos rfl, one_mul, one_smul, hw1]
-      simp
+      simp only [inv_one, Units.val_one, one_mul]
     · intro g _ hg1; rw [if_neg hg1, zero_mul, mul_zero]
     · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
-  -- additivity of `inv`
   have hadd : ∀ x y : A, inv (x + y) = inv x + inv y := by
     intro x y
     rw [hinv, ← Finset.sum_add_distrib]
@@ -637,12 +560,11 @@ theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraA
     rw [← TensorProduct.tmul_add]
     congr 1
     rw [mul_add, map_add]
-  -- left inverse
   have hleft : ∀ z : A ⊗[FixedPoints.subalgebra R A G] (twistedInvariants G R A w),
       inv (twistedMul G R A w z) = z := by
     intro z
     induction z using TensorProduct.induction_on with
-    | zero => simp [hinv]
+    | zero => simp only [hinv, map_zero, mul_zero, tmul_zero, Finset.sum_const_zero]
     | add z₁ z₂ h₁ h₂ => rw [map_add, hadd, h₁, h₂]
     | tmul a m =>
       rw [twistedMul_tmul, hinv]
@@ -656,8 +578,10 @@ theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraA
             = (g • (p.2 * a)) * (m : A) := by
           intro g
           rw [smul_mul', smul_mul', m.2 g]
-          rw [show (((w g)⁻¹ : Aˣ) : A) * ((g • p.2) * ((g • a) * ((w g : A) * (m : A))))
-              = ((g • p.2) * (g • a)) * ((((w g)⁻¹ : Aˣ) : A) * (w g : A)) * (m : A) by ring,
+          rw [show (((w g)⁻¹ : Aˣ) : A) *
+              ((g • p.2) * ((g • a) * ((w g : A) * (m : A)))) =
+              ((g • p.2) * (g • a)) * ((((w g)⁻¹ : Aˣ) : A) * (w g : A)) *
+                (m : A) by ring,
             (w g).inv_mul, mul_one]
           rw [smul_mul']
         simp only [hterm, ← Finset.sum_mul]
@@ -680,19 +604,8 @@ theorem twistedMul_bijective [Fintype G] [DecidableEq G] (hfree : IsFreeAlgebraA
       ring
   exact ⟨Function.LeftInverse.injective hleft, fun x => ⟨inv x, hright x⟩⟩
 
-/-- **(A711-DESC-loc; PROVEN)** If the invariant ring `Aᴳ` is **local**, every `1`-cocycle
-`w : G → Aˣ` is a coboundary: there is a unit `d : Aˣ` with `g • d = w(g) · d` for all `g`.
-
-Over a local ring the finitely generated projective module `M_w` is free
-(`Module.free_of_flat_of_isLocalRing`); `twistedMul_bijective` forces its rank to be one —
-two distinct basis vectors `eᵢ, eⱼ` would give the nonzero kernel element
-`(eⱼ) ⊗ eᵢ − (eᵢ) ⊗ eⱼ` — and then surjectivity writes `1 = a · d` for the single basis
-vector `d`, making it a unit. Since `d ∈ M_w`, `g • d = w(g) · d`.
-
-This is the local (hence, after localizing `Spec Aᴳ`, the Zariski-local) triviality of the
-`u`-part of a `VariableChange` cocycle: the Weierstrass model of the quotient curve exists
-Zariski-locally on the base. Together with `exists_sub_smul_eq_of_isCocycle` (the additive
-Hilbert 90 for `(r, s, t)`) this discharges step `a5-ii` of `[T-E5c-ROUTE-A]`. -/
+/-- If `Aᴳ` is local, every multiplicative `1`-cocycle is a coboundary represented by a
+unit of `A`. -/
 theorem exists_unit_smul_eq_of_isLocalRing [Fintype G] [DecidableEq G] [Nontrivial A]
     [IsLocalRing (FixedPoints.subalgebra R A G)] (hfree : IsFreeAlgebraAction G R A)
     (w : G → Aˣ) (hw : ∀ g h : G, ((w (g * h) : A)) = (w g : A) * g • (w h : A)) :
@@ -712,12 +625,10 @@ theorem exists_unit_smul_eq_of_isLocalRing [Fintype G] [DecidableEq G] [Nontrivi
     (twistedInvariants G R A w) with hι
   set bA := b.baseChange A with hbA
   have hbij := twistedMul_bijective G R A hfree w hw
-  -- basis vectors are nonzero in `A`
   have hbne : ∀ i : ι, ((b i : A)) ≠ 0 := by
     intro i hzero
     have : b i = 0 := Subtype.ext hzero
     exact (b.ne_zero i) this
-  -- `ι` is a subsingleton
   have hsub : Subsingleton ι := by
     refine ⟨fun i j => ?_⟩
     by_contra hij
@@ -728,7 +639,6 @@ theorem exists_unit_smul_eq_of_isLocalRing [Fintype G] [DecidableEq G] [Nontrivi
       refine hbij.1 ?_
       rw [hx, map_sub, twistedMul_tmul, twistedMul_tmul, map_zero]
       ring
-    -- read the `i`-coefficient of `x` in the base-changed basis
     have hxrepr : x = ((b j : A)) • bA i - ((b i : A)) • bA j := by
       rw [hx, hbA, Module.Basis.baseChange_apply, Module.Basis.baseChange_apply]
       rw [TensorProduct.smul_tmul', TensorProduct.smul_tmul', smul_eq_mul, smul_eq_mul,
@@ -739,20 +649,18 @@ theorem exists_unit_smul_eq_of_isLocalRing [Fintype G] [DecidableEq G] [Nontrivi
       Pi.smul_apply, Module.Basis.repr_self, smul_eq_mul, map_zero, Finsupp.coe_zero,
       Pi.zero_apply, Finsupp.single_apply] at hcoef
     have hcoef2 : ((b j : A)) = 0 := by
-      simpa [Ne.symm hij] using hcoef
+      simpa only [if_pos, mul_one, if_neg (Ne.symm hij), mul_zero, sub_zero] using hcoef
     exact hbne j hcoef2
-  -- `ι` is nonempty (else `A ⊗ M_w = 0` cannot surject onto `A ∋ 1`)
   have hne : Nonempty ι := by
     by_contra hempty
     rw [not_nonempty_iff] at hempty
     obtain ⟨z, hz⟩ := hbij.2 (1 : A)
     have hz0 : z = 0 := by
       conv_lhs => rw [← bA.sum_repr z]
-      simp
+      simp only [Finset.univ_eq_empty, Finset.sum_empty]
     rw [hz0, map_zero] at hz
     exact one_ne_zero hz.symm
   haveI : Unique ι := uniqueOfSubsingleton (Classical.choice hne)
-  -- the single basis vector is a unit of `A`
   set d : A := (b default : A) with hd
   obtain ⟨z, hz⟩ := hbij.2 (1 : A)
   have hzrepr : z = (bA.repr z default) • bA default := by
@@ -776,27 +684,67 @@ noncomputable def galoisInv [Fintype G] (S : Finset (A × A)) (x : G → A) :
     A ⊗[FixedPoints.subalgebra R A G] A :=
   ∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G] (∑ g : G, g⁻¹ • (x g * p.2))
 
-/-- **(T-Q2-A711, step 5 — KM A7.1.1, torsor part; PROVEN)** For a free action of a finite
-group the multiplication comparison `A ⊗[Aᴳ] A ≅ ∏_G A` is bijective — `Spec A` is a
-`G`-torsor over `Spec Aᴳ`.
+omit [SMulCommClass R G A] [Finite G] in
+/-- The pure-tensor case of the left-inverse identity for `galoisInv`: on `u ⊗ₜ v` the
+Galois-coordinate inverse recovers the tensor (the trace/averaging collapse). Extracted so
+`torsorMul_injective`'s induction stays short. -/
+theorem galoisInv_torsorMul_tmul [Fintype G] [DecidableEq G] (S : Finset (A × A))
+    (hS : ∀ g : G, (∑ p ∈ S, p.1 * (g • p.2)) = if g = 1 then 1 else 0) (u v : A) :
+    galoisInv G R A S (MulSemiringAction.torsorMul G R A
+        (u ⊗ₜ[FixedPoints.subalgebra R A G] v)) = u ⊗ₜ[FixedPoints.subalgebra R A G] v := by
+  rw [galoisInv]
+  have hterm : ∀ p : A × A,
+      (∑ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
+          (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2))
+        = (traceInvariants G R A (u * p.2) : A) * v := by
+    intro p
+    have hinner : ∀ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
+        (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2)
+          = (g⁻¹ • (u * p.2)) * v := by
+      intro g
+      rw [MulSemiringAction.torsorMul_tmul,
+        show u * g • v * p.2 = (u * p.2) * (g • v) by ring, smul_mul', smul_smul,
+        inv_mul_cancel, one_smul]
+    simp only [hinner, ← Finset.sum_mul]
+    congr 1
+    show (∑ g : G, g⁻¹ • (u * p.2)) = ∑ g : G, g • (u * p.2)
+    exact Fintype.sum_bijective (·⁻¹) (Equiv.inv G).bijective _ _ (fun _ => rfl)
+  simp only [hterm]
+  have hmove : ∀ p : A × A,
+      p.1 ⊗ₜ[FixedPoints.subalgebra R A G] ((traceInvariants G R A (u * p.2) : A) * v)
+        = ((traceInvariants G R A (u * p.2) : A) * p.1)
+            ⊗ₜ[FixedPoints.subalgebra R A G] v := by
+    intro p
+    show p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
+        ((traceInvariants G R A (u * p.2)) • v) = _
+    rw [TensorProduct.tmul_smul]
+    rfl
+  simp only [hmove]
+  rw [← TensorProduct.sum_tmul]
+  congr 1
+  show (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1) = u
+  have hswap : (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1)
+      = ∑ g : G, (g • u) * (∑ p ∈ S, p.1 * (g • p.2)) := by
+    simp only [Finset.sum_mul]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [smul_mul']
+    ring
+  rw [hswap, Finset.sum_eq_single (1 : G)]
+  · rw [hS (1 : G)]
+    simp only [if_pos, one_smul, mul_one]
+  · intro g _ hg; rw [hS g, if_neg hg, mul_zero]
+  · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
 
-This is SGA III Exp. V Thm 4.1 (iv) — *"`X₁ ⟶ X₀ ×_Y X₀` est un isomorphisme"* — obtained
-by the Chase–Harrison–Rosenberg route: the Galois coordinates of `exists_galoisCoords`
-give an explicit two-sided inverse `galoisInv`, so neither SGA's semi-local reduction, nor
-its Lemme 4.2, nor its faithfully-flat residue-field enlargement is needed (none of the
-three has a mathlib substrate — there is no `IsSemilocalRing`). No finiteness of `A` over
-`Aᴳ` is used either.
-
-`galoisInv ∘ torsorMul = id` is where the trace enters: on a pure tensor `u ⊗ v` the inner
-sum is `tr(u · bᵢ) · v` with `tr(u · bᵢ)` invariant, so it crosses the tensor to give
-`(∑ᵢ tr(u · bᵢ) · aᵢ) ⊗ v = u ⊗ v` by the coordinate identity again. -/
-theorem torsorMul_bijective_of_isFreeAlgebraAction
-    (hfree : IsFreeAlgebraAction G R A) :
-    Function.Bijective (MulSemiringAction.torsorMul G R A) := by
+/-- Surjectivity half of `torsorMul_bijective_of_isFreeAlgebraAction`: `galoisInv S` is a
+right inverse of `torsorMul` (Galois coordinates from `exists_galoisCoords`). -/
+theorem torsorMul_surjective (hfree : IsFreeAlgebraAction G R A) :
+    Function.Surjective (MulSemiringAction.torsorMul G R A) := by
   classical
   haveI : Fintype G := Fintype.ofFinite G
   obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
-  -- `galoisInv S` is a right inverse
   have hright : ∀ x : G → A,
       MulSemiringAction.torsorMul G R A (galoisInv G R A S x) = x := by
     intro x
@@ -814,13 +762,22 @@ theorem torsorMul_bijective_of_isFreeAlgebraAction
       ring
     simp only [hterm]
     rw [Finset.sum_eq_single h]
-    · simp
+    · simp only [mul_inv_cancel, one_smul, if_pos, mul_one]
     · intro g _ hgh
       have hne : h * g⁻¹ ≠ 1 := fun hc => hgh (mul_inv_eq_one.mp hc).symm
-      simp [hne]
+      simp only [hne, if_false, mul_zero]
     · intro hc
       exact absurd (Finset.mem_univ h) hc
-  -- `galoisInv S` is additive, so it suffices to check the left inverse on pure tensors
+  exact fun x => ⟨galoisInv G R A S x, hright x⟩
+
+/-- Injectivity half of `torsorMul_bijective_of_isFreeAlgebraAction`: `galoisInv S` is a
+left inverse of `torsorMul` (additive, checked on pure tensors via
+`galoisInv_torsorMul_tmul`). -/
+theorem torsorMul_injective (hfree : IsFreeAlgebraAction G R A) :
+    Function.Injective (MulSemiringAction.torsorMul G R A) := by
+  classical
+  haveI : Fintype G := Fintype.ofFinite G
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
   have hadd : ∀ x y : G → A, galoisInv G R A S (x + y)
       = galoisInv G R A S x + galoisInv G R A S y := by
     intro x y
@@ -833,54 +790,31 @@ theorem torsorMul_bijective_of_isFreeAlgebraAction
       galoisInv G R A S (MulSemiringAction.torsorMul G R A y) = y := by
     intro y
     induction y using TensorProduct.induction_on with
-    | zero => simp [galoisInv]
+    | zero =>
+      simp only [galoisInv, map_zero, Pi.zero_apply, zero_mul, smul_zero,
+        Finset.sum_const_zero, tmul_zero]
     | add y₁ y₂ h₁ h₂ => rw [map_add, hadd, h₁, h₂]
-    | tmul u v =>
-      rw [galoisInv]
-      have hterm : ∀ p : A × A,
-          (∑ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
-              (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2))
-            = (traceInvariants G R A (u * p.2) : A) * v := by
-        intro p
-        have hinner : ∀ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
-            (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2)
-              = (g⁻¹ • (u * p.2)) * v := by
-          intro g
-          rw [MulSemiringAction.torsorMul_tmul,
-            show u * g • v * p.2 = (u * p.2) * (g • v) by ring, smul_mul', smul_smul,
-            inv_mul_cancel, one_smul]
-        simp only [hinner, ← Finset.sum_mul]
-        congr 1
-        show (∑ g : G, g⁻¹ • (u * p.2)) = ∑ g : G, g • (u * p.2)
-        exact Fintype.sum_bijective (·⁻¹) (Equiv.inv G).bijective _ _ (fun _ => rfl)
-      simp only [hterm]
-      have hmove : ∀ p : A × A,
-          p.1 ⊗ₜ[FixedPoints.subalgebra R A G] ((traceInvariants G R A (u * p.2) : A) * v)
-            = ((traceInvariants G R A (u * p.2) : A) * p.1)
-                ⊗ₜ[FixedPoints.subalgebra R A G] v := by
-        intro p
-        show p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
-            ((traceInvariants G R A (u * p.2)) • v) = _
-        rw [TensorProduct.tmul_smul]
-        rfl
-      simp only [hmove]
-      rw [← TensorProduct.sum_tmul]
-      congr 1
-      show (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1) = u
-      have hswap : (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1)
-          = ∑ g : G, (g • u) * (∑ p ∈ S, p.1 * (g • p.2)) := by
-        simp only [Finset.sum_mul]
-        rw [Finset.sum_comm]
-        refine Finset.sum_congr rfl fun g _ => ?_
-        rw [Finset.mul_sum]
-        refine Finset.sum_congr rfl fun p _ => ?_
-        rw [smul_mul']
-        ring
-      rw [hswap, Finset.sum_eq_single (1 : G)]
-      · rw [hS (1 : G)]; simp
-      · intro g _ hg; rw [hS g, if_neg hg, mul_zero]
-      · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
-  exact ⟨Function.LeftInverse.injective hleft, fun x => ⟨galoisInv G R A S x, hright x⟩⟩
+    | tmul u v => exact galoisInv_torsorMul_tmul G R A S hS u v
+  exact Function.LeftInverse.injective hleft
+
+/-- **(T-Q2-A711, step 5 — KM A7.1.1, torsor part; PROVEN)** For a free action of a finite
+group the multiplication comparison `A ⊗[Aᴳ] A ≅ ∏_G A` is bijective — `Spec A` is a
+`G`-torsor over `Spec Aᴳ`.
+
+This is SGA III Exp. V Thm 4.1 (iv), *"`X₁ ⟶ X₀ ×_Y X₀` est un isomorphisme"*, obtained by
+the Chase–Harrison–Rosenberg route. The Galois coordinates of `exists_galoisCoords` give
+an explicit two-sided inverse `galoisInv`, so neither SGA's semi-local reduction, its
+Lemme 4.2, nor its faithfully-flat residue-field enlargement is needed. None of the three
+has a mathlib substrate (there is no `IsSemilocalRing`), and no finiteness of `A` over
+`Aᴳ` is used either.
+
+`galoisInv ∘ torsorMul = id` is where the trace enters: on a pure tensor `u ⊗ v` the inner
+sum is `tr(u · bᵢ) · v` with `tr(u · bᵢ)` invariant, so it crosses the tensor to give
+`(∑ᵢ tr(u · bᵢ) · aᵢ) ⊗ v = u ⊗ v` by the coordinate identity again. -/
+theorem torsorMul_bijective_of_isFreeAlgebraAction
+    (hfree : IsFreeAlgebraAction G R A) :
+    Function.Bijective (MulSemiringAction.torsorMul G R A) :=
+  ⟨torsorMul_injective G R A hfree, torsorMul_surjective G R A hfree⟩
 
 /-- **(A711-BC = KM A7.1.2; PROVEN)** Free actions satisfy base change for rings of
 invariants — `∗(A, G, R, R')` for every `R'`: `Aᴳ ⊗_R R' ≅ (A ⊗_R R')ᴳ`.
@@ -899,7 +833,6 @@ theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
   haveI : Fintype G := Fintype.ofFinite G
   obtain ⟨c, hc⟩ := exists_traceInvariants_eq_one G R A hfree
   have hc' : (∑ g : G, g • c) = 1 := congrArg Subtype.val hc
-  -- the `Aᴳ`-linear retraction `s : A → Aᴳ`, `s x = tr(c · x)`
   set s : A →ₗ[FixedPoints.subalgebra R A G] FixedPoints.subalgebra R A G :=
     (traceLinear G R A).comp (LinearMap.mulLeft (FixedPoints.subalgebra R A G) c) with hs
   have hs_apply : ∀ x : A, (s x : A) = ∑ g : G, g • (c * x) := fun _ => rfl
@@ -910,18 +843,16 @@ theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
     have hterm : ∀ g : G, g • (c * (b : A)) = (g • c) * (b : A) := by
       intro g; rw [smul_mul', b.2 g]
     simp only [hterm, ← Finset.sum_mul, hc', one_mul]
-  -- the base-changed retraction `ψ : A ⊗ R' → Aᴳ ⊗ R'`
   set ψ : A ⊗[R] R' →ₗ[R] (FixedPoints.subalgebra R A G) ⊗[R] R' :=
     TensorProduct.map (s.restrictScalars R) LinearMap.id with hψ
   set φ : (FixedPoints.subalgebra R A G) ⊗[R] R' →ₐ[R] A ⊗[R] R' :=
     Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val (AlgHom.id R R') with hφ
   have hcoe : ∀ x, (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x :
       A ⊗[R] R') = φ x := fun _ => rfl
-  -- `φ ∘ ψ` is the twisted average `z ↦ ∑_g g • ((c ⊗ 1) · z)`
   have hΘ : ∀ z : A ⊗[R] R', φ (ψ z) = ∑ g : G, g • ((c ⊗ₜ[R] (1 : R')) * z) := by
     intro z
     induction z using TensorProduct.induction_on with
-    | zero => simp [hψ]
+    | zero => simp only [hψ, map_zero, mul_zero, smul_zero, Finset.sum_const_zero]
     | add z₁ z₂ h₁ h₂ =>
       rw [map_add, map_add, h₁, h₂, ← Finset.sum_add_distrib]
       exact Finset.sum_congr rfl fun g _ => by rw [mul_add, smul_add]
@@ -933,11 +864,11 @@ theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
       rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul,
         MulSemiringAction.smul_tmul_baseChange g (c * a) r]
   refine ⟨fun x y hxy => ?_, fun y => ?_⟩
-  · -- injectivity: `ψ` is a left inverse of `φ`
+  ·
     have hleft : ∀ z : (FixedPoints.subalgebra R A G) ⊗[R] R', ψ (φ z) = z := by
       intro z
       induction z using TensorProduct.induction_on with
-      | zero => simp
+      | zero => simp only [map_zero]
       | add z₁ z₂ h₁ h₂ => rw [map_add, map_add, h₁, h₂]
       | tmul b r =>
         rw [hφ, Algebra.TensorProduct.map_tmul, AlgHom.id_apply, hψ]
@@ -949,7 +880,7 @@ theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
       simpa only [hcoe] using hval
     have h1 := congrArg ψ h0
     rwa [hleft, hleft] at h1
-  · -- surjectivity: for invariant `y`, `φ (ψ y) = y`
+  ·
     refine ⟨ψ (y : A ⊗[R] R'), ?_⟩
     refine Subtype.ext ?_
     rw [hcoe, hΘ]
@@ -1055,7 +986,7 @@ theorem exists_separabilityIdempotent (hfree : IsFreeAlgebraAction G R A) :
   obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
   refine ⟨∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G] p.2, ?_, ?_⟩
   · rw [map_sum]
-    simpa using hS 1
+    simpa only [Algebra.TensorProduct.lmul'_apply_tmul, one_smul, if_pos] using hS 1
   · intro x
     refine (torsorMul_bijective_of_isFreeAlgebraAction G R A hfree).1 ?_
     rw [map_zero, map_mul, map_sub, map_sum]
@@ -1064,7 +995,8 @@ theorem exists_separabilityIdempotent (hfree : IsFreeAlgebraAction G R A) :
       MulSemiringAction.torsorMul_tmul, one_mul, smul_one, mul_one]
     rw [hS g]
     by_cases hg : g = 1
-    · subst hg; simp
+    · subst hg
+      simp only [one_smul, sub_self, if_pos, mul_one]
     · rw [if_neg hg, mul_zero]
 
 /-- **(T-Q2-A711, step 8 — KM A7.1.1, unramifiedness; PROVEN)** For a free action of a
@@ -1080,15 +1012,16 @@ theorem Algebra.FormallyUnramified.of_isFreeAlgebraAction (hfree : IsFreeAlgebra
   let B := FixedPoints.subalgebra R A G
   have hD : ∀ x : A, KaehlerDifferential.D B A x = 0 := by
     intro x
-    have hmem : (1 : A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A) ∈ KaehlerDifferential.ideal B A :=
+    have hmem : (1 : A) ⊗ₜ[B] x - x ⊗ₜ[B] (1 : A) ∈ KaehlerDifferential.ideal B A :=
       KaehlerDifferential.one_smul_sub_smul_one_mem_ideal B x
     have h1e : (1 : A ⊗[B] A) - e ∈ KaehlerDifferential.ideal B A := by
       show _ ∈ RingHom.ker _
       rw [RingHom.mem_ker, map_sub, hmul, map_one, sub_self]
-    have hfac : ((1:A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A))
-        = ((1:A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A)) * ((1 : A ⊗[B] A) - e) := by
+    have hfac : ((1 : A) ⊗ₜ[B] x - x ⊗ₜ[B] (1 : A)) =
+        ((1 : A) ⊗ₜ[B] x - x ⊗ₜ[B] (1 : A)) * ((1 : A ⊗[B] A) - e) := by
       rw [mul_sub, mul_one, hann x, sub_zero]
-    have hsq : ((1:A) ⊗ₜ[B] x - x ⊗ₜ[B] (1:A)) ∈ (KaehlerDifferential.ideal B A) ^ 2 := by
+    have hsq : ((1 : A) ⊗ₜ[B] x - x ⊗ₜ[B] (1 : A)) ∈
+        (KaehlerDifferential.ideal B A) ^ 2 := by
       rw [pow_two, hfac]
       exact Ideal.mul_mem_mul hmem h1e
     show (KaehlerDifferential.ideal B A).toCotangent ⟨_, hmem⟩ = 0

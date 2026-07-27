@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
 import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
 import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
 import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
-import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
 
 /-!
 # The unconditional Hasse bound `|#E(𝔽_q) − q − 1| ≤ 2√q`
@@ -20,7 +20,7 @@ per-isogeny base-change Weil-pairing scalings now built over `K̄ = AlgebraicClo
 * `pencilScaling_holds_coprime` (leaf 3, `rπ − s` on `p ∤ r' ∧ p ∤ s'`) — axiom-clean, with the
   kernel-cardinality exponent `pencilKerCard`.
 
-The **coprime-BOTH** route (reviewer round-23, Route B) requests the pencil scaling only on the
+The **coprime-BOTH** route requests the pencil scaling only on the
 genuine locus `p ∤ r' ∧ p ∤ s'` — exactly where `rπ − s` is genuine — so the inseparable `p ∣ r'`
 geometric input is never demanded.  The resulting Hasse bound is **axiom-clean** (no `sorryAx`).
 
@@ -40,20 +40,18 @@ open WeierstrassCurve HasseWeil.Curves
 
 namespace HasseWeil.WeilPairing
 
-set_option linter.unusedSectionVars false
-set_option linter.style.longLine false
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
 
 noncomputable local instance : DecidableEq (AlgebraicClosure K) := Classical.decEq _
 
-set_option maxHeartbeats 2000000
-
-/-- **The unconditional Hasse bound** (Silverman V.1.1): for an elliptic curve `E` over a finite field
+/-- **The unconditional Hasse bound** (Silverman V.1.1): for an elliptic curve `E` over a
+finite field
 `𝔽_q`, `|#E(𝔽_q) − q − 1| ≤ 2√q`, with **no hypotheses** beyond `2 ≤ #K`.
 
-Assembled from `hasse_bound_unconditional_of_baseChange_scalings_coprime` (`FrobMatrixData.lean`) with
+Assembled from `hasse_bound_unconditional_of_baseChange_scalings_coprime`
+(`FrobMatrixData.lean`) with
 the kernel-cardinality degree function `pencilKerCard` and the three base-change scalings
 `frobeniusScaling_holds`, `oneSubFrobeniusScaling_holds`, `pencilScaling_holds_coprime`.
 
@@ -65,9 +63,9 @@ theorem hasse_bound_unconditional (hq : 2 ≤ Fintype.card K) :
       2 * Real.sqrt (Fintype.card K : ℝ) := by
   -- The canonical characteristic / exponent of `K`, used to fix the degree function `deg`.
   obtain ⟨p₀, hCharP₀, n₀, hp₀_prime, hcard₀⟩ := FiniteField.card' K
-  haveI : Fact p₀.Prime := ⟨hp₀_prime⟩
-  haveI : CharP K p₀ := hCharP₀
-  haveI : Fact (Fintype.card K = p₀ ^ (n₀ : ℕ)) := ⟨hcard₀⟩
+  have : Fact p₀.Prime := ⟨hp₀_prime⟩
+  have : CharP K p₀ := hCharP₀
+  have : Fact (Fintype.card K = p₀ ^ (n₀ : ℕ)) := ⟨hcard₀⟩
   -- The degree function, at the canonical `(p₀, n₀)`.  Kept as a local definition so the heavy
   -- `Nat.card (… .ker)` underneath `pencilKerCard` is never whnf-reduced during unification.
   set deg₀ : ℤ → ℤ → ℤ := pencilKerCard W p₀ (n₀ : ℕ) (pencilJunkPullback W) with hdeg₀
@@ -86,9 +84,7 @@ theorem hasse_bound_unconditional (hq : 2 ≤ Fintype.card K) :
 
 /-- **The Hasse bound, hypothesis-free capstone** (Silverman V.1.1):
 `|#E(𝔽_q) − q − 1| ≤ 2√q` with no explicit cardinality hypothesis — `2 ≤ #K` is
-automatic for a finite field (`Fintype.one_lt_card`).  This is the hypothesis-free
-form that replaced the retired `hasse_bound_universal` stub
-(`Hasse/OpenLemmaPrimitives.lean`, deleted 2026-06-11). -/
+automatic for a finite field (`Fintype.one_lt_card`). -/
 theorem hasse_bound :
     |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
       2 * Real.sqrt (Fintype.card K : ℝ) :=

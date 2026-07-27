@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Hilbert90
+module
+
+public import BernoulliRegular.FLT37.Hilbert90
 
 /-!
 # LV010-A: caseI ideal-principalization under `¬ p ∣ h⁺`

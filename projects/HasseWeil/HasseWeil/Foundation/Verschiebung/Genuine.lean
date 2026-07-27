@@ -320,6 +320,7 @@ noncomputable def genuineIsogSmulSubV_of_pole_witness
     (addCoordAlgHomPair_injective_zsmul_verschiebung_mulByInt_neg_of_pole
       W h_subset r s hr hs h_x_ne h_pole)
 
+/-- The additive-hom form of the genuine isogeny difference, from a pole witness. -/
 @[simp] theorem genuineIsogSmulSubV_of_pole_witness_toAddMonoidHom
     (h_subset :
       (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback.range ≤
@@ -383,6 +384,7 @@ III.6.2(b) is implicitly using when stating the polarization is
 non-degenerate; the cleanest formalisation goes via the polynomial
 divisibility ⟹ degree match ⟹ `p`-adic valuation contradiction. -/
 
+omit [Fintype K] [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- `algebraMap (Polynomial K) → K(E)` is injective: it factors as the two-step scalar
 tower `Polynomial K → CoordinateRing → FunctionField`, each step injective. -/
 private theorem algebraMap_poly_KE_injective :
@@ -394,6 +396,7 @@ private theorem algebraMap_poly_KE_injective :
       W.toAffine.FunctionField).comp
     Affine.CoordinateRing.algebraMap_poly_injective
 
+omit [Fintype K] in
 /-- **T26-B core** (R29 §2): from the assumed K(E) equation
 `mulByInt_x W (r * q) = (mulByInt_x W s) ^ q`, derive the polynomial
 equation in `K[X]` via algebra-map injectivity. -/
@@ -413,7 +416,7 @@ private theorem polyEq_of_mulByInt_x_eq_pow
   have h_cross :
       Φ_ff W n * (ΨSq_ff W m) ^ k = (Φ_ff W m) ^ k * ΨSq_ff W n := by
     have h := h_eq
-    unfold mulByInt_x at h
+    simp only [mulByInt_x] at h
     rw [div_pow] at h
     -- h : Φ_ff(n) / ΨSq_ff(n) = Φ_ff(m)^k / ΨSq_ff(m)^k
     field_simp at h
@@ -430,6 +433,7 @@ private theorem polyEq_of_mulByInt_x_eq_pow
     exact h_cross
   exact algebraMap_poly_KE_injective W h_alg
 
+omit [Fintype K] in
 /-- `(mulByInt n).pb x_gen = mulByInt_x W n` for `n ≠ 0`: `x_gen` form of
 `mulByInt_pullback_x` (`x_gen` unfolds to the `algebraMap`-of-`X` form). -/
 private theorem mulByInt_pullback_x_gen (n : ℤ) (hn : n ≠ 0) :
@@ -452,6 +456,7 @@ private theorem zsmul_verschiebung_pullback_x_eq
   congr 1
   exact mulByInt_pullback_x_gen W r hr
 
+omit [Fintype K] in
 /-- `(mulByInt (-s)).pb x_gen = mulByInt_x W s`: the `(-s)`-pullback of the x-coordinate
 generator, simplified via `mulByInt_x_neg`. Shared between the T26-B mismatch and the
 V-side pole-bound proofs. -/
@@ -471,7 +476,7 @@ theorem h_x_ne_zsmul_verschiebung_mulByInt_neg
       (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback.range ≤
         (frobeniusIsog W).pullback.range)
     (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0)
-    (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
+    (_hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
     ((verschiebungIsog_of_witness W h_subset).zsmul r).pullback (x_gen W) ≠
       (mulByInt W.toAffine (-s)).pullback (x_gen W) := by
   intro h_eq
@@ -878,7 +883,7 @@ theorem V_pullback_x_gen_ne_x_gen
       ΨSq_ff W ((Fintype.card K : ℕ) : ℤ) =
       Φ_ff W ((Fintype.card K : ℕ) : ℤ) := by
     have := h_pi
-    unfold mulByInt_x at this
+    simp only [mulByInt_x] at this
     field_simp at this
     linear_combination this
   -- Lift via algebraMap injectivity.
@@ -1025,6 +1030,7 @@ noncomputable def genuineIsogSmulSubV_universal
       (h_subset_of_isDualOf W V hV) r s hr hs hrK hsK)
     h_pole
 
+/-- The additive-hom form of the universal genuine isogeny difference. -/
 @[simp] theorem genuineIsogSmulSubV_universal_toAddMonoidHom
     (V : Isogeny W.toAffine W.toAffine)
     (hV : IsDualOf W.toAffine V (frobeniusIsog W))
@@ -1825,6 +1831,7 @@ noncomputable def genuineIsogSmulSubV_universal_unconditional
     (ord_addPullback_x_pair_zsmul_verschiebung_mulByInt_neg_lt_zero W
       (h_subset_of_isDualOf W V hV) r s hr hs hrK hsK)
 
+/-- The additive-hom form of the unconditional universal genuine isogeny difference. -/
 @[simp] theorem genuineIsogSmulSubV_universal_unconditional_toAddMonoidHom
     (V : Isogeny W.toAffine W.toAffine)
     (hV : IsDualOf W.toAffine V (frobeniusIsog W))

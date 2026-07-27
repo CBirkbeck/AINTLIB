@@ -4,26 +4,26 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Ramification.KernelOfDifferential
-import HasseWeil.Isogeny.Frobenius.Twist
-import HasseWeil.Isogeny.Frobenius.Dual
 import HasseWeil.HasseBound.Separability
+import HasseWeil.Isogeny.Frobenius.Dual
+import HasseWeil.Isogeny.Frobenius.Twist
 
 /-!
 # G3: the general twisted Frobenius factorization (Silverman II.2.12) and the relative Verschiebung
 
 Silverman II.2.12 over **every** field of characteristic `p > 0` (perfect base): every
 isogeny `φ : E → E'` factors as `φ = φ_sep ∘ Frob_{p^k}` where `Frob_{p^k} : E → E^{(p^k)}`
-is the *relative* `p^k`-power Frobenius (the cross-curve twist of `FrobeniusTwist.lean`)
+is the *relative* `p^k`-power Frobenius (the cross-curve twist of `Isogeny/Frobenius/Twist.lean`)
 and `φ_sep : E^{(p^k)} → E'` is separable.
 
 This is the **twisted, cross-curve** form. The same-curve statement "every inseparable `φ`
 has `Im(φ*) ⊆ Im(π_q*)`" is FALSE over composite `q = pˢ` (e.g. `[p]` over `𝔽_{p²}` has
 `deg_i = p`, not a `q`-power), which is why the factorization must pass through the twist
-`E^{(p)} ≠ E`; cf. the "general `p^k` twist gap" of `DualReduction.lean`, now closed.
+`E^{(p)} ≠ E`; cf. the "general `p^k` twist gap" of `Isogeny/Dual/Reduction.lean`, now closed.
 
 ## Layer 0 — the G1 corollary generalized to two curves
 
-`Curves/KernelOfDifferential.lean`'s `Im(φ*) ⊆ K(E)^p` for inseparable `φ` was
+`Curves/Ramification/KernelOfDifferential.lean`'s `Im(φ*) ⊆ K(E)^p` for inseparable `φ` was
 endomorphism-only. The proof route is curve-pair-agnostic (T-II-4-004 reverse direction +
 `ker d = K^p` on the **source** function field), so we generalize to `EC.Isogeny W₁ W₂`:
 
@@ -121,7 +121,7 @@ theorem Isogeny.finiteDimensional_toAlgebra (φ : Isogeny W₁ W₂) :
 unconditionally. Generalizes `EC.Isogeny.degree_pos` (which is endomorphism-only). -/
 theorem Isogeny.degree_pos' (φ : Isogeny W₁ W₂) : 0 < φ.degree := by
   change 0 < φ.toCurveMap.degree
-  unfold CurveMap.degree
+  simp only [CurveMap.degree]
   exact @Module.finrank_pos W₂.FunctionField W₁.FunctionField _ _
     φ.toCurveMap.toAlgebra.toModule _ φ.finiteDimensional_toAlgebra _ _ _
 
@@ -470,7 +470,6 @@ theorem twistedFrobeniusFactorization (φ : Isogeny E.toAffine V) :
 
 -- `[DecidableEq F]` enters through `twistedFrobeniusFactorization` (whose statement names
 -- `relativeFrobenius`) in the proof; the linter only inspects the surface type.
-set_option linter.unusedDecidableInType false in
 /-- **The pullback-level corollary of II.2.12**: every pullback of `φ` is a `p^k`-th
 power in `K(E)`, `k` the twisted exponent — `φ* z = (g_z)^{p^k}`. -/
 theorem twistedFrobeniusFactorization_pow_root (φ : Isogeny E.toAffine V) :
@@ -554,7 +553,7 @@ omit [Fact (Nat.Prime p)] [CharP K p] in
 /-- **`FrobeniusFactorization` from divisible twisted exponents** (deliverable c,
 capstone): if every endomorphism of `E/𝔽_q` admits a twisted factorization whose exponent
 is a multiple of `s` (`q = pˢ`), then the same-curve `FrobeniusFactorization` predicate of
-`DualReduction.lean` holds. Honest scope: the divisibility is genuinely needed — for
+`Isogeny/Dual/Reduction.lean` holds. Honest scope: the divisibility is genuinely needed — for
 `s ∤ k` (e.g. `[p]` over `𝔽_{p²}`) the same-curve factorization does not exist. -/
 theorem frobeniusFactorization_of_twisted_sdvd
     (h : ∀ φ : Isogeny E.toAffine E.toAffine,
@@ -576,7 +575,6 @@ variable (p : ℕ) [Fact p.Prime] [CharP K p]
 
 -- `[DecidableEq K]` enters through the twisted factorization in the proof; the linter
 -- only inspects the surface type.
-set_option linter.unusedDecidableInType false in
 /-- **II.2.12 same-curve existence over a prime field, re-derived through the twist**
 (`s = 1`, divisibility automatic): an independent confirmation of
 `frobeniusFactorization_of_card_eq_prime` via `twistedFrobeniusFactorization` +
@@ -596,8 +594,9 @@ end PrimeFieldCorollary
 The single non-formal input of the relative Verschiebung witness is the **inseparability
 of `[p]`** (`a_{[p]} = p = 0`, Silverman III.5.3/III.5.6(b)). The project has it
 **axiom-clean over an arbitrary base**: the field-general Route-B chord induction
-`omegaCoeff_mulByInt` (`RouteBGeneral.lean`, no EDS Wronskian, no `Fintype`) feeds
-`mulByInt_p_omega_pullback_eq_zero` (`Hasse/Separability.lean`). The historical finite-base
+`omegaCoeff_mulByInt` (`Foundation/OmegaCoeffMulByIntGeneral.lean`, no EDS Wronskian, no `Fintype`)
+feeds
+`mulByInt_p_omega_pullback_eq_zero` (`HasseBound/Separability.lean`). The historical finite-base
 twin (`omegaPullbackCoeff_mulByInt_p_eq_zero_routeB`, the `[Fintype K]`-scoped chord
 recursion of `RouteBInduction.lean`) is retained for compatibility.
 
@@ -646,13 +645,12 @@ theorem Isogeny.mulByInt_p_not_isSeparable_of_coeff_eq_zero
 
 -- `[DecidableEq F]` enters through `omegaPullbackCoeff` in the proof; the linter only
 -- inspects the surface type.
-set_option linter.unusedDecidableInType false in
 omit [PerfectField F] in
 /-- **`[p]` is inseparable over a general characteristic-`p` base — axiom-clean**
 (Silverman III.5.6(b)). Discharges `a_{[p]} = 0` through
-`mulByInt_p_omega_pullback_eq_zero` (`Hasse/Separability.lean`), which routes through
+`mulByInt_p_omega_pullback_eq_zero` (`HasseBound/Separability.lean`), which routes through
 the axiom-clean field-general Route-B chain `omegaCoeff_mulByInt`
-(`RouteBGeneral.lean`) — no EDS-Wronskian `sorryAx`. -/
+(`Foundation/OmegaCoeffMulByIntGeneral.lean`) — no EDS-Wronskian `sorryAx`. -/
 theorem Isogeny.mulByInt_p_not_isSeparable :
     ¬(Isogeny.mulByInt E.toAffine (intP_ne_zero p)).IsSeparable :=
   Isogeny.mulByInt_p_not_isSeparable_of_coeff_eq_zero p E
@@ -660,14 +658,12 @@ theorem Isogeny.mulByInt_p_not_isSeparable :
 
 -- `[DecidableEq F]`/`[Fintype F]` enter through the Route B coefficient computation in
 -- the proof; the linter only inspects the surface type.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 omit [PerfectField F] in
 /-- **`[p]` is inseparable over a finite base — axiom-clean** (Silverman III.5.6(b)):
 `a_{[p]} = p = 0` by the `[Fintype K]`-scoped chord-recursion Route B
 (`omegaPullbackCoeff_mulByInt_p_eq_zero_routeB`, no EDS Wronskian). Retained for
 compatibility — the general-base `mulByInt_p_not_isSeparable` is now equally
-axiom-clean (via `RouteBGeneral.lean`). -/
+axiom-clean (via `Foundation/OmegaCoeffMulByIntGeneral.lean`). -/
 theorem Isogeny.mulByInt_p_not_isSeparable_finite [Fintype F] :
     ¬(Isogeny.mulByInt E.toAffine (intP_ne_zero p)).IsSeparable :=
   Isogeny.mulByInt_p_not_isSeparable_of_coeff_eq_zero p E
@@ -768,12 +764,13 @@ theorem relativeVerschiebungOf_compose_relativeFrobenius
 /-! #### Headline instantiations of the Verschiebung
 
 General base and finite base — both axiom-clean (the III.5.3 input `a_{[p]} = 0` is the
-field-general Route-B `omegaCoeff_mulByInt` of `RouteBGeneral.lean`). -/
+field-general Route-B `omegaCoeff_mulByInt` of `Foundation/OmegaCoeffMulByIntGeneral.lean`). -/
 
 /-- **The relative Verschiebung over a general perfect base — axiom-clean** (deliverable
 d headline): `V̂_{p^e} : E^{(p^e)} → E` with `V̂ ∘ Frob = [p^e]`
 (`relativeVerschiebung_compose_relativeFrobenius`). The III.5.3 input is the axiom-clean
-`mulByInt_p_not_isSeparable` (field-general Route B, `RouteBGeneral.lean`). -/
+`mulByInt_p_not_isSeparable` (field-general Route B, `Foundation/OmegaCoeffMulByIntGeneral.lean`).
+-/
 noncomputable def relativeVerschiebung (e : ℕ) :
     Isogeny (E.iterateFrobeniusTwist p e).toAffine E.toAffine :=
   relativeVerschiebungOf p E (Isogeny.mulByInt_p_not_isSeparable p E) e
@@ -818,7 +815,6 @@ noncomputable def Isogeny.hasDualWitness_of_twistedFactorization {k : ℕ} [ExpC
 
 -- `[DecidableEq F]` enters through the twisted factorization and the Verschiebung
 -- witness in the proof; the linter only inspects the surface type.
-set_option linter.unusedDecidableInType false in
 /-- **THE FULLY GENERAL dual existence, modulo the separable side** (deliverable d,
 finale, hypothesis-threaded form): over a perfect field of characteristic `p`, *every*
 isogeny `φ : E → E'` carries a dual witness, given the `[p]`-inseparability input and
@@ -835,7 +831,6 @@ theorem nonempty_hasDualWitness_of_twisted_separable_witnessesOf
   exact ⟨φ.hasDualWitness_of_twistedFactorization p E φs hfact ws
     (hasDualWitnessRelativeFrobeniusOf p E hinsep k)⟩
 
-set_option linter.unusedDecidableInType false in
 /-- The finale over a general perfect base (inherits the standing III.5.3 `sorryAx`
 through the `[p]`-inseparability input; no new sorries). -/
 theorem nonempty_hasDualWitness_of_twisted_separable_witnesses
@@ -845,8 +840,6 @@ theorem nonempty_hasDualWitness_of_twisted_separable_witnesses
   nonempty_hasDualWitness_of_twisted_separable_witnessesOf p E
     (Isogeny.mulByInt_p_not_isSeparable p E) hsepw φ
 
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **The finale over a finite base — axiom-clean**: every isogeny out of `E/𝔽_q` (to any
 target curve) carries a dual witness, modulo only the separable side's witnesses on the
 Frobenius twists. -/

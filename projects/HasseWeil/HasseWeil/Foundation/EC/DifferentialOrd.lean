@@ -138,7 +138,7 @@ theorem evalEval_xy_gen_eq_algebraMap_mk (p : (Polynomial F)[X]) :
   have hinner : Polynomial.eval₂RingHom (algebraMap F R)
       (algebraMap (Polynomial F) R Polynomial.X) = algebraMap (Polynomial F) R := by
     ext x
-    · simp [Polynomial.eval₂_C, IsScalarTower.algebraMap_apply F (Polynomial F) R]
+    · simp [IsScalarTower.algebraMap_apply F (Polynomial F) R]
     · simp
   rw [hinner, ← Polynomial.aeval_def]
   exact AdjoinRoot.aeval_eq p
@@ -241,7 +241,7 @@ theorem ord_P_nonneg_of_mem_Rimg {f : KE} (hf : f ∈ Rimg W)
   · have hv := (⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one u P
     have hv0 : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P (algebraMap R KE u) ≠ 0 :=
       ((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).ne_zero_iff.mpr hu
-    unfold SmoothPlaneCurve.ord_P
+    simp only [SmoothPlaneCurve.ord_P]
     rw [dif_neg hv0, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
     have h_unz_le : WithZero.unzero hv0 ≤ 1 := by
       rw [← WithZero.coe_le_coe, WithZero.coe_one, WithZero.coe_unzero]; exact hv
@@ -338,7 +338,8 @@ theorem one_le_ord_P_Dω_of_two_le {f : KE} (hf_ne : f ≠ 0)
   exact le_trans (le_min ht2 ht1) (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
 
 /-- **`Dω`-unit criterion for order `≤ 1`** (contrapositive of `one_le_ord_P_Dω_of_two_le`).  If
-`f ≠ 0` has a unit `ω`-derivative at `P` (`ord_P (Dω f) = 0`), then `f` cannot vanish to order `≥ 2`,
+`f ≠ 0` has a unit `ω`-derivative at `P` (`ord_P (Dω f) = 0`), then `f` cannot vanish to order
+`≥ 2`,
 i.e. `ord_P f ≤ 1`. -/
 theorem ord_P_le_one_of_Dω_unit {f : KE} (hf_ne : f ≠ 0)
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
@@ -402,7 +403,6 @@ theorem Dω_isog_pullback_x_gen (α : Isogeny W.toAffine W.toAffine) :
   (Dω_eq_of_smul W
     (kaehlerD_alpha_pullback_x_eq_smul_omega W α).symm).symm
 
-set_option linter.unusedDecidableInType false in
 /-- **General differential `e ≤ 1` bound (x-coordinate, non-2-torsion image).**  For an isogeny `α`
 with separable invariant-differential coefficient `a_α = omegaPullbackCoeff W α ≠ 0`, if the pulled
 back differential denominator `α^*u = alpha_star_u W α` is a *unit* at `P` (`ord_P = 0`, the
@@ -443,7 +443,6 @@ theorem Dω_isog_pullback_y_gen (α : Isogeny W.toAffine W.toAffine) :
   (Dω_eq_of_smul W
     (kaehlerD_alpha_pullback_y_eq_smul_omega W α).symm).symm
 
-set_option linter.unusedDecidableInType false in
 /-- **General differential `e ≤ 1` bound (y-coordinate, 2-torsion image).**  For an isogeny `α` with
 separable invariant-differential coefficient `a_α = omegaPullbackCoeff W α ≠ 0`, if the pulled-back
 `y`-numerator `α^*ν = 3(α^*x)²+2a₂(α^*x)+a₄−a₁(α^*y)` is a *unit* at `P` (`ord_P = 0`, the condition
@@ -490,7 +489,6 @@ theorem Dω_mulByInt_pullback_y_gen (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
   rw [omegaCoeff_mulByInt W ℓ hℓ] at hkey
   exact (Dω_eq_of_smul W hkey.symm).symm
 
-set_option linter.unusedDecidableInType false in
 /-- **The differential `e = 1` bound.** With `[ℓ]` separable (`(ℓ:F) ≠ 0`) and the pulled-back
 `y`-numerator `[ℓ]^*polynomialX = 3X²+2a₂X+a₄−a₁Y` a unit at `P` (hypothesis `hPX`), the
 function `mulByInt_y ℓ − y_Q` has order `≤ 1` at `P`. -/

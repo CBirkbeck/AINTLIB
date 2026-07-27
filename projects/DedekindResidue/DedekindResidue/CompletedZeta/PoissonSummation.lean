@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -225,7 +230,7 @@ theorem norm_mFourier_apply (n : ι → ℤ) (q : UnitAddTorus ι) :
     ‖UnitAddTorus.mFourier n q‖ = 1 := by
   simp only [UnitAddTorus.mFourier, ContinuousMap.coe_mk, norm_prod]
   refine Finset.prod_eq_one (fun i _ => ?_)
-  simp [fourier_apply]
+  simp [fourier_apply, Circle.norm_coe]
 
 /-- The half-open box `(0,1]^ι` has volume `1`. -/
 theorem volume_iocBox :
@@ -334,7 +339,8 @@ theorem fourierIntegral_zpoint_eq (g : EuclideanSpace ℝ ι → ℂ) (m : ι �
   dsimp only
   rw [mFourier_neg_coe]
   refine congr_arg₂ (· • ·) ?_ rfl
-  have hinner : (inner ℝ (WithLp.toLp 2 x : EuclideanSpace ℝ ι) (zpoint m)) = ∑ i, x i * (m i : ℝ) := by
+  have hinner : (inner ℝ (WithLp.toLp 2 x : EuclideanSpace ℝ ι) (zpoint m)) =
+      ∑ i, x i * (m i : ℝ) := by
     simp only [zpoint, PiLp.inner_apply, WithLp.equiv_symm_apply, RCLike.inner_apply, conj_trivial]
     exact Finset.sum_congr rfl (fun i _ => mul_comm _ _)
   have hs : (∑ i, (x i : ℂ) * (m i : ℂ)) = ∑ i, (m i : ℂ) * (x i : ℂ) :=

@@ -41,12 +41,12 @@ lemma prod_primesOverFinset_of_unramified [Algebra.Unramified R S] [IsDedekindDo
   convert (pow_one _).symm
   have : p.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hp ‹_›
   rw [← Finset.mem_coe, IsDedekindDomain.coe_primesOverFinset hp] at hP
-  rw [← Ideal.IsDedekindDomain.ramificationIdx_eq_factors_count hpbot' hP.1
+  rw [← Ideal.IsDedekindDomain.ramificationIdx'_eq_factors_count hpbot' hP.1
     (ne_bot_of_mem_primesOver hp hP)]
   letI : P.IsPrime := hP.1
   letI : P.LiesOver p := hP.2
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' p P hp]
-  exact Ideal.ramificationIdx'_eq_one P R
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx p P hp]
+  exact Ideal.ramificationIdx_eq_one P R
 
 lemma comap_map_eq_of_unramified [IsGalois K L] [Algebra.Unramified R S] (I : Ideal S)
     (hI : ∀ σ : L ≃ₐ[K] L, I.comap (galRestrict R K L S σ) = I) :

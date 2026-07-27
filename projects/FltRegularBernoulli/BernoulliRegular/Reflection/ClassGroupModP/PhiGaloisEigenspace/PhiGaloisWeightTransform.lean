@@ -125,7 +125,7 @@ theorem pthSymbolAtIdeal_canonical_galois_numerator_of_strong
         (cyclotomicRingOfIntegersEquiv (p := p) K a η) I =
       ((a : ZMod p).val ^ i : ZMod p) *
         pthSymbolAtIdeal_canonical (p := p) (K := K) η I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [show
       ((UniqueFactorizationMonoid.normalizedFactors I).map
         (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)

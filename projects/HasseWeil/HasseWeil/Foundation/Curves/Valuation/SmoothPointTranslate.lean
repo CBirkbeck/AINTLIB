@@ -58,14 +58,14 @@ def _root_.WeierstrassCurve.Affine.Point.IsSome
     {R : Type*} [CommRing R] {W : Affine R}
     (x y : R) (h_ns : W.Nonsingular x y) :
     (Affine.Point.some x y h_ns : W.Point).IsSome := by
-  unfold Affine.Point.IsSome
+  simp only [Affine.Point.IsSome]
   intro h; nomatch h
 
 /-- `Point.zero` does NOT satisfy `IsSome`. -/
 theorem _root_.WeierstrassCurve.Affine.Point.zero_not_isSome
     {R : Type*} [CommRing R] {W : Affine R} :
     ¬ ((Affine.Point.zero : W.Point).IsSome) := by
-  unfold Affine.Point.IsSome
+  simp only [Affine.Point.IsSome]
   intro h; exact h rfl
 
 /-! ### `SmoothPoint.translate_of_finite`
@@ -110,7 +110,7 @@ omit [C.toAffine.IsElliptic] in
     (P : C.SmoothPoint) (k : C.toAffine.Point)
     (h : (P.toAffinePoint + k).IsSome) :
     (P.translate_of_finite k h).toAffinePoint = P.toAffinePoint + k := by
-  unfold SmoothPoint.translate_of_finite
+  simp only [SmoothPoint.translate_of_finite]
   show Affine.Point.some _ _ _ = _
   set ex := Affine.Point.exists_some_of_isSome (P.toAffinePoint + k) h
   exact (ex.choose_spec.choose_spec.choose_spec).symm

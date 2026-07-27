@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -279,6 +284,27 @@ theorem integral_vertical_split {Φ : ℂ → ℂ} {ρ : ℂ} {b c d : ℝ} {R :
   rw [intervalIntegral.integral_congr hsplit, intervalIntegral.integral_add hds_int
     (hinv_int.const_mul (Φ ρ)), intervalIntegral.integral_const_mul]
 
+/-- The rectangle integral of `dslope Φ ρ` vanishes: `dslope Φ ρ` is continuous on the
+closed rectangle and differentiable off the single point `ρ`, so the Cauchy–Goursat
+vanishing theorem `rectangleIntegral_eq_zero` applies. -/
+private theorem rectangleIntegral_dslope_eq_zero {Φ : ℂ → ℂ} {z w ρ : ℂ}
+    (hΦ : ∀ ζ ∈ Set.uIcc z.re w.re ×ℂ Set.uIcc z.im w.im, DifferentiableAt ℂ Φ ζ)
+    (hcont : ContinuousOn (dslope Φ ρ) (Set.uIcc z.re w.re ×ℂ Set.uIcc z.im w.im))
+    (hle_re : z.re ≤ w.re) (hle_im : z.im ≤ w.im) :
+    rectangleIntegral (dslope Φ ρ) z w = 0 := by
+  refine rectangleIntegral_eq_zero (Set.countable_singleton ρ) hcont ?_
+  intro x hx
+  obtain ⟨hxmem, hxne⟩ := hx
+  rw [Set.mem_singleton_iff] at hxne
+  refine (differentiableAt_dslope_of_ne hxne).mpr ?_
+  refine hΦ x ?_
+  rw [Complex.mem_reProdIm] at hxmem ⊢
+  rw [Set.uIcc_of_le hle_re, Set.uIcc_of_le hle_im]
+  obtain ⟨hx1, hx2⟩ := hxmem
+  rw [min_eq_left hle_re, max_eq_right hle_re] at hx1
+  rw [min_eq_left hle_im, max_eq_right hle_im] at hx2
+  exact ⟨Set.Ioo_subset_Icc_self hx1, Set.Ioo_subset_Icc_self hx2⟩
+
 /-- **The rectangle Cauchy integral formula** (SP2-RECT R-c): for `Φ` differentiable
 on (a neighbourhood of each point of) the closed rectangle and `ρ` in the open
 rectangle, `∮_{∂R} Φ(ζ)(ζ − ρ)⁻¹ dζ = 2πi·Φ(ρ)`. -/
@@ -300,22 +326,8 @@ theorem rectangleIntegral_cauchy {Φ : ℂ → ℂ} {z w ρ : ℂ}
     (continuousOn_dslope hρR).mpr
       ⟨fun ζ hζ => (hΦ ζ hζ).continuousAt.continuousWithinAt,
         hΦ ρ (mem_of_mem_nhds hρR)⟩
-  have hzero : rectangleIntegral (dslope Φ ρ) z w = 0 := by
-    refine rectangleIntegral_eq_zero (Set.countable_singleton ρ) hcont ?_
-    intro x hx
-    obtain ⟨hxmem, hxne⟩ := hx
-    rw [Set.mem_singleton_iff] at hxne
-    refine (differentiableAt_dslope_of_ne hxne).mpr ?_
-    refine hΦ x ?_
-    rw [hR]
-    rw [Complex.mem_reProdIm] at hxmem ⊢
-    rw [Set.uIcc_of_le (by linarith : z.re ≤ w.re), Set.uIcc_of_le (by linarith : z.im ≤ w.im)]
-    obtain ⟨hx1, hx2⟩ := hxmem
-    rw [min_eq_left (by linarith : z.re ≤ w.re), max_eq_right (by linarith : z.re ≤ w.re)]
-      at hx1
-    rw [min_eq_left (by linarith : z.im ≤ w.im), max_eq_right (by linarith : z.im ≤ w.im)]
-      at hx2
-    exact ⟨Set.Ioo_subset_Icc_self hx1, Set.Ioo_subset_Icc_self hx2⟩
+  have hzero : rectangleIntegral (dslope Φ ρ) z w = 0 :=
+    rectangleIntegral_dslope_eq_zero (hR ▸ hΦ) (hR ▸ hcont) (by linarith) (by linarith)
   -- segment membership and non-hitting facts
   have hsegB : ∀ x ∈ Set.uIcc z.re w.re, ((x:ℂ) + (z.im:ℂ) * Complex.I) ∈ R := by
     intro x hx

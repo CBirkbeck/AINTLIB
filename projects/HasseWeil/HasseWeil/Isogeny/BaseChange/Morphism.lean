@@ -327,6 +327,7 @@ theorem functionFieldMap_comp_algebraMap :
     ((⟨W.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField a
 
 omit [DecidableEq K] [DecidableEq L] [WeierstrassCurve.IsElliptic W.toAffine] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The base-change curve identity**: pushing `W_KE` along `functionFieldMap`
 gives the base change of `W.baseChange L` to its own function field. -/
 theorem baseChange_map_functionFieldMap :
@@ -594,7 +595,7 @@ noncomputable def baseChangeCoordHom [IsAlgClosed L] :
           (baseChange_generic_equation W φ L)
           (baseChangeXgen_transcendental W φ L)
           (algebraMap _ _ u') = _
-      unfold ofEquationPullback
+      simp only [ofEquationPullback]
       rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
       rfl
     exact h1.trans (RingHom.congr_fun

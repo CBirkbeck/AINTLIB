@@ -32,7 +32,7 @@ noncomputable def unitExponentVectorGroupRing (v : (ZMod p)ˣ → ℕ) :
 /-- The coefficient at `a⁻¹` recovers the exponent indexed by `a`. -/
 @[simp] lemma unitExponentVectorGroupRing_apply_inv
     (v : (ZMod p)ˣ → ℕ) (a : (ZMod p)ˣ) :
-    unitExponentVectorGroupRing (p := p) v a⁻¹ = (v a : ℤ) := by
+    (unitExponentVectorGroupRing (p := p) v).coeff a⁻¹ = (v a : ℤ) := by
   simp [unitExponentVectorGroupRing]
 
 /-- The additive-side exponent vector packaged in the downstream group-ring

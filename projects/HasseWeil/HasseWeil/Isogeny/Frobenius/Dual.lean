@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.MulByInt.Basepoint
 import HasseWeil.Foundation.Verschiebung.PurelyInsep
 import HasseWeil.Foundation.Verschiebung.UniversalQthRootWitness
+import HasseWeil.Isogeny.Dual.Morphism
+import HasseWeil.Isogeny.MulByInt.Basepoint
 
 /-!
 # The Frobenius dual — the Verschiebung as an `EC.Isogeny` (Silverman III.6.1 Case 2)
@@ -18,8 +18,8 @@ This file discharges the **inseparable side** of the dual-isogeny story: the
 the defining identity `(V ∘ π)* = [q]*` (Silverman III.6.1 with `ν = [deg π] = [q]`).
 
 This is the Frobenius counterpart of the separable capstone `dualMulByInt`
-(`EC/IsogenyAG/DualGaloisClosed.lean`); together they realize the two cases of
-Silverman III.6.1 inside the witness machinery of `EC/IsogenyAG/Dual.lean`.
+(`Isogeny/Dual/GaloisClosed.lean`); together they realize the two cases of
+Silverman III.6.1 inside the witness machinery of `Isogeny/Dual/Morphism.lean`.
 
 ## The three witness fields, all theorems
 
@@ -33,10 +33,10 @@ Silverman III.6.1 inside the witness machinery of `EC/IsogenyAG/Dual.lean`.
   `EC`-level one (`EC.Isogeny.frobenius`): both are
   `FiniteField.frobeniusAlgHom K K(E)`.
 * **`ν = [q]` basepoint**: `EC.mulByIntBasepoint_holds`
-  (`EC/IsogenyAG/MulByIntBasepoint.lean`), proven for all `n ≠ 0` including
+  (`Isogeny/MulByInt/Basepoint.lean`), proven for all `n ≠ 0` including
   `p ∣ n`, so `n = q = p^r` is covered.
 * **`π` reflects `∞`-regularity**: `EC.frobenius_reflects_ordAtInfty`
-  (`EC/IsogenyAG/Dual.lean`), from `π* g = g^q` and `ord_∞(g^q) = q·ord_∞ g`.
+  (`Isogeny/Dual/Morphism.lean`), from `π* g = g^q` and `ord_∞(g^q) = q·ord_∞ g`.
 
 ## Main definitions and results
 
@@ -84,8 +84,6 @@ variable (W : Affine K) [W.IsElliptic]
 -- `[DecidableEq K]` is genuinely required (the type contains the
 -- division-polynomial pullback `mulByInt_pullbackAlgHom`), but the linter only
 -- inspects the surface signature.
-set_option linter.unusedSectionVars false in
-set_option linter.unusedDecidableInType false in
 /-- **The range inclusion `Im([q]*) ⊆ Im(π*)`** (Silverman II.2.11–2.12 /
 III.6.2) for the `q`-power Frobenius on `E/K`, in the `EC` shapes — the deep
 field of the Frobenius dual witness, now a theorem. From the universal
@@ -111,7 +109,7 @@ III.6.1 Case 2) — every field a theorem:
 * `hbase` is assembled by `hbase_of_reflects` from the `[q]`-basepoint theorem
   (`mulByIntBasepoint_holds`, valid at `n = q` including `p ∣ q`) and the
   `∞`-regularity reflection of `π` (`frobenius_reflects_ordAtInfty`). -/
-noncomputable def frobeniusMulByIntDualWitness :
+theorem frobeniusMulByIntDualWitness :
     Isogeny.HasMulByIntDualWitness (Isogeny.frobenius W)
       ((Fintype.card K : ℕ) : ℤ) intCardK_ne_zero where
   hincl := frobenius_mulByInt_q_rangeIncl W
@@ -171,8 +169,6 @@ theorem dualFrobenius_compose_frobenius :
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the inhabitant is the
 -- dual of the `q`-power Frobenius (which only exists over a finite field), but
 -- the linter only inspects the type `Nonempty (Isogeny W W)`.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **`exists_dual` for the `q`-power Frobenius** (Silverman III.6.1 Case 2):
 the Frobenius admits a reverse isogeny — the concrete inseparable-side instance
 of the `exists_dual` story, with all witnesses discharged. -/
@@ -181,7 +177,6 @@ theorem exists_dual_frobenius : Nonempty (Isogeny W W) :=
 
 -- `[DecidableEq K]` is genuinely required by `Isogeny.frobenius` in the type,
 -- but the linter only inspects the surface signature.
-set_option linter.unusedDecidableInType false in
 /-- **The universal dual witness holds for `φ = π`**: the Frobenius instance of
 the `universal_dual_witness` shape (`Dual.lean`), unconditionally. -/
 theorem nonempty_hasDualWitness_frobenius :
@@ -217,6 +212,25 @@ section WitnessComposition
 variable {F : Type*} [Field F]
 variable {W₁ W₂ W₃ : Affine F} [W₁.IsElliptic] [W₂.IsElliptic] [W₃.IsElliptic]
 
+/-- **Generic range-inclusion for a conjugated composite** (abstract `AlgHom` form).
+If `Im(b) ≤ Im(d)` then `Im((a ∘ b) ∘ c) ≤ Im(a ∘ d)`: every value `a (b (c w))`
+lies in `Im(a ∘ d)`, because `b (c w) = d u` for some `u` (from `Im(b) ≤ Im(d)`),
+whence `a (b (c w)) = a (d u) = (a ∘ d) u`.
+
+Stated over *opaque* algebras / `AlgHom`s so that the `whnf`-heavy concrete
+`dualPullback` (= `factorThroughPullback` = `AlgEquiv.ofInjective.symm ∘ codRestrict`)
+and the curve-indexed function fields never unfold during elaboration — the
+template that removed the heartbeat blow-up in `Foundation/Curves/Map/Maps.lean`. -/
+private theorem range_comp_comp_le_comp {A B C D E : Type*}
+    [CommRing A] [CommRing B] [CommRing C] [CommRing D] [CommRing E]
+    [Algebra F A] [Algebra F B] [Algebra F C] [Algebra F D] [Algebra F E]
+    (a : C →ₐ[F] D) (b : A →ₐ[F] C) (c : B →ₐ[F] A) (d : E →ₐ[F] C)
+    (h : b.range ≤ d.range) :
+    ((a.comp b).comp c).range ≤ (a.comp d).range := by
+  rintro z ⟨w, rfl⟩
+  obtain ⟨u, hu⟩ := h ⟨c w, rfl⟩
+  exact ⟨u, congrArg a hu⟩
+
 namespace Isogeny.HasDualWitness
 
 /-- The composite witness endomorphism pullback `ν* = φ* ∘ ν_ψ* ∘ φ̂*` — the
@@ -229,34 +243,47 @@ noncomputable def composeNuPb {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
   (φ.toCurveMap.pullback.comp wψ.νPb).comp
     (Isogeny.dualPullback φ wφ.νPb wφ.hincl)
 
-set_option maxHeartbeats 800000 in
--- unifying `dualPullback` applications (which unfold to `factorThroughPullback` =
--- `AlgEquiv.ofInjective.symm ∘ codRestrict`) against the curve-indexed function
--- fields is `whnf`-heavy and exceeds the default heartbeat budget
+/-- Pointwise unfolding of `composeNuPb` (definitional): `ν* f = φ* (ν_ψ* (φ̂* f))`.
+`rfl`, so it reshapes the goal without a `whnf` unification against `dualPullback`. -/
+theorem composeNuPb_apply {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
+    (wψ : ψ.HasDualWitness) (wφ : φ.HasDualWitness)
+    (f : (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField) :
+    composeNuPb wψ wφ f =
+      φ.toCurveMap.pullback (wψ.νPb (Isogeny.dualPullback φ wφ.νPb wφ.hincl f)) := by
+  rw [composeNuPb, AlgHom.comp_apply, AlgHom.comp_apply]
+
 /-- **Range inclusion for the composite witness**:
 `Im(φ* ∘ ν_ψ* ∘ φ̂*) ⊆ Im((ψ ∘ φ)*)`, since `Im(ν_ψ*) ⊆ Im(ψ*)` and
-`(ψ ∘ φ)* = φ* ∘ ψ*`. -/
+`(ψ ∘ φ)* = φ* ∘ ψ*`. Discharged by the opaque-`AlgHom` `range_comp_comp_le_comp`
+(with `a = φ*`, `b = ν_ψ*`, `c = φ̂*`, `d = ψ*`) so the concrete `dualPullback`
+never `whnf`-unfolds; `compose_toCurveMap`/`comp_pullback` reshape the target
+into the `a.comp d` form syntactically first. -/
 theorem composeNuPb_rangeIncl {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
     (wψ : ψ.HasDualWitness) (wφ : φ.HasDualWitness) :
     (composeNuPb wψ wφ).range ≤
       (ψ.compose φ).toCurveMap.pullback.range := by
-  rintro z ⟨w, rfl⟩
-  obtain ⟨u, hu⟩ := wψ.hincl
-    ⟨Isogeny.dualPullback φ wφ.νPb wφ.hincl w, rfl⟩
-  exact ⟨u, congrArg φ.toCurveMap.pullback hu⟩
+  rw [composeNuPb, compose_toCurveMap, Curves.CurveMap.comp_pullback]
+  exact range_comp_comp_le_comp (F := F)
+    (A := (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField)
+    (B := (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField)
+    (C := (⟨W₂⟩ : SmoothPlaneCurve F).FunctionField)
+    (D := (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField)
+    (E := (⟨W₃⟩ : SmoothPlaneCurve F).FunctionField)
+    φ.toCurveMap.pullback wψ.νPb
+    (Isogeny.dualPullback φ wφ.νPb wφ.hincl) ψ.toCurveMap.pullback wψ.hincl
 
-set_option maxHeartbeats 800000 in
--- same `whnf` blowup as `composeNuPb_rangeIncl`: `dualPullback` applications must
--- be unified against the curve-indexed function fields
 /-- **The composite witness endomorphism preserves `∞`-regularity**: each
 factor of `ν* = φ* ∘ ν_ψ* ∘ φ̂*` does — `φ̂*` by `wφ.hbase`, `ν_ψ* = ψ* ∘ ψ̂*`
 by `wψ.hbase` plus `ψ`'s basepoint condition (via the factoring identity), and
-the outer `φ*` by `φ`'s basepoint condition. -/
+the outer `φ*` by `φ`'s basepoint condition. `composeNuPb_apply` reshapes the
+goal syntactically (no `whnf` unfolding of `dualPullback`) before the three
+regularity steps. -/
 theorem composeNuPb_ordAtInfty_nonneg {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
     (wψ : ψ.HasDualWitness) (wφ : φ.HasDualWitness)
     (f : (⟨W₁⟩ : SmoothPlaneCurve F).FunctionField)
     (hf : 0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty f) :
     0 ≤ (⟨W₁⟩ : SmoothPlaneCurve F).ordAtInfty (composeNuPb wψ wφ f) := by
+  rw [composeNuPb_apply]
   have h3 := ψ.pullback_ordAtInfty_nonneg _ (wψ.hbase _ (wφ.hbase f hf))
   rw [show ψ.toCurveMap.pullback (Isogeny.dualPullback ψ wψ.νPb wψ.hincl
       (Isogeny.dualPullback φ wφ.νPb wφ.hincl f)) =
@@ -305,8 +332,6 @@ noncomputable def hasDualWitness_frobenius_compose_frobenius :
 
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the inhabitant is the
 -- dual of the iterated Frobenius, but the linter only inspects the type.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **`exists_dual` for `π ∘ π`**: the iterated Frobenius admits a reverse
 isogeny, via the composed witness. -/
 theorem exists_dual_frobenius_compose_frobenius : Nonempty (Isogeny W W) :=

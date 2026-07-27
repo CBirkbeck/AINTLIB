@@ -264,19 +264,19 @@ noncomputable def cyclotomicUnit (k : ℕ) : 𝓞 K :=
 
 /-- For `k = 1`, the cyclotomic unit is `1`. -/
 theorem cyclotomicUnit_one : cyclotomicUnit p K 1 = 1 := by
-  unfold cyclotomicUnit
+  simp only [cyclotomicUnit]
   rw [Finset.sum_range_one, pow_zero]
 
 /-- For `k = 0`, the cyclotomic unit is `0`. -/
 theorem cyclotomicUnit_zero : cyclotomicUnit p K 0 = 0 := by
-  unfold cyclotomicUnit
+  simp only [cyclotomicUnit]
   rw [Finset.sum_range_zero]
 
 /-- Recursive identity: `cyclotomicUnit (k+1) = cyclotomicUnit k + ζ^k`. -/
 theorem cyclotomicUnit_succ (k : ℕ) :
     cyclotomicUnit p K (k + 1) =
       cyclotomicUnit p K k + ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k := by
-  unfold cyclotomicUnit
+  simp only [cyclotomicUnit]
   rw [Finset.sum_range_succ]
 
 /-- For `k = 2`, the cyclotomic unit is `1 + ζ`. -/
@@ -296,7 +296,7 @@ theorem cyclotomicUnit_add (a b : ℕ) :
     cyclotomicUnit p K (a + b) =
       cyclotomicUnit p K a +
         ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ a * cyclotomicUnit p K b := by
-  unfold cyclotomicUnit
+  simp only [cyclotomicUnit]
   rw [Finset.sum_range_add]
   congr 1
   rw [Finset.mul_sum]
@@ -315,7 +315,7 @@ theorem cyclotomicUnit_add_comm (a b : ℕ) :
 theorem one_sub_zeta_mul_cyclotomicUnit (k : ℕ) :
     (1 - (zeta_spec p ℚ K).toInteger) * cyclotomicUnit p K k =
       1 - ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k := by
-  unfold cyclotomicUnit
+  simp only [cyclotomicUnit]
   rw [Finset.mul_sum]
   induction k with
   | zero => simp
@@ -446,7 +446,7 @@ theorem exists_int_zetaSubOne_dvd_sub (x : 𝓞 K) :
 private theorem zetaSubOneConjUnit_val_eq [IsCMField K] :
     ((zetaSubOneConjUnit p K : (𝓞 K)ˣ) : 𝓞 K) =
       -((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) := by
-  unfold zetaSubOneConjUnit
+  simp only [zetaSubOneConjUnit]
   push_cast
   rw [IsUnit.unit_spec]
   ring
@@ -601,7 +601,7 @@ theorem exists_int_zetaSubOne_sq_dvd_algebraMap_real_unit_sub
 theorem zetaSubOne_dvd_cyclotomicUnit_sub_natCast (k : ℕ) :
     ((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1 ∣
       cyclotomicUnit p K k - (k : 𝓞 K) := by
-  unfold cyclotomicUnit
+  simp only [cyclotomicUnit]
   induction k with
   | zero => simp
   | succ n ih =>
@@ -654,7 +654,7 @@ theorem zetaSubOne_dvd_complexConj_cyclotomicUnit_sub_natCast [IsCMField K]
 `k` is coprime to `p`. Proven via mathlib's `geom_sum_isUnit`. -/
 theorem isUnit_cyclotomicUnit (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p) :
     IsUnit (cyclotomicUnit p K k) := by
-  unfold cyclotomicUnit
+  simp only [cyclotomicUnit]
   exact (zeta_spec p ℚ K).toInteger_isPrimitiveRoot.geom_sum_isUnit hp_two hk
 
 /-- The cyclotomic unit packaged as `(𝓞 K)ˣ` when `k` is coprime to `p`. -/
@@ -741,15 +741,15 @@ theorem zetaSubOne_sq_dvd_factor_sub_taylor (a b : ℤ) (k : ℕ) :
 /-- **`(ζ - 1)^{p-1} ∣ p` in `𝓞 K`.** Cyclotomic ramification: `(p)·𝓞 K`
 factors with `zetaPrime` to multiplicity `p - 1`. We use the project's
 `primesOver_ramificationIdx_eq_prime_sub_one_at_p` and mathlib's
-`Ideal.le_pow_ramificationIdx`. -/
+`Ideal.le_pow_ramificationIdx'`. -/
 theorem zetaSubOne_pow_p_sub_one_dvd_p :
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ (p - 1) ∣ ((p : ℕ) : 𝓞 K) := by
-  -- ramificationIdx (rationalPrimeIdeal p) (zetaPrime p K) = p - 1.
-  have hram : (rationalPrimeIdeal p).ramificationIdx (zetaPrime p K) = p - 1 :=
+  -- ramificationIdx' (rationalPrimeIdeal p) (zetaPrime p K) = p - 1.
+  have hram : (rationalPrimeIdeal p).ramificationIdx' (zetaPrime p K) = p - 1 :=
     primesOver_ramificationIdx_eq_prime_sub_one_at_p (p := p) (K := K) (zetaPrime p K)
       (zetaPrime_mem_primesOver_at_p (p := p) (K := K))
   -- map (algebraMap ℤ (𝓞 K)) (rationalPrimeIdeal p) ≤ (zetaPrime p K) ^ (p - 1).
-  have h_le := Ideal.le_pow_ramificationIdx
+  have h_le := Ideal.le_pow_ramificationIdx'
     (R := ℤ) (S := 𝓞 K)
     (p := rationalPrimeIdeal p) (P := zetaPrime p K)
   rw [hram] at h_le

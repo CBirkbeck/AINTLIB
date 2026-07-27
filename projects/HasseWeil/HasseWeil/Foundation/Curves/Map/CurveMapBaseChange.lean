@@ -85,7 +85,7 @@ theorem functionFieldMap_injective (L : Type*) [Field L] [Algebra F L] :
     C.functionFieldMap L (algebraMap C.CoordinateRing C.FunctionField u) =
       algebraMap (C.baseChange L).CoordinateRing
         (C.baseChange L).FunctionField (C.coordRingMap L u) := by
-  unfold functionFieldMap
+  simp only [functionFieldMap]
   exact IsLocalization.map_eq _ _
 
 end SmoothPlaneCurve
@@ -180,7 +180,7 @@ theorem baseChange_inner_comp_mapRingHom_eq {φ : CurveMap C₁ C₂}
         (algebraMap (Polynomial F) C₂.CoordinateRing (Polynomial.C a)))
     rw [Polynomial.map_C]
     change (cd.baseChangeInnerAlgHom L) (Polynomial.C (algebraMap F L a)) = _
-    unfold baseChangeInnerAlgHom
+    simp only [baseChangeInnerAlgHom]
     rw [Polynomial.aeval_C, show (algebraMap (Polynomial F) C₂.CoordinateRing) (Polynomial.C a) =
           algebraMap F C₂.CoordinateRing a from
         (IsScalarTower.algebraMap_apply F (Polynomial F) C₂.CoordinateRing a),
@@ -713,7 +713,8 @@ ring-iso `Algebra.TensorProduct.comm`. -/
 private theorem tensorCoordRing_comm_isDomain (L : Type*) [Field L] [Algebra F L] :
     IsDomain (C.toAffine.CoordinateRing ⊗[F] L) := by
   letI := C.isDomain_tensorCoordRing L
-  exact (Algebra.TensorProduct.comm F L C.toAffine.CoordinateRing).symm.toRingEquiv.toMulEquiv.isDomain
+  exact
+    (Algebra.TensorProduct.comm F L C.toAffine.CoordinateRing).symm.toRingEquiv.toMulEquiv.isDomain
     (L ⊗[F] C.toAffine.CoordinateRing)
 
 /-- The image, under the structure map `C.CoordinateRing → C.CoordinateRing ⊗[F] L`, of the
@@ -744,8 +745,10 @@ private theorem tensorCoordRing_algebraMapSubmonoid_le_nonZeroDivisors
 /-- `C.FunctionField ⊗[F] L` is a localization of `C.CoordinateRing ⊗[F] L` at the image of the
 nonzerodivisors of `C.CoordinateRing`, with respect to the natural `lTensor`-of-localization
 algebra structure `algBC`. This is the tensor–tensor localization
-`IsLocalization.tensorProduct_tensorProduct` for the localization `C.CoordinateRing → C.FunctionField`
-base-changed along `L/F`, with the scalar tower and structure-map equations discharged by `rfl`/`simp`. -/
+`IsLocalization.tensorProduct_tensorProduct` for the localization
+`C.CoordinateRing → C.FunctionField`
+base-changed along `L/F`, with the scalar tower and structure-map equations discharged by
+`rfl`/`simp`. -/
 private theorem tensorFunctionField_isLocalization (L : Type*) [Field L] [Algebra F L] :
     letI _algBC : Algebra (C.toAffine.CoordinateRing ⊗[F] L) (C.toAffine.FunctionField ⊗[F] L) :=
       (Algebra.TensorProduct.map

@@ -2,6 +2,33 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.ArtinHasseLogVanishing
 
+/-!
+# The Artin--Hasse tail of the Dwork parameter and its principal unit
+
+This file isolates the *tail* of the corrected same-prime Artin--Hasse logarithm — the correction
+terms `x^(p^r - 1) / p^r` for `r ≥ 2` — and shows it is `lambda`-adically small. It bounds the
+forced `lambda`-adic order of each tail term, assembles the finite (mod `lambda^(N+1)`) tails and
+their `1 + tail` units into completed elements, evaluates them at the Dwork parameter, and
+concludes that the completed tail lies in a high power of the Dwork complete `lambda`-ideal, so
+the Artin--Hasse tail unit `1 + tail` is a genuine unit of the completed integer ring.
+
+## Main definitions
+
+* `samePrimeArtinHasseTailTermOrder`: the forced `lambda`-adic order `p^r - 1 - r*(p-1)` of the
+  `r`-th corrected Artin--Hasse tail term.
+* `samePrimeFiniteArtinHasseTail` / `samePrimeFiniteArtinHasseTailUnit`: the finite tail and its
+  `1 + tail` unit modulo `lambda^(N+1)`.
+* `artinHasseTail` / `artinHasseTailUnit`: the completed Artin--Hasse tail of the Dwork parameter
+  and its `1 + tail` unit.
+
+## Main results
+
+* `artinHasseTail_mem_dworkCompleteLambdaIdeal_pow`: the completed tail lies in the
+  `(p - 1) ^ 2`-th power of the Dwork complete `lambda`-ideal.
+* `artinHasseTailUnit_eq_one_add_artinHasseTail`: the tail unit equals `1 + tail`.
+* `artinHasseTailUnit_isUnit`: the Artin--Hasse tail unit is a unit.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -173,7 +200,7 @@ theorem le_samePrimeArtinHasseTailTermOrder_of_two_lt
   have hgoalZ :
       (r : ℤ) ≤ (samePrimeArtinHasseTailTermOrder (p := p) r : ℤ) := by
     rw [intCast_samePrimeArtinHasseTailTermOrder (p := p) r]
-    unfold FormalDwork.artinHasseTailValuationIndex
+    simp only [FormalDwork.artinHasseTailValuationIndex]
     nlinarith
   exact_mod_cast hgoalZ
 
@@ -328,7 +355,7 @@ theorem samePrimeFiniteArtinHasseTail_eq_of_sub_mem
     samePrimeFiniteArtinHasseTail (p := p) (K := K) N x hx =
       samePrimeFiniteArtinHasseTail (p := p) (K := K) N y hy := by
   classical
-  unfold samePrimeFiniteArtinHasseTail
+  simp only [samePrimeFiniteArtinHasseTail]
   refine Finset.sum_congr rfl ?_
   intro r hr
   exact samePrimeFiniteArtinHasseTailTerm_eq_of_sub_mem
@@ -736,7 +763,7 @@ theorem artinHasseTail_evalₐ (hp_two : 2 < p) (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (artinHasseTail (p := p) (K := K) hp_two) =
       dworkParameterFiniteArtinHasseTailCoord (p := p) (K := K) N := by
-  unfold artinHasseTail
+  simp only [artinHasseTail]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
@@ -807,7 +834,7 @@ theorem artinHasseTailUnit_evalₐ (hp_two : 2 < p) (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (artinHasseTailUnit (p := p) (K := K) hp_two) =
       dworkParameterFiniteArtinHasseTailUnitCoord (p := p) (K := K) N := by
-  unfold artinHasseTailUnit
+  simp only [artinHasseTailUnit]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
@@ -849,7 +876,7 @@ theorem samePrimeFiniteArtinHasseTail_eq_zero_of_succ_le_sq
     (hN : N + 1 ≤ (p - 1) ^ 2) :
     samePrimeFiniteArtinHasseTail (p := p) (K := K) N x hx = 0 := by
   classical
-  unfold samePrimeFiniteArtinHasseTail
+  simp only [samePrimeFiniteArtinHasseTail]
   exact Finset.sum_eq_zero fun r hr ↦
     samePrimeFiniteArtinHasseTailTerm_eq_zero_of_succ_le
       (p := p) (K := K) (N := N) hx

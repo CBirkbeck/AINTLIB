@@ -6,8 +6,6 @@ public import Mathlib.NumberTheory.NumberField.InfinitePlace.Ramification
 /-!
 # Unit quotients: logarithmic embedding and permutation action
 
-This file proves `REF-07c2`.
-
 The Dirichlet logarithmic embedding in mathlib uses a deleted coordinate
 `NumberField.Units.logSpace K`, where one infinite place is omitted.  That
 space is convenient for Dirichlet's unit theorem, but it is not literally
@@ -34,6 +32,9 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
+-- Hides 1 warning: `cyclotomicFullLogEmbedding_apply` does not use `[NumberField K]`.
+-- Removing it needs `omit`, which drops that binder and so changes the statement —
+-- that is generalisation work (see the linter-suppression census), not cleanup.
 set_option linter.unusedSectionVars false
 
 variable (p : ℕ) [Fact p.Prime]
@@ -65,7 +66,7 @@ theorem cyclotomicFullLogEmbedding_apply
 /-- The multiplicity of an infinite place is unchanged by the Galois action. -/
 theorem infinitePlace_mult_smul (σ : Gal(K/ℚ)) (w : InfinitePlace K) :
     InfinitePlace.mult (σ • w) = InfinitePlace.mult w := by
-  unfold InfinitePlace.mult
+  simp only [InfinitePlace.mult]
   by_cases hw : InfinitePlace.IsReal w
   · rw [if_pos ((InfinitePlace.isReal_smul_iff (σ := σ) (w := w)).2 hw), if_pos hw]
   · rw [if_neg (by

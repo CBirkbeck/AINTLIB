@@ -373,46 +373,34 @@ theorem nonempty_tensorObj_iso_tensor (M N : X.Modules) :
   letI := Modules.monoidalCategory X
   have eM : (Localization.Monoidal.toMonoidalCategory
       (L := _root_.PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-          Sheaf _ RingCat.{u}).obj))
+        (ringSheafId X))
       (W := _root_.PresheafOfModules.sheafificationW.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-          Sheaf _ RingCat.{u}).obj))
+        (ringSheafId X))
       (Iso.refl _)).obj M.val ≅
       (M : LocalizedMonoidal
         (_root_.PresheafOfModules.sheafification.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-            Sheaf _ RingCat.{u}).obj))
+          (ringSheafId X))
         (_root_.PresheafOfModules.sheafificationW.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-            Sheaf _ RingCat.{u}).obj)) (Iso.refl _)) := sheafifyValIso M
+          (ringSheafId X)) (Iso.refl _)) := sheafifyValIso M
   have eN : (Localization.Monoidal.toMonoidalCategory
       (L := _root_.PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-          Sheaf _ RingCat.{u}).obj))
+        (ringSheafId X))
       (W := _root_.PresheafOfModules.sheafificationW.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-          Sheaf _ RingCat.{u}).obj))
+        (ringSheafId X))
       (Iso.refl _)).obj N.val ≅
       (N : LocalizedMonoidal
         (_root_.PresheafOfModules.sheafification.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-            Sheaf _ RingCat.{u}).obj))
+          (ringSheafId X))
         (_root_.PresheafOfModules.sheafificationW.{u}
-          (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-            Sheaf _ RingCat.{u}).obj)) (Iso.refl _)) := sheafifyValIso N
+          (ringSheafId X)) (Iso.refl _)) := sheafifyValIso N
   exact ⟨((tensorIso eM.symm eN.symm) ≪≫
     Functor.Monoidal.μIso (Localization.Monoidal.toMonoidalCategory
       (L := _root_.PresheafOfModules.sheafification.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-          Sheaf _ RingCat.{u}).obj))
+        (ringSheafId X))
       (W := _root_.PresheafOfModules.sheafificationW.{u}
-        (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
-          Sheaf _ RingCat.{u}).obj))
+        (ringSheafId X))
       (Iso.refl _)) M.val N.val).symm⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-U]** The hand-rolled unit of `Picard/InvertibleSheaf.lean` agrees with the
 localized monoidal unit: `unitObj X ≅ 𝟙_ X.Modules`. -/
 theorem nonempty_unitObj_iso_unit :
@@ -648,8 +636,6 @@ theorem nonempty_eval_iso {M : X.Modules} (hM : IsInvertible M) :
     infer_instance
   exact ⟨asIso (ev M)⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[PIC-P2-CMP], → direction.** A cover-locally trivial module is ⊗-invertible: the
 inverse class is the sheaf dual (`Picard/Dual.lean`), the unit isomorphism is the
 evaluation pairing. -/
@@ -1010,8 +996,6 @@ theorem isInvertible_of_isUnit_toSkeleton {M : X.Modules}
     exact fun x _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨x, hxV x⟩
   · exact nonempty_pullback_iso_unitObj_of_pairingElem ε (m x) (n x) (h1 x)
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[PIC-P2-CMP] (GME 2.2.2 (2.17)): the formation of an invertible sheaf is local** —
 cover-local invertibility agrees with ⊗-invertibility in `Pic X`'s ambient monoid. -/
 theorem isInvertible_iff_isUnit_toSkeleton (M : X.Modules) :

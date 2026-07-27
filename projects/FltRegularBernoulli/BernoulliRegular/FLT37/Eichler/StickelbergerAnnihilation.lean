@@ -184,7 +184,7 @@ theorem classGroupModPGroupRingAction_instance_apply_mk0
     classGroupModPGroupRingAction (p := p) (K := K)
         (cyclotomicGalActionInstance (p := p) (K := K)) x
         (Additive.ofMul (QuotientGroup.mk (ClassGroup.mk0 I) : ClassGroupModP K p)) =
-      x.sum fun a e ↦
+      x.coeff.sum fun a e ↦
         e • Additive.ofMul
           (QuotientGroup.mk
             (ClassGroup.mk0

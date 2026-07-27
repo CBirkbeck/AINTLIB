@@ -33,15 +33,8 @@ namespace ModularCurves
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-/-- Equality of `Proj.map`s from equal graded homomorphisms (the irrelevant-ideal hypotheses
-are propositions). Local copy of the same-named private helper in `GroupLawConstruction`. -/
-private lemma Proj_map_congr {A B σ τ : Type u} [CommRing A] [SetLike σ A]
-    [AddSubgroupClass σ A] [CommRing B] [SetLike τ B] [AddSubgroupClass τ B]
-    {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
-    {f g : 𝒜 →+*ᵍ ℬ} (h : f = g)
-    (hf : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map f)
-    (hg : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map g) :
-    Proj.map f hf = Proj.map g hg := by subst h; rfl
+-- `Proj_map_congr` (equality of `Proj.map`s from equal graded homs) is the shared public
+-- helper from `GroupLawConstruction` (imported above); the former local copy was deduplicated.
 
 variable {R : Type u} [CommRing R] {R' : Type u} [CommRing R']
 
@@ -66,28 +59,29 @@ lemma aeval_negVec_map (f : R →+* R') (W : WeierstrassCurve R) (p : MvPolynomi
 lemma negGradedQuot_comp_baseChangeGradedHom (f : R →+* R') (W : WeierstrassCurve R) :
     (negGradedQuot (W.map f)).comp (baseChangeGradedHom f W)
       = (baseChangeGradedHom f W).comp (negGradedQuot W) := by
-  refine GradedRingHom.ext fun x => ?_
+  refine GradedRingHom.ext fun x ↦ ?_
   obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
   have hbc : ∀ p : MvPolynomial (Fin 3) R,
       baseChangeGradedHom f W (Ideal.Quotient.mk (projIdeal W).toIdeal p)
         = Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal (MvPolynomial.map f p) :=
-    fun p => quotientGradingMap_mk (mvMapGraded f) (projIdeal W) (projIdeal (W.map f))
+    fun p ↦ quotientGradingMap_mk (mvMapGraded f) (projIdeal W) (projIdeal (W.map f))
       (projIdeal_le_comap f W) p
   have hneg : ∀ p : MvPolynomial (Fin 3) R,
       negGradedQuot W (Ideal.Quotient.mk (projIdeal W).toIdeal p)
         = Ideal.Quotient.mk (projIdeal W).toIdeal (aeval (negVec W) p) :=
-    fun p => quotientGradingMap_mk (negGradedPoly W) (projIdeal W) (projIdeal W)
+    fun p ↦ quotientGradingMap_mk (negGradedPoly W) (projIdeal W) (projIdeal W)
       (negGradedPoly_comap W) p
   have hneg' : ∀ p : MvPolynomial (Fin 3) R',
       negGradedQuot (W.map f) (Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal p)
         = Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal (aeval (negVec (W.map f)) p) :=
-    fun p => quotientGradingMap_mk (negGradedPoly (W.map f)) (projIdeal (W.map f))
+    fun p ↦ quotientGradingMap_mk (negGradedPoly (W.map f)) (projIdeal (W.map f))
       (projIdeal (W.map f)) (negGradedPoly_comap (W.map f)) p
   show negGradedQuot (W.map f) (baseChangeGradedHom f W (Ideal.Quotient.mk _ a))
     = baseChangeGradedHom f W (negGradedQuot W (Ideal.Quotient.mk _ a))
   rw [hbc, hneg', hneg, hbc]
   exact congrArg (Ideal.Quotient.mk _) (aeval_negVec_map f W a)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.0b-BC)** Negation on the projective Weierstrass model commutes with base change:
 `negModelHom` is natural in the base ring. Mirrors `projModelZero_baseChange`; consumed by the
 `invOver` Over-level group-axiom transport (c5β's T-G4). -/

@@ -42,7 +42,7 @@ theorem exists_artinHasseExp_inverse_product_pow_prime_iterate_peel_tail_of_le
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -52,12 +52,12 @@ theorem exists_artinHasseExp_inverse_product_pow_prime_iterate_peel_tail_of_le
     let zbar : A :=
       Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal (F.traceScale * y))
     ∃ c : WittVector ℓ k,
-      let cTail : WittVector ℓ k := WittVector.mk ℓ (fun r => c.coeff (r + 1))
-      let Z : ℕ → A := fun j =>
+      let cTail : WittVector ℓ k := WittVector.mk ℓ (fun r ↦ c.coeff (r + 1))
+      let Z : ℕ → A := fun j ↦
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
           ((δ ^ (ℓ ^ j)) ^ ℓ *
             θ (WittVector.teichmuller ℓ ((c.coeff 0) ^ ℓ)))) ^ ℓ
-      let W : ℕ → A := fun j =>
+      let W : ℕ → A := fun j ↦
         ∏ r ∈ Finset.Iic (N - 1),
           ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
             (δ ^ (ℓ ^ (j + 1)) *
@@ -83,7 +83,7 @@ theorem exists_artinHasseExp_inverse_product_pow_prime_iterate_peel_tail_of_le
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -95,12 +95,12 @@ theorem exists_artinHasseExp_inverse_product_pow_prime_iterate_peel_tail_of_le
   obtain ⟨c, hreindex⟩ :=
     F.exists_artinHasseExp_inverse_product_pow_prime_iterate_mul_tail_eq_reindexed_tail_of_le
       N (m + 1) (Nat.succ_pos m) hm y
-  let cTail : WittVector ℓ k := WittVector.mk ℓ (fun r => c.coeff (r + 1))
-  let Z : ℕ → A := fun j =>
+  let cTail : WittVector ℓ k := WittVector.mk ℓ (fun r ↦ c.coeff (r + 1))
+  let Z : ℕ → A := fun j ↦
     ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
       ((δ ^ (ℓ ^ j)) ^ ℓ *
         θ (WittVector.teichmuller ℓ ((c.coeff 0) ^ ℓ)))) ^ ℓ
-  let V : ℕ → A := fun j =>
+  let V : ℕ → A := fun j ↦
     ∏ r ∈ Finset.range N,
       ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         ((δ ^ (ℓ ^ j)) ^ ℓ *
@@ -108,7 +108,7 @@ theorem exists_artinHasseExp_inverse_product_pow_prime_iterate_peel_tail_of_le
             (((_root_.frobeniusEquiv k ℓ).symm ^ r)
               (c.coeff (r + 1)))))) ^
         (ℓ ^ (r + 2))
-  let W : ℕ → A := fun j =>
+  let W : ℕ → A := fun j ↦
     ∏ r ∈ Finset.Iic (N - 1),
       ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         (δ ^ (ℓ ^ (j + 1)) *
@@ -206,11 +206,11 @@ theorem artinHasseExp_inverse_base_trace_factor_eq
       Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
     let EpsN : PowerSeries AN :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let EpsM : PowerSeries AM :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient M)
     let IpsN : PowerSeries AN :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -234,7 +234,7 @@ theorem artinHasseExp_inverse_base_trace_factor_eq
   let φ : AN →+* AM :=
     Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let EpsN : PowerSeries AN := hE.mapTo (S0.rIntegralRatToQuotient N)
   let EpsM : PowerSeries AM := hE.mapTo (S0.rIntegralRatToQuotient M)
   let hI : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpInverseSeries ℓ) :=
@@ -276,11 +276,11 @@ theorem artinHasseExp_inverse_frobenius_product_factor_eq
       Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
     let EpsN : PowerSeries AN :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let EpsM : PowerSeries AM :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient M)
     let IpsN : PowerSeries AN :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -311,7 +311,7 @@ theorem artinHasseExp_inverse_frobenius_product_factor_eq
   let φ : AN →+* AM :=
     Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let EpsN : PowerSeries AN := hE.mapTo (S0.rIntegralRatToQuotient N)
   let EpsM : PowerSeries AM := hE.mapTo (S0.rIntegralRatToQuotient M)
   let hI : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpInverseSeries ℓ) :=
@@ -381,11 +381,11 @@ theorem artinHasseExp_inverse_splitting_difference_factor_eq
       Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
     let EpsN : PowerSeries AN :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let EpsM : PowerSeries AM :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient M)
     let IpsN : PowerSeries AN :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -417,7 +417,7 @@ theorem artinHasseExp_inverse_splitting_difference_factor_eq
   let φ : AN →+* AM :=
     Ideal.Quotient.factor (Ideal.pow_le_pow_right (Nat.succ_le_succ hMN))
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let EpsN : PowerSeries AN := hE.mapTo
     (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let EpsM : PowerSeries AM := hE.mapTo

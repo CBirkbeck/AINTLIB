@@ -82,7 +82,7 @@ def residueFieldEmbedding
     (x : 𝓞 K) :
     residueFieldEmbedding h_over (Ideal.Quotient.mk P x) =
       Ideal.Quotient.mk 𝔭 (algebraMap (𝓞 K) (𝓞 R') x) := by
-  unfold residueFieldEmbedding
+  simp only [residueFieldEmbedding]
   exact Ideal.quotientMap_mk
 
 /-- **Injectivity of the residue-field embedding**: `𝓞 K / P → 𝓞 R' / 𝔭`
@@ -94,7 +94,7 @@ theorem residueFieldEmbedding_injective
     {P : Ideal (𝓞 K)} {𝔭 : Ideal (𝓞 R')}
     (h_over : 𝔭.comap (algebraMap (𝓞 K) (𝓞 R')) = P) :
     Function.Injective (residueFieldEmbedding h_over) := by
-  unfold residueFieldEmbedding
+  simp only [residueFieldEmbedding]
   -- Ideal.quotientMap is injective when the comap equals the source ideal.
   rw [injective_iff_map_eq_zero]
   intro x hx
@@ -477,7 +477,7 @@ theorem ConcreteStickelbergerSetup.ramificationIdx_span_ell_Q_eq_ell_sub_one
     {R' : Type*} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower ℚ K R']
       [IsCyclotomicExtension {p, ℓ} ℚ R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') :
-    Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.Q = ℓ - 1 := by
+    Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.Q = ℓ - 1 := by
   classical
   haveI : IsCyclotomicExtension {ℓ, p} ℚ R' := by
     have h_swap : ({ℓ, p} : Set ℕ) = {p, ℓ} := by
@@ -497,11 +497,11 @@ theorem ConcreteStickelbergerSetup.ramificationIdx_span_ell_Q_eq_ell_sub_one
     exact S.hℓ_ne_p h_eq
   have h_n : (ℓ * p : ℕ) = ℓ ^ (0 + 1) * p := by simp [pow_one]
   have h_ram :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.Q =
+      Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.Q =
         ℓ ^ 0 * (ℓ - 1) := by
     have hq_ne : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ) ≠ ⊥ := by
       simp [(Fact.out : Nat.Prime ℓ).ne_zero]
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ S.Q hq_ne]
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx _ S.Q hq_ne]
     exact IsCyclotomicExtension.Rat.ramificationIdx_eq (n := ℓ * p) (p := ℓ)
       (k := 0) (m := p) (K := R') (P := S.Q) h_n h_ne_dvd
   simpa using h_ram
@@ -530,22 +530,22 @@ theorem ConcreteStickelbergerSetup.descentRamificationIdx_eq_ell_sub_one_of_unra
     ⟨h_under.symm⟩
   haveI := S.Q_liesOver_descentPrime
   have h_base' :
-      Ideal.ramificationIdx (S.descentPrime.under ℤ) S.descentPrime = 1 := by
+      Ideal.ramificationIdx' (S.descentPrime.under ℤ) S.descentPrime = 1 := by
     have hd_ne : S.descentPrime.under ℤ ≠ ⊥ := by
       rw [h_under]; simp [(Fact.out : Nat.Prime ℓ).ne_zero]
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ S.descentPrime hd_ne,
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx _ S.descentPrime hd_ne,
         ← Ideal.ramificationIdxIn_eq_ramificationIdx
           (p := S.descentPrime.under ℤ) (P := S.descentPrime) (G := Gal(K/ℚ))]
     exact he
   have h_base :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.descentPrime = 1 := by
+      Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.descentPrime = 1 := by
     simpa [h_under] using h_base'
   have h_abs := S.ramificationIdx_span_ell_Q_eq_ell_sub_one
   have h_tower :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.Q =
-        Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.descentPrime *
-          Ideal.ramificationIdx S.descentPrime S.Q := by
-    simpa using Ideal.ramificationIdx_algebra_tower'
+      Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.Q =
+        Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.descentPrime *
+          Ideal.ramificationIdx' S.descentPrime S.Q := by
+    simpa using Ideal.ramificationIdx'_algebra_tower'
       (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := S.descentPrime) (Q := S.Q)
   rw [h_abs, h_base, one_mul] at h_tower
   simpa [ConcreteStickelbergerSetup.descentRamificationIdx] using h_tower.symm
@@ -568,7 +568,7 @@ theorem cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime
     (hℓ_ne_p : ℓ ≠ p)
     {Q : Ideal (𝓞 R')} [Q.IsPrime]
     (h_lies : Q.under (𝓞 K) = P) :
-    P.inertiaDeg Q = 1 := by
+    P.inertiaDeg' Q = 1 := by
   classical
   let q : Ideal ℤ := Ideal.span ({(ℓ : ℤ)} : Set ℤ)
   letI : P.IsPrime := (show P.IsMaximal from inferInstance).isPrime
@@ -587,8 +587,8 @@ theorem cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime
   haveI hP_max : P.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := q) (P := P)
   have h_abs_K :
-      q.inertiaDeg P = orderOf (ℓ : ZMod p) := by
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+      q.inertiaDeg' P = orderOf (ℓ : ZMod p) := by
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P) hℓ_not_dvd_p)
@@ -603,20 +603,20 @@ theorem cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime
   haveI hQ_max : Q.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := q) (P := Q)
   have h_abs_R :
-      q.inertiaDeg Q = orderOf (ℓ : ZMod p) := by
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+      q.inertiaDeg' Q = orderOf (ℓ : ZMod p) := by
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq
         (n := ℓ * p) (p := ℓ) (k := 0) (m := p)
         (K := R') (P := Q) h_n hℓ_not_dvd_p)
   have h_tower :
-      q.inertiaDeg Q = q.inertiaDeg P * P.inertiaDeg Q :=
-    Ideal.inertiaDeg_algebra_tower q P Q
+      q.inertiaDeg' Q = q.inertiaDeg' P * P.inertiaDeg' Q :=
+    Ideal.inertiaDeg'_algebra_tower q P Q
   have h_order_pos : 0 < orderOf (ℓ : ZMod p) := by
-    have hq_pos : 0 < q.inertiaDeg P := Ideal.inertiaDeg_pos q P
+    have hq_pos : 0 < q.inertiaDeg' P := Ideal.inertiaDeg'_pos (p := q) (P := P)
     rwa [h_abs_K] at hq_pos
   have h_cancel :
-      orderOf (ℓ : ZMod p) * P.inertiaDeg Q =
+      orderOf (ℓ : ZMod p) * P.inertiaDeg' Q =
         orderOf (ℓ : ZMod p) * 1 := by
     rw [mul_one]
     rw [h_abs_R, h_abs_K] at h_tower
@@ -641,7 +641,7 @@ structure Ref18SourcePrimeOverData
   /-- The relative residue degree is one. -/
   inertia_one :
     letI : Q.IsPrime := Q_isPrime
-    P.inertiaDeg Q = 1
+    P.inertiaDeg' Q = 1
   /-- Hence the canonical residue quotient map is surjective. -/
   quotient_surjective :
     letI : Q.IsPrime := Q_isPrime
@@ -703,7 +703,7 @@ def ofFiniteCyclotomicPair
   have h_lies : Q.under (𝓞 K) = P := hQ_spec.2
   have hℓ_ne_p : ℓ ≠ p := fun h ↦
     hp_notin_P (by simpa [h] using hℓ_in_P)
-  have h_inertia : P.inertiaDeg Q = 1 := by
+  have h_inertia : P.inertiaDeg' Q = 1 := by
     letI : Q.IsPrime := hQ_prime
     exact
       cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime

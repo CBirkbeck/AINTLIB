@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
-import BernoulliRegular.FLT37.CaseI
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
+public import BernoulliRegular.FLT37.CaseI
 
 /-!
 # LV010-C: caseI `is_principal` analogue under `¬ p ∣ h⁺`
@@ -108,9 +110,7 @@ theorem caseI_is_principal_of_not_dvd_hPlus
   obtain ⟨u, hu⟩ := hαp_span
   refine ⟨u⁻¹, α, ?_⟩
   rw [show (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val * α ^ p =
-      α ^ p * (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val by ring]
-  rw [← hu]
-  rw [mul_assoc]
+      α ^ p * (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val by ring, ← hu, mul_assoc]
   simp [Units.mul_inv]
 
 end CaseI

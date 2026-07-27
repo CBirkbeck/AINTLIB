@@ -29,7 +29,8 @@ function-field-tensor naturality of the invariant differential `φ^*ω = a_φ·�
 (`omegaBaseChangeNeZero_holds`) from the omega-coefficient **value** transport
 `omegaPullbackCoeff (E_L) α_L = functionFieldMap (omegaPullbackCoeff E α)`
 (`omegaPullbackCoeff_baseChangePullback`, `WeilPairing/OmegaBaseChange.lean`): the invariant
-differential transports along `KaehlerDifferential.map K L K(E) K(E_L)`, the pullback compatibility is
+differential transports along `KaehlerDifferential.map K L K(E) K(E_L)`, the pullback
+compatibility is
 `baseChangePullback_functionFieldMap`, and `functionFieldMap` is injective, so `≠ 0` carries.  It is
 the differential analogue of the **degree** base change `baseChangePullback_finrank_eq`
 (`finrankBaseChange`).  `genuineIsogSmulSub_isSeparable` supplies the `K`-level value, so
@@ -48,9 +49,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil IsogenyBaseChangeConcrete
 
 set_option linter.unusedSectionVars false
-set_option linter.style.longLine false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
@@ -91,7 +89,8 @@ def OmegaBaseChangeNeZero : Prop :=
 /-- **`OmegaBaseChangeNeZero` is DISCHARGED** (no longer carried): the invariant-differential
 pullback coefficient stays nonzero after base change, because it transports *by value* —
 `omegaPullbackCoeff (E_L) α_L = functionFieldMap (omegaPullbackCoeff E α)`
-(`omegaPullbackCoeff_baseChangePullback`, the differential analogue of the finrank base change) — and
+(`omegaPullbackCoeff_baseChangePullback`, the differential analogue of the finrank base
+change) — and
 `functionFieldMap` is injective, so `≠ 0` carries.  This is the proved fact behind the named leaf;
 all downstream consumers can use it instead of carrying the `Prop`. -/
 theorem omegaBaseChangeNeZero_holds : OmegaBaseChangeNeZero W L := by
@@ -101,7 +100,8 @@ theorem omegaBaseChangeNeZero_holds : OmegaBaseChangeNeZero W L := by
     ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap_injective L) |>.mp h0)
 
 /-- **K̄-separability of the base-changed pencil from the isolated transport** (Silverman III.5.5,
-base-change form), CoordHom-free.  Given the base-change naturality leaf `OmegaBaseChangeNeZero`, the
+base-change form), CoordHom-free.  Given the base-change naturality leaf
+`OmegaBaseChangeNeZero`, the
 concrete base-changed pencil `pencilIsogBaseChange ... (pencilBaseChangePullback …)` over `L` is
 separable, because:
 
@@ -126,7 +126,8 @@ theorem pencilIsogBaseChange_isSeparable_of_omegaBaseChange
       (genuineIsogSmulSub_isSeparable W r' s' hr hs hrK hsK)
   -- Transport `≠ 0` across base change via the isolated leaf.
   have hL : omegaPullbackCoeff (W.baseChange L)
-      (pencilIsogBaseChange W p r L r' s' (pencilBaseChangePullback W L r' s' hr hs hrK hsK)) ≠ 0 := by
+      (pencilIsogBaseChange W p r L r' s'
+        (pencilBaseChangePullback W L r' s' hr hs hrK hsK)) ≠ 0 := by
     refine hbc _ (genuineIsogSmulSub W r' s' hr hs hrK hsK) ?_ hK
     rw [pencilIsogBaseChange_pullback]
     rfl

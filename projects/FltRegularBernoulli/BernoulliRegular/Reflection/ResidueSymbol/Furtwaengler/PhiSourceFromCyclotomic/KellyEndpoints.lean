@@ -36,17 +36,20 @@ universe u v
 
 namespace K2_2ReciprocalPrimeFactorBundle
 
+section ReciprocalBundle
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  [IsGalois ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+  [FaithfulSMul (𝓞 K) (𝓞 R')]
+  [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
+
 /-- Reciprocal prime-factor bundle constructor that derives the rational-prime
 split facts from `orderOf (ℓ : ZMod p) = 1`. -/
 noncomputable def ofCanonicalTraceForm_pairSigma_split_orderOfOne_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -83,14 +86,6 @@ noncomputable def ofCanonicalTraceForm_pairSigma_split_orderOfOne_of_mem_notMem_
 /-- Reciprocal prime-factor bundle constructor for a normalized source factor
 of `(α)`. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     {P : Ideal (𝓞 K)}
     (hP_factor : P ∈ normalizedFactors (Ideal.span ({α} : Set (𝓞 K))))
@@ -136,14 +131,6 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor
 /-- Reciprocal prime-factor bundle constructor for a normalized source factor
 of `(α)` that derives `(p : 𝓞 K) ∉ P` from `(α, p) = ⊤`. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -189,6 +176,8 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
       (P := P) (Q := Q) (iso := iso)
       hα_ne hαp_top hP_factor hℓ_in_P hQ_in h_compat h_trace h_order
 
+end ReciprocalBundle
+
 end K2_2ReciprocalPrimeFactorBundle
 
 /-- **Cyclotomic U4 endpoint from K2-2 source-data bundles**. Takes a
@@ -226,14 +215,12 @@ theorem ChosenPrimaryUnitFactorSymbolTrivial_of_K2_2PrimeFactorBundleFamily_cycl
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).1
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).2
@@ -277,14 +264,12 @@ theorem ChosenPrimaryUnitFactorProductPower_of_K2_2PrimeFactorBundleFamily_cyclo
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).1
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).2
@@ -329,14 +314,12 @@ theorem ChosenPrimaryUnitFactorProductSymbolZero_of_K2_2PrimeFactorBundleFamily_
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).1
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).2
@@ -507,7 +490,6 @@ theorem kellyPrimeNegEquality_of_K2_2PrimeFactorBundleFamily_targetData
   intro P hP
   letI : P.IsMaximal := (sourceBundle P hP).P_max
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   exact K2_2SourceData_phi_facts_at_targetData
     (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two hp_three
     (sourceBundle P hP).D targetData (hcop_each P hP)
@@ -856,7 +838,6 @@ theorem kellyPrimeNegEquality_of_K2_2Bundles_sourceCoprime_primeTarget
   let B₀ := sourceBundle P₀ hP₀
   letI : P₀.IsMaximal := B₀.P_max
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P₀) := B₀.alg_inst
-  letI : Field (𝓞 K ⧸ P₀) := Ideal.Quotient.field P₀
   have hℓ_notin_P' : (ℓ : 𝓞 K) ∉ P' :=
     natCast_notMem_of_absNorm_coprime_of_natCast_mem
       (P := P₀) (P' := P') B₀.D.hP_bot hP'_ne B₀.D.hℓ_in_P

@@ -76,16 +76,6 @@ def CaseIICor823Level71Deg68Scalar37
       secondOrderPart37 a = ρ * vandermondeFactorDeg68ModP37 a
 
 open BernoulliRegular (CPlusGenerator) in
-/-- The degree-`68` homogeneous-coefficient residual has a nonzero witness shape. -/
-theorem caseIICor823Level71Deg68Scalar37_consequent_inhabited
-    [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
-    [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
-    ∃ (ρ : ZMod 37) (a : Fin (kummerLogRank 37)),
-      ρ ≠ 0 ∧ ρ * vandermondeFactorDeg68ModP37 a = ρ * vandermondeFactorDeg68ModP37 a :=
-  ⟨kellnerLeadingCoeff37, ⟨0, by norm_num [kummerLogRank]⟩,
-    kellnerLeadingCoeff37_ne_zero, rfl⟩
-
-open BernoulliRegular (CPlusGenerator) in
 /-- The degree-`68` scalar residual implies the level-`71` second-order value identity. -/
 theorem caseIICor823Level71SecondOrderPartValue37_of_deg68Scalar
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]

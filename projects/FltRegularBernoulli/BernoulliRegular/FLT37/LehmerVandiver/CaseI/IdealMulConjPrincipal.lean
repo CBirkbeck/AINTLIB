@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
 
 /-!
 # LV010-B: caseI `𝔞 · σ𝔞` is principal under `¬ p ∣ h⁺`

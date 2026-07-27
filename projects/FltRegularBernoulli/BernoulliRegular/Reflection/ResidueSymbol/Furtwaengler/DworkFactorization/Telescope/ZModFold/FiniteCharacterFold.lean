@@ -135,7 +135,7 @@ theorem artinHasseExpCurrentRootPeelProduct_natCast_ell_mul_succ
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   have hcoeff0 :
       (((ℓ : WittVector ℓ k) * c).coeff 0) = 0 :=
@@ -207,7 +207,7 @@ theorem artinHasseExpCurrentRootPeelProduct_zero_parameter
       let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
       let Eps : PowerSeries A :=
         (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+          fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
             (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
       have hEzero :
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) 0 = 1 := by
@@ -223,7 +223,7 @@ theorem artinHasseExpCurrentRootPeelProduct_zero_parameter
           (DieudonneDwork.IsRIntegralPS.mapTo
             (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
             (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-              fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n))).eval₂
+              fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n))).eval₂
             (RingHom.id A) 0 = 1 by
         simpa [A, Eps] using hEzero]
       simp
@@ -231,7 +231,7 @@ theorem artinHasseExpCurrentRootPeelProduct_zero_parameter
       let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
       let Eps : PowerSeries A :=
         (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+          fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
             (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
       have hEzero :
           (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A) 0 = 1 := by
@@ -322,13 +322,13 @@ theorem artinHasseExpCurrentRootPeelProduct_traceCarry_tail_eq_one_of_factor_pow
           F.toConcreteStickelbergerSetup.wittThetaModQPow N
         let Eps : PowerSeries A :=
           (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-            fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+            fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
               (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
           (ε ^ (ℓ ^ j) *
             (θ (WittVector.teichmuller ℓ ((F.traceCarry y).coeff s))) ^ ℓ)) ^ ℓ = 1) :
     artinHasseExpCurrentRootPeelProduct F N m D ε
-        (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s)) = 1 := by
+        (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s)) = 1 := by
   classical
   induction D generalizing m s with
   | zero =>
@@ -337,7 +337,7 @@ theorem artinHasseExpCurrentRootPeelProduct_traceCarry_tail_eq_one_of_factor_pow
         F.toConcreteStickelbergerSetup.wittThetaModQPow N
       let Eps : PowerSeries A :=
         (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+          fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
             (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
       simp only [artinHasseExpCurrentRootPeelProduct]
       refine Finset.prod_eq_one ?_
@@ -346,7 +346,7 @@ theorem artinHasseExpCurrentRootPeelProduct_traceCarry_tail_eq_one_of_factor_pow
         (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
           (ε ^ (ℓ ^ j) *
             θ (WittVector.teichmuller ℓ
-              (((WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s)).coeff 0) ^ ℓ)))
+              (((WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s)).coeff 0) ^ ℓ)))
       have hB : B ^ ℓ = 1 := by
         have hBroot := hroot m s j hj
         dsimp only at hBroot
@@ -363,12 +363,12 @@ theorem artinHasseExpCurrentRootPeelProduct_traceCarry_tail_eq_one_of_factor_pow
         F.toConcreteStickelbergerSetup.wittThetaModQPow N
       let Eps : PowerSeries A :=
         (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-          fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+          fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
             (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
       let c : WittVector ℓ k :=
-        WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s)
+        WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s)
       let cTail : WittVector ℓ k :=
-        WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + (s + 1))
+        WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + (s + 1))
       have htailVec : coordinateTailRoot c = cTail := by
         ext r
         dsimp [coordinateTailRoot, c, cTail]
@@ -433,7 +433,7 @@ noncomputable def artinHasseExpTraceCarryCurrentRootRangeProduct
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   ∏ j ∈ Finset.range m,
     (((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -460,7 +460,7 @@ theorem artinHasseExpTraceCarryZModUnshiftedRangeProduct_eq_currentRootRange_pow
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   have hcoord :
       algebraMap (ZMod ℓ) k (F.traceCarryCoeffZMod y s) =
@@ -487,12 +487,12 @@ theorem artinHasseExpTraceCarryZModUnshiftedProduct_eq_currentRootPeelProduct_po
     (N m D s : ℕ) (ε : 𝓞 R' ⧸ F.Q ^ (N + 1)) (y : kˣ) :
     artinHasseExpTraceCarryZModUnshiftedProduct F N m D s ε y =
       (artinHasseExpCurrentRootPeelProduct F N m D ε
-        (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s))) ^ ℓ := by
+        (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s))) ^ ℓ := by
   classical
   induction D generalizing m s with
   | zero =>
       have hcoord :
-          (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s)).coeff 0 =
+          (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s)).coeff 0 =
             (F.traceCarry y).coeff s := by
         simp
       rw [show artinHasseExpTraceCarryZModUnshiftedProduct F N m 0 s ε y =
@@ -506,9 +506,9 @@ theorem artinHasseExpTraceCarryZModUnshiftedProduct_eq_currentRootPeelProduct_po
       rw [F.wittThetaModQPow_teichmuller_pow_prime N ((F.traceCarry y).coeff s)]
   | succ D ih =>
       let c : WittVector ℓ k :=
-        WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s)
+        WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s)
       let cTail : WittVector ℓ k :=
-        WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + (s + 1))
+        WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + (s + 1))
       have htailVec : coordinateTailRoot c = cTail := by
         ext r
         dsimp [coordinateTailRoot, c, cTail]
@@ -550,7 +550,7 @@ theorem artinHasseExpTraceCarryZModCorrection_mul_peel_eq_currentRoot_pow_prime
     artinHasseExpTraceCarryZModCorrectionProduct F N m D s ε y *
       artinHasseExpTraceCarryZModPeelProductDivisible F N m D s ε y =
       (artinHasseExpCurrentRootPeelProduct F N m D ε
-        (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s))) ^ ℓ := by
+        (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s))) ^ ℓ := by
   rw [F.artinHasseExpTraceCarryZModCorrectionProduct_mul_peelProduct_eq_unshiftedProduct
     N m D s ε y hε]
   rw [F.artinHasseExpTraceCarryZModUnshiftedProduct_eq_currentRootPeelProduct_pow_prime]
@@ -573,7 +573,7 @@ theorem artinHasseExpTraceCarryZModFiniteCharacter_eq_currentRoot_pow_prime
     (hε : ∀ j : ℕ, (ε ^ (ℓ ^ j)) ^ (N + 1) = 0) :
     artinHasseExpTraceCarryZModFiniteCharacter F N m D s ε y =
       (artinHasseExpCurrentRootPeelProduct F N m D ε
-        (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + s))) ^ ℓ := by
+        (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + s))) ^ ℓ := by
   simpa [artinHasseExpTraceCarryZModFiniteCharacter] using
     F.artinHasseExpTraceCarryZModCorrection_mul_peel_eq_currentRoot_pow_prime
       N m D s ε y hε
@@ -605,7 +605,7 @@ theorem artinHasseExpTraceCarryZModFiniteCharacter_inverse_fullDepth_eq_currentR
     let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
     artinHasseExpTraceCarryZModFiniteCharacter F N m N 0 δ y =
       (artinHasseExpCurrentRootPeelProduct F N m N δ
-        (WittVector.mk ℓ fun r => (F.traceCarry y).coeff r)) ^ ℓ := by
+        (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff r)) ^ ℓ := by
   classical
   dsimp only
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
@@ -619,7 +619,7 @@ theorem artinHasseExpTraceCarryZModFiniteCharacter_inverse_fullDepth_eq_currentR
     simpa [A, Ips, πbar, δ] using
       F.toConcreteStickelbergerSetup.artinHasseExp_inverse_trunc_eval_pow_succ_eq_zero N
   have hδ_iter :
-      ∀ j : ℕ, (δ ^ (ℓ ^ j)) ^ (N + 1) = 0 := fun j =>
+      ∀ j : ℕ, (δ ^ (ℓ ^ j)) ^ (N + 1) = 0 := fun j ↦
     F.parameter_pow_iterate_pow_succ_eq_zero N j δ hδ
   simpa [A, Ips, πbar, δ] using
     F.artinHasseExpTraceCarryZModFiniteCharacter_eq_currentRoot_pow_prime
@@ -646,7 +646,7 @@ theorem traceCarryFiniteCharacter_inverse_eq_currentRoot_pow_prime
   let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
   let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
   have hmk :
-      (WittVector.mk ℓ fun r => (F.traceCarry y).coeff r) = F.traceCarry y := by
+      (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff r) = F.traceCarry y := by
     ext r
     rfl
   simpa [A, Ips, πbar, δ, hmk] using

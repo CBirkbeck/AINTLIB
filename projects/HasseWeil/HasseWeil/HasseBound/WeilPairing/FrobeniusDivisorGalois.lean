@@ -199,8 +199,7 @@ theorem ordAtInfty_algebraMap_crFrobEquiv
   · subst hu
     rw [map_zero, map_zero, map_zero, SmoothPlaneCurve.ordAtInfty_zero,
       SmoothPlaneCurve.ordAtInfty_zero]
-  · have hcu : crFrobEquiv W u ≠ 0 := fun h ↦
-      hu ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero]))
+  · have hcu : crFrobEquiv W u ≠ 0 := (map_ne_zero_iff _ (crFrobEquiv W).injective).mpr hu
     rw [(⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
           SmoothPlaneCurve (AlgebraicClosure K)).ordAtInfty_algebraMap_coordinateRing _ hcu,
       (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
@@ -229,7 +228,7 @@ theorem ordAtInfty_ffFrobEquivRaw
   have hv_ne : v ≠ 0 := nonZeroDivisors.ne_zero hv_nzd
   have hv_map_ne : algebraMap _ (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField v ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr hv_ne
-  have hu_ne : u ≠ 0 := by intro h; exact hz (by rw [← heq, h, map_zero, zero_div])
+  have hu_ne : u ≠ 0 := fun h ↦ hz (by rw [← heq, h, map_zero, zero_div])
   have hu_map_ne : algebraMap _ (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField u ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr hu_ne
   rw [← heq, (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
@@ -242,12 +241,12 @@ theorem ordAtInfty_ffFrobEquivRaw
       (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       (crFrobEquiv W u) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h ↦ hu_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
+      ((map_ne_zero_iff _ (crFrobEquiv W).injective).mpr hu_ne)
   have hcv_map_ne : algebraMap _ ((W.baseChange (AlgebraicClosure K)).map
       (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       (crFrobEquiv W v) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h ↦ hv_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
+      ((map_ne_zero_iff _ (crFrobEquiv W).injective).mpr hv_ne)
   rw [(⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).ordAtInfty_div_eq_mul_inv _ hcu_map_ne hcv_map_ne,
     (⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
@@ -294,7 +293,7 @@ omit [DecidableEq K] [W.toAffine.IsElliptic]
     coeffFrobEquiv (K := K) (geomFrobSmoothPointInv W P).x = P.x := by
   show (coeffFrobEquiv (K := K))
     ((FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).symm P.x) = P.x
-  rw [AlgEquiv.coe_ringEquiv', AlgEquiv.apply_symm_apply]
+  rw [AlgEquiv.coe_ringEquiv, AlgEquiv.apply_symm_apply]
 
 omit [DecidableEq K] [W.toAffine.IsElliptic]
   [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] in
@@ -304,7 +303,7 @@ omit [DecidableEq K] [W.toAffine.IsElliptic]
     coeffFrobEquiv (K := K) (geomFrobSmoothPointInv W P).y = P.y := by
   show (coeffFrobEquiv (K := K))
     ((FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).symm P.y) = P.y
-  rw [AlgEquiv.coe_ringEquiv', AlgEquiv.apply_symm_apply]
+  rw [AlgEquiv.coe_ringEquiv, AlgEquiv.apply_symm_apply]
 
 omit [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] in
 /-- **`π̄` recovers `P` from its inverse-Frobenius point** (at the affine-point level):
@@ -341,6 +340,7 @@ theorem geomFrobeniusPointFun_injective :
 open HasseWeil
 
 omit [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The fibre-divisor place comparison** (the combinatorial heart of σ-naturality). The
 coefficient of the fibre divisor `[ℓ]^*(π̄T)` at an affine place `P` equals the coefficient of
 `[ℓ]^*(T)` at the inverse-Frobenius place `geomFrobSmoothPointInv P`, because
@@ -381,6 +381,7 @@ theorem pullbackDiv_geomFrobInv_eq (ℓ : ℤ) (hℓ : (ℓ : AlgebraicClosure K
         (geomFrobSmoothPointInv W P).toAffinePoint from hPrec.symm, ← hzsmul, h]
 
 omit [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The fibre-divisor place comparison at infinity**:
 `pullbackDiv [ℓ] (π̄T) ∞ = pullbackDiv [ℓ] T ∞` (both equal `if 0 = Q`, and `0 = π̄T ⟺ 0 = T` since
 π̄ is injective with `π̄ 0 = 0`). -/
@@ -420,7 +421,7 @@ theorem ord_P_frobeniusFunctionFieldEquiv
         SmoothPlaneCurve (AlgebraicClosure K)).ord_P P (frobeniusFunctionFieldEquiv W g) =
       (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).ord_P (geomFrobSmoothPointInv W P) g := by
-  unfold HasseWeil.Curves.SmoothPlaneCurve.ord_P
+  simp only [HasseWeil.Curves.SmoothPlaneCurve.ord_P]
   rw [pointValuation_frobeniusFunctionFieldEquiv W P (geomFrobSmoothPointInv W P)
     (coeffFrobEquiv_geomFrobSmoothPointInv_x W P).symm
     (coeffFrobEquiv_geomFrobSmoothPointInv_y W P).symm g]

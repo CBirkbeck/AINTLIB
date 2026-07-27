@@ -44,6 +44,17 @@ namespace FLT37
 
 universe u
 
+/-- In a monoid, if `x ^ p = 1` for an odd `p`, then `x` has a square root that is again
+killed by the `p`-th power: `y := x ^ ((p + 1) / 2)` satisfies `y ^ 2 = x` and `y ^ p = 1`
+(for odd `p`, squaring is a bijection on the `p`-torsion). -/
+private theorem exists_sq_eq_and_pow_eq_one_of_pow_eq_one_of_odd
+    {M : Type*} [Monoid M] {x : M} {n : ℕ} (hn_odd : Odd n) (hx : x ^ n = 1) :
+    ∃ y : M, y ^ 2 = x ∧ y ^ n = 1 := by
+  obtain ⟨m, hm⟩ := hn_odd
+  refine ⟨x ^ ((n + 1) / 2), ?_, ?_⟩
+  · rw [← pow_mul, show (n + 1) / 2 * 2 = n + 1 by omega, pow_succ, hx, one_mul]
+  · rw [← pow_mul, mul_comm, pow_mul, hx, one_pow]
+
 variable (p : ℕ) [hp : Fact p.Prime]
 variable {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
   [NumberField.IsCMField K]
@@ -92,14 +103,9 @@ theorem isPthPower_image_iff (hp_odd : p ≠ 2) (u : (𝓞 (NumberField.maximalR
       rwa [MonoidHom.mem_ker] at h_ker
     rw [h1, ← hα]
     exact h2
-  -- η := ζ^((p+1)/2). For p odd, η^2 = ζ and η^p = 1.
-  set η : NumberField.Units.torsion K := ζ ^ ((p + 1) / 2) with hη_def
-  have h_p_form : (p + 1) / 2 * 2 = p + 1 := by
-    rcases hp.out.odd_of_ne_two hp_odd with ⟨n, hn⟩; omega
-  have h_η_sq : η ^ 2 = ζ := by
-    rw [hη_def, ← pow_mul, h_p_form, pow_succ, h_ζ_pow, one_mul]
-  have h_η_p : η ^ p = 1 := by
-    rw [hη_def, ← pow_mul, mul_comm, pow_mul, h_ζ_pow, one_pow]
+  -- For p odd, ζ has a square root η with η^p = 1: η^2 = ζ and η^p = 1.
+  obtain ⟨η, h_η_sq, h_η_p⟩ :=
+    exists_sq_eq_and_pow_eq_one_of_pow_eq_one_of_odd (hp.out.odd_of_ne_two hp_odd) h_ζ_pow
   -- β_K := α · (η : (𝓞 K)ˣ)⁻¹ in (𝓞 K)ˣ.
   set β_K : (𝓞 K)ˣ := α * ((η : (𝓞 K)ˣ))⁻¹ with hβ_K_def
   -- β_K^p = α^p, since (η : (𝓞 K)ˣ)^p = 1.
@@ -109,13 +115,13 @@ theorem isPthPower_image_iff (hp_odd : p ≠ 2) (u : (𝓞 (NumberField.maximalR
       congrArg (·) (congrArg Subtype.val h_η_p)
     simpa using this
   have h_β_K_pow : β_K ^ p = α ^ p := by
-    rw [hβ_K_def, mul_pow]
-    rw [show ((η : (𝓞 K)ˣ))⁻¹ ^ p = (((η : (𝓞 K)ˣ)) ^ p)⁻¹ from (inv_pow _ _).symm]
-    rw [h_η_unit_pow, inv_one, mul_one]
+    rw [hβ_K_def, mul_pow,
+      show ((η : (𝓞 K)ˣ))⁻¹ ^ p = (((η : (𝓞 K)ˣ)) ^ p)⁻¹ from (inv_pow _ _).symm,
+      h_η_unit_pow, inv_one, mul_one]
   -- β_K ∈ realUnits since unitsMulComplexConjInv K β_K = 1.
   have h_β_K_real : β_K ∈ NumberField.IsCMField.realUnits K := by
-    rw [← NumberField.IsCMField.unitsMulComplexConjInv_ker, MonoidHom.mem_ker]
-    rw [hβ_K_def, map_mul, map_inv]
+    rw [← NumberField.IsCMField.unitsMulComplexConjInv_ker, MonoidHom.mem_ker,
+      hβ_K_def, map_mul, map_inv]
     -- unitsMulComplexConjInv K (η : (𝓞 K)ˣ) = η ^ 2 (apply torsion lemma)
     have h_torsion : NumberField.IsCMField.unitsMulComplexConjInv K ((η : (𝓞 K)ˣ)) = η ^ 2 :=
       NumberField.IsCMField.unitsMulComplexConjInv_apply_torsion (K := K) η

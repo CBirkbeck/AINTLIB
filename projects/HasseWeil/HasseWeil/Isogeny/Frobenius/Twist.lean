@@ -4,12 +4,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Map.Maps
+import HasseWeil.Isogeny.BaseChange.Basic
 import HasseWeil.Isogeny.Basic
-import HasseWeil.Isogeny.MulByInt.Basepoint
 import HasseWeil.Isogeny.Dual.Reduction
+import HasseWeil.Isogeny.MulByInt.Basepoint
 import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
 import HasseWeil.Isogeny.VerschiebungFactorization
-import HasseWeil.Isogeny.BaseChange.Basic
 
 /-!
 # G2: the explicit Frobenius-twist package (cross-curve relative Frobenius)
@@ -21,20 +21,20 @@ inseparable degree is not a `q`-power.
 This file builds ON the existing twist machinery, it does not duplicate it:
 
 * the twist curve `E^{(p^e)}` is the existing `WeierstrassCurve.iterateFrobeniusTwist`
-  (`Curves/Maps.lean`, defined as `E.map (iterateFrobenius F p e)`);
-* the single-`p` relative Frobenius pullback construction of `Curves/Maps.lean`
+  (`Curves/Map/Maps.lean`, defined as `E.map (iterateFrobenius F p e)`);
+* the single-`p` relative Frobenius pullback construction of `Curves/Map/Maps.lean`
   (`frobeniusRelativePullback`, in the parametric `HasseWeil.Isogeny` framework)
   is **generalised** here into a reusable builder `EC.Isogeny.ofEquation`
   producing genuine `EC.Isogeny`s (with the `ord_∞` basepoint condition proven,
   not carried) from an `Equation` witness plus transcendence of the `x`-image;
 * the basepoint condition is discharged by the `{1, y}`-parity route of
-  `EC/IsogenyAG/MulByIntBasepoint.lean`, with *exact* generator orders
+  `Isogeny/MulByInt/Basepoint.lean`, with *exact* generator orders
   `ord_∞(x^{p^e}) = -2p^e`, `ord_∞(y^{p^e}) = -3p^e`.
 
 ## The six package items
 
 1. **Twist curve** `E^{(p^e)}`: `WeierstrassCurve.iterateFrobeniusTwist p E e`
-   (already shipped in `Curves/Maps.lean`; iteration laws added here).
+   (already shipped in `Curves/Map/Maps.lean`; iteration laws added here).
 2. **Ellipticity preserved**: `iterateFrobeniusTwist_isElliptic` (instance) and
    `iterateFrobeniusTwist_Δ : Δ(E^{(p^e)}) = Δ(E)^{p^e} ≠ 0` via mathlib's
    `WeierstrassCurve.map_Δ` naturality.
@@ -45,7 +45,7 @@ This file builds ON the existing twist machinery, it does not duplicate it:
 4. **Degree** `= p^e`: `relativeFrobenius_degree` over a perfect base, via the
    imperfection tower `[K(E) : K(E)^{p^e}] = p^e`
    (`finrank_KE_over_iterateFrobeniusRange`, proven here by induction from the
-   `e = 1` case `GapQfKernel.finrank_KE_over_frobeniusRange_p`, transporting each
+   `e = 1` case `finrank_KE_over_frobeniusRange_p`, transporting each
    rung along the `p^e`-power isomorphism `K(E) ≅ K(E)^{p^e}`).
 5. **Iteration**: curve-level `iterateFrobeniusTwist_iterateFrobeniusTwist`
    (`(E^{(p^a)})^{(p^b)} = E^{(p^{a+b})}`) and the pullback-level composition law
@@ -126,11 +126,11 @@ the Weierstrass equation of a second curve `V` (base-changed to `K(E)`), with `u
 transcendental over `F` and of even negative order at infinity, we obtain a genuine
 `EC.Isogeny E.toAffine V.toAffine` whose pullback sends `x_gen V ↦ u`, `y_gen V ↦ v`.
 
-This abstracts the single-`p` relative-Frobenius construction of `Curves/Maps.lean`
+This abstracts the single-`p` relative-Frobenius construction of `Curves/Map/Maps.lean`
 (`frobeniusRelativeBaseHom` → `frobeniusRelativeCoordRingHom` →
 `frobeniusRelativePullback`) over the image pair, and discharges the basepoint
 condition `pullback_ordAtInfty_nonneg` by the `{1, y}`-parity route of
-`MulByIntBasepoint.lean`. -/
+`MulByInt/Basepoint.lean`. -/
 
 section Builder
 
@@ -254,6 +254,32 @@ theorem ofEquationCoordRingHom_smul_basis_eq (a b : Polynomial F) :
     · exact AdjoinRoot.lift_of _
     · exact AdjoinRoot.lift_root _
 
+omit [DecidableEq F] in
+/-- **Norm factorization of a rank-2 element** (curve-generic): for any Weierstrass
+curve `W` over `F`, the image under `algebraMap` of the `Polynomial F`-norm of
+`a • 1 + b • Y` factors as `(a • 1 + b • Y) * conj`, where `conj` is the
+`Galois`-conjugate rank-2 element. Stated over a *generic* `W` so that the
+`coe_norm_smul_basis` rewrite never has to `whnf`-unfold a concrete `iterateFrobeniusTwist`
+coordinate ring; the caller instantiates `W := V`. Mirror of
+`coordRing_norm_smul_basis_factor` from `Curves/Map/Maps.lean`. -/
+private lemma ofEquation_coordRing_norm_smul_basis_factor
+    (W : Affine F) (a b : Polynomial F) :
+    algebraMap (Polynomial F) W.CoordinateRing
+        (Algebra.norm (Polynomial F)
+          (a • (1 : W.CoordinateRing) +
+            b • Affine.CoordinateRing.mk W Polynomial.X)) =
+      (a • (1 : W.CoordinateRing) +
+          b • Affine.CoordinateRing.mk W Polynomial.X) *
+        Affine.CoordinateRing.mk W
+          (Polynomial.C a + Polynomial.C b *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
 omit [WeierstrassCurve.IsElliptic E.toAffine] [WeierstrassCurve.IsElliptic V.toAffine] in
 include h_eqn h_trans in
 /-- A vanishing rank-2 image forces the `Y`-coefficient to vanish (norm-degree
@@ -277,11 +303,7 @@ private theorem ofEquationCoordRingHom_smul_basis_b_eq_zero (a b : Polynomial F)
   have h_factor : algebraMap (Polynomial F) _
       (Algebra.norm (Polynomial F) r') = r' * conj_r := by
     rw [hr'_def, hconj_def]
-    change AdjoinRoot.of _ _ = _
-    rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-    congr 1
-    rw [map_add, map_mul]
-    simp [Algebra.smul_def]
+    exact ofEquation_coordRing_norm_smul_basis_factor V.toAffine a b
   have hr'_zero : ofEquationCoordRingHom E V u v h_eqn r' = 0 :=
     (ofEquationCoordRingHom_smul_basis_eq E V u v h_eqn a b).trans h0
   have h_norm_zero : ofEquationBaseHom E u
@@ -344,7 +366,7 @@ omit [WeierstrassCurve.IsElliptic E.toAffine] [WeierstrassCurve.IsElliptic V.toA
 /-- The pullback sends `x_gen V ↦ u`. -/
 theorem ofEquationPullback_x_gen :
     ofEquationPullback E V u v h_eqn h_trans (x_gen V) = u := by
-  unfold ofEquationPullback
+  simp only [ofEquationPullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -354,7 +376,7 @@ omit [WeierstrassCurve.IsElliptic E.toAffine] [WeierstrassCurve.IsElliptic V.toA
 /-- The pullback sends `y_gen V ↦ v`. -/
 theorem ofEquationPullback_y_gen :
     ofEquationPullback E V u v h_eqn h_trans (y_gen V) = v := by
-  unfold ofEquationPullback
+  simp only [ofEquationPullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -367,7 +389,7 @@ theorem ofEquationPullback_algebraMap_polynomial (q : Polynomial F) :
       (algebraMap (Polynomial F) KV q) = Polynomial.aeval u q := by
   rw [IsScalarTower.algebraMap_apply (Polynomial F) V.toAffine.CoordinateRing
     (V.toAffine.FunctionField) q]
-  unfold ofEquationPullback
+  simp only [ofEquationPullback]
   rw [IsFractionRing.liftAlgHom_apply]
   rw [IsFractionRing.lift_algebraMap]
   exact ofEquationCoordRingHom_algebraMap_polynomial E V u v h_eqn q
@@ -375,7 +397,6 @@ theorem ofEquationPullback_algebraMap_polynomial (q : Polynomial F) :
 /-! #### The basepoint condition for `ofEquationPullback` -/
 
 omit [WeierstrassCurve.IsElliptic E.toAffine] in
-set_option maxHeartbeats 800000 in
 /-- **Order transport for `F(x)`-elements**: for nonzero `r ∈ F(x)` and
 `ord_∞ u = M < 0`, there is `t ∈ ℤ` with `ord_∞^V(r) = -2t` and
 `ord_∞^E(pullback r) = t·M`. Mirror of
@@ -546,8 +567,6 @@ private theorem ordAtInfty_ofEquationPullback_y_term_nonneg
     exact ofEquation_ord_mul_nonneg_aux hm ht himg h_y hv_ne
 
 omit [WeierstrassCurve.IsElliptic E.toAffine] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 800000 in
 /-- **The basepoint condition**: the pullback preserves regularity at infinity,
 provided `ord_∞ u = 2m` is even and `≤ -2`. The `{1, y}`-parity route of
 `mulByInt_pullbackAlgHom_ordAtInfty_nonneg`, with the `y`-image order bound coming
@@ -578,7 +597,7 @@ theorem ofEquationPullback_ordAtInfty_nonneg
   obtain ⟨r₁, r₂, hf_decomp⟩ := (W_smooth V).exists_decomp f
   have hf_eq : f = algebraMap (FractionRing (Polynomial F)) (V.toAffine.FunctionField) r₁ +
       algebraMap (FractionRing (Polynomial F)) (V.toAffine.FunctionField) r₂ * y_gen V := by
-    rw [hf_decomp, y_gen_eq_coordYInFunctionField' V, Algebra.smul_def, mul_one,
+    rw [hf_decomp, y_gen_eq_coordYInFunctionField V, Algebra.smul_def, mul_one,
       Algebra.smul_def]
     rfl
   -- split the hypothesis through the parity/min formula
@@ -676,7 +695,7 @@ omit [DecidableEq F] [WeierstrassCurve.IsElliptic E.toAffine] in
 theorem iterateFrobeniusTwist_map_KE_eq (e : ℕ) :
     (E.iterateFrobeniusTwist p e).map (algebraMap F KE) =
       (W_KE E).map (iterateFrobenius KE p e) := by
-  unfold WeierstrassCurve.iterateFrobeniusTwist W_KE
+  simp only [WeierstrassCurve.iterateFrobeniusTwist, W_KE]
   rw [WeierstrassCurve.map_map, WeierstrassCurve.map_map,
       RingHom.iterateFrobenius_comm (algebraMap F (E.toAffine.FunctionField)) p e]
 
@@ -745,6 +764,7 @@ noncomputable def EC.Isogeny.relativeFrobenius (e : ℕ) :
 
 /-! #### The compositional identity and the pullback field range -/
 
+omit [DecidableEq F] [E.toAffine.IsElliptic] in
 /-- Base-ring agreement for the compositional identity: on the polynomial base
 `AdjoinRoot.mk _ (C q)`, the relative-Frobenius coordinate-ring hom precomposed with
 `CoordinateRing.map (iterateFrobenius F p e)` agrees with the iterate-Frobenius on `K(E)`
@@ -782,6 +802,7 @@ private theorem relativeFrobenius_coordRingHom_eq_on_C (e : ℕ) (q : Polynomial
     algebraMap _ _ ((AdjoinRoot.of _) q)
   exact (algebraMap_CR_KE_of_eq_eval₂ E q).symm
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic E.toAffine] in
 /-- Root agreement for the compositional identity: at `AdjoinRoot.root` both sides of the
 identity evaluate to `y_gen E ^ p ^ e` (the relative-Frobenius hom sends the root to the
 twisted `y`-generator via `ofEquationCoordAlgHom_y`, the iterate-Frobenius side via the
@@ -810,6 +831,7 @@ private theorem relativeFrobenius_coordRingHom_eq_on_root (e : ℕ) :
         (y_gen E ^ p ^ e) (iterateFrobeniusTwist_generic_equation p E e)]
   rfl
 
+omit [DecidableEq F] [E.toAffine.IsElliptic] in
 /-- **Compositional identity**: the relative Frobenius pullback of the
 `CoordinateRing.map (iterateFrobenius F p e)`-image of `r` is the `p^e`-th power of
 the image of `r` (mirror of `frobeniusRelativeCoordRingHom_comp_map`). The
@@ -827,6 +849,7 @@ private theorem relativeFrobenius_coordRingHom_comp_map (e : ℕ) :
   · exact RingHom.ext fun q => relativeFrobenius_coordRingHom_eq_on_C p E e q
   · exact relativeFrobenius_coordRingHom_eq_on_root p E e
 
+set_option backward.isDefEq.respectTransparency false in
 theorem relativeFrobenius_pullback_coordRingMap (e : ℕ) (r : E.toAffine.CoordinateRing) :
     (EC.Isogeny.relativeFrobenius p E e).toCurveMap.pullback
       (algebraMap (E.iterateFrobeniusTwist p e).toAffine.CoordinateRing
@@ -845,7 +868,7 @@ theorem relativeFrobenius_pullback_coordRingMap (e : ℕ) (r : E.toAffine.Coordi
       (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
       (iterateFrobeniusTwist_generic_equation p E e)
       (x_gen_pow_p_pow_transcendental p E e) _ = _
-    unfold ofEquationPullback
+    simp only [ofEquationPullback]
     rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
     rfl
   rw [h1]
@@ -881,7 +904,6 @@ private theorem coordinateRingMap_iterateFrobenius_surjective [PerfectField F] (
   exact ⟨AdjoinRoot.mk _ q',
     (WeierstrassCurve.Affine.CoordinateRing.map_mk (iterateFrobenius F p e) q')⟩
 
-set_option maxHeartbeats 800000 in
 /-- **Range identification over a perfect base**: the pullback field range of the
 relative `p^e`-Frobenius is exactly the subfield `K(E)^{p^e}` of `p^e`-th powers. -/
 theorem relativeFrobenius_fieldRange_toSubfield [PerfectField F] (e : ℕ) :
@@ -939,7 +961,6 @@ private theorem finrank_subfield_congr {L : Type*} [Field L] {S T : Subfield L}
   rfl
 
 omit [DecidableEq F] [WeierstrassCurve.IsElliptic E.toAffine] in
-set_option maxHeartbeats 800000 in
 /-- **The tower step**: `[K(E) : K(E)^{p^{e+1}}] = [K(E) : K(E)^p] · [K(E) : K(E)^{p^e}]`.
 The first factor of the tower law `[K(E)^{p^e} : K(E)^{p^{e+1}}]` is transported to
 `[K(E) : K(E)^p]` along the `p^e`-power isomorphism `K(E) ≅ K(E)^{p^e}`. -/
@@ -991,7 +1012,7 @@ private theorem finrank_iterFrobRange_succ (e : ℕ) :
 
 /-- **The imperfection tower** `[K(E) : K(E)^{p^e}] = p^e` over a perfect base
 field: induction on `e` with the tower step `finrank_iterFrobRange_succ`, the
-`e = 1` case `finrank_KE_over_frobeniusRange_p` (`GapQfKernel.lean`), and the
+`e = 1` case `finrank_KE_over_frobeniusRange_p` (`OmegaCoeffViaFormalGroup.lean`), and the
 trivial base `e = 0`. -/
 theorem finrank_KE_over_iterateFrobeniusRange [PerfectField F] (e : ℕ) :
     Module.finrank ↥((iterateFrobenius KE p e).fieldRange) KE = p ^ e := by
@@ -1035,7 +1056,8 @@ base. Via the range identification and `finrank_KE_over_frobeniusRange_p`. -/
 theorem relativeFrobenius_degree_one [PerfectField F] :
     (EC.Isogeny.relativeFrobenius p E 1).degree = p := by
   have h1 : ((iterateFrobenius (E.toAffine.FunctionField) p 1).fieldRange :
-      Subfield (E.toAffine.FunctionField)) = (frobenius (E.toAffine.FunctionField) p).fieldRange := by
+      Subfield (E.toAffine.FunctionField)) =
+        (frobenius (E.toAffine.FunctionField) p).fieldRange := by
     rw [iterateFrobenius_one]
   rw [EC.Isogeny.degree_eq_finrank_fieldRange,
     finrank_congr_toSubfield _ _ ((relativeFrobenius_fieldRange_toSubfield p E 1).trans h1)]
@@ -1095,7 +1117,7 @@ variable {F : Type*} [Field F]
 
 /-- Two `F`-algebra homs out of a Weierstrass function field agreeing on `x_gen`
 and `y_gen` are equal. Fintype-free restatement of `algHom_ext_x_y_gen_omega`
-(`GapSpines.lean`, whose section carries a `[Fintype K]`); same reduction chain
+(`VerschiebungFactorization.lean`, whose section carries a `[Fintype K]`); same reduction chain
 `IsLocalization.algHom_ext` → `AdjoinRoot.algHom_ext'` → `Polynomial.algHom_ext`. -/
 theorem functionField_algHom_ext {V : WeierstrassCurve F} [V.toAffine.IsElliptic]
     {Ω : Type*} [Field Ω] [Algebra F Ω]

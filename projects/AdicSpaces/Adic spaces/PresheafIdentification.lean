@@ -75,6 +75,7 @@ noncomputable def presheafValueRingEquivOfUnitS [DiscreteTopology A]
   (RingEquiv.ofBijective D.coeRingHom (coeRingHom_bijective_of_discrete D)).symm.trans
     (localizationAwayUnitRingEquiv D.s hs)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- For discrete `A` with unit `s`, the canonical map `A → presheafValue D` composed
 with `presheafValueRingEquivOfUnitS` is the identity. -/
 theorem presheafValueRingEquivOfUnitS_canonicalMap [DiscreteTopology A]
@@ -210,6 +211,7 @@ section LaurentBridge
 variable [NonarchimedeanRing A] [DiscreteTopology A]
 
 omit [IsTopologicalRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The evaluation map `evalInvFHom f : A⟨X⟩ →+* Localization.Away f` sends `X ↦ 1/f`.
 Its kernel is `(1 - fX)`, and the induced quotient map is the ring equivalence
 `quotientOneSubfXEquiv`. This is the algebraic core of the R(1/f) identification. -/
@@ -240,6 +242,7 @@ theorem evalInvF_kernel_eq_oneSubfX (f : A) :
     rw [← this, Ideal.Quotient.eq_zero_iff_mem.mpr hx, map_zero]
 
 omit [IsTopologicalRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The composition `algebraMap A (Localization.Away f)` factors through the
 Tate quotient: `A → A⟨X⟩/(1-fX) → Localization.Away f`, and the second map
 is an isomorphism. -/
@@ -373,6 +376,7 @@ theorem locToQuotientOneSubfX_gen_invSelf (f : A) :
   exact hunit.mul_left_cancel (h1.trans h2.symm)
 
 omit [IsTopologicalRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The composition `quotientOneSubfXToLoc ∘ locToQuotientOneSubfX_gen`
 equals the identity on `Localization.Away f` (discrete case bridge). -/
 theorem quotientOneSubfXToLoc_comp_gen
@@ -716,6 +720,7 @@ noncomputable def quotientToPresheaf [DiscreteTopology A]
     (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) →+* presheafValue D :=
   D.coeRingHom.comp (TateAlgebra.quotientOneSubfXToLoc D.s)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `quotientToPresheaf` sends `mk(algebraMap a)` to `canonicalMap a`. -/
 theorem quotientToPresheaf_algebraMap [DiscreteTopology A]
     (D : RationalLocData A) (a : A) :
@@ -729,6 +734,7 @@ theorem quotientToPresheaf_algebraMap [DiscreteTopology A]
     TateAlgebra.evalInvFHom_algebraMap, RationalLocData.canonicalMap,
     RingHom.comp_apply]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `quotientToPresheaf` agrees with `quotientEvalPresheafHom`. Both send
 `mk(p)` to `coeRingHom(evalInvFHom(p))`. -/
 theorem quotientToPresheaf_eq_quotientEvalPresheafHom [DiscreteTopology A]
@@ -1485,6 +1491,7 @@ noncomputable def tateQuotientPresheafEquiv
     ⟨quotientEvalPresheafHom_injective D,
      quotientEvalPresheafHom_surjective D⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The isomorphism sends `mk(algebraMap a)` to `canonicalMap(a)`. -/
 theorem tateQuotientPresheafEquiv_mk_algebraMap
     (D : RationalLocData A) (a : A) :
@@ -1495,6 +1502,7 @@ theorem tateQuotientPresheafEquiv_mk_algebraMap
     RingEquiv.ofBijective_apply, quotientEvalPresheafHom,
     Ideal.Quotient.lift_mk, evalPresheafHom_algebraMap]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The isomorphism sends `mk(X)` to `coeRingHom(invSelf s)`,
 which is the image of `1/s` in the completion. -/
 theorem tateQuotientPresheafEquiv_mk_X

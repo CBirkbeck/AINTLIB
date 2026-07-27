@@ -4,6 +4,28 @@ public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.Ramific
 public import BernoulliRegular.Reflection.Local.Graded
 public import Mathlib.LinearAlgebra.StdBasis
 
+/-!
+# Surjectivity of the Dwork-parameter power map
+
+This file builds the linear map sending a coefficient vector to the corresponding combination of
+powers of the Dwork parameter, and shows that when this map is surjective the Dwork parameter
+generates the whole complete integer ring — that is, `dworkParameterAdjoin` is `⊤`.  Along the way
+it identifies the rational `(p)`-adic integer ring inside the adic completion and records the
+algebra structure relating it to the Dwork-complete integer ring.
+
+## Main definitions
+
+* `RationalPadicIntegerRing`: the rational `(p)`-adic integer ring, realised inside the adic
+  completion of `ℚ`.
+* `dworkParameterPowerLinearMap`: the linear map from coefficient vectors to power combinations of
+  the Dwork parameter.
+
+## Main results
+
+* `dworkParameterAdjoin_eq_top_of_powerLinearMap_surjective`: surjectivity of the power map forces
+  the Dwork-parameter adjoin to be the whole ring.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -41,7 +63,10 @@ theorem rationalToLambdaCompletionRingHom_le_one_iff
   let f : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ →
       LambdaValuedCompletion p K :=
     rationalToLambdaCompletionRingHom (p := p) (K := K)
-  induction x using UniformSpace.Completion.induction_on with
+  obtain ⟨y, rfl⟩ :=
+    IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion_surjective ℚ
+      (lambdaRationalHeightOneSpectrum p) x
+  induction y using UniformSpace.Completion.induction_on with
   | hp =>
       let A : Set ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) :=
         {x | Valued.v x ≤ 1}
@@ -74,10 +99,31 @@ theorem rationalToLambdaCompletionRingHom_le_one_iff
             (B ∩ A) ∪ (Bᶜ ∩ Aᶜ) := by
         ext x
         simp [A, B, iff_iff_and_or_not_and_not, and_comm]
-      rw [hset]
-      exact (hB.inter hA).1.union ((hB.compl.inter hA.compl).1)
+      have hclopen :
+          IsClopen {x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ |
+              Valued.v (f x) ≤ 1 ↔ Valued.v x ≤ 1} := by
+        rw [hset]
+        exact (hB.inter hA).union (hB.compl.inter hA.compl)
+      have hpre :
+          {y : ((lambdaRationalHeightOneSpectrum p).valuation ℚ).Completion |
+              Valued.v
+                (f (IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion y)) ≤ 1 ↔
+                Valued.v
+                  (IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion y) ≤ 1} =
+            IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion ⁻¹'
+              {x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ |
+                Valued.v (f x) ≤ 1 ↔ Valued.v x ≤ 1} := rfl
+      rw [hpre]
+      exact (hclopen.preimage
+        (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_ofCompletion ℚ
+          (lambdaRationalHeightOneSpectrum p))).1
   | ih x =>
-      rw [rationalToLambdaCompletionRingHom_coe]
+      rw [IsDedekindDomain.HeightOneSpectrum.adicCompletion.valued_ofCompletion,
+        show IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion (K := ℚ)
+            (v := lambdaRationalHeightOneSpectrum p) (x : _) =
+          ((x : WithVal ((lambdaRationalHeightOneSpectrum p).valuation ℚ)) :
+            (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) from rfl,
+        rationalToLambdaCompletionRingHom_coe]
       simpa [Valued.valuedCompletion_apply] using
         rationalToLambdaWithValRingHom_le_one_iff (p := p) (K := K) x
 
@@ -106,20 +152,16 @@ def rationalPadicIntegerToValuedInteger :
     ⟨rationalToLambdaCompletionRingHom (p := p) (K := K)
         (x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ),
       rationalToLambdaCompletionRingHom_mem_integers (p := p) (K := K) x⟩
-  map_zero' := by
-    ext
-    exact map_zero (rationalToLambdaCompletionRingHom (p := p) (K := K))
-  map_one' := by
-    ext
-    exact map_one (rationalToLambdaCompletionRingHom (p := p) (K := K))
-  map_add' x y := by
-    ext
-    exact map_add (rationalToLambdaCompletionRingHom (p := p) (K := K))
-      (x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) y
-  map_mul' x y := by
-    ext
-    exact map_mul (rationalToLambdaCompletionRingHom (p := p) (K := K))
-      (x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) y
+  map_zero' :=
+    Subtype.ext (map_zero (rationalToLambdaCompletionRingHom (p := p) (K := K)))
+  map_one' :=
+    Subtype.ext (map_one (rationalToLambdaCompletionRingHom (p := p) (K := K)))
+  map_add' x y :=
+    Subtype.ext (map_add (rationalToLambdaCompletionRingHom (p := p) (K := K))
+      (x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) y)
+  map_mul' x y :=
+    Subtype.ext (map_mul (rationalToLambdaCompletionRingHom (p := p) (K := K))
+      (x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) y)
 
 instance instAlgebraRationalPadicIntegerValuedInteger :
     Algebra (RationalPadicIntegerRing p) (ValuedIntegerRing p K) :=
@@ -593,10 +635,20 @@ theorem exists_completion_fin_valuation_sub_le_exp_neg_one_of_valuation_le_one
   have hcover_all :
       ∀ x : ValuedCompletion p K, x ∈ Aᶜ ∪ B := by
     intro x
-    induction x using UniformSpace.Completion.induction_on with
+    obtain ⟨z, rfl⟩ :=
+      IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion_surjective K
+        (lambdaHeightOneSpectrum p K) x
+    induction z using UniformSpace.Completion.induction_on with
     | hp =>
-        exact (hA.compl.union hB).1
+        exact ((hA.compl.union hB).1.preimage
+          (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_ofCompletion K
+            (lambdaHeightOneSpectrum p K)))
     | ih y =>
+        have hofy :
+            IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion (K := K)
+                (v := lambdaHeightOneSpectrum p K) (y : _) =
+              ((y : WithVal (v.valuation K)) : ValuedCompletion p K) := rfl
+        rw [hofy]
         by_cases hy : Valued.v (y : ValuedCompletion p K) ≤ 1
         · right
           have hyK : v.valuation K (WithVal.ofVal y) ≤ 1 := by
@@ -605,20 +657,13 @@ theorem exists_completion_fin_valuation_sub_le_exp_neg_one_of_valuation_le_one
               (p := p) (K := K) (WithVal.ofVal y) hyK with
             ⟨i, hi⟩
           refine Set.mem_iUnion.mpr ⟨i, ?_⟩
-          have hconst :
-              ((i : ℕ) : ValuedCompletion p K) =
-                (((i : ℕ) : WithVal (v.valuation K)) :
-                  ValuedCompletion p K) :=
-            (map_natCast
-                (UniformSpace.Completion.coeRingHom :
-                  WithVal (v.valuation K) →+*
-                      ValuedCompletion p K) (i : ℕ)).symm
           have htarget :
               Valued.v
                   (((y -
                     ((i : ℕ) : WithVal (v.valuation K))) :
                     WithVal (v.valuation K)) :
-                    ValuedCompletion p K) ≤ WithZero.exp (-1 : ℤ) := by
+                    ((lambdaHeightOneSpectrum p K).valuation K).Completion) ≤
+                WithZero.exp (-1 : ℤ) := by
             rw [Valued.valuedCompletion_apply, ← WithVal.apply_ofVal]
             convert hi using 2
             simp [WithVal.ofVal_sub, WithVal.ofVal_natCast]
@@ -626,8 +671,23 @@ theorem exists_completion_fin_valuation_sub_le_exp_neg_one_of_valuation_le_one
             Valued.v
                 ((y : ValuedCompletion p K) - ((i : ℕ) : ValuedCompletion p K)) ≤
               WithZero.exp (-1 : ℤ)
-          rw [hconst]
-          simpa [UniformSpace.Completion.coe_sub] using htarget
+          rw [show ((y : ValuedCompletion p K) - ((i : ℕ) : ValuedCompletion p K)) =
+              IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion
+                (((y - ((i : ℕ) : WithVal (v.valuation K))) : WithVal (v.valuation K)) :
+                  ((lambdaHeightOneSpectrum p K).valuation K).Completion) from by
+              apply IsDedekindDomain.HeightOneSpectrum.adicCompletion.ext
+              rw [← IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv_apply,
+                map_sub (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv K
+                  (lambdaHeightOneSpectrum p K))]
+              simp only [IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv_apply,
+                UniformSpace.Completion.coe_sub, map_natCast]
+              rw [show ((((i : ℕ) : WithVal (v.valuation K)) :
+                    ((lambdaHeightOneSpectrum p K).valuation K).Completion)) =
+                  ((i : ℕ) : ((lambdaHeightOneSpectrum p K).valuation K).Completion) from
+                map_natCast (UniformSpace.Completion.coeRingHom
+                  (α := WithVal (v.valuation K))) (i : ℕ)],
+            IsDedekindDomain.HeightOneSpectrum.adicCompletion.valued_ofCompletion]
+          exact htarget
         · left
           exact hy
   have hcover : x ∈ Aᶜ ∪ B := hcover_all x
@@ -719,7 +779,6 @@ theorem dworkComplete_residue_lift_of_valuedInteger_residue_lift
   simpa [S, pow_one, dworkCompleteLambdaIdeal_eq_dworkParameterIdeal
     (p := p) (K := K)] using hmem
 
-set_option maxHeartbeats 800000 in
 /-- This induction repeatedly rewrites through the completed Dwork algebra
 structure and the coefficient algebra map; the higher heartbeat limit keeps
 the final normalization steps stable. -/

@@ -345,7 +345,7 @@ theorem caseII_zeta_sub_one_not_dvd_factorGenerator
         fun h ↦ hη (Subtype.ext h)
       rwa [caseII_etaZero_eq_one D hp] at h1
     have hpair :=
-      D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+      D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
         (by decide : Nat.Prime 37) hmem_eta hmem_one hne
     have hassoc : Associated (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ))
         (1 - (η : 𝓞 (CyclotomicField 37 ℚ))) := by
@@ -595,7 +595,6 @@ def CaseIISection91PContentExtractionDataWithUnits37 : Prop :=
         z' ∈ lv149 ∧ ω ∉ lv149 ∧ θ ∉ lv149 ∧
         ∃ m'' : ℕ, 2 * (2 * e - 1) = 37 * (m'' + 1)
 
-set_option maxHeartbeats 1600000 in
 -- The bumped `maxHeartbeats` is needed because `intro` must unfold the very large
 -- `CaseIISection91PContentExtractionDataWithUnits37` def (a long `∀`/`→`/`∃` chain over the §9.1
 -- datum) and the final `refine` reassembles the equally large extraction conclusion (24 conjuncts);
@@ -735,7 +734,6 @@ The descent step runs the **strengthened** producer
 with-units extraction data; the well-founded factor-count minimisation and the FLT37 endpoint then
 follow as in the existing chain, but on the **clean residual**. -/
 
-set_option maxRecDepth 4000 in
 /-- **[T-R2-L5d — the clean `p`-content descent step]** (proven, axiom-clean *given* the with-units
 extraction data + coprimality): the combined `ℓ ∣ z` descent step at content `37·(m+1)` with
 `p`-content output, running the strengthened L2 producer (so the integral-unit witnesses `u_a, u_b`

@@ -41,8 +41,7 @@ universe u
 theorem finalReflection_card_zMod_units_isUnit
     (p : ℕ) [Fact p.Prime] :
     IsUnit ((Fintype.card (ZMod p)ˣ : ZMod p)) := by
-  rw [ZMod.card_units]
-  rw [show ((p - 1 : ℕ) : ZMod p) = (-1 : ZMod p) from ?_]
+  rw [ZMod.card_units, show ((p - 1 : ℕ) : ZMod p) = (-1 : ZMod p) from ?_]
   · exact isUnit_one.neg
   · push_cast [Nat.cast_pred (Fact.out : Nat.Prime p).pos]
     rw [ZMod.natCast_self]
@@ -62,7 +61,7 @@ theorem classGroupModP_characterProjectionComponent_ne_bot_of_eigenspaceComponen
         (Reflection.SingularKummer.CharacterProjection.characterProjection
           (p := p) i (cyclotomicGalActionLinearEquivModP (p := p) (K := K))) ≠
       (⊥ : Submodule (ZMod p) (Additive (ClassGroupModP K p))) := by
-  haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   obtain ⟨v, hv_mem, hv_ne⟩ := hcomp
   have hcard :
       IsUnit
@@ -97,7 +96,7 @@ noncomputable def classGroupElementaryQuotientToModPLinear
     ElementaryQuotientComponent.ElementaryQuotient
         (Additive (ClassGroup (𝓞 K))) p →ₗ[ZMod p]
       Additive (ClassGroupModP K p) := by
-  haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   let q :
       Additive (ClassGroup (𝓞 K)) →+
         Additive (ClassGroupModP K p) :=
@@ -166,7 +165,7 @@ theorem classGroup_elementaryComponentNontrivial_of_modP_component_ne_bot
         (⊥ : Submodule (ZMod p) (Additive (ClassGroupModP K p)))) :
     ElementaryQuotientComponent.ElementaryComponentNontrivial
       (p := p) i (cyclotomicGalActionAddEquivHom (p := p) (K := K)) := by
-  haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   let f := classGroupElementaryQuotientToModPLinear p K
   have hmap :
       Submodule.map f
@@ -318,7 +317,7 @@ theorem classGroupPTorsionAdditiveLinearEquiv_equivariant
       SingularLinearAction.mulActionToAdditiveLinearAction (p := p)
           (cyclotomicClassGroupPTorsionAction K p) a
         (classGroupPTorsionAdditiveLinearEquiv p K x) := by
-  haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   apply Additive.ext
   apply Subtype.ext
   change
@@ -337,7 +336,7 @@ theorem classGroupPTorsionCharacterProjectionComponent_ne_bot_of_additivePTorsio
         (cyclotomicGalActionAddEquivHom (p := p) (K := K))) :
     classGroupPTorsionCharacterProjectionComponent
         (K := K) (p := p) i (cyclotomicClassGroupPTorsionAction K p) ≠ ⊥ := by
-  haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   let e := classGroupPTorsionAdditiveLinearEquiv p K
   have hmap :
       Submodule.map e.toLinearMap
@@ -533,7 +532,7 @@ theorem completedLocalizationKernel_nontrivial_of_classPTorsion_component
     simpa [Acomp, Primary] using
       completedLocalizationKernel_finrank_ge_classComponent_of_even_power_character
         (K := K) (p := p) hp_gt_two hi_even hi_low hi_high
-  haveI : Nontrivial Acomp := Submodule.nontrivial_iff_ne_bot.mpr (by
+  have : Nontrivial Acomp := Submodule.nontrivial_iff_ne_bot.mpr (by
     simpa [Acomp] using hA_ne_bot)
   have hA_pos : 0 < Module.finrank (ZMod p) Acomp := Module.finrank_pos
   have hPrimary_pos : 0 < Module.finrank (ZMod p) Primary :=
@@ -597,8 +596,8 @@ theorem exists_primarySingularPair_of_classPTorsion_component
             ((b : ZMod p) ^ i) •
               Additive.ofMul
                 (QuotientGroup.mk s : SingularGroup (R := 𝓞 K) (K := K) p) := by
-  haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  haveI : FiniteDimensional (ZMod p)
+  have : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : FiniteDimensional (ZMod p)
       (singularGroupCharacterProjectionComponent (K := K) (p := p) i
         (cyclotomicSingularGroupAction K p)) :=
     singularGroupCharacterProjectionComponent_finiteDimensional_of_even_power_character
@@ -646,7 +645,7 @@ theorem span_natCast_prime_eq_zetaPrime_pow
     (p : ℕ) [Fact p.Prime]
     (K : Type u) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K] :
     Ideal.span ({(p : 𝓞 K)} : Set (𝓞 K)) = zetaPrime p K ^ (p - 1) := by
-  haveI : IsCyclotomicExtension {p ^ (0 + 1)} ℚ K := by
+  have : IsCyclotomicExtension {p ^ (0 + 1)} ℚ K := by
     simpa using (inferInstance : IsCyclotomicExtension {p} ℚ K)
   have hζpow :
       IsPrimitiveRoot (IsCyclotomicExtension.zeta p ℚ K) (p ^ (0 + 1)) := by
@@ -703,12 +702,12 @@ theorem exists_integral_normalized_primarySingularPair_of_eigenspaceComponentNon
                 Additive.ofMul
                   (QuotientGroup.mk t :
                     SingularGroup (R := 𝓞 K) (K := K) p) := by
-  haveI : FiniteDimensional (ZMod p)
+  have : FiniteDimensional (ZMod p)
       (singularGroupCharacterProjectionComponent (K := K) (p := p) i
         (cyclotomicSingularGroupAction K p)) :=
     singularGroupCharacterProjectionComponent_finiteDimensional_of_even_power_character
       (K := K) (p := p) hp_gt_two hi_even hi_low hi_high
-  haveI : (zetaPrime p K).IsMaximal :=
+  have : (zetaPrime p K).IsMaximal :=
     Ideal.IsPrime.isMaximal (zetaPrime_isPrime p K) (zetaPrime_ne_bot p K)
   exact
     exists_integral_coprime_normalized_singularPair_in_concrete_completed_localization_kernel

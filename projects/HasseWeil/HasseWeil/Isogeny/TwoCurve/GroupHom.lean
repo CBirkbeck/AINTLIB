@@ -26,7 +26,8 @@ isomorphisms; the square `κ₂ ∘ φ = φ_∗ ∘ κ₁` commutes because `φ(
 `φ` additive.  The chase is *entirely abstract* — the **only** CoordHom dependence in the project's
 spine is:
 
-1. the **divisor pushforward** `pushforwardProjectiveDivisor φ cd = Finsupp.mapDomain (P ↦ toPointMap
+1. the **divisor pushforward**
+`pushforwardProjectiveDivisor φ cd = Finsupp.mapDomain (P ↦ toPointMap
    cd P)` — here replaced, CoordHom-free, by `placeRestrictionPushforward φ = Finsupp.mapDomain
    (P ↦ placeRestrictionPointMap φ P)` (a group hom on divisors *by construction*);
 2. the **diagram commute** `picZeroOfPoint_pushforwardPicZero` — here `placeRestrictionPushforward`
@@ -53,7 +54,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil HasseWeil.Curves HasseWeil.EC.Isogeny
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]
@@ -105,15 +105,8 @@ noncomputable def placeRestrictionPushforwardDegZero (φ : HasseWeil.Isogeny W�
       ProjectiveDivisor.mem_degZero.mpr <| by
         rw [degree_placeRestrictionPushforward]
         exact ProjectiveDivisor.mem_degZero.mp D.property⟩
-  map_zero' := by
-    apply Subtype.ext
-    show placeRestrictionPushforward φ 0 = 0
-    exact (placeRestrictionPushforward φ).map_zero
-  map_add' D₁ D₂ := by
-    apply Subtype.ext
-    show placeRestrictionPushforward φ (D₁.val + D₂.val) =
-      placeRestrictionPushforward φ D₁.val + placeRestrictionPushforward φ D₂.val
-    exact (placeRestrictionPushforward φ).map_add _ _
+  map_zero' := Subtype.ext (placeRestrictionPushforward φ).map_zero
+  map_add' D₁ D₂ := Subtype.ext ((placeRestrictionPushforward φ).map_add _ _)
 
 /-! ### The divisor-level diagram commute (square, CoordHom-free)
 
@@ -211,7 +204,8 @@ case (they only see `Eᵢ`, not `φ`), and the diagram commute is the pure-plumb
 CoordHom-free preserves-principal hypothesis `h_pres`. -/
 
 /-- **σ̄ is injective on Pic⁰** (curve-side stage of the chase): from the witness `h_inj`
-(`κ ∘ σ̄ = id`), the descended sum map `picZeroSumOfWitness W h_van` has a left inverse `κ`, hence is
+(`κ ∘ σ̄ = id`), the descended sum map `picZeroSumOfWitness W h_van`
+has a left inverse `κ`, hence is
 injective.  Independent of any isogeny — used for the source curve `W₁` in the diagram chase. -/
 private theorem picZeroSumOfWitness_injective (W : Affine F) [W.IsElliptic]
     (h_van : ∀ D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F),
@@ -220,13 +214,9 @@ private theorem picZeroSumOfWitness_injective (W : Affine F) [W.IsElliptic]
     (h_inj : ∀ D : SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F),
       Curves.picZeroOfPoint W
         (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D) = D) :
-    Function.Injective (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van) := by
-  intro D₁ D₂ h
-  have hh : Curves.picZeroOfPoint W
-      (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D₁) =
-      Curves.picZeroOfPoint W
-        (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D₂) := by rw [h]
-  rwa [h_inj D₁, h_inj D₂] at hh
+    Function.Injective (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van) :=
+  -- `h_inj` *is* the statement that `picZeroOfPoint W` is a left inverse.
+  Function.LeftInverse.injective h_inj
 
 /-- **The Abel–Jacobi map `κ` is additive** (curve-side stage of the chase): given the witnesses
 `h_van` / `h_inj`, the point-to-Pic⁰ map `picZeroOfPoint W` is a group homomorphism.  Proof: its
@@ -347,7 +337,8 @@ theorem placeRestrictionPointMap_add_of_preservesPrincipal
 Wiring the discharged group-hom property into `placeRestrictionRealization` produces the realized
 two-curve `HasseWeil.Isogeny` (stored map = `placeRestrictionPointMap φ`, function-field pullback =
 `φ.pullback`) directly from the single CoordHom-free input `PlaceRestrictionPreservesPrincipal φ`.
-Its `PullbackEvaluation_twoCurve` coherence is `pullbackEvaluation_twoCurve_placeRestrictionRealization`
+Its `PullbackEvaluation_twoCurve`
+coherence is `pullbackEvaluation_twoCurve_placeRestrictionRealization`
 (TASK A, already sorry-free), so this is the *complete* CoordHom-free geometric realization of `φ`
 modulo the lone preserves-principal wall. -/
 

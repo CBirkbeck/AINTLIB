@@ -283,6 +283,7 @@ open FLT37.LehmerVandiver.CaseI.AntiKummer IsLocalRing Polynomial IsLocalization
 
 variable [NumberField.IsCMField (CyclotomicField 37 ℚ)]
 
+set_option maxRecDepth 4000 in
 /-- **[FLT37-CASEII-LEMMA-9.1-AWAY] `CaseIIKummerUnramifiedAway37` is proven.**
 
 For a radical `α : K = ℚ(ζ₃₇)` whose fractional ideal is a `37`-th power, every prime `P` of
@@ -443,16 +444,12 @@ theorem caseIIKummerUnramifiedAway37_proven : CaseIIKummerUnramifiedAway37 := by
       Pₚ hPₚ_bot hpunder_bot hn' u hgen hθ'_pow
   haveI : IsNoetherianRing Sₚ := IsLocalization.isNoetherianRing
     (Algebra.algebraMapSubmonoid (𝓞 L) q.primeCompl) Sₚ inferInstance
-  have hePₚ : Ideal.ramificationIdx (IsLocalRing.maximalIdeal A) Pₚ = 1 := by
-    have h := Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A) (S := Sₚ) hPₚ_bot
-    rwa [hPₚ_under] at h
-  have heq : Ideal.ramificationIdx q P = 1 := by
-    rw [← IsLocalization.AtPrime.ramificationIdx_map_eq_ramificationIdx q A Sₚ P hq_bot]
+  have hePₚ : Pₚ.ramificationIdx A = 1 :=
+    Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A) (S := Sₚ)
+  have heq : P.ramificationIdx (𝓞 (CyclotomicField 37 ℚ)) = 1 := by
+    rw [← IsLocalization.AtPrime.ramificationIdx_map_eq_ramificationIdx q A Sₚ P]
     exact hePₚ
-  refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := 𝓞 (CyclotomicField 37 ℚ))
-    (S := 𝓞 L) hP_bot).mpr ?_
-  rw [show P.under (𝓞 (CyclotomicField 37 ℚ)) = q from rfl]
-  exact heq
+  exact Ideal.ramificationIdx_eq_one_iff.mp heq
 
 end Assembly
 

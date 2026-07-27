@@ -785,7 +785,7 @@ theorem finiteLog_eq_productHomogeneousGrid (N : ℕ)
       finiteLogProductHomogeneousGrid (F := F) N x y hx hy := by
   classical
   rw [F.finiteLog_eq_finiteLogLocalizedPolynomial]
-  unfold finiteLogLocalizedPolynomial finiteLogProductHomogeneousGrid
+  simp only [finiteLogLocalizedPolynomial, finiteLogProductHomogeneousGrid]
   refine Finset.sum_congr rfl ?_
   intro n hnC
   by_cases hn0 : n = 0

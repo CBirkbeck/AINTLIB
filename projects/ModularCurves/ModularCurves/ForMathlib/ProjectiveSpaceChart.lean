@@ -154,7 +154,6 @@ noncomputable def homogenizeAt (i : σ) :
       Away (homogeneousSubmodule σ R) (X i : MvPolynomial σ R) :=
   eval₂Hom (awayConstHom R i) (awayVar R i)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Homogenisation commutes with coefficient maps, through the graded `Away.map`
 and the transport along `map g (X i) = X i`. -/
 lemma homogenizeAt_map {S : Type*} [CommRing S] (g : R →+* S) (i : σ)
@@ -163,7 +162,7 @@ lemma homogenizeAt_map {S : Type*} [CommRing S] (g : R →+* S) (i : σ)
       ModularCurves.awayCongr (𝒜 := homogeneousSubmodule σ S)
         (MvPolynomial.map_X g i)
         ((HomogeneousLocalization.Away.map
-          (⟨MvPolynomial.map g, fun {n x} hx =>
+          (⟨MvPolynomial.map g, fun {_n _x} hx =>
             (mem_homogeneousSubmodule _ _).mpr
               (((mem_homogeneousSubmodule _ _).mp hx).map g)⟩ :
             GradedRingHom (homogeneousSubmodule σ R) (homogeneousSubmodule σ S))

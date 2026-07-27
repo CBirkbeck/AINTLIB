@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.RingTheory.Ideal.Over
+public import Mathlib.NumberTheory.RamificationInertia.Basic
 public import CebotarevDensity.Cyclotomic
 
 /-!
@@ -83,6 +84,7 @@ theorem frobeniusFibre_card_eq_of_isConj
     have hconj := hfrob.conj c⁻¹
     rwa [hsmul, ← hc, show c⁻¹ * (c * σ * c⁻¹) * c⁻¹⁻¹ = σ by group] at hconj
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Balanced fibre count.** If every prime above `𝔭` has Frobenius in the class `C = [σ]`
 and conjugate Frobenius values occur equally often (`hequi`), the total number of primes
 above `𝔭` is `|C|` times the number with `Frob_𝔓 = σ`: partition by the (class-`C`-valued)
@@ -145,8 +147,10 @@ theorem card_primesAbove_eq_card_carrier_mul_frobeniusFibre
       haveI := hP
       haveI := hfinP x.1 hP
       haveI : Algebra.IsUnramifiedAt (𝓞 K) x.1 :=
-        (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hne).mpr
-          (UnramifiedIn.ramificationIdx_eq_one K L hunr x.1 hP)
+        Ideal.ramificationIdx_eq_one_iff.mp
+          ((Ideal.ramificationIdx'_eq_ramificationIdx (x.1.under (𝓞 K)) x.1
+            (Ideal.IsIntegral.comap_ne_bot (𝓞 K) hne)).symm.trans
+            (UnramifiedIn.ramificationIdx_eq_one K L hunr x.1 hP))
       exact Subtype.ext (eq_arithFrobAt_of_isArithFrobAt K L x.1 g.1 hg).symm
   simp_rw [hfib]
   rw [Finset.sum_const, Finset.card_univ, smul_eq_mul, ← Nat.card_eq_fintype_card]
@@ -227,8 +231,8 @@ residue classes to the `N(𝔓 ∩ 𝓞 K)`-th power too, i.e. it is a `K`-Frobe
 mathlib has only `isConj_arithFrobAt` (conjugacy of `arithFrobAt` at primes over the same
 base); the restriction-through-a-subextension identity is the new tower content. -/
 theorem arithFrobAt_restrictScalars_eq (E : IntermediateField K L)
-    (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime] (hunrK : Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 = 1)
-    (_hunrE : Ideal.ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 = 1)
+    (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime] (hunrK : Ideal.ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 = 1)
+    (_hunrE : Ideal.ramificationIdx' (𝔓.under (𝓞 ↥E)) 𝔓 = 1)
     (hnorm : Nat.card (𝓞 ↥E ⧸ 𝔓.under (𝓞 ↥E)) = Nat.card (𝓞 K ⧸ 𝔓.under (𝓞 K))) :
     haveI : IsScalarTower K ↥E L := E.isScalarTower_mid'
     haveI : Finite (𝓞 L ⧸ 𝔓) :=
@@ -289,14 +293,14 @@ private theorem stabilizer_intermediate_eq_top_of_frobenius
     letI : Field (𝓞 L ⧸ 𝔓) := Ideal.Quotient.field _
     exact IsGalois.to_isSeparable
   have hmem : σ ∈ MulAction.stabilizer Gal(L/K) 𝔓 := hfrob.mem_stabilizer
-  have hinertK : (𝔓.under (𝓞 K)).inertiaDeg 𝔓 = orderOf σ := by
-    rw [Ideal.inertiaDeg_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
+  have hinertK : (𝔓.under (𝓞 K)).inertiaDeg' 𝔓 = orderOf σ := by
+    rw [Ideal.inertiaDeg'_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
   have hcardstab' : Nat.card (MulAction.stabilizer Gal(L/K) 𝔓) = orderOf σ := by
     rw [Ideal.card_stabilizer_eq (𝔓.under (𝓞 K)) 𝔓,
       Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
-      ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 hpbot, hraK, one_mul,
+      ← Ideal.ramificationIdx'_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 hpbot, hraK, one_mul,
       Ideal.inertiaDegIn_eq_inertiaDeg (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
-      ← Ideal.inertiaDeg_eq_inertiaDeg' (𝔓.under (𝓞 K)) 𝔓, hinertK]
+      ← Ideal.inertiaDeg'_eq_inertiaDeg (𝔓.under (𝓞 K)) 𝔓, hinertK]
   have hstab : Subgroup.zpowers σ = MulAction.stabilizer Gal(L/K) 𝔓 :=
     Subgroup.eq_of_le_of_card_ge (by rwa [Subgroup.zpowers_le])
       (by rw [Nat.card_zpowers, hcardstab'])
@@ -325,9 +329,9 @@ private theorem inertiaDeg_under_E_eq_one_of_frobenius
     (horderE : orderOf σ = Nat.card Gal(L/(IntermediateField.fixedField (Subgroup.zpowers σ)))) :
     haveI : IsScalarTower K ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L :=
       (IntermediateField.fixedField (Subgroup.zpowers σ)).isScalarTower_mid'
-    Ideal.ramificationIdx
+    Ideal.ramificationIdx'
         (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) 𝔓 = 1
-      ∧ (𝔓.under (𝓞 K)).inertiaDeg
+      ∧ (𝔓.under (𝓞 K)).inertiaDeg'
           (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) = 1
       ∧ Nat.card (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))
             ⧸ 𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))))
@@ -348,8 +352,8 @@ private theorem inertiaDeg_under_E_eq_one_of_frobenius
   haveI hPPE : 𝔓.LiesOver (𝔓.under (𝓞 ↥E)) := Ideal.over_under (A := 𝓞 ↥E) (P := 𝔓)
   have hpEbot : 𝔓.under (𝓞 ↥E) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 ↥E) hPbot
   haveI : (𝔓.under (𝓞 ↥E)).IsMaximal := hPEp.isMaximal hpEbot
-  have hraE : Ideal.ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 = 1 := by
-    have htower := Ideal.ramificationIdx_algebra_tower' (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
+  have hraE : Ideal.ramificationIdx' (𝔓.under (𝓞 ↥E)) 𝔓 = 1 := by
+    have htower := Ideal.ramificationIdx'_algebra_tower' (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
     rw [hraK] at htower
     exact Nat.eq_one_of_mul_eq_one_left htower.symm
   haveI : Algebra.IsSeparable (𝓞 ↥E ⧸ 𝔓.under (𝓞 ↥E)) (𝓞 L ⧸ 𝔓) := by
@@ -363,27 +367,27 @@ private theorem inertiaDeg_under_E_eq_one_of_frobenius
     Ideal.card_stabilizer_eq (𝔓.under (𝓞 ↥E)) 𝔓
   rw [hstabE, Subgroup.card_top,
     Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 Gal(L/(↥E)),
-    ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 ↥E)) 𝔓 hpEbot, hraE, one_mul,
+    ← Ideal.ramificationIdx'_eq_ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 hpEbot, hraE, one_mul,
     Ideal.inertiaDegIn_eq_inertiaDeg (𝔓.under (𝓞 ↥E)) 𝔓 Gal(L/(↥E)),
-    ← Ideal.inertiaDeg_eq_inertiaDeg' (𝔓.under (𝓞 ↥E)) 𝔓,
-    Ideal.inertiaDeg_algebraMap] at hcardE
-  have hinertTower : (𝔓.under (𝓞 K)).inertiaDeg 𝔓
-      = (𝔓.under (𝓞 K)).inertiaDeg (𝔓.under (𝓞 ↥E))
-        * (𝔓.under (𝓞 ↥E)).inertiaDeg 𝔓 :=
-    Ideal.inertiaDeg_algebra_tower (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
-  have hinertK : (𝔓.under (𝓞 K)).inertiaDeg 𝔓 = orderOf σ := by
-    rw [Ideal.inertiaDeg_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
-  have hfPE : (𝔓.under (𝓞 ↥E)).inertiaDeg 𝔓 = orderOf σ := by
-    rw [Ideal.inertiaDeg_algebraMap, ← hcardE, horderE]
+    ← Ideal.inertiaDeg'_eq_inertiaDeg (𝔓.under (𝓞 ↥E)) 𝔓,
+    Ideal.inertiaDeg'_algebraMap] at hcardE
+  have hinertTower : (𝔓.under (𝓞 K)).inertiaDeg' 𝔓
+      = (𝔓.under (𝓞 K)).inertiaDeg' (𝔓.under (𝓞 ↥E))
+        * (𝔓.under (𝓞 ↥E)).inertiaDeg' 𝔓 :=
+    Ideal.inertiaDeg'_algebra_tower (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
+  have hinertK : (𝔓.under (𝓞 K)).inertiaDeg' 𝔓 = orderOf σ := by
+    rw [Ideal.inertiaDeg'_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
+  have hfPE : (𝔓.under (𝓞 ↥E)).inertiaDeg' 𝔓 = orderOf σ := by
+    rw [Ideal.inertiaDeg'_algebraMap, ← hcardE, horderE]
   have hpos : 0 < orderOf σ := orderOf_pos_iff.mpr (isOfFinOrder_of_finite σ)
-  have hinertPK : (𝔓.under (𝓞 K)).inertiaDeg (𝔓.under (𝓞 ↥E)) = 1 := by
+  have hinertPK : (𝔓.under (𝓞 K)).inertiaDeg' (𝔓.under (𝓞 ↥E)) = 1 := by
     rw [hinertK, hfPE] at hinertTower
     exact Nat.eq_of_mul_eq_mul_right hpos (by rw [one_mul]; exact hinertTower.symm)
   refine ⟨hraE, hinertPK, ?_⟩
   have hnormP : Nat.card (𝓞 ↥E ⧸ 𝔓.under (𝓞 ↥E))
-      = Nat.card (𝓞 K ⧸ 𝔓.under (𝓞 K)) ^ (𝔓.under (𝓞 K)).inertiaDeg (𝔓.under (𝓞 ↥E)) := by
+      = Nat.card (𝓞 K ⧸ 𝔓.under (𝓞 K)) ^ (𝔓.under (𝓞 K)).inertiaDeg' (𝔓.under (𝓞 ↥E)) := by
     simpa [Submodule.cardQuot_apply, Ideal.absNorm_apply] using
-      Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver (𝔓.under (𝓞 ↥E)) (𝔓.under (𝓞 K))
+      Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver (𝔓.under (𝓞 ↥E)) (𝔓.under (𝓞 K))
         inferInstance hpbot
   rw [hnormP, hinertPK, pow_one]
 
@@ -429,7 +433,7 @@ private theorem arithFrobAt_E_eq_of_isArithFrobAt
     (hPK : 𝔓.LiesOver (𝔓.under (𝓞 K)))
     (hfrob : IsArithFrobAt (𝓞 K) σ 𝔓)
     (_horderE : orderOf σ = Nat.card Gal(L/(IntermediateField.fixedField (Subgroup.zpowers σ))))
-    (hraE : Ideal.ramificationIdx
+    (hraE : Ideal.ramificationIdx'
         (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) 𝔓 = 1)
     (hnorm : Nat.card (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))
           ⧸ 𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))))
@@ -446,12 +450,14 @@ private theorem arithFrobAt_E_eq_of_isArithFrobAt
     (IntermediateField.fixedField (Subgroup.zpowers σ)).isScalarTower_mid'
   haveI : IsGalois (↥(IntermediateField.fixedField (Subgroup.zpowers σ))) L :=
     IsGalois.tower_top_intermediateField _
-  have hraK : Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 = 1 :=
+  have hraK : Ideal.ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 = 1 :=
     UnramifiedIn.ramificationIdx_eq_one K L hunrK 𝔓 hPK
   have hPbot : 𝔓 ≠ ⊥ := ne_bot_of_ramificationIdx_eq_one K L hraK
   haveI : Finite (𝓞 L ⧸ 𝔓) := Ideal.finiteQuotientOfFreeOfNeBot 𝔓 hPbot
   haveI : Algebra.IsUnramifiedAt (𝓞 K) 𝔓 :=
-    (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hPbot).mpr hraK
+    Ideal.ramificationIdx_eq_one_iff.mp
+      ((Ideal.ramificationIdx'_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓
+        (Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPbot)).symm.trans hraK)
   have hbridge := arithFrobAt_restrictScalars_eq
     (IntermediateField.fixedField (Subgroup.zpowers σ)) 𝔓 hraK hraE hnorm
   rw [(eq_arithFrobAt_of_isArithFrobAt K L 𝔓 σ hfrob).symm] at hbridge
@@ -474,7 +480,7 @@ private theorem exists_arithFrobAt_over_fibrePrime
     (hPunr : UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P)
     (hPfrob : frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
       = ConjClasses.mk σE)
-    (hPdeg : (P.under (𝓞 K)).inertiaDeg P = 1) (hPbot : P ≠ ⊥) :
+    (hPdeg : (P.under (𝓞 K)).inertiaDeg' P = 1) (hPbot : P ≠ ⊥) :
     ∃ (𝔓 : Ideal (𝓞 L)) (_ : 𝔓.IsPrime) (_ : 𝔓.LiesOver P) (_ : 𝔓 ≠ ⊥),
       𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) = P ∧
         IsArithFrobAt (𝓞 K) σ 𝔓 := by
@@ -494,18 +500,21 @@ private theorem exists_arithFrobAt_over_fibrePrime
     rw [← Ideal.under_under (B := 𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) 𝔓, hPeq]
   have hunrK : UnramifiedIn K L (𝔓.under (𝓞 K)) := hunderK ▸ hunrP
   haveI : 𝔓.LiesOver (𝔓.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := 𝔓)
-  have hinertPK1 : (𝔓.under (𝓞 K)).inertiaDeg
+  have hinertPK1 : (𝔓.under (𝓞 K)).inertiaDeg'
       (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) = 1 := by
     rw [hPeq, hunderK]
     exact hPdeg
-  have hraE : Ideal.ramificationIdx
+  have hraE : Ideal.ramificationIdx'
       (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) 𝔓 = 1 :=
-    (Algebra.isUnramifiedAt_iff_of_isDedekindDomain h𝔓bot).mp
-      (hPunr.2 𝔓 (h𝔓p.isMaximal h𝔓bot) (hPeq ▸ hPPE))
+    (Ideal.ramificationIdx'_eq_ramificationIdx
+        (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) 𝔓
+        (Ideal.IsIntegral.comap_ne_bot _ h𝔓bot)).trans
+      (Ideal.ramificationIdx_eq_one_iff.mpr
+        (hPunr.2 𝔓 (h𝔓p.isMaximal h𝔓bot) (hPeq ▸ hPPE)))
   have hnorm : Nat.card (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))
         ⧸ 𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))))
       = Nat.card (𝓞 K ⧸ 𝔓.under (𝓞 K)) := by
-    have hnP := Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver
+    have hnP := Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver
       (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) (𝔓.under (𝓞 K))
       inferInstance (UnramifiedIn.ne_bot K L hunrK)
     simp only [Submodule.cardQuot_apply, Ideal.absNorm_apply] at hnP ⊢
@@ -551,7 +560,7 @@ private theorem under_E_mem_fibre_of_isArithFrobAt
         {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) |
           P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P ∧
           frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
-            = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg P = 1}
+            = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg' P = 1}
       ∧ (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))).LiesOver 𝔭
       ∧ (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) ≠ ⊥ := by
   haveI : IsScalarTower K ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L :=
@@ -574,7 +583,10 @@ private theorem under_E_mem_fibre_of_isArithFrobAt
     have h𝔔eq : 𝔔 = 𝔓 := eq_of_liesOver_under_E_of_frobenius σ 𝔓 hunrK inferInstance hfrob
       horderE 𝔔 h𝔔lo
     subst h𝔔eq
-    exact (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hPbot).mpr hraE
+    exact Ideal.ramificationIdx_eq_one_iff.mp
+      ((Ideal.ramificationIdx'_eq_ramificationIdx
+        (𝔔.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) 𝔔
+        (Ideal.IsIntegral.comap_ne_bot _ hPbot)).symm.trans hraE)
   haveI hPEK : (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))).LiesOver 𝔭 := by
     haveI : (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))).LiesOver
         (𝔓.under (𝓞 K)) := inferInstance
@@ -616,7 +628,7 @@ private theorem card_fibre_E_eq_card_fibre_L
         P ∈ {P | P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
               ∧ frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
                 = ConjClasses.mk σE
-              ∧ (P.under (𝓞 K)).inertiaDeg P = 1} ∧ P.LiesOver 𝔭 ∧ P ≠ ⊥}
+              ∧ (P.under (𝓞 K)).inertiaDeg' P = 1} ∧ P.LiesOver 𝔭 ∧ P ≠ ⊥}
       = Nat.card {𝔓 : Ideal (𝓞 L) // ∃ (_ : 𝔓.IsPrime) (_ : 𝔓.LiesOver 𝔭) (_ : 𝔓 ≠ ⊥),
           IsArithFrobAt (𝓞 K) σ 𝔓} := by
   haveI : IsScalarTower K ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L :=
@@ -678,7 +690,7 @@ private theorem frobeniusClass_under_eq_of_mem_fibre
     (hPunr : UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P)
     (hPfrob : frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
       = ConjClasses.mk σE)
-    (hPdeg : (P.under (𝓞 K)).inertiaDeg P = 1) (hPbot : P ≠ ⊥) :
+    (hPdeg : (P.under (𝓞 K)).inertiaDeg' P = 1) (hPbot : P ≠ ⊥) :
     frobeniusClass K L (P.under (𝓞 K)) = ConjClasses.mk σ := by
   haveI : IsGalois (↥(IntermediateField.fixedField (Subgroup.zpowers σ))) L :=
     IsGalois.tower_top_intermediateField _
@@ -726,12 +738,13 @@ private theorem card_fibre_T1_over_prime
         Nat.card {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) //
           P ∈ {P | P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
                 ∧ frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
-                  = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg P = 1}
+                  = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg' P = 1}
             ∧ P.LiesOver 𝔭 ∧ P ≠ ⊥}
       = Nat.card Gal(L/K) := by
   rw [card_fibre_E_eq_card_fibre_L σ σE hσE horderE 𝔭 hunr𝔭 hfrob𝔭, mul_comm, ← mul_assoc]
   exact count_primes_above_with_frobenius_eq_sigma K L σ (ConjClasses.mk σ) rfl 𝔭 hunr𝔭 hfrob𝔭
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **LEAF A: the degree-one part of `T` carries the main term** (Sharifi 7.2.2 p. 143). For
 `1 < s`, the partial Dirichlet sum over the set `T₁` of degree-one (over `K`) primes `P` of
 `𝓞 E` above an unramified-in-`L` prime, with `Frob^E_P = [σ_E]`, equals `|G|/(f·|C|)` times the
@@ -754,7 +767,7 @@ private theorem primeIdealZetaSum_fibre_eq_smul
         {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) |
           P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P ∧
           frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
-            = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg P = 1 ∧
+            = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg' P = 1 ∧
           UnramifiedIn K L (P.under (𝓞 K))} s
       = ((Nat.card Gal(L/K) : ℝ) / (orderOf σ * Nat.card (ConjClasses.mk σ).carrier))
         * primeIdealZetaSum {𝔭 : Ideal (𝓞 K) | 𝔭.IsPrime ∧ UnramifiedIn K L 𝔭 ∧
@@ -768,7 +781,7 @@ private theorem primeIdealZetaSum_fibre_eq_smul
   set T₁set := {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) |
     P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P ∧
     frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P = ConjClasses.mk σE ∧
-    (P.under (𝓞 K)).inertiaDeg P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))} with hT₁set
+    (P.under (𝓞 K)).inertiaDeg' P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))} with hT₁set
   set S' := {𝔭 : Ideal (𝓞 K) // 𝔭 ∈ Sset ∧ 𝔭.IsPrime ∧ 𝔭 ≠ ⊥} with hS'
   have hgmem : ∀ P : {P // P ∈ T₁set ∧ P.IsPrime ∧ P ≠ ⊥},
       P.1.under (𝓞 K) ∈ Sset ∧ (P.1.under (𝓞 K)).IsPrime ∧ P.1.under (𝓞 K) ≠ ⊥ := by
@@ -784,7 +797,7 @@ private theorem primeIdealZetaSum_fibre_eq_smul
     haveI := hPp
     have hpbot : P.under (𝓞 K) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPbot
     haveI : P.LiesOver (P.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := P)
-    have hpow := Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver P (P.under (𝓞 K)) inferInstance hpbot
+    have hpow := Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver P (P.under (𝓞 K)) inferInstance hpbot
     rw [hPdeg, pow_one] at hpow
     rw [hpow]
   have hcardfib : ∀ 𝔭 : S', (orderOf σ * Nat.card (ConjClasses.mk σ).carrier) *
@@ -796,7 +809,7 @@ private theorem primeIdealZetaSum_fibre_eq_smul
         = Nat.card {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) //
             P ∈ {P | P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ))
                   L P ∧ frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
-                  = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg P = 1}
+                  = ConjClasses.mk σE ∧ (P.under (𝓞 K)).inertiaDeg' P = 1}
               ∧ P.LiesOver 𝔭.1 ∧ P ≠ ⊥} := by
       refine Nat.card_congr ⟨fun x ↦ ⟨x.1.1, ?_, ?_, x.1.2.2.2⟩,
         fun y ↦ ⟨⟨y.1, ?_, y.2.1.1, y.2.2.2⟩, ?_⟩, fun _ ↦ rfl, fun _ ↦ rfl⟩
@@ -900,22 +913,22 @@ the square term of `𝔭`: `N P^{-s} ≤ N𝔭^{-2}` for `1 < s`. Here `N P = N�
 `N𝔭 ≥ 2`, so the exponent `f·s ≥ 2` dominates. -/
 private theorem absNorm_rpow_neg_le_under_sq (σ : Gal(L/K))
     (P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) [P.IsPrime]
-    (hPb : P ≠ ⊥) {s : ℝ} (hs : 1 < s) (hdeg : 2 ≤ (P.under (𝓞 K)).inertiaDeg P) :
+    (hPb : P ≠ ⊥) {s : ℝ} (hs : 1 < s) (hdeg : 2 ≤ (P.under (𝓞 K)).inertiaDeg' P) :
     (Ideal.absNorm P : ℝ) ^ (-s) ≤ (Ideal.absNorm (P.under (𝓞 K)) : ℝ) ^ (-(2 : ℝ)) := by
   have hppr : (P.under (𝓞 K)).IsPrime := inferInstance
   have hpbot : P.under (𝓞 K) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPb
   haveI : P.LiesOver (P.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := P)
-  have hpow := Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver P (P.under (𝓞 K)) hppr hpbot
+  have hpow := Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver P (P.under (𝓞 K)) hppr hpbot
   have hn2 : 2 ≤ Ideal.absNorm (P.under (𝓞 K)) := by
     have h0 : Ideal.absNorm (P.under (𝓞 K)) ≠ 0 := Ideal.absNorm_eq_zero_iff.not.mpr hpbot
     have h1 : Ideal.absNorm (P.under (𝓞 K)) ≠ 1 := Ideal.absNorm_eq_one_iff.not.mpr hppr.ne_top
     omega
   rw [hpow, Nat.cast_pow,
-    ← Real.rpow_natCast (Ideal.absNorm (P.under (𝓞 K)) : ℝ) ((P.under (𝓞 K)).inertiaDeg P),
+    ← Real.rpow_natCast (Ideal.absNorm (P.under (𝓞 K)) : ℝ) ((P.under (𝓞 K)).inertiaDeg' P),
     ← Real.rpow_mul (by positivity)]
   refine Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast Nat.one_le_of_lt hn2) ?_
-  nlinarith [mul_le_mul (show (2 : ℝ) ≤ ((P.under (𝓞 K)).inertiaDeg P : ℝ) by exact_mod_cast hdeg)
-    hs.le (by norm_num) (by positivity : (0 : ℝ) ≤ ((P.under (𝓞 K)).inertiaDeg P : ℝ))]
+  nlinarith [mul_le_mul (show (2 : ℝ) ≤ ((P.under (𝓞 K)).inertiaDeg' P : ℝ) by exact_mod_cast hdeg)
+    hs.le (by norm_num) (by positivity : (0 : ℝ) ≤ ((P.under (𝓞 K)).inertiaDeg' P : ℝ))]
 
 omit [IsGalois K L] in
 /-- The number of primes of `𝓞 E` over a fixed maximal prime `𝔭` of `𝓞 K` is at most `[E : K]`,
@@ -939,13 +952,13 @@ private theorem card_primesOver_le_finrank (σ : Gal(L/K))
 /-- **The degree-`≥ 2` part of `T₂` is bounded by a constant.** For `1 < s`, the partial sum over
 the set `A` of primes `P` of `𝓞 E` whose underlying `K`-prime is unramified in `L` but of inertia
 degree `≥ 2` is bounded by `[E:K]·Σ_𝔭 N𝔭^{-2}`. Indeed `N P = N𝔭^{f}` with `f ≥ 2`
-(`Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver`), so `N P^{-s} ≤ N𝔭^{-2}` for `s ≥ 1` and
+(`Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver`), so `N P^{-s} ≤ N𝔭^{-2}` for `s ≥ 1` and
 `N𝔭 ≥ 2`; grouping the `E`-primes by their `K`-prime fibre (each of size `≤ [E:K]` via
 `Ideal.card_primesOverFinset_le_finrank`) gives the bound. -/
 private theorem primeIdealZetaSum_degTwo_le (σ : Gal(L/K)) {s : ℝ}
     (hs : 1 < s) (Aset : Set (Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))))
     (hA : Aset = {P | P.IsPrime ∧ P ≠ ⊥ ∧
-      UnramifiedIn K L (P.under (𝓞 K)) ∧ 2 ≤ (P.under (𝓞 K)).inertiaDeg P}) :
+      UnramifiedIn K L (P.under (𝓞 K)) ∧ 2 ≤ (P.under (𝓞 K)).inertiaDeg' P}) :
     primeIdealZetaSum Aset s
       ≤ (Module.finrank K ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) : ℝ)
         * primeIdealZetaSum (univ : Set (Ideal (𝓞 K))) 2 := by
@@ -1038,7 +1051,7 @@ private theorem primeIdealZetaSum_T2_div_univ_tendsto_zero
           P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P ∧
           frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
             = ConjClasses.mk σE} |
-        (P.under (𝓞 K)).inertiaDeg P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))}) :
+        (P.under (𝓞 K)).inertiaDeg' P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))}) :
     Tendsto (fun s : ℝ ↦ primeIdealZetaSum T₂set s
       / primeIdealZetaSum (univ : Set (Ideal (𝓞 ↥(IntermediateField.fixedField
         (Subgroup.zpowers σ))))) s) (𝓝[>] 1) (𝓝 0) := by
@@ -1046,7 +1059,7 @@ private theorem primeIdealZetaSum_T2_div_univ_tendsto_zero
     IsGalois.tower_top_intermediateField _
   set Aset := {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) |
     P.IsPrime ∧ P ≠ ⊥ ∧ UnramifiedIn K L (P.under (𝓞 K)) ∧
-    2 ≤ (P.under (𝓞 K)).inertiaDeg P} with hAdef
+    2 ≤ (P.under (𝓞 K)).inertiaDeg' P} with hAdef
   set Bset := {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) |
     P.IsPrime ∧ P ≠ ⊥ ∧ ¬ UnramifiedIn K L (P.under (𝓞 K))} with hBdef
   have hsub : T₂set ⊆ Aset ∪ Bset := by
@@ -1057,13 +1070,13 @@ private theorem primeIdealZetaSum_T2_div_univ_tendsto_zero
     have hPb : P ≠ ⊥ := UnramifiedIn.ne_bot _ L hPunr
     by_cases hunrK : UnramifiedIn K L (P.under (𝓞 K))
     · refine Or.inl ⟨hPp, hPb, hunrK, ?_⟩
-      have hdegne : (P.under (𝓞 K)).inertiaDeg P ≠ 1 := fun hdeg1 ↦
+      have hdegne : (P.under (𝓞 K)).inertiaDeg' P ≠ 1 := fun hdeg1 ↦
         hPnotT1 ⟨hPp, hPunr, hPfr⟩ hdeg1 hunrK
       have hppr : (P.under (𝓞 K)).IsPrime := inferInstance
       haveI : (P.under (𝓞 K)).IsMaximal :=
         hppr.isMaximal (Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPb)
       haveI : P.LiesOver (P.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := P)
-      have hpos : 0 < (P.under (𝓞 K)).inertiaDeg P := Ideal.inertiaDeg_pos' _ _
+      have hpos : 0 < (P.under (𝓞 K)).inertiaDeg' P := Ideal.inertiaDeg_pos' _ _
       omega
     · exact Or.inr ⟨hPp, hPb, hunrK⟩
   have hdisj : Disjoint Aset Bset := by
@@ -1147,7 +1160,7 @@ theorem density_lift_through_fixedField
     P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P ∧
     frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P
       = ConjClasses.mk σE} with hTset
-  set T₁set := {P ∈ Tset | (P.under (𝓞 K)).inertiaDeg P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))}
+  set T₁set := {P ∈ Tset | (P.under (𝓞 K)).inertiaDeg' P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))}
     with hT₁set
   set T₂set := Tset \ T₁set with hT₂set
   have hT₁sub : T₁set ⊆ Tset := fun x hx ↦ hx.1
@@ -1199,7 +1212,7 @@ theorem density_lift_through_fixedField
   have hT₁flat : T₁set = {P : Ideal (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))) |
       P.IsPrime ∧ UnramifiedIn ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P ∧
       frobeniusClass ↥(IntermediateField.fixedField (Subgroup.zpowers σ)) L P = ConjClasses.mk σE ∧
-      (P.under (𝓞 K)).inertiaDeg P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))} := by
+      (P.under (𝓞 K)).inertiaDeg' P = 1 ∧ UnramifiedIn K L (P.under (𝓞 K))} := by
     rw [hT₁set, hTset]
     ext P
     simp only [Set.mem_setOf_eq]

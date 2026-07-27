@@ -4,26 +4,27 @@ import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDec
 # The SOUND level-`71` unit ↔ Dwork-slice coordinate bridge: the genuine `ρ₀ = (32!)⁻¹ + c₆₈` value,
 # threaded correctly through both unscaled and scaled coordinates
 
-This file builds the **sound** discharge of `CaseIICor823Level71SecondOrderPartValue37` (hence R4 and
-the FLT37 endpoint) from the two genuine `p`-adic-`L` pieces, *avoiding* the over-stated piece-2 value
-`37·(32!)⁻¹` that `CaseIICor823Level71DworkSpecializedReduction.lean` /
+This file builds the **sound** discharge of `CaseIICor823Level71SecondOrderPartValue37` (hence R4
+and the FLT37 endpoint) from the two genuine `p`-adic-`L` pieces, *avoiding* the over-stated piece-2
+value `37·(32!)⁻¹` that `CaseIICor823Level71DworkSpecializedReduction.lean` /
 `CaseIICor823Level71UnitDworkCoordBridge.lean` carry.  It imports only; it does **not** modify any
 existing file.  No `sorry`, no `axiom`.
 
 ## The soundness correction (the omitted degree-`68` second digit `c₆₈`)
 
-`CaseIICor823Level71DworkSpecializedReduction.lean`'s `coordIdentity` (and the residual it discharges,
-`CaseIICor823Level71UnitDworkCoordBridge37`, pinning `ρ = −(32!)⁻¹`) use the **over-stated** unscaled
-degree-`32` coordinate value `coordModSq 32 (dworkParameterNormalizedCoordFiniteLogN 71) = 37·(32!)⁻¹`.
-But `CaseIICor823Level71DworkSpecializedSound.lean` proves that the genuine unscaled coordinate is
+`CaseIICor823Level71DworkSpecializedReduction.lean`'s `coordIdentity` (and the residual it
+discharges, `CaseIICor823Level71UnitDworkCoordBridge37`, pinning `ρ = −(32!)⁻¹`) use the
+**over-stated** unscaled degree-`32` coordinate value
+`coordModSq 32 (dworkParameterNormalizedCoordFiniteLogN 71) = 37·(32!)⁻¹`. But
+`CaseIICor823Level71DworkSpecializedSound.lean` proves that the genuine unscaled coordinate is
 
   `coordModSq 32 (unscaled) = 37·((32!)⁻¹ + c₆₈)`,
 
-where `c₆₈ ∈ ZMod 37` is the degree-`68` homogeneous slice's second digit (the Kellner `α₁` content):
-the `deg-`32`` slice contributes `37·(32!)⁻¹` (`deg32SliceCoordModSq37_eq`, proven) **and** the `deg-`68``
-slice contributes `37·c₆₈` (`unscaled32SliceCoord_sixtyeight_castHom_eq_zero`, proven mod-`37` value `0`
-but generally nonzero second digit).  So the pinned `ρ = −(32!)⁻¹` is **wrong**; the genuine
-`ρ = −((32!)⁻¹ + c₆₈) = −ρ₀`.
+where `c₆₈ ∈ ZMod 37` is the degree-`68` homogeneous slice's second digit (the Kellner `α₁`
+content): the `deg-`32`` slice contributes `37·(32!)⁻¹` (`deg32SliceCoordModSq37_eq`, proven)
+**and** the `deg-`68`` slice contributes `37·c₆₈`
+(`unscaled32SliceCoord_sixtyeight_castHom_eq_zero`, proven mod-`37` value `0` but generally nonzero
+second digit).  So the pinned `ρ = −(32!)⁻¹` is **wrong**; the genuine `ρ = −((32!)⁻¹ + c₆₈) = −ρ₀`.
 
 Crucially, the FLT37 endpoint (`CaseIICor823Level71SecondOrderPartValue37`, the `M ≤ 1`
 non-degeneracy) needs **only** `ρ ≠ 0`, *not* a numeral.  So this file targets that **sound**
@@ -39,26 +40,27 @@ After this file, `CaseIICor823Level71SecondOrderPartValue37` rests on exactly:
    Dwork-specialized finite-log identity — `samePrimeFiniteLog 71 (c^{p-1} − 1) = unscaled − scaled`
    — the level-`71` lift of the proven `p − 2`-precise
    `kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs` applied to the **unit**
-   `c^{p-1} − 1`.  This is the genuine **second-order Fermat-quotient** content (the first-order Fermat
-   congruence `c^p ≡ c (mod p)` is valid only at precision `p − 1`).  It is *exactly* piece 1 of the
-   existing `CaseIICor823Level71DworkSpecializedFiniteLog37`, stated alone.
+   `c^{p-1} − 1`.  This is the genuine **second-order Fermat-quotient** content (the first-order
+   Fermat congruence `c^p ≡ c (mod p)` is valid only at precision `p − 1`).  It is *exactly* piece 1
+   of the existing `CaseIICor823Level71DworkSpecializedFiniteLog37`, stated alone.
 
-2. **`CaseIICor823Level71Unscaled32Coord37`** (from `CaseIICor823Level71DworkSpecializedSound.lean`):
-   the **sound** non-degeneracy `∃ ρ₀ ≠ 0, coordModSq 32 (unscaled) = 37·ρ₀.val`, where
-   `ρ₀ = (32!)⁻¹ + c₆₈`.  This is the genuine `v_p(L₃₇(1, ω³²)) = 1` / Washington Proposition 8.12
-   content: that the second `37`-adic digit of the unscaled Dwork coordinate of the cyclotomic-unit
-   log is nonzero.
+2. **`CaseIICor823Level71Unscaled32Coord37`** (from
+   `CaseIICor823Level71DworkSpecializedSound.lean`): the **sound** non-degeneracy
+   `∃ ρ₀ ≠ 0, coordModSq 32 (unscaled) = 37·ρ₀.val`, where `ρ₀ = (32!)⁻¹ + c₆₈`.  This is the
+   genuine `v_p(L₃₇(1, ω³²)) = 1` / Washington Proposition 8.12 content: that the second `37`-adic
+   digit of the unscaled Dwork coordinate of the cyclotomic-unit log is nonzero.
 
 **Honest soundness note on the bridge `v_p(L) = 1 ⟹ ρ₀ ≠ 0`.**  The proven `v₃₇(L₃₇(1, ω³²)) = 1`
 (`bernoulliGenOmegaValuationTwo37_proved`, `caseII_cor823_valuation_input_proven`) gives the **sharp
 Bernoulli valuation** `v₃₇(B₃₂/32) = 1` — the *analytic* `L`-value is a first-order zero.  Piece 2's
-`ρ₀ = (32!)⁻¹ + c₆₈` is the **second digit of the Dwork coordinate of the cyclotomic-unit logarithm**,
-a *different normalization* (related to `B₃₂/32` and `B₆₈/68` through Washington Proposition 8.12's
-single-unit `p`-adic-log valuation `v_p(log_p E_i^{(N)}) = i/(p−1) + v_p(L_p(1, ω^i))`).  The `37·`
-structure (the first digit `= 0`) is proven *unconditionally* (`genericColumnCoordLHS37_castHom_eq_zero`),
-**not** via `v_p(L)`; the non-degeneracy `ρ₀ ≠ 0` (the `unit` factor) is the genuine Proposition 8.12
-content that the repo's first-order Kummer-determinant infrastructure does *not* supply
-(cf. `CaseIICor823SecondOrder.lean`).  So `v_p(L) = 1` is the *motivation and analytic certificate* for
+`ρ₀ = (32!)⁻¹ + c₆₈` is the **second digit of the Dwork coordinate of the cyclotomic-unit
+logarithm**, a *different normalization* (related to `B₃₂/32` and `B₆₈/68` through Washington
+Proposition 8.12's single-unit `p`-adic-log valuation
+`v_p(log_p E_i^{(N)}) = i/(p−1) + v_p(L_p(1, ω^i))`).  The `37·` structure (the first digit `= 0`)
+is proven *unconditionally* (`genericColumnCoordLHS37_castHom_eq_zero`), **not** via `v_p(L)`; the
+non-degeneracy `ρ₀ ≠ 0` (the `unit` factor) is the genuine Proposition 8.12 content that the repo's
+first-order Kummer-determinant infrastructure does *not* supply (cf.
+`CaseIICor823SecondOrder.lean`).  So `v_p(L) = 1` is the *motivation and analytic certificate* for
 `ρ₀ ≠ 0`, but the formal bridge from the analytic valuation to the Dwork-coordinate second digit is
 itself Proposition 8.12 — left as the explicit hypothesis `CaseIICor823Level71Unscaled32Coord37`.
 
@@ -67,10 +69,10 @@ itself Proposition 8.12 — left as the explicit hypothesis `CaseIICor823Level71
 The existing `caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity` threads the over-stated
 `37·(32!)⁻¹` into *both* the unscaled and (via the Teichmüller factor) the scaled coordinate — but
 because it pins the unscaled value to `37·(32!)⁻¹` rather than the genuine `37·ρ₀.val`, it omits the
-`c₆₈` digit.  Here we keep the unscaled coordinate **abstract** (`= 37·ρ₀.val` from the sound residual)
-and let the *same* `ρ₀` flow into the scaled coordinate through the proven Teichmüller column factor,
-so the difference is `(1 − τ(k)³²)·37·ρ₀.val` with the genuine `ρ₀` preserved — the sound value
-`ρ = −ρ₀`.
+`c₆₈` digit.  Here we keep the unscaled coordinate **abstract** (`= 37·ρ₀.val` from the sound
+residual) and let the *same* `ρ₀` flow into the scaled coordinate through the proven Teichmüller
+column factor, so the difference is `(1 − τ(k)³²)·37·ρ₀.val` with the genuine `ρ₀` preserved — the
+sound value `ρ = −ρ₀`.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4 (Proposition 8.12, Theorem
@@ -83,7 +85,6 @@ so the difference is `(1 − τ(k)³²)·37·ρ₀.val` with the genuine `ρ₀`
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -95,8 +96,9 @@ open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 
 This is *exactly* piece 1 of the existing `CaseIICor823Level71DworkSpecializedFiniteLog37`, isolated
 as its own `def … : Prop`.  Unlike the bundled residual, it carries **no** numeric coordinate value
-(it is purely the finite-log substitution identity), so it cannot over-state the unscaled coordinate;
-the coordinate value comes *only* from the sound `CaseIICor823Level71Unscaled32Coord37`. -/
+(it is purely the finite-log substitution identity), so it cannot over-state the unscaled
+coordinate; the coordinate value comes *only* from the sound `CaseIICor823Level71Unscaled32Coord37`.
+-/
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The level-`71` unit ↔ Dwork-specialized finite-log identity** (a `def … : Prop`, **not** an
@@ -110,13 +112,13 @@ unscaled-minus-scaled Dwork-parameter difference:
     `scaledDworkParameterNormalizedCoordFiniteLogN (kummerLogColumnDelta a) 71`.
 
 This is **piece 1** of `CaseIICor823Level71DworkSpecializedFiniteLog37`
-(`CaseIICor823Level71DworkSpecializedReduction.lean`), stated *alone* (without the over-stated piece-2
-value `37·(32!)⁻¹`).  It is the level-`71` lift of the proven `p − 2`-precise
+(`CaseIICor823Level71DworkSpecializedReduction.lean`), stated *alone* (without the over-stated
+piece-2 value `37·(32!)⁻¹`).  It is the level-`71` lift of the proven `p − 2`-precise
 `kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs` applied to the **unit**
 `c^{p-1} − 1`, combining the level-`71` unit ↔ quotient Fermat bridge with the level-`71` Dwork ↔
-quotient Teichmüller transport (the Teichmüller difference `τ(k) − k` vanishes only to order `p − 1`,
-so the proven `p − 2`-precise `_evalₐ_pow_pred` does not lift — this is the genuine `v_p(L₃₇(1, ω³²)) =
-1` second-order Fermat-quotient content). -/
+quotient Teichmüller transport (the Teichmüller difference `τ(k) − k` vanishes only to order
+`p − 1`, so the proven `p − 2`-precise `_evalₐ_pow_pred` does not lift — this is the genuine
+`v_p(L₃₇(1, ω³²)) = 1` second-order Fermat-quotient content). -/
 def CaseIICor823Level71UnitFiniteLogIdentity37
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] : Prop :=
@@ -150,14 +152,14 @@ The level-`71` finite-log coordinate `W(a) = normalizedUnitCoeff37 a` of the uni
 computed from the finite-log identity (piece 1) and the sound unscaled coordinate value `37·ρ₀.val`
 (`CaseIICor823Level71Unscaled32Coord37`, the genuine `ρ₀ = (32!)⁻¹ + c₆₈`), threading the **same**
 `ρ₀` into the scaled coordinate through the proven Teichmüller column factor.  This is the sound
-replacement for `caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity` (which over-states the
-unscaled value as `37·(32!)⁻¹`, dropping `c₆₈`). -/
+replacement for `caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity` (which over-states
+the unscaled value as `37·(32!)⁻¹`, dropping `c₆₈`). -/
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **The sound mod-`37²` coordinate identity** (proven, axiom-clean given the finite-log identity and
-the sound unscaled coordinate value): if piece 1 (`CaseIICor823Level71UnitFiniteLogIdentity37`) holds
-and the unscaled `varpi^{32}` coordinate is `37·ρ₀.val` (the sound non-degeneracy datum), then for
-every column `a`
+/-- **The sound mod-`37²` coordinate identity** (proven, axiom-clean given the finite-log identity
+and the sound unscaled coordinate value): if piece 1 (`CaseIICor823Level71UnitFiniteLogIdentity37`)
+holds and the unscaled `varpi^{32}` coordinate is `37·ρ₀.val` (the sound non-degeneracy datum), then
+for every column `a`
 
   `normalizedUnitCoeff37 a = (1 − ((a+2 : ZMod 37²))³²)·(37·ρ₀.val)`.
 
@@ -168,9 +170,9 @@ distributes (`valuedLambdaQuotientDworkCoeffModSq_sub`), the scaled coordinate i
 factor times the **same** unscaled coordinate
 (`…_scaledDworkParameterNormalizedCoordFiniteLogN71_eq_smul`), the unscaled coordinate is the sound
 `37·ρ₀.val`, and the Teichmüller factor `τ(k)³²` collapses mod-`37` to the rational `k³² = (a+2)³²`
-under the `37·` factor (`teichmullerCoeffModSq_castHom`, `thirtyseven_mul_eq_of_castHom_eq`).  Unlike
-the existing `coordIdentity`, the unscaled value is kept abstract as `37·ρ₀.val`, so `ρ₀` (with `c₆₈`
-folded in) flows correctly into both coordinates — the sound value. -/
+under the `37·` factor (`teichmullerCoeffModSq_castHom`, `thirtyseven_mul_eq_of_castHom_eq`).
+Unlike the existing `coordIdentity`, the unscaled value is kept abstract as `37·ρ₀.val`, so `ρ₀`
+(with `c₆₈` folded in) flows correctly into both coordinates — the sound value. -/
 theorem caseIICor823Level71SoundCoordIdentity
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -231,22 +233,23 @@ theorem caseIICor823Level71SoundCoordIdentity
 /-! ## 3. The sound second-order part value: `secondOrderPart37 a = (−ρ₀)·V̄(a)`, `−ρ₀ ≠ 0`
 
 From the sound coordinate identity (`W(a) = 37·((1 − k³²)·ρ₀.val)`) and the proven `37·` structure,
-`secondOrderPart37 a = castHom((1 − k³²)·ρ₀.val) = (1 − k³²)·ρ₀ = (−V̄(a))·ρ₀ = (−ρ₀)·V̄(a)`.  The sound
-leading coefficient is `ρ = −ρ₀`, **nonzero** because the non-degeneracy residual gives `ρ₀ ≠ 0`. -/
+`secondOrderPart37 a = castHom((1 − k³²)·ρ₀.val) = (1 − k³²)·ρ₀ = (−V̄(a))·ρ₀ = (−ρ₀)·V̄(a)`.  The
+sound leading coefficient is `ρ = −ρ₀`, **nonzero** because the non-degeneracy residual gives
+`ρ₀ ≠ 0`. -/
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **The sound second-order-part value identity** (proven, axiom-clean given the finite-log identity
-and the sound non-degeneracy): if piece 1 holds and `coordModSq 32 (unscaled) = 37·ρ₀.val`, then for
-every column `a`
+/-- **The sound second-order-part value identity** (proven, axiom-clean given the finite-log
+identity and the sound non-degeneracy): if piece 1 holds and `coordModSq 32 (unscaled) = 37·ρ₀.val`,
+then for every column `a`
 
   `secondOrderPart37 a = (−ρ₀) · vandermondeFactorModP37 a`  (in `ZMod 37`).
 
 By `caseIICor823Level71SoundCoordIdentity`, `W(a) = 37·((1 − k³²)·ρ₀.val)`, so the proven `37·`
-structure (`secondOrderPart37_eq_castHom_of_eq_thirtyseven_mul`) gives `secondOrderPart37 a =
-castHom((1 − k³²)·ρ₀.val) = castHom(1 − k³²)·ρ₀`.  Evaluating `castHom(1 − k³²_modSq) = −V̄(a)`
-(`column_pow_thirtytwo_castHom`) and `castHom(ρ₀.val_modSq) = ρ₀` (`ZMod.natCast_val`,
-`ZMod.cast_id`) yields `(−V̄(a))·ρ₀ = (−ρ₀)·V̄(a)`.  This is the genuine value with `c₆₈` folded into
-`ρ₀` — **not** the over-pinned `−(32!)⁻¹`. -/
+structure (`secondOrderPart37_eq_castHom_of_eq_thirtyseven_mul`) gives
+`secondOrderPart37 a = castHom((1 − k³²)·ρ₀.val) = castHom(1 − k³²)·ρ₀`.  Evaluating
+`castHom(1 − k³²_modSq) = −V̄(a)` (`column_pow_thirtytwo_castHom`) and `castHom(ρ₀.val_modSq) = ρ₀`
+(`ZMod.natCast_val`, `ZMod.cast_id`) yields `(−V̄(a))·ρ₀ = (−ρ₀)·V̄(a)`.  This is the genuine value
+with `c₆₈` folded into `ρ₀` — **not** the over-pinned `−(32!)⁻¹`. -/
 theorem caseIICor823Level71SoundSecondOrderPartValue
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -286,20 +289,20 @@ theorem caseIICor823Level71SoundSecondOrderPartValue
 /-! ## 4. The sound discharge of `CaseIICor823Level71SecondOrderPartValue37`
 
 Combining the finite-log identity (piece 1) with the sound non-degeneracy residual
-`CaseIICor823Level71Unscaled32Coord37` (`∃ ρ₀ ≠ 0`, `CaseIICor823Level71DworkSpecializedSound.lean`),
-the sound second-order-part value identity gives `CaseIICor823Level71SecondOrderPartValue37` with the
-genuine nonzero `ρ = −ρ₀`. -/
+`CaseIICor823Level71Unscaled32Coord37` (`∃ ρ₀ ≠ 0`,
+`CaseIICor823Level71DworkSpecializedSound.lean`), the sound second-order-part value identity gives
+`CaseIICor823Level71SecondOrderPartValue37` with the genuine nonzero `ρ = −ρ₀`. -/
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **`CaseIICor823Level71SecondOrderPartValue37` from the sound pieces** (proven, axiom-clean given
 the level-`71` unit↔Dwork finite-log identity and the sound non-degeneracy
 `CaseIICor823Level71Unscaled32Coord37`).
 
-Destructure the sound non-degeneracy residual for the genuine nonzero `ρ₀` (`ρ₀ = (32!)⁻¹ + c₆₈ ≠ 0`)
-and its unscaled coordinate value `37·ρ₀.val`; supply `ρ = −ρ₀` (nonzero since `ρ₀ ≠ 0`) and the
-per-column identity `caseIICor823Level71SoundSecondOrderPartValue`.  This is the **sound** discharge —
-it threads `ρ₀` (with `c₆₈`) correctly, avoiding the over-stated `37·(32!)⁻¹` of
-`caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity`. -/
+Destructure the sound non-degeneracy residual for the genuine nonzero `ρ₀`
+(`ρ₀ = (32!)⁻¹ + c₆₈ ≠ 0`) and its unscaled coordinate value `37·ρ₀.val`; supply `ρ = −ρ₀` (nonzero
+since `ρ₀ ≠ 0`) and the per-column identity `caseIICor823Level71SoundSecondOrderPartValue`.  This is
+the **sound** discharge — it threads `ρ₀` (with `c₆₈`) correctly, avoiding the over-stated
+`37·(32!)⁻¹` of `caseIICor823Level71DworkSpecializedFiniteLog37_coordIdentity`. -/
 theorem caseIICor823Level71SecondOrderPartValue37_of_soundPieces
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -332,8 +335,8 @@ theorem cor823PthPowerOfRationalModSq37_of_soundPieces
             (caseIICor823Level71SecondOrderPartValue37_of_soundPieces hLog hNonDeg)))))
 
 open FLT37.LehmerVandiver.CaseII in
-/-- **Fermat's Last Theorem for `37`, with `R4` reduced to the TWO SOUND pieces** (proven, axiom-clean
-given the genuine residuals + the carried Kellner Prop).
+/-- **Fermat's Last Theorem for `37`, with `R4` reduced to the TWO SOUND pieces** (proven,
+axiom-clean given the genuine residuals + the carried Kellner Prop).
 
 `R4` (Washington Proposition 8.12 at `i = 32`) reduced to exactly:
 
@@ -364,7 +367,8 @@ theorem fermatLastTheoremFor_thirtyseven_of_soundPieces
     caseII_classConjFixed
     caseII_realDescent
     caseII_pthPow
-    (caseIICor823Level71SecondOrderPartValue37_of_soundPieces caseII_finiteLogIdentity caseII_nonDeg)
+    (caseIICor823Level71SecondOrderPartValue37_of_soundPieces caseII_finiteLogIdentity
+      caseII_nonDeg)
     noSecondOrderIrregular
 
 end BernoulliRegular.FLT37.Eichler

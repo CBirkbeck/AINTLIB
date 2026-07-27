@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.Primary
@@ -213,7 +218,7 @@ theorem pthSymbolAtPrime_galoisAction_of_compat
   -- Unfold both sides of `pthSymbolAtPrime` in their good case.
   have hbot_q' : cyclotomicGaloisConjugate (p := p) (K := K) a q ≠ ⊥ :=
     cyclotomicGaloisConjugate_ne_bot a hbot
-  unfold pthSymbolAtPrime
+  simp only [pthSymbolAtPrime]
   rw [dif_neg hbot_q', dif_pos hmax_q', dif_neg hα', dif_pos hdiv',
       dif_pos hroot_q']
   rw [dif_neg hbot, dif_pos hmax, dif_neg hα, dif_pos hdiv,
@@ -339,7 +344,7 @@ theorem pthSymbolAtPrime_galoisAction_exists_unit
     (notMem_cyclotomicGaloisConjugate_iff a).mpr hα
   have hbot_q'_ne : cyclotomicGaloisConjugate (p := p) (K := K) a q ≠ ⊥ :=
     cyclotomicGaloisConjugate_ne_bot a hbot
-  unfold pthSymbolAtPrime
+  simp only [pthSymbolAtPrime]
   rw [dif_neg hbot_q'_ne, dif_pos hmax_q', dif_neg hα', dif_pos hdiv',
       dif_pos hroot_q']
   rw [dif_neg hbot, dif_pos hmax, dif_neg hα, dif_pos hdiv,
@@ -404,9 +409,7 @@ theorem pthSymbolAtPrime_galoisAction_exists_unit
     rw [ZMod.natCast_eq_zero_iff] at h
     have hn_zero : n = 0 := Nat.eq_zero_of_dvd_of_lt h hn_lt
     rw [hn_zero] at hn_cop
-    have hp_eq : p = 1 := by
-      unfold Nat.Coprime at hn_cop
-      rwa [Nat.gcd_zero_left] at hn_cop
+    have hp_eq : p = 1 := (Nat.coprime_zero_left p).mp hn_cop
     exact ((Fact.out : p.Prime).one_lt.ne' hp_eq).elim
   rw [eq_inv_mul_iff_mul_eq₀ hn_ne_zero]
   linear_combination h_pow_eq
@@ -439,7 +442,7 @@ theorem stickelbergerIdeal_ne_bot
     {q_K : Ideal (𝓞 K)} (hq : q_K ≠ ⊥) :
     stickelbergerIdeal (p := p) (K := K) q_K ≠ ⊥ := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   rw [Ne, ← Ideal.zero_eq_bot, Finset.prod_eq_zero_iff]
   push Not
   intro a _
@@ -452,7 +455,7 @@ theorem stickelbergerIdeal_ne_bot
 @[simp] theorem stickelbergerIdeal_bot :
     stickelbergerIdeal (p := p) (K := K) (⊥ : Ideal (𝓞 K)) = ⊥ := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   -- Pull out the factor at a = 1: it's ⊥^1 = ⊥, which dominates everything.
   rw [← Finset.prod_erase_mul (Finset.univ : Finset (CyclotomicUnitDelta p))
         (fun a => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
@@ -477,7 +480,7 @@ theorem stickelbergerIdeal_le_factor
       cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ q_K ^
         ((a : ZMod p).val) := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   rw [← Finset.prod_erase_mul (Finset.univ : Finset (CyclotomicUnitDelta p))
         (fun a => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ q_K ^
             ((a : ZMod p).val)) (Finset.mem_univ a)]
@@ -511,7 +514,7 @@ is `(σ_1 q_K)^(1.val) = q_K^1 = q_K`, dominating the entire product. -/
 theorem stickelbergerIdeal_le_self (q_K : Ideal (𝓞 K)) :
     stickelbergerIdeal (p := p) (K := K) q_K ≤ q_K := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   -- Split off the factor at a = 1.
   rw [← Finset.prod_erase_mul (Finset.univ : Finset (CyclotomicUnitDelta p))
         (fun a => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ q_K ^
@@ -658,7 +661,7 @@ theorem cyclotomicConjugates_card_le (q : Ideal (𝓞 K)) :
     (cyclotomicConjugates (p := p) (K := K) q).card ≤
       Fintype.card (CyclotomicUnitDelta p) := by
   classical
-  unfold cyclotomicConjugates
+  simp only [cyclotomicConjugates]
   exact (Finset.card_image_le).trans (le_of_eq (Finset.card_univ))
 
 /-- The cardinality of the cyclotomic conjugate set equals `p - 1` over the
@@ -708,7 +711,7 @@ theorem residueGaussSum_pow_p_support_in_cyclotomicConjugates
       exact_mod_cast hγ'
     have h_norm_pow : Ideal.absNorm q_K =
         Ideal.absNorm (q_K.under ℤ) ^
-          ((Ideal.span ({(Ideal.absNorm (q_K.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg q_K) := by
+          ((Ideal.span ({(Ideal.absNorm (q_K.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg' q_K) := by
       have := Ideal.absNorm_eq_pow_inertiaDeg
         (R := 𝓞 K) (P := q_K) (p := (Ideal.absNorm (q_K.under ℤ) : ℤ))
         (Nat.prime_iff_prime_int.mp hp_prime)
@@ -757,7 +760,7 @@ theorem normalizedFactors_stickelbergerIdeal_subset
   -- Note: in Dedekind domains, `I ∣ J ↔ J ≤ I` (i.e., `I` divides `J` iff `J ⊆ I`).
   have hstick_le_b : stickelbergerIdeal (p := p) (K := K) q_K ≤ b :=
     Ideal.le_of_dvd hb_dvd
-  unfold stickelbergerIdeal at hstick_le_b
+  simp only [stickelbergerIdeal] at hstick_le_b
   have ⟨a, _, ha⟩ :=
     (Ideal.IsPrime.prod_le (s := Finset.univ)
       (f := fun a => cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ q_K ^

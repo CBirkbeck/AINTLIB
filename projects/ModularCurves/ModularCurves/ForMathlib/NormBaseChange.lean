@@ -1,7 +1,12 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.LinearAlgebra.Charpoly.BaseChange
 import Mathlib.RingTheory.Norm.Defs
 import Mathlib.RingTheory.TensorProduct.Free
 import Mathlib.RingTheory.TensorProduct.Maps
-import Mathlib.LinearAlgebra.Charpoly.BaseChange
 
 /-!
 # The norm commutes with base change

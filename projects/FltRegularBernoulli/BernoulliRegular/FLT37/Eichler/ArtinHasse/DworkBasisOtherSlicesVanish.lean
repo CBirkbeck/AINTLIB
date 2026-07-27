@@ -6,8 +6,8 @@ import BernoulliRegular.FLT37.Eichler.ArtinHasse.Deg68OnwardCorrectionDischarge
 
 This file builds toward `CaseIICor823Level71Deg68OtherSlicesVanish37`
 (`CaseIICor823Level71Deg68OnwardDischarge.lean`): the sum of the degree-`d` slice `varpi^{32}`
-coordinates over `d ∈ ((range 2664).erase 32).erase 68` vanishes mod `37²`.  It imports only; it does
-**not** modify any existing file.  No `sorry`, no `axiom`.
+coordinates over `d ∈ ((range 2664).erase 32).erase 68` vanishes mod `37²`.  It imports only; it
+does **not** modify any existing file.  No `sorry`, no `axiom`.
 
 ## The two vanishing mechanisms (the `d mod 36` dichotomy)
 
@@ -21,10 +21,11 @@ governed by `d mod 36`:
   `d mod 36 ≠ 32` — is proven here (`x_pow_coordModSq_eq_zero_of_emod_ne`).
 
 * **`d mod 36 = 32`, `d ≥ 104`** (i.e. `d ∉ {32, 68}` in range): the **whole** degree-`d` slice
-  `S_d^{(71)}` is `0` in the level-`71` precision quotient `⧸ (λ)^{72}`, because the formal degree-`d`
-  Artin-Hasse log source `formalSum_d` is `≡ 0 (mod 37²)` (its `37`-adic valuation grows with `d` by
-  the Artin-Hasse Frobenius structure — `v_37(formalSum_d) = (d - 32)/36 ≥ 2` for `d ≥ 104`), and the
-  cross-level factorial-weighted membership forces `S_d^{(71)} ∈ (λ)^{36·v_37(d!) + 72}`, i.e.
+  `S_d^{(71)}` is `0` in the level-`71` precision quotient `⧸ (λ)^{72}`, because the formal
+  degree-`d` Artin-Hasse log source `formalSum_d` is `≡ 0 (mod 37²)` (its `37`-adic valuation grows
+  with `d` by the Artin-Hasse Frobenius structure — `v_37(formalSum_d) = (d - 32)/36 ≥ 2` for
+  `d ≥ 104`), and the cross-level factorial-weighted membership forces
+  `S_d^{(71)} ∈ (λ)^{36·v_37(d!) + 72}`, i.e.
   `S_d^{(71)} = 0`.  This is the **opposite** of the `d = 68` slice (`v_37(formalSum_68) = 1`, hence
   `S_68^{(71)} ≠ 0`, carrying the genuine second digit `c₆₈ = 4`).
 
@@ -61,12 +62,13 @@ open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
 variable [NumberField.IsCMField K]
 
-/-! ## 1. The `varpi^{32}` coordinate of `dworkParameter^d` vanishes mod `37²` for `d mod 36 ≠ 32` -/
+/-! ## 1. The `varpi^{32}` coordinate of `dworkParameter^d` vanishes mod `37²` for `d mod 36 ≠ 32`
+-/
 
 omit [NumberField.IsCMField K] in
-/-- **The degree-`r` Dwork power (`r < 36`, `r ≠ 32`) is off the `varpi^{32}` basis vector** (proven):
-`repr(dworkParameter^r) 32 = 0`, since `r < 36 = p - 1` so `dworkParameter^r = dworkParameterPowerBasis
-r` is the basis vector of index `r ≠ 32`. -/
+/-- **The degree-`r` Dwork power (`r < 36`, `r ≠ 32`) is off the `varpi^{32}` basis vector**
+(proven): `repr(dworkParameter^r) 32 = 0`, since `r < 36 = p - 1` so
+`dworkParameter^r = dworkParameterPowerBasis r` is the basis vector of index `r ≠ 32`. -/
 theorem repr_dworkParameter_pow_eq_zero_of_lt_of_ne
     (k : Fin (37 - 1)) (hk : (k : ℕ) = 32) (r : ℕ) (hr : r < 36) (hrne : r ≠ 32) :
     (dworkParameterPowerBasis 37 K).repr (dworkParameter 37 K ^ r) k = 0 := by
@@ -96,9 +98,9 @@ theorem dworkParameter_pow_eq_fold (hp2 : 2 < 37) (q r : ℕ) :
     simpa using this
   rw [pow_add, pow_mul, h36]
 
-/-- **`(-37)^q` lies in `(rationalPadicPrimeIdeal)^2` for `q ≥ 2`** (proven): the ramification scalar
-is `37²`-divisible once `q ≥ 2`, so it vanishes mod `37²`.  Used for the `d ≥ 104` (`q ≥ 2`) Dwork
-powers.  `(rationalPadicPrimeIdeal)^2 = span {37²}`, and `(-37)^q = 37²·((-1)^q·37^{q-2})`. -/
+/-- **`(-37)^q` lies in `(rationalPadicPrimeIdeal)^2` for `q ≥ 2`** (proven): the ramification
+scalar is `37²`-divisible once `q ≥ 2`, so it vanishes mod `37²`.  Used for the `d ≥ 104` (`q ≥ 2`)
+Dwork powers.  `(rationalPadicPrimeIdeal)^2 = span {37²}`, and `(-37)^q = 37²·((-1)^q·37^{q-2})`. -/
 theorem neg_thirtyseven_pow_mem_primeIdeal_sq (q : ℕ) (hq : 2 ≤ q) :
     (-(37 : RationalPadicIntegerRing 37)) ^ q ∈ (rationalPadicPrimeIdeal 37) ^ 2 := by
   have h37 : (37 : RationalPadicIntegerRing 37) ∈ rationalPadicPrimeIdeal 37 :=
@@ -135,9 +137,10 @@ theorem x_pow_coordModSq_eq_zero_of_lt_of_ne
 omit [NumberField.IsCMField K] in
 /-- **The formal `rIntegralRat` scalar factors out of the mod-`37²` coordinate of `x^d`** (proven,
 general degree): for any `37`-integral rational `q`,
-`coordModSq(quotMap(x^d)·RIntToQuot(q)) = (q.num·q.den⁻¹)·coordModSq(quotMap(x^d))`.  The general-`d`
-analog of `rIntegralRat_scalar_factors_through_coordModSq_x68` (identical proof, with the exponent a
-parameter): denominator clearing by the `37`-unit `q.den` and `den_mul_rIntegralRatToValuedInteger`. -/
+`coordModSq(quotMap(x^d)·RIntToQuot(q)) = (q.num·q.den⁻¹)·coordModSq(quotMap(x^d))`.  The
+general-`d` analog of `rIntegralRat_scalar_factors_through_coordModSq_x68` (identical proof, with
+the exponent a parameter): denominator clearing by the `37`-unit `q.den` and
+`den_mul_rIntegralRatToValuedInteger`. -/
 theorem rIntegralRat_scalar_factors_through_coordModSq_xpow
     (d : ℕ) (q : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) (k : Fin (37 - 1)) :
     valuedLambdaQuotientDworkCoeffModSq (p := 37) (K := K) k
@@ -186,24 +189,24 @@ theorem rIntegralRat_scalar_factors_through_coordModSq_xpow
 
 /-! ## 2. The whole-slice vanishing engine: `S_d^{(71)} = 0` from formal-source `37`-divisibility
 
-For `d ≥ 72` (Case B and the bulk of Case A), the entire degree-`d` slice `S_d^{(71)}` vanishes in the
-level-`71` precision quotient `⧸ (λ)^{72}` once the formal Artin-Hasse log source `formalSum_d` is
-sufficiently `37`-divisible.  We prove this by mirroring the proven
+For `d ≥ 72` (Case B and the bulk of Case A), the entire degree-`d` slice `S_d^{(71)}` vanishes in
+the level-`71` precision quotient `⧸ (λ)^{72}` once the formal Artin-Hasse log source `formalSum_d`
+is sufficiently `37`-divisible.  We prove this by mirroring the proven
 `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_coeff_log_eq_zero`
 (`KummerLogNormalization/Part3.lean`), replacing its `formalSum_d = 0` hypothesis with the weaker
 `rIntegralRatToValuedInteger formalSum_d ∈ (λ)^{36·w}` plus the degree bound `d + 36·w ≥ 36·v + 72`
 (`v = v₃₇(d!)`, `w` the formal-source `37`-valuation). -/
 
 omit [NumberField.IsCMField K] in
-/-- **The factorial-weighted numerator sum vanishes at level `M = 36v + 71` from formal `37`-divisibility**
-(proven): if `rIntegralRatToValuedInteger formalSum_d ∈ (λ)^{36·w}` and `d + 36·w ≥ 36·v + 72`
-(`v = v₃₇(d!) = d!.factorization 37`), then at level `M = d!.factorization 37 · 36 + 71` the
-factorial-weighted numerator sum lies in `(λ)^{M+1}`.
+/-- **The factorial-weighted numerator sum vanishes at level `M = 36v + 71` from formal
+`37`-divisibility** (proven): if `rIntegralRatToValuedInteger formalSum_d ∈ (λ)^{36·w}` and
+`d + 36·w ≥ 36·v + 72` (`v = v₃₇(d!) = d!.factorization 37`), then at level
+`M = d!.factorization 37 · 36 + 71` the factorial-weighted numerator sum lies in `(λ)^{M+1}`.
 
 The `M`-level identity `quotient_mk_…_factorial_weighted_sum_eq_formal` gives
 `mk_{M+1}(Y_d^{(M)}) = mk_{M+1}(x^d) · RIntToQuot(formalSum_d)`; the right factors are `x^d ∈ (λ)^d`
-and `rIntToVal(formalSum_d) ∈ (λ)^{36w}`, so the product is in `(λ)^{d + 36w} ⊆ (λ)^{M+1}` (the degree
-bound), forcing the quotient image to `0`, i.e. membership in `(λ)^{M+1}`. -/
+and `rIntToVal(formalSum_d) ∈ (λ)^{36w}`, so the product is in `(λ)^{d + 36w} ⊆ (λ)^{M+1}` (the
+degree bound), forcing the quotient image to `0`, i.e. membership in `(λ)^{M+1}`. -/
 theorem factorial_weighted_numerator_sum_mem_highLevel_of_formalSum_mem
     (d w : ℕ) {x : ValuedIntegerRing 37 K} (hx : x ∈ lambdaIdeal 37 K)
     (hformal :
@@ -242,7 +245,8 @@ theorem factorial_weighted_numerator_sum_mem_highLevel_of_formalSum_mem
               rationalArtinHasseNormalizedFactorialWeightedLogCoeff 37 d n) ∈
         (lambdaIdeal 37 K) ^ (M + 1) :=
     Ideal.pow_le_pow_right (by rw [hM]; omega) hprod_mem
-  -- the quotient image of the factorial-weighted sum equals the quotient image of that product, = 0.
+  -- the quotient image of the factorial-weighted sum equals the quotient image of that
+  -- product, = 0.
   have hRHS :
       samePrimeQuotientMap (p := 37) (K := K) M (x ^ d) *
           samePrimeRIntegralRatToQuotient (p := 37) (K := K) M
@@ -267,11 +271,12 @@ theorem factorial_weighted_numerator_sum_mem_highLevel_of_formalSum_mem
   exact hq
 
 omit [NumberField.IsCMField K] in
-/-- **The level-`71` factorial-weighted numerator sum lies in `(λ)^{36v + 72}` from formal `37`-divisibility**
-(proven): combining the high-level vanishing (`…_mem_highLevel_of_formalSum_mem`, at level
-`M = 36v + 71`) with the proven cross-level numerator-difference bound
-(`…_factorial_weighted_sub_precision_mem_lambdaIdeal_pow`, `Y_d^{(71)} - Y_d^{(M)} ∈ (λ)^{36v + 72}`),
-the level-`71` sum `Y_d^{(71)} = (Y_d^{(71)} - Y_d^{(M)}) + Y_d^{(M)}` lies in `(λ)^{36v + 72}`. -/
+/-- **The level-`71` factorial-weighted numerator sum lies in `(λ)^{36v + 72}` from formal
+`37`-divisibility** (proven): combining the high-level vanishing
+(`…_mem_highLevel_of_formalSum_mem`, at level `M = 36v + 71`) with the proven cross-level
+numerator-difference bound (`…_factorial_weighted_sub_precision_mem_lambdaIdeal_pow`,
+`Y_d^{(71)} - Y_d^{(M)} ∈ (λ)^{36v + 72}`), the level-`71` sum
+`Y_d^{(71)} = (Y_d^{(71)} - Y_d^{(M)}) + Y_d^{(M)}` lies in `(λ)^{36v + 72}`. -/
 theorem factorial_weighted_numerator_sum_mem_of_formalSum_mem
     (d w : ℕ) {x : ValuedIntegerRing 37 K} (hx : x ∈ lambdaIdeal 37 K)
     (hformal :
@@ -351,7 +356,8 @@ omit [NumberField.IsCMField K] in
 Composes `factorial_weighted_numerator_sum_mem_of_formalSum_mem` (the level-`71` factorial-weighted
 sum lies in `(λ)^{36v + 72}`) with the proven
 `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_factorial_weighted_sum_mem`.
-This is the **whole-slice** vanishing — the bulk mechanism for `d ≥ 72` (Case B and large Case A). -/
+This is the **whole-slice** vanishing — the bulk mechanism for `d ≥ 72` (Case B and large Case A).
+-/
 theorem slice_eq_zero_of_formalSum_mem
     (d w : ℕ) {x : ValuedIntegerRing 37 K} (hx : x ∈ lambdaIdeal 37 K)
     (hformal :
@@ -367,10 +373,11 @@ theorem slice_eq_zero_of_formalSum_mem
     (factorial_weighted_numerator_sum_mem_of_formalSum_mem (K := K) d w hx hformal hdeg)
 
 omit [NumberField.IsCMField K] in
-/-- **`unscaled32SliceCoord d = 0` from formal `37`-divisibility** (proven): the whole degree-`d` slice
-vanishes (`slice_eq_zero_of_formalSum_mem`), so its `varpi^{32}` coordinate `unscaled32SliceCoord d`
-vanishes.  This is the bulk reduction: every `d ≥ 72` whose formal source `formalSum_d` is `37^w`-divisible
-with `d + 36w ≥ 36·v₃₇(d!) + 72` contributes `0` to the correction sum. -/
+/-- **`unscaled32SliceCoord d = 0` from formal `37`-divisibility** (proven): the whole degree-`d`
+slice vanishes (`slice_eq_zero_of_formalSum_mem`), so its `varpi^{32}` coordinate
+`unscaled32SliceCoord d` vanishes.  This is the bulk reduction: every `d ≥ 72` whose formal source
+`formalSum_d` is `37^w`-divisible with `d + 36w ≥ 36·v₃₇(d!) + 72` contributes `0` to the correction
+sum. -/
 theorem unscaled32SliceCoord_eq_zero_of_formalSum_mem
     (d w : ℕ)
     (hformal :
@@ -388,10 +395,11 @@ theorem unscaled32SliceCoord_eq_zero_of_formalSum_mem
 /-! ## 3. Reducing the formal-source membership to subring `37`-divisibility -/
 
 omit [NumberField.IsCMField K] in
-/-- **`37^w`-divisibility of `formalSum_d` in the integral subring gives the formal-source membership**
-(proven): if `formalSum_d = 37^w · g` for some `g` in the `37`-integral rational subring, then
-`rIntegralRatToValuedInteger formalSum_d = 37^w · rIntegralRatToValuedInteger g ∈ (λ)^{36·w}`, via the
-ring-hom property and `(37 : ValuedInteger)^w ∈ (λ)^{w·(37-1)} = (λ)^{36·w}`
+/-- **`37^w`-divisibility of `formalSum_d` in the integral subring gives the formal-source
+membership** (proven): if `formalSum_d = 37^w · g` for some `g` in the `37`-integral rational
+subring, then
+`rIntegralRatToValuedInteger formalSum_d = 37^w · rIntegralRatToValuedInteger g ∈ (λ)^{36·w}`, via
+the ring-hom property and `(37 : ValuedInteger)^w ∈ (λ)^{w·(37-1)} = (λ)^{36·w}`
 (`natCast_prime_pow_mem_lambdaIdeal_pow_mul_pred`). -/
 theorem rIntegralRatToValuedInteger_formalSum_mem_of_dvd
     (d w : ℕ)
@@ -421,10 +429,12 @@ theorem rIntegralRatToValuedInteger_formalSum_mem_of_dvd
 /-! ## 3b. The Case-A small-`d` coordinate vanishing (`d < 37`, `d ≠ 32`) via the factorial route -/
 
 omit [NumberField.IsCMField K] in
-/-- **The factorial-`d` second-order extraction at general degree** (proven): for `x = dworkParameterApprox
-72`, `(d! : ZMod 37²)·coordModSq(deg-d slice) = coordModSq(quotMap(x^d)·formalSum_d)`.  The general-`d`
-analog of `factorial37_deg68_coordModSq_extraction`: the mod-`37²` coordinate image of the all-degrees
-factorial identity `natCast_factorial_mul_…_eq_formal` via `valuedLambdaQuotientDworkCoeffModSq_natCast_mul`. -/
+/-- **The factorial-`d` second-order extraction at general degree** (proven): for
+`x = dworkParameterApprox 72`,
+`(d! : ZMod 37²)·coordModSq(deg-d slice) = coordModSq(quotMap(x^d)·formalSum_d)`.  The general-`d`
+analog of `factorial37_deg68_coordModSq_extraction`: the mod-`37²` coordinate image of the
+all-degrees factorial identity `natCast_factorial_mul_…_eq_formal` via
+`valuedLambdaQuotientDworkCoeffModSq_natCast_mul`. -/
 theorem factorial_deg_coordModSq_extraction
     (i : Fin (37 - 1)) (d : ℕ) {x : ValuedIntegerRing 37 K} (hx : x ∈ lambdaIdeal 37 K) :
     ((Nat.factorial d : ℕ) : ZMod (37 ^ 2)) *
@@ -443,8 +453,8 @@ theorem factorial_deg_coordModSq_extraction
   rwa [valuedLambdaQuotientDworkCoeffModSq_natCast_mul] at hcoord
 
 omit [NumberField.IsCMField K] in
-/-- **`(d! : ZMod 37²)` is a unit for `d < 37`** (proven): `37 ∤ d!` since `d < 37`, so `d!` is coprime
-to `37²`. -/
+/-- **`(d! : ZMod 37²)` is a unit for `d < 37`** (proven): `37 ∤ d!` since `d < 37`, so `d!` is
+coprime to `37²`. -/
 theorem factorial_isUnit_modSq_of_lt (d : ℕ) (hd : d < 37) :
     IsUnit ((Nat.factorial d : ℕ) : ZMod (37 ^ 2)) := by
   rw [ZMod.isUnit_iff_coprime]
@@ -457,11 +467,12 @@ theorem factorial_isUnit_modSq_of_lt (d : ℕ) (hd : d < 37) :
 
 omit [NumberField.IsCMField K] in
 /-- **The Case-A small-`d` coordinate vanishes** (proven): for `d < 36`, `d ≠ 32`,
-`unscaled32SliceCoord d = 0`.  The factorial route: `(d!)·coordModSq(S_d) = (formalSum residue)·coordModSq(x^d)`
-(`factorial_deg_coordModSq_extraction` + `rIntegralRat_scalar_factors_through_coordModSq_xpow`), with
-`coordModSq(x^d) = 0` (`x_pow_coordModSq_eq_zero_of_lt_of_ne`, the basis index `d ≠ 32`), so
-`(d!)·coordModSq(S_d) = 0`; dividing by the `37`-unit `d!` (`factorial_isUnit_modSq_of_lt`) gives
-`coordModSq(S_d) = 0`.  This discharges the `d < 36` members of `otherSlicesCaseASet`. -/
+`unscaled32SliceCoord d = 0`.  The factorial route:
+`(d!)·coordModSq(S_d) = (formalSum residue)·coordModSq(x^d)` (`factorial_deg_coordModSq_extraction`
++ `rIntegralRat_scalar_factors_through_coordModSq_xpow`), with `coordModSq(x^d) = 0`
+(`x_pow_coordModSq_eq_zero_of_lt_of_ne`, the basis index `d ≠ 32`), so `(d!)·coordModSq(S_d) = 0`;
+dividing by the `37`-unit `d!` (`factorial_isUnit_modSq_of_lt`) gives `coordModSq(S_d) = 0`.  This
+discharges the `d < 36` members of `otherSlicesCaseASet`. -/
 theorem unscaled32SliceCoord_eq_zero_of_lt_of_ne
     (d : ℕ) (hd : d < 36) (hdne : d ≠ 32) :
     unscaled32SliceCoord (K := K) d = 0 := by
@@ -475,7 +486,8 @@ theorem unscaled32SliceCoord_eq_zero_of_lt_of_ne
   have hscalar := rIntegralRat_scalar_factors_through_coordModSq_xpow (K := K) d
     (∑ n ∈ Finset.Icc 1 d,
       rationalArtinHasseNormalizedFactorialWeightedLogCoeff 37 d n) i
-  -- `coordModSq(x^d) = 0` (the basis index `d < 36`, `d ≠ 32`); the precisions `71+1` and `2*(37-1)`
+  -- `coordModSq(x^d) = 0` (the basis index `d < 36`, `d ≠ 32`); the precisions `71+1` and
+  -- `2*(37-1)`
   -- agree definitionally (`72 = 2·36`).
   have hxd0 : valuedLambdaQuotientDworkCoeffModSq (p := 37) (K := K) i
       (samePrimeQuotientMap (p := 37) (K := K) 71
@@ -498,8 +510,8 @@ theorem unscaled32SliceCoord_eq_zero_of_lt_of_ne
 omit [NumberField.IsCMField K] in
 /-- **The combined whole-slice vanishing from subring `37`-divisibility** (proven): packaging
 `rIntegralRatToValuedInteger_formalSum_mem_of_dvd` into
-`unscaled32SliceCoord_eq_zero_of_formalSum_mem`: if `formalSum_d = 37^w · g` (subring divisibility) and
-`d + 36·w ≥ 36·v₃₇(d!) + 72`, then `unscaled32SliceCoord d = 0`. -/
+`unscaled32SliceCoord_eq_zero_of_formalSum_mem`: if `formalSum_d = 37^w · g` (subring divisibility)
+and `d + 36·w ≥ 36·v₃₇(d!) + 72`, then `unscaled32SliceCoord d = 0`. -/
 theorem unscaled32SliceCoord_eq_zero_of_dvd
     (d w : ℕ)
     (g : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37)
@@ -533,8 +545,9 @@ theorem unscaled32SliceCoord_eq_zero_of_formalIntegral
     (by omega)
 
 omit [NumberField.IsCMField K] in
-/-- **The degree-`0` slice vanishes** (proven): `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
-71 0 x` is the empty sum (`Finset.Icc 1 0 = ∅`), hence `0`, so `unscaled32SliceCoord 0 = 0`. -/
+/-- **The degree-`0` slice vanishes** (proven):
+`samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum 71 0 x` is the empty sum
+(`Finset.Icc 1 0 = ∅`), hence `0`, so `unscaled32SliceCoord 0 = 0`. -/
 theorem unscaled32SliceCoord_zero_eq_zero :
     unscaled32SliceCoord (K := K) 0 = 0 := by
   rw [unscaled32SliceCoord]
@@ -548,28 +561,28 @@ theorem unscaled32SliceCoord_zero_eq_zero :
 
 /-! ## 4. The deg-`≠32,68` slice-vanishing residuals and the assembly
 
-The whole-slice engine (§2–§3) reduces the deg-`≠32,68` slice vanishing to two precisely-characterized
-pieces, which we name as residuals (`def … : Prop`, **not** axioms):
+The whole-slice engine (§2–§3) reduces the deg-`≠32,68` slice vanishing to two
+precisely-characterized pieces, which we name as residuals (`def … : Prop`, **not** axioms):
 
-* **`OtherSlicesCaseAVanish37`** (the finite Case-A grading): for the explicit finite set of `d ≤ 74`,
-  `d ∉ {32, 68}`, `d ≢ 32 (mod 36)` whose whole slice is *not* forced to vanish, the `varpi^{32}`
-  coordinate `unscaled32SliceCoord d` vanishes (the slice has no `varpi^{32}` graded component — a
-  mod-`37²` Dwork-grading fact).
+* **`OtherSlicesCaseAVanish37`** (the finite Case-A grading): for the explicit finite set of
+  `d ≤ 74`, `d ∉ {32, 68}`, `d ≢ 32 (mod 36)` whose whole slice is *not* forced to vanish, the
+  `varpi^{32}` coordinate `unscaled32SliceCoord d` vanishes (the slice has no `varpi^{32}` graded
+  component — a mod-`37²` Dwork-grading fact).
 
 * **`OtherSlicesDworkDivisibility37`** (the Case-B Dwork congruence): for every `d ∈ range 2664`,
   `d ∉ {32, 68}` *outside* the finite Case-A set, the formal Artin-Hasse log source `formalSum_d` is
   `37`-divisible enough — `formalSum_d = 37^w · g` with `d + 36·w ≥ 36·v₃₇(d!) + 72` — the genuine
-  Dwork/Frobenius valuation content (Washington Proposition 8.12 at general degree).  (The degrees with
-  `formalSum_d = 0`, including `d = 0`, are covered trivially by `g = 0`.) -/
+  Dwork/Frobenius valuation content (Washington Proposition 8.12 at general degree).  (The degrees
+  with `formalSum_d = 0`, including `d = 0`, are covered trivially by `g = 0`.) -/
 
 /-- **The finite Case-A set** `{1,2,4,…,30,34,37,38,…,70,74}` (`d ≤ 74`, `d ∉ {32, 68}`,
 `d ≢ 32 (mod 36)`) whose whole slice `S_d^{(71)}` does *not* vanish (the formal source is too
 `37`-singular: `d + 36·v₃₇(formalSum_d/d!) < 72`), so the deg-`≠32,68` vanishing on these `d` is the
-`varpi^{32}`-coordinate vanishing, not the whole-slice vanishing.  Enumerated from the Artin-Hasse log
-coefficient valuations. -/
+`varpi^{32}`-coordinate vanishing, not the whole-slice vanishing.  Enumerated from the Artin-Hasse
+log coefficient valuations. -/
 def otherSlicesCaseASet : Finset ℕ :=
-  {1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 34, 37, 38, 40, 42, 44, 46, 48, 50, 52,
-    54, 56, 58, 60, 62, 64, 66, 70, 74}
+  {1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 34, 37, 38, 40, 42, 44, 46, 48, 50,
+    52, 54, 56, 58, 60, 62, 64, 66, 70, 74}
 
 /-- **The mid Case-A set** `{37, 38, 40, …, 70, 74}` — the members of `otherSlicesCaseASet` with
 `37 ≤ d` (so `36 ≤ d`, beyond the factorial-unit range).  The complement (`d < 36` members) is
@@ -579,10 +592,11 @@ def otherSlicesCaseAMidSet : Finset ℕ :=
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The mid Case-A coordinate-vanishing residual** (a `def … : Prop`, **not** an axiom): for every
-`d ∈ otherSlicesCaseAMidSet` (the `37 ≤ d ≤ 74`, `d ≢ 32 (mod 36)` slices) the `varpi^{32}` coordinate
-`unscaled32SliceCoord d` vanishes mod `37²`.  These slices have nonzero whole slice but zero `varpi^{32}`
-graded component — a finite mod-`37²` Dwork power-basis grading fact for `d ≥ 36` (where the factorial
-route is unavailable since `37 ∣ d!`).  The `d < 36` Case-A members are proven unconditionally. -/
+`d ∈ otherSlicesCaseAMidSet` (the `37 ≤ d ≤ 74`, `d ≢ 32 (mod 36)` slices) the `varpi^{32}`
+coordinate `unscaled32SliceCoord d` vanishes mod `37²`.  These slices have nonzero whole slice but
+zero `varpi^{32}` graded component — a finite mod-`37²` Dwork power-basis grading fact for `d ≥ 36`
+(where the factorial route is unavailable since `37 ∣ d!`).  The `d < 36` Case-A members are proven
+unconditionally. -/
 def OtherSlicesCaseAMidVanish37
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] : Prop :=
@@ -592,7 +606,8 @@ open BernoulliRegular (CPlusGenerator) in
 /-- **The full finite Case-A coordinate vanishing, from the mid residual** (proven): every
 `d ∈ otherSlicesCaseASet` has `unscaled32SliceCoord d = 0`.  The `d < 36` members
 (`{1,2,4,…,30,34}`) are discharged by the factorial route `unscaled32SliceCoord_eq_zero_of_lt_of_ne`
-(proven); the `37 ≤ d ≤ 74` members are exactly `otherSlicesCaseAMidSet`, supplied by the residual. -/
+(proven); the `37 ≤ d ≤ 74` members are exactly `otherSlicesCaseAMidSet`, supplied by the residual.
+-/
 theorem otherSlicesCaseAVanish_of_mid
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -607,18 +622,19 @@ theorem otherSlicesCaseAVanish_of_mid
     exact unscaled32SliceCoord_eq_zero_of_lt_of_ne (K := CyclotomicField 37 ℚ) d hlt hne
   · -- `d ≥ 36`: `d ∈ otherSlicesCaseAMidSet`, supplied by the residual.
     apply hMid
-    -- membership transfer: the `≥ 36` members of `otherSlicesCaseASet` are `otherSlicesCaseAMidSet`.
+    -- membership transfer: the `≥ 36` members of `otherSlicesCaseASet` are
+    -- `otherSlicesCaseAMidSet`.
     fin_cases hd <;> first | (exfalso; omega) | (simp [otherSlicesCaseAMidSet])
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The Case-B Dwork-divisibility residual** (a `def … : Prop`, **not** an axiom): for every
-`d ∈ range 2664` with `d ≥ 72`, `d ∉ {32, 68}`, and `d ∉ otherSlicesCaseASet`, the formal Artin-Hasse
-log source `formalSum_d = ∑_n …FactorialWeightedLogCoeff` is `37`-divisible enough:
+`d ∈ range 2664` with `d ≥ 72`, `d ∉ {32, 68}`, and `d ∉ otherSlicesCaseASet`, the formal
+Artin-Hasse log source `formalSum_d = ∑_n …FactorialWeightedLogCoeff` is `37`-divisible enough:
 `formalSum_d = 37^w · g` for some `w` and `g` in the `37`-integral rational subring, with
 `36·v₃₇(d!) + 72 ≤ d + 36·w`.
 
-This is the genuine Dwork/Frobenius valuation of the normalized Artin-Hasse logarithm coefficients at
-general degree (Washington Proposition 8.12) — the same deep `p`-adic-`L` content the rest of R4
+This is the genuine Dwork/Frobenius valuation of the normalized Artin-Hasse logarithm coefficients
+at general degree (Washington Proposition 8.12) — the same deep `p`-adic-`L` content the rest of R4
 reduces to, here localized to the degree-`d` slice sources.  The whole-slice engine
 (`unscaled32SliceCoord_eq_zero_of_dvd`) turns it into `unscaled32SliceCoord d = 0`. -/
 def OtherSlicesDworkDivisibility37
@@ -634,9 +650,10 @@ def OtherSlicesDworkDivisibility37
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **Every deg-`≠32,68` slice coordinate vanishes, from the two residuals** (proven): for every
-`d ∈ ((range 2664).erase 32).erase 68`, `unscaled32SliceCoord d = 0`.  Cases on `d ∈ otherSlicesCaseASet`
-(use `OtherSlicesCaseAVanish37`, the finite Case-A grading) versus `d ∉ otherSlicesCaseASet` (use
-`OtherSlicesDworkDivisibility37` + the whole-slice engine `unscaled32SliceCoord_eq_zero_of_dvd`). -/
+`d ∈ ((range 2664).erase 32).erase 68`, `unscaled32SliceCoord d = 0`.  Cases on
+`d ∈ otherSlicesCaseASet` (use `OtherSlicesCaseAVanish37`, the finite Case-A grading) versus
+`d ∉ otherSlicesCaseASet` (use `OtherSlicesDworkDivisibility37` + the whole-slice engine
+`unscaled32SliceCoord_eq_zero_of_dvd`). -/
 theorem unscaled32SliceCoord_eq_zero_of_mem_erase
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -653,14 +670,14 @@ theorem unscaled32SliceCoord_eq_zero_of_mem_erase
     exact unscaled32SliceCoord_eq_zero_of_dvd (K := CyclotomicField 37 ℚ) d w g hg hbound
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **The deg-`≠32,68` slice-vanishing residual, from the two pieces** (proven, axiom-clean given the
-residuals): `OtherSlicesCaseAVanish37 → OtherSlicesDworkDivisibility37 →
+/-- **The deg-`≠32,68` slice-vanishing residual, from the two pieces** (proven, axiom-clean given
+the residuals): `OtherSlicesCaseAVanish37 → OtherSlicesDworkDivisibility37 →
 CaseIICor823Level71Deg68OtherSlicesVanish37`.
 
-`Finset.sum_eq_zero` over `((range 2664).erase 32).erase 68`, each term `unscaled32SliceCoord d = 0` by
-`unscaled32SliceCoord_eq_zero_of_mem_erase`.  This discharges the deg-`≠32,68` half of
-`CaseIICor823Level71Deg68OnwardCorrection37` to the two named residuals: the finite Case-A coordinate
-grading and the Case-B Dwork-divisibility (Washington Prop 8.12). -/
+`Finset.sum_eq_zero` over `((range 2664).erase 32).erase 68`, each term `unscaled32SliceCoord d = 0`
+by `unscaled32SliceCoord_eq_zero_of_mem_erase`.  This discharges the deg-`≠32,68` half of
+`CaseIICor823Level71Deg68OnwardCorrection37` to the two named residuals: the finite Case-A
+coordinate grading and the Case-B Dwork-divisibility (Washington Prop 8.12). -/
 theorem caseIICor823Level71Deg68OtherSlicesVanish37_of_residuals
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -680,16 +697,17 @@ coordinate grading + the Case-B Dwork divisibility** (proven, axiom-clean given 
 Kellner Prop).
 
 `CaseIICor823Level71Deg68OtherSlicesVanish37` of
-`fermatLastTheoremFor_thirtyseven_of_modCubePrecisionBridgeAndFiniteLog` is replaced by its two genuine
-pieces via `caseIICor823Level71Deg68OtherSlicesVanish37_of_residuals`:
+`fermatLastTheoremFor_thirtyseven_of_modCubePrecisionBridgeAndFiniteLog` is replaced by its two
+genuine pieces via `caseIICor823Level71Deg68OtherSlicesVanish37_of_residuals`:
 
-* `OtherSlicesCaseAMidVanish37` — the finite (18-element) Case-A coordinate grading for `37 ≤ d ≤ 74`,
-  `d ≢ 32 (mod 36)` (the `d < 36` Case-A members are proven unconditionally);
+* `OtherSlicesCaseAMidVanish37` — the finite (18-element) Case-A coordinate grading for
+  `37 ≤ d ≤ 74`, `d ≢ 32 (mod 36)` (the `d < 36` Case-A members are proven unconditionally);
 * `OtherSlicesDworkDivisibility37` — the Case-B Artin-Hasse log valuation (Washington Prop 8.12) for
   `d ≥ 36`, `d ≡ 32 (mod 36)` `∉ {32, 68}`.
 
-The whole-slice vanishing engine (`slice_eq_zero_of_formalSum_mem`) and the deg-`≠32,68` sum assembly
-are **proven in full**; the deg-`≠32,68` slice vanishing rests only on the two residuals. -/
+The whole-slice vanishing engine (`slice_eq_zero_of_formalSum_mem`) and the deg-`≠32,68` sum
+assembly are **proven in full**; the deg-`≠32,68` slice vanishing rests only on the two residuals.
+-/
 theorem fermatLastTheoremFor_thirtyseven_of_otherSlicesResiduals
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -62,7 +67,7 @@ theorem integrable_heckeΛ₀_norm (a : ℝ) :
     IntegrableOn (fun x : ℝ => x ^ (a - 1) * ‖(heckeFEPair K).f_modif x‖)
       (Set.Ioi 0) := by
   have hconv : MellinConvergent ((heckeFEPair K).f_modif) (a : ℂ) :=
-    ((heckeFEPair K).toStrongFEPair.hasMellin (a : ℂ)).1
+    ((heckeFEPair K).isStrongFEPair_toStrongFEPair.hasMellin (a : ℂ)).1
   have hnn : IntegrableOn
       (fun x : ℝ => ‖((x:ℂ) ^ ((a:ℂ) - 1) • (heckeFEPair K).f_modif x)‖)
       (Set.Ioi 0) := hconv.norm
@@ -789,6 +794,116 @@ theorem comparator_bound_left :
           (by positivity) (pow_le_pow_left₀ (norm_nonneg _) hden _)
     _ ≤ M := hM (-t)
 
+/-- Sub-double-exponential growth of the AC-A3 comparator
+`completedDedekindZetaEntire K ^ 4 * sin (π z) ^ n / (z - 4) ^ (4 n + 8)` on the strip
+`-1 ≤ Re ≤ 2`, from the polynomial strip bound `‖H‖ ≤ B (1 + ‖z‖)²`. Supplies the
+growth hypothesis of the Phragmén–Lindelöf step in `comparator_bound_strip`. -/
+private theorem comparator_isBigO_growth {B : ℝ} (hB0 : 0 ≤ B)
+    (hB : ∀ w : ℂ, -1 ≤ w.re → w.re ≤ 2 →
+        ‖completedDedekindZetaEntire K w‖ ≤ B * (1 + ‖w‖) ^ 2) :
+    ∃ c < π / (2 - (-1) : ℝ), ∃ Bg,
+      (fun z => completedDedekindZetaEntire K z ^ 4
+          * Complex.sin (π * z) ^ gammaExponent K / (z - 4) ^ (4 * gammaExponent K + 8))
+        =O[Filter.comap (_root_.abs ∘ Complex.im) Filter.atTop
+            ⊓ Filter.principal (Complex.re ⁻¹' Set.Ioo (-1 : ℝ) 2)]
+        fun z => Real.exp (Bg * Real.exp (c * |z.im|)) := by
+  set n : ℕ := gammaExponent K with hn
+  set f : ℂ → ℂ := fun z => completedDedekindZetaEntire K z^4
+    * Complex.sin (π * z)^n / (z - 4)^(4*n+8) with hf
+  refine ⟨1, ?_, 8 + (n:ℝ) * π, ?_⟩
+  · rw [show (2 - (-1) : ℝ) = 3 by norm_num, lt_div_iff₀ (by norm_num : (0:ℝ) < 3)]
+    linarith [Real.pi_gt_three]
+  refine Asymptotics.IsBigO.of_bound (B^4 * Real.exp 16) ?_
+  rw [Filter.eventually_inf_principal]
+  refine Filter.Eventually.of_forall (fun w hw => ?_)
+  have hw1 : -1 ≤ w.re := le_of_lt hw.1
+  have hw2 : w.re ≤ 2 := le_of_lt hw.2
+  have hden2 : (2:ℝ) ≤ ‖w - 4‖ := by
+    have habs : (2:ℝ) ≤ |(w - 4).re| := by
+      rw [show (w - 4).re = w.re - 4 by simp, abs_sub_comm,
+        abs_of_pos (by linarith : (0:ℝ) < 4 - w.re)]
+      linarith
+    exact le_trans habs (Complex.abs_re_le_norm _)
+  have hH := hB w hw1 hw2
+  have hwn : ‖w‖ ≤ 2 + |w.im| := by
+    calc ‖w‖ = ‖(w.re : ℂ) + (w.im : ℂ) * Complex.I‖ := by rw [Complex.re_add_im]
+      _ ≤ ‖(w.re : ℂ)‖ + ‖(w.im : ℂ) * Complex.I‖ := norm_add_le _ _
+      _ = |w.re| + |w.im| := by
+          rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
+            Real.norm_eq_abs, Real.norm_eq_abs]
+      _ ≤ 2 + |w.im| := by
+          have : |w.re| ≤ 2 := abs_le.mpr ⟨by linarith, hw2⟩
+          linarith
+  have hHb : ‖completedDedekindZetaEntire K w‖ ≤ B * (3 + |w.im|)^2 := by
+    refine le_trans hH ?_
+    have h1w : 1 + ‖w‖ ≤ 3 + |w.im| := by linarith
+    have hsq : (1 + ‖w‖)^2 ≤ (3 + |w.im|)^2 := by
+      have h0 : (0:ℝ) ≤ 1 + ‖w‖ := by positivity
+      nlinarith
+    exact mul_le_mul_of_nonneg_left hsq hB0
+  have hsinw : ‖Complex.sin (π * w)‖ ≤ Real.exp (π * |w.im|) := norm_sin_pi_mul_le w
+  -- assemble the crude growth estimate
+  have hfw : ‖f w‖ ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := by
+    rw [hf]
+    have hnum : ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖
+        ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := by
+      rw [norm_mul, norm_pow, norm_pow]
+      refine mul_le_mul (pow_le_pow_left₀ (norm_nonneg _) hHb 4) ?_
+        (pow_nonneg (norm_nonneg _) n) (by positivity)
+      calc ‖Complex.sin (π * w)‖^n ≤ (Real.exp (π * |w.im|))^n :=
+            pow_le_pow_left₀ (norm_nonneg _) hsinw n
+        _ = Real.exp ((n:ℝ) * (π * |w.im|)) := by rw [← Real.exp_nat_mul]
+    calc ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n
+          / (w - 4)^(4*n+8)‖
+        = ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖
+          / ‖w - 4‖^(4*n+8) := by rw [norm_div, norm_pow]
+      _ ≤ ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖ / 1 := by
+          gcongr
+          exact one_le_pow₀ (by linarith)
+      _ = ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖ := div_one _
+      _ ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := hnum
+  -- crude ≤ sub-double-exponential
+  have hpoly : (B * (3 + |w.im|)^2)^4 ≤ B^4 * Real.exp (8 * (2 + |w.im|)) := by
+    have h3x : 3 + |w.im| ≤ Real.exp (2 + |w.im|) := by
+      linarith [Real.add_one_le_exp (2 + |w.im|)]
+    have h3x2 : (3 + |w.im|)^2 ≤ Real.exp (2 * (2 + |w.im|)) := by
+      calc (3 + |w.im|)^2 ≤ (Real.exp (2 + |w.im|))^2 :=
+            pow_le_pow_left₀ (by positivity) h3x 2
+        _ = Real.exp (2 * (2 + |w.im|)) := by
+            rw [← Real.exp_nat_mul]
+            norm_num
+    calc (B * (3 + |w.im|)^2)^4 = B^4 * ((3 + |w.im|)^2)^4 := by ring
+      _ ≤ B^4 * (Real.exp (2 * (2 + |w.im|)))^4 := by
+          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+          have h0 : (0:ℝ) ≤ (3 + |w.im|)^2 := by positivity
+          exact pow_le_pow_left₀ h0 h3x2 4
+      _ = B^4 * Real.exp (8 * (2 + |w.im|)) := by
+          congr 1
+          rw [← Real.exp_nat_mul]
+          congr 1
+          push_cast
+          ring
+  have hfinal : ‖f w‖ ≤ B^4 * Real.exp 16
+      * Real.exp ((8 + (n:ℝ) * π) * |w.im|) := by
+    refine le_trans hfw ?_
+    calc (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|))
+        ≤ (B^4 * Real.exp (8 * (2 + |w.im|))) * Real.exp ((n:ℝ) * (π * |w.im|)) :=
+          mul_le_mul_of_nonneg_right hpoly (by positivity)
+      _ = B^4 * Real.exp 16 * Real.exp ((8 + (n:ℝ) * π) * |w.im|) := by
+          rw [mul_assoc, ← Real.exp_add, mul_assoc, ← Real.exp_add]
+          congr 2
+          ring
+  refine le_trans hfinal ?_
+  rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+  have hexp_le : Real.exp ((8 + (n:ℝ) * π) * |w.im|)
+      ≤ Real.exp ((8 + (n:ℝ) * π) * Real.exp (1 * |w.im|)) := by
+    rw [Real.exp_le_exp, one_mul]
+    have hc0 : (0:ℝ) ≤ 8 + (n:ℝ) * π := by positivity
+    have himle : |w.im| ≤ Real.exp |w.im| := by
+      linarith [Real.add_one_le_exp |w.im|]
+    nlinarith
+  exact mul_le_mul_of_nonneg_left hexp_le (by positivity)
+
 /-- **The comparator is bounded on the whole strip** `-1 ≤ Re z ≤ 2`
 (Phragmén–Lindelöf between the two boundary bounds). -/
 theorem comparator_bound_strip :
@@ -829,99 +944,8 @@ theorem comparator_bound_strip :
       f =O[Filter.comap (_root_.abs ∘ Complex.im) Filter.atTop
           ⊓ Filter.principal (Complex.re ⁻¹' Set.Ioo (-1 : ℝ) 2)]
         fun z => Real.exp (Bg * Real.exp (c * |z.im|)) := by
-    refine ⟨1, ?_, 8 + (n:ℝ) * π, ?_⟩
-    · rw [show (2 - (-1) : ℝ) = 3 by norm_num, lt_div_iff₀ (by norm_num : (0:ℝ) < 3)]
-      linarith [Real.pi_gt_three]
-    refine Asymptotics.IsBigO.of_bound (B^4 * Real.exp 16) ?_
-    rw [Filter.eventually_inf_principal]
-    refine Filter.Eventually.of_forall (fun w hw => ?_)
-    have hw1 : -1 ≤ w.re := le_of_lt hw.1
-    have hw2 : w.re ≤ 2 := le_of_lt hw.2
-    have hden2 : (2:ℝ) ≤ ‖w - 4‖ := by
-      have habs : (2:ℝ) ≤ |(w - 4).re| := by
-        rw [show (w - 4).re = w.re - 4 by simp, abs_sub_comm,
-          abs_of_pos (by linarith : (0:ℝ) < 4 - w.re)]
-        linarith
-      exact le_trans habs (Complex.abs_re_le_norm _)
-    have hH := hB w hw1 hw2
-    have hwn : ‖w‖ ≤ 2 + |w.im| := by
-      calc ‖w‖ = ‖(w.re : ℂ) + (w.im : ℂ) * Complex.I‖ := by rw [Complex.re_add_im]
-        _ ≤ ‖(w.re : ℂ)‖ + ‖(w.im : ℂ) * Complex.I‖ := norm_add_le _ _
-        _ = |w.re| + |w.im| := by
-            rw [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Complex.norm_real,
-              Real.norm_eq_abs, Real.norm_eq_abs]
-        _ ≤ 2 + |w.im| := by
-            have : |w.re| ≤ 2 := abs_le.mpr ⟨by linarith, hw2⟩
-            linarith
-    have hHb : ‖completedDedekindZetaEntire K w‖ ≤ B * (3 + |w.im|)^2 := by
-      refine le_trans hH ?_
-      have h1w : 1 + ‖w‖ ≤ 3 + |w.im| := by linarith
-      have hsq : (1 + ‖w‖)^2 ≤ (3 + |w.im|)^2 := by
-        have h0 : (0:ℝ) ≤ 1 + ‖w‖ := by positivity
-        nlinarith
-      exact mul_le_mul_of_nonneg_left hsq hB0
-    have hsinw : ‖Complex.sin (π * w)‖ ≤ Real.exp (π * |w.im|) := norm_sin_pi_mul_le w
-    -- assemble the crude growth estimate
-    have hfw : ‖f w‖ ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := by
-      rw [hf]
-      have hnum : ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖
-          ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := by
-        rw [norm_mul, norm_pow, norm_pow]
-        refine mul_le_mul (pow_le_pow_left₀ (norm_nonneg _) hHb 4) ?_
-          (pow_nonneg (norm_nonneg _) n) (by positivity)
-        calc ‖Complex.sin (π * w)‖^n ≤ (Real.exp (π * |w.im|))^n :=
-              pow_le_pow_left₀ (norm_nonneg _) hsinw n
-          _ = Real.exp ((n:ℝ) * (π * |w.im|)) := by rw [← Real.exp_nat_mul]
-      calc ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n
-            / (w - 4)^(4*n+8)‖
-          = ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖
-            / ‖w - 4‖^(4*n+8) := by rw [norm_div, norm_pow]
-        _ ≤ ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖ / 1 := by
-            gcongr
-            exact one_le_pow₀ (by linarith)
-        _ = ‖completedDedekindZetaEntire K w^4 * Complex.sin (π * w)^n‖ := div_one _
-        _ ≤ (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|)) := hnum
-    -- crude ≤ sub-double-exponential
-    have hpoly : (B * (3 + |w.im|)^2)^4 ≤ B^4 * Real.exp (8 * (2 + |w.im|)) := by
-      have h3x : 3 + |w.im| ≤ Real.exp (2 + |w.im|) := by
-        linarith [Real.add_one_le_exp (2 + |w.im|)]
-      have h3x2 : (3 + |w.im|)^2 ≤ Real.exp (2 * (2 + |w.im|)) := by
-        calc (3 + |w.im|)^2 ≤ (Real.exp (2 + |w.im|))^2 :=
-              pow_le_pow_left₀ (by positivity) h3x 2
-          _ = Real.exp (2 * (2 + |w.im|)) := by
-              rw [← Real.exp_nat_mul]
-              norm_num
-      calc (B * (3 + |w.im|)^2)^4 = B^4 * ((3 + |w.im|)^2)^4 := by ring
-        _ ≤ B^4 * (Real.exp (2 * (2 + |w.im|)))^4 := by
-            refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-            have h0 : (0:ℝ) ≤ (3 + |w.im|)^2 := by positivity
-            exact pow_le_pow_left₀ h0 h3x2 4
-        _ = B^4 * Real.exp (8 * (2 + |w.im|)) := by
-            congr 1
-            rw [← Real.exp_nat_mul]
-            congr 1
-            push_cast
-            ring
-    have hfinal : ‖f w‖ ≤ B^4 * Real.exp 16
-        * Real.exp ((8 + (n:ℝ) * π) * |w.im|) := by
-      refine le_trans hfw ?_
-      calc (B * (3 + |w.im|)^2)^4 * Real.exp ((n:ℝ) * (π * |w.im|))
-          ≤ (B^4 * Real.exp (8 * (2 + |w.im|))) * Real.exp ((n:ℝ) * (π * |w.im|)) :=
-            mul_le_mul_of_nonneg_right hpoly (by positivity)
-        _ = B^4 * Real.exp 16 * Real.exp ((8 + (n:ℝ) * π) * |w.im|) := by
-            rw [mul_assoc, ← Real.exp_add, mul_assoc, ← Real.exp_add]
-            congr 2
-            ring
-    refine le_trans hfinal ?_
-    rw [Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
-    have hexp_le : Real.exp ((8 + (n:ℝ) * π) * |w.im|)
-        ≤ Real.exp ((8 + (n:ℝ) * π) * Real.exp (1 * |w.im|)) := by
-      rw [Real.exp_le_exp, one_mul]
-      have hc0 : (0:ℝ) ≤ 8 + (n:ℝ) * π := by positivity
-      have himle : |w.im| ≤ Real.exp |w.im| := by
-        linarith [Real.add_one_le_exp |w.im|]
-      nlinarith
-    exact mul_le_mul_of_nonneg_left hexp_le (by positivity)
+    simp only [hf, hn]
+    exact comparator_isBigO_growth K hB0 hB
   -- boundary bounds in PL form
   have hle_a : ∀ w : ℂ, w.re = -1 → ‖f w‖ ≤ M₁ + M₂ := by
     intro w hw
@@ -2589,6 +2613,111 @@ theorem norm_logDeriv_le_of_norm_le {h : ℂ → ℂ} {c : ℂ} {r : ℝ} (hr : 
   refine le_trans hderiv ?_
   rw [show (8 : ℝ) * M * r / (1/4) = 32 * r * M by ring]
 
+/-- The norm of a finite product `∏ (z - u) ^ D u` with nonnegative exponents equals the
+product of the real powers `‖z - u‖ ^ (D u).toNat`. -/
+private theorem norm_prod_sub_zpow {F : Finset ℂ} {D : ℂ → ℤ}
+    (hD : ∀ u ∈ F, 0 ≤ D u) (z : ℂ) :
+    ‖∏ u ∈ F, (z - u) ^ D u‖ = ∏ u ∈ F, ‖z - u‖ ^ (D u).toNat := by
+  rw [norm_prod]
+  refine Finset.prod_congr rfl (fun u hu => ?_)
+  rw [show D u = ((D u).toNat : ℤ) from (Int.toNat_of_nonneg (hD u hu)).symm,
+    zpow_natCast, norm_pow, Int.toNat_natCast]
+
+/-- Lower bound for the norm of a monic-type product: if every factor distance `‖z - u‖`
+is at least `b ≥ 0`, then `‖∏ (z - u) ^ D u‖ ≥ b ^ (∑ (D u).toNat)`. -/
+private theorem pow_sum_toNat_le_norm_prod_sub {F : Finset ℂ} {D : ℂ → ℤ}
+    (hD : ∀ u ∈ F, 0 ≤ D u) {z : ℂ} {b : ℝ} (hb : 0 ≤ b)
+    (hzu : ∀ u ∈ F, b ≤ ‖z - u‖) :
+    b ^ (∑ u ∈ F, (D u).toNat) ≤ ‖∏ u ∈ F, (z - u) ^ D u‖ := by
+  rw [norm_prod_sub_zpow hD, ← Finset.prod_pow_eq_pow_sum]
+  exact Finset.prod_le_prod (fun u _ => by positivity)
+    (fun u hu => pow_le_pow_left₀ hb (hzu u hu) _)
+
+/-- Upper bound for the norm of a monic-type product: if every factor distance `‖z - u‖`
+is at most `B`, then `‖∏ (z - u) ^ D u‖ ≤ B ^ (∑ (D u).toNat)`. -/
+private theorem norm_prod_sub_le_pow {F : Finset ℂ} {D : ℂ → ℤ}
+    (hD : ∀ u ∈ F, 0 ≤ D u) {z : ℂ} {B : ℝ}
+    (hzu : ∀ u ∈ F, ‖z - u‖ ≤ B) :
+    ‖∏ u ∈ F, (z - u) ^ D u‖ ≤ B ^ (∑ u ∈ F, (D u).toNat) := by
+  rw [norm_prod_sub_zpow hD, ← Finset.prod_pow_eq_pow_sum]
+  exact Finset.prod_le_prod (fun u _ => by positivity)
+    (fun u hu => pow_le_pow_left₀ (norm_nonneg _) (hzu u hu) _)
+
+/-- **Divisor monotonicity from an open ball to its closed ball.** For an everywhere-analytic
+`f`, the (nonnegative) zero-count divisor over `ball c r` sums to at most the divisor over
+`closedBall c r`, since the local orders agree and the open-ball support is contained in the
+closed-ball support. -/
+private theorem finsum_divisor_ball_le_closedBall {f : ℂ → ℂ}
+    (hf : ∀ z : ℂ, AnalyticAt ℂ f z) (c : ℂ) (r : ℝ) :
+    (∑ᶠ u, (MeromorphicOn.divisor f (Metric.ball c r)) u)
+      ≤ ∑ᶠ u, (MeromorphicOn.divisor f (Metric.closedBall c r)) u := by
+  set D₁ : ℂ → ℤ := fun u => (MeromorphicOn.divisor f (Metric.ball c r)) u with hD₁
+  set Dcl : ℂ → ℤ := fun u => (MeromorphicOn.divisor f (Metric.closedBall c r)) u with hDcl
+  have hm₁ : MeromorphicOn f (Metric.ball c r) := fun z _ => (hf z).meromorphicAt
+  have hmcl : MeromorphicOn f (Metric.closedBall c r) := fun z _ => (hf z).meromorphicAt
+  have hfin₁ : (Function.support D₁).Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset hmcl
+      (isCompact_closedBall c r) Metric.ball_subset_closedBall
+  have hfincl : (Function.support Dcl).Finite :=
+    MeromorphicOn.divisor_support_finite_of_subset hmcl
+      (isCompact_closedBall c r) subset_rfl
+  have hD₁nn : ∀ u, 0 ≤ D₁ u := fun u =>
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ => hf z)) u
+  have hDclnn : ∀ u, 0 ≤ Dcl u := fun u =>
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ => hf z)) u
+  have hpt : ∀ u, D₁ u ≤ Dcl u := by
+    intro u
+    by_cases hu : u ∈ Metric.ball c r
+    · rw [hD₁, hDcl]
+      simp only
+      rw [MeromorphicOn.divisor_apply hm₁ hu,
+        MeromorphicOn.divisor_apply hmcl (Metric.ball_subset_closedBall hu)]
+    · rw [hD₁]
+      simp only
+      rw [Function.locallyFinsuppWithin.apply_eq_zero_of_notMem _ hu]
+      exact hDclnn u
+  have hFsub : hfin₁.toFinset ⊆ hfincl.toFinset := by
+    intro u hu
+    have hu' := Function.mem_support.mp (hfin₁.mem_toFinset.mp hu)
+    refine hfincl.mem_toFinset.mpr (Function.mem_support.mpr ?_)
+    intro h0
+    refine hu' (le_antisymm ?_ (hD₁nn u))
+    rw [← h0]
+    exact hpt u
+  rw [finsum_eq_sum D₁ hfin₁, finsum_eq_sum Dcl hfincl]
+  calc ∑ u ∈ hfin₁.toFinset, D₁ u
+      = ∑ u ∈ hfincl.toFinset, D₁ u :=
+        Finset.sum_subset hFsub (fun u _ hu => by
+          by_contra h0
+          exact hu (hfin₁.mem_toFinset.mpr (Function.mem_support.mpr h0)))
+    _ ≤ ∑ u ∈ hfincl.toFinset, Dcl u := Finset.sum_le_sum (fun u _ => hpt u)
+
+/-- **Maximum-modulus sup bound on a closed ball from a bound on its sphere.** If `f` is
+analytic on the open ball `ball c R` and `‖f‖ ≤ C` on the sphere `sphere c ρ` (with
+`0 < ρ < R`), then `‖f‖ ≤ C` on the whole closed ball `closedBall c ρ`. -/
+private theorem norm_le_of_frontier_ball {f : ℂ → ℂ} {c : ℂ} {ρ R : ℝ}
+    (hρ : 0 < ρ) (hρR : ρ < R)
+    (hanal : AnalyticOnNhd ℂ f (Metric.ball c R))
+    {C : ℝ} (hfront : ∀ x ∈ Metric.sphere c ρ, ‖f x‖ ≤ C) :
+    ∀ z ∈ Metric.closedBall c ρ, ‖f z‖ ≤ C := by
+  have hballs : Metric.ball c ρ ⊆ Metric.ball c R := Metric.ball_subset_ball hρR.le
+  have hcbs : Metric.closedBall c ρ ⊆ Metric.ball c R := by
+    intro x hx
+    rw [Metric.mem_closedBall] at hx
+    rw [Metric.mem_ball]
+    linarith
+  have hclosure : closure (Metric.ball c ρ) = Metric.closedBall c ρ := closure_ball c hρ.ne'
+  have hfrontier : frontier (Metric.ball c ρ) = Metric.sphere c ρ := frontier_ball c hρ.ne'
+  intro z hz
+  have hzcl : z ∈ closure (Metric.ball c ρ) := by rw [hclosure]; exact hz
+  refine Complex.norm_le_of_forall_mem_frontier_norm_le Metric.isBounded_ball
+    ⟨hanal.differentiableOn.mono hballs, ?_⟩ ?_ hzcl
+  · rw [hclosure]
+    exact hanal.continuousOn.mono hcbs
+  · intro x hx
+    rw [hfrontier] at hx
+    exact hfront x hx
+
 /-- **The Landau cofactor for `H` near height `T`** (A5-ii assembly): there is an
 abscissa `A` and a constant `C` such that at every height `|T| ≥ A+5` the completed
 zeta factors through the zeros in `ball (A+iT) (A+2)` with a cofactor `h` that is
@@ -2660,13 +2789,6 @@ theorem exists_H_landau_cofactor :
     intro h0
     rw [h0, zpow_zero] at hu
     exact hu rfl
-  -- norms of the peel product
-  have hQ : ∀ z : ℂ, ‖∏ u ∈ F, (z - u) ^ D₁ u‖ = ∏ u ∈ F, ‖z - u‖^((D₁ u).toNat) := by
-    intro z
-    rw [norm_prod]
-    refine Finset.prod_congr rfl (fun u _ => ?_)
-    rw [show D₁ u = ((D₁ u).toNat : ℤ) from (Int.toNat_of_nonneg (hD₁nn u)).symm,
-      zpow_natCast, norm_pow, Int.toNat_natCast]
   -- the envelope pieces
   set E : ℝ := Real.exp (-(((n:ℕ) : ℝ) * (π * |T|)) / 4) with hE
   have hEpos : 0 < E := Real.exp_pos _
@@ -2675,74 +2797,54 @@ theorem exists_H_landau_cofactor :
   have h1T : (0:ℝ) < 1 + |T| := by linarith [abs_nonneg T]
   have hmSpos : 0 < mS := by rw [hmS]; positivity
   have hmLpos : 0 < mL := by rw [hmL]; positivity
-  -- sup bound for h on the peel ball, via the maximum principle at radius A+5/2
-  have hballs : Metric.ball c (A + 5/2) ⊆ Metric.ball c (A+3) :=
-    Metric.ball_subset_ball (by linarith)
-  have hcbs : Metric.closedBall c (A + 5/2) ⊆ Metric.ball c (A+3) := by
+  -- sup bound for h on the peel ball, via the maximum principle at radius A+5/2:
+  -- first the bound on the sphere `A+5/2`, then propagate inward by `norm_le_of_frontier_ball`
+  have hfront : ∀ x ∈ Metric.sphere c (A + 5/2), ‖h x‖ ≤ mS := by
     intro x hx
-    rw [Metric.mem_closedBall] at hx
-    rw [Metric.mem_ball]
-    linarith
-  have hclosure : closure (Metric.ball c (A + 5/2)) = Metric.closedBall c (A + 5/2) :=
-    closure_ball c (ne_of_gt (by linarith : (0:ℝ) < A + 5/2))
-  have hfrontier : frontier (Metric.ball c (A + 5/2)) = Metric.sphere c (A + 5/2) :=
-    frontier_ball c (ne_of_gt (by linarith : (0:ℝ) < A + 5/2))
+    rw [Metric.mem_sphere] at hx
+    have hxball : x ∈ Metric.ball c (A+3) := by
+      rw [Metric.mem_ball, hx]
+      linarith
+    have hfacx := hfac x hxball
+    rw [hP₁ x] at hfacx
+    -- lower bound the peel product on the sphere
+    have hlowfac : ((1:ℝ)/2)^Dnat ≤ ‖∏ u ∈ F, (x - u) ^ D₁ u‖ := by
+      rw [hDnatdef]
+      refine pow_sum_toNat_le_norm_prod_sub (fun u _ => hD₁nn u) (by norm_num) (fun u hu => ?_)
+      have hd := hsuppF u hu
+      rw [Metric.mem_ball] at hd
+      rw [← dist_eq_norm]
+      have htri := dist_triangle x u c
+      have hcomm : dist u c = dist c u := dist_comm u c
+      have hxu : dist x u ≥ dist x c - dist u c := by linarith
+      rw [hx] at hxu
+      linarith
+    -- upper bound H on the sphere
+    have hxcb : x ∈ Metric.closedBall c (A+3) := by
+      rw [Metric.mem_closedBall, hx]
+      linarith
+    have hHx := hsup T hT x hxcb
+    -- combine
+    have hnorm : ‖completedDedekindZetaEntire K x‖
+        = ‖∏ u ∈ F, (x - u) ^ D₁ u‖ * ‖h x‖ := by
+      rw [hfacx, norm_mul]
+    have hkey : ‖h x‖ * ((1:ℝ)/2)^Dnat ≤ cB * (1 + |T|)^P * E := by
+      calc ‖h x‖ * ((1:ℝ)/2)^Dnat
+          ≤ ‖h x‖ * ‖∏ u ∈ F, (x - u) ^ D₁ u‖ :=
+            mul_le_mul_of_nonneg_left hlowfac (norm_nonneg _)
+        _ = ‖completedDedekindZetaEntire K x‖ := by rw [hnorm]; ring
+        _ ≤ cB * (1 + |T|)^P * E := hHx
+    have hhalfpos : (0:ℝ) < ((1:ℝ)/2)^Dnat := by positivity
+    rw [← le_div_iff₀ hhalfpos] at hkey
+    refine le_trans hkey (le_of_eq ?_)
+    rw [hmS, one_div, inv_pow, div_eq_mul_inv, inv_inv]
   have hhsup : ∀ z ∈ Metric.ball c (A+2), ‖h z‖ ≤ mS := by
     intro z hz
-    have hzcl : z ∈ closure (Metric.ball c (A + 5/2)) := by
-      rw [hclosure, Metric.mem_closedBall]
-      rw [Metric.mem_ball] at hz
-      linarith
-    refine Complex.norm_le_of_forall_mem_frontier_norm_le
-      Metric.isBounded_ball ⟨hhanal.differentiableOn.mono hballs, ?_⟩ ?_ hzcl
-    · rw [hclosure]
-      exact hhanal.continuousOn.mono hcbs
-    · intro x hx
-      rw [hfrontier, Metric.mem_sphere] at hx
-      have hxball : x ∈ Metric.ball c (A+3) := by
-        rw [Metric.mem_ball, hx]
-        linarith
-      have hfacx := hfac x hxball
-      rw [hP₁ x] at hfacx
-      -- lower bound the peel product on the sphere
-      have hlowfac : ((1:ℝ)/2)^Dnat ≤ ‖∏ u ∈ F, (x - u) ^ D₁ u‖ := by
-        rw [hQ x]
-        have hstep : ∀ u ∈ F, ((1:ℝ)/2)^((D₁ u).toNat) ≤ ‖x - u‖^((D₁ u).toNat) := by
-          intro u hu
-          refine pow_le_pow_left₀ (by norm_num) ?_ _
-          have hd := hsuppF u hu
-          rw [Metric.mem_ball] at hd
-          rw [← dist_eq_norm]
-          have htri := dist_triangle x u c
-          have hcomm : dist u c = dist c u := dist_comm u c
-          have : dist x u ≥ dist x c - dist u c := by linarith
-          rw [hx] at this
-          linarith
-        calc ((1:ℝ)/2)^Dnat = ∏ u ∈ F, ((1:ℝ)/2)^((D₁ u).toNat) := by
-              rw [Finset.prod_pow_eq_pow_sum]
-          _ ≤ ∏ u ∈ F, ‖x - u‖^((D₁ u).toNat) :=
-              Finset.prod_le_prod (fun u _ => by positivity) hstep
-      have hppos : (0:ℝ) < ‖∏ u ∈ F, (x - u) ^ D₁ u‖ :=
-        lt_of_lt_of_le (by positivity) hlowfac
-      -- upper bound H on the sphere
-      have hxcb : x ∈ Metric.closedBall c (A+3) := by
-        rw [Metric.mem_closedBall, hx]
-        linarith
-      have hHx := hsup T hT x hxcb
-      -- combine
-      have hnorm : ‖completedDedekindZetaEntire K x‖
-          = ‖∏ u ∈ F, (x - u) ^ D₁ u‖ * ‖h x‖ := by
-        rw [hfacx, norm_mul]
-      have hkey : ‖h x‖ * ((1:ℝ)/2)^Dnat ≤ cB * (1 + |T|)^P * E := by
-        calc ‖h x‖ * ((1:ℝ)/2)^Dnat
-            ≤ ‖h x‖ * ‖∏ u ∈ F, (x - u) ^ D₁ u‖ :=
-              mul_le_mul_of_nonneg_left hlowfac (norm_nonneg _)
-          _ = ‖completedDedekindZetaEntire K x‖ := by rw [hnorm]; ring
-          _ ≤ cB * (1 + |T|)^P * E := hHx
-      have hhalfpos : (0:ℝ) < ((1:ℝ)/2)^Dnat := by positivity
-      rw [← le_div_iff₀ hhalfpos] at hkey
-      refine le_trans hkey (le_of_eq ?_)
-      rw [hmS, one_div, inv_pow, div_eq_mul_inv, inv_inv]
+    refine norm_le_of_frontier_ball (by linarith) (show (A + 5/2:ℝ) < A + 3 by linarith)
+      hhanal hfront z ?_
+    rw [Metric.mem_closedBall]
+    rw [Metric.mem_ball] at hz
+    linarith
   -- center lower bound for h
   have hcball3 : c ∈ Metric.ball c (A+3) := Metric.mem_ball_self (by linarith)
   have hfacc := hfac c hcball3
@@ -2752,18 +2854,12 @@ theorem exists_H_landau_cofactor :
     rw [h0, zero_mul] at hfacc
     exact hHcne hfacc
   have hPc_ub : ‖∏ u ∈ F, (c - u) ^ D₁ u‖ ≤ (A+2)^Dnat := by
-    rw [hQ c]
-    have hstep : ∀ u ∈ F, ‖c - u‖^((D₁ u).toNat) ≤ (A+2)^((D₁ u).toNat) := by
-      intro u hu
-      refine pow_le_pow_left₀ (norm_nonneg _) ?_ _
-      have hd := hsuppF u hu
-      rw [Metric.mem_ball] at hd
-      rw [← dist_eq_norm, dist_comm]
-      linarith
-    calc ∏ u ∈ F, ‖c - u‖^((D₁ u).toNat)
-        ≤ ∏ u ∈ F, (A+2)^((D₁ u).toNat) :=
-          Finset.prod_le_prod (fun u _ => by positivity) hstep
-      _ = (A+2)^Dnat := by rw [Finset.prod_pow_eq_pow_sum]
+    rw [hDnatdef]
+    refine norm_prod_sub_le_pow (fun u _ => hD₁nn u) (fun u hu => ?_)
+    have hd := hsuppF u hu
+    rw [Metric.mem_ball] at hd
+    rw [← dist_eq_norm, dist_comm]
+    linarith
   have hhc_lb : mL ≤ ‖h c‖ := by
     have hnormc : ‖completedDedekindZetaEntire K c‖
         = ‖∏ u ∈ F, (c - u) ^ D₁ u‖ * ‖h c‖ := by
@@ -2779,69 +2875,28 @@ theorem exists_H_landau_cofactor :
     refine le_trans ?_ h1
     rw [hmL]
     gcongr
-  -- the zero count controls Dnat
+  -- the zero count controls Dnat, via divisor monotonicity `ball ⊆ closedBall`
+  have hDnat_finsum : (∑ᶠ u, D₁ u : ℤ) = (Dnat : ℤ) := by
+    rw [finsum_eq_sum D₁ hfin₁, hDnatdef]
+    push_cast
+    exact (Finset.sum_congr rfl (fun u _ => (Int.toNat_of_nonneg (hD₁nn u)))).symm
   have hDle : (Dnat : ℝ) ≤ Cc * Real.log (2 + |T|) := by
-    set Dcl : ℂ → ℤ := fun u => (MeromorphicOn.divisor (completedDedekindZetaEntire K)
-      (Metric.closedBall c (A+2))) u with hDcl
-    have hmcl : MeromorphicOn (completedDedekindZetaEntire K)
-        (Metric.closedBall c (A+2)) := fun z _ => (hHanal z).meromorphicAt
-    have hm₁ : MeromorphicOn (completedDedekindZetaEntire K)
-        (Metric.ball c (A+2)) := fun z _ => (hHanal z).meromorphicAt
-    have hfincl : (Function.support Dcl).Finite :=
-      MeromorphicOn.divisor_support_finite_of_subset hmcl
-        (isCompact_closedBall c (A+2)) subset_rfl
-    have hDclnn : ∀ u, 0 ≤ Dcl u := fun u =>
-      (MeromorphicOn.AnalyticOnNhd.divisor_nonneg (fun z _ => hHanal z)) u
-    have hpt : ∀ u, D₁ u ≤ Dcl u := by
-      intro u
-      by_cases hu : u ∈ Metric.ball c (A+2)
-      · rw [hD₁, hDcl]
-        simp only
-        rw [MeromorphicOn.divisor_apply hm₁ hu,
-          MeromorphicOn.divisor_apply hmcl (Metric.ball_subset_closedBall hu)]
-      · rw [hD₁]
-        simp only
-        rw [Function.locallyFinsuppWithin.apply_eq_zero_of_notMem _ hu]
-        exact hDclnn u
-    have hFsub : F ⊆ hfincl.toFinset := by
-      intro u hu
-      have hu' := Function.mem_support.mp (hfin₁.mem_toFinset.mp hu)
-      refine hfincl.mem_toFinset.mpr (Function.mem_support.mpr ?_)
-      intro h0
-      refine hu' (le_antisymm ?_ (hD₁nn u))
-      rw [← h0]
-      exact hpt u
-    have hint : (Dnat : ℤ) ≤ ∑ᶠ u, Dcl u := by
-      have e1 : (Dnat : ℤ) = ∑ u ∈ F, D₁ u := by
-        rw [hDnatdef]
-        push_cast
-        refine Finset.sum_congr rfl (fun u _ => Int.toNat_of_nonneg (hD₁nn u))
-      have e2 : ∑ u ∈ F, D₁ u = ∑ u ∈ hfincl.toFinset, D₁ u := by
-        refine Finset.sum_subset hFsub (fun u _ hu => ?_)
-        by_contra h0
-        exact hu (hfin₁.mem_toFinset.mpr (Function.mem_support.mpr h0))
-      have e3 : ∑ u ∈ hfincl.toFinset, D₁ u ≤ ∑ u ∈ hfincl.toFinset, Dcl u :=
-        Finset.sum_le_sum (fun u _ => hpt u)
-      have e4 : ∑ u ∈ hfincl.toFinset, Dcl u = ∑ᶠ u, Dcl u :=
-        (finsum_eq_sum Dcl hfincl).symm
-      rw [e1, e2, ← e4]
-      exact e3
-    have hcast : ((Dnat : ℤ) : ℝ) ≤ ((∑ᶠ u, Dcl u : ℤ) : ℝ) := by
-      exact_mod_cast hint
-    have := hcount T hT
+    have hmono := finsum_divisor_ball_le_closedBall hHanal c (A+2)
+    have hDnatZ_le : (Dnat : ℤ) ≤ ∑ᶠ u, (MeromorphicOn.divisor
+        (completedDedekindZetaEntire K) (Metric.closedBall c (A+2))) u := by
+      rw [← hDnat_finsum]
+      exact hmono
+    have hclosed := hcount T hT
     calc (Dnat : ℝ) = ((Dnat : ℤ) : ℝ) := by push_cast; ring
-      _ ≤ ((∑ᶠ u, Dcl u : ℤ) : ℝ) := hcast
-      _ ≤ Cc * Real.log (2 + |T|) := this
+      _ ≤ ((∑ᶠ u, (MeromorphicOn.divisor (completedDedekindZetaEntire K)
+            (Metric.closedBall c (A+2))) u : ℤ) : ℝ) := by exact_mod_cast hDnatZ_le
+      _ ≤ Cc * Real.log (2 + |T|) := hclosed
   -- export the open-ball zero count
   have hcount_open : ((∑ᶠ u, D₁ u : ℤ) : ℝ)
       ≤ (32 * (A+2)
         * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) + Cc)
         * Real.log (2 + |T|) := by
-    have hfs : (∑ᶠ u, D₁ u : ℤ) = (Dnat : ℤ) := by
-      rw [finsum_eq_sum D₁ hfin₁, hDnatdef]
-      push_cast
-      exact (Finset.sum_congr rfl (fun u _ => (Int.toNat_of_nonneg (hD₁nn u)))).symm
-    rw [hfs]
+    rw [hDnat_finsum]
     have hlog0 : (0:ℝ) ≤ Real.log (2 + |T|) := Real.log_nonneg (by linarith [abs_nonneg T])
     have hpad : (0:ℝ) ≤ 32 * (A+2)
         * (|Real.log (cB/cL)| + (P+Pn) + Cc * Real.log (2*(A+2)) + 1) := by positivity

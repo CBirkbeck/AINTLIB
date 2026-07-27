@@ -23,22 +23,29 @@ opaque base-changed pullback `pullback_L = baseChangePullback f = Φ ∘ (id_L �
 
   Proved CoordHom-free by `IsFractionRing.ringHom_ext` over `C.CR`: both `Φ ∘ (1 ⊗ ·)` and
   `functionFieldMap` are `F`-algebra homs out of the fraction field `K(C) = Frac(C.CR)`, so they
-  agree iff they agree on `C.CR`, where both reduce to `coordRingMap` (via the localization-uniqueness
-  characterisations of the two component isos `IsLocalization.algEquiv` / `IsFractionRing.algEquivOfAlgEquiv`).
+  agree iff they agree on `C.CR`, where both reduce to `coordRingMap` (via the
+  localization-uniqueness
+  characterisations of the two component isos `IsLocalization.algEquiv` /
+  `IsFractionRing.algEquivOfAlgEquiv`).
 
-* `baseChangePullback_functionFieldMap`: the immediate corollary — the conjugate `baseChangePullback`
+* `baseChangePullback_functionFieldMap`: the immediate corollary — the conjugate
+`baseChangePullback`
   intertwines `f` with `functionFieldMap`:
 
     `baseChangePullback f (functionFieldMap z) = functionFieldMap (f z)`.
 
-  (Apply `Φ⁻¹(functionFieldMap z) = 1 ⊗ z`, then `lTensorMap_tmul`, then `Φ(1 ⊗ f z) = functionFieldMap (f z)`.)
+  (Apply `Φ⁻¹(functionFieldMap z) = 1 ⊗ z`, then `lTensorMap_tmul`, then
+  `Φ(1 ⊗ f z) = functionFieldMap (f z)`.)
 
 * `functionFieldMap_x_gen` / `functionFieldMap_y_gen`: base change sends the `K`-level generic
-  coordinates to the `K̄`-level generic coordinates (`functionFieldMap (x_gen W) = x_gen (W.baseChange L)`,
-  similarly `y_gen`), via `functionFieldMap_algebraMap` + `CoordinateRing.map_mk` on the `X`/root generators.
+  coordinates to the `K̄`-level generic coordinates
+  (`functionFieldMap (x_gen W) = x_gen (W.baseChange L)`,
+  similarly `y_gen`), via `functionFieldMap_algebraMap` + `CoordinateRing.map_mk` on the `X`/root
+  generators.
 
 * `ffBaseChangePoint` and `ffBaseChangePoint_genericPoint`: the function-field base-change point map
-  `Affine.Point.map (functionField_baseChange)` sends `genericPoint W ↦ genericPoint (W.baseChange L)`.
+  `Affine.Point.map (functionField_baseChange)` sends
+  `genericPoint W ↦ genericPoint (W.baseChange L)`.
 
 ## The payoff for `1 − π`
 
@@ -64,8 +71,6 @@ open scoped TensorProduct
 namespace HasseWeil.WeilPairing.IsogenyBaseChangeConcrete
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 section Compat
 
@@ -189,7 +194,8 @@ theorem coordRingMap_X_gen :
         (Polynomial.mapRingHom (algebraMap K L))) =
         Polynomial.C Polynomial.X by
       rw [Polynomial.map_C, Polynomial.coe_mapRingHom, Polynomial.map_X]]
-  show WeierstrassCurve.Affine.CoordinateRing.mk (W.baseChange L).toAffine (Polynomial.C Polynomial.X) =
+  show WeierstrassCurve.Affine.CoordinateRing.mk (W.baseChange L).toAffine
+    (Polynomial.C Polynomial.X) =
     algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X
   rfl
 
@@ -232,7 +238,8 @@ variable {K : Type*} [Field K] [DecidableEq K] (W : WeierstrassCurve K) [W.toAff
 variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [Algebra.IsAlgebraic K L]
   [(W.baseChange L).toAffine.IsElliptic]
 
-/-- **The function-field base-change point map** `Affine.Point.map (functionField_baseChange)`, typed
+/-- **The function-field base-change point map**
+`Affine.Point.map (functionField_baseChange)`, typed
 via `W' := W` over the base field `K` (so the codomain `W.baseChange (K(E_L))` is definitionally
 `W_KE (W.baseChange L)` by the scalar tower `K → L → K(E_L)`).  The geometric realization of the
 function-field inclusion `functionFieldMap : K(E) → K(E_L)` on `E`-points. -/
@@ -252,7 +259,8 @@ theorem ffBaseChangePoint_some (x y : W.toAffine.FunctionField)
           ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange L).injective x y).mpr h) :=
   rfl
 
-/-- **The base-change point map sends the generic point to the generic point** (Silverman I.2/III.4.2):
+/-- **The base-change point map sends the generic point to the generic point** (Silverman
+I.2/III.4.2):
 `ffBaseChangePoint (genericPoint W) = genericPoint (W.baseChange L)`.  Both are `some` of the
 respective generic coordinates; `Affine.Point.map` of a `some` is definitionally a `some` whose
 coordinates are the `functionFieldMap`-images, which are the base-changed generic coordinates
@@ -278,7 +286,8 @@ variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [Algebra.IsAlgebrai
   [(W.baseChange L).toAffine.IsElliptic]
 
 /-- **The concrete base-changed pullback of `1 − π` on the `K̄`-generic x-coordinate** (the G-004
-square, CoordHom-free): `oneSubFrobeniusPullback_L (x_gen^{K̄}) = functionFieldMap ((1 − π).pullback x_gen^K)`.
+square, CoordHom-free):
+`oneSubFrobeniusPullback_L (x_gen^{K̄}) = functionFieldMap ((1 − π).pullback x_gen^K)`.
 
 Pure chaining of `functionFieldMap_x_gen` (`x_gen^{K̄} = functionFieldMap x_gen^K`) and
 `baseChangePullback_functionFieldMap` (the conjugate intertwines `(1 − π).pullback` with
@@ -294,7 +303,8 @@ theorem oneSubFrobeniusPullback_L_x_gen (hq : 2 ≤ Fintype.card K) :
     (HasseWeil.isogOneSub_negFrobenius W hq).pullback (HasseWeil.x_gen W)
 
 /-- **The concrete base-changed pullback of `1 − π` on the `K̄`-generic y-coordinate** (the G-004
-square, CoordHom-free): `oneSubFrobeniusPullback_L (y_gen^{K̄}) = functionFieldMap ((1 − π).pullback y_gen^K)`.
+square, CoordHom-free):
+`oneSubFrobeniusPullback_L (y_gen^{K̄}) = functionFieldMap ((1 − π).pullback y_gen^K)`.
 The `y`-analogue of `oneSubFrobeniusPullback_L_x_gen`. -/
 theorem oneSubFrobeniusPullback_L_y_gen (hq : 2 ≤ Fintype.card K) :
     oneSubFrobeniusPullback_L W L hq (HasseWeil.y_gen (W.baseChange L)) =

@@ -1,7 +1,9 @@
-import BernoulliRegular.CyclotomicUnits.Basic
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
-import Mathlib.Data.ZMod.Units
+module
+
+public import BernoulliRegular.CyclotomicUnits.Basic
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
+public import Mathlib.Data.ZMod.Units
 
 /-!
 # Normalized cyclotomic units
@@ -42,7 +44,7 @@ theorem normalizedCyclotomicUnitExponent_spec (hp_odd : p ≠ 2) (a : ℕ) :
   have hcop : Nat.Coprime 2 p := by
     simpa using ((Fact.out : Nat.Prime p).odd_of_ne_two hp_odd).coprime_two_left
   have hunit : IsUnit (2 : ZMod p) := (ZMod.isUnit_iff_coprime 2 p).2 hcop
-  unfold normalizedCyclotomicUnitExponent
+  simp only [normalizedCyclotomicUnitExponent]
   rw [Nat.cast_mul, ZMod.natCast_zmod_val]
   change (2 : ZMod p) * ((2 : ZMod p)⁻¹ * (1 - (a : ZMod p))) = 1 - (a : ZMod p)
   rw [← mul_assoc, ZMod.mul_inv_of_unit (2 : ZMod p) hunit, one_mul]
@@ -327,9 +329,9 @@ theorem normalizedCyclotomicUnitKOfRange_sq_val_eq_realCyclotomicUnit
     exact normalizedCyclotomicUnitExponent_spec (p := p) hp_odd a
   have hpow : ζ ^ (2 * e) = ζ ^ (p + 1 - a) := by
     simpa [ζ] using zeta_pow_eq_of_zmod_eq (p := p) (K := K) hmod
-  unfold normalizedCyclotomicUnitKOfRange normalizedCyclotomicUnitK
+  simp only [normalizedCyclotomicUnitKOfRange, normalizedCyclotomicUnitK]
   rw [normalizedCyclotomicUnitKWithExponent_sq_val]
-  unfold FLT37.realCyclotomicUnit
+  simp only [FLT37.realCyclotomicUnit]
   change ζ ^ (2 * e) * c ^ 2 = c * ringOfIntegersComplexConj K c
   rw [ringOfIntegersComplexConj_cyclotomicUnit_eq_zeta_pow_mul_self
     (p := p) (K := K) a (by omega) ha_le_p, hpow]

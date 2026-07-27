@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Adjoint
 import HasseWeil.Foundation.EC.GenericCovarianceGeneral
+import HasseWeil.Isogeny.Adjoint
 import HasseWeil.Isogeny.Dual.Canonical
 
 /-!
@@ -177,7 +177,7 @@ theorem Isogeny.pullback_eq_of_pointMap_eqOn_infinite
         WeierstrassCurve.Affine.Point.some xb yb hnsb :=
       heqa.symm.trans ((h P hPS).trans heqb)
     obtain ⟨hxx, hyy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp heq
-    exact ⟨⟨xa, hxa, by rw [hxx]; exact hxb⟩, ⟨ya, hya, by rw [hyy]; exact hyb⟩⟩
+    exact ⟨⟨xa, hxa, hxx ▸ hxb⟩, ⟨ya, hya, hyy ▸ hyb⟩⟩
   have hx : α.pullback (x_gen W) = β.pullback (x_gen W) :=
     eq_of_evaluatesTo_infinite W hS' fun P hP ↦ (key P hP).1
   have hy : α.pullback (y_gen W) = β.pullback (y_gen W) :=
@@ -355,8 +355,8 @@ theorem dual_add_pointMap_eqOn_torsionUnion
   rintro P ⟨ℓ, hmem, hP⟩
   have hℓ : ((ℓ : ℤ) : F) ≠ 0 := hLchar ℓ hmem
   have hsum : ∀ Q : W.toAffine.Point,
-      χ.toAddMonoidHom Q = φ.toAddMonoidHom Q + ψ.toAddMonoidHom Q := by
-    intro Q; rw [hχ]; rfl
+      χ.toAddMonoidHom Q = φ.toAddMonoidHom Q + ψ.toAddMonoidHom Q :=
+    fun Q ↦ by rw [hχ]; rfl
   exact IsWeilAdjointOn.add (hadjφ ℓ hmem hℓ) (hadjψ ℓ hmem hℓ) (hadjχ ℓ hmem hℓ) hsum hP
 
 variable {W} in

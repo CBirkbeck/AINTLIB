@@ -72,7 +72,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil HasseWeil.WeilPairing.TorsionGeometric
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
   [IsIntegrallyClosed (⟨W.toAffine⟩ : SmoothPlaneCurve F).CoordinateRing]

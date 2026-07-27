@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.AdditionPullback.SilvermanIV14
 import HasseWeil.HasseBound.Primitives
 import HasseWeil.Foundation.EC.MulByIntAddRecurrence
@@ -9,7 +14,8 @@ Builds on **RB-ω4** (`kaehler_D_addPullback_x_eq_one_add_smul_omega`, the Silve
 collapse) to assemble `omegaPullbackCoeff (mulByInt m) = m` WITHOUT the EDS Wronskian and WITHOUT
 the formal-group correspondence.
 
-* **RB-ADD** (`omegaPullbackCoeff_addIsog_id`): `omegaPullbackCoeff (id ⊞ α) = 1 + omegaPullbackCoeff α`.
+* **RB-ADD** (`omegaPullbackCoeff_addIsog_id`):
+  `omegaPullbackCoeff (id ⊞ α) = 1 + omegaPullbackCoeff α`.
 * **RB-ID/SUM/IND**: `id ⊞ [m] = [m+1]`, induction → `omegaPullbackCoeff (mulByInt m) = m`.
 
 This is Silverman III.5.2 `(φ+ψ)*ω = φ*ω + ψ*ω` specialised to `φ = id`, then III.5.3's induction.
@@ -49,7 +55,8 @@ theorem omegaPullbackCoeff_addIsog_id
       addPullback_y_pair_id]
   -- `α*u of σ = u₃ = 2·addPullback_y + a₁·addPullback_x + a₃`.
   have hu : alpha_star_u W (addIsog hxy hinj)
-      = 2 * addPullback_y W α + algebraMap K KE W.a₁ * addPullback_x W α + algebraMap K KE W.a₃ := by
+      = 2 * addPullback_y W α + algebraMap K KE W.a₁ * addPullback_x W α
+        + algebraMap K KE W.a₃ := by
     rw [show alpha_star_u W (addIsog hxy hinj)
         = 2 * (addIsog hxy hinj).pullback (y_gen W)
           + algebraMap K KE W.a₁ * (addIsog hxy hinj).pullback (x_gen W)
@@ -84,7 +91,8 @@ theorem omegaPullbackCoeff_addIsog_pair
       omegaPullbackCoeff W α₁ + omegaPullbackCoeff W α₂ := by
   -- `σ*x = addPullback_x_pair α₁ α₂`, `σ*y = addPullback_y_pair α₁ α₂`.
   have hpx : (addIsog hxy hinj).pullback
-        (algebraMap R KE (algebraMap (Polynomial K) R Polynomial.X)) = addPullback_x_pair α₁ α₂ := by
+        (algebraMap R KE (algebraMap (Polynomial K) R Polynomial.X))
+          = addPullback_x_pair α₁ α₂ := by
     show (addIsog hxy hinj).pullback (x_gen W) = addPullback_x_pair α₁ α₂
     rw [addIsog_pullback, OpenLemmaPrimitives.addPullbackAlgHomPair_x_gen_eq]
   have hpy : (addIsog hxy hinj).pullback (y_gen W) = addPullback_y_pair α₁ α₂ := by
@@ -118,7 +126,8 @@ theorem omegaPullbackCoeff_addIsog_pair
 Proof. By uniqueness in the 1-dimensional Kähler module. `omegaPullbackCoeff_spec` gives
 `a_{[k+1]} • ω = (α*u of [k+1])⁻¹ • D([k+1]*x)`. Now:
 * `[k+1]*x = mulByInt_x (k+1) = addPullback_x [k]` (RB-ID), so `D([k+1]*x) = D(addPullback_x [k])`.
-* RB-ω4 (α = `[k]`, with `x_gen ≠ [k]*x` since `k ≥ 2`): `D(addPullback_x [k]) = u₃ • ((1 + a_{[k]}) • ω)`
+* RB-ω4 (α = `[k]`, with `x_gen ≠ [k]*x` since `k ≥ 2`):
+  `D(addPullback_x [k]) = u₃ • ((1 + a_{[k]}) • ω)`
   where `u₃ = 2·addPullback_y [k] + a₁·addPullback_x [k] + a₃`.
 * RB-ID rewrites `addPullback_x/y [k] = mulByInt_x/y (k+1)`, so `u₃ = α*u of [k+1]` (definitionally,
   via `alpha_star_u_mulByInt`).
@@ -144,7 +153,8 @@ theorem omegaPullbackCoeff_mulByInt_succ (k : ℤ) (hk2 : 2 ≤ k) :
   -- (def + RB-ID + alpha_star_u_mulByInt).
   have hu : alpha_star_u W (mulByInt W.toAffine (k + 1))
       = 2 * addPullback_y W (mulByInt W.toAffine k)
-        + algebraMap K KE W.a₁ * addPullback_x W (mulByInt W.toAffine k) + algebraMap K KE W.a₃ := by
+        + algebraMap K KE W.a₁ * addPullback_x W (mulByInt W.toAffine k)
+        + algebraMap K KE W.a₃ := by
     rw [alpha_star_u_mulByInt W (k + 1) hk1, ← hAx, ← hAy]
   have hu3_ne : 2 * addPullback_y W (mulByInt W.toAffine k)
       + algebraMap K KE W.a₁ * addPullback_x W (mulByInt W.toAffine k) + algebraMap K KE W.a₃ ≠ 0 :=
@@ -226,7 +236,8 @@ theorem omegaPullbackCoeff_mulByInt_routeB (n : ℤ) (hn : n ≠ 0) :
 /-- **Pillar B endpoint (wronskian-free, formal-group-free)**: in characteristic `p`, `[p]*ω = 0`,
 i.e. `a_{[p]} = (p : K) = 0`. The axiom-clean Route B replacement for the formal-group
 `omegaPullbackCoeff_mulByInt_p_eq_zero_via_formalGroup` and the wronskian
-`omegaPullbackCoeff_mulByInt`. Direct from `omegaPullbackCoeff_mulByInt_routeB` + `CharP.cast_eq_zero`. -/
+`omegaPullbackCoeff_mulByInt`. Direct from `omegaPullbackCoeff_mulByInt_routeB`
++ `CharP.cast_eq_zero`. -/
 theorem omegaPullbackCoeff_mulByInt_p_eq_zero_routeB (p : ℕ) [CharP K p] (hp : p ≠ 0) :
     omegaPullbackCoeff W (mulByInt W.toAffine (p : ℤ)) = 0 := by
   rw [omegaPullbackCoeff_mulByInt_routeB W (p : ℤ) (by exact_mod_cast hp),

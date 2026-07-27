@@ -104,10 +104,6 @@ noncomputable def completedPrincipalUnitModPCharacterProjectionRange (i : ℕ) :
     Submodule (ZMod p) (Additive (completedPrincipalUnitModPQuotient p K)) :=
   LinearMap.range (completedPrincipalUnitModPCharacterProjection (p := p) K i)
 
--- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
--- module instance through additive/multiplicative wrappers.
-set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 /-- The eigenspace in `completed U_1 / completed U_1^p` for the `j`-th
 power character of `Delta`. -/
 def completedPrincipalUnitModPDeltaPowerEigenspace (j : ℕ) :
@@ -179,6 +175,7 @@ theorem localMaximalIdealGradedQuotient_card (n : ℕ) :
     (localMaximalIdealGradedQuotientEquivResidue (p := p) (K := K) n)).symm.trans
       (localCyclotomicResidueCard (p := p) (K := K))
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem factor_evalₐ_pow_le
     {R : Type*} [CommRing R] (I : Ideal R) {m n : ℕ} (hmn : m ≤ n)
     (x : AdicCompletion I R) :

@@ -175,7 +175,7 @@ theorem derivative_logOf_formalExpNormalizedMinusOne_mul_self :
     have h :=
       Furtwaengler.FiniteLogFormal.subst_deriv_log_mul_one_add (A := ℚ) hsubst
     simpa [N, sub_eq_add_neg, add_assoc] using h
-  rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ℚ hsubst]
+  rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst hsubst]
   have hderiv_sub : d⁄dX ℚ (N - 1) = d⁄dX ℚ N := by simp
   calc
     (PowerSeries.subst (N - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) *
@@ -214,11 +214,8 @@ theorem X_mul_derivative_logOf_formalExpNormalizedMinusOne :
             change N + PowerSeries.X * PowerSeries.derivativeFun N =
               PowerSeries.derivativeFun (PowerSeries.X * N)
             rw [PowerSeries.derivativeFun_mul]
-            have hdx : PowerSeries.derivativeFun (PowerSeries.X : PowerSeries ℚ) = 1 := by
-              ext n
-              by_cases hn : n = 0
-              · simp [PowerSeries.coeff_derivativeFun, PowerSeries.coeff_X, hn]
-              · simp [PowerSeries.coeff_derivativeFun, PowerSeries.coeff_X, hn]
+            have hdx : PowerSeries.derivativeFun (PowerSeries.X : PowerSeries ℚ) = 1 :=
+              PowerSeries.derivative_X
             rw [hdx]
             ring
       _ = d⁄dX ℚ (PowerSeries.exp ℚ - 1) := by

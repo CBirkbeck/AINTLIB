@@ -4,7 +4,7 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.LeadingCong
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceFormSetup
 
 /-!
-# Trace-form binomial truncation (REF-18c2c4-L2c2)
+# Trace-form binomial truncation
 
 Specialises the binomial-truncation layer of `LeadingCongruence.lean` to
 the trace-form additive character carried by a
@@ -14,7 +14,8 @@ canonical trace `(Algebra.trace (ZMod ℓ) k (traceScale · x)).val` (via
 `ConcreteStickelbergerSetup` immediately specialise.
 
 The remaining mathematical work — multinomial reduction, character
-orthogonality, minimal-weight uniqueness — lives in REF-18c2c4-L2c3.
+orthogonality, minimal-weight uniqueness — lives downstream, in the
+multinomial and trace-coefficient files.
 
 ## Main definitions
 
@@ -31,7 +32,7 @@ orthogonality, minimal-weight uniqueness — lives in REF-18c2c4-L2c3.
 * `gaussSumInt_sub_traceBinomialApprox_mem_Q_pow`:
   `gaussSumInt a − traceBinomialApprox a s ∈ Q^(s+1)`.
 * `gaussSumInt_qadic_ord_at_prime_of_traceLead`: exact-order transfer
-  theorem in trace form, ready for L2c3 leading-term consumption.
+  theorem in trace form, ready for leading-term consumption.
 -/
 
 @[expose] public section
@@ -90,16 +91,16 @@ noncomputable def gaussSumIntRec (a : ℕ) : 𝓞 R' :=
 theorem binomialCoeffSum_eq_traceCharacterChooseSum (a n : ℕ) :
     S.toConcreteStickelbergerSetup.binomialCoeffSum a n =
       S.traceCharacterChooseSum a n := by
-  unfold ConcreteStickelbergerSetup.binomialCoeffSum traceCharacterChooseSum
-  refine Finset.sum_congr rfl fun x _ => ?_
+  simp only [ConcreteStickelbergerSetup.binomialCoeffSum, traceCharacterChooseSum]
+  refine Finset.sum_congr rfl fun x _ ↦ ?_
   rw [S.psiExponent_trace]
 
 /-- The bundle's `binomialCoeffApprox` agrees with `traceBinomialApprox`. -/
 theorem binomialCoeffApprox_eq_traceBinomialApprox (a s : ℕ) :
     S.toConcreteStickelbergerSetup.binomialCoeffApprox a s =
       S.traceBinomialApprox a s := by
-  unfold ConcreteStickelbergerSetup.binomialCoeffApprox traceBinomialApprox
-  refine Finset.sum_congr rfl fun n _ => ?_
+  simp only [ConcreteStickelbergerSetup.binomialCoeffApprox, traceBinomialApprox]
+  refine Finset.sum_congr rfl fun n _ ↦ ?_
   rw [S.binomialCoeffSum_eq_traceCharacterChooseSum]
 
 /-- The reciprocal approximation is the ordinary approximation at index
@@ -122,7 +123,7 @@ theorem gaussSumIntRec_sub_traceBinomialApproxRec_mem_Q_pow (a s : ℕ) :
 /-- Exact-order consequence of a leading-term evaluation of the
 trace-form binomial approximation. This is the trace-form analogue of
 `gaussSumInt_qadic_ord_at_prime_of_binomialCoeffApprox` and is the
-interface consumed by L2c3. -/
+interface consumed downstream. -/
 theorem gaussSumInt_qadic_ord_at_prime_of_traceLead
     (a : ℕ) {lead : 𝓞 R'}
     (h_lead_mem :
@@ -158,16 +159,10 @@ theorem gaussSumIntRec_qadic_ord_at_prime_of_traceLead
         S.Q ^ (digitSum ℓ (a * ((Fintype.card k - 1) / p)) + 1) :=
   exact_mem_pow_of_sub_mem_succ h_lead_mem h_lead_not_mem_succ
     (by
-      have htrunc := S.gaussSumIntRec_sub_traceBinomialApproxRec_mem_Q_pow a
-        (digitSum ℓ (a * ((Fintype.card k - 1) / p)))
-      rw [show S.gaussSumIntRec a - lead =
-          (S.gaussSumIntRec a -
-              S.traceBinomialApproxRec a
-                (digitSum ℓ (a * ((Fintype.card k - 1) / p)))) +
-            (S.traceBinomialApproxRec a
-                (digitSum ℓ (a * ((Fintype.card k - 1) / p))) - lead) by ring]
-      exact (S.Q ^ (digitSum ℓ (a * ((Fintype.card k - 1) / p)) + 1)).add_mem
-        htrunc h_approx)
+      set s := digitSum ℓ (a * ((Fintype.card k - 1) / p))
+      rw [← sub_add_sub_cancel (S.gaussSumIntRec a) (S.traceBinomialApproxRec a s) lead]
+      exact (S.Q ^ (s + 1)).add_mem
+        (S.gaussSumIntRec_sub_traceBinomialApproxRec_mem_Q_pow a s) h_approx)
 
 end TraceFormStickelbergerSetup
 

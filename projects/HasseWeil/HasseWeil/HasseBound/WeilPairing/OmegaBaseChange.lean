@@ -53,9 +53,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil IsogenyBaseChangeConcrete
 
-set_option linter.unusedSectionVars false
-set_option linter.style.longLine false
-set_option linter.unusedDecidableInType false
 
 variable {K : Type*} [Field K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
@@ -70,6 +67,8 @@ noncomputable scoped instance algFunctionFieldBaseChange :
     Algebra W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField :=
   ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange L).toAlgebra
 
+omit [DecidableEq K] [W.toAffine.IsElliptic] [DecidableEq L] [Algebra.IsAlgebraic K L]
+  [(W.baseChange L).toAffine.IsElliptic] in
 /-- `algebraMap K(E) K(E_L) = functionFieldMap` (definitional via `functionField_baseChange`). -/
 theorem algebraMap_functionField_baseChange_eq (z : W.toAffine.FunctionField) :
     algebraMap W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField z =
@@ -81,11 +80,11 @@ noncomputable scoped instance towerFunctionFieldBaseChange :
     IsScalarTower K W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField :=
   IsScalarTower.of_algebraMap_eq fun k ↦ by
     change algebraMap K (W.baseChange L).toAffine.FunctionField k =
-      (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (algebraMap K W.toAffine.FunctionField k)
+      (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L
+        (algebraMap K W.toAffine.FunctionField k)
     rw [SmoothPlaneCurve.functionFieldMap_algebraMap_F]
     rfl
 
-set_option synthInstance.maxHeartbeats 1000000 in
 /-- `SMulCommClass L K(E) K(E_L)`: both act by multiplication in the commutative ring `K(E_L)`. -/
 noncomputable scoped instance smulCommFunctionFieldBaseChange :
     SMulCommClass L W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField where
@@ -102,6 +101,8 @@ noncomputable def omegaDiffMap :
       KaehlerDifferential L (W.baseChange L).toAffine.FunctionField :=
   KaehlerDifferential.map K L W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField
 
+omit [DecidableEq K] [W.toAffine.IsElliptic] [DecidableEq L] [Algebra.IsAlgebraic K L]
+  [(W.baseChange L).toAffine.IsElliptic] in
 /-- `omegaDiffMap (D_K z) = D_L (functionFieldMap z)` (`KaehlerDifferential.map_D`). -/
 theorem omegaDiffMap_D (z : W.toAffine.FunctionField) :
     omegaDiffMap W L (KaehlerDifferential.D K W.toAffine.FunctionField z) =
@@ -109,9 +110,13 @@ theorem omegaDiffMap_D (z : W.toAffine.FunctionField) :
         (algebraMap W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField z) :=
   KaehlerDifferential.map_D K L W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField z
 
-/-- `omegaDiffMap (s • ω) = s • omegaDiffMap ω` (`K(E)`-linearity, the `K(E)`-action on `Ω[K(E_L)/L]`
+omit [DecidableEq K] [W.toAffine.IsElliptic] [DecidableEq L] [Algebra.IsAlgebraic K L]
+  [(W.baseChange L).toAffine.IsElliptic] in
+/-- `omegaDiffMap (s • ω) = s • omegaDiffMap ω` (`K(E)`-linearity, the `K(E)`-action on
+`Ω[K(E_L)/L]`
 factoring through `functionFieldMap`). -/
-theorem omegaDiffMap_smul (s : W.toAffine.FunctionField) (ω : KaehlerDifferential K W.toAffine.FunctionField) :
+theorem omegaDiffMap_smul (s : W.toAffine.FunctionField)
+  (ω : KaehlerDifferential K W.toAffine.FunctionField) :
     omegaDiffMap W L (s • ω) = s • omegaDiffMap W L ω :=
   LinearMap.map_smul (omegaDiffMap W L) s ω
 
@@ -125,9 +130,11 @@ theorem functionFieldMap_pullback
     (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (α.pullback z) =
       α_L.pullback ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L z) := by
   rw [hpb]
-  exact (baseChangePullback_functionFieldMap (⟨W.toAffine⟩ : SmoothPlaneCurve K) L α.pullback z).symm
+  exact (baseChangePullback_functionFieldMap
+    (⟨W.toAffine⟩ : SmoothPlaneCurve K) L α.pullback z).symm
 
-/-- **Pullback compatibility**: `omegaDiffMap ∘ α.pullbackKaehler = α_L.pullbackKaehler ∘ omegaDiffMap`
+/-- **Pullback compatibility**: `omegaDiffMap ∘ α.pullbackKaehler = α_L.pullbackKaehler ∘
+omegaDiffMap`
 for a base-changed isogeny `α_L` whose pullback is `baseChangePullback α.pullback`.  Proved by span
 induction over the generators `D_K z`; the generator step is exactly `functionFieldMap_pullback`. -/
 theorem omegaDiffMap_pullbackKaehler
@@ -161,25 +168,28 @@ theorem omegaDiffMap_pullbackKaehler
     rw [algebraMap_functionField_baseChange_eq, algebraMap_functionField_baseChange_eq]
     exact functionFieldMap_pullback W L α α_L hpb s
 
-set_option synthInstance.maxHeartbeats 1000000 in
+omit [DecidableEq K] [DecidableEq L] in
 /-- **`functionFieldMap (u_gen) = u_gen` over `L`** (the invariant-differential denominator
 `u = 2y + a₁x + a₃` base-changes, since `x_gen`, `y_gen`, `a₁`, `a₃` do). -/
 theorem functionFieldMap_u_gen :
     (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (u_gen W) = u_gen (W.baseChange L) := by
-  have hx : (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (x_gen W) = x_gen (W.baseChange L) :=
+  have hx : (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (x_gen W) = x_gen
+    (W.baseChange L) :=
     functionFieldMap_x_gen W L
-  have hy : (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (y_gen W) = y_gen (W.baseChange L) :=
+  have hy : (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap L (y_gen W) = y_gen
+    (W.baseChange L) :=
     functionFieldMap_y_gen W L
   rw [show u_gen W = 2 * y_gen W + algebraMap K W.toAffine.FunctionField W.a₁ * x_gen W +
       algebraMap K W.toAffine.FunctionField W.a₃ from rfl]
   rw [show u_gen (W.baseChange L) = 2 * y_gen (W.baseChange L) +
-      algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₁ * x_gen (W.baseChange L) +
+      algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₁ * x_gen
+        (W.baseChange L) +
       algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₃ from rfl]
   rw [map_add, map_add, map_mul, map_mul, map_ofNat, hx, hy,
     SmoothPlaneCurve.functionFieldMap_algebraMap_F, SmoothPlaneCurve.functionFieldMap_algebraMap_F]
   congr 2
 
-set_option synthInstance.maxHeartbeats 1000000 in
+omit [DecidableEq K] [DecidableEq L] in
 /-- **The invariant differential transports**: `omegaDiffMap (ω_K) = ω_L`.  Both are
 `u⁻¹ • D(x_gen)`, and `functionFieldMap` carries `u_gen ↦ u_gen` (`functionFieldMap_u_gen`) and
 `x_gen ↦ x_gen` (`functionFieldMap_x_gen`). -/

@@ -153,7 +153,7 @@ from a maximal `P ⊂ 𝓞 K` containing `ℓ` (but not `p`), a chosen prime
 witness.
 
 Assembled witnesses:
-* `card_k = ℓ^(inertiaDeg P)` from `cardResidueField_eq_pow_ell_inertiaDeg`,
+* `card_k = ℓ^(inertiaDeg' P)` from `cardResidueField_eq_pow_ell_inertiaDeg`,
 * `zeta_k = canonicalResidueZetaP P` (with primitivity from
   `canonicalResidueZetaP_isPrimitiveRoot`),
 * `hdiv : p ∣ #(𝓞 K ⧸ P) − 1` from `p_dvd_card_residueField_sub_one`,
@@ -189,7 +189,7 @@ noncomputable def mkConcreteSetup_ofSplitPrime
   haveI : P.IsPrime := hP_max.isPrime
   have card_k :
       Fintype.card (𝓞 K ⧸ P) =
-        ℓ ^ ((Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P) :=
+        ℓ ^ ((Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P) :=
     cardResidueField_eq_pow_ell_inertiaDeg P hℓ_in_P
   have hdiv : p ∣ Fintype.card (𝓞 K ⧸ P) - 1 :=
     p_dvd_card_residueField_sub_one P hP_ne_bot hp_notin_P
@@ -289,7 +289,7 @@ theorem canonical_zeta_p_int_isPrimitiveRoot :
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   haveI : FaithfulSMul (𝓞 K) (𝓞 R') :=
     FaithfulSMul.of_field_isFractionRing (𝓞 K) (𝓞 R') K R'
-  unfold canonical_zeta_p_int
+  simp only [canonical_zeta_p_int]
   exact (BernoulliRegular.cyclotomicZetaInteger_isPrimitiveRoot
     (p := p) (K := K)).map_of_injective
     (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 R'))
@@ -338,7 +338,7 @@ theorem canonical_zeta_p_int_residue_of_kAlgebraCompat
           : (𝓞 K ⧸ P)ˣ) : 𝓞 K ⧸ P) := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  unfold canonical_zeta_p_int
+  simp only [canonical_zeta_p_int]
   rw [residueMap_of_split_algebraMap (K₀ := K) Q P iso h_compat]
   rfl
 
@@ -615,7 +615,7 @@ theorem mkConcreteSetup_ofSplitPrime_descentPrime_eq
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
     algebra_zmod_residueField (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
-  unfold ConcreteStickelbergerSetup.descentPrime
+  simp only [ConcreteStickelbergerSetup.descentPrime]
   rw [mkConcreteSetup_ofSplitPrime_Q]
   exact under_eq_P_of_kAlgebraCompat (K₀ := K) Q P iso h_compat
 
@@ -639,7 +639,7 @@ theorem mkConcreteSetup_ofSplitPrime_canonical_compat_descentPrime
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
     algebra_zmod_residueField (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
-  unfold mkConcreteSetup_ofSplitPrime_canonical_compat mkConcreteSetup_ofSplitPrime_canonical
+  simp only [mkConcreteSetup_ofSplitPrime_canonical_compat, mkConcreteSetup_ofSplitPrime_canonical]
   exact mkConcreteSetup_ofSplitPrime_descentPrime_eq (K := K) (R' := R') p ℓ
     P hℓ_in_P hp_notin_P hP_ne_bot hℓ_ne_p Q hQ_in iso h_compat
     (canonical_zeta_p p K R')

@@ -164,6 +164,19 @@ private theorem dvd_trailingCoeff_of_eval {B : Type*} [CommRing B] [IsDomain B] 
   rw [hq1eval, zero_sub, dvd_neg] at hsub
   rw [hcoeff, Polynomial.coeff_zero_eq_eval_zero]; exact hsub
 
+/-- For an injective ring hom `φ` and a nonzero polynomial `p`, the trailing coefficient of the
+mapped polynomial `p.map φ` is `φ` applied to some nonzero coefficient of `p` — namely the one at
+`(p.map φ).natTrailingDegree`, which injectivity keeps nonzero. -/
+private theorem exists_coeff_ne_zero_map_trailingCoeff {A B : Type*} [Semiring A] [Semiring B]
+    {φ : A →+* B} (hφ : Function.Injective φ) {p : A[X]} (hp : p ≠ 0) :
+    ∃ m, p.coeff m ≠ 0 ∧ (p.map φ).trailingCoeff = φ (p.coeff m) := by
+  refine ⟨(p.map φ).natTrailingDegree, ?_, ?_⟩
+  · have h1 : (p.map φ).trailingCoeff ≠ 0 :=
+      Polynomial.trailingCoeff_nonzero_iff_nonzero.mpr ((Polynomial.map_ne_zero_iff hφ).mpr hp)
+    rw [Polynomial.trailingCoeff, Polynomial.coeff_map] at h1
+    exact fun h => h1 (by rw [h, map_zero])
+  · rw [Polynomial.trailingCoeff, Polynomial.coeff_map]
+
 /-- **Hypersurface transcendence drop.** For `d ≥ 1`, a prime `𝔮'` of `R[X₀,…,X_{d-1}]` containing a
 nonzero `g`, the quotient domain has transcendence degree strictly below that of the polynomial
 ring. Proof: were there `d` algebraically independent elements in the quotient, lifting them and
@@ -185,7 +198,7 @@ private theorem trdeg_quotient_prime_lt {R : Type*} [CommRing R] [IsDomain R] {d
   · haveI : FaithfulSMul R C := (faithfulSMul_iff_algebraMap_injective R C).mpr hinj
     have hfin : Algebra.trdeg R C < ℵ₀ := trdeg_lt_aleph0
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     obtain ⟨ι, x, hx⟩ := exists_isTranscendenceBasis' R C
     have hmk : (#ι) = Algebra.trdeg R C := hx.cardinalMk_eq_trdeg
     haveI : Finite ι := Cardinal.lt_aleph0_iff_finite.mp (hmk ▸ hfin)
@@ -206,10 +219,10 @@ private theorem trdeg_quotient_prime_lt {R : Type*} [CommRing R] [IsDomain R] {d
       have hle : (d : ℕ) + 1 ≤ d := by
         have h3 := hai.lift_cardinalMk_le_trdeg
         rw [hPd] at h3
-        simpa [Cardinal.mk_fin, Cardinal.lift_natCast] using h3
+        simp at h3
       omega
     rw [AlgebraicIndependent, Function.Injective] at hnotai
-    push_neg at hnotai
+    push Not at hnotai
     obtain ⟨a, b, hab, hne⟩ := hnotai
     have hPol0 : a - b ≠ 0 := sub_ne_zero.mpr hne
     have hPolev :
@@ -231,32 +244,18 @@ private theorem trdeg_quotient_prime_lt {R : Type*} [CommRing R] [IsDomain R] {d
         rw [hcompeq] at hfinj
         exact fun p1 p2 h12 => hfinj (by rw [AlgHom.comp_apply, AlgHom.comp_apply, h12])
       exact hFai
-    have hcoeffqB : ∀ m, qB.coeff m
-        = MvPolynomial.aeval F ((MvPolynomial.finSuccEquiv R d (a - b)).coeff m) := by
-      intro m
-      rw [hqB, show Polynomial.mapAlgHom (MvPolynomial.aeval F)
-          (MvPolynomial.finSuccEquiv R d (a - b))
-          = Polynomial.map (MvPolynomial.aeval F :
-            MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
-            (MvPolynomial.finSuccEquiv R d (a - b)) from rfl, Polynomial.coeff_map]
-      rfl
-    have hqB0 : qB ≠ 0 := by
-      rw [hqB, show Polynomial.mapAlgHom (MvPolynomial.aeval F)
-          (MvPolynomial.finSuccEquiv R d (a - b))
-          = Polynomial.map (MvPolynomial.aeval F :
-            MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
-            (MvPolynomial.finSuccEquiv R d (a - b)) from rfl]
-      intro h0
-      have h1 : MvPolynomial.finSuccEquiv R d (a - b) ≠ 0 := fun h =>
-        hPol0 ((MvPolynomial.finSuccEquiv R d).injective (by rw [h]; simp))
-      exact h1 (Polynomial.map_injective _ haevalFinj (by rw [h0]; simp))
-    have hc0 : qB.trailingCoeff ≠ 0 := Polynomial.trailingCoeff_nonzero_iff_nonzero.mpr hqB0
+    have hfSE0 : MvPolynomial.finSuccEquiv R d (a - b) ≠ 0 := fun h =>
+      hPol0 ((MvPolynomial.finSuccEquiv R d).injective (by rw [h]; simp))
+    have hqBeq : qB = Polynomial.map (MvPolynomial.aeval F :
+        MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
+        (MvPolynomial.finSuccEquiv R d (a - b)) := by rw [hqB]; rfl
     have hgc : g ∣ qB.trailingCoeff := dvd_trailingCoeff_of_eval hg hevalqB
-    set Q' := (MvPolynomial.finSuccEquiv R d (a - b)).coeff qB.natTrailingDegree with hQ'
-    have hcQ : MvPolynomial.aeval F Q' = qB.trailingCoeff := by
-      rw [Polynomial.trailingCoeff]; exact (hcoeffqB _).symm
-    have hQ'0 : Q' ≠ 0 := by
-      intro h0; rw [h0, map_zero] at hcQ; exact hc0 hcQ.symm
+    obtain ⟨m, hm0, hmtc⟩ :=
+      exists_coeff_ne_zero_map_trailingCoeff (φ := (MvPolynomial.aeval F :
+        MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom) haevalFinj hfSE0
+    set Q' := (MvPolynomial.finSuccEquiv R d (a - b)).coeff m with hQ'
+    have hcQ : MvPolynomial.aeval F Q' = qB.trailingCoeff := by rw [hqBeq]; exact hmtc.symm
+    have hQ'0 : Q' ≠ 0 := hm0
     have hmem : MvPolynomial.aeval F Q' ∈ q' := by
       rw [hcQ]
       exact (Ideal.span_singleton_le_iff_mem q').mpr hgq (Ideal.mem_span_singleton.mpr hgc)
@@ -282,7 +281,8 @@ nonzero `f ∈ R`". The whole point is that `N` need not be finite over `R`, onl
 The reduction from an arbitrary finite `S`-module to the domains `S ⧸ 𝔮` is genuine and proved
 here, using the pre-packaged Noetherian dévissage induction
 `IsNoetherianRing.induction_on_isQuotientEquivQuotientPrime` (which supplies the prime filtration
-of Stacks 10.62.1) together with `GFree.of_exact` (GF2 through localization) and `GFree.subsingleton`.
+of Stacks 10.62.1) together with `GFree.of_exact` (GF2 through localization) and
+`GFree.subsingleton`.
 
 The **domain case** `exists_generically_free_domain` — the Noether-normalisation + induction on
 `dim((S ⧸ 𝔮) ⊗_R Frac R)` — is isolated as the single boxed statement; see its docstring.
@@ -366,12 +366,14 @@ private theorem free_localizedModule_away_mul {X : Type*}
         ← algebraMap_smul (A := Localization.Away (algebraMap R (Localization.Away a) b))
           (↑s : R) (t • y),
         smul_smul,
-        mul_comm (algebraMap R (Localization.Away (algebraMap R (Localization.Away a) b)) (↑s : R)) t,
+        mul_comm (algebraMap R (Localization.Away (algebraMap R (Localization.Away a) b)) (↑s : R))
+        t,
         hrs, algebraMap_smul, map_smul φ]
     have hsc : (↑s : R) • σA t = algebraMap R (Localization.Away (a * b)) r := by
       rw [← algebraMap_smul (A := Localization.Away (a * b)) (↑s : R) (σA t), smul_eq_mul,
         ← σA.commutes (↑s : R), ← map_mul,
-        mul_comm (algebraMap R (Localization.Away (algebraMap R (Localization.Away a) b)) (↑s : R)) t,
+        mul_comm (algebraMap R (Localization.Away (algebraMap R (Localization.Away a) b)) (↑s : R))
+        t,
         hrs, σA.commutes r]
     have eR : (↑s : R) • (σA t • φ y) = r • φ y := by
       rw [← smul_assoc, hsc, algebraMap_smul]
@@ -477,8 +479,10 @@ private theorem GFree.of_exact {N₁ N₂ N₃ : Type*}
 
 The domain-case induction switches the ambient algebra (from `S` to a polynomial ring `R[X]` and to
 its prime quotients). To carry it out cleanly we work with the ambient-algebra-free predicate `GF N`
-("`N`, as an `R`-module, is free after inverting one nonzero element"), which is exactly `GFree R S N`
-with `S` forgotten. All the closure properties of `GFree` are re-established for `GF` (the proofs are
+("`N`, as an `R`-module, is free after inverting one nonzero element"), which is exactly `GFree R S
+N`
+with `S` forgotten. All the closure properties of `GFree` are re-established for `GF` (the proofs
+are
 identical, only simpler as no `restrictScalars` is needed). -/
 
 /-- `GF R N`: the `R`-module `N` becomes free after inverting a single nonzero `f ∈ R`. This is
@@ -575,7 +579,8 @@ private theorem GF.of_smul_eq_zero {R N : Type*} [CommRing R] [AddCommGroup N] [
     refine LocalizedModule.induction_on (fun x s => ?_)
     rw [← hu.smul_eq_zero (x := LocalizedModule.mk x s), algebraMap_smul,
       LocalizedModule.smul'_mk, hann x, LocalizedModule.zero_mk]
-  have hsub : Subsingleton (LocalizedModule (Submonoid.powers f) N) := ⟨fun a b => by rw [hz a, hz b]⟩
+  have hsub : Subsingleton (LocalizedModule (Submonoid.powers f) N) := ⟨fun a b => by rw [hz a, hz
+  b]⟩
   infer_instance
 
 /-- **Cokernel filtering** (the transcendence-drop reduction, consuming GF1/GF2 and
@@ -787,14 +792,16 @@ finite-type algebra `S` over a Noetherian domain `R` becomes free over `R_f` aft
 single nonzero `f ∈ R`.
 
 Proved by the prime-filtration dévissage: `M` is built by finitely many extensions out of
-subsingletons and cyclic domains `S ⧸ 𝔮` (`IsNoetherianRing.induction_on_isQuotientEquivQuotientPrime`,
+subsingletons and cyclic domains `S ⧸ 𝔮`
+(`IsNoetherianRing.induction_on_isQuotientEquivQuotientPrime`,
 Stacks 10.62.1); generic freeness holds for the pieces (subsingletons trivially, domains by the
 boxed `exists_generically_free_domain`) and is stable under extensions after inverting a common
 element (`GFree.of_exact`, i.e. GF2 through exact localisation). -/
 theorem exists_generically_free {R S M : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
     [CommRing S] [Algebra R S] [Algebra.FiniteType R S]
     [AddCommGroup M] [Module S M] [Module R M] [IsScalarTower R S M] [Module.Finite S M] :
-    ∃ f : R, f ≠ 0 ∧ Module.Free (Localization.Away f) (LocalizedModule (Submonoid.powers f) M) := by
+    ∃ f : R, f ≠ 0 ∧ Module.Free (Localization.Away f) (LocalizedModule (Submonoid.powers f) M) :=
+    by
   haveI : IsNoetherianRing S := Algebra.FiniteType.isNoetherianRing R S
   suffices h : GFree R S M by
     have hsmul : (Module.compHom M (algebraMap R S) : Module R M) = ‹Module R M› := by

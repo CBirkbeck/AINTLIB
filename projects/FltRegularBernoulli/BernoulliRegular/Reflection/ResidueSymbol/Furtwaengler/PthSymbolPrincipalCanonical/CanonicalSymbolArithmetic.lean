@@ -65,9 +65,8 @@ variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 @[simp] theorem pthSymbolAtPrincipal_canonical_isUnit_right
     {ε : 𝓞 K} (α : 𝓞 K) (hε : IsUnit ε) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α ε = 0 := by
-  unfold pthSymbolAtPrincipal_canonical
-  rw [show (Ideal.span ({ε} : Set (𝓞 K))) = ⊤ from
-        Ideal.span_singleton_eq_top.mpr hε]
+  simp only [pthSymbolAtPrincipal_canonical]
+  rw [Ideal.span_singleton_eq_top.mpr hε]
   exact pthSymbolAtIdeal_canonical_top _
 
 /-- **Canonical principal symbol pow in the denominator**:
@@ -77,10 +76,8 @@ theorem pthSymbolAtPrincipal_canonical_pow_right
     (α β : 𝓞 K) (n : ℕ) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α (β ^ n) =
       (n : ZMod p) * pthSymbolAtPrincipal_canonical (p := p) (K := K) α β := by
-  unfold pthSymbolAtPrincipal_canonical
-  rw [show (Ideal.span ({β ^ n} : Set (𝓞 K))) =
-        (Ideal.span ({β} : Set (𝓞 K))) ^ n from
-        (Ideal.span_singleton_pow β n).symm]
+  simp only [pthSymbolAtPrincipal_canonical]
+  rw [← Ideal.span_singleton_pow]
   exact pthSymbolAtIdeal_canonical_pow_ideal α (Ideal.span ({β} : Set (𝓞 K))) n
 
 /-- **Vanishing engine in the denominator slot.** The canonical principal
@@ -98,7 +95,7 @@ denominator: `(α / -β)_canonical = (α / β)_canonical`. Direct from
     (α β : 𝓞 K) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α (-β) =
       pthSymbolAtPrincipal_canonical (p := p) (K := K) α β := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   congr 1
   exact Ideal.span_singleton_neg β
 
@@ -108,7 +105,7 @@ theorem pthSymbolAtPrincipal_canonical_mul_unit_right
     (α β : 𝓞 K) {ε : 𝓞 K} (hε : IsUnit ε) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α (β * ε) =
       pthSymbolAtPrincipal_canonical (p := p) (K := K) α β := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   congr 1
   rw [Ideal.span_singleton_eq_span_singleton]
   exact Associated.symm ⟨hε.unit, rfl⟩
@@ -122,7 +119,7 @@ theorem pthSymbolAtPrincipal_canonical_pow_left
               (Ideal.span ({β} : Set (𝓞 K))), α ∉ P) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) (α ^ n) β =
       (n : ZMod p) * pthSymbolAtPrincipal_canonical (p := p) (K := K) α β := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   exact pthSymbolAtIdeal_canonical_pow_α (p := p) hα n
 
 /-- **Vanishing engine, principal-level pow-p in `α`.** Whenever α is
@@ -148,7 +145,7 @@ theorem pthSymbolAtPrincipal_canonical_mul_left
     pthSymbolAtPrincipal_canonical (p := p) (K := K) (α * β) γ =
       pthSymbolAtPrincipal_canonical (p := p) (K := K) α γ +
         pthSymbolAtPrincipal_canonical (p := p) (K := K) β γ := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   exact pthSymbolAtIdeal_canonical_mul_α (p := p) hα hβ
 
 /-! ### Negation API for `pthSymbolAtPrime_canonical`
@@ -162,7 +159,7 @@ omit [NumberField K] in
 /-- `(-1 : 𝓞 K) ∉ q` for any maximal ideal `q`. This is automatic because
 `-1` is a unit and a maximal ideal cannot contain a unit. -/
 theorem neg_one_notMem_of_isMaximal {q : Ideal (𝓞 K)} (hmax : q.IsMaximal) :
-    (-1 : 𝓞 K) ∉ q := fun h =>
+    (-1 : 𝓞 K) ∉ q := fun h ↦
   hmax.ne_top (q.eq_top_of_isUnit_mem h isUnit_one.neg)
 
 /-- **`pthSymbolAtPrime_canonical` of `(-α)` splits as a sum.** For a non-bot
@@ -192,7 +189,7 @@ is a unit. -/
 theorem neg_one_notMem_normalizedFactors (β : 𝓞 K) :
     ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors
             (Ideal.span ({β} : Set (𝓞 K))), (-1 : 𝓞 K) ∉ P :=
-  fun P hP => unit_notMem_normalizedFactors isUnit_one.neg β P hP
+  fun P hP ↦ unit_notMem_normalizedFactors isUnit_one.neg β P hP
 
 /-- **`pthSymbolAtIdeal_canonical` at `(-1)^n`.** Direct from
 `pthSymbolAtIdeal_canonical_pow_α` (with `α := -1`) using that `(-1)` is a
@@ -242,12 +239,12 @@ theorem pthSymbolAtIdeal_canonical_neg_uncond_of_odd
     pthSymbolAtIdeal_canonical (p := p) (K := K) (-α) I =
       pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
   classical
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   refine congrArg Multiset.sum ?_
-  refine Multiset.map_congr rfl fun P hP => ?_
+  refine Multiset.map_congr rfl fun P hP ↦ ?_
   obtain ⟨_, hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
   by_cases hα : α ∈ P
-  · haveI hP_prime : P.IsPrime := hP_max.isPrime
+  · have hP_prime : P.IsPrime := hP_max.isPrime
     have h_neg_α_in : -α ∈ P := P.neg_mem hα
     rw [pthSymbolAtPrime_canonical_eq_zero_of_mem hP_ne_bot hP_max h_neg_α_in,
       pthSymbolAtPrime_canonical_eq_zero_of_mem hP_ne_bot hP_max hα]
@@ -276,7 +273,7 @@ theorem pthSymbolAtPrincipal_canonical_neg_left
     pthSymbolAtPrincipal_canonical (p := p) (K := K) (-α) β =
       pthSymbolAtPrincipal_canonical (p := p) (K := K) α β +
         pthSymbolAtPrincipal_canonical (p := p) (K := K) (-1 : 𝓞 K) β := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   exact pthSymbolAtIdeal_canonical_neg (p := p) hα
 
 /-- **`pthSymbolAtPrincipal_canonical` at `(-1)^n` in the numerator.** Direct
@@ -286,7 +283,7 @@ theorem pthSymbolAtPrincipal_canonical_neg_one_pow_left
     pthSymbolAtPrincipal_canonical (p := p) (K := K) ((-1 : 𝓞 K) ^ n) β =
       (n : ZMod p) *
         pthSymbolAtPrincipal_canonical (p := p) (K := K) (-1 : 𝓞 K) β := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   exact pthSymbolAtIdeal_canonical_neg_one_pow (p := p) _ n
 
 /-- **Vanishing engine, principal-level for `(-1)^p` in the numerator.**
@@ -326,23 +323,6 @@ Convenient sufficient conditions for the canonical ideal/principal symbol to
 vanish. These reduce to the prime-level vanishing lemmas
 (`pthSymbolAtPrime_canonical_eq_zero_*`). -/
 
-/-- **Vanishing characterization at the ideal level.** If the canonical
-prime-level symbol vanishes on every prime factor of `I`, then the canonical
-ideal symbol vanishes too. (The converse can fail because the symbol is a
-sum, not a product, in `ZMod p`.) -/
-theorem pthSymbolAtIdeal_canonical_eq_zero_of_forall_prime
-    {α : 𝓞 K} {I : Ideal (𝓞 K)}
-    (h : ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors I,
-            pthSymbolAtPrime_canonical (p := p) (K := K) α P = 0) :
-    pthSymbolAtIdeal_canonical (p := p) (K := K) α I = 0 := by
-  unfold pthSymbolAtIdeal_canonical
-  rw [show
-      ((UniqueFactorizationMonoid.normalizedFactors I).map
-        (fun P => pthSymbolAtPrime_canonical (p := p) (K := K) α P)) =
-      ((UniqueFactorizationMonoid.normalizedFactors I).map (fun _ => (0 : ZMod p)))
-        from Multiset.map_congr rfl (fun P hP => h P hP)]
-  simp
-
 /-- **Per-prime vanishing characterization at the principal level.** If the
 canonical prime symbol vanishes on every prime factor of `(β)`, then the
 canonical principal symbol `(α / β)_canonical` vanishes. Direct from
@@ -369,7 +349,7 @@ theorem pthSymbolAtPrincipal_canonical_eq_zero_of_singular_canonical_chain
       pthSymbolAtPrincipal_canonical (p := p) (K := K) γ η) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) η γ = 0 := by
   rw [h_kfr]
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   rw [hsing,
       show (Ideal.span ({b ^ p} : Set (𝓞 K))) =
         (Ideal.span ({b} : Set (𝓞 K))) ^ p from
@@ -412,7 +392,7 @@ theorem pthSymbolAtPrincipal_canonical_eq_of_associated_right
     {α β β' : 𝓞 K} (hββ' : Associated β β') :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α β =
       pthSymbolAtPrincipal_canonical (p := p) (K := K) α β' := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   refine pthSymbolAtIdeal_canonical_congr rfl ?_
   exact Ideal.span_singleton_eq_span_singleton.mpr hββ'
 
@@ -448,9 +428,8 @@ the self-vanishing and `_pow_right`. -/
 @[simp] theorem pthSymbolAtPrincipal_canonical_zero_right
     (α : 𝓞 K) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α 0 = 0 := by
-  unfold pthSymbolAtPrincipal_canonical
-  rw [show (Ideal.span ({(0 : 𝓞 K)} : Set (𝓞 K))) = ⊥ from
-        Ideal.span_singleton_eq_bot.mpr rfl]
+  simp only [pthSymbolAtPrincipal_canonical]
+  rw [Ideal.span_singleton_eq_bot.mpr rfl]
   exact pthSymbolAtIdeal_canonical_bot α
 
 /-- **Multiplicative form for the principal denominator slot**:
@@ -462,10 +441,8 @@ theorem pthSymbolAtPrincipal_canonical_mul_right
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α (β * γ) =
       pthSymbolAtPrincipal_canonical (p := p) (K := K) α β +
         pthSymbolAtPrincipal_canonical (p := p) (K := K) α γ := by
-  unfold pthSymbolAtPrincipal_canonical
-  rw [show (Ideal.span ({β * γ} : Set (𝓞 K))) =
-        Ideal.span ({β} : Set (𝓞 K)) * Ideal.span ({γ} : Set (𝓞 K)) from
-        (Ideal.span_singleton_mul_span_singleton β γ).symm]
+  simp only [pthSymbolAtPrincipal_canonical]
+  rw [← Ideal.span_singleton_mul_span_singleton]
   refine pthSymbolAtIdeal_canonical_mul_ideal α ?_ ?_
   · rwa [Ne, Ideal.span_singleton_eq_bot]
   · rwa [Ne, Ideal.span_singleton_eq_bot]
@@ -474,7 +451,7 @@ theorem pthSymbolAtPrincipal_canonical_mul_right
 @[simp] theorem pthSymbolAtPrincipal_canonical_one_right
     (α : 𝓞 K) :
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α 1 = 0 := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   rw [Ideal.span_singleton_one]
   exact pthSymbolAtIdeal_canonical_top α
 

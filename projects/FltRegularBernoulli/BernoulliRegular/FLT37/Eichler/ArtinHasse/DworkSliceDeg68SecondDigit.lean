@@ -15,15 +15,16 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 
 ## The full mod-`37³` relation (PROVEN)
 
-  `(68! : ZMod 37³) · X₆₈ = formalSum68ResidueCube · (−37)`   (`factorial37_deg68_coordModCube_value`),
+  `(68! : ZMod 37³) · X₆₈ = formalSum68ResidueCube · (−37)`
+  (`factorial37_deg68_coordModCube_value`),
 
 with `X₆₈ = coordCube(deg-68 slice at level 107)`.  Both sides carry **two** `37`'s: the left
 `68! = 37·u₆₈'`, the right `formalSum68ResidueCube = 37·391` AND the `−37`, giving `−37²·391`.
 
 ## The extraction `c₆₈ = 4` (PROVEN)
 
-`X₆₈ = 37·c₆₈` (first digit `0`, proven mod `37²` via the proven mod-`37²` slice; here lifted through
-`castHom_rationalPadicIntegerToZModCube`), and the relation becomes
+`X₆₈ = 37·c₆₈` (first digit `0`, proven mod `37²` via the proven mod-`37²` slice; here lifted
+through `castHom_rationalPadicIntegerToZModCube`), and the relation becomes
 `37²·u₆₈'·c₆₈ ≡ −37²·391 (mod 37³)`, so `u₆₈'·c₆₈ ≡ −391 ≡ −21 (mod 37)`, i.e.
 `c₆₈ = −u₆₈'⁻¹·21 = 4` (`deg68_coordModCube_secondDigit_eq_four`).  This is the genuine deg-`68`
 second digit, **extracted from a genuine mod-`37³` relation** with the source the PROVEN exact
@@ -33,8 +34,8 @@ rational `formalSum68 = N/120`.
 
 The relation and the `c₆₈ = 4` extraction are proven for the **level-`107`** deg-`68` slice
 coordinate.  Connecting `X₆₈ = 37·4` (level-`107`, mod `37³`) to the level-`71`
-`unscaled32SliceCoord 68` (mod `37²`) — i.e. that the mod-`37²` reduction of the level-`107` coordinate
-**is** `unscaled32SliceCoord 68` — is the one **precision-bridge** residual isolated in
+`unscaled32SliceCoord 68` (mod `37²`) — i.e. that the mod-`37²` reduction of the level-`107`
+coordinate **is** `unscaled32SliceCoord 68` — is the one **precision-bridge** residual isolated in
 `CaseIICor823Level71Deg68ModCubeRelation.lean`.
 
 ## References
@@ -46,7 +47,6 @@ coordinate.  Connecting `X₆₈ = 37·4` (level-`107`, mod `37³`) to the level
 
 noncomputable section
 
-set_option maxRecDepth 100000
 
 open NumberField
 
@@ -63,16 +63,16 @@ variable [NumberField.IsCMField K]
 /-! ## 1. The formal degree-`68` `rIntegralRat` scalar factored through the mod-`37³` coordinate -/
 
 omit [NumberField.IsCMField K] in
-/-- **The formal degree-`68` `rIntegralRat` scalar factors out of the mod-`37³` coordinate** (proven):
-for any `37`-integral rational `q`,
+/-- **The formal degree-`68` `rIntegralRat` scalar factors out of the mod-`37³` coordinate**
+(proven): for any `37`-integral rational `q`,
 
   `coordCube(quotMap(x^68)·RIntegralRatToQuotient(q)) =
      (q.num · q.den⁻¹ : ZMod 37³) · coordCube(quotMap(x^68))`.
 
 Third-order denominator clearing: multiply by the `37`-unit `q.den`, collapse
 `q.den·rIntegralRat(q) = q.num` (`den_mul_rIntegralRatToValuedInteger`), factor the integer `q.num`
-out of the coordinate (`valuedLambdaQuotientDworkCoeffModCube_intCast_mul`), divide by the unit `q.den`
-(`q.den` coprime to `37` hence to `37³`).  Mod-`37³` parallel of
+out of the coordinate (`valuedLambdaQuotientDworkCoeffModCube_intCast_mul`), divide by the unit
+`q.den` (`q.den` coprime to `37` hence to `37³`).  Mod-`37³` parallel of
 `rIntegralRat_scalar_factors_through_coordModSq_x68`. -/
 theorem rIntegralRat_scalar_factors_through_coordModCube_x68
     (q : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) (k : Fin (37 - 1)) :
@@ -162,14 +162,16 @@ theorem factorial37_deg68_coordModCube_value
     samePrimeQuotientMap_x68_coordModCube_eq_neg_thirtyseven (K := K) (by norm_num) i hi]
   rw [formalSum68ResidueCube]
 
-/-! ## 3. Two-step `37`-cancellation in `ZMod 37³ → ZMod 37²`, and the genuine second digit `c₆₈ = 4`
+/-! ## 3. Two-step `37`-cancellation in `ZMod 37³ → ZMod 37²`,
+and the genuine second digit `c₆₈ = 4`
 
 The mod-`37³` relation `37·u₆₈'·X = 37·(391·(−37))` cancels one `37` (to a `ZMod 37²` statement
-`u₆₈'·X = 391·(−37) mod 37²`), then — using the proven first digit `X mod 37² = 37·c₆₈` — cancels the
-second to pin `c₆₈ = −u₆₈'⁻¹·21 = 4` in `ZMod 37`. -/
+`u₆₈'·X = 391·(−37) mod 37²`), then — using the proven first digit `X mod 37² = 37·c₆₈` — cancels
+the second to pin `c₆₈ = −u₆₈'⁻¹·21 = 4` in `ZMod 37`. -/
 
 /-- **Forward `37`-cancellation `ZMod 37³ → ZMod 37²`**: if `37·a = 37·b` in `ZMod 37³` then
-`castHom (37²∣37³) a = castHom (37²∣37³) b` in `ZMod 37²` (proven).  From `37·(a−b) = 0` in `ZMod 37³`
+`castHom (37²∣37³) a = castHom (37²∣37³) b` in `ZMod 37²` (proven).
+From `37·(a−b) = 0` in `ZMod 37³`
 we get `37³ ∣ 37·(a−b).val`, hence `37² ∣ (a−b).val`, i.e. `castHom (a−b) = 0`.  Mod-`37³` analog of
 `castHom_eq_of_thirtyseven_mul_eq`. -/
 theorem castHom_cube_eq_of_thirtyseven_mul_eq {a b : ZMod (37 ^ 3)}

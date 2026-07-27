@@ -2173,7 +2173,6 @@ theorem iInf_subtype_finset_union_eq_inf_of_dependent
       rw [h_fu]
       exact iInf_le f ⟨D.1, Finset.mem_union_right _ D.2⟩
 
-set_option maxHeartbeats 1500000 in
 -- Bumped from default 200000 to 1500000: tree-inducing recursive proof
 -- exercises deep typeclass synthesis through Laurent splits + Pi-product
 -- topological structure, which inflates per-node tactic heartbeat usage.

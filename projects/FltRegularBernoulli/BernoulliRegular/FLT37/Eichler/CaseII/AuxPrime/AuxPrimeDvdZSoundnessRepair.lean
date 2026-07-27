@@ -97,14 +97,15 @@ geometric sum `∑_{i<37} ζⁱ = 0` reduces to `37 = 0` in `𝔽₁₄₉`, for
 `149 ∈ lv149` and `gcd(37, 149) = 1`. -/
 
 /-- **`37 ∉ lv149`.**  The prime `lv149` lies over the rational prime `149`
-(`lehmerVandiverPrime_natCast_ℓ_mem`), and `gcd(37, 149) = 1`; were `37 ∈ lv149` too, then `1 ∈ lv149`
+(`lehmerVandiverPrime_natCast_ℓ_mem`), and `gcd(37, 149) = 1`;
+were `37 ∈ lv149` too, then `1 ∈ lv149`
 (Bézout `4·37 - 1·149 = -1`), contradicting that `lv149` is a proper (prime) ideal. -/
 theorem caseII_thirtyseven_notMem_lv149 :
     ((37 : ℕ) : 𝓞 (CyclotomicField 37 ℚ)) ∉ lv149 := by
   intro h37
   -- `149 ∈ lv149` (lv149 lies over the rational prime 149).
   have h149 : ((149 : ℕ) : 𝓞 (CyclotomicField 37 ℚ)) ∈ lv149 := by
-    unfold lv149
+    simp only [lv149]
     exact FLT37.lehmerVandiverPrime_natCast_ℓ_mem 37 149 4
       (by decide : (149 : ℕ) = 4 * 37 + 1)
       (by decide : (2 : ℕ).Coprime 149)
@@ -122,11 +123,13 @@ theorem caseII_thirtyseven_notMem_lv149 :
 
 /-- **`ζ - 1 ∉ lv149` for any primitive `37`-th root `ζ ∈ 𝓞 (ℚ(ζ₃₇))`** (proven, axiom-clean).
 
-This is Washington's "`ℓ = 149` is unramified in `𝓞 (ℚ(ζ_p))`": the prime `lv149` over `149` does not
+This is Washington's "`ℓ = 149` is unramified in `𝓞 (ℚ(ζ_p))`": the prime `lv149` over `149`
+does not
 divide the generator `ζ - 1` of the unique ramified prime (over `37`).
 
 Proof: if `ζ - 1 ∈ lv149`, then in the geometric-sum identity `∑_{i<37} ζⁱ = 0`
-(`IsPrimitiveRoot.geom_sum_eq_zero`) every `ζⁱ ≡ 1 (mod lv149)`, so `0 ≡ ∑_{i<37} 1 = 37 (mod lv149)`,
+(`IsPrimitiveRoot.geom_sum_eq_zero`) every `ζⁱ ≡ 1 (mod lv149)`,
+so `0 ≡ ∑_{i<37} 1 = 37 (mod lv149)`,
 i.e. `37 ∈ lv149`, contradicting `caseII_thirtyseven_notMem_lv149`. -/
 theorem caseII_zeta_sub_one_notMem_lv149 {ζ : CyclotomicField 37 ℚ}
     (hζ : IsPrimitiveRoot ζ 37) :
@@ -228,9 +231,11 @@ def CaseIILemma98DescentSumMem37
 (a `def … : Prop`, **not** an axiom).
 
 `CaseIILehmerVandiverDvdZ37` (the conclusion `z' ∈ lv149`) **plus** the genuine Lemma-9.8 descent
-datum `CaseIILemma98DescentSumMem37` (the factorized `ℓ ∣ ω + θ`).  This is the **repaired** form: the
+datum `CaseIILemma98DescentSumMem37` (the factorized `ℓ ∣ ω + θ`).
+This is the **repaired** form: the
 over-stated version dropped the Lemma-9.8 input and is false over the bare twisted equation (free
-units absorb the residue equation; see the module B2 note).  With the genuine factorized `ℓ ∣ ω + θ`,
+units absorb the residue equation; see the module B2 note).
+With the genuine factorized `ℓ ∣ ω + θ`,
 `z' ∈ lv149` follows by `caseII_dvd_z_of_factorization`.  Discharged by
 `caseIILehmerVandiverDvdZ37Strict_proven`. -/
 def CaseIILehmerVandiverDvdZ37Strict
@@ -284,7 +289,8 @@ theorem caseIILehmerVandiverDvdZ37_of_strict
 
 /-! ## 4. FLT37 with the corrected (sound) `ℓ ∣ z` datum
 
-The downstream FLT37 endpoint `fermatLastTheoremFor_thirtyseven_of_genuineResiduals_localPowerStrict`
+The downstream FLT37 endpoint
+`fermatLastTheoremFor_thirtyseven_of_genuineResiduals_localPowerStrict`
 (`CaseIILocalPowerStrict.lean`) consumes the over-stated `CaseIILehmerVandiverDvdZ37` as one of its
 inputs.  Composing with `caseIILehmerVandiverDvdZ37_of_strict`, we supply that input from the
 **genuine** Lemma-9.8 datum `CaseIILemma98DescentSumMem37` (the factorized `ℓ ∣ ω + θ`), so the

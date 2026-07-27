@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -69,7 +74,8 @@ theorem two_mul_rpow_neg_lt_one {𝔭 : {𝔭 : Ideal (𝓞 K) // 𝔭.IsPrime �
     refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
     rw [Real.rpow_neg (by linarith), Real.rpow_neg (by norm_num)]
     exact (inv_le_inv₀ (Real.rpow_pos_of_pos (by linarith) _)
-      (Real.rpow_pos_of_pos (by norm_num) _)).mpr (Real.rpow_le_rpow (by norm_num) hN2 (by linarith))
+      (Real.rpow_pos_of_pos (by norm_num) _)).mpr
+        (Real.rpow_le_rpow (by norm_num) hN2 (by linarith))
   have h2s : (2 : ℝ) * (2 : ℝ) ^ (-σ) < 1 := by
     have hs2 : (2 : ℝ) ^ (-σ) < (2 : ℝ) ^ (-(1 : ℝ)) :=
       Real.rpow_lt_rpow_of_exponent_lt (by norm_num) (by linarith)

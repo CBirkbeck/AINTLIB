@@ -1,10 +1,12 @@
-import BernoulliRegular.Main
-import Mathlib.Algebra.Order.Ring.Unbundled.Rat
-import Mathlib.Data.Nat.Prime.Basic
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.NumberTheory.Padics.WithVal
-import Mathlib.Tactic
+module
+
+public import BernoulliRegular.Main
+public import Mathlib.Algebra.Order.Ring.Unbundled.Rat
+public import Mathlib.Data.Nat.Prime.Basic
+public import Mathlib.Data.Rat.Lemmas
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.NumberTheory.Padics.WithVal
+public import Mathlib.Tactic
 
 /-!
 # Rational numerator bookkeeping
@@ -13,6 +15,7 @@ This file records rational-number lemmas needed by the Diekmann/Jensen route.
 The results here only talk about reduced rational numerators and avoid any
 extra p-adic package assumptions.
 -/
+@[expose] public section
 
 namespace BernoulliRegular
 

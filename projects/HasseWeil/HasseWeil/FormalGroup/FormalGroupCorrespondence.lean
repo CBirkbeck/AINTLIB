@@ -75,7 +75,7 @@ omit [DecidableEq F] in
 private lemma D_coordXFF_mem_span_invariantDifferential :
     KaehlerDifferential.D F E.FunctionField (coordXFF E) ∈
       Submodule.span E.FunctionField {invariantDifferential E} := by
-  unfold coordXFF invariantDifferential
+  simp only [coordXFF, invariantDifferential]
   rw [Submodule.mem_span_singleton]
   exact ⟨2 * algebraMap E.CoordinateRing E.FunctionField (AdjoinRoot.root E.polynomial) +
       algebraMap F E.FunctionField E.a₁ * algebraMap E.CoordinateRing E.FunctionField
@@ -83,13 +83,13 @@ private lemma D_coordXFF_mem_span_invariantDifferential :
       algebraMap F E.FunctionField E.a₃,
     by rw [smul_smul, mul_inv_cancel₀ (denom_ne_zero E), one_smul]⟩
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic E] in
 /-- `D(x) ∈ derivSpanX E`: `D(x)` is the generator of the span by definition. -/
 private lemma D_coordXFF_mem :
     KaehlerDifferential.D F E.FunctionField (coordXFF E) ∈ derivSpanX E :=
   Submodule.subset_span rfl
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic E] in
 /-- `D(xⁿ) ∈ derivSpanX E` for every `n`, by induction on `n` using the Leibniz rule. -/
 private lemma D_coordXFF_pow_mem (n : ℕ) :
     KaehlerDifferential.D F E.FunctionField (coordXFF E ^ n) ∈ derivSpanX E := by
@@ -101,7 +101,7 @@ private lemma D_coordXFF_pow_mem (n : ℕ) :
     rw [pow_succ, Derivation.leibniz]
     exact S.add_mem (S.smul_mem _ (D_coordXFF_mem E)) (S.smul_mem _ ih)
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic E] in
 /-- `D(p(x)) ∈ derivSpanX E` for every polynomial `p ∈ F[X]`, by induction on `p`,
 reducing each monomial to a power of `x` via `D_coordXFF_pow_mem`. -/
 private lemma D_algebraMap_polynomial_mem (p : Polynomial F) :
@@ -122,7 +122,7 @@ private lemma D_algebraMap_polynomial_mem (p : Polynomial F) :
     exact S.smul_mem _ (D_coordXFF_pow_mem E n)
 
 open Polynomial.Bivariate in
-omit [DecidableEq F] in
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic E] in
 /-- The Weierstrass relation `y² + (a₁x+a₃)·y = x³ + a₂x² + a₄x + a₆` in the
 coordinate ring `K[E]` (Silverman II.4.2b), obtained from the defining polynomial. -/
 private lemma weierstrass_relation_coordinateRing :
@@ -144,7 +144,7 @@ private lemma weierstrass_relation_coordinateRing :
     algebraMap (Polynomial F) E.CoordinateRing p := fun _ ↦ rfl
   rw [hcc, hcc] at Y_sq; linear_combination Y_sq
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic E] in
 /-- The Weierstrass relation lifted to the function field `K(E)`:
 `y² + c·y = rhs`, where `c = a₁x+a₃` and `rhs = x³+a₂x²+a₄x+a₆`. -/
 private lemma weierstrass_relation_functionField :

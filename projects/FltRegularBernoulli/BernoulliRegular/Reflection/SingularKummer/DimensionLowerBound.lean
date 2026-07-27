@@ -1,11 +1,17 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
+
+public import Mathlib.LinearAlgebra.Dimension.Finite
+public import Mathlib.LinearAlgebra.LinearIndependent.Lemmas
 
 public import BernoulliRegular.Reflection.SingularKummer.GlobalUnitKernel
 public import BernoulliRegular.Reflection.SingularKummer.SingularLinearAction
 public import BernoulliRegular.Reflection.SingularKummer.SingularZMod
 public import BernoulliRegular.UnitQuotient.GlobalUnitDimension
-public import Mathlib.LinearAlgebra.Dimension.Finite
-public import Mathlib.LinearAlgebra.LinearIndependent.Lemmas
 
 /-!
 # Singular Kummer: dimension lower bounds
@@ -37,14 +43,28 @@ namespace BernoulliRegular
 namespace Reflection
 namespace SingularKummer
 
-set_option linter.unusedSectionVars false
-
 namespace LinearDimensionLowerBound
 
 variable {F U S A : Type*} [Field F]
 variable [AddCommGroup U] [Module F U]
 variable [AddCommGroup S] [Module F S]
 variable [AddCommGroup A] [Module F A]
+
+private lemma linearIndependent_pair_of_map_eq_zero_of_map_ne_zero
+    (π : S →ₗ[F] A) {Si : Submodule F S} (uS sS : Si) (a : A)
+    (huS_ne_zero : uS ≠ 0) (hπ_uS : π (uS : S) = 0)
+    (ha_ne_zero : a ≠ 0) (hπ_sS : π (sS : S) = a) :
+    LinearIndependent F ![uS, sS] := by
+  refine (LinearIndependent.pair_iff' (K := F) huS_ne_zero).2 ?_
+  intro c hc
+  apply ha_ne_zero
+  calc
+    a = π (sS : S) := hπ_sS.symm
+    _ = π ((c • uS : Si) : S) :=
+      congrArg (fun x : Si ↦ π (x : S)) hc.symm
+    _ = π (c • (uS : S)) := rfl
+    _ = c • π (uS : S) := map_smul π c (uS : S)
+    _ = 0 := by rw [hπ_uS, smul_zero]
 
 /-- A two-dimensional lower bound from a kernel line and a nonzero quotient
 component. -/
@@ -60,21 +80,18 @@ theorem finrank_ge_two_of_kernel_line_of_target_ne_bot
     (hAi_ne_bot : Ai ≠ ⊥) :
     2 ≤ Module.finrank F Si := by
   have hUi_ne_bot : Ui ≠ ⊥ := by
-    intro hUi_bot
-    have hfinrank_zero : Module.finrank F Ui = 0 := by
-      subst hUi_bot
-      simp
-    rw [hUi_finrank] at hfinrank_zero
-    exact Nat.succ_ne_zero 0 hfinrank_zero
+    rintro rfl
+    exact Nat.zero_ne_one <| by simpa only [finrank_bot] using hUi_finrank
   obtain ⟨u0, hu0_mem, hu0_ne_zero⟩ :=
     Submodule.exists_mem_ne_zero_of_ne_bot hUi_ne_bot
   let u : Ui := ⟨u0, hu0_mem⟩
-  have hu_ne_zero : u ≠ 0 := fun hu_zero =>
+  have hu_ne_zero : u ≠ 0 := fun hu_zero ↦
     hu0_ne_zero (congrArg Subtype.val hu_zero)
   obtain ⟨a, ha_mem, ha_ne_zero⟩ :=
     Submodule.exists_mem_ne_zero_of_ne_bot hAi_ne_bot
   have ha_mem_map : a ∈ Submodule.map π Si := by
-    simpa [hπSi] using ha_mem
+    rw [hπSi]
+    exact ha_mem
   obtain ⟨s, hs_mem, hs_image⟩ := ha_mem_map
   let uS : Si := ⟨ι u.1, hιUi ⟨u.1, u.2, rfl⟩⟩
   let sS : Si := ⟨s, hs_mem⟩
@@ -89,27 +106,10 @@ theorem finrank_ge_two_of_kernel_line_of_target_ne_bot
     apply hu_ne_zero
     apply Subtype.ext
     apply hι_inj
-    have hval : ι u.1 = 0 := by
-      simpa [uS] using congrArg Subtype.val huS_zero
-    simpa using hval
-  have hli : LinearIndependent F ![uS, sS] := by
-    refine (LinearIndependent.pair_iff' (K := F) huS_ne_zero).2 ?_
-    intro c hc
-    have hmap : π ((c • uS : Si) : S) = π (sS : S) :=
-      congrArg (fun x : Si => π (x : S)) hc
-    have hleft : π ((c • uS : Si) : S) = 0 := by
-      calc
-        π ((c • uS : Si) : S) = π (c • (uS : S)) := rfl
-        _ = c • π (uS : S) := map_smul π c (uS : S)
-        _ = c • 0 := by rw [hπ_uS]
-        _ = 0 := smul_zero c
-    have hright : π (sS : S) = 0 := hmap.symm.trans hleft
-    have ha_zero : a = 0 := by
-      simpa [hπ_sS] using hright
-    exact ha_ne_zero ha_zero
-  have hcard : Fintype.card (Fin 2) ≤ Module.finrank F Si :=
-    hli.fintype_card_le_finrank
-  simpa using hcard
+    simpa [uS] using congrArg Subtype.val huS_zero
+  simpa using
+    (linearIndependent_pair_of_map_eq_zero_of_map_ne_zero π uS sS a
+      huS_ne_zero hπ_uS ha_ne_zero hπ_sS).fintype_card_le_finrank
 
 end LinearDimensionLowerBound
 
@@ -124,6 +124,8 @@ def globalUnitPowerQuotientToSingularGroupLinear :
       Additive (SingularGroup (R := 𝓞 K) (K := K) p) :=
   (globalUnitPowerQuotientToSingularGroup K p).toAdditive.toZModLinearMap p
 
+omit [IsCyclotomicExtension {p} ℚ K] in
+/-- The linearized global-unit map agrees with the multiplicative map on underlying elements. -/
 @[simp]
 theorem globalUnitPowerQuotientToSingularGroupLinear_apply_toMul
     (x : Additive (CyclotomicUnitPowerQuotient (p := p) (N := 1) K)) :
@@ -131,12 +133,14 @@ theorem globalUnitPowerQuotientToSingularGroupLinear_apply_toMul
       globalUnitPowerQuotientToSingularGroup K p x.toMul :=
   rfl
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- The linearized global-unit map is injective. -/
 theorem globalUnitPowerQuotientToSingularGroupLinear_injective :
-    Function.Injective (globalUnitPowerQuotientToSingularGroupLinear K p) := fun x y hxy =>
+    Function.Injective (globalUnitPowerQuotientToSingularGroupLinear K p) := fun x y hxy ↦
   Additive.ext <| globalUnitPowerQuotientToSingularGroup_injective K p <| by
     simpa using congrArg Additive.toMul hxy
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- The composition `E/E^p -> S -> A[p]` is zero. -/
 @[simp]
 theorem singularGroupClassMapToPTorsionLinear_globalUnitPowerQuotientToSingularGroupLinear
@@ -145,15 +149,12 @@ theorem singularGroupClassMapToPTorsionLinear_globalUnitPowerQuotientToSingularG
         (globalUnitPowerQuotientToSingularGroupLinear K p x) = 0 := by
   apply Additive.ext
   change
-    singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p
-        (globalUnitPowerQuotientToSingularGroup K p x.toMul) = 1
-  have hmem :
-      globalUnitPowerQuotientToSingularGroup K p x.toMul ∈
-        (singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p).ker := by
-    rw [singularGroupClassMapToPTorsion_ker_eq_globalUnitPowerQuotientToSingularGroup_range]
-    exact ⟨x.toMul, rfl⟩
-  exact hmem
+    globalUnitPowerQuotientToSingularGroup K p x.toMul ∈
+      (singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p).ker
+  rw [singularGroupClassMapToPTorsion_ker_eq_globalUnitPowerQuotientToSingularGroup_range]
+  exact ⟨x.toMul, rfl⟩
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- Component-level REF-08 for the singular exact sequence. -/
 theorem singularGroup_component_finrank_ge_two
     (Ucomp :
@@ -212,6 +213,7 @@ def classGroupPTorsionCharacterProjectionComponent [NeZero p] (i : ℕ)
     (CharacterProjection.characterProjection (p := p) i
       (SingularLinearAction.mulActionToAdditiveLinearAction (p := p) ρA))
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- For compatible `Delta`-actions, the singular exact-sequence map carries the
 singular character-projection component onto the matching `A[p]` component. -/
 theorem singularGroupCharacterProjectionComponent_map_eq [NeZero p] (i : ℕ)
@@ -237,7 +239,7 @@ theorem singularGroupCharacterProjectionComponent_map_eq [NeZero p] (i : ℕ)
       (SingularLinearAction.mulActionToAdditiveLinearAction (p := p) ρA)
       (singularGroupClassMapToPTorsionLinear (R := 𝓞 K) (K := K) p)
       (singularGroupClassMapToPTorsionLinear_surjective (R := 𝓞 K) (K := K) p)
-      (fun d x =>
+      (fun d x ↦
         SingularLinearAction.linear_equivariant_of_multiplicative_equivariant
           (p := p)
           (singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p)
@@ -272,11 +274,12 @@ def singularGroupClassComponentMap [NeZero p] (i : ℕ)
     exact hx
   map_add' x y := by
     apply Subtype.ext
-    simp
+    simp only [Submodule.coe_add, map_add, AddMemClass.mk_add_mk]
   map_smul' c x := by
     apply Subtype.ext
-    simp
+    simp only [SetLike.val_smul, map_smul, RingHom.id_apply, SetLike.mk_smul_mk]
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- The component class map is onto because the global singular class map is
 onto and compatible with character projections. -/
 theorem singularGroupClassComponentMap_surjective [NeZero p] (i : ℕ)
@@ -305,6 +308,7 @@ theorem singularGroupClassComponentMap_surjective [NeZero p] (i : ℕ)
   refine ⟨⟨x, hx⟩, ?_⟩
   exact Subtype.ext <| hxy
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- REF-08 with the singular and torsion components taken to be actual
 character-projection ranges for a compatible `Delta`-action. -/
 theorem singularGroupCharacterProjectionComponent_finrank_ge_two [NeZero p]

@@ -27,7 +27,8 @@ field extension `L` that is killed by `[ℓ]` already descends to a `K̄`-ration
 The reason is the division-polynomial connection `[ℓ]Q = O ⟹ ψ_ℓ(x(Q), y(Q)) = 0 ⟹ Ψ²_ℓ(x(Q)) = 0`:
 the `x`-coordinate of `Q` is a root of the `ℓ`-division polynomial `Ψ²_ℓ`, whose coefficients lie
 in `K̄` (not just `L`); since `K̄` is algebraically closed, `Ψ²_ℓ` splits over `K̄`, so `x(Q)` is
-the image of a `K̄`-element. The `y`-coordinate then descends via the Weierstrass equation over `K̄`.
+the image of a `K̄`-element. The `y`-coordinate then descends via the Weierstrass
+equation over `K̄`.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.4.10c.
 -/
@@ -102,7 +103,7 @@ theorem zsmul_affine_point_eq_gen {L : Type*} [Field L] [DecidableEq L] (V : Wei
       WeierstrassCurve.Jacobian.Point.toAffine V
         (smulEval V x₀ y₀ m) := by
     show _ = WeierstrassCurve.Jacobian.Point.toAffine V _
-    unfold WeierstrassCurve.Jacobian.Point.toAffineLift
+    simp only [WeierstrassCurve.Jacobian.Point.toAffineLift]
     rw [h_smulEval]
     rfl
   rw [h_eq_lift, WeierstrassCurve.Jacobian.Point.toAffine_of_Z_ne_zero h_ns_smulEval hZ]
@@ -110,8 +111,10 @@ theorem zsmul_affine_point_eq_gen {L : Type*} [Field L] [DecidableEq L] (V : Wei
 
 /-- The `y`-coordinate descent of `kernelDescends_general`: over an algebraically closed `F`, if the
 `x`-coordinate of a Weierstrass point already descends (`xv = algebraMap F L x₀`) and the equation
-holds at `(xv, yv)`, then `yv = algebraMap F L y₀` for some `y₀ : F`. The `y`-coordinate is a root of
-the monic Weierstrass quadratic specialised at `x₀`, which splits over the algebraically closed `F`. -/
+holds at `(xv, yv)`, then `yv = algebraMap F L y₀` for some `y₀ : F`. The `y`-coordinate
+is a root of
+the monic Weierstrass quadratic specialised at `x₀`, which splits over the algebraically
+closed `F`. -/
 private theorem yCoord_descends_of_equation {F : Type*} [Field F] [IsAlgClosed F]
     (W : WeierstrassCurve F) {L : Type*} [Field L] [Algebra F L] (x₀ : F) (yv : L)
     (heqn : (W.map (algebraMap F L)).toAffine.Equation (algebraMap F L x₀) yv) :
@@ -140,6 +143,7 @@ private theorem yCoord_descends_of_equation {F : Type*} [Field F] [IsAlgClosed F
     hq_monic.ne_zero (i := algebraMap F L) (x := yv) hYroot
   exact ⟨y₀, hy₀.symm⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Kernel-rationality over a general extension** (Silverman III.4.10c, the engine): over `K̄`,
 every point `Q` of `W` with coordinates in an extension `L` that is killed by `[ℓ]` descends to a
 `K̄`-rational `ℓ`-torsion point `k : E(K̄)` with `Point.map (Algebra.ofId F L) k = Q`.
@@ -151,7 +155,8 @@ Jacobian `Z`-coordinate `ψ_ℓ(X, Y)` of `[ℓ]Q` vanishes (contrapositive of
 (`map_ΨSq`) is the image of a polynomial **over `F = K̄`**; since `K̄` is algebraically closed
 `Ψ²_{W,ℓ}` splits over `K̄`, so by `Splits.mem_range_of_isRoot` the root `X` is `algebraMap F L x₀`.
 The `y`-coordinate `Y` descends by `yCoord_descends_of_equation`. The pair `(x₀, y₀)` is nonsingular
-on `W` (`baseChange_nonsingular`), giving the curve point `k = some x₀ y₀` with `Point.map k = Q` and
+on `W` (`baseChange_nonsingular`), giving the curve point `k = some x₀ y₀` with
+`Point.map k = Q` and
 `ℓ • k = 0` (the latter by `Point.map` injectivity). -/
 theorem kernelDescends_general {F : Type*} [Field F] [DecidableEq F] (W : WeierstrassCurve F)
     [W.toAffine.IsElliptic] [IsAlgClosed F] {L : Type*} [Field L] [DecidableEq L]
@@ -252,7 +257,7 @@ theorem hdesc_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
   have hequiv : g (genericPointAct W (mulByInt W.toAffine ℓ) σ) =
       WeierstrassCurve.Affine.Point.map (W' := W) (σ.toAlgHom.restrictScalars F)
         (g (genericPoint W)) := by
-    unfold genericPointAct
+    simp only [genericPointAct]
     change ℓ • _ = WeierstrassCurve.Affine.Point.map (W' := W)
       (σ.toAlgHom.restrictScalars F) (ℓ • _)
     exact (map_zsmul (WeierstrassCurve.Affine.Point.map (W' := W)
@@ -325,6 +330,7 @@ theorem adjoin_x_gen_y_gen_eq_top :
   rw [← hrs]
   exact S.div_mem (hRmem r) (hRmem s)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The geometric heart** (Silverman III.4.10c): an `F`-embedding `g : K(E) → Ω` that agrees
 with a reference embedding `ι` on the pullback range `[ℓ]*K(E)` sends the generic-point coordinates
 `x_gen, y_gen` into the range of `ι`. Reason: `g` and `ι` give two points `g(P_gen), ι(P_gen)` of

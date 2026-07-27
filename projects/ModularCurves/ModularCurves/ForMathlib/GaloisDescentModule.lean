@@ -129,48 +129,56 @@ theorem descentInv_add (S : Finset (A × A)) (m m' : M) :
 
 variable [DecidableEq G]
 
+/-- Injectivity half of `descentMul_bijective`: `descentInv` (built from Galois coordinates
+`S`) is a left inverse of `descentMul`, checked on tensor generators via `galoisCoords_dual`
+(`∑ᵢ aᵢ · tr(bᵢ x) = x`). -/
+private lemma descentMul_injective (hfree : IsFreeAlgebraAction G R A) :
+    Function.Injective (descentMul G R A M hsl) := by
+  classical
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
+  have hleft : ∀ z, descentInv G R A M hsl S (descentMul G R A M hsl z) = z := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero =>
+      rw [map_zero]
+      show (∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
+        (semilinearTrace G R A M hsl p.2 0)) = 0
+      refine Finset.sum_eq_zero fun p _ => ?_
+      have h0 : semilinearTrace G R A M hsl p.2 (0 : M) = 0 := by
+        refine Subtype.ext ?_
+        simp only [semilinearTrace_coe, smul_zero, Finset.sum_const_zero]
+        rfl
+      rw [h0, TensorProduct.tmul_zero]
+    | tmul a m =>
+      rw [descentMul_tmul, descentInv]
+      have hterm : ∀ p : A × A, p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
+          (semilinearTrace G R A M hsl p.2 (a • (m : M))) =
+          (p.1 * (traceInvariants G R A (p.2 * a) : A)) ⊗ₜ[FixedPoints.subalgebra R A G] m := by
+        intro p
+        have hmm : (⟨(m : M), m.2⟩ : semilinearInvariants G R A M hsl) = m := Subtype.ext rfl
+        rw [semilinearTrace_of_mem G R A M hsl p.2 a (m : M) m.2, hmm,
+          TensorProduct.tmul_smul, TensorProduct.smul_tmul']
+        congr 1
+        exact mul_comm _ _
+      rw [Finset.sum_congr rfl fun p _ => hterm p, ← TensorProduct.sum_tmul,
+        galoisCoords_dual G R A hS a]
+    | add z z' hz hz' =>
+      rw [map_add, descentInv_add, hz, hz']
+  exact Function.LeftInverse.injective hleft
+
 /-- **Galois descent of semilinear modules ([A711-DESC], general form)**: for a free `G`-action
 on `A` and any semilinear `A[G]`-module `M`, multiplication `A ⊗_{Aᴳ} Mᴳ → M` is bijective.
 
 The right inverse is `descentInv`; surjectivity is the Galois-coordinate identity
-`∑ᵢ aᵢ · (g • bᵢ) = δ_{g,1}` applied to `∑_g (g • m)`, and injectivity is `galoisCoords_dual`
-(`∑ᵢ aᵢ · tr(bᵢ x) = x`) on the generators of the tensor product. -/
+`∑ᵢ aᵢ · (g • bᵢ) = δ_{g,1}` applied to `∑_g (g • m)`, and injectivity is `descentMul_injective`
+(`galoisCoords_dual` on the generators of the tensor product). -/
 theorem descentMul_bijective (hfree : IsFreeAlgebraAction G R A) :
     Function.Bijective (descentMul G R A M hsl) := by
   classical
-  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
   constructor
-  · -- injectivity: `descentInv` is a left inverse
-    have hleft : ∀ z, descentInv G R A M hsl S (descentMul G R A M hsl z) = z := by
-      intro z
-      induction z using TensorProduct.induction_on with
-      | zero =>
-        rw [map_zero]
-        show (∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
-          (semilinearTrace G R A M hsl p.2 0)) = 0
-        refine Finset.sum_eq_zero fun p _ => ?_
-        have h0 : semilinearTrace G R A M hsl p.2 (0 : M) = 0 := by
-          refine Subtype.ext ?_
-          simp only [semilinearTrace_coe, smul_zero, Finset.sum_const_zero]
-          rfl
-        rw [h0, TensorProduct.tmul_zero]
-      | tmul a m =>
-        rw [descentMul_tmul, descentInv]
-        have hterm : ∀ p : A × A, p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
-            (semilinearTrace G R A M hsl p.2 (a • (m : M))) =
-            (p.1 * (traceInvariants G R A (p.2 * a) : A)) ⊗ₜ[FixedPoints.subalgebra R A G] m := by
-          intro p
-          have hmm : (⟨(m : M), m.2⟩ : semilinearInvariants G R A M hsl) = m := Subtype.ext rfl
-          rw [semilinearTrace_of_mem G R A M hsl p.2 a (m : M) m.2, hmm,
-            TensorProduct.tmul_smul, TensorProduct.smul_tmul']
-          congr 1
-          exact mul_comm _ _
-        rw [Finset.sum_congr rfl fun p _ => hterm p, ← TensorProduct.sum_tmul,
-          galoisCoords_dual G R A hS a]
-      | add z z' hz hz' =>
-        rw [map_add, descentInv_add, hz, hz']
-    exact Function.LeftInverse.injective hleft
+  · exact descentMul_injective G R A M hsl hfree
   · -- surjectivity: `m = ∑ᵢ aᵢ • (∑_g g • (bᵢ • m))`
+    obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
     intro m
     refine ⟨descentInv G R A M hsl S m, ?_⟩
     rw [descentInv, map_sum]
@@ -204,9 +212,8 @@ theorem isBaseChange_semilinearInvariants (hfree : IsFreeAlgebraAction G R A) :
       (((Algebra.linearMap A (Module.End A
         (↥(semilinearInvariants G R A M hsl) →ₗ[FixedPoints.subalgebra R A G] M))).flip
           (semilinearInvariants G R A M hsl).subtype).restrictScalars
-            (FixedPoints.subalgebra R A G))) = descentMul G R A M hsl := by
-    refine TensorProduct.ext' fun a m => ?_
-    rfl
+            (FixedPoints.subalgebra R A G))) = descentMul G R A M hsl :=
+    TensorProduct.ext' fun a m => rfl
   show Function.Bijective _
   rw [hmap]
   exact descentMul_bijective G R A M hsl hfree

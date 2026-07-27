@@ -3,6 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.PollaczekR
@@ -96,7 +101,7 @@ F_{(g · b mod p).val} in the Pollaczek-identity proof. -/
 theorem pollaczekRFactor_eq_of_natCast_eq {a b : ℕ}
     (h : (a : ZMod p) = (b : ZMod p)) :
     pollaczekRFactor p K a = pollaczekRFactor p K b := by
-  unfold pollaczekRFactor
+  simp only [pollaczekRFactor]
   congr 4 <;> (unfold pollaczekRExp; rw [h])
 
 /-- **Bound on `((a · b) mod p).val`.** For `a ∈ (ZMod p)ˣ` (so `a ≠ 0`)
@@ -292,7 +297,7 @@ two ζ-zpow exponents up to multiples of `p`. -/
 theorem cyclotomicSigmaOfUnit_smul_pollaczekRFactor (a : (ZMod p)ˣ) (b : ℕ) :
     cyclotomicSigmaOfUnit (p := p) K a • pollaczekRFactor p K b =
       pollaczekRFactor p K (((a : ZMod p) * b).val) := by
-  unfold pollaczekRFactor
+  simp only [pollaczekRFactor]
   rw [smul_sub, cyclotomicSigmaOfUnit_smul_zetaUnit_zpow_cast,
     cyclotomicSigmaOfUnit_smul_zetaUnit_zpow_cast]
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
@@ -304,7 +309,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekRFactor (a : (ZMod p)ˣ) (b : ℕ) :
       ((pollaczekRExp p (((a : ZMod p) * b).val)).val : ℤ) [ZMOD (p : ℤ)] := by
     rw [Int.ModEq, ← ZMod.intCast_eq_intCast_iff']
     push_cast
-    unfold pollaczekRExp
+    simp only [pollaczekRExp]
     simp only [ZMod.natCast_val, ZMod.cast_id]
     ring
   have happly : ∀ {m n : ℤ}, m ≡ n [ZMOD (p : ℤ)] →
@@ -331,7 +336,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekR (a : (ZMod p)ˣ) (i : ℕ) :
     cyclotomicSigmaOfUnit (p := p) K a • pollaczekR p K i =
       ∏ b ∈ Finset.Ico 1 p,
         pollaczekRFactor p K (((a : ZMod p) * b).val) ^ b ^ (p - 1 - i) := by
-  unfold pollaczekR
+  simp only [pollaczekR]
   rw [show cyclotomicSigmaOfUnit (p := p) K a •
         ∏ b ∈ Finset.Ico 1 p, pollaczekRFactor p K b ^ b ^ (p - 1 - i) =
       ∏ b ∈ Finset.Ico 1 p,
@@ -418,7 +423,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekR_balanced (a : (ZMod p)ˣ) (i : ℕ
   rw [show pollaczekR p K i ^ ((((a⁻¹ : (ZMod p)ˣ) : ZMod p).val) ^ E) =
         ∏ b ∈ Finset.Ico 1 p,
           pollaczekRFactor p K b ^ (((((a⁻¹ : (ZMod p)ˣ) : ZMod p).val) ^ E * b ^ E)) from by
-    unfold pollaczekR
+    simp only [pollaczekR]
     rw [← Finset.prod_pow]
     refine Finset.prod_congr rfl ?_
     intro b _

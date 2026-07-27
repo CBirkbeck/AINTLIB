@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartCover
 import ModularCurves.EllipticCurve.AdditionChartOverlap
 import ModularCurves.ForMathlib.SpecBasicOpenAway
@@ -35,20 +40,27 @@ noncomputable def blOpenZPiece :
 /-- The three `D(t_k)` cover the law-2 regularity open, by construction. -/
 lemma blOpenYPiece_eq_iSup :
     blOpenYPiece W i j =
-      ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k) := by
+      ⨆ k,
+        (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (lawTwoTriple W i j k) := by
   rw [blOpenYPiece, regularityOpen]
   exact TopologicalSpace.Opens.map_iSup _ _
 
 /-- The three `D(s_k)` cover the law-1 regularity open, by construction. -/
 lemma blOpenZPiece_eq_iSup :
     blOpenZPiece W i j =
-      ⨆ k, (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k) := by
+      ⨆ k,
+        (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (lawOneTriple W i j k) := by
   rw [blOpenZPiece, regularityOpen]
   exact TopologicalSpace.Opens.map_iSup _ _
 
-/-- **(c3, the two-law overlap on a chart-product piece is same-index)** The overlap of the two laws'
-regularity opens on the `(i,j)` piece is covered by the SAME-index loci `D(lawTwo_k · lawOne_k)` — the
-piece-level form of `regularityOpen_inf_eq_iSup_basicOpen` (the vanishing minors force regularity at the
+/-- **(c3, the two-law overlap on a chart-product piece is same-index)** The overlap of the two
+laws'
+regularity opens on the `(i,j)` piece is covered by the SAME-index loci `D(lawTwo_k · lawOne_k)`
+— the
+piece-level form of `regularityOpen_inf_eq_iSup_basicOpen`
+  (the vanishing minors force regularity at the
 same index), pushed through the `chartPieceIso` preimage. -/
 lemma blOpenYPiece_inf_blOpenZPiece_eq_iSup :
     blOpenYPiece W i j ⊓ blOpenZPiece W i j =
@@ -63,12 +75,14 @@ lemma blOpenYPiece_inf_blOpenZPiece_eq_iSup :
 /-- The three `D(t_k)` as opens of the `(i,j)` piece — the cover of `blOpenYPiece`. -/
 noncomputable def blOpenYPieceFamily (k : Fin 3) :
     (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens :=
-  (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)
+  (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+    (lawTwoTriple W i j k)
 
 /-- The three `D(s_k)` as opens of the `(i,j)` piece — the cover of `blOpenZPiece`. -/
 noncomputable def blOpenZPieceFamily (k : Fin 3) :
     (Limits.pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W)).Opens :=
-  (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)
+  (chartPieceIso W i j).hom ⁻¹ᵁ specBasicOpen (CommRingCat.of (biChartRing W i j))
+    (lawOneTriple W i j k)
 
 lemma iSup_blOpenYPieceFamily : ⨆ k, blOpenYPieceFamily W i j k = blOpenYPiece W i j :=
   (blOpenYPiece_eq_iSup W i j).symm
@@ -118,7 +132,8 @@ coordinates are invertible, i.e. exactly the hypotheses of the cross-index crux
 lemma blOpenYPieceFamily_inf (k l : Fin 3) :
     blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l =
       (chartPieceIso W i j).hom ⁻¹ᵁ
-        specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k * lawTwoTriple W i j l) := by
+        specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (lawTwoTriple W i j k * lawTwoTriple W i j l) := by
   rw [blOpenYPieceFamily, blOpenYPieceFamily, specBasicOpen_mul]
   rfl
 
@@ -127,7 +142,8 @@ omit [IsJacobsonRing R] [IsDomain (biChartRing W i j)] in
 lemma blOpenZPieceFamily_inf (k l : Fin 3) :
     blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l =
       (chartPieceIso W i j).hom ⁻¹ᵁ
-        specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k * lawOneTriple W i j l) := by
+        specBasicOpen (CommRingCat.of (biChartRing W i j))
+          (lawOneTriple W i j k * lawOneTriple W i j l) := by
   rw [blOpenZPieceFamily, blOpenZPieceFamily, specBasicOpen_mul]
   rfl
 
@@ -153,7 +169,8 @@ lemma addOnYOnFamily_agree (k l : Fin 3) (hkl : l ≠ k)
     (hl : Ω ≤ (chartPieceIso W i j).hom ⁻¹ᵁ
       specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j l))
     (hΩ : Ω = (chartPieceIso W i j).hom ⁻¹ᵁ
-      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k * lawTwoTriple W i j l)) :
+      specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (lawTwoTriple W i j k * lawTwoTriple W i j l)) :
     Scheme.homOfLE _ hk ≫ addOnYOnFamily W i j k hΔ =
       Scheme.homOfLE _ hl ≫ addOnYOnFamily W i j l hΔ := by
   subst hΩ
@@ -170,7 +187,8 @@ lemma addOnZOnFamily_agree (k l : Fin 3) (hkl : l ≠ k)
     (hl : Ω ≤ (chartPieceIso W i j).hom ⁻¹ᵁ
       specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j l))
     (hΩ : Ω = (chartPieceIso W i j).hom ⁻¹ᵁ
-      specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k * lawOneTriple W i j l)) :
+      specBasicOpen (CommRingCat.of (biChartRing W i j))
+        (lawOneTriple W i j k * lawOneTriple W i j l)) :
     Scheme.homOfLE _ hk ≫ addOnZOnFamily W i j k hΔ =
       Scheme.homOfLE _ hl ≫ addOnZOnFamily W i j l hΔ := by
   subst hΩ
@@ -193,7 +211,8 @@ with the `D(t_k · t_l)` locus. The diagonal `k = l` is proof-irrelevance. -/
 lemma addOnYOnFamily_agree_inf (k l : Fin 3) :
     Scheme.homOfLE _ (inf_le_left : blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l ≤ _) ≫
         addOnYOnFamily W i j k hΔ =
-      Scheme.homOfLE _ (inf_le_right : blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l ≤ _) ≫
+      Scheme.homOfLE _
+        (inf_le_right : blOpenYPieceFamily W i j k ⊓ blOpenYPieceFamily W i j l ≤ _) ≫
         addOnYOnFamily W i j l hΔ := by
   rcases eq_or_ne l k with rfl | hkl
   · rfl
@@ -204,7 +223,8 @@ lemma addOnYOnFamily_agree_inf (k l : Fin 3) :
 lemma addOnZOnFamily_agree_inf (k l : Fin 3) :
     Scheme.homOfLE _ (inf_le_left : blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l ≤ _) ≫
         addOnZOnFamily W i j k hΔ =
-      Scheme.homOfLE _ (inf_le_right : blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l ≤ _) ≫
+      Scheme.homOfLE _
+        (inf_le_right : blOpenZPieceFamily W i j k ⊓ blOpenZPieceFamily W i j l ≤ _) ≫
         addOnZOnFamily W i j l hΔ := by
   rcases eq_or_ne l k with rfl | hkl
   · rfl

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.PrimeFamily
@@ -100,7 +105,7 @@ theorem pi_not_mem_Q_sq_of_ramificationIdx_eq
     (hzeta_int : IsPrimitiveRoot zeta_ell_int ℓ)
     (Q : Ideal (𝓞 R')) [Q.IsPrime] (hQ_ne : Q ≠ ⊥)
     (h_ram :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q = ℓ - 1) :
+      Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q = ℓ - 1) :
     zeta_ell_int - 1 ∉ Q ^ 2 := by
   classical
   obtain ⟨u, hu⟩ := (associated_ell_zeta_sub_one_pow hzeta_int).symm
@@ -122,10 +127,10 @@ theorem pi_not_mem_Q_sq_of_ramificationIdx_eq
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : Nat.Prime ℓ).ne_zero
   have h_ram_count :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q =
+      Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q =
         Multiset.count Q (UniqueFactorizationMonoid.normalizedFactors
           (Ideal.map (algebraMap ℤ (𝓞 R')) (Ideal.span ({(ℓ : ℤ)} : Set ℤ)))) :=
-    Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count
+    Ideal.IsDedekindDomain.ramificationIdx'_eq_normalizedFactors_count
       h_map_ne_bot (by infer_instance) hQ_ne
   rw [h_ram] at h_ram_count
   have h_map_eq :
@@ -225,6 +230,7 @@ noncomputable def residueCharIntUnitHom
     S.zeta_p_int_unit_isPrimitiveRoot
 
 omit [Algebra (ZMod ℓ) k] in
+/-- On units, the integral residue character is the unit-group hom. -/
 @[simp]
 theorem residueCharInt_apply_unit
     (S : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R') (x : kˣ) :
@@ -242,7 +248,7 @@ theorem residueCharIntUnitHom_pow_p
   change ((S.residueCharIntUnitHom x : (𝓞 R')ˣ) : 𝓞 R') ^ p = (1 : 𝓞 R')
   rw [← S.residueCharInt_apply_unit x]
   letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  unfold ConductorFlexibleConcreteStickelbergerSetup.residueCharInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.residueCharInt]
   exact residueMulChar_pow_eq_one S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot x
 
@@ -345,6 +351,7 @@ theorem teichUnitFullOfRootsOfUnityBijective_residue
       (x : k)
   rw [ht_val, hxQ]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The same Teichmüller section satisfies the power convention used by
 `ConductorFlexibleFullTeichStickelbergerSetup`. -/
 theorem residueCharInt_eq_teichUnitFullOfRootsOfUnityBijective_pow_d
@@ -470,10 +477,11 @@ theorem rootsOfUnityMapQuot_bijective_of_isPrimitiveRoot
     omega
   letI : NeZero (Fintype.card k - 1) := ⟨hn_ne⟩
   letI : Fintype (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) :=
-    inferInstance
+    Fintype.ofFinite _
   have hroots' :
       Fintype.card (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) =
-        Fintype.card k - 1 := hζ.card_rootsOfUnity
+        Fintype.card k - 1 := by
+    rw [← Nat.card_eq_fintype_card]; exact hζ.card_rootsOfUnity
   letI : DecidableEq k := Classical.decEq k
   letI : Fintype (𝓞 R' ⧸ S.Q)ˣ :=
     Fintype.ofEquiv kˣ

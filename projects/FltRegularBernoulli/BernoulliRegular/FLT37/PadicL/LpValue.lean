@@ -74,10 +74,11 @@ theorem padicValRat_bernoulli_thirtytwo :
       ((padicValInt_dvd_iff (p := 37) 1 (bernoulli 32).num).mp
         (by simpa using thirtyseven_dvd_bernoulli_thirtytwo_num)).resolve_left hne
     have h2 : ¬ 2 ≤ padicValInt 37 (bernoulli 32).num := fun hle =>
-      kellner_at_zero_not_dvd ((padicValInt_dvd_iff (p := 37) 2 (bernoulli 32).num).mpr (Or.inr hle))
+      kellner_at_zero_not_dvd
+        ((padicValInt_dvd_iff (p := 37) 2 (bernoulli 32).num).mpr (Or.inr hle))
     omega
   have hpvn : padicValNat 37 (bernoulli 32).den = 0 := by
-    rw [bernoulli_thirtytwo_den_eq, padicValNat.eq_zero_iff]; right; right; decide
+    rw [bernoulli_thirtytwo_den_eq]; exact padicValNat.eq_zero_of_not_dvd (by decide)
   rw [padicValRat_def, hpvi, hpvn]; norm_num
 
 /-- **`v₃₇(B₃₂ / 32) = 1`** (proved): the sharp first-order valuation, the
@@ -90,8 +91,8 @@ theorem valuation_bernoulliFactorQp_thirtytwo :
     Rat.num_ne_zero.mp (by rw [bernoulli_thirtytwo_num_eq]; norm_num)
   have h32 : ((32 : ℕ) : ℚ) ≠ 0 := by norm_num
   have hv32 : padicValRat 37 ((32 : ℕ) : ℚ) = 0 := by
-    rw [padicValRat.of_nat, Nat.cast_eq_zero, padicValNat.eq_zero_iff]
-    right; right; decide
+    rw [padicValRat.of_nat, Nat.cast_eq_zero]
+    exact padicValNat.eq_zero_of_not_dvd (by decide)
   rw [padicValRat.div hB_ne h32, padicValRat_bernoulli_thirtytwo, hv32]; ring
 
 /-- **The Kubota–Leopoldt `p`-adic `L`-value package** (B-C1.0).

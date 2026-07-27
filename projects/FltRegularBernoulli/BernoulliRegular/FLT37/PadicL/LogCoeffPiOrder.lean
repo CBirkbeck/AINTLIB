@@ -164,7 +164,7 @@ theorem integralLogCoeffValuationAt_of_integralProductBernoulliOrderAt
     rw [hprod', htop, top_add] at hfin_prod
     exact hfin_prod rfl
   -- Combine the two descriptions of the product order at the `.toNat` level.
-  unfold IntegralLogCoeffValuationAt
+  simp only [IntegralLogCoeffValuationAt]
   have hcombine : addVal S.O (S.logCoeffSum c i) + ((2 * i : ℕ) : ℕ∞)
       = ((p - 1) * ((bernoulliFactorQp p i).valuation.toNat + 1) : ℕ) := by
     rw [← hprod']; exact hprod
@@ -203,7 +203,7 @@ theorem addVal_logSumViaSeries_of_integralProductBernoulliOrderAt
   have hrewrite : S.logCoeffSum c i * S.gaussSum i ^ 2
       = S.logSumViaSeries c i * S.gaussSum i := by
     rw [S.logSumViaSeries_eq c i]; ring
-  unfold IntegralProductBernoulliOrderAt at hprod
+  simp only [IntegralProductBernoulliOrderAt] at hprod
   rw [hrewrite, addVal_mul, hτ] at hprod
   exact hprod
 
@@ -227,14 +227,14 @@ theorem addVal_logCoeffSum_thirtytwo_eq_eight
   have hint : S.IntegralLogCoeffValuationAt c 32 :=
     S.integralLogCoeffValuationAt_of_integralProductBernoulliOrderAt
       (by norm_num) (by norm_num) (by decide) hprod
-  unfold IntegralLogCoeffValuationAt at hint
+  simp only [IntegralLogCoeffValuationAt] at hint
   -- `v₃₇(B₃₂/32) = 1`, so `(p−1)(v+1) = 36·2 = 72`, giving `(addVal Λ).toNat = 8`.
   rw [valuation_bernoulliFactorQp_thirtytwo] at hint
   norm_num at hint
   -- `(addVal Λ).toNat = 8` and `addVal Λ` finite (the product order is finite) ⟹ `= 8`.
   have hfin_Λ : addVal S.O (S.logCoeffSum c 32) ≠ ⊤ := by
     intro htop
-    unfold IntegralProductBernoulliOrderAt at hprod
+    simp only [IntegralProductBernoulliOrderAt] at hprod
     rw [addVal_mul, htop, top_add] at hprod
     exact (ENat.coe_ne_top _) hprod.symm
   -- `.toNat = 8` from `hint`, then convert to `= (8 : ℕ∞)`.
@@ -398,19 +398,18 @@ the genuine `p = 37` instance discharges the core from the actual log-series.) -
 /-- The single-unit witness coefficient family supporting the order-`8` value:
 `c_1 = π⁸·((ω 1)³²)⁻¹`, `c_j = 0` for `j ≠ 1`.  Yields `Λ 32 = π⁸`. -/
 noncomputable def piOrderWitnessCoeff : (ZMod p)ˣ → S.O :=
-  fun j => if j = 1 then S.π ^ 8 * (((S.ω 1) ^ 32 : S.Oˣ)⁻¹ : S.Oˣ) else 0
+  fun j ↦ if j = 1 then S.π ^ 8 * (((S.ω 1) ^ 32 : S.Oˣ)⁻¹ : S.Oˣ) else 0
 
 /-- The witness coefficients give `Λ 32 = π⁸` exactly. -/
 theorem logCoeffSum_piOrderWitnessCoeff :
     S.logCoeffSum (S.piOrderWitnessCoeff) 32 = S.π ^ 8 := by
   classical
-  unfold logCoeffSum piOrderWitnessCoeff
-  rw [Finset.sum_eq_single (1 : (ZMod p)ˣ)]
+  simp only [logCoeffSum, piOrderWitnessCoeff]
+  rw [Fintype.sum_eq_single (1 : (ZMod p)ˣ)]
   · -- `j = 1` term: `(π⁸·((ω 1)³²)⁻¹) · (ω 1)³² = π⁸`.
     rw [if_pos rfl, mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, mul_one]
-  · intro j _ hj
+  · intro j hj
     rw [if_neg hj, zero_mul]
-  · intro h; exact absurd (Finset.mem_univ _) h
 
 /-- **Non-vacuity of `IntegralProductBernoulliOrderAt` at `i = 32`** (`p = 37`,
 soundness witness): for every setup `S` there is a `c` with
@@ -420,7 +419,7 @@ theorem integralProductBernoulliOrderAt_thirtytwo_inhabited
     (S : StickelbergerF1Setup 37) :
     ∃ c : (ZMod 37)ˣ → S.O, S.IntegralProductBernoulliOrderAt c 32 := by
   refine ⟨S.piOrderWitnessCoeff, ?_⟩
-  unfold IntegralProductBernoulliOrderAt
+  simp only [IntegralProductBernoulliOrderAt]
   rw [S.logCoeffSum_piOrderWitnessCoeff]
   -- `addVal(π⁸·τ²) = 8 + 64 = 72 = 36·(1+1)`.
   rw [addVal_mul, S.π_irreducible.addVal_pow,

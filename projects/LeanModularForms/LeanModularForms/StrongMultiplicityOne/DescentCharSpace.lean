@@ -8,7 +8,7 @@ import LeanModularForms.StrongMultiplicityOne.SquarefreeDecomp
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Lemma 4.6.14
 
-The `δ`-slash-sum coefficient vanishing (`miyake_4_6_14_delta_slash_sum_coeff_zero`)
+The `δ`-slash-sum coefficient vanishing (`delta_slash_sum_coeff_zero`)
 and the descent-witness apparatus for the `l' > 1` case. Part of a multi-file
 split of `StrongMultiplicityOne.lean`.
 
@@ -143,7 +143,7 @@ private lemma cuspForm_finsetSum_toModularForm' {α : Type*} [DecidableEq α]
   · intro q s hqs ih
     rw [Finset.sum_insert hqs, Finset.sum_insert hqs, ← ih]; rfl
 
-/-- Helper for `miyake_4_6_14_delta_slash_sum_coeff_zero`: if a cusp-form family
+/-- Helper for `delta_slash_sum_coeff_zero`: if a cusp-form family
 `Φ_q : α → CuspForm (Gamma1 M) k` identifies the family of functions
 `inner_fun : α → UpperHalfPlane → ℂ` pointwise, and the period-1 `q`-expansion of every
 `inner_fun q` has vanishing `m`-th coefficient, then so does the period-1 `q`-expansion
@@ -338,7 +338,7 @@ private lemma delta_slash_sum_per_q_inner_fun_coeff_zero {N : ℕ} [NeZero N] {k
     h_χ_F_factor (F_q_fam q.val q.property) (hF_q_char q.val q.property) m hq_not_m
     h_q_M_q_eq
 
-private lemma miyake_4_6_14_delta_slash_sum_coeff_zero
+private lemma delta_slash_sum_coeff_zero
     {N : ℕ} [NeZero N] {k : ℤ}
     (p : ℕ) [NeZero p] (hp : p.Prime) (hpN : p ∣ N)
     {l' : ℕ} (hl1_gt : 1 < l') (hl'_sqfree : Squarefree l')
@@ -366,7 +366,7 @@ private lemma miyake_4_6_14_delta_slash_sum_coeff_zero
     hΔ_form_vanish (p * m) (Nat.coprime_mul_iff_left.mpr ⟨hpl', hm_cop⟩)
   obtain ⟨g_q_fam, F_q_fam, χ_F_fam, hg_q_char, hF_q_char, hF_eq_g,
       hχ_F_fam_rel, hg_q_qexp⟩ :=
-    miyake_4_6_7_squarefree_decomp_with_lower_level χ_M_unit Δ_form hΔ_form_χ l'
+    squarefree_decomp_with_lower_level χ_M_unit Δ_form hΔ_form_χ l'
       hl1_gt hl'_sqfree hΔ_form_vanish
   haveI hLl2_NeZero : NeZero ((l' * N) * l' ^ 2) :=
     ⟨Nat.mul_ne_zero (NeZero.ne (l' * N)) (pow_ne_zero 2 (NeZero.ne l'))⟩
@@ -388,7 +388,7 @@ private lemma miyake_4_6_14_delta_slash_sum_coeff_zero
   by_cases hp_sq : p ^ 2 ∣ l' * N
   · exact delta_slash_sum_coeff_zero_sq_case p hp hp_dvd_lN hp_sq Δ_form m h_apm_zero
   ·
-    have h_M6_1_pt := miyake_4_6_6_level_commute (N := l' * N) (l := l' ^ 2) (k := k)
+    have h_M6_1_pt := level_commute (N := l' * N) (l := l' ^ 2) (k := k)
       p hp hp_dvd_lN (hpl'.pow_right 2) χ_M_unit Δ_form.toModularForm'
       ((cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace
         (k := k) χ_M_unit Δ_form).mpr hΔ_form_χ)
@@ -547,7 +547,7 @@ private lemma slash_sum_V_p_pointwise_eq_smul_g_low {N : ℕ} [NeZero N] {k : �
         (⇑(HeckeRing.GL2.modularFormLevelRaise (N / p) p k g_low) ∣[k]
           descendCosetList p N hp v) z) =
       (descendCosetCount p N : ℂ) / (p : ℂ) * g_low z := by
-  simp_rw [fun v ↦ multipass_V_p_slash_descendCoset p hp hpN g_low v z]
+  simp_rw [fun v ↦ V_p_slash_descendCoset p hp hpN g_low v z]
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   ring
 
@@ -598,7 +598,7 @@ private lemma slash_sum_Δ_form_qExp_coeff_zero {N : ℕ} [NeZero N] {k : ℤ} (
       χ_lifted_low.comp (ZMod.unitsMap (Nat.div_dvd_of_dvd hp_dvd_lN)) := by
     rw [hχ_M_unit_eq_chi, hχ_eq, MonoidHom.comp_assoc, MonoidHom.comp_assoc,
       ZMod.unitsMap_comp, ZMod.unitsMap_comp]
-  exact miyake_4_6_14_delta_slash_sum_coeff_zero p hp hpN hl1_gt hl'_sqfree hpl'
+  exact delta_slash_sum_coeff_zero p hp hpN hl1_gt hl'_sqfree hpl'
     hp_not_in χ_M_unit χ_lifted_low hχ_M_unit_eq Δ_form hΔ_form_χ
     hΔ_form_vanish m hm_cop
 
@@ -778,7 +778,7 @@ private lemma slash_sum_V_p_lifted_qExp_coeff_at_cast_eq
   set Dp_g_low : UpperHalfPlane → ℂ := fun z ↦
     (descendCosetCount p L : ℂ) / (p : ℂ) * g_low z
   have h_Vp_slash_lifted : ∀ z : UpperHalfPlane, Vp_slash_lifted_fun z = Dp_g_low z := fun z ↦ by
-    simp_rw [Vp_slash_lifted_fun, fun v ↦ multipass_V_p_slash_descendCoset p hp hpL
+    simp_rw [Vp_slash_lifted_fun, fun v ↦ V_p_slash_descendCoset p hp hpL
       g_low_cast.toModularForm' v z]
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul,
       show (g_low_cast.toModularForm' : UpperHalfPlane → ℂ) z = g_low z by
@@ -1086,7 +1086,7 @@ lemma Φ_qExp_coeff_eq_count_div_p_mul_g_low_coeff {N : ℕ} [NeZero N] {k : ℤ
         (⇑f.toModularForm' ∣[k] descendCosetList p (l' * N) hp v) z
   have hΦ_eq_Ψ : Φ_fun = Ψ_fun :=
     funext fun z ↦
-      miyake_4_6_6_level_commute p hp hpN hpl' χ f.toModularForm' hfχ_mod z
+      level_commute p hp hpN hpl' χ f.toModularForm' hfχ_mod z
   have h_Mp_eq : (l' * N) / p = l' * (N / p) := by
     rcases hpN with ⟨d, hd⟩
     rw [hd, show l' * (p * d) = p * (l' * d) by ring,

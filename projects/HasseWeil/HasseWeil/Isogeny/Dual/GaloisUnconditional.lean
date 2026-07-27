@@ -98,10 +98,7 @@ theorem isGalois_of_xy_family_card (β : Isogeny W.toAffine W.toAffine)
     IsGalois W.toAffine.FunctionField W.toAffine.FunctionField := by
   letI := β.toAlgebra
   -- the kernel-translation covariance and kernel finiteness
-  have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
-      translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
-      (h_xy_family k).1 (h_xy_family k).2 z
+  have hcov := hcov_of_xy_family_general W β h_xy_family
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   -- Im(β^*) = Fix(Multiplicative (ker β)) (Silverman III.4.10c)
   have h_eq := pullback_fieldRange_eq_fixedField_general W β h_xy_family h_card
@@ -111,16 +108,13 @@ theorem isGalois_of_xy_family_card (β : Isogeny W.toAffine W.toAffine)
         FixedPoints.subfield (Multiplicative β.kernel) W.toAffine.FunctionField := by
     intro z
     have hz : β.pullback z ∈ β.pullback.fieldRange := ⟨z, rfl⟩
-    rw [h_eq] at hz
-    exact hz
+    rwa [h_eq] at hz
   -- ... and surjects onto the fixed subfield (backward inclusion, via Im = Fix)
   have hsurj : ∀ w : W.toAffine.FunctionField,
       w ∈ FixedPoints.subfield (Multiplicative β.kernel) W.toAffine.FunctionField →
       ∃ z, β.pullback z = w := by
     intro w hw
-    have hw' : w ∈ β.pullback.fieldRange := by
-      rw [h_eq]
-      exact hw
+    have hw' : w ∈ β.pullback.fieldRange := by rwa [h_eq]
     exact hw'
   -- the base isomorphism `K(E) ≃+* Fix(ker β)` induced by `β^*`
   let e : W.toAffine.FunctionField ≃+*
@@ -177,10 +171,7 @@ theorem hdesc_of_xy_family_card (β : Isogeny W.toAffine W.toAffine)
         liftPointToKE W k = genericPointAct W β σ - genericPoint W := by
   letI := β.toAlgebra
   -- the kernel-translation covariance, kernel finiteness, and the Galois package
-  have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
-      translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
-      (h_xy_family k).1 (h_xy_family k).2 z
+  have hcov := hcov_of_xy_family_general W β h_xy_family
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   haveI hfd : @FiniteDimensional W.toAffine.FunctionField W.toAffine.FunctionField
       _ _ β.toAlgebra.toModule := isogeny_finiteDimensional W β

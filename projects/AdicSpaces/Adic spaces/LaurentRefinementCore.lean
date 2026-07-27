@@ -298,7 +298,6 @@ theorem prodImage_mul_comm (T₁ T₂ : Finset A) :
   constructor <;> rintro ⟨a, b, hp, rfl⟩ <;>
     exact ⟨b, a, Finset.mem_product.mpr (Finset.mem_product.mp hp).symm, mul_comm b a⟩
 
-set_option maxHeartbeats 400000 in
 -- heavy `Subring.closure_induction` over `locSubring` (6 cases × ring ops)
 /-- For `b ∈ I^N₁` (first datum), `divByS (b·s₂) (s₁·s₂)` lands in the product
 `locSubring` (lift of `D₁`'s `locSubring` along `Away s₁ → Away (s₁·s₂)`). -/
@@ -515,6 +514,7 @@ theorem RationalLocData.interSamePair_coUnitDatum_span_eq_top [IsTateRing A]
     (span_insert_eq_top_of_span_eq_top D₁.s h₁.span_eq_top)
     (span_insert_eq_top_of_span_eq_top f (span_eq_top_of_one_mem (Finset.mem_singleton_self 1)))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The base-independent **2-cover `𝒰_f`** of `D₀` (Wedhorn 4230): the two
 halves `R(f/1) ∩ D₀` and `R(1/f) ∩ D₀` (via `interSamePair`, base-independent
 conditions `v(f) ≤ 1` / `v(f) ≥ 1`). Covers by the valuation trichotomy. -/
@@ -542,6 +542,7 @@ noncomputable def unitCover (D₀ : RationalLocData A) (f : A) : RationalCoverin
         rw [Finset.mem_singleton.mp ht]; exact h, fun hf0 => ?_⟩
       exact v.not_vle_one_zero (v.vle_trans h hf0)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The two base-independent halves `R(f/1) ∩ D₀` and `R(1/f) ∩ D₀` cover `D₀`
 (valuation trichotomy `v(f) ≤ 1 ∨ v(f) ≥ 1`). Base-INDEPENDENT analogue of
 `laurentCover_covers` (whose split references `D₀.s`). -/
@@ -1107,6 +1108,7 @@ theorem iteratedPlus_forwardLocHom_generators_powerBounded
       Subring.le_topologicalClosure _ ⟨⟨divByS t D₀.s, hdiv_mem⟩, rfl⟩
     exact algebraMap_mem_locSubring _ _ _ hcoe_mem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the forward uncompleted hom to the completion (plus branch). -/
 theorem iteratedPlus_forwardToCompletion_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1236,6 +1238,7 @@ theorem iteratedPlus_backwardLocHom_generator_powerBounded
   exact ⟨(algebraMap A _ f) ^ n,
     (locSubring _ _ _).pow_mem hmem n, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the backward uncompleted hom (plus branch). -/
 theorem iteratedPlus_backwardLocHom_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1372,6 +1375,7 @@ theorem iteratedPlus_backwardHom_coeRingHom
     (iteratedPlusDatum_B P D₀ f).isTopologicalRing
   exact UniformSpace.Completion.extensionHom_coe _ _ b
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Round-trip 1 (plus branch): `backwardHom ∘ forwardHom = id`. -/
 theorem iteratedPlus_backwardHom_comp_forwardHom
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1841,6 +1845,7 @@ theorem iteratedMinus_forwardLocHom_generators_powerBounded
       exact ⟨⟨divByS a D₀.s, hdiv_mem_loc⟩, rfl⟩
     exact algebraMap_mem_locSubring _ _ _ hcoe_mem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the forward uncompleted hom to the completion
 (Wedhorn Prop 8.2 analogue, minus branch).
 
@@ -1960,6 +1965,7 @@ We package this as `iteratedMinus_backwardLocHom_generator_powerBounded`
 (parallels `iteratedMinus_forwardLocHom_generators_powerBounded` in the
 forward direction). -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Power-boundedness of the minus backward generator image** (Wedhorn
 Prop 8.2 analogue, minus branch backward generator). The image of
 `divByS 1 (canonicalMap f)` (= the unique generator of `T = {1}` in
@@ -2070,6 +2076,7 @@ theorem iteratedMinus_backwardLocHom_generator_powerBounded
   exact ⟨(divByS D₀.s (D₀.s * f)) ^ n,
     (locSubring _ _ _).pow_mem hdiv_mem n, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the backward uncompleted hom (minus branch).
 
 **Proof**: Apply `locTopology_continuous_lift` to `iteratedMinus_backwardLocHom D₀ f hsub`
@@ -2229,6 +2236,7 @@ theorem iteratedMinus_backwardHom_coeRingHom
     (iteratedMinusDatum_B P D₀ f).isTopologicalRing
   exact UniformSpace.Completion.extensionHom_coe _ _ b
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Round-trip 1 (minus branch): `backwardHom ∘ forwardHom = id`. This is
 the `Completion.ext'` chase using the uncompleted-level identity
 `iteratedMinus_backward_forward_locHom`. -/

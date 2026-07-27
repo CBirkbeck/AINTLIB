@@ -852,6 +852,7 @@ omit [Fintype ι] in
 /-- The `1`-st face of a `2`-simplex evaluates to its first index. -/
 theorem face_one_eval (τ : Fin 2 → ι) : FiniteCover.face 1 τ 0 = τ 0 := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Gluing in section form**: compatible `0`-cochains glue iff every
 section family that agrees on pairwise intersections comes from a global
 section. -/
@@ -980,6 +981,7 @@ theorem FiniteCover.prod_inter_eq {q : ℕ}
   Set.Subset.antisymm (U.prod_inter_subset_inter V σ)
     (U.inter_inter_subset_prod_inter V σ)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Proposition A.3(3) of Wedhorn, in degree ≤ 0** (wedhorn.txt:5321,
 5328-5330). *The product cover `U × V` is degree-zero `F`-acyclic provided
 `U` is, and `V` restricted to the `U`-multi-intersections is acyclic.* For

@@ -61,7 +61,7 @@ theorem dworkThetaFrobeniusProduct_eq_piFinset_sum
       ∑ m ∈ Fintype.piFinset (fun _ : Fin f => Finset.range (N + 1)),
         dworkMultiIndexTerm ℓ dworkCoeff u m := by
   classical
-  unfold dworkThetaFrobeniusProduct dworkThetaTrunc dworkMultiIndexTerm
+  simp only [dworkThetaFrobeniusProduct, dworkThetaTrunc, dworkMultiIndexTerm]
   rw [Finset.prod_univ_sum]
   refine Finset.sum_congr rfl fun m _hm => ?_
   rw [Finset.prod_mul_distrib]
@@ -121,13 +121,12 @@ theorem dworkPiFinsetSum_sub_multiIndexLESum_mem_I_pow_succ
       Nat.succ_le_of_lt (Nat.lt_of_not_ge hm.2)
     exact Ideal.pow_le_pow_right hN
       (dworkMultiIndexTerm_mem_I_pow_weight I ℓ dworkCoeff u hCoeff m)
-  have hsplit :=
-    Finset.sum_filter_add_sum_filter_not s (fun m => multiIndexWeight m ≤ N) term
   have hdiff :
       (∑ m ∈ s, term m) -
           (∑ m ∈ s.filter (fun m => multiIndexWeight m ≤ N), term m) =
         ∑ m ∈ s.filter (fun m => ¬ multiIndexWeight m ≤ N), term m := by
-    rw [← hsplit]
+    rw [← Finset.sum_filter_add_sum_filter_not s
+      (fun m => multiIndexWeight m ≤ N) term]
     abel
   simpa [hdiff] using hhigh
 
@@ -302,7 +301,7 @@ theorem finset_prod_one_add_sub_quadratic_mem_pow_three
       simpa using hmul'
     rw [show c i * (∏ j ∈ s with j < i, (1 + c j)) - (c i + c i * tail i) =
         c i * ((∏ j ∈ s.filter (fun j => j < i), (1 + c j)) - (1 + tail i)) by
-          simp [tail]
+          simp only [tail]
           ring]
     exact hmul
   have hsum :
@@ -322,9 +321,40 @@ theorem finset_prod_one_add_sub_quadratic_mem_pow_three
       (∑ i ∈ s, c i * (∏ j ∈ s with j < i, (1 + c j))) -
         (∑ i ∈ s, (c i + c i * tail i)) by
         rw [hsum_rewrite]
-        simp [tail]
+        simp only [tail]
         ring]
   exact hsum
+
+/-- Perturbing the linear parts `a` by quadratic parts `b ∈ I ^ 2` changes the
+lower-triangular bilinear sum `∑ᵢ aᵢ · ∑_{j<i} aⱼ` only within `I ^ 3`. -/
+theorem finset_sum_mul_lower_perturb_sub_mem_pow_three
+    {ι A : Type*} [LinearOrder ι] [CommRing A] (I : Ideal A) (s : Finset ι)
+    (a b : ι → A) (ha : ∀ i ∈ s, a i ∈ I) (hb : ∀ i ∈ s, b i ∈ I ^ 2) :
+    (∑ i ∈ s, (a i + b i) * ∑ j ∈ s.filter (fun j => j < i), (a j + b j)) -
+        (∑ i ∈ s, a i * ∑ j ∈ s.filter (fun j => j < i), a j) ∈ I ^ 3 := by
+  classical
+  rw [← Finset.sum_sub_distrib]
+  refine Ideal.sum_mem _ ?_
+  intro i hi
+  let T : A := ∑ j ∈ s.filter (fun j => j < i), a j
+  let U : A := ∑ j ∈ s.filter (fun j => j < i), b j
+  have hT : T ∈ I :=
+    Ideal.sum_mem _ fun j hj => ha j (Finset.mem_filter.mp hj).1
+  have hU : U ∈ I ^ 2 :=
+    Ideal.sum_mem _ fun j hj => hb j (Finset.mem_filter.mp hj).1
+  have h1 : a i * U ∈ I ^ 3 := by
+    rw [show (3 : ℕ) = 1 + 2 by decide, pow_add]
+    exact Ideal.mul_mem_mul (by simpa using ha i hi) hU
+  have h2 : b i * T ∈ I ^ 3 := by
+    rw [show (3 : ℕ) = 2 + 1 by decide, pow_add]
+    exact Ideal.mul_mem_mul (hb i hi) (by simpa using hT)
+  have h3 : b i * U ∈ I ^ 3 := by
+    refine Ideal.pow_le_pow_right (by decide : 3 ≤ 4) ?_
+    rw [show (4 : ℕ) = 2 + 2 by decide, pow_add]
+    exact Ideal.mul_mem_mul (hb i hi) hU
+  convert (I ^ 3).add_mem ((I ^ 3).add_mem h1 h2) h3 using 1
+  · simp only [T, U, Finset.sum_add_distrib]
+    ring
 
 /-- Second-order product truncation for factors already separated into linear
 and quadratic parts. -/
@@ -348,40 +378,8 @@ theorem finset_prod_one_add_linear_quadratic_sub_mem_pow_three
     simp [c, Finset.sum_add_distrib]
   have hquad :
       (∑ i ∈ s, c i * ∑ j ∈ s.filter (fun j => j < i), c j) -
-          (∑ i ∈ s, a i * ∑ j ∈ s.filter (fun j => j < i), a j) ∈ I ^ 3 := by
-    rw [← Finset.sum_sub_distrib]
-    refine Ideal.sum_mem _ ?_
-    intro i hi
-    let T : A := ∑ j ∈ s.filter (fun j => j < i), a j
-    let U : A := ∑ j ∈ s.filter (fun j => j < i), b j
-    have hT : T ∈ I := by
-      refine Ideal.sum_mem _ ?_
-      intro j hj
-      exact ha j (Finset.mem_filter.mp hj).1
-    have hU : U ∈ I ^ 2 := by
-      refine Ideal.sum_mem _ ?_
-      intro j hj
-      exact hb j (Finset.mem_filter.mp hj).1
-    have h1 : a i * U ∈ I ^ 3 := by
-      have hmul : a i * U ∈ I ^ 1 * I ^ 2 :=
-        Ideal.mul_mem_mul (by simpa using ha i hi) hU
-      rw [← pow_add] at hmul
-      simpa using hmul
-    have h2 : b i * T ∈ I ^ 3 := by
-      have hmul : b i * T ∈ I ^ 2 * I ^ 1 :=
-        Ideal.mul_mem_mul (hb i hi) (by simpa using hT)
-      rw [← pow_add] at hmul
-      simpa [Nat.add_comm] using hmul
-    have h3 : b i * U ∈ I ^ 3 := by
-      have hmul : b i * U ∈ I ^ 2 * I ^ 2 :=
-        Ideal.mul_mem_mul (hb i hi) hU
-      rw [← pow_add] at hmul
-      exact Ideal.pow_le_pow_right (by decide : 3 ≤ 4) (by simpa using hmul)
-    have hsum : a i * U + b i * T + b i * U ∈ I ^ 3 :=
-      (I ^ 3).add_mem ((I ^ 3).add_mem h1 h2) h3
-    convert hsum using 1
-    · simp [c, T, U, Finset.sum_add_distrib]
-      ring
+          (∑ i ∈ s, a i * ∑ j ∈ s.filter (fun j => j < i), a j) ∈ I ^ 3 :=
+    finset_sum_mul_lower_perturb_sub_mem_pow_three I s a b ha hb
   have hprod' :
       (∏ i ∈ s, (1 + a i + b i)) -
           (1 + ∑ i ∈ s, c i +
@@ -463,8 +461,7 @@ theorem sub_mem_sq_of_sub_mem_of_pow_prime_sub_self
     convert hfrobdiff using 1
     ring
   have hneg : -(x - y) ∈ I ^ 2 := by
-    have h := (I ^ 2).sub_mem hsub hpowdiff
-    convert h using 1
+    convert (I ^ 2).sub_mem hsub hpowdiff using 1
     ring
   simpa using (I ^ 2).neg_mem hneg
 
@@ -482,6 +479,7 @@ theorem mem_of_mul_mem_of_mul_inv_sub_one_mem
   rw [h]
   exact I.sub_mem hleft hright
 
+/-- The product of elements of `I ^ m` and `I ^ n` lies in `I ^ (m + n)`. -/
 theorem mul_mem_ideal_pow_add
     {A : Type*} [CommRing A] (I : Ideal A) {m n : ℕ} {x y : A}
     (hx : x ∈ I ^ m) (hy : y ∈ I ^ n) :
@@ -497,7 +495,6 @@ theorem quotient_mk_mem_pow_succ_eq_zero
   rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]
   exact Ideal.pow_mem_pow hx (N + 1)
 
-/-- The constant power series at a nilpotent element is substitutable. -/
 private theorem hasSubst_C_of_isNilpotent {A : Type*} [CommRing A] {a : A}
     (ha : IsNilpotent a) : PowerSeries.HasSubst (PowerSeries.C a : PowerSeries A) := by
   change IsNilpotent (PowerSeries.constantCoeff (PowerSeries.C a : PowerSeries A))
@@ -604,9 +601,8 @@ theorem polynomial_eval₂_sub_coeff_zero_isNilpotent
     IsNilpotent (P.eval₂ φ a - φ (P.coeff 0)) := by
   rcases Polynomial.X_dvd_sub_C (p := P) with ⟨Q, hQ⟩
   have heq : P.eval₂ φ a - φ (P.coeff 0) = a * Q.eval₂ φ a := by
-    have h := congrArg (fun P : Polynomial R => P.eval₂ φ a) hQ
     simpa [Polynomial.eval₂_sub, Polynomial.eval₂_C, Polynomial.eval₂_mul,
-      Polynomial.eval₂_X] using h
+      Polynomial.eval₂_X] using (congrArg (fun P : Polynomial R => P.eval₂ φ a) hQ)
   refine ⟨e, ?_⟩
   rw [heq, mul_pow, ha, zero_mul]
 
@@ -719,9 +715,6 @@ theorem rescale_exp_trunc_eval₂_mul
       (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) (δ * (x + y)) := by
   dsimp only
   let Rps : PowerSeries A := (rescale_exp_isRIntegral r).mapTo φ
-  have hmul :=
-    powerSeries_trunc_eval₂_mul_of_pow_succ_eq_zero
-      (A := A) δ N hδ (PowerSeries.rescale x Rps) (PowerSeries.rescale y Rps)
   have hformal : PowerSeries.rescale x Rps * PowerSeries.rescale y Rps =
       PowerSeries.rescale (x + y) Rps := by
     simpa [Rps] using rescale_exp_mapTo_mul r φ x y
@@ -738,7 +731,8 @@ theorem rescale_exp_trunc_eval₂_mul
     _ = (PowerSeries.trunc (N + 1)
             (PowerSeries.rescale x Rps * PowerSeries.rescale y Rps)).eval₂
             (RingHom.id A) δ := by
-          rw [hmul]
+          rw [powerSeries_trunc_eval₂_mul_of_pow_succ_eq_zero
+            (A := A) δ N hδ (PowerSeries.rescale x Rps) (PowerSeries.rescale y Rps)]
     _ = (PowerSeries.trunc (N + 1) (PowerSeries.rescale (x + y) Rps)).eval₂
             (RingHom.id A) δ := by
           rw [hformal]
@@ -757,11 +751,9 @@ theorem rescale_exp_trunc_eval₂_mul_sub
       (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) (δ * y) := by
   dsimp only
   let Rps : PowerSeries A := (rescale_exp_isRIntegral r).mapTo φ
-  have h :=
-    rescale_exp_trunc_eval₂_mul r φ N δ x (y - x) hδ
   have harg : δ * (x + (y - x)) = δ * y := by
     ring
-  simpa [Rps, harg] using h
+  simpa [Rps, harg] using rescale_exp_trunc_eval₂_mul r φ N δ x (y - x) hδ
 
 /-- Finite product form of `rescale_exp_trunc_eval₂_mul`: a product of
 correction factors around any finite family collapses to one factor at the
@@ -792,8 +784,6 @@ theorem rescale_exp_trunc_eval₂_finset_prod_eq_sum
       simp [PowerSeries.coeff_rescale, PowerSeries.coeff_exp]
     rw [hone, map_one]
   · intro a s ha ih
-    have htwo :=
-      rescale_exp_trunc_eval₂_mul r φ N δ (u a) (∑ i ∈ s, u i) hδ
     calc
       (∏ i ∈ insert a s,
           (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A) (δ * u i))
@@ -809,7 +799,8 @@ theorem rescale_exp_trunc_eval₂_finset_prod_eq_sum
             rw [ih]
       _ = (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A)
             (δ * (u a + ∑ i ∈ s, u i)) := by
-            simpa [Rps] using htwo
+            simpa [Rps] using
+              rescale_exp_trunc_eval₂_mul r φ N δ (u a) (∑ i ∈ s, u i) hδ
       _ = (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A)
             (δ * ∑ i ∈ insert a s, u i) := by
             rw [Finset.sum_insert ha]

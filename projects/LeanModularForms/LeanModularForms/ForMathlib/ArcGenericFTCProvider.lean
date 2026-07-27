@@ -627,64 +627,87 @@ private lemma arc_h_arc_ratio_eq {θ₀ : ℝ} {δ : ℝ} (hδ_pos : 0 < δ)
   field_simp
   ring
 
-private lemma arc_log_diff_tendsto {θ₀ : ℝ}
+/-- For a fixed real coefficient `c`, the branch logarithm of `exp (c·δ·I)` tends to `0`
+as `δ → 0⁺`: the map is continuous at `0`, where it takes the value `log 1 = 0`. -/
+private lemma log_cexp_ofReal_mul_I_tendsto_nhdsWithin (c : ℝ) :
+    Tendsto (fun δ : ℝ ↦ Complex.log (cexp (↑(c * δ) * I))) (𝓝[>] 0) (𝓝 0) := by
+  have h1 : (↑(c * (0 : ℝ)) * I : ℂ) = 0 := by push_cast; ring
+  have h_inner_cont : ContinuousAt (fun δ : ℝ ↦ cexp (↑(c * δ) * I)) 0 :=
+    Complex.continuous_exp.continuousAt.comp
+      ((Complex.continuous_ofReal.comp (by fun_prop)).mul continuous_const).continuousAt
+  have hcont := h_inner_cont.clog (h1 ▸ Complex.exp_zero ▸ Complex.one_mem_slitPlane)
+  have h_val_zero : Complex.log (cexp (↑(c * (0 : ℝ)) * I)) = 0 := by
+    rw [h1, Complex.exp_zero, Complex.log_one]
+  exact (h_val_zero ▸ hcont.tendsto).mono_left nhdsWithin_le_nhds
+
+/-- The real part `cos (fdArcAngle t) - cos θ₀` of the arc offset is positive when the
+arc angle at `t` lies below `θ₀` (both angles in `[π/3, 2π/3] ⊆ [0, π]`, where `cos` is
+strictly decreasing). -/
+private lemma arc_h_arc_re_pos_of_angle_lt {θ₀ t : ℝ} (h_hi : θ₀ ≤ 2 * Real.pi / 3)
+    (h_ge : Real.pi / 3 ≤ fdArcAngle t) (h_lt : fdArcAngle t < θ₀) :
+    0 < (arc_h_arc (exp (↑θ₀ * I)) t).re := by
+  have hpi := Real.pi_pos
+  rw [arc_h_arc_re]
+  linarith [Real.strictAntiOn_cos (a := fdArcAngle t) (b := θ₀)
+    ⟨by linarith, by linarith⟩ ⟨by linarith, by linarith⟩ h_lt]
+
+/-- The real part of the *negated* arc offset is positive when the arc angle at `t` lies
+above `θ₀` (both angles in `[π/3, 2π/3] ⊆ [0, π]`, where `cos` is strictly decreasing). -/
+private lemma neg_arc_h_arc_re_pos_of_angle_gt {θ₀ t : ℝ} (h_lo : Real.pi / 3 ≤ θ₀)
+    (h_gt : θ₀ < fdArcAngle t) (h_le : fdArcAngle t ≤ 2 * Real.pi / 3) :
+    0 < (-(arc_h_arc (exp (↑θ₀ * I)) t)).re := by
+  have hpi := Real.pi_pos
+  rw [Complex.neg_re, arc_h_arc_re]
+  linarith [Real.strictAntiOn_cos (a := θ₀) (b := fdArcAngle t)
+    ⟨by linarith, by linarith⟩ ⟨by linarith, by linarith⟩ h_gt]
+
+/-- On a punctured right-neighbourhood of `0`, the logarithm of the arc ratio
+`exp (-(5π/6)·δ·I)` coincides with the difference of the two arc logarithms.  This is the
+eventual equality feeding the limit in `arc_log_diff_tendsto`. -/
+private lemma arc_log_diff_eventuallyEq {θ₀ : ℝ}
     (h_lo : Real.pi / 3 < θ₀) (h_hi : θ₀ < 2 * Real.pi / 3) :
-    Tendsto (fun δ ↦ Complex.log (arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ - δ)) -
-        Complex.log (-(arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ + δ))))
-      (𝓝[>] 0) (𝓝 0) := by
+    ∀ᶠ δ in (𝓝[>] (0 : ℝ)),
+      Complex.log (cexp (↑(-(5 * Real.pi / 6 * δ)) * I)) =
+      Complex.log (arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ - δ)) -
+      Complex.log (-(arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ + δ))) := by
   have hpi := Real.pi_pos
   have ht₀_lo : 1/5 < arcT₀ θ₀ := arcT₀_gt_one_fifth h_lo
   have ht₀_hi : arcT₀ θ₀ < 3/5 := arcT₀_lt_three_fifths h_hi
-  have h_ratio_tendsto : Tendsto
-      (fun δ : ℝ ↦ Complex.log (cexp (↑(-(5 * Real.pi / 6 * δ)) * I)))
-      (𝓝[>] 0) (𝓝 0) := by
-    have h1 : (↑(-(5 * Real.pi / 6 * (0 : ℝ))) * I : ℂ) = 0 := by push_cast; ring
-    have h_inner_cont : ContinuousAt
-        (fun δ : ℝ ↦ cexp (↑(-(5 * Real.pi / 6 * δ)) * I)) 0 :=
-      Complex.continuous_exp.continuousAt.comp
-        ((Complex.continuous_ofReal.comp (by fun_prop)).mul continuous_const).continuousAt
-    have hcont := h_inner_cont.clog (h1 ▸ Complex.exp_zero ▸ Complex.one_mem_slitPlane)
-    have h_val_zero : Complex.log (cexp (↑(-(5 * Real.pi / 6 * (0 : ℝ))) * I)) = 0 := by
-      rw [h1, Complex.exp_zero, Complex.log_one]
-    exact (h_val_zero ▸ hcont.tendsto).mono_left nhdsWithin_le_nhds
   set gap := min (arcT₀ θ₀ - 1/5) (3/5 - arcT₀ θ₀) with h_gap_def
   have h_gap_pos : 0 < gap := lt_min (by linarith) (by linarith)
   have h_gap_le_fifth : gap ≤ 1/5 := by
     rcases le_total (arcT₀ θ₀ - 1/5) (3/5 - arcT₀ θ₀) with h | h
     · rw [h_gap_def, min_eq_left h]; linarith
     · rw [h_gap_def, min_eq_right h]; linarith
-  have h_eventually_eq : ∀ᶠ δ in (𝓝[>] (0 : ℝ)),
-      Complex.log (cexp (↑(-(5 * Real.pi / 6 * δ)) * I)) =
-      Complex.log (arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ - δ)) -
-      Complex.log (-(arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ + δ))) := by
-    rw [eventually_nhdsWithin_iff]
-    filter_upwards [Iio_mem_nhds h_gap_pos] with δ hδ_lt hδ_pos
-    rw [mem_Ioi] at hδ_pos
-    rw [mem_Iio] at hδ_lt
-    have h_δ_lt_fifth : δ < 1/5 := hδ_lt.trans_le h_gap_le_fifth
-    have hδ_small : δ * (5 * Real.pi / 6) < Real.pi := by
-      nlinarith [Real.pi_pos, h_δ_lt_fifth]
-    have harc := fdArcAngle_arcT₀ θ₀
-    have h_δ_lt_gap_l : δ < arcT₀ θ₀ - 1/5 := hδ_lt.trans_le (min_le_left _ _)
-    have h_δ_lt_gap_r : δ < 3/5 - arcT₀ θ₀ := hδ_lt.trans_le (min_le_right _ _)
-    have h_a_re : 0 < (arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ - δ)).re := by
-      rw [arc_h_arc_re]
-      have h_t_ge : Real.pi / 3 ≤ fdArcAngle (arcT₀ θ₀ - δ) := by
-        unfold fdArcAngle; nlinarith
-      have h_t_arc : fdArcAngle (arcT₀ θ₀ - δ) < θ₀ := by
-        unfold fdArcAngle at *; nlinarith
-      linarith [Real.strictAntiOn_cos (a := fdArcAngle (arcT₀ θ₀ - δ)) (b := θ₀)
-        ⟨by linarith, by linarith⟩ ⟨by linarith, by linarith⟩ h_t_arc]
-    have h_b_re : 0 < (-(arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ + δ))).re := by
-      rw [Complex.neg_re, arc_h_arc_re]
-      have h_t_le : fdArcAngle (arcT₀ θ₀ + δ) ≤ 2 * Real.pi / 3 := by
-        unfold fdArcAngle; nlinarith
-      have h_t_arc : θ₀ < fdArcAngle (arcT₀ θ₀ + δ) := by
-        unfold fdArcAngle at *; nlinarith
-      linarith [Real.strictAntiOn_cos (a := θ₀) (b := fdArcAngle (arcT₀ θ₀ + δ))
-        ⟨by linarith, by linarith⟩ ⟨by linarith, by linarith⟩ h_t_arc]
-    rw [← log_div_of_re_pos h_a_re h_b_re, arc_h_arc_ratio_eq hδ_pos hδ_small]
-  exact h_ratio_tendsto.congr' h_eventually_eq
+  rw [eventually_nhdsWithin_iff]
+  filter_upwards [Iio_mem_nhds h_gap_pos] with δ hδ_lt hδ_pos
+  rw [mem_Ioi] at hδ_pos
+  rw [mem_Iio] at hδ_lt
+  have h_δ_lt_fifth : δ < 1/5 := hδ_lt.trans_le h_gap_le_fifth
+  have hδ_small : δ * (5 * Real.pi / 6) < Real.pi := by
+    nlinarith [Real.pi_pos, h_δ_lt_fifth]
+  have harc := fdArcAngle_arcT₀ θ₀
+  have h_δ_lt_gap_l : δ < arcT₀ θ₀ - 1/5 := hδ_lt.trans_le (min_le_left _ _)
+  have h_δ_lt_gap_r : δ < 3/5 - arcT₀ θ₀ := hδ_lt.trans_le (min_le_right _ _)
+  have h_a_re : 0 < (arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ - δ)).re :=
+    arc_h_arc_re_pos_of_angle_lt h_hi.le
+      (by unfold fdArcAngle; nlinarith) (by unfold fdArcAngle at *; nlinarith)
+  have h_b_re : 0 < (-(arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ + δ))).re :=
+    neg_arc_h_arc_re_pos_of_angle_gt h_lo.le
+      (by unfold fdArcAngle at *; nlinarith) (by unfold fdArcAngle; nlinarith)
+  rw [← log_div_of_re_pos h_a_re h_b_re, arc_h_arc_ratio_eq hδ_pos hδ_small]
+
+private lemma arc_log_diff_tendsto {θ₀ : ℝ}
+    (h_lo : Real.pi / 3 < θ₀) (h_hi : θ₀ < 2 * Real.pi / 3) :
+    Tendsto (fun δ ↦ Complex.log (arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ - δ)) -
+        Complex.log (-(arc_h_arc (exp (↑θ₀ * I)) (arcT₀ θ₀ + δ))))
+      (𝓝[>] 0) (𝓝 0) := by
+  have h_ratio_tendsto : Tendsto
+      (fun δ : ℝ ↦ Complex.log (cexp (↑(-(5 * Real.pi / 6 * δ)) * I)))
+      (𝓝[>] 0) (𝓝 0) := by
+    simpa only [neg_mul] using
+      log_cexp_ofReal_mul_I_tendsto_nhdsWithin (-(5 * Real.pi / 6))
+  exact h_ratio_tendsto.congr' (arc_log_diff_eventuallyEq h_lo h_hi)
 
 private lemma arc_arcsinDelta_tendsto :
     Tendsto arcsinDelta (𝓝[>] 0) (𝓝[>] 0) := by
@@ -780,4 +803,3 @@ def arcFTCHyp_arc_generic {H : ℝ} (hH : 1 < H)
   h_limit := arc_E_tendsto h_lo h_hi
 
 end
-

@@ -162,14 +162,17 @@ theorem differentIdeal_ne_bot : differentIdeal A B ≠ ⊥ := by
 combined with `Ideal.ramificationIdx_eq_one_of_isUnramifiedAt`. -/
 theorem dvd_differentIdeal_of_ramificationIdx_ne_one {P : Ideal B} (hP : P.IsPrime)
     (hPbot : P ≠ ⊥)
-    (he : Ideal.ramificationIdx (P.under A) P ≠ 1) :
+    (he : Ideal.ramificationIdx' (P.under A) P ≠ 1) :
     P ∣ differentIdeal A B := by
   haveI := hP
   haveI := module_finite A K L B
   haveI := isSeparable_fractionRing A K L B
   rw [dvd_differentIdeal_iff]
   intro H
-  exact he (Ideal.ramificationIdx_eq_one_of_isUnramifiedAt hPbot)
+  apply he
+  have hunder : P.under A ≠ ⊥ := Ideal.under_ne_bot A hPbot
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx (P.under A) P hunder]
+  exact Ideal.ramificationIdx_eq_one_of_isUnramifiedAt
 
 end Different
 
@@ -205,7 +208,7 @@ theorem finite_ramifiedUnderLocus : (ramifiedUnderLocus A B).Finite :=
 over their contraction different from `1`) is finite. -/
 theorem finite_setOf_ramificationIdx_ne_one :
     {P : Ideal B | P.IsPrime ∧ P ≠ ⊥ ∧
-      Ideal.ramificationIdx (P.under A) P ≠ 1}.Finite :=
+      Ideal.ramificationIdx' (P.under A) P ≠ 1}.Finite :=
   (finite_setOf_dvd_differentIdeal A K L B).subset fun _ ⟨hP, hPbot, he⟩ ↦
     dvd_differentIdeal_of_ramificationIdx_ne_one A K L B hP hPbot he
 
@@ -214,7 +217,7 @@ theorem finite_setOf_ramificationIdx_ne_one :
 contraction). -/
 theorem finite_setOf_under_ramified :
     {q : Ideal A | ∃ P : Ideal B, P.IsPrime ∧ P ≠ ⊥ ∧ P.under A = q ∧
-      Ideal.ramificationIdx q P ≠ 1}.Finite := by
+      Ideal.ramificationIdx' q P ≠ 1}.Finite := by
   refine ((finite_setOf_ramificationIdx_ne_one A K L B).image (Ideal.under A)).subset ?_
   rintro q ⟨P, hP, hPbot, rfl, he⟩
   exact ⟨P, ⟨hP, hPbot, he⟩, rfl⟩
@@ -225,7 +228,7 @@ unramified: `e(P | q) = 1`. -/
 theorem ramificationIdx_eq_one_of_notMem {q : Ideal A}
     (hq : q ∉ ramifiedUnderLocus A B) {P : Ideal B} (hP : P.IsPrime)
     (hPq : P.under A = q) :
-    Ideal.ramificationIdx q P = 1 := by
+    Ideal.ramificationIdx' q P = 1 := by
   haveI := hP
   haveI := module_finite A K L B
   haveI := isSeparable_fractionRing A K L B
@@ -237,7 +240,9 @@ theorem ramificationIdx_eq_one_of_notMem {q : Ideal A}
   have hdvd : ¬P ∣ differentIdeal A B := fun hdvd ↦
     hq (Set.mem_insert_iff.mpr (Or.inr ⟨P, hdvd, hPq⟩))
   haveI : Algebra.IsUnramifiedAt A P := not_dvd_differentIdeal_iff.mp hdvd
-  exact hPq ▸ Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A) hPbot
+  have hunder : P.under A ≠ ⊥ := hPq ▸ hqbot
+  rw [← hPq, Ideal.ramificationIdx'_eq_ramificationIdx (P.under A) P hunder]
+  exact Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A)
 
 end BadLocus
 
@@ -249,7 +254,7 @@ has ramification index `1`. -/
 theorem exists_finite_ramification_locus :
     ∃ S : Set (Ideal A), S.Finite ∧
       ∀ q : Ideal A, q ∉ S → ∀ P : Ideal B, P.IsPrime → P.under A = q →
-        Ideal.ramificationIdx q P = 1 := by
+        Ideal.ramificationIdx' q P = 1 := by
   haveI := isDedekindDomain A K L B
   haveI := isTorsionFree A K L B
   exact ⟨ramifiedUnderLocus A B, finite_ramifiedUnderLocus A K L B,

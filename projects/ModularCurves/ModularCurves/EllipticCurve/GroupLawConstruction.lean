@@ -66,8 +66,9 @@ lemma irrelevant_map_le {ι σ τ A B : Type*} [CommRing A] [CommRing B]
   exact HomogeneousIdeal.mem_irrelevant_of_mem _ hi (f.map_mem hx)
 
 /-- Equality of `Proj.map`s from equal graded homomorphisms (the irrelevant-ideal
-hypotheses are propositions, so they may differ). -/
-private lemma Proj_map_congr {A B σ τ : Type u} [CommRing A] [SetLike σ A]
+hypotheses are propositions, so they may differ). Shared helper, also consumed by
+`EllipticCurve/NegModelBaseChange.lean` (which imports this file). -/
+lemma Proj_map_congr {A B σ τ : Type u} [CommRing A] [SetLike σ A]
     [AddSubgroupClass σ A] [CommRing B] [SetLike τ B] [AddSubgroupClass τ B]
     {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
     {f g : 𝒜 →+*ᵍ ℬ} (h : f = g)
@@ -84,8 +85,7 @@ noncomputable def negVec (W : WeierstrassCurve R) : Fin 3 → MvPolynomial (Fin 
 lemma negVec_isHomogeneous (W : WeierstrassCurve R) (i : Fin 3) :
     (negVec W i).IsHomogeneous 1 := by
   fin_cases i <;>
-    simp only [negVec, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
-      Matrix.cons_val_two, Matrix.tail_cons]
+    simp only [negVec]
   · exact isHomogeneous_X R 0
   · exact ((isHomogeneous_X R 1).neg.sub ((isHomogeneous_X R 0).C_mul W.a₁)).sub
       ((isHomogeneous_X R 2).C_mul W.a₃)
@@ -160,7 +160,7 @@ lemma negGradedQuot_involutive (W : WeierstrassCurve R) (x : projCoordRing W) :
 /-- The negation endomorphism composed with itself is the identity. -/
 lemma negGradedQuot_comp_self (W : WeierstrassCurve R) :
     (negGradedQuot W).comp (negGradedQuot W) = GradedRingHom.id _ :=
-  GradedRingHom.ext fun x => negGradedQuot_involutive W x
+  GradedRingHom.ext fun x ↦ negGradedQuot_involutive W x
 
 /-- The irrelevant-ideal hypothesis of `Proj.map` for negation, discharged via the
 involution: `f` maps the irrelevant ideal into itself, and `f = f⁻¹`. -/
@@ -178,7 +178,7 @@ that makes `negModelHom` a morphism over `Spec R`. -/
 lemma negGradedQuot_algebraMapGradeZero (W : WeierstrassCurve R) :
     (gradedRingHomZero (negGradedQuot W)).comp (algebraMapGradeZero (projIdeal W)) =
       algebraMapGradeZero (projIdeal W) := by
-  refine RingHom.ext fun r => Subtype.ext ?_
+  refine RingHom.ext fun r ↦ Subtype.ext ?_
   simp only [RingHom.coe_comp, Function.comp_apply, gradedRingHomZero_coe]
   show negGradedQuot W (algebraMap R (projCoordRing W) r) = algebraMap R (projCoordRing W) r
   have hmk : algebraMap R (projCoordRing W) r =
@@ -196,14 +196,13 @@ graded automorphism through which `negModelHom_zero` discharges the projective r
 `[0:−1:0] = [0:1:0]`. Built exactly parallel to `negGradedQuot`. -/
 
 /-- Negate all three variables `X, Y, Z ↦ −X, −Y, −Z` — the `(−1)`-rescaling. -/
-noncomputable def allNegVec (W : WeierstrassCurve R) : Fin 3 → MvPolynomial (Fin 3) R :=
+noncomputable def allNegVec (_W : WeierstrassCurve R) : Fin 3 → MvPolynomial (Fin 3) R :=
   ![-X 0, -X 1, -X 2]
 
 lemma allNegVec_isHomogeneous (W : WeierstrassCurve R) (i : Fin 3) :
     (allNegVec W i).IsHomogeneous 1 := by
   fin_cases i <;>
-    simp only [allNegVec, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
-      Matrix.cons_val_two, Matrix.tail_cons]
+    simp only [allNegVec]
   · exact (isHomogeneous_X R 0).neg
   · exact (isHomogeneous_X R 1).neg
   · exact (isHomogeneous_X R 2).neg
@@ -266,7 +265,7 @@ lemma allNegGradedQuot_involutive (W : WeierstrassCurve R) (x : projCoordRing W)
 
 lemma allNegGradedQuot_comp_self (W : WeierstrassCurve R) :
     (allNegGradedQuot W).comp (allNegGradedQuot W) = GradedRingHom.id _ :=
-  GradedRingHom.ext fun x => allNegGradedQuot_involutive W x
+  GradedRingHom.ext fun x ↦ allNegGradedQuot_involutive W x
 
 lemma allNegGradedQuot_irrelevant_le (W : WeierstrassCurve R) :
     (quotientGrading (projIdeal W))₊ ≤
@@ -281,17 +280,17 @@ at `(0, −1, 0)`. This is the ring-level identity feeding the `negModelHom_zero
 lemma projModelZeroEval_neg_eq_allNeg (W : WeierstrassCurve R) :
     (projModelZeroEval W).comp (negGradedQuot W).toRingHom =
       (projModelZeroEval W).comp (allNegGradedQuot W).toRingHom := by
-  refine RingHom.ext fun x => ?_
+  refine RingHom.ext fun x ↦ ?_
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
   simp only [RingHom.comp_apply]
   show projModelZeroEval W (negGradedQuot W (Ideal.Quotient.mk _ p)) =
     projModelZeroEval W (allNegGradedQuot W (Ideal.Quotient.mk _ p))
   rw [negGradedQuot, allNegGradedQuot, quotientGradingMap_mk, quotientGradingMap_mk,
     projModelZeroEval_mk, projModelZeroEval_mk]
-  show (aeval (fun i : Fin 3 => if i = 1 then (1 : R) else 0)) (aeval (negVec W) p) =
-       (aeval (fun i : Fin 3 => if i = 1 then (1 : R) else 0)) (aeval (allNegVec W) p)
+  show (aeval (fun i : Fin 3 ↦ if i = 1 then (1 : R) else 0)) (aeval (negVec W) p) =
+       (aeval (fun i : Fin 3 ↦ if i = 1 then (1 : R) else 0)) (aeval (allNegVec W) p)
   rw [comp_aeval_apply, comp_aeval_apply]
-  refine congrArg (fun g => aeval g p) (funext fun i => ?_)
+  refine congrArg (fun g ↦ aeval g p) (funext fun i ↦ ?_)
   fin_cases i <;>
     simp [negVec, allNegVec]
 
@@ -300,20 +299,20 @@ lemma projModelZeroEval_neg_eq_allNeg (W : WeierstrassCurve R) :
 lemma allNegVec_smul_of_homogeneous (W : WeierstrassCurve R) {d : ℕ}
     {p : MvPolynomial (Fin 3) R} (hp : p.IsHomogeneous d) :
     aeval (allNegVec W) p = (-1 : MvPolynomial (Fin 3) R) ^ d * p := by
-  have hv : (allNegVec W) = (fun i : Fin 3 => -X i) := by
+  have hv : (allNegVec W) = (fun i : Fin 3 ↦ -X i) := by
     funext i; fin_cases i <;> simp [allNegVec]
   rw [hv]
   conv_lhs => rw [p.as_sum]
   conv_rhs => rw [p.as_sum]
   rw [map_sum, Finset.mul_sum]
-  refine Finset.sum_congr rfl fun v hv => ?_
+  refine Finset.sum_congr rfl fun v hv ↦ ?_
   have hvdeg : v.degree = d := by
     by_contra h
     exact (MvPolynomial.mem_support_iff.mp hv) (hp.coeff_eq_zero h)
-  have hprod : (v.prod fun i e => (-X i : MvPolynomial (Fin 3) R) ^ e)
-      = (-1) ^ d * v.prod (fun i e => (X i) ^ e) := by
+  have hprod : (v.prod fun i e ↦ (-X i : MvPolynomial (Fin 3) R) ^ e)
+      = (-1) ^ d * v.prod (fun i e ↦ (X i) ^ e) := by
     simp only [Finsupp.prod]
-    rw [Finset.prod_congr rfl (fun i _ => neg_pow (X i : MvPolynomial (Fin 3) R) (v i)),
+    rw [Finset.prod_congr rfl (fun i _ ↦ neg_pow (X i : MvPolynomial (Fin 3) R) (v i)),
       Finset.prod_mul_distrib, Finset.prod_pow_eq_pow_sum, ← Finsupp.degree_apply, hvdeg]
   rw [aeval_monomial, algebraMap_eq, monomial_eq, hprod]
   ring
@@ -446,6 +445,7 @@ lemma inZChart_iff_opensRange (W : WeierstrassCurve R) (K : Type u) [Field K] [A
     subst hy
     exact hmem
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(L1 — T-W7.0b-points leaf)** Negation preserves the `Z`-chart: a field point is in the
 `Z`-chart iff its `negModelHom`-image is. Via `inZChart_iff_opensRange` both sides reduce to
 base-point membership in `D₊(X₂)` (`Proj.opensRange_awayι`), then
@@ -594,7 +594,8 @@ lemma negChartMap_mk (W : WeierstrassCurve R) (n : ℕ) (a : projCoordRing W)
 lemma away_mk_num_congr (W : WeierstrassCurve R) {n : ℕ} {a b : projCoordRing W}
     (ha : a ∈ quotientGrading (projIdeal W) (n • 1)) (hab : a = b) :
     Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) n a ha =
-      Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) n b (hab ▸ ha) := by
+      Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) n b
+        (hab ▸ ha) := by
   subst hab; rfl
 
 /-- **(V0)** `negChartMap` fixes the `X₀/X₂` chart coordinate. -/
@@ -606,6 +607,7 @@ lemma negChartMap_coord0 (W : WeierstrassCurve R) :
   refine (away_mk_num_congr W _ ?_).trans rfl
   rw [map_pow, negGradedQuot_mk_X0]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(V1)** `negChartMap` sends the `X₁/X₂` chart coordinate to `(−X₁−a₁X₀−a₃X₂)/X₂`, i.e. the
 dehomogenised `negY` substitution. -/
 lemma negChartMap_coord1 (W : WeierstrassCurve R) :
@@ -622,9 +624,10 @@ lemma negChartMap_coord1 (W : WeierstrassCurve R) :
   simp only [HomogeneousLocalization.val_sub, HomogeneousLocalization.val_mul,
     HomogeneousLocalization.val_neg, Away.val_mk, HomogeneousLocalization.algebraMap_eq,
     HomogeneousLocalization.fromZeroRingHom, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
-    HomogeneousLocalization.val_mk, map_sub, map_mul, pow_one, Localization.mk_mul, mul_one,
+    HomogeneousLocalization.val_mk, pow_one, Localization.mk_mul,
     Localization.neg_mk]
-  rw [Localization.sub_mk, Localization.sub_mk, Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  rw [Localization.sub_mk, Localization.sub_mk, Localization.mk_eq_mk_iff,
+    Localization.r_iff_exists]
   refine ⟨1, ?_⟩
   have hbridge : ∀ r : R, (↑((gradeZeroRingEquiv W) r) : projCoordRing W) =
       quotientGradingHom (projIdeal W) (C r) := by
@@ -667,6 +670,7 @@ private lemma negModelHom_zEquation (W : WeierstrassCurve R) (K : Type u) [Field
     WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
   linear_combination h2
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The composite's `Z`-chart `X₀`-coordinate equals the original's (negation fixes `X₀`).
 `simp only` (not `rw`): the goal mixes `chartSolutionsEquiv`- and `chartHomEquiv`-headed terms, and
 `rw`'s kabstract has no discrimination-tree pre-filter — it would `isDefEq` the `chartHomEquiv`
@@ -681,10 +685,12 @@ private lemma negModelHom_zCoord0 (W : WeierstrassCurve R) (K : Type u) [Field K
       (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩ := by
   simp only [coord_val, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply, negChartMap_coord0]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The composite's `Z`-chart `X₁`-coordinate is `negY` of the original coordinates. `simp only`
 front (see `negModelHom_zCoord0`): it rewrites both the composite's coordinate and the two `negY`
 arguments into `φ_P`-of-chart-coordinate form, so no `chartSolutionsEquiv`-vs-`chartHomEquiv`
-`isDefEq` ever fires; the remaining `chart_hom_aeval`/`negY`/`ring` steps then run over `φ_P`-atoms. -/
+`isDefEq` ever fires; the remaining `chart_hom_aeval`/`negY`/`ring` steps then run over
+`φ_P`-atoms. -/
 private lemma negModelHom_zCoord1 (W : WeierstrassCurve R) (K : Type u) [Field K] [Algebra R K]
     (P : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W P)
     (hZ' : InZChart W (⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ :
@@ -725,7 +731,7 @@ theorem negModelHom_specPoints (W : WeierstrassCurve R) [W.IsElliptic]
     have hZ' : InZChart W (⟨P.1 ≫ negModelHom W, negComp_π W K P⟩ :
         SpecPoints (projModel W) (projModelπ W) K) :=
       (inZChart_comp_negModelHom W K P _).mpr hZ
-    haveI : ((W.baseChange K).toAffine).IsElliptic :=
+    have : ((W.baseChange K).toAffine).IsElliptic :=
       inferInstanceAs ((W.map (algebraMap R K)).IsElliptic)
     have hxy := WeierstrassCurve.Affine.equation_iff_nonsingular.mp (negModelHom_zEquation W K P hZ)
     simp only [projModelPointsEquiv_some W K P hZ _ _ hxy rfl rfl,
@@ -887,6 +893,7 @@ noncomputable def oneOver : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ modelOver
       (𝟙_ (Over (Spec (CommRingCat.of R)))).hom
     rw [Category.assoc, projModelZero_projModelπ, Category.comp_id]
 
+omit [W.IsElliptic] in
 /-- **(T-W7.0g-one-left)** The underlying morphism of the unit is the zero section
 (precomposed with the structure map of the monoidal unit). -/
 theorem oneOver_left :
@@ -898,6 +905,7 @@ compatibility is `negModelHom ≫ π = π` (`negModelHom_π`). -/
 noncomputable def invOver : modelOver W ⟶ modelOver W :=
   Over.homMk (negModelHom W) (negModelHom_π W)
 
+omit [W.IsElliptic] in
 /-- **(T-W7.0g-inv-left)** The underlying morphism of the inverse is `negModelHom`. -/
 theorem invOver_left : (invOver W).left = negModelHom W :=
   rfl

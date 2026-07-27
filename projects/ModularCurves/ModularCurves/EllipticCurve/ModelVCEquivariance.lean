@@ -280,14 +280,243 @@ private theorem projModelπ_eqToHom_w {X Y : WeierstrassCurve R} (h : X = Y) :
       eqToHom (congrArg projModel h) ≫ projModelπ Y := by
   cases h; simp
 
+/-- Abstract solve-for-composite step used in `mulModelHom_vc`. Stated over opaque
+`Scheme` objects so the concrete `projModel` expressions never have to be unfolded during
+unification: from `a ≫ b = eqToHom p ≫ c ≫ d` recover `c ≫ d = eqToHom q ≫ a ≫ b`
+whenever `q` is the reverse object equality of `p`. -/
+private theorem eqToHom_solve_composite {U U' S T V : Scheme.{u}}
+    (p : U = U') (q : U' = U) {a : U ⟶ V} {b : V ⟶ S}
+    {c : U' ⟶ T} {d : T ⟶ S} (hγ : a ≫ b = eqToHom p ≫ c ≫ d) :
+    c ≫ d = eqToHom q ≫ a ≫ b := by
+  subst p
+  rw [eqToHom_refl, Category.id_comp] at hγ ⊢
+  exact hγ.symm
+
+/-- Congruence for `pullback.map` in its three morphism arguments, stated over opaque
+`Scheme` objects so the concrete `projModel`/`Spec` data are never unfolded (the proof
+arguments are `Prop`, hence irrelevant). -/
+private theorem pullback_map_congr₃ {X Y Z X' Y' Z' : Scheme.{u}}
+    {f : X ⟶ Z} {g : Y ⟶ Z} {f' : X' ⟶ Z'} {g' : Y' ⟶ Z'}
+    [HasPullback f g] [HasPullback f' g']
+    {i₁ i₁' : X ⟶ X'} {i₂ i₂' : Y ⟶ Y'} {i₃ i₃' : Z ⟶ Z'}
+    (h₁ : i₁ = i₁') (h₂ : i₂ = i₂') (h₃ : i₃ = i₃')
+    (e₁ e₂ e₃ e₄) :
+    pullback.map f g f' g' i₁ i₂ i₃ e₁ e₂ = pullback.map f g f' g' i₁' i₂' i₃' e₃ e₄ := by
+  subst h₁ h₂ h₃; rfl
+
+
+open scoped Pointwise in
+/-- The base-change leg of `mulModelHom_vc`'s `IsPullback.hom_ext`. Extracted to its own
+`private theorem` so that its long `calc` runs in an independent heartbeat budget (the
+per-step `Proj`/`eqToHom`/`pullback` reductions got costlier after the mathlib bump). -/
+private theorem mulModelHom_vc_bcLeg (φ : vcUnivRing →+* R)
+    [(vcUnivW₀.map φ).IsElliptic] [(vcUnivC.map φ • vcUnivW₀.map φ).IsElliptic] :
+    letI : Algebra vcUnivRing R := φ.toAlgebra
+    (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+        projModelBaseChange φ vcUnivW₀ =
+      (pullback.map (projModelπ (vcUnivC.map φ • vcUnivW₀.map φ))
+            (projModelπ (vcUnivC.map φ • vcUnivW₀.map φ))
+            (projModelπ (vcUnivW₀.map φ)) (projModelπ (vcUnivW₀.map φ))
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 (Spec (CommRingCat.of R)))
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm) ≫
+          mulModelHom (vcUnivW₀.map φ)) ≫
+        projModelBaseChange φ vcUnivW₀ := by
+  letI : Algebra vcUnivRing R := φ.toAlgebra
+  have e : (vcUnivC.map φ) • (vcUnivW₀.map φ) = (vcUnivC • vcUnivW₀).map φ :=
+    map_variableChange ..
+  haveI : ((vcUnivC • vcUnivW₀).map φ).IsElliptic := by rw [← e]; infer_instance
+  -- γ, φ-spelled and solved for the (VCIsoₘ ≫ pBC) composite
+  have hγ := projModelVCIso_map (R' := R) vcUnivC vcUnivW₀
+  have hγ'' : (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+      projModelBaseChange φ vcUnivW₀ =
+      eqToHom (congrArg projModel e) ≫
+        projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+          (projModelVCIso vcUnivC vcUnivW₀).hom :=
+    eqToHom_solve_composite _ (congrArg projModel e) hγ
+  have hβ := mulModelHom_map φ (vcUnivC • vcUnivW₀)
+  have hN := mulModelHom_vc_of_noetherian vcUnivC vcUnivW₀
+  have hα := mulModelHom_map φ vcUnivW₀
+  calc (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+        projModelBaseChange φ vcUnivW₀
+      = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+            projModelBaseChange φ vcUnivW₀) := Category.assoc _ _ _
+    _ = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          (eqToHom (congrArg projModel e) ≫
+            projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+              (projModelVCIso vcUnivC vcUnivW₀).hom) := by rw [hγ'']
+    _ = (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫ eqToHom (congrArg projModel e)) ≫
+          projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+            (projModelVCIso vcUnivC vcUnivW₀).hom := (Category.assoc _ _ _).symm
+    _ = (pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
+          mulModelHom ((vcUnivC • vcUnivW₀).map φ)) ≫
+          projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+            (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [mulModelHom_congr e]
+    _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
+          (mulModelHom ((vcUnivC • vcUnivW₀).map φ) ≫
+            projModelBaseChange φ (vcUnivC • vcUnivW₀)) ≫
+            (projModelVCIso vcUnivC vcUnivW₀).hom := by
+        simp only [Category.assoc]
+    _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
+          (pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+              (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+              (Spec.map (CommRingCat.ofHom φ))
+              (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
+              (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
+            mulModelHom (vcUnivC • vcUnivW₀)) ≫
+            (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [hβ]
+    _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
+          pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+              (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+              (Spec.map (CommRingCat.ofHom φ))
+              (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
+              (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
+            (mulModelHom (vcUnivC • vcUnivW₀) ≫
+              (projModelVCIso vcUnivC vcUnivW₀).hom) := by
+        simp only [Category.assoc]
+    _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
+          pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+              (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+              (Spec.map (CommRingCat.ofHom φ))
+              (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
+              (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
+            (pullback.map _ _ _ _ (projModelVCIso vcUnivC vcUnivW₀).hom
+                (projModelVCIso vcUnivC vcUnivW₀).hom (𝟙 _)
+                (by rw [Category.comp_id]; exact (projModelVCIso_π vcUnivC vcUnivW₀).symm)
+                (by rw [Category.comp_id]; exact (projModelVCIso_π vcUnivC vcUnivW₀).symm) ≫
+              mulModelHom vcUnivW₀) := by rw [hN]
+    _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+          pullback.map _ _ _ _ (projModelBaseChange φ vcUnivW₀)
+            (projModelBaseChange φ vcUnivW₀) (Spec.map (CommRingCat.ofHom φ))
+            (projModelBaseChange_π φ vcUnivW₀).symm
+            (projModelBaseChange_π φ vcUnivW₀).symm) ≫
+          mulModelHom vcUnivW₀ := by
+        simp only [← Category.assoc]
+        rw [pullback.map_comp, pullback.map_comp, pullback.map_comp]
+        have hleg : (eqToHom (congrArg projModel e) ≫ projModelBaseChange φ (vcUnivC • vcUnivW₀)) ≫
+              (projModelVCIso vcUnivC vcUnivW₀).hom =
+            (projModelVCIso (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).hom ≫ projModelBaseChange φ vcUnivW₀ := by
+          rw [Category.assoc, ← hγ'']
+        have hbase : (𝟙 (Spec (CommRingCat.of R)) ≫ Spec.map (CommRingCat.ofHom φ)) ≫
+              𝟙 (Spec (CommRingCat.of vcUnivRing)) =
+            𝟙 (Spec (CommRingCat.of R)) ≫ Spec.map (CommRingCat.ofHom φ) := by
+          rw [Category.comp_id]
+        exact congrArg (· ≫ mulModelHom vcUnivW₀) (pullback_map_congr₃ hleg hleg hbase _ _ _ _)
+    _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+          (mulModelHom (vcUnivW₀.map φ) ≫ projModelBaseChange φ vcUnivW₀) := by
+        rw [hα]
+        simp only [Category.assoc]
+    _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+          mulModelHom (vcUnivW₀.map φ)) ≫ projModelBaseChange φ vcUnivW₀ := by
+        simp only [Category.assoc]
+
+open scoped Pointwise in
+/-- The π leg of `mulModelHom_vc`'s `IsPullback.hom_ext`. Extracted to its own
+`private theorem` so that its long `calc` runs in an independent heartbeat budget. -/
+private theorem mulModelHom_vc_πLeg (φ : vcUnivRing →+* R)
+    [(vcUnivW₀.map φ).IsElliptic] [(vcUnivC.map φ • vcUnivW₀.map φ).IsElliptic] :
+    (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+        projModelπ (vcUnivW₀.map φ) =
+      (pullback.map (projModelπ (vcUnivC.map φ • vcUnivW₀.map φ))
+            (projModelπ (vcUnivC.map φ • vcUnivW₀.map φ))
+            (projModelπ (vcUnivW₀.map φ)) (projModelπ (vcUnivW₀.map φ))
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 (Spec (CommRingCat.of R)))
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm) ≫
+          mulModelHom (vcUnivW₀.map φ)) ≫
+        projModelπ (vcUnivW₀.map φ) := by
+  calc (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+        projModelπ (vcUnivW₀.map φ)
+      = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+            projModelπ (vcUnivW₀.map φ)) := Category.assoc _ _ _
+    _ = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+          projModelπ (vcUnivC.map φ • vcUnivW₀.map φ) := by
+        rw [projModelVCIso_π]
+    _ = pullback.fst _ _ ≫ projModelπ (vcUnivC.map φ • vcUnivW₀.map φ) :=
+        mulModelHom_π _
+    _ = pullback.fst _ _ ≫ ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+          projModelπ (vcUnivW₀.map φ)) := by rw [projModelVCIso_π]
+    _ = (pullback.fst _ _ ≫ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+          projModelπ (vcUnivW₀.map φ) := (Category.assoc _ _ _).symm
+    _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+          pullback.fst _ _) ≫ projModelπ (vcUnivW₀.map φ) := by
+        rw [Limits.pullback.lift_fst]
+    _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+          (pullback.fst _ _ ≫ projModelπ (vcUnivW₀.map φ)) := Category.assoc _ _ _
+    _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+          (mulModelHom (vcUnivW₀.map φ) ≫ projModelπ (vcUnivW₀.map φ)) := by
+        rw [mulModelHom_π]
+    _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]
+                exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+          mulModelHom (vcUnivW₀.map φ)) ≫ projModelπ (vcUnivW₀.map φ) :=
+        (Category.assoc _ _ _).symm
+
+open scoped Pointwise in
 /-- **(T-W7.0h)** Global variable-change equivariance of the multiplication morphism:
 the model isomorphism of a variable change intertwines the two glued multiplications —
 including the diagonal, anti-diagonal and infinity loci (reviewer round 1 caveat: the affine
 cocycle alone is not enough). PROVEN (Y1-CLOSER K1, superseding the designed field-points
 route): the noetherian case is GIT Cor 6.4 at the T-G4 group objects
 (`mulModelHom_vc_of_noetherian`), transported to every base along the classifying map from
-the noetherian universal VC-base (`hom_ext` on the base-change pullback square; statement
-relocated verbatim from `GroupLawConstruction.lean` per the v10.117 doctrine). -/
+the noetherian universal VC-base (`hom_ext` on the base-change pullback square; the two legs
+are `mulModelHom_vc_bcLeg` / `mulModelHom_vc_πLeg`, each in its own heartbeat budget). -/
 theorem mulModelHom_vc (C : VariableChange R) (W : WeierstrassCurve R)
     [W.IsElliptic] [(C • W).IsElliptic] :
     mulModelHom (C • W) ≫ (projModelVCIso C W).hom =
@@ -303,165 +532,12 @@ theorem mulModelHom_vc (C : VariableChange R) (W : WeierstrassCurve R)
   subst hW
   subst hC
   letI : Algebra vcUnivRing R := φ.toAlgebra
-  have e : (vcUnivC.map φ) • (vcUnivW₀.map φ) = (vcUnivC • vcUnivW₀).map φ :=
-    map_variableChange ..
-  haveI : ((vcUnivC • vcUnivW₀).map φ).IsElliptic := by rw [← e]; infer_instance
   have hpb := vcUniv_basechange_isPullback φ
   refine hpb.hom_ext ?_ ?_
-  · -- the base-change leg
-    have hOf : projModelBaseChangeOf φ vcUnivW₀ (vcUnivW₀.map φ) rfl =
+  · have hOf : projModelBaseChangeOf φ vcUnivW₀ (vcUnivW₀.map φ) rfl =
         projModelBaseChange φ vcUnivW₀ := by
       rw [projModelBaseChangeOf]
       simp
     rw [hOf]
-    -- γ, φ-spelled and solved for the (VCIsoₘ ≫ pBC) composite
-    have hγ := projModelVCIso_map (R' := R) vcUnivC vcUnivW₀
-    have hγ'' : (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
-        projModelBaseChange φ vcUnivW₀ =
-        eqToHom (congrArg projModel e) ≫
-          projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
-            (projModelVCIso vcUnivC vcUnivW₀).hom := by
-      have h2 := congrArg (fun m => eqToHom (congrArg projModel e) ≫ m) hγ
-      simp only [← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp] at h2
-      rw [Category.assoc] at h2
-      exact h2.symm
-    have hβ := mulModelHom_map φ (vcUnivC • vcUnivW₀)
-    have hN := mulModelHom_vc_of_noetherian vcUnivC vcUnivW₀
-    have hα := mulModelHom_map φ vcUnivW₀
-    calc (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
-            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
-          projModelBaseChange φ vcUnivW₀
-        = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
-            ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
-              projModelBaseChange φ vcUnivW₀) := Category.assoc _ _ _
-      _ = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
-            (eqToHom (congrArg projModel e) ≫
-              projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
-                (projModelVCIso vcUnivC vcUnivW₀).hom) := by rw [hγ'']
-      _ = (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫ eqToHom (congrArg projModel e)) ≫
-            projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
-              (projModelVCIso vcUnivC vcUnivW₀).hom := (Category.assoc _ _ _).symm
-      _ = (pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
-            mulModelHom ((vcUnivC • vcUnivW₀).map φ)) ≫
-            projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
-              (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [mulModelHom_congr e]
-      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
-            (mulModelHom ((vcUnivC • vcUnivW₀).map φ) ≫
-              projModelBaseChange φ (vcUnivC • vcUnivW₀)) ≫
-              (projModelVCIso vcUnivC vcUnivW₀).hom := by
-          simp only [Category.assoc]
-      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
-            (pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
-                (projModelBaseChange φ (vcUnivC • vcUnivW₀))
-                (Spec.map (CommRingCat.ofHom φ))
-                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
-                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
-              mulModelHom (vcUnivC • vcUnivW₀)) ≫
-              (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [hβ]
-      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
-            pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
-                (projModelBaseChange φ (vcUnivC • vcUnivW₀))
-                (Spec.map (CommRingCat.ofHom φ))
-                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
-                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
-              (mulModelHom (vcUnivC • vcUnivW₀) ≫
-                (projModelVCIso vcUnivC vcUnivW₀).hom) := by
-          simp only [Category.assoc]
-      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
-            pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
-                (projModelBaseChange φ (vcUnivC • vcUnivW₀))
-                (Spec.map (CommRingCat.ofHom φ))
-                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
-                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
-              (pullback.map _ _ _ _ (projModelVCIso vcUnivC vcUnivW₀).hom
-                  (projModelVCIso vcUnivC vcUnivW₀).hom (𝟙 _)
-                  (by rw [Category.comp_id]; exact (projModelVCIso_π vcUnivC vcUnivW₀).symm)
-                  (by rw [Category.comp_id]; exact (projModelVCIso_π vcUnivC vcUnivW₀).symm) ≫
-                mulModelHom vcUnivW₀) := by rw [hN]
-      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
-              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
-            pullback.map _ _ _ _ (projModelBaseChange φ vcUnivW₀)
-              (projModelBaseChange φ vcUnivW₀) (Spec.map (CommRingCat.ofHom φ))
-              (projModelBaseChange_π φ vcUnivW₀).symm
-              (projModelBaseChange_π φ vcUnivW₀).symm) ≫
-            mulModelHom vcUnivW₀ := by
-          simp only [← Category.assoc]
-          congr 1
-          refine Limits.pullback.hom_ext ?_ ?_ <;>
-            simp only [Category.assoc, Limits.pullback.lift_fst, Limits.pullback.lift_snd,
-              Limits.pullback.lift_fst_assoc, Limits.pullback.lift_snd_assoc,
-              Category.comp_id, Category.id_comp] <;>
-            rw [← hγ'']
-      _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
-              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
-            (mulModelHom (vcUnivW₀.map φ) ≫ projModelBaseChange φ vcUnivW₀) := by
-          rw [hα]
-          simp only [Category.assoc]
-      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
-              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
-            mulModelHom (vcUnivW₀.map φ)) ≫ projModelBaseChange φ vcUnivW₀ := by
-          simp only [Category.assoc]
-  · -- the π leg
-    calc (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
-            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
-          projModelπ (vcUnivW₀.map φ)
-        = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
-            ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
-              projModelπ (vcUnivW₀.map φ)) := Category.assoc _ _ _
-      _ = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
-            projModelπ (vcUnivC.map φ • vcUnivW₀.map φ) := by
-          rw [projModelVCIso_π]
-      _ = pullback.fst _ _ ≫ projModelπ (vcUnivC.map φ • vcUnivW₀.map φ) :=
-          mulModelHom_π _
-      _ = pullback.fst _ _ ≫ ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
-            projModelπ (vcUnivW₀.map φ)) := by rw [projModelVCIso_π]
-      _ = (pullback.fst _ _ ≫ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
-            projModelπ (vcUnivW₀.map φ) := (Category.assoc _ _ _).symm
-      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
-              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
-            pullback.fst _ _) ≫ projModelπ (vcUnivW₀.map φ) := by
-          rw [Limits.pullback.lift_fst]
-      _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
-              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
-            (pullback.fst _ _ ≫ projModelπ (vcUnivW₀.map φ)) := Category.assoc _ _ _
-      _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
-              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
-            (mulModelHom (vcUnivW₀.map φ) ≫ projModelπ (vcUnivW₀.map φ)) := by
-          rw [mulModelHom_π]
-      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
-              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-              (by rw [Category.comp_id]
-                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
-            mulModelHom (vcUnivW₀.map φ)) ≫ projModelπ (vcUnivW₀.map φ) :=
-          (Category.assoc _ _ _).symm
+    exact mulModelHom_vc_bcLeg φ
+  · exact mulModelHom_vc_πLeg φ

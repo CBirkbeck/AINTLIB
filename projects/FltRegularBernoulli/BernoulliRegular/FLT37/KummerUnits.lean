@@ -40,7 +40,7 @@ theorem exists_zeta_pow_mul_real_eq_unit (hp_two : 2 < p) (u : (𝓞 K)ˣ) :
     ∃ (m : ℕ) (v : (𝓞 (K⁺))ˣ),
       u = ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit ^ m *
         Units.map (algebraMap (𝓞 (K⁺)) (𝓞 K)).toMonoidHom v := by
-  haveI : IsCMField K := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_two⟩
+  have : IsCMField K := IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_two⟩
   obtain ⟨m, hm⟩ := unit_inv_conj_is_root_of_unity (zeta_spec p ℚ K) u hp_two
   set ζU : (𝓞 K)ˣ := ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit
   set v : (𝓞 K)ˣ := u * (ζU ^ m)⁻¹ with hv_def

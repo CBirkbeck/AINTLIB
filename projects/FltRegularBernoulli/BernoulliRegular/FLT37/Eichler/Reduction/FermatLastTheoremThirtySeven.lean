@@ -8,9 +8,7 @@ This file assembles `FermatLastTheoremFor 37` on the genuine **Theorem-9.4** rou
 half of the Case-II descent (the second-order Corollary-8.23 collapse), as the sound replacement for
 the degenerate **Theorem-9.5** (Mirimanoff / mod-`𝔩`) route.
 
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
-
-## What this changes vs the prior endpoint
+## Why the Theorem-9.4 route
 
 `fermatLastTheoremFor_thirtyseven_of_genuineResiduals` (`FLT37GenuineResiduals.lean`) closes FLT37
 from four residuals, the fourth being `Lemma98LocalPower37` — Washington Lemma 9.8's mod-`𝔩` Kummer
@@ -27,8 +25,8 @@ This endpoint replaces that single residual by the **two Theorem-9.4 residuals**
   mod `37²` is a `37`-th power, under `M ≤ 1`, whose single undischarged ingredient is Proposition
   8.12's single-unit `p`-adic-log valuation).
 
-The Corollary-8.23 non-degeneracy `M ≤ 1` is **proven** (`caseII_cor823_valuation_input_proven`, from
-the unconditional sharp valuation `v₃₇(B_{1,ω³¹}) = 1`).  Everything else — Case I (Eichler),
+The Corollary-8.23 non-degeneracy `M ≤ 1` is **proven** (`caseII_cor823_valuation_input_proven`,
+from the unconditional sharp valuation `v₃₇(B_{1,ω³¹}) = 1`).  Everything else — Case I (Eichler),
 `¬ 37 ∣ h⁺` (Sinnott), the Case-II II1 (Lemma 9.2), R3 (Lemma 9.9 regular indices), and the
 `37²`-power kernel — is proven.
 
@@ -40,8 +38,6 @@ the unconditional sharp valuation `v₃₇(B_{1,ω³¹}) = 1`).  Everything else
 @[expose] public section
 
 noncomputable section
-
-open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -97,10 +93,10 @@ datum `Cor823CorrectedUnitPthPowerRationalModP37` — the corrected descent unit
 the **proven** `37²`-power kernel (`caseII_pow37_sub_intCast_pow37_mem_37sq`), not hypothesised.
 
 So the genuine remaining Case-II irregular-index content is reduced to the *first-order* producer
-structure (`Cor823CorrectedUnitPthPowerRationalModP37`) plus Washington Theorem 8.22 / Corollary 8.23
-(`Cor823PthPowerOfRationalModSq37`, whose single undischarged ingredient is Proposition 8.12's
-single-unit `p`-adic-log valuation), with the second-order non-degeneracy `M ≤ 1` and the `37²`-power
-upgrade both **proven**.  No mod-`𝔩` / Theorem-9.5 / Mirimanoff input. -/
+structure (`Cor823CorrectedUnitPthPowerRationalModP37`) plus Washington Theorem 8.22 / Corollary
+8.23 (`Cor823PthPowerOfRationalModSq37`, whose single undischarged ingredient is Proposition 8.12's
+single-unit `p`-adic-log valuation), with the second-order non-degeneracy `M ≤ 1` and the
+`37²`-power upgrade both **proven**.  No mod-`𝔩` / Theorem-9.5 / Mirimanoff input. -/
 theorem fermatLastTheoremFor_thirtyseven_of_cor823_firstOrder
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]

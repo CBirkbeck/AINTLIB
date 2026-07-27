@@ -49,6 +49,58 @@ lemma deriv_deviation_bound_of_C2 {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ}
     t₀ (hball_sub (Metric.mem_ball_self hδ_pos))
   rwa [dist_eq_norm, hγ_deriv, Real.dist_eq] at h
 
+/-- A deviation-bound constant is nonnegative: if `‖g t‖ ≤ M * |t - t₀|` holds throughout a
+neighbourhood of `t₀` of radius `δ > 0`, then `0 ≤ M`. -/
+private lemma nonneg_of_norm_le_mul_abs_sub {E : Type*} [NormedAddCommGroup E]
+    {g : ℝ → E} {t₀ M δ : ℝ} (hδ : 0 < δ)
+    (h : ∀ t, |t - t₀| < δ → ‖g t‖ ≤ M * |t - t₀|) : 0 ≤ M := by
+  have h_t : |(t₀ + δ / 2) - t₀| < δ := by
+    simp [abs_of_pos (half_pos hδ), half_lt_self hδ]
+  have h_t_pos : 0 < |(t₀ + δ / 2) - t₀| := by
+    simp [abs_of_pos (half_pos hδ), half_pos hδ]
+  nlinarith [h (t₀ + δ / 2) h_t, norm_nonneg (g (t₀ + δ / 2))]
+
+/-- First-order Taylor remainder bound via the mean value inequality: if `γ` is differentiable
+on the segment `[t₀, t]` and its derivative stays within `B` of `L` there, then the affine
+approximation error `‖γ t - γ t₀ - (t - t₀) • L‖` is at most `B * |t - t₀|`. -/
+private lemma norm_taylor_remainder_le_of_deriv_le {E : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] {γ : ℝ → E} {t₀ t : ℝ} {L : E} {B : ℝ}
+    (h_diff : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ γ s)
+    (h_deriv_bound : ∀ s ∈ Set.uIcc t₀ t, ‖deriv γ s - L‖ ≤ B) :
+    ‖γ t - γ t₀ - (t - t₀) • L‖ ≤ B * |t - t₀| := by
+  let f₂ : ℝ → E := fun _ ↦ γ t₀
+  let f₃ : ℝ → E := fun s ↦ (s - t₀) • L
+  let h := fun s ↦ γ s - f₂ s - f₃ s
+  have h_f₂_diff : ∀ s, DifferentiableAt ℝ f₂ s := fun _ ↦ differentiableAt_const _
+  have h_f₃_diff : ∀ s, DifferentiableAt ℝ f₃ s :=
+    fun _ ↦ (differentiableAt_id.sub (differentiableAt_const _)).smul_const _
+  have h_diff_h : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ h s :=
+    fun s hs ↦ ((h_diff s hs).sub (h_f₂_diff s)).sub (h_f₃_diff s)
+  have h_deriv_f₂ : ∀ s, deriv f₂ s = 0 := fun s ↦ deriv_const s (γ t₀)
+  have h_deriv_f₃ : ∀ s, deriv f₃ s = L := fun s ↦ by
+    have h₀ : HasDerivAt f₃ ((1 : ℝ) • L) s :=
+      ((hasDerivAt_id s).sub_const t₀).smul_const L
+    simpa using h₀.deriv
+  have h_deriv_h : ∀ s ∈ Set.uIcc t₀ t, deriv h s = deriv γ s - L := by
+    intro s hs
+    have hs_diff : DifferentiableAt ℝ γ s := h_diff s hs
+    have step2 : deriv (fun s ↦ (γ s - f₂ s) - f₃ s) s =
+        deriv (fun s ↦ γ s - f₂ s) s - deriv f₃ s :=
+      deriv_sub (hs_diff.sub (h_f₂_diff s)) (h_f₃_diff s)
+    have step3 : deriv (fun s ↦ γ s - f₂ s) s = deriv γ s - deriv f₂ s :=
+      deriv_sub hs_diff (h_f₂_diff s)
+    simp only [show h = fun s ↦ (γ s - f₂ s) - f₃ s from rfl, step2, step3,
+      h_deriv_f₂, h_deriv_f₃, sub_zero]
+  have h_at_t₀ : h t₀ = 0 := by simp [h, f₂, f₃]
+  have h_bound_deriv : ∀ s ∈ Set.uIcc t₀ t, ‖deriv h s‖ ≤ B := fun s hs ↦ by
+    rw [h_deriv_h s hs]; exact h_deriv_bound s hs
+  have h_bound := Convex.norm_image_sub_le_of_norm_deriv_le h_diff_h h_bound_deriv
+    (convex_uIcc t₀ t) Set.left_mem_uIcc Set.right_mem_uIcc
+  rw [h_at_t₀, sub_zero, Real.norm_eq_abs] at h_bound
+  calc ‖γ t - γ t₀ - (t - t₀) • L‖
+      = ‖h t‖ := rfl
+    _ ≤ B * |t - t₀| := h_bound
+
 /-- Quadratic Taylor approximation from C² smoothness. -/
 lemma quadratic_approx_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ}
     (hγ_C2 : ContDiffAt ℝ 2 γ t₀) (hγ_deriv : deriv γ t₀ = L) :
@@ -62,20 +114,10 @@ lemma quadratic_approx_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ} {L : �
   let δ := min δ₁ δ₂
   have hδ_pos : 0 < δ := lt_min hδ₁_pos hδ₂_pos
   let K := M + 1
-  have hM_nonneg : 0 ≤ M := by
-    have h_t : |(t₀ + δ₁ / 2) - t₀| < δ₁ := by
-      simp [abs_of_pos (half_pos hδ₁_pos), half_lt_self hδ₁_pos]
-    have h_t_pos : 0 < |(t₀ + δ₁ / 2) - t₀| := by
-      simp [abs_of_pos (half_pos hδ₁_pos), half_pos hδ₁_pos]
-    nlinarith [h_deriv_dev (t₀ + δ₁ / 2) h_t, norm_nonneg (deriv γ (t₀ + δ₁ / 2) - L)]
+  have hM_nonneg : 0 ≤ M := nonneg_of_norm_le_mul_abs_sub hδ₁_pos h_deriv_dev
   have hK_pos : 0 < K := by linarith
   use K, δ, hδ_pos, hK_pos
   intro t ht
-  by_cases ht_eq : t = t₀
-  · simp [ht_eq]
-  let f₂ : ℝ → ℂ := fun _ ↦ γ t₀
-  let f₃ : ℝ → ℂ := fun s ↦ (s - t₀) • L
-  let h := fun s ↦ γ s - f₂ s - f₃ s
   have ht_lt_δ₁ : |t - t₀| < δ₁ := lt_of_lt_of_le ht (min_le_left _ _)
   have ht_lt_δ₂ : |t - t₀| < δ₂ := lt_of_lt_of_le ht (min_le_right _ _)
   have h_uIcc_sub_ball : Set.uIcc t₀ t ⊆ Metric.ball t₀ δ₂ := by
@@ -84,40 +126,15 @@ lemma quadratic_approx_of_contDiffAt_two {γ : ℝ → ℂ} {t₀ : ℝ} {L : �
     exact lt_of_le_of_lt (Set.abs_sub_left_of_mem_uIcc hs) ht_lt_δ₂
   have h_γ_diff_on : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ γ s :=
     fun s hs ↦ h_diff_ball (h_uIcc_sub_ball hs)
-  have h_f₂_diff : ∀ s, DifferentiableAt ℝ f₂ s := fun _ ↦ differentiableAt_const _
-  have h_f₃_diff : ∀ s, DifferentiableAt ℝ f₃ s :=
-    fun _ ↦ (differentiableAt_id.sub (differentiableAt_const _)).smul_const _
-  have h_diff : ∀ s ∈ Set.uIcc t₀ t, DifferentiableAt ℝ h s :=
-    fun s hs ↦ ((h_γ_diff_on s hs).sub (h_f₂_diff s)).sub (h_f₃_diff s)
-  have h_deriv_f₂ : ∀ s, deriv f₂ s = 0 := fun s ↦ deriv_const s (γ t₀)
-  have h_deriv_f₃ : ∀ s, deriv f₃ s = L := fun s ↦ by
-    have h₀ : HasDerivAt f₃ ((1 : ℝ) • L) s :=
-      ((hasDerivAt_id s).sub_const t₀).smul_const L
-    simpa using h₀.deriv
-  have h_deriv : ∀ s ∈ Set.uIcc t₀ t, deriv h s = deriv γ s - L := by
+  have h_deriv_bound : ∀ s ∈ Set.uIcc t₀ t, ‖deriv γ s - L‖ ≤ M * |t - t₀| := by
     intro s hs
-    have hs_diff : DifferentiableAt ℝ γ s := h_γ_diff_on s hs
-    have step2 : deriv (fun s ↦ (γ s - f₂ s) - f₃ s) s =
-        deriv (fun s ↦ γ s - f₂ s) s - deriv f₃ s :=
-      deriv_sub (hs_diff.sub (h_f₂_diff s)) (h_f₃_diff s)
-    have step3 : deriv (fun s ↦ γ s - f₂ s) s = deriv γ s - deriv f₂ s :=
-      deriv_sub hs_diff (h_f₂_diff s)
-    simp only [show h = fun s ↦ (γ s - f₂ s) - f₃ s from rfl, step2, step3,
-      h_deriv_f₂, h_deriv_f₃, sub_zero]
-  have h_at_t₀ : h t₀ = 0 := by simp [h, f₂, f₃]
-  have h_deriv_bound : ∀ s ∈ Set.uIcc t₀ t, ‖deriv h s‖ ≤ M * |t - t₀| := by
-    intro s hs
-    rw [h_deriv s hs]
     have hs_bound : |s - t₀| ≤ |t - t₀| := Set.abs_sub_left_of_mem_uIcc hs
     calc ‖deriv γ s - L‖
         ≤ M * |s - t₀| := h_deriv_dev s (lt_of_le_of_lt hs_bound ht_lt_δ₁)
       _ ≤ M * |t - t₀| := mul_le_mul_of_nonneg_left hs_bound hM_nonneg
-  have h_bound := Convex.norm_image_sub_le_of_norm_deriv_le h_diff h_deriv_bound
-    (convex_uIcc t₀ t) Set.left_mem_uIcc Set.right_mem_uIcc
-  rw [h_at_t₀, sub_zero, Real.norm_eq_abs] at h_bound
   calc ‖γ t - γ t₀ - (t - t₀) • L‖
-      = ‖h t‖ := rfl
-    _ ≤ M * |t - t₀| * |t - t₀| := h_bound
+      ≤ M * |t - t₀| * |t - t₀| :=
+        norm_taylor_remainder_le_of_deriv_le h_γ_diff_on h_deriv_bound
     _ ≤ K * |t - t₀| ^ 2 := by nlinarith [sq_nonneg |t - t₀|]
 
 /-- Numerator quadratic bound for `(t-t₀)γ'(t) - (γt - γt₀)`. -/

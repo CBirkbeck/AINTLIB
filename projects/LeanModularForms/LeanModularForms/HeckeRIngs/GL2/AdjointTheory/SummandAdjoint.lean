@@ -86,12 +86,15 @@ theorem glMap_mapGL_Q_eq_mapGL_R (γ : SL(2, ℤ)) :
       Matrix (Fin 2) (Fin 2) ℝ) i j =
     (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) γ) : Matrix (Fin 2) (Fin 2) ℝ) i j
   simp [glMap, Matrix.GeneralLinearGroup.map, mapGL_coe_matrix,
-    Matrix.SpecialLinearGroup.map, algebraMap_int_eq, Matrix.map_apply]
+    Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+    algebraMap_int_eq, Int.coe_castRingHom, Matrix.map_apply]
 
 def shiftSL_loc (m : ℤ) : SL(2, ℤ) :=
   ⟨!![1, m; 0, 1], by simp [Matrix.det_fin_two]⟩
 
-private lemma shiftSL_loc_mem_Gamma1 (m : ℤ) : shiftSL_loc m ∈ Gamma1 N := by
+omit [NeZero N] in
+/-- `[1, m; 0, 1] ∈ Γ₁(N)`. -/
+lemma shiftSL_loc_mem_Gamma1 (m : ℤ) : shiftSL_loc m ∈ Gamma1 N := by
   rw [Gamma1_mem]
   refine ⟨?_, ?_, ?_⟩ <;> simp [shiftSL_loc]
 
@@ -121,9 +124,12 @@ lemma peterssonAdj_T_p_upper_eq_shift_mul_lower
   have h_rhs : ((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (shiftSL_loc (-(b : ℤ))) *
       glMap (T_p_lower p hp) : GL (Fin 2) ℝ).val =
       (!![(p : ℝ), -(b : ℝ); 0, 1] : Matrix (Fin 2) (Fin 2) ℝ) := by
+    have hsh : (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (shiftSL_loc (-(b : ℤ)))) :
+        Matrix (Fin 2) (Fin 2) ℝ) = (!![1, -(b : ℤ); 0, 1]).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
     ext i' j'
     fin_cases i' <;> fin_cases j' <;>
-      simp [shiftSL_loc, glMap, T_p_lower, mapGL, Matrix.SpecialLinearGroup.map,
+      simp [hsh, Matrix.map_apply, glMap, T_p_lower,
         Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, Units.val_mul]
   show (peterssonAdj (glMap (T_p_upper p hp b)) : Matrix _ _ ℝ) i j =
     ((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (shiftSL_loc (-(b : ℤ))) *
@@ -157,10 +163,25 @@ private lemma T_p_lower_triple_product_matrix (p N : ℕ) [NeZero N] (hp : 0 < p
         ((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ))) :
       GL (Fin 2) ℝ).val =
       (!![(p : ℝ), 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℝ) := by
+    have h1 : (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (adjointGamma1Rep p N hpN)) :
+        Matrix (Fin 2) (Fin 2) ℝ) =
+        (↑(adjointGamma1Rep p N hpN) : Matrix (Fin 2) (Fin 2) ℤ).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+    have h2 : (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ)
+        ((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ))) :
+        Matrix (Fin 2) (Fin 2) ℝ) =
+        (↑((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ)) :
+          Matrix (Fin 2) (Fin 2) ℤ).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+    have hval1 : (↑(adjointGamma1Rep p N hpN) : Matrix (Fin 2) (Fin 2) ℤ) =
+        !![(p : ℤ) * Int.gcdA p N, Int.gcdB p N; -(N : ℤ), 1] := rfl
+    have hval2 : (↑((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ)) :
+        Matrix (Fin 2) (Fin 2) ℤ) =
+        !![(p : ℤ), -Int.gcdB p N; (N : ℤ), Int.gcdA p N] := rfl
     ext i' j'
     fin_cases i' <;> fin_cases j' <;>
-      simp [adjointGamma1Rep, adjointGamma0Rep, glMap, T_p_upper,
-        mapGL, Matrix.SpecialLinearGroup.map,
+      simp [h1, h2, hval1, hval2, glMap, T_p_upper,
+        Matrix.map_apply,
         Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, Units.val_mul] <;>
       nlinarith [hbezℝ]
   show (glMap (T_p_lower p hp) : Matrix _ _ ℝ) i j =
@@ -378,9 +399,11 @@ theorem glMap_T_p_upper_inv_mul_eq_mapGL_shift
           Matrix.GeneralLinearGroup.map, Matrix.of_apply]
     have h_R2 : (((mapGL ℝ : SL(2, ℤ) →* _) (shiftSL_loc ((b₂ : ℤ) - (b₁ : ℤ)))) :
         Matrix (Fin 2) (Fin 2) ℝ) = !![(1 : ℝ), (b₂ : ℝ) - (b₁ : ℝ); 0, 1] := by
+      rw [show (((mapGL ℝ : SL(2, ℤ) →* _) (shiftSL_loc ((b₂ : ℤ) - (b₁ : ℤ)))) :
+          Matrix (Fin 2) (Fin 2) ℝ) = (!![1, (b₂ : ℤ) - (b₁ : ℤ); 0, 1]).map Int.cast from
+        (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)]
       ext i' j'
-      fin_cases i' <;> fin_cases j' <;>
-        simp [mapGL_coe_matrix, shiftSL_loc, algebraMap_int_eq, Matrix.of_apply]
+      fin_cases i' <;> fin_cases j' <;> simp [Matrix.map_apply, Matrix.of_apply]
     show ((glMap (T_p_upper p hp b₂) : GL (Fin 2) ℝ) : Matrix _ _ ℝ) i j =
       ((glMap (T_p_upper p hp b₁) : GL (Fin 2) ℝ) *
        ((mapGL ℝ : SL(2, ℤ) →* _) (shiftSL_loc ((b₂ : ℤ) - (b₁ : ℤ)))) :
@@ -531,10 +554,15 @@ theorem glMap_T_p_upper_inv_mul_M_infty_eq_mapGL_Gamma1
              (b : ℝ) * (((N : ℤ) * mIdxOfCoprime N p hpN : ℤ) : ℝ),
            (1 : ℝ) - (b : ℝ);
            (((N : ℤ) * mIdxOfCoprime N p hpN : ℤ) : ℝ), 1] := by
+      rw [show (((mapGL ℝ : SL(2, ℤ) →* _) (M_infty_Gamma1_factor N p hpN b)) :
+          Matrix (Fin 2) (Fin 2) ℝ) =
+          (!![(aInvOfCoprime N p hpN : ℤ) * p - (b : ℤ) * ((N : ℤ) * mIdxOfCoprime N p hpN),
+              1 - (b : ℤ);
+              (N : ℤ) * mIdxOfCoprime N p hpN, 1]).map Int.cast from
+        (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)]
       ext i' j'
       fin_cases i' <;> fin_cases j' <;>
-        simp [mapGL_coe_matrix, M_infty_Gamma1_factor, algebraMap_int_eq,
-          Matrix.of_apply]
+        simp [Matrix.map_apply, Matrix.of_apply]
     show ((glMap (M_infty N p hp hpN) : GL (Fin 2) ℝ) : Matrix _ _ ℝ) i j =
       ((glMap (T_p_upper p hp b) : GL (Fin 2) ℝ) *
        ((mapGL ℝ : SL(2, ℤ) →* _) (M_infty_Gamma1_factor N p hpN b)) :
@@ -684,6 +712,7 @@ lemma slash_peterssonAdj_glMap_M_infty_eq_slash_T_p_lower
     p hp hpN g]
   exact (slash_T_p_lower_eq_T_p_upper_zero_slash_gamma0 p hp hpN g).symm
 
+omit [NeZero N] in
 lemma slash_peterssonAdj_glMap_T_p_upper_eq_slash_T_p_lower
     (p : ℕ) (hp : 0 < p) (b : ℕ)
     (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :

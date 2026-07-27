@@ -96,6 +96,7 @@ theorem Module.Flat.pi_of_algebra {R : Type*} [CommRing R]
     Module.Flat R (∀ i, B i) :=
   _root_.Module.Flat.pi
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Abstract Corollary 8.32 (faithful flatness)**: given a finite family of
 flat `R`-algebras `B i` such that every prime of `R` is a `comap` of some
 prime of some `B i`, the product algebra `∏ B i` is faithfully flat over `R`.
@@ -1157,6 +1158,7 @@ theorem presheafValue_isAdicComplete
   haveI : T2Space (presheafValue_ringOfDef D₀) := inferInstance
   exact hadic.isAdicComplete_iff.mpr ⟨inferInstance, inferInstance⟩
 
+set_option backward.isDefEq.respectTransparency false in
 omit [HasLocLiftPowerBounded A] [PlusSubring A] in
 private theorem completedLocSubring_eq_presheafValue_ringOfDef (D : RationalLocData A) :
     (D.completedLocSubring : Set (presheafValue D)) =

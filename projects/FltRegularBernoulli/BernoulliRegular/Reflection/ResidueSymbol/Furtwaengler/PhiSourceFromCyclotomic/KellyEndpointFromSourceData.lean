@@ -94,9 +94,9 @@ theorem reciprocalPhiCandidate_conj_mul_self_eq_absNorm_pow_cyclotomic
         (ℓ := ℓ) (p := p) (k := 𝓞 K ⧸ P) (K := K) (R' := R') S h_ne_zero =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
-  haveI : NumberField.IsCMField R' :=
+  have : NumberField.IsCMField R' :=
     isCMField_of_cyclotomicExtension_pair_primes (p := p) (ℓ := ℓ) hpℓ
   let σ : 𝓞 R' →+* 𝓞 R' :=
     (NumberField.IsCMField.ringOfIntegersComplexConj R').toRingEquiv.toRingHom
@@ -194,7 +194,7 @@ theorem ofReciprocalPhiCandidateAtomicSplit_gamma_facts_cyclotomic
           h_descentPrime h_ne_zero h_exp he hf).gamma =
           (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   refine ⟨?_, ?_⟩
   · simpa using
@@ -266,7 +266,7 @@ theorem ofReciprocalPhiCandidateAtomicSplit_symbol_pos_cyclotomic_sourceCoprime
   letI : P.IsPrime := (show P.IsMaximal from inferInstance).isPrime
   letI : P'.IsPrime := hP'_prime
   letI : P'.IsMaximal := Ideal.IsPrime.isMaximal hP'_prime hP'_bot
-  let h_span :
+  have h_span :
       Ideal.span ({reciprocalPhiCandidate
           (ℓ := ℓ) (p := p) (k := 𝓞 K ⧸ P) (K := K) (R' := R') S h_ne_zero} :
             Set (𝓞 K)) =
@@ -290,7 +290,7 @@ theorem ofReciprocalPhiCandidateAtomicSplit_symbol_pos_cyclotomic_sourceCoprime
       hP'_bot hp_notin_P'
       (natCast_notMem_of_absNorm_coprime_of_natCast_mem
         (P := P) (P' := P') hP_bot hP'_bot hℓ_in_P hcop)
-  unfold PhiPrimeSymbolIdentityPos
+  simp only [PhiPrimeSymbolIdentityPos]
   have hsym := K2_2ReciprocalSourceData.symbol_eq_norm_symbol D T hcop
   simpa [K2_2ReciprocalSourceData.phi, reciprocalPhiCandidate,
     Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card] using hsym
@@ -369,7 +369,7 @@ theorem K2_2SourceData_phi_facts_at_targetData
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p ∧
       PhiPrimeSymbolIdentity (p := p) (K := K) D.phi Q := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   obtain ⟨h_semi, h_norm⟩ :=
     K2_2SourceData_phi_facts_cyclotomic (ℓ := ℓ) (p := p) (K := K) (R' := R')
@@ -442,7 +442,7 @@ theorem K2_2ReciprocalSourceData_phi_facts_at_targetData
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p ∧
       PhiPrimeSymbolIdentityPos (p := p) (K := K) D.phi Q := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   obtain ⟨h_semi, h_norm⟩ :=
     K2_2ReciprocalSourceData_phi_facts_cyclotomic
@@ -531,14 +531,17 @@ noncomputable def phi
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   B.D.phi
 
+section SourceBundle
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+
 /-- Build a prime-factor bundle from the canonical trace-form split prime data
 and the exact-exponent theorem for the index-one Φ element. -/
 noncomputable def ofCanonicalTraceForm_atomic_split
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -603,11 +606,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split
 from the canonical trace-form identity and accepts split conditions directly on
 `P`. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atPrime
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -660,11 +658,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atPrime
 /-- Prime-factor bundle constructor that derives both the descent-prime equality
 and `ℓ ≠ p` from the source-prime membership/nonmembership hypotheses. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -717,11 +710,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem
 /-- Prime-factor bundle constructor that derives `P ≠ ⊥`, the descent-prime
 equality, and `ℓ ≠ p` from the source-prime hypotheses. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -773,11 +761,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maxima
 /-- Prime-factor bundle constructor that accepts splitting of the rational
 prime ideal `(ℓ)` instead of splitting written on `P.under ℤ`. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -825,6 +808,8 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
     K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
       (P := P) (Q := Q) (iso := iso)
       hℓ_in_P hp_notin_P hQ_in h_compat h_trace h_ne_zero h_exp he hf
+
+end SourceBundle
 
 end K2_2PrimeFactorBundle
 end PhiPrimeElement

@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
 
 /-!
 # Pollaczek units in cyclotomic-unit subgroups
@@ -32,13 +34,13 @@ variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 /-- The Pollaczek unit belongs to the cyclotomic-units subgroup. -/
 theorem pollaczekUnit_mem_cyclotomicUnitsSubgroup (hp_two : 2 ≤ p) (i : ℕ) :
     FLT37.pollaczekUnit p K i ∈ cyclotomicUnitsSubgroup p K hp_two := by
-  unfold FLT37.pollaczekUnit
+  simp only [FLT37.pollaczekUnit]
   apply Subgroup.prod_mem
   rintro ⟨b, hb⟩ _
   rw [FLT37.mem_pollaczek_range_iff] at hb
   obtain ⟨hb_pos, hb_le⟩ := hb
   apply Subgroup.pow_mem
-  unfold FLT37.pollaczekFactor
+  simp only [FLT37.pollaczekFactor]
   exact cyclotomicUnitUnit_mem_cyclotomicUnitsSubgroup p K _ hb_pos
     (FLT37.pollaczek_lt_of_le_half p hb_le) hp_two
 
@@ -47,7 +49,7 @@ variable [IsCMField K]
 /-- The σ-symmetrised Pollaczek unit belongs to the cyclotomic-units subgroup. -/
 theorem pollaczekUnitPlus_mem_cyclotomicUnitsSubgroup (hp_two : 2 ≤ p) (i : ℕ) :
     FLT37.pollaczekUnitPlus p K i ∈ cyclotomicUnitsSubgroup p K hp_two := by
-  unfold FLT37.pollaczekUnitPlus
+  simp only [FLT37.pollaczekUnitPlus]
   apply Subgroup.mul_mem
   · exact pollaczekUnit_mem_cyclotomicUnitsSubgroup (p := p) (K := K) hp_two i
   · exact unitsComplexConj_mem_cyclotomicUnitsSubgroup_of_mem (p := p) (K := K) hp_two

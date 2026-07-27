@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Differentials
-import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
 import HasseWeil.Isogeny.Dual.Reduction
+import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
 
 /-!
 # The kernel of `d` and the image of an inseparable pullback (ticket G1)
@@ -77,7 +77,7 @@ theorem kaehlerD_eq_zero_iff_mem_frobenius_fieldRange (p : ℕ) [Fact p.Prime] [
   letI : DecidableEq F := Classical.decEq F
   haveI : CharP KE p := charP_of_injective_algebraMap (algebraMap F KE).injective p
   rw [kaehlerD_eq_zero_iff_mem_pth_powers W p w]
-  exact ⟨fun ⟨g, hg⟩ ↦ ⟨g, hg⟩, fun ⟨g, hg⟩ ↦ ⟨g, hg⟩⟩
+  exact Iff.rfl
 
 /-- **An inseparable isogeny kills all differentials**: if `α` is not separable, the
 induced additive map `α.pullbackKaehler` on the one-dimensional `Ω[K(E)/F]` is

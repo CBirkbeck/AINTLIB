@@ -119,8 +119,6 @@ theorem residueCharInt_residueMap_eq_pow_d_of_unit
 
 end TraceFormStickelbergerSetup
 
-/-! ### Conductor-flexible trace-form API -/
-
 /-- Conductor-flexible refinement of
 `ConductorFlexibleConcreteStickelbergerSetup` to additive characters of the
 canonical trace form.
@@ -228,7 +226,7 @@ theorem gaussSumIntAtScale_eq_charUnit_mul_one
     S.gaussSumIntAtScale c a =
       (S.residueCharInt ^ a) ((c⁻¹ : kˣ) : k) * S.gaussSumIntAtScale 1 a := by
   classical
-  unfold gaussSumIntAtScale
+  simp only [gaussSumIntAtScale]
   have hχ : (S.residueCharInt ^ a) ((c⁻¹ : kˣ) : k) *
       (S.residueCharInt ^ a) ((c : k)) = 1 := by
     rw [show
@@ -236,7 +234,7 @@ theorem gaussSumIntAtScale_eq_charUnit_mul_one
         (S.residueCharInt ^ a) ((c : k)) =
       (S.residueCharInt ^ a) (((c⁻¹ : kˣ) : k) * ((c : k))) from
       (map_mul (S.residueCharInt ^ a) _ _).symm]
-    rw [show ((c⁻¹ : kˣ) : k) * ((c : k)) = 1 from by
+    rw [show ((c⁻¹ : kˣ) : k) * ((c : k)) = 1 by
       rw [← Units.val_mul, inv_mul_cancel, Units.val_one]]
     exact map_one _
   calc
@@ -247,12 +245,12 @@ theorem gaussSumIntAtScale_eq_charUnit_mul_one
               (S.residueCharInt ^ a) ((c : k))) *
             ((S.residueCharInt ^ a) x *
               S.zeta_ell_int ^ ((Algebra.trace (ZMod ℓ) k ((c : k) * x)).val)) := by
-        refine Finset.sum_congr rfl fun x _ => ?_
+        refine Finset.sum_congr rfl fun x _ ↦ ?_
         rw [hχ, one_mul]
     _ = ∑ x : k, (S.residueCharInt ^ a) ((c⁻¹ : kˣ) : k) *
           ((S.residueCharInt ^ a) ((c : k) * x) *
             S.zeta_ell_int ^ ((Algebra.trace (ZMod ℓ) k ((c : k) * x)).val)) := by
-        refine Finset.sum_congr rfl fun x _ => ?_
+        refine Finset.sum_congr rfl fun x _ ↦ ?_
         rw [show (S.residueCharInt ^ a) ((c : k) * x) =
             (S.residueCharInt ^ a) ((c : k)) * (S.residueCharInt ^ a) x from
             map_mul (S.residueCharInt ^ a) _ _]
@@ -266,14 +264,14 @@ theorem gaussSumIntAtScale_eq_charUnit_mul_one
             S.zeta_ell_int ^ ((Algebra.trace (ZMod ℓ) k y).val) := by
         congr 1
         exact Equiv.sum_comp (Equiv.mulLeft₀ (c : k) (Units.ne_zero c))
-          (fun y => (S.residueCharInt ^ a) y *
+          (fun y ↦ (S.residueCharInt ^ a) y *
             S.zeta_ell_int ^ ((Algebra.trace (ZMod ℓ) k y).val))
     _ = (S.residueCharInt ^ a) ((c⁻¹ : kˣ) : k) *
           ∑ y : k, (S.residueCharInt ^ a) y *
             S.zeta_ell_int ^
               ((Algebra.trace (ZMod ℓ) k (((1 : kˣ) : k) * y)).val) := by
         congr 1
-        refine Finset.sum_congr rfl fun y _ => ?_
+        refine Finset.sum_congr rfl fun y _ ↦ ?_
         rw [Units.val_one, one_mul]
 
 end ConcreteStickelbergerSetup
@@ -293,10 +291,10 @@ with `gaussSumIntAtScale` evaluated at the bundle's `traceScale`. -/
 theorem gaussSumInt_eq_gaussSumIntAtScale_traceScale (a : ℕ) :
     S.gaussSumInt a =
       S.toConcreteStickelbergerSetup.gaussSumIntAtScale S.traceScale a := by
-  unfold ConcreteStickelbergerSetup.gaussSumIntAtScale
+  simp only [ConcreteStickelbergerSetup.gaussSumIntAtScale]
   change _root_.gaussSum (S.residueCharInt ^ a) S.psiInt = _
-  unfold _root_.gaussSum
-  refine Finset.sum_congr rfl fun x _ => ?_
+  simp only [_root_.gaussSum]
+  refine Finset.sum_congr rfl fun x _ ↦ ?_
   rw [S.psiInt_eq_zeta_ell_int_pow_trace]
 
 end TraceFormStickelbergerSetup

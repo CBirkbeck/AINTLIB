@@ -32,8 +32,6 @@ variable (p : ℕ) [Fact p.Prime]
 
 -- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
 -- module instance through additive/multiplicative wrappers.
-set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 theorem exists_delta_zmod_pow_ne_one
     {k : ℕ} (hk_pos : 0 < k) (hk_lt : k < p - 1) :
     ∃ a : CyclotomicUnitDelta p, (a : ZMod p) ^ k ≠ 1 := by
@@ -104,8 +102,6 @@ theorem completedPrincipalUnitSubgroupToOne_equiv
 
 -- This proof crosses between quotient representatives, additive scalar
 -- notation, and the graded multiplicative quotient.
-set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 theorem completedPrincipalUnitModPEigenspace_mem_filtration_succ_of_exists_pow_ne
     (n j : ℕ) [Fact (1 ≤ n)] (hnp : n ≤ p)
     (hne : ∃ a : CyclotomicUnitDelta p, (a : ZMod p) ^ n ≠ (a : ZMod p) ^ j)
@@ -296,8 +292,6 @@ theorem completedPrincipalUnitModPFiltrationRep_spec
 
 -- The representative-defined linear map needs extra heartbeats for repeated
 -- `ZMod p` scalar and quotient-instance synthesis.
-set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 /-- The quotient map from a filtration step to the corresponding completed
 graded quotient. -/
 noncomputable def completedPrincipalUnitModPFiltrationToGraded
@@ -531,8 +525,6 @@ theorem completedPrincipalUnitModPFiltrationToGraded_equivariant
 
 -- The induction repeatedly instantiates filtration submodules at varying
 -- indices and transports through proof-irrelevant index bounds.
-set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 theorem completedPrincipalUnitModPEigenspace_le_filtration
     {j : ℕ} (hj_low : 2 ≤ j) (hj_high : j ≤ p - 2) :
     completedPrincipalUnitModPDeltaPowerEigenspace (p := p) K j ≤
@@ -565,8 +557,6 @@ theorem completedPrincipalUnitModPEigenspace_le_filtration
 
 -- The descending-filtration induction has the same varying-index submodule
 -- synthesis as the preceding containment theorem.
-set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 theorem completedPrincipalUnitModPEigenspace_eq_zero_of_mem_filtration_succ
     {j : ℕ} (hj_low : 2 ≤ j) (hj_high : j ≤ p - 2)
     {x : Additive (completedPrincipalUnitModPQuotient p K)}
@@ -668,8 +658,6 @@ theorem completedPrincipalUnitModPFiltrationCharacterProjection_mem_globalRange
 
 -- The final comparison map composes projected submodules with the
 -- representative-defined filtration-to-graded map.
-set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 noncomputable def completedPrincipalUnitModPCharacterProjectionRangeToGraded
     (hp_gt_two : 2 < p) {j : ℕ} [Fact (1 ≤ j)]
     (hj_low : 2 ≤ j) (hj_high : j ≤ p - 2) :

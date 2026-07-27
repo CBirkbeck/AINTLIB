@@ -83,7 +83,11 @@ theorem orbit_has_fd_repFM (q : OrbitFM) : ∃ p : ℍ, orbFM p = q ∧ p ∈ �
     obtain ⟨g, hg⟩ := ModularGroup.exists_smul_mem_fd z
     exact ⟨g • z, Quotient.sound' ⟨g, rfl⟩, hg⟩
 
-private theorem G_analyticAtFM (p : ℍ) :
+/-- The extension-by-zero of a `Γ(1)` modular form to `ℂ` is analytic at every point of `ℍ`.
+
+Public because the same fact is the input to every "order of vanishing is `≥ 0`" argument
+downstream (e.g. `JFunction.lean`), which would otherwise have to restate it. -/
+theorem G_analyticAtFM (p : ℍ) :
     AnalyticAt ℂ (fun w : ℂ ↦ if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) := by
   have h_diffOn : DifferentiableOn ℂ (f ∘ UpperHalfPlane.ofComplex) {w | 0 < w.im} :=
     UpperHalfPlane.mdifferentiable_iff.mp f.holo'

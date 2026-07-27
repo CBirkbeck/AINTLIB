@@ -35,7 +35,7 @@ section PolynomialFactorCount
 variable {F : Type*} [Field F] [DecidableEq F]
 
 noncomputable local instance fieldNormalizationMonoid : NormalizationMonoid F :=
-  (CommGroupWithZero.instNormalizedGCDMonoid F).toNormalizationMonoid
+  (inferInstance : NormalizedGCDMonoid F).toNormalizationMonoid
 
 /-- For a split polynomial over a field, distinct normalized
 irreducible factors are exactly the monic linear factors attached to its
@@ -99,7 +99,7 @@ theorem normalizedFactors_X_pow_sub_C_card_eq
 end PolynomialFactorCount
 
 variable {R S K L : Type*}
-variable [CommRing R] [IsDomain R] [IsDedekindDomain R] [IsIntegrallyClosed R]
+variable [CommRing R] [IsDedekindDomain R]
 variable [CommRing S] [IsDedekindDomain S] [Algebra R S]
 variable [Module.Finite R S] [Module.IsTorsionFree R S]
 variable [Field K] [Field L]
@@ -244,7 +244,7 @@ noncomputable local instance quotientDecidableEq {I : Ideal R} : DecidableEq (R 
 @[reducible] noncomputable local instance quotientNormalizationMonoid {I : Ideal R} [I.IsMaximal] :
     NormalizationMonoid (R ⧸ I) := by
   letI : Field (R ⧸ I) := Ideal.Quotient.field I
-  exact (CommGroupWithZero.instNormalizedGCDMonoid (R ⧸ I)).toNormalizationMonoid
+  exact (inferInstance : NormalizedGCDMonoid (R ⧸ I)).toNormalizationMonoid
 
 noncomputable local instance quotientPolynomialDecidableEq {I : Ideal R} :
     DecidableEq (R ⧸ I)[X] :=
@@ -294,7 +294,7 @@ theorem primesOverFinset_card_eq_reduced_minpoly_factor_card
   have hKD :=
     normalizedFactors_ideal_map_eq_normalizedFactors_min_poly_mk_map
       (R := R) (S := S) (x := x) (I := I) inferInstance hI0 hxcond hxint
-  unfold IsDedekindDomain.primesOverFinset
+  simp only [IsDedekindDomain.primesOverFinset]
   rw [factors_eq_normalizedFactors, hKD, Multiset.toFinset_map]
   have h_image :
       (Finset.image

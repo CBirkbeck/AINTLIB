@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -154,19 +159,110 @@ theorem Gamma_le_max_of_mem_Icc {σ : ℝ} (hσ : σ ∈ Set.Icc (1/2 : ℝ) (3/
     exact hσ
   exact Real.convexOn_Gamma.le_max_of_mem_segment (by norm_num) (by norm_num) hseg
 
+/-- On a line where `sin²(π·Re w) = 1`, the modulus of `sin(π w)` is exactly
+`cosh(π·Im w)`. -/
+private theorem norm_sin_pi_mul_eq_cosh_of_sin_sq_re {w : ℂ}
+    (hw : Real.sin (π * w.re) ^ 2 = 1) :
+    ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
+  have hdecomp : (π : ℂ) * w
+      = ((π * w.re : ℝ) : ℂ) + ((π * w.im : ℝ) : ℂ) * Complex.I := by
+    conv_lhs => rw [← Complex.re_add_im w]
+    push_cast
+    ring
+  have hsq := norm_sin_add_mul_I_sq (π * w.re) (π * w.im)
+  rw [← hdecomp, hw] at hsq
+  rw [← Real.sqrt_sq (norm_nonneg _), hsq,
+    show 1 + Real.sinh (π * w.im) ^ 2 = Real.cosh (π * w.im) ^ 2 by
+      rw [Real.cosh_sq]; ring,
+    Real.sqrt_sq (Real.cosh_pos _).le]
+
+/-- Boundary bound for the Phragmén–Lindelöf comparator `Γ²·sin(πz)/z²` on the line
+`Re z = 1/2`: its modulus is at most `4π`. -/
+private theorem norm_Gamma_sq_mul_sin_div_le_of_re_half {w : ℂ} (hw : w.re = 1/2) :
+    ‖Complex.Gamma w ^ 2 * Complex.sin (π * w) / w ^ 2‖ ≤ 4 * π := by
+  have hweq : w = (1/2 : ℂ) + (w.im : ℂ) * Complex.I := by
+    apply Complex.ext <;> simp [hw]
+  have hΓ : ‖Complex.Gamma w‖^2 = π / Real.cosh (π * w.im) := by
+    conv_lhs => rw [hweq]
+    exact norm_Gamma_half_add_mul_I_sq w.im
+  have hsin : ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
+    refine norm_sin_pi_mul_eq_cosh_of_sin_sq_re ?_
+    rw [hw, show π * (1/2 : ℝ) = π/2 by ring, Real.sin_pi_div_two]
+    norm_num
+  have hwn : (1/2 : ℝ) ≤ ‖w‖ := by
+    calc (1/2 : ℝ) = |w.re| := by rw [hw]; norm_num
+      _ ≤ ‖w‖ := Complex.abs_re_le_norm w
+  have hcosh0 : Real.cosh (π * w.im) ≠ 0 := (Real.cosh_pos _).ne'
+  have hw2 : (1/4 : ℝ) ≤ ‖w‖^2 := by nlinarith
+  have hw2pos : (0:ℝ) < ‖w‖^2 := lt_of_lt_of_le (by norm_num) hw2
+  rw [norm_div, norm_mul, norm_pow, norm_pow, hΓ, hsin,
+    div_mul_cancel₀ _ hcosh0, div_le_iff₀ hw2pos]
+  nlinarith [Real.pi_pos]
+
+/-- Boundary bound for the Phragmén–Lindelöf comparator `Γ²·sin(πz)/z²` on the line
+`Re z = 3/2`: its modulus is at most `4π` (via the recurrence `Γ(z) = (z-1)Γ(z-1)`). -/
+private theorem norm_Gamma_sq_mul_sin_div_le_of_re_three_halves {w : ℂ}
+    (hw : w.re = 3/2) :
+    ‖Complex.Gamma w ^ 2 * Complex.sin (π * w) / w ^ 2‖ ≤ 4 * π := by
+  have hwm : w - 1 = (1/2 : ℂ) + (w.im : ℂ) * Complex.I := by
+    apply Complex.ext
+    · simp [hw]
+      norm_num
+    · simp
+  have hne1 : w - 1 ≠ 0 := by
+    intro h0
+    rw [h0] at hwm
+    have := congrArg Complex.re hwm.symm
+    simp at this
+  have hrec : Complex.Gamma w = (w - 1) * Complex.Gamma (w - 1) := by
+    have := Complex.Gamma_add_one (w - 1) hne1
+    rw [sub_add_cancel] at this
+    rw [this]
+  have hΓ : ‖Complex.Gamma w‖^2
+      = ‖w - 1‖^2 * (π / Real.cosh (π * w.im)) := by
+    rw [hrec, norm_mul, mul_pow]
+    congr 1
+    rw [show w - 1 = (1/2 : ℂ) + (w.im : ℂ) * Complex.I from hwm]
+    have : ((1/2 : ℂ) + (w.im : ℂ) * Complex.I).im = w.im := by simp
+    rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) =
+      (1/2 : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I from rfl]
+    exact norm_Gamma_half_add_mul_I_sq w.im
+  have hsin : ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
+    refine norm_sin_pi_mul_eq_cosh_of_sin_sq_re ?_
+    rw [hw]
+    rw [show π * (3/2 : ℝ) = π + π/2 by ring, Real.sin_add]
+    simp
+  have hcosh0 : Real.cosh (π * w.im) ≠ 0 := (Real.cosh_pos _).ne'
+  have hle : ‖w - 1‖^2 ≤ ‖w‖^2 := by
+    have h1 : ‖w - 1‖^2 = (1/2)^2 + w.im^2 := by
+      rw [hwm]
+      rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) =
+        ((1/2 : ℝ) : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I by push_cast; ring]
+      rw [Complex.norm_add_mul_I, Real.sq_sqrt (by positivity)]
+    have h2 : ‖w‖^2 = (3/2)^2 + w.im^2 := by
+      have hwe : w = ((3/2 : ℝ) : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I := by
+        apply Complex.ext <;> simp [hw]
+      conv_lhs => rw [hwe]
+      rw [Complex.norm_add_mul_I, Real.sq_sqrt (by positivity)]
+    rw [h1, h2]
+    nlinarith
+  have hwn : (3/2 : ℝ) ≤ ‖w‖ := by
+    calc (3/2 : ℝ) = |w.re| := by rw [hw]; norm_num
+      _ ≤ ‖w‖ := Complex.abs_re_le_norm w
+  have hw2pos : (0:ℝ) < ‖w‖^2 := by nlinarith
+  rw [norm_div, norm_mul, norm_pow, norm_pow, hΓ, hsin]
+  rw [mul_assoc, div_mul_cancel₀ _ hcosh0, div_le_iff₀ hw2pos]
+  nlinarith [Real.pi_pos, sq_nonneg ‖w - 1‖]
+
 /-- The Phragmén–Lindelöf comparator bound: `‖Γ(z)²·sin(πz)/z²‖ ≤ 4π` on the closed
 strip `1/2 ≤ Re z ≤ 3/2`. -/
 theorem norm_Gamma_sq_mul_sin_div_le {z : ℂ} (h1 : 1/2 ≤ z.re) (h2 : z.re ≤ 3/2) :
     ‖Complex.Gamma z ^ 2 * Complex.sin (π * z) / z ^ 2‖ ≤ 4 * π := by
   set f : ℂ → ℂ := fun w => Complex.Gamma w ^ 2 * Complex.sin (π * w) / w ^ 2 with hf
-  -- nonvanishing of w on the closed strip
-  have hne : ∀ w : ℂ, 1/2 ≤ w.re → w ≠ 0 := by
-    intro w hw h0
-    rw [h0] at hw
-    norm_num at hw
   -- differentiable on Re > 0, hence DiffContOnCl on the open strip
   have hdiff : ∀ w : ℂ, 1/2 ≤ w.re → DifferentiableAt ℂ f w := by
     intro w hw
+    have hwne : w ≠ 0 := by intro h0; rw [h0] at hw; norm_num at hw
     have hG : DifferentiableAt ℂ Complex.Gamma w := by
       refine Complex.differentiableAt_Gamma w (fun m => ?_)
       intro h0
@@ -176,103 +272,18 @@ theorem norm_Gamma_sq_mul_sin_div_le {z : ℂ} (h1 : 1/2 ≤ z.re) (h2 : z.re �
       linarith
     exact ((hG.pow 2).mul ((Complex.differentiable_sin.comp
       ((differentiable_const _).mul differentiable_id)).differentiableAt)).div
-      (differentiableAt_pow 2) (pow_ne_zero 2 (hne w hw))
+      (differentiableAt_pow 2) (pow_ne_zero 2 hwne)
   -- Γ bounded on the closed strip
   have hM : ∀ w : ℂ, 1/2 ≤ w.re → w.re ≤ 3/2 →
       ‖Complex.Gamma w‖ ≤ max (Real.Gamma (1/2)) (Real.Gamma (3/2)) :=
     fun w hw1 hw2 => le_trans (norm_Gamma_le_Gamma_re (by linarith))
       (Gamma_le_max_of_mem_Icc ⟨hw1, hw2⟩)
-  -- |sin(πw)| ≤ cosh(π·Im w) ≤ exp(π·|Im w|)
-  have hsin_le : ∀ w : ℂ, ‖Complex.sin (π * w)‖ ≤ Real.exp (π * |w.im|) :=
-    norm_sin_pi_mul_le
-  -- norm of sin on the two boundary lines is exactly cosh(π·Im)
-  have hsin_line : ∀ w : ℂ, Real.sin (π * w.re) ^ 2 = 1 →
-      ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
-    intro w hw
-    have hdecomp : (π : ℂ) * w
-        = ((π * w.re : ℝ) : ℂ) + ((π * w.im : ℝ) : ℂ) * Complex.I := by
-      conv_lhs => rw [← Complex.re_add_im w]
-      push_cast
-      ring
-    have hsq := norm_sin_add_mul_I_sq (π * w.re) (π * w.im)
-    rw [← hdecomp] at hsq
-    rw [hw] at hsq
-    rw [← Real.sqrt_sq (norm_nonneg _), hsq,
-      show 1 + Real.sinh (π * w.im) ^ 2 = Real.cosh (π * w.im) ^ 2 by
-        rw [Real.cosh_sq]; ring,
-      Real.sqrt_sq (Real.cosh_pos _).le]
-  -- the exact boundary bounds
+  -- boundary bounds on the two lines `Re = 1/2` and `Re = 3/2` (extracted above)
   have hbdry_a : ∀ w : ℂ, w.re = 1/2 → ‖f w‖ ≤ 4 * π := by
-    intro w hw
-    have hweq : w = (1/2 : ℂ) + (w.im : ℂ) * Complex.I := by
-      apply Complex.ext <;> simp [hw]
-    have hΓ : ‖Complex.Gamma w‖^2 = π / Real.cosh (π * w.im) := by
-      conv_lhs => rw [hweq]
-      exact norm_Gamma_half_add_mul_I_sq w.im
-    have hsin : ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
-      refine hsin_line w ?_
-      rw [hw, show π * (1/2 : ℝ) = π/2 by ring, Real.sin_pi_div_two]
-      norm_num
-    have hwn : (1/2 : ℝ) ≤ ‖w‖ := by
-      calc (1/2 : ℝ) = |w.re| := by rw [hw]; norm_num
-        _ ≤ ‖w‖ := Complex.abs_re_le_norm w
-    have hcosh0 : Real.cosh (π * w.im) ≠ 0 := (Real.cosh_pos _).ne'
-    have hw2 : (1/4 : ℝ) ≤ ‖w‖^2 := by nlinarith
-    have hw2pos : (0:ℝ) < ‖w‖^2 := lt_of_lt_of_le (by norm_num) hw2
-    rw [hf]
-    rw [norm_div, norm_mul, norm_pow, norm_pow, hΓ, hsin,
-      div_mul_cancel₀ _ hcosh0, div_le_iff₀ hw2pos]
-    nlinarith [Real.pi_pos]
+    intro w hw; simp only [hf]; exact norm_Gamma_sq_mul_sin_div_le_of_re_half hw
   have hbdry_b : ∀ w : ℂ, w.re = 3/2 → ‖f w‖ ≤ 4 * π := by
-    intro w hw
-    have hwm : w - 1 = (1/2 : ℂ) + (w.im : ℂ) * Complex.I := by
-      apply Complex.ext
-      · simp [hw]
-        norm_num
-      · simp
-    have hne1 : w - 1 ≠ 0 := by
-      intro h0
-      rw [h0] at hwm
-      have := congrArg Complex.re hwm.symm
-      simp at this
-    have hrec : Complex.Gamma w = (w - 1) * Complex.Gamma (w - 1) := by
-      have := Complex.Gamma_add_one (w - 1) hne1
-      rw [sub_add_cancel] at this
-      rw [this]
-    have hΓ : ‖Complex.Gamma w‖^2
-        = ‖w - 1‖^2 * (π / Real.cosh (π * w.im)) := by
-      rw [hrec, norm_mul, mul_pow]
-      congr 1
-      rw [show w - 1 = (1/2 : ℂ) + (w.im : ℂ) * Complex.I from hwm]
-      have : ((1/2 : ℂ) + (w.im : ℂ) * Complex.I).im = w.im := by simp
-      rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) = (1/2 : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I from rfl]
-      exact norm_Gamma_half_add_mul_I_sq w.im
-    have hsin : ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
-      refine hsin_line w ?_
-      rw [hw]
-      rw [show π * (3/2 : ℝ) = π + π/2 by ring, Real.sin_add]
-      simp
-    have hcosh0 : Real.cosh (π * w.im) ≠ 0 := (Real.cosh_pos _).ne'
-    have hle : ‖w - 1‖^2 ≤ ‖w‖^2 := by
-      have h1 : ‖w - 1‖^2 = (1/2)^2 + w.im^2 := by
-        rw [hwm]
-        rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) = ((1/2 : ℝ) : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I by push_cast; ring]
-        rw [Complex.norm_add_mul_I, Real.sq_sqrt (by positivity)]
-      have h2 : ‖w‖^2 = (3/2)^2 + w.im^2 := by
-        have hwe : w = ((3/2 : ℝ) : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I := by
-          apply Complex.ext <;> simp [hw]
-        conv_lhs => rw [hwe]
-        rw [Complex.norm_add_mul_I, Real.sq_sqrt (by positivity)]
-      rw [h1, h2]
-      nlinarith
-    have hwn : (3/2 : ℝ) ≤ ‖w‖ := by
-      calc (3/2 : ℝ) = |w.re| := by rw [hw]; norm_num
-        _ ≤ ‖w‖ := Complex.abs_re_le_norm w
-    have hw2pos : (0:ℝ) < ‖w‖^2 := by nlinarith
-    rw [hf]
-    rw [norm_div, norm_mul, norm_pow, norm_pow, hΓ, hsin]
-    rw [mul_assoc, div_mul_cancel₀ _ hcosh0, div_le_iff₀ hw2pos]
-    nlinarith [Real.pi_pos, sq_nonneg ‖w - 1‖]
+    intro w hw; simp only [hf]
+    exact norm_Gamma_sq_mul_sin_div_le_of_re_three_halves hw
   -- differentiability up to the boundary
   have hcl : closure (Complex.re ⁻¹' Set.Ioo (1/2 : ℝ) (3/2))
       ⊆ Complex.re ⁻¹' Set.Icc (1/2 : ℝ) (3/2) :=
@@ -297,7 +308,7 @@ theorem norm_Gamma_sq_mul_sin_div_le {z : ℂ} (h1 : 1/2 ≤ z.re) (h2 : z.re �
     have hw1 : 1/2 ≤ w.re := le_of_lt hw.1
     have hw2' : w.re ≤ 3/2 := le_of_lt hw.2
     have hΓb := hM w hw1 hw2'
-    have hsinb := hsin_le w
+    have hsinb := norm_sin_pi_mul_le w
     have hwn : (1/2 : ℝ) ≤ ‖w‖ :=
       le_trans (le_trans hw1 (le_abs_self _)) (Complex.abs_re_le_norm w)
     have hw2sq : (1/4 : ℝ) ≤ ‖w‖^2 := by nlinarith

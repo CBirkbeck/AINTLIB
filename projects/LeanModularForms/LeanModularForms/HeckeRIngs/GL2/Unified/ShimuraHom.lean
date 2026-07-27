@@ -178,12 +178,14 @@ variable (p : ℕ)
 noncomputable def lunipH (r : ℕ) : GL (Fin 2) ℚ :=
   mapGL ℚ (⟨!![1, 0; (N : ℤ) * r, 1], by simp [Matrix.det_fin_two]⟩ : SL(2, ℤ))
 
+set_option backward.isDefEq.respectTransparency false in
 lemma lunipH_mem (r : ℕ) : lunipH (N := N) r ∈ (Gamma0_pair N).H :=
   Subgroup.mem_map_of_mem _ (by
     rw [CongruenceSubgroup.Gamma0_mem]
     show (((!![1, 0; (N : ℤ) * r, 1] : Matrix (Fin 2) (Fin 2) ℤ) 1 0 : ℤ) : ZMod N) = 0
     simp)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma lunipRep_eq_lunipH_mul_diag (hp : 0 < p) (r : ℕ) :
     lunipRep (N := N) p hp r =
       lunipH (N := N) r * (diag_1p_delta_Gamma0 N p hp : GL (Fin 2) ℚ) := by

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib
@@ -190,6 +195,20 @@ theorem integrable_admissible_majorant {F : ℝ → ℂ} (hF : IsAdmissibleTestF
   rw [e1, e2]
   ring
 
+/-- The elementary decay bound `|x| · e^{-c|x|} ≤ 1/c` for `c > 0`: from `c|x| ≤ e^{c|x|}`
+(via `1 + t ≤ eᵗ`), divide through. Extracted from `hasDerivAt_paperPhi` (dominating-function
+step). -/
+private theorem abs_mul_exp_neg_le {c : ℝ} (hc : 0 < c) (x : ℝ) :
+    |x| * Real.exp (-(c * |x|)) ≤ 1 / c := by
+  have h1 : c * |x| ≤ Real.exp (c * |x|) := by
+    have := Real.add_one_le_exp (c * |x|)
+    linarith
+  rw [Real.exp_neg, ← div_eq_mul_inv, div_le_iff₀ (Real.exp_pos _)]
+  calc |x| = 1 / c * (c * |x|) := by
+        rw [one_div, ← mul_assoc, inv_mul_cancel₀ hc.ne', one_mul]
+    _ ≤ 1 / c * Real.exp (c * |x|) :=
+        mul_le_mul_of_nonneg_left h1 (one_div_nonneg.mpr hc.le)
+
 /-- **Φ holomorphy** (SP2-Φ-c): in the open band `-ε < Re s < 1+ε`, `Φ` is
 complex-differentiable with derivative `∫ x·F(x)·e^{(s-1/2)x} dx`. -/
 theorem hasDerivAt_paperPhi {F : ℝ → ℂ} (hF : IsAdmissibleTestFn F)
@@ -225,17 +244,9 @@ theorem hasDerivAt_paperPhi {F : ℝ → ℂ} (hF : IsAdmissibleTestFn F)
     · linarith [habs.1]
     · linarith [habs.2]
   -- the dominating function
-  have habsorb : ∀ x : ℝ, |x| * Real.exp (-((gap/2) * |x|)) ≤ 2/gap := by
-    intro x
-    have hgt : (0:ℝ) ≤ |x| := abs_nonneg x
-    have h1 : (gap/2) * |x| ≤ Real.exp ((gap/2) * |x|) := by
-      have := Real.add_one_le_exp ((gap/2) * |x|)
-      linarith
-    rw [Real.exp_neg, ← div_eq_mul_inv, div_le_iff₀ (Real.exp_pos _)]
-    calc |x| = (2/gap) * ((gap/2) * |x|) := by field_simp
-      _ ≤ (2/gap) * Real.exp ((gap/2) * |x|) := by
-          refine mul_le_mul_of_nonneg_left h1 (by positivity)
-      _ = 2/gap * Real.exp ((gap/2) * |x|) := by ring
+  have habsorb : ∀ x : ℝ, |x| * Real.exp (-((gap/2) * |x|)) ≤ 2/gap := fun x => by
+    have h := abs_mul_exp_neg_le (half_pos hgappos) x
+    rwa [one_div_div] at h
   set bound : ℝ → ℝ := fun x =>
     (2/gap) * (‖F x‖ * (Real.exp ((1/2 + ε) * x) + Real.exp (-((1/2 + ε) * x)))) with hbd
   have hboundint : Integrable bound :=

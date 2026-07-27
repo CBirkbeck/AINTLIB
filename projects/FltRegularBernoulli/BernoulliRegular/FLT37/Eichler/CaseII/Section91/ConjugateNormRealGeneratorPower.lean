@@ -166,6 +166,32 @@ theorem caseII_productHalf_C_ne_bot
     (caseII_rootIdeal_ne_bot D.toCaseIIData37 hp η)
     (caseII_rootIdeal_ne_bot D.toCaseIIData37 hp (caseII_etaInv η))
 
+omit [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)] [IsCMField (CyclotomicField 37 ℚ)] in
+/-- **Class-group cancellation to principality.** In a Dedekind domain, if the product `A * D` and
+the factor `D` are both principal (with `A, D ≠ ⊥`), then `A` is principal.
+
+Proof via `ClassGroup.mk0`: `[A*D] = [A]·[D]` in `Cl(R)`, and `[A*D] = 1`, `[D] = 1` force
+`[A] = 1`, i.e. `A` principal (`ClassGroup.mk0_eq_one_iff`). -/
+private lemma isPrincipal_of_mul_isPrincipal_of_isPrincipal
+    {R : Type*} [CommRing R] [IsDedekindDomain R] {A D : Ideal R}
+    (hA : A ≠ ⊥) (hD : D ≠ ⊥)
+    (hAD : (A * D).IsPrincipal) (hDprin : D.IsPrincipal) :
+    A.IsPrincipal := by
+  have hA0 : A ∈ (Ideal R)⁰ := mem_nonZeroDivisors_iff_ne_zero.mpr hA
+  have hD0 : D ∈ (Ideal R)⁰ := mem_nonZeroDivisors_iff_ne_zero.mpr hD
+  have hAD0 : A * D ∈ (Ideal R)⁰ := mem_nonZeroDivisors_iff_ne_zero.mpr (mul_ne_zero hA hD)
+  -- `[A*D] = [A]·[D]` in `Cl(R)`.
+  have hmul : ClassGroup.mk0 ⟨A * D, hAD0⟩ =
+      ClassGroup.mk0 ⟨A, hA0⟩ * ClassGroup.mk0 ⟨D, hD0⟩ := by
+    rw [← map_mul]; rfl
+  -- `[A*D] = 1` and `[D] = 1`, so `[A] = 1`.
+  have hAD_one : ClassGroup.mk0 ⟨A * D, hAD0⟩ = 1 := (ClassGroup.mk0_eq_one_iff hAD0).mpr hAD
+  have hD_one : ClassGroup.mk0 ⟨D, hD0⟩ = 1 := (ClassGroup.mk0_eq_one_iff hD0).mpr hDprin
+  have hA_one : ClassGroup.mk0 ⟨A, hA0⟩ = 1 := by
+    rw [hAD_one, hD_one, mul_one] at hmul
+    exact hmul.symm
+  exact (ClassGroup.mk0_eq_one_iff hA0).mp hA_one
+
 set_option maxRecDepth 4000 in
 /-- **`C³⁷` is principal** (Washington's `[C³⁷] = 1`).
 
@@ -207,26 +233,14 @@ theorem caseII_productHalf_C_pow_isPrincipal
           (caseII_etaInv_ne_etaZero D hp η hη)
         rw [caseII_etaInv_coe] at hη1; exact hη1
       intro h0; exact hη36 (by linear_combination -h0)
-  have hNum_ne : Num ≠ ⊥ := by rw [hid]; exact mul_ne_zero hCpow_ne hDen_ne
-  -- `mk0(Num) = mk0(C³⁷)·mk0(Den)`.
-  have hmk_mul : ClassGroup.mk0 ⟨Num, mem_nonZeroDivisors_iff_ne_zero.mpr hNum_ne⟩ =
-      ClassGroup.mk0 ⟨C ^ 37, mem_nonZeroDivisors_iff_ne_zero.mpr hCpow_ne⟩ *
-        ClassGroup.mk0 ⟨Den, mem_nonZeroDivisors_iff_ne_zero.mpr hDen_ne⟩ := by
-    rw [← map_mul]
-    exact congrArg ClassGroup.mk0 (Subtype.ext hid)
-  -- `mk0(Num) = 1` and `mk0(Den) = 1` (both principal).
-  have hNum_one : ClassGroup.mk0 ⟨Num, mem_nonZeroDivisors_iff_ne_zero.mpr hNum_ne⟩ = 1 := by
-    rw [ClassGroup.mk0_eq_one_iff, hNum_def, Ideal.span_singleton_mul_span_singleton]
-    exact ⟨⟨_, rfl⟩⟩
-  have hDen_one : ClassGroup.mk0 ⟨Den, mem_nonZeroDivisors_iff_ne_zero.mpr hDen_ne⟩ = 1 := by
-    rw [ClassGroup.mk0_eq_one_iff, hDen_def, Ideal.span_singleton_mul_span_singleton]
-    exact ⟨⟨_, rfl⟩⟩
-  -- ⟹ `mk0(C³⁷) = 1`.
-  have hCpow_one : ClassGroup.mk0 ⟨C ^ 37, mem_nonZeroDivisors_iff_ne_zero.mpr hCpow_ne⟩ = 1 := by
-    have := hmk_mul
-    rw [hNum_one, hDen_one, mul_one] at this
-    exact this.symm
-  rwa [ClassGroup.mk0_eq_one_iff] at hCpow_one
+  -- `Num` and `Den` are principal (products of singleton spans).
+  have hNum_prin : Num.IsPrincipal := by
+    rw [hNum_def, Ideal.span_singleton_mul_span_singleton]; exact ⟨⟨_, rfl⟩⟩
+  have hDen_prin : Den.IsPrincipal := by
+    rw [hDen_def, Ideal.span_singleton_mul_span_singleton]; exact ⟨⟨_, rfl⟩⟩
+  -- `Num = C³⁷·Den` principal, `Den` principal ⟹ `C³⁷` principal (class-group cancellation).
+  have hAD_prin : (C ^ 37 * Den).IsPrincipal := by rw [← hid]; exact hNum_prin
+  exact isPrincipal_of_mul_isPrincipal_of_isPrincipal hCpow_ne hDen_ne hAD_prin hDen_prin
 
 /-! ## 3. K⁺-principalization with a real generator (the B₀ argument) -/
 

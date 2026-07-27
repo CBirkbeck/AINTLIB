@@ -202,6 +202,32 @@ private lemma segmentIntegrand_lipschitzOnWith {f : ℂ → ℂ}
         apply mul_le_mul_of_nonneg_right _ dist_nonneg
         exact Real.le_coe_toNNReal _
 
+/-- Over a closed ball around `z` contained in `S`, the norm of `deriv f` along the segments
+`t ↦ c + t • (w - c)` is uniformly bounded by some positive constant, for `w` in the ball and
+`t ∈ [0, 1]`.
+
+This is the uniform Lipschitz/domination bound needed to differentiate the segment integral under
+the integral sign: it holds because the segment map sends the compact set
+`closedBall z r ×ˢ Icc 0 1` into `S`, on whose (compact) image the continuous function `‖deriv f‖`
+attains a bound. -/
+private lemma exists_norm_deriv_segment_bound {f : ℂ → ℂ} {S : Set ℂ}
+    {c z : ℂ} {r : ℝ} (hS_convex : Convex ℝ S)
+    (hf'_cont : ContinuousOn (deriv f) S) (hc : c ∈ S)
+    (hr_ball : Metric.closedBall z r ⊆ S) :
+    ∃ M > 0, ∀ w ∈ Metric.ball z r, ∀ t ∈ Icc (0 : ℝ) 1,
+      ‖deriv f (c + t • (w - c))‖ ≤ M := by
+  let segmentMap : ℂ × ℝ → ℂ := fun ⟨w, t⟩ ↦ c + t • (w - c)
+  let K := segmentMap '' (Metric.closedBall z r ×ˢ Icc (0 : ℝ) 1)
+  have hK_compact : IsCompact K :=
+    ((isCompact_closedBall z r).prod isCompact_Icc).image (by fun_prop)
+  have hK_in_S : K ⊆ S := fun p hp ↦ by
+    obtain ⟨⟨w, t⟩, ⟨hw, ht⟩, rfl⟩ := hp
+    exact segment_subset_convex hS_convex hc (hr_ball hw) t ht
+  obtain ⟨M', hM'⟩ := hK_compact.bddAbove_image (hf'_cont.norm.mono hK_in_S)
+  exact ⟨max M' 1, by positivity, fun w hw t ht ↦
+    (hM' ⟨c + t • (w - c),
+      ⟨⟨w, t⟩, ⟨Metric.ball_subset_closedBall hw, ht⟩, rfl⟩, rfl⟩).trans (le_max_left _ _)⟩
+
 private lemma hasDerivAt_segmentIntegral_aux {f : ℂ → ℂ}
     {S : Set ℂ} {c z : ℂ} {ε : ℝ}
     (hε_pos : 0 < ε)
@@ -227,21 +253,9 @@ private lemma hasDerivAt_segmentIntegral_aux {f : ℂ → ℂ}
     Metric.ball_subset_ball hε'_lt_ε.le
   have hf'_cont : ContinuousOn (deriv f) S :=
     (hf.contDiffOn hS_open).continuousOn_deriv_of_isOpen hS_open le_rfl
-  obtain ⟨M, hM_pos, hM_bound⟩ :
-      ∃ M > 0, ∀ w ∈ Metric.ball z ε',
-        ∀ t ∈ Icc (0 : ℝ) 1, ‖deriv f (c + t • (w - c))‖ ≤ M := by
-    let segmentMap : ℂ × ℝ → ℂ := fun ⟨w, t⟩ ↦ c + t • (w - c)
-    let K := segmentMap '' (Metric.closedBall z ε' ×ˢ Icc (0 : ℝ) 1)
-    have hK_compact : IsCompact K :=
-      ((isCompact_closedBall z ε').prod isCompact_Icc).image (by fun_prop)
-    have hK_in_S : K ⊆ S := fun p hp ↦ by
-      obtain ⟨⟨w, t⟩, ⟨hw, ht⟩, rfl⟩ := hp
-      exact segment_subset_convex hS_convex hc
-        ((Metric.closedBall_subset_ball hε'_lt_ε).trans hε_ball hw) t ht
-    obtain ⟨M', hM'⟩ := hK_compact.bddAbove_image (hf'_cont.norm.mono hK_in_S)
-    exact ⟨max M' 1, by positivity, fun w hw t ht ↦
-      (hM' ⟨c + t • (w - c),
-        ⟨⟨w, t⟩, ⟨Metric.ball_subset_closedBall hw, ht⟩, rfl⟩, rfl⟩).trans (le_max_left _ _)⟩
+  obtain ⟨M, hM_pos, hM_bound⟩ :=
+    exists_norm_deriv_segment_bound hS_convex hf'_cont hc
+      ((Metric.closedBall_subset_ball hε'_lt_ε).trans hε_ball)
   have hF_meas : ∀ᶠ w in 𝓝 z,
       AEStronglyMeasurable (F w) (volume.restrict (Set.uIoc 0 1)) := by
     filter_upwards [Metric.ball_mem_nhds z hε'_pos] with w hw

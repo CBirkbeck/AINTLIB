@@ -71,9 +71,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback HasseWeil.WeilPairing.TorsionGeometric
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 section BaseChange
 
@@ -96,7 +93,8 @@ variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [ExpChar L p]
 `K(E_{K̄}) ≅ K(E) ⊗_K L`) and the **concrete** point map `id − π̄`, where
 `π̄ = frobeniusHomBaseChange W p r L` is the `q`-power Frobenius point map on `E_{K̄}`.
 
-Its `toAddMonoidHom` is **definitionally** `AddMonoidHom.id _ − frobeniusHomBaseChange W p r L`, i.e.
+Its `toAddMonoidHom` is **definitionally** `AddMonoidHom.id _ − frobeniusHomBaseChange W p r
+L`, i.e.
 exactly the bare hom named in `OneSubFrobeniusScaling`. -/
 noncomputable def oneSubFrobeniusIsogBaseChange
     (pullback_L : (W.baseChange L).toAffine.FunctionField →ₐ[L]
@@ -142,14 +140,17 @@ theorem oneSubFrobeniusIsogBaseChange_degree_eq_of_finrank
     (oneSubFrobeniusIsogBaseChange W p r L pullback_L) h_finrank
 
 /-- **`id − π̄` is the base-change of `(1 − π)`'s point map.**  The additive base-change functor
-sends `(1 − π).toAddMonoidHom = id − π_K` to `id − π̄`, because `π_K`'s point map base-changes to the
+sends `(1 − π).toAddMonoidHom = id − π_K` to `id − π̄`, because `π_K`'s point map base-changes
+to the
 `q`-power Frobenius `π̄ = frobeniusHomBaseChange` (which is *exactly* the underlying hom of the
-base-changed Frobenius `frobeniusIsog_baseChange_charP_pow`, by definition of `frobeniusHomBaseChange`),
+base-changed Frobenius `frobeniusIsog_baseChange_charP_pow`, by definition of
+`frobeniusHomBaseChange`),
 the identity base-changes to the identity, and subtraction is preserved.
 
 Concretely, since `frobeniusHomBaseChange W p r L` is *defined* as
 `(Isogeny.frobeniusIsog_baseChange_charP_pow p r W L).toAddMonoidHom`, the point map carried by
-`oneSubFrobeniusIsogBaseChange` is the literal "identity minus base-changed Frobenius point map" — the
+`oneSubFrobeniusIsogBaseChange` is the literal "identity minus base-changed Frobenius point
+map" — the
 faithful base-change of the K-level `1 − π` along `K → L`. -/
 theorem oneSubFrobeniusIsogBaseChange_toAddMonoidHom_eq_baseChange
     (pullback_L : (W.baseChange L).toAffine.FunctionField →ₐ[L]
@@ -167,7 +168,8 @@ For *any* isogeny point map `φ` (a group hom), `[ℓ]` commutes with `φ`:
 with `ℓ • ·` (`map_zsmul`).  Specialised to `φ = id − π̄`. -/
 
 /-- **`[ℓ] ∘ φ_L = φ_L ∘ [ℓ]`** for `φ_L = (1 − π)_{K̄}` (any base-changed pullback), at the
-`AddMonoidHom` level.  Pure `map_zsmul`: both sides send `P ↦ ℓ • (id − π̄)(P) = (id − π̄)(ℓ • P)`. -/
+`AddMonoidHom` level.  Pure `map_zsmul`: both sides send
+`P ↦ ℓ • (id − π̄)(P) = (id − π̄)(ℓ • P)`. -/
 theorem oneSubFrobeniusIsogBaseChange_commute_mulByInt (ℓ : ℤ)
     (pullback_L : (W.baseChange L).toAffine.FunctionField →ₐ[L]
       (W.baseChange L).toAffine.FunctionField) :
@@ -185,7 +187,8 @@ end BaseChange
 
 `OneSubScalingData` bundles the genuine CoordHom-free geometric residuals for the base-changed
 separable isogeny `(1 − π)_{K̄}`, carried per isogeny exactly as the project's other base-change
-residuals.  From it, `oneSubFrobeniusScaling_of_data` proves `OneSubFrobeniusScaling` via the shipped
+residuals.  From it, `oneSubFrobeniusScaling_of_data` proves `OneSubFrobeniusScaling` via the
+shipped
 CoordHom-free `weilScales_of_dualComp`. -/
 
 section Data
@@ -195,7 +198,6 @@ variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
 variable (p r : ℕ) [Fact p.Prime] [CharP K p] [Fact (Fintype.card K = p ^ r)]
 variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [IsAlgClosed L] [ExpChar L p]
   [(W.baseChange L).toAffine.IsElliptic]
-  [IsIntegrallyClosed (⟨(W.baseChange L).toAffine⟩ : SmoothPlaneCurve L).CoordinateRing]
 
 /-- **The base-changed `1 − π` geometric data** (Silverman III.6.1/III.6.2/III.8.2 content),
 CoordHom-free.  Bundles, for the base-changed separable isogeny `φ_L = (1 − π)_{K̄}` whose point map
@@ -214,10 +216,12 @@ is the concrete `id − π̄`:
 * `hcomm'` — the translation covariance `τ_S ∘ φ_L^* = φ_L^* ∘ τ_{φ_L S}` (Silverman III.8.2),
   supplied for every `ℓ`-torsion `S, T`.
 
-These are the genuine geometric facts about the separable isogeny `1 − π` base-changed to `K̄`, carried
+These are the genuine geometric facts about the separable isogeny `1 − π` base-changed to `K̄`,
+carried
 per isogeny in the project's witness-parametric style. -/
 structure OneSubScalingData (hq : 2 ≤ Fintype.card K) where
-  /-- The base-changed pullback `AlgHom` `K(E_{K̄}) →ₐ[L] K(E_{K̄})` (base-change of `(1−π).pullback`). -/
+  /-- The base-changed pullback `AlgHom` `K(E_{K̄}) →ₐ[L] K(E_{K̄})` (base-change of
+  `(1−π).pullback`). -/
   pullback_L : (W.baseChange L).toAffine.FunctionField →ₐ[L]
     (W.baseChange L).toAffine.FunctionField
   /-- Finiteness of `ker(φ_L)` (so the dual relation / `#ker` make sense). -/
@@ -243,7 +247,8 @@ structure OneSubScalingData (hq : 2 ≤ Fintype.card K) where
   /-- **Surjectivity** of `φ_L` on `E_{K̄}`-points (Silverman III.4.10a).  No longer consumed by the
   scaling itself (the image-restricted adjoint `weilPairing_adjoint_of_dualComp_image` removed that
   dependency, reviewer round-20 Q2); it remains the carrier of the surjectivity needed only to
-  *construct* the divisor-pushforward dual `δ`/`hdc` (the `degree(φ^*D) = #ker · degree D` formula). -/
+  *construct* the divisor-pushforward dual `δ`/`hdc` (the
+  `degree(φ^*D) = #ker · degree D` formula). -/
   hsurj :
     Function.Surjective (oneSubFrobeniusIsogBaseChange W p r L pullback_L).toAddMonoidHom
   /-- **The separable degree match** `#ker φ_L = φ_L.degree` (Silverman III.4.10c). -/
@@ -271,15 +276,18 @@ structure OneSubScalingData (hq : 2 ≤ Fintype.card K) where
 /-- **`OneSubFrobeniusScaling` from the bundled data** (Silverman III.8.6.1), CoordHom-free.
 
 For the base-changed separable isogeny `φ_L = (1 − π)_{K̄}` (point map `id − π̄`), given the bundled
-geometric data `d : OneSubScalingData`, the leaf `OneSubFrobeniusScaling W p r L hq` holds: for every
+geometric data `d : OneSubScalingData`, the leaf `OneSubFrobeniusScaling W p r L hq` holds: for
+every
 prime `ℓ ≠ ringChar K` with `(ℓ : K̄) ≠ 0`,
 `e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on `E_{K̄}[ℓ]`.
 
 Proof: `weilScales_of_dualComp` applied to `φ_L`, with the bare hom `ψ := id − π̄` (matched by the
-constructional `oneSubFrobeniusIsogBaseChange_toAddMonoidHom`, `rfl`), the degree `d := (1−π).degree`
+constructional `oneSubFrobeniusIsogBaseChange_toAddMonoidHom`, `rfl`), the degree `d :=
+(1−π).degree`
 (`hdeg_bc`), the dual `δ`/`hdc`, degree match `hkerdeg`, the `[ℓ]`-commutation (the proven
 `oneSubFrobeniusIsogBaseChange_commute_mulByInt`), and the translation covariance `hcomm'`.
-Surjectivity `hsurj` is **no longer** passed to the scaling (it now uses the image-restricted adjoint,
+Surjectivity `hsurj` is **no longer** passed to the scaling (it now uses the image-restricted
+adjoint,
 reviewer round-20 Q2); `d.hsurj` is consumed only upstream, to build `δ`/`hdc`. -/
 theorem oneSubFrobeniusScaling_of_data (hq : 2 ≤ Fintype.card K)
     (d : OneSubScalingData W p r L hq) :

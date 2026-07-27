@@ -54,17 +54,20 @@ theorem heilbronnGL_mul (M M' : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) (
 determinant) acts on cusps `ℙ¹(ℚ)` via the `GL(2, ℚ)`-action, and this permutation preserves the
 augmentation, hence `Div0 ℤ`. -/
 noncomputable def divAct (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) : Div0 ℤ →ₗ[ℤ] Div0 ℤ :=
-  LinearMap.restrict (Finsupp.lmapDomain ℤ ℤ ((heilbronnGL M hM) • ·)) <| by
+  LinearMap.restrict
+    (MonoidAlgebra.mapDomainLinearMap ℤ ℤ ((heilbronnGL M hM) • ·)) <| by
     intro x hx
-    simp only [LinearMap.mem_ker, Finsupp.lmapDomain_apply,
+    simp only [LinearMap.mem_ker, LinearMap.comp_apply, LinearEquiv.coe_coe,
+      MonoidAlgebra.coeffLinearEquiv_apply, MonoidAlgebra.coeff_mapDomainLinearMap,
       Finsupp.linearCombination_mapDomain] at hx ⊢
     rw [show ((fun _ => (1 : ℤ)) ∘ ((heilbronnGL M hM) • ·)) = (fun _ => (1 : ℤ)) from rfl]
     exact hx
 
 @[simp]
 theorem divAct_coe (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) (D : Div0 ℤ) :
-    ((divAct M hM D : Div0 ℤ) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ)
-      = Finsupp.mapDomain ((heilbronnGL M hM) • ·) (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) :=
+    ((divAct M hM D : Div0 ℤ) : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff
+      = Finsupp.mapDomain ((heilbronnGL M hM) • ·)
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff :=
   rfl
 
 /-- The Heilbronn action on `SymPow ℤ m`: the integer matrix `M` acts by the linear substitution
@@ -102,7 +105,7 @@ theorem det_mul_ne_zero {M M' : Matrix (Fin 2) (Fin 2) ℤ} (hM : M.det ≠ 0) (
 /-- `divAct` composes covariantly: `divAct (M * M') = divAct M ∘ divAct M'`. -/
 theorem divAct_mul (M M' : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) (hM' : M'.det ≠ 0) :
     divAct (M * M') (det_mul_ne_zero hM hM') = (divAct M hM).comp (divAct M' hM') := by
-  refine LinearMap.ext fun D => Subtype.ext ?_
+  refine LinearMap.ext fun D => Subtype.ext (MonoidAlgebra.coeff_injective ?_)
   rw [LinearMap.comp_apply, divAct_coe, divAct_coe, divAct_coe, ← Finsupp.mapDomain_comp]
   congr 1
   funext y
@@ -148,7 +151,7 @@ theorem heilbronnGL_smul_eq_sl_smul (g : SL(2, ℤ)) (y : Projectivization ℚ (
 /-- On `SL(2, ℤ)`, the divisor Heilbronn action agrees with `div0Rep`. -/
 theorem divAct_eq_div0Rep (g : SL(2, ℤ)) :
     divAct (g : Matrix (Fin 2) (Fin 2) ℤ) (sl_det_ne_zero g) = div0Rep ℤ g := by
-  refine LinearMap.ext fun D => Subtype.ext ?_
+  refine LinearMap.ext fun D => Subtype.ext (MonoidAlgebra.coeff_injective ?_)
   rw [divAct_coe, div0Rep_apply]
   rfl
 
@@ -326,7 +329,8 @@ noncomputable def upperOp (p : ℕ) (hp : 0 < p) (m : ℕ) :
   ∑ b ∈ Finset.range p, actMat (upperMat p b) (upperMat_det_ne_zero hp b) m
 
 theorem upperOp_apply (p : ℕ) (hp : 0 < p) (m : ℕ) (x : Div0 ℤ ⊗[ℤ] SymPow ℤ m) :
-    upperOp p hp m x = ∑ b ∈ Finset.range p, actMat (upperMat p b) (upperMat_det_ne_zero hp b) m x := by
+    upperOp p hp m x =
+      ∑ b ∈ Finset.range p, actMat (upperMat p b) (upperMat_det_ne_zero hp b) m x := by
   rw [upperOp, LinearMap.coe_sum, Finset.sum_apply]
 
 /-- For `σ ∈ Γ₁(N)` and `p ∣ N`, every value `σ₀₀ + b·σ₁₀` is coprime to `p` (`σ₀₀ ≡ 1`,
@@ -344,7 +348,8 @@ theorem not_dvd_gamma1_divN {p : ℕ} (hp : Nat.Prime p) (hpN : ¬Nat.Coprime p 
     have hp_dvd : (p : ℤ) ∣ ((σ : Matrix (Fin 2) (Fin 2) ℤ) 0 0 - 1) := hp_dvd_N.trans <| by
       rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]; push_cast; rw [hσ_g1.1]; ring
     rw [← sub_eq_zero]
-    have := (ZMod.intCast_zmod_eq_zero_iff_dvd ((σ : Matrix (Fin 2) (Fin 2) ℤ) 0 0 - 1) p).mpr hp_dvd
+    have := (ZMod.intCast_zmod_eq_zero_iff_dvd
+      ((σ : Matrix (Fin 2) (Fin 2) ℤ) 0 0 - 1) p).mpr hp_dvd
     push_cast at this ⊢; exact this
   intro hdvd
   have : (((σ : Matrix (Fin 2) (Fin 2) ℤ) 0 0 + ↑b * (σ : Matrix (Fin 2) (Fin 2) ℤ) 1 0 : ℤ) :
@@ -652,7 +657,7 @@ theorem lowerDiamondMat_mul_sl {p : ℕ} [NeZero N] [Fact p.Prime] (hp : Nat.Pri
 /-- **Upper → lower (case `p ∤ σ₁₀`, special index `b₀`).** For `σ ∈ Γ₁(N)`, `p ∤ N`, if
 `p ∣ σ₀₀ + b₀·σ₁₀` then `upper(b₀)·σ` maps to the diamond-twisted lower representative, up to a
 left `Γ₁(N)`-factor. -/
-theorem upperMat_mul_sl_to_lower {p : ℕ} [NeZero N] [Fact p.Prime] (hp : Nat.Prime p)
+theorem upperMat_mul_sl_to_lower {p : ℕ} [NeZero N] [Fact p.Prime] (_hp : Nat.Prime p)
     (hpN : Nat.Coprime p N) (σ : SL(2, ℤ)) (hσ : σ ∈ Gamma1 N) (b₀ : ℕ)
     (hb₀ : (p : ℤ) ∣ ((σ : Matrix (Fin 2) (Fin 2) ℤ) 0 0 +
       ↑b₀ * (σ : Matrix (Fin 2) (Fin 2) ℤ) 1 0)) :
@@ -732,7 +737,7 @@ theorem upperMat_mul_sl_to_lower {p : ℕ} [NeZero N] [Fact p.Prime] (hp : Nat.P
 /-- **Lower → lower (case `p ∣ σ₁₀`).** For `σ ∈ Γ₁(N)`, `p ∤ N`, if `p ∣ σ₁₀` then the
 diamond-twisted lower representative is fixed (up to a left `Γ₁(N)`-factor) by right multiplication
 by `σ`. -/
-theorem lowerDiamondMat_mul_sl_fixed {p : ℕ} [NeZero N] (hp : Nat.Prime p)
+theorem lowerDiamondMat_mul_sl_fixed {p : ℕ} [NeZero N] (_hp : Nat.Prime p)
     (hpN : Nat.Coprime p N) (σ : SL(2, ℤ)) (hσ : σ ∈ Gamma1 N)
     (hσ10 : (p : ℤ) ∣ (σ : Matrix (Fin 2) (Fin 2) ℤ) 1 0) :
     ∃ γ' : SL(2, ℤ), γ' ∈ Gamma1 N ∧
@@ -904,7 +909,8 @@ theorem mk_tpOp_comp_modSymRep [NeZero N] {p : ℕ} (hp : Nat.Prime p) (hpN : Na
       split_ifs with hbb
       · -- b = b₀ : upper(b₀) → lowerDiamond
         rw [hbb, hL]
-        obtain ⟨γ', hγ', hmat⟩ := upperMat_mul_sl_to_lower hp hpN (s : SL(2, ℤ)) s.property b₀.val hb₀
+        obtain ⟨γ', hγ', hmat⟩ :=
+          upperMat_mul_sl_to_lower hp hpN (s : SL(2, ℤ)) s.property b₀.val hb₀
         exact mk_actMat_coset _ _ k (s : SL(2, ℤ)) γ' hγ' hmat x
       · -- b ≠ b₀ : upper(b) → upper(moebius b)
         have hA : ¬(p : ℤ) ∣ (M 0 0 + ↑b.val * M 1 0) := by
@@ -978,7 +984,8 @@ noncomputable def diamondSymb (N : ℕ) [NeZero N] (k : ℤ) (d : (ZMod N)ˣ) : 
 /-! ## Assembling `T_n` from the prime-power components -/
 
 /-- `T_p` on `𝕄 N k` for **all** primes: `tpSymb` (= the upper sum + diamond-lower) when `(p,N)=1`,
-and `upperSymb` (= `U_p`, the upper sum only) when `p ∣ N`.  Mirrors `HeckeRing.GL2.heckeT_p_all`. -/
+and `upperSymb` (= `U_p`, the upper sum only) when `p ∣ N`.  Mirrors
+`HeckeRing.GL2.heckeT_p_all`. -/
 noncomputable def heckeSymb_p_all (N : ℕ) [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prime p) :
     Module.End ℤ (𝕄 N k) :=
   if hpN : Nat.Coprime p N then tpSymb hp hpN k else upperSymb hp hpN k
@@ -991,7 +998,8 @@ noncomputable def diamondSymb_n (N : ℕ) [NeZero N] (k : ℤ) (n : ℕ) : Modul
 /-- `T_{p^r}` on `𝕄 N k` via the Diamond–Shurman recurrence (over `ℤ`, weight `k ≥ 2`):
 - `T_{p^0} = 1`, `T_{p^1} = T_p`,
 - `T_{p^{r+2}} = T_p · T_{p^{r+1}} - p^{k-1} · ⟨p⟩ · T_{p^r}`.
-The scalar `p^{k-1}` uses `(k-1).toNat` (`= k-1` for `k ≥ 2`).  Mirrors `HeckeRing.GL2.heckeT_ppow`. -/
+The scalar `p^{k-1}` uses `(k-1).toNat` (`= k-1` for `k ≥ 2`).  Mirrors
+`HeckeRing.GL2.heckeT_ppow`. -/
 noncomputable def heckeSymbPpow (N : ℕ) [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prime p) :
     ℕ → Module.End ℤ (𝕄 N k)
   | 0 => 1

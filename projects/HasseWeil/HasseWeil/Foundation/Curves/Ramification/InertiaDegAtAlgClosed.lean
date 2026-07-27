@@ -1,12 +1,17 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Valuation.NormValuation
 import HasseWeil.Foundation.Curves.Map.CurveMap
 import Mathlib.RingTheory.Finiteness.Quotient
 
 /-!
-# `inertiaDeg = 1` at smooth points over algebraically closed base (Piece 9)
+# `inertiaDeg' = 1` at smooth points over algebraically closed base (Piece 9)
 
 **Status**: Partial. Structural inputs (surjectivity of the residue-field
-algebra map, finrank_le_one) delivered. Full `inertiaDeg = 1` closure
+algebra map, finrank_le_one) delivered. Full `inertiaDeg' = 1` closure
 blocked on a `Module.Finite (C₂.CR/Q) (C₁.CR/P)` instance-search issue:
 mathlib's `module_finite_of_liesOver` instance fires when given a
 standard `Algebra A B` instance, but our `coordHom.toAlgebra` is
@@ -38,7 +43,7 @@ F-algebras (when `Q, P` are maximal). Hence the induced algebra map
 between them is surjective, given the scalar tower `F → C₂.CR/Q → C₁.CR/P`.
 
 This is the "hard part" of Piece 9's residue-field computation; combined
-with `Module.Finite` on the pair, it gives `inertiaDeg = 1`. -/
+with `Module.Finite` on the pair, it gives `inertiaDeg' = 1`. -/
 theorem residue_algebraMap_surjective_of_isAlgClosed
     [IsAlgClosed F]
     {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
@@ -70,7 +75,7 @@ theorem residue_finrank_le_one_of_surjective
 
 /-! ### Progress note
 
-The full `inertiaDeg = 1` closure (combining the two lemmas above with
+The full `inertiaDeg' = 1` closure (combining the two lemmas above with
 `Module.finrank_pos`) requires the `Module.Finite (C₂.CR/Q) (C₁.CR/P)`
 instance to fire, which depends on `hfin : Module.Finite C₂.CR C₁.CR`
 being registered as a global instance under the standard `Algebra`
@@ -86,7 +91,7 @@ Workarounds that still hit walls:
 
 The residue-field AlgEquiv route (worker A's task #61) sidesteps this
 by constructing a direct ring isomorphism at each smooth point, then
-transporting `inertiaDeg` across it — bypassing the instance search
+transporting `inertiaDeg'` across it — bypassing the instance search
 entirely. Estimated ~100 LOC for that route.
 -/
 

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
 
 /-!
 # Bridge from substantive matrix content to RegOf-squared form
@@ -103,8 +105,8 @@ theorem regOfFamilySqEqProdNontrivialQeSq_of_detASubBSqEqProdQeSq
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) (hp_two : 2 < p)
     (h : DetASubBSqEqProdNontrivialQeSq (p := p) K) :
     RegOfFamilySqEqProdNontrivialQeSq (p := p) K hp_odd hp_three := by
-  unfold RegOfFamilySqEqProdNontrivialQeSq
-  unfold DetASubBSqEqProdNontrivialQeSq at h
+  simp only [RegOfFamilySqEqProdNontrivialQeSq]
+  simp only [DetASubBSqEqProdNontrivialQeSq] at h
   have h_reg_sq_R := regOfFamily_sq_eq_two_pow_mul_det_A_sub_B_sq
     (p := p) K hp_odd hp_three hp_two
   have h_reg_sq_C : ((NumberField.Units.regOfFamily
@@ -182,7 +184,7 @@ theorem det_sinnottMatrix_A_sub_B_via_rank_one
               sinnottRankOnePerturbationVec p K w) *
             (sinnottShiftedConvolutionMatrix p K hp_odd hp_three)⁻¹ *
             Matrix.replicateCol PUnit.{1} (fun _ => (-1 : ℂ))).det := by
-  unfold SinnottConvolutionMatrixDetUnit at hU
+  simp only [SinnottConvolutionMatrixDetUnit] at hU
   rw [sinnottMatrix_A_sub_B_as_replicateCol_replicateRow_perturbation
     (p := p) K hp_odd hp_three]
   exact Matrix.det_add_replicateCol_mul_replicateRow hU _ _
@@ -259,8 +261,8 @@ theorem detASubBSqEqProdNontrivialQeSq_of_detUMulScalar_named
     Fintype.ofFinite _
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Classical.decEq _
-  unfold DetASubBSqEqProdNontrivialQeSq
-  unfold DetUMulScalarSqEqProdNontrivialQeSq at h
+  simp only [DetASubBSqEqProdNontrivialQeSq]
+  simp only [DetUMulScalarSqEqProdNontrivialQeSq] at h
   have h_det := det_sinnottMatrix_A_sub_B_via_rank_one
     (p := p) K hp_odd hp_three hU
   -- Goal: (((det(A - B) : ℝ)) : ℂ)² = (∏ qe)²
@@ -410,8 +412,8 @@ theorem detASubBSqEqProdNontrivialQeSq_of_detASubBEqProdNontrivialQe
     Fintype.ofFinite _
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Classical.decEq _
-  unfold DetASubBSqEqProdNontrivialQeSq
-  unfold DetASubBEqProdNontrivialQe at h
+  simp only [DetASubBSqEqProdNontrivialQeSq]
+  simp only [DetASubBEqProdNontrivialQe] at h
   rcases h with h | h
   · rw [h]
   · rw [h]; ring
@@ -853,7 +855,7 @@ theorem charMatrix_nontriv_sq_mul_A_sub_B_transpose_eq_D_nontriv_sq_sub_rank_one
           sinnottCorrectionColVec (p := p) K
               ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val *
             sinnottCorrectionRowVec (p := p) K hp_odd hp_three i) := by
-  unfold charMatrix_K_plus_nontriv_sq sinnottDiagonalEigenvalueMatrix_nontriv_sq
+  simp only [charMatrix_K_plus_nontriv_sq, sinnottDiagonalEigenvalueMatrix_nontriv_sq]
   ext w i
   -- Use Matrix.submatrix_apply and Matrix.mul_apply to unfold both sides entry-wise.
   simp only [Matrix.submatrix_apply, Matrix.mul_apply, Matrix.transpose_apply,

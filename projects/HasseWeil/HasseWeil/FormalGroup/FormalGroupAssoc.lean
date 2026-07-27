@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.FormalGroup.FormalGroup
 import Mathlib.RingTheory.PowerSeries.Basic
 
@@ -80,7 +85,7 @@ private noncomputable def compFGL (s : ℕ → R) (n : ℕ) : R :=
 private noncomputable def formalMulByNat_coeff : ℕ → ℕ → R :=
   WellFoundedRelation.wf.fix fun m ih ↦
     if hm0 : m = 0 then fun _ ↦ 0
-    else if hm1 : m = 1 then fun n ↦ if n = 1 then 1 else 0
+    else if _hm1 : m = 1 then fun n ↦ if n = 1 then 1 else 0
     else fun n ↦ compFGL W (fun k ↦ ih (m - 1)
       (Nat.sub_lt (Nat.pos_of_ne_zero hm0) one_pos) k) n
 
@@ -116,18 +121,16 @@ theorem formalGroupLaw_coeff_right_unit (n : ℕ) :
       if n = 1 then 1 else 0 := by
   -- d 0 = n, d 1 = 0, so the definition enters the "j = 0" branch
   -- and returns "if i = 1 then 1 else 0" = "if n = 1 then 1 else 0".
-  unfold formalGroupLaw_coeff
-  simp only [Finsupp.single_apply, if_true, if_false, Fin.val_zero, Fin.val_one,
-    show (0 : Fin 2) ≠ 1 from by decide, show (1 : Fin 2) ≠ 0 from by decide]
+  simp only [formalGroupLaw_coeff]
+  simp only [Finsupp.single_apply, if_true, if_false, show (0 : Fin 2) ≠ 1 from by decide]
   split_ifs <;> simp_all
 
 /-- `F(0, Y) = Y`: coefficient `F_{0,n} = [n=1]`. -/
 theorem formalGroupLaw_coeff_left_unit (n : ℕ) :
     formalGroupLaw_coeff W (Finsupp.single 1 n) =
       if n = 1 then 1 else 0 := by
-  unfold formalGroupLaw_coeff
-  simp only [Finsupp.single_apply, if_true, if_false, Fin.val_zero, Fin.val_one,
-    show (0 : Fin 2) ≠ 1 from by decide, show (1 : Fin 2) ≠ 0 from by decide]
+  simp only [formalGroupLaw_coeff]
+  simp only [Finsupp.single_apply, if_true, if_false, show (1 : Fin 2) ≠ 0 from by decide]
 
 /-! ### The ring homomorphism property of the pullback coefficient (Silverman III.5.6) -/
 
@@ -177,7 +180,7 @@ private noncomputable def fgl_coeff (i j : ℕ) : R :=
     At linear order in T, only the terms `F_{1,0}·X` and `F_{0,1}·Y` contribute,
     since `X^i Y^j` with `i+j ≥ 2` starts at degree `≥ 2` when `X = O(T), Y = O(T)`.
     Since `F_{1,0} = 1` and `F_{0,1} = 1`, the result is `f₁ + g₁`. -/
-theorem pullbackCoeff_add (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
+theorem pullbackCoeff_add (f g : ℕ → R) (_hf0 : f 0 = 0) (_hg0 : g 0 = 0) :
     -- For any bivariate power series F with F(X,0) = X and F(0,Y) = Y,
     -- the linear coefficient of F(f(T), g(T)) is f₁ + g₁.
     -- We state this for the specific formal group law:
@@ -195,7 +198,7 @@ theorem pullbackCoeff_add (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
     (both vanishing at 0) is the product of their linear coefficients.
 
     Reference: Silverman III.5.6, proof of (a). -/
-theorem pullbackCoeff_comp (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
+theorem pullbackCoeff_comp (f g : ℕ → R) (_hf0 : f 0 = 0) (_hg0 : g 0 = 0) :
     -- The n-th coefficient of f(g(T)) at n=1 is f₁ · g₁.
     -- f(g(T)) = Σ_n f_n · g(T)^n. The coeff of T in g(T)^n is:
     --   n=0: 0 (constant term of 1 is at T^0, not T^1)
@@ -205,7 +208,7 @@ theorem pullbackCoeff_comp (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
     f 1 * g 1 = f 1 * g 1 := rfl
 
 /-- Packaged version: the composition linear coefficient. -/
-theorem comp_coeff_one (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
+theorem comp_coeff_one (f g : ℕ → R) (hf0 : f 0 = 0) (_hg0 : g 0 = 0) :
     -- For the formal composition Σ_n f_n · (univPow g n) at index 1:
     (Finset.range 2).sum (fun n ↦ f n * univPow g n 1) = f 1 * g 1 := by
   simp [Finset.sum_range_succ, hf0, univPow]
@@ -236,23 +239,9 @@ theorem comp_coeff_one (f g : ℕ → R) (hf0 : f 0 = 0) (hg0 : g 0 = 0) :
 
     Reference: Silverman III.6.2c (p.83). -/
 theorem dual_additivity_algebraic {K : Type*} [Field K] (a b d_a d_b d_ab : K)
-    (ha : a ≠ 0) (hb : b ≠ 0) (hab : a + b ≠ 0)
+    (_ha : a ≠ 0) (_hb : b ≠ 0) (_hab : a + b ≠ 0)
     (hquad : d_ab * a * b = (d_a + d_b) * a * b + a ^ 2 * d_b + b ^ 2 * d_a) :
     d_ab * a * b = (a + b) * (d_a * b + d_b * a) := by
   rw [hquad]; ring
-
--- The full proof of dual additivity (III.6.2(c), ticket #39) combines:
--- 1. pullbackCoeff_add (proved above): a_{φ+ψ} = a_φ + a_ψ
--- 2. comp_coeff_one (proved above): a_{φ∘ψ} = a_φ · a_ψ
--- 3. pullbackCoeff_mulByInt (proved above): a_{[m]} = m
--- 4. a dual-composition witness φ̂∘φ = [deg φ] (an `IsDualOf` conjunct,
---    DualIsogeny.lean; the choice-based `isogDual_comp_self` was deleted
---    with the refuted `exists_dual`)
--- 5. dual_additivity_algebraic (proved above): the algebraic identity
--- 6. Injectivity of φ ↦ a_φ on separable endomorphisms (from III.5.6b)
---
--- The connection between formal group coefficients and actual curve endomorphisms
--- requires the identification of the formal group with the local completion of E
--- near O (Silverman IV.1-2), which is infrastructure from tickets #31-#32.
 
 end HasseWeil

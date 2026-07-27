@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.SinnottRankOnePerturbation
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.SinnottRankOnePerturbation
 
 @[expose] public section
 
@@ -152,7 +154,7 @@ theorem sinnottMatrix_A_sub_B_apply_eq_sub_shifted
             kplusEmbeddingIndexQuotient (p := p) K
               NumberField.Units.dirichletUnitTheorem.w₀) 1 := by
   rw [sinnottMatrix_A_sub_B_apply_eq_sub p K hp_odd hp_three i w]
-  unfold kplusEmbeddingIndexQuotientShifted
+  simp only [kplusEmbeddingIndexQuotientShifted]
   rw [show (kplusEmbeddingIndexQuotient p K w.val *
       (kplusEmbeddingIndexQuotient p K
         NumberField.Units.dirichletUnitTheorem.w₀)⁻¹) *

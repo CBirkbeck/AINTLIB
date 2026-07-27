@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Character
@@ -56,6 +61,7 @@ def residueGaussSum [NeZero p]
   gaussSum (residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R) psi_q
 
 omit [IsDomain R'] in
+/-- `residueGaussSum` unfolds to the Gauss sum of the residue character. -/
 @[simp]
 theorem residueGaussSum_def [NeZero p]
     (zeta_q : kˣ) (hzeta_q : IsPrimitiveRoot zeta_q p)
@@ -106,7 +112,7 @@ theorem _root_.gaussSum_ringHomComp
     {R' R'' : Type*} [CommRing R'] [CommRing R'']
     (χ : MulChar R R') (ψ : AddChar R R') (σ : R' →+* R'') :
     σ (gaussSum χ ψ) = gaussSum (χ.ringHomComp σ) (σ.toMonoidHom.compAddChar ψ) := by
-  unfold gaussSum
+  simp only [gaussSum]
   rw [map_sum]
   refine Finset.sum_congr rfl fun x _ => ?_
   simp only [MulChar.ringHomComp_apply, MonoidHom.compAddChar_apply,
@@ -160,7 +166,7 @@ theorem finiteFieldExponent_eq_zero_iff
     (hdiv : p ∣ Fintype.card k - 1) (x : kˣ) :
     finiteFieldExponent zeta_q hzeta_q hdiv x = 0 ↔
       finiteFieldUnit hdiv x = 1 := by
-  unfold finiteFieldExponent
+  simp only [finiteFieldExponent]
   rw [(hzeta_q.zmodEquivZPowers).symm.map_eq_zero_iff]
   -- Goal: Additive.ofMul ⟨finiteFieldUnit hdiv x, _⟩ = 0 ↔ finiteFieldUnit hdiv x = 1
   constructor
@@ -219,7 +225,7 @@ theorem exists_finiteFieldUnit_ne_one
   obtain ⟨g, hg⟩ := IsCyclic.exists_generator (α := kˣ)
   refine ⟨g, ?_⟩
   intro h_eq
-  unfold finiteFieldUnit at h_eq
+  simp only [finiteFieldUnit] at h_eq
   have h_order : orderOf g = Fintype.card k - 1 := by
     rw [orderOf_eq_card_of_forall_mem_zpowers hg, Nat.card_eq_fintype_card,
         Fintype.card_units]

@@ -240,6 +240,7 @@ noncomputable def coarsenIdeal (v : Valuation A Γ₀) (I : Ideal A) :
     Valuation A (WithZero (Γ₀ˣ ⧸ (cGammaIdeal v I).toSubgroup)) :=
   (asWithZeroUnits v).coarsen (cGammaIdeal v I)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `coarsenIdeal v I a = 0` when `v(a) = 0` — coarsening preserves zero. -/
 theorem coarsenIdeal_eq_zero_of_eq_zero (v : Valuation A Γ₀) (I : Ideal A)
     {a : A} (hva : v a = 0) :
@@ -253,6 +254,7 @@ theorem coarsenIdeal_eq_zero_of_eq_zero (v : Valuation A Γ₀) (I : Ideal A)
   rw [h_asWZ]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Key trivialisation property: `coarsenIdeal v I a = 1` for `a ∈ I`
 with `v(a) ≠ 0`.** This is the substance of Wedhorn 7.4(iii) — the
 coarsening kills every value `v(a)` for `a ∈ I` (sends it to the

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.DirichletCharacter.GaussSum
@@ -604,7 +609,7 @@ theorem ZMod.isIntegral_stdAddChar (a : ZMod p) :
 Dirichlet character `χ` modulo a prime `p` is an algebraic integer. -/
 theorem isIntegral_gaussSum_stdAddChar (χ : DirichletCharacter ℂ p) :
     IsIntegral ℤ (gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ)) := by
-  unfold gaussSum
+  simp only [gaussSum]
   refine IsIntegral.sum _ fun a _ ↦ IsIntegral.mul ?_ ?_
   · exact DirichletCharacter.isIntegral_apply p χ a
   · exact ZMod.isIntegral_stdAddChar p a
@@ -654,7 +659,7 @@ theorem gaussSum_mem_algebraAdjoin_stickelbergerComplexRoot
     congr 1
     push_cast
     field_simp
-  unfold gaussSum
+  simp only [gaussSum]
   refine Subalgebra.sum_mem _ fun a _ ↦ Subalgebra.mul_mem _ ?_ ?_
   · -- `χ a ∈ Algebra.adjoin ℤ {ζ}` via `adjoin ℤ {ζ^p} ⊆ adjoin ℤ {ζ}`.
     have h_pow : χ ^ (p - 1) = 1 := by

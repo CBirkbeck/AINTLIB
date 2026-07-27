@@ -1,6 +1,8 @@
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.NumberTheory.MulChar.Basic
-import Mathlib.Tactic
+module
+
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.NumberTheory.MulChar.Basic
+public import Mathlib.Tactic
 
 /-!
 # Deleted Fourier matrices on the augmentation subspace
@@ -12,6 +14,7 @@ finite abelian group `G`, a function `q : G → ℂ`, and the deleted matrix
 the nontrivial Fourier coefficients.  The proof uses the deleted character
 matrix and includes the rank-one correction in its inverse.
 -/
+@[expose] public section
 
 noncomputable section
 
@@ -140,7 +143,7 @@ theorem deletedFourierCoeff_mulLeft
     (q : G → ℂ) (χ : MulChar G ℂ) (h₀ : G) :
     deletedFourierCoeff (G := G) (fun h ↦ q (h₀ * h)) χ =
       χ h₀ * deletedFourierCoeff (G := G) q χ := by
-  unfold deletedFourierCoeff
+  simp only [deletedFourierCoeff]
   have hsum := Equiv.sum_comp (Equiv.mulLeft h₀)
     (fun h : G ↦ q h * (χ (h₀⁻¹ * h))⁻¹)
   have hleft :
@@ -242,7 +245,7 @@ theorem sum_translate_inv_mulChar
     rw [hk]
   rw [hleft] at hsum
   rw [hsum]
-  unfold deletedFourierCoeff
+  simp only [deletedFourierCoeff]
   have hterm : ∀ t : G, q t * χ (t⁻¹ * h) =
       χ h * (q t * (χ t)⁻¹) := by
     intro t
@@ -555,7 +558,7 @@ theorem deletedFourierCoeffMul_mulLeft
     (q : G → ℂ) (χ : MulChar G ℂ) (h₀ : G) :
     deletedFourierCoeffMul (G := G) (fun h ↦ q (h₀ * h)) χ =
       (χ h₀)⁻¹ * deletedFourierCoeffMul (G := G) q χ := by
-  unfold deletedFourierCoeffMul
+  simp only [deletedFourierCoeffMul]
   have hsum := Equiv.sum_comp (Equiv.mulLeft h₀)
     (fun h : G ↦ χ (h₀⁻¹ * h) * q h)
   have hleft :
@@ -580,7 +583,7 @@ theorem deletedFourierCoeff_invArg_eq_mul
     (q : G → ℂ) (χ : MulChar G ℂ) :
     deletedFourierCoeff (G := G) (fun x ↦ q x⁻¹) χ =
       deletedFourierCoeffMul (G := G) q χ := by
-  unfold deletedFourierCoeff deletedFourierCoeffMul
+  simp only [deletedFourierCoeff, deletedFourierCoeffMul]
   have hsum := Equiv.sum_comp (Equiv.inv G)
     (fun h : G ↦ q h * (χ h⁻¹)⁻¹)
   have hleft :

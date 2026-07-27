@@ -158,7 +158,7 @@ private theorem toAffineLift_zsmul_fromAffine_eq_toAffine_smulEval (m : ℤ) {x�
         (m • WeierstrassCurve.Jacobian.Point.fromAffine
           (Affine.Point.some x₀ y₀ h_ns)) =
       WeierstrassCurve.Jacobian.Point.toAffine V (smulEval V x₀ y₀ m) := by
-  unfold WeierstrassCurve.Jacobian.Point.toAffineLift
+  simp only [WeierstrassCurve.Jacobian.Point.toAffineLift]
   rw [WeierstrassCurve.zsmul_eq_smulEval (W := V) h_ns m]
   rfl
 
@@ -203,8 +203,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
@@ -214,6 +212,7 @@ local notation "KE" => W.toAffine.FunctionField
 
 /-! ### Coordinate-ring elements evaluate -/
 
+set_option linter.unusedSectionVars false in
 /-- **Coordinate-ring elements evaluate**: the function-field image of `mk p` takes the
 value `p(P.x, P.y)` at every smooth `P`.  The residue computation of
 `pullbackEvaluation_of_coordHom`, packaged with the value in `evalEval` form. -/
@@ -241,39 +240,10 @@ theorem evaluatesTo_algebraMap_mk (P : (W_smooth W).SmoothPoint)
         algebraMap F R (p.evalEval P.x P.y)) := by
     rw [IsScalarTower.algebraMap_apply F R KE (p.evalEval P.x P.y)]
     exact (map_sub (algebraMap R KE) _ _).symm
-  unfold EvaluatesTo
+  simp only [EvaluatesTo]
   rw [hrw]
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := W_smooth W) _ P).mpr hmem
-
-/-- **The good-fraction representation of a local function** (curve-generic, to keep the
-localization instances uniform): a function with `v_Q ≤ 1` is a quotient of coordinate-ring
-elements whose denominator does not vanish at `Q`.  Lift to the local ring at `Q`
-(`mem_localRingAt_image_of_pointValuation_le_one`) and clear the `mk'` denominator. -/
-private theorem exists_mul_algebraMap_eq_of_pointValuation_le_one
-    {C : SmoothPlaneCurve F} {Q : C.SmoothPoint} {h : C.FunctionField}
-    (hh : C.pointValuation Q h ≤ 1) :
-    ∃ a b : C.CoordinateRing, b ∉ C.maximalIdealAt Q ∧
-      h * algebraMap C.CoordinateRing C.FunctionField b =
-        algebraMap C.CoordinateRing C.FunctionField a := by
-  obtain ⟨xL, hxL⟩ :=
-    Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one h hh
-  obtain ⟨a, s, hmk⟩ := IsLocalization.exists_mk'_eq (C.maximalIdealAt Q).primeCompl xL
-  refine ⟨a, (s : C.CoordinateRing), s.prop, ?_⟩
-  have h2 : algebraMap (C.localRingAt Q) C.FunctionField
-        (IsLocalization.mk' (C.localRingAt Q) a s) *
-      algebraMap (C.localRingAt Q) C.FunctionField
-        (algebraMap C.CoordinateRing (C.localRingAt Q) (s : C.CoordinateRing)) =
-      algebraMap (C.localRingAt Q) C.FunctionField
-        (algebraMap C.CoordinateRing (C.localRingAt Q) a) :=
-    (map_mul (algebraMap (C.localRingAt Q) C.FunctionField) _ _).symm.trans
-      (congrArg (algebraMap (C.localRingAt Q) C.FunctionField)
-        (IsLocalization.mk'_spec (C.localRingAt Q) a s))
-  rw [hmk, hxL,
-    ← IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField,
-    ← IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q)
-      C.FunctionField] at h2
-  exact h2
 
 /-! ### Evaluation transport along a witnessed pullback
 
@@ -343,17 +313,19 @@ private theorem pullback_algebraMap_evaluatesTo_evalAt
   exact pullback_mk_evaluatesTo hx hy p
 
 variable {W} in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A function vanishing-to-value at `Q` (its `g - c` has `pointValuation < 1`) is a good
 fraction over the local ring at `Q`: there are coordinate-ring elements `a`, `b` with
 `b ∉ maximalIdealAt Q`, `(g - c) * b = a`, and so `b(Q) ≠ 0` while `a(Q) = 0`.  Packages
-`exists_mul_algebraMap_eq_of_pointValuation_le_one` with the resulting `evalAt` facts:
+`Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one` with the resulting
+`evalAt` facts:
 multiplying by the unit `b` preserves the `< 1` valuation, forcing `a ∈ maximalIdealAt Q`. -/
 private theorem exists_good_fraction_of_evaluatesTo {Q : (W_smooth W).SmoothPoint} {g : KE}
     {c : F} (hg : EvaluatesTo W Q g c) :
     ∃ a b : R, (g - algebraMap F KE c) * algebraMap R KE b = algebraMap R KE a ∧
       (W_smooth W).evalAt Q b ≠ 0 ∧ (W_smooth W).evalAt Q a = 0 := by
   obtain ⟨a, b, hbm', hfrac'⟩ :=
-    exists_mul_algebraMap_eq_of_pointValuation_le_one (C := W_smooth W)
+    Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one (C := W_smooth W)
       (h := g - algebraMap F KE c) (le_of_lt hg)
   have hsm : b ∉ (W_smooth W).maximalIdealAt Q := hbm'
   have hfrac : (g - algebraMap F KE c) * algebraMap R KE b = algebraMap R KE a := hfrac'
@@ -486,6 +458,7 @@ theorem PullbackEvaluation.comp_bad_finite {β₂ : Isogeny W.toAffine W.toAffin
 def mulByIntSingular (n : ℤ) : Set (W_smooth W).SmoothPoint :=
   {P : (W_smooth W).SmoothPoint | (W.ψ n).evalEval P.x P.y = 0}
 
+set_option linter.unusedSectionVars false in
 /-- The zero locus of `ψ_n` is finite for `n ≠ 0`: it sits inside the zero set of the
 nonzero function `ψ_ff W n ∈ K(E)` (Silverman II.1.2, `finite_setOf_ord_P_nonzero`). -/
 theorem mulByIntSingular_finite (n : ℤ) (hn : n ≠ 0) : (mulByIntSingular W n).Finite := by
@@ -510,6 +483,7 @@ theorem mulByIntSingular_finite (n : ℤ) (hn : n ≠ 0) : (mulByIntSingular W n
   have h2' : ((1 : ℤ) : WithTop ℤ) ≤ ((0 : ℤ) : WithTop ℤ) := by exact_mod_cast h2
   exact absurd (WithTop.coe_le_coe.mp h2') (by norm_num)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The on-curve identity `φ_n = Φ_n` evaluated at a smooth point: in the coordinate ring
 `mk (φ_n) = mk (C (Φ_n))` (`mk_φ`), so the two-variable evaluation of `φ_n` agrees with the
 one-variable evaluation of `Φ_n` at any smooth point. -/
@@ -525,6 +499,7 @@ private theorem mulByInt_evalEval_φ_eq_Φ (n : ℤ) (P : (W_smooth W).SmoothPoi
     WeierstrassCurve.Affine.CoordinateRing.mk_φ (W := W.toAffine) n
   rw [← h1, h3, h2, Polynomial.evalEval_C]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The on-curve identity `ψ_n² = ΨSq_n` evaluated at a smooth point: in the coordinate ring
 `mk (ψ_n)² = mk (C (ΨSq_n))` (via `mk_ψ` then `mk_Ψ_sq`), so the square of the two-variable
 evaluation of `ψ_n` agrees with the one-variable evaluation of `ΨSq_n` at any smooth
@@ -652,8 +627,6 @@ namespace HasseWeil.EC
 
 open Curves HasseWeil.WeilPairing
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F] [IsAlgClosed F]
 variable {W : WeierstrassCurve F} [W.toAffine.IsElliptic]
@@ -804,8 +777,6 @@ end HasseWeil.EC
 
 namespace HasseWeil.EC
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 /-! ### The cross-curve covariance of the relative Frobenius (hypothesis-free)
 
@@ -836,7 +807,7 @@ private theorem relativeFrobenius_pullback_Φ_ff (e : ℕ) (n : ℤ) :
         (E.iterateFrobeniusTwist p e).toAffine.FunctionField
         (WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
           (algebraMap (Polynomial F) E.toAffine.CoordinateRing (E.Φ n))) := by
-    unfold Φ_ff
+    simp only [Φ_ff]
     congr 1
     rw [show algebraMap (Polynomial F) E.toAffine.CoordinateRing (E.Φ n) =
       WeierstrassCurve.Affine.CoordinateRing.mk E.toAffine (Polynomial.C (E.Φ n)) from rfl,
@@ -860,7 +831,7 @@ private theorem relativeFrobenius_pullback_ΨSq_ff (e : ℕ) (n : ℤ) :
         (E.iterateFrobeniusTwist p e).toAffine.FunctionField
         (WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
           (algebraMap (Polynomial F) E.toAffine.CoordinateRing (E.ΨSq n))) := by
-    unfold ΨSq_ff
+    simp only [ΨSq_ff]
     congr 1
     rw [show algebraMap (Polynomial F) E.toAffine.CoordinateRing (E.ΨSq n) =
       WeierstrassCurve.Affine.CoordinateRing.mk E.toAffine
@@ -884,7 +855,7 @@ private theorem relativeFrobenius_pullback_ψ_ff (e : ℕ) (n : ℤ) :
         (E.iterateFrobeniusTwist p e).toAffine.FunctionField
         (WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
           (WeierstrassCurve.Affine.CoordinateRing.mk E.toAffine (E.ψ n))) := by
-    unfold ψ_ff
+    simp only [ψ_ff]
     congr 1
     rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
     exact congrArg
@@ -905,7 +876,7 @@ private theorem relativeFrobenius_pullback_ω_ff (e : ℕ) (n : ℤ) :
         (E.iterateFrobeniusTwist p e).toAffine.FunctionField
         (WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (iterateFrobenius F p e)
           (WeierstrassCurve.Affine.CoordinateRing.mk E.toAffine (E.ω n))) := by
-    unfold ω_ff
+    simp only [ω_ff]
     congr 1
     rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
     exact congrArg
@@ -1059,7 +1030,6 @@ theorem relativeFrobenius_compose_relativeVerschiebungFinite [Fintype F] (e : �
 -- `[Fintype F]` is genuinely required: the statement names the finite-base witness
 -- `mulByInt_p_not_isSeparable_finite` (which carries it), but the witness sits in a
 -- proof-irrelevant position, so the linter cannot see the dependence.
-set_option linter.unusedFintypeInType false in
 /-- **The relative-Frobenius double dual over a finite base** (axiom-clean
 instantiation): `V̂^ = Frob` for the finite-base Verschiebung. -/
 theorem relativeVerschiebungFinite_dual_eq_relativeFrobenius [Fintype F] (e : ℕ) :

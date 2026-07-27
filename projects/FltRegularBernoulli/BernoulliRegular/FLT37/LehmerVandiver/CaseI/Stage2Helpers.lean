@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.PrimaryNormalization
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.PrimaryNormalization
 
 /-!
 # LV010 Stage 2 helpers: regularity-free local consequences of weak primary

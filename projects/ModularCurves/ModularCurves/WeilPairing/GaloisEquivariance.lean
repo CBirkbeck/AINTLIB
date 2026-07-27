@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.HasseBound.WeilPairing.Pairing
 import HasseWeil.HasseBound.WeilPairing.Constancy
 import HasseWeil.HasseBound.WeilPairing.DivisorGalois
@@ -63,14 +68,13 @@ namespace ModularCurves
 
 namespace WeilPairingGalois
 
-set_option linter.unusedSectionVars false
-set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) (σ : F ≃+* F)
 
 /-! ### Layer 1 — the function-field automorphism induced by `σ` -/
 
+set_option linter.unusedSectionVars false in
 /-- **`CoordinateRing.map σ` is surjective** for a ring equivalence `σ` of the base field:
 every `mk q` in the target is the image of `mk (q.map (mapRingHom σ.symm))`, since
 `σ ∘ σ.symm = id`. Mirror of `HasseWeil.WeilPairing.coordRingMap_surjective` at an
@@ -146,6 +150,7 @@ theorem functionFieldEquivRaw_algebraMap (a : F) :
     coordRingEquiv_apply, coordRingMap_algebraMap_base,
     show σ.toRingHom a = σ a from rfl, ← IsScalarTower.algebraMap_apply]
 
+set_option linter.unusedSectionVars false in
 /-- The codomain cast fixes base constants. Mirror of `ffFrobCast_algebraMap`. -/
 theorem functionFieldCast_algebraMap (hW : W.map σ.toRingHom = W) (b : F) :
     functionFieldCast W σ hW
@@ -212,6 +217,7 @@ end Generators
 
 /-! ### Layer 2 — the point action `σ • P` -/
 
+set_option linter.unusedSectionVars false in
 /-- Nonsingularity is preserved by a curve-fixing base automorphism:
 `(x, y)` nonsingular on `W` implies `(σ x, σ y)` nonsingular on `W`. -/
 theorem nonsingular_ringEquiv (hW : W.map σ.toRingHom = W) {x y : F}
@@ -280,6 +286,7 @@ theorem pointHom_injective (hW : W.map σ.toRingHom = W) :
     rw [WeierstrassCurve.Affine.Point.some.injEq]
     exact ⟨σ.injective h.1, σ.injective h.2⟩
 
+set_option linter.unusedSectionVars false in
 /-- The inverse automorphism also fixes the curve: `W.map σ.symm = W` from
 `W.map σ = W` (via `map_map` and `map_id`). -/
 theorem map_symm_eq (hW : W.map σ.toRingHom = W) : W.map σ.symm.toRingHom = W := by
@@ -295,6 +302,7 @@ section Conjugation
 
 variable [W.toAffine.IsElliptic]
 
+set_option linter.unusedSectionVars false in
 /-- `σ_KE` fixes the base-changed curve `W_KE W = W.map (algebraMap F F(E))`: its
 coefficients `algebraMap (W.aᵢ)` are sent to `algebraMap (σ W.aᵢ) = algebraMap W.aᵢ`
 (by `hW`). This feeds the σ-equivariance of the translation formulas below. -/
@@ -308,6 +316,7 @@ theorem mapKE_functionFieldEquiv_eq (hW : W.map σ.toRingHom = W) :
     exact functionFieldEquiv_algebraMap W σ hW a
   rw [W_KE, WeierstrassCurve.map_map, hcomp, ← WeierstrassCurve.map_map, hW]
 
+set_option linter.unusedSectionVars false in
 /-- **Generic σ-equivariance of the translation formulas** for a ring endomorphism `φ`
 of the function field that fixes the base-changed curve, fixes the generators, and acts
 by `σ` on base constants: `φ` sends `translateSlope_xy/translateX_xy/translateY_xy` at
@@ -459,6 +468,7 @@ section DivisorDescent
 
 variable [W.toAffine.IsElliptic]
 
+set_option linter.unusedSectionVars false in
 /-- `coordRingEquiv` sends `maximalIdealAt P` to `maximalIdealAt Q` on the mapped curve,
 where `Q` has coordinates `(σ P.x, σ P.y)`. Mirror of `map_maximalIdealAt_crFrobEquiv`,
 via the generic `map_XYIdeal`. -/
@@ -490,10 +500,12 @@ noncomputable def pointOnMapped (hW : W.map σ.toRingHom = W)
     have hM : (W.map σ.toRingHom).toAffine = W.toAffine := by rw [hW]
     rw [hM]; exact P.nonsingular
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem pointOnMapped_x (hW : W.map σ.toRingHom = W)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) :
     (pointOnMapped W σ hW P).x = P.x := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem pointOnMapped_y (hW : W.map σ.toRingHom = W)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) :
     (pointOnMapped W σ hW P).y = P.y := rfl
@@ -536,6 +548,7 @@ theorem pointValuation_functionFieldEquiv (hW : W.map σ.toRingHom = W)
       exact (map_maximalIdealAt_coordRingEquiv W σ Q (pointOnMapped W σ hW P)
         (by rw [pointOnMapped_x, hPx]) (by rw [pointOnMapped_y, hPy])).symm) g
 
+set_option linter.unusedSectionVars false in
 /-- `coordRingEquiv` on the `F[X]`-basis decomposition `p • 1 + q • y`: it maps the
 coefficients through `Polynomial.map σ` and fixes the basis `{1, y}`. Mirror of
 `crFrobEquiv_smul_basis`. -/
@@ -639,14 +652,17 @@ noncomputable def smoothPointInv (hW : W.map σ.toRingHom = W)
   y := σ.symm P.y
   nonsingular := nonsingular_ringEquiv W σ.symm (map_symm_eq W σ hW) P.nonsingular
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem smoothPointInv_x (hW : W.map σ.toRingHom = W)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) :
     (smoothPointInv W σ hW P).x = σ.symm P.x := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem smoothPointInv_y (hW : W.map σ.toRingHom = W)
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) :
     (smoothPointInv W σ hW P).y = σ.symm P.y := rfl
 
+set_option linter.unusedSectionVars false in
 /-- `σ • (smoothPointInv P) = P` at the affine-point level. Mirror of
 `geomFrobeniusPointFun_geomFrobSmoothPointInv`. -/
 theorem pointHom_smoothPointInv (hW : W.map σ.toRingHom = W)
@@ -671,10 +687,11 @@ theorem ord_P_functionFieldEquiv (hW : W.map σ.toRingHom = W)
     (g : W.toAffine.FunctionField) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P (functionFieldEquiv W σ hW g) =
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P (smoothPointInv W σ hW P) g := by
-  unfold HasseWeil.Curves.SmoothPlaneCurve.ord_P
+  simp only [HasseWeil.Curves.SmoothPlaneCurve.ord_P]
   rw [pointValuation_functionFieldEquiv W σ hW P (smoothPointInv W σ hW P)
     (σ.apply_symm_apply P.x).symm (σ.apply_symm_apply P.y).symm g]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Fibre-divisor place comparison** at an affine place: the coefficient of
 `[ℓ]^*(σ•T)` at `P` equals the coefficient of `[ℓ]^*(T)` at `σ⁻¹•P`, because
 `[ℓ](σ⁻¹•P) = T ⟺ [ℓ]P = σ•T` (the action is additive and injective). Mirror of
@@ -706,6 +723,8 @@ theorem pullbackDiv_smoothPointInv_eq (hW : W.map σ.toRingHom = W)
     rw [show P.toAffinePoint = pointHom W σ hW
         (smoothPointInv W σ hW P).toAffinePoint from hPrec.symm, ← hzsmul, h]
 
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Fibre-divisor place comparison at infinity**: `[ℓ]^*(σ•T) ∞ = [ℓ]^*(T) ∞`
 (`0 = σ•T ⟺ 0 = T`). Mirror of `pullbackDiv_geomFrob_infinity`. -/
 theorem pullbackDiv_pointHom_infinity (hW : W.map σ.toRingHom = W)

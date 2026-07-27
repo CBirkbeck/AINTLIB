@@ -56,9 +56,7 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
+omit [DecidableEq F] in
 /-- `pointValuation P f = exp (-n)` from `ord_P P f = n` (for `f ≠ 0`). Curve-side
 mirror of `ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq`, kept local to avoid an
 import of `Hasse.L6Witnesses`. -/
@@ -67,12 +65,13 @@ theorem pointValuation_eq_exp_neg_of_ord_P_eq {C : Curves.SmoothPlaneCurve F} {P
     C.pointValuation P f = WithZero.exp (-n) := by
   have hv : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
   have hord : C.ord_P P f = ((-(WithZero.unzero hv).toAdd : ℤ) : WithTop ℤ) := by
-    unfold Curves.SmoothPlaneCurve.ord_P
+    simp only [Curves.SmoothPlaneCurve.ord_P]
     rw [dif_neg hv]
   have hneq : n = -(WithZero.unzero hv).toAdd := by exact_mod_cast (hord.symm.trans hn).symm
   rw [hneq, neg_neg, WithZero.exp, ofAdd_toAdd, WithZero.coe_unzero]
 
 open Polynomial in
+omit [W.toAffine.IsElliptic] in
 /-- **Polynomial valuation via the leading monomial.** If `w u = exp 2` and `w`
 is trivial on nonzero constants, then `w (p(u)) = exp (2·natDeg p)` for nonzero `p`. -/
 theorem valuation_aeval_eq_exp (w : Valuation KE (WithZero (Multiplicative ℤ))) (u : KE)
@@ -106,6 +105,7 @@ theorem valuation_aeval_eq_exp (w : Valuation KE (WithZero (Multiplicative ℤ))
       omega
   · rw [h_term n, if_neg h_lead_ne]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `algebraMap (Polynomial F) K(E)` is `aeval x_gen` (both are the F-algebra hom
 sending `X ↦ x_gen`). -/
 theorem aeval_x_gen_eq_algebraMap (p : Polynomial F) :
@@ -122,6 +122,7 @@ theorem aeval_x_gen_eq_algebraMap (p : Polynomial F) :
       rfl
   exact DFunLike.congr_fun h p
 
+omit [W.toAffine.IsElliptic] in
 /-- **Polynomial-image valuation**: for `w` with `w x_gen = exp 2` and `w`
 trivial on `F^×`, the value on the image of a nonzero polynomial is
 `exp (2·natDeg p)`. Specialisation of `valuation_aeval_eq_exp` at `u = x_gen`. -/
@@ -132,6 +133,7 @@ theorem valuation_algebraMap_polynomial_eq_exp (w : Valuation KE (WithZero (Mult
   rw [← aeval_x_gen_eq_algebraMap W p]
   exact valuation_aeval_eq_exp W w (x_gen W) hu hc hp
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private theorem ordAtInftyValuation_algebraMap_polynomial_eq_exp {q : Polynomial F} (hq : q ≠ 0) :
     (W_smooth W).ordAtInftyValuation (algebraMap (Polynomial F) KE q) =
       WithZero.exp (2 * (q.natDegree : ℤ)) := by
@@ -143,6 +145,7 @@ private theorem ordAtInftyValuation_algebraMap_polynomial_eq_exp {q : Polynomial
   congr 1
   ring
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Numerator/denominator model in `K(E)`.** Any nonzero `r ∈ F(x) = Frac(F[X])`
 is the image of a quotient of nonzero polynomials: there exist `p d : F[X]`, both
 nonzero, with `algebraMap r = algebraMap p / algebraMap d` in `K(E)`. Obtained from
@@ -177,6 +180,7 @@ private theorem exists_polynomial_div_of_fracPolyX_ne_zero {r : FractionRing (Po
   rw [eq_div_iff h_alg_d_ne]
   exact h_KE
 
+omit [DecidableEq F] in
 /-- **Quotient-of-polynomials value via the degree formula.** A `ℤᵐ⁰`-valued
 valuation `v` on a field `L` over `F[X]` that takes the value `exp (2·natDeg q)` on
 the image of every nonzero polynomial `q` takes the value `exp (2·(natDeg p − natDeg d))`
@@ -194,6 +198,7 @@ private theorem valuation_polynomial_div_eq_exp_sub {L : Type*} [Field L] [Algeb
   congr 1
   ring
 
+omit [W.toAffine.IsElliptic] in
 /-- **Rational-image valuation agreement.** For `w` with `w x_gen = exp 2` and
 `w` trivial on `F^×`, the value on the image of any `r ∈ F(x) = Frac(F[X])`
 agrees with `ordAtInftyValuation`. -/
@@ -220,6 +225,7 @@ theorem valuation_algebraMap_fracPolyX_eq_ordAtInftyValuation
       (fun q hq ↦ ordAtInftyValuation_algebraMap_polynomial_eq_exp W hq) hp_ne hd_ne
   rw [hL, hR]
 
+omit [W.toAffine.IsElliptic] in
 /-- **Parity distinctness.** The two summands of the basis decomposition have
 distinct `ordAtInftyValuation`: `ord_∞(algMap r₁)` is even while
 `ord_∞(algMap r₂ · coordY)` is odd, so unless the whole element is zero the
@@ -271,6 +277,7 @@ theorem ordAtInftyValuation_basis_summands_distinct {r₁ r₂ : FractionRing (P
       intro h_eq
       omega
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Value on the coordinate function `y`.** A valuation `w` with `w y_gen = exp 3`
 agrees with `ordAtInftyValuation` on `coordYInFunctionField` (which is `y_gen`):
 both equal `exp (-3)`. -/
@@ -287,6 +294,7 @@ private theorem valuation_coordYInFunctionField_eq_ordAtInftyValuation
       (by rw [← h_yeq]; exact (W_smooth W).ordAtInfty_coordYInFunctionField)]
   norm_num
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Two valuations agreeing on factors agree on the product.** If `w` and `v`
 take the same value on `a` and on `b`, they take the same value on `a * b`
 (multiplicativity on both sides). -/
@@ -295,6 +303,7 @@ private theorem valuation_eq_mul_of_eq_of_eq
     (ha : w a = v a) (hb : w b = v b) : w (a * b) = v (a * b) := by
   rw [map_mul w, map_mul v, ha, hb]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Two valuations agreeing on distinctly-valued summands agree on the sum.**
 If `w` and `v` agree on `a` and on `b`, and `v` separates them (`v a ≠ v b`),
 then both valuations read off `a + b` as the *same* maximum of agreeing
@@ -308,6 +317,7 @@ private theorem valuation_eq_add_of_eq_of_eq_of_distinct
   rw [Valuation.map_add_of_distinct_val w h_dist_w,
     Valuation.map_add_of_distinct_val v h_dist, ha, hb]
 
+omit [W.toAffine.IsElliptic] in
 /-- **Extension from generators to all of `K(E)`.** A valuation `w` that agrees
 with `ordAtInftyValuation` on every `F(x)`-rational image (`h_rat`) and on the
 coordinate function `coordYInFunctionField` (`h_coordY`) agrees everywhere. The
@@ -381,6 +391,7 @@ theorem ord_P_negSmoothPoint_translateY_xy_eq_neg_three
   · exact ord_P_translateY_xy_eq_neg_three_at_2tor W xk yk h_ns h
   · exact ord_P_translateY_xy_eq_neg_three_of_non_2_tor W xk yk h_ns h
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private theorem ne_zero_of_ord_P_eq_coe {P : (W_smooth W).SmoothPoint}
     {g : (W_smooth W).FunctionField} {n : ℤ}
     (h : (W_smooth W).ord_P P g = (n : WithTop ℤ)) : g ≠ 0 := fun h0 ↦
@@ -423,6 +434,7 @@ theorem pointValuation_comap_translateAlgEquivOfPoint_some_eq_ordAtInftyValuatio
       (ne_zero_of_ord_P_eq_coe W h_ord) h_ord]
     norm_num
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Pointwise order transport at infinity** (`T = some xk yk h_ns`, the
 substantive nonzero-`f` core): `ord_P (-T) (τ_T f) = ordAtInfty f`. -/
 theorem ord_P_negSmoothPoint_translateAlgEquivOfPoint_eq_ordAtInfty_some

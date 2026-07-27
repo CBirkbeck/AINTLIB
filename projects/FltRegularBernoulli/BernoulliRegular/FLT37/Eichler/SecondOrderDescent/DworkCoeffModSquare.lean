@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Evaluator
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Evaluator
 
 /-!
 # The second-order (mod `p²`) Dwork-coordinate coefficient machinery
@@ -113,7 +115,7 @@ theorem rationalPadicIntegerToZModSq_eq_zero_iff_mem_primeIdeal_sq
     simp [e, padicIntToRationalPadicIntegerRingEquiv]
   rw [show ((rationalPadicPrimeIdeal p) ^ 2 :
       Ideal (RationalPadicIntegerRing p)) =
-        Ideal.span {(p : RationalPadicIntegerRing p) ^ 2} from by
+        Ideal.span {(p : RationalPadicIntegerRing p) ^ 2} by
       rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow]]
   rw [Ideal.mem_span_singleton, Ideal.mem_span_singleton]
   constructor
@@ -137,23 +139,25 @@ agrees mod `p²`.  This is the second-order analog of the proven
 difference as `p² · z`, transports to coordinates as `a = p² · b` by injectivity of the Dwork power
 linear map, and reads off `a i = p² · b i ∈ (rationalPadicPrimeIdeal)^2`. -/
 
-set_option maxHeartbeats 800000 in
--- The proof compares two full Dwork power-basis expansions through the completed ramification
--- identity `(p²) = (varpi)^(2(p-1))`; elaborating the basis and scalar-action coercions is slower
--- than the default budget (as in the first-order analog).
 omit [NumberField.IsCMField K] in
-theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_sq_of_mem_parameterIdeal_pow_two_pred
-    {x y : DworkCompleteIntegerRing p K}
-    (hxy : x - y ∈ (dworkParameterIdeal p K) ^ (2 * (p - 1)))
+/-- **General-exponent Dwork power-basis coordinate congruence.**  If
+`x - y ∈ (dworkParameterIdeal p K)^(k(p-1)) = (pᵏ)`, then every Dwork power-basis coordinate of
+`x - y` lies in `(rationalPadicPrimeIdeal p)^k`.  The proof writes the difference as `pᵏ · z`,
+transports to coordinates as `a = pᵏ · b` by injectivity of the Dwork power linear map, and reads off
+`a i = pᵏ · b i ∈ (rationalPadicPrimeIdeal)^k`.  The mod-`p²` case (`k = 2`) below and the mod-`p³`
+case (`k = 3`, in `DworkCoeffModCube`) are instances. -/
+theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_pow_of_mem_parameterIdeal_pow_mul
+    {k : ℕ} {x y : DworkCompleteIntegerRing p K}
+    (hxy : x - y ∈ (dworkParameterIdeal p K) ^ (k * (p - 1)))
     (i : Fin (p - 1)) :
     (dworkParameterPowerBasis p K).repr x i -
         (dworkParameterPowerBasis p K).repr y i ∈
-      (rationalPadicPrimeIdeal p) ^ 2 := by
+      (rationalPadicPrimeIdeal p) ^ k := by
   classical
   let R₀ : Type := RationalPadicIntegerRing p
   let S : Type _ := DworkCompleteIntegerRing p K
-  -- `(p²) = (varpi)^(2(p-1))`, so `x - y ∈ span {p²}`.
-  have hspan : x - y ∈ Ideal.span ({(p : S) ^ 2} : Set S) := by
+  -- `(pᵏ) = (varpi)^(k(p-1))`, so `x - y ∈ span {pᵏ}`.
+  have hspan : x - y ∈ Ideal.span ({(p : S) ^ k} : Set S) := by
     rw [← Ideal.span_singleton_pow,
       span_natCast_prime_dworkComplete_eq_parameterIdeal_pow_pred (p := p) (K := K),
       ← pow_mul, Nat.mul_comm]
@@ -184,39 +188,50 @@ theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_sq_of_mem_parameterIde
               KummerLogTrace.dworkParameterPowerLinearMap_repr
                 (p := p) (K := K) y]
   have hmap_b :
-      dworkParameterPowerLinearMap p K (((p : R₀) ^ 2) • b) = x - y := by
+      dworkParameterPowerLinearMap p K (((p : R₀) ^ k) • b) = x - y := by
     have hbmap : dworkParameterPowerLinearMap p K b = z := by
       change dworkParameterPowerLinearMap p K
         ((dworkParameterPowerBasis p K).repr z) = z
       exact KummerLogTrace.dworkParameterPowerLinearMap_repr
         (p := p) (K := K) z
     calc
-      dworkParameterPowerLinearMap p K (((p : R₀) ^ 2) • b)
-          = ((p : R₀) ^ 2) • dworkParameterPowerLinearMap p K b :=
-            (dworkParameterPowerLinearMap p K).map_smul ((p : R₀) ^ 2) b
-      _ = ((p : R₀) ^ 2) • z := by
+      dworkParameterPowerLinearMap p K (((p : R₀) ^ k) • b)
+          = ((p : R₀) ^ k) • dworkParameterPowerLinearMap p K b :=
+            (dworkParameterPowerLinearMap p K).map_smul ((p : R₀) ^ k) b
+      _ = ((p : R₀) ^ k) • z := by
             rw [hbmap]
-      _ = (p : S) ^ 2 * z := by
-            change algebraMap R₀ S ((p : R₀) ^ 2) * z = (p : S) ^ 2 * z
+      _ = (p : S) ^ k * z := by
+            change algebraMap R₀ S ((p : R₀) ^ k) * z = (p : S) ^ k * z
             simp [R₀, S]
       _ = x - y := by
             simpa [S, mul_comm] using hz
-  have hcoeff : a = ((p : R₀) ^ 2) • b :=
+  have hcoeff : a = ((p : R₀) ^ k) • b :=
     dworkParameterPowerLinearMap_injective (p := p) (K := K)
       (hmap_a.trans hmap_b.symm)
   have hi := congrFun hcoeff i
-  change a i ∈ (rationalPadicPrimeIdeal p) ^ 2
+  change a i ∈ (rationalPadicPrimeIdeal p) ^ k
   rw [hi]
-  -- `p² · b i ∈ (rationalPadicPrimeIdeal)^2 = span {p²}`.
-  have hp2_mem : (p : R₀) ^ 2 ∈ (rationalPadicPrimeIdeal p) ^ 2 := by
+  -- `pᵏ · b i ∈ (rationalPadicPrimeIdeal)^k = span {pᵏ}`.
+  have hp2_mem : (p : R₀) ^ k ∈ (rationalPadicPrimeIdeal p) ^ k := by
     rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow]
-    exact Ideal.mem_span_singleton_self ((p : R₀) ^ 2)
-  have hmul_mem : (p : R₀) ^ 2 * b i ∈ (rationalPadicPrimeIdeal p) ^ 2 :=
-    ((rationalPadicPrimeIdeal p) ^ 2).mul_mem_right (b i) hp2_mem
-  have hi' : (((p : R₀) ^ 2) • b) i = (p : R₀) ^ 2 * b i := by
+    exact Ideal.mem_span_singleton_self ((p : R₀) ^ k)
+  have hmul_mem : (p : R₀) ^ k * b i ∈ (rationalPadicPrimeIdeal p) ^ k :=
+    ((rationalPadicPrimeIdeal p) ^ k).mul_mem_right (b i) hp2_mem
+  have hi' : (((p : R₀) ^ k) • b) i = (p : R₀) ^ k * b i := by
     simp [Pi.smul_apply, smul_eq_mul]
   rw [hi']
   exact hmul_mem
+
+omit [NumberField.IsCMField K] in
+theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_sq_of_mem_parameterIdeal_pow_two_pred
+    {x y : DworkCompleteIntegerRing p K}
+    (hxy : x - y ∈ (dworkParameterIdeal p K) ^ (2 * (p - 1)))
+    (i : Fin (p - 1)) :
+    (dworkParameterPowerBasis p K).repr x i -
+        (dworkParameterPowerBasis p K).repr y i ∈
+      (rationalPadicPrimeIdeal p) ^ 2 := by
+  exact dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_pow_of_mem_parameterIdeal_pow_mul
+    (p := p) (K := K) (k := 2) hxy i
 
 omit [NumberField.IsCMField K] in
 theorem dworkParameterPowerBasis_coeff_zmodSq_eq_of_sub_mem_parameterIdeal_pow_two_pred

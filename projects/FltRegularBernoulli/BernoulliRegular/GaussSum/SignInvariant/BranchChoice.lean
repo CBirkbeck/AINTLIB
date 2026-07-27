@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
@@ -24,10 +29,14 @@ variable (p : ℕ) [hp : Fact p.Prime]
 
 attribute [local instance] Classical.decEq Classical.propDecidable
 
-/-- The even complex Dirichlet characters modulo `p` have cardinality
-`(p - 1) / 2`. -/
-theorem card_even_characters (hp₂ : p ≠ 2) :
-    (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even).card = (p - 1) / 2 := by
+set_option backward.isDefEq.respectTransparency false in
+/-- There are as many even complex Dirichlet characters modulo `p` as odd ones:
+the two filtered finsets have equal cardinality. This is the orthogonality
+identity `∑_χ χ(-1) = 0` read as `#even - #odd = 0`, valid since `p ≠ 2` makes
+`-1 ≠ 1`. -/
+theorem card_even_eq_card_odd_characters (hp₂ : p ≠ 2) :
+    (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even).card =
+      (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Odd).card := by
   let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
   let O : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Odd
   have hdisj : Disjoint E O := by
@@ -66,9 +75,27 @@ theorem card_even_characters (hp₂ : p ≠ 2) :
             rw [hsum_E, hsum_O]
             simp [sub_eq_add_neg]
   have hbalance : (E.card : ℂ) - O.card = 0 := hsum_split ▸ hsum_zero
-  have hsame : E.card = O.card := by
-    have hcast : (E.card : ℂ) = O.card := sub_eq_zero.mp hbalance
-    exact_mod_cast hcast
+  have hcast : (E.card : ℂ) = O.card := sub_eq_zero.mp hbalance
+  exact_mod_cast hcast
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The even complex Dirichlet characters modulo `p` have cardinality
+`(p - 1) / 2`. -/
+theorem card_even_characters (hp₂ : p ≠ 2) :
+    (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even).card = (p - 1) / 2 := by
+  let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
+  let O : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Odd
+  have hdisj : Disjoint E O := by
+    refine Finset.disjoint_left.mpr ?_
+    intro χ hχE hχO
+    have hχ_even : χ.Even := by simpa [E] using hχE
+    have hχ_odd : χ.Odd := by simpa [O] using hχO
+    exact DirichletCharacter.Odd.not_even χ hχ_odd hχ_even
+  have hunion : E ∪ O = (Finset.univ : Finset (DirichletCharacter ℂ p)) := by
+    ext χ
+    simp only [E, O, Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and, iff_true]
+    exact DirichletCharacter.even_or_odd χ
+  have hsame : E.card = O.card := card_even_eq_card_odd_characters (p := p) hp₂
   have hcard_total : E.card + O.card = p - 1 := by
     calc
       E.card + O.card = (E ∪ O).card := by
@@ -83,6 +110,7 @@ theorem card_even_characters (hp₂ : p ≠ 2) :
     omega
   simpa [E] using hcardE
 
+/-- A Dirichlet character and its inverse agree at `-1` (both values are `±1`). -/
 theorem inv_eval_neg_one_eq (χ : DirichletCharacter ℂ p) :
     χ⁻¹ (-1 : ZMod p) = χ (-1) := by
   have h_neg_unit : IsUnit (-1 : ZMod p) := isUnit_one.neg
@@ -96,6 +124,7 @@ theorem inv_eval_neg_one_eq (χ : DirichletCharacter ℂ p) :
     rw [← MulChar.mul_apply, MulChar.inv_mul, MulChar.one_apply h_neg_unit]
   exact mul_right_cancel₀ h_ne (h_inv_mul.trans h_sq.symm)
 
+/-- A character is even iff its inverse is. -/
 theorem even_inv_iff {χ : DirichletCharacter ℂ p} : χ⁻¹.Even ↔ χ.Even := by
   simp [DirichletCharacter.Even, inv_eval_neg_one_eq (p := p) χ]
 
@@ -104,12 +133,14 @@ omit hp in
 private theorem one_even : (1 : DirichletCharacter ℂ p).Even :=
   MulChar.one_apply isUnit_one.neg
 
+/-- For `p ≡ 1 [MOD 4]` the quadratic character is even. -/
 theorem quadraticCharComplex_even_of_mod_four_eq_one
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 1) :
     (quadraticCharComplex p).Even := by
   simpa [DirichletCharacter.Even] using
     quadraticCharComplex_eval_neg_one_of_mod_four_eq_one (p := p) hp₂ hp₄
 
+/-- For `p ≡ 3 [MOD 4]` the quadratic character is odd. -/
 theorem quadraticCharComplex_odd_of_mod_four_eq_three
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 3) :
     (quadraticCharComplex p).Odd := by
@@ -124,16 +155,20 @@ noncomputable def evenNonselfdualCharacterFinset : Finset (DirichletCharacter �
 noncomputable def evenNonselfdualCharacterReps : Finset (DirichletCharacter ℂ p) :=
   (nonselfdualCharacterReps (p := p)).filter fun χ => χ.Even
 
+/-- Membership in the even non-self-dual characters. -/
 theorem mem_evenNonselfdualCharacterFinset_iff (χ : DirichletCharacter ℂ p) :
     χ ∈ evenNonselfdualCharacterFinset (p := p) ↔
       χ ∈ nonselfdualCharacterFinset (p := p) ∧ χ.Even := by
   simp [evenNonselfdualCharacterFinset]
 
+/-- Membership in the even non-self-dual representatives. -/
 theorem mem_evenNonselfdualCharacterReps_iff (χ : DirichletCharacter ℂ p) :
     χ ∈ evenNonselfdualCharacterReps (p := p) ↔
       χ ∈ nonselfdualCharacterReps (p := p) ∧ χ.Even := by
   simp [evenNonselfdualCharacterReps]
 
+/-- The even non-self-dual characters are the even representatives together with
+their inverses. -/
 theorem evenNonselfdualCharacterFinset_eq_union_evenReps_image_inv (hp₂ : p ≠ 2) :
     evenNonselfdualCharacterFinset (p := p) =
       evenNonselfdualCharacterReps (p := p) ∪
@@ -142,7 +177,7 @@ theorem evenNonselfdualCharacterFinset_eq_union_evenReps_image_inv (hp₂ : p �
   constructor
   · intro hχ
     rcases (mem_evenNonselfdualCharacterFinset_iff (p := p) χ).1 hχ with ⟨hχnon, hχeven⟩
-    rcases mem_reps_or_inv_mem_reps (p := p) (hp₂ := hp₂) hχnon with hχrep | hχinvrep
+    rcases mem_reps_or_inv_mem_reps (p := p) hp₂ hχnon with hχrep | hχinvrep
     · exact Finset.mem_union.mpr <| Or.inl <|
         (mem_evenNonselfdualCharacterReps_iff (p := p) χ).2 ⟨hχrep, hχeven⟩
     · have hχinv_even : (χ⁻¹ : DirichletCharacter ℂ p).Even :=
@@ -163,6 +198,7 @@ theorem evenNonselfdualCharacterFinset_eq_union_evenReps_image_inv (hp₂ : p �
             ((mem_nonselfdualCharacterReps_iff (p := p) ψ).1 hψrep' |>.1),
           (even_inv_iff (p := p) (χ := ψ)).2 hψeven⟩
 
+/-- No even representative is the inverse of an even representative. -/
 theorem disjoint_evenNonselfdualCharacterReps_image_inv :
     Disjoint (evenNonselfdualCharacterReps (p := p))
       ((evenNonselfdualCharacterReps (p := p)).image fun χ => χ⁻¹) := by
@@ -177,6 +213,8 @@ theorem disjoint_evenNonselfdualCharacterReps_image_inv :
     simpa [hψ] using hχrep'
   exact (inv_not_mem_nonselfdualCharacterReps (p := p) hψrep') hψinv
 
+/-- For `p ≡ 1 [MOD 4]`, the even non-self-dual characters are the even ones with
+both `1` and the (even) quadratic character removed. -/
 theorem card_evenNonselfdualCharacterFinset_of_mod_four_eq_one
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 1) :
     (evenNonselfdualCharacterFinset (p := p)).card = (p - 5) / 2 := by
@@ -196,6 +234,7 @@ theorem card_evenNonselfdualCharacterFinset_of_mod_four_eq_one
   · simpa [E] using htriv_even
   · simp [E, hq_ne, hquad_even]
 
+/-- For `p ≡ 3 [MOD 4]` the quadratic character is odd, so only `1` is removed. -/
 theorem card_evenNonselfdualCharacterFinset_of_mod_four_eq_three
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 3) :
     (evenNonselfdualCharacterFinset (p := p)).card = (p - 3) / 2 := by
@@ -237,6 +276,8 @@ private theorem card_evenNonselfdualCharacterFinset_eq_two_mul_reps (hp₂ : p �
     Finset.card_image_of_injective _ (fun χ ψ hEq => by simpa using congrArg Inv.inv hEq),
     two_mul]
 
+/-- Halving the previous count: the number of even non-self-dual pairs when
+`p ≡ 1 [MOD 4]`. -/
 theorem card_evenNonselfdualCharacterReps_of_mod_four_eq_one
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 1) :
     (evenNonselfdualCharacterReps (p := p)).card = (p - 5) / 4 := by
@@ -244,6 +285,8 @@ theorem card_evenNonselfdualCharacterReps_of_mod_four_eq_one
   have hcard := card_evenNonselfdualCharacterFinset_of_mod_four_eq_one (p := p) hp₂ hp₄
   omega
 
+/-- Halving the previous count: the number of even non-self-dual pairs when
+`p ≡ 3 [MOD 4]`. -/
 theorem card_evenNonselfdualCharacterReps_of_mod_four_eq_three
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 3) :
     (evenNonselfdualCharacterReps (p := p)).card = (p - 3) / 4 := by
@@ -251,6 +294,9 @@ theorem card_evenNonselfdualCharacterReps_of_mod_four_eq_three
   have hcard := card_evenNonselfdualCharacterFinset_of_mod_four_eq_three (p := p) hp₂ hp₄
   omega
 
+/-- Each non-self-dual pair block has determinant `-χ(-1)`, which is `-1` exactly on
+the even representatives; so the product over all pairs is `(-1)` to the power of the
+number of even ones. -/
 theorem prod_pairBlockDeterminants_eq_negOnePow_card_evenReps :
     Finset.prod (nonselfdualCharacterReps (p := p)) (fun χ => -(χ (-1))) =
       (-1 : ℂ) ^ (evenNonselfdualCharacterReps (p := p)).card := by
@@ -286,6 +332,7 @@ theorem prod_pairBlockDeterminants_eq_negOnePow_card_evenReps :
     _ = (-1 : ℂ) ^ (evenNonselfdualCharacterReps (p := p)).card := by
           simp [evenNonselfdualCharacterReps, reps]
 
+/-- The pair-block determinant product for `p ≡ 1 [MOD 4]`. -/
 theorem prod_pairBlockDeterminants_of_mod_four_eq_one
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 1) :
     Finset.prod (nonselfdualCharacterReps (p := p)) (fun χ => -(χ (-1))) =
@@ -293,6 +340,7 @@ theorem prod_pairBlockDeterminants_of_mod_four_eq_one
   rw [prod_pairBlockDeterminants_eq_negOnePow_card_evenReps (p := p),
     card_evenNonselfdualCharacterReps_of_mod_four_eq_one (p := p) hp₂ hp₄]
 
+/-- The pair-block determinant product for `p ≡ 3 [MOD 4]`. -/
 theorem prod_pairBlockDeterminants_of_mod_four_eq_three
     (hp₂ : p ≠ 2) (hp₄ : p % 4 = 3) :
     Finset.prod (nonselfdualCharacterReps (p := p)) (fun χ => -(χ (-1))) =

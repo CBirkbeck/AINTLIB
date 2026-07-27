@@ -1,8 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AKPrimarity
 import BernoulliRegular.FLT37.CaseI.FactorDecompositionAndNorm
 import BernoulliRegular.FLT37.KummerUnits
+import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AKPrimarity
+import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
+import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
 
 /-!
 # Case-I antiRadical is not a p-th power
@@ -68,7 +68,7 @@ theorem antiRadical_sub_one_eq
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab - 1 =
       algebraMap (𝓞 K) K ((b : 𝓞 K) * (ζ - 1) * (ζ + 1)) /
         algebraMap (𝓞 K) K (ζ * (a : 𝓞 K) + (b : 𝓞 K)) := by
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
   set ζK : K := algebraMap (𝓞 K) K ζ with hζK_def
   have h_conj : NumberField.IsCMField.complexConj K
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) =
@@ -268,7 +268,7 @@ theorem zetaSubOne_dvd_pow_p_sub_self
     hn.trans (sub_dvd_pow_sub_pow x (n : 𝓞 K) p)
   have h_p_dvd_int : (p : ℤ) ∣ (n ^ p - n) := by
     have hp_prime : Nat.Prime p := Fact.out
-    haveI : Fact (Nat.Prime p) := ⟨hp_prime⟩
+    have : Fact (Nat.Prime p) := ⟨hp_prime⟩
     have h_zmod : ((n ^ p - n : ℤ) : ZMod p) = 0 := by
       push_cast
       rw [ZMod.pow_card]
@@ -347,7 +347,7 @@ theorem zetaSubOne_dvd_pow_p_sub_pow_p_iff
     have h_xy : (ζ - 1 : 𝓞 K) ∣ (x ^ p - y ^ p) - ((x ^ p - x) - (y ^ p - y)) :=
       dvd_sub h ((zetaSubOne_dvd_pow_p_sub_self hζ x).sub
         (zetaSubOne_dvd_pow_p_sub_self hζ y))
-    rw [show (x ^ p - y ^ p) - ((x ^ p - x) - (y ^ p - y)) = x - y from by ring] at h_xy
+    rw [show (x ^ p - y ^ p) - ((x ^ p - x) - (y ^ p - y)) = x - y by ring] at h_xy
     exact h_xy
   · intro h
     rw [h_decomp]
@@ -603,7 +603,7 @@ theorem caseI_antiRadical_not_pth_power
   intro h_pow_eq
   have h_α₀_ne : BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ 0 := by
-    unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+    simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
     exact div_ne_zero h_α_ne h_denom_orig_nz
   have hγ_ne : γ ≠ 0 := by
     intro hγ
@@ -705,7 +705,8 @@ theorem caseI_antiRadical_not_pth_power
     have h_lhs : multiplicity (ζ - 1 : 𝓞 K) ((num₀ : 𝓞 K) ^ p * (ζ * (a : 𝓞 K) + (b : 𝓞 K))) =
         p * multiplicity (ζ - 1 : 𝓞 K) (num₀ : 𝓞 K) := by
       rw [multiplicity_mul h_prime
-        (Prime.finiteMultiplicity_mul h_prime (FiniteMultiplicity.pow h_prime h_finmult_num) h_finmult_zab),
+        (Prime.finiteMultiplicity_mul h_prime (FiniteMultiplicity.pow h_prime h_finmult_num)
+          h_finmult_zab),
         FiniteMultiplicity.multiplicity_pow h_prime h_finmult_num]
       have h_zab_mult_zero : multiplicity (ζ - 1 : 𝓞 K) (ζ * (a : 𝓞 K) + (b : 𝓞 K)) = 0 := by
         rw [multiplicity_eq_zero]; exact h_zab_coprime
@@ -714,7 +715,8 @@ theorem caseI_antiRadical_not_pth_power
         multiplicity (ζ - 1 : 𝓞 K) ((ζ * (a : 𝓞 K) + ζ ^ 2 * (b : 𝓞 K)) * (den₀ : 𝓞 K) ^ p) =
         p * multiplicity (ζ - 1 : 𝓞 K) (den₀ : 𝓞 K) := by
       rw [multiplicity_mul h_prime
-        (Prime.finiteMultiplicity_mul h_prime h_finmult_zaz2b (FiniteMultiplicity.pow h_prime h_finmult_den)),
+        (Prime.finiteMultiplicity_mul h_prime h_finmult_zaz2b
+          (FiniteMultiplicity.pow h_prime h_finmult_den)),
         FiniteMultiplicity.multiplicity_pow h_prime h_finmult_den]
       have h_zaz2b_mult_zero :
           multiplicity (ζ - 1 : 𝓞 K) (ζ * (a : 𝓞 K) + ζ ^ 2 * (b : 𝓞 K)) = 0 := by
@@ -809,7 +811,7 @@ theorem caseI_antiRadical_not_pth_power_clean
 This delivers the named Prop directly. -/
 theorem CaseI_AntiRadical_NotPthPower_holds :
     CaseI_AntiRadical_NotPthPower (p := p) (K := K) :=
-  fun hp_odd _ _ _ hcaseI h_a_plus_b _ hζ hab v =>
+  fun hp_odd _ _ _ hcaseI h_a_plus_b _ hζ hab v ↦
     caseI_antiRadical_not_pth_power_clean (p := p) (K := K) hp_odd hcaseI h_a_plus_b hζ hab v
 
 /-- **Direct consumer form from FLT case-I equation**: given the FLT
@@ -907,11 +909,11 @@ theorem caseIAntiKummerLKUnramified_of_AK5_universal
         (hζ'.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 ∣ ((↑u : 𝓞 _) - 1)) :
     CaseIAntiKummerLKUnramified := by
   intro a b c heq hcaseI ζ hζ hab
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   obtain ⟨ζ', hζ'⟩ : (primitiveRoots 37 (CyclotomicField 37 ℚ)).Nonempty :=
     IsCyclotomicExtension.exists_isPrimitiveRoot ℚ (B := CyclotomicField 37 ℚ)
       (Set.mem_singleton 37) (by decide : (37 : ℕ) ≠ 0)
-      |>.imp fun _ h => (mem_primitiveRoots (by decide : 0 < 37)).mpr h
+      |>.imp fun _ h ↦ (mem_primitiveRoots (by decide : 0 < 37)).mpr h
   obtain ⟨γ, hγ_ne, u, h_unit_form, hcong⟩ := h_AK5 heq hcaseI hζ hab
     ((mem_primitiveRoots (by decide : 0 < 37)).mp hζ')
   exact antiKummerLift_isUnramified_via_AK5_of_FLT
@@ -1104,7 +1106,7 @@ theorem stage2KummerRatioK_of_AK5_unit_form_and_p_congr_cyclotomic
         (p : 𝓞 (CyclotomicField p ℚ)) ∣
           (↑u : 𝓞 (CyclotomicField p ℚ)) - 1) :
     Stage2KummerRatioK p (CyclotomicField p ℚ) := by
-  haveI : IsCyclotomicExtension {p} ℚ (CyclotomicField p ℚ) :=
+  have : IsCyclotomicExtension {p} ℚ (CyclotomicField p ℚ) :=
     CyclotomicField.isCyclotomicExtension p ℚ
   intro a b c hgcd hcaseI heq ζ hζ I hI_ne hI_pow
   exact
@@ -1121,7 +1123,7 @@ AK-5b root-of-unity factor by the Stage 2 normalization `ζ^k`. -/
 theorem exists_half_exponent_pow_eq
     (hp_two : 2 < p) {ζ : 𝓞 K} (hζ : IsPrimitiveRoot ζ p) (q : ℕ) :
     ∃ k : ℕ, k < p ∧ ζ ^ (2 * k) = ζ ^ q := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have htwo_ne : (2 : ZMod p) ≠ 0 := by
     intro h
     have h_dvd : p ∣ 2 := (ZMod.natCast_eq_zero_iff 2 p).mp h
@@ -1184,7 +1186,7 @@ theorem normalized_antiRadical_ratio_eq_zeta_sq_mul
         (algebraMap (𝓞 K) K ζ) ^ k * algebraMap (𝓞 K) K A by
       rw [map_mul, map_pow]]
     rw [map_mul, map_pow, hconjζ]
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
   change algebraMap (𝓞 K) K (ζ ^ k * A) /
       algebraMap (𝓞 K) K
         (NumberField.IsCMField.ringOfIntegersComplexConj K (ζ ^ k * A)) =
@@ -1514,7 +1516,7 @@ theorem AK5b_sigma_anti_unit_eq_real_unit_pow
   refine ⟨v_plus, ?_⟩
   have h_alg_int : (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) v_plus) =
       (v : 𝓞 K) := by
-    have := congrArg (fun w : (𝓞 K)ˣ => (w : 𝓞 K)) h_alg_eq
+    have := congrArg (fun w : (𝓞 K)ˣ ↦ (w : 𝓞 K)) h_alg_eq
     simpa using this
   rw [h_alg_int]
   apply FaithfulSMul.algebraMap_injective (𝓞 K) K
@@ -2002,7 +2004,7 @@ theorem stage2KummerRatioK_of_AK5a
         ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit_unit hp.1.ne_zero).pow_eq_one,
         one_pow]]
     rfl
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   obtain ⟨q, _hq_lt, hq⟩ := hζ.eq_pow_of_pow_eq_one hθinv_pow
   obtain ⟨k, hk_lt, hk_pow⟩ := exists_half_exponent_pow_eq
     (K := K) hp_two hζ q
@@ -2189,7 +2191,7 @@ theorem stage2KummerRatioK_of_factor_class_square_eq_and_not_dvd_hPlus_cyclotomi
               (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr hI_nz⟩ :
                 nonZeroDivisors (Ideal (𝓞 (CyclotomicField p ℚ)))) ^ 2)) :
     Stage2KummerRatioK p (CyclotomicField p ℚ) := by
-  haveI : IsCyclotomicExtension {p} ℚ (CyclotomicField p ℚ) :=
+  have : IsCyclotomicExtension {p} ℚ (CyclotomicField p ℚ) :=
     CyclotomicField.isCyclotomicExtension p ℚ
   intro a b c hgcd hcaseI heq ζ hζ I hI_ne hI_pow
   exact

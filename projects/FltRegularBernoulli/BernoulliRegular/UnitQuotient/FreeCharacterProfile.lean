@@ -25,11 +25,6 @@ noncomputable section
 
 namespace BernoulliRegular
 
-open Finset
-
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 attribute [local instance] Fintype.ofFinite
 
 variable (p : ℕ) [Fact p.Prime]
@@ -69,7 +64,7 @@ theorem evenDeltaRegularCharacterFunction_sum_of_ne_one {R : Type*}
     right_inv x := inv_inv x
   }
   change ∑ x : CyclotomicEvenDelta p, χ (invEquiv x) = 0
-  rw [Equiv.sum_comp invEquiv (fun x => χ x)]
+  rw [Equiv.sum_comp invEquiv (fun x ↦ χ x)]
   exact MulChar.sum_eq_zero_of_ne_one (χ := χ) hχ
 
 theorem evenDeltaRegularCharacterFunction_mem_augmentation_of_ne_one {R : Type*}
@@ -115,7 +110,7 @@ theorem evenDeltaAugmentationCharacterEigenspace_finrank_of_ne_one {R : Type*}
 /-- The quotient `Delta / {±1}` is cyclic because it is a quotient of the
 cyclic group `Delta = (ZMod p)^*`. -/
 theorem cyclotomicEvenDelta_isCyclic : IsCyclic (CyclotomicEvenDelta p) := by
-  letI : IsCyclic (CyclotomicUnitDelta p) := by
+  let : IsCyclic (CyclotomicUnitDelta p) := by
     dsimp [CyclotomicUnitDelta]
     exact ZMod.isCyclic_units_prime (Fact.out : p.Prime)
   exact isCyclic_of_surjective
@@ -132,7 +127,7 @@ noncomputable def cyclotomicEvenDeltaGenerator : CyclotomicEvenDelta p := by
 theorem cyclotomicEvenDeltaGenerator_spec (x : CyclotomicEvenDelta p) :
     x ∈ Submonoid.powers (cyclotomicEvenDeltaGenerator p) := by
   classical
-  letI := cyclotomicEvenDelta_isCyclic (p := p)
+  let := cyclotomicEvenDelta_isCyclic (p := p)
   exact Classical.choose_spec
     (IsCyclic.exists_monoid_generator (α := CyclotomicEvenDelta p)) x
 
@@ -238,7 +233,7 @@ noncomputable def cyclotomicEvenDeltaCardInvertibleZMod (hp_gt_two : 2 < p) :
 @[implicit_reducible]
 noncomputable def twoInvertibleZModOfPrimeGtTwo (hp_gt_two : 2 < p) :
     Invertible (2 : ZMod p) := by
-  have hp_not_dvd_two : ¬ p ∣ 2 := fun hdiv =>
+  have hp_not_dvd_two : ¬ p ∣ 2 := fun hdiv ↦
     not_le_of_gt hp_gt_two (Nat.le_of_dvd (by decide) hdiv)
   exact invertibleOfCoprime (R := ZMod p)
     (((Fact.out : p.Prime).coprime_iff_not_dvd.mpr hp_not_dvd_two).symm)
@@ -246,7 +241,7 @@ noncomputable def twoInvertibleZModOfPrimeGtTwo (hp_gt_two : 2 < p) :
 /-- `ZMod p` contains enough roots of unity for the quotient `Delta / {±1}`. -/
 theorem cyclotomicEvenDelta_hasEnoughRootsOfUnity_zmod :
     HasEnoughRootsOfUnity (ZMod p) (Monoid.exponent (CyclotomicEvenDelta p)) := by
-  haveI : NeZero (p - 1) := ⟨by have := (Fact.out : p.Prime).two_le; omega⟩
+  have : NeZero (p - 1) := ⟨by have := (Fact.out : p.Prime).two_le; omega⟩
   exact HasEnoughRootsOfUnity.of_dvd (ZMod p)
     ((Group.exponent_dvd_card (G := CyclotomicEvenDelta p)).trans
       (cyclotomicEvenDelta_card_dvd_p_sub_one (p := p)))
@@ -260,7 +255,7 @@ theorem evenDeltaCharacter_card_eq (hp_gt_two : 2 < p) :
   have hroot : HasEnoughRootsOfUnity (ZMod p)
       (Monoid.exponent (CyclotomicEvenDelta p)) :=
     cyclotomicEvenDelta_hasEnoughRootsOfUnity_zmod (p := p)
-  haveI : HasEnoughRootsOfUnity (ZMod p)
+  have : HasEnoughRootsOfUnity (ZMod p)
       (Monoid.exponent (CyclotomicEvenDelta p)ˣ) := by
     rw [Monoid.exponent_eq_of_mulEquiv (toUnits (G := CyclotomicEvenDelta p)).symm]
     exact hroot
@@ -278,11 +273,11 @@ open Classical in
 characters of `Delta / {±1}`. -/
 theorem evenDeltaNontrivialCharacter_card_eq (hp_gt_two : 2 < p) :
     ((Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) (ZMod p))).filter
-        (fun χ => χ ≠ 1)).card = (p - 3) / 2 := by
+        (fun χ ↦ χ ≠ 1)).card = (p - 3) / 2 := by
   classical
   have hfilter :
       ((Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) (ZMod p))).filter
-        (fun χ => χ ≠ 1)) =
+        (fun χ ↦ χ ≠ 1)) =
         (Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) (ZMod p))).erase 1 := by
     ext χ
     by_cases hχ : χ = 1 <;> simp [hχ]

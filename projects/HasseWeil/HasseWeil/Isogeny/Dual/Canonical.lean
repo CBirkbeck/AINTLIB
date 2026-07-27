@@ -184,7 +184,6 @@ theorem Isogeny.compose_mulByIntDual {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n 
   rw [Isogeny.compose_assoc, Isogeny.mulByIntDual_compose w,
     Isogeny.compose_mulByInt_of_covariant hcov]
 
-set_option maxHeartbeats 800000 in
 /-- **The dual carries the `[n]`-witness itself** (Silverman III.6.2 bookkeeping): from the
 second composition, `[n]₂* = φ̂* ∘ φ*`, so `Im([n]₂*) ⊆ Im(φ̂*)`; the basepoint condition is
 assembled from the `[n]`-basepoint theorem and `∞`-regularity reflection. This is the
@@ -192,12 +191,20 @@ witness through which the double dual is taken. -/
 theorem Isogeny.HasMulByIntDualWitness.dual {φ : Isogeny W₁ W₂} {n : ℤ} {hn : n ≠ 0}
     (w : φ.HasMulByIntDualWitness n hn) (hcov : φ.MulByIntPullbackCovariant n hn) :
     (Isogeny.mulByIntDual w).HasMulByIntDualWitness n hn := by
+  -- Recast the second-composition equation pointwise via `change` (defeq) so the concrete
+  -- isogeny pullback never `whnf`-unfolds (the pattern of `Composition.lean`'s
+  -- `compose_rangeIncl`).
+  have hcomp : (Isogeny.compose φ (Isogeny.mulByIntDual w)).toCurveMap.pullback =
+      (Isogeny.mulByInt W₂ hn).toCurveMap.pullback :=
+    congrArg (fun ψ : Isogeny W₂ W₂ ↦ ψ.toCurveMap.pullback)
+      (Isogeny.compose_mulByIntDual w hcov)
   have hincl : (HasseWeil.mulByInt_pullbackAlgHom W₂ n hn).range ≤
       (Isogeny.mulByIntDual w).toCurveMap.pullback.range := by
     rintro z ⟨u, rfl⟩
-    exact ⟨φ.toCurveMap.pullback u,
-      congrArg (fun χ : Isogeny W₂ W₂ ↦ χ.toCurveMap.pullback u)
-        (Isogeny.compose_mulByIntDual w hcov)⟩
+    refine ⟨φ.toCurveMap.pullback u, ?_⟩
+    change (Isogeny.compose φ (Isogeny.mulByIntDual w)).toCurveMap.pullback u = _
+    rw [hcomp, Isogeny.mulByInt_pullback]
+    rfl
   exact ⟨hincl, Isogeny.hbase_of_reflects (Isogeny.mulByIntDual w)
     (HasseWeil.mulByInt_pullbackAlgHom W₂ n hn) hincl
     (mulByIntBasepoint_holds W₂ hn)
@@ -505,7 +512,6 @@ section AlgClosedWiring
 variable {F : Type*} [Field F] [DecidableEq F] [IsAlgClosed F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
-set_option maxHeartbeats 800000 in
 /-- **The defining composition of the Galois-built `[ℓ]`-dual**:
 `dualMulByInt ∘ [ℓ] = [deg [ℓ]]` in fully bundled form. -/
 theorem dualMulByInt_compose_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ : F) ≠ 0) :

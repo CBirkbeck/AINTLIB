@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Isogeny.FunctionField
 import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 import Mathlib.RingTheory.Localization.AtPrime.Basic
@@ -26,7 +31,7 @@ variable {F : Type*} [Field F]
 /-- Inner derivative commutes with outer eval: `d/dX(W(X,y₀)) = (∂W/∂X)(X,y₀)`. -/
 private theorem eval_poly_deriv_eq_polynomialX_eval (W : Affine F) (y₀ : F) :
     (W.polynomial.eval (C y₀)).derivative = W.polynomialX.eval (C y₀) := by
-  unfold Affine.polynomial Affine.polynomialX
+  simp only [Affine.polynomial, Affine.polynomialX]
   simp only [eval_C, eval_X, eval_add, eval_sub, eval_mul, eval_pow,
     derivative_C, derivative_X, derivative_X_pow, derivative_add,
     derivative_sub, derivative_mul, derivative_sq,
@@ -37,9 +42,11 @@ variable (W : Affine F)
 
 /-! ### Point ideal -/
 
+/-- The maximal ideal of the coordinate ring cutting out the point `(x, y)`. -/
 noncomputable def pointIdeal (x : F) (y : F) : Ideal W.CoordinateRing :=
   Affine.CoordinateRing.XYIdeal W x (Polynomial.C y)
 
+/-- At a nonsingular point, the point ideal is maximal. -/
 theorem pointIdeal_isMaximal {x y : F} (h : W.Nonsingular x y) :
     (pointIdeal W x y).IsMaximal :=
   Ideal.Quotient.maximal_of_isField _
@@ -71,7 +78,7 @@ theorem yclass_mul_quot_in_xclass_span {x₀ y₀ : F} (h : W.Equation x₀ y₀
 /-! ### Q.evalEval = polynomialY.evalEval via derivative -/
 
 /-- The quotient `Q` evaluates to `polynomialY` at `(x₀, y₀)`. -/
-theorem quot_evalEval_eq_polynomialY {x₀ y₀ : F} (h : W.Equation x₀ y₀) :
+theorem quot_evalEval_eq_polynomialY {x₀ y₀ : F} (_h : W.Equation x₀ y₀) :
     Polynomial.evalEval x₀ y₀ (W.polynomial /ₘ (Y - C (C y₀ : F[X]))) =
       Polynomial.evalEval x₀ y₀ W.polynomialY := by
   set Q := W.polynomial /ₘ (Y - C (C y₀ : F[X]))
@@ -82,7 +89,7 @@ theorem quot_evalEval_eq_polynomialY {x₀ y₀ : F} (h : W.Equation x₀ y₀) 
   rw [derivative_add, derivative_C, zero_add, derivative_mul, derivative_sub,
     derivative_X, derivative_C, sub_zero, one_mul] at hd
   have hpoly : W.polynomial.derivative = W.polynomialY := by
-    unfold Affine.polynomial Affine.polynomialY
+    simp only [Affine.polynomial, Affine.polynomialY]
     simp only [derivative_C, derivative_X, derivative_add,
       derivative_sub, derivative_mul, derivative_sq]; C_simp; ring1
   rw [hpoly] at hd
@@ -101,19 +108,20 @@ theorem mk_quot_not_mem {x₀ y₀ : F}
     Affine.CoordinateRing.mk W (W.polynomial /ₘ (Y - C (C y₀ : F[X]))) ∉
       Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) := by
   intro hmem
+  have h' : W.polynomial.evalEval x₀ y₀ = 0 := h
   have hker : Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) ≤
-      RingHom.ker (AdjoinRoot.evalEval h) := by
+      RingHom.ker (AdjoinRoot.evalEval h') := by
     rw [Affine.CoordinateRing.XYIdeal]
     apply span_le.mpr
     intro z hz
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
     rcases hz with rfl | rfl
     · exact RingHom.mem_ker.mpr <| by
-        unfold Affine.CoordinateRing.XClass
+        simp only [Affine.CoordinateRing.XClass]
         rw [AdjoinRoot.evalEval_mk]
         simp [Polynomial.evalEval, eval_C, eval_X, eval_sub]
     · exact RingHom.mem_ker.mpr <| by
-        unfold Affine.CoordinateRing.YClass
+        simp only [Affine.CoordinateRing.YClass]
         rw [AdjoinRoot.evalEval_mk]
         simp [Polynomial.evalEval, eval_C, eval_X, eval_sub]
   have := RingHom.mem_ker.mp (hker hmem)
@@ -179,19 +187,20 @@ theorem mk_C_g_not_mem {x₀ y₀ : F}
       Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) := by
   set g := W.polynomial.eval (C y₀) /ₘ (X - C x₀)
   intro hmem
+  have h' : W.polynomial.evalEval x₀ y₀ = 0 := h
   have hker : Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) ≤
-      RingHom.ker (AdjoinRoot.evalEval h) := by
+      RingHom.ker (AdjoinRoot.evalEval h') := by
     rw [Affine.CoordinateRing.XYIdeal]
     apply Ideal.span_le.mpr
     intro z hz
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hz
     rcases hz with rfl | rfl
     · exact RingHom.mem_ker.mpr <| by
-        unfold Affine.CoordinateRing.XClass
+        simp only [Affine.CoordinateRing.XClass]
         rw [AdjoinRoot.evalEval_mk]
         simp [Polynomial.evalEval, eval_C, eval_X, eval_sub]
     · exact RingHom.mem_ker.mpr <| by
-        unfold Affine.CoordinateRing.YClass
+        simp only [Affine.CoordinateRing.YClass]
         rw [AdjoinRoot.evalEval_mk]
         simp [Polynomial.evalEval, eval_C, eval_X, eval_sub]
   have hev := RingHom.mem_ker.mp (hker hmem)

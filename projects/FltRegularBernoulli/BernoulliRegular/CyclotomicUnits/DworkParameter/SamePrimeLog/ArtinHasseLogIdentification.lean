@@ -68,7 +68,7 @@ theorem samePrimeFiniteLog_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
           samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm
             (p := p) (K := K) N n d x hx := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   by_cases hn0 : n = 0
@@ -421,7 +421,7 @@ theorem dworkParameterApprox_eq_sum_range (N : ℕ) :
         (PowerSeries.coeff (R := ValuedIntegerRing p K) n)
             (integralInverseSeries p K) *
           valuedCyclotomicLambdaInteger p K ^ n := by
-  unfold dworkParameterApprox
+  simp only [dworkParameterApprox]
   rw [PowerSeries.eval₂_trunc_eq_sum_range]
   simp
 
@@ -746,7 +746,7 @@ theorem evalIntegralPowerSeries_evalₐ
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (evalIntegralPowerSeries p K F x hx) =
       evalIntegralPowerSeriesMod p K F x N := by
-  unfold evalIntegralPowerSeries
+  simp only [evalIntegralPowerSeries]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by

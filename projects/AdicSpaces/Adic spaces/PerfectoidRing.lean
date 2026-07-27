@@ -3,8 +3,8 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».PseudoUniformizer
-import «Adic spaces».Uniform
 import «Adic spaces».StructureSheaf
+import «Adic spaces».Uniform
 import Mathlib.RingTheory.AdicCompletion.Basic
 import Mathlib.RingTheory.Valuation.Integers
 
@@ -202,7 +202,7 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   constructor
   intro x hx
   -- Extract perfectoid data: ϖ (top. nilp. unit), c (power-bounded), p = c * ϖ^p
-  obtain ⟨ϖ, hϖ_pb, ⟨c, hc_pb, hpc⟩⟩ :=
+  obtain ⟨ϖ, _, ⟨c, hc_pb, hpc⟩⟩ :=
     IsPerfectoidRing.exists_pseudoUniformizer (p := p) (A := A)
   -- x ∈ (Ideal.span {p})^n • ⊤ for all n, i.e., p^n | x in A°
   have hx_mem : ∀ n : ℕ, (x : A) ∈ (Set.range (fun y : PBSubring A ↦ (p : A) ^ n * (y : A))) := by
@@ -282,7 +282,6 @@ private theorem isPowerBounded_of_tendsto_of_powerBounded
   have hLfN : L - f N ∈ (J' : Set A) := by
     have h := hN N le_rfl
     simp only [Set.mem_preimage, Set.mem_setOf_eq] at h
-    have : -(f N - L) = L - f N := by ring
     rw [show L - f N = -(f N - L) from by ring]; exact J'.neg_mem h
   -- For all k: L^k - (f N)^k ∈ J' (J' is an ideal, L - f N ∈ J')
   have hLk : ∀ k : ℕ, L ^ k - (f N) ^ k ∈ (J' : Set A) := by

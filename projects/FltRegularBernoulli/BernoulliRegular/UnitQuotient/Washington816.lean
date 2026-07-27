@@ -8,8 +8,8 @@ import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealPthRootDescent
 This is the remaining §8.3 analytic boundary after the forward step `Washington814Forward37`
 was discharged by the eigenspace/index bridge of `Washington814ForwardD.lean`.
 
-The strategy (reviewer Target 2, finite-sum form, avoiding the full Kubota–Leopoldt
-`L_p`): write `pollaczekUnitPlusKplus i` as a `CPlusExponentProduct` whose exponent vector
+The strategy (finite-sum form, avoiding the full Kubota–Leopoldt `L_p`): write
+`pollaczekUnitPlusKplus i` as a `CPlusExponentProduct` whose exponent vector
 is the Pollaczek/Vandermonde column `e_a = (a+2)^{p-1-i}`.  If `[pollaczekUnit i] = 0` then
 this product is a 37-th power (modulo torsion, which the completed logarithm kills), so the
 completed-log relation gives `concreteKummerLogMatrix.mulVec (e mod 37) = 0`.  Because
@@ -17,9 +17,6 @@ completed-log relation gives `concreteKummerLogMatrix.mulVec (e mod 37) = 0`.  B
 Bernoulli factors (`kummerLogDetRowFactor_ne_zero_iff_bernoulliFactor_ne_zero`), the `i`-th
 component forces `rowFactor_i = 0`, i.e. `bernoulliFactor 37 i = 0`, i.e. `37 ∣ B_i`
 (`bernoulliFactor_ne_zero_iff_not_dvd_bernoulli_num`).
-
-This file is under construction: the entry identity (Pollaczek unit as exponent product)
-is established first.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.3 Thm 8.16, Cor 5.13.
@@ -47,16 +44,16 @@ exponent vector is the Pollaczek/Vandermonde column `e_a = (a+2)^{p-1-i}`. -/
 theorem pollaczekUnitPlusKplus_eq_CPlusExponentProduct (i : ℕ) :
     Sinnott.pollaczekUnitPlusKplus 37 K i (by norm_num) (by norm_num) =
       CPlusExponentProduct (p := 37) (K := K) (by norm_num) 0
-        (fun a : Fin ((37 - 3) / 2) => ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) := by
+        (fun a : Fin ((37 - 3) / 2) ↦ ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) := by
   have h_rank_eq :
       NumberField.Units.rank (NumberField.maximalRealSubfield K) = (37 - 3) / 2 :=
     (NumberField.IsCMField.units_rank_eq_units_rank (K := K)).trans
       (BernoulliRegular.units_rank_eq_prime_sub_three_div_two (p := 37) (K := K))
   rw [CPlusExponentProduct, zpow_zero, one_mul, Sinnott.pollaczekUnitPlusKplus]
   refine Fintype.prod_equiv (finCongr h_rank_eq)
-      (fun j => Sinnott.cyclotomicUnitFamilyKplusFinRank 37 K (by norm_num) (by norm_num) j ^
+      (fun j ↦ Sinnott.cyclotomicUnitFamilyKplusFinRank 37 K (by norm_num) (by norm_num) j ^
         (((j : ℕ) + 2) ^ (37 - 1 - i)))
-      (fun a : Fin ((37 - 3) / 2) =>
+      (fun a : Fin ((37 - 3) / 2) ↦
         CPlusGenerator (p := 37) (K := K) (by norm_num) a ^
           ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) ?_
   intro j
@@ -110,21 +107,21 @@ theorem concreteKummerLogMatrix_mulVec_pollaczek_eq_zero (i : ℕ)
     (h : cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (pollaczekUnit 37 K i)) = 0) :
     (concreteKummerLogMatrix (p := 37) (K := K) (by norm_num) (by norm_num)).mulVec
-        (fun a : Fin (kummerLogRank 37) =>
+        (fun a : Fin (kummerLogRank 37) ↦
           ((((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) : ZMod 37)) = 0 := by
   have hmem := pollaczekUnitPlusKplus_mem_pPowerSubgroup_of_class_eq_zero (K := K) i h
   rw [pollaczekUnitPlusKplus_eq_CPlusExponentProduct] at hmem
   refine concreteKummerLogMatrix_mulVec_exponents_eq_zero (p := 37) (K := K) (by norm_num)
-    (by norm_num) (fun a => ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) ?_
+    (by norm_num) (fun a ↦ ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) ?_
   simpa [concreteKummerLogVector] using
     completedLog_relation_of_CPlus_product_mem_powers (p := 37) (K := K) (by norm_num)
-      (by norm_num) 0 (fun a => ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) hmem
+      (by norm_num) 0 (fun a ↦ ((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) hmem
 
 omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
 /-- Sum over all of `ZMod 37` rewritten as a sum over the residue range `0,…,36`. -/
 theorem sum_zmod37_eq_sum_range (f : ZMod 37 → ZMod 37) :
     ∑ x : ZMod 37, f x = ∑ b ∈ Finset.range 37, f (b : ZMod 37) := by
-  refine Finset.sum_nbij' (fun x => ZMod.val x) (fun b => (b : ZMod 37)) ?_ ?_ ?_ ?_ ?_
+  refine Finset.sum_nbij' (fun x ↦ ZMod.val x) (fun b ↦ (b : ZMod 37)) ?_ ?_ ?_ ?_ ?_
   · intro x _; exact Finset.mem_range.mpr (ZMod.val_lt x)
   · intro b _; exact Finset.mem_univ _
   · intro x _; simp [ZMod.natCast_val, ZMod.cast_id]
@@ -133,10 +130,41 @@ theorem sum_zmod37_eq_sum_range (f : ZMod 37 → ZMod 37) :
   · intro x _; rw [ZMod.natCast_val, ZMod.cast_id]
 
 omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
+/-- **Reflection of the upper Pollaczek range onto the lower one.** The involution `b ↦ 37 - b`
+maps `{19,…,35}` bijectively onto `{2,…,18}`; since `(37 - b : ZMod 37) = -b`, for even `k` the
+power `b^k` is invariant, so the two `ZMod 37` power sums over `Ico 19 36` and `Ico 2 19`
+coincide. -/
+theorem sum_Ico_reflect_pow {k : ℕ} (hk_even : Even k) :
+    ∑ b ∈ Finset.Ico (19 : ℕ) 36, ((b : ZMod 37)) ^ k =
+      ∑ c ∈ Finset.Ico (2 : ℕ) 19, ((c : ZMod 37)) ^ k := by
+  refine Finset.sum_nbij' (fun b ↦ 37 - b) (fun c ↦ 37 - c) ?_ ?_ ?_ ?_ ?_
+  · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
+  · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
+  · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
+  · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
+  · intro b hb
+    simp only [Finset.mem_Ico] at hb
+    rw [show ((37 - b : ℕ) : ZMod 37) = -(b : ZMod 37) from by
+      rw [Nat.cast_sub (by omega), ZMod.natCast_self, zero_sub]]
+    rw [hk_even.neg_pow]
+
+omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
+/-- **Reindexing the Pollaczek `Fin`-sum as an `Ico`-sum.** The sum of `(a+2)^k` over
+`Fin ((37 - 3) / 2)` (`= Fin 17`) equals the sum of `b^k` over `Finset.Ico 2 19`, via the shift
+`a ↦ a + 2`. -/
+theorem sum_fin_add_two_pow_eq_sum_Ico_pow (k : ℕ) :
+    ∑ a : Fin ((37 - 3) / 2), (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ k =
+      ∑ b ∈ Finset.Ico (2 : ℕ) 19, ((b : ZMod 37)) ^ k := by
+  rw [Fin.sum_univ_eq_sum_range (fun m ↦ (((m + 2 : ℕ)) : ZMod 37) ^ k) ((37 - 3) / 2),
+    Finset.sum_Ico_eq_sum_range]
+  exact Finset.sum_congr (by norm_num) (fun i _ ↦ by rw [Nat.add_comm 2 i])
+
+omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
 /-- **The Pollaczek-range power sum `∑_a (a+2)^k ≡ -1 (mod 37)`** (even `0 < k < 36`).
 
 Write `S = ∑_{b=2}^{18} b^k` (`= ∑_{a:Fin 17} (a+2)^k`, the Pollaczek range). The full sum
-over `ZMod 37` vanishes; splitting `{0,…,36}` as `{0,1} ∪ {2,…,18} ∪ {19,…,35} ∪ {36}` and
+over `ZMod 37` vanishes; splitting `{0,…,36}` as `{0,1} ∪ {2,…,18} ∪ {19,…,35} ∪ {36}`
+and
 reflecting `{19,…,35}` onto `{2,…,18}` via `b ↦ 37 - b` (negation, `k` even) gives
 `1 + S + S + 1 = 0`, i.e. `2(S + 1) = 0`, so `S = -1`.
 
@@ -148,20 +176,8 @@ theorem sum_fin_add_two_pow_eq_neg_one {k : ℕ} (hk_even : Even k) (hk_pos : 0 
     (hk : k < 36) :
     ∑ a : Fin ((37 - 3) / 2), (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ k = -1 := by
   have hfull : ∑ b ∈ Finset.range 37, ((b : ZMod 37)) ^ k = 0 := by
-    rw [← sum_zmod37_eq_sum_range (fun x => x ^ k)]
+    rw [← sum_zmod37_eq_sum_range (fun x ↦ x ^ k)]
     exact FiniteField.sum_pow_lt_card_sub_one (ZMod 37) k (by simpa using hk)
-  have hrefl : ∑ b ∈ Finset.Ico (19 : ℕ) 36, ((b : ZMod 37)) ^ k =
-      ∑ c ∈ Finset.Ico (2 : ℕ) 19, ((c : ZMod 37)) ^ k := by
-    refine Finset.sum_nbij' (fun b => 37 - b) (fun c => 37 - c) ?_ ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
-    · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
-    · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
-    · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
-    · intro b hb
-      simp only [Finset.mem_Ico] at hb
-      rw [show ((37 - b : ℕ) : ZMod 37) = -(b : ZMod 37) from by
-        rw [Nat.cast_sub (by omega), ZMod.natCast_self, zero_sub]]
-      rw [hk_even.neg_pow]
   have hIco02 : ∑ b ∈ Finset.Ico (0 : ℕ) 2, ((b : ZMod 37)) ^ k = 1 := by
     rw [← Finset.range_eq_Ico, Finset.sum_range_succ, Finset.sum_range_one,
       Nat.cast_zero, zero_pow hk_pos.ne', Nat.cast_one, one_pow, zero_add]
@@ -177,19 +193,14 @@ theorem sum_fin_add_two_pow_eq_neg_one {k : ℕ} (hk_even : Even k) (hk_pos : 0 
           ((∑ b ∈ Finset.Ico (19 : ℕ) 36, ((b : ZMod 37)) ^ k) +
             ∑ b ∈ Finset.Ico (36 : ℕ) 37, ((b : ZMod 37)) ^ k)) := by
     rw [Finset.range_eq_Ico,
-      ← Finset.sum_Ico_consecutive (fun b => ((b : ZMod 37)) ^ k)
+      ← Finset.sum_Ico_consecutive (fun b ↦ ((b : ZMod 37)) ^ k)
         (by omega : (0 : ℕ) ≤ 2) (by omega : (2 : ℕ) ≤ 37),
-      ← Finset.sum_Ico_consecutive (fun b => ((b : ZMod 37)) ^ k)
+      ← Finset.sum_Ico_consecutive (fun b ↦ ((b : ZMod 37)) ^ k)
         (by omega : (2 : ℕ) ≤ 19) (by omega : (19 : ℕ) ≤ 37),
-      ← Finset.sum_Ico_consecutive (fun b => ((b : ZMod 37)) ^ k)
+      ← Finset.sum_Ico_consecutive (fun b ↦ ((b : ZMod 37)) ^ k)
         (by omega : (19 : ℕ) ≤ 36) (by omega : (36 : ℕ) ≤ 37)]
-  rw [hsplit, hrefl, hIco02, hIco3637] at hfull
-  have hreindex : ∑ a : Fin ((37 - 3) / 2), (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ k =
-      ∑ b ∈ Finset.Ico (2 : ℕ) 19, ((b : ZMod 37)) ^ k := by
-    rw [Fin.sum_univ_eq_sum_range (fun m => (((m + 2 : ℕ)) : ZMod 37) ^ k) ((37 - 3) / 2),
-      Finset.sum_Ico_eq_sum_range]
-    exact Finset.sum_congr (by norm_num) (fun i _ => by rw [Nat.add_comm 2 i])
-  rw [hreindex]
+  rw [hsplit, sum_Ico_reflect_pow hk_even, hIco02, hIco3637] at hfull
+  rw [sum_fin_add_two_pow_eq_sum_Ico_pow k]
   -- hfull : 1 + (S + (S + 1)) = 0  ⟹  2 * (S + 1) = 0
   have h2 : (2 : ZMod 37) ≠ 0 := by
     rw [show (2 : ZMod 37) = ((2 : ℕ) : ZMod 37) from by push_cast; ring,
@@ -213,7 +224,7 @@ theorem sum_fin_pow_36 :
     have hne : (((a : ℕ) + 2 : ℕ) : ZMod 37) ≠ 0 :=
       zmod_natCast_ne_zero_of_pos_lt (by omega) (by omega)
     exact ZMod.pow_card_sub_one_eq_one hne
-  rw [Finset.sum_congr rfl (fun a _ => h1 a)]
+  rw [Finset.sum_congr rfl (fun a _ ↦ h1 a)]
   simp
 
 omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
@@ -227,13 +238,15 @@ theorem pollaczek_pow_diff (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : 
   norm_num
 
 omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
-/-- **The `j₀`-component of the Vandermonde action on the Pollaczek exponent vector is `18 ≠ 0`**
+/-- **The `j₀`-component of the Vandermonde action on the Pollaczek exponent vector is
+`18 ≠ 0`**
 (where `2(j₀+1) = i`). Per term `((a+2)^i - 1)·(a+2)^{36-i} = (a+2)^36 - (a+2)^{36-i}`, and the
 summed difference is `17 - (-1) = 18` by `pollaczek_pow_diff`. -/
-theorem vandermonde_mulVec_pollaczek_eq_18 (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : i ≤ 34)
+theorem vandermonde_mulVec_pollaczek_eq_18 (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i)
+    (hi34 : i ≤ 34)
     (j₀ : Fin (kummerLogRank 37)) (hj0 : 2 * ((j₀ : ℕ) + 1) = i) :
     (vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num)).mulVec
-        (fun a : Fin (kummerLogRank 37) =>
+        (fun a : Fin (kummerLogRank 37) ↦
           ((((((a : ℕ) + 2) ^ (37 - 1 - i) : ℕ) : ℤ)) : ZMod 37)) j₀ = 18 := by
   have hterm : ∀ a : Fin (kummerLogRank 37),
       vandermondeTeichmullerEvenSubOneMatrix (p := 37) (by norm_num) j₀ a *
@@ -246,7 +259,7 @@ theorem vandermonde_mulVec_pollaczek_eq_18 (i : ℕ) (hi_even : Even i) (hi2 : 2
     rw [← pow_mul, hj0, sub_mul, one_mul, ← pow_add,
       show i + (37 - 1 - i) = 36 from by omega, show (37 - 1 - i) = 36 - i from by omega]
   simp only [Matrix.mulVec, dotProduct]
-  rw [Finset.sum_congr rfl (fun a _ => hterm a), Finset.sum_sub_distrib]
+  rw [Finset.sum_congr rfl (fun a _ ↦ hterm a), Finset.sum_sub_distrib]
   exact pollaczek_pow_diff i hi_even hi2 hi34
 
 /-- **The `j₀`-row factor vanishes** (where `2(j₀+1)=i`), from `[pollaczekUnit i]=0`.
@@ -268,7 +281,8 @@ theorem kummerLogDetRowFactor_eq_zero_of_pollaczek (i : ℕ) (hi_even : Even i) 
 
 /-- **WF-816, class form: `[pollaczekUnit i]_{mod 37} = 0 ⟹ 37 ∣ B_i`** (even `2 ≤ i ≤ 34`).
 Choosing the row `j₀ = i/2 - 1` (so `2(j₀+1) = i`), the vanishing class makes the `j₀`-row
-factor `0`, hence the Bernoulli factor at `kummerLogRowIndex j₀ = i/2` is `0`, i.e. `37 ∣ B_i`. -/
+factor `0`, hence the Bernoulli factor at `kummerLogRowIndex j₀ = i/2` is `0`, i.e.
+`37 ∣ B_i`. -/
 theorem flt37_dvd_bernoulli_of_pollaczek_class_eq_zero (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i)
     (hi34 : i ≤ 34)
     (h : cyclotomicUnitToFreePartModPAdd (p := 37) K (Additive.ofMul (pollaczekUnit 37 K i)) = 0) :

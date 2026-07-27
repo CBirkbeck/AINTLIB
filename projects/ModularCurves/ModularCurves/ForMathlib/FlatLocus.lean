@@ -173,9 +173,11 @@ this one, for a concrete and structural reason recorded below.
 *What the committed ingredients DO give (the necessary — but not sufficient — half).*  View `M` as a
 finitely-presented module over the polynomial ring `P = R[x₁,…,xₙ]` through the finite presentation
 `P ↠ S`.  The fibre ring `P ⊗_R κ(𝔭) = κ(𝔭)[x]` has finite global dimension `n`
-(`HilbertSyzygy.hasProjectiveDimensionLE_of_field`, DEV1a), so the `n`-th fibre syzygy is projective;
+(`HilbertSyzygy.hasProjectiveDimensionLE_of_field`, DEV1a), so the `n`-th fibre syzygy is
+projective;
 take a finite free `P`-resolution `F_• → M` (`Module.FiniteFreeResolution`, DEV1b); dévissage
-(Stacks 00HM) makes the `n`-th syzygy `Kₙ` flat over `R` at `q`; and `Module.free_of_flat_of_fibre_free`
+(Stacks 00HM) makes the `n`-th syzygy `Kₙ` flat over `R` at `q`; and
+`Module.free_of_flat_of_fibre_free`
 (Stacks 00MH, `ModularCurves.ForMathlib.LocalCriterion`) makes `(Kₙ)_q` **free over `P_q`**, which
 spreads to a basic open via `Module.basicOpen_subset_freeLocus_iff`.
 
@@ -186,7 +188,8 @@ yet `M` is **not** `R`-flat on `V(t)`, because `x ∈ M` is a nonzero `t`-torsio
 (`t · x = tx = 0`, `x ≠ 0`) and over the PID `k[t]` flatness is torsion-freeness.  Freeness of the
 syzygy fails to detect the non-flatness because the fibre complex `Kₙ ⊗_R κ(𝔭') → F_{n-1} ⊗_R κ(𝔭')`
 drops rank at the nearby primes `𝔭' = (t)` (there the map is literally `0`).  What actually controls
-`R`-flatness at `q'` is the **exactness of that fibre complex** — equivalently `Tor₁ᴿ(M, κ(𝔭'))_{q'} = 0`,
+`R`-flatness at `q'` is the **exactness of that fibre complex** — equivalently `Tor₁ᴿ(M, κ(𝔭'))_{q'}
+= 0`,
 the local criterion of flatness (Stacks **00MK**) — together with the **openness of the fibre-exact
 locus** (Stacks **00RB / 00MI**), which classically rests on the Buchsbaum–Eisenbud exactness
 criterion (Stacks 00N1).
@@ -275,8 +278,10 @@ private theorem isConstructible_flatLocus {R S M : Type*} [CommRing R] [IsNoethe
 
 It is the conjunction of two facts about the flat locus: it is **stable under generisation**
 (`flatLocus_stableUnderGeneralization`, an exact localisation argument) and it is **constructible**
-(`isConstructible_flatLocus`), and in the spectral space `Spec S` a constructible generisation-stable
-set is open (`PrimeSpectrum.isOpen_of_stableUnderGeneralization_of_isConstructible`, Stacks 00I0). -/
+(`isConstructible_flatLocus`), and in the spectral space `Spec S` a constructible
+generisation-stable
+set is open (`PrimeSpectrum.isOpen_of_stableUnderGeneralization_of_isConstructible`, Stacks 00I0).
+-/
 theorem isOpen_flatLocus {R S M : Type*} [CommRing R] [IsNoetherianRing R] [CommRing S]
     [Algebra R S] [Algebra.FinitePresentation R S] [AddCommGroup M] [Module R M] [Module S M]
     [IsScalarTower R S M] [Module.FinitePresentation S M] :

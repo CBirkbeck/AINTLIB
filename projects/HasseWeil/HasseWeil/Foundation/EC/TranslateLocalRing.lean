@@ -8,13 +8,12 @@ import HasseWeil.Foundation.EC.TranslationOrd
 /-!
 # Step (B'') localRingAt-image lifts for x_gen, y_gen, and constants
 
-This file contains Worker A's localRingAt-image lifting bridges,
-separated from `EC/TranslationOrd.lean` to avoid parallel-edit collisions
-with Worker B's stream there.
+This file collects the `localRingAt`-image lifting bridges (split out from
+`EC/TranslationOrd.lean`).
 
 Each lemma uses the biconditional integer characterisation
-`mem_localRingAt_image_of_pointValuation_le_one` (commit a1aa4d7) plus
-the underlying valuation bounds.
+`mem_localRingAt_image_of_pointValuation_le_one` plus the underlying
+valuation bounds.
 
 ## Main results
 
@@ -32,6 +31,7 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`x_gen W - algMap c` lifts to `localRingAt P`** for any constant `c`.
 Direct via the strong triangle inequality (Valuation.map_sub) applied
 to two ≤ 1 valuations. -/
@@ -45,6 +45,7 @@ theorem x_gen_sub_const_mem_localRingAt_image
     (max_le (pointValuation_x_gen_le_one W P)
       ((W_smooth W).pointValuation_algebraMap_F_le_one P c))
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`y_gen W - algMap c` lifts to `localRingAt P`** for any constant `c`.
 Companion to `x_gen_sub_const_mem_localRingAt_image`. -/
 theorem y_gen_sub_const_mem_localRingAt_image
@@ -57,6 +58,7 @@ theorem y_gen_sub_const_mem_localRingAt_image
     (max_le (pointValuation_y_gen_le_one W P)
       ((W_smooth W).pointValuation_algebraMap_F_le_one P c))
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Combined lifts**: both x-side and y-side `algMap c` differences lift
 to `localRingAt P`. Useful for downstream consumers needing both. -/
 theorem xy_gen_sub_const_mem_localRingAt_image
@@ -70,6 +72,7 @@ theorem xy_gen_sub_const_mem_localRingAt_image
   ⟨x_gen_sub_const_mem_localRingAt_image W P c,
    y_gen_sub_const_mem_localRingAt_image W P d⟩
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Sum lifts**: if two elements of K(E) lift to localRingAt P, their
 sum does too. Direct from the strong triangle inequality. -/
 theorem add_mem_localRingAt_image
@@ -82,6 +85,7 @@ theorem add_mem_localRingAt_image
   apply Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one
   exact le_trans (((W_smooth W).pointValuation P).map_add _ _) (max_le hf hg)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Difference lifts**: if two elements of K(E) lift to localRingAt P,
 their difference does too. -/
 theorem sub_mem_localRingAt_image
@@ -94,6 +98,7 @@ theorem sub_mem_localRingAt_image
   apply Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one
   exact le_trans (((W_smooth W).pointValuation P).map_sub _ _) (max_le hf hg)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Product lifts**: if two elements lift to localRingAt P, their
 product does too. -/
 theorem mul_mem_localRingAt_image
@@ -107,6 +112,7 @@ theorem mul_mem_localRingAt_image
   rw [Valuation.map_mul]
   exact mul_le_one' hf hg
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Power lifts**: if `f` lifts to localRingAt P, then `f^n` does too. -/
 theorem pow_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) {f : (W_smooth W).FunctionField}
@@ -118,6 +124,7 @@ theorem pow_mem_localRingAt_image
   rw [Valuation.map_pow]
   exact pow_le_one' hf n
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`x_gen W ^ n` lifts to localRingAt P** for any `n : ℕ`. -/
 theorem x_gen_pow_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) (n : ℕ) :
@@ -126,6 +133,7 @@ theorem x_gen_pow_mem_localRingAt_image
         x_gen W ^ n :=
   pow_mem_localRingAt_image W P (pointValuation_x_gen_le_one W P) n
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`y_gen W ^ n` lifts to localRingAt P** for any `n : ℕ`. -/
 theorem y_gen_pow_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) (n : ℕ) :
@@ -134,6 +142,7 @@ theorem y_gen_pow_mem_localRingAt_image
         y_gen W ^ n :=
   pow_mem_localRingAt_image W P (pointValuation_y_gen_le_one W P) n
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`(x_gen)^m * (y_gen)^n` lifts to localRingAt P**: monomial in x_gen,
 y_gen with positive integer exponents. -/
 theorem x_gen_pow_mul_y_gen_pow_mem_localRingAt_image
@@ -149,6 +158,7 @@ theorem x_gen_pow_mul_y_gen_pow_mem_localRingAt_image
     (le_trans (le_of_eq (((W_smooth W).pointValuation P).map_pow _ _))
       (pow_le_one' (pointValuation_y_gen_le_one W P) n))
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`algMap c * (x_gen)^m * (y_gen)^n` lifts to localRingAt P**:
 monomial with F-constant coefficient. -/
 theorem algebraMap_F_mul_x_gen_pow_mul_y_gen_pow_mem_localRingAt_image
@@ -167,18 +177,21 @@ theorem algebraMap_F_mul_x_gen_pow_mul_y_gen_pow_mem_localRingAt_image
     (le_trans (le_of_eq (((W_smooth W).pointValuation P).map_pow _ _))
       (pow_le_one' (pointValuation_x_gen_le_one W P) m))
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Zero lifts to localRingAt P**: trivially, 0 ∈ algMap '' localRingAt P. -/
 theorem zero_mem_localRingAt_image (P : (W_smooth W).SmoothPoint) :
     ∃ u : (W_smooth W).localRingAt P,
       algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField u = 0 :=
   ⟨0, map_zero _⟩
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **One lifts to localRingAt P**: trivially, 1 ∈ algMap '' localRingAt P. -/
 theorem one_mem_localRingAt_image (P : (W_smooth W).SmoothPoint) :
     ∃ u : (W_smooth W).localRingAt P,
       algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField u = 1 :=
   ⟨1, map_one _⟩
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Negation lifts**: if `f` lifts to localRingAt P, so does `-f`. -/
 theorem neg_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) {f : (W_smooth W).FunctionField}
@@ -196,6 +209,7 @@ For elements of valuation strictly less than 1 (i.e., in the maximal
 ideal at P), we have closure under addition and multiplication-by-an
 integer-element. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Multiplication: ≤ 1 * < 1 → < 1** (the < 1 factor dominates). -/
 theorem pointValuation_mul_lt_one_of_le_and_lt
     (P : (W_smooth W).SmoothPoint) {f g : (W_smooth W).FunctionField}
@@ -214,10 +228,10 @@ theorem pointValuation_mul_lt_one_of_le_and_lt
 
 /-! ### iff forms -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **iff form**: an element of K(E) lifts to localRingAt P iff it has
 pointValuation ≤ 1. Restatement of the biconditional integer
-characterisation `mem_localRingAt_image_iff_pointValuation_le_one`
-(commit a1aa4d7). -/
+characterisation `mem_localRingAt_image_iff_pointValuation_le_one`. -/
 theorem mem_localRingAt_image_iff_le_one
     (P : (W_smooth W).SmoothPoint) (f : (W_smooth W).FunctionField) :
     (∃ u : (W_smooth W).localRingAt P,
@@ -225,6 +239,7 @@ theorem mem_localRingAt_image_iff_le_one
     (W_smooth W).pointValuation P f ≤ 1 :=
   Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one f
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **algebraMap localRingAt P → KE is injective**: localRing → fraction
 field. Direct via `IsFractionRing.injective`. -/
 theorem algebraMap_localRingAt_injective (P : (W_smooth W).SmoothPoint) :
@@ -232,6 +247,7 @@ theorem algebraMap_localRingAt_injective (P : (W_smooth W).SmoothPoint) :
       (algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField) :=
   IsFractionRing.injective ((W_smooth W).localRingAt P) (W_smooth W).FunctionField
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **algebraMap CoordinateRing → KE images lift to localRingAt P**:
 elements of the CoordinateRing always have ≤ 1 valuation, so their
 images in K(E) lift. -/
@@ -243,6 +259,7 @@ theorem algebraMap_CoordinateRing_mem_localRingAt_image
   Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one
     _ ((W_smooth W).pointValuation_algebraMap_le_one r P)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`x_gen W ^ n - algMap c` lifts to localRingAt P**: any power of x_gen
 shifted by an F-constant lifts. -/
 theorem x_gen_pow_sub_const_mem_localRingAt_image
@@ -257,6 +274,7 @@ theorem x_gen_pow_sub_const_mem_localRingAt_image
       (pow_le_one' (pointValuation_x_gen_le_one W P) n))
     ((W_smooth W).pointValuation_algebraMap_F_le_one P c)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`y_gen W ^ n - algMap c` lifts to localRingAt P**: companion. -/
 theorem y_gen_pow_sub_const_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) (n : ℕ) (c : F) :
@@ -272,6 +290,7 @@ theorem y_gen_pow_sub_const_mem_localRingAt_image
 
 /-! ### Direct valuation bounds (≤ 1 forms without lifts) -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Sum bound**: if `f, g` have valuation ≤ 1, so does `f + g`. -/
 theorem pointValuation_add_le_one
     (P : (W_smooth W).SmoothPoint) {f g : (W_smooth W).FunctionField}
@@ -280,6 +299,7 @@ theorem pointValuation_add_le_one
     (W_smooth W).pointValuation P (f + g) ≤ 1 :=
   le_trans (((W_smooth W).pointValuation P).map_add _ _) (max_le hf hg)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Difference bound**: if `f, g` have valuation ≤ 1, so does `f - g`. -/
 theorem pointValuation_sub_le_one
     (P : (W_smooth W).SmoothPoint) {f g : (W_smooth W).FunctionField}
@@ -288,6 +308,7 @@ theorem pointValuation_sub_le_one
     (W_smooth W).pointValuation P (f - g) ≤ 1 :=
   le_trans (((W_smooth W).pointValuation P).map_sub _ _) (max_le hf hg)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Product bound**: if `f, g` have valuation ≤ 1, so does `f * g`. -/
 theorem pointValuation_mul_le_one
     (P : (W_smooth W).SmoothPoint) {f g : (W_smooth W).FunctionField}
@@ -297,6 +318,7 @@ theorem pointValuation_mul_le_one
   rw [Valuation.map_mul]
   exact mul_le_one' hf hg
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Power bound**: if `f` has valuation ≤ 1, so does `f^n`. -/
 theorem pointValuation_pow_le_one
     (P : (W_smooth W).SmoothPoint) {f : (W_smooth W).FunctionField}
@@ -305,6 +327,7 @@ theorem pointValuation_pow_le_one
   rw [Valuation.map_pow]
   exact pow_le_one' hf n
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Negation bound**: if `f` has valuation ≤ 1, so does `-f`. -/
 theorem pointValuation_neg_le_one
     (P : (W_smooth W).SmoothPoint) {f : (W_smooth W).FunctionField}
@@ -315,6 +338,7 @@ theorem pointValuation_neg_le_one
 
 /-! ### Linear combinations of generators -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`a · x_gen + b · y_gen + c` has valuation ≤ 1** for any constants
 `a, b, c : F`. -/
 theorem pointValuation_linear_combination_le_one
@@ -332,6 +356,7 @@ theorem pointValuation_linear_combination_le_one
         (pointValuation_y_gen_le_one W P)
   · exact (W_smooth W).pointValuation_algebraMap_F_le_one P c
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Linear combination lifts**: companion lift form. -/
 theorem linear_combination_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) (a b c : F) :
@@ -344,6 +369,7 @@ theorem linear_combination_mem_localRingAt_image
 
 /-! ### Negation forms -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`-x_gen + algMap c` lifts**: companion of `x_gen - algMap c` lift. -/
 theorem neg_x_gen_add_const_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) (c : F) :
@@ -355,6 +381,7 @@ theorem neg_x_gen_add_const_mem_localRingAt_image
   · exact pointValuation_neg_le_one W P (pointValuation_x_gen_le_one W P)
   · exact (W_smooth W).pointValuation_algebraMap_F_le_one P c
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`algMap c - x_gen` lifts**: by ring rearrangement, equivalent to
 `-(x_gen - algMap c)`. -/
 theorem const_sub_x_gen_mem_localRingAt_image
@@ -367,6 +394,7 @@ theorem const_sub_x_gen_mem_localRingAt_image
   · exact (W_smooth W).pointValuation_algebraMap_F_le_one P c
   · exact pointValuation_x_gen_le_one W P
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`algMap c - y_gen` lifts**: companion. -/
 theorem const_sub_y_gen_mem_localRingAt_image
     (P : (W_smooth W).SmoothPoint) (c : F) :

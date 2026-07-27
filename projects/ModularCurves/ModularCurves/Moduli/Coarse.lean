@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Moduli.GammaH
 
 /-!
@@ -51,11 +56,10 @@ algebraically closed points: the quotient by the join of the `H`-action and poin
 **isomorphism** (`(E, L) ∼ (E', L')` iff some pointed `S`-isomorphism carries `g • L`
 to `L'` for some `g ∈ H`; `Quot` takes the generated equivalence).
 
-ADVERSARIAL FIX (2026-07-06): `IsIso f.hom` is REQUIRED — general `HomOver`s include
-non-isomorphisms, and without the clause a 3-isogeny (an isomorphism on `E[2]`)
-collapsed non-isomorphic curves in `GammaHClasses S 2 H`, while at `N = 1` the zero
-morphism collapsed everything to a point. (The former justification via `T-G1` was
-void — that claim was false and is deleted.) -/
+The `IsIso f.hom` clause is required: general `HomOver`s include non-isomorphisms, and
+without it a 3-isogeny (an isomorphism on `E[2]`) would collapse non-isomorphic curves
+in `GammaHClasses S 2 H`, while at `N = 1` the zero morphism would collapse everything
+to a point. -/
 def GammaHClasses (S : Scheme.{u}) (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) : Type (u + 1) :=
   Quot (fun (a b : Σ E : EllipticCurve S, E.FullLevelPt N) =>

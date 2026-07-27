@@ -99,10 +99,9 @@ theorem petN_doubleCoset_sum_slashes_eq_aggregate
     petN F g =
       slToPslQuot_fiberCard N •
         peterssonInner k (⋃ i ∈ s, β i • (Gamma1_fundDomain_PSL N : Set ℍ)) ⇑f g' := by
-  rw [petN_eq_setIntegral_Gamma1_fundDomain_PSL, ← peterssonInner,
-    show (⇑F : ℍ → ℂ) = ∑ i ∈ s, ⇑f ∣[k] β i from hF]
-  rw [peterssonInner_T_p_family_sum_slashes_eq_aggregate_of_integrable
-    s β hβ f g g' hadj hm hd h_int_per hfi]
+  rw [petN_eq_setIntegral_Gamma1_fundDomain_PSL, ← peterssonInner, hF,
+    peterssonInner_T_p_family_sum_slashes_eq_aggregate_of_integrable
+      s β hβ f g g' hadj hm hd h_int_per hfi]
 
 /-! ### The aggregate → `Γ_p(α)`-fundamental-domain transfer
 

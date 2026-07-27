@@ -3,12 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.Bridge
 import HasseWeil.Foundation.EC.SeparableKernelTorsor
 import HasseWeil.HasseBound.PointCount
-import HasseWeil.Isogeny.SeparableWitnessReductions
 import HasseWeil.HasseBound.WeilPairing.PencilCovariance
+import HasseWeil.Isogeny.Bridge
+import HasseWeil.Isogeny.Dual.Morphism
+import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # Discharging the dual-isogeny fixed-field equality from the project's Galois infra
@@ -48,7 +48,6 @@ variable {F : Type*} [Field F] [DecidableEq F] [Fintype F]
 -- `[Fintype F]` is genuinely required (it is consumed by
 -- `pullback_fieldRange_eq_fixedField_of_card_match_intrinsic`), but the linter
 -- only inspects the type signature, where it is resolved through instances.
-set_option linter.unusedFintypeInType false in
 /-- **`hfix` from `xy_family` + `#ker = deg`** (Silverman III.4.10c, packaged for
 the dual witness). For a `Basic.Isogeny β` over a finite field, the image of
 `β.pullback` is *exactly* the subset of `K(E)` fixed by the kernel translations
@@ -314,7 +313,6 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic] [Fintype W.toAffine.Po
 
 -- `[Fintype F]` is genuinely required: the proof cites the `[Fintype K]`-scoped
 -- `mulByInt_isGenuineWith` (`GapSpines.lean`); the linter only inspects the type.
-set_option linter.unusedFintypeInType false in
 /-- **`hnu` for `ν = [n]` from DUAL-1** (Silverman III.6.1, the `[deg β]`-invariance).
 For `n` with `n • k = 0` on every kernel point of `β` (DUAL-1: `n = deg β` and
 `ker β ⊆ ker [deg β]`), the translation family `{τ_k : k ∈ ker β}` fixes the image
@@ -339,7 +337,6 @@ theorem hnu_mulByInt_of_kernel_nsmul_zero
   rw [hk0]
   rfl
 
-set_option linter.unusedFintypeInType false in
 /-- **`DualGaloisData φ` for a separable isogeny over a finite field** (Silverman
 III.4.11 / III.6.1, DUAL-3). For a separable `EC.Isogeny φ` whose pullback equals a
 `Basic.Isogeny β`'s (`h_pb`), `φ` admits a `DualGaloisData`. The fixed-field `hfix`
@@ -396,7 +393,6 @@ noncomputable def dualGaloisData_of_separable
     hν
     (fun g hg ↦ EC.reflects_ordAtInfty_of_ramificationIdx φ he hramO g hg)
 
-set_option linter.unusedFintypeInType false in
 /-- **`HasDualWitness φ` for a separable isogeny** (Silverman III.6.1, DUAL-3).
 Composes `dualGaloisData_of_separable` with `hasDualWitness_of_galoisData`: a
 separable `EC.Isogeny φ` (with pullback equal to a `Basic.Isogeny β`'s, over a
@@ -429,7 +425,6 @@ noncomputable def hasDualWitness_of_separable
   φ.hasDualWitness_of_galoisData
     (dualGaloisData_of_separable W φ β h_pb hsep hdeg hgcomm h_normal hdesc hν he hramO)
 
-set_option linter.unusedFintypeInType false in
 /-- **`exists_dual` for a separable isogeny** (Silverman III.6.1, DUAL-3 capstone):
 a separable `EC.Isogeny φ` (over a finite field, with pullback equal to a
 `Basic.Isogeny β`'s) admits a reverse isogeny `φ̂ : E₂ → E₁`, from the genuine

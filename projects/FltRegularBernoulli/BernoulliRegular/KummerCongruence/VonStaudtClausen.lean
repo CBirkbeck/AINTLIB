@@ -409,6 +409,57 @@ theorem sum_range_pow_sModEq_p_mul_bernoulli
   linear_combination this - ((∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ t) -
     (p : ℚ_[p]) * ((bernoulli t : ℚ) : ℚ_[p])) * hu_mul_Qp
 
+/-- **Shared algebraic tail for the `v_p(k+1) ∈ {1,2}` cases of von
+Staudt–Clausen.** Suppose the weighted identity
+`((k+1 : ℕ) : ℚ_[p]) * (y - b) = p² · W` holds for some `W : ℤ_[p]`
+(this is the conclusion of `sum_range_pow_sub_p_mul_bernoulli_weighted`),
+that `k + 1 = pᵉ · c` with `p ∤ c` and `e ≤ 2`, and that `y` is a
+`p`-adic integer. Then `b` is a `p`-adic integer.
+
+The cofactor `c` is a `p`-adic unit (as `p ∤ c`), so after cancelling
+`pᵉ` from the identity we may divide by `c`, obtaining
+`y - b = c⁻¹ · p^{2-e} · W ∈ ℤ_[p]` (note `2 - e ≥ 0`); since `y ∈ ℤ_[p]`,
+also `b = y - (y - b) ∈ ℤ_[p]`. This uniformly captures both Case B
+(`e = 1`, `k + 1 = p · m'`) and Case B′ (`e = 2`, `k + 1 = p² · q`) of
+`p_mul_bernoulli_mem_padicInt_restricted`, differing only in the value
+of `e`. -/
+theorem mem_padicInt_of_weighted_factor {p : ℕ} [hp : Fact p.Prime]
+    {k e c : ℕ} (hfact : k + 1 = p ^ e * c) (he : e ≤ 2) (hc : ¬ (p : ℕ) ∣ c)
+    {y b : ℚ_[p]} {W : ℤ_[p]}
+    (hW : ((k + 1 : ℕ) : ℚ_[p]) * (y - b) = (p : ℚ_[p]) ^ 2 * (W : ℚ_[p]))
+    (hy : ∃ s : ℤ_[p], y = (s : ℚ_[p])) :
+    ∃ z : ℤ_[p], b = (z : ℚ_[p]) := by
+  have hp' : Nat.Prime p := hp.out
+  have hpQ_ne : (p : ℚ_[p]) ≠ 0 := by exact_mod_cast hp'.ne_zero
+  obtain ⟨s, hs⟩ := hy
+  -- `c` is a `p`-adic unit, with inverse `cInv`.
+  have hc_unit : IsUnit ((c : ℕ) : ℤ_[p]) := by
+    rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
+    exact hp'.coprime_iff_not_dvd.mpr hc
+  set cInv : ℤ_[p] := (hc_unit.unit⁻¹ : (ℤ_[p])ˣ).val
+  have hcInv_mul : ((c : ℕ) : ℤ_[p]) * cInv = 1 := by
+    change ((hc_unit.unit * hc_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
+  have hcInv_mul_Qp : ((c : ℕ) : ℚ_[p]) * ((cInv : ℤ_[p]) : ℚ_[p]) = 1 := by
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hcInv_mul
+  -- Factorisation `(k+1) = pᵉ · c` cast to `ℚ_[p]`.
+  have h_fact_Qp : ((k + 1 : ℕ) : ℚ_[p]) = (p : ℚ_[p]) ^ e * ((c : ℕ) : ℚ_[p]) := by
+    rw [hfact]; push_cast; ring
+  rw [h_fact_Qp] at hW
+  -- Cancel `pᵉ` (using `e ≤ 2`): `c · (y - b) = p^{2-e} · W`.
+  have h_pow_split : (p : ℚ_[p]) ^ 2 = (p : ℚ_[p]) ^ e * (p : ℚ_[p]) ^ (2 - e) := by
+    rw [← pow_add]; congr 1; omega
+  have hW' : ((c : ℕ) : ℚ_[p]) * (y - b) =
+      (p : ℚ_[p]) ^ (2 - e) * ((W : ℤ_[p]) : ℚ_[p]) :=
+    mul_left_cancel₀ (pow_ne_zero e hpQ_ne)
+      (by rw [h_pow_split] at hW; linear_combination hW)
+  -- Divide by `c`: `y - b = cInv · p^{2-e} · W ∈ ℤ_[p]`, hence `b ∈ ℤ_[p]`.
+  refine ⟨s - cInv * (p : ℤ_[p]) ^ (2 - e) * W, ?_⟩
+  have h_diff : y - b =
+      ((cInv : ℤ_[p]) : ℚ_[p]) * ((p : ℚ_[p]) ^ (2 - e) * ((W : ℤ_[p]) : ℚ_[p])) := by
+    linear_combination ((cInv : ℤ_[p]) : ℚ_[p]) * hW' - (y - b) * hcInv_mul_Qp
+  push_cast
+  linear_combination hs - h_diff
+
 /-- **Von Staudt–Clausen (unified, restricted to `v_p(k+1) ≤ 2`)**: for
 every even `k ≥ 2` with `¬ p^3 ∣ (k+1)` we have `p · B_k ∈ ℤ_[p]`. This
 subsumes both the classical boundary case `(p-1) ∣ k` (where the naive
@@ -447,7 +498,6 @@ theorem p_mul_bernoulli_mem_padicInt_restricted
     ∃ z : ℤ_[p], (p : ℚ_[p]) * (((bernoulli k : ℚ)) : ℚ_[p]) = (z : ℚ_[p]) := by
   have hp : Nat.Prime p := hp.out
   have hp_gt : 2 < p := lt_of_le_of_ne hp.two_le (Ne.symm hp_odd)
-  have hpQ_ne : (p : ℚ_[p]) ≠ 0 := by exact_mod_cast hp.ne_zero
   -- Strong induction on k. Revert hypotheses to make them universally quantified over k.
   revert hk_two hk_even h_below
   induction k using Nat.strong_induction_on with
@@ -476,39 +526,9 @@ theorem p_mul_bernoulli_mem_padicInt_restricted
           apply h_not_pCube
           rw [hq, pow_succ]
           exact mul_dvd_mul_left (p ^ 2) hdvd
-        have hq_unit : IsUnit ((q : ℕ) : ℤ_[p]) := by
-          rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
-          exact hp.coprime_iff_not_dvd.mpr hq_coprime
-        set qInv : ℤ_[p] := (hq_unit.unit⁻¹ : (ℤ_[p])ˣ).val
-        have hqInv_mul : ((q : ℕ) : ℤ_[p]) * qInv = 1 := by
-          change ((hq_unit.unit * hq_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
-        have hqInv_mul_Qp : ((q : ℕ) : ℚ_[p]) * ((qInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-          simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hqInv_mul
         obtain ⟨W, hW⟩ := sum_range_pow_sub_p_mul_bernoulli_weighted hp_odd hk_two hk_even ih_pB
-        have h_kp1_eq : ((k + 1 : ℕ) : ℚ_[p]) = (p : ℚ_[p])^2 * ((q : ℕ) : ℚ_[p]) := by
-          have : (k + 1 : ℕ) = p^2 * q := hq
-          push_cast [this]; ring
-        rw [h_kp1_eq] at hW
-        -- p² · q · X = p² · W, cancel p²: q · X = W.
-        have hp_sq_ne : (p : ℚ_[p])^2 ≠ 0 := pow_ne_zero 2 hpQ_ne
-        have hW'' : ((q : ℕ) : ℚ_[p]) *
-            ((∑ k' ∈ Finset.range p, (k' : ℚ_[p]) ^ k) -
-              (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p])) =
-            ((W : ℤ_[p]) : ℚ_[p]) :=
-          mul_left_cancel₀ hp_sq_ne (by linear_combination hW)
-        -- Multiply by qInv: X = qInv · W.
-        have h_sub : ((∑ k' ∈ Finset.range p, (k' : ℚ_[p]) ^ k) -
-              (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p])) =
-            ((qInv : ℤ_[p]) : ℚ_[p]) * ((W : ℤ_[p]) : ℚ_[p]) := by
-          linear_combination ((qInv : ℤ_[p]) : ℚ_[p]) * hW'' -
-            (((∑ k' ∈ Finset.range p, (k' : ℚ_[p]) ^ k) -
-              (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p]))) * hqInv_mul_Qp
-        rw [hS_cast] at h_sub
-        refine ⟨(S_nat : ℤ_[p]) - qInv * W, ?_⟩
-        have h_rearr : (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p]) =
-            ((S_nat : ℕ) : ℚ_[p]) - ((qInv : ℤ_[p]) : ℚ_[p]) * ((W : ℤ_[p]) : ℚ_[p]) := by
-          linear_combination -h_sub
-        rw [h_rearr]; push_cast; ring
+        exact mem_padicInt_of_weighted_factor hq le_rfl hq_coprime hW
+          ⟨(S_nat : ℤ_[p]), by rw [hS_cast]; norm_cast⟩
       · -- Case B: `v_p(k+1) = 1`. Use pre-division form.
         obtain ⟨m', hm'⟩ := h_p_dvd
         have hm'_coprime : ¬ (p : ℕ) ∣ m' := by
@@ -516,41 +536,10 @@ theorem p_mul_bernoulli_mem_padicInt_restricted
           apply h_p_sq
           rw [hm', pow_two]
           exact mul_dvd_mul_left p hdvd
-        have hm'_unit : IsUnit ((m' : ℕ) : ℤ_[p]) := by
-          rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
-          exact hp.coprime_iff_not_dvd.mpr hm'_coprime
-        set mInv : ℤ_[p] := (hm'_unit.unit⁻¹ : (ℤ_[p])ˣ).val
-        have hmInv_mul : ((m' : ℕ) : ℤ_[p]) * mInv = 1 := by
-          change ((hm'_unit.unit * hm'_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) = 1; simp
-        have hmInv_mul_Qp : ((m' : ℕ) : ℚ_[p]) * ((mInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-          simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hmInv_mul
-        -- Pre-division form.
         obtain ⟨W, hW⟩ := sum_range_pow_sub_p_mul_bernoulli_weighted hp_odd hk_two hk_even ih_pB
-        -- Rewrite (k + 1) = p * m'.
-        have h_kp1_eq : ((k + 1 : ℕ) : ℚ_[p]) = (p : ℚ_[p]) * ((m' : ℕ) : ℚ_[p]) := by
-          have : (k + 1 : ℕ) = p * m' := hm'
-          push_cast [this]; ring
-        rw [h_kp1_eq] at hW
-        -- Divide by p: m' · (∑ a^k - p · B_k) = p · W.
-        have hW'' : ((m' : ℕ) : ℚ_[p]) *
-            ((∑ k' ∈ Finset.range p, (k' : ℚ_[p]) ^ k) -
-              (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p])) =
-            (p : ℚ_[p]) * ((W : ℤ_[p]) : ℚ_[p]) :=
-          mul_left_cancel₀ hpQ_ne (by linear_combination hW)
-        -- Multiply by mInv: (∑ a^k - p · B_k) = mInv · (p · W).
-        have h_sub : ((∑ k' ∈ Finset.range p, (k' : ℚ_[p]) ^ k) -
-              (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p])) =
-            ((mInv : ℤ_[p]) : ℚ_[p]) * ((p : ℚ_[p]) * ((W : ℤ_[p]) : ℚ_[p])) := by
-          linear_combination ((mInv : ℤ_[p]) : ℚ_[p]) * hW'' -
-            (((∑ k' ∈ Finset.range p, (k' : ℚ_[p]) ^ k) -
-              (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p]))) * hmInv_mul_Qp
-        rw [hS_cast] at h_sub
-        refine ⟨(S_nat : ℤ_[p]) - mInv * (p : ℤ_[p]) * W, ?_⟩
-        have h_rearr : (p : ℚ_[p]) * ((bernoulli k : ℚ) : ℚ_[p]) =
-            ((S_nat : ℕ) : ℚ_[p]) - ((mInv : ℤ_[p]) : ℚ_[p]) * (p : ℚ_[p]) *
-              ((W : ℤ_[p]) : ℚ_[p]) := by
-          linear_combination -h_sub
-        rw [h_rearr]; push_cast; ring
+        exact mem_padicInt_of_weighted_factor
+          (show k + 1 = p ^ 1 * m' by rw [pow_one]; exact hm') (by norm_num) hm'_coprime hW
+          ⟨(S_nat : ℤ_[p]), by rw [hS_cast]; norm_cast⟩
     · -- Case A: `p ∤ (k+1)`, apply Step 2.
       obtain ⟨w, hw⟩ :=
         sum_range_pow_sModEq_p_mul_bernoulli hp_odd hk_two hk_even h_p_dvd ih_pB

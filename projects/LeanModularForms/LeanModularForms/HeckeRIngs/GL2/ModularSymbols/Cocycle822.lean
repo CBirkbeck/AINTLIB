@@ -74,7 +74,6 @@ noncomputable def divCocycle₁ (N : ℕ) [NeZero N] (c₀ : ℙ¹ℚ) : cocycle
 theorem div0Rep_divCocycle_inv (c₀ : ℙ¹ℚ) (a : Gamma1 N) :
     div0Rep ℤ a.1 (divCocycle N c₀ a⁻¹) = -divCocycle N c₀ a := by
   have h := cocycles₁_map_inv (divCocycle₁ N c₀) a
-  rw [div0RepGamma1Rep_ρ] at h
   exact h
 
 end HeckeRing.GL2.ModularSymbols

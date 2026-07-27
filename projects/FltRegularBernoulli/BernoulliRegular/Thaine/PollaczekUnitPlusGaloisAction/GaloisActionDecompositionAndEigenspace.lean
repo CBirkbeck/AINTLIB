@@ -46,7 +46,8 @@ variable (K : Type*) [Field K] [NumberField K]
 
 Distributes the Galois action over the σ-symmetric product structure:
 
-  `σ_a • (P · σ_{-1} • P) = (σ_a • P) · (σ_a · σ_{-1}) • P = (σ_a • P) · σ_{-a} • P`
+  `σ_a • (P · σ_{-1} • P) = (σ_a • P) · (σ_a · σ_{-1}) • P`
+                          `= (σ_a • P) · σ_{-a} • P`
 
 via `MulSemiringAction.smul_mul` (multiplicativity of σ_a),
 `unitsComplexConj_val_eq_cyclotomicSigmaOfUnit_neg_one_smul` (T-EIG-B0
@@ -64,7 +65,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnitPlus_decomp
       ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) *
       ((NumberField.IsCMField.unitsComplexConj K (pollaczekUnit p K i) :
         (𝓞 K)ˣ) : 𝓞 K) := by
-    unfold pollaczekUnitPlus
+    simp only [pollaczekUnitPlus]
     rw [Units.val_mul]
   rw [h_def, smul_mul']
   -- Bridge unitsComplexConj K (pollaczekUnit) val = σ_{-1} • pollaczekUnit val (T-EIG-B0).
@@ -241,7 +242,7 @@ theorem cyclotomicUnitFreePartModP_powerSum_smul_eq_zero_FLT37
   -- The ZMod 37-module structure: (n : ℕ) • x factors through (n : ZMod 37) • x.
   -- For S divisible by 37, (S : ZMod 37) = 0, so S • x = 0.
   have hp : Fact (Nat.Prime 37) := hp37
-  haveI : NeZero (37 : ℕ) := ⟨by decide⟩
+  have : NeZero (37 : ℕ) := ⟨by decide⟩
   -- S = 37·11685, so 37 ∣ S, so (S : ZMod 37) = 0.
   have h_S_dvd : (37 : ℕ) ∣ ∑ b ∈ Finset.Ico (1 : ℕ) (((37 : ℕ) - 1) / 2 + 1),
       b ^ ((37 : ℕ) - 1 - 32) := by decide
@@ -304,7 +305,8 @@ theorem signZeta_factor_unit_val (cond : Prop) [Decidable cond] (k : ℕ) :
     ((if cond then (1 : (𝓞 K)ˣ) else
         -(((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit ^ k)) : 𝓞 K) =
       (if cond then (1 : 𝓞 K) else
-        -(((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit : 𝓞 K) ^ k) := by
+        -(((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit : 𝓞 K)
+          ^ k) := by
   by_cases h : cond
   · simp [h]
   · simp [h]
@@ -321,24 +323,19 @@ theorem signZeta_factor_isTorsion (cond : Prop) [Decidable cond] (k : ℕ) :
   by_cases h : cond
   · simp [h, NumberField.Units.torsion]
   · simp only [h, if_false]
-    -- -ζ^k is torsion: ζ has order p, so ζ^k has order dividing p.
-    -- -1 has order 2. Their product has order dividing 2p, hence finite.
-    apply (CommGroup.mem_torsion _).2
-    -- (-ζ^k)^(2p) = ζ^(2kp) = 1.
-    rw [isOfFinOrder_iff_pow_eq_one]
-    refine ⟨2 * p, by simp [(Fact.out : p.Prime).pos], ?_⟩
-    have hζp : ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit ^ p = 1 :=
+    set η := ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit with hη_def
+    have hζp : η ^ p = 1 :=
       ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit_unit hp.1.ne_zero).pow_eq_one
-    rw [show (-(((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit ^ k)) ^ (2 * p) =
-        ((-1 : (𝓞 K)ˣ) ^ (2 * p)) * (((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit ^ k) ^ (2 * p) from by
-      rw [neg_eq_neg_one_mul, mul_pow]]
-    rw [show ((-1 : (𝓞 K)ˣ) ^ (2 * p)) = 1 from by
-      rw [pow_mul, neg_one_sq, one_pow]]
-    rw [one_mul]
-    rw [show (((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit ^ k) ^ (2 * p) =
-        ((((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit ^ p) ^ (2 * k)) from by
-      rw [← pow_mul, ← pow_mul]; congr 1; ring]
-    rw [hζp, one_pow]
+    refine (CommGroup.mem_torsion _).2 (isOfFinOrder_iff_pow_eq_one.2
+      ⟨2 * p, by simp [(Fact.out : p.Prime).pos], ?_⟩)
+    calc (-(η ^ k)) ^ (2 * p)
+        = ((-1 : (𝓞 K)ˣ) ^ (2 * p)) * ((η ^ k) ^ (2 * p)) := by
+          rw [neg_eq_neg_one_mul, mul_pow]
+      _ = (η ^ p) ^ (2 * k) := by
+          rw [pow_mul (-1 : (𝓞 K)ˣ), neg_one_sq, one_pow, one_mul, ← pow_mul, ← pow_mul]
+          congr 1
+          ring
+      _ = 1 := by rw [hζp, one_pow]
 
 omit [NumberField.IsCMField K] in
 /-- **Unit-level half-range product form of the (sign+ζ)-prefactor**:
@@ -359,7 +356,7 @@ theorem signZeta_prefactor_unit_val (a : (ZMod p)ˣ) (i : ℕ) :
               -((zeta_spec p ℚ K).toInteger) ^
                 (((a : ZMod p) * (b : ZMod p)).val)) ^ (b ^ (p - 1 - i)) := by
   rw [Units.coe_prod]
-  refine Finset.prod_congr rfl fun b _ => ?_
+  refine Finset.prod_congr rfl fun b _ ↦ ?_
   rw [Units.val_pow_eq_pow_val]
   congr 1
   rw [apply_ite (·.val : (𝓞 K)ˣ → 𝓞 K)]
@@ -492,7 +489,7 @@ theorem pollaczekUnit_image_eigenvalue_FLT37
       ha_coprime
   -- Apply additive group hom to both sides.
   have h_class := congrArg
-    (fun u => cyclotomicUnitToFreePartModPAdd (p := 37) K' (Additive.ofMul u)) hγ
+    (fun u ↦ cyclotomicUnitToFreePartModPAdd (p := 37) K' (Additive.ofMul u)) hγ
   simp only [ofMul_mul, map_add, ofMul_pow, map_nsmul] at h_class
   -- Vanish each correction.
   rw [show ((∑ b ∈ Finset.Ico 1 ((37 - 1) / 2 + 1), b ^ (37 - 1 - 32)) •
@@ -586,7 +583,7 @@ theorem pollaczekUnit_image_eigenvalue_zmod_FLT37
       (Additive.ofMul (cyclotomicUnitFreeClass K' (pollaczekUnit 37 K' 32)))
   have h_smul : (((a^32 : (ZMod 37)ˣ) : ZMod 37).val : ℕ) • y =
       (((a^32 : (ZMod 37)ˣ) : ZMod 37)) • y := by
-    haveI : NeZero (37 : ℕ) := ⟨by decide⟩
+    have : NeZero (37 : ℕ) := ⟨by decide⟩
     rw [show ((((a^32 : (ZMod 37)ˣ) : ZMod 37)) • y : CyclotomicUnitFreePartModP (p := 37) K') =
         (((((a^32 : (ZMod 37)ˣ) : ZMod 37).val : ℕ) : ZMod 37)) • y from by
       rw [ZMod.natCast_val, ZMod.cast_id]]
@@ -683,7 +680,7 @@ theorem flt37_pollaczekUnit_class_in_powerQuotient_ne_one
   rw [cyclotomicUnitPowerClass, QuotientGroup.mk'_apply,
       QuotientGroup.eq_one_iff] at h_eq
   -- h_eq : pollaczekUnit ∈ CyclotomicUnitPowerSubgroup (= range of pow 37).
-  unfold CyclotomicUnitPowerSubgroup at h_eq
+  simp only [CyclotomicUnitPowerSubgroup] at h_eq
   rw [MonoidHom.mem_range] at h_eq
   obtain ⟨α, hα⟩ := h_eq
   -- hα : α^37 = pollaczekUnit (as units).
@@ -727,7 +724,7 @@ theorem flt37_pollaczekUnitPlus_class_in_powerQuotient_ne_one
   intro h_eq
   rw [cyclotomicUnitPowerClass, QuotientGroup.mk'_apply,
       QuotientGroup.eq_one_iff] at h_eq
-  unfold CyclotomicUnitPowerSubgroup at h_eq
+  simp only [CyclotomicUnitPowerSubgroup] at h_eq
   rw [MonoidHom.mem_range] at h_eq
   obtain ⟨α, hα⟩ := h_eq
   exact flt37_pollaczekUnitPlus_unit_ne_pow_37 α hα.symm
@@ -739,7 +736,7 @@ theorem flt37_pollaczekUnitPlus_class_in_powerQuotient_additive_ne_zero
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
     Additive.ofMul
         (cyclotomicUnitPowerClass (p := 37) (N := 1) (CyclotomicField 37 ℚ)
-          (pollaczekUnitPlus 37 (CyclotomicField 37 ℚ) 32)) ≠ 0 := fun h_eq =>
+          (pollaczekUnitPlus 37 (CyclotomicField 37 ℚ) 32)) ≠ 0 := fun h_eq ↦
   flt37_pollaczekUnitPlus_class_in_powerQuotient_ne_one <| Additive.ofMul.injective h_eq
 
 /-- **PUP class is fixed by `σ_{-1} = complex conjugation` at the E/E^37 level**.
@@ -788,7 +785,7 @@ theorem flt37_pollaczekUnitPlus_class_not_mem_torsion_powerClassSubgroup
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
     cyclotomicUnitPowerClass (p := 37) (N := 1) (CyclotomicField 37 ℚ)
         (pollaczekUnitPlus 37 (CyclotomicField 37 ℚ) 32) ∉
-      cyclotomicTorsionPowerClassSubgroup (p := 37) (CyclotomicField 37 ℚ) := fun hmem =>
+      cyclotomicTorsionPowerClassSubgroup (p := 37) (CyclotomicField 37 ℚ) := fun hmem ↦
   flt37_pollaczekUnitPlus_class_in_powerQuotient_additive_ne_zero <|
     cyclotomicUnitPowerQuotient_eq_zero_of_mem_torsion_of_neg_one_fixed
       (p := 37) (K := CyclotomicField 37 ℚ) (by omega) hmem

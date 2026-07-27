@@ -252,6 +252,17 @@ private lemma seg4_ae_eq_h₀ (H : ℝ) (z₀ : ℂ) :
 /-- Local alias for the shared ae-equality. -/
 private alias seg4_ae_eq_h₃ := ae_eq_vertSeg_h₃
 
+/-- Split an interval integral over three adjacent subintervals `[a,b]`, `[b,c]`, `[c,d]`
+into the sum of the three pieces. The 2-way case is `integral_add_adjacent_intervals`. -/
+private lemma integral_split_three {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {f : ℝ → E} {a b c d : ℝ}
+    (hab : IntervalIntegrable f volume a b) (hbc : IntervalIntegrable f volume b c)
+    (hcd : IntervalIntegrable f volume c d) :
+    ∫ t in a..d, f t =
+      (∫ t in a..b, f t) + (∫ t in b..c, f t) + (∫ t in c..d, f t) := by
+  rw [intervalIntegral.integral_add_adjacent_intervals hab hbc,
+      intervalIntegral.integral_add_adjacent_intervals (hab.trans hbc) hcd]
+
 /-- The full FTC telescope for the seg4 crossing. -/
 theorem fdBoundary_ftc_telescope_seg4 {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
     {z₀ : ℂ} (hz_re : z₀.re = -1/2)
@@ -285,19 +296,15 @@ theorem fdBoundary_ftc_telescope_seg4 {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
       (∫ t in (1/5:ℝ)..(3/5),
           (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) +
       (∫ t in (3/5:ℝ)..(t₀ - δ),
-          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) := by
-    have h1 := intervalIntegral.integral_add_adjacent_intervals hint_seg1 hint_arc
-    have h2 := intervalIntegral.integral_add_adjacent_intervals
-      (hint_seg1.trans hint_arc) hint_left
-    linear_combination -h1 - h2
+          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) :=
+    integral_split_three hint_seg1 hint_arc hint_left
   have h_split_right :
       ∫ t in (t₀ + δ)..(1 : ℝ), (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t =
       (∫ t in (t₀ + δ)..(4/5 : ℝ),
           (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) +
       (∫ t in (4/5 : ℝ)..(1 : ℝ),
-          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) := by
-    have h := intervalIntegral.integral_add_adjacent_intervals hint_right hint_seg5
-    linear_combination -h
+          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) :=
+    (intervalIntegral.integral_add_adjacent_intervals hint_right hint_seg5).symm
   rw [h_split_left, h_split_right, h_int_seg1, h_int_arc, h_int_left, h_int_right, h_int_seg5,
       seg4_junction_15 H z₀,
       show seg4_h_arc z₀ (3/5) = seg4_h₃ H z₀ (3/5) from vertSeg_junction_35 H z₀,

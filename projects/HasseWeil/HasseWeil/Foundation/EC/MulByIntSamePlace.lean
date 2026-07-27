@@ -64,8 +64,6 @@ open WeierstrassCurve HasseWeil.Curves
 
 namespace HasseWeil
 
-set_option linter.unusedSectionVars false
-
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve.Affine F} [W.IsElliptic]
 
 local notation "KE" => W.FunctionField
@@ -122,6 +120,7 @@ private theorem mulByInt_coords_at_affine (ℓ : ℤ) (_hℓ : ℓ ≠ 0)
   rw [hQ, Affine.Point.some.injEq] at heq
   exact ⟨hψ, heq.1, heq.2⟩
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- **Univariate value bridge (abstract)**: if `u ∈ K(E)` is regular at `P` and `u ≡ a` modulo
 `m_P` (i.e. `pointValuation P (u − a) < 1`), then for any `q : F[X]`,
 `q(u) ≡ q(a)` modulo `m_P`. Polynomial induction on `q` via the strong triangle inequality. -/
@@ -163,6 +162,7 @@ private theorem pointValuation_aeval_sub_eval_lt_one
     · exact pointValuation_mul_lt_one_of_le_and_lt W P
         ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_F_le_one P _) hu
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- **Coordinate-ring residue bridge**: a coordinate-ring element `r` is congruent, modulo `m_P`,
 to its value `evalAt P r` at `P` — i.e. `pointValuation P (algMap r − evalAt P r) < 1`.
 Direct from `ker (evalAt P) = m_P`. -/
@@ -183,6 +183,7 @@ private theorem pointValuation_algebraMap_sub_evalAt_lt_one
   rwa [map_sub, ← IsScalarTower.algebraMap_apply F (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing
     (⟨W⟩ : SmoothPlaneCurve F).FunctionField] at hlt
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- `algebraMap (Polynomial F) K(E)` is evaluation of the polynomial at `x_gen`. -/
 private theorem algebraMap_polynomial_eq_aeval_x_gen (p : Polynomial F) :
     algebraMap (Polynomial F) KE p = Polynomial.aeval (x_gen W) p := by
@@ -191,18 +192,21 @@ private theorem algebraMap_polynomial_eq_aeval_x_gen (p : Polynomial F) :
         Polynomial.X).symm,
     Polynomial.aeval_algebraMap_apply, Polynomial.aeval_X_left_apply]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- `Φ_ff W ℓ = (W.Φ ℓ)(x_gen)`. -/
 private theorem Φ_ff_eq_aeval (ℓ : ℤ) :
     Φ_ff W ℓ = Polynomial.aeval (x_gen W) (W.Φ ℓ) := by
   rw [← algebraMap_polynomial_eq_aeval_x_gen, Φ_ff,
     IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing KE]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- `ΨSq_ff W ℓ = (W.ΨSq ℓ)(x_gen)`. -/
 private theorem ΨSq_ff_eq_aeval (ℓ : ℤ) :
     ΨSq_ff W ℓ = Polynomial.aeval (x_gen W) (W.ΨSq ℓ) := by
   rw [← algebraMap_polynomial_eq_aeval_x_gen, ΨSq_ff,
     IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing KE]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- `ΨSq_ff ℓ` is a unit at `P`: its residue is the nonzero constant `ΨSq_ℓ(P.x)`,
 so `pointValuation P (ΨSq_ff ℓ) = 1`. -/
 private theorem pointValuation_ΨSq_ff_eq_one (ℓ : ℤ)
@@ -226,6 +230,7 @@ private theorem pointValuation_ΨSq_ff_eq_one (ℓ : ℤ)
   rw [hsplit, ((⟨W⟩ : SmoothPlaneCurve F).pointValuation P).map_add_eq_of_lt_right
     (by rw [hconst]; exact hbridge), hconst]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- The numerator `Φ_ff ℓ − x·ΨSq_ff ℓ` is in `m_P` (`< 1`): it is the `aeval` of
 `Φ_ℓ − C x·ΨSq_ℓ`, whose `P.x`-evaluation vanishes (`hx_eq`). -/
 private theorem pointValuation_Φ_ff_sub_mul_ΨSq_ff_lt_one (ℓ : ℤ)
@@ -272,6 +277,7 @@ private theorem pointValuation_mulByInt_x_sub_lt_one [IsAlgClosed F] (ℓ : ℤ)
     rw [mulByInt_x, sub_mul, div_eq_mul_inv, mul_assoc, mul_inv_cancel₀ hΨSq_ff_ne, mul_one]
   rwa [hmx, map_mul, map_inv₀, hΨSq_unit, inv_one, mul_one]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- The `y`-coordinate numerator `ω_ff − y·ψ_ff³` vanishes modulo `m_P`, from the generator
 residues `ω_ff ≡ ω_ℓ(P)`, `ψ_ff ≡ ψ_ℓ(P)` and the image coordinate relation `ω_ℓ(P) = y·ψ_ℓ(P)³`:
 cube the `ψ`-residue (`q = X³` in the univariate bridge), then `ω_ff − y·ψ_ff³ =
@@ -348,6 +354,7 @@ private theorem pointValuation_mulByInt_y_sub_lt_one [IsAlgClosed F] (ℓ : ℤ)
       mul_inv_cancel₀ (pow_ne_zero 3 hψ_ff_ne), mul_one]
   rwa [hmy, map_mul, map_inv₀, hψ3_unit, inv_one, mul_one]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- The monomial inductive step of `pointValuation_bivariate_bridge`: from the bridge bound
 for `C q · Xⁿ`, derive it for `C q · Xⁿ⁺¹` (the multiply-by-`X` step, splitting `Au·v − Ab·b`
 into `Au·(v−b) + b·(Au−Ab)`). -/
@@ -391,6 +398,7 @@ private theorem pointValuation_bivariate_bridge_monomial
   · exact pointValuation_mul_lt_one_of_le_and_lt W P
       ((⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_F_le_one P _) ih
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- **Bivariate value bridge**: if `u ≡ a` and `v ≡ b` modulo `m_P` (both `u, v` regular at `P`),
 then `p(u, v) ≡ p(a, b)` modulo `m_P` for any bivariate `p : F[X][X]` (the coefficients pushed
 through `algebraMap F K(E)`). Polynomial induction reducing to the two univariate bridges. -/
@@ -551,6 +559,7 @@ private theorem pointValuation_mulByInt_pullback_algebraMap_lt_one_of_mem [IsAlg
   have h := pointValuation_mulByInt_pullback_algebraMap_sub_evalAt_lt_one ℓ hℓ P h_ns hQ r
   rwa [hrQ, map_zero, sub_zero] at h
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- A function regular at the affine image `Q = ⟨x, y, h_ns⟩` is `algMap u / algMap v` for some
 coordinate-ring `u` and unit denominator `v ∉ m_Q`: the local-ring representative at `Q`, cleared
 through `IsLocalization.surj`. Shared setup for the two forward transfers. -/
@@ -670,6 +679,7 @@ theorem mulByInt_samePlace_le_one_iff_affine [IsAlgClosed F] (ℓ : ℤ) (hℓ :
   rw [hmul] at hlt1
   exact absurd hlt1 (lt_irrefl 1)
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- `ord_∞ (algebraMap F KE c · f) ≥ n` when `ord_∞ f ≥ n` (constants are units at `∞`). -/
 private theorem ord_algebraMap_mul_ge_aux' (c : F)
     {f : (⟨W⟩ : SmoothPlaneCurve F).FunctionField} {n : WithTop ℤ}
@@ -685,6 +695,7 @@ private theorem ord_algebraMap_mul_ge_aux' (c : F)
         (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_algebraMap_F_nonzero hc, zero_add]
       exact hf
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- `ord_∞(f + g) ≥ n` when both `ord_∞ f ≥ n`, `ord_∞ g ≥ n`. -/
 private theorem ord_add_ge_of_both_ge_aux'
     {f g : (⟨W⟩ : SmoothPlaneCurve F).FunctionField} {n : WithTop ℤ}
@@ -737,6 +748,7 @@ private theorem ordAtInfty_mulByInt_rhs_eq_neg_six_aux (ℓ : ℤ) (hℓ : ℓ �
   rw [← step2] at h_lt
   exact ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt h_lt).trans step2
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- Step (a) of `ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux`: writing `m = ord_∞ Y`, the
 order of the standard-form LHS being `-6` forces `m ≤ -3` (else every term has order `≥ -4`). -/
 private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_m_le (ℓ : ℤ) (m : ℤ)
@@ -763,6 +775,7 @@ private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_m_le (ℓ : ℤ) (m 
   rw [h_lhs_ord] at h_lhs_ge
   exact absurd (by exact_mod_cast h_lhs_ge : (-4 : ℤ) ≤ -6) (by lia)
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- Step (b) of `ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux`: once `m ≤ -3`, the `Y²` term
 strictly dominates the other two LHS terms, so the standard-form LHS has the same order as `Y²`. -/
 private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_lhs_eq_sq (ℓ : ℤ) (m : ℤ)
@@ -791,8 +804,10 @@ private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_lhs_eq_sq (ℓ : ℤ
     refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge_aux' W.a₃ (le_of_eq hm.symm))
     exact_mod_cast (by lia : (2 * m : ℤ) < m)
   have h_inner_eq := (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt h_a1xy_gt
-  exact ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt (h_inner_eq ▸ h_a3y_gt)).trans h_inner_eq
+  exact ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt (h_inner_eq ▸ h_a3y_gt)).trans
+    h_inner_eq
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- From `ord_∞(Y² + a₁XY + a₃Y) = -6` together with `ord_∞ X = -2` (`X = mulByInt_x ℓ`,
 `Y = mulByInt_y ℓ`), conclude `ord_∞ Y = -3`. Writing `m := ord_∞ Y`, the cross term `a₁XY` and the
 linear term `a₃Y` have order `≥ -2 + m` and `≥ m`; a lower bound forces `m ≤ -3`, after which `Y²`

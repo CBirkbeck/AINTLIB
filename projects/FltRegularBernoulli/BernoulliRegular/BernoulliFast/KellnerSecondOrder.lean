@@ -257,8 +257,8 @@ theorem kellner_at_small_s
 
 /-! ## The FLT37 second-order target -/
 
-/-- **`¬ 37³ ∣ B_{1184}.num` from Kellner Prop 2.7** (Reviewer guidance
-2026-05-22). The bare statement of the FLT37 target case is the
+/-- **`¬ 37³ ∣ B_{1184}.num` from Kellner Prop 2.7.**
+The bare statement of the FLT37 target case is the
 specialisation of `KellnerProp27_thirtyseven_thirtytwo` at `s = 32`:
 since the unique second-order index is `s = 7 ≠ 32`, and `37 ∣ 1184`,
 the Kellner Prop 2.7 conclusion at `s = 32` is `¬ 37³ ∣ B_{1184}.num`.

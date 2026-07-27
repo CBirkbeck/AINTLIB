@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
-import FltRegular.CaseI.Statement
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
+public import FltRegular.CaseI.Statement
 
 /-!
 # LV008-CTOR-a: case I factor ideals are `p`-th powers
@@ -43,7 +45,6 @@ namespace LehmerVandiver
 
 namespace CaseI
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Case I factor ideal is a `p`-th power.** Direct wrapper of
 `FltRegular.exists_ideal`: under FLT case I hypotheses (with
 `p ≥ 5`), each cyclotomic factor `(a + ζ b)` generates an ideal that is

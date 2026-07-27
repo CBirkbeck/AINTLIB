@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHasseLocalModel
@@ -76,6 +81,7 @@ def lambdaNatDenominatorUnit {n : ℕ} (hn_pos : 0 < n) (hn_lt : n < p) :
     (LambdaLocalIntegerRing p K)ˣ :=
   (isUnit_natCast_lambdaLocalIntegerRing_of_pos_lt (p := p) (K := K) hn_pos hn_lt).unit
 
+/-- The underlying ring element of a denominator unit is just `n`. -/
 @[simp]
 theorem lambdaNatDenominatorUnit_val {n : ℕ}
     (hn_pos : 0 < n) (hn_lt : n < p) :

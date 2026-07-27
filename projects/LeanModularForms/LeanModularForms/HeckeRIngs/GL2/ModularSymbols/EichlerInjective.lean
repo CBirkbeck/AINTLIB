@@ -15,20 +15,27 @@ import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 The *Eichler-integral* route to `periodMap'_injective` (decomposition
 `.mathlib-quality/decomposition-eichler.md`, tree §Step 2).  The top result
 `periodMap'_injective_eichler` is now **fully PROVEN and axiom-clean**.  The last residual
-`eichler_slashSL_bdd_finite` (sub-ticket EICH-3a-i) — the boundedness of the slashed Eichler integral
+`eichler_slashSL_bdd_finite` (sub-ticket EICH-3a-i) — the boundedness of the slashed Eichler
+integral
 at a *finite* cusp (`γ • ∞ ≠ ∞`, i.e. `γ₁₀ ≠ 0`) — is closed: after slashing by `γ ∈ SL(2,ℤ)`, the
-function decomposes as `(E_f∘↑)∣[2-k]γ = E_g − C_k·cuspValueGen g ((·-τ)ⁿ)(γ⁻¹∞)`, where `E_g` is the
+function decomposes as `(E_f∘↑)∣[2-k]γ = E_g − C_k·cuspValueGen g ((·-τ)ⁿ)(γ⁻¹∞)`, where `E_g` is
+the
 `∞`-Eichler integral of the conjugate cusp form `g := f∣[k]γ`
 (`eichler_slashSL_eq_eichlerIntegralGen_sub_cuspValueGen`, the honest general-`γ` form of
-`eichler_defect_eq_cuspValueMoving` via the Möbius change of variables + the generic interior-ray FTC
+`eichler_defect_eq_cuspValueMoving` via the Möbius change of variables + the generic interior-ray
+FTC
 `rayGen_integral_eq_top_sub`).  The conjugate cusp value vanishes under `ι(f)=0`
-(`cuspValueGen_translate_eq_zero`: `ι(f)=0 ⟹ ι(g)=0` via `rawPairingGen_actMat` since `γ` has det `1`,
-plus the generic base-point independence), so the slash *is* `C_k·E_g`, which is bounded at `i∞` by the
+(`cuspValueGen_translate_eq_zero`: `ι(f)=0 ⟹ ι(g)=0` via `rawPairingGen_actMat` since `γ` has det
+`1`,
+plus the generic base-point independence), so the slash *is* `C_k·E_g`, which is bounded at `i∞`
+by the
 dominated-integral cusp-decay bound `eichlerIntegralGen_isBoundedAtImInfty`.  The all-`γ`
-cusp-boundedness `eichler_bdd_at_cusp` is therefore PROVEN by case split: the `γ • ∞ = ∞` (`γ₁₀ = 0`)
+cusp-boundedness `eichler_bdd_at_cusp` is therefore PROVEN by case split: the `γ • ∞ = ∞` (`γ₁₀ =
+0`)
 case via the cusp-`∞` bound transfer (`eichler_cusp_holo`), the finite-cusp case via the above.
 `#print axioms periodMap'_injective_eichler` is `[propext, Classical.choice, Quot.sound]` — NO
-`sorryAx`, NO `interior_edges_cancel_sum`; `HeckeAlgFiniteFinal.heckeAlgℤ_finite` (k≥2) consumes this
+`sorryAx`, NO `interior_edges_cancel_sum`; `HeckeAlgFiniteFinal.heckeAlgℤ_finite` (k≥2) consumes
+this
 route, so the whole `k≥2` integral-Hecke-ring-finiteness chain is axiom-clean.
 
 The mathematical content (reply.md §1, transcribed in the decomposition):
@@ -107,7 +114,8 @@ private lemma hasSum_qExpansion_eichler (f : CuspForm ((Gamma1 N).map (mapGL ℝ
     (ModularFormClass.holo f) (ModularFormClass.bdd_at_infty f) τ
 
 /-- For any `r : ℝ≥0` with `r < 1`, the Fourier coefficients of `f` weighted by `r^m` are
-absolutely summable: this is the statement that the `q`-expansion has radius of convergence `≥ 1`. -/
+absolutely summable: this is the statement that the `q`-expansion has radius of convergence `≥ 1`.
+-/
 private lemma summable_norm_coeff_mul_geom (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     {r : NNReal} (hr : (r : ℝ) < 1) :
     Summable (fun m : ℕ ↦ ‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * (r : ℝ) ^ m) := by
@@ -181,7 +189,8 @@ private lemma hasDerivAt_eichlerQSeries (f : CuspForm ((Gamma1 N).map (mapGL ℝ
   have hρ1 : ρ < 1 := by
     rw [hρdef]; exact Real.exp_lt_one_iff.mpr (by have := Real.pi_pos; nlinarith [hy₀pos])
   set u : ℕ → ℝ := fun m ↦
-    (2 * π) ^ (j + 1) * (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * (m : ℝ) ^ (j + 1) * ρ ^ m)
+    (2 * π) ^ (j + 1) *
+      (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * (m : ℝ) ^ (j + 1) * ρ ^ m)
     with hudef
   -- (i) `u` is summable.
   have hu : Summable u := by
@@ -219,7 +228,8 @@ private lemma hasDerivAt_eichlerQSeries (f : CuspForm ((Gamma1 N).map (mapGL ℝ
   have hbound : ∀ (i m : ℕ) (w : ℂ), y₀ < w.im →
       ‖eichlerCoeff f m * (2 * (π : ℂ) * Complex.I * m) ^ i *
           Complex.exp (2 * (π : ℂ) * Complex.I * m * w)‖
-        ≤ (2 * π) ^ i * (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * (m : ℝ) ^ i * ρ ^ m) := by
+        ≤ (2 * π) ^ i *
+            (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * (m : ℝ) ^ i * ρ ^ m) := by
     intro i m w hwim
     rw [norm_mul, norm_mul, norm_pow, hnorm2pi, hnorm_exp]
     have hexp_le : Real.exp (-(2 * π * m * w.im)) ≤ ρ ^ m := by
@@ -319,7 +329,8 @@ theorem bol_iterated_eichler (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk :
   -- Step 2: pull the scalar `((2πi)⁻¹)^n` inside the sum.
   rw [← tsum_mul_left]
   -- Step 3: identify the point with the upper-half-plane element `⟨z, hz⟩`.
-  rw [show UpperHalfPlane.ofComplex z = (⟨z, hz⟩ : ℍ) from UpperHalfPlane.ofComplex_apply_of_im_pos hz]
+  rw [show UpperHalfPlane.ofComplex z = (⟨z, hz⟩ : ℍ) from
+    UpperHalfPlane.ofComplex_apply_of_im_pos hz]
   -- Step 4: the q-expansion of `f` sums to `f ⟨z, hz⟩`.
   rw [← (hasSum_qExpansion_eichler f ⟨z, hz⟩).tsum_eq]
   -- Step 5: match the two series term by term.
@@ -372,8 +383,9 @@ private lemma span_range_castSymPow_eq_top (m : ℕ) :
         = Submodule.span ℂ ((fun d => (MvPolynomial.monomial d 1 : MvPolynomial (Fin 2) ℂ)) ''
           {d | Finsupp.degree d = m}) := by
       rw [show SymPow ℂ m = MvPolynomial.homogeneousSubmodule (Fin 2) ℂ m from rfl,
-        MvPolynomial.homogeneousSubmodule_eq_finsupp_supported, Finsupp.supported_eq_span_single]
-      rfl
+        MvPolynomial.homogeneousSubmodule_eq_finsupp_supported,
+        AddMonoidAlgebra.supported_eq_span_single]
+      simp only [MvPolynomial.single_eq_monomial]
     conv_lhs => rw [heq]
     refine Submodule.span_le.mpr ?_
     rintro _ ⟨d, (hd : Finsupp.degree d = m), rfl⟩
@@ -391,7 +403,8 @@ TYPE-LEVEL NOTE (WEAKENED — see report): "the Eichler integral based at the cu
 independence that `ι(f)=0` actually supplies and that is genuinely true: for any two cusps
 `c₁, c₂`, the **difference** of their cusp values vanishes (`cuspValue f P c₁ = cuspValue f P c₂`).
 This is exactly the `Div⁰` content of `ι(f)=0` (cf. `rawPairing_eq_zero_of_periodMap'_zero`, which
-forces every `((c₁)-(c₂)) ⊗ P` period to `0`); the individual `cuspValue f P c` need NOT vanish, only
+forces every `((c₁)-(c₂)) ⊗ P` period to `0`); the individual `cuspValue f P c` need NOT vanish,
+only
 their differences do, so this is the faithful (non-vacuous, true) shadow.  It is **weaker** than the
 literal G3a equality of two Eichler integrals; closing G3a properly needs the `eichlerIntegralAt c`
 def first.  (`P` is taken in `SymPow ℂ (k-2).toNat`, matching `cuspValue`.) -/
@@ -402,7 +415,8 @@ theorem eichler_basepoint_indep (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (h
   -- The integer case: for integer-coefficient `Q`, the cusp-difference period vanishes by
   -- `rawPairing_eq_zero_of_periodMap'_zero` applied to `(c₁) - (c₂) ∈ Div⁰`.
   have hint : ∀ Q : SymPow ℤ (k - 2).toNat,
-      cuspValue f (castSymPow (k - 2).toNat Q) c₁ = cuspValue f (castSymPow (k - 2).toNat Q) c₂ := by
+      cuspValue f (castSymPow (k - 2).toNat Q) c₁ =
+        cuspValue f (castSymPow (k - 2).toNat Q) c₂ := by
     intro Q
     have hz := rawPairing_eq_zero_of_periodMap'_zero hk f hf (divDiff c₁ c₂ ⊗ₜ[ℤ] Q)
     rw [rawPairing_tmul, divDiff_val, map_sub, LinearMap.sub_apply,
@@ -429,20 +443,24 @@ theorem eichler_basepoint_indep (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (h
 
 set_option linter.unusedVariables false in
 /-- **G3b — only positive Fourier powers at every cusp.**  After slashing `E_f` by `σ` at weight
-`2-k`, the expansion `C_k' Σ_{m≥1} b_m/(m/h)^{k-1} e^{2πimz/h}` has only positive `q`-powers, so `E_f`
+`2-k`, the expansion `C_k' Σ_{m≥1} b_m/(m/h)^{k-1} e^{2πimz/h}` has only positive `q`-powers, so
+`E_f`
 is holomorphic and vanishing at every cusp (reply.md §1.3, (8)).
 
 TYPE-LEVEL NOTE: "holomorphic and bounded/zero at every cusp" is the mathlib `IsBoundedAtImInfty` /
 `OnePoint.IsBoundedAt` predicate applied to `(eichlerIntegral f) ∘ ofComplex` slashed by the
 cusp-width data.  We state the bounded-at-`i∞` shadow on the `ℍ → ℂ` bridge; the full per-cusp
 statement is folded into the `bdd_at_cusps'` field of `eichlerModularForm`.  Stated here as the
-`IsBoundedAtImInfty` of the bridged function (the cusp-`∞` case), which is what the packaging consumes.
+`IsBoundedAtImInfty` of the bridged function (the cusp-`∞` case), which is what the packaging
+consumes.
 
-The `ℍ → ℂ` carrier is `(eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)`, i.e. `fun z : ℍ => eichlerIntegral f z`
+The `ℍ → ℂ` carrier is `(eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)`, i.e. `fun z : ℍ => eichlerIntegral f
+z`
 (the project bridges `ℂ → ℂ` integrands to `ℍ → ℂ` by the `UpperHalfPlane.coe` coercion).
 
 NOTE: boundedness at `i∞` is *automatic* from `a₀ = 0` (the Eichler `q`-series starts at `m ≥ 1`),
-so `hf` is **not** used here; it is kept in the signature only for uniformity with the other `G3`/`G4`
+so `hf` is **not** used here; it is kept in the signature only for uniformity with the other
+`G3`/`G4`
 lemmas (`eichler_basepoint_indep`, `eichler_slash_invariant`) where it is genuinely needed. -/
 theorem eichler_cusp_holo (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)
     (hf : periodMap' N k hk f = 0) :
@@ -529,13 +547,16 @@ theorem eichler_isZeroAtImInfty (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
         one_le_pow₀ (by exact_mod_cast hm : (1 : ℝ) ≤ (m : ℝ)) (n := (k - 1).toNat)]
   -- Pointwise bound: `‖E_f z‖ ≤ exp(-π·Im z) · (exp π · M)` for `Im z ≥ 1`.
   have hpoint : ∀ z : ℍ, (1 : ℝ) ≤ (z : ℂ).im →
-      ‖(eichlerIntegral f ∘ ((↑) : ℍ → ℂ)) z‖ ≤ Real.exp (-(π * (z : ℂ).im)) * (Real.exp π * M) := by
+      ‖(eichlerIntegral f ∘ ((↑) : ℍ → ℂ)) z‖ ≤
+        Real.exp (-(π * (z : ℂ).im)) * (Real.exp π * M) := by
     intro z hz
     -- Per-term: `‖a_m q^m‖ ≤ exp(-π Im z) · exp π · (‖a_m‖ ρ^m)` for `Im z ≥ 1`.
     have hterm : ∀ m : ℕ,
         ‖eichlerCoeff f m * (2 * (π : ℂ) * Complex.I * m) ^ 0 *
           Complex.exp (2 * (π : ℂ) * Complex.I * m * (z : ℂ))‖
-        ≤ Real.exp (-(π * (z : ℂ).im)) * (Real.exp π * (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * ρ ^ m)) := by
+        ≤ Real.exp (-(π * (z : ℂ).im)) *
+            (Real.exp π *
+              (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * ρ ^ m)) := by
       intro m
       have hnexp : ‖Complex.exp (2 * (π : ℂ) * Complex.I * m * (z : ℂ))‖
           = Real.exp (-(2 * π * m * (z : ℂ).im)) := by
@@ -567,7 +588,8 @@ theorem eichler_isZeroAtImInfty (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
                 (Real.exp (-(π * (z : ℂ).im)) * (Real.exp π * Real.exp (m * -(2 * π)))) :=
               mul_le_mul (hcoeff_bd m) hexp_le (Real.exp_nonneg _) (norm_nonneg _)
           _ = Real.exp (-(π * (z : ℂ).im)) * (Real.exp π *
-                (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * Real.exp (m * -(2 * π)))) := by ring
+                (‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ *
+                  Real.exp (m * -(2 * π)))) := by ring
     -- Sum the per-term bound.
     have hsumm_term : Summable (fun m : ℕ ↦
         eichlerCoeff f m * (2 * (π : ℂ) * Complex.I * m) ^ 0 *
@@ -630,7 +652,8 @@ private lemma integrableOn_shifted_pow_mul_exp_neg {a c : ℝ} (_ha : 0 ≤ a) (
 The finite-cusp boundedness `eichler_slashSL_bdd_finite` (EICH-3a-i) is closed by the decomposition
 `(E_f∘↑)∣[2-k]γ = E_g + P`, where `E_g` is the `∞`-Eichler integral of the conjugate cusp form
 `g := f∣[k]γ` (a `CuspForm` for the arithmetic conjugate group `γ⁻¹•Γ`) and `P` is a degree-`≤k-2`
-period polynomial that vanishes under `ι(f)=0`.  Both pieces need the *generic* (arbitrary arithmetic
+period polynomial that vanishes under `ι(f)=0`.  Both pieces need the *generic* (arbitrary
+arithmetic
 cusp form) versions of the interior-ray integrability/FTC already proven for `Γ₁(N)` cusp forms; we
 transcribe them here with the polymorphic `[CuspFormClass F Γ k] [Γ.IsArithmetic]` hypotheses (the
 underlying bounds `periodForm_norm_le`, `differentiableOn_periodForm`, `Complex.isExactOn_upperHalf`
@@ -653,7 +676,7 @@ private lemma integrableOn_periodFormGen_ray_interior {F : Type*} [FunLike F ℍ
     apply Complex.ext <;>
       simp only [Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.I_re,
         Complex.I_im, Complex.ofReal_re, Complex.ofReal_im, mul_zero, mul_one, zero_mul, one_mul,
-        sub_zero, add_zero, zero_add] <;> ring
+        sub_zero, add_zero, zero_add]
   have him : ∀ t : ℝ, 0 ≤ t → 0 < (w₀ + Complex.I * t).im := by
     intro t ht; rw [hcoe t]; simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
       Complex.I_im, Complex.ofReal_re, mul_one, Complex.I_re, mul_zero, add_zero, zero_add]
@@ -684,7 +707,7 @@ private lemma integrableOn_periodFormGen_ray_interior {F : Type*} [FunLike F ℍ
           (|C| * Real.exp (-c * w₀.im)) * ((1 + (|w₀.re| + w₀.im) + t) ^ D * Real.exp (-c * t)))
           (Set.Ici M) := h0.const_mul _
       refine h1.congr_fun (fun t _ => ?_) measurableSet_Ici
-      simp only [hg, mul_comm c, show -c * (w₀.im + t) = -c * w₀.im + -c * t by ring, Real.exp_add]
+      simp only [hg, show -c * (w₀.im + t) = -c * w₀.im + -c * t by ring, Real.exp_add]
       ring
     refine MeasureTheory.Integrable.mono' hgint
       ((hcont h0M).aestronglyMeasurable measurableSet_Ici) ?_
@@ -718,7 +741,8 @@ private lemma integrableOn_periodFormGen_ray_interior {F : Type*} [FunLike F ℍ
   exact hcompact.union htail
 
 /-- **Interior vertical-ray FTC (generic arithmetic cusp form).**  Generic version of
-`ray_integral_eq_top_sub`: for `Φ` a primitive of `periodForm f0 Q` on the open upper half-plane with
+`ray_integral_eq_top_sub`: for `Φ` a primitive of `periodForm f0 Q` on the open upper half-plane
+with
 real-part-independent top boundary value `L`, the improper integral up the vertical ray from the
 interior point `w₀` to `i∞` equals `L − Φ(w₀)`. -/
 private lemma rayGen_integral_eq_top_sub {F : Type*} [FunLike F ℍ ℂ]
@@ -739,7 +763,7 @@ private lemma rayGen_integral_eq_top_sub {F : Type*} [FunLike F ℍ ℂ]
     intro t ht
     have him : 0 < (w₀ + Complex.I * (t : ℂ)).im := by
       simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.ofReal_im, Complex.I_im,
-        Complex.ofReal_re, mul_one, zero_mul, add_zero, zero_add]; linarith
+        Complex.ofReal_re, zero_mul, zero_add]; linarith
     have h1 := hΦ _ him
     have hpath : HasDerivAt (fun s : ℝ => w₀ + Complex.I * (s : ℂ)) Complex.I t := by
       have := ((Complex.ofRealCLM.hasDerivAt (x := t)).const_mul Complex.I).const_add w₀
@@ -783,17 +807,21 @@ private lemma rayGen_integral_eq_top_sub {F : Type*} [FunLike F ℍ ℂ]
 
 The heart (reply.md §1.2).  We route the weight-`(2-k)` slash invariance of `E_f` through the
 **integral representation** of `E_f` (`eichlerIntegral_eq_vertical`, sub-ticket EICH-2a) and the
-**modularity-defect formula** packaged as a finite `ℂ`-linear combination of cusp-value *differences*
+**modularity-defect formula** packaged as a finite `ℂ`-linear combination of cusp-value
+*differences*
 (`eichler_slash_sub_eq_cuspValue_diff`, sub-ticket EICH-2b).  Once the defect is in that shape, the
-main lemma `eichler_slash_invariant` is **fully proven** here: every cusp-value difference vanishes by
+main lemma `eichler_slash_invariant` is **fully proven** here: every cusp-value difference
+vanishes by
 `eichler_basepoint_indep` (EICH-3a, the `Div⁰`-content of `ι(f)=0`), so the whole defect is `0`,
 hence `E_f|_{2-k}γ = E_f`.  The two analytic ingredients (the term-by-term Gamma-integral and the
 Möbius change of variables) are isolated as the two sub-tickets and do **not** block the gluing. -/
 
 /-- The Eichler normalising constant `C_k = (2π)^{k-1}/(I^{k-1}·Γ(k-1))` of reply.md §1.1 (4), so
 that `E_f(z) = C_k ∫_z^{i∞} f(τ)(τ-z)^{k-2} dτ`.  It is the **reciprocal** of the per-term Gamma
-factor: the vertical-ray integral of the `q`-series term `a_m·exp(2πi m·)·(i·)^{k-2}·i` is, after the
-substitution `u = τ-z` and the Euler Gamma integral `∫_0^∞ e^{-2πm t} t^{k-2} dt = Γ(k-1)/(2πm)^{k-1}`
+factor: the vertical-ray integral of the `q`-series term `a_m·exp(2πi m·)·(i·)^{k-2}·i` is, after
+the
+substitution `u = τ-z` and the Euler Gamma integral `∫_0^∞ e^{-2πm t} t^{k-2} dt =
+Γ(k-1)/(2πm)^{k-1}`
 (mathlib `Complex.integral_cpow_mul_exp_neg_mul_Ioi`), equal to `(I^{k-1}·Γ(k-1)/(2π)^{k-1}) ·
 eichlerCoeff f m · exp(2πi m z)` (the `m^{k-1}` denominators are exactly the `eichlerCoeff` weights,
 the `m`-dependence cancelling); so `E_f(z) = C_k · ∫ …` requires `C_k` to invert that factor. -/
@@ -802,20 +830,23 @@ private def eichlerConst (k : ℤ) : ℂ :=
 
 /-- The per-`m` term function of the vertical-ray integrand: `a_m·exp(2πi m(z+i t))·(i t)^{k-2}·i`,
 with `a_m = (qExpansion 1 f).coeff m` the `m`-th Fourier coefficient of `f` at `∞` (so that the sum
-`∑' m, eichlerTerm f z m t = f(z + i t)·(i t)^{k-2}·i` by `hasSum_qExpansion_eichler`).  The `1/m^{k-1}`
+`∑' m, eichlerTerm f z m t = f(z + i t)·(i t)^{k-2}·i` by `hasSum_qExpansion_eichler`).  The
+`1/m^{k-1}`
 weight of `eichlerCoeff` is produced *by the Gamma integral*, not carried in the coefficient. -/
 private def eichlerTerm (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (z : ℂ) (m : ℕ) (t : ℝ) : ℂ :=
   (UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m *
       Complex.exp (2 * (π : ℂ) * Complex.I * m * (z + Complex.I * t)) *
     (Complex.I * (t : ℂ)) ^ (k - 2).toNat * Complex.I
 
-/-- The reciprocal of `eichlerConst`: the common Gamma factor `I^{k-1}·Γ(k-1)/(2π)^{k-1}` produced by
+/-- The reciprocal of `eichlerConst`: the common Gamma factor `I^{k-1}·Γ(k-1)/(2π)^{k-1}` produced
+by
 each per-term vertical-ray integral.  Nonzero (`Γ(k-1) ≠ 0` for `k ≥ 2`, `I^{k-1} ≠ 0`). -/
 private def eichlerGammaFactor (k : ℤ) : ℂ :=
   Complex.I ^ (k - 1).toNat * Complex.Gamma ((k : ℂ) - 1) / (2 * (π : ℂ)) ^ (k - 1).toNat
 
 omit [NeZero N] in
-/-- `eichlerConst` inverts the per-term Gamma factor: `eichlerConst k · eichlerGammaFactor k = 1`. -/
+/-- `eichlerConst` inverts the per-term Gamma factor: `eichlerConst k · eichlerGammaFactor k = 1`.
+-/
 private lemma eichlerConst_mul_gammaFactor (hk : 2 ≤ k) :
     eichlerConst k * eichlerGammaFactor k = 1 := by
   have hπ : (2 * (π : ℂ)) ^ (k - 1).toNat ≠ 0 := by
@@ -840,13 +871,15 @@ omit [NeZero N] in
 /-- **Per-term vertical-ray integral** (the Euler Gamma integral, the analytic core of EICH-2a).
 For each `m`, integrating the `q`-series term up the vertical ray gives the `eichlerCoeff` weight
 times the common Gamma factor and `exp(2πi m z)`:
-`∫_0^∞ a_m·exp(2πi m(z+i t))·(i t)^{k-2}·i dt = eichlerGammaFactor k · eichlerCoeff f m · exp(2πi m z)`.
+`∫_0^∞ a_m·exp(2πi m(z+i t))·(i t)^{k-2}·i dt = eichlerGammaFactor k · eichlerCoeff f m · exp(2πi
+m z)`.
 For `m = 0` both sides are `0` (`eichlerCoeff f 0 = 0`); for `m ≥ 1` it is
 `Complex.integral_cpow_mul_exp_neg_mul_Ioi` with `a = k-1`, `r = 2π m`. -/
 private lemma integral_eichlerTerm (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)
     (z : ℂ) (m : ℕ) :
     ∫ t in Set.Ioi (0 : ℝ), eichlerTerm f z m t
-      = eichlerGammaFactor k * eichlerCoeff f m * Complex.exp (2 * (π : ℂ) * Complex.I * m * z) := by
+      = eichlerGammaFactor k * eichlerCoeff f m *
+          Complex.exp (2 * (π : ℂ) * Complex.I * m * z) := by
   set n₂ : ℕ := (k - 2).toNat with hn₂
   have hn12 : (k - 1).toNat = n₂ + 1 := by omega
   rcases Nat.eq_zero_or_pos m with rfl | hm
@@ -868,7 +901,8 @@ private lemma integral_eichlerTerm (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     -- The constant pulled out front.
     set C : ℂ := (UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m *
       Complex.exp (2 * (π : ℂ) * Complex.I * m * z) * Complex.I ^ (n₂ + 1) with hC
-    -- Pointwise: rewrite `eichlerTerm f z m t` into the Gamma-integrand shape `C·(t^(a-1)·e^{-r t})`.
+    -- Pointwise: rewrite `eichlerTerm f z m t` into the Gamma-integrand shape `C·(t^(a-1)·e^{-r
+    -- t})`.
     have hpoint : ∀ t ∈ Set.Ioi (0 : ℝ),
         eichlerTerm f z m t = C * ((t : ℂ) ^ (a - 1) * Complex.exp (-(r * t))) := by
       intro t ht
@@ -954,7 +988,8 @@ private lemma integrableOn_eichlerTerm (f : CuspForm ((Gamma1 N).map (mapGL ℝ)
       integrableOn_rpow_mul_exp_neg_mul_rpow hn2nonneg le_rfl hr0
     refine MeasureTheory.Integrable.mono'
       (g := fun t : ℝ ↦ ‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ *
-        Real.exp (-(2 * π * m * z.im)) * ((t : ℝ) ^ (n₂ : ℝ) * Real.exp (-(2 * π * m) * t ^ (1 : ℝ))))
+        Real.exp (-(2 * π * m * z.im)) *
+          ((t : ℝ) ^ (n₂ : ℝ) * Real.exp (-(2 * π * m) * t ^ (1 : ℝ))))
       ((hint.const_mul _)) hmeas ?_
     filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioi] with t ht
     rw [norm_eichlerTerm f z m ht, ← hn₂]
@@ -974,7 +1009,8 @@ private lemma integral_norm_eichlerTerm (f : CuspForm ((Gamma1 N).map (mapGL ℝ
 
 /-- **Summability of the per-term integral-norms** (the dominated-convergence hypothesis of the
 `∑'/∫` interchange).  Bounds `∫ ‖term_m‖ ≤ ‖a_m‖·ρ^m·K` with `ρ = e^{-2π·Im z} < 1` and `K` the
-`m = 1` Gamma integral, then sums by the radius-of-convergence bound `summable_norm_coeff_mul_geom`. -/
+`m = 1` Gamma integral, then sums by the radius-of-convergence bound
+`summable_norm_coeff_mul_geom`. -/
 private lemma summable_integral_norm_eichlerTerm (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     {z : ℂ} (hz : 0 < z.im) :
     Summable (fun m : ℕ ↦ ∫ t in Set.Ioi (0 : ℝ), ‖eichlerTerm f z m t‖) := by
@@ -1005,7 +1041,8 @@ private lemma summable_integral_norm_eichlerTerm (f : CuspForm ((Gamma1 N).map (
     rw [show -(2 * π * c) * t = -(2 * π * c * t) by ring]
   -- The summable dominating sequence `B m = ‖a_m‖ · ρ^m · K`.
   refine Summable.of_nonneg_of_le (fun m => ?_) (fun m => ?_)
-    (((summable_norm_coeff_mul_geom f (r := ρ.toNNReal) (by rwa [Real.coe_toNNReal ρ hρ0.le])).mul_right K))
+    (((summable_norm_coeff_mul_geom f (r := ρ.toNNReal)
+      (by rwa [Real.coe_toNNReal ρ hρ0.le])).mul_right K))
   · -- nonnegativity of `∫ ‖term_m‖`
     refine MeasureTheory.setIntegral_nonneg measurableSet_Ioi (fun t ht => norm_nonneg _)
   · -- the bound `∫ ‖term_m‖ ≤ ‖a_m‖ · ρ^m · K`
@@ -1027,7 +1064,8 @@ private lemma summable_integral_norm_eichlerTerm (f : CuspForm ((Gamma1 N).map (
         refine mul_le_mul_of_nonneg_left ?_ (by positivity)
         rw [Real.exp_le_exp]
         have hm1 : (1 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
-        nlinarith [Real.pi_pos, htpos, mul_nonneg (mul_nonneg (by positivity : (0:ℝ) ≤ 2 * π) htpos.le)
+        nlinarith [Real.pi_pos, htpos,
+          mul_nonneg (mul_nonneg (by positivity : (0:ℝ) ≤ 2 * π) htpos.le)
           (by linarith : (0:ℝ) ≤ (m : ℝ) - 1)]
       rw [hexpρ]
       exact mul_le_mul_of_nonneg_left hmono
@@ -1078,7 +1116,8 @@ where `C_k = eichlerConst k = (2π)^{k-1}/(I^{k-1}·Γ(k-1))`.
 Proof: integrate the absolutely convergent `q`-series term by term.  The pointwise sum
 `∑' m, eichlerTerm f z m t = f(z+i t)·(i t)^{k-2}·i` (`hasSum_eichlerTerm`); the `∑'/∫` interchange
 is `MeasureTheory.integral_tsum_of_summable_integral_norm` with the integrability
-(`integrableOn_eichlerTerm`) and summable integral-norms (`summable_integral_norm_eichlerTerm`); each
+(`integrableOn_eichlerTerm`) and summable integral-norms (`summable_integral_norm_eichlerTerm`);
+each
 term integrates to `eichlerGammaFactor k · eichlerCoeff f m · exp(2πi m z)` via the Euler Gamma
 integral `Complex.integral_cpow_mul_exp_neg_mul_Ioi` (`integral_eichlerTerm`); and
 `eichlerConst k · eichlerGammaFactor k = 1` (`eichlerConst_mul_gammaFactor`) leaves
@@ -1118,10 +1157,12 @@ private theorem eichlerIntegral_eq_vertical (f : CuspForm ((Gamma1 N).map (mapGL
   refine tsum_congr (fun m => ?_)
   rw [pow_zero, mul_one]
 
-/-- The **Eichler moving polynomial** `(X₀ - τ·X₁)^n ∈ Sym^n(ℂ²)` (`n = (k-2).toNat`), written in the
+/-- The **Eichler moving polynomial** `(X₀ - τ·X₁)^n ∈ Sym^n(ℂ²)` (`n = (k-2).toNat`), written in
+the
 monomial basis `Σ_{j≤n} C(n,j)·(-τ)^{n-j}·symMon n j`, so that `evalSym1 (eichlerMovingPoly τ) z =
 (z - τ)^n` (`evalSym1_eichlerMovingPoly`).  This is the *fixed* `Sym^n` element (with `τ`-dependent
-coefficients) whose period form is the moving-basepoint Eichler kernel `f(z)·(z-τ)^{k-2}`; making it a
+coefficients) whose period form is the moving-basepoint Eichler kernel `f(z)·(z-τ)^{k-2}`; making
+it a
 genuine `Sym^n` element lets the whole polynomial-agnostic period-form/primitive engine
 (`periodForm`, `cuspValue_eq_top_sub_botVal`, `tendsto_F_pole`, …) apply to it directly. -/
 private def eichlerMovingPoly (n : ℕ) (τ : ℍ) : SymPow ℂ n :=
@@ -1142,7 +1183,8 @@ private lemma evalSym1_eichlerMovingPoly (n : ℕ) (τ : ℍ) (z : ℂ) :
 
 /-- The **homogeneous** evaluation of the moving polynomial: `eval ![u, v] (eichlerMovingPoly n τ) =
 (u - τ·v)^n`.  (The degree-`n` homogenisation of `evalSym1_eichlerMovingPoly`; used for the Möbius
-change of variables, where the evaluation point `(u,v)` is the linear image of `(σ,1)` under `symMat`.) -/
+change of variables, where the evaluation point `(u,v)` is the linear image of `(σ,1)` under
+`symMat`.) -/
 private lemma eval_eichlerMovingPoly_hom (n : ℕ) (τ : ℍ) (u v : ℂ) :
     MvPolynomial.eval ![u, v] (eichlerMovingPoly n τ : MvPolynomial (Fin 2) ℂ)
       = (u - (τ : ℂ) * v) ^ n := by
@@ -1172,7 +1214,8 @@ private lemma eval_eichlerMovingPoly_hom (n : ℕ) (τ : ℍ) (u v : ℂ) :
 /-- **Möbius covariance of the moving polynomial.**  `evalSym1 (symRep γ (eichlerMovingPoly n τ)) σ
 = (cτ+d)^n · (σ − γ·τ)^n`, where `(c,d) = (γ₁₀, γ₁₁)` and `γ·τ = mob γ τ`.  This is the moving-poly
 analogue of `evalSym1_symRep_smul`, but as an identity in the free variable `σ` (via the polynomial
-substitution `evalSym1_substAlgHom` + the homogeneous evaluation `eval_eichlerMovingPoly_hom`), which
+substitution `evalSym1_substAlgHom` + the homogeneous evaluation `eval_eichlerMovingPoly_hom`),
+which
 is exactly what the under-the-integral change of variables on the `γτ`-ray needs. -/
 private lemma evalSym1_symRep_eichlerMovingPoly (n : ℕ) (γ : SL(2, ℤ)) (τ : ℍ) (σ : ℂ) :
     evalSym1 n (symRep ℂ n γ (eichlerMovingPoly n τ)) σ
@@ -1232,7 +1275,7 @@ private lemma integrableOn_periodForm_ray_interior
     apply Complex.ext <;>
       simp only [Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im, Complex.I_re,
         Complex.I_im, Complex.ofReal_re, Complex.ofReal_im, mul_zero, mul_one, zero_mul, one_mul,
-        sub_zero, add_zero, zero_add] <;> ring
+        sub_zero, add_zero, zero_add]
   have him : ∀ t : ℝ, 0 ≤ t → 0 < (w₀ + Complex.I * t).im := by
     intro t ht; rw [hcoe t]; simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
       Complex.I_im, Complex.ofReal_re, mul_one, Complex.I_re, mul_zero, add_zero, zero_add]
@@ -1253,7 +1296,8 @@ private lemma integrableOn_periodForm_ray_interior
   -- Piece 1: integrable on the compact `[0, M]` by continuity.
   have hcompact : IntegrableOn g0 (Set.Icc 0 M) :=
     ((hcont le_rfl).mono Set.Icc_subset_Ici_self).integrableOn_compact isCompact_Icc
-  -- Piece 2: integrable on `[M, ∞)` by domination (where `periodForm_norm_le` applies, `w₀.im+t ≥ A`).
+  -- Piece 2: integrable on `[M, ∞)` by domination (where `periodForm_norm_le` applies, `w₀.im+t ≥
+  -- A`).
   have htail : IntegrableOn g0 (Set.Ici M) := by
     set g : ℝ → ℝ := fun t => |C| * (1 + (|w₀.re| + w₀.im) + t) ^ D *
       Real.exp (-c * (w₀.im + t)) with hg
@@ -1267,7 +1311,7 @@ private lemma integrableOn_periodForm_ray_interior
           (|C| * Real.exp (-c * w₀.im)) * ((1 + (|w₀.re| + w₀.im) + t) ^ D * Real.exp (-c * t)))
           (Set.Ici M) := h0.const_mul _
       refine h1.congr_fun (fun t _ => ?_) measurableSet_Ici
-      simp only [hg, mul_comm c, show -c * (w₀.im + t) = -c * w₀.im + -c * t by ring, Real.exp_add]
+      simp only [hg, show -c * (w₀.im + t) = -c * w₀.im + -c * t by ring, Real.exp_add]
       ring
     refine MeasureTheory.Integrable.mono' hgint
       ((hcont h0M).aestronglyMeasurable measurableSet_Ici) ?_
@@ -1302,7 +1346,8 @@ private lemma integrableOn_periodForm_ray_interior
   exact hcompact.union htail
 
 /-- **Interior vertical-ray FTC (`ℂ`-base form).**  For `Φ` a primitive of `periodForm f Q` on the
-open upper half-plane with real-part-independent top boundary value `L`, the improper integral up the
+open upper half-plane with real-part-independent top boundary value `L`, the improper integral up
+the
 vertical ray from the *interior* point `w₀` to `i∞` equals `L − Φ(w₀)`.  Unlike the cusp version
 (`cuspToInftyIntegral_eq_top_sub_bot`) the bottom is a genuine point of `ℍ`, so the bottom value is
 just `Φ(w₀)` with no `0⁺` limit.  (FTC `∫_0^{Y₁} = Φ(w₀+iY₁) − Φ(w₀)` plus `Φ(w₀+iY₁) → L` along the
@@ -1326,7 +1371,7 @@ private lemma ray_integral_eq_top_sub
     intro t ht
     have him : 0 < (w₀ + Complex.I * (t : ℂ)).im := by
       simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.ofReal_im, Complex.I_im,
-        Complex.ofReal_re, mul_one, zero_mul, add_zero, zero_add]; linarith
+        Complex.ofReal_re, zero_mul, zero_add]; linarith
     have h1 := hΦ _ him
     have hpath : HasDerivAt (fun s : ℝ => w₀ + Complex.I * (s : ℂ)) Complex.I t := by
       have := ((Complex.ofRealCLM.hasDerivAt (x := t)).const_mul Complex.I).const_add w₀
@@ -1371,17 +1416,21 @@ private lemma ray_integral_eq_top_sub
 
 /-- **EICH-2b-i (analytic core, packaged form) — the moving-basepoint Eichler defect as a single
 cusp value.**  For `γ ∈ Γ₁(N)`, the pointwise weight-`(2-k)` modularity defect of `E_f` equals
-`-C_k` times the cusp value of `f` against the *moving polynomial* `(·-τ)^{k-2}` (`eichlerMovingPoly τ`)
+`-C_k` times the cusp value of `f` against the *moving polynomial* `(·-τ)^{k-2}`
+(`eichlerMovingPoly τ`)
 at the single cusp `γ⁻¹∞`:
 
 `(E_f∘↑ ∣[2-k] γ) τ - (E_f∘↑) τ = -C_k · cuspValue f (eichlerMovingPoly τ) (γ⁻¹∞)`.
 
 This is exactly the classical Eichler formula (reply.md §1.2 (5), in the orientation-honest sign
-`∫_{i∞}^{γ⁻¹∞}` — see the note on `eichler_defect_cuspValue` for the sign): by `eichlerIntegral_eq_vertical`
-(EICH-2a) both `E_f(γτ)` and `E_f(τ)` are vertical-ray integrals of `periodForm f (eichlerMovingPoly ·)`;
+`∫_{i∞}^{γ⁻¹∞}` — see the note on `eichler_defect_cuspValue` for the sign): by
+`eichlerIntegral_eq_vertical`
+(EICH-2a) both `E_f(γτ)` and `E_f(τ)` are vertical-ray integrals of `periodForm f
+(eichlerMovingPoly ·)`;
 the Möbius change of variables `σ = γ·w` (using `f`'s weight-`k` automorphy + the slash factor
 `(cτ+d)^{k-2}` + `evalSym1_symRep_smul`) turns `E_f(γτ)·(cτ+d)^{k-2}` into the integral of
-`periodForm f (symRep γ (eichlerMovingPoly τ))` from the interior point `γτ` to `i∞`; the two interior
+`periodForm f (symRep γ (eichlerMovingPoly τ))` from the interior point `γτ` to `i∞`; the two
+interior
 endpoints cancel (`mob γ τ = γτ`), leaving the cusp boundary term, which the project's primitive/FTC
 engine (`cuspValue_eq_top_sub_botVal`, `tendsto_F_pole`, `tendsto_F_upper`) identifies with
 `cuspValue f (eichlerMovingPoly τ)(γ⁻¹∞)`.  The genuine moving-basepoint analytic content (NOT
@@ -1416,7 +1465,8 @@ private lemma eichler_defect_eq_cuspValueMoving
     have hd := hasDerivAt_primitive_mob_general (⇑f) g Pτ hk F (by rwa [← hQγ]) hz
     rwa [hslashg] at hd
   obtain ⟨Ginf, hGinf⟩ := exists_tendsto_primitive_vertical_atTop f Pτ (fun w => F (mob g w)) hG
-  -- Integrand identity: the EICH-2a kernel `f(ofComplex(w₀+i t))·(i t)ⁿ` is `periodForm f (eichlerMovingPoly n w₀)`.
+  -- Integrand identity: the EICH-2a kernel `f(ofComplex(w₀+i t))·(i t)ⁿ` is `periodForm f
+  -- (eichlerMovingPoly n w₀)`.
   have hker : ∀ (P : SymPow ℂ n) (w₀ : ℂ) (t : ℝ),
       evalSym1 n P (w₀ + Complex.I * t) = (Complex.I * (t : ℂ)) ^ n →
       f (UpperHalfPlane.ofComplex (w₀ + Complex.I * t)) * (Complex.I * (t : ℂ)) ^ n * Complex.I
@@ -1529,15 +1579,18 @@ For `γ ∈ Γ₁(N)`, writing `n = (k-2).toNat`, the pointwise modularity defec
 `2-k` equals the explicit binomial combination of cusp values of `f` against the monomials
 `symMon n j = X₀ʲ X₁^{n-j}` at the single cusp `γ⁻¹·∞` (`cuspAction γ⁻¹ cInf`):
 
-`(E_f∘↑ ∣[2-k] γ) τ - (E_f∘↑) τ = Σ_{j=0}^{n} -(C_k · C(n,j) · (-τ)^{n-j}) · cuspValue f (symMon n j) (γ⁻¹∞)`
+`(E_f∘↑ ∣[2-k] γ) τ - (E_f∘↑) τ = Σ_{j=0}^{n} -(C_k · C(n,j) · (-τ)^{n-j}) · cuspValue f (symMon n
+j) (γ⁻¹∞)`
 
 where `C_k = eichlerConst k` and `cInf = OnePoint.equivProjectivization ℚ ∞`.
 
 SIGN NOTE.  The overall `-` is **mathematically forced** (reply.md §1.2 (5) is written `∫_{γ⁻¹∞}^∞`,
 but the honest derivation — slash, then Möbius CoV `σ = γ·w` — yields the *opposite* orientation
 `C_k ∫_{i∞}^{γ⁻¹∞} f(σ)(σ-τ)^{k-2} dσ`, i.e. `-C_k ∫_{γ⁻¹∞}^{i∞}`; since `cuspValue` is the vertical
-`∫_{q₀}^{i∞}` integral, the defect is `-C_k · (cusp-value combination)`, not `+`).  Equivalently, the
-`k=2`/`n=0` case computes directly to `C_2 ∫_{i∞}^{γ⁻¹∞} f = -C_2 · cuspValue f 1 (γ⁻¹∞)`.  This sign
+`∫_{q₀}^{i∞}` integral, the defect is `-C_k · (cusp-value combination)`, not `+`).  Equivalently,
+the
+`k=2`/`n=0` case computes directly to `C_2 ∫_{i∞}^{γ⁻¹∞} f = -C_2 · cuspValue f 1 (γ⁻¹∞)`.  This
+sign
 is invisible to the only consumer `eichler_slash_invariant` (every cusp-value difference vanishes
 under `ι(f)=0`, so `±` is immaterial there), and is absorbed by the `coeff` witness in
 `eichler_slash_sub_eq_cuspValue_diff`.
@@ -1551,13 +1604,16 @@ factor `denom(γ,τ)^{k-2}`) collapses the defect to the geodesic period
 (binomial) and **straightening the geodesic to the vertical line** (path-independence: the cusp
 decay kills the connecting horizontal cap, exactly the project's `tendsto_horizontal_cap` mechanism)
 identifies the `j`-th monomial period with `cuspToInftyIntegral f (symMon n j) q₀ =
-cuspValue f (symMon n j) (γ⁻¹∞)` (`evalSym1 (symMon n j) τ' = τ'^j` by `evalSym1_symMon`; `cuspValue`
+cuspValue f (symMon n j) (γ⁻¹∞)` (`evalSym1 (symMon n j) τ' = τ'^j` by `evalSym1_symMon`;
+`cuspValue`
 at the finite cusp `γ⁻¹∞ = q₀` is the vertical-line integral, and `0` at `∞`).
 
 Unlike the project's `cuspValue_symRep_gamma` (the Möbius covariance of the *fixed-polynomial*
-modular-symbol periods), this is the Eichler integral's *moving*-polynomial change of variables under
+modular-symbol periods), this is the Eichler integral's *moving*-polynomial change of variables
+under
 the integral and is a genuinely separate development; it is therefore isolated as sub-ticket
-**EICH-2b-i** (Parent = EICH-2b).  The sign/normalisation is folded into the (existential) `coeff` of
+**EICH-2b-i** (Parent = EICH-2b).  The sign/normalisation is folded into the (existential) `coeff`
+of
 the consumer `eichler_slash_sub_eq_cuspValue_diff`, so it does not affect the gluing in
 `eichler_slash_invariant`. -/
 private theorem eichler_defect_cuspValue
@@ -1585,7 +1641,8 @@ finite `ℂ`-linear combination of cusp-value *differences* of `f` against the m
 
 The two cusps are `c₁ = γ⁻¹·∞` and `c₂ = ∞`; `coeff τ j = -C_k·C(n,j)·(-τ)^{n-j}` are (the negatives
 of) the binomial coefficients of `(τ - ·)^{n}` — the sign matches the orientation-honest defect
-formula `eichler_defect_cuspValue` (see its note).  Because `c₂ = ∞` has `cuspValue f · ∞ = 0` (the cusp value at `∞` is
+formula `eichler_defect_cuspValue` (see its note).  Because `c₂ = ∞` has `cuspValue f · ∞ = 0`
+(the cusp value at `∞` is
 `0` by definition of `cuspValue`/`cuspToInftyIntegral`), each difference reduces to the single cusp
 value at `c₁ = γ⁻¹∞`, and the identity is exactly the analytic core `eichler_defect_cuspValue`
 (EICH-2b-i).  This thin wrapper supplies the existential witnesses and discharges the
@@ -1622,7 +1679,8 @@ integral defect `G2a` + the binomial period bridge `G2b` + `L0`).  The slash is 
 TYPE-LEVEL NOTE (flagged G2 architecture gap): the mathlib weight-`w` `SlashAction` lives on
 `ℍ → ℂ`, while `eichlerIntegral f : ℂ → ℂ`.  We bridge by restricting along the coercion
 `((↑) : ℍ → ℂ)`: the slash invariant is stated as
-`((eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)) ∣[2 - k] (γ : SL(2,ℤ)) = (eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)`.
+`((eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)) ∣[2 - k] (γ : SL(2,ℤ)) = (eichlerIntegral f) ∘ ((↑) : ℍ →
+ℂ)`.
 This *does* state cleanly (the `SlashAction ℤ SL(2,ℤ) (ℍ → ℂ)` instance accepts the negative weight
 `2-k`), at the cost of the `UpperHalfPlane.coe` round-trip — the same cost `periodForm` pays.  No
 weakening of mathematical content; the bridge `(eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)` is faithful. -/
@@ -1640,7 +1698,8 @@ theorem eichler_slash_invariant (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (h
   rw [eichler_basepoint_indep f hk hf (symMon (k - 2).toNat j) c₁ c₂, sub_self, mul_zero]
 
 /-- **Boundedness at `i∞` of the `∞`-Eichler integral of a generic arithmetic cusp form.**  For any
-arithmetic cusp form `g0` and `n = (k-2).toNat`, the function `E_{g0}(τ) = ∫_0^∞ g0(τ+it)·(it)ⁿ·i dt`
+arithmetic cusp form `g0` and `n = (k-2).toNat`, the function `E_{g0}(τ) = ∫_0^∞ g0(τ+it)·(it)ⁿ·i
+dt`
 (`g0` extended off `ℍ` by `ofComplex`) is bounded as `Im τ → ∞`.  This is the cleaner "dominated
 integral" form of the cusp-holomorphy step (reply.md §1.3): `g0` is a cusp form ⟹ exponential decay
 `‖g0(z)‖ ≤ C·exp(-c·Im z)`, so for `Im τ ≥ A` (uniformly in `Re τ`) the integral is bounded by
@@ -1649,7 +1708,7 @@ boundedness of the conjugate cusp form's Eichler integral `E_g` (`g = f∣[k]γ`
 the finite-cusp case.  No width-`h` `q`-series is needed — the dominated integral suffices. -/
 private lemma eichlerIntegralGen_isBoundedAtImInfty {F : Type*} [FunLike F ℍ ℂ]
     {Γ : Subgroup (GL (Fin 2) ℝ)} [CuspFormClass F Γ k] [Γ.IsArithmetic] (g0 : F) (n : ℕ)
-    (hn : n = (k - 2).toNat) :
+    (_hn : n = (k - 2).toNat) :
     UpperHalfPlane.IsBoundedAtImInfty
       (fun τ : ℍ => ∫ t in Set.Ioi (0 : ℝ),
         g0 (UpperHalfPlane.ofComplex ((τ : ℂ) + Complex.I * t)) *
@@ -1739,7 +1798,8 @@ private lemma eichlerIntegralGen_isBoundedAtImInfty {F : Type*} [FunLike F ℍ �
             _ = |Cg| := mul_one _
         exact mul_le_mul_of_nonneg_right hfac hKnn
 
-/-- The conjugate arithmetic group `γ⁻¹•Γ` (`Γ = Γ₁(N)`) is arithmetic, for the `mapGL ℝ γ`-translate
+/-- The conjugate arithmetic group `γ⁻¹•Γ` (`Γ = Γ₁(N)`) is arithmetic, for the `mapGL ℝ
+γ`-translate
 `g = f∣[k]γ` to be a `CuspForm` with the full cusp-value/decay API. -/
 private instance instArithmetic_conj_mapGL (γ : SL(2, ℤ)) :
     (ConjAct.toConjAct (Matrix.SpecialLinearGroup.mapGL ℝ γ)⁻¹ •
@@ -1758,12 +1818,16 @@ integral of the conjugate cusp form `g` minus `C` times a single conjugate cusp 
 
 This is the honest general-`γ` form of `eichler_defect_eq_cuspValueMoving` (which only handled
 `γ ∈ Γ₁(N)`, where `g = f`): the Möbius change of variables `σ = γ·w` turns `E_f(γτ)·denom(γ,τ)ⁿ`
-into the integral of `periodForm f (symRep γ (·-τ)ⁿ)` from `γτ` to `i∞` (`eichlerIntegral_eq_vertical`
-+ `evalSym1_symRep_eichlerMovingPoly`, `rayGen_integral_eq_top_sub`); its primitive `F` pulled back by
+into the integral of `periodForm f (symRep γ (·-τ)ⁿ)` from `γτ` to `i∞`
+(`eichlerIntegral_eq_vertical`
++ `evalSym1_symRep_eichlerMovingPoly`, `rayGen_integral_eq_top_sub`); its primitive `F` pulled
+back by
 `mob γ` is, by `hasDerivAt_primitive_mob_general`, a primitive of `periodForm g (·-τ)ⁿ` — and that
-integral is exactly `E_g`.  The constant gap `C·(F∞ − G∞)` between the two frames' top boundary values
+integral is exactly `E_g`.  The constant gap `C·(F∞ − G∞)` between the two frames' top boundary
+values
 is `−C·cuspValueGen g (·-τ)ⁿ (γ⁻¹∞)` (the finite-cusp boundary of `G` at `γ⁻¹∞` is `F∞`, via
-`tendsto_F_pole`/`tendsto_F_upper`), the *single* conjugate cusp value that — unlike the `Γ₁(N)` case
+`tendsto_F_pole`/`tendsto_F_upper`), the *single* conjugate cusp value that — unlike the `Γ₁(N)`
+case
 — survives.  (Under `ι(f)=0` it vanishes too, by `cuspValueGen_eq_zero_of_periodMap'_zero`.) -/
 private lemma eichler_slashSL_eq_eichlerIntegralGen_sub_cuspValueGen
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k) (γ : SL(2, ℤ)) (τ : ℍ) :
@@ -1842,7 +1906,8 @@ private lemma eichler_slashSL_eq_eichlerIntegralGen_sub_cuspValueGen
         by ring, ← hDn]
     ring
   -- The slash: `(E_f∘↑ ∣[2-k] γ) τ = E_f(↑(γ•τ))·Dⁿ = C·(Finf − F(γτ))`.
-  have hslash : ((eichlerIntegral f ∘ ((↑) : ℍ → ℂ)) ∣[2 - k] γ) τ = C * (Finf - F ((γ • τ : ℍ) : ℂ)) := by
+  have hslash : ((eichlerIntegral f ∘ ((↑) : ℍ → ℂ)) ∣[2 - k] γ) τ =
+      C * (Finf - F ((γ • τ : ℍ) : ℂ)) := by
     rw [ModularForm.SL_slash_apply]
     have hden : UpperHalfPlane.denom
         (toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) τ = Dn := by
@@ -1852,7 +1917,8 @@ private lemma eichler_slashSL_eq_eichlerIntegralGen_sub_cuspValueGen
       rw [show (-(2 - k) : ℤ) = (n : ℤ) by rw [hn]; omega, zpow_natCast]
     simp only [Function.comp_apply, hpow]
     rw [hEγτ]
-  -- The conjugate cusp value: `cuspValueGen g Pτ (γ⁻¹∞) = Ginf − Finf` (generic FTC + pole geodesic).
+  -- The conjugate cusp value: `cuspValueGen g Pτ (γ⁻¹∞) = Ginf − Finf` (generic FTC + pole
+  -- geodesic).
   have hcusp : cuspValueGen g Pτ
       ((OnePoint.equivProjectivization ℚ)
         ((Matrix.SpecialLinearGroup.mapGL ℚ γ⁻¹) • (OnePoint.infty : OnePoint ℚ)))
@@ -1920,21 +1986,27 @@ private lemma rawBilinGen_single {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup 
   rw [rawBilinGen, Finsupp.linearCombination_single, LinearMap.smul_apply, cuspFunctionalGen]
   simp only [LinearMap.coe_mk, AddHom.coe_mk, zsmul_eq_mul]
 
-/-- **Base-point independence for the conjugate cusp form** (generic port of `eichler_basepoint_indep`
+/-- **Base-point independence for the conjugate cusp form** (generic port of
+`eichler_basepoint_indep`
 to `cuspValueGen`).  Under `ι(f)=0`, every conjugate cusp value `cuspValueGen g P c` vanishes (`g =
 f∣[k]γ`): the cusp-value *differences* vanish (the `Div⁰`-content of `ι(g)=0` via
 `rawPairingGen_actMat`, since `γ` has determinant `1` so `glMap (heilbronnGL γ) = mapGL ℝ γ`), and
-`cuspValueGen g P ∞ = 0` by definition, so all are `0`.  (The `rawPairingGen` content is carried by the
-`glMap (heilbronnGL γ)`-translate `g'`, which is equal as a *function* to `g`; the two are bridged at
-the `cuspValueGen` level by `cuspValueGen_congr`, sidestepping the heterogeneous group dependence.) -/
-private lemma cuspValueGen_translate_eq_zero (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)
+`cuspValueGen g P ∞ = 0` by definition, so all are `0`.  (The `rawPairingGen` content is carried
+by the
+`glMap (heilbronnGL γ)`-translate `g'`, which is equal as a *function* to `g`; the two are bridged
+at
+the `cuspValueGen` level by `cuspValueGen_congr`, sidestepping the heterogeneous group
+dependence.) -/
+private lemma cuspValueGen_translate_eq_zero (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
+    (hk : 2 ≤ k)
     (hf : periodMap' N k hk f = 0) (γ : SL(2, ℤ)) (P : SymPow ℂ (k - 2).toNat)
     (c : Projectivization ℚ (Fin 2 → ℚ)) :
     cuspValueGen (CuspForm.translate f (Matrix.SpecialLinearGroup.mapGL ℝ γ)) P c = 0 := by
   set g := CuspForm.translate f (Matrix.SpecialLinearGroup.mapGL ℝ γ) with hgdef
   have hdet : 0 < (γ : Matrix (Fin 2) (Fin 2) ℤ).det := by
     rw [Matrix.SpecialLinearGroup.det_coe]; norm_num
-  -- The `glMap (heilbronnGL γ)`-translate `g'` carries the `rawPairingGen` (= `rawPairingGen_actMat`).
+  -- The `glMap (heilbronnGL γ)`-translate `g'` carries the `rawPairingGen` (=
+  -- `rawPairingGen_actMat`).
   set g' := CuspForm.translate f (glMap (heilbronnGL (γ : Matrix (Fin 2) (Fin 2) ℤ) hdet.ne'))
     with hg'def
   -- `g` and `g'` are equal as functions (`mapGL ℝ γ = glMap (heilbronnGL γ)`, both slashes agree).
@@ -1953,9 +2025,11 @@ private lemma cuspValueGen_translate_eq_zero (f : CuspForm ((Gamma1 N).map (mapG
     intro Q; rw [cuspValueGen, hcInf, Equiv.symm_apply_apply]
   -- Integer case: cusp-difference periods of `g` vanish (`ι(g)=0`), bridged `g' ↦ g`.
   have hint : ∀ Q : SymPow ℤ (k - 2).toNat,
-      cuspValueGen g (castSymPow (k - 2).toNat Q) c = cuspValueGen g (castSymPow (k - 2).toNat Q) cInf := by
+      cuspValueGen g (castSymPow (k - 2).toNat Q) c =
+        cuspValueGen g (castSymPow (k - 2).toNat Q) cInf := by
     intro Q
-    have hz := rawPairingGen_actMat hk f (γ : Matrix (Fin 2) (Fin 2) ℤ) hdet (divDiff c cInf ⊗ₜ[ℤ] Q)
+    have hz := rawPairingGen_actMat hk f (γ : Matrix (Fin 2) (Fin 2) ℤ) hdet
+      (divDiff c cInf ⊗ₜ[ℤ] Q)
     rw [rawPairing_eq_zero_of_periodMap'_zero hk f hf, ← hg'def] at hz
     rw [rawPairingGen_tmul, divDiff_val, map_sub, LinearMap.sub_apply,
       rawBilinGen_single, rawBilinGen_single] at hz
@@ -1988,7 +2062,8 @@ reply.md §1.3 (8) that survives after the `γ • ∞ = ∞` (`γ₁₀ = 0`) c
 
 PROOF (the dominated-integral route, *not* a width-`h` `q`-series).  Write `g := f ∣[k] γ`
 (`= CuspForm.translate f (mapGL ℝ γ)`, a `CuspForm` for the arithmetic conjugate group `γ⁻¹•Γ`),
-`n := (k-2).toNat`, `C := eichlerConst k`.  By `eichler_slashSL_eq_eichlerIntegralGen_sub_cuspValueGen`
+`n := (k-2).toNat`, `C := eichlerConst k`.  By
+`eichler_slashSL_eq_eichlerIntegralGen_sub_cuspValueGen`
 (the honest general-`γ` form of `eichler_defect_eq_cuspValueMoving`: the Möbius change of variables
 `σ = γ·w`, the generic interior-ray FTC `rayGen_integral_eq_top_sub`, the `tendsto_F_pole`/`_upper`
 boundary engine):
@@ -1998,7 +2073,8 @@ boundary engine):
 The first term is the `∞`-Eichler integral `E_g(τ)` of `g`; the second is the degree-`≤n` period
 polynomial `P(τ)`, the *single* conjugate cusp value that survives for general `γ` (it collapses to
 `0` only for `γ ∈ Γ₁(N)`, where `g = f`).  Under `ι(f)=0` the polynomial vanishes
-(`cuspValueGen_translate_eq_zero`: `ι(f)=0 ⟹ ι(g)=0` via `rawPairingGen_actMat` — `γ` has det `1`, so
+(`cuspValueGen_translate_eq_zero`: `ι(f)=0 ⟹ ι(g)=0` via `rawPairingGen_actMat` — `γ` has det `1`,
+so
 `glMap (heilbronnGL γ) = mapGL ℝ γ` — plus the generic base-point independence forcing every
 conjugate cusp value to the vanishing value at `∞`).  So the slash *equals* `C·E_g`, and `E_g` is
 bounded at `i∞` by the dominated-integral cusp-decay bound `eichlerIntegralGen_isBoundedAtImInfty`
@@ -2008,11 +2084,12 @@ No width-`h` `q`-expansion or slashed-Bol identity is needed.
 NOTE: `hf` is genuinely needed here (the period polynomial `P` is nonzero in general and vanishes
 only under `ι(f)=0`), unlike the `γ • ∞ = ∞` case where boundedness is automatic from `b₀ = 0`. -/
 private theorem eichler_slashSL_bdd_finite (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)
-    (hf : periodMap' N k hk f = 0) (γ : SL(2, ℤ)) (hc : ¬ ((γ 1 0 : ℝ) = 0)) :
+    (hf : periodMap' N k hk f = 0) (γ : SL(2, ℤ)) (_hc : ¬ ((γ 1 0 : ℝ) = 0)) :
     UpperHalfPlane.IsBoundedAtImInfty
       (((eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)) ∣[2 - k] γ) := by
   set g := CuspForm.translate f (Matrix.SpecialLinearGroup.mapGL ℝ γ) with hgdef
-  -- Decomposition + `ι(g)=0` (`cuspValueGen g … = 0`): the slash IS `C·E_g` (period polynomial gone).
+  -- Decomposition + `ι(g)=0` (`cuspValueGen g … = 0`): the slash IS `C·E_g` (period polynomial
+  -- gone).
   have hdecomp : ((eichlerIntegral f ∘ ((↑) : ℍ → ℂ)) ∣[2 - k] γ)
       = eichlerConst k • (fun τ : ℍ => ∫ t in Set.Ioi (0 : ℝ),
           g (UpperHalfPlane.ofComplex ((τ : ℂ) + Complex.I * t)) *
@@ -2059,7 +2136,8 @@ private theorem eichler_bdd_at_cusp (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k
     have hdetZ : (γ 0 0 : ℤ) * (γ 1 1) - (γ 0 1) * (γ 1 0) = 1 := by
       have := γ.2; rwa [Matrix.det_fin_two] at this
     have hd2 : (γ 1 1 : ℝ) ^ 2 = 1 := by
-      have hprod : (γ 0 0 : ℤ) * (γ 1 1) = 1 := by rw [hcZ, mul_zero, sub_zero] at hdetZ; exact hdetZ
+      have hprod : (γ 0 0 : ℤ) * (γ 1 1) = 1 := by
+        rw [hcZ, mul_zero, sub_zero] at hdetZ; exact hdetZ
       have h11 : (γ 1 1 : ℤ) = 1 ∨ (γ 1 1 : ℤ) = -1 :=
         (Int.eq_one_or_neg_one_of_mul_eq_one' hprod).imp (·.2) (·.2)
       rcases h11 with h11 | h11 <;>
@@ -2068,7 +2146,8 @@ private theorem eichler_bdd_at_cusp (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k
     have hd1 : ‖(γ 1 1 : ℝ)‖ = 1 := by
       rw [Real.norm_eq_abs, ← Real.sqrt_sq_eq_abs, hd2, Real.sqrt_one]
     -- The slash denominator is `denom (toGL (γ.map castℝ)) τ`, equal to `↑(γ₁₁)` (since `γ₁₀ = 0`).
-    have hden : UpperHalfPlane.denom (toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) τ
+    have hden : UpperHalfPlane.denom
+        (toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) τ
         = ((γ 1 1 : ℝ) : ℂ) := by
       rw [UpperHalfPlane.denom]
       have h10 : ((toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) 1 0 : ℂ)
@@ -2078,7 +2157,8 @@ private theorem eichler_bdd_at_cusp (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k
       rw [h10, h11, hc]; push_cast; ring
     -- `Im (γ • τ) = Im τ` (the denominator has `normSq = 1`).
     have hnsq : Complex.normSq
-        (UpperHalfPlane.denom (toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) τ) = 1 := by
+        (UpperHalfPlane.denom
+          (toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) τ) = 1 := by
       rw [hden, Complex.normSq_ofReal, ← pow_two, hd2]
     have himeq : ((γ : SL(2, ℤ)) • τ).im = τ.im := by
       rw [ModularGroup.im_smul_eq_div_normSq, hnsq, div_one]
@@ -2096,18 +2176,24 @@ private theorem eichler_bdd_at_cusp (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k
 
 /-! ## `G4` — weight-`(2-k)` packaging and the `Δ^n` weight-0 vanishing -/
 
-/-- **G4a — package `E_f` as a `ModularForm Γ (2-k)`** (reply.md §1.4; the flagged architecture gap).
-Built from `eichler_slash_invariant` (L7, the `slash_action_eq'` field), `differentiableOn_eichlerIntegral`
-(G1c, the `holo'` field), and `eichler_bdd_at_cusp` (G3b/EICH-3a, the `bdd_at_cusps'` field, reduced to
+/-- **G4a — package `E_f` as a `ModularForm Γ (2-k)`** (reply.md §1.4; the flagged architecture
+gap).
+Built from `eichler_slash_invariant` (L7, the `slash_action_eq'` field),
+`differentiableOn_eichlerIntegral`
+(G1c, the `holo'` field), and `eichler_bdd_at_cusp` (G3b/EICH-3a, the `bdd_at_cusps'` field,
+reduced to
 the all-`γ` `IsBoundedAtImInfty` shadow via `Subgroup.IsArithmetic.isCusp_iff_isCusp_SL2Z` +
-`OnePoint.isBoundedAt_iff_forall_SL2Z`).  The weight is `2-k`, which is `≤ 0` for `k ≥ 2` — a genuine
+`OnePoint.isBoundedAt_iff_forall_SL2Z`).  The weight is `2-k`, which is `≤ 0` for `k ≥ 2` — a
+genuine
 negative-weight modular form, **not** a `CuspForm`.
 
 TYPE-LEVEL NOTE (flagged G4a architecture gap — RESOLVED at the type level): `ModularForm Γ w` is
 defined for **any** `w : ℤ`, so `ModularForm ((Gamma1 N).map (mapGL ℝ)) (2 - k)` type-checks for
 `2-k ≤ 0`.  The `ℍ → ℂ` carrier is the restriction `(eichlerIntegral f) ∘ ((↑) : ℍ → ℂ)`, consistent
-with `eichler_slash_invariant` / `differentiableOn_eichlerIntegral`.  This `def` is now fully assembled
-(no `sorry` in the `def` itself); its only deep input is the `bdd_at_cusps'` field, which delegates to
+with `eichler_slash_invariant` / `differentiableOn_eichlerIntegral`.  This `def` is now fully
+assembled
+(no `sorry` in the `def` itself); its only deep input is the `bdd_at_cusps'` field, which
+delegates to
 the lone residual `eichler_bdd_at_cusp` (EICH-3a). -/
 def eichlerModularForm (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)
     (hf : periodMap' N k hk f = 0) : ModularForm ((Gamma1 N).map (mapGL ℝ)) (2 - k) where
@@ -2145,7 +2231,8 @@ theorem eichler_eq_zero (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 �
       have hzero : eichlerModularForm f hk hf = 0 :=
         ModularForm.isZero_of_neg_weight (by omega) _
       rw [hzero, ModularForm.coe_zero]
-    · -- `k = 2`: weight `2 - k = 0`, so `E_f` is constant; vanishing at `∞` forces the constant `0`.
+    · -- `k = 2`: weight `2 - k = 0`, so `E_f` is constant; vanishing at `∞` forces the
+      -- constant `0`.
       have hw : 2 - k = 0 := by omega
       obtain ⟨c, hc⟩ := ModularForm.eq_const_of_weight_zero
         (ModularForm.mcast hw (eichlerModularForm f hk hf))
@@ -2189,7 +2276,8 @@ theorem eichler_eq_zero (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 �
       rw [Function.Periodic.norm_qParam, hρdef]; congr 1; ring
     have hsummable : Summable
         (fun m : ℕ ↦ eichlerCoeff f m • Function.Periodic.qParam (1 : ℝ) (τ : ℂ) ^ m) := by
-      have hbd : Summable (fun m : ℕ ↦ ‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * ρ ^ m) := by
+      have hbd : Summable
+          (fun m : ℕ ↦ ‖(UpperHalfPlane.qExpansion (1 : ℝ) f).coeff m‖ * ρ ^ m) := by
         have := summable_norm_coeff_mul_pow_geom f 0 hρ0.le hρ1
         simpa using this
       refine Summable.of_norm (hbd.of_nonneg_of_le (fun m ↦ norm_nonneg _) (fun m ↦ ?_))
@@ -2238,7 +2326,8 @@ theorem periodMap'_injective_eichler (hk : 2 ≤ k) :
     Function.Injective (periodMap' (N := N) (k := k) hk) := by
   rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
   intro f hf
-  -- `ι(f)=0 ⟹ E_f = 0`, hence the iterated derivative of `E_f` vanishes, hence `f = D^{k-1} E_f = 0`.
+  -- `ι(f)=0 ⟹ E_f = 0`, hence the iterated derivative of `E_f` vanishes, hence `f = D^{k-1} E_f =
+  -- 0`.
   have hE : eichlerIntegral f = 0 := eichler_eq_zero f hk hf
   ext τ
   -- `f τ = ((2πi)⁻¹)^{k-1} · D^{k-1} E_f (τ) = ((2πi)⁻¹)^{k-1} · D^{k-1} 0 (τ) = 0`.

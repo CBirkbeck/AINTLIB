@@ -3,8 +3,10 @@ Copyright (c) 2026 Bernoulli-Regular project contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bernoulli-Regular project contributors
 -/
-import BernoulliRegular.BernoulliFast.Computation
-import Mathlib.Data.List.GetD
+module
+
+public import BernoulliRegular.BernoulliFast.Computation
+public import Mathlib.Data.List.GetD
 
 /-!
 # Correctness of `bernoulliCompute`
@@ -36,6 +38,7 @@ computable definition to Mathlib's noncomputable `bernoulli`.
 * `bernoulliCompute_num_eq` — `(bernoulliCompute n).num = (bernoulli n).num`
 * `bernoulliCompute_den_eq` — `(bernoulliCompute n).den = (bernoulli n).den`
 -/
+@[expose] public section
 
 namespace BernoulliRegular.BernoulliFast
 
@@ -105,7 +108,7 @@ theorem binomSum_loop_eq (m : ℕ) (bs : List ℚ) (k : ℕ) (c acc : ℚ)
 theorem binomSum_eq (bs : List ℚ) (m : ℕ) :
     binomSum bs m =
       ∑ k ∈ range bs.length, ↑(m.choose k) * bs.getD k 0 := by
-  unfold binomSum
+  simp only [binomSum]
   rw [binomSum_loop_eq m bs 0 1 0 (by simp)]
   simp
 
@@ -239,7 +242,7 @@ theorem eq_bernoulli_of_sum_eq (f : ℕ → ℚ)
 
 /-- `bernoulliCompute n = bernoulli n`. -/
 theorem bernoulliCompute_eq (n : ℕ) : bernoulliCompute n = bernoulli n := by
-  unfold bernoulliCompute
+  simp only [bernoulliCompute]
   rw [List.getLast!_eq_getElem!, List.getElem!_eq_getElem?_getD,
     ← List.getD_eq_getElem?_getD]
   simpa [bernoulliList_length] using bernoulliList_getD_eq n n le_rfl

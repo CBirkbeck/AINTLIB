@@ -35,11 +35,11 @@ the endgame canonicity (route (c)), and both Drinfeld memberships become mechani
   multiplication-compatible morphism intertwines `[n]` and the zero section.
 * `pointAddEquiv`: the induced additive equivalence `E.Point g ≃+ E'.Point g` at every base
   point `g : T ⟶ S`.
-* `sectionsDivisor_comp_ideal`: the sections-divisor of composed sections, as the `comap` of
-  the original along the inverse.
+* `sectionsDivisor_pointMap_ideal`: the sections-divisor of the transported family of points,
+  as the `comap` of the original along the inverse.
 * `torsionIdeal_eq_comap`: `torsionIdeal` transports along the isomorphism.
 * `RelEffCartierDiv.IsSubgroup.of_ideal_comap`: the subgroup-divisor property transports.
-* `Section.HasExactOrder.comp_iso`: exact order transports (the `IsGammaOne` iso-leg).
+* `Section.HasExactOrder.pointMap`: exact order transports (the `IsGammaOne` iso-leg).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
@@ -49,36 +49,6 @@ attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
 
 universe u
-
-namespace AlgebraicGeometry.Scheme.IdealSheafData
-
-/-! Generic ideal-sheaf transport along an isomorphism of schemes. -/
-
-/-- For an isomorphism of schemes, pushing an ideal sheaf forward along the hom agrees with
-pulling it back along the inverse. -/
-lemma map_hom_eq_comap_inv {X Y : Scheme.{u}} (φ : X ≅ Y) (I : X.IdealSheafData) :
-    I.map φ.hom = I.comap φ.inv := by
-  refine le_antisymm ?_ ?_
-  · have h1 : ((I.map φ.hom).comap φ.hom).comap φ.inv ≤ I.comap φ.inv :=
-      comap_mono φ.inv (comap_map_le _ _)
-    rwa [← comap_comp, φ.inv_hom_id, comap_id] at h1
-  · refine ((map_gc φ.hom) _ _).mp ?_
-    show (I.comap φ.inv).comap φ.hom ≤ I
-    rw [← comap_comp, φ.hom_inv_id, comap_id]
-
-/-- The kernel of a morphism postcomposed with an isomorphism is the `comap` of the kernel
-along the inverse. -/
-lemma _root_.AlgebraicGeometry.Scheme.Hom.ker_comp_iso {T X Y : Scheme.{u}} (z : T ⟶ X)
-    (φ : X ≅ Y) : Scheme.Hom.ker (z ≫ φ.hom) = (Scheme.Hom.ker z).comap φ.inv := by
-  rw [Scheme.Hom.ker_comp]
-  exact map_hom_eq_comap_inv φ z.ker
-
-/-- Precomposition with an isomorphism does not change the kernel ideal sheaf. -/
-lemma _root_.AlgebraicGeometry.Scheme.Hom.ker_iso_comp {X Y Z : Scheme.{u}} (τ : X ⟶ Y)
-    [IsIso τ] (f : Y ⟶ Z) : Scheme.Hom.ker (τ ≫ f) = Scheme.Hom.ker f := by
-  rw [Scheme.Hom.ker_comp, Scheme.Hom.ker_eq_bot_of_isIso, map_bot]
-
-end AlgebraicGeometry.Scheme.IdealSheafData
 
 namespace ModularCurves
 
@@ -113,8 +83,8 @@ lemma zpow_comp_monHom
     (hμ : μ[E.asOver] ≫ e = MonoidalCategory.tensorHom e e ≫ μ[E'.asOver])
     {A : Over S} (f : A ⟶ E.asOver) (n : ℤ) :
     (f ^ n) ≫ e = (f ≫ e) ^ n :=
-  map_zpow (MonoidHom.mk' (fun z : A ⟶ E.asOver => z ≫ e)
-    (fun f g => mul_comp_monHom e hμ f g)) f n
+  map_zpow (MonoidHom.mk' (fun z : A ⟶ E.asOver ↦ z ≫ e)
+    (fun f g ↦ mul_comp_monHom e hμ f g)) f n
 
 /-- **The `[n]`-intertwining**: a pointed multiplication-compatible morphism commutes with
 multiplication-by-`n`. Both sides are `e ^ n` in the `Hom`-group `E.asOver ⟶ E'.asOver`:
@@ -184,7 +154,7 @@ lemma pointMapOfHom_add (e : E.asOver ⟶ E'.asOver)
   apply (E'.pointEquivOverHom g).injective
   have hcomm : ∀ R : E.Point g,
       (E'.pointEquivOverHom g) (pointMapOfHom e R) = (E.pointEquivOverHom g) R ≫ e :=
-    fun R => Over.OverMorphism.ext rfl
+    fun R ↦ Over.OverMorphism.ext rfl
   rw [pointEquivOverHom_add, hcomm, hcomm, hcomm, pointEquivOverHom_add]
   exact mul_comp_monHom e hμ _ _
 
@@ -227,7 +197,7 @@ sections-divisor along the inverse isomorphism. -/
 lemma sectionsDivisor_pointMap_ideal (e : E.asOver ≅ E'.asOver) {n : ℕ}
     (P : Fin n → E.Point (𝟙 S)) :
     (RelEffCartierDiv.sectionsDivisor E'.π
-        (fun i => pointMapOfHom e.hom (P i))).ideal
+        (fun i ↦ pointMapOfHom e.hom (P i))).ideal
       = (RelEffCartierDiv.sectionsDivisor E.π P).ideal.comap e.inv.left := by
   have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π :=
     ⟨inferInstance, E.smooth⟩
@@ -237,7 +207,7 @@ lemma sectionsDivisor_pointMap_ideal (e : E.asOver ≅ E'.asOver) {n : ℕ}
     dif_pos hpos, Scheme.IdealSheafData.comap_prod]
   show (∏ i, Scheme.Hom.ker ((pointMapOfHom e.hom (P i)).1 : S ⟶ E'.E))
     = ∏ i, (Scheme.Hom.ker ((P i).1 : S ⟶ E.E)).comap (schemeIsoOfOverIso e).inv
-  exact Finset.prod_congr rfl fun a _ =>
+  exact Finset.prod_congr rfl fun a _ ↦
     Scheme.Hom.ker_comp_iso ((P a).1 : S ⟶ E.E) (schemeIsoOfOverIso e)
 
 /-- `torsionIdeal` transports along a pointed multiplication-compatible isomorphism: the
@@ -260,7 +230,7 @@ lemma torsionIdeal_eq_comap (e : E.asOver ≅ E'.asOver)
       = pullback.map (E.mulByHom N) E.zero (E'.mulByHom N) E'.zero
           (schemeIsoOfOverIso e).hom (𝟙 S) (schemeIsoOfOverIso e).hom hsq hz
         ≫ E'.torsionι N from (pullback.lift_fst _ _ _).symm]
-  haveI : IsIso (pullback.map (E.mulByHom (N : ℤ)) E.zero (E'.mulByHom (N : ℤ)) E'.zero
+  have : IsIso (pullback.map (E.mulByHom (N : ℤ)) E.zero (E'.mulByHom (N : ℤ)) E'.zero
       (schemeIsoOfOverIso e).hom (𝟙 S) (schemeIsoOfOverIso e).hom hsq hz) :=
     pullback.map_isIso _ _ _ _ _ _ _ hsq hz
   exact (Scheme.Hom.ker_iso_comp
@@ -281,7 +251,7 @@ lemma _root_.ModularCurves.RelEffCartierDiv.IsSubgroup.of_ideal_comap
   intro T g
   obtain ⟨H, hH⟩ := hD g
   refine ⟨H.comap ((pointAddEquiv e hμ g).symm : E'.Point g ≃+ E.Point g).toAddMonoidHom,
-    fun P => ?_⟩
+    fun P ↦ ?_⟩
   rw [AddSubgroup.mem_comap, hH, hI]
   exact (Scheme.IdealSheafData.exists_factor_comap_iff D.ideal e.inv.left P.1).symm
 
@@ -295,10 +265,10 @@ theorem Section.HasExactOrder.pointMap (e : E.asOver ≅ E'.asOver)
   show (Section.orderDivisor E' (pointMapOfHom e.hom P) N).IsSubgroup E'
   refine RelEffCartierDiv.IsSubgroup.of_ideal_comap e hμ ?_ h
   rw [Section.orderDivisor, Section.orderDivisor,
-    show (fun a : Fin N => ((((a : ℕ) : ℤ) + 1) • pointMapOfHom e.hom P : E'.Point (𝟙 S)))
-        = fun a : Fin N =>
+    show (fun a : Fin N ↦ ((((a : ℕ) : ℤ) + 1) • pointMapOfHom e.hom P : E'.Point (𝟙 S)))
+        = fun a : Fin N ↦
           pointMapOfHom e.hom (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))) from
-      funext fun a => (map_zsmul (pointAddEquiv e hμ (𝟙 S)) _ _).symm]
+      funext fun a ↦ (map_zsmul (pointAddEquiv e hμ (𝟙 S)) _ _).symm]
   exact sectionsDivisor_pointMap_ideal e _
 
 end DivisorTransport

@@ -61,7 +61,7 @@ theorem PhiPrimeSymbolIdentity.of_K2_2SourceData
     (T : K2_2TargetData (ℓ := ℓ) (p := p) (K := K) (R' := R') Q)
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentity (p := p) (K := K) D.phi Q := by
-  unfold PhiPrimeSymbolIdentity
+  simp only [PhiPrimeSymbolIdentity]
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
     using K2_2SourceData.index_one_symbol_eq_norm_symbol D T hcop
 
@@ -93,7 +93,7 @@ theorem PhiPrimeSymbolIdentityPos.of_K2_2ReciprocalSourceData
     (T : K2_2TargetData (ℓ := ℓ) (p := p) (K := K) (R' := R') Q)
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentityPos (p := p) (K := K) D.phi Q := by
-  unfold PhiPrimeSymbolIdentityPos
+  simp only [PhiPrimeSymbolIdentityPos]
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
     using K2_2ReciprocalSourceData.symbol_eq_norm_symbol D T hcop
 
@@ -114,7 +114,7 @@ theorem PhiPrimeSymbolIdentityPos.of_K2_2FlexibleReciprocalSourceData
     (T : K2_2FlexibleTargetData (ℓ := ℓ) (p := p) (K := K) (R' := R') Q)
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentityPos (p := p) (K := K) D.phi Q := by
-  unfold PhiPrimeSymbolIdentityPos
+  simp only [PhiPrimeSymbolIdentityPos]
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
     using K2_2FlexibleReciprocalSourceData.symbol_eq_norm_symbol D T hcop
 
@@ -135,7 +135,7 @@ theorem PhiPrimeSymbolIdentity.of_K2_2FlexibleSourceData
     (T : K2_2FlexibleTargetData (ℓ := ℓ) (p := p) (K := K) (R' := R') Q)
     (hcop : (Ideal.absNorm P).Coprime (Ideal.absNorm Q)) :
     PhiPrimeSymbolIdentity (p := p) (K := K) D.phi Q := by
-  unfold PhiPrimeSymbolIdentity
+  simp only [PhiPrimeSymbolIdentity]
   simpa [Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card]
     using K2_2FlexibleSourceData.symbol_eq_neg_norm_symbol D T hcop
 
@@ -329,7 +329,7 @@ theorem idealNormFactorElement_eq_absNorm
     {B : Ideal (𝓞 K)} (hB : B ≠ ⊥) :
     idealNormFactorElement (p := p) (K := K) B =
       (((Ideal.absNorm B : ℤ) : 𝓞 K)) := by
-  unfold idealNormFactorElement
+  simp only [idealNormFactorElement]
   let m := normalizedFactors B
   have hcast :
       (m.map fun Q : Ideal (𝓞 K) => (((Ideal.absNorm Q : ℤ) : 𝓞 K))).prod =
@@ -470,7 +470,7 @@ theorem symbol_eq_double_sum_of_prime_symbol_identities
             pthSymbolAtPrime_canonical (p := p) (K := K)
               (((Ideal.absNorm Q : ℤ) : 𝓞 K)) P.1).sum) := by
       refine Multiset.map_congr rfl fun P _ => ?_
-      unfold pthSymbolAtIdeal_canonical
+      simp only [pthSymbolAtIdeal_canonical]
       have h_inner :
           ((normalizedFactors B).map fun Q =>
             pthSymbolAtPrime_canonical (p := p) (K := K)
@@ -520,7 +520,7 @@ theorem pthSymbolAtIdeal_canonical_idealNormFactorElement
       ((normalizedFactors B).map fun Q =>
         pthSymbolAtIdeal_canonical (p := p) (K := K)
           (((Ideal.absNorm Q : ℤ) : 𝓞 K)) A).sum := by
-  unfold idealNormFactorElement
+  simp only [idealNormFactorElement]
   rw [show
       ((normalizedFactors B).map fun Q : Ideal (𝓞 K) =>
         pthSymbolAtIdeal_canonical (p := p) (K := K)
@@ -749,7 +749,7 @@ theorem symbol_eq_double_sum_pos_of_prime_symbol_identities
             pthSymbolAtPrime_canonical (p := p) (K := K)
               (((Ideal.absNorm Q : ℤ) : 𝓞 K)) P.1).sum) := by
       refine Multiset.map_congr rfl fun P _ => ?_
-      unfold pthSymbolAtIdeal_canonical
+      simp only [pthSymbolAtIdeal_canonical]
       have h_inner :
           ((normalizedFactors B).map fun Q =>
             pthSymbolAtPrime_canonical (p := p) (K := K)

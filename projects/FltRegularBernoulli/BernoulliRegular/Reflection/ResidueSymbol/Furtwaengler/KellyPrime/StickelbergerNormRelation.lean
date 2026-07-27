@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiIdeal
@@ -49,7 +54,7 @@ def KellyIdealIdentity (α : 𝓞 K) (B : Ideal (𝓞 K)) : Prop :=
 /-- `KellyIdealIdentity α ⊤` holds unconditionally. -/
 theorem KellyIdealIdentity_top (α : 𝓞 K) :
     KellyIdealIdentity (p := p) (K := K) α (⊤ : Ideal (𝓞 K)) := by
-  unfold KellyIdealIdentity
+  simp only [KellyIdealIdentity]
   rw [pthSymbolAtIdeal_canonical_top, ← Ideal.one_eq_top,
     UniqueFactorizationMonoid.normalizedFactors_one]
   simp
@@ -57,7 +62,7 @@ theorem KellyIdealIdentity_top (α : 𝓞 K) :
 /-- `KellyIdealIdentity α ⊥` holds unconditionally. -/
 theorem KellyIdealIdentity_bot (α : 𝓞 K) :
     KellyIdealIdentity (p := p) (K := K) α (⊥ : Ideal (𝓞 K)) := by
-  unfold KellyIdealIdentity
+  simp only [KellyIdealIdentity]
   rw [pthSymbolAtIdeal_canonical_bot,
     show (⊥ : Ideal (𝓞 K)) = (0 : Ideal (𝓞 K)) from rfl,
     UniqueFactorizationMonoid.normalizedFactors_zero]
@@ -66,7 +71,7 @@ theorem KellyIdealIdentity_bot (α : 𝓞 K) :
 /-- `KellyIdealIdentity 0 B` holds unconditionally. -/
 theorem KellyIdealIdentity_zero (B : Ideal (𝓞 K)) :
     KellyIdealIdentity (p := p) (K := K) (0 : 𝓞 K) B := by
-  unfold KellyIdealIdentity
+  simp only [KellyIdealIdentity]
   rw [stickelbergerPrincipalGen_zero, pthSymbolAtIdeal_canonical_zero_alpha]
   rw [show (Ideal.span ({(0 : 𝓞 K)} : Set (𝓞 K))) = ⊥ from by simp]
   symm
@@ -87,7 +92,7 @@ theorem KellyIdealIdentity_of_kellyPrimeEquality_all
     {B : Ideal (𝓞 K)} (_hB : B ≠ ⊥) :
     KellyIdealIdentity (p := p) (K := K) α B := by
   classical
-  unfold KellyIdealIdentity pthSymbolAtIdeal_canonical
+  simp only [KellyIdealIdentity, pthSymbolAtIdeal_canonical]
   refine congrArg Multiset.sum ?_
   refine Multiset.map_congr rfl fun P hP => ?_
   obtain ⟨_, hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
@@ -120,7 +125,7 @@ theorem pthSymbolAtIdeal_canonical_principalGen_eq_galois_sum
           pthSymbolAtIdeal_canonical (p := p) (K := K)
             (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) B := by
   classical
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   -- Distribute pthSymbolAtIdeal_canonical over Finset-prod numerator.
   rw [pthSymbolAtIdeal_canonical_finset_prod_α (p := p) Finset.univ
     (fun a : CyclotomicUnitDelta p =>
@@ -265,7 +270,7 @@ both sides are `0`. -/
 theorem StickelbergerNormRelation_one
     (P' : Ideal (𝓞 K)) :
     StickelbergerNormRelation (p := p) (K := K) (1 : 𝓞 K) P' := by
-  unfold StickelbergerNormRelation
+  simp only [StickelbergerNormRelation]
   -- LHS: each (σ_{a^{-1}} 1 / P')_p = (1 / P')_p = 0.
   -- RHS: (NP' / Ideal.span {1})_p = (NP' / ⊤)_p = 0.
   have h_lhs :
@@ -291,7 +296,7 @@ both sides are `0`. -/
 theorem StickelbergerNormRelation_zero
     (P' : Ideal (𝓞 K)) :
     StickelbergerNormRelation (p := p) (K := K) (0 : 𝓞 K) P' := by
-  unfold StickelbergerNormRelation
+  simp only [StickelbergerNormRelation]
   -- LHS: each (σ_{a^{-1}} 0 / P')_p = (0 / P')_p = 0 since 0 ∈ P'.
   have h_lhs :
       (∑ a : CyclotomicUnitDelta p, ((a : ZMod p).val : ZMod p) *
@@ -370,9 +375,9 @@ theorem StickelbergerNormRelation_of_galois_invariant
       pthSymbolAtIdeal_canonical (p := p) (K := K)
         ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) = 0) :
     StickelbergerNormRelation (p := p) (K := K) α P' := by
-  unfold StickelbergerNormRelation
+  simp only [StickelbergerNormRelation]
   rw [stickelberger_norm_lhs_galois_invariant α P' h_inv]
-  unfold SumUnitsValEqZeroHypothesis at h_sum_zero
+  simp only [SumUnitsValEqZeroHypothesis] at h_sum_zero
   rw [h_sum_zero, zero_mul]
   exact h_norm_zero.symm
 
@@ -410,7 +415,7 @@ theorem pthSymbolAtPrincipal_canonical_principalGen_galois_invariant_eq_zero
     pthSymbolAtPrincipal_canonical (p := p) (K := K) α
         (stickelbergerPrincipalGen (p := p) (K := K) β) = 0 := by
   rw [pthSymbolAtPrincipal_canonical_principalGen_galois_invariant α hβ h_inv]
-  unfold SumUnitsValEqZeroHypothesis at h_sum_zero
+  simp only [SumUnitsValEqZeroHypothesis] at h_sum_zero
   rw [h_sum_zero, zero_mul]
 
 /-! ### Trivial discharges of the concrete Kelly equality -/
@@ -443,7 +448,7 @@ theorem kellyPrimeEquality_one (P' : Ideal (𝓞 K)) :
         (Ideal.span ({(1 : 𝓞 K)} : Set (𝓞 K))) := by
   -- α^Θ for α = 1: each factor (σ_{a^{-1}} 1)^a.val = 1^a.val = 1, product = 1.
   have h_one : stickelbergerPrincipalGen (p := p) (K := K) (1 : 𝓞 K) = 1 := by
-    unfold stickelbergerPrincipalGen
+    simp only [stickelbergerPrincipalGen]
     refine Finset.prod_eq_one fun a _ => ?_
     rw [show cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ (1 : 𝓞 K) =
         (1 : 𝓞 K) from map_one _]
@@ -556,7 +561,7 @@ every odd prime, by reducing through `ZMod.natCast_zmod_val` to
 `sum_units_coe_eq_zero_of_odd`. -/
 theorem sumUnitsValEqZero (hp_odd : p ≠ 2) :
     SumUnitsValEqZeroHypothesis (p := p) := by
-  unfold SumUnitsValEqZeroHypothesis
+  simp only [SumUnitsValEqZeroHypothesis]
   have hp_prime : p.Prime := Fact.out
   haveI : NeZero p := ⟨hp_prime.ne_zero⟩
   have h_eq :
@@ -588,7 +593,7 @@ both sides equal 0 via the p-th-power kill. -/
 theorem StickelbergerNormRelation_pow_p
     (β : 𝓞 K) (P' : Ideal (𝓞 K)) :
     StickelbergerNormRelation (p := p) (K := K) (β ^ p) P' := by
-  unfold StickelbergerNormRelation
+  simp only [StickelbergerNormRelation]
   -- LHS: each (σ_{a^{-1}} (β^p) / P')_p = ((σ_{a^{-1}} β)^p / P')_p = 0.
   have h_lhs :
       (∑ a : CyclotomicUnitDelta p, ((a : ZMod p).val : ZMod p) *
@@ -615,7 +620,7 @@ Direct from the definition: `(β^p)^Θ = ∏_a (σ_{a⁻¹}(β^p))^a.val
 theorem stickelbergerPrincipalGen_pow_p (β : 𝓞 K) :
     stickelbergerPrincipalGen (p := p) (K := K) (β ^ p) =
       (stickelbergerPrincipalGen (p := p) (K := K) β) ^ p := by
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   rw [← Finset.prod_pow]
   refine Finset.prod_congr rfl fun a _ => ?_
   rw [show cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ (β ^ p) =
@@ -686,7 +691,7 @@ theorem StickelbergerNormRelation_mul_pow_p
       cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ β ∉ P')
     (hα : StickelbergerNormRelation (p := p) (K := K) α P') :
     StickelbergerNormRelation (p := p) (K := K) (α * β ^ p) P' := by
-  unfold StickelbergerNormRelation at hα ⊢
+  simp only [StickelbergerNormRelation] at hα ⊢
   haveI hP'_max : P'.IsMaximal :=
     (Ideal.IsPrime.isMaximal (inferInstance : P'.IsPrime) hP'_ne)
   -- LHS: ∑_a a.val · (σ_{a⁻¹}(α · β^p) / P')_p = ∑_a a.val · (σ_{a⁻¹} α / P')_p.
@@ -766,7 +771,7 @@ theorem kellyPrimeEquality_mul_pow_p
     -- via the K1+K3 reverse: K3 ↔ K1 + K2 (with coprimality). Use the
     -- fact that K1 holds with hα_cop, so K3 ⟺ K2.
     have h_K2_α : StickelbergerNormRelation (p := p) (K := K) α P' := by
-      unfold StickelbergerNormRelation
+      simp only [StickelbergerNormRelation]
       rw [← pthSymbolAtIdeal_canonical_principalGen_at_prime_eq_galois_sum
         α hP'_ne hα_cop]
       exact hα
@@ -791,7 +796,7 @@ theorem StickelbergerNormRelation_mul
     (hα : StickelbergerNormRelation (p := p) (K := K) α P')
     (hβ : StickelbergerNormRelation (p := p) (K := K) β P') :
     StickelbergerNormRelation (p := p) (K := K) (α * β) P' := by
-  unfold StickelbergerNormRelation at hα hβ ⊢
+  simp only [StickelbergerNormRelation] at hα hβ ⊢
   haveI hP'_max : P'.IsMaximal :=
     (Ideal.IsPrime.isMaximal (inferInstance : P'.IsPrime) hP'_ne)
   -- LHS: split via multiplicativity at each index.
@@ -861,12 +866,12 @@ theorem kellyPrimeEquality_mul
     · exact hβ_cop a h₂
   · -- StickelbergerNormRelation (α · β) P' from multiplicativity.
     have h_K2_α : StickelbergerNormRelation (p := p) (K := K) α P' := by
-      unfold StickelbergerNormRelation
+      simp only [StickelbergerNormRelation]
       rw [← pthSymbolAtIdeal_canonical_principalGen_at_prime_eq_galois_sum
         α hP'_ne hα_cop]
       exact hα
     have h_K2_β : StickelbergerNormRelation (p := p) (K := K) β P' := by
-      unfold StickelbergerNormRelation
+      simp only [StickelbergerNormRelation]
       rw [← pthSymbolAtIdeal_canonical_principalGen_at_prime_eq_galois_sum
         β hP'_ne hβ_cop]
       exact hβ

@@ -37,7 +37,6 @@ open HasseWeil
 
 -- These instances are intentionally section-scoped for the engine below.
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
@@ -53,7 +52,7 @@ variable {W}
 /-- Constants evaluate to themselves. -/
 theorem evaluatesTo_algebraMap (P : (W_smooth W).SmoothPoint) (c : F) :
     EvaluatesTo W P (algebraMap F KE c) c := by
-  unfold EvaluatesTo
+  simp only [EvaluatesTo]
   rw [sub_self]
   exact (Valuation.map_zero _).trans_lt zero_lt_one
 
@@ -89,7 +88,7 @@ theorem EvaluatesTo.add {P : (W_smooth W).SmoothPoint} {f g : KE} {c d : F}
   have hrw : f + g - algebraMap F KE (c + d) =
       (f - algebraMap F KE c) + (g - algebraMap F KE d) := by
     rw [map_add]; abel
-  unfold EvaluatesTo
+  simp only [EvaluatesTo]
   rw [hrw]
   exact lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt hf hg)
 
@@ -98,7 +97,7 @@ theorem EvaluatesTo.neg {P : (W_smooth W).SmoothPoint} {f : KE} {c : F}
     (hf : EvaluatesTo W P f c) : EvaluatesTo W P (-f) (-c) := by
   have hrw : -f - algebraMap F KE (-c) = -(f - algebraMap F KE c) := by
     rw [map_neg]; abel
-  unfold EvaluatesTo
+  simp only [EvaluatesTo]
   rw [hrw]
   exact (Valuation.map_neg _ _).trans_lt hf
 
@@ -116,7 +115,7 @@ theorem EvaluatesTo.mul {P : (W_smooth W).SmoothPoint} {f g : KE} {c d : F}
   have hrw : f * g - algebraMap F KE (c * d) =
       f * (g - algebraMap F KE d) + (f - algebraMap F KE c) * algebraMap F KE d := by
     rw [map_mul]; ring
-  unfold EvaluatesTo
+  simp only [EvaluatesTo]
   rw [hrw]
   refine lt_of_le_of_lt (Valuation.map_add _ _ _) (max_lt ?_ ?_)
   · calc (W_smooth W).pointValuation P (f * (g - algebraMap F KE d))
@@ -174,7 +173,7 @@ theorem EvaluatesTo.div {P : (W_smooth W).SmoothPoint} {f g : KE} {c d : F}
         (W_smooth W).pointValuation P g *
           (W_smooth W).pointValuation P (algebraMap F KE d) from Valuation.map_mul _ _ _,
       hvg, pointValuation_algebraMap_F_eq_one_of_ne_zero W P hd, one_mul]
-  unfold EvaluatesTo
+  simp only [EvaluatesTo]
   rw [hrw]
   rw [show (W_smooth W).pointValuation P
       (((f - algebraMap F KE c) * algebraMap F KE d +
@@ -262,7 +261,7 @@ theorem evaluatesTo_translate (P : (W_smooth W).SmoothPoint)
         (f - algebraMap F KE c) :=
       (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
         (P := P.translate_of_finite (Affine.Point.some xs ys hnsS) h) h0).mpr hev
-    unfold EvaluatesTo
+    simp only [EvaluatesTo]
     rw [hτ]
     exact (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
       (P := P) hτ0).mp (h1.trans_eq hord.symm)
@@ -278,8 +277,10 @@ def PullbackEvaluation (β : Isogeny W.toAffine W.toAffine)
 
 variable {W}
 
-/-- `toAffinePoint` is injective on smooth points. -/
-private theorem toAffinePoint_injective :
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- `toAffinePoint` is injective on smooth points.  The single home of this fact: the copies in
+`Foundation/EC/KernelCount` and `Isogeny/TwoCurve/Covariance` now delegate here. -/
+theorem toAffinePoint_injective :
     Function.Injective
       (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) := by
   intro P Q h
@@ -288,6 +289,7 @@ private theorem toAffinePoint_injective :
   cases P; cases Q
   simp_all
 
+set_option backward.isDefEq.respectTransparency false in
 /-- All fibres of the stored point map over arbitrary points are finite. -/
 theorem PullbackEvaluation.finite_fiber {β : Isogeny W.toAffine W.toAffine}
     {bad : Set (W_smooth W).SmoothPoint} (hw : PullbackEvaluation W β bad)
@@ -366,6 +368,7 @@ theorem PullbackEvaluation.pullback_x_gen_ne_algebraMap [IsAlgClosed F]
 
 variable (W)
 
+omit [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The points whose translate by `Sk` is not affine form a finite set. -/
 private theorem notIsSome_add_finite (Sk : (W_smooth W).toAffine.Point) :
     {P : (W_smooth W).SmoothPoint | ¬(P.toAffinePoint + Sk).IsSome}.Finite := by
@@ -378,6 +381,7 @@ private theorem notIsSome_add_finite (Sk : (W_smooth W).toAffine.Point) :
     exact hP
   exact this
 
+omit [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The points whose translate by `Sk` lands in a finite set form a finite set. -/
 private theorem translate_mem_finite {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
     (Sk : (W_smooth W).toAffine.Point) :
@@ -654,6 +658,7 @@ variable {W}
 
 variable (W)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A `CoordHom` gives the pullback-evaluation witness with no bad set. -/
 theorem pullbackEvaluation_of_coordHom
     (φE : EC.Isogeny W.toAffine W.toAffine) (cd : φE.toCurveMap.CoordHom)
@@ -709,7 +714,7 @@ theorem pullbackEvaluation_of_coordHom
           (cd.toAlgHom (algebraMap (Polynomial F) W.toAffine.CoordinateRing
             Polynomial.X) - algebraMap F W.toAffine.CoordinateRing Q.x) := by
       rw [map_sub, ← hxgen, ← IsScalarTower.algebraMap_apply]
-    unfold EvaluatesTo
+    simp only [EvaluatesTo]
     rw [hrw]
     exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
       (C := W_smooth W) _ P).mpr hmem
@@ -734,7 +739,7 @@ theorem pullbackEvaluation_of_coordHom
           (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial) -
             algebraMap F W.toAffine.CoordinateRing Q.y) := by
       rw [map_sub, ← hygen, ← IsScalarTower.algebraMap_apply]
-    unfold EvaluatesTo
+    simp only [EvaluatesTo]
     rw [hrw]
     exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
       (C := W_smooth W) _ P).mpr hmem

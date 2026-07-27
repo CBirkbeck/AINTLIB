@@ -25,7 +25,7 @@ Both are axiom-clean and immediate.
 
 * **Symmetry** — the crux. It requires the **dual isogeny** `φ̂ : E₂ → E₁` of
   Silverman III.6.1, *as a morphism* (carrying a function-field pullback
-  `φ̂* : K(E₁) → K(E₂)`). `HasseWeil/EC/IsogenyAG/Dual.lean` builds it —
+  `φ̂* : K(E₁) → K(E₂)`). `HasseWeil/Isogeny/Dual/Morphism.lean` builds it —
   axiom-clean — from the per-isogeny witness package `Isogeny.HasDualWitness φ`
   (the range inclusion `Im(ν*) ⊆ Im(φ*)` + the basepoint condition), by
   factoring at the function-field level (`Curves.CurveMap.factorThrough`,
@@ -34,17 +34,17 @@ Both are axiom-clean and immediate.
   **There is no unconditional universal witness** in the development: the former
   `EC.universal_dualGaloisData` route (`∀ φ, Nonempty (DualGaloisData φ)`) is
   **false** for purely inseparable `φ` — refuted at the `q`-power Frobenius in
-  `EC/IsogenyAG/DualUniversal.lean` (B2, 2026-06-10) — and the true universal
+  `Isogeny/Dual/Universal.lean` (B2 refutation) — and the true universal
   statement `∀ φ, Nonempty φ.HasDualWitness` (Silverman III.6.1 proper) is open
   in general, reduced over a perfect characteristic-`p` base to the separable
   side on Frobenius twists
   (`nonempty_hasDualWitness_of_twisted_separable_witnessesOf`,
-  `EC/IsogenyAG/TwistedFactorization.lean`). Symmetry is therefore
+  `Isogeny/Frobenius/Factorization.lean`). Symmetry is therefore
   **witness-gated** here: `IsIsogenous.symm_of_witness` takes the per-pair
   witnesses, and the bundled `Equivalence`/`Setoid`/quotient take the named
   field-level hypothesis `UniversalDualWitness F`.
 
-## Gating architecture (B2 rewiring, 2026-06-10)
+## Gating architecture (B2 rewiring)
 
 Two honest packagings were considered for the downstream
 `Equivalence`/`Setoid`/quotient:
@@ -64,16 +64,16 @@ Two honest packagings were considered for the downstream
 ## Discharged witness instances (the gate is non-vacuous)
 
 `Nonempty φ.HasDualWitness` is a theorem for the project's concrete classes:
-`[ℓ]` (`mulByIntSelfDualWitness`, `EC/IsogenyAG/MulByIntPullbackComp.lean`; over
-`K̄` also `dualMulByInt` / `exists_dual_mulByInt`, `DualGaloisClosed.lean`), the
+`[ℓ]` (`mulByIntSelfDualWitness`, `Isogeny/MulByInt/Composition.lean`; over
+`K̄` also `dualMulByInt` / `exists_dual_mulByInt`, `Isogeny/Dual/GaloisClosed.lean`), the
 `q`-power Frobenius and its powers (`nonempty_hasDualWitness_frobenius`,
-`FrobeniusDual.lean`; `frobeniusPowerMulByIntDualWitness`,
-`DualReduction.lean`), the relative Frobenius / Verschiebung
+`Isogeny/Frobenius/Dual.lean`; `frobeniusPowerMulByIntDualWitness`,
+`Isogeny/Dual/Reduction.lean`), the relative Frobenius / Verschiebung
 (`hasDualWitnessRelativeFrobeniusOf`, `relativeVerschiebung*`,
-`TwistedFactorization.lean`), `1 − π` over `K̄` (`exists_dual_oneSub`,
+`Isogeny/Frobenius/Factorization.lean`), `1 − π` over `K̄` (`exists_dual_oneSub`,
 `oneSubCanonicalDual`, `WeilPairing/OneSubPullbackEvaluation.lean`), and the
 general separable class over `K̄`
-(`exists_dual_of_pullbackEvaluation_general`, `EC/KernelCountGeneral.lean`).
+(`exists_dual_of_pullbackEvaluation_general`, `Foundation/EC/KernelCountGeneral.lean`).
 
 ## The isogeny class (LMFDB)
 
@@ -81,7 +81,7 @@ LMFDB's *isogeny class* of an elliptic curve is the equivalence class of
 `IsIsogenous`. The `Equivalence`/`Setoid` packaging is assembled here, gated on
 `UniversalDualWitness F`:
 
-* `isIsogenous_refl`, `isIsogenous_trans` — the unconditional half;
+* `IsIsogenous.refl`, `IsIsogenous.trans` — the unconditional half;
 * `IsIsogenous.symm_of_witness` / `IsIsogenous.symm_of` — witness-gated symmetry;
 * `isIsogenousSetoid` / `isIsogenous_equivalence` — the bundled equivalence
   relation (hence the isogeny-class quotient `IsogenyClass`), gated.
@@ -127,26 +127,15 @@ identity isogeny `EC.Isogeny.id`. -/
 theorem IsIsogenous.refl (W : Affine F) [W.IsElliptic] : IsIsogenous W W :=
   ⟨EC.Isogeny.id W⟩
 
-/-- Reflexivity, named for the `Equivalence` packaging. -/
-theorem isIsogenous_refl (W : Affine F) [W.IsElliptic] : IsIsogenous W W :=
-  IsIsogenous.refl W
-
 /-! ### Transitivity (composition of isogenies) -/
 
 /-- **Transitivity**: isogenies compose. If `W₁` is isogenous to `W₂` and `W₂`
 is isogenous to `W₃`, then `W₁` is isogenous to `W₃`, via `EC.Isogeny.compose`. -/
 theorem IsIsogenous.trans {W₁ W₂ W₃ : Affine F}
     [W₁.IsElliptic] [W₂.IsElliptic] [W₃.IsElliptic]
-    (h₁₂ : IsIsogenous W₁ W₂) (h₂₃ : IsIsogenous W₂ W₃) : IsIsogenous W₁ W₃ := by
-  obtain ⟨φ⟩ := h₁₂
-  obtain ⟨ψ⟩ := h₂₃
-  exact ⟨ψ.compose φ⟩
-
-/-- Transitivity, named for the `Equivalence` packaging. -/
-theorem isIsogenous_trans {W₁ W₂ W₃ : Affine F}
-    [W₁.IsElliptic] [W₂.IsElliptic] [W₃.IsElliptic]
-    (h₁₂ : IsIsogenous W₁ W₂) (h₂₃ : IsIsogenous W₂ W₃) : IsIsogenous W₁ W₃ :=
-  h₁₂.trans h₂₃
+    (h₁₂ : IsIsogenous W₁ W₂) (h₂₃ : IsIsogenous W₂ W₃) :
+    IsIsogenous W₁ W₃ :=
+  h₁₂.elim fun φ ↦ h₂₃.map fun ψ ↦ ψ.compose φ
 
 /-! ### Symmetry via the dual isogeny (Silverman III.6.1) — witness-gated
 
@@ -156,7 +145,7 @@ isogeny** `φ̂ : E₂ → E₁` with `φ̂ ∘ φ = [m]`. Being itself a noncon
 in the reverse direction, `φ̂` immediately gives symmetry of `IsIsogenous`.
 
 In the present formalisation the dual is built from the per-isogeny witness
-package `Isogeny.HasDualWitness φ` (`Dual.lean`, axiom-clean), and **no
+package `Isogeny.HasDualWitness φ` (`Isogeny/Dual/Morphism.lean`, axiom-clean), and **no
 unconditional universal witness is available** (the former Galois-data route is
 false — see the module docstring). Symmetry is therefore stated against the
 witnesses; the named field-level gate is `UniversalDualWitness F`. -/
@@ -172,7 +161,7 @@ Given an `EC.Isogeny W₁ W₂` (a nonconstant isogeny `φ : E₁ → E₂`) tog
 a dual witness — the range inclusion `Im(ν*) ⊆ Im(φ*)` for a nonconstant
 endomorphism `ν` of `E₁` plus the basepoint condition, packaged as
 `Isogeny.HasDualWitness φ` — there is an `EC.Isogeny W₂ W₁`. Thin wrapper over
-the axiom-clean `EC.Isogeny.exists_dual_of_witness` (`Dual.lean`), which builds
+the axiom-clean `EC.Isogeny.exists_dual_of_witness` (`Isogeny/Dual/Morphism.lean`), which builds
 `φ̂* := (φ*)⁻¹|_{range} ∘ ν*` by Silverman III.4.11 factoring.
 
 The witness hypothesis is honest and per-isogeny: it is a theorem for the
@@ -193,12 +182,12 @@ carries a `HasDualWitness`.
 
 This is the *true* universal statement of Silverman III.6.1 — the former
 attempt to prove it via universal Galois data (`universal_dualGaloisData`) is
-refuted in `EC/IsogenyAG/DualUniversal.lean`, since the Galois fixed-field
+refuted in `Isogeny/Dual/Universal.lean`, since the Galois fixed-field
 packaging is unsatisfiable for purely inseparable isogenies. It is carried as a
 named hypothesis: discharged per concrete class (module docstring), and reduced
 over a perfect characteristic-`p` base to the separable side on Frobenius
 twists (`nonempty_hasDualWitness_of_twisted_separable_witnessesOf`,
-`EC/IsogenyAG/TwistedFactorization.lean`). -/
+`Isogeny/Frobenius/Factorization.lean`). -/
 def UniversalDualWitness (F : Type*) [Field F] : Prop :=
   ∀ ⦃W₁ W₂ : Affine F⦄ [W₁.IsElliptic] [W₂.IsElliptic] (φ : EC.Isogeny W₁ W₂),
     Nonempty φ.HasDualWitness
@@ -208,20 +197,14 @@ isogenous to `W₂` and every isogeny `W₁ → W₂` carries a dual witness, th
 is isogenous to `W₁`, by taking the dual of a witnessing isogeny. -/
 theorem IsIsogenous.symm_of_witness {W₁ W₂ : Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (h : IsIsogenous W₁ W₂)
-    (w : ∀ φ : EC.Isogeny W₁ W₂, Nonempty φ.HasDualWitness) : IsIsogenous W₂ W₁ := by
-  obtain ⟨φ⟩ := h
-  exact IsogenyDual.exists_dual φ (w φ)
+    (w : ∀ φ : EC.Isogeny W₁ W₂, Nonempty φ.HasDualWitness) : IsIsogenous W₂ W₁ :=
+  h.elim fun φ ↦ IsogenyDual.exists_dual φ (w φ)
 
 /-- **Symmetry under the universal dual-witness hypothesis** (Silverman
 III.6.1, gated form of the former `IsIsogenous.symm`). -/
 theorem IsIsogenous.symm_of (hw : UniversalDualWitness F) {W₁ W₂ : Affine F}
     [W₁.IsElliptic] [W₂.IsElliptic] (h : IsIsogenous W₁ W₂) : IsIsogenous W₂ W₁ :=
   h.symm_of_witness fun φ ↦ hw φ
-
-/-- Symmetry, named for the `Equivalence` packaging (witness-gated). -/
-theorem isIsogenous_symm_of (hw : UniversalDualWitness F) {W₁ W₂ : Affine F}
-    [W₁.IsElliptic] [W₂.IsElliptic] (h : IsIsogenous W₁ W₂) : IsIsogenous W₂ W₁ :=
-  h.symm_of hw
 
 /-! ### The isogeny class as an equivalence relation / setoid (witness-gated)
 

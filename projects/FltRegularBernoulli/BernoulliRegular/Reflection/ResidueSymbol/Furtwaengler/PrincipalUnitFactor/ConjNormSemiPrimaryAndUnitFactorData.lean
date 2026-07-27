@@ -68,7 +68,7 @@ theorem prod_cyclotomicRingOfIntegersEquiv_eq_intNorm (α : 𝓞 K) :
       cyclotomicRingOfIntegersEquiv (p := p) K a α) =
         ((Algebra.norm ℤ α : ℤ) : 𝓞 K) := by
   classical
-  haveI : IsGalois ℚ K := IsCyclotomicExtension.isGalois ({p} : Set ℕ) ℚ K
+  have : IsGalois ℚ K := IsCyclotomicExtension.isGalois ({p} : Set ℕ) ℚ K
   apply RingOfIntegers.ext
   change algebraMap (𝓞 K) K
       (∏ a : CyclotomicUnitDelta p,
@@ -84,15 +84,15 @@ theorem prod_cyclotomicRingOfIntegersEquiv_eq_intNorm (α : 𝓞 K) :
     refine Fintype.prod_equiv
       (cyclotomicGalEquivZMod (p := p) K)
       (fun σ : Gal(K / ℚ) => σ (α : K))
-      (fun a : CyclotomicUnitDelta p =>
+      (fun a : CyclotomicUnitDelta p ↦
         algebraMap (𝓞 K) K
           (cyclotomicRingOfIntegersEquiv (p := p) K a α)) ?_
     intro σ
     have ha : cyclotomicSigmaOfUnit (p := p) K
         (cyclotomicGalEquivZMod (p := p) K σ) = σ := by
-      unfold cyclotomicSigmaOfUnit
+      simp only [cyclotomicSigmaOfUnit]
       exact (cyclotomicGalEquivZMod (p := p) K).symm_apply_apply σ
-    unfold cyclotomicRingOfIntegersEquiv
+    simp only [cyclotomicRingOfIntegersEquiv]
     change σ (α : K) =
       algebraMap (𝓞 K) K
         ((MulSemiringAction.toRingEquiv (Gal(K / ℚ)) (𝓞 K)
@@ -121,9 +121,9 @@ theorem prod_cyclotomicRingOfIntegersEquiv_inv_eq_intNorm (α : 𝓞 K) :
           cyclotomicRingOfIntegersEquiv (p := p) K a α := by
           let e : CyclotomicUnitDelta p ≃ CyclotomicUnitDelta p := Equiv.inv _
           exact Fintype.prod_equiv e
-            (fun a : CyclotomicUnitDelta p =>
+            (fun a : CyclotomicUnitDelta p ↦
               cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α)
-            (fun a : CyclotomicUnitDelta p =>
+            (fun a : CyclotomicUnitDelta p ↦
               cyclotomicRingOfIntegersEquiv (p := p) K a α)
             (by intro a; simp [e])
     _ = ((Algebra.norm ℤ α : ℤ) : 𝓞 K) :=
@@ -147,7 +147,7 @@ theorem ringOfIntegersComplexConj_stickelbergerPrincipalGen_mul_self_eq_intNorm_
           cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ p := by
     simpa using
       (Finset.prod_pow (Finset.univ : Finset (CyclotomicUnitDelta p)) p
-        (fun a : CyclotomicUnitDelta p =>
+        (fun a : CyclotomicUnitDelta p ↦
           cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α))
   rw [hpow]
   rw [prod_cyclotomicRingOfIntegersEquiv_inv_eq_intNorm (p := p) (K := K) α]
@@ -169,90 +169,87 @@ theorem ringOfIntegersComplexConj_stickelbergerPrincipalGen_mul_self_eq_absNorm_
     Int.natAbs_of_nonneg h_norm_nonneg
   rw [hnatAbs]
 
+/-- No unit is divisible by `ζ - 1`, which is prime. -/
+private theorem not_zetaSubOne_dvd_unit (u : (𝓞 K)ˣ) :
+    ¬ FLT37.zetaSubOne p K ∣ (u : 𝓞 K) := by
+  rintro ⟨w, hw⟩
+  exact FLT37.zetaSubOne_not_isUnit (p := p) (K := K)
+    (isUnit_of_mul_isUnit_left (hw ▸ u.isUnit))
+
+/-- **Modular inversion at `(ζ - 1)^2`.**
+
+A semi-primary `y` prime to `ζ - 1` is invertible modulo `(ζ - 1)^2`, by an
+integer: if `y ≡ a (mod (ζ - 1)^2)` then `ζ - 1 ∤ y` forces `p ∤ a`, so a Bezout
+inverse `b` of `a` modulo `p` satisfies `b * y ≡ 1 (mod (ζ - 1)^2)`.
+
+This is the λ² calculation shared by `isSemiPrimary_unit_inv` (where `y` is a
+unit, hence automatically prime to `ζ - 1`) and by
+`isSemiPrimary_of_mul_right_of_not_zetaSubOne_dvd`. -/
+private theorem exists_intCast_mul_sub_one_of_isSemiPrimary_of_not_zetaSubOne_dvd
+    (hp_three : 3 ≤ p) {y : 𝓞 K}
+    (hy : FLT37.IsSemiPrimary p (K := K) y)
+    (hy_not_dvd : ¬ FLT37.zetaSubOne p K ∣ y) :
+    ∃ b : ℤ, FLT37.zetaSubOne p K ^ 2 ∣ (1 : 𝓞 K) - (b : 𝓞 K) * y := by
+  let ε : 𝓞 K := FLT37.zetaSubOne p K
+  obtain ⟨a, ha⟩ := hy
+  have haεsq : ε ^ 2 ∣ y - (a : 𝓞 K) := ha
+  have hε_sq_dvd_p_int : ε ^ 2 ∣ ((p : ℤ) : 𝓞 K) := by
+    simpa [ε] using FLT37.zetaSubOne_sq_dvd_p (p := p) (K := K) hp_three
+  have hε_dvd_sq : ε ∣ ε ^ 2 := ⟨ε, by ring⟩
+  have hp_not_dvd_a : ¬ (p : ℤ) ∣ a := by
+    intro hp_dvd_a
+    have hε_dvd_a : ε ∣ (a : 𝓞 K) := by
+      obtain ⟨c, hc⟩ := hp_dvd_a
+      rw [hc]
+      convert (hε_dvd_sq.trans hε_sq_dvd_p_int).mul_right (c : 𝓞 K) using 1
+      push_cast
+      ring
+    refine hy_not_dvd ?_
+    have h := dvd_add (hε_dvd_sq.trans haεsq) hε_dvd_a
+    convert h using 1
+    ring
+  have hcop_int : IsCoprime a (p : ℤ) := by
+    rw [Int.isCoprime_iff_nat_coprime]
+    have hp_prime : Nat.Prime p := Fact.out
+    rw [Int.natAbs_natCast, Nat.coprime_comm, hp_prime.coprime_iff_not_dvd]
+    exact fun hp_dvd_abs ↦
+      hp_not_dvd_a ((Int.natCast_dvd (m := p) (n := a)).mpr hp_dvd_abs)
+  obtain ⟨b, c, hbez⟩ := hcop_int
+  refine ⟨b, ?_⟩
+  have hdiff_y : ε ^ 2 ∣ (a : 𝓞 K) - y := by
+    have h := haεsq.neg_right
+    convert h using 1
+    ring
+  have hsum :=
+    dvd_add (hdiff_y.mul_left (b : 𝓞 K)) (hε_sq_dvd_p_int.mul_left (c : 𝓞 K))
+  have hbez_cast : ((b * a + c * (p : ℤ) : ℤ) : 𝓞 K) = 1 := by
+    rw [hbez]
+    norm_num
+  convert hsum using 1
+  calc
+    (1 : 𝓞 K) - (b : 𝓞 K) * y
+        = ((b * a + c * (p : ℤ) : ℤ) : 𝓞 K) - (b : 𝓞 K) * y := by
+            rw [hbez_cast]
+    _ = (b : 𝓞 K) * ((a : 𝓞 K) - y) + (c : 𝓞 K) * ((p : ℤ) : 𝓞 K) := by
+            push_cast
+            ring
+
 /-- A semi-primary unit has a semi-primary inverse. -/
 theorem isSemiPrimary_unit_inv
     (hp_three : 3 ≤ p) (u : (𝓞 K)ˣ)
     (hu : FLT37.IsSemiPrimary p (K := K) (u : 𝓞 K)) :
     FLT37.IsSemiPrimary p (K := K) ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) := by
-  let ε : 𝓞 K := FLT37.zetaSubOne p K
-  obtain ⟨a, ha⟩ := hu
-  have hε_sq_dvd_p_nat :
-      ε ^ 2 ∣ ((p : ℕ) : 𝓞 K) := by
-    simpa [ε] using FLT37.zetaSubOne_sq_dvd_p (p := p) (K := K) hp_three
-  have hε_sq_dvd_p_int :
-      ε ^ 2 ∣ ((p : ℤ) : 𝓞 K) := by
-    simpa using hε_sq_dvd_p_nat
-  have hε_dvd_sq : ε ∣ ε ^ 2 := ⟨ε, by ring⟩
-  have hε_dvd_p : ε ∣ ((p : ℤ) : 𝓞 K) :=
-    hε_dvd_sq.trans hε_sq_dvd_p_int
-  have hp_not_dvd_a : ¬ (p : ℤ) ∣ a := by
-    intro hp_dvd_a
-    have hε_dvd_u_sub_a : ε ∣ (u : 𝓞 K) - (a : 𝓞 K) :=
-      hε_dvd_sq.trans (by simpa [ε] using ha)
-    have hε_dvd_a : ε ∣ (a : 𝓞 K) := by
-      obtain ⟨c, hc⟩ := hp_dvd_a
-      rw [hc]
-      convert hε_dvd_p.mul_right (c : 𝓞 K) using 1
-      push_cast
-      ring
-    have hε_dvd_u : ε ∣ (u : 𝓞 K) := by
-      have h := dvd_add hε_dvd_u_sub_a hε_dvd_a
-      convert h using 1
-      ring
-    have hε_unit : IsUnit ε := by
-      obtain ⟨w, hw⟩ := hε_dvd_u
-      have hprod : IsUnit (ε * w) := by
-        rw [← hw]
-        exact Units.isUnit u
-      exact isUnit_of_mul_isUnit_left hprod
-    exact FLT37.zetaSubOne_not_isUnit (p := p) (K := K) hε_unit
-  have hcop_nat : Nat.Coprime a.natAbs p := by
-    have hp_prime : Nat.Prime p := Fact.out
-    rw [Nat.coprime_comm, hp_prime.coprime_iff_not_dvd]
-    intro hp_dvd_abs
-    exact hp_not_dvd_a
-      ((Int.natCast_dvd (m := p) (n := a)).mpr hp_dvd_abs)
-  have hcop_int : IsCoprime a (p : ℤ) := by
-    rw [Int.isCoprime_iff_nat_coprime]
-    simpa [Int.natAbs_natCast] using hcop_nat
-  obtain ⟨b, c, hbez⟩ := hcop_int
+  obtain ⟨b, hb⟩ :=
+    exists_intCast_mul_sub_one_of_isSemiPrimary_of_not_zetaSubOne_dvd
+      (p := p) (K := K) hp_three hu (not_zetaSubOne_dvd_unit (p := p) (K := K) u)
   refine ⟨b, ?_⟩
-  have haεsq : ε ^ 2 ∣ (u : 𝓞 K) - (a : 𝓞 K) := by
-    simpa [ε] using ha
-  have hdiff : ε ^ 2 ∣ (a : 𝓞 K) - (u : 𝓞 K) := by
-    have h := haεsq.neg_right
-    convert h using 1
-    ring
-  have hterm₁ :
-      ε ^ 2 ∣
-        (b : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) *
-          ((a : 𝓞 K) - (u : 𝓞 K)) :=
-    hdiff.mul_left ((b : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K))
-  have hterm₂ :
-      ε ^ 2 ∣
-        (c : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) *
-          ((p : ℤ) : 𝓞 K) :=
-    hε_sq_dvd_p_int.mul_left ((c : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K))
-  have hsum := dvd_add hterm₁ hterm₂
-  convert hsum using 1
-  have hbez_cast :
-      ((b * a + c * (p : ℤ) : ℤ) : 𝓞 K) = 1 := by
-    rw [hbez]
-    norm_num
-  have hmul_inv : (u : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) = 1 :=
-    Units.mul_inv u
-  calc
-    ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) - (b : 𝓞 K)
-        = ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) *
-            ((b * a + c * (p : ℤ) : ℤ) : 𝓞 K) -
-          (b : 𝓞 K) * ((u : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K)) := by
-            rw [hbez_cast, hmul_inv]
-            ring
-    _ = (b : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) *
-          ((a : 𝓞 K) - (u : 𝓞 K)) +
-        (c : 𝓞 K) * ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * ((p : ℤ) : 𝓞 K) := by
-            push_cast
-            ring
+  have hval :
+      ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) - (b : 𝓞 K) =
+        ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * ((1 : 𝓞 K) - (b : 𝓞 K) * (u : 𝓞 K)) := by
+    have hmul_inv : ((u⁻¹ : (𝓞 K)ˣ) : 𝓞 K) * (u : 𝓞 K) = 1 := u.inv_mul
+    linear_combination (b : 𝓞 K) * hmul_inv
+  rw [hval]
+  exact hb.mul_left _
 
 /-- Right-cancelling a semi-primary unit preserves semi-primarity. -/
 theorem isSemiPrimary_of_mul_right_unit
@@ -288,84 +285,15 @@ theorem isSemiPrimary_of_mul_right_of_not_zetaSubOne_dvd
     (hy : FLT37.IsSemiPrimary p (K := K) y)
     (hy_not_dvd : ¬ FLT37.zetaSubOne p K ∣ y) :
     FLT37.IsSemiPrimary p (K := K) x := by
-  let ε : 𝓞 K := FLT37.zetaSubOne p K
-  obtain ⟨a, ha⟩ := hy
   obtain ⟨r, hr⟩ := hxy
-  have hε_sq_dvd_p_nat :
-      ε ^ 2 ∣ ((p : ℕ) : 𝓞 K) := by
-    simpa [ε] using FLT37.zetaSubOne_sq_dvd_p (p := p) (K := K) hp_three
-  have hε_sq_dvd_p_int :
-      ε ^ 2 ∣ ((p : ℤ) : 𝓞 K) := by
-    simpa using hε_sq_dvd_p_nat
-  have hε_dvd_sq : ε ∣ ε ^ 2 := ⟨ε, by ring⟩
-  have hε_dvd_p : ε ∣ ((p : ℤ) : 𝓞 K) :=
-    hε_dvd_sq.trans hε_sq_dvd_p_int
-  have hp_not_dvd_a : ¬ (p : ℤ) ∣ a := by
-    intro hp_dvd_a
-    have hε_dvd_y_sub_a : ε ∣ y - (a : 𝓞 K) :=
-      hε_dvd_sq.trans (by simpa [ε] using ha)
-    have hε_dvd_a : ε ∣ (a : 𝓞 K) := by
-      obtain ⟨c, hc⟩ := hp_dvd_a
-      rw [hc]
-      convert hε_dvd_p.mul_right (c : 𝓞 K) using 1
-      push_cast
-      ring
-    have hε_dvd_y : ε ∣ y := by
-      have h := dvd_add hε_dvd_y_sub_a hε_dvd_a
-      convert h using 1
-      ring
-    exact hy_not_dvd (by simpa [ε] using hε_dvd_y)
-  have hcop_nat : Nat.Coprime a.natAbs p := by
-    have hp_prime : Nat.Prime p := Fact.out
-    rw [Nat.coprime_comm, hp_prime.coprime_iff_not_dvd]
-    intro hp_dvd_abs
-    exact hp_not_dvd_a
-      ((Int.natCast_dvd (m := p) (n := a)).mpr hp_dvd_abs)
-  have hcop_int : IsCoprime a (p : ℤ) := by
-    rw [Int.isCoprime_iff_nat_coprime]
-    simpa [Int.natAbs_natCast] using hcop_nat
-  obtain ⟨b, c, hbez⟩ := hcop_int
+  obtain ⟨b, hb⟩ :=
+    exists_intCast_mul_sub_one_of_isSemiPrimary_of_not_zetaSubOne_dvd
+      (p := p) (K := K) hp_three hy hy_not_dvd
   refine ⟨b * r, ?_⟩
-  have haεsq : ε ^ 2 ∣ y - (a : 𝓞 K) := by
-    simpa [ε] using ha
-  have hdiff_y : ε ^ 2 ∣ (a : 𝓞 K) - y := by
-    have h := haεsq.neg_right
-    convert h using 1
-    ring
-  have hone_sub_by :
-      ε ^ 2 ∣ (1 : 𝓞 K) - (b : 𝓞 K) * y := by
-    have hterm₁ : ε ^ 2 ∣ (b : 𝓞 K) * ((a : 𝓞 K) - y) :=
-      hdiff_y.mul_left (b : 𝓞 K)
-    have hterm₂ : ε ^ 2 ∣ (c : 𝓞 K) * ((p : ℤ) : 𝓞 K) :=
-      hε_sq_dvd_p_int.mul_left (c : 𝓞 K)
-    have hsum := dvd_add hterm₁ hterm₂
-    convert hsum using 1
-    have hbez_cast :
-        ((b * a + c * (p : ℤ) : ℤ) : 𝓞 K) = 1 := by
-      rw [hbez]
-      norm_num
-    calc
-      (1 : 𝓞 K) - (b : 𝓞 K) * y
-          = ((b * a + c * (p : ℤ) : ℤ) : 𝓞 K) - (b : 𝓞 K) * y := by
-              rw [hbez_cast]
-      _ = (b : 𝓞 K) * ((a : 𝓞 K) - y) +
-          (c : 𝓞 K) * ((p : ℤ) : 𝓞 K) := by
-              push_cast
-              ring
-  have hrεsq : ε ^ 2 ∣ x * y - (r : 𝓞 K) := by
-    simpa [ε] using hr
-  have hterm₁ : ε ^ 2 ∣ (b : 𝓞 K) * (x * y - (r : 𝓞 K)) :=
-    hrεsq.mul_left (b : 𝓞 K)
-  have hterm₂ : ε ^ 2 ∣ x * ((1 : 𝓞 K) - (b : 𝓞 K) * y) :=
-    hone_sub_by.mul_left x
-  have hsum := dvd_add hterm₁ hterm₂
+  have hsum := dvd_add (hr.mul_left (b : 𝓞 K)) (hb.mul_left x)
   convert hsum using 1
-  calc
-    x - ((b * r : ℤ) : 𝓞 K)
-        = (b : 𝓞 K) * (x * y - (r : 𝓞 K)) +
-          x * ((1 : 𝓞 K) - (b : 𝓞 K) * y) := by
-            push_cast
-            ring
+  push_cast
+  ring
 
 /-- Left-cancelling a semi-primary element which is prime to `ζ - 1`
 preserves semi-primarity. -/
@@ -494,7 +422,7 @@ theorem torsion_unit_isSign_of_isSemiPrimary
       (u : 𝓞 K) =
         (((-1 : (𝓞 K)ˣ) ^ k * cyclotomicZetaUnit (p := p) K ^ m :
           (𝓞 K)ˣ) : 𝓞 K) :=
-    congrArg (fun v : CyclotomicUnitGroup K => (v : 𝓞 K)) hu_eq
+    congrArg (fun v : CyclotomicUnitGroup K ↦ (v : 𝓞 K)) hu_eq
   have hsemi_signed :
       FLT37.IsSemiPrimary p (K := K)
         (((-1 : 𝓞 K) ^ k) *
@@ -519,16 +447,16 @@ theorem torsion_unit_isSign_of_isSemiPrimary
         u =
           (-1 : (𝓞 K)ˣ) ^ k * cyclotomicZetaUnit (p := p) K ^ (p * r) := by
       simpa [uT] using
-        congrArg (fun v : CyclotomicUnitGroup K => (v : (𝓞 K)ˣ)) hu_eq
+        congrArg (fun v : CyclotomicUnitGroup K ↦ (v : (𝓞 K)ˣ)) hu_eq
     rw [hunit, hzeta_pow, mul_one]
   rcases neg_one_pow_eq_or ((𝓞 K)ˣ) k with hk | hk
   · left
     have hval : (u : 𝓞 K) = (((-1 : (𝓞 K)ˣ) ^ k : (𝓞 K)ˣ) : 𝓞 K) :=
-      congrArg (fun v : (𝓞 K)ˣ => (v : 𝓞 K)) hu_sign_unit
+      congrArg (fun v : (𝓞 K)ˣ ↦ (v : 𝓞 K)) hu_sign_unit
     simpa [hk] using hval
   · right
     have hval : (u : 𝓞 K) = (((-1 : (𝓞 K)ˣ) ^ k : (𝓞 K)ˣ) : 𝓞 K) :=
-      congrArg (fun v : (𝓞 K)ˣ => (v : 𝓞 K)) hu_sign_unit
+      congrArg (fun v : (𝓞 K)ˣ ↦ (v : 𝓞 K)) hu_sign_unit
     simpa [hk] using hval
 
 omit [NumberField K] in
@@ -589,7 +517,7 @@ theorem unitsComplexConj_mul_self_ne_neg_one
   let φ : K →+* ℂ := Classical.choice (inferInstance : Nonempty (K →+* ℂ))
   have hK :
       complexConj K (u : K) * (u : K) = (-1 : K) := by
-    have hval := congrArg (fun v : (𝓞 K)ˣ => ((v : 𝓞 K) : K)) h
+    have hval := congrArg (fun v : (𝓞 K)ˣ ↦ ((v : 𝓞 K) : K)) h
     simpa [unitsComplexConj] using hval
   have hC := congrArg φ hK
   have hnorm :

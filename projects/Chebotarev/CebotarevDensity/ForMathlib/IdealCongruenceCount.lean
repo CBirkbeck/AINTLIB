@@ -906,7 +906,7 @@ private theorem card_isPrincipal_dvd_norm_le_residue {K : Type*} [Field K] [Numb
         Nat.card {a : idealSet K J // mixedEmbedding.norm (a : mixedSpace K) ≤ s ∧
           ((intNorm (idealSetEquiv K J a).val : ZMod m) = (b : ZMod m))} := by
   obtain hs | hs := le_or_gt 0 s
-  · rw [torsionOrder, ← Nat.card_eq_fintype_card, ← Nat.card_prod]
+  · rw [torsionOrder, ← Nat.card_prod]
     refine Nat.card_congr <| @Equiv.ofFiberEquiv _ (γ := Finset.Iic ⌊s⌋₊) _
       (fun I ↦ ⟨Ideal.absNorm I.1.val.1, Finset.mem_Iic.mpr (Nat.le_floor I.1.prop.2.2.1)⟩)
       (fun a ↦ ⟨intNorm (idealSetEquiv K J a.1).1, Finset.mem_Iic.mpr

@@ -62,7 +62,7 @@ theorem Module.Flat.of_comp_of_faithfullyFlat
     [Module.FaithfullyFlat B A] [Module.Flat C A] : Module.Flat C B := by
   rw [Module.Flat.iff_lTensor_injectiveₛ]
   intro Q _ _ S
-  set f : S →ₗ[C] Q := S.subtype with hf'
+  set f : S →ₗ[C] Q := S.subtype
   have hf : Function.Injective f := Subtype.val_injective
   set g : B ⊗[C] S →ₗ[B] B ⊗[C] Q :=
     AlgebraTensorModule.map (LinearMap.id : B →ₗ[B] B) f with hg
@@ -151,6 +151,7 @@ private lemma lfp_of_precomp_of_isAffine {W Y Z : Scheme.{u}} [IsAffine W] [IsAf
   rw [Scheme.Hom.comp_appTop, CommRingCat.hom_comp] at h
   exact RingHom.FinitePresentation.of_comp_of_faithfullyFlat hff hfp h
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Engine for Stacks 02KL, with the surjectivity hypothesis as an instance. The wlog
 cascade (mirroring `LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType`,
 `ForMathlib/FinitePresentationCancel.lean`) reduces to affine `Z` then affine `Y`; there,

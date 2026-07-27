@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.ForMathlib.CartierDual
 import Mathlib.AlgebraicGeometry.Morphisms.Affine
@@ -555,8 +560,11 @@ theorem pairTensorCompare_tmul :
   intro a b
   exact Algebra.TensorProduct.lift_tmul _ _ _ _ _
 
-/-- **(Layer B, reusable comparison.)** The pair comparison `Γ(X) ⊗_R Γ(Y) → Γ(X ×ₛ Y)` is bijective:
-it becomes an iso after `Spec`, via `pullbackSpecIso` and `isoSpec`, reflected back through the fully
+set_option backward.isDefEq.respectTransparency.types false in
+/-- **(Layer B, reusable comparison.)** The pair comparison `Γ(X) ⊗_R Γ(Y) → Γ(X ×ₛ Y)` is
+bijective:
+it becomes an iso after `Spec`, via `pullbackSpecIso` and `isoSpec`, reflected back through the
+fully
 faithful `Spec`. -/
 theorem pairTensorCompare_bijective :
     letI := schemeAlg (R := R) qX
@@ -643,6 +651,7 @@ noncomputable def biproductAlgebra :
     Algebra R Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
   ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom.toAlgebra
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(Layer B, κ-bijectivity foundation.)** `D ×_{Spec R} D` is affine: `D.subscheme` is finite —
 hence affine — over `Spec R`, so both projections are affine morphisms and the fibre product of
 affines over an affine base is affine. This is what makes `Γ(D ×_R D)` a genuine coordinate ring and
@@ -845,7 +854,8 @@ theorem subgroupMul_structMap (hD : D.IsSubgroup E) :
   exact ((E.bipt₁ (D := D)) + (E.bipt₂ (D := D))).2
 
 /- **(Layer B, L4 — scheme associativity toward coassoc.)** Triple-pullback multiplication maps
-`v`, `v'` (right/left associated) and `subgroupMul_assoc : v' ≫ m = v ≫ m`, with `Point` base-transport
+`v`, `v'` (right/left associated) and `subgroupMul_assoc : v' ≫ m = v ≫ m`, with `Point`
+base-transport
 helpers to invoke `add_assoc` across the reassociation. Dualizes to `Coalgebra.coassoc`. -/
 /-- base-congruence for points: transport preserves the underlying morphism. -/
 theorem Point.base_congr {T : Scheme.{u}} {g g' : T ⟶ Spec (CommRingCat.of R)} (h : g = g')
@@ -862,7 +872,8 @@ theorem Point.restrictT_eq {T T' : Scheme.{u}} {g : T ⟶ Spec (CommRingCat.of R
   Subtype.ext ((Point.base_congr (E := E) h (Point.restrict E k P)).trans hPQ)
 
 -- v : P₃ → P₂,  ⟨fst₃, snd₃ ≫ m⟩
-noncomputable def vmap (hD : D.IsSubgroup E) : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+noncomputable def vmap (hD : D.IsSubgroup E) :
+    pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
     pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
   pullback.lift (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)))
     (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupMul hD)
@@ -881,14 +892,16 @@ noncomputable def umap : pullback (E.subgroupStructMap D) (E.bimulBase (D := D))
       exact pullback.condition (f := E.subgroupStructMap D) (g := E.bimulBase (D := D)))
 
 -- v' : P₃ → P₂,  ⟨u ≫ m, snd₃ ≫ snd₂⟩
-noncomputable def vmap' (hD : D.IsSubgroup E) : pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
+noncomputable def vmap' (hD : D.IsSubgroup E) :
+    pullback (E.subgroupStructMap D) (E.bimulBase (D := D)) ⟶
     pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π) :=
   pullback.lift (E.umap (D := D) ≫ E.subgroupMul hD)
     (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
       pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π))
     (by
       have e1 : (E.umap (D := D) ≫ E.subgroupMul hD) ≫ (D.ideal.subschemeι ≫ E.π)
-          = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D := by
+          = pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+            E.subgroupStructMap D := by
         rw [Category.assoc, E.subgroupMul_structMap hD]
         show E.umap (D := D) ≫ (pullback.fst (D.ideal.subschemeι ≫ E.π)
             (D.ideal.subschemeι ≫ E.π) ≫ (D.ideal.subschemeι ≫ E.π)) = _
@@ -963,7 +976,8 @@ theorem subgroupMul_assoc (hD : D.IsSubgroup E) :
   -- inner: tpt₂ + tpt₃
   have Es : (hs ▸ Point.restrict E (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D)))
       (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
-        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+          E.subgroupStructMap D))
       = E.tpt₂ + E.tpt₃ :=
     Point.restrictT_add_eq E _ hs E.tpt₂ E.tpt₃
       (by show _ ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = _; rw [tpt₂])
@@ -971,7 +985,8 @@ theorem subgroupMul_assoc (hD : D.IsSubgroup E) :
   -- inner: tpt₁ + tpt₂
   have Eu : (hu ▸ Point.restrict E (E.umap (D := D))
       (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
-        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+          E.subgroupStructMap D))
       = E.tpt₁ + E.tpt₂ :=
     Point.restrictT_add_eq E _ hu E.tpt₁ E.tpt₂
       (by
@@ -983,7 +998,8 @@ theorem subgroupMul_assoc (hD : D.IsSubgroup E) :
   -- v: tpt₁ + (tpt₂ + tpt₃)
   have Ev : (hv ▸ Point.restrict E (E.vmap hD)
       (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
-        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+          E.subgroupStructMap D))
       = E.tpt₁ + (E.tpt₂ + E.tpt₃) :=
     Point.restrictT_add_eq E _ hv E.tpt₁ (E.tpt₂ + E.tpt₃)
       (by
@@ -999,7 +1015,8 @@ theorem subgroupMul_assoc (hD : D.IsSubgroup E) :
   -- v': (tpt₁ + tpt₂) + tpt₃
   have Ev' : (hv' ▸ Point.restrict E (E.vmap' hD)
       (E.bipt₁ (D := D) + E.bipt₂ (D := D)) :
-        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫ E.subgroupStructMap D))
+        E.Point (pullback.fst (E.subgroupStructMap D) (E.bimulBase (D := D)) ≫
+          E.subgroupStructMap D))
       = (E.tpt₁ + E.tpt₂) + E.tpt₃ :=
     Point.restrictT_add_eq E _ hv' (E.tpt₁ + E.tpt₂) E.tpt₃
       (by
@@ -1008,7 +1025,8 @@ theorem subgroupMul_assoc (hD : D.IsSubgroup E) :
           rw [← Eu]; exact Point.base_congr (E := E) hu _
         rw [hR]
         show E.vmap' hD ≫ (pullback.fst _ _ ≫ D.ideal.subschemeι) = _
-        rw [← Category.assoc, vmap', pullback.lift_fst, Category.assoc, E.subgroupMul_subschemeι hD])
+        rw [← Category.assoc, vmap', pullback.lift_fst, Category.assoc,
+          E.subgroupMul_subschemeι hD])
       (by
         show E.vmap' hD ≫ (pullback.snd _ _ ≫ D.ideal.subschemeι) = _
         rw [← Category.assoc, vmap', pullback.lift_snd, tpt₃]; simp only [Category.assoc])
@@ -1044,7 +1062,8 @@ noncomputable def subgroupComulHom (hD : D.IsSubgroup E) :
       rw [← CommRingCat.comp_apply, hcomp] }
 
 /-- **(Layer B, L3 — the comultiplication.)** `Δ = m^♯ : A →ₐ[R] A ⊗_R A`, the Hopf-dual of the
-group-scheme multiplication `subgroupMul` (`m : D ×_S D ⟶ D`) over the affine base: `Δ = κ⁻¹ ∘ Γ(m)`,
+group-scheme multiplication `subgroupMul` (`m : D ×_S D ⟶ D`) over the affine base: `Δ = κ⁻¹ ∘
+Γ(m)`,
 where `Γ(m)` pulls regular functions back along `m` into `Γ(D ×_{Spec R} D)` and `κ⁻¹` identifies
 that with `A ⊗_R A` (`subgroupTensorCompare`). Coassociativity dualizes associativity of `m`. -/
 noncomputable def subgroupComul (hD : D.IsSubgroup E) :
@@ -1113,7 +1132,8 @@ theorem subgroupComul_comm (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)
   -- κ ∘ comm = swapAlg ∘ κ
   have hproj₁ : ∀ b, E.swapAlg hD (E.subgroupProj₁ (D := D) b) = E.subgroupProj₂ (D := D) b := by
     intro b
-    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
+    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
         ((pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = _
     rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
       show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom
@@ -1123,7 +1143,8 @@ theorem subgroupComul_comm (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)
     rfl
   have hproj₂ : ∀ b, E.swapAlg hD (E.subgroupProj₂ (D := D) b) = E.subgroupProj₁ (D := D) b := by
     intro b
-    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
+    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
         ((pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom b) = _
     rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
       show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom
@@ -1142,7 +1163,8 @@ theorem subgroupComul_comm (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)
       map_mul, hproj₁, hproj₂, mul_comm]
   -- swapAlg fixes Γ(m)a (from subgroupMul_comm)
   have hswap : E.swapAlg hD (E.subgroupComulHom hD a) = E.subgroupComulHom hD a := by
-    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
+    show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π)
+        (D.ideal.subschemeι ≫ E.π)).hom.appTop.hom
         ((E.subgroupMul hD).appTop.hom a) = _
     rw [← CommRingCat.comp_apply, ← Scheme.Hom.comp_appTop,
       show (Limits.pullbackSymmetry (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).hom
@@ -1178,6 +1200,7 @@ an isomorphism, so injective — the tool that turns `subgroupMul_assoc` into `C
   ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
     (pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop).hom.toAlgebra
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `P₃ = D ×ₛ (D ×ₛ D)` is affine: `pullback.snd` is a base change of the finite (hence affine)
 `subgroupStructMap D`, and `D ×ₛ D` is affine. -/
 theorem subgroupTriple_isAffine :
@@ -1219,7 +1242,8 @@ theorem subgroupIdTensorCompare_tmul (hD : D.IsSubgroup E) :
     Algebra.TensorProduct.includeRight_apply, Algebra.TensorProduct.tmul_mul_tmul,
     one_mul, mul_one]
 
-/-- `id_A ⊗ κ` is injective (`κ` is an iso), via the retraction `lift includeLeft (includeRight ∘ κ⁻¹)`. -/
+/-- `id_A ⊗ κ` is injective (`κ` is an iso), via the retraction `lift includeLeft (includeRight ∘
+κ⁻¹)`. -/
 theorem subgroupIdTensorCompare_injective (hD : D.IsSubgroup E) :
     letI := E.subgroupAlgebra D
     letI := E.biproductAlgebra (D := D)
@@ -1347,7 +1371,8 @@ theorem baseGate_kappa_tmul (hD : D.IsSubgroup E)
     ∀ (x y : Γ(D.ideal.subscheme, ⊤)),
       E.baseGate hD w hw (E.subgroupTensorCompare (D := D) (x ⊗ₜ[R] y))
         = (w ≫ pullback.fst (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom x
-          * (w ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
+          * (w ≫ pullback.snd (D.ideal.subschemeι ≫ E.π)
+              (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
   letI := E.subgroupAlgebra D
   letI := E.biproductAlgebra (D := D)
   letI := E.tripleAlgebra (D := D)
@@ -1474,7 +1499,8 @@ theorem subgroupTripleCompare_assoc_tmul (hD : D.IsSubgroup E) :
       E.subgroupTripleCompare hD ((TensorProduct.assoc R _ _ _) (z ⊗ₜ[R] y))
         = E.baseGate hD (E.umap (D := D)) E.umap_base (E.subgroupTensorCompare (D := D) z)
           * (pullback.snd (E.subgroupStructMap D) (E.bimulBase (D := D))
-              ≫ pullback.snd (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
+              ≫ pullback.snd (D.ideal.subschemeι ≫ E.π)
+                (D.ideal.subschemeι ≫ E.π)).appTop.hom y := by
   letI := E.subgroupAlgebra D
   letI := E.biproductAlgebra (D := D)
   letI := E.tripleAlgebra (D := D)
@@ -1540,7 +1566,8 @@ theorem subgroupComul_coassoc_right (hD : D.IsSubgroup E) :
       E.baseGate_kappa_tmul hD (E.vmap hD) (E.vmap_base hD)]
     simp only [E.vmap_fst, E.vmap_snd, hcm]
 
-/-- **(coassoc, LEFT half.)** `κ₃ (assoc (rTensor Δ w)) = baseGate vmap' (κ w)`. The comultiplication
+/-- **(coassoc, LEFT half.)** `κ₃ (assoc (rTensor Δ w)) = baseGate vmap' (κ w)`. The
+comultiplication
 in the inner (first) tensor slot collapses along `vmap'`. Proven by `TensorProduct.induction_on w`;
 the `tmul` case uses the assoc-factoring `subgroupTripleCompare_assoc_tmul` (hZ), the pin, and the
 `baseGate` collapse over `umap` (which `vmap'` factors through). -/
@@ -1568,7 +1595,8 @@ theorem subgroupComul_coassoc_left (hD : D.IsSubgroup E) :
 `assoc ∘ (Δ ⊗ id) ∘ Δ = (id ⊗ Δ) ∘ Δ`. Dualizes the scheme associativity
 `subgroupMul_assoc` (`vmap' ≫ m = vmap ≫ m`) through the injective triple comparison `κ₃`:
 apply `κ₃` to both sides, reduce each via the RIGHT/LEFT halves to `baseGate vmap (Δa)` /
-`baseGate vmap' (Δa)`, i.e. `Γ(vmap ≫ m) a` / `Γ(vmap' ≫ m) a`, then `subgroupMul_assoc` closes it. -/
+`baseGate vmap' (Δa)`, i.e. `Γ(vmap ≫ m) a` / `Γ(vmap' ≫ m) a`, then `subgroupMul_assoc` closes it.
+-/
 theorem subgroupComul_coassoc (hD : D.IsSubgroup E) (a : Γ(D.ideal.subscheme, ⊤)) :
     letI := E.subgroupAlgebra D
     (TensorProduct.assoc R Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤) Γ(D.ideal.subscheme, ⊤))
@@ -1620,7 +1648,8 @@ theorem subgroupInv_structMap (hD : D.IsSubgroup E) :
 
 /-- **(Layer B, L3 — the antipode.)** `antipode : A →ₐ[R] A`, the Hopf-dual of the inversion
 `subgroupInv` (`n : D ⟶ D`). Concretely `Γ(n)`; it is `R`-linear because `n` is a morphism over
-the base (`subgroupInv_structMap`). The antipode laws dualize the inverse laws of the group scheme. -/
+the base (`subgroupInv_structMap`). The antipode laws dualize the inverse laws of the group scheme.
+-/
 noncomputable def subgroupAntipode (hD : D.IsSubgroup E) :
     letI := E.subgroupAlgebra D
     Γ(D.ideal.subscheme, ⊤) →ₐ[R] Γ(D.ideal.subscheme, ⊤) :=
@@ -2003,7 +2032,8 @@ two counit laws (`subgroupCounit_rTensor/lTensor_comul`) are the dualized group-
     rTensor_counit_comp_comul := LinearMap.ext fun a => E.subgroupCounit_rTensor_comul hD a
     lTensor_counit_comp_comul := LinearMap.ext fun a => E.subgroupCounit_lTensor_comul hD a }
 
-/-- **(Layer B, L3 — the bialgebra.)** `Δ` and `ε` are algebra homs (`subgroupComul`/`subgroupCounit`
+/-- **(Layer B, L3 — the bialgebra.)** `Δ` and `ε` are algebra homs
+(`subgroupComul`/`subgroupCounit`
 are `AlgHom`s over `subgroupAlgebra`), so `A` is an `R`-bialgebra. -/
 @[reducible] noncomputable def subgroupBialgebra (hD : D.IsSubgroup E) :
     letI := E.subgroupAlgebra D
@@ -2016,7 +2046,8 @@ are `AlgHom`s over `subgroupAlgebra`), so `A` is an `R`-bialgebra. -/
     (map_one (E.subgroupComul hD))
     (fun {a b} => map_mul (E.subgroupComul hD) a b)
 
-/-- **(Layer B, L3 — the Hopf algebra.)** Antipode `S = subgroupAntipode`, dual to inversion; the two
+/-- **(Layer B, L3 — the Hopf algebra.)** Antipode `S = subgroupAntipode`, dual to inversion; the
+two
 antipode axioms are the dualized inverse laws (`subgroupAntipode_rTensor/lTensor_comul`). `A` is a
 commutative `R`-Hopf algebra — the coordinate Hopf algebra `A_D` of Deligne's argument. -/
 @[reducible] noncomputable def subgroupHopfAlgebra (hD : D.IsSubgroup E) :
@@ -2030,7 +2061,8 @@ commutative `R`-Hopf algebra — the coordinate Hopf algebra `A_D` of Deligne's 
     mul_antipode_lTensor_comul :=
       LinearMap.ext fun a => E.subgroupAntipode_lTensor_comul hD a }
 
-/-- **(Layer B, L3 — cocommutativity.)** `A` is cocommutative (`comm ∘ Δ = Δ`, `subgroupComul_comm`),
+/-- **(Layer B, L3 — cocommutativity.)** `A` is cocommutative (`comm ∘ Δ = Δ`,
+`subgroupComul_comm`),
 dualizing the commutativity of the elliptic-curve group law. Gives `IsCocomm R A`, the last
 hypothesis Deligne's order theorem (`deligne_point_pow_eq_one`) needs on `A`. -/
 theorem subgroupIsCocomm (hD : D.IsSubgroup E) :
@@ -2060,6 +2092,7 @@ theorem smul_eq_zero_of_factors_section {D : RelEffCartierDiv E.π} (hD : D.IsSu
     (N : ℤ) • Q = 0 := by
   sorry
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(Layer B, L1 — the relative degree is base-change invariant.)** BOARDED `[T-D5h-degBC]`.
 The degree (fibre `finrank` of the finite flat structure map `D.subscheme ⟶ S`) is stable under
 base change: constant degree `N` on `S` gives constant degree `N` on any `T`. This is the

@@ -1,4 +1,11 @@
-import BernoulliRegular.Thaine.KolyvaginDerivative
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import BernoulliRegular.Thaine.KolyvaginDerivative
 
 /-!
 # T-THAINE-4: Thaine annihilator descent (parametric main theorem)

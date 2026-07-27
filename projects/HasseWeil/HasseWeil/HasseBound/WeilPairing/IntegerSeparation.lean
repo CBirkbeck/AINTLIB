@@ -1,10 +1,15 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Data.Nat.Prime.Infinite
 
 /-!
 # Route 2 endgame — integer separation from per-`ℓ` congruences (Silverman V.2.3.1, Step 7)
 
-This file ships **Step 7** of the round-17 Weil-pairing route to the Hasse bound: the purely
+This file ships **Step 7** of the Weil-pairing route to the Hasse bound: the purely
 arithmetic *integer-separation* lemma that lifts a family of mod-`ℓ` congruences (one per auxiliary
 prime `ℓ ≠ p`) to an equality of integers.
 
@@ -38,8 +43,7 @@ theorem int_eq_zero_of_dvd_all_primes_ne {D : ℤ} {p : ℕ}
     omega
   have hdvd : (ℓ : ℤ) ∣ D := h ℓ hℓ_prime hℓ_ne
   have hdvd_nat : ℓ ∣ D.natAbs := by
-    have h2 := Int.natAbs_dvd_natAbs.mpr hdvd
-    rwa [Int.natAbs_natCast] at h2
+    rwa [← Int.natAbs_dvd_natAbs, Int.natAbs_natCast] at hdvd
   have hle : ℓ ≤ D.natAbs := Nat.le_of_dvd (Int.natAbs_pos.mpr hD) hdvd_nat
   have hgt : D.natAbs < ℓ :=
     lt_of_lt_of_le (Nat.lt_succ_self _) (le_trans (le_max_left _ _) hℓ_ge)
@@ -55,10 +59,8 @@ theorem int_eq_of_congr_all_primes_ne {A B : ℤ} {p : ℕ}
   have hsub : A - B = 0 := by
     apply int_eq_zero_of_dvd_all_primes_ne (p := p)
     intro ℓ hℓ hℓne
-    haveI : NeZero ℓ := ⟨hℓ.ne_zero⟩
-    have hc := h ℓ hℓ hℓne
-    have h0 : ((A - B : ℤ) : ZMod ℓ) = 0 := by rw [Int.cast_sub, hc, sub_self]
-    rwa [ZMod.intCast_zmod_eq_zero_iff_dvd] at h0
+    have : NeZero ℓ := ⟨hℓ.ne_zero⟩
+    rw [← ZMod.intCast_zmod_eq_zero_iff_dvd, Int.cast_sub, h ℓ hℓ hℓne, sub_self]
   omega
 
 end HasseWeil.WeilPairing

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
@@ -131,6 +136,7 @@ def retractionsEquivAlgHom {A : CommRingCat.{u}} (ψ : CommRingCat.of k ⟶ A)
   left_inv χ := Subtype.ext (by ext; rfl)
   right_inv φ := by ext; rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-B6d)** A finite étale scheme over the spectrum of a separably closed field has
 exactly `finrank` many sections. -/
 theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCat.of k))

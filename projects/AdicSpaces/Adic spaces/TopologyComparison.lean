@@ -222,7 +222,6 @@ private theorem locToQuotientOneSubfX_gen_divByS (s t : A) :
     locToQuotientOneSubfX_gen_algebraMap,
     locToQuotientOneSubfX_gen_invSelf, ← map_mul]
 
-set_option linter.unusedSectionVars false in
 -- Helper: scaled coefficient of `algebraMap(a) * g`.
 private theorem scaledCoeff_algebraMap_mul (f a : A)
     (g : ↥(TateAlgebra A)) (n : ℕ) :
@@ -230,7 +229,6 @@ private theorem scaledCoeff_algebraMap_mul (f a : A)
       a * (f ^ n * TateAlgebra.coeff n g) := by
   rw [TateAlgebra.coeff_algebraMap_mul, ← mul_assoc, mul_comm (f ^ n) a, mul_assoc]
 
-set_option linter.unusedSectionVars false in
 -- Helper: scaled coefficient of `algebraMap(t) * X * g` at n+1.
 private theorem scaledCoeff_succ_tX_mul (f t : A)
     (g : ↥(TateAlgebra A)) (n : ℕ) :
@@ -241,7 +239,6 @@ private theorem scaledCoeff_succ_tX_mul (f t : A)
     TateAlgebra.coeff_algebraMap_mul, TateAlgebra.coeff_succ_X_mul, pow_succ]
   ring
 
-set_option linter.unusedSectionVars false in
 -- Helper: scaled coefficient of `algebraMap(t) * X * g` at 0.
 private theorem scaledCoeff_zero_tX_mul (f t : A) (g : ↥(TateAlgebra A)) :
     f ^ 0 * TateAlgebra.coeff 0 (algebraMap A _ t * TateAlgebra.X * g) = 0 := by
@@ -259,7 +256,6 @@ private def artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
     s ^ n * TateAlgebra.coeff n g ∈
       Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
 
-set_option linter.unusedSectionVars false in
 /-- `0 ∈ artinReesNhd`. -/
 private theorem zero_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
     (0 : ↥(TateAlgebra A)) ∈ artinReesNhd P s C M N := by
@@ -268,7 +264,6 @@ private theorem zero_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : 
   rw [this, mul_zero]
   exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
 
-set_option linter.unusedSectionVars false in
 /-- `artinReesNhd` is closed under addition. -/
 private theorem add_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
     {a b : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N)
@@ -281,7 +276,6 @@ private theorem add_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : �
   obtain ⟨y, hy, hy_eq⟩ := hb n hn
   exact ⟨x + y, (P.I ^ _).add_mem hx hy, by rw [Subring.coe_add, ← hx_eq, ← hy_eq]⟩
 
-set_option linter.unusedSectionVars false in
 /-- `artinReesNhd` is closed under negation. -/
 private theorem neg_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
     {a : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N) :
@@ -313,7 +307,6 @@ private theorem artinReesNhd_mem_nhds (P : PairOfDefinition A) (s : A) (C M N : 
     (P.pow_image_isOpen _).preimage
       (TateAlgebraWedhorn.tateTopologyT_continuous_scaledCoeff s n)
 
-set_option linter.unusedSectionVars false in
 /-- `artinReesNhd` is stable under multiplication by `algebraMap a₀` for `a₀ ∈ A₀`:
 multiplying scales each coefficient by `a₀`, and `a₀ · I^k ⊆ I^k`. -/
 private theorem mul_algebraMap_mem_artinReesNhd (P : PairOfDefinition A) (s : A)
@@ -325,7 +318,6 @@ private theorem mul_algebraMap_mem_artinReesNhd (P : PairOfDefinition A) (s : A)
   obtain ⟨b, hb, hb_eq⟩ := hg n hn
   exact ⟨a₀ * b, Ideal.mul_mem_left _ _ hb, by rw [MulMemClass.coe_mul, ← hb_eq]⟩
 
-set_option linter.unusedSectionVars false in
 /-- `artinReesNhd` is stable under multiplication by `algebraMap t * X` for any `t`
 with the Artin-Rees shift property `hC_shift`: the `X` shifts the coefficient index
 up by one (consuming one unit of the `(N - n) * C` budget), and `s * t` carries
@@ -350,7 +342,6 @@ private theorem mul_algebraMap_X_mem_artinReesNhd (P : PairOfDefinition A) (s t 
       rw [this, add_mul, one_mul]; omega
     exact hC_shift (M + (N - (n' + 1)) * C) b (hkey ▸ hb)
 
-set_option linter.unusedSectionVars false in
 /-- For any neighborhood W of 0 in the quotient T-topology, there exists m such that
 for all r in locSubring and b in I^m, the product phi(r) * mk(algebraMap(b)) lands in W.
 
@@ -979,7 +970,6 @@ T-topology. The image contains `mk(a)` for all `a ∈ A` and `mk(X)` (since
 Polynomials are dense in `A⟨X⟩` for the T-topology because truncations
 converge in the induced product topology. -/
 
-set_option linter.unusedSectionVars false in
 /-- A power series whose coefficients are zero above degree `N` is restricted,
 because only finitely many coefficients are nonzero. -/
 private theorem isRestricted_of_eventually_zero
@@ -1010,16 +1000,13 @@ private noncomputable def truncTate (g : ↥(TateAlgebra A)) (N : ℕ) :
   ⟨fun s ↦ if s 0 < N then g.val s else 0,
    isRestricted_of_eventually_zero _ N (fun s hs ↦ by simp [show ¬(s 0 < N) from by omega])⟩
 
-set_option linter.unusedSectionVars false in
 private theorem truncTate_val (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ) :
     (truncTate g N).val s = if s 0 < N then g.val s else 0 := rfl
 
-set_option linter.unusedSectionVars false in
 private theorem truncTate_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : N ≤ s 0) : (truncTate g N).val s = 0 := by
   simp [truncTate_val, show ¬(s 0 < N) from by omega]
 
-set_option linter.unusedSectionVars false in
 private theorem truncTate_coeff_low (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : s 0 < N) : (truncTate g N).val s = g.val s := by
   simp [truncTate_val, hs]
@@ -1031,6 +1018,7 @@ private theorem scaleIncl_truncTate_eq (g : ↥(TateAlgebra A)) (N : ℕ) (s : A
     TateAlgebraWedhorn.scaleIncl s g idx := by
   simp only [TateAlgebraWedhorn.scaleIncl_apply, truncTate_coeff_low g N idx h]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the T-topology. The T-topology is induced from the
 product `∏ A` via `scaleIncl`, and in the product topology a sequence of
@@ -1096,7 +1084,6 @@ theorem tateAlgebra_polynomials_dense (s : A) :
   · -- truncTate g N has finitely many nonzero coefficients
     exact ⟨N, fun n hn ↦ truncTate_coeff_high g N n hn⟩
 
-set_option linter.unusedSectionVars false in
 /-- Every polynomial element in `A⟨X⟩` (coefficients zero above degree N) has its
 quotient class in the range of `locToQuotientOneSubfX_gen`. By induction on N:
 the image contains `mk(algebraMap a)` and `mk(X)`, hence all finite sums of
@@ -1441,6 +1428,7 @@ which is topologically nilpotent. The caller discharges `hJ_eval` from this stru
 Then `IsQuotientMap.continuous_iff` descends continuity to the quotient. -/
 
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The reverse map `A⟨X⟩/(1-sX) → presheafValue D` is continuous.
 
 **Proof (Wedhorn Example 6.38):** `tateQuotientToPresheafHom = Quotient.lift tateEvalPresheafHom`.
@@ -1535,7 +1523,6 @@ private theorem truncTateC_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ)
     (truncTateC g N).val s = 0 := by
   simp [truncTateC_val, show ¬(s 0 < N) from by omega]
 
-set_option linter.unusedSectionVars false in
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the canonical (natural Tate) topology.
 
@@ -1612,7 +1599,6 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
   rw [show truncTateC g N - g = -(g - truncTateC g N) from by ring]
   exact neg_mem hg_diff_mem
 
-set_option linter.unusedSectionVars false in
 /-- The localization `A[1/s]` maps densely into `A⟨X⟩/(1-sX)` for the canonical
 quotient topology (Wedhorn Example 6.38, canonical topology version).
 
@@ -1666,7 +1652,6 @@ private def coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) : Set ↥(TateAlgeb
 
 omit [PlusSubring A] [IsHuberRing A] in
 omit [PlusSubring A] [IsHuberRing A] in
-set_option linter.unusedSectionVars false in
 /-- `0 ∈ coeffIdealNhd`. -/
 private theorem zero_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) :
     (0 : ↥(TateAlgebra A)) ∈ coeffIdealNhd P M := by
@@ -1675,7 +1660,6 @@ private theorem zero_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) :
   exact ⟨0, (P.I ^ M).zero_mem, rfl⟩
 
 omit [PlusSubring A] [IsHuberRing A] in
-set_option linter.unusedSectionVars false in
 /-- `coeffIdealNhd` is closed under addition. -/
 private theorem add_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
     {a b : ↥(TateAlgebra A)} (ha : a ∈ coeffIdealNhd P M)
@@ -1688,7 +1672,6 @@ private theorem add_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
     by rw [Subring.coe_add]; exact congrArg₂ (· + ·) hx_eq hy_eq⟩
 
 omit [PlusSubring A] [IsHuberRing A] in
-set_option linter.unusedSectionVars false in
 /-- `coeffIdealNhd` is closed under negation. -/
 private theorem neg_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
     {a : ↥(TateAlgebra A)} (ha : a ∈ coeffIdealNhd P M) :
@@ -1700,7 +1683,6 @@ private theorem neg_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
     by rw [NegMemClass.coe_neg]; exact congrArg (- ·) hx_eq⟩
 
 omit [PlusSubring A] [IsHuberRing A] in
-set_option linter.unusedSectionVars false in
 /-- `coeffIdealNhd` is stable under multiplication by `algebraMap a₀` for
 `a₀ ∈ P.A₀`: it scales every coefficient by `a₀`, and `a₀ · I^M ⊆ I^M`. -/
 private theorem mul_algebraMap_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
@@ -1716,7 +1698,6 @@ private theorem mul_algebraMap_mem_coeffIdealNhd (P : PairOfDefinition A) (M : �
     by rw [MulMemClass.coe_mul]; exact congrArg (a₀ * ·) hc_eq⟩
 
 omit [PlusSubring A] [IsHuberRing A] in
-set_option linter.unusedSectionVars false in
 /-- `coeffIdealNhd` is stable under multiplication by `X`: multiplying by `X`
 shifts coefficients up by one (and inserts `0` at index `0`), which preserves the
 property that every coefficient lies in `image (P.I ^ M)`. -/
@@ -1736,7 +1717,6 @@ private theorem mul_X_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
     exact hg (Finsupp.single 0 n)
 
 omit [PlusSubring A] [IsHuberRing A] in
-set_option linter.unusedSectionVars false in
 /-- The constant series `algebraMap b` lies in `coeffIdealNhd P M` whenever
 `b ∈ P.I ^ M`: its only nonzero coefficient is `b` at index `0`. -/
 private theorem algebraMap_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
@@ -2669,6 +2649,7 @@ theorem tateEvalPresheafHom_continuous_canonical
   exact W.toAddSubgroup.sum_mem (fun k _ ↦ hterm_mem k)
 
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Canonical-topology continuity of `tateQuotientToPresheafHom`
 (Wedhorn Prop 6.18 + Example 6.38).**
 

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 import Mathlib.FieldTheory.IntermediateField.Basic
@@ -108,7 +113,7 @@ theorem comp_algebraMap_eq (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂)
     Follows from the tower law for field extensions. -/
 theorem comp_degree (ψ : Isogeny W₂ W₃) (φ : Isogeny W₁ W₂) :
     (ψ.comp φ).degree = φ.degree * ψ.degree := by
-  unfold degree
+  simp only [degree]
   letI : Algebra W₂.FunctionField W₁.FunctionField := φ.toAlgebra
   letI : Algebra W₃.FunctionField W₂.FunctionField := ψ.toAlgebra
   letI : Algebra W₃.FunctionField W₁.FunctionField := (ψ.comp φ).toAlgebra
@@ -469,7 +474,6 @@ private theorem finrank_ratFunc_mulByInt {n : ℤ} (hn : n ≠ 0) :
 
 -- `backward.isDefEq.respectTransparency false` lets the `ext`/`change … rfl` compatibility
 -- goals for `Algebra.finrank_eq_of_equiv_equiv` close by reducible-transparency defeq.
-set_option backward.isDefEq.respectTransparency false in
 omit [DecidableEq F] in
 private theorem mulByInt_finrank_aux_fracRange_le {n : ℤ} (hn : n ≠ 0) :
     mulByIntFracRange W hn ≤
@@ -493,7 +497,6 @@ private theorem mulByInt_finrank_aux_fracRange_le {n : ℤ} (hn : n ≠ 0) :
     (Set.singleton_subset_iff.mpr h_mulByInt_x_mem_aR)
 
 omit [W.toAffine.IsElliptic] [DecidableEq F] in
-set_option backward.isDefEq.respectTransparency false in
 private theorem mulByInt_finrank_aux_top :
     Module.finrank
       (IsScalarTower.toAlgHom F (FractionRing F[X]) W.toAffine.FunctionField).fieldRange
@@ -525,8 +528,9 @@ private theorem fractionRing_algEquiv_genFrac {n : ℤ} :
   congr 1 <;> exact (FractionRing.algEquiv F[X] (RatFunc F)).commutes _
 
 -- The canonical `FractionRing F[X] ≃+* RatFunc F` isomorphism commutes with the base-field
--- algebra maps `F → ·`, both factoring through `F → F[X]`. (`omit [W.toAffine.IsElliptic]`/`[DecidableEq F]`:
--- a statement about the two fraction fields of `F[X]`, independent of `W`.)
+-- algebra maps `F → ·`, both factoring through `F → F[X]`.
+-- (`omit [W.toAffine.IsElliptic]`/`[DecidableEq F]`: a statement about the two fraction
+-- fields of `F[X]`, independent of `W`.)
 omit [W.toAffine.IsElliptic] [DecidableEq F] in
 private theorem fractionRing_algEquiv_baseField (c : F) :
     (FractionRing.algEquiv F[X] (RatFunc F)).toRingEquiv (algebraMap F (FractionRing F[X]) c) =
@@ -605,8 +609,6 @@ private noncomputable def adjoinGenFracFractionRingEquivRatFunc {n : ℤ} :
 -- lives entirely over canonical `IntermediateField` instances (unlike the outer `h_mid` step in
 -- `aux_total`).
 omit [DecidableEq F] in
-set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 250000 in
 private theorem finrank_fractionRing_mulByInt {n : ℤ} (hn : n ≠ 0) :
     Module.finrank
       (IntermediateField.adjoin F
@@ -629,8 +631,6 @@ private theorem finrank_fractionRing_mulByInt {n : ℤ} (hn : n ≠ 0) :
       (by ext ⟨x, hx⟩; rfl)]
   exact finrank_ratFunc_mulByInt W hn
 
-set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 250000 in
 -- The inner `[K(x) : K([n]*x)] = n²` step (`h_mid`) is stated over the non-canonical
 -- `mulByIntFracRange → aR` algebra (the inclusion from `mulByInt_finrank_aux_fracRange_le`), an
 -- instance that cannot live in a helper's signature, so it stays inline. After splitting off
@@ -686,7 +686,6 @@ private theorem mulByInt_finrank_aux_total {n : ℤ} (hn : n ≠ 0) :
 -- `mulByIntFracRange_le_fieldRange`, so it cannot be a standalone helper's signature; it is
 -- proved inline once that instance is in scope. `aux_total` is the canonical-codomain half
 -- and is extracted above.
-set_option backward.isDefEq.respectTransparency false in
 omit [DecidableEq F] in
 private theorem mulByInt_finrank {n : ℤ} (hn : n ≠ 0) :
     Module.finrank (mulByInt_pullbackAlgHom W n hn).fieldRange

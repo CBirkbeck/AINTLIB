@@ -16,22 +16,22 @@ F·(((a+2)²)^{16} − 1)`.  Two things must be established about the genuine le
 
 * **§1 — the proven first-order lift `F = 37·r` (the `castHom F = 0` structure).**  We prove
   *unconditionally* `castHom (genericColumnCoordLHS37 a) = 0` for every column `a`
-  (`genericColumnCoordLHS37_castHom_eq_zero`): the mod-`37` reduction of the level-`72` coordinate is
-  the level-`36` first-order coordinate (the proven `castHom`/level compatibility
+  (`genericColumnCoordLHS37_castHom_eq_zero`): the mod-`37` reduction of the level-`72` coordinate
+  is the level-`36` first-order coordinate (the proven `castHom`/level compatibility
   `valuedLambdaQuotientDworkCoeffModP_eq_castHom_modSq`), which is the first-order Kummer-log matrix
   entry `concreteKummerLogMatrix 15 a = kummerLogDetRowFactor 15 · V(15,a)`, and
-  `kummerLogDetRowFactor 15 = B₃₂/32 mod 37 = 0` (the proven `caseIICor823_rowFactor_fifteen_eq_zero`,
-  the irregularity `37 ∣ B₃₂`).  So the level-`72` coordinate is `37·(second-order part)`: the
-  `F = 37·r` structure is **forced**, not assumed.  This is the genuine first-order-structure lift
-  the project's first-order single-column chain provides (the mod-`37` reduction of the level-`72`
-  coordinate is the proven-degenerate first-order row).
+  `kummerLogDetRowFactor 15 = B₃₂/32 mod 37 = 0` (the proven
+  `caseIICor823_rowFactor_fifteen_eq_zero`, the irregularity `37 ∣ B₃₂`).  So the level-`72`
+  coordinate is `37·(second-order part)`: the `F = 37·r` structure is **forced**, not assumed.  This
+  is the genuine first-order-structure lift the project's first-order single-column chain provides
+  (the mod-`37` reduction of the level-`72` coordinate is the proven-degenerate first-order row).
 
 * **§2 — the smallest residual: the level-`72` second-order leading coefficient
   `CaseIICor823Level72LeadingCoeff37`.**  After §1, all that remains is the genuine
   second-order content: that the level-`72` coordinate is `37·ρ·(((a+2)²)^{16} − 1)` for a *uniform*
-  mod-`37` leading coefficient `ρ` that is **nonzero** (the `M ≤ 1` non-degeneracy).  We isolate this
-  as `∃ ρ : ZMod 37, ρ ≠ 0 ∧ ∀ a, genericColumnCoordLHS37 a = 37·(ρ.val)·(((a+2)²)^{16} − 1)`.  This
-  is exactly the level-`72` Dwork-evaluator content of Proposition 8.12 at `i = 32`: the
+  mod-`37` leading coefficient `ρ` that is **nonzero** (the `M ≤ 1` non-degeneracy).  We isolate
+  this as `∃ ρ : ZMod 37, ρ ≠ 0 ∧ ∀ a, genericColumnCoordLHS37 a = 37·(ρ.val)·(((a+2)²)^{16} −
+  1)`.  This is exactly the level-`72` Dwork-evaluator content of Proposition 8.12 at `i = 32`: the
   second-order leading coefficient (the second-order analog of the proven first-order
   `concreteKummerLogMatrix = diag(B mod 37)·V`, whose `j = 15` row is degenerate).  No level-`72`
   analog of the entire `KummerLogFormalEvaluator` chain exists in the project; this single
@@ -62,8 +62,8 @@ level-`72` factor is this plus a degree-`37..72` truncation correction.  The har
 part `29 ≠ 11`), and is **not** the level-`72` coordinate factor
 (`firstOrderStructureLiftFactor_ne_bernoulliFactor`).  By stating the residual over a *generic* `ρ`
 (the genuine second-order leading coefficient, whatever its value — `11` plus the correction's
-mod-`37` part), the wrong `1073` is avoided entirely; the generic engine needs only `ρ ≠ 0`, which is
-the proven `M ≤ 1`.
+mod-`37` part), the wrong `1073` is avoided entirely; the generic engine needs only `ρ ≠ 0`, which
+is the proven `M ≤ 1`.
 
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §8.4 (Proposition 8.12, Theorem
@@ -74,7 +74,6 @@ the proven `M ≤ 1`.
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -84,9 +83,9 @@ open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 /-! ## 1. The proven first-order lift: the mod-`37` reduction of the level-`72` coordinate vanishes
 
 For every column `a`, `castHom (genericColumnCoordLHS37 a) = 0`, i.e. the level-`72` coordinate is
-`37·(second-order part)`.  This is the project's first-order single-column structure at the level-`72`
-coordinate: the mod-`37` reduction is the first-order Kummer-log matrix entry, which is degenerate at
-`j = 15` (`B₃₂/32 mod 37 = 0`). -/
+`37·(second-order part)`.  This is the project's first-order single-column structure at the
+level-`72` coordinate: the mod-`37` reduction is the first-order Kummer-log matrix entry, which is
+degenerate at `j = 15` (`B₃₂/32 mod 37 = 0`). -/
 
 open BernoulliRegular (CPlusGenerator) in
 /-- **The level-`72` coordinate's mod-`37` reduction is the first-order Kummer-log matrix entry**
@@ -123,8 +122,8 @@ theorem genericColumnCoordLHS37_castHom_eq_concreteKummerLogMatrix
   rw [caseIIEx811Core_coeffModP_eq_evalₐ
     (concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a)
     (15 : Fin (kummerLogRank 37))]
-  -- `(concreteKummerLogVector a : Dwork) = kummerLogCompletedColumn a` (definitional coercion of the
-  -- fixed-subalgebra column `kummerLogFixedColumn a = ⟨kummerLogCompletedColumn a, _⟩`).
+  -- `(concreteKummerLogVector a : Dwork) = kummerLogCompletedColumn a` (definitional coercion of
+  -- the fixed-subalgebra column `kummerLogFixedColumn a = ⟨kummerLogCompletedColumn a, _⟩`).
   rw [show (concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a :
         DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) =
       kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a from rfl]
@@ -135,16 +134,16 @@ theorem genericColumnCoordLHS37_castHom_eq_concreteKummerLogMatrix
       (kummerLogCompletedColumn (p := 37) (K := CyclotomicField 37 ℚ) (by decide) a)]
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **The mod-`37` reduction of the level-`72` coordinate vanishes** (proven, axiom-clean): for every
-column `a`, `castHom (genericColumnCoordLHS37 a) = 0`.
+/-- **The mod-`37` reduction of the level-`72` coordinate vanishes** (proven, axiom-clean): for
+every column `a`, `castHom (genericColumnCoordLHS37 a) = 0`.
 
 The first-order structure lift: the level-`72` coordinate is `37·(second-order part)`, forcing the
 `F = 37·r` form of the generic engine's factor.  Proof: by
 `genericColumnCoordLHS37_castHom_eq_concreteKummerLogMatrix` the reduction is the first-order matrix
 entry `concreteKummerLogMatrix 15 a = kummerLogDetRowFactor 15 · V(15,a)`
 (`concreteKummerLogMatrix_eq_diagonal_mul_vandermonde`), and the proven
-`caseIICor823_rowFactor_fifteen_eq_zero` (`B₃₂/32 mod 37 = 0`, the irregularity `37 ∣ B₃₂`) makes the
-row factor `0`. -/
+`caseIICor823_rowFactor_fifteen_eq_zero` (`B₃₂/32 mod 37 = 0`, the irregularity `37 ∣ B₃₂`) makes
+the row factor `0`. -/
 theorem genericColumnCoordLHS37_castHom_eq_zero
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -169,8 +168,8 @@ open BernoulliRegular (CPlusGenerator) in
 /-- **The level-`72` second-order leading-coefficient residual** (a `def … : Prop`, **not** an axiom
 — the genuine level-`72` Dwork-evaluator `p`-adic-`L` content of Proposition 8.12 at `i = 32`).
 
-There is a *uniform* mod-`37` second-order leading coefficient `ρ : ZMod 37`, **nonzero** (the `M ≤ 1`
-non-degeneracy), such that for every cyclotomic column `a` the level-`72` even-degree-`32` Dwork
+There is a *uniform* mod-`37` second-order leading coefficient `ρ : ZMod 37`, **nonzero** (the `M ≤
+1` non-degeneracy), such that for every cyclotomic column `a` the level-`72` even-degree-`32` Dwork
 coordinate of the completed real cyclotomic-unit logarithm column is `37·ρ·(((a+2)²)^{16} − 1)`:
 
   `genericColumnCoordLHS37 a = (37 : ZMod 37²)·((ρ.val : ℕ) : ZMod 37²)·(((a+2)²)^{16} − 1)`.
@@ -223,10 +222,10 @@ open BernoulliRegular (CPlusGenerator) in
 /-- **`CaseIICor823GenericColumnCoord37` from the level-`72` leading-coefficient residual** (proven,
 axiom-clean given `CaseIICor823Level72LeadingCoeff37`).
 
-Take `F = 37·(ρ.val : ZMod 37²)`, `r = (ρ.val : ZMod 37²)`.  Then `F = 37·r` (rfl-level);
-`castHom r = (ρ.val : ZMod 37) = ρ ≠ 0` (`castHom_natCast_modSq` + `ZMod.natCast_val` + `ZMod.cast_id`
-on `ρ : ZMod 37`); and the per-column identity `genericColumnCoordLHS37 a = F·(((a+2)²)^{16} − 1)` is
-the residual rewritten (`37·(ρ.val)·V_a = (37·(ρ.val))·V_a`).  Feeds the generic R4 engine. -/
+Take `F = 37·(ρ.val : ZMod 37²)`, `r = (ρ.val : ZMod 37²)`.  Then `F = 37·r` (rfl-level); `castHom r
+= (ρ.val : ZMod 37) = ρ ≠ 0` (`castHom_natCast_modSq` + `ZMod.natCast_val` + `ZMod.cast_id` on `ρ :
+ZMod 37`); and the per-column identity `genericColumnCoordLHS37 a = F·(((a+2)²)^{16} − 1)` is the
+residual rewritten (`37·(ρ.val)·V_a = (37·(ρ.val))·V_a`).  Feeds the generic R4 engine. -/
 theorem caseIICor823GenericColumnCoord37_of_level72LeadingCoeff
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -244,8 +243,8 @@ theorem caseIICor823GenericColumnCoord37_of_level72LeadingCoeff
 
 /-! ## 4. R4 and the FLT37 endpoint, from the level-`72` leading-coefficient residual -/
 
-/-- **Washington Theorem 8.22 / Corollary 8.23 for `37` (`R4`) from the level-`72` leading-coefficient
-residual** (proven, axiom-clean given `CaseIICor823Level72LeadingCoeff37`).
+/-- **Washington Theorem 8.22 / Corollary 8.23 for `37` (`R4`) from the level-`72`
+leading-coefficient residual** (proven, axiom-clean given `CaseIICor823Level72LeadingCoeff37`).
 
 Composes `caseIICor823GenericColumnCoord37_of_level72LeadingCoeff` with the proven generic engine
 `cor823PthPowerOfRationalModSq37_of_genericColumnCoord`. -/
@@ -266,8 +265,8 @@ Supplies the level-`72` second-order leading coefficient to the generic R4 engin
 `fermatLastTheoremFor_thirtyseven_of_genericColumnCoord` — Washington Proposition 8.12 at `i = 32`
 reduced to the single statement that the level-`72` even-degree-`32` Dwork coordinate of a single
 completed real cyclotomic-unit logarithm column is `37·ρ·(((a+2)²)^{16} − 1)` for a uniform nonzero
-mod-`37` leading coefficient `ρ`.  The `F = 37·r` structure of that coordinate is **proven** (§1, the
-first-order lift `castHom = 0`); only the second-order leading coefficient `ρ` (the level-`72`
+mod-`37` leading coefficient `ρ`.  The `F = 37·r` structure of that coordinate is **proven** (§1,
+the first-order lift `castHom = 0`); only the second-order leading coefficient `ρ` (the level-`72`
 Dwork-evaluator content) and its non-degeneracy `ρ ≠ 0` (the proven `M ≤ 1`) remain.  Discharging
 this leaves FLT37 on R2 (the descent) + Kellner alone. -/
 theorem fermatLastTheoremFor_thirtyseven_of_level72LeadingCoeff

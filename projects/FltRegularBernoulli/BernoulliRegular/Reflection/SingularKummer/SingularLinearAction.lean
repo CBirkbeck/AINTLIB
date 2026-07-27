@@ -144,7 +144,7 @@ theorem singular_characterProjection_range_eq_range_of_multiplicative_equivarian
     (mulActionToAdditiveLinearAction (p := p) ρA)
     (SingularPair.singularGroupClassMapToPTorsionLinear (R := R) (K := K) p)
     (SingularPair.singularGroupClassMapToPTorsionLinear_surjective (R := R) (K := K) p)
-    (fun d x =>
+    (fun d x ↦
       singular_linearMap_equivariant_of_multiplicative_equivariant
         (R := R) (K := K) p (CharacterProjection.Delta p) ρS ρA hρ d x)
 

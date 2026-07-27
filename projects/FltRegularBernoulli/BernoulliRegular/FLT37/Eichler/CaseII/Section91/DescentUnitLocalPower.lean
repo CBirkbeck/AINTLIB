@@ -18,9 +18,9 @@ existing file.
 
 The Case-II descent unit is **not** an arbitrary unit: Washington's §9.1 / 9.4 descent constructs it
 *directly from the σ-stable pair generators*.  The proven producer
-`caseIILemma98Residue_producer_balanced` (`CaseIILemma98Residue.lean`, itself derived END-TO-END from
-the σ-stable pair-product `caseII_sigma_pair_pow37_K_plus_identity`) gives, for each adjacent root
-`η` and σ-stable anchored generator record `G`, the balanced `𝓞 K` identity
+`caseIILemma98Residue_producer_balanced` (`CaseIILemma98Residue.lean`, itself derived END-TO-END
+from the σ-stable pair-product `caseII_sigma_pair_pow37_K_plus_identity`) gives, for each adjacent
+root `η` and σ-stable anchored generator record `G`, the balanced `𝓞 K` identity
 
   `X^37 · Q_η · U_KP = Y^37 · Q_η₀`,        `X = algebraMap G.xPlus`, `Y = algebraMap G.yPlus`,
                                             `U_KP = algebraMap u_KP`,
@@ -56,9 +56,10 @@ generators; it is **not** Assumption II (`ε₁/ε₂ = ε'^37` as a black box).
   `37`-th power mod `𝔩`.
 
 * `caseIISection91_isPthPower_of_identification` — the **general** local-power consumer at a fixed
-  cross-unit (the satisfiable form of `caseIILemma98Residue_descentUnit_isPthPower_of_identification`,
-  whose `∀ u_KP` hypothesis is over-strong): given the §9.1 identification at the producer's *own*
-  `u_KP`, any descent unit `δ` is a `37`-th power mod `𝔩`.  The §9.1 identification above feeds it.
+  cross-unit (the satisfiable form of
+  `caseIILemma98Residue_descentUnit_isPthPower_of_identification`, whose `∀ u_KP` hypothesis is
+  over-strong): given the §9.1 identification at the producer's *own* `u_KP`, any descent unit `δ`
+  is a `37`-th power mod `𝔩`.  The §9.1 identification above feeds it.
 
 These discharge the §9.1 identification + the local-power half for the producer-constructed Case-II
 descent unit (the mathematically correct descent object), non-circularly from the σ-stable producer.
@@ -84,10 +85,10 @@ variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
 /-! ## 1. The general local-power consumer at a fixed cross-unit
 
 The proven `caseIILemma98Residue_descentUnit_isPthPower_of_identification` requires the §9.1
-identification to hold for **every** cross-unit `u_KP`, which is over-strong (it fixes `δ, Q_η, Q_η₀`
-and varies the right-hand side).  The genuinely usable form fixes the cross-unit at the producer's
-*own* choice — exactly the one that appears in the producer's balanced identity.  We prove that
-version directly. -/
+identification to hold for **every** cross-unit `u_KP`, which is over-strong (it fixes
+`δ, Q_η, Q_η₀` and varies the right-hand side).  The genuinely usable form fixes the cross-unit at
+the producer's *own* choice — exactly the one that appears in the producer's balanced identity.  We
+prove that version directly. -/
 
 /-- **Local-power of the descent unit from the §9.1 identification at the producer's cross-unit**
 (proven, axiom-clean — uses the σ-stable producer, **not** Assumption II).
@@ -266,10 +267,11 @@ theorem caseIISection91_descentUnit_isPthPower {m : ℕ} (D : RealCaseIIData37 K
 
 /-! ## 4. The producer-link Lemma-9.8 conjugate-residue Prop and its local-power conjunct
 
-The abstract `Lemma98ConjugateResidue37` (`CaseIILemma98Residue.lean`) quantifies over an *arbitrary*
-`CaseIIData37` with **unconstrained** units `ε₁, ε₂` and asks for the §9.1 local power of `ε₁/ε₂`.
-For free `ε₁, ε₂` that has no producer link, so the §9.1 identification cannot hold non-circularly
-(only Assumption II `ε₁/ε₂ = ε'^37` would supply it, which is the very thing being proved).
+The abstract `Lemma98ConjugateResidue37` (`CaseIILemma98Residue.lean`) quantifies over an
+*arbitrary* `CaseIIData37` with **unconstrained** units `ε₁, ε₂` and asks for the §9.1 local power
+of `ε₁/ε₂`. For free `ε₁, ε₂` that has no producer link, so the §9.1 identification cannot hold
+non-circularly (only Assumption II `ε₁/ε₂ = ε'^37` would supply it, which is the very thing being
+proved).
 
 The mathematically correct Case-II descent unit is the *producer-constructed* one: Washington's §9.1
 descent builds it from the σ-stable pair generators, and over a `RealCaseIIData37` it is
@@ -307,9 +309,9 @@ the §9.1 identification, discharged non-circularly from the σ-stable producer)
 `CaseIISection91Lemma98LocalPower37` is exactly `caseIISection91_descentUnit_isPthPower`, applied to
 each instance.  This discharges the local-power half of Washington Lemma 9.8 for the
 producer-constructed Case-II descent unit — the genuine §9.1 descent object — with the
-§9.1 identification `δ · Q_η₀ ≡ Q_η · U_KP (mod 𝔩)` proved (`caseIISection91_residue_identification`)
-and the `(ρ_b/ρ_a)^p` half supplied by the proven producer
-(`caseIILemma98Residue_pair_ratio_isPthPower`), never by Assumption II. -/
+§9.1 identification `δ · Q_η₀ ≡ Q_η · U_KP (mod 𝔩)` proved
+(`caseIISection91_residue_identification`) and the `(ρ_b/ρ_a)^p` half supplied by the proven
+producer (`caseIILemma98Residue_pair_ratio_isPthPower`), never by Assumption II. -/
 theorem caseIISection91_lemma98LocalPower37
     {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
     [NumberField.IsCMField K] :
@@ -320,10 +322,11 @@ theorem caseIISection91_lemma98LocalPower37
 /-! ## 5. Local power at the concrete residue prime `lv149`
 
 `Lemma98ConjugateResidue37` (`CaseIILemma98Residue.lean`) is keyed to the concrete residue prime
-`lv149` over `CyclotomicField 37 ℚ` (the Lehmer–Vandiver prime `ℓ = 149 ≡ 1 (mod 37)`).  Specialising
-§3 to `K = CyclotomicField 37 ℚ` and `𝔩 = lv149` gives the local power of the producer-built §9.1
-descent unit at exactly that prime — the residue-level shape of the local-power conjunct of
-`Lemma98ConjugateResidue37`, for the producer-constructed descent unit. -/
+`lv149` over `CyclotomicField 37 ℚ` (the Lehmer–Vandiver prime
+`ℓ = 149 ≡ 1 (mod 37)`).  Specialising §3 to `K = CyclotomicField 37 ℚ` and `𝔩 = lv149` gives the
+local power of the producer-built §9.1 descent unit at exactly that prime — the residue-level shape
+of the local-power conjunct of `Lemma98ConjugateResidue37`, for the producer-constructed descent
+unit. -/
 
 /-- **The local power at `lv149` for the producer-built §9.1 descent unit** (proven, axiom-clean).
 

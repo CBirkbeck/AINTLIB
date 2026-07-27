@@ -62,9 +62,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.TorsionGeometric
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
@@ -90,10 +87,13 @@ Frobenius, `S' = π̄ S`, `T' = π̄ T`).  Suppose:
 
 Then `e_ℓ(S', T') = e_ℓ(S, T) ^ q`.
 
-Proof: apply `σ` to the pairing relation `τ_S (g_T) = algebraMap (e_ℓ(S,T)) · g_T`.  The left side is
+Proof: apply `σ` to the pairing relation `τ_S (g_T) = algebraMap (e_ℓ(S,T)) · g_T`.  The left side
+is
 `τ_{S'} (σ g_T)` by `hconj`; the right side is `algebraMap (e_ℓ(S,T)^q) · σ(g_T)` by `hpow` and
-multiplicativity.  Substituting `σ(g_T) = algebraMap c · g_{T'}` (`hnat`), using that the `F`-algebra
-map `τ_{S'}` fixes `algebraMap c` and the pairing relation `τ_{S'} (g_{T'}) = algebraMap (e_ℓ(S',T')) ·
+multiplicativity.  Substituting `σ(g_T) = algebraMap c · g_{T'}` (`hnat`), using that the
+`F`-algebra
+map `τ_{S'}` fixes `algebraMap c` and the pairing relation
+`τ_{S'} (g_{T'}) = algebraMap (e_ℓ(S',T')) ·
 g_{T'}`, and cancelling the nonzero `algebraMap c · g_{T'}`, gives `e_ℓ(S',T') = e_ℓ(S,T)^q`. -/
 theorem weilPairing_galois_core (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) (q : ℕ)
     (σ : KE ≃+* KE)
@@ -127,7 +127,8 @@ theorem weilPairing_galois_core (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) (q : ℕ)
   -- Left side: `τ_{S'}` fixes `algebraMap c` and acts on `g_{T'}` by `e'`.
   rw [map_mul, (translateAlgEquivOfPoint W S').commutes,
     weilPairing_translate W ℓ hℓ S' T' hS' hT'] at hrel
-  -- Now `hrel : algebraMap c * (algebraMap e' * g_{T'}) = algebraMap (e^q) * (algebraMap c * g_{T'})`.
+  -- Now
+  -- `hrel : algebraMap c * (algebraMap e' * g_{T'}) = algebraMap (e^q) * (algebraMap c * g_{T'})`.
   -- Reassociate to cancel `algebraMap c * g_{T'} ≠ 0`.
   have hcancel : algebraMap F KE e' * (algebraMap F KE c * gT') =
       algebraMap F KE (e ^ q) * (algebraMap F KE c * gT') := by
@@ -165,7 +166,8 @@ noncomputable local instance instDecEqACFGS : DecidableEq (AlgebraicClosure K) :
 
 variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
   [IsIntegrallyClosed
-    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing]
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing]
 
 /-- **The base-changed Frobenius Galois leaf** (Silverman III.8.1d, the Galois-route content).
 For the base-changed `q`-power Frobenius point map `π̄ = frobeniusHomBaseChange p r K̄` on `E_{K̄}`,
@@ -371,7 +373,8 @@ theorem frobeniusGaloisGeometric_holds
     exact ⟨c, hc, by rw [hwfbridge hπT', hnat]⟩
 
 /-- **`FrobeniusGaloisData` for the base-changed `q`-power Frobenius** (Silverman III.8.1d).  A pure
-composition: the axiom-clean reduction `frobeniusGaloisData_of_geometric` (concrete `σ`, `q`-power on
+composition: the axiom-clean reduction `frobeniusGaloisData_of_geometric` (concrete `σ`, `q`-power
+on
 constants discharged) applied to the now axiom-clean geometric residual
 `frobeniusGaloisGeometric_holds` (conjugation + `σ`-naturality both proved).  Axiom-clean. -/
 theorem frobeniusGaloisData_holds
@@ -380,12 +383,15 @@ theorem frobeniusGaloisData_holds
   frobeniusGaloisData_of_geometric W p r
     (frobeniusGaloisGeometric_holds W p r)
 
-/-- **The Frobenius Weil-pairing scaling `FrobeniusScaling`** (Silverman III.8.1d), CoordHom-free, via
+/-- **The Frobenius Weil-pairing scaling `FrobeniusScaling`** (Silverman III.8.1d), CoordHom-free,
+via
 the **Galois route**: `e_ℓ(π̄ S, π̄ T) = e_ℓ(S, T)^{#K}` on `E_{K̄}[ℓ]` for every prime
 `ℓ ≠ ringChar K`, where `π̄ = frobeniusHomBaseChange` is the `q`-power Frobenius point map.
 
-This is `frobeniusScaling_of_galoisData` (the axiom-clean reduction via the Galois constant-ratio core
-`weilPairing_galois_core`) applied to the arithmetic-Frobenius leaf `frobeniusGaloisData_holds`.  With
+This is `frobeniusScaling_of_galoisData` (the axiom-clean reduction via the Galois constant-ratio
+core
+`weilPairing_galois_core`) applied to the arithmetic-Frobenius leaf `frobeniusGaloisData_holds`. 
+With
 the concrete `σ = frobeniusFunctionFieldEquiv` constructed and all of its `FrobeniusGaloisData`
 properties (conjugation, `σ`-naturality, `q`-power on constants) now proved, this is **fully
 axiom-clean**: `#print axioms frobeniusScaling_holds = [propext, Classical.choice, Quot.sound]`. -/

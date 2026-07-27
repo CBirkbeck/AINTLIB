@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.HasseBound.WeilPairing.Fiber
 import HasseWeil.Foundation.Curves.Divisor.PicZero
 
@@ -26,7 +31,7 @@ omit [DecidableEq F] [W.IsElliptic] in
 /-- Degree of a single projective place `(P)` with multiplicity `n` is `n`. -/
 theorem degree_single (P : Curves.ProjectiveSmoothPoint (⟨W⟩ : Curves.SmoothPlaneCurve F)) (n : ℤ) :
     Curves.ProjectiveDivisor.degree (Finsupp.single P n) = n := by
-  unfold Curves.ProjectiveDivisor.degree
+  simp only [Curves.ProjectiveDivisor.degree]
   exact Finsupp.sum_single_index rfl
 
 /-- **The multiplicity-free geometric pullback divisor** `f*((Q)) = Σ_{fP=Q} (P)`, summed over the

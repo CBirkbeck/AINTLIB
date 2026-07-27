@@ -358,13 +358,13 @@ theorem exists_solution_of_etaZeroSpanSingletons
         (ε₃ : 𝓞 K) * ((hζ.toInteger - 1) ^ m * z') ^ p := by
   set η₀ := zetaSubOneDvdRoot hp hζ e hy
   obtain ⟨u₁, hu₁⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
     η₂.prop (η₀ : _).prop (Subtype.coe_injective.ne_iff.mpr hη₂)
   obtain ⟨u₂, hu₂⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
     (η₀ : _).prop η₁.prop (Subtype.coe_injective.ne_iff.mpr hη₁.symm)
   obtain ⟨u₃, hu₃⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
     η₂.prop (η₁ : _).prop (Subtype.coe_injective.ne_iff.mpr hη)
   have := formula_of_etaZeroSpanSingletons
     hp hζ e hy hz η₁ η₂ hb₁ hb₂ hspan₁ hspan₂
@@ -1565,6 +1565,7 @@ theorem washington_real_expression_fixed_of_conj_pair
   field_simp [hden, hden_zeta, hden_inv, hζ_ne_zero]
   ring
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Primitive-root wrapper for
 `washington_real_expression_fixed_of_conj_pair`.
 

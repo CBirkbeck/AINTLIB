@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.Kummer.UnramifiedCriterion
@@ -69,7 +74,7 @@ non-trivially (i.e. when `count v γ ∉ p · ℤ` and `v ∤ p`) is
 > `e(P|v) = 1` iff `p ∣ count v γ`.
 
 This is a Kummer-theoretic ramification statement that is only partially
-present in mathlib (`Ideal.ramificationIdx`, `IsUnramifiedAt`,
+present in mathlib (`Ideal.ramificationIdx'`, `IsUnramifiedAt`,
 `Polynomial.discriminant`). Its full deductive proof is left to a
 downstream development; this file isolates the trivial cases and
 documents the obstruction.
@@ -90,7 +95,6 @@ open scoped nonZeroDivisors
 
 namespace BernoulliRegular
 
-set_option linter.unusedSectionVars false
 
 namespace KummerPresentation
 
@@ -123,7 +127,7 @@ For wild primes `v ∣ p`, the same Prop holds but the discharge requires
 the cyclotomic-uniformiser analysis (`1 - ζ_p`) instead. -/
 def TameKummerCriterion
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K)) : Prop :=
-  (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+  (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
     GenValuationDivisibleByPAt v P
 
 /-!

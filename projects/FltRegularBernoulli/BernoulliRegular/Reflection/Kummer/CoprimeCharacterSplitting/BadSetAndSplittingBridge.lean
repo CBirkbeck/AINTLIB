@@ -66,7 +66,7 @@ noncomputable local instance quotientDecidableEq_coprimeCharacterSplitting {q : 
 @[reducible] noncomputable local instance quotientNormalizationMonoid_coprimeCharacterSplitting
     {q : Ideal (𝓞 K)} [q.IsMaximal] :
     NormalizationMonoid (𝓞 K ⧸ q) :=
-  (CommGroupWithZero.instNormalizedGCDMonoid (𝓞 K ⧸ q)).toNormalizationMonoid
+  (inferInstance : NormalizedGCDMonoid (𝓞 K ⧸ q)).toNormalizationMonoid
 
 noncomputable local instance quotientUniqueFactorizationMonoid_coprimeCharacterSplitting
     {q : Ideal (𝓞 K)} [q.IsMaximal] :

@@ -60,7 +60,6 @@ theorem maximalRealSubfieldClassNumberFactor_eq_explicit (hp_odd' : p ≠ 2) :
     abs_discr_maximalRealSubfield_eq_pow (p := p) (K := K) hp_odd']
   norm_num
 
-set_option linter.unusedSectionVars false in
 theorem hPlus_formula_of_Kplus_residue
     {KplusResidue : ℂ}
     (hresPlus :
@@ -197,7 +196,7 @@ cyclotomic `hMinus` reduction chain. -/
 abbrev cyclotomicHPlusFactor : ℂ :=
   maximalRealSubfieldClassNumberFactor (K := K)
 
-set_option linter.unusedSectionVars false in
+omit hp [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
 lemma cyclotomicClassNumberFactor_eq_relative_coefficient_mul_hPlusFactor :
     cyclotomicClassNumberFactor (p := p) (K := K) =
       cyclotomicRelativeLValueCoefficient (p := p) (K := K) *

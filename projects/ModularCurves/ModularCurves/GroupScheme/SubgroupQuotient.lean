@@ -1,4 +1,9 @@
-import ModularCurves.GroupScheme.SubgroupQuotientGlueData
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import ModularCurves.GroupScheme.Subgroup
 
 /-!
 # The quotient of an elliptic curve by a finite locally free subgroup scheme
@@ -38,14 +43,11 @@ variable {S : Scheme.{u}} {E : EllipticCurve S}
 
 namespace FiniteLocallyFreeSubgroup
 
-/-- **(T-G3d-infra)** The quotient scheme `E/G` of `E` by the finite locally free subgroup
-scheme `G`, over `S` — **the option-γ glue construction** (`SubgroupQuotientGlueData`): one free
-affine chart patch per point of the curve, one Hopf-coinvariant patch quotient per point, glued
-along the saturated images of the pairwise stable windows. Requires the killing-integer datum
-`[G.HasKillingInt]` (automatic for torsion subgroups; by Deligne–Oort–Tate for constant rank).
-Consumers use only the universal-property pins below. -/
-noncomputable def quotient (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] : Scheme.{u} :=
-  G.gluedQuotient G.killN G.killN_spec
+/-- Invariance is preserved by post-composition: if `f` collapses `G`-translates, so does
+`f ≫ h`. -/
+theorem IsInvariant.comp {G : FiniteLocallyFreeSubgroup E} {Y Z : Scheme.{u}} {f : E.E ⟶ Y}
+    (hf : G.IsInvariant f) (h : Y ⟶ Z) : G.IsInvariant (f ≫ h) := fun _ g x t ht => by
+  rw [← Category.assoc, hf g x t ht, Category.assoc]
 
 /-- **(T-G3d-infra)** The structure morphism `E/G ⟶ S`. -/
 noncomputable def quotientS (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :

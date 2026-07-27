@@ -76,8 +76,9 @@ theorem isUnramifiedAt_of_not_over_37 (p : Ideal (𝓞 K⁺)) [p.IsPrime] (hp_ne
       h_ndvd P hP_prime h_mem
   haveI : Algebra.IsUnramifiedAt (𝓞 K⁺) P :=
     Algebra.IsUnramifiedAt.of_restrictScalars (R := ℤ) (A := 𝓞 K⁺) P
-  have he : Ideal.ramificationIdx (Ideal.under (𝓞 K⁺) P) P = 1 :=
-    Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K⁺) hP_ne
+  have he : Ideal.ramificationIdx' (Ideal.under (𝓞 K⁺) P) P = 1 :=
+    (Ideal.ramificationIdx'_eq_ramificationIdx _ P (hP_lies.over ▸ hp_ne)).trans
+      (Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K⁺))
   rwa [← hP_lies.over] at he
 
 /-- **II1-E (coprimality):** for an adjacent root `η ≠ η₀`, the auxiliary ideal `𝔞(η)` is coprime

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.ImaginaryQuadratic.Foundations
@@ -162,7 +167,7 @@ theorem gaussSum_eq_I_mul_sqrt_of_B_neg
   have h_def : DirichletCharacter.rootNumber (legendreDirichlet p) =
       gaussSum (legendreDirichlet p) (ZMod.stdAddChar : AddChar (ZMod p) ℂ) /
         Complex.I / ((p : ℂ) ^ (1 / 2 : ℂ)) := by
-    unfold DirichletCharacter.rootNumber
+    simp only [DirichletCharacter.rootNumber]
     rw [if_neg h_not_even, pow_one]
   rw [h_W_one] at h_def
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
@@ -418,6 +423,17 @@ theorem LFunction_one_eq_dedekindZeta_residue_of_CN05 (hp3 : p % 4 = 3)
   -- Uniqueness of limits.
   exact tendsto_nhds_unique h_tendsto_dedekind h_tendsto_product
 
+/-- For a natural number `n`, the principal square root `(n : ℂ) ^ (1 / 2 : ℂ)`
+equals the real square root `√n` cast to `ℂ`. This is the equality companion to
+`natCast_cpow_half_im_zero_and_re_pos` (which records the same value's imaginary
+and real parts). -/
+theorem natCast_cpow_half_eq_sqrt (n : ℕ) :
+    ((n : ℂ) ^ (1 / 2 : ℂ)) = ((Real.sqrt n : ℝ) : ℂ) := by
+  have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+  rw [Real.sqrt_eq_rpow, show (n : ℂ) = ((n : ℝ) : ℂ) from by push_cast; rfl,
+    show ((1 : ℂ) / 2) = ((1 / 2 : ℝ) : ℂ) from by push_cast; rfl,
+    ← Complex.ofReal_cpow hn]
+
 /-- **CN-08** (conditional on CN-05 via CN-07): Given the Dedekind factorization,
 the Bernoulli number and root number satisfy
   `W_η · B_{1,η} = -(2h / w : ℂ)`,
@@ -454,11 +470,8 @@ theorem rootNumber_mul_BernoulliGen_of_CN05 (hp_three_mod_four : p % 4 = 3)
   -- h_bridge: ((2πh/(w√p) : ℝ) : ℂ) * (p : ℂ)^(1/2 : ℂ) + π · W · B = 0.
   -- Simplify (p : ℂ)^(1/2) = √p (we need to coerce).
   have hp_pos : (0 : ℝ) < p := by exact_mod_cast hp.out.pos
-  have h_sqrt : ((p : ℂ) ^ (1 / 2 : ℂ)) = ((Real.sqrt p : ℝ) : ℂ) := by
-    rw [Real.sqrt_eq_rpow]
-    rw [show (p : ℂ) = ((p : ℝ) : ℂ) from by push_cast; rfl]
-    rw [show ((1 : ℂ) / 2) = ((1 / 2 : ℝ) : ℂ) from by push_cast; rfl]
-    rw [← Complex.ofReal_cpow hp_pos.le]
+  have h_sqrt : ((p : ℂ) ^ (1 / 2 : ℂ)) = ((Real.sqrt p : ℝ) : ℂ) :=
+    natCast_cpow_half_eq_sqrt p
   rw [h_sqrt] at h_bridge
   -- Now h_bridge is in ℂ. Convert the real-coerced product to a real number
   -- times I-in-ℂ wait - it's just real arithmetic via coercion.

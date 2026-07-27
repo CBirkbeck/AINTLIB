@@ -24,9 +24,11 @@ noetherianness is used **exclusively** to produce the group-homomorphism equatio
 the comparison isomorphism `curveIsoPullbackOver`; everything downstream is noetherian-free
 group algebra. So:
 
-* `transportSection_add_of_isMonHom` takes that group-hom equation as a **hypothesis** and
-  proves transport additivity **sorry-free, over an arbitrary base**. This is the single
-  "one transport proof" that closes the whole family.
+* `transportSection_add_of_isMonHom` (proved in `Moduli/PullSectionAdd.lean`, next to the
+  noetherian specialisation that consumes it) takes that group-hom equation as a
+  **hypothesis** and proves transport additivity **sorry-free, over an arbitrary base**.
+  This is the single "one transport proof" that closes the whole family; this file supplies
+  the hypothesis from the finite-presentation route.
 
 The hypothesis is supplied three ways, all feeding the *same* lemma:
 * `isMonHom_of_one_comp_eq'` (`Rigidity.lean`, noetherian) — recovers the existing
@@ -52,15 +54,15 @@ parked/`sorry`'d transport gates. Every one bottoms out at the *single* primitiv
   memberships `gammaOneNaiveProblem.map` / `gammaFullNaiveProblem.map` (~L214/L229) then close: the
   `(N : ℤ) • P = 0` killing clause transports by `pullSection_add_of_finitePresentation` +
   `pullSection_zsmul_of_finitePresentation`; the fibrewise `Point.pull` clauses transport barehanded
-  (pull commutes with `pullSection`, no group data). `pullSection_zsmul` (GammaHRepresentability, and
-  hence `pullAlong_glSmul`/GH) can drop its `pullSection_add` hypothesis onto the FP version.
+  (pull commutes with `pullSection`, no group data). `pullSection_zsmul` (GammaHRepresentability,
+  and hence `pullAlong_glSmul`/GH) can drop its `pullSection_add` hypothesis onto the FP version.
 * **`ModularCurve/YOneAssembly.lean` ([Y1-D2], NEW-Y1)** — `isNaiveGammaOne_pullSection_iff` closes
   the same way: the killing clause via the two FP `pullSection` lemmas above; the fibrewise clauses
   (`(N:ℤ) • Point.pull … = 0`, exact-order-`N`) barehanded via pull/`pullSection` compatibility. Do
   **not** shared-edit — this note is the coordination; assemble in your own file/PR.
 * **Coordination (attack-1, no duplication):** the canonicity transport is proved *once* — here, in
-  `transportSection_add_of_isMonHom` (sorry-free) — and everything above consumes it. Do not re-derive
-  the group-iso transport in the holder files.
+  `transportSection_add_of_isMonHom` (sorry-free) — and everything above consumes it. Do not
+  re-derive the group-iso transport in the holder files.
 
 ## References
 
@@ -267,8 +269,8 @@ primitive. Same proof as `pullSection_add_of_isLocallyNoetherian` but routed thr
 `transportSection_add_of_finitePresentation`, so the only remaining dependency is the
 arbitrary-base GIT Cor 6.4 (not `[IsLocallyNoetherian]`). -/
 theorem pullSection_add_of_finitePresentation (P Q : Y.curve.Section) :
-    EllHom.pullSection R f (P + Q)
-      = EllHom.pullSection R f P + EllHom.pullSection R f Q := by
+    pullSection R f (P + Q)
+      = pullSection R f P + pullSection R f Q := by
   apply transportSection_injective R f
   rw [transportSection_add_of_finitePresentation]
   apply (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom (𝟙 X.base)).injective
@@ -280,8 +282,8 @@ over an arbitrary base, from `pullSection_add_of_finitePresentation` via `map_zs
 `EllHom.pullSection_zsmul` (which assumes the noetherian/parked `pullSection_add`). Transports
 the `(N : ℤ) • P = 0` killing clause of `IsNaiveGammaOne`/`IsNaiveFullLevel`. -/
 theorem pullSection_zsmul_of_finitePresentation (n : ℤ) (P : Y.curve.Section) :
-    EllHom.pullSection R f (n • P) = n • EllHom.pullSection R f P :=
-  map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+    pullSection R f (n • P) = n • pullSection R f P :=
+  map_zsmul (AddMonoidHom.mk' (pullSection R f)
     (pullSection_add_of_finitePresentation R f)) n P
 
 /-- **(KM-W0 transport leaf — Drinfeld exact order pulls back along `Ell/R`-morphisms)**

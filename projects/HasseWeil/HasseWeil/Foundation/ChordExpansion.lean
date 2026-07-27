@@ -735,7 +735,7 @@ private lemma coordRing_map_C (a : F) :
     ← IsScalarTower.algebraMap_apply F (Polynomial F) W.toAffine.CoordinateRing,
     ← IsScalarTower.algebraMap_apply F W.toAffine.CoordinateRing KE]
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The combination `x³ − a₄x − 2a₆ + a₃y` of the generic coordinates is
 nonzero in `K(E)`: it is the image of the coordinate-ring element with
 basis coordinates `(X³ − a₄X − 2a₆, a₃)` against the power basis `{1, Y}`,

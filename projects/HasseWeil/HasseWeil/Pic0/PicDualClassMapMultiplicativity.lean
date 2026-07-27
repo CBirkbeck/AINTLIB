@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 import HasseWeil.Pic0.PicDualAdditivityReduction
 
@@ -264,7 +269,7 @@ equivalently (Phase 1.5b, at a point `Q`)  `[map α* 𝔪_Q] = [map α₁* 𝔪_
 
 The module note flagged that writing `map_mk0` under the *three distinct* `ch.toAlgebra` instances
 on the *same* ring `R` re-triggers the codebase's same-type instance diamond.  We resolve it as the
-`inertiaDeg = 1` lemma did: each `classMap` is unfolded **under its own explicit `letI`** with the
+`inertiaDeg' = 1` lemma did: each `classMap` is unfolded **under its own explicit `letI`** with the
 `nonZeroDivisor` membership of `map α* I` carried as an *explicit* argument (so synthesis never has
 to pick between the three `Algebra R R` structures), and the `map0`-package is bridged to the
 explicit `Ideal.map` by `rfl`.  The result is the diamond-free `mk0`/`Ideal.map` interface the note
@@ -499,7 +504,8 @@ extension of the maximal ideal at a point factors over the fibre primes,
 
   `map α* 𝔪_Q  =  ∏_{P ∈ primesOver 𝔪_Q} P ^ e_P`,
 
-where `e_P = ramificationIdx (α*) 𝔪_Q P` is the multiplicity Silverman writes `e_φ(P)`.  This is the
+where `e_P = ramificationIdx' (α*) 𝔪_Q P` is the multiplicity Silverman writes `e_φ(P)`.  This is
+the
 ideal incarnation of the pullback divisor `φ*((Q)) = ∑_{αP=Q} e_φ(P)(P)`: the primes `P` of `R` over
 `𝔪_Q` (via `α*`) are the fibre `α^{-1}(Q)`, and the exponents are the ramification/inseparability
 multiplicities.  It is `mathlib`'s `Ideal.map_algebraMap_eq_finsetProd_pow` applied to the
@@ -519,7 +525,7 @@ primes** — Silverman III.6.2(b), `φ*(𝔪_Q) = ∏_{P over Q} 𝔪_P ^ e_φ(P
 
 For a finite point `Q = (x, y)` with maximal ideal `𝔪_Q = XYIdeal E x (C y)`, the ideal extension
 `map α* 𝔪_Q` along the comorphism equals the product over the **primes of `R` lying over `𝔪_Q`**
-(via `α*`) of `P` raised to the **ramification index** `e_P = ramificationIdx (α*) 𝔪_Q P`.  This is
+(via `α*`) of `P` raised to the **ramification index** `e_P = ramificationIdx' (α*) 𝔪_Q P`.  This is
 the exact ideal-level form of the pullback divisor `φ*((Q)) = ∑_{P ∈ φ⁻¹(Q)} e_φ(P)(P)`
 (III.6.2(b)): the fibre `φ⁻¹(Q)` is the prime spectrum over `𝔪_Q`, and `e_P` is Silverman's
 inseparability multiplicity `e_φ(P)` (constant `= deg_i φ` by III.4.10, read off as ramification).
@@ -544,7 +550,7 @@ theorem map_xyIdeal_eq_prod_primesOver
         (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)) =
       ∏ P ∈ (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)).primesOver
           E.CoordinateRing,
-        P ^ (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)).ramificationIdx
+        P ^ (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)).ramificationIdx'
           P := by
   letI := ch.toAlgebra
   haveI := hfin
@@ -552,9 +558,21 @@ theorem map_xyIdeal_eq_prod_primesOver
   haveI : (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)).IsMaximal :=
     xyIdeal_isMaximal h
   haveI : Algebra.IsIntegral E.CoordinateRing E.CoordinateRing := Algebra.IsIntegral.of_finite _ _
-  exact Ideal.map_algebraMap_eq_finsetProd_pow
-    (S := E.CoordinateRing) (R := E.CoordinateRing)
-    (mem_nonZeroDivisors_iff_ne_zero.mp hmem)
+  have hne : WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y) ≠ 0 :=
+    mem_nonZeroDivisors_iff_ne_zero.mp hmem
+  have key := Ideal.map_algebraMap_eq_finsetProd_pow
+    (S := E.CoordinateRing) (R := E.CoordinateRing) hne
+  refine Eq.trans (b := ∏ P ∈ (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x
+      (Polynomial.C y)).primesOver E.CoordinateRing,
+      P ^ P.ramificationIdx E.CoordinateRing) key ?_
+  refine Finset.prod_congr rfl fun P hP ↦ ?_
+  have hPset : P ∈ (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x
+      (Polynomial.C y)).primesOver E.CoordinateRing := Set.mem_toFinset.mp hP
+  haveI : P.IsPrime := hPset.1
+  haveI : P.LiesOver (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)) :=
+    hPset.2
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx
+    (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)) P hne]
 
 /-! ### The precise irreducible residual after this file (PDF-verified, Silverman III.6.2(c))
 

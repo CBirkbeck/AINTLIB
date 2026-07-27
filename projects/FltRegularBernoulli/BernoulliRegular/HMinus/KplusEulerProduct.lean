@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.HMinus.KplusPrimeArithmetic
@@ -14,7 +19,7 @@ This module closes the analytic `K⁺` side of the T023b2a chain.
 noncomputable section
 
 open NumberField
-open scoped BigOperators Topology nonZeroDivisors
+open scoped Topology nonZeroDivisors
 
 namespace BernoulliRegular
 
@@ -42,7 +47,7 @@ lemma dedekindZeta_eq_tprod_primePowerSeriesNF
 lemma idealNormMultiplicityNF_p_pow_eq_one_plus (hp_odd : p ≠ 2) (k : ℕ) :
     idealNormMultiplicityNF K⁺ (p ^ k) = 1 := by
   classical
-  haveI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
+  have : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
   have hcard : (primesOverFinsetPlus (K := K) p).card = 1 := by
     rw [primesOverFinsetPlus_card_eq_ncard (K := K) (ℓ := p)]
     exact ncard_primesOverPlus_at_p_eq_one (p := p) (K := K)
@@ -62,9 +67,9 @@ lemma idealNormMultiplicityNF_p_pow_eq_one_plus (hp_odd : p ≠ 2) (k : ℕ) :
       rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
       exact_mod_cast hp.out.ne_zero
     exact hne hunder
-  haveI : PPlus.IsPrime := hPPlusmem.1
-  haveI : PPlus.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hPPlus_ne hPPlusmem.1
-  haveI : PPlus.LiesOver (Ideal.span {(p : ℤ)}) := by
+  have : PPlus.IsPrime := hPPlusmem.1
+  have : PPlus.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hPPlus_ne hPPlusmem.1
+  have : PPlus.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hPPlusmem.2
   have habsNormPPlus : Ideal.absNorm PPlus = p := by
     calc
@@ -72,8 +77,8 @@ lemma idealNormMultiplicityNF_p_pow_eq_one_plus (hp_odd : p ≠ 2) (k : ℕ) :
         rw [← primesOverPlus_inertiaDeg_eq_one_at_p (p := p) (K := K) PPlus hPPlusmem]
         exact Ideal.absNorm_eq_pow_inertiaDeg' PPlus hp.out
       _ = p := by simp
-  unfold idealNormMultiplicityNF idealNormMultiplicity
-  haveI : Unique {I : NonzeroIdealNF K⁺ // Ideal.absNorm I.1 = p ^ k} :=
+  simp only [idealNormMultiplicityNF, idealNormMultiplicity]
+  have : Unique {I : NonzeroIdealNF K⁺ // Ideal.absNorm I.1 = p ^ k} :=
     { default := ⟨⟨PPlus ^ k, pow_ne_zero k hPPlus_ne⟩, by
           rw [map_pow, habsNormPPlus]⟩
       uniq := by
@@ -95,10 +100,10 @@ lemma idealNormMultiplicityNF_p_pow_eq_one_plus (hp_odd : p ≠ 2) (k : ℕ) :
           have hRfac := (Ideal.mem_normalizedFactors_iff hQ_ne).1 hRmem
           have hRprime : R.IsPrime := hRfac.1
           have hQ_le_R : Q ≤ R := hRfac.2
-          haveI : R.IsPrime := hRprime
+          have : R.IsPrime := hRprime
           have hR_ne : R ≠ ⊥ := fun hR_bot ↦
             hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
-          haveI : NeZero R := ⟨hR_ne⟩
+          have : NeZero R := ⟨hR_ne⟩
           have hI_le_Q : I ≤ Q := by
             rw [hIeq]
             exact Ideal.mul_le_left
@@ -151,17 +156,17 @@ lemma normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow
     (UniqueFactorizationMonoid.normalizedFactors I).toFinset ⊆
       primesOverFinsetPlus (K := K) (q : ℕ) := by
   classical
-  haveI : Fact (q : ℕ).Prime := ⟨q.2⟩
+  have : Fact (q : ℕ).Prime := ⟨q.2⟩
   intro PPlus hPPlus
   have hPPlus_mem : PPlus ∈ UniqueFactorizationMonoid.normalizedFactors I :=
     Multiset.mem_toFinset.1 hPPlus
   have hPPlus_fac := (Ideal.mem_normalizedFactors_iff hI_ne).1 hPPlus_mem
   have hPPlus_prime : PPlus.IsPrime := hPPlus_fac.1
   have hI_le_PPlus : I ≤ PPlus := hPPlus_fac.2
-  haveI : PPlus.IsPrime := hPPlus_prime
+  have : PPlus.IsPrime := hPPlus_prime
   have hPPlus_ne : PPlus ≠ ⊥ := fun hPPlus_bot ↦
     hI_ne (le_bot_iff.mp (hPPlus_bot ▸ hI_le_PPlus))
-  haveI : NeZero PPlus := ⟨hPPlus_ne⟩
+  have : NeZero PPlus := ⟨hPPlus_ne⟩
   have hPPlus_dvd : Ideal.absNorm PPlus ∣ (q : ℕ) ^ k := by
     rw [← hI_norm]
     exact Ideal.absNorm_dvd_absNorm_of_le hI_le_PPlus
@@ -182,6 +187,16 @@ lemma normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow
     simpa [rationalPrimeIdeal] using hPPlus_lies
   exact (mem_primesOverFinsetPlus_iff (K := K) (ℓ := (q : ℕ))).2 hPPlus_over
 
+/-- Every normalized prime factor of an ideal `I` of `𝓞 K⁺` with `absNorm I = q ^ k`
+lies over the rational prime `q`, i.e. belongs to `primesOverFinsetPlus K q`. -/
+lemma mem_primesOverFinsetPlus_of_mem_normalizedFactors {q : Nat.Primes}
+    {I : Ideal (𝓞 K⁺)} (hI_ne : I ≠ ⊥) {k : ℕ}
+    (hI_norm : Ideal.absNorm I = (q : ℕ) ^ k) {PPlus : Ideal (𝓞 K⁺)}
+    (hPPlus : PPlus ∈ UniqueFactorizationMonoid.normalizedFactors I) :
+    PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ) :=
+  normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow (K := K) hI_ne hI_norm
+    (Multiset.mem_toFinset.2 hPPlus)
+
 lemma absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
     (hp_odd : p ≠ 2) {q : Nat.Primes} [Fact (q : ℕ).Prime] (hq : (q : ℕ) ≠ p)
     {PPlus : Ideal (𝓞 K⁺)}
@@ -189,12 +204,54 @@ lemma absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
     Ideal.absNorm PPlus = (q : ℕ) ^ localResidueDegreePlus (p := p) (q : ℕ) hq := by
   have hPPlus_over : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal (q : ℕ)) (𝓞 K⁺) :=
     (mem_primesOverFinsetPlus_iff (K := K) (ℓ := (q : ℕ))).1 hPPlus
-  haveI : PPlus.IsPrime := hPPlus_over.1
-  haveI : PPlus.LiesOver (Ideal.span {((q : ℕ) : ℤ)}) := by
+  have : PPlus.IsPrime := hPPlus_over.1
+  have : PPlus.LiesOver (Ideal.span {((q : ℕ) : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hPPlus_over.2
   rw [← primesOver_inertiaDeg_eq_localResidueDegreePlus
     (p := p) (K := K) hp_odd hq PPlus hPPlus_over]
   exact Ideal.absNorm_eq_pow_inertiaDeg' PPlus q.2
+
+/-- A prime ideal of `𝓞 K⁺` lying over the rational prime `q` (an element of
+`primesOverFinsetPlus K q`, with `q ≠ p`) is a `Prime` element of the ideal monoid. -/
+lemma prime_of_mem_primesOverFinsetPlus (hp_odd : p ≠ 2) {q : Nat.Primes}
+    [Fact (q : ℕ).Prime] (hq : (q : ℕ) ≠ p) {PPlus : Ideal (𝓞 K⁺)}
+    (hPPlus : PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ)) :
+    Prime PPlus := by
+  have hPPlus_ne : PPlus ≠ ⊥ := by
+    intro hPPlus_bot
+    have hPPlus_norm :=
+      absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
+        (p := p) (K := K) hp_odd hq hPPlus
+    rw [Ideal.absNorm_eq_zero_iff.mpr hPPlus_bot] at hPPlus_norm
+    exact pow_ne_zero _ q.2.ne_zero hPPlus_norm.symm
+  exact (Ideal.prime_iff_isPrime hPPlus_ne).2
+    ((mem_primesOverFinsetPlus_iff (K := K) (ℓ := (q : ℕ))).1 hPPlus).1
+
+/-- For a multiset `m` of ideals of `𝓞 K⁺` all lying over the rational prime `q`
+(i.e. `m.toFinset ⊆ primesOverFinsetPlus K q`, `q ≠ p`), the absolute norm of the product is
+`q ^ (d * m.card)`, where `d = localResidueDegreePlus` is the common local residue degree. -/
+lemma absNorm_multiset_prod_eq_of_toFinset_subsetPlus (hp_odd : p ≠ 2) {q : Nat.Primes}
+    [Fact (q : ℕ).Prime] (hq : (q : ℕ) ≠ p) {m : Multiset (Ideal (𝓞 K⁺))}
+    (hm_subset : m.toFinset ⊆ primesOverFinsetPlus (K := K) (q : ℕ)) :
+    Ideal.absNorm m.prod =
+      (q : ℕ) ^ (localResidueDegreePlus (p := p) (q : ℕ) hq * m.card) := by
+  set d := localResidueDegreePlus (p := p) (q : ℕ) hq with hd
+  have hsum_count : ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus = m.card :=
+    Multiset.sum_count_eq_card fun PPlus hPPlus ↦ hm_subset (Multiset.mem_toFinset.2 hPPlus)
+  rw [Finset.prod_multiset_count_of_subset m (primesOverFinsetPlus (K := K) (q : ℕ)) hm_subset,
+    map_prod]
+  calc
+    ∏ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), Ideal.absNorm (PPlus ^ m.count PPlus)
+        = ∏ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), ((q : ℕ) ^ d) ^ m.count PPlus := by
+            apply Finset.prod_congr rfl
+            intro PPlus hPPlus
+            rw [map_pow,
+              absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
+                (p := p) (K := K) hp_odd hq hPPlus, hd]
+    _ = (q : ℕ) ^ (d * ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus) := by
+            rw [Finset.prod_pow_eq_pow_sum]
+            simp [Nat.pow_mul]
+    _ = (q : ℕ) ^ (d * m.card) := by rw [hsum_count]
 
 lemma normalizedFactors_card_mul_localResidueDegreePlus_of_absNorm_prime_pow
     (hp_odd : p ≠ 2) {q : Nat.Primes} [Fact (q : ℕ).Prime] (hq : (q : ℕ) ≠ p)
@@ -208,23 +265,8 @@ lemma normalizedFactors_card_mul_localResidueDegreePlus_of_absNorm_prime_pow
   have hsubset : m.toFinset ⊆ primesOverFinsetPlus (K := K) (q : ℕ) := by
     simpa [hm] using
       normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow (K := K) hI_ne hI_norm
-  have hsum_count : ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus = m.card :=
-    Multiset.sum_count_eq_card fun PPlus hPPlus ↦ hsubset (Multiset.mem_toFinset.2 hPPlus)
   have hnorm_factors : Ideal.absNorm m.prod = (q : ℕ) ^ (d * m.card) := by
-    rw [Finset.prod_multiset_count_of_subset m (primesOverFinsetPlus (K := K) (q : ℕ)) hsubset,
-      map_prod]
-    calc
-      ∏ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), Ideal.absNorm (PPlus ^ m.count PPlus)
-          = ∏ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), ((q : ℕ) ^ d) ^ m.count PPlus := by
-              apply Finset.prod_congr rfl
-              intro PPlus hPPlus
-              rw [map_pow]
-              rw [absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
-                (p := p) (K := K) hp_odd hq hPPlus, hd]
-      _ = (q : ℕ) ^ (d * ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus) := by
-              rw [Finset.prod_pow_eq_pow_sum]
-              simp [Nat.pow_mul]
-      _ = (q : ℕ) ^ (d * m.card) := by rw [hsum_count]
+    rw [absNorm_multiset_prod_eq_of_toFinset_subsetPlus (p := p) (K := K) hp_odd hq hsubset, hd]
   have hpow : (q : ℕ) ^ (d * m.card) = (q : ℕ) ^ k := by
     calc
       (q : ℕ) ^ (d * m.card) = Ideal.absNorm m.prod := hnorm_factors.symm
@@ -236,7 +278,7 @@ lemma idealNormMultiplicityNF_prime_pow_eq_zero_of_not_dvd_plus
     (hp_odd : p ≠ 2) {q : Nat.Primes} [Fact (q : ℕ).Prime] (hq : (q : ℕ) ≠ p)
     {k : ℕ} (hk : ¬ localResidueDegreePlus (p := p) (q : ℕ) hq ∣ k) :
     idealNormMultiplicityNF K⁺ ((q : ℕ) ^ k) = 0 := by
-  unfold idealNormMultiplicityNF idealNormMultiplicity
+  simp only [idealNormMultiplicityNF, idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -255,7 +297,7 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
   classical
   set d := localResidueDegreePlus (p := p) (q : ℕ) hq with hd
   let α : Type _ := {PPlus : Ideal (𝓞 K⁺) // PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ)}
-  letI : Fintype α := Fintype.ofFinset (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus ↦ by
+  let : Fintype α := Fintype.ofFinset (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus ↦ by
     simp
   let β : Type _ := {I : NonzeroIdealNF K⁺ // Ideal.absNorm I.1 = (q : ℕ) ^ (d * n)}
   have hd_raw_pos : 0 < localResidueDegree (p := p) (q : ℕ) hq := by
@@ -269,20 +311,11 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
       omega
     · rw [localResidueDegreePlus_eq_self (p := p) hq hde]
       exact hd_raw_pos
-  have hpmap_val :
-      ∀ {m : Multiset (Ideal (𝓞 K⁺))}
-        (H : ∀ PPlus, PPlus ∈ m → PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ)),
-        (Multiset.pmap (fun PPlus hPPlus ↦ (⟨PPlus, hPPlus⟩ : α)) m H).map Subtype.val = m := by
-    intro m H
-    rw [Multiset.map_pmap, Multiset.pmap_eq_map, Multiset.map_id']
   let toSym : β → Sym α n := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ ↦
     let m := UniqueFactorizationMonoid.normalizedFactors I
-    let H : ∀ PPlus, PPlus ∈ m → PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ) := by
-      intro PPlus hPPlus
-      have hsubset : m.toFinset ⊆ primesOverFinsetPlus (K := K) (q : ℕ) := by
-        simpa [m] using
-          normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow (K := K) hI_ne hI_norm
-      exact hsubset (Multiset.mem_toFinset.2 hPPlus)
+    let H : ∀ PPlus, PPlus ∈ m → PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ) :=
+      fun PPlus hPPlus ↦
+        mem_primesOverFinsetPlus_of_mem_normalizedFactors (K := K) hI_ne hI_norm hPPlus
     have hm_card : m.card = n := by
       have hmul : d * m.card = d * n := by
         simpa [m, hd] using
@@ -303,50 +336,22 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
     have hm_prime : ∀ PPlus ∈ m, Prime PPlus := by
       intro PPlus hPPlus
       rcases Multiset.mem_map.1 hPPlus with ⟨QPlus, hQPlus, rfl⟩
-      have hQPlus_ne : (QPlus : Ideal (𝓞 K⁺)) ≠ ⊥ := by
-        intro hQPlus_bot
-        have hQPlus_norm :=
-          absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
-            (p := p) (K := K) hp_odd hq QPlus.2
-        rw [Ideal.absNorm_eq_zero_iff.mpr hQPlus_bot, ← hd] at hQPlus_norm
-        exact pow_ne_zero d q.2.ne_zero hQPlus_norm.symm
-      exact (Ideal.prime_iff_isPrime hQPlus_ne).2
-        ((mem_primesOverFinsetPlus_iff (K := K) (ℓ := (q : ℕ))).1 QPlus.2).1
+      exact prime_of_mem_primesOverFinsetPlus (p := p) (K := K) hp_odd hq QPlus.2
     have hm_prod_ne : m.prod ≠ ⊥ := Multiset.prod_ne_zero_of_prime m hm_prime
     have hm_norm : Ideal.absNorm m.prod = (q : ℕ) ^ (d * n) := by
-      have hsum_count :
-          ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus = m.card :=
-        Multiset.sum_count_eq_card fun PPlus hPPlus ↦
-          hm_subset (Multiset.mem_toFinset.2 hPPlus)
-      rw [Finset.prod_multiset_count_of_subset m (primesOverFinsetPlus (K := K) (q : ℕ)) hm_subset,
-        map_prod]
-      calc
-        ∏ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), Ideal.absNorm (PPlus ^ m.count PPlus)
-            = ∏ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), ((q : ℕ) ^ d) ^ m.count PPlus := by
-                apply Finset.prod_congr rfl
-                intro PPlus hPPlus
-                rw [map_pow]
-                rw [absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
-                  (p := p) (K := K) hp_odd hq hPPlus, hd]
-        _ = (q : ℕ) ^ (d * ∑ PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ), m.count PPlus) := by
-                rw [Finset.prod_pow_eq_pow_sum]
-                simp [Nat.pow_mul]
-        _ = (q : ℕ) ^ (d * m.card) := by rw [hsum_count]
-        _ = (q : ℕ) ^ (d * n) := by rw [hm_card]
+      rw [absNorm_multiset_prod_eq_of_toFinset_subsetPlus (p := p) (K := K) hp_odd hq hm_subset,
+        ← hd, hm_card]
     ⟨⟨m.prod, hm_prod_ne⟩, hm_norm⟩
   have htoSym_map_val :
       ∀ b : β, (toSym b).1.map Subtype.val = UniqueFactorizationMonoid.normalizedFactors b.1.1 := by
     rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
     dsimp [toSym]
     let m := UniqueFactorizationMonoid.normalizedFactors I
-    let H : ∀ PPlus, PPlus ∈ m → PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ) := by
-      intro PPlus hPPlus
-      have hsubset : m.toFinset ⊆ primesOverFinsetPlus (K := K) (q : ℕ) := by
-        simpa [m] using
-          normalizedFactors_subset_primesOverFinsetPlus_of_absNorm_prime_pow (K := K) hI_ne hI_norm
-      exact hsubset (Multiset.mem_toFinset.2 hPPlus)
+    let H : ∀ PPlus, PPlus ∈ m → PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ) :=
+      fun PPlus hPPlus ↦
+        mem_primesOverFinsetPlus_of_mem_normalizedFactors (K := K) hI_ne hI_norm hPPlus
     change (Multiset.pmap (fun PPlus hPPlus ↦ (⟨PPlus, hPPlus⟩ : α)) m H).map Subtype.val = m
-    rw [hpmap_val H]
+    exact map_val_pmap_mk m H
   have hofSym_nfactors :
       ∀ s : Sym α n,
         UniqueFactorizationMonoid.normalizedFactors (ofSym s).1.1 = s.1.map Subtype.val := by
@@ -356,15 +361,7 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
     have hm_prime : ∀ PPlus ∈ m, Prime PPlus := by
       intro PPlus hPPlus
       rcases Multiset.mem_map.1 hPPlus with ⟨QPlus, hQPlus, rfl⟩
-      have hQPlus_ne : (QPlus : Ideal (𝓞 K⁺)) ≠ ⊥ := by
-        intro hQPlus_bot
-        have hQPlus_norm :=
-          absNorm_eq_q_pow_localResidueDegreePlus_of_mem_primesOverFinsetPlus
-            (p := p) (K := K) hp_odd hq QPlus.2
-        rw [Ideal.absNorm_eq_zero_iff.mpr hQPlus_bot, ← hd] at hQPlus_norm
-        exact pow_ne_zero d q.2.ne_zero hQPlus_norm.symm
-      exact (Ideal.prime_iff_isPrime hQPlus_ne).2
-        ((mem_primesOverFinsetPlus_iff (K := K) (ℓ := (q : ℕ))).1 QPlus.2).1
+      exact prime_of_mem_primesOverFinsetPlus (p := p) (K := K) hp_odd hq QPlus.2
     change UniqueFactorizationMonoid.normalizedFactors m.prod = m
     exact UniqueFactorizationMonoid.normalizedFactors_prod_of_prime hm_prime
   have hleft : Function.LeftInverse ofSym toSym := by
@@ -380,7 +377,7 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
     simpa [hofSym_nfactors s] using htoSym_map_val (ofSym s)
   let e : β ≃ Sym α n :=
     ⟨toSym, ofSym, hleft, hright⟩
-  unfold idealNormMultiplicityNF idealNormMultiplicity
+  simp only [idealNormMultiplicityNF, idealNormMultiplicity]
   simpa [β, α, hd, Nat.card_eq_fintype_card] using Nat.card_congr e
 
 lemma dedekind_prime_power_series_eq_localFactorPlus_at_p
@@ -388,7 +385,7 @@ lemma dedekind_prime_power_series_eq_localFactorPlus_at_p
     (∑' k : ℕ, (idealNormMultiplicityNF K⁺ (p ^ k) : ℂ) *
       (((p ^ k : ℕ) : ℂ) ^ (-s))) =
       (dedekindLocalFactor K⁺ p s)⁻¹ := by
-  haveI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
+  have : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
   have hnorm : ‖(p : ℂ) ^ (-s)‖ < 1 := by
     have hle : ‖(p : ℂ) ^ (-s)‖ ≤ 1 / 2 :=
       Complex.norm_prime_cpow_le_one_half ⟨p, hp.out⟩ hs
@@ -407,7 +404,7 @@ lemma dedekind_prime_power_series_eq_localFactorPlus
     (∑' k : ℕ, (idealNormMultiplicityNF K⁺ ((q : ℕ) ^ k) : ℂ) *
       ((((q : ℕ) ^ k : ℕ) : ℂ) ^ (-s))) =
       (dedekindLocalFactor K⁺ (q : ℕ) s)⁻¹ := by
-  haveI : Fact (q : ℕ).Prime := ⟨q.2⟩
+  have : Fact (q : ℕ).Prime := ⟨q.2⟩
   by_cases hq : (q : ℕ) = p
   · have hq' : q = ⟨p, Fact.out⟩ := by
       apply Subtype.ext
@@ -416,11 +413,11 @@ lemma dedekind_prime_power_series_eq_localFactorPlus
     simpa using dedekind_prime_power_series_eq_localFactorPlus_at_p
       (p := p) (K := K) hp_odd hs
   · classical
-    haveI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
+    have : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
     set d := localResidueDegreePlus (p := p) (q : ℕ) hq with hd
     let α : Type _ := {PPlus : Ideal (𝓞 K⁺) //
       PPlus ∈ primesOverFinsetPlus (K := K) (q : ℕ)}
-    letI : Fintype α :=
+    let : Fintype α :=
       Fintype.ofFinset (primesOverFinsetPlus (K := K) (q : ℕ)) fun PPlus ↦ by simp
     let f : ℕ → ℂ := fun k ↦
       (idealNormMultiplicityNF K⁺ ((q : ℕ) ^ k) : ℂ) * ((((q : ℕ) ^ k : ℕ) : ℂ) ^ (-s))
@@ -515,7 +512,7 @@ lemma evenLProduct_eq_tprod_localFactors {s : ℂ} (hs : 1 < s.re) :
         ∏ χ ∈ evenNontrivialCharacters (p := p),
           (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹ := by
   classical
-  unfold evenLProduct
+  simp only [evenLProduct]
   rw [Finset.prod_congr rfl (fun χ _ ↦ LFunction_eq_prime_tprod_of_localFactors p χ hs)]
   exact (Multipliable.tprod_finsetProd
     (s := evenNontrivialCharacters (p := p))
@@ -527,7 +524,7 @@ lemma evenLProduct_eq_eulerProduct {s : ℂ} (hs : 1 < s.re) :
   classical
   rw [evenLProduct_eq_tprod_localFactors (p := p) hs]
   refine tprod_congr fun q ↦ ?_
-  unfold evenCharLocalFactor
+  simp only [evenCharLocalFactor]
   rw [Finset.prod_inv_distrib]
 
 lemma evenCharLocalFactor_at_p {s : ℂ} :
@@ -540,8 +537,8 @@ lemma localFactorsPlus_agree_prime_ne_p (hp_odd : p ≠ 2)
     {q : Nat.Primes} (hq : (q : ℕ) ≠ p) {s : ℂ} :
     dedekindLocalFactor K⁺ (q : ℕ) s =
       (1 - ((q : ℕ) : ℂ) ^ (-s)) * evenCharLocalFactor (p := p) (q : ℕ) s := by
-  haveI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
-  haveI : Fact (q : ℕ).Prime := ⟨q.2⟩
+  have : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
+  have : Fact (q : ℕ).Prime := ⟨q.2⟩
   rw [dedekindLocalFactor_eq_pow_localResidueDegreePlus (p := p) (K := K) hp_odd hq]
   symm
   simpa [neg_mul] using
@@ -551,7 +548,7 @@ lemma localFactorsPlus_agree_prime_ne_p (hp_odd : p ≠ 2)
 lemma localFactorsPlus_agree_at_p (hp_odd : p ≠ 2) {s : ℂ} :
     dedekindLocalFactor K⁺ p s =
       (1 - (p : ℂ) ^ (-s)) * evenCharLocalFactor (p := p) p s := by
-  haveI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
+  have : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
   rw [evenCharLocalFactor_at_p (p := p), mul_one, dedekindLocalFactorPlus_at_p (p := p) (K := K)]
 
 lemma localFactorsPlus_agree (hp_odd : p ≠ 2) {q : Nat.Primes} {s : ℂ} :
@@ -580,7 +577,7 @@ theorem dedekindZeta_eq_riemannZeta_mul_evenLProduct_of_one_lt_re
             ∏ χ ∈ evenNontrivialCharacters (p := p),
               (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹) := by
       funext q
-      unfold evenCharLocalFactor
+      simp only [evenCharLocalFactor]
       rw [Finset.prod_inv_distrib]
     rw [h1]
     exact multipliable_prod (s := evenNontrivialCharacters (p := p)) fun χ _ ↦

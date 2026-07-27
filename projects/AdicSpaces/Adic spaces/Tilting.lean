@@ -347,7 +347,7 @@ private theorem berkeley_6_2_8 (p : ℕ) [Fact (Nat.Prime p)]
     sorry
   -- (B) ∃ ξ ∈ ker(θ) with ξ.coeff 0 ≠ 0.
   have hA : ∃ (ξ : Ainf p A), ξ ∈ RingHom.ker θ ∧ ξ.coeff 0 ≠ 0 := by
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     -- All ker(θ) elements have coeff 0 = 0 implies ker(θ) = ⊥ (contradiction).
     apply hker; ext x; constructor
     · intro hx

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ForMathlib.GrassmannianTransition
 import ModularCurves.ForMathlib.GrassmannianChart
 import ModularCurves.ForMathlib.GrassmannianOverlap
@@ -290,6 +295,68 @@ private lemma includeLeft_algebraMap_eq_includeRight_algebraMap :
             (Localization.Away (Transition.det (R := R) ι ι'')) q from rfl]
   rw [← Algebra.TensorProduct.algebraMap_apply, Algebra.TensorProduct.algebraMap_apply']
 
+/-- The right t'-leg precomposed with the base `algebraMap` is the base leg
+`tPrimeBase` — the defining `IsLocalization.Away.lift` equation of `tPrimeLegRight`. -/
+lemma tPrimeLegRight_algebraMap (q : ChartRing R ι') :
+    tPrimeLegRight R ι ι' ι'' (algebraMap (ChartRing R ι')
+        (Localization.Away (Transition.det (R := R) ι' ι'')) q)
+      = tPrimeBase R ι ι' ι'' q :=
+  IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_right R ι ι' ι'') q
+
+/-- The middle telescope step: transporting the ι''→ι base `algebraMap` up through the
+right leg and `tPrimeRing` lands on the right leg of the ι'→ι'' transition. -/
+lemma tPrimeRing_tPrimeLegRight_algebraMap (q : ChartRing R ι'') :
+    tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
+        (algebraMap (ChartRing R ι'')
+          (Localization.Away (Transition.det (R := R) ι'' ι)) q))
+      = tPrimeLegRight R ι ι' ι'' (Transition.ringHom (R := R) ι' ι'' q) := by
+  rw [tPrimeLegRight_algebraMap R ι' ι'' ι q]
+  have hcl := RingHom.congr_fun (tPrimeRing_comp_includeLeft R ι ι' ι'')
+    (Transition.ringHom (R := R) ι' ι'' q)
+  rw [RingHom.comp_apply] at hcl
+  exact hcl
+
+/-- The ι→ι'' telescope matrix (`matrix ι ι''` pushed into the ι-side double ring through
+`includeLeft ∘ algebraMap`) has unit determinant: its determinant is
+`includeLeft (algebraMap (det ι ι''))`, a unit by the base-element slide. -/
+private lemma isUnit_det_matrix_includeLeft :
+    IsUnit (((Transition.matrix (R := R) ι ι'').map (fun q =>
+      (Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'')
+        (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι')) q))).det) := by
+  have hKdet' : ((Transition.matrix (R := R) ι ι'').map (fun q =>
+      (Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'')
+        (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι')) q))).det
+      = (Algebra.TensorProduct.includeLeftRingHom :
+          Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'')
+        (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι'))
+          (Transition.det (R := R) ι ι'')) := by
+    rw [show ((Transition.matrix (R := R) ι ι'').map
+        (fun q => (Algebra.TensorProduct.includeLeftRingHom :
+            Localization.Away (Transition.det (R := R) ι ι') →+* doubleRing R ι ι' ι'')
+          (algebraMap (ChartRing R ι)
+            (Localization.Away (Transition.det (R := R) ι ι')) q)))
+        = (Transition.matrix (R := R) ι ι'').map
+          ⇑((Algebra.TensorProduct.includeLeftRingHom :
+              Localization.Away (Transition.det (R := R) ι ι') →+*
+                doubleRing R ι ι' ι'').comp
+            (algebraMap (ChartRing R ι)
+              (Localization.Away (Transition.det (R := R) ι ι')))) from rfl]
+    rw [← RingHom.mapMatrix_apply, ← RingHom.map_det]
+    rfl
+  rw [hKdet']
+  have hsw := RingHom.congr_fun
+    (includeLeft_algebraMap_eq_includeRight_algebraMap R ι ι' ι'')
+    (Transition.det (R := R) ι ι'')
+  rw [RingHom.comp_apply, RingHom.comp_apply] at hsw
+  rw [hsw]
+  exact (IsLocalization.Away.algebraMap_isUnit
+    (Transition.det (R := R) ι ι'')).map _
+
 /-- The core of the cocycle: the triple transition composite restricted to the ι-chart
 ring is the canonical base map. Proven by the matrix telescope `N₂ = N₃⁻¹ · M₁⁻¹`. -/
 private lemma cocycle_core :
@@ -307,21 +374,12 @@ private lemma cocycle_core :
       (algebraMap (ChartRing R ι')
         (Localization.Away (Transition.det (R := R) ι' ι'')) q)
       = inclL (Transition.ringHom (R := R) ι ι' q) := fun q =>
-    IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_right R ι ι' ι'') q
+    tPrimeLegRight_algebraMap R ι ι' ι'' q
   have hF₂alg : ∀ q, tPrimeRing R ι ι' ι'' (tPrimeLegRight R ι' ι'' ι
       (algebraMap (ChartRing R ι'')
         (Localization.Away (Transition.det (R := R) ι'' ι)) q))
-      = tPrimeLegRight R ι ι' ι'' (Transition.ringHom (R := R) ι' ι'' q) := by
-    intro q
-    have hlg : tPrimeLegRight R ι' ι'' ι (algebraMap (ChartRing R ι'')
-        (Localization.Away (Transition.det (R := R) ι'' ι)) q)
-        = tPrimeBase R ι' ι'' ι q :=
-      IsLocalization.Away.lift_eq _ (isUnit_tPrimeBase_det_right R ι' ι'' ι) q
-    rw [hlg]
-    have hcl := RingHom.congr_fun (tPrimeRing_comp_includeLeft R ι ι' ι'')
-      (Transition.ringHom (R := R) ι' ι'' q)
-    rw [RingHom.comp_apply] at hcl
-    exact hcl
+      = tPrimeLegRight R ι ι' ι'' (Transition.ringHom (R := R) ι' ι'' q) := fun q =>
+    tPrimeRing_tPrimeLegRight_algebraMap R ι ι' ι'' q
   -- the telescope matrices (function-literal maps) and their determinant units
   set M₁ : Matrix (Fin k) (Fin k) (doubleRing R ι ι' ι'') :=
     (Transition.matrix (R := R) ι ι').map (fun q => inclL (algebraMap (ChartRing R ι)
@@ -343,27 +401,7 @@ private lemma cocycle_core :
   have hM₁det : IsUnit M₁.det := by
     rw [hM₁eq, ← RingHom.mapMatrix_apply, ← RingHom.map_det]
     exact (Transition.isUnit_det_matrixAway ι ι').map _
-  have hKdet : IsUnit K.det := by
-    have hKdet' : K.det = inclL (algebraMap (ChartRing R ι)
-        (Localization.Away (Transition.det (R := R) ι ι'))
-        (Transition.det (R := R) ι ι'')) := by
-      rw [hK]
-      rw [show ((Transition.matrix (R := R) ι ι'').map
-          (fun q => inclL (algebraMap (ChartRing R ι)
-            (Localization.Away (Transition.det (R := R) ι ι')) q)))
-          = (Transition.matrix (R := R) ι ι'').map
-            ⇑(inclL.comp (algebraMap (ChartRing R ι)
-              (Localization.Away (Transition.det (R := R) ι ι')))) from rfl]
-      rw [← RingHom.mapMatrix_apply, ← RingHom.map_det]
-      rfl
-    rw [hKdet']
-    have hsw := RingHom.congr_fun
-      (includeLeft_algebraMap_eq_includeRight_algebraMap R ι ι' ι'')
-      (Transition.det (R := R) ι ι'')
-    rw [RingHom.comp_apply, RingHom.comp_apply] at hsw
-    rw [hinclL, hsw]
-    exact (IsLocalization.Away.algebraMap_isUnit
-      (Transition.det (R := R) ι ι'')).map _
+  have hKdet : IsUnit K.det := isUnit_det_matrix_includeLeft R ι ι' ι''
   have hN₃eq : N₃ = M₁⁻¹ * K := by
     have h1 : N₃ = ((Transition.matrix (R := R) ι' ι'').map
         ⇑(Transition.ringHom (R := R) ι ι')).map ⇑inclL := by
@@ -647,6 +685,7 @@ theorem tPrimeRing_cocycle :
     simp only [RingHom.comp_apply] at this
     exact this
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The Spec-level cocycle: the triple `tPrimeScheme` composite telescopes to the
 identity through `Spec.map`-functoriality over the ring cocycle. -/
 lemma tPrimeScheme_cocycle :

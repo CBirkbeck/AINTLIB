@@ -6,13 +6,11 @@ import BernoulliRegular.BernoulliFast.KellnerSecondOrder
 /-!
 # Washington Proposition 8.12 at the irregular index `i = 32`, second order: the `ω³²`-collapse
 
-This file discharges `Cor823Omega32SecondOrderCollapse37` (`CaseIICor823Discharge.lean`) —
-Washington Proposition 8.12 at the irregular index `i = 32`, made explicit at the **second-order**
-coefficient — **down to one strictly-smaller, sound, non-vacuous residual**: the genuine level-`68`
-mod-`37²` leading-coefficient content at `j = 15`, isolated as
-`Cor823Omega32SecondOrderVandermonde37`.
-
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+This file discharges `Cor823Omega32SecondOrderCollapse37`
+(`IrregularUnitPthPowerOfRationalModSq.lean`) — Washington Proposition 8.12 at the irregular index
+`i = 32`, made explicit at the **second-order** coefficient — **down to one strictly-smaller, sound,
+non-vacuous residual**: the genuine level-`68` mod-`37²` leading-coefficient content at `j = 15`,
+isolated as `Cor823Omega32SecondOrderVandermonde37`.
 
 ## The first-order degeneracy at `j = 15`, and the second order
 
@@ -80,9 +78,7 @@ second-order), and **non-vacuous** (`u = 1`, `c = 1`, `v = 1`, `s = 0`, `e = 0`;
 
 noncomputable section
 
-set_option maxRecDepth 4000
-
-open NumberField BigOperators
+open NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 

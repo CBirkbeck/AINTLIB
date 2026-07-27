@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.GaussSum
@@ -213,7 +218,7 @@ theorem residueGaussSum_pow_eq_inv_apply_smul_of_charP
     (residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R) a *
         residueGaussSum zeta_q hzeta_q hdiv zeta_R hzeta_R psi_q ^ (ℓ ^ f) =
       residueGaussSum zeta_q hzeta_q hdiv zeta_R hzeta_R psi_q := by
-  unfold residueGaussSum
+  simp only [residueGaussSum]
   exact gaussSum_pow_eq_inv_apply_smul_of_charP hp
     (residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R)
     (residueMulChar_pow_eq_one_mulChar zeta_q hzeta_q hdiv zeta_R hzeta_R)
@@ -625,7 +630,7 @@ theorem pthSymbolAtPrime_canonical_eq_of_descent_pow_eq
   letI : Field (𝓞 K ⧸ P') := Ideal.Quotient.field P'
   rw [BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical_eq_primeExponent
     hP'_bot hP'_max hγ_notin_P' hdiv_P' hp_in_P']
-  unfold Reflection.ResidueSymbol.PowerResidue.primeExponent
+  simp only [Reflection.ResidueSymbol.PowerResidue.primeExponent]
   exact (finiteFieldExponent_eq_of_pow_eq
     (canonicalResidueZetaP_isPrimitiveRoot (p := p) (K := K) hP'_bot hp_in_P')
     hdiv_P' h_descent.symm).symm
@@ -659,7 +664,7 @@ theorem K2_2_of_descent_pow_eq_general
   letI : Field (𝓞 K ⧸ P') := Ideal.Quotient.field P'
   rw [BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical_eq_primeExponent
     hP'_bot hP'_max hγ_notin_P' hdiv_P' hp_in_P']
-  unfold Reflection.ResidueSymbol.PowerResidue.primeExponent
+  simp only [Reflection.ResidueSymbol.PowerResidue.primeExponent]
   exact (finiteFieldExponent_eq_of_pow_eq
     (canonicalResidueZetaP_isPrimitiveRoot (p := p) (K := K) hP'_bot hp_in_P')
     hdiv_P' h_descent.symm).symm
@@ -692,7 +697,7 @@ theorem K2_2_of_descent_pow_eq
   letI : Field (𝓞 K ⧸ P') := Ideal.Quotient.field P'
   rw [BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical_eq_primeExponent
     hP'_bot hP'_max hphi_notin_P' hdiv_P' hp_in_P']
-  unfold Reflection.ResidueSymbol.PowerResidue.primeExponent
+  simp only [Reflection.ResidueSymbol.PowerResidue.primeExponent]
   -- Goal: finiteFieldExponent (canonicalZetaP P') ... (quotientUnitOfNotMem P' phi) = -s
   -- Apply discrete log uniqueness with e = -s.
   exact (finiteFieldExponent_eq_of_pow_eq

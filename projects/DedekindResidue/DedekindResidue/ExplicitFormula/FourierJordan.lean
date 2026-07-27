@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import DedekindResidue.ExplicitFormula.PrimeSide
@@ -507,7 +512,8 @@ theorem tendsto_integral_mul_cexp_neg_atTop (G : ℝ → ℂ) :
   refine hcomp.congr (fun T => ?_)
   simp only [Function.comp_apply]
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun u => ?_))
-  show Real.fourierChar (-(u * (T / (2*π)))) • G u = G u * Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)
+  show Real.fourierChar (-(u * (T / (2*π)))) • G u =
+      G u * Complex.exp (-((u:ℂ) * (T:ℂ)) * Complex.I)
   rw [Circle.smul_def, Real.fourierChar_apply]
   have hreal : 2 * π * -(u * (T / (2 * π))) = -(u * T) := by
     have hpi : (2:ℝ) * π ≠ 0 := by positivity
@@ -597,7 +603,8 @@ theorem abs_integral_stieltjes_kernel_le {g K : ℝ → ℝ} (hg : Monotone g) {
   set μ := F.measure with hμ
   set μ' := μ.restrict (Set.Ioc 0 δ) with hμ'
   -- the window measure is finite, with total mass ḡ(δ) - ḡ(0)
-  have hmass : μ (Set.Ioc 0 δ) = ENNReal.ofReal (Function.rightLim g δ - Function.rightLim g 0) := by
+  have hmass : μ (Set.Ioc 0 δ) =
+      ENNReal.ofReal (Function.rightLim g δ - Function.rightLim g 0) := by
     rw [hμ, F.measure_Ioc, hFeq, hFeq]
   have hmono : Function.rightLim g 0 ≤ Function.rightLim g δ := hg.rightLim hδ.le
   have : IsFiniteMeasure μ' := by

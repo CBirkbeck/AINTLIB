@@ -114,7 +114,7 @@ variable {m : ℕ}
 
 /-- **`1 - ζ^a` is associate to `ζ - 1`** for `¬37∣a` (so `1 - ζ^a ∣ x + ζ^a·y`).  Both `1` and
 `ζ^a` are `37`-th roots and `ζ^a ≠ 1`, so `1 - ζ^a` is associate to `ζ - 1`
-(`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime`). -/
+(`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime`). -/
 theorem caseII_one_sub_zetaPow_associated_zeta_sub_one
     (D : RealCaseIIData37 (CyclotomicField 37 ℚ) m) {a : ℤ} (ha : ¬ (37 : ℤ) ∣ a) :
     Associated (1 - zetaPow 37 (CyclotomicField 37 ℚ) a) (D.hζ.toInteger - 1) := by
@@ -130,7 +130,7 @@ theorem caseII_one_sub_zetaPow_associated_zeta_sub_one
     rw [hcoe, sub_self]; exact lv149.zero_mem
   -- `Set.Pairwise`: `Associated (ζ - 1) (ζ^a - 1)`.
   have hassoc : Associated (D.hζ.toInteger - 1) (zetaPow 37 (CyclotomicField 37 ℚ) a - 1) :=
-    D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hzmem h1mem hne
   have hneg : Associated (1 - zetaPow 37 (CyclotomicField 37 ℚ) a)
       (zetaPow 37 (CyclotomicField 37 ℚ) a - 1) :=

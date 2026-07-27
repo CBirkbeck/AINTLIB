@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.RingTheory.ClassGroup
+public import Mathlib.RingTheory.ClassGroup.Basic
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 public import Mathlib.RingTheory.Ideal.Quotient.Operations
 
@@ -158,7 +158,7 @@ theorem exists_mem_coprime_principal_finset (I : Ideal R) (hI : I ≠ ⊥)
 Every ideal class has a nonzero integral representative coprime to a prescribed
 maximal ideal. -/
 theorem exists_class_representative_coprime_singleton (c : ClassGroup R)
-    (P : Ideal R) [IsDomain R] [P.IsMaximal] :
+    (P : Ideal R) [P.IsMaximal] :
     ∃ J : (Ideal R)⁰, ClassGroup.mk0 J = c ∧ IsCoprime (J : Ideal R) P := by
   obtain ⟨I, hI_class⟩ := ClassGroup.mk0_surjective (R := R) (c⁻¹)
   obtain ⟨x, hxI, hx_not_mem⟩ := exists_mem_notMem_mul_left (I : Ideal R) P
@@ -199,7 +199,7 @@ theorem exists_class_representative_coprime_singleton (c : ClassGroup R)
 Every ideal class has a nonzero integral representative coprime to each ideal
 in a prescribed finite set of maximal ideals. -/
 theorem exists_class_representative_coprime_finset (c : ClassGroup R)
-    (S : Finset (Ideal R)) [IsDomain R] (hSmax : ∀ P ∈ S, P.IsMaximal) :
+    (S : Finset (Ideal R)) (hSmax : ∀ P ∈ S, P.IsMaximal) :
     ∃ J : (Ideal R)⁰,
       ClassGroup.mk0 J = c ∧ ∀ P ∈ S, IsCoprime (J : Ideal R) P := by
   obtain ⟨I, hI_class⟩ := ClassGroup.mk0_surjective (R := R) (c⁻¹)
@@ -239,7 +239,7 @@ theorem exists_class_representative_coprime_finset (c : ClassGroup R)
 /-- Version of `exists_class_representative_coprime_finset` for nonzero prime
 ideals in a Dedekind domain. -/
 theorem exists_class_representative_coprime_prime_finset (c : ClassGroup R)
-    (S : Finset (Ideal R)) [IsDomain R]
+    (S : Finset (Ideal R))
     (hSprime : ∀ P ∈ S, P.IsPrime) (hS_ne : ∀ P ∈ S, P ≠ ⊥) :
     ∃ J : (Ideal R)⁰,
       ClassGroup.mk0 J = c ∧ ∀ P ∈ S, IsCoprime (J : Ideal R) P :=

@@ -310,7 +310,7 @@ lemma petN_toCuspForm_eq_zero_of_ne {f g : Newform N k} (hfg : f ≠ g) :
     -- Some good-prime eigenvalue differs, else `f = g` by Strong Multiplicity One + Task-2.
     have : ∃ n : ℕ+, Nat.Coprime n.val N ∧ f.eigenvalue n ≠ g.eigenvalue n := by
       by_contra hcon
-      push_neg at hcon
+      push Not at hcon
       refine hfg (ext_of_toCuspForm (strongMultiplicityOne f g g.χ
         (hχ ▸ f.mem_charSpace) g.mem_charSpace ∅ fun n hn _ => hcon n hn))
     obtain ⟨n, hn, hne⟩ := this
@@ -410,7 +410,8 @@ lemma coeffSeq_eq_coeffSeqLin (f : Newform N k) : coeffSeq f = coeffSeqLin f.toC
 /-- **Linear independence of newform coefficient sequences.**  The normalised Fourier coefficient
 sequences `coeffSeq f` of the newforms of level `N`, weight `k` are `ℂ`-linearly independent.  This
 transfers `linearIndependent_toCuspForm` along the injective linear map `coeffSeqLin`
-(`q`-expansion determines the form), and is the newform analogue of `linearIndependent_monoidHom`. -/
+(`q`-expansion determines the form), and is the newform analogue of
+`linearIndependent_monoidHom`. -/
 lemma linearIndependent_coeffSeq :
     LinearIndependent ℂ (coeffSeq (N := N) (k := k)) := by
   have h := linearIndependent_toCuspForm (N := N) (k := k) |>.map'
@@ -433,7 +434,8 @@ lemma coeffSeq_mem_coeffField (f : Newform N k) (n : ℕ+) : coeffSeq f n ∈ co
 /-! ### [T004a] Newform coefficients are Hecke eigenvalues for ALL `n` (DS eq 5.21 + Thm 5.8.2) -/
 
 /-- The canonical `q`-coefficient of `heckeT_n_cusp` agrees with that of the underlying
-`ModularForm`-level `heckeT_n` (they have the same `toModularForm'`, hence the same `q`-expansion). -/
+`ModularForm`-level `heckeT_n` (they have the same `toModularForm'`, hence the same
+`q`-expansion). -/
 private lemma coeff_heckeT_n_cusp_eq_heckeT_n (m j : ℕ) [NeZero j]
     (h : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
     (UpperHalfPlane.qExpansion (1 : ℝ) (heckeT_n_cusp k j h)).coeff m =
@@ -634,7 +636,8 @@ theorem coeffSeq_eq_newformEigenHom_heckeEnd (f : Newform N k) (n : ℕ+) :
 Automorphic Functions*, **Thm 3.48(3)** p.83; Diamond–Shurman Thm 6.5.1): each normalised Fourier
 coefficient `aₙ(f)` of a newform is integral **over `ℤ`** (a genuine algebraic integer — the full
 source strength, not merely algebraic over `ℚ`).  Proved modulo the single finiteness input
-`heckeAlgℤ_finite`.  (Shimura Thm 3.52, p.85, is the *integral q-expansion basis* / full-rank lattice
+`heckeAlgℤ_finite`.  (Shimura Thm 3.52, p.85, is the *integral q-expansion basis* / full-rank
+lattice
 — a different statement, used for `heckeAlgℤ_finite`, not here.) -/
 theorem coeffSeq_isIntegral (f : Newform N k) (n : ℕ+) : IsIntegral ℤ (coeffSeq f n) := by
   haveI : Module.Finite ℤ ↥(newformEigenHom f).range := newformEigenHom_range_finite f
@@ -645,7 +648,8 @@ theorem coeffSeq_isIntegral (f : Newform N k) (n : ℕ+) : IsIntegral ℤ (coeff
 
 /-- **The eigenvalue arithmetic of a newform** (Shimura Thm 3.51(1)): the generating set `{aₙ}` is a
 priori infinite, but all `aₙ` lie in the eigenvalue ring `O_f = (newformEigenHom f).range`, which is
-module-finite over `ℤ` — so `K_f` is finite-dimensional over `ℚ`.  Factored to take the finiteness as
+module-finite over `ℤ` — so `K_f` is finite-dimensional over `ℚ`.  Factored to take the
+finiteness as
 a hypothesis; the deep input (`heckeAlgℤ_finite`) enters at the use sites below.
 
 `K_f` is finite-dimensional over `ℚ` once the eigenvalue ring `O_f := (newformEigenHom f).range`
@@ -698,10 +702,12 @@ instance instNumberFieldCoeffField (f : Newform N k) : NumberField (coeffField f
 /-- **The coefficient field `K_f = ℚ(aₙ : n)` of a weight-`k ≥ 2` newform is a number field —
 UNCONDITIONALLY (axiom-clean).**  For `k ≥ 2` the finiteness of the integral Hecke algebra is
 supplied by the integral Eichler–Shimura *period-map injectivity* route
-(`ModularSymbols.heckeAlgℤ_finite_of_period` with injectivity `periodMap'_injective_eichler`, which is
+(`ModularSymbols.heckeAlgℤ_finite_of_period` with injectivity `periodMap'_injective_eichler`,
+which is
 axiom-clean — `{propext, Classical.choice, Quot.sound}`), so this carries **no**
 `exists_HeckeStableLattice` / Deligne–Serre dependency (that is only the `k < 2` branch of the
-all-weights instance `instNumberFieldCoeffField`).  This is the headline arithmetic consequence of the
+all-weights instance `instNumberFieldCoeffField`).  This is the headline arithmetic consequence
+of the
 Eichler route: `[K_f : ℚ] < ∞` for every weight `k ≥ 2`, every level `N`. -/
 theorem coeffField_numberField_of_two_le (f : Newform N k) (hk : 2 ≤ k) :
     NumberField (coeffField f) := by
@@ -715,7 +721,8 @@ theorem coeffField_numberField_of_two_le (f : Newform N k) (hk : 2 ≤ k) :
     Module.Finite.of_surjective
       (RingHom.rangeRestrict (newformEigenHom f)).toIntAlgHom.toLinearMap
       (RingHom.rangeRestrict_surjective _)
-  -- ...so `K_f = O_f ⊗ ℚ` is finite-dimensional, and `CharZero` (subfield of `ℂ`) gives a number field.
+  -- ...so `K_f = O_f ⊗ ℚ` is finite-dimensional, and `CharZero` (a subfield of `ℂ`) gives a
+  -- number field.
   exact { to_finiteDimensional := finiteDimensional_coeffField_of_rangeFinite f hOf }
 
 /-! ### The Galois action and the Hecke orbit
@@ -863,24 +870,6 @@ We reduce injectivity of `newformOrbitLabel` on distinct orbits to the orbit-lev
 separation `traceSeq_injOn_orbits` (equal trace sequences ⇒ same orbit), then run the same
 rank-injectivity argument as for the character label. -/
 
-/-- On a finite linearly ordered set `S`, the rank function `a ↦ #{x ∈ S | x < a}` is strictly
-monotone, hence injective, on `S`. -/
-private lemma rank_injOn {α : Type*} [LinearOrder α] (S : Finset α) {a b : α}
-    (ha : a ∈ S) (hb : b ∈ S)
-    (hcard : (S.filter (· < a)).card = (S.filter (· < b)).card) : a = b := by
-  classical
-  have mono : ∀ x y : α, x ∈ S → x < y →
-      (S.filter (· < x)).card < (S.filter (· < y)).card := by
-    intro x y hx hxy
-    refine Finset.card_lt_card <| (Finset.ssubset_iff_of_subset
-      (Finset.monotone_filter_right S (fun z _ hz => lt_trans hz hxy))).mpr ?_
-    exact ⟨x, Finset.mem_filter.mpr ⟨hx, hxy⟩,
-      fun hmem => lt_irrefl x (Finset.mem_filter.mp hmem).2⟩
-  rcases lt_trichotomy a b with hlt | heq | hgt
-  · exact absurd hcard (ne_of_lt (mono a b ha hlt))
-  · exact heq
-  · exact absurd hcard.symm (ne_of_lt (mono b a hb hgt))
-
 /-- **Orbit-level trace separation.**  If two newforms (of level `N`, weight `k`, sharing the
 Nebentypus eigenspace `modFormCharSpace k χ`) have the *same orbit trace sequence*
 `n ↦ Σ_{orbit} aₙ`, then they are Galois conjugate.  Equivalently, the LMFDB lexicographic order
@@ -930,7 +919,7 @@ rank function `key ↦ #{realised keys strictly below it}` is injective on the f
 keys (`rank_injOn`), and both keys are realised. -/
 lemma orbitIndex_inj {f g : Newform N k} (h : orbitIndex f = orbitIndex g) :
     orbitRankKey f = orbitRankKey g :=
-  rank_injOn _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
+  LeanModularForms.Labels.rank_injOn _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
     (Finset.mem_image_of_mem _ (Finset.mem_univ _)) h
 
 /-- **The label is injective on distinct orbits.**  If two newforms sharing a Nebentypus

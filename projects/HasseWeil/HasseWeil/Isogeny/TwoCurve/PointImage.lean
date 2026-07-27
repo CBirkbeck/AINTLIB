@@ -43,7 +43,8 @@ pole locus, both pulled-back generators are regular, so their **residue values**
 (`exists_evaluatesTo_of_pointValuation_le_one`, Phase 4c) and **form a point of `E₂`**
 (`twoCurve_equation_of_evaluatesTo` + `nonsingular_of_evaluatesTo_generators`, Phase 5).  So
 the place-restriction image `φ(P)` is *constructed*, not assumed; the only residual tie to the
-stored point map is the residue-value agreement (`pullbackEvaluation_twoCurve_of_residue_agreement`),
+stored point map is the residue-value agreement
+(`pullbackEvaluation_twoCurve_of_residue_agreement`),
 which the genuine place-restriction point map satisfies by construction.  This route reduces the
 coherence to the **single** geometric input III.4.8 (the point map is a group hom).
 
@@ -62,7 +63,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 
@@ -70,35 +70,43 @@ variable {F : Type*} [Field F] [DecidableEq F]
 
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
+/-- **A coordinate-ring element evaluates to its residue value.**  For `r ∈ F[E]` and a smooth
+point `P`, the function `algebraMap r ∈ K(E)` takes at `P` the residue value `evalAt P r`. -/
+theorem evaluatesTo_algebraMap_coordinateRing
+    (r : (W_smooth W).CoordinateRing) (P : (W_smooth W).SmoothPoint) :
+    EvaluatesTo W P
+      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r)
+      ((W_smooth W).evalAt P r) := by
+  -- `r − evalAt r ∈ ker evalAt = maximalIdealAt P`, so its image vanishes at `P`.
+  have h0 : (W_smooth W).evalAt P
+      (r - algebraMap F (W_smooth W).CoordinateRing ((W_smooth W).evalAt P r)) = 0 :=
+    (map_sub ((W_smooth W).evalAt P) _ _).trans
+      (by rw [(W_smooth W).evalAt_algebraMap P ((W_smooth W).evalAt P r), sub_self])
+  have hmem : r - algebraMap F (W_smooth W).CoordinateRing ((W_smooth W).evalAt P r) ∈
+      (W_smooth W).maximalIdealAt P :=
+    (W_smooth W).ker_evalAt P ▸ RingHom.mem_ker.mpr h0
+  have hrw : algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r -
+      algebraMap F (W_smooth W).FunctionField ((W_smooth W).evalAt P r) =
+      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
+        (r - algebraMap F (W_smooth W).CoordinateRing ((W_smooth W).evalAt P r)) := by
+    rw [map_sub, ← IsScalarTower.algebraMap_apply]
+  show (W_smooth W).pointValuation P (_ - algebraMap F (W_smooth W).FunctionField _) < 1
+  rw [hrw]
+  exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
+    (C := W_smooth W) _ P).mpr hmem
+
 /-- The `x`-generator evaluates at a smooth point `Q` to its own `x`-coordinate. -/
 theorem evaluatesTo_x_gen_self (Q : (W_smooth W).SmoothPoint) :
     EvaluatesTo W Q (x_gen W) Q.x := by
-  -- `x_gen W − Q.x = algebraMap (X − Q.x)`, and `X − Q.x ∈ maximalIdealAt Q`.
+  -- `x_gen W` is the image of `X ∈ F[E]`, whose residue value at `Q` is `Q.x`.
   have hx : (W_smooth W).evalAt Q
       (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) = Q.x := by
     rw [show algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X =
       WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
         (Polynomial.C Polynomial.X) from rfl]
     exact (W_smooth W).evalAt_x Q
-  have h0 : (W_smooth W).evalAt Q
-      (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X -
-        algebraMap F W.toAffine.CoordinateRing Q.x) = 0 :=
-    (map_sub ((W_smooth W).evalAt Q) _ _).trans
-      (by rw [hx]; exact sub_eq_zero_of_eq ((W_smooth W).evalAt_algebraMap Q Q.x).symm)
-  have hmem : (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X -
-      algebraMap F W.toAffine.CoordinateRing Q.x) ∈ (W_smooth W).maximalIdealAt Q :=
-    (W_smooth W).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
-  -- transport membership to the valuation statement
-  have hrw : x_gen W - algebraMap F (W.toAffine.FunctionField) Q.x =
-      algebraMap W.toAffine.CoordinateRing (W.toAffine.FunctionField)
-        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X -
-          algebraMap F W.toAffine.CoordinateRing Q.x) := by
-    rw [map_sub, ← IsScalarTower.algebraMap_apply]
-    rfl
-  unfold EvaluatesTo
-  rw [hrw]
-  exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-    (C := W_smooth W) _ Q).mpr hmem
+  exact hx ▸ evaluatesTo_algebraMap_coordinateRing W
+    (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) Q
 
 /-- The `y`-generator evaluates at a smooth point `Q` to its own `y`-coordinate. -/
 theorem evaluatesTo_y_gen_self (Q : (W_smooth W).SmoothPoint) :
@@ -107,24 +115,8 @@ theorem evaluatesTo_y_gen_self (Q : (W_smooth W).SmoothPoint) :
     rw [show AdjoinRoot.root W.toAffine.polynomial =
       WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine Polynomial.X from rfl]
     exact (W_smooth W).evalAt_y Q
-  have h0 : (W_smooth W).evalAt Q
-      (AdjoinRoot.root W.toAffine.polynomial -
-        algebraMap F W.toAffine.CoordinateRing Q.y) = 0 :=
-    (map_sub ((W_smooth W).evalAt Q) _ _).trans
-      (by rw [hy]; exact sub_eq_zero_of_eq ((W_smooth W).evalAt_algebraMap Q Q.y).symm)
-  have hmem : (AdjoinRoot.root W.toAffine.polynomial -
-      algebraMap F W.toAffine.CoordinateRing Q.y) ∈ (W_smooth W).maximalIdealAt Q :=
-    (W_smooth W).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
-  have hrw : y_gen W - algebraMap F (W.toAffine.FunctionField) Q.y =
-      algebraMap W.toAffine.CoordinateRing (W.toAffine.FunctionField)
-        (AdjoinRoot.root W.toAffine.polynomial -
-          algebraMap F W.toAffine.CoordinateRing Q.y) := by
-    rw [map_sub, ← IsScalarTower.algebraMap_apply]
-    rfl
-  unfold EvaluatesTo
-  rw [hrw]
-  exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-    (C := W_smooth W) _ Q).mpr hmem
+  exact hy ▸ evaluatesTo_algebraMap_coordinateRing W
+    (AdjoinRoot.root W.toAffine.polynomial) Q
 
 /-! ### Phase 2 — the place-restriction coherence
 
@@ -326,61 +318,16 @@ algebraically closed base has a value — which is the gateway to the constructi
 remaining step being that those two values form a point on `E₂`, by `EvaluatesTo`-arithmetic
 through the Weierstrass equation; see the closing report). -/
 
-/-- **A coordinate-ring element evaluates to its residue value.**  For `r ∈ F[E]` and a smooth
-point `P`, the function `algebraMap r ∈ K(E)` takes at `P` the residue value `evalAt P r`. -/
-theorem evaluatesTo_algebraMap_coordinateRing
-    (r : (W_smooth W).CoordinateRing) (P : (W_smooth W).SmoothPoint) :
-    EvaluatesTo W P
-      (algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r)
-      ((W_smooth W).evalAt P r) := by
-  -- `r − evalAt r ∈ ker evalAt = maximalIdealAt P`, so its image vanishes at `P`.
-  have h0 : (W_smooth W).evalAt P
-      (r - algebraMap F (W_smooth W).CoordinateRing ((W_smooth W).evalAt P r)) = 0 :=
-    (map_sub ((W_smooth W).evalAt P) _ _).trans
-      (by rw [(W_smooth W).evalAt_algebraMap P ((W_smooth W).evalAt P r), sub_self])
-  have hmem : r - algebraMap F (W_smooth W).CoordinateRing ((W_smooth W).evalAt P r) ∈
-      (W_smooth W).maximalIdealAt P :=
-    (W_smooth W).ker_evalAt P ▸ RingHom.mem_ker.mpr h0
-  have hrw : algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField r -
-      algebraMap F (W_smooth W).FunctionField ((W_smooth W).evalAt P r) =
-      algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField
-        (r - algebraMap F (W_smooth W).CoordinateRing ((W_smooth W).evalAt P r)) := by
-    rw [map_sub, ← IsScalarTower.algebraMap_apply]
-  show (W_smooth W).pointValuation P (_ - algebraMap F (W_smooth W).FunctionField _) < 1
-  rw [hrw]
-  exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
-    (C := W_smooth W) _ P).mpr hmem
-
-/-- **Good-fraction representation** (Fintype-free, mirroring the private helper of
-`CovarianceDischarge`): a function regular at `P` is `algebraMap a / algebraMap s` with the
-denominator `s` not vanishing at `P`. -/
+/-- **Good-fraction representation**: a function regular at `P` is `algebraMap a / algebraMap s`
+with the denominator `s` not vanishing at `P`.  The `W_smooth`-shaped form of
+`Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one`. -/
 theorem exists_mul_algebraMap_eq_of_regular
     {f : (W_smooth W).FunctionField} {P : (W_smooth W).SmoothPoint}
     (hf : (W_smooth W).pointValuation P f ≤ 1) :
     ∃ a s : (W_smooth W).CoordinateRing, s ∉ (W_smooth W).maximalIdealAt P ∧
       f * algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField s =
-        algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField a := by
-  obtain ⟨xL, hxL⟩ :=
-    Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one f hf
-  obtain ⟨a, s, hmk⟩ :=
-    IsLocalization.exists_mk'_eq ((W_smooth W).maximalIdealAt P).primeCompl xL
-  refine ⟨a, (s : (W_smooth W).CoordinateRing), s.prop, ?_⟩
-  have h2 : algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField
-        (IsLocalization.mk' ((W_smooth W).localRingAt P) a s) *
-      algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField
-        (algebraMap (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P)
-          (s : (W_smooth W).CoordinateRing)) =
-      algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField
-        (algebraMap (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P) a) :=
-    (map_mul (algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField) _ _).symm.trans
-      (congrArg (algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField)
-        (IsLocalization.mk'_spec ((W_smooth W).localRingAt P) a s))
-  rw [hmk, hxL,
-    ← IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P)
-      (W_smooth W).FunctionField,
-    ← IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P)
-      (W_smooth W).FunctionField] at h2
-  exact h2
+        algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField a :=
+  Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one hf
 
 /-- **Residue-value existence** (Silverman II.1, residue field `= F` over `F̄`): every function
 `f ∈ K(E)` that is *regular* at a smooth point `P` (`pointValuation P f ≤ 1`) has a value
@@ -552,7 +499,8 @@ The map is:
   (`twoCurvePoleLocus φ`, where the pulled-back generators have poles) `↦ O`;
 * an affine smooth `P = (x, y)` *off* the pole locus `↦` the **residue-value point**
   `(cx, cy)` of the regular pulled-back generators (`exists_evaluatesTo_of_pointValuation_le_one`),
-  which is a point of `E₂` (`twoCurve_equation_of_evaluatesTo` / `nonsingular_of_evaluatesTo_generators`).
+  which is a point of `E₂` (`twoCurve_equation_of_evaluatesTo`
+  / `nonsingular_of_evaluatesTo_generators`).
 
 The point-map agreement of `PullbackEvaluation_twoCurve` is then **not literally `rfl`** (the
 coherence theorem quantifies over *arbitrary* residue values `cx cy`, while the map picks
@@ -645,20 +593,15 @@ noncomputable def placeRestrictionPointMap
 theorem placeRestrictionPointMap_some_of_mem (φ : HasseWeil.Isogeny W₁ W₂)
     {x y : F} {h : W₁.toAffine.Nonsingular x y}
     (hSP : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∈ twoCurvePoleLocus φ) :
-    placeRestrictionPointMap φ (Affine.Point.some x y h) = Affine.Point.zero := by
-  show (if _ : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∈ twoCurvePoleLocus φ then
-    Affine.Point.zero else placeRestrictionResiduePoint φ ⟨x, y, h⟩ _) = Affine.Point.zero
-  rw [dif_pos hSP]
+    placeRestrictionPointMap φ (Affine.Point.some x y h) = Affine.Point.zero :=
+  dif_pos hSP
 
 theorem placeRestrictionPointMap_some_of_notMem (φ : HasseWeil.Isogeny W₁ W₂)
     {x y : F} {h : W₁.toAffine.Nonsingular x y}
     (hSP : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∉ twoCurvePoleLocus φ) :
     placeRestrictionPointMap φ (Affine.Point.some x y h) =
-      placeRestrictionResiduePoint φ ⟨x, y, h⟩ hSP := by
-  show (if _ : (⟨x, y, h⟩ : (W_smooth W₁).SmoothPoint) ∈ twoCurvePoleLocus φ then
-    Affine.Point.zero else placeRestrictionResiduePoint φ ⟨x, y, h⟩ _) =
-      placeRestrictionResiduePoint φ ⟨x, y, h⟩ hSP
-  rw [dif_neg hSP]
+      placeRestrictionResiduePoint φ ⟨x, y, h⟩ hSP :=
+  dif_neg hSP
 
 /-- **The residue-value-point agreement for `placeRestrictionPointMap`.**  At a good smooth point
 `SP = (x, y)` off the pole locus, with *any* residue values `cx cy` of the two pulled-back
@@ -721,7 +664,8 @@ noncomputable def placeRestrictionRealization
 /-- **TASK A deliverable — the `PullbackEvaluation_twoCurve` coherence of the concrete
 place-restriction realization.**  For the realization `placeRestrictionRealization φ hgrouphom`
 (stored map `placeRestrictionPointMap φ`, function-field pullback `φ.pullback`), the two-curve
-cofinite pullback-evaluation witness holds with `bad = twoCurvePoleLocus φ` (finite), **sorry-free**.
+cofinite pullback-evaluation witness holds with `bad = twoCurvePoleLocus φ`
+(finite), **sorry-free**.
 
 The proof is `pullbackEvaluation_twoCurve_of_residue_agreement` fed with the residue agreement
 `placeRestrictionPointMap_residue_agreement`: the residue-value point on the right (whose

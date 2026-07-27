@@ -51,7 +51,6 @@ We therefore build the forward map landing in
 
 universe u
 
-set_option linter.style.openClassical false
 
 open Classical
 
@@ -153,7 +152,8 @@ private theorem divByS_mul_algebraMap_clear (D₀ : RationalLocData A) (f p q r 
       ← IsLocalization.mk'_mul,
       ← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
         (S := Localization.Away (D₀.s * f)) r]
-  exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul, Submonoid.coe_one]; rw [h]; ring)
+  exact IsLocalization.mk'_eq_of_eq
+    (by simp only [Submonoid.coe_mul, Submonoid.coe_one]; rw [h]; ring)
 
 /-- Target-level fact: `algebraMap_B (canMap f) * divByS 1 s_B = 1` (the canonical
 unit `canMap f` is inverted in `Loc_B(s_B)`). -/
@@ -668,6 +668,7 @@ private theorem f_sq_mem_laurentOverlap_T
   · change f ∈ ({D₀.s, f} : Finset A)
     exact Finset.mem_insert_of_mem (Finset.mem_singleton_self _)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Backward loc hom power-boundedness, overlap case.**
 
 For each `t ∈ (iteratedOverlapDatum_B P D₀ f hLocLift_B).T = {1, canonicalMap f,

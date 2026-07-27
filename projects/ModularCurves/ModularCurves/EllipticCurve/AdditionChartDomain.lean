@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartLadder
 import ModularCurves.EllipticCurve.PoleFiltration
 import ModularCurves.ForMathlib.MonicQuotientDescent
@@ -102,7 +107,8 @@ lemma infChartCubic_map (φ : R →+* S) (W : WeierstrassCurve R) :
 
 /-- **(β2b, `Y`-chart)** Over a domain, the `Y`-chart ring is a domain: it is `AdjoinRoot` of the
 monic chart cubic, whose domain-ness descends from the fraction field by monic descent
-(`AdjoinRoot.isDomain_of_monic_of_map`), the field case being `isDomain_affineChartRing_of_field`. -/
+(`AdjoinRoot.isDomain_of_monic_of_map`), the field case being
+`isDomain_affineChartRing_of_field`. -/
 instance instIsDomainAffineChartRingY [IsDomain R] : IsDomain (affineChartRing W 1) := by
   set K := FractionRing R with hK
   set φ : R →+* K := algebraMap R K with hφdef

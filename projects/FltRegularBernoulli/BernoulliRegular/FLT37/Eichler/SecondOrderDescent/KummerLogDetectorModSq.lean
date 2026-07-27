@@ -6,10 +6,9 @@ import BernoulliRegular.FLT37.Eichler.Reduction.SecondOrderVandermondeRowCollaps
 # The second-order (mod `37²`) Kummer-log detector at the irregular index `i = 32`
 
 This file builds the **second-order matrix row** of Washington Proposition 8.12 at the irregular
-index `i = 32`, parallel to the proven first-order Dwork-coefficient row of `CaseIIEx811Core.lean`,
-using the mod-`37²` coefficient machinery of `CaseIICor823SecondOrderCoeff.lean`.
-
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+index `i = 32`, parallel to the proven first-order Dwork-coefficient row of
+`KummerMatrixKernelCollapse.lean`, using the mod-`37²` coefficient machinery of
+`DworkCoeffModSquare.lean`.
 
 ## The first-order row, and the second order
 
@@ -58,8 +57,6 @@ non-degenerate leading coefficient of Proposition 8.12 at `i = 32`.
 @[expose] public section
 
 noncomputable section
-
-set_option maxRecDepth 4000
 
 open NumberField
 
@@ -111,10 +108,6 @@ vanishes
 at every row `j`.  The reachable mod-`37²` analog of
 `caseIIEx811Core_mulVec_eq_zero_of_evalₐ_eq_zero`. -/
 
-set_option maxHeartbeats 1600000 in
--- The completed-log-column sum lives in the heavy `DworkCompleteIntegerRing`; unifying the
--- `evalₐ`-of-coerced-sum with the column sum exceeds the default heartbeat budget (as in the
--- first-order analog).
 /-- **The second-order detector vanishes from level-`72` vanishing** (proven, axiom-clean).
 
 If the cyclotomic local logarithm `∑_a e_a · kummerLogCompletedColumn a` vanishes at the
@@ -195,7 +188,6 @@ genuine
 second-order mechanism (a zero-divisor times the row, where the `37` comes from the irregularity
 `37 ∣ B₃₂` and the extra precision recovers the mod-`37` row). -/
 
-open BernoulliRegular (CPlusGenerator) in
 /-- **The second-order Bernoulli factor as an element of `ZMod (37²)`**: `B₃₂/32 mod 37²`, the
 non-degenerate (`= 37·q`, `q ≡ 3`) leading coefficient of Proposition 8.12 at `i = 32`. -/
 def caseIICor823SecondOrderBernoulliFactorModSq : ZMod (37 ^ 2) :=
@@ -238,7 +230,6 @@ theorem caseIICor823SecondOrderBernoulliFactorModSq_eq_thirtyseven_mul :
         ZMod.natCast_eq_zero_iff]
       decide
 
-open BernoulliRegular (CPlusGenerator) in
 /-- **The genuine second-order leading-coefficient residual: Proposition 8.12 at `i = 32`** (a
 `def … : Prop`, **not** an axiom — the genuine `p`-adic-`L` content).
 
@@ -298,24 +289,7 @@ theorem prop812SecondOrderCoeff37_inhabited
         (∑ a : Fin (kummerLogRank 37),
           (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1) *
             (((0 : Fin (kummerLogRank 37) → ℤ) a : ℤ) : ZMod (37 ^ 2))) := by
-  have hlhs : (∑ a : Fin (kummerLogRank 37),
-        (0 : Fin (kummerLogRank 37) → ℤ) a •
-          concreteKummerLogVector (p := 37) (K := CyclotomicField 37 ℚ) (by norm_num) a) = 0 := by
-    refine Finset.sum_eq_zero (fun a _ ↦ ?_)
-    simp
-  rw [hlhs]
-  rw [show ((dworkFixedEvenPowerBasis (p := 37) (K := CyclotomicField 37 ℚ)
-        (by norm_num : 2 < 37)).repr
-        (0 : dworkFixedSubalgebra 37 (CyclotomicField 37 ℚ))
-        (kummerLogEvenPowerIndex (p := 37) (by norm_num) (15 : Fin (kummerLogRank 37)))) = 0
-      from by rw [LinearEquiv.map_zero]; rfl]
-  rw [map_zero]
-  symm
-  rw [show (∑ a : Fin (kummerLogRank 37),
-        (((((a : ℕ) + 2 : ℕ) : ZMod (37 ^ 2)) ^ 2) ^ ((15 : ℕ) + 1) - 1) *
-          (((0 : Fin (kummerLogRank 37) → ℤ) a : ℤ) : ZMod (37 ^ 2))) = 0
-      from Finset.sum_eq_zero (fun a _ ↦ by simp)]
-  rw [mul_zero]
+  simp
 
 end BernoulliRegular.FLT37.Eichler
 

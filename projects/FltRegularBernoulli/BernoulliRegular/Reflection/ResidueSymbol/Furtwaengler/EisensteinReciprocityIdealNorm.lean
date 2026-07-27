@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicConjugateNorm
@@ -110,7 +115,7 @@ theorem pthSymbolAtIdeal_canonical_absNorm_eq_sum_of_idealNormPrincipal_coprime
           (((Ideal.absNorm Q : ℤ) : 𝓞 K)) A).sum := by
   rw [← PhiPrimeElement.PhiIdealElement.idealNormFactorElement_eq_absNorm
     (p := p) (K := K) hB]
-  unfold PhiPrimeElement.PhiIdealElement.idealNormFactorElement
+  simp only [PhiPrimeElement.PhiIdealElement.idealNormFactorElement]
   rw [show
       ((normalizedFactors B).map fun Q : Ideal (𝓞 K) =>
         pthSymbolAtIdeal_canonical (p := p) (K := K)
@@ -163,7 +168,7 @@ theorem pthSymbolAtIdeal_canonical_idealNormPrincipal_eq_principalGen
     _ = ∑ a : CyclotomicUnitDelta p,
         pthSymbolAtIdeal_canonical (p := p) (K := K) α
           (cyclotomicGaloisConjugate (p := p) (K := K) a B) := by
-          unfold cyclotomicConjugateProductIdeal
+          simp only [cyclotomicConjugateProductIdeal]
           rw [pthSymbolAtIdeal_canonical_finset_prod (p := p) Finset.univ
             (fun a : CyclotomicUnitDelta p =>
               cyclotomicGaloisConjugate (p := p) (K := K) a B) α]

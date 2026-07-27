@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.PoleFiltration
 import ModularCurves.ForMathlib.AffinePointVariableChange
 import ModularCurves.ForMathlib.ProjToSpecZero
@@ -50,26 +55,33 @@ theorem vcMvSubst_polynomial (C : VariableChange R) (W : WeierstrassCurve R) :
     intro m n hnm
     conv_lhs => rw [show m = (m - n) + n from (Nat.sub_add_cancel hnm).symm]
     rw [pow_add, mul_assoc, ← mul_pow, hu, one_pow, mul_one]
-  have Cl1 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C ((C • W).a₁)
+  have Cl1 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C
+    ((C • W).a₁)
       = (MvPolynomial.C (↑C.u : R)) ^ 5 * (MvPolynomial.C W.a₁ + 2 * MvPolynomial.C C.s) := by
     have inner : (↑C.u : R) ^ 6 * (C • W).a₁ = (↑C.u : R) ^ 5 * (W.a₁ + 2 * C.s) := by
       rw [variableChange_a₁, ← pow_one (↑C.u⁻¹ : R), ← mul_assoc, huinv 6 1 (by norm_num)]
     rw [← map_pow, ← map_mul, inner]; simp only [map_mul, map_pow, map_add, map_ofNat]
-  have Cl2 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C ((C • W).a₂)
-      = (MvPolynomial.C (↑C.u : R)) ^ 4 * (MvPolynomial.C W.a₂ - MvPolynomial.C C.s * MvPolynomial.C W.a₁
+  have Cl2 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C
+    ((C • W).a₂)
+      = (MvPolynomial.C (↑C.u : R)) ^ 4 *
+        (MvPolynomial.C W.a₂ - MvPolynomial.C C.s * MvPolynomial.C W.a₁
         + 3 * MvPolynomial.C C.r - MvPolynomial.C C.s ^ 2) := by
     have inner : (↑C.u : R) ^ 6 * (C • W).a₂
         = (↑C.u : R) ^ 4 * (W.a₂ - C.s * W.a₁ + 3 * C.r - C.s ^ 2) := by
       rw [variableChange_a₂, ← mul_assoc, huinv 6 2 (by norm_num)]
     rw [← map_pow, ← map_mul, inner]; simp only [map_mul, map_pow, map_add, map_sub, map_ofNat]
-  have Cl3 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C ((C • W).a₃)
-      = (MvPolynomial.C (↑C.u : R)) ^ 3 * (MvPolynomial.C W.a₃ + MvPolynomial.C C.r * MvPolynomial.C W.a₁
+  have Cl3 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C
+    ((C • W).a₃)
+      = (MvPolynomial.C (↑C.u : R)) ^ 3 *
+        (MvPolynomial.C W.a₃ + MvPolynomial.C C.r * MvPolynomial.C W.a₁
         + 2 * MvPolynomial.C C.t) := by
     have inner : (↑C.u : R) ^ 6 * (C • W).a₃ = (↑C.u : R) ^ 3 * (W.a₃ + C.r * W.a₁ + 2 * C.t) := by
       rw [variableChange_a₃, ← mul_assoc, huinv 6 3 (by norm_num)]
     rw [← map_pow, ← map_mul, inner]; simp only [map_mul, map_pow, map_add, map_ofNat]
-  have Cl4 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C ((C • W).a₄)
-      = (MvPolynomial.C (↑C.u : R)) ^ 2 * (MvPolynomial.C W.a₄ - MvPolynomial.C C.s * MvPolynomial.C W.a₃
+  have Cl4 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C
+    ((C • W).a₄)
+      = (MvPolynomial.C (↑C.u : R)) ^ 2 *
+        (MvPolynomial.C W.a₄ - MvPolynomial.C C.s * MvPolynomial.C W.a₃
         + 2 * MvPolynomial.C C.r * MvPolynomial.C W.a₂
         - (MvPolynomial.C C.t + MvPolynomial.C C.r * MvPolynomial.C C.s) * MvPolynomial.C W.a₁
         + 3 * MvPolynomial.C C.r ^ 2 - 2 * MvPolynomial.C C.s * MvPolynomial.C C.t) := by
@@ -78,15 +90,17 @@ theorem vcMvSubst_polynomial (C : VariableChange R) (W : WeierstrassCurve R) :
           + 3 * C.r ^ 2 - 2 * C.s * C.t) := by
       rw [variableChange_a₄, ← mul_assoc, huinv 6 4 (by norm_num)]
     rw [← map_pow, ← map_mul, inner]; simp only [map_mul, map_pow, map_add, map_sub, map_ofNat]
-  have Cl6 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C ((C • W).a₆)
+  have Cl6 : ((MvPolynomial.C (↑C.u : R)) ^ 6 : MvPolynomial (Fin 3) R) * MvPolynomial.C
+    ((C • W).a₆)
       = MvPolynomial.C W.a₆ + MvPolynomial.C C.r * MvPolynomial.C W.a₄
         + MvPolynomial.C C.r ^ 2 * MvPolynomial.C W.a₂ + MvPolynomial.C C.r ^ 3
         - MvPolynomial.C C.t * MvPolynomial.C W.a₃ - MvPolynomial.C C.t ^ 2
         - MvPolynomial.C C.r * MvPolynomial.C C.t * MvPolynomial.C W.a₁ := by
     have inner : (↑C.u : R) ^ 6 * (C • W).a₆
-        = W.a₆ + C.r * W.a₄ + C.r ^ 2 * W.a₂ + C.r ^ 3 - C.t * W.a₃ - C.t ^ 2 - C.r * C.t * W.a₁ := by
+        = W.a₆ + C.r * W.a₄ + C.r ^ 2 * W.a₂ + C.r ^ 3 - C.t * W.a₃ - C.t ^ 2
+          - C.r * C.t * W.a₁ := by
       rw [variableChange_a₆, ← mul_assoc, huinv 6 6 (by norm_num), pow_zero, one_mul]
-    rw [← map_pow, ← map_mul, inner]; simp only [map_mul, map_pow, map_add, map_sub, map_ofNat]
+    rw [← map_pow, ← map_mul, inner]; simp only [map_mul, map_pow, map_add, map_sub]
   simp only [WeierstrassCurve.Projective.polynomial, vcMvSubst,
     map_add, map_sub, map_mul, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C,
     Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val, MvPolynomial.algebraMap_eq,
@@ -102,8 +116,8 @@ theorem vcMvSubst_polynomial (C : VariableChange R) (W : WeierstrassCurve R) :
 lemma vcMvSubst_isHomogeneous (C : VariableChange R) (j : Fin 3) :
     (vcMvSubst C j).IsHomogeneous 1 := by
   fin_cases j <;>
-    simp only [vcMvSubst, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
-      Matrix.cons_val, MvPolynomial.smul_eq_C_mul]
+    simp only [vcMvSubst,
+      MvPolynomial.smul_eq_C_mul]
   · exact (MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _).add
       (MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _)
   · exact ((MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _).add
@@ -148,19 +162,19 @@ theorem vcMvSubst_comp_inv (C : VariableChange R) (j : Fin 3) :
   fin_cases j
   · show MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C⁻¹ (0 : Fin 3)) = MvPolynomial.X (0 : Fin 3)
     simp only [vcMvSubst, VariableChange.inv_def, Fin.isValue, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, map_add, map_sub, map_mul, map_pow,
+      Matrix.cons_val, map_add, map_sub, map_mul, map_pow,
       map_neg, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.smul_eq_C_mul,
       MvPolynomial.algebraMap_eq]
     linear_combination MvPolynomial.X (0 : Fin 3) * hupow 2
   · show MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C⁻¹ (1 : Fin 3)) = MvPolynomial.X (1 : Fin 3)
     simp only [vcMvSubst, VariableChange.inv_def, Fin.isValue, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, map_add, map_sub, map_mul, map_pow,
+      Matrix.cons_val_one, Matrix.cons_val, map_add, map_sub, map_mul, map_pow,
       map_neg, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.smul_eq_C_mul,
       MvPolynomial.algebraMap_eq]
     linear_combination MvPolynomial.X (1 : Fin 3) * hupow 3
   · show MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C⁻¹ (2 : Fin 3)) = MvPolynomial.X (2 : Fin 3)
-    simp only [vcMvSubst, VariableChange.inv_def, Fin.isValue, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, MvPolynomial.aeval_X]
+    simp only [vcMvSubst, VariableChange.inv_def, Fin.isValue,
+      Matrix.cons_val, MvPolynomial.aeval_X]
 
 /-- Reverse composition on generators, free via `inv_inv`. -/
 theorem vcMvSubst_inv_comp (C : VariableChange R) (j : Fin 3) :
@@ -312,8 +326,8 @@ noncomputable def allScaleVec (μ : Rˣ) : Fin 3 → MvPolynomial (Fin 3) R :=
 lemma allScaleVec_isHomogeneous (μ : Rˣ) (i : Fin 3) :
     (allScaleVec μ i : MvPolynomial (Fin 3) R).IsHomogeneous 1 := by
   fin_cases i <;>
-    simp only [allScaleVec, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
-      Matrix.cons_val, MvPolynomial.smul_eq_C_mul]
+    simp only [allScaleVec,
+      MvPolynomial.smul_eq_C_mul]
   · exact MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _
   · exact MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _
   · exact MvPolynomial.isHomogeneous_C_mul_X (R := R) _ _
@@ -325,17 +339,20 @@ lemma allScaleVec_polynomial (μ : Rˣ) (W : WeierstrassCurve R) :
   rw [WeierstrassCurve.Projective.polynomial]
   simp only [map_add, map_sub, map_mul, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C,
     allScaleVec, MvPolynomial.algebraMap_eq, Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul]
+    Matrix.cons_val, MvPolynomial.smul_eq_C_mul]
   ring
 
 lemma allScaleVec_comp_inv (μ : Rˣ) (i : Fin 3) :
     MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ i) = MvPolynomial.X i := by
   fin_cases i
-  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (0 : Fin 3)) = MvPolynomial.X (0 : Fin 3)
+  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (0 : Fin 3))
+        = MvPolynomial.X (0 : Fin 3)
     simp [allScaleVec, smul_smul, Units.inv_mul]
-  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (1 : Fin 3)) = MvPolynomial.X (1 : Fin 3)
+  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (1 : Fin 3))
+        = MvPolynomial.X (1 : Fin 3)
     simp [allScaleVec, smul_smul, Units.inv_mul]
-  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (2 : Fin 3)) = MvPolynomial.X (2 : Fin 3)
+  · show MvPolynomial.aeval (allScaleVec μ) (allScaleVec μ⁻¹ (2 : Fin 3))
+        = MvPolynomial.X (2 : Fin 3)
     simp [allScaleVec, smul_smul, Units.inv_mul]
 
 lemma allScaleRingHom_comp_inv (μ : Rˣ) (p : MvPolynomial (Fin 3) R) :
@@ -504,18 +521,19 @@ lemma vcMvSubst_map {R' : Type u} [CommRing R'] (f : R →+* R') (C : VariableCh
   fin_cases i
   · show MvPolynomial.map f (vcMvSubst C (0 : Fin 3)) = vcMvSubst (C.map f) (0 : Fin 3)
     simp only [vcMvSubst, VariableChange.map_u, VariableChange.map_r, Fin.isValue,
-      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val,
+      Matrix.cons_val_zero,
       MvPolynomial.smul_eq_C_mul, map_add, map_mul, map_pow, MvPolynomial.map_C,
       MvPolynomial.map_X, Units.coe_map, MonoidHom.coe_coe]
   · show MvPolynomial.map f (vcMvSubst C (1 : Fin 3)) = vcMvSubst (C.map f) (1 : Fin 3)
     simp only [vcMvSubst, VariableChange.map_u, VariableChange.map_r, VariableChange.map_s,
       VariableChange.map_t, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add, map_mul, map_pow,
+      MvPolynomial.smul_eq_C_mul, map_add, map_mul, map_pow,
       MvPolynomial.map_C, MvPolynomial.map_X, Units.coe_map, MonoidHom.coe_coe]
   · show MvPolynomial.map f (vcMvSubst C (2 : Fin 3)) = vcMvSubst (C.map f) (2 : Fin 3)
-    simp only [vcMvSubst, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    simp only [vcMvSubst, Fin.isValue,
       Matrix.cons_val, MvPolynomial.map_X]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- HEq-based transport: an `eqToHom` from a curve equality absorbs into `Proj.map`, bridged
 by an `HEq` of the graded homs. -/
 private lemma projMap_transport_heq {R' : Type u} [CommRing R'] (W : WeierstrassCurve R)
@@ -556,6 +574,7 @@ lemma map_aeval_vcMvSubst {R' : Type u} [CommRing R'] (f : R →+* R') (C : Vari
   | add p q hp hq => rw [map_add, map_add, hp, hq, map_add, map_add]
   | mul_X p i hp => simp only [map_mul, MvPolynomial.aeval_X, MvPolynomial.map_X, hp, vcMvSubst_map]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.0h-i, base-change naturality — coordinator §2-P5)** `projModelVCIso` is natural
 under base change of the ground ring: base-changing then applying the base-changed variable
 change agrees with applying the variable change then base-changing (`map_variableChange`
@@ -598,6 +617,7 @@ lemma aeval_vcMvSubst_one (p : MvPolynomial (Fin 3) R) :
     MvPolynomial.aeval (vcMvSubst (1 : VariableChange R)) p = p := by
   rw [vcMvSubst_one, MvPolynomial.aeval_X_left, AlgHom.id_apply]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(map_id support, [REQ→A-lane])** The identity variable change induces the identity model
 isomorphism (the `_one` cocycle law, sibling of `projModelVCIso_mul`): `projModelVCIso 1 W` is
 `eqToHom` of `1 • W = W`. -/
@@ -618,20 +638,23 @@ theorem projModelVCIso_one (W : WeierstrassCurve R) :
 lemma vcMvSubst_mul (C C' : VariableChange R) (i : Fin 3) :
     vcMvSubst (C * C') i = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' i) := by
   fin_cases i
-  · show vcMvSubst (C * C') (0 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' (0 : Fin 3))
+  · show vcMvSubst (C * C') (0 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C'
+    (0 : Fin 3))
     simp only [vcMvSubst, VariableChange.mul_def, Fin.isValue, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add,
+      Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add,
       map_mul, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq,
       Units.val_mul]
     ring
-  · show vcMvSubst (C * C') (1 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' (1 : Fin 3))
+  · show vcMvSubst (C * C') (1 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C'
+    (1 : Fin 3))
     simp only [vcMvSubst, VariableChange.mul_def, Fin.isValue, Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add,
+      Matrix.cons_val_one, Matrix.cons_val, MvPolynomial.smul_eq_C_mul, map_add,
       map_mul, map_pow, MvPolynomial.aeval_X, MvPolynomial.aeval_C, MvPolynomial.algebraMap_eq,
       Units.val_mul]
     ring
-  · show vcMvSubst (C * C') (2 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C' (2 : Fin 3))
-    simp only [vcMvSubst, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+  · show vcMvSubst (C * C') (2 : Fin 3) = MvPolynomial.aeval (vcMvSubst C) (vcMvSubst C'
+    (2 : Fin 3))
+    simp only [vcMvSubst, Fin.isValue,
       Matrix.cons_val, MvPolynomial.aeval_X]
 
 /-- Ring-level substitution cocycle on a general polynomial. -/
@@ -1272,7 +1295,8 @@ lemma pointedIso_zero_appLE_chartY {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     (hez : projModelZero W ≫ e.hom = projModelZero W') :
     e.hom.appLE (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) (e.hom ⁻¹ᵁ (Proj.basicOpen
+          (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) le_rfl ≫
       (projModelZero W).appLE (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) ⊤
@@ -1280,7 +1304,8 @@ lemma pointedIso_zero_appLE_chartY {W W' : WeierstrassCurve R}
     (projModelZero W').appLE (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) ⊤
         (le_of_eq (projModelZero_preimage_yChart W').symm) :=
-  appLE_appLE_of_comp_eq (projModelZero W) e.hom (projModelZero W') hez (Proj.basicOpen (quotientGrading (projIdeal W'))
+  appLE_appLE_of_comp_eq (projModelZero W) e.hom (projModelZero W') hez (Proj.basicOpen
+    (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))
     (zero_le_preimage_pointedPreimage e hez)
     (le_of_eq (projModelZero_preimage_yChart W').symm)
@@ -1291,12 +1316,14 @@ private lemma appLE_le_rfl_apply {W W' : WeierstrassCurve R}
     (w' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) :
     ((e.hom.appLE (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) (e.hom ⁻¹ᵁ (Proj.basicOpen
+          (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) le_rfl).hom) w' =
     ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom) w' := by
   have h2 : (homOfLE (le_rfl : e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) ≤ e.hom ⁻¹ᵁ (Proj.basicOpen
+          (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))).op =
       𝟙 (Opposite.op (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))) := Subsingleton.elim _ _
@@ -1304,9 +1331,11 @@ private lemma appLE_le_rfl_apply {W W' : WeierstrassCurve R}
     ((projModel W).presheaf.map ψ)) (((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom) w')) h2
   refine h3.trans ?_
-  exact congrArg (fun φ => CommRingCat.Hom.hom φ (((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
+  exact congrArg (fun φ => CommRingCat.Hom.hom φ (((e.hom.app (Proj.basicOpen (quotientGrading
+    (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom) w'))
-    ((projModel W).presheaf.map_id (Opposite.op (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+    ((projModel W).presheaf.map_id (Opposite.op (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+      (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))))))
 
 /-- **The zero-section value of a transported chart function is the source augmentation**:
@@ -1319,12 +1348,14 @@ lemma pointedIso_zero_val_chartYSection {W W' : WeierstrassCurve R}
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) ⊤
         (zero_le_preimage_pointedPreimage e hez)).hom)
       ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')) =
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b')) =
     ((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom (infChartAug W' b') := by
   have h1 := congrArg (fun φ => CommRingCat.Hom.hom φ
     ((chartYSectionsRingEquiv W').symm b')) (pointedIso_zero_appLE_chartY e hez)
   simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1
-  have h2 := congrArg ((((projModelZero W).appLE (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+  have h2 := congrArg ((((projModelZero W).appLE (e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+    (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))) ⊤
     (zero_le_preimage_pointedPreimage e hez))).hom)
     (appLE_le_rfl_apply e ((chartYSectionsRingEquiv W').symm b'))
@@ -1352,7 +1383,8 @@ private lemma appLE_map_val {X Y : Scheme.{u}} (f : X ⟶ Y) {U : Y.Opens}
 augmentation. -/
 lemma zero_appLE_basicOpen_chartYSection (W : WeierstrassCurve R)
     (r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) (b : AdjoinRoot (infChartCubic W)) :
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) (b : AdjoinRoot
+          (infChartCubic W)) :
     (((projModelZero W).appLE ((projModel W).basicOpen r)
         ((projModelZero W) ⁻¹ᵁ (projModel W).basicOpen r) le_rfl).hom)
       (((projModel W).presheaf.map
@@ -1385,12 +1417,14 @@ lemma pointedIso_zero_appLE_basicOpen {W W' : WeierstrassCurve R}
   refine (map_appLE_val (projModelZero W) hV le_rfl
     (le_top.trans (zero_le_preimage_pointedPreimage e hez))
     ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b'))).trans ?_
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b'))).trans ?_
   refine ((appLE_map_val (projModelZero W)
     (zero_le_preimage_pointedPreimage e hez) le_top
     (le_top.trans (zero_le_preimage_pointedPreimage e hez))
     ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b'))).symm).trans ?_
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b'))).symm).trans ?_
   exact congrArg (((Spec (CommRingCat.of R)).presheaf.map (homOfLE le_top).op).hom)
     (pointedIso_zero_val_chartYSection e hez b')
 
@@ -1547,15 +1581,18 @@ private lemma transport_mem_span_aux (W : WeierstrassCurve R)
           (homOfLE ((projModel W).basicOpen_le r)).op).hom
           ((chartYSectionsRingEquiv W).symm (infChartTElem W))} := by
     refine mem_of_eq_of_mem (congrArg (algebraMap _ _) (hBeq.trans hsymm)) ?_
-    refine mem_of_eq_of_mem (map_add (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+    refine mem_of_eq_of_mem (map_add (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading
+      (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
       (↑Γ(projModel W, (projModel W).basicOpen r)) : _ →+* _) _ _) ?_
     refine Ideal.add_mem _ ?_ ?_
-    · refine mem_of_eq_of_mem (map_mul (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+    · refine mem_of_eq_of_mem (map_mul (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading
+      (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
         (↑Γ(projModel W, (projModel W).basicOpen r)) : _ →+* _) _ _) ?_
       exact Ideal.mul_mem_left _ _ (Ideal.subset_span (Set.mem_insert _ _))
-    · refine mem_of_eq_of_mem (map_mul (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+    · refine mem_of_eq_of_mem (map_mul (algebraMap (↑Γ(projModel W, Proj.basicOpen (quotientGrading
+      (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
         (↑Γ(projModel W, (projModel W).basicOpen r)) : _ →+* _) _ _) ?_
       exact Ideal.mul_mem_left _ _ (Ideal.subset_span
@@ -1698,13 +1735,15 @@ lemma pointedIsoChartTransport_res {W W' : WeierstrassCurve R}
     pointedIsoChartTransport e (hVV'.trans hV') b' := by
   have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
     ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b')))
     ((projModel W).presheaf.map_comp (homOfLE hV').op (homOfLE hVV').op)
   simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
   refine hfuse.symm.trans ?_
   exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
     ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b')))
     (Subsingleton.elim _ _)
 
 /-- **Refinement with an invertible transported section unit**: every section prime admits a
@@ -1742,7 +1781,8 @@ lemma exists_basicOpen_transport_unit {W W' : WeierstrassCurve R}
     ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
     (mk_X_mem_quotientGrading_one W 1) one_pos).exists_basicOpen_le
     ⟨chartPointOf W P, hpU⟩ hp1
-  have hr₂le' : (projModel W).basicOpen r₂ ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+  have hr₂le' : (projModel W).basicOpen r₂ ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+    (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) :=
     le_trans (hr₂le.trans ((projModel W).basicOpen_le _)) hr₁le
   refine ⟨r₂, hr₂le', (chartPointOf_mem_basicOpen_iff W P r₂).mp hpr₂, ?_⟩
@@ -1770,7 +1810,8 @@ private lemma transport_symm_roundtrip {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     {r' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))}
-    (hr'le : (projModel W').basicOpen r' ≤ e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+    (hr'le : (projModel W').basicOpen r' ≤ e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+      (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
     {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
@@ -1785,7 +1826,8 @@ private lemma transport_symm_roundtrip {W W' : WeierstrassCurve R}
       ((chartYSectionsRingEquiv W).symm b) := by
   have hnat := congrArg (fun φ => CommRingCat.Hom.hom φ
     ((e.symm.hom.app (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W).symm b)))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W).symm b)))
     (Scheme.Hom.naturality e.hom ((homOfLE hr'le).op))
   simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hnat
   have hstep1 : (((projModel W).presheaf.map (homOfLE hrleE).op).hom)
@@ -1797,20 +1839,23 @@ private lemma transport_symm_roundtrip {W W' : WeierstrassCurve R}
         ((e.hom.app (e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))).hom
           ((e.symm.hom.app (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W).symm b)))) :=
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W).symm b)))) :=
     congrArg (((projModel W).presheaf.map (homOfLE hrleE).op).hom) hnat
   refine hstep1.trans ?_
   have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
     ((e.hom.app (e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))).hom
       ((e.symm.hom.app (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W).symm b))))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W).symm b))))
     (((projModel W).presheaf.map_comp
       ((TopologicalSpace.Opens.map e.hom.base).map (homOfLE hr'le)).op
       (homOfLE hrleE).op).symm)
   simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfuse
   refine hfuse.trans ?_
-  have hVle : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (e.inv ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+  have hVle : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (e.inv ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+    (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) := by
     intro x hx
     show e.inv.base (e.hom.base x) ∈ (Proj.basicOpen (quotientGrading (projIdeal W))
@@ -1826,12 +1871,14 @@ private lemma transport_symm_roundtrip {W W' : WeierstrassCurve R}
     ((e.hom.app (e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))).hom
       ((e.symm.hom.app (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W).symm b))))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W).symm b))))
     (Subsingleton.elim
       ((((TopologicalSpace.Opens.map e.hom.base).map (homOfLE hr'le)).op) ≫
         (homOfLE hrleE).op) ((homOfLE hVle).op))
   refine halign.trans ?_
-  exact app_app_res_of_comp_eq_id e.hom e.inv e.hom_inv_id (Proj.basicOpen (quotientGrading (projIdeal W))
+  exact app_app_res_of_comp_eq_id e.hom e.inv e.hom_inv_id (Proj.basicOpen (quotientGrading
+    (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) hVle hrleU
     ((chartYSectionsRingEquiv W).symm b)
 
@@ -1839,7 +1886,8 @@ private lemma transport_symm_roundtrip {W W' : WeierstrassCurve R}
 private lemma transport_res_of_chartY_gen {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     {r' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))} {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W'))
+          (MvPolynomial.X 1)))} {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
     (hrleE : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ ((projModel W').basicOpen r'))
     (hrle' : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
@@ -1858,7 +1906,8 @@ private lemma transport_res_of_chartY_gen {W W' : WeierstrassCurve R}
   refine (congrArg (((projModel W).presheaf.map (homOfLE hrleE).op).hom) hnat).trans ?_
   have hfuse := congrArg (fun φ => CommRingCat.Hom.hom φ
     ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b')))
     (((projModel W).presheaf.map_comp
       ((TopologicalSpace.Opens.map e.hom.base).map (homOfLE
         ((projModel W').basicOpen_le r'))).op (homOfLE hrleE).op).symm)
@@ -1866,14 +1915,16 @@ private lemma transport_res_of_chartY_gen {W W' : WeierstrassCurve R}
   refine hfuse.trans ?_
   exact congrArg (fun ψ => (CommRingCat.Hom.hom ((projModel W).presheaf.map ψ))
     ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b')))
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b')))
     (Subsingleton.elim _ _)
 
 private lemma mirror_span_aux {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     {r' : Γ(projModel W', Proj.basicOpen (quotientGrading (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))}
-    (hr'le : (projModel W').basicOpen r' ≤ e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+    (hr'le : (projModel W').basicOpen r' ≤ e.symm.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+      (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))))
     {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))}
@@ -2007,7 +2058,8 @@ lemma exists_basicOpen_root_mem_span_transport {W W' : WeierstrassCurve R}
     hrle.trans inf_le_left
   have hrleE : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ
       ((projModel W').basicOpen r') := hrle.trans inf_le_right
-  have hrle' : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W'))
+  have hrle' : (projModel W).basicOpen r ≤ e.hom ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+    (projIdeal W'))
         ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1))) :=
     hrle₀.trans hr₀le
   refine ⟨r, hrle', (chartPointOf_mem_basicOpen_iff W P r).mp hpr, ?_, ?_⟩
@@ -2234,7 +2286,7 @@ private lemma witness_V_le_overlapPreimage {W W' : WeierstrassCurve R}
   exact ⟨h1, h3⟩
 
 private lemma witness_V_le_overlapW {W W' : WeierstrassCurve R}
-    (e : projModel W ≅ projModel W')
+    (_e : projModel W ≅ projModel W')
     {r : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))} :
     (projModel W).basicOpen r ⊓ (projModel W).basicOpen
@@ -2283,7 +2335,8 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
       (((((projModel W).presheaf.map
         (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom)
         ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm
           (AdjoinRoot.root (infChartCubic W'))))) ^ n)).trans
     (congrArg ((((projModel W).presheaf.map
       (homOfLE hVE).op).hom)
@@ -2295,7 +2348,8 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
         ((((projModel W).presheaf.map
           (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom)
           ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm
             (AdjoinRoot.root (infChartCubic W'))))) n))
   have hY : ∀ b₀ : AdjoinRoot (infChartCubic W'),
       (((projModel W).presheaf.map
@@ -2303,7 +2357,8 @@ private lemma witness_eq_V {W W' : WeierstrassCurve R}
         ((((projModel W).presheaf.map
           (homOfLE (overlapPreimage_le_chartYPreimage e)).op).hom)
           ((e.hom.app (Proj.basicOpen (quotientGrading (projIdeal W'))
-        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom ((chartYSectionsRingEquiv W').symm b₀))) =
+        ((quotientGradingHom (projIdeal W')) (MvPolynomial.X 1)))).hom
+          ((chartYSectionsRingEquiv W').symm b₀))) =
       pointedIsoChartTransport e hVY b₀ := by
     intro b₀
     exact pointedIsoChartTransport_res e (overlapPreimage_le_chartYPreimage e)
@@ -2641,6 +2696,16 @@ private lemma equiv_fold_generic {A B : Type u} [CommRing A] [CommRing B]
     (φ r * φ rt) ^ m * (φ bΦs * (φ ss) ^ n * (φ v₀) ^ n * (φ r) ^ j) := by
   simpa only [map_mul, map_pow] using congrArg φ hm
 
+/-- Transport an "avoids every prime not containing `g`" property across a ring hom:
+if `v₀ ∉ Q` for every prime `Q` with `g ∉ Q`, and `φ g ∉ P` for a prime `P`, then `φ v₀ ∉ P`.
+Instantiate the hypothesis at the pullback prime `P.comap φ`. -/
+private lemma notMem_of_ringHom_forall_prime {S A : Type u} [CommRing S] [CommRing A]
+    (φ : S →+* A) (P : Ideal A) [P.IsPrime] {g v₀ : S}
+    (hv₀P : ∀ (Q : Ideal S), Q.IsPrime → g ∉ Q → v₀ ∉ Q)
+    (hgP : φ g ∉ P) : φ v₀ ∉ P :=
+  fun hbv => hv₀P (P.comap φ) (Ideal.IsPrime.comap φ)
+    (fun hg => hgP (Ideal.mem_comap.mp hg)) (Ideal.mem_comap.mpr hbv)
+
 private lemma witness_B_data {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     (heπ : e.hom ≫ projModelπ W' = projModelπ W)
@@ -2657,7 +2722,8 @@ private lemma witness_B_data {W W' : WeierstrassCurve R}
       g ∉ P ∧ bv ∉ P ∧
       (overlapMap W (pointedIsoCoordEquiv e heπ hez f') *
         (algebraMap (AdjoinRoot (infChartCubic W))
-      (Localization.Away (infChartTElem W))) (infChartTElem W) ^ K = (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) (infChartTElem W) ^ K = (algebraMap (AdjoinRoot
+        (infChartCubic W))
       (Localization.Away (infChartTElem W))) bΦ) ∧
       ((g * infChartTElem W) ^ m *
           (bu * infChartTElem W ^ K * g ^ (n * k)) =
@@ -2758,14 +2824,11 @@ private lemma witness_B_data {W W' : WeierstrassCurve R}
   rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply,
     RingEquiv.apply_symm_apply] at hBfold
   -- bv ∉ P
-  have hbvP : chartYSectionsRingEquiv W v₀ ∉ P := by
-    intro hbv
-    exact (hv₀P (Ideal.comap ((chartYSectionsRingEquiv W) :
-        ↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) →+*
-        AdjoinRoot (infChartCubic W)) P)
-      (Ideal.IsPrime.comap _)
-      (fun hr' => hrP (Ideal.mem_comap.mp hr'))) (Ideal.mem_comap.mpr hbv)
+  have hbvP : chartYSectionsRingEquiv W v₀ ∉ P :=
+    notMem_of_ringHom_forall_prime
+      ((chartYSectionsRingEquiv W) : ↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) →+* AdjoinRoot (infChartCubic W))
+      P hv₀P hrP
   exact ⟨chartYSectionsRingEquiv W r, chartYSectionsRingEquiv W u₀,
     chartYSectionsRingEquiv W v₀, bΦ, m, K, j, k, hrP, hbvP, hbΦ0, hBfold⟩
 
@@ -2812,21 +2875,25 @@ lemma pointedIso_exists_witness {W W' : WeierstrassCurve R}
     have hDfold : (algebraMap (AdjoinRoot (infChartCubic W))
       (Localization.Away (infChartTElem W))) (g ^ (m + n * k) * bu) =
         ((algebraMap (AdjoinRoot (infChartCubic W))
-      (Localization.Away (infChartTElem W))) g) ^ (m + n * k) * (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + n * k) * (algebraMap (AdjoinRoot
+        (infChartCubic W))
       (Localization.Away (infChartTElem W))) bu := by
       rw [map_mul, map_pow]
     have hcfold : (algebraMap (AdjoinRoot (infChartCubic W))
       (Localization.Away (infChartTElem W))) (g ^ (m + j) * bv ^ n) =
         ((algebraMap (AdjoinRoot (infChartCubic W))
-      (Localization.Away (infChartTElem W))) g) ^ (m + j) * ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + j) * ((algebraMap (AdjoinRoot
+        (infChartCubic W))
       (Localization.Away (infChartTElem W))) bv) ^ n := by
       rw [map_mul, map_pow, map_pow]
     refine hDfold.trans ?_
     have hgoal : ((algebraMap (AdjoinRoot (infChartCubic W))
-      (Localization.Away (infChartTElem W))) g) ^ (m + n * k) * (algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + n * k) * (algebraMap (AdjoinRoot
+        (infChartCubic W))
       (Localization.Away (infChartTElem W))) bu =
         ((algebraMap (AdjoinRoot (infChartCubic W))
-      (Localization.Away (infChartTElem W))) g) ^ (m + j) * ((algebraMap (AdjoinRoot (infChartCubic W))
+      (Localization.Away (infChartTElem W))) g) ^ (m + j) * ((algebraMap (AdjoinRoot
+        (infChartCubic W))
       (Localization.Away (infChartTElem W))) bv) ^ n *
         (overlapMap W (pointedIsoCoordEquiv e heπ hez f') *
           (algebraMap (AdjoinRoot (infChartCubic W))

@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.CoordHomFinite
 import HasseWeil.Foundation.Curves.Divisor.PicZeroPushforward
+import HasseWeil.Foundation.Curves.Map.CoordHomFinite
 import HasseWeil.Foundation.Curves.Valuation.NormValuation
 
 /-!
@@ -51,7 +51,6 @@ norm–conorm identity NEW-1(ii).
 open WeierstrassCurve
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 namespace HasseWeil.Curves.CurveMap
 
@@ -94,7 +93,7 @@ theorem degree_pushforwardDivisorVal (φ : CurveMap C₁ C₂) (cd : φ.CoordHom
     (D : ProjectiveDivisor C₁) :
     (pushforwardDivisorVal φ cd D).degree = D.degree := by
   rw [pushforwardDivisorVal_apply]
-  unfold ProjectiveDivisor.degree
+  simp only [ProjectiveDivisor.degree]
   rw [Finsupp.sum_mapDomain_index (h := fun _ n ↦ n) (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)]
 
 /-! ### NEW-1(ii): the norm–conorm identity `div(N_φ f) = φ_∗(div f)`
@@ -108,14 +107,13 @@ by generalising the `F[X] → F[C]` machinery of `NormValuation.lean` to the
 coordinate-ring extension `F[C₂] → F[C₁]` supplied by a `CoordHom`.  The generic
 ideal/localisation lemmas (`count_preservation_localization`,
 `count_finset_prod_factors`, `map_eq_localRing_max_pow_count`, …) are reused
-verbatim; the curve-specific inputs are `inertiaDeg = 1`, `relNorm m_P = m_{φP}`,
+verbatim; the curve-specific inputs are `inertiaDeg' = 1`, `relNorm m_P = m_{φP}`,
 and the fibre bijection `maximalIdealAt_toPointMap`. -/
 
 section NormConorm
 
 variable [IsAlgClosed F]
   [IsDedekindDomain C₁.CoordinateRing] [IsDedekindDomain C₂.CoordinateRing]
-  [IsIntegrallyClosed C₁.CoordinateRing] [IsIntegrallyClosed C₂.CoordinateRing]
   (φ : CurveMap C₁ C₂) (cd : φ.CoordHom)
 
 /-- The coordinate-ring comorphism `cd.toAlgHom : F[C₂] → F[C₁]` is injective:
@@ -214,13 +212,13 @@ theorem inertiaDeg_maximalIdealAt_toPointMap (P : C₁.SmoothPoint) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     haveI : (C₁.maximalIdealAt P).LiesOver (C₂.maximalIdealAt (toPointMap cd P)) :=
       ⟨(maximalIdealAt_toPointMap cd P)⟩
-    Ideal.inertiaDeg (C₂.maximalIdealAt (toPointMap cd P)) (C₁.maximalIdealAt P) = 1 := by
+    Ideal.inertiaDeg' (C₂.maximalIdealAt (toPointMap cd P)) (C₁.maximalIdealAt P) = 1 := by
   letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   haveI hLies : (C₁.maximalIdealAt P).LiesOver (C₂.maximalIdealAt (toPointMap cd P)) :=
     ⟨maximalIdealAt_toPointMap cd P⟩
   set Q := toPointMap cd P with hQ
   haveI hPmax : (C₁.maximalIdealAt P).IsMaximal := C₁.maximalIdealAt_isMaximal P
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   -- The residue field `F[C₁]/m_P` is `F` (alg-closed), hence nontrivial.
   haveI : Field (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) := Ideal.Quotient.field _
   haveI : Nontrivial (C₁.CoordinateRing ⧸ C₁.maximalIdealAt P) :=
@@ -267,10 +265,8 @@ section NormConormSteps
 
 variable [IsAlgClosed F]
   [IsDedekindDomain C₁.CoordinateRing] [IsDedekindDomain C₂.CoordinateRing]
-  [IsIntegrallyClosed C₁.CoordinateRing] [IsIntegrallyClosed C₂.CoordinateRing]
   (φ : CurveMap C₁ C₂) (cd : φ.CoordHom)
 
-set_option synthInstance.maxHeartbeats 100000 in
 include φ cd in
 /-- **`F[C₂]` acts faithfully on `K(C₁)`** through the `cd`-induced algebra: the
 structure map `F[C₂] → K(C₁)` factors (by the `F[C₂] → F[C₁] → K(C₁)` scalar tower)
@@ -278,18 +274,22 @@ as the injective comorphism `cd.toAlgHom` followed by the injective localisation
 `F[C₁] → K(C₁)`, so it is injective.  Packaged for reuse by the function-field
 finiteness/degree arguments. -/
 private theorem faithfulSMul_coordinateRing_functionField :
-    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
-  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
-    inferInstance
-  rw [faithfulSMul_iff_algebraMap_injective,
-    IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField]
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
+  rw [faithfulSMul_iff_algebraMap_injective]
+  have halg : (algebraMap C₂.CoordinateRing C₁.FunctionField) =
+      (algebraMap C₁.CoordinateRing C₁.FunctionField).comp
+        (algebraMap C₂.CoordinateRing C₁.CoordinateRing) :=
+    IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField
+  rw [halg, RingHom.coe_comp, RingHom.algebraMap_toAlgebra]
   exact (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
     (CurveMap.coordHom_injective φ cd)
 
-set_option synthInstance.maxHeartbeats 100000 in
-set_option maxHeartbeats 800000 in
 include φ cd in
 /-- **The coordinate-ring/function-field scalar tower** `F[C₂] → K(C₂) → K(C₁)`.
 The `K(C₂) → K(C₁)` map is `φ.pullback`, and `cd.compat` says it agrees with the
@@ -297,19 +297,21 @@ The `K(C₂) → K(C₁)` map is `φ.pullback`, and `cd.compat` says it agrees w
 `IsScalarTower.of_algebraMap_smul`.  Packaged for reuse by the function-field
 finiteness/integral-norm arguments. -/
 private theorem isScalarTower_coordinateRing_functionField :
-    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
-    letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
     IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
   refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
   rw [Algebra.smul_def]
   show φ.pullback ((algebraMap C₂.CoordinateRing C₂.FunctionField) r) * x = r • x
   rw [cd.compat r, ← IsScalarTower.algebraMap_smul C₁.CoordinateRing r x, ← Algebra.smul_def]
   rfl
 
-set_option synthInstance.maxHeartbeats 100000 in
-set_option maxHeartbeats 800000 in
 include φ cd in
 /-- **`K(C₁)` is algebraic over `K(C₂)`** (the `φ.toAlgebra` extension): the ring
 extension `F[C₂] → F[C₁]` is integral (`cd.module_finite`), hence algebraic, and
@@ -317,9 +319,13 @@ algebraicity transfers to the fraction fields by `IsFractionRing.isAlgebraic_iff
 (over `F[C₂]`) and then `IsFractionRing.comap_isAlgebraic_iff` (descending the base
 to `K(C₂)`).  This is the algebraicity input to the localisation-finiteness step. -/
 private theorem isAlgebraic_functionField :
-    letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+    letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
     Algebra.IsAlgebraic C₂.FunctionField C₁.FunctionField := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ algCR.toModule :=
     cd.module_finite
   haveI hint : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
@@ -336,11 +342,6 @@ private theorem isAlgebraic_functionField :
   exact (IsFractionRing.comap_isAlgebraic_iff (A := C₂.CoordinateRing)
     (K := C₂.FunctionField) (C := C₁.FunctionField)).mp halgAB
 
-set_option synthInstance.maxHeartbeats 100000 in
--- Establishing the finite extension `K(C₂) → K(C₁)` goes through the integral-closure
--- localisation instance and the `tower1` scalar-tower derivation, both of which are
--- heartbeat-heavy; hence the scoped bumps.
-set_option maxHeartbeats 800000 in
 include cd in
 /-- `K(C₁)` is a finite extension of `φ*K(C₂)` (the fraction fields of the finite ring
 extension `F[C₂] → F[C₁]` induced by `cd`).  Used for `Algebra.norm_zero` in the
@@ -352,6 +353,10 @@ theorem finiteDimensional_functionField :
       cd.toAlgebra.toModule := by
     exact cd.module_finite
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
   haveI hint : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
@@ -373,10 +378,6 @@ theorem finiteDimensional_functionField :
   exact Module.Finite.of_isLocalization C₂.CoordinateRing C₁.CoordinateRing
     (nonZeroDivisors C₂.CoordinateRing)
 
-set_option synthInstance.maxHeartbeats 100000 in
--- The `FractionRing.liftAlgebra` / `Module.finrank` defeq here (identifying
--- `FractionRing C₂.CR` with `C₂.FunctionField`) is heartbeat-heavy, hence the bumps.
-set_option maxHeartbeats 600000 in
 include φ cd in
 /-- **The fraction-field degree equals `φ.degree`**: the `K(C₂)`-rank of `K(C₁)`,
 computed through `FractionRing.liftAlgebra C₂.CR C₁.FF`, is `φ.degree`.  The key step
@@ -385,21 +386,21 @@ identifies that lift-algebra with `φ.toAlgebra` via `IsFractionRing.lift_unique
 by `rfl`.  This supplies the global balance `relNorm(m_Q·F[C₁]) = m_Q^{φ.degree}`. -/
 private theorem finrank_functionField_eq_degree :
     letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    haveI : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+      refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+      rw [RingHom.algebraMap_toAlgebra]
+      rfl
     haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField :=
-      (faithfulSMul_iff_algebraMap_injective C₂.CoordinateRing C₁.FunctionField).mpr
-        ((IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField).symm ▸
-          (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
-            (CurveMap.coordHom_injective φ cd))
+      faithfulSMul_coordinateRing_functionField φ cd
     @Module.finrank C₂.FunctionField C₁.FunctionField _ _
       (FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField).toModule = φ.degree := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
-  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
-    inferInstance
-  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
-    rw [faithfulSMul_iff_algebraMap_injective,
-      IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField]
-    exact (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
-      (CurveMap.coordHom_injective φ cd)
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
+  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField :=
+    faithfulSMul_coordinateRing_functionField φ cd
   have halgmap :
       IsFractionRing.lift (A := C₂.CoordinateRing) (K := C₂.FunctionField)
         (FaithfulSMul.algebraMap_injective C₂.CoordinateRing C₁.FunctionField) =
@@ -467,7 +468,7 @@ private theorem inertiaDeg_eq_one_of_liesOver_maximalIdealAt (Q : C₂.SmoothPoi
       cd.module_finite
     haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
       isTorsionFree_coordHom φ cd
-    Ideal.inertiaDeg (C₂.maximalIdealAt Q) P' = 1 := by
+    Ideal.inertiaDeg' (C₂.maximalIdealAt Q) P' = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
@@ -512,7 +513,7 @@ private theorem sum_ramificationIdx_eq_degree (Q : C₂.SmoothPoint)
     haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
       isTorsionFree_coordHom φ cd
     ∑ P' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing,
-      (C₂.maximalIdealAt Q).ramificationIdx P' = φ.degree := by
+      (C₂.maximalIdealAt Q).ramificationIdx' P' = φ.degree := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
@@ -528,10 +529,6 @@ private theorem sum_ramificationIdx_eq_degree (Q : C₂.SmoothPoint)
     (IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hQ0).mp hP'
   rw [inertiaDeg_eq_one_of_liesOver_maximalIdealAt φ cd Q P' hP'prime hP'lies, mul_one]
 
-set_option synthInstance.maxHeartbeats 100000 in
--- Establishing the global balance reuses `finrank_functionField_eq_degree` and the
--- `FractionRing.liftAlgebra` / `Module.finrank` defeq, which is heartbeat-heavy.
-set_option maxHeartbeats 600000 in
 include φ cd in
 /-- **The degree balance `φ.degree = Σ sfn(P')·e(P')`**: if, over a smooth point `Q`
 of `C₂`, the relative norm of each prime `P' / m_Q` is the corresponding power
@@ -559,7 +556,7 @@ private theorem degree_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPoi
       isTorsionFree_coordHom φ cd
     haveI : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
     φ.degree = ∑ P' ∈ ((C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing).toFinset,
-      sfn P' * (C₂.maximalIdealAt Q).ramificationIdx P' := by
+      sfn P' * (C₂.maximalIdealAt Q).ramificationIdx' P' := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR := hfin
@@ -572,13 +569,19 @@ private theorem degree_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPoi
   have hcoh : @Module.finrank C₂.FunctionField C₁.FunctionField _ _
       (FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField).toModule = φ.degree :=
     finrank_functionField_eq_degree φ cd
-  have hfact := Ideal.map_algebraMap_eq_finsetProd_pow (R := C₁.CoordinateRing)
+  have hfact0 := Ideal.map_algebraMap_eq_finsetProd_pow (R := C₁.CoordinateRing)
     (S := C₂.CoordinateRing) (p := p) hp0
+  have hfact : Ideal.map (algebraMap C₂.CoordinateRing C₁.CoordinateRing) p =
+      ∏ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, P' ^ p.ramificationIdx' P' := by
+    rw [hfact0]
+    refine Finset.prod_congr rfl fun P' hP' ↦ ?_
+    obtain ⟨hP'_prime, hP'_over⟩ := Set.mem_toFinset.mp hP'
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx p P' hp0]
   have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
   rw [Ideal.relNorm_algebraMap C₁.CoordinateRing p, hcoh, map_prod] at hrel
   have hrhs : ∏ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset,
-      Ideal.relNorm C₂.CoordinateRing (P' ^ p.ramificationIdx P') =
-      p ^ (∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * p.ramificationIdx P') := by
+      Ideal.relNorm C₂.CoordinateRing (P' ^ p.ramificationIdx' P') =
+      p ^ (∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * p.ramificationIdx' P') := by
     rw [← Finset.prod_pow_eq_pow_sum]
     apply Finset.prod_congr rfl
     intro P' hP'
@@ -602,7 +605,7 @@ private theorem one_le_ramificationIdx_of_liesOver_maximalIdealAt (Q : C₂.Smoo
       cd.module_finite
     haveI : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
       isTorsionFree_coordHom φ cd
-    1 ≤ (C₂.maximalIdealAt Q).ramificationIdx P' := by
+    1 ≤ (C₂.maximalIdealAt Q).ramificationIdx' P' := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
@@ -613,7 +616,7 @@ private theorem one_le_ramificationIdx_of_liesOver_maximalIdealAt (Q : C₂.Smoo
   haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
   have hp0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
   rw [Nat.one_le_iff_ne_zero]
-  exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P' hp0
+  exact Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver P' hp0
 
 /-- **A `ℕ`-valued sum squeeze**: if `∑ c = ∑ a·c` over a finset `s` with every
 `a i ≥ 1` and every `c i ≥ 1`, then `a i₀ = 1` for each `i₀ ∈ s`.  Each summand
@@ -630,11 +633,6 @@ private theorem eq_one_of_sum_eq_sum_mul {ι : Type*} (s : Finset ι) (a c : ι 
   have hi := heach i₀ hi₀
   nlinarith [hi, hc i₀ hi₀]
 
-set_option synthInstance.maxHeartbeats 100000 in
--- Assembling the global balance still synthesises the cross-algebra instances and the
--- `FractionRing.liftAlgebra` / `Module.finrank` defeq (via `finrank_functionField_eq_degree`),
--- which is heartbeat-heavy, hence the scoped bumps.
-set_option maxHeartbeats 600000 in
 /-- **The `s = 1` core — Silverman II.3.6**: the relative norm of the maximal ideal
 `m_R` of `F[C₁]` is the maximal ideal `m_{φR}` of `F[C₂]`.  Proof via the global
 balance `relNorm(m_Q·F[C₁]) = m_Q^{φ.degree} = ∏ relNorm(m_{P'})^{e_{P'}}` together
@@ -672,7 +670,7 @@ theorem relNorm_maximalIdealAt_eq
   have hge1 : 1 ≤ s := one_le_of_relNorm_eq_pow φ cd hQmax s hLies hs
   set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
   -- Every residue degree over `m_Q` is `1`.
-  have hinertia : ∀ P' ∈ p.primesOver C₁.CoordinateRing, Ideal.inertiaDeg p P' = 1 := by
+  have hinertia : ∀ P' ∈ p.primesOver C₁.CoordinateRing, Ideal.inertiaDeg' p P' = 1 := by
     intro P' hP'
     obtain ⟨hP'prime, hP'lies⟩ := hP'
     exact inertiaDeg_eq_one_of_liesOver_maximalIdealAt φ cd Q P' hP'prime hP'lies
@@ -700,7 +698,7 @@ theorem relNorm_maximalIdealAt_eq
     intro P' hP'
     simp only [sfn, dif_pos hP']
     exact (hexp P' hP').choose_spec.2
-  set ee : Ideal C₁.CoordinateRing → ℕ := fun P' ↦ p.ramificationIdx P'
+  set ee : Ideal C₁.CoordinateRing → ℕ := fun P' ↦ p.ramificationIdx' P'
   -- Global balance: `φ.degree = Σ sfn(P')·e_{P'}`.
   have hdeg_eq : φ.degree = ∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * ee P' :=
     degree_eq_sum_relNormExp_mul_ramificationIdx φ cd Q hfin sfn hsfn_relNorm
@@ -740,7 +738,7 @@ Were `Q' = ⊥`, its contraction `Q'.under = comap ⊥` would be `⊥` (the como
 injective), forcing `p = ⊥`. -/
 private theorem primesOverFinset_ne_bot {p : Ideal C₂.CoordinateRing}
     (hpMax : p.IsMaximal) (hp_ne : p ≠ ⊥) :
-    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, Q' ≠ ⊥ := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
@@ -869,7 +867,8 @@ private theorem count_maximalIdealAt_relNorm_pow_of_not_liesOver (Q : C₂.Smoot
     rw [hrel]
     intro hpe
     exact hQ'not (hpe ▸ hlies')
-  haveI hP'max2 : (Ideal.relNorm C₂.CoordinateRing Q').IsMaximal := hrel ▸ C₂.maximalIdealAt_isMaximal _
+  haveI hP'max2 : (Ideal.relNorm C₂.CoordinateRing Q').IsMaximal :=
+    hrel ▸ C₂.maximalIdealAt_isMaximal _
   have hP'_ne_bot2 : Ideal.relNorm C₂.CoordinateRing Q' ≠ ⊥ := hrel ▸ C₂.maximalIdealAt_ne_bot _
   have h_vP'_irr : Irreducible (Associates.mk (Ideal.relNorm C₂.CoordinateRing Q')) :=
     (⟨_, hP'max2.isPrime, hP'_ne_bot2⟩ :
@@ -1080,7 +1079,8 @@ theorem count_relNorm_eq_sum_fiber :
     ⟨Q', ((IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne).mp hQ').1,
       h_prime_ne_bot Q' hQ'⟩
   let sH : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) :=
-    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image (fun ⟨Q', hQ'⟩ ↦ toHOS Q' hQ')
+    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
+      (fun ⟨Q', hQ'⟩ ↦ toHOS Q' hQ')
   set S : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) :=
     h_supp.toFinset ∪ sH with hS_def
   have hS_supp : Function.mulSupport
@@ -1123,7 +1123,7 @@ equal degree whose coefficients agree at every affine place agree at infinity as
 well.  (The difference is supported only at infinity, so its degree *is* its
 infinity coefficient.)  This pins the place at infinity in `II.3.6` once the affine
 coefficients are matched and both divisors have degree `0`. -/
-private theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve F}
+theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve F}
     (D₁ D₂ : ProjectiveDivisor C) (hdeg : D₁.degree = D₂.degree)
     (haff : ∀ Q : C.SmoothPoint,
       D₁ (ProjectiveSmoothPoint.affine Q) = D₂ (ProjectiveSmoothPoint.affine Q)) :
@@ -1147,7 +1147,7 @@ private theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve
   have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
     have : E.degree = E ProjectiveSmoothPoint.infinity := by
       conv_lhs => rw [hE_single]
-      unfold ProjectiveDivisor.degree
+      simp only [ProjectiveDivisor.degree]
       rw [Finsupp.sum_single_index rfl]
     rw [this] at hE_deg
     exact hE_deg
@@ -1155,10 +1155,6 @@ private theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve
     rw [← Finsupp.sub_apply]; exact hEinf
   linarith [this]
 
-set_option synthInstance.maxHeartbeats 100000 in
--- Synthesising the cross-algebra `Algebra C₂.CR C₁.FF` for the scalar towers (needed
--- by `Algebra.algebraMap_intNorm`) is heartbeat-heavy, hence the scoped bumps.
-set_option maxHeartbeats 400000 in
 include φ cd in
 /-- **Conorm of an `algebraMap` is the `algebraMap` of the integral norm**: for
 `w ∈ F[C₁]`, the pushforward `φ_∗(algebraMap w)` equals `algebraMap (N_{F[C₂]} w)`,
@@ -1184,13 +1180,12 @@ private theorem pushforward_algebraMap_eq_algebraMap_intNorm (w : C₁.Coordinat
     isTorsionFree_coordHom φ cd
   haveI hint : Algebra.IsIntegral C₂.CoordinateRing C₁.CoordinateRing :=
     Algebra.IsIntegral.of_finite C₂.CoordinateRing C₁.CoordinateRing
-  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
-    inferInstance
-  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
-    rw [faithfulSMul_iff_algebraMap_injective,
-      IsScalarTower.algebraMap_eq C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField]
-    exact (IsFractionRing.injective C₁.CoordinateRing C₁.FunctionField).comp
-      (CurveMap.coordHom_injective φ cd)
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
+  haveI faith : FaithfulSMul C₂.CoordinateRing C₁.FunctionField :=
+    faithfulSMul_coordinateRing_functionField φ cd
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
     refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
@@ -1362,7 +1357,8 @@ private theorem sum_filter_support_eq_sum_image_section
         (C₂.maximalIdealAt Q) C₁.CoordinateRing), toPointMap cd (g Q' hQ') = Q),
       (∑ x ∈ D.support.filter
           (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x) =
-        ∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing).attach.image
+        ∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q)
+          C₁.CoordinateRing).attach.image
           (fun Q' ↦ ProjectiveSmoothPoint.affine (g Q'.1 Q'.2)), D x := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
@@ -1424,7 +1420,8 @@ private theorem sum_image_section_eq_sum_primesOver
         C₁.SmoothPoint)
       (_ : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset
         (C₂.maximalIdealAt Q) C₁.CoordinateRing), C₁.maximalIdealAt (g Q' hQ') = Q'),
-      (∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing).attach.image
+      (∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q)
+        C₁.CoordinateRing).attach.image
           (fun Q' ↦ ProjectiveSmoothPoint.affine (g Q'.1 Q'.2)),
           (C₁.projectiveDivisorOf (algebraMap C₁.CoordinateRing C₁.FunctionField w)) x) =
         ∑ Q' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing,
@@ -1437,7 +1434,8 @@ private theorem sum_image_section_eq_sum_primesOver
     isTorsionFree_coordHom φ cd
   intro g hg_ideal
   rw [Finset.sum_image (affine_section_injOn_attach φ cd Q g hg_ideal)]
-  rw [← Finset.sum_attach (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing)
+  rw [← Finset.sum_attach
+      (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing)
     (fun Q' ↦ ((Associates.mk Q').count
       (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ))]
   apply Finset.sum_congr rfl
@@ -1445,10 +1443,8 @@ private theorem sum_image_section_eq_sum_primesOver
   rw [projectiveDivisorOf_algebraMap_apply_affine_eq_count w hw (g Q'.1 Q'.2),
     hg_ideal Q'.1 Q'.2]
 
-set_option synthInstance.maxHeartbeats 100000 in
 -- The fibre bijection `{primes over m_Q} ≃ {P : φP = Q}` and the supporting
--- `LiesOver`/`maximalIdealAt` defeq are heartbeat-heavy, hence the scoped bumps.
-set_option maxHeartbeats 400000 in
+-- `LiesOver`/`maximalIdealAt` defeq are heartbeat-heavy (pre-existing budget).
 include φ cd in
 /-- **The pushforward coefficient at an affine place is the fibre sum** (the heart of
 the affine matching in `II.3.6`): the `affine Q` coefficient of
@@ -1500,10 +1496,8 @@ private theorem pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber
       pt hpt_ideal hpt_Q,
     sum_image_section_eq_sum_primesOver φ cd w hw Q pt hpt_ideal]
 
-set_option synthInstance.maxHeartbeats 100000 in
 -- Synthesising the cross-algebra `Algebra C₂.CR C₁.FF` for the scalar towers (needed
--- by `Algebra.algebraMap_intNorm`) is heartbeat-heavy, hence the scoped bumps.
-set_option maxHeartbeats 500000 in
+-- by `Algebra.algebraMap_intNorm`) is heartbeat-heavy (pre-existing budget).
 include φ cd in
 /-- **Affine coefficients of the `algebraMap` norm–conorm identity agree**: for a
 nonzero `w ∈ F[C₁]` and any smooth point `Q` of `C₂`, the `affine Q` coefficient of
@@ -1723,7 +1717,6 @@ Here the general `f = u/v` reduces to `f = algebraMap u`, `u ∈ F[C₁]` nonzer
 (`projectiveDivisorOf_mul`, `pushforward_mul`, `pushforwardDivisorVal` a hom). -/
 theorem projectiveDivisorOf_pushforward_eq_pushforwardDivisorVal [IsAlgClosed F]
     [IsDedekindDomain C₁.CoordinateRing] [IsDedekindDomain C₂.CoordinateRing]
-    [IsIntegrallyClosed C₁.CoordinateRing] [IsIntegrallyClosed C₂.CoordinateRing]
     (φ : CurveMap C₁ C₂) (cd : φ.CoordHom)
     (f : C₁.FunctionField) :
     C₂.projectiveDivisorOf (φ.pushforward f) =
@@ -1778,8 +1771,6 @@ principal. -/
 theorem pushforward_preserves_principal [IsAlgClosed F]
     [IsDedekindDomain (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
     [IsDedekindDomain (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
     (φ : Isogeny W₁ W₂) (cd : φ.toCurveMap.CoordHom)
     (D : ProjectiveDivisor (⟨W₁⟩ : SmoothPlaneCurve F))
     (hD : D ∈ (⟨W₁⟩ : SmoothPlaneCurve F).projPrincipalSubgroup) :

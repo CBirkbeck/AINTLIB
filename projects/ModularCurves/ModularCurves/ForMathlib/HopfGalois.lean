@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ForMathlib.Coaction
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 
@@ -16,9 +21,9 @@ their `Algebra.TensorProduct.lift`.
 
 `IsHopfGalois ρ` bundles the crux: `β` bijective (**the action is free and transitive on fibres**)
 together with `B` faithfully flat over `S` (**the quotient map `Spec B → Spec S` is flat +
-surjective**). By `isRegularEpi_of_flat_of_surjective_of_isAffine` (`@[stacks 023Q]`), `IsHopfGalois`
-gives the affine-local `Spec B → Spec B^{coρ}` as the coequalizer of the groupoid — discharging the
-`SubgroupQuotient` pins through `isInvariant_iff_coequalizes`.
+surjective**). By `isRegularEpi_of_flat_of_surjective_of_isAffine` (`@[stacks 023Q]`),
+`IsHopfGalois` gives the affine-local `Spec B → Spec B^{coρ}` as the coequalizer of the groupoid —
+discharging the `SubgroupQuotient` pins through `isInvariant_iff_coequalizes`.
 
 This statement is **route-independent**: the general finite-flat route and the E[N] étale shortcut
 both target `IsHopfGalois`; only its *proof* (finite-flat-group-scheme torsor theory vs. étale
@@ -91,8 +96,8 @@ theorem canonicalGaloisMap_comp_includeRight (ρ : B →ₐ[R] B ⊗[R] A) :
   rw [canonicalGaloisMap_tmul, ← Algebra.TensorProduct.one_def, one_mul]
 
 /-- The **Hopf-Galois / torsor property** of a co-action `ρ`, the precise form of the `T-G3d-infra`
-Piece 3 crux. Both conditions are needed to realise `Spec B → Spec B^{coρ}` as the affine coequalizer
-of the translation groupoid via `@[stacks 023Q]`:
+Piece 3 crux. Both conditions are needed to realise `Spec B → Spec B^{coρ}` as the affine
+coequalizer of the translation groupoid via `@[stacks 023Q]`:
 
 * `galois`: the canonical Galois map `β` is bijective — the action `G ×_S X ⇉ X` is *free and
   transitive on fibres* (its kernel pair is the graph of the action);
@@ -112,8 +117,8 @@ namespace IsHopfGalois
 variable {ρ : B →ₐ[R] B ⊗[R] A}
 
 /-- The **Galois isomorphism** `B ⊗_S B ≃ B ⊗_R A` packaged from the bijective canonical Galois map.
-This is the algebra dual of the groupoid iso `Spec B ×_{Spec S} Spec B ≅ G ×_S Spec B` (the action is
-an equivalence relation); on `Spec` it identifies the kernel pair of the quotient map with the
+This is the algebra dual of the groupoid iso `Spec B ×_{Spec S} Spec B ≅ G ×_S Spec B` (the action
+is an equivalence relation); on `Spec` it identifies the kernel pair of the quotient map with the
 translation groupoid, the input to the `@[stacks 023Q]` coequalizer. -/
 noncomputable def galoisEquiv (h : IsHopfGalois ρ) :
     (B ⊗[coinvariants ρ] B) ≃ₐ[coinvariants ρ] (B ⊗[R] A) :=

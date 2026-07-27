@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LogEmbedding
-import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LogEmbedding
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
 
 /-!
 # LV-SIN-B: Vandermonde-style determinant evaluation
@@ -131,8 +133,7 @@ theorem cyclotomicUnitNormFormula_proven (p : ℕ) :
       push_cast; ring
     rw [h_eq, norm_one_sub_exp_two_pi_I_mul]
     ring_nf
-  rw [h1, h2]
-  rw [mul_div_mul_left _ _ (by norm_num : (2 : ℝ) ≠ 0)]
+  rw [h1, h2, mul_div_mul_left _ _ (by norm_num : (2 : ℝ) ≠ 0)]
 
 /-- **Log version of the cyclotomic-unit norm formula**: in additive form,
 `log‖φ((1-ζ^k))‖ - log‖φ((1-ζ))‖ = log|sin(πak/p)| - log|sin(πa/p)|`. -/
@@ -145,11 +146,9 @@ theorem log_norm_one_sub_exp_diff (a k p : ℕ) (_hp : 0 < p)
         * Complex.I))‖ =
     Real.log |Real.sin (Real.pi * (a * k / p : ℝ))| -
       Real.log |Real.sin (Real.pi * (a / p : ℝ))| := by
-  rw [norm_one_sub_exp_two_pi_I_mul, norm_one_sub_exp_two_pi_I_mul]
-  rw [Real.log_mul (by norm_num : (2 : ℝ) ≠ 0)
-      (by simp [h_sin_ne_ak])]
-  rw [Real.log_mul (by norm_num : (2 : ℝ) ≠ 0)
-      (by simp [h_sin_ne_a])]
+  rw [norm_one_sub_exp_two_pi_I_mul, norm_one_sub_exp_two_pi_I_mul,
+    Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by simp [h_sin_ne_ak]),
+    Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by simp [h_sin_ne_a])]
   push_cast
   ring
 
@@ -236,6 +235,63 @@ theorem dirichletCharacter_sum_matrix_eigenvalue
     dirichletCharacter_sum_mulRight_substitution χ k g]
   ring
 
+/-- **Reflection symmetry of the `log|2 sin|` character sum**: for an odd prime
+`p` and an even Dirichlet character `χ` mod `p`, the character-weighted sum over
+the upper half `Finset.Ico ((p+1)/2) p` of `Real.log (2 · |sin (πa/p)|)` equals
+the sum over the lower half `Finset.Ico 1 ((p+1)/2)`.
+
+The bijection `a ↦ p − a` maps the upper half onto the lower half (and is its own
+inverse), and it preserves the summand: `χ(a) = χ(p − a)` because `χ` is even
+(`dirichletCharacter_even_apply_pSub`), while `|sin(π(p−a)/p)| = |sin(πa/p)|` by
+the sine reflection `abs_sin_pi_sub_div`. -/
+theorem dirichletCharacter_even_log_sin_high_eq_low
+    {p : ℕ} (hp_odd : Odd p) (χ : DirichletCharacter ℂ p) (hχ : χ.Even) :
+    ∑ a ∈ Finset.Ico ((p + 1) / 2) p,
+        χ ((a : ℕ) : ZMod p) *
+          ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ) =
+      ∑ a ∈ Finset.Ico 1 ((p + 1) / 2),
+        χ ((a : ℕ) : ZMod p) *
+          ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ) := by
+  obtain ⟨n, hn⟩ := hp_odd
+  refine Finset.sum_nbij' (fun a ↦ p - a) (fun a ↦ p - a) ?_ ?_ ?_ ?_ ?_
+  · -- maps Ico ((p+1)/2) p → Ico 1 ((p+1)/2)
+    intro a ha
+    rw [Finset.mem_Ico] at ha ⊢
+    omega
+  · -- maps Ico 1 ((p+1)/2) → Ico ((p+1)/2) p
+    intro a ha
+    rw [Finset.mem_Ico] at ha ⊢
+    omega
+  · -- left inverse: p - (p - a) = a (need a ≤ p)
+    intro a ha
+    rw [Finset.mem_Ico] at ha
+    have : a ≤ p := by omega
+    omega
+  · -- right inverse: p - (p - a) = a (need a ≤ p)
+    intro a ha
+    rw [Finset.mem_Ico] at ha
+    have : a ≤ p := by omega
+    omega
+  · -- pointwise equality of summands
+    intro a ha
+    rw [Finset.mem_Ico] at ha
+    have ha_le : a ≤ p := by omega
+    rw [dirichletCharacter_even_apply_pSub χ hχ ha_le]
+    congr 1
+    -- log argument: 2 * |sin (π(p-a)/p)| = 2 * |sin (πa/p)|
+    have h_sin_eq :
+        |Real.sin (Real.pi * ((p - a : ℕ) : ℝ) / (p : ℝ))| =
+          |Real.sin (Real.pi * (a : ℝ) / (p : ℝ))| := by
+      have hcast : (Real.pi * ((p - a : ℕ) : ℝ) / (p : ℝ)) =
+          (Real.pi * (((p - a : ℕ) : ℝ) / (p : ℝ))) := by ring
+      rw [hcast]
+      have hcast2 : (Real.pi * (a : ℝ) / (p : ℝ)) =
+          (Real.pi * ((a : ℝ) / (p : ℝ))) := by ring
+      rw [hcast2]
+      have := abs_sin_pi_sub_div a p ha_le
+      convert this using 2
+    rw [h_sin_eq]
+
 /-- **Even-character full→half sum identity for `log|2 sin|`**: for an odd
 prime `p` and an even Dirichlet character `χ` mod `p`, the full character-
 weighted sum over `Finset.Ico 1 p` of `Real.log (2 · |sin (πa/p)|)` equals
@@ -252,65 +308,12 @@ theorem dirichletCharacter_even_log_sin_full_eq_two_half
       2 * ∑ a ∈ Finset.Ico 1 ((p + 1) / 2),
         χ ((a : ℕ) : ZMod p) *
           ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ) := by
-  -- Split Ico 1 p = Ico 1 ((p+1)/2) ⊔ Ico ((p+1)/2) p.
+  -- Split Ico 1 p = Ico 1 ((p+1)/2) ⊔ Ico ((p+1)/2) p, then the high half equals
+  -- the low half by the reflection `a ↦ p - a` (`…_high_eq_low`).
   obtain ⟨n, hn⟩ := hp_odd
-  -- For p = 2n+1, (p+1)/2 = n+1, and Ico 1 p splits at n+1.
-  have h_split_idx : (p + 1) / 2 = n + 1 := by omega
-  have h_p : p = 2 * n + 1 := hn
-  have h_le : (p + 1) / 2 ≤ p := by omega
-  rw [← Finset.sum_Ico_consecutive _ (by omega : 1 ≤ (p + 1) / 2) h_le]
-  -- The high half = the low half by the substitution a ↦ p - a.
-  -- Specifically: Ico ((p+1)/2) p ↔ Ico 1 ((p+1)/2) under a ↦ p-a.
-  -- Use Finset.sum_nbij' with the involution.
-  have h_high_eq_low :
-      ∑ a ∈ Finset.Ico ((p + 1) / 2) p,
-          χ ((a : ℕ) : ZMod p) *
-            ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ) =
-        ∑ a ∈ Finset.Ico 1 ((p + 1) / 2),
-          χ ((a : ℕ) : ZMod p) *
-            ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ) := by
-    refine Finset.sum_nbij' (fun a ↦ p - a) (fun a ↦ p - a) ?_ ?_ ?_ ?_ ?_
-    · -- maps Ico ((p+1)/2) p → Ico 1 ((p+1)/2)
-      intro a ha
-      rw [Finset.mem_Ico] at ha ⊢
-      omega
-    · -- maps Ico 1 ((p+1)/2) → Ico ((p+1)/2) p
-      intro a ha
-      rw [Finset.mem_Ico] at ha ⊢
-      omega
-    · -- left inverse: p - (p - a) = a (need a ≤ p)
-      intro a ha
-      rw [Finset.mem_Ico] at ha
-      have : a ≤ p := by omega
-      omega
-    · -- right inverse: p - (p - a) = a (need a ≤ p)
-      intro a ha
-      rw [Finset.mem_Ico] at ha
-      have : a ≤ p := by omega
-      omega
-    · -- pointwise equality of summands
-      intro a ha
-      rw [Finset.mem_Ico] at ha
-      have ha_le : a ≤ p := by omega
-      rw [dirichletCharacter_even_apply_pSub χ hχ ha_le]
-      congr 1
-      -- log argument: 2 * |sin (π(p-a)/p)| = 2 * |sin (πa/p)|
-      have h_sin_eq :
-          |Real.sin (Real.pi * ((p - a : ℕ) : ℝ) / (p : ℝ))| =
-            |Real.sin (Real.pi * (a : ℝ) / (p : ℝ))| := by
-        have hcast : (Real.pi * ((p - a : ℕ) : ℝ) / (p : ℝ)) =
-            (Real.pi * (((p - a : ℕ) : ℝ) / (p : ℝ))) := by ring
-        rw [hcast]
-        have hcast2 : (Real.pi * (a : ℝ) / (p : ℝ)) =
-            (Real.pi * ((a : ℝ) / (p : ℝ))) := by ring
-        rw [hcast2]
-        have h_div : (((p - a : ℕ) : ℝ) / (p : ℝ)) =
-            (((p - a : ℕ) : ℕ) : ℝ) / ((p : ℕ) : ℝ) := by norm_cast
-        have := abs_sin_pi_sub_div a p ha_le
-        push_cast at this ⊢
-        convert this using 2
-      rw [h_sin_eq]
-  rw [h_high_eq_low]
+  rw [← Finset.sum_Ico_consecutive _ (by omega : 1 ≤ (p + 1) / 2)
+      (by omega : (p + 1) / 2 ≤ p),
+    dirichletCharacter_even_log_sin_high_eq_low ⟨n, hn⟩ χ hχ]
   ring
 
 end Sinnott

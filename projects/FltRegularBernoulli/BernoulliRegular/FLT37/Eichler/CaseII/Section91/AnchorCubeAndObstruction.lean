@@ -135,7 +135,7 @@ omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] [NumberField K]
 
 The real prime `λ = (1−ζ')(1−ζ'³⁶)` spans the square of `𝔭 = span(ζ−1)`: both factors `1−ζ'`,
 `1−ζ'³⁶` are associates of `ζ−1` (all `1−ζ'^j`, `j ≢ 0`, are associates of `ζ−1` via
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime` based at `ζ`), so each spans `𝔭`, and
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime` based at `ζ`), so each spans `𝔭`, and
 `span(λ) = span(1−ζ')·span(1−ζ'³⁶) = 𝔭·𝔭 = 𝔭²`.  (Ideal-level form of `caseII_lambda_emultiplicity`
 `v_𝔭(λ) = 2`.) -/
 theorem caseII_span_lambda_eq_p_sq {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
@@ -154,7 +154,7 @@ theorem caseII_span_lambda_eq_p_sq {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
   have h1 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger) := by
     have hne : (1 : 𝓞 K) ≠ hζ'.toInteger :=
       fun h ↦ hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h.symm
-    exact hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    exact hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmemζ' hne
   have h2 : Associated (hζ.toInteger - 1 : 𝓞 K) (1 - hζ'.toInteger ^ 36) := by
     have hne : (1 : 𝓞 K) ≠ hζ'.toInteger ^ 36 := by
@@ -164,7 +164,7 @@ theorem caseII_span_lambda_eq_p_sq {ζ ζ' : K} (hζ : IsPrimitiveRoot ζ 37)
         have hps : hζ'.toInteger ^ 37 = hζ'.toInteger ^ 36 * hζ'.toInteger := pow_succ _ _
         rw [h37, ← h, one_mul] at hps; exact hps.symm
       exact hζ'.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) this
-    exact hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    exact hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmem36 hne
   -- `span(1−ζ') = 𝔭`, `span(1−ζ'³⁶) = 𝔭`, and `span(λ) = span(1−ζ')·span(1−ζ'³⁶) = 𝔭²`.
   have hspan1 : Ideal.span ({(1 - hζ'.toInteger : 𝓞 K)} : Set (𝓞 K)) =

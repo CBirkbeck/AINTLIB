@@ -41,6 +41,26 @@ and `DiscreteValuationRing` API) so that the place classification need not impor
 
 namespace HasseWeil.Curves
 
+/-- **A surjective `ℤᵐ⁰`-valued valuation is nontrivial**: surjectivity hits `exp 1`, an
+element with valuation `≠ 0, 1`. -/
+theorem isNontrivial_of_surjective_withZeroInt {F : Type*} [Field F]
+    (v : Valuation F (WithZero (Multiplicative ℤ))) (hv : Function.Surjective v) :
+    v.IsNontrivial := by
+  refine ⟨?_⟩
+  obtain ⟨z, hz⟩ := hv (WithZero.exp (1 : ℤ))
+  refine ⟨z, ?_, ?_⟩
+  · rw [hz]; exact WithZero.exp_ne_zero
+  · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
+      (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
+
+/-- **The valuation subring of a surjective `ℤᵐ⁰`-valued valuation is proper** (`≠ ⊤`), from
+`isNontrivial_of_surjective_withZeroInt` via `Valuation.valuationSubring_eq_top_iff`. -/
+theorem valuationSubring_ne_top_of_surjective_withZeroInt {F : Type*} [Field F]
+    (v : Valuation F (WithZero (Multiplicative ℤ))) (hv : Function.Surjective v) :
+    v.valuationSubring ≠ ⊤ := fun htop =>
+  (Valuation.valuationSubring_eq_top_iff _).mp htop
+    (isNontrivial_of_surjective_withZeroInt v hv)
+
 /-- **General field-valuation helper (axiom-clean).** A surjective
 `ℤᵐ⁰ = WithZero (Multiplicative ℤ)`-valued valuation on a field has a *discrete valuation ring* as
 its valuation subring (rank one).  Surjectivity onto `ℤᵐ⁰` forces the value group to be all of `⊤`,
@@ -199,7 +219,8 @@ private theorem overring_eq_top_of_idealOfLE_eq_bot {L : Type*} [Field L]
 
 /-- **Maximal-prime overring is `A` itself.** An overring `B ≥ A` whose cut-out prime
 is the maximal ideal of `A` (`idealOfLE A B = maximalIdeal A`) equals `A`: it cuts out
-the same prime as the self-inclusion (`ValuationSubring.idealOfLE_self : idealOfLE A A = maximalIdeal A`),
+the same prime as the self-inclusion
+(`ValuationSubring.idealOfLE_self : idealOfLE A A = maximalIdeal A`),
 so transport (`overring_eq_of_idealOfLE_eq`) identifies them. -/
 private theorem overring_eq_self_of_idealOfLE_eq_maximalIdeal {L : Type*} [Field L]
     (A B : ValuationSubring L) (hB : A ≤ B)

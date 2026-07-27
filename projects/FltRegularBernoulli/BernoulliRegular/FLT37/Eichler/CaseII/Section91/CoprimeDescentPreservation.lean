@@ -182,7 +182,7 @@ theorem caseII_coprime_two_root_factor_mem_forces_p
     have hne : (ζ ^ j : 𝓞 (CyclotomicField 37 ℚ)) ≠ ζ ^ k :=
       fun h ↦ hjk (D.hζ.toInteger_isPrimitiveRoot.pow_inj hj hk h)
     have hassoc : Associated (ζ - 1) (ζ ^ j - ζ ^ k) :=
-      D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+      D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
         (by decide : Nat.Prime 37) hmem_j' hmem_k' hne
     obtain ⟨t, ht⟩ := hassoc.symm.dvd
     rw [ht]
@@ -500,12 +500,6 @@ universal), and the **new** datum's coprimality is derived from §3 — the desc
 `ω = v²·r_aσr_a`, `θ = −r_bσr_b` (integral identifications via the integral-closure witnesses)
 generates coprime ideals. -/
 
-set_option maxRecDepth 4000 in
-set_option maxHeartbeats 800000 in
--- The bumped `maxHeartbeats` (and `maxRecDepth`, as in the parent
--- `freeContentCaseIIDvdZData37_pContent_descend_withUnits`) is needed because destructuring the
--- very large `CaseIISection91PContentExtractionDataWithUnits37` output (a 24-conjunct `∃`-chain)
--- and re-checking the §3 coprimality derivation on top exceeds the default budgets.
 /-- **[F3 — the coprime-preserving descent step]** (proven, axiom-clean *given* the with-units
 extraction data): the combined `ℓ ∣ z` descent step at content `37·(m+1)` with `p`-content output,
 on the **coprime-restricted** domain — the old coprimality is consumed from the datum, the new

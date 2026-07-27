@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.Rigidity
@@ -118,7 +123,8 @@ theorem endMonHom [IsLocallyNoetherian S] (f : E.asOver ⟶ E.asOver)
   exact isMonHom_of_one_comp_eq' E.toEllipticCurveGeom.universallyOConnected f hη
 
 /-- **(T-END0a — right-distributivity of `End(E/S)`)** Post-composition by a **pointed**
-endomorphism `f` distributes over the pointwise (additive) group law: `(a * b) ≫ f = (a ≫ f) * (b ≫ f)`
+endomorphism `f` distributes over the pointwise (additive) group law: `(a * b) ≫ f = (a ≫ f) * (b ≫
+f)`
 (the `*` is the additive `Hom.commGroup`/`Hom.group` operation). This is the additive half of the
 ring structure that is *not* free — pre-composition distributes over `*` for **every** morphism
 (`MonObj.comp_mul`, naturality of `lift`), but post-composition distributes only through a *monoid
@@ -432,7 +438,8 @@ theorem endDeg_one_add (f : E.asOver ⟶ E.asOver) :
 
 /-- **(T-END0c pin — KM 2.6.1.1, `deg` multiplicative)** The degree scales quadratically under
 post-composition by `[n]`: `deg(g ∘ [n]) = n² · deg g`. KM (verbatim, Cor 2.6.1.1): *"deg is
-multiplicative"* together with the displayed *"deg([N]) = N²"* — here `deg(g ≫ [n]) = deg g · deg [n]
+multiplicative"* together with the displayed *"deg([N]) = N²"* — here `deg(g ≫ [n]) = deg g · deg
+[n]
 = deg g · n²`. -/
 theorem endDeg_comp_mulBy (n : ℤ) (g : E.asOver ⟶ E.asOver) :
     E.endDeg (g ≫ E.mulBy n) = n ^ 2 * E.endDeg g := sorry
@@ -470,7 +477,8 @@ theorem eq_zero_of_endDeg_eq_zero (g : E.asOver ⟶ E.asOver) (hg : E.endDeg g =
 /-- **(T-G3d — KM 2.7.2 proof)** `N`-divisibility of `ε − 1`: an endomorphism `ε` fixing the
 `N`-torsion subscheme `E[N]` (i.e. `ε.left` restricts to the identity on `E.torsionι N`) factors as
 `ε = 1 + g∘[N]` for some `g ∈ End(E/S)`. KM (verbatim, proof of Cor 2.7.2): *"ε−1 kills E[N], so it
-factors as ε−1 = g·N for some g ∈ End(E). Then ε = 1 + gN."* (`1 = 𝟙 E.asOver`, `+` = `Hom.commGroup`
+factors as ε−1 = g·N for some g ∈ End(E). Then ε = 1 + gN."* (`1 = 𝟙 E.asOver`, `+` =
+`Hom.commGroup`
 `*`, `g∘[N] = g ≫ [N]`.) -/
 theorem exists_eq_one_add_mulBy_comp_of_fixesTorsion (N : ℕ) [NeZero N]
     (ε : E.asOver ⟶ E.asOver) (hfix : E.torsionι N ≫ ε.left = E.torsionι N) :
@@ -481,7 +489,8 @@ theorem exists_eq_one_add_mulBy_comp_of_fixesTorsion (N : ℕ) [NeZero N]
 the automorphism-rigidity computation, abstracted from the elliptic-curve setup so it is proved and
 reused independently of the endomorphism-degree infrastructure.
 
-Reading `d = deg g ≥ 0`, `t = tr g` (the polar/trace form of the degree quadratic form), `n = N ≥ 3`:
+Reading `d = deg g ≥ 0`, `t = tr g` (the polar/trace form of the degree quadratic form), `n = N ≥
+3`:
 GME's chain "`1 = deg ε = 1 + n·tr g + n²·deg g`" for an automorphism `ε = 1 + n·g` gives the linear
 relation `hlin` (`n·t + n²·d = 0`), and the Hasse / Cauchy–Schwarz discriminant bound `t² ≤ 4·d`
 gives `hbound`. Together with `n ≥ 3` these force `deg g = 0`, whence (by positive-definiteness of

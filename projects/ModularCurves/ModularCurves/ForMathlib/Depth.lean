@@ -15,7 +15,8 @@ verbatim Stacks quotes per leaf, and the route decision.
 
 ## The invariant
 
-mathlib has NO packaged `depth` (only `RingTheory.Sequence.IsRegular`; `RingTheory/Regular/Depth.lean`
+mathlib has NO packaged `depth` (only `RingTheory.Sequence.IsRegular`;
+`RingTheory/Regular/Depth.lean`
 is a deprecated stub, and `RegularSequence.lean`'s own TODO lists "depth" as unbuilt).  We package
 the LEAN predicate `Module.HasDepthGE R M k := "𝔪 contains an M-regular sequence of length k"`
 (Stacks 00LE/00LF depth, in `≥ k` predicate form).  This is the module analogue of the existing
@@ -44,7 +45,6 @@ via associated primes (depth-0 localisations), rank stability, a prime-avoidance
 quotient-by-a-nonzerodivisor (00MZ) + induction.  Neither direction of 00N1 invokes 090V/0AVJ.  So
 this file contains NO Auslander–Buchsbaum leaf.
 -/
-import Mathlib
 import ModularCurves.ForMathlib.Grade
 
 noncomputable section
@@ -132,7 +132,8 @@ form (`min(x, y) ≥ k ⟺ x ≥ k ∧ y ≥ k`), which is what 00N0's syzygy in
 
 omit [IsLocalRing R] in
 /-- The `ModuleCat`-valued short exact sequence attached to a short exact sequence of `R`-linear
-maps `0 → A →f→ B →g→ C → 0`.  This packages `f`, `g` into a `ShortComplex.ShortExact`, ready for the
+maps `0 → A →f→ B →g→ C → 0`.  This packages `f`, `g` into a `ShortComplex.ShortExact`, ready
+for the
 covariant `Ext` long exact sequence. -/
 private lemma shortExact_of_exact {A B C : Type u} [AddCommGroup A] [Module R A]
     [AddCommGroup B] [Module R B] [AddCommGroup C] [Module R C]
@@ -197,7 +198,8 @@ theorem hasDepthGE_quotient_of_shortExact [IsNoetherianRing R]
 
 /-- **[T-DEPTH.ses3] Stacks 00LX(3) — LOAD-BEARING.**  `depth A ≥ min(depth B, depth C + 1)`, i.e.
 `depth B ≥ k+1` and `depth C ≥ k` force `depth A ≥ k+1`.  Used for the `0 → Kᵢ → Mᵢ → im → 0`
-kernel-depth step of the acyclicity lemma (`depth Kᵢ ≥ 1` from `depth Mᵢ ≥ i ≥ 1`, taking `k = 0`). -/
+kernel-depth step of the acyclicity lemma (`depth Kᵢ ≥ 1` from `depth Mᵢ ≥ i ≥ 1`, taking
+`k = 0`). -/
 theorem hasDepthGE_sub_of_shortExact [IsNoetherianRing R]
     {A B C : Type u} [AddCommGroup A] [Module R A] [AddCommGroup B] [Module R B]
     [AddCommGroup C] [Module R C] [Module.Finite R A] [Module.Finite R B] [Module.Finite R C]
@@ -219,7 +221,8 @@ theorem hasDepthGE_sub_of_shortExact [IsNoetherianRing R]
     refine ⟨fun a b => ?_⟩
     have hinj := Ext.postcomp_mk₀_injective_of_mono κ S.f
     exact hinj (Subsingleton.elim _ _)
-  · -- Degree `j+1`: `f* γ = 0` since `Extʲ⁺¹(κ,B)` vanishes; hence `γ = δ x₃`, `x₃ ∈ Extʲ(κ,C) = 0`.
+  · -- Degree `j+1`: `f* γ = 0` since `Extʲ⁺¹(κ,B)` vanishes; hence `γ = δ x₃`,
+    -- `x₃ ∈ Extʲ(κ,C) = 0`.
     simp only [Fin.val_succ]
     haveI : Subsingleton (Ext κ S.X₃ (j : ℕ)) := hC j
     haveI : Subsingleton (Ext κ S.X₂ ((j : ℕ) + 1)) := hB ⟨(j : ℕ) + 1, by omega⟩
@@ -251,7 +254,8 @@ private theorem exists_isSMulRegular_of_forall_not_le_associatedPrimes {S : Type
   simpa using hxnot
 
 /-- **[T-DEPTH.ass] Stacks 00LD / 00LW base case.**  `depth(M) ≥ 1 ⟺ 𝔪 ∉ Ass(M)`: the maximal
-ideal carries an `M`-regular element iff it is not an associated prime.  This turns "the homology `H`
+ideal carries an `M`-regular element iff it is not an associated prime.  This turns "the
+homology `H`
 is supported only at `𝔪` and `H ≠ 0`" into "`¬ HasDepthGE R H 1`" (since then `𝔪 ∈ Ass H`), the
 contradiction that closes 00N1's backward induction. -/
 theorem hasDepthGE_one_iff_notMem_associatedPrimes [IsNoetherianRing R]

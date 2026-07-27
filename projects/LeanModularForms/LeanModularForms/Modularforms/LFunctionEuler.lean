@@ -46,42 +46,35 @@ local Euler quadratic. -/
 
 namespace LocalFactor
 
-/-- Peel the first term of a `tsum` over `ℕ`. -/
-private theorem tsum_peel_zero {f : ℕ → ℂ} (h : Summable f) :
-    ∑' i, f i = f 0 + ∑' i, f (i + 1) := by
-  have := h.sum_add_tsum_nat_add (f := f) 1
-  rw [Finset.sum_range_one] at this
-  exact this.symm
-
 variable {b : ℕ → ℂ} {X c d : ℂ}
 
-private theorem cXS (hsum : Summable (fun e => b e * X ^ e)) :
+private theorem const_mul_X_mul_tsum (hsum : Summable (fun e => b e * X ^ e)) :
     c * X * (∑' e, b e * X ^ e) = c * b 0 * X + ∑' e, c * b (e + 1) * X ^ (e + 2) := by
   have e1 : c * X * (∑' e, b e * X ^ e) = ∑' e, c * b e * X ^ (e + 1) := by
     rw [← hsum.tsum_mul_left (c * X)]; exact tsum_congr fun e => by ring
   have hsumc1 : Summable (fun e => c * b e * X ^ (e + 1)) := by
     have := hsum.mul_left c; exact (this.mul_right X).congr fun e => by ring
-  rw [e1, tsum_peel_zero hsumc1]
+  rw [e1, hsumc1.tsum_eq_zero_add]
   have head : c * b 0 * X ^ (0 + 1) = c * b 0 * X := by norm_num
   rw [head]
 
-private theorem dX2S (hsum : Summable (fun e => b e * X ^ e)) :
+private theorem const_mul_X_sq_mul_tsum (hsum : Summable (fun e => b e * X ^ e)) :
     d * X ^ 2 * (∑' e, b e * X ^ e) = ∑' e, d * b e * X ^ (e + 2) := by
   rw [← hsum.tsum_mul_left (d * X ^ 2)]; exact tsum_congr fun e => by ring
 
-private theorem peel2 (hsum : Summable (fun e => b e * X ^ e)) :
+private theorem tsum_peel_two (hsum : Summable (fun e => b e * X ^ e)) :
     (∑' e, b e * X ^ e) = b 0 + (b 1 * X + ∑' e, b (e + 2) * X ^ (e + 2)) := by
   have hsum_s1 : Summable (fun e => b (e + 1) * X ^ (e + 1)) :=
     (summable_nat_add_iff 1).mpr hsum
   have hinner : (∑' e, b (e + 1) * X ^ (e + 1)) = b 1 * X + ∑' e, b (e + 2) * X ^ (e + 2) := by
-    rw [tsum_peel_zero hsum_s1]
+    rw [hsum_s1.tsum_eq_zero_add]
     have e1 : b (0 + 1) * X ^ (0 + 1) = b 1 * X := by norm_num
     rw [e1]
-  rw [tsum_peel_zero hsum, hinner]
+  rw [hsum.tsum_eq_zero_add, hinner]
   have e0 : b 0 * X ^ 0 = b 0 := by simp
   rw [e0]
 
-private theorem tailZero (hsum : Summable (fun e => b e * X ^ e))
+private theorem tsum_tail_rec_eq_zero (hsum : Summable (fun e => b e * X ^ e))
     (hrec : ∀ e, b (e + 2) = c * b (e + 1) - d * b e) :
     (∑' e, b (e + 2) * X ^ (e + 2))
       - (∑' e, c * b (e + 1) * X ^ (e + 2))
@@ -108,8 +101,8 @@ theorem inv (hsum : Summable (fun e => b e * X ^ e))
   have expand : (1 - c * X + d * X ^ 2) * (∑' e, b e * X ^ e)
       = (∑' e, b e * X ^ e) - c * X * (∑' e, b e * X ^ e)
         + d * X ^ 2 * (∑' e, b e * X ^ e) := by ring
-  rw [expand, cXS hsum, dX2S hsum, peel2 hsum, hb0, hb1]
-  linear_combination tailZero hsum hrec
+  rw [expand, const_mul_X_mul_tsum hsum, const_mul_X_sq_mul_tsum hsum, tsum_peel_two hsum, hb0, hb1]
+  linear_combination tsum_tail_rec_eq_zero hsum hrec
 
 end LocalFactor
 
@@ -313,7 +306,8 @@ private lemma lterm_ppow (p : ℕ) (hp : Nat.Prime p) (e : ℕ) :
   rw [lterm, LSeries.term_of_ne_zero hpe, lCoeff_eq_a, cpow_ppow, div_eq_mul_inv,
     Complex.cpow_neg]
 
-/-- Norm-summability of the local series `e ↦ a_{p^e} · X^e` (a subsequence of the global series). -/
+/-- Norm-summability of the local series `e ↦ a_{p^e} · X^e` (a subsequence of the global
+series). -/
 private lemma local_summable (p : ℕ) (hp : Nat.Prime p) (hs : (k : ℝ) / 2 + 1 < s.re) :
     Summable (fun e => a f (p ^ e) * ((p : ℂ) ^ (-s)) ^ e) := by
   have hinj : Function.Injective (fun e => p ^ e) := Nat.pow_right_injective hp.two_le

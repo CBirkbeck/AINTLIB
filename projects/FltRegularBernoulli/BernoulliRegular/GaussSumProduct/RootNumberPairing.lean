@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.GaussSumProduct.GaussProduct
@@ -43,7 +48,7 @@ theorem rootNumber_mul_rootNumber_inv_of_odd
   have h_not_even : ¬ χ.Even := h_odd.not_even
   have h_inv_not_even : ¬ χ⁻¹.Even := h_inv_odd.not_even
   have hχ_neg_one : χ (-1) = -1 := h_odd
-  unfold DirichletCharacter.rootNumber
+  simp only [DirichletCharacter.rootNumber]
   rw [if_neg h_not_even, if_neg h_inv_not_even, pow_one]
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
   have hp_cpow_ne_zero : (p : ℂ) ^ (1 / 2 : ℂ) ≠ 0 :=
@@ -78,7 +83,7 @@ theorem rootNumber_mul_rootNumber_inv_of_even
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   have h_inv_even : χ⁻¹.Even := DirichletCharacter.Even.inv h_even
   have hχ_neg_one : χ (-1) = 1 := h_even
-  unfold DirichletCharacter.rootNumber
+  simp only [DirichletCharacter.rootNumber]
   rw [if_pos h_even, if_pos h_inv_even, pow_zero]
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
   have hp_cpow_ne_zero : (p : ℂ) ^ (1 / 2 : ℂ) ≠ 0 :=
@@ -174,7 +179,7 @@ theorem prod_rootNumber_ne_one_eq_rootNumber_legendre (hp_odd : p ≠ 2) :
   classical
   have h_η_ne_one : legendreDirichlet p ≠ 1 := legendreDirichlet_ne_one p hp_odd
   have h_η_mem : legendreDirichlet p ∈ nontrivialCharacters p := by
-    unfold nontrivialCharacters
+    simp only [nontrivialCharacters]
     simpa using h_η_ne_one
   have h_η_quad : (legendreDirichlet p).IsQuadratic := legendreDirichlet_isQuadratic p
   have h_η_sq : (legendreDirichlet p) ^ 2 = 1 :=
@@ -198,7 +203,7 @@ theorem prod_rootNumber_ne_one_eq_rootNumber_legendre (hp_odd : p ≠ 2) :
     intro a ha
     have h_a_ne_one : a ≠ 1 := by
       have : a ∈ nontrivialCharacters p := (Finset.mem_erase.mp ha).2
-      unfold nontrivialCharacters at this
+      simp only [nontrivialCharacters] at this
       simpa using this
     exact rootNumber_mul_rootNumber_inv p h_a_ne_one
   · -- hg₃: W_χ ≠ 1 → χ⁻¹ ≠ χ for χ ∈ S_free.
@@ -206,7 +211,7 @@ theorem prod_rootNumber_ne_one_eq_rootNumber_legendre (hp_odd : p ≠ 2) :
     have h_a_ne_η : a ≠ legendreDirichlet p := (Finset.mem_erase.mp ha).1
     have h_a_ne_one : a ≠ 1 := by
       have : a ∈ nontrivialCharacters p := (Finset.mem_erase.mp ha).2
-      unfold nontrivialCharacters at this
+      simp only [nontrivialCharacters] at this
       simpa using this
     have h_inv : a⁻¹ = a := h_inv_eq
     have h_a_sq : a ^ 2 = 1 := by
@@ -218,7 +223,7 @@ theorem prod_rootNumber_ne_one_eq_rootNumber_legendre (hp_odd : p ≠ 2) :
     have h_a_ne_η : a ≠ legendreDirichlet p := (Finset.mem_erase.mp ha).1
     have h_a_nontriv : a ∈ nontrivialCharacters p := (Finset.mem_erase.mp ha).2
     have h_a_ne_one : a ≠ 1 := by
-      unfold nontrivialCharacters at h_a_nontriv
+      simp only [nontrivialCharacters] at h_a_nontriv
       simpa using h_a_nontriv
     change a⁻¹ ∈ S_free
     simp only [hS_free, Finset.mem_erase]
@@ -258,7 +263,7 @@ lemma prod_inv_reindex_nontrivialCharacters
   classical
   refine Finset.prod_bij (fun χ _ ↦ χ⁻¹) ?_ ?_ ?_ ?_
   · intro χ hχ
-    unfold nontrivialCharacters at hχ ⊢
+    simp only [nontrivialCharacters] at hχ ⊢
     simp only [Finset.mem_erase, Finset.mem_univ, and_true] at hχ ⊢
     intro h
     apply hχ
@@ -267,7 +272,7 @@ lemma prod_inv_reindex_nontrivialCharacters
     rw [show χ₁ = (χ₁⁻¹)⁻¹ from (inv_inv _).symm, h, inv_inv]
   · intro χ hχ
     refine ⟨χ⁻¹, ?_, inv_inv _⟩
-    unfold nontrivialCharacters at hχ ⊢
+    simp only [nontrivialCharacters] at hχ ⊢
     simp only [Finset.mem_erase, Finset.mem_univ, and_true] at hχ ⊢
     intro h
     apply hχ
@@ -291,7 +296,7 @@ theorem prod_completedLFunction_nontrivial_one_sub (s : ℂ) :
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   classical
   have h_prim : ∀ χ ∈ nontrivialCharacters p, χ.IsPrimitive := fun χ hχ ↦ by
-    unfold nontrivialCharacters at hχ
+    simp only [nontrivialCharacters] at hχ
     have h_ne : χ ≠ 1 := by simpa using hχ
     exact DirichletCharacter.isPrimitive_of_ne_one p h_ne
   have h_each : ∀ χ ∈ nontrivialCharacters p,
@@ -317,7 +322,7 @@ lemma card_nontrivialCharacters : (nontrivialCharacters p).card = p - 2 := by
   haveI : NeZero ((Monoid.exponent (ZMod p)ˣ : ℕ) : ℂ) :=
     ⟨Nat.cast_ne_zero.mpr h_expo_ne⟩
   classical
-  unfold nontrivialCharacters
+  simp only [nontrivialCharacters]
   rw [Finset.card_erase_of_mem (Finset.mem_univ _), Finset.card_univ]
   have h_card : Fintype.card (DirichletCharacter ℂ p) = p - 1 := by
     have h_nat := DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity ℂ p
@@ -453,7 +458,7 @@ theorem gaussSum_legendreDirichlet_eq_I_mul_sqrt
   have h_def : DirichletCharacter.rootNumber (legendreDirichlet p) =
       gaussSum (legendreDirichlet p) (ZMod.stdAddChar : AddChar (ZMod p) ℂ) /
         Complex.I / ((p : ℂ) ^ (1 / 2 : ℂ)) := by
-    unfold DirichletCharacter.rootNumber
+    simp only [DirichletCharacter.rootNumber]
     rw [if_neg h_not_even, pow_one]
   rw [h_root_one] at h_def
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
@@ -486,6 +491,42 @@ theorem gaussSum_legendreDirichlet_eq_I_mul_sqrt_of_dedekindFE
       Complex.I * ((p : ℂ) ^ (1 / 2 : ℂ)) :=
   gaussSum_legendreDirichlet_eq_I_mul_sqrt p hp_three_mod_four
     (prod_rootNumber_eq_one_of_dedekindFE p s hZ hL h_FE)
+
+/-- **Gauss-sum inversion pairing for odd characters**: for an odd Dirichlet
+character `χ` modulo a prime `p`, the product of the Gauss sums of `χ` and `χ⁻¹`
+against the standard additive character equals `-p`. An odd character is
+non-trivial, so the general identity `τ(χ)·τ(χ⁻¹) = χ(-1)·p` applies, and
+`χ(-1) = -1` supplies the sign. -/
+lemma gaussSum_mul_gaussSum_inv_stdAddChar_of_odd
+    {χ : DirichletCharacter ℂ p} (h_odd : χ.Odd) :
+    gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) *
+        gaussSum χ⁻¹ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) = -(p : ℂ) := by
+  have hχ_ne_one : χ ≠ 1 := fun h ↦ by
+    rw [h] at h_odd
+    have h1 : (1 : DirichletCharacter ℂ p).Even := MulChar.one_apply isUnit_one.neg
+    exact absurd h_odd h1.not_odd
+  rw [gaussSum_mul_gaussSum_inv_stdAddChar p hχ_ne_one, show χ (-1) = -1 from h_odd]
+  ring
+
+/-- **No non-trivial self-inverse odd character besides `η`**: for `p` an odd
+prime, an odd Dirichlet character `χ` modulo `p` other than the Legendre
+character `η = legendreDirichlet p` is not its own inverse. Indeed `χ⁻¹ = χ`
+would give `χ² = 1`, and `η` is the unique non-trivial character with that
+property (`legendreDirichlet_eq_of_sq_eq_one`). This is the "no fixed points"
+input to the involution `χ ↦ χ⁻¹` used to pair up the odd characters. -/
+lemma inv_ne_self_of_odd_ne_legendre (hp_odd : p ≠ 2)
+    {χ : DirichletCharacter ℂ p} (h_odd : χ.Odd)
+    (h_ne_legendre : χ ≠ legendreDirichlet p) : χ⁻¹ ≠ χ := by
+  intro h_inv
+  have hχ_ne_one : χ ≠ 1 := fun h ↦ by
+    rw [h] at h_odd
+    have h1 : (1 : DirichletCharacter ℂ p).Even := MulChar.one_apply isUnit_one.neg
+    exact absurd h_odd h1.not_odd
+  have hχ_sq : χ ^ 2 = 1 := by
+    have h : χ * χ⁻¹ = 1 := mul_inv_cancel _
+    rw [h_inv] at h
+    rw [← sq] at h; exact h
+  exact h_ne_legendre (legendreDirichlet_eq_of_sq_eq_one p hp_odd hχ_sq hχ_ne_one)
 
 open scoped Classical in
 /-- **Signed product of Gauss sums over odd characters excluding `η`**: for
@@ -537,13 +578,7 @@ theorem gaussSum_oddCharacters_erase_legendre_prod
     have hχ_odd : χ.Odd := by
       simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and] at hχ_odd_set
       exact hχ_odd_set
-    have hχ_ne_one : χ ≠ 1 := fun h ↦ by
-      rw [h] at hχ_odd
-      have h1 : (1 : DirichletCharacter ℂ p).Even := MulChar.one_apply isUnit_one.neg
-      exact absurd hχ_odd h1.not_odd
-    have hχ_neg : χ (-1) = -1 := hχ_odd
-    rw [gaussSum_mul_gaussSum_inv_stdAddChar p hχ_ne_one, hχ_neg]
-    ring
+    exact gaussSum_mul_gaussSum_inv_stdAddChar_of_odd p hχ_odd
   -- Apply prod_involution with f(χ) := gaussSum(χ) / c.
   have h_prod_f : ∏ χ ∈ S,
       (gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) / c) = 1 := by
@@ -557,20 +592,12 @@ theorem gaussSum_oddCharacters_erase_legendre_prod
         _ = -(p : ℂ) / -(p : ℂ) := by rw [h_pair_χ, hc_sq]
         _ = 1 := div_self (neg_ne_zero.mpr (Nat.cast_ne_zero.mpr hp.out.ne_zero))
     · -- f(χ) ≠ 1 → χ⁻¹ ≠ χ: on S (excluding η), χ⁻¹ ≠ χ by uniqueness.
-      intro χ hχ _ h_inv_eq
+      intro χ hχ _
       have hχ_odd_set : χ ∈ oddCharacters p := (Finset.mem_erase.mp hχ).2
-      have hχ_ne_one : χ ≠ 1 := fun h ↦ by
-        simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and, h] at hχ_odd_set
-        have : (1 : DirichletCharacter ℂ p) (-1) = -1 := hχ_odd_set
-        rw [MulChar.one_apply (isUnit_one.neg)] at this
-        exact (by norm_num : (1 : ℂ) ≠ -1) this
-      have hχ_ne_η : χ ≠ η := (Finset.mem_erase.mp hχ).1
-      have h_inv : χ⁻¹ = χ := h_inv_eq
-      have hχ_sq : χ ^ 2 = 1 := by
-        have : χ * χ⁻¹ = 1 := mul_inv_cancel _
-        rw [h_inv] at this
-        rw [← sq] at this; exact this
-      exact hχ_ne_η (legendreDirichlet_eq_of_sq_eq_one p hp_odd hχ_sq hχ_ne_one)
+      have hχ_odd : χ.Odd := by
+        simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and] at hχ_odd_set
+        exact hχ_odd_set
+      exact inv_ne_self_of_odd_ne_legendre p hp_odd hχ_odd (Finset.mem_erase.mp hχ).1
     · -- χ⁻¹ ∈ S (closed under inversion).
       intro χ hχ
       have hχ_odd_set : χ ∈ oddCharacters p := (Finset.mem_erase.mp hχ).2
@@ -723,7 +750,7 @@ lemma card_evenNontrivialCharacters_of_three_mod_four
     change (1 : DirichletCharacter ℂ p) (-1) = 1
     rw [MulChar.one_apply isUnit_one.neg]
   have h_eq : evenNontrivialCharacters p = E.erase 1 := by
-    unfold evenNontrivialCharacters
+    simp only [evenNontrivialCharacters]
     rw [hE]
     ext χ
     simp only [Finset.mem_filter, Finset.mem_erase, Finset.mem_univ, true_and]

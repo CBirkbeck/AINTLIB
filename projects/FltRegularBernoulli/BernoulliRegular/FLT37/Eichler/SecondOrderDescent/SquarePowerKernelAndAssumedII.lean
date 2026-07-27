@@ -26,11 +26,11 @@ The proven single-index expansion (R3) gives `ε₁/ε₂ = E₃₂^{d} · α^{3
 
 * **Theorem 9.4** forces `d ≡ 0` via **Corollary 8.23**: a unit `≡ rational integer mod 37²` is a
   `37`-th power, *given* `37³ ∤ B_{37·i}` (Kellner, `NoSecondOrderIrregularPair 37 32`).  The
-  congruence mod `37²` is **not** the naive descent congruence (which is only mod `37` at the minimal
-  level `m = 1`); it comes from Washington's producer-`μ` structure
+  congruence mod `37²` is **not** the naive descent congruence (which is only mod `37` at the
+  minimal level `m = 1`); it comes from Washington's producer-`μ` structure
   `(η_a/η_b)·(η̄_a²/η̄_b²) ≡ (μ_b/μ_a)^{p²} (mod 37²)`, where the `p²`-th power upgrades the
-  freshman's-dream `(μ_b/μ_a)^p ≡` rational mod `p` to a congruence mod `p²` via the **elementary
-  `p²`-power kernel** `x ≡ y (mod p) ⟹ x^p ≡ y^p (mod p²)` (this file, §1).
+  freshman's-dream `(μ_b/μ_a)^p ≡` rational mod `p` to a congruence mod `p²` via the
+  **elementary `p²`-power kernel** `x ≡ y (mod p) ⟹ x^p ≡ y^p (mod p²)` (this file, §1).
 
 ## The second-order non-degeneracy (`M ≤ 1`), genuinely proven
 
@@ -38,9 +38,9 @@ Corollary 8.23's input is `M = max_i v_p(L_p(1,ω^i)) ≤ 1`.  Washington's proo
 `v_p(L_p(1,ω^i)) ≤ 1` to `p³ ∤ B_{pi}` via `L_p(1,ω^i) ≡ -B_{pi}/(pi) (mod p²)` (Theorem 5.12).  For
 `p = 37` the **only** irregular even index is `i = 32`, and the corresponding `p`-adic valuation is
 the sharp generalized-Bernoulli valuation `v₃₇(B_{1,ω³¹}) = 1` — **proven unconditionally** in
-`HerbrandBoundAnalytic.lean` (`flt37SharpHMinusValuation_proved`, the Teichmüller modular computation
-`37·B_{1,ω³¹} ≡ 37²·23 (mod 37³)`).  So the Cor-8.23 non-degeneracy is not assumed: this file
-derives it (§2) from the proven sharp valuation, and records that the carried Kellner input
+`HerbrandBoundAnalytic.lean` (`flt37SharpHMinusValuation_proved`, the Teichmüller modular
+computation `37·B_{1,ω³¹} ≡ 37²·23 (mod 37³)`).  So the Cor-8.23 non-degeneracy is not assumed: this
+file derives it (§2) from the proven sharp valuation, and records that the carried Kellner input
 `NoSecondOrderIrregularPair 37 32` is the `B_{1184}`-level statement Washington's proof of Cor 8.23
 actually quotes.
 
@@ -62,12 +62,12 @@ namespace BernoulliRegular.FLT37.Eichler
 
 /-! ## 1. The elementary `p²`-power kernel (Washington Theorem 9.4's mod-`p²` upgrade)
 
-The mod-`p²` congruence in Washington's Theorem 9.4 is *not* a naive freshman's dream — it comes from
-the structural `(μ_b/μ_a)^{p²}` (the descent producer `μ` is itself a `p`-th-power coefficient), and
-the `p`-th-power-of-`p`-th-power upgrades a mod-`p` congruence to a mod-`p²` one.  The arithmetic
-kernel is the elementary fact that congruence modulo `p` is upgraded to congruence modulo `p²` upon
-raising to the `p`-th power.  We prove it in `𝓞 K` via the mathlib lemma `SModEq.pow_pow_add_one`
-(with `m = 1`), since `(p : 𝓞 K) ∈ (p)`. -/
+The mod-`p²` congruence in Washington's Theorem 9.4 is *not* a naive freshman's dream — it comes
+from the structural `(μ_b/μ_a)^{p²}` (the descent producer `μ` is itself a `p`-th-power
+coefficient), and the `p`-th-power-of-`p`-th-power upgrades a mod-`p` congruence to a mod-`p²` one.
+The arithmetic kernel is the elementary fact that congruence modulo `p` is upgraded to congruence
+modulo `p²` upon raising to the `p`-th power.  We prove it in `𝓞 K` via the mathlib lemma
+`SModEq.pow_pow_add_one` (with `m = 1`), since `(p : 𝓞 K) ∈ (p)`. -/
 
 /-- **The `p²`-power kernel** (proven, axiom-clean): in `𝓞 K`, if `x ≡ y (mod 37)` then
 `x^{37} ≡ y^{37} (mod 37²)`.
@@ -101,15 +101,15 @@ theorem caseII_pow37_sub_pow37_mem_37sq
 /-- **The `p²`-power kernel, rational-target form** (proven, axiom-clean): if `x ≡ c (mod 37)` for a
 rational integer `c`, then `x^{37} ≡ c^{37} (mod 37²)` and `c^{37}` is again a rational integer.
 
-This is `caseII_pow37_sub_pow37_mem_37sq` specialised to `y = (c : 𝓞 K)`, packaging the conclusion as
-a rational-integer mod-`37²` congruence — the exact shape consumed by the Corollary-8.23 descent
+This is `caseII_pow37_sub_pow37_mem_37sq` specialised to `y = (c : 𝓞 K)`, packaging the conclusion
+as a rational-integer mod-`37²` congruence — the exact shape consumed by the Corollary-8.23 descent
 (`δ ≡ rational mod 37²`). -/
 theorem caseII_pow37_sub_intCast_pow37_mem_37sq
     {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
     {x : 𝓞 K} {c : ℤ} (h : (37 : 𝓞 K) ∣ (x - (c : 𝓞 K))) :
     ((37 : 𝓞 K) ^ 2) ∣ (x ^ 37 - ((c ^ 37 : ℤ) : 𝓞 K)) := by
   have := caseII_pow37_sub_pow37_mem_37sq (K := K) (x := x) (y := (c : 𝓞 K)) h
-  rwa [show (((c : 𝓞 K)) ^ 37) = ((c ^ 37 : ℤ) : 𝓞 K) from by push_cast; ring] at this
+  rwa [show (((c : 𝓞 K)) ^ 37) = ((c ^ 37 : ℤ) : 𝓞 K) by push_cast; ring] at this
 
 /-! ## 2. The Corollary-8.23 second-order non-degeneracy `M ≤ 1`, genuinely proven
 
@@ -130,8 +130,8 @@ Corollary 8.23, after the interpolation index shift `ω³² ↦ ω³¹`) has `37
 requires, and it is the **proven** `flt37SharpHMinusValuation_proved` (the Teichmüller modular
 computation `37·B_{1,ω³¹} ≡ 37²·23 (mod 37³)`, `37 ∤ 23`).
 
-So the second-order non-degeneracy of the `ω³²` index — that the `i = 32` `L`-value is a *first-order*
-zero, not higher — is established directly, not hypothesised. -/
+So the second-order non-degeneracy of the `ω³²` index — that the `i = 32` `L`-value is a
+*first-order* zero, not higher — is established directly, not hypothesised. -/
 theorem caseII_cor823_valuation_input_proven :
     haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
     (37 : ℝ) ^ (-2 : ℤ) <
@@ -140,7 +140,7 @@ theorem caseII_cor823_valuation_input_proven :
 
 /-- **The Corollary-8.23 valuation input is non-vacuously sharp**: the irregular `B₃₂/32` ratio also
 has `37`-adic valuation exactly `1` (norm `> 37⁻²`), the classical (un-Teichmüller-twisted) form of
-the same `M = 1` non-degeneracy.  Proven `norm_bernoulli_thirtytwo_ratio_gt`, banking
+the same `M = 1` non-degeneracy. Proven `zpow_lt_norm_bernoulli_thirtytwo_ratio`, banking
 `kellner_at_zero_not_dvd` (`37² ∤ B₃₂.num`, i.e. `α₀ = 1`).
 
 This is the second-order non-degeneracy *at the Bernoulli-number level* `v₃₇(B₃₂/32) = 1`, the input
@@ -148,7 +148,7 @@ Washington's proof of Corollary 8.23 reads off `L_p(1,ω³²) ≡ -B_{1184}/1184
 theorem caseII_cor823_bernoulli_ratio_nondegenerate :
     haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
     (37 : ℝ) ^ (-2 : ℤ) < ‖(((bernoulli 32 : ℚ) / 32 : ℚ) : ℚ_[37])‖ :=
-  norm_bernoulli_thirtytwo_ratio_gt
+  zpow_lt_norm_bernoulli_thirtytwo_ratio
 
 /-! ## 3. Washington Theorem 8.22 / Corollary 8.23 for `37` — the genuine isolated residual
 
@@ -162,8 +162,8 @@ The proof of Theorem 8.22 uses **Proposition 8.12** — the *single-unit* `p`-ad
 (the repo's completed-log / Kummer-determinant infrastructure is multi-unit /
 regulator-determinant-shaped, `concreteKummerLogMatrix = diag(B)·V`; it forces the *regular*
 eigencomponents to agree, but reads no single-unit `λ`-level for the irregular index).  So Theorem
-8.22 for `37` is the **genuine remaining `p`-adic-`L` content** of the Theorem-9.4 route.  We isolate
-it precisely as a `def … : Prop` (**not** an axiom), with the proven `M ≤ 1` valuation input
+8.22 for `37` is the **genuine remaining `p`-adic-`L` content** of the Theorem-9.4 route.  We
+isolate it precisely as a `def … : Prop` (**not** an axiom), with the proven `M ≤ 1` valuation input
 (`caseII_cor823_valuation_input_proven`) made an *explicit hypothesis* so the soundness condition is
 visible and the statement is exactly Washington's. -/
 
@@ -176,12 +176,13 @@ congruent to a rational integer modulo `37²` (`∃ c : ℤ, 37² ∣ ↑η - c`
 `(𝓞 K)ˣ`.
 
 This is Washington Theorem 8.22 at `M = 1` (equivalently Corollary 8.23 under `37³ ∤ B_{37·i}`),
-specialised to `K = ℚ(ζ₃₇)`.  It is **sound** — its conclusion is the genuine Theorem-8.22 statement,
-not the descent unit's `37`-th-power-ness; **non-circular** — it quantifies over an arbitrary unit
-constrained by a sharp mod-`37²` congruence, the valuation-theoretic content of Proposition 8.12, not
-over the Case-II descent datum; and **non-vacuous** (the antecedent holds for `η = 1` with `c = 1`,
-and for every global `37`-th power, see `cor823PthPowerOfRationalModSq37_antecedent_inhabited`).  Its
-single undischarged ingredient is Proposition 8.12's single-unit `p`-adic-log valuation. -/
+specialised to `K = ℚ(ζ₃₇)`.  It is **sound** — its conclusion is the genuine Theorem-8.22
+statement, not the descent unit's `37`-th-power-ness; **non-circular** — it quantifies over an
+arbitrary unit constrained by a sharp mod-`37²` congruence, the valuation-theoretic content of
+Proposition 8.12, not over the Case-II descent datum; and **non-vacuous** (the antecedent holds for
+`η = 1` with `c = 1`, and for every global `37`-th power, see
+`cor823PthPowerOfRationalModSq37_antecedent_inhabited`).  Its single undischarged ingredient is
+Proposition 8.12's single-unit `p`-adic-log valuation. -/
 def Cor823PthPowerOfRationalModSq37
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] : Prop :=
@@ -200,8 +201,8 @@ congruent to the rational integer `1` modulo `37²` and is a `37`-th power.  So
 true.
 
 More substantively, the antecedent `∃ c, 37² ∣ ↑η - c` holds for **every** global `37`-th power
-`η = ε'^{37}` whose base `ε'` is `≡` a rational integer mod `37` (the `37²`-power kernel §1), and for
-every unit reducing to a rational integer mod `37²` — the genuine Corollary-8.23 input class. -/
+`η = ε'^{37}` whose base `ε'` is `≡` a rational integer mod `37` (the `37²`-power kernel §1), and
+for every unit reducing to a rational integer mod `37²` — the genuine Corollary-8.23 input class. -/
 theorem cor823PthPowerOfRationalModSq37_antecedent_inhabited
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
@@ -218,9 +219,9 @@ theorem cor823PthPowerOfRationalModSq37_antecedent_inhabited
 
 Washington Theorem 9.4 (GTM 83, pp. 174–175) does **not** apply Corollary 8.23 to the bare descent
 unit `η_a/η_b` (which is only `≡` rational mod `37` at the minimal descent level).  It applies it to
-the **producer-corrected** unit `(η_a/η_b)·(η̄_b/η̄_a)^{37}`, where `η̄_a, η̄_b` are the *real* units
-from the principal generators `(ρ_a − ζρ_{-a})/(1−ζ) = η̄_a μ_a^{37}` (`p ∤ h⁺`, so `C₁` principal).
-That corrected unit satisfies
+the **producer-corrected** unit `(η_a/η_b)·(η̄_b/η̄_a)^{37}`, where `η̄_a, η̄_b` are the *real*
+units from the principal generators `(ρ_a − ζρ_{-a})/(1−ζ) = η̄_a μ_a^{37}` (`p ∤ h⁺`, so `C₁`
+principal). That corrected unit satisfies
 
   `(η_a/η_b)·(η̄_b/η̄_a)^{37} ≡ (μ_b/μ_a)^{37²} ≡ rational integer (mod 37²)`,
 
@@ -233,16 +234,17 @@ open FLT37.LehmerVandiver.CaseII in
 axiom — the genuine §9.2 producer residual).
 
 For every Case-II descent instance, there is a **real** unit `ν : (𝓞 K⁺)ˣ` (Washington's
-`η̄_b/η̄_a`, from the principal generators of `§9.1` under `37 ∤ h⁺`) such that the corrected descent
-unit `(ε₁/ε₂)·(Units.map ν)^{37}` is congruent to a rational integer modulo `37²`:
+`η̄_b/η̄_a`, from the principal generators of `§9.1` under `37 ∤ h⁺`) such that the corrected
+descent unit `(ε₁/ε₂)·(Units.map ν)^{37}` is congruent to a rational integer modulo `37²`:
 
   `∃ c : ℤ, 37² ∣ ↑((ε₁/ε₂)·(Units.map ν)^{37}) - c`.
 
-This is Washington Theorem 9.4's mod-`37²` congruence `(η_a/η_b)(η̄_b/η̄_a)^{37} ≡ (μ_b/μ_a)^{37²} ≡`
-rational mod `37²` (pp. 174–175).  Unlike the naive descent congruence (only mod `37` at level
-`m = 1`), it holds via the producer-`μ` structure and the `37²`-power kernel §1.  It is **sound**
-(asserting the corrected congruence for the *specific* descent unit, with the real twist `ν` an
-explicit `K⁺`-unit) and **non-vacuous** (`caseIICor823_descentUnitModSqCongruence37_nonvacuous`). -/
+This is Washington Theorem 9.4's mod-`37²` congruence
+`(η_a/η_b)(η̄_b/η̄_a)^{37} ≡ (μ_b/μ_a)^{37²} ≡` rational mod `37²` (pp. 174–175).  Unlike the naive
+descent congruence (only mod `37` at level `m = 1`), it holds via the producer-`μ` structure and the
+`37²`-power kernel §1.  It is **sound** (asserting the corrected congruence for the *specific*
+descent unit, with the real twist `ν` an explicit `K⁺`-unit) and **non-vacuous**
+(`caseIICor823_descentUnitModSqCongruence37_nonvacuous`). -/
 def Cor823DescentUnitModSqCongruence37
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] : Prop :=
   ∀ (_hV : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ))
@@ -268,9 +270,9 @@ def Cor823DescentUnitModSqCongruence37
 
 /-- **The producer-`μ` congruence consequent is inhabitable** (non-vacuity, proven): for the
 quotient unit `δ = 1`, the trivial real twist `ν = 1` and rational integer `c = 1` satisfy the
-consequent `37² ∣ ↑(δ·(Units.map ν)^{37}) - c`.  So `Cor823DescentUnitModSqCongruence37`'s consequent
-is a genuine (satisfiable, non-contradictory) existential, not a vacuously-false target; the
-quantified body is a real producer-congruence demand on the descent unit. -/
+consequent `37² ∣ ↑(δ·(Units.map ν)^{37}) - c`.  So `Cor823DescentUnitModSqCongruence37`'s
+consequent is a genuine (satisfiable, non-contradictory) existential, not a vacuously-false target;
+the quantified body is a real producer-congruence demand on the descent unit. -/
 theorem caseIICor823_descentUnitModSqCongruence37_consequent_inhabited
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
@@ -287,9 +289,9 @@ theorem caseIICor823_descentUnitModSqCongruence37_consequent_inhabited
 
 Composing the two named residuals §3 and §4 with the **proven** `M ≤ 1` valuation input §2 gives
 **Assumption II** (`WashingtonCaseIIExactQuotientUnitPower37Source`) — the descent unit `ε₁/ε₂` is a
-`37`-th power — through the genuine Theorem-9.4 route, with **no** mod-`𝔩` (Theorem-9.5 / Mirimanoff)
-input.  The single proven step in between is the cancellation of the real `37`-th-power twist
-`(Units.map ν)^{37}`. -/
+`37`-th power — through the genuine Theorem-9.4 route, with **no** mod-`𝔩` (Theorem-9.5 /
+Mirimanoff) input.  The single proven step in between is the cancellation of the real `37`-th-power
+twist `(Units.map ν)^{37}`. -/
 
 open FLT37.LehmerVandiver.CaseII in
 /-- **Assumption II via Corollary 8.23** (proven, axiom-clean *given* the two named Theorem-9.4
@@ -298,23 +300,24 @@ residuals).
 `WashingtonCaseIIExactQuotientUnitPower37Source` (Assumption II: the descent unit `ε₁/ε₂` is a
 `37`-th power) follows from
 
-* `h_modSq : Cor823DescentUnitModSqCongruence37` — Washington Theorem 9.4's producer-`μ` second-order
-  congruence `(ε₁/ε₂)·(Units.map ν)^{37} ≡ rational mod 37²`; and
+* `h_modSq : Cor823DescentUnitModSqCongruence37` — Washington Theorem 9.4's producer-`μ`
+  second-order congruence `(ε₁/ε₂)·(Units.map ν)^{37} ≡ rational mod 37²`; and
 * `h_cor823 : Cor823PthPowerOfRationalModSq37` — Washington Theorem 8.22 / Corollary 8.23 (a unit
   `≡ rational mod 37²` is a `37`-th power, under `M ≤ 1`).
 
 The proven second-order non-degeneracy `caseII_cor823_valuation_input_proven` discharges the `M ≤ 1`
 hypothesis of `h_cor823` internally; the corrected unit `(ε₁/ε₂)·(Units.map ν)^{37}` is then a
 `37`-th power `ε'^{37}`, and dividing out the real `37`-th-power twist gives
-`ε₁/ε₂ = (ε' · (Units.map ν)⁻¹)^{37}`.  **No `Lemma98LocalPower37` and no mod-`𝔩` engine are used** —
-this is the genuine Theorem-9.4 route, the degenerate Theorem-9.5 / Mirimanoff dependency removed. -/
+`ε₁/ε₂ = (ε' · (Units.map ν)⁻¹)^{37}`.  **No `Lemma98LocalPower37` and no mod-`𝔩` engine are used**
+— this is the genuine Theorem-9.4 route, the degenerate Theorem-9.5 / Mirimanoff dependency removed.
+-/
 theorem caseIIOmega32_assumptionII_of_cor823
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (h_modSq : Cor823DescentUnitModSqCongruence37)
     (h_cor823 : Cor823PthPowerOfRationalModSq37) :
     WashingtonCaseIIExactQuotientUnitPower37Source := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro hV hSO m D x' y' z' ε₁ ε₂ ε₃ hx hy hz heq
   -- Theorem-9.4 producer-`μ` congruence: a real twist `ν` with `(ε₁/ε₂)·(map ν)^{37} ≡ c mod 37²`.
   obtain ⟨ν, c, hc⟩ := h_modSq hV hSO D hx hy hz heq
@@ -336,12 +339,13 @@ theorem caseIIOmega32_assumptionII_of_cor823
 
 The mod-`37²` congruence `Cor823DescentUnitModSqCongruence37` is **not** an opaque second-order
 input: its `37²` is supplied by the **proven** `37²`-power kernel §1.  Washington Theorem 9.4 writes
-the corrected unit as `(η_a/η_b)·(η̄_b/η̄_a)^{37} = w^{37}` where `w = (μ_b/μ_a)^{37}` is a **global
-`37`-th power** and `w ≡` rational integer mod `37` (the freshman's-dream `(μ_b/μ_a)^{37} ≡` rational
-mod `37`, Lemma 1.8).  By the `37²`-power kernel, `w ≡ c (mod 37) ⟹ w^{37} ≡ c^{37} (mod 37²)`, so
-the mod-`37²` congruence follows from this **sharper, first-order** producer datum.  We name that
-sharper datum and prove it discharges `Cor823DescentUnitModSqCongruence37`, moving the second-order
-content into proven territory and leaving only the producer's first-order structure. -/
+the corrected unit as `(η_a/η_b)·(η̄_b/η̄_a)^{37} = w^{37}` where `w = (μ_b/μ_a)^{37}` is a
+**global `37`-th power** and `w ≡` rational integer mod `37` (the freshman's-dream
+`(μ_b/μ_a)^{37} ≡` rational mod `37`, Lemma 1.8).  By the `37²`-power kernel,
+`w ≡ c (mod 37) ⟹ w^{37} ≡ c^{37} (mod 37²)`, so the mod-`37²` congruence follows from this
+**sharper, first-order** producer datum.  We name that sharper datum and prove it discharges
+`Cor823DescentUnitModSqCongruence37`, moving the second-order content into proven territory and
+leaving only the producer's first-order structure. -/
 
 open FLT37.LehmerVandiver.CaseII in
 /-- **The sharper Theorem-9.4 producer datum: the corrected unit is a `37`-th power with rational
@@ -392,7 +396,8 @@ The corrected unit `(ε₁/ε₂)·(Units.map ν)^{37} = w^{37}` with `w ≡ c (
 `37²`-power kernel §1 (`caseII_pow37_sub_intCast_pow37_mem_37sq`) upgrades this to
 `w^{37} ≡ c^{37} (mod 37²)`, i.e. the corrected unit is `≡` the rational integer `c^{37}` mod `37²`.
 This **discharges the entire second-order content** of `Cor823DescentUnitModSqCongruence37` from the
-sharper *first-order* producer datum — the `37²` is supplied by the proven kernel, not hypothesised. -/
+sharper *first-order* producer datum — the `37²` is supplied by the proven kernel, not hypothesised.
+-/
 theorem caseIICor823_descentUnitModSqCongruence37_of_pthPower
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -404,7 +409,7 @@ theorem caseIICor823_descentUnitModSqCongruence37_of_pthPower
   -- The corrected unit equals `w^{37}`; apply the `37²`-power kernel to `w ≡ c (mod 37)`.
   rw [hfac]
   rw [show (((w ^ 37 : (𝓞 (CyclotomicField 37 ℚ))ˣ)) : 𝓞 (CyclotomicField 37 ℚ)) =
-      (w : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 from by rw [Units.val_pow_eq_pow_val]]
+      (w : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 by rw [Units.val_pow_eq_pow_val]]
   exact caseII_pow37_sub_intCast_pow37_mem_37sq hwc
 
 open FLT37.LehmerVandiver.CaseII in

@@ -82,7 +82,8 @@ open HasseWeil HasseWeil.WeilPairing.DivisorPullback HasseWeil.WeilPairing.Torsi
 /-! ### Step 0 — the `mk`-computation of `picZeroIsoE_allChar`
 
 `picZeroIsoE_allChar` is the Abel–Jacobi iso `κ : Pic⁰(E) ≅ E`; its forward map is the descended
-group-sum `σ̄`.  On a class `[D]` of a degree-zero divisor it is just `σ D = projectiveDivisorSum D`. -/
+group-sum `σ̄`.  On a class `[D]` of a degree-zero divisor it is just
+`σ D = projectiveDivisorSum D`. -/
 
 /-- **`picZeroIsoE_allChar` on a `Pic⁰` class is the group sum `σ`.** For a degree-zero divisor `D`,
 `κ([D]) = projectiveDivisorSum D` — the Abel–Jacobi iso's forward map is the descended `σ̄`. -/
@@ -273,7 +274,8 @@ noncomputable def divisorPushforwardDual (φ : Isogeny W.toAffine W.toAffine)
 for separable `φ`.  Unfolding `δ` at `f P` (with `κ⁻¹(f P) = [(f P) − (O)]` and
 `f = φ.toAddMonoidHom`): `δ(f P) = κ([φ^*((f P) − (O))]) = σ(φ^*((f P) − (O)))`, and the σ-bridge
 `sigma_pullbackDivisor_kappaDivisor` (the multiplicity-free fibre sum, proved) yields
-`σ(φ^*((f P) − (O))) = #ker(f) · P` taking `P` as the preimage of `f P`.  Hence `δ(f P) = #ker(f) • P`,
+`σ(φ^*((f P) − (O))) = #ker(f) · P` taking `P` as the preimage of `f P`.  Hence
+`δ(f P) = #ker(f) • P`,
 i.e. `δ ∘ φ = [#ker φ]` — **no characteristic polynomial / `π + V = [t]` trace relation**. -/
 theorem divisorPushforwardDual_comp (φ : Isogeny W.toAffine W.toAffine)
     [Finite φ.toAddMonoidHom.ker] (hproj : ProjOrdTransport φ)
@@ -323,17 +325,22 @@ variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
     (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing]
 
-/-- **Leaf-2 `OneSubScalingData` from the divisor-pushforward dual** (Silverman III.6.1b/III.6.2(a)),
-CoordHom-free.  Assembles the full `OneSubScalingData` for `(1 − π)_{K̄}` over `L = AlgebraicClosure K`
-with the dual point `δ` supplied by `divisorPushforwardDual` (the divisor pushforward `κ ∘ φ^* ∘ κ⁻¹`)
+/-- **Leaf-2 `OneSubScalingData` from the divisor-pushforward dual** (Silverman
+III.6.1b/III.6.2(a)),
+CoordHom-free.  Assembles the full `OneSubScalingData` for `(1 − π)_{K̄}` over
+`L = AlgebraicClosure K`
+with the dual point `δ` supplied by `divisorPushforwardDual` (the divisor pushforward
+`κ ∘ φ^* ∘ κ⁻¹`)
 and the dual relation `hdc` by `divisorPushforwardDual_comp` (**automatic via the σ-bridge**, no
 characteristic polynomial / trace relation).
 
-Inputs — all CoordHom-free, carried per isogeny exactly as the project's other base-change residuals:
+Inputs — all CoordHom-free, carried per isogeny exactly as the project's other
+base-change residuals:
 * `hdeg_eq` — V.1.3 `φ_L.degree = pointCount` (already a field of the assembler);
 * `hproj` — `ProjOrdTransport φ_L` (multiplicity-free divisor-pullback functoriality), which *also*
   feeds the dual construction (it makes `φ^*` descend to `Pic⁰`);
-* `hsurj` — surjectivity of `φ_L` on `E_{K̄}`-points (Silverman III.4.10a over `K̄`), needed both for
+* `hsurj` — surjectivity of `φ_L` on `E_{K̄}`-points (Silverman III.4.10a over `K̄`),
+needed both for
   `δ`/`hdc` (the σ-bridge preimage) and by `weilScales_of_dualComp` (the adjoint preimage);
 * `hcomm'` — the translation covariance (Silverman III.8.2). -/
 noncomputable def mkOneSubScalingDataConcrete_of_divisorDual (hq : 2 ≤ Fintype.card K)
@@ -356,7 +363,8 @@ noncomputable def mkOneSubScalingDataConcrete_of_divisorDual (hq : 2 ≤ Fintype
         translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S
             ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
               (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).pullback
-              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
+              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ)
+                (by exact_mod_cast hℓF)
                 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                   (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom T) hφT)) =
           (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
@@ -364,7 +372,8 @@ noncomputable def mkOneSubScalingDataConcrete_of_divisorDual (hq : 2 ≤ Fintype
             (translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K))
               ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                 (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom S)
-              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
+              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ)
+                (by exact_mod_cast hℓF)
                 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                   (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom T) hφT))) :
     OneSubScalingData W p r (AlgebraicClosure K) hq :=
@@ -391,11 +400,13 @@ noncomputable def mkOneSubScalingDataConcrete_of_divisorDual (hq : 2 ≤ Fintype
 /-- **`OneSubFrobeniusScaling` discharged via the divisor-pushforward dual** (Silverman III.8.6.1),
 CoordHom-free.  For `(1 − π)_{K̄}` over `L = AlgebraicClosure K`, the symplectic scaling
 `e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on `E_{K̄}[ℓ]` (every prime `ℓ ≠ p`) holds,
-from the divisor-pushforward dual `δ`/`hdc` (`divisorPushforwardDual` + `divisorPushforwardDual_comp`,
+from the divisor-pushforward dual `δ`/`hdc` (`divisorPushforwardDual` +
+`divisorPushforwardDual_comp`,
 the σ-bridge dual of Step 4 — **no characteristic polynomial / `π + V = [t]` trace relation, no
 `CoordHom`**) together with the project's standing CoordHom-free residuals:
 
-* `hdeg_eq` — Silverman V.1.3 `deg(1 − π) = #E(𝔽_q)` (the project's known sharp residual, axiom-clean
+* `hdeg_eq` — Silverman V.1.3 `deg(1 − π) = #E(𝔽_q)` (the project's known sharp
+residual, axiom-clean
   modulo `sorryAx` exactly as in `OneSubDual.lean`);
 * `hproj` — `ProjOrdTransport` (multiplicity-free divisor-pullback functoriality);
 * `hsurj` — surjectivity of `(1 − π)_{K̄}` over `K̄` (Silverman III.4.10a);
@@ -425,7 +436,8 @@ theorem oneSubFrobeniusScaling_of_divisorDual (hq : 2 ≤ Fintype.card K)
         translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S
             ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
               (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).pullback
-              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
+              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ)
+                (by exact_mod_cast hℓF)
                 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                   (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom T) hφT)) =
           (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
@@ -433,7 +445,8 @@ theorem oneSubFrobeniusScaling_of_divisorDual (hq : 2 ≤ Fintype.card K)
             (translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K))
               ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                 (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom S)
-              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
+              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ)
+                (by exact_mod_cast hℓF)
                 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                   (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom T) hφT))) :
     OneSubFrobeniusScaling W p r (AlgebraicClosure K) hq :=

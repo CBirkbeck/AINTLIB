@@ -89,11 +89,8 @@ theorem mulByInt_deg_rangeIncl_twoCurve (φ : Isogeny W₁ W₂)
     (HasseWeil.mulByInt_pullbackAlgHom W₁ (φ.degree : ℤ)
         (by exact_mod_cast (degree_pos_twoCurve φ).ne')).range ≤
       φ.pullback.range := by
-  have hcov : ∀ k : φ.kernel, ∀ z : W₂.FunctionField,
-      translateAlgEquivOfPoint W₁ k.val (φ.pullback z) = φ.pullback z :=
-    fun k z => translate_pullback_invariance_of_xy_twoCurve φ k.val
-      (h_xy_family k).1 (h_xy_family k).2 z
-  haveI : Finite φ.kernel := finite_kernel_of_hcov_twoCurve φ hcov
+  haveI : Finite φ.kernel :=
+    finite_kernel_of_hcov_twoCurve φ (hcov_of_xy_family φ h_xy_family)
   have hm : (φ.degree : ℤ) ≠ 0 := by exact_mod_cast (degree_pos_twoCurve φ).ne'
   rintro z hz
   rw [fixedField_hfix_twoCurve φ h_xy_family h_card z]

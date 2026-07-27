@@ -53,6 +53,8 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- For `P.x ≠ xk`, the coord ring element `XClass W xk` is NOT in the
 maximal ideal at `P`. Companion to `XClass_mem_maximalIdealAt` (which
 handles the `P.x = xk` case). -/
@@ -68,11 +70,12 @@ theorem XClass_notMem_maximalIdealAt (P : (W_smooth W).SmoothPoint) (xk : F) (h_
       (Affine.CoordinateRing.XClass W.toAffine xk) = P.x - xk := by
     change ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve F).evalAt P)
         (Affine.CoordinateRing.XClass W.toAffine xk) = P.x - xk
-    unfold Affine.CoordinateRing.XClass
+    simp only [Affine.CoordinateRing.XClass]
     rw [SmoothPlaneCurve.evalAt_mk]
     simp [Polynomial.evalEval_C]
   exact sub_eq_zero.mp (h_xk_eval ▸ h_eval)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For `P.x ≠ xk`, the function `x_gen − alg xk` has `pointValuation = 1`
 at `P` (i.e., is a unit in localRingAt(P)). This is the chord-case
 non-vanishing complement of the negSmoothPoint vanishing. -/
@@ -93,6 +96,8 @@ theorem pointValuation_x_gen_sub_const_eq_one_of_X_ne
       (C := W_smooth W) _ P).mp h_lt
   exact le_antisymm h_le (not_lt.mp h_not_lt)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- When `P.x ≠ xk`, `(x_gen − alg xk)` is a unit in K(E), and its inverse
 also has `pointValuation = 1` at `P`. -/
 theorem pointValuation_x_gen_sub_const_inv_eq_one_of_X_ne
@@ -105,12 +110,13 @@ theorem pointValuation_x_gen_sub_const_inv_eq_one_of_X_ne
   rw [map_inv₀, h_eq]
   rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For chord-case `P` (P.x ≠ xk), the translate slope `(y_gen − alg yk) /
 (x_gen − alg xk)` is in `localRingAt(P)` (no pole). -/
 theorem pointValuation_translateSlope_xy_le_one_of_X_ne
     (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_x : P.x ≠ xk) :
     (W_smooth W).pointValuation P (translateSlope_xy W xk yk) ≤ 1 := by
-  unfold translateSlope_xy
+  simp only [translateSlope_xy]
   rw [Affine.slope_of_X_ne (hx := fun h_eq ↦ x_gen_sub_const_ne_zero W xk
     (sub_eq_zero.mpr h_eq))]
   rw [div_eq_mul_inv]
@@ -120,11 +126,12 @@ theorem pointValuation_translateSlope_xy_le_one_of_X_ne
     exact (W_smooth W).pointValuation_algebraMap_le_one _ P
   · exact le_of_eq (pointValuation_x_gen_sub_const_inv_eq_one_of_X_ne W P xk h_x)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Helper: for chord-case `P` (P.x ≠ xk), the algebraic identity
 `(y_gen − alg yk) · (P.x − xk) − (P.y − yk) · (x_gen − alg xk)` vanishes
 at `P`. This is the substantive content of "slope difference vanishes at P". -/
 theorem pointValuation_chord_numerator_lt_one_of_X_ne
-    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_x : P.x ≠ xk) :
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (_h_x : P.x ≠ xk) :
     (W_smooth W).pointValuation P
       ((y_gen W - algebraMap F KE yk) * algebraMap F KE (P.x - xk) -
         algebraMap F KE (P.y - yk) * (x_gen W - algebraMap F KE xk)) < 1 := by
@@ -166,6 +173,7 @@ theorem pointValuation_chord_numerator_lt_one_of_X_ne
       exact h_lt
     exact pointValuation_mul_lt_one_of_le_and_lt W P h1 h2
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A nonzero constant in F has `pointValuation = 1` at any smooth point. -/
 theorem pointValuation_algebraMap_F_eq_one_of_ne_zero
     (P : (W_smooth W).SmoothPoint) {c : F} (hc : c ≠ 0) :
@@ -174,7 +182,7 @@ theorem pointValuation_algebraMap_F_eq_one_of_ne_zero
     Curves.SmoothPlaneCurve.ord_P_algebraMap_F_of_ne_zero (W_smooth W) hc P
   have h_alg_ne : (algebraMap F KE c : KE) ≠ 0 := fun h ↦ hc <|
     FaithfulSMul.algebraMap_injective F KE (h.trans (map_zero _).symm)
-  unfold Curves.SmoothPlaneCurve.ord_P at h_ord
+  simp only [Curves.SmoothPlaneCurve.ord_P] at h_ord
   by_cases hv : (W_smooth W).pointValuation P (algebraMap F KE c) = 0
   · exfalso
     exact h_alg_ne ((Curves.SmoothPlaneCurve.pointValuation_eq_zero_iff
@@ -188,6 +196,7 @@ theorem pointValuation_algebraMap_F_eq_one_of_ne_zero
     rw [← WithZero.coe_unzero hv, h_unz]
     rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- If the denominator `b` is a unit at `P` (`pointValuation = 1`) and `a ∈ m_P`
 (`pointValuation < 1`), then `a / b ∈ m_P`. -/
 private theorem pointValuation_div_lt_one_of_denom_eq_one (P : (W_smooth W).SmoothPoint)
@@ -197,6 +206,7 @@ private theorem pointValuation_div_lt_one_of_denom_eq_one (P : (W_smooth W).Smoo
   rw [div_eq_mul_inv, Valuation.map_mul, map_inv₀, hb, inv_one, mul_one]
   exact ha
 
+omit [W.toAffine.IsElliptic] in
 /-- For chord-case `P` (P.x ≠ xk), the difference `translateSlope_xy −
 alg(chord slope at P, k)` vanishes at `P`. -/
 theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne
@@ -209,7 +219,7 @@ theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne
     x_gen_sub_const_ne_zero W xk
   have h_tslope : translateSlope_xy W xk yk =
       (y_gen W - algebraMap F KE yk) / (x_gen W - algebraMap F KE xk) := by
-    unfold translateSlope_xy
+    simp only [translateSlope_xy]
     rw [Affine.slope_of_X_ne (hx := fun h_eq ↦
       h_denom_xgen_ne (sub_eq_zero.mpr h_eq))]
   have h_alg_slope : W.toAffine.slope P.x xk P.y yk =
@@ -251,6 +261,7 @@ theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne
     pointValuation_chord_numerator_lt_one_of_X_ne W P xk yk h_x
   exact pointValuation_div_lt_one_of_denom_eq_one W P h_denom_pV h_num_pV_lt
 
+omit [W.toAffine.IsElliptic] in
 /-- Chord-case slope factor bound: the product
 `(slope_K − alg slope_F) · (slope_K + alg slope_F + a₁)` has `pointValuation < 1` at `P`,
 where `slope_K = translateSlope_xy W xk yk` and `slope_F = W.slope P.x xk P.y yk`. -/
@@ -284,6 +295,7 @@ private theorem pointValuation_slope_diff_mul_sum_lt_one_of_X_ne
   rw [h_swap]
   exact pointValuation_mul_lt_one_of_le_and_lt W P h_sum_le h_slope_diff_lt
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The generator difference `x_gen − alg P.x` lies in the maximal ideal at `P`
 (vanishes at `P`), hence has `pointValuation < 1`. -/
 private theorem pointValuation_x_gen_sub_alg_x_self_lt_one
@@ -299,6 +311,7 @@ private theorem pointValuation_x_gen_sub_alg_x_self_lt_one
   rw [h_eq]
   exact h_lt
 
+omit [W.toAffine.IsElliptic] in
 /-- For chord-case `P` (P.x ≠ xk), the difference
 `translateX_xy − alg(W.addX P.x xk slope_at_P)` has `pointValuation < 1` at P.
 This is the geometric content "value of τ_k(x_gen) at P equals (P+k).x"
@@ -311,7 +324,7 @@ theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne
           (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateX_xy
+  simp only [translateX_xy]
   have h_alg_addX :
       algebraMap F KE (W.toAffine.addX P.x xk slope_F) =
         (W_KE W).toAffine.addX (algebraMap F KE P.x) (algebraMap F KE xk)
@@ -365,6 +378,7 @@ theorem addY_diff_four_term_ring_identity {R : Type*} [CommRing R]
         (ℓK - ℓF) * (aF - xP) - (yK - yP) := by
   ring
 
+omit [W.toAffine.IsElliptic] in
 /-- T1 (chord case): the product `(slope_K + a₁) · (translateX_xy − alg addX)`
 has `pointValuation < 1` at `P`. The first factor has valuation `≤ 1` (sum of a
 slope with valuation `≤ 1` and a constant), the second is the regular vanishing
@@ -391,6 +405,7 @@ private theorem pointValuation_slope_add_a₁_mul_translateX_diff_lt_one_of_X_ne
     exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne W P xk yk h_x
   exact pointValuation_mul_lt_one_of_le_and_lt W P h_factor1_le h_diff_addX_lt
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- T2 (chord case): the product `slope_K · (x_gen − alg P.x)` has
 `pointValuation < 1` at `P`. The slope has valuation `≤ 1`; the generator
 difference `x_gen − alg P.x` vanishes at `P`
@@ -403,6 +418,7 @@ private theorem pointValuation_slope_mul_x_gen_diff_lt_one_of_X_ne
     (pointValuation_translateSlope_xy_le_one_of_X_ne W P xk yk h_x) ?_
   exact pointValuation_x_gen_sub_alg_x_self_lt_one W P
 
+omit [W.toAffine.IsElliptic] in
 /-- T3 (chord case): the product `(slope_K − alg slope_F) · (alg addX − alg P.x)`
 has `pointValuation < 1` at `P`. The slope difference is the regular vanishing of
 the slope evaluation (`…translateSlope_xy_sub_alg_slope…`), strictly `< 1`; the
@@ -423,6 +439,7 @@ private theorem pointValuation_slope_diff_mul_alg_addX_diff_lt_one_of_X_ne
   exact pointValuation_mul_lt_one_of_le_and_lt W P h_addX_diff_F_le
     (pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne W P xk yk h_x)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- T4 (chord case): the generator difference `y_gen − alg P.y` lies in the
 maximal ideal at `P` (vanishes at `P`), hence has `pointValuation < 1`. The
 `y`-coordinate mirror of `pointValuation_x_gen_sub_alg_x_self_lt_one`. -/
@@ -438,6 +455,7 @@ private theorem pointValuation_y_gen_sub_alg_y_self_lt_one
   rw [y_gen_sub_const_eq_algebraMap_YClass W P.y]
   exact h_lt
 
+omit [W.toAffine.IsElliptic] in
 /-- For chord-case `P` (P.x ≠ xk), the difference
 `translateY_xy − alg(W.addY P.x xk P.y slope_at_P)` has `pointValuation < 1` at P.
 This is the geometric content "value of τ_k(y_gen) at P equals (P+k).y"
@@ -450,7 +468,7 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne
           (W.toAffine.addY P.x xk P.y (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [← Affine.map_addY (algebraMap F KE) P.x P.y xk slope_F]
   -- Normalize: use W.map (algebraMap F KE) form throughout (= W_KE W definitionally).
   change (W_smooth W).pointValuation P
@@ -488,6 +506,7 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne
     · exact pointValuation_slope_diff_mul_alg_addX_diff_lt_one_of_X_ne W P xk yk h_x
   · exact pointValuation_y_gen_sub_alg_y_self_lt_one W P
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The base change to `K(E)` of the Weierstrass equation satisfied by `(xk, yk)`:
 the F-level relation `W.Equation xk yk` becomes the `equation_iff'`-normal-form
 identity `… = 0` for `W_KE` at `(algebraMap F KE xk, algebraMap F KE yk)`. -/
@@ -504,6 +523,7 @@ private theorem weierstrass_equation_image_eq_zero
     Affine.Equation.map (algebraMap F KE) h_eq
   rwa [WeierstrassCurve.Affine.equation_iff'] at h_map
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Weierstrass factorization** in K(E): from the curve equation at
 `(xk, yk)` and the generic-point equation, the K(E)-level identity
 `(y_gen − alg yk) · A = (x_gen − alg xk) · B`, where `A, B` are the
@@ -535,6 +555,7 @@ theorem weierstrass_factorization
     weierstrass_equation_image_eq_zero W xk yk h_eq
   linear_combination h_gen - h_eq_alg
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- In the doubling case (`P = (xk, yk)`), the factor `A` differs from the nonzero
 constant `yk − negY xk yk` by `(y_gen − yk) + a₁·(x_gen − xk)` — both in `m_P` — so
 `pointValuation P (A − algebraMap (yk − negY xk yk)) < 1`. -/
@@ -580,6 +601,7 @@ private theorem pointValuation_A_sub_algC_lt_one_of_doubling
     rw [h_xeq]
     exact h_lt
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Helper: at `P = (xk, yk)` with `yk ≠ negY xk yk` (non-2-tor), the K(E)
 factor `A = y_gen + alg yk + a₁ · x_gen + a₃` has `pointValuation = 1` at
 `P`. This is because `A` evaluates to `yk − negY xk yk ≠ 0` at `P`. -/
@@ -627,6 +649,7 @@ theorem pointValuation_A_eq_one_of_doubling
     exact h_diff_lt
   exact (Valuation.map_add_eq_of_lt_right _ h_lt_strict).trans h_alg_c_eq
 
+omit [W.toAffine.IsElliptic] in
 /-- **Tangent slope identity, lifted to K(E)**: in the doubling case
 `P = (xk, yk)` with `yk ≠ negY xk yk`, the tangent slope
 `slope_F = W.slope P.x xk P.y yk` satisfies
@@ -662,6 +685,7 @@ private theorem algebraMap_slope_mul_two_yk_add_eq_of_doubling
   simp only [map_sub, map_add, map_mul, map_pow, map_ofNat] at h_alg
   exact h_alg
 
+omit [W.toAffine.IsElliptic] in
 /-- **`B − A · slope_F` factorization** in the doubling case. With the explicit
 K(E) factors `A = y_gen + alg yk + a₁ x_gen + a₃` and
 `B = x_gen² + alg xk · x_gen + alg xk² + a₂(x_gen + alg xk) + a₄ − a₁ alg yk`
@@ -693,6 +717,7 @@ private theorem B_sub_A_mul_slope_factorization_of_doubling
   rw [ha1, ha2, ha3, ha4]
   linear_combination -h_slope_F_mul_KE
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The generator difference `x_gen − alg xk` has `pointValuation < 1` at a
 doubling point `P = (xk, …)`: rewriting `xk = P.x`, it is the image of
 `XClass W.toAffine P.x ∈ m_P`, which vanishes at `P`. -/
@@ -708,6 +733,7 @@ private theorem pointValuation_x_gen_sub_alg_const_lt_one_of_eq
       (C := W_smooth W) (Affine.CoordinateRing.XClass W.toAffine P.x) P).mpr h_xmem
   rw [x_gen_sub_const_eq_algebraMap_XClass W P.x]; exact h_lt
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The generator difference `y_gen − alg yk` has `pointValuation < 1` at a
 doubling point `P = (…, yk)`: rewriting `yk = P.y`, it is the image of
 `YClass W.toAffine (C P.y) ∈ m_P`, which vanishes at `P`. -/
@@ -724,6 +750,7 @@ private theorem pointValuation_y_gen_sub_alg_const_lt_one_of_eq
       P).mpr h_ymem
   rw [y_gen_sub_const_eq_algebraMap_YClass W P.y]; exact h_lt
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The inner factor `(x_gen − alg xk) + (3 alg xk + a₂ − alg slope_F · a₁)` of
 the `B − A · slope_F` factorization has `pointValuation ≤ 1` at `P` — a routine
 combination of the `x_gen` / F-constant bounds via additivity, subtraction and
@@ -749,6 +776,7 @@ private theorem pointValuation_x_gen_sub_const_add_slope_inner_le_one
         ((W_smooth W).pointValuation_algebraMap_F_le_one P slope_F)
         ((W_smooth W).pointValuation_algebraMap_F_le_one P W.a₁)
 
+omit [W.toAffine.IsElliptic] in
 /-- The right-hand side of the `B − A · slope_F` factorization,
 `(x_gen − alg xk) · (inner) − alg slope_F · (y_gen − alg yk)`, has
 `pointValuation < 1` at a doubling point. Both summands are a product of a
@@ -773,6 +801,7 @@ private theorem pointValuation_slope_factorization_rhs_lt_one_of_doubling
       ((W_smooth W).pointValuation_algebraMap_F_le_one P _)
       (pointValuation_y_gen_sub_alg_const_lt_one_of_eq W P yk h_eq_y)
 
+omit [W.toAffine.IsElliptic] in
 /-- **Slope-difference as a quotient** in the doubling case. With `A` the K(E)
 factor of `weierstrass_factorization` (which is nonzero at `P`, having
 `pointValuation = 1`), the slope difference rewrites as
@@ -805,6 +834,7 @@ private theorem translateSlope_xy_sub_alg_slope_eq_factor_div_A_of_doubling
   field_simp
   linear_combination h_T_A
 
+omit [W.toAffine.IsElliptic] in
 /-- **Tangent (doubling) case slope eval**: at `P = (xk, yk)` with
 `yk ≠ negY xk yk`, the K(E) slope `translateSlope_xy` evaluates to the
 tangent slope `(3 xk² + 2 a₂ xk + a₄ − a₁ yk) / (yk − negY xk yk)` in
@@ -837,6 +867,7 @@ theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling
   rw [B_sub_A_mul_slope_factorization_of_doubling W P xk yk h_eq_x h_eq_y h_not_2_tor]
   exact pointValuation_slope_factorization_rhs_lt_one_of_doubling W P xk yk h_eq_x h_eq_y
 
+omit [W.toAffine.IsElliptic] in
 /-- Tangent (doubling) bound: at `P = (xk, yk)` with `yk ≠ negY xk yk`,
 `translateSlope_xy` has `pointValuation ≤ 1` at `P`. Derived from the slope
 eval lemma plus the F-constant bound on `alg slope_F`. -/
@@ -855,6 +886,7 @@ theorem pointValuation_translateSlope_xy_le_one_of_doubling
   rw [h_eq]
   exact pointValuation_add_le_one W P (le_of_lt h_eval) h_alg_le
 
+omit [W.toAffine.IsElliptic] in
 /-- Doubling-case slope factor bound: the product
 `(slope_K − alg slope_F) · (slope_K + alg slope_F + a₁)` has `pointValuation < 1` at `P`,
 where `slope_K = translateSlope_xy W xk yk` and `slope_F = W.slope P.x xk P.y yk`.
@@ -892,6 +924,7 @@ private theorem pointValuation_slope_diff_mul_sum_lt_one_of_doubling
   rw [h_swap]
   exact pointValuation_mul_lt_one_of_le_and_lt W P h_sum_le h_slope_diff_lt
 
+omit [W.toAffine.IsElliptic] in
 /-- **Tangent (doubling) case x_gen evaluation**: at `P = (xk, yk)` with
 `yk ≠ negY xk yk`, the difference `translateX_xy − alg(W.addX P.x xk slope_F)`
 has `pointValuation < 1` at `P`. This is the geometric content
@@ -905,7 +938,7 @@ theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_doubling
           (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateX_xy
+  simp only [translateX_xy]
   have h_alg_addX :
       algebraMap F KE (W.toAffine.addX P.x xk slope_F) =
         (W_KE W).toAffine.addX (algebraMap F KE P.x) (algebraMap F KE xk)
@@ -933,6 +966,7 @@ theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_doubling
   · exact pointValuation_slope_diff_mul_sum_lt_one_of_doubling W P xk yk h_eq_x h_eq_y h_not_2_tor
   · exact pointValuation_x_gen_sub_alg_x_self_lt_one W P
 
+omit [W.toAffine.IsElliptic] in
 /-- T1 (doubling case): the product `(slope_K + a₁) · (translateX_xy − alg addX)`
 has `pointValuation < 1` at `P`. The first factor has valuation `≤ 1` (sum of a
 slope with valuation `≤ 1` and a constant), the second is the regular vanishing
@@ -964,6 +998,7 @@ private theorem pointValuation_slope_add_a₁_mul_translateX_diff_lt_one_of_doub
       h_eq_x h_eq_y h_not_2_tor
   exact pointValuation_mul_lt_one_of_le_and_lt W P h_factor1_le h_diff_addX_lt
 
+omit [W.toAffine.IsElliptic] in
 /-- T2 (doubling case): the product `slope_K · (x_gen − alg P.x)` has
 `pointValuation < 1` at `P`. The slope has valuation `≤ 1`; the generator
 difference `x_gen − alg P.x` vanishes at `P`
@@ -979,6 +1014,7 @@ private theorem pointValuation_slope_mul_x_gen_diff_lt_one_of_doubling
       h_eq_x h_eq_y h_not_2_tor) ?_
   exact pointValuation_x_gen_sub_alg_x_self_lt_one W P
 
+omit [W.toAffine.IsElliptic] in
 /-- T3 (doubling case): the product `(slope_K − alg slope_F) · (alg addX − alg P.x)`
 has `pointValuation < 1` at `P`. The slope difference is the regular vanishing of
 the slope evaluation (`…translateSlope_xy_sub_alg_slope…_of_doubling`), strictly
@@ -1003,6 +1039,7 @@ private theorem pointValuation_slope_diff_mul_alg_addX_diff_lt_one_of_doubling
     (pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_doubling W P xk yk
       h_eq_x h_eq_y h_not_2_tor)
 
+omit [W.toAffine.IsElliptic] in
 /-- **Tangent (doubling) case y_gen evaluation**: at `P = (xk, yk)` with
 `yk ≠ negY xk yk`, the difference `translateY_xy − alg(W.addY P.x xk P.y slope_F)`
 has `pointValuation < 1` at `P`. This is the geometric content
@@ -1016,7 +1053,7 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_doubling
           (W.toAffine.addY P.x xk P.y (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [← Affine.map_addY (algebraMap F KE) P.x P.y xk slope_F]
   change (W_smooth W).pointValuation P
       ((W.map (algebraMap F KE)).toAffine.addY (x_gen W) (algebraMap F KE xk) (y_gen W) slope_K -
@@ -1088,6 +1125,7 @@ theorem translateAlgEquivOfPoint_apply_y_gen
 instance W_smooth_toAffine_isElliptic : (W_smooth W).toAffine.IsElliptic :=
   inferInstanceAs W.toAffine.IsElliptic
 
+omit [W.toAffine.IsElliptic] in
 /-- If `P + (xk, yk)` is a finite point, then `P` is not the negation of `(xk, yk)`,
 i.e. `(P.x, P.y) ≠ (xk, negY xk yk)`. (If it were, the sum would be the point at
 infinity, contradicting `IsSome`.) -/
@@ -1104,6 +1142,7 @@ private theorem not_eq_negY_pair_of_add_isSome
     exact Affine.Point.add_of_Y_eq h_x_eq h_y_eq
   exact Affine.Point.zero_not_isSome (h_zero ▸ h)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- In the equal-`x` branch of an addition with `(P.x, P.y) ≠ (xk, negY xk yk)`,
 the point is genuinely being doubled: `P.y = yk` and `yk ≠ negY xk yk`. -/
 private theorem yk_ne_negY_and_eq_of_x_eq
@@ -1116,6 +1155,7 @@ private theorem yk_ne_negY_and_eq_of_x_eq
     W.toAffine.Y_eq_of_Y_ne P.nonsingular.1 h_ns.1 h_xeq h_y_ne_negY
   exact ⟨h_yeq, h_yeq ▸ h_y_ne_negY⟩
 
+omit [W.toAffine.IsElliptic] in
 /-- The `x_gen` half of `isTranslateXY_evaluatesAt_some`: dispatches the
 equal-`x` (doubling) and distinct-`x` (chord) cases of the `addX` valuation bound. -/
 private theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_isSome
@@ -1132,6 +1172,7 @@ private theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_isSome
       h_xeq h_yeq h_not_2_tor
   · exact pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne W P xk yk h_xeq
 
+omit [W.toAffine.IsElliptic] in
 /-- The `y_gen` half of `isTranslateXY_evaluatesAt_some`: dispatches the
 equal-`x` (doubling) and distinct-`x` (chord) cases of the `addY` valuation bound. -/
 private theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_isSome
@@ -1191,6 +1232,7 @@ theorem isTranslateXY_evaluatesAt_some
     exact pointValuation_translateY_xy_sub_alg_addY_lt_one_of_isSome W P xk yk h_ns
       h_not_zero_pair
 
+omit [W.toAffine.IsElliptic] in
 /-- **Unified slope bound**: for any P and non-zero `k = (xk, yk)` with
 `(P + k).IsSome`, `pV(translateSlope_xy W xk yk) ≤ 1` at `P`. -/
 theorem pointValuation_translateSlope_xy_le_one_of_isSome
@@ -1216,6 +1258,7 @@ theorem pointValuation_translateSlope_xy_le_one_of_isSome
       h_xeq h_yeq h_not_2_tor
   · exact pointValuation_translateSlope_xy_le_one_of_X_ne W P xk yk h_xeq
 
+omit [W.toAffine.IsElliptic] in
 /-- `pV(translateX_xy) ≤ 1` at `P` when `(P + k).IsSome`. Used in
 polynomial-induction lifting of `IsTranslateXY_evaluatesAt`. -/
 theorem pointValuation_translateX_xy_le_one_of_isSome
@@ -1223,7 +1266,7 @@ theorem pointValuation_translateX_xy_le_one_of_isSome
     (h : (P.toAffinePoint +
         (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome) :
     (W_smooth W).pointValuation P (translateX_xy W xk yk) ≤ 1 := by
-  unfold translateX_xy
+  simp only [translateX_xy]
   change (W_smooth W).pointValuation P
     ((translateSlope_xy W xk yk) ^ 2 + (W_KE W).a₁ * translateSlope_xy W xk yk -
       (W_KE W).a₂ - x_gen W - algebraMap F KE xk) ≤ 1
@@ -1245,6 +1288,7 @@ theorem pointValuation_translateX_xy_le_one_of_isSome
     · exact h_xgen_le
   · exact h_alg_xk_le
 
+omit [W.toAffine.IsElliptic] in
 /-- `pV(translateY_xy) ≤ 1` at `P` when `(P + k).IsSome`. Companion to
 `pointValuation_translateX_xy_le_one_of_isSome`. -/
 theorem pointValuation_translateY_xy_le_one_of_isSome
@@ -1286,7 +1330,7 @@ is an `F`-algebra map it fixes `algebraMap F KE c`, whose valuation is `≤ 1` b
 `pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome`.) -/
 private theorem pointValuation_translateAlgEquivOfPoint_of_C_le_one
     (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
-    (h : (P.toAffinePoint +
+    (_h : (P.toAffinePoint +
         (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
     (c : F) :
     (W_smooth W).pointValuation P
@@ -1717,6 +1761,7 @@ theorem isTranslateMaxIdealCompatible_on_CoordinateRing_some
   exact pointValuation_translateAlgEquivOfPoint_XClass_add_YClass_lt_one_some
     W P xk yk h_ns h a b h_xy_x h_xy_y
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- If `r ∉ maximalIdealAt P'`, then its evaluation `evalAt P' r` is a nonzero
 constant. Immediate from `ker_evalAt`: the maximal ideal is exactly the kernel
 of evaluation, so an element outside it has nonzero value. -/
@@ -1729,6 +1774,7 @@ private theorem evalAt_ne_zero_of_notMem_maximalIdealAt
   rw [← (W_smooth W).ker_evalAt P', RingHom.mem_ker]
   exact h_c
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Subtracting off its evaluation lands `r` in the maximal ideal: with
 `c = evalAt P' r`, the difference `r - algebraMap c` lies in `maximalIdealAt P'`.
 This is the "vanishing at `P'`" half of `ker_evalAt`, since `evalAt` is constant
@@ -1777,6 +1823,7 @@ private theorem translateAlgEquivOfPoint_algebraMap_eq_add_algebraMap_const
     algebraMap F W.toAffine.FunctionField c
   rw [(translateAlgEquivOfPoint W Q).commutes c]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- For `r ∈ CoordinateRing` with `r ∉ maxIdealAt(P+k)`,
 `pV P (τ_k(algMap r)) = 1`. -/
 theorem pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
@@ -1818,6 +1865,7 @@ theorem pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
     exact isTranslateMaxIdealCompatible_on_CoordinateRing_some W P xk yk h_ns h r' h_r'_mem
   exact (Valuation.map_add_eq_of_lt_right _ h_lt).trans h_alg_c_eq_one
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For nonzero `f` with `pV P f ≤ 1`, `0 ≤ ord_P P f` — companion to
 `one_le_ord_P_iff_pointValuation_lt_one`. -/
 theorem zero_le_ord_P_of_pointValuation_le_one {f : (W_smooth W).FunctionField}
@@ -1845,7 +1893,7 @@ theorem zero_le_ord_P_of_pointValuation_le_one {f : (W_smooth W).FunctionField}
       have h_not_one_le : ¬ (1 : WithTop ℤ) ≤ (W_smooth W).ord_P P f := fun h_le ↦
         h_not_lt_one ((Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
           (P := P) hzero).mp h_le)
-      unfold Curves.SmoothPlaneCurve.ord_P
+      simp only [Curves.SmoothPlaneCurve.ord_P]
       rw [dif_neg hv]
       change (0 : WithTop ℤ) ≤ ((-(WithZero.unzero hv).toAdd : ℤ) : WithTop ℤ)
       have h_unz_one : WithZero.unzero hv = 1 := by
@@ -2051,6 +2099,7 @@ private theorem translateAlgEquivOfPoint_neg_apply_apply
   exact (congrArg (fun (e : (W_smooth W).FunctionField ≃ₐ[F]
     (W_smooth W).FunctionField) ↦ e g) h_group_hom).symm
 
+omit [W.toAffine.IsElliptic] in
 /-- The translate `P + k` translated back by `-k` returns to `P` at the level of the
 underlying affine point: `(P.translate_of_finite k h).toAffinePoint + (-k) = P.toAffinePoint`,
 where `-k` is `(xk, negY xk yk)`. -/
@@ -2071,6 +2120,7 @@ private theorem translate_of_finite_toAffinePoint_add_neg
     add_neg_cancel _
   rw [h_neg_pt, add_zero]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- An element `f ∈ K(E)` with `pointValuation P f ≤ 1` lies in the local ring at `P`, hence
 is a fraction `u / q` of elements of the CoordinateRing with denominator `q ∉ maxIdealAt P`:
 there exist `u, q` in the CoordinateRing with `q ∉ maxIdealAt P` and `f * algMap q = algMap u`. -/
@@ -2093,6 +2143,7 @@ private theorem exists_coordinateRing_repr_of_pointValuation_le_one
     at h_apply
   exact h_apply
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A CoordinateRing element outside `maxIdealAt P` is a unit at `P`: its image has `ord_P = 0`. -/
 private theorem ord_P_algebraMap_eq_zero_of_notMem
     (P : (W_smooth W).SmoothPoint) {q : (W_smooth W).CoordinateRing}
@@ -2104,6 +2155,7 @@ private theorem ord_P_algebraMap_eq_zero_of_notMem
   exact hq (((W_smooth W).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hq_ne_zero P).mp
     h_ord_ne)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Multiplying by a CoordinateRing element that is a unit at `P` (i.e. `q ∉ maxIdealAt P`)
 does not change the order: `ord_P P (f * algMap q) = ord_P P f`. -/
 private theorem ord_P_mul_algebraMap_notMem (P : (W_smooth W).SmoothPoint)
@@ -2116,6 +2168,7 @@ private theorem ord_P_mul_algebraMap_notMem (P : (W_smooth W).SmoothPoint)
 -- `IsIntegrallyClosed CoordinateRing` (needed for `ord_P_algebraMap_eq_count`) is supplied
 -- unconditionally by `HasseWeil.Ramification.coordinateRing_isIntegrallyClosed`, so no
 -- `[NeZero 2/3]` (char ≠ 2, 3) hypotheses are required here.
+omit [DecidableEq F] in
 private theorem mem_pow_maxIdealAt_of_le_ord_P_algebraMap (P : (W_smooth W).SmoothPoint)
     {r : (W_smooth W).CoordinateRing} (hr : r ≠ 0) {n : ℕ}
     (h_le : (n : WithTop ℤ) ≤ (W_smooth W).ord_P P
@@ -2194,6 +2247,7 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_le_of_ne_zero
   rw [h_ord_eq_count]
   exact h_step1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- After translating the lift `f · algMap q = algMap u` by `-k` and using `τ_{-k} ∘ τ_k = id`
 (with `f = τ_k (algMap r)`), the numerator's `τ_{-k}`-image factors as
 `τ_{-k}(algMap u) = algMap r · τ_{-k}(algMap q)`. Here `-k = (xk, negY xk yk)`, and the maps are
@@ -2222,7 +2276,8 @@ private theorem translateAlgEquivOfPoint_neg_algebraMap_numerator_eq
 
 /-- The `τ_{-k}`-image of `algMap q` is a unit at `P + k` whenever `q` is a nonzero CoordinateRing
 element that is a unit at `P` (`q ∉ maxIdealAt P`): `ord_(P+k) (τ_{-k}(algMap q)) = 0`. The point is
-that `(P + k) + (-k) = P`, so `q ∉ maxIdealAt P` transports to `q ∉ maxIdealAt` of the back-translate
+that `(P + k) + (-k) = P`, so `q ∉ maxIdealAt P` transports to `q ∉ maxIdealAt` of the
+back-translate
 of `P + k` by `-k`. Here `-k = (xk, negY xk yk)`. -/
 private theorem ord_P_translate_translateAlgEquivOfPoint_neg_algebraMap_eq_zero_of_notMem
     (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -2404,6 +2459,7 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_eq_of_ne_zero
     (ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_ne_zero W P xk yk h_ns h r hr)
     (ord_P_translateAlgEquivOfPoint_algebraMap_le_of_ne_zero W P xk yk h_ns h r hr)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A nonzero function-field element `g` is a quotient of two nonzero coordinate-ring
 elements (with nonzero algebraMap images): `g = algC a / algC b`. The `DecidableEq F`
 section instance is reported unused by the linter but is needed for `CoordinateRing`

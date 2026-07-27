@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.ChordExpansion
 import HasseWeil.Foundation.EC.MulByIntAddRecurrence
 import HasseWeil.Isogeny.FormalSeries
@@ -47,16 +52,6 @@ variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
-
-/-- `mulByInt_y W n ≠ 0` for `n ≠ 0` (its image under the injective `[n]`-pullback
-is `y_gen ≠ 0`). -/
-theorem mulByInt_y_ne_zero (n : ℤ) (hn : n ≠ 0) : mulByInt_y W n ≠ 0 := by
-  intro h
-  apply y_gen_ne_zero W
-  apply (mulByInt W.toAffine n).pullback_injective
-  rw [map_zero,
-    show (mulByInt W.toAffine n).pullback (y_gen W) = mulByInt_y W n from
-      mulByInt_pullback_y W n hn, h]
 
 /-- `[n]^* t = -mulByInt_x n / mulByInt_y n` for `n ≠ 0`: the pullback of the local
 parameter `t = -x/y` in division-polynomial coordinates. -/
@@ -503,8 +498,10 @@ the lift to `omegaPullbackCoeff_spec` turns the Kähler identity `a_α • ω = 
 Laurent-series identity whose coefficients can be read off.
 
 Mirrors the `TwistedKaehler` wrapper pattern of `Auxiliary/PullbackKaehler.lean`: a wrapper carries
-the `K(E)`-module structure (via `localExpand`) and an `F`-module restricted through `algebraMap F K(E)`,
-so the `IsScalarTower F K(E) _` needed by `liftKaehlerDifferential` holds by construction (sidestepping
+the `K(E)`-module structure (via `localExpand`) and an `F`-module restricted through `algebraMap F
+K(E)`,
+so the `IsScalarTower F K(E) _` needed by `liftKaehlerDifferential` holds by construction
+(sidestepping
 the `SMul F (LaurentSeries F)` instance diamond). -/
 
 /-- Wrapper for `LaurentSeries F` carrying the `K(E)`-module structure via `localExpand`. -/
@@ -1386,9 +1383,7 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
   have hkey := subst_derivative_formalW_key W f hfsub
   have hchain : d⁄dX F (PowerSeries.subst f (formalW W)) =
       PowerSeries.subst f (d⁄dX F (formalW W)) * d⁄dX F f :=
-    -- mathlib's `derivative_subst` takes the base ring `A` as an *explicit* argument
-    -- (it lives under `variable (A : Type*) [CommRing A]`); supply `A := F`.
-    PowerSeries.derivative_subst F hfsub
+    PowerSeries.derivative_subst hfsub
   have hstar := pullback_diff_rearrange (PowerSeries.C W.a₁) (PowerSeries.C W.a₂)
     (PowerSeries.C W.a₃) (PowerSeries.C W.a₄) (PowerSeries.C W.a₆) f
     (PowerSeries.subst f (formalW W)) (d⁄dX F f)
@@ -1820,11 +1815,11 @@ theorem minpoly_x_gen_frobeniusRange_natDegree (p : ℕ) [Fact p.Prime] [CharP F
     nlinarith [this, hub]
   rw [hdeg, show n = 1 by omega, pow_one]
 
-set_option backward.isDefEq.respectTransparency false in
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **SK-FINRANK-P-2 separable input**: `KE / K(E)ᵖ(x_gen)` is separable. From `KE / K(x)` separable
 (`K(x) = FractionRing (Polynomial F)`, via `functionField_isSeparable` passed in as `hsep0`) by
-tower-top, since `K(x) ⊆ L`. The FractionRing `Algebra`/`IsSeparable` instances are passed *explicitly*
+tower-top, since `K(x) ⊆ L`. The FractionRing `Algebra`/`IsSeparable` instances are passed
+*explicitly*
 (`halg`, `hsep0`) because they cannot be synthesised under the `respectTransparency` option this
 lemma needs for the nested `Algebra ↥L KE` instance. -/
 theorem isSeparable_KE_over_frobeniusRange_adjoin_x_gen (p : ℕ) [Fact p.Prime] [CharP F p]
@@ -1882,13 +1877,11 @@ theorem isSeparable_KE_over_frobeniusRange_adjoin_x_gen (p : ℕ) [Fact p.Prime]
     IsScalarTower.of_algebraMap_eq (fun _ ↦ rfl)
   exact Algebra.isSeparable_tower_top_of_isSeparable (FractionRing (Polynomial F)) ↥L KE
 
-set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 /-- **SK-KERD-FINRANK-P** (char-`p` imperfection degree of the elliptic function field = `p`).
 `[K(E) : K(E)ᵖ] = p`, where `K(E)ᵖ = (frobenius KE p).fieldRange`. Route: `K(E) = K(E)ᵖ(x_gen)`
 (via `surjective_algebraMap_of_isSeparable`: `KE/K(E)ᵖ(x_gen)` purely-insep ∧ separable), then
-`IntermediateField.adjoin.finrank` + `minpoly_x_gen_frobeniusRange_natDegree` (= p) + `finrank_top`. -/
+`IntermediateField.adjoin.finrank` + `minpoly_x_gen_frobeniusRange_natDegree` (= p) + `finrank_top`.
+-/
 theorem finrank_KE_over_frobeniusRange_p (p : ℕ) [Fact p.Prime] [CharP F p] [PerfectField F] :
     letI : CharP KE p := charP_of_injective_algebraMap (algebraMap F KE).injective p
     Module.finrank ↥((frobenius KE p).fieldRange) KE = p := by
@@ -1905,7 +1898,8 @@ theorem finrank_KE_over_frobeniusRange_p (p : ℕ) [Fact p.Prime] [CharP F p] [P
     exact ⟨⟨x ^ p, IntermediateField.algebraMap_mem _
       (⟨x ^ p, x, rfl⟩ : ↥((frobenius KE p).fieldRange))⟩, rfl⟩
   -- [SK-FINRANK-P-2 separable input] `KE/L` separable; from the helper lemma above, with the
-  -- FractionRing `Algebra`/`IsSeparable` instances passed as terms (synthesised in their own context).
+  -- FractionRing `Algebra`/`IsSeparable` instances passed as terms (synthesised in their own
+  -- context).
   haveI hLsep : Algebra.IsSeparable ↥L KE :=
     isSeparable_KE_over_frobeniusRange_adjoin_x_gen W p
       (functionField_algebra_fractionRing W.toAffine) (functionField_isSeparable W.toAffine)
@@ -1923,15 +1917,13 @@ theorem finrank_KE_over_frobeniusRange_p (p : ℕ) [Fact p.Prime] [CharP F p] [P
   rw [htop, ← hLtop]
   exact hfin
 
-set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 1600000 in
 theorem kaehlerD_eq_zero_iff_mem_pth_powers (p : ℕ) [Fact p.Prime] [CharP F p] [PerfectField F]
     (w : KE) :
     KaehlerDifferential.D F KE w = 0 ↔ ∃ g : KE, g ^ p = w := by
   haveI : CharP KE p := charP_of_injective_algebraMap (algebraMap F KE).injective p
   refine ⟨?_, ?_⟩
-  · -- ⟹ : `ker D` is an IntermediateField `K(E)ᵖ ⊆ ker D ⊊ K(E)`; `[K(E):K(E)ᵖ]=p` prime ⟹ `ker D = ⊥`.
+  · -- ⟹ : `ker D` is an IntermediateField `K(E)ᵖ ⊆ ker D ⊊ K(E)`;
+    -- `[K(E):K(E)ᵖ]=p` prime ⟹ `ker D = ⊥`.
     intro hw
     have hfin_p : Module.finrank ↥((frobenius KE p).fieldRange) KE = p :=
       finrank_KE_over_frobeniusRange_p W p

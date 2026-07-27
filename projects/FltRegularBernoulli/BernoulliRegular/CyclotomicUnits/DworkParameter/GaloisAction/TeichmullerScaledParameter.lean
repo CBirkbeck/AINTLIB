@@ -3,6 +3,26 @@ module
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.ConjugationFixedBasis
 public import BernoulliRegular.Characters
 
+/-!
+# The Teichmüller-scaled Dwork parameter
+
+This file constructs the Teichmüller-scaled Dwork parameter attached to a residue class
+`a : ZMod p` and studies its finite Artin–Hasse logarithm.  It works in the rational `(p)`-adic
+integer model `RationalPadicIntegerRing p`, which is canonically equivalent to Mathlib's `ℤ_[p]`,
+lifts `a` to its Teichmüller representative there, scales the Dwork parameter by that
+representative, and records the coordinates of the resulting Artin–Hasse logarithm.
+
+## Main definitions
+
+* `padicIntToRationalPadicIntegerRingEquiv`: the canonical ring equivalence between Mathlib's
+  `ℤ_[p]` and the rational `(p)`-adic integer subring used on the Dwork side.
+* `rationalPadicTeichmuller`: the Teichmüller lift of `a : ZMod p` into the rational `(p)`-adic
+  integers.
+* `scaledDworkParameter`: the Dwork parameter scaled by the Teichmüller representative of `a`.
+* `scaledDworkParameterFiniteArtinHasseLog` and `scaledDworkParameterFiniteArtinHasseLogCoord`:
+  the finite Artin–Hasse logarithm of the scaled parameter and its Dwork-basis coordinates.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -222,7 +242,6 @@ theorem scaledDworkParameter_evalₐ_one (a : ZMod p) :
         (scaledDworkParameter p K a) = 0 := by
   rw [scaledDworkParameter, map_mul, dworkParameter_evalₐ_one, mul_zero]
 
-set_option maxHeartbeats 800000 in
 -- This congruence transports ideals through the rational and Dwork completions;
 -- the higher limit keeps the nested completion abbreviations from timing out.
 theorem scaledDworkParameter_sub_natCast_mul_lambda_mem_sq
@@ -429,7 +448,7 @@ theorem samePrimeFiniteLog_eq_mk_of_mem_pow_of_two_le
   classical
   have hxI : x ∈ lambdaIdeal p K :=
     Ideal.pow_le_self (Nat.ne_of_gt (lt_of_lt_of_le (by decide : 0 < 2) hm)) hx
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   rw [Finset.sum_eq_single 1]
   · exact samePrimeFiniteLogTerm_one_eq_mk (p := p) (K := K) m hxI
   · intro n hn_range hn_ne_one
@@ -573,7 +592,7 @@ theorem samePrimeFiniteLog_eq_sum_Icc_add_p_term_pow_pred
   have hpnot : p ∉ Finset.Icc 1 (p - 1) := by
     simp
     omega
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   change (∑ n ∈ Finset.range C, f n) =
     (∑ n ∈ Finset.Icc 1 (p - 1), f n) + f p
   rw [hrestrict, hrange]

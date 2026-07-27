@@ -64,17 +64,9 @@ theorem connectedSpace_of_isOpenMap_of_isClosedMap_of_isConnected_preimage
 lemma isConnected_preimage_val {Z : Type*} [TopologicalSpace Z] {u A : Set Z} (hAu : A ⊆ u)
     (hA : IsConnected A) : IsConnected (Subtype.val ⁻¹' A : Set u) := by
   haveI : ConnectedSpace ↑A := isConnected_iff_connectedSpace.mp hA
-  have h1 : IsConnected ((Set.inclusion hAu) '' Set.univ) :=
-    isConnected_univ.image _ (continuous_inclusion hAu).continuousOn
-  have h2 : (Set.inclusion hAu) '' Set.univ = (Subtype.val ⁻¹' A : Set u) := by
-    ext z
-    simp only [Set.image_univ, Set.mem_range, Set.mem_preimage]
-    constructor
-    · rintro ⟨a, rfl⟩
-      exact a.2
-    · intro hz
-      exact ⟨⟨z.1, hz⟩, rfl⟩
-  rwa [h2] at h1
+  rw [show (Subtype.val ⁻¹' A : Set u) = Set.range (Set.inclusion hAu) from
+    (Set.range_inclusion hAu).symm, ← Set.image_univ]
+  exact isConnected_univ.image _ (continuous_inclusion hAu).continuousOn
 
 /-- **Components of the total space of an open–closed map with connected fibres are the
 fibres of the components**: `connectedComponent x = f ⁻¹' (connectedComponent (f x))`.

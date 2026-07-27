@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import ModularCurves.ForMathlib.GrassmannianChart
 import ModularCurves.ForMathlib.GrassmannianTransition
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
@@ -15,9 +20,6 @@ second chart `ι'` is a determinant condition: the **pointwise transition matrix
 — Stacks 089T step (4): the overlap is the basic open `D(det T)` of the ι-chart. The
 generic-matrix-ring half of this statement lives in `GrassmannianTransition.lean`
 ([GR-E3]); the spec tying the two is the next increment.
-
-Decomposition artifact: `.mathlib-quality/decomposition-nisog-grass.md` ([STREAM-FP],
-fable-FP, [GR-E] design).
 -/
 
 universe u
@@ -114,8 +116,7 @@ lemma evalAt_column (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
     rw [congrFun (Transition.column_mem ι i₀) i₁, Pi.single_apply, Pi.single_apply]
     split <;> simp [evalAt]
   · funext i₁
-    rw [congrFun (Transition.column_notMem ι hj) i₁]
-    rw [evalAt, eval₂Hom_X']
+    rw [congrFun (Transition.column_notMem ι hj) i₁, evalAt, eval₂Hom_X']
     rfl
 
 /-- `evalAt` carries the generic transition matrix to the pointwise one. -/
@@ -170,14 +171,17 @@ lemma transitionMatrixAt_mulVec
   rw [Pi.smul_apply, smul_eq_mul]
   rfl
 
-/-- **[GR-SPEC], the spec**: extending the ι-evaluation over the overlap and
-precomposing with the generic transition map recovers the ι'-evaluation — the glue
-square of the chart atlas commutes with evaluation at every chart member. -/
-theorem evalAwayAt_comp_ringHom
+/-- The generic-variable case of `evalAwayAt_comp_ringHom`: for the chart variable
+`X_{j',i'}`, the extended ι-evaluation of the transition image equals the ι'-evaluation.
+The localized solution vector `u = (matrixAway)⁻¹ ·(ι-column of j')` and the ι'-chart
+matrix both solve `T *ᵥ ? = evalAt(ι-column j')`, so cancelling the invertible `T` matches
+them. Extracted from `evalAwayAt_comp_ringHom` (the `ringHom_ext` generator branch). -/
+private lemma evalAwayAt_comp_ringHom_X
     (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
-    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
-    (evalAwayAt ι ι' N h hι').comp (Transition.ringHom (R := A) ι ι')
-      = evalAt ι' N hι' := by
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N)
+    (p : {j : Fin n // j ∉ Set.range ι'} × Fin k) :
+    (evalAwayAt ι ι' N h hι').comp (Transition.ringHom (R := A) ι ι') (X p)
+      = evalAt ι' N hι' (X p) := by
   classical
   have h'ι : Function.Bijective
       ⇑(N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A))) := h
@@ -190,63 +194,79 @@ theorem evalAwayAt_comp_ringHom
     fun q => IsLocalization.Away.lift_eq _ (isUnit_evalAt_det ι ι' N h hι') q
   have hdetT : IsUnit (transitionMatrixAt ι ι' N h).det :=
     (isChartAt_iff_isUnit_det ι ι' N h).mp hι'
+  obtain ⟨⟨j', hj'⟩, i'⟩ := p
+  rw [RingHom.comp_apply, Transition.ringHom, eval₂Hom_X']
+  -- the localized solution vector and its image under the extended evaluation
+  set T := transitionMatrixAt ι ι' N h with hT
+  set u : Fin k → Localization.Away (Transition.det (R := A) ι ι') :=
+    (Transition.matrixAway (R := A) ι ι')⁻¹ *ᵥ
+      (fun i₁ => algebraMap (ChartRing A ι) _ (Transition.column ι j' i₁)) with hu
+  -- the extended evaluation carries the localized matrix to `T`
+  have hMap : (Transition.matrixAway (R := A) ι ι').map ⇑(evalAwayAt ι ι' N h hι')
+      = T := by
+    funext i₁ i₂
+    simp only [Transition.matrixAway, Matrix.map_apply]
+    rw [hlift]
+    exact congrFun (congrFun (evalAt_matrix ι ι' N h h'ι) i₁) i₂
+  -- the evaluated solution solves `T *ᵥ ? = (ι-retraction of the j'-column)`
+  have hTu : T *ᵥ (⇑(evalAwayAt ι ι' N h hι') ∘ u)
+      = fun i₁ => evalAt ι N h (Transition.column ι j' i₁) := by
+    funext i₁
+    rw [← hMap, ← RingHom.map_mulVec, hu]
+    rw [show (Transition.matrixAway (R := A) ι ι') *ᵥ
+        ((Transition.matrixAway (R := A) ι ι')⁻¹ *ᵥ
+          (fun i₁ => algebraMap (ChartRing A ι) _ (Transition.column ι j' i₁)))
+        = fun i₁ => algebraMap (ChartRing A ι) _ (Transition.column ι j' i₁) by
+      rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _
+        (Transition.isUnit_det_matrixAway ι ι'), Matrix.one_mulVec]]
+    exact hlift _
+  -- the ι'-chart matrix solves the same equation
+  have hTw : T *ᵥ chartMatrix n ι' N hι' ⟨j', hj'⟩
+      = fun i₁ => evalAt ι N h (Transition.column ι j' i₁) := by
+    rw [hT, transitionMatrixAt_mulVec ι ι' N h h'ι]
+    have hmk : N.toSubmodule.mkQ
+        (coordMap (fun i => Pi.single (ι' i) (1 : A))
+          (chartMatrix n ι' N hι' ⟨j', hj'⟩))
+        = N.toSubmodule.mkQ (Pi.single j' 1) := by
+      show (N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι' i) (1 : A)))
+        (chartMatrix n ι' N hι' ⟨j', hj'⟩) = _
+      rw [show chartMatrix n ι' N hι' ⟨j', hj'⟩
+          = (LinearEquiv.ofBijective _ h'ι').symm
+            (N.toSubmodule.mkQ (Pi.single j' 1)) from rfl]
+      exact (LinearEquiv.ofBijective _ h'ι').apply_symm_apply _
+    rw [hmk]
+    exact (evalAt_column ι N h h'ι j').symm
+  -- cancel the invertible matrix
+  have hcancel : ⇑(evalAwayAt ι ι' N h hι') ∘ u
+      = chartMatrix n ι' N hι' ⟨j', hj'⟩ := by
+    have hEq := hTu.trans hTw.symm
+    have := congrArg (fun v => T⁻¹ *ᵥ v) hEq
+    simpa [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hdetT,
+      Matrix.one_mulVec] using this
+  have hfin := congrFun hcancel i'
+  rw [Function.comp_apply] at hfin
+  rw [hfin, evalAt, eval₂Hom_X']
+
+/-- **[GR-SPEC], the spec**: extending the ι-evaluation over the overlap and
+precomposing with the generic transition map recovers the ι'-evaluation — the glue
+square of the chart atlas commutes with evaluation at every chart member. -/
+theorem evalAwayAt_comp_ringHom
+    (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    (evalAwayAt ι ι' N h hι').comp (Transition.ringHom (R := A) ι ι')
+      = evalAt ι' N hι' := by
+  classical
+  have hlift : ∀ q : ChartRing A ι,
+      evalAwayAt ι ι' N h hι'
+        (algebraMap (ChartRing A ι) (Localization.Away (Transition.det (R := A) ι ι')) q)
+      = evalAt ι N h q :=
+    fun q => IsLocalization.Away.lift_eq _ (isUnit_evalAt_det ι ι' N h hι') q
   apply MvPolynomial.ringHom_ext
   · intro a
     rw [RingHom.comp_apply, Transition.ringHom, eval₂Hom_C, RingHom.comp_apply, hlift]
     rw [evalAt, eval₂Hom_C, evalAt, eval₂Hom_C]
   · intro p
-    obtain ⟨⟨j', hj'⟩, i'⟩ := p
-    rw [RingHom.comp_apply, Transition.ringHom, eval₂Hom_X']
-    -- the localized solution vector and its image under the extended evaluation
-    set T := transitionMatrixAt ι ι' N h with hT
-    set u : Fin k → Localization.Away (Transition.det (R := A) ι ι') :=
-      (Transition.matrixAway (R := A) ι ι')⁻¹ *ᵥ
-        (fun i₁ => algebraMap (ChartRing A ι) _ (Transition.column ι j' i₁)) with hu
-    -- the extended evaluation carries the localized matrix to `T`
-    have hMap : (Transition.matrixAway (R := A) ι ι').map ⇑(evalAwayAt ι ι' N h hι')
-        = T := by
-      funext i₁ i₂
-      simp only [Transition.matrixAway, Matrix.map_apply]
-      rw [hlift]
-      exact congrFun (congrFun (evalAt_matrix ι ι' N h h'ι) i₁) i₂
-    -- the evaluated solution solves `T *ᵥ ? = (ι-retraction of the j'-column)`
-    have hTu : T *ᵥ (⇑(evalAwayAt ι ι' N h hι') ∘ u)
-        = fun i₁ => evalAt ι N h (Transition.column ι j' i₁) := by
-      funext i₁
-      rw [← hMap, ← RingHom.map_mulVec, hu]
-      rw [show (Transition.matrixAway (R := A) ι ι') *ᵥ
-          ((Transition.matrixAway (R := A) ι ι')⁻¹ *ᵥ
-            (fun i₁ => algebraMap (ChartRing A ι) _ (Transition.column ι j' i₁)))
-          = fun i₁ => algebraMap (ChartRing A ι) _ (Transition.column ι j' i₁) by
-        rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _
-          (Transition.isUnit_det_matrixAway ι ι'), Matrix.one_mulVec]]
-      exact hlift _
-    -- the ι'-chart matrix solves the same equation
-    have hTw : T *ᵥ chartMatrix n ι' N hι' ⟨j', hj'⟩
-        = fun i₁ => evalAt ι N h (Transition.column ι j' i₁) := by
-      rw [hT, transitionMatrixAt_mulVec ι ι' N h h'ι]
-      have hmk : N.toSubmodule.mkQ
-          (coordMap (fun i => Pi.single (ι' i) (1 : A))
-            (chartMatrix n ι' N hι' ⟨j', hj'⟩))
-          = N.toSubmodule.mkQ (Pi.single j' 1) := by
-        show (N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι' i) (1 : A)))
-          (chartMatrix n ι' N hι' ⟨j', hj'⟩) = _
-        rw [show chartMatrix n ι' N hι' ⟨j', hj'⟩
-            = (LinearEquiv.ofBijective _ h'ι').symm
-              (N.toSubmodule.mkQ (Pi.single j' 1)) from rfl]
-        exact (LinearEquiv.ofBijective _ h'ι').apply_symm_apply _
-      rw [hmk]
-      exact (evalAt_column ι N h h'ι j').symm
-    -- cancel the invertible matrix
-    have hcancel : ⇑(evalAwayAt ι ι' N h hι') ∘ u
-        = chartMatrix n ι' N hι' ⟨j', hj'⟩ := by
-      have hEq := hTu.trans hTw.symm
-      have := congrArg (fun v => T⁻¹ *ᵥ v) hEq
-      simpa [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hdetT,
-        Matrix.one_mulVec] using this
-    have hfin := congrFun hcancel i'
-    rw [Function.comp_apply] at hfin
-    rw [hfin, evalAt, eval₂Hom_X']
+    exact evalAwayAt_comp_ringHom_X ι ι' N h hι' p
 
 end Spec
 

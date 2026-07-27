@@ -249,13 +249,21 @@ theorem gammaUnit_mem_cycloUnitsPlus {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : 
       · rw [Units.val_mk0, gammaUnit]
         refine (?_ : IsIntegral ℤ (zhp p (halfExp p a n))).mul ?_
         · rw [zhp]
-          exact IsIntegral.pow (show IsIntegral ℤ (zetaSys p n) from ⟨Polynomial.X ^ p ^ n - Polynomial.C 1, Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero), by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩) _
+          exact IsIntegral.pow
+            (show IsIntegral ℤ (zetaSys p n) from
+              ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+                Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+                by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩) _
         · exact isIntegral_cycloUnit p a n
       · rw [show (((Units.mk0 (gammaUnit p a n) hγ0)⁻¹ : ℂ_[p]ˣ) : ℂ_[p])
             = (gammaUnit p a n)⁻¹ from rfl, gammaUnit, mul_inv]
         refine (?_ : IsIntegral ℤ (zhp p (halfExp p a n))⁻¹).mul ?_
         · rw [← zhp_neg]; rw [zhp]
-          exact IsIntegral.pow (show IsIntegral ℤ (zetaSys p n) from ⟨Polynomial.X ^ p ^ n - Polynomial.C 1, Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero), by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩) _
+          exact IsIntegral.pow
+            (show IsIntegral ℤ (zetaSys p n) from
+              ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+                Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+                by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩) _
         · exact isIntegral_inv_cycloUnit p ha hn
   · -- `γ ∈ F_n⁺`
     rw [Units.val_mk0]; exact gammaUnit_mem_FglobalPlus p hp2 hn
@@ -1556,7 +1564,8 @@ theorem galNCU_inv (a : ℤ_[p]ˣ) (u : NormCompatUnits p) :
     galNCU p a u⁻¹ = (galNCU p a u)⁻¹ :=
   eq_inv_of_mul_eq_one_left (by rw [← galNCU_mul, inv_mul_cancel, galNCU_one])
 
-/-- At level `0` the Galois action is trivial (`K_0 = ℚ_p`, `σ_a 0 = refl`): `galAutValU a 0 = id`. -/
+/-- At level `0` the Galois action is trivial (`K_0 = ℚ_p`, `σ_a 0 = refl`):
+`galAutValU a 0 = id`. -/
 private theorem galAutValU_zero (a : ℤ_[p]ˣ) (v : ℂ_[p]ˣ) : galAutValU p a 0 v = v := by
   by_cases h : (v : ℂ_[p]) ∈ K p 0
   · refine Units.ext ?_

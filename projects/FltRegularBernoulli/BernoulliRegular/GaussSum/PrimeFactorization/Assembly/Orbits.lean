@@ -437,7 +437,6 @@ lemma ncard_primesOver_characterSubfieldPrime_eq_one
       (P := Pchar)
       (G := Gal(characterSubfield (L := L) (p := p) / ℚ))
       (GAC := Gal(L / ℚ))
-      (GBC := ↥GBC)
   have hL :
       (Ideal.primesOver 𝔭 (𝓞 L)).ncard = Nat.totient (p - 1) := by
     rw [← coe_primesAboveP (p := p) (L := L), Set.ncard_coe_finset]
@@ -553,7 +552,7 @@ lemma sigmaOfUnitPrimeExponent_eq_distinguishedPrimeExponent
     (a : (ZMod p)ˣ) (χ : DirichletCharacter ℂ p) :
     sigmaOfUnitPrimeExponent (p := p) (L := L) a χ =
       distinguishedPrimeExponent (p := p) (L := L) χ := by
-  unfold sigmaOfUnitPrimeExponent distinguishedPrimeExponent primeAbovePExponent
+  simp only [sigmaOfUnitPrimeExponent, distinguishedPrimeExponent, primeAbovePExponent]
   rw [sigmaOfUnit_smul_distinguishedPrimeAboveP_eq (p := p) (L := L) a]
 
 /-- The additive prime orbit is the singleton `{P₀}`. -/

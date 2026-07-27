@@ -34,7 +34,7 @@ theorem exists_lift_of_map_eq_of_ne_bot
     (f : M →ₗ[R] N) (S : Submodule R M) (T : Submodule R N)
     (hmap : S.map f = T) (hT : T ≠ ⊥) :
     ∃ x : S, f x.1 ≠ 0 := by
-  haveI : Nontrivial T := (Submodule.nontrivial_iff_ne_bot).2 hT
+  have : Nontrivial T := (Submodule.nontrivial_iff_ne_bot).2 hT
   obtain ⟨y, hy_ne⟩ := exists_ne (0 : T)
   have hy_map : y.1 ∈ S.map f := by
     simp [hmap, y.2]

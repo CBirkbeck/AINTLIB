@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.WeakSplitting.SplitsCompletely
@@ -52,8 +57,8 @@ variable [Module.Free ℤ R] [Module.Free ℤ S]
 /--
 Under `SplitsCompletely`, every prime `Q` of `S` lying above `p` has the
 same absolute norm as `p`. Indeed, by `absNorm_eq_pow_inertiaDeg_of_liesOver`,
-`absNorm Q = absNorm p ^ inertiaDeg p Q`, and the splits-completely
-hypothesis forces `inertiaDeg p Q = 1`.
+`absNorm Q = absNorm p ^ inertiaDeg' p Q`, and the splits-completely
+hypothesis forces `inertiaDeg' p Q = 1`.
 -/
 theorem SplitsCompletely.absNorm_eq_of_mem
     {p : Ideal R} [hp_max : p.IsMaximal] (hp0 : p ≠ ⊥) (h : SplitsCompletely S p)
@@ -62,7 +67,7 @@ theorem SplitsCompletely.absNorm_eq_of_mem
   obtain ⟨_he, hf⟩ := h Q hQ
   haveI : Q.IsPrime := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).1
   haveI : Q.LiesOver p := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).2
-  rw [_root_.Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver Q p hp_max.isPrime hp0, hf, pow_one]
+  rw [_root_.Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver Q p hp_max.isPrime hp0, hf, pow_one]
 
 /--
 The local-factor identity at a prime `p` that splits completely in `M / K`:

@@ -860,7 +860,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
   exact le_of_pow_le_pow_left₀ hMpos.ne' (by norm_num) (by rwa [one_pow])
 
 set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis and the
 -- `adjoin.powerBasis`/`Basis.sum_repr` term elaboration both exceed the default budgets
 /-- `K_n`-coordinate expansion in the tower step: for an integral generator `W` of

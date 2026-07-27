@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.NumberField.Basic
@@ -101,7 +106,7 @@ when `q` is a rational prime.
 -/
 theorem dedekindLocalFactorRat_continuous {q : ℕ} (hq : q.Prime) :
     Continuous (fun s : ℂ => dedekindLocalFactorRat L q s) := by
-  unfold dedekindLocalFactorRat
+  simp only [dedekindLocalFactorRat]
   refine continuous_finsetProd _ fun Q hQ => ?_
   refine continuous_const.sub <| continuous_neg.const_cpow (.inl ?_)
   exact_mod_cast absNorm_ne_zero_of_mem_primesOverFinset_rat L hq hQ
@@ -114,7 +119,7 @@ since each factor `(1 - N(Q)^{-s})` is nonzero (`N(Q) ≥ 2` and
 -/
 theorem dedekindLocalFactorRat_ne_zero {q : ℕ} (hq : q.Prime) {s : ℂ} (hs : 0 < s.re) :
     dedekindLocalFactorRat L q s ≠ 0 := by
-  unfold dedekindLocalFactorRat
+  simp only [dedekindLocalFactorRat]
   refine Finset.prod_ne_zero_iff.mpr fun Q hQ => ?_
   have hQ_one_lt_real : (1 : ℝ) < (Ideal.absNorm Q : ℝ) := by
     exact_mod_cast one_lt_absNorm_of_mem_primesOverFinset_rat L hq hQ

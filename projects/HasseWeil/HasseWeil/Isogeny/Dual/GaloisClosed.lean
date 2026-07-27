@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.EC.GenericCovarianceGeneral
-import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
 import HasseWeil.HasseBound.WeilPairing.TorsionGeometric
+import HasseWeil.HasseBound.WeilPairing.TorsionKernelRational
 import HasseWeil.Isogeny.MulByInt.Basepoint
 
 /-!
@@ -102,6 +102,21 @@ theorem translate_pullback_invariance_of_xy_general
       (ψ₁ := (translateAlgEquivOfPoint W k).toAlgHom.comp β.pullback)
       (ψ₂ := β.pullback) h_x h_y) z
 
+/-- **The full covariance family from the generator-restricted one, field-general**: the
+`x_gen`/`y_gen` covariance witnesses for every kernel point extend to all of `K(E)`.  The
+same-curve counterpart of `Isogeny.hcov_of_xy_family` (`TwoCurve/FixedField.lean`), and the
+standing first step of every consumer of `h_xy_family` below. -/
+theorem hcov_of_xy_family_general (β : Isogeny W.toAffine W.toAffine)
+    (h_xy_family : ∀ k : β.kernel,
+      (translateAlgEquivOfPoint W k.val (β.pullback (x_gen W)) =
+        β.pullback (x_gen W)) ∧
+      (translateAlgEquivOfPoint W k.val (β.pullback (y_gen W)) =
+        β.pullback (y_gen W))) :
+    ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
+      translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
+  fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
+    (h_xy_family k).1 (h_xy_family k).2 z
+
 /-- **Forward inclusion of the fixed-field theorem, field-general** (the `[Fintype F]`-free
 `pullback_fieldRange_le_fixedField_of_xy_family`): under the xy-covariance family,
 `Im(β*) ⊆ Fix(Multiplicative (ker β))`. -/
@@ -152,10 +167,7 @@ theorem pullback_fieldRange_eq_fixedField_general
     β.pullback.fieldRange =
       (FixedPoints.intermediateField (Multiplicative β.kernel) :
         IntermediateField F W.toAffine.FunctionField) := by
-  have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
-      translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
-      (h_xy_family k).1 (h_xy_family k).2 z
+  have hcov := hcov_of_xy_family_general W β h_xy_family
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   haveI : Fintype (Multiplicative β.kernel) := Fintype.ofFinite _
   haveI := finiteDimensional_pullback_fieldRange W β
@@ -182,10 +194,7 @@ theorem fixedField_hfix_general
       z ∈ β.pullback.range ↔
         ∀ σ ∈ (Set.range (fun k : β.kernel ↦
             translateAlgEquivOfPoint W k.val)), σ z = z := by
-  have hcov : ∀ k : β.kernel, ∀ z : W.toAffine.FunctionField,
-      translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z :=
-    fun k z ↦ translate_pullback_invariance_of_xy_general W β k.val
-      (h_xy_family k).1 (h_xy_family k).2 z
+  have hcov := hcov_of_xy_family_general W β h_xy_family
   haveI : Finite β.kernel := finite_kernel_of_hcov W β hcov
   haveI : Fintype (Multiplicative β.kernel) := Fintype.ofFinite _
   have h_eq := pullback_fieldRange_eq_fixedField_general W β h_xy_family h_card
@@ -201,8 +210,7 @@ theorem fixedField_hfix_general
       intro g
       exact hz _ ⟨Multiplicative.toAdd g, rfl⟩
     rw [← h_eq, AlgHom.mem_fieldRange] at hmem
-    rw [AlgHom.mem_range]
-    exact hmem
+    rwa [AlgHom.mem_range]
 
 /-! ### `hnu` for `ν = [n]` over an arbitrary base field
 

@@ -22,7 +22,8 @@ exhibit a *finite* set whose `Γ₁(N)`-orbit spans the whole tensor module over
 
 The proof has two layers:
 
-* **Layer (i)** (`Div0` is orbit-spanned): a finite set `S_Div : Finset (Div0 ℤ)` whose `Γ₁(N)`-orbit
+* **Layer (i)** (`Div0` is orbit-spanned): a finite set `S_Div : Finset (Div0 ℤ)` whose
+  `Γ₁(N)`-orbit
   spans `Div0 ℤ`.  This is the crux — it uses the finitely-many-cusps fact
   (`instFiniteCuspsGamma1`) to pick orbit representatives, the augmentation-kernel-as-differences
   description of `Div0`, finite generation of `Γ₁(N)` (`SL2Generation.lean`), and a telescoping
@@ -58,34 +59,34 @@ theorem smul_projQQ_eq (g : SL(2, ℤ)) (x : ℙ¹ℚ) :
 
 /-- A formal difference `(x) - (y)` of two cusps has augmentation `0`, hence lies in `Div0 ℤ`. -/
 theorem single_sub_single_mem_div0 (x y : ℙ¹ℚ) :
-    (Finsupp.single x (1 : ℤ) - Finsupp.single y 1) ∈ Div0 ℤ := by
-  rw [LinearMap.sub_mem_ker_iff]
-  simp
+    (MonoidAlgebra.single x (1 : ℤ) - MonoidAlgebra.single y 1) ∈ Div0 ℤ := by
+  rw [LinearMap.mem_ker]
+  simp [MonoidAlgebra.coeff_single]
 
 /-- The `Div0 ℤ` element `(x) - (y)`. -/
 noncomputable def divDiff (x y : ℙ¹ℚ) : Div0 ℤ :=
-  ⟨Finsupp.single x 1 - Finsupp.single y 1, single_sub_single_mem_div0 x y⟩
+  ⟨MonoidAlgebra.single x 1 - MonoidAlgebra.single y 1, single_sub_single_mem_div0 x y⟩
 
 @[simp]
 theorem divDiff_val (x y : ℙ¹ℚ) :
-    (divDiff x y : ℙ¹ℚ →₀ ℤ) = Finsupp.single x 1 - Finsupp.single y 1 :=
-  rfl
+    ((divDiff x y : MonoidAlgebra ℤ ℙ¹ℚ)).coeff = Finsupp.single x 1 - Finsupp.single y 1 := by
+  simp [divDiff, MonoidAlgebra.coeff_single]
 
 @[simp]
 theorem divDiff_self (x : ℙ¹ℚ) : divDiff x x = 0 := by
-  apply Subtype.ext; simp
+  apply Subtype.ext; simp [divDiff]
 
 /-- Telescoping: `(x) - (z) = ((x) - (y)) + ((y) - (z))`. -/
 theorem divDiff_add_divDiff (x y z : ℙ¹ℚ) :
     divDiff x y + divDiff y z = divDiff x z := by
   apply Subtype.ext
-  simp only [AddMemClass.coe_add, divDiff_val]
+  simp only [AddMemClass.coe_add, divDiff]
   abel
 
 /-- Antisymmetry: `(x) - (y) = -((y) - (x))`. -/
 theorem divDiff_swap (x y : ℙ¹ℚ) : divDiff x y = -divDiff y x := by
   apply Subtype.ext
-  simp only [NegMemClass.coe_neg, divDiff_val]
+  simp only [NegMemClass.coe_neg, divDiff]
   abel
 
 /-- **The `div0Rep`/cusp-action bridge.**  The representation `div0Rep ℤ g` sends the difference
@@ -94,6 +95,7 @@ theorem divDiff_swap (x y : ℙ¹ℚ) : divDiff x y = -divDiff y x := by
 theorem div0Rep_divDiff (g : SL(2, ℤ)) (x y : ℙ¹ℚ) :
     div0Rep ℤ g (divDiff x y) = divDiff (g • x) (g • y) := by
   apply Subtype.ext
+  apply MonoidAlgebra.coeff_injective
   rw [div0Rep_apply, divDiff_val, divDiff_val, ← Finsupp.mapDomain.addMonoidHom_apply, map_sub,
     Finsupp.mapDomain.addMonoidHom_apply, Finsupp.mapDomain.addMonoidHom_apply,
     Finsupp.mapDomain_single, Finsupp.mapDomain_single]
@@ -112,23 +114,32 @@ divisor module `Div0 ℤ` is spanned over `ℤ` by the differences `(x) - (x₀)
 theorem span_divDiff_basepoint (x₀ : ℙ¹ℚ) :
     Submodule.span ℤ (Set.range fun x : ℙ¹ℚ => divDiff x x₀) = ⊤ := by
   refine top_unique fun D _ => ?_
+  -- The underlying finsupp of `D`, obtained via the `MonoidAlgebra` coefficient field.
+  set Dc : ℙ¹ℚ →₀ ℤ := (D : MonoidAlgebra ℤ ℙ¹ℚ).coeff with hDc
   -- `D` equals `∑_{x ∈ supp} (D x) • ((x) - (x₀))`, the value of `linearCombination` at `D.val`.
-  have key : D = Finsupp.linearCombination ℤ (fun x : ℙ¹ℚ => divDiff x x₀) (D : ℙ¹ℚ →₀ ℤ) := by
+  have key : D = Finsupp.linearCombination ℤ (fun x : ℙ¹ℚ => divDiff x x₀) Dc := by
     apply Subtype.ext
+    apply MonoidAlgebra.coeff_injective
     -- Push the `Div0`-coercion through `linearCombination`, landing on the underlying finsupp.
-    rw [← Submodule.coe_subtype, Finsupp.apply_linearCombination]
-    simp only [Function.comp_def, Submodule.coe_subtype, divDiff_val]
+    rw [show ((Finsupp.linearCombination ℤ (fun x : ℙ¹ℚ => divDiff x x₀) Dc :
+          Div0 ℤ) : MonoidAlgebra ℤ ℙ¹ℚ).coeff
+        = ((MonoidAlgebra.coeffLinearEquiv ℤ).toLinearMap ∘ₗ (Div0 ℤ).subtype)
+            (Finsupp.linearCombination ℤ (fun x : ℙ¹ℚ => divDiff x x₀) Dc) from rfl,
+      Finsupp.apply_linearCombination]
+    simp only [Function.comp_def, LinearMap.comp_apply, Submodule.coe_subtype,
+      LinearEquiv.coe_coe, MonoidAlgebra.coeffLinearEquiv_apply, divDiff_val]
     simp only [Finsupp.linearCombination_apply, smul_sub]
     rw [Finsupp.sum_sub]
     -- The first sum reconstructs `D.val = ∑ c_x • single x 1`.
-    conv_lhs => rw [← Finsupp.sum_single (D : ℙ¹ℚ →₀ ℤ)]
+    conv_lhs => rw [← hDc, ← Finsupp.sum_single Dc]
     simp only [Finsupp.smul_single, smul_eq_mul, mul_one]
     -- The second sum `∑_x single x₀ (D x) = single x₀ (∑ D x) = single x₀ 0 = 0`.
-    have haug : ((D : ℙ¹ℚ →₀ ℤ).sum fun _ c => c) = 0 := by
+    have haug : (Dc.sum fun _ c => c) = 0 := by
       have := D.2
-      rw [LinearMap.mem_ker, Finsupp.linearCombination_apply] at this
-      simpa using this
-    have hsum : ((D : ℙ¹ℚ →₀ ℤ).sum fun _ c => Finsupp.single x₀ c) = 0 := by
+      rw [LinearMap.mem_ker, LinearMap.comp_apply, LinearEquiv.coe_coe,
+        MonoidAlgebra.coeffLinearEquiv_apply, Finsupp.linearCombination_apply] at this
+      simpa [hDc] using this
+    have hsum : (Dc.sum fun _ c => Finsupp.single x₀ c) = 0 := by
       rw [← Finsupp.single_sum, haug, Finsupp.single_zero]
     rw [hsum, sub_zero]
   rw [key, Finsupp.linearCombination_apply]
@@ -234,7 +245,7 @@ theorem exists_div0_orbit_span :
   have hsubset : ∀ d ∈ divGenSet gens c₀, d ∈ T := by
     intro d hd
     refine Submodule.subset_span ⟨1, d, hd, ?_⟩
-    simp
+    simp only [OneMemClass.coe_one, map_one, Module.End.one_apply]
   -- One-step generators `(s • c) - (c)` lie in `T` (for representatives `c`).
   have hgen : ∀ s ∈ (gens : Set (CongruenceSubgroup.Gamma1 N)), ∀ c ∈ orbitReps N,
       divDiff (s • c) c ∈ T := by
@@ -263,12 +274,8 @@ theorem exists_div0_orbit_span :
 
 /-- `SymPow R m` (degree-`m` homogeneous polynomials in two variables) is finitely generated:
 it is the span of the finitely many degree-`m` monomials. -/
-theorem symPow_fg (R : Type u) [CommRing R] (m : ℕ) : (SymPow R m).FG := by
-  rw [SymPow, MvPolynomial.homogeneousSubmodule_eq_finsupp_supported,
-    Finsupp.supported_eq_span_single]
-  refine Submodule.fg_span ?_
-  exact (Finsupp.finite_of_degree_le (σ := Fin 2) m).subset
-    (fun d (hd : d.degree = m) => hd.le) |>.image _
+theorem symPow_fg (R : Type u) [CommRing R] (m : ℕ) : (SymPow R m).FG :=
+  MvPolynomial.homogeneousSubmodule_fg (Fin 2) R m
 
 instance instModuleFiniteSymPow (R : Type u) [CommRing R] (m : ℕ) :
     Module.Finite R (SymPow R m) :=

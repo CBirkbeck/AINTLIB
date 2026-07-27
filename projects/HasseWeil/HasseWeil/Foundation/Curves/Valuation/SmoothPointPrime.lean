@@ -488,10 +488,10 @@ theorem FractionalIdeal.unitsToHeightOneFinsuppMonoidHom_injective
     FractionalIdeal.unitsToHeightOneFinsupp_apply] at this
 
 /-- **A4 classToFinsuppQuotient is injective**. Kernel-trivial argument:
-    if `unitsToHeightOneFinsuppMonoidHom I ∈ principalImageSubgroup`, write it
-    as `principalToHeightOneFinsuppMonoidHom x = unitsToHeightOneFinsuppMonoidHom (toPrincipalIdeal x)`,
-    then `unitsToHeightOneFinsuppMonoidHom_injective` gives `I = toPrincipalIdeal x`,
-    so `I ∈ toPrincipalIdeal.range` and `[I] = 1` in the source quotient. -/
+if `unitsToHeightOneFinsuppMonoidHom I ∈ principalImageSubgroup`, write it
+as `principalToHeightOneFinsuppMonoidHom x = unitsToHeightOneFinsuppMonoidHom (toPrincipalIdeal x)`,
+then `unitsToHeightOneFinsuppMonoidHom_injective` gives `I = toPrincipalIdeal x`,
+so `I ∈ toPrincipalIdeal.range` and `[I] = 1` in the source quotient. -/
 theorem FractionalIdeal.classToFinsuppQuotient_injective
     {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
     {K : Type*} [Field K] [Algebra R K] [IsFractionRing R K] :
@@ -508,7 +508,8 @@ theorem FractionalIdeal.classToFinsuppQuotient_injective
       (FractionalIdeal.unitsToHeightOneFinsuppMonoidHom I)) = 1 at hI
   simp only [QuotientGroup.mk'_apply, QuotientGroup.eq_one_iff] at hI
   obtain ⟨x, hx⟩ := hI
-  -- `principalToHeightOneFinsuppMonoidHom x` is defeq `uthsf (toPrincipalIdeal x)`, so `hx` retypes:
+  -- `principalToHeightOneFinsuppMonoidHom x` is defeq `uthsf (toPrincipalIdeal x)`,
+  -- so `hx` retypes:
   have hx' : FractionalIdeal.unitsToHeightOneFinsuppMonoidHom (toPrincipalIdeal R K x) =
       FractionalIdeal.unitsToHeightOneFinsuppMonoidHom I := hx
   have hI_eq : toPrincipalIdeal R K x = I :=

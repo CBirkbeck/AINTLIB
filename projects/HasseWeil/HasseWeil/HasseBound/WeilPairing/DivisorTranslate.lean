@@ -39,7 +39,6 @@ namespace HasseWeil
 open HasseWeil.WeilPairing
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
@@ -96,6 +95,7 @@ noncomputable def ordProj (v : ProjectiveSmoothPoint (W_smooth W))
 @[simp] theorem ordProj_infinity (f : KE) :
     ordProj W ProjectiveSmoothPoint.infinity f = (W_smooth W).ordAtInfty f := rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The coefficient of `projectiveDivisorOf f` at `v` is `(ordProj v f).untopD 0`. -/
 theorem projectiveDivisorOf_apply_ordProj (f : KE)
     (v : ProjectiveSmoothPoint (W_smooth W)) :
@@ -118,6 +118,7 @@ theorem ord_P_translate (P : (W_smooth W).SmoothPoint)
     rw [Curves.SmoothPlaneCurve.SmoothPoint.translate_of_finite_zero]
   · exact translate_ord_eq_all_nonzero W P xk yk h_ns h f hf
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- If `P + S` is finite, `placeTranslate W S (affine P)` is the translated affine place. -/
 theorem placeTranslate_affine_of_isSome (S : (W_smooth W).toAffine.Point)
     (P : (W_smooth W).SmoothPoint)
@@ -130,6 +131,7 @@ theorem placeTranslate_affine_of_isSome (S : (W_smooth W).toAffine.Point)
   exact (Curves.SmoothPlaneCurve.SmoothPoint.translate_of_finite_toAffinePoint
     P S h).symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- When `P + S = O` (the translate hits infinity), the place
 `placeTranslate W S (affine P)` is the place at infinity. -/
 theorem placeTranslate_affine_eq_infinity (S : (W_smooth W).toAffine.Point)
@@ -142,6 +144,7 @@ theorem placeTranslate_affine_eq_infinity (S : (W_smooth W).toAffine.Point)
   rw [placeTranslate_apply, Equiv.symm_apply_apply]
   exact hz
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Projective order transport for places involving infinity. -/
 theorem ordProj_translate_infinity (S : (W_smooth W).toAffine.Point)
     (f : KE) (_hf : f ≠ 0) (v : ProjectiveSmoothPoint (W_smooth W))
@@ -204,7 +207,7 @@ theorem ordProj_translate (S : (W_smooth W).toAffine.Point)
     · rw [placeTranslate_affine_of_isSome W S P h, ordProj_affine, ordProj_affine]
       exact ord_P_translate W P S h f hf
     · have hz : P.toAffinePoint + S = (0 : W.toAffine.Point) := by
-        unfold WeierstrassCurve.Affine.Point.IsSome at h
+        simp only [WeierstrassCurve.Affine.Point.IsSome] at h
         exact not_not.mp h
       exact ordProj_translate_infinity W S f hf (ProjectiveSmoothPoint.affine P)
         (Or.inr (placeTranslate_affine_eq_infinity W S P hz))
@@ -279,6 +282,7 @@ theorem projectiveDivisorOf_translate_div_eq_zero_of_invariant
         rw [(W_smooth W).projectiveDivisorOf_inv hg, sub_eq_add_neg]
     _ = 0 := by rw [hself, sub_self]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The `toAffinePoint` of a translated place is `w.toAffinePoint + S`. -/
 theorem placeTranslate_toAffinePoint (S : (W_smooth W).toAffine.Point)
     (w : ProjectiveSmoothPoint (W_smooth W)) :
@@ -288,6 +292,7 @@ theorem placeTranslate_toAffinePoint (S : (W_smooth W).toAffine.Point)
   rw [placeTranslate_apply]
   exact WeierstrassCurve.Affine.Point.toProjectiveSmoothPoint_toAffinePoint _
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The coefficient of `pullbackDiv f hker Q` is `1` on the fibre over `Q` and `0` otherwise. -/
 theorem pullbackDiv_apply (f : W.toAffine.Point →+ W.toAffine.Point)
     (hker : Finite f.ker) (Q : W.toAffine.Point)
@@ -327,6 +332,7 @@ theorem pullbackDiv_apply (f : W.toAffine.Point →+ W.toAffine.Point)
       rw [← (hkey P).mp hPw]
       exact hP)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- If `f S = 0`, `pullbackDiv f hker Q` is pointwise invariant under `placeTranslate W S`. -/
 theorem pullbackDiv_placeTranslate_apply (S : (W_smooth W).toAffine.Point)
     (f : W.toAffine.Point →+ W.toAffine.Point) (hker : Finite f.ker)
@@ -338,6 +344,7 @@ theorem pullbackDiv_placeTranslate_apply (S : (W_smooth W).toAffine.Point)
   congr 1
   rw [map_add, hfS, add_zero]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Translating a fibre divisor shifts the target point by `-f S` coefficientwise. -/
 theorem pullbackDiv_placeTranslate_apply_general (S : (W_smooth W).toAffine.Point)
     (f : W.toAffine.Point →+ W.toAffine.Point) (hker : Finite f.ker)
@@ -349,6 +356,7 @@ theorem pullbackDiv_placeTranslate_apply_general (S : (W_smooth W).toAffine.Poin
   rw [map_add]
   exact propext eq_sub_iff_add_eq.symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Translating a fibre divisor shifts the fibre target by `-f S`. -/
 theorem equivMapDomain_placeTranslate_pullbackDiv (S : (W_smooth W).toAffine.Point)
     (f : W.toAffine.Point →+ W.toAffine.Point) (hker : Finite f.ker) (Q : W.toAffine.Point) :

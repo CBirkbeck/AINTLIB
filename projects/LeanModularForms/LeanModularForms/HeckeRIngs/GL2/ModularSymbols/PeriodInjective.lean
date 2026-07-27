@@ -34,8 +34,9 @@ sorry-free:
   twisted-diagonal form `A(f, iⁿ·f) = 2·iⁿ·(f,f)` (`periodPairingA_twist_self`) is a clean
   consequence of Hermitian symmetry of the Petersson product — **proven here**.
 * **The Stokes/coboundary input** (Shimura (8.2.22)): if all periods of `f` vanish
-  (`periodMap' f = 0`), then `A f g = 0` for every `g` (`periodPairingA_eq_zero_of_periodMap'_zero`).
-  This is the integral Eichler–Shimura period↔Petersson pairing — a Green's-theorem computation over
+  (`periodMap' f = 0`), then `A f g = 0` for every `g`
+  (`periodPairingA_eq_zero_of_periodMap'_zero`).  This is the integral Eichler–Shimura
+  period↔Petersson pairing — a Green's-theorem computation over
   a `Γ₁(N)`-fundamental domain whose boundary edges are paired by `Γ₁(N)` — and is the lone deep
   analytic fact of ES-4, isolated as one named lemma.
 
@@ -62,9 +63,10 @@ variable {N : ℕ} [NeZero N] {k : ℤ}
 /-! ## The bilinear period pairing `A` (Shimura (8.2.17)/(8.2.18a)) -/
 
 /-- **The Shimura period pairing `A(f,g)`** (§8.2, (8.2.17)), written on the Petersson side via
-(8.2.18a): `A f g = (f,g) + (-1)ⁿ·(g,f)` with `n = k-2` and `(·,·) = petN` the level-`N` Petersson
-inner product.  (Shimura's `A` carries an extra fixed nonzero scalar `(2i)^{n+1}` which is irrelevant
-to its non-degeneracy, so we drop it.)  This is the `ℝ`-bilinear cohomological period pairing whose
+(8.2.18a): `A f g = (f,g) + (-1)ⁿ·(g,f)` with `n = k-2` and `(·,·) = petN` the level-`N`
+Petersson inner product.  (Shimura's `A` carries an extra fixed nonzero scalar `(2i)^{n+1}` which
+is irrelevant to its non-degeneracy, so we drop it.)  This is the `ℝ`-bilinear cohomological
+period pairing whose
 non-degeneracy drives the injectivity of the period map. -/
 def periodPairingA (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) : ℂ :=
   petN f g + ((-1 : ℂ) ^ (k - 2).toNat) • petN g f
@@ -78,10 +80,10 @@ side is a nonzero multiple of the Petersson norm. -/
 theorem periodPairingA_twist_self (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
     periodPairingA f ((Complex.I ^ (k - 2).toNat) • f) =
       (2 * Complex.I ^ (k - 2).toNat) * petN f f := by
-  rw [periodPairingA, petN_smul_right, petN_conj_smul_left, smul_eq_mul, map_pow, Complex.conj_I]
-  rw [show ((-1 : ℂ) ^ (k - 2).toNat) * ((-Complex.I) ^ (k - 2).toNat * petN f f)
-      = (((-1 : ℂ) * (-Complex.I)) ^ (k - 2).toNat) * petN f f by rw [mul_pow]; ring]
-  rw [show (-1 : ℂ) * (-Complex.I) = Complex.I by ring]
+  rw [periodPairingA, petN_smul_right, petN_conj_smul_left, smul_eq_mul, map_pow, Complex.conj_I,
+    show ((-1 : ℂ) ^ (k - 2).toNat) * ((-Complex.I) ^ (k - 2).toNat * petN f f)
+      = (((-1 : ℂ) * (-Complex.I)) ^ (k - 2).toNat) * petN f f by rw [mul_pow]; ring,
+    show (-1 : ℂ) * (-Complex.I) = Complex.I by ring]
   ring
 
 /-! ## The Stokes/coboundary input (Shimura (8.2.22)) — the isolated analytic core -/

@@ -90,7 +90,7 @@ theorem translate_pullback_invariance_of_xy_twoCurve
 /-- **Full covariance from the xy-covariance family, two-curve.** The per-generator covariance
 `h_xy_family` extends, via `translate_pullback_invariance_of_xy_twoCurve`, to covariance of every
 kernel translation with `β.pullback` on all of `K(E₂)`. -/
-private theorem hcov_of_xy_family (β : Isogeny W₁ W₂)
+theorem hcov_of_xy_family (β : Isogeny W₁ W₂)
     (h_xy_family : ∀ k : β.kernel,
       (translateAlgEquivOfPoint W₁ k.val (β.pullback (x_gen W₂)) = β.pullback (x_gen W₂)) ∧
       (translateAlgEquivOfPoint W₁ k.val (β.pullback (y_gen W₂)) = β.pullback (y_gen W₂)))
@@ -264,14 +264,10 @@ theorem finrank_pullback_fieldRange_eq_degree_twoCurve (β : Isogeny W₁ W₂) 
   -- the base isomorphism `K(E₂) ≃+* Im(β*)` induced by `β*`
   let i_alg : W₂.FunctionField ≃ₐ[F] ↥β.pullback.range :=
     AlgEquiv.ofInjective β.pullback β.pullback_injective
-  let bridge : ↥β.pullback.range ≃+* ↥β.pullback.fieldRange :=
-    { toFun := fun x => ⟨x.val, by obtain ⟨y, hy⟩ := x.property; exact ⟨y, hy⟩⟩
-      invFun := fun x => ⟨x.val, by obtain ⟨y, hy⟩ := x.property; exact ⟨y, hy⟩⟩
-      left_inv := fun _ => Subtype.ext rfl
-      right_inv := fun _ => Subtype.ext rfl
-      map_mul' := fun _ _ => Subtype.ext rfl
-      map_add' := fun _ _ => Subtype.ext rfl }
-  let i : W₂.FunctionField ≃+* ↥β.pullback.fieldRange := i_alg.toRingEquiv.trans bridge
+  -- `fieldRange` and `range` have the same carrier (`AlgHom.fieldRange_toSubalgebra`)
+  let bridge : ↥β.pullback.range ≃ₐ[F] ↥β.pullback.fieldRange :=
+    Subalgebra.equivOfEq _ _ (AlgHom.fieldRange_toSubalgebra β.pullback).symm
+  let i : W₂.FunctionField ≃+* ↥β.pullback.fieldRange := (i_alg.trans bridge).toRingEquiv
   let j : W₁.FunctionField ≃+* W₁.FunctionField := RingEquiv.refl _
   have h_compat : (algebraMap ↥β.pullback.fieldRange W₁.FunctionField).comp i.toRingHom =
       j.toRingHom.comp (algebraMap W₂.FunctionField W₁.FunctionField) := by

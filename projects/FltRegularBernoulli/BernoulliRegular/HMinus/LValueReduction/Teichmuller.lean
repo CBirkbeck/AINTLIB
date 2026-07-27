@@ -353,7 +353,7 @@ theorem oddCharacters_eq_image_oddComplexPowers (hp_odd' : p ≠ 2) :
     refine Finset.mem_image.mpr ⟨⟨k, hk_odd⟩, Finset.mem_univ _, ?_⟩
     simpa using hk_eq
   · intro hχ
-    unfold oddComplexCharacters at hχ
+    simp only [oddComplexCharacters] at hχ
     rcases Finset.mem_image.mp hχ with ⟨j, -, rfl⟩
     exact Finset.mem_filter.mpr ⟨Finset.mem_univ _, by
       exact (complexCharacterGenerator_pow_odd_iff (p := p) hp_odd' (j.1 : ℕ)).2 j.2⟩
@@ -365,7 +365,7 @@ theorem prod_oddCharacters_eq_prod_oddCharacterIndex (hp_odd' : p ≠ 2)
         (fun j ↦ F ((complexCharacterGenerator p) ^ (j.1 : ℕ))) := by
   classical
   rw [oddCharacters_eq_image_oddComplexPowers (p := p) hp_odd']
-  unfold oddComplexCharacters
+  simp only [oddComplexCharacters]
   exact Finset.prod_image fun a _ b _ hab ↦
     Subtype.ext <| Fin.ext <|
       (complexCharacterGenerator_pow_eq_iff_of_lt (p := p) a.1.is_lt b.1.is_lt).mp hab
@@ -442,6 +442,7 @@ theorem card_dirichletCharacterQp :
 noncomputable def qpadicGeneratorRoot : ℚ_[p] :=
   (((teichmuller p (((unitGroupGenerator p : (ZMod p)ˣ) : ZMod p)) : ℤ_[p])) : ℚ_[p])
 
+set_option backward.isDefEq.respectTransparency false in
 theorem qpadicGeneratorRoot_isPrimitiveRoot :
     IsPrimitiveRoot (qpadicGeneratorRoot p) (p - 1) := by
   simpa [qpadicGeneratorRoot] using
@@ -546,7 +547,7 @@ theorem oddCharactersQp_eq_oddQpCharacters (hp_odd' : p ≠ 2) :
     oddCharactersQp (p := p) = oddQpCharacters (p := p) := by
   classical
   rw [oddCharactersQp_eq_image_oddTeichmullerPowers (p := p) hp_odd']
-  unfold oddTeichmullerCharactersQp oddQpCharacters
+  simp only [oddTeichmullerCharactersQp, oddQpCharacters]
   ext χ
   constructor
   · intro hχ
@@ -569,7 +570,7 @@ theorem prod_oddCharactersQp_eq_prod_oddCharacterIndex (hp_odd' : p ≠ 2)
         (fun j ↦ F ((teichmullerCharQp p) ^ (j.1 : ℕ))) := by
   classical
   rw [oddCharactersQp_eq_oddQpCharacters (p := p) hp_odd']
-  unfold oddQpCharacters
+  simp only [oddQpCharacters]
   exact Finset.prod_image fun a _ b _ hab ↦
     Subtype.ext <| Fin.ext <|
       (teichmullerCharQp_pow_eq_iff_of_lt (p := p) a.1.is_lt b.1.is_lt).mp hab
@@ -802,7 +803,7 @@ theorem hMinus_formula_oddTeichmullerExponents (hp_odd' : p ≠ 2) :
   classical
   rw [hMinus_formula_oddCharactersQp (p := p) (K := K) hp_odd']
   rw [oddCharactersQp_eq_image_oddTeichmullerPowers (p := p) hp_odd']
-  unfold oddTeichmullerCharactersQp
+  simp only [oddTeichmullerCharactersQp]
   rw [Finset.prod_image]
   · intro a ha b hb hab
     exact (teichmullerCharQp_pow_eq_iff_of_lt (p := p)
@@ -832,7 +833,7 @@ theorem hMinus_formula_teichmuller (hp_odd' : p ≠ 2) :
       Nat.Even.sub_odd (Nat.le_of_lt hj.1) hp_even hj.2
     exact ⟨Nat.sub_lt (prime_sub_one_pos (p := p)) hj_pos, hcomp_odd⟩
   congr 1
-  unfold oddTeichmullerExponents
+  simp only [oddTeichmullerExponents]
   refine Finset.prod_bij (fun j _ ↦ (p - 1) - j) ?_ ?_ ?_ ?_
   · intro j hj
     exact hmem_complement hj

@@ -12,8 +12,9 @@ import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.LevelSpaceEtaleClose
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.GroupScheme.DeligneOrder
-import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.RelativeInvariantSpec
+import ModularCurves.ForMathlib.SchemeActionFree
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements
@@ -3223,7 +3224,7 @@ theorem glSmul_eq_one_of_eq_self {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
     obtain ⟨j, l, hjl⟩ := hwmem
     refine ⟨![(j : ZMod N), (l : ZMod N)], ?_⟩
     apply Subtype.ext
-    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one]
     rw [zsmul_eq_of_intCast_eq pp hppN (a := (((j : ZMod N)).val : ℤ)) (b := j)
           (by simp [ZMod.natCast_val]),
         zsmul_eq_of_intCast_eq pq hpqN (a := (((l : ZMod N)).val : ℤ)) (b := l)
@@ -3243,24 +3244,24 @@ theorem glSmul_eq_one_of_eq_self {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
   have hval0 : ((0 : ZMod N).val : ℤ) = 0 := by simp
   have hbase1 : S ![1, 0] = ⟨pp, hppM⟩ := by
     apply Subtype.ext
-    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, hval1, hval0,
       one_zsmul, zero_zsmul, add_zero]
   have hbase2 : S ![0, 1] = ⟨pq, hpqM⟩ := by
     apply Subtype.ext
-    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, hval1, hval0,
       one_zsmul, zero_zsmul, zero_add]
   -- Injectivity forces the columns.
   have heq1 : (![m 0 0, m 1 0] : Fin 2 → ZMod N) = ![1, 0] := hSinj (hcol1.trans hbase1.symm)
   have heq2 : (![m 0 1, m 1 1] : Fin 2 → ZMod N) = ![0, 1] := hSinj (hcol2.trans hbase2.symm)
-  have e00 : m 0 0 = 1 := by have := congrFun heq1 0; simpa using this
-  have e10 : m 1 0 = 0 := by have := congrFun heq1 1; simpa using this
-  have e01 : m 0 1 = 0 := by have := congrFun heq2 0; simpa using this
-  have e11 : m 1 1 = 1 := by have := congrFun heq2 1; simpa using this
+  have e00 : m 0 0 = 1 := by simpa using congrFun heq1 0
+  have e10 : m 1 0 = 0 := by simpa using congrFun heq1 1
+  have e01 : m 0 1 = 0 := by simpa using congrFun heq2 0
+  have e11 : m 1 1 = 1 := by simpa using congrFun heq2 1
   -- Conclude `g = 1`.
   apply Units.ext
   rw [Units.val_one, ← hm]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp [Matrix.one_apply, e00, e10, e01, e11]
+  fin_cases i <;> fin_cases j <;> simp [e00, e10, e01, e11]
 
 /-! ### PART 0 (instantiation) — the `H`-action on the naive full-level problem -/
 
@@ -3400,6 +3401,7 @@ variable {S : Scheme.{u}} (E : EllipticCurve S)
 noncomputable def levelSpaceΓπ (N : ℕ) [NeZero N] : levelSpaceΓ E N ⟶ S :=
   levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GHA2] (finiteness half of KM 3.7.1's conclusion)** `U_{Γ(N)} → S` is finite:
 closed immersion (`subschemeι`) into `E[N] ×_S E[N]`, which is finite over `S`
 (`torsionπ_isFinite`, T-B4 registered box, + base-change/composition stability).
@@ -3421,7 +3423,7 @@ invertible, `U_{Γ(N)} → S` is étale. Loeffler (verbatim): "it is an open sub
 E[N] ×_S E[N] given by non-vanishing of Weil pairings" — i.e. `levelSpaceΓ` is the
 preimage under `weilPairing` (DS4) of the *primitive* locus `μ_N^× ⊆ μ_N` (for
 non-prime `N`, primitivity, not mere non-vanishing), which is clopen over `ℤ[1/N]`;
-a clopen subscheme of the finite étale `E[N] ×_S E[N]` (`torsionπ_etale`, T-B5′,
+a clopen subscheme of the finite étale `E[N] ×_S E[N]` (`Torsionπ.etale`, T-B5′,
 PROVEN) is finite étale over `S`. Unramifiedness is free (closed immersion into
 étale); openness/flatness is the genuine content — a closed subscheme of a finite
 étale scheme is NOT étale in general. Fallback route (KM 3.7.1's proof, verbatim):
@@ -3455,7 +3457,8 @@ theorem gammaFullNaive_relRepData (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
       IsFinite d.f ∧ Etale d.f := by
   obtain ⟨eqv, hnat⟩ := YFull.exists_pointsEquiv_family R X N hinv
   refine ⟨⟨YFull.fullLevelSpace X N, YFull.fullLevelSpaceStruct X N, @eqv, @hnat⟩,
-    YFull.isFinite_fullLevelSpaceStruct X N, ?_⟩
+    YFull.isFinite_fullLevelSpaceStruct X N
+      (YFull.nIsInvertible_over_spec R X.structMap hinv), ?_⟩
   exact levelSpaceΓπ_etale X.curve N (YFull.nIsInvertible_over_spec R X.structMap hinv)
 
 /-- **[GHA5] (H = 1 data, equivariantly)** Upgrade of [GHA4] along the generic
@@ -3737,6 +3740,7 @@ private theorem pullSection_asSection_aux {R : CommRingCat.{u}} (X : EllObj R)
       (Point.asSection_val_snd X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
 
 open EllipticCurve in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GHC4, the glue]** Glue a `Bool`-family of naive full level structures on
 `X.curve` into a full level structure on the base change `X.curve.baseChange g`, where
 `g` restricts to `𝟙` on each `Bool`-summand. This is the constructor of the "second
@@ -3764,7 +3768,11 @@ noncomputable def coprodFullLevel {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X 
     obtain ⟨b, s, hs⟩ := spec_factors_coprod (fun _ : Bool => X.base) t
     have htg : t ≫ g = s := by rw [← hs, Category.assoc, hg b, Category.comp_id]
     have hdx : (N : ℤ) • Point.baseChangeEquiv X.curve g t x = 0 := by
-      rw [← map_zsmul (Point.baseChangeEquiv X.curve g t), hx, map_zero]
+      have h1 : Point.baseChangeEquiv X.curve g t ((N : ℤ) • x) =
+          (N : ℤ) • Point.baseChangeEquiv X.curve g t x :=
+        map_zsmul (Point.baseChangeEquiv X.curve g t).toAddMonoidHom (N : ℤ) x
+      rw [← h1, hx]
+      exact map_zero (Point.baseChangeEquiv X.curve g t).toAddMonoidHom
     have hcompatP : Point.baseChangeEquiv X.curve g t
         (Point.pull (X.curve.baseChange g) t
           (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))))
@@ -3851,7 +3859,8 @@ lemma restrict_coprodPoint {R : CommRingCat.{u}} (X : EllObj R)
 open EllipticCurve in
 /-- `FullLevelPt.pullAlong` commutes with the `GL₂`-action: `pullAlong σ (glSmul γ L)
 = glSmul γ (pullAlong σ L)`. Both sides are `asSection ∘ pull` of the `glSmul`-combination,
-and `pull`/`asSection` are `ℤ`-linear (`pull_add`/`pull_zsmul`/`asSection_add`/`asSection_zsmul`). -/
+and `pull`/`asSection` are `ℤ`-linear
+(`pull_add`/`pull_zsmul`/`asSection_add`/`asSection_zsmul`). -/
 lemma pullAlong_glSmul {S : Scheme.{u}} {E : EllipticCurve S} (N : ℕ) [NeZero N]
     {T : Scheme.{u}} (σ : T ⟶ S) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
     (L : E.FullLevelPt N) :
@@ -3944,6 +3953,7 @@ lemma coprodFullLevel_restrict {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
       (coprodFullLevel_restrict_snd N X g hg Lf i)))
 
 open EllipticCurve in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive
@@ -4002,7 +4012,8 @@ theorem gammaHNaiveProblem_not_relativelyRepresentable (N : ℕ) [NeZero N]
   obtain ⟨h, hhH, hhAB⟩ := Quotient.exact hsep
   -- Restricting `glSmul h A = B` to the `false` summand (where `A`, `B` agree) forces `h = 1`.
   have hh1 : h = 1 := by
-    refine glSmul_eq_one_of_eq_self N hinv (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g))
+    refine glSmul_eq_one_of_eq_self N hinv
+      (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g))
       hne h (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g) L)
       (Subtype.ext (Prod.ext ?_ ?_))
     · have hf1 := congrArg (fun M => EllHom.pullSection R

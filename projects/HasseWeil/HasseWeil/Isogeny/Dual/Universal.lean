@@ -13,7 +13,7 @@ This file *refutes* the former universal-witness statement
 
 > `universal_dualGaloisData : ∀ φ : Isogeny W₁ W₂, Nonempty (Isogeny.DualGaloisData φ)`
 
-which used to close `HasseWeil/EC/IsogenyAG/Dual.lean` as a `sorry`.
+which used to close `HasseWeil/Isogeny/Dual/Morphism.lean` as a `sorry`.
 
 ## The counterexample: the `q`-power Frobenius
 
@@ -88,8 +88,6 @@ variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the statement is about
 -- the `q`-power Frobenius (which only exists over a finite field with decidable
 -- equality), but the linter only inspects the surface signature.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **`DualGaloisData` is empty for the `q`-power Frobenius** (B2 refutation core).
 No automorphism family realises the `hfix` fixed-field equality
 `Im(π*) = Fix(transAut)`: every member would fix all `q`-th powers, hence be the
@@ -140,7 +138,7 @@ def frobeniusCounterexampleCurve : Affine (ZMod 2) :=
 instance : frobeniusCounterexampleCurve.IsElliptic :=
   ⟨by rw [show frobeniusCounterexampleCurve.Δ = 1 by decide]; exact isUnit_one⟩
 
-/-- **The former `universal_dualGaloisData` is false** (B2, 2026-06-10): it is
+/-- **The former `universal_dualGaloisData` is false** (B2 refutation): it is
 *not* the case that every isogeny carries a `DualGaloisData` — the `q`-power
 Frobenius of `y² + y = x³` over `𝔽₂` is a counterexample
 (`isEmpty_dualGaloisData_frobenius`). Stated at universe `0`, which the original
@@ -154,7 +152,7 @@ theorem not_universal_dualGaloisData :
 
 /-! ### The legacy Basic-world `exists_dual` is false (second B2 refutation)
 
-`HasseWeil/DualIsogeny.lean` formerly closed with the keystone sorry
+`HasseWeil/Isogeny/Dual/Relation.lean` formerly closed with the keystone sorry
 
 > `exists_dual (α : Isogeny E E) : ∃! β : Isogeny E E, IsDualOf E β α`
 
@@ -171,12 +169,12 @@ pullback-level uniqueness `HasseWeil.IsDualOf.pullback_unique` survives.)
 
 Ticket `DUAL-LEGACY-B2` in `.mathlib-quality/b2_log.jsonl`. The true
 Silverman III.6.1 is the witness-gated `∃!` of
-`EC/IsogenyAG/CanonicalDual.lean`.
+`Isogeny/Dual/Canonical.lean`.
 
 The scalar self-duality that the legacy cascade's deleted
 `isogDual_mulByInt_of_comp` was after is genuine and lives here
 (`mulByInt_isDualOf_self`): its proof needs `mulByInt_comp_eq_mul`
-(`EC/GenericPointZsmul.lean`), which is outside `DualIsogeny.lean`'s import
+(`Foundation/EC/GenericPointZsmul.lean`), which is outside `Isogeny/Dual/Relation.lean`'s import
 closure. -/
 
 section LegacyExistsDual

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PthSymbolNoncanonical
@@ -77,7 +82,7 @@ theorem pthSymbolAtIdeal_pow {K : Type*} [Field K] [NumberField K]
     (n : ℕ) :
     pthSymbolAtIdeal (p := p) (α ^ n) I =
       (n : ZMod p) * pthSymbolAtIdeal (p := p) α I := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   have hmap :
       ((UniqueFactorizationMonoid.normalizedFactors I).map
         (fun P => pthSymbolAtPrime (p := p) (α ^ n) P)) =
@@ -101,7 +106,7 @@ is maximal and non-zero, so `pthSymbolAtPrime 1 P = 0` term-by-term. -/
 @[simp] theorem pthSymbolAtIdeal_one_alpha {K : Type*} [Field K] [NumberField K]
     (I : Ideal (𝓞 K)) :
     pthSymbolAtIdeal (p := p) (1 : 𝓞 K) I = 0 := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   rw [show
       ((UniqueFactorizationMonoid.normalizedFactors I).map
         (fun P => pthSymbolAtPrime (p := p) (1 : 𝓞 K) P)) =
@@ -117,7 +122,7 @@ is maximal and non-zero, so `pthSymbolAtPrime 1 P = 0` term-by-term. -/
 @[simp] theorem pthSymbolAtIdeal_zero_alpha {K : Type*} [Field K] [NumberField K]
     (I : Ideal (𝓞 K)) :
     pthSymbolAtIdeal (p := p) (0 : 𝓞 K) I = 0 := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   rw [show
       ((UniqueFactorizationMonoid.normalizedFactors I).map
         (fun P => pthSymbolAtPrime (p := p) (0 : 𝓞 K) P)) =
@@ -151,7 +156,7 @@ theorem pthSymbolAtPrincipal_pow_right {K : Type*}
     [Field K] [NumberField K] (α β : 𝓞 K) (n : ℕ) :
     pthSymbolAtPrincipal (p := p) α (β ^ n) =
       (n : ZMod p) * pthSymbolAtPrincipal (p := p) α β := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   rw [show (Ideal.span ({β ^ n} : Set (𝓞 K))) =
         (Ideal.span ({β} : Set (𝓞 K))) ^ n from
         (Ideal.span_singleton_pow β n).symm]
@@ -162,7 +167,7 @@ theorem pthSymbolAtPrincipal_pow_right {K : Type*}
 @[simp] theorem pthSymbolAtPrincipal_isUnit_right {K : Type*}
     [Field K] [NumberField K] {ε : 𝓞 K} (α : 𝓞 K) (hε : IsUnit ε) :
     pthSymbolAtPrincipal (p := p) α ε = 0 := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   rw [show (Ideal.span ({ε} : Set (𝓞 K))) = ⊤ from
         Ideal.span_singleton_eq_top.mpr hε]
   exact pthSymbolAtIdeal_top _
@@ -186,7 +191,7 @@ the self-symbol vanishing. -/
 @[simp] theorem pthSymbolAtPrincipal_neg_right {K : Type*}
     [Field K] [NumberField K] (α β : 𝓞 K) :
     pthSymbolAtPrincipal (p := p) α (-β) = pthSymbolAtPrincipal (p := p) α β := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   congr 1
   exact Ideal.span_singleton_neg β
 
@@ -195,7 +200,7 @@ multiplying by a unit doesn't change it. -/
 theorem pthSymbolAtPrincipal_mul_unit_right {K : Type*}
     [Field K] [NumberField K] (α β : 𝓞 K) {ε : 𝓞 K} (hε : IsUnit ε) :
     pthSymbolAtPrincipal (p := p) α (β * ε) = pthSymbolAtPrincipal (p := p) α β := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   congr 1
   rw [Ideal.span_singleton_eq_span_singleton]
   exact Associated.symm ⟨hε.unit, rfl⟩
@@ -238,7 +243,7 @@ theorem pow_notMem_normalizedFactors {K : Type*}
 @[simp] theorem pthSymbolAtPrincipal_self_mul_pow_p {K : Type*}
     [Field K] [NumberField K] {α : 𝓞 K} (hα : α ≠ 0) {γ : 𝓞 K} (hγ : γ ≠ 0) :
     pthSymbolAtPrincipal (p := p) α (α * γ ^ p) = 0 := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   rw [show Ideal.span ({α * γ ^ p} : Set (𝓞 K)) =
       Ideal.span ({α} : Set (𝓞 K)) * Ideal.span ({γ ^ p} : Set (𝓞 K)) from
         (Ideal.span_singleton_mul_span_singleton _ _).symm]
@@ -268,7 +273,7 @@ theorem pthSymbolAtIdeal_prime_eq_pthSymbolAtPrime {K : Type*}
     [Field K] [NumberField K] (α : 𝓞 K) {P : Ideal (𝓞 K)}
     (hP_max : P.IsMaximal) (hP_ne : P ≠ ⊥) :
     pthSymbolAtIdeal (p := p) α P = pthSymbolAtPrime (p := p) α P := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   -- normalizedFactors P = {P} since P is irreducible.
   haveI : P.IsPrime := hP_max.isPrime
   have hP_irred : Irreducible P :=
@@ -287,7 +292,7 @@ theorem pthSymbolAtPrincipal_pow_left {K : Type*}
               (Ideal.span ({β} : Set (𝓞 K))), α ∉ P) :
     pthSymbolAtPrincipal (p := p) (α ^ n) β =
       (n : ZMod p) * pthSymbolAtPrincipal (p := p) α β := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   exact pthSymbolAtIdeal_pow (p := p) hα n
 
 /-- **Vanishing engine, principal version.** The principal-symbol of any
@@ -321,7 +326,7 @@ noncomputable def cyclotomicGaloisConjugate
 /-- The Galois conjugate at the identity is the original ideal. -/
 @[simp] theorem cyclotomicGaloisConjugate_one (q : Ideal (𝓞 K)) :
     cyclotomicGaloisConjugate (p := p) (K := K) 1 q = q := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   apply Ideal.ext
   intro x
   rw [Ideal.mem_map_of_equiv]
@@ -337,7 +342,7 @@ theorem cyclotomicGaloisConjugate_mul
     cyclotomicGaloisConjugate (p := p) (K := K) (a * b) q =
       cyclotomicGaloisConjugate (p := p) (K := K) a
         (cyclotomicGaloisConjugate (p := p) (K := K) b q) := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   apply Ideal.ext
   intro x
   rw [Ideal.mem_map_of_equiv, Ideal.mem_map_of_equiv]
@@ -357,26 +362,26 @@ theorem cyclotomicGaloisConjugate_mul
 instance cyclotomicGaloisConjugate_isPrime
     (a : CyclotomicUnitDelta p) (q : Ideal (𝓞 K)) [q.IsPrime] :
     (cyclotomicGaloisConjugate (p := p) (K := K) a q).IsPrime := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact Ideal.map_isPrime_of_equiv (cyclotomicRingOfIntegersEquiv (p := p) K a)
 
 /-- The Galois conjugate of `⊥` is `⊥`. -/
 @[simp] theorem cyclotomicGaloisConjugate_bot (a : CyclotomicUnitDelta p) :
     cyclotomicGaloisConjugate (p := p) (K := K) a (⊥ : Ideal (𝓞 K)) = ⊥ := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact Ideal.map_bot
 
 /-- The Galois conjugate of `⊤` is `⊤`. -/
 @[simp] theorem cyclotomicGaloisConjugate_top (a : CyclotomicUnitDelta p) :
     cyclotomicGaloisConjugate (p := p) (K := K) a (⊤ : Ideal (𝓞 K)) = ⊤ := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact Ideal.map_top _
 
 /-- The Galois conjugate of a maximal ideal is maximal. -/
 instance cyclotomicGaloisConjugate_isMaximal
     (a : CyclotomicUnitDelta p) (q : Ideal (𝓞 K)) [hq : q.IsMaximal] :
     (cyclotomicGaloisConjugate (p := p) (K := K) a q).IsMaximal := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact Ideal.map_isMaximal_of_equiv (cyclotomicRingOfIntegersEquiv (p := p) K a)
 
 /-- The Galois conjugate of a non-`⊥` ideal is non-`⊥`. -/
@@ -388,7 +393,7 @@ theorem cyclotomicGaloisConjugate_ne_bot
   have h := cyclotomicGaloisConjugate_mul (p := p) (K := K) a⁻¹ a q
   rw [inv_mul_cancel, cyclotomicGaloisConjugate_one] at h
   rw [h, hbot]
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact Ideal.map_bot
 
 /-- The Galois conjugate lies above the same rational prime as `q`. This is
@@ -402,7 +407,7 @@ theorem cyclotomicGaloisConjugate_under_eq
   -- `comap`s via `Ideal.comap_comap`. The composite ring hom
   -- `σ.symm.comp (algebraMap ℤ (𝓞 K))` equals `algebraMap ℤ (𝓞 K)` by
   -- uniqueness of `ℤ`-ring homomorphisms (`RingHom.ext_int`).
-  unfold cyclotomicGaloisConjugate Ideal.under
+  simp only [cyclotomicGaloisConjugate, Ideal.under]
   -- Any two ring homs `ℤ → 𝓞 K` agree (`RingHom.ext_int`), so for any
   -- `n : ℤ`, `σ (algebraMap n) = algebraMap n`. From this the membership
   -- condition is equivalent on both sides.
@@ -537,7 +542,7 @@ theorem cyclotomicGaloisConjugate_mul_ideal
     cyclotomicGaloisConjugate (p := p) (K := K) a (I * J) =
       cyclotomicGaloisConjugate (p := p) (K := K) a I *
         cyclotomicGaloisConjugate (p := p) (K := K) a J := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact Ideal.map_mul _ I J
 
 /-- The Galois conjugate is monotone in the ideal (preserves ≤). -/
@@ -560,7 +565,7 @@ theorem cyclotomicGaloisConjugate_le_iff
     rw [← h1, ← h2]
     exact Ideal.map_mono h
   · intro h
-    unfold cyclotomicGaloisConjugate
+    simp only [cyclotomicGaloisConjugate]
     exact Ideal.map_mono h
 
 /-- The action commutes with ideal powers. -/
@@ -586,7 +591,7 @@ noncomputable def cyclotomicConjugates (q : Ideal (𝓞 K)) :
 theorem self_mem_cyclotomicConjugates (q : Ideal (𝓞 K)) :
     q ∈ cyclotomicConjugates (p := p) (K := K) q := by
   classical
-  unfold cyclotomicConjugates
+  simp only [cyclotomicConjugates]
   rw [Finset.mem_image]
   exact ⟨1, Finset.mem_univ _, cyclotomicGaloisConjugate_one q⟩
 
@@ -596,7 +601,7 @@ theorem mem_cyclotomicConjugates_iff (q I : Ideal (𝓞 K)) :
       ∃ a : CyclotomicUnitDelta p,
         cyclotomicGaloisConjugate (p := p) (K := K) a q = I := by
   classical
-  unfold cyclotomicConjugates
+  simp only [cyclotomicConjugates]
   rw [Finset.mem_image]
   refine ⟨?_, ?_⟩
   · rintro ⟨a, _, ha⟩; exact ⟨a, ha⟩
@@ -650,13 +655,13 @@ theorem exists_mem_cyclotomicConjugates_of_under_eq
     ⟨cyclotomicGalEquivZMod (p := p) K σ, ?_⟩
   have ha : cyclotomicSigmaOfUnit (p := p) K
       (cyclotomicGalEquivZMod (p := p) K σ) = σ := by
-    unfold cyclotomicSigmaOfUnit
+    simp only [cyclotomicSigmaOfUnit]
     exact (cyclotomicGalEquivZMod (p := p) K).symm_apply_apply σ
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   rw [show cyclotomicRingOfIntegersEquiv (p := p) K
         (cyclotomicGalEquivZMod (p := p) K σ) =
       MulSemiringAction.toRingEquiv (Gal(K/ℚ)) (𝓞 K) σ by
-    unfold cyclotomicRingOfIntegersEquiv
+    simp only [cyclotomicRingOfIntegersEquiv]
     rw [ha]]
   exact hσ
 
@@ -752,7 +757,7 @@ theorem mem_cyclotomicGaloisConjugate_iff
     (a : CyclotomicUnitDelta p) {α : 𝓞 K} {q : Ideal (𝓞 K)} :
     cyclotomicRingOfIntegersEquiv (p := p) K a α ∈
         cyclotomicGaloisConjugate (p := p) (K := K) a q ↔ α ∈ q := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   rw [Ideal.mem_map_of_equiv]
   refine ⟨?_, fun h => ⟨α, h, rfl⟩⟩
   rintro ⟨x, hx, hxα⟩

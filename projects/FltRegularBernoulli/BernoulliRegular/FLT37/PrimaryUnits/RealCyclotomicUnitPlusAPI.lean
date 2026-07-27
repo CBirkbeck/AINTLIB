@@ -1,22 +1,30 @@
 module
 
 public import BernoulliRegular.FLT37.PrimaryConj
-public import BernoulliRegular.TotallyRealSubfield.ZetaPrime
-public import BernoulliRegular.HMinus.KplusPrimeArithmetic
-public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
-public import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
 public import BernoulliRegular.FLT37.PrimaryUnits.RealCyclotomicUnitsAndTaylorExpansions
+public import BernoulliRegular.HMinus.KplusPrimeArithmetic
+public import BernoulliRegular.TotallyRealSubfield.ZetaPrime
+public import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
+public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
 
 /-!
-# Primary units of `𝓞 K⁺` (ticket FLT37c, scaffold)
+# Real cyclotomic units in `𝓞 K⁺`
 
-For Vandiver Lemma 2 (primary unit decomposition), an element
-`γ ∈ 𝓞 K⁺` is **primary** when it is congruent to a rational integer
-modulo `𝔭⁺^p`, where `𝔭⁺` is the unique prime of `𝓞 K⁺` above `(p)`.
-Equivalently (since `𝔭⁺·𝓞 K = 𝔭² = (ζ-1)^2`), this is
-`γ ≡ a (mod (ζ-1)^{2p})` viewed in `𝓞 K`.
+The real cyclotomic combination in `𝓞 K` is invariant under complex conjugation, so it descends
+to the ring of integers of the maximal real subfield. This file chooses such a descent and develops
+its natural-number and `ZMod p`-indexed API.
 
-This file isolates the K⁺-side primary definition with basic API.
+## Main definitions
+
+* `realCyclotomicUnitPlus`: the chosen descent to `𝓞 K⁺`.
+* `realCyclotomicUnitZMod` and `realCyclotomicUnitPlusZMod`: residue-indexed wrappers.
+* `realCyclotomicUnitPlusUnit`: the descended element packaged as a unit.
+
+## Main results
+
+* `algebraMap_realCyclotomicUnitPlus`: the chosen descent maps to the K-side combination.
+* `isUnit_realCyclotomicUnitPlus`: a coprime-indexed descent is a unit.
+* `realCyclotomicUnitPlus_norm_int_sq_eq_one`: its integer norm has square one.
 
 ## References
 
@@ -111,7 +119,7 @@ theorem realCyclotomicUnitPlus_mod_p [IsCMField K] (k : ℕ) :
 noncomputable def realCyclotomicUnitZMod [IsCMField K] (k : ZMod p) : 𝓞 K :=
   realCyclotomicUnit p K k.val
 
-/-- The ZMod-indexed real cyclotomic combination is σ-fixed. -/
+/-- The ZMod-indexed real cyclotomic combination is invariant under complex conjugation. -/
 theorem realCyclotomicUnitZMod_complexConj [IsCMField K] (k : ZMod p) :
     ringOfIntegersComplexConj K (realCyclotomicUnitZMod p K k) =
       realCyclotomicUnitZMod p K k :=
@@ -121,18 +129,17 @@ theorem realCyclotomicUnitZMod_complexConj [IsCMField K] (k : ZMod p) :
 theorem realCyclotomicUnitZMod_two [IsCMField K] (hp_three : 3 ≤ p) :
     realCyclotomicUnitZMod p K (2 : ZMod p) = realCyclotomicUnit p K 2 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   congr 1
-  exact ZMod.val_two_eq_two_mod p |>.trans (Nat.mod_eq_of_lt (by omega))
+  exact ZMod.val_natCast_of_lt (n := p) (a := 2) (by omega)
 
 /-- ZMod-indexed value at `k = 3` (for `p ≥ 5`). -/
 theorem realCyclotomicUnitZMod_three [IsCMField K] (hp_five : 5 ≤ p) :
     realCyclotomicUnitZMod p K (3 : ZMod p) = realCyclotomicUnit p K 3 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   congr 1
-  rw [show (3 : ZMod p) = ((3 : ℕ) : ZMod p) from by push_cast; rfl,
-    ZMod.val_natCast, Nat.mod_eq_of_lt (by omega)]
+  exact ZMod.val_natCast_of_lt (n := p) (a := 3) (by omega)
 
 /-- ZMod-indexed residue-field congruence: `realCyclotomicUnitZMod k ≡ k.val²
 (mod ζ - 1)` in `𝓞 K`. -/
@@ -141,41 +148,39 @@ theorem zetaSubOne_dvd_realCyclotomicUnitZMod_sub_sq [IsCMField K] (k : ZMod p) 
       realCyclotomicUnitZMod p K k - (k.val : 𝓞 K) ^ 2 :=
   zetaSubOne_dvd_realCyclotomicUnit_sub_sq p K k.val
 
+/-- Casting a natural index to `ZMod p` does not change the real cyclotomic combination. -/
 theorem realCyclotomicUnitZMod_natCast [IsCMField K] (k : ℕ) [NeZero p] :
     realCyclotomicUnitZMod p K (k : ZMod p) = realCyclotomicUnit p K k := by
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   rw [ZMod.val_natCast, ← realCyclotomicUnit_mod_p]
 
+/-- The ZMod-indexed real cyclotomic combination vanishes at zero. -/
 theorem realCyclotomicUnitZMod_zero [IsCMField K] [NeZero p] :
     realCyclotomicUnitZMod p K (0 : ZMod p) = 0 := by
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   rw [ZMod.val_zero, realCyclotomicUnit_zero]
 
+/-- The ZMod-indexed real cyclotomic combination equals one at one. -/
 theorem realCyclotomicUnitZMod_one [IsCMField K] :
     realCyclotomicUnitZMod p K (1 : ZMod p) = 1 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   rw [ZMod.val_one, realCyclotomicUnit_one]
 
 /-- `realCyclotomicUnitZMod p K k = 0 ↔ k = 0`. -/
 theorem realCyclotomicUnitZMod_eq_zero_iff [IsCMField K] (k : ZMod p) :
     realCyclotomicUnitZMod p K k = 0 ↔ k = 0 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
-  rw [realCyclotomicUnit_eq_zero_iff]
-  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
-  · rw [show (0 : ZMod p) = ((0 : ℕ) : ZMod p) from by push_cast; rfl,
-      ← ZMod.natCast_zmod_val k, ZMod.natCast_eq_natCast_iff]
-    exact (Nat.modEq_zero_iff_dvd).mpr h
-  · subst h
-    simp
+  simp only [realCyclotomicUnitZMod]
+  rw [realCyclotomicUnit_eq_zero_iff, ← ZMod.natCast_eq_zero_iff,
+    ZMod.natCast_zmod_val]
 
 /-- For `k : (ZMod p)ˣ`, `realCyclotomicUnitZMod p K (k : ZMod p)` is a unit. -/
 theorem isUnit_realCyclotomicUnitZMod_of_units [IsCMField K] (k : (ZMod p)ˣ)
     (hp_two : 2 ≤ p) :
     IsUnit (realCyclotomicUnitZMod p K (k : ZMod p)) := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   exact isUnit_realCyclotomicUnit p K (k : ZMod p).val
     (ZMod.val_coe_unit_coprime k) hp_two
 
@@ -192,13 +197,13 @@ theorem isUnit_realCyclotomicUnitZMod_iff [IsCMField K] (k : ZMod p) :
     rw [← hu]
     exact isUnit_realCyclotomicUnitZMod_of_units p K u hp.1.two_le
 
-/-- The K-side cyclotomic unit `(0 : ZMod p)`-indexed equals `0`. -/
+/-- The ZMod-indexed K-side cyclotomic unit vanishes exactly when `p` divides the representative. -/
 theorem cyclotomicUnitZMod_eq_iff_val_dvd (k : ZMod p) :
     cyclotomicUnitZMod p K k = 0 ↔ p ∣ k.val := by
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   rw [cyclotomicUnit_eq_zero_iff]
 
-/-- For ZMod-indexed cyclotomic unit at unit-class element. -/
+/-- Unfolding the ZMod-indexed cyclotomic unit at a unit-class element. -/
 theorem cyclotomicUnitZMod_units_val (k : (ZMod p)ˣ) :
     cyclotomicUnitZMod p K (k : ZMod p) = cyclotomicUnit p K (k : ZMod p).val := rfl
 
@@ -206,18 +211,17 @@ theorem cyclotomicUnitZMod_units_val (k : (ZMod p)ˣ) :
 theorem cyclotomicUnitZMod_two (hp_three : 3 ≤ p) :
     cyclotomicUnitZMod p K (2 : ZMod p) = cyclotomicUnit p K 2 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   congr 1
-  exact ZMod.val_two_eq_two_mod p |>.trans (Nat.mod_eq_of_lt (by omega))
+  exact ZMod.val_natCast_of_lt (n := p) (a := 2) (by omega)
 
 /-- ZMod-indexed cyclotomic unit value at `k = 3` (for `p ≥ 5`). -/
 theorem cyclotomicUnitZMod_three (hp_five : 5 ≤ p) :
     cyclotomicUnitZMod p K (3 : ZMod p) = cyclotomicUnit p K 3 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   congr 1
-  rw [show (3 : ZMod p) = ((3 : ℕ) : ZMod p) from by push_cast; rfl,
-    ZMod.val_natCast, Nat.mod_eq_of_lt (by omega)]
+  exact ZMod.val_natCast_of_lt (n := p) (a := 3) (by omega)
 
 /-- ZMod-indexed residue-field congruence: `cyclotomicUnitZMod k ≡ k.val
 (mod ζ - 1)` in `𝓞 K`. -/
@@ -231,57 +235,56 @@ noncomputable def realCyclotomicUnitPlusZMod [IsCMField K] (k : ZMod p) :
     𝓞 (NumberField.maximalRealSubfield K) :=
   realCyclotomicUnitPlus p K k.val
 
+/-- Casting a natural index to `ZMod p` does not change the descended cyclotomic unit. -/
 theorem realCyclotomicUnitPlusZMod_natCast [IsCMField K] (k : ℕ) [NeZero p] :
     realCyclotomicUnitPlusZMod p K (k : ZMod p) = realCyclotomicUnitPlus p K k := by
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   rw [ZMod.val_natCast, ← realCyclotomicUnitPlus_mod_p]
 
+/-- The descended ZMod-indexed unit maps to the corresponding K-side combination. -/
 theorem algebraMap_realCyclotomicUnitPlusZMod [IsCMField K] (k : ZMod p) :
     algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
         (realCyclotomicUnitPlusZMod p K k) =
-      realCyclotomicUnitZMod p K k := by
-  unfold realCyclotomicUnitPlusZMod realCyclotomicUnitZMod
-  rw [algebraMap_realCyclotomicUnitPlus]
+      realCyclotomicUnitZMod p K k :=
+  algebraMap_realCyclotomicUnitPlus p K k.val
 
+/-- The descended ZMod-indexed cyclotomic unit vanishes at zero. -/
 theorem realCyclotomicUnitPlusZMod_zero [IsCMField K] [NeZero p] :
     realCyclotomicUnitPlusZMod p K (0 : ZMod p) = 0 := by
   apply FaithfulSMul.algebraMap_injective
     (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
   rw [algebraMap_realCyclotomicUnitPlusZMod, realCyclotomicUnitZMod_zero, map_zero]
 
+/-- The descended ZMod-indexed cyclotomic unit equals one at one. -/
 theorem realCyclotomicUnitPlusZMod_one [IsCMField K] :
     realCyclotomicUnitPlusZMod p K (1 : ZMod p) = 1 := by
   apply FaithfulSMul.algebraMap_injective
     (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
   rw [algebraMap_realCyclotomicUnitPlusZMod, realCyclotomicUnitZMod_one, map_one]
 
+/-- The descended ZMod-indexed cyclotomic unit vanishes exactly at the zero index. -/
 theorem realCyclotomicUnitPlusZMod_eq_zero_iff [IsCMField K] (k : ZMod p) :
     realCyclotomicUnitPlusZMod p K k = 0 ↔ k = 0 := by
-  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
-  · have h_alg := congrArg
-      (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) h
-    rw [algebraMap_realCyclotomicUnitPlusZMod, map_zero] at h_alg
-    exact (realCyclotomicUnitZMod_eq_zero_iff p K k).mp h_alg
-  · subst h
-    haveI : NeZero p := ⟨hp.1.ne_zero⟩
-    exact realCyclotomicUnitPlusZMod_zero p K
+  rw [← (FaithfulSMul.algebraMap_injective
+      (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)).eq_iff,
+    map_zero, algebraMap_realCyclotomicUnitPlusZMod,
+    realCyclotomicUnitZMod_eq_zero_iff]
 
 /-- K⁺-side ZMod-indexed value at `k = 2` (for `p ≥ 3`). -/
 theorem realCyclotomicUnitPlusZMod_two [IsCMField K] (hp_three : 3 ≤ p) :
     realCyclotomicUnitPlusZMod p K (2 : ZMod p) = realCyclotomicUnitPlus p K 2 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   congr 1
-  exact ZMod.val_two_eq_two_mod p |>.trans (Nat.mod_eq_of_lt (by omega))
+  exact ZMod.val_natCast_of_lt (n := p) (a := 2) (by omega)
 
 /-- K⁺-side ZMod-indexed value at `k = 3` (for `p ≥ 5`). -/
 theorem realCyclotomicUnitPlusZMod_three [IsCMField K] (hp_five : 5 ≤ p) :
     realCyclotomicUnitPlusZMod p K (3 : ZMod p) = realCyclotomicUnitPlus p K 3 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   congr 1
-  rw [show (3 : ZMod p) = ((3 : ℕ) : ZMod p) from by push_cast; rfl,
-    ZMod.val_natCast, Nat.mod_eq_of_lt (by omega)]
+  exact ZMod.val_natCast_of_lt (n := p) (a := 3) (by omega)
 
 /-- The K⁺-side real cyclotomic unit is itself a unit when `k` is coprime
 to `p`. Uses the norm characterization of units in `𝓞 K⁺`. -/
@@ -291,17 +294,9 @@ theorem isUnit_realCyclotomicUnitPlus [IsCMField K] (k : ℕ)
   have h_unit : IsUnit (realCyclotomicUnit p K k) :=
     isUnit_realCyclotomicUnit p K k hk hp_two
   rw [← algebraMap_realCyclotomicUnitPlus p K k] at h_unit
-  -- norm of a unit is a unit; norm K⁺ (algebraMap y) = y^[K:K⁺] = y^2
-  have h_norm_unit : IsUnit (RingOfIntegers.norm (NumberField.maximalRealSubfield K)
-      (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
-        (realCyclotomicUnitPlus p K k))) :=
-    h_unit.map _
-  rw [RingOfIntegers.norm_algebraMap] at h_norm_unit
-  -- IsUnit (y ^ finrank) → IsUnit y when finrank > 0
-  have hfin_ne : Module.finrank (NumberField.maximalRealSubfield K) K ≠ 0 := by
-    rw [finrank_K_over_Kplus]
-    decide
-  exact (isUnit_pow_iff hfin_ne).mp h_norm_unit
+  rw [← (RingOfIntegers.isUnit_norm (K := NumberField.maximalRealSubfield K)),
+    RingOfIntegers.norm_algebraMap] at h_unit
+  exact (isUnit_pow_iff Module.finrank_pos.ne').mp h_unit
 
 /-- The K⁺-side real cyclotomic unit, packaged as an element of
 `(𝓞 K⁺)ˣ` when `k` is coprime to `p`. -/
@@ -310,6 +305,7 @@ noncomputable def realCyclotomicUnitPlusUnit [IsCMField K] (k : ℕ)
     (𝓞 (NumberField.maximalRealSubfield K))ˣ :=
   (isUnit_realCyclotomicUnitPlus p K k hk hp_two).unit
 
+/-- The value of the packaged K⁺-side unit is the chosen descended cyclotomic unit. -/
 @[simp]
 theorem realCyclotomicUnitPlusUnit_val [IsCMField K] (k : ℕ)
     (hk : k.Coprime p) (hp_two : 2 ≤ p) :
@@ -331,7 +327,7 @@ theorem isUnit_realCyclotomicUnitPlusZMod_of_units [IsCMField K] (k : (ZMod p)ˣ
     (hp_two : 2 ≤ p) :
     IsUnit (realCyclotomicUnitPlusZMod p K (k : ZMod p)) := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   exact isUnit_realCyclotomicUnitPlus p K (k : ZMod p).val
     (ZMod.val_coe_unit_coprime k) hp_two
 
@@ -348,21 +344,17 @@ theorem isUnit_realCyclotomicUnitPlusZMod_iff [IsCMField K] (k : ZMod p) :
     rw [← hu]
     exact isUnit_realCyclotomicUnitPlusZMod_of_units p K u hp.1.two_le
 
-/-- **Integer norm of K⁺-side cyclotomic unit is a unit in ℤ.** Since
-`realCyclotomicUnitPlus p K k` is a unit (for `k` coprime to `p`,
-`p ≥ 2`), its integer norm is a unit in `ℤ`, hence `±1`. -/
+/-- The integer norm of a K⁺-side cyclotomic unit with coprime index is a unit in `ℤ`. -/
 theorem realCyclotomicUnitPlus_norm_int_isUnit [IsCMField K]
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p) :
     IsUnit (Algebra.norm ℤ (realCyclotomicUnitPlus p K k)) :=
   (isUnit_realCyclotomicUnitPlus p K k hk hp_two).map _
 
-/-- **Squared integer norm of K⁺-side cyclotomic unit is 1.** Direct
-corollary of the unit property. -/
+/-- The squared integer norm of a K⁺-side cyclotomic unit with coprime index is one. -/
 theorem realCyclotomicUnitPlus_norm_int_sq_eq_one [IsCMField K]
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p) :
-    (Algebra.norm ℤ (realCyclotomicUnitPlus p K k)) ^ 2 = (1 : ℤ) := by
-  rcases Int.isUnit_iff.mp (realCyclotomicUnitPlus_norm_int_isUnit p K k hk hp_two) with h | h
-    <;> rw [h] <;> norm_num
+    (Algebra.norm ℤ (realCyclotomicUnitPlus p K k)) ^ 2 = (1 : ℤ) :=
+  Int.isUnit_sq (realCyclotomicUnitPlus_norm_int_isUnit p K k hk hp_two)
 
 end RealCyclotomicUnits
 

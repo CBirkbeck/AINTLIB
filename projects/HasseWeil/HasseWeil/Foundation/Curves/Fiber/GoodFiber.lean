@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.GenericFiber
 import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
+import HasseWeil.Foundation.Curves.Fiber.GenericFiber
 import HasseWeil.Foundation.Curves.Ramification.RamificationFinite
 
 /-!
@@ -39,11 +39,6 @@ variable {F : Type*} [Field F] {C₁ C₂ : SmoothPlaneCurve F}
   [C₁.toAffine.IsElliptic] [C₂.toAffine.IsElliptic]
   [IsIntegrallyClosed C₁.CoordinateRing] [IsIntegrallyClosed C₂.CoordinateRing]
 
-set_option synthInstance.maxHeartbeats 100000 in
--- The OreLocalization-derived scalar tower `F[C₂] → F[C₁] → K(C₁)` and the
--- integral-closure instances are heartbeat-heavy, exactly as in
--- `PushforwardDivisor.finiteDimensional_functionField` (same bumps).
-set_option maxHeartbeats 800000 in
 /-- **W-2 at the coordinate-ring pair**: away from a finite set of primes of `F[C₂]`,
 every prime of `F[C₁]` lying over (along `cd.toAlgebra`) is unramified.  This is
 `RamificationFinite.exists_finite_ramification_locus` at `(A, K, L, B) =
@@ -59,15 +54,17 @@ theorem exists_finite_ramified_locus_coordHom [IsAlgClosed F]
           (letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra;
             P.under C₂.CoordinateRing = q) →
           letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
-          Ideal.ramificationIdx q P = 1 := by
+          Ideal.ramificationIdx' q P = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
     cd.module_finite
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   -- the `A → B → L` tower is the OreLocalization-derived one (as in `PushforwardDivisor`)
-  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
-    inferInstance
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
   -- the `A → K → L` tower, from `cd.compat` (the `tower1` dance of `PushforwardDivisor`)
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
     refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
@@ -86,11 +83,6 @@ theorem exists_finite_ramified_locus_coordHom [IsAlgClosed F]
   exact RamificationFinite.exists_finite_ramification_locus
     C₂.CoordinateRing C₂.FunctionField C₁.FunctionField C₁.CoordinateRing
 
-set_option synthInstance.maxHeartbeats 100000 in
--- Whnf-reducing the `letI`/`haveI`-prefixed statement of
--- `inertiaDeg_maximalIdealAt_toPointMap` against the pinned coordinate algebra
--- exceeds the default budget; same bumps as its home file `PushforwardDivisor`.
-set_option maxHeartbeats 800000 in
 /-- **Residue degrees are trivial over `K̄`**: every prime of `F[C₁]` over the maximal
 ideal of a smooth point of `C₂` has inertia degree `1`.  This is the inline `hinertia`
 argument of `PushforwardDivisor.relNorm_maximalIdealAt_eq`, extracted: a prime over
@@ -101,7 +93,7 @@ theorem inertiaDeg_eq_one_of_mem_primesOver [IsAlgClosed F]
     (φ : CurveMap C₁ C₂) (cd : φ.CoordHom) (Q : C₂.SmoothPoint) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     ∀ P' ∈ (C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing,
-      Ideal.inertiaDeg (C₂.maximalIdealAt Q) P' = 1 := by
+      Ideal.inertiaDeg' (C₂.maximalIdealAt Q) P' = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
@@ -121,14 +113,10 @@ theorem inertiaDeg_eq_one_of_mem_primesOver [IsAlgClosed F]
   rw [hP''] at h1
   have hpeq : C₂.maximalIdealAt (toPointMap cd P'') = C₂.maximalIdealAt Q :=
     h1.trans hP'lies.over.symm
-  have hid : Ideal.inertiaDeg (C₂.maximalIdealAt (toPointMap cd P''))
+  have hid : Ideal.inertiaDeg' (C₂.maximalIdealAt (toPointMap cd P''))
       (C₁.maximalIdealAt P'') = 1 := inertiaDeg_maximalIdealAt_toPointMap φ cd P''
   rwa [hpeq, hP''] at hid
 
-set_option synthInstance.maxHeartbeats 100000 in
--- Same instance-synthesis bumps as `exists_finite_ramified_locus_coordHom` above: the
--- `coe_primesOverFinset` conversion whnf-reduces the pinned coordinate-algebra instances.
-set_option maxHeartbeats 800000 in
 /-- **The point-fibre ↔ prime-fibre dictionary**: at every smooth point `Q` of `C₂`, the
 fibre of the coordinate point map `toPointMap cd` over `Q` is in bijection with the
 primes of `F[C₁]` over `m_Q` — forward by `P ↦ m_P` (`maximalIdealAt_liesOver_toPointMap`

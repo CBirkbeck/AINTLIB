@@ -82,7 +82,8 @@ theorem isCompl_invariants_antiInvariants [Invertible (2 : R)] (σ : M →ₗ[R]
     intro x hx hx'
     rw [mem_invariants_iff] at hx
     rw [mem_antiInvariants_iff] at hx'
-    have h2 : (2 : R) • x = 0 := by rw [two_smul]; exact add_eq_zero_iff_eq_neg.2 (hx.symm.trans hx')
+    have h2 : (2 : R) • x = 0 := by
+      rw [two_smul]; exact add_eq_zero_iff_eq_neg.2 (hx.symm.trans hx')
     have := invOf_smul_smul (2 : R) x
     rwa [h2, smul_zero, eq_comm] at this
   · -- Codisjointness: `x = ⅟2•(x+σx) + ⅟2•(x−σx)` with parts in the two eigenspaces.

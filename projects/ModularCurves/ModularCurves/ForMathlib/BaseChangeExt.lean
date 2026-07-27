@@ -1,4 +1,16 @@
-import Mathlib
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.Algebra.Category.Grp.AB
+import Mathlib.Algebra.Category.ModuleCat.Ext.DimensionShifting
+import Mathlib.Algebra.FiveLemma
+import Mathlib.Algebra.Homology.DerivedCategory.Ext.Map
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.CategoryTheory.Abelian.Ext
+import Mathlib.RingTheory.LocalProperties.ProjectiveDimension
+import Mathlib.RingTheory.PicardGroup
 
 open CategoryTheory Abelian Limits ModuleCat
 open scoped ModuleCat.Algebra
@@ -201,6 +213,30 @@ private lemma isLocalizedModule_mapExt_zero [IsNoetherianRing S] (X Y : ModuleCa
       ← Submonoid.smul_def, ← Submonoid.smul_def]
     exact hc
 
+/-- A pointwise-commuting square of `S`-linear maps `ρ' ∘ iP = iK ∘ ρ` localizes: the
+localized lifts of the verticals `iP, iK` (against `𝔪`-inverting units `hU_P, hU_K`)
+intertwine `ρ'` with the localized map of `ρ`. The naturality core shared by the two
+ladder squares of `isLocalizedModule_mapExt_succ`. -/
+private lemma localizedLift_comp_map_eq {M₁ M₂ N₁ N₂ : Type u}
+    [AddCommGroup M₁] [Module S M₁] [AddCommGroup M₂] [Module S M₂]
+    [AddCommGroup N₁] [Module S N₁] [AddCommGroup N₂] [Module S N₂]
+    (iP : M₁ →ₗ[S] N₁) (hU_P : ∀ x : 𝔪, IsUnit (algebraMap S (Module.End S N₁) x))
+    (iK : M₂ →ₗ[S] N₂) (hU_K : ∀ x : 𝔪, IsUnit (algebraMap S (Module.End S N₂) x))
+    (ρ : M₁ →ₗ[S] M₂) (ρ' : N₁ →ₗ[S] N₂) (hnat : ∀ e, ρ' (iP e) = iK (ρ e)) :
+    ρ'.comp (LocalizedModule.lift 𝔪 iP hU_P)
+      = (LocalizedModule.lift 𝔪 iK hU_K).comp
+          (IsLocalizedModule.map 𝔪 (LocalizedModule.mkLinearMap 𝔪 M₁)
+            (LocalizedModule.mkLinearMap 𝔪 M₂) ρ) := by
+  apply IsLocalizedModule.ext 𝔪 (LocalizedModule.mkLinearMap 𝔪 M₁) hU_K
+  ext e
+  show ρ' (LocalizedModule.lift 𝔪 iP hU_P (LocalizedModule.mkLinearMap 𝔪 M₁ e))
+    = LocalizedModule.lift 𝔪 iK hU_K
+        (IsLocalizedModule.map 𝔪 (LocalizedModule.mkLinearMap 𝔪 M₁)
+          (LocalizedModule.mkLinearMap 𝔪 M₂) ρ (LocalizedModule.mkLinearMap 𝔪 M₁ e))
+  rw [IsLocalizedModule.map_apply]
+  simp only [LocalizedModule.mkLinearMap_apply, LocalizedModule.lift_mk_one]
+  exact hnat e
+
 /-- **Inductive step of flat base change for Ext.** Assuming the statement at degree `n` for every
 finite module (hypothesis `ih`), it holds at degree `n + 1`. This is the five-lemma argument on the
 localized contravariant `Ext` long exact sequence of a finite projective presentation
@@ -218,9 +254,7 @@ private lemma isLocalizedModule_mapExt_succ [IsNoetherianRing S] (Y : ModuleCat.
   obtain ⟨P, _, _, _, _, f, surjf⟩ := Module.exists_finite_presentation S X
   set 𝒮 : ShortComplex (ModuleCat.{u} S) := (f : P →ₗ[S] X).shortComplexKer with h𝒮def
   have h𝒮 : 𝒮.ShortExact := LinearMap.shortExact_shortComplexKer surjf
-  haveI : Module.Finite S 𝒮.X₁ := by
-    have : Module.Finite S ↥(LinearMap.ker f) := inferInstance
-    exact this
+  haveI : Module.Finite S 𝒮.X₁ := inferInstanceAs (Module.Finite S ↥(LinearMap.ker f))
   haveI : Module.Finite S 𝒮.X₂ := inferInstanceAs (Module.Finite S P)
   haveI : Projective 𝒮.X₂ := inferInstanceAs (Projective (ModuleCat.of S P))
   haveI : Projective (F.obj 𝒮.X₂) := inferInstance
@@ -264,22 +298,10 @@ private lemma isLocalizedModule_mapExt_succ [IsNoetherianRing S] (Y : ModuleCat.
   -- naturality of the localized ladder
   have hc₁ : ρ'.comp (LocalizedModule.lift 𝔪 iP hU_P)
       = (LocalizedModule.lift 𝔪 iK hU_K).comp Lρ := by
-    apply IsLocalizedModule.ext 𝔪 (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₂ Y n)) hU_K
-    ext e
-    show ρ' (LocalizedModule.lift 𝔪 iP hU_P (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₂ Y n) e))
-      = LocalizedModule.lift 𝔪 iK hU_K (Lρ (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₂ Y n) e))
-    rw [hLρ, IsLocalizedModule.map_apply]
-    simp only [LocalizedModule.mkLinearMap_apply, LocalizedModule.lift_mk_one]
-    exact hnat1 e
+    rw [hLρ]; exact localizedLift_comp_map_eq 𝔪 iP hU_P iK hU_K ρ ρ' hnat1
   have hc₂ : δ'.comp (LocalizedModule.lift 𝔪 iK hU_K)
       = (LocalizedModule.lift 𝔪 iX hU_X).comp Lδ := by
-    apply IsLocalizedModule.ext 𝔪 (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₁ Y n)) hU_X
-    ext e
-    show δ' (LocalizedModule.lift 𝔪 iK hU_K (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₁ Y n) e))
-      = LocalizedModule.lift 𝔪 iX hU_X (Lδ (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₁ Y n) e))
-    rw [hLδ, IsLocalizedModule.map_apply]
-    simp only [LocalizedModule.mkLinearMap_apply, LocalizedModule.lift_mk_one]
-    exact hnat2 e
+    rw [hLδ]; exact localizedLift_comp_map_eq 𝔪 iK hU_K iX hU_X δ δ' hnat2
   -- exactness (S-side localized, and L-side)
   have hExactρδ : Function.Exact ρ δ :=
     (ShortComplex.ab_exact_iff_function_exact _).1
@@ -330,8 +352,10 @@ in `Mathlib/.../Ext/MapBijective.lean`, replacing "bijective for a fully faithfu
   (`LinearMap.bijective_of_surjective_of_bijective_of_right_exact`) to the comparison ladder of
   `LocalizedModule.lift`s, whose neighbouring rungs are bijective by the induction hypothesis at
   degree `n` for the finite modules `K` and `P` (via `isLocalizedModule_iff_bijective_lift`).
-  Naturality of the comparison comes from `Ext.mapExactFunctor_comp` and `Ext.mapExactFunctor_extClass`.
-* **Base case `n = 0` (proved in `isLocalizedModule_mapExt_zero`).** Here `F.mapExtLinearMap S X Y 0`
+  Naturality of the comparison comes from `Ext.mapExactFunctor_comp` and
+  `Ext.mapExactFunctor_extClass`.
+* **Base case `n = 0` (proved in `isLocalizedModule_mapExt_zero`).** Here
+  `F.mapExtLinearMap S X Y 0`
   is, through `Ext.linearEquiv₀`/`ModuleCat.homLinearEquiv` (the identification `Ext _ _ 0 ≃ Hom`),
   the localization map `IsLocalizedModule.mapExtendScalars 𝔪 …` on the hom-space, which is a
   localization because `X` is finitely presented
@@ -340,9 +364,10 @@ in `Mathlib/.../Ext/MapBijective.lean`, replacing "bijective for a fully faithfu
   `ModuleCat.Algebra` `Module S`-structure, while `mapExtendScalars` uses the `LocalizedModule` one;
   these are provably-equal but not defeq, so unifying them naively (which would touch
   `LocalizedModule.mk e s` for every `s`) is prohibitively expensive. We avoid the unification by
-  pinning the `LocalizedModule` `Module S`-structure (plus its scalar tower and `SMulCommClass`) with
-  `letI`, keeping the `L`-linear identification `w` diamond-free, and transferring the three
-  localization axioms from `mapExtendScalars` to `mapExtLinearMap` elementwise through the bijections
+  pinning the `LocalizedModule` `Module S`-structure (plus its scalar tower and
+  `SMulCommClass`) with `letI`, keeping the `L`-linear identification `w` diamond-free, and
+  transferring the three localization axioms from `mapExtendScalars` to `mapExtLinearMap`
+  elementwise through the bijections
   (only ever using `LocalizedModule.mk _ 1`, never a general `mk e s`). -/
 lemma isLocalizedModule_mapExt [IsNoetherianRing S] (X Y : ModuleCat.{u} S)
     [Module.Finite S X] (n : ℕ) :
@@ -363,8 +388,10 @@ theorem localizedModule_ext_subsingleton_iff {S : Type u} [CommRing S] [IsNoethe
         (Ext (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i))
       ↔ Subsingleton (Ext
           (ModuleCat.of (Localization q.asIdeal.primeCompl)
-            (Localization q.asIdeal.primeCompl ⧸ I.map (algebraMap S (Localization q.asIdeal.primeCompl))))
-          (ModuleCat.of (Localization q.asIdeal.primeCompl) (Localization q.asIdeal.primeCompl)) i) := by
+            (Localization q.asIdeal.primeCompl ⧸
+              I.map (algebraMap S (Localization q.asIdeal.primeCompl))))
+          (ModuleCat.of (Localization q.asIdeal.primeCompl)
+            (Localization q.asIdeal.primeCompl)) i) := by
   set 𝔪 := q.asIdeal.primeCompl with h𝔪
   haveI : IsLocalizedModule 𝔪
       ((ModuleCat.localizedModuleFunctor.{u} 𝔪).mapExtLinearMap S

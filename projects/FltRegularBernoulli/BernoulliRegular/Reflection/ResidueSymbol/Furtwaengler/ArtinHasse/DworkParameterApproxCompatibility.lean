@@ -351,7 +351,7 @@ theorem artinHasseDworkParameterApprox_mem_Q
       [IsCyclotomicExtension {p, ℓ} ℚ R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') (N : ℕ) :
     artinHasseDworkParameterApprox S N ∈ S.Q := by
-  unfold artinHasseDworkParameterApprox
+  simp only [artinHasseDworkParameterApprox]
   apply Ideal.sum_mem
   intro n hn
   by_cases hn0 : n = 0
@@ -366,7 +366,7 @@ theorem artinHasseDworkParameterApproxTo_mem_Q
       [IsCyclotomicExtension {p, ℓ} ℚ R']
     (S : ConcreteStickelbergerSetup ℓ p k K R') (N : ℕ) :
     artinHasseDworkParameterApproxTo S N ∈ S.Q := by
-  unfold artinHasseDworkParameterApproxTo
+  simp only [artinHasseDworkParameterApproxTo]
   apply Ideal.sum_mem
   intro n hn
   by_cases hn0 : n = 0

@@ -19,8 +19,9 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
-open Finset
-
+-- Hides one warning: `cyclotomicUnitsComplexConj_apply_coe` does not use all of the section
+-- instances. Removing the suppression needs `omit`, which drops the binder and so changes the
+-- statement — generalisation work, not cleanup.
 set_option linter.unusedSectionVars false
 
 attribute [local instance] Fintype.ofFinite
@@ -34,7 +35,7 @@ field, with the CM structure supplied by `p > 2`. -/
 noncomputable def cyclotomicRingOfIntegersComplexConj
     (hp_gt_two : 2 < p) :
     𝓞 K ≃+* 𝓞 K := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   exact (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv
 
@@ -43,7 +44,7 @@ structure supplied by `p > 2`. -/
 noncomputable def cyclotomicUnitsComplexConj
     (hp_gt_two : 2 < p) :
     CyclotomicUnitGroup K ≃* CyclotomicUnitGroup K := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   exact NumberField.IsCMField.unitsComplexConj K
 
@@ -53,7 +54,7 @@ theorem cyclotomicUnitsComplexConj_apply_coe
     ((cyclotomicUnitsComplexConj (p := p) K hp_gt_two u : CyclotomicUnitGroup K) :
         𝓞 K) =
       cyclotomicRingOfIntegersComplexConj (p := p) K hp_gt_two (u : 𝓞 K) := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   rfl
 
@@ -61,21 +62,22 @@ theorem cyclotomicUnitsComplexConj_apply_coe
 field. -/
 noncomputable def cyclotomicComplexConjGal
     (hp_gt_two : 2 < p) : Gal(K / ℚ) := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   exact
     { (NumberField.IsCMField.complexConj K).toRingEquiv with
-      commutes' := fun q => by
+      commutes' := fun q ↦ by
         exact map_ratCast
           ((NumberField.IsCMField.complexConj K).toRingEquiv.toRingHom) q }
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Under the standard cyclotomic Galois identification, complex conjugation
 is the element `-1` of `(ZMod p)^*`. -/
 theorem cyclotomicGalEquivZMod_complexConjGal_eq_neg_one
     (hp_gt_two : 2 < p) :
     cyclotomicGalEquivZMod (p := p) K
         (cyclotomicComplexConjGal (p := p) K hp_gt_two) = -1 := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   let c : Gal(K / ℚ) := cyclotomicComplexConjGal (p := p) K hp_gt_two
   have hζ := IsCyclotomicExtension.zeta_spec p ℚ K
@@ -144,7 +146,7 @@ theorem cyclotomicFullLogSpaceDeltaAction_neg_one_apply
   ext x
   rw [InfinitePlace.smul_apply]
   change w (cyclotomicComplexConjGal (p := p) K hp_gt_two x) = w x
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   simp [cyclotomicComplexConjGal]
 
@@ -210,15 +212,10 @@ theorem cyclotomicInfinitePlace_not_isUnramified
   refine ⟨?_, ?_⟩
   · rw [← InfinitePlace.not_isReal_iff_isComplex]
     intro hw
-    have hpos' : 0 < NumberField.InfinitePlace.nrRealPlaces K :=
-      by
-        classical
-        letI : DecidablePred (fun w : InfinitePlace K => InfinitePlace.IsReal w) :=
-          Classical.decPred _
-        letI : Fintype {w : InfinitePlace K // InfinitePlace.IsReal w} :=
-          Subtype.fintype InfinitePlace.IsReal
-        rw [NumberField.InfinitePlace.nrRealPlaces]
-        exact Fintype.card_pos_iff.mpr ⟨⟨w, hw⟩⟩
+    have hpos' : 0 < NumberField.InfinitePlace.nrRealPlaces K := by
+      classical
+      rw [NumberField.InfinitePlace.nrRealPlaces]
+      exact Fintype.card_pos_iff.mpr ⟨⟨w, hw⟩⟩
     simp [IsCyclotomicExtension.Rat.nrRealPlaces_eq_zero (n := p) K hp_gt_two] at hpos'
   · rw [Subsingleton.elim (w.comap (algebraMap ℚ K)) Rat.infinitePlace]
     exact Rat.isReal_infinitePlace
@@ -228,17 +225,17 @@ theorem cyclotomicInfinitePlaceStabilizer_card
     Nat.card (cyclotomicInfinitePlaceStabilizer (p := p) K w) = 2 := by
   let e : cyclotomicInfinitePlaceStabilizer (p := p) K w ≃
       MulAction.stabilizer (Gal(K / ℚ)) w :=
-    { toFun := fun a => ⟨cyclotomicSigmaOfUnit (p := p) K a, a.property⟩
-      invFun := fun σ => ⟨cyclotomicGalEquivZMod (p := p) K σ, by
+    { toFun := fun a ↦ ⟨cyclotomicSigmaOfUnit (p := p) K a, a.property⟩
+      invFun := fun σ ↦ ⟨cyclotomicGalEquivZMod (p := p) K σ, by
         change ((cyclotomicGalEquivZMod (p := p) K).symm
             ((cyclotomicGalEquivZMod (p := p) K) (σ : Gal(K / ℚ)))) • w = w
         rw [(cyclotomicGalEquivZMod (p := p) K).symm_apply_apply (σ : Gal(K / ℚ))]
         exact σ.property⟩
-      left_inv := fun a =>
+      left_inv := fun a ↦
         Subtype.ext <| cyclotomicGalEquivZMod_sigmaOfUnit (p := p) (K := K) a
-      right_inv := fun σ =>
+      right_inv := fun σ ↦
         Subtype.ext <| (cyclotomicGalEquivZMod (p := p) K).symm_apply_apply σ }
-  haveI : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p} ℚ K
+  have : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p} ℚ K
   have hcard : Nat.card (MulAction.stabilizer (Gal(K / ℚ)) w) = 2 := by
     simpa [cyclotomicInfinitePlace_not_isUnramified (p := p) (K := K) hp_gt_two w] using
       (InfinitePlace.card_stabilizer (k := ℚ) (K := K) (w := w))
@@ -280,61 +277,81 @@ theorem cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
   rw [← cyclotomicInfinitePlaceStabilizer_eq_evenSubgroup (p := p) (K := K) hp_gt_two w,
     mem_cyclotomicInfinitePlaceStabilizer_iff]
 
+private theorem cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_eq_one
+    (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p)
+    (hq : cyclotomicEvenDeltaQuotient p a = 1) :
+    LinearMap.trace ℝ (CyclotomicFullLogSpace K)
+        ((cyclotomicFullLogSpaceDeltaAction (p := p) K a).toLinearMap) =
+      Fintype.card (InfinitePlace K) := by
+  classical
+  rw [LinearMap.trace_eq_matrix_trace (b := Pi.basisFun ℝ (InfinitePlace K))]
+  simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
+    Pi.basisFun_apply]
+  calc
+    (∑ x : InfinitePlace K,
+        (cyclotomicFullLogSpaceDeltaAction (p := p) K a
+          ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
+        = ∑ x : InfinitePlace K, (1 : ℝ) := by
+            apply Finset.sum_congr rfl
+            intro w _
+            have hw : cyclotomicSigmaOfUnit (p := p) K a • w = w :=
+              (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
+                (p := p) (K := K) hp_gt_two a w).2 ((QuotientGroup.eq_one_iff a).1 hq)
+            have hwinv : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w = w := by
+              calc
+                (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w =
+                    (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ •
+                      (cyclotomicSigmaOfUnit (p := p) K a • w) := by rw [hw]
+                _ = w := by rw [inv_smul_smul]
+            rw [cyclotomicFullLogSpaceDeltaAction_apply, hwinv]
+            simp
+    _ = Fintype.card (InfinitePlace K) := by simp
+
+private theorem cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_ne_one
+    (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p)
+    (hq : cyclotomicEvenDeltaQuotient p a ≠ 1) :
+    LinearMap.trace ℝ (CyclotomicFullLogSpace K)
+        ((cyclotomicFullLogSpaceDeltaAction (p := p) K a).toLinearMap) = ((0 : ℕ) : ℝ) := by
+  classical
+  rw [LinearMap.trace_eq_matrix_trace (b := Pi.basisFun ℝ (InfinitePlace K))]
+  simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
+    Pi.basisFun_apply]
+  calc
+    (∑ x : InfinitePlace K,
+        (cyclotomicFullLogSpaceDeltaAction (p := p) K a
+          ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
+        = ∑ x : InfinitePlace K, (0 : ℝ) := by
+            apply Finset.sum_congr rfl
+            intro w _
+            have hnot : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w ≠ w := by
+              intro hw
+              have hfix : cyclotomicSigmaOfUnit (p := p) K a • w = w := by
+                calc
+                  cyclotomicSigmaOfUnit (p := p) K a • w =
+                      cyclotomicSigmaOfUnit (p := p) K a •
+                        ((cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w) := by rw [hw]
+                  _ = w := by rw [smul_inv_smul]
+              have ha_mem : a ∈ CyclotomicEvenDeltaSubgroup p :=
+                (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
+                  (p := p) (K := K) hp_gt_two a w).1 hfix
+              exact hq ((QuotientGroup.eq_one_iff a).2 ha_mem)
+            rw [cyclotomicFullLogSpaceDeltaAction_apply]
+            simp [hnot]
+    _ = ((0 : ℕ) : ℝ) := by simp
+
 theorem cyclotomicFullLogSpaceDeltaAction_trace
     (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p) :
     LinearMap.trace ℝ (CyclotomicFullLogSpace K)
         ((cyclotomicFullLogSpaceDeltaAction (p := p) K a).toLinearMap) =
       if cyclotomicEvenDeltaQuotient p a = 1 then Fintype.card (InfinitePlace K) else 0 := by
   classical
-  rw [LinearMap.trace_eq_matrix_trace (b := Pi.basisFun ℝ (InfinitePlace K))]
   by_cases hq : cyclotomicEvenDeltaQuotient p a = 1
   · rw [if_pos hq]
-    simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
-      Pi.basisFun_apply]
-    calc
-      (∑ x : InfinitePlace K,
-          (cyclotomicFullLogSpaceDeltaAction (p := p) K a
-            ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
-          = ∑ x : InfinitePlace K, (1 : ℝ) := by
-              apply Finset.sum_congr rfl
-              intro w _
-              have hw : cyclotomicSigmaOfUnit (p := p) K a • w = w :=
-                (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
-                  (p := p) (K := K) hp_gt_two a w).2 ((QuotientGroup.eq_one_iff a).1 hq)
-              have hwinv : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w = w := by
-                calc
-                  (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w =
-                      (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ •
-                        (cyclotomicSigmaOfUnit (p := p) K a • w) := by rw [hw]
-                  _ = w := by rw [inv_smul_smul]
-              rw [cyclotomicFullLogSpaceDeltaAction_apply, hwinv]
-              simp
-      _ = Fintype.card (InfinitePlace K) := by simp
+    exact cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_eq_one
+      (p := p) (K := K) hp_gt_two a hq
   · rw [if_neg hq]
-    simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
-      Pi.basisFun_apply]
-    calc
-      (∑ x : InfinitePlace K,
-          (cyclotomicFullLogSpaceDeltaAction (p := p) K a
-            ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
-          = ∑ x : InfinitePlace K, (0 : ℝ) := by
-              apply Finset.sum_congr rfl
-              intro w _
-              have hnot : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w ≠ w := by
-                intro hw
-                have hfix : cyclotomicSigmaOfUnit (p := p) K a • w = w := by
-                  calc
-                    cyclotomicSigmaOfUnit (p := p) K a • w =
-                        cyclotomicSigmaOfUnit (p := p) K a •
-                          ((cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w) := by rw [hw]
-                    _ = w := by rw [smul_inv_smul]
-                have ha_mem : a ∈ CyclotomicEvenDeltaSubgroup p :=
-                  (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
-                    (p := p) (K := K) hp_gt_two a w).1 hfix
-                exact hq ((QuotientGroup.eq_one_iff a).2 ha_mem)
-              rw [cyclotomicFullLogSpaceDeltaAction_apply]
-              simp [hnot]
-      _ = ((0 : ℕ) : ℝ) := by simp
+    exact cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_ne_one
+      (p := p) (K := K) hp_gt_two a hq
 
 theorem cyclotomicFullLogAugmentationLinearEquiv_trace_formula
     (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p) :
@@ -370,7 +387,6 @@ theorem cyclotomicFullLogAugmentationLinearEquiv_trace_formula
       rw [if_neg hq] at hfull
       simpa using hfull
     linarith
-
 
 end BernoulliRegular
 

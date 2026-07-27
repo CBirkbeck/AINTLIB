@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.NormalizedUnitLog
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.NormalizedUnitLog
 
 @[expose] public section
 
@@ -13,9 +15,7 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-variable [NumberField.IsCMField K]
 
-omit [NumberField.IsCMField K] in
 /-- Image in the level-`N + 1` quotient of the rational normalized factorial-weighted log
 coefficient, as a signed factorial-weighted coefficient of the mapped Artin-Hasse series. -/
 theorem samePrime_rIntegralRatToQuotient_normalizedFactorialWeightedLogCoeff
@@ -137,7 +137,6 @@ theorem samePrime_rIntegralRatToQuotient_normalizedFactorialWeightedLogCoeff
               ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) ^ (n + 1)) * y)
           hcoeff
 
-omit [NumberField.IsCMField K] in
 @[simp]
 theorem integralArtinHasseNormalizedExpMinusOneSeries_coeff (n : ℕ) :
     (PowerSeries.coeff (R := ValuedIntegerRing p K) n)
@@ -146,7 +145,6 @@ theorem integralArtinHasseNormalizedExpMinusOneSeries_coeff (n : ℕ) :
         (integralExpMinusOneSeries p K) := by
   simp [integralArtinHasseNormalizedExpMinusOneSeries]
 
-omit [NumberField.IsCMField K] in
 @[simp]
 theorem integralArtinHasseNormalizedExpMinusOneSeries_constantCoeff :
     PowerSeries.constantCoeff
@@ -164,7 +162,6 @@ theorem integralArtinHasseNormalizedExpMinusOneSeries_constantCoeff :
   rw [hsub]
   exact map_one (rIntegralRatToValuedInteger p K)
 
-omit [NumberField.IsCMField K] in
 @[simp]
 theorem integralArtinHasseNormalizedExpMinusOneSeries_map_valuedIntegerCyclotomicEquiv
     (a : CyclotomicUnitDelta p) :
@@ -173,17 +170,16 @@ theorem integralArtinHasseNormalizedExpMinusOneSeries_map_valuedIntegerCyclotomi
           ValuedIntegerRing p K →+* ValuedIntegerRing p K)
         (integralArtinHasseNormalizedExpMinusOneSeries p K) =
       integralArtinHasseNormalizedExpMinusOneSeries p K := by
-  ext n
+  refine PowerSeries.ext fun n => ?_
   rw [PowerSeries.coeff_map, integralArtinHasseNormalizedExpMinusOneSeries_coeff,
     integralExpMinusOneSeries, Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
-  exact congrArg Subtype.val
+  exact
     (Conjugation.valuedIntegerCyclotomicEquiv_rIntegralRatToValuedInteger
     (p := p) (K := K) a
     ⟨(PowerSeries.coeff (R := ℚ) (n + 1))
       (PadicLogSetup.FormalDwork.expMinusOneSeries p),
       PadicLogSetup.FormalDwork.expMinusOneSeries_isPIntegral p (n + 1)⟩)
 
-omit [NumberField.IsCMField K] in
 /-- Formal normalized-factor identity for the integral Artin-Hasse series. -/
 theorem integralExpMinusOneSeries_eq_X_mul_normalized :
     integralExpMinusOneSeries p K =
@@ -212,7 +208,6 @@ theorem integralExpMinusOneSeries_eq_X_mul_normalized :
           simpa [integralArtinHasseNormalizedExpMinusOneSeries] using
             (PowerSeries.sub_const_eq_X_mul_shift (integralExpMinusOneSeries p K))
 
-omit [NumberField.IsCMField K] in
 theorem evalIntegralPowerSeriesMod_X_mul
     (F : PowerSeries (ValuedIntegerRing p K))
     {x : DworkCompleteIntegerRing p K}
@@ -255,7 +250,6 @@ theorem evalIntegralPowerSeriesMod_X_mul
           rw [PowerSeries.trunc_X]
           simp
 
-omit [NumberField.IsCMField K] in
 theorem evalIntegralPowerSeries_X_mul
     (F : PowerSeries (ValuedIntegerRing p K))
     {x : DworkCompleteIntegerRing p K}
@@ -267,7 +261,6 @@ theorem evalIntegralPowerSeries_X_mul
   rw [evalIntegralPowerSeries_evalₐ, map_mul, evalIntegralPowerSeries_evalₐ]
   exact evalIntegralPowerSeriesMod_X_mul (p := p) (K := K) F hx N
 
-omit [NumberField.IsCMField K] in
 theorem evalIntegralPowerSeries_expMinusOne_eq_exp_sub_one
     {x : DworkCompleteIntegerRing p K}
     (hx : AdicCompletion.evalₐ (lambdaIdeal p K) 1 x = 0) :
@@ -279,7 +272,6 @@ theorem evalIntegralPowerSeries_expMinusOne_eq_exp_sub_one
     map_one,
     PadicLogSetup.DworkParameter.Conjugation.evalIntegralPowerSeriesMod_expMinusOne_eq_exp_sub_one]
 
-omit [NumberField.IsCMField K] in
 /-- Completed evaluation of the normalized Artin-Hasse numerator. -/
 noncomputable def artinHasseNormalizedExpMinusOneEval
     (x : DworkCompleteIntegerRing p K)
@@ -288,7 +280,6 @@ noncomputable def artinHasseNormalizedExpMinusOneEval
   evalIntegralPowerSeries p K
     (integralArtinHasseNormalizedExpMinusOneSeries p K) x hx
 
-omit [NumberField.IsCMField K] in
 /-- In the complete Dwork ring, `E_p(x)-1 = x * A_p(x)` for the normalized
 Artin-Hasse factor `A_p(T) = (E_p(T)-1)/T`. -/
 theorem artinHasseExp_eval_sub_one_eq_mul_normalized
@@ -301,7 +292,6 @@ theorem artinHasseExp_eval_sub_one_eq_mul_normalized
   exact evalIntegralPowerSeries_X_mul (p := p) (K := K)
     (integralArtinHasseNormalizedExpMinusOneSeries p K) hx
 
-omit [NumberField.IsCMField K] in
 /-- Truncated finite value of the normalized Artin-Hasse factor
 `(E_p(T)-1)/T`. -/
 def samePrimeFiniteArtinHasseNormalized
@@ -310,13 +300,11 @@ def samePrimeFiniteArtinHasseNormalized
       (integralArtinHasseNormalizedExpMinusOneSeries p K)).eval₂
     (RingHom.id (ValuedIntegerRing p K)) x
 
-omit [NumberField.IsCMField K] in
 /-- Principal-unit coordinate of the truncated normalized Artin-Hasse factor. -/
 def samePrimeFiniteArtinHasseNormalizedCoord
     (N : ℕ) (x : ValuedIntegerRing p K) : ValuedIntegerRing p K :=
   samePrimeFiniteArtinHasseNormalized (p := p) (K := K) N x - 1
 
-omit [NumberField.IsCMField K] in
 /-- Truncated normalized Artin-Hasse factor at the Dwork-parameter
 approximant. -/
 noncomputable def dworkParameterNormalizedApprox (N : ℕ) :
@@ -324,7 +312,6 @@ noncomputable def dworkParameterNormalizedApprox (N : ℕ) :
   samePrimeFiniteArtinHasseNormalized (p := p) (K := K) N
     (dworkParameterApprox p K (N + 1))
 
-omit [NumberField.IsCMField K] in
 /-- Truncated normalized Artin-Hasse factor at the scaled Dwork-parameter
 approximant. -/
 noncomputable def scaledDworkParameterNormalizedApprox
@@ -332,19 +319,16 @@ noncomputable def scaledDworkParameterNormalizedApprox
   samePrimeFiniteArtinHasseNormalized (p := p) (K := K) N
     (scaledDworkParameterApprox p K a (N + 1))
 
-omit [NumberField.IsCMField K] in
 /-- Principal-unit coordinate of `dworkParameterNormalizedApprox`. -/
 noncomputable def dworkParameterNormalizedCoordApprox (N : ℕ) :
     ValuedIntegerRing p K :=
   dworkParameterNormalizedApprox (p := p) (K := K) N - 1
 
-omit [NumberField.IsCMField K] in
 /-- Principal-unit coordinate of `scaledDworkParameterNormalizedApprox`. -/
 noncomputable def scaledDworkParameterNormalizedCoordApprox
     (a : ZMod p) (N : ℕ) : ValuedIntegerRing p K :=
   scaledDworkParameterNormalizedApprox (p := p) (K := K) a N - 1
 
-omit [NumberField.IsCMField K] in
 theorem dworkParameterNormalizedCoordApprox_eq
     (N : ℕ) :
     dworkParameterNormalizedCoordApprox (p := p) (K := K) N =
@@ -352,7 +336,6 @@ theorem dworkParameterNormalizedCoordApprox_eq
         (dworkParameterApprox p K (N + 1)) :=
   rfl
 
-omit [NumberField.IsCMField K] in
 theorem scaledDworkParameterNormalizedCoordApprox_eq
     (a : ZMod p) (N : ℕ) :
     scaledDworkParameterNormalizedCoordApprox (p := p) (K := K) a N =
@@ -360,7 +343,6 @@ theorem scaledDworkParameterNormalizedCoordApprox_eq
         (scaledDworkParameterApprox p K a (N + 1)) :=
   rfl
 
-omit [NumberField.IsCMField K] in
 theorem quotient_mk_dworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
     (N : ℕ) :
     Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
@@ -387,7 +369,6 @@ theorem quotient_mk_dworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
   intro n _hn
   simp [q, I, map_pow]
 
-omit [NumberField.IsCMField K] in
 theorem quotient_mk_scaledDworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
     (a : ZMod p) (N : ℕ) :
     Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
@@ -414,7 +395,6 @@ theorem quotient_mk_scaledDworkParameterNormalizedApprox_eq_evalIntegralPowerSer
   intro n _hn
   simp [q, I, map_pow]
 
-omit [NumberField.IsCMField K] in
 theorem evalₐ_artinHasseNormalized_dworkParameter_eq_mk_normalizedApprox
     (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) (N + 1)
@@ -427,7 +407,6 @@ theorem evalₐ_artinHasseNormalized_dworkParameter_eq_mk_normalizedApprox
   exact (quotient_mk_dworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
     (p := p) (K := K) N).symm
 
-omit [NumberField.IsCMField K] in
 theorem evalₐ_artinHasseNormalized_scaledDworkParameter_eq_mk_normalizedApprox
     (a : ZMod p) (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) (N + 1)
@@ -440,14 +419,12 @@ theorem evalₐ_artinHasseNormalized_scaledDworkParameter_eq_mk_normalizedApprox
   exact (quotient_mk_scaledDworkParameterNormalizedApprox_eq_evalIntegralPowerSeriesMod
     (p := p) (K := K) a N).symm
 
-omit [NumberField.IsCMField K] in
 @[simp] theorem samePrimeFiniteArtinHasseNormalizedCoord_add_one
     (N : ℕ) (x : ValuedIntegerRing p K) :
     samePrimeFiniteArtinHasseNormalizedCoord (p := p) (K := K) N x + 1 =
       samePrimeFiniteArtinHasseNormalized (p := p) (K := K) N x := by
   simp [samePrimeFiniteArtinHasseNormalizedCoord]
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoord_eq_positive_sum
     (N : ℕ) (x : ValuedIntegerRing p K) :
     samePrimeFiniteArtinHasseNormalizedCoord (p := p) (K := K) N x =
@@ -464,7 +441,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoord_eq_positive_sum
       integralArtinHasseNormalizedExpMinusOneSeries_constantCoeff]
   simp [hcoeff0]
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoord_mem_lambdaIdeal
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseNormalizedCoord (p := p) (K := K) N x ∈
@@ -478,7 +454,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoord_mem_lambdaIdeal
       (Ideal.pow_mem_pow hx (n + 1))
   exact (lambdaIdeal p K).mul_mem_left _ hpow
 
-omit [NumberField.IsCMField K] in
 theorem dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
     (N : ℕ) :
     dworkParameterNormalizedCoordApprox (p := p) (K := K) N ∈ lambdaIdeal p K := by
@@ -487,7 +462,6 @@ theorem dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
       (p := p) (K := K) N
       (dworkParameterApprox_mem_lambdaIdeal (p := p) (K := K) (N + 1))
 
-omit [NumberField.IsCMField K] in
 theorem scaledDworkParameterNormalizedCoordApprox_mem_lambdaIdeal
     (a : ZMod p) (N : ℕ) :
     scaledDworkParameterNormalizedCoordApprox (p := p) (K := K) a N ∈
@@ -497,7 +471,6 @@ theorem scaledDworkParameterNormalizedCoordApprox_mem_lambdaIdeal
       (p := p) (K := K) N
       (scaledDworkParameterApprox_mem_lambdaIdeal (p := p) (K := K) a (N + 1))
 
-omit [NumberField.IsCMField K] in
 /-- Homogeneous bookkeeping polynomial for the normalized Artin-Hasse
 principal-unit coordinate. -/
 def samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -508,7 +481,6 @@ def samePrimeFiniteArtinHasseNormalizedCoordPoly
       ((PowerSeries.coeff (R := ValuedIntegerRing p K) (n + 1))
         (integralArtinHasseNormalizedExpMinusOneSeries p K) * x ^ (n + 1))
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_eval_one
     (N : ℕ) (x : ValuedIntegerRing p K) :
     (samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -519,7 +491,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_eval_one
   simp [samePrimeFiniteArtinHasseNormalizedCoordPoly, Polynomial.eval_finsetSum,
     Polynomial.eval_monomial]
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_mem_lambdaIdeal_pow
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) (d : ℕ) :
     (samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -536,7 +507,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_mem_lambdaIdeal_pow
         (Ideal.pow_mem_pow hx (n + 1)))
   · simp [Polynomial.coeff_monomial, hnd]
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_zero
     (N : ℕ) (x : ValuedIntegerRing p K) :
     (samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -544,7 +514,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_zero
   classical
   simp [samePrimeFiniteArtinHasseNormalizedCoordPoly, Polynomial.coeff_monomial]
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_eq_of_pos_le
     (N d : ℕ) (x : ValuedIntegerRing p K) (hd0 : d ≠ 0) (hdN : d ≤ N) :
     (samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -577,7 +546,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_eq_of_pos_le
         have hdsub : (d - 1) + 1 = d := Nat.sub_add_cancel hdpos
         simp [hdsub]
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_eq_zero_of_lt
     (N d : ℕ) (x : ValuedIntegerRing p K) (hdN : N < d) :
     (samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -590,7 +558,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_eq_zero_of_lt
       have hne : n + 1 ≠ d := by omega
       simp [Polynomial.coeff_monomial, hne]
 
-omit [NumberField.IsCMField K] in
 /-- Dummy-variable quotient series whose `T^d` coefficient is the image of
 the degree-`d` homogeneous part of `A_p(x) - 1`. -/
 def samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries
@@ -601,7 +568,6 @@ def samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries
     (PowerSeries.map (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1)))
       (integralArtinHasseNormalizedExpMinusOneSeries p K - 1))
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_map_eq_quotientSeries
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     ((samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -650,7 +616,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_map_eq_quotientSeries
       have hpowmap : (q x) ^ d = q (x ^ d) := (map_pow q x d).symm
       rw [hpoly, map_zero, hpowmap, hxzero, zero_mul]
 
-omit [NumberField.IsCMField K] in
 theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_eq
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
@@ -687,7 +652,6 @@ theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_eq
           (p := p) (K := K) N x) ^ n) := by
         rw [hseries]
 
-omit [NumberField.IsCMField K] in
 theorem coeff_samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries_pow
     (N n d : ℕ) (x : ValuedIntegerRing p K) :
     (PowerSeries.coeff
@@ -726,7 +690,6 @@ theorem coeff_samePrimeFiniteArtinHasseNormalizedCoordQuotientSeries_pow
             (integralArtinHasseNormalizedExpMinusOneSeries p K - 1)) ^ n) := by
         simp [xbar, q, A, F]
 
-omit [NumberField.IsCMField K] in
 /-- Signed numerator of the normalized homogeneous logarithm term, before the
 same-prime division by `n`. -/
 def samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator

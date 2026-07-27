@@ -480,7 +480,7 @@ theorem one_add_pi_pow_traceNatCast_mul_one_add_traceRootInverseCoord_eq_one
   have hcoord_eq :
       finiteLogProductCoord ((1 + F.π) ^ t - 1) (F.traceRootInverseCoord y) =
         (1 + F.π) ^ t * (1 + F.traceRootInverseCoord y) - 1 := by
-    unfold finiteLogProductCoord
+    simp only [finiteLogProductCoord]
     ring
   rw [hcoord_eq] at hcoord
   simpa [t] using sub_eq_zero.mp hcoord

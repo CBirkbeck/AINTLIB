@@ -70,13 +70,13 @@ private lemma glMap_diagQ (d : ℕ) [NeZero d] :
     glMap (diagQ d) = levelRaiseMatrix d := by
   apply Units.ext
   ext i j
-  have hentry : (glMap (diagQ d)) i j = (algebraMap ℚ ℝ) ((diagQ d : GL (Fin 2) ℚ).val i j) := rfl
-  rw [hentry, diagQ_coe]
+  rw [glMap_apply, diagQ_coe]
   fin_cases i <;> fin_cases j <;>
     simp [levelRaiseMatrix, GeneralLinearGroup.mkOfDetNeZero]
 
 /-- **Include → raise matrix identity** (machine-verified): `frickeGL N = frickeGL M * diag(d, 1)`
-as `GL₂(ℚ)` elements, for `d * M = N`.  Concretely `[0,-1;M,0]·[d,0;0,1] = [0,-1;Md,0] = [0,-1;N,0]`. -/
+as `GL₂(ℚ)` elements, for `d * M = N`.  Concretely
+`[0,-1;M,0]·[d,0;0,1] = [0,-1;Md,0] = [0,-1;N,0]`. -/
 private lemma frickeGL_eq_frickeGL_mul_diagQ {M : ℕ} [NeZero M] (d : ℕ) [NeZero d]
     (heq : d * M = N) :
     frickeGL N = frickeGL M * diagQ d := by
@@ -84,8 +84,7 @@ private lemma frickeGL_eq_frickeGL_mul_diagQ {M : ℕ} [NeZero M] (d : ℕ) [NeZ
   rw [GeneralLinearGroup.coe_mul, frickeGL_coe, frickeGL_coe, diagQ_coe]
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.of_apply] <;> push_cast [← heq] <;> ring
+    simp [Matrix.mul_apply, Fin.sum_univ_two, ← heq, mul_comm]
 
 /-- **Raise → include matrix identity** (machine-verified): `diag(d, 1) * frickeGL N =
 frickeGL M * diag(d, d)` as `GL₂(ℚ)` elements, for `d * M = N`.  Concretely
@@ -98,8 +97,7 @@ private lemma diagQ_mul_frickeGL {M : ℕ} [NeZero M] (d : ℕ) [NeZero d]
     diagQ_coe, scalQ_coe]
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.of_apply] <;> push_cast [← heq] <;> ring
+    simp [Matrix.mul_apply, Fin.sum_univ_two, ← heq, mul_comm]
 
 /-- `glMap (scalQ d)` has positive determinant `d² > 0`. -/
 private lemma glMap_scalQ_det_pos (d : ℕ) [NeZero d] :
@@ -119,18 +117,16 @@ private lemma slash_scalQ (d : ℕ) [NeZero d] (h : UpperHalfPlane → ℂ) :
   rw [ModularForm.slash_apply, sigma_eq_id_of_pos_det (glMap_scalQ_det_pos d),
     ContinuousAlgEquiv.refl_apply]
   have hdpos : (0 : ℝ) < (d : ℝ) := by exact_mod_cast NeZero.pos d
-  have hentry : ∀ i j, (glMap (scalQ d)) i j =
-      (algebraMap ℚ ℝ) ((scalQ d : GL (Fin 2) ℚ).val i j) := fun i j ↦ rfl
   have hsmul : (glMap (scalQ d)) • z = z := by
     refine (GL_smul_pos_eq hdpos (g := 1) (by simp) ?_ z).trans (one_smul _ z)
     rw [Units.val_one]
     ext i j
-    rw [hentry, scalQ_coe]
+    rw [glMap_apply, scalQ_coe]
     fin_cases i <;> fin_cases j <;>
       simp [Matrix.smul_apply]
   have hdenom : UpperHalfPlane.denom (glMap (scalQ d)) z = (d : ℂ) := by
     show ((glMap (scalQ d)) 1 0 : ℂ) * (z : ℂ) + ((glMap (scalQ d)) 1 1 : ℂ) = _
-    rw [hentry 1 0, hentry 1 1, scalQ_coe]
+    rw [glMap_apply (scalQ d) 1 0, glMap_apply (scalQ d) 1 1, scalQ_coe]
     simp only [Matrix.cons_val_one, Matrix.cons_val_zero, map_natCast,
       map_zero, Matrix.of_apply]
     push_cast; ring
@@ -236,13 +232,13 @@ theorem frickeOperatorCusp_mem_cuspFormsOldExtended
     · -- level-INCLUSION generator → level-RAISE generator (up to scalar)
       obtain ⟨d, hd⟩ := id hMN
       have hNpos : 0 < N := Nat.pos_of_neZero N
-      haveI : NeZero d := ⟨by rintro rfl; rw [hd, mul_zero] at hNpos; exact absurd hNpos (lt_irrefl 0)⟩
+      haveI : NeZero d := ⟨by rintro rfl; simp [hd] at hNpos⟩
       have heq : d * M = N := by rw [hd]; ring
       have hd1 : 1 < d := by
         rcases Nat.lt_or_ge 1 d with h | h
         · exact h
-        · have hd1' : d = 1 := le_antisymm h (Nat.pos_of_neZero d)
-          rw [hd1', one_mul] at heq; omega
+        · rw [le_antisymm h (Nat.pos_of_neZero d), one_mul] at heq
+          omega
       rw [frickeOperatorCusp_levelInclude d heq hMN g']
       refine Submodule.smul_mem _ _ (Submodule.subset_span (Or.inl ?_))
       exact ⟨M, d, inferInstance, inferInstance, hd1, heq, frickeOperatorCusp (N := M) k g', rfl⟩

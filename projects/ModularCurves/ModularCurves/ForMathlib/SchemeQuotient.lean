@@ -215,6 +215,7 @@ noncomputable def localQuotientπ {V : X.Opens} (hV : σ.IsStableOpen V)
   letI := σ.gammaMulSemiringAction hV
   hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The affine identification intertwines the geometric action restricted to a
 stable affine open with the `Spec` of the section-ring action (the c3 bridge:
 `resLE`/`isoSpec` naturality). -/
@@ -1033,84 +1034,99 @@ private theorem exists_chart_lift {Y : Scheme.{u}} (F : X ⟶ Y)
   rw [localQuotientπ_def, Category.assoc, hqx, ← Category.assoc, Iso.hom_inv_id,
     Category.id_comp]
 
+omit [IsAffineHom (pullback.diagonal (terminal.from X))] in
+/-- A chart descent `qxk` of `V k`, pulled back through the local quotient of a
+smaller stable affine open `W ≤ V k`, is the inclusion `W ↪ X` followed by `F`.
+This is the `qx`-level refinement of `localQuotientπ_localQuotientMap`. -/
+private theorem localQuotientπ_localQuotientMap_qx {Y : Scheme.{u}} (F : X ⟶ Y)
+    {W : X.Opens} (hW : σ.IsStableOpen W) (hWa : IsAffineOpen W) (k : X)
+    (hWk : W ≤ V k) (qxk : σ.localQuotient (hVs k) ⟶ Y)
+    (hqxk : σ.localQuotientπ (hVs k) (hVa k) ≫ qxk = (V k).ι ≫ F) :
+    σ.localQuotientπ hW hWa ≫
+        σ.localQuotientMap hW hWa (hVs k) (hVa k) hWk ≫ qxk =
+      W.ι ≫ F := by
+  rw [← Category.assoc, localQuotientπ_localQuotientMap σ hW hWa (hVs k) (hVa k) hWk,
+    Category.assoc, hqxk, ← Category.assoc]
+  congr 1
+  exact Scheme.homOfLE_ι X hWk
+
+/-- **Overlap agreement of the chart descents**: over the overlap `V i ⊓ V j` the
+two chart descents `qx i` and `qx j` agree, after the glue transition `glueT`. -/
+private theorem qx_overlap_comm {Y : Scheme.{u}} (F : X ⟶ Y)
+    (qx : ∀ x, σ.localQuotient (hVs x) ⟶ Y)
+    (hqx : ∀ x, σ.localQuotientπ (hVs x) (hVa x) ≫ qx x = (V x).ι ≫ F) (i j : X) :
+    σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
+          (hVs i) (hVa i) inf_le_left ≫ qx i =
+      glueT σ V hVs hVa i j ≫
+        σ.localQuotientMap ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i))
+          (hVs j) (hVa j) inf_le_left ≫ qx j := by
+  letI := σ.gammaMulSemiringAction ((hVs i).inf (hVs j))
+  have hπ' : invariantsπ G ↑Γ(X, V i ⊓ V j) ℤ =
+      ((hVa i).inf (hVa j)).isoSpec.inv ≫
+        σ.localQuotientπ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) := by
+    rw [localQuotientπ_def, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  refine invariantsπ_hom_ext G ↑Γ(X, V i ⊓ V j) ℤ _ _ ?_
+  rw [hπ', Category.assoc, Category.assoc]
+  congr 1
+  show σ.localQuotientπ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) ≫
+      σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
+        (hVs i) (hVa i) inf_le_left ≫ qx i =
+    σ.localQuotientπ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) ≫
+      glueT σ V hVs hVa i j ≫
+        σ.localQuotientMap ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i))
+          (hVs j) (hVa j) inf_le_left ≫ qx j
+  rw [localQuotientπ_localQuotientMap_qx σ V hVs hVa F ((hVs i).inf (hVs j))
+        ((hVa i).inf (hVa j)) i inf_le_left (qx i) (hqx i),
+    localQuotientMap_trans_assoc σ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
+      ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i)) (hVs j) (hVa j)
+      (le_inf inf_le_right inf_le_left) inf_le_left,
+    localQuotientπ_localQuotientMap_qx σ V hVs hVa F ((hVs i).inf (hVs j))
+      ((hVa i).inf (hVa j)) j inf_le_right (qx j) (hqx j)]
+
+/-- **Compatibility of the chart descents over the glue overlaps**: the chart
+descents `qx i`, `qx j` agree after pulling back along the glue-data inclusions,
+so they glue to a single morphism out of the quotient (`glueMorphisms`). -/
+private theorem qx_glueData_compat {Y : Scheme.{u}} (F : X ⟶ Y)
+    (qx : ∀ x, σ.localQuotient (hVs x) ⟶ Y)
+    (hqx : ∀ x, σ.localQuotientπ (hVs x) (hVa x) ≫ qx x = (V x).ι ≫ F) (i j : X) :
+    pullback.fst ((quotientGlueData σ V hVs hVa).ι i)
+          ((quotientGlueData σ V hVs hVa).ι j) ≫ qx i =
+      pullback.snd _ _ ≫ qx j := by
+  obtain ⟨ℓ, hℓ₁, hℓ₂⟩ :
+      ∃ ℓ : pullback ((quotientGlueData σ V hVs hVa).ι i)
+          ((quotientGlueData σ V hVs hVa).ι j) ⟶
+        σ.localQuotient ((hVs i).inf (hVs j)),
+        ℓ ≫ σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
+            (hVs i) (hVa i) inf_le_left = pullback.fst _ _ ∧
+        ℓ ≫ glueT σ V hVs hVa i j ≫
+            σ.localQuotientMap ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i))
+              (hVs j) (hVa j) inf_le_left = pullback.snd _ _ := by
+    obtain ⟨ℓ, h₁, h₂⟩ := PullbackCone.IsLimit.lift'
+      ((quotientGlueData σ V hVs hVa).vPullbackConeIsLimit i j)
+      (pullback.fst ((quotientGlueData σ V hVs hVa).ι i)
+        ((quotientGlueData σ V hVs hVa).ι j))
+      (pullback.snd _ _) pullback.condition
+    exact ⟨ℓ, h₁, h₂⟩
+  rw [← hℓ₁, ← hℓ₂, Category.assoc, qx_overlap_comm σ V hVs hVa F qx hqx i j,
+    Category.assoc, Category.assoc]
+
 /-- **Existence of descent along the quotient projection** (T-Q5d contract,
 part 3). -/
 theorem exists_quotientπ_lift {Y : Scheme.{u}} (F : X ⟶ Y)
     (hF : ∀ g : G, σ.hom g ≫ F = F) :
     ∃ q : σ.quotient V hVs hVa ⟶ Y, σ.quotientπ V hVs hVa hVmem ≫ q = F := by
   choose qx hqx using exists_chart_lift σ V hVs hVa F hF
-  -- compatibility over the glue overlaps
-  have hcompat : ∀ i j : X,
-      pullback.fst ((quotientGlueData σ V hVs hVa).ι i)
-          ((quotientGlueData σ V hVs hVa).ι j) ≫ qx i =
-        pullback.snd _ _ ≫ qx j := by
-    intro i j
-    -- both legs factor through the overlap quotient
-    have hleg : ∀ (k : X) (hk : V i ⊓ V j ≤ V k),
-        σ.localQuotientπ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) ≫
-          σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
-            (hVs k) (hVa k) hk ≫ qx k = (V i ⊓ V j).ι ≫ F := by
-      intro k hk
-      rw [← Category.assoc, localQuotientπ_localQuotientMap σ _ _ _ _ hk,
-        Category.assoc, hqx k, ← Category.assoc]
-      congr 1
-      exact Scheme.homOfLE_ι X hk
-    -- uniqueness at the overlap quotient
-    have hover : σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
-          (hVs i) (hVa i) inf_le_left ≫ qx i =
-        glueT σ V hVs hVa i j ≫
-          σ.localQuotientMap ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i))
-            (hVs j) (hVa j) inf_le_left ≫ qx j := by
-      letI := σ.gammaMulSemiringAction ((hVs i).inf (hVs j))
-      have hπ' : invariantsπ G ↑Γ(X, V i ⊓ V j) ℤ =
-          ((hVa i).inf (hVa j)).isoSpec.inv ≫
-            σ.localQuotientπ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) := by
-        rw [localQuotientπ_def, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
-      refine invariantsπ_hom_ext G ↑Γ(X, V i ⊓ V j) ℤ _ _ ?_
-      rw [hπ', Category.assoc, Category.assoc]
-      congr 1
-      show σ.localQuotientπ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) ≫
-          σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
-            (hVs i) (hVa i) inf_le_left ≫ qx i =
-        σ.localQuotientπ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j)) ≫
-          glueT σ V hVs hVa i j ≫
-            σ.localQuotientMap ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i))
-              (hVs j) (hVa j) inf_le_left ≫ qx j
-      rw [hleg i inf_le_left,
-        localQuotientMap_trans_assoc σ ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
-          ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i)) (hVs j) (hVa j)
-          (le_inf inf_le_right inf_le_left) inf_le_left,
-        hleg j inf_le_right]
-    -- transport along the vPullbackCone limit
-    obtain ⟨ℓ, hℓ₁, hℓ₂⟩ :
-        ∃ ℓ : pullback ((quotientGlueData σ V hVs hVa).ι i)
-            ((quotientGlueData σ V hVs hVa).ι j) ⟶
-          σ.localQuotient ((hVs i).inf (hVs j)),
-          ℓ ≫ σ.localQuotientMap ((hVs i).inf (hVs j)) ((hVa i).inf (hVa j))
-              (hVs i) (hVa i) inf_le_left = pullback.fst _ _ ∧
-          ℓ ≫ glueT σ V hVs hVa i j ≫
-              σ.localQuotientMap ((hVs j).inf (hVs i)) ((hVa j).inf (hVa i))
-                (hVs j) (hVa j) inf_le_left = pullback.snd _ _ := by
-      obtain ⟨ℓ, h₁, h₂⟩ := PullbackCone.IsLimit.lift'
-        ((quotientGlueData σ V hVs hVa).vPullbackConeIsLimit i j)
-        (pullback.fst ((quotientGlueData σ V hVs hVa).ι i)
-          ((quotientGlueData σ V hVs hVa).ι j))
-        (pullback.snd _ _) pullback.condition
-      refine ⟨ℓ, ?_, ?_⟩
-      · exact h₁
-      · exact h₂
-    rw [← hℓ₁, ← hℓ₂, Category.assoc, hover, Category.assoc, Category.assoc]
   refine ⟨(quotientGlueData σ V hVs hVa).openCover.glueMorphisms (fun x => qx x)
-    (fun i j => hcompat i j), ?_⟩
+    (fun i j => qx_glueData_compat σ V hVs hVa F qx hqx i j), ?_⟩
   have hfac : ∀ x' : X, (V x').ι ≫ σ.quotientπ V hVs hVa hVmem ≫
       (quotientGlueData σ V hVs hVa).openCover.glueMorphisms (fun x => qx x)
-        (fun i j => hcompat i j) = (V x').ι ≫ F := by
+        (fun i j => qx_glueData_compat σ V hVs hVa F qx hqx i j) = (V x').ι ≫ F := by
     intro x'
     have hι : (quotientGlueData σ V hVs hVa).ι x' ≫
         (quotientGlueData σ V hVs hVa).openCover.glueMorphisms (fun x => qx x)
-          (fun i j => hcompat i j) = qx x' :=
+          (fun i j => qx_glueData_compat σ V hVs hVa F qx hqx i j) = qx x' :=
       (quotientGlueData σ V hVs hVa).openCover.ι_glueMorphisms
-        (fun x => qx x) (fun i j => hcompat i j) x'
+        (fun x => qx x) (fun i j => qx_glueData_compat σ V hVs hVa F qx hqx i j) x'
     rw [← Category.assoc, opensι_quotientπ σ V hVs hVa hVmem x', Category.assoc,
       hι, hqx x']
   exact (atlasCover V hVmem).hom_ext _ _ fun x => hfac x

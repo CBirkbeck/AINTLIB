@@ -1,5 +1,12 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PSaturation
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PSaturation
 
 /-!
 # Cor 8.19 / Sinnott bridge: final synthesis

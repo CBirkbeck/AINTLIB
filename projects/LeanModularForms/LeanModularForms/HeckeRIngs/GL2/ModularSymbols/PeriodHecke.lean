@@ -23,7 +23,8 @@ both through the transpose `dualPrecomp`.
 The analytic and symbol Hecke operators are built from the **same** Heilbronn coset representatives
 (`T_p_upper` / `lowerDiamondMat`, ensured by ES-2), and the period map intertwines them via the
 Möbius change of variables `z = M • w` in the contour integral.  The crux is the change-of-variables
-identity, which we package as a general `SL(2, ℤ)` cusp-value covariance (`cuspValue_symRep_sl`) and a
+identity, which we package as a general `SL(2, ℤ)` cusp-value covariance
+(`cuspValue_symRep_sl`) and a
 determinant-`p` Heilbronn covariance (`cuspValue_symAct`); both reuse the σ-conjugate-frame boundary
 naturality engine of `PeriodInvariant.lean`.
 
@@ -215,7 +216,8 @@ theorem cuspValue_symRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL ℝ)) k
     ((Matrix.SpecialLinearGroup.mapGL ℚ g) • c)
   have hcvP := cuspValue_eq_top_sub_botVal f₂ cP (fun w => F (mob g w)) hG Ginf hGinf c
   rw [hcvQ, hcvP]
-  -- The cusp dictionary: the `OnePoint` representative of `(mapGL ℚ g) • c` is `(mapGL ℚ g) • (rep c)`.
+  -- The cusp dictionary: the `OnePoint` representative of `(mapGL ℚ g) • c` is
+  -- `(mapGL ℚ g) • (rep c)`.
   have hdict : (OnePoint.equivProjectivization ℚ).symm ((Matrix.SpecialLinearGroup.mapGL ℚ g) • c)
       = (Matrix.SpecialLinearGroup.mapGL ℚ g) • (OnePoint.equivProjectivization ℚ).symm c := by
     rw [Equiv.symm_apply_eq, OnePoint.equivProjectivization_smul, Equiv.apply_symm_apply]
@@ -247,8 +249,9 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
     -- The RHS `rawPairing f₁ (fullModSymRep g (D ⊗ P))` is *definitionally* the `rawBilin` of the
     -- `g`-moved divisor and `symRep`-acted polynomial (`fullModSymRep_apply` and `rawPairing_tmul`
     -- are `rfl`); `show` bridges the `Module ℤ` instance diamond on the tensor type.
-    show rawBilin f₂ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P =
-      rawBilin f₁ ((div0Rep ℤ g D : Div0 ℤ) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ)
+    show rawBilin f₂ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P =
+      rawBilin f₁ ((div0Rep ℤ g D : Div0 ℤ) :
+          MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff
         (symRep ℤ (k - 2).toNat g P)
     -- Expand `rawBilin` as a `Finsupp.sum`.
     have hrb : ∀ (D' : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) (P' : SymPow ℤ (k - 2).toNat),
@@ -267,9 +270,9 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
         zsmul_eq_mul]
     rw [hrb, hrb₂, castSymPow_symRep]
     -- Reindex the `g`-image divisor sum injectively.
-    have hdiv : ((div0Rep ℤ g D) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) =
+    have hdiv : ((div0Rep ℤ g D) : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff =
         Finsupp.mapDomain ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) g) • ·)
-          (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) := by
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff := by
       rw [div0Rep_apply]
     have hinj : Function.Injective
         (fun c : Projectivization ℚ (Fin 2 → ℚ) =>
@@ -278,14 +281,15 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
     rw [hdiv, Finsupp.sum_mapDomain_index_inj hinj]
     -- Combine into a single degree-0 sum of the (constant) cusp-value difference.
     rw [← sub_eq_zero, Finsupp.sum, Finsupp.sum, ← Finset.sum_sub_distrib]
-    -- Each summand: `n · cuspValue f₂ (cast P) c − n · cuspValue f₁ (symRep g (cast P)) (g•c) = n · (−T)`.
-    have hsummand : ∀ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+    -- Each summand:
+    -- `n · cuspValue f₂ (cast P) c − n · cuspValue f₁ (symRep g (cast P)) (g•c) = n · (−T)`.
+    have hsummand : ∀ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValue f₂ (castSymPow (k - 2).toNat P) c -
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValue f₁ (symRep ℂ (k - 2).toNat g (castSymPow (k - 2).toNat P))
               ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) g) • c) =
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) * (-T) := by
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) * (-T) := by
       intro c _
       have hmapeq : (Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) g) • c =
           (Matrix.SpecialLinearGroup.mapGL ℚ g) • c := by
@@ -293,8 +297,8 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
       rw [hmapeq, hT c]; ring
     rw [Finset.sum_congr rfl hsummand, ← Finset.sum_mul]
     -- The total weight `Σ_c D(c) = 0`.
-    have hsum0 : (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) = 0 := by
+    have hsum0 : (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) = 0 := by
       rw [← Int.cast_sum]
       have := Div0.sum_coeff_eq_zero D
       rw [Finsupp.sum] at this
@@ -307,9 +311,11 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
 
 /-! ## The diamond equivariance `hD`
 
-`diamondOpCusp k d` is the slash by a chosen `Γ₀(N)` representative `γ_d`, and `diamondSymb N k d` is
+`diamondOpCusp k d` is the slash by a chosen `Γ₀(N)` representative `γ_d`, and
+`diamondSymb N k d` is
 the descent of `fullModSymRep γ_d` to `Γ₁(N)`-coinvariants — using the *same* representative
-`γ_d = (Gamma0MapUnits_surjective d).choose`.  Hence the diamond equivariance is the det-`1` change of
+`γ_d = (Gamma0MapUnits_surjective d).choose`.  Hence the diamond equivariance is the
+det-`1` change of
 variables `rawPairing_fullModSymRep_sl` for `g = γ_d`. -/
 
 /-- **Diamond equivariance of the period map (`k ≥ 2`).**  The period map intertwines the cusp
@@ -341,7 +347,8 @@ theorem periodMap'_diamond (hk : 2 ≤ k) (d : (ZMod N)ˣ)
 /-! ## The determinant-`p` Heilbronn change of variables (the analogue of the det-`1` engine)
 
 We now mirror the entire det-`1` `SL(2, ℤ)` covariance engine (`mob`, `periodForm_mob_general`,
-`cuspBoundary_mob_naturality_sl`, `cuspValue_symRep_sl`, `rawPairing_fullModSymRep_sl`) for a general
+`cuspBoundary_mob_naturality_sl`, `cuspValue_symRep_sl`, `rawPairing_fullModSymRep_sl`)
+for a general
 integer matrix `M` of positive determinant — in particular the Heilbronn coset matrices `upperMat`,
 `lowerDiamondMat` of determinant `p`.  The Möbius map `mobM M w = (M₀₀w+M₀₁)/(M₁₀w+M₁₁)` now has
 derivative `det(M)/(M₁₀w+M₁₁)²`, and the project's slash carries the determinant factor
@@ -371,7 +378,8 @@ theorem denom_mobM_ne (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) {w : �
   rw [h10, h11]; exact hc
 
 omit [NeZero N] in
-/-- On the upper half-plane, `mobM M` is the (positive-determinant) Möbius action of `heilbronnGL M`.
+/-- On the upper half-plane, `mobM M` is the (positive-determinant) Möbius action of
+`heilbronnGL M`.
 -/
 theorem mobM_eq_smul (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det) (z : ℍ) :
     mobM M (z : ℂ) = ((glMap (heilbronnGL M hM.ne') • z : ℍ) : ℂ) := by
@@ -389,7 +397,8 @@ theorem mobM_eq_smul (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det) (z : ℍ)
   rw [hcast, hcast, hcast, hcast]
 
 omit [NeZero N] in
-/-- **The Möbius derivative (determinant `p`).**  `d/dw[(M₀₀w+M₀₁)/(M₁₀w+M₁₁)] = det(M)/(M₁₀w+M₁₁)²`.
+/-- **The Möbius derivative (determinant `p`).**
+`d/dw[(M₀₀w+M₀₁)/(M₁₀w+M₁₁)] = det(M)/(M₁₀w+M₁₁)²`.
 Generalises `hasDerivAt_mob` (which has `det = 1`). -/
 theorem hasDerivAt_mobM (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) {w : ℂ} (hw : 0 < w.im) :
     HasDerivAt (mobM M)
@@ -500,9 +509,11 @@ theorem evalSym1_symActC_mobM {m : ℕ} (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M
 omit [NeZero N] in
 /-- **Möbius change of variables for a determinant-`p` integer matrix `M` (slash form).**  For any
 `h0 : ℍ → ℂ`, weight `k ≥ 2`, `w` in the upper half-plane and `R : Sym^{k-2}`, the period integrand
-of `symActC M R` evaluated at `mobM M w`, times the Möbius derivative `det(M)·D⁻²`, equals the period
+of `symActC M R` evaluated at `mobM M w`, times the Möbius derivative `det(M)·D⁻²`,
+equals the period
 integrand of the slashed function `h0 ∣ heilbronnGL M` at `w`.  The determinant factors
-`det(M)^{1-k}·det(M)^{k-2}·det(M) = 1` and the automorphy factors `D^{k-(k-2)-2} = 1` cancel exactly.
+`det(M)^{1-k}·det(M)^{k-2}·det(M) = 1` and the automorphy factors `D^{k-(k-2)-2} = 1`
+cancel exactly.
 The determinant-`p` analogue of `periodForm_mob_general`. -/
 theorem periodForm_mobM_general (h0 : ℍ → ℂ) (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det)
     (R : SymPow ℂ (k - 2).toNat) (hk : 2 ≤ k) {w : ℂ} (hw : 0 < w.im) :
@@ -532,9 +543,11 @@ theorem periodForm_mobM_general (h0 : ℍ → ℂ) (M : Matrix (Fin 2) (Fin 2) �
       exact Int.cast_pos.mpr hM)
   have hdeneq : UpperHalfPlane.denom (glMap (heilbronnGL M hM.ne')) (wH : ℂ) = D := by
     rw [UpperHalfPlane.denom, hDdef]
-    have h10 : ((glMap (heilbronnGL M hM.ne') : Matrix (Fin 2) (Fin 2) ℝ) 1 0 : ℂ) = (M 1 0 : ℂ) := by
+    have h10 : ((glMap (heilbronnGL M hM.ne') : Matrix (Fin 2) (Fin 2) ℝ) 1 0 : ℂ) =
+        (M 1 0 : ℂ) := by
       simp [glMap, heilbronnGL, qMat, Matrix.GeneralLinearGroup.map, Units.map]
-    have h11 : ((glMap (heilbronnGL M hM.ne') : Matrix (Fin 2) (Fin 2) ℝ) 1 1 : ℂ) = (M 1 1 : ℂ) := by
+    have h11 : ((glMap (heilbronnGL M hM.ne') : Matrix (Fin 2) (Fin 2) ℝ) 1 1 : ℂ) =
+        (M 1 1 : ℂ) := by
       simp [glMap, heilbronnGL, qMat, Matrix.GeneralLinearGroup.map, Units.map]
     rw [h10, h11]
   have hv : (glMap (heilbronnGL M hM.ne')).det.val = (M.det : ℝ) := by
@@ -553,7 +566,8 @@ theorem periodForm_mobM_general (h0 : ℍ → ℂ) (M : Matrix (Fin 2) (Fin 2) �
       apply UpperHalfPlane.ext; exact hmobcoe
     rw [hpt]
     have happ : (h0 ∣[k] (heilbronnGL M hM.ne')) wH =
-        (UpperHalfPlane.σ (glMap (heilbronnGL M hM.ne'))) (h0 ((glMap (heilbronnGL M hM.ne')) • wH)) *
+        (UpperHalfPlane.σ (glMap (heilbronnGL M hM.ne')))
+          (h0 ((glMap (heilbronnGL M hM.ne')) • wH)) *
           ((|(glMap (heilbronnGL M hM.ne')).det.val| : ℝ) : ℂ) ^ (k - 1) *
           UpperHalfPlane.denom (glMap (heilbronnGL M hM.ne')) wH ^ (-k) := by
       show (h0 ∣[k] (glMap (heilbronnGL M hM.ne'))) wH = _
@@ -599,7 +613,8 @@ theorem hasDerivAt_primitive_mobM_general (h0 : ℍ → ℂ) (M : Matrix (Fin 2)
     HasDerivAt (fun z => Fp (mobM M z))
       (periodForm (h0 ∣[k] (heilbronnGL M hM.ne')) R w) w := by
   have hmobpos : 0 < (mobM M w).im := by
-    rw [mobM_eq_smul M hM ⟨w, hw⟩]; exact ((glMap (heilbronnGL M hM.ne') • (⟨w, hw⟩ : ℍ) : ℍ)).im_pos
+    rw [mobM_eq_smul M hM ⟨w, hw⟩]
+    exact ((glMap (heilbronnGL M hM.ne') • (⟨w, hw⟩ : ℍ) : ℍ)).im_pos
   have hF' : HasDerivAt Fp (periodForm h0 (symActC M (k - 2).toNat R) (mobM M w)) (mobM M w) :=
     hFp (mobM M w) hmobpos
   have hmob' : HasDerivAt (mobM M)
@@ -621,7 +636,8 @@ composition law and the pole/upper geometry of `mobM` for a general nonzero-dete
 omit [NeZero N] in
 /-- **Möbius composition.**  For `g ∈ SL(2, ℤ)` and an integer matrix `M` of positive determinant,
 `mob g ∘ mobM M` is the Möbius map of the matrix product `(g : ℤ-mat) · M`:
-`mob g (mobM M w) = mobM ((g : ℤ-mat) * M) w` (for `w` in the upper half-plane).  Möbius maps compose
+`mob g (mobM M w) = mobM ((g : ℤ-mat) * M) w` (for `w` in the upper half-plane).  Möbius
+maps compose
 by matrix multiplication. -/
 theorem mob_mobM_comp (g : SL(2, ℤ)) (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det) {w : ℂ}
     (hw : 0 < w.im) :
@@ -630,7 +646,8 @@ theorem mob_mobM_comp (g : SL(2, ℤ)) (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 
   set D : ℂ := (M 1 0 : ℂ) * w + (M 1 1 : ℂ) with hDdef
   -- The inner Möbius image stays in the upper half-plane, so `mob g`'s denominator is nonzero.
   have hmw : 0 < (mobM M w).im := by
-    rw [mobM_eq_smul M hM ⟨w, hw⟩]; exact ((glMap (heilbronnGL M hM.ne') • (⟨w, hw⟩ : ℍ) : ℍ)).im_pos
+    rw [mobM_eq_smul M hM ⟨w, hw⟩]
+    exact ((glMap (heilbronnGL M hM.ne') • (⟨w, hw⟩ : ℍ) : ℍ)).im_pos
   have hg : ((g 1 0 : ℂ) * (mobM M w) + (g 1 1 : ℂ)) ≠ 0 := denom_mob_ne g hmw
   -- The denominator of `mobM (gM) w`: `(g10 M00 + g11 M10) w + (g10 M01 + g11 M11) ≠ 0`.
   have hRHSden : ((g 1 0 : ℂ) * (M 0 0 : ℂ) + (g 1 1 : ℂ) * (M 1 0 : ℂ)) * w +
@@ -691,7 +708,8 @@ theorem re_mobM_pole (M : Matrix (Fin 2) (Fin 2) ℤ) {q Y : ℝ} (hc : (M 1 0 :
 
 omit [NeZero N] in
 /-- The imaginary part of the Möbius image of the vertical ray at a pole tends to `+∞` as `Y → 0⁺`
-(for `det M > 0`): the perpendicular approach to the finite cusp `q` is sent to a curve running off to
+(for `det M > 0`): the perpendicular approach to the finite cusp `q` is sent to a curve
+running off to
 `i∞`.  The determinant-`p` analogue of `tendsto_im_mob_pole`. -/
 theorem tendsto_im_mobM_pole (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det) {q : ℝ}
     (hc : (M 1 0 : ℝ) ≠ 0) (hpole : (M 1 0 : ℝ) * q + (M 1 1 : ℝ) = 0) :
@@ -745,7 +763,8 @@ omit [NeZero N] in
 `(M₀₀ q + M₀₁)/M₁₁`. -/
 theorem re_mobM_upper (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det) {q Y : ℝ}
     (hc : (M 1 0 : ℝ) = 0) :
-    (mobM M ((q : ℂ) + (Y : ℂ) * Complex.I)).re = ((M 0 0 : ℝ) * q + (M 0 1 : ℝ)) / (M 1 1 : ℝ) := by
+    (mobM M ((q : ℂ) + (Y : ℂ) * Complex.I)).re =
+      ((M 0 0 : ℝ) * q + (M 0 1 : ℝ)) / (M 1 1 : ℝ) := by
   rw [mobM_upper_eq M hM hc, Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_re,
     Complex.ofReal_im, Complex.I_re, Complex.I_im]
   ring
@@ -823,7 +842,8 @@ theorem tendsto_FM_pole (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 �
 
 /-- **Boundary value of `F` along an upper-triangular geodesic to `i∞` (determinant `p`).**  The
 det-`p` analogue of `tendsto_F_upper`: for `F` a primitive of `periodForm f (symActC M R)` with
-identity-frame top value `Finf`, if `M` is upper-triangular (`M₁₀ = 0`, so `M • ∞ = ∞`), the vertical
+identity-frame top value `Finf`, if `M` is upper-triangular (`M₁₀ = 0`, so `M • ∞ = ∞`),
+the vertical
 ray's image `mobM M (q₀ + iY)` runs off to `i∞` as `Y → ∞`, so `F(mobM M (q₀ + iY)) → Finf`. -/
 theorem tendsto_FM_upper (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)
     (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det) (R : SymPow ℂ (k - 2).toNat) (F : ℂ → ℂ)
@@ -849,10 +869,12 @@ theorem tendsto_FM_upper (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 �
 /-- **Boundary value of `F` along a Möbius geodesic running to a finite cusp `M • ∞` (determinant
 `p`).**  The det-`p` σ-frame companion to `tendsto_FM_upper`, handling a *general* matrix `M` (not
 necessarily upper-triangular).  For `F` a primitive of `periodForm f (symActC M R)` with σ-frame top
-value `L`, if `σ⁻¹ · M` is upper-triangular (`(σ⁻¹·M)₁₀ = 0`, equivalently `σ⁻¹ · (M • ∞) = ∞`), then
+value `L`, if `σ⁻¹ · M` is upper-triangular (`(σ⁻¹·M)₁₀ = 0`, equivalently
+`σ⁻¹ · (M • ∞) = ∞`), then
 the curve `Y ↦ mobM M (q₀ + iY)`'s `σ⁻¹`-image is the upper geodesic `mobM (σ⁻¹·M)(q₀ + iY)`, which
 runs off to `i∞` as `Y → ∞` (`tendsto_im_mobM_upper`, `re_mobM_upper`), so
-`F(mobM M (q₀ + iY)) → L`.  Used for the `o = ∞` finite-image cases of the boundary naturality, where
+`F(mobM M (q₀ + iY)) → L`.  Used for the `o = ∞` finite-image cases of the boundary
+naturality, where
 `Ginf` is the top value of `F ∘ mobM M` along a curve approaching the finite cusp `M • ∞`. -/
 theorem tendsto_FM_upper_gen (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (hk : 2 ≤ k)
     (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det) (R : SymPow ℂ (k - 2).toNat) (F : ℂ → ℂ)
@@ -990,12 +1012,14 @@ noncomputable def rawBilinGen (f0 : F) {m : ℕ} :
 
 /-- The generic raw period pairing on `Div⁰ ⊗ Sym^m` for an arbitrary arithmetic cusp form. -/
 noncomputable def rawPairingGen (f0 : F) {m : ℕ} : (Div0 ℤ ⊗[ℤ] SymPow ℤ m) →ₗ[ℤ] ℂ :=
-  TensorProduct.lift ((rawBilinGen f0).comp (Div0 ℤ).subtype)
+  TensorProduct.lift ((rawBilinGen f0).comp
+    ((MonoidAlgebra.coeffLinearEquiv ℤ).toLinearMap ∘ₗ (Div0 ℤ).subtype))
 
 /-- The generic `rawPairingGen` against a single tensor is the `rawBilinGen` of the divisor and
 polynomial. -/
 theorem rawPairingGen_tmul (f0 : F) {m : ℕ} (D : Div0 ℤ) (P : SymPow ℤ m) :
-    rawPairingGen f0 (D ⊗ₜ P) = rawBilinGen f0 (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P :=
+    rawPairingGen f0 (D ⊗ₜ P) =
+      rawBilinGen f0 (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P :=
   rfl
 
 /-! ### The generic cusp-value formula `cuspValueGen = top − bottom`
@@ -1129,7 +1153,8 @@ theorem cuspValueGen_eq_top_sub_botValGen (f0 : F) {m : ℕ} (P : SymPow ℂ m) 
         exact hint.mono_set Set.Ioc_subset_Ioi_self
       have htop : Tendsto (fun Y : ℝ => Fp ((r : ℂ) + Y * Complex.I)) (𝓝[<] Y₁)
           (𝓝 (Fp ((r : ℂ) + Y₁ * Complex.I))) :=
-        ((hasDerivAt_periodForm_primitive_vertical f0 P Fp hFp r hY₁).continuousAt).tendsto.mono_left
+        ((hasDerivAt_periodForm_primitive_vertical f0 P Fp hFp r
+          hY₁).continuousAt).tendsto.mono_left
           nhdsWithin_le_nhds
       rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_tendsto hY₁ hderiv hii hBbot htop]
     have hTrunc2 : Tendsto (fun Y₁ : ℝ => ∫ t in (0 : ℝ)..Y₁, g t) atTop
@@ -1150,7 +1175,8 @@ theorem cuspValueGen_eq_cuspValue (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) 
     cuspValueGen f P c = cuspValue f P c :=
   rfl
 
-/-- For a genuine `Γ₁(N)` cusp form the generic raw pairing coincides with the typed `rawPairing`. -/
+/-- For a genuine `Γ₁(N)` cusp form the generic raw pairing coincides with the typed
+`rawPairing`. -/
 theorem rawPairingGen_eq_rawPairing (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     (x : Div0 ℤ ⊗[ℤ] SymPow ℤ (k - 2).toNat) :
     rawPairingGen f x = rawPairing f x := by
@@ -1195,12 +1221,14 @@ theorem heilbronnGL_sl (g : SL(2, ℤ)) :
     heilbronnGL (g : Matrix (Fin 2) (Fin 2) ℤ) (sl_det_ne_zero g)
       = Matrix.SpecialLinearGroup.mapGL ℚ g := by
   apply Units.ext
-  show qMat (g : Matrix (Fin 2) (Fin 2) ℤ) = (Matrix.SpecialLinearGroup.mapGL ℚ g : Matrix (Fin 2) (Fin 2) ℚ)
+  show qMat (g : Matrix (Fin 2) (Fin 2) ℤ) =
+    (Matrix.SpecialLinearGroup.mapGL ℚ g : Matrix (Fin 2) (Fin 2) ℚ)
   rw [Matrix.SpecialLinearGroup.mapGL_coe_matrix]
   ext i j; simp [qMat, Matrix.SpecialLinearGroup.map_apply_coe]
 
 omit [NeZero N] in
-/-- **Pole data from a det-`p` cusp mapping to `∞`.**  If the Heilbronn element `heilbronnGL M` of an
+/-- **Pole data from a det-`p` cusp mapping to `∞`.**  If the Heilbronn element
+`heilbronnGL M` of an
 integer matrix `M` (det `≠ 0`) sends the rational cusp `c` to `∞`, then its lower row `(M₁₀, M₁₁)`
 annihilates `c` and `M₁₀ ≠ 0` (over `ℝ`).  The det-`p` analogue of `pole_of_smul_infty`:
 `M₁₀ = 0` would force `M₁₁ = 0` (from the pole), hence `det M = 0`, a contradiction. -/
@@ -1219,12 +1247,14 @@ theorem pole_of_smul_infty_M (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0)
     rw [Matrix.det_fin_two]; push_cast; ring
   rw [hpoleR] at hdet
   have hz' : (M 1 0 : ℝ) = 0 := by exact_mod_cast hz
-  rw [hz'] at hdet; simp at hdet; exact hM (by exact_mod_cast hdet.symm)
+  rw [hz'] at hdet; simp only [Fin.isValue, mul_zero, sub_self] at hdet
+  exact hM (by exact_mod_cast hdet.symm)
 
 /-- **Determinant-`p` boundary naturality (the isolated geodesic-period crux, `μ ≡ 0`).**  The
 det-`p` analogue of `cuspBoundary_mob_naturality_sl`.  For an integer matrix `M` of positive
 determinant, a typed `Γ₁(N)` cusp form `f₁`, a generic arithmetic cusp form `f₂` with
-`⇑f₂ = ⇑f₁ ∣[k] heilbronnGL M`, a primitive `F` of `periodForm f₁ (symActC M (cast P))` with vertical
+`⇑f₂ = ⇑f₁ ∣[k] heilbronnGL M`, a primitive `F` of `periodForm f₁ (symActC M (cast P))`
+with vertical
 top value `Finf`, and `Ginf` the top value of its det-`p` Möbius pullback `G = F ∘ mobM M` (a
 primitive of `periodForm f₂ (cast P)`), the cusp boundary value of `G` (for `f₂`) at any cusp `o`
 equals the cusp boundary value of `F` (for `f₁`) at the Möbius-moved cusp `heilbronnGL M • o`.
@@ -1317,7 +1347,8 @@ theorem cuspBoundary_mobM_naturality {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgr
         have : ((M 1 0 : ℤ) : ℚ) = 0 := by rw [← heilbronnGL_entry M hM.ne' 1 0]; exact hc
         exact_mod_cast this
       exact tendsto_nhds_unique (hGinf 0) (tendsto_FM_upper f₁ hk M hM cP Fp hF Finf hFinf 0 hc0)
-    · -- `M • ∞ = M₀₀/M₁₀` finite, RHS = `botVal f₁ Q Fp r`; show `Ginf = botVal f₁ Q Fp r` (case B).
+    · -- `M • ∞ = M₀₀/M₁₀` finite, RHS = `botVal f₁ Q Fp r`; show
+      -- `Ginf = botVal f₁ Q Fp r` (case B).
       rw [if_neg hc]
       set r : ℚ := (heilbronnGL M hM.ne') 0 0 / (heilbronnGL M hM.ne') 1 0 with hr
       show Ginf = botVal f₁ Q Fp r
@@ -1401,7 +1432,8 @@ theorem cuspBoundary_mobM_naturality {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgr
 
 /-- **The determinant-`p` cusp-value covariance.**  For an integer matrix `M` with `0 < M.det`, the
 conjugate cusp form `f ∣ heilbronnGL M`, and any `P : Sym^{k-2}(ℤ)`, the cusp value of `f` against
-the adjugate-substituted `symActC M (cast P)` at the Möbius-moved cusp `heilbronnGL M • c` equals the
+the adjugate-substituted `symActC M (cast P)` at the Möbius-moved cusp
+`heilbronnGL M • c` equals the
 generic cusp value of the conjugate `f ∣ heilbronnGL M` against `cast P` at `c`, up to a
 `c`-independent constant.  Determinant-`p` analogue of `cuspValue_symRep_sl`. -/
 theorem cuspValueGen_symActC_heilbronn (hk : 2 ≤ k)
@@ -1436,7 +1468,8 @@ theorem cuspValueGen_symActC_heilbronn (hk : 2 ≤ k)
   have hcvQ := cuspValue_eq_top_sub_botVal f Q Fp hFz Finf hFinf ((heilbronnGL M hM.ne') • c)
   have hcvP := cuspValueGen_eq_top_sub_botValGen f₂ cP (fun w => Fp (mobM M w)) hG Ginf hGinf c
   rw [hcvQ, hcvP]
-  -- The cusp dictionary: the `OnePoint` representative of `(heilbronnGL M) • c` is `(heilbronnGL M) • (rep c)`.
+  -- The cusp dictionary: the `OnePoint` representative of `(heilbronnGL M) • c` is
+  -- `(heilbronnGL M) • (rep c)`.
   have hdict : (OnePoint.equivProjectivization ℚ).symm ((heilbronnGL M hM.ne') • c)
       = (heilbronnGL M hM.ne') • (OnePoint.equivProjectivization ℚ).symm c := by
     rw [Equiv.symm_apply_eq, OnePoint.equivProjectivization_smul, Equiv.apply_symm_apply]
@@ -1450,7 +1483,8 @@ theorem cuspValueGen_symActC_heilbronn (hk : 2 ≤ k)
 /-- **The determinant-`p` change of variables for `rawPairing`.**  For an integer matrix `M` with
 `0 < M.det`, the generic raw pairing of the conjugate cusp form `f ∣ heilbronnGL M` against `x`
 equals the typed raw pairing of `f` against the Heilbronn-acted `actMat M x`.  The `c`-independent
-tail of `cuspValueGen_symActC_heilbronn` cancels because the divisor has degree `0`.  Determinant-`p`
+tail of `cuspValueGen_symActC_heilbronn` cancels because the divisor has degree `0`.
+Determinant-`p`
 analogue of `rawPairing_fullModSymRep_sl`. -/
 theorem rawPairingGen_actMat (hk : 2 ≤ k) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : 0 < M.det)
@@ -1464,8 +1498,9 @@ theorem rawPairingGen_actMat (hk : 2 ≤ k) (f : CuspForm ((Gamma1 N).map (mapGL
     -- The RHS `rawPairing f (actMat M (D ⊗ P))` expands as the `rawBilin` of the `M`-moved divisor
     -- and the `symAct`-acted polynomial.
     show rawBilinGen (CuspForm.translate f (glMap (heilbronnGL M hM.ne')))
-        (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P =
-      rawBilin f ((divAct M hM.ne' D : Div0 ℤ) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ)
+        (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P =
+      rawBilin f ((divAct M hM.ne' D : Div0 ℤ) :
+          MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff
         (symAct M (k - 2).toNat P)
     -- Expand both `rawBilin`/`rawBilinGen` as `Finsupp.sum` against cusp values.
     have hrb : ∀ (D' : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) (P' : SymPow ℤ (k - 2).toNat),
@@ -1486,9 +1521,9 @@ theorem rawPairingGen_actMat (hk : 2 ≤ k) (f : CuspForm ((Gamma1 N).map (mapGL
         zsmul_eq_mul]
     rw [hrb, hrbG, castSymPow_symActC]
     -- Reindex the `M`-image divisor sum injectively.
-    have hdiv : ((divAct M hM.ne' D) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) =
+    have hdiv : ((divAct M hM.ne' D) : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff =
         Finsupp.mapDomain ((heilbronnGL M hM.ne') • ·)
-          (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) := by
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff := by
       rw [divAct_coe]
     have hinj : Function.Injective
         (fun c : Projectivization ℚ (Fin 2 → ℚ) => (heilbronnGL M hM.ne') • c) :=
@@ -1496,19 +1531,19 @@ theorem rawPairingGen_actMat (hk : 2 ≤ k) (f : CuspForm ((Gamma1 N).map (mapGL
     rw [hdiv, Finsupp.sum_mapDomain_index_inj hinj]
     -- Combine into a single degree-0 sum of the (constant) cusp-value difference.
     rw [← sub_eq_zero, Finsupp.sum, Finsupp.sum, ← Finset.sum_sub_distrib]
-    have hsummand : ∀ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+    have hsummand : ∀ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValueGen (CuspForm.translate f (glMap (heilbronnGL M hM.ne')))
               (castSymPow (k - 2).toNat P) c -
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValue f (symActC M (k - 2).toNat (castSymPow (k - 2).toNat P))
               ((heilbronnGL M hM.ne') • c) =
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) * (-T) := by
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) * (-T) := by
       intro c _
       rw [hT c]; ring
     rw [Finset.sum_congr rfl hsummand, ← Finset.sum_mul]
-    have hsum0 : (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) = 0 := by
+    have hsum0 : (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) = 0 := by
       rw [← Int.cast_sum]
       have := Div0.sum_coeff_eq_zero D
       rw [Finsupp.sum] at this
@@ -1526,7 +1561,8 @@ Heilbronn cosets `M` of the slash `⇑f ∣ heilbronnGL M`.  Since the cusp valu
 depends on the cusp form only through its underlying function and is additive over a pointwise
 function-sum (the period integrand is linear in the function), `rawPairing (heckeEnd f)` is the sum
 of the `rawPairingGen` of the conjugate cusp forms `f ∣ heilbronnGL M`.  Combined with
-`rawPairingGen_actMat`, this expresses `rawPairing (heckeEnd f) x` as `Σ_M rawPairing f (actMat M x)`
+`rawPairingGen_actMat`, this expresses `rawPairing (heckeEnd f) x` as
+`Σ_M rawPairing f (actMat M x)`
 — matching the symbol-side `tpOp`/`upperOp` exactly. -/
 
 /-- **Cusp-value additivity over a coset sum.**  If the underlying function of a `Γ₁(N)` cusp form
@@ -1595,7 +1631,8 @@ theorem cuspValue_eq_sum_of_coe {ι : Type*} (s : Finset ι)
     simp only [dif_pos (hdet i hi)]
     rw [cuspToInftyIntegralGen_eq_periodForm]
 
-/-- **Raw-pairing additivity over a coset sum.**  Lifts `cuspValue_eq_sum_of_coe` from cusp values to
+/-- **Raw-pairing additivity over a coset sum.**  Lifts `cuspValue_eq_sum_of_coe` from
+cusp values to
 the raw period pairing: if `⇑g = ∑ i ∈ s, ⇑f ∣[k] glMap (heilbronnGL (Mfun i))`, then
 `rawPairing g x = ∑ i ∈ s, rawPairingGen (f ∣ glMap (heilbronnGL (Mfun i))) x`. -/
 theorem rawPairing_eq_sum_of_coe {ι : Type*} (s : Finset ι)
@@ -1612,10 +1649,11 @@ theorem rawPairing_eq_sum_of_coe {ι : Type*} (s : Finset ι)
   | zero => simp
   | tmul D P =>
     rw [rawPairing_tmul]
-    -- Expand each `rawBilin`/`rawPairingGen` as a `Finsupp.sum` of cusp values, using the cusp-value
+    -- Expand each `rawBilin`/`rawPairingGen` as a `Finsupp.sum` of cusp values, using
+    -- the cusp-value
     -- coset decomposition `cuspValue_eq_sum_of_coe`.
-    have hrb : rawBilin g (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P =
-        (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum
+    have hrb : rawBilin g (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P =
+        (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum
           (fun c n => (n : ℂ) *
             ∑ i ∈ s, if h : (Mfun i).det ≠ 0 then
               cuspValueGen (CuspForm.translate f (glMap (heilbronnGL (Mfun i) h)))
@@ -1627,7 +1665,7 @@ theorem rawPairing_eq_sum_of_coe {ι : Type*} (s : Finset ι)
       rw [cuspValue_eq_sum_of_coe s f g Mfun hdet _ hcoe c]
     have hrbG : ∀ (i : ι), i ∈ s → ∀ (h : (Mfun i).det ≠ 0),
         rawPairingGen (CuspForm.translate f (glMap (heilbronnGL (Mfun i) h))) (D ⊗ₜ P) =
-          (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum
             (fun c n => (n : ℂ) *
               cuspValueGen (CuspForm.translate f (glMap (heilbronnGL (Mfun i) h)))
                 (castSymPow (k - 2).toNat P) c) := by
@@ -1664,7 +1702,8 @@ recursions `heckeT_ppow`/`heckeSymbPpow` and `heckeT_n_aux`/`heckeSymb_aux` redu
 equivariance to the prime base case `heckeT_p_all`/`heckeSymb_p_all`, the genuine analytic input. -/
 
 /-- The period-equivariance relation between a cusp-form endomorphism `A` and a modular-symbol
-endomorphism `B`: `periodMap' (A f) = dualPrecomp B (periodMap' f)` for every cusp form `f`.  Carries
+endomorphism `B`: `periodMap' (A f) = dualPrecomp B (periodMap' f)` for every cusp form
+`f`.  Carries
 the weight hypothesis `2 ≤ k` of the period map `periodMap'`. -/
 def PeriodEquiv (hk : 2 ≤ k) (A : Module.End ℂ (CuspForm ((Gamma1 N).map (mapGL ℝ)) k))
     (B : Module.End ℤ (𝕄 N k)) : Prop :=
@@ -1750,9 +1789,12 @@ theorem periodEquiv_diamond_n (hk : 2 ≤ k) (n : ℕ) :
 
 The genuine cusp Hecke operator `heckeEnd N k n` is built by the *forward* analytic recursion
 `heckeT_n` (prime-power block on the left, in `heckeT_n_aux`), while the period-side mirror
-`heckeEnd_aux` writes the prime-power block on the right (reversed, so `dualPrecomp`'s order-reversal
-matches the symbol recursion).  The two agree because all the prime-power Hecke blocks commute, a fact
-we lift from the *unrestricted* (all-prime, bad primes included) operator-level commutativity already
+`heckeEnd_aux` writes the prime-power block on the right (reversed, so `dualPrecomp`'s
+order-reversal
+matches the symbol recursion).  The two agree because all the prime-power Hecke blocks
+commute, a fact
+we lift from the *unrestricted* (all-prime, bad primes included) operator-level
+commutativity already
 available on `M_k(Γ₁(N))`:
 
 * `heckeT_p_all_comm_distinct` — `T_p T_q = T_q T_p` for distinct primes (all four good/bad cases);
@@ -1768,7 +1810,8 @@ underlying `M_k`-operators via `toModularForm'`. -/
 `toModularForm'` (both act by the same slash `f ∣ mapGL ℝ g` on a shared representative). -/
 theorem diamondOpCusp_toModularForm' (d : (ZMod N)ˣ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
-    (HeckeRing.GL2.diamondOpCusp k d f).toModularForm' = HeckeRing.GL2.diamondOp k d f.toModularForm' :=
+    (HeckeRing.GL2.diamondOpCusp k d f).toModularForm' =
+      HeckeRing.GL2.diamondOp k d f.toModularForm' :=
   rfl
 
 /-- Bridge: the prime cusp Hecke operator `heckeEnd N k ⟨p, _⟩` agrees, under `toModularForm'`, with
@@ -1809,7 +1852,7 @@ theorem commute_heckeT_ppow_mf {p : ℕ} (hp : Nat.Prime p)
     (hTp : Commute T (heckeT_p_all k p hp)) (hTd : Commute T (diamondOp_n k p)) (r : ℕ) :
     Commute T (heckeT_ppow k p hp r) := by
   induction r using Nat.twoStepInduction with
-  | zero => simpa using Commute.one_right T
+  | zero => simp
   | one => simpa using hTp
   | more r ih1 ih2 =>
     rw [heckeT_ppow_succ_succ]
@@ -1847,7 +1890,7 @@ theorem commute_heckeT_p_all_heckeT_n {p : ℕ} (hp : Nat.Prime p) (m : ℕ) [Ne
     intro hj0 hpj
     haveI := hj0
     rcases eq_or_ne j 1 with rfl | hj1
-    · simpa using Commute.one_right _
+    · simp
     · have hj : 1 < j := by have := NeZero.ne j; omega
       rw [heckeT_n_unfold k j hj]
       set q := j.minFac with hq_def
@@ -1868,7 +1911,8 @@ theorem commute_heckeT_p_all_heckeT_n {p : ℕ} (hp : Nat.Prime p) (m : ℕ) [Ne
         (ih _ hdiv_lt ⟨hdiv_pos.ne'⟩ hp_quot)
 
 open HeckeRing.GL2 in
-/-- `T_{p^w}` commutes with `T_m` whenever `p ∤ m` (distinct-prime block commutation, all primes). -/
+/-- `T_{p^w}` commutes with `T_m` whenever `p ∤ m` (distinct-prime block commutation,
+all primes). -/
 theorem commute_heckeT_ppow_heckeT_n {p : ℕ} (hp : Nat.Prime p) (w m : ℕ) [NeZero m]
     (hpm : ¬ p ∣ m) :
     Commute (heckeT_ppow (N := N) k p hp w) (heckeT_n k m) := by
@@ -1880,7 +1924,8 @@ theorem commute_heckeT_ppow_heckeT_n {p : ℕ} (hp : Nat.Prime p) (w m : ℕ) [N
 prime `p` the period map intertwines the prime cusp Hecke operator `heckeEnd N k p` (= `T_p` at good
 primes, `U_p` at bad primes) with the integral modular-symbol operator `heckeSymb_p_all N k p hp`.
 
-This is the determinant-`p` analogue of the diamond-case equivariance `periodMap'_diamond` (which was
+This is the determinant-`p` analogue of the diamond-case equivariance
+`periodMap'_diamond` (which was
 proven via the det-`1` change of variables `rawPairing_fullModSymRep_sl`).  Its proof is the
 determinant-`p` boundary naturality — the geodesic-period (`μ ≡ 0`) fact for the conjugate cusp form
 `f ∣ heilbronnGL M` at each Heilbronn coset representative `M` (`upperMat`/`lowerDiamondMat`,
@@ -1904,7 +1949,8 @@ formula `cuspValueGen_eq_top_sub_botValGen`), as are the two assembly steps:
 
 * `rawPairingGen_actMat` — the determinant-`p` per-coset change of variables
   `rawPairingGen (f ∣ heilbronnGL M) x = rawPairing f (actMat M x)` (modulo the single deep input
-  `cuspValueGen_symActC_heilbronn`, the determinant-`p` cusp-value covariance / boundary naturality);
+  `cuspValueGen_symActC_heilbronn`, the determinant-`p` cusp-value covariance / boundary
+  naturality);
 * `rawPairing_eq_sum_of_coe` — the function-additivity expressing `rawPairing (heckeEnd f) x` as the
   sum over the Heilbronn cosets `Σ_M rawPairingGen (f ∣ heilbronnGL M) x`.
 
@@ -1941,15 +1987,18 @@ theorem periodEquiv_heckeEnd_prime (hk : 2 ≤ k) {p : ℕ} (hp : Nat.Prime p) :
       · rw [if_neg hbp, lowerDiamondMat_det]; exact_mod_cast hp.pos
     have hdet : ∀ b ∈ Finset.range (p + 1), (Mfun b).det ≠ 0 :=
       fun b _ => (hdetpos b).ne'
-    -- The lower-term coset identity: `⇑(⟨p⟩ f) ∣ T_p_lower = ⇑f ∣ glMap(heilbronnGL lowerDiamondMat)`.
+    -- The lower-term coset identity:
+    -- `⇑(⟨p⟩ f) ∣ T_p_lower = ⇑f ∣ glMap(heilbronnGL lowerDiamondMat)`.
     have hlower : (⇑(HeckeRing.GL2.diamondOp k (ZMod.unitOfCoprime p hpN) f.toModularForm')
           ∣[k] (HeckeRing.GL2.T_p_lower p hp.pos : GL (Fin 2) ℚ))
         = ⇑f ∣[k] glMap (heilbronnGL (lowerDiamondMat (N := N) hpN)
             (lowerDiamondMat_det_ne_zero hp.pos hpN)) := by
       have hdmdet : (diamondMat (N := N) hpN).det ≠ 0 := by
         rw [diamondMat]; exact sl_det_ne_zero _
-      -- Factor the Heilbronn element of `lowerDiamondMat` as a `GL(2, ℚ)` product (no matrix rewrite).
-      have hGLfac : heilbronnGL (lowerDiamondMat (N := N) hpN) (lowerDiamondMat_det_ne_zero hp.pos hpN)
+      -- Factor the Heilbronn element of `lowerDiamondMat` as a `GL(2, ℚ)` product (no
+      -- matrix rewrite).
+      have hGLfac : heilbronnGL (lowerDiamondMat (N := N) hpN)
+          (lowerDiamondMat_det_ne_zero hp.pos hpN)
           = heilbronnGL (diamondMat (N := N) hpN) hdmdet *
             heilbronnGL (lowerMat p) (lowerMat_det_ne_zero hp.pos) :=
         heilbronnGL_mul (diamondMat (N := N) hpN) (lowerMat p) hdmdet (lowerMat_det_ne_zero hp.pos)
@@ -1967,7 +2016,8 @@ theorem periodEquiv_heckeEnd_prime (hk : 2 ≤ k) {p : ℕ} (hp : Nat.Prime p) :
         rfl
       rw [hGLfac, heilbronnGL_lowerMat hp.pos, map_mul, SlashAction.slash_mul, hd2]
       rfl
-    -- The analytic coset decomposition `⇑(heckeEnd f) = Σ_{b<p+1} dite(⇑f ∣ glMap(heilbronnGL (Mfun b)), 0)`.
+    -- The analytic coset decomposition
+    -- `⇑(heckeEnd f) = Σ_{b<p+1} dite(⇑f ∣ glMap(heilbronnGL (Mfun b)), 0)`.
     have hcoe : (⇑(heckeEnd N k ⟨p, hp.pos⟩ f) : ℍ → ℂ) =
         fun zz => ∑ b ∈ Finset.range (p + 1), (fun b => if h : (Mfun b).det ≠ 0 then
           (⇑f ∣[k] glMap (heilbronnGL (Mfun b) h)) zz else 0) b := by
@@ -2017,7 +2067,8 @@ theorem periodEquiv_heckeEnd_prime (hk : 2 ≤ k) {p : ℕ} (hp : Nat.Prime p) :
       rw [upperMat_det]; exact_mod_cast hp.pos
     have hdet : ∀ b ∈ Finset.range p, (upperMat p b).det ≠ 0 :=
       fun b _ => (hdetpos b).ne'
-    -- The analytic coset decomposition `⇑(heckeEnd f) = Σ_{b<p} dite(⇑f ∣ glMap(heilbronnGL (upperMat p b)), 0)`.
+    -- The analytic coset decomposition
+    -- `⇑(heckeEnd f) = Σ_{b<p} dite(⇑f ∣ glMap(heilbronnGL (upperMat p b)), 0)`.
     have hcoe : (⇑(heckeEnd N k ⟨p, hp.pos⟩ f) : ℍ → ℂ) =
         fun zz => ∑ b ∈ Finset.range p, (fun b => if h : (upperMat p b).det ≠ 0 then
           (⇑f ∣[k] glMap (heilbronnGL (upperMat p b) h)) zz else 0) b := by
@@ -2048,11 +2099,14 @@ theorem periodEquiv_heckeEnd_prime (hk : 2 ≤ k) {p : ℕ} (hp : Nat.Prime p) :
 
 We mirror the symbol-side recursions `heckeSymbPpow` / `heckeSymb_aux` by CuspForm-`Module.End`
 operators `heckeEndPpow` / `heckeEnd_aux`.  The mirror is written with the multiplicative factors in
-the *reversed* order, so the order-reversal of `dualPrecomp` (`PeriodEquiv.mul`) lands exactly on the
-symbol-side recursions without needing any commutativity input.  We then reconcile the mirror with the
+the *reversed* order, so the order-reversal of `dualPrecomp` (`PeriodEquiv.mul`) lands
+exactly on the
+symbol-side recursions without needing any commutativity input.  We then reconcile the
+mirror with the
 genuine `heckeEnd` operator (where the analytic commutativity of Hecke operators is used). -/
 
-/-- CuspForm-`Module.End` mirror of `heckeSymbPpow`: the `T_{p^r}` recurrence on cusp forms, with the
+/-- CuspForm-`Module.End` mirror of `heckeSymbPpow`: the `T_{p^r}` recurrence on cusp
+forms, with the
 *same* scalar `(p : ℤ)^{(k-1).toNat}` as the symbol side, and the products written in reversed order
 (so `PeriodEquiv.mul`'s order-reversal matches the symbol recursion exactly). -/
 noncomputable def heckeEndPpow (N : ℕ) [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prime p) :
@@ -2189,7 +2243,8 @@ The genuine cusp Hecke operator `heckeEnd N k n` (= `heckeT_n_cusp k n`, built b
 analytic recursion `heckeT_n`) agrees, on every cusp form, with the reversed-order mirror
 `heckeEnd_aux N k n.val`.  The two recursions differ only in the order of the (commuting) Hecke
 factors, so this is the analytic commutativity of `T_n` (`heckeT_n_comm` / the Petersson
-`heckeT_n_cusp_comm`) transported to the mirror; it contains no change-of-variables content.  Isolated
+`heckeT_n_cusp_comm`) transported to the mirror; it contains no change-of-variables
+content.  Isolated
 here as the pure-algebra gap (it does not involve `periodMap'`). -/
 theorem heckeEnd_apply_eq_heckeEnd_aux (hk : 2 ≤ k) (n : ℕ+)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :

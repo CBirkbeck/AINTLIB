@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.ArbitraryDegreeSourceData
@@ -78,6 +83,8 @@ noncomputable def reciprocalPrimePhiElement_of_f_eq_orderOf
     S.repeatedExactOnOrbit_phiPrimeGenDescent_sub_one_of_f_eq_orderOf
       h_psi h_source_coprime h_ne_zero hℓp hf he
 
+/-- The `γ` of the reciprocal prime φ-element, when the residue degree `f` equals the
+order of `γ`. -/
 @[simp]
 theorem reciprocalPrimePhiElement_of_f_eq_orderOf_gamma
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
@@ -499,7 +506,7 @@ theorem reciprocalPrimePhiElement_symbolIdentityPos
       (reciprocalPrimePhiElement_of_f_eq_orderOf
         (ℓ := ℓ) (p := p) (K := K) (P := P) (R' := R')
         S h_psi h_descentPrime h_source_coprime h_ne_zero hℓp hf he) Q := by
-  unfold PhiPrimeElement.PhiPrimeSymbolIdentityPos
+  simp only [PhiPrimeElement.PhiPrimeSymbolIdentityPos]
   exact reciprocalPrimePhiElement_symbol_eq_norm_symbol
     (ℓ := ℓ) (p := p) (K := K) (P := P) hP_bot hℓ_in_P hp_notin_P
     (R' := R') S h_psi h_descentPrime h_source_coprime

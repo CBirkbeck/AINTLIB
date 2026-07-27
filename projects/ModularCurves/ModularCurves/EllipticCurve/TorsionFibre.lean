@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.MulByHomUnramifiedField
 import ModularCurves.EllipticCurve.MulByHomDegree
@@ -276,8 +281,7 @@ theorem smul_eq_zero_iff_comp_mulByHom {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
   constructor
   · intro h
     have hval := congrArg (fun Q : E.Point g ↦ (Q : T ⟶ E.E)) h
-    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
-    exact hval
+    rwa [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
   · intro h
     apply Subtype.ext
     rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
@@ -293,8 +297,7 @@ noncomputable def torsionPointsEquiv (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
       have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
         pullback.condition
       have hπ : E.torsionι N ≫ E.π = E.torsionπ N := by
-        have h2 := congrArg (fun m ↦ m ≫ E.π) hcond
-        simpa [E.mulByHom_π, E.zero_π] using h2
+        simpa [E.mulByHom_π, E.zero_π] using congrArg (fun m ↦ m ≫ E.π) hcond
       rw [Category.assoc, hπ, h.2]⟩, by
     have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
       pullback.condition
@@ -319,7 +322,7 @@ noncomputable def torsionPointsEquiv (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
 
 /-- Sections of the base-changed torsion over `T` are the `E[N]`-points over `t`
 (the two legs of `torsion_baseChange_isPullback`). -/
-private noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
+noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
     {s : T ⟶ (E.baseChange t).torsion N // s ≫ (E.baseChange t).torsionπ N = 𝟙 T} ≃
       {h : T ⟶ E.torsion N // h ≫ E.torsionπ N = t} where
   toFun s := ⟨s.1 ≫ E.torsionBaseChangeHom N t, by
@@ -333,12 +336,11 @@ private noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t 
     (by rw [(E.torsion_baseChange_isPullback N t).lift_snd, s.2]))
   right_inv h := Subtype.ext ((E.torsion_baseChange_isPullback N t).lift_fst _ _ _)
 
-private lemma torsionByNsmulKer_mem (G : Type u) [AddCommGroup G] {N d : ℕ}
-    (hdN : d ∣ N) {y : G} (hy : (d : ℤ) • y = 0) :
-    y ∈ Submodule.torsionBy ℤ G (N : ℤ) := by
-  rw [Submodule.mem_torsionBy_iff]
-  obtain ⟨c, hc⟩ := hdN
-  rw [hc, Nat.cast_mul, mul_comm, mul_zsmul, hy, smul_zero]
+/- `torsionByNsmulKerEquiv` RELOCATED to `ForMathlib/TorsionByEquiv.lean` as
+`Submodule.torsionByNsmulKerEquiv` (#6996; statement byte-identical, proof golfed) — a
+general `AddCommGroup` fact with no elliptic-curve content. Its former helper
+`torsionByNsmulKer_mem` turned out to be mathlib's
+`Submodule.torsionBy_le_torsionBy_of_dvd` and was deleted. -/
 
 private def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
     (hdN : d ∣ N) :

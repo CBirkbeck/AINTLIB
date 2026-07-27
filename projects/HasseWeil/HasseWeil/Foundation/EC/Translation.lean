@@ -241,9 +241,9 @@ private theorem translateBaseHom_norm_smulBasis_eq_zero (xk yk : F)
     algebraMap_norm_smulBasis_eq_mul_conj, map_mul, hr, zero_mul]
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
-/-- **Witness-parametric `translateCoordAlgHom_injective`**: takes the
-base-hom injectivity (`hxinj`) as an explicit hypothesis. Transposes
-`addCoordAlgHom_injective_of_baseHom_inj` to the translation-by-(xk,yk)
+/-- Injectivity of `translateCoordAlgHom`, witness-parametric on the base-hom
+injectivity (`hxinj`, taken as an explicit hypothesis). Transposes
+`addCoordAlgHom_injective_of_baseHom_inj` to the translation-by-`(xk, yk)`
 case. The only α-specific parts of that proof were `addBaseHom W α` and
 `addPullback_y W α`; here they become `translateBaseHom W xk yk` and
 `translateY_xy W xk yk`.
@@ -293,9 +293,9 @@ noncomputable def translateAlgHom (xk yk : F) (h_eq : W.toAffine.Equation xk yk)
     (translateCoordAlgHom_injective_of_baseHom_inj W xk yk h_eq hxy hxinj)
 
 omit [DecidableEq F] in
-/-- **`translateX_xy_ne_const_of_pole`**: a pole of `translateX_xy` at infinity
-forces non-constancy: if `ordAtInfty (translateX_xy) < 0` then `translateX_xy`
-is not `algebraMap F KE c` for any `c : F`. -/
+/-- A pole of `translateX_xy` at infinity forces non-constancy: if
+`ordAtInfty (translateX_xy) < 0` then `translateX_xy` is not `algebraMap F KE c`
+for any `c : F`. -/
 theorem translateX_xy_ne_const_of_pole (xk yk : F) (c : F)
     (h_pole : (W_smooth W).ordAtInfty (translateX_xy W xk yk) < 0)
     (hc : translateX_xy W xk yk = algebraMap F KE c) : False := by
@@ -312,9 +312,9 @@ theorem translateX_xy_ne_const_of_pole (xk yk : F) (c : F)
     exact absurd h_pole (lt_irrefl _)
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
-/-- **`translateBaseHom_injective_of_transcendental`**: if `translateX_xy W xk yk`
-is transcendental over `F`, then `translateBaseHom W xk yk` is injective.  Direct
-from `transcendental_iff_injective` and `translateBaseHom = aeval translateX_xy`. -/
+/-- If `translateX_xy W xk yk` is transcendental over `F`, then
+`translateBaseHom W xk yk` is injective. Direct from `transcendental_iff_injective`
+and `translateBaseHom = aeval translateX_xy`. -/
 theorem translateBaseHom_injective_of_transcendental (xk yk : F)
     (h_trans : Transcendental F (translateX_xy W xk yk)) :
     Function.Injective (translateBaseHom W xk yk) := by
@@ -340,8 +340,8 @@ private theorem ordAtInfty_sub_const_of_neg_aux {g : KE} {n : ℤ} (hn : n < 0)
     exact_mod_cast hn
 
 omit [DecidableEq F] in
-/-- **`ord_x_gen_sub_const`**: for any `xk ∈ F`, `ord(x_gen - xk) = -2`, since the
-constant `xk` has nonnegative order while `x_gen` has order `-2`. -/
+/-- For any `xk ∈ F`, `ord(x_gen - xk) = -2`, since the constant `xk` has
+nonnegative order while `x_gen` has order `-2`. -/
 theorem ord_x_gen_sub_const (xk : F) :
     (W_smooth W).ordAtInfty (x_gen W - algebraMap F KE xk) =
       ((-2 : ℤ) : WithTop ℤ) := by
@@ -365,13 +365,13 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
 theorem translateSlope_xy_eq (xk yk : F) :
     translateSlope_xy W xk yk =
       (y_gen W - algebraMap F KE yk) / (x_gen W - algebraMap F KE xk) := by
-  unfold translateSlope_xy
+  simp only [translateSlope_xy]
   rw [WeierstrassCurve.Affine.slope_of_X_ne]
   intro h_eq
   exact x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h_eq)
 
 omit [DecidableEq F] in
-/-- **`ord_y_gen_sub_const`**: `ord(y_gen - yk) = -3` for any `yk : F`. -/
+/-- `ord(y_gen - yk) = -3` for any `yk : F`. -/
 theorem ord_y_gen_sub_const (yk : F) :
     (W_smooth W).ordAtInfty (y_gen W - algebraMap F KE yk) =
       ((-3 : ℤ) : WithTop ℤ) := by
@@ -379,8 +379,8 @@ theorem ord_y_gen_sub_const (yk : F) :
   exact ordAtInfty_sub_const_of_neg_aux W (by norm_num) (ordAtInfty_y_gen W) yk
 
 omit [DecidableEq F] in
-/-- **`ord_translateSlope_xy`**: `ord(translateSlope_xy) = -1` for non-zero
-`xk` (so the slope is in secant form). -/
+/-- `ord(translateSlope_xy) = -1` for non-zero `xk` (so the slope is in secant
+form). -/
 theorem ord_translateSlope_xy (xk yk : F) :
     (W_smooth W).ordAtInfty (translateSlope_xy W xk yk) =
       ((-1 : ℤ) : WithTop ℤ) := by

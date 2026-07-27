@@ -171,7 +171,8 @@ lemma addMulSub_two_zero : addMulSub W 2 0 = W 1 ^ 2 := (sq _).symm
 lemma addMulSub_three_one : addMulSub W 3 1 = W 2 * W 1 := rfl
 
 lemma addMulSub_even (m n : ℤ) : addMulSub W (2 * m) (2 * n) = W (m + n) * W (m - n) := by
-  simp_rw [addMulSub, ← left_distrib, ← mul_sub_left_distrib, Int.mul_tdiv_cancel_left _ two_ne_zero]
+  simp_rw [addMulSub, ← left_distrib, ← mul_sub_left_distrib,
+    Int.mul_tdiv_cancel_left _ two_ne_zero]
 
 lemma addMulSub_odd (m n : ℤ) :
     addMulSub W (2 * m + 1) (2 * n + 1) = W (m + n + 1) * W (m - n) := by
@@ -1397,7 +1398,10 @@ lemma invarDenom_eq_redInvarDenom_mul :
   rw [invarDenom, redInvarDenom]; split_ifs with h h h h h h -- slow
   · rw [← normEDS_mul_complEDS_div _ (Int.dvd_of_emod_eq_zero h), normEDS_six_eq_mul]; ring
   · rw [← normEDS_mul_complEDS_div _ (Int.dvd_self_sub_of_emod_eq h), normEDS_six_eq_mul]; ring
-  · rw [show m + 1 = m + 6 - 5 by abel, ← normEDS_mul_complEDS_div _ (Int.dvd_self_sub_of_emod_eq (Int.emod_eq_add_self_emod.symm.trans h)), normEDS_six_eq_mul]; ring
+  · rw [show m + 1 = m + 6 - 5 by abel,
+      ← normEDS_mul_complEDS_div _
+        (Int.dvd_self_sub_of_emod_eq (Int.emod_eq_add_self_emod.symm.trans h)),
+      normEDS_six_eq_mul]; ring
   on_goal 1 => rw [← normEDS_mul_complEDS_div _ (hd3 <| by simp [h, Int.add_emod]),
     ← normEDS_mul_complEDS_div m (hd2 <| by simp [h])]
   on_goal 2 => rw [← normEDS_mul_complEDS_div (m - 1) (hd3 <| by simp [h, Int.sub_emod]),

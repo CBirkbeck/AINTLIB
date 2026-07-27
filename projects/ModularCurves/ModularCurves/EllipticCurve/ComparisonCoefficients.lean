@@ -78,7 +78,8 @@ lemma exists_coordX_image {W W' : WeierstrassCurve R} [Nontrivial R]
   have hxmem : coordX W ∈ poleOrderFiltration W 2 := by
     rw [poleOrderFiltration_two]; exact Submodule.subset_span (Set.mem_insert_of_mem _ rfl)
   have hxinv : Φ.symm (coordX W) ∈ poleOrderFiltration W' 2 := by
-    have hmem : coordX W ∈ Submodule.map Φ.toLinearEquiv.toLinearMap (poleOrderFiltration W' 2) := by
+    have hmem : coordX W ∈ Submodule.map Φ.toLinearEquiv.toLinearMap
+      (poleOrderFiltration W' 2) := by
       rw [hfil 2]; exact hxmem
     obtain ⟨w, hw, hΦw⟩ := hmem
     have hΦw' : Φ w = coordX W := hΦw
@@ -87,7 +88,8 @@ lemma exists_coordX_image {W W' : WeierstrassCurve R} [Nontrivial R]
   obtain ⟨c'', d'', hcd''⟩ := hxinv
   have hxinv_eq : Φ.symm (coordX W) = algebraMap R _ d'' * coordX W' + algebraMap R _ c'' := by
     rw [← hcd'', Algebra.smul_def, Algebra.smul_def, mul_one]; ring
-  have hxback : algebraMap R _ (d'' * d) * coordX W + algebraMap R _ (d'' * c + c'') = coordX W := by
+  have hxback : algebraMap R _ (d'' * d) * coordX W + algebraMap R _ (d'' * c
+    + c'') = coordX W := by
     have h1 : Φ (Φ.symm (coordX W)) = coordX W := Φ.apply_symm_apply _
     rw [hxinv_eq, map_add, map_mul, AlgEquiv.commutes, AlgEquiv.commutes, hΦx'_eq] at h1
     rw [map_mul, map_add, map_mul]; linear_combination h1
@@ -126,14 +128,16 @@ lemma exists_coordY_image {W W' : WeierstrassCurve R} [Nontrivial R]
     rw [poleOrderFiltration_three]
     exact Submodule.subset_span (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ rfl))
   have hyinv : Φ.symm (coordY W) ∈ poleOrderFiltration W' 3 := by
-    have hmem : coordY W ∈ Submodule.map Φ.toLinearEquiv.toLinearMap (poleOrderFiltration W' 3) := by
+    have hmem : coordY W ∈ Submodule.map Φ.toLinearEquiv.toLinearMap
+      (poleOrderFiltration W' 3) := by
       rw [hfil 3]; exact hymem
     obtain ⟨w, hw, hΦw⟩ := hmem
     have hΦw' : Φ w = coordY W := hΦw
     rw [← hΦw', Φ.symm_apply_apply]; exact hw
   rw [poleOrderFiltration_three, Submodule.mem_span_triple] at hyinv
   obtain ⟨a'', b'', c'', habc''⟩ := hyinv
-  have hyinv_eq : Φ.symm (coordY W) = algebraMap R _ c'' * coordY W' + algebraMap R _ b'' * coordX W'
+  have hyinv_eq : Φ.symm (coordY W) = algebraMap R _ c'' * coordY W'
+    + algebraMap R _ b'' * coordX W'
       + algebraMap R _ a'' := by
     rw [← habc'', Algebra.smul_def, Algebra.smul_def, Algebra.smul_def, mul_one]; ring
   have hyback : algebraMap R _ (c'' * c) * coordY W
@@ -230,6 +234,24 @@ private lemma six_ext {W : WeierstrassCurve R} [Nontrivial R]
      (rw [← sub_eq_zero]; exact hp2); (rw [← sub_eq_zero]; exact hp3);
      (rw [← sub_eq_zero]; exact hq0); (rw [← sub_eq_zero]; exact hq1)]
 
+/-- The scaling unit of a Weierstrass variable change: if `α` and `γ` are units of a commutative
+ring with `γ ^ 2 = α ^ 3`, then there is a unit `u` with `u ^ 2 = α` and `u ^ 3 = γ` (morally
+`u = γ / α`). Packages the `u`-construction of `exists_variableChange_of_filtration`, where the
+relation `γ ^ 2 = α ^ 3` comes from equating the `coordX ^ 3` coefficients of the two Weierstrass
+relations. -/
+private lemma exists_unit_sq_cube {α γ : R} (hα : IsUnit α) (hγ : IsUnit γ)
+    (h : γ ^ 2 = α ^ 3) : ∃ u : Rˣ, (↑u : R) ^ 2 = α ∧ (↑u : R) ^ 3 = γ := by
+  obtain ⟨uα, hαs⟩ := hα
+  obtain ⟨uγ, hγs⟩ := hγ
+  have hu_val : (↑(uγ * uα⁻¹) : R) = γ * (↑uα⁻¹ : R) := by rw [Units.val_mul, hγs]
+  have hvα : α * (↑uα⁻¹ : R) = 1 := by rw [← hαs]; exact uα.mul_inv
+  refine ⟨uγ * uα⁻¹, ?_, ?_⟩
+  · rw [hu_val]
+    linear_combination (↑uα⁻¹ : R) ^ 2 * h + α * (α * (↑uα⁻¹ : R) + 1) * hvα
+  · rw [hu_val]
+    linear_combination γ * (↑uα⁻¹ : R) ^ 3 * h
+      + γ * ((α * (↑uα⁻¹ : R)) ^ 2 + α * (↑uα⁻¹ : R) + 1) * hvα
+
 lemma exists_variableChange_of_filtration {W W' : WeierstrassCurve R}
     (Φ : W'.toAffine.CoordinateRing ≃ₐ[R] W.toAffine.CoordinateRing)
     (hfil : ∀ n, Submodule.map Φ.toLinearEquiv.toLinearMap (poleOrderFiltration W' n)
@@ -268,18 +290,7 @@ lemma exists_variableChange_of_filtration {W W' : WeierstrassCurve R}
       linear_combination hM
         - (algebraMap R W.toAffine.CoordinateRing γ) ^ 2 * coordY_mul_coordY W
     obtain ⟨e_x0, e_x1, e_x2, e_x3, e_y, e_xy⟩ := six_ext hinput
-    obtain ⟨uα, hαs⟩ := hα
-    obtain ⟨uγ, hγs⟩ := hγ
-    set u : Rˣ := uγ * uα⁻¹ with hu_def
-    have hu_val : (↑u : R) = γ * (↑uα⁻¹ : R) := by rw [hu_def, Units.val_mul, hγs]
-    have hvα : α * (↑uα⁻¹ : R) = 1 := by rw [← hαs]; exact uα.mul_inv
-    have hu2 : (↑u : R) ^ 2 = α := by
-      rw [hu_val]
-      linear_combination (↑uα⁻¹ : R) ^ 2 * e_x3 + α * (α * (↑uα⁻¹ : R) + 1) * hvα
-    have hu3 : (↑u : R) ^ 3 = γ := by
-      rw [hu_val]
-      linear_combination γ * (↑uα⁻¹ : R) ^ 3 * e_x3
-        + γ * ((α * (↑uα⁻¹ : R)) ^ 2 + α * (↑uα⁻¹ : R) + 1) * hvα
+    obtain ⟨u, hu2, hu3⟩ := exists_unit_sq_cube hα hγ e_x3
     simp only [← hu2, ← hu3] at e_x0 e_x1 e_x2 e_y e_xy
     have h6 : IsUnit ((↑u : R) ^ 6) := by
       rw [← Units.val_pow_eq_pow_val]; exact (u ^ 6).isUnit
@@ -289,27 +300,65 @@ lemma exists_variableChange_of_filtration {W W' : WeierstrassCurve R}
         dsimp only
         refine h6.mul_right_inj.mp ?_
         linear_combination e_xy
-          + (2*(↑u:R)^5*(↑u⁻¹:R)^2*δ + (↑u:R)^5*W'.toAffine.a₁ + 2*(↑u:R)^4*(↑u⁻¹:R)*δ + 2*(↑u:R)^3*δ) * u.mul_inv
+          + (2*(↑u:R)^5*(↑u⁻¹:R)^2*δ + (↑u:R)^5*W'.toAffine.a₁ + 2*(↑u:R)^4*(↑u⁻¹:R)*δ
+            + 2*(↑u:R)^3*δ) * u.mul_inv
       · rw [variableChange_a₂]
         dsimp only
         refine h6.mul_right_inj.mp ?_
         linear_combination -e_x2
-          + (-(↑u:R)^5*(↑u⁻¹:R)^5*δ^2 - (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₁*δ + (↑u:R)^5*(↑u⁻¹:R)*W'.toAffine.a₂ + 3*(↑u:R)^5*(↑u⁻¹:R)*β - (↑u:R)^4*(↑u⁻¹:R)^4*δ^2 - (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₁*δ + (↑u:R)^4*W'.toAffine.a₂ + 3*(↑u:R)^4*β - (↑u:R)^3*(↑u⁻¹:R)^3*δ^2 - (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₁*δ - (↑u:R)^2*(↑u⁻¹:R)^2*δ^2 - (↑u:R)^2*W'.toAffine.a₁*δ - (↑u:R)*(↑u⁻¹:R)*δ^2 - δ^2) * u.mul_inv
+          + (-(↑u:R)^5*(↑u⁻¹:R)^5*δ^2 - (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₁*δ
+            + (↑u:R)^5*(↑u⁻¹:R)*W'.toAffine.a₂ + 3*(↑u:R)^5*(↑u⁻¹:R)*β - (↑u:R)^4*(↑u⁻¹:R)^4*δ^2
+            - (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₁*δ + (↑u:R)^4*W'.toAffine.a₂ + 3*(↑u:R)^4*β
+            - (↑u:R)^3*(↑u⁻¹:R)^3*δ^2 - (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₁*δ - (↑u:R)^2*(↑u⁻¹:R)^2*δ^2
+            - (↑u:R)^2*W'.toAffine.a₁*δ - (↑u:R)*(↑u⁻¹:R)*δ^2 - δ^2) * u.mul_inv
       · rw [variableChange_a₃]
         dsimp only
         refine h6.mul_right_inj.mp ?_
         linear_combination e_y
-          + ((↑u:R)^5*(↑u⁻¹:R)^2*W'.toAffine.a₁*β + (↑u:R)^5*(↑u⁻¹:R)^2*W'.toAffine.a₃ + 2*(↑u:R)^5*(↑u⁻¹:R)^2*ε + (↑u:R)^4*(↑u⁻¹:R)*W'.toAffine.a₁*β + (↑u:R)^4*(↑u⁻¹:R)*W'.toAffine.a₃ + 2*(↑u:R)^4*(↑u⁻¹:R)*ε + (↑u:R)^3*W'.toAffine.a₁*β + (↑u:R)^3*W'.toAffine.a₃ + 2*(↑u:R)^3*ε) * u.mul_inv
+          + ((↑u:R)^5*(↑u⁻¹:R)^2*W'.toAffine.a₁*β + (↑u:R)^5*(↑u⁻¹:R)^2*W'.toAffine.a₃
+            + 2*(↑u:R)^5*(↑u⁻¹:R)^2*ε + (↑u:R)^4*(↑u⁻¹:R)*W'.toAffine.a₁*β
+            + (↑u:R)^4*(↑u⁻¹:R)*W'.toAffine.a₃ + 2*(↑u:R)^4*(↑u⁻¹:R)*ε + (↑u:R)^3*W'.toAffine.a₁*β
+            + (↑u:R)^3*W'.toAffine.a₃ + 2*(↑u:R)^3*ε) * u.mul_inv
       · rw [variableChange_a₄]
         dsimp only
         refine h6.mul_right_inj.mp ?_
         linear_combination -e_x1
-          + (-(↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₁*β*δ - (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₃*δ - 2*(↑u:R)^5*(↑u⁻¹:R)^5*δ*ε - (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₁*ε + 2*(↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₂*β + (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₄ + 3*(↑u:R)^5*(↑u⁻¹:R)^3*β^2 - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₁*β*δ - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₃*δ - 2*(↑u:R)^4*(↑u⁻¹:R)^4*δ*ε - (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₁*ε + 2*(↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₂*β + (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₄ + 3*(↑u:R)^4*(↑u⁻¹:R)^2*β^2 - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₁*β*δ - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₃*δ - 2*(↑u:R)^3*(↑u⁻¹:R)^3*δ*ε - (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₁*ε + 2*(↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₂*β + (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₄ + 3*(↑u:R)^3*(↑u⁻¹:R)*β^2 - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₁*β*δ - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₃*δ - 2*(↑u:R)^2*(↑u⁻¹:R)^2*δ*ε - (↑u:R)^2*W'.toAffine.a₁*ε + 2*(↑u:R)^2*W'.toAffine.a₂*β + (↑u:R)^2*W'.toAffine.a₄ + 3*(↑u:R)^2*β^2 - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₁*β*δ - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₃*δ - 2*(↑u:R)*(↑u⁻¹:R)*δ*ε - W'.toAffine.a₁*β*δ - W'.toAffine.a₃*δ - 2*δ*ε) * u.mul_inv
+          + (-(↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₁*β*δ - (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₃*δ
+            - 2*(↑u:R)^5*(↑u⁻¹:R)^5*δ*ε - (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₁*ε
+            + 2*(↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₂*β + (↑u:R)^5*(↑u⁻¹:R)^3*W'.toAffine.a₄
+            + 3*(↑u:R)^5*(↑u⁻¹:R)^3*β^2 - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₁*β*δ
+            - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₃*δ - 2*(↑u:R)^4*(↑u⁻¹:R)^4*δ*ε
+            - (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₁*ε + 2*(↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₂*β
+            + (↑u:R)^4*(↑u⁻¹:R)^2*W'.toAffine.a₄ + 3*(↑u:R)^4*(↑u⁻¹:R)^2*β^2
+            - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₁*β*δ - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₃*δ
+            - 2*(↑u:R)^3*(↑u⁻¹:R)^3*δ*ε - (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₁*ε
+            + 2*(↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₂*β + (↑u:R)^3*(↑u⁻¹:R)*W'.toAffine.a₄
+            + 3*(↑u:R)^3*(↑u⁻¹:R)*β^2 - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₁*β*δ
+            - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₃*δ - 2*(↑u:R)^2*(↑u⁻¹:R)^2*δ*ε
+            - (↑u:R)^2*W'.toAffine.a₁*ε + 2*(↑u:R)^2*W'.toAffine.a₂*β + (↑u:R)^2*W'.toAffine.a₄
+            + 3*(↑u:R)^2*β^2 - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₁*β*δ - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₃*δ
+            - 2*(↑u:R)*(↑u⁻¹:R)*δ*ε - W'.toAffine.a₁*β*δ - W'.toAffine.a₃*δ - 2*δ*ε) * u.mul_inv
       · rw [variableChange_a₆]
         dsimp only
         refine h6.mul_right_inj.mp ?_
         linear_combination -e_x0
-          + (-(↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₁*β*ε + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₂*β^2 - (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₃*ε + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₄*β + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₆ + (↑u:R)^5*(↑u⁻¹:R)^5*β^3 - (↑u:R)^5*(↑u⁻¹:R)^5*ε^2 - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₁*β*ε + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₂*β^2 - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₃*ε + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₄*β + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₆ + (↑u:R)^4*(↑u⁻¹:R)^4*β^3 - (↑u:R)^4*(↑u⁻¹:R)^4*ε^2 - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₁*β*ε + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₂*β^2 - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₃*ε + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₄*β + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₆ + (↑u:R)^3*(↑u⁻¹:R)^3*β^3 - (↑u:R)^3*(↑u⁻¹:R)^3*ε^2 - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₁*β*ε + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₂*β^2 - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₃*ε + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₄*β + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₆ + (↑u:R)^2*(↑u⁻¹:R)^2*β^3 - (↑u:R)^2*(↑u⁻¹:R)^2*ε^2 - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₁*β*ε + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₂*β^2 - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₃*ε + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₄*β + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₆ + (↑u:R)*(↑u⁻¹:R)*β^3 - (↑u:R)*(↑u⁻¹:R)*ε^2 - W'.toAffine.a₁*β*ε + W'.toAffine.a₂*β^2 - W'.toAffine.a₃*ε + W'.toAffine.a₄*β + W'.toAffine.a₆ + β^3 - ε^2) * u.mul_inv
+          + (-(↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₁*β*ε + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₂*β^2
+            - (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₃*ε + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₄*β
+            + (↑u:R)^5*(↑u⁻¹:R)^5*W'.toAffine.a₆ + (↑u:R)^5*(↑u⁻¹:R)^5*β^3 - (↑u:R)^5*(↑u⁻¹:R)^5*ε^2
+            - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₁*β*ε + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₂*β^2
+            - (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₃*ε + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₄*β
+            + (↑u:R)^4*(↑u⁻¹:R)^4*W'.toAffine.a₆ + (↑u:R)^4*(↑u⁻¹:R)^4*β^3 - (↑u:R)^4*(↑u⁻¹:R)^4*ε^2
+            - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₁*β*ε + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₂*β^2
+            - (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₃*ε + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₄*β
+            + (↑u:R)^3*(↑u⁻¹:R)^3*W'.toAffine.a₆ + (↑u:R)^3*(↑u⁻¹:R)^3*β^3 - (↑u:R)^3*(↑u⁻¹:R)^3*ε^2
+            - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₁*β*ε + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₂*β^2
+            - (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₃*ε + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₄*β
+            + (↑u:R)^2*(↑u⁻¹:R)^2*W'.toAffine.a₆ + (↑u:R)^2*(↑u⁻¹:R)^2*β^3 - (↑u:R)^2*(↑u⁻¹:R)^2*ε^2
+            - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₁*β*ε + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₂*β^2
+            - (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₃*ε + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₄*β
+            + (↑u:R)*(↑u⁻¹:R)*W'.toAffine.a₆ + (↑u:R)*(↑u⁻¹:R)*β^3 - (↑u:R)*(↑u⁻¹:R)*ε^2
+            - W'.toAffine.a₁*β*ε + W'.toAffine.a₂*β^2 - W'.toAffine.a₃*ε + W'.toAffine.a₄*β
+            + W'.toAffine.a₆ + β^3 - ε^2) * u.mul_inv
     · dsimp only
       rw [hx, hu2]
     · dsimp only

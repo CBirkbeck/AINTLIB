@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.GroupLawAxioms
 import ModularCurves.EllipticCurve.Rigidity
 import ModularCurves.EllipticCurve.Comparison
@@ -10,7 +15,7 @@ packaging" half of the v10.123-CASCADE gate verdict, unlocked by T-G4 (v10.138-C
 Over-level group laws at every commutative ring):
 
 * `modelEllipticCurve W` — the working record on `projModel W`: geometry the projective model
-  (`fibreGeom`-pattern), group structure `mulOver`/`oneOver`/`invOver` with the T-G4 laws,
+  (`Fibre.geom`-pattern), group structure `mulOver`/`oneOver`/`invOver` with the T-G4 laws,
   commutativity `mulOver_comm`, unit normalisation `oneOver_left`.
 * `modelEllipticCurve_point_add_val` — addition of `Spec`-points of the model record **computes
   as `mulModelHom`**: `(P + Q).1 = pullback.lift P.1 Q.1 _ ≫ mulModelHom W`.
@@ -63,7 +68,7 @@ the left one by commutativity and the braiding. -/
 
 /-- **(T-B6′ packaging, the working record)** The projective model of an elliptic
 Weierstrass curve as a working record `EllipticCurve (Spec R)`: geometry as in
-`MarkedChartData.fibreGeom`, group structure `modelGrpObj` (the T-G4 laws at every ring),
+`MarkedChartData.Fibre.geom`, group structure `modelGrpObj` (the T-G4 laws at every ring),
 commutativity `mulOver_comm`, unit normalisation `oneOver_left`. -/
 noncomputable def modelEllipticCurve (W : WeierstrassCurve R) [W.IsElliptic] :
     EllipticCurve (Spec (CommRingCat.of R)) where
@@ -172,6 +177,24 @@ theorem pullback_lift_eqToHom_congr {S : Scheme.{u}} {E E' : EllipticCurve S}
   obtain rfl : geomE = geomE' := h
   simp
 
+/-- Transport of a single point's base-changed section across a working-record geometry
+equality: the pullback-lift of `P₁` into `E`'s base-changed record, moved along the record
+equality `hbcE`, is the corresponding lift for `E'`, provided the two sections agree via
+`eqToHom hEE`. The per-point core shared by the two summands of `point_add_val_of_geom_eq`. -/
+private lemma baseChangeEquiv_symm_val_comp_eqToHom {S : Scheme.{u}} {E E' : EllipticCurve S}
+    (h : E.toEllipticCurveGeom = E'.toEllipticCurveGeom) {T : Scheme.{u}} {g : T ⟶ S}
+    (hbcE : pullback E.π g = pullback E'.π g) (hEE : E.E = E'.E)
+    (P₁ : E.Point (𝟙 T ≫ g)) (P₁' : E'.Point (𝟙 T ≫ g))
+    (hP : P₁.1 ≫ eqToHom hEE = P₁'.1) :
+    ((Point.baseChangeEquiv E g (𝟙 T)).symm P₁).1 ≫ eqToHom hbcE =
+      ((Point.baseChangeEquiv E' g (𝟙 T)).symm P₁').1 :=
+  (pullback_lift_eqToHom_congr h g hbcE hEE (𝟙 T) P₁.1 P₁.2
+      ((Category.assoc _ _ _).trans ((congrArg (P₁.1 ≫ ·)
+        (eqToHom_π_congr h hEE)).trans P₁.2))).trans
+    (pullback.hom_ext
+      ((pullback.lift_fst _ _ _).trans (hP.trans (pullback.lift_fst _ _ _).symm))
+      ((pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm))
+
 /-- **(T-B6′, the rigidity driver — GIT Cor 6.6 at the point level)** Over a locally
 noetherian base `T`, two working records on `S` with the same geometry add points over
 `g : T ⟶ S` identically (`eqToHom`-spelled). Fibrewise route (v10.123-CASCADE audit):
@@ -215,22 +238,8 @@ theorem point_add_val_of_geom_eq {S : Scheme.{u}} {E E' : EllipticCurve S}
       rw [map_add, AddEquiv.apply_symm_apply, AddEquiv.apply_symm_apply])).trans
       (Point.baseChangeEquiv_apply_coe E' g (𝟙 T) _)
   -- the sections' underlying morphisms match across the geometry equality
-  have hx : ((Point.baseChangeEquiv E g (𝟙 T)).symm P₁).1 ≫ eqToHom hbcE =
-      ((Point.baseChangeEquiv E' g (𝟙 T)).symm P₁').1 :=
-    (pullback_lift_eqToHom_congr h g hbcE hEE (𝟙 T) P₁.1 P₁.2
-        ((Category.assoc _ _ _).trans ((congrArg (P.1 ≫ ·)
-          (eqToHom_π_congr h hEE)).trans (P.2.trans hgc)))).trans
-      (pullback.hom_ext
-        ((pullback.lift_fst _ _ _).trans (hP.trans (pullback.lift_fst _ _ _).symm))
-        ((pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm))
-  have hy : ((Point.baseChangeEquiv E g (𝟙 T)).symm Q₁).1 ≫ eqToHom hbcE =
-      ((Point.baseChangeEquiv E' g (𝟙 T)).symm Q₁').1 :=
-    (pullback_lift_eqToHom_congr h g hbcE hEE (𝟙 T) Q₁.1 Q₁.2
-        ((Category.assoc _ _ _).trans ((congrArg (Q.1 ≫ ·)
-          (eqToHom_π_congr h hEE)).trans (Q.2.trans hgc)))).trans
-      (pullback.hom_ext
-        ((pullback.lift_fst _ _ _).trans (hQ.trans (pullback.lift_fst _ _ _).symm))
-        ((pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm))
+  have hx := baseChangeEquiv_symm_val_comp_eqToHom h hbcE hEE P₁ P₁' hP
+  have hy := baseChangeEquiv_symm_val_comp_eqToHom h hbcE hEE Q₁ Q₁' hQ
   -- the middle transport across the record equality, then reassemble
   have hmid : ((Point.baseChangeEquiv E g (𝟙 T)).symm P₁ +
         (Point.baseChangeEquiv E g (𝟙 T)).symm Q₁).1 ≫ eqToHom hbcE =

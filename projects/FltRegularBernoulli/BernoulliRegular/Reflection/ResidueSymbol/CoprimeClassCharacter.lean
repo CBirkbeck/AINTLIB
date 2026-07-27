@@ -129,7 +129,7 @@ theorem onClassGroup_mk0
     (I : (Ideal R)⁰)
     (hI : ∀ P ∈ S, IsCoprime (I : Ideal R) P) :
     D.onClassGroup (ClassGroup.mk0 I) = D.symbol I hI := by
-  unfold onClassGroup
+  simp only [onClassGroup]
   exact D.symbol_eq_of_mk0_eq (D.rep_coprime (ClassGroup.mk0 I)) hI
     (D.rep_mk0 (ClassGroup.mk0 I))
 

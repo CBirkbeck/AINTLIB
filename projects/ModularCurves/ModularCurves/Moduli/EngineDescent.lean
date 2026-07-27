@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.QuotientProblem
+import ModularCurves.EllipticCurve.AdditionBaseChange
+import ModularCurves.EllipticCurve.GroupLawAxioms
 import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import ModularCurves.ForMathlib.SchemeActionFree
@@ -129,9 +131,10 @@ theorem exists_isStableOpen_isAffineOpen_of_orbit [Finite G]
 is `G`-equivariant: `g • (φ a) = φ (g • a)`, where the two actions are the `gammaMulSemiringAction`s
 on the stable affine opens `U ⊆ X` and `W ⊆ E`.
 
-This is exactly `appLE`-functoriality applied to the equivariance square `IsCurveAction.π_equivariant`
-(`σE.hom g ≫ C.π = C.π ≫ σ.hom g`). It is what makes `Γ(E, W)` a *semilinear* `Γ(X,U)[G]`-module, the
-hypothesis `hslC` of `MulSemiringAction.isPushout_fixedPoints`. -/
+This is exactly `appLE`-functoriality applied to the equivariance square
+`IsCurveAction.π_equivariant` (`σE.hom g ≫ C.π = C.π ≫ σ.hom g`). It is what makes `Γ(E, W)`
+a *semilinear* `Γ(X,U)[G]`-module, the hypothesis `hslC` of
+`MulSemiringAction.isPushout_fixedPoints`. -/
 theorem appLE_π_equivariant (hact : IsCurveAction σ C σE)
     {U : X.Opens} (hU : σ.IsStableOpen U) {W : (C.E).Opens} (hW : σE.IsStableOpen W)
     (h : W ≤ C.π ⁻¹ᵁ U) (g : G) :
@@ -177,7 +180,7 @@ theorem isPullback_localQuotientπ [Finite G] (hact : IsCurveAction σ C σE)
     have hm := appLE_π_equivariant hact hU hW h g
     have e2 := congrArg (fun m : Γ(X, U) ⟶ Γ(C.E, W) => m.hom a) hm
     simp only [CommRingCat.hom_comp, RingHom.comp_apply] at e2
-    simp only [SchemeAction.gammaMulSemiringAction_smul_def, RingHom.algebraMap_toAlgebra]
+    simp only [RingHom.algebraMap_toAlgebra]
     exact e2
   haveI hsl : SMulCommClass G (↥(FixedPoints.subalgebra ℤ (↑Γ(X, U)) G)) (↑Γ(C.E, W)) := by
     refine ⟨fun g b c => ?_⟩
@@ -499,7 +502,7 @@ theorem isPullback_chart [Finite G] [IsAffine X]
   -- e₄.hom = chartIso_X.hom ≫ chart_X.ι
   have he₄hom : e₄.hom = (σ.quotientChartIso V hVs hVa x₀).hom ≫
       (σ.quotientChart V hVs hVa x₀).ι := by
-    simp only [he₄, Iso.trans_hom, Category.assoc, Scheme.topIso_hom, Scheme.isoOfEq_hom_ι]
+    simp only [he₄, Iso.trans_hom, Scheme.topIso_hom, Scheme.isoOfEq_hom_ι]
   -- assemble by transport of the affine core
   refine hcore.of_iso (Iso.refl _) (σE.quotientChartIso VE hVEs hVEa i) e₃ e₄ ?_ ?_ ?_ ?_
   · rw [Iso.refl_hom, Category.id_comp]
@@ -586,6 +589,7 @@ theorem isProper_of_locallyWeierstrass {S E' : Scheme.{u}} {p : E' ⟶ S} {z : S
       MorphismProperty.cancel_right_of_respectsIso (P := @IsProper)]
     exact projModelπ_isProper (W s)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([a4]/[a5], smoothness from the local model — LEAF, waits on T-A3)** A morphism admitting a
 Zariski-local Weierstrass model is **smooth of relative dimension 1**.
 
@@ -854,28 +858,23 @@ private theorem projModelVCIso_map₂ {S₀ S₁ : Type u} [CommRing S₀] [Comm
   rw [he] at h
   exact h
 
-/-- Two-ring form of `isPullback_projModelBaseChange` (for an arbitrary ring hom, via
-`RingHom.toAlgebra`). -/
+/-- Two-ring form of `isPullback_projModelBaseChange`: the eqToHom-free base-change square
+`isPullback_projModelBaseChangeOf` at the definitional target `V.map ρ`. -/
 private theorem isPullback_projModelBaseChange₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
     (ρ : S₀ →+* S₁) (V : WeierstrassCurve S₀) :
     IsPullback (projModelBaseChange ρ V) (projModelπ (V.map ρ)) (projModelπ V)
       (Spec.map (CommRingCat.ofHom ρ)) := by
-  letI : Algebra S₀ S₁ := ρ.toAlgebra
-  have h := isPullback_projModelBaseChange (R := S₀) (R' := S₁) V
-  have he : (algebraMap S₀ S₁ : S₀ →+* S₁) = ρ := ρ.algebraMap_toAlgebra
-  rw [he] at h
-  exact h
+  rw [← projModelBaseChangeOf_rfl ρ V]
+  exact isPullback_projModelBaseChangeOf ρ V (V.map ρ) rfl
 
-/-- Two-ring form of `projModelZero_baseChange`. -/
+/-- Two-ring form of `projModelZero_baseChange`: `projModelZero_baseChangeOf` at the
+definitional target `V.map ρ`. -/
 private theorem projModelZero_baseChange₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
     (ρ : S₀ →+* S₁) (V : WeierstrassCurve S₀) :
     projModelZero (V.map ρ) ≫ projModelBaseChange ρ V
       = Spec.map (CommRingCat.ofHom ρ) ≫ projModelZero V := by
-  letI : Algebra S₀ S₁ := ρ.toAlgebra
-  have h := projModelZero_baseChange (R := S₀) (R' := S₁) V
-  have he : (algebraMap S₀ S₁ : S₀ →+* S₁) = ρ := ρ.algebraMap_toAlgebra
-  rw [he] at h
-  exact h
+  rw [← projModelBaseChangeOf_rfl ρ V]
+  exact projModelZero_baseChangeOf ρ V (V.map ρ) rfl
 
 /-- Two-ring form of `isIso_projModelBaseChange`. -/
 private theorem isIso_projModelBaseChange₂ {S₀ S₁ : Type u} [CommRing S₀] [CommRing S₁]
@@ -893,6 +892,24 @@ private theorem projModelVCIso_map₂' {S₀ S₁ : Type u} [CommRing S₀] [Com
         ≫ projModelBaseChange ρ (C • V) ≫ (projModelVCIso C V).hom := by
   rw [projModelVCIso_map₂ ρ C V, ← Category.assoc, eqToHom_trans, eqToHom_refl,
     Category.id_comp]
+
+/-- Abstract collapse of the five-fold `eqToHom` chain arising in `actLoc_baseChange`,
+stated over opaque `Scheme` objects so that the concrete `projModel` expressions never
+have to be unfolded during unification. -/
+private theorem eqToHom_chain₅_collapse {X₀ X₁ X₂ X₃ X₄ : Scheme.{u}}
+    (h₁ : X₀ = X₁) (h₂ : X₁ = X₂) (h₃ : X₂ = X₃) (h₄ : X₃ = X₄) (h₅ : X₄ = X₀)
+    {Z : Scheme.{u}} (f : X₀ ⟶ Z) :
+    eqToHom h₁ ≫ eqToHom h₂ ≫ eqToHom h₃ ≫ eqToHom h₄ ≫ eqToHom h₅ ≫ f = f := by
+  subst h₁ h₂ h₃ h₄
+  simp only [eqToHom_refl, Category.id_comp]
+
+/-- Abstract collapse of a two-fold leading `eqToHom` chain, stated over opaque `Scheme`
+objects so that the concrete `projModel` expressions never have to be unfolded. -/
+private theorem eqToHom_chain₂_collapse {X₀ X₁ : Scheme.{u}}
+    (h₁ : X₀ = X₁) (h₂ : X₁ = X₀) {Z : Scheme.{u}} (f : X₀ ⟶ Z) :
+    f = eqToHom h₁ ≫ eqToHom h₂ ≫ f := by
+  subst h₁
+  simp only [eqToHom_refl, Category.id_comp]
 
 /-- **The key base-change compatibility of the localized action datum.** If `act` is the
 `Ψ`-composite of the cocycle value `CA` over `A` and `CR = CA.map ρ` is its localization,
@@ -927,7 +944,7 @@ private theorem actLoc_baseChange {A R : Type u} [CommRing A] [CommRing R] (ρ :
   rw [reassoc_of% projModelVCIso_natEq₂ (rfl : CA.map ρ = CA.map ρ) hVeq,
     reassoc_of% projModelVCIso_map₂' ρ CA (W₀.map τA), hΨA,
     reassoc_of% projModelBaseChange_natEq₂ ρ hCA]
-  simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  exact eqToHom_chain₅_collapse _ _ _ _ _ (projModelBaseChange ρ W₀ ≫ act)
 
 open scoped Pointwise in
 /-- **The localized action datum on the model of `W₀A ⊗ A_a`.** Packaged for the per-point
@@ -1026,7 +1043,12 @@ private theorem exists_actLoc {A : Type u} [CommRing A] [MulSemiringAction G A]
               (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g'))).hom
         ≫ projModelBaseChange (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g')
             (W₀A.map (algebraMap A (Localization.Away ((a : A)))))) (fun g' => ?_) g
-    simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+    exact eqToHom_chain₂_collapse _ _
+      ((projModelVCIso ((Cvc g').map (algebraMap A (Localization.Away ((a : A)))))
+          ((W₀A.map (algebraMap A (Localization.Away ((a : A))))).map
+            (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g'))).hom
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g')
+            (W₀A.map (algebraMap A (Localization.Away ((a : A))))))
   · -- (ii) covers the action through the base change
     exact actLoc_baseChange (algebraMap A (Localization.Away ((a : A))))
       (MulSemiringAction.toRingHom G A g)
@@ -1208,12 +1230,11 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
     (φA : EE ≅ projModel W₀A)
     (hπφA : φA.hom ≫ projModelπ W₀A = πE)
     (hzeroφA : zeroE ≫ φA.hom = projModelZero W₀A)
-    -- the action family and its cocycle
+    -- the action family and its variable-change compatibility
     (act : G → (projModel W₀A ⟶ projModel W₀A))
     (hEact : ∀ g, (φA.hom ≫ act g ≫ φA.inv) ≫ qE = qE)
     (Cvc : G → VariableChange A)
     (hCvc : ∀ g, Cvc g • (W₀A.map (MulSemiringAction.toRingHom G A g)) = W₀A)
-    (hcoc : IsVCocycle Cvc)
     (hΨ : ∀ g, (projModelVCIso (Cvc g) (W₀A.map (MulSemiringAction.toRingHom G A g))).hom
         ≫ projModelBaseChange (MulSemiringAction.toRingHom G A g) W₀A
       = eqToHom (congrArg projModel (hCvc g)) ≫ act g)
@@ -1228,8 +1249,6 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
     -- the fppf data of the invariants cover
     (hfsur : Surjective (invariantsπ G A ℤ)) (hffl : Flat (invariantsπ G A ℤ))
     (hfqc : QuasiCompact (invariantsπ G A ℤ))
-    -- the freeness (for the localized fixed-point identifications)
-    (hfreeA : IsFreeAlgebraAction G ℤ A)
     -- the point and the descended local model
     (s : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))))
     (a : FixedPoints.subring A G) (hap : a ∉ s.asIdeal)
@@ -2196,7 +2215,7 @@ private theorem discharge_hlift [Finite G]
     apply pullback.hom_ext
     · simp only [Category.assoc, pullback.lift_fst, SchemeAction.transport_hom,
         Iso.hom_inv_id, Category.comp_id, Iso.hom_inv_id_assoc]
-    · simp only [Category.assoc, pullback.lift_snd]
+    · simp only [pullback.lift_snd]
   rw [hmap_eq]
   exact hf g
 
@@ -2281,14 +2300,14 @@ theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
       (zeroSq_transport hzero'c hqiso)
       W₀ hW₀ φ hπφ (zero_transport hzeroφ) ((σE.transport φ).hom)
       (discharge_hEact VE hVEs hVEa hVEmem W₀ φ)
-      Cvc hCvc hcoc hΨ
+      Cvc hCvc hΨ
       (discharge_hlift VE hVEs hVEa hVEmem hfreeE W₀ φ
         (discharge_hEact VE hVEs hVEa hVEmem W₀ φ))
       (discharge_hepi VE hVEs hVEa hVEmem hfreeE)
       (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).1
       (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.1
       (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.2
-      hfreeA s a hap W₁ E hW₁ hcob
+      s a hap W₁ E hW₁ hcob
   exact lw_of_baseIso π' zero' hz qiso hspec
 
 set_option backward.isDefEq.respectTransparency false in

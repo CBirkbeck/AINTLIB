@@ -222,6 +222,23 @@ theorem heckeT_n_cusp_unfold (m : ℕ) [NeZero m] (hm : 1 < m)
     (heckeT_n_prime_pow k hp' _
       (hp'.factorization_pos_of_dvd (by lia) (Nat.minFac_dvd m))).symm]
 
+/-- `T_1` is the identity on cusp forms. -/
+theorem heckeT_n_cusp_one (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    heckeT_n_cusp k 1 f = f :=
+  CuspForm.ext fun z ↦ by
+    change (heckeT_n k 1 f.toModularForm').toFun z = f z
+    rw [heckeT_n_one]; rfl
+
+/-- Transport an operator factorisation `T_m = T_a · T_b` to the cusp-form level. -/
+theorem heckeT_n_cusp_decomp_of_mul (a b m : ℕ) [NeZero a] [NeZero b] [NeZero m]
+    (h_mul : heckeT_n (N := N) k m = heckeT_n k a * heckeT_n k b)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    heckeT_n_cusp k m f = heckeT_n_cusp k a (heckeT_n_cusp k b f) :=
+  CuspForm.ext fun z ↦ by
+    change ((heckeT_n (N := N) k m) f.toModularForm').toFun z =
+      ((heckeT_n k a) ((heckeT_n k b) f.toModularForm')).toFun z
+    rw [h_mul]; rfl
+
 @[simp]
 theorem heckeT_n_cusp_toModularForm' (n : ℕ) [NeZero n]
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
@@ -259,9 +276,9 @@ noncomputable def adjointGamma0Rep (p N : ℕ) (hpN : Nat.Coprime p N) : ↥(Gam
   ⟨⟨!![(p : ℤ), n; (N : ℤ), m], by
       have hbez := coprime_bezout_aux hpN
       simp only [Matrix.det_fin_two_of]
-      linarith⟩, by
-      rw [Gamma0_mem]
-      simp⟩
+      linarith⟩, Gamma0_mem.mpr (by
+      show (((N : ℤ) : ℤ) : ZMod N) = 0
+      simp)⟩
 
 /-- The mod-`N` unit attached to `adjointGamma0Rep` is `(unitOfCoprime p)⁻¹`. -/
 lemma adjointGamma0Rep_units (p N : ℕ) (hpN : Nat.Coprime p N) [NeZero N] :

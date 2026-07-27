@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.RealClosure
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
 
 /-!
 # Case-II route decision: the Thm-9.5 (computational, Cor 8.19) bypass

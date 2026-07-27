@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.Algebra.Group.Nat.Even
@@ -223,7 +228,7 @@ theorem fourierCyclotomicSingleDifferenceProduct_eq_weightedPairProduct
   have hp_sub : p - 1 = n + n := by
     have := congrArg (fun m : ℕ => m - 1) hp_eqn
     simpa [two_mul, add_assoc, add_left_comm, add_comm] using this
-  unfold fourierCyclotomicSingleDifferenceProduct
+  simp only [fourierCyclotomicSingleDifferenceProduct]
   rw [hp_sub, Finset.prod_range_add]
   have hfirst :
       ∏ d ∈ Finset.range n,
@@ -343,14 +348,17 @@ theorem fourierBaseRoot_pow_chooseThree_add_halfWeightedExponent_eq_one
   rw [hm, pow_mul, (fourierBaseRoot_isPrimitiveRoot (p := p)).pow_eq_one]
   simp
 
-theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
-    ∏ d ∈ Finset.range ((p - 1) / 2),
-      2 * Real.sin (Real.pi * ((d + 1 : ℕ) / p : ℝ)) = Real.sqrt p := by
+/-- The square of the half-range double-sine product `∏_{d < (p-1)/2} 2·sin(π(d+1)/p)`
+equals the odd prime `p`.  Pairing each index `d+1` with its complement `p-(d+1)` turns the
+full product `∏_{k < p-1} (1 - ζ^{k+1})` of `1 - ζ^k` over the nonzero residues into a product
+of squared double-sines; by `fourierBaseRoot_prod_one_sub_pow_eq_order` that full product is `p`.
+This is the key squared identity behind `halfRangeDoubleSinProduct_eq_sqrt_order`. -/
+theorem halfRangeDoubleSinProduct_sq_eq_order (hp2 : p ≠ 2) :
+    (∏ d ∈ Finset.range ((p - 1) / 2),
+      2 * Real.sin (Real.pi * ((d + 1 : ℕ) : ℝ) / p)) ^ 2 = (p : ℝ) := by
   let n : ℕ := (p - 1) / 2
   let S : ℕ → ℝ := fun k => 2 * Real.sin (Real.pi * (k : ℝ) / p)
   have hp_eqn : p = 2 * n + 1 := eq_two_mul_pred_div_two_add_one (p := p) hp2
-  have hp_add : p = n + n + 1 := by
-    simpa [two_mul, add_assoc, add_left_comm, add_comm] using hp_eqn
   have hp_sub : p - 1 = n + n := by
     have := congrArg (fun m : ℕ => m - 1) hp_eqn
     simpa [two_mul, add_assoc, add_left_comm, add_comm] using this
@@ -386,8 +394,17 @@ theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
   have hsqC : (((∏ d ∈ Finset.range n, S (d + 1)) ^ 2 : ℝ) : ℂ) = (p : ℂ) := by
     rw [← hpair]
     exact fourierBaseRoot_prod_one_sub_pow_eq_order (p := p)
-  have hsq : (∏ d ∈ Finset.range n, S (d + 1)) ^ 2 = (p : ℝ) := by
-    exact_mod_cast hsqC
+  show (∏ d ∈ Finset.range n, S (d + 1)) ^ 2 = (p : ℝ)
+  exact_mod_cast hsqC
+
+theorem halfRangeDoubleSinProduct_eq_sqrt_order (hp2 : p ≠ 2) :
+    ∏ d ∈ Finset.range ((p - 1) / 2),
+      2 * Real.sin (Real.pi * ((d + 1 : ℕ) / p : ℝ)) = Real.sqrt p := by
+  let n : ℕ := (p - 1) / 2
+  let S : ℕ → ℝ := fun k => 2 * Real.sin (Real.pi * (k : ℝ) / p)
+  have hp_eqn : p = 2 * n + 1 := eq_two_mul_pred_div_two_add_one (p := p) hp2
+  have hsq : (∏ d ∈ Finset.range n, S (d + 1)) ^ 2 = (p : ℝ) :=
+    halfRangeDoubleSinProduct_sq_eq_order (p := p) hp2
   have hpos : 0 < ∏ d ∈ Finset.range n, S (d + 1) := by
     refine Finset.prod_pos ?_
     intro d hd

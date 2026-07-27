@@ -1,5 +1,10 @@
-import ModularCurves.EllipticCurve.AdditionChartHom
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartDomain
+import ModularCurves.EllipticCurve.AdditionChartHom
 
 /-!
 # The addition laws as chart morphisms on the localized chart-product (T-W7.0c-c5β, β3)

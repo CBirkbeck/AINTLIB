@@ -1,4 +1,7 @@
-import FltRegular.NumberTheory.Unramified
+module
+
+public import FltRegular.NumberTheory.Unramified
+import Mathlib.NumberTheory.RamificationInertia.Galois
 
 /-!
 # Localized Galois descent of ideals (away from the ramified primes)
@@ -42,7 +45,7 @@ prime), whose role mathlib's `Algebra.IsUnramifiedAt` (base ring, *upstairs* pri
 directly fill. -/
 def IsUnramifiedAt (S : Type*) [CommRing S] {R : Type*} [CommRing R] [Algebra R S]
     (p : Ideal R) : Prop :=
-  ∀ P, P ∈ primesOver p S → Ideal.ramificationIdx p P = 1
+  ∀ P, P ∈ primesOver p S → Ideal.ramificationIdx' p P = 1
 
 /-- **Per-prime version of `prod_primesOverFinset_of_isUnramified`.** If `S/R` is unramified at
 the single prime `p` (every prime over `p` has ramification index `1`), then the product of the
@@ -61,9 +64,30 @@ lemma prod_primesOverFinset_of_isUnramifiedAt [IsDedekindDomain S]
   convert (pow_one _).symm
   have : p.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hp ‹_›
   rw [← Finset.mem_coe, IsDedekindDomain.coe_primesOverFinset hp] at hP
-  rw [← Ideal.IsDedekindDomain.ramificationIdx_eq_factors_count hpbot' hP.1
+  rw [← Ideal.IsDedekindDomain.ramificationIdx'_eq_factors_count hpbot' hP.1
     (ne_bot_of_mem_primesOver hp hP)]
   exact hunram _ hP
+
+/-- **Galois-conjugate primes have equal `I`-adic valuation in a stable ideal.** In a Galois
+number-field tower (`S/R` integrally closed inside the Galois extension `L/K`), if the ideal `I` of
+`S` is fixed by `Gal(L/K)`, then any two primes `P₁, P₂` of `S` lying over the same prime `p` of `R`
+occur to the same power in `I`: `emultiplicity P₁ I = emultiplicity P₂ I`.
+
+This is the `emultiplicity` (valuation) analogue of mathlib's
+`Ideal.ramificationIdx_eq_of_isGaloisGroup` (equal ramification indices for conjugate primes),
+applied to the exponents in an *arbitrary* `Gal(L/K)`-stable ideal; it isolates the Galois
+transitivity step (`Ideal.exists_comap_galRestrict_eq`) used by `comap_map_eq_of_unramifiedAt_support`. -/
+private lemma emultiplicity_eq_of_mem_primesOver [IsGalois K L] [IsDedekindDomain S] {I : Ideal S}
+    (hI : ∀ σ : L ≃ₐ[K] L, I.comap (galRestrict R K L S σ) = I) {p : Ideal R} {P₁ P₂ : Ideal S}
+    (hP₁ : P₁ ∈ primesOver p S) (hP₂ : P₂ ∈ primesOver p S) :
+    emultiplicity P₁ I = emultiplicity P₂ I := by
+  rw [emultiplicity_eq_emultiplicity_iff]
+  intro n
+  obtain ⟨σ, hσ⟩ := exists_comap_galRestrict_eq R K L S hP₂ hP₁
+  rw [Ideal.dvd_iff_le, Ideal.dvd_iff_le]
+  conv_lhs => rw [← hI σ, ← hσ,
+    Ideal.comap_le_iff_le_map _ (AlgEquiv.bijective _), Ideal.map_pow,
+    Ideal.map_comap_of_surjective _ (AlgEquiv.surjective _)]
 
 /-- **Localized Galois descent of ideals.** If `L/K` is Galois, `I` is an ideal of `S` fixed by
 `Gal(L/K)`, and `S/R` is unramified at every prime in the support of `I ∩ R`, then `(I ∩ R)·S = I`.
@@ -130,14 +154,8 @@ lemma comap_map_eq_of_unramifiedAt_support [IsGalois K L] [IsDedekindDomain S]
         ← emultiplicity_eq_count_normalizedFactors
           (prime_of_mem_primesOver hpbot hP).irreducible hIbot,
         ← normalize_eq (𝔓 p hp), ← emultiplicity_eq_count_normalizedFactors
-          (prime_of_mem_primesOver hpbot <| h𝔓' p hp).irreducible hIbot,
-          emultiplicity_eq_emultiplicity_iff]
-      intro n
-      have ⟨σ, hσ⟩ := exists_comap_galRestrict_eq R K L S (h𝔓' _ hp) hP
-      rw [Ideal.dvd_iff_le, Ideal.dvd_iff_le]
-      conv_lhs => rw [← hI σ, ← hσ,
-        Ideal.comap_le_iff_le_map _ (AlgEquiv.bijective _), Ideal.map_pow,
-        Ideal.map_comap_of_surjective _ (AlgEquiv.surjective _)]
+          (prime_of_mem_primesOver hpbot <| h𝔓' p hp).irreducible hIbot]
+      exact emultiplicity_eq_of_mem_primesOver hI hP (h𝔓' p hp)
   · intro P hP
     simp only [factors_eq_normalizedFactors, Multiset.mem_toFinset,
       Ideal.mem_normalizedFactors_iff hIbot] at hP

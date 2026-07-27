@@ -25,7 +25,8 @@ noncomputable section
 A holomorphic function on a *ball* has a primitive (Morera, `DifferentiableOn.isExactOn_ball`).  We
 upgrade this to the open upper half-plane `{0 < im}` (which is convex but not a ball) by exhausting
 it with the increasing family of balls `ball (n·i) n` (`n ≥ 1`): the normalized primitives on these
-balls agree on the connected overlaps (their difference has zero derivative on a connected open set),
+balls agree on the connected overlaps (their difference has zero derivative on a connected open
+set),
 so they glue to a global primitive.  Applied to `periodForm f P`, this makes the period integral of
 the holomorphic form path-independent via the fundamental theorem of calculus, and is reused by
 ES-3c/ES-4. -/
@@ -202,7 +203,7 @@ def cuspDiff (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {m : ℕ} (γ : Congr
 theorem rawPairing_modSymRep_sub (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {m : ℕ}
     (γ : CongruenceSubgroup.Gamma1 N) (D : Div0 ℤ) (P : SymPow ℤ m) :
     rawPairing f (modSymRep N m γ (D ⊗ₜ P)) - rawPairing f (D ⊗ₜ P) =
-      (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum
+      (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum
         (fun c n => (n : ℂ) * cuspDiff f γ (castSymPow m P) c) := by
   have h1 : modSymRep N m γ (D ⊗ₜ[ℤ] P) =
       (div0Rep ℤ (γ : SL(2, ℤ)) D) ⊗ₜ[ℤ] (symRep ℤ m (γ : SL(2, ℤ)) P) := rfl
@@ -217,8 +218,10 @@ theorem rawPairing_modSymRep_sub (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {
   rw [hrb, hrb, castSymPow_symRep]
   -- The divisor of `div0Rep γ D` is `mapDomain (γ • ·) D`, reindex the sum injectively.
   set g := Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) (γ : SL(2, ℤ)) with hg
-  have hdiv : ((div0Rep ℤ (γ : SL(2, ℤ)) D) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) =
-      Finsupp.mapDomain (g • ·) (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) := by
+  have hdiv : ((div0Rep ℤ (γ : SL(2, ℤ)) D) :
+        MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff =
+      Finsupp.mapDomain (g • ·)
+        (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff := by
     rw [div0Rep_apply]
   have hinj : Function.Injective (fun c : Projectivization ℚ (Fin 2 → ℚ) => g • c) :=
     MulAction.injective g
@@ -230,9 +233,10 @@ theorem rawPairing_modSymRep_sub (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {
 
 /-- A degree-`0` divisor `D` has vanishing total weight `Σ_c D(c) = 0`. -/
 theorem Div0.sum_coeff_eq_zero (D : Div0 ℤ) :
-    (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum (fun _ n => n) = 0 := by
+    (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum (fun _ n => n) = 0 := by
   have hD := D.2
-  rw [LinearMap.mem_ker, Finsupp.linearCombination_apply, Finsupp.sum] at hD
+  rw [LinearMap.mem_ker, LinearMap.comp_apply, LinearEquiv.coe_coe,
+    MonoidAlgebra.coeffLinearEquiv_apply, Finsupp.linearCombination_apply, Finsupp.sum] at hD
   simp only [smul_eq_mul, mul_one] at hD
   rwa [Finsupp.sum]
 
@@ -244,24 +248,27 @@ theorem sum_cuspDiff_eq_zero_of_const (f : CuspForm ((Gamma1 N).map (mapGL ℝ))
     (γ : CongruenceSubgroup.Gamma1 N) (Q : SymPow ℂ m) (D : Div0 ℤ)
     (hconst : ∀ c₁ c₂ : Projectivization ℚ (Fin 2 → ℚ),
       cuspDiff f γ Q c₁ = cuspDiff f γ Q c₂) :
-    (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum (fun c n => (n : ℂ) * cuspDiff f γ Q c) = 0 := by
-  by_cases hsupp : (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support = ∅
+    (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum
+      (fun c n => (n : ℂ) * cuspDiff f γ Q c) = 0 := by
+  by_cases hsupp : (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support = ∅
   · simp [Finsupp.sum, hsupp]
   · obtain ⟨c₀, hc₀⟩ := Finset.nonempty_of_ne_empty hsupp
-    have hconst' : ∀ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        (fun c n => (n : ℂ) * cuspDiff f γ Q c) c ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c) =
+    have hconst' : ∀ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        (fun c n => (n : ℂ) * cuspDiff f γ Q c) c
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c) =
         (fun c n => (n : ℂ) * cuspDiff f γ Q c₀) c
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c) := by
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c) := by
       intro c _; simp only []; rw [hconst c c₀]
     rw [Finsupp.sum, Finset.sum_congr rfl hconst']
-    have : ∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) * cuspDiff f γ Q c₀ =
-        (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) * cuspDiff f γ Q c₀ := by
+    have : ∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) * cuspDiff f γ Q c₀ =
+        (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) *
+        cuspDiff f γ Q c₀ := by
       rw [Finset.sum_mul]
     rw [this]
-    have hsum0 : (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) = 0 := by
+    have hsum0 : (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) = 0 := by
       rw [← Int.cast_sum]
       have := Div0.sum_coeff_eq_zero D
       rw [Finsupp.sum] at this
@@ -434,7 +441,8 @@ theorem tendsto_horizontal_cap {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (G
 /-! ### Identifying the cusp integral as an improper vertical integral of `periodForm`
 
 `cuspToInftyIntegral f P q` is the integral of the holomorphic form `periodForm f P` up the vertical
-line `Re = q` from the real axis to `i∞`.  We record this identification and the integrability of the
+line `Re = q` from the real axis to `i∞`.  We record this identification and the integrability of
+the
 shifted integrand, so the contour-deformation engine applies directly to `cuspValue`. -/
 
 omit [NeZero N] in
@@ -540,9 +548,11 @@ theorem horizontal_slide {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (GL (Fin
 /-! ## The Möbius change-of-variables (reusable)
 
 The substitution `z = γ•w` in the contour integral.  We record the Möbius map `mob γ : ℂ → ℂ`, its
-derivative `(c₀w+d)⁻²` (det `= 1`), the automorphy `f(γ•z) = (c₀z+d)^k f(z)` for `γ ∈ Γ₁(N)`, and the
+derivative `(c₀w+d)⁻²` (det `= 1`), the automorphy `f(γ•z) = (c₀z+d)^k f(z)` for `γ ∈ Γ₁(N)`, and
+the
 integrand-level change-of-variables identity `periodForm f (symRep γ P̂)(γ•w)·(c₀w+d)⁻² =
-periodForm f P̂ (w)` in which all automorphy factors cancel (`(c₀w+d)^{k-m-2} = 1`, `m = k-2`).  This
+periodForm f P̂ (w)` in which all automorphy factors cancel (`(c₀w+d)^{k-m-2} = 1`, `m = k-2`).
+This
 is the algebraic core of the `γ`-covariance and is reused by ES-3c/ES-4. -/
 
 /-- The Möbius transformation `w ↦ (a w + b)/(c₀ w + d)` as a map `ℂ → ℂ` for `γ ∈ SL(2, ℤ)`. -/
@@ -630,7 +640,8 @@ theorem periodForm_mob (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     denom_mob_ne (γ : SL(2, ℤ)) hw
   set D : ℂ := ((γ : SL(2, ℤ)) 1 0 : ℂ) * w + ((γ : SL(2, ℤ)) 1 1 : ℂ) with hD
   set wH : ℍ := ⟨w, hw⟩ with hwH
-  have hmob : mob (γ : SL(2, ℤ)) w = (((γ : SL(2, ℤ)) • wH : ℍ) : ℂ) := mob_eq_smul (γ : SL(2, ℤ)) wH
+  have hmob : mob (γ : SL(2, ℤ)) w = (((γ : SL(2, ℤ)) • wH : ℍ) : ℂ) :=
+    mob_eq_smul (γ : SL(2, ℤ)) wH
   rw [periodForm, periodForm, hmob]
   have hofc : UpperHalfPlane.ofComplex (((γ : SL(2, ℤ)) • wH : ℍ) : ℂ) = (γ : SL(2, ℤ)) • wH :=
     UpperHalfPlane.ofComplex_apply ((γ : SL(2, ℤ)) • wH)
@@ -638,7 +649,8 @@ theorem periodForm_mob (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     rw [show w = (wH : ℂ) from rfl, UpperHalfPlane.ofComplex_apply wH]
   rw [hofc, hofw]
   have haut : f ((γ : SL(2, ℤ)) • wH) = (D ^ k) * f wH := automorphy f γ wH
-  have hev : evalSym1 (k - 2).toNat (symRep ℂ (k - 2).toNat (γ : SL(2, ℤ)) (castSymPow (k - 2).toNat P))
+  have hev : evalSym1 (k - 2).toNat
+      (symRep ℂ (k - 2).toNat (γ : SL(2, ℤ)) (castSymPow (k - 2).toNat P))
         (((γ : SL(2, ℤ)) • wH : ℍ) : ℂ)
       = (D ^ (k - 2).toNat)⁻¹ * evalSym1 (k - 2).toNat (castSymPow (k - 2).toNat P) (wH : ℂ) :=
     evalSym1_symRep_smul (γ : SL(2, ℤ)) (castSymPow (k - 2).toNat P) wH
@@ -671,7 +683,8 @@ ingredients of the geodesic-period invariance and are reused by ES-4. -/
 
 /-- **Vertical-ray cusp decay.**  For a cusp form `f`, the period form `periodForm f P` tends to `0`
 along the *vertical* ray `t ↦ q + i t` as `t → 0⁺`, for every rational cusp `q`.  This is the honest
-finite-cusp decay (the cusp form vanishes at the cusp *along the vertical geodesic*): it follows from
+finite-cusp decay (the cusp form vanishes at the cusp *along the vertical geodesic*): it follows
+from
 `tendsto_genIntegrand_nhdsGT_zero` applied to the horizontal translate `f ∣ transMat q`, since
 `genIntegrand (f ∣ transMat q)(shiftPoly q P) t = periodForm f P (q + i t)·i`.
 
@@ -760,7 +773,8 @@ theorem hasDerivAt_periodForm_primitive_vertical {F : Type*} [FunLike F ℍ ℂ]
 
 /-! ### The cusp value as a difference of boundary values of a primitive (FTC)
 
-Combining the FTC derivative `hasDerivAt_periodForm_primitive_vertical` with the integrability of the
+Combining the FTC derivative `hasDerivAt_periodForm_primitive_vertical` with the integrability of
+the
 vertical integrand and the convergence of the improper integral, the cusp-to-`i∞` integral
 `cuspToInftyIntegral f P q` along the vertical line `Re = q` equals the difference of the *top*
 boundary value `lim_{Y→∞} Fp(q + iY)` and the *bottom* boundary value `lim_{Y→0⁺} Fp(q + iY)` of any
@@ -791,7 +805,8 @@ theorem tendsto_primitive_vertical_nhdsGT_zero (f : CuspForm ((Gamma1 N).map (ma
       rcases ht with h | h
       · linarith [h.1]
       · linarith [h.1]
-    have hderiv : ∀ t ∈ Set.uIcc Y 1, HasDerivAt (fun s : ℝ => Fp ((q : ℂ) + s * Complex.I)) (g t) t := by
+    have hderiv : ∀ t ∈ Set.uIcc Y 1,
+        HasDerivAt (fun s : ℝ => Fp ((q : ℂ) + s * Complex.I)) (g t) t := by
       intro t ht
       exact hasDerivAt_periodForm_primitive_vertical f P Fp hFp q (hsub ht)
     have hii : IntervalIntegrable g MeasureTheory.volume Y 1 :=
@@ -834,7 +849,8 @@ theorem tendsto_primitive_vertical_nhdsGT_zero (f : CuspForm ((Gamma1 N).map (ma
   exact hkey
 
 /-- **The cusp value as top-minus-bottom boundary values of a primitive (improper FTC).**  Let `Fp`
-be a primitive of `periodForm f P` on the open upper half-plane.  If `Fp(q + iY)` converges to `Ttop`
+be a primitive of `periodForm f P` on the open upper half-plane.  If `Fp(q + iY)` converges to
+`Ttop`
 as `Y → +∞` (top boundary value at `i∞` along the vertical ray) and to `Bbot` as `Y → 0⁺` (bottom
 boundary value at the finite cusp `q`), then the cusp-to-`i∞` integral equals `Ttop − Bbot`.  This
 is the FTC bridge identifying the concrete improper integral with boundary values of any primitive.
@@ -1066,7 +1082,8 @@ theorem im_mob_pos (γ : CongruenceSubgroup.Gamma1 N) {w : ℂ} (hw : 0 < w.im) 
 /-- **The Möbius-pullback primitive.**  If `F` is a primitive of `periodForm f Q` on the open upper
 half-plane (where `Q = symRep γ (cast P)`), then `F ∘ mob γ` is a primitive of
 `periodForm f (cast P)`: its derivative at `w` is the Möbius change-of-variables of `F`'s, which by
-`periodForm_mob` is exactly `periodForm f (cast P) w` (all automorphy factors cancel).  This realises
+`periodForm_mob` is exactly `periodForm f (cast P) w` (all automorphy factors cancel).  This
+realises
 the change of variables `z = γ•w` at the level of primitives. -/
 theorem hasDerivAt_primitive_mob (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     (γ : CongruenceSubgroup.Gamma1 N) (P : SymPow ℤ (k - 2).toNat) (hk : 2 ≤ k)
@@ -1107,7 +1124,8 @@ action into the `OnePoint` (Möbius) action that governs `cuspValue`. -/
 theorem equivProjectivization_symm_cuspAction (γ : CongruenceSubgroup.Gamma1 N)
     (c : Projectivization ℚ (Fin 2 → ℚ)) :
     (OnePoint.equivProjectivization ℚ).symm (cuspAction γ c) =
-      (Matrix.SpecialLinearGroup.mapGL ℚ (γ : SL(2, ℤ))) • (OnePoint.equivProjectivization ℚ).symm c := by
+      (Matrix.SpecialLinearGroup.mapGL ℚ (γ : SL(2, ℤ))) •
+        (OnePoint.equivProjectivization ℚ).symm c := by
   rw [cuspAction_eq_mapGL_smul, Equiv.symm_apply_eq, OnePoint.equivProjectivization_smul,
     Equiv.apply_symm_apply]
 
@@ -1117,7 +1135,8 @@ The remaining analytic content is that `cuspDiff f γ Q c` does not depend on `c
 contour-deformation / path-independence statement: writing `Q = symRep γ (cast P)`, the integral of
 the holomorphic form `f(z)·(symRep γ P)(z,1) dz` up the vertical geodesic from `γ•c` to `i∞` equals
 (by the substitution `z = γ•w`) the integral of `f(w)·P(w,1) dw` along the *geodesic arc*
-`γ⁻¹·(vertical ray at γc)` from `c` to `γ⁻¹·∞`, and the difference from the vertical cusp integral at
+`γ⁻¹·(vertical ray at γc)` from `c` to `γ⁻¹·∞`, and the difference from the vertical cusp integral
+at
 `c` is a `c`-independent tail.
 
 Three reusable ingredients are **proven, sorry-free**, above:
@@ -1163,13 +1182,17 @@ cusp `r`: the value `lim_{Y→0⁺} Fp(r + iY)`, computed by `tendsto_primitive_
 `Fp(r + i) − ∫₀¹ periodForm f P (r + it)·i dt`. -/
 def botVal (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → ℂ)
     (r : ℚ) : ℂ :=
-  Fp ((r : ℂ) + Complex.I) - ∫ t in (0 : ℝ)..1, periodForm (⇑f) P ((r : ℂ) + t * Complex.I) * Complex.I
+  Fp ((r : ℂ) + Complex.I) -
+    ∫ t in (0 : ℝ)..1, periodForm (⇑f) P ((r : ℂ) + t * Complex.I) * Complex.I
 
 /-- **The cusp value as `(top boundary) − (cusp boundary)` of a primitive.**  Given a primitive `Fp`
-of `periodForm f P` on the upper half-plane whose vertical top boundary value is the constant `L` (at
+of `periodForm f P` on the upper half-plane whose vertical top boundary value is the constant `L`
+(at
 every real part), the cusp value at any projective cusp `c` is `L` minus the cusp boundary value of
-`Fp` at `c` (which is `L` itself at `∞`, and the finite bottom value `botVal` at a finite cusp).  This
-packages `cuspToInftyIntegral_eq_top_sub_bot` (finite cusp) with the definitional value `0` at `∞`. -/
+`Fp` at `c` (which is `L` itself at `∞`, and the finite bottom value `botVal` at a finite cusp).
+This
+packages `cuspToInftyIntegral_eq_top_sub_bot` (finite cusp) with the definitional value `0` at
+`∞`. -/
 theorem cuspValue_eq_top_sub_botVal (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {m : ℕ}
     (P : SymPow ℂ m) (Fp : ℂ → ℂ)
     (hFp : ∀ z : ℂ, 0 < z.im → HasDerivAt Fp (periodForm (⇑f) P z) z) (L : ℂ)
@@ -1271,12 +1294,15 @@ The key analytic fact for the geodesic-period vanishing: a primitive `Hp` of `pe
 (`h` an arithmetic cusp form) has the *same* boundary value `L` at the cusp `i∞` along **any** curve
 `φ Y → i∞` whose real part stays bounded.  The difference from the vertical ray `0 + i·Im(φ Y)` is a
 horizontal cap of `periodForm h R`, which vanishes uniformly because the cusp decay
-`exp(-c·Im)` beats the polynomial growth on the bounded real strip (`tendsto_uniform_horizontal_cap`,
+`exp(-c·Im)` beats the polynomial growth on the bounded real strip
+(`tendsto_uniform_horizontal_cap`,
 the uniform-in-`x` analogue of `tendsto_horizontal_cap`). -/
 
 /-- **Uniform top horizontal cap.**  For a cusp form `f`, the cap integral
-`∫₀^{x(i)} periodForm f P (t + i·I(i)) dt` tends to `0` along any filter where `I(i) → +∞`, uniformly
-over the endpoints `x(i)` confined to a fixed band `|x(i)| ≤ M`.  (Cusp decay beats polynomial growth
+`∫₀^{x(i)} periodForm f P (t + i·I(i)) dt` tends to `0` along any filter where `I(i) → +∞`,
+uniformly
+over the endpoints `x(i)` confined to a fixed band `|x(i)| ≤ M`.  (Cusp decay beats polynomial
+growth
 on the band.)  This is the uniform-endpoint strengthening of `tendsto_horizontal_cap`. -/
 theorem tendsto_uniform_horizontal_cap {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (GL (Fin 2) ℝ)}
     {k : ℤ} [CuspFormClass F Γ k] [Γ.IsArithmetic] (f0 : F) {m : ℕ} (P : SymPow ℂ m)
@@ -1311,7 +1337,8 @@ theorem tendsto_uniform_horizontal_cap {F : Type*} [FunLike F ℍ ℂ] {Γ : Sub
   have hI0 : 0 ≤ If i := le_trans (le_max_right A 0) hi
   have hgnn : 0 ≤ g (If i) := by rw [hg]; positivity
   rw [norm_norm]
-  refine (intervalIntegral.norm_integral_le_of_norm_le_const (C := g (If i)) fun t ht => ?_).trans ?_
+  refine (intervalIntegral.norm_integral_le_of_norm_le_const (C := g (If i))
+    fun t ht => ?_).trans ?_
   · have htM : |t| ≤ M := by
       have hmem : t ∈ Set.uIcc 0 (xf i) := Set.uIoc_subset_uIcc ht
       have hbb := abs_le.mp hxi
@@ -1389,7 +1416,8 @@ theorem tendsto_primitive_curve_atInfty {F : Type*} [FunLike F ℍ ℂ]
 When `g ∈ SL(2,ℤ)` sends `q` to `∞` (its lower row annihilates `q`), the Möbius image of the
 vertical ray at `q` runs off to `i∞`: `mob g (q + iY) = g₀₀/g₁₀ + i/(g₁₀² Y)`, so its real part is
 the *constant* `g₀₀/g₁₀` and its imaginary part `1/(g₁₀² Y) → +∞` as `Y → 0⁺`.  This is the precise
-sense in which the `g`-image of a perpendicular approach to the finite cusp `q` is a curve tending to
+sense in which the `g`-image of a perpendicular approach to the finite cusp `q` is a curve tending
+to
 `i∞` with bounded real part — exactly the hypotheses of `tendsto_primitive_curve_atInfty`. -/
 
 /-- **Closed form of the Möbius image of the vertical ray at a pole.**  If `g ∈ SL(2,ℤ)` has
@@ -1647,8 +1675,10 @@ vertical-ray limit and the geodesic-arc limit `F(mob γ ·)` — together with t
 reconciliations at `∞`.  It is the integral Eichler–Shimura geodesic-period fact (Shimura §8.2),
 proven by conjugating with `σ ∈ SL(2,ℤ)`, `σ•∞ = γ•o`, so that both rays become curves tending to
 `i∞` in the `σ`-frame and their difference is a horizontal cap of the period form of the conjugate
-(arithmetic) cusp form `f ∣ σ`, vanishing by `tendsto_horizontal_cap`.  All the surrounding reduction
-(`cuspValue_eq_top_sub_botVal`, `hasDerivAt_primitive_mob`, `exists_tendsto_primitive_vertical_atTop`,
+(arithmetic) cusp form `f ∣ σ`, vanishing by `tendsto_horizontal_cap`.  All the surrounding
+reduction
+(`cuspValue_eq_top_sub_botVal`, `hasDerivAt_primitive_mob`,
+`exists_tendsto_primitive_vertical_atTop`,
 the cusp dictionary) is proven; this naturality is the lone remaining analytic input. -/
 theorem cuspBoundary_mob_naturality (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     (γ : CongruenceSubgroup.Gamma1 N) (P : SymPow ℤ (k - 2).toNat) (hk : 2 ≤ k)
@@ -1788,7 +1818,8 @@ theorem cuspBoundary_mob_naturality (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k
 
 This is assembled, axiom-cleanly modulo `cuspBoundary_mob_naturality`, from: a primitive
 `F` of `periodForm f Q` on `ℍ` (`Complex.isExactOn_upperHalf`); its Möbius pullback `G = F ∘ mob γ`,
-a primitive of `periodForm f (cast P)` (`hasDerivAt_primitive_mob`); the `c`-independent top boundary
+a primitive of `periodForm f (cast P)` (`hasDerivAt_primitive_mob`); the `c`-independent top
+boundary
 values `F∞`, `G∞` (`exists_tendsto_primitive_vertical_atTop`); the cusp-value formula
 `cuspValue = (top) − (cusp boundary)` (`cuspValue_eq_top_sub_botVal`); and the cusp dictionary
 (`equivProjectivization_symm_cuspAction`).  Then `T = F∞ − G∞`, and the residual identity is exactly

@@ -74,9 +74,8 @@ theorem kellyPrimeNegEquality_awayFromP_of_K2_2Bundles_sourceCoprime
         -pthSymbolAtIdeal_canonical (p := p) (K := K)
           ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := by
   let B₀ := sourceBundle P₀ hP₀
-  letI : P₀.IsMaximal := B₀.P_max
-  letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P₀) := B₀.alg_inst
-  letI : Field (𝓞 K ⧸ P₀) := Ideal.Quotient.field P₀
+  let _ : P₀.IsMaximal := B₀.P_max
+  let _ : Algebra (ZMod ℓ) (𝓞 K ⧸ P₀) := B₀.alg_inst
   exact kellyPrimeNegEquality_awayFromP_of_K2_2Bundles_notMem
     (R' := R') (ℓ := ℓ) hpℓ hp_gt_two hp_three hα_ne hαp_top hα_primary
     sourceBundle
@@ -120,7 +119,7 @@ theorem kellyPrimeEquality_of_K2_2ReciprocalPrimeFactorBundleFamily_targetData
         (stickelbergerPrincipalGen (p := p) (K := K) α) P' =
       pthSymbolAtIdeal_canonical (p := p) (K := K)
         ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   refine
     kellyPrimeEquality_of_K2_2ReciprocalSourceDataFamily_cyclotomic_primeTarget_bundled
@@ -128,9 +127,8 @@ theorem kellyPrimeEquality_of_K2_2ReciprocalPrimeFactorBundleFamily_targetData
       (primePhi := fun P hP => (sourceBundle P hP).phi)
       hα_primary targetData.hP'_bot hcop ?_ h_coprime
   intro P hP
-  letI : P.IsMaximal := (sourceBundle P hP).P_max
-  letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let _ : P.IsMaximal := (sourceBundle P hP).P_max
+  let _ : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
   exact K2_2ReciprocalSourceData_phi_facts_at_targetData
     (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two hp_three
     (sourceBundle P hP).D targetData (hcop_each P hP)
@@ -232,7 +230,7 @@ theorem kellyPrimeEquality_awayFromP_of_K2_2ReciprocalPrimeFactorBundleFamily_ta
         pthSymbolAtIdeal_canonical (p := p) (K := K)
           ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := by
   intro P' hP'_prime hP'_ne hp_notin_P'
-  haveI : P'.IsMaximal := Ideal.IsPrime.isMaximal hP'_prime hP'_ne
+  have : P'.IsMaximal := Ideal.IsPrime.isMaximal hP'_prime hP'_ne
   exact kellyPrimeEquality_of_K2_2ReciprocalPrimeFactorBundleFamily_targetData
     (R' := R') (ℓ := ℓ) hpℓ hp_gt_two hp_three hα_ne hαp_top hα_primary
     sourceBundle (targetData P' hP'_prime hP'_ne hp_notin_P')
@@ -279,7 +277,7 @@ theorem kellyPrimeEquality_of_K2_2PrimeFactorBundleFamily_targetData_signOrient
         (stickelbergerPrincipalGen (p := p) (K := K) α) P' =
       pthSymbolAtIdeal_canonical (p := p) (K := K)
         ((P'.absNorm : ℤ) : 𝓞 K) (Ideal.span ({α} : Set (𝓞 K))) := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   have h_neg :=
     kellyPrimeNegEquality_of_K2_2PrimeFactorBundleFamily_targetData

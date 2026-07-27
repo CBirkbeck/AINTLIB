@@ -19,10 +19,6 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
-open Finset
-
-set_option linter.unusedSectionVars false
-
 attribute [local instance] Fintype.ofFinite
 attribute [local instance] NumberField.Units.instZLattice_unitLattice
 
@@ -112,7 +108,7 @@ noncomputable def cyclotomicFullLogAugmentationProdEquiv :
   toFun x w := x.1.1 w + x.2
   invFun f :=
     let c := cyclotomicFullLogAverage K f
-    (⟨fun w => f w - c, by
+    (⟨fun w ↦ f w - c, by
         rw [cyclotomicFullLogAugmentationSubmodule, LinearMap.mem_ker]
         change ∑ w : InfinitePlace K, (f w - c) = 0
         rw [Finset.sum_sub_distrib, Finset.sum_const, nsmul_eq_mul]
@@ -126,14 +122,14 @@ noncomputable def cyclotomicFullLogAugmentationProdEquiv :
       have hx : x.1.1 ∈ LinearMap.ker (cyclotomicFullLogAugmentationMap K) := x.1.2
       rwa [LinearMap.mem_ker] at hx
     have havg :
-        cyclotomicFullLogAverage K (fun w : InfinitePlace K => x.1.1 w + x.2) = x.2 := by
+        cyclotomicFullLogAverage K (fun w : InfinitePlace K ↦ x.1.1 w + x.2) = x.2 := by
       have hcard : (Fintype.card (InfinitePlace K) : ℝ) ≠ 0 := by
         exact_mod_cast Fintype.card_ne_zero
       simp [cyclotomicFullLogAverage, Finset.sum_add_distrib, hsum, Finset.sum_const,
         nsmul_eq_mul]
     ext w
     · change x.1.1 w + x.2 - cyclotomicFullLogAverage K
-          (fun w : InfinitePlace K => x.1.1 w + x.2) = x.1.1 w
+          (fun w : InfinitePlace K ↦ x.1.1 w + x.2) = x.1.1 w
       rw [havg]
       abel
     · exact havg
@@ -160,9 +156,6 @@ theorem cyclotomicFullLogAverage_deltaAction
       cyclotomicFullLogAverage K f := by
   dsimp [cyclotomicFullLogAverage]
   congr 1
-  change ∑ w : InfinitePlace K,
-      f ((cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w) =
-    ∑ w : InfinitePlace K, f w
   simpa [MulAction.toPerm] using
     (Equiv.sum_comp
       (MulAction.toPerm ((cyclotomicSigmaOfUnit (p := p) K a)⁻¹)) f)
@@ -237,7 +230,6 @@ theorem cyclotomicFullLogSpaceDeltaAction_trace_eq_augmentation_trace_add_one
           ((cyclotomicFullLogAugmentationLinearEquiv (p := p) K a).toLinearMap) + 1 := by
           rw [LinearMap.trace_prodMap', LinearMap.trace_id]
           simp
-
 
 end BernoulliRegular
 

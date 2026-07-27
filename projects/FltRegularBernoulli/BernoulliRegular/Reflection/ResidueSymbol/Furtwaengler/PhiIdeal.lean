@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.StickelbergerPrincipalGen
@@ -70,7 +75,7 @@ variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 theorem stickelbergerIdeal_one :
     stickelbergerIdeal (p := p) (K := K) (1 : Ideal (𝓞 K)) =
       (1 : Ideal (𝓞 K)) := by
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   refine Finset.prod_eq_one fun a _ => ?_
   rw [show cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ (1 : Ideal _) =
       (1 : Ideal _) from by

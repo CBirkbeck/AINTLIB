@@ -22,7 +22,8 @@ generalized residue theorem for piecewise C¹ immersions.
   value `L` (Tendsto-based, on a raw curve `γ : ℝ → ℂ` over `[a, b]`).
 * `cauchyPrincipalValueOn` — multi-point CPV value (limUnder-based; secondary)
 * `CauchyPrincipalValueExistsOn` — abbreviation `∃ L, HasCauchyPVOn' S f γ a b L`
-* `HasCauchyPVOn'.cauchyPVOn_eq` — bridge: `HasCauchyPVOn' S f γ a b L → cauchyPrincipalValueOn S f γ a b = L`
+* `HasCauchyPVOn'.cauchyPVOn_eq` — bridge:
+  `HasCauchyPVOn' S f γ a b L → cauchyPrincipalValueOn S f γ a b = L`
 * `residueSimplePole` — residue at a simple pole via limit
 * `HasSimplePoleAt` (re-exported from `ForMathlib.Residue`) — simple pole decomposition
 

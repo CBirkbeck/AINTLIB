@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.MulByIntPullback
 import HasseWeil.FormalGroup.FormalGroup
 import Mathlib.RingTheory.LaurentSeries
@@ -292,6 +297,7 @@ theorem formalW_ps_order : (formalW W).order = 3 := by
       PowerSeries.order_zero_of_unit (formalU_isUnit W)]
   rfl
 
+omit [DecidableEq F] in
 /-- Helper: `HahnSeries.C a * HahnSeries.single n 1 = HahnSeries.single n a` in
     `LaurentSeries F`. -/
 private theorem hC_single' (a : F) (n : ℤ) :
@@ -300,12 +306,14 @@ private theorem hC_single' (a : F) (n : ℤ) :
   rw [show (HahnSeries.C a : LaurentSeries F) = HahnSeries.single (0 : ℤ) a from rfl,
       HahnSeries.single_mul_single, zero_add, mul_one]
 
+omit [DecidableEq F] in
 /-- Helper: `HahnSeries.single 1 1 ^ k = HahnSeries.single (k : ℤ) 1` in
     `LaurentSeries F`. -/
 private theorem single_one_pow' (k : ℕ) :
     (HahnSeries.single (1 : ℤ) (1 : F)) ^ k = HahnSeries.single (k : ℤ) (1 : F) := by
   rw [HahnSeries.single_pow, one_pow, nsmul_eq_mul, mul_one]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The lifted version of `formalW_recurrence` in `LaurentSeries F`, in a form
     where `ring` can handle the algebraic structure. Uses `z := single 1 1` as
     the formal variable and `HahnSeries.C aᵢ` as the constants. -/
@@ -427,71 +435,19 @@ follows because if `y_gen = 0`, the Weierstrass equation forces
 `x_gen³ + a₂x_gen² + a₄x_gen + a₆ = 0`, contradicting the transcendence of
 `x_gen` over `F` (since the leading coefficient is `1 ≠ 0`). -/
 
-/-- `y_gen ≠ 0` in `K(E)`.
-
-    This follows from `y_gen = algebraMap R KE (AdjoinRoot.root W.polynomial)`
-    being the image of `Y` modulo the Weierstrass polynomial `W.polynomial`,
-    which is a polynomial of natDegree 1 in the outer variable. Since
-    `W.polynomial` has natDegree 2 > 1, the class of `Y` is nonzero in the
-    coordinate ring by `AdjoinRoot.mk_ne_zero_of_natDegree_lt`. The algebra
-    map to the function field is injective (`IsFractionRing.injective`), so
-    `y_gen ≠ 0` in `K(E)`.
-
-    Reference: Silverman III.3 (the coordinate ring of an affine Weierstrass
-    curve is a two-dimensional extension of `F[x]`). -/
-theorem y_gen_ne_zero : y_gen W ≠ 0 := by
-  intro h
-  have hinj : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
-    IsFractionRing.injective _ _
-  have h_root_zero : AdjoinRoot.root W.toAffine.polynomial =
-      (0 : W.toAffine.CoordinateRing) := by
-    apply hinj
-    show algebraMap W.toAffine.CoordinateRing KE
-        (AdjoinRoot.root W.toAffine.polynomial) = algebraMap _ _ 0
-    rw [map_zero]
-    exact h
-  have h_root_ne : AdjoinRoot.root W.toAffine.polynomial ≠
-      (0 : W.toAffine.CoordinateRing) := by
-    change AdjoinRoot.mk W.toAffine.polynomial Polynomial.X ≠ 0
-    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
-      Polynomial.X_ne_zero
-    rw [Polynomial.natDegree_X, Affine.natDegree_polynomial]
-    decide
-  exact h_root_ne h_root_zero
+/- `y_gen_ne_zero` HOISTED to `Foundation/MulByIntPullback.lean` next to the `y_gen` def
+(#7621) — it was declared here AND in `OrdAtInftyBridge.lean`, an import-clash landmine. -/
 
 /-- The **local parameter** at `O`: `t = -x/y` in `K(E)`. This is a uniformizer
     at the place corresponding to `O` (Silverman IV.1). -/
 noncomputable def localParam : KE :=
   -(x_gen W) / y_gen W
 
-/-- `x_gen ≠ 0` in `K(E)`. Follows from the same argument as `y_gen_ne_zero`:
-    `x_gen = algebraMap R KE (mk W.polynomial (C X))`, where `C X` has natDegree 0
-    in the outer variable (< 2), so its class in `R = F[X][Y]/(W.polynomial)` is
-    nonzero by `AdjoinRoot.mk_ne_zero_of_natDegree_lt`, and the algebra map
-    `R → KE` is injective. -/
-theorem x_gen_ne_zero : x_gen W ≠ 0 := by
-  intro h
-  have hinj_R : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
-    IsFractionRing.injective _ _
-  have h_poly_zero : algebraMap (Polynomial F) W.toAffine.CoordinateRing
-      Polynomial.X = (0 : W.toAffine.CoordinateRing) := by
-    apply hinj_R
-    change algebraMap W.toAffine.CoordinateRing KE
-        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) =
-      algebraMap _ _ 0
-    rw [map_zero]
-    exact h
-  have h_poly_ne : algebraMap (Polynomial F) W.toAffine.CoordinateRing
-      Polynomial.X ≠ (0 : W.toAffine.CoordinateRing) := by
-    change (Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X)) ≠ 0
-    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
-    · exact Polynomial.C_ne_zero.mpr Polynomial.X_ne_zero
-    · rw [Polynomial.natDegree_C, Affine.natDegree_polynomial]; decide
-  exact h_poly_ne h_poly_zero
+/- `x_gen_ne_zero` HOISTED to `Foundation/MulByIntPullback.lean` (#7621). -/
 
 /-- The local parameter is nonzero in `K(E)`. -/
 theorem localParam_ne_zero : localParam W ≠ 0 := by
-  unfold localParam
+  simp only [localParam]
   rw [ne_eq, div_eq_zero_iff, not_or, neg_eq_zero]
   exact ⟨x_gen_ne_zero W, y_gen_ne_zero W⟩
 
@@ -531,7 +487,7 @@ private theorem localExpand_weierstrass_eval :
         W.toAffine.polynomial = 0 := by
   -- Unfold `localExpand_inner` and use `eval₂_eval₂RingHom_apply` to rewrite as
   -- `evalEval` over the mapped polynomial.
-  unfold localExpand_inner
+  simp only [localExpand_inner]
   rw [Polynomial.eval₂_eval₂RingHom_apply, ← Affine.map_polynomial,
     Affine.evalEval_polynomial]
   -- The goal matches `formalXY_weierstrass` up to `algebraMap F _ a ↔ ofPowerSeries C a`.
@@ -798,7 +754,7 @@ noncomputable def localExpand : KE →+* LaurentSeries F :=
 
 /-- `localExpand` sends `x_gen` to `formalX W`. -/
 @[simp] theorem localExpand_x_gen : localExpand W (x_gen W) = formalX W := by
-  unfold localExpand x_gen
+  simp only [localExpand, x_gen]
   rw [IsFractionRing.lift_algebraMap]
   -- Goal: localExpand_coordHom W (algebraMap (Polynomial F) R X) = formalX W
   change localExpand_coordHom W
@@ -807,7 +763,7 @@ noncomputable def localExpand : KE →+* LaurentSeries F :=
 
 /-- `localExpand` sends `y_gen` to `formalY W`. -/
 @[simp] theorem localExpand_y_gen : localExpand W (y_gen W) = formalY W := by
-  unfold localExpand y_gen
+  simp only [localExpand, y_gen]
   rw [IsFractionRing.lift_algebraMap, localExpand_coordHom_root]
 
 /-- `localExpand` is an `F`-algebra hom. -/

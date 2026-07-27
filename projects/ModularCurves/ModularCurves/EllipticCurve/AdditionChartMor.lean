@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartAway
 
 /-!
@@ -8,7 +13,8 @@ morphisms into the projective model:
 
   `addOnYPieceMor : Spec (Localization.Away (lawTwoTriple W i j k)) ⟶ projModel W`
 
-together with its `over R` specification `addOnYPieceMor ≫ projModelπ W = Spec.map (algebraMap R _)`.
+together with its `over R` specification
+`addOnYPieceMor ≫ projModelπ W = Spec.map (algebraMap R _)`.
 The source is the basic open `D(t_k)` of `Spec (biChartRing W i j)`, which β1's `chartPieceIso`
 identifies with the `(i,j)` chart-product open of `E ×_R E`. Ranging over `k`, these are the local
 pieces of `addOnY`; the union of the three `D(t_k)` is the regularity open of law 2 on the piece
@@ -39,9 +45,9 @@ lemma addOnYPieceMor_projModelπ (hΔ : IsUnit W.Δ) :
     addOnYPieceMor W i j k hΔ ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom
         (algebraMap R (Localization.Away (lawTwoTriple W i j k)))) := by
-  rw [addOnYPieceMor, Category.assoc, chartι_projModelπ, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-  congr 1
-  congr 1
+  rw [addOnYPieceMor, Category.assoc, chartι_projModelπ, ← Spec.map_comp,
+    ← CommRingCat.ofHom_comp]
+  congr 2
   exact (addOnYPieceHom W i j k hΔ).comp_algebraMap
 
 /-- The `k`-th piece of `addOnZ` lies over the base. -/
@@ -49,9 +55,9 @@ lemma addOnZPieceMor_projModelπ (hΔ : IsUnit W.Δ) :
     addOnZPieceMor W i j k hΔ ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom
         (algebraMap R (Localization.Away (lawOneTriple W i j k)))) := by
-  rw [addOnZPieceMor, Category.assoc, chartι_projModelπ, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-  congr 1
-  congr 1
+  rw [addOnZPieceMor, Category.assoc, chartι_projModelπ, ← Spec.map_comp,
+    ← CommRingCat.ofHom_comp]
+  congr 2
   exact (addOnZPieceHom W i j k hΔ).comp_algebraMap
 
 end WeierstrassCurve.Projective

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
 
 /-!
 # Pollaczek descent to the family subgroup
@@ -41,7 +43,7 @@ theorem pollaczekUnitPlusKplus_mem_familyClosure (i_irreg : ℕ) (hp_odd : p ≠
     pollaczekUnitPlusKplus p K i_irreg hp_odd hp_three ∈
       Subgroup.closure
         (Set.range (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three)) := by
-  unfold pollaczekUnitPlusKplus
+  simp only [pollaczekUnitPlusKplus]
   apply Subgroup.prod_mem
   intro j _
   exact Subgroup.pow_mem _ (Subgroup.subset_closure (Set.mem_range_self j)) _
@@ -89,7 +91,7 @@ theorem algebraMap_cyclotomicUnitFamilyKplus
         ((j.cast ((NumberField.IsCMField.units_rank_eq_units_rank (K := K)).trans
           (BernoulliRegular.units_rank_eq_prime_sub_three_div_two
             (p := p) (K := K)))) + 2) := by
-  unfold cyclotomicUnitFamilyKplusFinRank cyclotomicUnitFamilyKplus
+  simp only [cyclotomicUnitFamilyKplusFinRank, cyclotomicUnitFamilyKplus]
   rw [realCyclotomicUnitPlusUnit_val]
   exact FLT37.algebraMap_realCyclotomicUnitPlus p K _
 
@@ -99,9 +101,9 @@ theorem pollaczekUnitPlus_val_eq_prod_realCyclotomicUnit (i : ℕ) :
     ((FLT37.pollaczekUnitPlus p K i : (𝓞 K)ˣ) : 𝓞 K) =
       ∏ b ∈ (Finset.Ico 1 ((p - 1) / 2 + 1)).attach,
         FLT37.realCyclotomicUnit p K b.1 ^ ((b.1 : ℕ) ^ (p - 1 - i)) := by
-  unfold FLT37.pollaczekUnitPlus
+  simp only [FLT37.pollaczekUnitPlus]
   rw [Units.val_mul]
-  unfold FLT37.pollaczekUnit
+  simp only [FLT37.pollaczekUnit]
   rw [Units.coe_prod]
   rw [show ((unitsComplexConj K
       (∏ b ∈ (Finset.Ico 1 ((p - 1) / 2 + 1)).attach,
@@ -162,7 +164,7 @@ set_option backward.isDefEq.respectTransparency false in
 theorem algebraMapPollaczekUnitPlusKplus_eq (i_irreg : ℕ)
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     AlgebraMapPollaczekUnitPlusKplus_eq p K i_irreg hp_odd hp_three := by
-  unfold AlgebraMapPollaczekUnitPlusKplus_eq pollaczekUnitPlusKplus
+  simp only [AlgebraMapPollaczekUnitPlusKplus_eq, pollaczekUnitPlusKplus]
   rw [Units.coe_prod, map_prod]
   rw [pollaczekUnitPlus_val_eq_prod_Ico_two p K i_irreg hp_three]
   rw [show (∏ b ∈ Finset.Ico 2 ((p - 1) / 2 + 1),

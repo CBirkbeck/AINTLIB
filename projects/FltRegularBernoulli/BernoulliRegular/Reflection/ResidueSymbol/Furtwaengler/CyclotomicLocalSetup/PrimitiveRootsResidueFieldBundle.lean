@@ -263,12 +263,12 @@ theorem under_eq_span_of_natCast_mem
 
 /-- **Stage 4 / `card_k`**: For a maximal `P ⊂ 𝓞 K` containing the
 rational prime `ℓ`, the residue-field cardinality is a power of `ℓ`,
-with exponent the inertia degree `(span {(ℓ : ℤ)}).inertiaDeg P`. -/
+with exponent the inertia degree `(span {(ℓ : ℤ)}).inertiaDeg' P`. -/
 theorem cardResidueField_eq_pow_ell_inertiaDeg
     (P : Ideal (𝓞 K₀)) [hP_max : P.IsMaximal]
     (hℓ_in_P : (ℓ₀ : 𝓞 K₀) ∈ P) :
     Fintype.card (𝓞 K₀ ⧸ P) =
-      ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg P) := by
+      ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg' P) := by
   -- Step 1: (ℓ : ℤ) ∈ comap algebraMap P.
   have hℓ_in_comap : (ℓ₀ : ℤ) ∈ Ideal.comap (algebraMap ℤ (𝓞 K₀)) P := by
     rw [Ideal.mem_comap]
@@ -297,9 +297,9 @@ theorem cardResidueField_eq_pow_ell_inertiaDeg
     h_span_max.eq_of_le h_under_ne_top h_span_le
   -- Step 6: P lies over span {(ℓ : ℤ)}.
   have hP_lies : P.LiesOver (Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)) := ⟨h_eq⟩
-  -- Step 7: absNorm = ℓ ^ inertiaDeg.
+  -- Step 7: absNorm = ℓ ^ inertiaDeg'.
   have h_absNorm :
-      Ideal.absNorm P = ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg P) :=
+      Ideal.absNorm P = ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg' P) :=
     Ideal.absNorm_eq_pow_inertiaDeg' P (Fact.out : ℓ₀.Prime)
   -- Step 8: absNorm = card.
   have h_card : Ideal.absNorm P = Fintype.card (𝓞 K₀ ⧸ P) := by
@@ -428,7 +428,7 @@ theorem residueMap_of_split_ker {R' : Type w} [Field R'] [NumberField R'] [Algeb
     (Q : Ideal (𝓞 R')) (P : Ideal (𝓞 K₀))
     (iso : (𝓞 R' ⧸ Q) ≃+* (𝓞 K₀ ⧸ P)) :
     RingHom.ker (residueMap_of_split Q P iso) = Q := by
-  unfold residueMap_of_split
+  simp only [residueMap_of_split]
   ext x
   constructor
   · intro hx
@@ -470,7 +470,7 @@ theorem residueMap_of_split_algebraMap {R' : Type w} [Field R'] [NumberField R']
     (x : 𝓞 K₀) :
     residueMap_of_split Q P iso (algebraMap (𝓞 K₀) (𝓞 R') x) =
       (Ideal.Quotient.mk P) x := by
-  unfold residueMap_of_split
+  simp only [residueMap_of_split]
   simp only [RingHom.coe_comp, Function.comp_apply]
   exact h_compat x
 
@@ -553,7 +553,7 @@ theorem canonicalQuotientMap_surjective_of_inertiaDeg_eq_one
     {R' : Type w} [Field R'] [NumberField R'] [Algebra K₀ R']
     (P : Ideal (𝓞 K₀)) [P.IsMaximal] (Q : Ideal (𝓞 R')) [Q.IsPrime]
     (h_lies : Q.under (𝓞 K₀) = P)
-    (h_inertia : P.inertiaDeg Q = 1) :
+    (h_inertia : P.inertiaDeg' Q = 1) :
     Function.Surjective (canonicalQuotientMap P Q h_lies) := by
   letI : Q.LiesOver P := ⟨h_lies.symm⟩
   letI : Algebra (𝓞 K₀ ⧸ P) (𝓞 R' ⧸ Q) :=
@@ -561,7 +561,7 @@ theorem canonicalQuotientMap_surjective_of_inertiaDeg_eq_one
   letI : Field (𝓞 K₀ ⧸ P) := Ideal.Quotient.field P
   have hfin :
       Module.finrank (𝓞 K₀ ⧸ P) (𝓞 R' ⧸ Q) = 1 := by
-    simpa [Ideal.inertiaDeg_algebraMap] using h_inertia
+    simpa [Ideal.inertiaDeg'_algebraMap] using h_inertia
   have hQ_ne_top : Q ≠ ⊤ :=
     Ideal.IsPrime.ne_top (I := Q) inferInstance
   haveI : Nontrivial (𝓞 R' ⧸ Q) :=
@@ -591,6 +591,7 @@ noncomputable def canonicalSplittingIso
     ⟨Ideal.quotientMap_injective' (le_of_eq h_lies), h_surj⟩).symm
 
 omit [NumberField K₀] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The canonical splitting iso satisfies `IsKAlgebraCompatibleSplittingIso`. -/
 theorem canonicalSplittingIso_isKAlgebraCompatible
     {R' : Type w} [Field R'] [NumberField R'] [Algebra K₀ R']
@@ -604,7 +605,7 @@ theorem canonicalSplittingIso_isKAlgebraCompatible
   -- iso (Quotient.mk Q (algebraMap x)) = Quotient.mk P x
   -- ⟺ Quotient.mk Q (algebraMap x) = (canonicalQuotientMap) (Quotient.mk P x)
   -- and the RHS = Quotient.mk Q (algebraMap x) by canonicalQuotientMap_mk.
-  unfold canonicalSplittingIso
+  simp only [canonicalSplittingIso]
   apply (RingEquiv.ofBijective (canonicalQuotientMap P Q h_lies) _).injective
   rw [RingEquiv.apply_symm_apply]
   exact (canonicalQuotientMap_mk P Q h_lies x).symm

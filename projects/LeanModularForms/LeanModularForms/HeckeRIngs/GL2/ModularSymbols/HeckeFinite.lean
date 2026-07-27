@@ -38,7 +38,8 @@ homomorphisms out of the **free** `ℤ`-algebra `FreeAlgebra ℤ (Idx N)` (free,
 property `FreeAlgebra.lift` applies even to the noncommutative endomorphism rings): `evalS` into
 `End_ℂ(S_k)` (whose range is `heckeAlgℤ`) and `evalM` into `End_ℤ(𝕄)`.  Since `𝕄` is `ℤ`-finite and
 `ℤ` is Noetherian, `End_ℤ(𝕄)` is `ℤ`-finite, hence so is `range evalM`.  The commutativity `hComm`
-makes the image `range evalM` commutative, which (together with the generator equivariance `hT`/`hD`)
+makes the image `range evalM` commutative, which (together with the generator equivariance
+`hT`/`hD`)
 lets the equivariance identity `ι ((evalS p) f) = (evalM p).dualPrecomp (ι f)` extend by
 `FreeAlgebra.induction` to all `p` — the multiplicative step needs precisely that the two factors'
 images commute, since `dualPrecomp` is an anti-homomorphism.  Injectivity of `ι` then gives
@@ -214,7 +215,8 @@ variable (ι : CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ] (𝕄 N k →
 /-- **The crux.**  Given the generator-level Hecke/diamond equivariance and commutativity of the
 symbol-side generators, the identity `ι ((evalS p) f) = (evalM p).dualPrecomp (ι f)` extends from
 generators to *all* `p`, by `FreeAlgebra.induction`.  The multiplicative step uses that the image of
-`evalM` is commutative (`evalM_commute`), so that the order-reversal forced by `dualPrecomp` being an
+`evalM` is commutative (`evalM_commute`), so that the order-reversal forced by `dualPrecomp` being
+an
 anti-homomorphism is harmless. -/
 theorem ι_evalS_eq_dualPrecomp
     (hT : ∀ (n : ℕ+) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k),

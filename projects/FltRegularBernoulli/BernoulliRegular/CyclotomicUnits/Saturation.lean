@@ -102,7 +102,7 @@ theorem CPlusExponentProduct_single (hp_three : 3 ≤ p) (i : Fin ((p - 3) / 2))
         (fun j => if j = i then 1 else 0) =
       CPlusGenerator (p := p) (K := K) hp_three i := by
   classical
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   simp only [zpow_zero, one_mul]
   rw [Finset.prod_eq_single i]
   · simp
@@ -116,7 +116,7 @@ theorem CPlusExponentProduct_mem_CPlus (hp_three : 3 ≤ p) (s : ℤ)
     CPlusExponentProduct (p := p) (K := K) hp_three s e ∈
       CPlus (p := p) (K := K) hp_three := by
   classical
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   exact (CPlus (p := p) (K := K) hp_three).mul_mem
     ((CPlus (p := p) (K := K) hp_three).zpow_mem
       (neg_one_mem_CPlus (p := p) (K := K) hp_three) s)
@@ -131,7 +131,7 @@ theorem exists_CPlusExponentProduct_of_mem_CPlus (hp_three : 3 ≤ p)
     ∃ (s : ℤ) (e : Fin ((p - 3) / 2) → ℤ),
       CPlusExponentProduct (p := p) (K := K) hp_three s e = x := by
   classical
-  unfold CPlus at hx
+  simp only [CPlus] at hx
   induction hx using Subgroup.closure_induction with
   | mem x hx =>
       rcases hx with hx | hx
@@ -207,7 +207,7 @@ theorem CPlusExponentProduct_pow_of_exponents_eq_mul (hp_odd : p ≠ 2)
     CPlusExponentProduct (p := p) (K := K) hp_three s k ^ p =
       CPlusExponentProduct (p := p) (K := K) hp_three s e := by
   classical
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   rw [mul_pow, neg_one_zpow_pow_eq_self (p := p) (K := K) hp_odd s,
     ← Finset.prod_pow]
   congr 1

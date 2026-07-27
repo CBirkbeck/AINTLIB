@@ -7,7 +7,7 @@ public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Stickelberger.GaussSumPowerFacts
 
 /-!
-# Stickelberger-style prime factorisation of `g(χ_q)^p` (REF-18c2c)
+# Stickelberger-style prime factorisation of `g(χ_q)^p`
 
 This file develops the Stickelberger-type theorem for the residue Gauss sum
 `g(χ_q, ψ_q)` raised to its character order. The classical statement
@@ -31,8 +31,8 @@ Stickelberger weight. We work in stages:
 3. **Prime factorisation via Stickelberger weight** (deferred).
    The actual Stickelberger formula `g(χ_q)^p = q^{p-1} · ∏ σ_a^{?}`
    requires the explicit Galois-orbit computation and Jacobi-sum
-   factorisation. This is the core of REF-18c2c and is left for follow-up
-   commits.
+   factorisation. This is the core of the Stickelberger theorem and is left
+   for follow-up commits.
 
 The Galois-invariance step is small but essential: it shows that
 `g(χ_q, ψ_q)^p` *descends* from the larger ring `R' = K(ζ_{Nq})` to the
@@ -108,7 +108,7 @@ private lemma Finset.pow_card_dvd_prod_of_each {α β : Type*} [CommMonoid β]
       mul_comm (d ^ s.card) d]
     exact mul_dvd_mul
       (h a (Finset.mem_insert_self a s))
-      (ih fun i hi => h i (Finset.mem_insert_of_mem hi))
+      (ih fun i hi ↦ h i (Finset.mem_insert_of_mem hi))
 
 /-- **Cyclotomic ramification ideal identity.** In a domain `R` with primitive
 `q`-th root of unity `ζ` (q prime), `(ζ - 1)^{q-1}` divides `q` in `R`.
@@ -165,7 +165,7 @@ theorem natCast_mem_of_zeta_sub_one_mem
   exact Ideal.pow_le_self (Nat.one_le_iff_ne_zero.mp hpos) hpow
 
 /-!
-### Modulo `Q^2` reduction (REF-18c2c4 — Phase C precursor)
+### Modulo `Q^2` reduction (Phase C precursor)
 
 The Taylor expansion of `x^n` near `x = 1`: if `x - 1 ∈ I` for some ideal `I`,
 then `x^n - 1 ≡ n · (x - 1) (mod I^2)`. This is the key algebraic input for
@@ -204,7 +204,7 @@ theorem pow_sub_one_sub_smul_sub_one_mem_sq
   rw [sq, sq]
   exact Ideal.mul_mem_mul h h
 
-/-- **Gauss sum modulo `I²`** (REF-18c2c4 — Phase C precursor). When the
+/-- **Gauss sum modulo `I²`** (Phase C precursor). When the
 additive character has the form `ψ(x) = ζ^{f(x)}` for an integer-valued
 function `f`, the Gauss sum is `(ζ - 1) · ∑ χ(x) · f(x)` modulo `I²` for
 any ideal `I` containing `ζ - 1`.
@@ -224,15 +224,12 @@ theorem gaussSum_sub_smul_mem_sq_of_psi_pow
   have hsplit : gaussSum χ ψ = ∑ x, χ x * (ψ x - 1) := by
     have hdiff : (∑ x, χ x * ψ x) - (∑ x, χ x * (ψ x - 1)) = ∑ x, χ x := by
       rw [← Finset.sum_sub_distrib]
-      refine Finset.sum_congr rfl fun x _ => ?_
-      ring
-    have hzero : (∑ x, χ x : R') = 0 := MulChar.sum_eq_zero_of_ne_one hχ
-    have := hdiff
-    rw [hzero, sub_eq_zero] at this
-    exact this
+      exact Finset.sum_congr rfl fun x _ ↦ by ring
+    rw [MulChar.sum_eq_zero_of_ne_one hχ, sub_eq_zero] at hdiff
+    exact hdiff
   rw [hsplit, Finset.mul_sum, ← Finset.sum_sub_distrib]
   -- Goal: ∑ (χ(x)(ψ(x) - 1) - (ζ - 1) · χ(x) · f(x)) ∈ I^2
-  refine Ideal.sum_mem _ fun x _ => ?_
+  refine Ideal.sum_mem _ fun x _ ↦ ?_
   -- Each term: χ(x) · (ψ(x) - 1 - f(x)(ζ - 1)) ∈ I^2 (factor out χ(x))
   have h_step : χ x * (ψ x - 1) - (ζ - 1) * (χ x * (f x : R')) =
       χ x * (ψ x - 1 - (f x : R') * (ζ - 1)) := by ring
@@ -271,7 +268,7 @@ theorem gaussSum_not_mem_sq_of_psi_pow
   exact (I ^ 2).sub_mem hg hsub
 
 /-!
-### Combined ord_I = 1 statement (REF-18c2c4 — Phase B + C synthesis)
+### Combined ord_I = 1 statement (Phase B + C synthesis)
 
 The combination of Phase B (`g(χ_q) ∈ I`) and Phase C
 (`g(χ_q) ∉ I²` under non-degeneracy) gives the q-adic valuation `= 1`
@@ -310,7 +307,7 @@ theorem residueGaussSum_qadic_ord_eq_one_under_nondeg
   refine ⟨?_, ?_⟩
   · -- Phase B containment
     refine residueGaussSum_mem_ideal_of_psi_sub_one_mem
-      zeta_q hzeta_q hdiv zeta_R hzeta_R fun x => ?_
+      zeta_q hzeta_q hdiv zeta_R hzeta_R fun x ↦ ?_
     rw [hf x]
     exact zeta_pow_sub_one_mem_of_natCast_mem hζ hQ (f x)
   · -- Phase C non-vanishing

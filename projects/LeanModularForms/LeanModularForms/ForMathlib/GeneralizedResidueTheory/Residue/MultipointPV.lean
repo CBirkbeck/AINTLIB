@@ -41,11 +41,11 @@ private lemma measurableSet_norm_gt_of_continuousOn {f : ℝ → ℂ} {s : Set �
     (hf : ContinuousOn f s) (hs : MeasurableSet s) :
     MeasurableSet ({t | ε < ‖f t‖} ∩ s) := by
   obtain ⟨U, hU_open, hU_eq⟩ := isOpen_induced_iff.mp
-    (isOpen_Ioi.preimage hf.norm.restrict)
+    (isOpen_Ioi.preimage hf.norm.domRestrict)
   have h_eq : {t | ε < ‖f t‖} ∩ s = U ∩ s := by
     ext x
     refine ⟨fun ⟨hx_far, hx_s⟩ ↦ ⟨?_, hx_s⟩, fun ⟨hx_U, hx_s⟩ ↦ ⟨?_, hx_s⟩⟩
-    · have h1 : (⟨x, hx_s⟩ : ↑s) ∈ (s.restrict (fun t ↦ ‖f t‖)) ⁻¹' Set.Ioi ε := hx_far
+    · have h1 : (⟨x, hx_s⟩ : ↑s) ∈ (s.domRestrict (fun t ↦ ‖f t‖)) ⁻¹' Set.Ioi ε := hx_far
       rw [← hU_eq] at h1; exact h1
     · have h1 : (⟨x, hx_s⟩ : ↑s) ∈ Subtype.val ⁻¹' U := hx_U
       rw [hU_eq] at h1; exact h1

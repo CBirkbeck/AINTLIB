@@ -609,6 +609,7 @@ theorem isRestricted_iff_finite_support [DiscreteTopology A]
     exact h.subset (fun s hs ↦ by simp only [Set.mem_compl_iff] at hs ⊢; exact hs)
 
 omit [NonarchimedeanRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- A finitely supported function gives a restricted power series (discrete case). -/
 theorem finsupp_isRestricted [DiscreteTopology A]
     (g : (Fin 1 →₀ ℕ) →₀ A) :
@@ -672,21 +673,24 @@ We build a ring isomorphism `TateAlgebra A ≃+* MvPolynomial (Fin 1) A`. -/
 This is `toFinsupp` with the correct type annotation for `MvPolynomial`. -/
 noncomputable def toMvPolynomial [DiscreteTopology A]
     (f : ↥(TateAlgebra A)) : MvPolynomial (Fin 1) A :=
-  toFinsupp f
+  .ofCoeff (toFinsupp f)
 
 /-- Convert an `MvPolynomial (Fin 1) A` to `TateAlgebra A` (discrete case).
 This is `ofFinsupp` with the correct type annotation for `MvPolynomial`. -/
 noncomputable def fromMvPolynomial [DiscreteTopology A]
     (p : MvPolynomial (Fin 1) A) : ↥(TateAlgebra A) :=
-  ofFinsupp p
+  ofFinsupp (AddMonoidAlgebra.coeff p)
 
 theorem fromMvPolynomial_toMvPolynomial [DiscreteTopology A] (f : ↥(TateAlgebra A)) :
-    fromMvPolynomial (toMvPolynomial f) = f :=
-  (linearEquivFinsupp (A := A)).left_inv f
+    fromMvPolynomial (toMvPolynomial f) = f := by
+  rw [fromMvPolynomial, toMvPolynomial, AddMonoidAlgebra.coeff_ofCoeff]
+  exact (linearEquivFinsupp (A := A)).left_inv f
 
 theorem toMvPolynomial_fromMvPolynomial [DiscreteTopology A] (p : MvPolynomial (Fin 1) A) :
-    toMvPolynomial (fromMvPolynomial p) = p :=
-  (linearEquivFinsupp (A := A)).right_inv p
+    toMvPolynomial (fromMvPolynomial p) = p := by
+  rw [toMvPolynomial, fromMvPolynomial,
+    show toFinsupp (ofFinsupp (AddMonoidAlgebra.coeff p)) = AddMonoidAlgebra.coeff p from
+      (linearEquivFinsupp (A := A)).right_inv (AddMonoidAlgebra.coeff p)]
 
 /-- `fromMvPolynomial` preserves multiplication: it is the restriction of the
 coercion `MvPolynomial → MvPowerSeries`, which is a ring homomorphism. -/
@@ -712,8 +716,11 @@ theorem toMvPolynomial_mul [DiscreteTopology A] (f g : ↥(TateAlgebra A)) :
       fromMvPolynomial_toMvPolynomial, fromMvPolynomial_toMvPolynomial]
 
 theorem toMvPolynomial_add [DiscreteTopology A] (f g : ↥(TateAlgebra A)) :
-    toMvPolynomial (f + g) = toMvPolynomial f + toMvPolynomial g :=
-  (linearEquivFinsupp (A := A)).map_add' f g
+    toMvPolynomial (f + g) = toMvPolynomial f + toMvPolynomial g := by
+  rw [toMvPolynomial, toMvPolynomial, toMvPolynomial,
+    show toFinsupp (f + g) = toFinsupp f + toFinsupp g from
+      (linearEquivFinsupp (A := A)).map_add' f g]
+  rfl
 
 /-- The ring equivalence `TateAlgebra A ≃+* MvPolynomial (Fin 1) A` (discrete case).
 Under `[DiscreteTopology A]`, the restricted power series ring coincides with the
@@ -752,8 +759,9 @@ theorem ringEquivMvPolynomial_X [DiscreteTopology A] :
       MvPolynomial.coeff s (MvPolynomial.X (0 : Fin 1)) by
     ext s; exact h s
   intro s
-  change @DFunLike.coe _ _ _ Finsupp.instFunLike (toMvPolynomial (X : ↥(TateAlgebra A))) s = _
-  simp only [toMvPolynomial, toFinsupp, Finsupp.onFinset_apply]
+  show MvPolynomial.coeff s (toMvPolynomial (X : ↥(TateAlgebra A))) = _
+  rw [toMvPolynomial, MvPolynomial.coeff, AddMonoidAlgebra.coeff_ofCoeff]
+  simp only [toFinsupp, Finsupp.onFinset_apply]
   change MvPowerSeries.coeff s (MvPowerSeries.X (0 : Fin 1)) = _
   rw [MvPowerSeries.coeff_X]
   rw [MvPolynomial.coeff_X]
@@ -911,6 +919,7 @@ noncomputable def AToQuotientFSubX [DiscreteTopology A] (f : A) :
     A →+* (↥(TateAlgebra A) ⧸ Ideal.span {algebraMap A ↥(TateAlgebra A) f - X}) :=
   (Ideal.Quotient.mk _).comp (algebraMap A _)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem quotientFSubXToA_comp_AToQuotientFSubX [DiscreteTopology A] (f : A) :
     (quotientFSubXToA f).comp (AToQuotientFSubX f) = RingHom.id A := by
   ext a
@@ -1104,6 +1113,7 @@ theorem locToQuotientOneSubfX_algebraMap [DiscreteTopology A] (f a : A) :
   rw [IsLocalization.Away.lift_eq]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem quotientOneSubfXToLoc_comp_locToQuotientOneSubfX [DiscreteTopology A] (f : A) :
     (quotientOneSubfXToLoc f).comp (locToQuotientOneSubfX f) =
       RingHom.id (Localization.Away f) := by
@@ -1236,6 +1246,7 @@ noncomputable def quotientOneSubfXEquiv [DiscreteTopology A] (f : A) :
   map_mul' := map_mul _
   map_add' := map_add _
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `A⟨X⟩/(1 - f·X)` is flat over a noetherian `A` (Lemma 8.31(2), second case).
 Under discrete topology, `A⟨X⟩/(1-fX) ≅ Localization.Away f` via the universal
 property of localization, and localization is flat.
@@ -1466,6 +1477,7 @@ theorem restrictedModule_map_injective
 
 /-! #### Equivalence restrictedModule A A ≃ TateAlgebra A -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The restricted module `A⟨X⟩` (as an `A`-submodule of
 `MvPowerSeries`) is linearly equivalent to the Tate algebra `A⟨X⟩`
 (as a subring). The two have the same carrier (restricted power
@@ -1932,6 +1944,7 @@ private lemma tate_mem_span_range {l : ℕ} {g : Fin l → A} {k : ℕ}
     exact Submodule.sum_mem _
       (fun j _ ↦ Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
 
 For a strongly noetherian Tate ring `A` (with noetherian ring of definition `A₀`),
@@ -2556,6 +2569,7 @@ theorem forall_coeff_mem_of_mem_ideal_map (I : Ideal A) (g : ↥(TateAlgebra A))
 
 variable [IsTopologicalRing A] [T2Space A] [IsTateRing A]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A restricted power series with all coefficients in `I` belongs to `Ideal.map I`
 in the Tate algebra. This is the reverse direction of `forall_coeff_mem_of_mem_ideal_map`.
 

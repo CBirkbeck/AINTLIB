@@ -8,7 +8,7 @@ import HasseWeil.Isogeny.Kernel
 import Mathlib.Algebra.CharP.Lemmas
 
 /-!
-# T-II-2-016 (Silverman II.2.12 specialised to `[p]`): factorisation of `[p]`
+# Factorisation of `[p]` via the relative Frobenius (Silverman II.2.12)
 
 Foundational pieces toward Silverman II.2.12 specialised to `[p]`: in
 characteristic `p > 0`, the multiplication-by-`p` isogeny factors as
@@ -20,38 +20,27 @@ characteristic `p > 0`, the multiplication-by-`p` isogeny factors as
 where `F_{E/k} : E → E^{(p)}` is the relative `p`-Frobenius and `ψ : E^{(p)} → E`
 is separable.
 
-## Structural pieces shipped here
+## Main definitions
 
 * `WeierstrassCurve.frobeniusTwist`: the Frobenius twist `E^{(p)}` of a
-  Weierstrass curve `E` in characteristic `p`. Defined as
-  `E.map (frobenius k p)`. Inherits `IsElliptic` from Mathlib's
-  `(W.map f).IsElliptic` instance.
+  Weierstrass curve `E` in characteristic `p`, defined as `E.map (frobenius k p)`.
+  Inherits `IsElliptic` from Mathlib's `(W.map f).IsElliptic` instance.
+* `WeierstrassCurve.iterateFrobeniusTwist`: the iterated twist `E^{(p^e)}`.
+* `frobeniusRelativeCoordRingHom` / `frobeniusRelativeCoordAlgHom`: the relative
+  Frobenius pullback on the coordinate ring of `E^{(p)}`.
+* `frobeniusIsog_relative`: the relative `p`-Frobenius `F_{E/k} : E → E^{(p)}`
+  as a structured `Isogeny`.
 
-## Downstream content
+## Main results
 
-The full immediate-scope theorem `mulByNat_p_factors_through_frobenius`
-requires:
-
-* The relative Frobenius isogeny `frobeniusIsog_relative : Isogeny E.toAffine
-  (E.frobeniusTwist).toAffine` as a structured `Isogeny`. Construction
-  involves the pullback `(E^{(p)}).FunctionField →ₐ[k] E.FunctionField`
-  factoring through the absolute Frobenius on `E.FunctionField`, plus
-  the corresponding point map. This is structurally substantial
-  (estimated 50-100 LOC) and is NOT shipped here pending coordination
-  with Worker C's T-FROB-INSEP / T-FROB-OMEGA-ZERO output.
-
-* Silverman II.2.12 specialised to `[p]`: the existence of the separable
-  factor `ψ`. Construction follows the separable closure of `[p]^* K(E)`
-  in `K(E)`; the intermediate field corresponds to `K(E^{(p)})` (Silverman
-  II.2.12 proof). Estimated 50-100 LOC of substantive curve-theory.
-
-Total realistic budget for the unconditional immediate-scope theorem:
-~150-250 LOC across multiple commits, beyond the original 30 LOC estimate.
+* `frobeniusRelativeCoordRingHom_injective`: the relative Frobenius pullback is
+  injective on the coordinate ring.
+* `mulByNat_p_factors_through_frobenius_of_silvermanII212`: the factorisation
+  `[p] = ψ ∘ F_{E/k}`, conditional on the separable factor from Silverman II.2.12.
 
 ## References
 
 * Silverman, *The Arithmetic of Elliptic Curves*, II.2.11–II.2.12.
-
 -/
 
 open WeierstrassCurve
@@ -80,7 +69,7 @@ codomain of `frobeniusIsog_relative_iterate p E e`. -/
 
 end Curves
 
-/-! ### T-II-2-016a: Relative `p`-Frobenius equation (W_KE-level)
+/-! ### Relative `p`-Frobenius equation (W_KE-level)
 
 The substantive structural content needed for the relative Frobenius
 isogeny: the polynomial of `(E.frobeniusTwist p).baseChange K(E)` evaluates
@@ -103,16 +92,18 @@ instance instExpChar_FunctionField : ExpChar KE p :=
   expChar_of_injective_algebraMap
     (RingHom.injective (algebraMap k KE)) p
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- The W_KE-level base-change of `E.frobeniusTwist` equals the absolute
 Frobenius pullback of `W_KE E`. Direct from `RingHom.frobenius_comm` (the
 algebraMap commutes with Frobenius on coefficients). -/
 theorem frobeniusTwist_baseChange_KE_eq_W_KE_map_frobenius :
     (E.frobeniusTwist p).map (algebraMap k KE) =
       (W_KE E).map (frobenius KE p) := by
-  unfold WeierstrassCurve.frobeniusTwist W_KE
+  simp only [WeierstrassCurve.frobeniusTwist, W_KE]
   rw [WeierstrassCurve.map_map, WeierstrassCurve.map_map,
       RingHom.frobenius_comm (algebraMap k KE) p]
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **Frobenius twist Weierstrass equation at the generic point** (`W_KE`-level):
 `((E.frobeniusTwist p).baseChange K(E)).Equation (x_gen^p) (y_gen^p)`.
 Direct from `Affine.Equation.map` with `f = frobenius K(E) p` applied to
@@ -140,6 +131,7 @@ give the coordinate ring hom `(E.frobeniusTwist).CoordinateRing → K(E)`. -/
 noncomputable def frobeniusRelativeBaseHom : Polynomial k →+* KE :=
   Polynomial.eval₂RingHom (algebraMap k KE) (x_gen E ^ p)
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- The Weierstrass polynomial of `E.frobeniusTwist` evaluates to zero at the
 p-th-power generic point coordinates (as an `eval₂` over `Polynomial k`). -/
 theorem frobeniusTwist_polynomial_eval₂_zero :
@@ -173,6 +165,7 @@ noncomputable def frobeniusRelativeCoordAlgHom :
     change frobeniusRelativeBaseHom p E (algebraMap k (Polynomial k) r) = _
     simp [frobeniusRelativeBaseHom, Polynomial.eval₂_C]
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **Action of the relative Frobenius coord AlgHom on the X-coordinate**:
 sends `algebraMap (Polynomial k) CoordinateRing X` (the X-coordinate generator)
 to `x_gen^p`. Direct from the AdjoinRoot.lift structure. -/
@@ -187,6 +180,7 @@ theorem frobeniusRelativeCoordAlgHom_x :
   rw [AdjoinRoot.lift_mk, Polynomial.eval₂_C]
   simp [frobeniusRelativeBaseHom, Polynomial.eval₂_X]
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **Action of the relative Frobenius coord AlgHom on the Y-coordinate**:
 sends `AdjoinRoot.root` (the Y-coordinate generator) to `y_gen^p`. Direct
 from `AdjoinRoot.lift_root`. -/
@@ -208,11 +202,13 @@ standard pattern from `mulByInt_coordHom_injective`: transcendence of
 the rank-2 basis decomposition + norm-degree analysis extends to the
 full coordinate ring. -/
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **`x_gen^p` is transcendental over `k`**: direct from
 `x_gen_transcendental` + `Transcendental.pow` + `expChar_pos`. -/
 lemma x_gen_pow_p_transcendental : Transcendental k (x_gen E ^ p) :=
   (x_gen_transcendental E).pow (expChar_pos k p)
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **`frobeniusRelativeBaseHom` is injective**: the polynomial-base hom
 `Polynomial k →+* K(E)` sending `X ↦ x_gen^p` is injective via
 `transcendental_iff_injective`. -/
@@ -224,6 +220,7 @@ lemma frobeniusRelativeBaseHom_injective :
   rw [h]
   exact transcendental_iff_injective.mp (x_gen_pow_p_transcendental p E)
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **Image of a rank-2 basis decomposition** under `frobeniusRelativeCoordRingHom`:
 for `a • 1 + b • Y` in the coordinate ring, the image is
 `baseHom a + baseHom b * y_gen^p`. The algebraic core of injectivity. -/
@@ -242,6 +239,7 @@ theorem frobeniusRelativeCoordRingHom_smul_basis_eq (a b : Polynomial k) :
     · exact AdjoinRoot.lift_of _
     · exact AdjoinRoot.lift_root _
 
+omit [DecidableEq k] in
 /-- **Degree obstruction to a vanishing rank-2 norm** (curve-generic): for an
 elliptic affine Weierstrass curve `W` over the field `k`, the `Polynomial k`-norm
 of a rank-2 element `a • 1 + b • Y` of its coordinate ring is nonzero whenever its
@@ -270,6 +268,30 @@ private lemma norm_smul_basis_ne_zero_of_coeff_ne_zero (W : WeierstrassCurve k)
   exact absurd (h_deg ▸ le_max_right _ _ : 2 • b.degree + 3 ≤ ⊥)
     (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr h2bot))
 
+omit [DecidableEq k] in
+/-- **Norm factorization of a rank-2 element** (curve-generic): for any Weierstrass curve `W'`
+over `k`, the image under `algebraMap` of the `Polynomial k`-norm of `a • 1 + b • Y` factors as
+`(a • 1 + b • Y) * conj`, where `conj` is the `Galois`-conjugate rank-2 element.  Stated over a
+*generic* `W'` so that the `coe_norm_smul_basis` rewrite never has to `whnf`-unfold a concrete
+`frobeniusTwist` coordinate ring; the caller instantiates `W' := E.frobeniusTwist p`. -/
+private lemma coordRing_norm_smul_basis_factor (W : WeierstrassCurve k) (a b : Polynomial k) :
+    algebraMap (Polynomial k) W.toAffine.CoordinateRing
+        (Algebra.norm (Polynomial k)
+          (a • (1 : W.toAffine.CoordinateRing) +
+            b • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) =
+      (a • (1 : W.toAffine.CoordinateRing) +
+          b • Affine.CoordinateRing.mk W.toAffine Polynomial.X) *
+        Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C a + Polynomial.C b *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **The `Polynomial k`-norm of a rank-2 element killed by the relative Frobenius
 coord ring hom vanishes**: if `baseHom a + baseHom b * y_gen^p = 0`, then the norm
 of `a • 1 + b • Y` in `(E.frobeniusTwist p).CoordinateRing` is zero. The norm
@@ -295,13 +317,8 @@ private theorem frobeniusRelativeCoordRingHom_norm_smul_basis_eq_zero (a b : Pol
         (Polynomial.C (E.frobeniusTwist p).a₁ * Polynomial.X +
           Polynomial.C (E.frobeniusTwist p).a₃))) with hconj_def
   have h_factor : algebraMap (Polynomial k) _
-      (Algebra.norm (Polynomial k) r') = r' * conj_r := by
-    rw [hr'_def, hconj_def]
-    change AdjoinRoot.of _ _ = _
-    rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-    congr 1
-    rw [map_add, map_mul]
-    simp [Algebra.smul_def]
+      (Algebra.norm (Polynomial k) r') = r' * conj_r :=
+    coordRing_norm_smul_basis_factor (E.frobeniusTwist p) a b
   have hr'_zero : frobeniusRelativeCoordRingHom p E r' = 0 :=
     (frobeniusRelativeCoordRingHom_smul_basis_eq p E a b).trans h0
   have h_norm_zero : frobeniusRelativeBaseHom p E
@@ -309,6 +326,7 @@ private theorem frobeniusRelativeCoordRingHom_norm_smul_basis_eq_zero (a b : Pol
     rw [← h_alg, h_factor, map_mul, hr'_zero, zero_mul]
   exact frobeniusRelativeBaseHom_injective p E (h_norm_zero.trans (map_zero _).symm)
 
+omit [E.toAffine.IsElliptic] in
 /-- A vanishing rank-2 image forces the `Y`-coefficient to vanish: if
 `baseHom a + baseHom b * y_gen^p = 0` then `b = 0`. Uses the norm-degree
 analysis (`degree_norm_smul_basis`): a nonzero `b` would give the norm of
@@ -321,6 +339,7 @@ private theorem frobeniusRelativeCoordRingHom_smul_basis_b_eq_zero (a b : Polyno
   exact norm_smul_basis_ne_zero_of_coeff_ne_zero (E.frobeniusTwist p) a b hb
     (frobeniusRelativeCoordRingHom_norm_smul_basis_eq_zero p E a b h0)
 
+omit [E.toAffine.IsElliptic] in
 /-- **Full coord ring injectivity** for `frobeniusRelativeCoordRingHom`.
 Pattern parallel to `mulByInt_coordHom_injective`: rank-2 basis
 decomposition + norm-degree analysis using `degree_norm_smul_basis`.
@@ -343,6 +362,7 @@ theorem frobeniusRelativeCoordRingHom_injective :
   have ha : a = 0 := frobeniusRelativeBaseHom_injective p E (hr.trans (map_zero _).symm)
   rw [← hab, ha, hb, zero_smul, zero_smul, add_zero]
 
+omit [E.toAffine.IsElliptic] in
 /-- Coord-ring AlgHom injectivity (AlgHom-level form) for the relative
 Frobenius, derived from the ring-hom injectivity. -/
 lemma frobeniusRelativeCoordAlgHom_injective :
@@ -377,6 +397,8 @@ noncomputable def frobeniusRelativePointFun :
       ((WeierstrassCurve.Affine.map_nonsingular (W := E.toAffine)
           (RingHom.injective (frobenius k p)) x y).mpr h)
 
+omit [E.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **`frobeniusRelativePointFun` preserves addition**. Pattern parallel to
 Mathlib's `Affine.Point.map.map_add'`: case analysis on the curve group
 law (`add_of_Y_eq` / `add_some`) + `simpa` with `map_addX`, `map_addY`,
@@ -420,7 +442,7 @@ noncomputable def frobeniusRelativePointMap :
   map_zero' := rfl
   map_add' := frobeniusRelativePointFun_add p E
 
-/-! ### T-II-2-016a deliverable: the relative Frobenius `Isogeny`
+/-! ### The relative Frobenius `Isogeny`
 
 Combining `frobeniusRelativePullback` (the function-field k-AlgHom) and
 `frobeniusRelativePointMap` (the K-rational point AddMonoidHom) into the
@@ -432,13 +454,10 @@ Direct from Mathlib's `(W.map f).IsElliptic` instance via the
 instance : (E.frobeniusTwist p).toAffine.IsElliptic :=
   show (E.map (frobenius k p)).IsElliptic from inferInstance
 
-/-- **T07 (R27)**: the Frobenius twist of an elliptic curve is elliptic.
-
-Silverman III.4 Example 4.6 + III.4.2 (page 70): `Δ(E^{(p)}) = Δ(E)^p ≠ 0`,
-so `E^{(p)}` is nonsingular.
-
-This is the explicit-named theorem version of the auto-inferred instance
-above. Its existence is what `tickets/R27-SORRY-LIST-COMPLETE.md` §T07 names. -/
+omit [DecidableEq k] in
+/-- The Frobenius twist of an elliptic curve is elliptic. Silverman III.4
+Example 4.6 + III.4.2: `Δ(E^{(p)}) = Δ(E)^p ≠ 0`, so `E^{(p)}` is nonsingular.
+The explicit-named theorem version of the auto-inferred instance above. -/
 theorem _root_.WeierstrassCurve.frobeniusTwist_isElliptic :
     (E.frobeniusTwist p).toAffine.IsElliptic := inferInstance
 
@@ -455,8 +474,7 @@ noncomputable def frobeniusIsog_relative :
 /-! ### Evaluation lemmas for `frobeniusIsog_relative`
 
 Direct evaluation of the relative Frobenius isogeny on x_gen, y_gen of E^(p)
-and on K-rational points. These are what downstream consumers (T-II-2-016b
-degree analysis, T-FROB-DUAL-ASSEMBLY) use to interface with the isogeny. -/
+and on K-rational points, used to interface with the isogeny downstream. -/
 
 /-- **Relative Frobenius pullback on `x_gen` of E^(p)**: sends to `x_gen E ^ p`.
 Direct from `IsFractionRing.liftAlgHom_apply` + `frobeniusRelativeCoordAlgHom_x`. -/
@@ -464,7 +482,7 @@ theorem frobeniusIsog_relative_pullback_x_gen :
     (frobeniusIsog_relative p E).pullback (x_gen (E.frobeniusTwist p)) =
       x_gen E ^ p := by
   change frobeniusRelativePullback p E (x_gen (E.frobeniusTwist p)) = _
-  unfold frobeniusRelativePullback
+  simp only [frobeniusRelativePullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -476,7 +494,7 @@ theorem frobeniusIsog_relative_pullback_y_gen :
     (frobeniusIsog_relative p E).pullback (y_gen (E.frobeniusTwist p)) =
       y_gen E ^ p := by
   change frobeniusRelativePullback p E (y_gen (E.frobeniusTwist p)) = _
-  unfold frobeniusRelativePullback
+  simp only [frobeniusRelativePullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -495,7 +513,7 @@ theorem frobeniusIsog_relative_apply_some
 @[simp] theorem frobeniusIsog_relative_apply_zero :
     (frobeniusIsog_relative p E).toAddMonoidHom 0 = 0 := rfl
 
-/-! ### T-II-2-016b: purely inseparable structural lemmas
+/-! ### Purely inseparable structural lemmas
 
 The relative Frobenius is purely inseparable of degree p. We ship the
 foundational `*_mem_fieldRange` lemmas: x_gen^p, y_gen^p, and algebraMap
@@ -519,7 +537,7 @@ theorem algebraMap_k_mem_fieldRange (c : k) :
     algebraMap k KE c ∈ (frobeniusIsog_relative p E).pullback.fieldRange :=
   ⟨algebraMap k _ c, AlgHom.commutes _ c⟩
 
-/-! ### T-II-2-016b-1: Compositional identity at the CoordinateRing level
+/-! ### Compositional identity at the CoordinateRing level
 
 `algebraMap (Polynomial k) FF q = Polynomial.aeval (x_gen E) q`: the
 `Polynomial k`-algebra map to FF coincides with `aeval` at `x_gen`, since
@@ -530,6 +548,7 @@ Then the compositional identity
 `frobeniusRelativeCoordRingHom (CoordinateRing.map (frobenius k p) r) =
   (algebraMap CR KE r) ^ p` follows via `AdjoinRoot.ringHom_ext`. -/
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **algebraMap CR KE applied to `of q`** for q ∈ Polynomial k equals
 `q.eval₂ (algebraMap k KE) (x_gen E)`. Direct induction on q via
 `Polynomial.induction_on'`: handles `C` (constant), `X^n`, and `+` cases
@@ -552,6 +571,7 @@ lemma algebraMap_CR_KE_of_eq_eval₂ (q : Polynomial k) :
           ← IsScalarTower.algebraMap_apply k E.toAffine.CoordinateRing KE c]
       rfl
 
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
 /-- **Compositional identity (CoordinateRing level)**: the relative Frobenius
 pullback composed with `Affine.CoordinateRing.map (frobenius k p)` equals
 the absolute Frobenius `(·^p)` on the algebraMap-image. -/
@@ -599,7 +619,8 @@ theorem frobeniusRelativeCoordRingHom_comp_map :
         frobeniusRelativeCoordAlgHom_y p E]
     rfl
 
-/-- **T-II-2-016b-1 applied form**: for `r ∈ E.toAffine.CoordinateRing`, the
+omit [DecidableEq k] [E.toAffine.IsElliptic] in
+/-- **Compositional identity (applied form)**: for `r ∈ E.toAffine.CoordinateRing`, the
 relative Frobenius pullback of the `frobeniusTwist`-mapped image equals
 `(algebraMap r)^p`. -/
 theorem frobeniusRelative_compose_eq_pow (r : E.toAffine.CoordinateRing) :
@@ -608,7 +629,7 @@ theorem frobeniusRelative_compose_eq_pow (r : E.toAffine.CoordinateRing) :
       (algebraMap E.toAffine.CoordinateRing KE r) ^ p :=
   RingHom.congr_fun (frobeniusRelativeCoordRingHom_comp_map p E) r
 
-/-! ### T-II-2-016b-2: Extension to the function field K(E)
+/-! ### Extension to the function field K(E)
 
 The compositional identity at CoordinateRing level extends to: for any
 `f ∈ K(E)`, `f^p ∈ frobeniusRelativePullback.fieldRange`. This is the
@@ -625,16 +646,26 @@ Direct from `frobeniusRelative_compose_eq_pow` + the fact that
 theorem algebraMap_CR_KE_pow_p_mem_fieldRange (r : E.toAffine.CoordinateRing) :
     (algebraMap E.toAffine.CoordinateRing KE r) ^ p ∈
       (frobeniusIsog_relative p E).pullback.fieldRange := by
+  -- Compute `pullback ∘ algebraMap` on a *variable* of the twist coordinate ring first,
+  -- so the `rw`s below match a uniformly-typed target; then instantiate at the
+  -- (`map`-curve-typed) image of `r`.
+  have key : ∀ s : (E.frobeniusTwist p).toAffine.CoordinateRing,
+      frobeniusRelativePullback p E
+          (algebraMap (E.frobeniusTwist p).toAffine.CoordinateRing
+            (E.frobeniusTwist p).toAffine.FunctionField s) =
+        frobeniusRelativeCoordRingHom p E s := by
+    intro s
+    simp only [frobeniusRelativePullback]
+    rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
+    rfl
   refine ⟨algebraMap (E.frobeniusTwist p).toAffine.CoordinateRing
     (E.frobeniusTwist p).toAffine.FunctionField
     (WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (frobenius k p) r), ?_⟩
   change frobeniusRelativePullback p E _ = _
-  unfold frobeniusRelativePullback
-  rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
-  change frobeniusRelativeCoordRingHom p E _ = _
-  exact frobeniusRelative_compose_eq_pow p E r
+  exact (key _).trans (frobeniusRelative_compose_eq_pow p E r)
 
-/-- **T-II-2-016b-2 deliverable**: every element of K(E) has its p-th power
+/-- **Purely-inseparable witness (power-membership form)**: every element of
+K(E) has its p-th power
 in `(frobeniusIsog_relative E).pullback.fieldRange`. The purely-inseparable
 witness in power-membership form, parallel to
 `frobeniusIsogeny_pow_mem_fieldRange` for the q-Frobenius case. -/
@@ -647,33 +678,26 @@ theorem frobeniusIsog_relative_pow_p_mem_fieldRange (f : KE) :
   · exact algebraMap_CR_KE_pow_p_mem_fieldRange p E a
   · exact algebraMap_CR_KE_pow_p_mem_fieldRange p E b
 
-/-! ### T-II-2-016c: Factorisation `[p] = ψ ∘ frobeniusIsog_relative E`
+/-! ### Factorisation `[p] = ψ ∘ frobeniusIsog_relative E`
 
-The Hasse-critical Silverman II.2.12 specialisation: in characteristic p,
-`[p]` factors as a separable map ψ post-composed with the relative
-Frobenius. The full unconditional construction of `ψ` requires Silverman
-II.2.12's separable closure machinery (the separable closure of
-`[p]^* K(E)` in `K(E)` corresponds to `K(E^{(p)})`).
+The Silverman II.2.12 specialisation: in characteristic `p`, `[p]` factors as a
+separable map `ψ` post-composed with the relative Frobenius. The full
+unconditional construction of `ψ` requires Silverman II.2.12's separable-closure
+machinery (the separable closure of `[p]^* K(E)` in `K(E)` corresponds to
+`K(E^{(p)})`).
 
-We ship the **witness-parametric form** under `Conditional` namespace
-(per anti-drift gate 1): the factorisation existence is the structured
-interface Worker C's T-FROB-DUAL-ASSEMBLY consumes for III.6.1 Case 2.
-The substantive Silverman II.2.12 content (separable closure construction)
-is the upstream witness; specialised to [p] it gives the factorisation.
-
-The `Conditional` namespace makes the witness-parametric nature explicit
-and prevents drift — downstream consumers MUST discharge the hypothesis
-upstream (via Silverman II.2.12 + T-FROB-INSEP) rather than stack
-further witness layers. -/
+The results below are stated in **witness-parametric form** in the `Conditional`
+namespace: the separable factor is taken as a hypothesis, to be discharged
+upstream by the Silverman II.2.12 separable-closure construction specialised
+to `[p]`. -/
 
 namespace Conditional
 
-/-- **T-II-2-016c (Conditional)**: given Silverman II.2.12 specialised to
-the inseparable map `[p]` — i.e., the existence of a separable factor
-through the relative Frobenius — we package this as the structured
-factorisation theorem. The hypothesis represents UPSTREAM content
-(Silverman II.2.12's separable–inseparable decomposition); specialised
-here for clean downstream consumption. -/
+/-- **Factorisation of `[p]`, conditional form**: given Silverman II.2.12
+specialised to the inseparable map `[p]` — i.e., the existence of a separable
+factor through the relative Frobenius — package this as the structured
+factorisation theorem. The hypothesis represents upstream content
+(Silverman II.2.12's separable–inseparable decomposition). -/
 theorem mulByNat_p_factors_through_frobenius_of_silvermanII212
     (h_factor : ∃ ψ : Isogeny (E.frobeniusTwist p).toAffine E.toAffine,
       ψ.IsSeparable ∧
@@ -683,10 +707,10 @@ theorem mulByNat_p_factors_through_frobenius_of_silvermanII212
         ψ.comp (frobeniusIsog_relative p E) = mulByInt E.toAffine (p : ℤ) :=
   h_factor
 
-/-- **T-II-2-016c (Conditional, factored form)**: refines the witness
-into separate hypotheses — `[p]` inseparable (T-FROB-INSEP / Worker C)
-+ Silverman II.2.12 applied to the inseparable map. Both are upstream
-content; their composition gives the factorisation. -/
+/-- **Factorisation of `[p]`, factored hypothesis form**: refines the witness
+into separate hypotheses — `[p]` inseparable + Silverman II.2.12 applied to the
+inseparable map. Both are upstream content; their composition gives the
+factorisation. -/
 theorem mulByNat_p_factors_through_frobenius_of_witnesses
     (_h_p_insep : ¬ (mulByInt E.toAffine (p : ℤ)).IsSeparable)
     (h_factor : ∀ φ : Isogeny E.toAffine E.toAffine, ¬ φ.IsSeparable →

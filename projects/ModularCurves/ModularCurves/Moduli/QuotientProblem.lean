@@ -266,6 +266,7 @@ theorem toPullbackAlong_pullbackAlongMap {Y X : EllObj R} {T : Scheme.{u}}
       erw [(v ≫ X.pullbackAlongπ g).isPullback.isoPullback_hom_snd_assoc]
       exact v.isPullback.w.symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Every `Ell/R`-morphism is cartesian**: the comparison isomorphism
 `Y ≅ X.pullbackAlong u.baseHom` induced by `u : Y ⟶ X`. Loeffler Def 3.7.1's
 "morphisms are squares where `E ≅ E' ×_T S`", packaged as an iso onto the chosen
@@ -351,9 +352,8 @@ theorem eq_id_of_baseHom_of_comp {V X : EllObj R} (v : V ⟶ X) (ξ : V ⟶ V)
       rw [Category.assoc, toPullbackAlong_pullbackAlongπ, h2]
     · show ξ.baseHom ≫ 𝟙 V.base = 𝟙 V.base
       rw [Category.comp_id, h1]
-  have := (cancel_mono (toPullbackAlong v)).mp
+  exact (cancel_mono (toPullbackAlong v)).mp
     (key.trans (Category.id_comp (toPullbackAlong v)).symm)
-  exact this
 
 end EllObj
 
@@ -635,15 +635,15 @@ read as equivariance. -/
 theorem simulSchemeActionTotal_π (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     (P.simulSchemeActionTotal Q φ rM).hom γ ≫ XM.curve.π =
-      XM.curve.π ≫ (P.simulSchemeAction Q φ rM).hom γ := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback.w
+      XM.curve.π ≫ (P.simulSchemeAction Q φ rM).hom γ :=
+  (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback.w
 
 /-- **([a1], the zero section is equivariant)** -/
 theorem simulSchemeActionTotal_zero (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     XM.curve.zero ≫ (P.simulSchemeActionTotal Q φ rM).hom γ =
-      (P.simulSchemeAction Q φ rM).hom γ ≫ XM.curve.zero := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.zero_w
+      (P.simulSchemeAction Q φ rM).hom γ ≫ XM.curve.zero :=
+  (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.zero_w
 
 /-- **([a1], each `γ` acts cartesianly)** Every `γ ∈ G` acts on `E` by an isomorphism whose
 square over the base action is **cartesian**. Equivalently: `E` is the pullback of itself
@@ -651,8 +651,8 @@ along `σ_base γ`. This is what makes `E → E/G` a `G`-torsor over `X → X/G`
 theorem simulSchemeActionTotal_isPullback (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     IsPullback ((P.simulSchemeActionTotal Q φ rM).hom γ) XM.curve.π XM.curve.π
-      ((P.simulSchemeAction Q φ rM).hom γ) := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback
+      ((P.simulSchemeAction Q φ rM).hom γ) :=
+  (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback
 
 section Engine
 
@@ -790,6 +790,7 @@ structure TorsorData {Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
       (by rw [Category.id_comp]; exact over_base γ)) :
     (∐ fun _ : G => Z) ⟶ Limits.pullback f f)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Freeness of the KM action** (KM p. 113: "By axiom 2) and the rigidity of
 `𝒫`, `G` operates freely on `𝕸(𝒫,δ)`"): if `𝒫` is rigid and the auxiliary
 problem is a rigidifier, no `g ≠ 1` fixes a point of the representing object of
@@ -923,22 +924,14 @@ theorem simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian
       (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
         (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 := by
     have heq := td.equivariant (𝟙 (XM.pullbackAlong t).base)
-      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-        (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-          (rM.homEquiv (XM.pullbackAlongπ t)).2)) γ
+      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm β) γ
     rw [Equiv.apply_symm_apply, hβ] at heq
     exact congrArg Subtype.val ((td.eqv _).injective
       (heq.trans (Equiv.apply_symm_apply _ _).symm))
   -- torsor endgame: the point factors through two distinct summands
   haveI := td.torsor
-  have hpt : ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫
-        Limits.Sigma.ι (fun _ : G => td.Z) γ =
-      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫
-        Limits.Sigma.ι (fun _ : G => td.Z) (1 : G) := by
+  have hpt : z ≫ Limits.Sigma.ι (fun _ : G => td.Z) γ =
+      z ≫ Limits.Sigma.ι (fun _ : G => td.Z) (1 : G) := by
     rw [← cancel_mono ((Limits.Sigma.desc fun γ' : G =>
       Limits.pullback.lift (td.σZ.hom γ') (𝟙 td.Z)
         (by rw [Category.id_comp]; exact td.over_base γ')) :

@@ -1,6 +1,13 @@
-import Mathlib.NumberTheory.Padics.PadicNumbers
-import Mathlib.Topology.Algebra.InfiniteSum.Defs
-import Mathlib.Topology.Algebra.InfiniteSum.Group
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import Mathlib.NumberTheory.Padics.PadicNumbers
+public import Mathlib.Topology.Algebra.InfiniteSum.Defs
+public import Mathlib.Topology.Algebra.InfiniteSum.Group
 
 /-!
 # B-C1.0 (part 1) — the Iwasawa `p`-adic logarithm `log_p`
@@ -36,6 +43,7 @@ here.
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §5.1, §5.4.
 * Iwasawa, *Lectures on `p`-adic `L`-functions*, §1–2.
 -/
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 

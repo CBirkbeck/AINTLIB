@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.FormalGroup.MulByNat
 import HasseWeil.FormalGroup.Logarithm
 
@@ -60,45 +65,21 @@ noncomputable def FormalGroupHom.id (F : FormalGroup R) : FormalGroupHom F F whe
   toSeries := PowerSeries.X
   zero_const := by simp
   preserves_add := by
-    -- LHS: subst F.toSeries X = F.toSeries (by `PowerSeries.subst_X` style).
-    -- RHS: subst ![subst (X 0) X, subst (X 1) X] F.toSeries
-    --    = subst ![X 0, X 1] F.toSeries = F.toSeries (identity subst).
-    -- Both equal F.toSeries.
-    have hlhs : PowerSeries.subst F.toSeries (PowerSeries.X : PowerSeries R) =
-        F.toSeries := by
-      change MvPowerSeries.subst (fun _ : Unit ↦ F.toSeries)
-        (MvPowerSeries.X () : MvPowerSeries Unit R) = F.toSeries
-      have h : MvPowerSeries.HasSubst
-          (fun _ : Unit ↦ F.toSeries : Unit → MvPowerSeries (Fin 2) R) := by
-        apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-        intro; exact HasseWeil.FG.constantCoeff_FG_toSeries F
-      exact MvPowerSeries.subst_X h ()
+    -- LHS: `subst F.toSeries X = F.toSeries`. RHS: `subst ![X 0, X 1] F.toSeries`,
+    -- the identity substitution. Both sides equal `F.toSeries`.
+    have hlhs : PowerSeries.subst F.toSeries (PowerSeries.X : PowerSeries R) = F.toSeries :=
+      PowerSeries.subst_X
+        (PowerSeries.HasSubst.of_constantCoeff_zero (HasseWeil.FG.constantCoeff_FG_toSeries F))
     have hX0 : PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)
-        (PowerSeries.X : PowerSeries R) = MvPowerSeries.X 0 := by
-      change MvPowerSeries.subst (fun _ : Unit ↦ (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R))
-        (MvPowerSeries.X () : MvPowerSeries Unit R) = _
-      have h : MvPowerSeries.HasSubst
-          (fun _ : Unit ↦ (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R)) := by
-        apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; simp
-      exact MvPowerSeries.subst_X h ()
+        (PowerSeries.X : PowerSeries R) = MvPowerSeries.X 0 :=
+      PowerSeries.subst_X (PowerSeries.HasSubst.X 0)
     have hX1 : PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)
-        (PowerSeries.X : PowerSeries R) = MvPowerSeries.X 1 := by
-      change MvPowerSeries.subst (fun _ : Unit ↦ (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R))
-        (MvPowerSeries.X () : MvPowerSeries Unit R) = _
-      have h : MvPowerSeries.HasSubst
-          (fun _ : Unit ↦ (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R)) := by
-        apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; simp
-      exact MvPowerSeries.subst_X h ()
+        (PowerSeries.X : PowerSeries R) = MvPowerSeries.X 1 :=
+      PowerSeries.subst_X (PowerSeries.HasSubst.X 1)
     rw [hlhs, hX0, hX1]
-    -- Goal: F.toSeries = subst ![X 0, X 1] F.toSeries
-    have h_id : MvPowerSeries.HasSubst
-        (![MvPowerSeries.X 0, MvPowerSeries.X 1] :
-          Fin 2 → MvPowerSeries (Fin 2) R) := by
-      apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-      intro s; fin_cases s <;> simp
+    -- Goal: `F.toSeries = subst ![X 0, X 1] F.toSeries`, the identity substitution.
     have heq : (![MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X 1] :
-        Fin 2 → MvPowerSeries (Fin 2) R) =
-        (fun s : Fin 2 ↦ MvPowerSeries.X s) := by
+        Fin 2 → MvPowerSeries (Fin 2) R) = (fun s : Fin 2 ↦ MvPowerSeries.X s) := by
       funext s; fin_cases s <;> rfl
     rw [heq]
     exact (congr_fun MvPowerSeries.subst_self F.toSeries).symm
@@ -122,8 +103,8 @@ theorem FormalGroupHom.id_eq_mulByNatHom_one (F : FormalGroup R) :
 
 /-! ### Helpers for composition
 
-These helpers are useful for downstream composition-style proofs but a clean
-`FormalGroupHom.comp` with `preserves_add` is deferred (see T-IV-2-010). -/
+A commutation identity between univariate and multivariate substitution, used
+to verify the `preserves_add` axiom of `FormalGroupHom.comp` below. -/
 
 /-- Commutation identity: substituting `MvPowerSeries.subst A B` for the
 variable of a `PowerSeries` can be replaced by first substituting `B` and
@@ -177,18 +158,16 @@ noncomputable def FormalGroupHom.comp
   preserves_add := by
     -- Abbreviations for the bivariate lifts of f and g.
     set fX : MvPowerSeries (Fin 2) R :=
-      PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f.toSeries with hfX_def
+      PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f.toSeries
     set fY : MvPowerSeries (Fin 2) R :=
-      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f.toSeries with hfY_def
+      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f.toSeries
     set gX : MvPowerSeries (Fin 2) R :=
-      PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) g.toSeries with hgX_def
+      PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) g.toSeries
     set gY : MvPowerSeries (Fin 2) R :=
-      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) g.toSeries with hgY_def
+      PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) g.toSeries
     -- Abbreviation for the underlying series of the composite.
-    set fg : PowerSeries R := PowerSeries.subst f.toSeries g.toSeries with hfg_def
-    have hfg_cc : PowerSeries.constantCoeff fg = 0 :=
-      PowerSeries.constantCoeff_subst_eq_zero f.zero_const g.toSeries g.zero_const
-    -- HasSubst facts. We rely on the `PowerSeries.HasSubst` name (abbreviation).
+    set fg : PowerSeries R := PowerSeries.subst f.toSeries g.toSeries
+    -- HasSubst facts.
     have hF_ps : PowerSeries.HasSubst (F.toSeries : MvPowerSeries (Fin 2) R) :=
       PowerSeries.HasSubst.of_constantCoeff_zero
         (HasseWeil.FG.constantCoeff_FG_toSeries F)
@@ -280,14 +259,8 @@ theorem FormalGroupHom.id_comp (f : FormalGroupHom F G) :
     (FormalGroupHom.id G).comp f = f := by
   refine FormalGroupHom.ext ?_
   rw [FormalGroupHom.comp_toSeries, FormalGroupHom.id_toSeries]
-  -- Goal: PowerSeries.subst f.toSeries PowerSeries.X = f.toSeries.
-  change MvPowerSeries.subst (fun _ : Unit ↦ f.toSeries)
-    (MvPowerSeries.X () : MvPowerSeries Unit R) = f.toSeries
-  have h : MvPowerSeries.HasSubst
-      (fun _ : Unit ↦ f.toSeries : Unit → MvPowerSeries Unit R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-    intro; exact f.zero_const
-  exact MvPowerSeries.subst_X h ()
+  -- Goal: `PowerSeries.subst f.toSeries PowerSeries.X = f.toSeries`.
+  exact PowerSeries.subst_X (PowerSeries.HasSubst.of_constantCoeff_zero' f.zero_const)
 
 /-- Right identity for composition: `f.comp (id F) = f`. -/
 @[simp]
@@ -295,14 +268,8 @@ theorem FormalGroupHom.comp_id (f : FormalGroupHom F G) :
     f.comp (FormalGroupHom.id F) = f := by
   refine FormalGroupHom.ext ?_
   rw [FormalGroupHom.comp_toSeries, FormalGroupHom.id_toSeries]
-  -- Goal: PowerSeries.subst PowerSeries.X f.toSeries = f.toSeries.
-  rw [PowerSeries.subst_def]
-  -- Goal: MvPowerSeries.subst (fun _ : Unit => PowerSeries.X) f.toSeries = f.toSeries.
-  have heq : (fun _ : Unit ↦ (PowerSeries.X : PowerSeries R)) =
-      (MvPowerSeries.X : Unit → MvPowerSeries Unit R) := by
-    funext _; rfl
-  rw [heq]
-  exact congr_fun MvPowerSeries.subst_self f.toSeries
+  -- Goal: `PowerSeries.subst PowerSeries.X f.toSeries = f.toSeries`.
+  exact PowerSeries.X_subst f.toSeries
 
 end Comp
 
@@ -464,18 +431,6 @@ theorem FormalGroup.subst_mulByNatInvSeries_mulByNatHom (F : FormalGroup R) (n :
   · exact (F.mulByNatHom n).zero_const
   · exact FormalGroup.coeff_one_mulByNatHom F n
 
-/-- Auxiliary: `PowerSeries.subst PowerSeries.X f = f`, i.e. substituting
-`X` for the variable is the identity. Used in the bootstrap chain that
-proves the left-inverse identity for `mulByNatHom`. -/
-private theorem subst_X_eq_self (f : PowerSeries R) :
-    PowerSeries.subst (PowerSeries.X : PowerSeries R) f = f := by
-  rw [PowerSeries.subst_def]
-  have heq : (fun _ : Unit ↦ (PowerSeries.X : PowerSeries R)) =
-      (MvPowerSeries.X : Unit → MvPowerSeries Unit R) := by
-    funext _; rfl
-  rw [heq]
-  exact congr_fun MvPowerSeries.subst_self f
-
 /-- Auxiliary bootstrap: **a one-sided compositional inverse with a unit
 linear coefficient is automatically two-sided**. If `g` has zero constant
 coefficient, `coeff 1 g` is a unit, and `g` is a left inverse of `f`
@@ -496,8 +451,8 @@ private theorem subst_eq_X_of_subst_eq_X_of_isUnit_coeff_one
     (h_right : PowerSeries.subst g f = PowerSeries.X) :
     PowerSeries.subst f g = PowerSeries.X := by
   -- Build the canonical right inverse `h` of `g` with linear coefficient `coeff 1 g`.
-  set v : R := PowerSeries.coeff 1 g with hv_def
-  set h : PowerSeries R := compInverseOfUnit g v hg_unit with hh_def
+  set v : R := PowerSeries.coeff 1 g
+  set h : PowerSeries R := compInverseOfUnit g v hg_unit
   have h_subst_h_g : PowerSeries.subst h g = PowerSeries.X :=
     subst_compInverseOfUnit_eq_X g v hg_unit hg_const rfl
   have h_h_hasSubst : PowerSeries.HasSubst h := compInverseOfUnit_hasSubst _ _ hg_unit
@@ -509,7 +464,7 @@ private theorem subst_eq_X_of_subst_eq_X_of_isUnit_coeff_one
   -- LHS: subst h (subst g f) = subst h X = h.
   rw [h_right, PowerSeries.subst_X h_h_hasSubst] at hassoc
   -- RHS: subst (subst h g) f = subst X f = f.
-  rw [h_subst_h_g, subst_X_eq_self f] at hassoc
+  rw [h_subst_h_g, PowerSeries.X_subst f] at hassoc
   -- hassoc : h = f, so subst f g = subst h g = X.
   rw [← hassoc]
   exact h_subst_h_g
@@ -530,7 +485,7 @@ and `mulByNatInvSeries F n hn` are mutual compositional inverses.
    This gives `subst h g = X` (right-inverse of `g`).
 4. Apply associativity `subst h (subst g f) = subst (subst h g) f`:
    - LHS becomes `subst h X = h` (using `subst g f = X` and `subst_X`).
-   - RHS becomes `subst X f = f` (using `subst h g = X` and `subst_X_eq_self`).
+   - RHS becomes `subst X f = f` (using `subst h g = X` and `PowerSeries.X_subst`).
 5. Therefore `h = f`, so `subst f g = subst h g = X`. -/
 theorem FormalGroup.subst_mulByNatHom_mulByNatInvSeries (F : FormalGroup R) {n : ℕ}
     (hn : IsUnit ((n : ℕ) : R)) :

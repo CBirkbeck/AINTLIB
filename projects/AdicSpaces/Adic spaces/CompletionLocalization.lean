@@ -273,6 +273,7 @@ private noncomputable def algLift
 
 omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     in
+set_option backward.isDefEq.respectTransparency false in
 /-- The restriction map on the dense image factors through `algLift`. -/
 private theorem restrictionMapHom_coe_eq
     (D₀ D : RationalLocData A) (h : rationalOpen D.T D.s ⊆ rationalOpen D₀.T D₀.s)

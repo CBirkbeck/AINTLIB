@@ -180,7 +180,8 @@ theorem addPullback_x_negFrobenius_mem_range
   refine ⟨x_gen W.toAffine, ?_⟩
   change addPullbackAlgHom_negFrobenius W hq (x_gen W.toAffine) =
     addPullback_x W (negFrobeniusIsog W)
-  unfold addPullbackAlgHom_negFrobenius addPullbackAlgHom_negFrobenius_of_inj addPullbackAlgHom
+  simp only [addPullbackAlgHom_negFrobenius, addPullbackAlgHom_negFrobenius_of_inj,
+    addPullbackAlgHom]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -188,7 +189,7 @@ theorem addPullback_x_negFrobenius_mem_range
     (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X) =
     addPullback_x W (negFrobeniusIsog W)
   change addCoordRingHom (negFrobeniusIsog_addNonInverse W) _ = _
-  unfold addCoordRingHom
+  simp only [addCoordRingHom]
   rw [show algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X =
       Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X) from rfl,
     AdjoinRoot.lift_mk]
@@ -234,6 +235,7 @@ theorem addPullback_x_negFrobenius_isAlgebraic_range
   addPullback_x_negFrobenius_isAlgebraic_range_of_witness W hq hxy
     (addPullback_x_negFrobenius_mem_range W hq)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Algebraicity over the type-synonym wrapper (UNCONDITIONAL, axiom-clean,
 Path (a) step 8)**: `K(E)` is algebraic over `IsogenyAlgebraSource W
 (isogOneSub_negFrobenius W hq)`.
@@ -308,7 +310,6 @@ theorem isogOneSub_negFrobenius_isSeparable_iff_omegaPullbackCoeff_ne_zero
 
 -- `[Fintype K]` is unused in the statement but needed transitively by the proof's
 -- instance resolution, so it cannot be `omit`ted.
-set_option linter.unusedFintypeInType false in
 /-- **`alpha_star_u` for `mulByInt (-1)` equals `-u_gen` (axiom-clean)**:
 the negation isogeny pulls `u_gen = 2y + a₁x + a₃` to its negative
 (via `mulByInt_pullback_y_neg_one`). -/
@@ -324,7 +325,6 @@ theorem alpha_star_u_mulByInt_neg_one :
   ring
 
 -- `[Fintype K]` is unused in the statement but needed transitively by the proof.
-set_option linter.unusedFintypeInType false in
 /-- **omegaPullbackCoeff for `mulByInt (-1)` equals `-1` (axiom-clean)**:
 direct via `omegaPullbackCoeff_unique` + the spec equation, using
 `alpha_star_u_mulByInt_neg_one` and `mulByInt_pullback_x_neg_one`.
@@ -351,7 +351,7 @@ Avoids the Wronskian-tainted `omegaPullbackCoeff_mulByInt`; uses the
 direct `omegaPullbackCoeff_mulByInt_neg_one` (Commit 35) instead. -/
 theorem omegaPullbackCoeff_negFrobeniusIsog :
     omegaPullbackCoeff W (negFrobeniusIsog W) = 0 := by
-  unfold negFrobeniusIsog
+  simp only [negFrobeniusIsog]
   rw [omegaPullbackCoeff_comp_of_base W (mulByInt W.toAffine (-1)) (frobeniusIsog W) (-1)]
   · rw [omegaPullbackCoeff_frobenius, mul_zero]
   · rw [omegaPullbackCoeff_mulByInt_neg_one]

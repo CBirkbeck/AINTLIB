@@ -208,7 +208,7 @@ theorem count_auxFractionalIdealRoot
     FractionalIdeal.count K v (auxFractionalIdealRoot P) =
       FractionalIdeal.count K v
         (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) / (p : ℤ) := by
-  unfold auxFractionalIdealRoot
+  simp only [auxFractionalIdealRoot]
   rw [FractionalIdeal.count_finprod K v
     (fun w ↦ FractionalIdeal.count K w
       (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) / (p : ℤ))
@@ -217,7 +217,7 @@ theorem count_auxFractionalIdealRoot
 /-- The auxiliary ideal `J` is nonzero. -/
 theorem auxFractionalIdealRoot_ne_zero (P : KummerPresentation Ext) :
     auxFractionalIdealRoot P ≠ 0 := by
-  unfold auxFractionalIdealRoot
+  simp only [auxFractionalIdealRoot]
   -- The finprod is over `v.asIdeal ^ (e_v)`, all nonzero.
   -- Use `finprod_mem_induction` with `I ≠ 0` as the property.
   apply finprod_induction (fun I : FractionalIdeal (𝓞 K)⁰ K ↦ I ≠ 0)
@@ -318,7 +318,7 @@ height-one prime `v.asIdeal ⊂ 𝓞 K` has ramification index `1`. -/
 def KummerDedekindUnramifiedAt
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K)) : Prop :=
   (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E),
-      Ideal.ramificationIdx v.asIdeal Q = 1) →
+      Ideal.ramificationIdx' v.asIdeal Q = 1) →
     GenValuationDivisibleByPAt v P
 
 /-- **Global accumulated form of the Kummer-Dedekind hypothesis.** The per-prime
@@ -377,7 +377,7 @@ theorem genIsPowOfFractionalIdealClass_of_isUnramified
   apply genIsPowOfFractionalIdealClass_of_perPrime_kummerDedekind P
   intro v
   refine kdHyp v ?_
-  -- Need: every prime `Q` of `𝓞 Ext.E` over `v.asIdeal` has `ramificationIdx = 1`.
+  -- Need: every prime `Q` of `𝓞 Ext.E` over `v.asIdeal` has `ramificationIdx' = 1`.
   -- Use the global `Algebra.Unramified (𝓞 K) (𝓞 Ext.E)` provided by `Ext`.
   rintro Q ⟨hQ_prime, hQ_over⟩
   haveI : Q.IsPrime := hQ_prime
@@ -385,8 +385,9 @@ theorem genIsPowOfFractionalIdealClass_of_isUnramified
   have hQ_bot : Q ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot v.ne_bot Q
   haveI : Algebra.IsUnramifiedAt (𝓞 K) Q :=
     Algebra.unramified_iff_forall.mp Ext.isUnramified ⟨Q, hQ_prime⟩
-  have h := Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K) (S := 𝓞 Ext.E) hQ_bot
-  rwa [show Q.under (𝓞 K) = v.asIdeal from (Ideal.LiesOver.over (p := v.asIdeal)).symm] at h
+  have hv_bot : v.asIdeal ≠ ⊥ := v.ne_bot
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx v.asIdeal Q hv_bot]
+  exact Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K)
 
 end KummerPresentation
 

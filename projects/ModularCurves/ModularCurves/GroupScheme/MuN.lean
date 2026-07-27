@@ -150,6 +150,7 @@ private lemma muNRingLift_gen {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ 
   rw [Ideal.Quotient.lift_mk]
   simp [Polynomial.coe_eval₂RingHom]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Morphisms into an affine scheme are determined by their action on global sections. -/
 private lemma specHom_ext {R : CommRingCat.{u}} {X : Scheme.{u}} {f₁ f₂ : X ⟶ Spec R}
     (h : f₁.appTop = f₂.appTop) : f₁ = f₂ := by
@@ -209,6 +210,7 @@ private lemma muNPointsEquivAux_coe (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} 
       (h.1 ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))).appTop
         ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) := rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 private lemma muNPointsEquivAux_natural (S : Scheme.{u}) (N : ℕ) {T T' : Scheme.{u}}
     (g : T ⟶ S) (k : T' ⟶ T) (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
     (muNPointsEquivAux S N (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ : Γ(T', ⊤)) =
@@ -243,6 +245,7 @@ private lemma nthRootsMap_coe {R R' : Type*} [CommMonoid R] [CommMonoid R'] {N :
     [NeZero N] (f : R →* R') (a : { a : R // a ^ N = 1 }) :
     (nthRootsMap f a : R') = f a.1 := rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The presheaf of groups on `Over S` represented by `μ_{N,S}`: `N`-th roots of unity
 of the global sections, with pointwise multiplication. -/
 private def muNGrpFunctor (S : Scheme.{u}) (N : ℕ) [NeZero N] : (Over S)ᵒᵖ ⥤ GrpCat.{u} where
@@ -255,6 +258,7 @@ private def muNGrpFunctor (S : Scheme.{u}) (N : ℕ) [NeZero N] : (Over S)ᵒᵖ
     refine GrpCat.hom_ext (MonoidHom.ext fun a ↦ Subtype.ext ?_)
     simp
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `μ_{N,S}` represents its points presheaf. -/
 private def muNRepresentableBy (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     (muNGrpFunctor S N ⋙ forget _).RepresentableBy (Over.mk (muNπ S N)) where
@@ -376,6 +380,7 @@ private lemma constDesc_π {T : Scheme.{u}} (g : T ⟶ S) (c : LocallyConstant T
     rw [← Category.assoc, constFiber_ι_constDesc, Category.assoc, Category.assoc,
       Sigma.ι_desc, Category.comp_id]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(DS3b pin, ticket T-B2)** `S`-morphisms into the constant scheme `∐_A S` over
 `g : T ⟶ S` are the locally constant `A`-valued functions on `T`.
 Source: KM 1.4.4(5) ("the constant `S`-scheme `ℤ/Nℤ`"); consumed by the
@@ -760,6 +765,7 @@ private lemma muNRingMap_flat (N : ℕ) [NeZero N] : (muNRingMap N).hom.Flat := 
     (RingHom.Flat.comp (RingHom.flat_algebraMap_iff.mpr inferInstance)
       (RingHom.Flat.of_bijective ULift.ringEquiv.symm.bijective))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The defining square of `μ_{N,S}`, with the cospan corner moved from the abstract
 terminal scheme to `Spec (ULift ℤ)`. -/
 private lemma isPullback_muN (S : Scheme.{u}) (N : ℕ) :
@@ -880,6 +886,7 @@ private lemma pushout_inr_gen_pow (A : Type u) [CommRing A] (N : ℕ)
     (s.inr (muNRingGen N)) ^ N = 1 := by
   rw [← map_pow, muNRingGen_pow, map_one]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The model over `A` is the pushout (base change) of `μ_N`'s coordinate ring. -/
 private lemma muNModel_isPushout (A : Type u) [CommRing A] (N : ℕ) :
     IsPushout (muNBaseMap A) (muNRingMap N) (muNModelStruct A N) (muNModelCompare A N) := by
@@ -899,9 +906,8 @@ private lemma muNModel_isPushout (A : Type u) [CommRing A] (N : ℕ) :
         (AdjoinRoot.root (muNModelPoly A N)) = s.inr (muNRingGen N)
       exact AdjoinRoot.lift_root (test s)))
     (fun s m' hleft hright ↦ ?_))
-  have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly A N)) = s.inl.hom := by
-    have h3 := congrArg CommRingCat.Hom.hom hleft
-    exact h3
+  have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly A N)) = s.inl.hom :=
+    congrArg CommRingCat.Hom.hom hleft
   have hX : m'.hom (AdjoinRoot.root (muNModelPoly A N)) = s.inr (muNRingGen N) := by
     have h2 := congrArg (fun (t : muNRing N ⟶ s.pt) ↦ t (muNRingGen N)) hright
     simpa [CommRingCat.comp_apply,
@@ -971,6 +977,7 @@ private lemma muNModelStruct_etale (N : ℕ) [NeZero N] :
   rw [AdjoinRoot.algebraMap_eq] at h5
   exact h5
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
 for `S = ∅`). -/
@@ -1018,46 +1025,46 @@ lemma isPullback_muN_baseChange (S T : Scheme.{u}) (N : ℕ) (g : T ⟶ S) :
   rw [← hθ1] at big
   exact ⟨θ, IsPullback.of_right big hθ2 t⟩
 
-/-- Field case of the converse: if `μ_N` is étale over a field, `N` is nonzero in it. -/
-private lemma etale_field_nezero (K : Type u) [Field K] (N : ℕ) [NeZero N]
-    (h : Etale (muNπ (Spec (CommRingCat.of K)) N)) : (N : K) ≠ 0 := by
-  intro hNK
-  -- transfer étale to the model over K (LEFT square with identity factor)
-  have t := (isPullback_SpecMap_of_isPushout _ _ _ _ (muNModel_isPushout K N)).flip
-  have hterm : terminal.from (Spec (CommRingCat.of K)) ≫
-      (terminalIsoIsTerminal specULiftZIsTerminal).hom = Spec.map (muNBaseMap K) :=
+set_option backward.isDefEq.respectTransparency.types false in
+/-- If `μ_N` is étale over an affine base `Spec A`, then the model structure map
+`A → A[T]/(Tᴺ − 1)` is étale. Obtained by transferring étaleness of `μ_N → Spec A` across the
+defining pushout/pullback square (the LEFT square has the identity factor). -/
+private lemma muNModelStruct_etale_of_etale (A : Type u) [CommRing A] (N : ℕ)
+    (h : Etale (muNπ (Spec (CommRingCat.of A)) N)) :
+    Etale (Spec.map (muNModelStruct A N)) := by
+  have t := (isPullback_SpecMap_of_isPushout _ _ _ _ (muNModel_isPushout A N)).flip
+  have hterm : terminal.from (Spec (CommRingCat.of A)) ≫
+      (terminalIsoIsTerminal specULiftZIsTerminal).hom = Spec.map (muNBaseMap A) :=
     specULiftZIsTerminal.hom_ext _ _
-  have b := (isPullback_muN (Spec (CommRingCat.of K)) N).flip
+  have b := (isPullback_muN (Spec (CommRingCat.of A)) N).flip
   rw [hterm] at b
   let mid := t.lift (pullback.snd _ _) (muNπ _ N) b.w
-  have hmid1 : mid ≫ Spec.map (muNModelCompare K N) = pullback.snd _ _ := t.lift_fst _ _ _
-  have hmid2 : mid ≫ Spec.map (muNModelStruct K N) = muNπ _ N := t.lift_snd _ _ _
-  have big2 : IsPullback (mid ≫ Spec.map (muNModelCompare K N))
-      (muNπ (Spec (CommRingCat.of K)) N) (Spec.map (muNRingMap N))
-      (𝟙 (Spec (CommRingCat.of K)) ≫ Spec.map (muNBaseMap K)) := by
+  have hmid1 : mid ≫ Spec.map (muNModelCompare A N) = pullback.snd _ _ := t.lift_fst _ _ _
+  have hmid2 : mid ≫ Spec.map (muNModelStruct A N) = muNπ _ N := t.lift_snd _ _ _
+  have big2 : IsPullback (mid ≫ Spec.map (muNModelCompare A N))
+      (muNπ (Spec (CommRingCat.of A)) N) (Spec.map (muNRingMap N))
+      (𝟙 (Spec (CommRingCat.of A)) ≫ Spec.map (muNBaseMap A)) := by
     rw [Category.id_comp, hmid1]
     exact b
   have LEFT := IsPullback.of_right big2 (by rw [Category.comp_id]; exact hmid2) t
-  have triv : IsPullback (𝟙 (Spec (muNModelRing K N))) (Spec.map (muNModelStruct K N))
-      (Spec.map (muNModelStruct K N)) (𝟙 (Spec (CommRingCat.of K))) :=
+  have triv : IsPullback (𝟙 (Spec (muNModelRing A N))) (Spec.map (muNModelStruct A N))
+      (Spec.map (muNModelStruct A N)) (𝟙 (Spec (CommRingCat.of A))) :=
     IsPullback.of_horiz_isIso ⟨by simp⟩
-  have hSpecEtale : Etale (Spec.map (muNModelStruct K N)) := by
-    have hesnd : (LEFT.isoIsPullback _ _ triv).hom ≫ Spec.map (muNModelStruct K N)
-        = muNπ (Spec (CommRingCat.of K)) N :=
-      LEFT.isoIsPullback_hom_snd _ _ triv
-    rw [← MorphismProperty.cancel_left_of_respectsIso @Etale
-      (LEFT.isoIsPullback _ _ triv).hom, hesnd]
-    exact h
-  have hre : RingHom.Etale (muNModelStruct K N).hom :=
-    HasRingHomProperty.Spec_iff.mp hSpecEtale
-  haveI halg : Algebra.Etale K (AdjoinRoot (muNModelPoly K N)) := by
-    refine (RingHom.etale_algebraMap (R := K)
-      (S := AdjoinRoot (muNModelPoly K N))).mp ?_
-    rw [AdjoinRoot.algebraMap_eq]
-    exact hre
-  haveI hred : IsReduced (AdjoinRoot (muNModelPoly K N)) :=
-    Algebra.FormallyUnramified.isReduced_of_field K _
-  -- char analysis: q := ringChar K divides N
+  have hesnd : (LEFT.isoIsPullback _ _ triv).hom ≫ Spec.map (muNModelStruct A N)
+      = muNπ (Spec (CommRingCat.of A)) N :=
+    LEFT.isoIsPullback_hom_snd _ _ triv
+  rw [← MorphismProperty.cancel_left_of_respectsIso @Etale
+    (LEFT.isoIsPullback _ _ triv).hom, hesnd]
+  exact h
+
+/-- Over a field `K` in which `N ≠ 0` casts to `0`, the model ring `K[T]/(Tᴺ − 1)` is not reduced:
+writing `q = ringChar K` (prime, dividing `N`), the class of `T^(N/q) − 1` is a nonzero nilpotent
+(its `q`-th power is `T^N − 1 = 0`, yet it is nonzero because its degree `N/q < N` is too small to
+be divisible by `Tᴺ − 1`). -/
+private lemma not_isReduced_adjoinRoot_muNModelPoly (K : Type u) [Field K] (N : ℕ) [NeZero N]
+    (hNK : (N : K) = 0) : ¬ IsReduced (AdjoinRoot (muNModelPoly K N)) := by
+  intro hred
+  haveI := hred
   haveI : CharP K (ringChar K) := ringChar.charP K
   have hqdvd : ringChar K ∣ N := (CharP.cast_eq_zero_iff K (ringChar K) N).mp hNK
   have hqprime : (ringChar K).Prime := by
@@ -1096,6 +1103,23 @@ private lemma etale_field_nezero (K : Type u) [Field K] (N : ℕ) [NeZero N]
   have hlt : N / ringChar K < N :=
     Nat.div_lt_self (Nat.pos_of_ne_zero (NeZero.ne N)) hqprime.one_lt
   omega
+
+/-- Field case of the converse: if `μ_N` is étale over a field, `N` is nonzero in it. -/
+private lemma etale_field_nezero (K : Type u) [Field K] (N : ℕ) [NeZero N]
+    (h : Etale (muNπ (Spec (CommRingCat.of K)) N)) : (N : K) ≠ 0 := by
+  intro hNK
+  -- transfer étale to the model over K, then read off `K[T]/(Tᴺ−1)` is étale, hence reduced
+  have hre : RingHom.Etale (muNModelStruct K N).hom :=
+    HasRingHomProperty.Spec_iff.mp (muNModelStruct_etale_of_etale K N h)
+  haveI halg : Algebra.Etale K (AdjoinRoot (muNModelPoly K N)) := by
+    refine (RingHom.etale_algebraMap (R := K)
+      (S := AdjoinRoot (muNModelPoly K N))).mp ?_
+    rw [AdjoinRoot.algebraMap_eq]
+    exact hre
+  haveI hred : IsReduced (AdjoinRoot (muNModelPoly K N)) :=
+    Algebra.FormallyUnramified.isReduced_of_field K _
+  -- but `(N : K) = 0` makes the model ring non-reduced — contradiction
+  exact not_isReduced_adjoinRoot_muNModelPoly K N hNK hred
 
 private lemma isUnit_of_etale_muNπ (S : Scheme.{u}) (N : ℕ) [NeZero N]
     (h : Etale (muNπ S N)) : IsUnit (N : Γ(S, ⊤)) := by

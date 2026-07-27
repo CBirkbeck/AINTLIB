@@ -101,9 +101,7 @@ committing to a particular factor structure, leaving room for the
 namespace ValuationSpectrum
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
-  [IsTopologicalRing A]
 
-omit [IsTopologicalRing A] in
 /-- **Per-piece subset via pointwise clearing residual** (T067 main
 substantive theorem).
 
@@ -144,7 +142,6 @@ theorem per_piece_subset_via_pointwise_clearing
   exact ⟨hv_spa, fun t'' ht'' => Finset.mem_singleton.mp ht'' ▸ hv_t_D_s,
     not_vle_zero_of_one_vle (v.vle_trans hv_one_t hv_t_D_s)⟩
 
-omit [IsTopologicalRing A] in
 /-- **Per-piece subset supplier — uniform-over-`t' ∈ D.T` form** (T067
 direct T064 supplier).
 
@@ -169,7 +166,6 @@ theorem per_piece_subset_supplier_via_pointwise_clearing
     per_piece_subset_via_pointwise_clearing T_base s D_s f t'
       (h_clearing_uniform t' ht')
 
-omit [IsTopologicalRing A] in
 /-- **Per-piece subset via the corrected multi-clearing primitive**
 (T067 alternative route via `vle_of_dominating_unit_multi_corrected_at`).
 

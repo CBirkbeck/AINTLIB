@@ -55,7 +55,6 @@ lemma irrelevant_map_comp_toRingHom_eq_top {C : Type u} [CommRing C]
   have h := toIdeal_le_toIdeal_iff.mpr hg
   rwa [HomogeneousIdeal.toIdeal_map] at h
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The per-chart form of `fromOfGlobalSections_map`: on the basic open `D(g t)`, the point
 map `toBasicOpenOfGlobalSections ℬ f` followed by `Proj.map g` agrees with
 `toBasicOpenOfGlobalSections 𝒜 (f ∘ g)`. -/

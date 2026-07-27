@@ -737,7 +737,7 @@ theorem finrank_pullback_fieldRange_eq_degree
     inst_im.toModule
   change @Module.finrank ↥β.pullback.fieldRange W.toAffine.FunctionField _ _ mod_im =
     β.degree
-  unfold Isogeny.degree
+  simp only [Isogeny.degree]
   let i_alg : W.toAffine.FunctionField ≃ₐ[F] ↥β.pullback.range :=
     AlgEquiv.ofInjective β.pullback β.pullback_injective
   let bridge : ↥β.pullback.range ≃+* ↥β.pullback.fieldRange :=

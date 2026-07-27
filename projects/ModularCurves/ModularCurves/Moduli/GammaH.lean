@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Groupoid
 import ModularCurves.EllipticCurve.TorsionFibre
@@ -5,6 +10,8 @@ import ModularCurves.Moduli.PullSectionCanonicity
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import Mathlib.AlgebraicGeometry.AlgClosed.Basic
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
+import ModularCurves.EllipticCurve.MulByHomUnramified
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # General level structures P_H, and full level N over an arbitrary base
@@ -687,6 +694,7 @@ theorem EllipticCurve.section_ext (k : Type u) [Field k] [IsAlgClosed k]
     (h : P.1 (IsLocalRing.closedPoint k) = Q.1 (IsLocalRing.closedPoint k)) : P = Q :=
   Subtype.ext (ext_of_apply_closedPoint_eq E.π P.2 Q.2 h)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-H7b-i)** Pulling sections back along any morphism of field-Specs is
 injective: the base spaces are single points, so the closed-point values are
 preserved, and `section_ext` separates. -/
@@ -708,6 +716,7 @@ theorem EllipticCurve.pull_injective (k k' : Type u) [Field k] [IsAlgClosed k]
   rw [h4 P, h4 Q] at h2
   exact E.section_ext k h2
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-H7b-i)** `Spec` of a field embedding is an epimorphism onto morphisms into any
 scheme: two morphisms from `Spec k` agree as soon as they agree after the extension
 `Spec k' ⟶ Spec k`. The point components agree since the source spaces are single
@@ -896,7 +905,7 @@ theorem EllipticCurve.exists_isNaiveFullLevel_of_le_two (k : Type u) [Field k]
 theorem EllObj.exists_geometricPoint (X : EllObj R) (hne : Nonempty X.base)
     (N : ℕ) (hinv : IsUnit ((N : ℕ) : R)) :
     ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
-      (t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0 := by
+      (_t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0 := by
   obtain ⟨s⟩ := hne
   refine ⟨AlgebraicClosure (X.base.residueField s), inferInstance, inferInstance,
     Spec.map (CommRingCat.ofHom (algebraMap (X.base.residueField s)

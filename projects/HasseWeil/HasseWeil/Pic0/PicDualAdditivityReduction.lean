@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Pic0.PicDual
 import HasseWeil.Isogeny.Frobenius.OrdAtInfty
 
@@ -49,7 +54,8 @@ that pins down the irreducible content as sharply as possible:
 * `htrace_dual_of_picDual_additive` — the **abstract dual-additivity engine**: given the single
   III.6.2(c) hypothesis `picDual α = picDual α₁ + picDual α₂` at the point-map level (with
   `α.toAddMonoidHom = α₁.toAddMonoidHom + α₂.toAddMonoidHom`) **and** the two shipped per-summand
-  `picDual` values `picDual α₁ = r·V`, `picDual α₂ = −s·id`, derive `htrace_dual`.  This **converts**
+  `picDual` values `picDual α₁ = r·V`, `picDual α₂ = −s·id`, derive `htrace_dual`.  This
+  **converts**
   the III.8-trace residual into the single cleanest possible residual — *pointwise additivity of
   `picDual` on the fixed two-term decomposition `rπ + [−s]`* — and discharges everything else
   non-circularly.
@@ -72,7 +78,8 @@ It is **Silverman III.6.2(c)** for this pair and needs the `Div⁰`/addition-for
 machinery is the project's addition-formula pullback (`AdditionPullback/Frobenius.lean`,
 `addPullbackAlgHomPair`, `mk_XYIdeal'_mul_mk_XYIdeal'`) feeding the theorem-of-the-cube linearity of
 the divisor-class pullback on `Pic⁰`.  It is **not** circular with `deg(rπ − s) = N` (it never
-mentions that degree), but it is **not** structural in the ideal-extension framework, which is why it
+mentions that degree), but it is **not** structural in the ideal-extension framework, which is why
+it
 is the genuine irreducible residual.
 
 ## References
@@ -101,7 +108,8 @@ is **equivalent** to the dual-additivity output
 
 Both directions are pure left-cancellation against the non-circular candidate identity
 `(rπ − s) + (rV − s) = [r·t − 2s]` (`PicDual.smul_sub_add_smul_sub_eq_mulByInt`, derived from `hsum`
-alone — *no degree, no uniqueness*).  This is the algebraic backbone of Route-C Part (B) v3: it shows
+alone — *no degree, no uniqueness*).  This is the algebraic backbone of Route-C Part (B) v3: it
+shows
 the III.8 residual and the III.6.2(c) dual-value are literally the same content up to the shipped
 trace half. -/
 
@@ -208,7 +216,8 @@ Output: the Silverman III.8 trace relation `α + α̂ = [r·t − 2s]` (`htrace_
 
 Proof: `hadd` + the two seeds give `α̂ = r·V + (−s·id) = r·V − s·id`, which is `hpicval`; then the
 non-circular converse `htrace_dual_of_picDual_eq` upgrades it to the III.8 relation.  **No degree of
-`α`, no uniqueness, no circularity with `deg(rπ − s) = N`** — the only non-structural input is `hadd`
+`α`, no uniqueness, no circularity with `deg(rπ − s) = N`** — the only non-structural input is
+`hadd`
 (Silverman III.6.2(c) for this pair). -/
 theorem htrace_dual_of_picDual_additive
     {α α₁ α₂ : Isogeny E E}

@@ -70,7 +70,7 @@ complex conjugate. The conjugate has the same `Algebra.norm ℤ` since
 `restrictScalars`. -/
 theorem pollaczekUnitPlus_norm [IsCMField K] (hp_odd : p ≠ 2) :
     Algebra.norm ℤ ((pollaczekUnitPlus p K i : (𝓞 K)ˣ) : 𝓞 K) = 1 := by
-  unfold pollaczekUnitPlus
+  simp only [pollaczekUnitPlus]
   rw [Units.val_mul, map_mul]
   have h_E := pollaczekUnit_norm p K i hp_odd
   have h_σE :

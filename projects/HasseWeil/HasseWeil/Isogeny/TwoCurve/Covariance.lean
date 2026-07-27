@@ -47,9 +47,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W₁ W₂ : Affine F) [W₁.IsElliptic] [W₂.IsElliptic]
 
@@ -73,16 +70,6 @@ def PullbackEvaluation_twoCurve (β : HasseWeil.Isogeny W₁ W₂)
       EvaluatesTo W₁ P (β.pullback (y_gen W₂)) y'
 
 variable {W₁ W₂}
-
-/-- `toAffinePoint` is injective on smooth points of `W₁`. -/
-private theorem toAffinePoint_injective_W₁ :
-    Function.Injective
-      (fun P : (W_smooth W₁).SmoothPoint => P.toAffinePoint) := by
-  intro P Q h
-  simp only [Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at h
-  obtain ⟨hx, hy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp h
-  cases P; cases Q
-  simp_all
 
 /-! ### The kernel-translation covariance -/
 
@@ -120,7 +107,7 @@ theorem xy_family_of_pullbackEvaluation_twoCurve [IsAlgClosed F]
     -- the two finite exclusion sets tied to the translation
     have hB2fin : {P : (W_smooth W₁).SmoothPoint |
         ¬(P.toAffinePoint + Sk).IsSome}.Finite := by
-      refine (Set.Finite.preimage toAffinePoint_injective_W₁.injOn
+      refine (Set.Finite.preimage toAffinePoint_injective.injOn
         (Set.finite_singleton (-Sk))).subset ?_
       intro P hP
       rw [Set.mem_setOf_eq, WeierstrassCurve.Affine.Point.IsSome, not_not] at hP
@@ -131,7 +118,7 @@ theorem xy_family_of_pullbackEvaluation_twoCurve [IsAlgClosed F]
     have hB3fin : {P : (W_smooth W₁).SmoothPoint |
         ∃ h' : (P.toAffinePoint + Sk).IsSome,
           P.translate_of_finite Sk h' ∈ bad}.Finite := by
-      refine (Set.Finite.preimage toAffinePoint_injective_W₁.injOn
+      refine (Set.Finite.preimage toAffinePoint_injective.injOn
         (((hbad.image (fun P : (W_smooth W₁).SmoothPoint => P.toAffinePoint)).image
           (fun R => R - Sk)))).subset ?_
       rintro P ⟨h', hmem⟩
@@ -154,11 +141,11 @@ theorem xy_family_of_pullbackEvaluation_twoCurve [IsAlgClosed F]
           EvaluatesTo W₁ P By c) := by
       intro P hP
       rw [Set.mem_union, Set.mem_union] at hP
-      push_neg at hP
+      push Not at hP
       obtain ⟨⟨hP1, hP2⟩, hP3⟩ := hP
       rw [Set.mem_setOf_eq, not_not] at hP2
       rw [Set.mem_setOf_eq] at hP3
-      push_neg at hP3
+      push Not at hP3
       -- the witness at the translated point `P + k`
       obtain ⟨xI, yI, hI, heqI, hxI, hyI⟩ := hw (P.translate_of_finite Sk hP2) (hP3 hP2)
       have hι : (P.translate_of_finite Sk hP2).toAffinePoint = P.toAffinePoint + Sk :=

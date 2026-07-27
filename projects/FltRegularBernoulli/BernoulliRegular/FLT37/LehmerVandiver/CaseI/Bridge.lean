@@ -96,7 +96,7 @@ theorem caseI_ex_fin_div_of_not_dvd_hPlus
           (b : 𝓞 (CyclotomicField p ℚ)) * ζ -
           (a : 𝓞 (CyclotomicField p ℚ)) * ζ ^ (k₁ : ℕ) -
           (b : 𝓞 (CyclotomicField p ℚ)) * ζ ^ (k₂ : ℕ) := by
-  set K := CyclotomicField p ℚ with hK_def
+  set K := CyclotomicField p ℚ
   let ζ' := (ζ : K)
   have hζ' : IsPrimitiveRoot ζ' p := IsPrimitiveRoot.coe_submonoidClass_iff.2 hζ
   let zetaUnit := (hζ'.toInteger_isPrimitiveRoot.isUnit hpri.out.ne_zero).unit

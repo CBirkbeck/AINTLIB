@@ -357,7 +357,6 @@ theorem natCast_delta_val_pow_sub_zmod_pow_val_mem_completedMaximalIdeal
     exact Ideal.mul_mem_right (A ^ n / p : S) M hpM
   simpa [S, M, A, c] using hmem
 
-set_option maxHeartbeats 800000 in
 -- The completed local ring typeclass and quotient coercions make this congruence
 -- substantially heavier than the surrounding formal subgroup lemmas.
 theorem completedLocalCyclotomicRingEquiv_uniformizer_pow_sub_zmodPowVal_mul_mem_succ
@@ -415,7 +414,6 @@ theorem completedLocalCyclotomicRingEquiv_uniformizer_pow_sub_zmodPowVal_mul_mem
   convert hsum using 1
   ring
 
-set_option maxHeartbeats 800000 in
 -- This packages the principal-uniformizer calculation for arbitrary elements of `m^n`;
 -- the proof repeatedly coerces through the completed local ring and its ideal powers.
 theorem completedLocalCyclotomicRingEquiv_sub_zmodPowVal_mul_mem_succ
@@ -737,7 +735,6 @@ theorem completedPrincipalUnitGradedDeltaAction_apply_class
         (completedPrincipalUnitSubgroupEquiv (p := p) K a n u) :=
   completedPrincipalUnitGradedQuotientEquiv_mk (p := p) (K := K) a n u
 
-set_option maxHeartbeats 800000 in
 -- Moving from the additive congruence on `m^n` to units expands several
 -- completed-ring coercions and a binomial congruence for `(1 + x)^k`.
 theorem completedPrincipalUnitSubgroupEquiv_sub_pow_zmodPowVal_mem_succ
@@ -929,9 +926,6 @@ theorem completedPrincipalUnitGradedDeltaActionZMod_apply
       Additive.ofMul ((completedPrincipalUnitGradedDeltaAction (p := p) K n) a x.toMul) :=
   rfl
 
-set_option synthInstance.maxHeartbeats 80000 in
--- The `ZMod p` module instance is built from the quotient's `p`-torsion proof,
--- and synthesizing it for this displayed scalar action needs a larger budget.
 theorem completedPrincipalUnitGradedDeltaActionZMod_apply_eq_smul
     (n : ℕ) [Fact (1 ≤ n)] (a : CyclotomicUnitDelta p)
     (x : Additive (completedPrincipalUnitGradedQuotient p K n)) :

@@ -182,8 +182,7 @@ theorem map_extendedRelNorm_prime_eq_cyclotomicConjugates_prod_pow
       Ideal.relNorm ℤ P = (P.under ℤ) ^ f := by
     have h := Ideal.relNorm_eq_pow_of_isMaximal (R := ℤ) (S := 𝓞 K) P (P.under ℤ)
     dsimp [f]
-    rw [Ideal.inertiaDegIn_eq_inertiaDeg (P.under ℤ) P Gal(K/ℚ),
-      ← Ideal.inertiaDeg_eq_inertiaDeg' (p := P.under ℤ) (q := P)]
+    rw [Ideal.inertiaDegIn_eq_inertiaDeg (P.under ℤ) P Gal(K/ℚ)]
     exact h
   have hprimes :
       ((P.under ℤ).primesOver (𝓞 K)).toFinset =
@@ -199,7 +198,7 @@ theorem map_extendedRelNorm_prime_eq_cyclotomicConjugates_prod_pow
         (R := 𝓞 K) (S := ℤ) (p := P.under ℤ) h_under_ne
     rw [hprimes] at hmap
     trans ∏ Q ∈ cyclotomicConjugates (p := p) (K := K) P,
-        Q ^ (P.under ℤ).ramificationIdx Q
+        Q ^ Q.ramificationIdx ℤ
     · exact hmap
     · refine Finset.prod_congr rfl ?_
       intro Q hQ
@@ -208,8 +207,7 @@ theorem map_extendedRelNorm_prime_eq_cyclotomicConjugates_prod_pow
       haveI : Q.LiesOver (P.under ℤ) :=
         ⟨(under_eq_of_mem_cyclotomicConjugates (p := p) (K := K) hQ).symm⟩
       dsimp [e]
-      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (P.under ℤ) Q Gal(K/ℚ),
-        ← Ideal.ramificationIdx_eq_ramificationIdx' (q := Q) (hp := h_under_ne)]
+      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (P.under ℤ) Q Gal(K/ℚ)]
   rw [extendedRelNormIdeal, hrel, Ideal.map_pow, hmap_under]
   dsimp [e, f]
   rw [← Finset.prod_pow]
@@ -325,7 +323,7 @@ theorem cyclotomicRingOfIntegersEquiv_inv_notMem_of_absNorm_span_coprime
   have hσP_ne_top : σP ≠ ⊤ := (inferInstance : σP.IsMaximal).ne_top
   have hα_mem_σP : α ∈ σP := by
     change α ∈ cyclotomicGaloisConjugate (p := p) (K := K) a P
-    unfold cyclotomicGaloisConjugate
+    simp only [cyclotomicGaloisConjugate]
     rw [Ideal.mem_map_of_equiv]
     refine ⟨cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α, hmem, ?_⟩
     rw [← cyclotomicRingOfIntegersEquiv_mul_apply (p := p) (K := K) a a⁻¹ α,
@@ -349,7 +347,7 @@ theorem cyclotomicRingOfIntegersEquiv_inv_notMem_of_absNorm_span_coprime
     have hdvd :
         cyclotomicGaloisConjugate (p := p) (K := K) a B ∣
           cyclotomicConjugateProductIdeal (p := p) (K := K) B := by
-      unfold cyclotomicConjugateProductIdeal
+      simp only [cyclotomicConjugateProductIdeal]
       exact Finset.dvd_prod_of_mem
         (fun b : CyclotomicUnitDelta p ↦
           cyclotomicGaloisConjugate (p := p) (K := K) b B)

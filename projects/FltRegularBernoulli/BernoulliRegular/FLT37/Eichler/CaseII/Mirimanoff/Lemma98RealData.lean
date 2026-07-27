@@ -3,9 +3,11 @@ import BernoulliRegular.FLT37.Eichler.CaseII.Mirimanoff.MirimanoffResidualAndSum
 import BernoulliRegular.FLT37.Eichler.CaseII.Section91.DescentUnitLocalPower
 
 /-!
-# [FLT37-CASEII-R4] Washington Theorem 9.5 Case-II `ℓ ∣ z` content, assembled over `RealCaseIIData37`
+# [FLT37-CASEII-R4] Washington Theorem 9.5 Case-II `ℓ ∣ z` content, assembled over
+`RealCaseIIData37`
 
-This file assembles **R4** — the irregular-index local power / Washington *Introduction to Cyclotomic
+This file assembles **R4** — the irregular-index local power / Washington *Introduction to
+Cyclotomic
 Fields*, 2nd ed., GTM 83, Theorem 9.5 Lemma-9.6–9.9 `ℓ ∣ z` content — over the genuine real datum
 `RealCaseIIData37`, now that its DEEP analytic core is proven (the step-6 `ρ_a`-reality
 `γ`-ratio congruence `caseIIMirimanoffStep6CongReal37_proven`, Washington's `j = 0` over real data
@@ -31,7 +33,8 @@ The second-case proof, with the standing Fermat solution `p ∤ xy`, `p ∣ z`, 
   unramified and `ω + θ = η₀ λ^{m−(p−1)/2} ρ g`) follows from `ℓ ∣ (ω + θ)`.
 * **Lemma 9.8** (`ℓ ∣ ω + θ`, i.e. `j = 0`): `∏_i (ω + ζ^i θ) ≡ 0 (mod 𝔩)` (this is where `ℓ ∣ z` is
   used), so `ω + ζ^j θ ≡ 0` for some `j`.  **Suppose `j ≠ 0`.**  Telescoping the
-  `(ζ^a − ζ^j)/(1 − ζ^{a+j})` `p`-th-power congruences over the `ξ`-units (Lemma 8.1) shows **every**
+  `(ζ^a − ζ^j)/(1 − ζ^{a+j})` `p`-th-power congruences over the `ξ`-units (Lemma 8.1) shows
+  **every**
   real cyclotomic unit is a `p`-th power mod every prime above `ℓ`; Proposition 8.18 then forces
   `Q_i^t ≡ 1` for all `t`, **contradicting `Q_i^k ≢ 1`**.  So `j = 0`, i.e. `ℓ ∣ ω + θ`.  **This is
   where the proven `Q₃₂⁴ ≢ 1` certificate enters** — and over real data it is exactly
@@ -48,15 +51,16 @@ integer (`ℓ ≢ 0`, `ℓ < p² − p`); there is no `ℓ ∤ z` branch.  The `
 
 ## What this file discharges over real data (R4(i), Lemma 9.8 `j = 0`)
 
-* **`caseII_real_no_nontrivial_factor`** (proven, axiom-clean) — Washington's `j = 0` over real data:
+* **`caseII_real_no_nontrivial_factor`** (proven, axiom-clean) — Washington's `j = 0` over real
+  data:
   for a `RealCaseIIData37` with `ℓ ∤ x, ℓ ∤ y`, **no** nontrivial conjugate factor `x + η·y ∈ lv149`
   (`η ≠ 1`) occurs.  This is `caseII_realStep6_no_nontrivial_factor` at the **proven** step-6 core
   `caseIIMirimanoffStep6CongReal37_proven` — the deep analytic content of Lemma 9.8 (the
   `Q₃₂⁴ ≢ 1`-driven contradiction with `j ≠ 0`), now PROVEN (no `Lemma98MirimanoffPthPower37`
   hypothesis).
 
-* **`RealCaseIILemma98Mirimanoff37` / `realCaseIILemma98Mirimanoff37_proven`** — the real-data analog
-  of the abstract `Lemma98MirimanoffPthPower37`, **proven**: over real data its antecedent
+* **`RealCaseIILemma98Mirimanoff37` / `realCaseIILemma98Mirimanoff37_proven`** — the real-data
+  analog of the abstract `Lemma98MirimanoffPthPower37`, **proven**: over real data its antecedent
   (`x + η·y ∈ lv149`, `η ≠ 1`) is refuted by `caseII_real_no_nontrivial_factor`, so the implication
   holds.  This **discharges the Kummer–Mirimanoff residual over real data** — the abstract residual
   was carried as a `def … : Prop` precisely because over *bare* `CaseIIData37` the `ρ_a`-reality
@@ -73,8 +77,8 @@ integer (`ℓ ≢ 0`, `ℓ < p² − p`); there is no `ℓ ∤ z` branch.  The `
 
 ## What this file records about the local power (R4(i), Lemma 9.8 mod-`𝔩` half)
 
-* **`caseII_real_localPower_section91`** (proven, axiom-clean) — the §9.1 producer-built descent unit
-  `δ = caseIISection91_descentUnit D η G lv149` is a `37`-th power mod `lv149` over real data
+* **`caseII_real_localPower_section91`** (proven, axiom-clean) — the §9.1 producer-built descent
+  unit `δ = caseIISection91_descentUnit D η G lv149` is a `37`-th power mod `lv149` over real data
   (`caseIISection91_lv149_localPower`).  This is the local power of Lemma 9.8 / 9.9 for the
   **producer-constructed** descent unit (Washington's explicit `η_a`, residue form `(Y·X⁻¹)^37`),
   discharged non-circularly from the σ-stable producer (**not** Assumption II).
@@ -97,7 +101,8 @@ real data**.  Two things remain, each isolated precisely:
   (`CaseIISection91DescentUnitIdentification37`, `Lemma98LocalPower37`, the abstract
   `Lemma98MirimanoffPthPower37`) are keyed to a **bare** `CaseIIData37` with *unconstrained* units
   `ε₁, ε₂, ε₃` carrying **no** reality datum, whereas the proven Lemma-9.8 content (this file) lives
-  over `RealCaseIIData37` (`σx = x`, `σy = y`).  Discharging the abstract residuals from the real-data
+  over `RealCaseIIData37` (`σx = x`, `σy = y`).  Discharging the abstract residuals from the
+  real-data
   content requires threading the producer's reality invariant into the abstract Assumption-II
   telescope (the §9.1 identification of the *abstract* `ε₁/ε₂` with the producer `δ`); that
   identification is the named `CaseIISection91DescentUnitIdentification37` (R4(i)), which this file
@@ -214,7 +219,8 @@ sum `x + y ∈ lv149`.  The proven `caseII_exists_factor_mem_lv149_of_dvd_z` giv
 (`D.z ∈ lv149`, Lemma 9.7) and `ℓ ∤ x, ℓ ∤ y` (Lemma 9.6), the descended sum `x + y ∈ lv149`
 (`ℓ ∣ ω + θ`, Washington's `j = 0`).
 
-Proof: `caseII_exists_factor_mem_lv149_of_dvd_z` (the all-conjugate `∏(x + ζ^i y) = x³⁷ + y³⁷ ∈ lv149`
+Proof: `caseII_exists_factor_mem_lv149_of_dvd_z` (the all-conjugate
+`∏(x + ζ^i y) = x³⁷ + y³⁷ ∈ lv149`
 under `ℓ ∣ z`) gives a factor `x + η·y ∈ lv149` with `η ∈ μ₃₇`.  If `η = 1` this is `x + y ∈ lv149`
 directly; if `η ≠ 1`, `caseII_real_no_nontrivial_factor` (the proven `j = 0`) refutes it. -/
 theorem caseII_real_x_add_y_mem_of_dvd_z
@@ -296,7 +302,8 @@ genuine remaining R4(ii) input.
 For every real Case-II descent datum, the descent integer `D.z` is divisible by the
 Lehmer–Vandiver auxiliary prime `lv149` (`ℓ ∣ z`).  This is genuinely true and **non-vacuous** for
 the descent integer (`z` is the `p`-divisible Fermat variable; Lemma 9.7 forces `ℓ ∣ z` since
-`149 ≡ 1 (mod 37)` and `149 < 37² − 37`, see `caseII_lv149_one_mod_37` / `caseII_lv149_lt_p_sq_sub_p`),
+`149 ≡ 1 (mod 37)` and `149 < 37² − 37`, see `caseII_lv149_one_mod_37` /
+`caseII_lv149_lt_p_sq_sub_p`),
 but it is **not** derivable from the descended datum (which forgets the rational origin the
 all-conjugate `∑`-argument over `ℤ` needs).  Carried as the genuine-descent-datum hypothesis. -/
 def RealCaseIILehmerVandiverDvdZ37

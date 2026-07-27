@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Isogeny.Class
 import HasseWeil.Isogeny.MulByInt.Basepoint
 import HasseWeil.Isogeny.Frobenius.Factorization
@@ -24,8 +29,10 @@ label layer become unconditional.
 
 **Route (Silverman III.6.1, transcribed):** over char 0 every isogeny is separable, so the dual is
 purely the III.4.11 factorization `ker φ ⊆ E[m] ⟹ [m] = φ̂ ∘ φ`. III.4.11 is irreducibly a
-`K̄`-Galois argument, so the dual is built over `K̄ = AlgebraicClosure F` (existing K̄ machinery) and
-**descended to `F` by uniqueness + Galois-invariance** (`φ̂^σ ∘ φ = [m] ⟹ φ̂^σ = φ̂`). The descent is
+`K̄`-Galois argument, so the dual is built over `K̄ = AlgebraicClosure F` (existing K̄
+machinery) and
+**descended to `F` by uniqueness + Galois-invariance** (`φ̂^σ ∘ φ = [m] ⟹ φ̂^σ = φ̂`). The
+descent is
 run at a *finite* Galois level `L/F`. The new infrastructure is the descent of a curve morphism
 (DUAL-Q2, the deep crux); this file holds the headline + assembly, with the descent internals filled
 in across tickets DUAL-Q1…Q4.
@@ -41,14 +48,17 @@ The arc is landed end-to-end and is now **axiom-clean** (the headline results de
   direction `galActFunctionField_fixes_baseChange` — **all axiom-clean**. The fixed-field
   characterization `mem_range_functionField_baseChange_iff_fixed` is **fully proved (both
   directions)**: its `→` is the self-contained Galois descent of the fraction field
-  `F(C_L) = Frac(L ⊗_F F[C])` (ring descent `tensor_fixed_mem_range` + norm-denominator fraction lift
+  `F(C_L) = Frac(L ⊗_F F[C])` (ring descent `tensor_fixed_mem_range` + norm-denominator
+  fraction lift
   `the_lift`), needing no base-change-of-`IsGalois` lemma.
-* **DUAL-Q2** (`descendPullback` / `descendIsogeny`): a `Gal(L/F)`-equivariant pullback descends to an
+* **DUAL-Q2** (`descendPullback` / `descendIsogeny`): a `Gal(L/F)`-equivariant pullback
+descends to an
   `F`-algebra hom and to an `EC.Isogeny` over `F`; the algebra-hom packaging, the round-trip
   `functionFieldMap_comp_descendPullback`, and the basepoint condition `descend_basepoint` are all
   proved — **axiom-clean** (Q1's `sorry` is gone).
 * **DUAL-Q3** (`galEquivariant_of_compose`): from the defining identity `φ* ∘ φ̂* = [m]*` and
-  injectivity of `φ*`, the dual pullback is equivariant — **axiom-clean** (the full base-changed-pullback
+  injectivity of `φ*`, the dual pullback is equivariant — **axiom-clean** (the full
+  base-changed-pullback
   equivariance feeding it is one of the sub-gaps inside the single residual below).
 * **DUAL-Q4** (`hasDualWitness_of_compose` + `universalDualWitness_of_charZero`): a reverse isogeny
   `ρ` over `F` with `ρ ∘ φ = [deg φ]` yields `HasDualWitness φ` — **axiom-clean**. The headline
@@ -58,26 +68,33 @@ The arc is landed end-to-end and is now **axiom-clean** (the headline results de
     isogeny with `ρ ∘ φ = [n]` is purely formal) — **proved, axiom-clean**;
   - `hasMulByIntDualWitness_of_rangeIncl` (the basepoint leaf, `mulByIntBasepoint_holds` +
     `reflects_ordAtInfty`) — **proved**;
-  and the range inclusion `Im([deg φ]*) ⊆ Im(φ*)` over `F` (`rationalRangeIncl_of_separable`), a thin
-  consequence of the proven elementwise descent `rangeIncl_of_descentData` over the single named leaf
+  and the range inclusion `Im([deg φ]*) ⊆ Im(φ*)` over `F` (`rationalRangeIncl_of_separable`),
+  a thin
+  consequence of the proven elementwise descent `rangeIncl_of_descentData` over the single
+  named leaf
   `exists_descentData_of_separable`.
 
 * **MOVE 1 — field-of-definition over `K̄` (this pass, axiom-clean)**: the descent's
   field-of-definition gap is now discharged inside `K̄ = AlgebraicClosure F`. In char 0 `K̄/F` is
   Galois (`instIsGalois_algebraicClosure`); a finite set of `K̄`-elements lies in a finite Galois
   intermediate field `L ⊆ K̄` (`exists_finiteGalois_fieldOfDefinition`, via mathlib's
-  `FiniteGaloisIntermediateField.adjoin`); and `Gal(K̄/F)`-fixedness descends to `Gal(L/F)`-fixedness
+  `FiniteGaloisIntermediateField.adjoin`); and `Gal(K̄/F)`-fixedness descends to
+  `Gal(L/F)`-fixedness
   (`galFixed_of_galFixed_top`, via `AlgEquiv.restrictNormalHom_surjective`). The wrapper
   `someDescentData_of_overKbar` threads the (equal) universe. So the residual is no longer "field of
   definition".
 
 * **TWO-CURVE BASE-CHANGE via `ofEquation` (this pass, axiom-clean)**: the `DescentData`'s two-curve
-  base-change is now built CoordHom-free in the `TwoCurveBaseChange` namespace. The earlier framing —
-  "`psiL = baseChangeAlgHom cd L` needs a `CoordHom` for `φ`, which a general `EC.Isogeny` lacks" — is
+  base-change is now built CoordHom-free in the `TwoCurveBaseChange` namespace. The earlier
+  framing —
+  "`psiL = baseChangeAlgHom cd L` needs a `CoordHom` for `φ`, which a general `EC.Isogeny`
+  lacks" — is
   superseded: `TwoCurveBaseChange.bcIsog` builds `φ_L : E₁_L → E₂_L` over a *general* finite `L`
-  directly from the pullback generator images `functionFieldMap (φ^* x_gen₂/y_gen₂)` via the two-curve
+  directly from the pullback generator images `functionFieldMap (φ^* x_gen₂/y_gen₂)` via the
+  two-curve
   `EC.Isogeny.ofEquation` builder. The transcendence over a non-algebraically-closed `L` is supplied
-  by `ordAtInfty_eq_zero_of_isAlgebraic_constants` (order `0` for elements algebraic over the constant
+  by `ordAtInfty_eq_zero_of_isAlgebraic_constants` (order `0` for elements algebraic over the
+  constant
   field). This furnishes — all axiom-clean — `ψ_L` (`psiL`), `[m]_L*` (`mPbL`), the base-change
   naturalities (`psiL_nat`, `mPbL_nat`), `ψ_L`'s injectivity (`psiL_injective`), and `ψ_L`'s **full
   `Gal(L/F)`-equivariance** (`psiL_galEquivariant`, via the `σ`-semilinearity
@@ -139,7 +156,7 @@ theorem congr_id_trans (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F
           (A₁ := C.toAffine.CoordinateRing))).trans
         (Algebra.TensorProduct.congr τ (AlgEquiv.refl (R := F)
           (A₁ := C.toAffine.CoordinateRing))) := by
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply Algebra.TensorProduct.ext'
   intro l u
   simp [Algebra.TensorProduct.congr_apply]
@@ -148,7 +165,7 @@ theorem congr_id_trans (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F
     letI := C.isDomain_tensorCoordRing L
     galActFrac C L (AlgEquiv.refl) = AlgEquiv.refl := by
   letI := C.isDomain_tensorCoordRing L
-  unfold galActFrac
+  simp only [galActFrac]
   rw [Algebra.TensorProduct.congr_refl]
   ext x
   simp [IsFractionRing.algEquivOfAlgEquiv]
@@ -268,7 +285,8 @@ private noncomputable abbrev ringAct (C : SmoothPlaneCurve F) (L : Type*) [Field
     (L ⊗[F] C.toAffine.CoordinateRing) ≃ₐ[F] (L ⊗[F] C.toAffine.CoordinateRing) :=
   Algebra.TensorProduct.congr σ (AlgEquiv.refl (R := F) (A₁ := C.toAffine.CoordinateRing))
 
-/-- Coordinate description of the `σ ⊗ id` action in the base-changed basis: the `i`-th `L`-coordinate
+/-- Coordinate description of the `σ ⊗ id` action in the base-changed basis: the `i`-th
+`L`-coordinate
 of `(σ ⊗ id) z` is `σ` of the `i`-th coordinate of `z`. Proven by tensor induction (the action is
 `L`-semilinear with respect to `σ`). -/
 private theorem repr_congr_apply (L : Type*) [Field L] [Algebra F L]
@@ -367,7 +385,7 @@ private theorem galActFrac_algebraMap (C : SmoothPlaneCurve F) (L : Type*) [Fiel
     galActFrac C L σ (algebraMap (L ⊗[F] C.toAffine.CoordinateRing) _ b)
       = algebraMap _ _ (ringAct C L σ b) := by
   letI := C.isDomain_tensorCoordRing L
-  unfold galActFrac ringAct
+  simp only [galActFrac, ringAct]
   rw [IsFractionRing.algEquivOfAlgEquiv_algebraMap]
 
 /-- The norm `∏_σ (σ ⊗ id) d` is `Gal(L/F)`-fixed (group-translation invariance of the product). -/
@@ -376,7 +394,7 @@ private theorem norm_fixed (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algeb
     (d : L ⊗[F] C.toAffine.CoordinateRing) (τ : L ≃ₐ[F] L) :
     ringAct C L τ (∏ σ : L ≃ₐ[F] L, ringAct C L σ d) = ∏ σ : L ≃ₐ[F] L, ringAct C L σ d := by
   classical
-  unfold ringAct
+  simp only [ringAct]
   rw [map_prod]
   have step : ∀ σ : L ≃ₐ[F] L,
       (Algebra.TensorProduct.congr τ (AlgEquiv.refl (R := F)
@@ -392,7 +410,8 @@ private theorem norm_fixed (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algeb
   rfl
 
 /-- The norm `∏_σ (σ ⊗ id) d` splits off its identity factor: `∏_σ (σ ⊗ id) d = d · ∏_{σ ≠ 1}
-(σ ⊗ id) d`. The `σ = 1` factor is `(1 ⊗ id) d = d` because `ringAct` at the identity is the identity
+(σ ⊗ id) d`. The `σ = 1` factor is `(1 ⊗ id) d = d` because `ringAct` at the identity is the
+identity
 `AlgEquiv`. -/
 private theorem prod_ringAct_eq_self_mul_prod_erase_one (C : SmoothPlaneCurve F) (L : Type*)
     [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L]
@@ -407,7 +426,8 @@ private theorem prod_ringAct_eq_self_mul_prod_erase_one (C : SmoothPlaneCurve F)
   rw [show (1 : L ≃ₐ[F] L) = AlgEquiv.refl from rfl, Algebra.TensorProduct.congr_refl]
   rfl
 
-/-- Image of a numerator scaled by the complementary norm factor. With `den = d · P` and `d ≠ 0`, the
+/-- Image of a numerator scaled by the complementary norm factor. With `den = d · P` and `d ≠
+0`, the
 `algebraMap` of `a' · P` into `Frac(L ⊗_F F[C])` equals `(a'/d) · den`. This is the bookkeeping that
 turns an arbitrary ratio `a/d` into the normalized ratio with the `Gal`-fixed denominator `den`. -/
 private theorem algebraMap_mul_eq_div_mul_of_eq_mul (C : SmoothPlaneCurve F) (L : Type*)
@@ -452,7 +472,8 @@ private theorem ringAct_numerator_fixed (C : SmoothPlaneCurve F) (L : Type*) [Fi
     norm_fixed C L d τ, ← hnmap]
 
 /-- **Fraction lift**: a `galActFrac`-fixed element of `Frac(L ⊗_F F[C])` is a ratio `n/den` of two
-`σ ⊗ id`-fixed elements of `L ⊗_F F[C]` (with `den ≠ 0`). The denominator is the norm of an arbitrary
+`σ ⊗ id`-fixed elements of `L ⊗_F F[C]` (with `den ≠ 0`). The denominator is the norm of an
+arbitrary
 denominator; the numerator is forced fixed by the fixed quotient. -/
 private theorem the_lift (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F L]
     [FiniteDimensional F L] [IsGalois F L]
@@ -494,11 +515,13 @@ private theorem the_lift (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra
 
 /-- **Transport of Galois-fixedness through the tensor presentation.** If `x ∈ (C.baseChange L).
 FunctionField` is fixed by every `galActFunctionField C L σ`, then its image
-`y = functionField_baseChange_tensorEquiv x` in the tensor fraction field `Frac(L ⊗_F F[C])` is fixed
+`y = functionField_baseChange_tensorEquiv x` in the tensor fraction field `Frac(L ⊗_F F[C])` is
+fixed
 by every `galActFrac C L σ`. This is the first reduction shared by both the finite
 (`mem_range_functionField_baseChange_iff_fixed`) and the tower
 (`mem_range_functionField_baseChange_iff_fixed_kbar`) descent: `galActFunctionField` is
-`galActFrac` conjugated by `functionField_baseChange_tensorEquiv`, so fixedness transports across the
+`galActFrac` conjugated by `functionField_baseChange_tensorEquiv`, so fixedness transports
+across the
 equivalence. -/
 private theorem galActFrac_fixed_of_galActFunctionField_fixed (C : SmoothPlaneCurve F)
     (L : Type*) [Field L] [Algebra F L] (x : (C.baseChange L).FunctionField)
@@ -630,11 +653,11 @@ theorem descendFun_eq_iff {C₁ C₂ : SmoothPlaneCurve F}
   · intro h; exact C₁.functionFieldMap_injective L
       ((functionFieldMap_descendFun L hξ f).trans h.symm)
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Importing the two-curve fixed-field machinery (`TwoCurveDualRange`) transitively brings the
 -- kernel-translation `MulSemiringAction` on `FunctionField` into scope, which expands instance
 -- search through the `Submodule` lattice during this `AlgHom`-structure elaboration — the same
 -- `synthInstance` pressure handled identically in `EC/KernelCountGeneral.lean`.
+set_option synthInstance.maxHeartbeats 400000 in
 /-- **DUAL-Q2(b)** — the descended pullback `ξ↓ : F(E₂) →ₐ[F] F(E₁)`, packaged as an `F`-algebra
 hom. The ring/algebra structure is forced by the round-trip `functionFieldMap_descendFun` and the
 injectivity of `functionFieldMap`: `ξ↓` is the unique map making the base-change square commute, and
@@ -666,7 +689,8 @@ noncomputable def descendPullback {C₁ C₂ : SmoothPlaneCurve F}
     (hξ : GalEquivariant L ξ) (f : C₂.FunctionField) :
     descendPullback L hξ f = descendFun L hξ f := rfl
 
-/-- **DUAL-Q2(c)** — the full round-trip as algebra homs: `functionFieldMap ∘ ξ↓ = ξ ∘ functionFieldMap`,
+/-- **DUAL-Q2(c)** — the full round-trip as algebra homs: `functionFieldMap ∘ ξ↓ = ξ ∘
+functionFieldMap`,
 i.e. the descended pullback base-changes back to `ξ` on the `F(E₂)`-image. -/
 theorem functionFieldMap_comp_descendPullback {C₁ C₂ : SmoothPlaneCurve F}
     (L : Type*) [Field L] [Algebra F L] [FiniteDimensional F L] [IsGalois F L]
@@ -743,7 +767,8 @@ The defining identity of the dual is `φ̂ ∘ φ = [m]`, i.e. at the pullback l
 must commute with `φ̂*` too. This is `galEquivariant_of_compose` — a clean pullback-level
 cancellation (cheaper than Silverman's isogeny-subtraction uniqueness). -/
 
-/-- **DUAL-Q3 core** (uniqueness ⟹ equivariance, pullback form): if `p`, `m` are `Gal(L/F)`-equivariant
+/-- **DUAL-Q3 core** (uniqueness ⟹ equivariance, pullback form): if `p`, `m` are
+`Gal(L/F)`-equivariant
 function-field homs with `p ∘ q = m` and `p` injective, then `q` is equivariant. Instantiated with
 `p = φ*`, `q = φ̂*`, `m = [m]*` (the defining identity `φ* ∘ φ̂* = [m]*`), this is the
 Galois-equivariance of the dual pullback. -/
@@ -777,7 +802,8 @@ theorem galEquivariant_baseChange_on_image {C₁ C₂ : SmoothPlaneCurve F} (L :
 
 /-! ## DUAL-Q4 — assembly: a reverse isogeny with `ρ ∘ φ = [m]` gives a dual witness
 
-The descended reverse isogeny `φ̂` satisfies `φ̂ ∘ φ = [m]` over `F` (round-trip of the K̄ identity).
+The descended reverse isogeny `φ̂` satisfies `φ̂ ∘ φ = [m]` over `F` (round-trip of the K̄
+identity).
 From such an `F`-rational reverse isogeny, `HasDualWitness φ` is purely formal: `[m]* = φ* ∘ φ̂*`
 gives the range inclusion `Im([m]*) ⊆ Im(φ*)`, and the basepoint condition is `reflects_ordAtInfty`.
 This is `hasDualWitness_of_compose` — fully discharged at the `F`-level. -/
@@ -788,7 +814,8 @@ variable [DecidableEq F]
 `ρ : E₂ → E₁` over `F` with `ρ ∘ φ = [n]` (`n ≠ 0`, mathematically `n = deg φ`), then `φ` admits a
 `HasDualWitness`. The range inclusion `Im([n]*) ⊆ Im(φ*)` follows from `[n]* = φ* ∘ ρ*` (the
 function-field shadow of `ρ ∘ φ = [n]`), and the basepoint condition from the unconditional
-`∞`-regularity reflection `reflects_ordAtInfty`. This isolates the final descent step: produce such a
+`∞`-regularity reflection `reflects_ordAtInfty`. This isolates the final descent step: produce
+such a
 reverse isogeny over `F` (DUAL-Q2 `descendIsogeny` of the K̄ dual, with the `∘ = [n]` identity from
 the round-trip). -/
 noncomputable def hasDualWitness_of_compose {W₁ W₂ : WeierstrassCurve.Affine F}
@@ -818,7 +845,8 @@ level `L/F`, exploiting the now-fully-proven DUAL-Q1 fixed-field characterizatio
 
 1. **(K̄/L input, isolated)** Over a finite Galois `L/F`, the `L`-base-change `ψ_L` of `φ*` (an
    `F`-algebra hom `F(C₂_L) → F(C₁_L)`, `Gal(L/F)`-equivariant, injective, natural with `φ*`) admits
-   the `L`-level range inclusion `Im([m]_L*) ⊆ Im(ψ_L)`. (This is the two-curve `K̄` dual descended to
+   the `L`-level range inclusion `Im([m]_L*) ⊆ Im(ψ_L)`. (This is the two-curve `K̄` dual
+   descended to
    `L`; it is the genuine deep residual — see `DescentData` below.)
 2. **(proven here)** For `z = [m]_F* u`, naturality of `[m]` gives
    `functionFieldMap z = [m]_L* (functionFieldMap u) ∈ Im([m]_L*) ⊆ Im(ψ_L)`, so
@@ -833,7 +861,8 @@ level `L/F`, exploiting the now-fully-proven DUAL-Q1 fixed-field characterizatio
 2–4). -/
 
 /-- **The `K̄`/finite-Galois descent input** for the range inclusion `Im([m]*) ⊆ Im(φ*)` over `F`
-(the isolated deep residual of Silverman III.6.1, descent half). For a curve map `φ* : F(C₂) → F(C₁)`
+(the isolated deep residual of Silverman III.6.1, descent half). For a curve map `φ* : F(C₂) →
+F(C₁)`
 (the pullback of `φ : C₁ → C₂`) and a nonconstant endomorphism pullback `mPb : F(C₁) → F(C₁)`
 (Silverman takes `mPb = [m]*`, `m = deg φ`), this bundles, over a *finite Galois* `L/F`:
 
@@ -842,7 +871,8 @@ level `L/F`, exploiting the now-fully-proven DUAL-Q1 fixed-field characterizatio
 * `hpsiL_equiv` — `ψ_L` is `Gal(L/F)`-equivariant;
 * `hpsiL_inj` — `ψ_L` is injective (it is a base-changed field-pullback);
 * `hpsiL_nat` — base-change naturality of `φ*`: `functionFieldMap ∘ φ* = ψ_L ∘ functionFieldMap`;
-* `hmPbL_nat` — base-change naturality of `mPb`: `functionFieldMap ∘ mPb = mPb_L ∘ functionFieldMap`;
+* `hmPbL_nat` — base-change naturality of `mPb`: `functionFieldMap ∘ mPb = mPb_L ∘
+functionFieldMap`;
 * `hLincl` — the **`L`-level range inclusion** `Im([m]_L*) ⊆ Im(ψ_L)` (the two-curve `K̄` dual,
   descended to `L`).
 
@@ -962,7 +992,8 @@ by *every* `σ ∈ Gal(K/F)` is fixed by *every* `τ ∈ Gal(L/F)`. Proof: every
 `AlgEquiv.restrictNormal_commutes` transports the fixed-ness down through the injective inclusion
 `algebraMap L K`.
 
-This is the order-theoretic heart of MOVE 1: it lets a `Gal(K̄/F)`-fixed function on the curve over a
+This is the order-theoretic heart of MOVE 1: it lets a `Gal(K̄/F)`-fixed function on the curve
+over a
 finite Galois `L ⊆ K̄` be recognised as `Gal(L/F)`-fixed, which is the hypothesis of the proven
 fixed-field characterization `mem_range_functionField_baseChange_iff_fixed`. -/
 theorem galFixed_of_galFixed_top {K : Type*} [Field K] [Algebra E K] [Normal E K]
@@ -976,7 +1007,8 @@ theorem galFixed_of_galFixed_top {K : Type*} [Field K] [Algebra E K] [Normal E K
 
 /-- **The finite Galois field of definition of a finite set of `K̄`-elements** (MOVE 1). Over a
 perfect field, for a finite `s : Set K̄` there is a finite Galois extension `L/F` (concretely the
-normal closure of `F(s)` inside `K̄`, `FiniteGaloisIntermediateField.adjoin`) containing `s` — so any
+normal closure of `F(s)` inside `K̄`, `FiniteGaloisIntermediateField.adjoin`) containing `s` —
+so any
 datum built from finitely many algebraic elements of `K̄` is defined over a *finite* Galois `L/F`.
 This discharges the field-of-definition half of the descent: the (infinite) `K̄`-dual descends to a
 finite Galois `L`. -/
@@ -994,7 +1026,8 @@ end FieldOfDefinition
 /-! ### MOVE 2 — the infinite-Galois tower descent `K̄ → F`
 
 The descent of the range inclusion (`rangeIncl_of_descentData`) runs over a *finite* Galois `L/F`,
-which forces the genuine geometric realization of `φ_L` over that `L` (the `twoCurveGeometricDualData`
+which forces the genuine geometric realization of `φ_L` over that `L` (the
+`twoCurveGeometricDualData`
 leaf).  MOVE 2 supplies an alternative that descends the **`K̄`-direct** range inclusion
 (`ecIsog_mulByInt_deg_rangeIncl_of_charZero`, over `K̄ = AlgebraicClosure F`) all the way to `F` in
 one step, *bypassing* the finite-`L` geometric realization.
@@ -1055,7 +1088,7 @@ theorem towerTensorIncl_congr (R : Type*) [CommRing R] [Algebra F R]
       rw [Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul,
         towerTensorIncl_tmul, towerTensorIncl_tmul, Algebra.TensorProduct.congr_apply,
         Algebra.TensorProduct.map_tmul]
-      simp only [AlgEquiv.coe_refl, id_eq, AlgEquiv.coe_algHom]
+      simp only [AlgEquiv.coe_refl, id_eq, AlgEquiv.coe_toAlgHom]
       rw [hστ m]
   | add x y hx hy => rw [map_add, map_add, map_add, map_add, hx, hy]
 
@@ -1072,7 +1105,8 @@ private theorem towerTensorIncl_finset_sum_mem_range (R : Type*) [CommRing R] [A
   rw [towerTensorIncl_tmul]
 
 /-- **The tensor tower fact** (perfect base field): every element of `K̄ ⊗_F R`
-(`K̄ = AlgebraicClosure F`) is the image, under `towerTensorIncl`, of an element of `M ⊗_F R` for some
+(`K̄ = AlgebraicClosure F`) is the image, under `towerTensorIncl`, of an element of `M ⊗_F R`
+for some
 *finite Galois* intermediate field `M ⊆ K̄`. The finitely many `K̄`-scalars in a finite-sum
 representation lie in a finite Galois `M` (`exists_finiteGalois_fieldOfDefinition`). -/
 theorem exists_finiteGalois_towerTensorIncl_range [PerfectField F]
@@ -1137,7 +1171,7 @@ theorem fracTowerIncl_algebraMap (C : SmoothPlaneCurve F)
         (towerTensorIncl C.toAffine.CoordinateRing M b) := by
   letI := C.isDomain_tensorCoordRing M
   letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
-  unfold fracTowerIncl
+  simp only [fracTowerIncl]
   exact IsLocalization.map_eq _ b
 
 /-- `fracTowerIncl` is injective: its domain `FractionRing (M ⊗ F[C])` is a field, and every ring
@@ -1163,7 +1197,8 @@ theorem fracTowerIncl_galActFrac (C : SmoothPlaneCurve F)
          FractionRing (M ⊗[F] C.toAffine.CoordinateRing)) :
     letI := C.isDomain_tensorCoordRing M
     letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
-    fracTowerIncl C M (galActFrac C M τ y) = galActFrac C (AlgebraicClosure F) σ (fracTowerIncl C M y) := by
+    fracTowerIncl C M (galActFrac C M τ y) =
+      galActFrac C (AlgebraicClosure F) σ (fracTowerIncl C M y) := by
   letI := C.isDomain_tensorCoordRing M
   letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
   -- the key compatibility on a single `algebraMap` image
@@ -1183,7 +1218,8 @@ theorem fracTowerIncl_galActFrac (C : SmoothPlaneCurve F)
   rw [map_div₀, map_div₀, map_div₀, map_div₀, key a, key d]
 
 /-- **A full automorphism restricting to a prescribed `τ` agrees with `τ` on `M`.** If
-`σ : K̄ ≃ₐ[F] K̄` satisfies `restrictNormalHom M σ = τ` for a normal intermediate field `M ⊆ K̄`, then
+`σ : K̄ ≃ₐ[F] K̄` satisfies `restrictNormalHom M σ = τ` for a normal intermediate field `M ⊆
+K̄`, then
 `σ (m : K̄) = (τ m : K̄)` for every `m ∈ M`. This is the hypothesis `towerTensorIncl_congr` /
 `fracTowerIncl_galActFrac` need; it just unfolds `restrictNormalHom` to `restrictNormal` and applies
 `AlgEquiv.restrictNormal_commutes`. -/
@@ -1196,8 +1232,10 @@ private theorem restrictNormalHom_apply_coe (M : IntermediateField F (AlgebraicC
   rw [hσ] at hc
   simpa using hc
 
-/-- **Descent of `galActFrac`-fixedness along the tower inclusion.** Let `M ⊆ K̄` be finite Galois and
-let `yM ∈ Frac(M ⊗_F F[C])` map to a `galActFrac`-fixed `y` upstairs under `fracTowerIncl`. Then `yM`
+/-- **Descent of `galActFrac`-fixedness along the tower inclusion.** Let `M ⊆ K̄` be finite
+Galois and
+let `yM ∈ Frac(M ⊗_F F[C])` map to a `galActFrac`-fixed `y` upstairs under `fracTowerIncl`.
+Then `yM`
 is itself fixed by every `galActFrac C M τ`. Each `τ : M ≃ₐ[F] M` lifts to some `σ : K̄ ≃ₐ[F] K̄`
 (`restrictNormalHom_surjective`) restricting to it (`restrictNormalHom_apply_coe`); the equivariance
 of `fracTowerIncl` (`fracTowerIncl_galActFrac`) then carries the upstairs fixedness of `y` down to
@@ -1207,7 +1245,8 @@ private theorem galActFrac_fixed_of_fracTowerIncl_eq (C : SmoothPlaneCurve F)
     (y : letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
          FractionRing (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing))
     (hyfix : letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
-             ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F, galActFrac C (AlgebraicClosure F) σ y = y)
+             ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F,
+               galActFrac C (AlgebraicClosure F) σ y = y)
     (yM : letI := C.isDomain_tensorCoordRing M
           FractionRing (M ⊗[F] C.toAffine.CoordinateRing))
     (hymap : fracTowerIncl C M yM = y) :
@@ -1222,7 +1261,8 @@ private theorem galActFrac_fixed_of_fracTowerIncl_eq (C : SmoothPlaneCurve F)
   apply fracTowerIncl_injective C M
   rw [fracTowerIncl_galActFrac C M σ τ (restrictNormalHom_apply_coe M σ τ hσ), hymap, hyfix σ]
 
-/-- **`fracTowerIncl` carries a `1 ⊗ -` fraction to the corresponding `1 ⊗ -` fraction upstairs.** For
+/-- **`fracTowerIncl` carries a `1 ⊗ -` fraction to the corresponding `1 ⊗ -` fraction
+upstairs.** For
 `m : F[C]`, the downstairs class `algebraMap ((1 : M) ⊗ₜ m)` maps under `fracTowerIncl C M` to the
 upstairs class `algebraMap ((1 : K̄) ⊗ₜ m)`. Combines `fracTowerIncl_algebraMap` with
 `towerTensorIncl_tmul` (which sends `(1 : M) ⊗ₜ m` to `(1 : K̄) ⊗ₜ m`). -/
@@ -1232,19 +1272,22 @@ private theorem fracTowerIncl_algebraMap_one_tmul (C : SmoothPlaneCurve F)
     letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
     fracTowerIncl C M
         (algebraMap (M ⊗[F] C.toAffine.CoordinateRing) _ ((1 : M) ⊗ₜ[F] m)) =
-      algebraMap (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing) _ ((1 : AlgebraicClosure F) ⊗ₜ[F] m) := by
+      algebraMap (AlgebraicClosure F ⊗[F] C.toAffine.CoordinateRing) _
+        ((1 : AlgebraicClosure F) ⊗ₜ[F] m) := by
   letI := C.isDomain_tensorCoordRing M
   letI := C.isDomain_tensorCoordRing (AlgebraicClosure F)
   rw [fracTowerIncl_algebraMap, towerTensorIncl_tmul]
   norm_num
 
-/-- **The infinite-Galois fixed-field characterization** (`L = K̄ = AlgebraicClosure F`, perfect base
+/-- **The infinite-Galois fixed-field characterization** (`L = K̄ = AlgebraicClosure F`,
+perfect base
 field): an element of the `K̄`-function field `(C.baseChange K̄).FunctionField` lies in the image of
 `F(C)` under the base-change embedding `functionFieldMap` iff it is fixed by *every*
 `galActFunctionField C K̄ σ`.
 
 This is the `L = K̄` analogue of the finite `mem_range_functionField_baseChange_iff_fixed`. The `←`
-direction is the genuine **tower descent**: a `Gal(K̄/F)`-fixed `x` is transported to a `galActFrac`-
+direction is the genuine **tower descent**: a `Gal(K̄/F)`-fixed `x` is transported to a
+`galActFrac`-
 fixed `y` in the tensor fraction field; the (finitely many) `K̄`-scalars of `y`'s numerator and
 denominator lie in a finite Galois `M ⊆ K̄` (`exists_finiteGalois_towerTensorIncl_range₂`), so
 `y = fracTowerIncl y_M`; `y_M` is `Gal(M/F)`-fixed (`fracTowerIncl` equivariance + injectivity +
@@ -1317,10 +1360,12 @@ theorem mem_range_functionField_baseChange_iff_fixed_kbar [PerfectField F] (C : 
 naturalities, `psiK` `Gal(K̄/F)`-equivariant + injective) and the **`K̄`-level** range inclusion
 `Im(mPbK) ⊆ Im(psiK)`, the `F`-level inclusion `Im(mPb) ⊆ Im(φ*)` follows.
 
-Unlike `rangeIncl_of_descentData` (which descends from a *finite* Galois `L`), this descends straight
+Unlike `rangeIncl_of_descentData` (which descends from a *finite* Galois `L`), this descends
+straight
 from `K̄ = AlgebraicClosure F`, using the tower fixed-field characterization
-`mem_range_functionField_baseChange_iff_fixed_kbar`.  This removes the need for a finite-`L` geometric
-realization: the `K̄`-level inclusion is the *fully proven* `ecIsog_mulByInt_deg_rangeIncl_of_charZero`. -/
+`mem_range_functionField_baseChange_iff_fixed_kbar`.  This removes the need for a finite-`L`
+geometric realization: the `K̄`-level inclusion is the *fully proven*
+`ecIsog_mulByInt_deg_rangeIncl_of_charZero`. -/
 theorem rangeIncl_of_descentData_kbar [PerfectField F] {C₁ C₂ : SmoothPlaneCurve F}
     {φPb : C₂.FunctionField →ₐ[F] C₁.FunctionField}
     {mPb : C₁.FunctionField →ₐ[F] C₁.FunctionField}
@@ -1331,9 +1376,11 @@ theorem rangeIncl_of_descentData_kbar [PerfectField F] {C₁ C₂ : SmoothPlaneC
     (hpsiK_equiv : GalEquivariant (AlgebraicClosure F) psiK)
     (hpsiK_inj : Function.Injective psiK)
     (hpsiK_nat : ∀ g : C₂.FunctionField,
-      C₁.functionFieldMap (AlgebraicClosure F) (φPb g) = psiK (C₂.functionFieldMap (AlgebraicClosure F) g))
+      C₁.functionFieldMap (AlgebraicClosure F) (φPb g) =
+        psiK (C₂.functionFieldMap (AlgebraicClosure F) g))
     (hmPbK_nat : ∀ u : C₁.FunctionField,
-      C₁.functionFieldMap (AlgebraicClosure F) (mPb u) = mPbK (C₁.functionFieldMap (AlgebraicClosure F) u))
+      C₁.functionFieldMap (AlgebraicClosure F) (mPb u) =
+        mPbK (C₁.functionFieldMap (AlgebraicClosure F) u))
     (hKincl : mPbK.range ≤ psiK.range) :
     mPb.range ≤ φPb.range := by
   rintro z ⟨u, rfl⟩
@@ -1344,7 +1391,8 @@ theorem rangeIncl_of_descentData_kbar [PerfectField F] {C₁ C₂ : SmoothPlaneC
     exact ⟨C₁.functionFieldMap (AlgebraicClosure F) u, rfl⟩
   obtain ⟨ĝ, hĝ⟩ := hz_mem
   have hĝ' : psiK ĝ = C₁.functionFieldMap (AlgebraicClosure F) (mPb u) := hĝ
-  -- `ĝ` is `Gal(K̄/F)`-fixed (since `psiK ĝ` is a base-change image, `psiK` equivariant + injective)
+  -- `ĝ` is `Gal(K̄/F)`-fixed (since `psiK ĝ` is a base-change image, `psiK` equivariant +
+  -- injective)
   have hĝ_fixed : ∀ σ : AlgebraicClosure F ≃ₐ[F] AlgebraicClosure F,
       galActFunctionField C₂ (AlgebraicClosure F) σ ĝ = ĝ := by
     intro σ
@@ -1354,7 +1402,8 @@ theorem rangeIncl_of_descentData_kbar [PerfectField F] {C₁ C₂ : SmoothPlaneC
   obtain ⟨g, hg⟩ := (mem_range_functionField_baseChange_iff_fixed_kbar C₂ ĝ).2 hĝ_fixed
   -- and `φPb g = mPb u` by injectivity of `functionFieldMap` and naturality
   refine ⟨g, C₁.functionFieldMap_injective (AlgebraicClosure F) ?_⟩
-  show C₁.functionFieldMap (AlgebraicClosure F) (φPb g) = C₁.functionFieldMap (AlgebraicClosure F) (mPb u)
+  show C₁.functionFieldMap (AlgebraicClosure F) (φPb g) =
+    C₁.functionFieldMap (AlgebraicClosure F) (mPb u)
   rw [hpsiK_nat g, hg, hĝ']
 
 /-! ### The two-curve `K̄`-direct dual range inclusion over an alg-closed char-0 base
@@ -1388,7 +1437,8 @@ noncomputable def ecShell [DecidableEq F] {W₁ W₂ : WeierstrassCurve F} [W₁
     [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic] (φ : EC.Isogeny W₁.toAffine W₂.toAffine) :
     (ecShell φ).pullback = φ.toCurveMap.pullback := rfl
 
-/-- **`(ecShell φ).IsSeparable` from `φ.IsSeparable`** (EC-sense to Basic-`Isogeny`-sense). The shell
+/-- **`(ecShell φ).IsSeparable` from `φ.IsSeparable`** (EC-sense to Basic-`Isogeny`-sense). The
+shell
 has `(ecShell φ).pullback = φ.toCurveMap.pullback` definitionally, so `(ecShell φ).toAlgebra` and
 `φ.toCurveMap.toAlgebra` are the *same* algebra; separability is a property of that algebra
 (`Isogeny.isSeparable_iff_algebra_isSeparable`). -/
@@ -1463,8 +1513,10 @@ theorem ecIsog_mulByInt_deg_rangeIncl_of_charZero [IsAlgClosed F] [CharZero F]
 end TowerDescent
 
 /-- **A `DescentData` over a concrete finite Galois intermediate field of `K̄`** (MOVE 1's data
-carrier). Bundles the concrete `L ⊆ K̄ = AlgebraicClosure F` (with its finite/Galois instances) and a
-`DescentData` over it. Unlike `SomeDescentData` (which takes an abstract `L : Type w`), this fixes `L`
+carrier). Bundles the concrete `L ⊆ K̄ = AlgebraicClosure F` (with its finite/Galois instances)
+and a
+`DescentData` over it. Unlike `SomeDescentData` (which takes an abstract `L : Type w`), this
+fixes `L`
 to be a *subfield of the algebraic closure* — exactly the shape MOVE 1's
 `exists_finiteGalois_fieldOfDefinition` produces. -/
 structure DescentDataOverKbar {F : Type u} [Field F] (C₁ C₂ : SmoothPlaneCurve F)
@@ -1484,9 +1536,11 @@ field-of-definition wrapper). A finite Galois intermediate field `L ⊆ K̄ = Al
 in the *same* universe `u` as `F`, so a `DescentData` over it directly furnishes the
 `SomeDescentData.{u, u}` demanded by `exists_descentData_of_separable`.
 
-This makes the field-of-definition reduction **concrete and load-bearing**: the residual no longer has
+This makes the field-of-definition reduction **concrete and load-bearing**: the residual no
+longer has
 to *exhibit* a finite Galois `L` from thin air — MOVE 1 supplies `L` as a subfield of `K̄`, and this
-wrapper threads the universe. The only remaining obligation is the `DescentData` over `L` itself (the
+wrapper threads the universe. The only remaining obligation is the `DescentData` over `L`
+itself (the
 two-curve base-change data). -/
 noncomputable def someDescentData_of_overKbar {F : Type u} [Field F]
     {C₁ C₂ : SmoothPlaneCurve F}
@@ -1573,7 +1627,8 @@ If `ord_∞ z = a ≥ 0`, then for every constant coefficient `c : L` and every 
 `c • z ^ (i + 1)` satisfies `a ≤ ord_∞ (c • z ^ (i + 1))`.
 
 If `c = 0` the term is `0` (order `⊤`). Otherwise the constant `algebraMap L _ c ≠ 0` has order `0`
-(`ordAtInfty_algebraMap_F_nonzero`) and `ord_∞ (z ^ (i + 1)) = (i + 1) · a`, so additivity gives order
+(`ordAtInfty_algebraMap_F_nonzero`) and `ord_∞ (z ^ (i + 1)) = (i + 1) · a`, so additivity
+gives order
 `(i + 1) · a ≥ a` (as `a ≥ 0`). Constant-field analogue of the function-field
 `le_ordAtInfty_smul_pow_succ_of_ordAtInfty_eq_zero` (`OrdAtInftyRamification.lean`). -/
 private theorem le_ordAtInfty_constSmul_pow_succ_of_ordAtInfty_eq {L : Type*} [Field L]
@@ -1590,7 +1645,8 @@ private theorem le_ordAtInfty_constSmul_pow_succ_of_ordAtInfty_eq {L : Type*} [F
     have hi : (0 : ℤ) ≤ (i : ℤ) := Int.natCast_nonneg i
     push_cast; nlinarith
 
-/-- **An element algebraic over the constant field cannot have strictly positive order at infinity.**
+/-- **An element algebraic over the constant field cannot have strictly positive order at
+infinity.**
 Take the minimal polynomial `z ^ n + ⋯ + a₀` of `z` over `L`: its constant term `a₀` is nonzero, so
 `ord_∞ (algebraMap L _ a₀) = 0`; but `algebraMap L _ a₀ = -(z ^ n + ⋯ + a₁ z)` and every term on the
 right has order `≥ a = ord_∞ z` (`le_ordAtInfty_constSmul_pow_succ_of_ordAtInfty_eq`), so the
@@ -1661,6 +1717,7 @@ theorem bcXgen_ne_zero : bcXgen W₁ W₂ φ L ≠ 0 := fun h0 =>
     ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap_injective L
       (h0.trans (map_zero _).symm))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The two-curve generator images satisfy the Weierstrass equation of `E₂_L` over `L(E₁_L)`:
 apply `φ^*` to the generic equation of `W₂` (over `K(E₂)`), then push along
 `functionFieldMap : K(E₁) → L(E₁_L)`. -/
@@ -1847,7 +1904,8 @@ is. The proof is the **differential** transport: a separable `φ` has a separati
 (`D_K(φ*g) ≠ 0`), and the base-change map on Kähler differentials `omegaDiffMap` (single-curve, from
 `OmegaBaseChange`) carries it to `D_L(bcIsog^*(functionFieldMap g)) ≠ 0` — nonzero because
 `Ω[K(E₁)/K]` is one-dimensional and `omegaDiffMap` sends the (nonzero) invariant differential to the
-(nonzero) base-changed invariant differential. This is the EC-analogue of the omega-coefficient value
+(nonzero) base-changed invariant differential. This is the EC-analogue of the omega-coefficient
+value
 transport `omegaPullbackCoeff_baseChangePullback`, but two-curve. -/
 
 open HasseWeil.WeilPairing in
@@ -1866,7 +1924,8 @@ theorem exists_separating_element (hsep : φ.IsSeparable) :
     (EC.Isogeny.isSeparable_iff_algebra_isSeparable φ).mp hsep
   haveI : Algebra.FormallyUnramified W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
     Algebra.FormallyUnramified.of_isSeparable _ _
-  haveI hsub : Subsingleton (KaehlerDifferential W₂.toAffine.FunctionField W₁.toAffine.FunctionField) :=
+  haveI hsub :
+      Subsingleton (KaehlerDifferential W₂.toAffine.FunctionField W₁.toAffine.FunctionField) :=
     Algebra.FormallyUnramified.subsingleton_kaehlerDifferential
   have hsurj : Function.Surjective
       (KaehlerDifferential.mapBaseChange K W₂.toAffine.FunctionField W₁.toAffine.FunctionField) :=
@@ -1876,14 +1935,16 @@ theorem exists_separating_element (hsep : φ.IsSeparable) :
   obtain ⟨t, ht⟩ := hsurj (invariantDifferential W₁.toAffine)
   by_contra hcon
   push Not at hcon
-  have hmapzero : KaehlerDifferential.map K K W₂.toAffine.FunctionField W₁.toAffine.FunctionField = 0 := by
+  have hmapzero :
+      KaehlerDifferential.map K K W₂.toAffine.FunctionField W₁.toAffine.FunctionField = 0 := by
     apply LinearMap.ext_on (KaehlerDifferential.span_range_derivation K W₂.toAffine.FunctionField)
     rintro _ ⟨g, rfl⟩
     rw [KaehlerDifferential.map_D, LinearMap.zero_apply]
     exact hcon g
   have hbc0 : ∀ s : W₁.toAffine.FunctionField ⊗[W₂.toAffine.FunctionField]
       KaehlerDifferential K W₂.toAffine.FunctionField,
-      KaehlerDifferential.mapBaseChange K W₂.toAffine.FunctionField W₁.toAffine.FunctionField s = 0 := by
+      KaehlerDifferential.mapBaseChange K W₂.toAffine.FunctionField
+        W₁.toAffine.FunctionField s = 0 := by
     intro s
     induction s using TensorProduct.induction_on with
     | zero => simp
@@ -2012,12 +2073,14 @@ theorem ringHom_ext_baseL {A : Type*} [Field A]
   simp only [RingHom.comp_apply] at ha hbb
   rw [map_div₀, map_div₀, ha, hbb]
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W₁.toAffine] in
 /-- `coordRingMap` over `K̄` sends `algebraMap K[X] (W.Φ m)` to the base-changed `Φ m`
 (char-independent; via `WeierstrassCurve.map_Φ`). -/
 private theorem coordRingMap_algebraMap_Φ_kbar (m : ℤ) :
     (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
         (algebraMap (Polynomial K) W₁.toAffine.CoordinateRing (W₁.Φ m)) =
-      algebraMap (Polynomial (AlgebraicClosure K)) (W₁.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
+      algebraMap (Polynomial (AlgebraicClosure K))
+        (W₁.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
         ((W₁.baseChange (AlgebraicClosure K)).Φ m) := by
   change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
     (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (Polynomial.C (W₁.Φ m))) = _
@@ -2031,11 +2094,13 @@ private theorem coordRingMap_algebraMap_Φ_kbar (m : ℤ) :
         WeierstrassCurve.map_Φ (W := W₁) (algebraMap K (AlgebraicClosure K)) m]]
   rfl
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W₁.toAffine] in
 /-- `coordRingMap` over `K̄` sends `algebraMap K[X] (W.ΨSq m)` to the base-changed `ΨSq m`. -/
 private theorem coordRingMap_algebraMap_ΨSq_kbar (m : ℤ) :
     (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
         (algebraMap (Polynomial K) W₁.toAffine.CoordinateRing (W₁.ΨSq m)) =
-      algebraMap (Polynomial (AlgebraicClosure K)) (W₁.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
+      algebraMap (Polynomial (AlgebraicClosure K))
+        (W₁.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
         ((W₁.baseChange (AlgebraicClosure K)).ΨSq m) := by
   change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
     (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (Polynomial.C (W₁.ΨSq m))) = _
@@ -2049,6 +2114,7 @@ private theorem coordRingMap_algebraMap_ΨSq_kbar (m : ℤ) :
         WeierstrassCurve.map_ΨSq (W := W₁) (algebraMap K (AlgebraicClosure K)) m]]
   rfl
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W₁.toAffine] in
 /-- `coordRingMap` over `K̄` sends `mk (W.ω m)` to the base-changed `mk (ω m)`. -/
 private theorem coordRingMap_mk_ω_kbar (m : ℤ) :
     (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
@@ -2058,10 +2124,12 @@ private theorem coordRingMap_mk_ω_kbar (m : ℤ) :
   change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
     (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ω m)) = _
   rw [WeierstrassCurve.Affine.CoordinateRing.map_mk,
-    show (W₁.baseChange (AlgebraicClosure K)).ω m = (W₁.map (algebraMap K (AlgebraicClosure K))).ω m from rfl,
+    show (W₁.baseChange (AlgebraicClosure K)).ω m =
+      (W₁.map (algebraMap K (AlgebraicClosure K))).ω m from rfl,
     WeierstrassCurve.map_ω (W := W₁) (algebraMap K (AlgebraicClosure K)) m]
   rfl
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W₁.toAffine] in
 /-- `coordRingMap` over `K̄` sends `mk (W.ψ m)` to the base-changed `mk (ψ m)`. -/
 private theorem coordRingMap_mk_ψ_kbar (m : ℤ) :
     (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
@@ -2071,10 +2139,12 @@ private theorem coordRingMap_mk_ψ_kbar (m : ℤ) :
   change WeierstrassCurve.Affine.CoordinateRing.map W₁.toAffine (algebraMap K (AlgebraicClosure K))
     (WeierstrassCurve.Affine.CoordinateRing.mk W₁.toAffine (W₁.ψ m)) = _
   rw [WeierstrassCurve.Affine.CoordinateRing.map_mk,
-    show (W₁.baseChange (AlgebraicClosure K)).ψ m = (W₁.map (algebraMap K (AlgebraicClosure K))).ψ m from rfl,
+    show (W₁.baseChange (AlgebraicClosure K)).ψ m =
+      (W₁.map (algebraMap K (AlgebraicClosure K))).ψ m from rfl,
     WeierstrassCurve.map_ψ (W := W₁) (algebraMap K (AlgebraicClosure K)) m]
   rfl
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W₁.toAffine] in
 /-- **Base-change of `mulByInt_x` to `K̄`** (char-independent). -/
 private theorem functionFieldMap_mulByInt_x_kbar (m : ℤ) :
     (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
@@ -2091,6 +2161,7 @@ private theorem functionFieldMap_mulByInt_x_kbar (m : ℤ) :
     rw [SmoothPlaneCurve.functionFieldMap_algebraMap, coordRingMap_algebraMap_ΨSq_kbar]
     rfl
 
+omit [DecidableEq K] [WeierstrassCurve.IsElliptic W₁.toAffine] in
 /-- **Base-change of `mulByInt_y` to `K̄`** (char-independent). -/
 private theorem functionFieldMap_mulByInt_y_kbar (m : ℤ) :
     (⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
@@ -2114,7 +2185,8 @@ private theorem functionFieldMap_mulByInt_y_kbar (m : ℤ) :
 `ringHom_ext_baseL` they coincide. -/
 theorem mPbL_eq_mulByInt_baseChange_kbar [DecidableEq (AlgebraicClosure K)] (hn : n ≠ 0) :
     mPbL W₁ (AlgebraicClosure K) hn =
-      (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K)) n hn).restrictScalars K := by
+      (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K))
+        n hn).restrictScalars K := by
   apply AlgHom.coe_ringHom_injective
   apply ringHom_ext_baseL W₁ (AlgebraicClosure K)
   · -- K̄-constants: both fix them
@@ -2122,14 +2194,16 @@ theorem mPbL_eq_mulByInt_baseChange_kbar [DecidableEq (AlgebraicClosure K)] (hn 
     show mPbL W₁ (AlgebraicClosure K) hn
         (algebraMap (AlgebraicClosure K) _ l) = _
     rw [mPbL, psiL_algebraMap_L]
-    exact ((HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K)) n hn).commutes l).symm
+    exact ((HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K))
+      n hn).commutes l).symm
   · -- x_gen: both sides equal `mulByInt_x (W₁_K̄) n`
     show mPbL W₁ (AlgebraicClosure K) hn (HasseWeil.x_gen (W₁.baseChange (AlgebraicClosure K))) =
       (HasseWeil.mulByInt_pullbackAlgHom (W₁.baseChange (AlgebraicClosure K)) n hn)
         (HasseWeil.x_gen (W₁.baseChange (AlgebraicClosure K)))
     rw [HasseWeil.mulByInt_pullbackAlgHom_x_gen]
     rw [mPbL, psiL]
-    show (bcIsog W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn) (AlgebraicClosure K)).toCurveMap.pullback
+    show (bcIsog W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn)
+        (AlgebraicClosure K)).toCurveMap.pullback
         (HasseWeil.x_gen (W₁.baseChange (AlgebraicClosure K))) = _
     rw [bcIsog_pullback_x_gen, bcXgen,
       show (EC.Isogeny.mulByInt W₁.toAffine hn).toCurveMap.pullback (HasseWeil.x_gen W₁)
@@ -2141,7 +2215,8 @@ theorem mPbL_eq_mulByInt_baseChange_kbar [DecidableEq (AlgebraicClosure K)] (hn 
         (HasseWeil.y_gen (W₁.baseChange (AlgebraicClosure K)))
     rw [HasseWeil.mulByInt_pullbackAlgHom_y_gen]
     rw [mPbL, psiL]
-    show (bcIsog W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn) (AlgebraicClosure K)).toCurveMap.pullback
+    show (bcIsog W₁ W₁ (EC.Isogeny.mulByInt W₁.toAffine hn)
+        (AlgebraicClosure K)).toCurveMap.pullback
         (HasseWeil.y_gen (W₁.baseChange (AlgebraicClosure K))) = _
     rw [bcIsog_pullback_y_gen, bcYgen,
       show (EC.Isogeny.mulByInt W₁.toAffine hn).toCurveMap.pullback (HasseWeil.y_gen W₁)
@@ -2222,7 +2297,8 @@ private theorem hasMulByIntDualWitness_of_rangeIncl_general {F : Type*} [Field F
 /-- **MOVE 2 — the `F`-level range inclusion via the `K̄`-direct route** (no finite-`L` geometric
 realization), separable form. For a **separable** `φ` and `m = deg` of the `K̄`-base-changed isogeny
 `bcIsog`, the inclusion `Im([m]*_F) ⊆ Im(φ*_F)` holds: the `K̄`-direct inclusion
-`ecIsog_mulByInt_deg_rangeIncl_of_separable` (applied to `bcIsog`, separable by `bcIsog_isSeparable`,
+`ecIsog_mulByInt_deg_rangeIncl_of_separable` (applied to `bcIsog`, separable by
+`bcIsog_isSeparable`,
 with `hreg` = its `pullback_ordAtInfty_nonneg`) gives the inclusion over `K̄` for `mPbK = [m]*_K̄`
 (`mPbL_eq_mulByInt_baseChange_kbar`) and `psiK = φ*_K̄`; this is descended to `F` by
 `rangeIncl_of_descentData_kbar` (the tower fixed-field characterization, `PerfectField`-relaxed). -/
@@ -2292,7 +2368,8 @@ Two leaves of the assembly that are **fully provable at the base field** (no des
   which requires `β.IsSeparable`) available over a char-0 base.
 
 * **The formal compose payoff** (`rationalDualCompose_of_hasMulByIntDualWitness`): once an
-  `F`-rational faithful `[n]`-witness `HasMulByIntDualWitness φ n hn` is in hand, the reverse isogeny
+  `F`-rational faithful `[n]`-witness `HasMulByIntDualWitness φ n hn` is in hand, the reverse
+  isogeny
   `φ̂ = mulByIntDual w` satisfies `φ̂ ∘ φ = [n]` *purely formally* — `(φ̂ ∘ φ)* = [n]*` is
   `dualOfWitness_comp_pullback`, and `Isogeny.ext_toCurveMap`/`CurveMap.ext` turn pullback equality
   into isogeny equality. (This is the inline form of `Isogeny.mulByIntDual_compose`, which lives in
@@ -2335,7 +2412,8 @@ theorem rationalDualCompose_of_hasMulByIntDualWitness
   rw [EC.Isogeny.mulByInt_pullback]
   exact EC.Isogeny.mulByIntDual_comp_pullback w z
 
-/-- **DUAL-Q4 residual** (the assembled DUAL-Q1–Q3 chain, char-0): every isogeny `φ : E₁ → E₂` over a
+/-- **DUAL-Q4 residual** (the assembled DUAL-Q1–Q3 chain, char-0): every isogeny `φ : E₁ → E₂`
+over a
 char-0 field has an `F`-rational reverse isogeny `ρ : E₂ → E₁` with `ρ ∘ φ = [deg φ]`.
 
 This is the dual `φ̂` over `F` from Silverman III.6.1: base-change `φ` to `K̄ = AlgebraicClosure F`
@@ -2366,7 +2444,8 @@ tickets.
 **Residual.** By `hasDualWitness_of_compose` (DUAL-Q4, proven), it suffices to produce, for every
 `φ`, an `F`-rational reverse isogeny `ρ` with `ρ ∘ φ = [deg φ]` — packaged as the predicate
 `RationalDualCompose F`. That existence is the assembled DUAL-Q1–Q3 chain (base-change to `K̄`, K̄
-dual `exists_dual_of_pullbackEvaluation_general`, Galois-equivariance via `galEquivariant_of_compose`,
+dual `exists_dual_of_pullbackEvaluation_general`, Galois-equivariance via
+`galEquivariant_of_compose`,
 descent via `descendIsogeny`, and round-trip of `φ̂ ∘ φ = [m]`). Its deep inputs are exactly Q1's
 fixed-field descent (`mem_range_functionField_baseChange_iff_fixed`'s `→`) and Q3's full
 base-changed-pullback equivariance; it is isolated as the single residual below. -/
@@ -2386,10 +2465,13 @@ theorem isIsogenous_symm_charZero {F : Type*} [Field F] [DecidableEq F] [CharZer
 /-! ### The perfect-field headline (char-p via the twisted Frobenius factorization)
 
 Over a perfect field of any characteristic, every isogeny has an `F`-rational dual. The separable
-side is the `K̄`-direct engine `rationalReverseCompose_of_separable` (now `PerfectField`-scoped); the
-inseparable side over char `p` is absorbed by `nonempty_hasDualWitness_of_twisted_separable_witnesses`
+side is the `K̄`-direct engine `rationalReverseCompose_of_separable` (now
+`PerfectField`-scoped); the
+inseparable side over char `p` is absorbed by
+`nonempty_hasDualWitness_of_twisted_separable_witnesses`
 (the twisted Frobenius factorization + relative Verschiebung, `TwistedFactorization`), whose only
-remaining input — dual witnesses for the *separable* isogenies out of the Frobenius twists of `E` — is
+remaining input — dual witnesses for the *separable* isogenies out of the Frobenius twists of
+`E` — is
 exactly what the separable engine supplies. -/
 
 /-- **The separable reverse-isogeny existence over a perfect field** (Silverman III.6.1). For a
@@ -2405,7 +2487,8 @@ theorem rationalDualCompose_of_separable {F : Type*} [Field F] [DecidableEq F] [
   exact ⟨n, hn, EC.Isogeny.mulByIntDual w, rationalDualCompose_of_hasMulByIntDualWitness w⟩
 
 /-- **DUAL headline, perfect-field case** (Silverman III.6.1): every isogeny over a *perfect* field
-`F` has an `F`-rational dual — i.e. `UniversalDualWitness F` holds. Case on the characteristic of `F`:
+`F` has an `F`-rational dual — i.e. `UniversalDualWitness F` holds. Case on the characteristic
+of `F`:
 
 * char 0 (`CharZero F` from `CharP F 0`): every isogeny is separable, so the char-0 headline
   `universalDualWitness_of_charZero` applies directly.
@@ -2416,7 +2499,8 @@ theorem rationalDualCompose_of_separable {F : Type*} [Field F] [DecidableEq F] [
   `hasDualWitness_of_compose`.
 
 Axiom-clean (the char-p inseparable/Verschiebung side is discharged inside the finale). -/
-theorem universalDualWitness_of_perfectField (F : Type*) [Field F] [DecidableEq F] [PerfectField F] :
+theorem universalDualWitness_of_perfectField
+    (F : Type*) [Field F] [DecidableEq F] [PerfectField F] :
     UniversalDualWitness F := by
   intro W₁ W₂ _ _ φ
   obtain ⟨p, hp⟩ := CharP.exists F

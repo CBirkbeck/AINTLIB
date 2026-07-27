@@ -228,13 +228,13 @@ theorem Sinf_inertia_one_at_kernel
       ∀ (φ : (isogOneSub_negFrobenius W hq).kernel → Ideal data.carrier),
         (∀ T, (φ T).IsPrime ∧ (φ T).LiesOver (xIdeal (k := K))) →
         ∀ T : (isogOneSub_negFrobenius W hq).kernel,
-          Ideal.inertiaDeg (xIdeal (k := K)) (φ T) = 1) :
+          Ideal.inertiaDeg' (xIdeal (k := K)) (φ T) = 1) :
     letI := data.commRing
     letI := data.algPoly
     ∀ (φ : (isogOneSub_negFrobenius W hq).kernel → Ideal data.carrier),
       (∀ T, (φ T).IsPrime ∧ (φ T).LiesOver (xIdeal (k := K))) →
       ∀ T : (isogOneSub_negFrobenius W hq).kernel,
-        Ideal.inertiaDeg (xIdeal (k := K)) (φ T) = 1 :=
+        Ideal.inertiaDeg' (xIdeal (k := K)) (φ T) = 1 :=
   h_inertia_witness
 
 end Group1
@@ -700,7 +700,7 @@ is taken as-is from the parameter. -/
           W.toAffine.FunctionField) < 0) :
     (isogOneSub_V W V hV h_x_ne h_pole).toAddMonoidHom =
       AddMonoidHom.id (W.toAffine.Point) - V.toAddMonoidHom := by
-  unfold isogOneSub_V
+  simp only [isogOneSub_V]
   ext P
   rw [addIsog_toAddMonoidHom, AddMonoidHom.add_apply, AddMonoidHom.sub_apply,
     Isogeny.id_toAddMonoidHom, AddMonoidHom.id_apply,
@@ -747,7 +747,7 @@ theorem isogTrace_def_unfold (hq : 2 ≤ Fintype.card K) :
     ((isogOneSub_negFrobenius W hq).degree : ℤ) =
       1 + ((frobeniusIsog W).degree : ℤ) -
         isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) := by
-  unfold isogTrace
+  simp only [isogTrace]
   ring
 
 /-! ### T13.a (Worker C TIER 2) — Identification of V.pullback with verschiebungPullback
@@ -884,7 +884,7 @@ theorem addPullback_x_pair_frobenius_V_explicit
       algebraMap K W.toAffine.FunctionField W.toAffine.a₂ -
       x_gen W ^ Fintype.card K -
       V.pullback (x_gen W) := by
-  unfold addPullback_x_pair
+  simp only [addPullback_x_pair]
   rw [show (W_KE W).toAffine.addX
         ((frobeniusIsog W).pullback (x_gen W))
         (V.pullback (x_gen W))
@@ -930,7 +930,7 @@ theorem addPullbackAlgHomPair_x_gen_eq
     (hxy : AddNonInversePair α₁ α₂)
     (hinj : Function.Injective (addCoordAlgHomPair hxy)) :
     addPullbackAlgHomPair hxy hinj (x_gen W) = addPullback_x_pair α₁ α₂ := by
-  unfold addPullbackAlgHomPair
+  simp only [addPullbackAlgHomPair]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -938,7 +938,7 @@ theorem addPullbackAlgHomPair_x_gen_eq
     (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X) =
     addPullback_x_pair α₁ α₂
   change addCoordRingHomPair hxy _ = _
-  unfold addCoordRingHomPair
+  simp only [addCoordRingHomPair]
   rw [show algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X =
       Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X) from rfl,
     AdjoinRoot.lift_mk]
@@ -953,14 +953,14 @@ theorem addPullbackAlgHomPair_y_gen_eq
     (hxy : AddNonInversePair α₁ α₂)
     (hinj : Function.Injective (addCoordAlgHomPair hxy)) :
     addPullbackAlgHomPair hxy hinj (y_gen W) = addPullback_y_pair α₁ α₂ := by
-  unfold addPullbackAlgHomPair
+  simp only [addPullbackAlgHomPair]
   rw [IsFractionRing.liftAlgHom_apply,
     show y_gen W = algebraMap _ _ (AdjoinRoot.root W.toAffine.polynomial) from rfl,
     IsFractionRing.lift_algebraMap]
   change (addCoordAlgHomPair hxy).toRingHom
     (AdjoinRoot.root W.toAffine.polynomial) = addPullback_y_pair α₁ α₂
   change addCoordRingHomPair hxy _ = _
-  unfold addCoordRingHomPair
+  simp only [addCoordRingHomPair]
   rw [show AdjoinRoot.root W.toAffine.polynomial =
       AdjoinRoot.mk W.toAffine.polynomial Polynomial.X from AdjoinRoot.mk_X.symm,
     AdjoinRoot.lift_mk]
@@ -1089,7 +1089,7 @@ theorem pi_plus_V_eq_isogTrace_toAddMonoidHom_of_T14_witness
     show isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) =
         1 + ((frobeniusIsog W).degree : ℤ) -
           ((isogOneSub_negFrobenius W hq).degree : ℤ) by
-      unfold isogTrace; ring,
+      simp only [isogTrace],
     frobeniusIsog_degree, sub_zsmul, add_zsmul, one_zsmul, ← h_combined]
   abel
 

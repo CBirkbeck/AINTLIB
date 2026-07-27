@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import HasseWeil.Foundation.Curves.Divisor.Divisors
 import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.FieldTheory.RatFunc.Degree
-import HasseWeil.Foundation.Curves.Divisor.Divisors
 
 /-!
 # Projective divisors on a smooth plane curve
@@ -18,7 +18,7 @@ equation, the projective closure has a unique point at infinity
 `SmoothPlaneCurve.ordAtInfty : F(C) → WithTop ℤ` defined in
 `HasseWeil/Curves/Infinity.lean`.
 
-This file provides the minimal type-theoretic scaffolding:
+## Main definitions
 
 * `ProjectiveSmoothPoint C` — inductive type with constructors `affine P`
   (for `P : C.SmoothPoint`) and `infinity`.
@@ -28,17 +28,28 @@ This file provides the minimal type-theoretic scaffolding:
   map with its additive-group-hom packaging.
 * `Divisor.toProjective` — the embedding of the affine divisor group into
   `ProjectiveDivisor C`.
+* `SmoothPlaneCurve.projectiveDivisorOf f` — the projective divisor of a
+  rational function, combining `divisorOf` with `ordAtInfty`.
+* `SmoothPlaneCurve.projPrincipalSubgroup`, `PicProj`, `PicProj₀` — the
+  principal subgroup and the (degree-zero) Picard group on the projective
+  closure.
 
-Future work (this ticket):
+## Main results
 
-* `SmoothPlaneCurve.projectiveDivisorOf f` — the full projective divisor
-  of a rational function, combining `divisorOf` with `ordAtInfty`.
-* Principal subgroup, linear equivalence, `Pic`/`Pic⁰` lifted to the
-  projective setting.
-* Silverman II.3.1(b): `deg(projectiveDivisorOf f) = 0` for nonzero `f`.
+* `projectiveDivisorOf_mul`, `projectiveDivisorOf_inv` — multiplicativity of
+  the projective divisor map on nonzero functions.
+* `projectiveDivisorOf_degree` — the structural decomposition
+  `deg = (divisorOf f).degree + (ordAtInfty f).untopD 0`.
 
-Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.3 (projective
-form).
+## Future work
+
+* Silverman II.3.1(b): `deg(projectiveDivisorOf f) = 0` for nonzero `f`,
+  unconditionally (currently proved only in the Helper-B-factored form
+  `projectiveDivisorOf_degree_eq_zero_of_helperB`).
+
+## References
+
+* [Silverman, *The Arithmetic of Elliptic Curves*], II.3 (projective form).
 -/
 
 namespace HasseWeil.Curves
@@ -147,7 +158,7 @@ supports and sends each support element to a new support element with the
 same coefficient, the sum of coefficients is unchanged. -/
 theorem degree_toProjective (D : Divisor C) :
     (toProjective D).degree = D.degree := by
-  unfold toProjective ProjectiveDivisor.degree Divisor.degree
+  simp only [toProjective, ProjectiveDivisor.degree, Divisor.degree]
   exact Finsupp.sum_mapDomain_index (h := fun _ n ↦ n)
     (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)
 
@@ -210,14 +221,14 @@ noncomputable def projectiveDivisorOf (C : SmoothPlaneCurve F) (f : C.FunctionFi
 
 @[simp] theorem projectiveDivisorOf_zero :
     C.projectiveDivisorOf (0 : C.FunctionField) = 0 := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [C.divisorOf_zero, Divisor.toProjective_zero, zero_add, C.ordAtInfty_zero,
     WithTop.untopD_top, Finsupp.single_zero]
 
 theorem projectiveDivisorOf_apply_affine (f : C.FunctionField) (P : C.SmoothPoint) :
     C.projectiveDivisorOf f (ProjectiveSmoothPoint.affine P) =
       (C.ord_P P f).untopD 0 := by
-  unfold projectiveDivisorOf Divisor.toProjective
+  simp only [projectiveDivisorOf, Divisor.toProjective]
   have h_ne : ProjectiveSmoothPoint.affine P ≠
       (ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint C) := by
     intro h; nomatch h
@@ -228,7 +239,7 @@ theorem projectiveDivisorOf_apply_affine (f : C.FunctionField) (P : C.SmoothPoin
 theorem projectiveDivisorOf_apply_infinity (f : C.FunctionField) :
     C.projectiveDivisorOf f ProjectiveSmoothPoint.infinity =
       (C.ordAtInfty f).untopD 0 := by
-  unfold projectiveDivisorOf Divisor.toProjective
+  simp only [projectiveDivisorOf, Divisor.toProjective]
   have hnot : (ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint C) ∉
       ((C.divisorOf f).mapDomain ProjectiveSmoothPoint.affine).support := by
     intro h
@@ -247,7 +258,7 @@ theorem projectiveDivisorOf_apply_infinity (f : C.FunctionField) :
 theorem projectiveDivisorOf_eq_toProjective_of_ordAtInfty_zero {f : C.FunctionField}
     (h : C.ordAtInfty f = ((0 : ℤ) : WithTop ℤ)) :
     C.projectiveDivisorOf f = (C.divisorOf f).toProjective := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [h, WithTop.untopD_coe, Finsupp.single_zero, add_zero]
 
 /-- **II.3.1(b) structural decomposition**: the degree of the projective divisor
@@ -260,10 +271,10 @@ theorem projectiveDivisorOf_eq_toProjective_of_ordAtInfty_zero {f : C.FunctionFi
 theorem projectiveDivisorOf_degree (f : C.FunctionField) :
     (C.projectiveDivisorOf f).degree =
       (C.divisorOf f).degree + (C.ordAtInfty f).untopD 0 := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [ProjectiveDivisor.degree_add, Divisor.degree_toProjective]
   congr 1
-  unfold ProjectiveDivisor.degree
+  simp only [ProjectiveDivisor.degree]
   exact Finsupp.sum_single_index rfl
 
 /-- **II.3.1(b) trivial case f = 0**: the degree of the projective divisor
@@ -290,7 +301,7 @@ theorem projectiveDivisorOf_mul {f g : C.FunctionField} (hf : f ≠ 0) (hg : g �
   have hv_g : C.ordAtInfty g ≠ ⊤ := (C.ordAtInfty_eq_top_iff g).not.mpr hg
   obtain ⟨a, ha⟩ := WithTop.ne_top_iff_exists.mp hv_f
   obtain ⟨b, hb⟩ := WithTop.ne_top_iff_exists.mp hv_g
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [C.divisorOf_mul hf hg, Divisor.toProjective_add, C.ordAtInfty_mul hf hg,
     ← ha, ← hb, ← WithTop.coe_add, WithTop.untopD_coe, WithTop.untopD_coe,
     WithTop.untopD_coe, Finsupp.single_add]

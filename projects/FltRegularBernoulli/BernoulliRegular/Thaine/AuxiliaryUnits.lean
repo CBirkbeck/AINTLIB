@@ -1,5 +1,12 @@
-import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
-import Mathlib.NumberTheory.NumberField.Units.Basic
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+public import Mathlib.NumberTheory.NumberField.Units.Basic
 
 /-!
 # T-THAINE-1: Cyclotomic units in auxiliary cyclotomic extensions
@@ -84,7 +91,7 @@ theorem auxiliaryCyclotomicUnitOneMinus_eq_neg
     [IsCyclotomicExtension {ℓ} K M] :
     auxiliaryCyclotomicUnitOneMinus ℓ K M =
       -(auxiliaryCyclotomicUnitMinusOne ℓ K M) := by
-  unfold auxiliaryCyclotomicUnitOneMinus auxiliaryCyclotomicUnitMinusOne
+  simp only [auxiliaryCyclotomicUnitOneMinus, auxiliaryCyclotomicUnitMinusOne]
   ring
 
 end Thaine

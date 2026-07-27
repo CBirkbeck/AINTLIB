@@ -1,8 +1,10 @@
-import BernoulliRegular.CyclotomicUnits.IndexFormula
-import BernoulliRegular.CyclotomicUnits.IndexDeterminant
-import BernoulliRegular.CyclotomicUnits.NormalizedSubgroup
-import BernoulliRegular.HMinus.ClassNumberFormula
-import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
+module
+
+public import BernoulliRegular.CyclotomicUnits.IndexFormula
+public import BernoulliRegular.CyclotomicUnits.IndexDeterminant
+public import BernoulliRegular.CyclotomicUnits.NormalizedSubgroup
+public import BernoulliRegular.HMinus.ClassNumberFormula
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
 
 /-!
 # Normalized cyclotomic-unit index theorem
@@ -39,8 +41,7 @@ theorem cyclotomicUnitFamilyKplus_mem_CPlus
     (hp_three : 3 ≤ p) (i : Fin ((p - 3) / 2)) :
     FLT37.Sinnott.cyclotomicUnitFamilyKplus p K hp_three i ∈
       CPlus (p := p) (K := K) hp_three := by
-  rw [← CPlusGenerator_eq_cyclotomicUnitFamilyKplus
-    (p := p) (K := K) hp_three i]
+  rw [← CPlusGenerator_eq_cyclotomicUnitFamilyKplus (p := p) (K := K) hp_three i]
   exact CPlusGenerator_mem (p := p) (K := K) hp_three i
 
 /-- The rank-indexed and the `Fin ((p - 3) / 2)`-indexed Sinnott cyclotomic-unit
@@ -90,7 +91,7 @@ theorem CPlus_le_cyclotomicUnitIndexSubgroup
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     CPlus (p := p) (K := K) hp_three ≤
       cyclotomicUnitIndexSubgroup (p := p) (K := K) hp_odd hp_three := by
-  unfold CPlus cyclotomicUnitIndexSubgroup
+  simp only [CPlus, cyclotomicUnitIndexSubgroup]
   rw [Subgroup.closure_le]
   rintro x (rfl | ⟨i, rfl⟩)
   · exact Subgroup.mem_sup_right <| neg_one_mem_torsion
@@ -105,7 +106,7 @@ theorem cyclotomicUnitIndexSubgroup_le_CPlus
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     cyclotomicUnitIndexSubgroup (p := p) (K := K) hp_odd hp_three ≤
       CPlus (p := p) (K := K) hp_three := by
-  unfold cyclotomicUnitIndexSubgroup
+  simp only [cyclotomicUnitIndexSubgroup]
   exact sup_le
     (closure_cyclotomicUnitFamilyKplus_le_CPlus (p := p) (K := K) hp_odd hp_three)
     (torsionKplus_le_CPlus (p := p) (K := K) hp_three)
@@ -159,14 +160,10 @@ theorem hPlus_eq_one_of_eq_three (hp_odd : p ≠ 2) (hp_eq : p = 3) :
     hPlus K = 1 := by
   subst p
   letI : IsPrincipalIdealRing (𝓞 K) := IsCyclotomicExtension.Rat.three_pid K
-  have h_dvd : hPlus K ∣ h K :=
-    hPlus_dvd_h (p := 3) (hp_odd := by norm_num) (K := K)
+  have h_dvd : hPlus K ∣ h K := hPlus_dvd_h (p := 3) (hp_odd := by norm_num) (K := K)
   have h_one : h K = 1 := by
-    have h_class : NumberField.classNumber K = 1 :=
-      NumberField.classNumber_eq_one_iff.mpr inferInstance
-    simpa [h, NumberField.classNumber] using h_class
-  rw [h_one] at h_dvd
-  exact Nat.eq_one_of_dvd_one h_dvd
+    simpa [h, NumberField.classNumber] using NumberField.classNumber_eq_one_iff.mpr inferInstance
+  exact Nat.eq_one_of_dvd_one (h_one ▸ h_dvd)
 
 /-- For `p = 3`, the subgroup `C⁺` is the whole unit group. -/
 theorem CPlus_eq_top_of_eq_three

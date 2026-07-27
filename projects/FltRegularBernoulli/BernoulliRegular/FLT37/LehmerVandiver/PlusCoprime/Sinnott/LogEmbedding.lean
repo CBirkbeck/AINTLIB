@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
-import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
+public import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
 
 /-!
 # Logarithmic embedding of cyclotomic-unit family elements
@@ -258,7 +260,7 @@ theorem log_infinitePlace_realCyclotomicUnit
   have h_eq : ((FLT37.realCyclotomicUnit p K k : 𝓞 K) : K) =
       ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K) *
         complexConj K ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K) := by
-    unfold FLT37.realCyclotomicUnit
+    simp only [FLT37.realCyclotomicUnit]
     push_cast
     rw [← coe_ringOfIntegersComplexConj]
   rw [h_eq, map_mul, infinitePlace_complexConj, ← sq, Real.log_pow]

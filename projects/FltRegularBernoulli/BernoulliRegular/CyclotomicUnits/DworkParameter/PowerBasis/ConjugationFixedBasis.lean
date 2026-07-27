@@ -20,7 +20,6 @@ variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
 namespace Conjugation
 
-set_option maxHeartbeats 800000 in
 -- Expanding the completion automorphism exposes two nested completion maps.
 theorem continuous_valuedCompletionCyclotomicEquiv
     (a : CyclotomicUnitDelta p) :
@@ -30,21 +29,29 @@ theorem continuous_valuedCompletionCyclotomicEquiv
   let w : Valuation K ℤᵐ⁰ := v.comap σ.toRingHom
   have h : v.IsEquiv w :=
     lambdaValuation_isEquiv_comap_cyclotomicSigma (p := p) (K := K) a
+  have hAux : Continuous (valuedCompletionCyclotomicEquivAux (p := p) K a) := by
+    change Continuous fun x ↦
+      (((UniformSpace.Completion.mapRingEquiv
+        (WithVal.congr v w (RingEquiv.refl K))
+        h.uniformContinuous_congr.continuous
+        h.symm.uniformContinuous_congr.continuous).trans
+      (UniformSpace.Completion.mapRingEquiv
+        (WithVal.congr w v σ)
+        (uniformContinuous_withValCongr_comap (K := K) v σ).continuous
+        (uniformContinuous_withValCongr_comap_symm (K := K) v σ).continuous)) x)
+    change Continuous fun x ↦
+      UniformSpace.Completion.map (WithVal.congr w v σ)
+        (UniformSpace.Completion.map (WithVal.congr v w (RingEquiv.refl K)) x)
+    exact UniformSpace.Completion.continuous_map.comp UniformSpace.Completion.continuous_map
   change Continuous fun x ↦
-    (((UniformSpace.Completion.mapRingEquiv
-      (WithVal.congr v w (RingEquiv.refl K))
-      h.uniformContinuous_congr.continuous
-      h.symm.uniformContinuous_congr.continuous).trans
-    (UniformSpace.Completion.mapRingEquiv
-      (WithVal.congr w v σ)
-      (uniformContinuous_withValCongr_comap (K := K) v σ).continuous
-      (uniformContinuous_withValCongr_comap_symm (K := K) v σ).continuous)) x)
-  change Continuous fun x ↦
-    UniformSpace.Completion.map (WithVal.congr w v σ)
-      (UniformSpace.Completion.map (WithVal.congr v w (RingEquiv.refl K)) x)
-  exact UniformSpace.Completion.continuous_map.comp UniformSpace.Completion.continuous_map
+    IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion
+      (valuedCompletionCyclotomicEquivAux (p := p) K a
+        (IsDedekindDomain.HeightOneSpectrum.adicCompletion.toCompletion x))
+  exact (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_ofCompletion K
+      (lambdaHeightOneSpectrum p K)).comp
+    (hAux.comp (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_toCompletion K
+      (lambdaHeightOneSpectrum p K)))
 
-set_option maxHeartbeats 800000 in
 -- The closed-set induction compares two continuous maps out of a completion.
 theorem valuedCompletionCyclotomicEquiv_rationalToLambdaCompletionRingHom
     (a : CyclotomicUnitDelta p)
@@ -54,12 +61,20 @@ theorem valuedCompletionCyclotomicEquiv_rationalToLambdaCompletionRingHom
       rationalToLambdaCompletionRingHom (p := p) (K := K) x := by
   have hecont : Continuous (valuedCompletionCyclotomicEquiv (p := p) K a) :=
     continuous_valuedCompletionCyclotomicEquiv (p := p) (K := K) a
-  have hfcont : Continuous (rationalToLambdaCompletionRingHom (p := p) (K := K)) := by
-    rw [rationalToLambdaCompletionRingHom, UniformSpace.Completion.coe_mapRingHom]
-    exact UniformSpace.Completion.continuous_map
-  induction x using UniformSpace.Completion.induction_on with
+  have hfcont : Continuous (rationalToLambdaCompletionRingHom (p := p) (K := K)) :=
+    continuous_algebraMap_rationalCompletionToLambdaAlgebra (p := p) (K := K)
+  obtain ⟨z, rfl⟩ :=
+    IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion_surjective ℚ
+      (lambdaRationalHeightOneSpectrum p) x
+  induction z using UniformSpace.Completion.induction_on with
   | hp =>
-      exact isClosed_eq (hecont.comp hfcont) hfcont
+      exact isClosed_eq
+        ((hecont.comp hfcont).comp
+          (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_ofCompletion ℚ
+            (lambdaRationalHeightOneSpectrum p)))
+        (hfcont.comp
+          (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_ofCompletion ℚ
+            (lambdaRationalHeightOneSpectrum p)))
   | ih y =>
       rw [rationalToLambdaCompletionRingHom_coe]
       change valuedCompletionCyclotomicEquiv (p := p) K a
@@ -78,7 +93,7 @@ theorem valuedIntegerComplexConj_rationalPadicIntegerToValuedInteger
     valuedIntegerComplexConj (p := p) K
         (rationalPadicIntegerToValuedInteger (p := p) (K := K) x) =
       rationalPadicIntegerToValuedInteger (p := p) (K := K) x := by
-  ext
+  apply Subtype.ext
   change valuedCompletionCyclotomicEquiv (p := p) K (-1)
       (rationalToLambdaCompletionRingHom (p := p) (K := K)
         (x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)) =
@@ -152,7 +167,6 @@ def dworkSignedCoefficients
     Fin (p - 1) → RationalPadicIntegerRing p :=
   fun i ↦ (-1 : RationalPadicIntegerRing p) ^ (i : ℕ) * a i
 
-set_option maxHeartbeats 800000 in
 -- The proof normalizes nested algebra maps from the rational integer ring.
 theorem dworkCompleteComplexConj_powerLinearMap
     (hp_two : 2 < p)
@@ -260,7 +274,6 @@ theorem dworkEvenParameterAdjoin_eq_fixed (hp_two : 2 < p) :
     (dworkEvenParameterAdjoin_le_fixed (p := p) (K := K) hp_two)
     (dworkFixedSubalgebra_le_evenParameterAdjoin (p := p) (K := K) hp_two)
 
-set_option synthInstance.maxHeartbeats 80000 in
 -- Register the fixed subalgebra instances once so later linear maps do not
 -- repeatedly unfold the conjugation predicate during typeclass search.
 instance instAddCommMonoidDworkFixedSubalgebra :
@@ -300,7 +313,6 @@ theorem dworkSignedCoefficients_evenCoeffExtend
   · simp [dworkSignedCoefficients, hi, hi.neg_one_pow]
   · simp [dworkSignedCoefficients, hi]
 
-set_option synthInstance.maxHeartbeats 80000 in
 -- The codomain is a predicate subtype, so instance search needs the local
 -- fixed-subalgebra instance above.
 /-- The even-power expansion map into the fixed subalgebra. -/
@@ -372,7 +384,7 @@ theorem dworkEvenPowerLinearMap_injective (hp_two : 2 < p) :
       dworkParameterPowerLinearMap p K (dworkEvenCoeffExtend p a) =
         dworkParameterPowerLinearMap p K (dworkEvenCoeffExtend p b) :=
     congrArg Subtype.val hab
-  ext i
+  funext i
   have hi := congrFun (dworkParameterPowerLinearMap_injective (p := p) (K := K) hfull) i.1
   simpa [dworkEvenCoeffExtend, i.2] using hi
 

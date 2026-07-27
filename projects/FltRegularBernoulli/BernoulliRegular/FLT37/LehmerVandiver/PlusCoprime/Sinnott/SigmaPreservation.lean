@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
-import BernoulliRegular.TotallyRealSubfield.ZetaPrime
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
+public import BernoulliRegular.TotallyRealSubfield.ZetaPrime
 
 /-!
 # σ-preservation of `cyclotomicUnitsSubgroup`
@@ -211,7 +213,7 @@ theorem unitsComplexConj_mem_cyclotomicUnitsSubgroup_of_mem (hp_two : 2 ≤ p)
       Subgroup.comap (unitsComplexConj K).toMonoidHom
         (cyclotomicUnitsSubgroup p K hp_two) by
     exact h_le hu
-  unfold cyclotomicUnitsSubgroup
+  simp only [cyclotomicUnitsSubgroup]
   refine sup_le ?_ ?_
   ·
     rw [Subgroup.closure_le]

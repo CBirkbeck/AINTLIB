@@ -116,7 +116,7 @@ theorem stickelbergerOrbitIdeal_galAction (e : CyclotomicUnitDelta p → ℕ)
       stickelbergerOrbitIdeal (p := p) (K := K) e
         (Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b q) := by
   classical
-  unfold stickelbergerOrbitIdeal
+  simp only [stickelbergerOrbitIdeal]
   -- Push `σ_b` through the finite product (via the bundled ring hom
   -- `Ideal.mapHom` on the underlying `Ideal.map`).
   rw [show Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) b
@@ -126,7 +126,7 @@ theorem stickelbergerOrbitIdeal_galAction (e : CyclotomicUnitDelta p → ℕ)
         (∏ a : CyclotomicUnitDelta p,
           Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a q ^ e a) from rfl,
     map_prod]
-  refine Finset.prod_congr rfl fun a _ => ?_
+  refine Finset.prod_congr rfl fun a _ ↦ ?_
   -- Termwise: `σ_b ((σ_a q)^{e a}) = (σ_a (σ_b q))^{e a}`. Refold the bundled hom
   -- application to `σ_b`, distribute over the power, then apply commutativity.
   rw [show (Ideal.mapHom (cyclotomicRingOfIntegersEquiv (p := p) K b))

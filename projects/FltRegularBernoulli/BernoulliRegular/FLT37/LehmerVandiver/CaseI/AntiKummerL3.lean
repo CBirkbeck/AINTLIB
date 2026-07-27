@@ -37,7 +37,7 @@ theorem antiKummerLift_finrank_realSubfield_external
         (antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
           (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))
         (antiKummerLift (p := p) K α₀ hα₀) = 2 := by
-  haveI : IsGalois (NumberField.maximalRealSubfield K)
+  have : IsGalois (NumberField.maximalRealSubfield K)
       (antiKummerLift (p := p) K α₀ hα₀) :=
     antiKummerLift_isGalois_of_anti (p := p) K α₀ hα₀ h_anti
   have h_card :
@@ -72,7 +72,7 @@ theorem antiKummerRealSubfield_finrank_eq_p
       (antiKummerLift (p := p) K α₀ hα₀) = 2 :=
     antiKummerLift_finrank_realSubfield_external (p := p) (K := K) α₀ hα₀ h_anti
       h_irr h_irr_g h_alpha_sq_ne
-  haveI : IsScalarTower (NumberField.maximalRealSubfield K)
+  have : IsScalarTower (NumberField.maximalRealSubfield K)
       (antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))
       (antiKummerLift (p := p) K α₀ hα₀) := IntermediateField.isScalarTower_mid' _
@@ -100,7 +100,7 @@ theorem antiKummerSigmaTildeInvolutive_apply_root_inv
 
 /-- **σ̃ inverts `ζ_L^k · ρ`** in L (the Kummer roots of the X^p - α₀ factor). -/
 theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho
-    (hp_odd : p ≠ 2) (α₀ : K) (hα₀ : α₀ ≠ 0)
+    (α₀ : K) (hα₀ : α₀ ≠ 0)
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹)
     (h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K))
     (h_irr_g : Irreducible (antiKummerKplusPoly (p := p) K α₀ hα₀ h_anti))
@@ -122,12 +122,12 @@ theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho
   rw [← map_pow,
     show ((NumberField.IsCMField.complexConj K) (IsCyclotomicExtension.zeta p ℚ K)) ^ k =
       (IsCyclotomicExtension.zeta p ℚ K ^ k)⁻¹ by
-      rw [← map_pow, complexConj_zeta_pow_eq_inv hp_odd k],
+      rw [← map_pow, complexConj_zeta_pow_eq_inv k],
     map_inv₀, map_pow]
 
 /-- **σ̃ inverts `ζ_L^k · ρ⁻¹`** in L (the Kummer roots of the X^p - α₀⁻¹ factor). -/
 theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho_inv
-    (hp_odd : p ≠ 2) (α₀ : K) (hα₀ : α₀ ≠ 0)
+    (α₀ : K) (hα₀ : α₀ ≠ 0)
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹)
     (h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K))
     (h_irr_g : Irreducible (antiKummerKplusPoly (p := p) K α₀ hα₀ h_anti))
@@ -149,7 +149,7 @@ theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho_inv
   rw [← map_pow,
     show ((NumberField.IsCMField.complexConj K) (IsCyclotomicExtension.zeta p ℚ K)) ^ k =
       (IsCyclotomicExtension.zeta p ℚ K ^ k)⁻¹ by
-      rw [← map_pow, complexConj_zeta_pow_eq_inv hp_odd k],
+      rw [← map_pow, complexConj_zeta_pow_eq_inv k],
     map_inv₀, map_pow]
 
 /-- **Every K⁺-AlgEquiv `K ≃ K` commutes with complex conjugation**. -/
@@ -188,7 +188,7 @@ theorem antiKummerSigmaTildeInvolutive_pow_mul_sigma_pow_eq_one
     g_aut (antiKummerLiftRoot (p := p) K α₀ hα₀) ^ p *
       (antiKummerSigmaTildeInvolutive (p := p) K α₀ hα₀ h_anti h_irr h_irr_g)
         (g_aut (antiKummerLiftRoot (p := p) K α₀ hα₀) ^ p) = 1 := by
-  haveI : Normal (NumberField.maximalRealSubfield K) K := inferInstance
+  have : Normal (NumberField.maximalRealSubfield K) K := inferInstance
   have h_root_pow : (antiKummerLiftRoot (p := p) K α₀ hα₀) ^ p =
       algebraMap K (antiKummerLift (p := p) K α₀ hα₀) α₀ :=
     antiKummerLiftRoot_pow_eq (p := p) K α₀ hα₀
@@ -248,7 +248,7 @@ theorem antiKummerSigmaTildeInvolutive_inverts_g_aut_root
   obtain ⟨k, _hk_lt, h_eq⟩ : ∃ k : ℕ, k < p ∧ zetaL ^ k = r * sigmaT r :=
     hζ_L.eq_pow_of_pow_eq_one h_pow_one
   have h_sigma_apply : sigmaT (r * sigmaT r) = r * sigmaT r := by
-    rw [map_mul, show sigmaT (sigmaT r) = r from by
+    rw [map_mul, show sigmaT (sigmaT r) = r by
       have h_sq := antiKummerSigmaTildeInvolutive_sq_eq_refl
         (p := p) K α₀ hα₀ h_anti h_irr h_irr_g
       have := congrFun (congrArg DFunLike.coe h_sq) r
@@ -261,7 +261,7 @@ theorem antiKummerSigmaTildeInvolutive_inverts_g_aut_root
       simp [zetaL, map_pow],
       antiKummerSigmaTildeInvolutive_restricts_K (p := p) K α₀ hα₀ h_anti h_irr h_irr_g
       h_alpha_sq_ne,
-      complexConj_zeta_pow_eq_inv hp_odd k, map_inv₀, map_pow]
+      complexConj_zeta_pow_eq_inv k, map_inv₀, map_pow]
   have h_combined : zetaL ^ k = (zetaL ^ k)⁻¹ :=
     calc zetaL ^ k = r * sigmaT r := h_eq
       _ = sigmaT (r * sigmaT r) := h_sigma_apply.symm
@@ -270,7 +270,7 @@ theorem antiKummerSigmaTildeInvolutive_inverts_g_aut_root
   have h_zeta_ne : zetaL ≠ 0 := hζ_L.ne_zero (Fact.out : Nat.Prime p).ne_zero
   have h_pow_2k : zetaL ^ (2 * k) = 1 := by
     rw [show (2 * k : ℕ) = k + k by ring, pow_add,
-      show zetaL ^ k * zetaL ^ k = zetaL ^ k * (zetaL ^ k)⁻¹ from by rw [← h_combined]]
+      show zetaL ^ k * zetaL ^ k = zetaL ^ k * (zetaL ^ k)⁻¹ by rw [← h_combined]]
     exact mul_inv_cancel₀ (pow_ne_zero k h_zeta_ne)
   have hp_prime : Nat.Prime p := Fact.out
   have h_dvd : p ∣ 2 * k := hζ_L.dvd_of_pow_eq_one (2 * k) h_pow_2k
@@ -295,7 +295,7 @@ theorem antiKummerSigmaTildeInvolutive_central
     (antiKummerSigmaTildeInvolutive (p := p) K α₀ hα₀ h_anti h_irr h_irr_g).trans g_aut =
       g_aut.trans
         (antiKummerSigmaTildeInvolutive (p := p) K α₀ hα₀ h_anti h_irr h_irr_g) := by
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply AlgHom.ext_of_adjoin_eq_top
     (antiKummerLiftRoot_adjoin_eq_top (p := p) K α₀ hα₀ h_anti h_irr h_irr_g)
   rintro x ⟨rfl⟩
@@ -345,8 +345,8 @@ theorem antiKummerRealSubfield_isGalois
     IsGalois (NumberField.maximalRealSubfield K)
       (antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne)) := by
-  haveI := antiKummerLift_isGalois_of_anti (p := p) K α₀ hα₀ h_anti
-  haveI normal :
+  have := antiKummerLift_isGalois_of_anti (p := p) K α₀ hα₀ h_anti
+  have normal :
       (Subgroup.zpowers
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g
           h_alpha_sq_ne).sigmaTilde).Normal :=
@@ -368,12 +368,12 @@ theorem antiKummerRealSubfield_isCyclic
           NumberField.maximalRealSubfield K]
         antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
           (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne)) := by
-  haveI := antiKummerRealSubfield_isGalois
+  have := antiKummerRealSubfield_isGalois
     (p := p) hp_odd α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne
-  haveI fd_L : FiniteDimensional (NumberField.maximalRealSubfield K)
+  have fd_L : FiniteDimensional (NumberField.maximalRealSubfield K)
       (antiKummerLift (p := p) K α₀ hα₀) :=
     antiKummerLift_finiteDimensional_Kplus p K (α₀ := α₀) (hα₀ := hα₀)
-  haveI : FiniteDimensional (NumberField.maximalRealSubfield K)
+  have : FiniteDimensional (NumberField.maximalRealSubfield K)
       (antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne)) :=
     inferInstance
@@ -397,7 +397,7 @@ theorem mkAntiKummerRealSubfieldH94Inputs
     AntiKummerRealSubfieldH94Inputs (p := p) (K := K)
       (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne) where
   finiteDim := by
-    haveI fd_L : FiniteDimensional (NumberField.maximalRealSubfield K)
+    have fd_L : FiniteDimensional (NumberField.maximalRealSubfield K)
         (antiKummerLift (p := p) K α₀ hα₀) :=
       antiKummerLift_finiteDimensional_Kplus p K (α₀ := α₀) (hα₀ := hα₀)
     exact inferInstance
@@ -424,7 +424,7 @@ theorem antiKummerRealSubfield_isUnramified_of_ram_bound
         (h_irr := h_irr)
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne)))),
         𝔭.IsPrime → 𝔓.IsPrime → 𝔭 ≠ ⊥ → 𝔓.LiesOver 𝔭 →
-        Ideal.ramificationIdx 𝔭 𝔓 = 1) :
+        Ideal.ramificationIdx' 𝔭 𝔓 = 1) :
     Algebra.Unramified (𝓞 (NumberField.maximalRealSubfield K))
       (𝓞 (antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))) := by
@@ -437,12 +437,13 @@ theorem antiKummerRealSubfield_isUnramified_of_ram_bound
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne)))
   · set 𝔭 : Ideal (𝓞 (NumberField.maximalRealSubfield K)) :=
       𝔓.under (𝓞 (NumberField.maximalRealSubfield K)) with h𝔭_def
-    haveI h𝔭_prime : 𝔭.IsPrime := Ideal.IsPrime.under _ 𝔓
-    haveI h𝔓_over : 𝔓.LiesOver 𝔭 := ⟨rfl⟩
+    have h𝔭_prime : 𝔭.IsPrime := Ideal.IsPrime.under _ 𝔓
+    have h𝔓_over : 𝔓.LiesOver 𝔭 := ⟨rfl⟩
     have h𝔭_bot : 𝔭 ≠ ⊥ := by
       rw [h𝔭_def]
       exact mt Ideal.eq_bot_of_comap_eq_bot h𝔓_bot
-    refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain h𝔓_bot).mpr ?_
+    refine Ideal.ramificationIdx_eq_one_iff.mp ?_
+    rw [← Ideal.ramificationIdx'_eq_ramificationIdx (p := 𝔭) (q := 𝔓) h𝔭_bot]
     exact h_ram_bound 𝔭 𝔓 h𝔭_prime h𝔓_prime h𝔭_bot h𝔓_over
 
 /-- **AK-4 discharge under per-FLT-data AK inputs**: a function producing

@@ -7,7 +7,8 @@ import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.EigenbasisVandermon
 
 This file formalises the expert reviewer's *eigenunit* reformulation of the Case-II `R4`
 second-order `ω³²` collapse `Cor823Omega32SecondOrderCollapse37` (Washington Proposition 8.12 at the
-irregular index `i = 32`).  The reviewer's argument runs the collapse through the **single eigenunit**
+irregular index `i = 32`).  The reviewer's argument runs the collapse through the
+**single eigenunit**
 `E₃₂` (the repository's `pollaczekUnitPlusKplus 37 K 32`, whose class lies in the `ω³²`-eigenspace,
 the proven `pollaczekUnit_image_in_omegaChar_eigenspace_general` at `i = 32`) and its `λ`-adic log
 valuation, instead of the per-cyclotomic-column level-`72` Dwork distribution
@@ -20,7 +21,8 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 The repository's level-`72` `ω³²` projection is the proven linear functional
 `caseIICor823DetSqLog X = valuedLambdaQuotientDworkCoeffModSq ⟨32,_⟩ (evalₐ 72 X)`
 (`CaseIICor823SecondOrderDescentReduction.lean`): for a completed `λ`-adic log element `X`, it reads
-the `varpi^{32}` Dwork coordinate at level `72`, in `ZMod 37²`.  This **is** "the `ω³²`-projection at
+the `varpi^{32}` Dwork coordinate at level `72`, in `ZMod 37²`.  This **is** "the
+`ω³²`-projection at
 level `72`" of the reviewer's argument; it is additive (`caseIICor823DetSqLog_add`) and `ℤ`-linear,
 and scales the `p`-th-power correction by `37` (`caseIICor823DetSqLog_nsmul_thirtyseven`).
 
@@ -81,7 +83,8 @@ So the reviewer's eigenunit route is the *structurally clean* repackaging of the
 Dwork content, but it **relocates** rather than **removes** the shape: the genuine level-`72`
 Galois-graded Dwork-evaluator content (that a *regular*-eigenspace unit has vanishing `ω³²`
 level-`72` log coordinate — the `16` vanishings — together with the sharp `E₃₂` valuation) is the
-per-column shape, in the eigenbasis.  The single `E₃₂` valuation is **necessary but not sufficient**.
+per-column shape, in the eigenbasis.  The single `E₃₂` valuation is **necessary but not
+sufficient**.
 This is the honest finding requested.
 
 ## References
@@ -93,7 +96,6 @@ This is the honest finding requested.
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -131,7 +133,7 @@ theorem caseIICor823DetSqLog_zsmul
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (n : ℤ) (X : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) :
     caseIICor823DetSqLog (n • X) = ((n : ℤ) : ZMod (37 ^ 2)) * caseIICor823DetSqLog X := by
-  unfold caseIICor823DetSqLog
+  simp only [caseIICor823DetSqLog]
   rw [zsmul_eq_mul, map_mul, map_intCast, valuedLambdaQuotientDworkCoeffModSq_intCast_mul]
 
 open BernoulliRegular (CPlusGenerator) in
@@ -142,7 +144,8 @@ theorem caseIICor823DetSqLog_finsetSum
     {ι : Type*} (s : Finset ι) (f : ι → DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) :
     caseIICor823DetSqLog (∑ i ∈ s, f i) = ∑ i ∈ s, caseIICor823DetSqLog (f i) := by
   classical
-  have hzero : caseIICor823DetSqLog (0 : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) = 0 := by
+  have hzero : caseIICor823DetSqLog (0 : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ))
+    = 0 := by
     have h := caseIICor823DetSqLog_add (0 : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) 0
     rw [add_zero] at h
     exact left_eq_add.mp h
@@ -166,7 +169,6 @@ theorem caseIICor823DetSqLog_kummerLogCompletedColumn
   unfold caseIICor823DetSqLog genericColumnCoordLHS37
   congr 1
 
-set_option maxHeartbeats 1600000 in
 open BernoulliRegular (CPlusGenerator) in
 /-- **The eigenunit detector is the `(a+2)^{36-i}`-weighted column sum** (proven, axiom-clean).
 
@@ -188,7 +190,7 @@ theorem caseII_eigenunitDetector_eq_column_sum
           genericColumnCoordLHS37 a := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   classical
-  unfold caseII_E32EigenunitDetector
+  simp only [caseII_E32EigenunitDetector]
   -- `E_i = CPlusExponentProduct 0 (e_a)`, `e_a = (a+2)^{36-i}`.
   rw [FLT37.pollaczekUnitPlusKplus_eq_CPlusExponentProduct i]
   -- `completedLog(E_i^36) = ∑_a e_a • kummerLogCompletedColumn a`.
@@ -285,7 +287,8 @@ theorem caseII_eigenunit_columnSum_mod37 :
 /-! ## 5. The shape ⟹ eigenunit data: both §2 and §3 hold from the per-basis shape
 
 We now prove the **shape ⟹ eigenunit-data** direction, which is the rigorous content of the verdict:
-the single `E₃₂` valuation (§2) **and** the `16` regular vanishings (§3) are *both* downstream of the
+the single `E₃₂` valuation (§2) **and** the `16` regular vanishings (§3) are *both*
+downstream of the
 per-basis level-`72` shape `CaseIICor823Level72LeadingCoeff37` (the residual `∃ ρ ≠ 0, ∀ a,
 genericColumnCoordLHS37 a = 37·ρ.val·(((a+2)²)^{16} − 1)`).  This certifies that the eigenunit data
 is **not smaller** than the shape — it is the same `17`-fold level-`72` Dwork content, in the
@@ -293,7 +296,8 @@ eigenbasis.
 
 The computation: with `genericColumnCoordLHS37 a = 37·ρ.val·V_a` (`V_a = (((a+2)²)^{16}−1)`),
 
-  `caseII_E32EigenunitDetector i = ∑_a (a+2)^{36-i}·(37·ρ.val·V_a) = 37·ρ.val·(∑_a (a+2)^{36-i}·V_a)`,
+  `caseII_E32EigenunitDetector i = ∑_a (a+2)^{36-i}·(37·ρ.val·V_a) = 37·ρ.val·(∑_a
+  (a+2)^{36-i}·V_a)`,
 
 and the mod-`37` reduction of the column sum `∑_a (a+2)^{36-i}·V_a` is `18·[i = 32]`
 (`caseII_eigenunit_columnSum_mod37`).  At `i = 32` this is the unit `18·ρ` (so the detector is
@@ -338,15 +342,16 @@ theorem caseII_eigenunit_columnSum_castHom (m : Fin 17) :
   push_cast
   ring
 
-set_option maxHeartbeats 800000 in
 open BernoulliRegular (CPlusGenerator) in
 /-- **The eigenunit detector value at an even index, from the shape** (proven, axiom-clean given
 `CaseIICor823Level72LeadingCoeff37`).
 
-With the per-basis shape `genericColumnCoordLHS37 a = 37·ρ.val·V_a` (`ρ ≠ 0`), the eigenunit detector
+With the per-basis shape `genericColumnCoordLHS37 a = 37·ρ.val·V_a` (`ρ ≠ 0`), the
+eigenunit detector
 at the even index `i = 2(m+1)` is `37·(ρ · 18·[m = 15]).val`:
 
-  `caseII_E32EigenunitDetector (2(m+1)) = 37·(((ρ · (if m = 15 then 18 else 0)).val : ℕ) : ZMod 37²)`.
+  `caseII_E32EigenunitDetector (2(m+1)) = 37·(((ρ · (if m = 15 then 18 else 0)).val : ℕ) :
+  ZMod 37²)`.
 
 This is the master computation of §5: `det = 37·ρ.val·S` with `S` the column sum, and `37·X` depends
 only on `castHom X` (`thirtyseven_mul_eq_castHom_val`), where
@@ -439,7 +444,8 @@ theorem caseII_regularEigenunitVanish_of_shape
   rw [if_neg hm_ne, mul_zero]
   simp
 
-/-! ## 6. The eigenunit valuation supplies the non-degeneracy — the per-column **shape** is NOT dropped
+/-! ## 6. The eigenunit valuation supplies the non-degeneracy — the per-column **shape**
+is NOT dropped
 
 The single eigenunit valuation `CaseIIE32EigenunitLogPiVal37` (§2) **does** supply the
 non-degeneracy `Level72ColumnNonVanish37` (`CaseIICor823Level72Valuation.lean`: *some* column
@@ -450,7 +456,8 @@ clean source for the non-degeneracy half of the prior split.
 
 But the per-column **shape** `CaseIICor823Level72Shape37` (the `varpi^{32}` Teichmüller-Vandermonde
 distribution `genericColumnCoordLHS37 a = 37·ρ·V_a` across the `17` columns) is **not** dropped: the
-eigenunit valuation constrains a *single* linear combination `∑_a (a+2)^4 · col_a` of the `17` column
+eigenunit valuation constrains a *single* linear combination `∑_a (a+2)^4 · col_a` of
+the `17` column
 values, so it determines only one coordinate of the (invertible-Vandermonde) column system, never
 the full per-column distribution.  Composing §6 with the prior split's
 `caseIICor823Level72LeadingCoeff37_of_shape_of_nonVanish` confirms: the collapse follows from
@@ -509,7 +516,8 @@ valuation** (proven, axiom-clean): `CaseIICor823Level72LeadingCoeff37` follows f
 `CaseIIE32EigenunitLogPiVal37` (the eigenunit valuation §2, supplying the non-degeneracy).
 
 This is the eigenunit-interface refactor of the prior split
-(`CaseIICor823Level72Valuation.lean`): the non-degeneracy half `Level72ColumnNonVanish37` is now read
+(`CaseIICor823Level72Valuation.lean`): the non-degeneracy half
+`Level72ColumnNonVanish37` is now read
 off the **single eigenunit valuation** `CaseIIE32EigenunitLogPiVal37`
 (`level72ColumnNonVanish37_of_eigenunitPiVal`), in place of the prior abstract
 `CaseIIE32CompletedLogPropEightTwelve37`.  The per-column **shape** `CaseIICor823Level72Shape37`
@@ -550,11 +558,13 @@ content is supplied through **two** residuals,
 * `CaseIIE32EigenunitLogPiVal37` — the **single eigenunit valuation** `v_π(completedLog E₃₂) = 68 <
   72` (the `M ≤ 1` non-degeneracy in eigenunit form, supplying `Level72ColumnNonVanish37`).
 
-The honest verdict (this file): the eigenunit reformulation isolates the non-degeneracy as the single
+The honest verdict (this file): the eigenunit reformulation isolates the non-degeneracy
+as the single
 eigenunit valuation, but it does **not** drop the per-column shape — the per-basis shape **proves**
 the full eigenunit data, both `§2` and the `16` regular vanishings `§3`
 (`caseII_E32EigenunitLogPiVal37_of_shape`, `caseII_regularEigenunitVanish_of_shape`), so the
-eigenunit data is no weaker than the shape, and the single valuation `§2` alone is *necessary but not
+eigenunit data is no weaker than the shape, and the single valuation `§2` alone is
+*necessary but not
 sufficient* (the `16` regular vanishings `§3` are a genuine companion input). -/
 theorem fermatLastTheoremFor_thirtyseven_of_shape_of_eigenunitPiVal
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]

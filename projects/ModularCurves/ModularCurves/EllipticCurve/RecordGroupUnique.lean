@@ -3,10 +3,10 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
+import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.ModelGroupUniq
 import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
 import ModularCurves.ForMathlib.OverPullbackMul
-import ModularCurves.EllipticCurve.GroupLaw
 
 /-!
 # Uniqueness of the pointed group structure on a locally Weierstrass record (K3)

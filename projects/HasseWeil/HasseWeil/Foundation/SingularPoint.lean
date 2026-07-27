@@ -37,9 +37,11 @@ def Singular (W : WeierstrassCurve R) (x y : R) : Prop :=
 
 variable {W : WeierstrassCurve R}
 
+/-- A singular point satisfies the Weierstrass equation. -/
 theorem Singular.equation {x y : R} (h : W.Singular x y) :
     W.toAffine.Equation x y := h.1
 
+/-- A singular point is not nonsingular. -/
 theorem Singular.not_nonsingular {x y : R} (h : W.Singular x y) :
     ¬W.toAffine.Nonsingular x y := by
   rintro ⟨_, hx | hy⟩
@@ -185,12 +187,14 @@ Reference: Silverman III.1.4(c). -/
 def HasCusp (W : WeierstrassCurve R) : Prop :=
   ∃ x y, W.Singular x y ∧ W.tangentConeDisc x = 0
 
+/-- A nodal curve has `Δ = 0` and `c₄ ≠ 0`. -/
 theorem HasNode.Δ_eq_zero_and_c₄_ne_zero {W : WeierstrassCurve F} (h : W.HasNode) :
     W.Δ = 0 ∧ W.c₄ ≠ 0 := by
   obtain ⟨x, y, hsing, hdisc⟩ := h
   exact ⟨Δ_eq_zero_of_singular hsing,
     by rw [c₄_eq_tangentConeDisc_sq_of_singular hsing]; exact pow_ne_zero 2 hdisc⟩
 
+/-- A cuspidal curve has `Δ = 0` and `c₄ = 0`. -/
 theorem HasCusp.Δ_eq_zero_and_c₄_eq_zero {W : WeierstrassCurve F} (h : W.HasCusp) :
     W.Δ = 0 ∧ W.c₄ = 0 := by
   obtain ⟨x, y, hsing, hdisc⟩ := h

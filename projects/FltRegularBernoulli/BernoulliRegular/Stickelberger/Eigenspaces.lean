@@ -6,7 +6,7 @@ public import Mathlib.Algebra.Group.Units.Equiv
 public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
-# Eigenspace projection of the Stickelberger element (T033)
+# Eigenspace projection of the Stickelberger element
 
 For a prime `p`, the idempotent associated to a rational character
 `χ : MulChar (ZMod p)ˣ ℚ` projects the Stickelberger element `θ_p` to a scalar
@@ -29,9 +29,9 @@ The scalar is then identified with the generalized Bernoulli number
   invertible, `ε_χ · single c 1 = χ(c) • ε_χ`. This is the right-multiplication
   counterpart to `single_mul_charIdempotent`, proved directly to avoid the
   `IsDomain`/`HasEnoughRootsOfUnity` constraints of the latter.
-* `charIdempotent_mul_stickelbergerElement`: **T033a**, the reduction
+* `charIdempotent_mul_stickelbergerElement`: the reduction
   `ε_χ · θ_p = stickelbergerEigenvalue p χ • ε_χ`.
-* `stickelbergerEigenvalue_eq_BernoulliGen`: **T033b**, the identification
+* `stickelbergerEigenvalue_eq_BernoulliGen`: the identification
   `stickelbergerEigenvalue p χ = B_{1,χ⁻¹}` for nontrivial `χ`.
 * `charIdempotent_mul_stickelbergerElement_eq_BernoulliGen`: the projected
   Stickelberger formula with the Bernoulli scalar.
@@ -49,9 +49,6 @@ noncomputable section
 namespace BernoulliRegular
 
 open Finset MonoidAlgebra MulChar
-
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 section Basic
 
@@ -72,9 +69,9 @@ lemma charIdempotent_mul_single (χ : MulChar G R) (c : G) :
         simp_rw [Finset.sum_mul, smul_mul_assoc, MonoidAlgebra.single_mul_single, one_mul]
     _ = ∑ σ : G, χ (σ * c) • MonoidAlgebra.single ((σ * c)⁻¹ * c) (1 : R) :=
         ((Group.mulRight_bijective c).sum_comp
-          (fun σ => χ σ • MonoidAlgebra.single (σ⁻¹ * c) (1 : R))).symm
+          (fun σ ↦ χ σ • MonoidAlgebra.single (σ⁻¹ * c) (1 : R))).symm
     _ = ∑ σ : G, (χ σ * χ c) • MonoidAlgebra.single σ⁻¹ (1 : R) := by
-        refine Finset.sum_congr rfl fun σ _ => ?_
+        refine Finset.sum_congr rfl fun σ _ ↦ ?_
         rw [map_mul, show (σ * c)⁻¹ * c = σ⁻¹ from by
           rw [mul_comm σ c, mul_inv_rev, mul_assoc, inv_mul_cancel, mul_one]]
     _ = χ c • ∑ σ : G, χ σ • MonoidAlgebra.single σ⁻¹ (1 : R) := by
@@ -99,7 +96,7 @@ instance invertible_card_units_rat : Invertible ((Fintype.card (ZMod p)ˣ : ℚ)
 
 This is the scalar by which `θ_p` acts on `ε_χ · ℚ[(ZMod p)ˣ]`. Its
 identification with the generalized Bernoulli number `B_{1,χ⁻¹}` is the
-content of `T033b`. -/
+content of `stickelbergerEigenvalue_eq_BernoulliGen`. -/
 def stickelbergerEigenvalue (χ : MulChar (ZMod p)ˣ ℚ) : ℚ :=
   (p : ℚ)⁻¹ * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹
 
@@ -109,7 +106,7 @@ lemma stickelbergerEigenvalue_def (χ : MulChar (ZMod p)ˣ ℚ) :
       (p : ℚ)⁻¹ * ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹ :=
   rfl
 
-/-- **T033a**: Projecting the Stickelberger element `θ_p` onto the `χ`-eigenspace
+/-- Projecting the Stickelberger element `θ_p` onto the `χ`-eigenspace
 yields the scalar `stickelbergerEigenvalue p χ` times the idempotent `ε_χ`. -/
 theorem charIdempotent_mul_stickelbergerElement (χ : MulChar (ZMod p)ˣ ℚ) :
     charIdempotent χ * stickelbergerElement p =
@@ -153,7 +150,7 @@ residue contributes zero. -/
 lemma sum_unitMulCharDirichlet_eq_sum_units (χ : MulChar (ZMod p)ˣ ℚ) :
     ∑ a : ZMod p, unitMulCharDirichlet p χ a * (a.val : ℚ) =
       ∑ a : (ZMod p)ˣ, χ a * ((a : ZMod p).val : ℚ) := by
-  let F : ZMod p → ℚ := fun a => unitMulCharDirichlet p χ a * (a.val : ℚ)
+  let F : ZMod p → ℚ := fun a ↦ unitMulCharDirichlet p χ a * (a.val : ℚ)
   have hsplit :
       ∑ a : ZMod p, F a = F 0 + ∑ a : {a : ZMod p // a ≠ 0}, F a.1 := by
     simpa using Fintype.sum_eq_add_sum_subtype_ne F (0 : ZMod p)
@@ -162,9 +159,9 @@ lemma sum_unitMulCharDirichlet_eq_sum_units (χ : MulChar (ZMod p)ˣ ℚ) :
         ∑ u : (ZMod p)ˣ, F (u : ZMod p) := by
     simpa using
       (Fintype.sum_equiv unitsEquivNeZero
-        (fun u : (ZMod p)ˣ => F (u : ZMod p))
-        (fun a : {a : ZMod p // a ≠ 0} => F a.1)
-        (fun u => rfl)).symm
+        (fun u : (ZMod p)ˣ ↦ F (u : ZMod p))
+        (fun a : {a : ZMod p // a ≠ 0} ↦ F a.1)
+        (fun u ↦ rfl)).symm
   calc
     ∑ a : ZMod p, unitMulCharDirichlet p χ a * (a.val : ℚ) =
         ∑ a : ZMod p, F a := rfl
@@ -175,7 +172,7 @@ lemma sum_unitMulCharDirichlet_eq_sum_units (χ : MulChar (ZMod p)ˣ ℚ) :
     _ = ∑ a : (ZMod p)ˣ, χ a * ((a : ZMod p).val : ℚ) := by
       simp [F]
 
-/-- **T033b**: the Stickelberger eigenvalue is the generalized Bernoulli number
+/-- The Stickelberger eigenvalue is the generalized Bernoulli number
 `B_{1,χ⁻¹}` for the Dirichlet character induced by `χ⁻¹`. -/
 theorem stickelbergerEigenvalue_eq_BernoulliGen {χ : MulChar (ZMod p)ˣ ℚ}
     (hχ : χ ≠ 1) :
@@ -193,7 +190,7 @@ theorem stickelbergerEigenvalue_eq_BernoulliGen {χ : MulChar (ZMod p)ˣ ℚ}
         ∑ a : (ZMod p)ˣ, ((a : ZMod p).val : ℚ) * χ a⁻¹ := by
       rw [stickelbergerEigenvalue_def, ← mul_assoc, mul_inv_cancel₀ hp_ne, one_mul]
     _ = ∑ a : (ZMod p)ˣ, χ⁻¹ a * ((a : ZMod p).val : ℚ) := by
-      refine Finset.sum_congr rfl fun a _ => ?_
+      refine Finset.sum_congr rfl fun a _ ↦ ?_
       rw [MulChar.inv_apply_eq_inv', ← map_inv]
       ring
     _ = ∑ a : ZMod p, unitMulCharDirichlet p χ⁻¹ a * (a.val : ℚ) := by

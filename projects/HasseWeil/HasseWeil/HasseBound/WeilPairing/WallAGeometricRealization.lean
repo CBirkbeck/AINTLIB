@@ -12,7 +12,8 @@ import HasseWeil.Isogeny.SeparableWitnessReductions
 # Wall A closed for `1 − π`: the base-changed pullback is a genuine translatable action over `K̄`
 
 This file completes Wall A (G-004) for the separable isogeny `1 − π` base-changed to `K̄`: it proves
-that the **concrete** opaque base-changed pullback `pullback_L = baseChangePullback (1 − π).pullback`
+that the **concrete** opaque base-changed pullback
+`pullback_L = baseChangePullback (1 − π).pullback`
 is *genuine* with the translatable geometric action `g = id − π̄` over `K̄`, i.e.
 
   `IsGenuineWith (W.baseChange K̄) (oneSubFrobeniusIsogBaseChange … pullback_L) (id − π̄)`
@@ -33,10 +34,13 @@ the **`K`-level** addition-formula realization through the function-field base c
    (functionField_baseChange)`, typed via `W' := W` over the base field `K` (scalar tower
    `K → L → K(E_L)`).  It sends `genericPoint W ↦ genericPoint (W.baseChange L)`
    (`ffBaseChangePoint_genericPoint`, `WallAGenericRealization.lean`) and intertwines the `q`-power
-   geometric Frobenius (`ffbc_frob_comm`: `ffBaseChangePoint ∘ frobeniusW_KE = π̄ ∘ ffBaseChangePoint`,
-   from `Affine.Point.map_some` + `map_pow` — the `q`-power commutes with the ring hom `functionFieldMap`).
+   geometric Frobenius (`ffbc_frob_comm`:
+   `ffBaseChangePoint ∘ frobeniusW_KE = π̄ ∘ ffBaseChangePoint`,
+   from `Affine.Point.map_some` + `map_pow` — the `q`-power commutes with the ring hom
+   `functionFieldMap`).
 
-2. **`gKbar_genericPoint`** — the geometric `K̄`-action `g = id − π̄` evaluated at `P_gen^{K̄}` equals
+2. **`gKbar_genericPoint`** — the geometric `K̄`-action `g = id − π̄` evaluated at `P_gen^{K̄}`
+equals
    `ffBaseChangePoint (P_gen − π(P_gen))`, the function-field base-change of the `K`-level
    geometric `1 − π` image of the generic point (additivity of `ffBaseChangePoint` + the two
    commutation facts).
@@ -49,7 +53,8 @@ the **`K`-level** addition-formula realization through the function-field base c
    `pullback_L ?_gen^{K̄} = functionFieldMap ((1 − π).pullback ?_gen)`.
 
 Chaining 1–4: `g (P_gen^{K̄}) = ffBaseChangePoint (some addPullback_x addPullback_y) =
-some (functionFieldMap addPullback_x) (functionFieldMap addPullback_y) = some (pullback_L x_gen^{K̄})
+some (functionFieldMap addPullback_x) (functionFieldMap addPullback_y) = some (pullback_L
+x_gen^{K̄})
 (pullback_L y_gen^{K̄})`.  This is exactly `IsGenuineWith φ_L (id − π̄)`.
 
 ## Why this is CoordHom-free and non-degenerate
@@ -71,8 +76,6 @@ open scoped TensorProduct
 namespace HasseWeil.WeilPairing
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 noncomputable section
 
@@ -83,6 +86,7 @@ noncomputable local instance instDecEqACGeom : DecidableEq (AlgebraicClosure K) 
 
 variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The `q`-power geometric Frobenius commutes with the function-field base-change point map**
 (Silverman III.4, base change).  For the function-field base-change point map `ffBaseChangePoint`
 and the geometric `q`-power Frobenius `frobeniusW_KE` (over `K`) / `frobFunctionFieldPointKbar`
@@ -107,11 +111,15 @@ theorem ffbc_frob_comm (P : (W_KE W).toAffine.Point) :
           ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange (AlgebraicClosure K) y) _)
     rw [WeierstrassCurve.Affine.Point.map_some]
     refine (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr ⟨?_, ?_⟩
-    · show (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K) (x ^ Fintype.card K) =
-        ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K) x) ^ Fintype.card K
+    · show (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (x ^ Fintype.card K) =
+        ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+          x) ^ Fintype.card K
       rw [map_pow]
-    · show (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K) (y ^ Fintype.card K) =
-        ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K) y) ^ Fintype.card K
+    · show (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+        (y ^ Fintype.card K) =
+        ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
+          y) ^ Fintype.card K
       rw [map_pow]
 
 /-- **The geometric `K̄`-action `id − π̄`** for `(1 − π)_{K̄}`: the function-field point map
@@ -123,7 +131,8 @@ noncomputable def gKbar :
   AddMonoidHom.id _ - frobFunctionFieldPointKbar W
 
 /-- **`gKbar` at the generic point is the function-field base-change of the `K`-level `1 − π`
-image** (Silverman III.8.2, base change): `gKbar (P_gen^{K̄}) = ffBaseChangePoint (P_gen − π(P_gen))`.
+image** (Silverman III.8.2, base change):
+`gKbar (P_gen^{K̄}) = ffBaseChangePoint (P_gen − π(P_gen))`.
 Additivity of `ffBaseChangePoint` + `ffBaseChangePoint_genericPoint` + `ffbc_frob_comm`. -/
 theorem gKbar_genericPoint :
     gKbar W (HasseWeil.genericPoint (W.baseChange (AlgebraicClosure K))) =
@@ -154,14 +163,13 @@ theorem oneSub_pullback_y_gen_eq (hq : 2 ≤ Fintype.card K) :
 
 /-- `gKbar` at the generic point, typed via the `W' := W` base-change point map (the form fed to
 genuineness; `gKbar_genericPoint` with `ffBaseChangePoint` unfolded). -/
-theorem gKbar_genericPoint_eq_map (hq : 2 ≤ Fintype.card K) :
+theorem gKbar_genericPoint_eq_map (_hq : 2 ≤ Fintype.card K) :
     gKbar W (HasseWeil.genericPoint (W.baseChange (AlgebraicClosure K))) =
       WeierstrassCurve.Affine.Point.map (W' := W) (S := K)
         ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange (AlgebraicClosure K))
         (HasseWeil.genericPoint W - frobeniusW_KE W (HasseWeil.genericPoint W)) := by
   rw [gKbar_genericPoint]; rfl
 
-set_option maxHeartbeats 1600000 in
 /-- **Wall A closed for `1 − π` (CoordHom-free).**  The concrete base-changed pullback
 `pullback_L = oneSubFrobeniusPullback_L` is *genuine* with the translatable geometric action
 `gKbar = id − π̄` over `K̄`:
@@ -174,7 +182,8 @@ established purely through the function-field base-change naturality `functionFi
 
 Proof: `gKbar (P_gen^{K̄}) = ffBaseChangePoint (P_gen − π(P_gen))` (`gKbar_genericPoint_eq_map`)
 `= ffBaseChangePoint (some addPullback_x addPullback_y _)` (`genericPoint_sub_frobeniusW_KE_apply`)
-`= some (functionFieldMap addPullback_x) (functionFieldMap addPullback_y) _` (`Affine.Point.map_some`,
+`= some (functionFieldMap addPullback_x) (functionFieldMap addPullback_y) _`
+(`Affine.Point.map_some`,
 definitional), and `functionFieldMap addPullback_? = functionFieldMap ((1 − π).pullback ?_gen) =
 pullback_L ?_gen^{K̄}` (`oneSub_pullback_?_gen_eq` + `oneSubFrobeniusPullback_L_?_gen`). -/
 theorem oneSub_isGenuineWith_Kbar (hq : 2 ≤ Fintype.card K) :
@@ -201,7 +210,8 @@ theorem oneSub_isGenuineWith_Kbar (hq : 2 ≤ Fintype.card K) :
 /-- **`gKbar` satisfies the generic-point covariance leaf `MapTranslateGenericPoint`** (Silverman
 III.8.2 for `1 − π` over `K̄`).  Direct from the additive structure `gKbar = id − π̄`: the identity
 component is the master translation lemma `translateAlgEquivOfPoint_map_genericPoint`
-(`Point.map τ_S P_gen = P_gen + lift S`), the Frobenius component is `frobeniusGenericCovariance_Kbar`
+(`Point.map τ_S P_gen = P_gen + lift S`), the Frobenius component is
+`frobeniusGenericCovariance_Kbar`
 (`Point.map τ_S (π̄ P_gen) = π̄ P_gen + lift (π̄ S)`), and the two lifts recombine to
 `lift (S − π̄ S) = lift (φ_L S)`. -/
 theorem mapTranslateGenericPoint_gKbar (hq : 2 ≤ Fintype.card K) :
@@ -250,8 +260,10 @@ theorem mapTranslateGenericPoint_gKbar (hq : 2 ≤ Fintype.card K) :
   rw [hlift]
   abel
 
-/-- **The canonical-action generic-point covariance `hgcomm` for `(1 − π)_{K̄}`** (Silverman III.8.2),
-CoordHom-free — the form the `SeparableWitnesses` reductions consume.  From `oneSub_isGenuineWith_Kbar`
+/-- **The canonical-action generic-point covariance `hgcomm` for `(1 − π)_{K̄}`** (Silverman
+III.8.2),
+CoordHom-free — the form the `SeparableWitnesses` reductions consume.  From
+`oneSub_isGenuineWith_Kbar`
 (genuineness with `gKbar`) + `mapTranslateGenericPoint_gKbar` (the covariance for `gKbar`), via
 `mapTranslateGenericPoint_canonical_of_genuine`. -/
 theorem mapTranslateGenericPoint_oneSub_canonical (hq : 2 ≤ Fintype.card K) :

@@ -37,13 +37,12 @@ theorem PIDGalois [IsGalois ℚ K] {θ : 𝓞 K} (hθ : exponent θ = 1)
     Ideal.span_singleton_eq_bot.not.mpr (Nat.cast_ne_zero.mpr hp.ne_zero)
   haveI hJmax : (↑J : Ideal (𝓞 K)).IsMaximal :=
     J.2.1.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hspne (↑J : Ideal (𝓞 K)))
-  by_cases h : ⌊(M K)⌋₊ < p ^ I.inertiaDeg' ℤ
+  by_cases h : ⌊(M K)⌋₊ < p ^ I.inertiaDeg ℤ
   · linarith
   haveI hIlies : I.LiesOver (span ({↑p} : Set ℤ)) := hI.2
   haveI hImax : I.IsMaximal := hI.1.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hspne I)
   rw [← Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
     (hθ ▸ hp.not_dvd_one) hQ] at H
-  simp only [Ideal.inertiaDeg_eq_inertiaDeg'] at H
   rw [inertiaDeg_eq_of_isGaloisGroup (span ({↑p} : Set ℤ)) (↑J) I Gal(K/ℚ)] at H
   obtain ⟨σ, rfl⟩ := exists_smul_eq_of_isGaloisGroup (span ({↑p} : Set ℤ)) J I Gal(K/ℚ)
   exact (H.resolve_left h).map_ringHom _

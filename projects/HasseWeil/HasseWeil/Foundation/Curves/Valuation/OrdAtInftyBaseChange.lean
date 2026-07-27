@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Valuation.Infinity
-import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
 import HasseWeil.Foundation.Curves.IntegralClosure
+import HasseWeil.Foundation.Curves.Map.CurveMapBaseChange
+import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
 # Base change of the order at infinity (Silverman I.2 + IV.1)
@@ -44,8 +44,6 @@ namespace HasseWeil.Curves.SmoothPlaneCurve
 
 variable {K : Type*} [Field K] (C : SmoothPlaneCurve K)
 variable (L : Type*) [Field L] [Algebra K L]
-
-set_option linter.style.longLine false
 
 /-- `coordRingMap` on the `K[X]`-basis decomposition `p • 1 + q • y`: it sends the coefficients
 `p, q` through `Polynomial.map (algebraMap K L)` and fixes the basis `{1, y}`. -/

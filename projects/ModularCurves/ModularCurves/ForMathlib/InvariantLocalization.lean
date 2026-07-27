@@ -5,8 +5,8 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Tickets T-Q3a, T-Q3b, T-Q3c.
 -/
-import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.Algebra.Algebra.Subalgebra.Operations
+import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
 # Group actions on localizations at an invariant element

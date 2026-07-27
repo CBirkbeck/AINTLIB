@@ -71,7 +71,7 @@ theorem isIntegral_of_isDomain [IsDomain A] (h : ∃ i, 0 < i ∧ ∃ x ∈ 𝒜
   haveI hred : IsReduced (Proj 𝒜) := by
     haveI : ∀ i, IsReduced ((Proj.affineOpenCover 𝒜).openCover.X i) := by
       intro i
-      rw [AlgebraicGeometry.Scheme.AffineOpenCover.openCover_X]
+      show IsReduced (Spec ((Proj.affineOpenCover 𝒜).X i))
       haveI : _root_.IsReduced (↥((Proj.affineOpenCover 𝒜).X i)) := isReduced_away 𝒜 _
       infer_instance
     exact IsReduced.of_openCover _ (Proj.affineOpenCover 𝒜).openCover

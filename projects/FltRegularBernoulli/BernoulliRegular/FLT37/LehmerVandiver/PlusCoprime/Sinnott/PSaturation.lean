@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.IndexFormula
 
 /-!
 # p-saturation for the Sinnott bridge
@@ -75,7 +77,7 @@ theorem isPthPower_iff_isPthPower_of_sinnott
         (Set.range (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three)) ⊔
       NumberField.Units.torsion (NumberField.maximalRealSubfield K)
   have h_β_pow_in : β ^ p ∈ H := hβ ▸ hα
-  unfold SinnottIndexFormula at h_sinnott
+  simp only [SinnottIndexFormula] at h_sinnott
   have h_index : H.index = 2 ^ ((p - 3) / 2) * hPlus K := h_sinnott
   have h_hPlus_pos : 0 < hPlus K :=
     Nat.pos_of_ne_zero (Fintype.card_ne_zero)

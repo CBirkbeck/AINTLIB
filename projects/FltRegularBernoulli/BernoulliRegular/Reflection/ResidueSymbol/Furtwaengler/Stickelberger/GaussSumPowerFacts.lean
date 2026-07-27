@@ -6,7 +6,7 @@ public import Mathlib.RingTheory.Polynomial.Cyclotomic.Eval
 public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
 
 /-!
-# Stickelberger-style prime factorisation of `g(χ_q)^p` (REF-18c2c)
+# Stickelberger-style prime factorisation of `g(χ_q)^p`
 
 This file develops the Stickelberger-type theorem for the residue Gauss sum
 `g(χ_q, ψ_q)` raised to its character order. The classical statement
@@ -30,8 +30,8 @@ Stickelberger weight. We work in stages:
 3. **Prime factorisation via Stickelberger weight** (deferred).
    The actual Stickelberger formula `g(χ_q)^p = q^{p-1} · ∏ σ_a^{?}`
    requires the explicit Galois-orbit computation and Jacobi-sum
-   factorisation. This is the core of REF-18c2c and is left for follow-up
-   commits.
+   factorisation. This is the core of the Stickelberger theorem and is left
+   for follow-up commits.
 
 The Galois-invariance step is small but essential: it shows that
 `g(χ_q, ψ_q)^p` *descends* from the larger ring `R' = K(ζ_{Nq})` to the
@@ -288,7 +288,7 @@ intended cyclotomic application, and equals `𝓞_K` for `K = ℚ(ζ_p)`.
 -/
 
 /-!
-### q-adic valuation of `g(χ_q)` (REF-18c2c2 — abstract form)
+### q-adic valuation of `g(χ_q)` (abstract form)
 
 The classical Stickelberger argument proves `g(χ_q) ∈ P` for `P` a prime
 ideal of `𝓞_{R'}` above the rational prime `q`, by reducing the Gauss
@@ -302,7 +302,7 @@ is the content of a later subticket since it requires concrete cyclotomic
 extension scaffolding.
 -/
 
-/-- **Abstract form of REF-18c2c2.** For a non-trivial multiplicative
+/-- **Abstract form.** For a non-trivial multiplicative
 character `χ` and an additive character `ψ` that is "constantly 1 mod `I`"
 (i.e., `ψ(x) - 1 ∈ I` for all `x`), the Gauss sum lies in `I`.
 
@@ -316,14 +316,14 @@ theorem gaussSum_mem_ideal_of_addChar_sub_one_mem
     {I : Ideal R'} (h : ∀ x : R, ψ x - 1 ∈ I) :
     gaussSum χ ψ ∈ I := by
   have h_split : gaussSum χ ψ = ∑ x, χ x * (ψ x - 1) + ∑ x, χ x := by
-    unfold gaussSum
+    simp only [gaussSum]
     rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl fun x _ => ?_
+    refine Finset.sum_congr rfl fun x _ ↦ ?_
     rw [mul_sub, mul_one, sub_add_cancel]
   rw [h_split, MulChar.sum_eq_zero_of_ne_one hχ, add_zero]
-  exact Ideal.sum_mem _ (fun x _ => Ideal.mul_mem_left _ _ (h x))
+  exact Ideal.sum_mem _ fun x _ ↦ Ideal.mul_mem_left _ _ (h x)
 
-/-- **Algebraic helper for the concrete instantiation of REF-18c2c2.**
+/-- **Algebraic helper for the concrete instantiation.**
 If `x - 1 ∈ I`, then `x^n - 1 ∈ I` for all `n`. Useful when verifying the
 hypothesis of `gaussSum_mem_ideal_of_addChar_sub_one_mem` for the concrete
 additive character `ψ_q(x) = ζ_q^{Tr(x)}`: assuming `ζ_q - 1 ∈ P` (the
@@ -337,7 +337,7 @@ theorem pow_sub_one_mem_of_sub_one_mem
   rw [hc]
   exact Ideal.mul_mem_right _ _ h
 
-/-- **Residue Gauss sum specialisation of REF-18c2c2.** If `ψ_q` of a
+/-- **Residue Gauss sum specialisation.** If `ψ_q` of a
 `StickelbergerSetup` is "constantly 1 mod `I`" on the residue field `k`,
 then `g(χ_q) ∈ I`.
 
@@ -367,7 +367,7 @@ residue MulChar with `σ` equals the `a`-th power character:
 
 This identifies how a Galois automorphism `σ` (concretely `σ_a` sending
 `ζ_R ↦ ζ_R^a`) permutes the residue character among its powers. Combined
-with `gaussSum_ringHomComp` (REF-18c2b), it gives the input REF-18c2c3
+with `gaussSum_ringHomComp`, it gives the input the Galois-orbit step
 needs for the Galois orbit assembly: `σ_a(g(χ_q)) = g(χ_q^a, σ_a · ψ_q)`
 after suitable adjustment. -/
 theorem residueMulChar_ringHomComp_pow_eq
@@ -386,9 +386,9 @@ theorem residueMulChar_ringHomComp_pow_eq
       residueMulChar_apply_unit, σ.map_pow, hσ, ← pow_mul, ← pow_mul, mul_comm]
 
 /-!
-### Galois orbit of `g(χ_q)` (REF-18c2c3 — abstract form)
+### Galois orbit of `g(χ_q)` (abstract form)
 
-Combining `residueGaussSum_ringHomComp` (REF-18c2b) with the character
+Combining `residueGaussSum_ringHomComp` with the character
 compatibility `residueMulChar_ringHomComp_pow_eq` above gives the
 *abstract Galois orbit identity*: for any ring hom `σ : R' →+* R'`
 sending `ζ_R ↦ ζ_R^a`,
@@ -400,16 +400,16 @@ Galois automorphism with `ζ_q ↦ ζ_q^a`), the additive character
 transforms as `(σ_a · ψ_q)(x) = ψ_q(a·x)`; the substitution `y = a·x`
 then converts the right-hand side into a multiple of `g(χ_q^a, ψ_q)`
 controlled by `χ_q^a(a^{-1})`. That refinement requires the concrete
-trace formula `ψ_q(x) = ζ_q^{Tr(x)}` and is deferred to REF-18c2c4
+trace formula `ψ_q(x) = ζ_q^{Tr(x)}` and is deferred to the concrete layer
 together with the prime-ideal factorisation work.
 -/
 
-/-- **Abstract form of REF-18c2c3** (Galois orbit of `residueGaussSum`).
+/-- **Abstract form** (Galois orbit of `residueGaussSum`).
 For any ring hom `σ : R' →+* R'` sending `ζ_R ↦ ζ_R^a`,
 `σ(g(χ_q, ψ_q)) = gaussSum (χ_q^a) (σ ∘ ψ_q)`.
 
 This is the basic Galois transformation rule. The key inputs are
-`residueGaussSum_ringHomComp` (REF-18c2b) and
+`residueGaussSum_ringHomComp` and
 `residueMulChar_ringHomComp_pow_eq` (above). -/
 theorem residueGaussSum_ringHomComp_pow_eq
     {k : Type*} [Field k] [Fintype k]
@@ -476,7 +476,7 @@ theorem residueJacobiSum_mem_closure
     jacobiSum (residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R)
         ((residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R) ^ i) ∈
       Subring.closure {((zeta_R : R'ˣ) : R')} := by
-  unfold jacobiSum
+  simp only [jacobiSum]
   apply Subring.sum_mem
   intro x _
   apply Subring.mul_mem
@@ -488,7 +488,7 @@ provided `ψ_q` is primitive (so the Jacobi-sum chain identity applies).
 
 In the intended cyclotomic application with `R' = K(ζ_{Nq})` and
 `zeta_R ∈ K = ℚ(ζ_p)`, the closure equals `ℤ[ζ_p] = 𝓞_K`, so
-`g(χ_q, ψ_q)^p ∈ 𝓞_K` — the key descent that REF-18c2d will exploit. -/
+`g(χ_q, ψ_q)^p ∈ 𝓞_K` — the key descent exploited downstream. -/
 theorem residueGaussSum_pow_p_mem_closure
     {k : Type*} [Field k] [Fintype k]
     {R' : Type*} [CommRing R'] [IsDomain R']
@@ -516,15 +516,15 @@ private theorem isIntegral_of_mem_closure_singleton
     {x : R'} (hx : x ∈ Subring.closure {y}) :
     IsIntegral ℤ x := by
   refine Subring.closure_induction
-    (p := fun x _ => IsIntegral ℤ x) ?_ ?_ ?_ ?_ ?_ ?_ hx
+    (p := fun x _ ↦ IsIntegral ℤ x) ?_ ?_ ?_ ?_ ?_ ?_ hx
   · intro z hz
     rw [Set.mem_singleton_iff] at hz
     exact hz ▸ hy
   · exact isIntegral_zero
   · exact isIntegral_one
-  · exact fun _ _ _ _ ha hb => ha.add hb
-  · exact fun _ _ ha => ha.neg
-  · exact fun _ _ _ _ ha hb => ha.mul hb
+  · exact fun _ _ _ _ ha hb ↦ ha.add hb
+  · exact fun _ _ ha ↦ ha.neg
+  · exact fun _ _ _ _ ha hb ↦ ha.mul hb
 
 /-- **Algebraic-integer corollary for Jacobi sums.** `J(χ_q, χ_q^i)` is
 integral over `ℤ`. Follows from `residueJacobiSum_mem_closure` together
@@ -649,7 +649,7 @@ theorem residueGaussSum_pow_p_mul_pow_p_sub_one_eq_card_pow
       residueMulChar_neg_one_pow_eq_one zeta_q hzeta_q hdiv zeta_R hzeta_R, one_mul]
 
 /-!
-### Abstract consequences for prime ideal factorisation (REF-18c2c4 — Phase A)
+### Abstract consequences for prime ideal factorisation (Phase A)
 
 The full Stickelberger prime ideal factorisation requires concrete cyclotomic
 ramification machinery (a chosen extension `R'` containing both `μ_p` and
@@ -718,7 +718,7 @@ theorem residueGaussSum_pow_p_support_above_card
     hgauss
 
 /-!
-### Cyclotomic ramification (REF-18c2c4 — Phase B)
+### Cyclotomic ramification (Phase B)
 
 The classical ramification fact: in any commutative domain `R` containing a
 primitive `q`-th root of unity `ζ` (with `q` a rational prime), every prime
@@ -730,7 +730,7 @@ The proof uses the polynomial identity `Φ_q(1) = q` together with the
 factorisation `Φ_q = ∏_{μ primitive} (X - C μ)` and the associate-class
 identification of `ζ - 1` with each `ζ^j - 1` for `j` coprime to `q`.
 
-Combined with REF-18c2c2's `gaussSum_mem_ideal_of_addChar_sub_one_mem`,
+Combined with `gaussSum_mem_ideal_of_addChar_sub_one_mem`,
 this gives the concrete instantiation: `g(χ_q) ∈ Q` for `Q` above `q`,
 when the additive character `ψ_q` has the form `ψ_q(x) = ζ^{Tr(x)}`.
 -/
@@ -807,7 +807,7 @@ character `ψ_q : k → R'` has the form `ψ_q(x) = ζ^{f(x)}` for some primitiv
 of `gaussSum_mem_ideal_of_addChar_sub_one_mem` is satisfied for any prime
 ideal `Q` of `R'` containing `q`. Hence `g(χ_q, ψ_q) ∈ Q`.
 
-This is the *concrete instantiation* of REF-18c2c2 for the standard
+This is the *concrete instantiation* of the abstract form for the standard
 cyclotomic additive character. The hypothesis `h_psi_pow` captures the
 trace-formula structure `ψ_q(x) = ζ_q^{Tr(x)}` of the standard primitive
 character on a finite field. -/
@@ -824,7 +824,7 @@ theorem residueGaussSum_mem_ideal_of_psi_pow_form
     {Q : Ideal R'} [Q.IsPrime] (hQ : (q : R') ∈ Q) :
     residueGaussSum zeta_q hzeta_q hdiv zeta_R hzeta_R psi_q ∈ Q := by
   refine residueGaussSum_mem_ideal_of_psi_sub_one_mem
-    zeta_q hzeta_q hdiv zeta_R hzeta_R (fun x => ?_)
+    zeta_q hzeta_q hdiv zeta_R hzeta_R fun x ↦ ?_
   obtain ⟨n, hn⟩ := h_psi_pow x
   rw [hn]
   exact zeta_pow_sub_one_mem_of_natCast_mem hζ hQ n

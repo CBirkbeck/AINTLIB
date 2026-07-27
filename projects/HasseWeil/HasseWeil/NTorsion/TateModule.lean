@@ -61,6 +61,7 @@ def tateCompat : AddSubgroup (Π n : ℕ, W.toAffine[((ℓ ^ n : ℕ) : ℤ)]) w
   neg_mem' {f} hf n := by simp only [Pi.neg_apply, map_neg, hf n]
 
 omit [IsAlgClosed F] hℓ in
+/-- Membership in `tateCompat`: the coordinates are compatible under the connecting maps. -/
 @[simp] theorem mem_tateCompat (f : Π n : ℕ, W.toAffine[((ℓ ^ n : ℕ) : ℤ)]) :
     f ∈ tateCompat W ℓ ↔ ∀ n, tateConn W ℓ n (f (n + 1)) = f n := Iff.rfl
 
@@ -83,6 +84,7 @@ noncomputable instance : SMul ℤ_[ℓ] (tateCompat W ℓ) where
     rw [ZMod.castHom_apply, PadicInt.cast_toZModPow (p := ℓ) n (n + 1) n.le_succ z]⟩
 
 omit [IsAlgClosed F] in
+/-- The `ℤ_[ℓ]`-scalar action on `tateCompat`, coordinatewise via `toZModPow`. -/
 @[simp] theorem smul_tateCompat_val (z : ℤ_[ℓ]) (f : tateCompat W ℓ) (n : ℕ) :
     ((z • f : tateCompat W ℓ) : Π n : ℕ, W.toAffine[((ℓ ^ n : ℕ) : ℤ)]) n =
       PadicInt.toZModPow n z • (f : Π n : ℕ, W.toAffine[((ℓ ^ n : ℕ) : ℤ)]) n := rfl
@@ -183,6 +185,7 @@ noncomputable def tateForwardCompat (f : tateModule W ℓ) (i : Fin 2) : compatS
     intro n
     rw [← torsion_ellPow_linearEquiv_tateConn W ℓ hℓF n (f.val (n + 1)) i, tateCompat_compat]⟩
 
+/-- The `n`-th coordinate of `tateForwardCompat`, via the level-`n` torsion basis. -/
 @[simp] theorem tateForwardCompat_val (f : tateModule W ℓ) (i : Fin 2) (n : ℕ) :
     (tateForwardCompat W ℓ hℓF f i).val n = torsion_ellPow_linearEquiv W ℓ hℓF n (f.val n) i := rfl
 

@@ -91,7 +91,7 @@ the additivity that turns a multiplicative cyclotomic-unit factorisation
 `δ = ∏ᵢ Eᵢ^{dᵢ}` into the *linear* index equation `ind δ = ∑ᵢ dᵢ · ind Eᵢ`. -/
 theorem cyclicInd_mul {G : Type*} [CommGroup G] [Finite G] (h : IsCyclic G)
     (u v : G) : cyclicInd h (u * v) = cyclicInd h u + cyclicInd h v := by
-  unfold cyclicInd
+  simp only [cyclicInd]
   rw [map_mul]
   rfl
 
@@ -100,7 +100,7 @@ theorem cyclicInd_mul {G : Type*} [CommGroup G] [Finite G] (h : IsCyclic G)
 index relation underlying Washington Lemma 9.9. -/
 theorem cyclicInd_pow {G : Type*} [CommGroup G] [Finite G] (h : IsCyclic G)
     (u : G) (n : ℕ) : cyclicInd h (u ^ n) = n * cyclicInd h u := by
-  unfold cyclicInd
+  simp only [cyclicInd]
   rw [map_pow]
   simp only [toAdd_pow, nsmul_eq_mul]
 
@@ -111,7 +111,7 @@ Proposition 8.18: `p ∣ indᵢ Eᵢ` exactly when `Eᵢ` is a `p`-th power. -/
 theorem isPow_iff_dvd_cyclicInd {G : Type*} [CommGroup G] [Finite G]
     (h : IsCyclic G) (u : G) (p : ℕ) :
     (∃ v : G, u = v ^ p) ↔ (p : ZMod (Nat.card G)) ∣ cyclicInd h u := by
-  unfold cyclicInd
+  simp only [cyclicInd]
   constructor
   · rintro ⟨v, rfl⟩
     refine ⟨Multiplicative.toAdd ((zmodCyclicMulEquiv h).symm v), ?_⟩
@@ -165,7 +165,7 @@ nonzero (it lies over the rational prime `149`), so in the Dedekind domain
 instance lv149_isMaximal : lv149.IsMaximal := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   haveI : Fact (Nat.Prime 149) := ⟨by decide⟩
-  unfold lv149
+  simp only [lv149]
   refine Ideal.IsPrime.isMaximal
     (FLT37.lehmerVandiverPrime_isPrime 37 149 4 _ _ _) ?_
   have h := FLT37.lehmerVandiverPrime_natCast_ℓ_mem 37 149 4
@@ -279,7 +279,7 @@ theorem isPthPowerModPrime_iff_dvd_residueUnitInd
         ((u : (𝓞 (CyclotomicField 37 ℚ))ˣ) : 𝓞 (CyclotomicField 37 ℚ)) ↔
       (p : ZMod (Nat.card (𝓞 (CyclotomicField 37 ℚ) ⧸ lv149)ˣ)) ∣ residueUnitInd u := by
   -- `IsPthPowerModPrime` unfolds to `∃ y, Q(u) = y^p`.
-  unfold BernoulliRegular.IsPthPowerModPrime residueUnitInd
+  simp only [BernoulliRegular.IsPthPowerModPrime, residueUnitInd]
   -- Rewrite `Q(u) = (residueUnit u).val` to expose the unit `residueUnit u`.
   rw [← residueUnit_val u]
   -- Ring `p`-th power of a unit element ↔ unit-group `p`-th power.

@@ -220,7 +220,7 @@ theorem freeContentCaseIIData37_even_content
     have hne : D.hζ.toInteger ≠ (1 : 𝓞 K) :=
       fun h ↦ D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h
     have hpair := (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
-      |>.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+      |>.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
         (by decide : Nat.Prime 37) hmem_dζ hmem_one hne
     -- `hpair : Associated ((zeta_spec).toInteger − 1) (ζ_D − 1)`.
     simpa [hπD, hπ] using hpair.symm

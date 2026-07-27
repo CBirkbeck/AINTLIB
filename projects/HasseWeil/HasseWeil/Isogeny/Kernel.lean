@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import HasseWeil.Foundation.Basic
 import Mathlib.FieldTheory.Galois.Basic
 import Mathlib.FieldTheory.SeparableDegree
-import HasseWeil.Foundation.Basic
 
 /-!
 # Kernel of an Isogeny
@@ -130,26 +130,16 @@ instance kernel_finite_of_point_finite [Finite W₁.Point] (φ : Isogeny W₁ W�
     Finite φ.kernel :=
   inferInstance
 
-/-- **T-III-4-011 for finite fields**: over F with Finite Point structure,
-    every isogeny's kernel is automatically finite (named theorem form). -/
-theorem kernel_finite_of_point_finite_named [Finite W₁.Point]
-    (φ : Isogeny W₁ W₂) : Finite φ.kernel :=
-  inferInstance
-
 /-- **Cardinality bound**: over a finite field, `#ker φ ≤ #W₁.Point`. -/
 theorem kernel_card_le_point_card [Finite W₁.Point] (φ : Isogeny W₁ W₂) :
     Nat.card φ.kernel ≤ Nat.card W₁.Point :=
   Nat.card_le_card_of_injective _ (Subtype.val_injective)
 
 /-- **Lagrange for kernel**: over a finite field, `#ker φ ∣ #W₁.Point`
-    (subgroup cardinality divides group cardinality). Via
-    `Subgroup.card_subgroup_dvd_card` applied in multiplicative form. -/
+    (subgroup cardinality divides group cardinality). -/
 theorem kernel_card_dvd_point_card [Finite W₁.Point] (φ : Isogeny W₁ W₂) :
-    Nat.card φ.kernel ∣ Nat.card W₁.Point := by
-  have := @Subgroup.card_subgroup_dvd_card (Multiplicative W₁.Point) _
-    (AddSubgroup.toSubgroup φ.kernel)
-  rwa [Nat.card_congr (Multiplicative.ofAdd : W₁.Point ≃ _).symm,
-    Nat.card_congr (Equiv.refl _)] at this
+    Nat.card φ.kernel ∣ Nat.card W₁.Point :=
+  AddSubgroup.card_addSubgroup_dvd_card φ.kernel
 
 /-- **Kernel of sum** (for AddSubgroup inclusion): `ker φ ∩ ker ψ ≤ ker (φ + ψ)`,
     where `(φ + ψ)` is a hypothetical isogeny with summed action.
@@ -225,7 +215,7 @@ theorem fiber_finite_of_kernel_finite (φ : Isogeny W₁ W₂)
   · exact Finite.of_equiv _ (fiberEquivKernel φ hP₀).symm
   · haveI : IsEmpty {P : W₁.Point // φ.toAddMonoidHom P = Q} :=
       ⟨fun ⟨P, hP⟩ ↦ h_empty ⟨P, hP⟩⟩
-    exact Finite.of_equiv Empty (Equiv.equivEmpty _).symm
+    infer_instance
 
 /-- **Bijection of nonempty fibers**: any two nonempty fibers of `φ` are in
     bijection. (They're both cosets of the kernel, hence have the same size.) -/
@@ -414,15 +404,6 @@ theorem card_kernel_eq_degree_of_sepDegree_eq_card_kernel (φ : Isogeny W₁ W�
   rw [← h_count]
   exact (isSeparable_iff_sepDegree_eq_degree φ hfin).mp hsep
 
-/-- **Combinatorial helper**: if `e : α → ℤ` is uniformly `c` on a finset `S`,
-then `∑ P ∈ S, e P = (#S) * c`. -/
-theorem _root_.Finset.sum_eq_card_mul_of_constant
-    {α : Type*} {S : Finset α} {e : α → ℤ} {c : ℤ}
-    (heq : ∀ P ∈ S, e P = c) :
-    ∑ P ∈ S, e P = (S.card : ℤ) * c := by
-  rw [Finset.sum_congr rfl heq, Finset.sum_const]
-  simp
-
 /-- **Witness-parametric Silverman III.4.10(a) second half** (T-III-4-013):
 given a finite fiber `S` with uniform ramification index `c` summing to
 `deg φ`, and `#S = deg_s φ`, we recover the product identity
@@ -446,8 +427,7 @@ theorem ramificationIndex_mul_sepDegree_eq_degree_of_witnesses
     (h_sum : ∑ P ∈ S, e P = (φ.degree : ℤ))
     (h_card : S.card = φ.sepDegree) :
     (φ.sepDegree : ℤ) * c = (φ.degree : ℤ) := by
-  rw [← h_card]
-  exact (Finset.sum_eq_card_mul_of_constant h_uniform).symm.trans h_sum
+  rw [← h_card, ← h_sum, Finset.sum_eq_card_nsmul h_uniform, nsmul_eq_mul]
 
 /-- **Witness-parametric T-III-4-013** in ratio form: under the same hypotheses,
 if `φ.sepDegree ≠ 0`, the common ramification index `c` equals

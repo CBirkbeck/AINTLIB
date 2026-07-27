@@ -157,8 +157,8 @@ theorem torsionComponentNontrivial_of_elementaryComponentNontrivial_modPow
     (hV : ElementaryQuotientComponent.ElementaryComponentNontrivial
       (p := p) i rho) :
     TorsionComponent.TorsionComponentNontrivial (p := p) i rho := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero (p ^ N) := ⟨pow_ne_zero N (Fact.out : p.Prime).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero (p ^ N) := ⟨pow_ne_zero N (Fact.out : p.Prime).ne_zero⟩
   exact torsionComponentNontrivial_of_finiteLevelCharacter_cast
       (p := p) (m := p ^ N)
       (hcardp := isUnit_card_delta_zmod (p := p))
@@ -174,7 +174,7 @@ theorem torsionComponentNontrivial_of_elementaryComponentNontrivial_pow_killed
     (hV : ElementaryQuotientComponent.ElementaryComponentNontrivial
       (p := p) i rho) :
     TorsionComponent.TorsionComponentNontrivial (p := p) i rho := by
-  letI : Module (ZMod (p ^ N)) A :=
+  let _ : Module (ZMod (p ^ N)) A :=
     AddCommGroup.zmodModule (n := p ^ N) hkill
   exact torsionComponentNontrivial_of_elementaryComponentNontrivial_modPow
     (p := p) (A := A) hN i rho hV
@@ -197,8 +197,8 @@ open FiniteLevelProjectionBridge
 open ProjectedSubgroupComparison
 open TorsionComponent
 
-variable {A : Type*} [AddCommGroup A] [Finite A]
-
+/-- An automorphism of `A` restricts to an automorphism of its `p`-primary
+component, since it preserves additive orders. -/
 def primaryComponentAddEquiv (e : A ≃+ A) :
     AddCommGroup.primaryComponent A p ≃+ AddCommGroup.primaryComponent A p where
   toFun x := ⟨e x, by
@@ -228,6 +228,8 @@ theorem primaryComponentAddEquiv_apply_coe
       AddCommGroup.primaryComponent A p) : A) = e x :=
   rfl
 
+/-- The action of `Delta` on the `p`-primary component of `A`, obtained by
+restricting each `rho d` along `primaryComponentAddEquiv`. -/
 def primaryComponentAction
     (rho : CharacterProjection.Delta p →* Multiplicative (A ≃+ A)) :
     CharacterProjection.Delta p →*
@@ -275,7 +277,7 @@ theorem elementaryComponentNontrivial_primary_of_elementaryComponentNontrivial
     (hV : ElementaryComponentNontrivial (p := p) i rho) :
     ElementaryComponentNontrivial (p := p) i
       (primaryComponentAction (p := p) rho) := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   let B := AddCommGroup.primaryComponent A p
   let f : ElementaryQuotient B p →ₗ[ZMod p] ElementaryQuotient A p :=
     subgroupElementaryQuotientLinearMap (p := p) B
@@ -329,6 +331,8 @@ theorem primaryComponent_exists_pow_killed :
       rw [pow_succ, mul_nsmul]
     _ = 0 := by rw [hkillN, nsmul_zero]
 
+/-- The inclusion of a subgroup `B ≤ A` induces a `ZMod p`-linear map on
+`p`-torsion. -/
 def subgroupTorsionToTorsionLinearMap [NeZero p]
     (B : AddSubgroup A) :
     torsionBySubgroup B p →ₗ[ZMod p] torsionBySubgroup A p :=
@@ -390,7 +394,7 @@ theorem torsionComponentNontrivial_of_elementaryComponentNontrivial_finite
     (i : ℕ) (rho : CharacterProjection.Delta p →* Multiplicative (A ≃+ A))
     (hV : ElementaryComponentNontrivial (p := p) i rho) :
     TorsionComponentNontrivial (p := p) i rho := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   let B := AddCommGroup.primaryComponent A p
   have hV_B : ElementaryComponentNontrivial (p := p) i
       (primaryComponentAction (p := p) rho) :=
@@ -412,7 +416,7 @@ theorem torsionComponentNontrivial_of_elementaryComponentNontrivial_finite
     apply Subtype.ext
     apply Subtype.ext
     simpa [B, subgroupTorsionToTorsionLinearMap] using
-      congrArg (fun y : torsionBySubgroup A p => (y.1 : A)) hx_zero
+      congrArg (fun y : torsionBySubgroup A p ↦ (y.1 : A)) hx_zero
   · exact subgroupTorsionToTorsion_mem_torsionComponent_of_mem
       (p := p) (A := A) i rho hx_mem
 

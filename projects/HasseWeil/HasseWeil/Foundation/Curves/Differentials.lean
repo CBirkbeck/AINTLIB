@@ -262,20 +262,6 @@ theorem subsingleton_relativeKaehler_of_mapBaseChange_surjective
   have hy : y = 0 := by rw [← hb, h_map_zero]; rfl
   rw [hx, hy]
 
-/-- **Forward chain step 4 (axiom-clean)**: the smul_assoc identity for the
-algebra structure `F → K(E) → K(E)` where the inner step is `α.pullback`.
-
-Direct from `α.pullback` being an `F`-algebra hom (commutes with `algebraMap F`)
-plus `mul_assoc`. This is the underlying mathematical fact needed for the
-IsScalarTower instance; ship as a bare equation to bypass typeclass-instance
-defeq issues (mathlib's default `SMul F K(E)` from `OreLocalization` vs.
-`α.toAlgebra.toSMul` are both defeq but syntactically distinct). -/
-theorem isogeny_smul_assoc_identity (α : Isogeny W.toAffine W.toAffine)
-    (a : F) (b c : W.toAffine.FunctionField) :
-    α.pullback (algebraMap F W.toAffine.FunctionField a * b) * c =
-      algebraMap F W.toAffine.FunctionField a * (α.pullback b * c) := by
-  rw [map_mul, AlgHom.commutes, mul_assoc]
-
 /-- **Forward chain step 4 (axiom-clean)**: the `IsScalarTower` instance for the
 algebra structure from an isogeny.
 
@@ -447,21 +433,6 @@ theorem isSeparable_iff_omegaPullbackCoeff_ne_zero_of_witnesses
   (isSeparable_iff_subsingleton_kaehler_of_finiteDimensional W α h_fin).trans
     (h_bridge.trans (pullbackKaehler_injective_iff_omegaPullbackCoeff_ne_zero W α))
 
-/-- **Algebra-Kähler iff (witness-parametric)**: combines a forward-direction
-implication and the reverse-direction implication into the full iff
-`IsSeparable α ↔ pullbackKaehler injective`.
-
-Forward direction: takes a witness `h_fwd : IsSeparable α → pullbackKaehler injective`.
-Reverse direction: takes a witness `h_rev : pullbackKaehler injective → IsSeparable α`.
-
-When both land axiom-clean, this fires the composition. -/
-theorem isSeparable_iff_pullbackKaehler_injective_of_witnesses
-    (α : Isogeny W.toAffine W.toAffine)
-    (h_fwd : α.IsSeparable → Function.Injective α.pullbackKaehler)
-    (h_rev : Function.Injective α.pullbackKaehler → α.IsSeparable) :
-    α.IsSeparable ↔ Function.Injective α.pullbackKaehler :=
-  ⟨h_fwd, h_rev⟩
-
 /-- A type synonym for `K(E)` on the source side of the algebra structure
 induced by an isogeny `α`. Carries `α.toAlgebra` as its only `Algebra` instance,
 avoiding the `OreLocalization.instSMul` vs `α.toAlgebra.toSMul` defeq fight that
@@ -627,8 +598,9 @@ theorem isogeny_mapBaseChange_one_tmul_D
       ((1 : W.toAffine.FunctionField) ⊗ₜ
         KaehlerDifferential.D F (IsogenyAlgebraSource W α) x) =
       KaehlerDifferential.D F W.toAffine.FunctionField (α.pullback x) := by
-  rw [KaehlerDifferential.mapBaseChange_tmul, one_smul,
-    KaehlerDifferential.map_D]
+  have h_map_D := KaehlerDifferential.map_D F F (IsogenyAlgebraSource W α)
+    W.toAffine.FunctionField x
+  rw [KaehlerDifferential.mapBaseChange_tmul, one_smul, h_map_D]
   rfl
 
 /-- **Bridge: image of mapBaseChange contains the invariant differential** when
@@ -649,7 +621,11 @@ theorem isogeny_mapBaseChange_surjective_of_omegaCoeff_ne_zero
     KaehlerDifferential.D F (IsogenyAlgebraSource W α)
       (algebraMap (W.toAffine.CoordinateRing) W.toAffine.FunctionField
         (algebraMap (Polynomial F) (W.toAffine.CoordinateRing) Polynomial.X))), ?_⟩
-  rw [map_smul, KaehlerDifferential.mapBaseChange_tmul, KaehlerDifferential.map_D]
+  have h_map_D := KaehlerDifferential.map_D F F (IsogenyAlgebraSource W α)
+    W.toAffine.FunctionField
+    (algebraMap (W.toAffine.CoordinateRing) W.toAffine.FunctionField
+      (algebraMap (Polynomial F) (W.toAffine.CoordinateRing) Polynomial.X))
+  rw [map_smul, KaehlerDifferential.mapBaseChange_tmul, h_map_D]
   have hu_ne : alpha_star_u W α ≠ 0 := by
     rw [alpha_star_u_eq]
     exact (map_ne_zero_iff α.pullback α.pullback_injective).mpr
@@ -738,7 +714,9 @@ private theorem kaehlerMap_eq_zero_of_pullbackKaehler_eq_zero
       W.toAffine.FunctionField (KaehlerDifferential.D F (IsogenyAlgebraSource W α)
         (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
           (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X))) = 0 := by
-    rw [KaehlerDifferential.map_D]
+    rw [KaehlerDifferential.map_D F F (IsogenyAlgebraSource W α) W.toAffine.FunctionField
+      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X))]
     exact (Isogeny.pullbackKaehler_D α _).symm.trans (h_pK_zero _)
   have h_map_ω : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
       W.toAffine.FunctionField (invariantDifferential W.toAffine) = 0 := by
@@ -748,7 +726,7 @@ private theorem kaehlerMap_eq_zero_of_pullbackKaehler_eq_zero
     rw [LinearMap.map_smul, h_map_D, smul_zero]
   exact (LinearMap.map_smul (KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
     W.toAffine.FunctionField) a (invariantDifferential W.toAffine)).trans
-    (by rw [h_map_ω, smul_zero])
+    (by rw [h_map_ω]; exact smul_zero _)
 
 /-- Helper for `isogeny_omegaCoeff_ne_zero_of_isSeparable`: if the cotangent map
 `KaehlerDifferential.map` is zero, then so is `KaehlerDifferential.mapBaseChange`,
@@ -833,25 +811,6 @@ theorem isSeparable_iff_omegaPullbackCoeff_ne_zero_of_finiteDim
     α.IsSeparable ↔ omegaPullbackCoeff W α ≠ 0 :=
   ⟨isogeny_omegaCoeff_ne_zero_of_isSeparable W α,
    fun h ↦ isogeny_isSeparable_of_omegaCoeff_ne_zero_finiteDim W α h h_fin⟩
-
-/-- **T-II-4-004 reverse direction (witness-parametric, axiom-clean)**: if
-`α.pullbackKaehler` is injective on `Ω[K(E)/F]`, then given Witness #2
-(`FiniteDimensional`) and the algebra-Kähler bridge
-(`Subsingleton ↔ pullbackKaehler injective`), `α` is separable.
-
-Composes the bridge's reverse direction (`pullbackKaehler injective →
-Subsingleton`) with `isogeny_isSeparable_of_subsingleton_kaehler_finiteDimensional`. -/
-theorem isogeny_isSeparable_of_pullbackKaehler_injective_witnesses
-    (α : Isogeny W.toAffine W.toAffine)
-    (h_inj : Function.Injective α.pullbackKaehler)
-    (h_fin : @FiniteDimensional W.toAffine.FunctionField W.toAffine.FunctionField
-      _ _ α.toAlgebra.toModule)
-    (h_bridge : @Subsingleton (@KaehlerDifferential W.toAffine.FunctionField
-        W.toAffine.FunctionField _ _ α.toAlgebra) ↔
-      Function.Injective α.pullbackKaehler) :
-    α.IsSeparable :=
-  isogeny_isSeparable_of_subsingleton_kaehler_finiteDimensional W α
-    (h_bridge.mpr h_inj) h_fin
 
 /-- **T-II-4-004 reverse direction (axiom-clean, unconditional)**: if the
 differential pullback `α.pullbackKaehler` is injective on `Ω[K(E)/F]`, then `α`

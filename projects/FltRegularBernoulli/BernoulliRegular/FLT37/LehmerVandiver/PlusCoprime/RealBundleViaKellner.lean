@@ -29,7 +29,7 @@ namespace BernoulliRegular
 /-- **FLT37 bundle from remaining fields, with Kellner**: identical to
 `FLT37BridgeBundle.ofRemaining` but takes `KellnerProp27_thirtyseven_thirtytwo`
 in place of `NoSecondOrderIrregularPair 37 32`. -/
-def FLT37BridgeBundle.ofRemainingViaKellner
+theorem FLT37BridgeBundle.ofRemainingViaKellner
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
     (caseI : CaseIBridge 37 (CyclotomicField 37 ℚ))

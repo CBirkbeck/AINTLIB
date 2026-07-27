@@ -67,7 +67,6 @@ discharging the full core from it together with this file's proven matrix-kernel
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -128,7 +127,6 @@ theorem caseIIEx811Core_coeffModP_zero
       (lambdaIdeal 37 (CyclotomicField 37 ℚ)) ^ (37 - 1)) 0
   simpa using h
 
-set_option maxHeartbeats 1600000 in
 -- The completed-log-column sum lives in the heavy `DworkCompleteIntegerRing`; unifying the
 -- `evalₐ`-of-coerced-sum with the column sum exceeds the default heartbeat budget.
 /-- **Bridge (i): the matrix kernel from the `λ`-level-`36` vanishing** (proven, axiom-clean).
@@ -332,7 +330,6 @@ The high `maxHeartbeats` on the assembly is because checking the term against
 `LeadingExponentEx811Core37` reconciles two copies of the heavy `kummerLogCompletedColumn` `evalₐ`
 sum (an `isDefEq` above the default budget, below the `adicCompletionIntegers` `whnf` wall). -/
 
-set_option maxHeartbeats 8000000 in
 -- Checking the assembled term against `LeadingExponentEx811Core37` reconciles two copies of the
 -- heavy `kummerLogCompletedColumn` `evalₐ` sum, an `isDefEq` above the default heartbeat budget
 -- (well below the `adicCompletionIntegers` `whnf` wall), hence the raised limit.

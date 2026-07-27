@@ -613,6 +613,7 @@ theorem productRestriction_map_sub
 
 /-! #### Factorization of restrictionMapAlg through localization -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The algebraic restriction map factors through the completion
 embedding: `restrictionMapAlg C.base D h = D.coeRingHom ∘ locLift`
 when `C.base.s` is a unit in `Localization.Away D.s`.

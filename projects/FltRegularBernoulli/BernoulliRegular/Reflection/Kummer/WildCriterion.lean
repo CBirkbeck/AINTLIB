@@ -190,7 +190,7 @@ the Hensel-lift argument rather than the discriminant argument.* -/
 def KummerWildLocalLift
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K)) : Prop :=
   IsAboveP (p := p) v →
-    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
     GenValuationDivisibleByPAt v P
 
 /-- **Valuation reduction (wild case).** *If `γ` is locally a `p`-th power
@@ -214,7 +214,7 @@ prime `v ∣ p`; structurally it is the composition
 def KummerWildCriterion
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K)) : Prop :=
   IsAboveP (p := p) v →
-    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
     GenValuationDivisibleByPAt v P
 
 /-!
@@ -298,7 +298,7 @@ theorem kummerDedekindUnramifiedAt_of_wild_and_tame
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K))
     (hWild : KummerWildCriterion P v)
     (hTame : IsCoprimeToP (p := p) v →
-      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
         GenValuationDivisibleByPAt v P) :
     KummerDedekindUnramifiedAt P v := by
   intro hUnr
@@ -327,7 +327,7 @@ ramification analysis; for `v ∣ p` it is vacuously satisfied. -/
 def KummerTame (P : KummerPresentation Ext) : Prop :=
   ∀ v : HeightOneSpectrum (𝓞 K),
     IsCoprimeToP (p := p) v →
-      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
       GenValuationDivisibleByPAt v P
 
 /-- **Global assembly.** From the global wild and tame criteria, derive the

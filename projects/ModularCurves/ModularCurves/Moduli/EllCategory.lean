@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.Basic
 
 /-!
@@ -82,9 +87,6 @@ instance : Category (EllObj R) where
       isPullback := f.isPullback.paste_horiz g.isPullback
       zero_w := by rw [← Category.assoc, f.zero_w, Category.assoc, g.zero_w,
         Category.assoc] }
-  id_comp := by intros; ext <;> simp
-  comp_id := by intros; ext <;> simp
-  assoc := by intros; ext <;> simp
 
 /-- A **moduli problem** for elliptic curves over `R`: a contravariant functor
 `Ell/R → Set`. Source: Loeffler Def 3.7.1(2); KM 4.2. -/
@@ -223,8 +225,7 @@ Note the cartesian square of `u` is indispensable: an elliptic curve does have n
 automorphisms over the identity of its base (e.g. `[-1]`), and it is exactly the existence of
 `a` — i.e. of `u` — that kills them. -/
 theorem rigid_of_representable {P : ModuliProblem R} (hP : P.Representable) : P.Rigid := by
-  intro X e hbase hne a
-  intro hfix
+  intro X e hbase hne a hfix
   refine hne (Iso.ext ?_)
   haveI : P.IsRepresentable := hP
   set repr := Functor.representableBy P with hrepr

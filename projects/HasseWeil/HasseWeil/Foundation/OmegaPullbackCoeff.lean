@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Algebra.Polynomial.Derivation
-import HasseWeil.Foundation.Auxiliary.DiffQuotientRule
 import HasseWeil.FormalGroup.FormalGroupCorrespondence
+import HasseWeil.Foundation.Auxiliary.DiffQuotientRule
 import HasseWeil.Foundation.WronskianAux
+import Mathlib.Algebra.Polynomial.Derivation
 
 /-!
 # The Omega-Based Pullback Coefficient
@@ -613,7 +613,7 @@ theorem divPoly_wronskian_identity_of_poly (n : ℤ) (hn : n ≠ 0)
     intro h
     exact ΨSq_ff_ne_zero' W hn ((ψ_ff_sq_eq W n).symm ▸
       show (ψ_ff W n) ^ 2 = 0 by
-        unfold ψ_ff
+        simp only [ψ_ff]
         rw [h]; ring)
   have h_preΨ_u : algebraMap (Polynomial F) KE (W.preΨ (2 * n)) * u_gen W = ψn * ψcn := by
     rw [hψn_def, hψcn_def, ψc_spec_ff W n, Affine.CoordinateRing.mk_ψ (W := W.toAffine) (2 * n)]
@@ -663,9 +663,7 @@ theorem divPoly_wronskian_identity (n : ℤ) (hn : n ≠ 0) :
 -- Chain rule for `D` on polynomial images in K(E), using `Derivation.comp_aeval_eq`: for
 -- `p : F[X]` and `a ∈ KE`, `D(aeval a p) = aeval a (derivative p) • D(a)`.
 
--- `DecidableEq F` is needed for the `K(E)` instance in the statement but not by the proof, so
--- the `unusedSectionVars` linter (a false positive here) is locally disabled.
-set_option linter.unusedSectionVars false in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `D(p(x_gen)) = p'(x_gen) • D(x_gen)` for any polynomial `p : F[X]`.
     This is the chain rule for the universal derivation applied to polynomial evaluation.
     Uses `Derivation.comp_aeval_eq` from mathlib. -/
@@ -689,7 +687,6 @@ theorem D_poly_eval (p : Polynomial F) :
   exact @Derivation.comp_aeval_eq F KE (KaehlerDifferential F KE)
     _ _ _ _ _ _ _ x_ff (KaehlerDifferential.D F KE) p
 
--- (removed D_div_eq; we work directly with Leibniz + D_inv_smul in the main proof)
 
 /-- For [n], the omega-based pullback coefficient is n, **parametrized** by the
     polynomial-level Wronskian identity `hpoly`.

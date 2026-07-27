@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.ConcreteSetup
@@ -27,6 +32,8 @@ namespace Furtwaengler
 
 universe u v w
 
+/-- If all coefficients of a Witt vector up to level `n` lie in `I`, and `r ∈ I`, then its
+`n`-th ghost component lies in `I ^ (n + 1)`. -/
 theorem wittGhostComponent_mem_ideal_pow_succ_of_coeff_mem
     {r : ℕ} [Fact (Nat.Prime r)]
     {A : Type*} [CommRing A] (I : Ideal A) (hrI : (r : A) ∈ I)
@@ -66,6 +73,8 @@ theorem wittGhostComponent_mem_ideal_pow_succ_of_coeff_mem
       omega)
     hmul
 
+/-- Hence a Witt vector that dies mod `I` has `n`-th ghost component zero mod `I ^ (n + 1)`,
+which is what lets the ghost component descend to the quotient. -/
 theorem witt_ker_map_le_ker_mk_comp_ghostComponent
     {r : ℕ} [Fact (Nat.Prime r)]
     {A : Type*} [CommRing A] (I : Ideal A) (hrI : (r : A) ∈ I) (n : ℕ) :
@@ -90,6 +99,7 @@ noncomputable def wittGhostComponentModIdealPow
     ⟨(Ideal.Quotient.mk (I ^ (n + 1))).comp (WittVector.ghostComponent (p := r) n),
       witt_ker_map_le_ker_mk_comp_ghostComponent I hrI n⟩
 
+/-- The descended ghost component computes the ghost component. -/
 @[simp]
 theorem wittGhostComponentModIdealPow_map_mk
     {r : ℕ} [Fact (Nat.Prime r)]
@@ -100,6 +110,7 @@ theorem wittGhostComponentModIdealPow_map_mk
       Ideal.Quotient.mk (I ^ (n + 1)) (WittVector.ghostComponent n x) :=
   RingHom.liftOfSurjective_comp_apply _ _ _ _
 
+/-- On a Teichmüller lift, it is `a ^ r ^ n`. -/
 @[simp]
 theorem wittGhostComponentModIdealPow_teichmuller_mk
     {r : ℕ} [Fact (Nat.Prime r)]
@@ -421,6 +432,7 @@ noncomputable def frobeniusUnitPreimage
   Units.mapEquiv ((_root_.iterateFrobeniusEquiv k ℓ N).symm.toMulEquiv) x
 
 omit [Fact (Nat.Prime ℓ)] [Fintype k] [Algebra (ZMod ℓ) k] in
+/-- The underlying element of the inverse-Frobenius preimage. -/
 @[simp]
 theorem frobeniusUnitPreimage_val
     [ExpChar k ℓ] [PerfectRing k ℓ] (N : ℕ) (x : kˣ) :
@@ -429,6 +441,7 @@ theorem frobeniusUnitPreimage_val
   rfl
 
 omit [Fact (Nat.Prime ℓ)] [Fintype k] [Algebra (ZMod ℓ) k] in
+/-- It is a preimage: raising it to `ℓ ^ N` recovers `x`. -/
 theorem frobeniusUnitPreimage_pow
     [ExpChar k ℓ] [PerfectRing k ℓ] (N : ℕ) (x : kˣ) :
     frobeniusUnitPreimage (ℓ := ℓ) N x ^ (ℓ ^ N) = x := by
@@ -445,17 +458,20 @@ noncomputable def teichFullVal
   classical
   exact if hx : x = 0 then 0 else F.teichUnitFullVal (Units.mk0 x hx)
 
+/-- The extended Teichmüller lift sends `0` to `0`. -/
 @[simp]
 theorem teichFullVal_zero :
     F.teichFullVal (0 : k) = 0 := by
   classical
   simp [teichFullVal]
 
+/-- …and agrees with the unit lift elsewhere. -/
 theorem teichFullVal_of_ne {x : k} (hx : x ≠ 0) :
     F.teichFullVal x = F.teichUnitFullVal (Units.mk0 x hx) := by
   classical
   simp [teichFullVal, hx]
 
+/-- It is a section of the residue map. -/
 theorem residueMap_teichFullVal (x : k) :
     F.residueMap (F.teichFullVal x) = x := by
   classical

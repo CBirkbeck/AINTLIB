@@ -1,8 +1,13 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter
 public import BernoulliRegular.CyclotomicUnits.Vandermonde
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.ConductorFlexiblePhiFacts
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor
 
 /-!
 # The Kummer logarithm coefficient matrix
@@ -529,7 +534,7 @@ theorem kummerLogCompletedColumn_evalₐ
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (kummerLogCompletedColumn (p := p) (K := K) hp_three a) =
       kummerLogColumnCoord (p := p) (K := K) hp_three a N := by
-  unfold kummerLogCompletedColumn
+  simp only [kummerLogCompletedColumn]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
@@ -572,7 +577,7 @@ theorem valuedIntegerComplexConj_algebraMap_ringOfIntegers
         (algebraMap (𝓞 K) (ValuedIntegerRing p K) x) =
       algebraMap (𝓞 K) (ValuedIntegerRing p K)
         (cyclotomicRingOfIntegersEquiv (p := p) K (-1) x) := by
-  ext
+  apply Subtype.ext
   change valuedCompletionCyclotomicEquiv (p := p) K (-1)
       (algebraMap (𝓞 K) (ValuedCompletion p K) x) =
     algebraMap (𝓞 K) (ValuedCompletion p K)
@@ -725,7 +730,7 @@ theorem samePrimeFiniteLog_quotientMap_complexConj {N : ℕ}
         (valuedIntegerComplexConj (p := p) K x)
         (valuedIntegerComplexConj_mem_lambdaIdeal (p := p) (K := K) hx) := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   rw [map_sum]
   exact Finset.sum_congr rfl fun n _hn ↦
     samePrimeFiniteLogTerm_quotientMap_complexConj (p := p) (K := K) hx
@@ -737,7 +742,7 @@ theorem samePrimeFiniteLog_level_zero
     {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLog (p := p) (K := K) 0 x hx = 0 := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   refine Finset.sum_eq_zero fun n _hn ↦ ?_
   by_cases hn : n = 0
   · subst n
@@ -778,13 +783,6 @@ theorem dworkEvenPowerIndex_pos_of_ne_zero
   apply Fin.ext
   simpa [dworkEvenPowerIndexZero] using hnat
 
-set_option synthInstance.maxHeartbeats 80000 in
--- The proof repeatedly forms quotient rings of the completed Dwork ring; the
--- local aliases keep the statement readable but make quotient-ring instance
--- search slightly deeper than the default budget.
-set_option maxHeartbeats 400000 in
--- The proof normalizes the basis expansion through quotient maps and ideal
--- membership before applying the existing scalar-prime-ideal criterion.
 omit [NumberField.IsCMField K] in
 theorem dworkFixedEvenPower_constantCoeff_mem_primeIdeal_of_mem_parameterIdeal
     (hp_two : 2 < p) {x : dworkFixedSubalgebra p K}
@@ -876,7 +874,7 @@ theorem kummerLogColumnFiniteLogArg_complexConj
     Conjugation.valuedIntegerComplexConj (p := p) K
         (kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a) =
       kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a := by
-  unfold kummerLogColumnFiniteLogArg
+  simp only [kummerLogColumnFiniteLogArg]
   rw [map_sub, map_pow,
     kummerLogValuedCyclotomicUnit_complexConj (p := p) (K := K) hp_three a,
     map_one]

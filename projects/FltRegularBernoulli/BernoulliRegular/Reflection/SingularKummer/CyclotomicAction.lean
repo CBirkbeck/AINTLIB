@@ -1,8 +1,8 @@
 module
 
-public import BernoulliRegular.Reflection.SingularKummer.Equivariance
-public import BernoulliRegular.Reflection.SingularKummer.DimensionLowerBound
 public import BernoulliRegular.Reflection.SingularKummer.CharacterProjectionIdempotent
+public import BernoulliRegular.Reflection.SingularKummer.DimensionLowerBound
+public import BernoulliRegular.Reflection.SingularKummer.Equivariance
 public import BernoulliRegular.Reflection.SingularKummer.FiniteLevelCharacterLift
 public import BernoulliRegular.UnitQuotient.DeltaAction
 
@@ -30,8 +30,6 @@ namespace BernoulliRegular
 namespace Reflection
 namespace SingularKummer
 
-set_option linter.unusedSectionVars false
-
 namespace SingularPair
 
 variable (K : Type*) [Field K] [NumberField K]
@@ -57,10 +55,10 @@ noncomputable def cyclotomicFieldSemilinearEquiv
   K ≃ₛₗ[RingHomClass.toRingHom (cyclotomicRingOfIntegersAuto (K := K) (p := p) a)] K where
   toFun := cyclotomicSigmaOfUnit (p := p) K a
   invFun := (cyclotomicSigmaOfUnit (p := p) K a).symm
-  left_inv := fun x => (cyclotomicSigmaOfUnit (p := p) K a).left_inv x
-  right_inv := fun x => (cyclotomicSigmaOfUnit (p := p) K a).right_inv x
-  map_add' := fun x y => map_add _ x y
-  map_smul' := fun r x => by
+  left_inv := fun x ↦ (cyclotomicSigmaOfUnit (p := p) K a).left_inv x
+  right_inv := fun x ↦ (cyclotomicSigmaOfUnit (p := p) K a).right_inv x
+  map_add' := fun x y ↦ map_add _ x y
+  map_smul' := fun r x ↦ by
     change cyclotomicSigmaOfUnit (p := p) K a ((r : K) * x) =
       (((cyclotomicRingOfIntegersAuto (K := K) (p := p) a) r : 𝓞 K) : K) *
         cyclotomicSigmaOfUnit (p := p) K a x
@@ -129,7 +127,7 @@ theorem cyclotomicFractionalIdealHom_coe
         IsLocalization.map K
           ((cyclotomicRingOfIntegersAuto (K := K) (p := p) a).toRingHom)
           (cyclotomicRingOfIntegersAuto_le_comap_nonZeroDivisors (K := K) (p := p) a) x :=
-      congrArg (fun f : K →+* K => f x)
+      congrArg (fun f : K →+* K ↦ f x)
         (cyclotomicFieldSemilinearEquiv_eq_map (K := K) (p := p) a)
     exact Submodule.mem_map.mpr ⟨x, hx, hmap⟩
   · rintro y ⟨x, hx, rfl⟩
@@ -137,7 +135,7 @@ theorem cyclotomicFractionalIdealHom_coe
         IsLocalization.map K
           ((cyclotomicRingOfIntegersAuto (K := K) (p := p) a).toRingHom)
           (cyclotomicRingOfIntegersAuto_le_comap_nonZeroDivisors (K := K) (p := p) a) x :=
-      congrArg (fun f : K →+* K => f x)
+      congrArg (fun f : K →+* K ↦ f x)
         (cyclotomicFieldSemilinearEquiv_eq_map (K := K) (p := p) a)
     exact Submodule.subset_span ⟨x, hx, hmap.symm⟩
 
@@ -155,7 +153,7 @@ theorem cyclotomicFractionalIdealInvHom_coe
         IsLocalization.map K
           ((cyclotomicRingOfIntegersAuto (K := K) (p := p) a).symm.toRingHom)
           (cyclotomicRingOfIntegersAuto_symm_le_comap_nonZeroDivisors (K := K) (p := p) a) x :=
-      congrArg (fun f : K →+* K => f x)
+      congrArg (fun f : K →+* K ↦ f x)
         (cyclotomicFieldSemilinearEquiv_symm_eq_map (K := K) (p := p) a)
     exact Submodule.mem_map.mpr ⟨x, hx, hmap⟩
   · rintro y ⟨x, hx, rfl⟩
@@ -163,7 +161,7 @@ theorem cyclotomicFractionalIdealInvHom_coe
         IsLocalization.map K
           ((cyclotomicRingOfIntegersAuto (K := K) (p := p) a).symm.toRingHom)
           (cyclotomicRingOfIntegersAuto_symm_le_comap_nonZeroDivisors (K := K) (p := p) a) x :=
-      congrArg (fun f : K →+* K => f x)
+      congrArg (fun f : K →+* K ↦ f x)
         (cyclotomicFieldSemilinearEquiv_symm_eq_map (K := K) (p := p) a)
     exact Submodule.subset_span ⟨x, hx, hmap.symm⟩
 
@@ -240,17 +238,17 @@ theorem cyclotomicFieldUnitEquiv_mul_apply
 noncomputable def cyclotomicFractionalIdealEquiv
     (a : CharacterProjection.Delta p) :
     (FractionalIdeal (𝓞 K)⁰ K)ˣ ≃* (FractionalIdeal (𝓞 K)⁰ K)ˣ :=
-  { toFun := fun I => Units.map (cyclotomicFractionalIdealHom K p a) I
-    invFun := fun I => Units.map (cyclotomicFractionalIdealInvHom K p a) I
-    left_inv := fun I => by
+  { toFun := fun I ↦ Units.map (cyclotomicFractionalIdealHom K p a) I
+    invFun := fun I ↦ Units.map (cyclotomicFractionalIdealInvHom K p a) I
+    left_inv := fun I ↦ by
       exact Units.ext <|
         cyclotomicFractionalIdealInvHom_apply_apply K p a
           (I : FractionalIdeal (𝓞 K)⁰ K)
-    right_inv := fun I => by
+    right_inv := fun I ↦ by
       exact Units.ext <|
         cyclotomicFractionalIdealHom_inv_apply_apply K p a
           (I : FractionalIdeal (𝓞 K)⁰ K)
-    map_mul' := fun I J => by
+    map_mul' := fun I J ↦ by
       apply Units.ext
       simp [cyclotomicFractionalIdealHom] }
 
@@ -456,7 +454,7 @@ theorem cyclotomicSingularGroupClassMapToPTorsion_equivariant
         (singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p x) =
       singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p
         (cyclotomicSingularGroupAction K p a x) := by
-  unfold cyclotomicSingularGroupAction cyclotomicClassGroupPTorsionAction
+  simp only [cyclotomicSingularGroupAction, cyclotomicClassGroupPTorsionAction]
   exact
     PrincipalIdealPreservingEquiv.singularGroupClassMapToPTorsion_equivariant
       (A := cyclotomicPrincipalIdealPreservingEquiv (K := K) (p := p) a) p x

@@ -13,10 +13,10 @@ Usage:
   refill-cleanup-tickets.py --next   [--dry-run] [--max 60]
   refill-cleanup-tickets.py --project HasseWeil [--dry-run] [--max 60]
 """
-import os, re, sys, json, subprocess, argparse
+import os, re, sys, json, subprocess, argparse, shutil
 
 REPO = "CBirkbeck/AINTLIB"
-GH   = "/opt/homebrew/bin/gh"
+GH   = shutil.which("gh") or "/opt/homebrew/bin/gh"   # PATH-first (Linux box), Mac fallback
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # repo root (scripts/..)
 
 # Projects to ticket, in priority order. PadicLFunctions + AdicSpaces are already

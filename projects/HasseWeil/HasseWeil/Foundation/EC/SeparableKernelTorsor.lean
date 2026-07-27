@@ -1,6 +1,11 @@
-import HasseWeil.Isogeny.Kernel
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.EC.TranslationOrd
+import HasseWeil.Isogeny.Kernel
 
 /-!
 # Separable isogeny: `#ker φ = deg φ` over an algebraically closed field
@@ -95,7 +100,8 @@ theorem card_kernel_eq_degree_of_separable_of_witnesses
 `k`, promoted to a `φ*K(E)`-algebra automorphism of `K(E)` via the covariance hypothesis `hcov`
 (`τ_k` fixes the pullback range, the function-field shadow of `φ ∘ (·+k) = φ` for `k ∈ ker φ`).
 This supplies the `forward` argument of `card_kernel_eq_degree_of_separable_of_witnesses`, leaving
-only `hcov`, the `inverse` map, the mutual-inverse identities, and `h_normal` to discharge for `[ℓ]`.
+only `hcov`, the `inverse` map, the mutual-inverse identities, and `h_normal` to
+discharge for `[ℓ]`.
 (PointFix's version is `[Fintype]`-scoped; this is the K̄ version.) -/
 noncomputable def kernelTranslateForwardAut
     (φ : Isogeny W.toAffine W.toAffine)
@@ -168,12 +174,12 @@ theorem translateAlgEquivOfPoint_apply_x_gen_of_some
   by_cases h2 : yk = W.toAffine.negY xk yk
   · rw [translateAlgEquivOfPoint_some_2tor W xk yk h_ns h2]
     show translateAlgEquiv_of_2tor W xk yk h_ns h2 (x_gen W) = _
-    unfold translateAlgEquiv_of_2tor
+    simp only [translateAlgEquiv_of_2tor]
     rw [AlgEquiv.ofAlgHom_apply]
     exact translateAlgHom_of_2tor_apply_x_gen W xk yk h_ns h2
   · rw [translateAlgEquivOfPoint_some_nonTor W xk yk h_ns h2]
     show translateAlgEquiv W xk yk h_ns h2 (x_gen W) = _
-    unfold translateAlgEquiv
+    simp only [translateAlgEquiv]
     rw [AlgEquiv.ofAlgHom_apply]
     exact translateAlgHom_apply_x_gen W xk yk h_ns h2
 
@@ -185,12 +191,12 @@ theorem translateAlgEquivOfPoint_apply_y_gen_of_some
   by_cases h2 : yk = W.toAffine.negY xk yk
   · rw [translateAlgEquivOfPoint_some_2tor W xk yk h_ns h2]
     show translateAlgEquiv_of_2tor W xk yk h_ns h2 (y_gen W) = _
-    unfold translateAlgEquiv_of_2tor
+    simp only [translateAlgEquiv_of_2tor]
     rw [AlgEquiv.ofAlgHom_apply]
     exact translateAlgHom_of_2tor_apply_y_gen W xk yk h_ns h2
   · rw [translateAlgEquivOfPoint_some_nonTor W xk yk h_ns h2]
     show translateAlgEquiv W xk yk h_ns h2 (y_gen W) = _
-    unfold translateAlgEquiv
+    simp only [translateAlgEquiv]
     rw [AlgEquiv.ofAlgHom_apply]
     exact translateAlgHom_apply_y_gen W xk yk h_ns h2
 
@@ -252,7 +258,7 @@ theorem genericPointAct_eq_some (φ : Isogeny W.toAffine W.toAffine)
           (σ.toAlgHom.restrictScalars F).injective (x_gen W) (y_gen W)).mpr
             (generic_nonsingular W)) := by
   letI := φ.toAlgebra
-  unfold genericPointAct
+  simp only [genericPointAct]
   rw [genericPoint_xOf_some]
   exact WeierstrassCurve.Affine.Point.map_some
     (f := σ.toAlgHom.restrictScalars F) (generic_nonsingular W)
@@ -298,7 +304,7 @@ theorem genericPointAct_kernelTranslateForwardAut (φ : Isogeny W.toAffine W.toA
     genericPointAct W φ (kernelTranslateForwardAut W φ hcov k) =
       genericPoint W + liftPointToKE W k.val := by
   letI := φ.toAlgebra
-  unfold genericPointAct kernelTranslateForwardAut
+  simp only [genericPointAct, kernelTranslateForwardAut]
   have hAlgHom : ((AlgEquiv.ofRingEquiv (f := (translateAlgEquivOfPoint W k.val).toRingEquiv)
         (fun r ↦ hcov k r)).toAlgHom.restrictScalars F) =
       (translateAlgEquivOfPoint W k.val).toAlgHom := by
@@ -343,7 +349,7 @@ theorem card_kernel_eq_degree_of_separable_concrete
     fun σ ↦ (hdesc σ).choose_spec.2
   -- `liftPointToKE` is injective.
   have hlift_inj : Function.Injective (liftPointToKE W) := by
-    unfold liftPointToKE
+    simp only [liftPointToKE]
     exact WeierstrassCurve.Affine.Point.map_injective (Algebra.ofId F W.toAffine.FunctionField)
   -- `h_left`: inverse (forward k) = k.
   have h_left : Function.LeftInverse inverse forward := by

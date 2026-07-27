@@ -26,130 +26,6 @@ open scoped MatrixGroups ModularForm Pointwise
 
 variable {N : ℕ} [NeZero N] {k : ℤ}
 
-/-! ### Re-derived level-raise / upper-sum interaction (local copies)
-
-The lemmas `heckeT_p_ut_levelRaise` and its reindex in `LevelRaiseComm.lean` are `private`,
-so we re-derive the chain here for the bad-prime level-raise generator case. -/
-
-private lemma bp_glMap_mapGL_eq_R (s : SL(2, ℤ)) :
-    glMap (mapGL ℚ s) = (mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) s := by
-  apply Units.ext; ext i j
-  simp only [glMap, Matrix.GeneralLinearGroup.map]
-  exact (IsScalarTower.algebraMap_apply ℤ ℚ ℝ (s.1 i j)).symm
-
-private lemma bp_slash_mapGL_Q_Gamma1 (M : ℕ) [NeZero M] (k : ℤ) (S : SL(2, ℤ))
-    (hS : S ∈ Gamma1 M) (g : ModularForm ((Gamma1 M).map (mapGL ℝ)) k) :
-    ⇑g ∣[k] (mapGL ℚ S : GL (Fin 2) ℚ) = ⇑g := by
-  show ⇑g ∣[k] glMap (mapGL ℚ S) = ⇑g
-  rw [bp_glMap_mapGL_eq_R]
-  exact g.slash_action_eq' (mapGL ℝ S) (Subgroup.mem_map.mpr ⟨S, hS, rfl⟩)
-
-open Matrix in
-private lemma bp_T_p_upper_mod (p : ℕ) (hp : 0 < p) (a : ℕ) :
-    T_p_upper p hp a = mapGL ℚ (shiftSL (↑(a / p : ℕ) : ℤ)) * T_p_upper p hp (a % p) := by
-  apply Units.ext
-  ext i j
-  simp only [T_p_upper, shiftSL, mapGL_coe_matrix, Matrix.GeneralLinearGroup.mkOfDetNeZero,
-    Matrix.mul_apply, Fin.sum_univ_two, Units.val_mul]
-  fin_cases i <;> fin_cases j <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
-  rw [← Int.natCast_ediv]
-  simp only [Int.cast_natCast]
-  exact_mod_cast show (a : ℤ) = (a % p : ℤ) + (a / p : ℤ) * (p : ℤ) by
-    have := Int.emod_add_mul_ediv (a : ℤ) (p : ℤ); linarith
-
-private lemma bp_slash_T_p_upper_mod (M : ℕ) [NeZero M] (k : ℤ) (p : ℕ) (hp : 0 < p) (a : ℕ)
-    (g : ModularForm ((Gamma1 M).map (mapGL ℝ)) k) :
-    ⇑g ∣[k] (T_p_upper p hp a : GL (Fin 2) ℚ) =
-      ⇑g ∣[k] (T_p_upper p hp (a % p) : GL (Fin 2) ℚ) := by
-  rw [bp_T_p_upper_mod p hp a, SlashAction.slash_mul]
-  congr 1
-  exact bp_slash_mapGL_Q_Gamma1 M k (shiftSL (↑(a / p : ℕ))) (shiftSL_mem_Gamma1 M _) g
-
-open Matrix in
-private lemma bp_levelRaise_mul_T_p_upper (d : ℕ) [NeZero d] (p : ℕ) (hp : 0 < p) (b : ℕ) :
-    levelRaiseMatrix d * glMap (T_p_upper p hp b) =
-      glMap (T_p_upper p hp (d * b)) * levelRaiseMatrix d := by
-  apply Matrix.GeneralLinearGroup.ext
-  intro i j
-  simp only [Matrix.GeneralLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two,
-    levelRaiseMatrix, glMap, Matrix.GeneralLinearGroup.map,
-    Matrix.GeneralLinearGroup.mkOfDetNeZero]
-  fin_cases i <;> fin_cases j <;> simp
-
-private lemma bp_sum_reindex_mul_mod {α : Type*} [AddCommMonoid α] (d p : ℕ) (hp : Nat.Prime p)
-    (hd : Nat.Coprime d p) (f : ℕ → α) :
-    ∑ b ∈ Finset.range p, f (d * b % p) = ∑ b ∈ Finset.range p, f b := by
-  haveI : Fact p.Prime := ⟨hp⟩
-  haveI : NeZero p := ⟨hp.ne_zero⟩
-  have h_inj : Set.InjOn (fun b ↦ d * b % p) (↑(Finset.range p)) := by
-    intro b₁ hb₁ b₂ hb₂ heq
-    simp only [Finset.coe_range, Set.mem_Iio] at hb₁ hb₂
-    have h₂ : b₁ % p = b₂ % p := by
-      have : (d : ZMod p) ≠ 0 := by
-        intro h
-        rw [ZMod.natCast_eq_zero_iff] at h
-        exact (hp.coprime_iff_not_dvd.mp hd.symm) h
-      have h₃ : ((d * b₁ : ℕ) : ZMod p) = ((d * b₂ : ℕ) : ZMod p) :=
-        (ZMod.natCast_eq_natCast_iff' _ _ _).mpr heq
-      simp only [Nat.cast_mul] at h₃
-      exact (ZMod.natCast_eq_natCast_iff' _ _ _).mp (mul_left_cancel₀ this h₃)
-    rwa [Nat.mod_eq_of_lt hb₁, Nat.mod_eq_of_lt hb₂] at h₂
-  refine Finset.sum_nbij (fun b ↦ d * b % p)
-    (fun b _ ↦ Finset.mem_range.mpr (Nat.mod_lt _ hp.pos)) h_inj ?_ (fun b _ ↦ rfl)
-  intro b hb
-  have h_img : Finset.image (fun b ↦ d * b % p) (Finset.range p) = Finset.range p :=
-    Finset.eq_of_subset_of_card_le
-      (Finset.image_subset_iff.mpr fun b _ ↦ Finset.mem_range.mpr (Nat.mod_lt _ hp.pos))
-      (by rw [Finset.card_image_of_injOn h_inj])
-  exact Finset.mem_image.mp (by rw [h_img]; exact hb)
-
-private lemma bp_sum_slash_R (k : ℤ) {ι : Type*} (s : Finset ι) (φ : ι → (UpperHalfPlane → ℂ))
-    (g : GL (Fin 2) ℝ) :
-    (∑ b ∈ s, φ b) ∣[k] g = ∑ b ∈ s, (φ b ∣[k] g) := by
-  induction s using Finset.cons_induction with
-  | empty => simp [SlashAction.zero_slash]
-  | cons a s has ih => simp only [Finset.sum_cons, SlashAction.add_slash, ih]
-
-private lemma bp_heckeT_p_ut_levelRaise
-    (p : ℕ) (hp : Nat.Prime p) (M d : ℕ) [NeZero M] [NeZero d]
-    (g : CuspForm ((Gamma1 M).map (mapGL ℝ)) k) :
-    heckeT_p_ut k p hp.pos (⇑((levelRaise M d k g).toModularForm')) =
-      ∑ b ∈ Finset.range p, ((d : ℂ) ^ (1 - k)) •
-        (⇑g.toModularForm' ∣[k] (T_p_upper p hp.pos (d * b % p) : GL (Fin 2) ℚ)) ∣[k]
-          levelRaiseMatrix d := by
-  simp only [heckeT_p_ut]
-  simp_rw [show (⇑((levelRaise M d k g).toModularForm') : UpperHalfPlane → ℂ) =
-      ((d : ℂ) ^ (1 - k)) • (⇑g ∣[k] levelRaiseMatrix d) from rfl,
-    smul_slash_pos_det k _ _ _ (T_p_upper_det_pos p hp.pos _)]
-  simp_rw [show ∀ b, (⇑g ∣[k] levelRaiseMatrix d) ∣[k] (T_p_upper p hp.pos b : GL (Fin 2) ℚ) =
-    ⇑g ∣[k] (levelRaiseMatrix d * glMap (T_p_upper p hp.pos b)) from
-    fun b ↦ show (⇑g ∣[k] levelRaiseMatrix d) ∣[k] glMap (T_p_upper p hp.pos b) = _ from
-      (SlashAction.slash_mul k _ _ _).symm]
-  simp_rw [bp_levelRaise_mul_T_p_upper d p hp.pos]
-  simp_rw [show ∀ b, ⇑g ∣[k] (glMap (T_p_upper p hp.pos (d * b)) * levelRaiseMatrix d) =
-    (⇑g ∣[k] (T_p_upper p hp.pos (d * b) : GL (Fin 2) ℚ)) ∣[k] levelRaiseMatrix d from
-    fun b ↦ show ⇑g ∣[k] (glMap (T_p_upper p hp.pos (d * b)) * levelRaiseMatrix d) =
-      (⇑g ∣[k] glMap (T_p_upper p hp.pos (d * b))) ∣[k] levelRaiseMatrix d from
-      SlashAction.slash_mul k _ _ _]
-  simp_rw [show ∀ b, ⇑g ∣[k] (T_p_upper p hp.pos (d * b) : GL (Fin 2) ℚ) =
-    ⇑g.toModularForm' ∣[k] (T_p_upper p hp.pos (d * b % p) : GL (Fin 2) ℚ) from
-    fun b ↦ bp_slash_T_p_upper_mod M k p hp.pos (d * b) g.toModularForm']
-
-private lemma bp_heckeT_p_ut_levelRaise_reindex
-    (p : ℕ) (hp : Nat.Prime p) (M d : ℕ) [NeZero M] [NeZero d]
-    (hdp : Nat.Coprime d p) (g : CuspForm ((Gamma1 M).map (mapGL ℝ)) k) :
-    (∑ b ∈ Finset.range p, ((d : ℂ) ^ (1 - k)) •
-        (⇑g.toModularForm' ∣[k] (T_p_upper p hp.pos (d * b % p) : GL (Fin 2) ℚ)) ∣[k]
-          levelRaiseMatrix d) =
-      ((d : ℂ) ^ (1 - k)) •
-        (heckeT_p_ut k p hp.pos (⇑g.toModularForm') ∣[k] levelRaiseMatrix d) := by
-  rw [bp_sum_reindex_mul_mod d p hp hdp
-    (fun b ↦ ((d : ℂ) ^ (1 - k)) • (⇑g.toModularForm' ∣[k]
-      (T_p_upper p hp.pos b : GL (Fin 2) ℚ)) ∣[k] levelRaiseMatrix d),
-    heckeT_p_ut, bp_sum_slash_R, ← Finset.smul_sum]
-
-/-- **Bad-prime bridge.** For `p ∣ N`, the underlying function of `U_p f = heckeT_n_cusp k p f`
-is the upper-triangular sum `heckeT_p_ut k p ⇑f = Σ_{b<p} ⇑f ∣[k] [1,b;0,p]`. -/
 lemma coe_heckeT_n_cusp_divN (p : ℕ) [NeZero p] (hp : Nat.Prime p) (hpN : ¬ Nat.Coprime p N)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
     (⇑(heckeT_n_cusp k p f) : UpperHalfPlane → ℂ) = heckeT_p_ut k p hp.pos (⇑f) := by
@@ -278,15 +154,15 @@ private lemma heckeT_n_cusp_levelRaise_coprimeD
       heq ▸ levelRaise M d k (heckeT_n_cusp k p g') := by
   apply CuspForm.ext
   intro z
-  -- LHS: bridge at level N, then `bp_heckeT_p_ut_levelRaise` + reindex.
+  -- LHS: bridge at level N, then `heckeT_p_ut_levelRaise` + reindex.
   subst heq
   rw [show (heckeT_n_cusp k p (levelRaise M d k g')) z =
       (⇑(heckeT_n_cusp k p (levelRaise M d k g')) : UpperHalfPlane → ℂ) z from rfl,
     coe_heckeT_n_cusp_divN p hp hpN (levelRaise M d k g')]
   rw [show (⇑(levelRaise M d k g') : UpperHalfPlane → ℂ) =
       ⇑((levelRaise M d k g').toModularForm') from rfl,
-    bp_heckeT_p_ut_levelRaise p hp M d g',
-    bp_heckeT_p_ut_levelRaise_reindex p hp M d hdp g']
+    heckeT_p_ut_levelRaise p hp M d g',
+    heckeT_p_ut_levelRaise_reindex p hp M d hdp g']
   -- RHS: `levelRaise (U_p g')`, whose function is `d^{1-k} • (heckeT_p_ut ⇑g' ∣[k] α_d)`.
   rw [show (levelRaise M d k (heckeT_n_cusp k p g')) z =
       (⇑(levelRaise M d k (heckeT_n_cusp k p g')) : UpperHalfPlane → ℂ) z from rfl,
@@ -355,7 +231,7 @@ private lemma bp_heckeT_p_ut_levelRaise_collapse
     heckeT_p_ut k p hp.pos (⇑((levelRaise M (p * e) k g').toModularForm')) =
       levelRaiseFun e k ⇑g' := by
   haveI : NeZero (p * e) := ⟨Nat.mul_ne_zero (NeZero.ne p) (NeZero.ne e)⟩
-  rw [bp_heckeT_p_ut_levelRaise p hp M (p * e) g']
+  rw [heckeT_p_ut_levelRaise p hp M (p * e) g']
   -- All summands have `(p*e)*b % p = 0`.
   have hmod : ∀ b : ℕ, (p * e) * b % p = 0 := fun b ↦ by
     rw [mul_assoc]; exact Nat.mul_mod_right p (e * b)
@@ -387,7 +263,8 @@ private lemma bp_heckeT_p_ut_levelRaise_collapse
   simp only [Pi.smul_apply, nsmul_eq_mul]
   rw [hF]
   simp only [Pi.smul_apply, smul_eq_mul]
-  rw [show ((p : ℂ) * (↑(p * e) ^ (1 - k) * ((p : ℂ) ^ (k - 2) * (⇑g' ∣[k] levelRaiseMatrix e) z))) =
+  rw [show ((p : ℂ) *
+      (↑(p * e) ^ (1 - k) * ((p : ℂ) ^ (k - 2) * (⇑g' ∣[k] levelRaiseMatrix e) z))) =
       ((p : ℂ) * ((↑(p * e) : ℂ) ^ (1 - k) * (p : ℂ) ^ (k - 2))) *
         ((⇑g' ∣[k] levelRaiseMatrix e) z) from by ring, hscalar]
 

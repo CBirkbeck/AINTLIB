@@ -34,17 +34,20 @@ namespace PhiPrimeElement
 
 universe u v
 
+section NormalizedFactor
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+
 /-- Source-data constructor for a normalized source factor of `(α)`.
 
 This is the caller-facing version for source primes coming from
 `normalizedFactors (Ideal.span {α})`: maximality of `P` is derived from
 `α ≠ 0` and normalized-factor membership. -/
 noncomputable def K2_2SourceData.ofCanonicalTraceForm_orderOfOne_normalizedFactor
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     {P : Ideal (𝓞 K)}
     (hP_factor : P ∈ normalizedFactors (Ideal.span ({α} : Set (𝓞 K))))
@@ -110,11 +113,6 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_orderOfOne_normalizedFacto
 derives `(p : 𝓞 K) ∉ P` from `(α, p) = ⊤`. -/
 noncomputable def
     K2_2SourceData.ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -188,11 +186,6 @@ derives `(p : 𝓞 K) ∉ P` from `(α, p) = ⊤` and derives the index-one Gaus
 nonvanishing from Dwork exact order. -/
 noncomputable def
     K2_2SourceData.ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_dworkNeZero
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -256,6 +249,19 @@ noncomputable def
         (le_refl 1) (one_le_p_sub_one_of_prime (p := p)))
       h_exp h_order
 
+end NormalizedFactor
+
+section Reciprocal
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  [IsGalois ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+  [FaithfulSMul (𝓞 K) (𝓞 R')]
+  [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
+
 /-- **Reciprocal actual K2-2 source data from the canonical trace-form split
 bundle and the pair-field exact-exponent theorem.**
 
@@ -264,14 +270,6 @@ reciprocal exact-exponent theorem to a usable K2-2 source object. It produces
 `D.phi.gamma = phiPrimeGenDescent S (p - 1) ...` and discharges the
 Stickelberger span field by the atomic split theorem for that same element. -/
 noncomputable def K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -384,14 +382,6 @@ noncomputable def K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split
 that derives the descent-prime equality from the canonical trace-form identity
 and accepts split conditions directly for `P`. -/
 noncomputable def K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split_atPrime
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -444,14 +434,6 @@ noncomputable def K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split_
 derives `ℓ ≠ p` from `(ℓ : 𝓞 K) ∈ P` and `(p : 𝓞 K) ∉ P`. -/
 noncomputable def
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split_atPrime_of_mem_notMem
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -493,14 +475,6 @@ noncomputable def
 that also derives `P ≠ ⊥` from maximality of the source prime. -/
 noncomputable def
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split_atPrime_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -543,14 +517,6 @@ that accepts splitting of the rational prime ideal `(ℓ)` instead of splitting
 written on `P.under ℤ`. -/
 noncomputable def
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split_atSpan_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -601,14 +567,6 @@ that derives the rational-prime split equalities from the cyclotomic
 ramification theorem and the order-one condition for `ℓ` modulo `p`. -/
 noncomputable def
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split_orderOfOne_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -654,14 +612,6 @@ maximality of `P` is derived from `α ≠ 0` and
 `P ∈ normalizedFactors (Ideal.span {α})`. -/
 noncomputable def
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_orderOfOne_normalizedFactor
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     {P : Ideal (𝓞 K)}
     (hP_factor : P ∈ normalizedFactors (Ideal.span ({α} : Set (𝓞 K))))
@@ -711,14 +661,6 @@ noncomputable def
 that derives `(p : 𝓞 K) ∉ P` from `(α, p) = ⊤`. -/
 noncomputable def
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -771,6 +713,8 @@ noncomputable def
         (K := K) hα_ne hαp_top hP_factor)
       hQ_in h_compat h_trace h_order
 
+end Reciprocal
+
 /-- **Cyclotomic discharged facts for a single `K2_2SourceData`**: bundles
 `K2_2SourceData_phi_gamma_isSemiPrimary` and
 `K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic` into a single
@@ -791,13 +735,12 @@ theorem K2_2SourceData_phi_facts_cyclotomic
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma ∧
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
-  refine ⟨?_, ?_⟩
-  · exact PhiPrimeElement.K2_2SourceData_phi_gamma_isSemiPrimary
-      (p := p) (K := K) D hp_three
-  · exact K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
-      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D
+  exact ⟨PhiPrimeElement.K2_2SourceData_phi_gamma_isSemiPrimary
+      (p := p) (K := K) D hp_three,
+    K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
+      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D⟩
 
 /-- **Cyclotomic discharged facts for a single reciprocal `K2_2SourceData`**:
 bundles reciprocal semi-primary and conjugation-norm facts into one named
@@ -818,13 +761,12 @@ theorem K2_2ReciprocalSourceData_phi_facts_cyclotomic
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma ∧
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
-  refine ⟨?_, ?_⟩
-  · exact PhiPrimeElement.K2_2ReciprocalSourceData_phi_gamma_isSemiPrimary
-      (p := p) (K := K) D hp_three
-  · exact K2_2ReciprocalSourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
-      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D
+  exact ⟨PhiPrimeElement.K2_2ReciprocalSourceData_phi_gamma_isSemiPrimary
+      (p := p) (K := K) D hp_three,
+    K2_2ReciprocalSourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
+      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D⟩
 
 end PhiPrimeElement
 

@@ -378,7 +378,8 @@ with α = α₀, β = α₁. Expanding via `y_gen² = a₁ x_gen y_gen + a₃ y_
 
 Matching coefficients with `(A + B·y_gen)/ψ₂³`:
 * y_gen-side: `α₁²·ψ₂ = B/ψ₂³` ⟹ `α₁² = B/ψ₂⁴` ⟹ requires B ∈ expand-range (✓ shipped).
-* 1-side: `α₀² + α₁²·cubic_x = A/ψ₂³` ⟹ `α₀²·ψ₂⁴ = A·ψ₂ + B·cubic_x` (in char 2; sign flips since -B=B).
+* 1-side: `α₀² + α₁²·cubic_x = A/ψ₂³` ⟹ `α₀²·ψ₂⁴ = A·ψ₂ + B·cubic_x`
+  (in char 2; sign flips since -B=B).
 
 The coupled-residual `A·ψ₂ + B·cubic_x` must be in expand-range. This is
 **non-trivial** — sympy-verified for arbitrary char-2 Weierstrass curves
@@ -493,7 +494,6 @@ residual `A·ψ₂ + B·cubic_x`, every nonzero coefficient is at an even
 degree (sympy-verified, char-2-reduced), so its derivative vanishes. -/
 
 omit [Fintype K] [DecidableEq K] in
-set_option maxHeartbeats 1000000 in
 /-- **Derivative of `omega2_coupled_residual_char_two` vanishes in char 2**.
     Direct: the polynomial has only even-degree nonzero coefficients in
     char 2, so its derivative is zero. -/
@@ -972,7 +972,6 @@ def OmegaTwoBasisHolds (W : WeierstrassCurve K) : Prop :=
     Polynomial.C (omega2_Y_coeff_char_two W) * Polynomial.X
 
 omit [Fintype K] [DecidableEq K] in
-set_option maxHeartbeats 1000000 in
 /-- **Unconditional basis decomposition of ω₂ in char 2**: the bivariate
     polynomial `W.ω 2` in `K[X][Y]` decomposes as `C(A) + C(B)·Y` after
     char-2 reductions (mathlib's `redInvarDenom_two`, `complEDSAux₂_two`,
@@ -983,13 +982,13 @@ theorem omegaTwoBasisHolds_char_two
   have h_b2 : W.b₂ = W.a₁ ^ 2 := WeierstrassCurve.b₂_of_char_two W
   have h_b4 : W.b₄ = W.a₁ * W.a₃ := WeierstrassCurve.b₄_of_char_two W
   have h_b6 : W.b₆ = W.a₃ ^ 2 := WeierstrassCurve.b₆_of_char_two W
-  unfold OmegaTwoBasisHolds omega2_X_coeff_char_two omega2_Y_coeff_char_two
+  simp only [OmegaTwoBasisHolds, omega2_X_coeff_char_two, omega2_Y_coeff_char_two]
   rw [WeierstrassCurve.ω, redInvarDenom_two, complEDSAux₂_two,
       WeierstrassCurve.ψ_two, WeierstrassCurve.Ψ₃, WeierstrassCurve.b₈,
       h_b2, h_b4, h_b6]
-  unfold WeierstrassCurve.ψ₂ WeierstrassCurve.Affine.negPolynomial
-    WeierstrassCurve.Affine.polynomial WeierstrassCurve.Affine.polynomialX
-    WeierstrassCurve.Affine.polynomialY
+  simp only [WeierstrassCurve.ψ₂, WeierstrassCurve.Affine.negPolynomial,
+    WeierstrassCurve.Affine.polynomial, WeierstrassCurve.Affine.polynomialX,
+    WeierstrassCurve.Affine.polynomialY]
   reduce_mod_char!
   simp only [Polynomial.C_mul, Polynomial.C_pow, Polynomial.C_add,
     Polynomial.C_0, Polynomial.C_1]
@@ -1012,7 +1011,7 @@ theorem omega_ff_two_basis_decomp_char_two
       Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W) * y_gen W := by
   -- ω_ff W 2 = algebraMap CR KE (mk W (W.ω 2)).
   -- By omegaTwoBasisHolds, W.ω 2 = C(A) + C(B) · X (Y-variable).
-  unfold ω_ff
+  simp only [ω_ff]
   rw [omegaTwoBasisHolds_char_two W]
   -- mk W is a ring hom; algebraMap CR KE is also.
   -- Apply map_add, map_mul to push through.
@@ -1066,9 +1065,9 @@ theorem psi_ff_two_eq_aeval_char_two
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [CharP K 2] :
     ψ_ff W 2 = Polynomial.aeval (x_gen W)
       (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃) := by
-  unfold ψ_ff
+  simp only [ψ_ff]
   rw [WeierstrassCurve.ψ_two]
-  unfold WeierstrassCurve.ψ₂ WeierstrassCurve.Affine.polynomialY
+  simp only [WeierstrassCurve.ψ₂, WeierstrassCurve.Affine.polynomialY]
   -- ψ₂ = C(C 2)·Y + C(C a₁ * X + C a₃). In char 2, C(C 2) = 0.
   -- mk W (0·Y + C(C a₁ * X + C a₃)) = algebraMap (Poly K) CR (C a₁ * X + C a₃)
   reduce_mod_char!
@@ -1118,7 +1117,7 @@ theorem alpha_1_sq_psi_eq_B_div_psi_cubed_of_witness
       Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W) /
       Polynomial.aeval (x_gen W)
         (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃) ^ 3 := by
-  unfold alpha_1_y_qth_root_char_two
+  simp only [alpha_1_y_qth_root_char_two]
   rw [div_pow, h_polyRoot_sq]
   field_simp
 
@@ -1153,7 +1152,7 @@ theorem alpha_0_sq_polynomial_match_char_two
       Polynomial.aeval (x_gen W) (omega2_X_coeff_char_two W) *
       Polynomial.aeval (x_gen W)
         (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃) := by
-  unfold alpha_0_y_qth_root_char_two alpha_1_y_qth_root_char_two
+  simp only [alpha_0_y_qth_root_char_two, alpha_1_y_qth_root_char_two]
   rw [div_pow, div_pow, h_polyRoot_sq_alpha_0, h_polyRoot_sq_alpha_1]
   -- Keep aeval x_gen (omega2_coupled_residual_char_two W) opaque; use the
   -- definitional unfolding aeval (A·ψ + B·cubic) = aeval A · aeval ψ + aeval B · aeval cubic
@@ -1164,7 +1163,7 @@ theorem alpha_0_sq_polynomial_match_char_two
           (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃) +
       Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W) *
         Polynomial.aeval (x_gen W) (cubic_x W) := by
-    unfold omega2_coupled_residual_char_two
+    simp only [omega2_coupled_residual_char_two]
     rw [map_add, map_mul, map_mul]
   rw [h_residual]
   have h_2 : (2 : W.toAffine.FunctionField) = 0 := natCast_functionField_eq_zero W 2
@@ -1192,13 +1191,13 @@ theorem y_qth_root_squared_eq_mulByInt_y_two_of_witnesses
           (h_card ▸ omega2_Y_coeff_mem_expand_two_char_two W : _))) ^ 2 =
       Polynomial.aeval (x_gen W) (omega2_Y_coeff_char_two W)) :
     (y_qth_root_q_eq_2_char_2 W h_card) ^ 2 = mulByInt_y W 2 := by
-  unfold y_qth_root_q_eq_2_char_2 y_qth_root_q_eq_2_char_2_of_witnesses
+  simp only [y_qth_root_q_eq_2_char_2, y_qth_root_q_eq_2_char_2_of_witnesses]
   rw [char_two_sq_basis_form, y_gen_sq_weierstrass_char_two]
   have h_Y := alpha_1_sq_psi_eq_B_div_psi_cubed_of_witness W h_card h_psi_ne
     h_polyRoot_sq_alpha_1
   have h_const := alpha_0_sq_polynomial_match_char_two W h_card h_psi_ne
     h_polyRoot_sq_alpha_0 h_polyRoot_sq_alpha_1
-  unfold mulByInt_y
+  simp only [mulByInt_y]
   rw [omega_ff_two_basis_decomp_char_two, psi_ff_two_eq_aeval_char_two]
   -- Bind names.
   set ψ : W.toAffine.FunctionField := Polynomial.aeval (x_gen W)
@@ -1240,7 +1239,7 @@ theorem y_qth_root_squared_eq_mulByInt_y_two_of_witnesses
     show _ = (algebraMap K W.toAffine.FunctionField W.a₁ * x_gen W +
         algebraMap K W.toAffine.FunctionField W.a₃) * y_gen W +
         Polynomial.aeval (x_gen W) (cubic_x W)
-    unfold cubic_x
+    simp only [cubic_x]
     simp [Polynomial.aeval_C, Polynomial.aeval_X, map_add, map_mul, map_pow]
     ring]
   -- Goal: α₀² + α₁²·(ψ·y_gen + C') = (A' + B'·y_gen) / ψ³
@@ -1563,7 +1562,6 @@ noncomputable def omega3_witness_coeff_X6 (W : WeierstrassCurve K) : K :=
   W.a₂^3*W.a₃ + 2*W.a₃^3
 
 set_option maxHeartbeats 2000000 in
-set_option maxRecDepth 4096 in
 /-- **Witness coefficient at X⁰** (constant term, q=3 char-3): ~70-term
     polynomial. -/
 noncomputable def omega3_witness_coeff_X0 (W : WeierstrassCurve K) : K :=
@@ -1902,7 +1900,7 @@ theorem psi_2_sq_plus_cubic_x_form_char_three
     (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃) ^ 2 + cubic_x W =
     Polynomial.X ^ 3 + Polynomial.C W.b₂ * Polynomial.X ^ 2 +
       Polynomial.C (2 * W.b₄) * Polynomial.X + Polynomial.C W.b₆ := by
-  unfold cubic_x
+  simp only [cubic_x]
   rw [WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆]
   have h_3 : (3 : K) = 0 := CharP.cast_eq_zero K 3
   have h_3P : (3 : Polynomial K) = 0 := by
@@ -2282,7 +2280,7 @@ theorem omega_ff_three_decomp_via_nat_degree_bound
       (algebraMap (Polynomial K) W.toAffine.CoordinateRing p) = _
     rw [← IsScalarTower.algebraMap_apply]
     exact h_alg_eq_aeval p
-  unfold ω_ff
+  simp only [ω_ff]
   conv_lhs => rw [h_decomp_poly]
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     map_add, map_mul, map_pow, h_C_aeval, h_X_y]
@@ -2310,8 +2308,8 @@ theorem omega_ff_three_basis_decomp_via_witness_char_three
       Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 4) * (y_gen W) ^ 4 +
       Polynomial.aeval (x_gen W) (Polynomial.coeff (W.ω 3) 5) * (y_gen W) ^ 5) :
     OmegaThreeBasisHoldsReduced W := by
-  unfold OmegaThreeBasisHoldsReduced
-    omega_3_X_coeff_reduced_char_three omega_3_Y_coeff_reduced_char_three
+  simp only [OmegaThreeBasisHoldsReduced, omega_3_X_coeff_reduced_char_three,
+    omega_3_Y_coeff_reduced_char_three]
   rw [h_decomp]
   -- Use the Y-degree contribution helpers (multiplied form) for k=2,3,4,5.
   have h_sq_mul := y_gen_sq_mul_basis_form_char_three W
@@ -2327,7 +2325,7 @@ theorem omega_ff_three_basis_decomp_via_witness_char_three
   -- after aeval distributes.
   simp only [map_add, map_mul, map_pow, map_sub, map_ofNat,
     Polynomial.aeval_C, Polynomial.aeval_X]
-  unfold cubic_x
+  simp only [cubic_x]
   simp only [map_add, map_mul, map_pow, Polynomial.aeval_C, Polynomial.aeval_X]
   ring
 
@@ -2340,7 +2338,7 @@ bound on a building-block polynomial in `R[X][Y]`. -/
 theorem natDegree_polynomialY_le {R : Type*} [CommRing R] [Nontrivial R]
     (W : WeierstrassCurve R) :
     W.toAffine.polynomialY.natDegree ≤ 1 := by
-  unfold WeierstrassCurve.Affine.polynomialY
+  simp only [WeierstrassCurve.Affine.polynomialY]
   refine (Polynomial.natDegree_add_le _ _).trans ?_
   refine max_le ?_ ?_
   · refine (Polynomial.natDegree_mul_le).trans ?_
@@ -2351,7 +2349,7 @@ theorem natDegree_polynomialY_le {R : Type*} [CommRing R] [Nontrivial R]
 theorem natDegree_polynomialX_le {R : Type*} [CommRing R] [Nontrivial R]
     (W : WeierstrassCurve R) :
     W.toAffine.polynomialX.natDegree ≤ 1 := by
-  unfold WeierstrassCurve.Affine.polynomialX
+  simp only [WeierstrassCurve.Affine.polynomialX]
   refine (Polynomial.natDegree_sub_le _ _).trans ?_
   refine max_le ?_ ?_
   · refine (Polynomial.natDegree_mul_le).trans ?_
@@ -2362,7 +2360,7 @@ theorem natDegree_polynomialX_le {R : Type*} [CommRing R] [Nontrivial R]
 theorem natDegree_negPolynomial_le {R : Type*} [CommRing R] [Nontrivial R]
     (W : WeierstrassCurve R) :
     W.toAffine.negPolynomial.natDegree ≤ 1 := by
-  unfold WeierstrassCurve.Affine.negPolynomial
+  simp only [WeierstrassCurve.Affine.negPolynomial]
   refine (Polynomial.natDegree_sub_le _ _).trans ?_
   refine max_le ?_ ?_
   · rw [Polynomial.natDegree_neg, Polynomial.natDegree_X]
@@ -2582,7 +2580,7 @@ theorem preΨ_4_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K']
 theorem ψ_2_ne_zero_of_char_three {K' : Type*} [CommRing K'] [Nontrivial K'] [CharP K' 3]
     (W : WeierstrassCurve K') : W.ψ₂ ≠ 0 := by
   show W.toAffine.polynomialY ≠ 0
-  unfold WeierstrassCurve.Affine.polynomialY
+  simp only [WeierstrassCurve.Affine.polynomialY]
   intro h
   -- Take coeff at degree 1: C(C 2) = 0, so C 2 = 0, so 2 = 0 — contradicting char 3.
   have h_coeff_1 := congrArg (Polynomial.coeff · 1) h

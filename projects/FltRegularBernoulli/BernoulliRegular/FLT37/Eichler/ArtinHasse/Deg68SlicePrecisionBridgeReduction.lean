@@ -23,7 +23,8 @@ is here **reduced** — using only the unconditional functional precision-compat
 agreement** between the level-`107` deg-`68` slice folded down to precision `72` and the level-`71`
 deg-`68` slice, read at the `varpi^{32}` coordinate mod `37²`.  Both slices are the degree-`68`
 homogeneous part of the Artin-Hasse normalized log; the level-`107` one (precision `108`) reduces to
-precision `72` and the question is whether its `varpi^{32}` coordinate agrees with the level-`71` one.
+precision `72` and the question is whether its `varpi^{32}` coordinate agrees with the level-`71`
+one.
 
 It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
 
@@ -49,7 +50,6 @@ level-`71` deg-`68` coordinate `unscaled32SliceCoord 68`.
 
 noncomputable section
 
-set_option maxRecDepth 100000
 
 open NumberField
 
@@ -66,9 +66,10 @@ variable [NumberField.IsCMField K]
 /-! ## 1. The level-`107` deg-`68` slice (the argument of `unscaled32SliceCoordCube`) -/
 
 omit [NumberField.IsCMField K] in
-/-- **The level-`107` deg-`68` homogeneous slice** (a name): the argument of `unscaled32SliceCoordCube`
-— the degree-`68` homogeneous slice of the level-`107` Dwork-parameter normalized Artin-Hasse log, an
-element of `ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K)^(3*(37-1)) = ⧸(λ)^{108}` (mod `37³`). -/
+/-- **The level-`107` deg-`68` homogeneous slice** (a name): the argument of
+`unscaled32SliceCoordCube` — the degree-`68` homogeneous slice of the level-`107` Dwork-parameter
+normalized Artin-Hasse log, an element of
+`ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K)^(3*(37-1)) = ⧸(λ)^{108}` (mod `37³`). -/
 def deg68Slice107 : ValuedIntegerRing 37 K ⧸ (lambdaIdeal 37 K) ^ (3 * (37 - 1)) :=
   samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
     (p := 37) (K := K) 107 68
@@ -90,10 +91,10 @@ theorem unscaled32SliceCoordCube_eq :
 omit [NumberField.IsCMField K] in
 /-- **`castHom (unscaled32SliceCoordCube) = coordModSq 32 (factorPow (72≤108) (deg-68 slice@107))`**
 (proven, axiom-clean): the unconditional precision-compatibility
-`castHom_valuedLambdaQuotientDworkCoeffModCube_eq_coeffModSq_factorPow` specialised to the level-`107`
-deg-`68` slice at the irregular index `(kummerLogEvenPowerIndex 15).1` (value `32`).  The left side is
-the mod-`37²` reduction of the level-`107` (mod-`37³`) coordinate; the right side is the level-`107`
-slice folded to precision `72` and read at `varpi^{32}` mod `37²`. -/
+`castHom_valuedLambdaQuotientDworkCoeffModCube_eq_coeffModSq_factorPow` specialised to the
+level-`107` deg-`68` slice at the irregular index `(kummerLogEvenPowerIndex 15).1` (value `32`).
+The left side is the mod-`37²` reduction of the level-`107` (mod-`37³`) coordinate; the right side
+is the level-`107` slice folded to precision `72` and read at `varpi^{32}` mod `37²`. -/
 theorem castHom_unscaled32SliceCoordCube_eq_coeffModSq_factorPow_slice107 :
     (ZMod.castHom (pow_dvd_pow 37 (by norm_num : 2 ≤ 3)) (ZMod (37 ^ 2)))
         (unscaled32SliceCoordCube K) =
@@ -132,13 +133,14 @@ def CaseIICor823Level71Deg68SliceCoordAgreement37
     unscaled32SliceCoord (K := CyclotomicField 37 ℚ) 68
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **The precision bridge from the same-level slice-coordinate agreement** (proven, axiom-clean given
-the agreement): `CaseIICor823Level71Deg68SliceCoordAgreement37 →
+/-- **The precision bridge from the same-level slice-coordinate agreement** (proven, axiom-clean
+given the agreement): `CaseIICor823Level71Deg68SliceCoordAgreement37 →
 CaseIICor823Level71Deg68ModCubePrecisionBridge37`.
 
-By the precision-compatibility (`castHom_unscaled32SliceCoordCube_eq_coeffModSq_factorPow_slice107`),
-`castHom (unscaled32SliceCoordCube) = coordModSq 32 (factorPow (deg-68 slice@107))`; the agreement says
-this equals `unscaled32SliceCoord 68`, which is exactly the bridge. -/
+By the precision-compatibility
+(`castHom_unscaled32SliceCoordCube_eq_coeffModSq_factorPow_slice107`),
+`castHom (unscaled32SliceCoordCube) = coordModSq 32 (factorPow (deg-68 slice@107))`; the agreement
+says this equals `unscaled32SliceCoord 68`, which is exactly the bridge. -/
 theorem caseII_precisionBridge_of_sliceCoordAgreement
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]

@@ -8,8 +8,8 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Stickelberg
 /-!
 # `StickelbergerIdealEquality` from a `FullTeichDworkSetup`
 
-This file provides the substantive valuation-descent content of c.1
-(`REF-18c2d-main-c.1`) by showing how to assemble a
+This file provides the substantive valuation-descent content by showing
+how to assemble a
 `StickelbergerIdealEquality (S.Q.under (𝓞 K))` from a
 `FullTeichDworkSetup S` together with a coverage hypothesis on the
 Galois orbit of the descent prime.
@@ -83,11 +83,9 @@ variable {k : Type u} [Field k] [Fintype k] [Algebra (ZMod ℓ) k]
 variable {K : Type v} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower ℚ K R']
   [IsCyclotomicExtension {p, ℓ} ℚ R']
-variable [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
 
 variable (S : FullTeichDworkSetup ℓ p k K R')
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-! ### Forward construction via per-conjugate generators
 
 The orbit-coverage predicate
@@ -107,7 +105,6 @@ is the substantive content of multi-bundle Stickelberger descent — it
 remains hypothesized as a `Prop` but the `Prop` is now atomic (one
 ∃ per orbit element), and the constructor is a one-line product. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Atomic per-conjugate generator predicate.**
 
 For every `a ∈ (ZMod p)ˣ`, there is a non-zero `γ_a ∈ 𝓞 K` such that
@@ -127,7 +124,6 @@ def StickelbergerExactPerConjugateGenerator : Prop :=
             S.toConcreteStickelbergerSetup.descentPrime ^
           ((a : ZMod p).val)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Forward construction of `StickelbergerOrbitCoverage` from per-conjugate
 generators.** Given a witness `StickelbergerExactPerConjugateGenerator S`,
 the product `γ := ∏_a γ_a` over the cyclotomic unit group satisfies
@@ -154,13 +150,11 @@ theorem stickelbergerOrbitCoverage_of_perConjugateGenerator
     -- Ideal.span {∏ γ_a} = ∏ Ideal.span {γ_a} = ∏ (σ_{a⁻¹} q_K)^a.val
     rw [← Ideal.prod_span_singleton (Finset.univ : Finset (CyclotomicUnitDelta p)) γ_a]
     -- Goal: ∏ Ideal.span {γ_a} = stickelbergerIdeal q_K
-    unfold stickelbergerIdeal
+    simp only [stickelbergerIdeal]
     refine Finset.prod_congr rfl ?_
     intro a _
     exact hγ_a_eq a
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Forward end-to-end discharge of `StickelbergerIdealEquality` via
 per-conjugate generators.** Given the per-conjugate generator predicate,
 we obtain `StickelbergerIdealEquality (S.Q.under (𝓞 K))` directly.
@@ -206,7 +200,6 @@ def StickelbergerConjugateIsPrincipal : Prop :=
       (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
         S.toConcreteStickelbergerSetup.descentPrime)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Trivial discharge of `StickelbergerConjugateIsPrincipal` from
 principality of the descent prime.**
 
@@ -223,10 +216,9 @@ theorem stickelbergerConjugateIsPrincipal_of_principal
       S.toConcreteStickelbergerSetup.descentPrime) :
     S.StickelbergerConjugateIsPrincipal := by
   intro a
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact h_princ.map_ringHom (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Constructing per-conjugate generators from principality.**
 If each `σ_{a⁻¹} q_K` is principal with generator `g_a`, then `g_a^{a.val}`
 generates the corresponding power, satisfying
@@ -237,7 +229,7 @@ theorem stickelbergerExactPerConjugateGenerator_of_principal
   classical
   intro a
   -- Extract the generator g_a of σ_{a⁻¹} q_K.
-  haveI := h_princ a
+  have := h_princ a
   obtain ⟨g_a, hg_a_eq⟩ := Submodule.IsPrincipal.principal
     (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
       S.toConcreteStickelbergerSetup.descentPrime)
@@ -269,7 +261,6 @@ theorem stickelbergerExactPerConjugateGenerator_of_principal
       (Ideal.span_singleton_pow g_a ((a : ZMod p).val)).symm]
     rw [hg_a_ideal]
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **End-to-end forward construction from principality.** Combining
 `stickelbergerExactPerConjugateGenerator_of_principal` with
 `stickelbergerOrbitCoverage_of_perConjugateGenerator`: under the
@@ -281,7 +272,6 @@ theorem stickelbergerOrbitCoverage_of_principal
   S.stickelbergerOrbitCoverage_of_perConjugateGenerator
     (S.stickelbergerExactPerConjugateGenerator_of_principal h_princ)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **End-to-end forward construction of `StickelbergerIdealEquality`
 under conjugate-principality.** This is the pure-forward c.1 closure
 modulo the principality input on each Galois conjugate of `q_K`. -/
@@ -292,8 +282,6 @@ theorem stickelbergerIdealEquality_of_principal
   S.stickelbergerIdealEquality_of_orbitCoverage
     (S.stickelbergerOrbitCoverage_of_principal h_princ)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Cleanest atomic consumer-facing composer for c.1:
 `StickelbergerIdealEquality` from descent-prime principality and
 totally-split ramification.**
@@ -334,7 +322,6 @@ This direction exhibits the per-conjugate generators by extracting
 the Galois-conjugate factors of `(γ)`'s factorisation, using
 the `StickelbergerExactConjugateExponents` discharge already in place. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Round-trip:** orbit coverage + orbit faithfulness imply per-conjugate
 generators exist. The witness γ_a is built from `(σ_{a⁻¹} q_K)`'s
 principality, which here is asserted via the multiplicity computation

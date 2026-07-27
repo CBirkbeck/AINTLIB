@@ -77,6 +77,7 @@ def IsInvertible (M : X.Modules) : Prop :=
   ∃ (ι : Type u) (U : ι → X.Opens), iSup U = ⊤ ∧
     ∀ i, Nonempty ((Modules.pullback (U i).ι).obj M ≅ unitObj ↑(U i))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Pullback of the structure sheaf along any morphism of schemes is the structure
 sheaf (mathlib's `pullbackObjUnitToUnit` isomorphism, available because the
 opens-preimage site functor is final — `Opens.map_final`; repackaged across the
@@ -145,5 +146,29 @@ noncomputable def restrictTrivialization {P : X.Modules} {U W : X.Opens} (e : W 
     (Modules.pullback (X.homOfLE e)).mapIso eP ≪≫
     pullbackUnitIso (X.homOfLE e)
 
+/-- `IsInvertible` is phrased with *pullback* trivializations, while the consumers of a
+trivialization (`overTrivializationOfRestrictIso`, the dual, the base-Čech flatness route)
+want the *restriction* form. These two bridges are the only place the
+`restrictFunctorIsoPullback` plumbing needs to appear. -/
+noncomputable def restrictIsoOfPullbackIso (M : X.Modules) (U : X.Opens)
+    (e : (Modules.pullback U.ι).obj M ≅ unitObj U.toScheme) :
+    M.restrict U.ι ≅ unitObj U.toScheme :=
+  (restrictFunctorIsoPullback U.ι).app M ≪≫ e
+
+/-- The converse bridge of `restrictIsoOfPullbackIso`: a restriction trivialization gives the
+pullback trivialization that `IsInvertible` asks for. -/
+noncomputable def pullbackIsoOfRestrictIso (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ unitObj U.toScheme) :
+    (Modules.pullback U.ι).obj M ≅ unitObj U.toScheme :=
+  (restrictFunctorIsoPullback U.ι).symm.app M ≪≫ e
+
+/-- A trivialization on an open subscheme induces the corresponding trivialization
+on the over-site of that open. -/
+noncomputable def overTrivializationOfRestrictIso (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ unitObj U.toScheme) :
+    M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U) :=
+  (overEquiv U).fullyFaithfulFunctor.preimageIso
+    ((overFunctorEquiv U).app M ≪≫ e ≪≫
+      (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).symm)
 
 end AlgebraicGeometry.Scheme.Modules

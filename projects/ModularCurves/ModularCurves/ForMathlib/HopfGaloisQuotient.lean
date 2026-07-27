@@ -1,16 +1,21 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import ModularCurves.ForMathlib.HopfGalois
 import ModularCurves.ForMathlib.SpecEqualizer
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.EffectiveEpi
-import Mathlib.AlgebraicGeometry.Pullbacks
 import Mathlib.Algebra.Category.Ring.Constructions
+import Mathlib.AlgebraicGeometry.EffectiveEpi
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.Pullbacks
 import Mathlib.CategoryTheory.Limits.Shapes.KernelPair
 
 /-!
 # The affine quotient map is a regular epimorphism
 
-Construction support for `T-G3d-infra` Piece 3 (`.mathlib-quality/decomposition-g3d-piece3.md`): the
-first, **route-independent** half of the `@[stacks 023Q]` application. Given the co-invariant
+Construction support for `T-G3d-infra` Piece 3: the first, **route-independent** half of the
+`@[stacks 023Q]` application. Given the co-invariant
 faithful-flatness half of the Hopf-Galois property (`Module.FaithfullyFlat B^{coρ} B`), the affine
 quotient map `π = specEqualizerπ ρ includeLeft : Spec B ⟶ Spec B^{coρ}` is a **regular epimorphism**
 (= the coequalizer of its kernel pair), via `isRegularEpi_of_flat_of_surjective_of_isAffine`.
@@ -19,11 +24,11 @@ The chain: `Module.FaithfullyFlat B^{coρ} B` → `RingHom.FaithfullyFlat (algeb
 (`faithfullyFlat_algebraMap_iff`) → `Flat (Spec.map …) ∧ Surjective (Spec.map …)`
 (`flat_and_surjective_SpecMap_iff`) → `IsRegularEpi π` (023Q; both `Spec`s affine).
 
-The second half (`isKernelPair_specEqualizerπ` → `isColimit_of_isHopfGalois`) identifies this regular
-epi's kernel pair with the translation groupoid: the tensor pushout `B ⊗_S B` gives, under `Spec`
-(`isPullback_SpecMap_of_isPushout`), the kernel pair `Spec B ×_{Spec S} Spec B`; the Galois iso
-`IsHopfGalois.galoisEquiv` transports it to `Spec(B ⊗_R A)` with legs `Spec ρ, Spec includeLeft` (the
-`SpecEqualizer` cofork's legs, via `canonicalGaloisMap_comp_include{Left,Right}`); then
+The second half (`isKernelPair_specEqualizerπ` → `isColimit_of_isHopfGalois`) identifies this
+regular epi's kernel pair with the translation groupoid: the tensor pushout `B ⊗_S B` gives, under
+`Spec` (`isPullback_SpecMap_of_isPushout`), the kernel pair `Spec B ×_{Spec S} Spec B`; the Galois
+iso `IsHopfGalois.galoisEquiv` transports it to `Spec(B ⊗_R A)` with legs `Spec ρ, Spec includeLeft`
+(the `SpecEqualizer` cofork's legs, via `canonicalGaloisMap_comp_include{Left,Right}`); then
 `IsKernelPair.toCoequalizer'` (regular epi ⟹ coequalizer of its kernel pair) gives the affine-local
 `IsColimit`. This is the full route-independent reduction `IsHopfGalois ρ ⟹ IsColimit`, feeding
 `exists_unique_lift_of_isColimit` and thence the `SubgroupQuotient` pins.
@@ -38,8 +43,8 @@ universe u
 
 variable {R A B : Type u} [CommRing R] [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
 
-/-- The affine quotient map `π : Spec B ⟶ Spec B^{coρ}` is `Spec.map` of the co-invariants inclusion,
-which is `algebraMap B^{coρ} B`. -/
+/-- The affine quotient map `π : Spec B ⟶ Spec B^{coρ}` is `Spec.map` of the co-invariants
+inclusion, which is `algebraMap B^{coρ} B`. -/
 theorem specEqualizerπ_includeLeft_eq (ρ : B →ₐ[R] B ⊗[R] A) :
     specEqualizerπ ρ Algebra.TensorProduct.includeLeft
       = Spec.map (CommRingCat.ofHom (algebraMap (coinvariants ρ) B)) := by
@@ -48,8 +53,8 @@ theorem specEqualizerπ_includeLeft_eq (ρ : B →ₐ[R] B ⊗[R] A) :
 
 /-- **The affine quotient map is a regular epimorphism.** If `B` is faithfully flat over its
 co-invariants `S = B^{coρ}` (the flatness half of the Hopf-Galois property), then
-`π = specEqualizerπ ρ includeLeft : Spec B ⟶ Spec S` is a regular epi — the coequalizer of its kernel
-pair — by `@[stacks 023Q]`. -/
+`π = specEqualizerπ ρ includeLeft : Spec B ⟶ Spec S` is a regular epi — the coequalizer of its
+kernel pair — by `@[stacks 023Q]`. -/
 theorem isRegularEpi_specEqualizerπ (ρ : B →ₐ[R] B ⊗[R] A)
     (hff : Module.FaithfullyFlat (coinvariants ρ) B) :
     IsRegularEpi (specEqualizerπ ρ Algebra.TensorProduct.includeLeft) := by
@@ -57,18 +62,19 @@ theorem isRegularEpi_specEqualizerπ (ρ : B →ₐ[R] B ⊗[R] A)
     rw [CommRingCat.hom_ofHom, RingHom.faithfullyFlat_algebraMap_iff]
     exact hff
   obtain ⟨hflat, hsurj⟩ :=
-    (flat_and_surjective_SpecMap_iff (CommRingCat.ofHom (algebraMap (coinvariants ρ) B))).mpr hffRing
+    (flat_and_surjective_SpecMap_iff
+      (CommRingCat.ofHom (algebraMap (coinvariants ρ) B))).mpr hffRing
   rw [specEqualizerπ_includeLeft_eq]
   haveI := hflat
   haveI := hsurj
   exact isRegularEpi_of_flat_of_surjective_of_isAffine
     (Spec.map (CommRingCat.ofHom (algebraMap (coinvariants ρ) B)))
 
-/-- **The kernel pair of the affine quotient map is the translation groupoid.** Under `IsHopfGalois`,
-the pair `(Spec ρ, Spec includeLeft) : Spec (B ⊗_R A) ⇉ Spec B` is a kernel pair of
+/-- **The kernel pair of the affine quotient map is the translation groupoid.** Under
+`IsHopfGalois`, the pair `(Spec ρ, Spec includeLeft) : Spec (B ⊗_R A) ⇉ Spec B` is a kernel pair of
 `π = specEqualizerπ ρ includeLeft`: the tensor pushout `B ⊗_S B` gives the canonical kernel pair
-`Spec B ×_{Spec S} Spec B` (`isPullback_SpecMap_of_isPushout`), transported to `Spec (B ⊗_R A)` along
-the Galois iso `IsHopfGalois.galoisEquiv`, whose legs are exactly `Spec ρ, Spec includeLeft`
+`Spec B ×_{Spec S} Spec B` (`isPullback_SpecMap_of_isPushout`), transported to `Spec (B ⊗_R A)`
+along the Galois iso `IsHopfGalois.galoisEquiv`, whose legs are exactly `Spec ρ, Spec includeLeft`
 (`canonicalGaloisMap_comp_include{Right,Left}`). -/
 theorem isKernelPair_specEqualizerπ (ρ : B →ₐ[R] B ⊗[R] A) (h : IsHopfGalois ρ) :
     IsKernelPair (specEqualizerπ ρ Algebra.TensorProduct.includeLeft)
@@ -120,11 +126,11 @@ noncomputable def isColimit_of_isHopfGalois (ρ : B →ₐ[R] B ⊗[R] A) (h : I
     isRegularEpi_specEqualizerπ ρ h.faithfullyFlat
   exact (isKernelPair_specEqualizerπ ρ h).toCoequalizer'
 
-/-- **The affine Hopf-Galois quotient is the categorical quotient** — the universal property packaged
-from `isColimit_of_isHopfGalois`. If `ρ` is Hopf-Galois, then every map `f : Spec B ⟶ Y` that
-coequalizes `Spec ρ, Spec includeLeft` (i.e. is constant on `G`-orbits) factors *uniquely* through the
-quotient map `π : Spec B ⟶ Spec B^{coρ}`. This is the ready-to-consume interface for the glue step
-(and, via the `ρ = act^#` geometry bridge, the `SubgroupQuotient` pins). -/
+/-- **The affine Hopf-Galois quotient is the categorical quotient** — the universal property
+packaged from `isColimit_of_isHopfGalois`. If `ρ` is Hopf-Galois, then every map `f : Spec B ⟶ Y`
+that coequalizes `Spec ρ, Spec includeLeft` (i.e. is constant on `G`-orbits) factors *uniquely*
+through the quotient map `π : Spec B ⟶ Spec B^{coρ}`. This is the ready-to-consume interface for the
+glue step (and, via the `ρ = act^#` geometry bridge, the `SubgroupQuotient` pins). -/
 theorem existsUnique_lift_of_isHopfGalois (ρ : B →ₐ[R] B ⊗[R] A) (h : IsHopfGalois ρ)
     {Y : Scheme.{u}} (f : Spec (CommRingCat.of B) ⟶ Y)
     (hf : Spec.map (CommRingCat.ofHom ρ.toRingHom) ≫ f

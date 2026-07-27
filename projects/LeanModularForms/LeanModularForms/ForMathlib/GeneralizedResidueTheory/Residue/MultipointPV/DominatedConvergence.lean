@@ -289,6 +289,62 @@ private lemma A_int_aEStronglyMeasurable (S0 : Finset ℂ) (f g_reg : ℂ → �
   exact (h_meas_pv.sub (aEStronglyMeasurable_pv_sum_residue S0 f γ.toFun ε hε γ.a γ.b hγ_cont
     hγ'_off_P)).mono_measure (Measure.restrict_mono (uIoc_subset_Icc_of_lt γ.hab) le_rfl)
 
+/-- Away from all `ε`-neighbourhoods of the points of `S0`, the multi-point PV integrand equals
+the regular part `g_reg ∘ γ` times `γ'`; inside some neighbourhood it vanishes. -/
+private lemma cpvIntegrandOn_eq_decomposed (S0 : Finset ℂ) (f g_reg : ℂ → ℂ) (γ : ℝ → ℂ)
+    (hg_decomp : ∀ z, z ∉ (S0 : Set ℂ) →
+      f z = g_reg z + ∑ s ∈ S0, residueSimplePole f s / (z - s))
+    {ε : ℝ} (hε : 0 < ε) (t : ℝ) :
+    cpvIntegrandOn S0 f γ ε t =
+      if ∃ s ∈ S0, ‖γ t - s‖ ≤ ε then 0
+        else (g_reg (γ t) + ∑ s ∈ S0, residueSimplePole f s / (γ t - s)) * deriv γ t := by
+  simp only [cpvIntegrandOn]
+  split_ifs with h_near
+  · rfl
+  · push Not at h_near
+    rw [hg_decomp (γ t) (γt_not_mem_S0_of_all_far hε h_near)]
+
+/-- On the parameter interval and for a fixed `ε > 0`, the multi-point PV integrand is bounded by
+an explicit constant built from sup-norm bounds `Mg`, `Mγ'` on `g_reg ∘ γ`, `γ'` and a bound
+`res_bound` on the residues. -/
+private lemma norm_cpvIntegrandOn_le (S0 : Finset ℂ) (f g_reg : ℂ → ℂ)
+    (γ : PiecewiseC1Immersion) (Mg Mγ' res_bound : ℝ) (h_res_nonneg : 0 ≤ res_bound)
+    (hMg : ∀ z ∈ γ.toFun '' Icc γ.a γ.b, ‖g_reg z‖ ≤ Mg)
+    (hMγ' : ∀ t ∈ Icc γ.a γ.b, ‖deriv γ.toFun t‖ ≤ Mγ')
+    (hres : ∀ s ∈ S0, ‖residueSimplePole f s‖ ≤ res_bound)
+    (hg_decomp : ∀ z, z ∉ (S0 : Set ℂ) →
+      f z = g_reg z + ∑ s ∈ S0, residueSimplePole f s / (z - s))
+    {t ε : ℝ} (hε : 0 < ε) (ht : t ∈ Icc γ.a γ.b) :
+    ‖cpvIntegrandOn S0 f γ.toFun ε t‖ ≤ (|Mg| + S0.card * res_bound / ε) * |Mγ'| + 1 := by
+  simp only [cpvIntegrandOn]
+  split_ifs with h
+  · simp only [norm_zero]; positivity
+  · push Not at h
+    rw [hg_decomp (γ.toFun t) (γt_not_mem_S0_of_all_far hε h)]
+    calc ‖(g_reg (γ.toFun t) + ∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)) *
+            deriv γ.toFun t‖
+        = ‖g_reg (γ.toFun t) + ∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)‖ *
+            ‖deriv γ.toFun t‖ := norm_mul _ _
+      _ ≤ (|Mg| + S0.card * res_bound / ε) * |Mγ'| := by
+          refine mul_le_mul ?_ ((hMγ' t ht).trans (le_abs_self _)) (norm_nonneg _) (by positivity)
+          calc ‖g_reg (γ.toFun t) + ∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)‖
+              ≤ ‖g_reg (γ.toFun t)‖ +
+                  ‖∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)‖ := norm_add_le _ _
+            _ ≤ |Mg| + ∑ s ∈ S0, ‖residueSimplePole f s / (γ.toFun t - s)‖ := by
+                gcongr
+                · exact (hMg _ (Set.mem_image_of_mem _ ht)).trans (le_abs_self _)
+                · exact norm_sum_le _ _
+            _ ≤ |Mg| + ∑ _s ∈ S0, res_bound / ε := by
+                gcongr with s hs
+                rw [norm_div]
+                calc ‖residueSimplePole f s‖ / ‖γ.toFun t - s‖
+                    ≤ res_bound / ‖γ.toFun t - s‖ :=
+                      div_le_div_of_nonneg_right (hres s hs) (norm_nonneg _)
+                  _ ≤ res_bound / ε :=
+                      div_le_div_of_nonneg_left h_res_nonneg hε (h s hs).le
+            _ = |Mg| + S0.card * res_bound / ε := by simp only [Finset.sum_const]; ring
+      _ ≤ (|Mg| + S0.card * res_bound / ε) * |Mγ'| + 1 := by linarith
+
 private lemma pvIntegrand_intervalIntegrable_of_nonempty (S0 : Finset ℂ) (f g_reg : ℂ → ℂ)
     (γ : PiecewiseC1Immersion) (hS0_ne : S0 ≠ ∅)
     (hg_decomp : ∀ z, z ∉ (S0 : Set ℂ) →
@@ -301,54 +357,19 @@ private lemma pvIntegrand_intervalIntegrable_of_nonempty (S0 : Finset ℂ) (f g_
   obtain ⟨Mγ', hMγ'⟩ := piecewiseC1Immersion_deriv_bounded γ
   obtain ⟨Mg, hMg⟩ := continuousOn_image_bounded hγ_cont hg_cont
   have hS0_nonempty : S0.Nonempty := Finset.nonempty_of_ne_empty hS0_ne
-  let res_bound := S0.sup' hS0_nonempty (fun s ↦ ‖residueSimplePole f s‖)
+  obtain ⟨res_bound, hres⟩ := residueSimplePole_norm_bound S0 f hS0_nonempty
   have h_res_nonneg : 0 ≤ res_bound :=
-    (norm_nonneg _).trans (Finset.le_sup' (fun s ↦ ‖residueSimplePole f s‖)
-      hS0_nonempty.choose_spec)
+    (norm_nonneg _).trans (hres _ hS0_nonempty.choose_spec)
   let Mb := (|Mg| + S0.card * res_bound / ε) * |Mγ'| + 1
-  have h_bound : ∀ t ∈ Icc γ.a γ.b,
-      ‖cpvIntegrandOn S0 f γ.toFun ε t‖ ≤ Mb := by
-    intro t ht
-    simp only [cpvIntegrandOn]
-    split_ifs with h
-    · simp only [Mb, norm_zero]; positivity
-    · push Not at h
-      rw [hg_decomp (γ.toFun t) (γt_not_mem_S0_of_all_far hε h)]
-      calc ‖(g_reg (γ.toFun t) + ∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)) *
-              deriv γ.toFun t‖
-          = ‖g_reg (γ.toFun t) + ∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)‖ *
-              ‖deriv γ.toFun t‖ := norm_mul _ _
-        _ ≤ (|Mg| + S0.card * res_bound / ε) * |Mγ'| := by
-            refine mul_le_mul ?_ ((hMγ' t ht).trans (le_abs_self _)) (norm_nonneg _) (by positivity)
-            calc ‖g_reg (γ.toFun t) + ∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)‖
-                ≤ ‖g_reg (γ.toFun t)‖ +
-                    ‖∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)‖ := norm_add_le _ _
-              _ ≤ |Mg| + ∑ s ∈ S0, ‖residueSimplePole f s / (γ.toFun t - s)‖ := by
-                  gcongr
-                  · exact (hMg _ (Set.mem_image_of_mem _ ht)).trans (le_abs_self _)
-                  · exact norm_sum_le _ _
-              _ ≤ |Mg| + ∑ _s ∈ S0, res_bound / ε := by
-                  gcongr with s hs
-                  rw [norm_div]
-                  calc ‖residueSimplePole f s‖ / ‖γ.toFun t - s‖
-                      ≤ res_bound / ‖γ.toFun t - s‖ :=
-                        div_le_div_of_nonneg_right
-                          (Finset.le_sup' (fun s ↦ ‖residueSimplePole f s‖) hs) (norm_nonneg _)
-                    _ ≤ res_bound / ε :=
-                        div_le_div_of_nonneg_left h_res_nonneg hε (h s hs).le
-              _ = |Mg| + S0.card * res_bound / ε := by simp only [Finset.sum_const]; ring
-        _ ≤ Mb := by simp only [Mb]; linarith
+  have h_bound : ∀ t ∈ Icc γ.a γ.b, ‖cpvIntegrandOn S0 f γ.toFun ε t‖ ≤ Mb :=
+    fun t ht ↦ norm_cpvIntegrandOn_le S0 f g_reg γ Mg Mγ' res_bound h_res_nonneg hMg hMγ'
+      hres hg_decomp hε ht
   have h_eq_ae : (fun t ↦ cpvIntegrandOn S0 f γ.toFun ε t)
       =ᵐ[volume.restrict (Icc γ.a γ.b)]
       (fun t ↦ if ∃ s ∈ S0, ‖γ.toFun t - s‖ ≤ ε then (0 : ℂ)
         else (g_reg (γ.toFun t) + ∑ s ∈ S0, residueSimplePole f s / (γ.toFun t - s)) *
-          deriv γ.toFun t) := by
-    filter_upwards [ae_restrict_mem isClosed_Icc.measurableSet] with t _
-    simp only [cpvIntegrandOn]
-    split_ifs with h_near
-    · rfl
-    · push Not at h_near
-      rw [hg_decomp (γ.toFun t) (γt_not_mem_S0_of_all_far hε h_near)]
+          deriv γ.toFun t) :=
+    ae_of_all _ (fun t ↦ cpvIntegrandOn_eq_decomposed S0 f g_reg γ.toFun hg_decomp hε t)
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le γ.hab.le]
   exact (integrableOn_of_bounded_aeMeasurable Mb
     ((aEStronglyMeasurable_pv_integrand_decomposed S0 (residueSimplePole f) hε hg_cont

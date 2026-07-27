@@ -162,7 +162,7 @@ theorem map_cyclotomicRingOfIntegersEquiv_coe
     (a : CyclotomicUnitDelta p) (x : 𝓞 K) :
     ((cyclotomicRingOfIntegersEquiv (p := p) K a x : 𝓞 K) : K) =
       cyclotomicSigmaOfUnit (p := p) K a (x : K) := by
-  unfold cyclotomicRingOfIntegersEquiv
+  simp only [cyclotomicRingOfIntegersEquiv]
   change (cyclotomicSigmaOfUnit (p := p) K a • x : K) =
     cyclotomicSigmaOfUnit (p := p) K a (x : K)
   exact algebraMap.coe_smul' (cyclotomicSigmaOfUnit (p := p) K a) x K
@@ -287,10 +287,12 @@ theorem valuedCompletion_withValCongrComap_le_one_iff
       change v (σ y.ofVal) ≤ 1 ↔ (v.comap σ.toRingHom) y.ofVal ≤ 1
       rfl
 
-/-- The cyclotomic automorphism of the valued lambda-completion. -/
-noncomputable def valuedCompletionCyclotomicEquiv
+/-- The cyclotomic automorphism at the level of the underlying uniform-space
+completion `((lambdaHeightOneSpectrum p K).valuation K).Completion`. -/
+noncomputable def valuedCompletionCyclotomicEquivAux
     (a : CyclotomicUnitDelta p) :
-    ValuedCompletion p K ≃+* ValuedCompletion p K := by
+    ((lambdaHeightOneSpectrum p K).valuation K).Completion ≃+*
+      ((lambdaHeightOneSpectrum p K).valuation K).Completion := by
   let v : Valuation K ℤᵐ⁰ := (lambdaHeightOneSpectrum p K).valuation K
   let σ : K ≃+* K := (cyclotomicSigmaOfUnit (p := p) K a).toRingEquiv
   let w : Valuation K ℤᵐ⁰ := v.comap σ.toRingHom
@@ -306,6 +308,16 @@ noncomputable def valuedCompletionCyclotomicEquiv
       (uniformContinuous_withValCongr_comap (K := K) v σ).continuous
       (uniformContinuous_withValCongr_comap_symm (K := K) v σ).continuous)
 
+/-- The cyclotomic automorphism of the valued lambda-completion. -/
+noncomputable def valuedCompletionCyclotomicEquiv
+    (a : CyclotomicUnitDelta p) :
+    ValuedCompletion p K ≃+* ValuedCompletion p K :=
+  (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv K
+      (lambdaHeightOneSpectrum p K)).trans
+    ((valuedCompletionCyclotomicEquivAux (p := p) K a).trans
+      (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv K
+        (lambdaHeightOneSpectrum p K)).symm)
+
 theorem valuedCompletionCyclotomicEquiv_le_one_iff
     (a : CyclotomicUnitDelta p) {x : ValuedCompletion p K} :
     Valued.v (valuedCompletionCyclotomicEquiv (p := p) K a x) ≤ 1 ↔
@@ -315,6 +327,11 @@ theorem valuedCompletionCyclotomicEquiv_le_one_iff
   let w : Valuation K ℤᵐ⁰ := v.comap σ.toRingHom
   let h : v.IsEquiv w :=
     lambdaValuation_isEquiv_comap_cyclotomicSigma (p := p) (K := K) a
+  rw [show valuedCompletionCyclotomicEquiv (p := p) K a x =
+      IsDedekindDomain.HeightOneSpectrum.adicCompletion.ofCompletion
+        (valuedCompletionCyclotomicEquivAux (p := p) K a x.toCompletion) from rfl,
+    IsDedekindDomain.HeightOneSpectrum.adicCompletion.valued_ofCompletion,
+    ← IsDedekindDomain.HeightOneSpectrum.adicCompletion.valued_toCompletion (x := x)]
   change Valued.v
       (((UniformSpace.Completion.mapRingEquiv
         (WithVal.congr v w (RingEquiv.refl K))
@@ -323,11 +340,12 @@ theorem valuedCompletionCyclotomicEquiv_le_one_iff
       (UniformSpace.Completion.mapRingEquiv
         (WithVal.congr w v σ)
         (uniformContinuous_withValCongr_comap (K := K) v σ).continuous
-        (uniformContinuous_withValCongr_comap_symm (K := K) v σ).continuous)) x) ≤ 1 ↔
-    Valued.v x ≤ 1
+        (uniformContinuous_withValCongr_comap_symm (K := K) v σ).continuous))
+          x.toCompletion) ≤ 1 ↔
+    Valued.v x.toCompletion ≤ 1
   rw [RingEquiv.trans_apply]
   rw [valuedCompletion_withValCongrComap_le_one_iff (K := K) v σ]
-  exact (h.valuedCompletion_le_one_iff (x := x)).symm
+  exact (h.valuedCompletion_le_one_iff (x := x.toCompletion)).symm
 
 /-- The cyclotomic automorphism restricted to the valued integer ring. -/
 noncomputable def valuedIntegerCyclotomicEquiv
@@ -360,6 +378,7 @@ theorem valuedCompletionCyclotomicEquiv_algebraMap
   let w : Valuation K ℤᵐ⁰ := v.comap σ.toRingHom
   let h : v.IsEquiv w :=
     lambdaValuation_isEquiv_comap_cyclotomicSigma (p := p) (K := K) a
+  apply IsDedekindDomain.HeightOneSpectrum.adicCompletion.ext
   change
     (((UniformSpace.Completion.mapRingEquiv
       (WithVal.congr v w (RingEquiv.refl K))
@@ -394,7 +413,7 @@ theorem zmodUnit_neg_one_val_eq_pred :
 theorem valuedIntegerComplexConj_valuedCyclotomicZetaInteger :
     valuedIntegerComplexConj (p := p) K (valuedCyclotomicZetaInteger p K) =
       valuedCyclotomicZetaInteger p K ^ (p - 1) := by
-  ext
+  apply Subtype.ext
   change valuedCompletionCyclotomicEquiv (p := p) K (-1)
       (algebraMap (𝓞 K) (ValuedCompletion p K)
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger) =
@@ -501,7 +520,7 @@ theorem valuedIntegerComplexConj_rIntegralRatToValuedInteger
     (q : Furtwaengler.DieudonneDwork.rIntegralRatSubring p) :
     valuedIntegerComplexConj (p := p) K (rIntegralRatToValuedInteger p K q) =
       rIntegralRatToValuedInteger p K q := by
-  ext
+  apply Subtype.ext
   change valuedCompletionCyclotomicEquiv (p := p) K (-1)
       (algebraMap K (ValuedCompletion p K) (algebraMap ℚ K (q : ℚ))) =
     algebraMap K (ValuedCompletion p K) (algebraMap ℚ K (q : ℚ))

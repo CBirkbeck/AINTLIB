@@ -159,10 +159,7 @@ private theorem exists_intCast_ord_P (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothP
     (((⟨W⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff _).not.mpr hf)
   exact ⟨m, hm.symm⟩
 
--- The type carries no `DecidableEq F`, but the proof routes through the `DecidableEq`-scoped
--- `ord_P_x_gen_sub_const_eq_one_of_non_2_tor` (whose `negSmoothPoint`/`SmoothPoint.ext` steps need
--- the section instance, not a `classical` one); suppress the unused-in-type lint.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (x_gen − P.x) = 1`** at a non-2-torsion smooth point `P` (its x-coordinate as the
 constant). Bridges the `negSmoothPoint`-form `ord_P_x_gen_sub_const_eq_one_of_non_2_tor` via the
 involution `negY (negY) = id`. -/
@@ -204,9 +201,7 @@ theorem ord_P_algebraMap_poly_eq_zero_of_eval_ne (P : (⟨W⟩ : SmoothPlaneCurv
   exact h_notmem
     (((⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hu_ne P).mp h_ne)
 
--- Proof routes through the `DecidableEq`-scoped `ord_P_x_gen_sub_self_eq_one`; the section instance
--- is needed even though the type does not mention it. Suppress the unused-in-type lint.
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Step 2 — the root-multiplicity formula.** For a non-2-torsion smooth point `P` and nonzero
 `p ∈ F[X]`, the order of `algebraMap (Polynomial F) KE p` at `P` is the multiplicity of `P.x`
 as a root of `p`. Proof: peel off `(X − P.x)^m` (`m = rootMultiplicity P.x p`); the factor
@@ -683,7 +678,7 @@ theorem ord_P_ψ_ff_eq_zero {x y x_Q y_Q : F}
   exact h_notmem
     (((⟨W⟩ : SmoothPlaneCurve F).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hne P).mp h_ne)
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The non-constant remainder of `ord_P_y_numerator_eq_zero` lies in `m_P` (`ord_P > 0`):
 given `X` regular and `X ≡ x_Q`, `Y ≡ y_Q` at `P`, the part
 `3(X−x_Q)(X+x_Q) + 2a₂(X−x_Q) − a₁(Y−y_Q)` has positive order. -/
@@ -731,7 +726,7 @@ private theorem ord_P_y_numerator_remainder_pos
     (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
   rwa [← SmoothPlaneCurve.ord_P_neg] at ht3
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private theorem ord_P_y_numerator_eq_zero
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {X Y : KE} {x_Q y_Q : F}
     (hc : (3 * x_Q ^ 2 + 2 * W.a₂ * x_Q + W.a₄ - W.a₁ * y_Q : F) ≠ 0)
@@ -760,7 +755,7 @@ private theorem ord_P_y_numerator_eq_zero
     ring
   rw [hsplit, SmoothPlaneCurve.ord_P_add_eq_of_lt (by rw [hC_ord]; exact hR'_pos), hC_ord]
 
-omit [DecidableEq F] in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **The ratio-cofactor `B` is a unit at `P`** (`ord_P B = 0`). With `X := mulByInt_x ℓ`, the
 cofactor in `(Y − y_Q)·A = (X − x_Q)·B` is
 `B = X² + X·x_Q + x_Q² + a₂(X + x_Q) + a₄ − a₁·y_Q`, which splits as
@@ -929,7 +924,8 @@ private theorem ord_P_algebraMap_F_mul_eq {c : F} (hc : c ≠ 0)
 
 /-- **The pulled-back `Ψ₂` rewritten on the difference coordinates has order `1`.** Combining the
 uniformizer fact `ord_P ([ℓ]^*Ψ₂) = 1` (`ord_P_psiTwo_pullback_eq_one`) with the `2`-torsion
-relation `2 y_Q + a₁ x_Q + a₃ = 0` (which lets `[ℓ]^*Ψ₂ = 2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)`
+relation `2 y_Q + a₁ x_Q + a₃ = 0` (which lets
+`[ℓ]^*Ψ₂ = 2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)`
 after cancelling `a₃`), the sum on the difference coordinates `mulByInt_y − y_Q`, `mulByInt_x − x_Q`
 itself has order `1`. -/
 private theorem ord_P_two_mul_y_sub_add_a₁_mul_x_sub_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0)
@@ -989,7 +985,8 @@ private theorem ord_P_mulByInt_y_sub_const_eq_of_sum_ord_eq_one (ℓ : ℤ) (h2F
 (`ord_P_psiTwo_pullback_eq_one`, the `[2ℓ]`-torsion pole). Its `2(mulByInt_y − y_Q)` term has order
 `n := ord_P (mulByInt_y ℓ − y_Q)` (as `2` is a unit), strictly dominating the
 `a₁(mulByInt_x − x_Q)` term whenever `a₁ ≠ 0` (using the strict order gap
-`ord_P (mulByInt_y − y_Q) < ord_P (mulByInt_x − x_Q)`), so the sum has order `n`, forcing `n = 1`. -/
+`ord_P (mulByInt_y − y_Q) < ord_P (mulByInt_x − x_Q)`),
+so the sum has order `n`, forcing `n = 1`. -/
 private theorem ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_ne_zero (ℓ : ℤ) (hℓ : ℓ ≠ 0)
     (h2ℓF : (2 * ℓ : F) ≠ 0) (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x_Q y_Q : F}
     (h2torKE : (2 : KE) * algebraMap F KE y_Q + algebraMap F KE W.a₁ * algebraMap F KE x_Q +

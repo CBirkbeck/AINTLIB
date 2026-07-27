@@ -40,8 +40,7 @@ noncomputable instance (X : Scheme.{u}) : MonoidalCategory
   inferInstanceAs (MonoidalCategory
     (_root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The pullback of a sheaf of modules is the sheafification of the presheaf pullback of
 its underlying presheaf (`sheafificationCompPullback`, precomposed with the counit
 identification `sh(M.val) ≅ M`). -/
@@ -52,8 +51,7 @@ noncomputable def pullbackIsoSheafifyPresheafPullback (f : Y ⟶ X) (M : X.Modul
   (Modules.pullback f).mapIso (sheafifyValIso M).symm ≪≫
     (SheafOfModules.sheafificationCompPullback.{u} f.toRingCatSheafHom).app M.val
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(GAP-1 downstream core, general `f`, closed.)** Pullback commutes with the
 sheafified tensor: `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. Relocated from
 `Picard/InvertibleSheaf.lean` and proved: express both sides through the sheafification
@@ -63,31 +61,19 @@ the monoidal presheaf pullback, and collapse the double sheafification
 theorem nonempty_pullback_tensorObj (f : Y ⟶ X) (M N : X.Modules) :
     Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
       tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
-  letI : (PresheafOfModules.pullback.{u} (f.toRingCatSheafHom.hom :
-      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) ⟶
-        (TopologicalSpace.Opens.map f.base).op ⋙
-          (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).Monoidal :=
-    _root_.PresheafOfModules.pullbackMonoidal f
   -- E1: the pullback of the sheafified tensor is the sheafification of the presheaf
   -- pullback of the presheaf tensor
   have E1 : (Modules.pullback f).obj (tensorObj M N) ≅
       (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
         ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj (M.val ⊗ N.val)) :=
     (SheafOfModules.sheafificationCompPullback.{u} f.toRingCatSheafHom).app (M.val ⊗ N.val)
-  -- E2: the tensorator of the monoidal presheaf pullback
-  have E2 : (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
-        ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj (M.val ⊗ N.val)) ≅
-      (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
-        ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj M.val ⊗
-          (PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj N.val) :=
-    (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).mapIso
-      (Functor.Monoidal.μIso (PresheafOfModules.pullback.{u} (f.toRingCatSheafHom.hom :
-        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) ⟶
-          (TopologicalSpace.Opens.map f.base).op ⋙
-            (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))) M.val N.val).symm
+  -- E2: the tensorator of the monoidal presheaf pullback, already packaged as
+  -- `nonempty_sheafify_presheafPullback_tensor` (same statement, `CommRingCat`-derived
+  -- clothing — definitionally the spelling used here)
+  obtain ⟨E2⟩ := nonempty_sheafify_presheafPullback_tensor f M.val N.val
   -- E3: collapse the double sheafification (the D-Idem leaf)
   obtain ⟨E3⟩ := _root_.PresheafOfModules.nonempty_sheafify_tensor_idem
-    Y.sheaf.obj Y.ringCatSheaf.cond
+    Y.sheaf.obj Y.ringCatSheaf.property
     ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj M.val)
     ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj N.val)
   -- E4: identify the sheafified factors with the pullbacks

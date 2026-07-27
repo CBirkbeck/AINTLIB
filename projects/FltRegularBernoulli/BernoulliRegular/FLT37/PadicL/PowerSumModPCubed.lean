@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.LogCoeffBernoulli
 
 /-!
@@ -125,6 +130,51 @@ theorem bernoulli_le_thirtytwo_integral_thirtyseven {m : ℕ} (hm_pos : 0 < m)
   have hle : (36 : ℕ) ≤ m := Nat.le_of_dvd hm_pos (by simpa using hdvd)
   omega
 
+/-- **Bernoulli numbers up to index `30` are `37`-integral.**  For every `j ≤ 30`,
+`B_j` lands in `ℤ_[37]`, by a four-way split on `j`:
+
+* `j = 0`: `B_0 = 1`, a unit;
+* even `0 < j ≤ 30`: integral by von Staudt (`36 ∤ j`), via
+  `bernoulli_le_thirtytwo_integral_thirtyseven`;
+* `j = 1`: `B_1 = -1/2`, integral at `37` since `2` is a `37`-unit;
+* odd `j > 1`: `B_j = 0`.
+
+This is the "all Bernoulli numbers below the boundary index are `37`-units" fact that
+feeds the cubic remainder bound at `h = 32` (the relevant indices are `32 - s` for
+`2 ≤ s ≤ 32`, i.e. `0 ≤ 32 - s ≤ 30`). -/
+theorem bernoulli_integral_thirtyseven_of_le {j : ℕ} (hj : j ≤ 30) :
+    ∃ b : ℤ_[37], ((bernoulli j : ℚ) : ℚ_[37]) = (b : ℚ_[37]) := by
+  haveI : Fact (Nat.Prime 37) := ⟨by norm_num⟩
+  rcases Nat.even_or_odd j with heven | hodd
+  · -- even index: `B_0 = 1` (a unit) or `0 < j ≤ 30` integral by von Staudt.
+    rcases Nat.eq_zero_or_pos j with hz | hpos
+    · refine ⟨1, ?_⟩; rw [hz, bernoulli_zero]; push_cast; ring
+    · exact bernoulli_le_thirtytwo_integral_thirtyseven hpos (by omega) heven
+  · -- odd index: either `j = 1` (`B_1 = −1/2`, integral at 37) or `B_j = 0`.
+    rcases eq_or_ne j 1 with h1 | hne
+    · -- `B_1 = −1/2`; `2` is a `37`-unit, so `−2⁻¹ ∈ ℤ_[37]`.
+      have h2_unit : IsUnit ((2 : ℕ) : ℤ_[37]) :=
+        padicInt_natCast_isUnit_of_not_dvd (p := 37) (n := 2) (by decide)
+      set twoInv : ℤ_[37] := (h2_unit.unit⁻¹ : (ℤ_[37])ˣ).val with htwoInv
+      have htwo_mul_inv : ((2 : ℕ) : ℤ_[37]) * twoInv = 1 := by
+        rw [htwoInv]
+        change ((h2_unit.unit * h2_unit.unit⁻¹ : (ℤ_[37])ˣ).val : ℤ_[37]) = 1
+        simp
+      have htwo_mul_inv_Qp : (2 : ℚ_[37]) * ((twoInv : ℤ_[37]) : ℚ_[37]) = 1 := by
+        have := congrArg (fun x : ℤ_[37] => (x : ℚ_[37])) htwo_mul_inv
+        push_cast at this; exact this
+      refine ⟨-twoInv, ?_⟩
+      rw [h1, bernoulli_one]
+      have h2Q_ne : (2 : ℚ_[37]) ≠ 0 := by norm_num
+      push_cast
+      rw [show ((twoInv : ℤ_[37]) : ℚ_[37]) = (2 : ℚ_[37])⁻¹ from
+        (inv_eq_of_mul_eq_one_right htwo_mul_inv_Qp).symm]
+      field_simp
+    · refine ⟨0, ?_⟩
+      have hmod : j % 2 = 1 := Nat.odd_iff.mp hodd
+      have hgt : 1 < j := by omega
+      rw [bernoulli_eq_zero_of_odd hodd hgt]; simp
+
 /-- **Each reindexed non-leading remainder term at `h = 32`, `p = 37` is a `32·37³`
 multiple.**  The `s = h − i` reindexing matches `faulhaber_remainder_term_mem_h_p_sq`;
 the cubic strength comes from the unit Bernoulli factors at the boundary index. -/
@@ -166,36 +216,9 @@ theorem faulhaber_remainder_term_thirtytwo_mem_h_p_cubed
     ring
   · -- `s ≥ 2`: cubic bound via the integral Bernoulli factor.
     have hs_two : 2 ≤ s := by omega
-    have hbern : ∃ b : ℤ_[37], ((bernoulli (32 - s) : ℚ) : ℚ_[37]) = (b : ℚ_[37]) := by
-      rcases Nat.even_or_odd (32 - s) with heven | hodd
-      · -- even index: `B_0 = 1` (a unit) or `0 < 32−s ≤ 30` integral by von Staudt.
-        rcases Nat.eq_zero_or_pos (32 - s) with hz | hpos
-        · refine ⟨1, ?_⟩; rw [hz, bernoulli_zero]; push_cast; ring
-        · exact bernoulli_le_thirtytwo_integral_thirtyseven hpos (by omega) heven
-      · -- odd index: either `32−s = 1` (`B_1 = −1/2`, integral at 37) or `B_{32−s} = 0`.
-        rcases eq_or_ne (32 - s) 1 with h1 | hne
-        · -- `B_1 = −1/2`; `2` is a `37`-unit, so `−2⁻¹ ∈ ℤ_[37]`.
-          have h2_unit : IsUnit ((2 : ℕ) : ℤ_[37]) :=
-            padicInt_natCast_isUnit_of_not_dvd (p := 37) (n := 2) (by decide)
-          set twoInv : ℤ_[37] := (h2_unit.unit⁻¹ : (ℤ_[37])ˣ).val with htwoInv
-          have htwo_mul_inv : ((2 : ℕ) : ℤ_[37]) * twoInv = 1 := by
-            rw [htwoInv]
-            change ((h2_unit.unit * h2_unit.unit⁻¹ : (ℤ_[37])ˣ).val : ℤ_[37]) = 1
-            simp
-          have htwo_mul_inv_Qp : (2 : ℚ_[37]) * ((twoInv : ℤ_[37]) : ℚ_[37]) = 1 := by
-            have := congrArg (fun x : ℤ_[37] => (x : ℚ_[37])) htwo_mul_inv
-            push_cast at this; exact this
-          refine ⟨-twoInv, ?_⟩
-          rw [h1, bernoulli_one]
-          have h2Q_ne : (2 : ℚ_[37]) ≠ 0 := by norm_num
-          push_cast
-          rw [show ((twoInv : ℤ_[37]) : ℚ_[37]) = (2 : ℚ_[37])⁻¹ from
-            (inv_eq_of_mul_eq_one_right htwo_mul_inv_Qp).symm]
-          field_simp
-        · refine ⟨0, ?_⟩
-          have hmod : (32 - s) % 2 = 1 := Nat.odd_iff.mp hodd
-          have hgt : 1 < 32 - s := by omega
-          rw [bernoulli_eq_zero_of_odd hodd hgt]; simp
+    -- `B_{32−s}` is `37`-integral: `0 ≤ 32 − s ≤ 30` since `2 ≤ s`.
+    have hbern : ∃ b : ℤ_[37], ((bernoulli (32 - s) : ℚ) : ℚ_[37]) = (b : ℚ_[37]) :=
+      bernoulli_integral_thirtyseven_of_le (by omega)
     obtain ⟨z, hz⟩ :=
       shifted_faulhaber_term_mem_h_p_cubed_of_integral_bernoulli (p := 37) (h := 32) (s := s)
         (by norm_num) (by norm_num) hs_two hs_le hbern

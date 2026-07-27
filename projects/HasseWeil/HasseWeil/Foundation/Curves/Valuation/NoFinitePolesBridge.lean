@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Fiber.AFConditional
 import HasseWeil.Foundation.Curves.Valuation.NormValuation
 import Mathlib.RingTheory.DedekindDomain.AdicValuation
@@ -51,6 +56,7 @@ noncomputable def smoothPointToHeightOne
   isPrime := ((⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt_isMaximal P).isPrime
   ne_bot := (⟨W⟩ : SmoothPlaneCurve F).maximalIdealAt_ne_bot P
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 @[simp] theorem smoothPointToHeightOne_asIdeal
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) :
@@ -59,6 +65,7 @@ noncomputable def smoothPointToHeightOne
 
 /-! ### Surjection: every height-one prime is `maximalIdealAt P` for some `P` -/
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- Under `[IsAlgClosed F]` and `[IsElliptic]` plus the Dedekind structure,
 the `smoothPointToHeightOne` map is surjective: every height-one prime
 of `F[C]` is of the form `maximalIdealAt P` for some smooth point `P`.
@@ -137,17 +144,18 @@ def PointValuationEqHeightOneValuation
       (smoothPointToHeightOne W P).valuation
         (⟨W⟩ : SmoothPlaneCurve F).FunctionField f
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- Bridge from `ord_P f ≥ 0` everywhere to `pointValuation P f ≤ 1`
 everywhere. Uses the relationship between `ord_P` and `pointValuation`
 defined in the project. -/
 theorem pointValuation_le_one_of_ord_nonneg
-    {f : (⟨W⟩ : SmoothPlaneCurve F).FunctionField} (hf : f ≠ 0)
+    {f : (⟨W⟩ : SmoothPlaneCurve F).FunctionField} (_hf : f ≠ 0)
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
     (h_ord : 0 ≤ (⟨W⟩ : SmoothPlaneCurve F).ord_P P f) :
     (⟨W⟩ : SmoothPlaneCurve F).pointValuation P f ≤ 1 := by
   -- Unfold ord_P: it's defined via -toAdd of the multiplicative valuation.
   -- ord_P f ≥ 0 ↔ pointValuation P f ≤ 1 (when f ≠ 0).
-  unfold SmoothPlaneCurve.ord_P at h_ord
+  simp only [SmoothPlaneCurve.ord_P] at h_ord
   by_cases h_zero : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P f = 0
   · rw [h_zero]; exact zero_le_one' _
   · rw [dif_neg h_zero] at h_ord
@@ -167,6 +175,7 @@ theorem pointValuation_le_one_of_ord_nonneg
       change (WithZero.unzero h_zero).toAdd ≤ (1 : Multiplicative ℤ).toAdd
       simpa using h_nonpos)
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- **Conditional NoFinitePolesBridge** — given the valuation
 identification (the technical bridge whose proof is outstanding),
 the no-finite-poles bridge follows immediately by composing:
@@ -176,7 +185,6 @@ the no-finite-poles bridge follows immediately by composing:
 theorem noFinitePolesBridge_of_valuationEq
     [IsAlgClosed F] [(⟨W⟩ : SmoothPlaneCurve F).toAffine.IsElliptic]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (h_id : PointValuationEqHeightOneValuation W) :
     NoFinitePolesBridge W := by
   intro f hf h_ord
@@ -194,6 +202,7 @@ The shipped `pointValuation_algebraMap_eq_exp_count` and
 `IsFractionRing.div_surjective` and `Valuation.map_div` discharges the
 `PointValuationEqHeightOneValuation` predicate unconditionally. -/
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- **Per-element valuation identification on `algMap u`**: for any
     `u ∈ F[C]`, both project's `pointValuation P` and mathlib's
     `(smoothPointToHeightOne W P).valuation F(C)` evaluate to the same
@@ -203,7 +212,6 @@ The shipped `pointValuation_algebraMap_eq_exp_count` and
 theorem pointValuation_eq_heightOneValuation_algebraMap
     [IsAlgClosed F] [(⟨W⟩ : SmoothPlaneCurve F).toAffine.IsElliptic]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
     (u : (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing) :
     (⟨W⟩ : SmoothPlaneCurve F).pointValuation P
@@ -221,6 +229,7 @@ theorem pointValuation_eq_heightOneValuation_algebraMap
       IsDedekindDomain.HeightOneSpectrum.intValuation_if_neg _ hu,
       smoothPointToHeightOne_asIdeal]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- **Valuation identification (unconditional)**: project's `pointValuation P`
     agrees with mathlib's `(smoothPointToHeightOne W P).valuation F(C)`
     everywhere on `F(C)`. Discharges `PointValuationEqHeightOneValuation`.
@@ -231,8 +240,7 @@ theorem pointValuation_eq_heightOneValuation_algebraMap
     `Valuation.map_div`) reduces to the algMap case. -/
 theorem pointValuation_eq_heightOneValuation
     [IsAlgClosed F] [(⟨W⟩ : SmoothPlaneCurve F).toAffine.IsElliptic]
-    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     PointValuationEqHeightOneValuation W := by
   intro P f
   classical
@@ -246,15 +254,16 @@ theorem pointValuation_eq_heightOneValuation
     pointValuation_eq_heightOneValuation_algebraMap W P u,
     pointValuation_eq_heightOneValuation_algebraMap W P v]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- **NoFinitePolesBridge unconditional** (composes
     `pointValuation_eq_heightOneValuation` with `noFinitePolesBridge_of_valuationEq`). -/
 theorem noFinitePolesBridge_unconditional
     [IsAlgClosed F] [(⟨W⟩ : SmoothPlaneCurve F).toAffine.IsElliptic]
-    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     NoFinitePolesBridge W :=
   noFinitePolesBridge_of_valuationEq W (pointValuation_eq_heightOneValuation W)
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- **PointMinusOPrincipalEqZero unconditional** (composes
     `noFinitePolesBridge_unconditional` with `pointMinusO_of_bridge`).
     If `(P) − (O)` is principal on a smooth-plane elliptic curve over an
@@ -263,8 +272,7 @@ theorem noFinitePolesBridge_unconditional
     the §5/Pic⁰ chain (the first being DivZeroReduce, gated on Miller). -/
 theorem pointMinusOPrincipalEqZero_unconditional
     [IsAlgClosed F] [(⟨W⟩ : SmoothPlaneCurve F).toAffine.IsElliptic]
-    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
+    [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing] :
     PointMinusOPrincipalEqZero W :=
   pointMinusO_of_bridge W (noFinitePolesBridge_unconditional W)
 
@@ -289,8 +297,6 @@ theorem AddHomProperty_of_miller_divZeroReduce
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
     [IsDedekindDomain (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
     (φ : HasseWeil.EC.Isogeny W₁ W₂)
     (cd : φ.toCurveMap.CoordHom)
     (h_miller₁ : MillerHypothesis W₁) (h_miller₂ : MillerHypothesis W₂)
@@ -336,7 +342,6 @@ noncomputable def picZeroIsoE_of_AFInputs
     {W : Affine F} [W.IsElliptic]
     [IsAlgClosed F] [NeZero (2 : F)] [NeZero (3 : F)]
     [IsDedekindDomain (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing]
     (a : AFInputs W) :
     SmoothPlaneCurve.PicProj₀ (⟨W⟩ : SmoothPlaneCurve F) ≃+ W.Point :=
   let h_van : ∀ D : ProjectiveDivisor (⟨W⟩ : SmoothPlaneCurve F),
@@ -384,8 +389,6 @@ noncomputable def picZeroIsoE_baseChange_of_AFInputs
     [IsAlgClosed L] [NeZero (2 : L)] [NeZero (3 : L)]
     (W : Affine F) [W.IsElliptic]
     [IsDedekindDomain (⟨W.baseChange L⟩ : SmoothPlaneCurve L).CoordinateRing]
-    [IsIntegrallyClosed
-      (⟨W.baseChange L⟩ : SmoothPlaneCurve L).CoordinateRing]
     (a : AFInputs (W.baseChange L)) :
     SmoothPlaneCurve.PicProj₀ (⟨W.baseChange L⟩ : SmoothPlaneCurve L) ≃+
       WeierstrassCurve.Affine.Point (W.baseChange L) :=

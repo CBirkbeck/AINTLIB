@@ -58,7 +58,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil
 
 set_option linter.unusedSectionVars false
-set_option linter.style.longLine false
 
 section Additive
 
@@ -133,7 +132,8 @@ theorem mapTranslateGenericPoint_canonical_of_genuine
   have hbridge : WeierstrassCurve.Affine.Point.map (W' := W) φ.pullback (genericPoint W) =
       g (genericPoint W) :=
     map_pullback_genericPoint_of_isGenuineWith W φ hgen
-  -- The leaf for `g` at `S`, with `g P_gen` rewritten back to the canonical `Point.map φ.pullback P_gen`.
+  -- The leaf for `g` at `S`, with `g P_gen` rewritten back to the
+  -- canonical `Point.map φ.pullback P_gen`.
   have hgS := hg S
   rw [← hbridge] at hgS
   exact hgS
@@ -150,19 +150,24 @@ base-field-linear map, so unlike the `[m]` case its generic-point covariance is 
 content (the project carries it as a hypothesis, e.g. `FrobeniusScalingWitnesses` in
 `FrobeniusGalois.lean`).
 
-The structural core of that content is the **commutation of the `q`-power with translation**: for the
-`q`-power Frobenius `frob = FiniteField.frobeniusAlgHom 𝔽_q (K̄(E))` (the `q`-power as an `𝔽_q`-algebra
-hom of the function field of `E_{K̄}`) and translation `τ_S` (an `K̄`-algebra hom, hence a ring hom),
+The structural core of that content is the **commutation of the `q`-power with translation**: for
+the
+`q`-power Frobenius `frob = FiniteField.frobeniusAlgHom 𝔽_q (K̄(E))` (the `q`-power as an
+`𝔽_q`-algebra
+hom of the function field of `E_{K̄}`) and translation `τ_S` (an `K̄`-algebra hom, hence a ring
+hom),
 
   `frob (τ_S g) = τ_S (frob g)`   for all `g ∈ K̄(E)`,
 
 because `(τ_S g)^q = τ_S (g^q)` (`τ_S` is a ring hom and `frob = (· ^ q)`).  Note this is the *same*
-`S` on both sides at the function-field level; the geometric Frobenius twist `π̄ S` appears only when
+`S` on both sides at the function-field level; the geometric Frobenius twist `π̄ S` appears only
+when
 this is combined with `frob (lift S) = lift (π̄ S)` (the `q`-power on coordinates is the geometric
 Frobenius on a `K̄`-point — `geomFrobeniusPointFun_some`) inside the full generic-point leaf.
 
 This commutation is the `K̄` analogue of the fixed-field `frobeniusIsog_pullback_universal_commute`
-(`Frobenius.lean`), which does *not* apply over `K̄` (there `frob` is `K̄`-linear only on `𝔽_q`).  We
+(`Frobenius.lean`), which does *not* apply over `K̄` (there `frob` is `K̄`-linear only on `𝔽_q`). 
+We
 ship it here as the reusable kernel of the Frobenius component leaf. -/
 
 section Frobenius
@@ -173,12 +178,14 @@ variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [(W.baseChange L).t
 
 /-- **The `q`-power Frobenius commutes with translation on `K̄(E)`** (the kernel of the Frobenius
 generic-point leaf; Silverman III.8.2 for `π` over `K̄`).  For the `q`-power `𝔽_q`-algebra Frobenius
-`frob = FiniteField.frobeniusAlgHom K (K̄(E))` and the translation `τ_S` of `E_{K̄}` by any point `S`,
+`frob = FiniteField.frobeniusAlgHom K (K̄(E))` and the translation `τ_S` of `E_{K̄}` by any point
+`S`,
 
   `frob (τ_S g) = τ_S (frob g)`   for all `g`,
 
 since `frob = (· ^ q)` and `τ_S` is a ring hom, so both sides are `(τ_S g)^q`.  This is the `K̄`
-analogue of `frobeniusIsog_pullback_universal_commute` (which holds only over the fixed field `𝔽_q`);
+analogue of `frobeniusIsog_pullback_universal_commute` (which holds only over the fixed field
+`𝔽_q`);
 combined with `frob (lift S) = lift (π̄ S)` it yields the Frobenius component of the generic-point
 covariance `hgcomm`. -/
 theorem frobeniusAlgHom_translate_commute

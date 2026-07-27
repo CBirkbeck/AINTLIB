@@ -1,6 +1,12 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.GroupScheme.SubgroupGroupObject
 import ModularCurves.GroupScheme.StableCharts
 import ModularCurves.GroupScheme.PatchKunneth
+import ModularCurves.ForMathlib.SchemeAppLE
 
 /-!
 # The Hopf algebra of a finite locally free subgroup over an affine patch
@@ -100,7 +106,6 @@ theorem squareMul_π : P.squareMul ≫ G.π
   rw [show ((Over.mk G.π ⊗ Over.mk G.π).hom)
       = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl]
   rw [P.groupSquareToSquare_fst_assoc, Scheme.Hom.resLE_comp_ι]
-  exact Category.assoc _ _ _
 
 /-- The restricted multiplication lands in the group patch. -/
 theorem top_le_preimage_groupOpen_squareMul :
@@ -125,35 +130,6 @@ noncomputable def groupPatchComul :
 
 Each is the `Γ`-dual of the corresponding "is a morphism over `S`" fact, through
 `Scheme.Hom.appLE_comp_appLE`. -/
-
-/-- The `appLE` of an identity morphism is the identity. -/
-theorem appLE_id {X : Scheme.{u}} {U : X.Opens} (e : U ≤ (𝟙 X) ⁻¹ᵁ U) :
-    Scheme.Hom.appLE (𝟙 X) U U e = 𝟙 _ := by
-  rw [Scheme.Hom.appLE, AlgebraicGeometry.Scheme.Hom.id_app]
-  exact (Category.id_comp _).trans (X.presheaf.map_id _)
-
-/-- `appLE` between the top opens is `appTop`. -/
-theorem appLE_top_top {X Y : Scheme.{u}} (f : X ⟶ Y) :
-    Scheme.Hom.appLE f ⊤ ⊤ le_top = f.appTop := by
-  simp [Scheme.Hom.appLE, Scheme.Hom.appTop]
-
-/-- The `⊤`-restriction of an open immersion's sections is the section iso. -/
-theorem ι_appLE_top {X : Scheme.{u}} (U : X.Opens) :
-    U.ι.appLE U ⊤ U.ι_preimage_self.ge = U.topIso.inv := by
-  rw [Scheme.Opens.ι_appLE, Scheme.Opens.topIso_inv]
-  congr 1
-
-/-- `resLE` transported along an equality of morphisms. -/
-theorem appLE_congr_hom_resLE {X Y : Scheme.{u}} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens)
-    (W : X.Opens) {e : W ≤ f ⁻¹ᵁ U} :
-    f.resLE U W e = g.resLE U W (h ▸ e) := by
-  subst h; rfl
-
-/-- `appLE` transported along an equality of morphisms. -/
-theorem appLE_congr_hom {X Y : Scheme.{u}} {f g : X ⟶ Y} (h : f = g) (U : Y.Opens)
-    (W : X.Opens) (e : W ≤ f ⁻¹ᵁ U) :
-    f.appLE U W e = g.appLE U W (h ▸ e) := by
-  subst h; rfl
 
 /-- **The counit is `R`-linear**: `ε ∘ (algebraMap R A) = 𝟙 R`, the `Γ`-dual of
 `unitHom ≫ π = 𝟙 S`. -/
@@ -272,6 +248,7 @@ noncomputable def comulAlg :
 noncomputable def unitSection : P.V.toScheme ⟶ P.groupOpen.toScheme :=
   G.unitHom.resLE P.groupOpen P.V P.le_preimage_groupOpen_unitHom
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The restricted unit section is a section of the restricted structure map. -/
 @[reassoc (attr := simp)]
 theorem unitSection_comp_groupToBase :
@@ -319,8 +296,8 @@ theorem leftUnitSection_comp_squareMul :
   rw [G.mulHom_ι]
   -- restrict the point sum along `k`
   have hsum : k ≫ ((G.sqFstPoint + G.sqSndPoint : E.Point _) : _ ⟶ E.E)
-      = ((EllipticCurve.Point.restrict E k G.sqFstPoint + EllipticCurve.Point.restrict E k G.sqSndPoint :
-          E.Point _) : _ ⟶ E.E) := by
+      = ((EllipticCurve.Point.restrict E k G.sqFstPoint +
+            EllipticCurve.Point.restrict E k G.sqSndPoint : E.Point _) : _ ⟶ E.E) := by
     rw [← EllipticCurve.Point.restrict_add]
     rfl
   rw [hsum]
@@ -348,7 +325,6 @@ theorem leftUnitSection_comp_squareMul :
   -- the second restricted point is the inclusion
   show k ≫ ((snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
   rw [← Category.assoc k, hk2]
-  rfl
 
 /-! ### The counit law, `Γ`-side -/
 
@@ -375,6 +351,7 @@ noncomputable def counitLiftΓ :
     CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
   inv P.squareΓ ≫ P.leftUnitSection.appTop ≫ P.groupOpen.topIso.hom
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The counit law, `Γ`-side, in transported form**: `Δ` followed by the dual of the
 left unit section is the identity. -/
 theorem groupPatchComul_comp_counitLiftΓ :
@@ -528,13 +505,13 @@ theorem rightUnitSection_comp_squareMul :
   rw [hsnd, add_zero]
   show k ≫ ((fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
   rw [← Category.assoc k, hk1]
-  rfl
 
 /-- The `Γ`-dual of the right unit section. -/
 noncomputable def counitLiftΓ' :
     CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
   inv P.squareΓ ≫ P.rightUnitSection.appTop ≫ P.groupOpen.topIso.hom
 
+set_option backward.isDefEq.respectTransparency.types false in
 theorem groupPatchComul_comp_counitLiftΓ' :
     P.groupPatchComul ≫ P.counitLiftΓ' = 𝟙 P.groupRing := by
   rw [groupPatchComul_eq, counitLiftΓ', Category.assoc,

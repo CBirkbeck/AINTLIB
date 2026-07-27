@@ -1,8 +1,13 @@
-import ModularCurves.Moduli.WeierstrassAtlas
-import ModularCurves.ForMathlib.ProjIntegral
-import ModularCurves.ForMathlib.WeierstrassProjectivePrime
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import Mathlib.AlgebraicGeometry.Geometrically.Integral
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+import ModularCurves.ForMathlib.ProjIntegral
+import ModularCurves.ForMathlib.WeierstrassProjectivePrime
+import ModularCurves.Moduli.WeierstrassAtlas
 
 /-!
 # T-W7 lane P2 — geometric integrality of `E_U^n` and the field-points dictionary
@@ -17,7 +22,8 @@ parallel `Moduli/PointsDictionary.lean`, now deleted).
   chart/domain fallback: `IsDomain (projCoordRing W)` (`ForMathlib/WeierstrassProjectivePrime.lean`
   — the projective Weierstrass cubic is prime, Eisenstein at `Z`; no `Δ ≠ 0` needed) + `Proj` of a
   graded domain is integral (`ForMathlib/ProjIntegral.lean`) ⟹ `IsIntegral (projModel W_K)`;
-  base-change transport (`isPullback_projModelBaseChange`) ⟹ `GeometricallyIntegral universalCurveπ`.
+  base-change transport (`isPullback_projModelBaseChange`) ⟹
+  `GeometricallyIntegral universalCurveπ`.
 
 * **T-W7.0f** the field-points dictionary: `projModelPointsEquiv` (`K`-points of `projModel W`
   biject with `(W.baseChange K).toAffine.Point`, pointed at `[0:1:0] ↦ 0`), choice-extracted from
@@ -101,7 +107,8 @@ instance geometricallyIntegral_universalCurveπ : GeometricallyIntegral universa
   have hy : y = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing K)) := by
     have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRing K) = Spec.preimage y :=
       CommRingCat.ofHom_hom _
-    rw [h1, Spec.map_preimage]
+    rw [h1]
+    exact (Spec.map_preimage y).symm
   have hpb := isPullback_projModelBaseChange (R := WeierstrassAtlasRing) (R' := K)
     universalWeierstrassLoc
   rw [← hy] at hpb
@@ -168,7 +175,8 @@ theorem projModelPointsEquiv_zero (W : WeierstrassCurve R) [W.IsElliptic]
 through the `Z`-chart with dehomogenised coordinates `(x, y)` corresponds under
 `projModelPointsEquiv` to the affine point `some x y`. The value-characterisation the negation and
 multiplication specs (`negModelHom_specPoints`, `mulModelHom_specPoints`) and the group axioms read
-through. Coordinates and their nonsingularity are hypotheses, so callers supply their own witness. -/
+through. Coordinates and their nonsingularity are hypotheses, so callers supply their own
+witness. -/
 theorem projModelPointsEquiv_some (W : WeierstrassCurve R) [W.IsElliptic]
     (K : Type u) [Field K] [Algebra R K]
     (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g)

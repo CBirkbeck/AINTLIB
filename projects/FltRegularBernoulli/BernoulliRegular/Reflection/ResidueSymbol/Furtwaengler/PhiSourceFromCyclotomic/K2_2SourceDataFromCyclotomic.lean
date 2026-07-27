@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.BundleFromCyclotomic
@@ -82,14 +87,14 @@ theorem ramificationIdx_span_natCast_eq_one_of_ne
     {P : Ideal (𝓞 K)} [P.IsPrime]
     [P.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ))]
     (hℓ_ne_p : ℓ ≠ p) :
-    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).ramificationIdx P = 1 := by
+    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).ramificationIdx' P = 1 := by
   haveI : IsGalois ℚ K :=
     IsCyclotomicExtension.isGalois ({p} : Set ℕ) (K := ℚ) (L := K)
   have _ : IsGaloisGroup Gal(K/ℚ) ℤ (𝓞 K) :=
     IsGaloisGroup.of_isFractionRing (Gal(K/ℚ)) ℤ (𝓞 K) ℚ K
   have hℓ_ne : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ) ≠ ⊥ := by
     simp [(Fact.out : Nat.Prime ℓ).ne_zero]
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' _ P hℓ_ne,
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx _ P hℓ_ne,
       ← Ideal.ramificationIdxIn_eq_ramificationIdx
         (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
   exact ramificationIdxIn_span_natCast_eq_one_of_ne (K := K) hℓ_ne_p
@@ -102,7 +107,7 @@ theorem inertiaDeg_span_natCast_eq_orderOf_of_ne
     {P : Ideal (𝓞 K)} [P.IsPrime]
     [P.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ))]
     (hℓ_ne_p : ℓ ≠ p) :
-    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P =
+    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P =
       orderOf (ℓ : ZMod p) := by
   haveI : IsGalois ℚ K :=
     IsCyclotomicExtension.isGalois ({p} : Set ℕ) (K := ℚ) (L := K)
@@ -112,7 +117,7 @@ theorem inertiaDeg_span_natCast_eq_orderOf_of_ne
     Int.ideal_span_isMaximal_of_prime ℓ
   haveI hP_max : P.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P)
-  rw [Ideal.inertiaDeg_eq_inertiaDeg',
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
       ← Ideal.inertiaDegIn_eq_inertiaDeg
         (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
   exact inertiaDegIn_span_natCast_eq_orderOf_of_ne (K := K) hℓ_ne_p
@@ -216,7 +221,7 @@ The point of this constructor is to make the Stage 4 constructor chain usable by
 the K/U source-data route: the canonical `zeta_k` and `zeta_p_int` fields are
 discharged from the bundle identity, while the actual Gauss-sum non-vanishing
 and descended-span equality remain as the substantive caller inputs. -/
-noncomputable def K2_2SourceData.ofCanonicalConcrete
+theorem K2_2SourceData.ofCanonicalConcrete
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
     {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
@@ -283,7 +288,7 @@ noncomputable def K2_2SourceData.ofCanonicalConcrete
 If the Dwork bundle's trace-form layer is the canonical compatible split-prime
 trace-form constructor, the concrete-layer identity required by
 `ofCanonicalConcrete` follows automatically. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm
+theorem K2_2SourceData.ofCanonicalTraceForm
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
     {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']

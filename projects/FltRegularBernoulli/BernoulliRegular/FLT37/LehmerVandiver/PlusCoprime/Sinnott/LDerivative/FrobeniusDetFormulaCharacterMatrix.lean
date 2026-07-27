@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.DirichletLogSumGaussSumPrefactor
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.DirichletLogSumGaussSumPrefactor
 
 @[expose] public section
 
@@ -57,6 +59,30 @@ def FrobeniusDetIdentity
     (∏ χ ∈ BernoulliRegular.evenNontrivialCharacters (p := p),
         DirichletLogSum p χ⁻¹) ^ 2
 
+/-- **The family regulator `regOfFamily (cyclotomicUnitFamilyKplusFinRank …)`
+is nonnegative**: it equals the absolute value `|det …|` of the log-embedding
+matrix (`regOfFamily_cyclotomicUnitFamilyKplus_eq_det`), hence `0 ≤ …`. -/
+theorem regOfFamily_cyclotomicUnitFamilyKplus_nonneg
+    (K : Type) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+    [NumberField.IsCMField K]
+    (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
+    (0 : ℝ) ≤ NumberField.Units.regOfFamily
+      (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three) := by
+  rw [BernoulliRegular.FLT37.Sinnott.regOfFamily_cyclotomicUnitFamilyKplus_eq_det
+    (p := p) (K := K) hp_odd hp_three]
+  exact abs_nonneg _
+
+omit [Fact p.Prime] in
+/-- **`(2^((p-3)/2))² = 2^(p-3)` for odd `p`** (real base `2`, cast to `ℂ`):
+since `p` is odd, `p - 3` is even, so `((p - 3) / 2) * 2 = p - 3`. -/
+theorem two_pow_half_sq_eq (hp_odd : Odd p) :
+    (((2 : ℝ) ^ ((p - 3) / 2) : ℝ) : ℂ) ^ 2 = (2 : ℂ) ^ (p - 3) := by
+  push_cast
+  rw [← pow_mul]
+  congr 1
+  obtain ⟨k, hk⟩ := hp_odd
+  omega
+
 /-- **`KummerDirichletDeterminant` from `FrobeniusDetIdentity`**:
 under the algebraic-side Frobenius-determinant identity, the corrected
 Kummer-Dirichlet identity `regOfFamily = 2^((p-3)/2) · h⁺ · R(K⁺)` holds.
@@ -69,8 +95,8 @@ theorem KummerDirichletDeterminant_of_FrobeniusDetIdentity
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (h_frob : FrobeniusDetIdentity (p := p) K hp_odd hp_three) :
     FLT37.Sinnott.KummerDirichletDeterminant p K hp_odd hp_three := by
-  unfold FLT37.Sinnott.KummerDirichletDeterminant
-  unfold FrobeniusDetIdentity at h_frob
+  simp only [FLT37.Sinnott.KummerDirichletDeterminant]
+  simp only [FrobeniusDetIdentity] at h_frob
   -- h_frob : ↑regOfFamily ^ 2 = (∏ DLS χ⁻¹)² in ℂ
   have h_analytic := hPlus_mul_regulator_sq_eq (p := p) K hp_odd hp_three
   -- h_analytic : (↑hPlus · ↑regulator)² = (∏ DLS χ⁻¹)² / 2^(p-3) in ℂ
@@ -90,14 +116,7 @@ theorem KummerDirichletDeterminant_of_FrobeniusDetIdentity
       field_simp]
     rw [← h_analytic]
     -- Goal: 2^(p-3) · (hPlus · R)² = (2^((p-3)/2))² · (hPlus · R)²
-    have h_pow_eq : (((2 : ℝ) ^ ((p - 3) / 2) : ℝ) : ℂ) ^ 2 = (2 : ℂ) ^ (p - 3) := by
-      push_cast
-      rw [← pow_mul]
-      congr 1
-      have h_p_odd : Odd p := hp.out.odd_of_ne_two hp_odd
-      rcases h_p_odd with ⟨k, hk⟩
-      omega
-    rw [h_pow_eq]
+    rw [two_pow_half_sq_eq p (hp.out.odd_of_ne_two hp_odd)]
   -- Cast h_sq_eq_C to ℝ.
   have h_sq_eq_R : (NumberField.Units.regOfFamily
       (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three)) ^ 2 =
@@ -112,11 +131,8 @@ theorem KummerDirichletDeterminant_of_FrobeniusDetIdentity
       linear_combination h_sq_eq_C
     exact_mod_cast h_cast
   -- Positivity: regOfFamily ≥ 0 and 2^((p-3)/2) · hPlus · regulator > 0.
-  have h_reg_nonneg : (0 : ℝ) ≤ NumberField.Units.regOfFamily
-      (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three) := by
-    rw [BernoulliRegular.FLT37.Sinnott.regOfFamily_cyclotomicUnitFamilyKplus_eq_det
-      (p := p) (K := K) hp_odd hp_three]
-    exact abs_nonneg _
+  have h_reg_nonneg :=
+    regOfFamily_cyclotomicUnitFamilyKplus_nonneg p K hp_odd hp_three
   have h_rhs_nonneg : (0 : ℝ) ≤ (2 : ℝ) ^ ((p - 3) / 2) *
       ((BernoulliRegular.hPlus K : ℕ) : ℝ) *
       NumberField.Units.regulator (NumberField.maximalRealSubfield K) := by
@@ -564,7 +580,7 @@ theorem sum_units_logNorm_eq_log_p :
   rw [sum_units_val_eq_sum_Ico (p := p)
       (fun n ↦ ((Real.log (2 * |Real.sin (Real.pi * n / p)|) : ℝ) : ℂ))]
   have h_dls := DirichletLogSum_principal_eq_neg_log p
-  unfold DirichletLogSum at h_dls
+  simp only [DirichletLogSum] at h_dls
   have h_eval : ∀ n ∈ Finset.Ico 1 p,
       (1 : DirichletCharacter ℂ p) ((n : ℕ) : ZMod p) *
         ((Real.log (2 * |Real.sin (Real.pi * n / p)|) : ℝ) : ℂ) =
@@ -613,7 +629,7 @@ theorem dirichletOfQuotientChar_apply_unit
     (a : BernoulliRegular.CyclotomicUnitDelta p) :
     dirichletOfQuotientChar p ξ ((a : ZMod p)) =
       ξ (BernoulliRegular.cyclotomicEvenDeltaQuotient p a) := by
-  unfold dirichletOfQuotientChar
+  simp only [dirichletOfQuotientChar]
   rw [MulChar.ofUnitHom_coe, MonoidHom.comp_apply, MulChar.coe_toUnitHom]
   change (BernoulliRegular.evenDeltaCharacterPullback (p := p) ξ)
       ((toUnits a).val) = _
@@ -738,7 +754,7 @@ theorem frobenius_eigenvalue_eq_neg_DirichletLogSum
         χ a * ((Real.log ‖(1 : ℂ) -
           ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ) =
       BernoulliRegular.evenLValueLogSum p χ⁻¹ := by
-    unfold BernoulliRegular.evenLValueLogSum
+    simp only [BernoulliRegular.evenLValueLogSum]
     refine Finset.sum_congr rfl ?_
     intro a _
     rw [inv_inv]

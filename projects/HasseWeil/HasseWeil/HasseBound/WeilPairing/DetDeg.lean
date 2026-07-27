@@ -142,12 +142,12 @@ noncomputable def omegaFun (S T : W.toAffine[((ℓ : ℕ) : ℤ)]) : ZMod ℓ :=
 
 theorem omegaFun_add_left (S₁ S₂ T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaFun W ℓ hℓF (S₁ + S₂) T = omegaFun W ℓ hℓF S₁ T + omegaFun W ℓ hℓF S₂ T := by
-  unfold omegaFun
+  simp only [omegaFun]
   rw [pairingRou_mul_left, logRou_mul]
 
 theorem omegaFun_add_right (S T₁ T₂ : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaFun W ℓ hℓF S (T₁ + T₂) = omegaFun W ℓ hℓF S T₁ + omegaFun W ℓ hℓF S T₂ := by
-  unfold omegaFun
+  simp only [omegaFun]
   rw [pairingRou_mul_right, logRou_mul]
 
 /-- For fixed `S`, the additive map `T ↦ ω(S,T)`. -/
@@ -200,7 +200,7 @@ noncomputable def omegaForm :
 theorem pairingRou_self (T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     pairingRou W ℓ hℓF T T = 1 := by
   refine Subtype.ext (Units.ext ?_)
-  rw [pairingRou_coe, show ((((1 : rootsOfUnity ℓ F) : Fˣ)) : F) = (1 : F) from rfl]
+  rw [pairingRou_coe, OneMemClass.coe_one, Units.val_one]
   exact weilPairing_self W ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF) T.val
     (zsmul_eq_zero_of_mem_torsion W ℓ T)
 
@@ -208,8 +208,8 @@ theorem pairingRou_self (T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
 theorem omegaForm_self (T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaForm W ℓ hℓF T T = 0 := by
   rw [omegaForm_apply]
-  unfold omegaFun
-  rw [pairingRou_self, show Additive.ofMul (1 : rootsOfUnity ℓ F) = 0 from rfl, map_zero]
+  simp only [omegaFun]
+  rw [pairingRou_self, ofMul_one, map_zero]
 
 /-- **`ω` is nondegenerate** in the second slot: if `ω(S,T) = 0` for all `S ∈ E[ℓ]`, then
 `T = 0`. -/
@@ -229,7 +229,7 @@ theorem omegaForm_nondegenerate {T : W.toAffine[((ℓ : ℕ) : ℤ)]}
   have hval : ((pairingRou W ℓ hℓF S' T : Fˣ) : F) =
       ((((1 : rootsOfUnity ℓ F) : Fˣ)) : F) := by
     rw [show pairingRou W ℓ hℓF S' T = 1 by simpa using congrArg Additive.toMul hone]
-  rwa [pairingRou_coe, show ((((1 : rootsOfUnity ℓ F) : Fˣ)) : F) = (1 : F) from rfl] at hval
+  rwa [pairingRou_coe, OneMemClass.coe_one, Units.val_one] at hval
 
 /-- The pairing-power: if `e_ℓ(ψS, ψT) = e_ℓ(S,T)^d` for an `AddMonoidHom ψ` (preserving `E[ℓ]`),
 then `pairingRou (ψS) (ψT) = (pairingRou S T)^d` as roots of unity. -/
@@ -258,7 +258,7 @@ theorem omegaForm_scaling (ψ : W.toAffine.Point →+ W.toAffine.Point) (d : ℕ
     omegaForm W ℓ hℓF (torsionRestrict W ℓ ψ S) (torsionRestrict W ℓ ψ T) =
       (d : ZMod ℓ) * omegaForm W ℓ hℓF S T := by
   rw [omegaForm_apply, omegaForm_apply]
-  unfold omegaFun
+  simp only [omegaFun]
   rw [pairingRou_scaling W ℓ hℓF ψ d S T hsc,
     show Additive.ofMul (pairingRou W ℓ hℓF S T ^ d)
       = d • Additive.ofMul (pairingRou W ℓ hℓF S T) from rfl, map_nsmul, nsmul_eq_mul]
@@ -268,14 +268,14 @@ theorem omegaForm_scaling (ψ : W.toAffine.Point →+ W.toAffine.Point) (d : ℕ
 theorem omegaForm_antisymm (S T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaForm W ℓ hℓF S T + omegaForm W ℓ hℓF T S = 0 := by
   rw [omegaForm_apply, omegaForm_apply]
-  unfold omegaFun
+  simp only [omegaFun]
   rw [← logRou_mul]
   have hmul : pairingRou W ℓ hℓF S T * pairingRou W ℓ hℓF T S = 1 := by
     refine Subtype.ext (Units.ext ?_)
     rw [Subgroup.coe_mul, Units.val_mul, pairingRou_coe, pairingRou_coe,
-      show ((((1 : rootsOfUnity ℓ F) : Fˣ)) : F) = (1 : F) from rfl]
+      OneMemClass.coe_one, Units.val_one]
     exact weilPairing_antisymm W ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF) S.val T.val _ _
-  rw [hmul, show Additive.ofMul (1 : rootsOfUnity ℓ F) = 0 from rfl, map_zero]
+  rw [hmul, ofMul_one, map_zero]
 
 /-- **The Gram entry `ω(b 0, b 1) ≠ 0`** (nondegeneracy on the symplectic basis).  If it were `0`,
 then by alternating (`ω(b i, b i) = 0`) and antisymmetry (`ω(b 1, b 0) = -ω(b 0, b 1) = 0`), the

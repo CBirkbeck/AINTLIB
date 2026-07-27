@@ -251,7 +251,7 @@ theorem den_div_thirtyseven_pow_three_dvd {x : ℚ} (h : (37 : ℤ) ^ 3 ∣ x.nu
 (`1184 = 32 · 37`), by the Faulhaber power-sum method. -/
 theorem noSecondOrderIrregularPair_thirtyseven_thirtytwo :
     NoSecondOrderIrregularPair 37 32 := by
-  unfold NoSecondOrderIrregularPair
+  simp only [NoSecondOrderIrregularPair]
   rw [show (32 * 37 : ℕ) = 1184 by norm_num]
   intro hdvd
   obtain ⟨W, hW, hB⟩ := exists_bernoulli_1184_decomposition

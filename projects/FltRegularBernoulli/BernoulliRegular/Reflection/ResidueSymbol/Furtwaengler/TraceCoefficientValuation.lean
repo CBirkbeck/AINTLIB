@@ -6,13 +6,13 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Multinomial
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 
 /-!
-# Trace coefficient valuation reductions (REF-18c2c4-L2c3d3)
+# Trace coefficient valuation reductions
 
-The full L2c3d3 coefficient estimate is
+The full coefficient estimate is
 
 `traceCharacterChooseSumRec a n ∈ Q^(s-n)`.
 
-This file proves the no-sorry valuation reductions that isolate the remaining
+This file proves the valuation reductions that isolate the remaining
 core estimate:
 
 * if `n ≥ ℓ`, the coefficient is exactly zero because every trace value has
@@ -55,7 +55,7 @@ Stickelberger range. -/
 theorem traceCharacterChooseSumRec_zero_eq_zero
     (a : ℕ) (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
     S.traceCharacterChooseSumRec a 0 = 0 := by
-  unfold traceCharacterChooseSumRec traceCharacterChooseSum
+  simp only [traceCharacterChooseSumRec, traceCharacterChooseSum]
   simp only [Nat.choose_zero_right, Nat.cast_one, mul_one]
   exact MulChar.sum_eq_zero_of_ne_one
     (S.residueCharInt_pow_ne_one (a := p - a) (by omega) (by omega))
@@ -73,7 +73,7 @@ theorem natCast_factorial_not_mem_Q_of_lt_ell {n : ℕ} (hn : n < ℓ) :
     (Nat.factorial n : 𝓞 R') ∉ S.Q := by
   classical
   intro hmem
-  haveI : CharP k ℓ := by
+  have : CharP k ℓ := by
     rw [← Algebra.charP_iff (ZMod ℓ) k ℓ]
     exact ZMod.charP ℓ
   have hres :
@@ -100,9 +100,9 @@ theorem traceCharacterChooseSumRec_eq_zero_of_ell_le
     (a n : ℕ) (hn : ℓ ≤ n) :
     S.traceCharacterChooseSumRec a n = 0 := by
   classical
-  haveI : NeZero ℓ := ⟨(Fact.out : Nat.Prime ℓ).ne_zero⟩
-  unfold traceCharacterChooseSumRec traceCharacterChooseSum
-  refine Finset.sum_eq_zero fun x _ => ?_
+  have : NeZero ℓ := ⟨(Fact.out : Nat.Prime ℓ).ne_zero⟩
+  simp only [traceCharacterChooseSumRec, traceCharacterChooseSum]
+  refine Finset.sum_eq_zero fun x _ ↦ ?_
   have hval :
       (Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)).val < n :=
     (ZMod.val_lt _).trans_le hn
@@ -127,7 +127,7 @@ theorem traceCharacterChooseSumRec_mem_Q_pow_of_mul_factorial_mem
   · exact S.mem_Q_pow_of_mul_factorial_mem hn hfac
   · exact S.traceCharacterChooseSumRec_mem_Q_pow_of_ell_le a n r (Nat.le_of_not_gt hn)
 
-/-- Assembly form for L2c3d3: it is enough to prove the factorial-cleared
+/-- Assembly form: it is enough to prove the factorial-cleared
 estimate in the nonzero range `n < ℓ`. -/
 theorem traceCharacterChooseSumRec_mem_Q_pow_sub_of_factorialCleared
     (a s : ℕ)
@@ -156,7 +156,7 @@ theorem traceCharacterChooseSumRec_mem_Q_pow_sub_of_factorialCleared_middle
   rcases n with _ | n
   · exact S.traceCharacterChooseSumRec_zero_mem_Q_pow a s ha₁ ha₂
   · exact S.traceCharacterChooseSumRec_mem_Q_pow_sub_of_factorialCleared a s
-      (fun m hm_le hmℓ => by
+      (fun m hm_le hmℓ ↦ by
         rcases m with _ | m
         · have hzero := S.traceCharacterChooseSumRec_zero_eq_zero a ha₁ ha₂
           rw [hzero, zero_mul]
@@ -164,7 +164,7 @@ theorem traceCharacterChooseSumRec_mem_Q_pow_sub_of_factorialCleared_middle
         · exact hfac (m + 1) hm_le (Nat.succ_pos m) hmℓ)
       (n + 1) hn_le
 
-/-- Concrete desc-factorial form of the remaining L2c3d3 middle-range
+/-- Concrete desc-factorial form of the remaining middle-range
 estimate.  This is the interface for the Teichmuller-lift/Gauss-period
 congruence: after `traceCharacterChooseSumRec_mul_factorial_eq_descFactorialSum`,
 the coefficientwise valuation is exactly a valuation of these finite sums. -/
@@ -179,7 +179,7 @@ theorem traceCharacterChooseSumRec_mem_Q_pow_sub_of_descFactorial_middle
     ∀ n, n ≤ s → S.traceCharacterChooseSumRec a n ∈ S.Q ^ (s - n) :=
   S.traceCharacterChooseSumRec_mem_Q_pow_sub_of_factorialCleared_middle
     a s ha₁ ha₂
-    (fun n hn_le hn_pos hnℓ => by
+    (fun n hn_le hn_pos hnℓ ↦ by
       rw [S.traceCharacterChooseSumRec_mul_factorial_eq_descFactorialSum]
       exact hdesc n hn_le hn_pos hnℓ)
 

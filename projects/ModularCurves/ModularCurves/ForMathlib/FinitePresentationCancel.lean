@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
 
@@ -18,6 +23,7 @@ universe u
 
 namespace AlgebraicGeometry
 
+set_option backward.isDefEq.respectTransparency.types false in
 theorem LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType
     {X Y Z : Scheme.{u}} {f : X ⟶ Y} {g : Y ⟶ Z}
     (h : LocallyOfFinitePresentation (f ≫ g)) (hg : LocallyOfFiniteType g) :

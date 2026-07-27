@@ -98,6 +98,7 @@ end Algebra
 section UniversalProperty
 
 variable (G B) in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Uniqueness of descent along the invariants morphism, in restriction-stable form:
 for an open immersion `j : W ⟶ Spec Bᴳ`, two morphisms out of `W` agreeing after
 precomposition with the pullback of `invariantsπ` along `j` are equal.
@@ -621,25 +622,69 @@ theorem pullbackSpecSMul_snd {Q' : Scheme.{u}}
   pullback.lift_snd _ _ _
 
 variable (G B) in
-/-- **`j`-relative existence of descent** (the keystone of the glued quotient): for
-an open immersion `j : Q' ⟶ Spec Bᴳ`, every morphism out of `pullback π j` that is
-invariant for the relative action descends to `Q'`. At `j = 𝟙` this recovers
-`exists_invariantsπ_lift`; applied to the image of a stable open it produces the
-open-immersion property of the local quotient maps; applied chart-wise it glues the
-global quotient (T-Q5d). -/
-theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u}}
+/-- **Overlap comparison for the relative chart descent.** Given a chart at an
+invariant `a` with a local descent `qa` of `f` (through `κB'a`) and its lift `ℓa` to
+`Q'`, any factorization `pr` of an overlap `j''` through `ℓa` yields a comparison map
+`m : pullback π j'' ⟶ pullback π j` with `m ≫ pullback.fst = pullback.fst` and
+`pullback.snd _ j'' ≫ (pr ≫ qa) = m ≫ f`. This is the per-chart building block of the
+gluing compatibility in `exists_invariantsπ_lift_of_isOpenImmersion`. -/
+private theorem relative_chart_descent_comparison {Y Q' J'' : Scheme.{u}}
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (f : pullback (invariantsπ G B R) j ⟶ Y)
+    (a : FixedPoints.subalgebra R B G)
+    (qa : Spec (CommRingCat.of (Localization.Away a)) ⟶ Y)
+    (κB'a : Spec (CommRingCat.of (Localization.Away ((a : B)))) ⟶
+      pullback (invariantsπ G B R) j)
+    (hκB'fst : κB'a ≫ pullback.fst (invariantsπ G B R) j = chartB R a)
+    (hqa : chartπ R a ≫ qa = κB'a ≫ f)
+    (ℓa : Spec (CommRingCat.of (Localization.Away a)) ⟶ Q')
+    (hℓj : ℓa ≫ j = chartA R a)
+    (j'' : J'' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (pr : J'' ⟶ Spec (CommRingCat.of (Localization.Away a)))
+    (hpr : pr ≫ ℓa ≫ j = j'') :
+    ∃ m : pullback (invariantsπ G B R) j'' ⟶ pullback (invariantsπ G B R) j,
+      m ≫ pullback.fst (invariantsπ G B R) j =
+        pullback.fst (invariantsπ G B R) j'' ∧
+      pullback.snd (invariantsπ G B R) j'' ≫ (pr ≫ qa) = m ≫ f := by
+  have hcone : (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ chartA R a =
+      pullback.fst (invariantsπ G B R) j'' ≫ invariantsπ G B R := by
+    rw [Category.assoc, ← hℓj, hpr]
+    exact pullback.condition.symm
+  have hu₁ := (isPullback_chart G B R a).lift_fst
+    (pullback.snd (invariantsπ G B R) j'' ≫ pr)
+    (pullback.fst (invariantsπ G B R) j'') hcone
+  have hu₂ := (isPullback_chart G B R a).lift_snd
+    (pullback.snd (invariantsπ G B R) j'' ≫ pr)
+    (pullback.fst (invariantsπ G B R) j'') hcone
+  refine ⟨(isPullback_chart G B R a).lift _ _ hcone ≫ κB'a, ?_, ?_⟩
+  · rw [Category.assoc, hκB'fst, hu₂]
+  · have h40 : ((isPullback_chart G B R a).lift _ _ hcone ≫ chartπ R a) ≫ qa =
+        (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ qa := by
+      rw [hu₁]
+    calc pullback.snd (invariantsπ G B R) j'' ≫ (pr ≫ qa)
+        = (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ qa := by rw [Category.assoc]
+      _ = ((isPullback_chart G B R a).lift _ _ hcone ≫ chartπ R a) ≫ qa := h40.symm
+      _ = (isPullback_chart G B R a).lift _ _ hcone ≫ (chartπ R a ≫ qa) := by
+          rw [Category.assoc]
+      _ = (isPullback_chart G B R a).lift _ _ hcone ≫ (κB'a ≫ f) := by rw [hqa]
+      _ = ((isPullback_chart G B R a).lift _ _ hcone ≫ κB'a) ≫ f := by
+          rw [Category.assoc]
+
+variable (G B) in
+set_option backward.isDefEq.respectTransparency.types false in
+/-- **Per-point local descent for the relative quotient.** For an open immersion
+`j : Q' ⟶ Spec Bᴳ` and a relatively-`G`-invariant morphism `f` out of `pullback π j`,
+around every point of `Q'` there is an invariant basic open `D(a) ⊆ range j` together
+with a local descent `qa` of `f` over the chart at `a`. This is the `j`-relative
+analogue of `exists_chart_descent`; it supplies the local data glued in
+`exists_invariantsπ_lift_of_isOpenImmersion`. -/
+private theorem exists_relative_chart_descent [Finite G] {Q' Y : Scheme.{u}}
     (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
     [IsOpenImmersion j]
     (f : pullback (invariantsπ G B R) j ⟶ Y)
-    (hf : ∀ g : G, pullbackSpecSMul G B R j g ≫ f = f) :
-    ∃ q : Q' ⟶ Y, pullback.snd (invariantsπ G B R) j ≫ q = f := by
-  classical
-  have hπ : Surjective (invariantsπ G B R) := ⟨invariantsπ_surjective G B R⟩
-  have hsnd : Surjective (pullback.snd (invariantsπ G B R) j) :=
-    MorphismProperty.pullback_snd _ _ hπ
-  -- per-point local descent data: an invariant basic chart inside `range j` and a
-  -- local descent of `f` over it
-  have key : ∀ p : Q', ∃ a : FixedPoints.subalgebra R B G,
+    (hf : ∀ g : G, pullbackSpecSMul G B R j g ≫ f = f)
+    (p : Q') :
+    ∃ a : FixedPoints.subalgebra R B G,
       j p ∈ PrimeSpectrum.basicOpen a ∧
       (↑(PrimeSpectrum.basicOpen a) :
         Set (PrimeSpectrum (FixedPoints.subalgebra R B G))) ⊆ Set.range ⇑j ∧
@@ -648,7 +693,10 @@ theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u
             pullback (invariantsπ G B R) j),
           κB' ≫ pullback.fst (invariantsπ G B R) j = chartB R a →
           chartπ R a ≫ qa = κB' ≫ f := by
-    intro p
+    classical
+    have hπ : Surjective (invariantsπ G B R) := ⟨invariantsπ_surjective G B R⟩
+    have hsnd : Surjective (pullback.snd (invariantsπ G B R) j) :=
+      MorphismProperty.pullback_snd _ _ hπ
     obtain ⟨z, hz⟩ := hsnd.surj p
     obtain ⟨i₀, y₀, hy₀⟩ := Y.affineCover.exists_eq (f z)
     set ι := Y.affineCover.f i₀ with hι
@@ -759,8 +807,23 @@ theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u
         exact CommRingCat.ofHom_hom φ
       rw [h14']
     rw [hκκ, ← Category.assoc, h14, hφ, Category.assoc, Iso.hom_inv_id_assoc, ht]
-  -- choose the local data and glue over the induced cover of `Q'`
-  choose a hmem hrange qa hqa using key
+
+variable (G B) in
+/-- **`j`-relative existence of descent** (the keystone of the glued quotient): for
+an open immersion `j : Q' ⟶ Spec Bᴳ`, every morphism out of `pullback π j` that is
+invariant for the relative action descends to `Q'`. At `j = 𝟙` this recovers
+`exists_invariantsπ_lift`; applied to the image of a stable open it produces the
+open-immersion property of the local quotient maps; applied chart-wise it glues the
+global quotient (T-Q5d). -/
+theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u}}
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    [IsOpenImmersion j]
+    (f : pullback (invariantsπ G B R) j ⟶ Y)
+    (hf : ∀ g : G, pullbackSpecSMul G B R j g ≫ f = f) :
+    ∃ q : Q' ⟶ Y, pullback.snd (invariantsπ G B R) j ≫ q = f := by
+  classical
+  -- per-point local descent data (`exists_relative_chart_descent`), glued over `Q'`
+  choose a hmem hrange qa hqa using exists_relative_chart_descent G B R j f hf
   have hliftA : ∀ p : Q', Set.range ⇑(chartA R (a p)) ⊆ Set.range ⇑j := by
     intro p t ht
     refine hrange p ?_
@@ -821,45 +884,13 @@ theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u
     obtain ⟨j'', hj''⟩ : ∃ j'', pullback.fst (ℓ p) (ℓ r) ≫ ℓ p ≫ j = j'' := ⟨_, rfl⟩
     haveI : IsOpenImmersion j'' := hj'' ▸ inferInstance
     refine invariantsπ_hom_ext_of_isOpenImmersion G B R j'' _ _ ?_
-    have hside : ∀ (rr : Q')
-        (pr : pullback (ℓ p) (ℓ r) ⟶
-          Spec (CommRingCat.of (Localization.Away (a rr))))
-        (hpr : pr ≫ ℓ rr ≫ j = j''),
-        ∃ m : pullback (invariantsπ G B R) j'' ⟶ pullback (invariantsπ G B R) j,
-          m ≫ pullback.fst (invariantsπ G B R) j =
-            pullback.fst (invariantsπ G B R) j'' ∧
-          pullback.snd (invariantsπ G B R) j'' ≫ (pr ≫ qa rr) = m ≫ f := by
-      intro rr pr hpr
-      have hcone : (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ chartA R (a rr) =
-          pullback.fst (invariantsπ G B R) j'' ≫ invariantsπ G B R := by
-        rw [Category.assoc, ← hℓj rr, hpr]
-        exact pullback.condition.symm
-      have hu₁ := (isPullback_chart G B R (a rr)).lift_fst
-        (pullback.snd (invariantsπ G B R) j'' ≫ pr)
-        (pullback.fst (invariantsπ G B R) j'') hcone
-      have hu₂ := (isPullback_chart G B R (a rr)).lift_snd
-        (pullback.snd (invariantsπ G B R) j'' ≫ pr)
-        (pullback.fst (invariantsπ G B R) j'') hcone
-      refine ⟨(isPullback_chart G B R (a rr)).lift _ _ hcone ≫ κB' rr, ?_, ?_⟩
-      · rw [Category.assoc, hκB'fst, hu₂]
-      · have h40 : ((isPullback_chart G B R (a rr)).lift _ _ hcone ≫
-            chartπ R (a rr)) ≫ qa rr =
-            (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ qa rr := by
-          rw [hu₁]
-        calc pullback.snd (invariantsπ G B R) j'' ≫ (pr ≫ qa rr)
-            = (pullback.snd (invariantsπ G B R) j'' ≫ pr) ≫ qa rr := by
-              rw [Category.assoc]
-          _ = ((isPullback_chart G B R (a rr)).lift _ _ hcone ≫ chartπ R (a rr)) ≫
-              qa rr := h40.symm
-          _ = (isPullback_chart G B R (a rr)).lift _ _ hcone ≫
-              (chartπ R (a rr) ≫ qa rr) := by rw [Category.assoc]
-          _ = (isPullback_chart G B R (a rr)).lift _ _ hcone ≫ (κB' rr ≫ f) := by
-              rw [hqa rr (κB' rr) (hκB'fst rr)]
-          _ = ((isPullback_chart G B R (a rr)).lift _ _ hcone ≫ κB' rr) ≫ f := by
-              rw [Category.assoc]
-    obtain ⟨m₁, hm₁f, hm₁⟩ := hside p (pullback.fst (ℓ p) (ℓ r)) hj''
-    obtain ⟨m₂, hm₂f, hm₂⟩ := hside r (pullback.snd (ℓ p) (ℓ r)) (by
-      rw [← Category.assoc, ← pullback.condition, Category.assoc, hj''])
+    obtain ⟨m₁, hm₁f, hm₁⟩ := relative_chart_descent_comparison G B R j f (a p) (qa p)
+      (κB' p) (hκB'fst p) (hqa p (κB' p) (hκB'fst p)) (ℓ p) (hℓj p)
+      j'' (pullback.fst (ℓ p) (ℓ r)) hj''
+    obtain ⟨m₂, hm₂f, hm₂⟩ := relative_chart_descent_comparison G B R j f (a r) (qa r)
+      (κB' r) (hκB'fst r) (hqa r (κB' r) (hκB'fst r)) (ℓ r) (hℓj r)
+      j'' (pullback.snd (ℓ p) (ℓ r)) (by
+        rw [← Category.assoc, ← pullback.condition, Category.assoc, hj''])
     have hmm : m₁ = m₂ := by
       rw [← cancel_mono (pullback.fst (invariantsπ G B R) j), hm₁f, hm₂f]
     rw [← Category.assoc, Category.assoc, hm₁, ← Category.assoc, Category.assoc,

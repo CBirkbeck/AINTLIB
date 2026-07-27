@@ -224,26 +224,64 @@ theorem integrableOn_expTest_diffQuot_window {h : ℝ} (hh : 0 < h) :
       exact ENNReal.ofReal_lt_top.ne)
   · exact Filter.Eventually.of_forall (fun x => norm_expTest_diffQuot_le hh x)
 
+/-- **Far bound** for the divided difference: `‖(expTest h 0 - expTest h x)/x‖ ≤ 1/|x|`
+away from `0`, since the numerator has norm `≤ 1`. Companion to `norm_expTest_diffQuot_le`. -/
+theorem norm_expTest_diffQuot_le_inv_abs {h : ℝ} (hh : 0 < h) (x : ℝ) (hx : x ≠ 0) :
+    ‖(expTest h 0 - expTest h x)/(x:ℂ)‖ ≤ 1/|x| := by
+  rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
+  rw [div_le_div_iff_of_pos_right (abs_pos.mpr hx)]
+  have h1 : Real.exp (-h * |x|) ≤ 1 := by
+    refine Real.exp_le_one_iff.mpr ?_
+    have h0 := abs_nonneg x
+    nlinarith [hh, h0]
+  have h2 := Real.exp_pos (-h * |x|)
+  rw [expTest_zero]
+  unfold expTest
+  rw [show (1 : ℂ) - ((Real.exp (-h * |x|) : ℝ) : ℂ)
+      = (((1 - Real.exp (-h * |x|)) : ℝ) : ℂ) by push_cast; ring,
+    Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by linarith)]
+  linarith
+
+/-- Square-integrability on `Iic (-1)` follows from that on `Ioi 1` by the reflection
+`x ↦ -x`, under which `‖(expTest h 0 - expTest h x)/x‖²` is invariant (`expTest` is even). -/
+theorem integrableOn_Iic_expTest_diffQuot_sq {h : ℝ}
+    (hraypos : IntegrableOn
+      (fun x : ℝ => ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2) (Set.Ioi 1)) :
+    IntegrableOn (fun x : ℝ => ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2) (Set.Iic (-1)) := by
+  have A : MeasurableEmbedding fun x : ℝ => -x :=
+    (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
+  have hmap : (volume : Measure ℝ).restrict (Set.Iic (-1))
+      = Measure.map (fun x : ℝ => -x)
+          ((volume : Measure ℝ).restrict (Set.Ici 1)) := by
+    rw [show Set.Ici (1:ℝ) = (fun x : ℝ => -x) ⁻¹' (Set.Iic (-1)) by
+        ext x
+        simp only [Set.mem_preimage, Set.mem_Iic, Set.mem_Ici]
+        constructor <;> intro hy <;> linarith,
+      ← Measure.restrict_map A.measurable measurableSet_Iic,
+      Measure.map_neg_eq_self (volume : Measure ℝ)]
+  rw [IntegrableOn, hmap, A.integrable_map_iff]
+  have hIci : IntegrableOn
+      (fun x : ℝ => ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2) (Set.Ici 1) :=
+    hraypos.congr_set_ae (Ioi_ae_eq_Ici (a := (1:ℝ))).symm
+  refine hIci.congr (Filter.Eventually.of_forall (fun x => ?_))
+  show ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2
+      = ‖(expTest h 0 - expTest h (-x))/((-x : ℝ):ℂ)‖^2
+  rw [expTest_neg]
+  have hnorm : ‖(expTest h 0 - expTest h x)/(x:ℂ)‖
+      = ‖(expTest h 0 - expTest h x)/((-x : ℝ):ℂ)‖ := by
+    rw [norm_div, norm_div]
+    congr 1
+    rw [Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_neg]
+  rw [hnorm]
+
 /-- **`hFdiv2` at the Landau–Stark function**: the divided difference is
 square-integrable on the line (`≤ h` near `0`, `O(1/|x|)` beyond). -/
 theorem memLp_two_expTest_diffQuot {h : ℝ} (hh : 0 < h) :
     MemLp (fun x : ℝ => (expTest h 0 - expTest h x)/(x:ℂ)) 2 (volume : Measure ℝ) := by
   have hmeas := aestronglyMeasurable_expTest_diffQuot h
-  have hfar : ∀ x : ℝ, x ≠ 0 → ‖(expTest h 0 - expTest h x)/(x:ℂ)‖ ≤ 1/|x| := by
-    intro x hx
-    rw [norm_div, Complex.norm_real, Real.norm_eq_abs]
-    rw [div_le_div_iff_of_pos_right (abs_pos.mpr hx)]
-    have h1 : Real.exp (-h * |x|) ≤ 1 := by
-      refine Real.exp_le_one_iff.mpr ?_
-      have h0 := abs_nonneg x
-      nlinarith [hh, h0]
-    have h2 := Real.exp_pos (-h * |x|)
-    rw [expTest_zero]
-    unfold expTest
-    rw [show (1 : ℂ) - ((Real.exp (-h * |x|) : ℝ) : ℂ)
-        = (((1 - Real.exp (-h * |x|)) : ℝ) : ℂ) by push_cast; ring,
-      Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by linarith)]
-    linarith
+  have hfar : ∀ x : ℝ, x ≠ 0 → ‖(expTest h 0 - expTest h x)/(x:ℂ)‖ ≤ 1/|x| :=
+    fun x hx => norm_expTest_diffQuot_le_inv_abs hh x hx
   rw [memLp_two_iff_integrable_sq_norm hmeas]
   have hraypos : IntegrableOn
       (fun x : ℝ => ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2) (Set.Ioi 1) := by
@@ -272,34 +310,7 @@ theorem memLp_two_expTest_diffQuot {h : ℝ} (hh : 0 < h) :
     · refine Filter.Eventually.of_forall (fun x => ?_)
       rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
       exact pow_le_pow_left₀ (norm_nonneg _) (norm_expTest_diffQuot_le hh x) 2
-  have hrayneg : IntegrableOn
-      (fun x : ℝ => ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2) (Set.Iic (-1)) := by
-    have A : MeasurableEmbedding fun x : ℝ => -x :=
-      (Homeomorph.neg ℝ).isClosedEmbedding.measurableEmbedding
-    have hmap : (volume : Measure ℝ).restrict (Set.Iic (-1))
-        = Measure.map (fun x : ℝ => -x)
-            ((volume : Measure ℝ).restrict (Set.Ici 1)) := by
-      rw [show Set.Ici (1:ℝ) = (fun x : ℝ => -x) ⁻¹' (Set.Iic (-1)) by
-          ext x
-          simp only [Set.mem_preimage, Set.mem_Iic, Set.mem_Ici]
-          constructor <;> intro hy <;> linarith,
-        ← Measure.restrict_map A.measurable measurableSet_Iic,
-        Measure.map_neg_eq_self (volume : Measure ℝ)]
-    rw [IntegrableOn, hmap, A.integrable_map_iff]
-    have hIci : IntegrableOn
-        (fun x : ℝ => ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2) (Set.Ici 1) :=
-      hraypos.congr_set_ae (Ioi_ae_eq_Ici (a := (1:ℝ))).symm
-    refine hIci.congr (Filter.Eventually.of_forall (fun x => ?_))
-    show ‖(expTest h 0 - expTest h x)/(x:ℂ)‖^2
-        = ‖(expTest h 0 - expTest h (-x))/((-x : ℝ):ℂ)‖^2
-    rw [expTest_neg]
-    have hnorm : ‖(expTest h 0 - expTest h x)/(x:ℂ)‖
-        = ‖(expTest h 0 - expTest h x)/((-x : ℝ):ℂ)‖ := by
-      rw [norm_div, norm_div]
-      congr 1
-      rw [Complex.norm_real, Complex.norm_real, Real.norm_eq_abs, Real.norm_eq_abs,
-        abs_neg]
-    rw [hnorm]
+  have hrayneg := integrableOn_Iic_expTest_diffQuot_sq hraypos
   have hcover : (Set.univ : Set ℝ) = Set.Iic (-1) ∪ (Set.Ioc (-1) 1 ∪ Set.Ioi 1) := by
     ext x
     simp only [Set.mem_univ, Set.mem_union, Set.mem_Iic, Set.mem_Ioc, Set.mem_Ioi,

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 import Mathlib.LinearAlgebra.Determinant
@@ -316,12 +321,12 @@ lemma psiLinearEquiv_one :
   apply WithConv.ext
   ext x
   rw [Algebra.TensorProduct.one_def, psiLinearEquiv_tmul_ofConv]
-  simp [LinearMap.convOne_apply, Algebra.TensorProduct.algebraMap_apply,
-    Algebra.TensorProduct.one_def]
+  simp [LinearMap.convOne_apply, Algebra.TensorProduct.algebraMap_apply]
 
 /-- `Ψ` is multiplicative: it carries the tensor-of-algebras product on `M = A'_B ⊗_R A` to the
-convolution product on `T = A'_{B⊗A}`. On generators both sides send `x ↦ ∑ (f x₍₁₎ · g x₍₂₎) ⊗ (a·c)`
-(the convolution Sweedler sum), by `convMul_apply` on each side. -/
+convolution product on `T = A'_{B⊗A}`. On generators both sides send
+`x ↦ ∑ (f x₍₁₎ · g x₍₂₎) ⊗ (a·c)` (the convolution Sweedler sum), by `convMul_apply` on each
+side. -/
 lemma psiLinearEquiv_mul (m₁ m₂ : WithConv (A →ₗ[R] B) ⊗[R] A) :
     psiLinearEquiv (m₁ * m₂) = psiLinearEquiv m₁ * psiLinearEquiv m₂ := by
   induction m₁ using TensorProduct.induction_on with
@@ -354,8 +359,9 @@ noncomputable def psiAlgEquiv :
 
 `τ = translationEndo φ` is promoted to an `A'_B`-algebra **automorphism** with inverse
 `translationEndo φ'`, `φ' = φ ∘ S`. The two compositions reduce (via `Algebra.TensorProduct.ext`)
-to `translationEndo φ (translationTarget φ' a) = 1 ⊗ a`, which is monoid algebra in the *commutative*
-linear-convolution ring `A'_M = WithConv (A →ₗ[R] M)`: writing `Pψ = pointConv(a ↦ ptS ψ(a) ⊗ 1)`,
+to `translationEndo φ (translationTarget φ' a) = 1 ⊗ a`, which is monoid algebra in the
+*commutative* linear-convolution ring `A'_M = WithConv (A →ₗ[R] M)`: writing
+`Pψ = pointConv(a ↦ ptS ψ(a) ⊗ 1)`,
 `η = pointConv includeRight`, one has `translationTarget φ = Pφ ⋆ η` and
 `translationEndo φ ∘ translationTarget ψ = Pψ ⋆ Pφ ⋆ η`, with `Pφ' = Pφ⁻¹` (the antipode is the
 convolution inverse, `mul_pointConv_antipode_eq_one`). -/
@@ -388,8 +394,9 @@ lemma translationTarget_apply (φ : A →ₐ[R] B) (a : A) {ι : Type*} (repr : 
     show (Bialgebra.comulAlgHom R A) a = Coalgebra.comul a from rfl, ← repr.eq, map_sum]
   exact Finset.sum_congr rfl fun i _ => by rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
 
-/-- **(T-D5e-τ, L1.)** In `A'_M`, `translationEndo φ ∘ translationTarget ψ = Pψ ⋆ (translationTarget φ
-as a point)`: both send `a ↦ ∑ (ptS ψ(a₍₁₎) ⊗ 1) · translationTarget φ(a₍₂₎)`. -/
+/-- **(T-D5e-τ, L1.)** In `A'_M`,
+`translationEndo φ ∘ translationTarget ψ = Pψ ⋆ (translationTarget φ as a point)`: both send
+`a ↦ ∑ (ptS ψ(a₍₁₎) ⊗ 1) · translationTarget φ(a₍₂₎)`. -/
 lemma translationEndo_translationTarget_conv (φ ψ : A →ₐ[R] B) (a : A) :
     translationEndo φ (translationTarget ψ a)
       = (pointConv (leftPointHom ψ) * pointConv (translationTarget φ)) a := by
@@ -397,7 +404,7 @@ lemma translationEndo_translationTarget_conv (φ ψ : A →ₐ[R] B) (a : A) :
     (ℛ R a).convMul_apply (pointConv (leftPointHom ψ)) (pointConv (translationTarget φ))]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [translationEndo_tmul]
-  simp only [ofConv_pointConv, pointConv, WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
+  simp only [pointConv, WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
     leftPointHom_apply]
 
 /-- **(T-D5e-τ, L2.)** `translationTarget φ = Pφ ⋆ η` in `A'_M`, `η = pointConv includeRight`:
@@ -410,9 +417,10 @@ lemma pointConv_translationTarget_eq (φ : A →ₐ[R] B) :
   rw [ofConv_pointConv]
   show translationTarget φ a = _
   rw [translationTarget_apply φ a (ℛ R a),
-    (ℛ R a).convMul_apply (pointConv (leftPointHom φ)) (pointConv Algebra.TensorProduct.includeRight)]
+    (ℛ R a).convMul_apply (pointConv (leftPointHom φ))
+      (pointConv Algebra.TensorProduct.includeRight)]
   refine Finset.sum_congr rfl fun i _ => ?_
-  simp only [ofConv_pointConv, pointConv, WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
+  simp only [pointConv, WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
     leftPointHom_apply, Algebra.TensorProduct.includeRight_apply,
     Algebra.TensorProduct.tmul_mul_tmul, one_mul, mul_one]
 
@@ -443,7 +451,7 @@ lemma translationEndo_translationTarget_of_mul_eq_one (φ ψ : A →ₐ[R] B)
   show (pointConv (Algebra.TensorProduct.includeRight :
     A →ₐ[R] WithConv (A →ₗ[R] B) ⊗[R] A)) a = 1 ⊗ₜ[R] a
   rw [pointConv]
-  simp only [WithConv.ofConv_toConv, AlgHom.toLinearMap_apply,
+  simp only [AlgHom.toLinearMap_apply,
     Algebra.TensorProduct.includeRight_apply]
 
 /-- **(T-D5e-τ — the right-translation automorphism.)** `τ = translationEndo φ` promoted to an
@@ -485,17 +493,19 @@ noncomputable def coev : WithConv (A →ₗ[R] B) ⊗[R] A :=
     (Module.Free.chooseBasis R A) i
 
 /-- **(T-D5e-core, key A.)** `Ψ(u) = pointConv (includeRight)`: under the comparison iso the
-coevaluation is the universal point `a ↦ 1 ⊗ a` of `T` (dual-basis collapse `∑ᵢ eᵢ'(x) • eᵢ = x`). -/
+coevaluation is the universal point `a ↦ 1 ⊗ a` of `T` (dual-basis collapse
+`∑ᵢ eᵢ'(x) • eᵢ = x`). -/
 lemma psiAlgEquiv_coev :
     psiAlgEquiv coev = pointConv (Algebra.TensorProduct.includeRight : A →ₐ[R] B ⊗[R] A) := by
   apply WithConv.ext
   ext x
-  rw [psiAlgEquiv_apply, coev, map_sum, WithConv.ofConv_sum, LinearMap.coeFn_sum,
+  rw [psiAlgEquiv_apply, coev, map_sum, WithConv.ofConv_sum, LinearMap.coe_sum,
     Finset.sum_apply]
   rw [ofConv_pointConv, AlgHom.toLinearMap_apply, Algebra.TensorProduct.includeRight_apply]
   have : ∀ i, (psiLinearEquiv (toConv (Algebra.linearMap R B ∘ₗ
       (Module.Free.chooseBasis R A).coord i) ⊗ₜ[R] (Module.Free.chooseBasis R A) i)).ofConv x
-      = (Module.Free.chooseBasis R A).repr x i • ((1 : B) ⊗ₜ[R] (Module.Free.chooseBasis R A) i) := by
+      = (Module.Free.chooseBasis R A).repr x i •
+        ((1 : B) ⊗ₜ[R] (Module.Free.chooseBasis R A) i) := by
     intro i
     rw [psiLinearEquiv_tmul_ofConv, WithConv.ofConv_toConv, LinearMap.comp_apply,
       Algebra.linearMap_apply, Algebra.algebraMap_eq_smul_one,
@@ -505,7 +515,8 @@ lemma psiAlgEquiv_coev :
   exact Finset.sum_congr rfl fun i _ => TensorProduct.smul_tmul _ _ _
 
 /-- `rightTranslationAlgHom φ a = ∑ φ(a₍₁₎) ⊗ a₍₂₎` in any Sweedler representation of `a`. -/
-lemma rightTranslationAlgHom_apply (φ : A →ₐ[R] B) (a : A) {ι : Type*} (repr : Coalgebra.Repr R a ι) :
+lemma rightTranslationAlgHom_apply (φ : A →ₐ[R] B) (a : A) {ι : Type*}
+    (repr : Coalgebra.Repr R a ι) :
     rightTranslationAlgHom φ a = ∑ i ∈ repr.index, φ (repr.left i) ⊗ₜ[R] repr.right i := by
   rw [rightTranslationAlgHom, AlgHom.comp_apply,
     show (Bialgebra.comulAlgHom R A) a = Coalgebra.comul a from rfl, ← repr.eq, map_sum]
@@ -529,7 +540,7 @@ lemma psiAlgEquiv_translationEndo_tmul (φ : A →ₐ[R] B) (f : WithConv (A →
     (psiAlgEquiv (translationEndo φ (f ⊗ₜ[R] a))).ofConv x
       = (f.ofConv x ⊗ₜ[R] (1 : A)) * rightTranslationAlgHom φ a := by
   rw [psiAlgEquiv_apply, translationEndo_tmul_expand, map_sum, WithConv.ofConv_sum,
-    LinearMap.coeFn_sum, Finset.sum_apply, rightTranslationAlgHom_apply φ a (ℛ R a), Finset.mul_sum]
+    LinearMap.coe_sum, Finset.sum_apply, rightTranslationAlgHom_apply φ a (ℛ R a), Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [psiLinearEquiv_tmul_ofConv, Algebra.TensorProduct.tmul_mul_tmul, one_mul]
   congr 1
@@ -537,13 +548,14 @@ lemma psiAlgEquiv_translationEndo_tmul (φ : A →ₐ[R] B) (f : WithConv (A →
 
 /-- **(T-D5e-core, LHS of Lemma 3.8.2.)** `Ψ(τ u) = pointConv (rightTranslationAlgHom φ)`: applying
 `τ` to the coevaluation and pushing through `Ψ` gives the point `a ↦ ∑ φ(a₍₁₎) ⊗ a₍₂₎`, by the
-generator formula and the dual-basis collapse `∑ᵢ eᵢ'(x) • rightTranslation(eᵢ) = rightTranslation x`. -/
+generator formula and the dual-basis collapse
+`∑ᵢ eᵢ'(x) • rightTranslation(eᵢ) = rightTranslation x`. -/
 lemma psiAlgEquiv_translationEndo_coev (φ : A →ₐ[R] B) :
     psiAlgEquiv (translationEndo φ coev) = pointConv (rightTranslationAlgHom φ) := by
   apply WithConv.ext
   ext x
   rw [ofConv_pointConv, AlgHom.toLinearMap_apply, coev, map_sum, map_sum, WithConv.ofConv_sum,
-    LinearMap.coeFn_sum, Finset.sum_apply]
+    LinearMap.coe_sum, Finset.sum_apply]
   have step : ∀ i, (psiAlgEquiv (translationEndo φ
       (toConv (Algebra.linearMap R B ∘ₗ (Module.Free.chooseBasis R A).coord i) ⊗ₜ[R]
         (Module.Free.chooseBasis R A) i))).ofConv x
@@ -581,8 +593,8 @@ lemma coev_relation (φ : A →ₐ[R] B) :
     rw [ofConv_pointConv, AlgHom.toLinearMap_apply, rightTranslationAlgHom_apply φ a (ℛ R a),
       (ℛ R a).convMul_apply]
     simp only [ofConv_pointConv, AlgHom.toLinearMap_apply, Algebra.TensorProduct.includeRight_apply,
-      AlgHom.comp_apply, Algebra.TensorProduct.includeLeft_apply, Algebra.TensorProduct.tmul_mul_tmul,
-      one_mul, mul_one]
+      AlgHom.comp_apply, Algebra.TensorProduct.includeLeft_apply,
+      Algebra.TensorProduct.tmul_mul_tmul, one_mul, mul_one]
     have e1 : (∑ i ∈ (ℛ R a).index, φ ((ℛ R a).left i) ⊗ₜ[R] (ℛ R a).right i)
         = TensorProduct.map φ.toLinearMap LinearMap.id (Coalgebra.comul a) := by
       rw [← (ℛ R a).eq, map_sum]
@@ -707,8 +719,8 @@ cocommutative Hopf algebra satisfies `(toConv φ)^(finrank R A) = 1`. This is `n
 the point group — the exact form the geometric bridge (`RelEffCartierDiv.IsSubgroup`, Layer B)
 consumes once it identifies the curve's group law on a subgroup divisor with convolution of points.
 Obtained from `deligne_pointConv_pow_finrank` by transporting along the injective forgetful
-`AlgHom → LinearMap` (mathlib's `AlgHom.toLinearMap_convPow`/`toLinearMap_convOne`). Mathlib-upstream
-candidate alongside the linear form. -/
+`AlgHom → LinearMap` (mathlib's `AlgHom.toLinearMap_convPow`/`toLinearMap_convOne`).
+Mathlib-upstream candidate alongside the linear form. -/
 theorem deligne_point_pow_eq_one (φ : A →ₐ[R] B) [Module.Free R A] [Module.Finite R A]
     [Nontrivial R] [Nontrivial (WithConv (A →ₗ[R] B))] :
     (toConv φ : WithConv (A →ₐ[R] B)) ^ (Module.finrank R A) = 1 := by

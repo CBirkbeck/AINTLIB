@@ -289,6 +289,21 @@ lemma dirichletCharacter_sum_eq_zero_of_ne_one
 
 /-! ### T003 — Character parity (Diekmann Lemmas 23, 25) -/
 
+/-- Odd rational unit characters are the rational stand-in for odd
+Teichmüller-indexed eigenspaces in the current `ℚ`-valued idempotent API. -/
+def IsOddUnitCharacter (χ : MulChar (ZMod p)ˣ ℚ) : Prop :=
+  χ (-1 : (ZMod p)ˣ) = -1
+
+lemma IsOddUnitCharacter.ne_one {χ : MulChar (ZMod p)ˣ ℚ}
+    (hχ_odd : IsOddUnitCharacter (p := p) χ) :
+    χ ≠ 1 := by
+  intro hχ
+  have hval : χ (-1 : (ZMod p)ˣ) = 1 := by
+    rw [hχ]
+    exact MulChar.one_apply (R' := ℚ) (Group.isUnit (-1 : (ZMod p)ˣ))
+  rw [hχ_odd] at hval
+  norm_num at hval
+
 /-- `ω(-1) = -1` for any odd prime `p`.
 
 Proof: `(ω(-1))^2 = ω(1) = 1`, so `ω(-1) ∈ {1, -1}` in the integral

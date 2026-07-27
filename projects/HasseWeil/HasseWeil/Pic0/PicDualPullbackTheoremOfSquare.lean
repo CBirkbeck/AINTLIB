@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Pic0.TheoremOfSquareDivisorForm
 import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 
@@ -173,7 +178,7 @@ theorem sigma_tosPullDivisor
         (tosPullDivisor ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ Q) =
       α.picDual ch hinj hfin Q - α₁.picDual ch₁ hinj₁ hfin₁ Q -
         α₂.picDual ch₂ hinj₂ hfin₂ Q := by
-  unfold tosPullDivisor
+  simp only [tosPullDivisor]
   exact HasseWeil.Pic0.RouteCTheoremOfSquareDiv.sigma_delta E
     (f := α.picDual ch hinj hfin) (g := α₁.picDual ch₁ hinj₁ hfin₁)
     (h := α₂.picDual ch₂ hinj₂ hfin₂) Q
@@ -204,7 +209,7 @@ theorem tos_pullback_principal_of_dual_additive_at
       α₁.picDual ch₁ hinj₁ hfin₁ Q + α₂.picDual ch₂ hinj₂ hfin₂ Q) :
     Curves.SmoothPlaneCurve.ProjIsPrincipal (⟨E⟩ : Curves.SmoothPlaneCurve F)
       (tosPullDivisor ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ Q) := by
-  unfold tosPullDivisor
+  simp only [tosPullDivisor]
   -- Regroup `κ(ŵ Q) − κ(α̂₁ Q) − κ(α̂₂ Q)` as `κ(ŵ Q) − (κ(α̂₁ Q) + κ(α̂₂ Q))` (`sub_sub`),
   -- rewrite `ŵ(α₁⊞α₂)(Q) = α̂₁(Q) + α̂₂(Q)` (`hQ`), then close with Abel's `κ`-additivity.
   rw [sub_sub, hQ]
@@ -274,7 +279,7 @@ theorem dualAddResidual_iff_sigma_vanishes
     DualAddMulByIntResidual α α₁ α₂ ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ ↔
       (∀ Q : E.Point, Curves.projectiveDivisorSum E
         (tosPullDivisor ch hinj hfin ch₁ hinj₁ hfin₁ ch₂ hinj₂ hfin₂ Q) = 0) := by
-  unfold DualAddMulByIntResidual
+  simp only [DualAddMulByIntResidual]
   refine forall_congr' (fun Q ↦ ?_)
   -- `ŵ Q = α̂₁ Q + α̂₂ Q ↔ σ(Δ_Q) = ŵ Q − α̂₁ Q − α̂₂ Q = 0` (`sub_sub` then `sub_eq_zero`).
   rw [sigma_tosPullDivisor, sub_sub, sub_eq_zero]

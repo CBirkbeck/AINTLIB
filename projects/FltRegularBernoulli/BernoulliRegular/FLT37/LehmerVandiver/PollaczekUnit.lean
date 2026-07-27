@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.PrimaryUnits
@@ -125,7 +130,7 @@ theorem pollaczekUnit_one (h : p = 2) :
   have hempty : (Finset.Ico 1 ((p - 1) / 2 + 1)).attach = ∅ := by
     subst h
     decide
-  unfold pollaczekUnit
+  simp only [pollaczekUnit]
   rw [hempty, Finset.prod_empty]
 
 /-- The **integer norm** of the Pollaczek unit equals `1`.
@@ -137,7 +142,7 @@ b` has integer norm `1` (for `b` coprime to `p` and `p` odd) by
 the norm. -/
 theorem pollaczekUnit_norm (hp_odd : p ≠ 2) :
     Algebra.norm ℤ ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) = 1 := by
-  unfold pollaczekUnit
+  simp only [pollaczekUnit]
   rw [Units.coe_prod, map_prod]
   refine Finset.prod_eq_one fun b _ => ?_
   rw [Units.val_pow_eq_pow_val, map_pow, pollaczekFactor_val]

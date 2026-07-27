@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37CoefficientClosedForm
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37CoefficientClosedForm
 
 /-!
 # The degree-`68` log-coefficient recurrence: `[Tᵐ] log((E₃₇−1)/T)` via the log ODE
@@ -76,7 +78,7 @@ theorem derivative_logOf_gAH_mul_self :
     have h := Furtwaengler.FiniteLogFormal.subst_deriv_log_mul_one_add (A := ℚ) hsubst
     have hone_add : (1 : PowerSeries ℚ) + (gAH - 1) = gAH := by ring
     rwa [hone_add] at h
-  rw [logG, PowerSeries.logOf_eq, PowerSeries.derivative_subst ℚ hsubst]
+  rw [logG, PowerSeries.logOf_eq, PowerSeries.derivative_subst hsubst]
   have hderiv_sub : d⁄dX ℚ (gAH - 1) = d⁄dX ℚ gAH := by simp
   calc
     (PowerSeries.subst (gAH - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) *

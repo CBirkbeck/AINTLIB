@@ -114,7 +114,7 @@ theorem classGroupModPGroupRingAction_apply_eigenvector
     {v : ClassGroupModPMod p K} (hv : ∀ a, ρ a v = ψ a • v)
     (x : MonoidAlgebra (ZMod p) (CyclotomicUnitDelta p)) :
     classGroupModPGroupRingAction (p := p) (K := K) ρ x v =
-      (x.sum fun a b ↦ b * ψ a) • v := by
+      (x.coeff.sum fun a b ↦ b * ψ a) • v := by
   rw [classGroupModPGroupRingAction, MonoidAlgebra.lift_apply, LinearMap.finsupp_sum_apply,
     Finsupp.sum, Finsupp.sum, Finset.sum_smul]
   refine Finset.sum_congr rfl fun a _ ↦ ?_

@@ -194,7 +194,8 @@ private noncomputable def imAxisLift (t : ℝ) : ℍ := UpperHalfPlane.ofComplex
 
 private lemma imAxisLift_coe {t : ℝ} (ht : 0 < t) :
     ((imAxisLift t : ℍ) : ℂ) = Complex.I * (t : ℂ) := by
-  rw [imAxisLift, UpperHalfPlane.ofComplex_apply_of_im_pos (z := Complex.I * (t : ℂ)) (by simp [ht])]
+  rw [imAxisLift,
+    UpperHalfPlane.ofComplex_apply_of_im_pos (z := Complex.I * (t : ℂ)) (by simp [ht])]
 
 private lemma imAxisLift_im_of_pos {t : ℝ} (ht : 0 < t) : (imAxisLift t).im = t := by
   rw [← UpperHalfPlane.coe_im, imAxisLift_coe ht, Complex.mul_im, Complex.I_im, Complex.I_re,
@@ -291,7 +292,7 @@ open ModularForm in
 root number is `ε = i^k`. -/
 noncomputable def feqPair [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
     (hw : Γ.strictWidthInfty = 1) (hk : 0 < k)
-    (hS : (f : ℍ → ℂ) ∣[k] ModularGroup.S = f) : StrongFEPair ℂ where
+    (hS : (f : ℍ → ℂ) ∣[k] ModularGroup.S = f) : WeakFEPair ℂ where
   f := (f : ℍ → ℂ).resToImagAxis
   g := (f : ℍ → ℂ).resToImagAxis
   k := (k : ℝ)
@@ -305,6 +306,13 @@ noncomputable def feqPair [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
   h_feq := fun x hx ↦ resToImagAxis_feq f hS (mem_Ioi.mp hx)
   hf_top := fun r ↦ by simpa using isBigO_resToImagAxis_rpow f hw r
   hg_top := fun r ↦ by simpa using isBigO_resToImagAxis_rpow f hw r
+
+open ModularForm in
+/-- The `feqPair` of a cusp form is a strong FE-pair: its constant terms vanish. -/
+theorem isStrongFEPair_feqPair [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
+    (hw : Γ.strictWidthInfty = 1) (hk : 0 < k)
+    (hS : (f : ℍ → ℂ) ∣[k] ModularGroup.S = f) :
+    IsStrongFEPair (feqPair f hw hk hS) where
   hf₀ := rfl
   hg₀ := rfl
 
@@ -334,8 +342,12 @@ theorem lcompleted_eq_lcompletedSeries (f : F) (hw : Γ.strictWidthInfty = 1) (h
 /-- **The completed L-function is entire.** -/
 theorem differentiable_lcompleted (f : F) (hw : Γ.strictWidthInfty = 1) (hk : 0 < k)
     (hS : (f : ℍ → ℂ) ∣[k] ModularGroup.S = f) :
-    Differentiable ℂ (lcompleted f) :=
-  (feqPair f hw hk hS).differentiable_Λ
+    Differentiable ℂ (lcompleted f) := by
+  have hP := isStrongFEPair_feqPair f hw hk hS
+  have hΛ : lcompleted f = (feqPair f hw hk hS).Λ :=
+    funext fun s ↦ (hP.hasMellin s).2
+  rw [hΛ]
+  exact hP.differentiable_Λ
 
 open ModularForm in
 /-- **The functional equation of the completed L-function.**  For a level-`1` weight-`k` cusp form
@@ -343,13 +355,20 @@ open ModularForm in
 theorem lcompleted_functional_equation (f : F) (hw : Γ.strictWidthInfty = 1) (hk : 0 < k)
     (hS : (f : ℍ → ℂ) ∣[k] ModularGroup.S = f) (s : ℂ) :
     lcompleted f ((k : ℂ) - s) = Complex.I ^ k * lcompleted f s := by
-  have hfe := (feqPair f hw hk hS).functional_equation s
-  -- `P.Λ (k - s) = ε • P.symm.Λ s`; here `P.symm.Λ = P.Λ` (since `f = g`) and `ε = I^k`.
+  have hP := isStrongFEPair_feqPair f hw hk hS
+  set P := feqPair f hw hk hS with hP_def
+  have hfe := P.functional_equation s
+  -- `P.Λ (k - s) = ε • P.symm.Λ s`; here `P.symm.Λ = P.Λ = lcompleted f` (since `f = g`)
+  -- and `ε = I^k`.
   rw [smul_eq_mul] at hfe
-  have : (((k : ℝ) : ℂ) - s) = ((k : ℂ) - s) := by push_cast; ring
-  rw [← this]
-  simpa only [lcompleted_apply, StrongFEPair.Λ, StrongFEPair.symm, WeakFEPair.symm,
-    feqPair] using hfe
+  have hΛ : ∀ t, lcompleted f t = P.Λ t := fun t ↦ (hP.hasMellin t).2
+  have hΛsymm : ∀ t, lcompleted f t = P.symm.Λ t := fun t ↦ (hP.symm.hasMellin t).2
+  have hPk : (P.k : ℂ) = (k : ℂ) := by
+    have hk_eq : P.k = (k : ℝ) := by rw [hP_def]; rfl
+    rw [hk_eq]; push_cast; ring
+  have hcast : ((k : ℂ) - s) = (↑P.k - s) := by rw [hPk]
+  rw [hΛ ((k : ℂ) - s), hcast, hfe, ← hΛsymm s]
+  rfl
 
 /-- **Hecke's functional equation, naive form.**  On the half-plane `k/2 + 1 < Re s`, the
 completed Dirichlet product `(2π)^{-s} · Γ(s) · L(s, f)` at `s` equals (after multiplying by
@@ -364,8 +383,13 @@ theorem lcompletedSeries_functional_equation (f : F) (hw : Γ.strictWidthInfty =
 
 /-! ### Analytic continuation of `L(·, f)` -/
 
-/-- The half-plane `{s | x < Re s}` (with `x : EReal`) is preconnected. -/
-private lemma isPreconnected_re_gt_EReal (x : EReal) :
+/-- The half-plane `{s | x < Re s}` (with `x : EReal`) is preconnected.
+
+Stated for `EReal` so it applies directly to `{s | abscissaOfAbsConv a < Re s}`, the natural domain
+of an `LSeries`.  Not modular-form-specific: it is the identity-theorem input shared by every
+analytic-continuation argument here, so it is public and reused at level `N`
+(`LFunctionFEqN.lean`). -/
+lemma isPreconnected_re_gt_EReal (x : EReal) :
     IsPreconnected {z : ℂ | x < (z.re : EReal)} := by
   induction x using EReal.rec with
   | bot =>

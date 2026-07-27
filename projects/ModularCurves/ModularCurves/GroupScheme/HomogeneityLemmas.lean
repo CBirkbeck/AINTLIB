@@ -67,6 +67,21 @@ theorem factor_unit_or_maximal [IsLocalRing A] {P a g : A}
 
 /-! ## KM 6.3.4 — multiplication by the root is injective (determinant-free) -/
 
+/-- The constant coefficient of `∏ᵢ (X - bᵢ)`, over a multiset `s = {bᵢ}`, is
+`(-1) ^ (card s) * ∏ᵢ bᵢ` — evaluate the product of monic linear factors at `0`. -/
+theorem coeff_zero_multiset_prod_X_sub_C (s : Multiset A) :
+    ((s.map fun b => X - C b).prod).coeff 0 = (-1) ^ Multiset.card s * s.prod := by
+  rw [coeff_zero_eq_eval_zero, eval_multiset_prod, Multiset.map_map]
+  simp only [Function.comp_apply, eval_sub, eval_X, eval_C, zero_sub]
+  rw [show (s.map fun b => -b) = s.map Neg.neg from rfl]
+  calc (s.map Neg.neg).prod
+      = (s.map fun b => -1 * b).prod := by
+        exact congrArg _ (Multiset.map_congr rfl fun b _ => by ring)
+    _ = (s.map fun _ => (-1 : A)).prod * (s.map fun b => b).prod :=
+        Multiset.prod_map_mul
+    _ = (-1) ^ Multiset.card s * s.prod := by
+        rw [Multiset.map_const', Multiset.prod_replicate, Multiset.map_id']
+
 /-- **(KM Lemma 6.3.4, determinant-free core)** On `A[Q]/(∏ᵢ (Q - bᵢ))`, multiplication
 by (the image of) `Q` is injective provided `∏ᵢ bᵢ` is a nonzerodivisor of `A`. KM's
 determinant computation `det(Q | A₁) = ± ∏ [b](P) ≠ 0` (over the regular local domain `A`)
@@ -95,16 +110,7 @@ theorem root_mul_injective (s : Multiset A) (hreg : IsSMulRegular A s.prod) :
           rw [AdjoinRoot.mk_C, AdjoinRoot.algebraMap_eq]
   -- the constant coefficient is `(-1)^(card s) * ∏ bᵢ`, a nonzerodivisor of `A`
   have hcoeff : f.coeff 0 = (-1) ^ Multiset.card s * s.prod := by
-    rw [hf, coeff_zero_eq_eval_zero, eval_multiset_prod, Multiset.map_map]
-    simp only [Function.comp_apply, eval_sub, eval_X, eval_C, zero_sub]
-    rw [show (s.map fun b => -b) = s.map Neg.neg from rfl]
-    calc (s.map Neg.neg).prod
-        = (s.map fun b => -1 * b).prod := by
-          exact congrArg _ (Multiset.map_congr rfl fun b _ => by ring)
-      _ = (s.map fun _ => (-1 : A)).prod * (s.map fun b => b).prod :=
-          Multiset.prod_map_mul
-      _ = (-1) ^ Multiset.card s * s.prod := by
-          rw [Multiset.map_const', Multiset.prod_replicate, Multiset.map_id']
+    rw [hf]; exact coeff_zero_multiset_prod_X_sub_C s
   have hc : IsSMulRegular A (f.coeff 0) := by
     rw [hcoeff]
     exact ((isUnit_one.neg.pow (Multiset.card s)).isSMulRegular A).mul hreg
@@ -143,7 +149,7 @@ theorem esymm_card_eq_prod (s : Multiset A) : s.esymm (Multiset.card s) = s.prod
 maximal ideal (positive degree). -/
 theorem esymm_mem_maximalIdeal [IsLocalRing A] {v : Multiset A}
     (hv : ∀ x ∈ v, x ∈ IsLocalRing.maximalIdeal A) {k : ℕ} (hk : 0 < k)
-    (hkv : k ≤ Multiset.card v) :
+    (_hkv : k ≤ Multiset.card v) :
     v.esymm k ∈ IsLocalRing.maximalIdeal A := by
   rw [Multiset.esymm]
   refine multiset_sum_mem _ fun x hx => ?_
@@ -180,7 +186,7 @@ theorem coeff_prod_X_add_C (w : Multiset A) (i : ℕ) :
 /-- A product of units is a unit (multiset form). -/
 theorem isUnit_multiset_prod {u : Multiset A} (hu : ∀ x ∈ u, IsUnit x) : IsUnit u.prod := by
   induction u using Multiset.induction_on with
-  | empty => simpa using isUnit_one
+  | empty => simp
   | cons a t ih =>
       rw [Multiset.prod_cons]
       exact (hu a (Multiset.mem_cons_self a t)).mul

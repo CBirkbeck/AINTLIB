@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.Algebra.Category.CommAlgCat.Basic
 import Mathlib.Algebra.Category.Ring.Colimits
 import Mathlib.CategoryTheory.Galois.Basic
@@ -48,7 +53,8 @@ instance hasFiniteColimits : HasFiniteColimits (CommAlgCat.{u} k) where
 
 instance hasColimitsOfShapeSingleObjCommRingCat (G : Type u) [Group G] :
     HasColimitsOfShape (SingleObj G) CommRingCat.{u} :=
-  have : HasColimitsOfSize.{u, 0} CommRingCat.{u} := hasColimitsOfSizeShrink.{u, 0, u, u} CommRingCat.{u}
+  have : HasColimitsOfSize.{u, 0} CommRingCat.{u} :=
+    hasColimitsOfSizeShrink.{u, 0, u, u} CommRingCat.{u}
   inferInstance
 
 instance hasColimitsOfShapeSingleObjUnder (G : Type u) [Group G] :
@@ -549,6 +555,50 @@ section EpiSplitting
 
 variable {k : Type u} [Field k]
 
+/-- Chinese remainder bijectivity: if `φ : B →ₐ[k] C` is surjective and the ideal `J`
+is a complement of `ker φ`, then `(φ, mkₐ J) : B → C × (B ⧸ J)` is bijective. The
+idempotent `e + f = 1` splitting `ker φ ⊕ J` gives both directions. -/
+theorem bijective_algHom_prod_mkₐ_of_isCompl {B C : Type u} [CommRing B] [Algebra k B]
+    [CommRing C] [Algebra k C] (φ : B →ₐ[k] C) (hsurj : Function.Surjective φ)
+    {J : Ideal B} (hIJ : IsCompl (RingHom.ker φ) J) :
+    Function.Bijective (φ.prod (Ideal.Quotient.mkₐ k J)) := by
+  classical
+  obtain ⟨e, he, f, hf, hef⟩ := Submodule.mem_sup.mp
+    (show (1 : B) ∈ RingHom.ker φ ⊔ J from hIJ.sup_eq_top ▸ Submodule.mem_top)
+  have hπe : φ e = 0 := he
+  have hπf : φ f = 1 := by
+    have h := congrArg φ hef
+    rw [map_add, map_one, hπe, zero_add] at h
+    exact h
+  have hqf : Ideal.Quotient.mk J f = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hf
+  have hqe : Ideal.Quotient.mk J e = 1 := by
+    have h := congrArg (Ideal.Quotient.mk J) hef
+    rw [map_add, map_one, hqf, add_zero] at h
+    exact h
+  constructor
+  · intro x y hxy
+    have h1 : φ (x - y) = 0 := by
+      have := congrArg Prod.fst hxy
+      simpa [map_sub, sub_eq_zero] using this
+    have h2 : x - y ∈ J := by
+      have := congrArg Prod.snd hxy
+      rw [show (φ.prod (Ideal.Quotient.mkₐ k J)) x =
+        (φ x, Ideal.Quotient.mk J x) from rfl] at hxy
+      have h2' : (Ideal.Quotient.mk J) x = (Ideal.Quotient.mk J) y :=
+        congrArg Prod.snd hxy
+      exact Ideal.Quotient.eq.mp h2'
+    have hmem : x - y ∈ RingHom.ker φ ⊓ J := ⟨h1, h2⟩
+    rw [hIJ.inf_eq_bot] at hmem
+    exact sub_eq_zero.mp (by simpa using hmem)
+  · rintro ⟨a', z⟩
+    obtain ⟨a, ha⟩ := hsurj a'
+    obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective z
+    refine ⟨a * f + b * e, Prod.ext ?_ ?_⟩
+    · show φ (a * f + b * e) = a'
+      rw [map_add, map_mul, map_mul, hπf, hπe, mul_one, mul_zero, add_zero, ha]
+    · show Ideal.Quotient.mk J (a * f + b * e) = Ideal.Quotient.mk J b
+      rw [map_add, map_mul, map_mul, hqf, hqe, mul_zero, zero_add, mul_one]
+
 /-- Chinese remainder splitting along an epimorphism of finite étale algebras: the
 source is the binary product of the target and the quotient by a complement of the
 kernel.  This is the content of axiom (G3) for `(FiniteEtale k)ᵒᵖ`. -/
@@ -573,43 +623,7 @@ theorem monoInducesIsoOnDirectSummand_op {X Y : (CommAlgCat.FiniteEtale.{u} k)�
     CommAlgCat.FiniteEtale.of k ((Y.unop.obj : Type u) ⧸ J) with hZdef
   set q : Y.unop ⟶ Zobj :=
     ObjectProperty.homMk (CommAlgCat.ofHom (Ideal.Quotient.mkₐ k J)) with hqdef
-  obtain ⟨e, he, f, hf, hef⟩ := Submodule.mem_sup.mp
-    (show (1 : (Y.unop.obj : Type u)) ∈ I ⊔ J from hIJ.sup_eq_top ▸ Submodule.mem_top)
-  have hπe : π.hom.hom e = 0 := he
-  have hπf : π.hom.hom f = 1 := by
-    have h := congrArg π.hom.hom hef
-    rw [map_add, map_one, hπe, zero_add] at h
-    exact h
-  have hqf : Ideal.Quotient.mk J f = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hf
-  have hqe : Ideal.Quotient.mk J e = 1 := by
-    have h := congrArg (Ideal.Quotient.mk J) hef
-    rw [map_add, map_one, hqf, add_zero] at h
-    exact h
-  have hbij : Function.Bijective
-      ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) := by
-    constructor
-    · intro x y hxy
-      have h1 : π.hom.hom (x - y) = 0 := by
-        have := congrArg Prod.fst hxy
-        simpa [map_sub, sub_eq_zero] using this
-      have h2 : x - y ∈ J := by
-        have := congrArg Prod.snd hxy
-        rw [show ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) x =
-          (π.hom.hom x, Ideal.Quotient.mk J x) from rfl] at hxy
-        have h2' : (Ideal.Quotient.mk J) x = (Ideal.Quotient.mk J) y :=
-          congrArg Prod.snd hxy
-        exact Ideal.Quotient.eq.mp h2'
-      have hmem : x - y ∈ I ⊓ J := ⟨h1, h2⟩
-      rw [hIJ.inf_eq_bot] at hmem
-      exact sub_eq_zero.mp (by simpa using hmem)
-    · rintro ⟨a', z⟩
-      obtain ⟨a, ha⟩ := hsurj a'
-      obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective z
-      refine ⟨a * f + b * e, Prod.ext ?_ ?_⟩
-      · show π.hom.hom (a * f + b * e) = a'
-        rw [map_add, map_mul, map_mul, hπf, hπe, mul_one, mul_zero, add_zero, ha]
-      · show Ideal.Quotient.mk J (a * f + b * e) = Ideal.Quotient.mk J b
-        rw [map_add, map_mul, map_mul, hqf, hqe, mul_zero, zero_add, mul_one]
+  have hbij := bijective_algHom_prod_mkₐ_of_isCompl π.hom.hom hsurj (hIdef ▸ hIJ)
   set Φ := AlgEquiv.ofBijective ((π.hom.hom).prod (Ideal.Quotient.mkₐ k J)) hbij
     with hΦdef
   have hlim : IsLimit (BinaryFan.mk π q) := by

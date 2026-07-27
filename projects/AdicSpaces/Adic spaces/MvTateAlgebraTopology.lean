@@ -697,6 +697,7 @@ private theorem mvPow_image_isClosed (P : PairOfDefinition A) (k : ℕ) :
     (AddSubgroup.map P.A₀.subtype.toAddMonoidHom (P.I ^ k).toAddSubgroup : Set A) from rfl]
   exact AddSubgroup.isClosed_of_isOpen _ (P.pow_image_isOpen k)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **T-MVT-3:** `A⟨X₁,…,Xₙ⟩` is complete with the canonical natural Tate topology, provided
 the ground ring `A` is complete and Hausdorff. Generalizes
 `TateAlgebra.tateAlgebraTopology'_completeSpace` from `Fin 1` to `Fin n`; Wedhorn Prop 6.21(2).
@@ -1157,7 +1158,8 @@ theorem mvPowerSeries_X_isBounded [IsTateRing A] {m : ℕ} (j : Fin m) :
   exact hbd.subset (by rintro _ ⟨n, rfl⟩; exact hpow n)
 
 /-- **`algebraMap` (the constant-series map) preserves boundedness** into `A⟨X₁,…,Xₘ⟩`: a bounded
-set `S ⊆ A` has bounded image under `a ↦` (constant series `a`). Since `coeffₗ(C(s)·v) = s·coeffₗ(v)`
+set `S ⊆ A` has bounded image under `a ↦` (constant series `a`).
+Since `coeffₗ(C(s)·v) = s·coeffₗ(v)`
 and `S` is bounded, the small coefficients of `v` (in `Iᵏ`) are absorbed: `s·coeffₗ(v) ∈ S·Iᵏ ⊆ Iʲ`.
 Needed for the relative Example-6.38 evaluation tuple (the `tᵢ/s` constant entries). -/
 theorem mvTateAlgebra_algebraMap_isBounded [IsTateRing A] {m : ℕ} {S : Set A}

@@ -21,6 +21,73 @@ attribute [local instance] Classical.propDecidable
 
 noncomputable section
 
+/-- For any real constant `c`, the dyadic sequence `c / 2 ^ n` tends to `0`. -/
+lemma tendsto_const_div_two_pow_atTop (c : ℝ) :
+    Tendsto (fun n : ℕ ↦ c / 2 ^ n) atTop (𝓝 0) := by
+  have h_inv : Tendsto (fun n : ℕ ↦ 1 / (2 : ℝ) ^ n) atTop (𝓝 0) := by
+    simp_rw [one_div]
+    exact tendsto_inv_atTop_zero.comp
+      (tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (1 : ℝ) < 2))
+  simpa using (Tendsto.const_mul c h_inv).congr
+    (fun n ↦ show c * (1 / (2 : ℝ) ^ n) = c / 2 ^ n by ring)
+
+/-- For a positive constant `c` and any positive bound `η`, some dyadic scale `c / 2 ^ N`
+falls below `η`. -/
+lemma exists_const_div_two_pow_lt {c : ℝ} (hc : 0 < c) {η : ℝ} (hη : 0 < η) :
+    ∃ N : ℕ, c / 2 ^ N < η := by
+  have h_tendsto := tendsto_const_div_two_pow_atTop c
+  rw [Metric.tendsto_atTop] at h_tendsto
+  obtain ⟨N, hN⟩ := h_tendsto η hη
+  refine ⟨N, ?_⟩
+  have := hN N le_rfl
+  rwa [Real.dist_eq, sub_zero, abs_of_pos (div_pos hc (by positivity))] at this
+
+/-- Distance control from a sub-dyadic point to a dyadic node. Given a consecutive-step bound
+`h_step` and a bracket-step bound `h_bracket` (both of geometric type `K * δ / 2 ^ ·`), any
+`ε` strictly below the `N`-th dyadic point `δ / 2 ^ N` satisfies
+`‖I ε - I (δ / 2 ^ N)‖ ≤ 2 * K * δ / 2 ^ N`. The proof brackets `ε` between two consecutive
+dyadic points and telescopes the intervening steps. -/
+lemma norm_sub_dyadic_le_of_bracket {X : Type*} [SeminormedAddCommGroup X] {I : ℝ → X}
+    {K δ : ℝ} (hK_pos : 0 < K) (hδ_pos : 0 < δ)
+    (h_step : ∀ n, ‖I (δ / 2 ^ (n + 1)) - I (δ / 2 ^ n)‖ ≤ K * δ / 2 ^ n)
+    (h_bracket : ∀ (ε : ℝ) (M : ℕ), 0 < ε → ε ≤ δ / 2 ^ M → δ / 2 ^ M ≤ 2 * ε →
+      ‖I ε - I (δ / 2 ^ M)‖ ≤ K * δ / 2 ^ M)
+    {N : ℕ} {ε : ℝ} (hε_pos : 0 < ε) (hε_lt : ε < δ / 2 ^ N) :
+    ‖I ε - I (δ / 2 ^ N)‖ ≤ 2 * K * δ / 2 ^ N := by
+  have hε_le_δ : ε ≤ δ := hε_lt.le.trans
+    (div_le_self hδ_pos.le (one_le_pow₀ (by norm_num : (1 : ℝ) ≤ 2)))
+  obtain ⟨M, hM_lower, hM_upper⟩ := exists_dyadic_bracket hδ_pos hε_pos hε_le_δ
+  have hM_ge_N : M ≥ N := by
+    by_contra! h_lt
+    have h_div_ge : δ / 2 ^ (M + 1) ≥ δ / 2 ^ N :=
+      div_le_div_of_nonneg_left hδ_pos.le (by positivity)
+        (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) h_lt)
+    linarith
+  have h_first_piece : ‖I ε - I (δ / 2 ^ M)‖ ≤ K * δ / 2 ^ M := by
+    have h_ratio_M : δ / 2 ^ M ≤ 2 * ε := by
+      have : δ / 2 ^ M = 2 * (δ / 2 ^ (M + 1)) := by rw [pow_succ]; ring
+      linarith
+    exact h_bracket ε M hε_pos hM_upper h_ratio_M
+  by_cases hMN : M = N
+  · subst hMN
+    calc ‖I ε - I (δ / 2 ^ M)‖
+        ≤ K * δ / 2 ^ M := h_first_piece
+      _ ≤ K * δ / 2 ^ M + K * δ / 2 ^ M := by
+          linarith [show (0:ℝ) ≤ K * δ / 2 ^ M by positivity]
+      _ = 2 * K * δ / 2 ^ M := by ring
+  · have h_sum_bound : ‖I (δ / 2 ^ M) - I (δ / 2 ^ N)‖ ≤
+        2 * K * δ / 2 ^ N - 2 * K * δ / 2 ^ M :=
+      telescoping_sum_bound (I := fun n ↦ I (δ / 2 ^ n)) hK_pos hδ_pos h_step N M
+        (Nat.lt_of_le_of_ne hM_ge_N (Ne.symm hMN))
+    calc ‖I ε - I (δ / 2 ^ N)‖
+        ≤ ‖I ε - I (δ / 2 ^ M)‖ + ‖I (δ / 2 ^ M) - I (δ / 2 ^ N)‖ :=
+          norm_sub_le_norm_sub_add_norm_sub _ _ _
+      _ ≤ K * δ / 2 ^ M + (2 * K * δ / 2 ^ N - 2 * K * δ / 2 ^ M) := by
+          linarith [h_first_piece, h_sum_bound]
+      _ = 2 * K * δ / 2 ^ N - K * δ / 2 ^ M := by ring
+      _ ≤ 2 * K * δ / 2 ^ N := by
+          linarith [show (0 : ℝ) ≤ K * δ / 2 ^ M by positivity]
+
 /-- The principal value cutoff integral converges as `ε ↘ 0` for a `C²` curve with
 non-vanishing derivative at an interior point `t₀`, using a dyadic Cauchy argument. -/
 lemma pv_limit_via_dyadic {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ}
@@ -44,17 +111,17 @@ lemma pv_limit_via_dyadic {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ}
       (by simp only [δ]; linarith)
   let I : ℝ → ℂ := fun ε ↦ ∫ t in a..b,
     if ε < ‖γ t - γ t₀‖ then (γ t - γ t₀)⁻¹ * deriv γ t else 0
+  have h_bracket : ∀ (e : ℝ) (m : ℕ), 0 < e → e ≤ δ / 2 ^ m → δ / 2 ^ m ≤ 2 * e →
+      ‖I e - I (δ / 2 ^ m)‖ ≤ K * δ / 2 ^ m := fun e m he hup hrat ↦ by
+    rw [mul_div_assoc]
+    exact h_step_uniform (δ / 2 ^ m) e he hup hrat (h_dyadic_lt m)
   have h_step : ∀ n, ‖I (δ / 2 ^ (n + 1)) - I (δ / 2 ^ n)‖ ≤ K * δ / 2 ^ n := fun n ↦ by
     have h_le : δ / 2 ^ (n + 1) ≤ δ / 2 ^ n :=
       div_le_div_of_nonneg_left hδ_pos.le (by positivity)
         (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) (Nat.le_succ n))
     have h_ratio : δ / 2 ^ n ≤ 2 * (δ / 2 ^ (n + 1)) := by
       rw [pow_succ]; ring_nf; linarith
-    calc ‖I (δ / 2 ^ (n + 1)) - I (δ / 2 ^ n)‖
-        ≤ K * (δ / 2 ^ n) :=
-          h_step_uniform (δ / 2 ^ n) (δ / 2 ^ (n + 1))
-            (div_pos hδ_pos (by positivity)) h_le h_ratio (h_dyadic_lt n)
-      _ = K * δ / 2 ^ n := by ring
+    exact h_bracket (δ / 2 ^ (n + 1)) n (div_pos hδ_pos (by positivity)) h_le h_ratio
   obtain ⟨limit_dyadic, h_limit_tendsto⟩ : ∃ L, Tendsto (fun n ↦ I (δ / 2 ^ n)) atTop (𝓝 L) :=
     CompleteSpace.complete (cauchySeq_pv_dyadic hδ_pos hK_pos h_step)
   refine ⟨limit_dyadic, ?_⟩
@@ -62,20 +129,8 @@ lemma pv_limit_via_dyadic {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ}
   intro η hη_pos
   rw [Metric.tendsto_atTop] at h_limit_tendsto
   obtain ⟨N₁, hN₁⟩ := h_limit_tendsto (η / 2) (by linarith)
-  obtain ⟨N₂, hN₂⟩ : ∃ N₂ : ℕ, K * δ / 2 ^ N₂ < η / 4 := by
-    have h_tendsto : Tendsto (fun n : ℕ ↦ K * δ / 2 ^ n) atTop (𝓝 0) := by
-      have h_tendsto_inv : Tendsto (fun n : ℕ ↦ 1 / (2 : ℝ) ^ n) atTop (𝓝 0) := by
-        simp_rw [one_div]
-        exact tendsto_inv_atTop_zero.comp
-          (tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (1 : ℝ) < 2))
-      simpa using (Tendsto.const_mul (K * δ) h_tendsto_inv).congr
-        (fun n ↦ show K * δ * (1 / (2 : ℝ) ^ n) = K * δ / 2 ^ n by ring)
-    rw [Metric.tendsto_atTop] at h_tendsto
-    obtain ⟨N₂, hN₂⟩ := h_tendsto (η / 4) (by linarith)
-    refine ⟨N₂, ?_⟩
-    have := hN₂ N₂ le_rfl
-    rwa [Real.dist_eq, sub_zero,
-      abs_of_pos (div_pos (mul_pos hK_pos hδ_pos) (by positivity))] at this
+  obtain ⟨N₂, hN₂⟩ : ∃ N₂ : ℕ, K * δ / 2 ^ N₂ < η / 4 :=
+    exists_const_div_two_pow_lt (mul_pos hK_pos hδ_pos) (by linarith : (0 : ℝ) < η / 4)
   let N := max N₁ N₂
   refine ⟨δ / 2 ^ N, div_pos hδ_pos (by positivity), fun ε hε_dist hε_pos ↦ ?_⟩
   have hε_pos' : 0 < ε := hε_dist
@@ -83,42 +138,7 @@ lemma pv_limit_via_dyadic {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ}
     rwa [Real.dist_eq, sub_zero, abs_of_pos hε_pos'] at hε_pos
   have h_first : dist (I ε) (I (δ / 2 ^ N)) ≤ 2 * K * δ / 2 ^ N := by
     rw [dist_eq_norm]
-    have hε_le_δ : ε ≤ δ := hε_lt_dyadic.le.trans
-      (div_le_self hδ_pos.le (one_le_pow₀ (by norm_num : (1 : ℝ) ≤ 2)))
-    obtain ⟨M, hM_lower, hM_upper⟩ := exists_dyadic_bracket hδ_pos hε_pos' hε_le_δ
-    have hM_ge_N : M ≥ N := by
-      by_contra! h_lt
-      have h_div_ge : δ / 2 ^ (M + 1) ≥ δ / 2 ^ N :=
-        div_le_div_of_nonneg_left hδ_pos.le (by positivity)
-          (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) h_lt)
-      linarith
-    have h_first_piece : ‖I ε - I (δ / 2 ^ M)‖ ≤ K * δ / 2 ^ M := by
-      have h_ratio_M : δ / 2 ^ M ≤ 2 * ε := by
-        have : δ / 2 ^ M = 2 * (δ / 2 ^ (M + 1)) := by rw [pow_succ]; ring
-        linarith
-      calc ‖I ε - I (δ / 2 ^ M)‖
-          ≤ K * (δ / 2 ^ M) :=
-            h_step_uniform (δ / 2 ^ M) ε hε_pos' hM_upper h_ratio_M (h_dyadic_lt M)
-        _ = K * δ / 2 ^ M := by ring
-    by_cases hMN : M = N
-    · subst hMN
-      calc ‖I ε - I (δ / 2 ^ N)‖
-          ≤ K * δ / 2 ^ N := h_first_piece
-        _ ≤ K * δ / 2 ^ N + K * δ / 2 ^ N := by
-            linarith [show (0:ℝ) ≤ K * δ / 2 ^ N by positivity]
-        _ = 2 * K * δ / 2 ^ N := by ring
-    · have h_sum_bound : ‖I (δ / 2 ^ M) - I (δ / 2 ^ N)‖ ≤
-          2 * K * δ / 2 ^ N - 2 * K * δ / 2 ^ M :=
-        telescoping_sum_bound (I := fun n ↦ I (δ / 2 ^ n)) hK_pos hδ_pos h_step N M
-          (Nat.lt_of_le_of_ne hM_ge_N (Ne.symm hMN))
-      calc ‖I ε - I (δ / 2 ^ N)‖
-          ≤ ‖I ε - I (δ / 2 ^ M)‖ + ‖I (δ / 2 ^ M) - I (δ / 2 ^ N)‖ :=
-            norm_sub_le_norm_sub_add_norm_sub _ _ _
-        _ ≤ K * δ / 2 ^ M + (2 * K * δ / 2 ^ N - 2 * K * δ / 2 ^ M) := by
-            linarith [h_first_piece, h_sum_bound]
-        _ = 2 * K * δ / 2 ^ N - K * δ / 2 ^ M := by ring
-        _ ≤ 2 * K * δ / 2 ^ N := by
-            linarith [show (0 : ℝ) ≤ K * δ / 2 ^ M by positivity]
+    exact norm_sub_dyadic_le_of_bracket hK_pos hδ_pos h_step h_bracket hε_pos' hε_lt_dyadic
   have h_Kδ_bound : K * δ / 2 ^ N < η / 4 :=
     (div_le_div_of_nonneg_left (mul_nonneg hK_pos.le hδ_pos.le) (by positivity)
       (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) (le_max_right _ _))).trans_lt hN₂

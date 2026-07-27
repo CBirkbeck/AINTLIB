@@ -1,7 +1,9 @@
-import Mathlib.Analysis.SpecificLimits.Basic
-import Mathlib.NumberTheory.ZetaValues
-import Mathlib.Topology.Algebra.Order.Floor
-import Mathlib.Tactic
+module
+
+public import Mathlib.Analysis.SpecificLimits.Basic
+public import Mathlib.NumberTheory.ZetaValues
+public import Mathlib.Topology.Algebra.Order.Floor
+public import Mathlib.Tactic
 
 /-!
 # Bernoulli growth along even indices
@@ -10,6 +12,7 @@ This file proves the analytic growth input used in Diekmann's proof that
 there are infinitely many irregular primes.  The source is mathlib's exact
 zeta-value formula `hasSum_zeta_nat`.
 -/
+@[expose] public section
 
 open Filter
 open scoped Nat Real Topology

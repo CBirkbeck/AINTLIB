@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ForMathlib.AwayCongr
 import ModularCurves.ForMathlib.GradedQuotient
 import ModularCurves.ForMathlib.StandardSmoothHypersurface
@@ -161,6 +166,7 @@ lemma projModelZeroEval_mk (W : WeierstrassCurve R) (p : MvPolynomial (Fin 3) R)
       MvPolynomial.eval (fun i : Fin 3 => if i = 1 then 1 else 0) p :=
   Ideal.Quotient.lift_mk _ _ _
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The class of `Y` lies in the irrelevant ideal of the quotient grading. -/
 lemma mk_Y_mem_irrelevant (W : WeierstrassCurve R) :
     Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X 1) ∈
@@ -192,7 +198,6 @@ noncomputable def projModelZero (W : WeierstrassCurve R) : Spec (.of R) ⟶ proj
     ((Scheme.ΓSpecIso (.of R)).inv.hom.comp (projModelZeroEval W))
     (projModelZeroEval_irrelevant_map_top W)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **(T-A2, PROVED)** The section at infinity is a section of the structure morphism:
 `[0:1:0]` lies over the identity of `Spec R`. -/
 @[reassoc (attr := simp)]
@@ -476,7 +481,6 @@ open HomogeneousIdeal HomogeneousLocalization
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Every `K`-point of the model factors through one of the three affine charts. -/
 lemma specPoint_factors_through_chart (W : WeierstrassCurve R)
     {K : Type u} [Field K] [Algebra R K] (g : Spec (.of K) ⟶ projModel W) :
@@ -569,7 +573,6 @@ noncomputable def chartCoordEquiv (W : WeierstrassCurve R) (i : Fin 3) :
       show MvPolynomial.dehomogenizeAt R i _ = _
       rw [MvPolynomial.dehomogenizeAt_mk])).symm).trans (chartQuotientEquiv W i)
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp]
 lemma chartCoordEquiv_mk (W : WeierstrassCurve R) (i : Fin 3)
     (p : MvPolynomial {j : Fin 3 // j ≠ i} R) :
@@ -583,7 +586,6 @@ lemma chartCoordEquiv_mk (W : WeierstrassCurve R) (i : Fin 3)
   rw [RingEquiv.trans_apply, Ideal.quotEquivOfEq_mk]
   exact RingHom.quotientKerEquivOfSurjective_apply_mk _ _
 
-set_option backward.isDefEq.respectTransparency false in
 lemma chartCoordEquiv_mk_C (W : WeierstrassCurve R) (i : Fin 3) (r : R) :
     chartCoordEquiv W i (Ideal.Quotient.mk
         (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
@@ -673,7 +675,6 @@ private noncomputable def quotSolutionsEquiv {i : Fin 3}
     refine Subtype.ext (funext fun j => ?_)
     simp only [Ideal.Quotient.lift_mk, RingHom.coe_coe, MvPolynomial.aeval_X]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Ring homomorphisms from a chart of the model, compatible with the `R`-structure,
 are the `K`-solutions of the dehomogenised cubic. -/
 noncomputable def chartSolutionsEquiv (W : WeierstrassCurve R) (i : Fin 3)
@@ -848,6 +849,7 @@ lemma chartCoordEquiv_mk_X (W : WeierstrassCurve R) (i : Fin 3)
   rw [Localization.mk_eq_mk_iff, Localization.r_iff_exists]
   exact ⟨1, by ring⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A `K`-point of the model sitting in chart `i` lies in chart `j` precisely when
 its `j`-th coordinate is nonzero. -/
 lemma chartPointOfHom_factors_iff (W : WeierstrassCurve R) (i j : Fin 3)
@@ -1105,7 +1107,7 @@ private lemma eq_infPoint_of_not_inZ (W : WeierstrassCurve R) (K : Type u) [Fiel
         fun j : {j : Fin 3 // j ≠ 0} => φ.1 (chartCoordEquiv W 0
           (Ideal.Quotient.mk _ (MvPolynomial.X j))) := rfl
     rw [hcomp, aeval_dehomog_zero] at hv
-    simp only [hz, mul_zero, zero_mul, zero_pow, add_zero, zero_add, sub_zero] at hv
+    simp only [hz, mul_zero, add_zero, zero_add] at hv
     simp at hv
   · -- the Y-chart: the coordinates are forced to (0,0), the point at infinity
     have hz : φ.1 (chartCoordEquiv W 1 (Ideal.Quotient.mk _
@@ -1141,6 +1143,7 @@ private lemma eq_infPoint_of_not_inZ (W : WeierstrassCurve R) (K : Type u) [Fiel
   · -- the Z-chart: contradicts the hypothesis
     exact absurd ⟨Spec.map (CommRingCat.ofHom φ.1), rfl⟩ hg
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-A2e)** The pointed `K`-points clause for elliptic `W`: `K`-points of the model
 biject with `(W.baseChange K).toAffine.Point`, sending `[0:1:0]` to `0`.
 Route: every `Spec K`-point factors through one of the three affine charts (`K` is
@@ -1197,7 +1200,6 @@ abbrev InZChart (W : WeierstrassCurve R) {K : Type u} [CommRing K] [Algebra R K]
     h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
       (mk_X_mem_quotientGrading_one W 2) one_pos = g.1
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The zero section avoids the `Z`-chart: `X₂` evaluates to `0` at `[0:1:0]`, so the preimage of
 the `Z`-chart basic open is empty. (Analogue of `projModelZero_preimage_yChart`, with `1 ↦ 0`.) -/
 lemma projModelZero_not_preimage_zChart (W : WeierstrassCurve R) :
@@ -1249,7 +1251,7 @@ lemma projModelZero_not_inZ (W : WeierstrassCurve R) (K : Type u) [Field K] [Alg
       (projModelZero W ⁻¹ᵁ Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := hin
   rw [projModelZero_not_preimage_zChart] at hpre
-  simpa using hpre
+  simp at hpre
 
 /-- Membership of the `Z`-chart for a point presented on chart `i`: exactly when the transition
 coordinate `X₂/Xᵢ` has nonzero value. Public wrapper of `chartPointOfHom_factors_iff` at `j = 2`,
@@ -1377,10 +1379,9 @@ private lemma aeval_pderiv_dehomog_two_u (W : WeierstrassCurve R) {K : Type u}
   simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
     MvPolynomial.pderiv_X_self,
     MvPolynomial.pderiv_X_of_ne (show (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 2}) ≠
-      ⟨0, by decide⟩ by simp), map_sub, map_add,
-    MvPolynomial.pderiv_one]
-  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
-    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+      ⟨0, by decide⟩ by simp), map_add]
+  simp only [map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_natCast]
   ring
 
 private lemma aeval_pderiv_dehomog_two_v (W : WeierstrassCurve R) {K : Type u}
@@ -1398,10 +1399,9 @@ private lemma aeval_pderiv_dehomog_two_v (W : WeierstrassCurve R) {K : Type u}
   simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
     MvPolynomial.pderiv_X_self,
     MvPolynomial.pderiv_X_of_ne (show (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 2}) ≠
-      ⟨1, by decide⟩ by simp), map_sub, map_add,
-    MvPolynomial.pderiv_one]
-  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
-    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+      ⟨1, by decide⟩ by simp), map_add]
+  simp only [map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_natCast]
   ring
 
 /-- **(T-A3a)** Certificate-free Weierstrass Jacobian comaximality: for elliptic `W`,
@@ -1441,7 +1441,7 @@ theorem span_dehomog_jacobian_eq_top (W : WeierstrassCurve R) [W.IsElliptic] :
     have hF := hmem _ (Set.mem_insert _ _)
     rw [haev, aeval_dehomog_two] at hF
     simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
-      WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆, halg]
+      WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
     linear_combination hF
   have h2 : ¬ (W.map f).toAffine.Nonsingular (q (MvPolynomial.X ⟨0, by decide⟩))
       (q (MvPolynomial.X ⟨1, by decide⟩)) := by
@@ -1451,12 +1451,12 @@ theorem span_dehomog_jacobian_eq_top (W : WeierstrassCurve R) [W.IsElliptic] :
       have hFu := hmem _ (Set.mem_insert_of_mem _ (Set.mem_insert _ _))
       rw [haev, aeval_pderiv_dehomog_two_u] at hFu
       simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
-        WeierstrassCurve.map_a₄, halg]
+        WeierstrassCurve.map_a₄]
       linear_combination hFu
     · apply hv
       have hFv := hmem _ (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ rfl))
       rw [haev, aeval_pderiv_dehomog_two_v] at hFv
-      simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃, halg]
+      simp only [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃]
       linear_combination hFv
   haveI : ((W.map f).toAffine).IsElliptic := inferInstanceAs ((W.map f).IsElliptic)
   exact h2 (WeierstrassCurve.Affine.equation_iff_nonsingular.mp h1)
@@ -1477,9 +1477,9 @@ private lemma aeval_pderiv_dehomog_one_u (W : WeierstrassCurve R) {K : Type u}
   simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
     MvPolynomial.pderiv_X_self,
     MvPolynomial.pderiv_X_of_ne (show (⟨2, by decide⟩ : {j : Fin 3 // j ≠ 1}) ≠
-      ⟨0, by decide⟩ by simp), map_sub, map_add, Derivation.map_one_eq_zero]
-  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
-    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+      ⟨0, by decide⟩ by simp), map_add]
+  simp only [map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_natCast]
   ring
 
 private lemma aeval_pderiv_dehomog_one_w (W : WeierstrassCurve R) {K : Type u}
@@ -1500,9 +1500,9 @@ private lemma aeval_pderiv_dehomog_one_w (W : WeierstrassCurve R) {K : Type u}
   simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
     MvPolynomial.pderiv_X_self,
     MvPolynomial.pderiv_X_of_ne (show (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 1}) ≠
-      ⟨2, by decide⟩ by simp), map_sub, map_add, Derivation.map_one_eq_zero]
-  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
-    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+      ⟨2, by decide⟩ by simp), map_add]
+  simp only [map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_natCast]
   ring
 
 private lemma aeval_pderiv_dehomog_zero_s (W : WeierstrassCurve R) {K : Type u}
@@ -1517,13 +1517,13 @@ private lemma aeval_pderiv_dehomog_zero_s (W : WeierstrassCurve R) {K : Type u}
     MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
     MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 0 by decide),
     MvPolynomial.dehomogenizeAux_X_ne _ _ (show (2 : Fin 3) ≠ 0 by decide),
-    mul_one, one_pow, one_mul]
+    mul_one, one_pow]
   simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
     MvPolynomial.pderiv_X_self,
     MvPolynomial.pderiv_X_of_ne (show (⟨2, by decide⟩ : {j : Fin 3 // j ≠ 0}) ≠
-      ⟨1, by decide⟩ by simp), map_sub, map_add, Derivation.map_one_eq_zero]
-  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
-    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+      ⟨1, by decide⟩ by simp), map_add, Derivation.map_one_eq_zero]
+  simp only [map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_natCast]
   ring
 
 private lemma aeval_pderiv_dehomog_zero_t (W : WeierstrassCurve R) {K : Type u}
@@ -1539,13 +1539,13 @@ private lemma aeval_pderiv_dehomog_zero_t (W : WeierstrassCurve R) {K : Type u}
     MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
     MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 0 by decide),
     MvPolynomial.dehomogenizeAux_X_ne _ _ (show (2 : Fin 3) ≠ 0 by decide),
-    mul_one, one_pow, one_mul]
+    mul_one, one_pow]
   simp only [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow, MvPolynomial.pderiv_C,
     MvPolynomial.pderiv_X_self,
     MvPolynomial.pderiv_X_of_ne (show (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 0}) ≠
-      ⟨2, by decide⟩ by simp), map_sub, map_add, Derivation.map_one_eq_zero]
-  simp only [map_sub, map_add, map_mul, map_pow, MvPolynomial.aeval_C,
-    MvPolynomial.aeval_X, map_zero, map_one, map_ofNat, map_natCast]
+      ⟨2, by decide⟩ by simp), map_add, Derivation.map_one_eq_zero]
+  simp only [map_add, map_mul, map_pow, MvPolynomial.aeval_C,
+    MvPolynomial.aeval_X, map_zero, map_one, map_natCast]
   ring
 
 /-- No affine point of an elliptic curve over a field kills the equation and both
@@ -1759,7 +1759,7 @@ theorem locally_isStandardSmooth_algebraMap_gradeZero_away (W : WeierstrassCurve
         Ideal.span_insert_zero] at h3
       exact h3
     · intro t ht
-      simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ht
+      simp only at ht
       rcases ht with rfl | rfl
       · exact hstep ⟨1, by decide⟩
       · exact hstep ⟨2, by decide⟩
@@ -1776,7 +1776,7 @@ theorem locally_isStandardSmooth_algebraMap_gradeZero_away (W : WeierstrassCurve
         Ideal.span_insert_zero] at h3
       exact h3
     · intro t ht
-      simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ht
+      simp only at ht
       rcases ht with rfl | rfl
       · exact hstep ⟨0, by decide⟩
       · exact hstep ⟨2, by decide⟩
@@ -1793,11 +1793,12 @@ theorem locally_isStandardSmooth_algebraMap_gradeZero_away (W : WeierstrassCurve
         Ideal.span_insert_zero] at h3
       exact h3
     · intro t ht
-      simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ht
+      simp only at ht
       rcases ht with rfl | rfl
       · exact hstep ⟨0, by decide⟩
       · exact hstep ⟨1, by decide⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The chart inclusion from the degree-zero part is locally standard smooth of
 relative dimension 1, for elliptic `W`. -/
 theorem locally_isStandardSmooth_algebraMap_gradeZero_away' (W : WeierstrassCurve R)
@@ -1819,8 +1820,13 @@ theorem locally_isStandardSmooth_algebraMap_gradeZero_away' (W : WeierstrassCurv
         (Away (quotientGrading (projIdeal W))
           ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))) :=
     RingHom.ext fun x => by
-      show algebraMap _ _ ((gradeZeroRingEquiv W)
-        ((gradeZeroRingEquiv W).symm.toRingHom x)) = algebraMap _ _ x
+      show algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))
+          ((gradeZeroRingEquiv W) ((gradeZeroRingEquiv W).symm.toRingHom x)) =
+        algebraMap (↥(quotientGrading (projIdeal W) 0))
+          (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))) x
       exact congrArg _ ((gradeZeroRingEquiv W).apply_symm_apply x)
   rwa [h3] at h2
 
@@ -1870,7 +1876,7 @@ noncomputable def mvMapGraded : GradedRingHom
     (MvPolynomial.homogeneousSubmodule (Fin 3) R)
     (MvPolynomial.homogeneousSubmodule (Fin 3) R') where
   toRingHom := MvPolynomial.map f
-  map_mem {i x} hx := (MvPolynomial.mem_homogeneousSubmodule _ _).mpr
+  map_mem {_i _x} hx := (MvPolynomial.mem_homogeneousSubmodule _ _).mpr
     (((MvPolynomial.mem_homogeneousSubmodule _ _).mp hx).map f)
 
 lemma projIdeal_le_comap (W : WeierstrassCurve R) :
@@ -1888,6 +1894,7 @@ noncomputable def baseChangeGradedHom (W : WeierstrassCurve R) :
   quotientGradingMap (mvMapGraded f) (projIdeal W) (projIdeal (W.map f))
     (projIdeal_le_comap f W)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma baseChangeGradedHom_irrelevant_le (W : WeierstrassCurve R) :
     (HomogeneousIdeal.irrelevant (quotientGrading (projIdeal (W.map f)))).toIdeal ≤
       Ideal.map (baseChangeGradedHom f W).toRingHom
@@ -1921,6 +1928,7 @@ noncomputable def projModelBaseChange (W : WeierstrassCurve R) :
     projModel (W.map f) ⟶ projModel W :=
   Proj.map (baseChangeGradedHom f W) (baseChangeGradedHom_irrelevant_le f W)
 
+set_option backward.isDefEq.respectTransparency false in
 private lemma bc_ring_square (W : WeierstrassCurve R) {i : ℕ}
     (s : projCoordRing W) (hs : s ∈ quotientGrading (projIdeal W) i) :
     (HomogeneousLocalization.Away.map (baseChangeGradedHom f W) s).comp
@@ -2086,7 +2094,9 @@ private noncomputable def sChartTensorInvAux (W : WeierstrassCurve R) (i : Fin 3
       (R' ⊗[R] (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
         Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})) :=
   MvPolynomial.aeval fun j => (1 : R') ⊗ₜ[R]
-    (Ideal.Quotient.mk _ (MvPolynomial.X j))
+    (Ideal.Quotient.mk
+      (Ideal.span {MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial})
+      (MvPolynomial.X j))
 
 private lemma sChartTensorInvAux_map_algebraMap (W : WeierstrassCurve R) (i : Fin 3)
     (p : MvPolynomial {j : Fin 3 // j ≠ i} R) :
@@ -2104,6 +2114,7 @@ private lemma sChartTensorInvAux_map_algebraMap (W : WeierstrassCurve R) (i : Fi
   rw [h]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Scalar extension of the chart quotient as a tensor identification. -/
 noncomputable def sChartTensorEquiv (W : WeierstrassCurve R) (i : Fin 3) :
     (R' ⊗[R] (MvPolynomial {j : Fin 3 // j ≠ i} R ⧸
@@ -2191,8 +2202,8 @@ lemma isPushout_sChart (W : WeierstrassCurve R) (i : Fin 3) :
           (W.map (algebraMap R R')).toProjective.polynomial}) :=
     IsScalarTower.of_algebraMap_eq fun r =>
       ((sChartBaseChange (R' := R') W i).commutes r).symm
-  refine Algebra.IsPushout.of_equiv (sChartTensorEquiv W i) ?_
-  refine RingHom.ext fun x => ?_
+  refine ⟨IsBaseChange.of_equiv
+    (sChartTensorEquiv (R' := R') W i).toLinearEquiv fun x => ?_⟩
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
   show sChartTensorEquiv (R' := R') W i
     ((1 : R') ⊗ₜ[R] (Ideal.Quotient.mk _ p)) = _
@@ -2303,6 +2314,7 @@ lemma isPullback_piece (W : WeierstrassCurve R) (j : Fin 3) :
     refine RingHom.ext fun r => ?_
     exact ((chartCoordEquiv W j).symm_apply_apply _).symm
 
+set_option backward.isDefEq.respectTransparency false in
 lemma baseChangeGradedHom_mk_X (W : WeierstrassCurve R) (j : Fin 3) :
     (baseChangeGradedHom (algebraMap R R') W)
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j)) =
@@ -2367,7 +2379,6 @@ private lemma coverPiece_f_eq (W : WeierstrassCurve R) (j : Fin 3) :
   · rw [Category.assoc, Limits.pullbackRightPullbackFstIso_inv_snd_snd]
     simp
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The first-projection square over a cover piece is cartesian. -/
 private lemma isPullback_coverPiece (W : WeierstrassCurve R) (j : Fin 3) :
     IsPullback
@@ -2393,7 +2404,6 @@ private lemma isPullback_coverPiece (W : WeierstrassCurve R) (j : Fin 3) :
   · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
   · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The wall-crossing identification of the base-changed chart `Spec`s. -/
 private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
     Spec (.of (MvPolynomial {k : Fin 3 // k ≠ j} R' ⧸
@@ -2414,6 +2424,7 @@ private noncomputable def thetaIso (W : WeierstrassCurve R) (j : Fin 3) :
   asIso (Spec.map ((awayCongr
     (baseChangeGradedHom_mk_X (R' := R') W j)).toCommRingCatIso.hom))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The graded square of the base change: quotient map after coefficient map. -/
 lemma gradedSquare (W : WeierstrassCurve R) :
     (baseChangeGradedHom (algebraMap R R') W).comp
@@ -2428,7 +2439,6 @@ lemma gradedSquare (W : WeierstrassCurve R) :
   rw [quotientGradingMap_mk]
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Elementwise chart naturality of the base change. -/
 private lemma bc_chart_value (W : WeierstrassCurve R) (j : Fin 3)
     (p : MvPolynomial {k : Fin 3 // k ≠ j} R) :
@@ -2455,7 +2465,6 @@ private lemma bc_chart_value (W : WeierstrassCurve R) (j : Fin 3)
     (congrArg (fun z => (quotientGradingHom (projIdeal (W.map (algebraMap R R')))) z)
       (MvPolynomial.map_X (algebraMap R R') j))
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Chart naturality of the base change, across the wall: the plane-chart
 comparison equals the graded `Away.map` under the two chart identifications. -/
 private lemma piece_fst_natural (W : WeierstrassCurve R) (j : Fin 3) :
@@ -2484,7 +2493,6 @@ private lemma piece_fst_natural (W : WeierstrassCurve R) (j : Fin 3) :
   rw [chartCoordEquiv_mk, chartCoordEquiv_mk]
   exact (bc_chart_value (R' := R') W j p).symm
 
-set_option backward.isDefEq.respectTransparency false in
 /-- `Proj.awayι` absorbs the transport along an element equality. -/
 lemma awayι_awayCongr (W' : WeierstrassCurve R') {s t : projCoordRing W'}
     (h : s = t) (hs : s ∈ quotientGrading (projIdeal W') 1) :
@@ -2497,7 +2505,6 @@ lemma awayι_awayCongr (W' : WeierstrassCurve R') {s t : projCoordRing W'}
       (rfl : s = s)).toCommRingCatIso.hom) = 𝟙 _ from rfl]
   rw [Spec.map_id, Category.id_comp]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The chart of the base-changed model over its own structure map, θ-form. -/
 private lemma theta_awayι_π (W : WeierstrassCurve R) (j : Fin 3) :
     (thetaIso (R' := R') W j).hom ≫
@@ -2667,7 +2674,6 @@ end TensorComparison
 
 end BaseChangeGraded
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The section at infinity lands entirely in the `Y`-chart. -/
 lemma projModelZero_preimage_yChart (W : WeierstrassCurve R) :
     projModelZero W ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
@@ -2687,7 +2693,6 @@ lemma projModelZero_preimage_yChart (W : WeierstrassCurve R) :
     rw [map_one]]
   simp
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The chart factorisation of the section at infinity through the `Y`-chart. -/
 noncomputable def projModelZeroChart (W : WeierstrassCurve R) :
     Spec (.of R) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
@@ -2720,7 +2725,6 @@ lemma projModelZeroChart_fac (W : WeierstrassCurve R) :
       (mk_X_mem_quotientGrading_one W 1) one_pos = projModelZero W :=
   IsOpenImmersion.lift_fac _ _ _
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The chart factorisation of the zero section is a retraction of the chart's
 `R`-structuring. -/
 lemma projModelZeroChart_comp_χ (W : WeierstrassCurve R) :
@@ -2880,7 +2884,6 @@ lemma spec_zeroChartHom_awayι (W : WeierstrassCurve R) :
   rw [Scheme.Cover.ι_glueMorphisms]
   exact glue_pieceY W
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The `Y`-chart factorisation of the zero section is `Spec` of the evaluation
 at the point at infinity. -/
 lemma projModelZeroChart_eq_spec (W : WeierstrassCurve R) :

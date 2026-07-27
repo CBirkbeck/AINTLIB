@@ -469,7 +469,8 @@ omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] [CompatiblePlusS
 /-- **Faithful forward completion map** `presheafValue D →+* A⟨X⟩/(1−sX)` — faithful (case-(b))
 replacement for `presheafValueToCanonicalQuotient`, which threads `hnoeth`. The localization
 generator map `locToQuotientOneSubfX_gen D.s : Localization.Away D.s → A⟨X⟩/(1−sX)` extends to the
-completion `presheafValue D` because the target is complete (`quotient_oneSubfXIdeal_completeSpace_faithful`)
+completion `presheafValue D` because the target is complete
+(`quotient_oneSubfXIdeal_completeSpace_faithful`)
 and Hausdorff (`quotient_oneSubfXIdeal_t2Space_faithful`), both supplied faithfully from
 `[IsStronglyNoetherian A]` + `hA_complete`. -/
 private noncomputable def presheafValueToCanonicalQuotient_faithful [IsStronglyNoetherian A]
@@ -771,18 +772,24 @@ through the faithful Example-6.38 iso `presheafValueCanonicalQuotientEquiv_faith
 (`presheafValue D ≃+* A⟨X⟩/(1−sX)`, `[IsStronglyNoetherian A]`-only, NO `pairSubring`/`A₀⟨X⟩`
 noetherianness) and the faithful Lemma 8.31(2) `lemma_8_31_oneSubfX_flat` (`[IsNoetherianRing A]`,
 derived from `[IsStronglyNoetherian A]` at `k = 0`). The case-(a) route
-`presheafValue_flat_of_canonical → flat_quotient_oneSubfX_general P` (needs `[IsNoetherianRing P.A₀]`,
+`presheafValue_flat_of_canonical → flat_quotient_oneSubfX_general P`
+(needs `[IsNoetherianRing P.A₀]`,
 ℂ_p-false) is avoided entirely.
 
-The power-boundedness hypotheses `hb`/`hT_pb` are exactly those Wedhorn's reduction guarantees: for a
-basic-Laurent subset `R(1/f)` (`s = f`, `1 ∈ T = {1}`) one has `invS = 1/s` power-bounded via `1 ∈ T`
+The power-boundedness hypotheses `hb`/`hT_pb` are exactly those Wedhorn's reduction guarantees: for
+a
+basic-Laurent subset `R(1/f)` (`s = f`, `1 ∈ T = {1}`) one has `invS = 1/s`
+power-bounded via `1 ∈ T`
 (`invS_isPowerBounded_of_one_mem_T`) and `1 ∈ T = {1}` power-bounded; more generally any
 LaurentNormalized datum supplies both.
 
 Its only flatness input is `lemma_8_31_oneSubfX_flat` (case (b), `[IsNoetherianRing A]`); it never
-touches the case-(a) `flat_quotient_oneSubfX_general P` (which needs `[IsNoetherianRing P.A₀]` and is
-ℂ_p-false). The body uses only the faithful Example-6.38 iso `presheafValueCanonicalQuotientEquiv_faithful`
-+ its `canonicalMap` intertwining + `Module.Flat.of_linearEquiv` — no `A⁺`/Huber/loc-lift content. See
+touches the case-(a) `flat_quotient_oneSubfX_general P` (which needs `[IsNoetherianRing P.A₀]` and
+is
+ℂ_p-false). The body uses only the faithful Example-6.38 iso
+`presheafValueCanonicalQuotientEquiv_faithful`
++ its `canonicalMap` intertwining + `Module.Flat.of_linearEquiv` — no `A⁺`/Huber/loc-lift content.
+See
 `prop_8_30_relative_laurent_flat` for how this engine is meant to feed the (still-missing) relative
 reduction object. -/
 -- de-privatised 2026-06-11: consumed by `prop_8_30_basic_laurent_step_flat`,
@@ -799,7 +806,8 @@ theorem presheafValue_flat_of_canonical_faithful [IsStronglyNoetherian A]
   let e := presheafValueCanonicalQuotientEquiv_faithful D hb hA_complete hT_pb
   change @Module.Flat A (presheafValue D) _ _ (RingHom.toModule D.canonicalMap)
   letI : Module A (presheafValue D) := RingHom.toModule D.canonicalMap
-  -- The faithful equiv intertwines the two `A`-module structures (`canonicalMap` ↔ `mk∘algebraMap`).
+  -- The faithful equiv intertwines the two `A`-module structures (`canonicalMap` ↔
+  -- `mk∘algebraMap`).
   have he_smul : ∀ (a : A) (x : presheafValue D), e (a • x) = a • e x := by
     intro a x
     change e (D.canonicalMap a * x) =
@@ -1088,7 +1096,8 @@ theorem mvEvalHomBounded_X {n : ℕ} (g : R →+* S) (hg : Continuous g) (b : Fi
 -- INFRASTRUCTURE (not in Wedhorn): in a topological additive group, a summable family all of
 -- whose terms lie in an *open* additive subgroup `G` has its sum in `G`. Open subgroups are
 -- clopen (`AddSubgroup.isClosed_of_isOpen`); `HasSum` is the limit of the finite partial sums,
--- each in `G` by `AddSubgroup.sum_mem`, so the sum lies in the closed `G` by `IsClosed.mem_of_tendsto`.
+-- each in `G` by `AddSubgroup.sum_mem`, so the sum lies in the closed `G` by
+-- `IsClosed.mem_of_tendsto`.
 private theorem tsum_mem_of_isOpen_addSubgroup {G₀ : Type*} [AddCommGroup G₀]
     [TopologicalSpace G₀] [IsTopologicalAddGroup G₀] {ι : Type*} {f : ι → G₀}
     (hf : Summable f) {G : AddSubgroup G₀} (hG : IsOpen (G : Set G₀))
@@ -1100,7 +1109,8 @@ private theorem tsum_mem_of_isOpen_addSubgroup {G₀ : Type*} [AddCommGroup G₀
 
 /-- **`mvEvalHomBounded` is continuous** (generic), for the canonical Tate topology on the source
 `R⟨X₁,…,Xₙ⟩` and any nonarchimedean complete target `S`, given a continuous base map `g` and a
-power-bounded tuple `b`. The `Fin n` generalization of the `example638_evalHom_continuous` technique:
+power-bounded tuple `b`. The `Fin n` generalization of the `example638_evalHom_continuous`
+technique:
 continuity at `0` (additive-group hom) + nonarchimedean reduction to an open subgroup `W`, absorbing
 the bounded product-power range into `W`, so `mvTateAlgNhd n P k` maps into `W`. Used both for
 `example638_evalHom` (the `Â⟨T/s⟩` case) and the relative strong-noetherian surjection. -/
@@ -1202,6 +1212,7 @@ theorem example638_evalHom_X [IsTateRing A] [IsNoetherianRing A]
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Density helper (faithful):** every `D.coeRingHom`-image of an element of the ring of
 definition `locSubring D.P D.T D.s = A₀[t/s]` lies in the range of `example638_evalHom D`.
 
@@ -1350,7 +1361,8 @@ private theorem example638_evalHom_denseRange [IsTateRing A] [IsNoetherianRing A
 
 Wedhorn Example 6.38 (p. 56, `wedhorn.txt:2700`–`2707`): "Set `C = Â⟨X⟩`, `a = (t − sᵢXᵢ)`;
 `C` noetherian ⟹ `a` closed (Prop 6.17); `A → Â⟨T/s⟩` and `A → C/a` satisfy the same universal
-property ⟹ `C/a ≅ Â⟨T/s⟩`." We build the ring iso `presheafValue D ≃+* C ⧸ ker(example638_evalHom D)`
+property ⟹ `C/a ≅ Â⟨T/s⟩`." We build the ring iso
+`presheafValue D ≃+* C ⧸ ker(example638_evalHom D)`
 directly, mirroring the `n = 1` template (`presheafValueCanonicalQuotientEquiv_faithful`, this
 file), but with the power-bounded multivariate generators `tᵢ/s` (so NO `hb : IsPowerBounded
 (invS D)` whole-space hypothesis is needed) and the J-adic Tate topology `mvTateAlgebraTopology'`
@@ -1704,7 +1716,8 @@ The localization `0`-nbhd `locNhd k = image((I·D)^k)` maps into the `C ⧸ ker`
 `mk(A₀⟨X⟩) = mk(mvPairSubring)` (via `ψ(algebraMap a₀) = mk(algebraMap a₀)` and `ψ(tᵢ/s) = mk(Xᵢ)`,
 the latter from injectivity of `ē` since `ē(mk Xᵢ) = tᵢ/s = ē(ψ(tᵢ/s))`), and the ideal of
 definition `locIdeal = I·D` into `mk(mvPairIdeal) = mk(I·A₀⟨X⟩)`; raising to the `k`-th power,
-`ψ(locNhd k) ⊆ mk(mvTateAlgNhd k)`. Since `mk` is an open map, `mk(mvTateAlgNhd k)` is a `0`-nbhd. -/
+`ψ(locNhd k) ⊆ mk(mvTateAlgNhd k)`. Since `mk` is an open map, `mk(mvTateAlgNhd k)` is a `0`-nbhd.
+-/
 private theorem example638_locToQuot_continuous (D : RationalLocData A) :
     @Continuous _ _ D.topology (mvQuotTopology D.T.card (RingHom.ker (example638_evalHom D)))
       (example638_locToQuot D) := by
@@ -1836,7 +1849,8 @@ private theorem example638_quotBackward_continuous (D : RationalLocData A)
 
 omit [CompatiblePlusSubring A] in
 /-- **Round-trip `ē ∘ backward = id` on `presheafValue D`** (Wedhorn Example 6.38). Both
-`ē ∘ backward` and `id` are continuous (`example638_kerLift_continuous`, `example638_quotBackward_continuous`)
+`ē ∘ backward` and `id` are continuous (`example638_kerLift_continuous`,
+`example638_quotBackward_continuous`)
 and agree on the dense image `coeRingHom a`: `ē(backward(coeRingHom a)) = ē(ψ a) = coeRingHom a`
 (`example638_quotBackward_coe` + `example638_kerLift_locToQuot_apply`). By `Completion.ext'` they
 agree everywhere — so `ē` is **surjective** (every `x = ē(backward x)`). -/
@@ -1917,7 +1931,8 @@ because `IsNoetherianRing` transfers along surjections from a noetherian source
 noeth-`A₀` — the faithful case-(b) source of noetherianness).
 
 **This is PROVEN** — `#print axioms` clean (`{propext, Classical.choice, Quot.sound}`, verified
-2026-06-05). The general `Fin n` evaluation map IS in the repo: `mvEvalHomBounded` (`Wedhorn828:996`,
+2026-06-05). The general `Fin n` evaluation map IS in the repo: `mvEvalHomBounded`
+(`Wedhorn828:996`,
 any continuous base map `g : R →+* S` + bounded tuple `b : Fin n → S`), instantiated as
 `example638_evalHom` (`Xᵢ ↦ tᵢ/s`). Its surjectivity onto the completion `presheafValue D` is
 `example638_evalHom_surjective`, via the completion-comparison route: Prop 6.17
@@ -1925,7 +1940,8 @@ any continuous base map `g : R →+* S` + bounded tuple `b : Fin n → S`), inst
 complete + Hausdorff, and the backward completion-extension `example638_quotBackward` right-inverts
 the injective factorisation `ē : C ⧸ ker ↪ presheafValue D`. NOTE: an earlier version of this
 docstring wrongly described this as a "documented repo gap / genuinely absent" — it had since been
-built and is sorry-free, so `presheafValue` noetherianness (`presheafValue_isNoetherianRing_faithful`)
+built and is sorry-free, so `presheafValue` noetherianness
+(`presheafValue_isNoetherianRing_faithful`)
 is genuinely complete. (The general-`Fin n` summability + nonarchimedean Cauchy product live in the
 `mvEvalHomBounded` development; this lemma just packages the surjection.)
 
@@ -2128,11 +2144,11 @@ private lemma presheafValue_mvRestricted_iU_denseRange
   refine closure_minimal (fun g hg ↦ ?_) isClosed_closure
   exact hbox g hg
 
-set_option maxHeartbeats 1600000 in
 omit [CompatiblePlusSubring A] in
 /-- **`mk(s)` is a unit in the quotient `γ = source ⧸ ker Ψ`** (helper for
 `presheafValue_mvRestricted_surjection`). Mirrors `example638_isUnit_mk_s`: the relation
-`algebraMap _ B⟨Y⟩ ∘ example638_evalHom D = Ψ ∘ ι` (pushed termwise through the evaluation tsum, using
+`algebraMap _ B⟨Y⟩ ∘ example638_evalHom D = Ψ ∘ ι` (pushed termwise through the evaluation tsum,
+using
 the three characterizing facts `hΨ_cont`/`hΨ_alg`/`hΨ_genX` of the bounded evaluation hom `Ψ`) plus
 `invS D ∈ range (example638_evalHom D)` exhibit `mk(ι c)` as the inverse of `mk(algebraMap s)`.
 `Ψ` is opaque; its evaluation behaviour enters only through the three facts, so the conclusion is
@@ -2253,7 +2269,6 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
   rw [hΨ_alg D.s]
   rw [← map_mul, canonicalMap_s_mul_invS, map_one]
 
-set_option maxHeartbeats 1600000 in
 omit [CompatiblePlusSubring A] in
 /-- **Uniform continuity of `fU : U → γ`** (helper for `presheafValue_mvRestricted_surjection`),
 where `U = (Localization.Away D.s)[Y]` carries the pullback uniformity along `iU` and
@@ -2494,7 +2509,6 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
 -- nbhd-basis chases (`hUnitS`, `hi_dense`, `hf_unif`) over the heavy reducible quotient-Tate
 -- uniform structures on `γ = C ⧸ ker Ψ`; the cumulative `isDefEq`/`whnf` cost exceeds the default
 -- heartbeat budget even though each step is elementary.
-set_option maxHeartbeats 1600000 in
 omit [CompatiblePlusSubring A] in
 /-- **Relative Example 6.38 surjection** (the genuine residual for strong-noetherian propagation).
 For `n = |D.T|` and any `m : ℕ`, the `(n+m)`-variable restricted power series over `A` surject
@@ -2594,7 +2608,8 @@ private theorem presheafValue_mvRestricted_surjection
     obtain ⟨c, rfl⟩ := Ideal.Quotient.mk_surjective q
     exact ⟨c, (RingHom.kerLift_mk Ψ c).symm⟩
   -- `RingHom.kerLift Ψ : source ⧸ ker → (presheafValue D)⟨Y⟩` is injective; surjectivity is the
-  -- relative backward map (AG1b). Foundation: `ker Ψ` is closed (Prop 6.17 over strongly-noeth `A`),
+  -- relative backward map (AG1b). Foundation: `ker Ψ` is closed (Prop 6.17 over strongly-noeth
+  -- `A`),
   -- so `source ⧸ ker` is a complete topological ring — the codomain for the extension.
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
     MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
@@ -2661,7 +2676,8 @@ private theorem presheafValue_mvRestricted_surjection
         D.coeRingHom c := fun c ↦ MvPolynomial.eval₂Hom_C _ _ c
   have hiU_X : ∀ j, iU (MvPolynomial.X j) =
       (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-        restrictedMvPowerSeriesSubring m (presheafValue D)) := fun j ↦ MvPolynomial.eval₂Hom_X' _ _ j
+        restrictedMvPowerSeriesSubring m (presheafValue D)) := fun j ↦ MvPolynomial.eval₂Hom_X' _ _
+          j
   have hfU_C : ∀ c : Localization.Away D.s, fU (MvPolynomial.C c) = ψγ c :=
     fun c ↦ MvPolynomial.eval₂Hom_C _ _ c
   have hfU_X : ∀ j, fU (MvPolynomial.X j) =
@@ -2809,11 +2825,13 @@ sorry-free:
   `presheafValue_flat_of_canonical → flat_quotient_oneSubfX_general P`, which needs
   `[IsNoetherianRing P.A₀]` and is ℂ_p-false; that route is NOT used).
 
-**DONE this session — the relative apparatus is now noeth-`A₀`-free.** The repo's relative-Example-6.38
+**DONE this session — the relative apparatus is now noeth-`A₀`-free.** The repo's
+relative-Example-6.38
 machinery (`relativeRationalLocData_laurentNormalized`, `relativeLaurentNormalized_equiv`,
 `relativeLaurentNormalized_equiv_intertwine`, and the whole forward/backward hom chain in
 `RelativeRationalLocData.lean`) has been **retyped** to drop the dead case-(a) plumbing
-`(P : PairOfDefinition A) [IsNoetherianRing P.A₀]` and `[IsNoetherianRing (locSubring E.P E.T E.s)]`,
+`(P : PairOfDefinition A) [IsNoetherianRing P.A₀]`
+and `[IsNoetherianRing (locSubring E.P E.T E.s)]`,
 re-routing the relative pair through the faithful `presheafValue_concretePair`/
 `presheafValue_isTateRing_concrete` (`PresheafTateStructure.lean`, defeq to the entangled
 `presheafValue_pairOfDefinition_concrete P E` by proof irrelevance). So
@@ -2824,32 +2842,42 @@ re-routing the relative pair through the faithful `presheafValue_concretePair`/
 
 **TWO genuine obstructions remain**, both isolated here as the single named residual:
 
-1. **The faithful Example-6.38 iso `presheafValueCanonicalQuotientEquiv_faithful` (and hence the flat
+1. **The faithful Example-6.38 iso `presheafValueCanonicalQuotientEquiv_faithful` (and hence the
+flat
    engine `presheafValue_flat_of_canonical_faithful`) is NOT instantiable at the base
    `B := presheafValue D`**, because it genuinely depends on `[PlusSubring A]` (the `A⁺`-structure),
    which `B` does not carry (its only global instances are
    `CommRing/TopologicalSpace/UniformSpace/IsTopologicalRing/CompleteSpace/T0Space`,
    `Presheaf.lean:220`–`247`). The dependence is **real, not superficial threading**: the iso's
-   round-trip fields (`tateQuotientToPresheaf_comp_faithful` / `presheafToCanonicalQuotient_comp_faithful`)
+   round-trip fields (`tateQuotientToPresheaf_comp_faithful` /
+   `presheafToCanonicalQuotient_comp_faithful`)
    invoke `locToQuotientOneSubfX_gen_denseRange_canonical` — the Example-6.38 **density** of `A[M]`
    (`M = {tᵢ/s}`) in `Â⟨T/s⟩` — whose proof fundamentally uses the `+`-subring structure
    (`[PlusSubring A]`). *Verified this session:* (a) the forward-map continuity lemmas
    `locToQuotientOneSubfX_gen_divByS`, `locToQuotientOneSubfX_gen_continuous_canonical`
    (`TopologyComparison.lean`) were successfully `omit`-cleaned of `[PlusSubring A] [IsHuberRing A]`
    (they genuinely don't use them — a small faithful improvement landed this session); but (b)
-   `omit [PlusSubring A]` on the round-trip helpers fails at the `locToQuotientOneSubfX_gen_denseRange_canonical`
-   call (`failed to synthesize PlusSubring A`). [`IsHuberRing B` is *not* the blocker — it is available
-   in this context via `hTate.toIsHuberRing` — and `HasLocLiftPowerBounded B` is not needed by the engine;
-   the genuine wall is `[PlusSubring B]` through density.] Closing this requires either omit-cleaning the
-   Example-6.38 **density** chain of `[PlusSubring A]` (`locToQuotientOneSubfX_gen_denseRange_canonical`
-   and its `TopologyComparison`/`PresheafIdentification` dependencies — substantial, since density of
-   `A[M]` is where `A⁺` enters), or constructing a faithful `[PlusSubring (presheafValue D)]` instance
+   `omit [PlusSubring A]` on the round-trip helpers fails at the
+   `locToQuotientOneSubfX_gen_denseRange_canonical`
+   call (`failed to synthesize PlusSubring A`). [`IsHuberRing B` is *not* the blocker — it is
+   available
+   in this context via `hTate.toIsHuberRing` — and `HasLocLiftPowerBounded B` is not needed by the
+   engine;
+   the genuine wall is `[PlusSubring B]` through density.] Closing this requires either
+   omit-cleaning the
+   Example-6.38 **density** chain of `[PlusSubring A]`
+   (`locToQuotientOneSubfX_gen_denseRange_canonical`
+   and its `TopologyComparison`/`PresheafIdentification` dependencies — substantial, since density
+   of
+   `A[M]` is where `A⁺` enters), or constructing a faithful `[PlusSubring (presheafValue D)]`
+   instance
    (the canonical `A⁺` on a completion of a localization — not currently in the repo).
 
 2. **The Remark-7.55 chain decomposition** (arbitrary `D' ⊆ D` into a chain `V = X₀ ⊇ X₁ ⊇ ⋯ ⊇ Xₙ
    = U` of LaurentNormalized basic-Laurent steps over intermediate bases, composed by
    `Module.Flat.trans`) is not yet a usable theorem in the repo. A faithful single-step lemma — for
-   LaurentNormalized `D'`, via the (now noeth-`A₀`-free) `relativeLaurentNormalized_equiv` + the flat
+   LaurentNormalized `D'`, via the (now noeth-`A₀`-free) `relativeLaurentNormalized_equiv` + the
+   flat
    engine of obstruction 1 (over `B`) + `Module.Flat.of_linearEquiv`, with `hb`/`hT_pb` from
    `invS_isPowerBounded_of_one_mem_T` / `canonicalMap_isPowerBounded_of_mem_A₀` — is **not yet
    written** (it is blocked on obstruction 1); it would discharge each chain step, after which the

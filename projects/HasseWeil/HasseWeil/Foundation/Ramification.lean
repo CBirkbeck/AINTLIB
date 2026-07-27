@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.Algebra.Polynomial.SpecificDegree
 import Mathlib.FieldTheory.IntermediateField.Algebraic
 import Mathlib.FieldTheory.SeparableDegree
@@ -23,13 +28,13 @@ import HasseWeil.Foundation.Valuation
 /-!
 # Ramification Theory for Elliptic Curve Isogenies
 
-We connect mathlib's `Ideal.ramificationIdx` and `Ideal.inertiaDeg` to the
+We connect mathlib's `Ideal.ramificationIdx'` and `Ideal.inertiaDeg'` to the
 theory of elliptic curve isogenies, specializing the general framework from
 `Mathlib.NumberTheory.RamificationInertia` to coordinate ring extensions.
 
 For an isogeny `φ : E₁ → E₂`, the pullback `φ* : K(E₂) →ₐ[F] K(E₁)` restricts to
 a ring homomorphism on coordinate rings. The ramification index `e_P(φ)` at a
-prime `P` of `R₁ = K[E₁]` is `Ideal.ramificationIdx (φ*.restrict) p P` where
+prime `P` of `R₁ = K[E₁]` is `Ideal.ramificationIdx' (φ*.restrict) p P` where
 `p = φ*⁻¹(P)` is the prime of `R₂ = K[E₂]` below `P`.
 
 ## Main results
@@ -326,7 +331,7 @@ private lemma exists_coeffs_via_polynomialY (E : Affine F)
   --   `C b * Y = C(C inv2 * b) * polynomialY - C(C inv2 * b * (a₁X + a₃))`.
   have poly_id : (C b * Y : F[X][Y]) =
       C (C inv2 * b) * E.polynomialY - C (C inv2 * b * (C E.a₁ * X + C E.a₃)) := by
-    unfold Affine.polynomialY
+    simp only [Affine.polynomialY]
     rw [show (C (C inv2 * b * (C E.a₁ * X + C E.a₃)) : F[X][Y]) =
         C (C inv2 * b) * C (C E.a₁ * X + C E.a₃) from map_mul _ _ _]
     have cinv2 : (C (C inv2 * b) : F[X][Y]) * (2 : F[X][Y]) = C b := by
@@ -592,7 +597,8 @@ private lemma YminusAlpha_sq_mem_of_char2_square (E : Affine F) [E.IsElliptic]
     rw [map_add, map_sub, map_pow, map_mul, map_mul]
     rw [show (AdjoinRoot.mk E.polynomial 2 : E.CoordinateRing) =
         AdjoinRoot.mk E.polynomial (2 : F[X][Y]) from rfl,
-        show (AdjoinRoot.mk E.polynomial (2 : F[X][Y])) = 0 from by rw [h_two_FXY]; exact map_zero _,
+        show (AdjoinRoot.mk E.polynomial (2 : F[X][Y])) = 0 from by
+          rw [h_two_FXY]; exact map_zero _,
         zero_mul, zero_mul, sub_zero]
   rw [h_step, hmk_Ysq]
   rw [show (C (C α) : F[X][Y]) ^ 2 = C (C (α ^ 2)) from by rw [← map_pow, ← map_pow],
@@ -659,7 +665,7 @@ private theorem maximalIdeal_isPrincipal_case_char2_ordinary_square (E : Affine 
     exact (hPmax.isPrime.mem_or_mem h_sq).elim id id
   -- `pointIdeal E x₀ α ⊆ P`; both maximal, so equal; then the point gives a DVR.
   have h_pointIdeal_le : pointIdeal E x₀ α ≤ P := by
-    unfold pointIdeal Affine.CoordinateRing.XYIdeal
+    simp only [pointIdeal, Affine.CoordinateRing.XYIdeal]
     rw [Ideal.span_le]
     intro z hz
     rcases Set.mem_insert_iff.mp hz with hz | hz
@@ -683,7 +689,7 @@ private lemma X_sq_add_C_irreducible_of_not_square (δ : F) (h2 : (2 : F) = 0)
     rw [hf_quad_def]; exact Polynomial.natDegree_X_pow_add_C
   have hf_quad_no_root : ∀ x : F, ¬ Polynomial.IsRoot f_quad x := by
     intro x hroot
-    unfold Polynomial.IsRoot at hroot
+    simp only [Polynomial.IsRoot] at hroot
     rw [hf_quad_def, Polynomial.eval_add, Polynomial.eval_pow, Polynomial.eval_X,
       Polynomial.eval_C] at hroot
     have h_x_sq : x ^ 2 = δ := by
@@ -766,7 +772,8 @@ private lemma principal_of_proj_ker_eq_span_nonsquare (E : Affine F) [E.IsEllipt
 /-- Char 2 ordinary, NON-SQUARE: action of the lift `proj = AdjoinRoot.lift i_hom (root f_quad)`
 (`i_hom = of f_quad ∘ eval x₀`) on the generators — `proj(mk(C a)) = of(a(x₀))`, `proj(mk Y) = root`
 — and `proj(mk(C c)) = 0`. -/
-private lemma proj_props_of_nonsquare (E : Affine F) [E.IsElliptic] (x₀ : F) (c f_quad : Polynomial F)
+private lemma proj_props_of_nonsquare (E : Affine F) [E.IsElliptic] (x₀ : F)
+    (c f_quad : Polynomial F)
     (hc_def : c = C E.a₁ * X + C E.a₃) (h_a1x0_a3 : E.a₁ * x₀ + E.a₃ = 0)
     (h_eval_zero : E.polynomial.eval₂
       ((AdjoinRoot.of f_quad).comp (Polynomial.evalRingHom x₀)) (AdjoinRoot.root f_quad) = 0) :
@@ -774,7 +781,8 @@ private lemma proj_props_of_nonsquare (E : Affine F) [E.IsElliptic] (x₀ : F) (
         (AdjoinRoot.root f_quad) h_eval_zero (AdjoinRoot.mk E.polynomial (C a)) =
       (AdjoinRoot.of f_quad) (a.eval x₀)) ∧
     AdjoinRoot.lift ((AdjoinRoot.of f_quad).comp (Polynomial.evalRingHom x₀))
-        (AdjoinRoot.root f_quad) h_eval_zero (AdjoinRoot.mk E.polynomial Y) = AdjoinRoot.root f_quad ∧
+        (AdjoinRoot.root f_quad) h_eval_zero (AdjoinRoot.mk E.polynomial Y) =
+        AdjoinRoot.root f_quad ∧
     AdjoinRoot.lift ((AdjoinRoot.of f_quad).comp (Polynomial.evalRingHom x₀))
         (AdjoinRoot.root f_quad) h_eval_zero (AdjoinRoot.mk E.polynomial (C c)) = 0 := by
   set i_hom : F[X] →+* AdjoinRoot f_quad :=
@@ -806,7 +814,8 @@ private lemma dvd_of_eval_eq_zero_of_char2_ordinary (E : Affine F) (x₀ : F) (c
 
 /-- The lift `proj : R → AdjoinRoot f_quad` is surjective: by `Polynomial.induction_on'` every
 monomial `mk(C(C a)·Y^n)` hits `of(a)·root^n`, and these generate `AdjoinRoot f_quad`. -/
-private lemma proj_surjective_of_nonsquare (E : Affine F) [E.IsElliptic] (x₀ : F) (f_quad : Polynomial F)
+private lemma proj_surjective_of_nonsquare (E : Affine F) [E.IsElliptic] (x₀ : F)
+    (f_quad : Polynomial F)
     (proj : E.CoordinateRing →+* AdjoinRoot f_quad)
     (h_proj_C : ∀ (a : F[X]),
       proj (AdjoinRoot.mk E.polynomial (C a)) = (AdjoinRoot.of f_quad) (a.eval x₀))
@@ -837,7 +846,8 @@ private lemma ker_proj_eq_span_of_nonsquare (E : Affine F) [E.IsElliptic] (x₀ 
     (h_proj_gc : proj (AdjoinRoot.mk E.polynomial (C c)) = 0)
     (h_proj_decomp : ∀ (a b : F[X]),
       proj (AdjoinRoot.mk E.polynomial (C a + C b * Y)) =
-      (AdjoinRoot.of f_quad) (a.eval x₀) + (AdjoinRoot.of f_quad) (b.eval x₀) * AdjoinRoot.root f_quad)
+      (AdjoinRoot.of f_quad) (a.eval x₀) +
+        (AdjoinRoot.of f_quad) (b.eval x₀) * AdjoinRoot.root f_quad)
     (h_indep : ∀ lam mu : F,
       (AdjoinRoot.of f_quad) lam + (AdjoinRoot.of f_quad) mu * AdjoinRoot.root f_quad = 0 →
       lam = 0 ∧ mu = 0)
@@ -897,7 +907,7 @@ private lemma eval_polynomial_zero_of_nonsquare (E : Affine F) [E.IsElliptic] (x
       show (Polynomial.evalRingHom x₀) (X ^ 3 + C E.a₂ * X ^ 2 + C E.a₄ * X + C E.a₆) = δ from by
         rw [hδ_def]; simp [Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_mul,
           Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_C]]
-  unfold Affine.polynomial
+  simp only [Affine.polynomial]
   rw [Polynomial.eval₂_sub, Polynomial.eval₂_add, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X, Polynomial.eval₂_C]
   rw [h_i_c_eval, zero_mul, add_zero, h_i_cubic_eval, h_y_target_sq]
@@ -1003,7 +1013,7 @@ private lemma mk_Ysq_of_char2 (E : Affine F) [E.IsElliptic] (c : F[X])
         (C (X ^ 3 + C E.a₂ * X ^ 2 + C E.a₄ * X + C E.a₆)) := by
   have hW_char2 : E.polynomial =
       Y ^ 2 + C c * Y - C (X ^ 3 + C E.a₂ * X ^ 2 + C E.a₄ * X + C E.a₆) := by
-    unfold Affine.polynomial; rw [hc_def]
+    simp only [Affine.polynomial]; rw [hc_def]
   have hW_zero : AdjoinRoot.mk E.polynomial
       (Y ^ 2 + C c * Y - C (X ^ 3 + C E.a₂ * X ^ 2 + C E.a₄ * X + C E.a₆)) = 0 := by
     rw [← hW_char2]; exact AdjoinRoot.mk_self
@@ -1443,7 +1453,7 @@ instance isIntegrallyClosed_coordinateRing (E : Affine F) [E.IsElliptic] :
   inferInstance
 
 -- Downstream ramification theory builds on the Dedekind-domain structure above via mathlib's
--- `Ideal.ramificationIdx`, `Ideal.inertiaDeg`, and `Ideal.sum_ramification_inertia`, applied to
+-- `Ideal.ramificationIdx'`, `Ideal.inertiaDeg'`, and `Ideal.sum_ramification_inertia`, applied to
 -- the coordinate-ring extension `R₂ → R₁` induced by the pullback of an isogeny.
 
 end HasseWeil

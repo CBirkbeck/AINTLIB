@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ForMathlib.HopfGaloisBootstrap
 import ModularCurves.ForMathlib.CoinvariantsPoints
 import ModularCurves.ForMathlib.CoinvariantsBaseChange
@@ -619,6 +624,64 @@ theorem smul_coactionBaseChange_one_tmul' (c' : C') (b c : B) :
         rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul]]
       rw [assocT, TensorProduct.AlgebraTensorModule.assoc_symm_tmul]
 
+/-- The comparison-square identity: composing the two associativity/base-change equivalences
+with the generalized Galois product map of the base-changed co-action recovers
+`lTensor C' (canonicalGaloisLinear …)`. The heart of `injective_lTensor_canonicalGaloisMap`,
+proved by tensor induction. -/
+theorem lTensor_canonicalGaloisMap_eq_galoisProductMap
+    [Module.Free R A] [Module.Finite R A] [Module.Flat (coinvariants ρ) C'] :
+    ∀ u : C' ⊗[coinvariants ρ] (B ⊗[coinvariants ρ] B),
+      (assocT R A ρ C')
+        (galoisProductMap R A C' (coactionBaseChange R A ρ C')
+          (fun c' => (mem_coinvariants).mp
+            (tmul_one_mem_coinvariants_coactionBaseChange R A ρ C' c'))
+          ((TensorProduct.AlgebraTensorModule.cancelBaseChange (coinvariants ρ) C'
+              (C' ⊗[coinvariants ρ] B) (C' ⊗[coinvariants ρ] B) B).symm
+            ((TensorProduct.AlgebraTensorModule.assoc (coinvariants ρ) (coinvariants ρ) C'
+                C' B B).symm u)))
+      = (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)) u := by
+  classical
+  set S₁ := (TensorProduct.AlgebraTensorModule.assoc (coinvariants ρ) (coinvariants ρ) C'
+    C' B B).symm with hS₁
+  set S₂ := (TensorProduct.AlgebraTensorModule.cancelBaseChange (coinvariants ρ) C'
+    (C' ⊗[coinvariants ρ] B) (C' ⊗[coinvariants ρ] B) B).symm with hS₂
+  set G := galoisProductMap R A C' (coactionBaseChange R A ρ C')
+    (fun c' => (mem_coinvariants).mp
+      (tmul_one_mem_coinvariants_coactionBaseChange R A ρ C' c')) with hG
+  intro u
+  induction u with
+  | zero =>
+      rw [map_zero S₁, map_zero S₂, map_zero G, map_zero (assocT R A ρ C'),
+        map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
+  | add u₁ u₂ h₁ h₂ =>
+      rw [map_add S₁, map_add S₂, map_add G, map_add (assocT R A ρ C'), h₁, h₂,
+        ← map_add (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
+  | tmul c' w =>
+      induction w with
+      | zero =>
+          rw [TensorProduct.tmul_zero, map_zero S₁, map_zero S₂, map_zero G,
+            map_zero (assocT R A ρ C'),
+            map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
+      | add w₁ w₂ h₁ h₂ =>
+          rw [TensorProduct.tmul_add, map_add S₁, map_add S₂, map_add G,
+            map_add (assocT R A ρ C'), h₁, h₂,
+            ← map_add (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)),
+            ← TensorProduct.tmul_add]
+      | tmul b₁ b₂ =>
+          rw [hS₁, TensorProduct.AlgebraTensorModule.assoc_symm_tmul, hS₂,
+            TensorProduct.AlgebraTensorModule.cancelBaseChange_symm_tmul, hG,
+            galoisProductMap_tmul, LinearMap.lTensor_tmul]
+          rw [show canonicalGaloisLinear R A ρ (b₁ ⊗ₜ[coinvariants ρ] b₂)
+              = (b₁ ⊗ₜ[R] (1 : A)) * ρ b₂ from canonicalGaloisMap_tmul ρ b₁ b₂]
+          rw [show ((c' ⊗ₜ[coinvariants ρ] b₁ : C' ⊗[coinvariants ρ] B) ⊗ₜ[R] (1 : A))
+                * (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂))
+              = ((c' ⊗ₜ[coinvariants ρ] b₁ : C' ⊗[coinvariants ρ] B))
+                • (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂)) from by
+            rw [Algebra.smul_def]
+            rfl]
+          rw [smul_coactionBaseChange_one_tmul' R A ρ C' c' b₁ b₂,
+            LinearEquiv.apply_symm_apply]
+
 /-- **The comparison square**: base-changing the canonical Galois map along `C → C'`
 realizes the generalized Galois product map of the base-changed co-action, so its
 injectivity descends per prime. -/
@@ -630,6 +693,7 @@ theorem injective_lTensor_canonicalGaloisMap
     Function.Injective
       (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)) := by
   classical
+  have hsq := lTensor_canonicalGaloisMap_eq_galoisProductMap R A ρ C'
   set S₁ := (TensorProduct.AlgebraTensorModule.assoc (coinvariants ρ) (coinvariants ρ) C'
     C' B B).symm with hS₁
   set S₂ := (TensorProduct.AlgebraTensorModule.cancelBaseChange (coinvariants ρ) C'
@@ -637,42 +701,6 @@ theorem injective_lTensor_canonicalGaloisMap
   set G := galoisProductMap R A C' (coactionBaseChange R A ρ C')
     (fun c' => (mem_coinvariants).mp
       (tmul_one_mem_coinvariants_coactionBaseChange R A ρ C' c')) with hG
-  have hsq : ∀ u : C' ⊗[coinvariants ρ] (B ⊗[coinvariants ρ] B),
-      (assocT R A ρ C') (G (S₂ (S₁ u)))
-      = (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)) u := by
-    intro u
-    induction u with
-    | zero =>
-        rw [map_zero S₁, map_zero S₂, map_zero G, map_zero (assocT R A ρ C'),
-          map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
-    | add u₁ u₂ h₁ h₂ =>
-        rw [map_add S₁, map_add S₂, map_add G, map_add (assocT R A ρ C'), h₁, h₂,
-          ← map_add (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
-    | tmul c' w =>
-        induction w with
-        | zero =>
-            rw [TensorProduct.tmul_zero, map_zero S₁, map_zero S₂, map_zero G,
-              map_zero (assocT R A ρ C'),
-              map_zero (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ))]
-        | add w₁ w₂ h₁ h₂ =>
-            rw [TensorProduct.tmul_add, map_add S₁, map_add S₂, map_add G,
-              map_add (assocT R A ρ C'), h₁, h₂,
-              ← map_add (LinearMap.lTensor C' (canonicalGaloisLinear R A ρ)),
-              ← TensorProduct.tmul_add]
-        | tmul b₁ b₂ =>
-            rw [hS₁, TensorProduct.AlgebraTensorModule.assoc_symm_tmul, hS₂,
-              TensorProduct.AlgebraTensorModule.cancelBaseChange_symm_tmul, hG,
-              galoisProductMap_tmul, LinearMap.lTensor_tmul]
-            rw [show canonicalGaloisLinear R A ρ (b₁ ⊗ₜ[coinvariants ρ] b₂)
-                = (b₁ ⊗ₜ[R] (1 : A)) * ρ b₂ from canonicalGaloisMap_tmul ρ b₁ b₂]
-            rw [show ((c' ⊗ₜ[coinvariants ρ] b₁ : C' ⊗[coinvariants ρ] B) ⊗ₜ[R] (1 : A))
-                  * (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂))
-                = ((c' ⊗ₜ[coinvariants ρ] b₁ : C' ⊗[coinvariants ρ] B))
-                  • (coactionBaseChange R A ρ C' ((1 : C') ⊗ₜ[coinvariants ρ] b₂)) from by
-              rw [Algebra.smul_def]
-              rfl]
-            rw [smul_coactionBaseChange_one_tmul' R A ρ C' c' b₁ b₂,
-              LinearEquiv.apply_symm_apply]
   intro u v huv
   have h2 : (assocT R A ρ C') (G (S₂ (S₁ u))) = (assocT R A ρ C') (G (S₂ (S₁ v))) := by
     rw [hsq u, hsq v, huv]

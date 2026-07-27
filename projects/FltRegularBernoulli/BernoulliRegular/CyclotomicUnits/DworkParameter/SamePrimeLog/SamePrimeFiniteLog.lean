@@ -185,7 +185,7 @@ theorem samePrimeFiniteLog_eq_of_sub_mem {N : ℕ}
     samePrimeFiniteLog (p := p) (K := K) N x hx =
       samePrimeFiniteLog (p := p) (K := K) N y hy := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   exact Finset.sum_congr rfl fun n _hn =>
     samePrimeFiniteLogTerm_eq_of_sub_mem (p := p) (K := K) hx hy hxy
 
@@ -225,7 +225,7 @@ theorem samePrimeFiniteLog_eq_samePrimeFiniteLogLocalizedPolynomial (N : ℕ)
     samePrimeFiniteLog (p := p) (K := K) N x hx =
       samePrimeFiniteLogLocalizedPolynomial (p := p) (K := K) N x hx := by
   classical
-  unfold samePrimeFiniteLog samePrimeFiniteLogLocalizedPolynomial
+  simp only [samePrimeFiniteLog, samePrimeFiniteLogLocalizedPolynomial]
   exact Finset.sum_congr rfl fun n _hn =>
     samePrimeFiniteLogTerm_eq_localizedTerm (p := p) (K := K) N n hx
 
@@ -234,7 +234,7 @@ theorem samePrimeFiniteLog_arg_zero (N : ℕ) :
     samePrimeFiniteLog (p := p) (K := K) N 0
         (zero_mem (lambdaIdeal p K)) = 0 := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   exact Finset.sum_eq_zero fun n _hn =>
     samePrimeFiniteLogTerm_arg_zero (p := p) (K := K) N n
 

@@ -141,8 +141,8 @@ theorem betaDualV_toAddMonoidHom_sub (hq : 2 ≤ Fintype.card K)
       r • (verschiebungV W hq).toAddMonoidHom - s • (AddMonoidHom.id _) := by
   -- `betaDualV` unfolds (via the V-side universal constructor) to `addIsog (V.zsmul r) [−s]`,
   -- whose `toAddMonoidHom` is `(V.zsmul r).toAddMonoidHom + (mulByInt -s).toAddMonoidHom`.  The
-  -- internally-produced `verschiebungIsog_of_witness W _` is, by proof irrelevance on its `h_subset`
-  -- argument, the same as `verschiebungV W hq`.
+  -- internally-produced `verschiebungIsog_of_witness W _` is, by proof irrelevance on its
+  -- `h_subset` argument, the same as `verschiebungV W hq`.
   show ((verschiebungV W hq).zsmul r).toAddMonoidHom +
       (mulByInt W.toAffine (-s)).toAddMonoidHom = _
   ext P
@@ -153,7 +153,8 @@ theorem betaDualV_toAddMonoidHom_sub (hq : 2 ≤ Fintype.card K)
 /-! ### The Wall-A keystone, reduced to the standing dual residuals
 
 `genuineIsogSmulSub_degree_eq_signed_closed` is the live, witness-parametric form of the Wall-A
-keystone (whose unconditional sorried form was deleted 2026-06-11).  It constructs the concrete Verschiebung
+keystone (whose unconditional sorried form was deleted 2026-06-11).  It constructs the concrete
+Verschiebung
 `V` and the V-side genuine isogeny `β_dual = r·V − s` internally, discharges the three *structural*
 pivot inputs (`h_isDual_V_pi`, `h_beta_dual_hom`, `h_beta_pos`), and reduces the keystone to exactly
 the three **standing dual residuals** plus the nonvanishing of `N`:

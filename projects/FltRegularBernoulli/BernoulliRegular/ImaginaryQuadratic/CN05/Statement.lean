@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.ImaginaryQuadratic.ClassNumber
@@ -129,7 +134,7 @@ theorem CN05_of_CN05CoeffEq (h_coeff : CN05CoeffEq p) : CN05Hypothesis p := by
   have h_LHS : NumberField.dedekindZeta (Kminus p) s =
       LSeries (fun n : ℕ ↦ (idealNormMultiplicity (Kminus p) n : ℂ)) s := by
     rw [dedekindZeta_eq_tsum_idealNormMultiplicity (Kminus p) hs]
-    unfold LSeries LSeries.term
+    simp only [LSeries, LSeries.term]
     congr 1
     ext n
     by_cases hn : n = 0
@@ -160,6 +165,7 @@ theorem CN05_of_CN05CoeffEq (h_coeff : CN05CoeffEq p) : CN05Hypothesis p := by
     (DirichletCharacter.LFunction_eq_LSeries _ hs).symm
   rw [h_zeta, h_Leta]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Convolution of the constant `1` function with any `g` at `p^k` equals
 `∑_{j=0}^k g(p^j)`. -/
 lemma convolution_one_at_prime_pow {q : ℕ} (hq : q.Prime) (k : ℕ) (g : ℕ → ℂ) :

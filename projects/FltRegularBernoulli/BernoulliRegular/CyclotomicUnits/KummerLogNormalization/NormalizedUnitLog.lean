@@ -1,6 +1,8 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogTrace
-import BernoulliRegular.CyclotomicUnits.DworkParameter
-import BernoulliRegular.CyclotomicUnits.NormalizedUnits
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogTrace
+public import BernoulliRegular.CyclotomicUnits.DworkParameter
+public import BernoulliRegular.CyclotomicUnits.NormalizedUnits
 
 /-!
 # Normalization of the Kummer logarithm columns
@@ -309,7 +311,6 @@ theorem kummerLogColumnFiniteLog_eq_normalizedUnit_square
       simp [samePrimeFiniteLogProductCoord, kummerLogNormalizedUnitFiniteLogArg, u]
       ring)
 
-set_option maxHeartbeats 800000 in
 -- The final rewrite unfolds the finite-log additivity proof and the
 -- normalized-unit argument proof; the larger heartbeat budget keeps this
 -- wrapper theorem deterministic without changing the proof source.

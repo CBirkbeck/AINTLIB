@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.BundleFromCyclotomic
@@ -36,14 +41,17 @@ universe u v
 
 namespace K2_2PrimeFactorBundle
 
+section SourceBundle
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+
 /-- Prime-factor bundle constructor that derives the rational-prime split
 facts from `orderOf (ℓ : ZMod p) = 1`. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_orderOfOne_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -94,11 +102,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split_orderOfOne_of_mem_notMem_max
 This packages `K2_2SourceData.ofCanonicalTraceForm_orderOfOne_normalizedFactor`
 and derives the bundle's maximality field from normalized-factor membership. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     {P : Ideal (𝓞 K)}
     (hP_factor : P ∈ normalizedFactors (Ideal.span ({α} : Set (𝓞 K))))
@@ -160,11 +163,6 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor
 /-- Prime-factor bundle constructor for a normalized source factor of `(α)`
 that derives `(p : 𝓞 K) ∉ P` from `(α, p) = ⊤`. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -231,11 +229,6 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
 that derives `(p : 𝓞 K) ∉ P` from `(α, p) = ⊤` and derives index-one
 Gauss-sum nonvanishing from Dwork exact order. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_dworkNeZero
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -293,6 +286,19 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_dwork
       hα_ne hαp_top hP_factor hℓ_in_P hQ_in h_compat
       h_trace h_exp h_order
 
+end SourceBundle
+
+section ReciprocalBundle
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  [IsGalois ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+  [FaithfulSMul (𝓞 K) (𝓞 R')]
+  [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
+
 /-- Prime-factor bundle constructor for the actual signed Φ source route
 that derives the exact conjugate-exponent input from the split trace form and
 the concrete Galois covariance of `phiPrimeGenDescent S 1`.
@@ -301,14 +307,6 @@ This is the honest nonreciprocal analogue of the reciprocal pair-field
 constructor: callers still provide the substantive covariance equality, but
 no longer provide `StickelbergerExactConjugateExponents` directly. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_covariance
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -415,14 +413,6 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_covar
 `ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_covariance` for all
 normalized source factors of `(α)`. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_covarianceFamily
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     (hℓ_in :
@@ -519,6 +509,8 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop_covar
         (hQ_in P hP)
         (h_compat P hP) (h_trace P hP) (h_conj P hP) h_order
 
+end ReciprocalBundle
+
 end K2_2PrimeFactorBundle
 
 /-- **Per-prime reciprocal K2-2 source-data bundle**, packaging the same
@@ -561,17 +553,20 @@ noncomputable def phi
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   B.D.phi
 
+section ReciprocalBundle
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  [IsGalois ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+  [FaithfulSMul (𝓞 K) (𝓞 R')]
+  [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
+
 /-- Build a reciprocal prime-factor bundle from the canonical trace-form split
 prime data and the pair-field exact-exponent theorem. -/
 noncomputable def ofCanonicalTraceForm_pairSigma_split
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -624,14 +619,6 @@ noncomputable def ofCanonicalTraceForm_pairSigma_split
 equality from the canonical trace-form identity and accepts split conditions
 directly for `P`. -/
 noncomputable def ofCanonicalTraceForm_pairSigma_split_atPrime
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -673,14 +660,6 @@ noncomputable def ofCanonicalTraceForm_pairSigma_split_atPrime
 descent-prime equality and `ℓ ≠ p` from the source-prime
 membership/nonmembership hypotheses. -/
 noncomputable def ofCanonicalTraceForm_pairSigma_split_atPrime_of_mem_notMem
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -721,14 +700,6 @@ noncomputable def ofCanonicalTraceForm_pairSigma_split_atPrime_of_mem_notMem
 /-- Reciprocal prime-factor bundle constructor that derives `P ≠ ⊥`, the
 descent-prime equality, and `ℓ ≠ p` from the source-prime hypotheses. -/
 noncomputable def ofCanonicalTraceForm_pairSigma_split_atPrime_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -768,14 +739,6 @@ noncomputable def ofCanonicalTraceForm_pairSigma_split_atPrime_of_mem_notMem_max
 /-- Reciprocal prime-factor bundle constructor that accepts splitting of the
 rational prime ideal `(ℓ)` instead of splitting written on `P.under ℤ`. -/
 noncomputable def ofCanonicalTraceForm_pairSigma_split_atSpan_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -811,6 +774,8 @@ noncomputable def ofCanonicalTraceForm_pairSigma_split_atSpan_of_mem_notMem_maxi
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_pairSigma_split_atSpan_of_mem_notMem_maximal
       (P := P) (Q := Q) (iso := iso)
       hℓ_in_P hp_notin_P hQ_in h_compat h_trace he hf
+
+end ReciprocalBundle
 
 end K2_2ReciprocalPrimeFactorBundle
 end PhiPrimeElement

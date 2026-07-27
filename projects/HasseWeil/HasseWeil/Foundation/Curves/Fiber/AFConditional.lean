@@ -10,10 +10,10 @@ Wires together the shipped infrastructure into the witnesses needed by
 theorem). Each witness is parametrized over the remaining outstanding
 hypotheses, making the dependency chain explicit:
 
-| Witness needed | Conditional hypothesis |
-|---|---|
-| `h_inj` (`κ ∘ σ̄ = id`) | `DivZeroReduce W` (= reduction lemma) |
-| `h_van` (`σ` vanishes on principal) | `DivZeroReduce W` AND a `point_minus_O_principal_eq_zero` over arbitrary functions (= the no-finite-poles bridge) |
+* `h_inj` (`κ ∘ σ̄ = id`): `DivZeroReduce W` (= reduction lemma).
+* `h_van` (`σ` vanishes on principal): `DivZeroReduce W` AND a
+  `point_minus_O_principal_eq_zero` over arbitrary functions
+  (= the no-finite-poles bridge).
 
 Once `DivZeroReduce W` lands (which itself decomposes into the
 list-induction `effective_sum_reduce` + Finsupp-to-list bridge for
@@ -69,7 +69,7 @@ theorem h_inj_of_divZeroReduce
         (HasseWeil.EC.Isogeny.picZeroSumOfWitness W h_van D) = D := by
   refine QuotientAddGroup.induction_on D fun D' ↦ ?_
   rw [HasseWeil.EC.Isogeny.picZeroSumOfWitness_apply_mk]
-  unfold picZeroOfPoint
+  simp only [picZeroOfPoint]
   apply Quot.sound
   rw [QuotientAddGroup.leftRel_apply]
   show (-kappaDivisor W (projectiveDivisorSum W D'.val) + D'.val) ∈
@@ -144,7 +144,7 @@ theorem pointMinusO_of_bridge
   have h_eq := SmoothPlaneCurve.projectiveDivisorOf_apply_affine
     (C := (⟨W⟩ : SmoothPlaneCurve F)) f Q
   rw [hf_div] at h_eq
-  unfold kappaDivisor at h_eq
+  simp only [kappaDivisor] at h_eq
   rw [Finsupp.sub_apply, Finsupp.single_apply, Finsupp.single_apply] at h_eq
   -- `∞ ≠ affine Q` (distinct constructors), so the `(O)` term contributes `0`.
   have h_inf_ne :

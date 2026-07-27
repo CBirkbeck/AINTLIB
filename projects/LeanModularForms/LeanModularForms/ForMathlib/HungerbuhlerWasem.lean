@@ -374,6 +374,34 @@ theorem analyticRemainder_hasCauchyPVOn_zero
     (fun t ↦ ‖PiecewiseC1Path.contourIntegrand decomp.analyticRemainder γP t‖)
     h_meas h_bound h_full.norm h_pointwise
 
+/-- On the complement of the bad set, `γ(t)` stays strictly more than `ε` away
+from every pole `s' ∈ S`. This is the pointwise dual of the definition of
+`cpv_badSet`. -/
+theorem lt_norm_extend_sub_of_notMem_badSet (γP : PiecewiseC1Path x x)
+    (S : Finset ℂ) (ε : ℝ) {t : ℝ} (ht : t ∈ (cpv_badSet γP S ε)ᶜ)
+    {s' : ℂ} (hs' : s' ∈ S) : ε < ‖γP.toPath.extend t - s'‖ := by
+  simp only [cpv_badSet, Set.mem_compl_iff, Set.mem_setOf_eq, not_exists, not_and,
+    not_le] at ht
+  exact ht s' hs'
+
+/-- Termwise bound for a finite Laurent tail at `s`: if `0 < ε ≤ ‖z - s‖`, then
+the norm of `∑ k, a k / (z - s) ^ (k + 1)` is at most the termwise bound
+`∑ k, ‖a k‖ / ε ^ (k + 1)` obtained by replacing `‖z - s‖` with `ε`. -/
+theorem norm_laurentSum_le {N : ℕ} (a : Fin N → ℂ) (s z : ℂ) {ε : ℝ}
+    (hε : 0 < ε) (hz : ε ≤ ‖z - s‖) :
+    ‖∑ k : Fin N, a k / (z - s) ^ (k.val + 1)‖ ≤
+      ∑ k : Fin N, ‖a k‖ / ε ^ (k.val + 1) :=
+  (norm_sum_le _ _).trans <| Finset.sum_le_sum fun k _ ↦ by
+    rw [norm_div, norm_pow]
+    exact div_le_div_of_nonneg_left (norm_nonneg _) (pow_pos hε _)
+      (pow_le_pow_left₀ hε.le hz _)
+
+/-- A finite Laurent tail `z ↦ ∑ k, a k / (z - s) ^ (k + 1)` is measurable. -/
+theorem measurable_laurentSum {N : ℕ} (a : Fin N → ℂ) (s : ℂ) :
+    Measurable (fun z ↦ ∑ k : Fin N, a k / (z - s) ^ (k.val + 1)) :=
+  Finset.measurable_sum _ fun _k _ ↦
+    ((measurable_id.sub_const s).pow_const _).const_div _
+
 /-- Interval-integrability of the cutoff integrand of a polar part of the
 decomposition. Eliminates the `h_polar_int` oracle from
 `residueTheorem_crossing`. -/
@@ -394,11 +422,6 @@ theorem cpvIntegrandOn_polarPart_intervalIntegrable
   set laurentSum : ℂ → ℂ := fun z ↦ ∑ k : Fin N, a k / (z - s) ^ (k.val + 1)
   set h_curve : ℝ → ℂ := fun t ↦
     laurentSum (γP.toPath.extend t) * deriv γP.toPath.extend t
-  have h_far_of : ∀ t ∈ (cpv_badSet γP S ε)ᶜ, ∀ s' ∈ S,
-      ε < ‖γP.toPath.extend t - s'‖ := fun t ht_in s' hs' ↦ by
-    simp only [cpv_badSet, Set.mem_compl_iff, Set.mem_setOf_eq, not_exists, not_and,
-      not_le] at ht_in
-    exact ht_in s' hs'
   have h_indicator_eq' :
       (fun t ↦ cpvIntegrandOn S (decomp.polarPart s)
         γP.toPath.extend ε t) =
@@ -408,7 +431,7 @@ theorem cpvIntegrandOn_polarPart_intervalIntegrable
     by_cases ht_in : t ∈ (cpv_badSet γP S ε)ᶜ
     · rw [Set.indicator_of_mem ht_in, Set.indicator_of_mem ht_in]
       have h_ne : γP.toPath.extend t ≠ s := fun heq ↦ by
-        have := h_far_of t ht_in s hs
+        have := lt_norm_extend_sub_of_notMem_badSet γP S ε ht_in hs
         rw [heq, sub_self, norm_zero] at this; linarith
       change decomp.polarPart s (γP.toPath.extend t) *
         deriv γP.toPath.extend t =
@@ -424,15 +447,12 @@ theorem cpvIntegrandOn_polarPart_intervalIntegrable
     calc ‖h_curve t‖ = ‖laurentSum (γP.toPath.extend t)‖ *
           ‖deriv γP.toPath.extend t‖ := norm_mul _ _
       _ ≤ M_polar * K := mul_le_mul
-          ((norm_sum_le _ _).trans <| Finset.sum_le_sum fun k _ ↦ by
-            rw [norm_div, norm_pow]
-            exact div_le_div_of_nonneg_left (norm_nonneg _) (pow_pos hε _)
-              (pow_le_pow_left₀ hε.le (h_far_of t ht_in s hs).le _))
+          (norm_laurentSum_le a s _ hε
+            (lt_norm_extend_sub_of_notMem_badSet γP S ε ht_in hs).le)
           (norm_deriv_le_of_lipschitz hLip) (norm_nonneg _) h_M_polar_nonneg
   have h_curve_meas : Measurable h_curve :=
-    (Finset.measurable_sum (Finset.univ : Finset (Fin N)) fun k _ ↦
-      Measurable.const_div ((γP.toPath.continuous_extend.measurable.sub_const s).pow_const _) _)
-      |>.mul (measurable_deriv _)
+    ((measurable_laurentSum a s).comp γP.toPath.continuous_extend.measurable).mul
+      (measurable_deriv _)
   rw [intervalIntegrable_iff, h_indicator_eq']
   refine MeasureTheory.IntegrableOn.of_bound measure_Ioc_lt_top
     (h_curve_meas.aestronglyMeasurable.indicator (cpv_badSet_measurableSet γP S ε).compl) M ?_

@@ -52,7 +52,7 @@ theorem finiteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum
               (Ideal.pow_le_pow_right hden
                 (F.finiteArtinHasseExpCoordLogHomogeneousNumerator_mem_Q_pow
                   N a.1 d hx))) := by
-  unfold finiteArtinHasseExpCoordLogHomogeneousDegreeSum
+  simp only [finiteArtinHasseExpCoordLogHomogeneousDegreeSum]
   refine Finset.sum_congr rfl ?_
   intro a _ha
   have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
@@ -478,7 +478,7 @@ theorem finiteLog_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
       ∑ n ∈ Finset.range (finiteLogCutoff (ℓ := ℓ) N),
         ∑ d ∈ ((F.finiteArtinHasseExpCoordPoly N x) ^ n).support,
           F.finiteArtinHasseExpCoordLogHomogeneousTerm N n d x hx := by
-  unfold finiteLog
+  simp only [finiteLog]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   by_cases hn0 : n = 0

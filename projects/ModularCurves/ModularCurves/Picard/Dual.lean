@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Picard.InvertibleSheaf
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.PushforwardContinuous
 import Mathlib.CategoryTheory.Sites.SheafHom
@@ -74,6 +79,7 @@ theorem overUnitScalarEnd_app_apply (U : C) (r : R.obj.obj (op U))
 
 variable [∀ U, IsMulCommutative (R.obj.obj U)]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The central action of `O(U)` on the unit module over the over-site of `U`. -/
 noncomputable def overUnitScalarEndRingHom (U : C) :
     R.obj.obj (op U) →+* End (SheafOfModules.unit (R.over U)) where
@@ -92,7 +98,6 @@ noncomputable def overUnitScalarEndRingHom (U : C) :
     ext V
     repeat' erw [overUnitScalarEnd_app_apply]
     simp
-    rfl
   map_zero' := by
     apply (SheafOfModules.forget _).map_injective
     ext V
@@ -111,7 +116,6 @@ noncomputable def overUnitScalarEndRingHom (U : C) :
       (overUnitScalarEnd R U s).val.app V
         (show (R.over U).obj.obj V from 1)
     rw [overUnitScalarEnd_app_apply, overUnitScalarEnd_app_apply, one_mul, one_mul]
-    rfl
 
 /-- The module structure on local linear functionals, induced by postcomposition with
 scalar multiplication on the unit module. -/
@@ -262,6 +266,121 @@ noncomputable def dualSubfunctor (M : _root_.SheafOfModules R) :
     exact ⟨dualRestrict R M f α, ambientDual_map_dualToAmbient R M f α⟩
 
 omit [∀ U, IsMulCommutative (R.obj.obj U)] in
+set_option backward.isDefEq.respectTransparency.types false in
+/-- If a section `s` of the additive internal Hom over `U` restricts to module-linear
+functionals along a `J`-covering sieve, then `s` is itself module-linear. This is the
+linearity-descent step in the sheaf condition for the module-linear dual. -/
+private theorem dualSubfunctor_hom_app_smul (M : _root_.SheafOfModules R) {U : Cᵒᵖ}
+    (s : (ambientDual R M).obj.obj U)
+    (hs : (dualSubfunctor R M).sieveOfSection s ∈ J U.unop)
+    (V : (Over U.unop)ᵒᵖ) (r : (R.over U.unop).obj.obj V)
+    (m : (M.over U.unop).val.obj V) :
+    s.hom.app V (r • m) =
+      r • (show (_root_.SheafOfModules.unit (R.over U.unop)).val.obj V from
+        s.hom.app V m) := by
+  let T : Sieve V.unop :=
+    (Sieve.overEquiv V.unop).symm
+      (Sieve.pullback (V.unop.hom) ((dualSubfunctor R M).sieveOfSection s))
+  have hT : T ∈ (J.over U.unop) V.unop :=
+    J.overEquiv_symm_mem_over V.unop _ (J.pullback_stable (V.unop.hom) hs)
+  apply (_root_.SheafOfModules.unit (R.over U.unop)).isSheaf.isSeparated
+    V.unop T hT
+  intro W i hi
+  erw [← CategoryTheory.congr_fun (s.hom.naturality i.op) (r • m)]
+  change s.hom.app (op W)
+      ((M.over U.unop).val.map i.op (r • m)) =
+    (_root_.SheafOfModules.unit (R.over U.unop)).val.map i.op
+      (r • (show (_root_.SheafOfModules.unit (R.over U.unop)).val.obj V from
+        s.hom.app V m))
+  rw [PresheafOfModules.map_smul, PresheafOfModules.map_smul]
+  erw [← CategoryTheory.congr_fun (s.hom.naturality i.op) m]
+  have hi' :
+      (Sieve.pullback (V.unop.hom)
+        ((dualSubfunctor R M).sieveOfSection s)) i.left :=
+    (Sieve.overEquiv_symm_iff _ i).mp hi
+  change (ambientDual R M).obj.map (i.left ≫ V.unop.hom).op s ∈
+    (dualSubfunctor R M).obj (op W.left) at hi'
+  rcases hi' with ⟨β, hβ⟩
+  change s.hom.app (op W)
+      ((R.over U.unop).obj.map i.op r • (M.over U.unop).val.map i.op m) =
+    (R.over U.unop).obj.map i.op r •
+      (show (_root_.SheafOfModules.unit (R.over U.unop)).val.obj (op W) from
+        s.hom.app (op W) ((M.over U.unop).val.map i.op m))
+  rw [Over.w i] at hβ
+  have hβ_app := congr_arg
+    (fun q => q.hom.app (op (Over.mk (𝟙 W.left)))) hβ
+  let r' : (R.over W.left).obj.obj (op (Over.mk (𝟙 W.left))) :=
+    (R.over U.unop).obj.map i.op r
+  let m' : (M.over W.left).val.obj (op (Over.mk (𝟙 W.left))) :=
+    (M.over U.unop).val.map i.op m
+  have hβ_smul := CategoryTheory.congr_fun hβ_app (r' • m')
+  have hβ_m := CategoryTheory.congr_fun hβ_app m'
+  have hleft_smul :
+      (dualToAmbient R M W.left β).hom.app (op (Over.mk (𝟙 W.left)))
+          (r' • m') =
+        β.val.app (op (Over.mk (𝟙 W.left))) (r' • m') := rfl
+  have hleft_m :
+      (dualToAmbient R M W.left β).hom.app (op (Over.mk (𝟙 W.left))) m' =
+        β.val.app (op (Over.mk (𝟙 W.left))) m' := rfl
+  have hright_smul :
+      (((ambientDual R M).obj.map W.hom.op s).hom.app
+          (op (Over.mk (𝟙 W.left)))) (r' • m') =
+        s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
+          (r' • m') := rfl
+  have hright_m :
+      (((ambientDual R M).obj.map W.hom.op s).hom.app
+          (op (Over.mk (𝟙 W.left)))) m' =
+        s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left)))) m' := rfl
+  have hβ_canon_smul :
+      β.val.app (op (Over.mk (𝟙 W.left))) (r' • m') =
+        s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
+          (r' • m') :=
+    hleft_smul.symm.trans (hβ_smul.trans hright_smul)
+  have hβ_canon_m :
+      β.val.app (op (Over.mk (𝟙 W.left))) m' =
+        s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left)))) m' :=
+    hleft_m.symm.trans (hβ_m.trans hright_m)
+  let e : (Over.map W.hom).obj (Over.mk (𝟙 W.left)) ≅ W :=
+    Over.isoMk (Iso.refl _) (by rfl)
+  have hs_canon_smul :
+      s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
+          (r' • m') = s.hom.app (op W) (r' • m') := by
+    have h := CategoryTheory.congr_fun (s.hom.naturality e.hom.op) (r' • m')
+    dsimp [e] at h
+    change s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
+        (((_root_.SheafOfModules.toSheaf R).obj M).obj.map (𝟙 W.left).op
+          (r' • m')) =
+      ((_root_.SheafOfModules.toSheaf R).obj
+          (_root_.SheafOfModules.unit R)).obj.map (𝟙 W.left).op
+        (s.hom.app (op W) (r' • m')) at h
+    rw [op_id,
+      ((_root_.SheafOfModules.toSheaf R).obj M).obj.map_id,
+      ((_root_.SheafOfModules.toSheaf R).obj
+        (_root_.SheafOfModules.unit R)).obj.map_id] at h
+    simpa using h
+  have hs_canon_m :
+      s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left)))) m' =
+        s.hom.app (op W) m' := by
+    have h := CategoryTheory.congr_fun (s.hom.naturality e.hom.op) m'
+    dsimp [e] at h
+    change s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
+        (((_root_.SheafOfModules.toSheaf R).obj M).obj.map (𝟙 W.left).op m') =
+      ((_root_.SheafOfModules.toSheaf R).obj
+          (_root_.SheafOfModules.unit R)).obj.map (𝟙 W.left).op
+        (s.hom.app (op W) m') at h
+    rw [op_id,
+      ((_root_.SheafOfModules.toSheaf R).obj M).obj.map_id,
+      ((_root_.SheafOfModules.toSheaf R).obj
+        (_root_.SheafOfModules.unit R)).obj.map_id] at h
+    simpa using h
+  change s.hom.app (op W) (r' • m') =
+    r' • (show (_root_.SheafOfModules.unit (R.over W.left)).val.obj
+      (op (Over.mk (𝟙 W.left))) from s.hom.app (op W) m')
+  rw [← hs_canon_smul, ← hs_canon_m, ← hβ_canon_smul, ← hβ_canon_m]
+  exact (β.val.app (op (Over.mk (𝟙 W.left)))).hom.map_smul r' m'
+
+omit [∀ U, IsMulCommutative (R.obj.obj U)] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Module-linearity of a local functional descends along covering sieves. -/
 theorem dualSubfunctor_isSheaf (M : _root_.SheafOfModules R) :
     Presieve.IsSheaf J (dualSubfunctor R M).toFunctor := by
@@ -270,110 +389,8 @@ theorem dualSubfunctor_isSheaf (M : _root_.SheafOfModules R) :
       (ambientDual R M).property)).2
   intro U s hs
   let α : M.over U.unop ⟶ _root_.SheafOfModules.unit (R.over U.unop) :=
-    { val := PresheafOfModules.homMk s.hom (by
-        intro V r m
-        let T : Sieve V.unop :=
-          (Sieve.overEquiv V.unop).symm
-            (Sieve.pullback (V.unop.hom) ((dualSubfunctor R M).sieveOfSection s))
-        have hT : T ∈ (J.over U.unop) V.unop :=
-          J.overEquiv_symm_mem_over V.unop _ (J.pullback_stable (V.unop.hom) hs)
-        apply (_root_.SheafOfModules.unit (R.over U.unop)).isSheaf.isSeparated
-          V.unop T hT
-        intro W i hi
-        erw [← CategoryTheory.congr_fun (s.hom.naturality i.op) (r • m)]
-        change s.hom.app (op W)
-            ((M.over U.unop).val.map i.op (r • m)) =
-          (_root_.SheafOfModules.unit (R.over U.unop)).val.map i.op
-            (r • (show (_root_.SheafOfModules.unit (R.over U.unop)).val.obj V from
-              s.hom.app V m))
-        rw [PresheafOfModules.map_smul, PresheafOfModules.map_smul]
-        erw [← CategoryTheory.congr_fun (s.hom.naturality i.op) m]
-        have hi' :
-            (Sieve.pullback (V.unop.hom)
-              ((dualSubfunctor R M).sieveOfSection s)) i.left :=
-          (Sieve.overEquiv_symm_iff _ i).mp hi
-        change (ambientDual R M).obj.map (i.left ≫ V.unop.hom).op s ∈
-          (dualSubfunctor R M).obj (op W.left) at hi'
-        rcases hi' with ⟨β, hβ⟩
-        change s.hom.app (op W)
-            ((R.over U.unop).obj.map i.op r • (M.over U.unop).val.map i.op m) =
-          (R.over U.unop).obj.map i.op r •
-            (show (_root_.SheafOfModules.unit (R.over U.unop)).val.obj (op W) from
-              s.hom.app (op W) ((M.over U.unop).val.map i.op m))
-        rw [Over.w i] at hβ
-        have hβ_app := congr_arg
-          (fun q => q.hom.app (op (Over.mk (𝟙 W.left)))) hβ
-        let r' : (R.over W.left).obj.obj (op (Over.mk (𝟙 W.left))) :=
-          (R.over U.unop).obj.map i.op r
-        let m' : (M.over W.left).val.obj (op (Over.mk (𝟙 W.left))) :=
-          (M.over U.unop).val.map i.op m
-        have hβ_smul := CategoryTheory.congr_fun hβ_app (r' • m')
-        have hβ_m := CategoryTheory.congr_fun hβ_app m'
-        have hleft_smul :
-            (dualToAmbient R M W.left β).hom.app (op (Over.mk (𝟙 W.left)))
-                (r' • m') =
-              β.val.app (op (Over.mk (𝟙 W.left))) (r' • m') := rfl
-        have hleft_m :
-            (dualToAmbient R M W.left β).hom.app (op (Over.mk (𝟙 W.left))) m' =
-              β.val.app (op (Over.mk (𝟙 W.left))) m' := rfl
-        have hright_smul :
-            (((ambientDual R M).obj.map W.hom.op s).hom.app
-                (op (Over.mk (𝟙 W.left)))) (r' • m') =
-              s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
-                (r' • m') := rfl
-        have hright_m :
-            (((ambientDual R M).obj.map W.hom.op s).hom.app
-                (op (Over.mk (𝟙 W.left)))) m' =
-              s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left)))) m' := rfl
-        have hβ_canon_smul :
-            β.val.app (op (Over.mk (𝟙 W.left))) (r' • m') =
-              s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
-                (r' • m') :=
-          hleft_smul.symm.trans (hβ_smul.trans hright_smul)
-        have hβ_canon_m :
-            β.val.app (op (Over.mk (𝟙 W.left))) m' =
-              s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left)))) m' :=
-          hleft_m.symm.trans (hβ_m.trans hright_m)
-        let e : (Over.map W.hom).obj (Over.mk (𝟙 W.left)) ≅ W :=
-          Over.isoMk (Iso.refl _) (by rfl)
-        have hs_canon_smul :
-            s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
-                (r' • m') = s.hom.app (op W) (r' • m') := by
-          have h := CategoryTheory.congr_fun (s.hom.naturality e.hom.op) (r' • m')
-          dsimp [e] at h
-          change s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
-              (((_root_.SheafOfModules.toSheaf R).obj M).obj.map (𝟙 W.left).op
-                (r' • m')) =
-            ((_root_.SheafOfModules.toSheaf R).obj
-                (_root_.SheafOfModules.unit R)).obj.map (𝟙 W.left).op
-              (s.hom.app (op W) (r' • m')) at h
-          rw [op_id,
-            ((_root_.SheafOfModules.toSheaf R).obj M).obj.map_id,
-            ((_root_.SheafOfModules.toSheaf R).obj
-              (_root_.SheafOfModules.unit R)).obj.map_id] at h
-          simpa using h
-        have hs_canon_m :
-            s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left)))) m' =
-              s.hom.app (op W) m' := by
-          have h := CategoryTheory.congr_fun (s.hom.naturality e.hom.op) m'
-          dsimp [e] at h
-          change s.hom.app (op ((Over.map W.hom).obj (Over.mk (𝟙 W.left))))
-              (((_root_.SheafOfModules.toSheaf R).obj M).obj.map (𝟙 W.left).op m') =
-            ((_root_.SheafOfModules.toSheaf R).obj
-                (_root_.SheafOfModules.unit R)).obj.map (𝟙 W.left).op
-              (s.hom.app (op W) m') at h
-          rw [op_id,
-            ((_root_.SheafOfModules.toSheaf R).obj M).obj.map_id,
-            ((_root_.SheafOfModules.toSheaf R).obj
-              (_root_.SheafOfModules.unit R)).obj.map_id] at h
-          simpa using h
-        change s.hom.app (op W) (r' • m') =
-          r' • (show (_root_.SheafOfModules.unit (R.over W.left)).val.obj
-            (op (Over.mk (𝟙 W.left))) from s.hom.app (op W) m')
-        rw [← hs_canon_smul, ← hs_canon_m, ← hβ_canon_smul, ← hβ_canon_m]
-        exact (β.val.app (op (Over.mk (𝟙 W.left)))).hom.map_smul r' m') }
-  exact ⟨α, by
-    rfl⟩
+    { val := PresheafOfModules.homMk s.hom (dualSubfunctor_hom_app_smul R M s hs) }
+  exact ⟨α, rfl⟩
 
 /-- Local module-linear functionals identify with the corresponding points of the
 module-linear subfunctor of the additive internal Hom. -/
@@ -417,7 +434,6 @@ theorem dual_val (M : _root_.SheafOfModules R) :
     (dual R M).val = dualPresheaf R M :=
   rfl
 
-set_option maxHeartbeats 4000000 in
 section
 
 private instance overIsMulCommutative (U : C) :
@@ -433,12 +449,14 @@ private noncomputable def iteratedOverEquivalence (U : C) (V : Over U) :
     (S := (R.over U).over V) (R := R.over V.left) (𝟙 _) (𝟙 _)
     (by ext : 2; exact R.1.map_id _) (by ext : 2; exact R.1.map_id _)).symm
 
+set_option maxHeartbeats 2000000 in
 private noncomputable def iteratedDualSectionsEquiv
     (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
     (((M.over U).over V ⟶ _root_.SheafOfModules.unit ((R.over U).over V))) ≃
       (M.over V.left ⟶ _root_.SheafOfModules.unit (R.over V.left)) :=
   (iteratedOverEquivalence R U V).fullyFaithfulFunctor.homEquiv
 
+set_option maxHeartbeats 2000000 in
 private noncomputable def iteratedDualSectionsLinearEquiv
     (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
     letI : Module (R.obj.obj (op V.left))
@@ -510,6 +528,7 @@ noncomputable def dualUnitEndModule (U : C) :
       (End (_root_.SheafOfModules.unit (R.over U))) :=
   Module.compHom _ (overUnitScalarEndRingHom R U)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The identification of unit endomorphisms with scalars is linear for the
 postcomposition action used on the dual. -/
 noncomputable def dualUnitLinearEquiv (U : C) :
@@ -544,6 +563,7 @@ noncomputable def dualUnitLinearEquiv (U : C) :
     rw [op_id, R.obj.map_id]
     exact mul_comm' _ _
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualUnitLinearEquiv_dualRestrict {U V : Cᵒᵖ} (f : U ⟶ V)
     (α : (_root_.SheafOfModules.unit R).over U.unop ⟶
@@ -676,6 +696,7 @@ noncomputable def dualMap {M N : _root_.SheafOfModules R} (f : M ⟶ N) :
     dual R N ⟶ dual R M :=
   ⟨dualMapVal R f⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualMap_id (M : _root_.SheafOfModules R) :
     dualMap R (𝟙 M) = 𝟙 (dual R M) := by
@@ -684,6 +705,7 @@ theorem dualMap_id (M : _root_.SheafOfModules R) :
   change dualPrecomp R (𝟙 M) U.unop α = α
   simp [dualPrecomp]
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualMap_comp {M N P : _root_.SheafOfModules R} (f : M ⟶ N) (g : N ⟶ P) :
     dualMap R (f ≫ g) = dualMap R g ≫ dualMap R f := by
@@ -779,6 +801,7 @@ theorem restrictOverTrivialization_inv_app_apply
       e.inv.val.app (op ((Over.map V.hom).obj Z.unop)) x :=
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualTrivializationLinearEquiv_dualRestrict
     (M : _root_.SheafOfModules R) (U : C)
@@ -914,15 +937,6 @@ noncomputable def dualMapObj {M N : X.Modules} (f : M ⟶ N) :
 noncomputable def dualUnitObjIso : dualObj (unitObj X) ≅ unitObj X :=
   ModularCurves.SheafOfModules.dualUnitIso X.ringCatSheaf
 
-/-- A trivialization on an open subscheme induces the corresponding trivialization
-on the over-site of that open. -/
-noncomputable def overTrivializationOfRestrictIso (M : X.Modules) (U : X.Opens)
-    (e : M.restrict U.ι ≅ unitObj U.toScheme) :
-    M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U) :=
-  (overEquiv U).fullyFaithfulFunctor.preimageIso
-    ((overFunctorEquiv U).app M ≪≫ e ≪≫
-      (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).symm)
-
 /-- A restriction trivialization of `M` induces a restriction trivialization of
 its sheaf dual. -/
 noncomputable def dualRestrictIsoOfRestrictIso (M : X.Modules) (U : X.Opens)
@@ -941,10 +955,7 @@ theorem IsInvertible.dual {M : X.Modules} (hM : IsInvertible M) :
   obtain ⟨ι, U, hU, htriv⟩ := hM
   refine ⟨ι, U, hU, fun i ↦ ?_⟩
   obtain ⟨e⟩ := htriv i
-  let eRestrict : M.restrict (U i).ι ≅ unitObj (U i).toScheme :=
-    (restrictFunctorIsoPullback (U i).ι).app M ≪≫ e
-  exact ⟨(restrictFunctorIsoPullback (U i).ι).symm.app
-      (dualObj M) ≪≫
-    dualRestrictIsoOfRestrictIso M (U i) eRestrict⟩
+  exact ⟨pullbackIsoOfRestrictIso (dualObj M) (U i)
+    (dualRestrictIsoOfRestrictIso M (U i) (restrictIsoOfPullbackIso M (U i) e))⟩
 
 end AlgebraicGeometry.Scheme.Modules

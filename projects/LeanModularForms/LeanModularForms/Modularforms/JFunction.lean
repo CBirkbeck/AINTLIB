@@ -223,27 +223,12 @@ lemma orderAtCusp'_gForm (a : ℂ) : orderAtCusp' (gForm a) = 0 := by
     le_antisymm (by simpa using PowerSeries.order_le 0 hcoeff) bot_le
   rw [orderAtCusp', hord]; rfl
 
-/-- Analyticity of the `dite`-extension of a `Γ(1)` modular form, used to bound vanishing
-orders below. (Reproduces the private `Orbits.G_analyticAtFM`.) -/
-private lemma gExt_analyticAt {k : ℤ} (f : ModularForm (Gamma 1) k) (p : ℍ) :
-    AnalyticAt ℂ (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) := by
-  have h_diffOn : DifferentiableOn ℂ (f ∘ UpperHalfPlane.ofComplex) {w | 0 < w.im} :=
-    UpperHalfPlane.mdifferentiable_iff.mp f.holo'
-  apply Complex.analyticAt_iff_eventually_differentiableAt.mpr
-  filter_upwards [UpperHalfPlane.isOpen_upperHalfPlaneSet.mem_nhds p.im_pos] with w hw
-  have h_eq : ∀ᶠ u in nhds w, (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0) u =
-        (f ∘ UpperHalfPlane.ofComplex) u := by
-    filter_upwards [UpperHalfPlane.isOpen_upperHalfPlaneSet.mem_nhds hw] with u hu
-    simp only [Function.comp_apply, dif_pos hu, UpperHalfPlane.ofComplex_apply_of_im_pos hu]
-  exact ((h_diffOn w hw).differentiableAt
-    (UpperHalfPlane.isOpen_upperHalfPlaneSet.mem_nhds hw)).congr_of_eventuallyEq h_eq
-
 /-- The order of vanishing of `gForm a` at any point of `ℍ` is nonnegative (since `gForm a`
 is holomorphic). -/
 lemma orderOfVanishingAt'_gForm_nonneg (a : ℂ) (p : ℍ) :
     0 ≤ orderOfVanishingAt' (gForm a) p := by
   rw [orderOfVanishingAt', WithTop.untop₀_nonneg]
-  exact (gExt_analyticAt (gForm a) p).meromorphicOrderAt_nonneg
+  exact (G_analyticAtFM (gForm a) p).meromorphicOrderAt_nonneg
 
 /-- The non-elliptic orbit sum of `gForm a`, as an integer. -/
 private def gFormOrbitSumℤ (a : ℂ) : ℤ :=
@@ -299,23 +284,23 @@ private lemma one_le_orderOfVanishingAt'_gForm (a : ℂ) (p : ℍ) (hp : gForm a
   have hge := orderOfVanishingAt'_gForm_nonneg a p
   omega
 
+/-- A zero `p` of `gForm a` forces order `≥ 1` at every point of its orbit.  The order is an
+orbit invariant (`ordOrbit_mkFM`), so it may be read off at any representative. -/
+private lemma one_le_orderOfVanishingAt'_of_orb_eq (a : ℂ) {p x : ℍ} (hp : gForm a p = 0)
+    (horb : orbFM p = orbFM x) : 1 ≤ orderOfVanishingAt' (gForm a) x := by
+  have h := ordOrbit_mkFM (gForm a) p
+  rw [horb, ordOrbit_mkFM] at h
+  rw [h]; exact one_le_orderOfVanishingAt'_gForm a p hp
+
 /-- If a zero `p` of `gForm a` lies in the orbit of `i`, then the order `A` at `i` is `≥ 1`. -/
 private lemma slot_i (a : ℂ) (p : ℍ) (hp : gForm a p = 0) (horb : orbFM p = oiFM) :
-    1 ≤ orderOfVanishingAt' (gForm a) ellipticPointI' := by
-  have h1 : orderOfVanishingAt' (gForm a) ellipticPointI' = orderOfVanishingAt' (gForm a) p := by
-    have := ordOrbit_mkFM (gForm a) p
-    rw [horb, oiFM, ordOrbit_mkFM] at this
-    exact this
-  rw [h1]; exact one_le_orderOfVanishingAt'_gForm a p hp
+    1 ≤ orderOfVanishingAt' (gForm a) ellipticPointI' :=
+  one_le_orderOfVanishingAt'_of_orb_eq a hp horb
 
 /-- If a zero `p` of `gForm a` lies in the orbit of `ρ`, then the order `B` at `ρ` is `≥ 1`. -/
 private lemma slot_rho (a : ℂ) (p : ℍ) (hp : gForm a p = 0) (horb : orbFM p = orhoFM) :
-    1 ≤ orderOfVanishingAt' (gForm a) ellipticPointRho' := by
-  have h1 : orderOfVanishingAt' (gForm a) ellipticPointRho' = orderOfVanishingAt' (gForm a) p := by
-    have := ordOrbit_mkFM (gForm a) p
-    rw [horb, orhoFM, ordOrbit_mkFM] at this
-    exact this
-  rw [h1]; exact one_le_orderOfVanishingAt'_gForm a p hp
+    1 ≤ orderOfVanishingAt' (gForm a) ellipticPointRho' :=
+  one_le_orderOfVanishingAt'_of_orb_eq a hp horb
 
 /-- The orbit order of `gForm a` at the orbit of a zero `p` is at least `1`. -/
 private lemma one_le_ordOrbitFM_gForm (a : ℂ) (p : ℍ) (hp : gForm a p = 0) :
@@ -336,8 +321,8 @@ private lemma slot_nonEll_two (a : ℂ) (q₁ q₂ : NonEllOrbitFM) (hne : q₁ 
     (h1 : 1 ≤ ordOrbitFM (gForm a) q₁.val) (h2 : 1 ≤ ordOrbitFM (gForm a) q₂.val) :
     2 ≤ gFormOrbitSumℤ a := by
   classical
-  have hfin : Function.HasFiniteSupport
-      (fun q : NonEllOrbitFM => ordOrbitFM (gForm a) q.val) :=
+  have hfin : (Function.support
+      (fun q : NonEllOrbitFM => ordOrbitFM (gForm a) q.val)).Finite :=
     (finite_support_ordOrbit_nonEllFM (gForm a) (gForm_ne_zero a)).subset fun _ h => h
   have hsum : gFormOrbitSumℤ a =
       ∑ q ∈ hfin.toFinset, ordOrbitFM (gForm a) q.val := by

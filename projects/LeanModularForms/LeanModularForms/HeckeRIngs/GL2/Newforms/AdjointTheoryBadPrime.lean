@@ -90,20 +90,6 @@ theorem petN_badUp_LHS_eq_aggregate
     badUp_coe_eq_sum_slashes p hp hpN f]
 
 open UpperHalfPlane ModularGroup MeasureTheory in
-/-- Null-measurability of a positive-determinant `GL(2,ℝ)`-translate of the `Γ₁(N)` PSL-FD
-(re-proof of the `ConcreteFamily` private helper). -/
-private lemma nullMeasurableSet_glPos_smul_Gamma1_fundDomain_PSL'
-    {β : GL (Fin 2) ℝ} (hβ : 0 < β.det.val) :
-    NullMeasurableSet (β • (Gamma1_fundDomain_PSL N : Set ℍ)) μ_hyp := by
-  have hinv : 0 < (β⁻¹).det.val := by
-    rw [map_inv, Units.val_inv_eq_inv_val]; exact inv_pos.mpr hβ
-  have h_eq : (β • (Gamma1_fundDomain_PSL N : Set ℍ)) =
-      ((β⁻¹ • ·) : ℍ → ℍ) ⁻¹' (Gamma1_fundDomain_PSL N : Set ℍ) := by
-    ext τ; simp [Set.mem_preimage, Set.mem_smul_set_iff_inv_smul_mem]
-  rw [h_eq]
-  exact isFundamentalDomain_Gamma1_PSL.nullMeasurableSet.preimage
-    (measurePreserving_glPos_smul _ hinv).quasiMeasurePreserving
-
 open UpperHalfPlane ModularGroup MeasureTheory in
 /-- **Sum-of-slashes adjoint (bad-prime `p`-tile family).** The Petersson integral of
 `Σ_{b<p} f ∣ [1,b;0,p]` against `g` over the `Γ₁(N)` PSL-FD transfers to the integral of `f`
@@ -130,7 +116,7 @@ theorem peterssonInner_badUp_sum_slashes_eq_aggregate
     (f := f) (g := g) (g' := ⇑g ∣[k] (glMap (T_p_lower p hp.pos) : GL (Fin 2) ℝ))
     (fun b _ ↦ glMap_T_p_upper_det_pos p hp.pos b.val)
     (fun b _ ↦ slash_peterssonAdj_glMap_T_p_upper_eq_slash_T_p_lower p hp.pos b.val g)
-    (fun b _ ↦ nullMeasurableSet_glPos_smul_Gamma1_fundDomain_PSL'
+    (fun b _ ↦ nullMeasurableSet_glPos_smul_Gamma1_fundDomain_PSL
       (glMap_T_p_upper_det_pos p hp.pos b.val))
     (by
       intro b₁ _ b₂ _ hne
@@ -348,29 +334,8 @@ coprimality-touching ingredient there is `center_mem_Gamma_p_α_T_p_lower_iff_me
 the center (conjugation fixes `±I` in `GL(2,ℝ)`), with no coprimality. -/
 
 open CongruenceSubgroup in
-/-- PSL-fiber characterization at `[1]` (any `H ≤ SL(2,ℤ)`): the double PSL-quotient lands at
-the identity iff there is a central rep `z` with `g·z ∈ H`. Coprimality-free re-proof of the
-private `ConcreteFamily.pslQuot_eq_one_iff_exists_center_mem`. -/
-private theorem pslQuot_eq_one_iff_exists_center_mem'
-    (H : Subgroup SL(2, ℤ)) (g : SL(2, ℤ)) :
-    (QuotientGroup.mk (QuotientGroup.mk g : PSL(2, ℤ)) :
-        PSL(2, ℤ) ⧸ (H.map (QuotientGroup.mk' (Subgroup.center SL(2, ℤ))))) =
-      QuotientGroup.mk 1 ↔
-    ∃ z ∈ Subgroup.center SL(2, ℤ), g * z ∈ H := by
-  rw [QuotientGroup.eq, mul_one, Subgroup.inv_mem_iff, Subgroup.mem_map]
-  constructor
-  · rintro ⟨h, hh, hhe⟩
-    rw [QuotientGroup.mk'_apply, QuotientGroup.eq] at hhe
-    refine ⟨g⁻¹ * h, ?_, by group; exact hh⟩
-    have := (Subgroup.center SL(2, ℤ)).inv_mem hhe
-    rwa [mul_inv_rev, inv_inv] at this
-  · rintro ⟨z, hz, hgz⟩
-    exact ⟨g * z, hgz, by
-      rw [QuotientGroup.mk'_apply, QuotientGroup.mk_mul,
-        (QuotientGroup.eq_one_iff _).mpr hz, mul_one]⟩
-
-omit [NeZero N] in
 open CongruenceSubgroup in
+omit [NeZero N] in
 /-- `-I ∈ Γ_p(A) ↔ -I ∈ Γ₁(N)` (`A = diag(p,1)`), coprimality-free: conjugation by any
 `GL(2,ℝ)` element fixes the central image `±I`, so `z ∈ conjGL Γ₁ A ↔ z ∈ Γ₁` for central
 `z`. -/
@@ -403,6 +368,7 @@ private theorem center_mem_Gamma_p_α_T_p_lower_iff_mem_Gamma1'
     hcomm.eq, mul_assoc, ← Matrix.GeneralLinearGroup.coe_mul, mul_inv_cancel,
     Matrix.GeneralLinearGroup.coe_one, mul_one]
 
+omit [NeZero N] in
 open CongruenceSubgroup in
 /-- Center crux (coprimality-free mirror of
 `ConcreteFamily.Gamma1_coset_iff_Gamma_p_α_coset_of_center_fiber`). -/
@@ -457,11 +423,12 @@ private theorem slGamma_p_αToGamma1_maps_into_Gamma1_fiber'
   induction q using QuotientGroup.induction_on with | _ g => ?_
   rw [slToPslQuot_Gamma_p_α_mk] at hq
   rw [slGamma_p_αToGamma1_mk, slToPslQuot_mk]
-  obtain ⟨z, hz, hgz⟩ := (pslQuot_eq_one_iff_exists_center_mem' _ g).mp hq
-  exact (pslQuot_eq_one_iff_exists_center_mem' _ g).mpr
+  obtain ⟨z, hz, hgz⟩ := (pslQuot_eq_one_iff_exists_center_mem _ g).mp hq
+  exact (pslQuot_eq_one_iff_exists_center_mem _ g).mpr
     ⟨z, hz, (Gamma_p_α_le_Gamma1 _) hgz⟩
 
 open CongruenceSubgroup in
+omit [NeZero N] in
 /-- `slGamma_p_αToGamma1 A` is injective on the `Γ_p(A)`-fiber of `[1]`. Coprimality-free
 mirror of `ConcreteFamily.slGamma_p_αToGamma1_injective_on_Gamma_p_α_fiber`. -/
 private theorem slGamma_p_αToGamma1_injective_on_Gamma_p_α_fiber'
@@ -480,8 +447,8 @@ private theorem slGamma_p_αToGamma1_injective_on_Gamma_p_α_fiber'
   induction q₂ using QuotientGroup.induction_on with | _ g₂ => ?_
   rw [slToPslQuot_Gamma_p_α_mk] at hq₁ hq₂
   rw [slGamma_p_αToGamma1_mk, slGamma_p_αToGamma1_mk, QuotientGroup.eq] at heq
-  obtain ⟨z₁, hz₁, hgz₁⟩ := (pslQuot_eq_one_iff_exists_center_mem' _ g₁).mp hq₁
-  obtain ⟨z₂, hz₂, hgz₂⟩ := (pslQuot_eq_one_iff_exists_center_mem' _ g₂).mp hq₂
+  obtain ⟨z₁, hz₁, hgz₁⟩ := (pslQuot_eq_one_iff_exists_center_mem _ g₁).mp hq₁
+  obtain ⟨z₂, hz₂, hgz₂⟩ := (pslQuot_eq_one_iff_exists_center_mem _ g₂).mp hq₂
   rw [QuotientGroup.eq]
   exact (Gamma1_coset_iff_Gamma_p_α_coset_of_center_fiber' p hp g₁ g₂ z₁ z₂
     hz₁ hz₂ hgz₁ hgz₂).mp heq
@@ -501,10 +468,10 @@ private theorem slGamma_p_αToGamma1_surjective_onto_Gamma1_fiber'
       slGamma_p_αToGamma1 (N := N) (T_p_lower p hp) a = q := by
   induction q using QuotientGroup.induction_on with | _ g => ?_
   rw [slToPslQuot_mk] at hq
-  obtain ⟨z, hz, hgz⟩ := (pslQuot_eq_one_iff_exists_center_mem' _ g).mp hq
+  obtain ⟨z, hz, hgz⟩ := (pslQuot_eq_one_iff_exists_center_mem _ g).mp hq
   refine ⟨QuotientGroup.mk z⁻¹, ?_, ?_⟩
   · rw [slToPslQuot_Gamma_p_α_mk]
-    refine (pslQuot_eq_one_iff_exists_center_mem' _ z⁻¹).mpr ⟨z, hz, ?_⟩
+    refine (pslQuot_eq_one_iff_exists_center_mem _ z⁻¹).mpr ⟨z, hz, ?_⟩
     rw [inv_mul_cancel]
     exact (Gamma_p_α (N := N) (T_p_lower p hp)).one_mem
   · rw [slGamma_p_αToGamma1_mk, QuotientGroup.eq, inv_inv,
@@ -558,7 +525,7 @@ theorem petN_badUp_eq_petN_badUpAdjoint
         show (glMap (T_p_lower p hp.pos) : GL (Fin 2) ℝ) =
           ((T_p_lower p hp.pos).map (Rat.castHom ℝ) : GL (Fin 2) ℝ) from rfl]
       exact slash_α_Gamma_p_α_invariant_cuspForm (T_p_lower p hp.pos) g hγ)
-    (fun b _ ↦ nullMeasurableSet_glPos_smul_Gamma1_fundDomain_PSL'
+    (fun b _ ↦ nullMeasurableSet_glPos_smul_Gamma1_fundDomain_PSL
       (glMap_T_p_upper_det_pos p hp.pos b.val))
     (by
       intro b₁ _ b₂ _ hne

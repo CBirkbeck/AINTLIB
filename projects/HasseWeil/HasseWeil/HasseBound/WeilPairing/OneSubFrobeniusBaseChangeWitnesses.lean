@@ -82,16 +82,17 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback
 
-set_option linter.style.longLine false
 
 /- `frobeniusIsog_baseChange_charP_pow` and `frobeniusIsog_relative_iterate` carry their codomain
 through a `cast` over a *propositional* curve equality.  Evaluating the point map of such a `cast`
-on a point requires transporting across the curve equality; the three `HEq` helpers below do that. -/
+on a point requires transporting across the curve equality; the three `HEq` helpers
+below do that. -/
 
 /-- **Cast-transport for `Isogeny.toAddMonoidHom`** (`HEq` form).  When the codomain curve equality
 `A₂ = A₂'` holds, casting an isogeny `A₁ → A₂` to `A₁ → A₂'` and applying its point map at `P`
 is heterogeneously equal to applying the original point map at `P`. -/
-theorem isogeny_cast_apply_heq {F : Type*} [Field F] [DecidableEq F] {A₁ A₂ A₂' : WeierstrassCurve F}
+theorem isogeny_cast_apply_heq {F : Type*} [Field F] [DecidableEq F] {A₁ A₂ A₂' : WeierstrassCurve
+  F}
     [A₁.toAffine.IsElliptic] [A₂.toAffine.IsElliptic] [A₂'.toAffine.IsElliptic]
     (φ : Isogeny A₁.toAffine A₂.toAffine) (hcurve : A₂ = A₂')
     (hisog : Isogeny A₁.toAffine A₂.toAffine = Isogeny A₁.toAffine A₂'.toAffine)
@@ -129,7 +130,8 @@ theorem hns_iter (E : WeierstrassCurve K) [E.toAffine.IsElliptic] (n : ℕ) {x y
     (f := iterateFrobenius K p n) (RingHom.injective _) x y).mpr h
 
 /-- **The iterated relative `p`-Frobenius point map on `.some`** (`HEq` form, transporting the
-codomain `cast`).  `(frobeniusIsog_relative_iterate p E r).toAddMonoidHom (x, y) = (x^{p^r}, y^{p^r})`
+codomain `cast`). 
+`(frobeniusIsog_relative_iterate p E r).toAddMonoidHom (x, y) = (x^{p^r}, y^{p^r})`
 on `E.map (iterateFrobenius K p r)`.
 
 Induction on `r`: the base case is the identity (after the `cast` over `E.map id = E`), and the step
@@ -177,7 +179,8 @@ theorem iterate_apply_some_heq (E : WeierstrassCurve K) [E.toAffine.IsElliptic] 
     refine HEq.trans ?_ (some_heq_of_curve_eq hcs ?_ h')
     · congr 1
     · rw [← hxp, ← hyp]
-      exact (WeierstrassCurve.Affine.map_nonsingular (W := (E.map (iterateFrobenius K p n)).toAffine)
+      exact (WeierstrassCurve.Affine.map_nonsingular (W := (E.map
+        (iterateFrobenius K p n)).toAffine)
         (f := frobenius K p) (RingHom.injective _) (x ^ p ^ n) (y ^ p ^ n)).mpr hns_n
 
 end Iterate
@@ -204,7 +207,8 @@ theorem frobeniusHomBaseChange_eq_geomFrobeniusPoint
   haveI : ExpChar (AlgebraicClosure K) p := ExpChar.prime Fact.out
   have hcz : (W.baseChange (AlgebraicClosure K)).map (iterateFrobenius (AlgebraicClosure K) p r) =
       W.baseChange (AlgebraicClosure K) :=
-    Isogeny.frobeniusTwistIterate_baseChange_eq_self_of_charP_pow (k := K) p r W (AlgebraicClosure K)
+    Isogeny.frobeniusTwistIterate_baseChange_eq_self_of_charP_pow (k := K) p r W
+      (AlgebraicClosure K)
   ext P
   change (Isogeny.frobeniusIsog_baseChange_charP_pow p r W (AlgebraicClosure K)).toAddMonoidHom P
     = geomFrobeniusPointFun W P
@@ -212,7 +216,8 @@ theorem frobeniusHomBaseChange_eq_geomFrobeniusPoint
   rcases P with _ | ⟨x, y, h⟩
   · refine eq_of_heq (HEq.trans (isogeny_cast_apply_heq _ hcz ?_ Affine.Point.zero) ?_)
     · congr 1
-    · change HEq ((Isogeny.frobeniusIsog_relative_iterate p (W.baseChange (AlgebraicClosure K)) r).toAddMonoidHom 0)
+    · change HEq ((Isogeny.frobeniusIsog_relative_iterate p (W.baseChange
+      (AlgebraicClosure K)) r).toAddMonoidHom 0)
         (geomFrobeniusPointFun W 0)
       rw [map_zero, geomFrobeniusPointFun_zero]
       exact zero_heq_of_curve_eq hcz
@@ -258,14 +263,16 @@ noncomputable local instance instDecEqAC' : DecidableEq (AlgebraicClosure K) := 
 /-- **Witness 1 — `finiteKer`** (PROVED, axiom-clean): the kernel of `(1 − π)_{K̄}` is finite.
 
 Via the linchpin, `ker(id − π̄) = ker(oneSubGeomFrobHom)`, whose underlying set is the
-geometric-Frobenius fixed locus `= range(includePointBC)` (Step S2/S3 of `FrobeniusFixedPoint.lean`),
+geometric-Frobenius fixed locus `= range(includePointBC)` (Step S2/S3 of
+`FrobeniusFixedPoint.lean`),
 i.e. the image of the **finite** point set `E(𝔽_q) = W.toAffine.Point` under the base-change
 inclusion — hence finite. -/
 theorem oneSubFrobeniusIsogBaseChange_finiteKer
     [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
     (pullback_L : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[AlgebraicClosure K]
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) :
-    Finite (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) pullback_L).toAddMonoidHom.ker := by
+    Finite (oneSubFrobeniusIsogBaseChange W p r
+      (AlgebraicClosure K) pullback_L).toAddMonoidHom.ker := by
   rw [oneSubFrobeniusIsogBaseChange_toAddMonoidHom_eq_oneSubGeomFrobHom]
   have hset : ((oneSubGeomFrobHom W).ker : Set (W.baseChange (AlgebraicClosure K)).toAffine.Point) =
       Set.range (includePointBC W) := by
@@ -281,11 +288,13 @@ theorem oneSubFrobeniusIsogBaseChange_nat_card_ker_eq_pointCount
     [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
     (pullback_L : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[AlgebraicClosure K]
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) :
-    Nat.card (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) pullback_L).toAddMonoidHom.ker =
+    Nat.card (oneSubFrobeniusIsogBaseChange W p r
+      (AlgebraicClosure K) pullback_L).toAddMonoidHom.ker =
       pointCount W.toAffine := by
   rw [oneSubFrobeniusIsogBaseChange_toAddMonoidHom_eq_oneSubGeomFrobHom]
   have hcard : Nat.card ↥(oneSubGeomFrobHom W).ker =
-      ((oneSubGeomFrobHom W).ker : Set (W.baseChange (AlgebraicClosure K)).toAffine.Point).ncard := by
+      ((oneSubGeomFrobHom W).ker : Set (W.baseChange
+        (AlgebraicClosure K)).toAffine.Point).ncard := by
     rw [← Nat.card_coe_set_eq]; rfl
   rw [hcard, ncard_ker_oneSubGeomFrobHom_eq_pointCount]
   rfl
@@ -307,7 +316,8 @@ theorem oneSubFrobeniusIsogBaseChange_hkerdeg_of_degree_eq_pointCount
     (hdeg_eq :
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) pullback_L).degree =
         pointCount W.toAffine) :
-    Nat.card (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) pullback_L).toAddMonoidHom.ker =
+    Nat.card (oneSubFrobeniusIsogBaseChange W p r
+      (AlgebraicClosure K) pullback_L).toAddMonoidHom.ker =
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K) pullback_L).degree := by
   rw [oneSubFrobeniusIsogBaseChange_nat_card_ker_eq_pointCount, hdeg_eq]
 
@@ -350,12 +360,14 @@ open IsogenyBaseChangeConcrete
 
 variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
   [IsIntegrallyClosed
-    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing]
+    (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve
+      (AlgebraicClosure K)).CoordinateRing]
 
 /-- **Assemble `OneSubScalingData` over `K̄` from only the still-open witnesses.**
 
 Discharges `pullback_L` (concrete `oneSubFrobeniusPullback_L`), `hdeg_bc` (proved, no hypothesis),
-`finiteKer` (proved), `hkerdeg` (from the V.1.3 identity `hdeg_eq`), and `hsurj` (from the dual composition
+`finiteKer` (proved), `hkerdeg` (from the V.1.3 identity `hdeg_eq`), and `hsurj` (from the
+dual composition
 `hself` + `mulByInt_point_surjective`).  The caller supplies only the genuinely-deep divisor-level
 residuals: the dual `δ` with *both* composition identities `hdc`/`hself` (an `IsDualOf`), the
 divisor-pullback functoriality `hproj`, and the translation covariance `hcomm'`. -/
@@ -373,13 +385,15 @@ noncomputable def mkOneSubScalingDataConcrete_of_witnesses (hq : 2 ≤ Fintype.c
           (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom =
         (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine
           (Nat.card (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
-            (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom.ker : ℤ)).toAddMonoidHom)
+            (oneSubFrobeniusPullback_L W
+              (AlgebraicClosure K) hq)).toAddMonoidHom.ker : ℤ)).toAddMonoidHom)
     (hself :
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
           (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom.comp δ =
         (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine
           (Nat.card (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
-            (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom.ker : ℤ)).toAddMonoidHom)
+            (oneSubFrobeniusPullback_L W
+              (AlgebraicClosure K) hq)).toAddMonoidHom.ker : ℤ)).toAddMonoidHom)
     (hNne :
       ((Nat.card (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
         (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom.ker : ℤ)
@@ -394,7 +408,8 @@ noncomputable def mkOneSubScalingDataConcrete_of_witnesses (hq : 2 ≤ Fintype.c
         translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) S
             ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
               (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).pullback
-              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
+              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ)
+                (by exact_mod_cast hℓF)
                 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                   (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom T) hφT)) =
           (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
@@ -402,12 +417,14 @@ noncomputable def mkOneSubScalingDataConcrete_of_witnesses (hq : 2 ≤ Fintype.c
             (translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K))
               ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                 (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom S)
-              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
+              (weilFunction (W.baseChange (AlgebraicClosure K)) ((ℓ : ℕ) : ℤ)
+                (by exact_mod_cast hℓF)
                 ((oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
                   (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq)).toAddMonoidHom T) hφT))) :
     OneSubScalingData W p r (AlgebraicClosure K) hq :=
   mkOneSubScalingDataConcrete W p r (AlgebraicClosure K) hq
-    (oneSubFrobeniusIsogBaseChange_finiteKer W p r (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq))
+    (oneSubFrobeniusIsogBaseChange_finiteKer W p r (oneSubFrobeniusPullback_L W
+      (AlgebraicClosure K) hq))
     hproj δ hdc (oneSubFrobeniusIsogBaseChange_hsurj_of_self_comp_dual W p r
       (oneSubFrobeniusPullback_L W (AlgebraicClosure K) hq) δ _ hNne hself)
     (oneSubFrobeniusIsogBaseChange_hkerdeg_of_degree_eq_pointCount W p r

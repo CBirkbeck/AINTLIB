@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
 
 /-!
 # Sinnott index formula: structural decomposition
@@ -89,7 +91,7 @@ theorem sinnottIndexFormula_of_regulatorIdentity
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (h : SinnottRegulatorIdentity p K hp_odd hp_three) :
     SinnottIndexFormula p K hp_odd hp_three := by
-  unfold SinnottIndexFormula SinnottRegulatorIdentity at *
+  simp only [SinnottIndexFormula, SinnottRegulatorIdentity] at *
   -- `regOfFamily family / regulator K⁺ = [E⁺ : ⟨family⟩ ⊔ torsion]`.
   have h_div := regOfFamily_cyclotomicUnitFamilyKplus_div_regulator
     p K hp_odd hp_three
@@ -105,7 +107,7 @@ theorem sinnottRegulatorIdentity_of_indexFormula
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (h : SinnottIndexFormula p K hp_odd hp_three) :
     SinnottRegulatorIdentity p K hp_odd hp_three := by
-  unfold SinnottIndexFormula SinnottRegulatorIdentity at *
+  simp only [SinnottIndexFormula, SinnottRegulatorIdentity] at *
   have h_div := regOfFamily_cyclotomicUnitFamilyKplus_div_regulator
     p K hp_odd hp_three
   rw [h] at h_div
@@ -168,7 +170,7 @@ theorem sinnottRegulatorIdentity_of_analyticIdentity
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (h : SinnottAnalyticIdentity p K hp_odd hp_three) :
     SinnottRegulatorIdentity p K hp_odd hp_three := by
-  unfold SinnottAnalyticIdentity SinnottRegulatorIdentity at *
+  simp only [SinnottAnalyticIdentity, SinnottRegulatorIdentity] at *
   -- Analytic CNF: `(hPlus K : ℝ) = (analytic factor) / (… · regulator K⁺)`.
   have h_cnf := hPlus_formula K
   have h_reg_pos : 0 < NumberField.Units.regulator
@@ -184,7 +186,7 @@ theorem sinnottAnalyticIdentity_of_regulatorIdentity
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (h : SinnottRegulatorIdentity p K hp_odd hp_three) :
     SinnottAnalyticIdentity p K hp_odd hp_three := by
-  unfold SinnottRegulatorIdentity SinnottAnalyticIdentity at *
+  simp only [SinnottRegulatorIdentity, SinnottAnalyticIdentity] at *
   have h_cnf := hPlus_formula K
   have h_reg_pos : 0 < NumberField.Units.regulator
       (NumberField.maximalRealSubfield K) :=

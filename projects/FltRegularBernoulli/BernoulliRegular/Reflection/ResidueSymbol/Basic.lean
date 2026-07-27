@@ -177,7 +177,7 @@ theorem finiteFieldExponent_eq_zero_iff_finiteFieldUnit_eq_one [NeZero p]
     (zeta : kˣ) (hzeta : IsPrimitiveRoot zeta p)
     (hdiv : p ∣ Fintype.card k - 1) (x : kˣ) :
     finiteFieldExponent zeta hzeta hdiv x = 0 ↔ finiteFieldUnit hdiv x = 1 := by
-  unfold finiteFieldExponent
+  simp only [finiteFieldExponent]
   rw [(hzeta.zmodEquivZPowers).symm.map_eq_zero_iff]
   constructor
   · intro h
@@ -352,7 +352,7 @@ theorem idealExponent_mul (chi : Ideal R → ZMod p)
     {I J : Ideal R} (hI : I ≠ 0) (hJ : J ≠ 0) :
     idealExponent chi (I * J) =
       idealExponent chi I + idealExponent chi J := by
-  unfold idealExponent
+  simp only [idealExponent]
   rw [normalizedFactors_mul hI hJ]
   simp
 
@@ -367,7 +367,7 @@ theorem idealExponentOfPrimeSymbols_mul (chi : (q : Ideal R) → Prime q → ZMo
     idealExponentOfPrimeSymbols chi (I * J) =
       idealExponentOfPrimeSymbols chi I + idealExponentOfPrimeSymbols chi J := by
   classical
-  unfold idealExponentOfPrimeSymbols
+  simp only [idealExponentOfPrimeSymbols]
   exact idealExponent_mul (fun q ↦ if hq : Prime q then chi q hq else 0) hI hJ
 
 end IdealFactorization

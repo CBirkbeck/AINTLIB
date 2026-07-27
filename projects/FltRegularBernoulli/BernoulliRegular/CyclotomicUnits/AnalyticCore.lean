@@ -1,7 +1,9 @@
-import BernoulliRegular.LValueAtOne.Even
-import BernoulliRegular.GaussSum.Basic
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge
-import Mathlib.NumberTheory.LSeries.Nonvanishing
+module
+
+public import BernoulliRegular.LValueAtOne.Even
+public import BernoulliRegular.GaussSum.Basic
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge
+public import Mathlib.NumberTheory.LSeries.Nonvanishing
 
 /-!
 # Analytic core for the cyclotomic-unit route

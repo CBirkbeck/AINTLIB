@@ -790,6 +790,7 @@ theorem example638Plus_backward_forward_eq_id
       rw [hg_eq, map_add, map_add, hg'_agree, hgk_agree, ← map_add]
   exact congr_fun (Continuous.ext_on hS_dense hLHS_cont hRHS_cont hagree) x
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `forward ∘ backward = id` on `presheafValue (trivialPlusDatum B P b)`. -/
 theorem example638Plus_forward_backward_eq_id
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
@@ -900,6 +901,7 @@ noncomputable def example638Plus_equiv
   map_mul' := map_mul _
   map_add' := map_add _
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The forward direction of `example638Plus_equiv` sends `mk(algebraMap a)` to
 `canonicalMap a`. -/
 theorem example638Plus_equiv_mk_algebraMap
@@ -925,6 +927,7 @@ theorem example638Plus_equiv_mk_algebraMap
   rw [Ideal.Quotient.lift_mk]
   exact example638Plus_evalHom_algebraMap B P b a
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The forward direction of `example638Plus_equiv` sends `mk(X)` to `canonicalMap b`. -/
 theorem example638Plus_equiv_mk_X
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)

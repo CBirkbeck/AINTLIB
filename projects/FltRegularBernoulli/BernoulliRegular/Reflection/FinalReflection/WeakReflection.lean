@@ -356,36 +356,8 @@ theorem exists_ne_one_classGroupModP_of_dvd_classNumber
     (K : Type u) [Field K] [NumberField K]
     (hdvd : p ∣ Fintype.card (ClassGroup (𝓞 K))) :
     ∃ x : ClassGroupModP K p, x ≠ 1 := by
-  classical
-  by_contra hnone
-  push Not at hnone
-  have hsub : Subsingleton (ClassGroupModP K p) :=
-    ⟨fun x y ↦ by rw [hnone x, hnone y]⟩
-  let G := ClassGroup (𝓞 K)
-  have htop : (powMonoidHom p : G →* G).range = ⊤ :=
-    QuotientGroup.subgroup_eq_top_of_subsingleton
-      ((powMonoidHom p : G →* G).range) hsub
-  have hsurj : Function.Surjective (powMonoidHom p : G →* G) := by
-    intro y
-    have hy : y ∈ (powMonoidHom p : G →* G).range := by
-      rw [htop]
-      exact Subgroup.mem_top y
-    simpa [MonoidHom.mem_range] using hy
-  have hinj : Function.Injective (powMonoidHom p : G →* G) :=
-    (Finite.injective_iff_surjective).mpr hsurj
-  obtain ⟨g, hg_order⟩ :=
-    exists_prime_orderOf_dvd_card (G := G) p hdvd
-  have hg_pow : g ^ p = 1 :=
-    orderOf_dvd_iff_pow_eq_one.mp (by rw [hg_order])
-  have hg_ne : g ≠ 1 := by
-    intro hg
-    have : orderOf g = 1 := orderOf_eq_one_iff.mpr hg
-    rw [this] at hg_order
-    exact (Fact.out : Nat.Prime p).ne_one hg_order.symm
-  apply hg_ne
-  apply hinj
-  change g ^ p = (1 : G) ^ p
-  simpa using hg_pow
+  rw [← nontrivial_iff_exists_ne (1 : ClassGroupModP K p)]
+  exact nontrivial_classGroupModP_of_dvd_card p K hdvd
 
 /-- Additive form of `exists_ne_one_classGroupModP_of_dvd_classNumber`. -/
 theorem exists_ne_zero_additive_classGroupModP_of_dvd_classNumber
@@ -417,7 +389,7 @@ theorem plusClassGroupImage_index_eq_hMinus
   have hhmul : h K = hPlus K * hMinus K :=
     h_eq_hPlus_mul_hMinus p hp_odd K
   have hpos : 0 < hPlus K := by
-    unfold hPlus
+    simp only [hPlus]
     exact Fintype.card_pos
   exact Nat.eq_of_mul_eq_mul_left hpos (by
     rw [hmul, hhmul])

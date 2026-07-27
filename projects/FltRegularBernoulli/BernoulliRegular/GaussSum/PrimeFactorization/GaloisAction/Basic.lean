@@ -669,12 +669,14 @@ lemma stickelbergerComplexCharacter_apply_unit
     (stickelbergerComplexCharacter_apply_characterUnitGeneratorPow (p := p) χ
       (characterUnitGeneratorExponent (p := p) a : ℕ))
 
+set_option backward.isDefEq.respectTransparency false in
 lemma stickelbergerEmbedding_gaussSumLiftAdditiveRoot :
     stickelbergerEmbedding p L (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L)) =
       stickelbergerComplexRoot p ^ (p - 1) := by
   simp [gaussSumLiftAdditiveRoot, stickelbergerZetaInteger, map_pow,
     stickelbergerEmbedding_apply_zeta]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma stickelbergerEmbedding_gaussSumLiftCharacterRoot :
     stickelbergerEmbedding p L (((gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L)) =
       stickelbergerComplexCharacterRoot (p := p) := by
@@ -702,7 +704,7 @@ lemma gaussSumComplexRootSum_eq_gaussSum (χ : DirichletCharacter ℂ p) :
             χ (((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p) *
               (ZMod.stdAddChar : AddChar (ZMod p) ℂ)
                 ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p)) := by
-              unfold gaussSumComplexRootSum
+              simp only [gaussSumComplexRootSum]
               apply Finset.sum_congr rfl
               intro m _
               rw [stickelbergerComplexCharacter_apply_characterUnitGeneratorPow (p := p),
@@ -732,7 +734,7 @@ noncomputable def gaussSumLiftCharacterValue
 lemma gaussSumLiftCharacterValue_isUnit
     (χ : DirichletCharacter ℂ p) (a : (ZMod p)ˣ) :
     IsUnit (gaussSumLiftCharacterValue (p := p) (L := L) χ a) := by
-  unfold gaussSumLiftCharacterValue
+  simp only [gaussSumLiftCharacterValue]
   exact ((gaussSumLiftCharacterRoot_isPrimitiveRoot (p := p) (L := L)).isUnit
     (Nat.sub_ne_zero_of_lt hp.out.one_lt)).pow _
 
@@ -741,7 +743,7 @@ lemma stickelbergerEmbedding_gaussSumLiftCharacterValue
     stickelbergerEmbedding p L
         (((gaussSumLiftCharacterValue (p := p) (L := L) χ a : 𝓞 L) : L)) =
       χ (a : ZMod p) := by
-  unfold gaussSumLiftCharacterValue
+  simp only [gaussSumLiftCharacterValue]
   calc
     stickelbergerEmbedding p L
         (((gaussSumLiftCharacterRoot (p := p) L ^
@@ -765,7 +767,7 @@ lemma stickelbergerEmbedding_gaussSumLiftCharacterValue
 lemma stickelbergerEmbedding_gaussSumLiftRootSum (χ : DirichletCharacter ℂ p) :
     stickelbergerEmbedding p L (gaussSumLiftRootSum (p := p) (L := L) χ) =
       gaussSumComplexRootSum (p := p) χ := by
-  unfold gaussSumLiftRootSum gaussSumComplexRootSum
+  simp only [gaussSumLiftRootSum, gaussSumComplexRootSum]
   rw [map_sum]
   apply Finset.sum_congr rfl
   intro m hm
@@ -837,7 +839,7 @@ lemma characterSideEmbedding_gaussSumLiftRootSum
                 (((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p) *
               (ZMod.stdAddChar : AddChar (ZMod p) ℂ)
                 ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p)) := by
-              unfold gaussSumLiftRootSum
+              simp only [gaussSumLiftRootSum]
               rw [map_sum]
               apply Finset.sum_congr rfl
               intro m _

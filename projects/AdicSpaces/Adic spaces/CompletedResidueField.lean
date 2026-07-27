@@ -105,7 +105,7 @@ noncomputable def completedResidueField (x : ↥(Spa A A⁺)) : Type u :=
 (inherited from the uniform completion of the valued fraction field). -/
 noncomputable instance completedResidueField.instCommRing
     (x : ↥(Spa A A⁺)) : CommRing (completedResidueField A x) := by
-  unfold completedResidueField Valuation.Completion
+  simp only [completedResidueField, Valuation.Completion]
   infer_instance
 
 end ValuationSpectrum

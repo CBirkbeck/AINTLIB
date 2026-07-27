@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import Mathlib.RingTheory.Grassmannian
 import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 
@@ -18,9 +23,6 @@ by `x : Fin k → M` … the composition `R^k → M → M⧸N` is an isomorphism
 
 Consumer: KM 6.5.1's ambient space for `[N-Isog]` (`exists_nIsogSpace`,
 `GroupScheme/NIsogeny.lean`, gate [NISOG-GRASS]).
-
-Decomposition artifact: `.mathlib-quality/decomposition-nisog-grass.md` ([STREAM-FP],
-fable-FP). Waves 2–3 (chart functors, covering, gluing, T-points) are boarded there.
 -/
 
 universe u v
@@ -41,6 +43,14 @@ noncomputable def coordMap (x : Fin k → M) : (Fin k → R) →ₗ[R] M :=
     coordMap x (Pi.single i (1 : R)) = x i := by
   simp [coordMap]
 
+/-- The coordinate map is natural in the ambient module: post-composing the tuple with a
+linear map `e` is the same as post-composing `coordMap` with `e` (the `coordMap`/`Fintype`-
+linear-combination analogue of `Finsupp.linearCombination_linear_comp`). -/
+lemma coordMap_comp {M' : Type*} [AddCommGroup M'] [Module R M'] (e : M →ₗ[R] M')
+    (x : Fin k → M) : coordMap (⇑e ∘ x) = e ∘ₗ coordMap x := by
+  refine (Pi.basisFun R (Fin k)).ext fun i => ?_
+  simp only [Pi.basisFun_apply, coordMap_single, LinearMap.comp_apply, Function.comp_apply]
+
 /-- **[GR-A0]** The chart predicate: `N` lies in the chart at `x : Fin k → M` when the
 composite `(Fin k → R) → M → M ⧸ N` is bijective — the images of `x` form a basis of the
 quotient (mathlib TODO: *"the composition `R^k → M → M⧸N` is an isomorphism"*). -/
@@ -56,6 +66,7 @@ lemma retraction_comp_coordMap (x : Fin k → M) {φ : M →ₗ[R] (Fin k → R)
   simp_rw [map_smul, hφ, ← Pi.single_smul, smul_eq_mul, mul_one]
   exact Finset.univ_sum_single c
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Forward direction of [GR-A1]: the retraction attached to a chart member,
 `φ = (chart iso)⁻¹ ∘ mkQ`. -/
 noncomputable def chartToRetraction (x : Fin k → M) (N : {N : G(k, M; R) // IsChartAt x N}) :
@@ -102,6 +113,7 @@ noncomputable def retractionToChart (x : Fin k → M)
        simp [rankAtStalk_eq_finrank_of_free] },
    bijective_mkQ_comp_coordMap x φ.2⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GR-A1]** A chart member at `x` is the same data as a retraction of `x`: a linear
 `φ : M → (Fin k → R)` with `φ (x i) = eᵢ`, via `N = ker φ` (Stacks 089T step (3), the
 coordinate-free form). -/
@@ -282,6 +294,13 @@ theorem bijective_of_surjective_of_rankAtStalk {Q : Type v} [AddCommGroup Q] [Mo
   refine ⟨?_, hsurj⟩
   rw [← LinearMap.ker_eq_bot, ← Submodule.subsingleton_iff_eq_bot]
   exact (Module.rankAtStalk_eq_zero_iff_subsingleton).mp hker0
+
+/-- The base-changed quotient map `baseChangeMkQ` on the canonical generator `1 ⊗ₜ m`:
+it sends `(1 : B) ⊗ₜ[R] m` to `(1 : B) ⊗ₜ[A] N.mkQ ((1 : A) ⊗ₜ[R] m)`. -/
+lemma baseChangeMkQ_one_tmul [Algebra A B] [IsScalarTower R A B]
+    (N : Submodule A (A ⊗[R] M)) (m : M) :
+    baseChangeMkQ B N ((1 : B) ⊗ₜ[R] m) = (1 : B) ⊗ₜ[A] N.mkQ ((1 : A) ⊗ₜ[R] m) := by
+  simp [baseChangeMkQ]
 
 section Covering
 
@@ -657,6 +676,7 @@ lemma coordMap_apply {x : Fin k → M} (c : Fin k → R) :
     coordMap x c = ∑ i, c i • x i := by
   simp [coordMap, Fintype.linearCombination_apply]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GR-B2n-4]** Kernel-uniqueness for the chart coordinate: *any* retraction `ψ` of the
 coordinate sub-basis `Pi.single ∘ ι` whose kernel contains `N` reads off the chart matrix of `N`
 on the complementary coordinate vectors. This is the workhorse behind naturality (and wave-3
@@ -681,6 +701,7 @@ theorem chartMatrix_eq_of_retraction {A' : Type w''} [CommRing A'] (n : ℕ) (ι
   rw [← key]
   exact N.toSubmodule.liftQ_apply ψ (Pi.single j.1 1)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GR-B2n-4]** Naturality of the chart coordinate under `normMap`: the chart matrix of
 `normMap f N` is the entrywise-`f` image of the chart matrix of `N`. The retraction realising
 `normMap f N` is the base change of the one realising `N` (transported through `piScalarRight`),
@@ -723,24 +744,18 @@ theorem chartMatrix_normMap (n : ℕ) (ι : Fin k ↪ Fin n) (f : A →ₐ[R] B)
     show (v l) • (1 : B) = f (v l)
     rw [Algebra.smul_def, mul_one]
     rfl
-  -- the value of `ψf` on a coordinate vector, through the base-change square
-  have hbcmkq : ∀ (m : Fin n → R), baseChangeMkQ B P.toSubmodule ((1 : B) ⊗ₜ[R] m)
-      = (1 : B) ⊗ₜ[A] P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] m) := by
-    intro m; simp [baseChangeMkQ]
   have hchain : ∀ (j : Fin n), ψf (Pi.single j 1)
       = sk ((1 : B) ⊗ₜ[A]
           E_At.symm (P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] (Pi.single j 1 : Fin n → R)))) := by
     intro j
     rw [hψf]
     simp only [LinearMap.comp_apply, LinearEquiv.coe_coe]
-    rw [TensorProduct.piScalarRight_symm_single, hbcmkq, LinearMap.baseChange_tmul]
+    rw [TensorProduct.piScalarRight_symm_single, baseChangeMkQ_one_tmul, LinearMap.baseChange_tmul]
     rfl
   -- the tensor chart tuple is the `qA.symm`-transport of the coordinate combination
   have hcoordP : coordMap (fun i => (1 : A) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))
       = qA.symm.toLinearMap ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A)) := by
-    refine (Pi.basisFun A (Fin k)).ext fun i => ?_
-    rw [Pi.basisFun_apply, coordMap_single, LinearMap.comp_apply, coordMap_single]
-    exact (TensorProduct.piScalarRight_symm_single R A A (Fin n) 1 (ι i)).symm
+    rw [← htuple]; exact coordMap_comp qA.symm.toLinearMap _
   -- reading off a coordinate commutes with the `congr qA.symm` transport
   have hconn : ∀ (m : Fin n → A), E_At.symm (P.toSubmodule.mkQ (qA.symm m))
       = chartEA.symm (N.toSubmodule.mkQ m) := by
@@ -775,7 +790,8 @@ theorem chartMatrix_normMap (n : ℕ) (ι : Fin k ↪ Fin n) (f : A →ₐ[R] B)
       unfold chartMatrix
       rfl
     rw [hval, hsk_val]
-  -- `ψf` factors through `baseChangeMkQ`, so its kernel contains `(normMap f N).toSubmodule` (`hψ2`)
+  -- `ψf` factors through `baseChangeMkQ`, so its kernel contains
+  -- `(normMap f N).toSubmodule` (`hψ2`)
   have hK : (normMap n f N).toSubmodule ≤ LinearMap.ker ψf := by
     have hnm : (normMap n f N).toSubmodule
         = Submodule.map qB.toLinearMap (baseChangeMkQ B P.toSubmodule).ker := by
@@ -803,7 +819,8 @@ variable (R)
 goes to the standard basis, the complementary coordinates to the generic matrix
 variables. -/
 noncomputable def genericRetraction (n : ℕ) (ι : Fin k ↪ Fin n) :
-    (Fin n → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R) →ₗ[MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R]
+    (Fin n → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R)
+      →ₗ[MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R]
       (Fin k → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R) := by
   classical
   exact (Pi.basisFun (MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R)

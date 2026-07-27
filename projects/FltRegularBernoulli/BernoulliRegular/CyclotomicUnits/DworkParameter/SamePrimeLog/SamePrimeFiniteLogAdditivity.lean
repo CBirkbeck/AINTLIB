@@ -396,7 +396,7 @@ theorem samePrimeFiniteLog_eq_productHomogeneousGrid (N : ℕ)
       samePrimeFiniteLogProductHomogeneousGrid (p := p) (K := K) N x y hx hy := by
   classical
   rw [samePrimeFiniteLog_eq_samePrimeFiniteLogLocalizedPolynomial (p := p) (K := K)]
-  unfold samePrimeFiniteLogLocalizedPolynomial samePrimeFiniteLogProductHomogeneousGrid
+  simp only [samePrimeFiniteLogLocalizedPolynomial, samePrimeFiniteLogProductHomogeneousGrid]
   refine Finset.sum_congr rfl ?_
   intro n _hnC
   by_cases hn0 : n = 0
