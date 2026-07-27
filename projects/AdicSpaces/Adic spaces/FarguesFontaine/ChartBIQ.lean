@@ -307,6 +307,30 @@ theorem biSubringCongr_coe_val
   subst h
   rfl
 
+/-- The window exponents decrease. -/
+theorem invPow_succ_lt (n : ℕ) : (1 / (p ^ (n + 1) : ℚ)) < 1 / (p ^ n : ℚ) := by
+  have hp : (1 : ℚ) < p := by
+    exact_mod_cast Nat.Prime.one_lt (Fact.out : Nat.Prime p)
+  have h0 : (0 : ℚ) < (p ^ n : ℚ) := by positivity
+  have h1 : (0 : ℚ) < (p ^ (n + 1) : ℚ) := by positivity
+  refine one_div_lt_one_div_of_lt h0 ?_
+  rw [pow_succ]
+  nlinarith
+
+/-- **The restriction hom from the `n`-th window chart to a rational
+sub-interval** (route (c)): the chart identification composed with the
+decreasing-orientation `BIQ`-restriction. -/
+noncomputable def windowResBIQ (n : ℕ) (r₁ r₂ : ℚ) (hr₁ : 0 < r₁)
+    (hr₂ : 0 < r₂)
+    (hr₁m : 1 / (p ^ (n + 1) : ℚ) ≤ r₁ ∧ r₁ ≤ 1 / (p ^ n : ℚ))
+    (hr₂m : 1 / (p ^ (n + 1) : ℚ) ≤ r₂ ∧ r₂ ≤ 1 / (p ^ n : ℚ)) :
+    presheafValue (chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1)
+      →+* ↥(BIQ p F ϖ r₁ r₂ hr₁ hr₂) :=
+  (biResQ' p F ϖ (1 / (p ^ n : ℚ)) (1 / (p ^ (n + 1) : ℚ)) r₁ r₂
+      (invPowQ_pos p n) (invPowQ_pos p (n + 1)) hr₁ hr₂
+      (invPow_succ_lt p n) hr₁m hr₂m).comp
+    (chartRingEquivBIQ p F ϖ n).toRingHom
+
 end FarguesFontaine
 
 end

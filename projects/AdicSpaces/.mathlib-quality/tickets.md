@@ -1145,7 +1145,17 @@ non-Tate bases are supported.
     biSubringCongr of BISub_twist — RingHom-level composition, no
     elementwise membership juggling). The plus-map correspondence
     (BIPlusIn_map_twist) is NOT needed on this route; keep the (b)-profiler
-    idea only if a future consumer genuinely needs IsSheafy ↥BIQ verbatim. Negative-side mirror DONE 2026-07-27
+    idea only if a future consumer genuinely needs IsSheafy ↥BIQ verbatim.
+    ROUTE-(c) PROGRESS 2026-07-27: windowResBIQ (ChartBIQ.lean) — the
+    restriction hom from the n-th window chart's presheaf value to any
+    rational sub-interval BIQ r₁ r₂ of [1/p^{n+1}, 1/p^n], as
+    biResQ' ∘ chartRingEquivBIQ (+ invPow_succ_lt). CONTINUITY DEFERRED:
+    needs the composite chartRingEquivBIQ-continuity whose step-3 instance
+    kernel-ground — profiler task; alternatively restate windowResBIQ as the
+    unfolded four-step RingHom-comp so each factor's continuity applies
+    foldedly. NEXT: the negative-side windowResBIQNeg mirror; the pairwise
+    compatibility (two windows restricting to a common circle-subinterval
+    agree through the overlap identifications) — the sheaf-gluing datum. Negative-side mirror DONE 2026-07-27
     (chartRingEquivBIQNeg via the pPowM abbreviation — presheafValue of the
     (-m)-window chart ≃+* ↥(BIQ (p^m) (p^m/p)); the twist enters through
     BISub_twist.symm since the power relation points the other way). BOARD-HYGIENE LESSON: two
