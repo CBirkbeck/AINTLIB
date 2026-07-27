@@ -1300,11 +1300,33 @@ non-Tate bases are supported.
     the defeq (also limitRestrict-of-product is DEFEQ to
     product-of-limitRestrict — explicit-toFun — so map_mul-rewrites there
     are unnecessary);
-    (S4) IsLocalRing (ringStalk v) with maximalIdeal = supp (Wedhorn 8.14:
-    nonunits = {germ f | valueAt v f = 0}; a germ with nonzero value is
-    invertible on a shrunk rational datum — needs
-    rational-inside-rational composition over the Tate chart, i.e.
-    keystone-over-B_n);
+    (S4) IsLocalRing (ringStalk v) with maximalIdeal = supp(stalkValue) —
+    PLAN REFINED 2026-07-27 after reconnaissance: (S4-easy, do first)
+    unit ⇒ nonzero stalk-value (v(x)v(x⁻¹) = v(1) ≠ 0), nonunits-⊆-supp
+    contrapositive, supp is an ideal ⇒ once the hard half lands,
+    IsLocalRing via the nonunits-add criterion; REDUCTION LEMMA: germ of a
+    section that becomes a UNIT on a smaller open is a stalk-unit (germ =
+    ring hom); so the hard half reduces to THE SHRINK CLAIM: f ∈ 𝒪(U),
+    (openValue U hv).vle f 0 false ⇒ ∃ rational D' ∋ v inside U with
+    evaluation of f a unit of presheafValue D'. (S4-core route, Wedhorn
+    8.14 via the repo's Laurent machinery): (a) evaluate f at a rational
+    D ∋ v: fD ∈ PD := presheafValue D with pointValue-vD(fD) ≠ 0; PD is
+    complete TATE (presheafValue_isTateRing_concrete ✓); (b) cofinality of
+    the pseudouniformizer for the CONTINUOUS vD: ∃ N, vD(π^N) ≤ vD(fD);
+    (c) the trivial datum over PD + laurentMinusDatum at π^{-N}·fD: the
+    Laurent-minus piece contains vD's point and makes fD a unit — NOTE the
+    packaged unit-lemmas (LaurentRefinementCore 983-1010) sit in an
+    over-hypothesized [IsNoetherianRing]-section, but the fact is
+    ELEMENTARY (f·(s₀·(s₀f)⁻¹) = 1 since s := s₀·f is the inverted
+    denominator) — re-derive the 3-liner generically at PD; (d)
+    exists_downstairs_rationalDatum (SpaRationalSubsetCorrespondence:185,
+    complete-Tate, NO Noetherian) to convert the upstairs Laurent piece to
+    a base-rational D' ⊆ R(D) ∋ v; unit-transport along the comparison;
+    (e) assemble. INSTANCE PREREQUISITE for (c)/(d) at PD: PlusSubring PD
+    = (PD)⁺ ✓, IsHuberRing ✓ from Tate; HasLocLiftPowerBounded PD via the
+    faithful supplier needs IsRingOfIntegralElements ((PD)⁺) — the
+    plus-reconciliation question (was load-bearing already in NT-1) —
+    AUDIT what supplies it before starting (c);
     (S5) spaVObj: package (SpaTop B, structurePresheaf B) + S3/S4 +
     structurePresheaf_isSheafOfTopologicalRings into a VObj — the FIRST
     inhabitant of the VObj category.
