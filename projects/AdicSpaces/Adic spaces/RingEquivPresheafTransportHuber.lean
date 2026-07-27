@@ -460,6 +460,110 @@ theorem RationalLocData.mapHuber_comp (e₁ : A ≃+* B) (he₁ : Continuous e�
 
 end Composite
 
+section Refl
+
+variable [DecidableEq A]
+
+private theorem ideal_map_heq_of_coe_fix' {S S' : Subring A} (h : S' = S)
+    (φ : S →+* S') (hφ : ∀ x : S, ((φ x : S') : A) = (x : A)) (I : Ideal S) :
+    HEq (I.map φ) I := by
+  subst h
+  rw [show φ = RingHom.id _ from RingHom.ext fun x => Subtype.ext (hφ x),
+    Ideal.map_id]
+
+/-- The pair transport at the identity equivalence. -/
+theorem PairOfDefinition.mapRingEquiv_refl (hc : Continuous
+      (RingEquiv.refl A)) (hc' : Continuous (RingEquiv.refl A).symm)
+    (P : PairOfDefinition A) :
+    PairOfDefinition.mapRingEquiv (RingEquiv.refl A) hc hc' P = P := by
+  refine PairOfDefinition.ext_of_fields ?_ ?_
+  · show P.A₀.map (RingEquiv.refl A).toRingHom = P.A₀
+    rw [show (RingEquiv.refl A).toRingHom = RingHom.id A from rfl,
+      Subring.map_id]
+  · exact ideal_map_heq_of_coe_fix'
+      (by rw [show (RingEquiv.refl A).toRingHom = RingHom.id A from rfl,
+        Subring.map_id])
+      ((RingEquiv.refl A).subringMap (s := P.A₀)).toRingHom
+      (fun x => rfl) P.I
+
+/-- The Huber datum transport at the identity equivalence. -/
+theorem RationalLocData.mapHuber_refl (hc : Continuous (RingEquiv.refl A))
+    (hc' : Continuous (RingEquiv.refl A).symm) (D : RationalLocData A) :
+    D.mapHuber (RingEquiv.refl A) hc hc' = D := by
+  refine RationalLocData.ext' ?_ ?_ ?_
+  · exact PairOfDefinition.mapRingEquiv_refl hc hc' D.P
+  · show D.T.image (RingEquiv.refl A) = D.T
+    exact (Finset.image_congr fun x _ => rfl).trans Finset.image_id
+  · rfl
+
+section ReflValue
+
+variable [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+
+private theorem presheafValue_eq_of_coeRingHom {E : RationalLocData A}
+    {E' : RationalLocData A} {G H : presheafValue E → presheafValue E'}
+    (hG : Continuous G) (hH : Continuous H)
+    (h : ∀ l, G (E.coeRingHom l) = H (E.coeRingHom l)) (x : presheafValue E) :
+    G x = H x := by
+  have hdense : DenseRange (⇑(E.coeRingHom)) :=
+    @UniformSpace.Completion.denseRange_coe _ E.uniformSpace
+  exact congr_fun (hdense.equalizer hG hH (funext h)) x
+
+/-- **The Huber value equivalence at the identity is the restriction along
+the datum collapse** (elementwise; the containment is an argument, any
+witness works by proof irrelevance). -/
+theorem presheafValueRingEquivHuber_refl_apply
+    (hc : Continuous (RingEquiv.refl A))
+    (hc' : Continuous (RingEquiv.refl A).symm) (D : RationalLocData A)
+    (hle : rationalOpen (D.mapHuber (RingEquiv.refl A) hc hc').T
+        (D.mapHuber (RingEquiv.refl A) hc hc').s
+      ⊆ rationalOpen D.T D.s)
+    (x : presheafValue D) :
+    presheafValueRingEquivHuber (RingEquiv.refl A) hc hc' D x
+      = restrictionMap D (D.mapHuber (RingEquiv.refl A) hc hc') hle x := by
+  have hs0 : (D.mapHuber (RingEquiv.refl A) hc hc').s
+      = (RingEquiv.refl A).toRingHom D.s := rfl
+  have hT0 : ∀ t ∈ D.T, (RingEquiv.refl A).toRingHom t
+      ∈ (D.mapHuber (RingEquiv.refl A) hc hc').T :=
+    fun _ ht => Finset.mem_image_of_mem _ ht
+  refine presheafValue_eq_of_coeRingHom
+    (presheafValueRingEquivHuber_continuous _ hc hc' D)
+    (restrictionMapHom_continuous D _ _) (fun l => ?_) x
+  have hL : presheafValueRingEquivHuber (RingEquiv.refl A) hc hc' D
+        (D.coeRingHom l)
+      = (D.mapHuber (RingEquiv.refl A) hc hc').coeRingHom
+          (locMapOfHom (RingEquiv.refl A).toRingHom D
+            (D.mapHuber (RingEquiv.refl A) hc hc') hs0 l) :=
+    presheafValueMapOfHom_coe (RingEquiv.refl A).toRingHom hc D
+      (D.mapHuber (RingEquiv.refl A) hc hc') hs0 hT0 l
+  have hR : restrictionMapHom D (D.mapHuber (RingEquiv.refl A) hc hc') hle
+        (D.coeRingHom l)
+      = restrictionMapAlg D (D.mapHuber (RingEquiv.refl A) hc hc') hle l := by
+    letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+    letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+    letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+    exact UniformSpace.Completion.extensionHom_coe
+      (restrictionMapAlg D _ hle) (restrictionMapAlg_continuous D _ hle) l
+  rw [hL, hR]
+  have halg : ((D.mapHuber (RingEquiv.refl A) hc hc').coeRingHom).comp
+        (locMapOfHom (RingEquiv.refl A).toRingHom D
+          (D.mapHuber (RingEquiv.refl A) hc hc') hs0)
+      = restrictionMapAlg D (D.mapHuber (RingEquiv.refl A) hc hc') hle := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s)
+      (RingHom.ext fun a => ?_)
+    simp only [RingHom.comp_apply]
+    rw [locMapOfHom_algebraMap]
+    rw [show restrictionMapAlg D (D.mapHuber (RingEquiv.refl A) hc hc') hle
+        (algebraMap A (Localization.Away D.s) a)
+      = (D.mapHuber (RingEquiv.refl A) hc hc').canonicalMap a from by
+      rw [restrictionMapAlg, IsLocalization.Away.lift_eq]]
+    rfl
+  exact congr_fun (congrArg DFunLike.coe halg) l
+
+end ReflValue
+
+end Refl
+
 end ValuationSpectrum
 
 end
