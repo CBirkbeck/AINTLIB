@@ -33,6 +33,15 @@ lemma equation_X_mul_r_Y_r_pow_three
   simp only [fin3_def_ext]
   linear_combination r ^ 3 * h
 
+/-- The point-at-infinity triple `[0, 1, 0]` lies on every projective
+generalized Weierstrass cubic. -/
+lemma equation_zero_one_zero
+    {A : Type u} [CommRing A]
+    (W : WeierstrassCurve R) (f : R →+* A) :
+    (W.map f).toProjective.Equation ![0, 1, 0] := by
+  rw [equation_iff]
+  simp
+
 end WeierstrassCurve.Projective
 
 namespace ModularCurves
@@ -79,6 +88,26 @@ lemma projModelEval_X
         (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i)) = P i := by
   rw [projModelEval_mk]
   simp only [MvPolynomial.eval₂_X]
+
+/-- Evaluation at the homogeneous triple `[0, 1, 0]` is the point-at-infinity
+evaluation followed by the coefficient homomorphism. -/
+lemma projModelEval_zero_one_zero
+    (W : WeierstrassCurve R) (f : R →+* A) :
+    projModelEval W f ![0, 1, 0]
+        (WeierstrassCurve.Projective.equation_zero_one_zero W f) =
+      f.comp (projModelZeroEval W) := by
+  apply Ideal.Quotient.ringHom_ext
+  apply MvPolynomial.ringHom_ext
+  · intro r
+    simp only [RingHom.comp_apply, projModelEval_mk,
+      projModelZeroEval_mk, MvPolynomial.eval₂_C,
+      MvPolynomial.eval_C]
+  · intro i
+    fin_cases i <;>
+      simp only [RingHom.comp_apply, projModelEval_mk,
+        projModelZeroEval_mk, MvPolynomial.eval₂_X,
+        MvPolynomial.eval_X] <;>
+      norm_num
 
 /-- A unit homogeneous coordinate makes the image of the irrelevant ideal the
 unit ideal. -/

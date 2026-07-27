@@ -314,6 +314,62 @@ theorem projModelFromOfGlobalSections_naturality
       ext x
       exact DFunLike.congr_fun hchartRing x]
 
+/-- The homogeneous-coordinate morphism defined by `[0, 1, 0]` is the
+point-at-infinity section after the canonical map to the spectrum of global
+sections. -/
+theorem projModelFromOfGlobalSections_zero_one_zero
+    {X : Scheme.{u}}
+    (W : WeierstrassCurve Γ(X, (⊤ : X.Opens))) :
+    let P : Fin 3 → Γ(X, (⊤ : X.Opens)) := ![0, 1, 0]
+    let hP : (W.map (RingHom.id _)).toProjective.Equation P :=
+      WeierstrassCurve.Projective.equation_zero_one_zero W (RingHom.id _)
+    projModelFromOfGlobalSections W (RingHom.id _) P hP 1
+        (by
+          simp only [P, WeierstrassCurve.Projective.fin3_def_ext,
+            isUnit_iff_exists_inv]
+          exact ⟨1, one_mul 1⟩) =
+      X.toSpecΓ ≫ projModelZero W := by
+  dsimp only
+  let e : Γ(X, (⊤ : X.Opens)) →+*
+      Γ(Spec (.of Γ(X, (⊤ : X.Opens))),
+        (⊤ : (Spec (.of Γ(X, (⊤ : X.Opens)))).Opens)) :=
+    (Scheme.ΓSpecIso (.of Γ(X, (⊤ : X.Opens)))).inv.hom
+  let P₀ : Fin 3 →
+      Γ(Spec (.of Γ(X, (⊤ : X.Opens))),
+        (⊤ : (Spec (.of Γ(X, (⊤ : X.Opens)))).Opens)) :=
+    ![0, 1, 0]
+  let hP₀ : (W.map e).toProjective.Equation P₀ :=
+    WeierstrassCurve.Projective.equation_zero_one_zero W e
+  have hunit₀ : IsUnit (P₀ 1) := by
+    simp only [P₀, WeierstrassCurve.Projective.fin3_def_ext]
+    exact isUnit_one
+  have hspec :
+      projModelFromOfGlobalSections W e P₀ hP₀ 1 hunit₀ =
+        projModelZero W := by
+    unfold projModelFromOfGlobalSections projModelZero
+    congr 1
+    exact projModelEval_zero_one_zero W e
+  have he :
+      X.toSpecΓ.appTop.hom.comp e =
+        RingHom.id Γ(X, (⊤ : X.Opens)) := by
+    rw [Scheme.toSpecΓ_appTop]
+    ext a
+    exact ConcreteCategory.congr_hom
+      (Iso.inv_hom_id
+        (Scheme.ΓSpecIso (.of Γ(X, (⊤ : X.Opens))))) a
+  have hPpull :
+      X.toSpecΓ.appTop.hom ∘ P₀ =
+        (![0, 1, 0] : Fin 3 → Γ(X, (⊤ : X.Opens))) := by
+    funext i
+    fin_cases i <;>
+      simp only [P₀, Function.comp_apply] <;>
+      norm_num
+  have hnat :=
+    projModelFromOfGlobalSections_naturality
+      X.toSpecΓ W e P₀ hP₀ 1 hunit₀
+  rw [hspec] at hnat
+  simpa only [he, hPpull] using hnat.symm
+
 /-- Proportional on-curve triples with invertible coordinates define the same
 projective morphism, even when the invertible coordinates have different
 indices. The proportionality factor need not be a unit. -/
