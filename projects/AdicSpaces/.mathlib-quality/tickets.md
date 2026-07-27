@@ -1305,7 +1305,27 @@ non-Tate bases are supported.
     isUnit_iff_not_vle_zero + mem_nonunits_iff_vle_zero +
     isLocalRing_stalk_of_shrink + maximalIdeal_stalk_eq_supp (all
     conditional on StalkShrink; axiom-clean). REMAINING = S4-core:
-    discharge StalkShrink via the Laurent route below.
+    discharge StalkShrink via the Laurent route below. S4-core STEP 1
+    DONE 2026-07-27: **stalkShrink_of_rationalShrink** — StalkShrink
+    reduced to the named RationalShrink claim (nonzero point value on
+    presheafValue D ⇒ unit after restricting to a smaller valid rational
+    ∋ v). INSTANCE AUDIT RESOLVED: at PD := presheafValue D all needed
+    instances exist (presheafValuePlus_isRingOfIntegralElements is an
+    INSTANCE given [IsRingOfIntegralElements A⁺];
+    presheafValue_isTateRing_concrete; PlusSubring-PD canonical) and the
+    cofinality lemma is exists_pow_vle_of_isContinuous
+    (SpaRationalOpenHomeomorph:63). REMAINING for RationalShrink (the
+    Laurent argument over PD): (i) trivial/global datum over PD
+    (globalLocData of presheafValue_concretePair) + laurentMinusDatum at
+    u^{-k}·b (u := presheafValue_topNilUnit, k from cofinality); (ii)
+    membership of pointValue-v in the Laurent-minus rational (unfold the
+    product-T conditions; vle 1 b' and vle b' b' + s-nonzero); (iii) the
+    ELEMENTARY unit fact (b'-inverse = s₀·(s₀b')⁻¹, no Noetherian);
+    (iv) exists_downstairs_rationalDatum + the keystone/imgDatum
+    comparison to land on a base-rational D' with
+    IsUnit (restrictionMapHom D D' h b) — study imgDatum/keystone
+    statements (RelativePieceKeystone) for the exact unit-transport
+    path.
     PLAN REFINED 2026-07-27 after reconnaissance: (S4-easy, do first)
     unit ⇒ nonzero stalk-value (v(x)v(x⁻¹) = v(1) ≠ 0), nonunits-⊆-supp
     contrapositive, supp is an ideal ⇒ once the hard half lands,
