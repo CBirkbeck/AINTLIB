@@ -1111,9 +1111,11 @@ non-Tate bases are supported.
     exponent pair q₁ > q₂ (κ-window [p^n, p^{n+1}] ↔ radii
     [vπ^{1/p^n}, vπ^{1/p^{n+1}}] ↔ q-pair (1/p^n, 1/p^{n+1})). biResQ's
     `hlt : q₁ < q₂` is only used for hlt.ne (interpolation) and the
-    theta_mem_unit sign-bookkeeping; for the presheaf either instantiate with
-    increasing q-pairs (radius-DEcreasing — fine, BISub takes any pair) or
-    add the mirrored theta_mem_unit variant for q₁ > q₂. Also vpiQ_natCast /
+    theta_mem_unit sign-bookkeeping; MIRROR DONE 2026-07-27: theta_mem_unit' + the
+    decreasing-orientation family biResQ' with dense-layer identity,
+    continuity, and the id/comp laws (UniformizerEquivariance.lean) — the
+    radius-ordered (q₁ > q₂) orientation used by the chart-side BIQ-pairs
+    is now first-class. Also vpiQ_natCast /
     vpiQ_one bridge to the chart layer's nat-power radii; the bigWindow-n
     chart ring is BIQ at the (1/p^{n+1}, 1/p^n)-pair up to the ID2d equiv at
     ϖ_n (rhoRight-in-ϖ_n p 1 = vpiQ-in-ϖ (1/p^{n+1}) via
