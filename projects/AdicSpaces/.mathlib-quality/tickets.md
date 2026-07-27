@@ -1168,10 +1168,16 @@ non-Tate bases are supported.
     ChartSpa); (D-ii-2) the sheaf condition: per-window via
     isSheafy_presheafChart + spaChartHomeoBigWindow + windowResBIQ,
     refinement via the rational basis; (D-ii-3) VPreObj packaging: stalks +
-    valuations (stalk theory over the sheafy charts); (D-iii) φ-action as
-    shifts of the BIQ-indexing (κ ↦ pκ maps interval-exponents q ↦ q/p —
-    at the BIQ level a REINDEXING equiv, cleanly compatible with biResQ'),
-    then X := Y/φ^ℤ via Curve.lean's point-set layer + descent. DEFERRED
+    valuations (stalk theory over the sheafy charts); (D-iii) φ-action:
+    FOUNDATION DONE 2026-07-27 (FrobeniusGauss.lean — teichCoeff_frob/
+    gaussTerm_frob/gaussValue_frob: w_{ρ^p}(φx) = w_ρ(x)^p; frobBloc +
+    frobBloc_algebraMap + wLoc_frobBloc; uniformContinuous_frobToBI with the
+    power modulus; biPhi : B^{[ρ₁,ρ₂]} →+* B^{[ρ₁^p,ρ₂^p]} + dense-layer
+    identity biPhi_blocToBI). Direction note: on vpiQ-exponents biPhi is
+    exponent-times-p (W_n-ring → W_{n-1}-ring, the function-side of κ↦pκ).
+    REMAINING D-iii: biPhi iso-property (inverse from frob.symm through the
+    same extension), φ-compatibility with biResQ' (dense equalizer), the
+    BIQ-reindexing wrapper, and X := Y/φ^ℤ via Curve.lean + descent. DEFERRED
     (profiler task): composite chartRingEquivBIQ-continuity (step-3 kernel
     grind) and hence windowResBIQ-continuity — needed by D-ii-2's topology
     half; the unfolded four-step comp restatement is the likely fix. Negative-side mirror DONE 2026-07-27
