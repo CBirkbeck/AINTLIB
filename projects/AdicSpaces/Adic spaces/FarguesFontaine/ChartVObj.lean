@@ -330,6 +330,162 @@ theorem chartPlus_le_completedPlusSubring_of_dense (a b : ℕ) (ha : 0 < a)
   exact hclosed.mem_of_tendsto hlim
     (Filter.Eventually.of_forall fun n => hdense (hseq n) (hw1 n) (hw2 n))
 
+
+/-! ### Dense-level monomial membership (ChartDensePlus bricks m1/m3) -/
+
+/-- Divisibility in `O_F` from the valuation comparison: an element of value
+at most `|ϖ|^j` is `ϖ^j` times an integral element. -/
+theorem exists_eq_toOF_pow_mul (j : ℕ) (c : OF F)
+    (hc : perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j) :
+    ∃ c' : OF F, c = (PseudoUniformizer.toOF F ϖ : OF F) ^ j * c' := by
+  have hdvd := (perfectoidValuation_integers p F).dvd_of_le
+    (x := c) (y := (PseudoUniformizer.toOF F ϖ : OF F) ^ j) ?_
+  · obtain ⟨c', hc'⟩ := hdvd
+    exact ⟨c', hc'⟩
+  · show perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
+      ≤ perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
+          ((PseudoUniformizer.toOF F ϖ : OF F) ^ j))
+    rw [show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
+        = (c : F) from rfl,
+      show ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
+          ((PseudoUniformizer.toOF F ϖ : OF F) ^ j))
+        = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j from by
+        push_cast
+        rfl,
+      map_pow]
+    exact hc
+
+/-- **(m1) Negative-monomial membership**: a Teichmüller monomial `[c]/p^j`
+whose coordinate satisfies the left-endpoint bound `|c| ≤ |ϖ|^j` is
+`chartFracPi^j · [c']` and lies in the chart subring. -/
+theorem teich_div_p_pow_mem_chartSubring (a b : ℕ) (j : ℕ) (c : OF F)
+    (hc : perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j) :
+    algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c)
+        * (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) ^ j
+      ∈ Subring.closure
+        (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+          ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) := by
+  obtain ⟨c', rfl⟩ := exists_eq_toOF_pow_mul p F ϖ j c hc
+  have hkey : algebraMap (Ainf p F) (Bloc p F ϖ)
+      (WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ : OF F) ^ j * c'))
+        * (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) ^ j
+      = chartFracPi p F ϖ ^ j
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c') := by
+    rw [map_mul (WittVector.teichmuller p), map_pow (WittVector.teichmuller p),
+      map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+      map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)), chartFracPi, mul_pow]
+    rw [show WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ : OF F)
+      = teichPi p F ϖ from rfl]
+    ring
+  rw [hkey]
+  refine mul_mem (pow_mem (Subring.subset_closure ?_) j)
+    (Subring.subset_closure ?_)
+  · exact Set.mem_union_right _ (Set.mem_insert _ _)
+  · exact Set.mem_union_left _ ⟨_, rfl⟩
+
+/-- **(m3) Positive-monomial `a`-th-power membership**: for a fraction
+monomial `(p/[ϖ])^d·[c']` whose coordinate satisfies the right-endpoint bound
+`|c'|^a ≤ |ϖ|^{d(a−b)}`, the `a`-th power is `chartFracP^d·[c'']` and lies in
+the chart subring — the monic witness for its integrality. -/
+theorem p_div_teich_pow_a_mem_chartSubring (a b d : ℕ) (hab : b ≤ a)
+    (c' : OF F)
+    (hc : perfectoidValuation p F ((c' : F)) ^ a
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        ^ (d * (a - b))) :
+    (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')) ^ a
+      ∈ Subring.closure
+        (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+          ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) := by
+  have hc' : perfectoidValuation p F (((c' ^ a : OF F)) : F)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        ^ (d * (a - b)) := by
+    rw [show (((c' ^ a : OF F)) : F) = ((c' : F)) ^ a from by push_cast; rfl,
+      map_pow]
+    exact hc
+  obtain ⟨c'', hc''⟩ := exists_eq_toOF_pow_mul p F ϖ (d * (a - b)) (c' ^ a) hc'
+  -- atoms
+  have hIT : AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b))
+      * algebraMap (Ainf p F) (Bloc p F ϖ)
+        (teichPi p F ϖ) ^ (d * (a - b)) = 1 := by
+    rw [← map_pow (AlocToBloc p F ϖ),
+      ← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+    exact AlocToBloc_teichPiInv_mul p F ϖ (d * (a - b))
+  have h1 : algebraMap (Ainf p F) (Bloc p F ϖ)
+        (WittVector.teichmuller p c') ^ a
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b))
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c'') := by
+    rw [← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+      ← map_pow (WittVector.teichmuller p), hc'',
+      map_mul (WittVector.teichmuller p),
+      map_pow (WittVector.teichmuller p),
+      map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+      map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+    rfl
+  have h2 : chartFracP p F ϖ a b
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b := by
+    rw [chartFracP, map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+  have hda : d * a = d * b + d * (a - b) := by
+    have h : a = b + (a - b) := by omega
+    calc d * a = d * (b + (a - b)) := by rw [← h]
+      _ = d * b + d * (a - b) := by ring
+  have hkey : (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c')) ^ a
+      = chartFracP p F ϖ a b ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c'') := by
+    calc (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c')) ^ a
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c') ^ a := by
+          rw [(show d * a = a * d from mul_comm d a), pow_mul, pow_mul]
+          ring
+      _ = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
+        * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b))
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p c'')) := by
+        rw [h1]
+      _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
+        * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
+        * ((AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b))
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (teichPi p F ϖ) ^ (d * (a - b)))
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p c'')) := by
+        rw [show AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
+            = AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * b)
+              * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b)) from by
+          rw [← pow_add, ← hda]]
+        ring
+      _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
+        * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c'') := by
+        rw [hIT, one_mul]
+      _ = chartFracP p F ϖ a b ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c'') := by
+        rw [h2, mul_pow]
+  rw [hkey]
+  refine mul_mem (pow_mem (Subring.subset_closure ?_) d)
+    (Subring.subset_closure ?_)
+  · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
+  · exact Set.mem_union_left _ ⟨_, rfl⟩
+
 end FarguesFontaine
 
 end
