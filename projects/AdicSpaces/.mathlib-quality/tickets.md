@@ -1350,7 +1350,14 @@ non-Tate bases are supported.
     t/s-images via the multiplicative cancel w''(lift)·w''(ρ'(s)) =
     w''(ρ'(t)) ≤ w''(ρ'(s)) ≠ 0 from base-membership R(D') ⊆ R(D);
     (B4) assemble; (B5) comap_restrictionMapHom_mem_spa :=
-    comap_mem_spa + (B4). ⚡ MAJOR SIDE-DISCOVERY (architecture-relevant):
+    comap_mem_spa + (B4). (B1)-(B5) ALL DONE 2026-07-27 (commit: plus
+    functoriality of restriction maps, axiom-clean). REMAINING for
+    RationalShrink: the assembly (cofinality k + basicOpen-membership of
+    pointValue at c := u^{-k}·b + exists_A_level_open_presentation at the
+    singleton family + rational basis in W ∩ R(D) + the capture-argument
+    at each w'' ∈ Spa(PD') via comap_restrictionMapHom_mem_spa + 7.52(2)
+    isUnit_of_forall_not_vle_zero_of_isOpen_topologicallyNilpotent with
+    IsTateRing.isOpen_topologicallyNilpotentElements at PD'). ⚡ MAJOR SIDE-DISCOVERY (architecture-relevant):
     **hasLocLiftPowerBounded_huber_instance** (HuberLocLift:622, M8
     2026-07-17) supplies HasLocLiftPowerBounded for EVERY complete Huber
     pair with [IsRingOfIntegralElements A⁺] — NO Tate. The board's
