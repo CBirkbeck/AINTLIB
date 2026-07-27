@@ -208,4 +208,36 @@ lemma segreProductOverlap_rightRatio_transition
     projectiveChartOverlap_ratio_transition]
   rfl
 
+/-- The localized Segre equivalence sends a first-chart left ratio to the left factor. -/
+lemma segreStandardChartOverlapRingEquiv_firstLeftRatio
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a c : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreStandardChartOverlapRingEquiv R m n i a j b
+        (segreImageFirstChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n i c j j)) =
+      segreProductOverlapLeftRingHom R m n i a j b
+        (projectiveCoordinateRatio R i c) := by
+  unfold segreImageFirstChartToOverlapAway
+  rw [
+    segreStandardChartOverlapRingEquiv_awayMap,
+    ← segreLeftChartToImageAlgHom_ratio R m n i c j,
+    segreChartForwardAlgHom_left_ratio]
+  rfl
+
+/-- The localized Segre equivalence sends a first-chart right ratio to the right factor. -/
+lemma segreStandardChartOverlapRingEquiv_firstRightRatio
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b c : Fin (n + 1)) :
+    segreStandardChartOverlapRingEquiv R m n i a j b
+        (segreImageFirstChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n i i j c)) =
+      segreProductOverlapRightRingHom R m n i a j b
+        (projectiveCoordinateRatio R j c) := by
+  unfold segreImageFirstChartToOverlapAway
+  rw [
+    segreStandardChartOverlapRingEquiv_awayMap,
+    ← segreRightChartToImageAlgHom_ratio R m n i j c,
+    segreChartForwardAlgHom_right_ratio]
+  rfl
+
 end MvPolynomial
