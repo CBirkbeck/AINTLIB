@@ -148,4 +148,64 @@ lemma segreImageChartOverlap_rightRatio_transition
       rw [hanchor]
       ring
 
+/-- The left projective coordinate ratio obeys the product-overlap transition formula. -/
+lemma segreProductOverlap_leftRatio_transition
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a c : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductSecondLeftRingHom R m n i a j b
+          (projectiveCoordinateRatio R a c) *
+        segreProductOverlapLeftRingHom R m n i a j b
+          (projectiveCoordinateRatio R i a) =
+      segreProductOverlapLeftRingHom R m n i a j b
+        (projectiveCoordinateRatio R i c) := by
+  change
+    segreProductLeftOverlapLift R m n i a j b
+          (projectiveSecondChartToOverlapAway R i a
+            (projectiveCoordinateRatio R a c)) *
+        segreProductOverlapLeftRingHom R m n i a j b
+          (projectiveCoordinateRatio R i a) =
+      segreProductOverlapLeftRingHom R m n i a j b
+        (projectiveCoordinateRatio R i c)
+  rw [
+    ← DFunLike.congr_fun
+      (segreProductLeftOverlapLift_comp_first R m n i a j b)
+      (projectiveCoordinateRatio R i a),
+    ← DFunLike.congr_fun
+      (segreProductLeftOverlapLift_comp_first R m n i a j b)
+      (projectiveCoordinateRatio R i c),
+    RingHom.comp_apply,
+    ← map_mul,
+    projectiveChartOverlap_ratio_transition]
+  rfl
+
+/-- The right projective coordinate ratio obeys the product-overlap transition formula. -/
+lemma segreProductOverlap_rightRatio_transition
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b c : Fin (n + 1)) :
+    segreProductSecondRightRingHom R m n i a j b
+          (projectiveCoordinateRatio R b c) *
+        segreProductOverlapRightRingHom R m n i a j b
+          (projectiveCoordinateRatio R j b) =
+      segreProductOverlapRightRingHom R m n i a j b
+        (projectiveCoordinateRatio R j c) := by
+  change
+    segreProductRightOverlapLift R m n i a j b
+          (projectiveSecondChartToOverlapAway R j b
+            (projectiveCoordinateRatio R b c)) *
+        segreProductOverlapRightRingHom R m n i a j b
+          (projectiveCoordinateRatio R j b) =
+      segreProductOverlapRightRingHom R m n i a j b
+        (projectiveCoordinateRatio R j c)
+  rw [
+    ← DFunLike.congr_fun
+      (segreProductRightOverlapLift_comp_first R m n i a j b)
+      (projectiveCoordinateRatio R j b),
+    ← DFunLike.congr_fun
+      (segreProductRightOverlapLift_comp_first R m n i a j b)
+      (projectiveCoordinateRatio R j c),
+    RingHom.comp_apply,
+    ← map_mul,
+    projectiveChartOverlap_ratio_transition]
+  rfl
+
 end MvPolynomial
