@@ -5470,6 +5470,149 @@ theorem nonempty_case2_quotient_equiv
 
 end SurjectivityBot
 
+/-- **The bottom-anchored restriction pair lands in the sub-interval ring**:
+the first coordinate is kept literally. -/
+theorem resI_bot_pair_mem {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    (z.1, resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 z)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 := by
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have h2 := tendsto_resI p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 hz
+  have h1 : Filter.Tendsto (fun x => BlocToHatK p F ϖ hρ₁0 hρ₁1 x)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds z.1) := by
+    have hb : Filter.Tendsto
+        (fun x => (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x).1)
+        (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+        (nhds z.1) :=
+      (continuous_fst.tendsto z).comp Filter.tendsto_comap
+    refine hb.congr fun x => ?_
+    exact BIProd_fst p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+  have hpair : Filter.Tendsto (fun x => (BlocToHatK p F ϖ hρ₁0 hρ₁1 x,
+        BlocToHatK p F ϖ hσ₁0 hσ₁1 x))
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds (z.1, resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 z)) :=
+    Filter.Tendsto.prodMk_nhds h1 h2
+  have hmem : ∀ᶠ x in Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      (nhds z),
+      (BlocToHatK p F ϖ hρ₁0 hρ₁1 x, BlocToHatK p F ϖ hσ₁0 hσ₁1 x)
+        ∈ (Set.range (BIProd p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1)) :=
+    Filter.Eventually.of_forall fun x => ⟨x, rfl⟩
+  exact mem_closure_of_tendsto hpair hmem
+
+/-- **The bottom-anchored restriction hom** `B^I → B^{[ρ₁,σ]}`: bottom
+coordinate kept literally, top coordinate restricted (so the shared-bottom
+kernel machinery applies without radius transport). -/
+def resIHomBot {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1) :
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1) where
+  toFun z := ⟨(((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1,
+      resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 (z : _)),
+    resI_bot_pair_mem p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2⟩
+  map_one' := by
+    have hone : ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 1 := by
+      rw [map_one]
+      rfl
+    have e2 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+        ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 1 := by
+      rw [hone, resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1, map_one]
+    have e1 : ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 = 1 := rfl
+    refine Subtype.ext ?_
+    rw [show ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₁0 hσ₁1)) = (1, 1) from rfl]
+    exact Prod.ext e1 e2
+  map_mul' := fun z z' => by
+    have e2 := resI_mul p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 z'.2
+    have e1 := congrArg Prod.fst (BISub_coe_mul p F ϖ z z')
+    refine Subtype.ext ?_
+    exact Prod.ext e1 e2
+  map_zero' := by
+    have hzero : ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 0 := by
+      rw [map_zero]
+      rfl
+    have e2 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+        ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 := by
+      rw [hzero, resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1, map_zero]
+    have e1 : ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 = 0 := rfl
+    refine Subtype.ext ?_
+    rw [show ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₁0 hσ₁1)) = (0, 0) from rfl]
+    exact Prod.ext e1 e2
+  map_add' := fun z z' => by
+    have e2 := resI_add p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 z'.2
+    have e1 := congrArg Prod.fst (BISub_coe_add p F ϖ z z')
+    refine Subtype.ext ?_
+    exact Prod.ext e1 e2
+
+/-- The bottom-anchored restriction contracts the interval norm. -/
+theorem wI_resIHomBot_le {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    wI p F hρ₁0 hρ₁1 hσ₁0 hσ₁1
+        ((resIHomBot p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₁0 hσ₁1))
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+  refine max_le ?_ ?_
+  · exact le_max_left _ _
+  · exact valued_resI_le_wI p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2
+
+/-- The bottom-anchored restriction fixes the first coordinate. -/
+theorem resIHomBot_fst {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    ((resIHomBot p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₁0 hσ₁1)).1
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 := rfl
+
+/-- The bottom-anchored restriction carries `Bloc`-images to `Bloc`-images. -/
+theorem resIHomBot_blocToBI {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (x : Bloc p F ϖ) :
+    ((resIHomBot p F ϖ hθ0 hθ1 hσ₁0 hσ₁1
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₁0 hσ₁1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 x := by
+  refine Prod.ext ?_ ?_
+  · show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+      = (BIProd p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 x).1
+    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x from rfl]
+    rw [BIProd_fst p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x,
+      BIProd_fst p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 x]
+  · show resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+        ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = (BIProd p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 x).2
+    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x from rfl]
+    rw [resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 x,
+      BIProd_snd p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 x]
+
 end FarguesFontaine
 
 end
