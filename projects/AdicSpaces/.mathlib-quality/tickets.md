@@ -2035,7 +2035,32 @@ non-Tate bases are supported.
     CompleteTopCommRingCat-values (subring topology; completeness
     from isClosed_frobFixed + completeSpace of limitSections —
     check the limitSections-CompleteSpace instance's availability);
-    then D-iv-3 stalks. Non-critical parked:
+    then D-iv-3 stalks.
+    ★★ D-iv-2 COMPLETE 2026-07-28 (commit aa71704e2, axiom-clean):
+    frobFixed_restrict (invariance survives restriction — the two
+    limitRestrict_comp collapses MEET IN THE MIDDLE by
+    proof-irrelevance of the composite ≤'s, 1st try);
+    frobFixedRestrict (codRestrict) + continuity (induced_rng +
+    shallow hfun-rfl); frobFixed.completeSpace (closed-in-complete) +
+    frobFixed.isUniformAddGroup (the IsUniformInducing.subtype pattern
+    from StructurePresheafBundled 65); **xStructurePresheaf : the
+    STRUCTURE PRESHEAF OF THE ADIC FARGUES–FONTAINE CURVE** — obj :=
+    .of (frobFixed V) (letI the two instances — the section-variable
+    instances do NOT fire through TC at the .of-site, letI them),
+    map := frobFixedRestrict, functor laws by
+    Subtype.ext∘Subtype.ext∘funext∘rfl.
+    NEXT (D-iv-3, stalks): at c = π(y) the invariants-stalk ≅ the
+    𝒴-stalk at y — design: the germ-map xStalk c → yStalk y by
+    forgetting invariance (restrict the invariant section to the
+    saturated preimage then germ at y — as a colimit-map along
+    curvePreimage: Opens(X) ∋ V ↦ yFunctor(curvePreimage V) is a
+    functor into Opens(Spa) with y-membership ⟺ c-membership);
+    inject+surject via the window sections: any 𝒴-germ at y extends
+    uniquely to an invariant section on a small saturated open
+    (spread the section along the orbit through the yFrobVPreHom
+    transports; freeness/wandering gives disjoint windows —
+    injOn_toCurve_windowU/V); then local rings + valuations pull
+    back and (D-iv-4) the sheaf condition; (D-iv-5) xVObj. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
