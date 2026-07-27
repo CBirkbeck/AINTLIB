@@ -380,4 +380,130 @@ lemma segreImagePairOverlapIso_inv_snd
       Nat.zero_lt_one
       rfl
 
+private lemma segreImagePairChartToProduct_eq
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    segreImagePairChartToProduct R m n i j =
+      (segreImagePairChartIsoSpec R m n i j).inv ≫
+        (segreProductStandardChartIsoImageChart
+          R m n i j).inv ≫
+        segreProductStandardChartMap R m n i j := by
+  simp only [segreImagePairChartToProduct,
+    segreProductStandardOpenCover_f]
+
+/-- The inverse chart maps agree on every pairwise overlap of the explicit
+homogeneous basic-open charts. -/
+lemma segreImagePairChartToProduct_compatible_awayι
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    pullback.fst
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n i j))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n i j))
+            Nat.zero_lt_one)
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n a b))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n a b))
+            Nat.zero_lt_one) ≫
+        segreImagePairChartToProduct R m n i j =
+      pullback.snd
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n i j))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n i j))
+            Nat.zero_lt_one)
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n a b))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n a b))
+            Nat.zero_lt_one) ≫
+        segreImagePairChartToProduct R m n a b := by
+  rw [← cancel_epi
+    (segreImagePairOverlapIso
+      R m n i a j b).inv]
+  rw [segreImagePairOverlapIso_inv_fst_assoc,
+    segreImagePairOverlapIso_inv_snd_assoc]
+  rw [segreImagePairChartToProduct_eq,
+    segreImagePairChartToProduct_eq]
+  rw [← segreImageOverlapToFirstProductChart_assoc,
+    ← segreImageOverlapToSecondProductChart_assoc]
+  have htransition :
+      segreProductChartOverlapToChart R m n i a j b ≫
+          segreProductStandardChartMap R m n i j =
+        segreProductChartOverlapToSecondChart R m n i a j b ≫
+          segreProductStandardChartMap R m n a b := by
+    simpa only [segreProductStandardOpenCover_f] using
+      segreProductChartOverlap_transition
+        R m n i a j b
+  exact
+    congrArg
+      (fun z =>
+        (segreProductOverlapIsoSegreImage
+          R m n i a j b).inv ≫ z)
+      htransition
+
+/-- The inverse chart maps satisfy the cocycle condition on the actual
+pair-indexed affine cover of the Segre image. -/
+lemma segreImagePairChartToProduct_compatible
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    pullback.fst
+          ((segreImagePairAffineOpenCover
+            R m n).openCover.f (i, j))
+          ((segreImagePairAffineOpenCover
+            R m n).openCover.f (a, b)) ≫
+        segreImagePairChartToProduct R m n i j =
+      pullback.snd
+          ((segreImagePairAffineOpenCover
+            R m n).openCover.f (i, j))
+          ((segreImagePairAffineOpenCover
+            R m n).openCover.f (a, b)) ≫
+        segreImagePairChartToProduct R m n a b := by
+  change
+    pullback.fst
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n i j))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n i j))
+            Nat.zero_lt_one)
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n a b))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n a b))
+            Nat.zero_lt_one) ≫
+        segreImagePairChartToProduct R m n i j =
+      pullback.snd
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n i j))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n i j))
+            Nat.zero_lt_one)
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n a b))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n a b))
+            Nat.zero_lt_one) ≫
+        segreImagePairChartToProduct R m n a b
+  exact
+    segreImagePairChartToProduct_compatible_awayι
+      R m n i a j b
+
 end MvPolynomial
