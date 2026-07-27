@@ -380,7 +380,7 @@ lemma segreImagePairOverlapIso_inv_snd
       Nat.zero_lt_one
       rfl
 
-private lemma segreImagePairChartToProduct_eq
+private lemma segreImagePairChartToProduct_eq_chartMap
     (R : Type u) [CommRing R] (m n : ℕ)
     (i : Fin (m + 1)) (j : Fin (n + 1)) :
     segreImagePairChartToProduct R m n i j =
@@ -433,8 +433,8 @@ lemma segreImagePairChartToProduct_compatible_awayι
       R m n i a j b).inv]
   rw [segreImagePairOverlapIso_inv_fst_assoc,
     segreImagePairOverlapIso_inv_snd_assoc]
-  rw [segreImagePairChartToProduct_eq,
-    segreImagePairChartToProduct_eq]
+  rw [segreImagePairChartToProduct_eq_chartMap,
+    segreImagePairChartToProduct_eq_chartMap]
   rw [← segreImageOverlapToFirstProductChart_assoc,
     ← segreImageOverlapToSecondProductChart_assoc]
   have htransition :
@@ -530,5 +530,75 @@ lemma segreImagePairOpenCover_f_segreImageProjToProduct
         segreImageProjToProduct R m n =
       segreImagePairChartToProduct R m n i j := by
   apply Scheme.Cover.ι_glueMorphisms
+
+/-- The isomorphism from a standard product chart to the corresponding
+pair-indexed affine-spectrum chart of the Segre image. -/
+def segreProductStandardChartIsoPairChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    segreProductStandardChart R m n i j ≅
+      Spec
+        (CommRingCat.of
+          (SegreImageChartRing R m n i j)) :=
+  segreProductStandardChartIsoImageChart R m n i j ≪≫
+    segreImagePairChartIsoSpec R m n i j
+
+/-- The product-to-target chart isomorphism followed by the homogeneous
+basic-open immersion is the prescribed local Segre morphism. -/
+@[reassoc]
+lemma segreProductStandardChartIsoPairChart_hom_awayι
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    (segreProductStandardChartIsoPairChart
+          R m n i j).hom ≫
+        Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n i j))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n i j))
+          Nat.zero_lt_one =
+      segreProductStandardChartToImageProj R m n i j := by
+  rw [← segreImagePairChartIsoSpec_inv_ι]
+  simp only [segreProductStandardChartIsoPairChart,
+    Iso.trans_hom, Category.assoc,
+    Iso.hom_inv_id_assoc,
+    segreProductStandardChartIsoImageChart_hom_ι]
+
+/-- The inverse local chart map is the inverse product-to-target chart
+isomorphism followed by the canonical source-chart inclusion. -/
+lemma segreImagePairChartToProduct_eq
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    segreImagePairChartToProduct R m n i j =
+      (segreProductStandardChartIsoPairChart
+          R m n i j).inv ≫
+        segreProductStandardChartMap R m n i j := by
+  rw [segreImagePairChartToProduct_eq_chartMap]
+  rfl
+
+/-- On a homogeneous target chart, the global inverse restricts to the explicit
+inverse chart map. -/
+@[reassoc]
+lemma segreImagePairAwayι_segreImageProjToProduct
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n i j))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n i j))
+          Nat.zero_lt_one ≫
+        segreImageProjToProduct R m n =
+      segreImagePairChartToProduct R m n i j := by
+  change
+    (segreImagePairAffineOpenCover
+          R m n).openCover.f (i, j) ≫
+        segreImageProjToProduct R m n =
+      segreImagePairChartToProduct R m n i j
+  exact
+    segreImagePairOpenCover_f_segreImageProjToProduct
+      R m n i j
 
 end MvPolynomial
