@@ -9,6 +9,7 @@ import «Adic spaces».RationalBasis
 import «Adic spaces».StructurePresheafLimit
 import «Adic spaces».StructurePresheafBundled
 import «Adic spaces».HuberLocLift
+import «Adic spaces».SpaRationalOpenHomeomorph
 import «Adic spaces».StructureSheaf
 import Mathlib.Algebra.Category.Ring.FilteredColimits
 
@@ -961,6 +962,127 @@ theorem stalkShrink_of_rationalShrink (hRS : RationalShrink A)
   exact isUnit_germ_of_isUnit hvW' hfunit
 
 end StalkValue
+
+
+/-! ### The shrink claim holds (Wedhorn 8.14, unconditional) -/
+
+section ShrinkHolds
+
+open TopologicalSpace CategoryTheory TopCat
+
+variable [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+    CompleteSpace A]
+  [IsRingOfIntegralElements (A⁺ : Subring A)] [HasLocLiftPowerBounded A]
+
+noncomputable local instance : DecidableEq A := Classical.decEq _
+
+/-- **The rational shrink claim holds** (Wedhorn 8.14, the substantive step):
+an element `b` of a completed rational localization with nonzero point value
+becomes a unit on a smaller valid rational neighbourhood. The proof scales `b`
+to `c := u^{-k}·b` of value `≥ 1` (cofinality of the topologically nilpotent
+unit), captures the condition `|1| ≤ |c| ≠ 0` on a base open via
+`exists_A_level_open_presentation`, shrinks to a valid rational `D'` inside,
+and detects the unit by Wedhorn 7.52(2) at `presheafValue D'` — every
+Spa-point of the smaller value pulls back (plus functoriality) to a captured
+point, so `b` is nonvanishing there. -/
+theorem rationalShrink_holds : RationalShrink A := by
+  intro D hD v' hv b hnz
+  haveI hTate : IsTateRing (presheafValue D) :=
+    presheafValue_isTateRing_concrete D
+  have hwspa := pointValue_mem_spa D hv
+  have hwcont := pointValue_isContinuous D hv
+  obtain ⟨u, hu⟩ := presheafValue_topNilUnit D
+  obtain ⟨k, hk⟩ := exists_pow_vle_of_isContinuous hwcont hu hnz
+  set c : presheafValue D := ((u⁻¹ : _ˣ) : presheafValue D) ^ k * b with hcdef
+  have h1c : (pointValue D hv).vle 1 c := by
+    have h1 := (pointValue D hv).mul_vle_mul_left hk
+      (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
+    rw [show ((u : presheafValue D) ^ k
+          * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 from by
+        rw [← mul_pow, Units.mul_inv, one_pow],
+      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+        rw [hcdef]; ring] at h1
+    exact h1
+  have hc0 : ¬ (pointValue D hv).vle c 0 := by
+    intro hcon
+    refine hnz ?_
+    have h2 := (pointValue D hv).mul_vle_mul_left hcon
+      ((u : presheafValue D) ^ k)
+    rw [zero_mul, show c * (u : presheafValue D) ^ k = b from by
+      rw [hcdef, mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow,
+        mul_one]] at h2
+    exact h2
+  obtain ⟨W, hWopen, hvW, hcapture⟩ := exists_A_level_open_presentation D
+    hwspa (ι := Unit) (fam := {()}) (F := fun _ => (1 : presheafValue D))
+    (G := fun _ => c) (fun i _ => ⟨h1c, hc0⟩)
+  rw [comap_pointValue D hv] at hvW
+  obtain ⟨D', hD', hvD', hD'sub⟩ := exists_isRational_spaOpen_subset
+    (V := Subtype.val ⁻¹' W ∩ spaOpen D)
+    (IsOpen.inter (hWopen.preimage continuous_subtype_val)
+      (isOpen_spaOpen D))
+    (v := ⟨v', hv.2⟩) ⟨hvW, mem_spaOpen.mpr hv.1⟩
+  have hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s :=
+    spaOpen_subset_iff.mp (hD'sub.trans Set.inter_subset_right)
+  refine ⟨D', hD', hsub, mem_spaOpen.mp hvD', ?_⟩
+  haveI hTate' : IsTateRing (presheafValue D') :=
+    presheafValue_isTateRing_concrete D'
+  haveI : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
+  letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
+  rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
+  intro w'' hw'' hcon
+  have hwPD := comap_restrictionMapHom_mem_spa D D' hsub hw''
+  have hbase' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
+  have hbaseEq : comap D.canonicalMap
+      (comap (restrictionMapHom D D' hsub) w'')
+      = comap D'.canonicalMap w'' := by
+    rw [show comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
+        = comap ((restrictionMapHom D D' hsub).comp D.canonicalMap) w'' from
+      by rw [comap_comp]; rfl]
+    have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap
+        = D'.canonicalMap :=
+      RingHom.ext (restrictionMapHom_canonicalMap_generic D D' hsub)
+    rw [hcomp]
+  have hW' : comap D.canonicalMap
+      (comap (restrictionMapHom D D' hsub) w'') ∈ W := by
+    rw [hbaseEq]
+    exact (hD'sub (show (⟨comap D'.canonicalMap w'', hbase'.2⟩
+      : ↥(Spa A A⁺)) ∈ spaOpen D' from hbase'.1)).1
+  have hcap := hcapture (comap (restrictionMapHom D D' hsub) w'') hwPD hW'
+    () (Finset.mem_singleton_self ())
+  -- transport `vle (σ b) 0` to `vle c 0` at the pulled-back point
+  refine hcap.2 ?_
+  show (comap (restrictionMapHom D D' hsub) w'').vle c 0
+  have hcb : (comap (restrictionMapHom D D' hsub) w'').vle b 0 := by
+    show w''.vle (restrictionMapHom D D' hsub b)
+      (restrictionMapHom D D' hsub 0)
+    rw [map_zero]
+    exact hcon
+  have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
+    (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
+  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+    rw [hcdef]; ring] at h3
+  exact h3
+
+/-- **The stalk shrink claim holds.** -/
+theorem stalkShrink_holds (v : ↥(Spa A A⁺)) : StalkShrink v :=
+  stalkShrink_of_rationalShrink rationalShrink_holds v
+
+/-- **Wedhorn 8.14, unconditional**: the stalk of the structure presheaf at
+any point of `Spa (A, A⁺)` is a local ring. -/
+theorem isLocalRing_stalk (v : ↥(Spa A A⁺)) :
+    IsLocalRing (ToType ((spaRingPresheaf A).stalk v)) :=
+  isLocalRing_stalk_of_shrink (stalkShrink_holds v)
+
+/-- **Wedhorn 8.14, the maximal ideal**: it is the support of the stalk
+valuation. -/
+theorem maximalIdeal_stalk (v : ↥(Spa A A⁺)) :
+    @IsLocalRing.maximalIdeal _ _ (isLocalRing_stalk v)
+      = (stalkValue v).supp :=
+  maximalIdeal_stalk_eq_supp (stalkShrink_holds v)
+
+end ShrinkHolds
 
 end ValuationSpectrum
 
