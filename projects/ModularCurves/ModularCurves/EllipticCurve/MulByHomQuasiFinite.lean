@@ -9,6 +9,7 @@ import ModularCurves.ForMathlib.GeometricFibreComparison
 import ModularCurves.ForMathlib.JacobsonPointCount
 import ModularCurves.ForMathlib.TorsionByEquiv
 import HasseWeil.NTorsion.TorsionGeneralN
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Quasi-finiteness of `[N]` for `N` invertible (BB-QF, invertible case)
@@ -29,6 +30,9 @@ HasseWeil's `torsion_genN_addEquiv` counts those (`E[N] ≃+ (ZMod N)²`, the cr
 anchor). Finitely many sections force a finite fibre space by the Jacobson bridge
 (`Scheme.finite_of_finite_sections`).
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj WeierstrassCurve

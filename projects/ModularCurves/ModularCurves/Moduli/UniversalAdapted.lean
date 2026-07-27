@@ -11,6 +11,7 @@ import ModularCurves.Moduli.AdaptedModel
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.Moduli.OmegaFunctor
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The universal ω-adapted curve and its moduli ring (T-E12, E12-D1)
@@ -24,6 +25,9 @@ short-normal-form Weierstrass curve `y² = x³ + A₄x + A₆` over it — the c
 `(g₂, g₃) = (−4A₄, −4A₆)`-style; the short form matches `adaptedCoeff₄/₆`,
 `Moduli/AdaptedModel.lean`).
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 universe u
 

@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.ForMathlib.TateNormalForm
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.RingTheory.Localization.Away.Basic
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Representability: Tate normal form, Y₁(N), Y(N) (Loeffler §§3.3–3.4, 3.8; KM Ch. 3–5)
@@ -34,6 +35,9 @@ The nowhere-order-≤3 condition is expressed ring-theoretically through the div
 polynomials (`ψ₂`, `ψ₃` — mathlib `WeierstrassCurve.Ψ`): a function on `Spec R` is nowhere
 zero iff it is a unit.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Polynomial
 

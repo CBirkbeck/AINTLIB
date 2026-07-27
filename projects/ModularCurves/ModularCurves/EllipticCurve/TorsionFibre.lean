@@ -13,6 +13,7 @@ import ModularCurves.ForMathlib.NilpotentKerSpecMap
 import ModularCurves.ForMathlib.UnramifiedOfCardAlgHom
 import HasseWeil.NTorsion.TorsionGeneralN
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Fibre comparison for the torsion subscheme (ticket T-B6)
@@ -35,6 +36,9 @@ Two layers, per the T-B6 design of record (replanned 2026-07-06):
   chord–tangent group (HasseWeil) is the separate optional dictionary leaf, still
   recorded on the board for the black-box discharges.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj
