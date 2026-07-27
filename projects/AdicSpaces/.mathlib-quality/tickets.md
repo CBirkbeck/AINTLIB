@@ -1529,14 +1529,79 @@ non-Tate bases are supported.
     mk_monomial_mem_of_le + mk_monomial_mem_of_large, axiom-clean; PERF:
     omega CANNOT see k*a-vs-a*k as equal atoms — nonlinear — keep ONE
     spelling; generalize the map-atoms before ring; the final membership
-    exacts must use the refine-bullet form). REMAINING: (M2'') the
-    middle-zone identity (mk'(p^i[c], s^k))^a = chartFracP^{i−k}·[c'']
-    (both sides = P^{ia}·T^{k(a+1)−i}·C''-normal form; mk'_pow +
-    hIT-insert at exponent i−k + T^{ka}-split), then the head-sum
-    (init-expansion of x as Σ p^i[teichCoeff] — needs the finite
-    Teichmüller-expansion lemma via coeff_add_of_disjoint-induction, CHECK
-    if already in GaussNorm/Presentation) + the tail-smallness + closure
-    assembly.
+    exacts must use the refine-bullet form). (M2'') DONE 2026-07-27
+    (mk_monomial_pow_a_eq, commit 709e65781): (mk'(p^{k+d}[c], s^k))^a
+    = chartFracP^d·[c''] given |c|^a ≤ |ϖ|^{ka−d}; mk'-power collapse
+    via eq_comm+mk'_eq_iff_eq_mul with the sPow SUBTYPE-COE spelled as
+    show-from-rfl bridges INSIDE the rw chain (rw only sees the
+    syntactic coe form), main identity by 3-step calc with
+    (k+d)*a = a*d + k*a spelling + hIT-insert + generalize-then-ring.
+    REMAINING: the head-sum — the finite Teichmüller expansion EXISTS:
+    mathlib WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff
+    (x r): p^{r+1} ∣ x − Σ_{i∈Iic r}[frobEquiv.symm^i(coeff i x)]·p^i
+    (used in AinfHuber.lean:339 with eq_add_of_sub_eq: x = p^{r+1}·w + Σ).
+    So head-sum = image of that identity under mk'(·, s^k); per-monomial
+    bounds from gaussValue-sup ⇒ each monomial in a zone lemma;
+    THEN tail-smallness + closure assembly.
+    TRANSPORT BRICKS DONE 2026-07-27 (commit ab7c8ccd1, ChartVObj.lean,
+    all axiom-clean): presheafChartRingEquivBISub_symm_blocToBI
+    (ψ(h) = coeRingHom(blocEquivAwayChartS.symm h), via injective +
+    compare_coe mirror + BIProd-defeq show), chartSubring_le_
+    locPlusSubring_map (S-generators ↦ alg/divByS via blocEquiv_divByS_
+    teichPi/p; A⁺ = ⊤ so Subring.mem_top), coeRingHom_mem_completedPlus
+    SubringBase_of_mem, symm_blocToBI_mem_completedPlusSubring_of_mem /
+    _of_pow_mem (IsIntegral.of_pow; the registered subtype.toAlgebra makes
+    isIntegral_algebraMap defeq-close), monomial_symm_blocToBI_mem_
+    completedPlusSubring (3-zone dispatch at b=1 from the two Gauss-term
+    bounds ρ^i·|c| ≤ (ρ·|ϖ|)^k). PERF: chartData PROJECTIONS (.s/.T) are
+    NOT reducible-defeq — never let ⟨w,hw⟩/rw touch a D.s-typed goal
+    directly; route via ∀-quantified helper lemmas stated in the D.s
+    spelling, and pin isIntegral_algebraMap's R with show-from ascription.
+    ★★ (r5b) DONE 2026-07-27 — ChartDensePlus PROVEN at (a,1)
+    (chartDensePlus_of_exact, commit 237ae3573, all axiom-clean):
+    gaussValue_sPow + gaussTerm_le_of_wLoc_mk'_le_one (inv-cancel calc) +
+    mk'_sPow_split (congrArg-alg + simp only [← mk'_eq_mul_mk'_one]) +
+    wLoc_mk'_tail_le (gaussValue_le_one) + valued_BlocToHatK_sub_of_add +
+    tendsto_max_const_mul_pow (include hρ₁1 hρ₂1) + the assembly
+    (mk'_surjective PAIR-pattern ⟨⟨x,s⟩,rfl⟩; Submonoid.mem_powers_iff +
+    Subtype.ext + subst to sPow k; choose over mathlib
+    dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff — teichCoeff is
+    DEFEQ to the frobEquiv-form so hwspec plugs straight in; hpair via
+    Prod.ext (BIProd_fst …).symm with ALL radius args explicit;
+    tendsto_subtype_rng + show-BIProd-normalization + rw [← hpair];
+    per-coordinate ε-bounds by le_of_eq (by ring) into le_max_left/right).
+    PERF: this mathlib's cancel lemmas are mul_le_mul_LEFT (h)(c): b*a ≤
+    c*a and mul_le_mul_RIGHT (h)(a): a*b ≤ a*c — primed variants GONE.
+    ★★★ (r5c) DONE 2026-07-27 (commit pending-hash): chartPlus_map_eq_
+    completedPlusSubring + chartPlus_eq_canonical (b=1) — THE PLUS
+    RECONCILIATION IS AN EQUALITY; chart VObj plus structure canonical.
+    D-ii-3 CHART-LEVEL COMPLETE: charts of 𝒴 are 𝒱-objects with
+    canonical plus. ARCHITECTURE DECIDED 2026-07-27 (after re-audit):
+    the M8 ambient route is DEAD for stalks/VObj — StructureSheafStalks'
+    ShrinkHolds section (isLocalRing_stalk/spaVPreObj/spaVObj) is
+    [IsTateRing A]-gated (the 8.14 shrink uses a top-nilpotent UNIT), and
+    A_inf is not Tate; the keystone chain (RelativePieceKeystone) is
+    additionally [IsNoetherianRing]+[IsStronglyNoetherian]-gated — dead
+    too. The M8 instance still gives the ambient PRESHEAF (no Tate), but
+    stalk data must come from the CHARTS. The chosen Y-architecture is
+    the DYADIC one already started in YPresheaf.lean: limitSectionsY
+    (compatible families over dyadic-trace indices ⊆ W) as the presheaf
+    on Y-subsets, limitEvalTop_bijective as the basis-identification,
+    2-piece + N-piece gluing as the sheaf axiom. ★ N-PIECE CHAIN GLUE
+    DONE 2026-07-27 (biResQ'_chain_glue, commit b93e8020b, axiom-clean):
+    rational-level formulation (q : ℕ → ℚ chain) keeps ALL spellings
+    uniform (NO DyadicIdx-projection defeq-traps); induction peels the
+    top piece via biResQ'_split_existsUnique + biFstQ_biResQ'_left
+    endpoint transport + biResQ'_comp; PERF: RingHom.congr_fun of a comp-
+    law needs rw [RingHom.comp_apply] BEFORE the inner rw can match.
+    NEXT (Y-OBJ pipeline): (Y-a) the Opens-functor packaging of
+    limitSectionsY on the subspace Y (presheaf-on-Y in TopCat.Presheaf
+    form or hand-rolled contravariant functor); (Y-b) sheaf condition for
+    trace-covers via chain-glue (cover of a dyadic trace by dyadic traces
+    refines to a finite chain — compactness/order argument on ℚ-
+    intervals); (Y-c) stalk package at v ∈ Y from the CHART spaVObj data
+    (cofinality of dyadic traces ∋ v + limitEvalTop + BIQ-level stalk =
+    chart-stalk); then (D-iii) φ-action as VObj-isos and X := Y/φ^ℤ.
     Bricks: (r4a) DONE 2026-07-27
     (ChartVObj.lean: exists_eq_toOF_pow_mul + teich_div_p_pow_mem_
     chartSubring (m1) + p_div_teich_pow_a_mem_chartSubring (m3);
@@ -2197,7 +2262,38 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   the endpoint values `≤ ε`; ultrametric max gives `v(z.i) ≤ ε`; conclude `z = 0`.
 
 ### [T910] Lemma 4.9, first two presentations
-- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T907, T908
+- **Status**: in_progress (beastmode 2026-07-27) | **File**: FarguesFontaine/RobbaPresentation.lean (new) | **Depends**: T907, T908
+- **OPENING PLAN (2026-07-27, after the D-track wall audit)**. The D-track's next
+  steps (Y-b sheaf-on-Y, VObj-glue) hit two genuine infra walls: (i) Spa(A_inf)
+  quasicompactness — the Tate-case closed-image route does not apply (A_inf not
+  Tate) and even the Tate noHArch variant is a recorded sorry
+  (isClosed_image_spa_ιSpv_bool_noHArch, SpaCompactNoHArch:312); (ii) gluing
+  infrastructure for TopRingPresheafedSpace/VObj does not exist. Both are
+  coordinator-scale planning items. Meanwhile T910 is CONTRACTUAL, has met
+  dependencies, and its cases 1–2 are exactly the rational-localization
+  presentations 𝒪_{B^I}(sub-opens) ≅ B^{I∩…} that the chart-local sheaf theory
+  of the D-track needs (keystone-free). So T910 now.
+- **Pinned repo statement (case 1, untwisted radius-1 form)**: coefficients
+  BI⟨T⟩ := restrictedMvPowerSeriesSubring 1 ↥(BISub ρ₁ ρ₂) (instances exist —
+  T912 already states over it). Generator: T − b with b the image in B^{I′} of
+  the p-unit-scaled Teichmüller (teichPowOverP-family: [z̄^e]/p^m; p is a unit
+  of B^I). The cut endpoint: ρ₁′ pinned by an hexact-style hypothesis
+  (|ϖ|-power = the radius where |p^{-m}[z̄^e]|_t = 1), I′ = [ρ₁′, ρ₂].
+  Mirror of the T911 pipeline (Presentation.lean):
+  (P1) evalBIHom : BI⟨T⟩ →+* BISub′ at power-bounded b — series limit +
+  hom laws (mirror evalTerm/evalAr/evalArHom, with coefficient map
+  resIHom (T909) in place of ArToBI; contraction valued_resI_le_wI);
+  (P2) the specific b + its wI′ ≤ 1 (teichPowOverP norms exist from T911);
+  (P3) surjectivity with (4.9.1)-norm control: per-monomial lift
+  y = ϖ^n[x̄_n z̄^{-j}]·T^j (mirror exists_evalAr_eq_of_mem_BISub);
+  (P4) kernel = (T − b), closed, strict: multiplicativity bound wI(y) ≥
+  |T−b|-factor + the x_n = −Σ y_i [z̄]^{i−n−1} coefficient-decay injectivity
+  (Kedlaya ln 527–546; per-t case split t < t₀ geometric unit / t ≥ t₀
+  quotient-iso);
+  (P5) the Banach-iso package + the ρ ∈ p^ℚ plus-ring statement (integral
+  closure of the image of B^{I,+} = B^{I′,+} — reuse the ChartVObj
+  plus-reconciliation technique: three-zone/power-integrality).
+  Case 2 ([z̄⁻¹]-variant, right cut) mirrors with the endpoint swapped.
 - **Statement** (untwisted form; z := ϖF^{a/b}-powers, radii in c^ℚ, rescale per AD-5):
   `BI⟨T⟩/(T − [z]·unit-rescaled) ≅ B^{I∩[...]}` and the `[z⁻¹]`-variant — the exact
   endpoint arithmetic per Kedlaya ln 380–392, transported through ρ = p^{-1/t}.
