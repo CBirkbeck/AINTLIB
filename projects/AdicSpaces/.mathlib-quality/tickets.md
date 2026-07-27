@@ -2354,7 +2354,35 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   needs wI_evalBI_le — the eval-value bound, mirror wI_evalAr_le at
   Presentation ~1990-2040 — check its exact statement first); (P3d) the
   first-approximation lemma (the per-monomial Kedlaya lift on the
-  Bloc-dense layer). ⚠ DESIGN FACT (2026-07-27 re-read of ln 546-561):
+  Bloc-dense layer). ⚠⚠ DESIGN CORRECTED (2026-07-27, second analysis —
+  supersedes the note below, which transliterated Kedlaya's λ_t-norms
+  (coordinate enters with t-POWER) into our gaussValue (coordinate
+  LINEAR, |p| = ρ varies) incorrectly): in OUR normalization,
+  NUMERATOR-monomials alg(p^i[c]) have wI-ρ = wI-σ (max at the shared
+  top radius ρ₂) — NO twist, K = 1, constant-lift. The twist is needed
+  exactly for DENOMINATOR-dominant monomials mk'(p^i[c], s^k) with
+  i < k (ρ-max at ρ₁ exceeds the σ-norm by (σ₁/ρ₁)^{k−i}); the twist
+  depth j needed is ⌈(k−i)/m⌉-ish, and THE DIVISIBILITY zb^j ∣ c IS
+  SUPPLIED BY THE σ-GAUSS-BOUND on the element being lifted (v_{σ₁}-
+  boundedness forces v(c) ≤ σ₁^{k−i}·stuff = c₀^{(k−i)/m}·stuff —
+  exactly the ChartDensePlus zone-M1 mechanism, r5b machinery reusable:
+  gaussTerm ≤ gaussValue at σ₁ + exists_eq_toOF_pow_mul-style dvd).
+  So P3d = per-monomial dispatch on i vs k (numerator-zone constant
+  lift; denominator-zone twisted lift y·T^j via teichPowGen_pow_mul_
+  twist + the σ-bound-derived divisibility), head/tail-split of the
+  Bloc-approximant via mk'_sPow_split (ChartVObj), tail smallness,
+  finite-head assembly. K = 1 likely achievable (both zones bound by
+  the σ-norm directly); re-verify during implementation.
+  P3d(i) SHIPPED 2026-07-27 (commit 7111e8ef1): teichPowGen +
+  algebraMap_p_pow_mul_vp_pow + teichPowGen_pow_mul_twist (the exact
+  substitution identity) + exists_twist (maximal-twist normalization
+  via Nat.findGreatest; PERF: set-bound lambdas need show-beta at every
+  P-use site; NNReal.exists_pow_lt_of_lt_one needs namespace
+  disambiguation). NOTE RobbaPresentation now imports ChartVObj? NO —
+  NOT yet: sPow/gaussValue_sPow live in ChartVObj.lean; when P3d(ii)
+  needs mk'-monomials either import ChartVObj into RobbaPresentation
+  or work at the alg(p^i[c])·u_k-factored form (u_k := mk'(1, s^k)
+  unit) — DECIDE at implementation. STALE-BELOW:
   case 1's lift is NOT norm-≤ like case 3's — Kedlaya (4.9.1) is
   |z|_ρ ≤ c^{t₀−t}·λ_{I′}(x), a CONSTANT blow-up (the far endpoint vs
   the cut endpoint). In our radius-1 conventions: monomial x = p^n[x̄],
