@@ -983,7 +983,10 @@ non-Tate bases are supported.
   bounded·nilpotent); value lemmas `v(toOF (frobRoot ϖ s))^(p^s) = v(toOF ϖ)`,
   `toOF (pow ϖ m) = toOF ϖ ^ m`, and the Ainf-side `teichPi (frobRoot/pow)`
   power relations.
-- **ID3b** (open): window identification. `Y p F ϖ = Y p F ϖ_n` (powers detect
+- **ID3b** DONE (2026-07-27, FarguesFontaine/BigWindows.lean: teichPi_frobRoot_pow/
+  teichPi_pPow, Y_eq_of_teichPi_pow, vle_pow_iff, bigWindow (def) +
+  bigWindow_eq_union (split at c·p^n; KGE/KLE_mono de-privatized in YSpace) +
+  Y_eq_iUnion_bigWindow + bigWindow_eq_rationalOpen_ofNat/_neg): `Y p F ϖ = Y p F ϖ_n` (powers detect
   the same vanishing) and `BigW_n(ϖ) = rationalOpen (chartT-in-ϖ_n p 1)
   (chartS-in-ϖ_n 1 1)` via mem_rationalOpen_chartData_iff at ϖ_n + the
   KGE/KLE cross-multiplication bridges ([ϖ_n]^{p^n} = [ϖ] as teichPi-powers).

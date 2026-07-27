@@ -448,7 +448,7 @@ interval `[p^{-N}, p^N]`; among the finitely many `n` in range, take the largest
 
 Source: [Kedlaya-AWS, Rem. 3.1.9]: "This space can be covered by the subspaces U_n ...
 V_n". -/
-private theorem KGE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
+theorem KGE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
     (hq' : 0 < q') (hle : q' ≤ q) (h : KGE p F ϖ q v) : KGE p F ϖ q' v := by
   letI : ValuativeRel (Ainf p F) := v.toValuativeRel
   have hq : 0 < q := hq'.trans_le hle
@@ -490,7 +490,7 @@ private theorem KGE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
     _ = (ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat) ^ q.den :=
         pow_mul _ _ _
 
-private theorem KLE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
+theorem KLE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
     (hq : 0 < q) (hle : q ≤ q') (h : KLE p F ϖ q v) : KLE p F ϖ q' v := by
   letI : ValuativeRel (Ainf p F) := v.toValuativeRel
   have hq' : 0 < q' := hq.trans_le hle
