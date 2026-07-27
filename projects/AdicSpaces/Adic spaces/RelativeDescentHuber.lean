@@ -1205,6 +1205,119 @@ theorem exists_glue_of_imgCovering
 
 end GluingTransportMain
 
+
+section EmbeddingTransport
+
+variable [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [DecidableEq A]
+variable (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)]
+
+/-- Casting along a datum equality is continuous (subst-form). -/
+theorem continuous_cast_presheafValue {E₁ E₂ : RationalLocData (presheafValue D₀)}
+    (heq : E₁ = E₂) :
+    Continuous (fun v : presheafValue E₁ => heq ▸ v) := by
+  subst heq
+  exact continuous_id
+
+/-- The product restriction is continuous (local copy of the private
+`StandardDescent` fact). -/
+theorem productRestrictionSub_continuous_local (C : RationalCoveringData A) :
+    Continuous (productRestrictionSub A C) := by
+  refine continuous_pi fun E => ?_
+  show Continuous fun x : presheafValue C.base =>
+    restrictionMap C.base E.1 (C.hsubset E.1 E.2) x
+  exact restrictionMapHom_continuous C.base E.1 (C.hsubset E.1 E.2)
+
+variable [DecidableEq (RationalLocData (presheafValue D₀))]
+
+/-- **The embedding transport** (the topological half of the single-`D₀`
+sheaf transport): the product restriction of an interior covering is a
+topological embedding, provided the completion at `D₀` is a sheafy Tate
+ring. -/
+theorem isEmbedding_productRestrictionSub_of_imgCovering
+    [IsSheafy (presheafValue D₀)]
+    [T2Space (presheafValue D₀)] [NonarchimedeanRing (presheafValue D₀)]
+    [letI : UniformSpace (presheafValue D₀) :=
+        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
+      CompleteSpace (presheafValue D₀)]
+    [IsRingOfIntegralElements ((presheafValue D₀)⁺)]
+    (hcertAll : ∀ E : RationalLocData A, E.IsRational →
+      Ideal.span ((E.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (C : RationalCoveringData A) (hC : C.IsRational)
+    (hCD₀ : rationalOpen C.base.T C.base.s ⊆ rationalOpen D₀.T D₀.s) :
+    Topology.IsEmbedding (productRestrictionSub A C) := by
+  classical
+  have hcertB := hcertAll _ hC.base
+  have hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤ :=
+    fun D hD => hcertAll D (hC.piece hD)
+  have hCBrat := imgCoveringO_isRational D₀ C hcertB hcertP
+  -- the comparison map on products
+  set g : (∀ D : ↥C.covers, presheafValue D.1) →
+      (∀ D' : ↥(imgCoveringO D₀ C hcertB hcertP).covers, presheafValue D'.1) :=
+    fun s D' =>
+      ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm ▸
+        (keystoneHomO D₀
+          (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+          (s ⟨((mem_imgCoversO D₀ C hcertP).mp D'.2).choose,
+            ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose⟩))
+    with hgdef
+  have hgcont : Continuous g := by
+    refine continuous_pi fun D' => ?_
+    exact (continuous_cast_presheafValue D₀ _).comp
+      ((keystoneHomO_continuous D₀ _).comp (continuous_apply _))
+  -- the composite is the B-side product restriction after the base keystone
+  have hcomp : g ∘ productRestrictionSub A C
+      = productRestrictionSub (presheafValue D₀)
+          (imgCoveringO D₀ C hcertB hcertP)
+        ∘ (keystoneHomO D₀ hcertB) := by
+    funext x D'
+    show (((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm ▸
+        (keystoneHomO D₀ _ (restrictionMap C.base _ _ x))) = _
+    rw [restrictionMap_cast _ _
+      ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm _]
+    have hsq := keystone_restriction_squareO D₀ hcertB
+      (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+      (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+      x
+    rw [hsq]
+    have hc := congr_fun (restrictionMap_comp
+      (imgDatumO D₀ C.base hcertB)
+      (imgDatumO D₀ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose
+        (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
+      D'.1
+      (imgDatumO_rationalOpen_subset D₀ hcertB
+        (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+        (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
+      (le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
+        ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec)))
+      (keystoneHomO D₀ hcertB x)
+    simp only [Function.comp_apply] at hc
+    exact hc
+  -- the composite is an embedding: B-side embedding after the base homeo
+  have hkeyhomeo : Topology.IsEmbedding (keystoneHomO D₀ hcertB) := by
+    have h : Topology.IsEmbedding
+        (⇑(Homeomorph.mk (keystoneO D₀ hcertB hCD₀).toEquiv
+          (keystoneHomO_continuous D₀ hcertB)
+          (keystoneInvO_continuous D₀ hcertB hCD₀))) :=
+      (Homeomorph.mk _ _ _).isEmbedding
+    exact h
+  have hcompEmb : Topology.IsEmbedding
+      (productRestrictionSub (presheafValue D₀)
+        (imgCoveringO D₀ C hcertB hcertP)
+      ∘ (keystoneHomO D₀ hcertB)) :=
+    (IsSheafy.embedding _ hCBrat).comp hkeyhomeo
+  rw [← hcomp] at hcompEmb
+  constructor
+  · exact Topology.IsInducing.of_comp
+      (productRestrictionSub_continuous_local C) hgcont
+      hcompEmb.isInducing
+  · exact Function.Injective.of_comp (f := g) hcompEmb.injective
+
+end EmbeddingTransport
+
 end ValuationSpectrum
 
 end
