@@ -1862,7 +1862,50 @@ non-Tate bases are supported.
     pointwise trans-chains, NO rw-motives); **yVObj**.
     REMAINING ON THE Y/X-TRACK: D-iii (φ-action as VObj-isos; the
     biPhiQ interval layer is complete), X := Y/φ^ℤ (Curve.lean has the
-    topological quotient + CompactSpace already). Non-critical parked:
+    topological quotient + CompactSpace already).
+    ★ D-iii PROGRESS 2026-07-28 (all axiom-clean):
+    (D-iii-1, commits 371a67504 + 365a37beb) NEW FILE
+    RingEquivPresheafTransportHuber.lean — the TATE-GATE of
+    RingEquivPresheafTransport dissolved: locMapAway (datum-free
+    localization pushforward) + closure-induction locSubring mapping;
+    RationalLocData.mapHuber (hopen transported directly — no
+    genPieceDatum/span); mapHuber_isRational (openness through the
+    open map); presheafValueRingEquivHuber (pvFwd/pvBwd pattern at
+    presheafValueMapOfHom — which was Huber-generic all along!) with
+    continuity both ways, canonicalMap + restriction naturality (fwd
+    and symm), comap-preimage description of transported opens; datum
+    roundtrips via RationalLocData.ext' + pair-roundtrips. GOTCHAS:
+    pass TYPED hs-lemmas (hs_fwd') not bare rfl (rw-matching needs the
+    binder-shape); congrArg with EXPLICIT function at coe-mismatches;
+    finset_symm_image_image has a Classical-instance mismatch — use
+    Finset.image_image + image_congr + image_id.
+    (D-iii-2a, commit 2da664187) FarguesFontaine/FrobeniusSpa.lean —
+    frobPow k (RingAut-zpow) bicontinuous (continuity via the
+    const-smul instance; symm = frobPow (-k)); comap_frobPow_eq_smul
+    (alignment with the φ^ℤ-action); spaFrobHomeo; spaFrob_preimage_
+    spaOpen (= spaOpen of mapHuber (frobPow k)); ySpaSet stability.
+    (D-iii-2b, commit 28ee54ce2) FarguesFontaine/FrobeniusLimit.lean —
+    frobOpens/frobIndex; limitFrobHom (the transport of ambient limit
+    sections; Pi.ringHom-of-composites + codRestrict so ALL ring laws
+    are FREE — the direct where-fields hit isDefEq walls through the
+    Subring-coe instances); continuity via continuous_induced_rng +
+    shallow rfl-bridges; limitRestrict-naturality DEFINITIONAL.
+    (D-iii-3a, commit e8ba952d8) ambientFrobHom : the ambient
+    presheafed-space endo (spaFrobTop + ambientFrobNat; naturality by
+    trans-chains through structurePresheaf_map — calc FAILS across
+    defeq-distinct Opens-instance spellings (SpaTop.str vs subtype),
+    Eq.trans-terms unify fine).
+    (D-iii-3b, commit 1ee9043e6) **yFrobHom : the Frobenius
+    endomorphism of the 𝒴-presheafed space** — two-sided ySpaSet
+    stability, yFrobTop, yFunctor_frobOpens (image-functor commutes
+    with the Frobenius preimage), and the INDEX-BRIDGED Y-transport
+    (yFrobIndexBridge casts indices along the opens-equality at the
+    ⊆-Prop, so NO eqToHom algebra appears and yFrobNat's naturality
+    is DEFINITIONAL — Subtype.ext∘funext∘rfl).
+    NEXT (D-iii-4): the VPreHom fields for yFrobHom (isLocalHom on
+    ring stalks + val-compat through yRingStalkIso) and the iso
+    (k/-k roundtrips at PresheafedSpace-Hom level); then the VObj-iso
+    of yVObj and X := Y/φ^ℤ packaging. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
