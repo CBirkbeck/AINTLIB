@@ -461,6 +461,62 @@ theorem map_yFrobTop_zero (W : Opens ↥(yTop p F ϖ)) :
   show yFrobTop p F ϖ 0 y ∈ (W : Set _) ↔ y ∈ (W : Set _)
   rw [yFrobTop_zero p F ϖ y]
 
+theorem frobPow_toRingHom_comp (k l : ℤ) :
+    (frobPow p F (k + l)).toRingHom
+      = (frobPow p F k).toRingHom.comp (frobPow p F l).toRingHom := by
+  refine RingHom.ext fun x => ?_
+  show ((frob p F ^ (k + l) : RingAut (Ainf p F)) : Ainf p F ≃+* Ainf p F) x
+    = ((frob p F ^ k : RingAut (Ainf p F)) : Ainf p F ≃+* Ainf p F)
+        (((frob p F ^ l : RingAut (Ainf p F)) : Ainf p F ≃+* Ainf p F) x)
+  rw [zpow_add]
+  rfl
+
+/-- Additivity of the `Spa`-Frobenius. -/
+theorem spaFrob_add (k l : ℤ)
+    (v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    spaFrob p F (k + l) v = spaFrob p F l (spaFrob p F k v) := by
+  refine Subtype.ext ?_
+  show comap (frobPow p F (k + l)).toRingHom v.1
+    = comap (frobPow p F l).toRingHom (comap (frobPow p F k).toRingHom v.1)
+  rw [frobPow_toRingHom_comp p F k l]
+  exact congr_fun (ValuationSpectrum.comap_comp
+    (frobPow p F l).toRingHom (frobPow p F k).toRingHom) v.1
+
+/-- Additivity of the `𝒴`-carrier Frobenius. -/
+theorem yFrobTop_add (k l : ℤ) (y : ↥(yTop p F ϖ)) :
+    yFrobTop p F ϖ (k + l) y
+      = yFrobTop p F ϖ l (yFrobTop p F ϖ k y) := by
+  refine Subtype.ext ?_
+  show spaFrob p F (k + l) y.1 = spaFrob p F l (spaFrob p F k y.1)
+  exact spaFrob_add p F k l y.1
+
+/-- **Pairwise disjointness of distinct Frobenius translates.** -/
+theorem translates_pairwise_disjoint
+    {W : Opens ↥(yTop p F ϖ)}
+    (hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)))
+    {i j : ℤ} (hij : i ≠ j) :
+    Disjoint (((Opens.map (yFrobTop p F ϖ i)).obj W
+        : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+      (((Opens.map (yFrobTop p F ϖ j)).obj W
+        : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)) := by
+  refine Set.disjoint_left.mpr ?_
+  rintro y hyi hyj
+  -- yFrobTop i y ∈ W and yFrobTop j y ∈ W
+  have hcomp : yFrobTop p F ϖ (j - i) (yFrobTop p F ϖ i y)
+      = yFrobTop p F ϖ j y := by
+    rw [← yFrobTop_add p F ϖ i (j - i) y]
+    norm_num
+  have h1 : yFrobTop p F ϖ i y
+      ∈ (((Opens.map (yFrobTop p F ϖ (j - i))).obj W
+        : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)) := by
+    show yFrobTop p F ϖ (j - i) (yFrobTop p F ϖ i y) ∈ (W : Set _)
+    rw [hcomp]
+    exact hyj
+  exact Set.disjoint_left.mp (hdis (j - i) (by omega)) h1 hyi
+
 end FarguesFontaine
 
 end
