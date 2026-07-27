@@ -5,6 +5,7 @@ Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.ChartComparison
 import «Adic spaces».StructureSheafStalks
+import «Adic spaces».FarguesFontaine.IntervalSplitting
 
 /-!
 # The Fargues–Fontaine charts as objects of `𝒱` (D-ii-3 instantiation)
@@ -103,6 +104,81 @@ noncomputable def chartVObj (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a
     isSheafy_presheafChart p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
   spaVObj_of_isSheafy (presheafValue (chartData p F ϖ 1 b a b))
+
+
+/-! ### The plus reconciliation, easy half: canonical ⊆ ball -/
+
+/-- The forward comparison map is open (a ring equivalence with continuous
+inverse). -/
+theorem presheafChartRingEquivBISub_isOpenMap (a b : ℕ) (ha : 0 < a)
+    (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    IsOpenMap (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+      hexact1 hexact2) := by
+  intro U hU
+  rw [show (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2) '' U
+    = (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1
+      hexact2).symm ⁻¹' U from
+    Equiv.image_eq_preimage_symm _ U]
+  exact (presheafChartRingEquivBISub_symm_continuous p F ϖ (hρ₁0 := hρ₁0)
+    (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+    hexact1 hexact2).isOpen_preimage U hU
+
+/-- **The easy half of the plus reconciliation** (Kedlaya Def 4.5, ⊆): the
+canonical plus subring of a chart value lands in the transported unit ball —
+canonical-plus elements are power-bounded (the ring-of-integral-elements
+field), power-boundedness transports along the open comparison map, and the
+ball is exactly the power-bounded subring of `B^I`. -/
+theorem completedPlusSubring_le_chartPlus (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    (chartData p F ϖ 1 b a b).completedPlusSubring
+      ≤ (BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).map
+          ((presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+            (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+            hexact1 hexact2).symm.toRingHom) := by
+  intro x hx
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+    isAffinoidRing_Ainf p F
+  have hIRIE := RationalLocData.presheafValuePlus_isRingOfIntegralElements
+    (A := Ainf p F) (chartData p F ϖ 1 b a b)
+  -- power-bounded in the chart value
+  have hpb : TopologicalRing.IsPowerBounded x :=
+    hIRIE.subset_powerBounded hx
+  -- transport to `B^I` along the open comparison
+  have hpbB : TopologicalRing.IsPowerBounded
+      (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2 x) :=
+    isPowerBounded_map_of_isOpenMap
+      (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1
+        hexact2).toRingHom
+      (presheafChartRingEquivBISub_continuous p F ϖ (hρ₁0 := hρ₁0)
+        (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+        hexact1 hexact2)
+      (presheafChartRingEquivBISub_isOpenMap p F ϖ (hρ₁0 := hρ₁0)
+        (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+        hexact1 hexact2)
+      hpb
+  -- the ball membership
+  have hball : presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+      hexact1 hexact2 x ∈ BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := by
+    rw [mem_BIPlusIn_iff]
+    exact (isPowerBounded_iff_wI_le_one p F ϖ _).mp hpbB
+  refine ⟨_, hball, ?_⟩
+  exact (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1
+    hexact2).symm_apply_apply x
 
 end FarguesFontaine
 
