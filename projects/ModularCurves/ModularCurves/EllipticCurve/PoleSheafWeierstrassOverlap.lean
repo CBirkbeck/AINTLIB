@@ -483,6 +483,35 @@ private theorem sectionPoleSheafPower_cartier_away_subopen_transition
         z hz V hV n))
     (rW ^ n) hPower'
 
+/-- On a Cartier/away overlap, the frames of a pole-sheaf power differ by the
+corresponding power of the restricted Cartier generator. -/
+theorem sectionPoleSheafPower_cartier_away_overlap_transition
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (V : C.Opens) (hV : z ⁻¹ᵁ V = ⊥) (n : ℕ) :
+    let W := U.1 ⊓ V
+    let eCartier :=
+      Scheme.Modules.restrictOpenTrivialization
+        (inf_le_left : W ≤ U.1)
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd n)
+    let eAway :=
+      Scheme.Modules.restrictOpenTrivialization
+        (inf_le_right : W ≤ V)
+        (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+          z hz V hV n)
+    let rW := C.presheaf.map (homOfLE (inf_le_left : W ≤ U.1)).op r
+    (Scheme.Modules.overTrivializationOfRestrictIso
+        (sectionPoleSheafPower π z hz n) W eCartier).hom =
+      (Scheme.Modules.overTrivializationOfRestrictIso
+          (sectionPoleSheafPower π z hz n) W eAway).hom ≫
+        SheafOfModules.overUnitScalarEnd C.ringCatSheaf W (rW ^ n) := by
+  exact sectionPoleSheafPower_cartier_away_subopen_transition
+    z hz U r hr hspan hnzd V hV (U.1 ⊓ V) inf_le_left inf_le_right n
+
 /-- On a Cartier/away overlap, coefficients of a pole-power section differ by
 the corresponding power of the restricted Cartier generator. -/
 theorem sectionPoleSheafPower_cartier_away_overlap_coefficient
