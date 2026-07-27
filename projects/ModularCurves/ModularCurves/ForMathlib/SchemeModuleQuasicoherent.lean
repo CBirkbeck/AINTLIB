@@ -4,6 +4,7 @@ import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import Mathlib.Algebra.Module.LocalizedModule.Submodule
 import Mathlib.AlgebraicGeometry.Modules.Tilde
 import Mathlib.AlgebraicGeometry.Noetherian
+import Mathlib.CategoryTheory.ObjectProperty.Kernels
 import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 import Mathlib.LinearAlgebra.Dimension.Finite
 import Mathlib.RingTheory.Localization.Finiteness
@@ -496,6 +497,58 @@ theorem isQuasicoherent_kernel
   exact @SheafOfModules.IsQuasicoherent.of_coversTop
     _ _ _ _ _ _ _ _ (kernel f) _
       (fun U : X.affineOpens ↦ (U : X.Opens)) hcover hlocal
+
+/-- The cokernel of a morphism between quasicoherent modules on a scheme is
+quasicoherent. -/
+theorem isQuasicoherent_cokernel
+    {X : Scheme.{u}} {M N : X.Modules}
+    [M.IsQuasicoherent] [N.IsQuasicoherent] (f : M ⟶ N) :
+    (cokernel f).IsQuasicoherent := by
+  have hlocal (U : X.affineOpens) :
+      ((cokernel f).over (U : X.Opens)).IsQuasicoherent := by
+    let F := restrictFunctor U.1.ι
+    letI : IsAffine U.1 := U.2
+    letI : PreservesColimitsOfSize.{u, u} F := by
+      dsimp [F]
+      infer_instance
+    let P := isQuasicoherent U.1
+    letI : P.IsClosedUnderColimitsOfShape WalkingParallelPair := by
+      dsimp [P]
+      rw [← isQuasicoherent_inverseImage_iso (isoSpec U.1).symm]
+      exact ObjectProperty.IsClosedUnderColimitsOfShape.inverseImage ..
+    let c := CokernelCofork.ofπ
+      (cokernel.π (F.map f)) (cokernel.condition (F.map f))
+    have hCokernel : (cokernel (F.map f)).IsQuasicoherent := by
+      change P c.pt
+      apply P.prop_of_isColimit (cokernelIsCokernel (F.map f))
+      rintro (_ | _)
+      · change (F.obj M).IsQuasicoherent
+        infer_instance
+      · change (F.obj N).IsQuasicoherent
+        infer_instance
+    have hRestrict : (F.obj (cokernel f)).IsQuasicoherent :=
+      (isQuasicoherent U.1).prop_of_iso
+        (PreservesCokernel.iso F f).symm hCokernel
+    letI : (F.obj (cokernel f)).IsQuasicoherent := hRestrict
+    exact
+      isQuasicoherent_over_of_restrict_of_isAffineOpen
+        (cokernel f) U.1
+  have hcover : (Opens.grothendieckTopology X).CoversTop
+      (fun U : X.affineOpens ↦ (U : X.Opens)) := by
+    rw [Opens.coversTop_iff, IsOpenCover, iSup_affineOpens_eq_top X]
+  exact @SheafOfModules.IsQuasicoherent.of_coversTop
+    _ _ _ _ _ _ _ _ (cokernel f) _
+      (fun U : X.affineOpens ↦ (U : X.Opens)) hcover hlocal
+
+/-- The image of a morphism between quasicoherent modules on a scheme is
+quasicoherent. -/
+theorem isQuasicoherent_image
+    {X : Scheme.{u}} {M N : X.Modules}
+    [M.IsQuasicoherent] [N.IsQuasicoherent] (f : M ⟶ N) :
+    (Abelian.image f).IsQuasicoherent := by
+  letI : (cokernel f).IsQuasicoherent :=
+    isQuasicoherent_cokernel f
+  exact isQuasicoherent_kernel (cokernel.π f)
 
 variable [IsAffine X] (F : J ⥤ X.Modules)
 
