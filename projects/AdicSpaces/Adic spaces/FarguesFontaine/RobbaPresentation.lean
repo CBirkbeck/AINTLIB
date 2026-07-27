@@ -935,6 +935,134 @@ theorem wI_z_sub_evalBI_add_le
 
 end EvalBIBounds
 
+
+/-! ### The case-1/2 generator and the per-monomial twist (T910 P3d) -/
+
+/-- **The case-1/2 Robba generator** `[z̄]/p^m ∈ B_loc` — the element whose
+`T`-substitution cuts the interval at `|z̄|^{1/m}`. -/
+def teichPowGen (zb : OF F) (m : ℕ) : Bloc p F ϖ :=
+  algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p zb)
+    * (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) ^ m
+
+/-- `p`-cancellation against the generator's inverse powers. -/
+theorem algebraMap_p_pow_mul_vp_pow (m : ℕ) :
+    algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ m)
+      * (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) ^ m = 1 := by
+  have hvpmul : algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)
+      * (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.mul_inv
+    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
+  rw [map_pow, ← mul_pow, hvpmul, one_pow]
+
+/-- **The exact per-monomial lift identity** (Kedlaya ln 546–551, the
+substitution side): a Teichmüller monomial whose coordinate is divisible by
+`zb^j` is the generator's `j`-th power times the twisted monomial. -/
+theorem teichPowGen_pow_mul_twist (zb : OF F) (m : ℕ) (i j : ℕ)
+    (c c' : OF F) (hc : c = zb ^ j * c') :
+    teichPowGen p F ϖ zb m ^ j
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (i + m * j) * WittVector.teichmuller p c')
+      = algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c) := by
+  have hcancel := algebraMap_p_pow_mul_vp_pow p F ϖ (m * j)
+  rw [teichPowGen, mul_pow, ← pow_mul,
+    ← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+    ← map_pow (WittVector.teichmuller p)]
+  rw [hc, map_mul (WittVector.teichmuller p),
+    map_pow (WittVector.teichmuller p)]
+  rw [show (p : Ainf p F) ^ (i + m * j)
+      = (p : Ainf p F) ^ i * (p : Ainf p F) ^ (m * j) from pow_add _ _ _]
+  rw [map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))
+      ((p : Ainf p F) ^ i * (p : Ainf p F) ^ (m * j))
+      (WittVector.teichmuller p c'),
+    map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))
+      ((p : Ainf p F) ^ i) ((p : Ainf p F) ^ (m * j)),
+    map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))
+      ((p : Ainf p F) ^ i)
+      (WittVector.teichmuller p zb ^ j * WittVector.teichmuller p c'),
+    map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))
+      (WittVector.teichmuller p zb ^ j) (WittVector.teichmuller p c')]
+  generalize hA : algebraMap (Ainf p F) (Bloc p F ϖ)
+    (WittVector.teichmuller p zb ^ j) = A
+  generalize hP2 : algebraMap (Ainf p F) (Bloc p F ϖ)
+    ((p : Ainf p F) ^ (m * j)) = P2 at hcancel ⊢
+  generalize hV : (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) ^ (m * j)
+    = V at hcancel ⊢
+  generalize hP1 : algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ i)
+    = P1
+  generalize hC : algebraMap (Ainf p F) (Bloc p F ϖ)
+    (WittVector.teichmuller p c') = C
+  calc A * V * (P1 * P2 * C) = P1 * (A * C) * (P2 * V) := by ring
+    _ = P1 * (A * C) := by rw [hcancel, mul_one]
+
+/-- **The maximal-twist normalization** (Kedlaya's `j`-choice, in the
+integral-coordinate direction): a nonzero integral coordinate factors as
+`zb^j · c'` with the cofactor's value strictly above `|zb|`. -/
+theorem exists_twist (zb c : OF F)
+    (hzb0 : perfectoidValuation p F (zb : F) ≠ 0)
+    (hzb1 : perfectoidValuation p F (zb : F) < 1)
+    (hc0 : perfectoidValuation p F (c : F) ≠ 0) :
+    ∃ (j : ℕ) (c' : OF F), c = zb ^ j * c'
+      ∧ perfectoidValuation p F (zb : F)
+        < perfectoidValuation p F (c' : F) := by
+  have hcpos : 0 < perfectoidValuation p F (c : F) :=
+    pos_iff_ne_zero.mpr hc0
+  -- some power of `zb` drops strictly below `|c|`
+  obtain ⟨j₀, hj₀⟩ := NNReal.exists_pow_lt_of_lt_one hcpos hzb1
+  -- the largest `j ≤ j₀` with `|c| ≤ |zb|^j`
+  set P : ℕ → Prop := fun j => perfectoidValuation p F (c : F)
+    ≤ perfectoidValuation p F (zb : F) ^ j with hP
+  have hP0 : P 0 := by
+    show perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F (zb : F) ^ 0
+    rw [pow_zero]
+    exact perfectoidValuation_le_one p F c
+  have hnot : ¬ P j₀ := by
+    show ¬ (perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F (zb : F) ^ j₀)
+    exact not_le.mpr hj₀
+  set j := Nat.findGreatest P j₀ with hj
+  have hPj : P j := Nat.findGreatest_spec (Nat.zero_le j₀) hP0
+  have hjlt : j < j₀ := by
+    rcases lt_or_eq_of_le (Nat.findGreatest_le (P := P) j₀) with h | h
+    · exact h
+    · exact absurd (h ▸ hPj) hnot
+  have hnext : ¬ P (j + 1) := by
+    intro hcon
+    exact Nat.findGreatest_is_greatest (Nat.lt_succ_self j)
+      (Nat.succ_le_of_lt hjlt) hcon
+  -- divisibility from the value comparison
+  have hdvd := (perfectoidValuation_integers p F).dvd_of_le
+    (x := c) (y := zb ^ j) ?_
+  · obtain ⟨c', hc'⟩ := hdvd
+    refine ⟨j, c', hc', ?_⟩
+    -- multiplicativity gives |c| = |zb|^j·|c'|; maximality gives the bound
+    have hval : perfectoidValuation p F (c : F)
+        = perfectoidValuation p F (zb : F) ^ j
+          * perfectoidValuation p F (c' : F) := by
+      rw [hc']
+      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+        push_cast; rfl]
+      rw [Valuation.map_mul, map_pow]
+    have hnext' : ¬ (perfectoidValuation p F (c : F)
+        ≤ perfectoidValuation p F (zb : F) ^ (j + 1)) := hnext
+    have hlt : perfectoidValuation p F (zb : F) ^ (j + 1)
+        < perfectoidValuation p F (c : F) := not_le.mp hnext
+    rw [hval, pow_succ] at hlt
+    have hzjpos : 0 < perfectoidValuation p F (zb : F) ^ j :=
+      pow_pos (pos_iff_ne_zero.mpr hzb0) j
+    exact lt_of_mul_lt_mul_left (by rwa [mul_comm] at hlt ⊢) zero_le
+  · show perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
+      ≤ perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ j))
+    rw [show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
+        = (c : F) from rfl,
+      show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ j))
+        = ((zb : OF F) : F) ^ j from by push_cast; rfl,
+      map_pow]
+    exact hPj
+
 end FarguesFontaine
 
 end
