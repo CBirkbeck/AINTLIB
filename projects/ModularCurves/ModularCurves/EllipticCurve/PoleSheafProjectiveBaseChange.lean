@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.EllipticCurve.PoleSheafProjectiveCech
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.PullbackTensorSection
+import ModularCurves.ForMathlib.FiniteAffineOpenCover
 import ModularCurves.ForMathlib.SchemeModuleBaseSectionsBaseChange
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
 import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
@@ -755,6 +756,10 @@ private theorem projectivePoleBasicOpenBaseSectionsEquiv_one_tmul
     _ = eAfter (eBeforeB ((1 : A) ⊗ₜ[B] s)) := hMainApply.trans hTrans
     _ = _ := congrArg (fun x => eAfter x) hBeforeB |>.trans hAfter
 
+end ModularCurves
+
+namespace AlgebraicGeometry.Scheme.Modules
+
 private theorem isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv
     {S : Scheme.{u}} [IsAffine S] (N : S.Modules)
     (P : ModuleCat.{u} Γ(S, (⊤ : S.Opens)))
@@ -817,7 +822,9 @@ private theorem isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv
     (S := Submonoid.powers r) eTop.toLinearMap eTop.bijective).mp
       hComposedLocalized
 
-private theorem pushforward_isQuasicoherent_of_finiteAffineCover
+/-- Pushforward to an affine scheme is quasicoherent when the source is separated
+and has a finite affine open cover. -/
+theorem isQuasicoherent_pushforward_of_finiteAffineCover
     {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules)
     {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
     (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
@@ -829,7 +836,7 @@ private theorem pushforward_isQuasicoherent_of_finiteAffineCover
   let eOpen := fun r =>
     Scheme.Modules.finiteAffineCoverBasicOpenBaseSectionsEquiv
       f M U hU hUaff r
-  apply isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv N
+  apply Scheme.Modules.isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv N
     (Scheme.Modules.baseSections f M) eTop eOpen
   intro r s
   let V := S.basicOpen r
@@ -841,6 +848,43 @@ private theorem pushforward_isQuasicoherent_of_finiteAffineCover
       Scheme.Modules.pushforwardTopSection f M s := rfl
   have hTopMapped := congrArg (fun y => ψ y) hTop.symm
   exact hOpen.trans hTopMapped
+
+/-- Pushforward of a quasicoherent module along a proper morphism to an
+affine scheme is quasicoherent. -/
+theorem isQuasicoherent_pushforward_of_isProper_to_affine
+    {X S : Scheme.{u}} (f : X ⟶ S) [IsProper f] [IsAffine S]
+    (M : X.Modules) [M.IsQuasicoherent] :
+    ((pushforward f).obj M).IsQuasicoherent := by
+  letI : X.IsSeparated := ⟨by
+    rw [← terminal.comp_from f]
+    infer_instance⟩
+  obtain ⟨ι, hι, U, hU, hUaff, _⟩ :=
+    f.exists_finite_affine_openCover_of_isProper
+  letI : Finite ι := hι
+  letI : Fintype ι := Fintype.ofFinite ι
+  letI : LinearOrder ι :=
+    LinearOrder.lift' (Fintype.equivFin ι) (Fintype.equivFin ι).injective
+  exact isQuasicoherent_pushforward_of_finiteAffineCover
+    f M U hU hUaff
+
+end AlgebraicGeometry.Scheme.Modules
+
+namespace ModularCurves
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- Pole-sheaf pushforwards along a proper smooth relative curve over an
+affine base are quasicoherent. -/
+theorem sectionPoleSheafPowerPushforward_isQuasicoherent
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsProper π] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    ((Scheme.Modules.pushforward π).obj
+      (sectionPoleSheafPower π z hz n)).IsQuasicoherent := by
+  letI : (sectionPoleSheafPower π z hz n).IsQuasicoherent :=
+    sectionPoleSheafPower_isQuasicoherent hsm z hz n
+  exact Scheme.Modules.isQuasicoherent_pushforward_of_isProper_to_affine
+    π (sectionPoleSheafPower π z hz n)
 
 /-- Positive pole-sheaf pushforwards on a projectively presented fibrewise
 elliptic family are quasicoherent. -/
@@ -871,7 +915,7 @@ theorem
   let eTop := eTopIso.toLinearEquiv
   let eOpen := fun r => projectivePoleBasicOpenBaseSectionsEquiv
     f hsm z hz h hn r
-  apply isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv N
+  apply Scheme.Modules.isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv N
     (Scheme.Modules.baseSections π M) eTop eOpen
   intro r s
   let U := S.basicOpen r
@@ -938,7 +982,7 @@ theorem
   have hUTaff : ∀ j, IsAffineOpen (UT j) := by
     intro j
     exact IsAffineOpen.preimage_pullback_fst π t (hUaff j)
-  exact pushforward_isQuasicoherent_of_finiteAffineCover
+  exact Scheme.Modules.isQuasicoherent_pushforward_of_finiteAffineCover
     πT MT UT hUT hUTaff
 
 /-- The canonical pole-sheaf pushforward base-change morphism is an isomorphism on global
