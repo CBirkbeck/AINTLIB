@@ -4455,6 +4455,300 @@ theorem ker_evalBIHom_eq_span₂
 
 end KerTransportBot
 
+/-- **The case-2 Robba generator** `p^m/[z̄] ∈ B_loc` — the element whose
+`T`-substitution cuts the interval at `|z̄|^{1/m}` from above. -/
+def teichPowGen₂ (zb : OF F) (m : ℕ) : Bloc p F ϖ :=
+  algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ m)
+    * Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+        (WittVector.teichmuller p zb))
+
+/-- The inverse-Teichmüller cancellation. -/
+theorem teichmuller_image_mul_inverse (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) :
+    algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p zb)
+      * Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p zb)) = 1 :=
+  Ring.mul_inverse_cancel _ (isUnit_teichmuller_image p F ϖ zb hzb)
+
+/-- The local valuation of the inverse Teichmüller image. -/
+theorem wLoc_inverse_teichmuller {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (zb : OF F) (hzb : perfectoidValuation p F (zb : F) ≠ 0) :
+    wLoc p F ϖ hρ0 hρ1 (Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+        (WittVector.teichmuller p zb)))
+      = (perfectoidValuation p F (zb : F))⁻¹ := by
+  have hmul := congrArg (wLoc p F ϖ hρ0 hρ1)
+    (teichmuller_image_mul_inverse p F ϖ zb hzb)
+  rw [map_mul, map_one, wLoc_algebraMap,
+    gaussValue_teichmuller p F hρ1.le] at hmul
+  exact eq_inv_of_mul_eq_one_left
+    (by rw [mul_comm] at hmul; exact hmul)
+
+/-- **The case-2 generator's local valuation.** -/
+theorem wLoc_teichPowGen₂ {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (zb : OF F) (hzb : perfectoidValuation p F (zb : F) ≠ 0) (m : ℕ) :
+    wLoc p F ϖ hρ0 hρ1 (teichPowGen₂ p F ϖ zb m)
+      = ρ ^ m * (perfectoidValuation p F (zb : F))⁻¹ := by
+  rw [teichPowGen₂, map_mul, wLoc_algebraMap,
+    wLoc_inverse_teichmuller p F ϖ hρ0 hρ1 zb hzb]
+  congr 1
+  rw [← gaussVal_apply p F hρ0 hρ1, map_pow, gaussVal_apply,
+    gaussValue_p p F hρ1.le]
+
+/-- The valuation of a Teichmüller power is nonzero off zero. -/
+theorem perfectoidValuation_pow_ne_zero (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) (j : ℕ) :
+    perfectoidValuation p F ((zb ^ j : OF F) : F) ≠ 0 := by
+  have hcoe : ((zb ^ j : OF F) : F) = ((zb : F)) ^ j := by
+    push_cast
+    rfl
+  rw [hcoe, map_pow]
+  exact pow_ne_zero j hzb
+
+/-- **The case-2 lift identity at the algebra-map level**: the generator
+power times the twisted monomial recovers the original. -/
+theorem teichPowGen₂_pow_mul_twist (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0)
+    (m i j : ℕ) (hji : m * j ≤ i) (c : OF F) :
+    teichPowGen₂ p F ϖ zb m ^ j
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (i - m * j)
+            * WittVector.teichmuller p (c * zb ^ j))
+      = algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c) := by
+  have hinvpow : Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+        (WittVector.teichmuller p zb)) ^ j
+      = Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+        (WittVector.teichmuller p (zb ^ j))) := by
+    rw [Ring.inverse_pow, ← map_pow, ← map_pow]
+  have hcancel : Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+        (WittVector.teichmuller p (zb ^ j)))
+      * algebraMap (Ainf p F) (Bloc p F ϖ)
+        (WittVector.teichmuller p (zb ^ j)) = 1 :=
+    Ring.inverse_mul_cancel _
+      (isUnit_teichmuller_image p F ϖ (zb ^ j)
+        (perfectoidValuation_pow_ne_zero p F zb hzb j))
+  rw [teichPowGen₂, mul_pow, ← map_pow (algebraMap (Ainf p F)
+      (Bloc p F ϖ)), ← pow_mul, hinvpow]
+  rw [map_mul (WittVector.teichmuller p),
+    map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+    map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))]
+  calc algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ (m * j))
+        * Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p (zb ^ j)))
+        * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ (i - m * j))
+          * (algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c)
+            * algebraMap (Ainf p F) (Bloc p F ϖ)
+              (WittVector.teichmuller p (zb ^ j))))
+      = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ (m * j))
+          * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ (i - m * j)))
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c)
+        * (Ring.inverse (algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p (zb ^ j)))
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p (zb ^ j))) := by ring
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c) := by
+        rw [hcancel, mul_one, ← map_mul (algebraMap (Ainf p F)
+            (Bloc p F ϖ)), ← pow_add,
+          Nat.add_sub_cancel' hji,
+          map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))]
+
+/-- **The case-2 per-monomial twist at the fraction level.** -/
+theorem mk'_monomial_twist_factor₂ (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0)
+    (m i j k : ℕ) (hji : m * j ≤ i) (c : OF F) :
+    IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+      = teichPowGen₂ p F ϖ zb m ^ j
+        * IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (i - m * j)
+            * WittVector.teichmuller p (c * zb ^ j))
+          (sPow p F ϖ k) := by
+  rw [show IsLocalization.mk' (Bloc p F ϖ)
+      ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+    = algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+      * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k) from
+    IsLocalization.mk'_eq_mul_mk'_one _ _]
+  rw [show IsLocalization.mk' (Bloc p F ϖ)
+      ((p : Ainf p F) ^ (i - m * j)
+        * WittVector.teichmuller p (c * zb ^ j))
+      (sPow p F ϖ k)
+    = algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (i - m * j)
+          * WittVector.teichmuller p (c * zb ^ j))
+      * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k) from
+    IsLocalization.mk'_eq_mul_mk'_one _ _]
+  calc algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+        * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k)
+      = (teichPowGen₂ p F ϖ zb m ^ j
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (i - m * j)
+              * WittVector.teichmuller p (c * zb ^ j)))
+          * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k) := by
+        rw [teichPowGen₂_pow_mul_twist p F ϖ zb hzb m i j hji c]
+    _ = teichPowGen₂ p F ϖ zb m ^ j
+        * (algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (i - m * j)
+              * WittVector.teichmuller p (c * zb ^ j))
+          * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k)) := by
+        ring
+
+/-- **The case-2 shallow-zone comparison**: for `i ≤ k` the monomial's value
+at the outer radius is dominated by its value at the cut radius. -/
+theorem numerator_formula_le₂ {σ₂ ρ₂ V vc : NNReal}
+    (hσ₂0 : 0 < σ₂) (hρ₂0 : 0 < ρ₂) (hV0 : 0 < V)
+    (hσρ : σ₂ ≤ ρ₂) {i k : ℕ} (hik : i ≤ k) :
+    ρ₂ ^ i * vc * (((ρ₂ * V) ^ k)⁻¹)
+      ≤ σ₂ ^ i * vc * (((σ₂ * V) ^ k)⁻¹) := by
+  have hρ₂V : (0 : NNReal) < (ρ₂ * V) ^ k :=
+    pow_pos (mul_pos hρ₂0 hV0) k
+  have hσ₂V : (0 : NNReal) < (σ₂ * V) ^ k :=
+    pow_pos (mul_pos hσ₂0 hV0) k
+  rw [mul_comm (ρ₂ ^ i) vc, mul_comm (σ₂ ^ i) vc, mul_assoc, mul_assoc]
+  refine mul_le_mul_right ?_ vc
+  rw [← div_eq_mul_inv, ← div_eq_mul_inv, div_le_div_iff₀ hρ₂V hσ₂V]
+  calc ρ₂ ^ i * (σ₂ * V) ^ k
+      = (σ₂ ^ k * ρ₂ ^ i) * V ^ k := by rw [mul_pow]; ring
+    _ ≤ (ρ₂ ^ k * σ₂ ^ i) * V ^ k :=
+        mul_le_mul_left (pow_mul_pow_le_of_le hσρ hik) _
+    _ = σ₂ ^ i * (ρ₂ * V) ^ k := by rw [mul_pow]; ring
+
+/-- **The case-2 twisted-zone comparison** (deep zone `k ≤ e < k + m`,
+original exponent `e + m·j`, coordinate multiplied by `z̄^j`). -/
+theorem twisted_formula_le₂ {ρ₁ σ₂ ρ₂ V vc vc' : NNReal}
+    (hρ₁0 : 0 < ρ₁) (hσ₂0 : 0 < σ₂) (hρ₂0 : 0 < ρ₂) (hV0 : 0 < V)
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂) {m e k j : ℕ}
+    (hval : vc' = σ₂ ^ (m * j) * vc)
+    (hke : k ≤ e) (hwin : e < k + m) :
+    ρ₁ ^ e * vc' * (((ρ₁ * V) ^ k)⁻¹)
+      ≤ σ₂ ^ (e + m * j) * vc * (((σ₂ * V) ^ k)⁻¹)
+    ∧ ρ₂ ^ e * vc' * (((ρ₂ * V) ^ k)⁻¹)
+      ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹)
+        * (σ₂ ^ (e + m * j) * vc * (((σ₂ * V) ^ k)⁻¹)) := by
+  have hfold : σ₂ ^ (e + m * j) * vc = σ₂ ^ e * vc' := by
+    rw [hval, pow_add]
+    ring
+  have hρ₁V : (0 : NNReal) < (ρ₁ * V) ^ k :=
+    pow_pos (mul_pos hρ₁0 hV0) k
+  have hρ₂V : (0 : NNReal) < (ρ₂ * V) ^ k :=
+    pow_pos (mul_pos hρ₂0 hV0) k
+  have hσ₂V : (0 : NNReal) < (σ₂ * V) ^ k :=
+    pow_pos (mul_pos hσ₂0 hV0) k
+  constructor
+  · rw [hfold]
+    exact numerator_formula_le (V := V) (vc := vc') hρ₁0 hσ₂0 hV0
+      hρσ hke
+  · rw [hfold, mul_comm (ρ₂ ^ e) vc', mul_assoc]
+    rw [show ρ₂ ^ m * ((σ₂ ^ m)⁻¹) * (σ₂ ^ e * vc' * (((σ₂ * V) ^ k)⁻¹))
+        = vc' * (ρ₂ ^ m * σ₂ ^ e * ((σ₂ ^ m * (σ₂ * V) ^ k)⁻¹)) from by
+      rw [mul_inv]
+      ring]
+    refine mul_le_mul_right ?_ vc'
+    rw [← div_eq_mul_inv, ← div_eq_mul_inv,
+      div_le_div_iff₀ hρ₂V
+        (mul_pos (pow_pos hσ₂0 m) hσ₂V)]
+    calc ρ₂ ^ e * (σ₂ ^ m * (σ₂ * V) ^ k)
+        = (σ₂ ^ (m + k) * ρ₂ ^ e) * V ^ k := by
+          rw [mul_pow, pow_add]
+          ring
+      _ ≤ (ρ₂ ^ (m + k) * σ₂ ^ e) * V ^ k :=
+          mul_le_mul_left (pow_mul_pow_le_of_le hσρ
+            (by omega : e ≤ m + k)) _
+      _ = ρ₂ ^ m * σ₂ ^ e * (ρ₂ * V) ^ k := by
+          rw [mul_pow, pow_add]
+          ring
+
+/-- **The case-2 per-monomial lift package**: every monomial fraction
+factors through a case-2 generator power, with the cofactor controlled at
+the source radii by the original at the cut radii — no divisibility input
+(the twist multiplies the coordinate). -/
+theorem exists_monomial_lift_package₂ {ρ₁ σ₂ ρ₂ : NNReal}
+    (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hσ₂0 : 0 < σ₂) (hσ₂1 : σ₂ < 1)
+    (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1) (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (hzb : perfectoidValuation p F (zb : F) ≠ 0)
+    (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m)
+    (i k : ℕ) (c : OF F) :
+    ∃ (j : ℕ) (e : ℕ) (c' : OF F),
+      IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+        = teichPowGen₂ p F ϖ zb m ^ j
+          * IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ e * WittVector.teichmuller p c')
+            (sPow p F ϖ k)
+      ∧ wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ e * WittVector.teichmuller p c')
+          (sPow p F ϖ k))
+        ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹)
+          * (wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+            (sPow p F ϖ k)))
+      ∧ wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ e * WittVector.teichmuller p c')
+          (sPow p F ϖ k))
+        ≤ max (wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+            (sPow p F ϖ k)))
+          (wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+            (sPow p F ϖ k))) := by
+  have hK1 : (1 : NNReal) ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
+    calc (1 : NNReal) = σ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
+        (mul_inv_cancel₀ (pow_pos hσ₂0 m).ne').symm
+      _ ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hσρ m) _
+  by_cases hik : k < i
+  · set j := (i - k) / m with hj
+    have hmj : m * j ≤ i - k := by
+      have h1 : j * m ≤ i - k := Nat.div_mul_le_self (i - k) m
+      rwa [mul_comm] at h1
+    have hji : m * j ≤ i := le_trans hmj (Nat.sub_le i k)
+    set e := i - m * j with he
+    have hie : i = e + m * j := by omega
+    have hke : k ≤ e := by omega
+    have hwin : e < k + m := by
+      have hdm := Nat.div_add_mod (i - k) m
+      have hmlt := Nat.mod_lt (i - k) hm
+      rw [← hj] at hdm
+      omega
+    have hval : perfectoidValuation p F ((c * zb ^ j : OF F) : F)
+        = σ₂ ^ (m * j) * perfectoidValuation p F (c : F) := by
+      have hcoe : ((c * zb ^ j : OF F) : F)
+          = (c : F) * ((zb : F)) ^ j := by
+        push_cast
+        rfl
+      rw [hcoe, map_mul, map_pow, hgen, ← pow_mul]
+      exact mul_comm _ _
+    have hcmp := twisted_formula_le₂
+      (V := perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F))
+      (vc := perfectoidValuation p F (c : F))
+      (vc' := perfectoidValuation p F ((c * zb ^ j : OF F) : F))
+      hρ₁0 hσ₂0 hρ₂0 (vpi_pos p F ϖ) hρσ hσρ (m := m) (e := e) (k := k)
+      (j := j) hval hke hwin
+    refine ⟨j, e, c * zb ^ j,
+      by
+        rw [show e = i - m * j from he]
+        exact mk'_monomial_twist_factor₂ p F ϖ zb hzb m i j k hji c,
+      ?_, ?_⟩
+    · rw [wLoc_mk'_monomial p F ϖ hρ₂0 hρ₂1,
+        wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1]
+      rw [show i = e + m * j from hie]
+      exact hcmp.2
+    · rw [wLoc_mk'_monomial p F ϖ hρ₁0 hρ₁1 e k,
+        wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1 i k]
+      rw [show i = e + m * j from hie]
+      exact le_trans hcmp.1 (le_max_left _ _)
+  · refine ⟨0, i, c, by rw [pow_zero, one_mul], ?_, ?_⟩
+    · rw [wLoc_mk'_monomial p F ϖ hρ₂0 hρ₂1,
+        wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1]
+      refine le_trans (numerator_formula_le₂ hσ₂0 hρ₂0 (vpi_pos p F ϖ)
+        hσρ (not_lt.mp hik)) ?_
+      exact le_mul_of_one_le_left zero_le hK1
+    · exact le_max_right _ _
+
 end FarguesFontaine
 
 end
