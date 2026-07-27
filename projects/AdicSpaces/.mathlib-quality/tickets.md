@@ -1257,8 +1257,44 @@ non-Tate bases are supported.
     or (ii) VPreObj-gluing machinery for the ℤ-chain (cocycle-free since
     only adjacent windows meet). Decide when (b) lands. (D-ii-2) the sheaf condition: per-window via
     isSheafy_presheafChart + spaChartHomeoBigWindow + windowResBIQ,
-    refinement via the rational basis; (D-ii-3) VPreObj packaging: stalks +
-    valuations (stalk theory over the sheafy charts); (D-iii) φ-action:
+    refinement via the rational basis; (D-ii-3) VPreObj packaging — RECONNAISSANCE 2026-07-27 (beastmode,
+    load-bearing): the pair-level ALL-OPENS presheaf ALREADY EXISTS
+    generically (StructurePresheafLimit.lean: limitSections V = compatible
+    families over RationalIndex V, complete+T2, limitRestrict with rfl-laws,
+    **limitEval : 𝒪(spaOpens D₀) ≃+* presheafValue D₀** the top-element
+    argument, bundled structurePresheaf; StructurePresheafBundled.lean:
+    **structurePresheaf_isSheafOfTopologicalRings (h : IsLimitSheaf A)**) —
+    all gated on [HasLocLiftPowerBounded A] which holds for the TATE charts
+    B_n via the faithful supplier + isSheafy_presheafChart ⟹ IsLimitSheaf.
+    So per-chart 𝒪_{Spa(B_n)} as a sheaf of topological rings is DONE
+    modulo instantiation, and the Y-assembly must REUSE this generic
+    machinery per chart (do NOT rebuild dyadic-style limits per chart —
+    only the CROSS-chart layer is new). Ambient route stays closed (the
+    class over A_inf needs Wedhorn 7.51/7.52 in general-Huber form —
+    deferred work-package, decision stands). WHAT IS GENUINELY MISSING
+    (checked: no Spa-as-VObj constructor, no stalk-locality anywhere):
+    **the Wedhorn 8.14 stalk package**, generic over a pair with
+    [HasLocLiftPowerBounded] (+Tate where needed) — spawn as:
+    (S1) valueAt: the point-valuation on presheafValue D at v ∈ R(D) via
+    (spaPresheafValueEquivRationalOpen D).symm (exists, Huber-generic) +
+    its defining comap-property;
+    (S2) valueAt-compat: comap (restrictionMapHom D D' h) (valueAt D' v)
+    = valueAt D v (uniqueness of extensions via the equiv's injectivity);
+    (S3) the stalk valuation on (structurePresheaf A).ringStalk v via the
+    mathlib germ API (germ_exist + germ-ext over the rational basis;
+    well-defined by S2);
+    (S4) IsLocalRing (ringStalk v) with maximalIdeal = supp (Wedhorn 8.14:
+    nonunits = {germ f | valueAt v f = 0}; a germ with nonzero value is
+    invertible on a shrunk rational datum — needs
+    rational-inside-rational composition over the Tate chart, i.e.
+    keystone-over-B_n);
+    (S5) spaVObj: package (SpaTop B, structurePresheaf B) + S3/S4 +
+    structurePresheaf_isSheafOfTopologicalRings into a VObj — the FIRST
+    inhabitant of the VObj category.
+    Then Y := glue the ℤ-chain of chart VObjs (cocycle-free, adjacent
+    circles only; transitions from BISub_twist + the ID2 comparisons + the
+    D-ii-2 split fiber-product) — architecture note above stands. Original:
+    stalks + valuations (stalk theory over the sheafy charts); (D-iii) φ-action:
     FOUNDATION DONE 2026-07-27 (FrobeniusGauss.lean — teichCoeff_frob/
     gaussTerm_frob/gaussValue_frob: w_{ρ^p}(φx) = w_ρ(x)^p; frobBloc +
     frobBloc_algebraMap + wLoc_frobBloc; uniformContinuous_frobToBI with the
