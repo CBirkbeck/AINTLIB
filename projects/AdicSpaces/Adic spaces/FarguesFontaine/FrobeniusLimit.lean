@@ -15,7 +15,7 @@ transport is a continuous ring homomorphism (`limitFrobHom`, built at the
 definitionally. Substrate for the φ-morphism of presheafed spaces (D-iii-3).
 -/
 
-open TopologicalRing ValuationSpectrum WittVector NNReal TopologicalSpace Topology Filter
+open TopologicalRing ValuationSpectrum WittVector NNReal TopologicalSpace Topology Filter CategoryTheory Opposite
 
 set_option linter.overlappingInstances false
 
@@ -156,6 +156,35 @@ theorem limitFrobHom_limitRestrict (k : ℤ)
     limitFrobHom p F k V (limitRestrict h x)
       = limitRestrict (frobOpens_mono p F k h) (limitFrobHom p F k W x) :=
   Subtype.ext (funext fun _ => rfl)
+
+/-- The Frobenius on the ambient adic spectrum, as a `TopCat`-morphism. -/
+def spaFrobTop (k : ℤ) : SpaTop (Ainf p F) ⟶ SpaTop (Ainf p F) :=
+  TopCat.ofHom ⟨spaFrob p F k, continuous_spaFrob p F k⟩
+
+/-- **The Frobenius comparison of the ambient structure presheaf**: the
+natural transformation into the pushforward, with components the limit
+transports. -/
+def ambientFrobNat (k : ℤ) :
+    structurePresheaf (Ainf p F)
+      ⟶ (Opens.map (spaFrobTop p F k)).op ⋙ structurePresheaf (Ainf p F) where
+  app V := ⟨limitFrobHom p F k V.unop, limitFrobHom_continuous p F k V.unop⟩
+  naturality V V' i := by
+    refine Subtype.ext (RingHom.ext fun x => ?_)
+    show limitFrobHom p F k V'.unop
+        (((structurePresheaf (Ainf p F)).map i).1 x)
+      = (((Opens.map (spaFrobTop p F k)).op ⋙ structurePresheaf (Ainf p F)).map
+            i).1 (limitFrobHom p F k V.unop x)
+    exact (congrArg (limitFrobHom p F k V'.unop)
+        (structurePresheaf_map i x)).trans
+      ((limitFrobHom_limitRestrict p F k (leOfHom i.unop) x).trans
+        (structurePresheaf_map ((Opens.map (spaFrobTop p F k)).op.map i)
+          (limitFrobHom p F k V.unop x)).symm)
+
+/-- **The Frobenius endomorphism of the ambient presheafed space.** -/
+def ambientFrobHom (k : ℤ) :
+    yAmbientPresheafedSpace p F ⟶ yAmbientPresheafedSpace p F where
+  base := spaFrobTop p F k
+  c := ambientFrobNat p F k
 
 end FarguesFontaine
 
