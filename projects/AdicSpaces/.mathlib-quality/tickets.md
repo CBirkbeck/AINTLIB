@@ -1680,6 +1680,21 @@ non-Tate bases are supported.
     (structurePresheaf, limitSections, S1-S3 stalks) instantiates at
     Spa(A_inf, A_inf). NEXT YB3: the Y-relativized S4 (Laurent shrink
     replay with PD-Tate := YB1 at Y-interior rationals).
+    YB3 DEPENDENCY AUDIT 2026-07-27: the S3a/S3b OpenValue+StalkValue
+    sections are ALSO [IsTateRing A]-gated, and the root dependency is
+    **exists_isRational_spaOpen_subset** (RationalBasis.lean:158,
+    Wedhorn 7.35(2)) whose proof route uses the Tate principal-pair
+    trick (IsTateRing.exists_principal_pairOfDefinition_le_subring +
+    spa_topology_eq_generateFrom at a UNIT π ∈ I). Wedhorn proves
+    7.35(2) for general f-adic rings — the Tate-gate is a route
+    artifact. ORDERED SURGERY LIST for the ambient Y-object: (YB3a)
+    generalize the rational-basis lemma to general Huber (or prove the
+    A_inf-specific basis via I := Iinf, no unit — examine
+    spa_topology_eq_generateFrom's use of the unit first); (YB3b)
+    de-Tate the OpenValue/StalkValue sections (their content uses the
+    basis + presheafValue-instances now available Huber-free); (YB3c)
+    the shrink S4 replay at Y-points with PD-Tate := YB1. Each bounded;
+    they stack — keep each its own commit.
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
