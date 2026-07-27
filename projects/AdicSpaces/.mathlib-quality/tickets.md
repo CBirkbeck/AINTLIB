@@ -1118,7 +1118,26 @@ non-Tate bases are supported.
     chart ring is BIQ at the (1/p^{n+1}, 1/p^n)-pair up to the ID2d equiv at
     ϖ_n (rhoRight-in-ϖ_n p 1 = vpiQ-in-ϖ (1/p^{n+1}) via
     perfectoidValuation_frobRoot_pow — the rpow-arith bridge lemma to prove
-    when connecting). Original design: a ℚ-exponent wrapper layer —
+    when connecting). STATUS 2026-07-27: chartRingEquivBIQ DONE
+    (FarguesFontaine/ChartBIQ.lean — presheafValue(chart-ϖ_n) ≃+*
+    ↥(BIQ (1/p^n) (1/p^{n+1})) as three named steps: ID2d at ϖ_n, radius
+    rewriting via rhoRight_eq_vpiQ + twist bridges, biSubringCongr of
+    BISub_twist; step-1/2 continuities landed, biCongr/biSubringCongr symm-
+    continuity generic lemmas landed). OPEN SUB-PROBLEM (PERF): transporting
+    IsSheafy from the ϖ_n-side BISub to BIQ — three attempts hit heartbeat
+    walls: (i) composite continuity of chartRingEquivBIQ (whnf through the
+    trans-chain; step2-symm/step3 instances kernel-ground); (ii) ▸-transport
+    of the letI-package (dependent instP/instI mismatch); (iii) elementwise
+    BIPlusIn_map_twist via biSubringCongr (whnf through the closed
+    BIPlusIn/BISub instances). NEXT ATTEMPTS (fresh context): (a) add
+    `mem_BIPlusIn_iff : z ∈ BIPlusIn ↔ wI ↑z ≤ 1` as an rfl-lemma in
+    IntervalRing + retry (iii) rw-only with typed ascriptions; (b) profiler
+    to find the unfolding site; (c) fallback: presheaf values at the
+    ϖ_n-side BISub's (sheafiness free by TC2), twists only in the
+    restriction maps. Also open: the negative-side chartRingEquivBIQ mirror
+    (pPow — same compiling pattern as nonneg). BOARD-HYGIENE LESSON: two
+    silent no-op board edits this stretch (unasserted python replaces) —
+    ALWAYS `assert old in src`. Original design: a ℚ-exponent wrapper layer —
     `BIQ (q₁ q₂ : ℚ)` := BISub at the radii `vπ^{qᵢ}` (NNReal-rpow of the
     rational exponents, 0 < q₁ ≤ q₂ say), with restriction maps
     `biResQ : BIQ q₁ q₂ →+* BIQ r₁ r₂` for [r₁,r₂]-exponent-intervals inside
