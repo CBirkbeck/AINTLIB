@@ -43,6 +43,11 @@ fields to the field case, where `X^{N/q} − 1` is a nonzero nilpotent in charac
 `q ∣ N`.
 -/
 
+-- v4.33 bump: the `↥U` / `↥↑U` opens coercion is no longer transparent enough for the
+-- `Scheme.comp_apply` / `Category.assoc` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 open AlgebraicGeometry CategoryTheory Limits Polynomial
 
 universe u
@@ -196,7 +201,7 @@ private def muNHomEquivAbsHom (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} (g : T
   left_inv h := Subtype.ext <| by
     have hw : h.1 ≫ pullback.fst (terminal.from S) (terminal.from (muNAbs N)) = g := h.2
     exact pullback.hom_ext (by rw [pullback.lift_fst]; exact hw.symm)
-      (by rw [pullback.lift_snd]; rfl)
+      (by rw [pullback.lift_snd])
   right_inv k := pullback.lift_snd _ _ _
 
 /-- The core points description (engine for `muNGrpObj` and `muNPointsEquiv`). -/
