@@ -2436,13 +2436,39 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   congrArg-le_of_eq beats rwa-kabstract in the fat context) and
   exists_evalBI_eq_of_le_one — CASE-1 STRICT SURJECTIVITY on the unit
   ball with the (4.9.1)-K-constant. ⇒ T910 P3 (the surjectivity half)
-  IS COMPLETE. NEXT: (P4) the kernel: multiplication by (T − C g) is a
-  strict injective endomorphism (the Gauss-norm multiplicativity bound
-  wIRPS((T − C g)·f) ≥ wIRPS f-form, Kedlaya ln 527-533) + ker(evalBI)
-  = (T − C g)-ideal via the x_n = −Σ y_i [z̄]^{i−n−1}-coefficient
-  argument (ln 534-546: per-radius case split t < t₀ geometric-unit /
-  t ≥ t₀ the quotient-iso, then Cor Banach-to-Fréchet-analogue = our
-  coefficientwise-completeness); then (P5) the case-1 iso package
+  IS COMPLETE. NEXT: (P4) the kernel. DESIGN NOTES (2026-07-27, from the ln
+  527-546 re-read in our conventions): the generator RPS-element is
+  Gelt := (monomial (single 0 1) 1) − (monomial 0 (blocToBI-ρ g)) with
+  g := teichPowGen zb m₀ ∈ Bloc; (P4-a) STRICTNESS needs the PER-RADIUS
+  Gauss norm N_τ(f) := ⨆ n, v_τ(coeff n f) on RPS over B^I (τ ∈ {ρ₁,
+  ρ₂}; wIRPS = max of the two N_τ's — prove that as a lemma) and its
+  MULTIPLICATIVITY over each hatK-component (the classical Gauss lemma
+  over a complete valued FIELD, T-weight 1; check whether the repo's
+  T803/gaussValueF or Groebner degAr-machinery gives a reusable engine —
+  else prove the leading-index argument for hatK-coefficient series);
+  then N_τ(Gelt) = max(1, v_τ(g)) ≥ 1 gives N_τ(Gelt·x) ≥ N_τ(x) and
+  the sup: wIRPS(Gelt·x) ≥ wIRPS x — strict injectivity + closed ideal.
+  (P4-b) KERNEL-INCLUSION: y ∈ ker(evalBIHom) ⇒ y = Gelt·x with
+  x_n := −Σ_{i≤n} y_i·(blocToBI-ρ g)^{i−n−1}-POWERS — CAREFUL: g is
+  NOT invertible in B^I-ρ globally (only its σ-image is unit-adjacent);
+  Kedlaya's x_n-formula uses [z̄]^{i−n−1} with NEGATIVE exponents —
+  in his field-coefficient world fine; ours: [z̄]-inverses do NOT exist
+  in B^I-ρ... BUT the formula only needs g-POSITIVE-powers after
+  re-indexing: x_n = −Σ_{i=0}^{n} y_i·g^{i−n−1} has exponents ≤ −1 —
+  his convention allows [z̄^{-1}]-Teichmüllers (L a field). OUR case-1
+  kernel argument must instead follow the per-radius split he gives:
+  at radii τ with v_τ(g) > 1 (below the cut: τ < σ₁-side) T − g is
+  a UNIT of the τ-component-RPS (geometric series in g⁻¹T?? g-inverse
+  again... his 'T − [z̄] invertible in B^{[t,t]}{T/ρ}' inverts via
+  [z̄]⁻¹(1 − [z̄]⁻¹T)⁻¹ — the component B^{[t,t]} = hatK-τ is a FIELD
+  ✓ g-inverse EXISTS per-component!). So P4-b works COMPONENTWISE
+  (hatK-fields) + the coefficientwise-completeness reassembly
+  (isRestricted from the two component-decays — the C:Banach-to-Fréchet
+  analogue = our isRestricted_iff_wI). Substantial; sequence as:
+  (P4-a1) N_τ + wIRPS = max-lemma; (P4-a2) hatK-Gauss multiplicativity
+  (or the ≥-bound directly via leading-index); (P4-a3) strictness;
+  (P4-b1) the componentwise inverse-formula x-construction; (P4-b2)
+  decay + reassembly; (P4-b3) ker = span. Then (P5) the case-1 iso package
   B^I⟨T⟩/(T − C g) ≅ B^{I′} + the ρ ∈ p^ℚ plus-ring statement (via the
   ChartVObj plus-technique), and the [z̄⁻¹]-variant case 2 (mirrored
   cut on the right — the geometry swaps ρ₂ and σ₁-roles). THE ORIGINAL P3e NOTE: mirror exists_correction_sequence (Presentation:2131,
