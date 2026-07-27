@@ -1612,6 +1612,168 @@ noncomputable def xVPreObj : VPreObj where
     exact (maximalIdeal_comap_ringEquiv (isLocalRing_xStalk p F ϖ x)
       hSloc (xStalkEquiv p F ϖ x)).symm
 
+/-- Saturated preimages commute with binary intersections. -/
+theorem curvePreimage_inf (V₁ V₂ : Opens (Curve p F ϖ)) :
+    curvePreimage p F ϖ (V₁ ⊓ V₂)
+      = curvePreimage p F ϖ V₁ ⊓ curvePreimage p F ϖ V₂ := by
+  refine Opens.ext ?_
+  rw [Opens.coe_inf]
+  rfl
+
+/-- Saturated preimages commute with unions. -/
+theorem curvePreimage_iSup {ι : Type*} (U : ι → Opens (Curve p F ϖ)) :
+    curvePreimage p F ϖ (iSup U) = ⨆ i, curvePreimage p F ϖ (U i) := by
+  refine Opens.ext ?_
+  rw [Opens.coe_iSup]
+  show yTopToCurve p F ϖ ⁻¹' ((iSup U : Opens (Curve p F ϖ))
+      : Set (Curve p F ϖ))
+    = ⋃ i, (curvePreimage p F ϖ (U i) : Set ↥(yTop p F ϖ))
+  rw [Opens.coe_iSup, Set.preimage_iUnion]
+  rfl
+
+/-- The curve presheaf's action is the invariant restriction (pointwise,
+the bundled-morphism form). -/
+theorem xPresheaf_map_apply {V' V : Opens (Curve p F ϖ)} (h : V' ≤ V)
+    (t : ((curveSpace p F ϖ).presheaf.obj (op V) : Type _)) :
+    ((curveSpace p F ϖ).presheaf.map (homOfLE h).op).1 t
+      = frobFixedRestrict p F ϖ h t := rfl
+
+/-- **The curve presheaf is a sheaf of topological rings** (D-iv-4, Wedhorn
+Remark 8.20 for the quotient): compatible continuous `T`-families of
+invariant sections glue uniquely — glue the underlying `𝒴`-sections over
+the saturated preimages, then check invariance by separation over the
+same saturated cover. -/
+theorem xPresheaf_isSheafOfTopologicalRings :
+    TopCat.Presheaf.IsSheafOfTopologicalRings
+      (curveSpace p F ϖ).presheaf := by
+  intro T _tc _tt _tr ι U f hcompat
+  set V' : Opens ↥(SpaTop (Ainf p F)) :=
+    (yFunctor p F ϖ).obj (curvePreimage p F ϖ (iSup U)) with hV'def
+  set U' : ι → Opens ↥(SpaTop (Ainf p F)) :=
+    fun i => (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i)) with hU'def
+  have hle : ∀ i, U' i ≤ V' :=
+    fun i => yFunctor_curvePreimage_mono p F ϖ (le_iSup U i)
+  have hVS : (V' : Set ↥(SpaTop (Ainf p F)))
+      ⊆ Subtype.val ⁻¹' Y p F ϖ := yFunctor_trace p F ϖ _
+  have hcov : (V' : Set ↥(SpaTop (Ainf p F)))
+      ⊆ ⋃ i, (U' i : Set ↥(SpaTop (Ainf p F))) := by
+    rw [hV'def, curvePreimage_iSup p F ϖ U]
+    exact yFunctor_cov p F ϖ (fun i => curvePreimage p F ϖ (U i))
+  -- the stability equalities
+  have stabV : frobOpens p F 1 V' = V' :=
+    frobOpens_yFunctor_curvePreimage p F ϖ 1 (iSup U)
+  have stabU : ∀ i, frobOpens p F 1 (U' i) = U' i :=
+    fun i => frobOpens_yFunctor_curvePreimage p F ϖ 1 (U i)
+  -- the underlying 𝒴-side family
+  have hcompat' : ∀ i j,
+      (limitRestrict (inf_le_left (a := U' i) (b := U' j))).comp
+          ((piComponent p F ϖ (U i)).comp (f i).1)
+        = (limitRestrict (inf_le_right (a := U' i) (b := U' j))).comp
+            ((piComponent p F ϖ (U j)).comp (f j).1) := by
+    intro i j
+    refine RingHom.ext fun t => ?_
+    have h0 := DFunLike.congr_fun (hcompat i j) t
+    have h0' := congrArg Subtype.val
+      ((xPresheaf_map_apply p F ϖ
+          (inf_le_left (a := U i) (b := U j)) ((f i).1 t)).symm.trans
+        (h0.trans (xPresheaf_map_apply p F ϖ
+          (inf_le_right (a := U i) (b := U j)) ((f j).1 t))))
+    have e1 := curvePreimage_inf p F ϖ (U i) (U j)
+    have e2 := yFunctor_inf p F ϖ (curvePreimage p F ϖ (U i))
+      (curvePreimage p F ϖ (U j))
+    have hpre : (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i ⊓ U j))
+        = U' i ⊓ U' j := by rw [e1, e2]
+    exact ValuationSpectrum.limitRestrict_cross_eq_of_opens_eq hpre
+      (yFunctor_curvePreimage_mono p F ϖ
+        (inf_le_left (a := U i) (b := U j)))
+      (yFunctor_curvePreimage_mono p F ϖ
+        (inf_le_right (a := U i) (b := U j)))
+      (inf_le_left (a := U' i) (b := U' j))
+      (inf_le_right (a := U' i) (b := U' j)) h0'
+  obtain ⟨g, hg, huniq⟩ := (isLimitSheafOn_Y p F ϖ).homGlue hVS hle hcov
+    (fun i => (piComponent p F ϖ (U i)).comp (f i).1)
+    (fun i => continuous_subtype_val.comp (f i).2) hcompat'
+  -- the glued section is invariant at every T-input
+  have hginv : ∀ t : T, g.1 t ∈ frobFixed p F ϖ (iSup U) := by
+    intro t
+    rw [mem_frobFixed]
+    -- separation over the saturated pieces
+    have hVS2 : ((frobOpens p F 1 V'
+        : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        ⊆ Subtype.val ⁻¹' Y p F ϖ :=
+      fun v hv => hVS (stabV ▸ hv)
+    have hle2 : ∀ i, U' i ≤ frobOpens p F 1 V' :=
+      fun i => le_trans (hle i) (le_of_eq stabV.symm)
+    have hcov2 : ((frobOpens p F 1 V'
+        : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        ⊆ ⋃ i, (U' i : Set ↥(SpaTop (Ainf p F))) :=
+      fun v hv => hcov (stabV ▸ hv)
+    refine (isLimitSheafOn_Y p F ϖ).injective hVS2 hle2 hcov2
+      (fun i => ?_)
+    -- the common value on the piece: the underlying section of `f i t`
+    have hLa := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+      (le_of_eq (stabU i).symm) (frobOpens_mono p F 1 (hle i))))
+      (limitFrobHom p F 1 V' (g.1 t))
+    have hLb := limitFrobHom_limitRestrict p F 1 (hle i) (g.1 t)
+    have hLc := congrArg
+      (fun s => limitRestrict (le_of_eq (stabU i).symm)
+        (limitFrobHom p F 1 (U' i) s)) (DFunLike.congr_fun (hg i) t)
+    have hLd : limitFrobHom p F 1 (U' i) ((f i).1 t).1
+        = limitRestrict (le_of_eq (stabU i)) ((f i).1 t).1 :=
+      ((f i).1 t).2
+    have hLe := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+      (le_of_eq (stabU i).symm) (le_of_eq (stabU i)))) ((f i).1 t).1
+    have hLf := congr_fun (congrArg DFunLike.coe
+      (limitRestrict_id (U' i))) ((f i).1 t).1
+    have hL : limitRestrict (hle2 i) (limitFrobHom p F 1 V' (g.1 t))
+        = ((f i).1 t).1 :=
+      (hLa.symm.trans (congrArg
+          (limitRestrict (le_of_eq (stabU i).symm)) hLb)).trans
+        ((hLc.trans (congrArg
+          (limitRestrict (le_of_eq (stabU i).symm)) hLd)).trans
+        (hLe.trans hLf))
+    have hRa := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+      (hle2 i) (le_of_eq stabV))) (g.1 t)
+    have hR : limitRestrict (hle2 i)
+        (limitRestrict (le_of_eq stabV) (g.1 t)) = ((f i).1 t).1 :=
+      hRa.trans (DFunLike.congr_fun (hg i) t)
+    exact hL.trans hR.symm
+  -- package the glued invariant section
+  set gX : T →+* ↥(frobFixed p F ϖ (iSup U)) :=
+    RingHom.codRestrict g.1 (frobFixed p F ϖ (iSup U)) hginv with hgXdef
+  have hgXc : Continuous gX := by
+    refine continuous_induced_rng.mpr ?_
+    exact g.2
+  refine ⟨⟨gX, hgXc⟩, fun i => ?_, ?_⟩
+  · refine RingHom.ext fun t => ?_
+    refine (xPresheaf_map_apply p F ϖ (le_iSup U i) (gX t)).trans ?_
+    refine Subtype.ext ?_
+    exact DFunLike.congr_fun (hg i) t
+  · rintro ⟨g'', hg''c⟩ hg''
+    have hres : ∀ i, (limitRestrict (hle i)).comp
+        ((piComponent p F ϖ (iSup U)).comp g'')
+        = (piComponent p F ϖ (U i)).comp (f i).1 := by
+      intro i
+      refine RingHom.ext fun t => ?_
+      have h1 := congrArg Subtype.val
+        ((xPresheaf_map_apply p F ϖ (le_iSup U i) (g'' t)).symm.trans
+          (DFunLike.congr_fun (hg'' i) t))
+      exact h1
+    have := huniq ⟨(piComponent p F ϖ (iSup U)).comp g'',
+      continuous_subtype_val.comp hg''c⟩ hres
+    have hval := congrArg Subtype.val this
+    refine Subtype.ext (RingHom.ext fun t => Subtype.ext ?_)
+    exact DFunLike.congr_fun hval t
+
+/-- **The adic Fargues–Fontaine curve as an object of Wedhorn's category
+`𝒱`** (D-iv-5, the headline): the `𝒱^pre`-object together with the
+sheaf-of-topological-rings condition. -/
+noncomputable def xVObj : ValuationSpectrum.VObj :=
+  { xVPreObj p F ϖ with
+    isSheafTopRings := xPresheaf_isSheafOfTopologicalRings p F ϖ }
+
 end FarguesFontaine
 
 end
