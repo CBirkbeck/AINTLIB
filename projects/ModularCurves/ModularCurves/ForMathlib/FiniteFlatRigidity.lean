@@ -14,6 +14,7 @@ import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.RingTheory.Flat.EquationalCriterion
 import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Rank rigidity for surjections of finite projective modules
@@ -25,6 +26,11 @@ everywhere, hence subsingleton. This is the module engine behind KM 1.10.2 ("a c
 subscheme of a finite flat scheme of the same constant rank is the whole scheme") —
 the scheme-level statement reduces to this over affines.
 -/
+
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 universe u
 

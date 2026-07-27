@@ -8,6 +8,7 @@ import Mathlib.AlgebraicGeometry.Properties
 import Mathlib.AlgebraicGeometry.FunctionField
 import ModularCurves.ForMathlib.FinrankTower
 import ModularCurves.EllipticCurve.FinrankFractionField
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Composition multiplicativity of `Scheme.Hom.finrank` over integral schemes
@@ -34,6 +35,11 @@ restriction to a target open) — reproving on this branch the Y1-wave helpers o
 This is the scheme engine of the `endDeg_comp` multiplicativity pin of the endomorphism-degree
 keystone (`ModularCurves/EllipticCurve/EndomorphismDegree.lean`, KM 2.6.1).
 -/
+
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open CategoryTheory Limits TopologicalSpace
 

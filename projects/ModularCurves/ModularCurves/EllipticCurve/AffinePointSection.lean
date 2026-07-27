@@ -21,6 +21,11 @@ chart to `projModelAffineSection … 0 0 …` and `Q` to `projModelAffineSection
 (on `2`-torsion, `y = 0` is forced in char ≠ 2, so pinning `x` pins the point).
 -/
 
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 noncomputable section

@@ -6,6 +6,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
 import Mathlib.LinearAlgebra.LinearIndependent.Lemmas
 import Mathlib.LinearAlgebra.Dual.Lemmas
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Unramifiedness from the count of algebra homomorphisms
@@ -18,6 +19,11 @@ formally unramified.
 This is the endgame of the BB-DIFF kernel-count argument: `Γ(E[N])` over `κ̄` has `N²`
 points (HasseWeil) and rank `N²` (BB-DEG), so it is étale.
 -/
+
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 universe u
 

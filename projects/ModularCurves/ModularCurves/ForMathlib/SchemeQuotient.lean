@@ -6,6 +6,7 @@ Authors: AINTLIB ModularCurves project
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q5 (leaf T-Q5a).
 -/
 import ModularCurves.ForMathlib.AffineQuotient
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Group actions on schemes: vocabulary for the quotient construction
@@ -25,6 +26,11 @@ the covariant composition laws (`SchemeAction`), matching the convention of
 This is the vocabulary layer of the quotient of a scheme by a finite group
 ([Loeffler, *Modular curves*, Prop 3.6.1]; the gluing itself is tickets T-Q5b–d).
 -/
+
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 universe u
 

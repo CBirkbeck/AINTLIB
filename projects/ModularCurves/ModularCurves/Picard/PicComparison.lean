@@ -28,6 +28,11 @@ Leaves (`Nonempty`-wrapped `Prop`s, v10.8 discipline):
   freeness of invertible modules — independent of the dual machinery).
 -/
 
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 open CategoryTheory MonoidalCategory

@@ -1,4 +1,5 @@
 import ModularCurves.LevelStructure.CartierDivisor
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Pushforward of a relative effective Cartier divisor along an automorphism
@@ -13,6 +14,11 @@ along the divisor inclusion is again an iso.
 The `[HG-C3]` cover uses this with `φ = E.translateByIso x` to form the shifted divisor
 `x + D` (a degree-`N` divisor whose complement `E ∖ (x + D)` is the second affine chart).
 -/
+
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits
 

@@ -10,6 +10,7 @@ import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.EllipticCurve.ModelVCEquivariance
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Descent of the group law to every locally-Weierstrass family
@@ -27,6 +28,11 @@ hence globally by the cover extensionality. This yields the existence milestone 
 Sources: reviewer round 1 §3/§Q5 (existence by base change + atlas gluing, valid over
 non-reduced `S`); audits A1/A6; `Scheme.Cover.glueMorphisms`/`hom_ext` (mathlib, verified).
 -/
+
+-- v4.33 bump: opens/hom coercions are no longer transparent enough for the
+-- `≫`-associativity and `comp_apply` rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj
