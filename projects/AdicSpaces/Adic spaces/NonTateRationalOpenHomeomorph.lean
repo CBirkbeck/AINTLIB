@@ -236,6 +236,37 @@ def spaPresheafValueHomeomorphRationalOpen'
     (spaPresheafValueEquivRationalOpen_continuous D)
     (spaPresheafValueEquivRationalOpen_isOpenMap' D u hu)
 
+/-- **Rational subsets pull back along the canonical map** (the forward half of
+Wedhorn 8.2(2)'s subset correspondence, pointwise form — Huber-base generic):
+for a Spa-point `w` of the completed localization, `comap w` lies in
+`R(T'/s')` iff `w` lies in the rational subset with the image parameters. -/
+theorem comap_canonicalMap_mem_rationalOpen_iff
+    {D : RationalLocData A} [DecidableEq (presheafValue D)]
+    {w : Spv (presheafValue D)}
+    (hw : w ∈ Spa (presheafValue D) (presheafValue D)⁺)
+    (T' : Finset A) (s' : A) :
+    comap D.canonicalMap w ∈ rationalOpen T' s'
+      ↔ w ∈ rationalOpen (T'.image D.canonicalMap) (D.canonicalMap s') := by
+  constructor
+  · rintro ⟨-, hT, hs⟩
+    refine ⟨hw, ?_, ?_⟩
+    · intro t ht
+      obtain ⟨t', ht', rfl⟩ := Finset.mem_image.mp ht
+      exact (comap_vle D.canonicalMap w t' s').mp (hT t' ht')
+    · intro hcon
+      refine hs ?_
+      rw [comap_vle, map_zero] at *
+      exact hcon
+  · rintro ⟨-, hT, hs⟩
+    refine ⟨comap_canonicalMap_mem_spa D ⟨w, hw⟩, ?_, ?_⟩
+    · intro t ht
+      exact (comap_vle D.canonicalMap w t s').mpr
+        (hT _ (Finset.mem_image_of_mem _ ht))
+    · intro hcon
+      refine hs ?_
+      have := (comap_vle D.canonicalMap w s' 0).mp hcon
+      rwa [map_zero] at this
+
 end ValuationSpectrum
 
 end
