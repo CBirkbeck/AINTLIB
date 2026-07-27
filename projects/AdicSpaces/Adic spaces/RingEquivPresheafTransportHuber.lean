@@ -586,6 +586,14 @@ theorem presheafValueRingEquivHuber_symm_apply_of_eq_refl
 
 end ReflValue
 
+/-- The datum collapse for any equivalence equal to the identity. -/
+theorem RationalLocData.mapHuber_eq_of_eq_refl {e : A ≃+* A}
+    (he : Continuous e) (he' : Continuous e.symm)
+    (hE : e = RingEquiv.refl A) (D : RationalLocData A) :
+    D.mapHuber e he he' = D := by
+  subst hE
+  exact RationalLocData.mapHuber_refl he he' D
+
 end Refl
 
 end ValuationSpectrum

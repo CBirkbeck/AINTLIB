@@ -403,6 +403,64 @@ theorem frobOpens_zero (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
   show spaFrob p F 0 v ∈ (W : Set _) ↔ v ∈ (W : Set _)
   rw [spaFrob_zero]
 
+theorem frobPow_neg_zero_eq_refl :
+    frobPow p F (-0) = RingEquiv.refl (Ainf p F) := by
+  rw [neg_zero, frobPow_zero]
+
+/-- **The zero-power transport is the restriction along the preimage
+collapse.** -/
+theorem limitFrobHom_zero
+    (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (s : ↥(limitSections W)) :
+    limitFrobHom p F 0 W s
+      = limitRestrict (le_of_eq (frobOpens_zero p F W)) s := by
+  refine Subtype.ext (funext fun E => ?_)
+  have hDeq : E.D.mapHuber (frobPow p F (-0)) (continuous_frobPow p F (-0))
+      (continuous_frobPow_symm p F (-0)) = E.D :=
+    RationalLocData.mapHuber_eq_of_eq_refl _ _
+      (frobPow_neg_zero_eq_refl p F) E.D
+  have hle' : rationalOpen E.D.T E.D.s
+      ⊆ rationalOpen (E.D.mapHuber (frobPow p F (-0))
+          (continuous_frobPow p F (-0))
+          (continuous_frobPow_symm p F (-0))).T
+        (E.D.mapHuber (frobPow p F (-0)) (continuous_frobPow p F (-0))
+          (continuous_frobPow_symm p F (-0))).s := by
+    rw [hDeq]
+  have hle : rationalOpen (E.D.mapHuber (frobPow p F (-0))
+        (continuous_frobPow p F (-0))
+        (continuous_frobPow_symm p F (-0))).T
+      (E.D.mapHuber (frobPow p F (-0)) (continuous_frobPow p F (-0))
+        (continuous_frobPow_symm p F (-0))).s
+      ⊆ rationalOpen E.D.T E.D.s := by
+    rw [hDeq]
+  have hsymm := ValuationSpectrum.presheafValueRingEquivHuber_symm_apply_of_eq_refl
+    (continuous_frobPow p F (-0)) (continuous_frobPow_symm p F (-0))
+    (frobPow_neg_zero_eq_refl p F) E.D hle' hle
+    ((s : ∀ j : RationalIndex W, presheafValue j.D) (frobIndex p F 0 E))
+  have hset : ((frobOpens p F 0 W
+        : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      = ((W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
+    rw [frobOpens_zero p F W]
+  have hcompat := s.2 (frobIndex p F 0 E)
+    ⟨E.D, E.isRational, E.subset.trans hset.le⟩
+    hle'
+  exact ((limitFrobHom_component p F 0 W s E).trans hsymm).trans hcompat
+/-- The zero-power Frobenius on the `𝒴`-carrier is the identity. -/
+theorem yFrobTop_zero (y : ↥(yTop p F ϖ)) :
+    yFrobTop p F ϖ 0 y = y := by
+  refine Subtype.ext ?_
+  show spaFrob p F 0 y.1 = y.1
+  exact spaFrob_zero p F y.1
+
+theorem map_yFrobTop_zero (W : Opens ↥(yTop p F ϖ)) :
+    (Opens.map (yFrobTop p F ϖ 0)).obj W = W := by
+  refine Opens.ext ?_
+  ext y
+  show yFrobTop p F ϖ 0 y ∈ (W : Set _) ↔ y ∈ (W : Set _)
+  rw [yFrobTop_zero p F ϖ y]
+
 end FarguesFontaine
 
 end
