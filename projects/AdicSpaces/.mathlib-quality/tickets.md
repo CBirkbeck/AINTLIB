@@ -1069,8 +1069,10 @@ non-Tate bases are supported.
     canonically ([ϖ] = [ϖ']^{p^s} makes the localizations agree:
     1/[ϖ'] = [ϖ']^{p^s-1}/[ϖ]), and wLoc/gaussValue are ϖ-independent, so
     BISub-in-ϖ' [ρ₁,ρ₂] = BISub-in-ϖ [ρ₁,ρ₂] under the canonical iso.
-    Sub-tickets: (D-i-t1) Bloc uniformizer-invariance ring iso +
-    wLoc-compatibility; (D-i-t2) BISub-equivariance; (D-i-t3) circle datum
+    Sub-tickets: (D-i-t1) DONE 2026-07-27
+    (FarguesFontaine/UniformizerEquivariance.lean: isLocalization_twist_Bloc,
+    blocTwistEquiv + _algebraMap, gaussValue_p_teichPi_pow,
+    wLoc_blocTwistEquiv); (D-i-t2) BISub-equivariance; (D-i-t3) circle datum
     over B_n (RationalLocData with image params, hopen from p-unit) +
     keystone-over-B_n applications; (D-i-t4) the composed transition iso;
     negative-side mirrors throughout;
