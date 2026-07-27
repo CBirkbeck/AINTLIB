@@ -789,6 +789,26 @@ theorem presheafValueRingEquivHuber_symm_apply_of_eq_refl
   · exact hcomp
   · exact hid
 
+/-- Transport of the Huber value equivalence across an equality of the
+equivalences (subst-friendly; the containment is an argument). -/
+theorem presheafValueRingEquivHuber_congr_e_symm
+    {e e' : A ≃+* A} (he : Continuous e) (he' : Continuous e.symm)
+    (hf : Continuous e') (hf' : Continuous e'.symm)
+    (hE : e = e') (D : RationalLocData A)
+    (hle : rationalOpen (D.mapHuber e' hf hf').T (D.mapHuber e' hf hf').s
+      ⊆ rationalOpen (D.mapHuber e he he').T (D.mapHuber e he he').s)
+    (z : presheafValue (D.mapHuber e he he')) :
+    (presheafValueRingEquivHuber e he he' D).symm z
+      = (presheafValueRingEquivHuber e' hf hf' D).symm
+          (restrictionMap (D.mapHuber e he he') (D.mapHuber e' hf hf')
+            hle z) := by
+  subst hE
+  have hid : restrictionMap (D.mapHuber e he he') (D.mapHuber e hf hf')
+      hle z = z := by
+    have hcomp := congr_fun (restrictionMap_id (D.mapHuber e he he')) z
+    exact hcomp ▸ rfl
+  rw [hid]
+
 end ReflValue
 
 /-- The datum collapse for any equivalence equal to the identity. -/

@@ -662,6 +662,16 @@ theorem frobOpens_add (k l : ℤ)
     ↔ spaFrob p F l (spaFrob p F k v) ∈ (W : Set _)
   rw [spaFrob_add p F k l v]
 
+/-- Frobenius powers compose. -/
+theorem frobPow_trans (a b : ℤ) :
+    (frobPow p F a).trans (frobPow p F b) = frobPow p F (a + b) := by
+  refine RingEquiv.ext fun x => ?_
+  show (frobPow p F b) ((frobPow p F a) x) = (frobPow p F (a + b)) x
+  have h := congr_fun (congrArg DFunLike.coe
+    (frobPow_toRingHom_comp p F b a)) x
+  rw [show b + a = a + b from add_comm b a] at h
+  exact h.symm
+
 end FarguesFontaine
 
 end
