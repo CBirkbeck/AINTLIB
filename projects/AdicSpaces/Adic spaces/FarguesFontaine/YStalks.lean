@@ -6,6 +6,7 @@ import «Adic spaces».FarguesFontaine.YCharts
 import «Adic spaces».StructureSheafStalks
 import «Adic spaces».RelativeDescentHuber
 import «Adic spaces».FarguesFontaine.ChartVObj
+import «Adic spaces».SpaQCviaSpvAI
 
 /-!
 # Stalk locality of the ambient structure presheaf at points of `𝒴` (YB3c)
@@ -907,6 +908,101 @@ theorem isSheafyOn_runChart (n : ℤ) (k : ℕ) :
     exact exists_glue_of_imgCovering
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
       (fun E hE => span_image_runChart_eq_top p F ϖ n k E hE) C hC hCS f hf
+
+private theorem ainf_pair_spec' :
+    ∃ P : PairOfDefinition (Ainf p F), ∃ g₁ g₂ : P.A₀,
+      P.I = Ideal.span ({g₁, g₂} : Set P.A₀) ∧
+      (∀ x : P.A₀, (x : Ainf p F) ∈ (ringPlus (Ainf p F) : Subring (Ainf p F))) ∧
+      Iinf p F (IsTateRing.pseudoUniformizer (A := F)) =
+        Ideal.span ({(g₁ : Ainf p F), (g₂ : Ainf p F)} : Set (Ainf p F)) := by
+  refine ⟨pairOfDefinition_ofAdic (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
+      (Submodule.fg_span (Set.toFinite _)),
+    ⟨(p : Ainf p F), trivial⟩, ⟨teichPi p F (IsTateRing.pseudoUniformizer (A := F)),
+      trivial⟩, ?_, fun _ => trivial, ?_⟩
+  · show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F))) = _
+    rw [show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
+        = Ideal.map (Subring.topEquiv (R := Ainf p F)).symm.toRingHom
+          (Ideal.span {(p : Ainf p F),
+            teichPi p F (IsTateRing.pseudoUniformizer (A := F))}) from rfl,
+      Ideal.map_span, Set.image_insert_eq, Set.image_singleton]
+    rfl
+  · rfl
+
+/-- **Valid rational subsets of `Spa(A_inf, A_inf)` are quasi-compact**
+(Wedhorn 7.35(2) at the two-generator ideal `(p, [ϖ])`): openness of the
+tray span gives `I_inf ≤ √(span T)`. -/
+theorem isCompact_subtype_rationalOpen_ainf (E : RationalLocData (Ainf p F))
+    (hErat : E.IsRational) :
+    IsCompact (Subtype.val ⁻¹' rationalOpen E.T E.s
+      : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
+  classical
+  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := ainf_pair_spec' p F
+  refine isCompact_subtype_rationalOpen₂ P hpair hA₀le _ hIeq E.T E.s ?_
+  obtain ⟨N, hN⟩ := (isAdic_iff.mp
+      (isAdic_Iinf p F (IsTateRing.pseudoUniformizer (A := F)))).2
+    _ (hErat.mem_nhds (by
+      exact (Ideal.span ((E.T : Finset (Ainf p F)) : Set (Ainf p F))).zero_mem))
+  intro x hx
+  exact ⟨N, hN (Ideal.pow_mem_pow hx N)⟩
+
+/-- **Every valid `Y`-interior rational open lies inside a run chart**: the
+quasi-compact trace meets only finitely many Big windows. -/
+theorem exists_runChart_superset (E : RationalLocData (Ainf p F))
+    (hErat : E.IsRational) (hEY : rationalOpen E.T E.s ⊆ Y p F ϖ) :
+    ∃ n : ℤ, ∃ k : ℕ, rationalOpen E.T E.s
+      ⊆ rationalOpen
+          (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).T
+          (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).s := by
+  classical
+  have hcomp := isCompact_subtype_rationalOpen_ainf p F E hErat
+  have hopen : ∀ n : ℤ, IsOpen (Subtype.val ⁻¹' bigWindow p F ϖ n
+      : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
+    intro n
+    rw [bigWindow_eq_rationalOpen_windowUnif p F ϖ n]
+    exact rationalOpen_isOpen _ _
+  have hcov : (Subtype.val ⁻¹' rationalOpen E.T E.s
+      : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      ⊆ ⋃ n : ℤ, Subtype.val ⁻¹' bigWindow p F ϖ n := by
+    intro x hx
+    have hxY : (x : Spv (Ainf p F)) ∈ Y p F ϖ := hEY hx
+    rw [Y_eq_iUnion_bigWindow p F ϖ (one_lt_p p)] at hxY
+    obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hxY
+    exact Set.mem_iUnion.mpr ⟨n, hn⟩
+  obtain ⟨J, hJ⟩ := hcomp.elim_finite_subcover
+    (fun n : ℤ => Subtype.val ⁻¹' bigWindow p F ϖ n) hopen hcov
+  set J' : Finset ℤ := insert 0 J with hJ'def
+  have hJ'ne : J'.Nonempty := ⟨0, Finset.mem_insert_self 0 J⟩
+  set n₀ := J'.min' hJ'ne with hn₀def
+  set N := J'.max' hJ'ne with hNdef
+  have hn₀N : n₀ ≤ N := J'.min'_le_max' hJ'ne
+  refine ⟨n₀, (N - n₀).toNat, ?_⟩
+  rw [← runWindow_eq_rationalOpen p F ϖ n₀ (N - n₀).toNat]
+  intro v hv
+  have hvSpa : v ∈ Spa (Ainf p F) (ringPlus (Ainf p F)) :=
+    rationalOpen_subset_spa hv
+  have hvtrace := hJ (Set.mem_preimage.mpr
+    (show ((⟨v, hvSpa⟩ : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F)) ∈ rationalOpen E.T E.s from hv))
+  obtain ⟨j, hjJ, hjmem⟩ := by
+    simpa only [Set.mem_iUnion, Set.mem_preimage, exists_prop] using hvtrace
+  refine bigWindow_subset_runWindow p F ϖ n₀ (N - n₀).toNat
+    (J'.min'_le j (Finset.mem_insert_of_mem hjJ)) ?_ hjmem
+  have : (j : ℤ) ≤ N := J'.le_max' j (Finset.mem_insert_of_mem hjJ)
+  omega
+
+/-- **YB6c-3d — the `Y`-interior sheaf condition over the ambient `A_inf`**:
+every valid rational covering whose base lies inside `Y` satisfies both
+`IsSheafy`-fields — quasi-compactness places the base inside a single run
+chart, whose `isSheafyOn_runChart` applies. -/
+theorem isSheafyOn_Y :
+    ValuationSpectrum.IsSheafyOn (A := Ainf p F) (Y p F ϖ) := by
+  constructor
+  · intro C hC hCS
+    obtain ⟨n, k, hsub⟩ := exists_runChart_superset p F ϖ C.base hC.base hCS
+    exact (isSheafyOn_runChart p F ϖ n k).embedding C hC hsub
+  · intro C hC hCS f hf
+    obtain ⟨n, k, hsub⟩ := exists_runChart_superset p F ϖ C.base hC.base hCS
+    exact (isSheafyOn_runChart p F ϖ n k).gluing C hC hsub f hf
 
 end FarguesFontaine
 
