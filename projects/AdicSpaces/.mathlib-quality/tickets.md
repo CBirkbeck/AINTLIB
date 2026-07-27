@@ -1201,7 +1201,23 @@ non-Tate bases are supported.
     — biFstQ/biSndQ explicit-toFun projections, the three dense-equalizer
     laws, biResQ'_split_injective; teichCoeff_init/tail,
     pow_mul_gaussValue_init/tail_le in multiplied no-division form,
-    exists_wLoc_split; all axiom-clean). Remaining: (b3) assembly.
+    exists_wLoc_split; all axiom-clean). (b3) DONE 2026-07-27: THE SPLIT
+    FIBER-PRODUCT THEOREM COMPLETE (IntervalSplitting.lean) —
+    exists_blocApprox_pair (joint ε-approximation via closure approximants
+    + splitting the discrepancy at the split radius), tendsto-from-bounds
+    helpers, biResQ'_eq_left/right_of_tendsto (abstract-f restriction
+    recognition), glueSeq/biGlue (the glued element = the pair of outer
+    endpoint components, in BIQ by mem_closure_of_tendsto),
+    biResQ'_biGlue_left/right, **biResQ'_split_surjective** — with
+    biResQ'_split_injective: B^{[q₁,q₂]} ≅ B^{[q₁,r]} ×_{hatK r} B^{[r,q₂]},
+    the sheaf axiom of the interval presheaf on a two-piece cover. All 14
+    new decls axiom-clean. NEW PERF LESSON (binding): the KERNEL ignores
+    @[irreducible] and head-compares ring homs at DIFFERENT radii before
+    projecting — cross-radius component equations must be routed through
+    the val-projection (biGlue_coe-style) and kept out of rfl-args, else
+    (kernel) deterministic timeout; also per-declaration kernel budgets ⇒
+    hoist branch proofs into abstract-parameter lemmas (the aux-lemma +
+    named-def restructure pattern).
     Original sub-step text: (b1) endpoint projections biFst/biSnd : BISub → hatK ρᵢ
     (= RingHom.fst/snd ∘ subtype; continuous; dense-layer = BlocToHatK) and
     the three dense-equalizer laws: biFst∘biResQ'(left-shared) = biFst,
