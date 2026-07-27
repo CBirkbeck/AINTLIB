@@ -1,4 +1,5 @@
-import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.EllipticCurve.PoleSheafWeierstrassOverlap
+import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Sections away from a marked section
@@ -50,5 +51,222 @@ theorem affine_inf_sectionAway_eq_basicOpen
     have hxzero := (z.ker.mem_support_iff_of_mem hxU).1 hx
     rw [hspan, C.zeroLocus_span, C.zeroLocus_singleton] at hxzero
     exact hxzero hxr
+
+/-- The marked section has empty preimage in its open complement. -/
+@[simp]
+theorem preimage_sectionAway
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
+    z ⁻¹ᵁ sectionAway z hz = ⊥ := by
+  ext s
+  change z s ∈ (Set.range ⇑z)ᶜ ↔ s ∈ (⊥ : S.Opens)
+  simp
+
+/-- Any open containing the marked section covers the curve together with the section's open
+complement. -/
+theorem sup_sectionAway_eq_top_of_preimage_eq_top
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.Opens) (hU : z ⁻¹ᵁ U = ⊤) :
+    U ⊔ sectionAway z hz = ⊤ := by
+  ext c
+  change c ∈ (U : Set C) ∪ (Set.range ⇑z)ᶜ ↔ c ∈ Set.univ
+  simp only [Set.mem_union, Set.mem_compl_iff, Set.mem_univ, iff_true]
+  by_cases hc : c ∈ Set.range ⇑z
+  · left
+    obtain ⟨s, rfl⟩ := hc
+    have hs : s ∈ z ⁻¹ᵁ U := by
+      rw [hU]
+      trivial
+    exact hs
+  · exact Or.inr hc
+
+private theorem exists_section_sup_of_restrict_eq
+    {X : Scheme.{u}} (M : X.Modules) (U V : X.Opens)
+    (sU : Γ(M, U)) (sV : Γ(M, V))
+    (h : M.presheaf.map (homOfLE inf_le_left).op sU =
+      M.presheaf.map (homOfLE inf_le_right).op sV) :
+    ∃ s : Γ(M, U ⊔ V),
+      M.presheaf.map (homOfLE le_sup_left).op s = sU ∧
+      M.presheaf.map (homOfLE le_sup_right).op s = sV := by
+  let F := (SheafOfModules.toSheaf X.ringCatSheaf).obj M
+  let f := F.1.map (homOfLE inf_le_left : U ⊓ V ⟶ U).op
+  let g := F.1.map (homOfLE inf_le_right : U ⊓ V ⟶ V).op
+  let p : ToType (pullback f g) :=
+    Limits.Concrete.pullbackMk f g sU sV h
+  let s :=
+    TopCat.Sheaf.interUnionPullbackConeLift F U V (pullback.cone f g) p
+  refine ⟨s, ?_, ?_⟩
+  · exact (ConcreteCategory.congr_hom
+      (TopCat.Sheaf.interUnionPullbackConeLift_left
+        F U V (pullback.cone f g)) p).trans
+        (Limits.Concrete.pullbackMk_fst f g sU sV h)
+  · exact (ConcreteCategory.congr_hom
+      (TopCat.Sheaf.interUnionPullbackConeLift_right
+        F U V (pullback.cone f g)) p).trans
+        (Limits.Concrete.pullbackMk_snd f g sU sV h)
+
+private theorem exists_section_top_of_restrict_eq
+    {X : Scheme.{u}} (M : X.Modules) (U V : X.Opens)
+    (hUV : U ⊔ V = ⊤)
+    (sU : Γ(M, U)) (sV : Γ(M, V))
+    (h : M.presheaf.map (homOfLE inf_le_left).op sU =
+      M.presheaf.map (homOfLE inf_le_right).op sV) :
+    ∃ s : Γ(M, (⊤ : X.Opens)),
+      M.presheaf.map (homOfLE le_top).op s = sU ∧
+      M.presheaf.map (homOfLE le_top).op s = sV := by
+  obtain ⟨s, hsU, hsV⟩ :=
+    exists_section_sup_of_restrict_eq M U V sU sV h
+  let e := M.presheaf.mapIso (eqToIso hUV).op
+  let t : Γ(M, (⊤ : X.Opens)) := e.inv s
+  have het : e.hom t = s := e.inv_hom_id_apply s
+  refine ⟨t, ?_, ?_⟩
+  · calc
+      M.presheaf.map (homOfLE le_top).op t =
+          M.presheaf.map (homOfLE le_sup_left).op (e.hom t) := by
+        change _ = (M.presheaf.map (eqToIso hUV).op.hom ≫
+          M.presheaf.map (homOfLE le_sup_left).op) t
+        rw [← M.presheaf.map_comp]
+        congr 1
+      _ = M.presheaf.map (homOfLE le_sup_left).op s :=
+        congrArg (M.presheaf.map (homOfLE le_sup_left).op) het
+      _ = sU := hsU
+  · calc
+      M.presheaf.map (homOfLE le_top).op t =
+          M.presheaf.map (homOfLE le_sup_right).op (e.hom t) := by
+        change _ = (M.presheaf.map (eqToIso hUV).op.hom ≫
+          M.presheaf.map (homOfLE le_sup_right).op) t
+        rw [← M.presheaf.map_comp]
+        congr 1
+      _ = M.presheaf.map (homOfLE le_sup_right).op s :=
+        congrArg (M.presheaf.map (homOfLE le_sup_right).op) het
+      _ = sV := hsV
+
+/-- Every regular function away from a marked section is the away coefficient of a global section
+with some finite pole order along the section. -/
+theorem exists_sectionPoleSheafPower_away_coefficient_eq
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (s : Γ(C, sectionAway z hz)) :
+    ∃ (n : ℕ)
+      (m : Γ(sectionPoleSheafPower π z hz n, (⊤ : C.Opens))),
+      overTrivializationCoefficient
+          (sectionPoleSheafPower π z hz n) (sectionAway z hz)
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (sectionPoleSheafPower π z hz n) (sectionAway z hz)
+            (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+              z hz (sectionAway z hz) (preimage_sectionAway z hz) n)) m = s := by
+  let V := sectionAway z hz
+  have hV : z ⁻¹ᵁ V = ⊥ := preimage_sectionAway z hz
+  have hUV : U.1 ⊔ V = ⊤ :=
+    sup_sectionAway_eq_top_of_preimage_eq_top z hz U.1 hU
+  have hW : U.1 ⊓ V = C.basicOpen r :=
+    affine_inf_sectionAway_eq_basicOpen z hz U r hspan
+  have hBasicV : C.basicOpen r ≤ V := by
+    rw [← hW]
+    exact inf_le_right
+  let sW : Γ(Scheme.Modules.unitObj C, C.basicOpen r) :=
+    C.presheaf.map (homOfLE hBasicV).op s
+  letI : (Scheme.Modules.unitObj C).IsQuasicoherent :=
+    Scheme.Modules.isInvertible_unit.isQuasicoherent
+  obtain ⟨n, t, ht⟩ :=
+    Scheme.Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffineOpen
+      (Scheme.Modules.unitObj C) U r sW
+  let tRing : Γ(C, U.1) := t
+  let sWRing : Γ(C, C.basicOpen r) := sW
+  have htBasic :
+      C.presheaf.map (homOfLE (C.basicOpen_le r)).op tRing =
+        C.presheaf.map (homOfLE hBasicV).op s *
+          C.presheaf.map (homOfLE (C.basicOpen_le r)).op r ^ n := by
+    change C.presheaf.map (homOfLE (C.basicOpen_le r)).op tRing =
+      C.presheaf.map (homOfLE (C.basicOpen_le r)).op (r ^ n) * sWRing at ht
+    simpa only [sWRing, sW, map_pow, mul_comm] using ht
+  let M := sectionPoleSheafPower π z hz n
+  have hr : r ∈ z.ker.ideal U := by
+    rw [hspan]
+    exact Ideal.mem_span_singleton_self r
+  let eU :=
+    Scheme.Modules.overTrivializationOfRestrictIso M U.1
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd n)
+  let eV :=
+    Scheme.Modules.overTrivializationOfRestrictIso M V
+      (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+        z hz V hV n)
+  let mU : Γ(M, U.1) := overTrivializationSection M U.1 eU tRing
+  let mV : Γ(M, V) := overTrivializationSection M V eV s
+  have hrestrictU (q : Γ(C, U.1)) :
+      C.presheaf.map
+          (homOfLE (inf_le_left : U.1 ⊓ V ≤ U.1)).op q =
+        C.presheaf.map (eqToHom hW).op
+          (C.presheaf.map (homOfLE (C.basicOpen_le r)).op q) := by
+    change _ = (C.presheaf.map (homOfLE (C.basicOpen_le r)).op ≫
+      C.presheaf.map (eqToHom hW).op) q
+    rw [← C.presheaf.map_comp]
+    congr 1
+  have hrestrictV (q : Γ(C, V)) :
+      C.presheaf.map
+          (homOfLE (inf_le_right : U.1 ⊓ V ≤ V)).op q =
+        C.presheaf.map (eqToHom hW).op
+          (C.presheaf.map (homOfLE hBasicV).op q) := by
+    change _ = (C.presheaf.map (homOfLE hBasicV).op ≫
+      C.presheaf.map (eqToHom hW).op) q
+    rw [← C.presheaf.map_comp]
+    congr 1
+  have htW :
+      C.presheaf.map
+          (homOfLE (inf_le_left : U.1 ⊓ V ≤ U.1)).op tRing =
+        C.presheaf.map
+            (homOfLE (inf_le_right : U.1 ⊓ V ≤ V)).op s *
+          C.presheaf.map
+              (homOfLE (inf_le_left : U.1 ⊓ V ≤ U.1)).op r ^ n := by
+    calc
+      _ = C.presheaf.map (eqToHom hW).op
+          (C.presheaf.map (homOfLE (C.basicOpen_le r)).op tRing) :=
+        hrestrictU tRing
+      _ = C.presheaf.map (eqToHom hW).op
+          (C.presheaf.map (homOfLE hBasicV).op s *
+            C.presheaf.map (homOfLE (C.basicOpen_le r)).op r ^ n) :=
+        congrArg (C.presheaf.map (eqToHom hW).op) htBasic
+      _ = C.presheaf.map (eqToHom hW).op
+            (C.presheaf.map (homOfLE hBasicV).op s) *
+          C.presheaf.map (eqToHom hW).op
+              (C.presheaf.map (homOfLE (C.basicOpen_le r)).op r) ^ n := by
+        rw [map_mul, map_pow]
+      _ = _ := by
+        rw [← hrestrictV s, ← hrestrictU r]
+  have hmUV :
+      M.presheaf.map (homOfLE inf_le_left).op mU =
+        M.presheaf.map (homOfLE inf_le_right).op mV := by
+    dsimp only [mU, mV]
+    rw [overTrivializationSection_restrict,
+      overTrivializationSection_restrict]
+    rw [← Scheme.Modules.overTrivializationOfRestrictOpenTrivialization,
+      ← Scheme.Modules.overTrivializationOfRestrictOpenTrivialization]
+    apply overTrivializationSection_eq_of_transition M (U.1 ⊓ V)
+      (Scheme.Modules.overTrivializationOfRestrictIso M (U.1 ⊓ V)
+        (Scheme.Modules.restrictOpenTrivialization inf_le_left
+          (sectionPoleSheafPowerTrivializationOfCartierGenerator
+            z hz U r hr hspan hnzd n)))
+      (Scheme.Modules.overTrivializationOfRestrictIso M (U.1 ⊓ V)
+        (Scheme.Modules.restrictOpenTrivialization inf_le_right
+          (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+            z hz V hV n)))
+      (C.presheaf.map (homOfLE inf_le_left).op r ^ n)
+    · exact sectionPoleSheafPower_cartier_away_overlap_transition
+        z hz U r hr hspan hnzd V hV n
+    · exact htW
+  obtain ⟨m, -, hmV⟩ :=
+    exists_section_top_of_restrict_eq M U.1 V hUV mU mV hmUV
+  refine ⟨n, m, ?_⟩
+  have hcoord := congrArg
+    (fun q => eV.hom.val.app (.op (Over.mk (𝟙 V))) q) hmV
+  rw [overTrivializationSection_coefficient] at hcoord
+  change overTrivializationCoefficient M V eV m = s at hcoord
+  simpa only [V, eV] using hcoord
 
 end ModularCurves
