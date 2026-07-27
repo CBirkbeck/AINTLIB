@@ -48,6 +48,7 @@ import «Adic spaces».FarguesFontaine.ChartData
 import «Adic spaces».FarguesFontaine.ChartComparison
 import «Adic spaces».FarguesFontaine.UniformizerTwist
 import «Adic spaces».FarguesFontaine.BigWindows
+import «Adic spaces».FarguesFontaine.ChartSpa
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries

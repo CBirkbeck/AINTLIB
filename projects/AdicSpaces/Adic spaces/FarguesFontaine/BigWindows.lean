@@ -384,7 +384,8 @@ theorem bigWindow_inter_succ_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
     rw [hteich] at hge hle
     exact ⟨hY, (KGE_iff hY hq hpk hab).mpr hge, (KLE_iff hY hq hpk hab).mpr hle⟩
 
-noncomputable local instance : DecidableEq (Ainf p F) := Classical.decEq _
+noncomputable local instance instDecEqAinfBigWindows : DecidableEq (Ainf p F) :=
+  Classical.decEq _
 
 /-- **The `n`-th Big-window chart equivalence (nonnegative side)**: `Spa` of the
 chart presheaf value is in bijection with the trace of `bigWindow n` on

@@ -1070,7 +1070,12 @@ non-Tate bases are supported.
   Tate-gated is ONLY the HOMEOMORPH-upgrade (forward-openness,
   `spaPresheafValueEquivRationalOpen_isOpenMap`; continuity of the forward map
   is generic comap-continuity) and the RationalSubset-CORRESPONDENCE file.
-  [NT-1] (reduced; EXECUTION PLAN 2026-07-27): the open-map chain
+  [NT-1] DONE 2026-07-27 (NonTateRationalOpenHomeomorph.lean: the primed
+  open-map chain; FarguesFontaine/ChartSpa.lean: isTateRing_presheafChart /
+  isTateRing_bigWindowChart + the chart homeomorphisms spaChartHomeoBigWindow
+  /-Neg : Spa(B_n, B_n⁺-canonical) ≃ₜ bigWindow-trace, both sides, over the
+  non-Tate A_inf base). Original plan text (executed as written):
+  the open-map chain
   (SpaRationalOpenHomeomorph 225-421) uses [IsTateRing A] ONLY to supply
   (i) the completion's topologically nilpotent unit (presheafValue_topNilUnit
   maps A's unit; steps 1-2 of the proof are already parameter-level in
