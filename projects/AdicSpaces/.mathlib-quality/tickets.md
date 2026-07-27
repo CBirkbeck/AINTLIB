@@ -1202,9 +1202,15 @@ non-Tate bases are supported.
     equalizer). The φ-machinery on the interval-ring layer is COMPLETE:
     Frobenius is a bicontinuous bijection BIQ q₁ q₂ ↔ B^{[σ]} at
     σ = vpiQ(q)^p, with everything reaching the presheaf substrate.
-    REMAINING D-iii: the φ-biResQ'-compatibility square at abstract radii
-    (φ commutes with restrictions — the presheaf-equivariance datum), and
-    X := Y/φ^ℤ via Curve.lean + descent (needs the D-ii presheaf first). DEFERRED
+    φ-SQUARE DONE 2026-07-27: biPhiQP (the
+    BIQ-endpoint instantiation) with dense-layer identity and continuity;
+    mulQ_mem/mulQ_lt; and **biPhiQP_biResQ'_comm** — Frobenius commutes with
+    the interval restrictions (dense equalizer; compiled first-try under the
+    explicit-args discipline). The φ-EQUIVARIANT INTERVAL-PRESHEAF SUBSTRATE
+    IS NOW COMPLETE: values BIQ, restrictions biResQ' (functorial), φ a
+    bicontinuous bijection commuting with restrictions. REMAINING D-iii:
+    X := Y/φ^ℤ via Curve.lean + descent — needs the D-ii presheaf-on-opens
+    assembly first (the substrate → Y-VObj step). DEFERRED
     (profiler task): composite chartRingEquivBIQ-continuity (step-3 kernel
     grind) and hence windowResBIQ-continuity — needed by D-ii-2's topology
     half; the unfolded four-step comp restatement is the likely fix. Negative-side mirror DONE 2026-07-27
