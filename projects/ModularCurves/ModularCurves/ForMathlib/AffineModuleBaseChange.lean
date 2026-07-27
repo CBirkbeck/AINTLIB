@@ -1061,4 +1061,59 @@ theorem isIso_pullbackPushforward_unit_of_isAffine_of_isIso_extendScalars_unit
   dsimp only [affineΓMap]
   infer_instance
 
+/-- For a tilde sheaf on an affine spectrum, an invertible extension-of-scalars
+unit implies that the geometric pullback unit is invertible. -/
+theorem isIso_pullbackPushforward_unit_tilde_of_isIso_extendScalars_unit
+    {R S : CommRingCat.{u}} (φ : R ⟶ S) (M : ModuleCat R)
+    [IsIso ((ModuleCat.extendRestrictScalarsAdj φ.hom).unit.app M)] :
+    IsIso ((pullbackPushforwardAdjunction (Spec.map φ)).unit.app (tilde M)) := by
+  let adj₁ := (tilde.adjunction (R := R)).comp
+    (pullbackPushforwardAdjunction (Spec.map φ))
+  let adj₂ := (ModuleCat.extendRestrictScalarsAdj φ.hom).comp
+    (tilde.adjunction (R := S))
+  haveI hAdj₂ : IsIso (adj₂.unit.app M) := by
+    dsimp only [adj₂]
+    rw [Adjunction.comp_unit_app]
+    infer_instance
+  haveI hAdj₁ : IsIso (adj₁.unit.app M) :=
+    Adjunction.isIso_unit_app_of_natIso_left
+      adj₁ adj₂ (tildePullbackIsoExtendScalars φ).symm M
+  haveI hComposite :
+      IsIso ((tilde.adjunction (R := R)).unit.app M ≫
+        moduleSpecΓFunctor.map
+          ((pullbackPushforwardAdjunction (Spec.map φ)).unit.app (tilde M))) := by
+    exact hAdj₁
+  haveI hMapped :
+      IsIso (moduleSpecΓFunctor.map
+        ((pullbackPushforwardAdjunction (Spec.map φ)).unit.app (tilde M))) :=
+    @IsIso.of_isIso_comp_left _ _ _ _ _
+      ((tilde.adjunction (R := R)).unit.app M)
+      (moduleSpecΓFunctor.map
+        ((pullbackPushforwardAdjunction (Spec.map φ)).unit.app (tilde M)))
+      (inferInstanceAs (IsIso ((tilde.adjunction (R := R)).unit.app M)))
+      hComposite
+  haveI hPullback :
+      ((pullback (Spec.map φ)).obj (tilde M)).IsQuasicoherent :=
+    isQuasicoherent_pullback_of_isAffine (Spec.map φ) (tilde M)
+  haveI hPushforward :
+      ((pushforward (Spec.map φ)).obj
+        ((pullback (Spec.map φ)).obj (tilde M))).IsQuasicoherent :=
+    isQuasicoherent_of_pushforward (Spec.map φ)
+      ((pullback (Spec.map φ)).obj (tilde M))
+  letI hSource :
+      ((𝟭 (Spec R).Modules).obj (tilde M)).IsQuasicoherent := by
+    change (tilde M).IsQuasicoherent
+    infer_instance
+  letI hTarget :
+      ((pullback (Spec.map φ) ⋙ pushforward (Spec.map φ)).obj
+        (tilde M)).IsQuasicoherent := by
+    change ((pushforward (Spec.map φ)).obj
+      ((pullback (Spec.map φ)).obj (tilde M))).IsQuasicoherent
+    exact hPushforward
+  apply isIso_of_isQuasicoherent_of_isIso_app_top
+  rw [ConcreteCategory.isIso_iff_bijective]
+  exact ConcreteCategory.bijective_of_isIso
+    (moduleSpecΓFunctor.map
+      ((pullbackPushforwardAdjunction (Spec.map φ)).unit.app (tilde M)))
+
 end AlgebraicGeometry.Scheme.Modules
