@@ -1975,7 +1975,27 @@ non-Tate bases are supported.
     REMAINING: isLocalHom_stalkMap for yFrobHom (iso-route: the stalk
     map is an iso since components are isos — or direct units-reflect
     through the germ-naturality + the k/-k roundtrip); the VPreHom
-    bundle + the VObj-auto-iso; X := Y/φ^ℤ packaging. Non-critical parked:
+    bundle + the VObj-auto-iso; X := Y/φ^ℤ packaging.
+    ★★ D-iii-4e DONE 2026-07-28 (commit 3048f0582, axiom-clean):
+    yFrob_isLocalHom — the VALUATION ROUTE (20 lines, no iso/roundtrip
+    machinery!): units correspond exactly through yFrob_val_compat +
+    yVPreObj.val_supp (supp = maximalIdeal) + supp_comap; the
+    mem_maximalIdeal-sites need @-EXPLICIT IsLocalRing instances
+    ((yVPreObj).isLocalRing_stalk — TC can't find them across the
+    ringStalk/ringPresheaf.stalk carrier spellings).
+    **yFrobVPreHom k : VPreHom yVPreObj yVPreObj — THE FROBENIUS IS A
+    MORPHISM OF WEDHORN'S 𝒱^pre ON 𝒴** (toHom := yFrobHom k;
+    isLocalHom + val_compat proven). φ^ℤ acts by k ↦ yFrobVPreHom k.
+    REMAINING (D-iii tail): the k/-k composite-identity (the VPreHom
+    iso — VPreHom.ext reduces it to the PresheafedSpace-Hom roundtrip:
+    base = spaFrob_spaFrob-ext; c-components = the pv-equiv
+    left_inv/right_inv through the opens-roundtrip cast — sizeable
+    cast-algebra; NOTE the VObj-side needs only the yVObj-object
+    (done) and morphisms-as-VPreHom (done) — the ISO-form is optional
+    packaging for the φ-action-groupoid); X := Y/φ^ℤ (topological
+    layer complete in Curve.lean; the X-OBJECT needs quotient-descent
+    of the presheaf along the free wandering action — a genuinely new
+    development, board it when reached). Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
