@@ -2417,8 +2417,23 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   Bloc-images via resI_BIProd + BIProd_fst/snd), wLoc_mk'_monomial_le
   (monomial ≤ element via gaussTerm-sup), isRestricted_monomial_BI,
   evalBI_monomial (y·T^l ↦ φ(y)·b^l, stabilization), wIRPS_monomial/
-  _add_le/_finset_sum_le. ALL BRICKS NOW IN PLACE for (v-d) THE
-  ASSEMBLY exists_evalBI_approx_bloc: x = mk'(w, sPow k) with both
+  _add_le/_finset_sum_le. ★★ (v-d) DONE 2026-07-27 — exists_evalBI_approx_bloc PROVEN
+  (RobbaPresentation.lean, axiom-clean, compiled FIRST SHOT; the port
+  incident 6d6958bb1 → fixed 9d6c3f95b, lesson logged above PERF-1).
+  P3d IS COMPLETE: the Kedlaya first-approximation lift for case 1.
+  Statement: abstract contracting φ with the Bloc-image law hφb, eval
+  point b = BIProd-σ(teichPowGen zb m), w/k with both σ-wLoc ≤ 1, any
+  ε > 0 → a T-polynomial f with residual ≤ ε and wIRPS f ≤ K :=
+  σ₁^m(ρ₁^m)⁻¹. NEXT (P3e): the correction sequence + limit +
+  surjectivity: mirror exists_correction_sequence (Presentation:2131,
+  via the generic exists_chain + exists_BIProd_approx at the σ-radii —
+  note the K-rescaling: approximate to ε/(2K)-style per round so the
+  K-normed corrections telescope; W ≤ 1-normalization via p-power
+  scaling at the outer statement) + exists_evalBI_eq_of_correction
+  (mirror :2073 with exists_rps_series_limit_BI + wI_z_sub_evalBI_add_le
+  — both SHIPPED) ⇒ surjective-with-norm-control ⇒ (P4) kernel =
+  (T − C g) strictness/injectivity ⇒ (P5) the case-1 iso package.
+  The original (v-d)-plan sketch: x = mk'(w, sPow k) with both
   σ-wLoc ≤ 1; head/tail split at N (mk'_sPow_split + choose over
   dvd_sub_sum); f := Σ_{i≤N} ⟨monomial (single 0 j_i) (blocToBI-ρ
   Y_i), isRestricted_monomial_BI⟩ (RPS-subring sum); eval f =
