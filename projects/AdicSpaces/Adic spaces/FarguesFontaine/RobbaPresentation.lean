@@ -1324,6 +1324,26 @@ theorem twisted_formula_le {ρ₁ σ₁ ρ₂ V vc vc' : NNReal}
           rw [mul_pow]
           ring
 
+/-- **The numerator-zone comparison**: for `k ≤ i` the monomial's value at
+the inner radius is dominated by its value at the cut radius. -/
+theorem numerator_formula_le {ρ₁ σ₁ V vc : NNReal}
+    (hρ₁0 : 0 < ρ₁) (hσ₁0 : 0 < σ₁) (hV0 : 0 < V)
+    (hρσ : ρ₁ ≤ σ₁) {i k : ℕ} (hki : k ≤ i) :
+    ρ₁ ^ i * vc * (((ρ₁ * V) ^ k)⁻¹)
+      ≤ σ₁ ^ i * vc * (((σ₁ * V) ^ k)⁻¹) := by
+  have hρ₁V : (0 : NNReal) < (ρ₁ * V) ^ k :=
+    pow_pos (mul_pos hρ₁0 hV0) k
+  have hσ₁V : (0 : NNReal) < (σ₁ * V) ^ k :=
+    pow_pos (mul_pos hσ₁0 hV0) k
+  rw [mul_comm (ρ₁ ^ i) vc, mul_comm (σ₁ ^ i) vc, mul_assoc, mul_assoc]
+  refine mul_le_mul_right ?_ vc
+  rw [← div_eq_mul_inv, ← div_eq_mul_inv, div_le_div_iff₀ hρ₁V hσ₁V]
+  calc ρ₁ ^ i * (σ₁ * V) ^ k
+      = (ρ₁ ^ i * σ₁ ^ k) * V ^ k := by rw [mul_pow]; ring
+    _ ≤ (σ₁ ^ i * ρ₁ ^ k) * V ^ k :=
+        mul_le_mul_left (pow_mul_pow_le_of_le hρσ hki) _
+    _ = σ₁ ^ i * (ρ₁ * V) ^ k := by rw [mul_pow]; ring
+
 end FarguesFontaine
 
 end
