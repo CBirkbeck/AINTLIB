@@ -704,4 +704,56 @@ lemma segreImageOverlapToSecondChart_toProj
         (segrePairIndex m n a b)
   · exact Nat.zero_lt_one
 
+/-- The product-overlap localization model maps to the affine spectrum of the second chart. -/
+def segreProductOverlapToSecondChartSpec
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    Spec
+        (CommRingCat.of
+          (SegreProductChartOverlapRing R m n i a j b)) ⟶
+      Spec
+        (CommRingCat.of
+          (SegreProductChartRing R m n a b)) :=
+  Spec.map
+    (CommRingCat.ofHom
+      (segreProductSecondChartAlgHom R m n i a j b).toRingHom)
+
+/-- The product-overlap localization model maps to the second standard product chart. -/
+def segreProductChartOverlapToSecondChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    Spec
+        (CommRingCat.of
+          (SegreProductChartOverlapRing R m n i a j b)) ⟶
+      segreProductStandardChart R m n a b :=
+  segreProductOverlapToSecondChartSpec R m n i a j b ≫
+    (segreProductStandardChartIsoSpec R m n a b).inv
+
+/-- The second product-chart presentation of the overlap induces the canonical double-chart
+morphism to the Segre-image `Proj`. -/
+lemma segreProductChartOverlapToSecondChart_toImageProj
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductChartOverlapToSecondChart R m n i a j b ≫
+        segreProductStandardChartToImageProj R m n a b =
+      (segreProductOverlapIsoSegreImage R m n i a j b).hom ≫
+        segreImageOverlapToProj R m n i a j b := by
+  rw [segreProductStandardChartToImageProj_eq]
+  unfold segreProductChartOverlapToSecondChart
+  simp only [Category.assoc, Iso.inv_hom_id_assoc]
+  unfold segreProductOverlapToSecondChartSpec
+  rw [← segreProductOverlapIsoSegreImage_hom_toSecondChart_assoc]
+  rw [segreImageOverlapToSecondChart_toProj]
+
+/-- The two chartwise Segre maps agree on the explicit product-overlap localization model. -/
+lemma segreProductChartToImageProj_overlap_compatible
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductChartOverlapToChart R m n i a j b ≫
+        segreProductStandardChartToImageProj R m n i j =
+      segreProductChartOverlapToSecondChart R m n i a j b ≫
+        segreProductStandardChartToImageProj R m n a b := by
+  rw [segreProductChartOverlapToChart_toImageProj,
+    segreProductChartOverlapToSecondChart_toImageProj]
+
 end MvPolynomial
