@@ -6,6 +6,7 @@ Authors: AINTLIB AI workers
 import «Adic spaces».FarguesFontaine.UniformizerTwist
 import «Adic spaces».FarguesFontaine.YSpace
 import «Adic spaces».FarguesFontaine.ChartData
+import «Adic spaces».SpaRationalOpenComparison
 
 /-!
 # The Big-window covering of `Y` by twisted charts (ID3b)
@@ -382,6 +383,41 @@ theorem bigWindow_inter_succ_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
     simp only [pow_one] at hge hle
     rw [hteich] at hge hle
     exact ⟨hY, (KGE_iff hY hq hpk hab).mpr hge, (KLE_iff hY hq hpk hab).mpr hle⟩
+
+noncomputable local instance : DecidableEq (Ainf p F) := Classical.decEq _
+
+/-- **The `n`-th Big-window chart equivalence (nonnegative side)**: `Spa` of the
+chart presheaf value is in bijection with the trace of `bigWindow n` on
+`Spa (A_inf, A_inf)` (Wedhorn 8.2 over the Huber — non-Tate — base `A_inf`,
+composed with the window identification). -/
+noncomputable def spaChartEquivBigWindow (n : ℕ) (hp : 1 < p) :
+    ↥(Spa (presheafValue (chartData p F
+        (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1))
+      (ringPlus (presheafValue (chartData p F
+        (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1))))
+      ≃ ↥(bigWindow p F ϖ (n : ℤ) ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+  (spaPresheafValueEquivRationalOpen
+    (chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1)).trans
+    (Equiv.setCongr (by
+      rw [bigWindow_eq_rationalOpen_ofNat p F ϖ n hp]
+      rfl))
+
+
+/-- **The `-m`-th Big-window chart equivalence (negative side).** -/
+noncomputable def spaChartEquivBigWindowNeg (m : ℕ) (hp : 1 < p) :
+    ↥(Spa (presheafValue (chartData p F
+        (PseudoUniformizer.pPow F ϖ (p ^ m)
+          (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1 1 p 1))
+      (ringPlus (presheafValue (chartData p F
+        (PseudoUniformizer.pPow F ϖ (p ^ m)
+          (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1 1 p 1))))
+      ≃ ↥(bigWindow p F ϖ (-(m : ℤ)) ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+  (spaPresheafValueEquivRationalOpen
+    (chartData p F (PseudoUniformizer.pPow F ϖ (p ^ m)
+      (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1 1 p 1)).trans
+    (Equiv.setCongr (by
+      rw [bigWindow_eq_rationalOpen_neg p F ϖ m hp]
+      rfl))
 
 end FarguesFontaine
 

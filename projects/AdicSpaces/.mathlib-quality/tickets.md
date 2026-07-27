@@ -1060,23 +1060,22 @@ non-Tate bases are supported.
   (every valid A_inf-datum is p[ϖ]-adically manageable; would unlock the
   ambient route and Wedhorn Rem 8.27 verbatim). Decide at D-ii if gluing
   infrastructure proves heavier than the direct class proof.
-- **AUDIT FINDING (2026-07-27, blocking BOTH routes)**: the entire Spa-side
-  Wedhorn-8.2(2) layer is COMPLETE-TATE-GATED on the base:
-  `spaPresheafValueHomeomorphRationalOpen`/`spaPresheafValueEquivRationalOpen`
-  (SpaRationalOpenHomeomorph.lean) and
-  `spaPresheafValueRationalSubsetEquiv` (SpaRationalSubsetCorrespondence.lean)
-  all take `[IsTateRing A]` — false for A_inf. So even the point-set chart
-  identification `Spa(B_n) ≃ₜ bigWindow-trace` is not yet available over the
-  A_inf base. NEW WORK-PACKAGE [NT-1]: an A_inf-base version of the chart
-  homeomorphism for the BigWindow data. Scoping route: audit which
-  ingredients of the equiv/homeo chain genuinely use Tate-ness
-  (candidates: the open-map approximation `exists_A_level_open_presentation`,
-  compactness inputs from SpaCompactNoHArch, the valuation-extension
-  `valuation_extends_to_localization_of_rationalOpen` — the latter looks
-  base-generic) and re-derive them for the concrete `s = p·[ϖ']`-data using
-  the Iinf-adic structure (AinfHuber) + the ID2 machinery (the chart ring IS
-  B^I with known topology). Kedlaya-side: this is [Ked 8.7.x / KL 8.7]'s
-  identification of Y with lim Spa(B^I); the math is standard for adic Y.
+- **AUDIT REFINED (2026-07-27, second pass — good news)**: the point-set
+  BIJECTION `spaPresheafValueEquivRationalOpen` (SpaRationalOpenComparison)
+  is HUBER-BASE-GENERIC (signature: CommRing+TopologicalSpace+IsTopologicalRing
+  +PlusSubring+IsHuberRing only — NO IsTateRing, NO CompatiblePlusSubring) and
+  axiom-clean. It INSTANTIATES at (A_inf, ⊤) today: DONE 2026-07-27
+  `spaChartEquivBigWindow` / `spaChartEquivBigWindowNeg` (BigWindows.lean) —
+  `Spa(B_n, B_n⁺-canonical) ≃ bigWindow-trace ∩ Spa(A_inf, A_inf)`.
+  Tate-gated is ONLY the HOMEOMORPH-upgrade (forward-openness,
+  `spaPresheafValueEquivRationalOpen_isOpenMap`; continuity of the forward map
+  is generic comap-continuity) and the RationalSubset-CORRESPONDENCE file.
+  [NT-1] (reduced): the open-map property over the A_inf base for the
+  BigWindow data — OR side-step: build the glued Y-object's topology through
+  the bijections by construction. Plus-ring note: the equiv lands on the
+  CANONICAL `ringPlus (presheafValue …)`, not the transported BIPlusIn of
+  ID2e — reconcile the two plus-structures when the VObj-level gluing needs
+  it (they should agree by the §5-correction argument; ticket when reached).
 - Content: 𝒴 pre-adic structure + chart identifications respecting restrictions
   (Wedhorn Rem 8.27); then EITHER 𝒪_X(W) := 𝒪_Y(q⁻¹W)^{φ^ℤ} descent (with plus
   sheaf and stalk valuations) OR two-chart gluing along the Frobenius transitions
