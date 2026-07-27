@@ -15,7 +15,7 @@ shrink replays verbatim with the de-Tated S3 machinery and the general-Huber
 rational basis. See the board's YB-plan.
 -/
 
-open TopologicalRing ValuationSpectrum WittVector NNReal TopologicalSpace CategoryTheory TopCat
+open TopologicalRing ValuationSpectrum WittVector NNReal TopologicalSpace CategoryTheory TopCat AlgebraicGeometry
 
 set_option linter.overlappingInstances false
 
@@ -228,6 +228,111 @@ theorem maximalIdeal_stalk_Y
     @IsLocalRing.maximalIdeal _ _ (isLocalRing_stalk_Y p F ϖ v hvY)
       = (stalkValue v).supp :=
   maximalIdeal_stalk_eq_supp (stalkShrink_Y p F ϖ v hvY)
+
+/-- The `𝒴`-trace inside the `Spa`-subspace. -/
+def ySpaSet : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+  Subtype.val ⁻¹' Y p F ϖ
+
+/-- The `𝒴`-carrier as a topological space. -/
+def yTop : TopCat := TopCat.of ↥(ySpaSet p F ϖ)
+
+/-- The inclusion of the `𝒴`-carrier into `Spa (A_inf, A_inf)`. -/
+def yIncl : yTop p F ϖ ⟶ SpaTop (Ainf p F) :=
+  TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+
+/-- The inclusion is an open embedding (`𝒴` is open in `Spa`). -/
+theorem yIncl_isOpenEmbedding :
+    Topology.IsOpenEmbedding (yIncl p F ϖ) :=
+  (isOpen_Y p F ϖ).isOpenEmbedding_subtypeVal
+
+/-- **The ambient `Spa (A_inf, A_inf)` as a presheafed space** (general-Huber
+form of `spaPresheafedSpace`, available through the M8 package). -/
+def yAmbientPresheafedSpace : TopRingPresheafedSpace where
+  carrier := SpaTop (Ainf p F)
+  presheaf := structurePresheaf (Ainf p F)
+
+/-- **The `𝒴`-presheafed space**: the restriction of the ambient structure
+presheaf along the open inclusion. -/
+def yPresheafedSpace : TopRingPresheafedSpace :=
+  (yAmbientPresheafedSpace p F).restrict (yIncl_isOpenEmbedding p F ϖ)
+
+/-- The ambient space with its ring presheaf, as a `CommRingCat`-valued
+presheafed space (the stalk-comparison vehicle). -/
+def yAmbientRingSpace : AlgebraicGeometry.PresheafedSpace CommRingCat where
+  carrier := SpaTop (Ainf p F)
+  presheaf := (yAmbientPresheafedSpace p F).ringPresheaf
+
+/-- **The restricted ring stalks are the ambient ring stalks** (mathlib's
+`restrictStalkIso` at the ring-presheaf level; the two restricted ring
+presheaves agree by associativity of functor composition). -/
+noncomputable def yRingStalkIso (x : yTop p F ϖ) :
+    (yPresheafedSpace p F ϖ).ringStalk x
+      ≅ (yAmbientPresheafedSpace p F).ringStalk ((yIncl p F ϖ) x) :=
+  AlgebraicGeometry.PresheafedSpace.restrictStalkIso
+    (yAmbientRingSpace p F) (yIncl_isOpenEmbedding p F ϖ) x
+
+/-- The ambient `Spa`-point of a `𝒴`-carrier point (spelled as the
+inclusion image, so the stalk types line up definitionally). -/
+def ySpaPoint (x : yTop p F ϖ) :
+    ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+  show ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))
+    from (ConcreteCategory.hom (yIncl p F ϖ)) x
+
+/-- The `Y`-membership of the ambient point. -/
+theorem ySpaPoint_mem_Y (x : yTop p F ϖ) :
+    ((ySpaPoint p F ϖ x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F)) ∈ Y p F ϖ :=
+  (x : ↥(ySpaSet p F ϖ)).2
+
+/-- The stalk comparison as a ring equivalence. -/
+noncomputable def yRingStalkEquiv (x : yTop p F ϖ) :
+    ToType ((yPresheafedSpace p F ϖ).ringStalk x)
+      ≃+* ToType ((spaRingPresheaf (Ainf p F)).stalk (ySpaPoint p F ϖ x)) :=
+  (yRingStalkIso p F ϖ x).commRingCatIsoToRingEquiv
+
+/-- **The stalks of the `𝒴`-presheafed space are local** (transport of the
+`Y`-point Wedhorn 8.14 package along the restriction stalk iso). -/
+theorem isLocalRing_yStalk (x : yTop p F ϖ) :
+    IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk x)) := by
+  haveI : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
+      (ySpaPoint p F ϖ x))) :=
+    isLocalRing_stalk_Y p F ϖ (ySpaPoint p F ϖ x) (ySpaPoint_mem_Y p F ϖ x)
+  exact (yRingStalkEquiv p F ϖ x).symm.isLocalRing
+
+/-- Maximal ideals transport through a ring equivalence of local rings
+(instance-explicit form). -/
+theorem maximalIdeal_comap_ringEquiv {R S : Type*} [CommRing R] [CommRing S]
+    (instR : IsLocalRing R) (instS : IsLocalRing S) (e : R ≃+* S) :
+    @IsLocalRing.maximalIdeal R _ instR
+      = (@IsLocalRing.maximalIdeal S _ instS).comap (e : R →+* S) := by
+  refine Ideal.ext fun r => ?_
+  rw [@IsLocalRing.mem_maximalIdeal _ _ instR, Ideal.mem_comap,
+    @IsLocalRing.mem_maximalIdeal _ _ instS, mem_nonunits_iff,
+    mem_nonunits_iff, not_iff_not]
+  exact ⟨fun h => h.map (e : R →+* S), fun h => by
+    have := h.map (e.symm : S →+* R)
+    rwa [show (e.symm : S →+* R) ((e : R →+* S) r) = r from
+      e.symm_apply_apply r] at this⟩
+
+/-- **`𝒴` as an object of `𝒱^pre`** (Wedhorn Definition 8.5): the ambient
+structure presheaf restricted to the open subset `𝒴`, with the Wedhorn 8.14
+stalk package transported along the restriction stalk isomorphisms. -/
+noncomputable def yVPreObj : VPreObj where
+  toPresheafedSpace := yPresheafedSpace p F ϖ
+  isLocalRing_stalk := fun x => isLocalRing_yStalk p F ϖ x
+  val := fun x => comap ((yRingStalkEquiv p F ϖ x : _ →+* _))
+    (stalkValue (ySpaPoint p F ϖ x))
+  val_supp := fun x => by
+    haveI hSloc : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
+        (ySpaPoint p F ϖ x))) :=
+      isLocalRing_stalk_Y p F ϖ (ySpaPoint p F ϖ x) (ySpaPoint_mem_Y p F ϖ x)
+    rw [supp_comap]
+    rw [show (stalkValue (ySpaPoint p F ϖ x)).supp
+        = @IsLocalRing.maximalIdeal _ _ hSloc from
+      (maximalIdeal_stalk_Y p F ϖ (ySpaPoint p F ϖ x)
+        (ySpaPoint_mem_Y p F ϖ x)).symm]
+    exact (maximalIdeal_comap_ringEquiv (isLocalRing_yStalk p F ϖ x)
+      hSloc (yRingStalkEquiv p F ϖ x)).symm
 
 end FarguesFontaine
 
