@@ -2402,8 +2402,24 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   exists_monomial_lift_package (607abaed1 — the FULL per-monomial lift:
   zone-dispatched factorization + both outer-radius bounds),
   monomial_dvd_of_wLoc_le_one (the σ₁-Gauss bound ⇒ floor-div
-  divisibility; W = 1 normalized). REMAINING for (v): the head/tail
-  first-approximation assembly
+  divisibility; W = 1 normalized). (v-c1..c3) SHIPPED 2026-07-27
+  (1660b21b2, 4b8c1f01c, + wIRPS monomial/add/sum bounds):
+  resIHom_blocToBI (interval restriction carries Bloc-images to
+  Bloc-images via resI_BIProd + BIProd_fst/snd), wLoc_mk'_monomial_le
+  (monomial ≤ element via gaussTerm-sup), isRestricted_monomial_BI,
+  evalBI_monomial (y·T^l ↦ φ(y)·b^l, stabilization), wIRPS_monomial/
+  _add_le/_finset_sum_le. ALL BRICKS NOW IN PLACE for (v-d) THE
+  ASSEMBLY exists_evalBI_approx_bloc: x = mk'(w, sPow k) with both
+  σ-wLoc ≤ 1; head/tail split at N (mk'_sPow_split + choose over
+  dvd_sub_sum); f := Σ_{i≤N} ⟨monomial (single 0 j_i) (blocToBI-ρ
+  Y_i), isRestricted_monomial_BI⟩ (RPS-subring sum); eval f =
+  Σ φ(blocToBI Y_i)·b^{j_i} (evalBIHom = evalBI on subring-sums via
+  map_sum + evalBI_monomial) = Σ BIProd-σ(Y_i·g^{j_i}) (resIHom_
+  blocToBI + BIProd-mult) = BIProd-σ(head) (package hfact); residual
+  = BIProd-σ(tail-term), wI-σ ≤ max of two wLoc_mk'_tail_le-bounds
+  (σ-radii geometric in N); wIRPS f ≤ K := σ₁^m(ρ₁^m)⁻¹ via
+  wIRPS_finset_sum_le + wIRPS_monomial + the package bounds +
+  wLoc_mk'_monomial_le + the element bounds ≤ 1.
   (exists_evalBI_approx_bloc: finite T-polynomial lift of the head via
   mk'_sPow_split + per-monomial dispatch, tail small; NOTE the plan is
   APPROXIMATE-lift (residual ≤ ε), not exact — the correction machinery
