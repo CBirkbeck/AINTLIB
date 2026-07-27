@@ -1397,9 +1397,18 @@ non-Tate bases are supported.
     faithful supplier needs IsRingOfIntegralElements ((PD)⁺) — the
     plus-reconciliation question (was load-bearing already in NT-1) —
     AUDIT what supplies it before starting (c);
-    (S5) spaVObj: package (SpaTop B, structurePresheaf B) + S3/S4 +
-    structurePresheaf_isSheafOfTopologicalRings into a VObj — the FIRST
-    inhabitant of the VObj category.
+    (S5) DONE 2026-07-27: **spaVObj** — Spa of a sheafy complete Tate
+    pair as the FIRST inhabitant of the VObj category (spaPresheafedSpace,
+    spaVPreObj with 8.14-stalks + stalkValue + val_supp, spaVObj at
+    IsLimitSheaf, spaVObj_of_isSheafy). ★ THE STALK PACKAGE S1–S5 IS
+    COMPLETE (StructureSheafStalks.lean, all axiom-clean, generic over
+    complete Tate pairs with integrally-closed plus + HasLocLift). The FF
+    charts B_n satisfy every hypothesis (Tate ✓ ID2e, IRIE-plus =
+    the NT-1 plus-reconciliation instance presheafValuePlus_… if the chart
+    pair is presented as a presheafValue — CHECK at instantiation;
+    IsLimitSheaf from isSheafy_presheafChart via isSheafy_iff_isLimitSheaf)
+    — NEXT: instantiate spaVObj at the FF charts, then the Y-object
+    (architecture decision: ambient-vs-glue, see the M8 note above).
     Then Y := glue the ℤ-chain of chart VObjs (cocycle-free, adjacent
     circles only; transitions from BISub_twist + the ID2 comparisons + the
     D-ii-2 split fiber-product) — architecture note above stands. Original:
