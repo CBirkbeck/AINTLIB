@@ -51,6 +51,7 @@ import «Adic spaces».FarguesFontaine.UniformizerEquivariance
 import «Adic spaces».FarguesFontaine.ChartBIQ
 import «Adic spaces».FarguesFontaine.FrobeniusGauss
 import «Adic spaces».FarguesFontaine.YPresheaf
+import «Adic spaces».FarguesFontaine.IntervalSplitting
 import «Adic spaces».FarguesFontaine.BigWindows
 import «Adic spaces».FarguesFontaine.ChartSpa
 import «Adic spaces».FlatnessResults
