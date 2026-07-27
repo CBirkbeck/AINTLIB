@@ -1182,9 +1182,21 @@ non-Tate bases are supported.
     (root modulus, le_of_pow_le_pow); biPhiInv + dense-layer identity;
     biPhi/biPhiInv continuity; the round-trips by dense equalizer; and
     **biPhiEquiv : B^{[ρ₁,ρ₂]} ≃+* B^{[ρ₁^p,ρ₂^p]}** — the Frobenius
-    equivalence of interval rings, bicontinuous. REMAINING D-iii:
-    φ-compatibility with biResQ' (dense equalizer square), the
-    BIQ-reindexing wrapper (exponent-times-p), and X := Y/φ^ℤ via
+    equivalence of interval rings, bicontinuous. biPhiQ DONE 2026-07-27
+    (FrobeniusGauss.lean — the BIQ-level Frobenius hom in ABSTRACT-TARGET
+    form: biPhiQ (q₁ q₂) {σ} (hσ : vpiQ q^p = σ) : BIQ q₁ q₂ →+* B^{[σ₁,σ₂]}
+    with dense-layer identity; vpiQ_pow_p + mulQ_pos support. PERF NOTES
+    from this stretch, binding for the presheaf phase: (1) vpiQ is now
+    @[irreducible] (radius atoms; full library green with it); (2) the
+    composite-radius instance search times out when composite radii appear
+    in def HEADERS — state defs at ABSTRACT σ-radii with EQUATION-args
+    (hσ : expr = σ) and let consumers instantiate; (3) the .trans-packaged
+    equiv-form of biPhiQ ground on the BIQ-vs-BISub spelling — the
+    RingHom-comp + biCongr form with explicit-toFun-style shows is the
+    compiling pattern; the ISO-form of biPhiQ is deferred (round-trips at
+    the Q-level need the σ-abstract statement of biPhiInvQ — same recipe).
+    REMAINING D-iii: biPhiInvQ + Q-level round-trips (same recipe),
+    φ-biResQ' compatibility square at abstract radii, and X := Y/φ^ℤ via
     Curve.lean + descent. DEFERRED
     (profiler task): composite chartRingEquivBIQ-continuity (step-3 kernel
     grind) and hence windowResBIQ-continuity — needed by D-ii-2's topology

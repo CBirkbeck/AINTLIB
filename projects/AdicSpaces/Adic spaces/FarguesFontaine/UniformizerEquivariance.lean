@@ -381,8 +381,9 @@ theorem biRes_blocToBI {θ₁ θ₂ : ℝ}
       (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
       hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1).continuous z
 
-/-- The radius `|ϖ|^q` for a rational exponent `q`. -/
-noncomputable def vpiQ (q : ℚ) : NNReal :=
+/-- The radius `|ϖ|^q` for a rational exponent `q` (irreducible: the radius
+is an opaque atom for instance search — PERF). -/
+@[irreducible] noncomputable def vpiQ (q : ℚ) : NNReal :=
   perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (q : ℝ)
 
 theorem vpiQ_pos (q : ℚ) : 0 < vpiQ p F ϖ q := by

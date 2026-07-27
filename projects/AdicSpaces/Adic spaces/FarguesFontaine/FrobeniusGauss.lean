@@ -507,6 +507,57 @@ noncomputable def biPhiEquiv (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 
   map_add' x y := map_add (biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
     (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) x y
 
+/-- The `p`-th power of a rational radius is the radius at `p`-times the
+exponent. -/
+theorem vpiQ_pow_p (q : ℚ) :
+    vpiQ p F ϖ q ^ p = vpiQ p F ϖ ((p : ℚ) * q) := by
+  rw [vpiQ, vpiQ, ← NNReal.rpow_natCast (_ ^ (q : ℝ)) p, ← NNReal.rpow_mul]
+  congr 1
+  push_cast
+  ring
+
+theorem mulQ_pos {q : ℚ} (hq : 0 < q) : (0 : ℚ) < (p : ℚ) * q := by
+  have hp : (0 : ℚ) < p := by
+    exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
+  positivity
+
+/-- **Frobenius on the rational-exponent interval rings** (forward hom,
+abstract-target form): for target radii `σᵢ` EQUAL to `vpiQ(qᵢ)^p`, Frobenius
+maps `BIQ q₁ q₂` into `B^{[σ₁,σ₂]}`. The abstract `σ`-variables keep the
+instance keys atomic (PERF). -/
+noncomputable def biPhiQ (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂) :
+    ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+  (biCongr p F ϖ hσ₁ hσ₂
+      (hρ₁0' := hσ₁0) (hρ₁1' := hσ₁1) (hρ₂0' := hσ₂0) (hρ₂1' := hσ₂1)).toRingHom.comp
+    (biPhi p F ϖ
+      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)
+      (hσ₁ ▸ pow_pos (vpiQ_pos p F ϖ q₁) p)
+      (hσ₁ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₁)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))
+      (hσ₂ ▸ pow_pos (vpiQ_pos p F ϖ q₂) p)
+      (hσ₂ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₂)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p))))
+
+
+/-- `φ` on `BIQ` extends `frobBloc` on the dense layer (abstract-target
+form). -/
+theorem biPhiQ_blocToBI (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂)
+    (z : Bloc p F ϖ) :
+    biPhiQ p F ϖ q₁ q₂ h₁ h₂ hσ₁ hσ₂
+        (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+          (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z)
+      = blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 (frobBloc p F ϖ z) := by
+  show (biCongr p F ϖ hσ₁ hσ₂) (biPhi p F ϖ _ _ _ _
+    (blocToBI p F ϖ _ _ _ _ z)) = _
+  rw [biPhi_blocToBI, biCongr_blocToBI]
+
 end FarguesFontaine
 
 end
