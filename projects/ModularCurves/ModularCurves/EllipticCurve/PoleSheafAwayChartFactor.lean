@@ -169,6 +169,143 @@ theorem sectionAway_chartSpecMap_isIso
     (RingEquiv.toCommRingCatIso e).isIso_hom
   infer_instance
 
+private lemma chartAwayHomOfTriple_invUnit_eq_one
+    {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (P : Fin 3 → A)
+    (hP : (W.map (algebraMap R A)).toProjective.Equation P)
+    (i : Fin 3) (hi : IsUnit (P i)) (hone : P i = 1) :
+    chartAwayHomOfTriple W i P (↑hi.unit⁻¹) hi.mul_val_inv hP =
+      chartAwayHomOfTriple W i P 1 (by rw [hone, one_mul]) hP := by
+  exact chartAwayHomOfTriple_congr_of_smul W i P P 1
+    (↑hi.unit⁻¹) 1 (fun m => (one_mul (P m)).symm)
+    (by rw [hone, one_mul]) hi.mul_val_inv hP hP
+
+private lemma specMap_chartAwayHomOfTriple_invUnit_isIso_of_eq_one
+    {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (P : Fin 3 → A)
+    (hP : (W.map (algebraMap R A)).toProjective.Equation P)
+    (i : Fin 3) (hi : IsUnit (P i)) (hone : P i = 1)
+    (hfixed : IsIso (Spec.map (CommRingCat.ofHom
+      (chartAwayHomOfTriple W i P 1
+        (by rw [hone, one_mul]) hP).toRingHom))) :
+    IsIso (Spec.map (CommRingCat.ofHom
+      (chartAwayHomOfTriple W i P (↑hi.unit⁻¹)
+        hi.mul_val_inv hP).toRingHom)) := by
+  rw [chartAwayHomOfTriple_invUnit_eq_one W P hP i hi hone]
+  exact hfixed
+
+/-- For the canonical pole-coordinate triple on the exact section complement,
+the explicit-base chart morphism used by the projective comparison is an
+isomorphism. -/
+theorem sectionAway_chartSpecMapOfRingHom_isIso
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hHOne : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    (bOne : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz 1)))
+    (hbOne : bOne 0 = sectionPoleSheafPowerOneSection π z hz)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1)
+    (W : WeierstrassCurve Γ(S, (⊤ : S.Opens))) :
+    let V := sectionAway z hz
+    let A : Γ(S, (⊤ : S.Opens)) →+* Γ(C, V) :=
+      (C.presheaf.map
+        (homOfLE (le_top : V ≤ (⊤ : C.Opens))).op).hom.comp
+          π.appTop.hom
+    let X := overTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 2) V
+      (Scheme.Modules.overTrivializationOfRestrictIso
+        (sectionPoleSheafPower π z hz 2) V
+        (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+          z hz V (preimage_sectionAway z hz) 2)) x
+    let Y := overTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 3) V
+      (Scheme.Modules.overTrivializationOfRestrictIso
+        (sectionPoleSheafPower π z hz 3) V
+        (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+          z hz V (preimage_sectionAway z hz) 3)) y
+    let τ : Γ(C, V) →+*
+        Γ(V.toScheme, (⊤ : V.toScheme.Opens)) :=
+      V.topIso.inv.hom
+    let f := τ.comp A
+    ∀ hxy : (W.map A).toAffine.Equation X Y,
+      let hxy' := affineEquation_map_comp W A τ X Y hxy
+      let hP : (W.map f).toProjective.Equation
+          ![τ X, τ Y, 1] := by
+        rw [WeierstrassCurve.Projective.equation_some]
+        exact hxy'
+      let hZ : IsUnit ((![τ X, τ Y, 1] :
+          Fin 3 → Γ(V.toScheme, (⊤ : V.toScheme.Opens))) 2) := by
+        simp
+      IsIso (Spec.map (CommRingCat.ofHom
+        (chartAwayHomOfTripleOfRingHom W f ![τ X, τ Y, 1]
+          hP 2 hZ))) := by
+  dsimp only
+  intro hxy
+  letI : Algebra Γ(S, (⊤ : S.Opens))
+      Γ((sectionAway z hz).toScheme,
+        (⊤ : (sectionAway z hz).toScheme.Opens)) :=
+    ((sectionAway z hz).topIso.inv.hom.comp
+      ((C.presheaf.map
+        (homOfLE (le_top :
+          sectionAway z hz ≤ (⊤ : C.Opens))).op).hom.comp
+            π.appTop.hom)).toAlgebra
+  let P : Fin 3 → Γ((sectionAway z hz).toScheme,
+      (⊤ : (sectionAway z hz).toScheme.Opens)) :=
+    ![(sectionAway z hz).topIso.inv.hom
+        (overTrivializationCoefficient
+          (sectionPoleSheafPower π z hz 2) (sectionAway z hz)
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (sectionPoleSheafPower π z hz 2) (sectionAway z hz)
+            (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+              z hz (sectionAway z hz) (preimage_sectionAway z hz) 2)) x),
+      (sectionAway z hz).topIso.inv.hom
+        (overTrivializationCoefficient
+          (sectionPoleSheafPower π z hz 3) (sectionAway z hz)
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (sectionPoleSheafPower π z hz 3) (sectionAway z hz)
+            (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+              z hz (sectionAway z hz) (preimage_sectionAway z hz) 3)) y),
+      1]
+  have hP : (W.map (algebraMap Γ(S, (⊤ : S.Opens))
+      Γ((sectionAway z hz).toScheme,
+        (⊤ : (sectionAway z hz).toScheme.Opens)))).toProjective.Equation P := by
+    rw [WeierstrassCurve.Projective.equation_some]
+    rw [RingHom.algebraMap_toAlgebra]
+    exact affineEquation_map_comp W
+      ((C.presheaf.map
+        (homOfLE (le_top :
+          sectionAway z hz ≤ (⊤ : C.Opens))).op).hom.comp
+            π.appTop.hom)
+      (sectionAway z hz).topIso.inv.hom _ _ hxy
+  have hP2 : P 2 = 1 := by
+    simp [P]
+  let hZ : IsUnit (P 2) := by
+    simp [P]
+  have hfixed : IsIso (Spec.map (CommRingCat.ofHom
+      (chartAwayHomOfTriple W 2 P 1
+        (by rw [hP2, one_mul]) hP).toRingHom)) := by
+    simpa only [P] using
+      sectionAway_chartSpecMap_isIso
+        hsm z hz U hU r hspan hnzd hHOne bOne hbOne x hx y hy W hxy
+  have htransported :=
+    specMap_chartAwayHomOfTriple_invUnit_isIso_of_eq_one
+      W P hP 2 hZ hP2 hfixed
+  simpa only [chartAwayHomOfTripleOfRingHom,
+    RingHom.algebraMap_toAlgebra, P] using htransported
+
 end
 
 end ModularCurves
