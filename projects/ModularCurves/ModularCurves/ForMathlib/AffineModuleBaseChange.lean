@@ -1,3 +1,4 @@
+import ModularCurves.ForMathlib.AdjunctionUnitIsoTransport
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
@@ -1011,5 +1012,53 @@ theorem affinePullbackΓIso_naturality
       k ≫ (affineΓLiteralIso Y ((pullback g).obj N)).inv)
     (affinePullbackΓCoreIso_naturality g f)
   simpa only [Category.assoc] using h
+
+/-- On affine schemes, invertibility of the extension-of-scalars unit on
+global sections implies invertibility of the geometric pullback unit. -/
+theorem isIso_pullbackPushforward_unit_of_isAffine_of_isIso_extendScalars_unit
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+    (g : Y ⟶ X) (M : X.Modules) [M.IsQuasicoherent]
+    [IsIso ((ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+      (ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(M, (⊤ : X.Opens))))] :
+    IsIso ((pullbackPushforwardAdjunction g).unit.app M) := by
+  haveI hPullback : ((pullback g).obj M).IsQuasicoherent :=
+    isQuasicoherent_pullback_of_isAffine g M
+  haveI hPushforward :
+      ((pushforward g).obj ((pullback g).obj M)).IsQuasicoherent :=
+    isQuasicoherent_of_pushforward g ((pullback g).obj M)
+  letI hSource : ((𝟭 X.Modules).obj M).IsQuasicoherent := by
+    change M.IsQuasicoherent
+    infer_instance
+  letI hTarget :
+      ((pullback g ⋙ pushforward g).obj M).IsQuasicoherent := by
+    change ((pushforward g).obj ((pullback g).obj M)).IsQuasicoherent
+    exact hPushforward
+  haveI hAlgebraic :
+      IsIso ((ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+        ((affineΓFunctor X).obj M)) :=
+    NatTrans.isIso_app_of_iso
+      (ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit
+      (affineΓLiteralIso X M).symm
+  haveI hComposite :
+      IsIso ((affineΓFunctor X).map
+          ((pullbackPushforwardAdjunction g).unit.app M) ≫
+        (affinePushforwardΓIso g).hom.app ((pullback g).obj M)) := by
+    rw [← affinePullbackΓCoreIso_hom_comp_unit g M]
+    infer_instance
+  haveI hMapped :
+      IsIso ((affineΓFunctor X).map
+        ((pullbackPushforwardAdjunction g).unit.app M)) :=
+    @IsIso.of_isIso_comp_right _ _ _ _ _
+      ((affineΓFunctor X).map
+        ((pullbackPushforwardAdjunction g).unit.app M))
+      ((affinePushforwardΓIso g).hom.app ((pullback g).obj M))
+      (inferInstanceAs
+        (IsIso ((affinePushforwardΓIso g).hom.app ((pullback g).obj M))))
+      hComposite
+  apply isIso_of_isQuasicoherent_of_isIso_app_top
+  change IsIso (affineΓMap
+    ((pullbackPushforwardAdjunction g).unit.app M))
+  dsimp only [affineΓMap]
+  infer_instance
 
 end AlgebraicGeometry.Scheme.Modules
