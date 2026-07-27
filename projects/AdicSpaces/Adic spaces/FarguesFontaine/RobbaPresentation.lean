@@ -3258,6 +3258,79 @@ theorem kerSolElt_wI_decay (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂
   rw [max_self] at hmax
   exact hmax
 
+section KerTransport
+
+variable {σ₁ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
+/-- **The kernel-to-vanishing transport** (shared-top setting): if a
+restricted series evaluates to zero, the second components of its partial
+sums — which the contraction `φ` leaves untouched — tend to zero at the
+top radius. -/
+theorem tendsto_snd_partial_sums_of_evalBI_eq_zero
+    (hφsnd : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hb2 : b.2 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+    (U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hU : evalBI p F ϖ φ hφ hbmem hb U = 0) :
+    Filter.Tendsto (fun n => ∑ i ∈ Finset.range (n + 1),
+        ((coeffSeq (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) i
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ i)
+      Filter.atTop (nhds 0) := by
+  have h0 := tendsto_evalBI p F ϖ φ hφ hbmem hb U
+  rw [hU] at h0
+  have h2 : Filter.Tendsto (fun n => (∑ l ∈ Finset.range n,
+      evalBITerm p F ϖ φ b
+        (U : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l).2)
+      Filter.atTop (nhds (0 : hatK p F hρ₂0 hρ₂1)) := by
+    have hc := (continuous_snd.tendsto
+      (0 : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))).comp h0
+    exact hc
+  have hterm : ∀ n, (∑ l ∈ Finset.range n,
+      evalBITerm p F ϖ φ b
+        (U : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l).2
+      = ∑ l ∈ Finset.range n,
+        ((coeffSeq (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ l := by
+    intro n
+    refine (map_sum (AddMonoidHom.snd (hatK p F hσ₁0 hσ₁1)
+      (hatK p F hρ₂0 hρ₂1)) _ (Finset.range n)).trans ?_
+    refine Finset.sum_congr rfl fun l _ => ?_
+    show (evalBITerm p F ϖ φ b
+      (U : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l).2 = _
+    rw [evalBITerm, Prod.snd_mul, Prod.pow_snd, hφsnd, hb2]
+  have h3 := h2.congr hterm
+  exact h3.comp (Filter.tendsto_add_atTop_nat 1)
+
+end KerTransport
+
 end FarguesFontaine
 
 end
