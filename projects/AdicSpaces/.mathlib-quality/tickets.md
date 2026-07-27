@@ -1509,7 +1509,23 @@ non-Tate bases are supported.
     chartFracP^i · algebraMap [c^a·ϖ^{ib}] ∈ S ⇒ m integral over S with
     the monic X^a − m^a; (m4) head_K ∈ IntCl(S) (sum of m1-m3), tail_K
     wI-small ⇒ blocToBI-image of h ∈ topClosure(coe(IntCl(S-image)))
-    ⊆ canonical ✓ ChartDensePlus. Bricks: (r4a) DONE 2026-07-27
+    ⊆ canonical ✓ ChartDensePlus. r4b ZONE ANALYSIS COMPLETE 2026-07-27 (b=1, s = p[ϖ], h = mk'(x, s^k),
+    monomials p^i[c_i], per-monomial ball bounds from the sup-def:
+    ρ₁-bound |c_i| ≤ |ϖ|^{2k−i}, ρ₂-bound |c_i|^a ≤ |ϖ|^{k(a+1)−i} via
+    hexact2 ρ₂^a = |ϖ|): THREE ZONES, all closing EXACTLY —
+    (M1'') i ≤ k: c_i = ϖ^k·c' (ρ₁-bound, 2k−i ≥ k) ⇒ mk'(p^i[c_i], s^k)
+    = [c']·p^{−(k−i)} = the m1-form ∈ S;
+    (M2'') k < i ≤ k(a+1): the a-th power collapses UNIFORMLY:
+    (mk'(p^i[c_i], s^k))^a = chartFracP^{i−k}·[c''] with
+    c'' := c_i^a/ϖ^{k(a+1)−i} (the ρ₂-bound is EXACTLY the divisibility;
+    b=1 makes every exponent cancel: [ϖ]^{-1} = fracP·p^{-a} budget) ⇒
+    integral over S with monic X^a − (S-element);
+    (M3'') i > k(a+1): direct ∈ S — mk' = fracP^k·p^{i−k(a+1)}[c_i]-image;
+    TAIL: both wLoc-norms of the ≥K-tail decay (ρ₁: |ϖ|^{i−2k};
+    ρ₂: ρ₂^{i−k}|ϖ|^{−k}, ρ₂ < 1) ⇒ head-in-IntCl(S) + tail → 0 ⇒
+    closure ⇒ ChartDensePlus at b=1. Implement (M1'')-(M3'') as
+    mk'-fraction lemmas, then the init/tail head-sum, then the limit.
+    Bricks: (r4a) DONE 2026-07-27
     (ChartVObj.lean: exists_eq_toOF_pow_mul + teich_div_p_pow_mem_
     chartSubring (m1) + p_div_teich_pow_a_mem_chartSubring (m3);
     m2 = A_inf-images are generators, no lemma needed; axiom-clean); (r4b) the head/tail split of
