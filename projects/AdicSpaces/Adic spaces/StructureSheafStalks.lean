@@ -8,6 +8,7 @@ import «Adic spaces».PresheafFunctoriality
 import «Adic spaces».RationalBasis
 import «Adic spaces».StructurePresheafLimit
 import «Adic spaces».StructurePresheafBundled
+import «Adic spaces».HuberLocLift
 import «Adic spaces».StructureSheaf
 import Mathlib.Algebra.Category.Ring.FilteredColimits
 
@@ -94,6 +95,279 @@ theorem comap_restrictionMapHom_pointValue [HasLocLiftPowerBounded A]
     _ = comap D'.canonicalMap (pointValue D' hv') := by rw [hcomp]
     _ = v := comap_pointValue D' hv'
 
+
+/-! ### Valuation-theoretic generic bricks and plus functoriality (S4-core) -/
+
+section Generic
+
+variable {B : Type*} [CommRing B]
+
+/-- **(B1)** The `≤ 1`-locus of a continuous valuation is closed (the
+ultrametric translate argument: around a point of value `> 1`, the ball
+`a + {v < v a}` stays in the complement). -/
+theorem isClosed_setOf_vle_one [TopologicalSpace B] [IsTopologicalRing B]
+    {w : Spv B} (hw : w.IsContinuous) :
+    IsClosed {y : B | w.vle y 1} := by
+  letI : ValuativeRel B := w.toValuativeRel
+  have hbridge : ∀ x y : B, w.vle x y ↔
+      ValuativeRel.valuation B x ≤ ValuativeRel.valuation B y := fun x y =>
+    Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation B) x y
+  rw [← isOpen_compl_iff]
+  rw [isOpen_iff_mem_nhds]
+  intro a ha
+  have hlt : ValuativeRel.valuation B 1 < ValuativeRel.valuation B a :=
+    lt_of_not_ge (fun hle => ha ((hbridge a 1).mpr hle))
+  have hball : IsOpen {h : B | ValuativeRel.valuation B h
+      < ValuativeRel.valuation B a} := hw _
+  have hmem : (0 : B) ∈ {h : B | ValuativeRel.valuation B h
+      < ValuativeRel.valuation B a} := by
+    simp only [Set.mem_setOf_eq, map_zero]
+    exact lt_of_le_of_lt zero_le' hlt
+  have htrans : (fun h : B => a + h) '' {h : B | ValuativeRel.valuation B h
+      < ValuativeRel.valuation B a} ∈ nhds a := by
+    have hopen : IsOpen ((fun h : B => a + h) '' {h : B |
+        ValuativeRel.valuation B h < ValuativeRel.valuation B a}) := by
+      have := (Homeomorph.addLeft a).isOpenMap _ hball
+      simpa using this
+    refine hopen.mem_nhds ⟨0, hmem, by simp⟩
+  refine Filter.mem_of_superset htrans ?_
+  rintro y ⟨h, hh, rfl⟩
+  simp only [Set.mem_compl_iff, Set.mem_setOf_eq]
+  intro hcon
+  have hval : ValuativeRel.valuation B (a + h) = ValuativeRel.valuation B a :=
+    Valuation.map_add_eq_of_lt_left _ hh
+  exact absurd (le_trans (le_of_eq hval.symm) ((hbridge _ 1).mp hcon))
+    (not_le_of_gt hlt)
+
+/-- **(B2)** An element integral over a `≤ 1`-bounded subring is `≤ 1`
+(the valuation bound on integral extensions). -/
+theorem vle_one_of_isIntegral {w : Spv B} {S : Subring B}
+    (hS : ∀ y ∈ S, w.vle y 1) {x : B}
+    (hx : letI : Algebra ↥S B := S.subtype.toAlgebra; IsIntegral ↥S x) :
+    w.vle x 1 := by
+  letI : Algebra ↥S B := S.subtype.toAlgebra
+  letI : ValuativeRel B := w.toValuativeRel
+  have hbridge : ∀ x y : B, w.vle x y ↔
+      ValuativeRel.valuation B x ≤ ValuativeRel.valuation B y := fun x y =>
+    Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation B) x y
+  set v := ValuativeRel.valuation B with hv
+  by_contra hgt
+  have h1 : (1 : _) < v x := by
+    have := lt_of_not_ge (fun hle => hgt ((hbridge x 1).mpr hle))
+    rwa [map_one] at this
+  obtain ⟨p, hmonic, heval⟩ := hx
+  set n := p.natDegree with hn
+  rcases Nat.eq_zero_or_pos n with h0 | hn0
+  · have hp1 : p = 1 :=
+      Polynomial.eq_one_of_monic_natDegree_zero hmonic h0
+    rw [hp1] at heval
+    simp only [Polynomial.eval₂_one] at heval
+    refine hgt ((hbridge x 1).mpr ?_)
+    have hx0 : x = 0 := by
+      rw [← mul_one x, show (1 : B) = 0 from heval, mul_zero]
+    rw [hx0, map_zero]
+    exact zero_le'
+  have hexp : ∑ i ∈ Finset.range (n + 1), S.subtype (p.coeff i) * x ^ i
+      = 0 := by
+    rw [← Polynomial.eval₂_eq_sum_range]
+    exact heval
+  rw [Finset.sum_range_succ] at hexp
+  have hcn : S.subtype (p.coeff n) = 1 := by
+    rw [show p.coeff n = 1 from hmonic.coeff_natDegree]
+    exact map_one _
+  rw [hcn, one_mul] at hexp
+  have hxn : x ^ n
+      = -∑ i ∈ Finset.range n, S.subtype (p.coeff i) * x ^ i :=
+    eq_neg_of_add_eq_zero_left ((add_comm _ _).trans hexp)
+  have hbound : v (x ^ n) ≤ v x ^ (n - 1) := by
+    rw [hxn, Valuation.map_neg]
+    refine Valuation.map_sum_le v ?_
+    intro i hi
+    rw [Valuation.map_mul, Valuation.map_pow]
+    have hci : v (S.subtype (p.coeff i)) ≤ 1 := by
+      have hm := hS (S.subtype (p.coeff i)) (SetLike.coe_mem _)
+      have := (hbridge _ 1).mp hm
+      rwa [map_one] at this
+    have hpow : v x ^ i ≤ v x ^ (n - 1) :=
+      pow_le_pow_right₀ h1.le (by
+        have := Finset.mem_range.mp hi
+        omega)
+    calc v (S.subtype (p.coeff i)) * v x ^ i
+        ≤ 1 * v x ^ (n - 1) := mul_le_mul' hci hpow
+      _ = v x ^ (n - 1) := one_mul _
+  rw [Valuation.map_pow] at hbound
+  have hstrict : v x ^ (n - 1) < v x ^ n :=
+    pow_lt_pow_right₀ h1 (by omega)
+  exact absurd hbound (not_le_of_gt hstrict)
+
+/-- Reflexivity of `vle`. -/
+theorem vle_refl {w : Spv B} (a : B) : w.vle a a :=
+  (w.vle_total a a).elim id id
+
+/-- `vle 0 1`. -/
+theorem vle_zero_one {w : Spv B} : w.vle (0 : B) 1 := by
+  letI : ValuativeRel B := w.toValuativeRel
+  have hbridge := fun x y : B =>
+    Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation B) x y
+  refine (hbridge 0 1).mpr ?_
+  rw [map_zero]
+  exact zero_le'
+
+/-- The `≤ 1`-elements are multiplicatively stable. -/
+theorem vle_one_mul {w : Spv B} {a b : B} (ha : w.vle a 1) (hb : w.vle b 1) :
+    w.vle (a * b) 1 := by
+  have h1 := w.mul_vle_mul_left ha b
+  rw [one_mul] at h1
+  exact w.vle_trans h1 hb
+
+/-- The `≤ 1`-elements are stable under negation. -/
+theorem vle_one_neg {w : Spv B} {a : B} (ha : w.vle a 1) : w.vle (-a) 1 := by
+  letI : ValuativeRel B := w.toValuativeRel
+  have hbridge := fun x y : B =>
+    Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation B) x y
+  have hneg : w.vle (-a) a := by
+    refine (hbridge (-a) a).mpr ?_
+    rw [Valuation.map_neg]
+  exact w.vle_trans hneg ha
+
+end Generic
+
+section PlusFunctoriality
+
+variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [PlusSubring A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+    CompleteSpace A]
+  [IsRingOfIntegralElements (A⁺ : Subring A)] [HasLocLiftPowerBounded A]
+
+/-- **Plus functoriality of the restriction maps** (the `σ(B⁺) ⊆ B'⁺` half of
+Wedhorn Prop 8.2(3)): the canonical plus subring of a completed rational
+localization maps into that of any smaller one. Proof: by the Spa
+characterization of the plus ring (`mem_plus_of_forall_spa_vle_one_huber`),
+reduce to `≤ 1`-bounds of the pulled-back valuation on the generators, then
+climb the closure tower with `isClosed_setOf_vle_one` and
+`vle_one_of_isIntegral`. -/
+theorem aplus_le_comap_restrictionMapHom (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
+    ((presheafValue D)⁺ : Subring (presheafValue D))
+      ≤ ((presheafValue D')⁺).comap (restrictionMapHom D D' h) := by
+  intro x hx
+  show restrictionMapHom D D' h x ∈ ((presheafValue D')⁺ : Subring _)
+  refine mem_plus_of_forall_spa_vle_one_huber D' _ (fun w'' hw'' => ?_)
+  have hwcont : (comap (restrictionMapHom D D' h) w'').IsContinuous :=
+    comap_isContinuous (restrictionMapHom_continuous D D' h)
+      ((mem_spa_iff _).mp hw'').1
+  have hred : (comap (restrictionMapHom D D' h) w'').vle x 1 →
+      w''.vle (restrictionMapHom D D' h x) 1 := by
+    intro hh
+    have h1 : w''.vle (restrictionMapHom D D' h x)
+        (restrictionMapHom D D' h 1) := hh
+    rwa [map_one] at h1
+  refine hred ?_
+  -- the base point of `w''`, inside both rationals
+  have hv''D' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
+  have hv''D : comap D'.canonicalMap w'' ∈ rationalOpen D.T D.s :=
+    h hv''D'.1
+  -- generator bounds at the localization level
+  have hgen : ∀ y ∈ D.locPlusSubring,
+      (comap D.coeRingHom (comap (restrictionMapHom D D' h) w'')).vle y 1 := by
+    intro y hy
+    induction hy using Subring.closure_induction with
+    | mem z hz =>
+      rcases hz with ⟨a, ha, rfl⟩ | ⟨t, rfl⟩
+      · -- an `A⁺`-image
+        have h2 : w''.vle (restrictionMapHom D D' h
+            (D.coeRingHom (algebraMap A (Localization.Away D.s) a)))
+            (restrictionMapHom D D' h (D.coeRingHom 1)) := by
+          rw [map_one, map_one]
+          rw [show D.coeRingHom (algebraMap A (Localization.Away D.s) a)
+              = D.canonicalMap a from rfl,
+            restrictionMapHom_canonicalMap_generic D D' h a]
+          exact hw''.2 _ (D'.canonicalMap_Aplus_le_completedPlusSubring a ha)
+        exact h2
+      · -- a `t/s`-generator: the multiplicative cancel against `ρ'(D.s)`
+        refine (show w''.vle (restrictionMapHom D D' h
+            (D.coeRingHom (divByS (t : A) D.s)))
+            (restrictionMapHom D D' h (D.coeRingHom 1)) → _ from fun hh => hh) ?_
+        rw [map_one, map_one]
+        have hs0 : ¬ w''.vle (D'.canonicalMap D.s) 0 := by
+          intro hcon
+          refine hv''D.2.2 ?_
+          show w''.vle (D'.canonicalMap D.s) (D'.canonicalMap 0)
+          rw [map_zero]
+          exact hcon
+        have hkey : restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
+            * D'.canonicalMap D.s = D'.canonicalMap (t : A) := by
+          calc restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
+              * D'.canonicalMap D.s
+              = restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
+                * restrictionMapHom D D' h (D.canonicalMap D.s) := by
+                rw [restrictionMapHom_canonicalMap_generic D D' h D.s]
+            _ = restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s)
+                * D.canonicalMap D.s) := (map_mul _ _ _).symm
+            _ = restrictionMapHom D D' h (D.canonicalMap (t : A)) := by
+                congr 1
+                show D.coeRingHom (divByS (t : A) D.s)
+                    * D.coeRingHom (algebraMap A (Localization.Away D.s) D.s)
+                  = D.coeRingHom (algebraMap A (Localization.Away D.s) (t : A))
+                rw [← map_mul, mul_comm, algebraMap_s_mul_divByS D (t : A)]
+            _ = D'.canonicalMap (t : A) :=
+                restrictionMapHom_canonicalMap_generic D D' h (t : A)
+        have hvt : w''.vle (D'.canonicalMap (t : A)) (D'.canonicalMap D.s) :=
+          hv''D.2.1 (t : A) t.2
+        have hprod : w''.vle (restrictionMapHom D D' h
+            (D.coeRingHom (divByS (t : A) D.s)) * D'.canonicalMap D.s)
+            (1 * D'.canonicalMap D.s) := by
+          rw [hkey, one_mul]
+          exact hvt
+        exact w''.vle_mul_cancel hs0 hprod
+    | one => exact vle_refl 1
+    | zero => exact vle_zero_one
+    | mul a b _ _ iha ihb => exact vle_one_mul iha ihb
+    | add a b _ _ iha ihb => exact (comap _ _).vle_add iha ihb
+    | neg a _ iha => exact vle_one_neg iha
+  -- integral closure at the localization
+  have hIntCl : ∀ z ∈ (integralClosure ↥(D.locPlusSubring)
+      (Localization.Away D.s)).toSubring,
+      (comap D.coeRingHom (comap (restrictionMapHom D D' h) w'')).vle z 1 := by
+    intro z hz
+    rw [Subalgebra.mem_toSubring] at hz
+    exact vle_one_of_isIntegral hgen hz
+  -- the mapped core, then the topological closure
+  have hbase : ∀ y ∈ D.completedPlusSubringBase,
+      (comap (restrictionMapHom D D' h) w'').vle y 1 := by
+    intro y hy
+    have hsub : (((integralClosure ↥(D.locPlusSubring)
+        (Localization.Away D.s)).toSubring.map D.coeRingHom)
+          : Set (presheafValue D)) ⊆
+        {y | (comap (restrictionMapHom D D' h) w'').vle y 1} := by
+      rintro _ ⟨z, hz, rfl⟩
+      have h1 := hIntCl z hz
+      show (comap (restrictionMapHom D D' h) w'').vle (D.coeRingHom z) 1
+      have h2 : (comap (restrictionMapHom D D' h) w'').vle (D.coeRingHom z)
+          (D.coeRingHom 1) := h1
+      rwa [map_one] at h2
+    exact closure_minimal hsub (isClosed_setOf_vle_one hwcont) hy
+  -- the integral closure at the completion
+  refine vle_one_of_isIntegral hbase ?_
+  have hx' : x ∈ (integralClosure ↥(D.completedPlusSubringBase)
+      (presheafValue D)).toSubring := hx
+  rw [Subalgebra.mem_toSubring] at hx'
+  exact hx'
+
+/-- Spa-pullback of restriction maps (the point-set half of Wedhorn 8.2(3)):
+`comap` along a restriction map sends `Spa` of the smaller value into `Spa` of
+the larger. -/
+theorem comap_restrictionMapHom_mem_spa (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    {w : Spv (presheafValue D')}
+    (hw : w ∈ Spa (presheafValue D') (presheafValue D')⁺) :
+    comap (restrictionMapHom D D' h) w
+      ∈ Spa (presheafValue D) (presheafValue D)⁺ :=
+  comap_mem_spa (restrictionMapHom_continuous D D' h)
+    (aplus_le_comap_restrictionMapHom D D' h) hw
+
+end PlusFunctoriality
 
 /-! ### The point valuation on the sections over an arbitrary open (S3a)
 
