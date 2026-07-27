@@ -66,6 +66,8 @@ import «Adic spaces».FarguesFontaine.YStalks
 import «Adic spaces».FarguesFontaine.YSheaf
 import «Adic spaces».FarguesFontaine.FrobeniusSpa
 import «Adic spaces».FarguesFontaine.FrobeniusLimit
+import «Adic spaces».FarguesFontaine.FrobeniusValuation
+import «Adic spaces».FarguesFontaine.CurveObject
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
