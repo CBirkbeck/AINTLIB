@@ -30,6 +30,19 @@ noncomputable section
 
 namespace ModularCurves
 
+-- v4.33 bump: mathlib's priority-900 `IsStableUnderBaseChange.respectsIso` is no longer
+-- picked up for these two properties; supply them locally.
+private instance : MorphismProperty.RespectsIso @IsFinite :=
+  MorphismProperty.IsStableUnderBaseChange.respectsIso
+private instance : MorphismProperty.RespectsIso @Flat :=
+  MorphismProperty.IsStableUnderBaseChange.respectsIso
+private instance {A B : Scheme.{u}} (h : A ⟶ B) :
+    MorphismProperty.IsStableUnderBaseChangeAlong (@IsFinite) h :=
+  ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
+private instance {A B : Scheme.{u}} (h : A ⟶ B) :
+    MorphismProperty.IsStableUnderBaseChangeAlong (@Flat) h :=
+  ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
+
 variable {X Y S T : Scheme.{u}}
 
 /-- Rebuild of mathlib's private `IsAffine.finrank`: the rank of `f : X ⟶ S` at `s`,
