@@ -1,1 +1,1 @@
-FOCUS: W10 (TailC0 ring) — CommRing/NormedCommRing/instances + single laws in WP/Tail.lean
+FOCUS: W11 (Tail III Φ-embedding) — tailIdxEquivFinsupp + tailC0ToMvPowerSeries; note W11 depends R1 (isReduced MvPowerSeries) — R1 may need doing first

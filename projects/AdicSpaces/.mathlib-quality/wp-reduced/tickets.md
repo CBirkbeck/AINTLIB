@@ -219,7 +219,31 @@ propext/Classical.choice/Quot.sound) before marking done.
   monoid-ideal argument (tail-content absorbs).  Sources: [WP] 1014–1034.
 
 ### [W10] Tail.lean II — the TailC0 ring
-- Status: open | File: WP/Tail.lean | Depends: W1, W2 | Parallel: yes
+- Status: done | File: WP/Tail.lean | Depends: W1, W2 | Parallel: yes
+- Progress: DONE 2026-07-28.  Architecture: (i) NEW `Finset.HasAntidiagonal
+  (TailIdx N)` instance (attach+map from the ambient Finsupp antidiagonal — both
+  components of a splitting of a tail index are automatically tail) + a local
+  `sum_antidiagonal_swap` via `Finset.sum_equiv (Equiv.prodComm)`; (ii)
+  AddCommGroup via `inferInstanceAs (… ↥(addSubgroup N P))`; (iii) One/Mul as
+  standalone instances with `one_val`/`mul_val` rfl-lemmas; c₀-closure of the
+  twisted convolution by squeeze against
+  `MvPowerSeries.tendsto_sup'_antidiagonal_cofinite` (vendored) +
+  `tendsto_mul_cofinite_nhds_zero` (mathlib), with the e=0/e>0 case split for
+  `‖ρ^e‖ ≤ 1` (NO NormOneClass needed: `norm_pow_le'` at e>0, `pow_zero` at 0);
+  (iv) mul_assoc mirrors mathlib MvPowerSeries: sum_mul/mul_sum + `sum_sigma'` +
+  `sum_nbij'` with hand legs; cocycle handled by a `key` lemma
+  ρ^a((ρ^b(uv))s) = ρ^c(u(ρ^d(vs))) given a+b=c+d (`rw pow_add; ring`) + omega
+  on 4 subadditivity facts; (v) CommRing via `letI G := inferInstance; { G with … }`
+  (the `{ inferInstanceAs … with }` and `where __ :=` forms both FAIL with
+  universe-mvar errors — letI is the working idiom); (vi) norm = ⨆ via
+  `AddGroupNorm.toNormedAddCommGroup` (lpSpace pattern), NormedCommRing by
+  two-parent `{ _, _ with norm_mul_le }`; (vii) CompleteSpace = W2
+  coefficientwise-Cauchy port (no weights).  GOTCHAS: type-ascribe the
+  mem_antidiagonal.mp haves in nbij legs (unreduced Sigma projections otherwise
+  poison omega/rw); `rw [← hpt]` on τ.1 breaks motive (τ in types) — rewrite
+  `← Finsupp.add_apply, hpt` instead; beta-`show` before if-rewrites under dist.
+  Axioms clean (instCommRing/instNormedCommRing/instCompleteSpace/
+  single_mul_single/ofHead/toHead).
 - Decls: TailC0 `CommRing`, `NormedCommRing`, `IsUltrametricDist`, `CompleteSpace`,
   `NormOneClass`, `single` (+`coeff_single`), `single_mul_single`,
   `norm_eq_iSup_coeff`, `ofHead/toHead` (+laws).
