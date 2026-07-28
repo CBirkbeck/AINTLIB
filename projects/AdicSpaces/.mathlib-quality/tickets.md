@@ -2967,11 +2967,15 @@ theorem ringStalkMap_corestrictHom {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶
   `xStalkEquiv x`, not in the term), so the aux lemma abstracts the comparison as `(φ, hφ)`
   — a hom plus its germ formula — and `subst`s the *variable* `y₀` instead.
 
-### [P5-5b] The quotient leg morphism — FREE from P5-A3
-- **Status**: open | **Depends on**: P5-5a
-- `VPreHom.corestrict (piYVPreHom.comp (VPreHom.ofRestrictOpen V)) (xImage V) hrange`
-  is exactly `VPreHom (yVPreObj.restrictOpen V) (xVPreObj.restrictOpen (xImage V))`.
-  Range condition: `π '' V = xImage V` by definition of `xImage`.
+### [P5-5b] The quotient leg morphism — DONE 2026-07-28 (free from P5-A3)
+- **Status**: DONE, axiom-clean, full gate green
+- `ValuationSpectrum.VPreHom.comp` (+ `val_compat_comp`) landed in `VRestrict.lean`
+  (it did not exist!). `isLocalHom` again via `isLocalHom_of_val_comap`, so composition
+  never has to compose local homs.
+- `FarguesFontaine.yRestrictToCurve`, `range_yRestrictToCurve`, `quotientLegVPreHom :
+  VPreHom ((yVPreObj).restrictOpen V) ((xVPreObj).restrictOpen (xImage V))` in
+  `CurveVMorphism.lean`. NO wandering hypothesis is needed for the MORPHISM — wandering
+  only enters when asking for it to be an ISO (P5-5c).
 
 ### [P5-5c] The section comparison is an iso **with continuous inverse**
 - **Status**: open | **Depends on**: P5-5b | **THE analytic core of P5-5**

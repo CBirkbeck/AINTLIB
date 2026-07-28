@@ -482,6 +482,34 @@ inclusion stalk maps, and locality is then read off the valuation. -/
 
 section CorestrictV
 
+section Comp
+
+variable {X Y Z : VPreObj.{u}} (f : VPreHom X Y) (g : VPreHom Y Z)
+
+/-- The valuation compatibility of a composite. -/
+theorem val_compat_comp (x : ↥(X.toTopCat)) :
+    Z.val (ConcreteCategory.hom (f.toHom ≫ g.toHom).base x)
+      = comap (ringStalkMap (f.toHom ≫ g.toHom) x).hom' (X.val x) := by
+  have h1 := g.val_compat (ConcreteCategory.hom f.toHom.base x)
+  have h2 := f.val_compat x
+  rw [h2] at h1
+  rw [ringStalkMap_comp f.toHom g.toHom x]
+  refine h1.trans ?_
+  exact (congr_fun (comap_comp (ringStalkMap g.toHom
+    (ConcreteCategory.hom f.toHom.base x)).hom'
+      (ringStalkMap f.toHom x).hom') (X.val x)).symm
+
+/-- **Composition of `𝒱^pre`-morphisms.** -/
+noncomputable def VPreHom.comp : VPreHom X Z where
+  toHom := f.toHom ≫ g.toHom
+  isLocalHom_stalkMap := fun x =>
+    isLocalHom_of_val_comap (Z.isLocalRing_stalk _) (X.isLocalRing_stalk x)
+      _ _ _ (val_compat_comp f g x) (Z.val_supp _) (X.val_supp x)
+  val_compat := fun x => val_compat_comp f g x
+
+end Comp
+
+
 /-- The inclusion's stalk map is surjective — it is the inverse of the
 restriction stalk comparison. -/
 theorem ringStalkMap_ofRestrict_surjective {X : VPreObj.{u}}

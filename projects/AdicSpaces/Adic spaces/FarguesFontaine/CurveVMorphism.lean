@@ -304,6 +304,36 @@ noncomputable def piYVPreHom :
       ((xVPreObj p F ϖ).val_supp _) ((yVPreObj p F ϖ).val_supp y)
   val_compat := fun y => piY_val_compat p F ϖ y
 
+
+/-! ### The quotient leg (P5-5b)
+
+`π` restricted to an open `V` of `𝒴` lands in the open image `xImage V`, so
+`VPreHom.corestrict` turns it into a `𝒱^pre`-morphism `𝒴|_V ⟶ X|_{π V}`.
+No wandering hypothesis is needed here — that only enters when one asks for
+the morphism to be an isomorphism. -/
+
+/-- The projection restricted to an open of `𝒴`. -/
+noncomputable def yRestrictToCurve (V : Opens ↥(yTop p F ϖ)) :
+    ValuationSpectrum.VPreHom ((yVPreObj p F ϖ).restrictOpen V)
+      (xVPreObj p F ϖ) :=
+  (ValuationSpectrum.VPreHom.ofRestrictOpen
+    (X := yVPreObj p F ϖ) V).comp (piYVPreHom p F ϖ)
+
+/-- The restricted projection lands in the open image. -/
+theorem range_yRestrictToCurve (V : Opens ↥(yTop p F ϖ)) :
+    Set.range (ConcreteCategory.hom (yRestrictToCurve p F ϖ V).toHom.base)
+      ⊆ ((xImage p F ϖ V : Opens (Curve p F ϖ)) : Set (Curve p F ϖ)) := by
+  rintro _ ⟨v, rfl⟩
+  exact ⟨v.1, v.2, rfl⟩
+
+/-- **The quotient leg** (P5-5b): `𝒴|_V ⟶ X|_{π V}` as a morphism of
+`𝒱^pre`. -/
+noncomputable def quotientLegVPreHom (V : Opens ↥(yTop p F ϖ)) :
+    ValuationSpectrum.VPreHom ((yVPreObj p F ϖ).restrictOpen V)
+      ((xVPreObj p F ϖ).restrictOpen (xImage p F ϖ V)) :=
+  ValuationSpectrum.VPreHom.corestrict (yRestrictToCurve p F ϖ V)
+    (xImage p F ϖ V) (range_yRestrictToCurve p F ϖ V)
+
 end FarguesFontaine
 
 end
