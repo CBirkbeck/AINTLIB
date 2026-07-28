@@ -1254,6 +1254,60 @@ theorem comap_ringStalkMap_spaCompHom_stalkValue [DecidableEq A]
     rw [hresf, hresg] at hgerm
     exact hgerm
 
+/-- The ambient `Spa (A, A⁺)` as a `𝒱^pre`-object, given the Wedhorn-8.14
+stalk package at every point of interest. -/
+noncomputable def spaVPreObjOf
+    (hloc : ∀ v : ↥(Spa A A⁺), IsLocalRing (ToType ((spaRingPresheaf A).stalk v)))
+    (hsupp : ∀ v : ↥(Spa A A⁺),
+      (stalkValue v).supp = @IsLocalRing.maximalIdeal _ _ (hloc v)) :
+    VPreObj where
+  toPresheafedSpace := spaSpace (A := A)
+  isLocalRing_stalk := hloc
+  val := fun v => stalkValue v
+  val_supp := hsupp
+
+/-- **The valuation route to locality**: a ring hom whose source valuation is
+the pullback of the target's is a local homomorphism, when both supports are
+the maximal ideals. -/
+theorem isLocalHom_of_val_comap {R S : Type*} [CommRing R] [CommRing S]
+    (instR : IsLocalRing R) (instS : IsLocalRing S) (φ : R →+* S)
+    (vR : Spv R) (vS : Spv S) (hval : vR = comap φ vS)
+    (hR : vR.supp = @IsLocalRing.maximalIdeal _ _ instR)
+    (hS : vS.supp = @IsLocalRing.maximalIdeal _ _ instS) :
+    IsLocalHom φ := by
+  refine ⟨fun a ha => ?_⟩
+  have h1 : φ a ∉ vS.supp := by
+    rw [hS]
+    exact fun hmem => (mem_nonunits_iff.mp
+      ((@IsLocalRing.mem_maximalIdeal _ _ instS _).mp hmem)) ha
+  have hchain : vR.supp = (vS.supp).comap φ := by
+    rw [hval]; exact supp_comap _ _
+  have h2 : a ∉ vR.supp := fun h => h1 (Ideal.mem_comap.mp (hchain ▸ h))
+  by_contra hnu
+  refine h2 ?_
+  rw [hR]
+  exact (@IsLocalRing.mem_maximalIdeal _ _ instR _).mpr (mem_nonunits_iff.mpr hnu)
+
+/-- **The comparison is a morphism of `𝒱^pre`** (P5-K13): `Spa B ⟶ Spa A`
+with its stalk maps local and its stalk valuations matching. -/
+noncomputable def spaCompVPreHom [DecidableEq A]
+    (hloc : ∀ v : ↥(Spa A A⁺), IsLocalRing (ToType ((spaRingPresheaf A).stalk v)))
+    (hsupp : ∀ v : ↥(Spa A A⁺),
+      (stalkValue v).supp = @IsLocalRing.maximalIdeal _ _ (hloc v)) :
+    VPreHom (spaVObjTate (A := presheafValue D₀)).toVPreObj
+      (spaVPreObjOf (A := A) hloc hsupp) where
+  toHom := spaCompHom D₀ u hu
+  isLocalHom_stalkMap := fun w => by
+    haveI hA : IsLocalRing (ToType ((spaRingPresheaf A).stalk (shadow D₀ w))) :=
+      hloc _
+    haveI hB : IsLocalRing (ToType ((spaRingPresheaf (presheafValue D₀)).stalk w)) :=
+      isLocalRing_stalk_of_shrink (stalkShrink_tate w)
+    exact isLocalHom_of_val_comap hA hB _ _ _
+      (comap_ringStalkMap_spaCompHom_stalkValue D₀ u hu w)
+      (hsupp (shadow D₀ w))
+      (maximalIdeal_stalk_eq_supp (stalkShrink_tate w)).symm
+  val_compat := fun w => comap_ringStalkMap_spaCompHom_stalkValue D₀ u hu w
+
 end Assembly
 
 end SpaVIso
