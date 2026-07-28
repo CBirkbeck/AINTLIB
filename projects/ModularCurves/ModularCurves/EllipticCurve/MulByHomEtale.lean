@@ -63,7 +63,8 @@ theorem Torsionπ.formallyUnramified_of_nIsInvertible' (N : ℕ) (h : NIsInverti
 invertible, through the proven quasi-finiteness. -/
 theorem MulByHom.formallyUnramified'' (N : ℕ) (h : NIsInvertible S N) :
     FormallyUnramified (E.mulByHom N) :=
-  MulByHom.formallyUnramified_of_torsionπ E N
+  -- dev's name for main's `MulByHom.formallyUnramified_of_torsionπ` (statement identical).
+  E.formallyUnramified_mulByHom_of_torsionπ N
     (Torsionπ.formallyUnramified_of_nIsInvertible' E N h)
 
 /-- **(T-B5, proven-finiteness variant)** `[N]` étale when `N` is invertible. All inputs

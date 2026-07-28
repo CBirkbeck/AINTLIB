@@ -39,11 +39,6 @@ section LevelModuli
 
 variable (R : CommRingCat.{u})
 
-theorem EllHom.pullSection_add {X Y : EllObj R} (f : X ⟶ Y)
-    (P Q : Y.curve.Section) :
-    EllHom.pullSection R f (P + Q) =
-      EllHom.pullSection R f P + EllHom.pullSection R f Q :=
-  EllHom.pullSection_add_of_finitePresentation R f P Q
 
 /-- **(Y1-D2 bridge)** A pulled section vanishes on the fibre over `τ` iff its `transportSection`
 (along the `Ell/R`-morphism's cartesian comparison iso `curveIsoPullback`) does — pure
@@ -202,57 +197,10 @@ private lemma isNaiveGammaOne_asSection_pull (N : ℕ) [NeZero N] {X Y : EllObj 
     obtain ⟨hk, hord⟩ := hfib k (t ≫ f.baseHom)
     exact ⟨(hbc (N : ℤ)).mpr hk, fun a ha haN h0 ↦ hord a ha haN ((hbc (a : ℤ)).mp h0)⟩
 
-/-- The naive `Γ₁(N)` moduli problem over `R`: `E/S ↦ {P ∈ E(S) : P` has naive exact
-order `N}` (fibrewise; the right notion for `N` invertible, KM 1.4.4). Functor laws are
-`T-E4`. Source: Loeffler §3.3/§3.8; KM 3.2 + 3.7. -/
-noncomputable def gammaOneNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R where
-  obj X := { P : X.unop.curve.Section // X.unop.curve.IsNaiveGammaOne N P }
-  map f := ↾fun P ↦ ⟨EllHom.pullSection R f.unop P.1,
-    (isNaiveGammaOne_pullSection_iff R N f.unop P.1).mpr
-      (isNaiveGammaOne_asSection_pull R N f.unop P.2)⟩
-  map_id X := by
-    ext P
-    exact congrArg Subtype.val (EllHom.pullSection_id R P.1)
-  map_comp f g := by
-    ext P
-    exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop P.1)
-
-/-- The naive full-level-`N` (`Γ(N)`) moduli problem over `R`:
-`E/S ↦ {(P, Q) generating E[N] in every fibre}`. Source: Loeffler Fact 3.8.1 (verbatim:
-"pairs of sections `P, Q ∈ E[S]` generating `E[N]` in every fibre"); KM 3.1 + 3.7. -/
-noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R where
-  obj X := { PQ : X.unop.curve.Section × X.unop.curve.Section //
-    X.unop.curve.IsNaiveFullLevel N PQ.1 PQ.2 }
-  map f := ↾fun PQ => ⟨⟨EllHom.pullSection R f.unop PQ.1.1,
-    EllHom.pullSection R f.unop PQ.1.2⟩, by sorry⟩
-  map_id X := by
-    ext PQ
-    · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.1)
-    · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.2)
-  map_comp f g := by
-    ext PQ
-    · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.1)
-    · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.2)
-
 /- **RELOCATED (Y1-CLOSER S6, v10.111/117 doctrine)**: the held T-E7 MASTER
 `gammaOneNaive_representable` now lives BYTE-IDENTICAL in `ModularCurve/YOneTatePoint.lean`,
 closed by `gammaOneNaive_representable_assembly` (zero code-consumers of the name at
 relocation time — the cap theorem). -/
-
-/-- **(T-E9 = Loeffler Prop 3.8.2–3.8.3; KM 3.1/4.7/5.1)** For `N ≥ 3` and `N` invertible
-in `R`, the naive full-level problem `[Γ(N)]` is rigid and representable; the representing
-scheme `Y(N)` is smooth and affine over `Spec R`.
-(Rigidity: Loeffler Prop 3.8.3 covers `Ell/R[1/6]` only; for residue characteristics
-2 and 3 the source of record is the GME 2.6.4 Aut-computation ("`ε ∈ Aut(E,φ)`,
-`n ≥ 3` invertible ⟹ `ε = 1`", chain B9 in decomposition-gme2 — valid in all
-characteristics with `N` invertible); KM locator pending. Smooth+affine conjunct
-restored 2026-07-06 — it was in this docstring but missing from the statement.) -/
-theorem gammaFullNaive_representable (N : ℕ) [NeZero N] (hN : 3 ≤ N)
-    (hinv : IsUnit (N : R)) :
-    ((gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable) ∧
-      ∀ X : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X) →
-        (Smooth X.structMap ∧ IsAffineHom X.structMap) := by
-  sorry
 
 end LevelModuli
 

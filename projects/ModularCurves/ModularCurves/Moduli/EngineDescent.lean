@@ -943,7 +943,6 @@ private theorem actLoc_baseChange {A R : Type u} [CommRing A] [CommRing R] (ρ :
         ≫ projModelBaseChange τA W₀ := by
     rw [← projModelBaseChange_comp₃ τR ρ W₀, ← projModelBaseChange_comp₃ ρ τA W₀,
       hbcc hcomm]
-    congr 1
   simp only [Category.assoc]
   rw [hswap, projModelVCIso_congr₂ hCR ((W₀.map ρ).map τR)]
   simp only [Category.assoc]
@@ -1650,6 +1649,16 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
     rw [reassoc_of% hbmapinv, ← reassoc_of% hζpQ, hcmp, hfdef, reassoc_of% hζθ,
       reassoc_of% hzψ, hzν]
 
+section OpaqueProjModel
+
+/- `projModel` is a `Proj`-of-graded-ring construction; on this pin `whnf` chases it inside
+the `eqToHom (congrArg projModel _)` transports of the chart engines below without bound.
+Opacity is the fix (budget is not — 25.6M heartbeats does not close it). Scoped to this
+section because the `projModel*` API earlier in the file does need to see through it. Same
+treatment as `Moduli/EngineMouthCharts.lean`. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 set_option maxHeartbeats 800000 in
 /-- **([a5-W6-loc], the per-point chart from a LOCALIZED model — ABSTRACT)** The `lw_chart_at`
 engine with the global-model inputs (`W₀A`, `φA`, `act`, `Cvc`, `hΨ`) replaced by their
@@ -2209,7 +2218,7 @@ private theorem discharge_hlift [Finite G]
   -- adapt the local (old-order) free-action hypothesis to the canonical
   -- `SchemeQuotient` order `∀ {T} (t) (g), …` that the consumer now expects.
   refine σE.exists_quotientπ_lift_of_isOpenImmersion VE hVEs hVEa hVEmem
-    (fun t g hg h => hfreeE g hg _ t h) j f ?_
+    hfreeE j f ?_
   intro g
   have hmap_eq : pullback.map (σE.quotientπ VE hVEs hVEa hVEmem) j
       (σE.quotientπ VE hVEs hVEa hVEmem) j (σE.hom g) (𝟙 Q') (𝟙 _)
@@ -2241,7 +2250,7 @@ theorem discharge_hlift' [Finite G]
       ∃ q : Q' ⟶ Y, pullback.snd (σE.quotientπ VE hVEs hVEa hVEmem) j ≫ q = f := by
   intro Q' Y j hj f hf
   exact σE.exists_quotientπ_lift_of_isOpenImmersion VE hVEs hVEa hVEmem
-    (fun t g hg h => hfreeE g hg _ t h) j f hf
+    hfreeE j f hf
 
 /-- The restricted-cover epi property, in ∀-shape (own budget). -/
 theorem discharge_hepi [Finite G]
@@ -2253,6 +2262,7 @@ theorem discharge_hepi [Finite G]
     ∀ {Q' : Scheme.{u}} (j : Q' ⟶ σE.quotient VE hVEs hVEa) [IsOpenImmersion j],
       Epi (pullback.snd (σE.quotientπ VE hVEs hVEa hVEmem) j) := by
   intro Q' j hj
+  -- `epi_pullback_snd_quotientπ` takes the `∀ {T} (t) (g), …` order; adapt.
   exact σE.epi_pullback_snd_quotientπ VE hVEs hVEa hVEmem
     (fun t g hg h => hfreeE g hg _ t h) j
 
@@ -3008,5 +3018,7 @@ theorem exists_localModel_core_of_presentation [Finite G] [IsAffine X]
     rw [← Category.assoc, hkey, Category.assoc, hρact₁ g, ← Category.assoc]
   exact ⟨aF, haF, W₀R₁.map f1F, hell, projModelBaseChange f1F W₀R₁ ≫ ρR₁, hρsq, hρzero,
     fun g => (Cvc₁ g).map f1F, hCvcR, hρact, E, hEcob f1F hf1F_alg⟩
+
+end OpaqueProjModel
 
 end ModularCurves.RouteA

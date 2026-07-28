@@ -189,7 +189,7 @@ noncomputable def torsionAlgebra (k : Type u) [Field k]
     (hk : (N : k) ≠ 0) : CommAlgCat.FiniteEtale.{u} k :=
   -- `E[N] → Spec k` is finite (T-B4 box) and étale for `N` invertible (T-B5 box).
   finiteEtaleOfπ (E.torsionπ N) (E.torsionπ_isFinite N)
-    (Torsionπ.etale E N ((nIsInvertible_spec_iff k N).mpr hk))
+    (E.torsionπ_etale N ((nIsInvertible_spec_iff k N).mpr hk))
 
 /-- **(T-C0b)** The `k̄`-points of the torsion algebra are the `N`-torsion of the
 geometric point group: the fibre functor applied to `torsionAlgebra` is

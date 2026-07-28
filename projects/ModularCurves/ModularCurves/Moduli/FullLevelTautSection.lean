@@ -86,6 +86,9 @@ theorem exists_tautSection_of_isFullLevel
       (Point.asSection E (U.ι ≫ tautBase E N) (Point.restrict E U.ι (tautPt₁ E N)))
       (Point.asSection E (U.ι ≫ tautBase E N) (Point.restrict E U.ι (tautPt₂ E N)))) :
     ∃ s : (U : Scheme.{u}) ⟶ levelSpaceΓ E N, s ≫ levelSpaceΓι E N = U.ι := by
+  -- `Mono (torsionι N)` no longer resolves by unification from the closed-immersion
+  -- instance; supply the closed immersion locally so the preimmersion→mono instance fires.
+  haveI : IsClosedImmersion (E.torsionι N) := E.torsionι_isClosedImmersion N
   -- the killing conditions of the restricted taut points (restriction is precomposition)
   have hkill : ∀ P : E.Point (tautBase E N),
       P.1 ≫ E.mulByHom N = tautBase E N ≫ E.zero →
