@@ -3127,7 +3127,31 @@ development the old P5-3/P5-4 sketches describe.
   `comap_canonicalMap_mem_rationalOpen_inter_spa` → `bigWindow_eq_rationalOpen_windowUnif`
   → `mem_Y_of_mem_bigWindow`.
 
-### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — THE LAST STEP
+### [P5-6e] The WANDERING chart selection — the OTHER remaining piece (scoped 2026-07-28)
+`isAdicSpace_xVObj_of_yCharts` needs, for each `y : 𝒴`, a chart neighbourhood that is
+**wandering**. `windowSubOpen n D' …` (P5-6d(i)) need not be. `curveAdicSpacePresentation`
+solves the analogous topological problem by first taking a wandering `W₀ ∋ y`
+(`exists_disjoint_translates`) and then shrinking inside it — but its `V` is built inside the
+proof of `exists_window_subdatum_nbhd` and is NOT `windowSubOpen`, so it cannot be reused
+directly. What is needed:
+
+    ∀ y : 𝒴, ∀ O ∋ y, ∃ n D' u' hu' u hu,
+      y ∈ windowSubOpen n D' u' hu' u hu ∧ windowSubOpen n D' u' hu' u hu ≤ O
+
+ROUTE (all ingredients exist):
+  1. `Y_eq_iUnion_bigWindow` → an `n` with `ySpaPoint y ∈ bigWindow n`.
+  2. `spaChartHomeoWindow` → the chart-side point `w₀ : Spa(B_n)` with `shadow D₀ w₀ = ySpaPoint y`.
+  3. `exists_isRational_spaOpen_subset_huber` over `B_n` (rational opens are a BASIS) → a
+     datum `D'` with `w₀ ∈ spaOpen D'` and `spaOpen D'` inside the chart-side preimage of `O`.
+  4. `SpaVIso.range_shadow D₀ u hu : Set.range (shadow D₀) = spaOpens D₀` (and the fact that
+     `spaCompHom`'s base IS `shadow`) give
+     `range (windowSubCompHom) = shadow D₀ '' spaOpens D'`, hence
+     `windowSubOpen = yTrace (shadow D₀ '' spaOpens D')`; both required properties then
+     transfer from 3.
+Then combine with `exists_disjoint_translates` (take `O := W₀`) to get wandering, and feed
+`isAdicSpace_xVObj_of_yCharts`.
+
+### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — IN PROGRESS
 
 
 Two halves, and the SECOND is the real one:
