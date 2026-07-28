@@ -382,6 +382,17 @@ theorem ringStalkMap_liftToRestrict
     (congrArg CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map
       (liftToRestrict_fac f U hr).symm) z
 
+/-- The stalk map of the restriction inclusion is the inverse of the
+restriction stalk comparison (mathlib, in our `ringStalkMap` spelling). -/
+theorem ringStalkMap_ofRestrict {X : TopRingPresheafedSpace.{u}}
+    (U : Opens ↥(X.carrier)) (y : ↥U) :
+    ringStalkMap (X.ofRestrict (openIncl_isOpenEmbedding U)) y
+      = (restrictRingStalkIsoRaw U y).inv :=
+  (AlgebraicGeometry.PresheafedSpace.restrictStalkIso_inv_eq_ofRestrict
+    (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.obj X)
+    (openIncl_isOpenEmbedding U) y).symm
+
+
 end Corestrict
 
 end ValuationSpectrum
