@@ -204,6 +204,29 @@ theorem IsAdicSpace.of_openCover {Z : VObj.{u}}
     ⟨(VObj.isoOfVPreIso
       (VPreObj.restrictRestrictIso Z.toVPreObj W U)).symm ≪≫ e⟩⟩
 
+
+/-! ### `Spa` of a strongly-noetherian complete Tate ring -/
+
+section Tate
+
+variable {A : Type u} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+  [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+  [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+    CompleteSpace A]
+  [IsStronglyNoetherian A]
+
+/-- The Tate chart's `𝒱`-object is the P5-2 package. -/
+theorem AffinoidVChart.ofTate_toVObj :
+    (AffinoidVChart.ofTate A).toVObj = spaVObjTate (A := A) := rfl
+
+/-- **`Spa (A, A⁺)` of a strongly-noetherian complete Tate ring is an adic
+space** in the sense of Wedhorn Definition 8.22. -/
+theorem isAdicSpace_spaVObjTate : IsAdicSpace (spaVObjTate (A := A)) :=
+  AffinoidVChart.ofTate_toVObj (A := A) ▸ isAdicSpace_toVObj (AffinoidVChart.ofTate A)
+
+end Tate
+
 end ValuationSpectrum
 
 end
