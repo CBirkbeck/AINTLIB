@@ -231,41 +231,47 @@ private theorem pushforward_sections_module_finite
   rw [U.1.ι_image_top] at htarget
   exact htarget
 
-private theorem isQuasicoherent_pushforward
-    {k : Type u} [CommRing k] {X S : Scheme.{u}}
-    {s : S ⟶ Spec (.of k)} {f : X ⟶ S}
-    (h : IsRelativeProjectiveFactorization s f)
+end AlgebraicGeometry.IsRelativeProjectiveFactorization
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+/-- Pushforward along a proper morphism preserves quasicoherent modules. -/
+theorem isQuasicoherent_pushforward_of_isProper
+    {X S : Scheme.{u}} (f : X ⟶ S) [IsProper f]
     (M : X.Modules) [M.IsQuasicoherent] :
-    ((Scheme.Modules.pushforward f).obj M).IsQuasicoherent := by
+    ((pushforward f).obj M).IsQuasicoherent := by
   have hlocal (U : S.affineOpens) :
-      (((Scheme.Modules.pushforward f).obj M).over U.1).IsQuasicoherent := by
+      (((pushforward f).obj M).over U.1).IsQuasicoherent := by
     let V := f ⁻¹ᵁ U.1
     let fU := morphismRestrict f U.1
     let MU := M.restrict V.ι
     letI : IsAffine U.1.toScheme := U.2
-    letI : IsProper fU := (h.restrict U.1).isProper
+    letI : IsProper fU := by infer_instance
     have hPush :
-        ((Scheme.Modules.pushforward fU).obj MU).IsQuasicoherent :=
-      Scheme.Modules.isQuasicoherent_pushforward_of_isProper_to_affine
-        fU MU
+        ((pushforward fU).obj MU).IsQuasicoherent :=
+      isQuasicoherent_pushforward_of_isProper_to_affine fU MU
     have hRestrict :
-        (((Scheme.Modules.pushforward f).obj M).restrict U.1.ι).IsQuasicoherent :=
-      (Scheme.Modules.isQuasicoherent U.1).prop_of_iso
-        (Scheme.Modules.restrictPushforwardIsoOfIsPullbackApp
+        (((pushforward f).obj M).restrict U.1.ι).IsQuasicoherent :=
+      (isQuasicoherent U.1).prop_of_iso
+        (restrictPushforwardIsoOfIsPullbackApp
           f fU V.ι U.1.ι
           (isPullback_morphismRestrict f U.1) M).symm
         hPush
     letI :
-        (((Scheme.Modules.pushforward f).obj M).restrict U.1.ι).IsQuasicoherent :=
+        (((pushforward f).obj M).restrict U.1.ι).IsQuasicoherent :=
       hRestrict
-    exact Scheme.Modules.isQuasicoherent_over_of_restrict_of_isAffineOpen
-      ((Scheme.Modules.pushforward f).obj M) U.1
+    exact isQuasicoherent_over_of_restrict_of_isAffineOpen
+      ((pushforward f).obj M) U.1
   have hcover : (Opens.grothendieckTopology S).CoversTop
       (fun U : S.affineOpens => (U : S.Opens)) := by
     rw [Opens.coversTop_iff, IsOpenCover, iSup_affineOpens_eq_top S]
   exact @SheafOfModules.IsQuasicoherent.of_coversTop
-    _ _ _ _ _ _ _ _ ((Scheme.Modules.pushforward f).obj M) _
+    _ _ _ _ _ _ _ _ ((pushforward f).obj M) _
       (fun U : S.affineOpens => (U : S.Opens)) hcover hlocal
+
+end AlgebraicGeometry.Scheme.Modules
+
+namespace AlgebraicGeometry.IsRelativeProjectiveFactorization
 
 /-- The pushforward of a finite-type quasicoherent module along a relative
 projective factorization over a locally Noetherian base is finite type. -/
@@ -277,7 +283,9 @@ theorem isFiniteType_pushforward
     (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType] :
     ((Scheme.Modules.pushforward f).obj M).IsFiniteType := by
   let N := (Scheme.Modules.pushforward f).obj M
-  letI : N.IsQuasicoherent := isQuasicoherent_pushforward h M
+  letI : IsProper f := h.isProper
+  letI : N.IsQuasicoherent :=
+    Scheme.Modules.isQuasicoherent_pushforward_of_isProper f M
   apply Scheme.Modules.isFiniteType_of_sections_module_finite N
   intro U
   letI : Module.Finite
