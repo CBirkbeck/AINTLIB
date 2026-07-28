@@ -6352,6 +6352,60 @@ theorem wIRPS_neg
   have h2 := haux (-f)
   rwa [neg_neg] at h2
 
+/-- **The unit ball of `B^I⟨T⟩`** (T910-M): the `wIRPS ≤ 1` restricted
+series form a subring. -/
+noncomputable def wIRPSBall :
+    Subring ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) where
+  carrier := {U : ↥(restrictedMvPowerSeriesSubring 1
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) |
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (U : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ 1}
+  zero_mem' := by
+    show wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((0 : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ 1
+    rw [show ((0 : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = 0 from rfl, wIRPS_zero p F ϖ]
+    exact zero_le_one
+  one_mem' := le_of_eq (wIRPS_one p F ϖ)
+  add_mem' := fun {a b} ha hb => by
+    show wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((a + b : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ 1
+    refine le_trans (le_of_eq (congrArg _ (rfl :
+      ((a + b : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = (a : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        + (b : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))))) ?_
+    exact le_trans (wIRPS_add_le p F ϖ a.2 b.2) (max_le ha hb)
+  mul_mem' := fun {a b} ha hb => by
+    show wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((a * b : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ 1
+    rw [RPS_BI_coe_mul p F ϖ]
+    refine le_trans (wIRPS_mul_le p F ϖ a.2 b.2) ?_
+    calc wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (a : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (b : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ 1 * 1 := mul_le_mul ha hb zero_le zero_le
+      _ = 1 := one_mul 1
+  neg_mem' := fun {a} ha => by
+    show wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((-a : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ 1
+    rw [wIRPS_neg p F ϖ a]
+    exact ha
+
 end FarguesFontaine
 
 end
