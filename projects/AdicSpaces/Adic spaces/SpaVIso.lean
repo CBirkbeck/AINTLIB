@@ -37,6 +37,15 @@ namespace ValuationSpectrum
 
 namespace SpaVIso
 
+/-- The inverse of a bijective ring hom is any two-sided-inverse ring hom. -/
+theorem ofBijective_symm_apply {R S : Type*} [CommRing R] [CommRing S]
+    (f : R →+* S) (hf : Function.Bijective f) (g : S →+* R)
+    (h : ∀ x, g (f x) = x) (y : S) :
+    (RingEquiv.ofBijective f hf).symm y = g y := by
+  obtain ⟨x, rfl⟩ := hf.2 y
+  rw [h x]
+  exact (RingEquiv.ofBijective f hf).symm_apply_apply x
+
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A] [IsRingOfIntegralElements (A⁺ : Subring A)]
 
@@ -588,6 +597,149 @@ theorem phiHom_surjective {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
       (limitEvalHom (idxOf D₀ hVW i) x) = _
   rw [hcomp, RingEquiv.symm_apply_apply]
   rfl
+
+/-- `genPiece_rel_forward` is continuous (it is a completion extension). -/
+theorem genPiece_rel_forward_continuous
+    (T : Finset A) (t : A) (M : ℕ)
+    (hle : (Ideal.span (D₀.P.A₀.subtype '' (D₀.P.I : Set D₀.P.A₀))) ^ M
+      ≤ Ideal.span ((T : Finset A) : Set A)) :
+    Continuous (OpenKeystone.genPiece_rel_forward D₀ T t M hle) := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  letI : UniformSpace (Localization.Away
+    (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P T t M hle) rfl).s) :=
+    (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P T t M hle) rfl).uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
+/-- `genPiece_rel_backward` is continuous (it is a completion extension). -/
+theorem genPiece_rel_backward_continuous
+    (T : Finset A) (t : A) (M : ℕ)
+    (hle : (Ideal.span (D₀.P.A₀.subtype '' (D₀.P.I : Set D₀.P.A₀))) ^ M
+      ≤ Ideal.span ((T : Finset A) : Set A)) :
+    Continuous (OpenKeystone.genPiece_rel_backward D₀ T t M hle) := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  letI : UniformSpace (Localization.Away
+    (OpenKeystone.imagePieceDatumOpen D₀ T t M hle).s) :=
+    (OpenKeystone.imagePieceDatumOpen D₀ T t M hle).uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
+/-- The keystone comparison is continuous. -/
+theorem pieceEquiv_continuous {E : RationalLocData A} (hE : E.IsRational)
+    (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
+    Continuous (pieceEquiv D₀ hE hE_sub) := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  exact (genPiece_rel_forward_continuous D₀ E.T E.s (certExp D₀ hE)
+    (certExp_spec D₀ hE)).comp (restrictionMapHom_continuous _ _ _)
+
+/-- The open-equality behind the keystone comparison. -/
+theorem pieceEquiv_open_eq {E : RationalLocData A} (hE : E.IsRational)
+    (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
+    rationalOpen E.T E.s
+      = rationalOpen (D₀.interSamePair
+          (OpenKeystone.genPieceDatumOpen D₀.P E.T E.s (certExp D₀ hE)
+            (certExp_spec D₀ hE)) rfl).T
+        (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P E.T E.s
+          (certExp D₀ hE) (certExp_spec D₀ hE)) rfl).s := by
+  have h := RationalLocData.interSamePair_rationalOpen D₀
+    (OpenKeystone.genPieceDatumOpen D₀.P E.T E.s (certExp D₀ hE)
+      (certExp_spec D₀ hE))
+    (OpenKeystone.genPieceDatumOpen_P D₀.P E.T E.s (certExp D₀ hE)
+      (certExp_spec D₀ hE))
+  rw [OpenKeystone.genPieceDatumOpen_T, OpenKeystone.genPieceDatumOpen_s] at h
+  exact (h.trans (Set.inter_eq_right.mpr hE_sub)).symm
+
+/-- The keystone comparison has continuous inverse. -/
+theorem pieceEquiv_symm_continuous {E : RationalLocData A} (hE : E.IsRational)
+    (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) :
+    Continuous (pieceEquiv D₀ hE hE_sub).symm := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  have hEeq := pieceEquiv_open_eq D₀ hE hE_sub
+  have hbij := restrictionMap_bijective_of_rationalOpen_eq E
+    (D₀.interSamePair (OpenKeystone.genPieceDatumOpen D₀.P E.T E.s
+      (certExp D₀ hE) (certExp_spec D₀ hE)) rfl) hEeq
+  have hfun : ∀ z, (pieceEquiv D₀ hE hE_sub).symm z
+      = restrictionMapHom _ E hEeq.le
+          (OpenKeystone.genPiece_rel_backward D₀ E.T E.s (certExp D₀ hE)
+            (certExp_spec D₀ hE) z) := by
+    intro z
+    show (RingEquiv.ofBijective (restrictionMapHom E _ hEeq.symm.le) hbij).symm
+        (OpenKeystone.genPiece_rel_backward D₀ E.T E.s (certExp D₀ hE)
+          (certExp_spec D₀ hE) z) = _
+    refine ofBijective_symm_apply _ hbij (restrictionMapHom _ E hEeq.le)
+      (fun x => ?_) _
+    exact congrFun (restrictionMap_comp E _ E hEeq.symm.le hEeq.le) x |>.trans
+      (congrFun (restrictionMap_id E) x)
+  rw [show ((pieceEquiv D₀ hE hE_sub).symm : _ → _) = _ from funext hfun]
+  exact (restrictionMapHom_continuous _ _ _).comp
+    (genPiece_rel_backward_continuous D₀ E.T E.s (certExp D₀ hE)
+      (certExp_spec D₀ hE))
+
+/-- **The comparison map is continuous.** -/
+theorem phiHom_continuous {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) : Continuous (phiHom D₀ hV hVW) := by
+  refine Continuous.subtype_mk (continuous_pi fun i => ?_) _
+  exact (pieceEquiv_symm_continuous D₀ i.isRational (index_sub D₀ hV i)).comp
+    (limitEvalHom_continuous (idxOf D₀ hVW i))
+
+/-- **The comparison ring isomorphism** (P5-K6). -/
+noncomputable def phiEquiv [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) :
+    ↥(limitSections W) ≃+* ↥(limitSections V) :=
+  RingEquiv.ofBijective (phiHom D₀ hV hVW)
+    ⟨phiHom_injective D₀ hV hVW, phiHom_surjective D₀ hV hVW⟩
+
+/-- The inverse of the comparison restricts to the candidate sections. -/
+theorem phiEquiv_symm_restrict [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (y : ↥(limitSections V)) (i : RationalIndex V) :
+    limitRestrict (imgOpens_le D₀ hVW i) ((phiEquiv D₀ hV hVW).symm y)
+      = imgSection D₀ hV y i := by
+  refine Subtype.ext (funext fun k => ?_)
+  set x := (phiEquiv D₀ hV hVW).symm y with hx
+  have hxy : phiHom D₀ hV hVW x = y := (phiEquiv D₀ hV hVW).apply_symm_apply y
+  -- the `k`-component of both sides is a restriction of the `i`-th value
+  have hki : rationalOpen k.D.T k.D.s
+      ⊆ rationalOpen (imgDatum D₀ i.isRational).T
+          (imgDatum D₀ i.isRational).s := spaOpen_subset_iff.mp k.subset
+  have hcompat := x.2 (idxOf D₀ hVW i) (k.mono (imgOpens_le D₀ hVW i)) hki
+  have hval : limitEvalHom (idxOf D₀ hVW i) x
+      = pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y) := by
+    have h1 : (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm
+        (limitEvalHom (idxOf D₀ hVW i) x) = limitEvalHom i y := by
+      rw [← phiHom_apply_component D₀ hV hVW x i, hxy]
+    exact ((RingEquiv.apply_symm_apply
+        (pieceEquiv D₀ i.isRational (index_sub D₀ hV i))
+        (limitEvalHom (idxOf D₀ hVW i) x)).symm.trans
+      (congrArg (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)) h1))
+  show (x : ∀ j : RationalIndex W, presheafValue j.D)
+      (k.mono (imgOpens_le D₀ hVW i)) = _
+  rw [← hcompat]
+  show restrictionMap _ _ _ (limitEvalHom (idxOf D₀ hVW i) x) = _
+  rw [hval]
+  rfl
+
+/-- **The comparison inverse is continuous** — via the embedding of sections
+into the product over the image-open cover. -/
+theorem phiEquiv_symm_continuous [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) : Continuous (phiEquiv D₀ hV hVW).symm := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  refine ((isLimitSheaf_value D₀).isEmbedding (imgOpens_le D₀ hVW)
+    (imgOpens_cover D₀ hV hVW)).continuous_iff.mpr ?_
+  refine continuous_pi fun i => ?_
+  show Continuous fun y => limitRestrictProd (imgOpens_le D₀ hVW)
+    ((phiEquiv D₀ hV hVW).symm y) i
+  rw [show (fun y => limitRestrictProd (imgOpens_le D₀ hVW)
+      ((phiEquiv D₀ hV hVW).symm y) i)
+      = fun y => imgSection D₀ hV y i from
+    funext fun y => phiEquiv_symm_restrict D₀ hV hVW y i]
+  exact (limitOfValue_continuous (imgDatum D₀ i.isRational)).comp
+    ((pieceEquiv_continuous D₀ i.isRational (index_sub D₀ hV i)).comp
+      (limitEvalHom_continuous i))
 
 end Phi
 
