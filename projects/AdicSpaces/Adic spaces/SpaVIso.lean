@@ -1438,6 +1438,24 @@ noncomputable def spaCompIsoRestrict [DecidableEq A] :
   AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoRestrict
     (spaCompHom D₀ u hu)
 
+/-- **Wedhorn 8.15 at the `𝒱` level**: the adic spectrum of a rational
+localization IS the rational subset, as an object of Wedhorn's category — with
+its structure sheaf, stalk local rings and stalk valuations, not merely as a
+topological space. -/
+noncomputable def spaCompVIso [DecidableEq A]
+    (hloc : ∀ v : ↥(Spa A A⁺), IsLocalRing (ToType ((spaRingPresheaf A).stalk v)))
+    (hsupp : ∀ v : ↥(Spa A A⁺),
+      (stalkValue v).supp = @IsLocalRing.maximalIdeal _ _ (hloc v)) :
+    (spaVObjTate (A := presheafValue D₀)).toVPreObj
+      ≅ (spaVPreObjOf (A := A) hloc hsupp).restrictOpen (spaOpens D₀) :=
+  @VPreObj.isoRestrictOfOpenImmersion
+    ((spaVObjTate (A := presheafValue D₀)).toVPreObj)
+    (spaVPreObjOf (A := A) hloc hsupp)
+    (spaCompHom D₀ u hu)
+    (fun w => comap_ringStalkMap_spaCompHom_stalkValue D₀ u hu w)
+    (spaOpens D₀) (range_shadow D₀ u hu)
+    (spaCompHom_isOpenImmersion D₀ u hu)
+
 end Assembly
 
 end SpaVIso
