@@ -42,6 +42,12 @@ open AlgebraicGeometry CategoryTheory Limits
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
 
+-- v4.33 bump: neither the `Scheme`/`CommAlgCat` category instances nor the semireducible
+-- component types are transparent enough for the rewrites below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace ModularCurves
