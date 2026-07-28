@@ -29,6 +29,8 @@ This file builds the substrate:
 
 open CategoryTheory TopologicalSpace Opposite
 
+open scoped AlgebraicGeometry
+
 noncomputable section
 
 universe u
@@ -783,7 +785,99 @@ theorem paired_aOpen_bOpen (U : Opens ↥(spaOpens D₀)) :
   · intro hw
     exact ⟨baseHomeo D₀ u hu w, hw, rfl⟩
 
+/-- **Naturality of the comparison map**: it commutes with restriction on
+both sides. Componentwise both sides are the same keystone comparison of the
+same `B`-component (the two `RationalIndex` spellings differ only in
+`Prop`-valued fields). -/
+theorem phiHom_naturality {V V' : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀) (hV' : V' ≤ spaOpens D₀) (hVV' : V' ≤ V)
+    {W W' : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (hVW' : Paired D₀ V' W') (hWW' : W' ≤ W)
+    (x : ↥(limitSections W)) :
+    limitRestrict hVV' (phiHom D₀ hV hVW x)
+      = phiHom D₀ hV' hVW' (limitRestrict hWW' x) :=
+  rfl
+
 end Phi
+
+section Assembly
+
+variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [PlusSubring A] [IsHuberRing A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [T2Space A] [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+    CompleteSpace A]
+
+/-- The ambient `Spa (A, A⁺)` as a presheafed space of complete topological
+rings (no Tate hypothesis). -/
+def spaSpace : TopRingPresheafedSpace where
+  carrier := SpaTop A
+  presheaf := structurePresheaf A
+
+/-- The inclusion of an open of `Spa (A, A⁺)`. -/
+def spaOpensIncl (U : Opens ↥(Spa A A⁺)) : TopCat.of ↥U ⟶ SpaTop A :=
+  TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+
+theorem spaOpensIncl_isOpenEmbedding (U : Opens ↥(Spa A A⁺)) :
+    Topology.IsOpenEmbedding (spaOpensIncl U) :=
+  U.2.isOpenEmbedding_subtypeVal
+
+/-- The restriction of the ambient space to an open. -/
+def spaRestrict (U : Opens ↥(Spa A A⁺)) : TopRingPresheafedSpace :=
+  (spaSpace (A := A)).restrict (spaOpensIncl_isOpenEmbedding U)
+
+variable (D₀ : RationalLocData A) [IsTateRing (presheafValue D₀)]
+  [IsNoetherianRing (presheafValue D₀)] [IsStronglyNoetherian (presheafValue D₀)]
+
+/-- `Spa B` as a presheafed space. -/
+def bSpace : TopRingPresheafedSpace where
+  carrier := SpaTop (presheafValue D₀)
+  presheaf := structurePresheaf (presheafValue D₀)
+
+variable (u : (presheafValue D₀)ˣ)
+  (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀))
+
+/-- The base isomorphism in `TopCat`. -/
+def baseIso : (bSpace D₀).carrier ≅ (spaRestrict (spaOpens D₀)).carrier :=
+  TopCat.isoOfHomeo (baseHomeo D₀ u hu)
+
+variable [DecidableEq A]
+
+/-- The comparison as an isomorphism in `CompleteTopCommRingCat`. -/
+def phiCatIso (U : Opens ↥(spaOpens D₀)) :
+    CompleteTopCommRingCat.of ↥(limitSections (bOpen D₀ u hu U))
+      ≅ CompleteTopCommRingCat.of ↥(limitSections (aOpen D₀ U)) where
+  hom := ⟨(phiEquiv D₀ (aOpen_le D₀ U) (paired_aOpen_bOpen D₀ u hu U)).toRingHom,
+    phiHom_continuous D₀ (aOpen_le D₀ U) (paired_aOpen_bOpen D₀ u hu U)⟩
+  inv := ⟨(phiEquiv D₀ (aOpen_le D₀ U)
+      (paired_aOpen_bOpen D₀ u hu U)).symm.toRingHom,
+    phiEquiv_symm_continuous D₀ (aOpen_le D₀ U)
+      (paired_aOpen_bOpen D₀ u hu U)⟩
+  hom_inv_id := Subtype.ext (RingHom.ext fun x =>
+    (phiEquiv D₀ (aOpen_le D₀ U) (paired_aOpen_bOpen D₀ u hu U)).symm_apply_apply x)
+  inv_hom_id := Subtype.ext (RingHom.ext fun x =>
+    (phiEquiv D₀ (aOpen_le D₀ U) (paired_aOpen_bOpen D₀ u hu U)).apply_symm_apply x)
+
+/-- **The presheaf comparison as a natural isomorphism**. -/
+def presheafIso :
+    (baseIso D₀ u hu).hom _* (bSpace D₀).presheaf ≅ (spaRestrict (spaOpens D₀)).presheaf :=
+  NatIso.ofComponents (fun U => phiCatIso D₀ u hu U.unop) (by
+    intro U U' f
+    refine Subtype.ext (RingHom.ext fun x => ?_)
+    exact phiHom_naturality D₀ (aOpen_le D₀ U.unop) (aOpen_le D₀ U'.unop)
+      (fun v hv => by
+        obtain ⟨z, hz, rfl⟩ := hv
+        exact ⟨z, leOfHom f.unop hz, rfl⟩)
+      (paired_aOpen_bOpen D₀ u hu U.unop) (paired_aOpen_bOpen D₀ u hu U'.unop)
+      (fun w hw => leOfHom f.unop hw) x)
+
+/-- **Wedhorn 8.15 at the presheafed-space level** (P5-K7): `Spa 𝒪_X(D₀)` is
+the rational subset `R(T/s)` of `Spa (A, A⁺)`, with its structure presheaf. -/
+def spaRestrictIso : bSpace D₀ ≅ spaRestrict (spaOpens D₀) :=
+  AlgebraicGeometry.PresheafedSpace.isoOfComponents (baseIso D₀ u hu)
+    (presheafIso D₀ u hu)
+
+end Assembly
 
 end SpaVIso
 
