@@ -251,10 +251,23 @@ noncomputable def representableByProd :
             ⟨k.baseHom ≫ u.baseHom, _⟩) =
         Q.map k.op (Q.map (EllObj.toPullbackAlong (u ≫ X.pullbackAlongπ f)).op
           (eqv (u ≫ X.pullbackAlongπ f).baseHom ⟨u.baseHom, rfl⟩))
-      rw [hnat, ← FunctorToTypes.map_comp_apply, ← FunctorToTypes.map_comp_apply,
-        ← op_comp, ← op_comp,
-        toPullbackAlong_comp_pullbackAlongMap k (u ≫ X.pullbackAlongπ f)]
-      rfl
+      -- `rw [← Functor.map_comp_apply]` no longer fires against these two `Q.map` pairs;
+      -- fold each side with the lemma as a term (which unifies up to defeq) and compare the
+      -- two `op`-composites through the naturality square.
+      rw [hnat]
+      have hop : (X.pullbackAlongMap (u ≫ X.pullbackAlongπ f).baseHom k.baseHom).op ≫
+            (EllObj.toPullbackAlong (k ≫ u ≫ X.pullbackAlongπ f)).op
+          = (EllObj.toPullbackAlong (u ≫ X.pullbackAlongπ f)).op ≫ k.op := by
+        rw [← op_comp, ← op_comp,
+          toPullbackAlong_comp_pullbackAlongMap k (u ≫ X.pullbackAlongπ f)]
+      exact ((Functor.map_comp_apply Q
+            (X.pullbackAlongMap (u ≫ X.pullbackAlongπ f).baseHom k.baseHom).op
+            (EllObj.toPullbackAlong (k ≫ u ≫ X.pullbackAlongπ f)).op
+            ((eqv (u ≫ X.pullbackAlongπ f).baseHom) ⟨u.baseHom, rfl⟩)).symm.trans
+          (congrArg (fun m => (ConcreteCategory.hom (Q.map m))
+              ((eqv (u ≫ X.pullbackAlongπ f).baseHom) ⟨u.baseHom, rfl⟩)) hop)).trans
+        (Functor.map_comp_apply Q (EllObj.toPullbackAlong (u ≫ X.pullbackAlongπ f)).op k.op
+          ((eqv (u ≫ X.pullbackAlongπ f).baseHom) ⟨u.baseHom, rfl⟩))
 
 end Prod
 

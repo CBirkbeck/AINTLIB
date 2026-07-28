@@ -22,6 +22,12 @@ structures and back:
 * (3e) the two constructions are mutually inverse.
 -/
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry
 
 namespace ModularCurves
@@ -910,7 +916,6 @@ theorem muNRootsRead_classify_field (D : GaloisRepData N) [Fact (1 < N)]
       pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
         (terminal.from (muNAbs N)) = _
     simp only [Category.assoc]
-    rfl
   refine Eq.trans (congrArg
     (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
     (h1.trans (congrArg
@@ -6246,7 +6251,6 @@ theorem rhoOfSection_zrel
       (X.pullbackAlongπ (ξ ≫ k)).baseHom := by
     show ξt ≫ strPr D (X.pullbackAlong k) ≫ k = ξ ≫ k
     rw [← Category.assoc, hξt]
-    exact rfl
   set w₁ := EllObj.homToPullbackAlong (X.pullbackAlongπ (ξ ≫ k)) ξt hh₁ with hw₁
   have hh₂ : ζ ≫ secCover D d s = (X.pullbackAlongMap k ξ).baseHom := hζ
   set w₂ := EllObj.homToPullbackAlong (X.pullbackAlongMap k ξ) ζ hh₂ with hw₂
@@ -6261,13 +6265,12 @@ theorem rhoOfSection_zrel
     (d.eqv (strPr D (X.pullbackAlong k) ≫ k)).apply_symm_apply _
   have pf₁ : z₁ ≫ d.f = ξ ≫ k := by
     rw [hz₁, Category.assoc, (strZ D d k str').2, ← Category.assoc, hξt]
-    exact rfl
   have heqv₁ : d.eqv (ξ ≫ k) ⟨z₁, pf₁⟩ =
       v₁ := by
     have hnat := rhoMap_eqv d.toRelRepData w₁ ξt rfl
       (by show ξt ≫ strPr D (X.pullbackAlong k) ≫ k = ξ ≫ k
           rw [← Category.assoc, hξt]
-          exact rfl)
+          )
       (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _)
       (strZ D d k str')
     rw [hVAL] at hnat
@@ -6425,7 +6428,6 @@ theorem strSection_rhoOfSection
   calc geomPt T' ω ≫ strSection D d k str'
       = (ξt ≫ strPr D (X.pullbackAlong k)) ≫ strSection D d k str' := by
         rw [hξt]
-        exact rfl
     _ = ξt ≫ strSigmaP D d k str' := by
         rw [Category.assoc, strPr_strSection]
     _ = (ξt ≫ (strZ D d k str').1) ≫ d.σZ.relQuotientπ d.f d.over_base := by
@@ -6522,7 +6524,6 @@ theorem strSection_pull_pointwise
         k)).baseHom := by
     show ξt ≫ strPr D (X.pullbackAlong k) ≫ k = _ ≫ k
     rw [← Category.assoc, hξt]
-    exact rfl
   have hVAL : d.eqv (strPr D (X.pullbackAlong k) ≫ k) (strZ D d k str) =
       (sympFramedProblem D).map (EllObj.toPullbackAlong
         (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))).op
@@ -6547,7 +6548,7 @@ theorem strSection_pull_pointwise
         ξt hh₁) ξt rfl
       (by show ξt ≫ strPr D (X.pullbackAlong k) ≫ k = _ ≫ k
           rw [← Category.assoc, hξt]
-          exact rfl)
+          )
       (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _)
       (strZ D d k str)
     rw [hVAL] at hnat
@@ -7133,7 +7134,6 @@ theorem strZ_pull_pointwise {X : EllObj (CommRingCat.of ℚ)}
       (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1) ≫ d.f =
       ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')) := by
     rw [Category.assoc, (strZ D d (k' ≫ g') _).2, ← Category.assoc]
-    exact rfl
   have heqv₁ : d.eqv ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))
       ⟨ξt ≫ (strZ D d (k' ≫ g')
         (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1, pf₁⟩ =
@@ -7168,7 +7168,6 @@ theorem strZ_pull_pointwise {X : EllObj (CommRingCat.of ℚ)}
     rw [Category.assoc, ← Category.assoc (strCoverMap D g' k'),
       strCoverMap_pr]
     simp only [Category.assoc]
-    exact rfl
   have pf₂ : ((ξt ≫ strCoverMap D g' k') ≫ (strZ D d g' str0).1) ≫ d.f =
       ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')) := by
     rw [Category.assoc, (strZ D d g' str0).2, ← Category.assoc]
@@ -7300,7 +7299,6 @@ theorem strZ_pull_pointwise {X : EllObj (CommRingCat.of ℚ)}
           strPr D (X.pullbackAlong g')
       rw [Category.comp_id, Category.comp_id, Category.comp_id,
         Category.assoc, Category.assoc, strCoverMap_pr]
-      exact rfl
   have hcarve : rhoLevelStructureOfCarve D
       (X.pullbackAlong ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫
         (k' ≫ g'))).structMap
@@ -7406,8 +7404,7 @@ theorem strZ_pull {X : EllObj (CommRingCat.of ℚ)}
       (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1 ≫ d.f =
       (strCoverMap D g' k' ≫ (strZ D d g' str0).1) ≫ d.f := by
     rw [(strZ D d (k' ≫ g') _).2, Category.assoc, (strZ D d g' str0).2,
-      ← Category.assoc, strCoverMap_pr]
-    exact (Category.assoc _ _ _).symm
+      ← Category.assoc, ← Category.assoc, strCoverMap_pr]
   refine eq_of_forall_geomPt_agree d.f _ _ hfg ?_
   intro ω
   refine Eq.trans (strZ_pull_pointwise D d g' k' str0 (geomPt _ ω)) ?_

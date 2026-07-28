@@ -19,6 +19,12 @@ noncomputable section
 
 namespace ModularCurves
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry Opposite
 
 variable {N : ℕ} [NeZero N]
