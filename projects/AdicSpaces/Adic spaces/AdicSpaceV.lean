@@ -93,6 +93,40 @@ def IsAdicSpace (X : VObj.{u}) : Prop :=
   ∀ x : ↥(X.toTopCat), ∃ (U : Opens ↥(X.toTopCat)) (_ : x ∈ U)
     (C : AffinoidVChart.{u}), Nonempty (X.restrictOpen U ≅ C.toVObj)
 
+
+/-! ### Consistency with the carrier-level definition -/
+
+/-- The underlying continuous map of an isomorphism of `𝒱`-objects, as an
+isomorphism of topological spaces. -/
+noncomputable def VObj.baseIso {X Y : VObj.{u}} (e : X ≅ Y) :
+    X.toVPreObj.toPresheafedSpace.carrier
+      ≅ Y.toVPreObj.toPresheafedSpace.carrier where
+  hom := e.hom.toHom.base
+  inv := e.inv.toHom.base
+  hom_inv_id :=
+    congrArg (fun f : VPreHom X.toVPreObj X.toVPreObj => f.toHom.base)
+      e.hom_inv_id
+  inv_hom_id :=
+    congrArg (fun f : VPreHom Y.toVPreObj Y.toVPreObj => f.toHom.base)
+      e.inv_hom_id
+
+/-- **An isomorphism of `𝒱`-objects is in particular a homeomorphism of
+carriers.** -/
+noncomputable def VObj.baseHomeo {X Y : VObj.{u}} (e : X ≅ Y) :
+    ↥(X.toTopCat) ≃ₜ ↥(Y.toTopCat) :=
+  TopCat.homeoOfIso (VObj.baseIso e)
+
+/-- **The `𝒱`-level definition refines the carrier-level one**: an adic space in
+the sense of Wedhorn 8.22 is in particular locally homeomorphic to the adic
+spectra of sheafy affinoid pairs — the condition recorded by
+`AdicSpacePresentation`. -/
+theorem exists_homeo_of_isAdicSpace {X : VObj.{u}} (h : IsAdicSpace X)
+    (x : ↥(X.toTopCat)) :
+    ∃ (U : Opens ↥(X.toTopCat)) (_ : x ∈ U) (C : AffinoidVChart.{u}),
+      Nonempty (↥U ≃ₜ ↥(Spa C.Ring (ringPlus C.Ring))) := by
+  obtain ⟨U, hxU, C, ⟨e⟩⟩ := h x
+  exact ⟨U, hxU, C, ⟨VObj.baseHomeo e⟩⟩
+
 end ValuationSpectrum
 
 end
