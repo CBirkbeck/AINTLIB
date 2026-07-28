@@ -532,6 +532,20 @@ noncomputable def curveAdicSpacePresentation :
     -- the homeomorphism chain
     exact ⟨(xImageHomeo p F ϖ hdisV).symm.trans e.symm⟩
 
+
+/-- **𝒴 is locally affinoid** (ID3d, the `Y`-level carrier presentation):
+every point of the punctured-spectrum space `𝒴` has an open neighbourhood
+homeomorphic to the adic spectrum of a sheafy strongly noetherian complete
+Tate ring — a rational localization of a big-window chart ring. -/
+noncomputable def yAdicSpacePresentation :
+    ValuationSpectrum.AdicSpacePresentation where
+  carrier := ↥(yTop p F ϖ)
+  isLocallyAffinoid := by
+    intro y
+    obtain ⟨n, D', V, hyV, _, ⟨e⟩⟩ :=
+      exists_window_subdatum_nbhd p F ϖ (one_lt_p p) y ⊤ trivial
+    exact ⟨V, hyV, windowSubAffinoid p F ϖ n D', ⟨e.symm⟩⟩
+
 end FarguesFontaine
 
 end
