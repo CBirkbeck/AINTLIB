@@ -477,7 +477,14 @@ propext/Classical.choice/Quot.sound) before marking done.
   below replaces the gate.)
 
 ### [HRW-1] L2 — reducedness from reduced completed locals (mathlib-grade)
-- Status: open | File: WP/HeadReduced.lean | Depends: none | Parallel: yes
+- Status: done | File: WP/HeadReduced.lean | Depends: none | Parallel: yes
+- Progress: DONE 2026-07-28.  Proof exactly per sketch; the completion-kernel leaf
+  closed by `algebraMap L (AdicCompletion I L) = AdicCompletion.of I L` (rfl, from
+  `AdicCompletion/Algebra.lean:118` at S := R) + `AdicCompletion.eval_of` +
+  `Submodule.Quotient.mk_eq_zero`, feeding the SMUL Krull form
+  `Ideal.iInf_pow_smul_eq_bot_of_isLocalRing` (avoids I^n•⊤-vs-I^n juggling).
+  Noetherian localization: `IsLocalization.isNoetherianRing 𝔪.primeCompl`.
+  Axioms [propext, Classical.choice, Quot.sound].
 - Decls: `isReduced_of_forall_completedLocal_reduced`.
 - Sketch: nilpotent x; per maximal 𝔪: image nilpotent in the reduced completion ⇒
   x/1 ∈ ⋂ (maxIdeal)ⁿ = ⊥ in R_𝔪 (`Ideal.iInf_pow_eq_bot_of_isLocalRing`, VERIFIED

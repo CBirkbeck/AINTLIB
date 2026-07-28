@@ -52,7 +52,38 @@ ideals are reduced is reduced ([hrw-decomposition] L2: Krull intersection makes
 theorem isReduced_of_forall_completedLocal_reduced (R : Type*) [CommRing R]
     [IsNoetherianRing R]
     (h : ∀ (𝔪 : Ideal R) (_ : 𝔪.IsMaximal), IsReduced (completedLocal R 𝔪)) :
-    IsReduced R := by sorry
+    IsReduced R := by
+  refine ⟨fun x hx => ?_⟩
+  have hloc : ∀ (𝔪 : Ideal R) (_ : 𝔪.IsMaximal),
+      algebraMap R (Localization.AtPrime 𝔪) x = 0 := by
+    intro 𝔪 h𝔪
+    haveI := h𝔪
+    haveI : IsNoetherianRing (Localization.AtPrime 𝔪) :=
+      IsLocalization.isNoetherianRing 𝔪.primeCompl (Localization.AtPrime 𝔪)
+        inferInstance
+    set L := Localization.AtPrime 𝔪 with hL
+    set I : Ideal L := maximalIdeal L with hI
+    set y : L := algebraMap R L x with hy_def
+    have hy : IsNilpotent y := hx.map (algebraMap R L)
+    have hz : IsNilpotent (algebraMap L (AdicCompletion I L) y) :=
+      hy.map (algebraMap L (AdicCompletion I L))
+    haveI := h 𝔪 h𝔪
+    have hz0 : algebraMap L (AdicCompletion I L) y = 0 := hz.eq_zero
+    have hmem : y ∈ (⊥ : Submodule L L) := by
+      rw [← Ideal.iInf_pow_smul_eq_bot_of_isLocalRing (I := I) (M := L)
+        (IsLocalRing.maximalIdeal.isMaximal L).ne_top]
+      rw [Submodule.mem_iInf]
+      intro n
+      have hev := congrArg (AdicCompletion.eval I L n) hz0
+      rw [show algebraMap L (AdicCompletion I L) y = AdicCompletion.of I L y from rfl,
+        AdicCompletion.eval_of, map_zero] at hev
+      exact (Submodule.Quotient.mk_eq_zero _).mp hev
+    simpa using hmem
+  have hbot : x ∈ (⊥ : Ideal R) := by
+    refine Ideal.mem_of_localization_maximal fun P hP => ?_
+    rw [Ideal.map_bot, Ideal.mem_bot]
+    exact hloc P hP
+  simpa using hbot
 
 /-! ### L1 — the completed-local comparison for the graph model -/
 
