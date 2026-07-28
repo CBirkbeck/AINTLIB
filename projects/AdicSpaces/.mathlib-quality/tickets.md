@@ -3132,8 +3132,11 @@ development the old P5-3/P5-4 sketches describe.
 **`isAdicSpace_xVObj_of_windowCharts`** (`FarguesFontaine/CurveAdicSpace.lean`, axiom-clean,
 full gate green) proves `IsAdicSpace (xVObj p F ϖ)` from EXACTLY two inputs:
 
-* `hbasis` — the `windowSubOpen n D' …` are a neighbourhood basis of `𝒴`  → ticket **P5-6e**
-* `hviso` — each is `𝒱^pre`-isomorphic to `spaVObjTate (presheafValue D')` → ticket **P5-6d(ii)**
+* ~~`hbasis`~~ **DISCHARGED 2026-07-28** by `exists_windowSubOpen_nbhd` (P5-6e).
+* `hviso` — each window sub-open is `𝒱^pre`-isomorphic to `spaVObjTate (presheafValue D')`
+  → ticket **P5-6d(ii)**, THE LAST STEP.
+
+**`isAdicSpace_xVObj_of_windowVIso`** now proves the capstone from `hviso` ALONE.
 
 Everything else is proven: the quotient leg (P5-5), `exists_disjoint_translates` +
 `disjoint_translates_mono` for wandering, `windowSubVChart` for the chart, `VObj.isoOfVPreIso`,

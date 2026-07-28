@@ -133,6 +133,24 @@ theorem isAdicSpace_xVObj_of_windowCharts
   obtain ⟨e⟩ := hviso n D' u' hu' u hu
   exact ⟨ValuationSpectrum.VObj.isoOfVPreIso e.symm⟩
 
+
+/-- **The adic Fargues–Fontaine curve is an adic space, given only the chart
+`𝒱`-isomorphisms.** The neighbourhood-basis input is now discharged by
+`exists_windowSubOpen_nbhd`, so the capstone rests on a single statement: each
+window sub-open of `𝒴` is `𝒱`-isomorphic to its window sub-affinoid. -/
+theorem isAdicSpace_xVObj_of_windowVIso (hp : 1 < p)
+    (hviso : ∀ (n : ℤ) (D' : RationalLocData (windowChartRing p F ϖ n))
+        (u' : (presheafValue D')ˣ) (hu' : IsTopologicallyNilpotent
+          ((u' : (presheafValue D')ˣ) : presheafValue D'))
+        (u : (windowChartRing p F ϖ n)ˣ) (hu : IsTopologicallyNilpotent
+          ((u : (windowChartRing p F ϖ n)ˣ) : windowChartRing p F ϖ n)),
+      Nonempty ((ValuationSpectrum.spaVObjTate (A := presheafValue D')).toVPreObj
+        ≅ (yVPreObj p F ϖ).restrictOpen
+            (windowSubOpen p F ϖ n D' u' hu' u hu))) :
+    ValuationSpectrum.IsAdicSpace (xVObj p F ϖ) :=
+  isAdicSpace_xVObj_of_windowCharts p F ϖ
+    (fun y O hyO => exists_windowSubOpen_nbhd p F ϖ hp y O hyO) hviso
+
 end FarguesFontaine
 
 end
