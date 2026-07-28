@@ -53,8 +53,7 @@ noncomputable def coordinateHyperplanePoleSheafPowerTensorEquivalence
     (tensorRightTensor N P).symm ≪≫
       (tensoringRight X.Modules).mapIso eNP ≪≫
       rightUnitorNatIso X.Modules
-  letI : F.IsEquivalence := Functor.IsEquivalence.mk' G eta epsilon
-  exact F.asEquivalence
+  exact CategoryTheory.Equivalence.mk F G eta epsilon
 
 /-- The functor underlying the positive-twist equivalence is right tensoring
 by the concrete module `O(n)`. -/
@@ -66,6 +65,18 @@ theorem coordinateHyperplanePoleSheafPowerTensorEquivalence_functor
     (coordinateHyperplanePoleSheafPowerTensorEquivalence
       (R := R) j n).functor =
       tensorRight (coordinateHyperplanePoleSheafPower (R := R) j n) := by
+  rfl
+
+/-- The inverse functor of the positive-twist equivalence is right tensoring
+by the concrete module `O(-n)`. -/
+@[simp]
+theorem coordinateHyperplanePoleSheafPowerTensorEquivalence_inverse
+    (j : σ) (n : ℕ) :
+    let X := Proj (homogeneousSubmodule σ R)
+    letI := Scheme.Modules.monoidalCategory X
+    (coordinateHyperplanePoleSheafPowerTensorEquivalence
+      (R := R) j n).inverse =
+      tensorRight (coordinateHyperplaneIdealModulePower (R := R) j n) := by
   rfl
 
 end
