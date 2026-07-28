@@ -32,6 +32,14 @@ dictionary, so node B is `Subtype.ext` plus
 associativity), the first is `pullback.lift` and needs the universal property.
 -/
 
+-- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback`/`resLE`
+-- defs are defeq only after delta, which `rw`/`simp` will not do at `implicit`
+-- transparency; and the `Scheme` category instance is likewise no longer transparent
+-- enough for the `≫`-associativity rewrites.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 open CategoryTheory AlgebraicGeometry Limits
@@ -101,7 +109,6 @@ theorem chartPointsEquiv_restrict_coe {T T' : Scheme.{u}} (tV : T ⟶ Spec Γ(S,
     · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd]
   rw [chartPointsEquiv_coe Pr (a ≫ tV) Q, chartPointsEquiv_coe Pr tV P, hlift,
     Category.assoc]
-  rfl
 
 /-- `chartPointsEquiv` only depends on the base point through its value: two points with
 the same underlying morphism over equal base points have the same image. This is the

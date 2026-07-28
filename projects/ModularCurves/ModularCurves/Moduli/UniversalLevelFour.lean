@@ -2337,6 +2337,15 @@ noncomputable def E4Witness.restrict {R : CommRingCat.{u}} {X : EllObj R}
   hP := by have := w.hP.restrict h; rwa [map_zero] at this
   hQ := w.hQ.restrict h
 
+section OpaqueProjModelE4Piece
+
+/- `projModel` is a `Proj`-of-graded-ring construction; `whnf` chases it inside the
+`eqToHom (congrArg projModel _)` transports below without bound on this pin. Opacity is
+the fix (budget is not); scoped because the `projModel*` API elsewhere in the file needs
+transparency. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(E4A-12)** The pieces are compatible with restriction (Tate-normal-form
@@ -2388,6 +2397,8 @@ theorem e4Piece_restrict {R : CommRingCat.{u}} {X : EllObj R}
   rw [← projModelBaseChange_comp',
     projModelBaseChange_congr_hom hσ.symm (universalE4 R),
     ← Category.assoc, eqToHom_trans]
+
+end OpaqueProjModelE4Piece
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 /-- **(E4A-12)** The witness cover of the total space. Mirror of `e3WitnessCover`. -/
@@ -2665,6 +2676,15 @@ noncomputable def e4BaseCover {R : CommRingCat.{u}} {X : EllObj R}
       obtain ⟨V, hxV, Pr, B, u, v, hF, hP, hQ, _hBu, _hrel⟩ := hD x
       exact ⟨⟨V, Pr, B, u, v, hF, hP, hQ⟩, ⟨x, hxV⟩, rfl⟩)
 
+section OpaqueProjModelE4Top
+
+/- `projModel` is a `Proj`-of-graded-ring construction; `whnf` chases it inside the
+`eqToHom (congrArg projModel _)` transports below without bound on this pin. Opacity is
+the fix (budget is not); scoped because the `projModel*` API elsewhere in the file needs
+transparency. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(E4A-12 ★)** The glued comparison respects the zero sections. Mirror of
@@ -2735,6 +2755,8 @@ theorem e4Top_zero {R : CommRingCat.{u}} {X : EllObj R}
       Spec.map (CommRingCat.ofHom (e4ClassifyingRingHom X L hD)) =
     w.V.1.ι ≫ e4ClassifyingMap X L hD from by rw [Category.assoc]; rfl]
   simp only [Category.assoc]
+
+end OpaqueProjModelE4Top
 
 open AlgebraicGeometry CategoryTheory Scheme in
 set_option backward.isDefEq.respectTransparency false in

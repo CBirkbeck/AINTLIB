@@ -69,6 +69,14 @@ square-root/`b`↔`u` dictionary).
 
 open AlgebraicGeometry CategoryTheory Limits
 
+-- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback`/`resLE`
+-- defs are defeq only after delta, which `rw`/`simp` will not do at `implicit`
+-- transparency; and the `Scheme` category instance is likewise no longer transparent
+-- enough for the `≫`-associativity rewrites.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace ModularCurves
@@ -611,9 +619,10 @@ private noncomputable def glueNatTrans :
             ≫ Spec.map (CommRingCat.ofHom (Scheme.resLE hpq))
       rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp,
         ← CommRingCat.ofHom_comp, transRingHom_comp_algebraMap R X h2 p q hpq]
-    erw [Category.assoc, Category.assoc, htr]
-    rw [IsAffineOpen.isoSpec_inv_ι, ← Category.assoc, hsq]
-    erw [Category.assoc, specMap_resLE_fromSpec hpq]
+    -- `simp only` above already applied `htr` and `isoSpec_inv_ι`; from
+    -- `map f ≫ sqrtCoverπ q ≫ fromSpec = sqrtCoverπ p ≫ fromSpec` it is just `hsq`
+    -- reassociated into place.
+    rw [← Category.assoc, hsq, Category.assoc, specMap_resLE_fromSpec hpq]
 
 /-- **The relative gluing datum of the scale-torsor**: the square-root pieces over the
 locally directed affine-in-chart cover of the level-`2` locus, glued along the
