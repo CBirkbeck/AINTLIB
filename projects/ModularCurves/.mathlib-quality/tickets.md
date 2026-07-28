@@ -28962,3 +28962,44 @@ Only **SUB2h** (the scheme-level assembly) remains of SUB2.
 - **SUB2h** — the assembly: `∀ s, ∃ V ∋ s, ∃ Pr lam, IsAdapted ∧ Pr.W = legendreCurve lam
   ∧ MarksAt 0 0 ∧ MarksAt 1 0`, over `Spec k̄` where `V = ⊤`, mirroring
   `universalLegendre_isLegendreDatum` (`Moduli/UniversalLegendre.lean:196`).
+
+---
+
+## [GAP-A] Relative theorem of the square — decomposition as of 2026-07-29
+
+**Landed and axiom-clean this session** (`Picard/DivisorClass.lean`,
+`Picard/PicComparison.lean`, `Picard/SelfAdjointN.lean`):
+
+- `RelEffCartierDiv.exists_pic_map_of_nonempty_tensor_pullback_iso` — the weakened
+  multiplicativity (tensor iso up to `π^*N` ⟹ class products equal up to `Pic.map π [N]`).
+  The *exact* form is false: the two sides differ by `π^*` of the normal bundle
+  `0^*𝒪(D_0) ≅ ω⁻¹`.
+- `Modules.toSkeleton_tensorObj_eq`, `Modules.toSkeleton_unitObj`,
+  `Modules.nonempty_iso_of_tensorObj_right_cancel`,
+  `Modules.nonempty_iso_of_tensorObj_unitObj`.
+- `exists_invertible_tensor_idealModule_add_of_tensor_iso` — the chart case (`N = 𝒪_T`).
+- `kappa_ratio_algebra` — the κ-shaped ratio, over abstract commutative-group elements.
+- `exists_pic_map_snd_sectionCls_add` is now **derived**, not assumed.
+
+**The single remaining sorry** is `exists_invertible_tensor_idealModule_add`
+(`Picard/SelfAdjointN.lean`), and it decomposes into exactly two bricks:
+
+### [GAP-A-1] chart-local exact tensor iso — `state:todo`
+Over an open `U ⊆ T` carrying a Weierstrass model, on `f⁻¹U`:
+`I(D_Q) ⊗ I(D_{Q'}) ≅ I(D_{Q+Q'}) ⊗ I(D_0)`.
+Source: the line-and-vertical function of the addition law,
+`I(D_P)·I(D_Q)·I(D_{−(P+Q)}) = (ℓ)` and `I(D_{P+Q})·I(D_{−(P+Q)}) = (v)`.
+The degenerate loci (`Q = Q'`, `Q = −Q'`, either `= 0`) are handled by proving this on the
+**universal pair** over `B = C ×_U C` — integral, so no case analysis over the given base —
+and base-changing (`RelEffCartierDiv.sectionDivisor_baseChange`,
+`EllipticCurve/AdditionBaseChange.lean`, reducedness in `EllipticCurve/GroupLawAxioms.lean`).
+Feeds `exists_invertible_tensor_idealModule_add_of_tensor_iso` directly.
+
+### [GAP-A-2] descent assembly — `state:todo`, depends on GAP-A-1
+Glue GAP-A-1 over a cover of `T` (`EllipticCurve.exists_weierstrass_cover_baseChange`) with
+`nonempty_unitObj_iso_of_normalized_glue`, whose overlap condition is *forced* by
+zero-normalisation (`eq_one_of_pullback_eq_one`). Read the glued triviality of the
+discrepancy module off with `Modules.nonempty_iso_of_tensorObj_unitObj`. Output: the leaf.
+
+Not needed, contrary to the earlier plan: a general reduced **seesaw** theorem. The
+reducedness enters only through GAP-A-1's universal-pair argument.

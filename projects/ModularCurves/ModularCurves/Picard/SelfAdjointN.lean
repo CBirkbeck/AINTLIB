@@ -106,6 +106,48 @@ is reduced and the seesaw applies, and then base-changes down:
 The expected bottleneck is not the seesaw but the comparison between HasseWeil's
 *projective-divisor* linear equivalence and the scheme-theoretic `picClass`, together with
 its base-change naturality.
+
+### State (2026-07-29): the Picard layer is discharged; the leaf is now module-level
+
+Everything between the leaf and `kappa_add` / `(★′)` is proved and axiom-clean. The chain,
+top to bottom:
+
+* `kappa_add` ⟸ `exists_pic_map_snd_sectionCls_add` (was the sorry; now **derived**)
+  ⟸ `RelEffCartierDiv.exists_pic_map_of_nonempty_tensor_pullback_iso`
+  (`Picard/DivisorClass.lean`) + `kappa_ratio_algebra`.
+  The first is the *weakened* multiplicativity: an exact tensor iso is false here (the two
+  sides differ by `π^*` of the normal bundle `0^*𝒪(D_0) ≅ ω⁻¹`), so the usable form is
+  "tensor iso up to `π^*N` ⟹ equality of class products up to `Pic.map π [N]`". The second
+  is pure commutative-group algebra, stated over abstract elements so that no `sectionCls`
+  term is ever AC-normalised (that normalisation times out).
+* The remaining sorry is `exists_invertible_tensor_idealModule_add`, stated on the ideal
+  modules of the four section divisors:
+  `I(D_Q) ⊗ I(D_{Q'}) ≅ (I(D_{Q+Q'}) ⊗ I(D_0)) ⊗ π^*N` for some invertible `N` on `T`.
+* Two feeders into it are proved:
+  - `exists_invertible_tensor_idealModule_add_of_tensor_iso` — the **chart case**: an exact
+    tensor iso gives the leaf with `N = 𝒪_T`. This is the shape a Weierstrass chart
+    produces, because there the invariant differential trivialises `ω`, hence the normal
+    bundle, and the obstruction vanishes.
+  - `Modules.nonempty_iso_of_tensorObj_unitObj` (`Picard/PicComparison.lean`) — `M ⊗ N ≅ 𝒪`
+    and `M' ⊗ N ≅ 𝒪` give `M ≅ M'`, with `N`'s invertibility *derived*. This is exactly
+    what converts the descent machinery's output (triviality of the single discrepancy
+    module `L = (I(D_{Q+Q'}) ⊗ I(D_0)) ⊗ N`) into the two-sided iso the chart case wants.
+    Its engine `Modules.nonempty_iso_of_tensorObj_right_cancel` cancels an invertible
+    tensor factor, in the skeleton, via `Units` (the skeleton has no cancellation
+    instance).
+
+So the two remaining bricks are:
+
+* **(A)** the chart-local exact iso — over an open `U ⊆ T` carrying a Weierstrass model,
+  `I(D_Q) ⊗ I(D_{Q'}) ≅ I(D_{Q+Q'}) ⊗ I(D_0)` on `f⁻¹U`, from the line-and-vertical
+  function of the addition law; and
+* **(B)** the descent assembly — glue (A) over a cover of `T` via
+  `nonempty_unitObj_iso_of_normalized_glue`, whose overlap condition is *forced* by
+  zero-normalisation, and read the result off with the two lemmas above.
+
+Note that (A) is where the universal-curve/reduced-seesaw discussion above lands: the
+degenerate loci (`Q = Q'`, `Q = −Q'`, either `= 0`) are handled by proving (A) on the
+universal pair and base-changing, not by case analysis over the given base.
 -/
 
 universe u
