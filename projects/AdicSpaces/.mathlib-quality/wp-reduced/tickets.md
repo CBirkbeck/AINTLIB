@@ -63,7 +63,11 @@ propext/Classical.choice/Quot.sound) before marking done.
   `.abv_mul` at `hnorm := norm_mul`.  Generality: arbitrary σ; c ≡ 1 where stated.
 
 ### [W3] Algebra.lean I — the support subring 𝒜 and its coefficient API
-- Status: open | File: WP/Algebra.lean | Depends: W1, W2 | Parallel: after deps
+- Status: done (2026-07-28; Algebra.lean now 0 sorries — W4's instance block folded in;
+  build green full WP tree; axioms clean; cleanup deferred to CLEANUP-1)
+- Progress: gotchas — antidiagonal membership via `Finset.HasAntidiagonal.
+  mem_antidiagonal` (export alias mismatches the instance form); `subst`-style if_neg
+  proofs beat `▸`; `Real.mul_iSup_of_nonneg` needs the iSup pre-shaped by iSup_congr. | File: WP/Algebra.lean | Depends: W1, W2 | Parallel: after deps
 - Decls: `wpSupport` (5 closure fields), `isClosed_wpSupport`, `coeffA` laws
   (`coeffA_of_not_wpMem`, `norm_coeffA_le`, `norm_eq_iSup_coeffA`,
   `coeffA_injective`), `wpMonomial` (+`coeffA_wpMonomial`, `norm_wpMonomial`),
@@ -78,7 +82,9 @@ propext/Classical.choice/Quot.sound) before marking done.
   `norm_eq_iSup_coeffA` + `norm_mul` of K.  Sources: [WP] 705–730.
 
 ### [W4] Algebra.lean II — instance stack
-- Status: open | File: WP/Algebra.lean | Depends: W3 | Type: instances
+- Status: done (2026-07-28, folded into the W3 pass: piW lemmas one-liners off constA;
+  norm-window Huber/Tate instances with inlined exists_norm_window'; maximal
+  PlusSubring + isRingOfIntegralElements_powerBounded verbatim from the JetA block) | File: WP/Algebra.lean | Depends: W3 | Type: instances
 - Decls: `NormOneClass (WPA)`, `piW` lemmas (norm/lt_one/pos/isUnit/mul),
   unconditional `IsHuberRing/IsTateRing (WPA)`, `PlusSubring`,
   `IsRingOfIntegralElements (ringPlus)`.
