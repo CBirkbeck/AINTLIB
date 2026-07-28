@@ -411,6 +411,184 @@ theorem phiHom_injective [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
   exact map_zero (restrictionMapHom (idxOf D₀ hVW i).D
     (RationalIndex.mono (imgOpens_le D₀ hVW i) k).D hsub)
 
+/-- The image-open comparison is monotone in the `A`-side datum. -/
+theorem imgDatum_mono {E E' : RationalLocData A} (hE : E.IsRational)
+    (hE' : E'.IsRational)
+    (h : rationalOpen E'.T E'.s ⊆ rationalOpen E.T E.s) :
+    rationalOpen (imgDatum D₀ hE').T (imgDatum D₀ hE').s
+      ⊆ rationalOpen (imgDatum D₀ hE).T (imgDatum D₀ hE).s := by
+  intro w hw
+  have hspa : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ := hw.1
+  exact (mem_imgDatum_iff D₀ hE ⟨w, hspa⟩).mpr
+    (h ((mem_imgDatum_iff D₀ hE' ⟨w, hspa⟩).mp hw))
+
+/-- **The comparison transports restrictions**: the keystone comparison of a
+smaller `A`-datum is the `B`-side restriction of the bigger one. -/
+theorem pieceEquiv_restrict' {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    (y : ↥(limitSections V)) (i j : RationalIndex V)
+    (h : rationalOpen j.D.T j.D.s ⊆ rationalOpen i.D.T i.D.s) :
+    restrictionMap (imgDatum D₀ i.isRational) (imgDatum D₀ j.isRational)
+        (imgDatum_mono D₀ i.isRational j.isRational h)
+        (pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y))
+      = pieceEquiv D₀ j.isRational (index_sub D₀ hV j) (limitEvalHom j y) := by
+  have hsq := pieceEquiv_restrict D₀ i.isRational j.isRational
+    (index_sub D₀ hV i) h (limitEvalHom i y)
+  have hy : restrictionMap i.D j.D h (limitEvalHom i y) = limitEvalHom j y :=
+    y.2 i j h
+  rw [hy] at hsq
+  exact hsq.symm
+
+variable [DecidableEq A]
+
+/-- Membership in the intersection datum's open implies membership in the
+left one (extracted so `interIdx`'s field is a one-liner). -/
+theorem interDatumOpen_left_aux {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V)
+    (v : ↥(Spa A A⁺))
+    (hv : v ∈ spaOpen (i.D.interDatumOpen j.D
+      (exists_pow_le_of_isRational_pair i.D.P i.D i.isRational).choose
+      (exists_pow_le_of_isRational_pair i.D.P j.D j.isRational).choose
+      (exists_pow_le_of_isRational_pair i.D.P i.D i.isRational).choose_spec
+      (exists_pow_le_of_isRational_pair i.D.P j.D j.isRational).choose_spec)) :
+    v ∈ spaOpen i.D :=
+  ((Set.ext_iff.mp (RationalLocData.interDatumOpen_rationalOpen i.D j.D _ _ _ _)
+    ((v : ↥(Spa A A⁺)) : Spv A)).mp hv).1
+
+/-- The `A`-index of the intersection of two indices (openness certificates
+from `exists_pow_le_of_isRational_pair` at the shared pair `i.D.P`). -/
+noncomputable def interIdx {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
+    RationalIndex V where
+  D := i.D.interDatumOpen j.D
+    (exists_pow_le_of_isRational_pair i.D.P i.D i.isRational).choose
+    (exists_pow_le_of_isRational_pair i.D.P j.D j.isRational).choose
+    (exists_pow_le_of_isRational_pair i.D.P i.D i.isRational).choose_spec
+    (exists_pow_le_of_isRational_pair i.D.P j.D j.isRational).choose_spec
+  isRational := RationalLocData.isRational_of_pow_le _
+    (RationalLocData.interDatumOpen_pow_le _ _ _ _ _ _)
+  subset := fun v hv => i.subset (interDatumOpen_left_aux i j v hv)
+
+theorem interIdx_rationalOpen {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
+    rationalOpen (interIdx i j).D.T (interIdx i j).D.s
+      = rationalOpen i.D.T i.D.s ∩ rationalOpen j.D.T j.D.s :=
+  RationalLocData.interDatumOpen_rationalOpen i.D j.D
+    (exists_pow_le_of_isRational_pair i.D.P i.D i.isRational).choose
+    (exists_pow_le_of_isRational_pair i.D.P j.D j.isRational).choose
+    (exists_pow_le_of_isRational_pair i.D.P i.D i.isRational).choose_spec
+    (exists_pow_le_of_isRational_pair i.D.P j.D j.isRational).choose_spec
+
+theorem interIdx_le_left {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
+    rationalOpen (interIdx i j).D.T (interIdx i j).D.s
+      ⊆ rationalOpen i.D.T i.D.s := by
+  rw [interIdx_rationalOpen]
+  exact Set.inter_subset_left
+
+theorem interIdx_le_right {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V) :
+    rationalOpen (interIdx i j).D.T (interIdx i j).D.s
+      ⊆ rationalOpen j.D.T j.D.s := by
+  rw [interIdx_rationalOpen]
+  exact Set.inter_subset_right
+
+/-- The image open of the intersection index is the intersection of the
+image opens. -/
+theorem mem_imgDatum_interIdx {V : Opens ↥(Spa A A⁺)} (i j : RationalIndex V)
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
+    (w : Spv (presheafValue D₀))
+        ∈ rationalOpen (imgDatum D₀ (interIdx i j).isRational).T
+            (imgDatum D₀ (interIdx i j).isRational).s
+      ↔ ((w : Spv (presheafValue D₀))
+            ∈ rationalOpen (imgDatum D₀ i.isRational).T
+                (imgDatum D₀ i.isRational).s
+          ∧ (w : Spv (presheafValue D₀))
+            ∈ rationalOpen (imgDatum D₀ j.isRational).T
+                (imgDatum D₀ j.isRational).s) := by
+  rw [mem_imgDatum_iff D₀ (interIdx i j).isRational w,
+    mem_imgDatum_iff D₀ i.isRational w, mem_imgDatum_iff D₀ j.isRational w]
+  rw [show rationalOpen (interIdx i j).D.T (interIdx i j).D.s
+      = rationalOpen i.D.T i.D.s ∩ rationalOpen j.D.T j.D.s from
+    interIdx_rationalOpen i j]
+  exact Set.mem_inter_iff _ _ _
+
+/-- The candidate `B`-side section on the image open of an `A`-index. -/
+noncomputable def imgSection {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    (y : ↥(limitSections V)) (i : RationalIndex V) :
+    ↥(limitSections (imgOpens D₀ i)) :=
+  limitOfValue (imgDatum D₀ i.isRational)
+    (pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y))
+
+/-- **The candidate sections agree on overlaps** — via the intersection index
+and the keystone square. -/
+theorem imgSection_compat {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    (y : ↥(limitSections V)) (i j : RationalIndex V) :
+    limitRestrict (inf_le_left (a := imgOpens D₀ i) (b := imgOpens D₀ j))
+        (imgSection D₀ hV y i)
+      = limitRestrict (inf_le_right (a := imgOpens D₀ i) (b := imgOpens D₀ j))
+          (imgSection D₀ hV y j) := by
+  refine Subtype.ext (funext fun k => ?_)
+  -- `k` sits inside the image open of the intersection index
+  have hk : rationalOpen k.D.T k.D.s
+      ⊆ rationalOpen (imgDatum D₀ (interIdx i j).isRational).T
+          (imgDatum D₀ (interIdx i j).isRational).s := by
+    intro w hw
+    have hspa : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ := hw.1
+    have hkw : (⟨w, hspa⟩ : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+        ∈ (imgOpens D₀ i ⊓ imgOpens D₀ j) := k.subset hw
+    exact (mem_imgDatum_interIdx D₀ i j ⟨w, hspa⟩).mpr ⟨hkw.1, hkw.2⟩
+  have hmi : rationalOpen (imgDatum D₀ (interIdx i j).isRational).T
+      (imgDatum D₀ (interIdx i j).isRational).s
+      ⊆ rationalOpen (imgDatum D₀ i.isRational).T
+          (imgDatum D₀ i.isRational).s :=
+    imgDatum_mono D₀ i.isRational (interIdx i j).isRational (interIdx_le_left i j)
+  have hmj : rationalOpen (imgDatum D₀ (interIdx i j).isRational).T
+      (imgDatum D₀ (interIdx i j).isRational).s
+      ⊆ rationalOpen (imgDatum D₀ j.isRational).T
+          (imgDatum D₀ j.isRational).s :=
+    imgDatum_mono D₀ j.isRational (interIdx i j).isRational (interIdx_le_right i j)
+  have hi := pieceEquiv_restrict' D₀ hV y i (interIdx i j) (interIdx_le_left i j)
+  have hj := pieceEquiv_restrict' D₀ hV y j (interIdx i j) (interIdx_le_right i j)
+  show restrictionMap (imgDatum D₀ i.isRational) k.D _ _
+    = restrictionMap (imgDatum D₀ j.isRational) k.D _ _
+  have hfi := congrFun (restrictionMap_comp (imgDatum D₀ i.isRational)
+    (imgDatum D₀ (interIdx i j).isRational) k.D hmi hk)
+    (pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y))
+  have hfj := congrFun (restrictionMap_comp (imgDatum D₀ j.isRational)
+    (imgDatum D₀ (interIdx i j).isRational) k.D hmj hk)
+    (pieceEquiv D₀ j.isRational (index_sub D₀ hV j) (limitEvalHom j y))
+  rw [← hfi, ← hfj]
+  simp only [Function.comp_apply]
+  rw [hi, hj]
+
+/-- **The comparison map hits everything** (P5-K5): the keystone comparisons
+of an `A`-side family glue over the image-open cover to a `B`-side family
+mapping back to it. -/
+theorem phiHom_surjective {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) :
+    Function.Surjective (phiHom D₀ hV hVW) := by
+  classical
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  intro y
+  obtain ⟨x, hx⟩ := (isLimitSheaf_value D₀).glue
+    (U := imgOpens D₀ (A := A) (V := V)) (imgOpens_le D₀ hVW)
+    (imgOpens_cover D₀ hV hVW) (imgSection D₀ hV y)
+    (imgSection_compat D₀ hV y)
+  refine ⟨x, Subtype.ext (funext fun i => ?_)⟩
+  -- read off the top component of the `i`-th piece
+  have htop := congrArg (fun z : ↥(limitSections (imgOpens D₀ i)) =>
+      (z : ∀ k : RationalIndex (imgOpens D₀ i), presheafValue k.D)
+        (RationalIndex.self (imgDatum D₀ i.isRational)
+          (imgDatum_isRational D₀ i.isRational))) (hx i)
+  have hid : restrictionMap (imgDatum D₀ i.isRational)
+      (imgDatum D₀ i.isRational) (subset_refl _)
+      (pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y))
+      = pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y) :=
+    congrFun (restrictionMap_id (imgDatum D₀ i.isRational)) _
+  have hcomp : limitEvalHom (idxOf D₀ hVW i) x
+      = pieceEquiv D₀ i.isRational (index_sub D₀ hV i) (limitEvalHom i y) :=
+    htop.trans hid
+  show (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm
+      (limitEvalHom (idxOf D₀ hVW i) x) = _
+  rw [hcomp, RingEquiv.symm_apply_apply]
+  rfl
+
 end Phi
 
 end SpaVIso
