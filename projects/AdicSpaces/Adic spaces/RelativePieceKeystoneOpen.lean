@@ -1184,7 +1184,7 @@ style values), hence on the dense localization image (ring homs preserve the
 inverted `E.s`), hence everywhere by continuity + `T2`. Same 8-step stack as
 `genPiece_relative_equiv`'s G3b overlap squares. -/
 theorem relativePiece_equiv_restrict_square
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺)]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]

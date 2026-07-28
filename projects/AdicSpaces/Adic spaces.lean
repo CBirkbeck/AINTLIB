@@ -163,6 +163,7 @@ import «Adic spaces».VRestrict
 import «Adic spaces».SpaVObj
 import «Adic spaces».RelativePieceKeystoneGen
 import «Adic spaces».RelativePieceKeystoneOpen
+import «Adic spaces».SpaVIso
 import «Adic spaces».TateAcyclicity
 import «Adic spaces».TateAcyclicityFinalAssembly
 import «Adic spaces».TateAcyclicityResiduals
