@@ -2605,7 +2605,31 @@ valuations.
     phiCatIso, presheafIso, **spaRestrictIso**.
   * K8a (VRestrict.lean) isIso_ringStalkMap / isoStalkRingEquiv /
     `VPreObj.ofIso` — transport of a 𝒱^pre-structure along an isomorphism.
-- **REMAINING for P5-K**: (i) the sheaf-condition transport
+- **K8b DONE** (VRestrict.lean): `VPreHom.ofIso` — the transported iso IS a
+  𝒱^pre-morphism (isLocalHom from surjectivity of the stalk comparison;
+  val_compat by comap_comp against the transported valuation's definition).
+- ★ **THE PRECISE REMAINING GAP (identified 2026-07-28, read this first)**:
+  `VPreObj.ofIso` transports a valuation *along the iso*, so
+  `VPreHom.ofIso` compares the TRANSPORTED structure with the target. For
+  `IsAdicSpace` we need the comparison between the two structures that
+  already exist: `X.restrictOpen U` (P5-1, whose `val` comes from the
+  ambient `stalkValue` package) and `spaVObjTate B` (whose `val` is B's
+  `stalkValue`). So the last mathematical step is
+  **`val`-AGREEMENT**: the stalk valuation of `Spa B` at `w` corresponds,
+  under the stalk isomorphism induced by `spaRestrictIso`, to the ambient
+  stalk valuation at `shadow w`. Route: both are germ-limits of
+  `pointValue`; the comparison at each rational index is `pieceEquiv`, and
+  `comap_pointValue` + `eq_pointValue_of_comap_eq` (StructureSheafStalks
+  60-75) say a continuous valuation pulling back to the point IS the point
+  valuation — so it suffices to check that `pieceEquiv` intertwines the two
+  point values, which is `comap_pointValue` composed with
+  `mem_imgDatum_iff`'s shadow description. With that, `spaRestrictIso`
+  upgrades to a genuine 𝒱-iso and `IsAdicSpace` follows by the P5-6
+  assembly.
+  (The sheaf-condition transport `VObj.ofIso` is NOT needed on this route —
+  both sides are already `VObj`s: the source by `VObj.restrictOpen` (P5-1),
+  the target by `spaVObjTate` (P5-2).)
+- **ALSO REMAINING**: (i) the sheaf-condition transport
   (`VObj.ofIso`) — `IsSheafOfTopologicalRings` along a homeomorphism +
   presheaf iso; (ii) `e.hom` as a VPreHom (isLocalHom from surjectivity of
   the stalk iso, val_compat near-definitional since `VPreObj.ofIso`'s `val`
