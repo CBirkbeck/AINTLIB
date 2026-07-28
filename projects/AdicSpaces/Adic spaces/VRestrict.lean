@@ -482,12 +482,36 @@ inclusion stalk maps, and locality is then read off the valuation. -/
 
 section CorestrictV
 
+/-- **`𝒱` is a full subcategory of `𝒱^pre`**: an isomorphism of the underlying
+`𝒱^pre`-objects is an isomorphism of `𝒱`-objects. -/
+def VObj.isoOfVPreIso {X Y : VObj.{u}} (e : X.toVPreObj ≅ Y.toVPreObj) :
+    X ≅ Y where
+  hom := e.hom
+  inv := e.inv
+  hom_inv_id := VPreHom.ext
+    (congrArg (fun f : VPreHom X.toVPreObj X.toVPreObj => f.toHom) e.hom_inv_id)
+  inv_hom_id := VPreHom.ext
+    (congrArg (fun f : VPreHom Y.toVPreObj Y.toVPreObj => f.toHom) e.inv_hom_id)
+
+
 /-- Composition of `𝒱^pre`-morphisms. This is exactly the composition of the
 `Category VPreObj` instance, named because the `⟶` spelling does not always
 elaborate when the expected type is written as `VPreHom _ _`. -/
 noncomputable abbrev VPreHom.comp {X Y Z : VPreObj.{u}} (f : VPreHom X Y)
     (g : VPreHom Y Z) : VPreHom X Z :=
   show X ⟶ Z from (f : X ⟶ Y) ≫ (g : Y ⟶ Z)
+
+/-- A `𝒱^pre`-morphism whose underlying morphism of presheafed spaces is
+invertible is an isomorphism of `𝒱^pre`. -/
+noncomputable def VPreHom.isoOfIsIso {X Y : VPreObj.{u}} (f : VPreHom X Y)
+    [IsIso f.toHom] (ginv : VPreHom Y X)
+    (hg : ginv.toHom = CategoryTheory.inv f.toHom) : X ≅ Y where
+  hom := f
+  inv := ginv
+  hom_inv_id := VPreHom.ext (by rw [show (f.comp ginv).toHom
+    = f.toHom ≫ ginv.toHom from rfl, hg, IsIso.hom_inv_id]; rfl)
+  inv_hom_id := VPreHom.ext (by rw [show (ginv.comp f).toHom
+    = ginv.toHom ≫ f.toHom from rfl, hg, IsIso.inv_hom_id]; rfl)
 
 
 
