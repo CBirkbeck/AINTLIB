@@ -2631,7 +2631,32 @@ valuations.
     embedding, with a generalize-subst key for the Opens equality);
   * K13 `spaVPreObjOf` + `isLocalHom_of_val_comap` + **`spaCompVPreHom`** —
     the comparison is a `VPreHom`.
-- **REMAINING (assembly only)**: P5-5 (quotient leg `X|_{π V} ≅ 𝒴|_V`) and
+- ⚠ **PACKAGING BLOCKER (2026-07-28, four approaches tried — read before retrying)**:
+  turning `spaCompVPreHom` into a 𝒱-ISO needs the factorisation
+  `spaCompHom = (spaRestrictIso).hom ≫ (spaSpace).ofRestrict …`
+  (or, equivalently, its stalk-level form
+  `ringStalkMap spaCompHom w ∘ restrictRingStalkEquiv = ringStalkMap
+  spaRestrictIso.hom w`). Attempts that FAILED: (1) `rfl` — the composite's
+  `c` is not definitionally `ambComp`; (2) `PresheafedSpace.Hom.ext` +
+  componentwise `rfl` — same; (3) `show ambComp … = _` before `simp` — the
+  `Opens ↥(spaSpace)` vs `Opens ↥(Spa A A⁺)` instance spelling makes the
+  `show` ill-typed (the known Opens-spelling trap); (4) `rw
+  [PresheafedSpace.comp_c_app]` — the `Hom.ext`-introduced `whiskerRight
+  (eqToHom …)` blocks the pattern.
+  SUGGESTED NEXT ROUTE (not yet tried): avoid the composite entirely — build
+  `VPreHom (spaVObjTate B) ((spaVPreObjOf hloc hsupp).restrictOpen (spaOpens
+  D₀))` directly with `toHom := spaRestrictIso.hom`, proving its `val_compat`
+  by re-running the K12 germ argument on the RESTRICTED presheaf, where
+  mathlib's `restrictStalkIso_hom_eq_germ` / `restrictStalkIso_inv_eq_germ`
+  convert restricted germs to ambient ones (the FF precedent is
+  `yRingStalkIso_hom_germ` in FrobeniusValuation.lean, D-iii-4c/4d).
+  ALTERNATIVE: state `IsAdicSpace` via open immersions from affinoids
+  (`IsOpenImmersionV`: base an open embedding, sections an iso over opens of
+  the image) — `spaCompVPreHom` already satisfies it (base by
+  `shadow_isOpenMap` + `shadow_injective`, sections by `phiEquiv`); the
+  equivalence with Wedhorn's restriction form is then a separate lemma.
+- **REMAINING (assembly)**: the packaging above, then P5-5 (quotient leg
+  `X|_{π V} ≅ 𝒴|_V`) and
   P5-6 (`IsAdicSpace` + `isAdicSpace_xVObj`), plus the small step of turning
   `spaCompVPreHom` into a 𝒱-ISO (its underlying presheafed-space map is
   `spaRestrictIso`-composed-with-`ofRestrict`, an open immersion onto
