@@ -6207,6 +6207,33 @@ theorem exists_evalBI_eq_of_le_inv
 
 end CorrectionW
 
+/-- **Submultiplicativity of the interval Gauss norm on restricted series**
+(T910-M M2b-0: the unit ball of `B^I⟨T⟩` is multiplicatively closed). -/
+theorem wIRPS_mul_le
+    {f g : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (f * g)
+      ≤ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
+        * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 g := by
+  refine ciSup_le fun K => ?_
+  rw [MvPowerSeries.coeff_mul]
+  have hcoe : ((∑ q ∈ Finset.antidiagonal K,
+        MvPowerSeries.coeff q.1 f * MvPowerSeries.coeff q.2 g
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = ∑ q ∈ Finset.antidiagonal K,
+        ((MvPowerSeries.coeff q.1 f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        * ((MvPowerSeries.coeff q.2 g : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+    push_cast
+    rfl
+  rw [hcoe]
+  refine wI_sum_le p F _ _ (fun q _ => ?_)
+  refine le_trans (wI_mul_le p F _ _) ?_
+  exact mul_le_mul (wI_coeff_le_wIRPS p F ϖ hf q.1)
+    (wI_coeff_le_wIRPS p F ϖ hg q.2) zero_le zero_le
+
 end FarguesFontaine
 
 end
