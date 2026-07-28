@@ -1281,28 +1281,6 @@ noncomputable def spaVPreObjOf
   val := fun v => stalkValue v
   val_supp := hsupp
 
-/-- **The valuation route to locality**: a ring hom whose source valuation is
-the pullback of the target's is a local homomorphism, when both supports are
-the maximal ideals. -/
-theorem isLocalHom_of_val_comap {R S : Type*} [CommRing R] [CommRing S]
-    (instR : IsLocalRing R) (instS : IsLocalRing S) (φ : R →+* S)
-    (vR : Spv R) (vS : Spv S) (hval : vR = comap φ vS)
-    (hR : vR.supp = @IsLocalRing.maximalIdeal _ _ instR)
-    (hS : vS.supp = @IsLocalRing.maximalIdeal _ _ instS) :
-    IsLocalHom φ := by
-  refine ⟨fun a ha => ?_⟩
-  have h1 : φ a ∉ vS.supp := by
-    rw [hS]
-    exact fun hmem => (mem_nonunits_iff.mp
-      ((@IsLocalRing.mem_maximalIdeal _ _ instS _).mp hmem)) ha
-  have hchain : vR.supp = (vS.supp).comap φ := by
-    rw [hval]; exact supp_comap _ _
-  have h2 : a ∉ vR.supp := fun h => h1 (Ideal.mem_comap.mp (hchain ▸ h))
-  by_contra hnu
-  refine h2 ?_
-  rw [hR]
-  exact (@IsLocalRing.mem_maximalIdeal _ _ instR _).mpr (mem_nonunits_iff.mpr hnu)
-
 /-- **The comparison is a morphism of `𝒱^pre`** (P5-K13): `Spa B ⟶ Spa A`
 with its stalk maps local and its stalk valuations matching. -/
 noncomputable def spaCompVPreHom [DecidableEq A]

@@ -2901,50 +2901,36 @@ theorem ringStalkMap_corestrictHom {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶
   hypotheses; it is pure presheafed-space theory.
 
 ### [P5-A3] The corestriction as a 𝒱^pre-morphism
-- **Status**: in_progress — CORE LANDED 2026-07-28, packaging remains
-- **Progress**:
-  - `liftToRestrict` (VRestrict.lean): the corestriction via mathlib's
-    `IsOpenImmersion.lift` at `X.ofRestrict`, which also hands back
-    `liftToRestrict_fac : lift ≫ ofRestrict = f` as a PROVEN lemma — the identity
-    that four hand-rolled attempts could not establish. `liftToRestrict_base`
-    gives `incl (lift.base z) = f.base z`.
-  - `ringStalkMap_liftToRestrict`: the stalk-level factorisation
-    `ringStalkMap f z = eqToHom … ≫ ringStalkMap (lift ≫ ofRestrict) z`, via
-    `PresheafedSpace.stalkMap.congr_hom` on the functor image of `lift_fac`.
-  - `ringStalkMap_ofRestrict`: `ringStalkMap (ofRestrict) = restrictStalkIso.inv`
-    (mathlib's `restrictStalkIso_inv_eq_ofRestrict` in our spelling) — PROVEN in
-    scratch r161, not yet ported.
-  - ⚠ **REMAINING = CAST BOOKKEEPING ONLY.** Composing the two gives
-    `(restrictStalkIso).inv ≫ ringStalkMap lift z = eqToHom … ≫ ringStalkMap f z`,
-    but the `rw`s to cancel the eqToHom pair fail on the carrier spelling
-    (`↑↑(X.restrict …)` vs `↑(TopCat.of ↥U)`) — the same trap as elsewhere.
-    **NEXT MOVE**: do NOT chase the morphism-level `_comp` variant. Go straight to
-    `val_compat`, which is a statement about `comap`s: state it with the target
-    point generalized (`∀ y, lift.base z = y → …`), `subst`, and the eqToHom
-    becomes `eqToHom rfl`. Then `isLocalHom` follows from `val_compat` via the
-    already-proven `SpaVIso.isLocalHom_of_val_comap` (ChatGPT's valuation route),
-    not from composing local homs.
- | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A2
-- **Type**: def
-- **Statement**:
-```lean
-noncomputable def VPreHom.corestrict {Z X : VPreObj.{u}} (g : VPreHom Z X)
-    (U : Opens ↥(X.toTopCat))
-    (hrange : ∀ z, (ConcreteCategory.hom g.toHom.base) z ∈ U) :
-    VPreHom Z (X.restrictOpen U)
-```
-- **Proof sketch**:
-  1. `toHom := corestrictHom g.toHom U hrange`.
-  2. `isLocalHom_stalkMap`: by P5-A2 the stalk map is `(iso).hom ≫ ringStalkMap g.toHom`;
-     the first factor is an iso, the second is local by `g.isLocalHom_stalkMap`; composition
-     of a local hom after an iso is local (`RingHom.isLocalHom_comp`, or the valuation route
-     `SpaVIso.isLocalHom_of_val_comap`).
-  3. `val_compat`: `(X.restrictOpen U).val x` is by definition
-     `comap (restrictRingStalkEquiv x) (X.val (restrictPoint x))`; substitute `g.val_compat`
-     and then P5-A2, and the two `comap`s compose (`comap_comp` is definitional here).
-- **Mathlib lemmas needed**: `RingHom.isLocalHom_comp` (verify the exact name), `comap_comp`.
-- **Sources**: Wedhorn Def 8.7.
-- **Generality**: arbitrary `VPreObj`s.
+- **Status**: DONE 2026-07-28 — axiom-clean, `lake build '«Adic spaces»'` green
+- **Landed** (all in `Adic spaces/VRestrict.lean`, section `CorestrictV`):
+  - `liftToRestrict` — the corestriction via mathlib's `IsOpenImmersion.lift` at
+    `X.ofRestrict`, which also hands back `liftToRestrict_fac : lift ≫ ofRestrict = f`
+    as a PROVEN lemma (the identity four hand-rolled attempts could not establish).
+  - `ringStalkMap_liftToRestrict`, `ringStalkMap_ofRestrict` — the stalk-level
+    factorisations.
+  - `ringStalkMap_ofRestrict_surjective` — the inclusion's stalk map is surjective
+    (it is `restrictRingStalkEquiv⁻¹`).
+  - `val_compat_liftToRestrict` — the valuation identity.
+  - `VPreHom.corestrict : VPreHom Z (X.restrictOpen U)`.
+- **THE MOVE THAT UNBLOCKED IT.** The cast bookkeeping was never done at the
+  morphism level. Instead:
+  1. `rw [← liftToRestrict_fac] at hg` turns `g.val_compat` into a statement about
+     `lift ≫ ofRestrict`, so **no `eqToHom` is ever produced**;
+  2. `ringStalkMap_comp` (arguments passed EXPLICITLY — inference picks the wrong
+     spelling) splits it into `comap ψ (comap φ (Z.val z))`;
+  3. `comap_injective` (already in `ValuationSpectrum.lean`!) applied to the
+     SURJECTIVITY of the inclusion's stalk map cancels `ψ`. Surjectivity is a Prop
+     about a *function*, so unlike a `RingHom`/`RingEquiv` equation it needs **no
+     type ascription** — this is what dodged the `ringStalk` vs `ringPresheaf.stalk`
+     and `openIncl U y` vs `ofRestrict.base y` unification failures that killed the
+     `comap_injective_of_ringEquiv` route.
+  4. `isLocalHom_stalkMap` then follows from `val_compat` by
+     `isLocalHom_of_val_comap` (the valuation route), never by composing local homs.
+- **Refactor**: `isLocalHom_of_val_comap` MOVED from `SpaVIso.lean` into
+  `VRestrict.lean` (it is a generic `Spv` fact and `SpaVIso` imports `VRestrict`).
+- **Do not re-derive**: `ValuationSpectrum.comap_injective` (surjective ⟹ comap
+  injective) and `comap_vle`/`comap_comp` already exist in `ValuationSpectrum.lean`.
+ | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A2 (bypassed)
 
 ### [P5-5] The quotient leg: `𝒴|_V ≅ X|_{π V}` for wandering `V`
 - **Status**: blocked | **File**: `Adic spaces/FarguesFontaine/CurveObject.lean` (new section)

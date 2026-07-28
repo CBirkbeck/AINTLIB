@@ -397,6 +397,28 @@ section RestrictHom
 
 variable {X : VPreObj.{u}} (U : Opens ↥(X.toTopCat))
 
+/-- **The valuation route to locality**: a ring hom whose source valuation is
+the pullback of the target's is a local homomorphism, when both supports are
+the maximal ideals. -/
+theorem isLocalHom_of_val_comap {R S : Type*} [CommRing R] [CommRing S]
+    (instR : IsLocalRing R) (instS : IsLocalRing S) (φ : R →+* S)
+    (vR : Spv R) (vS : Spv S) (hval : vR = comap φ vS)
+    (hR : vR.supp = @IsLocalRing.maximalIdeal _ _ instR)
+    (hS : vS.supp = @IsLocalRing.maximalIdeal _ _ instS) :
+    IsLocalHom φ := by
+  refine ⟨fun a ha => ?_⟩
+  have h1 : φ a ∉ vS.supp := by
+    rw [hS]
+    exact fun hmem => (mem_nonunits_iff.mp
+      ((@IsLocalRing.mem_maximalIdeal _ _ instS _).mp hmem)) ha
+  have hchain : vR.supp = (vS.supp).comap φ := by
+    rw [hval]; exact supp_comap _ _
+  have h2 : a ∉ vR.supp := fun h => h1 (Ideal.mem_comap.mp (hchain ▸ h))
+  by_contra hnu
+  refine h2 ?_
+  rw [hR]
+  exact (@IsLocalRing.mem_maximalIdeal _ _ instR _).mpr (mem_nonunits_iff.mpr hnu)
+
 /-- The restriction comparison and the inclusion's stalk map are mutually
 inverse, elementwise. -/
 theorem restrictRingStalkEquiv_ringStalkMap_ofRestrict (y : ↥U)
@@ -450,6 +472,61 @@ noncomputable def VPreHom.ofRestrictOpen : VPreHom (X.restrictOpen U) X where
 end RestrictHom
 
 end Corestrict
+
+/-! ### Corestriction of `𝒱^pre`-morphisms
+
+A morphism of `𝒱^pre` whose range lands in an open `U` of the target
+corestricts to a morphism into `X|_U`.  Both structure fields come from a
+single valuation identity: the stalk maps factor through the (isomorphic)
+inclusion stalk maps, and locality is then read off the valuation. -/
+
+section CorestrictV
+
+/-- The inclusion's stalk map is surjective — it is the inverse of the
+restriction stalk comparison. -/
+theorem ringStalkMap_ofRestrict_surjective {X : VPreObj.{u}}
+    (U : Opens ↥(X.toTopCat)) (y : ↥U) :
+    Function.Surjective
+      (ringStalkMap (X.toPresheafedSpace.ofRestrict
+        (opensIncl_isOpenEmbedding X U)) y).hom' := by
+  intro c
+  refine ⟨restrictRingStalkEquiv X U y c, ?_⟩
+  exact (restrictRingStalkEquiv X U y).injective
+    (restrictRingStalkEquiv_ringStalkMap_ofRestrict U y _)
+
+variable {Z X : VPreObj.{u}} (g : VPreHom Z X)
+  (U : Opens ↥(X.toPresheafedSpace.carrier))
+  (hr : Set.range (ConcreteCategory.hom g.toHom.base)
+    ⊆ (U : Set ↥(X.toPresheafedSpace.carrier)))
+
+/-- **The corestricted valuation compatibility.** Rewrite `g.toHom` as
+`lift ≫ ofRestrict` (so no `eqToHom` ever appears), split the stalk map, and
+cancel the inclusion's stalk map, which is surjective. -/
+theorem val_compat_liftToRestrict (z : ↥(Z.toTopCat)) :
+    (X.restrictOpen U).val
+        (ConcreteCategory.hom (liftToRestrict g.toHom U hr).base z)
+      = comap (ringStalkMap (liftToRestrict g.toHom U hr) z).hom' (Z.val z) := by
+  set y := ConcreteCategory.hom (liftToRestrict g.toHom U hr).base z with hy
+  have hincl := (VPreHom.ofRestrictOpen (X := X) U).val_compat y
+  have hg := g.val_compat z
+  rw [← liftToRestrict_fac g.toHom U hr] at hg
+  rw [ringStalkMap_comp (liftToRestrict g.toHom U hr)
+    (X.toPresheafedSpace.ofRestrict (openIncl_isOpenEmbedding U)) z] at hg
+  refine comap_injective (ringStalkMap_ofRestrict_surjective U y) ?_
+  exact hincl.symm.trans hg
+
+/-- **The corestriction of a `𝒱^pre`-morphism into an open containing its
+range** — Wedhorn's `𝒱`-morphisms restrict to opens of the target. -/
+noncomputable def VPreHom.corestrict : VPreHom Z (X.restrictOpen U) where
+  toHom := liftToRestrict g.toHom U hr
+  isLocalHom_stalkMap := fun z =>
+    isLocalHom_of_val_comap
+      ((X.restrictOpen U).isLocalRing_stalk _) (Z.isLocalRing_stalk z) _ _ _
+      (val_compat_liftToRestrict g U hr z)
+      ((X.restrictOpen U).val_supp _) (Z.val_supp z)
+  val_compat := fun z => val_compat_liftToRestrict g U hr z
+
+end CorestrictV
 
 end ValuationSpectrum
 
