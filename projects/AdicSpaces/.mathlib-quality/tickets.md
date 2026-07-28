@@ -2576,7 +2576,43 @@ valuations.
   `RelativePieceKeystone.lean` is untouched; existing consumers unaffected.
 
 ### [P5-K] THE remaining core: (Spa A)|_{spaOpen D₀} ≅ Spa B in 𝒱 (unifies P5-3/P5-4)
-- **Status**: open — DESIGN + OBSTRUCTION ANALYSIS 2026-07-28
+- **Status**: PRESHEAF LEVEL COMPLETE 2026-07-28 — `SpaVIso.spaRestrictIso`
+  (`bSpace D₀ ≅ spaRestrict (spaOpens D₀)` as TopRingPresheafedSpaces,
+  axiom-clean). Sub-steps landed, all in `SpaVIso.lean` unless noted:
+  * K1 substrate — spaOpensHomeoInter (double-subtype vs Spv-intersection),
+    certExp/certExp_spec, imgDatum/imgIdx/mem_imgDatum_iff, pieceEquiv and
+    pieceEquiv_restrict (the keystone square). Also fixed the P5-3a/3b port
+    gap: `relativePiece_equiv_restrict_square` has a differently-shaped
+    binder block and had kept the base-Tate hypotheses.
+  * K2 exists_imgDatum_subset — the image opens are a BASIS of Spa B
+    (Huber approximation `exists_A_level_open_presentation'` on the family
+    `insert F.s F.T` — with `F.T` alone the empty-tray case is unprovable —
+    plus the A-rational basis at the shadow point).
+  * K2b exists_index_mem / imgOpens / imgOpens_cover — the cover (needs no
+    approximation, just the A-rational basis).
+  * K3 Paired/shadow/idxOf/index_sub, phiComp + phiComp_compat, phiHom.
+  * K4 phiHom_injective — components at image indices vanish, then
+    IsLimitSheaf.injective on the image-open cover.
+  * K5 phiHom_surjective — imgSection + imgSection_compat (overlaps factored
+    through interIdx, built from `interDatumOpen` since RestrictedLimitSheaf's
+    `interValid` would import-cycle through FarguesFontaine.YStalks), then
+    IsLimitSheaf.glue and restrictionMap_id at the top index.
+  * K6 phiEquiv + continuity BOTH ways — pieceEquiv_continuous (completion
+    extensions) / pieceEquiv_symm_continuous (ofBijective_symm_apply to
+    identify the inverse of the open-equal restriction) /
+    phiEquiv_symm_continuous via `IsLimitSheaf.isEmbedding`.
+  * K7 baseHomeo/aOpen/bOpen/paired_aOpen_bOpen, phiHom_naturality (`rfl`!),
+    phiCatIso, presheafIso, **spaRestrictIso**.
+  * K8a (VRestrict.lean) isIso_ringStalkMap / isoStalkRingEquiv /
+    `VPreObj.ofIso` — transport of a 𝒱^pre-structure along an isomorphism.
+- **REMAINING for P5-K**: (i) the sheaf-condition transport
+  (`VObj.ofIso`) — `IsSheafOfTopologicalRings` along a homeomorphism +
+  presheaf iso; (ii) `e.hom` as a VPreHom (isLocalHom from surjectivity of
+  the stalk iso, val_compat near-definitional since `VPreObj.ofIso`'s `val`
+  IS the comap of the target's) and the resulting 𝒱-iso; (iii) for the FF
+  instance, identify `(yVObj).restrictOpen V` with `spaRestrict` of the
+  ambient A_inf space (restriction-of-restriction).
+- **HISTORICAL: DESIGN + OBSTRUCTION ANALYSIS 2026-07-28**
 - **Statement**: for a Huber base `A` and a valid rational datum `D₀` whose value
   `B := presheafValue D₀` is complete Tate + strongly noetherian:
   `(spaVPreObj A).restrictOpen (spaOpens D₀) ≅ spaVObjTate B` in 𝒱.
