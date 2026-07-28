@@ -1,1 +1,1 @@
-FOCUS: root target ModularCurves is GREEN (9181 jobs). Now repairing the 66 root-orphaned modules (incl. ModularCurve.Rho* = the Y(rho) line + ForMathlib.UnitRetraction/StandardEtaleH1) under v4.33.
+FOCUS: Gap A leaf (i). DONE: Picard bookkeeping (exists_pic_map_of_nonempty_tensor_pullback_iso) + leaf restated at module level (exists_invertible_tensor_idealModule_add, SelfAdjointN:216). NEXT: reduce that leaf to "the rigidified discrepancy is trivial" by taking N := 0^*Delta, using Picard/Dual.lean + PullbackTensorObj.

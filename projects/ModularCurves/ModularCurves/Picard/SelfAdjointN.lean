@@ -223,6 +223,28 @@ theorem exists_invertible_tensor_idealModule_add (Q Q' : (E.baseChange t).Point 
             ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd E.π t)).obj N)) := by
   sorry
 
+/-- **The chart case of the leaf.** When the discrepancy is *exactly* trivial the leaf holds
+with `N = 𝒪_T`. This is the shape a Weierstrass chart produces: there the invariant
+differential trivialises `ω_{E/T}`, hence the normal bundle `0^*𝒪(D_0)` of the zero section,
+and the obstruction that forces the general `π^*N` disappears. -/
+theorem exists_invertible_tensor_idealModule_add_of_tensor_iso
+    (Q Q' : (E.baseChange t).Point (𝟙 T))
+    (e : Nonempty (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+          (idealModule (Scheme.Hom.ker Q'.1)) ≅
+        tensorObj (idealModule (Scheme.Hom.ker (Q + Q').1))
+          (idealModule (Scheme.Hom.ker (baseChangeZero E.π E.zero E.zero_π t))))) :
+    ∃ N : T.Modules, IsInvertible N ∧
+      Nonempty (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+            (idealModule (Scheme.Hom.ker Q'.1)) ≅
+          tensorObj
+            (tensorObj (idealModule (Scheme.Hom.ker (Q + Q').1))
+              (idealModule (Scheme.Hom.ker (baseChangeZero E.π E.zero E.zero_π t))))
+            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd E.π t)).obj
+              (unitObj T))) :=
+  ⟨unitObj T, isInvertible_unit,
+    ⟨e.some ≪≫ (nonempty_tensorObj_unit_iso _).some.symm ≪≫
+      tensorObjCongr (Iso.refl _) (pullbackUnitIso (pullback.snd E.π t)).symm⟩⟩
+
 /-- Pure group algebra behind the reduction of the leaf to its module form: in a commutative
 group, the `κ`-shaped ratio of "numerator over product of numerators" is the ratio of the
 plain products. Stated over abstract elements so that no `sectionCls` term is ever
