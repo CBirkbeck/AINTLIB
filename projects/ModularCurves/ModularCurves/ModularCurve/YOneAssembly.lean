@@ -796,11 +796,7 @@ theorem zsmul_pull_baseChange_asSection_iff {T : Scheme.{u}} (t : T ⟶ S) {k : 
         (Point.asSection E t (Point.pull E t P)))
       = a • (Point.baseChangeEquiv E t τ) (Point.pull (E.baseChange t) τ
         (Point.asSection E t (Point.pull E t P))) := by
-    first
-    | exact map_zsmul (Point.baseChangeEquiv E t τ).toAddMonoidHom _ a
-    | exact (Point.baseChangeEquiv E t τ).toAddMonoidHom.map_zsmul _ a
-    | exact AddEquiv.map_zsmul _ _ _
-    | exact map_zsmul _ _ a
+    exact AddMonoidHom.map_zsmul (Point.baseChangeEquiv E t τ).toAddMonoidHom a _
   rw [← (Point.baseChangeEquiv E t τ).map_eq_zero_iff, hzs, hbeq]
 
 /-- **(Y1-D1 bridge, killing)** The base-changed marked section is `a`-killed iff the pulled point

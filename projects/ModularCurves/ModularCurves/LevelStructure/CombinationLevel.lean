@@ -27,6 +27,11 @@ Ingredients:
 
 open AlgebraicGeometry CategoryTheory Limits
 
+-- v4.33 bump: the `Scheme` category instance inside these arguments is no longer
+-- transparent enough for the `≫`-associativity rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 namespace ModularCurves
@@ -39,8 +44,12 @@ variable {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) [NeZero N]
 
 private theorem subsingleton_spec_field (k : Type u) [Field k] :
     Subsingleton ↥(Spec (CommRingCat.of k)) :=
-  ⟨fun a b => PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans
-    (Ideal.eq_bot_of_prime _).symm)⟩
+  ⟨fun a b => by
+    -- the `IsPrime` fields are no longer picked up as instances on this pin
+    haveI := a.isPrime
+    haveI := b.isPrime
+    exact PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans
+      (Ideal.eq_bot_of_prime _).symm)⟩
 
 /-- A `Spec k`-valued point of `E[N]` meets the zero section topologically iff it is
 the zero point: `Spec k` is a single point, so topological membership makes the whole

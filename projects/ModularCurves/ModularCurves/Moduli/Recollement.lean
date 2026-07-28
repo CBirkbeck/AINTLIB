@@ -45,6 +45,11 @@ representable over `R` — glue the two representing objects over `D(ab)`. State
   mathlib has no group-scheme-gluing API, so [R-glue-obj] is a from-scratch development).
 -/
 
+-- v4.33 bump: the `EllObj.baseChangeRing` component types (`.curve.E`, `.base`) are defeq
+-- to the pullbacks they are defined as only after unfolding that semireducible def, which
+-- `rw`/`simp` will not do at `implicit` transparency on this pin.
+set_option backward.isDefEq.respectTransparency.types false
+
 open CategoryTheory AlgebraicGeometry Opposite Limits
 
 universe u
