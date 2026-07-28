@@ -2631,7 +2631,23 @@ valuations.
     embedding, with a generalize-subst key for the Opens equality);
   * K13 `spaVPreObjOf` + `isLocalHom_of_val_comap` + **`spaCompVPreHom`** —
     the comparison is a `VPreHom`.
-- ⚠ **PACKAGING BLOCKER (2026-07-28, four approaches tried — read before retrying)**:
+- ★★★ **P5-K FULLY LANDED 2026-07-28 in the OPEN-IMMERSION form (K14)**:
+  `IsOpenImmersionV` (base an open embedding + sections bijective over opens
+  of the image) and `spaCompVPreHom_isOpenImmersion` — `Spa 𝒪_X(D₀) ⟶
+  Spa(A, A⁺)` is an open immersion in `𝒱^pre` onto the rational subset, with
+  sections, stalk locality and stalk valuations all matching. Supporting:
+  `range_shadow`, `shadow_isOpenEmbedding`, `limitRestrict_bijective_of_eq`.
+  This is the Wedhorn-8.22 chart condition in the form the charts produce.
+- ⚠ **REMAINING PLUMBING for the FF endgame — CORESTRICTION**: the curve's
+  charts must land in `yVPreObj` (the restriction of the ambient
+  `Spa A_inf` to the `Y`-trace), not in the ambient object — `A_inf` has the
+  Wedhorn-8.14 stalk package only `Y`-locally, so `spaVPreObjOf` does not
+  apply globally. NEEDED: **corestriction of an open immersion** — given
+  `f : Z ⟶ X` an open immersion in `𝒱^pre` with `range f.base ⊆ U`, produce
+  `Z ⟶ X.restrictOpen U`, still an open immersion. Equivalently the stalk
+  identity `ringStalkMap (X.ofRestrict h) = restrictStalkIso.inv`
+  (mathlib: `restrictStalkIso_inv_eq_ofRestrict`) plus `ringStalkMap_comp`.
+- ⚠ **HISTORICAL PACKAGING BLOCKER (four approaches tried)**:
   turning `spaCompVPreHom` into a 𝒱-ISO needs the factorisation
   `spaCompHom = (spaRestrictIso).hom ≫ (spaSpace).ofRestrict …`
   (or, equivalently, its stalk-level form
