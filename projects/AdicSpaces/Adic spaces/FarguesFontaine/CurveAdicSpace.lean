@@ -151,6 +151,29 @@ theorem isAdicSpace_xVObj_of_windowVIso (hp : 1 < p)
   isAdicSpace_xVObj_of_windowCharts p F ϖ
     (fun y O hyO => exists_windowSubOpen_nbhd p F ϖ hp y O hyO) hviso
 
+
+/-- **`𝒴` is an adic space, given the same chart `𝒱`-isomorphisms.** The
+companion of `isAdicSpace_xVObj_of_windowVIso`: the window sub-opens are a
+neighbourhood basis (`exists_windowSubOpen_nbhd`), so the charts cover `𝒴`
+directly — no quotient leg is needed on this side. -/
+theorem isAdicSpace_yVObj_of_windowVIso (hp : 1 < p)
+    (hviso : ∀ (n : ℤ) (D' : RationalLocData (windowChartRing p F ϖ n))
+        (u' : (presheafValue D')ˣ) (hu' : IsTopologicallyNilpotent
+          ((u' : (presheafValue D')ˣ) : presheafValue D'))
+        (u : (windowChartRing p F ϖ n)ˣ) (hu : IsTopologicallyNilpotent
+          ((u : (windowChartRing p F ϖ n)ˣ) : windowChartRing p F ϖ n)),
+      Nonempty ((ValuationSpectrum.spaVObjTate (A := presheafValue D')).toVPreObj
+        ≅ (yVPreObj p F ϖ).restrictOpen
+            (windowSubOpen p F ϖ n D' u' hu' u hu))) :
+    ValuationSpectrum.IsAdicSpace (yVObj p F ϖ) := by
+  intro y
+  obtain ⟨n, D', u', hu', u, hu, hyV, -⟩ :=
+    exists_windowSubOpen_nbhd p F ϖ hp y ⊤ trivial
+  obtain ⟨e⟩ := hviso n D' u' hu' u hu
+  exact ⟨windowSubOpen p F ϖ n D' u' hu' u hu, hyV,
+    windowSubVChart p F ϖ n D',
+    ⟨ValuationSpectrum.VObj.isoOfVPreIso e.symm⟩⟩
+
 end FarguesFontaine
 
 end
