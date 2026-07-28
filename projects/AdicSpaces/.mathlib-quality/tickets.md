@@ -2797,6 +2797,23 @@ valuations.
   (`genPiece_rel_forward/backward`, the roundtrips) never touches `hspan`
   except through `genPieceDatum`/`imagePieceDatum`, so (a)+(b) is the whole job.
 
+### ★★★★ CAMPAIGN 9 — **COMPLETE** 2026-07-28 ★★★★
+
+**`FarguesFontaine.isAdicSpace_xVObj : ValuationSpectrum.IsAdicSpace (xVObj p F ϖ)`**
+— the adic Fargues–Fontaine curve IS an adic space in the sense of **Wedhorn Definition
+8.22**. Axiom-clean (`[propext, Classical.choice, Quot.sound]`), `lake build '«Adic spaces»'`
+green, no `sorry` and no `maxHeartbeats` raise anywhere in `FarguesFontaine/`.
+Companion: **`isAdicSpace_yVObj`** — `𝒴` is an adic space too.
+File: `FarguesFontaine/CurveIsAdicSpace.lean`.
+
+The two legs:
+* **`quotientLegVObjIso : 𝒴|_V ≅ X|_{π V}`** in `𝒱`, for every wandering `V`
+  (`CurveQuotientLeg.lean`) — `X = 𝒴/φ^ℤ` upgraded from a homeomorphism to an isomorphism
+  of Wedhorn's category.
+* **`windowSubVPreIso : Spa(𝒪_{B_n}(D')) ≅ 𝒴|_{windowSubOpen}`** in `𝒱`
+  (`CurveChartVIso.lean`), plus `exists_windowSubOpen_nbhd` (`CurveYSlice.lean`) making
+  those a neighbourhood basis of `𝒴`.
+
 ### ★★★ CAMPAIGN 9 — STATE OF PLAY (2026-07-28, end of the long beastmode run)
 
 **PROVEN, axiom-clean, `lake build '«Adic spaces»'` green, all pushed:**
@@ -3213,7 +3230,16 @@ NOTE: a TATE base always has the package (`stalkShrink_tate`), so this applies v
 every window chart ring `B_n`; it does NOT apply over `A_inf`, whose stalks are local only
 over `Y` — which is exactly why the last step must corestrict into `𝒴` first.
 
-### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — REDUCED TO ONE IDENTITY
+### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — DONE 2026-07-28 ★
+- `comap_ringStalkMap_windowSubCompHom_stalkValue` (the ambient valuation identity for the
+  two-step comparison), `val_compat_of_ambient` (the slice criterion transporting it down
+  through `ySliceIncl`), `windowSubYSliceIso_hom_fac` (mathlib's `lift_fac` — pass the
+  range hypothesis EXPLICITLY, the `_` cannot be synthesised),
+  `windowSubYSliceIso_val_compat`, `windowSubVPreHom`, `windowSubVPreIso`,
+  **`nonempty_windowSubVPreIso`** = the `hviso` the capstone needed.
+  File: `FarguesFontaine/CurveChartVIso.lean`.
+- The packaging (locality of stalk maps, invertibility) was free from
+  `VPreObj.isoRestrictOfOpenImmersion` / `VPreHom.ofValCompat` + `VPreHom.asIso`.
 
 ★ **2026-07-28: `VPreObj.isoRestrictOfOpenImmersion` (VRestrict.lean, section `ChartStep`)
 removes all the packaging.** Signature:
