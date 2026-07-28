@@ -7,6 +7,7 @@ import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.Moduli.Bootstrap
 import ModularCurves.Moduli.QuotientStack
 import ModularCurves.ForMathlib.EtaleSectionsCount
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # T-E15b — the level-3 `TorsorData` package (KM 4.7, axiom 2, at `(N, G) = (3, GL₂(𝔽₃))`)
@@ -76,6 +77,12 @@ axiom 2 upgrades to a finite étale `G`-torsor.
   (`ForMathlib/EtaleIsoLocus.lean` route) reduces the iso to constant fibre rank 1 =
   exactly-one-`γ`-per-fibre-pair.
 -/
+
+-- v4.33 bump: neither the `Scheme` category instance nor the semireducible component
+-- types are transparent enough for the rewrites below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
 
 universe u
 
@@ -214,10 +221,18 @@ theorem levelThreeData_Z (hinv : IsUnit ((3 : ℕ) : R)) (X : EllObj R) :
 theorem levelThreeData_f (hinv : IsUnit ((3 : ℕ) : R)) (X : EllObj R) :
     (levelThreeData R hinv X).f = YFull.fullLevelSpaceStruct X 3 := rfl
 
-/-- The structure map is finite ([YF-FIN], no invertibility needed). -/
+-- v4.33 bump: `IsZariskiLocalAtSource @Etale` no longer fires by unification. Declared
+-- here rather than in `ForMathlib/BaseChangeAlongCompat` so it does not invalidate the
+-- whole project's build for one consumer.
+set_option backward.isDefEq.respectTransparency.types false in
+private instance zariskiLocalAtSource_etale : IsZariskiLocalAtSource (@Etale) :=
+  inferInstance
+
+/-- The structure map is finite ([YF-FIN]). -/
 theorem levelThreeData_finite (hinv : IsUnit ((3 : ℕ) : R)) (X : EllObj R) :
     IsFinite (levelThreeData R hinv X).f :=
   YFull.isFinite_fullLevelSpaceStruct X 3
+    (YFull.nIsInvertible_over_spec R X.structMap hinv)
 
 /-- The structure map is étale ([GHA3], the Weil-pairing leaf, AXIOM-CLEAN). -/
 theorem levelThreeData_etale (hinv : IsUnit ((3 : ℕ) : R)) (X : EllObj R) :
@@ -599,7 +614,11 @@ private theorem isIso_torsorSigmaDesc_of_existsUnique {S Z : Scheme.{u}} {G : Ty
       (pullback fZ fZ).fromSpecResidueField p with hpbar
   obtain ⟨pt⟩ : Nonempty ↥(Spec (CommRingCat.of kbar)) := inferInstance
   have hbase : pbar.base pt = p := by
-    rw [hpbar, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+    -- `rw` no longer matches `fromSpecResidueField_apply` here (the point's type is
+    -- `Spec (CommRingCat.of ↥(residueField p))`, defeq to `Spec (residueField p)` only after
+    -- delta); `exact` unifies up to defeq.
+    rw [hpbar, Scheme.Hom.comp_apply]
+    exact (pullback fZ fZ).fromSpecResidueField_apply p _
   haveI : IsFinite (pullback.snd Φ pbar) := MorphismProperty.pullback_snd _ _ inferInstance
   haveI : Etale (pullback.snd Φ pbar) := MorphismProperty.pullback_snd _ _ inferInstance
   have hcount : (pullback.snd Φ pbar).finrank pt =
@@ -684,7 +703,8 @@ private theorem levelThree_surjective (hinv : IsUnit ((3 : ℕ) : R)) (X : EllOb
     have h0 : (z ≫ (levelThreeData R hinv X).f).base pt = t.base pt :=
       congrArg (fun m => m.base pt) hz
     rwa [Scheme.Hom.comp_apply] at h0
-  rw [h1, ht, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+  rw [h1, ht, Scheme.Hom.comp_apply]
+  exact X.base.fromSpecResidueField_apply y _
 
 /-- **PROVEN (KM p. 112 axiom 2's geometric heart)** — the torsor comparison
 `(γ, z) ↦ (γ·z, z) : ∐_{GL₂(𝔽₃)} Z → Z ×_S Z` is an isomorphism. Discharged by the abstract
