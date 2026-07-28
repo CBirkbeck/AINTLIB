@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.LevelStructure.Factorization
 import ModularCurves.Moduli.PullSectionCanonicity
 import ModularCurves.ForMathlib.FiniteFlatRigidity
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The full-level bridge, forward half (T-D8 ⟹, KM 3.7 / 1.4.4 for Γ(N))
@@ -27,6 +28,9 @@ remaining content of the box — see the scope notes on the board (it needs the
 divisor↔norm dictionary `isFullSetOfSectionsAlg_iff_fields` (T-D2, proved) or an
 étale/reduced-fibre route).
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits
 

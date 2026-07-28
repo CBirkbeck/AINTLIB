@@ -1,9 +1,4 @@
-/-
-Copyright (c) 2026 Chris Birkbeck. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Chris Birkbeck
--/
-import ModularCurves.GroupScheme.SubgroupQuotient
+import ModularCurves.GroupScheme.SubgroupQuotientInterface
 
 /-!
 # The translation action of a finite locally free subgroup scheme
@@ -158,10 +153,9 @@ theorem isInvariant_iff_coequalizes {G : FiniteLocallyFreeSubgroup E} {Y : Schem
 /-- **Pins from a coequalizer.** If `π : E ⟶ Q` is a colimit cofork of the two legs `act, pr_E`
 (i.e. `Q = E/G` as the coequalizer), then every `G`-invariant `f` factors **uniquely** through `π` —
 which is exactly the `quotient_lift` universal property of `SubgroupQuotient`. Combined with
-`IsInvariant.of_coequalizes` (giving `quotientπ_isInvariant`), this reduces the whole
-construction to one obligation: **build `Q` with `π` a coequalizer of `act, pr_E`**. The proof
-turns invariance into coequalization (`IsInvariant.coequalizes`) and applies the cofork's
-universal property. -/
+`IsInvariant.of_coequalizes` (giving `quotientπ_isInvariant`), this reduces the whole construction to
+one obligation: **build `Q` with `π` a coequalizer of `act, pr_E`**. The proof turns invariance into
+coequalization (`IsInvariant.coequalizes`) and applies the cofork's universal property. -/
 theorem exists_unique_lift_of_isColimit {G : FiniteLocallyFreeSubgroup E} {Q : Scheme.{u}}
     {π : E.E ⟶ Q} (hcoeq : G.translationAction.left ≫ π = G.actionProj.left ≫ π)
     (hπ : IsColimit (Cofork.ofπ π hcoeq)) {Y : Scheme.{u}} (f : E.E ⟶ Y) (hf : G.IsInvariant f) :
@@ -169,12 +163,12 @@ theorem exists_unique_lift_of_isColimit {G : FiniteLocallyFreeSubgroup E} {Q : S
   have hd : π ≫ hπ.desc (Cofork.ofπ f hf.coequalizes) = f :=
     hπ.fac (Cofork.ofπ f hf.coequalizes) WalkingParallelPair.one
   refine ⟨hπ.desc (Cofork.ofπ f hf.coequalizes), hd, fun h' hh' => ?_⟩
-  exact Cofork.IsColimit.hom_ext hπ (hh'.trans hd.symm)
+  have hh'' : π ≫ h' = f := hh'
+  exact Cofork.IsColimit.hom_ext hπ (hh''.trans hd.symm)
 
-/-- **The graph of the translation action** `⟨act, pr_E⟩ : G ×_S E ⟶ E ×_S E`,
-`(t, x) ↦ (x + ι t, x)`. Its image is the equivalence relation `x ∼ x + ι t` whose quotient is
-`E/G`: `E/G` is the coequalizer of `act, pr_E`, equivalently the quotient of `E` by (the image
-of) `actPair`. The two components
+/-- **The graph of the translation action** `⟨act, pr_E⟩ : G ×_S E ⟶ E ×_S E`, `(t, x) ↦ (x + ι t, x)`.
+Its image is the equivalence relation `x ∼ x + ι t` whose quotient is `E/G`: `E/G` is the coequalizer
+of `act, pr_E`, equivalently the quotient of `E` by (the image of) `actPair`. The two components
 recover the legs (`actPair_fst`, `actPair_snd`). The action is free — `actPair` is a monomorphism —
 which is what makes the finite-locally-free groupoid an equivalence relation with effective quotient
 (the input to Piece 3's existence, `.mathlib-quality/decomposition-g3d-infra.md`). -/
@@ -194,6 +188,7 @@ theorem actPair_snd (G : FiniteLocallyFreeSubgroup E) :
 
 /-- The inclusion `ιOver : G ⟶ E` is a monomorphism (it is a closed immersion). -/
 instance ιOver_mono (G : FiniteLocallyFreeSubgroup E) : Mono G.ιOver := by
+  haveI : Mono G.ι := inferInstance
   refine ⟨fun {Z} a b h => Over.OverMorphism.ext ?_⟩
   have h' : a.left ≫ G.ι = b.left ≫ G.ι := congrArg CommaMorphism.left h
   exact (cancel_mono G.ι).mp h'

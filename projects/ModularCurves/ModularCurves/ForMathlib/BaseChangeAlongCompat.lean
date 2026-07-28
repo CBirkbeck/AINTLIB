@@ -11,6 +11,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 import Mathlib.AlgebraicGeometry.PullbackCarrier
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiCompact
 
 /-!
 # `IsStableUnderBaseChangeAlong` / `RespectsIso` for the standard morphism properties
@@ -106,6 +107,14 @@ instance respectsIso_formallyUnramified :
 set_option backward.isDefEq.respectTransparency.types false in
 instance stableAlong_formallyUnramified {X Y : Scheme.{u}} (f : X ⟶ Y) :
     MorphismProperty.IsStableUnderBaseChangeAlong (@FormallyUnramified) f :=
+  ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
+
+instance stableAlong_quasiCompact {X Y : Scheme.{u}} (f : X ⟶ Y) :
+    MorphismProperty.IsStableUnderBaseChangeAlong (@QuasiCompact) f :=
+  ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
+
+instance stableAlong_etale {X Y : Scheme.{u}} (f : X ⟶ Y) :
+    MorphismProperty.IsStableUnderBaseChangeAlong (@Etale) f :=
   ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
 
 end ModularCurves.BumpCompat

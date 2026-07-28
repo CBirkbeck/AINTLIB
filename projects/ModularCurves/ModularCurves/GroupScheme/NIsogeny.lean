@@ -1,14 +1,10 @@
-/-
-Copyright (c) 2026 Chris Birkbeck. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Chris Birkbeck
--/
 import ModularCurves.GroupScheme.CyclicSubgroup
 import ModularCurves.GroupScheme.DeligneOrder
 import ModularCurves.GroupScheme.SubgroupQuotient
 import ModularCurves.LevelStructure.Incidence
 import ModularCurves.EllipticCurve.GroupLawDescent
 import ModularCurves.EllipticCurve.RigiditySpreadingOut
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Cyclic `N`-isogenies: KM Chapter 6 (STREAM-NISOG skeleton)
@@ -253,7 +249,6 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
       (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i), hπ', ?_⟩
   rw [LinearMap.exact_iff, Fintype.range_linearCombination, hk]
 
-set_option backward.isDefEq.respectTransparency.types false in
 /-- **[L1-b, the affine core]** For `M = coker (α : R^m → R^n)` and any `R`-algebra `A`:
 the base change `A ⊗ M` is finite locally free of rank `n` (flat with all stalk ranks `n`)
 iff every matrix entry of `α` dies in `A`. Forward: flat + finite ⟹ free stalks; the
@@ -810,7 +805,7 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
     -- Step 3b: the rank at any prime is computed on a patch containing it
     have hexists : ∃ t : T, algebraMap R A (gfun (pf t)) ∉ q.asIdeal := by
       by_contra h
-      push Not at h
+      push_neg at h
       have hle : Ideal.span (Set.range fun t : T => algebraMap R A (gfun (pf t)))
           ≤ q.asIdeal := Ideal.span_le.mpr (by rintro _ ⟨t, rfl⟩; exact h t)
       rw [hTA] at hle
@@ -881,12 +876,12 @@ private noncomputable def locallyFreeRankLocusSheaf (n : ℕ)
       IsScalarTower.of_algebraMap_eq' (by
         rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
           RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
-        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE])
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
     haveI : IsScalarTower Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
       IsScalarTower.of_algebraMap_eq' (by
         rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
           RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
-        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map])
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
     haveI := locallyFreeRankLocusSheaf_fp f U
     -- the `.1`-spelled givens at the basic open, re-keyed by defeq ascription
     haveI hfpV : letI := ((f.app (S.basicOpen g)).hom).toAlgebra
@@ -993,7 +988,6 @@ open scoped TensorProduct
 
 variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
 
-omit [LocallyOfFinitePresentation f] in
 /-- The geometric identification behind the chart bridge: the pullback of `f` along an
 affine chart point is the `Spec` of the section tensor product, with the projection
 matching the `Spec` of the left inclusion (sealed; consumed by the bridge and by the
@@ -1065,7 +1059,6 @@ private theorem locallyFreeRankLocus_pullback_iso {X : Scheme.{u}} [IsAffine X]
   slice_rhs 2 3 => rw [← h₂]
   slice_rhs 1 2 => rw [← h₁]
 
-omit [IsFinite f] [LocallyOfFinitePresentation f] in
 /-- The section-ring identification behind the chart bridge, sealed behind its own
 constant (the construction is let-heavy; consumers only need existence). -/
 private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X]
@@ -1104,7 +1097,7 @@ private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X
       (Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap
         (R := Γ(S, U.1)) (A := Γ(X, ⊤)) (B := Γ(W, f ⁻¹ᵁ U.1)))
     simp only [RingHom.comp_apply, Algebra.TensorProduct.includeLeftRingHom_apply,
-] at h2
+      Algebra.TensorProduct.includeRight_apply] at h2
     have h3 : (algebraMap Γ(S, U.1) Γ(X, ⊤))
         (((Scheme.Opens.topIso U.1).hom).hom u) = (x'.appTop).hom u := by
       rw [RingHom.algebraMap_toAlgebra, RingHom.comp_apply]
@@ -1247,7 +1240,6 @@ private theorem locallyFreeRankLocus_finrank_le_of_span {R B K M : Type u} [Comm
           simpa using finrank_span_le_card ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M))
     _ ≤ s.card := Finset.card_image_le
 
-omit [LocallyOfFinitePresentation f] in
 /-- Emptiness transport for the chart bridge: if the pullback of `f` along an affine chart
 point is the empty scheme, the section tensor product is trivial (sealed; the empty branch
 of the fibre dichotomy). -/
@@ -1263,8 +1255,6 @@ private theorem locallyFreeRankLocus_sections_subsingleton {X : Scheme.{u}} [IsA
   rw [← PrimeSpectrum.isEmpty_iff_subsingleton]
   exact ⟨fun p => hE.false (eP.inv.base p)⟩
 
-omit [LocallyOfFinitePresentation f] in
-set_option backward.isDefEq.respectTransparency.types false in
 /-- **[L1-e0, the affine chart bridge]** For an affine test scheme `X` mapping into an
 affine chart `U` of `S`, the geometric rank-`n` local-freeness of the pulled-back `f` is
 the module-theoretic condition for the pushforward sections, base-changed to `Γ(X)`. This
@@ -1380,7 +1370,6 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
     rw [congrFun hrk q]
     exact h2 q
 
-set_option backward.isDefEq.respectTransparency.types false in
 /-- **[L1-e3, the per-chart condition]** For an affine chart `V ⊆ T` mapped into an affine
 chart `U ⊆ S` by `t`, the geometric rank-`n` local-freeness of `f` pulled back over `V` is
 exactly the vanishing in `Γ(T, V)` of the flattening ideal of `U` (composing the chart
@@ -1430,7 +1419,6 @@ private theorem locallyFreeRankLocus_chart_cond {T : Scheme.{u}} (t : T ⟶ S) (
 end LocallyFreeRankLocusBridge
 
 open scoped TensorProduct in
-set_option backward.isDefEq.respectTransparency.types false in
 /-- **(KM 6.4.3, dichotomy form — the flattening-locus leaf)** Let `f : W ⟶ S` be finite and
 locally of finite presentation, whose field-valued fibres are all either empty or finite
 locally free of rank `n`. Then there is a closed subscheme `Z ⊆ S`, universal for "the base
@@ -1692,7 +1680,6 @@ theorem hasExactOrder_of_orderDivisor_ideal_eq (N : ℕ) [NeZero N] (D : RelEffC
   rw [← h] at hsub
   exact hsub
 
-set_option backward.isDefEq.respectTransparency.types false in
 /-- **(KM 6.1, the scheme of generators `G^×` — divisor register)** For a rank-`N` subgroup
 divisor `D ⊆ E`, there is a closed subscheme `Z ⊆ D` universal for "the point is a
 generator of `D`": for a `T`-point `P` of `E` lying on `D` (witnessed by the factorisation
@@ -1707,8 +1694,12 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
       (∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S) (P : E.Point t)
         (h : T ⟶ D.ideal.subscheme), h ≫ D.ideal.subschemeι = P.1 →
         ((∃ k : T ⟶ Z.subscheme, k ≫ Z.subschemeι = h) ↔
-          E.IsDivisorGenerator N D t (Point.asSection E t P)) := by
-  obtain ⟨Z, hZ⟩ := RelEffCartierDiv.exists_incidenceLocusEQ
+          E.IsDivisorGenerator N D t (Point.asSection E t P))) ∧
+      ∀ V : D.ideal.subscheme.affineOpens, (Z.ideal V).FG := by
+  haveI : Smooth (E.baseChange (D.ideal.subschemeι ≫ E.π)).π :=
+    SmoothOfRelativeDimension.smooth 1 _
+  obtain ⟨Z, hZ, hfg⟩ := RelEffCartierDiv.exists_incidenceLocusEQ'
+    (E.baseChange (D.ideal.subschemeι ≫ E.π)).smooth
     (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
       (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N)
     (D.baseChange (D.ideal.subschemeι ≫ E.π))
@@ -1718,71 +1709,61 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
     ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal, RelEffCartierDiv.baseChange_ideal]
   -- REMAINING (coherence) — PRECISELY SCOPED via LSP 2026-07-09.  After
   --   `rw [← baseChange_ideal, ← baseChange_ideal, Section.orderDivisor_baseChange]` the goal is
-  --     `(orderDivisor ((E.baseChange π_B).baseChange h) (asSection h (pull (asSection π_B taut)))
-  -- N).ideal
-  --        = ((D.baseChange π_B).baseChange h).ideal  ↔  IsDivisorGenerator N D t (asSection E t
-  -- P)`,
-  --   i.e. an `orderDivisor.ideal = D.ideal` equality over the curve `(E.baseChange π_B).baseChange
-  -- h`
+  --     `(orderDivisor ((E.baseChange π_B).baseChange h) (asSection h (pull (asSection π_B taut))) N).ideal
+  --        = ((D.baseChange π_B).baseChange h).ideal  ↔  IsDivisorGenerator N D t (asSection E t P)`,
+  --   i.e. an `orderDivisor.ideal = D.ideal` equality over the curve `(E.baseChange π_B).baseChange h`
   --   versus one over `E.baseChange t` — the two total spaces are iso (not equal) via
-  --   `pullbackLeftPullbackSndIso E.π π_B h`.  Closing it needs the ORDER-DIVISOR-IDEAL NATURALITY
-  -- engine:
+  --   `pullbackLeftPullbackSndIso E.π π_B h`.  Closing it needs the ORDER-DIVISOR-IDEAL NATURALITY engine:
   --     • D side: `baseChange_baseChange_ideal` + `h ≫ π_B = t` (from `hcomp` + `P.1 ≫ E.π = t`).
-  --     • OD side: `sectionsDivisor.ideal = ∏ ker` → `IdealSheafData.comap_prod` →
-  -- `Finset.prod_congr`
-  --       → per-factor `ExactOrderLocus.ker_comap_eq` with the sections matched by
-  --       `divisorTautPoint_restrict` — EXACTLY the proven twin `FullLevelLocus.P1/P2` pattern.
-  --     • then `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P)
-  -- ·)`.
-  --   BLOCKER: that engine (`ExactOrderLocus.ker_comap_eq` L1583, `SubgroupLocus.val` L985
-  -- +snd,
-  --   `ExactOrderLocus.val_isClosedImmersion` L1630, and a general `sectionsDivisor_ideal` — the
-  --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH:
-  -- expose the
-  --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.
-  --  A
+  --     • OD side: `sectionsDivisor.ideal = ∏ ker` → `IdealSheafData.comap_prod` → `Finset.prod_congr`
+  --       → per-factor `exactOrderLocusAux_ker_comap_eq` with the sections matched by
+  --       `divisorTautPoint_restrict` — EXACTLY the proven twin `fullLevelLocusAux_P1/P2` pattern.
+  --     • then `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P) ·)`.
+  --   BLOCKER: that engine (`exactOrderLocusAux_ker_comap_eq` L1583, `subgroupLocusAux_val` L985 +snd,
+  --   `exactOrderLocusAux_val_isClosedImmersion` L1630, and a general `sectionsDivisor_ideal` — the
+  --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH: expose the
+  --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.  A
   --   cross-file API change worth flagging to the coordinator; not an inline close.
   have hct : h ≫ (D.ideal.subschemeι ≫ E.π) = t := by
     rw [← Category.assoc, hcomp]; exact P.2
-  refine Iff.trans (FullLevelLocus.comap_iff hct _ _) ?_
-  have hP2 : (D.baseChange (D.ideal.subschemeι ≫ E.π)).ideal.comap (FullLevelLocus.theta hct)
+  refine Iff.trans (fullLevelLocusAux_comap_iff hct _ _) ?_
+  have hP2 : (D.baseChange (D.ideal.subschemeι ≫ E.π)).ideal.comap (fullLevelLocusAux_theta hct)
       = (D.baseChange t).ideal := by
     rw [RelEffCartierDiv.baseChange_ideal, ← Scheme.IdealSheafData.comap_comp,
-      FullLevelLocus.theta_fst, ← RelEffCartierDiv.baseChange_ideal]
+      fullLevelLocusAux_theta_fst, ← RelEffCartierDiv.baseChange_ideal]
   have hP1 : (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
         (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N).ideal.comap
-        (FullLevelLocus.theta hct)
+        (fullLevelLocusAux_theta hct)
       = (Section.orderDivisor (E.baseChange t) (Point.asSection E t P) N).ideal := by
     simp only [Section.orderDivisor]
-    rw [FullLevelLocus.sectionsDivisor_ideal, FullLevelLocus.sectionsDivisor_ideal,
+    rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal,
       Scheme.IdealSheafData.comap_prod]
     refine Finset.prod_congr rfl fun a _ => ?_
-    have hm_a : h ≫ (SubgroupLocus.val E (D.ideal.subschemeι ≫ E.π)
+    have hm_a : h ≫ (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
           ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π)
             (E.divisorTautPoint D)) ≫ pullback.fst E.π (D.ideal.subschemeι ≫ E.π))
-        = SubgroupLocus.val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P)
+        = subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P)
           ≫ pullback.fst E.π t := by
-      rw [ExactOrderLocus.val_smul_asSection_fst, ExactOrderLocus.val_smul_asSection_fst,
+      rw [exactOrderLocusAux_val_smul_asSection_fst, exactOrderLocusAux_val_smul_asSection_fst,
         ← Category.assoc]
       exact congrArg (· ≫ E.mulByHom (((a : ℕ) : ℤ) + 1)) hcomp
-    have key := ExactOrderLocus.ker_comap_eq
-      (SubgroupLocus.val E (D.ideal.subschemeι ≫ E.π)
+    have key := exactOrderLocusAux_ker_comap_eq
+      (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
         ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)))
-      (SubgroupLocus.val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P))
-      (ExactOrderLocus.val_isClosedImmersion E _ _)
-      (ExactOrderLocus.val_isClosedImmersion E t _)
-      (SubgroupLocus.val_snd E _ _)
-      (SubgroupLocus.val_snd E t _)
+      (subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P))
+      (exactOrderLocusAux_val_isClosedImmersion E _ _)
+      (exactOrderLocusAux_val_isClosedImmersion E t _)
+      (subgroupLocusAux_val_snd E _ _)
+      (subgroupLocusAux_val_snd E t _)
       hm_a
-      (FullLevelLocus.theta hct) (𝟙 (pullback E.π t))
-      (FullLevelLocus.theta_snd hct) (Category.id_comp _)
-      (by rw [Category.id_comp, FullLevelLocus.theta_fst])
+      (fullLevelLocusAux_theta hct) (𝟙 (pullback E.π t))
+      (fullLevelLocusAux_theta_snd hct) (Category.id_comp _)
+      (by rw [Category.id_comp, fullLevelLocusAux_theta_fst])
     rw [Scheme.IdealSheafData.comap_id] at key
     exact key
   refine Iff.trans (Iff.of_eq (congrArg₂ Eq hP1 hP2)) ?_
   simp only [EllipticCurve.IsDivisorGenerator]
-  exact ⟨fun hb => ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD t (Point.asSection E t P) hb,
-  hb⟩,
+  exact ⟨fun hb => ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD t (Point.asSection E t P) hb, hb⟩,
     fun hh => hh.2⟩
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
@@ -1845,7 +1826,6 @@ private theorem generatorSpace_baseChange_le_ker_iff (D : RelEffCartierDiv E.π)
         Scheme.IdealSheafData.map_comp],
     Scheme.IdealSheafData.le_map_iff_comap_le]
 
-set_option backward.isDefEq.respectTransparency.types false in
 /-- The value of an integer multiple of the original point, pulled back through the
 pasting isomorphism, is the value of the multiple of the transported point (sealed; the
 morphism-level input to the order-divisor pasting naturality — stated with `ψ.inv` so the
@@ -1853,23 +1833,23 @@ whole equation elaborates at the raw iterated-pullback spelling). -/
 private theorem generatorSpace_baseChange_val_comp {T Q : Scheme.{u}} (t : T ⟶ S)
     (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
     (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) (m : ℤ) :
-    SubgroupLocus.val E (q ≫ t) (m • EllipticCurve.Point.asSection E (q ≫ t) P) ≫
+    subgroupLocusAux_val E (q ≫ t) (m • EllipticCurve.Point.asSection E (q ≫ t) P) ≫
         (pullbackLeftPullbackSndIso E.π t q).inv =
-      SubgroupLocus.val (E.baseChange t) q
+      subgroupLocusAux_val (E.baseChange t) q
         (m • EllipticCurve.Point.asSection (E.baseChange t) q P') := by
   have hsmul' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q)
         (pullback E.π t)
-        (SubgroupLocus.val (E.baseChange t) q
+        (subgroupLocusAux_val (E.baseChange t) q
           (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
         (pullback.fst (pullback.snd E.π t) q) =
       (P'.1 : Q ⟶ pullback E.π t) ≫ (E.baseChange t).mulByHom m :=
-    ExactOrderLocus.val_smul_asSection_fst (E.baseChange t) q m P'
+    exactOrderLocusAux_val_smul_asSection_fst (E.baseChange t) q m P'
   have hval' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q) Q
-        (SubgroupLocus.val (E.baseChange t) q
+        (subgroupLocusAux_val (E.baseChange t) q
           (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
         (pullback.snd (pullback.snd E.π t) q) =
       𝟙 Q :=
-    SubgroupLocus.val_snd (E.baseChange t) q _
+    subgroupLocusAux_val_snd (E.baseChange t) q _
   have hmul' : @CategoryStruct.comp Scheme _ (pullback E.π t) (pullback E.π t) E.E
       ((E.baseChange t).mulByHom m) (pullback.fst E.π t) =
       pullback.fst E.π t ≫ E.mulByHom m :=
@@ -1896,13 +1876,13 @@ private theorem generatorSpace_baseChange_val_comp {T Q : Scheme.{u}} (t : T ⟶
     rw [Category.assoc, hsmul']
     apply pullback.hom_ext
     · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst,
-        ExactOrderLocus.val_smul_asSection_fst E (q ≫ t) m P]
+        exactOrderLocusAux_val_smul_asSection_fst E (q ≫ t) m P]
       exact hkey₁.symm
     · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst_snd,
-        ← Category.assoc, SubgroupLocus.val_snd, Category.id_comp]
+        ← Category.assoc, subgroupLocusAux_val_snd, Category.id_comp]
       exact hkey₂.symm
   · rw [Category.assoc, pullbackLeftPullbackSndIso_inv_snd_snd, hval',
-      SubgroupLocus.val_snd]
+      subgroupLocusAux_val_snd]
 
 
 /-- Kernels of closed immersions transport along a precomposed inverse isomorphism, in
@@ -1930,7 +1910,7 @@ private theorem generatorSpace_baseChange_orderDivisor_ideal {T Q : Scheme.{u}} 
           (EllipticCurve.Point.asSection E (q ≫ t) P) N).ideal
         (pullbackLeftPullbackSndIso E.π t q).hom := by
   simp only [EllipticCurve.Section.orderDivisor]
-  rw [FullLevelLocus.sectionsDivisor_ideal, FullLevelLocus.sectionsDivisor_ideal]
+  rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal]
   have hcp : @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
       (pullback E.π (q ≫ t))
       ((∏ i : Fin N, Scheme.Hom.ker
@@ -1944,17 +1924,16 @@ private theorem generatorSpace_baseChange_orderDivisor_ideal {T Q : Scheme.{u}} 
     Scheme.IdealSheafData.comap_prod _ _ _
   rw [hcp]
   refine Finset.prod_congr rfl fun a _ => ?_
-  haveI := ExactOrderLocus.val_isClosedImmersion E (q ≫ t)
+  haveI := exactOrderLocusAux_val_isClosedImmersion E (q ≫ t)
     ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P)
   have h1 := congrArg Scheme.Hom.ker
     (generatorSpace_baseChange_val_comp E t q P P' hPP' (((a : ℕ) : ℤ) + 1))
   have h2 := generatorSpace_baseChange_ker_inv
-    (SubgroupLocus.val E (q ≫ t)
+    (subgroupLocusAux_val E (q ≫ t)
       ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P))
     (pullbackLeftPullbackSndIso E.π t q)
   exact h1.symm.trans h2
 
-set_option backward.isDefEq.respectTransparency.types false in
 /-- **The `IsDivisorGenerator` composite-vs-iterated base-change bridge** (sealed): a point
 of `E` over `q ≫ t` generates `D` iff the corresponding point of `E ×_S T` over `q`
 generates `D ×_S T`. Both sides reduce to their order-divisor–ideal equalities
@@ -1994,7 +1973,6 @@ private theorem generatorSpace_baseChange_isDivisorGenerator_iff (N : ℕ) [NeZe
     exact h'
   · exact fun h => by rw [h]
 
-set_option backward.isDefEq.respectTransparency.types false in
 /-- **(KM 6.1, "formation commutes with arbitrary change of base")** The generator scheme
 of the base-changed divisor is the base change of the generator scheme. Dischargeable from
 the universal property (`generatorSpace_spec` on both sides + Yoneda); no new gates. -/
@@ -2790,7 +2768,7 @@ theorem orderDivisor_ideal_eq_prod_primeOrderDivisor (N : ℕ) [NeZero N] (P₀ 
     Nat.mem_divisors.mpr ⟨Nat.div_dvd_of_dvd (Nat.gcd_dvd_right x.val N), hN.ne'⟩
   -- Step 1: the LHS is the product of `K` over all residues.
   have hLHS : (P₀.orderDivisor E N).ideal = ∏ x : ZMod N, K x := by
-    rw [Section.orderDivisor, FullLevelLocus.sectionsDivisor_ideal]
+    rw [Section.orderDivisor, fullLevelLocusAux_sectionsDivisor_ideal]
     refine Fintype.prod_bijective (fun a : Fin N => (((a : ℕ) + 1 : ℕ) : ZMod N)) ?_ _ _
       fun a => ?_
     · rw [Fintype.bijective_iff_injective_and_card]
@@ -2817,7 +2795,7 @@ theorem orderDivisor_ideal_eq_prod_primeOrderDivisor (N : ℕ) [NeZero N] (P₀ 
     · refine Finset.prod_congr rfl fun d _ => ?_
       letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
       show (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal = _
-      rw [primeOrderDivisor, FullLevelLocus.sectionsDivisor_ideal,
+      rw [primeOrderDivisor, fullLevelLocusAux_sectionsDivisor_ideal,
         Equiv.prod_comp (Fintype.equivFinOfCardEq
           (ZMod.card_units_eq_totient d.1)).symm
           (fun u : (ZMod d.1)ˣ =>

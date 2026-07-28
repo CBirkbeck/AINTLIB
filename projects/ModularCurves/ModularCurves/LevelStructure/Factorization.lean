@@ -13,6 +13,7 @@ import ModularCurves.EllipticCurve.MulByHomFlatFibre
 import ModularCurves.ForMathlib.FlatOfRetract
 import ModularCurves.ForMathlib.FinrankPullbackComp
 import ModularCurves.ForMathlib.EtaleSectionsCount
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -34,6 +35,9 @@ The skeleton keeps the repo's divisor encoding (`Section.HasExactOrder`,
 KM 1.4.1): no `φ`-homomorphism vocabulary is introduced — for the cyclic group
 `ℤ/N` a homomorphism *is* its value at `1` (KM 1.5.2).
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
 

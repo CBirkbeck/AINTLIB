@@ -7,6 +7,7 @@ import ModularCurves.GroupScheme.SubgroupGroupObject
 import ModularCurves.GroupScheme.StableCharts
 import ModularCurves.GroupScheme.PatchKunneth
 import ModularCurves.ForMathlib.SchemeAppLE
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The Hopf algebra of a finite locally free subgroup over an affine patch
@@ -26,6 +27,9 @@ the group-object laws already proven (`mulOver_assoc`, `unitOver_mulOver_left`,
 * `groupPatchCounit` — `ε : A ⟶ R`, restriction along the unit section.
 * `groupPatchAntipode` — `S : A ⟶ A`, restriction along inversion.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 open scoped TensorProduct

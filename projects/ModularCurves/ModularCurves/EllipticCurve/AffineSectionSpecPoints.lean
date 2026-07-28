@@ -9,6 +9,7 @@ import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.MulByHomFibres
 import ModularCurves.LevelStructure.ExactOrder
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Affine-point sections at field points ([T-E15-NORM] Stage B — the fibre evaluation)
@@ -31,6 +32,9 @@ hom (`projModelAffineChart_eq_spec`), so its composite with a field point is
 `affineChartHom_mk` + `projModelAffineEval_mk` compute the two `Z`-chart coordinates to
 `(p̄, q̄)`; `projModelPointsEquiv_some` closes.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory MvPolynomial HomogeneousIdeal
 open HomogeneousLocalization

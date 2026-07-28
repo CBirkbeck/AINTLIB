@@ -1,8 +1,3 @@
-/-
-Copyright (c) 2026 Chris Birkbeck. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Chris Birkbeck
--/
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.MulByHomUnramifiedField
 import ModularCurves.EllipticCurve.MulByHomDegree
@@ -36,9 +31,6 @@ Two layers, per the T-B6 design of record (replanned 2026-07-06):
   chord–tangent group (HasseWeil) is the separate optional dictionary leaf, still
   recorded on the board for the black-box discharges.
 -/
-
-set_option backward.defeqAttrib.useBackward true
-set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj
@@ -285,7 +277,8 @@ theorem smul_eq_zero_iff_comp_mulByHom {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
   constructor
   · intro h
     have hval := congrArg (fun Q : E.Point g ↦ (Q : T ⟶ E.E)) h
-    rwa [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
+    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
+    exact hval
   · intro h
     apply Subtype.ext
     rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
@@ -301,7 +294,8 @@ noncomputable def torsionPointsEquiv (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
       have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
         pullback.condition
       have hπ : E.torsionι N ≫ E.π = E.torsionπ N := by
-        simpa [E.mulByHom_π, E.zero_π] using congrArg (fun m ↦ m ≫ E.π) hcond
+        have h2 := congrArg (fun m ↦ m ≫ E.π) hcond
+        simpa [E.mulByHom_π, E.zero_π] using h2
       rw [Category.assoc, hπ, h.2]⟩, by
     have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
       pullback.condition
@@ -326,7 +320,7 @@ noncomputable def torsionPointsEquiv (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
 
 /-- Sections of the base-changed torsion over `T` are the `E[N]`-points over `t`
 (the two legs of `torsion_baseChange_isPullback`). -/
-noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
+private noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
     {s : T ⟶ (E.baseChange t).torsion N // s ≫ (E.baseChange t).torsionπ N = 𝟙 T} ≃
       {h : T ⟶ E.torsion N // h ≫ E.torsionπ N = t} where
   toFun s := ⟨s.1 ≫ E.torsionBaseChangeHom N t, by
@@ -340,11 +334,12 @@ noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ 
     (by rw [(E.torsion_baseChange_isPullback N t).lift_snd, s.2]))
   right_inv h := Subtype.ext ((E.torsion_baseChange_isPullback N t).lift_fst _ _ _)
 
-/- `torsionByNsmulKerEquiv` RELOCATED to `ForMathlib/TorsionByEquiv.lean` as
-`Submodule.torsionByNsmulKerEquiv` (#6996; statement byte-identical, proof golfed) — a
-general `AddCommGroup` fact with no elliptic-curve content. Its former helper
-`torsionByNsmulKer_mem` turned out to be mathlib's
-`Submodule.torsionBy_le_torsionBy_of_dvd` and was deleted. -/
+private lemma torsionByNsmulKer_mem (G : Type u) [AddCommGroup G] {N d : ℕ}
+    (hdN : d ∣ N) {y : G} (hy : (d : ℤ) • y = 0) :
+    y ∈ Submodule.torsionBy ℤ G (N : ℤ) := by
+  rw [Submodule.mem_torsionBy_iff]
+  obtain ⟨c, hc⟩ := hdN
+  rw [hc, Nat.cast_mul, mul_comm, mul_zsmul, hy, smul_zero]
 
 private def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
     (hdN : d ∣ N) :
@@ -609,9 +604,12 @@ theorem modelMulByHom_formallyUnramified_of_field {k : Type u} [Field k]
   -- (4) the descent leg `Spec κ̄ → Spec k` is fppf
   haveI hSurjSpec : Surjective (Spec.map fc) := by
     refine ⟨fun y => ?_⟩
-    haveI hsing : Subsingleton (↥(Spec (CommRingCat.of k))) :=
-      ⟨fun a b => PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans
-        (Ideal.eq_bot_of_prime _).symm)⟩
+    haveI hsing : Subsingleton (↥(Spec (CommRingCat.of k))) := by
+      refine ⟨fun a b => ?_⟩
+      haveI := a.isPrime
+      haveI := b.isPrime
+      exact PrimeSpectrum.ext ((Ideal.eq_bot_of_prime a.asIdeal).trans
+        (Ideal.eq_bot_of_prime b.asIdeal).symm)
     obtain ⟨x⟩ : Nonempty ↥(Spec (CommRingCat.of κ)) := inferInstance
     exact ⟨x, Subsingleton.elim _ _⟩
   haveI hFlatSpec : Flat (Spec.map fc) := by

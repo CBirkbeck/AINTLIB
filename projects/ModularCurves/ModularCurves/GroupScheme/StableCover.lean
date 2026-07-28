@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.GroupScheme.StableCharts
 import ModularCurves.EllipticCurve.WeierstrassModel
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The `G`-stable affine cover of `E` — complement stability (`[HG-C3b]`)
@@ -21,6 +22,9 @@ compatible pairs (`Scheme.Pullback.exists_preimage_pullback`).
 The complement chart `complOpen` is the first of the two charts of the `[HG-C3e]` cover; its
 affineness is `[HG-C3c]` (the Proj basic-open route).
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

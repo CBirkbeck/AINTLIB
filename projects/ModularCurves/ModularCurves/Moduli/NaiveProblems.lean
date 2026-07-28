@@ -6,6 +6,7 @@ Authors: The AINTLIB Authors
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.PullSectionCanonicity
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The naive level-structure moduli problems (relocated holder, Y1-CLOSER S4)
@@ -19,6 +20,9 @@ producer WIP: the `gammaFullNaiveProblem.map` membership and `gammaFullNaive_rep
 `isMonHom_of_one_comp_eq'_of_finitePresentation` (route (a) `RigiditySpreadingOut` /
 route (c) T-W7a — in flight on other lanes).
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Polynomial
 

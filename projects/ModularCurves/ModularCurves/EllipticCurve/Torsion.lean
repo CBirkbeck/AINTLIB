@@ -243,6 +243,9 @@ theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
     infer_instance
   exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
 
+@[inherit_doc mulByHom_locallyOfFinitePresentation]
+alias MulByHom.locallyOfFinitePresentation := mulByHom_locallyOfFinitePresentation
+
 /-! `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness of `[N]`) and its étale
 consequences `mulBy_etale` / `torsionπ_etale` live in `TorsionFibre.lean` — their
 discharge runs through the `E[N]`-torsor argument and the residue-fibre criterion,
