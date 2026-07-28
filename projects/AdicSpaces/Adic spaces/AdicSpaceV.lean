@@ -24,6 +24,8 @@ separates this from the carrier-level `AdicSpacePresentation`.
 
 open CategoryTheory TopologicalSpace Opposite
 
+open scoped AlgebraicGeometry
+
 noncomputable section
 
 universe u
@@ -138,6 +140,28 @@ noncomputable def AdicSpacePresentation.ofIsAdicSpace {X : VObj.{u}}
   isLocallyAffinoid := fun x => by
     obtain ⟨U, hxU, C, ⟨e⟩⟩ := exists_homeo_of_isAdicSpace h x
     exact ⟨U, hxU, C.toAffinoidAdicPresentation, ⟨e⟩⟩
+
+
+/-! ### Invariance under isomorphism -/
+
+/-- The underlying presheafed-space morphism of a `𝒱`-isomorphism is invertible. -/
+theorem isIso_toHom_of_iso {X Y : VObj.{u}} (e : X ≅ Y) : IsIso e.hom.toHom :=
+  ⟨e.inv.toHom,
+    congrArg (fun f : VPreHom X.toVPreObj X.toVPreObj => f.toHom) e.hom_inv_id,
+    congrArg (fun f : VPreHom Y.toVPreObj Y.toVPreObj => f.toHom) e.inv_hom_id⟩
+
+/-- **Being an adic space is invariant under isomorphism in `𝒱`.** -/
+theorem IsAdicSpace.of_iso {X Y : VObj.{u}} (e : X ≅ Y) (h : IsAdicSpace X) :
+    IsAdicSpace Y := by
+  haveI := isIso_toHom_of_iso e
+  intro y
+  obtain ⟨U, hxU, C, ⟨eC⟩⟩ :=
+    h (ConcreteCategory.hom e.inv.toHom.base y)
+  refine ⟨imgOpenOfHom e.hom U, ⟨_, hxU, ?_⟩, C, ⟨?_⟩⟩
+  · exact congr_fun (congrArg
+      (fun f : VPreHom Y.toVPreObj Y.toVPreObj =>
+        (ConcreteCategory.hom f.toHom.base : _ → _)) e.inv_hom_id) y
+  · exact (VObj.isoOfVPreIso (VPreHom.restrictIso e.hom U)).symm ≪≫ eC
 
 end ValuationSpectrum
 
