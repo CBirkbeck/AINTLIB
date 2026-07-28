@@ -44,6 +44,12 @@ The rank-two torsion input `addEquiv_pi_fin_two_zmod_of_natCard` is pure group t
   exports `exists_levelFourTorsorData` / `exists_levelFourTorsorData_ulift`.
 -/
 
+-- v4.33 bump: neither the `Scheme` category instance nor the semireducible component
+-- types are transparent enough for the rewrites below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 open CategoryTheory AlgebraicGeometry Limits
@@ -84,6 +90,7 @@ theorem levelFourData_f (hinv : IsUnit ((4 : ℕ) : R)) (X : EllObj R) :
 theorem levelFourData_finite (hinv : IsUnit ((4 : ℕ) : R)) (X : EllObj R) :
     IsFinite (levelFourData R hinv X).f :=
   YFull.isFinite_fullLevelSpaceStruct X 4
+    (YFull.nIsInvertible_over_spec R X.structMap hinv)
 
 /-- The structure map is étale ([GHA3], the Weil-pairing leaf, AXIOM-CLEAN). -/
 theorem levelFourData_etale (hinv : IsUnit ((4 : ℕ) : R)) (X : EllObj R) :
@@ -446,7 +453,11 @@ private theorem e4_isIso_torsorSigmaDesc_of_existsUnique {S Z : Scheme.{u}} {G :
       (pullback fZ fZ).fromSpecResidueField p with hpbar
   obtain ⟨pt⟩ : Nonempty ↥(Spec (CommRingCat.of kbar)) := inferInstance
   have hbase : pbar.base pt = p := by
-    rw [hpbar, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+    -- `rw` no longer matches `fromSpecResidueField_apply` here (the point's type is
+    -- `Spec (CommRingCat.of ↥(residueField p))`, defeq to `Spec (residueField p)` only after
+    -- delta); `exact` unifies up to defeq.
+    rw [hpbar, Scheme.Hom.comp_apply]
+    exact (pullback fZ fZ).fromSpecResidueField_apply p _
   haveI : IsFinite (pullback.snd Φ pbar) := MorphismProperty.pullback_snd _ _ inferInstance
   haveI : Etale (pullback.snd Φ pbar) := MorphismProperty.pullback_snd _ _ inferInstance
   have hcount : (pullback.snd Φ pbar).finrank pt =
@@ -531,7 +542,8 @@ private theorem levelFour_surjective (hinv : IsUnit ((4 : ℕ) : R)) (X : EllObj
     have h0 : (z ≫ (levelFourData R hinv X).f).base pt = t.base pt :=
       congrArg (fun m => m.base pt) hz
     rwa [Scheme.Hom.comp_apply] at h0
-  rw [h1, ht, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+  rw [h1, ht, Scheme.Hom.comp_apply]
+  exact X.base.fromSpecResidueField_apply y _
 
 /-- **KM p. 112 axiom 2's geometric heart at `N = 4`** — the torsor comparison
 `(γ, z) ↦ (γ·z, z) : ∐_{GL₂(ℤ/4)} Z → Z ×_S Z` is an isomorphism. Discharged by the
