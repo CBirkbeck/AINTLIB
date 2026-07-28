@@ -244,6 +244,149 @@ noncomputable def windowSubYSliceIso (hp : 1 < p) :
   ySliceIsoOfSubset p F ϖ (windowSubCompHom p F ϖ n D' u' hu' u hu)
     (range_windowSubCompHom_subset p F ϖ n D' u' hu' u hu hp)
 
+
+/-! ### The range of the two-step chart comparison -/
+
+section Range
+
+variable (n : ℤ) (D' : RationalLocData (windowChartRing p F ϖ n))
+  (u' : (presheafValue D')ˣ)
+  (hu' : IsTopologicallyNilpotent ((u' : (presheafValue D')ˣ) : presheafValue D'))
+  (u : (windowChartRing p F ϖ n)ˣ)
+  (hu : IsTopologicallyNilpotent
+    ((u : (windowChartRing p F ϖ n)ˣ) : windowChartRing p F ϖ n))
+
+/-- **The base map of the two-step chart comparison is the composite of the two
+shadow maps.**  Definitional, but the two sides are spelled at different (only
+definitionally equal) carrier types — `↥↑(bSpace D')` versus
+`↥(Spa (𝒪(D')) 𝒪(D')⁺)` — so it is recorded once here and used as a rewrite
+vehicle nowhere else. -/
+theorem base_windowSubCompHom_eq :
+    (ConcreteCategory.hom (windowSubCompHom p F ϖ n D' u' hu' u hu).base :
+        ↥(Spa (presheafValue D') (presheafValue D')⁺)
+          → ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      = (ValuationSpectrum.SpaVIso.shadow
+            (chartData p F (windowUnif p F ϖ n) 1 1 p 1))
+        ∘ (ValuationSpectrum.SpaVIso.shadow D') := rfl
+
+/-- **The range of the two-step chart comparison is the `D₀`-shadow of the rational
+open of `D'`.**  Each leg of `Spa(𝒪(D')) ⟶ Spa(B_n) ⟶ Spa(A_inf)` is a shadow map,
+and the range of a shadow map is the rational open it presents
+(`ValuationSpectrum.SpaVIso.range_shadow`); so the range of the composite is the
+image of `spaOpen D'` under the outer shadow. -/
+theorem range_windowSubCompHom :
+    Set.range (ConcreteCategory.hom
+        (windowSubCompHom p F ϖ n D' u' hu' u hu).base)
+      = ValuationSpectrum.SpaVIso.shadow
+            (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+          '' ValuationSpectrum.spaOpen D' := by
+  have hr := ValuationSpectrum.SpaVIso.range_shadow D' u' hu'
+  refine Set.ext fun v => ⟨?_, ?_⟩
+  · rintro ⟨w, rfl⟩
+    exact ⟨ValuationSpectrum.SpaVIso.shadow D' w,
+      (Set.ext_iff.mp hr (ValuationSpectrum.SpaVIso.shadow D' w)).mp ⟨w, rfl⟩, rfl⟩
+  · rintro ⟨z, hz, rfl⟩
+    obtain ⟨w, hw⟩ := (Set.ext_iff.mp hr z).mpr hz
+    exact ⟨w, congrArg (ValuationSpectrum.SpaVIso.shadow
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) hw⟩
+
+/-- **Pointwise description of `windowSubOpen`**: a point of `𝒴` lies in the open
+cut out by `D'` exactly when its ambient `Spa(A_inf)`-point is the `D₀`-shadow of a
+point of the rational open of `D'`. -/
+theorem mem_windowSubOpen_iff (z : ↥(yTop p F ϖ)) :
+    z ∈ windowSubOpen p F ϖ n D' u' hu' u hu ↔
+      ySpaPoint p F ϖ z ∈ ValuationSpectrum.SpaVIso.shadow
+            (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+          '' ValuationSpectrum.spaOpen D' :=
+  Set.ext_iff.mp (range_windowSubCompHom p F ϖ n D' u' hu' u hu) (ySpaPoint p F ϖ z)
+
+end Range
+
+/-! ### The neighbourhood basis -/
+
+/-- **The window-subdatum opens are a neighbourhood basis of `𝒴`** : every open
+neighbourhood `O` of a point `y` of the `𝒴`-carrier contains an open of the form
+`windowSubOpen p F ϖ n D' u' hu' u hu` still containing `y`.
+
+The proof: `y` lies in some Big window `bigWindow p F ϖ n` (`Y_eq_iUnion_bigWindow`),
+i.e. in the rational open presented by the `n`-th chart datum `D₀`, so it is the
+`D₀`-shadow of a point `w₀` of `Spa(B_n)` (`SpaVIso.range_shadow`).  The shadow lands
+inside `𝒴` (`shadow_windowDatum_mem_ySpaSet`), so it is a continuous map
+`Spa(B_n) → 𝒴`, along which `O` pulls back to an open chart-side neighbourhood of
+`w₀`; rational opens are a basis there (`exists_isRational_spaOpen_subset_huber`),
+producing `D'`.  Finally `range_windowSubCompHom` identifies
+`windowSubOpen p F ϖ n D' …` with the `𝒴`-trace of the `D₀`-shadow of
+`spaOpen D'`, which turns both goals into the two properties of `D'`. -/
+theorem exists_windowSubOpen_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
+    (O : Opens ↥(yTop p F ϖ)) (hyO : y ∈ O) :
+    ∃ (n : ℤ) (D' : RationalLocData (windowChartRing p F ϖ n))
+      (u' : (presheafValue D')ˣ) (hu' : IsTopologicallyNilpotent
+        ((u' : (presheafValue D')ˣ) : presheafValue D'))
+      (u : (windowChartRing p F ϖ n)ˣ) (hu : IsTopologicallyNilpotent
+        ((u : (windowChartRing p F ϖ n)ˣ) : windowChartRing p F ϖ n)),
+      y ∈ windowSubOpen p F ϖ n D' u' hu' u hu ∧
+        windowSubOpen p F ϖ n D' u' hu' u hu ≤ O := by
+  classical
+  -- the window containing the point
+  have hyY : ((ySpaPoint p F ϖ y : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F)) ∈ Y p F ϖ := ySpaPoint_mem_Y p F ϖ y
+  rw [Y_eq_iUnion_bigWindow p F ϖ hp] at hyY
+  obtain ⟨n, hbw⟩ := Set.mem_iUnion.mp hyY
+  refine ⟨n, ?_⟩
+  haveI : IsHuberRing (windowChartRing p F ϖ n) :=
+    (isTateRing_bigWindowChart p F (windowUnif p F ϖ n)).toIsHuberRing
+  obtain ⟨u, hu⟩ := IsTateRing.exists_topologicallyNilpotent_unit
+    (A := windowChartRing p F ϖ n)
+  -- the point of `Spa(B_n)` lying over `y`
+  have hyD₀ : ySpaPoint p F ϖ y ∈ ValuationSpectrum.spaOpen
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1) := by
+    refine ValuationSpectrum.mem_spaOpen.mpr ?_
+    rw [← bigWindow_eq_rationalOpen_windowUnif p F ϖ n]
+    exact hbw
+  obtain ⟨w₀, hw₀⟩ := (Set.ext_iff.mp
+    (ValuationSpectrum.SpaVIso.range_shadow
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1) u hu)
+    (ySpaPoint p F ϖ y)).mpr hyD₀
+  -- the chart-side preimage of `O` along the shadow, viewed as a map into `𝒴`
+  have hcont : Continuous (fun z : ↥(Spa (windowChartRing p F ϖ n)
+      (windowChartRing p F ϖ n)⁺) =>
+      (⟨ValuationSpectrum.SpaVIso.shadow
+          (chartData p F (windowUnif p F ϖ n) 1 1 p 1) z,
+        shadow_windowDatum_mem_ySpaSet p F ϖ n hp z⟩ : ↥(yTop p F ϖ))) :=
+    Continuous.subtype_mk
+      ((ValuationSpectrum.SpaVIso.baseHomeo
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1) u hu).continuous.subtype_val) _
+  have hOchOpen : IsOpen {z : ↥(Spa (windowChartRing p F ϖ n)
+      (windowChartRing p F ϖ n)⁺) |
+      (⟨ValuationSpectrum.SpaVIso.shadow
+          (chartData p F (windowUnif p F ϖ n) 1 1 p 1) z,
+        shadow_windowDatum_mem_ySpaSet p F ϖ n hp z⟩ : ↥(yTop p F ϖ)) ∈ O} :=
+    O.2.preimage hcont
+  have hw₀Och : w₀ ∈ {z : ↥(Spa (windowChartRing p F ϖ n)
+      (windowChartRing p F ϖ n)⁺) |
+      (⟨ValuationSpectrum.SpaVIso.shadow
+          (chartData p F (windowUnif p F ϖ n) 1 1 p 1) z,
+        shadow_windowDatum_mem_ySpaSet p F ϖ n hp z⟩ : ↥(yTop p F ϖ)) ∈ O} := by
+    show (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp w₀⟩ : ↥(yTop p F ϖ)) ∈ O
+    exact (show (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp w₀⟩
+      : ↥(yTop p F ϖ)) = y from Subtype.ext hw₀) ▸ hyO
+  -- the rational open around `w₀` inside it
+  obtain ⟨D', -, hw₀D', hD'sub⟩ :=
+    ValuationSpectrum.exists_isRational_spaOpen_subset_huber
+      (A := windowChartRing p F ϖ n) hOchOpen hw₀Och
+  obtain ⟨u', hu'⟩ := IsTateRing.exists_topologicallyNilpotent_unit
+    (A := presheafValue D')
+  refine ⟨D', u', hu', u, hu, ?_, ?_⟩
+  · -- `y` is the shadow of `w₀ ∈ spaOpen D'`
+    exact (mem_windowSubOpen_iff p F ϖ n D' u' hu' u hu y).mpr ⟨w₀, hw₀D', hw₀⟩
+  · -- every shadow of a point of `spaOpen D'` lies in `O`
+    intro z hz
+    obtain ⟨t, htD', htz⟩ := (mem_windowSubOpen_iff p F ϖ n D' u' hu' u hu z).mp hz
+    have htO : (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp t⟩
+        : ↥(yTop p F ϖ)) ∈ O := hD'sub htD'
+    exact (show (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp t⟩
+      : ↥(yTop p F ϖ)) = z from Subtype.ext htz) ▸ htO
+
 end FarguesFontaine
 
 end

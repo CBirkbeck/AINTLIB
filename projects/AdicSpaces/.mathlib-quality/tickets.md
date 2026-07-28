@@ -3140,29 +3140,22 @@ Everything else is proven: the quotient leg (P5-5), `exists_disjoint_translates`
 and Wedhorn 8.22 itself. Also landed: `windowSubVChart_toVPreObj` — the chart's `𝒱`-object IS
 the P5-2 `spaVObjTate` package, by `rfl`.
 
-### [P5-6e] The WANDERING chart selection — the OTHER remaining piece (scoped 2026-07-28)
-`isAdicSpace_xVObj_of_yCharts` needs, for each `y : 𝒴`, a chart neighbourhood that is
-**wandering**. `windowSubOpen n D' …` (P5-6d(i)) need not be. `curveAdicSpacePresentation`
-solves the analogous topological problem by first taking a wandering `W₀ ∋ y`
-(`exists_disjoint_translates`) and then shrinking inside it — but its `V` is built inside the
-proof of `exists_window_subdatum_nbhd` and is NOT `windowSubOpen`, so it cannot be reused
-directly. What is needed:
-
-    ∀ y : 𝒴, ∀ O ∋ y, ∃ n D' u' hu' u hu,
-      y ∈ windowSubOpen n D' u' hu' u hu ∧ windowSubOpen n D' u' hu' u hu ≤ O
-
-ROUTE (all ingredients exist):
-  1. `Y_eq_iUnion_bigWindow` → an `n` with `ySpaPoint y ∈ bigWindow n`.
-  2. `spaChartHomeoWindow` → the chart-side point `w₀ : Spa(B_n)` with `shadow D₀ w₀ = ySpaPoint y`.
-  3. `exists_isRational_spaOpen_subset_huber` over `B_n` (rational opens are a BASIS) → a
-     datum `D'` with `w₀ ∈ spaOpen D'` and `spaOpen D'` inside the chart-side preimage of `O`.
-  4. `SpaVIso.range_shadow D₀ u hu : Set.range (shadow D₀) = spaOpens D₀` (and the fact that
-     `spaCompHom`'s base IS `shadow`) give
-     `range (windowSubCompHom) = shadow D₀ '' spaOpens D'`, hence
-     `windowSubOpen = yTrace (shadow D₀ '' spaOpens D')`; both required properties then
-     transfer from 3.
-Then combine with `exists_disjoint_translates` (take `O := W₀`) to get wandering, and feed
-`isAdicSpace_xVObj_of_yCharts`.
+### [P5-6e] The WANDERING chart selection — DONE 2026-07-28 ★
+- **Status**: DONE, axiom-clean, full gate green | **File**: `FarguesFontaine/CurveYSlice.lean`
+- `base_windowSubCompHom_eq`, `range_windowSubCompHom`, `mem_windowSubOpen_iff`,
+  **`exists_windowSubOpen_nbhd`** — the `windowSubOpen n D' …` are a NEIGHBOURHOOD BASIS
+  of `𝒴`. This is exactly the `hbasis` input of `isAdicSpace_xVObj_of_windowCharts`.
+- **THE SHORTCUT (worth remembering)**: `spaChartHomeoWindow` is NOT needed. The shadow map
+  of the chart datum `D₀` already IS that identification — `range_shadow D₀ u hu :
+  Set.range (shadow D₀) = spaOpen D₀`, and `spaOpen D₀ = bigWindow n` by
+  `bigWindow_eq_rationalOpen_windowUnif`. So the chart-side point comes straight out of
+  `range_shadow`, and the pullback of `O` is along the SINGLE continuous map
+  `z ↦ ⟨shadow D₀ z, shadow_windowDatum_mem_ySpaSet …⟩ : Spa(B_n) → 𝒴`. ~60 lines instead
+  of the ~230 of `exists_window_subdatum_nbhd`, and it never touches `Spv`-level opens.
+- Gotchas: `rw [Set.range_comp]` fails on the range goal (`↑↑(bSpace D')` vs
+  `↥(Spa (𝒪(D')) 𝒪(D')⁺)` under `implicit` transparency) — do it elementwise with
+  `Set.ext` + `rintro`; and `IsHuberRing (windowChartRing …)` is NOT found by search, use
+  `haveI := (isTateRing_bigWindowChart …).toIsHuberRing`.
 
 ### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — IN PROGRESS
 

@@ -712,6 +712,76 @@ noncomputable def VPreHom.corestrict : VPreHom Z (X.restrictOpen U) where
       ((X.restrictOpen U).val_supp _) (Z.val_supp z)
   val_compat := fun z => val_compat_liftToRestrict g U hr z
 
+/-! ### Restriction of a `𝒱^pre`-isomorphism to an open
+
+Being an adic space is a local property, which needs: an isomorphism of
+`𝒱^pre`-objects restricts to an isomorphism between the restrictions to an open
+and its image. -/
+
+section RestrictIso
+
+variable {X Y : VPreObj.{u}} (f : VPreHom X Y) [IsIso f.toHom]
+  (U : Opens ↥(X.toPresheafedSpace.carrier))
+
+/-- The image of an open under an invertible `𝒱^pre`-morphism. -/
+def imgOpenOfHom : Opens ↥(Y.toPresheafedSpace.carrier) :=
+  imgOfIso (asIso f.toHom) U
+
+/-- The restricted morphism lands in the image open. -/
+theorem range_restrict_comp :
+    Set.range (ConcreteCategory.hom
+        (((VPreHom.ofRestrictOpen (X := X) U).comp f).toHom).base)
+      = ((imgOpenOfHom f U : Opens ↥(Y.toPresheafedSpace.carrier))
+          : Set ↥(Y.toPresheafedSpace.carrier)) :=
+  (range_comp_val (α := ↥(X.toPresheafedSpace.carrier))
+    (β := ↥(Y.toPresheafedSpace.carrier))
+    (ConcreteCategory.hom f.toHom.base)
+    (U : Set ↥(X.toPresheafedSpace.carrier))).trans Subtype.range_coe
+
+/-- **The restriction of an invertible `𝒱^pre`-morphism to an open**. -/
+noncomputable def VPreHom.restrictHom :
+    VPreHom (X.restrictOpen U) (Y.restrictOpen (imgOpenOfHom f U)) :=
+  VPreHom.corestrict ((VPreHom.ofRestrictOpen (X := X) U).comp f)
+    (imgOpenOfHom f U) (le_of_eq (range_restrict_comp f U))
+
+/-- The presheafed-space isomorphism induced on the restrictions. -/
+noncomputable def restrictHomIso :
+    (X.restrictOpen U).toPresheafedSpace
+      ≅ Y.toPresheafedSpace.restrict
+          (openIncl_isOpenEmbedding (X := Y.toPresheafedSpace)
+            (imgOpenOfHom f U)) :=
+  letI _hoi : AlgebraicGeometry.PresheafedSpace.IsOpenImmersion
+      (((VPreHom.ofRestrictOpen (X := X) U).comp f).toHom) :=
+    AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.comp
+      (f := X.toPresheafedSpace.ofRestrict
+        (opensIncl_isOpenEmbedding X U))
+      (H := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofRestrict
+        X.toPresheafedSpace (opensIncl_isOpenEmbedding X U))
+      (g := f.toHom)
+      (hg := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso
+        (asIso f.toHom))
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
+    (f := ((VPreHom.ofRestrictOpen (X := X) U).comp f).toHom)
+    (g := Y.toPresheafedSpace.ofRestrict
+      (openIncl_isOpenEmbedding (X := Y.toPresheafedSpace) (imgOpenOfHom f U)))
+    ((range_restrict_comp f U).trans Subtype.range_val.symm)
+
+theorem restrictHom_toHom_eq :
+    (VPreHom.restrictHom f U).toHom = (restrictHomIso f U).hom := rfl
+
+theorem isIso_restrictHom_toHom : IsIso (VPreHom.restrictHom f U).toHom := by
+  rw [restrictHom_toHom_eq f U]
+  exact (restrictHomIso f U).isIso_hom
+
+/-- **Restriction of a `𝒱^pre`-isomorphism to an open** — so being an adic space
+is a local property. -/
+noncomputable def VPreHom.restrictIso :
+    X.restrictOpen U ≅ Y.restrictOpen (imgOpenOfHom f U) :=
+  letI := isIso_restrictHom_toHom f U
+  VPreHom.asIso (VPreHom.restrictHom f U)
+
+end RestrictIso
+
 end CorestrictV
 
 end ValuationSpectrum
