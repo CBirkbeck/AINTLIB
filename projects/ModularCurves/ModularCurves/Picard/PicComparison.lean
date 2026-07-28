@@ -1017,6 +1017,25 @@ theorem isInvertible_iff_isUnit_toSkeleton (M : X.Modules) :
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+theorem toSkeleton_tensorObj_eq (M N : X.Modules) :
+    letI := Modules.monoidalCategory X
+    toSkeleton (tensorObj M N) = toSkeleton M * toSkeleton N :=
+  letI := Modules.monoidalCategory X
+  (toSkeleton_eq_toSkeleton_iff.mpr (nonempty_tensorObj_iso_tensor M N)).trans
+    (Skeleton.toSkeleton_tensorObj _ _)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The unit module has trivial class. -/
+theorem toSkeleton_unitObj :
+    letI := Modules.monoidalCategory X
+    toSkeleton (unitObj X) = 1 := by
+  letI := Modules.monoidalCategory X
+  rw [Skeleton.one_eq]
+  exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_unitObj_iso_unit (X := X))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Cancelling an invertible tensor factor.** `A ⊗ C ≅ B ⊗ C` with `C` invertible gives
 `A ≅ B`. Only a `Nonempty` isomorphism, of course — the cancellation happens in the
 skeleton, where `toSkeleton C` is a unit of a commutative monoid.
@@ -1029,10 +1048,7 @@ theorem nonempty_iso_of_tensorObj_right_cancel {A B C : X.Modules} (hC : IsInver
   letI := Modules.monoidalCategory X
   letI := Modules.symmetricCategory X
   refine toSkeleton_eq_toSkeleton_iff.mp ?_
-  have key : ∀ M N : X.Modules,
-      toSkeleton (tensorObj M N) = toSkeleton M * toSkeleton N := fun M N =>
-    (toSkeleton_eq_toSkeleton_iff.mpr (nonempty_tensorObj_iso_tensor M N)).trans
-      (Skeleton.toSkeleton_tensorObj _ _)
+  have key := toSkeleton_tensorObj_eq (X := X)
   have hmul : toSkeleton A * toSkeleton C = toSkeleton B * toSkeleton C := by
     rw [← key, ← key]
     exact toSkeleton_eq_toSkeleton_iff.mpr e
@@ -1044,5 +1060,23 @@ theorem nonempty_iso_of_tensorObj_right_cancel {A B C : X.Modules} (hC : IsInver
   | exact u.mul_left_cancel hmul
   | · have := congrArg (· * (u⁻¹ : (Skeleton X.Modules)ˣ)) hmul
       simpa [mul_assoc] using this
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Two modules with a common ⊗-inverse are isomorphic.** This is the shape the descent
+machinery delivers: `Picard/GlueTrivialization.lean` produces `Nonempty (𝒪ₓ ≅ L)` for the
+*discrepancy* module `L = (𝒪(D_{Q+Q'}) ⊗ 𝒪(D_0)) ⊗ N` where `N` inverts
+`𝒪(D_Q) ⊗ 𝒪(D_{Q'})`; this lemma converts that into the honest
+`𝒪(D_{Q+Q'}) ⊗ 𝒪(D_0) ≅ 𝒪(D_Q) ⊗ 𝒪(D_{Q'})`. -/
+theorem nonempty_iso_of_tensorObj_unitObj {M M' N : X.Modules}
+    (h : Nonempty (tensorObj M N ≅ unitObj X))
+    (h' : Nonempty (tensorObj M' N ≅ unitObj X)) : Nonempty (M ≅ M') := by
+  letI := Modules.monoidalCategory X
+  letI := Modules.symmetricCategory X
+  have hN : IsInvertible N := by
+    refine isInvertible_of_isUnit_toSkeleton (isUnit_of_dvd_one ⟨toSkeleton M, ?_⟩)
+    rw [mul_comm, ← toSkeleton_tensorObj_eq]
+    exact ((toSkeleton_eq_toSkeleton_iff.mpr h).trans toSkeleton_unitObj).symm
+  exact nonempty_iso_of_tensorObj_right_cancel hN ⟨h.some ≪≫ h'.some.symm⟩
 
 end AlgebraicGeometry.Scheme.Modules
