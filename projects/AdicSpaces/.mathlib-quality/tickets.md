@@ -2475,6 +2475,141 @@ non-Tate bases are supported.
 
 ---
 
+## Campaign 9 (2026-07-28): X IS AN ADIC SPACE — the Wedhorn 8.22 upgrade
+
+**Goal**: `IsAdicSpace (xVObj)` — the curve is an adic space in the letter of
+Wedhorn Def 8.22: an object of 𝒱, locally 𝒱-isomorphic to `Spa` of sheafy
+affinoid pairs. Upgrades the carrier-level `curveAdicSpacePresentation`
+(homeomorphisms only) to 𝒱-isomorphisms carrying structure sheaves + stalk
+valuations.
+
+**SURVEY FACTS (2026-07-28, binding for the design)**:
+- 𝒱-infrastructure EXISTS: `VPreObj`/`VObj` (+ category instances),
+  `VPreHom` (toHom + isLocalHom_stalkMap + val_compat) — StructureSheaf.lean
+  480-580. Iso in 𝒱 = CategoryTheory.Iso.
+- Wedhorn 8.14 stalk machinery EXISTS generically: `stalkValue`,
+  `StalkShrink v` (per-point), `isLocalRing_stalk_of_shrink`,
+  `maximalIdeal_stalk_eq_supp`, `RationalShrink A` (per-ring core),
+  `stalkShrink_of_rationalShrink` — StructureSheafStalks.lean 811-960.
+  Discharged so far ONLY Y-locally over A_inf (`rationalShrink_Y`,
+  YStalks.lean:44-158, via Y-interior Tate-ness
+  `isTateRing_presheafValue_of_rationalOpen_subset_Y` +
+  `exists_A_level_open_presentation'` + `exists_isRational_spaOpen_subset_huber`
+  + `isUnit_iff_forall_not_vle_zero_of_completePair`).
+- The 8.16 keystone `relativePiece_equiv (D₀ E) : 𝒪(E) ≃+* 𝒪_B(im E)`
+  (B := 𝒪(D₀)) EXISTS **over Tate bases only** ([IsTateRing A]
+  [IsNoetherianRing A] [IsStronglyNoetherian A] [T2] [Nonarch] [HasLocLift]
+  [CompleteSpace right]) with naturality `relativePiece_equiv_restrictionMap`
+  + `relativePiece_equiv_restrict_square` — RelativePieceKeystone.lean
+  933-1120. NOT available over A_inf (non-Tate; the D-i audit stands).
+- `windowChartRing n := presheafValue (chartData … (windowUnif n) 1 1 p 1)`
+  — the chart ring IS the ambient window-datum value; complete Tate
+  (isTateRing_bigWindowChart) + strongly noetherian
+  (isStronglyNoetherian_canonical_window) + sheafy
+  (isSheafy_canonical_window) + `spaChartHomeoWindow : Spa(A_W) ≃ₜ
+  bigWindow-trace` with forward coe = comap canonicalMap (rfl).
+- Restriction pattern: yVPreObj = ambient `.restrict` along the open
+  embedding + `restrictStalkIso` transport (YStalks.lean 236-330); sheaf
+  condition of the restriction from the ambient homGlue
+  (yPresheaf_isSheafOfTopologicalRings, YSheaf.lean 95-140).
+- HasLocLiftPowerBounded (Ainf) EXISTS (hasLocLiftPowerBounded_Ainf,
+  axiom-clean — it fed xVObj).
+
+### [P5-1] Generic VObj restriction to an open
+- **Status**: open | **File**: StructureSheaf.lean or new VRestrict.lean
+- **Statement**: `VPreObj.restrictOpen (X : VPreObj) (U : Opens X.toTopCat) :
+  VPreObj` (carrier ↥U, presheaf = X.presheaf restricted along
+  U.isOpenEmbedding, stalks/val/val_supp transported along restrictStalkIso —
+  generalize the yVPreObj construction verbatim) + `VObj.restrictOpen`
+  (sheaf condition: restriction of IsSheafOfTopologicalRings along an open
+  embedding — generalize yPresheaf_isSheafOfTopologicalRings with the
+  ambient homGlue replaced by X.isSheafTopRings at image covers; the
+  image-functor lemmas yFunctor_trace/cov/inf generalize to any open
+  embedding's IsOpenMap.functor).
+- **Consumers**: X|_U, 𝒴|_V, Spa(A_W)|_rational everywhere below.
+
+### [P5-2] Spa of a sheafy complete Tate ring as a VObj
+- **Status**: open | **File**: new SpaVObj.lean
+- **Statement**: for [IsTateRing A][IsNoetherianRing A][IsStronglyNoetherian A]
+  [T2Space A][NonarchimedeanRing A][IsRingOfIntegralElements A⁺]
+  [CompleteSpace-right]: `spaVObjTate A : VObj` with carrier SpaTop A,
+  presheaf structurePresheaf A, stalks via `rationalShrink_tate : RationalShrink A`.
+- **Sketch**: rationalShrink_tate = rationalShrink_Y's proof with the
+  Y-interiority hypothesis DELETED and `isTateRing_presheafValue_of_…_Y`
+  replaced by the generic Tate supplier (presheafValue_isTateRing_concrete
+  / the huber machinery already used there — everything else in that proof
+  is Y-free). val := stalkValue; val_supp := maximalIdeal_stalk_eq_supp.
+  Sheaf field: IsSheafy A → IsSheafOfTopologicalRings (structurePresheaf A)
+  — locate/build the bridge (isSheafy_iff_isLimitSheaf + the homGlue form;
+  survey SheafyPair.lean/HomSheafPredicate.lean first).
+- **Consumers**: the affinoid targets Spa(A_W), Spa(presheafValue D').
+
+### [P5-4] Rational-in-chart 𝒱-iso (8.15 over the Tate chart)
+- **Status**: open | **Depends**: P5-1, P5-2 | **File**: new (chart side)
+- **Statement**: for D' : RationalLocData A_W valid (A_W := windowChartRing n):
+  `(spaVObjTate A_W).restrictOpen (spaOpens D') ≅ spaVObjTate (presheafValue D')`
+  in 𝒱 (or VPreObj-iso + both sides' sheaf conditions).
+- **Sketch**: base homeo = NT-1′ (SpaRationalOpenHomeomorph, over A_W).
+  Sections: per-rational comparison = relativePiece_equiv over the TATE A_W;
+  naturality from relativePiece_equiv_restrictionMap/_restrict_square;
+  assemble to all opens via the limitSections-limit (cofinal rational bases;
+  mirror the pvHuber fwd/bwd dense-extension pattern of
+  RingEquivPresheafTransportHuber where needed). Stalk/val compat: both
+  sides' stalkValues are germ-limits of pointValues — compare through the
+  per-rational isos. presheafValue D' instances: Tate
+  (presheafValue_isTateRing_concrete), strongly noetherian
+  (presheafValue_isStronglyNoetherian_faithful), sheafy (828b) — all exist
+  (windowSubAffinoid's letI-package).
+- **NOTE**: do this BEFORE P5-3 — same shape, all tools exist; it
+  establishes the presheaf-assembly pattern P5-3 mirrors.
+
+### [P5-3] Window transitivity 𝒱-iso (the FF-keystone, the hard one)
+- **Status**: open | **Depends**: P5-1, P5-2; pattern from P5-4
+- **Statement**: `(ambient Spa(A_inf)-VPreObj).restrictOpen (bigWindow-trace n)
+  ≅ spaVObjTate (windowChartRing n)` in 𝒱^pre — equivalently 𝒴|_{trace n} ≅
+  Spa(A_W) after composing with the 𝒴-definitional restriction.
+- **Sketch**: base homeo = spaChartHomeoWindow (coe = comap canonicalMap,
+  rfl). Sections: the ambient keystone is Tate-BLOCKED, so build the
+  comparison by the dense-extension pattern instead: for corresponding
+  rational pieces (ambient E ⊆ window-trace vs its chart-side transport),
+  both section rings are complete TATE (ambient side by
+  isTateRing_presheafValue_of_rationalOpen_subset_Y — window ⊆ Y) and both
+  receive the SAME A_inf-localization with dense image (presheafValue is by
+  construction the completion of the base localization; the chart-side
+  composite localization refines it); the iso = IsDenseInducing.extendRingHom
+  of the identity on the common localization (ID2d AbstractCompletion
+  pattern, biRes/pvHuber precedents), naturality by dense-extension
+  uniqueness. Span bookkeeping: chart-side data via
+  exists_spanning_presentation_of_mem_basicOpens (Tate) as in X-ADIC-1.
+- **This is the substantive new mathematics of the campaign.**
+
+### [P5-5] The quotient leg: X|_{xImage V} ≅ 𝒴|_V for wandering V
+- **Status**: open | **Depends**: P5-1 | **File**: FarguesFontaine/ (new)
+- **Statement**: for V ⊆ yTop open with pairwise-disjoint Frobenius
+  translates: `(xVObj …).restrictOpen (xImage V) ≅ (yVObj …).restrictOpen V`
+  in 𝒱.
+- **Sketch**: base = xImageHomeo (exists). Sections over W ≤ xImage V:
+  𝒪_X(W) = invariant sections over the saturated preimage ≅ 𝒪_𝒴(π⁻¹W ∩ V)
+  (project to the V-piece; injective by invariant_pieces_eq/separation,
+  surjective by the invariantExtension spread — D-iv 3ii-c machinery at
+  SECTION level, naturality in W). Stalk maps: ringStalkMap piYHom —
+  bijectivity PROVEN (ringStalkMap_piYHom_bijective); val compat: xVPreObj.val
+  was DEFINED by transport along these stalk maps (check: likely rfl-adjacent);
+  isLocalHom free from iso.
+- **NOTE**: this makes `isAdicSpace_yVObj` a corollary en route (𝒴 is an
+  adic space via P5-3/P5-4 alone).
+
+### [P5-6] IsAdicSpace + the capstones
+- **Status**: open | **Depends**: P5-1..P5-5
+- **Statement**: `def IsAdicSpace (X : VObj) : Prop := ∀ x, ∃ (U : Opens _)
+  (_ : x ∈ U) (data…), Nonempty ((X.restrictOpen U) ≅ spaVObjTate …)`;
+  `theorem isAdicSpace_yVObj`; `theorem isAdicSpace_xVObj` — THE CURVE IS AN
+  ADIC SPACE. Assembly: fiberPoint + exists_disjoint_translates +
+  exists_window_subdatum_nbhd's V (shrunk inside a window trace) + the iso
+  chain P5-5 ∘ P5-3|_V ∘ P5-4.
+- Also record the restriction-composition plumbing needed (X|_U|_W ≅ X|_W
+  transport, iso-restriction) as it surfaces.
+
 ## Campaign 8 Lane B (PLAN-GATE-1 output, 2026-07-26): Kedlaya 1410.5160 §2–§4
 Architecture decisions AD-1..AD-7 in `.mathlib-quality/decomposition-laneB.md` are BINDING.
 File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` (T902–T903),
