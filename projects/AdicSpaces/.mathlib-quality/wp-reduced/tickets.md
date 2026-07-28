@@ -22,7 +22,14 @@ propext/Classical.choice/Quot.sound) before marking done.
 ## Tickets
 
 ### [W1] Weight.lean — the parity-weight combinatorics
-- Status: open | File: WP/Weight.lean | Depends: none | Parallel: yes | Type: lemmas
+- Status: done (2026-07-28; all 21 sorries filled + 3 helper lemmas
+  `wpWeight_eq_sum_subset`/`wpWeight_update_zero`/`wpWeight_filter_split` +
+  `TailIdx.prop`; build green 888 jobs; axioms clean on 4 spot-checks; Phase-6.5
+  cleanup deferred by board design to CLEANUP-1)
+- Progress: 2026-07-28: proofs via superset-sum normalization + split_ifs/subst_vars/
+  omega pattern; gotcha: omega cannot substitute `n = 0` inside atoms `t n` —
+  subst_vars required; `tailShift` fold/unfold atom alignment needed in
+  headPart_of_headMem_add. | File: WP/Weight.lean | Depends: none | Parallel: yes | Type: lemmas
 - Decls: all 21 sorries (`wpWeight_zero…wpWeight_shiftWeight_zero`, `WPMem.*`,
   `HeadMem.*`, `tailIdxSubmonoid`, `wpMem_tailShift`, `headPart_*`, `tailPart_*`).
 - Sketch: unfold `wpWeight` as a support-sum with if-then-else; parity case analysis
@@ -173,8 +180,10 @@ propext/Classical.choice/Quot.sound) before marking done.
 - Status: open | File: WP/Tail.lean | Depends: W10, R1 | Type: def+theorems
 - Decls: `tailIdxEquivFinsupp`, `tailC0ToMvPowerSeries`,
   `tailC0ToMvPowerSeries_injective`, `isReduced_tailC0`, `isDomain_tailC0`.
-- Sketch: reindex tails to `TailVar N →₀ ℕ` (`Finsupp.subtypeDomain/extendDomain`,
-  Basic:778/1222); Φ coefficient at μ := ρ^{ω(μ)}·x_μ; multiplicative by twist
+- Sketch [ChatGPT-5.6 review: D3/D4 confirmed; `MvPowerSeries.map_injective`
+  exists vendored — use it]: reindex tails to `TailVar N →₀ ℕ`
+  (`Finsupp.subtypeDomain/extendDomain`, Basic:778/1222); Φ coefficient at
+  μ := ρ^{ω(μ)}·x_μ; multiplicative by twist
   absorption (Φ(xy)_τ = ρ^{ω(τ)}·(xy)_τ — expand both sides over the antidiagonal);
   injective given ρ-regularity (cancel ρ^{ω(μ)} by induction on the power);
   reduced/domain by `isReduced_of_injective` + R1 / mathlib
@@ -346,6 +355,9 @@ propext/Classical.choice/Quot.sound) before marking done.
 - Status: open | File: WP/Sheafy.lean | Depends: W3 | Parallel: yes (any time)
 - Decls: `tateExtEquiv` (+ its topological refinement, to be STATED during the
   ticket per the in-file note: bicontinuity for `mvTateAlgebraTopology'`).
+- [ChatGPT-5.6 review]: the bridge must be a topological/normed HUBER-PAIR-level
+  identification (transporting the ring of definition / plus subring), not a bare
+  ring iso; the c₀-Fubini/reindex isomorphism must be proved ISOMETRIC.
 - Sketch: `restrictedGaussEquiv` (ExampleUnitDisc:112) at radius 1 over WPA reduces
   to MvRestricted (Fin s) over WPA; flatten: coefficientwise reindex
   (Fin s)-exponents ⊔ ℕ-exponents ≅ ℕ-exponents under the interleaving order-iso
@@ -370,7 +382,9 @@ propext/Classical.choice/Quot.sound) before marking done.
 ### [R2] Reduced.lean II — W-regularity of head localizations
 - Status: open | File: WP/Reduced.lean | Depends: W15, W16
 - Decls: `rhoQ_regular`.
-- Sketch: transport to presheafValue via headLocEquiv; there: multiplication by
+- Sketch [ChatGPT-5.6 review: route confirmed characteristic-free; use
+  `Module.Flat.isSMulRegular_of_isRegular`]: transport to presheafValue via
+  headLocEquiv; there: multiplication by
   canonicalMap(WaHead) is injective — `prop_8_30_flat_clean_proof`
   (AuditCleanWrappers:113) with D := globalLocData (Presheaf:1141), D' := DH gives
   flatness of the restriction presheafValue(global) → presheafValue(DH);
@@ -415,8 +429,19 @@ propext/Classical.choice/Quot.sound) before marking done.
 ### [CLEANUP-FINAL] /cleanup-all
 - Status: open | Depends: M1 | Type: cleanup
 
-### [HRW-0] Head-reducedness route adjudication (GATED — do not start)
-- Status: blocked (awaiting ChatGPT 5.6 consult + user sign-off on route)
+### [HRW-0] Head-reducedness route adjudication (GATED — awaiting user sign-off)
+- Status: blocked (ChatGPT-5.6 adjudication RECEIVED 2026-07-28 — see
+  wp-reduced/chatgpt-review-2026-07-28.md: NO short route exists; routes (a)/(b)/(c)
+  all refuted with reasons (CM-transfer wall; char-2 inseparability; explicit
+  counterexample k⟨x,T⟩/(ϖT−x²) killing the mod-ϖ power-multiplicativity
+  criterion); char-2 TRUTH of the claim confirmed (BGR 7.3.2/10 has no
+  separability hypothesis).  Recommended sub-campaign = 4 lemmas:
+  (1) rationalLoc_completedLocalRingEquiv (Â_𝔭 ≅ P̂_𝔮 for subdomain maps, via the
+  graph presentation), (2) reduced_of_reduced_completedLocals (Krull
+  intersection), (3) head_completedLocal_reduced — THE wall (case split W ∉ 𝔭:
+  eliminate Z_i, regular; W ∈ 𝔭: explicit completed quadratic-tower analysis),
+  (4) assembly.  User decision needed: open this sub-campaign (est. multi-week)
+  or ship (3) conditionally long-term.)
 - The wall: discharge `HeadLocsReduced K w` (BGR 7.3.2/10 at the heads).  Candidate
   routes in decomposition.md § HRW.  On adjudication: run `/develop --continue` to
   cut its ticket tree (new files `WP/HeadReduced*.lean`), then the unconditional

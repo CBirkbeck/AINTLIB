@@ -98,14 +98,15 @@ theorem isReduced_presheafValue_WPA (hred : HeadLocsReduced K w)
     (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
     IsReduced (presheafValue D) := by sorry
 
-/-- Finite chains of rational localizations, and reducedness all the way up
+/-- Finite chains of rational localizations, and reducedness all the way down
 ([WP] def:rationally-stably-reduced: "every finite iterated rational localization is
-reduced").  `ChainReduced A n` says: every length-`n` chain of rational
-localizations starting at `A` ends in a reduced ring. -/
+reduced").  `ChainReduced A n` says: `A` itself and every iterated rational
+localization of depth `≤ n` is reduced (cumulative successor form per the 2026-07-28
+ChatGPT-5.6 plan review, so each level records all shallower depths too). -/
 def ChainReduced : (A : Type _) → [inst : CommRing A] → [inst : TopologicalSpace A] →
     [inst : IsTopologicalRing A] → ℕ → Prop
   | A, _, _, _, 0 => IsReduced A
-  | A, _, _, _, (n + 1) => ∀ D : RationalLocData A, D.IsRational →
+  | A, _, _, _, (n + 1) => IsReduced A ∧ ∀ D : RationalLocData A, D.IsRational →
       ChainReduced (presheafValue D) n
 
 variable {K w} in
