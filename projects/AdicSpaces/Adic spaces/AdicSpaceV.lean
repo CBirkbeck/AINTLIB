@@ -127,6 +127,18 @@ theorem exists_homeo_of_isAdicSpace {X : VObj.{u}} (h : IsAdicSpace X)
   obtain ⟨U, hxU, C, ⟨e⟩⟩ := h x
   exact ⟨U, hxU, C, ⟨VObj.baseHomeo e⟩⟩
 
+
+/-- **Every adic space in the sense of Wedhorn 8.22 has an underlying
+carrier-level presentation.** This is the formal statement that the `𝒱`-level
+definition refines `AdicSpacePresentation`, whose docstring recorded that it
+"does not itself implement Wedhorn Definition 8.22". -/
+noncomputable def AdicSpacePresentation.ofIsAdicSpace {X : VObj.{u}}
+    (h : IsAdicSpace X) : AdicSpacePresentation.{u} where
+  carrier := ↥(X.toTopCat)
+  isLocallyAffinoid := fun x => by
+    obtain ⟨U, hxU, C, ⟨e⟩⟩ := exists_homeo_of_isAdicSpace h x
+    exact ⟨U, hxU, C.toAffinoidAdicPresentation, ⟨e⟩⟩
+
 end ValuationSpectrum
 
 end
