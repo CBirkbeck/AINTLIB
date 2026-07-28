@@ -74,7 +74,7 @@ instance ySliceIncl_isOpenImmersion (V : Opens ↥(yTop p F ϖ)) :
       (yAmbientPresheafedSpace p F) (yIncl_isOpenEmbedding p F ϖ))
 
 /-- **The range of the slice inclusion is the ambient image of `V`.**  Proved in term
-mode against `ValuationSpectrum.range_val_val`: the carrier spellings
+mode against `ValuationSpectrum.range_comp_val`: the carrier spellings
 (`Opens ↥(yTop p F ϖ)` versus `Opens ↑↑((yAmbientPresheafedSpace p F).restrict ⋯)`)
 are only definitionally equal, so `rw` — which matches up to implicit transparency —
 would make `Membership.mem` ill-typed on the goal. -/
@@ -82,8 +82,10 @@ theorem range_ySliceIncl (V : Opens ↥(yTop p F ϖ)) :
     Set.range (ConcreteCategory.hom (ySliceIncl p F ϖ V).base)
       = (Subtype.val : ↥(yTop p F ϖ) → ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
           '' (V : Set ↥(yTop p F ϖ)) :=
-  (ValuationSpectrum.range_val_val (α := ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-      (ySpaSet p F ϖ) (V : Set ↥(yTop p F ϖ))).trans Subtype.range_coe
+  (ValuationSpectrum.range_comp_val (α := ↥(yTop p F ϖ))
+      (β := ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      (Subtype.val : ↥(yTop p F ϖ) → ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      (V : Set ↥(yTop p F ϖ))).trans Subtype.range_coe
 
 /-! ### The leg itself -/
 

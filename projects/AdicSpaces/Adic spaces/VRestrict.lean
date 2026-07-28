@@ -502,14 +502,18 @@ section CorestrictV
 
 /-! ### Restriction transitivity (P5-RT) -/
 
-/-- The range of the double inclusion `↥W → ↥U → α` of an open `W` of an open
-`U`, as the range of the inclusion of the image `Subtype.val '' W`. -/
-theorem range_val_val {α : Type u} (U : Set α) (W : Set ↥U) :
-    Set.range (fun w : ↥W => ((w : ↥U) : α))
-      = Set.range (Subtype.val : ↥(Subtype.val '' W : Set α) → α) := by
-  rw [Subtype.range_coe, show (fun w : ↥W => ((w : ↥U) : α))
-        = (Subtype.val : ↥U → α) ∘ (Subtype.val : ↥W → ↥U) from rfl,
-    Set.range_comp, Subtype.range_coe]
+
+/-- The range of a function restricted to a subset, as the range of the inclusion
+of the image.  Two mathlib calls (`Set.image_eq_range`, `Subtype.range_coe`), but
+worth naming: it is the spelling that lets range equalities between presheafed
+spaces be discharged in TERM mode, where `exact`-level defeq unfolds
+`TopCat.of` / `restrict` / `ofRestrict` silently.  A `rw`-based proof fails —
+`rw` matches at reducible transparency, where the carrier spellings
+(`Opens ↥U` versus `Opens ↑↑(PresheafedSpace.restrict X ⋯)`) do not agree. -/
+theorem range_comp_val {α β : Type u} (g : α → β) (U : Set α) :
+    Set.range (fun w : ↥U => g (w : α))
+      = Set.range (Subtype.val : ↥(g '' U) → β) :=
+  (Set.image_eq_range g U).symm.trans Subtype.range_coe.symm
 
 /-- The composite inclusion of a double restriction has the same range as the
 inclusion of the image open. -/
@@ -521,15 +525,9 @@ theorem range_openIncl_comp {X : TopRingPresheafedSpace.{u}}
           X.ofRestrict (openIncl_isOpenEmbedding U)).base)
       = Set.range (ConcreteCategory.hom
           (X.ofRestrict (openIncl_isOpenEmbedding (imgOfOpen U W))).base) :=
-  range_val_val (α := ↥(X.carrier)) (U : Set ↥(X.carrier)) (W : Set ↥U)
+  range_comp_val (α := ↥U) (β := ↥(X.carrier))
+    (Subtype.val : ↥U → ↥(X.carrier)) (W : Set ↥U)
 
-/-- The range of `g` restricted to a subset, as the range of the inclusion of
-the image. -/
-theorem range_comp_val {α β : Type u} (g : α → β) (U : Set α) :
-    Set.range (fun w : ↥U => g (w : α))
-      = Set.range (Subtype.val : ↥(g '' U) → β) := by
-  rw [Subtype.range_coe, show (fun w : ↥U => g (w : α))
-      = g ∘ (Subtype.val : ↥U → α) from rfl, Set.range_comp, Subtype.range_coe]
 
 /-- The image of an open under an isomorphism of presheafed spaces. -/
 def imgOfIso {X Y : TopRingPresheafedSpace.{u}} (e : X ≅ Y)
@@ -817,8 +815,8 @@ theorem range_double_restrict :
           (VPreHom.ofRestrictOpen (X := X) W)).toHom).base)
       = ((imgOfOpen W U : Opens ↥(X.toPresheafedSpace.carrier))
           : Set ↥(X.toPresheafedSpace.carrier)) :=
-  (range_val_val (α := ↥(X.toPresheafedSpace.carrier))
-    (W : Set ↥(X.toPresheafedSpace.carrier)) (U : Set ↥W)).trans
+  (range_comp_val (α := ↥W) (β := ↥(X.toPresheafedSpace.carrier))
+    (Subtype.val : ↥W → ↥(X.toPresheafedSpace.carrier)) (U : Set ↥W)).trans
     Subtype.range_coe
 
 /-- **Restriction transitivity as a `𝒱^pre`-morphism.** -/
