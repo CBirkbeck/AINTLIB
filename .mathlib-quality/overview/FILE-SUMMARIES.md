@@ -196,3 +196,52 @@ matching the last source decls).  RECOVERY PROCEDURE: on any worker failure, fir
 section; extract the summary from the artifact with
 `sed -n '/### File Summary/,$p' <file>`.  Only relaunch (in RESUME mode, continuing from the
 last covered declaration) if the artifact is genuinely partial.
+
+## IntervalRing.lean — 99 decls (14 defs, 82 theorems, 3 instances), 1844 lines
+Kedlaya's interval rings `B^I`: realized as the topological closure of the diagonal image of
+`Bloc` inside `hatK rho1 x hatK rho2`, with `lambda_I = max{lambda_rho1, lambda_rho2}` induced
+coordinatewise.  Core is the three-circles Lemma 4.4 (termwise on Gauss terms -> Gauss values
+-> Bloc), giving Cor 4.5 and a wI-Lipschitz estimate that extends the endpoint maps to `resI`
+and `resIHom` (Cor 4.6).  Endgame identifies powers of (p) in the unit ball with the
+two-coordinate valuation balls, giving the pair of definition and Huber/Tate.
+- Key API: `wI` (~90 sites), `BISub` (~80), `BIPlusIn` (~31), `pImage` (~30), `BIProd` (28)
+- **GENUINELY DEAD (12, verified 1 ref = own defn, instances excluded)**: `BISub_fst_mem`,
+  `BISub_snd_mem`, `BIProd_injective`, `mem_BIPlus_iff`, `BIPlus_le_BISub`, `wI_pow_le_one`,
+  `wI_pow_eq_one_iff`, `tendsto_wI_p_pow`, `wI_le_of_approx`, `isComplete_BIPlus`,
+  `wI_p_pow_mul_le`, `p_pow_smul_ball_eq`
+- NOT dead despite 1 ref: `isHuberRing_BISub`, `isTateRing_BISub`,
+  `instIsTopologicalRingBIPlusIn` — INSTANCES, found by resolution not by name
+- sorry: none.  set_option: none.
+- Proofs >30 lines: 9.  Largest `mem_pIdeal_pow_iff` (68), `wLoc_rpow_interpolate` (59),
+  `resIHom` (53)
+
+## METHOD NOTE — dead-code test must exclude instances
+An `instance` with a single textual reference (its own declaration) is NOT dead: it is
+consumed by typeclass resolution, never by name.  The same applies to `@[simp]` lemmas
+consumed by the simp set.  Any Step-8 junk verdict must check the declaration KIND before
+concluding.  Three IntervalRing instances would have been wrongly deleted by a naive count.
+
+## ArCompletion.lean — 58 decls (13 defs, 2 abbrevs, 43 theorems), 1787 lines
+Kedlaya's completed rings `A^r` (Def 2.4): the Gauss valuation on A_inf has trivial support so
+extends to `K = Frac(A_inf)`; `ArSub` is the closure of `Aloc = A_inf[1/[w]]` in the valued
+completion `hatK`, hence complete.  A c0-style parametrization: `PhiHatK b = sum p^n [b_n]`
+converges iff `rho^n |b_n| -> 0`, `teichCoeffAr` extracts the coordinates as limits, and the
+two are mutually inverse.  Payoff is Kedlaya (2.2.1) on the completion —
+`valued_eq_iSup_teichCoeffAr` — plus attainment at a dominating index, so degree exists.
+- Key API: `hatK` (28), `Aloc` (25), `AlocToHatK` (18), `alocToWittF` (16), `wAloc` (16),
+  `ArSub` (12), `prefixAloc` (11).  Load-bearing bridges: `valued_AlocToHatK`,
+  `gaussValueF_alocToWittF`, `tendsto_teichCoeffAr` — almost every later proof factors
+  through one of them.
+- Unused in-file (8, all exported API not dead code): `BrSub`, `gaussTerm_teichCoeffAr_le`,
+  `wAloc_alocTeich`, `exists_finite_teichmuller_sum_close`, `wAr_apply`,
+  `exists_valued_eq_teichCoeffAr`, `teichCoeffAr_PhiHatK`, `teichCoeffAr_zero`
+- sorry: none.  set_option: none — *no heartbeat bump despite a 197-line proof*.
+- Proofs >30 lines: 14 (~24% of decls).  Largest `PhiHatK_teichCoeffAr` (197),
+  `exists_finite_teichmuller_sum_close` (124), `valued_PhiHatK` (106)
+- ***STRONGEST API-EXTRACTION FINDING (Step 7).*** Three preambles repeat VERBATIM and
+  account for most of the long-proof bulk:
+  1. the `z0 = toHatK (p^N)` / `gamma = Units.mk0 ...` value-group block — **4 copies, ~25
+     lines each (~100 lines)**
+  2. the `u*[w]^k = a` localization-and-cancel-`c^k` preamble — **7 copies**
+  3. the `B <= (c^-1)^m` value cap (2 copies) and the `BddAbove`-from-`c0` block (2 copies)
+  Extracting these three helpers should remove 200+ lines AND shrink the decompose targets.

@@ -233,7 +233,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: Write `u·y = a` with `a ∈ A_inf`, `y` a power of `[ϖ]` (`IsLocalization.surj`); `gaussValue y ≠ 0` because `gaussValue_teichmuller` and `PseudoUniformizer.toOF_ne_zero` make it a nonzero power. Both sides multiplied by `gaussValue y` equal `gaussValue a` (via `IsLocalization.lift_eq`, `valued_toHatK`, `wAloc_algebraMap`), so `mul_right_cancel₀` concludes.
 - **Hypotheses**: `0 < ρ < 1`; `ϖ` a pseudo-uniformizer so `[ϖ]` has nonzero Gauss value.
 - **Uses from project**: `AlocToHatK`, `wAloc`, `wAloc_algebraMap`, `toHatK`, `valued_toHatK`, `gaussValue`, `gaussVal`, `gaussValue_teichmuller`, `teichPi`, `PseudoUniformizer.toOF`, `PseudoUniformizer.toOF_ne_zero`, `perfectoidValuation`, `Aloc`, `Ainf`
-- **Used by**: `eventually_pair_wAloc_le`, `eventually_wAloc_eq`, `cauchySeq_of_valued_le`, `valued_PhiHatK`, `eventually_valued_sub_le`, `PhiHatK_teichCoeffAr`, and more
+- **Used by**: `eventually_pair_wAloc_le`, `eventually_wAloc_eq`, `cauchySeq_prefix_image`, `valued_PhiHatK`, `tendsto_gaussTerm_teichCoeffAr`, `PhiHatK_teichCoeffAr`
 - **Visibility**: public
 - **Lines**: 344–374 (proof ~29 lines)
 - **Notes**: none
@@ -255,7 +255,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: The set `ϖ^m · O_F` is open, since multiplication by the unit `ϖ^m` is an open map (`IsUnit.isOpenMap_smul`) and `O_F = powerBoundedSubring F` is open in a Huber ring (`IsHuberRing.exists_pairOfDefinition`, `PairOfDefinition.isOpen_powerBoundedSubring`); it contains `0` and lands inside the ball because `perfectoidValuation_le_one` bounds power-bounded elements by `1`.
 - **Hypotheses**: `F` a perfectoid (hence Huber) field; `ϖ` a pseudo-uniformizer (a unit of `F`).
 - **Uses from project**: `perfectoidValuation`, `perfectoidValuation_le_one`, `PseudoUniformizer.toOF`, `powerBoundedSubring`, `isPowerBounded_zero`, `IsHuberRing.exists_pairOfDefinition`, `OF`
-- **Used by**: `tendsto_teichCoeffAr`
+- **Used by**: `isClosed_ball`, `PhiHatK_teichCoeffAr`
 - **Visibility**: public
 - **Lines**: 385–405 (proof ~19 lines)
 - **Notes**: none
@@ -277,7 +277,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: `Filter.comap_neBot_iff` reduces to meeting every neighbourhood of `x`; since `ArSub` is by definition the topological closure of `Set.range (AlocToHatK …)`, `mem_closure_iff_nhds` produces a point of the range in each such neighbourhood.
 - **Hypotheses**: `x ∈ ArSub` (i.e. `x` lies in the closure of the `Aloc`-image).
 - **Uses from project**: `ArSub`, `AlocToHatK`, `hatK`
-- **Used by**: `exists_eventually_wAloc_le`, `tendsto_teichCoeffAr`, `eventually_wAloc_eq`, `gaussTerm_teichCoeffAr_le`, `PhiHatK_teichCoeffAr`, and more
+- **Used by**: `exists_eventually_wAloc_le`, `tendsto_teichCoeffAr`, `gaussTerm_teichCoeffAr_le`, `tendsto_gaussTerm_teichCoeffAr`, `PhiHatK_teichCoeffAr`
 - **Visibility**: public
 - **Lines**: 440–454 (proof ~13 lines)
 - **Notes**: none
@@ -288,7 +288,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: Pick `N` with `ρ^N < ε` (`exists_pow_lt_of_lt_one`) and use the test element `z₀ = toHatK (p^N)`, whose value is `ρ^N` by `gaussValue_p_mul`/`gaussValue_one`. The uniformity basis `Valued.hasBasis_uniformity` at the unit `γ = Units.mk0 ((Valued.v).restrict z₀)` plus `cauchy_nhds` gives eventual `restrict`-smallness of differences; `Valuation.restrict_lt_iff` converts it to `Valued.v (…) < Valued.v z₀`, and `valued_AlocToHatK` transports it to `wAloc (u' - u) < ρ^N ≤ ε`.
 - **Hypotheses**: `0 < ρ < 1` (so `ρ^N → 0`); `0 < ε`; nothing about `x` beyond membership in the completion.
 - **Uses from project**: `AlocToHatK`, `valued_AlocToHatK`, `toHatK`, `valued_toHatK`, `wAloc`, `gaussValue`, `gaussVal`, `gaussValue_p_mul`, `gaussValue_one`, `hatK`, `Ainf`, `Aloc`
-- **Used by**: `exists_eventually_wAloc_le`, `eventually_wAloc_eq`, `tendsto_teichCoeffAr`
+- **Used by**: `exists_eventually_wAloc_le`, `tendsto_teichCoeffAr`
 - **Visibility**: public
 - **Lines**: 459–523 (proof ~59 lines)
 - **Notes**: proof >30 lines — decompose candidate (the `γ`/`restrict` value-group plumbing is separable from the `ρ^N < ε` bookkeeping)
@@ -299,7 +299,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: Apply `eventually_pair_wAloc_le` with `ε = 1` and split the product-eventually into two one-sided sets (`Filter.eventually_prod_iff`); fix one witness `u₀` from the nonempty filter (`neBot_comap_of_mem_ArSub`), then the ultrametric inequality `Valuation.map_add` on `u = (u - u₀) + u₀` bounds every later `u` by `max (wAloc u₀) 1`.
 - **Hypotheses**: `x ∈ ArSub` (so the approximant filter is `NeBot`); `0 < ρ < 1`.
 - **Uses from project**: `neBot_comap_of_mem_ArSub`, `eventually_pair_wAloc_le`, `wAloc`, `AlocToHatK`, `ArSub`, `hatK`, `Aloc`
-- **Used by**: `tendsto_teichCoeffAr`, `gaussTerm_teichCoeffAr_le`, `PhiHatK_teichCoeffAr`
+- **Used by**: `tendsto_teichCoeffAr`
 - **Visibility**: public
 - **Lines**: 526–549 (proof ~22 lines)
 - **Notes**: none
@@ -321,7 +321,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: The ball `{z | (Valued.v).restrict (z - x) < γ}` with `γ = Units.mk0 ((Valued.v).restrict x)` is a neighbourhood of `x` (`Valued.mem_nhds`); on it `Valuation.restrict_lt_iff` gives `v(z - x) < v x`, and two applications of the ultrametric `Valuation.map_add` (to `z = (z-x)+x` and `x = (x-z)+z`, using `Valuation.map_neg`) force `v z = v x`. Transport to `wAloc` by `valued_AlocToHatK`.
 - **Hypotheses**: `Valued.v x ≠ 0`; `0 < ρ < 1`.
 - **Uses from project**: `valued_AlocToHatK`, `AlocToHatK`, `wAloc`, `hatK`, `Aloc`
-- **Used by**: `gaussTerm_teichCoeffAr_le`, `valued_eq_iSup_teichCoeffAr`, `exists_valued_eq_teichCoeffAr`, `PhiHatK_teichCoeffAr`
+- **Used by**: `gaussTerm_teichCoeffAr_le`
 - **Visibility**: public
 - **Lines**: 637–679 (proof ~40 lines)
 - **Notes**: proof >30 lines — decompose candidate; shares the `γ = Units.mk0 (restrict …)` preamble with `eventually_pair_wAloc_le`. Contains `push Not` (line 666)
@@ -343,7 +343,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: Set `r = v(x)·(ρ^n)⁻¹`. By `eventually_wAloc_eq` the approximants eventually have `wAloc u = v x`, and `gaussTermF_alocToWittF_le` then puts each approximant coordinate inside the ball `{s ≤ r}`; that ball is closed (`isClosed_ball`), so `IsClosed.mem_of_tendsto` with `tendsto_teichCoeffAr` passes the bound to the limit coordinate, and multiplying back by `ρ^n` gives the claim.
 - **Hypotheses**: `x ∈ ArSub` and `Valued.v x ≠ 0` (the latter to make `r` positive and `eventually_wAloc_eq` applicable); `0 < ρ < 1`.
 - **Uses from project**: `teichCoeffAr`, `tendsto_teichCoeffAr`, `eventually_wAloc_eq`, `gaussTermF_alocToWittF_le`, `gaussTermF`, `isClosed_ball`, `neBot_comap_of_mem_ArSub`, `teichCoeffF`, `alocToWittF`, `AlocToHatK`, `ArSub`, `perfectoidValuation`, `hatK`
-- **Used by**: `valued_eq_iSup_teichCoeffAr`, `wAr_apply`
+- **Used by**: unused in file (exported term bound; the value formula reaches the same statement via `valued_PhiHatK`)
 - **Visibility**: public
 - **Lines**: 712–742 (proof ~29 lines)
 - **Notes**: none
@@ -365,7 +365,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: Multiply by the denominator (`IsLocalization.mk'_spec`) and push through `alocToWittF` using `alocToWittF_algebraMap`; `WittVector.map_teichmuller` rewrites both sides as Teichmüller lifts, and since `[ϖ^k]` is a unit in `W(F)` (its inverse is `[(ϖ^k)⁻¹]`, `F` a field) `IsUnit.mul_right_cancel` removes it.
 - **Hypotheses**: `F` a field so `ϖ^k ≠ 0` is invertible; `ϖ` a pseudo-uniformizer.
 - **Uses from project**: `alocTeich`, `alocToWittF`, `alocToWittF_algebraMap`, `teichPi`, `PseudoUniformizer.toOF`, `exists_mul_pow_isPowerBounded`, `powerBoundedSubring`, `Ainf`, `Aloc`, `OF`
-- **Used by**: `alocToWittF_prefixAloc`, `teichCoeffF_prefixAloc`
+- **Used by**: `alocToWittF_prefixAloc`, `exists_finite_teichmuller_sum_close`
 - **Visibility**: public
 - **Lines**: 756–798 (proof ~41 lines)
 - **Notes**: proof >30 lines — decompose candidate (the `hyW`/`haW` `WittVector.map`-of-Teichmüller computations are reusable helpers); shares its `k`/`a`/`y` preamble with `wAloc_alocTeich`
@@ -376,7 +376,7 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **How**: Same `IsLocalization.mk'_spec` multiplication as `alocToWittF_alocTeich`, but evaluated with `wAloc_algebraMap`; `gaussValue_teichmuller` computes both `gaussValue [ϖ]^k = c_ϖ^k` and `gaussValue [c·ϖ^k] = |c|·c_ϖ^k`, and `mul_right_cancel₀` with `c_ϖ^k > 0` gives the result.
 - **Hypotheses**: `0 < ρ < 1`; `ϖ ≠ 0` so `c_ϖ = |ϖ| > 0`.
 - **Uses from project**: `alocTeich`, `wAloc`, `wAloc_algebraMap`, `gaussValue`, `gaussVal`, `gaussValue_teichmuller`, `teichPi`, `PseudoUniformizer.toOF`, `PseudoUniformizer.toOF_ne_zero`, `perfectoidValuation`, `exists_mul_pow_isPowerBounded`, `Ainf`, `Aloc`, `OF`
-- **Used by**: `exists_finite_teichmuller_sum_close`, `wAloc_prefixAloc`
+- **Used by**: unused in file (exported isometry statement for Teichmüller lifts)
 - **Visibility**: public
 - **Lines**: 801–832 (proof ~30 lines)
 - **Notes**: shares the `k`/`a`/`y`/`mk'_spec` preamble with `alocToWittF_alocTeich` — joint decompose candidate
@@ -402,3 +402,315 @@ Opens: `TopologicalRing ValuationSpectrum WittVector`.
 - **Visibility**: public
 - **Lines**: 967–968
 - **Notes**: noncomputable
+
+### `theorem alocToWittF_prefixAloc`
+- **Type**: `(b : ℕ → F) (N : ℕ) : alocToWittF p F ϖ (prefixAloc p F ϖ b N) = ∑ n ∈ Finset.range N, WittVector.teichmuller p (b n) * (p : WittVector p F) ^ n`
+- **What**: The `W(F)`-image of a prefix sum is the corresponding truncated Witt series `Σ_{n<N} [bₙ]·pⁿ`.
+- **How**: Push the ring hom through the sum (`map_sum`) and use `alocToWittF_alocTeich` termwise.
+- **Hypotheses**: none beyond the ambient data.
+- **Uses from project**: `prefixAloc`, `alocToWittF`, `alocToWittF_alocTeich`
+- **Used by**: `teichCoeffF_prefixAloc`, `wAloc_prefixAloc`, `PhiHatK_teichCoeffAr`
+- **Visibility**: public
+- **Lines**: 970–976
+- **Notes**: none
+
+### `theorem teichCoeffF_prefixAloc`
+- **Type**: `(b : ℕ → F) {N j : ℕ} (hj : j < N) : teichCoeffF p F (alocToWittF p F ϖ (prefixAloc p F ϖ b N)) j = b j`
+- **What**: The Teichmüller coordinates of a prefix sum recover the prescribed coefficients in the range `j < N`.
+- **How**: Rewrite by `alocToWittF_prefixAloc`, pad the sum with the zero tail `p^N·0`, and apply the coordinate-extraction lemma `teichCoeffF_sum_range_add`.
+- **Hypotheses**: `j < N`.
+- **Uses from project**: `prefixAloc`, `alocToWittF`, `alocToWittF_prefixAloc`, `teichCoeffF`, `teichCoeffF_sum_range_add`
+- **Used by**: `teichCoeffAr_PhiHatK`
+- **Visibility**: public
+- **Lines**: 979–989
+- **Notes**: none
+
+### `theorem wAloc_prefixAloc`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : ℕ → F) (N : ℕ) : wAloc p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N) = (Finset.range N).sup (fun n => ρ ^ n * perfectoidValuation p F (b n))`
+- **What**: **The isometry identity on the dense layer**: the Gauss value of a finite Teichmüller prefix sum is exactly the finite max of the term values `ρⁿ|bₙ|`.
+- **How**: Transfer to `W(F)` by `gaussValueF_alocToWittF` and `alocToWittF_prefixAloc`. Each summand `[bₙ]·pⁿ` has value `ρⁿ|bₙ|` and bounded terms (`gaussValueF_p_pow_mul`, `gaussValueF_teichmuller`, `bddAbove_gaussTermF_teichmuller`), so `gaussValueF_finset_sum_le` gives `≤ sup`. For `≥`, `teichCoeffF_sum_range_add` shows the `n`-th Gauss term of the sum is exactly `ρⁿ|bₙ|`, and `gaussTermF_le_gaussValueF` bounds each such term by the value; `Finset.sup_le` concludes.
+- **Hypotheses**: `0 < ρ < 1`.
+- **Uses from project**: `prefixAloc`, `wAloc`, `gaussValueF`, `gaussValueF_alocToWittF`, `alocToWittF_prefixAloc`, `gaussTermF`, `gaussTermF_le_gaussValueF`, `gaussValueF_finset_sum_le`, `gaussValueF_p_pow_mul`, `gaussValueF_teichmuller`, `bddAbove_gaussTermF_p_pow_mul`, `bddAbove_gaussTermF_teichmuller`, `teichCoeffF_sum_range_add`, `perfectoidValuation`
+- **Used by**: `cauchySeq_prefix_image`, `valued_PhiHatK`
+- **Visibility**: public
+- **Lines**: 993–1031 (proof ~36 lines)
+- **Notes**: proof >30 lines — decompose candidate (the per-summand `hpiece` bundle and the `hterm` coordinate computation are natural helpers)
+
+### `theorem wAloc_p_pow_mul`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (n : ℕ) (u : Aloc p F ϖ) : wAloc p F ϖ hρ0 hρ1 ((p : Aloc p F ϖ) ^ n * u) = ρ ^ n * wAloc p F ϖ hρ0 hρ1 u`
+- **What**: Multiplication by `pⁿ` scales the Gauss valuation on `Aloc` by exactly `ρⁿ` — the defining normalization `λ_r(p) = ρ`.
+- **How**: Transfer to `W(F)` via `gaussValueF_alocToWittF` and apply `gaussValueF_p_pow_mul`, whose boundedness side condition is `bddAbove_gaussTermF_alocToWittF`.
+- **Hypotheses**: `0 < ρ < 1`.
+- **Uses from project**: `wAloc`, `gaussValueF_alocToWittF`, `gaussValueF_p_pow_mul`, `bddAbove_gaussTermF_alocToWittF`, `alocToWittF`, `Aloc`
+- **Used by**: `cauchySeq_prefix_image`
+- **Visibility**: public
+- **Lines**: 1034–1040
+- **Notes**: none
+
+### `theorem cauchySeq_of_valued_le`
+- **Type**: `{ρ} {hρ0 hρ1} (s : ℕ → hatK p F hρ0 hρ1) (h : ∀ ε : NNReal, 0 < ε → ∃ N₀, ∀ m n, N₀ ≤ m → N₀ ≤ n → Valued.v (s m - s n) ≤ ε) : CauchySeq s`
+- **What**: A Cauchy criterion for sequences in the completed field stated in plain `NNReal` bounds, avoiding all reasoning inside the abstract value group.
+- **How**: Unfold `CauchySeq` against the valued-field basis (`Valued.hasBasis_uniformity`). Given a value-group unit `γ`, its `NNReal` image is positive (injectivity of `MonoidWithZeroHom.ValueGroup₀.embedding_strictMono` plus `γ.ne_zero`); pick `K` with `ρ^K` below it (`exists_pow_lt_of_lt_one`), apply the hypothesis at `ε = ρ^K`, and push the resulting `NNReal` inequality back through `Valuation.embedding_restrict` and `StrictMono.lt_iff_lt`.
+- **Hypotheses**: `0 < ρ < 1` (so `ρ^K` can be made arbitrarily small); nothing about `s` beyond `h`.
+- **Uses from project**: `hatK`
+- **Used by**: `cauchySeq_prefix_image`
+- **Visibility**: public
+- **Lines**: 1044–1074 (proof ~29 lines)
+- **Notes**: the only place the value-group `embedding` bookkeeping is isolated; keeps `γ`-arithmetic out of the rest of the file
+
+### `theorem prefixAloc_sub`
+- **Type**: `(b : ℕ → F) {N M : ℕ} (hNM : N ≤ M) : prefixAloc p F ϖ b M - prefixAloc p F ϖ b N = (p : Aloc p F ϖ) ^ N * prefixAloc p F ϖ (fun j => b (N + j)) (M - N)`
+- **What**: A segment of a prefix sum is `p^N` times the prefix sum of the shifted coefficient sequence — the telescoping identity behind the Cauchy estimate.
+- **How**: `Finset.sum_Ico_eq_sub` turns the difference into a sum over `Ico N M`, `Finset.sum_Ico_eq_sum_range` reindexes it to `range (M - N)`, and `pow_add` factors out `p^N` termwise.
+- **Hypotheses**: `N ≤ M`.
+- **Uses from project**: `prefixAloc`, `Aloc`
+- **Used by**: `cauchySeq_prefix_image`
+- **Visibility**: public
+- **Lines**: 1077–1084
+- **Notes**: none
+
+### `theorem cauchySeq_prefix_image`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F} (hb : Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n)) atTop (nhds 0)) : CauchySeq (fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N))`
+- **What**: If the coefficient terms `ρⁿ|bₙ|` tend to `0` (the `c₀` condition), the images of the prefix sums form a Cauchy sequence in `hatK`, so the series converges.
+- **How**: Use the `NNReal` criterion `cauchySeq_of_valued_le`. For `c ≤ a` past the threshold, `valued_AlocToHatK` + `prefixAloc_sub` + `wAloc_p_pow_mul` + `wAloc_prefixAloc` express the difference's value as `ρ^c · sup_{j < a-c} ρ^j|b_{c+j}|`; `Finset.exists_mem_eq_sup` picks the attaining index `j`, and `pow_add` recombines it into the single term `ρ^{c+j}|b_{c+j}| ≤ ε`. The other order follows by `Valuation.map_neg` on `neg_sub`.
+- **Hypotheses**: `0 < ρ < 1`; the `c₀` decay hypothesis `hb`.
+- **Uses from project**: `cauchySeq_of_valued_le`, `prefixAloc`, `prefixAloc_sub`, `wAloc_prefixAloc`, `wAloc_p_pow_mul`, `valued_AlocToHatK`, `AlocToHatK`, `perfectoidValuation`
+- **Used by**: `tendsto_PhiHatK`
+- **Visibility**: public
+- **Lines**: 1087–1117 (proof ~29 lines)
+- **Notes**: none
+
+### `def PhiHatK`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : ℕ → F) : hatK p F hρ0 hρ1`
+- **What**: **The `c₀`-parametrization `Φ`**: the point of the completion represented by the formal Teichmüller series `Σ pⁿ[bₙ]`, defined as the limit of its prefix images.
+- **How**: Definition — `Filter.limUnder Filter.atTop` of `N ↦ AlocToHatK (prefixAloc b N)`.
+- **Hypotheses**: `0 < ρ < 1`; genuinely a limit only under the `c₀` decay condition (see `tendsto_PhiHatK`), junk value otherwise.
+- **Uses from project**: `hatK`, `AlocToHatK`, `prefixAloc`
+- **Used by**: `tendsto_PhiHatK`, `PhiHatK_mem_ArSub`, `valued_PhiHatK`, `PhiHatK_teichCoeffAr`, `teichCoeffAr_PhiHatK`
+- **Visibility**: public
+- **Lines**: 1121–1124
+- **Notes**: noncomputable
+
+### `theorem tendsto_PhiHatK`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F} (hb : Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n)) atTop (nhds 0)) : Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N)) atTop (nhds (PhiHatK p F ϖ hρ0 hρ1 b))`
+- **What**: Under the `c₀` decay condition the prefix images really converge, and their limit is `PhiHatK b` — so the `limUnder` in the definition is not junk.
+- **How**: `cauchySeq_prefix_image` plus completeness of `hatK` (`cauchySeq_tendsto_of_complete`) produce a limit `y`; `Tendsto.limUnder_eq` identifies `PhiHatK b = y`.
+- **Hypotheses**: `0 < ρ < 1`; `c₀` decay `hb`; completeness of the valued-field completion `hatK`.
+- **Uses from project**: `PhiHatK`, `cauchySeq_prefix_image`, `AlocToHatK`, `prefixAloc`, `perfectoidValuation`
+- **Used by**: `PhiHatK_mem_ArSub`, `valued_PhiHatK`, `PhiHatK_teichCoeffAr`, `teichCoeffAr_PhiHatK`
+- **Visibility**: public
+- **Lines**: 1127–1138
+- **Notes**: none
+
+### `theorem PhiHatK_mem_ArSub`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F} (hb : …) : PhiHatK p F ϖ hρ0 hρ1 b ∈ ArSub p F ϖ hρ0 hρ1`
+- **What**: Every `c₀`-series `Φ b` lands in `A^r` — the parametrization has the right target.
+- **How**: Each prefix image lies in the range of `AlocToHatK`, hence in its topological closure (`Subring.le_topologicalClosure`); that closure is closed (`Subring.isClosed_topologicalClosure`), so `IsClosed.mem_of_tendsto` applied to `tendsto_PhiHatK` puts the limit in `ArSub`.
+- **Hypotheses**: `c₀` decay `hb`; `0 < ρ < 1`.
+- **Uses from project**: `PhiHatK`, `tendsto_PhiHatK`, `ArSub`, `AlocToHatK`, `prefixAloc`, `hatK`, `perfectoidValuation`
+- **Used by**: `teichCoeffAr_PhiHatK`
+- **Visibility**: public
+- **Lines**: 1141–1150
+- **Notes**: none
+
+### `theorem valued_PhiHatK`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F} (hb : …) : Valued.v (PhiHatK p F ϖ hρ0 hρ1 b) = ⨆ n, ρ ^ n * perfectoidValuation p F (b n)`
+- **What**: **The isometry identity for `Φ`**: the value of the series `Σ pⁿ[bₙ]` is the supremum of its term values — Kedlaya (2.2.1) for `c₀`-series.
+- **How**: The partial sums satisfy `Valued.v (s N) = sup_{n<N}` (`valued_AlocToHatK` + `wAloc_prefixAloc`), and the term family is bounded above (from `hb` past a threshold, finite `Finset.sup` below it). Split on `Valued.v (Φ b) = 0`: in the zero case a positive term `ρⁿ|bₙ|` would beat a `ρ^K`-ball around `0` (test element `toHatK (p^K)`, `Valued.mem_nhds`, `Valuation.restrict_lt_iff`) that the partial sums eventually enter — contradiction. In the nonzero case the ball `{v(z - Φb) < v(Φb)}` is a neighbourhood, so `Valuation.map_add_eq_of_lt_left` gives `Valued.v (s N) = Valued.v (Φ b)` for all large `N`; then `le_ciSup` and `Finset.sup_le` sandwich the two sides.
+- **Hypotheses**: `0 < ρ < 1`; `c₀` decay `hb` (used for boundedness of the term family and for `tendsto_PhiHatK`).
+- **Uses from project**: `PhiHatK`, `tendsto_PhiHatK`, `valued_AlocToHatK`, `wAloc_prefixAloc`, `AlocToHatK`, `prefixAloc`, `toHatK`, `valued_toHatK`, `gaussValue`, `gaussVal`, `gaussValue_p_mul`, `gaussValue_one`, `perfectoidValuation`, `hatK`, `Ainf`
+- **Used by**: `valued_eq_iSup_teichCoeffAr`
+- **Visibility**: public
+- **Lines**: 1153–1260 (proof ~106 lines)
+- **Notes**: **decompose-proof candidate** — three separable blocks: `hBterms` (boundedness of the term family from `c₀`), the zero case (`ρ^K`-ball contradiction, which duplicates the `z₀ = toHatK (p^K)` computation in `eventually_pair_wAloc_le`), and the nonzero case (`map_add_eq_of_lt_left` stabilization). Contains `push Not` (line 1183)
+
+### `theorem tendsto_gaussTermF_alocToWittF`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (u : Aloc p F ϖ) : Tendsto (gaussTermF p F ρ (alocToWittF p F ϖ u)) atTop (nhds 0)`
+- **What**: **`Aloc`-images decay geometrically**: the Gauss terms of any `u ∈ A_inf[1/[ϖ]]` are `O(ρⁿ)` and hence tend to `0`, so every element of the dense layer is a `c₀`-series.
+- **How**: Write `u·[ϖ]^k = a` with `a ∈ A_inf` (`IsLocalization.surj`); `gaussTermF_teichmuller_mul` converts the `n`-th term of `u` into `c^{-k}` times the `A_inf`-term `gaussTerm a n`, which is `≤ ρⁿ` because Teichmüller coordinates of `A_inf`-elements are power-bounded (`perfectoidValuation_le_one`). The geometric bound `ρⁿ·(c^k)⁻¹ → 0` (`tendsto_pow_atTop_nhds_zero_of_lt_one`) then squeezes via `tendsto_of_tendsto_of_tendsto_of_le_of_le`.
+- **Hypotheses**: `0 < ρ < 1`; `ϖ ≠ 0` so `c = |ϖ| > 0`.
+- **Uses from project**: `gaussTermF`, `gaussTermF_teichmuller_mul`, `gaussTermF_map`, `gaussTerm`, `alocToWittF`, `alocToWittF_algebraMap`, `teichPi`, `teichCoeff`, `perfectoidValuation`, `perfectoidValuation_le_one`, `PseudoUniformizer.toOF`, `PseudoUniformizer.toOF_ne_zero`, `powerBoundedSubring`, `Ainf`, `Aloc`, `OF`
+- **Used by**: `tendsto_gaussTerm_teichCoeffAr`, `PhiHatK_teichCoeffAr`
+- **Visibility**: public
+- **Lines**: 1264–1313 (proof ~47 lines)
+- **Notes**: proof >30 lines — decompose candidate; the `u·[ϖ]^k = a` / `hy` / `himg` preamble is the same one used in `gaussTermF_alocToWittF_le`, `gaussValueF_alocToWittF` and `exists_finite_teichmuller_sum_close`
+
+### `theorem eventually_valued_sub_le`
+- **Type**: `{ρ} {hρ0 hρ1} (x : hatK p F hρ0 hρ1) {ε : NNReal} (hε : 0 < ε) : ∀ᶠ u in comap (AlocToHatK …) (nhds x), Valued.v (AlocToHatK p F ϖ hρ0 hρ1 u - x) ≤ ε`
+- **What**: The approximants of any point `x` of the completion are eventually within `ε` of `x` in the completed-field valuation — the one-sided companion of `eventually_pair_wAloc_le`.
+- **How**: Choose `N` with `ρ^N < ε` and use the test element `z₀ = toHatK (p^N)` of value `ρ^N` (`valued_toHatK`, `gaussValue_p_mul`, `gaussValue_one`). The ball `{(Valued.v).restrict (z - x) < Units.mk0 ((Valued.v).restrict z₀)}` is a neighbourhood of `x` (`Valued.mem_nhds`), and `Valuation.restrict_lt_iff` converts membership into `Valued.v (z - x) < ρ^N ≤ ε`.
+- **Hypotheses**: `0 < ρ < 1`; `0 < ε`; no assumption on `x`.
+- **Uses from project**: `AlocToHatK`, `toHatK`, `valued_toHatK`, `gaussValue`, `gaussVal`, `gaussValue_p_mul`, `gaussValue_one`, `hatK`, `Ainf`
+- **Used by**: `tendsto_gaussTerm_teichCoeffAr`, `PhiHatK_teichCoeffAr`
+- **Visibility**: public
+- **Lines**: 1316–1358 (proof ~41 lines)
+- **Notes**: proof >30 lines — decompose candidate; the `z₀`/`hvz₀`/`hrne`/`γ` preamble is byte-for-byte the one in `eventually_pair_wAloc_le` and `eventually_valued_sub_le_of_tendsto` (three-way duplication, prime dedup target)
+
+### `theorem tendsto_gaussTerm_teichCoeffAr`
+- **Type**: `{ρ} {hρ0 hρ1} {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) : Tendsto (fun n => ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)) atTop (nhds 0)`
+- **What**: **The decay-closure crux**: for every `x ∈ A^r` the scaled limit coordinates `ρⁿ|xₙ|` tend to `0`, so `teichCoeffAr x` is a legitimate `c₀` coefficient sequence and `PhiHatK` may be applied to it.
+- **How**: Via `tendsto_order` it suffices to beat each `a > 0`. Pick `b < a` and one `b`-close approximant `u₀` from `eventually_valued_sub_le`; since `u₀`'s own terms decay (`tendsto_gaussTermF_alocToWittF`), both its tail value and head bound go to `0` (`tendsto_tailValueF_of_tendsto`, `tendsto_headBoundF_of_tendsto`), so past `max N₁ N₂` the threshold `r = max (max (tailValueF w₀ n) (headBoundF w₀ n)) b` is `< a`. For any closer approximant `u`, `valued_AlocToHatK` + `Valuation.map_sub` give `wAloc (u - u₀) ≤ b`, and the moving-prefix estimate `tailValueF_add_le_gaussValueF` on `u = w₀ + (u - w₀)` bounds `gaussTermF u n ≤ tailValueF u n ≤ r` (`gaussTermF_le_tailValueF`). This puts the approximant coordinates in the closed ball of radius `(ρⁿ)⁻¹r` (`isClosed_ball`), so `IsClosed.mem_of_tendsto` with `tendsto_teichCoeffAr` transfers it to the limit coordinate, giving `ρⁿ|xₙ| ≤ r < a`.
+- **Hypotheses**: `x ∈ ArSub`; `0 < ρ < 1`.
+- **Uses from project**: `teichCoeffAr`, `tendsto_teichCoeffAr`, `eventually_valued_sub_le`, `tendsto_gaussTermF_alocToWittF`, `tendsto_tailValueF_of_tendsto`, `tendsto_headBoundF_of_tendsto`, `tailValueF`, `tailValueF_add_le_gaussValueF`, `headBoundF`, `gaussTermF`, `gaussTermF_le_tailValueF`, `gaussValueF`, `gaussValueF_alocToWittF`, `bddAbove_gaussTermF_alocToWittF`, `isClosed_ball`, `neBot_comap_of_mem_ArSub`, `valued_AlocToHatK`, `wAloc`, `alocToWittF`, `teichCoeffF`, `AlocToHatK`, `ArSub`, `perfectoidValuation`
+- **Used by**: `PhiHatK_teichCoeffAr`, `valued_eq_iSup_teichCoeffAr`, `exists_valued_eq_teichCoeffAr`, `wAr_apply`
+- **Visibility**: public
+- **Lines**: 1365–1441 (proof ~74 lines)
+- **Notes**: proof >30 lines — decompose candidate (the inner `hevn` uniform-coordinate-bound block is a standalone lemma about `tailValueF`)
+
+### `theorem eventually_valued_sub_le_of_tendsto`
+- **Type**: `{ρ} {hρ0 hρ1} {ι} {l : Filter ι} {g : ι → hatK p F hρ0 hρ1} {y} (hg : Tendsto g l (nhds y)) {ε : NNReal} (hε : 0 < ε) : ∀ᶠ i in l, Valued.v (g i - y) ≤ ε`
+- **What**: The filter-generic form of `eventually_valued_sub_le`: along any convergent net in `hatK`, the difference from the limit is eventually of valuation `≤ ε`.
+- **How**: Same `z₀ = toHatK (p^N)` device with `ρ^N < ε` (`valued_toHatK`, `gaussValue_p_mul`, `gaussValue_one`); the `γ`-ball around `y` is a neighbourhood (`Valued.mem_nhds`), `Tendsto.eventually` pulls it back along `g`, and `Valuation.restrict_lt_iff` converts to the `NNReal` bound.
+- **Hypotheses**: `0 < ρ < 1`; `0 < ε`; `g` converges to `y` along `l`.
+- **Uses from project**: `toHatK`, `valued_toHatK`, `gaussValue`, `gaussVal`, `gaussValue_p_mul`, `gaussValue_one`, `hatK`, `Ainf`
+- **Used by**: `PhiHatK_teichCoeffAr`
+- **Visibility**: public
+- **Lines**: 1444–1485 (proof ~40 lines)
+- **Notes**: proof >30 lines; near-duplicate of `eventually_valued_sub_le` (which is its special case at `l = comap …`, `g = AlocToHatK`) — dedup candidate
+
+### `theorem PhiHatK_teichCoeffAr`
+- **Type**: `{ρ} {hρ0 hρ1} {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) : PhiHatK p F ϖ hρ0 hρ1 (teichCoeffAr p F ϖ hρ0 hρ1 x) = x`
+- **What**: **The series realization** (Kedlaya (2.2.1) on the completion, existence direction): every element of `A^r` is the sum of its own Teichmüller series, `x = Σₙ pⁿ[xₙ]` with `xₙ = teichCoeffAr x n`. Together with `teichCoeffAr_PhiHatK` this makes `Φ` a bijection between `c₀` coefficient sequences and `A^r`.
+- **How**: Show `Valued.v (Φ b - x) ≤ ε` for every `ε > 0` (then `NNReal.half_lt_self` forces the value to be `0`, and `Valuation.zero_iff` + `sub_eq_zero` give equality). The `ε`-estimate is a three-term ultrametric chain `Φb - x = (Φb - S_N) + ((S_N - u) + (u - x))` where `S_N = AlocToHatK (prefixAloc b N)`: the outer legs come from `eventually_valued_sub_le_of_tendsto` applied to `tendsto_PhiHatK` (needing the `c₀` decay `tendsto_gaussTerm_teichCoeffAr`) and from `eventually_valued_sub_le`. The middle leg is the quantitative core, computed in `W(F)` via `valued_AlocToHatK` + `gaussValueF_alocToWittF` + `alocToWittF_prefixAloc` and split as `w_u - P_b = (w_u - P_u) + (P_u - P_b)`: (i) `gaussValueF_sub_prefix` identifies `gaussValueF (w_u - P_u)` with `tailValueF w_u N`, which is `≤ ε'` by the same base-approximant perturbation as in `tendsto_gaussTerm_teichCoeffAr` (`tailValueF_add_le_gaussValueF` against `u₀`, with `N` past the `tendsto_tailValueF_of_tendsto` / `tendsto_headBoundF_of_tendsto` thresholds); (ii) `P_u - P_b` is the finite sum of the `N` differences `pⁱ([u_i] - [b_i])`, each of which is `≤ ε'` by the Hölder modulus `gaussValueF_teichmuller_sub_le_of_le_scaled` — applicable because the coordinates are capped by `c⁻ᵐ` (finite `Finset.sup` of `|b i|`) and are `δ'`-close by `tendsto_teichCoeffAr` uniformly over `i < N` (`Filter.eventually_all_finset`) — so `gaussValueF_finset_sum_le` bounds the whole sum. Boundedness side conditions come from `exists_iter_splitF` / `bddAbove_gaussTermF_of_coords_shift` / `bddAbove_gaussTermF_teichmuller_sub`, and the two halves are combined by `gaussValueF_add_le`.
+- **Hypotheses**: `x ∈ ArSub`; `0 < ρ < 1`; `ϖ` a pseudo-uniformizer with `0 < c = |ϖ| < 1` (used to build the value cap `c⁻ᵐ` and the ball `{|z| ≤ δ'}`); `ε` truncated to `ε' = min ε 1` so the Hölder modulus applies.
+- **Uses from project**: `PhiHatK`, `tendsto_PhiHatK`, `teichCoeffAr`, `tendsto_teichCoeffAr`, `tendsto_gaussTerm_teichCoeffAr`, `eventually_valued_sub_le`, `eventually_valued_sub_le_of_tendsto`, `neBot_comap_of_mem_ArSub`, `valued_AlocToHatK`, `AlocToHatK`, `prefixAloc`, `alocToWittF`, `alocToWittF_prefixAloc`, `wAloc`, `gaussValueF`, `gaussValueF_alocToWittF`, `gaussValueF_sub_prefix`, `gaussValueF_add_le`, `gaussValueF_finset_sum_le`, `gaussValueF_p_pow_mul`, `gaussValueF_teichmuller_sub_le_of_le_scaled`, `gaussTermF`, `tailValueF`, `tailValueF_add_le_gaussValueF`, `tendsto_tailValueF_of_tendsto`, `headBoundF`, `tendsto_headBoundF_of_tendsto`, `tendsto_gaussTermF_alocToWittF`, `bddAbove_gaussTermF_alocToWittF`, `bddAbove_gaussTermF_p_pow_mul`, `bddAbove_gaussTermF_teichmuller_sub`, `bddAbove_gaussTermF_of_coords_shift`, `exists_iter_splitF`, `teichCoeffF`, `ball_mem_nhds_zero`, `perfectoidValuation`, `perfectoidValuation_toOF_lt_one`, `PseudoUniformizer.toOF`, `PseudoUniformizer.toOF_ne_zero`, `ArSub`, `hatK`, `OF`
+- **Used by**: `valued_eq_iSup_teichCoeffAr`
+- **Visibility**: public
+- **Lines**: 1492–1690 (proof ~197 lines)
+- **Notes**: **the file's longest proof and the prime decompose-proof candidate**. Natural extraction points: (a) the `capB ≤ (c⁻¹)^m` value-cap lemma (verbatim duplicate of the same block in `tendsto_teichCoeffAr`), (b) `hcoordAll` — uniform `δ'`-closeness of the first `N` coordinates, (c) `htailu` — the base-approximant tail bound (shared with `tendsto_gaussTerm_teichCoeffAr`), (d) `hpieces`/`hsum` — the finite Hölder-sum bound, (e) `hwuPb` — the `W(F)`-side middle-leg estimate, (f) the closing "value below every `ε` is zero" argument, which is a standalone `NNReal` valuation lemma
+
+### `theorem valued_eq_iSup_teichCoeffAr`
+- **Type**: `{ρ} {hρ0 hρ1} {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) : Valued.v x = ⨆ n, ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)`
+- **What**: **The value formula on `A^r`** (Kedlaya (2.2.1) on the completion): the Gauss value of any element of `A^r` is the supremum of its scaled coordinate values `ρⁿ|xₙ|`.
+- **How**: Rewrite `x` as `Φ (teichCoeffAr x)` by `PhiHatK_teichCoeffAr` and apply the isometry identity `valued_PhiHatK`, whose `c₀` hypothesis is `tendsto_gaussTerm_teichCoeffAr`.
+- **Hypotheses**: `x ∈ ArSub`; `0 < ρ < 1`.
+- **Uses from project**: `PhiHatK_teichCoeffAr`, `valued_PhiHatK`, `tendsto_gaussTerm_teichCoeffAr`, `teichCoeffAr`, `ArSub`, `hatK`, `perfectoidValuation`
+- **Used by**: `exists_valued_eq_teichCoeffAr`, `teichCoeffAr_zero`
+- **Visibility**: public
+- **Lines**: 1694–1699
+- **Notes**: the file's headline theorem; short because both halves were proved separately
+
+### `def wAr`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) : Valuation (ArSub p F ϖ hρ0 hρ1) NNReal`
+- **What**: **The Gauss valuation on the completed ring `A^r`** (Kedlaya Definition 2.4 on the completion) — the restriction of the completed-field valuation to the closed subring.
+- **How**: Definition — `Valuation.comap` of `Valued.v` along the subring inclusion `(ArSub …).subtype`.
+- **Hypotheses**: `0 < ρ < 1`.
+- **Uses from project**: `ArSub`, `hatK`
+- **Used by**: `wAr_apply`
+- **Visibility**: public
+- **Lines**: 1704–1707
+- **Notes**: noncomputable
+
+### `theorem wAr_apply`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (z : ArSub p F ϖ hρ0 hρ1) : wAr p F ϖ hρ0 hρ1 z = Valued.v (z : hatK p F hρ0 hρ1)`
+- **What**: The defining simp lemma for `wAr`: evaluating it is just evaluating the ambient `Valued.v` on the underlying element.
+- **How**: `rfl` — the comap is definitionally the composite.
+- **Hypotheses**: none.
+- **Uses from project**: `wAr`, `ArSub`, `hatK`
+- **Used by**: unused in file (API for downstream)
+- **Visibility**: public
+- **Lines**: 1710–1713
+- **Notes**: `@[simp]`
+
+### `theorem exists_valued_eq_teichCoeffAr`
+- **Type**: `{ρ} {hρ0 hρ1} {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) : ∃ n₀, Valued.v x = ρ ^ n₀ * perfectoidValuation p F (teichCoeffAr … x n₀) ∧ ∀ m, ρ ^ m * … ≤ ρ ^ n₀ * …`
+- **What**: **Attainment on `A^r`** (Kedlaya Definition 2.4, existence of the degree): a nonzero element of `A^r` attains its value at some coordinate index `n₀`, which dominates all other coordinate terms — so the `⨆` of the value formula is a maximum.
+- **How**: The value formula `valued_eq_iSup_teichCoeffAr` rewrites the sup; since the terms tend to `0` (`tendsto_gaussTerm_teichCoeffAr`) and the sup is nonzero (`Valuation.ne_zero_iff` from `x ≠ 0`), the general attainment lemma `exists_iSup_eq_of_tendsto_zero` produces the maximizing index.
+- **Hypotheses**: `x ∈ ArSub`, `x ≠ 0`; `0 < ρ < 1`.
+- **Uses from project**: `valued_eq_iSup_teichCoeffAr`, `tendsto_gaussTerm_teichCoeffAr`, `exists_iSup_eq_of_tendsto_zero`, `teichCoeffAr`, `ArSub`, `hatK`, `perfectoidValuation`
+- **Used by**: unused in file (exported degree statement)
+- **Visibility**: public
+- **Lines**: 1718–1729
+- **Notes**: none
+
+### `theorem teichCoeffAr_PhiHatK`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F} (hb : …) (n : ℕ) : teichCoeffAr p F ϖ hρ0 hρ1 (PhiHatK p F ϖ hρ0 hρ1 b) n = b n`
+- **What**: **Coordinate recovery for `Φ`**: the limit coordinates of the series `Φ b` are exactly the input coefficients. With `PhiHatK_teichCoeffAr` this shows `Φ` and `teichCoeffAr` are mutually inverse.
+- **How**: The prefix sums converge to `Φ b` (`tendsto_PhiHatK`), hence tend to `Φ b` along the comap filter (`Filter.tendsto_comap_iff`); composing with `tendsto_teichCoeffAr` (legitimate since `PhiHatK_mem_ArSub`) makes the `n`-th coordinate of the prefixes converge to `teichCoeffAr (Φ b) n`. But `teichCoeffF_prefixAloc` makes that coordinate eventually constantly `b n`, so `Filter.Tendsto.congr'` plus `tendsto_nhds_unique` (in the `T0`, complete `F`) forces the two limits to agree.
+- **Hypotheses**: `c₀` decay `hb`; `0 < ρ < 1`; `F` complete, `T0`, uniform additive group.
+- **Uses from project**: `teichCoeffAr`, `PhiHatK`, `tendsto_PhiHatK`, `PhiHatK_mem_ArSub`, `tendsto_teichCoeffAr`, `teichCoeffF_prefixAloc`, `prefixAloc`, `alocToWittF`, `teichCoeffF`, `AlocToHatK`, `IsPerfectoidRing.complete`, `IsPerfectoidRing.t0`, `IsPerfectoidRing.uniformAddGroup`, `perfectoidValuation`
+- **Used by**: unused in file (the injectivity half of the parametrization, exported)
+- **Visibility**: public
+- **Lines**: 1733–1754 (proof ~18 lines)
+- **Notes**: none
+
+### `theorem teichCoeffAr_zero`
+- **Type**: `{ρ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (n : ℕ) : teichCoeffAr p F ϖ hρ0 hρ1 (0 : hatK p F hρ0 hρ1) n = 0`
+- **What**: All limit coordinates of `0` vanish — the normalization making `teichCoeffAr` a genuine coordinate system.
+- **How**: Apply the value formula `valued_eq_iSup_teichCoeffAr` at `x = 0` (`zero_mem (ArSub …)`), so the sup of the terms is `Valuation.map_zero = 0`. The term family is bounded above (finite `Finset.sup` below a threshold from `tendsto_gaussTerm_teichCoeffAr`, `< 1` above it), so `le_ciSup` bounds each individual term by `0`; `mul_eq_zero` with `ρⁿ > 0` and `Valuation.zero_iff` then kills the coordinate.
+- **Hypotheses**: `0 < ρ < 1`.
+- **Uses from project**: `teichCoeffAr`, `valued_eq_iSup_teichCoeffAr`, `tendsto_gaussTerm_teichCoeffAr`, `ArSub`, `hatK`, `perfectoidValuation`
+- **Used by**: unused in file (final normalization lemma)
+- **Visibility**: public
+- **Lines**: 1757–1783 (proof ~25 lines)
+- **Notes**: the `hB` boundedness block duplicates `hBterms` inside `valued_PhiHatK` — dedup candidate (a standalone `BddAbove`-from-`c₀` lemma)
+
+---
+
+### File Summary
+
+**Total declarations: 58** — 43 `theorem`, 13 `def`, 2 `abbrev` (`hatK`, `Aloc`), 0 `instance`. File length 1787 lines, single namespace `FarguesFontaine`, whole file inside `noncomputable section`.
+
+**Key API used by 3+ other declarations in this file** (in-file consumer count):
+
+| Declaration | Kind | Consumers |
+|---|---|---|
+| `hatK` | abbrev | 28 |
+| `Aloc` | abbrev | 25 |
+| `AlocToHatK` | def | 18 |
+| `alocToWittF` | def | 16 |
+| `wAloc` | def | 16 |
+| `ArSub` | def | 12 |
+| `prefixAloc` | def | 11 |
+| `teichCoeffAr` | def | 9 |
+| `toHatK` | def | 8 |
+| `valued_toHatK` | theorem | 7 |
+| `gaussValueF_alocToWittF` | theorem | 6 |
+| `valued_AlocToHatK` | theorem | 6 |
+| `alocToWittF_algebraMap` | theorem | 5 |
+| `bddAbove_gaussTermF_alocToWittF` | theorem | 5 |
+| `neBot_comap_of_mem_ArSub` | theorem | 5 |
+| `PhiHatK` | def | 5 |
+| `wK` | def | 4 |
+| `wAloc_algebraMap` | theorem | 4 |
+| `tendsto_teichCoeffAr` | theorem | 4 |
+| `alocTeich` | def | 4 |
+| `tendsto_PhiHatK` | theorem | 4 |
+| `tendsto_gaussTerm_teichCoeffAr` | theorem | 4 |
+| `gaussTermF_alocToWittF_le` | theorem | 3 |
+| `alocToWittF_prefixAloc` | theorem | 3 |
+
+The three load-bearing bridges are `valued_AlocToHatK` (ground valuation ↔ completed-field valuation), `gaussValueF_alocToWittF` (`Aloc` value ↔ `W(F)` Gauss value) and `tendsto_teichCoeffAr` (approximant coordinates ↔ limit coordinates); almost every later proof factors through at least one of them.
+
+**Unused declarations (no in-file consumer — all are exported API, not dead code): 8**
+`BrSub` (the `B^r` companion of `ArSub`; defined for the downstream `B^r` theory, never consumed here), `gaussTerm_teichCoeffAr_le`, `wAloc_alocTeich`, `exists_finite_teichmuller_sum_close`, `wAr_apply`, `exists_valued_eq_teichCoeffAr`, `teichCoeffAr_PhiHatK`, `teichCoeffAr_zero`. The last four are the file's exported endpoints (degree attainment, coordinate recovery, normalization, `wAr` simp lemma).
+
+**Declarations with `sorry`: 0.** The file is sorry-free.
+
+**Declarations with `set_option`: 0.** No `maxHeartbeats` / `maxRecDepth` bumps anywhere — notable for a file with a 197-line proof.
+
+**Proofs longer than 30 lines: 14** (of 58 declarations, i.e. ~24%):
+
+| Declaration | Lines | Proof length |
+|---|---|---|
+| `PhiHatK_teichCoeffAr` | 1492–1690 | ~197 |
+| `exists_finite_teichmuller_sum_close` | 837–964 | ~124 |
+| `valued_PhiHatK` | 1153–1260 | ~106 |
+| `tendsto_teichCoeffAr` | 554–632 | ~74 |
+| `tendsto_gaussTerm_teichCoeffAr` | 1365–1441 | ~74 |
+| `gaussValueF_alocToWittF` | 276–341 | ~63 |
+| `eventually_pair_wAloc_le` | 459–523 | ~59 |
+| `gaussTermF_alocToWittF_le` | 212–263 | ~50 |
+| `tendsto_gaussTermF_alocToWittF` | 1264–1313 | ~47 |
+| `alocToWittF_alocTeich` | 756–798 | ~41 |
+| `eventually_valued_sub_le` | 1316–1358 | ~41 |
+| `eventually_wAloc_eq` | 637–679 | ~40 |
+| `eventually_valued_sub_le_of_tendsto` | 1444–1485 | ~40 |
+| `wAloc_prefixAloc` | 993–1031 | ~36 |
+
+(`wAloc_alocTeich`, 801–832, is exactly at the ~30-line boundary.)
+
+**Cross-cutting duplication (dedup / decompose targets).** Three preambles are repeated verbatim across many of the long proofs and account for most of their length:
+1. **The `z₀ = toHatK (p^N)` / `γ = Units.mk0 ((Valued.v).restrict z₀)` value-group block** — in `eventually_pair_wAloc_le`, `eventually_valued_sub_le`, `eventually_valued_sub_le_of_tendsto` and the zero case of `valued_PhiHatK` (4 copies, ~25 lines each). `cauchySeq_of_valued_le` already isolates the analogous plumbing; a shared `∃ z₀, Valued.v z₀ = ρ^N` helper would collapse all four.
+2. **The `u·[ϖ]^k = a` localization/scaling preamble** (`IsLocalization.surj` + `WittVector.map_teichmuller` + cancel `c^k`) — in `valued_AlocToHatK`, `gaussTermF_alocToWittF_le`, `gaussValueF_alocToWittF`, `alocToWittF_alocTeich`, `wAloc_alocTeich`, `exists_finite_teichmuller_sum_close`, `tendsto_gaussTermF_alocToWittF` (7 copies).
+3. **The `B ≤ (c⁻¹)^m` value-cap extraction** — identical in `tendsto_teichCoeffAr` and `PhiHatK_teichCoeffAr`; and the **`BddAbove`-from-`c₀`** block, identical in `valued_PhiHatK` and `teichCoeffAr_zero`.

@@ -22,6 +22,22 @@ the user as a separate later run.
 Workers write the full per-declaration inventory to a file and return only the File Summary
 (1656 entries cannot be held in context).
 
+### STATUS as of the RobbaPresentation split
+
+COMPLETE (16): Euclidean, Groebner, ChartVObj, IntervalSplitting, CurveObject, Presentation,
+WittF, YSpace, UniformizerEquivariance, YStalks, YPresheaf, ChartData, IntervalRing,
+ArCompletion, + GaussNorm(part 1 of 2)
+
+IN FLIGHT: GaussNorm pt2, FrobeniusGauss, ChartComparison, FrobeniusValuation
+
+STILL TO DISPATCH (~28): RobbaPresentation (SPLIT INTO HALVES — stalled twice whole),
+CurveVMorphism, Curve, CurveAdicPresentation, RestrictionInjective, AinfHuber, BigWindows,
+CurveYSlice, CurveChartVIso, ChartBIQ, SheafyBI, RobbaCorrespondence, FrobeniusLimit,
+ChartSpa, IntervalCoordinates, CurveQuotientLeg, PerfectoidFieldCharP, YCharts, GaussPoint,
+FrobeniusAction, CurveAdicSpace, UniformizerTwist, FrobeniusSpa, YSheaf, RobbaLoc,
+StronglyNoetherianB, CurveVChart, CurveIsAdicSpace
+
+### (original batching plan)
 ### Batch 1 — DISPATCHED
 | File | Lines | Status |
 |---|---|---|
@@ -87,7 +103,20 @@ Biggest decompose-proof targets: `exists_window_subdatum_nbhd` (228 lines),
 (80 + 154), line packing (115), and whatever semantic duplication / mathlib-dedup /
 generalisation the inventory turns up.
 
-## Worker reliability note
+## Worker reliability note — RESOLVED, three lessons
+
+1. **"Agent failed" != "work lost."** Workers stall in the REPLY stream *after* the artifact
+   is written.  ChartData reported failure with a complete 773-line artifact.  ALWAYS check
+   `inventory/<File>.md` (entry count vs source decl count, and for a `### File Summary`)
+   before relaunching; recover the summary with `sed -n '/### File Summary/,$p'`.
+2. **Relaunch in RESUME mode**, not from scratch: tell the worker to read the partial
+   artifact, find the last declaration covered, and continue from the next.  ArCompletion
+   went 20/58 -> 58/58 this way.
+3. **Split files that stall repeatedly** into explicit line ranges.  GaussNorm died three
+   times whole; as two halves it went through immediately.  RobbaPresentation (6578 lines,
+   stalled twice) must be split.
+
+## (historical) Worker reliability note
 Two large-file inventory workers (Presentation, ArCompletion) died on transient
 "Response stalled mid-stream" API errors. Relaunched with an INCREMENTAL instruction
 (read ~350-line chunk -> write immediately -> next chunk) rather than accumulating the
