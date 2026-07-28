@@ -10,7 +10,8 @@ import ModularCurves.EllipticCurve.TorsionFibre
 /-!
 # Restricted self-adjointness of `[N]` on the relative Picard group (DS4 Gap A, `(★)`/`(★′)`)
 
-**Skeleton only — `/develop --decompose` Step 2.5. Not yet proved.**
+**One sorry left** (`exists_invertible_tensor_idealModule_add`); the whole Picard layer
+around it is proved and axiom-clean. See "State (2026-07-29)" below.
 
 The decisive input for the Katz–Mazur / GME construction of the relative Weil pairing.
 Writing `κ_T(Q) = [𝒪(Q − 0)]` for `sectionToPicRel` and `m_N = [N]` on the base-changed
@@ -377,6 +378,23 @@ theorem kappa_nsmul (Q : (E.baseChange t).Point (𝟙 T)) (n : ℕ) :
   induction n with
   | zero => simpa using kappa_zero E hsm t
   | succ n ih => rw [succ_nsmul, kappa_add, ih, pow_succ]
+
+/-- `κ` inverts negation. Derived from `kappa_add` and `kappa_zero`. -/
+@[simp] theorem kappa_neg (Q : (E.baseChange t).Point (𝟙 T)) :
+    kappa E hsm t (-Q) = (kappa E hsm t Q)⁻¹ := by
+  have h := kappa_add E hsm t Q (-Q)
+  rw [add_neg_cancel, kappa_zero] at h
+  exact eq_inv_of_mul_eq_one_right h.symm
+
+/-- `κ` carries `ℤ`-multiples to powers — the form the Weil-pairing construction consumes,
+where the multiples that matter are `[N]`-torsion indices and can be negative. -/
+theorem kappa_zsmul (Q : (E.baseChange t).Point (𝟙 T)) (n : ℤ) :
+    kappa E hsm t (n • Q) = kappa E hsm t Q ^ n := by
+  obtain ⟨m, rfl | rfl⟩ := n.eq_nat_or_neg
+  · rw [natCast_zsmul, zpow_natCast]
+    exact kappa_nsmul E hsm t Q m
+  · rw [neg_smul, kappa_neg, natCast_zsmul, zpow_neg, zpow_natCast]
+    exact congrArg Inv.inv (kappa_nsmul E hsm t Q m)
 
 /-- **(LEAF (ii) — theorem of the square)** Pullback along `[N]` is the `N`-th power on the
 classes `κ(Q)`.
