@@ -2594,7 +2594,24 @@ valuations.
   `limitSections V` is a LIMIT over `RationalIndex V` and at `V = spaOpens D₀`
   the index `D₀` is INITIAL, so `limitEval : limitSections (spaOpens D₀) ≃
   presheafValue D₀` (the top-open case is free).
-- **ROUTE (settled)**: both sides are SHEAVES (A-side by `VObj.restrictOpen` of
+- **ROUTE REFINED 2026-07-28 (after P5-3a+P5-3b landed — do it this way)**: build
+  the presheaf comparison as ONE map and prove it bijective, rather than two maps.
+  For `V ⊆ spaOpens D₀` open and `W :=` its homeo-preimage in `Spa B`:
+  `φ_W : limitSections_B W → limitSections_A V`, component at an A-index `E ⊆ V`
+  := `(relativePiece_equiv D₀ E …)⁻¹` applied to the B-component at
+  `imagePieceDatumOpen D₀ E.T E.s …` (certificate from
+  `exists_pow_le_of_isRational_pair D₀.P E hE`; the open-correspondence is
+  `imagePieceDatum_mem_rationalOpen_iff`, compatibility is
+  `relativePiece_equiv_restrict_square`). Then:
+  * INJECTIVE — the image-opens `spaOpen_B (im E)` are a BASIS of `W` (the
+    A-rational opens are a basis of `V` and the homeo transports), and `𝒪_B` is
+    separated (`spaVObjTate`'s sheaf field);
+  * SURJECTIVE — an A-side family gives a compatible family on that basis; glue
+    by the `𝒪_B` sheaf property, then identify the components at every B-index.
+  This replaces the "iso on a basis + glue" phrasing below and avoids needing
+  mathlib's `Functor.Initial` machinery against the hand-rolled `limitSections`
+  subring-of-a-product.
+- **ROUTE (original phrasing)**: both sides are SHEAVES (A-side by `VObj.restrictOpen` of
   P5-1, B-side by 828b in `spaVObjTate`), so it suffices to give a natural iso
   on a BASIS of opens and glue. Basis of `Spa B`: the `spaOpen_B(imagePieceDatum
   D₀ E.T E.s hspanE)` for A-rational `E ⊆ spaOpen D₀` with `span E.T = ⊤`; on
