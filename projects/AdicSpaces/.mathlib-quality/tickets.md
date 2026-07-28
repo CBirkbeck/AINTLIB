@@ -3086,7 +3086,27 @@ noncomputable def quotientLegVPreHom (V : Opens ↥(yTop p F ϖ))
   * `Opens.coe_iSup` + `Set.mem_iUnion` does NOT fire on an `Opens`-membership hypothesis;
     use `Opens.mem_iSup`.
 
-### ★ P5-6 CAPSTONE ROADMAP (state as of 2026-07-28, after P5-5d)
+### ★ P5-6 CAPSTONE — REDUCED TO ONE INPUT 2026-07-28
+
+**`isAdicSpace_xVObj_of_yCharts`** (`FarguesFontaine/CurveAdicSpace.lean`, axiom-clean):
+
+    (∀ y : 𝒴, ∃ V ∋ y, IsWandering V ∧ ∃ C : AffinoidVChart,
+        Nonempty ((yVObj p F ϖ).restrictOpen V ≅ C.toVObj))
+      → IsAdicSpace (xVObj p F ϖ)
+
+So the whole capstone now reduces to a statement about `𝒴` ALONE: every point of `𝒴` has a
+WANDERING neighbourhood `𝒱`-isomorphic to an affinoid. The quotient leg (P5-5) transports
+such a chart to the curve.
+
+`curveAdicSpacePresentation` already proves the corresponding TOPOLOGICAL statement
+(`exists_disjoint_translates` for wandering + `exists_window_subdatum_nbhd` for the chart
+homeomorphism). **The single remaining mathematical step [P5-6d] is to upgrade that chart
+HOMEOMORPHISM to a `𝒱`-ISOMORPHISM** — see the ROUTE DISCOVERY below: it is a composition
+of existing `isoRestrict`s (`spaCompIsoRestrict` applies over `A_inf` thanks to P5-3a/3b)
+plus `restrictRestrictIso` / `restrictIsoOfIso` / `VPreHom.asIso`, NOT the dense-extension
+development the old P5-3/P5-4 sketches describe.
+
+### ★ (superseded) P5-6 CAPSTONE ROADMAP (state as of 2026-07-28, after P5-5d)
 
 `IsAdicSpace (xVObj p F ϖ)` needs, for each `x : Curve`:
   `U := xImage V'` with `x ∈ U`, a chart `C : AffinoidVChart`, and `X|_U ≅ C.toVObj` in `𝒱`.
