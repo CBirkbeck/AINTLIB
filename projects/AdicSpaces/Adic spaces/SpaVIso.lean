@@ -7,6 +7,7 @@ import «Adic spaces».RelativePieceKeystoneOpen
 import «Adic spaces».NonTateRationalOpenHomeomorph
 import «Adic spaces».SpaVObj
 import «Adic spaces».VRestrict
+import Mathlib.Geometry.RingedSpace.OpenImmersion
 
 /-!
 # `Spa` of a rational localization as a `𝒱`-object over the base (Campaign 9, P5-K)
@@ -1373,6 +1374,81 @@ theorem spaCompVPreHom_isOpenImmersion [DecidableEq A]
       (phiEquiv D₀ _ (shadowPre_paired D₀ u hu U)).symm.bijective
     exact hbij.comp (limitRestrict_bijective_of_eq
       (inf_eq_self_of_le D₀ hUle) inf_le_left)
+
+/-- Restriction along an equality of opens, as an isomorphism in
+`CompleteTopCommRingCat`. -/
+def limitRestrictCatIso {R : Type u} [CommRing R] [TopologicalSpace R]
+    [PlusSubring R] [IsHuberRing R] [HasLocLiftPowerBounded R]
+    {U V : Opens ↥(Spa R R⁺)} (h : V = U) :
+    CompleteTopCommRingCat.of ↥(limitSections U)
+      ≅ CompleteTopCommRingCat.of ↥(limitSections V) where
+  hom := ⟨limitRestrict (le_of_eq h), limitRestrict_continuous _⟩
+  inv := ⟨limitRestrict (le_of_eq h.symm), limitRestrict_continuous _⟩
+  hom_inv_id := by
+    subst h
+    exact Subtype.ext (RingHom.ext fun x => Subtype.ext (funext fun i => rfl))
+  inv_hom_id := by
+    subst h
+    exact Subtype.ext (RingHom.ext fun x => Subtype.ext (funext fun i => rfl))
+
+/-- The comparison, as an isomorphism in `CompleteTopCommRingCat` (generic
+paired form). -/
+def phiCatIso' [DecidableEq A] {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) :
+    CompleteTopCommRingCat.of ↥(limitSections W)
+      ≅ CompleteTopCommRingCat.of ↥(limitSections V) where
+  hom := ⟨(phiEquiv D₀ hV hVW).toRingHom, phiHom_continuous D₀ hV hVW⟩
+  inv := ⟨(phiEquiv D₀ hV hVW).symm.toRingHom, phiEquiv_symm_continuous D₀ hV hVW⟩
+  hom_inv_id := Subtype.ext (RingHom.ext fun x =>
+    (phiEquiv D₀ hV hVW).symm_apply_apply x)
+  inv_hom_id := Subtype.ext (RingHom.ext fun x =>
+    (phiEquiv D₀ hV hVW).apply_symm_apply x)
+
+/-- **The ambient comparison at an open inside the rational subset is an
+isomorphism** in `CompleteTopCommRingCat`. -/
+def ambCompCatIso [DecidableEq A] (W : Opens ↥(Spa A A⁺))
+    (hW : W ≤ spaOpens D₀) :
+    CompleteTopCommRingCat.of ↥(limitSections W)
+      ≅ CompleteTopCommRingCat.of ↥(limitSections (shadowPre D₀ u hu W)) :=
+  (limitRestrictCatIso (R := A) (inf_eq_left.mpr hW)) ≪≫
+    (phiCatIso' D₀ (inf_le_right : W ⊓ spaOpens D₀ ≤ spaOpens D₀)
+      (shadowPre_paired D₀ u hu W)).symm
+
+theorem ambCompCatIso_hom [DecidableEq A] (W : Opens ↥(Spa A A⁺))
+    (hW : W ≤ spaOpens D₀) :
+    (ambCompCatIso D₀ u hu W hW).hom
+      = ⟨ambComp D₀ u hu W, ambComp_continuous D₀ u hu W⟩ :=
+  Subtype.ext (RingHom.ext fun x => rfl)
+
+theorem shadowImage_le [DecidableEq A]
+    (U : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
+    shadowImage D₀ u hu U ≤ spaOpens D₀ := by
+  rintro v ⟨w, -, rfl⟩
+  exact (comap_canonicalMap_mem_rationalOpen_inter_spa D₀ w).1
+
+/-- **The comparison morphism is an open immersion of presheafed spaces**
+(mathlib's predicate — its `c_iso` field is `IsIso` in
+`CompleteTopCommRingCat`, so it carries continuity of the inverse, which a
+bare bijection would not). -/
+instance spaCompHom_isOpenImmersion [DecidableEq A] :
+    AlgebraicGeometry.PresheafedSpace.IsOpenImmersion (spaCompHom D₀ u hu) where
+  base_open := shadow_isOpenEmbedding D₀ u hu
+  c_iso := fun U => by
+    have hkey : ∀ (W : Opens ↥(Spa A A⁺)) (hW : W ≤ spaOpens D₀)
+        (Z : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+        (_ : shadowPre D₀ u hu W = Z),
+        IsIso ((spaCompHom D₀ u hu).c.app (op W)) := by
+      intro W hW Z hZ
+      have happ : (spaCompHom D₀ u hu).c.app (op W)
+          = (ambCompCatIso D₀ u hu W hW).hom :=
+        (ambCompCatIso_hom D₀ u hu W hW).symm
+      rw [happ]
+      exact ⟨(ambCompCatIso D₀ u hu W hW).inv,
+        (ambCompCatIso D₀ u hu W hW).hom_inv_id,
+        (ambCompCatIso D₀ u hu W hW).inv_hom_id⟩
+    exact hkey (shadowImage D₀ u hu U) (shadowImage_le D₀ u hu U) U
+      (shadowPre_shadowImage D₀ u hu U)
 
 end Assembly
 
