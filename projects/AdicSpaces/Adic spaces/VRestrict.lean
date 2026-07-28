@@ -505,6 +505,35 @@ theorem range_openIncl_comp {X : TopRingPresheafedSpace.{u}}
           (X.ofRestrict (openIncl_isOpenEmbedding (imgOfOpen U W))).base) :=
   range_val_val (α := ↥(X.carrier)) (U : Set ↥(X.carrier)) (W : Set ↥U)
 
+/-- The range of `g` restricted to a subset, as the range of the inclusion of
+the image. -/
+theorem range_comp_val {α β : Type u} (g : α → β) (U : Set α) :
+    Set.range (fun w : ↥U => g (w : α))
+      = Set.range (Subtype.val : ↥(g '' U) → β) := by
+  rw [Subtype.range_coe, show (fun w : ↥U => g (w : α))
+      = g ∘ (Subtype.val : ↥U → α) from rfl, Set.range_comp, Subtype.range_coe]
+
+/-- The image of an open under an isomorphism of presheafed spaces. -/
+def imgOfIso {X Y : TopRingPresheafedSpace.{u}} (e : X ≅ Y)
+    (U : Opens ↥(X.carrier)) : Opens ↥(Y.carrier) where
+  carrier := (ConcreteCategory.hom e.hom.base) '' (U : Set ↥(X.carrier))
+  is_open' :=
+    haveI := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
+    (AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.base_open
+      (f := e.hom)).isOpenMap _ U.2
+
+/-- **Restriction transports along an isomorphism.** -/
+noncomputable def restrictIsoOfIso {X Y : TopRingPresheafedSpace.{u}} (e : X ≅ Y)
+    (U : Opens ↥(X.carrier)) :
+    X.restrict (openIncl_isOpenEmbedding U)
+      ≅ Y.restrict (openIncl_isOpenEmbedding (imgOfIso e U)) :=
+  haveI := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
+    (X.ofRestrict (openIncl_isOpenEmbedding U) ≫ e.hom)
+    (Y.ofRestrict (openIncl_isOpenEmbedding (imgOfIso e U)))
+    (range_comp_val (α := ↥(X.carrier)) (β := ↥(Y.carrier))
+      (ConcreteCategory.hom e.hom.base) (U : Set ↥(X.carrier)))
+
 /-- **Restriction transitivity** (P5-RT): restricting twice is restricting to
 the image open. -/
 noncomputable def restrictRestrictIso {X : TopRingPresheafedSpace.{u}}
