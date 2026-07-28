@@ -112,7 +112,15 @@ propext/Classical.choice/Quot.sound) before marking done.
   Sources: [WP] 789–811.
 
 ### [W6] Nonnoetherian.lean — ψ_m and the ideal chain
-- Status: open | File: WP/Nonnoetherian.lean | Depends: W3 | Parallel: yes
+- Status: done (2026-07-28; all 5 filled + helpers not_wpMem_single_odd/psiCoeff/
+  psiHom_apply_coeff/two_nsmul_single_eq/stage_ideal_mono; ψ multiplicativity via
+  antidiagonal_single + even/odd filter + halving nbij; nonnoetherianity by
+  finite-stage bounds. Endpoint thm 6.2(1) nonnoetherian PROVEN. Axioms clean.)
+- Progress: gotchas — `Finset.antidiagonal`/`mem_antidiagonal` ambiguous in this
+  import scope (an IsPWO-flavoured constant shadows): qualify as
+  `Finset.HasAntidiagonal.antidiagonal`/`.mem_antidiagonal`; evaluate Finsupp
+  equalities at the RIGHT index (j, not m+1) for the Za_of_le contradiction;
+  `Submodule.mem_span_finite_of_mem_span` returns a Finset pair. | File: WP/Nonnoetherian.lean | Depends: W3 | Parallel: yes
 - Decls: `psiHom`, `psiHom_Za_succ_ne_zero`, `psiHom_Za_of_le`,
   `Za_succ_notMem_span`, `not_isNoetherianRing_WPA`.
 - Sketch: define ψ on coefficients (f ↦ series with n-th coefficient =
