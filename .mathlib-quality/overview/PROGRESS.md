@@ -1,0 +1,114 @@
+# FarguesFontaine folder — /overview + full /cleanup campaign
+
+**Goal (user, 2026-07-28):** run `/overview` on everything in
+`projects/AdicSpaces/Adic spaces/FarguesFontaine/`, then act on its suggestions with the
+full `/cleanup` procession and `/decompose-proof` where needed, until **every single result
+in the folder has had a full `/cleanup`**. Slow and methodical is explicitly fine.
+
+## Scale
+- 46 files, 39,787 lines
+- **1656 declarations** (1586 public, 70 private)
+- 0 `sorry`, 5 non-linter `set_option`s
+- Baseline at start: `lake build '«Adic spaces»'` GREEN, `isAdicSpace_xVObj` axiom-clean
+
+## Scope decision
+Running `/overview` Steps 1–8. **Step 9 (mathlibable) deliberately deferred**: the skill
+estimates 2–4 h for 35 declarations; at 1586 public decls that is hundreds of hours, and its
+purpose (mathlib-PR triage) is orthogonal to the stated goal (cleanup coverage). Offered to
+the user as a separate later run.
+
+## Phase 1 — per-file inventory (46 workers, output to `inventory/<File>.md`)
+
+Workers write the full per-declaration inventory to a file and return only the File Summary
+(1656 entries cannot be held in context).
+
+### Batch 1 — DISPATCHED
+| File | Lines | Status |
+|---|---|---|
+| RobbaPresentation.lean | 6578 | dispatched |
+| Groebner.lean | 2424 | dispatched |
+| Presentation.lean | 2398 | dispatched |
+| Euclidean.lean | 2224 | dispatched |
+| WittF.lean | 2058 | dispatched |
+| IntervalRing.lean | 1844 | dispatched |
+
+### Batch 2 — pending
+ArCompletion (1787), CurveObject (1781), ChartData (1674), ChartVObj (1338),
+IntervalSplitting (1029), YStalks (996)
+
+### Batch 3 — pending
+YSpace (963), GaussNorm (923), UniformizerEquivariance (801), YPresheaf (798),
+FrobeniusGauss (782), ChartComparison (632)
+
+### Batch 4 — pending
+FrobeniusValuation (626), CurveVMorphism (611), Curve (580), CurveAdicPresentation (551),
+RestrictionInjective (536), AinfHuber (451)
+
+### Batch 5 — pending
+BigWindows (425), CurveYSlice (397), CurveChartVIso (365), ChartBIQ (357), SheafyBI (356),
+RobbaCorrespondence (345)
+
+### Batch 6 — pending
+FrobeniusLimit (340), ChartSpa (319), IntervalCoordinates (311), CurveQuotientLeg (308),
+PerfectoidFieldCharP (274), YCharts (240)
+
+### Batch 7 — pending
+GaussPoint (190), FrobeniusAction (180), CurveAdicSpace (179), UniformizerTwist (166),
+FrobeniusSpa (157), YSheaf (152)
+
+### Batch 8 — pending
+RobbaLoc (138), StronglyNoetherianB (86), CurveVChart (59), CurveIsAdicSpace (58)
+
+## Structural scan — DONE (`scan-structural.md`), mechanical half of Steps 5-8
+
+Scanned 1632 declarations across all 46 files:
+
+| Finding | Count |
+|---|---|
+| Bodies > 60 lines (decompose-proof candidates) | **80** |
+| Bodies 30-60 lines (STRUCTURE watch) | 154 |
+| Declarations with no docstring | **206** |
+| Lines > 100 codepoints | 115 (mostly FrobeniusGauss 12, ChartVObj 10) |
+| Forbidden name patterns / abbreviations | **0** |
+| `≥`/`>` in a signature (orientation) | **0** |
+| Banned `set_option` (maxHeartbeats/maxRecDepth) | **0** |
+| Cross-file name collisions | 2, both false positives |
+
+The 5 non-linter `set_option`s are all benign: `warn.classDefReducibility false` (x2, a
+warning suppression) and `maxSynthPendingDepth 1` (x3, a *reduction*, explicitly allowed).
+The 2 name "collisions" (`isUniformAddGroup`, `presheaf`) are same-name declarations in
+different namespaces, not duplication.
+
+Biggest decompose-proof targets: `exists_window_subdatum_nbhd` (228 lines),
+`PhiHatK_teichCoeffAr` (197), `valued_degAr_PhiHatK_convF` (156), `resIHom_injective` (150),
+`digit_sub_le` (145).
+
+**So the folder's hard gates already pass** — the work is documentation (206), structure
+(80 + 154), line packing (115), and whatever semantic duplication / mathlib-dedup /
+generalisation the inventory turns up.
+
+## Worker reliability note
+Two large-file inventory workers (Presentation, ArCompletion) died on transient
+"Response stalled mid-stream" API errors. Relaunched with an INCREMENTAL instruction
+(read ~350-line chunk -> write immediately -> next chunk) rather than accumulating the
+whole inventory before writing. Use that pattern for all remaining large files.
+
+## Phase 2 — deep analysis (Steps 4–8), sequential after inventory
+- Step 4 Mathlib API audit (most important)
+- Step 5 Moral duplications (pairwise table REQUIRED)
+- Step 6 Generalisation opportunities (with literature search)
+- Step 7 API design review
+- Step 8 Junk identification
+
+## Phase 3 — write `PROJECT_OVERVIEW.md`
+
+## Phase 4 — act: full `/cleanup` per file + `/decompose-proof` where flagged
+Tracked in a table appended here once the overview lands.
+
+## Notes / invariants to preserve
+- `lake build '«Adic spaces»'` must stay green; `isAdicSpace_xVObj` axiom-clean.
+- NEVER add `set_option maxHeartbeats`; no `sorry`.
+- Path contains a space — quote it; `lake` runs from the repo root.
+- Already fully cleaned this session (Campaign 9 files): CurveVMorphism, CurveQuotientLeg,
+  CurveVChart, CurveYSlice, CurveAdicSpace, CurveChartVIso, CurveIsAdicSpace — these still
+  need the *full* per-declaration `/cleanup` procession, only the file-level pass was done.
