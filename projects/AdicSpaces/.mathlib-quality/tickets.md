@@ -2797,6 +2797,36 @@ valuations.
   (`genPiece_rel_forward/backward`, the roundtrips) never touches `hspan`
   except through `genPieceDatum`/`imagePieceDatum`, so (a)+(b) is the whole job.
 
+### ★★★ CAMPAIGN 9 — STATE OF PLAY (2026-07-28, end of the long beastmode run)
+
+**PROVEN, axiom-clean, `lake build '«Adic spaces»'` green, all pushed:**
+* **Wedhorn Definition 8.22 itself** — `ValuationSpectrum.IsAdicSpace` (`AdicSpaceV.lean`),
+  over SHEAFY affinoid pairs (`AffinoidVChart`), not restricted to strongly-noetherian Tate.
+  API: `AffinoidVChart.toVObj`/`.ofTate`, `VObj.baseHomeo`, `exists_homeo_of_isAdicSpace`,
+  `AdicSpacePresentation.ofIsAdicSpace`, `IsAdicSpace.of_iso`.
+* **The `𝒱` toolkit** (`VRestrict.lean`) — `VObj.restrictOpen`, `VPreHom.corestrict`,
+  `VPreHom.comp`, `isLocalHom_of_val_comap`, `restrictRestrictIso`, `restrictIsoOfIso`,
+  `VObj.isoOfVPreIso`, `VPreHom.inv`/`asIso`/`isIso_of_isIso_toHom`, `VPreHom.restrictIso`.
+* **`π : 𝒴 → X` is a `𝒱`-morphism** — `piYVPreHom` (`CurveVMorphism.lean`), resting on
+  `frobFixed_zpow`.
+* **★ `quotientLegVObjIso : 𝒴|_V ≅ X|_{π V}` in `𝒱`** for wandering `V`
+  (`CurveQuotientLeg.lean`) — the Fargues–Fontaine presentation `X = 𝒴/φ^ℤ` upgraded from a
+  homeomorphism to an isomorphism of Wedhorn's category.
+* **The `𝒴`-side charts** — `windowSubYSliceIso : Spa(𝒪_{B_n}(D')) ≅ 𝒴|_{windowSubOpen}` as
+  presheafed spaces, and `exists_windowSubOpen_nbhd` (they are a neighbourhood BASIS)
+  (`CurveYSlice.lean`); `windowSubVChart` (`CurveVChart.lean`) makes them 8.22 charts.
+* **The capstone, modulo ONE hypothesis** (`CurveAdicSpace.lean`):
+  `isAdicSpace_xVObj_of_windowVIso` and `isAdicSpace_yVObj_of_windowVIso` prove
+  `IsAdicSpace (xVObj p F ϖ)` and `IsAdicSpace (yVObj p F ϖ)` from `hviso` alone.
+
+**THE SINGLE REMAINING STEP** is ticket **P5-6d(ii)**: promote `windowSubYSliceIso` from a
+presheafed-space isomorphism to a `𝒱^pre`-isomorphism. No new mathematics is required — see
+that ticket for the four-step route; the valuation identity
+(`comap_ringStalkMap_spaCompHom_stalkValue`) is already proven and unconditional.
+
+**Invariants held throughout**: zero `sorry` and zero `maxHeartbeats`/`synthInstance.maxHeartbeats`
+raises anywhere in `FarguesFontaine/` or in any file added this campaign.
+
 ### ★ EXTERNAL REVIEW (ChatGPT gpt-5.6-sol, max effort, 2026-07-28) — BINDING CORRECTIONS
 
 Consulted on the whole remaining arc. Three substantive findings, two citation fixes:
