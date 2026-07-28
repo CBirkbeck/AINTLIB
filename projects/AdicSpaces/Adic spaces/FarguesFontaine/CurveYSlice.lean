@@ -305,6 +305,27 @@ end Range
 
 /-! ### The neighbourhood basis -/
 
+/-- The chart-side shadow, viewed as a map into the `𝒴`-carrier: the `D₀`-shadow
+of a point of `Spa(B_n)` lies in `𝒴` (`shadow_windowDatum_mem_ySpaSet`), so the
+shadow factors through `𝒴`. -/
+private def chartToY (n : ℤ) (hp : 1 < p)
+    (z : ↥(Spa (windowChartRing p F ϖ n) (windowChartRing p F ϖ n)⁺)) :
+    ↥(yTop p F ϖ) :=
+  ⟨ValuationSpectrum.SpaVIso.shadow
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1) z,
+    shadow_windowDatum_mem_ySpaSet p F ϖ n hp z⟩
+
+/-- The chart-side shadow into `𝒴` is continuous — it is the base homeomorphism
+of the chart comparison followed by two subtype inclusions. -/
+private theorem continuous_chartToY (n : ℤ) (hp : 1 < p)
+    (u : (windowChartRing p F ϖ n)ˣ)
+    (hu : IsTopologicallyNilpotent
+      ((u : (windowChartRing p F ϖ n)ˣ) : windowChartRing p F ϖ n)) :
+    Continuous (chartToY p F ϖ n hp) :=
+  Continuous.subtype_mk
+    ((ValuationSpectrum.SpaVIso.baseHomeo
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1) u hu).continuous.subtype_val) _
+
 /-- **The window-subdatum opens are a neighbourhood basis of `𝒴`** : every open
 neighbourhood `O` of a point `y` of the `𝒴`-carrier contains an open of the form
 `windowSubOpen p F ϖ n D' u' hu' u hu` still containing `y`.
@@ -349,28 +370,11 @@ theorem exists_windowSubOpen_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1) u hu)
     (ySpaPoint p F ϖ y)).mpr hyD₀
   -- the chart-side preimage of `O` along the shadow, viewed as a map into `𝒴`
-  have hcont : Continuous (fun z : ↥(Spa (windowChartRing p F ϖ n)
-      (windowChartRing p F ϖ n)⁺) =>
-      (⟨ValuationSpectrum.SpaVIso.shadow
-          (chartData p F (windowUnif p F ϖ n) 1 1 p 1) z,
-        shadow_windowDatum_mem_ySpaSet p F ϖ n hp z⟩ : ↥(yTop p F ϖ))) :=
-    Continuous.subtype_mk
-      ((ValuationSpectrum.SpaVIso.baseHomeo
-        (chartData p F (windowUnif p F ϖ n) 1 1 p 1) u hu).continuous.subtype_val) _
-  have hOchOpen : IsOpen {z : ↥(Spa (windowChartRing p F ϖ n)
-      (windowChartRing p F ϖ n)⁺) |
-      (⟨ValuationSpectrum.SpaVIso.shadow
-          (chartData p F (windowUnif p F ϖ n) 1 1 p 1) z,
-        shadow_windowDatum_mem_ySpaSet p F ϖ n hp z⟩ : ↥(yTop p F ϖ)) ∈ O} :=
-    O.2.preimage hcont
-  have hw₀Och : w₀ ∈ {z : ↥(Spa (windowChartRing p F ϖ n)
-      (windowChartRing p F ϖ n)⁺) |
-      (⟨ValuationSpectrum.SpaVIso.shadow
-          (chartData p F (windowUnif p F ϖ n) 1 1 p 1) z,
-        shadow_windowDatum_mem_ySpaSet p F ϖ n hp z⟩ : ↥(yTop p F ϖ)) ∈ O} := by
-    show (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp w₀⟩ : ↥(yTop p F ϖ)) ∈ O
-    exact (show (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp w₀⟩
-      : ↥(yTop p F ϖ)) = y from Subtype.ext hw₀) ▸ hyO
+  have hOchOpen : IsOpen {z | chartToY p F ϖ n hp z ∈ O} :=
+    O.2.preimage (continuous_chartToY p F ϖ n hp u hu)
+  have hw₀Och : w₀ ∈ {z | chartToY p F ϖ n hp z ∈ O} := by
+    show chartToY p F ϖ n hp w₀ ∈ O
+    exact (show chartToY p F ϖ n hp w₀ = y from Subtype.ext hw₀) ▸ hyO
   -- the rational open around `w₀` inside it
   obtain ⟨D', -, hw₀D', hD'sub⟩ :=
     ValuationSpectrum.exists_isRational_spaOpen_subset_huber
@@ -383,10 +387,8 @@ theorem exists_windowSubOpen_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
   · -- every shadow of a point of `spaOpen D'` lies in `O`
     intro z hz
     obtain ⟨t, htD', htz⟩ := (mem_windowSubOpen_iff p F ϖ n D' u' hu' u hu z).mp hz
-    have htO : (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp t⟩
-        : ↥(yTop p F ϖ)) ∈ O := hD'sub htD'
-    exact (show (⟨_, shadow_windowDatum_mem_ySpaSet p F ϖ n hp t⟩
-      : ↥(yTop p F ϖ)) = z from Subtype.ext htz) ▸ htO
+    have htO : chartToY p F ϖ n hp t ∈ O := hD'sub htD'
+    exact (show chartToY p F ϖ n hp t = z from Subtype.ext htz) ▸ htO
 
 end FarguesFontaine
 
