@@ -29,9 +29,9 @@ short-normal-form Weierstrass curve `y² = x³ + A₄x + A₆` over it — the c
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
 
-set_option synthInstance.maxHeartbeats 800000
+set_option synthInstance.maxHeartbeats 6400000
 set_option maxSynthPendingDepth 5
-set_option maxHeartbeats 1600000
+set_option maxHeartbeats 6400000
 
 universe u
 
@@ -190,7 +190,7 @@ noncomputable def classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E1)** The per-chart coefficient match: specializing the universal curve
 along the classifying map, restricted to a chart-supported affine, recovers exactly
 the adapted local model. -/
@@ -269,7 +269,7 @@ noncomputable def chartPiece {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E2)** The piece map lies over the restricted classifying map. -/
 theorem chartPiece_π {R : CommRingCat.{u}} (Y : EllObj R)
     (b : OmegaBasis Y.curve.toEllipticCurveGeom)
@@ -305,7 +305,7 @@ theorem chartPiece_π {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E3b)** The piece maps are compatible with restriction: the classifying
 pieces glue. Core: the restricted adapted model IS the smaller adapted model
 (`transVC_eq_one_of_isAdapted` through `pointedIso_hom_of_transVC_eq_one`) and the
@@ -373,7 +373,7 @@ theorem chartPiece_restrict {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E3c)** The piece map does not depend on the chart supporting the affine:
 adapted uniqueness at the shared affine. -/
 theorem chartPiece_index_congr {R : CommRingCat.{u}} (Y : EllObj R)
@@ -442,7 +442,7 @@ open CategoryTheory Limits in
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E3d)** The classifying pieces agree on overlaps: refine the fibre
 product by common affines; per-affine two restrictions plus the index congruence. -/
 private theorem chartPiece_agree {R : CommRingCat.{u}} (Y : EllObj R)
@@ -597,7 +597,7 @@ theorem classifyingTop_piece {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4)** The glued comparison lies over the classifying map: the base
 square of the classifying `EllHom` commutes. -/
 theorem classifyingTop_π_w {R : CommRingCat.{u}} (Y : EllObj R)
@@ -646,7 +646,7 @@ noncomputable def adaptedBaseCover {R : CommRingCat.{u}} (Y : EllObj R) :
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4)** The glued comparison respects the zero sections. -/
 theorem classifyingTop_zero {R : CommRingCat.{u}} (Y : EllObj R)
     (b : OmegaBasis Y.curve.toEllipticCurveGeom)
@@ -746,7 +746,7 @@ theorem restrict_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4)** The per-chart classifying square is cartesian: the chart
 isomorphism square pasted with the model base-change square. -/
 theorem chartPiece_isPullback {R : CommRingCat.{u}} (Y : EllObj R)
@@ -802,7 +802,7 @@ theorem chartPiece_isPullback {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D3-E4 ★★)** The classifying square is cartesian: `Y` is the pullback of the
 universal curve along the classifying map — the universality of GME Thm 2.2.3,
 geometric half. -/
@@ -884,7 +884,7 @@ theorem classifyingRingHom_algebraMap {R : CommRingCat.{u}} (Y : EllObj R)
 
 open AlgebraicGeometry CategoryTheory Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D4)** The classifying map lies over `Spec R`. -/
 theorem classifyingMap_structMap {R : CommRingCat.{u}} (Y : EllObj R)
     (b : OmegaBasis Y.curve.toEllipticCurveGeom)
@@ -1132,7 +1132,7 @@ theorem IsAdapted.transport {R : CommRingCat.{u}} {Y' Y : EllObj R} (φ : Y' ⟶
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt1)** The section comparison of the classifying map is the restricted
 classifying algebra (`Spec`-side determination through `restrict_classifyingMap`). -/
 theorem sectionsMapLE_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
@@ -1377,7 +1377,7 @@ theorem tautPresentation_isAdapted (R : CommRingCat.{u}) :
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt1 ★)** Roundtrip: pulling the universal `ω`-basis back along the
 classifying morphism recovers the given basis, `(classifyingEllHom Y b)^* ω_univ = b`.
 The pulled basis and `b` differ by a global unit `u` (the `𝔾ₘ`-torsor); on every
@@ -1558,7 +1558,7 @@ theorem transport_taut_e_eq {R : CommRingCat.{u}} {Y : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-D4 rt2a ★)** The classifying algebra of the pulled basis is the algebra of
 `φ` itself: any `Ell/R`-morphism to the universal object induces on global sections
 exactly the classifying ring map of the basis it pulls back. Generators: `C`-scalars

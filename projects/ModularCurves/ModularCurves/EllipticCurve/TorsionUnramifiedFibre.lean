@@ -55,27 +55,11 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
-/-- `pointEquivOverHom` carries point-subtraction to the division of `Over`-homs (companion to
-`pointEquivOverHom_add`). -/
-theorem pointEquivOverHom_sub {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) :
-    letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
-    (E.pointEquivOverHom g) (P - Q) =
-      (E.pointEquivOverHom g) P / (E.pointEquivOverHom g) Q := rfl
+-- `pointEquivOverHom_sub` lives in `EllipticCurve/TorsionFibre.lean` (dev's home); the merge duplicated it.
 
-/-- Restriction of a point along `k` corresponds, under `pointEquivOverHom`, to precomposition by
-the induced `Over`-morphism `Over.mk (k ≫ g) ⟶ Over.mk g`. -/
-theorem pointEquivOverHom_restrict {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P : E.Point g) :
-    E.pointEquivOverHom (k ≫ g) (Point.restrict E k P) =
-      (Over.homMk k : Over.mk (k ≫ g) ⟶ Over.mk g) ≫ E.pointEquivOverHom g P := by
-  apply Over.OverMorphism.ext
-  simp only [pointEquivOverHom, Equiv.coe_fn_mk, Point.restrict, Over.comp_left, Over.homMk_left]
-  rfl
+-- `pointEquivOverHom_restrict` lives in `EllipticCurve/TorsionFibre.lean` (dev's home); the merge duplicated it.
 
-/-- `Point.restrict` is additive on subtraction (precomposition is a group homomorphism). -/
-theorem restrict_sub {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P Q : E.Point g) :
-    Point.restrict E k (P - Q) = Point.restrict E k P - Point.restrict E k Q := by
-  apply (E.pointEquivOverHom (k ≫ g)).injective
-  simp only [E.pointEquivOverHom_restrict, E.pointEquivOverHom_sub, GrpObj.comp_div]
+-- `restrict_sub` lives in `EllipticCurve/TorsionFibre.lean` (dev's home); the merge duplicated it.
 
 section AugmentationAlgebra
 
@@ -1190,7 +1174,6 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
     rw [← hid, hq]
     rw [point_add_val_mu F P₁ P₂, pairing_eq_pairBox P₁ P₂ hp₁ hp₂]
     simp only [Category.assoc, Iso.hom_inv_id_assoc]
-    exact Category.assoc _ _ _
   -- 6c. units of the pair-lift away from the augmentation prime
   have hfold : ∀ x, pT x - algebraMap _ ↑R (foldε ε' x) ∈ I := by
     intro x
