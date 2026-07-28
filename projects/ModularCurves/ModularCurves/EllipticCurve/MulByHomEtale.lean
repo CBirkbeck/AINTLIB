@@ -3,7 +3,7 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.EllipticCurve.MulByHomUnramified
+import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
 import ModularCurves.EllipticCurve.MulByHomQuasiFinite
 import ModularCurves.EllipticCurve.MulByHomSmooth
 

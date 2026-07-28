@@ -13,6 +13,7 @@ import ModularCurves.ForMathlib.GaloisDescentModule
 import ModularCurves.ForMathlib.QuotientCurveModel
 import ModularCurves.ForMathlib.QuotientLift
 import ModularCurves.ForMathlib.WeierstrassInvariantLocal
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Route (a): the KM 4.7 ⇐-curve as a quotient `E/G` (T-E5c leaves a2–a5)
@@ -47,6 +48,11 @@ The group law on the quotient is *not* part of this file: `EllipticCurveGeom.toE
 (T-W7, beastmode-A/P3b3) upgrades any geometric elliptic curve to the full record, so route
 (a) only ever has to produce an `EllipticCurveGeom`.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 universe u
 

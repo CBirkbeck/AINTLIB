@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.GroupScheme.SubgroupQuotientGlue
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The subgroup-scheme quotient glue data (`[HG-C4c-2]` S5)
@@ -16,6 +17,11 @@ project, descend); every glue-data identity reduces along `restrictedπ_hom_ext`
 window-level identity, which `window_hom_ext` closes because every window map in sight
 fixes the ambient curve.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
 open scoped TensorProduct

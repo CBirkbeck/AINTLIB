@@ -10,8 +10,9 @@ import ModularCurves.Moduli.PullSectionCanonicity
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import Mathlib.AlgebraicGeometry.AlgClosed.Basic
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
-import ModularCurves.EllipticCurve.MulByHomUnramified
+import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
 import ModularCurves.Moduli.NaiveProblems
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # General level structures P_H, and full level N over an arbitrary base
@@ -51,6 +52,9 @@ concretely (owner question, 2026-07-05; Loeffler §3.8; KM Ch. 3–5, 7).
   record is the levelled groupoid (`FullLevelGroupoid`), per design D6. Coarse spaces:
   `Moduli/Coarse.lean`.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits
 

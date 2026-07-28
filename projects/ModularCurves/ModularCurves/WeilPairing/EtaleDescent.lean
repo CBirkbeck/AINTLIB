@@ -5,9 +5,10 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.EllipticCurve.TorsionFibre
-import ModularCurves.EllipticCurve.MulByHomUnramified
+import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
 import ModularCurves.ForMathlib.FiniteEtaleGalois
 import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The char-0 étale-descent Weil pairing (T-C0)
@@ -76,6 +77,11 @@ axiom-clean (`propext`/`Classical.choice`/`Quot.sound` only); `sorryAx` enters
 `torsionPairAlgebra`/`torsionPairAlgebraPointsEquiv`/
 `exists_pairingAlgebraHom_of_galoisEquivariant` only through `torsionAlgebra`.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits
 

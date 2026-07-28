@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.ModelRecord
 import ModularCurves.EllipticCurve.MulByHomFlat
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.LevelStructure.IsoTransport
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Kernel divisibility: from the chart to arbitrary records (BB-FLAT N5)
@@ -18,6 +19,11 @@ chart theorems at the projective model's Y-chart, transports them along the
 `Point.baseChangeEquiv`/`pointAddEquiv` chain (the BB-QF pattern, hμ from K3), and glues
 over a basic-open cover of the test.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
   MonObj WeierstrassCurve TensorProduct

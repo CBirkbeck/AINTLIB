@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ForMathlib.OpenImmersionOfSection
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The tautological full-level section (YFULL route γ, [YF-TAUT])
@@ -24,6 +25,11 @@ the closed immersion `levelSpaceΓι` to an open immersion — the `Y(N)` clopen
 classifier leaf `[YF-CLASSIFIER]` (the divisor↔iso dictionary); this file is the
 construction-free plumbing that turns it into a section.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits
 
