@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».WP.Algebra
 import «Adic spaces».FJP.CDVFNoetherian
+import «Adic spaces».FJP.FiniteJetNoetherianVertices
 import «Adic spaces».SheafyRing
 
 /-!
@@ -960,13 +961,106 @@ theorem isNoetherianRing_WPHead (ϖ : Uniformizer K)
     moduleFinite_head_over_even K w N
   exact IsNoetherianRing.of_finite ↥(wpEvenSupport K w N) (WPHead K w N)
 
+open scoped Classical in
+variable {K w N} in
+/-- Slices do not increase the norm (their coefficients are a subfamily of `f`'s). -/
+theorem norm_slice_le (ε : Fin N → Bool) (f : WPHead K w N) :
+    ‖slice ε f‖ ≤ ‖f‖ := by
+  have hb : ∀ u : ℕ →₀ ℕ, ‖MvPowerSeries.coeff u (slice ε f).1.1‖ ≤ ‖f‖ := by
+    intro u
+    rw [slice_coeff]
+    by_cases hev : EvenHeadMem w N u
+    · rw [if_pos hev]
+      exact norm_coeff_le_one_norm f.1 _
+    · rw [if_neg hev, norm_zero]
+      exact norm_nonneg _
+  rw [show ‖slice ε f‖ =
+    MvPowerSeries.gaussNorm (norm : K → ℝ) (fun _ : ℕ => (1 : ℝ)) (slice ε f).1.1
+    from rfl, MvPowerSeries.gaussNorm]
+  refine ciSup_le fun u => ?_
+  rw [prod_one_weights, mul_one]
+  exact hb u
+
 variable {K} in
 /-- The unit ball of the head is noetherian (needed by the graph-Koszul layer at the
 head; same finite-module argument over the unit ball of `P K (N+1)`,
 `FiniteJetOver.Uniformizer.isNoetherianRing_unitBall_P`). -/
 theorem isNoetherianRing_unitBall_WPHead (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsNoetherianRing (FiniteJet.unitBall (WPHead K w N)) := by sorry
+    IsNoetherianRing (FiniteJet.unitBall (WPHead K w N)) := by
+  classical
+  haveI hPball : IsNoetherianRing
+      ↥(FiniteJet.unitBall (FiniteJet.GraphKoszul.P K (N + 1))) :=
+    ϖ.isNoetherianRing_unitBall_P hK₀ (N + 1)
+  have heq : ∀ y, ‖(evenSupportEquiv K w N).symm y‖ = ‖y‖ := by
+    intro y
+    rw [← norm_evenSupportEquiv K w N ((evenSupportEquiv K w N).symm y),
+      RingEquiv.apply_symm_apply]
+  haveI hEball : IsNoetherianRing ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N)) :=
+    FiniteJet.isNoetherianRing_unitBall_of_isometry
+      (evenSupportEquiv K w N).symm heq hPball
+  -- the ball-level inclusion of the even part
+  set ι : ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N)) →+*
+      ↥(FiniteJet.unitBall (WPHead K w N)) :=
+    RingHom.codRestrict
+      ((Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)).comp
+        (FiniteJet.unitBall ↥(wpEvenSupport K w N)).subtype)
+      (FiniteJet.unitBall (WPHead K w N)) (fun x => by
+        rw [FiniteJet.mem_unitBall_iff]
+        show ‖Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N) x.1‖ ≤ 1
+        rw [show ‖Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N) x.1‖ =
+          ‖x.1‖ from rfl]
+        exact (FiniteJet.mem_unitBall_iff _ _).mp x.2) with hι_def
+  letI : Algebra ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N))
+      ↥(FiniteJet.unitBall (WPHead K w N)) := ι.toAlgebra
+  haveI hMF : Module.Finite ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N))
+      ↥(FiniteJet.unitBall (WPHead K w N)) := by
+    -- ball-level generators and slices
+    have hYb : ∀ ε : Fin N → Bool, Ypat K w N ε ∈ FiniteJet.unitBall (WPHead K w N) := by
+      intro ε
+      rw [FiniteJet.mem_unitBall_iff]
+      rw [show ‖Ypat K w N ε‖ = MvPowerSeries.gaussNorm (norm : K → ℝ)
+        (fun _ : ℕ => (1 : ℝ)) (Ypat K w N ε).1.1 from rfl, MvPowerSeries.gaussNorm]
+      refine ciSup_le fun t => ?_
+      rw [prod_one_weights, mul_one]
+      show ‖MvPowerSeries.coeff t (MvPowerSeries.monomial (patExp w N ε) (1 : K))‖ ≤ 1
+      rw [MvPowerSeries.coeff_monomial]
+      split_ifs <;> simp
+    refine ⟨⟨Finset.univ.image fun ε : Fin N → Bool =>
+      (⟨Ypat K w N ε, hYb ε⟩ : ↥(FiniteJet.unitBall (WPHead K w N))), ?_⟩⟩
+    rw [eq_top_iff]
+    rintro ⟨f, hf⟩ _
+    have hsb : ∀ ε : Fin N → Bool, slice ε f ∈
+        FiniteJet.unitBall ↥(wpEvenSupport K w N) := by
+      intro ε
+      rw [FiniteJet.mem_unitBall_iff]
+      exact (norm_slice_le ε f).trans ((FiniteJet.mem_unitBall_iff _ _).mp hf)
+    have hidentity : (∑ ε : Fin N → Bool,
+        (⟨slice ε f, hsb ε⟩ : ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N))) •
+          (⟨Ypat K w N ε, hYb ε⟩ : ↥(FiniteJet.unitBall (WPHead K w N)))) =
+        ⟨f, hf⟩ := by
+      refine Subtype.ext ?_
+      have hval : ((∑ ε : Fin N → Bool,
+          (⟨slice ε f, hsb ε⟩ : ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N))) •
+            (⟨Ypat K w N ε, hYb ε⟩ : ↥(FiniteJet.unitBall (WPHead K w N)))) :
+          ↥(FiniteJet.unitBall (WPHead K w N))).1 =
+          ∑ ε : Fin N → Bool,
+            (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)) (slice ε f) *
+              Ypat K w N ε := by
+        show (FiniteJet.unitBall (WPHead K w N)).subtype (∑ ε : Fin N → Bool,
+          (⟨slice ε f, hsb ε⟩ : ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N))) •
+            (⟨Ypat K w N ε, hYb ε⟩ : ↥(FiniteJet.unitBall (WPHead K w N)))) = _
+        rw [map_sum]
+        refine Finset.sum_congr rfl fun ε _ => ?_
+        rw [Algebra.smul_def]
+        rfl
+      rw [hval, sum_slice_mul_Ypat]
+    rw [← hidentity]
+    refine Submodule.sum_mem _ fun ε _ => ?_
+    exact Submodule.smul_mem _ _ (Submodule.subset_span
+      (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_univ ε))))
+  exact IsNoetherianRing.of_finite ↥(FiniteJet.unitBall ↥(wpEvenSupport K w N))
+    ↥(FiniteJet.unitBall (WPHead K w N))
 
 variable {K} in
 /-- **The heads are strongly noetherian** ([WP] §6.4: "Since `𝒜_N` is affinoid" —
