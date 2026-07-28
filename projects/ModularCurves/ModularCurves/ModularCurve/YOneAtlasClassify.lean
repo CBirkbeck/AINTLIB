@@ -3291,17 +3291,21 @@ theorem pt_hord (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
   have hpc0 : (a : ℤ) • Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k))).symm
       (EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P) = 0 :=
     ((congrArg ((a : ℤ) • ·) happ2).symm.trans
-      ((map_zsmul (EllipticCurve.Point.baseChangeEquiv Y.curve
-        (D.geomPt (D.specPt k)) (𝟙 _)) (a : ℤ) (Fibre.section D k P)).symm.trans
+      -- `map_zsmul` on the bare `≃+` stalls the `AddMonoidHomClass` search; go through
+      -- `toAddMonoidHom`, where the instance is immediate.
+      ((AddMonoidHom.map_zsmul (EllipticCurve.Point.baseChangeEquiv Y.curve
+        (D.geomPt (D.specPt k)) (𝟙 _)).toAddMonoidHom (a : ℤ)
+          (Fibre.section D k P)).symm.trans
         ((congrArg (EllipticCurve.Point.baseChangeEquiv Y.curve
           (D.geomPt (D.specPt k)) (𝟙 _)) hfs0).trans
-          (map_zero (EllipticCurve.Point.baseChangeEquiv Y.curve
-            (D.geomPt (D.specPt k)) (𝟙 _))))))
+          ((EllipticCurve.Point.baseChangeEquiv Y.curve
+            (D.geomPt (D.specPt k)) (𝟙 _)).toAddMonoidHom.map_zero))))
   have hpull0 : (a : ℤ) • EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P = 0 := by
-    have h2 := (map_zsmul (Y.curve.pointCongr
-      (Category.id_comp (D.geomPt (D.specPt k)))) (a : ℤ) _).symm.trans
+    have h2 := (AddMonoidHom.map_zsmul (Y.curve.pointCongr
+      (Category.id_comp (D.geomPt (D.specPt k)))).toAddMonoidHom (a : ℤ) _).symm.trans
       ((congrArg (Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k)))) hpc0).trans
-        (map_zero (Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k))))))
+        ((Y.curve.pointCongr
+          (Category.id_comp (D.geomPt (D.specPt k)))).toAddMonoidHom.map_zero))
     have h3 : Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k)))
         (Y.curve.pointCongr (Category.id_comp (D.geomPt (D.specPt k))).symm
           (EllipticCurve.Point.pull Y.curve (D.geomPt (D.specPt k)) P)) =

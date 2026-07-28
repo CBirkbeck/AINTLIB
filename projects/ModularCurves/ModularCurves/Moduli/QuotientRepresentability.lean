@@ -22,6 +22,10 @@ axiom-clean {propext, Classical.choice, Quot.sound} (v10.330; the group-law enri
 chain is complete, and no sorryAx reaches this file from the group-law side).
 -/
 
+-- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback` defs are
+-- defeq only after delta, which `rw`/`simp`/`calc` will not do at `implicit` transparency.
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 open CategoryTheory Limits AlgebraicGeometry Opposite
 open ModularCurves ModularCurves.ModuliProblem ModularCurves.RouteA

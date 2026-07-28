@@ -69,6 +69,10 @@ open AlgebraicGeometry CategoryTheory Limits
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
 
+-- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback` defs are
+-- defeq only after delta, which `rw`/`simp`/`calc` will not do at `implicit` transparency.
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 -- The `MulByHomFibresGlobal` import subtree (BB-QF closure via `Torsion`) enlarges the

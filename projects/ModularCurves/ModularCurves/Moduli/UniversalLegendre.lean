@@ -885,8 +885,6 @@ open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-E14-CLS-5, ≈E3b)** The piece maps are compatible with restriction: restrict
 a witness (adaptedness, Legendre form and markings all restrict) and the piece
-end OpaqueProjModelLegendre
-
 restricts (mirrors `chartPiece_restrict`; uniqueness = `legendre_witness_transVC_eq_one`). -/
 theorem legendrePiece_restrict {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
@@ -937,6 +935,8 @@ theorem legendrePiece_restrict {R : CommRingCat.{u}} {X : EllObj R}
   rw [← projModelBaseChange_comp',
     projModelBaseChange_congr_hom hσ.symm (universalLegendre R),
     ← Category.assoc, eqToHom_trans]
+
+end OpaqueProjModelLegendre
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in

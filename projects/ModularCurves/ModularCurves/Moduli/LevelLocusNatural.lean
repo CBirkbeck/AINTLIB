@@ -22,6 +22,10 @@ read through `pullback.fst` of the base-changed curve. Naturality in `T` is then
 one-line consequence (both sides are pinned to the same morphism).
 -/
 
+-- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback` defs are
+-- defeq only after delta, which `rw`/`simp`/`calc` will not do at `implicit` transparency.
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 open CategoryTheory AlgebraicGeometry Limits
