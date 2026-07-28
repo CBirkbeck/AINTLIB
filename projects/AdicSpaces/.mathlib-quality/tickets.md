@@ -2839,6 +2839,20 @@ Consulted on the whole remaining arc. Three substantive findings, two citation f
    Prop 8.2**; **Prop 8.16** identifies the `+`-ring on a rational subset. VERIFY against
    `refs/` before mass-editing docstrings — edition numbering may differ.
 
+### [P5-OI] Adopt mathlib's `PresheafedSpace.IsOpenImmersion` — DONE 2026-07-28
+- `spaCompHom_isOpenImmersion` (SpaVIso.lean, axiom-clean): the comparison
+  `Spa 𝒪_X(D₀) ⟶ Spa(A, A⁺)` is an open immersion in mathlib's sense, whose `c_iso`
+  is `IsIso` in `CompleteTopCommRingCat` and so carries inverse continuity —
+  repairing review finding (1). Supporting: `limitRestrictCatIso`, `phiCatIso'`,
+  `ambCompCatIso` (+ `_hom`), `shadowImage_le`.
+- CONSEQUENCE: mathlib's open-immersion API is now available —
+  `IsOpenImmersion.isoRestrict` gives `Spa B ≅ Spa(A)|_{range}` directly, and
+  `IsOpenImmersion.comp` handles composition. **P5-A2 may now be unnecessary**: check
+  whether `isoRestrict` supersedes the hand-rolled corestriction stalk factorisation
+  before working it.
+- The custom `IsOpenImmersionV` predicate stays for now (K14 is true as stated) but
+  should be re-expressed as `PresheafedSpace.IsOpenImmersion f.toHom` in cleanup.
+
 ### [P5-A2] The corestricted stalk map factors through the restriction comparison
 - **Status**: open | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A (done)
 - **Type**: theorem
