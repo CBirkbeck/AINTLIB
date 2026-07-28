@@ -2608,8 +2608,27 @@ valuations.
   `span T = ⊤` forces a unit in `T` — the spanning data are far from a basis of
   the window. ⇒ **instance (i) needs the keystone at `hopen`-only data**
   (Wedhorn's actual generality) — sub-ticket P5-3b below.
-- **P5-3b (spawned)**: generalize the Gen chain from `hspan : span T = ⊤` to
-  the datum's own `hopen`. Content: (a) `genPieceDatum` → take `E` itself (it
+- **P5-3b DONE 2026-07-28** (RelativePieceKeystoneOpen.lean, namespace
+  `ValuationSpectrum.OpenKeystone`, axiom-clean, 1307 lines): the keystone at
+  `hopen`-only data — `span T = ⊤` replaced by the power certificate
+  `(span I_A)^M ≤ span T` (`genPiece_hopen_of_pow_le`, already in
+  RationalBasisHuber). NEW MATH: `span_idealOfDef_image` — the B-side ideal of
+  definition IS the `canonicalMap`-image of the A-side one, because
+  `subtype ∘ locSubringToRingOfDef ∘ algebraMapD = canonicalMap ∘ A₀.subtype`
+  by `rfl` (all three legs are `codRestrict`s of the same map); hence
+  `imagePiece_pow_le` transports certificates A→B by `Ideal.map_map` +
+  `Ideal.map_pow` + `Ideal.map_span`. Datum constructors `genPieceDatumOpen` /
+  `imagePieceDatumOpen`; `imagePieceDatum_isRational` now via
+  `isRational_of_pow_le`; `imageGenCover_span` DROPPED (span = ⊤ over B is not
+  available and was unused). PORT NOTE: the scripted binder swap must also
+  restore `genPiece_relative_equiv_restrictionMap` — it has its own
+  `set_option … in` and a naive "rindex back to the previous set_option" when
+  deleting `imageGenCover_span` swallows it.
+  ⇒ **BOTH keystone restrictions are now lifted; P5-K instance (i) over A_inf
+  is unblocked.** REMAINING for P5-K: the presheaf assembly (sheaf-from-basis)
+  + stalk/val compatibility; then P5-5 (quotient leg) and P5-6 (IsAdicSpace).
+- **(historical) P5-3b as spawned**: generalize the Gen chain from
+  `hspan : span T = ⊤` to the datum's own `hopen`. Content: (a) `genPieceDatum` → take `E` itself (it
   carries `hopen` at its own pair; retarget to `D₀.P` — the pair-change lemma);
   (b) the B-side openness `span (image E.T)` open in `B` from `span E.T` open in
   `A` (continuity of `canonicalMap` + `presheafValue_ringOfDef` absorption —
