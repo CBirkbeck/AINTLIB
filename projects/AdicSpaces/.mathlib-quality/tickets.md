@@ -3046,7 +3046,28 @@ on the vanishing point + endpoint continuity). Generality: interior-parameter
 sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval needed.
 
 ### [T910-M] Lemma 4.9 'Moreover' clause: the plus-ring correspondence (spawned 2026-07-31)
-- **Status**: OPEN | **File**: FarguesFontaine/RobbaPresentation.lean | **Parent**: T910
+- **Status**: DONE 2026-07-28 | **File**: FarguesFontaine/RobbaCorrespondence.lean (NEW module; M0-M2 infra in RobbaPresentation.lean) | **Parent**: T910
+- **Landed (all axiom-clean, commits ..81886577a, 5d739e752)**: M0 map_BIPlusIn_le_BIPlusIn;
+  M1 mk'_monomial_pow + wLoc_balanced + exists_balanced_pow_twist +
+  valuation_coeff_of_wLoc_eq_one + exists_evalBI_pow_norm_exact; M2
+  valuation_coeff_of_wLoc_le_one + exists_evalBI_pow_mem_image_of_le +
+  exists_evalBI_eq_of_le(_inv) + wIRPS_mul_le + wLoc_mk'_monomial_le_one/_mono_of_le +
+  wIRPSBall + evalBallSubring + isIntegral_monomial_of_le_one +
+  blocToBI_mem_evalBallSubring_of_wI_le; MASTER isIntegral_blocToBI_of_wLoc_le_one
+  (head/tail split at Teichmuller depth N, two monomial routes, W-scaled small tail);
+  SANDWICH mem_BIPlusIn_iff_isIntegral (z in B^{I,+} iff z integral over the image
+  ball evalBallSubring) + evalBallSubring_le_BIPlusIn. This IS the 'moreover' clause
+  in the repo's hom-level framing (restriction hom = eval on constants, AD-9 grid radii).
+- **PERF lesson (BINDING for this lib)**: `lake env lean` does NOT apply the lakefile's
+  [lean_lib.leanOptions] — «Adic spaces» BUILDS with maxSynthPendingDepth=3 +
+  relaxedAutoImplicit=false, so scratch must iterate with
+  `lake env lean -DmaxSynthPendingDepth=3 -DrelaxedAutoImplicit=false`. A
+  signature-level whnf grind that appears only under build = pending-synth recursion;
+  fix with per-decl `set_option maxSynthPendingDepth 1 in` (a REDUCTION — legal).
+  Fat-type IsIntegral assembly: NEVER rw/▸ at IsIntegral goals — abstract-ambient
+  private helpers (isIntegral_split_assembly / isIntegral_add_of_mem /
+  isIntegral_of_subring_le) keep every whnf small.
+
 - **Statement (Kedlaya line 514-516)**: for the case-1/2 presentations at radii in the
   |ϖ|-grid (our AD-9 σ's are exactly there), the integral closure of the image of
   `BIPlusIn`-ρ under the presentation equivalence is `BIPlusIn`-σ (the target's unit
