@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.GroupScheme.ChartBridges
 import ModularCurves.GroupScheme.ActPairImmersion
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The chart precursor is a closed immersion (`[HG-C2]` geometric heart)
@@ -19,6 +20,9 @@ proven `isClosedImmersion_actPair_left` (battle plan: `decomposition-c2-heart.md
 set_option synthInstance.maxHeartbeats 800000
 set_option maxSynthPendingDepth 5
 set_option maxHeartbeats 1600000
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
 open scoped TensorProduct

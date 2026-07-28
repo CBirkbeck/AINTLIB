@@ -8,6 +8,7 @@ import ModularCurves.ForMathlib.FormallyUnramifiedFibre
 import ModularCurves.ForMathlib.NilpotentKerSpecMap
 import ModularCurves.GroupScheme.PatchHopf
 import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # L-BC: `E[N] ⟶ S` is formally unramified when `N` is invertible (BB-DIFF, the fibre leg)
@@ -33,6 +34,11 @@ The three `Point`-restriction lemmas at the head are relocated byte-identically 
 `MulByHomUnramified.lean` (which now imports this file; pointer comments at the old site) —
 they are needed on both sides of the L-A/L-BC split.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 

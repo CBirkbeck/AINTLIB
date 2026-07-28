@@ -42,6 +42,9 @@ subsequent T-Q6 leaves; the étale-torsor input is `ForMathlib/InvariantTorsor.l
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
 
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
+
 universe u
 
 open CategoryTheory Limits AlgebraicGeometry

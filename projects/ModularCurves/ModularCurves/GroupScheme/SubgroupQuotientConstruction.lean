@@ -7,6 +7,7 @@ import ModularCurves.GroupScheme.GroupRingFree
 import ModularCurves.GroupScheme.StableChartData
 import ModularCurves.GroupScheme.ChartBridges
 import ModularCurves.ForMathlib.HopfGaloisQuotient
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The subgroup-scheme quotient, per-patch layer (`[HG-C4a]`)
@@ -23,6 +24,11 @@ point of `E` by `[HG-C3f]` (`exists_affineChartPatch_free`).
 The geometry bridge (invariant morphisms coequalize the chart pair — `[HG-C4b]`) and the
 two-stage glue (`[HG-C4c]`) consume this layer.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits
 open scoped TensorProduct

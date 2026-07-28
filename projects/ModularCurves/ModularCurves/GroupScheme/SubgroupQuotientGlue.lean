@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.GroupScheme.SubgroupQuotientConstruction
 import Mathlib.AlgebraicGeometry.Sites.Fpqc
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The subgroup-scheme quotient glue: the equalizer-subring model (`[HG-C4c-2]`)
@@ -15,6 +16,11 @@ subring of the two restricted-leg section maps — no affineness, no Künneth:
 on the `ForMathlib/SchemeQuotient` pattern. The Hopf layer (C4a/C4b, proven) enters only
 through the per-affine-patch comparison `quotientRing P.U = coinvariants P.chartCoaction`.
 -/
+
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
 open scoped TensorProduct
