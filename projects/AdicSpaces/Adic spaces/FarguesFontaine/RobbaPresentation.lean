@@ -6292,6 +6292,66 @@ theorem wLoc_mk'_monomial_mono_of_le {ρ σ : NNReal} (hρ0 : 0 < ρ)
   rw [hsplit ρ hρ0, hsplit σ hσ0]
   exact mul_le_mul_of_nonneg_right (pow_le_pow_left' hρσ (i - k)) zero_le
 
+/-- The interval Gauss norm of the constant series `1`. -/
+theorem wIRPS_one :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((1 : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) = 1 := by
+  rw [show ((1 : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    = MvPowerSeries.monomial (0 : Fin 1 →₀ ℕ)
+      (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) from
+    (MvPowerSeries.monomial_zero_one).symm]
+  rw [wIRPS_monomial p F ϖ]
+  rw [show ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 1 from rfl]
+  exact wI_one p F
+
+/-- The interval Gauss norm is negation-invariant. -/
+theorem wIRPS_neg
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (((-f : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      = wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((f : ↥(restrictedMvPowerSeriesSubring 1
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  have haux : ∀ g : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (((-g : ↥(restrictedMvPowerSeriesSubring 1
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        ≤ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            ((g : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin 1)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+    intro g
+    refine ciSup_le fun K => ?_
+    have hcoeff : ((MvPowerSeries.coeff K
+        (((-g : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = -((MvPowerSeries.coeff K
+          ((g : ↥(restrictedMvPowerSeriesSubring 1
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := rfl
+    rw [hcoeff, wI_neg p F]
+    exact wI_coeff_le_wIRPS p F ϖ g.2 K
+  refine le_antisymm (haux f) ?_
+  have h2 := haux (-f)
+  rwa [neg_neg] at h2
+
 end FarguesFontaine
 
 end
