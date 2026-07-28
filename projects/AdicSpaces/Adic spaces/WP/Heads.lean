@@ -567,7 +567,39 @@ noncomputable def evenSupportEquiv :
   RingEquiv.ofBijective evenToP evenToP_bijective
 
 theorem norm_evenSupportEquiv (x : ↥(wpEvenSupport K w N)) :
-    ‖evenSupportEquiv K w N x‖ = ‖x‖ := by sorry
+    ‖evenSupportEquiv K w N x‖ = ‖x‖ := by
+  classical
+  have hLHS : ‖evenSupportEquiv K w N x‖ =
+      ⨆ s : Fin (N + 1) →₀ ℕ, ‖MvPowerSeries.coeff (unhalve N s) x.1.1‖ := by
+    rw [show ‖evenSupportEquiv K w N x‖ =
+      MvPowerSeries.gaussNorm (norm : K → ℝ) (fun _ : Fin (N + 1) => (1 : ℝ))
+        (evenToP (K := K) (w := w) (N := N) x).1 from rfl, MvPowerSeries.gaussNorm]
+    exact iSup_congr fun s => by
+      rw [prod_one_weights, mul_one, evenToP_coeff]
+  have hRHS : ‖x‖ = ⨆ t : ℕ →₀ ℕ, ‖MvPowerSeries.coeff t x.1.1‖ := by
+    rw [show ‖x‖ =
+      MvPowerSeries.gaussNorm (norm : K → ℝ) (fun _ : ℕ => (1 : ℝ)) x.1.1 from rfl,
+      MvPowerSeries.gaussNorm]
+    exact iSup_congr fun t => by rw [prod_one_weights, mul_one]
+  rw [hLHS, hRHS]
+  have hbddR : ∀ t : ℕ →₀ ℕ, ‖MvPowerSeries.coeff t x.1.1‖ ≤ ‖x‖ := fun t =>
+    norm_coeff_le_one_norm x.1 t
+  have hbddL : ∀ s : Fin (N + 1) →₀ ℕ,
+      ‖MvPowerSeries.coeff (unhalve N s) x.1.1‖ ≤ ‖x‖ := fun s => hbddR _
+  apply le_antisymm
+  · refine ciSup_le fun s => ?_
+    exact le_ciSup ⟨‖x‖, Set.forall_mem_range.mpr hbddR⟩ (unhalve N s)
+  · refine ciSup_le fun t => ?_
+    by_cases hmem : EvenHeadMem w N t
+    · have h1 : MvPowerSeries.coeff t x.1.1 =
+          MvPowerSeries.coeff (unhalve N (halve N t)) x.1.1 := by
+        rw [unhalve_halve hmem]
+      rw [h1]
+      exact le_ciSup ⟨‖x‖, Set.forall_mem_range.mpr hbddL⟩ (halve N t)
+    · rw [x.2 t hmem, norm_zero]
+      have h0 := hbddL 0
+      refine le_trans ?_ (le_ciSup ⟨‖x‖, Set.forall_mem_range.mpr hbddL⟩ 0)
+      exact norm_nonneg _
 
 /-- The head is a finite module over its even Tate subalgebra — the formal content of
 the rank-`2^N` free normal form [WP] eq:finite-stage-normal-form. -/
