@@ -6258,6 +6258,40 @@ theorem wLoc_mk'_monomial_le_one {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
         mul_le_mul_of_nonneg_right hterm zero_le
     _ = 1 := mul_inv_cancel₀ hpos.ne'
 
+/-- **Radius monotonicity for integral-slope monomials** (T910-M M2b-2):
+when the `p`-power dominates the denominator depth, monomial values grow
+with the radius. -/
+theorem wLoc_mk'_monomial_mono_of_le {ρ σ : NNReal} (hρ0 : 0 < ρ)
+    (hρ1 : ρ < 1) (hσ0 : 0 < σ) (hσ1 : σ < 1) (hρσ : ρ ≤ σ)
+    (i k : ℕ) (hki : k ≤ i) (c : OF F) :
+    wLoc p F ϖ hρ0 hρ1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k))
+      ≤ wLoc p F ϖ hσ0 hσ1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+        (sPow p F ϖ k)) := by
+  rw [wLoc_mk'_monomial p F ϖ hρ0 hρ1, wLoc_mk'_monomial p F ϖ hσ0 hσ1]
+  set V : NNReal := perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hV
+  have hV0 : 0 < V := vpi_pos p F ϖ
+  have hsplit : ∀ τ : NNReal, 0 < τ →
+      τ ^ i * perfectoidValuation p F (c : F) * (((τ * V) ^ k)⁻¹)
+        = τ ^ (i - k) * (perfectoidValuation p F (c : F) * ((V ^ k)⁻¹)) := by
+    intro τ hτ0
+    rw [mul_pow, mul_inv]
+    rw [show τ ^ i = τ ^ (i - k) * τ ^ k from by
+      rw [← pow_add]
+      congr 1
+      omega]
+    calc τ ^ (i - k) * τ ^ k * perfectoidValuation p F (c : F)
+        * ((τ ^ k)⁻¹ * (V ^ k)⁻¹)
+        = (τ ^ k * (τ ^ k)⁻¹)
+          * (τ ^ (i - k) * (perfectoidValuation p F (c : F)
+            * ((V ^ k)⁻¹))) := by ring
+      _ = τ ^ (i - k) * (perfectoidValuation p F (c : F) * ((V ^ k)⁻¹)) := by
+          rw [mul_inv_cancel₀ (pow_pos hτ0 k).ne', one_mul]
+  rw [hsplit ρ hρ0, hsplit σ hσ0]
+  exact mul_le_mul_of_nonneg_right (pow_le_pow_left' hρσ (i - k)) zero_le
+
 end FarguesFontaine
 
 end
