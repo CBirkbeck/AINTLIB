@@ -3199,6 +3199,29 @@ the P5-2 `spaVObjTate` package, by `rfl`.
 
 ### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — IN PROGRESS
 
+⚠ **PROBE FINDING 2026-07-28 (saves a wrong start).** `windowSubYSliceIso …` is
+`isoOfRangeEq (windowSubCompHom …) (ySliceIncl p F ϖ V) …`, so its `hom` is
+`IsOpenImmersion.lift (ySliceIncl …) (windowSubCompHom …) …` — a lift through `ySliceIncl`,
+which is a COMPOSITE of two `ofRestrict`s, NOT a single one. It is therefore **not** a
+`ValuationSpectrum.liftToRestrict`, and the naive identification does not even typecheck
+(`liftToRestrict f U hr` wants `U : Opens ↥(target.carrier)`, an open of `Spa(A_inf)`, while
+`windowSubOpen` is an `Opens ↥(yTop p F ϖ)`).
+
+TWO WAYS FORWARD:
+1. **Double lift** — `liftToRestrict (windowSubCompHom …) YOpens _` lands in
+   `yAmbientPresheafedSpace.restrict (openIncl YOpens)`, which IS `yPresheafedSpace` (defeq);
+   `liftToRestrict` again with `windowSubOpen` lands in `𝒴|_{windowSubOpen}`. Get `IsIso`
+   either by identifying it with `(windowSubYSliceIso …).hom` (both lift the same morphism
+   through the same open immersion — cancel the mono `ySliceIncl`) or directly by
+   `isoOfRangeEq`.
+2. **Bypass the lift** — take `toHom := (windowSubYSliceIso …).hom` verbatim, prove
+   `val_compat` for it, and get `IsIso` from `(windowSubYSliceIso …).isIso_hom` with no
+   bridging at all. The `val_compat_liftToRestrict` technique still applies, using
+   `IsOpenImmersion.lift_fac (ySliceIncl …) (windowSubCompHom …) _ :
+   (windowSubYSliceIso …).hom ≫ ySliceIncl … = windowSubCompHom …` in place of
+   `liftToRestrict_fac`. Probably the shorter path.
+
+
 
 Two halves, and the SECOND is the real one:
 
