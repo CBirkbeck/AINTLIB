@@ -741,6 +741,48 @@ theorem phiEquiv_symm_continuous [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     ((pieceEquiv_continuous D₀ i.isRational (index_sub D₀ hV i)).comp
       (limitEvalHom_continuous i))
 
+/-- **The base homeomorphism**: `Spa B` is the rational subset, as a subspace
+of `Spa A`. -/
+def baseHomeo (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
+    ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺) ≃ₜ ↥(spaOpens D₀) :=
+  (spaPresheafValueHomeomorphRationalOpen' D₀ u hu).trans
+    (spaOpensHomeoInter D₀).symm
+
+@[simp] theorem baseHomeo_coe (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀))
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
+    ((baseHomeo D₀ u hu w : ↥(spaOpens D₀)) : ↥(Spa A A⁺)) = shadow D₀ w := rfl
+
+variable (u : (presheafValue D₀)ˣ)
+  (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀))
+
+/-- The `A`-side open attached to an open of the restricted space. -/
+def aOpen (U : Opens ↥(spaOpens D₀)) : Opens ↥(Spa A A⁺) where
+  carrier := Subtype.val '' (U : Set ↥(spaOpens D₀))
+  is_open' := ((spaOpens D₀).2.isOpenEmbedding_subtypeVal).isOpenMap _ U.2
+
+/-- The `B`-side open attached to an open of the restricted space. -/
+def bOpen (U : Opens ↥(spaOpens D₀)) :
+    Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺) where
+  carrier := (baseHomeo D₀ u hu) ⁻¹' (U : Set ↥(spaOpens D₀))
+  is_open' := U.2.preimage (baseHomeo D₀ u hu).continuous
+
+theorem aOpen_le (U : Opens ↥(spaOpens D₀)) : aOpen D₀ U ≤ spaOpens D₀ := by
+  rintro v ⟨z, -, rfl⟩
+  exact z.2
+
+theorem paired_aOpen_bOpen (U : Opens ↥(spaOpens D₀)) :
+    Paired D₀ (aOpen D₀ U) (bOpen D₀ u hu U) := by
+  intro w
+  constructor
+  · rintro ⟨z, hz, hzeq⟩
+    show baseHomeo D₀ u hu w ∈ U
+    have hz' : z = baseHomeo D₀ u hu w := Subtype.ext hzeq
+    exact hz' ▸ hz
+  · intro hw
+    exact ⟨baseHomeo D₀ u hu w, hw, rfl⟩
+
 end Phi
 
 end SpaVIso
