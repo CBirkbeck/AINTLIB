@@ -1450,6 +1450,16 @@ instance spaCompHom_isOpenImmersion [DecidableEq A] :
     exact hkey (shadowImage D₀ u hu U) (shadowImage_le D₀ u hu U) U
       (shadowPre_shadowImage D₀ u hu U)
 
+/-- **`Spa 𝒪_X(D₀)` is isomorphic, as a presheafed space, to the restriction of
+`Spa (A, A⁺)` to the rational subset** — mathlib's `isoRestrict` at our open
+immersion. This is Wedhorn 8.15 in the form that composes. -/
+noncomputable def spaCompIsoRestrict [DecidableEq A] :
+    bSpace D₀ ≅ (spaSpace (A := A)).restrict
+      (AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.base_open
+        (f := spaCompHom D₀ u hu)) :=
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoRestrict
+    (spaCompHom D₀ u hu)
+
 end Assembly
 
 end SpaVIso
