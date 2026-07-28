@@ -39,8 +39,11 @@ section LevelModuli
 
 variable (R : CommRingCat.{u})
 
--- `EllHom.pullSection_add` lives in `Moduli/Representability.lean` (dev's location);
--- main had relocated it here, so the merge produced two copies.
+theorem EllHom.pullSection_add {X Y : EllObj R} (f : X ⟶ Y)
+    (P Q : Y.curve.Section) :
+    EllHom.pullSection R f (P + Q) =
+      EllHom.pullSection R f P + EllHom.pullSection R f Q :=
+  EllHom.pullSection_add_of_finitePresentation R f P Q
 
 /-- **(Y1-D2 bridge)** A pulled section vanishes on the fibre over `τ` iff its `transportSection`
 (along the `Ell/R`-morphism's cartesian comparison iso `curveIsoPullback`) does — pure

@@ -216,4 +216,64 @@ be cyclic (PullSectionCanonicity → PullSectionAdd → this file). -/
 
 end LevelModuli
 
+
+-- Ported from dev's Representability: main's version does not carry it, and
+-- Moduli/GammaH + ModularCurve/YRho consume it.
+/-- **(T-E4b ★, the level-preservation input — de-parks the naive functor sorries)**
+`pullSection` preserves the naive full-level condition: killing transports through the
+additivity (T-E4a), and fibrewise generation transports through the point-level
+comparison `pointTransportEquiv` followed by the base-change dictionary — the
+`EllHom`-form of `isNaiveFullLevel_pullAlong`. -/
+theorem EllHom.isNaiveFullLevel_pullSection {N : ℕ} [NeZero N]
+    {P Q : Y.curve.Section} (h : Y.curve.IsNaiveFullLevel N P Q) :
+    X.curve.IsNaiveFullLevel N
+      (EllHom.pullSection R f P) (EllHom.pullSection R f Q) := by
+  obtain ⟨⟨hP, hQ⟩, hgen⟩ := h
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · calc (N : ℤ) • EllHom.pullSection R f P
+        = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) ((N : ℤ) • P) :=
+          (map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f)) (N : ℤ) P).symm
+      _ = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) 0 := by rw [hP]
+      _ = 0 := map_zero _
+  · calc (N : ℤ) • EllHom.pullSection R f Q
+        = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) ((N : ℤ) • Q) :=
+          (map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f)) (N : ℤ) Q).symm
+      _ = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) 0 := by rw [hQ]
+      _ = 0 := map_zero _
+  · intro k _ _ t x hx
+    set ψ := (EllHom.pointTransportEquiv R f t).trans
+      (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t) with hψ
+    have hdx : (N : ℤ) • ψ x = 0 := by
+      rw [← map_zsmul ψ, hx, map_zero]
+    have h1 := hgen k (t ≫ f.baseHom) (ψ x) hdx
+    have hcompatP : ψ (EllipticCurve.Point.pull X.curve t
+        (EllHom.pullSection R f P)) =
+      EllipticCurve.Point.pull Y.curve (t ≫ f.baseHom) P :=
+      EllHom.pointTransportEquiv_pull_pullSection R f t P
+    have hcompatQ : ψ (EllipticCurve.Point.pull X.curve t
+        (EllHom.pullSection R f Q)) =
+      EllipticCurve.Point.pull Y.curve (t ≫ f.baseHom) Q :=
+      EllHom.pointTransportEquiv_pull_pullSection R f t Q
+    rw [← hcompatP, ← hcompatQ] at h1
+    have hKle : AddSubgroup.closure
+        ({ψ (EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P)),
+          ψ (EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q))} :
+          Set (Y.curve.Point (t ≫ f.baseHom)))
+        ≤ (AddSubgroup.closure
+            {EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P),
+             EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q)}).map
+          ψ.toAddMonoidHom := by
+      rw [AddSubgroup.closure_le]
+      rintro z (rfl | rfl)
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert _ _), rfl⟩
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl), rfl⟩
+    obtain ⟨y, hy, hyx⟩ := hKle h1
+    exact (ψ.injective hyx) ▸ hy
+
 end ModularCurves

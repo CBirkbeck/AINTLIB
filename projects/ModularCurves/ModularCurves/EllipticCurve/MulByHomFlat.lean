@@ -474,4 +474,26 @@ theorem mulByHom_finrank_general (E : EllipticCurve S) (N : ℕ) [NeZero N] (x :
 
 end Assembly
 
+
+-- Ported from main's MulByHomFlat: this file carries dev's version (for
+-- `mulByHom_flat_general`), and `KernelDivisibilityGlue` consumes this definition.
+namespace EllipticCurve
+
+/-- **(BB-FLAT funnel)** The square-zero kernels of the point functor are `N`-divisible:
+for every affine square-zero thickening `Spec (A'/I) ⊆ Spec A'` over `S` and every point
+`ε ∈ E(A')` restricting to zero on the thickening, `ε` is `N` times such a point. This is
+the Lie-theoretic content of `[N]`-smoothness (`d[N] = N·`, invertible when `N` is);
+discharge route: the `TorsionUnramifiedFibre` co-multiplication layer off the field base
+(board v10.147). -/
+def KernelNDivisible {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) : Prop :=
+  ∀ (A' : CommRingCat.{u}) (I : Ideal A'), I ^ 2 = ⊥ → ∀ (b' : Spec A' ⟶ S)
+    (ε : E.Point b'),
+    Point.restrict E (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))) ε = 0 →
+    ∃ δ : E.Point b',
+      Point.restrict E (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))) δ = 0 ∧
+      (N : ℤ) • δ = ε
+
+end EllipticCurve
+
+
 end ModularCurves
