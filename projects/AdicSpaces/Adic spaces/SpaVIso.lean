@@ -1007,6 +1007,92 @@ def spaRestrictIso : bSpace D₀ ≅ spaRestrict (spaOpens D₀) :=
   AlgebraicGeometry.PresheafedSpace.isoOfComponents (baseIso D₀ u hu)
     (presheafIso D₀ u hu)
 
+/-- The shadow-preimage of an ambient open. -/
+def shadowPre (U : Opens ↥(Spa A A⁺)) :
+    Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺) where
+  carrier := {w | shadow D₀ w ∈ U}
+  is_open' := by
+    have : {w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺) | shadow D₀ w ∈ U}
+        = (baseHomeo D₀ u hu) ⁻¹' (Subtype.val ⁻¹' (U : Set ↥(Spa A A⁺))) := rfl
+    rw [this]
+    exact (U.2.preimage continuous_subtype_val).preimage
+      (baseHomeo D₀ u hu).continuous
+
+theorem shadowPre_paired (U : Opens ↥(Spa A A⁺)) :
+    Paired D₀ (U ⊓ spaOpens D₀) (shadowPre D₀ u hu U) := by
+  intro w
+  constructor
+  · exact fun h => h.1
+  · exact fun h => ⟨h, (comap_canonicalMap_mem_rationalOpen_inter_spa D₀ w).1⟩
+
+/-- **The ambient comparison**: sections over an ambient open restrict and
+compare to `B`-side sections over the shadow-preimage. -/
+noncomputable def ambComp [DecidableEq A] (U : Opens ↥(Spa A A⁺)) :
+    ↥(limitSections U) →+* ↥(limitSections (shadowPre D₀ u hu U)) :=
+  ((phiEquiv D₀ (inf_le_right : U ⊓ spaOpens D₀ ≤ spaOpens D₀)
+      (shadowPre_paired D₀ u hu U)).symm.toRingHom).comp
+    (limitRestrict (inf_le_left : U ⊓ spaOpens D₀ ≤ U))
+
+/-- **The ambient comparison intertwines the open values.** -/
+theorem comap_ambComp_openValue [DecidableEq A] (U : Opens ↥(Spa A A⁺))
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+    (hw : w ∈ shadowPre D₀ u hu U) :
+    comap (ambComp D₀ u hu U) (openValue (shadowPre D₀ u hu U) hw)
+      = openValue U hw := by
+  have h1 := comap_phiEquiv_symm_openValue D₀
+    (inf_le_right : U ⊓ spaOpens D₀ ≤ spaOpens D₀)
+    (shadowPre_paired D₀ u hu U) w hw
+  have h2 := comap_limitRestrict_openValue
+    (inf_le_left : U ⊓ spaOpens D₀ ≤ U)
+    (paired_shadow D₀ (shadowPre_paired D₀ u hu U) w hw)
+  rw [show comap (ambComp D₀ u hu U) (openValue (shadowPre D₀ u hu U) hw)
+      = comap (limitRestrict (inf_le_left : U ⊓ spaOpens D₀ ≤ U))
+        (comap ((phiEquiv D₀ (inf_le_right : U ⊓ spaOpens D₀ ≤ spaOpens D₀)
+          (shadowPre_paired D₀ u hu U)).symm.toRingHom)
+          (openValue (shadowPre D₀ u hu U) hw)) from rfl, h1, h2]
+
+/-- Naturality of the inverse comparison. -/
+theorem phiEquiv_symm_naturality [DecidableEq A] {V V' : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀) (hV' : V' ≤ spaOpens D₀) (hVV' : V' ≤ V)
+    {W W' : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (hVW' : Paired D₀ V' W') (hWW' : W' ≤ W)
+    (y : ↥(limitSections V)) :
+    limitRestrict hWW' ((phiEquiv D₀ hV hVW).symm y)
+      = (phiEquiv D₀ hV' hVW').symm (limitRestrict hVV' y) := by
+  have hnat := phiHom_naturality D₀ hV hV' hVV' hVW hVW' hWW'
+    ((phiEquiv D₀ hV hVW).symm y)
+  rw [show phiHom D₀ hV hVW ((phiEquiv D₀ hV hVW).symm y) = y from
+    (phiEquiv D₀ hV hVW).apply_symm_apply y] at hnat
+  exact (((phiEquiv D₀ hV' hVW').symm_apply_eq).mpr hnat).symm
+
+/-- The shadow map as a morphism of topological spaces. -/
+def shadowMap : SpaTop (presheafValue D₀) ⟶ SpaTop A :=
+  TopCat.ofHom ⟨fun w => shadow D₀ w,
+    (baseHomeo D₀ u hu).continuous.subtype_val⟩
+
+theorem ambComp_continuous [DecidableEq A] (U : Opens ↥(Spa A A⁺)) :
+    Continuous (ambComp D₀ u hu U) :=
+  (phiEquiv_symm_continuous D₀ _ (shadowPre_paired D₀ u hu U)).comp
+    (limitRestrict_continuous _)
+
+/-- **The comparison morphism** `Spa B ⟶ Spa A` of presheafed spaces: the
+shadow map on points, the ambient comparison on sections. -/
+noncomputable def spaCompHom [DecidableEq A] :
+    bSpace D₀ ⟶ spaSpace (A := A) where
+  base := shadowMap D₀ u hu
+  c :=
+    { app := fun U => ⟨ambComp D₀ u hu U.unop, ambComp_continuous D₀ u hu U.unop⟩
+      naturality := fun U U' f => by
+        refine Subtype.ext (RingHom.ext fun x => ?_)
+        show ambComp D₀ u hu U'.unop (limitRestrict (leOfHom f.unop) x)
+          = limitRestrict (leOfHom ((Opens.map (shadowMap D₀ u hu)).map
+              f.unop)) (ambComp D₀ u hu U.unop x)
+        exact (phiEquiv_symm_naturality D₀ _ _
+          (inf_le_inf_right (spaOpens D₀) (leOfHom f.unop))
+          (shadowPre_paired D₀ u hu U.unop) (shadowPre_paired D₀ u hu U'.unop)
+          (leOfHom ((Opens.map (shadowMap D₀ u hu)).map f.unop))
+          (limitRestrict inf_le_left x)).symm }
+
 end Assembly
 
 end SpaVIso
