@@ -326,7 +326,13 @@ private theorem locallyFreeRankLocusAux_core_iff {R A : Type u} [CommRing R] [Co
             rw [LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply,
               LinearMap.coe_comp, Function.comp_apply, map_sub, hs', sub_self]) ?_
         ext x
-        simp [LinearMap.mem_ker.mp x.2]
+        -- `simp` normalises to `subtype x - s (π_A (subtype x)) = ↑x`; the kernel condition
+        -- then has to be applied in exactly that `subtype`-shape (a `↑x`-phrased version of
+        -- it no longer matches).
+        simp
+        rw [show (LinearMap.baseChange A π) ((LinearMap.baseChange A π).ker.subtype x) = 0 from
+          LinearMap.mem_ker.mp x.2, map_zero, sub_zero]
+        rfl
       exact Module.Flat.of_projective
     haveI : Module.Finite A (LinearMap.range s) :=
       Module.Finite.equiv (LinearEquiv.ofInjective s hsinj)
@@ -1339,9 +1345,17 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
           X.isoSpec.inv :=
         IsPullback.of_horiz_isIso ⟨by simp⟩
       rw [Scheme.Hom.finrank_comp_left_of_isIso]
-      have := Scheme.Hom.finrank_of_isPullback _ _ _ _ hsq (X.isoSpec.hom p)
-      rw [show X.isoSpec.inv (X.isoSpec.hom p) = p by simp] at this
-      rw [← this]
+      -- Orient the square the *other* way (`isoSpec.hom` as the base leg) so the point
+      -- argument is `p` itself: the round-trip form `inv (hom p)` produced by `hsq`
+      -- is defeq-but-not-syntactically the `p` a `rw`/`simp only` would need.
+      haveI : Flat (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))) :=
+        (MorphismProperty.cancel_right_of_respectsIso (P := @Flat) _ X.isoSpec.inv).mp hflSM
+      haveI : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap Γ(X, ⊤)
+          (Γ(X, ⊤) ⊗[Γ(↑U.1, ⊤)] Γ(↑(f ⁻¹ᵁ U.1), ⊤))))) :=
+        (IsFinite.SpecMap_iff _).mpr hφfin
+      exact Scheme.Hom.finrank_of_isPullback (𝟙 _) _ _ X.isoSpec.hom
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) p
     constructor
     · intro h q
       have hq := hpt (X.isoSpec.inv q)
@@ -1405,9 +1419,11 @@ private theorem locallyFreeRankLocus_chart_cond {T : Scheme.{u}} (t : T ⟶ S) (
         (Scheme.Opens.topIso V.1).inv from Scheme.Hom.resLE_app_top t e]
     have hround : (Scheme.Opens.topIso U.1).hom.hom ((Scheme.Opens.topIso U.1).inv.hom z)
         = z := by
-      have := congrArg (fun ψ : Γ(S, U.1) ⟶ Γ(S, U.1) => ψ.hom z)
-        (Scheme.Opens.topIso U.1).inv_hom_id
-      simpa using this
+      first
+      | (rw [← CommRingCat.comp_apply, Iso.inv_hom_id]; rfl)
+      | (rw [← CommRingCat.comp_apply, Iso.inv_hom_id, CommRingCat.id_apply])
+      | exact congrArg (fun ψ : Γ(S, U.1) ⟶ Γ(S, U.1) => ψ.hom z)
+          (Scheme.Opens.topIso U.1).inv_hom_id
     rw [CommRingCat.comp_apply, CommRingCat.comp_apply, hround]
   have hinj : Function.Injective ((Scheme.Opens.topIso V.1).inv.hom) :=
     (Scheme.Opens.topIso V.1).symm.commRingCatIsoToRingEquiv.injective
@@ -2077,7 +2093,7 @@ theorem generatorSpace_baseChange (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.�
         exact hc₁r
       have hαv : α ≫ P₂.1 = P₁.1 := by
         have h1 : α ≫ P₂.1 = (α ≫ P₂'.1) ≫ pullback.fst E.π t := by
-          rw [← Category.assoc]; rfl
+          rw [← Category.assoc]
         rw [h1, hnat, hPP₁']
       exact hαv
     · rw [Category.assoc, Category.id_comp,
@@ -2396,7 +2412,6 @@ theorem generatorSpace_fibre_isEmpty_of_not_isGammaZeroFppf (N : ℕ) [NeZero N]
     q ≫ (E.baseChange t).generatorSpaceπ N (D.baseChange t) hD' with hh
   have hcomp : h = Spec.map (σ ≫ CommRingCat.ofHom (Ideal.Quotient.mk m)) := by
     rw [hh, hq, Spec.map_comp, Category.assoc, hσmap]
-    rfl
   -- the cover properties: surjective, flat, finitely presented
   have hsurj : Function.Surjective h.base := by
     haveI : Subsingleton ↑(Spec (CommRingCat.of k)) :=
@@ -2424,8 +2439,7 @@ theorem generatorSpace_fibre_isEmpty_of_not_isGammaZeroFppf (N : ℕ) [NeZero N]
     ⟨q ≫ (E.baseChange t).generatorSpaceι N (D.baseChange t) hD' ≫
       (D.baseChange t).ideal.subschemeι, by
         rw [hh, generatorSpaceπ]
-        simp only [Category.assoc]
-        rfl⟩ with hP
+        simp only [Category.assoc]⟩ with hP
   have hgen : (E.baseChange t).IsDivisorGenerator N (D.baseChange t) h
       (Point.asSection (E.baseChange t) h P) :=
     ((E.baseChange t).generatorSpace_spec N (D.baseChange t) hD' h P
