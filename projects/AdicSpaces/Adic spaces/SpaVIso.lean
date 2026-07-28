@@ -153,6 +153,131 @@ theorem pieceEquiv_restrict {E E' : RationalLocData A} (hE : E.IsRational)
 
 end Comparison
 
+section Phi
+
+
+variable [T2Space A] [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+    CompleteSpace A]
+
+variable (D₀ : RationalLocData A) [IsTateRing (presheafValue D₀)]
+  [IsNoetherianRing (presheafValue D₀)] [IsStronglyNoetherian (presheafValue D₀)]
+
+/-- The pairing of an `A`-side open with a `B`-side open through the
+canonical map: every valid `A`-datum inside `V` has its shadow-preimage
+inside `W`. This is the hypothesis-form of "`W` is the preimage of `V`". -/
+def Paired (V : Opens ↥(Spa A A⁺))
+    (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) : Prop :=
+  ∀ w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺),
+    ∀ hmem : comap D₀.canonicalMap (w : Spv (presheafValue D₀)) ∈ Spa A A⁺,
+      (⟨comap D₀.canonicalMap (w : Spv (presheafValue D₀)), hmem⟩
+        : ↥(Spa A A⁺)) ∈ V → w ∈ W
+
+/-- The `A`-shadow of a `Spa B`-point is a `Spa A`-point. -/
+theorem comap_mem_spa (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
+    comap D₀.canonicalMap (w : Spv (presheafValue D₀)) ∈ Spa A A⁺ :=
+  ValuationSpectrum.comap_mem_spa (canonicalMap_continuous D₀)
+    D₀.canonicalMap_integral w.2
+
+/-- The `A`-shadow as a `Spa A`-point. -/
+def shadow (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) : ↥(Spa A A⁺) :=
+  ⟨comap D₀.canonicalMap (w : Spv (presheafValue D₀)), comap_mem_spa D₀ w⟩
+
+theorem paired_apply {V : Opens ↥(Spa A A⁺)}
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (h : Paired D₀ V W) (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+    (hw : shadow D₀ w ∈ V) : w ∈ W :=
+  h w (comap_mem_spa D₀ w) hw
+
+/-- Under a pairing, a valid `A`-index of `V` produces a `B`-index of `W`. -/
+def idxOf {V : Opens ↥(Spa A A⁺)}
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (i : RationalIndex V) : RationalIndex W :=
+  imgIdx D₀ W i.isRational fun w hw =>
+    paired_apply D₀ hVW w (i.subset (show shadow D₀ w ∈ spaOpen i.D from hw))
+
+@[simp] theorem idxOf_D {V : Opens ↥(Spa A A⁺)}
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (i : RationalIndex V) :
+    (idxOf D₀ hVW i).D = imgDatum D₀ i.isRational := rfl
+
+/-- An `A`-index of an open inside `spaOpens D₀` sits inside `D₀`. -/
+theorem index_sub {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    (i : RationalIndex V) :
+    rationalOpen i.D.T i.D.s ⊆ rationalOpen D₀.T D₀.s :=
+  spaOpen_subset_iff.mp (i.subset.trans hV)
+
+/-- **The comparison map, componentwise**: the `A`-side value of a `B`-side
+compatible family at a valid `A`-index. -/
+noncomputable def phiComp {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (x : ↥(limitSections W)) (i : RationalIndex V) :
+    presheafValue i.D :=
+  (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm
+    (limitEvalHom (idxOf D₀ hVW i) x)
+
+/-- **The comparison map is a compatible family**: the keystone square
+transports the `B`-side compatibility to the `A` side. -/
+theorem phiComp_compat {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (x : ↥(limitSections W))
+    (i j : RationalIndex V)
+    (h : rationalOpen j.D.T j.D.s ⊆ rationalOpen i.D.T i.D.s) :
+    restrictionMap i.D j.D h (phiComp D₀ hV hVW x i) = phiComp D₀ hV hVW x j := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  -- the B-side compatibility of `x` at the two image indices
+  have hB : restrictionMap (imgDatum D₀ i.isRational) (imgDatum D₀ j.isRational)
+      (OpenKeystone.imagePieceDatum_rationalOpen_mono D₀ i.D j.D
+        (certExp D₀ i.isRational) (certExp_spec D₀ i.isRational)
+        (certExp D₀ j.isRational) (certExp_spec D₀ j.isRational) h)
+      (limitEvalHom (idxOf D₀ hVW i) x)
+      = limitEvalHom (idxOf D₀ hVW j) x :=
+    x.2 (idxOf D₀ hVW i) (idxOf D₀ hVW j) _
+  -- the keystone square at the A-side value
+  have hsq := pieceEquiv_restrict D₀ i.isRational j.isRational
+    (index_sub D₀ hV i) h (phiComp D₀ hV hVW x i)
+  have hcancel : pieceEquiv D₀ i.isRational (index_sub D₀ hV i)
+      (phiComp D₀ hV hVW x i) = limitEvalHom (idxOf D₀ hVW i) x :=
+    RingEquiv.apply_symm_apply _ _
+  rw [hcancel] at hsq
+  rw [hB] at hsq
+  have := congrArg (pieceEquiv D₀ j.isRational (index_sub D₀ hV j)).symm hsq
+  rwa [RingEquiv.symm_apply_apply] at this
+
+/-- **The comparison ring homomorphism** `𝒪_B(W) → 𝒪_A(V)`: componentwise the
+inverse keystone comparison at the image index. -/
+noncomputable def phiHom {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) :
+    ↥(limitSections W) →+* ↥(limitSections V) where
+  toFun x := ⟨phiComp D₀ hV hVW x, phiComp_compat D₀ hV hVW x⟩
+  map_one' := Subtype.ext (funext fun i =>
+    ((pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm.congr_arg
+        (map_one (limitEvalHom (idxOf D₀ hVW i)))).trans
+      (map_one (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm))
+  map_mul' x y := Subtype.ext (funext fun i =>
+    ((pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm.congr_arg
+        (map_mul (limitEvalHom (idxOf D₀ hVW i)) x y)).trans
+      (map_mul (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm _ _))
+  map_zero' := Subtype.ext (funext fun i =>
+    ((pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm.congr_arg
+        (map_zero (limitEvalHom (idxOf D₀ hVW i)))).trans
+      (map_zero (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm))
+  map_add' x y := Subtype.ext (funext fun i =>
+    ((pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm.congr_arg
+        (map_add (limitEvalHom (idxOf D₀ hVW i)) x y)).trans
+      (map_add (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm _ _))
+
+@[simp] theorem phiHom_apply_component {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (x : ↥(limitSections W)) (i : RationalIndex V) :
+    limitEvalHom i (phiHom D₀ hV hVW x)
+      = (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm
+          (limitEvalHom (idxOf D₀ hVW i) x) := rfl
+
+end Phi
+
 end SpaVIso
 
 end ValuationSpectrum
