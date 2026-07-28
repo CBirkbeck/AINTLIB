@@ -223,6 +223,37 @@ noncomputable def quotientLegIsoRestrict (V : Opens ↥(yTop p F ϖ))
   AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoRestrict
     (yRestrictToCurve p F ϖ V).toHom
 
+
+/-- The range of the quotient leg is exactly the open image. -/
+theorem range_yRestrictToCurve_eq (V : Opens ↥(yTop p F ϖ)) :
+    Set.range (ConcreteCategory.hom (yRestrictToCurve p F ϖ V).toHom.base)
+      = ((xImage p F ϖ V : Opens (Curve p F ϖ)) : Set (Curve p F ϖ)) := by
+  refine Set.ext fun x => ⟨?_, ?_⟩
+  · rintro ⟨v, rfl⟩
+    exact ⟨v.1, v.2, rfl⟩
+  · rintro ⟨v, hv, rfl⟩
+    exact ⟨⟨v, hv⟩, rfl⟩
+
+/-- **The quotient leg in `restrictOpen` form** — the shape Wedhorn 8.22 needs:
+`𝒴|_V ≅ X|_{π V}` with both sides written as restrictions of the `𝒱^pre`-objects
+to named opens. -/
+noncomputable def quotientLegIsoRestrictOpen (V : Opens ↥(yTop p F ϖ))
+    (hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj V
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((V : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))) :
+    ((yVPreObj p F ϖ).restrictOpen V).toPresheafedSpace
+      ≅ (xVPreObj p F ϖ).toPresheafedSpace.restrict
+          (ValuationSpectrum.openIncl_isOpenEmbedding
+            (X := (xVPreObj p F ϖ).toPresheafedSpace) (xImage p F ϖ V)) :=
+  letI := yRestrictToCurve_isOpenImmersion p F ϖ V hdis
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
+    (f := (yRestrictToCurve p F ϖ V).toHom)
+    (g := (xVPreObj p F ϖ).toPresheafedSpace.ofRestrict
+      (ValuationSpectrum.openIncl_isOpenEmbedding
+        (X := (xVPreObj p F ϖ).toPresheafedSpace) (xImage p F ϖ V)))
+    ((range_yRestrictToCurve_eq p F ϖ V).trans Subtype.range_val.symm)
+
 end FarguesFontaine
 
 end

@@ -3090,12 +3090,21 @@ DONE:
 * the restriction toolkit: `restrictRestrictIso` (P5-RT), `restrictIsoOfIso`
 
 REMAINING, in order:
-1. **[P5-6c] `VPreHom.asIso`** — the forgetful functor `𝒱^pre ⥤ TopRingPresheafedSpace` reflects
-   isomorphisms. Without it, `quotientLegIsoRestrict` (a presheafed-space iso) cannot be turned
-   into the `𝒱`-iso that 8.22 asks for. Route: `val_compat` for the inverse by
-   `comap_injective` along the (iso, hence surjective) stalk map of `f`, then `isLocalHom` from
-   `isLocalHom_of_val_comap`. ⚠ `ringStalkMap` is CONTRAVARIANT and `generalize`/`subst` on the
-   base point fails ("result is not type correct") — see the failed attempt in scratch r179.
+1. ~~[P5-6c] `VPreHom.asIso`~~ **DONE 2026-07-28**, axiom-clean (`VRestrict.lean`, section
+   `Reflects`): `val_compat_of_eq_id`, `surjective_ringStalkMap_of_eq_id`,
+   `val_compat_of_inverse`, `VPreHom.inv`, `VPreHom.asIso`, `VPreHom.isIso_of_isIso_toHom`.
+   **THE MOVE**: do NOT fight `IsIso.inv_hom_id` inside `ringStalkMap`'s dependent type.
+   State the core lemma for an ARBITRARY two-sided inverse `g` with hypotheses
+   `g ≫ f.toHom = 𝟙` and `f.toHom ≫ g = 𝟙`; the two "is the identity" facts then become
+   generic lemmas about an endomorphism `g = 𝟙 Z`, where a plain `subst hg` is legal
+   because `g` is a free variable. (r179 failed because it tried to `subst` the BASE POINT,
+   which is "motive is not type correct".) Bonus: `IsIso (ringStalkMap f.toHom x)` is never
+   needed — surjectivity falls out of `ringStalkMap_comp` + `Function.Surjective.of_comp`.
+   Also landed: `quotientLegIsoRestrictOpen` — the quotient leg in the `restrictOpen` shape
+   8.22 wants (`CurveQuotientLeg.lean`; note the target open must be spelled with
+   `openIncl_isOpenEmbedding` on `.carrier`, NOT `opensIncl_isOpenEmbedding` on `.toTopCat`
+   — `toTopCat` is a non-reducible `def`, so instance search cannot find mathlib's
+   `IsOpenImmersion.ofRestrict` through it).
 2. **[P5-6d] the 𝒴-side leg** `Spa(presheafValue D') ≅ 𝒴|_{V'}` as presheafed spaces. Per the
    ROUTE DISCOVERY below this is a COMPOSITION of existing `isoRestrict`s plus `restrictRestrictIso`
    / `restrictIsoOfIso` — `spaCompIsoRestrict` applies over `A_inf` because P5-3a/3b moved the

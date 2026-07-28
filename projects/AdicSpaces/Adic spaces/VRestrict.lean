@@ -580,6 +580,92 @@ noncomputable def VPreHom.isoOfIsIso {X Y : VPreObj.{u}} (f : VPreHom X Y)
   inv_hom_id := VPreHom.ext (by rw [show (ginv.comp f).toHom
     = ginv.toHom ≫ f.toHom from rfl, hg, IsIso.inv_hom_id]; rfl)
 
+/-! ### `𝒱^pre` reflects isomorphisms (P5-6c) -/
+
+section Reflects
+
+variable {X Y : VPreObj.{u}} (f : VPreHom X Y) [IsIso f.toHom]
+
+/-- An endomorphism of a `𝒱^pre`-object that is the identity satisfies the
+valuation-compatibility condition. -/
+theorem val_compat_of_eq_id (Z : VPreObj.{u})
+    (g : Z.toPresheafedSpace ⟶ Z.toPresheafedSpace)
+    (hg : g = 𝟙 Z.toPresheafedSpace) (z : Z.toPresheafedSpace) :
+    Z.val (ConcreteCategory.hom g.base z)
+      = comap (ringStalkMap g z).hom' (Z.val z) := by
+  subst hg
+  simp only [ringStalkMap_id]
+  exact (congr_fun ValuationSpectrum.comap_id (Z.val z)).symm
+
+/-- The ring stalk map of an endomorphism equal to the identity is surjective. -/
+theorem surjective_ringStalkMap_of_eq_id (Z : VPreObj.{u})
+    (g : Z.toPresheafedSpace ⟶ Z.toPresheafedSpace)
+    (hg : g = 𝟙 Z.toPresheafedSpace) (z : Z.toPresheafedSpace) :
+    Function.Surjective (ringStalkMap g z).hom' := by
+  subst hg
+  rw [ringStalkMap_id]
+  exact Function.surjective_id
+
+omit [IsIso f.toHom] in
+/-- **Valuation compatibility of a two-sided inverse.** -/
+theorem val_compat_of_inverse (g : Y.toPresheafedSpace ⟶ X.toPresheafedSpace)
+    (hgf : g ≫ f.toHom = 𝟙 Y.toPresheafedSpace)
+    (hfg : f.toHom ≫ g = 𝟙 X.toPresheafedSpace) (y : Y.toPresheafedSpace) :
+    X.val (ConcreteCategory.hom g.base y)
+      = comap (ringStalkMap g y).hom' (Y.val y) := by
+  have hsurj : Function.Surjective
+      (ringStalkMap f.toHom (ConcreteCategory.hom g.base y)).hom' := by
+    have h := surjective_ringStalkMap_of_eq_id X (f.toHom ≫ g) hfg
+      (ConcreteCategory.hom g.base y)
+    rw [ringStalkMap_comp] at h
+    have h2 : Function.Surjective
+        ((ringStalkMap f.toHom (ConcreteCategory.hom g.base y)).hom' ∘
+          (ringStalkMap g (ConcreteCategory.hom f.toHom.base
+            (ConcreteCategory.hom g.base y))).hom') := h
+    exact h2.of_comp
+  refine comap_injective hsurj ?_
+  have e1 : comap (ringStalkMap f.toHom (ConcreteCategory.hom g.base y)).hom'
+        (X.val (ConcreteCategory.hom g.base y))
+      = Y.val (ConcreteCategory.hom f.toHom.base (ConcreteCategory.hom g.base y)) :=
+    (f.val_compat _).symm
+  have e2 : comap ((ringStalkMap g y).hom'.comp
+        (ringStalkMap f.toHom (ConcreteCategory.hom g.base y)).hom') (Y.val y)
+      = comap (ringStalkMap f.toHom (ConcreteCategory.hom g.base y)).hom'
+          (comap (ringStalkMap g y).hom' (Y.val y)) :=
+    congr_fun (comap_comp _ _) (Y.val y)
+  have e3 : (ringStalkMap (g ≫ f.toHom) y).hom'
+      = (ringStalkMap g y).hom'.comp
+          (ringStalkMap f.toHom (ConcreteCategory.hom g.base y)).hom' := by
+    rw [ringStalkMap_comp]
+    rfl
+  have e4 : Y.val (ConcreteCategory.hom (g ≫ f.toHom).base y)
+      = comap (ringStalkMap (g ≫ f.toHom) y).hom' (Y.val y) :=
+    val_compat_of_eq_id Y (g ≫ f.toHom) hgf y
+  exact e1.trans (e4.trans ((congrArg (fun ρ => comap ρ (Y.val y)) e3).trans e2))
+
+/-- **The inverse of an invertible `𝒱^pre`-morphism is a `𝒱^pre`-morphism.** -/
+noncomputable def VPreHom.inv : VPreHom Y X where
+  toHom := CategoryTheory.inv f.toHom
+  isLocalHom_stalkMap := fun y =>
+    isLocalHom_of_val_comap (X.isLocalRing_stalk _) (Y.isLocalRing_stalk y) _ _ _
+      (val_compat_of_inverse f (CategoryTheory.inv f.toHom)
+        (IsIso.inv_hom_id f.toHom) (IsIso.hom_inv_id f.toHom) y)
+      (X.val_supp _) (Y.val_supp y)
+  val_compat := fun y =>
+    val_compat_of_inverse f (CategoryTheory.inv f.toHom)
+      (IsIso.inv_hom_id f.toHom) (IsIso.hom_inv_id f.toHom) y
+
+/-- A `𝒱^pre`-morphism whose underlying morphism is invertible is an isomorphism. -/
+noncomputable def VPreHom.asIso : X ≅ Y :=
+  VPreHom.isoOfIsIso f (VPreHom.inv f) rfl
+
+/-- **The forgetful functor `𝒱^pre ⥤ PresheafedSpace` reflects isomorphisms.** -/
+theorem VPreHom.isIso_of_isIso_toHom : IsIso (show X ⟶ Y from f) :=
+  (VPreHom.asIso f).isIso_hom
+
+end Reflects
+
+
 
 
 /-- The inclusion's stalk map is surjective — it is the inverse of the
