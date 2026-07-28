@@ -3390,7 +3390,26 @@ theorem isAdicSpace_xVObj : IsAdicSpace (xVObj p F ϖ)
   P5-A3 + the fact that an open immersion onto its image is an iso onto the restriction;
   record that as a follow-up once P5-A3 lands.
 
-### [CLEANUP-P5] /cleanup on Adic spaces/SpaVIso.lean and VRestrict.lean
+### [CLEANUP-P5] /cleanup on the Campaign 9 files — DONE 2026-07-28
+- **Status**: DONE. Ran on all nine campaign files (AdicSpaceV, VRestrict, CurveVMorphism,
+  CurveQuotientLeg, CurveVChart, CurveYSlice, CurveAdicSpace, CurveChartVIso,
+  CurveIsAdicSpace). Baseline green; every file ends 0 diagnostics; `lake build` green;
+  `isAdicSpace_xVObj` still axiom-clean.
+- **Punch-list found and actioned**: module docstring refreshed (VRestrict's still described
+  only P5-1); imports reordered Mathlib-first (VRestrict, CurveYSlice); 34 `haveI`/`letI` →
+  `have`; docstrings added to all 25 undocumented declarations; `chartToY` extracted from
+  `exists_windowSubOpen_nbhd` (62 → 43-line body, and it collapses a 3× repeated lambda);
+  **mathlib dedup**: `maximalIdeal_comap_of_ringEquiv` / `maximalIdeal_comap_ringEquiv` were
+  byte-identical hand-rolled proofs of mathlib's `IsLocalRing.maximalIdeal_comap` (via
+  `isLocalHom_equiv`) — both replaced by the 5-line derivation.
+- **Gates all pass file-wide**: 0 forbidden name patterns, 0 `≥`/`>` in Lean signatures,
+  0 lines over 100 codepoints, 0 bodies over 60 lines, 0 `sorry`, 0 heartbeat raises.
+- **Buzz**: no declaration over the 1000ms budget; two mild tactic hits (1.1s `exact`,
+  1.3s `rewriteSeq`) inside the P5-5c continuity proofs, left as within tolerance.
+- **FLAGGED, not done** (needs a coordinator cross-file move): the two `maximalIdeal`
+  wrappers still exist under two names in `VRestrict.lean` and `FarguesFontaine/YStalks.lean`,
+  which do not import each other. Deduping to one needs a common-ancestor move into
+  `StructureSheaf.lean` — a structural change to a foundational non-campaign file.
 - **Status**: blocked | **Depends on**: P5-6 | **Type**: cleanup
 - Cadence rule: SpaVIso.lean has taken 14 proof tickets (K1–K14) with no cleanup;
   VRestrict.lean 4 (P5-1, K8a, K8b, P5-A). Two cleanups are overdue.
