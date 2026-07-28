@@ -2854,7 +2854,12 @@ Consulted on the whole remaining arc. Three substantive findings, two citation f
   should be re-expressed as `PresheafedSpace.IsOpenImmersion f.toHom` in cleanup.
 
 ### [P5-A2] The corestricted stalk map factors through the restriction comparison
-- **Status**: open | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A (done)
+- **Status**: SUPERSEDED 2026-07-28 by `spaCompIsoRestrict` (mathlib's
+  `IsOpenImmersion.isoRestrict` at `spaCompHom_isOpenImmersion` gives the
+  presheafed-space iso onto the restriction directly). Keep the hand-rolled
+  `corestrictHom` (P5-A) — it is still the right tool when the target open is
+  LARGER than the range (e.g. corestricting into `𝒴` rather than onto the image).
+  Original status: open | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A (done)
 - **Type**: theorem
 - **Statement**:
 ```lean
