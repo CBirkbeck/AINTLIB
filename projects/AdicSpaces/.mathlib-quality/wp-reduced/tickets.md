@@ -42,7 +42,13 @@ propext/Classical.choice/Quot.sound) before marking done.
   (quotes in paper-extraction §6.1/§6.4).  Generality: arbitrary `w : ℕ → ℕ`.
 
 ### [W2] RestrictedComplete.lean — infinite-σ analytic base
-- Status: open | File: WP/RestrictedComplete.lean | Depends: none | Parallel: yes
+- Status: done (2026-07-28; all 8 sorries filled + helpers `prod_one_weights`/
+  `prod_weights_pos`; the ~110-line completeness port ran exactly per the recipe;
+  build green incl. full WP tree; axioms clean ×3; cleanup deferred to CLEANUP-1)
+- Progress: 2026-07-28: gotchas — `IsRestrictedGauss` is a def (no equation rewrites:
+  use `show`/typed `have` with the Tendsto form); IsAbsoluteValue field is `abv_mul'`
+  (primed); `lipschitzWith_iff_dist_le_mul` + `NNReal.coe_one`; `MvPowerSeries.mk`
+  not needed — the series IS the coefficient function.
 - Decls: `isCompleteSpace_general`, `normOneClass_one`, `norm_coeff_le_one_norm`,
   `lipschitzWith_coeff`, `continuous_coeff`, `finite_setOf_le_norm_coeff`,
   `isClosed_setOf_coeff_eq_zero`, `norm_restricted_mul_general`.
