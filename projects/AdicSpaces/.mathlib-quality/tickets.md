@@ -2932,6 +2932,62 @@ theorem ringStalkMap_corestrictHom {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶
   injective) and `comap_vle`/`comap_comp` already exist in `ValuationSpectrum.lean`.
  | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A2 (bypassed)
 
+### [P5-5a] `piYVPreHom` — the projection `π : 𝒴 → X` is a morphism of 𝒱^pre
+- **Status**: DONE 2026-07-28 — axiom-clean, `lake build '«Adic spaces»'` green
+- **File**: NEW `Adic spaces/FarguesFontaine/CurveVMorphism.lean` (a new file, not
+  `CurveObject.lean`, because the packaging needs `isLocalHom_of_val_comap` from
+  `VRestrict.lean` and `CurveObject` must not grow that import).
+- **Why it was not formal** (review finding (3)): `xVPreObj.val x` is DEFINED through
+  `fiberPoint x`, so `π` being a 𝒱-morphism needs `v_{π y} = comap (π♯_y) v_y` for EVERY
+  `y` — i.e. independence of the fiber-point choice.
+- **Landed chain**:
+  - `limitFrobHom_eq_limitRestrict_succ/_pred/_pred'/_of_one` + `frobFixed_zpow` — a
+    `φ`-invariant section is invariant under EVERY integral power (`frobFixed` records only
+    the generator). Stated generally for any totally Frobenius-stable ambient open
+    (`hstab : ∀ k, frobOpens p F k U = U`); definitional proof irrelevance on the `≤`
+    arguments discharges most of the bookkeeping (the predecessor case closes by `rfl`).
+  - `exists_yFrob_eq_of_yTopToCurve_eq` — two points of a fiber differ by `φ^k`
+    (`MulAction.orbitRel_apply.mp (Quotient.eq''.mp h)` + `yTopToY_yFrobTop` +
+    `yTopToY_bijective`).
+  - `mem_curvePreimage_yFrob`, `xStalkEquiv_germ` — the latter via
+    `germ_stalkSpecializes_apply` with the specialization `(Inseparable.of_eq …).ge`
+    passed EXPLICITLY (it is not inferable), then `ringStalkMap_piYHom_germ`.
+  - `yLimitFrobHom_piComponent`, `ringStalkMap_yFrob_piYHom_germ` — move the germ back
+    from `(Opens.map (yFrobTop k)).obj (curvePreimage V)` to `curvePreimage V` with
+    `yGerm_limitRestrict`, NOT by rewriting the open (that moves the type).
+  - `piY_val_compat_aux`, `piY_val_compat`, `piYVPreHom`.
+- **THE TYPE-SPELLING LESSON (cost two build cycles)**: `piY_val_compat_aux` must take the
+  comparison as a bare `RingHom` `φ`, NOT a `RingEquiv` with an `(e : _ →+* _)` ascription.
+  The metavariable in `_ →+* _` gets solved from the goal in the `ringPresheaf.stalk
+  (ConcreteCategory.hom f.base y)` spelling and then refuses to accept the equiv, which is
+  stated in the `ringStalk (yTopToCurve y)` spelling. Nothing in the proof uses the equiv
+  structure. Same reason `mem_curvePreimage_yFrob` is a separate lemma: inside the proof
+  `V : Opens ↑↑(curveSpace p F ϖ)`, so an inline `show … ∈ (V : Set (Curve p F ϖ))` fails.
+- **Abstraction trick**: `fiberPoint x` cannot be `subst`ed (it occurs only in the TYPE of
+  `xStalkEquiv x`, not in the term), so the aux lemma abstracts the comparison as `(φ, hφ)`
+  — a hom plus its germ formula — and `subst`s the *variable* `y₀` instead.
+
+### [P5-5b] The quotient leg morphism — FREE from P5-A3
+- **Status**: open | **Depends on**: P5-5a
+- `VPreHom.corestrict (piYVPreHom.comp (VPreHom.ofRestrictOpen V)) (xImage V) hrange`
+  is exactly `VPreHom (yVPreObj.restrictOpen V) (xVPreObj.restrictOpen (xImage V))`.
+  Range condition: `π '' V = xImage V` by definition of `xImage`.
+
+### [P5-5c] The section comparison is an iso **with continuous inverse**
+- **Status**: open | **Depends on**: P5-5b | **THE analytic core of P5-5**
+- Review finding (3), second half: the section bijection is NOT automatically a
+  homeomorphism. `𝒪_X(π U) = frobFixed (xImage U)` → `𝒪_𝒴(U)` is
+  `limitRestrict ∘ subtype`; bijectivity is already proven
+  (`invariant_sections_eq_of_zero_piece` + `exists_glue_extending`/`glue_invariant`).
+- **THE TOOL for the inverse's continuity**: `IsLimitSheafOn` has an **`isEmbedding`
+  field** — `Topology.IsEmbedding (limitRestrictProd hle)` — so `limitSections B` carries
+  the topology induced by restriction to the pieces `B_k := φ^k U`. The inverse
+  `s ↦ glue (φ^{-k}·s)_k` therefore has continuous components
+  (`yLimitFrobHom_continuous`), hence is continuous. Use
+  `(isLimitSheafOn_Y p F ϖ).isEmbedding` with the ULift ℤ-indexed cover already used in
+  `invariant_sections_eq_of_zero_piece`.
+- ⚠ Do NOT reach for an open-mapping-theorem argument; the review explicitly rejects it.
+
 ### [P5-5] The quotient leg: `𝒴|_V ≅ X|_{π V}` for wandering `V`
 - **Status**: blocked | **File**: `Adic spaces/FarguesFontaine/CurveObject.lean` (new section)
 - **Depends on**: P5-A3
