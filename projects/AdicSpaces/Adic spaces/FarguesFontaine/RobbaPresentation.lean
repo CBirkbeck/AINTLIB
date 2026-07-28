@@ -6513,6 +6513,66 @@ theorem isIntegral_monomial_of_le_one
 
 end MonomialRoutes
 
+section ConstRoute
+
+variable {σ₁ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+variable (hφb : ∀ x : Bloc p F ϖ,
+  ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+    : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+    : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
+
+include hφb in
+/-- **The constant lift of a ρ-ball element** (T910-M M2b-3ii support): any
+`Bloc`-element inside the ρ-interval ball has its σ-image in the image
+ball, via the constant series. -/
+theorem blocToBI_mem_evalBallSubring_of_wI_le
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (w : Bloc p F ϖ)
+    (hw : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 w
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ 1) :
+    blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 w
+      ∈ evalBallSubring p F ϖ φ hφ hbmem hb := by
+  refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 0)
+      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 w),
+    isRestricted_monomial_BI p F ϖ _⟩, ?_, ?_⟩
+  · show wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 _ ≤ 1
+    rw [show ((⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 0)
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 w),
+        isRestricted_monomial_BI p F ϖ _⟩
+        : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 0)
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 w) from rfl]
+    rw [wIRPS_monomial p F ϖ]
+    exact hw
+  · refine Subtype.ext ?_
+    show evalBI p F ϖ φ hφ hbmem hb _
+      = ((blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 w
+        : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+    have h0 := evalBI_monomial p F ϖ φ hφ hbmem hb 0
+      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 w)
+      (isRestricted_monomial_BI p F ϖ _)
+    rw [h0, pow_zero, mul_one, hφb]
+    rfl
+
+end ConstRoute
+
 end FarguesFontaine
 
 end
