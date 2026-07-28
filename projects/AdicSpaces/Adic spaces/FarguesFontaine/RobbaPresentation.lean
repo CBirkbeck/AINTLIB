@@ -6117,6 +6117,96 @@ theorem exists_evalBI_pow_mem_image_of_le
     rw [mul_comm]
     exact hfact.symm
 
+section CorrectionW
+
+variable {σ₁ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+variable (hφb : ∀ x : Bloc p F ϖ,
+  ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+    : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+    : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
+
+include hφb in
+/-- **`W`-scaled strict surjectivity** (T910-M M2a support): elements of the
+`W`-ball are values of series of norm at most `K·W`. -/
+theorem exists_evalBI_eq_of_le
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m₀)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀))
+    {z : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    {W : NNReal} (hW0 : 0 < W) (hW1 : W ≤ 1)
+    (hzle : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 z ≤ W) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      evalBI p F ϖ φ hφ hbmem hb U = z
+      ∧ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) * W := by
+  have hK1 : (1 : NNReal) ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
+    calc (1 : NNReal) = ρ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
+        (mul_inv_cancel₀ (pow_pos hρ₁0 m₀).ne').symm
+      _ ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hρσ m₀) _
+  obtain ⟨u, hCbnd, hres⟩ := exists_correction_sequence_BI p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz hW0 hW1 hzle
+  exact exists_evalBI_eq_of_correction_BI p F ϖ
+    φ hφ hbmem hb z hK1 hW0 u hCbnd hres
+
+include hφb in
+/-- **The small ball lies in the image of the unit ball** (T910-M M2a): an
+element of `σ₁`-interval norm at most `K⁻¹ = ρ₁^{m₀}/σ₁^{m₀}` is the value
+of a series of norm at most `1`. -/
+theorem exists_evalBI_eq_of_le_inv
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m₀)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀))
+    {z : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hzle : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 z
+      ≤ ρ₁ ^ m₀ * ((σ₁ ^ m₀)⁻¹)) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      evalBI p F ϖ φ hφ hbmem hb U = z
+      ∧ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ 1 := by
+  have hW0 : (0 : NNReal) < ρ₁ ^ m₀ * ((σ₁ ^ m₀)⁻¹) :=
+    mul_pos (pow_pos hρ₁0 m₀) (inv_pos.mpr (pow_pos hσ₁0 m₀))
+  have hW1 : ρ₁ ^ m₀ * ((σ₁ ^ m₀)⁻¹) ≤ 1 := by
+    calc ρ₁ ^ m₀ * ((σ₁ ^ m₀)⁻¹) ≤ σ₁ ^ m₀ * ((σ₁ ^ m₀)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hρσ m₀) _
+      _ = 1 := mul_inv_cancel₀ (pow_pos hσ₁0 m₀).ne'
+  obtain ⟨U, hUeq, hUnorm⟩ := exists_evalBI_eq_of_le p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz hW0 hW1 hzle
+  refine ⟨U, hUeq, le_trans hUnorm (le_of_eq ?_)⟩
+  calc σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) * (ρ₁ ^ m₀ * ((σ₁ ^ m₀)⁻¹))
+      = (σ₁ ^ m₀ * ((σ₁ ^ m₀)⁻¹)) * (ρ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹)) := by ring
+    _ = 1 := by
+        rw [mul_inv_cancel₀ (pow_pos hσ₁0 m₀).ne',
+          mul_inv_cancel₀ (pow_pos hρ₁0 m₀).ne', mul_one]
+
+end CorrectionW
+
 end FarguesFontaine
 
 end
