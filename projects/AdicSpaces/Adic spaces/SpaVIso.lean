@@ -37,6 +37,20 @@ universe u
 
 namespace ValuationSpectrum
 
+/-- **An open immersion in `𝒱^pre`**: the base is an open embedding and the
+section maps are isomorphisms over opens of the image. This is the
+"locally isomorphic to" relation of Wedhorn Definition 8.22, in the form
+that the affinoid charts naturally produce. -/
+structure IsOpenImmersionV {X Y : VPreObj.{u}} (f : VPreHom X Y) : Prop where
+  /-- The base map is an open embedding. -/
+  base_isOpenEmbedding :
+    Topology.IsOpenEmbedding (ConcreteCategory.hom f.toHom.base)
+  /-- The section comparison is bijective over opens contained in the image. -/
+  c_bijective : ∀ U : Opens ↥(Y.toTopCat),
+    (U : Set ↥(Y.toTopCat))
+      ⊆ Set.range (ConcreteCategory.hom f.toHom.base) →
+    Function.Bijective (f.toHom.c.app (op U)).1
+
 namespace SpaVIso
 
 /-- The inverse of a bijective ring hom is any two-sided-inverse ring hom. -/
@@ -1307,6 +1321,58 @@ noncomputable def spaCompVPreHom [DecidableEq A]
       (hsupp (shadow D₀ w))
       (maximalIdeal_stalk_eq_supp (stalkShrink_tate w)).symm
   val_compat := fun w => comap_ringStalkMap_spaCompHom_stalkValue D₀ u hu w
+
+theorem range_shadow (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
+    Set.range (shadow D₀ (A := A)) = (spaOpens D₀ : Set ↥(Spa A A⁺)) := by
+  refine Set.ext fun v => ?_
+  constructor
+  · rintro ⟨w, rfl⟩
+    exact (comap_canonicalMap_mem_rationalOpen_inter_spa D₀ w).1
+  · intro hv
+    exact ⟨(baseHomeo D₀ u hu).symm ⟨v, hv⟩,
+      congrArg Subtype.val ((baseHomeo D₀ u hu).apply_symm_apply ⟨v, hv⟩)⟩
+
+theorem shadow_isOpenEmbedding [DecidableEq A] (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
+    Topology.IsOpenEmbedding (shadow D₀ (A := A)) := by
+  refine Topology.IsOpenEmbedding.of_continuous_injective_isOpenMap ?_ ?_ ?_
+  · exact (baseHomeo D₀ u hu).continuous.subtype_val
+  · exact shadow_injective D₀ u hu
+  · exact shadow_isOpenMap D₀ u hu
+
+/-- An open contained in the rational subset is its own trace. -/
+theorem inf_eq_self_of_le {U : Opens ↥(Spa A A⁺)} (h : U ≤ spaOpens D₀) :
+    U ⊓ spaOpens D₀ = U :=
+  inf_eq_left.mpr h
+
+/-- Restriction along an equality of opens is bijective. -/
+theorem limitRestrict_bijective_of_eq {R : Type u} [CommRing R]
+    [TopologicalSpace R] [PlusSubring R] [IsHuberRing R]
+    [HasLocLiftPowerBounded R] {U V : Opens ↥(Spa R R⁺)} (h : V = U)
+    (hle : V ≤ U) : Function.Bijective (limitRestrict hle) := by
+  subst h
+  refine ⟨fun x y hxy => ?_, fun y => ⟨y, ?_⟩⟩
+  · exact Subtype.ext (funext fun i => congrFun (congrArg Subtype.val hxy) i)
+  · exact Subtype.ext (funext fun i => rfl)
+
+/-- **The comparison is an open immersion in `𝒱^pre`** (P5-K14): the
+Wedhorn-8.22 chart condition in the form the affinoid charts produce. -/
+theorem spaCompVPreHom_isOpenImmersion [DecidableEq A]
+    (hloc : ∀ v : ↥(Spa A A⁺), IsLocalRing (ToType ((spaRingPresheaf A).stalk v)))
+    (hsupp : ∀ v : ↥(Spa A A⁺),
+      (stalkValue v).supp = @IsLocalRing.maximalIdeal _ _ (hloc v)) :
+    IsOpenImmersionV (spaCompVPreHom D₀ u hu hloc hsupp) where
+  base_isOpenEmbedding := shadow_isOpenEmbedding D₀ u hu
+  c_bijective := fun U hU => by
+    have hUle : U ≤ spaOpens D₀ := fun v hv =>
+      (Set.ext_iff.mp (range_shadow D₀ u hu) v).mp (hU hv)
+    have hbij : Function.Bijective
+        (phiEquiv D₀ (inf_le_right : U ⊓ spaOpens D₀ ≤ spaOpens D₀)
+          (shadowPre_paired D₀ u hu U)).symm.toRingHom :=
+      (phiEquiv D₀ _ (shadowPre_paired D₀ u hu U)).symm.bijective
+    exact hbij.comp (limitRestrict_bijective_of_eq
+      (inf_eq_self_of_le D₀ hUle) inf_le_left)
 
 end Assembly
 
