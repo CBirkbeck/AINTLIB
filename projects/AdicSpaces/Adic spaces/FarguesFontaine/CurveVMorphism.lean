@@ -334,6 +334,208 @@ noncomputable def quotientLegVPreHom (V : Opens ↥(yTop p F ϖ)) :
   ValuationSpectrum.VPreHom.corestrict (yRestrictToCurve p F ϖ V)
     (xImage p F ϖ V) (range_yRestrictToCurve p F ϖ V)
 
+
+/-! ### The section comparison of the quotient leg (P5-5c)
+
+For a *wandering* open `W` of `𝒴` — all `φ^k W` disjoint from `W` for `k ≠ 0` —
+restriction identifies the `φ`-invariant sections over `xImage W` with the
+plain sections over `W`.  Bijectivity is the already-proven separation and
+gluing; what needs an argument is that the inverse is **continuous**: a
+continuous bijective ring hom need not be a topological isomorphism.  The tool
+is the `isEmbedding` field of `IsLimitSheafOn`, which says the saturation's
+topology is induced by restriction to the translates — and each translate
+component of the glue is a Frobenius transport, hence continuous. -/
+
+/-- An open sits inside the saturated preimage of its image. -/
+theorem le_curvePreimage_xImage (W : Opens ↥(yTop p F ϖ)) :
+    W ≤ curvePreimage p F ϖ (xImage p F ϖ W) :=
+  fun y hy => ⟨y, hy, rfl⟩
+
+/-- The `yFunctor`-image form of the previous inclusion. -/
+theorem yFunctor_le_curvePreimage_xImage (W : Opens ↥(yTop p F ϖ)) :
+    (yFunctor p F ϖ).obj W
+      ≤ (yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W)) :=
+  leOfHom ((yFunctor p F ϖ).map (homOfLE (le_curvePreimage_xImage p F ϖ W)))
+
+/-- **The section comparison of the quotient leg**: an invariant section over
+`xImage W` restricted to `W`. -/
+noncomputable def curveSectionRestrict (W : Opens ↥(yTop p F ϖ)) :
+    ↥(frobFixed p F ϖ (xImage p F ϖ W))
+      →+* ↥(limitSections ((yFunctor p F ϖ).obj W)) :=
+  (limitRestrict (yFunctor_le_curvePreimage_xImage p F ϖ W)).comp
+    (frobFixed p F ϖ (xImage p F ϖ W)).subtype
+
+theorem curveSectionRestrict_continuous (W : Opens ↥(yTop p F ϖ)) :
+    Continuous (curveSectionRestrict p F ϖ W) :=
+  (limitRestrict_continuous _).comp continuous_subtype_val
+
+/-- The zero translate factors through `W`. -/
+theorem translate_zero_le_W (W : Opens ↥(yTop p F ϖ)) :
+    (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ 0)).obj W)
+      ≤ (yFunctor p F ϖ).obj W :=
+  yFunctor_translate_zero_le p F ϖ W
+
+/-- Restricting to `W` and then to the zero translate is restricting to the
+zero translate. -/
+theorem restrict_zero_factor (W : Opens ↥(yTop p F ϖ))
+    (g : ↥(limitSections ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W))))) :
+    limitRestrict (yFunctor_translate_le p F ϖ W 0) g
+      = limitRestrict (translate_zero_le_W p F ϖ W)
+          (limitRestrict (yFunctor_le_curvePreimage_xImage p F ϖ W) g) :=
+  (congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (translate_zero_le_W p F ϖ W)
+    (yFunctor_le_curvePreimage_xImage p F ϖ W))) g).symm
+
+/-- Restriction along the zero-translate equality is injective. -/
+theorem restrict_zero_injective (W : Opens ↥(yTop p F ϖ)) :
+    Function.Injective (limitRestrict (translate_zero_le_W p F ϖ W)) := by
+  intro a b h
+  have hcomp := fun z => congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (congrArg (yFunctor p F ϖ).obj
+      (map_yFrobTop_zero p F ϖ W)).symm)
+    (translate_zero_le_W p F ϖ W))) z
+  have hid := fun z => congr_fun (congrArg DFunLike.coe
+    (limitRestrict_id ((yFunctor p F ϖ).obj W))) z
+  have h2 := congrArg (limitRestrict (le_of_eq (congrArg (yFunctor p F ϖ).obj
+    (map_yFrobTop_zero p F ϖ W)).symm)) h
+  calc a = limitRestrict (le_of_eq (congrArg (yFunctor p F ϖ).obj
+          (map_yFrobTop_zero p F ϖ W)).symm)
+        (limitRestrict (translate_zero_le_W p F ϖ W) a) :=
+        ((hcomp a).trans (hid a)).symm
+    _ = limitRestrict (le_of_eq (congrArg (yFunctor p F ϖ).obj
+          (map_yFrobTop_zero p F ϖ W)).symm)
+        (limitRestrict (translate_zero_le_W p F ϖ W) b) := h2
+    _ = b := (hcomp b).trans (hid b)
+
+/-- **Injectivity of the section comparison** for a wandering open. -/
+theorem curveSectionRestrict_injective (W : Opens ↥(yTop p F ϖ))
+    (hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))) :
+    Function.Injective (curveSectionRestrict p F ϖ W) := by
+  intro t t' h
+  refine invariant_sections_eq_of_zero_piece p F ϖ W t t' ?_
+  rw [restrict_zero_factor p F ϖ W t.1, restrict_zero_factor p F ϖ W t'.1]
+  exact congrArg _ h
+
+
+variable (W : Opens ↥(yTop p F ϖ))
+  (hdis : ∀ k : ℤ, k ≠ 0 →
+    Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+        : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+      ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)))
+
+/-- The glued extension of a section over a wandering open. -/
+noncomputable def glueInvRaw (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    ↥(limitSections ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))) :=
+  (exists_glue_extending p F ϖ W hdis s).choose
+
+theorem glueInvRaw_pieces (s : ↥(limitSections ((yFunctor p F ϖ).obj W)))
+    (k : ℤ) :
+    limitRestrict (yFunctor_translate_le p F ϖ W k) (glueInvRaw p F ϖ W hdis s)
+      = translateFam p F ϖ W s k :=
+  (exists_glue_extending p F ϖ W hdis s).choose_spec.1 k
+
+theorem glueInvRaw_invariant (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    glueInvRaw p F ϖ W hdis s ∈ frobFixed p F ϖ (xImage p F ϖ W) :=
+  glue_invariant p F ϖ W s _ (glueInvRaw_pieces p F ϖ W hdis s)
+
+/-- The glued extension, as an invariant section. -/
+noncomputable def glueInv (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    ↥(frobFixed p F ϖ (xImage p F ϖ W)) :=
+  ⟨glueInvRaw p F ϖ W hdis s, glueInvRaw_invariant p F ϖ W hdis s⟩
+
+theorem curveSectionRestrict_glueInv
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    curveSectionRestrict p F ϖ W (glueInv p F ϖ W hdis s) = s := by
+  refine restrict_zero_injective p F ϖ W ?_
+  have h0 := glueInvRaw_pieces p F ϖ W hdis s 0
+  rw [translateFam_zero p F ϖ W s] at h0
+  rw [restrict_zero_factor p F ϖ W (glueInvRaw p F ϖ W hdis s)] at h0
+  exact h0
+
+/-- The cover of the saturation by the translates. -/
+theorem saturation_cover :
+    (((yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W)))
+      : Set ↥(SpaTop (Ainf p F)))
+      ⊆ ⋃ m : ULift ℤ, (SetLike.coe ((yFunctor p F ϖ).obj
+          ((Opens.map (yFrobTop p F ϖ m.down)).obj W))) := by
+  intro v hv
+  obtain ⟨y, hy, rfl⟩ := hv
+  rw [show curvePreimage p F ϖ (xImage p F ϖ W)
+      = ⨆ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W from
+    curvePreimage_xImage p F ϖ W] at hy
+  rw [Opens.coe_iSup] at hy
+  obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy
+  exact Set.mem_iUnion.mpr ⟨⟨k⟩, ⟨y, hk, rfl⟩⟩
+
+/-- **The glued extension is continuous** — the sheaf's `isEmbedding` field
+says the saturation's topology is induced by restriction to the translates,
+and each translate-component of the glue is a Frobenius transport. -/
+theorem translateFam_continuous (k : ℤ) :
+    Continuous (fun s : ↥(limitSections ((yFunctor p F ϖ).obj W)) =>
+      translateFam p F ϖ W s k) := by
+  show Continuous (fun s : ↥(limitSections ((yFunctor p F ϖ).obj W)) =>
+    limitRestrict (le_of_eq (yFunctor_frobOpens p F ϖ k W).symm)
+      (limitFrobHom p F k ((yFunctor p F ϖ).obj W) s))
+  exact (limitRestrict_continuous
+      (le_of_eq (yFunctor_frobOpens p F ϖ k W).symm)).comp
+    (limitFrobHom_continuous p F k ((yFunctor p F ϖ).obj W))
+
+theorem glueInvRaw_continuous : Continuous (glueInvRaw p F ϖ W hdis) := by
+  have hcont : Continuous (fun (s : ↥(limitSections ((yFunctor p F ϖ).obj W)))
+      (m : ULift ℤ) => translateFam p F ϖ W s m.down) :=
+    continuous_pi fun m => translateFam_continuous p F ϖ W m.down
+  have hemb := (isLimitSheafOn_Y p F ϖ).isEmbedding
+    (V := (yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W)))
+    (yFunctor_trace p F ϖ _)
+    (ι := ULift ℤ)
+    (U := fun m : ULift ℤ => (yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ m.down)).obj W))
+    (fun m => yFunctor_translate_le p F ϖ W m.down)
+    (saturation_cover p F ϖ W)
+  refine hemb.toIsInducing.continuous_iff.mpr (hcont.congr fun s => ?_)
+  exact (funext fun m : ULift ℤ =>
+    glueInvRaw_pieces p F ϖ W hdis s m.down).symm
+
+theorem glueInv_continuous : Continuous (glueInv p F ϖ W hdis) :=
+  continuous_induced_rng.mpr (glueInvRaw_continuous p F ϖ W hdis)
+
+include hdis in
+/-- **The section comparison of the quotient leg is bijective.** -/
+theorem curveSectionRestrict_bijective :
+    Function.Bijective (curveSectionRestrict p F ϖ W) :=
+  ⟨curveSectionRestrict_injective p F ϖ W hdis,
+    fun s => ⟨glueInv p F ϖ W hdis s,
+      curveSectionRestrict_glueInv p F ϖ W hdis s⟩⟩
+
+include hdis in
+/-- **The section comparison as a ring equivalence.** -/
+noncomputable def curveSectionEquiv :
+    ↥(frobFixed p F ϖ (xImage p F ϖ W))
+      ≃+* ↥(limitSections ((yFunctor p F ϖ).obj W)) :=
+  RingEquiv.ofBijective (curveSectionRestrict p F ϖ W)
+    (curveSectionRestrict_bijective p F ϖ W hdis)
+
+theorem curveSectionEquiv_symm_eq :
+    ((curveSectionEquiv p F ϖ W hdis).symm : _ → _)
+      = glueInv p F ϖ W hdis := by
+  funext s
+  refine (curveSectionEquiv p F ϖ W hdis).injective ?_
+  rw [RingEquiv.apply_symm_apply]
+  exact (curveSectionRestrict_glueInv p F ϖ W hdis s).symm
+
+/-- **The inverse of the section comparison is continuous** — review finding
+(3), second half: the bijection is a homeomorphism, not merely a bijection. -/
+theorem curveSectionEquiv_symm_continuous :
+    Continuous ((curveSectionEquiv p F ϖ W hdis).symm) := by
+  rw [show ((curveSectionEquiv p F ϖ W hdis).symm : _ → _)
+      = glueInv p F ϖ W hdis from curveSectionEquiv_symm_eq p F ϖ W hdis]
+  exact glueInv_continuous p F ϖ W hdis
+
 end FarguesFontaine
 
 end

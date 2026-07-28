@@ -2977,20 +2977,28 @@ theorem ringStalkMap_corestrictHom {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶
   `CurveVMorphism.lean`. NO wandering hypothesis is needed for the MORPHISM — wandering
   only enters when asking for it to be an ISO (P5-5c).
 
-### [P5-5c] The section comparison is an iso **with continuous inverse**
-- **Status**: open | **Depends on**: P5-5b | **THE analytic core of P5-5**
-- Review finding (3), second half: the section bijection is NOT automatically a
-  homeomorphism. `𝒪_X(π U) = frobFixed (xImage U)` → `𝒪_𝒴(U)` is
-  `limitRestrict ∘ subtype`; bijectivity is already proven
-  (`invariant_sections_eq_of_zero_piece` + `exists_glue_extending`/`glue_invariant`).
-- **THE TOOL for the inverse's continuity**: `IsLimitSheafOn` has an **`isEmbedding`
-  field** — `Topology.IsEmbedding (limitRestrictProd hle)` — so `limitSections B` carries
-  the topology induced by restriction to the pieces `B_k := φ^k U`. The inverse
-  `s ↦ glue (φ^{-k}·s)_k` therefore has continuous components
-  (`yLimitFrobHom_continuous`), hence is continuous. Use
-  `(isLimitSheafOn_Y p F ϖ).isEmbedding` with the ULift ℤ-indexed cover already used in
-  `invariant_sections_eq_of_zero_piece`.
-- ⚠ Do NOT reach for an open-mapping-theorem argument; the review explicitly rejects it.
+### [P5-5c] The section comparison is an iso **with continuous inverse** — DONE
+- **Status**: DONE 2026-07-28, axiom-clean, full gate green. THE analytic core of P5-5.
+- **Landed** (`CurveVMorphism.lean`): `le_curvePreimage_xImage`,
+  `yFunctor_le_curvePreimage_xImage`, `curveSectionRestrict` (+`_continuous`),
+  `translate_zero_le_W`, `restrict_zero_factor`, `restrict_zero_injective`,
+  `curveSectionRestrict_injective`, `glueInvRaw` (+`_pieces`, `_invariant`,
+  `_continuous`), `glueInv` (+`_continuous`), `curveSectionRestrict_glueInv`,
+  `saturation_cover`, `translateFam_continuous`, `curveSectionRestrict_bijective`,
+  `curveSectionEquiv`, `curveSectionEquiv_symm_eq`,
+  **`curveSectionEquiv_symm_continuous`**.
+- **THE TOOL, as predicted**: `IsLimitSheafOn.isEmbedding` — the saturation's topology is
+  induced by restriction to the translates — plus `exists_glue_extending`'s FIRST conjunct
+  (`∀ k, restrict_k g = translateFam W s k`), which says every translate-component of the
+  glue is a Frobenius transport of `s` and hence continuous in `s`. No open-mapping
+  theorem anywhere, exactly as the review required.
+- **Two Lean gotchas**:
+  * `include hdis in` must precede the DOCSTRING, not sit between docstring and
+    `theorem` (a section hypothesis used only in the proof body is otherwise dropped).
+  * Stating the continuity witness as an equation between `∘`-composites blows
+    `isDefEq` past 200000 heartbeats. Fix (no heartbeat raise): a separate
+    `translateFam_continuous` with an explicit `show` unfolding `translateFam`, then
+    `Continuous.congr` + `IsInducing.continuous_iff` pointwise.
 
 ### [P5-5] The quotient leg: `𝒴|_V ≅ X|_{π V}` for wandering `V`
 - **Status**: blocked | **File**: `Adic spaces/FarguesFontaine/CurveObject.lean` (new section)
