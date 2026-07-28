@@ -163,6 +163,32 @@ theorem IsAdicSpace.of_iso {X Y : VObj.{u}} (e : X ≅ Y) (h : IsAdicSpace X) :
         (ConcreteCategory.hom f.toHom.base : _ → _)) e.inv_hom_id) y
   · exact (VObj.isoOfVPreIso (VPreHom.restrictIso e.hom U)).symm ≪≫ eC
 
+
+/-! ### Affinoids are adic spaces -/
+
+/-- Restricting to `⊤` changes nothing, at the presheafed-space level. -/
+theorem isIso_ofRestrictOpen_top (X : VPreObj.{u}) :
+    IsIso (VPreHom.ofRestrictOpen (X := X) ⊤).toHom :=
+  ⟨X.toPresheafedSpace.toRestrictTop,
+    (AlgebraicGeometry.PresheafedSpace.restrictTopIso
+      X.toPresheafedSpace).hom_inv_id,
+    (AlgebraicGeometry.PresheafedSpace.restrictTopIso
+      X.toPresheafedSpace).inv_hom_id⟩
+
+/-- **Restricting a `𝒱^pre`-object to `⊤` gives an isomorphic object.** -/
+noncomputable def VPreObj.restrictTopIso (X : VPreObj.{u}) :
+    X.restrictOpen ⊤ ≅ X :=
+  letI := isIso_ofRestrictOpen_top X
+  VPreHom.asIso (VPreHom.ofRestrictOpen (X := X) ⊤)
+
+/-- **Restricting a `𝒱`-object to `⊤` gives an isomorphic object.** -/
+noncomputable def VObj.restrictTopIso (X : VObj.{u}) : X.restrictOpen ⊤ ≅ X :=
+  VObj.isoOfVPreIso (VPreObj.restrictTopIso X.toVPreObj)
+
+/-- **An affinoid is an adic space** — the definition is not vacuous. -/
+theorem isAdicSpace_toVObj (C : AffinoidVChart.{u}) : IsAdicSpace C.toVObj :=
+  fun x => ⟨⊤, trivial, C, ⟨VObj.restrictTopIso C.toVObj⟩⟩
+
 end ValuationSpectrum
 
 end
