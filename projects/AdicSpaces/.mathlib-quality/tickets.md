@@ -3106,7 +3106,29 @@ of existing `isoRestrict`s (`spaCompIsoRestrict` applies over `A_inf` thanks to 
 plus `restrictRestrictIso` / `restrictIsoOfIso` / `VPreHom.asIso`, NOT the dense-extension
 development the old P5-3/P5-4 sketches describe.
 
-### [P5-6d] The 𝒴-side chart as a 𝒱-isomorphism — THE LAST STEP (analysis 2026-07-28)
+### [P5-6d(i)] The 𝒴-side chart as a PRESHEAFED-SPACE iso — DONE 2026-07-28
+- **File**: NEW `Adic spaces/FarguesFontaine/CurveYSlice.lean`, axiom-clean, full gate green.
+- `ySliceIncl` (+`_isOpenImmersion`), `range_ySliceIncl`, `ySliceIso`, `yTrace`,
+  `image_yTrace`, **`ySliceIsoOfSubset`** (builds `V` from the range, so `hrange` holds by
+  construction), then the FF instantiation `windowSubCompHom` (+`_isOpenImmersion`),
+  `shadow_windowDatum_mem_ySpaSet`, `range_windowSubCompHom_subset`, `windowSubOpen`,
+  **`windowSubYSliceIso : bSpace D' ≅ 𝒴|_{windowSubOpen}`**.
+- **THE BLOCKER AND THE GENERAL LESSON**: neither mathlib `IsOpenImmersion.ofRestrict` nor
+  `.comp` fires by instance search here. TC unification runs at **reducible** transparency,
+  and `yAmbientPresheafedSpace`, `bSpace`, `spaSpace`, `yPresheafedSpace` are plain `def`s,
+  so e.g. `(yAmbientPresheafedSpace p F).carrier` never reduces to `SpaTop (Ainf p F)` and
+  `spaSpace (A := B_n)` never reduces to `bSpace D₀`. **Apply both instances BY HAND as
+  terms** (`comp (f := …) (H := …) (g := …) (hg := …)`), where elaboration runs at default
+  transparency. (Same root cause as the `toTopCat`-vs-`carrier` failure in
+  `quotientLegIsoRestrictOpen`.)
+- Confirmed by `rfl`: `spaSpace (A := Ainf p F) = yAmbientPresheafedSpace p F` and
+  `bSpace (chartData p F (windowUnif p F ϖ n) 1 1 p 1) = spaSpace (A := windowChartRing p F ϖ n)`.
+  No new FF bookkeeping was needed; the range containment is
+  `comap_canonicalMap_mem_rationalOpen_inter_spa` → `bigWindow_eq_rationalOpen_windowUnif`
+  → `mem_Y_of_mem_bigWindow`.
+
+### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — THE LAST STEP
+
 
 Two halves, and the SECOND is the real one:
 
