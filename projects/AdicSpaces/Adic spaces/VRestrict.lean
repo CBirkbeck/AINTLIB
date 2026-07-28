@@ -22,6 +22,8 @@ This is the `X|_U` operation of Wedhorn Definition 8.22.
 
 open CategoryTheory TopologicalSpace Opposite
 
+open scoped AlgebraicGeometry
+
 noncomputable section
 
 universe u
@@ -220,6 +222,38 @@ noncomputable def VPreObj.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u
     rw [show (Y.val (ConcreteCategory.hom e.hom.base x)).supp
         = @IsLocalRing.maximalIdeal _ _ hY from Y.val_supp _]
     exact (maximalIdeal_comap_of_ringEquiv hX hY (isoStalkRingEquiv e x).symm).symm
+
+/-- The isomorphism is a morphism of `𝒱^pre` onto the transported
+structure. -/
+noncomputable def VPreHom.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u}}
+    (e : X ≅ Y.toPresheafedSpace) :
+    VPreHom (VPreObj.ofIso e) Y where
+  toHom := e.hom
+  isLocalHom_stalkMap := fun x => by
+    haveI hY : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
+        (ConcreteCategory.hom e.hom.base x))) := Y.isLocalRing_stalk _
+    haveI hX : IsLocalRing (ToType (X.ringStalk x)) :=
+      (isoStalkRingEquiv e x).isLocalRing
+    exact @IsLocalHom.of_surjective _ _ _ _ hX.toNontrivial hY
+      ((ringStalkMap e.hom x).hom') (isoStalkRingEquiv e x).surjective
+  val_compat := fun x => by
+    show Y.val (ConcreteCategory.hom e.hom.base x)
+      = comap (ringStalkMap e.hom x).hom'
+        (comap ((isoStalkRingEquiv e x).symm.toRingHom)
+          (Y.val (ConcreteCategory.hom e.hom.base x)))
+    have h2 := congr_fun (comap_comp ((ringStalkMap e.hom x).hom')
+      ((isoStalkRingEquiv e x).symm.toRingHom))
+      (Y.val (ConcreteCategory.hom e.hom.base x))
+    have hcomp : ((isoStalkRingEquiv e x).symm.toRingHom).comp
+        (ringStalkMap e.hom x).hom' = RingHom.id _ :=
+      RingHom.ext fun z => (isoStalkRingEquiv e x).symm_apply_apply z
+    refine Eq.trans ?_ h2.symm
+    show Y.val (ConcreteCategory.hom e.hom.base x)
+      = comap (((isoStalkRingEquiv e x).symm.toRingHom).comp
+          (ringStalkMap e.hom x).hom')
+        (Y.val (ConcreteCategory.hom e.hom.base x))
+    rw [hcomp]
+    exact (congr_fun comap_id _).symm
 
 end ValuationSpectrum
 
