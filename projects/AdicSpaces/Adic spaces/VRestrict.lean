@@ -179,6 +179,48 @@ noncomputable def VObj.restrictOpen (X : VObj.{u}) (U : Opens ↥(X.toTopCat)) :
   isSheafTopRings := isSheafOfTopologicalRings_restrict X.toVPreObj U
     X.isSheafTopRings
 
+/-! ### Transport of a `𝒱^pre`-structure along an isomorphism of presheafed
+spaces (Campaign 9, P5-K8) -/
+
+/-- The ring stalk map of an isomorphism of presheafed spaces is an
+isomorphism. -/
+instance isIso_ringStalkMap {X Y : TopRingPresheafedSpace.{u}} (α : X ⟶ Y)
+    [IsIso α] (x : X) : IsIso (ringStalkMap α x) := by
+  haveI : IsIso (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map α) :=
+    Functor.map_isIso _ α
+  exact (show IsIso ((CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map
+    α).stalkMap x) from AlgebraicGeometry.PresheafedSpace.stalkMap.isIso
+      (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map α) x)
+
+/-- The stalk comparison of an isomorphism, as a ring equivalence. -/
+noncomputable def isoStalkRingEquiv {X Y : TopRingPresheafedSpace.{u}}
+    (e : X ≅ Y) (x : X) :
+    ToType (Y.ringStalk (ConcreteCategory.hom e.hom.base x))
+      ≃+* ToType (X.ringStalk x) :=
+  (asIso (ringStalkMap e.hom x)).commRingCatIsoToRingEquiv
+
+/-- **Transport of a `𝒱^pre`-structure along an isomorphism** (P5-K8): a
+presheafed space isomorphic to a `𝒱^pre`-object is one, with the stalk
+package pulled back along the stalk comparisons. -/
+noncomputable def VPreObj.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u}}
+    (e : X ≅ Y.toPresheafedSpace) : VPreObj.{u} where
+  toPresheafedSpace := X
+  isLocalRing_stalk := fun x => by
+    haveI : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
+        (ConcreteCategory.hom e.hom.base x))) := Y.isLocalRing_stalk _
+    exact (isoStalkRingEquiv e x).isLocalRing
+  val := fun x => comap ((isoStalkRingEquiv e x).symm : _ →+* _)
+    (Y.val (ConcreteCategory.hom e.hom.base x))
+  val_supp := fun x => by
+    haveI hY : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
+        (ConcreteCategory.hom e.hom.base x))) := Y.isLocalRing_stalk _
+    haveI hX : IsLocalRing (ToType (X.ringStalk x)) := by
+      exact (isoStalkRingEquiv e x).isLocalRing
+    rw [supp_comap]
+    rw [show (Y.val (ConcreteCategory.hom e.hom.base x)).supp
+        = @IsLocalRing.maximalIdeal _ _ hY from Y.val_supp _]
+    exact (maximalIdeal_comap_of_ringEquiv hX hY (isoStalkRingEquiv e x).symm).symm
+
 end ValuationSpectrum
 
 end
