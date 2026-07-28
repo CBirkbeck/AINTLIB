@@ -2608,7 +2608,26 @@ valuations.
 - **K8b DONE** (VRestrict.lean): `VPreHom.ofIso` — the transported iso IS a
   𝒱^pre-morphism (isLocalHom from surjectivity of the stalk comparison;
   val_compat by comap_comp against the transported valuation's definition).
-- ★ **THE PRECISE REMAINING GAP (identified 2026-07-28, read this first)**:
+- **K9 DONE** (SpaVIso.lean): `pieceEquiv_canonicalMap` +
+  `comap_pieceEquiv_pointValue` — the comparison intertwines the POINT
+  valuations. This is the core of the val-agreement: the B-side point value
+  of the image datum pulls back along `pieceEquiv` to the A-side point value
+  of `E` (`eq_pointValue_of_comap_eq`: both continuous, both pulling back
+  along `E.canonicalMap` to the same `Spa A` point).
+- ★ **WHAT IS LEFT (2026-07-28, exact)**: lift `comap_pieceEquiv_pointValue`
+  from POINT values to STALK values. `stalkValue` is characterised by
+  `comap_germ_stalkValue : comap (germ U v hvU) (stalkValue v) = openValue U
+  hvU` (StructureSheafStalks ~830), and `openValue` is the limit of
+  `pointValue`s over rational indices. So: (1) show the stalk comparison
+  induced by `spaRestrictIso` intertwines germs (naturality of `germ` under
+  the presheaf iso — mathlib `stalkMap_germ`); (2) conclude
+  `comap (stalkIso) (stalkValue_B w) = stalkValue_A (shadow w)` from the
+  germ characterisation plus K9 at each rational index; (3) then
+  `spaRestrictIso` is a 𝒱-iso between `X.restrictOpen U` (P5-1) and
+  `spaVObjTate B` (P5-2) — no transport needed.
+  THEN P5-5 (quotient leg X|_{π V} ≅ 𝒴|_V) and P5-6 (`IsAdicSpace` +
+  `isAdicSpace_xVObj`).
+- ★ **HISTORICAL — the gap as first identified**:
   `VPreObj.ofIso` transports a valuation *along the iso*, so
   `VPreHom.ofIso` compares the TRANSPORTED structure with the target. For
   `IsAdicSpace` we need the comparison between the two structures that
