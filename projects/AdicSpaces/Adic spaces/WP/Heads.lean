@@ -704,6 +704,223 @@ noncomputable def Ypat (ε : Fin N → Bool) : WPHead K w N :=
       rw [MvPowerSeries.coeff_monomial,
         if_neg (by intro h; subst h; exact hs (headMem_patExp ε))]⟩
 
+/-! #### The parity-slice decomposition ([WP] eq:parity-factorization) -/
+
+variable {N} in
+/-- The parity pattern of an exponent. -/
+noncomputable def patOf (t : ℕ →₀ ℕ) : Fin N → Bool := fun i =>
+  decide (t (i.1 + 1) % 2 = 1)
+
+open scoped Classical in
+variable {K w N} in
+/-- The `ε`-slice of a head element: the even-head series of coefficients at
+`(· + Y^ε-exponent)`. -/
+noncomputable def slice (ε : Fin N → Bool) (f : WPHead K w N) :
+    ↥(wpEvenSupport K w N) := by
+  classical
+  refine ⟨⟨fun u => if EvenHeadMem w N u then
+    MvPowerSeries.coeff (u + patExp w N ε) f.1.1 else 0, ?_⟩, fun u hu => by
+      show (if EvenHeadMem w N u then
+        MvPowerSeries.coeff (u + patExp w N ε) f.1.1 else 0) = 0
+      rw [if_neg hu]⟩
+  show MvPowerSeries.IsRestrictedGauss _ _
+  have hchar : ∀ ε' : ℝ, 0 < ε' → {u : ℕ →₀ ℕ |
+      ε' ≤ ‖(if EvenHeadMem w N u then
+        MvPowerSeries.coeff (u + patExp w N ε) f.1.1 else 0 : K)‖}.Finite := by
+    intro ε' hε'
+    have hfin := finite_setOf_le_norm_coeff (f := f.1) hε'
+    refine (hfin.preimage
+      (Set.injOn_of_injective (add_left_injective (patExp w N ε)))).subset ?_
+    intro u hu
+    rw [Set.mem_setOf_eq] at hu
+    by_cases hmem : EvenHeadMem w N u
+    · rw [if_pos hmem] at hu
+      exact hu
+    · rw [if_neg hmem, norm_zero] at hu
+      exact absurd (hε'.trans_le hu) (lt_irrefl 0)
+  show Filter.Tendsto _ Filter.cofinite (nhds 0)
+  rw [Metric.tendsto_nhds]
+  intro ε' hε'
+  rw [Filter.eventually_cofinite]
+  refine (hchar ε' hε').subset ?_
+  intro u hu
+  rw [Set.mem_setOf_eq] at hu ⊢
+  rw [Real.dist_eq, sub_zero, prod_one_weights, mul_one] at hu
+  rw [abs_of_nonneg (norm_nonneg _)] at hu
+  exact not_lt.mp hu
+
+open scoped Classical in
+variable {K w N} in
+theorem slice_coeff (ε : Fin N → Bool) (f : WPHead K w N) (u : ℕ →₀ ℕ) :
+    MvPowerSeries.coeff u (slice ε f).1.1 =
+      if EvenHeadMem w N u then
+        MvPowerSeries.coeff (u + patExp w N ε) f.1.1 else 0 := rfl
+
+variable {w N} in
+theorem wpWeight_eq_zero_of_even {t : ℕ →₀ ℕ} (h : ∀ n, n ≠ 0 → t n % 2 = 0) :
+    wpWeight w t = 0 := by
+  unfold wpWeight
+  refine Finset.sum_eq_zero fun n _ => ?_
+  rcases eq_or_ne n 0 with rfl | h0
+  · simp
+  · rw [if_neg]
+    rintro ⟨hpar, -⟩
+    have := h n h0
+    omega
+
+variable {w N} in
+/-- On a head exponent, the parity weight is the pattern sum. -/
+theorem wpWeight_head_eq_patSum {t : ℕ →₀ ℕ} (hhead : HeadMem w N t) :
+    wpWeight w t = ∑ i : Fin N, if patOf (N := N) t i then w (i.1 + 1) else 0 := by
+  classical
+  have hsub : t.support ⊆ insert 0 (Finset.univ.image fun i : Fin N => i.1 + 1) := by
+    intro m hm
+    rw [Finsupp.mem_support_iff] at hm
+    rw [Finset.mem_insert]
+    by_cases hm0 : m = 0
+    · exact Or.inl hm0
+    · refine Or.inr (Finset.mem_image.mpr ?_)
+      by_cases hbd : 1 ≤ m ∧ m ≤ N
+      · exact ⟨⟨m - 1, by omega⟩, Finset.mem_univ _, by show m - 1 + 1 = m; omega⟩
+      · exact absurd (hhead.2 m (by omega)) hm
+  rw [wpWeight_eq_sum_subset w hsub, Finset.sum_insert (by
+    rw [Finset.mem_image]
+    rintro ⟨i, -, hi⟩
+    omega)]
+  rw [show (if t 0 % 2 = 1 ∧ (0 : ℕ) ≠ 0 then w 0 else 0) = 0 by simp, zero_add,
+    Finset.sum_image (fun i _ j _ h => Fin.ext (by omega))]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  unfold patOf
+  rcases hb : decide (t (i.1 + 1) % 2 = 1) with _ | _
+  · rw [if_neg (by simpa using of_decide_eq_false hb), if_neg (by simp [hb])]
+  · rw [if_pos ⟨of_decide_eq_true hb, by omega⟩, if_pos (by simp [hb])]
+
+variable {w N} in
+/-- (A) The pattern exponent of a head exponent divides it. -/
+theorem patExp_patOf_le {t : ℕ →₀ ℕ} (hhead : HeadMem w N t) :
+    patExp w N (patOf t) ≤ t := by
+  classical
+  intro n
+  rcases eq_or_ne n 0 with rfl | h0
+  · rw [patExp_apply_zero]
+    exact le_trans (le_of_eq (wpWeight_head_eq_patSum hhead).symm) hhead.1
+  · by_cases hbd : 1 ≤ n ∧ n ≤ N
+    · obtain ⟨i, rfl⟩ : ∃ i : Fin N, i.1 + 1 = n :=
+        ⟨⟨n - 1, by omega⟩, by show n - 1 + 1 = n; omega⟩
+      rw [patExp_apply_succ]
+      unfold patOf
+      rcases hb : decide (t (i.1 + 1) % 2 = 1) with _ | _
+      · simp
+      · rw [if_pos rfl]
+        have := of_decide_eq_true hb
+        omega
+    · rw [patExp_apply_out _ h0 hbd]
+      exact Nat.zero_le _
+
+variable {w N} in
+/-- (B) Subtracting the pattern exponent of a head exponent leaves an even head
+exponent. -/
+theorem evenHeadMem_sub_patExp {t : ℕ →₀ ℕ} (hhead : HeadMem w N t) :
+    EvenHeadMem w N (t - patExp w N (patOf t)) := by
+  classical
+  have heven : ∀ n, n ≠ 0 → (t - patExp w N (patOf t)) n % 2 = 0 := by
+    intro n h0
+    rw [Finsupp.tsub_apply]
+    by_cases hbd : 1 ≤ n ∧ n ≤ N
+    · obtain ⟨i, rfl⟩ : ∃ i : Fin N, i.1 + 1 = n :=
+        ⟨⟨n - 1, by omega⟩, by show n - 1 + 1 = n; omega⟩
+      rw [patExp_apply_succ]
+      unfold patOf
+      rcases hb : decide (t (i.1 + 1) % 2 = 1) with _ | _
+      · have := of_decide_eq_false hb
+        simp only [Bool.false_eq_true, if_false]
+        omega
+      · have := of_decide_eq_true hb
+        simp only [if_true]
+        omega
+    · rw [patExp_apply_out _ h0 hbd]
+      by_cases hN : N < n
+      · rw [hhead.2 n hN]
+      · omega
+  refine ⟨⟨?_, ?_⟩, heven⟩
+  · unfold WPMem
+    rw [wpWeight_eq_zero_of_even heven]
+    exact Nat.zero_le _
+  · intro n hn
+    rw [Finsupp.tsub_apply, hhead.2 n hn]
+    simp
+
+variable {w N} in
+/-- (C) The conditions select a unique pattern. -/
+theorem patOf_eq_of_evenSub {t : ℕ →₀ ℕ} {ε : Fin N → Bool}
+    (hle : patExp w N ε ≤ t) (hev : EvenHeadMem w N (t - patExp w N ε)) :
+    ε = patOf t := by
+  classical
+  funext i
+  have h1 := hev.2 (i.1 + 1) (by omega)
+  rw [Finsupp.tsub_apply, patExp_apply_succ] at h1
+  have h2 := hle (i.1 + 1)
+  rw [patExp_apply_succ] at h2
+  unfold patOf
+  rcases hb : ε i with _ | _ <;> rw [hb] at h1 h2 <;>
+    simp only [Bool.false_eq_true, if_false, if_true] at h1 h2
+  · rw [Nat.sub_zero] at h1
+    exact (decide_eq_false (by omega)).symm
+  · exact (decide_eq_true (by omega)).symm
+
+variable {K w N} in
+/-- **The parity-slice decomposition** ([WP] eq:parity-factorization /
+lem:finite-stage-normal-form): every head element is the sum over the `2^N` parity
+patterns of an even-head slice times the pattern generator. -/
+theorem sum_slice_mul_Ypat (f : WPHead K w N) :
+    (∑ ε : Fin N → Bool,
+      (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)) (slice ε f) *
+        Ypat K w N ε) = f := by
+  classical
+  refine Subtype.ext (Subtype.ext (MvPowerSeries.ext fun t => ?_))
+  let V : WPHead K w N →+* MvPowerSeries ℕ K :=
+    ((MvPowerSeries.isSubring (fun _ : ℕ => (1 : ℝ))).subtype).comp
+      (wpHeadSupport K w N).subtype
+  have hV : ∀ g : WPHead K w N, V g = g.1.1 := fun _ => rfl
+  have hsum : ((∑ ε : Fin N → Bool,
+      (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)) (slice ε f) *
+        Ypat K w N ε : WPHead K w N)).1.1 =
+      ∑ ε : Fin N → Bool, (slice ε f).1.1 *
+        MvPowerSeries.monomial (patExp w N ε) (1 : K) := by
+    rw [← hV, map_sum]
+    refine Finset.sum_congr rfl fun ε _ => ?_
+    rw [map_mul]
+    rfl
+  show MvPowerSeries.coeff t ((∑ ε : Fin N → Bool,
+      (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)) (slice ε f) *
+        Ypat K w N ε : WPHead K w N)).1.1 = MvPowerSeries.coeff t f.1.1
+  rw [hsum, map_sum]
+  have hterm : ∀ ε : Fin N → Bool,
+      MvPowerSeries.coeff t ((slice ε f).1.1 *
+        MvPowerSeries.monomial (patExp w N ε) (1 : K)) =
+      if patExp w N ε ≤ t ∧ EvenHeadMem w N (t - patExp w N ε) then
+        MvPowerSeries.coeff t f.1.1 else 0 := by
+    intro ε
+    rw [MvPowerSeries.coeff_mul_monomial]
+    by_cases hle : patExp w N ε ≤ t
+    · rw [if_pos hle, slice_coeff, mul_one]
+      by_cases hev : EvenHeadMem w N (t - patExp w N ε)
+      · rw [if_pos hev, if_pos ⟨hle, hev⟩, tsub_add_cancel_of_le hle]
+      · rw [if_neg hev, if_neg (fun h => hev h.2)]
+    · rw [if_neg hle, if_neg (fun h => hle h.1)]
+  rw [Finset.sum_congr rfl fun ε _ => hterm ε]
+  rw [Finset.sum_eq_single (patOf t)]
+  · by_cases hhead : HeadMem w N t
+    · rw [if_pos ⟨patExp_patOf_le hhead, evenHeadMem_sub_patExp hhead⟩]
+    · rw [f.2 t hhead]
+      split_ifs <;> rfl
+  · intro ε _ hne
+    rw [if_neg]
+    rintro ⟨hle, hev⟩
+    exact hne (patOf_eq_of_evenSub hle hev)
+  · intro h
+    exact absurd (Finset.mem_univ _) h
+
 /-- The head is a finite module over its even Tate subalgebra — the formal content of
 the rank-`2^N` free normal form [WP] eq:finite-stage-normal-form. -/
 theorem moduleFinite_head_over_even :
