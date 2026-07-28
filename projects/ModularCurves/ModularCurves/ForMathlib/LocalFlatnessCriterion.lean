@@ -55,6 +55,12 @@ merely `R`-flat (not necessarily finite).  This is the form needed to bridge sca
 -/
 import Mathlib
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 open TensorProduct Function
 
 namespace Module.Flat
@@ -506,7 +512,9 @@ theorem coker_of_flat_of_fibre_injective_sModule
       IsLocalHom.of_surjective _ Ideal.Quotient.mk_surjective
     have hbar'' := residueField_fibre_baseChange_injective (I := I) u hbar
     have hinj : Function.Injective ⇑(LinearMap.baseChange (R ⧸ I) u) :=
-      injective_baseChange_of_residueField_fibre_sModule u hbar''
+      -- `S` is not determined by `u` or `hbar''`; pass it explicitly (the `Module.Finite S N`
+      -- instance search used to pin it and no longer does).
+      injective_baseChange_of_residueField_fibre_sModule (S := S) u hbar''
     rwa [LinearMap.baseChange_eq_ltensor] at hinj
 
 end Module.Flat

@@ -24,6 +24,12 @@ The finiteness/flatness of `δ.left` are the isogeny fibre inputs, taken as inst
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace ModularCurves
@@ -86,7 +92,6 @@ theorem endDeg_eq_left_finrank (E : EllipticCurve (Spec (CommRingCat.of k)))
     inferInstanceAs (Subsingleton (PrimeSpectrum k))
   have hpt : (hne.some : ↑(Spec (CommRingCat.of k))) = x₀ := Subsingleton.elim _ _
   simp only [EllipticCurve.endDeg, dif_pos hne, hpt]
-  rfl
 
 /-- **([KEY-KER], `endDeg` form — GH's `hH` second consumer, v10.219)** If a finite-flat endomorphism
 `δ ≠ 1` of `E / Spec k` kills `N` pairwise-distinct points, then `(N : ℤ) ≤ E.endDeg δ`. This is the

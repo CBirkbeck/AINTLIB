@@ -26,6 +26,12 @@ open CategoryTheory Limits TopologicalSpace
 
 namespace AlgebraicGeometry
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 variable {X Y : Scheme.{u}}

@@ -49,6 +49,12 @@ has `γ` binders and mathlib's `Monoidal/Mod.lean` puts a scoped `notation "γ"`
 `MonObj` (the v10.343 clash). Same idiom as `GammaHMaster.lean`. -/
 local notation "η[" M "]" => CategoryTheory.MonObj.one (X := M)
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace ModularCurves

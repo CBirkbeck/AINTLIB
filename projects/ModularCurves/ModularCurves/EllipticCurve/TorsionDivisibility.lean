@@ -35,6 +35,12 @@ open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalC
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace ModularCurves
@@ -67,7 +73,6 @@ theorem sub_one_isInvariant_torsionSubgroup [IsLocallyNoetherian S] (N : ℕ) [N
     apply Over.OverMorphism.ext
     show t.1 ≫ ε.left = t.1
     rw [← hh, Category.assoc, hfix']
-    rfl
   -- `δ` kills `t`
   have htkill : (E.pointEquivOverHom g) t ≫ (ε * (𝟙 E.asOver)⁻¹) = 1 := by
     rw [MonObj.comp_mul, GrpObj.comp_inv, Category.comp_id, htfix, _root_.mul_inv_cancel]
@@ -110,7 +115,6 @@ theorem exists_eq_one_add_mulBy_comp_of_fixesTorsion_of_isIso [IsLocallyNoetheri
     have hfix'' : pullback.fst (E.mulByHom (N : ℕ)) E.zero ≫ ε.left
         = pullback.fst (E.mulByHom (N : ℕ)) E.zero := hfix
     rw [← hw0, Category.assoc, hfix'']
-    rfl
   have hη : η[E.asOver] ≫ ε = η[E.asOver] := by
     apply Over.OverMorphism.ext
     show (η[E.asOver]).left ≫ ε.left = (η[E.asOver]).left

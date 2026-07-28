@@ -23,6 +23,12 @@ Decomposition artifact: `.mathlib-quality/decomposition-nisog-grass.md` ([STREAM
 fable-FP, [GR-F] architecture pin).
 -/
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace Module.Grassmannian
@@ -1024,7 +1030,6 @@ theorem pointOfChartMember_eq (h : IsChartAt (fun i => Pi.single (ι i) (1 : A))
   simp only [Category.assoc]
   erw [← hgc]
   erw [pointOverlap_comp_overlapTransition_assoc]
-  rfl
 
 /-! ### [GR-G-ASM] inverse-direction foundation: the chart covering as a spanning family -/
 

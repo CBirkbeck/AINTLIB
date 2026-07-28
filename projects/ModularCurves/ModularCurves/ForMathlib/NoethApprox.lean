@@ -6,6 +6,14 @@ Authors: AINTLIB ModularCurves project
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-NOETH.
 -/
 import ModularCurves.ForMathlib.FlatLocus
+-- v4.33 bump: these no longer arrive transitively through `FlatLocus`.
+import Mathlib.AlgebraicGeometry.AffineScheme
+import Mathlib.CategoryTheory.Limits.IsLimit
+import Mathlib.CategoryTheory.Limits.Types.Colimits
+import Mathlib.CategoryTheory.ConcreteCategory.Basic
+import Mathlib.RingTheory.TensorProduct.DirectLimitFG
+import Mathlib.AlgebraicGeometry.Morphisms.Affine
+import Mathlib.AlgebraicGeometry.AffineTransitionLimit
 
 /-!
 # Noetherian approximation for finitely-presented algebras
@@ -65,6 +73,11 @@ Grothendieck, *EGA IV*, §8.5 (spreading out finitely-presented algebras) and §
 -/
 
 open TensorProduct MvPolynomial
+
+-- v4.33 bump: the category instances are no longer transparent enough for the rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
 
 universe u
 
