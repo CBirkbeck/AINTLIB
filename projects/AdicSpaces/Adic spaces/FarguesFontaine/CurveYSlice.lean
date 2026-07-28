@@ -2,10 +2,11 @@
 Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import Mathlib.Geometry.RingedSpace.OpenImmersion
+
 import «Adic spaces».FarguesFontaine.CurveAdicPresentation
 import «Adic spaces».SpaVIso
 import «Adic spaces».VRestrict
-import Mathlib.Geometry.RingedSpace.OpenImmersion
 
 /-!
 # The `𝒴`-side leg of the Fargues–Fontaine adic-space capstone
@@ -333,7 +334,7 @@ theorem exists_windowSubOpen_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
   rw [Y_eq_iUnion_bigWindow p F ϖ hp] at hyY
   obtain ⟨n, hbw⟩ := Set.mem_iUnion.mp hyY
   refine ⟨n, ?_⟩
-  haveI : IsHuberRing (windowChartRing p F ϖ n) :=
+  have : IsHuberRing (windowChartRing p F ϖ n) :=
     (isTateRing_bigWindowChart p F (windowUnif p F ϖ n)).toIsHuberRing
   obtain ⟨u, hu⟩ := IsTateRing.exists_topologicallyNilpotent_unit
     (A := windowChartRing p F ϖ n)

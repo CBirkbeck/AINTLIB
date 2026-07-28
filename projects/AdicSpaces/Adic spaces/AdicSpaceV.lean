@@ -73,14 +73,14 @@ the `spaVObjTate` package of P5-2, repackaged as a chart of Definition 8.22. -/
 noncomputable def AffinoidVChart.ofTate (A : Type u) [CommRing A]
     [TopologicalSpace A] [PlusSubring A] [IsTateRing A] [T2Space A]
     [NonarchimedeanRing A] [IsRingOfIntegralElements (A⁺ : Subring A)]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+    [have : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsStronglyNoetherian A] : AffinoidVChart.{u} :=
-  letI : DecidableEq A := Classical.decEq A
-  letI : DecidableEq (RationalLocData A) := Classical.decEq _
-  haveI : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
-  haveI := hasLocLiftPowerBounded_faithful (A := A)
-  haveI : IsSheafy A := isSheafy_of_stronglyNoetherian_828b
+  have : DecidableEq A := Classical.decEq A
+  have : DecidableEq (RationalLocData A) := Classical.decEq _
+  have : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
+  have := hasLocLiftPowerBounded_faithful (A := A)
+  have : IsSheafy A := isSheafy_of_stronglyNoetherian_828b
   { Ring := A
     sheafy := isLimitSheaf_of_isSheafy
     isLocalRing_stalk := fun v => isLocalRing_stalk_of_shrink (stalkShrink_tate v)
@@ -155,7 +155,7 @@ theorem isIso_toHom_of_iso {X Y : VObj.{u}} (e : X ≅ Y) : IsIso e.hom.toHom :=
 /-- **Being an adic space is invariant under isomorphism in `𝒱`.** -/
 theorem IsAdicSpace.of_iso {X Y : VObj.{u}} (e : X ≅ Y) (h : IsAdicSpace X) :
     IsAdicSpace Y := by
-  haveI := isIso_toHom_of_iso e
+  have := isIso_toHom_of_iso e
   intro y
   obtain ⟨U, hxU, C, ⟨eC⟩⟩ :=
     h (ConcreteCategory.hom e.inv.toHom.base y)
@@ -180,7 +180,7 @@ theorem isIso_ofRestrictOpen_top (X : VPreObj.{u}) :
 /-- **Restricting a `𝒱^pre`-object to `⊤` gives an isomorphic object.** -/
 noncomputable def VPreObj.restrictTopIso (X : VPreObj.{u}) :
     X.restrictOpen ⊤ ≅ X :=
-  letI := isIso_ofRestrictOpen_top X
+  have := isIso_ofRestrictOpen_top X
   VPreHom.asIso (VPreHom.ofRestrictOpen (X := X) ⊤)
 
 /-- **Restricting a `𝒱`-object to `⊤` gives an isomorphic object.** -/
@@ -214,7 +214,7 @@ section Tate
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [PlusSubring A]
   [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
   [IsRingOfIntegralElements (A⁺ : Subring A)]
-  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+  [have : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
     CompleteSpace A]
   [IsStronglyNoetherian A]
 

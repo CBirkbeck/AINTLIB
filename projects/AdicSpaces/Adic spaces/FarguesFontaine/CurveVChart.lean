@@ -46,10 +46,10 @@ strongly-noetherian complete Tate ring, so its `Spa` is an object of `𝒱`. -/
 noncomputable def windowSubVChart (n : ℤ)
     (D' : RationalLocData (windowChartRing p F ϖ n)) :
     ValuationSpectrum.AffinoidVChart :=
-  letI : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
-  letI : IsStronglyNoetherian (presheafValue D') :=
+  have : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+  have : IsStronglyNoetherian (presheafValue D') :=
     presheafValue_isStronglyNoetherian_faithful D'
-  letI : @CompleteSpace (presheafValue D')
+  have : @CompleteSpace (presheafValue D')
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D')) :=
     completeSpace_right_presheafValue D'
   ValuationSpectrum.AffinoidVChart.ofTate (presheafValue D')

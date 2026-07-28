@@ -342,7 +342,7 @@ noncomputable def windowSubVPreIso (hp : 1 < p) :
     (ValuationSpectrum.spaVObjTate (A := presheafValue D')).toVPreObj
       ≅ (yVPreObj p F ϖ).restrictOpen
           (windowSubOpen p F ϖ n D' u' hu' u hu) :=
-  letI := isIso_windowSubVPreHom_toHom p F ϖ n D' u' hu' u hu hp
+  have := isIso_windowSubVPreHom_toHom p F ϖ n D' u' hu' u hu hp
   ValuationSpectrum.VPreHom.asIso (windowSubVPreHom p F ϖ n D' u' hu' u hu hp)
 
 /-- **`hviso`** — the last hypothesis of `isAdicSpace_xVObj_of_windowVIso`. -/

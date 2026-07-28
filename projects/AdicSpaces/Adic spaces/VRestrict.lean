@@ -3,23 +3,43 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB AI contributors
 -/
-import «Adic spaces».StructureSheaf
 import Mathlib.Geometry.RingedSpace.OpenImmersion
+
 import «Adic spaces».AdicMorphismsCore
+import «Adic spaces».StructureSheaf
 
 /-!
-# Restriction of `𝒱`-objects to open subsets (Campaign 9, P5-1)
+# Restriction and corestriction in Wedhorn's category `𝒱`
 
-The restriction of a valued (pre)sheafed space to an open subset:
-`VPreObj.restrictOpen` restricts the presheafed space along the open
-inclusion and transports the stalk package (locality, valuation, support)
-along mathlib's `restrictStalkIso`; `VObj.restrictOpen` adds the restricted
-sheaf-of-topological-rings condition (image covers are covers, so the
-ambient `Hom_cont(T, −)`-gluing applies).
+The `X|_U` operation of Wedhorn Definition 8.22 and the morphism-level toolkit
+built on it: restricting a valued (pre)sheafed space to an open subset,
+corestricting a morphism onto an open containing its range, and the transport
+lemmas that turn a presheafed-space isomorphism into a `𝒱`-isomorphism.
 
-This is the `X|_U` operation of Wedhorn Definition 8.22.
+## Main definitions
+
+* `VPreObj.restrictOpen`, `VObj.restrictOpen`: restrict along the open inclusion,
+  transporting the stalk package (locality, valuation, support) along mathlib's
+  `restrictStalkIso`, and — for `VObj` — the sheaf-of-topological-rings condition.
+* `VPreObj.ofIso`, `VPreHom.ofIso`: transport of a `𝒱^pre`-structure along an
+  isomorphism of presheafed spaces.
+* `liftToRestrict`, `VPreHom.corestrict`: corestriction of a morphism whose range
+  lands in an open, at the presheafed-space and `𝒱^pre` levels.
+* `VPreHom.inv`, `VPreHom.asIso`: the inverse of an invertible `𝒱^pre`-morphism.
+
+## Main results
+
+* `VPreHom.isIso_of_isIso_toHom`: the forgetful functor to presheafed spaces
+  reflects isomorphisms, so a `𝒱^pre`-morphism is invertible as soon as its
+  underlying morphism is.
+* `restrictRestrictIso`, `VPreObj.restrictRestrictIso`, `restrictIsoOfIso`,
+  `VPreHom.restrictIso`: restriction is transitive and transports along
+  isomorphisms, at both levels.
+* `VPreObj.isoRestrictOfOpenImmersion`: **the chart step** — an open immersion
+  between `𝒱^pre`-objects that respects the stalk valuations exhibits its source
+  as the restriction of its target to its range. Locality of the stalk maps and
+  invertibility both come for free.
 -/
-
 
 open CategoryTheory TopologicalSpace Opposite
 
@@ -90,7 +110,7 @@ theorem maximalIdeal_comap_of_ringEquiv {R S : Type*} [CommRing R] [CommRing S]
 /-- The stalks of the restriction are local. -/
 theorem isLocalRing_restrictStalk (x : ↥U) :
     IsLocalRing (ToType ((restrictSpace X U).ringStalk x)) := by
-  haveI : IsLocalRing (ToType (X.toPresheafedSpace.ringStalk
+  have : IsLocalRing (ToType (X.toPresheafedSpace.ringStalk
       (restrictPoint X U x))) := X.isLocalRing_stalk (restrictPoint X U x)
   exact (restrictRingStalkEquiv X U x).symm.isLocalRing
 
@@ -103,7 +123,7 @@ noncomputable def VPreObj.restrictOpen : VPreObj where
   val := fun x => comap ((restrictRingStalkEquiv X U x : _ →+* _))
     (X.val (restrictPoint X U x))
   val_supp := fun x => by
-    haveI hAmb : IsLocalRing (ToType (X.toPresheafedSpace.ringStalk
+    have hAmb : IsLocalRing (ToType (X.toPresheafedSpace.ringStalk
         (restrictPoint X U x))) := X.isLocalRing_stalk (restrictPoint X U x)
     rw [supp_comap]
     rw [show (X.val (restrictPoint X U x)).supp
@@ -189,7 +209,7 @@ spaces (Campaign 9, P5-K8) -/
 isomorphism. -/
 instance isIso_ringStalkMap {X Y : TopRingPresheafedSpace.{u}} (α : X ⟶ Y)
     [IsIso α] (x : X) : IsIso (ringStalkMap α x) := by
-  haveI : IsIso (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map α) :=
+  have : IsIso (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map α) :=
     Functor.map_isIso _ α
   exact (show IsIso ((CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map
     α).stalkMap x) from AlgebraicGeometry.PresheafedSpace.stalkMap.isIso
@@ -209,15 +229,15 @@ noncomputable def VPreObj.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u
     (e : X ≅ Y.toPresheafedSpace) : VPreObj.{u} where
   toPresheafedSpace := X
   isLocalRing_stalk := fun x => by
-    haveI : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
+    have : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
         (ConcreteCategory.hom e.hom.base x))) := Y.isLocalRing_stalk _
     exact (isoStalkRingEquiv e x).isLocalRing
   val := fun x => comap ((isoStalkRingEquiv e x).symm : _ →+* _)
     (Y.val (ConcreteCategory.hom e.hom.base x))
   val_supp := fun x => by
-    haveI hY : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
+    have hY : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
         (ConcreteCategory.hom e.hom.base x))) := Y.isLocalRing_stalk _
-    haveI hX : IsLocalRing (ToType (X.ringStalk x)) := by
+    have hX : IsLocalRing (ToType (X.ringStalk x)) := by
       exact (isoStalkRingEquiv e x).isLocalRing
     rw [supp_comap]
     rw [show (Y.val (ConcreteCategory.hom e.hom.base x)).supp
@@ -231,9 +251,9 @@ noncomputable def VPreHom.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u
     VPreHom (VPreObj.ofIso e) Y where
   toHom := e.hom
   isLocalHom_stalkMap := fun x => by
-    haveI hY : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
+    have hY : IsLocalRing (ToType (Y.toPresheafedSpace.ringStalk
         (ConcreteCategory.hom e.hom.base x))) := Y.isLocalRing_stalk _
-    haveI hX : IsLocalRing (ToType (X.ringStalk x)) :=
+    have hX : IsLocalRing (ToType (X.ringStalk x)) :=
       (isoStalkRingEquiv e x).isLocalRing
     exact @IsLocalHom.of_surjective _ _ _ _ hX.toNontrivial hY
       ((ringStalkMap e.hom x).hom') (isoStalkRingEquiv e x).surjective
@@ -439,9 +459,9 @@ the restriction comparisons, so both fields hold by construction. -/
 noncomputable def VPreHom.ofRestrictOpen : VPreHom (X.restrictOpen U) X where
   toHom := X.toPresheafedSpace.ofRestrict (opensIncl_isOpenEmbedding X U)
   isLocalHom_stalkMap := fun y => by
-    haveI hX : IsLocalRing (ToType (X.toPresheafedSpace.ringStalk
+    have hX : IsLocalRing (ToType (X.toPresheafedSpace.ringStalk
         (restrictPoint X U y))) := X.isLocalRing_stalk _
-    haveI hR : IsLocalRing (ToType ((restrictSpace X U).ringStalk y)) :=
+    have hR : IsLocalRing (ToType ((restrictSpace X U).ringStalk y)) :=
       isLocalRing_restrictStalk X U y
     refine @IsLocalHom.of_surjective _ _ _ _ hR.toNontrivial hX _ ?_
     intro c
@@ -518,7 +538,7 @@ def imgOfIso {X Y : TopRingPresheafedSpace.{u}} (e : X ≅ Y)
     (U : Opens ↥(X.carrier)) : Opens ↥(Y.carrier) where
   carrier := (ConcreteCategory.hom e.hom.base) '' (U : Set ↥(X.carrier))
   is_open' :=
-    haveI := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
+    have := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
     (AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.base_open
       (f := e.hom)).isOpenMap _ U.2
 
@@ -527,7 +547,7 @@ noncomputable def restrictIsoOfIso {X Y : TopRingPresheafedSpace.{u}} (e : X ≅
     (U : Opens ↥(X.carrier)) :
     X.restrict (openIncl_isOpenEmbedding U)
       ≅ Y.restrict (openIncl_isOpenEmbedding (imgOfIso e U)) :=
-  haveI := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
+  have := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
   AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
     (X.ofRestrict (openIncl_isOpenEmbedding U) ≫ e.hom)
     (Y.ofRestrict (openIncl_isOpenEmbedding (imgOfIso e U)))
@@ -750,7 +770,7 @@ noncomputable def restrictHomIso :
       ≅ Y.toPresheafedSpace.restrict
           (openIncl_isOpenEmbedding (X := Y.toPresheafedSpace)
             (imgOpenOfHom f U)) :=
-  letI _hoi : AlgebraicGeometry.PresheafedSpace.IsOpenImmersion
+  have _hoi : AlgebraicGeometry.PresheafedSpace.IsOpenImmersion
       (((VPreHom.ofRestrictOpen (X := X) U).comp f).toHom) :=
     AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.comp
       (f := X.toPresheafedSpace.ofRestrict
@@ -777,7 +797,7 @@ theorem isIso_restrictHom_toHom : IsIso (VPreHom.restrictHom f U).toHom := by
 is a local property. -/
 noncomputable def VPreHom.restrictIso :
     X.restrictOpen U ≅ Y.restrictOpen (imgOpenOfHom f U) :=
-  letI := isIso_restrictHom_toHom f U
+  have := isIso_restrictHom_toHom f U
   VPreHom.asIso (VPreHom.restrictHom f U)
 
 end RestrictIso
@@ -812,7 +832,7 @@ noncomputable def restrictRestrictHomIso :
     ((X.restrictOpen W).restrictOpen U).toPresheafedSpace
       ≅ X.toPresheafedSpace.restrict
           (openIncl_isOpenEmbedding (X := X.toPresheafedSpace) (imgOfOpen W U)) :=
-  letI _h1 : AlgebraicGeometry.PresheafedSpace.IsOpenImmersion
+  have _h1 : AlgebraicGeometry.PresheafedSpace.IsOpenImmersion
       (((VPreHom.ofRestrictOpen (X := X.restrictOpen W) U).comp
         (VPreHom.ofRestrictOpen (X := X) W)).toHom) :=
     AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.comp
@@ -842,7 +862,7 @@ theorem isIso_restrictRestrictHom_toHom :
 /-- **Restriction transitivity in `𝒱^pre`.** -/
 noncomputable def VPreObj.restrictRestrictIso :
     (X.restrictOpen W).restrictOpen U ≅ X.restrictOpen (imgOfOpen W U) :=
-  letI := isIso_restrictRestrictHom_toHom X W U
+  have := isIso_restrictRestrictHom_toHom X W U
   VPreHom.asIso (restrictRestrictHom X W U)
 
 end RestrictRestrict
@@ -912,7 +932,7 @@ comparison that is an open immersion of presheafed spaces and satisfies the
 valuation identity, one gets a genuine `𝒱`-isomorphism onto the corresponding
 open, with locality of the stalk maps and invertibility both for free. -/
 noncomputable def VPreObj.isoRestrictOfOpenImmersion : Z ≅ X.restrictOpen U :=
-  letI := isIso_corestrictOfValCompat f hval U hU
+  have := isIso_corestrictOfValCompat f hval U hU
   VPreHom.asIso (VPreHom.corestrictOfValCompat f hval U hU)
 
 end ChartStep

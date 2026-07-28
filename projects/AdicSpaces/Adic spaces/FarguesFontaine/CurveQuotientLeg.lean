@@ -219,7 +219,7 @@ noncomputable def quotientLegIsoRestrict (V : Opens ↥(yTop p F ϖ))
     ((yVPreObj p F ϖ).restrictOpen V).toPresheafedSpace
       ≅ (xVPreObj p F ϖ).toPresheafedSpace.restrict
           (yRestrictToCurve_base_isOpenEmbedding p F ϖ V hdis) :=
-  letI := yRestrictToCurve_isOpenImmersion p F ϖ V hdis
+  have := yRestrictToCurve_isOpenImmersion p F ϖ V hdis
   AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoRestrict
     (yRestrictToCurve p F ϖ V).toHom
 
@@ -246,7 +246,7 @@ noncomputable def quotientLegIsoRestrictOpen (V : Opens ↥(yTop p F ϖ))
       ≅ (xVPreObj p F ϖ).toPresheafedSpace.restrict
           (ValuationSpectrum.openIncl_isOpenEmbedding
             (X := (xVPreObj p F ϖ).toPresheafedSpace) (xImage p F ϖ V)) :=
-  letI := yRestrictToCurve_isOpenImmersion p F ϖ V hdis
+  have := yRestrictToCurve_isOpenImmersion p F ϖ V hdis
   AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
     (f := (yRestrictToCurve p F ϖ V).toHom)
     (g := (xVPreObj p F ϖ).toPresheafedSpace.ofRestrict
@@ -287,7 +287,7 @@ not merely the topology. -/
 noncomputable def quotientLegVIso :
     (yVPreObj p F ϖ).restrictOpen V
       ≅ (xVPreObj p F ϖ).restrictOpen (xImage p F ϖ V) :=
-  letI := isIso_quotientLegVPreHom_toHom p F ϖ V hdis
+  have := isIso_quotientLegVPreHom_toHom p F ϖ V hdis
   ValuationSpectrum.VPreHom.asIso (quotientLegVPreHom p F ϖ V)
 
 include hdis in
