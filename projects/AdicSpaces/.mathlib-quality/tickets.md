@@ -2803,7 +2803,14 @@ valuations.
 * **Wedhorn Definition 8.22 itself** — `ValuationSpectrum.IsAdicSpace` (`AdicSpaceV.lean`),
   over SHEAFY affinoid pairs (`AffinoidVChart`), not restricted to strongly-noetherian Tate.
   API: `AffinoidVChart.toVObj`/`.ofTate`, `VObj.baseHomeo`, `exists_homeo_of_isAdicSpace`,
-  `AdicSpacePresentation.ofIsAdicSpace`, `IsAdicSpace.of_iso`.
+  `AdicSpacePresentation.ofIsAdicSpace`, `IsAdicSpace.of_iso`, `isAdicSpace_toVObj`
+  (affinoids ARE adic spaces — the definition is not vacuous), `VObj.restrictTopIso`,
+  `VPreObj.restrictRestrictIso`, **`IsAdicSpace.of_openCover`** (adic-ness is local).
+  ⚠ NOT proven, and NOT a quick win: `IsAdicSpace (X.restrictOpen W)` from `IsAdicSpace X`.
+  It needs `Spa(A)|_V ≅ Spa(𝒪_A(D))` for a rational `D`, i.e. `spaCompHom_isOpenImmersion`,
+  whose hypotheses require `presheafValue D` to be Tate + strongly noetherian — available
+  for Tate charts, NOT for a general sheafy `AffinoidVChart`. File it as its own ticket if
+  wanted, restricted to Tate charts.
 * **The `𝒱` toolkit** (`VRestrict.lean`) — `VObj.restrictOpen`, `VPreHom.corestrict`,
   `VPreHom.comp`, `isLocalHom_of_val_comap`, `restrictRestrictIso`, `restrictIsoOfIso`,
   `VObj.isoOfVPreIso`, `VPreHom.inv`/`asIso`/`isIso_of_isIso_toHom`, `VPreHom.restrictIso`.
