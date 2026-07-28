@@ -2901,7 +2901,30 @@ theorem ringStalkMap_corestrictHom {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶
   hypotheses; it is pure presheafed-space theory.
 
 ### [P5-A3] The corestriction as a 𝒱^pre-morphism
-- **Status**: blocked | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A2
+- **Status**: in_progress — CORE LANDED 2026-07-28, packaging remains
+- **Progress**:
+  - `liftToRestrict` (VRestrict.lean): the corestriction via mathlib's
+    `IsOpenImmersion.lift` at `X.ofRestrict`, which also hands back
+    `liftToRestrict_fac : lift ≫ ofRestrict = f` as a PROVEN lemma — the identity
+    that four hand-rolled attempts could not establish. `liftToRestrict_base`
+    gives `incl (lift.base z) = f.base z`.
+  - `ringStalkMap_liftToRestrict`: the stalk-level factorisation
+    `ringStalkMap f z = eqToHom … ≫ ringStalkMap (lift ≫ ofRestrict) z`, via
+    `PresheafedSpace.stalkMap.congr_hom` on the functor image of `lift_fac`.
+  - `ringStalkMap_ofRestrict`: `ringStalkMap (ofRestrict) = restrictStalkIso.inv`
+    (mathlib's `restrictStalkIso_inv_eq_ofRestrict` in our spelling) — PROVEN in
+    scratch r161, not yet ported.
+  - ⚠ **REMAINING = CAST BOOKKEEPING ONLY.** Composing the two gives
+    `(restrictStalkIso).inv ≫ ringStalkMap lift z = eqToHom … ≫ ringStalkMap f z`,
+    but the `rw`s to cancel the eqToHom pair fail on the carrier spelling
+    (`↑↑(X.restrict …)` vs `↑(TopCat.of ↥U)`) — the same trap as elsewhere.
+    **NEXT MOVE**: do NOT chase the morphism-level `_comp` variant. Go straight to
+    `val_compat`, which is a statement about `comap`s: state it with the target
+    point generalized (`∀ y, lift.base z = y → …`), `subst`, and the eqToHom
+    becomes `eqToHom rfl`. Then `isLocalHom` follows from `val_compat` via the
+    already-proven `SpaVIso.isLocalHom_of_val_comap` (ChatGPT's valuation route),
+    not from composing local homs.
+ | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A2
 - **Type**: def
 - **Statement**:
 ```lean
