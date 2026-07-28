@@ -396,11 +396,175 @@ theorem evenHeadMem_iff_mem_range_unhalve (t : ℕ →₀ ℕ) :
   · rintro ⟨s, rfl⟩
     exact evenHeadMem_unhalve s
 
+variable {N} in
+theorem halve_unhalve (s : Fin (N + 1) →₀ ℕ) : halve N (unhalve N s) = s :=
+  unhalve_injective (unhalve_halve (evenHeadMem_unhalve (w := fun _ => 0) s))
+
+variable {K w N} in
+/-- The underlying coefficient-transport map. -/
+noncomputable def evenToPFun (F : ↥(wpEvenSupport K w N)) :
+    FiniteJet.GraphKoszul.P K (N + 1) :=
+  ⟨fun s : Fin (N + 1) →₀ ℕ => MvPowerSeries.coeff (unhalve N s) F.1.1, by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    have hnull : Filter.Tendsto
+        (fun t : ℕ →₀ ℕ => ‖MvPowerSeries.coeff t F.1.1‖) Filter.cofinite (nhds 0) := by
+      have h2 : Filter.Tendsto (fun t : ℕ →₀ ℕ =>
+          ‖MvPowerSeries.coeff t F.1.1‖ *
+            t.prod ((fun _ : ℕ => (1 : ℝ)) · ^ ·)) Filter.cofinite (nhds 0) := F.1.2
+      refine h2.congr fun t => ?_
+      rw [prod_one_weights, mul_one]
+    have hcomp := hnull.comp ((unhalve_injective (N := N)).tendsto_cofinite)
+    refine hcomp.congr fun s => ?_
+    rw [prod_one_weights, mul_one]
+    rfl⟩
+
+variable {K w N} in
+theorem evenToPFun_coeff (F : ↥(wpEvenSupport K w N)) (s : Fin (N + 1) →₀ ℕ) :
+    MvPowerSeries.coeff s (evenToPFun F).1 = MvPowerSeries.coeff (unhalve N s) F.1.1 :=
+  rfl
+
+variable {K w N} in
+/-- The coefficient-transport homomorphism `T_N →+* K⟨T_0,…,T_N⟩` along the exponent
+halving. -/
+noncomputable def evenToP :
+    ↥(wpEvenSupport K w N) →+* FiniteJet.GraphKoszul.P K (N + 1) where
+  toFun := evenToPFun
+  map_zero' := Subtype.ext (MvPowerSeries.ext (by
+    intro s
+    rw [evenToPFun_coeff]
+    show MvPowerSeries.coeff (unhalve N s) (0 : MvPowerSeries ℕ K) =
+      MvPowerSeries.coeff s (0 : MvPowerSeries (Fin (N + 1)) K)
+    simp))
+  map_one' := Subtype.ext (MvPowerSeries.ext (by
+    classical
+    intro s
+    rw [evenToPFun_coeff]
+    show MvPowerSeries.coeff (unhalve N s) (1 : MvPowerSeries ℕ K) =
+      MvPowerSeries.coeff s (1 : MvPowerSeries (Fin (N + 1)) K)
+    have h0 : unhalve N (0 : Fin (N + 1) →₀ ℕ) = 0 := by
+      ext n
+      rw [unhalve_apply]
+      split_ifs <;> simp
+    rcases eq_or_ne s 0 with rfl | hs
+    · rw [h0]
+      simp
+    · rw [MvPowerSeries.coeff_one, MvPowerSeries.coeff_one, if_neg, if_neg hs]
+      intro h
+      exact hs (unhalve_injective (h.trans h0.symm))))
+  map_add' F G := Subtype.ext (MvPowerSeries.ext (by
+    intro s
+    rw [evenToPFun_coeff]
+    show MvPowerSeries.coeff (unhalve N s) (F.1.1 + G.1.1) =
+      MvPowerSeries.coeff s ((evenToPFun F).1 + (evenToPFun G).1)
+    rw [map_add, map_add, evenToPFun_coeff, evenToPFun_coeff]))
+  map_mul' F G := Subtype.ext (MvPowerSeries.ext (by
+    classical
+    intro s
+    rw [evenToPFun_coeff]
+    show MvPowerSeries.coeff (unhalve N s) (F.1.1 * G.1.1) =
+      MvPowerSeries.coeff s ((evenToPFun F).1 * (evenToPFun G).1)
+    rw [MvPowerSeries.coeff_mul, MvPowerSeries.coeff_mul]
+    have hvanish : ∀ p : (ℕ →₀ ℕ) × (ℕ →₀ ℕ),
+        p ∈ Finset.HasAntidiagonal.antidiagonal (unhalve N s) →
+        ¬ (EvenHeadMem w N p.1 ∧ EvenHeadMem w N p.2) →
+        MvPowerSeries.coeff p.1 F.1.1 * MvPowerSeries.coeff p.2 G.1.1 = 0 := by
+      intro p _ hne
+      by_cases h1 : EvenHeadMem w N p.1
+      · have h2 : ¬ EvenHeadMem w N p.2 := fun h2 => hne ⟨h1, h2⟩
+        rw [G.2 p.2 h2, mul_zero]
+      · rw [F.2 p.1 h1, zero_mul]
+    rw [← Finset.sum_filter_of_ne
+      (p := fun p : (ℕ →₀ ℕ) × (ℕ →₀ ℕ) => EvenHeadMem w N p.1 ∧ EvenHeadMem w N p.2)
+      (by
+        intro p hp hne
+        by_contra hcon
+        exact hne (hvanish p hp hcon))]
+    refine (Finset.sum_nbij'
+      (i := fun p : (Fin (N + 1) →₀ ℕ) × (Fin (N + 1) →₀ ℕ) =>
+        (unhalve N p.1, unhalve N p.2))
+      (j := fun p : (ℕ →₀ ℕ) × (ℕ →₀ ℕ) => (halve N p.1, halve N p.2))
+      ?_ ?_ ?_ ?_ ?_).symm
+    · intro p hp
+      rw [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal]
+      rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
+      exact ⟨by rw [← unhalve_add, hp], evenHeadMem_unhalve p.1, evenHeadMem_unhalve p.2⟩
+    · intro p hp
+      rw [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal] at hp
+      rw [Finset.HasAntidiagonal.mem_antidiagonal]
+      have := congrArg (halve N) hp.1
+      rw [← unhalve_halve hp.2.1, ← unhalve_halve hp.2.2, ← unhalve_add] at hp
+      exact unhalve_injective hp.1
+    · intro p hp
+      ext : 1 <;> simp [halve_unhalve]
+    · intro p hp
+      rw [Finset.mem_filter] at hp
+      ext : 1 <;> simp [unhalve_halve hp.2.1, unhalve_halve hp.2.2]
+    · intro p _
+      rw [evenToPFun_coeff, evenToPFun_coeff]))
+
+variable {K w N} in
+theorem evenToP_coeff (F : ↥(wpEvenSupport K w N)) (s : Fin (N + 1) →₀ ℕ) :
+    MvPowerSeries.coeff s (evenToP F).1 = MvPowerSeries.coeff (unhalve N s) F.1.1 :=
+  rfl
+
+variable {K w N} in
+theorem evenToP_bijective : Function.Bijective (evenToP (K := K) (w := w) (N := N)) := by
+  classical
+  constructor
+  · intro F G h
+    refine Subtype.ext (Subtype.ext (MvPowerSeries.ext fun t => ?_))
+    by_cases ht : EvenHeadMem w N t
+    · have := congrArg (fun x : FiniteJet.GraphKoszul.P K (N + 1) =>
+        MvPowerSeries.coeff (halve N t) x.1) h
+      simp only [evenToP_coeff, unhalve_halve ht] at this
+      exact this
+    · rw [F.2 t ht, G.2 t ht]
+  · intro G
+    classical
+    have hbwd_res : MvPowerSeries.IsRestrictedGauss (fun _ : ℕ => (1 : ℝ))
+        (fun t => if _ : EvenHeadMem w N t then
+          MvPowerSeries.coeff (halve N t) G.1 else 0) := by
+      have hchar : ∀ ε : ℝ, 0 < ε → {t : ℕ →₀ ℕ |
+          ε ≤ ‖(if _ : EvenHeadMem w N t then
+            MvPowerSeries.coeff (halve N t) G.1 else 0 : K)‖}.Finite := by
+        intro ε hε
+        have hfin := finite_setOf_le_norm_coeff (f := G) hε
+        refine (hfin.image (unhalve N)).subset ?_
+        intro t ht
+        rw [Set.mem_setOf_eq] at ht
+        by_cases hmem : EvenHeadMem w N t
+        · rw [dif_pos hmem] at ht
+          exact ⟨halve N t, ht, unhalve_halve hmem⟩
+        · rw [dif_neg hmem, norm_zero] at ht
+          exact absurd (hε.trans_le ht) (lt_irrefl 0)
+      show Filter.Tendsto _ Filter.cofinite (nhds 0)
+      rw [Metric.tendsto_nhds]
+      intro ε hε
+      rw [Filter.eventually_cofinite]
+      refine (hchar ε hε).subset ?_
+      intro t ht
+      rw [Set.mem_setOf_eq] at ht ⊢
+      rw [Real.dist_eq, sub_zero, prod_one_weights, mul_one] at ht
+      rw [abs_of_nonneg (norm_nonneg _)] at ht
+      exact not_lt.mp ht
+    refine ⟨⟨⟨fun t => if _ : EvenHeadMem w N t then
+        MvPowerSeries.coeff (halve N t) G.1 else 0, hbwd_res⟩,
+      fun t ht => by
+        show (if _ : EvenHeadMem w N t then
+          MvPowerSeries.coeff (halve N t) G.1 else 0) = 0
+        rw [dif_neg ht]⟩, ?_⟩
+    refine Subtype.ext (MvPowerSeries.ext fun s => ?_)
+    rw [evenToP_coeff]
+    show (if _ : EvenHeadMem w N (unhalve N s) then
+      MvPowerSeries.coeff (halve N (unhalve N s)) G.1 else 0) = _
+    rw [dif_pos (evenHeadMem_unhalve s), halve_unhalve]
+
 /-- `T_N` is isometrically isomorphic to the Tate algebra `K⟨T_0,…,T_N⟩ = P K (N+1)`
 (the exponent-halving reindexing `(a, 2ν) ↦ (a, ν)`; [WP]
 eq:finite-stage-normal-form). -/
 noncomputable def evenSupportEquiv :
-    ↥(wpEvenSupport K w N) ≃+* FiniteJet.GraphKoszul.P K (N + 1) := by sorry
+    ↥(wpEvenSupport K w N) ≃+* FiniteJet.GraphKoszul.P K (N + 1) :=
+  RingEquiv.ofBijective evenToP evenToP_bijective
 
 theorem norm_evenSupportEquiv (x : ↥(wpEvenSupport K w N)) :
     ‖evenSupportEquiv K w N x‖ = ‖x‖ := by sorry
