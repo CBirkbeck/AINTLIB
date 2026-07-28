@@ -3359,8 +3359,11 @@ REMAINING, in order:
 3. **[P5-6e] `isAdicSpace_xVObj`** — assemble: `X|_{π V'} ≅ 𝒴|_{V'} ≅ Spa(presheafValue D')`,
    promote with `VPreHom.asIso` + `VObj.isoOfVPreIso`, and take `C := windowSubVChart n D'`.
 
-### [P5-6] `IsAdicSpace` and `isAdicSpace_xVObj`
-- **Status**: blocked | **File**: new `Adic spaces/AdicSpaceV.lean` + FF capstone
+### [P5-6] `IsAdicSpace` and `isAdicSpace_xVObj` — ★ DONE 2026-07-28 ★
+- **Status**: DONE. `IsAdicSpace` in `Adic spaces/AdicSpaceV.lean` (over SHEAFY affinoid
+  pairs, per external-review point 5); `isAdicSpace_xVObj` and `isAdicSpace_yVObj` in
+  `FarguesFontaine/CurveIsAdicSpace.lean`, axiom-clean, full gate green.
+- **(historical) Status**: blocked | **File**: new `Adic spaces/AdicSpaceV.lean` + FF capstone
 - **Depends on**: P5-5, P5-K (done)
 - **Type**: def + theorem
 - **Statement**:
