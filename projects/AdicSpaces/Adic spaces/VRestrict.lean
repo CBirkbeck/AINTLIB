@@ -95,19 +95,19 @@ noncomputable def restrictRingStalkEquiv (x : ↥U) :
   (restrictRingStalkIso X U x).commRingCatIsoToRingEquiv
 
 /-- Maximal ideals transport through a ring equivalence of local rings
-(instance-explicit form). -/
+(instance-explicit form).  This is mathlib's `IsLocalRing.maximalIdeal_comap`
+for the coercion of `e`, whose `IsLocalHom` instance is `isLocalHom_equiv`; the
+wrapper exists only to take the two `IsLocalRing` instances explicitly, which is
+what the stalk-package code needs. -/
 theorem maximalIdeal_comap_of_ringEquiv {R S : Type*} [CommRing R] [CommRing S]
     (instR : IsLocalRing R) (instS : IsLocalRing S) (e : R ≃+* S) :
     @IsLocalRing.maximalIdeal R _ instR
       = (@IsLocalRing.maximalIdeal S _ instS).comap (e : R →+* S) := by
-  refine Ideal.ext fun r => ?_
-  rw [@IsLocalRing.mem_maximalIdeal _ _ instR, Ideal.mem_comap,
-    @IsLocalRing.mem_maximalIdeal _ _ instS, mem_nonunits_iff,
-    mem_nonunits_iff, not_iff_not]
-  exact ⟨fun h => h.map (e : R →+* S), fun h => by
-    have := h.map (e.symm : S →+* R)
-    rwa [show (e.symm : S →+* R) ((e : R →+* S) r) = r from
-      e.symm_apply_apply r] at this⟩
+  have := instR
+  have := instS
+  have : IsLocalHom (e : R →+* S) :=
+    ⟨fun a ha => (isLocalHom_equiv e).map_nonunit a ha⟩
+  exact (IsLocalRing.maximalIdeal_comap (e : R →+* S)).symm
 
 /-- The stalks of the restriction are local. -/
 theorem isLocalRing_restrictStalk (x : ↥U) :
