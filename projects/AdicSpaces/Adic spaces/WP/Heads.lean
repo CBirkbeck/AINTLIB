@@ -934,7 +934,16 @@ variable {K} in
 `FiniteJetOver.Uniformizer.isNoetherianRing_P`). -/
 theorem isNoetherianRing_WPHead (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsNoetherianRing (WPHead K w N) := by sorry
+    IsNoetherianRing (WPHead K w N) := by
+  haveI hP : IsNoetherianRing (FiniteJet.GraphKoszul.P K (N + 1)) :=
+    ϖ.isNoetherianRing_P hK₀ (N + 1)
+  haveI hTN : IsNoetherianRing ↥(wpEvenSupport K w N) :=
+    isNoetherianRing_of_ringEquiv _ (evenSupportEquiv K w N).symm
+  letI : Algebra ↥(wpEvenSupport K w N) (WPHead K w N) :=
+    (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)).toAlgebra
+  haveI : Module.Finite ↥(wpEvenSupport K w N) (WPHead K w N) :=
+    moduleFinite_head_over_even K w N
+  exact IsNoetherianRing.of_finite ↥(wpEvenSupport K w N) (WPHead K w N)
 
 variable {K} in
 /-- The unit ball of the head is noetherian (needed by the graph-Koszul layer at the
