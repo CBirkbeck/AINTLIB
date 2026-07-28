@@ -3118,21 +3118,33 @@ so `IsOpenImmersion.isoOfRangeEq` applies once the two ranges agree. DEFINE `V` 
 `𝒴`-preimage of the composite's range (legitimate because that range lies in the big-window
 trace ⊆ `Y`), and the range condition holds by construction.
 
-**(ii) ⚠ promoting it to a `𝒱^pre`-iso — the genuine obstruction.** A presheafed-space
-isomorphism between two `𝒱^pre`-objects is NOT automatically a `𝒱^pre`-morphism: it must be
-checked to respect the stalk valuations. `VPreHom.asIso` (P5-6c) needs a `VPreHom` as input.
-The natural supplier is `SpaVIso.spaCompVPreHom` (P5-K13) — but it takes
-`hloc : ∀ v : ↥(Spa A A⁺), IsLocalRing …` and `hsupp` GLOBALLY over the base, and for
-`A := A_inf` those hold only over `Y` (`isLocalRing_stalk_Y`, `maximalIdeal_stalk_Y`).
-This is exactly external-review point 2 ("do not package `Spa(A_inf)` globally as a
-`VPreObj`"). RESOLUTION: restate the P5-K13 valuation compatibility **pointwise**, i.e.
-`∀ w, val-compat at w` given the stalk package only at `shadow w`, and then instantiate at
-points of `Y`. The proof of `spaCompVPreHom` is already pointwise in `w` — the global `hloc`
-/`hsupp` are only used to name the target `VPreObj`. So the work is:
-  * a `VPreObj` structure on `𝒴` viewed as `Spa(A_inf)|_Y` — ALREADY EXISTS as `yVPreObj`;
-  * `corestrictHom`/`liftToRestrict` the comparison into `𝒴` at the presheafed-space level
-    FIRST (per review point 2), then package with `VPreHom.corestrict` (P5-A3) using the
-    `Y`-local stalk facts. `VPreHom.corestrict` is exactly the tool built for this.
+**(ii) promoting it to a `𝒱^pre`-iso.** A presheafed-space isomorphism between two
+`𝒱^pre`-objects is NOT automatically a `𝒱^pre`-morphism — it must be checked to respect the
+stalk valuations — and `VPreHom.asIso` (P5-6c) needs a `VPreHom` as input.
+
+⚠ **CORRECTION 2026-07-28 (I first overstated this).** The obstruction is NOT the global
+`hloc`/`hsupp` in `spaCompVPreHom`'s signature. Reading its proof:
+
+    val_compat := fun w => comap_ringStalkMap_spaCompHom_stalkValue D₀ u hu w
+
+— i.e. **`comap_ringStalkMap_spaCompHom_stalkValue` is already the pointwise valuation
+compatibility and takes NO `hloc`/`hsupp` at all.** Those hypotheses only serve to *name the
+target object* `spaVPreObjOf hloc hsupp`, and `isLocalHom` is derived from the val identity
+by `isLocalHom_of_val_comap` anyway. So nothing has to be re-proved.
+
+CONCRETE ROUTE for (ii):
+  1. `liftToRestrict (spaCompHom D₀ u hu) Y hrange : bSpace D₀ ⟶ yPresheafedSpace`
+     (the range lies in `Y`; `yPresheafedSpace` IS `spaSpace (A_inf)` restricted to `Y`).
+  2. Its `val_compat` = the unconditional `comap_ringStalkMap_spaCompHom_stalkValue`
+     composed with the restriction-comparison bookkeeping — literally the shape of
+     `val_compat_liftToRestrict` (P5-A3), with `yVPreObj.val` being by definition
+     `comap (yRingStalkEquiv y) (stalkValue (ySpaPoint y))`.
+  3. `isLocalHom` then from `isLocalHom_of_val_comap`, using the `Y`-local stalk facts
+     `isLocalRing_stalk_Y` / `maximalIdeal_stalk_Y` (available exactly on `Y`).
+  4. `VPreHom.corestrict` (P5-A3) into the open `V`, then `VPreHom.asIso` (P5-6c).
+
+So review point 2 ("don't package `Spa(A_inf)` globally as a `VPreObj`") is respected without
+any new mathematics: corestrict at the presheafed-space level first, package afterwards.
 
 ### ★ (superseded) P5-6 CAPSTONE ROADMAP (state as of 2026-07-28, after P5-5d)
 
