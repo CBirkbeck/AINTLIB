@@ -393,6 +393,62 @@ theorem ringStalkMap_ofRestrict {X : TopRingPresheafedSpace.{u}}
     (openIncl_isOpenEmbedding U) y).symm
 
 
+section RestrictHom
+
+variable {X : VPreObj.{u}} (U : Opens ↥(X.toTopCat))
+
+/-- The restriction comparison and the inclusion's stalk map are mutually
+inverse, elementwise. -/
+theorem restrictRingStalkEquiv_ringStalkMap_ofRestrict (y : ↥U)
+    (t : ToType (X.toPresheafedSpace.ringStalk (restrictPoint X U y))) :
+    (restrictRingStalkEquiv X U y)
+        ((ringStalkMap (X.toPresheafedSpace.ofRestrict
+          (opensIncl_isOpenEmbedding X U)) y).hom' t) = t := by
+  have h1 : (ringStalkMap (X.toPresheafedSpace.ofRestrict
+      (opensIncl_isOpenEmbedding X U)) y) = (restrictRingStalkIso X U y).inv :=
+    (AlgebraicGeometry.PresheafedSpace.restrictStalkIso_inv_eq_ofRestrict
+      (restrictRingAmbient X) (opensIncl_isOpenEmbedding X U) y).symm
+  rw [h1]
+  exact congrFun (congrArg (fun m : _ ⟶ _ => (CommRingCat.Hom.hom m).toFun)
+    ((restrictRingStalkIso X U y).inv_hom_id)) t
+
+/-- **The restriction inclusion is a `𝒱^pre`-morphism.** Its stalk maps are
+the restriction comparisons, so both fields hold by construction. -/
+noncomputable def VPreHom.ofRestrictOpen : VPreHom (X.restrictOpen U) X where
+  toHom := X.toPresheafedSpace.ofRestrict (opensIncl_isOpenEmbedding X U)
+  isLocalHom_stalkMap := fun y => by
+    haveI hX : IsLocalRing (ToType (X.toPresheafedSpace.ringStalk
+        (restrictPoint X U y))) := X.isLocalRing_stalk _
+    haveI hR : IsLocalRing (ToType ((restrictSpace X U).ringStalk y)) :=
+      isLocalRing_restrictStalk X U y
+    refine @IsLocalHom.of_surjective _ _ _ _ hR.toNontrivial hX _ ?_
+    intro c
+    refine ⟨restrictRingStalkEquiv X U y c, ?_⟩
+    have h := restrictRingStalkEquiv_ringStalkMap_ofRestrict U y
+    have hinj : Function.Injective (restrictRingStalkEquiv X U y) :=
+      (restrictRingStalkEquiv X U y).injective
+    exact hinj (h (restrictRingStalkEquiv X U y c))
+  val_compat := fun y => by
+    refine (ValuationSpectrum.ext (funext₂ fun a b => propext ?_)).symm
+    show ((X.restrictOpen U).val y).vle
+        ((ringStalkMap (X.toPresheafedSpace.ofRestrict
+          (opensIncl_isOpenEmbedding X U)) y).hom' a)
+        ((ringStalkMap (X.toPresheafedSpace.ofRestrict
+          (opensIncl_isOpenEmbedding X U)) y).hom' b)
+      ↔ (X.val (restrictPoint X U y)).vle a b
+    show (X.val (restrictPoint X U y)).vle
+        ((restrictRingStalkEquiv X U y)
+          ((ringStalkMap (X.toPresheafedSpace.ofRestrict
+            (opensIncl_isOpenEmbedding X U)) y).hom' a))
+        ((restrictRingStalkEquiv X U y)
+          ((ringStalkMap (X.toPresheafedSpace.ofRestrict
+            (opensIncl_isOpenEmbedding X U)) y).hom' b))
+      ↔ (X.val (restrictPoint X U y)).vle a b
+    rw [restrictRingStalkEquiv_ringStalkMap_ofRestrict U y a,
+      restrictRingStalkEquiv_ringStalkMap_ofRestrict U y b]
+
+end RestrictHom
+
 end Corestrict
 
 end ValuationSpectrum
