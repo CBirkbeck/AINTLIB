@@ -132,7 +132,14 @@ propext/Classical.choice/Quot.sound) before marking done.
   (`isNoetherianRing_iff`/`monotone_stabilizes`).  Sources: [WP] 813–834.
 
 ### [W7] Heads.lean I — head subring, T_N, free normal form
-- Status: open | File: WP/Heads.lean | Depends: W3, W4 | Parallel: with W5, W6
+- Status: done (2026-07-28; all W7 decls proven across 6 commits: subring+instances,
+  even-head monoid + unhalve/halve, the halving ring iso evenSupportEquiv (ofBijective)
+  + isometry, patExp/Ypat, the parity-slice decomposition sum_slice_mul_Ypat, and
+  moduleFinite_head_over_even. Remaining Heads.lean sorries are W8-scope.)
+- Progress: gotchas — def-alias types (Amb/Restricted) block SetLike/AddSubmonoidClass
+  rewrites: route sums through explicit double-val RingHoms + map_sum; Fin-mk iota
+  vs omega: obtain ⟨i, rfl⟩ reindexing beats mk-instantiation; decide-orientation:
+  (decide_eq_false h).symm. | File: WP/Heads.lean | Depends: W3, W4 | Parallel: with W5, W6
 - Decls: `wpHeadSupport` fields, `wpHeadSupport_le_wpSupport`, `_mono`, `headIncl`,
   `norm_headIncl`, `isClosed_wpHeadSupport`, `NormOneClass`, `constHead`, `piHead`
   lemmas, unconditional `IsHuberRing/IsTateRing`, `PlusSubring`, `IsROIE`,
