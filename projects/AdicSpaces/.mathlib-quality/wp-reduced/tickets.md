@@ -254,7 +254,19 @@ propext/Classical.choice/Quot.sound) before marking done.
   Generality: any normed ultrametric commutative P.  Sources: [WP] 1021–1029.
 
 ### [W11] Tail.lean III — the Φ-embedding
-- Status: open | File: WP/Tail.lean | Depends: W10, R1 | Type: def+theorems
+- Status: done | File: WP/Tail.lean | Depends: W10, R1 | Type: def+theorems
+- Progress: DONE 2026-07-28.  ARCHITECTURE CHANGE: R1's three lemmas moved to NEW
+  upstream file `WP/FormalReduced.lean` (Tail cannot import Reduced — cycle);
+  Tail + Reduced both import it.  Equiv via `Finsupp.subtypeDomain`/`extendDomain`
+  (membership by `support_extendDomain_subset`, NOT extendDomain_apply-dite);
+  symm-additivity FREE via injectivity of the forward map (no extendDomain_add
+  needed).  Φ built as bare `tailC0ToFormalFun` + rfl coeff lemma + standalone
+  zero/one/add/mul laws, THEN bundled (avoids coeff-of-lambda defeq fights inside
+  RingHom fields); Φ-mul by sum_nbij' along the equiv-pair map + `Nat.add_sub_cancel'`
+  + pow_add + ring.  ρ-regularity upgraded to ρ^k-regularity by induction for
+  injectivity.  isDomain: manual Nontrivial (coeff_zero_one) +
+  `NoZeroDivisors.to_isDomain _` + `Function.Injective.isDomain`.
+  Tail.lean now 0 sorries; tree 3164 green; axioms clean ×5.
 - Decls: `tailIdxEquivFinsupp`, `tailC0ToMvPowerSeries`,
   `tailC0ToMvPowerSeries_injective`, `isReduced_tailC0`, `isDomain_tailC0`.
 - Sketch [ChatGPT-5.6 review: D3/D4 confirmed; `MvPowerSeries.map_injective`

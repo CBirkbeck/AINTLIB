@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».WP.Heads
+import «Adic spaces».WP.FormalReduced
 
 /-!
 # The tail decomposition and the twisted `c₀`-sum ([WP] §6.4)
@@ -983,35 +984,194 @@ end TailC0
 def TailVar (N : ℕ) : Type := {n : ℕ // N < n}
 
 /-- Tail indices are finitely supported exponent vectors on the tail variables. -/
-noncomputable def tailIdxEquivFinsupp : TailIdx N ≃ (TailVar N →₀ ℕ) := by sorry
+noncomputable def tailIdxEquivFinsupp : TailIdx N ≃ (TailVar N →₀ ℕ) where
+  toFun μ := Finsupp.subtypeDomain (fun n => N < n) μ.1
+  invFun e := ⟨Finsupp.extendDomain e, fun n hn => by
+    by_contra h
+    have hmem : n ∈ (Finsupp.extendDomain e).support := Finsupp.mem_support_iff.mpr h
+    have hlt := Finsupp.support_extendDomain_subset e hmem
+    rw [Set.mem_setOf_eq] at hlt
+    omega⟩
+  left_inv μ := Subtype.ext (Finsupp.extendDomain_subtypeDomain μ.1 fun a ha => by
+    by_contra h
+    exact (Finsupp.mem_support_iff.mp ha) (μ.prop a (by omega)))
+  right_inv e := Finsupp.subtypeDomain_extendDomain e
+
+theorem tailIdxEquivFinsupp_zero : tailIdxEquivFinsupp N 0 = 0 := by
+  show Finsupp.subtypeDomain (fun n => N < n) (0 : TailIdx N).1 = 0
+  rw [TailIdx.zero_val]
+  exact Finsupp.subtypeDomain_zero
+
+theorem tailIdxEquivFinsupp_symm_zero : (tailIdxEquivFinsupp N).symm 0 = 0 := by
+  rw [← tailIdxEquivFinsupp_zero, Equiv.symm_apply_apply]
+
+theorem tailIdxEquivFinsupp_add (μ ν : TailIdx N) :
+    tailIdxEquivFinsupp N (μ + ν) =
+      tailIdxEquivFinsupp N μ + tailIdxEquivFinsupp N ν := by
+  show Finsupp.subtypeDomain (fun n => N < n) (μ + ν).1 = _
+  rw [TailIdx.add_val]
+  exact Finsupp.subtypeDomain_add
+
+theorem tailIdxEquivFinsupp_symm_add (e e' : TailVar N →₀ ℕ) :
+    (tailIdxEquivFinsupp N).symm (e + e') =
+      (tailIdxEquivFinsupp N).symm e + (tailIdxEquivFinsupp N).symm e' := by
+  apply (tailIdxEquivFinsupp N).injective
+  rw [Equiv.apply_symm_apply, tailIdxEquivFinsupp_add, Equiv.apply_symm_apply,
+    Equiv.apply_symm_apply]
 
 variable {P : Type*} [NormedCommRing P] [IsUltrametricDist P]
+
+noncomputable def tailC0ToFormalFun (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P)
+    (x : TailC0 w N P ρ) : MvPowerSeries (TailVar N) P :=
+  fun e => ρ.val ^ wpWeight w ((tailIdxEquivFinsupp N).symm e).1 *
+    x.1 ((tailIdxEquivFinsupp N).symm e)
+
+theorem coeff_tailC0ToFormalFun (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P)
+    (x : TailC0 w N P ρ) (e : TailVar N →₀ ℕ) :
+    MvPowerSeries.coeff e (tailC0ToFormalFun w N ρ x) =
+      ρ.val ^ wpWeight w ((tailIdxEquivFinsupp N).symm e).1 *
+        x.1 ((tailIdxEquivFinsupp N).symm e) := rfl
+
+theorem tailC0ToFormalFun_zero (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P) :
+    tailC0ToFormalFun w N ρ 0 = 0 := by
+  refine MvPowerSeries.ext fun e => ?_
+  rw [coeff_tailC0ToFormalFun,
+    show ((0 : TailC0 w N P ρ)).1 ((tailIdxEquivFinsupp N).symm e) = 0 from rfl,
+    mul_zero]
+  simp
+
+theorem tailC0ToFormalFun_one (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P) :
+    tailC0ToFormalFun w N ρ 1 = 1 := by
+  classical
+  refine MvPowerSeries.ext fun e => ?_
+  rw [coeff_tailC0ToFormalFun, TailC0.one_val, MvPowerSeries.coeff_one]
+  by_cases he : e = 0
+  · subst he
+    rw [if_pos (tailIdxEquivFinsupp_symm_zero N), if_pos rfl,
+      tailIdxEquivFinsupp_symm_zero, TailIdx.zero_val, wpWeight_zero, pow_zero,
+      one_mul]
+  · rw [if_neg (fun h => he ((Equiv.apply_symm_apply (tailIdxEquivFinsupp N)
+        e).symm.trans (by rw [h, tailIdxEquivFinsupp_zero]))),
+      if_neg he, mul_zero]
+
+theorem tailC0ToFormalFun_add (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P)
+    (x y : TailC0 w N P ρ) :
+    tailC0ToFormalFun w N ρ (x + y) =
+      tailC0ToFormalFun w N ρ x + tailC0ToFormalFun w N ρ y := by
+  refine MvPowerSeries.ext fun e => ?_
+  rw [map_add, coeff_tailC0ToFormalFun, coeff_tailC0ToFormalFun,
+    coeff_tailC0ToFormalFun,
+    show ((x + y) : TailC0 w N P ρ).1 ((tailIdxEquivFinsupp N).symm e) =
+      x.1 ((tailIdxEquivFinsupp N).symm e) + y.1 ((tailIdxEquivFinsupp N).symm e)
+      from rfl, mul_add]
+
+theorem tailC0ToFormalFun_mul (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P)
+    (x y : TailC0 w N P ρ) :
+    tailC0ToFormalFun w N ρ (x * y) =
+      tailC0ToFormalFun w N ρ x * tailC0ToFormalFun w N ρ y := by
+  classical
+  refine MvPowerSeries.ext fun e => ?_
+  rw [MvPowerSeries.coeff_mul, coeff_tailC0ToFormalFun, TailC0.mul_val,
+    Finset.mul_sum]
+  refine Finset.sum_nbij'
+    (fun p => (tailIdxEquivFinsupp N p.1, tailIdxEquivFinsupp N p.2))
+    (fun q => ((tailIdxEquivFinsupp N).symm q.1, (tailIdxEquivFinsupp N).symm q.2))
+    ?_ ?_ ?_ ?_ ?_
+  · rintro ⟨p₁, p₂⟩ hp
+    rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp ⊢
+    have hp' : p₁ + p₂ = (tailIdxEquivFinsupp N).symm e := hp
+    rw [← tailIdxEquivFinsupp_add, hp']
+    exact Equiv.apply_symm_apply _ e
+  · rintro ⟨q₁, q₂⟩ hq
+    rw [Finset.HasAntidiagonal.mem_antidiagonal] at hq ⊢
+    rw [← tailIdxEquivFinsupp_symm_add, hq]
+  · rintro ⟨p₁, p₂⟩ _
+    rw [Prod.ext_iff]
+    exact ⟨Equiv.symm_apply_apply _ _, Equiv.symm_apply_apply _ _⟩
+  · rintro ⟨q₁, q₂⟩ _
+    rw [Prod.ext_iff]
+    exact ⟨Equiv.apply_symm_apply _ _, Equiv.apply_symm_apply _ _⟩
+  · rintro ⟨p₁, p₂⟩ hp
+    rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
+    rw [coeff_tailC0ToFormalFun, coeff_tailC0ToFormalFun,
+      Equiv.symm_apply_apply, Equiv.symm_apply_apply]
+    have hval : ((tailIdxEquivFinsupp N).symm e).1 = p₁.1 + p₂.1 := by
+      rw [← hp, TailIdx.add_val]
+    have hle : wpWeight w ((tailIdxEquivFinsupp N).symm e).1 ≤
+        wpWeight w p₁.1 + wpWeight w p₂.1 := by
+      rw [hval]
+      exact wpWeight_add_le w p₁.1 p₂.1
+    rw [show ρ.val ^ wpWeight w ((tailIdxEquivFinsupp N).symm e).1 *
+        (ρ.val ^ (wpWeight w p₁.1 + wpWeight w p₂.1 -
+          wpWeight w ((tailIdxEquivFinsupp N).symm e).1) * (x.1 p₁ * y.1 p₂)) =
+      ρ.val ^ (wpWeight w ((tailIdxEquivFinsupp N).symm e).1 +
+        (wpWeight w p₁.1 + wpWeight w p₂.1 -
+          wpWeight w ((tailIdxEquivFinsupp N).symm e).1)) * (x.1 p₁ * y.1 p₂) by
+        rw [pow_add]; ring,
+      Nat.add_sub_cancel' hle, pow_add]
+    ring
 
 /-- **The formal-series embedding** `Φ : TailC0 → ℱ_J(P) = MvPowerSeries J P`,
 `Φ(∑ x_μ e_μ) = ∑ ρ^{ω(μ)} x_μ U^μ` ([WP] eq:formal-embedding).  Multiplicative
 because the `ρ`-powers absorb the twist (eq:tail-multiplication); it forgets the
 topology (the target is the full formal product). -/
 noncomputable def tailC0ToMvPowerSeries (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P) :
-    TailC0 w N P ρ →+* MvPowerSeries (TailVar N) P := by sorry
+    TailC0 w N P ρ →+* MvPowerSeries (TailVar N) P where
+  toFun := tailC0ToFormalFun w N ρ
+  map_one' := tailC0ToFormalFun_one w N ρ
+  map_mul' := tailC0ToFormalFun_mul w N ρ
+  map_zero' := tailC0ToFormalFun_zero w N ρ
+  map_add' := tailC0ToFormalFun_add w N ρ
+
+theorem coeff_tailC0ToMvPowerSeries (w : ℕ → ℕ) (N : ℕ) (ρ : TwistElem P)
+    (x : TailC0 w N P ρ) (e : TailVar N →₀ ℕ) :
+    MvPowerSeries.coeff e (tailC0ToMvPowerSeries w N ρ x) =
+      ρ.val ^ wpWeight w ((tailIdxEquivFinsupp N).symm e).1 *
+        x.1 ((tailIdxEquivFinsupp N).symm e) := rfl
 
 /-- `Φ` is injective when the twist element is regular
 ([WP] thm:parity-rationally-reduced: "The `W`-regularity of `P` then gives
 `x_μ = 0`"). -/
 theorem tailC0ToMvPowerSeries_injective (ρ : TwistElem P)
     (hρ : ∀ x : P, ρ.val * x = 0 → x = 0) :
-    Function.Injective (tailC0ToMvPowerSeries w N ρ) := by sorry
+    Function.Injective (tailC0ToMvPowerSeries w N ρ) := by
+  have hreg : ∀ (k : ℕ) (a : P), ρ.val ^ k * a = 0 → a = 0 := by
+    intro k
+    induction k with
+    | zero => intro a ha; rwa [pow_zero, one_mul] at ha
+    | succ n ih =>
+      intro a ha
+      exact hρ a (ih (ρ.val * a) (by rwa [pow_succ, mul_assoc] at ha))
+  rw [injective_iff_map_eq_zero]
+  intro x hx
+  refine Subtype.ext (funext fun μ => ?_)
+  have he := congrArg (MvPowerSeries.coeff (tailIdxEquivFinsupp N μ)) hx
+  rw [coeff_tailC0ToMvPowerSeries, Equiv.symm_apply_apply, map_zero] at he
+  show x.1 μ = (0 : P)
+  exact hreg _ _ he
 
 /-- Reducedness descends through `Φ` ([WP] thm:parity-rationally-reduced, final
 step; with `WP/Reduced.lean`'s `IsReduced (MvPowerSeries J P)`). -/
 theorem isReduced_tailC0 (ρ : TwistElem P) [IsReduced P]
     (hρ : ∀ x : P, ρ.val * x = 0 → x = 0) :
-    IsReduced (TailC0 w N P ρ) := by sorry
+    IsReduced (TailC0 w N P ρ) := by
+  haveI : IsReduced (MvPowerSeries (TailVar N) P) := isReduced_mvPowerSeries _ _
+  exact isReduced_of_injective (tailC0ToMvPowerSeries w N ρ)
+    (tailC0ToMvPowerSeries_injective w N ρ hρ)
 
 /-- Domain-ness descends through `Φ` (used for the bad chart ℬ,
 [WP] prop:weighted-chart-domain-nonuniform; with mathlib's
 `NoZeroDivisors (MvPowerSeries σ R)`). -/
 theorem isDomain_tailC0 (ρ : TwistElem P) [IsDomain P]
     (hρ : ∀ x : P, ρ.val * x = 0 → x = 0) :
-    IsDomain (TailC0 w N P ρ) := by sorry
+    IsDomain (TailC0 w N P ρ) := by
+  haveI : Nontrivial (MvPowerSeries (TailVar N) P) :=
+    ⟨⟨0, 1, fun h => by
+      have h0 := congrArg (MvPowerSeries.coeff (0 : TailVar N →₀ ℕ)) h
+      rw [map_zero, MvPowerSeries.coeff_zero_one] at h0
+      exact zero_ne_one h0⟩⟩
+  haveI : IsDomain (MvPowerSeries (TailVar N) P) := NoZeroDivisors.to_isDomain _
+  exact Function.Injective.isDomain (tailC0ToMvPowerSeries w N ρ)
+    (tailC0ToMvPowerSeries_injective w N ρ hρ)
 
 end WeightedParity
