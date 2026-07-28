@@ -925,8 +925,23 @@ theorem sum_slice_mul_Ypat (f : WPHead K w N) :
 the rank-`2^N` free normal form [WP] eq:finite-stage-normal-form. -/
 theorem moduleFinite_head_over_even :
     letI : Algebra ↥(wpEvenSupport K w N) (WPHead K w N) :=
-      (Subring.inclusion (by sorry : wpEvenSupport K w N ≤ wpHeadSupport K w N)).toAlgebra
-    Module.Finite ↥(wpEvenSupport K w N) (WPHead K w N) := by sorry
+      (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)).toAlgebra
+    Module.Finite ↥(wpEvenSupport K w N) (WPHead K w N) := by
+  classical
+  letI : Algebra ↥(wpEvenSupport K w N) (WPHead K w N) :=
+    (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)).toAlgebra
+  refine ⟨⟨Finset.univ.image (Ypat K w N), ?_⟩⟩
+  rw [eq_top_iff]
+  intro f _
+  rw [← sum_slice_mul_Ypat f]
+  refine Submodule.sum_mem _ fun ε _ => ?_
+  have hsmul : (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N))
+      (slice ε f) * Ypat K w N ε = (slice ε f) • Ypat K w N ε := by
+    rw [Algebra.smul_def]
+    rfl
+  rw [hsmul]
+  exact Submodule.smul_mem _ _ (Submodule.subset_span
+    (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_univ ε))))
 
 variable {K} in
 /-- **The heads are noetherian** ([WP]: "`𝒜_N` is affinoid"; via
