@@ -26,6 +26,8 @@ open CategoryTheory TopologicalSpace Opposite
 
 open scoped AlgebraicGeometry
 
+set_option linter.overlappingInstances false
+
 noncomputable section
 
 universe u
@@ -187,7 +189,7 @@ noncomputable def VObj.restrictTopIso (X : VObj.{u}) : X.restrictOpen ⊤ ≅ X 
 
 /-- **An affinoid is an adic space** — the definition is not vacuous. -/
 theorem isAdicSpace_toVObj (C : AffinoidVChart.{u}) : IsAdicSpace C.toVObj :=
-  fun x => ⟨⊤, trivial, C, ⟨VObj.restrictTopIso C.toVObj⟩⟩
+  fun _x => ⟨⊤, trivial, C, ⟨VObj.restrictTopIso C.toVObj⟩⟩
 
 
 /-! ### Locality -/

@@ -408,9 +408,11 @@ theorem restrict_zero_injective (W : Opens ↥(yTop p F ϖ)) :
         (limitRestrict (translate_zero_le_W p F ϖ W) b) := h2
     _ = b := (hcomp b).trans (hid b)
 
-/-- **Injectivity of the section comparison** for a wandering open. -/
+/-- **Injectivity of the section comparison.** The wandering hypothesis is
+carried for uniformity with the surjectivity half but is not used: separation of
+invariant sections holds over any open. -/
 theorem curveSectionRestrict_injective (W : Opens ↥(yTop p F ϖ))
-    (hdis : ∀ k : ℤ, k ≠ 0 →
+    (_hdis : ∀ k : ℤ, k ≠ 0 →
       Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
           : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
         ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))) :
