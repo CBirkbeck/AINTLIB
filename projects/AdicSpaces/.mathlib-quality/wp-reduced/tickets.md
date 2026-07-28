@@ -156,7 +156,16 @@ propext/Classical.choice/Quot.sound) before marking done.
   cover).  Sources: [WP] 739–787 (route change documented, decomposition.md E2).
 
 ### [W8] Heads.lean II — noetherian, strongly noetherian, sheafy, dense
-- Status: open | File: WP/Heads.lean | Depends: W7, W5 | Type: theorems
+- Status: in_progress (2026-07-28: isNoetherianRing_WPHead DONE (equiv transport +
+  of_finite, axiom-clean); exists_head_approx density DONE (superlevel truncation).
+  REMAINING 3 sorries: isNoetherianRing_unitBall_WPHead (ball-level slice argument —
+  mirror sum_slice_mul_Ypat with norm-1 generators over unitBall(even) after
+  isNoetherianRing_unitBall_of_isometry transport of Uniformizer.
+  isNoetherianRing_unitBall_P), isStronglyNoetherian_WPHead (per-k: restrictedGauss
+  bridge + generalize CDVFNoetherian's isNoetherianRing_P to arbitrary scale-bundle
+  base + MvRestricted-congr along isometric isos + coefficientwise slices), and
+  isSheafy_WPHead (828b assembly: haveI IsStronglyNoetherian + the ambient letI
+  ceremony per isSheafy_of_stronglyNoetherian_828b).) | File: WP/Heads.lean | Depends: W7, W5 | Type: theorems
 - Decls: `IsDomain (WPHead)`, `isNoetherianRing_WPHead`,
   `isNoetherianRing_unitBall_WPHead`, `isStronglyNoetherian_WPHead`,
   `isSheafy_WPHead`, `exists_head_approx`.

@@ -993,6 +993,86 @@ precision by an element of some head ([WP] eq:A-completion-of-heads:
 "`𝒜 = closure(⋃_N 𝒜_N)`"). -/
 theorem exists_head_approx (ϖ : Uniformizer K) (f : WPA K w) (ℓ : ℕ) :
     ∃ (N : ℕ) (g : WPHead K w N),
-      ‖f - headIncl K w N g‖ ≤ ‖ϖ.val‖ ^ ℓ * ‖f‖ := by sorry
+      ‖f - headIncl K w N g‖ ≤ ‖ϖ.val‖ ^ ℓ * ‖f‖ := by
+  classical
+  rcases eq_or_ne f 0 with rfl | hf0
+  · refine ⟨0, 0, ?_⟩
+    rw [map_zero, sub_zero, norm_zero]
+    exact mul_nonneg (pow_nonneg (norm_nonneg _) _) (le_refl _)
+  · set ε : ℝ := ‖ϖ.val‖ ^ ℓ * ‖f‖ with hε_def
+    have hf_pos : (0 : ℝ) < ‖f‖ := norm_pos_iff.mpr hf0
+    have hε_pos : 0 < ε := mul_pos (pow_pos ϖ.norm_val_pos ℓ) hf_pos
+    have hSfin : {t : ℕ →₀ ℕ | ε < ‖coeffA K w t f‖}.Finite := by
+      refine (finite_setOf_le_norm_coeff (f := f.1) hε_pos).subset ?_
+      intro t ht
+      rw [Set.mem_setOf_eq] at ht ⊢
+      exact le_of_lt ht
+    set S : Finset (ℕ →₀ ℕ) := hSfin.toFinset with hS_def
+    set N : ℕ := S.sup fun t => t.support.sup id with hN_def
+    have hbound : ∀ t ∈ S, ∀ n, N < n → t n = 0 := by
+      intro t ht n hn
+      by_contra hne
+      have hmem : n ∈ t.support := Finsupp.mem_support_iff.mpr hne
+      have h1 : n ≤ t.support.sup id := Finset.le_sup (f := id) hmem
+      have h2 : t.support.sup id ≤ N := Finset.le_sup (f := fun t => t.support.sup id) ht
+      omega
+    have hres : MvPowerSeries.IsRestrictedGauss (fun _ : ℕ => (1 : ℝ))
+        (fun t => if t ∈ S then coeffA K w t f else 0) := by
+      have hchar : ∀ δ : ℝ, 0 < δ → {t : ℕ →₀ ℕ |
+          δ ≤ ‖(if t ∈ S then coeffA K w t f else 0 : K)‖}.Finite := by
+        intro δ hδ
+        refine S.finite_toSet.subset ?_
+        intro t ht
+        rw [Set.mem_setOf_eq] at ht
+        by_cases htS : t ∈ S
+        · exact htS
+        · rw [if_neg htS, norm_zero] at ht
+          exact absurd (hδ.trans_le ht) (lt_irrefl 0)
+      show Filter.Tendsto _ Filter.cofinite (nhds 0)
+      rw [Metric.tendsto_nhds]
+      intro δ hδ
+      rw [Filter.eventually_cofinite]
+      refine (hchar δ hδ).subset ?_
+      intro t ht
+      rw [Set.mem_setOf_eq] at ht ⊢
+      rw [Real.dist_eq, sub_zero, prod_one_weights, mul_one] at ht
+      rw [abs_of_nonneg (norm_nonneg _)] at ht
+      exact not_lt.mp ht
+    have hsupp : ∀ t : ℕ →₀ ℕ, ¬ HeadMem w N t →
+        (⟨(fun t => if t ∈ S then coeffA K w t f else 0 : (ℕ →₀ ℕ) → K), hres⟩ :
+          Amb K).1 t = 0 := by
+      intro t ht
+      show (if t ∈ S then coeffA K w t f else 0) = 0
+      by_cases htS : t ∈ S
+      · exfalso
+        apply ht
+        have hlt : ε < ‖coeffA K w t f‖ := hSfin.mem_toFinset.mp htS
+        have hne : coeffA K w t f ≠ 0 := by
+          intro h0
+          rw [h0, norm_zero] at hlt
+          linarith
+        refine ⟨?_, fun n hn => hbound t htS n hn⟩
+        by_contra hmem
+        exact hne (coeffA_of_not_wpMem K w hmem f)
+      · rw [if_neg htS]
+    refine ⟨N, ⟨⟨(fun t => if t ∈ S then coeffA K w t f else 0 : (ℕ →₀ ℕ) → K),
+      hres⟩, hsupp⟩, ?_⟩
+    rw [norm_eq_iSup_coeffA]
+    refine ciSup_le fun t => ?_
+    have hco : coeffA K w t (f - headIncl K w N
+        ⟨⟨(fun t => if t ∈ S then coeffA K w t f else 0 : (ℕ →₀ ℕ) → K), hres⟩,
+          hsupp⟩) = coeffA K w t f - (if t ∈ S then coeffA K w t f else 0) := by
+      show MvPowerSeries.coeff t (f.1.1 - _) = _
+      rw [map_sub]
+      rfl
+    rw [hco]
+    by_cases htS : t ∈ S
+    · rw [if_pos htS, sub_self, norm_zero]
+      exact le_of_lt hε_pos
+    · rw [if_neg htS, sub_zero]
+      have : ¬ ε < ‖coeffA K w t f‖ := fun h => htS (hSfin.mem_toFinset.mpr h)
+      linarith [not_lt.mp this]
+
+
 
 end WeightedParity
