@@ -22,6 +22,12 @@ proves the bridge:
   each piece.
 -/
 
+-- v4.33 bump: neither the `Scheme`/`CommAlgCat` category instances nor the semireducible
+-- component types are transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry
 
 namespace ModularCurves
@@ -508,7 +514,6 @@ theorem framedPinned_leg_comb (D : GaloisRepData N) {T : Scheme.{0}}
         pullback.lift_snd_assoc]
       rw [IsPullback.isoPullback_hom_snd_assoc, ι_constSchemeMapAlong_assoc,
         constVecCorrPt, reassoc_of% hover]
-      exact rfl
     · simp only [Category.assoc, pullback.lift_fst_assoc, pullback.lift_snd,
         Category.comp_id]
       rw [← Category.assoc _ _ h,
@@ -1880,7 +1885,6 @@ theorem muNRootsRead_classify (D : GaloisRepData N) [Fact (1 < N)]
       pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
         (terminal.from (muNAbs N)) = _
     simp only [Category.assoc]
-    rfl
   refine Eq.trans (congrArg
     (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
     (h1.trans (congrArg

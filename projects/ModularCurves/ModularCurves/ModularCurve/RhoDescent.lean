@@ -17,6 +17,12 @@ dictionary), agreeing on overlaps by `rhoLevelStructureOfFramed_glSmul` (T-EQ-2)
 and descend by this module.
 -/
 
+-- v4.33 bump: neither the `Scheme`/`CommAlgCat` category instances nor the semireducible
+-- component types are transparent enough for the rewrites and instance searches below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry
 
 namespace ModularCurves

@@ -1,1 +1,1 @@
-FOCUS: v4.33 bump repair on merge/main-into-dev — LAST file: GroupScheme/NIsogeny.lean (5 errs: 323 unsolved, 1343 rw isoSpec, 1410 True-mismatch, 2080/2399 no-goals). All else green.
+FOCUS: root target ModularCurves is GREEN (9181 jobs). Now repairing the 66 root-orphaned modules (incl. ModularCurve.Rho* = the Y(rho) line + ForMathlib.UnitRetraction/StandardEtaleH1) under v4.33.
