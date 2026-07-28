@@ -2516,7 +2516,16 @@ valuations.
   axiom-clean — it fed xVObj).
 
 ### [P5-1] Generic VObj restriction to an open
-- **Status**: open | **File**: StructureSheaf.lean or new VRestrict.lean
+- **Status**: DONE 2026-07-28 (VRestrict.lean, axiom-clean): opensIncl +
+  restrictPoint (the ySpaPoint pattern — ALWAYS route subset points through
+  it) + restrictSpace + restrictRingStalkIso/Equiv +
+  maximalIdeal_comap_of_ringEquiv + VPreObj.restrictOpen +
+  restrictOpenFunctor(_iSup/_inf) + isSheafOfTopologicalRings_restrict +
+  VObj.restrictOpen. PERF/PROOF pattern: propositionally-equal Opens
+  (image-of-inf vs inf-of-images, image-of-iSup vs iSup-of-images) are
+  bridged by GENERALIZE-SUBST keys (∀ Z, Z = … → …; subst; exact) — homOfLE
+  is proof-irrelevant so the transported statement lands definitionally; no
+  eqToHom juggling, no value-level cross lemmas needed | **File**: StructureSheaf.lean or new VRestrict.lean
 - **Statement**: `VPreObj.restrictOpen (X : VPreObj) (U : Opens X.toTopCat) :
   VPreObj` (carrier ↥U, presheaf = X.presheaf restricted along
   U.isOpenEmbedding, stalks/val/val_supp transported along restrictStalkIso —
@@ -2529,7 +2538,11 @@ valuations.
 - **Consumers**: X|_U, 𝒴|_V, Spa(A_W)|_rational everywhere below.
 
 ### [P5-2] Spa of a sheafy complete Tate ring as a VObj
-- **Status**: open | **File**: new SpaVObj.lean
+- **Status**: DONE 2026-07-28 (SpaVObj.lean, axiom-clean): rationalShrink_tate
+  (the rationalShrink_Y port, Y-interiority stripped — compiled on the SECOND
+  try; the whole 8.14 dance was Y-free except the two Tate suppliers) +
+  stalkShrink_tate + spaPresheafedSpaceTate + spaVObjTate ([IsStronglyNoetherian
+  A] for the 828b sheaf field; `classical` needed before the letI-chain) | **File**: new SpaVObj.lean
 - **Statement**: for [IsTateRing A][IsNoetherianRing A][IsStronglyNoetherian A]
   [T2Space A][NonarchimedeanRing A][IsRingOfIntegralElements A⁺]
   [CompleteSpace-right]: `spaVObjTate A : VObj` with carrier SpaTop A,
@@ -2544,7 +2557,69 @@ valuations.
   survey SheafyPair.lean/HomSheafPredicate.lean first).
 - **Consumers**: the affinoid targets Spa(A_W), Spa(presheafValue D').
 
-### [P5-4] Rational-in-chart 𝒱-iso (8.15 over the Tate chart)
+### [P5-3a] The keystone at weakened hypotheses — DONE (the campaign's breakthrough)
+- **Status**: DONE 2026-07-28 (RelativePieceKeystoneGen.lean, namespace
+  `ValuationSpectrum.GenKeystone`, axiom-clean, 1189 lines). **AUDIT FINDING**:
+  in `RelativePieceKeystone.lean`'s Tate-base chain the hypotheses
+  `[IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]` are used for
+  EXACTLY ONE purpose — supplying the same three classes for the VALUE ring
+  `B := presheafValue D₀` via `presheafValue_is…_faithful`. Moving them to `B`
+  is therefore a faithful generalization. Mechanical port recipe (reusable):
+  (1) delete the trio from each binder block; (2) insert
+  `[IsTateRing (presheafValue D₀)] [IsNoetherianRing (presheafValue D₀)]
+  [IsStronglyNoetherian (presheafValue D₀)]` immediately AFTER the `D₀`
+  argument (watch the 4 binder shapes: `(D₀ …)`, `(D₀ E …)`, `(D₀ E E' …)`,
+  `(D₀ E₁ E₂ E₃ …)`); (3) delete the `haveI … := presheafValue_is…_faithful D₀`
+  supplier lines; (4) `hTateB.toIsHuberRing` → `IsTateRing.toIsHuberRing`;
+  (5) `presheafValue_concretePair_A₀` carries a VESTIGIAL `[IsTateRing A]`
+  (statement is `rfl`) — local copy `GenKeystone.concretePair_A₀'`.
+  `RelativePieceKeystone.lean` is untouched; existing consumers unaffected.
+
+### [P5-K] THE remaining core: (Spa A)|_{spaOpen D₀} ≅ Spa B in 𝒱 (unifies P5-3/P5-4)
+- **Status**: open — DESIGN + OBSTRUCTION ANALYSIS 2026-07-28
+- **Statement**: for a Huber base `A` and a valid rational datum `D₀` whose value
+  `B := presheafValue D₀` is complete Tate + strongly noetherian:
+  `(spaVPreObj A).restrictOpen (spaOpens D₀) ≅ spaVObjTate B` in 𝒱.
+  Needed TWICE for the curve: (i) `A := A_inf`, `D₀ :=` the window datum
+  (`B = windowChartRing n`, Tate by `isTateRing_bigWindowChart`, strongly
+  noetherian by `isStronglyNoetherian_canonical_window`); (ii) `A := B_n`
+  (Tate), `D₀ := D'` the rational sub-datum of `exists_window_subdatum_nbhd`.
+- **AVAILABLE**: base homeo — Tate `spaPresheafValueHomeomorphRationalOpen`,
+  non-Tate `spaPresheafValueHomeomorphRationalOpen'` (needs a supplied top-nilp
+  unit of the completion; the FF side already uses it via spaChartHomeoWindow);
+  open-correspondence `comap_canonicalMap_mem_rationalOpen_iff` (Huber-generic,
+  no spanning needed); ring-comparison `GenKeystone.relativePiece_equiv` +
+  `_restrictionMap` + `_restrict_square` + `imagePieceDatum_isRational` +
+  `imagePieceDatum_mem_rationalOpen_iff` + `_rationalOpen_mono/_inter`;
+  `limitSections V` is a LIMIT over `RationalIndex V` and at `V = spaOpens D₀`
+  the index `D₀` is INITIAL, so `limitEval : limitSections (spaOpens D₀) ≃
+  presheafValue D₀` (the top-open case is free).
+- **ROUTE (settled)**: both sides are SHEAVES (A-side by `VObj.restrictOpen` of
+  P5-1, B-side by 828b in `spaVObjTate`), so it suffices to give a natural iso
+  on a BASIS of opens and glue. Basis of `Spa B`: the `spaOpen_B(imagePieceDatum
+  D₀ E.T E.s hspanE)` for A-rational `E ⊆ spaOpen D₀` with `span E.T = ⊤`; on
+  such a basic open both values are canonically `presheafValue_A E ≅
+  presheafValue_B (im E)` (keystone) — naturality is `_restrict_square`.
+- **⚠ THE REMAINING OBSTRUCTION (precise)**: the keystone needs
+  `hspanE : Ideal.span (E.T) = ⊤`, NOT merely E's `hopen`. Over a TATE base
+  spanning rational opens are a basis (`exists_spanning_presentation_of_mem_
+  basicOpens`, the ϖ^k-numerator trick), so instance (ii) is unblocked.
+  Over `A_inf` they are NOT: `A_inf` is LOCAL (max ideal `(p, [ϖ])`), so
+  `span T = ⊤` forces a unit in `T` — the spanning data are far from a basis of
+  the window. ⇒ **instance (i) needs the keystone at `hopen`-only data**
+  (Wedhorn's actual generality) — sub-ticket P5-3b below.
+- **P5-3b (spawned)**: generalize the Gen chain from `hspan : span T = ⊤` to
+  the datum's own `hopen`. Content: (a) `genPieceDatum` → take `E` itself (it
+  carries `hopen` at its own pair; retarget to `D₀.P` — the pair-change lemma);
+  (b) the B-side openness `span (image E.T)` open in `B` from `span E.T` open in
+  `A` (continuity of `canonicalMap` + `presheafValue_ringOfDef` absorption —
+  mirror `genPiece_hopen`'s absorption argument with `pod_absorb_finset_mul_pow`
+  at the B-pair, replacing the `span = ⊤` combination by an `I^N ⊆ span T`
+  combination); (c) re-run the recipe of P5-3a. The rest of the chain
+  (`genPiece_rel_forward/backward`, the roundtrips) never touches `hspan`
+  except through `genPieceDatum`/`imagePieceDatum`, so (a)+(b) is the whole job.
+
+### [P5-4] Rational-in-chart 𝒱-iso (8.15 over the Tate chart) — now = P5-K instance (ii)
 - **Status**: open | **Depends**: P5-1, P5-2 | **File**: new (chart side)
 - **Statement**: for D' : RationalLocData A_W valid (A_W := windowChartRing n):
   `(spaVObjTate A_W).restrictOpen (spaOpens D') ≅ spaVObjTate (presheafValue D')`
