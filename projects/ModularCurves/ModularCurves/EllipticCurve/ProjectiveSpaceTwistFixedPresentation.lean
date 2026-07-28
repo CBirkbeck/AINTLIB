@@ -26,7 +26,8 @@ variable {R : Type u} {σ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance fixedPresentationMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 /-- A section on one coordinate chart extends after twisting by the positive
