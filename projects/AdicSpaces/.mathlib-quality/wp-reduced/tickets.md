@@ -443,7 +443,19 @@ propext/Classical.choice/Quot.sound) before marking done.
   ticket; budget the Coram-Fubini idioms (maxSynthPendingDepth 8, maxHeartbeats).
 
 ### [R1] Reduced.lean I — MvPowerSeries reducedness (mathlib-grade)
-- Status: open | File: WP/Reduced.lean | Depends: none | Parallel: yes (early)
+- Status: done | File: WP/Reduced.lean | Depends: none | Parallel: yes (early)
+- Progress: DONE 2026-07-28.  KEY SIMPLIFICATION vs sketch: `mvPowerSeriesPi`'s
+  forward map is `MvPowerSeries.map (Pi.evalRingHom R i)` per component — map_mul'
+  free via `map_mul`, and BOTH inverse laws are literal `rfl` (kernel unfolds map).
+  Raw-lambda coefficientwise route FAILED on coeff-coe opacity (show/rw stuck on
+  `(coeff t X) i` vs `coeff t (fun t' => X t' i)`) — avoid.  Embedding via
+  `RingHom.pi (Ideal.Quotient.mk ·)` (Pi.ringHom deprecated), kernel by
+  `nilradical_eq_sInf` + `Ideal.mem_sInf` + `nilradical_eq_zero` +
+  `Ideal.zero_eq_bot` (0 vs ⊥ needs the bridge).  Assembly: vendored
+  `MvPowerSeries.map_injective` (XiaMvPowerSeriesEquiv — NEW import in
+  Reduced.lean) + mathlib `NoZeroDivisors (MvPowerSeries σ R)` (arb σ) + Pi/quotient
+  IsReduced instances + `isReduced_of_injective` on the composed RingHom.
+  Axioms clean ×3.  Mathlib-contribution candidate confirmed.
 - Decls: `mvPowerSeriesPi`, `exists_injective_pi_quotient`,
   `isReduced_mvPowerSeries`.
 - Sketch: pi-equiv coefficientwise (`MvPowerSeries.coeff`/`Pi.ringHom`; ring-hom

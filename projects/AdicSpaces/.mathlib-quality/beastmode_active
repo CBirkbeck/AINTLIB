@@ -1,1 +1,1 @@
-FOCUS: W11 (Tail III Φ-embedding) — tailIdxEquivFinsupp + tailC0ToMvPowerSeries; note W11 depends R1 (isReduced MvPowerSeries) — R1 may need doing first
+FOCUS: W11 (Tail III Φ) — tailIdxEquivFinsupp + tailC0ToMvPowerSeries + isReduced/isDomain_tailC0
