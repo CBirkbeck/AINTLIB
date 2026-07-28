@@ -845,6 +845,68 @@ theorem comap_pieceEquiv_pointValue [DecidableEq A]
             (pointValue (imgDatum D₀ hE) hwB)) from h1.symm]
     rw [comap_pointValue (imgDatum D₀ hE) hwB]
 
+/-- The comparison carries the `A`-side point value of an index to the
+`B`-side point value of its image index. -/
+theorem comap_pieceEquiv_symm_pointValue [DecidableEq A]
+    {E : RationalLocData A} (hE : E.IsRational)
+    (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s)
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+    (hwB : (w : Spv (presheafValue D₀))
+      ∈ (rationalOpen (imgDatum D₀ hE).T (imgDatum D₀ hE).s
+        ∩ Spa (presheafValue D₀) (presheafValue D₀)⁺
+        : Set (Spv (presheafValue D₀))))
+    (hwA : comap D₀.canonicalMap (w : Spv (presheafValue D₀))
+      ∈ (rationalOpen E.T E.s ∩ Spa A A⁺ : Set (Spv A))) :
+    comap ((pieceEquiv D₀ hE hE_sub).symm.toRingHom) (pointValue E hwA)
+      = pointValue (imgDatum D₀ hE) hwB := by
+  have hK := comap_pieceEquiv_pointValue D₀ hE hE_sub w hwB hwA
+  have hcomp : ((pieceEquiv D₀ hE hE_sub).toRingHom).comp
+      ((pieceEquiv D₀ hE hE_sub).symm.toRingHom) = RingHom.id _ :=
+    RingHom.ext fun z => (pieceEquiv D₀ hE hE_sub).apply_symm_apply z
+  rw [← hK]
+  rw [show comap ((pieceEquiv D₀ hE hE_sub).symm.toRingHom)
+        (comap ((pieceEquiv D₀ hE hE_sub).toRingHom)
+          (pointValue (imgDatum D₀ hE) hwB))
+      = comap (((pieceEquiv D₀ hE hE_sub).toRingHom).comp
+          ((pieceEquiv D₀ hE hE_sub).symm.toRingHom))
+        (pointValue (imgDatum D₀ hE) hwB) from rfl, hcomp]
+  exact congr_fun comap_id _
+
+/-- **The comparison intertwines the open values** — the presheaf-level form
+of the stalk-valuation agreement. -/
+theorem comap_phiHom_openValue [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W)
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) (hw : w ∈ W) :
+    comap (phiHom D₀ hV hVW) (openValue V (paired_shadow D₀ hVW w hw))
+      = openValue W hw := by
+  classical
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  -- an `A`-index of `V` around the shadow, and its image index
+  obtain ⟨E, hE, hEmem, hEsub⟩ := exists_isRational_spaOpen_subset_huber
+    (V := (V : Set ↥(Spa A A⁺))) V.2 (paired_shadow D₀ hVW w hw)
+  set i : RationalIndex V := ⟨E, hE, hEsub⟩ with hi
+  have hwB : (w : Spv (presheafValue D₀))
+      ∈ (rationalOpen (imgDatum D₀ hE).T (imgDatum D₀ hE).s
+        ∩ Spa (presheafValue D₀) (presheafValue D₀)⁺
+        : Set (Spv (presheafValue D₀))) :=
+    ⟨(mem_imgDatum_iff D₀ hE w).mpr hEmem, w.2⟩
+  have hwA : comap D₀.canonicalMap (w : Spv (presheafValue D₀))
+      ∈ (rationalOpen E.T E.s ∩ Spa A A⁺ : Set (Spv A)) :=
+    ⟨hEmem, (shadow D₀ w).2⟩
+  -- both sides computed at that index
+  rw [← comap_limitEvalHom_pointValue (paired_shadow D₀ hVW w hw) i hwA,
+    ← comap_limitEvalHom_pointValue hw (idxOf D₀ hVW i) hwB]
+  -- the componentwise formula for the comparison
+  have hcomp : (limitEvalHom i).comp (phiHom D₀ hV hVW)
+      = ((pieceEquiv D₀ hE (index_sub D₀ hV i)).symm.toRingHom).comp
+          (limitEvalHom (idxOf D₀ hVW i)) :=
+    RingHom.ext fun x => phiHom_apply_component D₀ hV hVW x i
+  refine Eq.trans ?_ (congrArg (comap (limitEvalHom (idxOf D₀ hVW i)))
+    (comap_pieceEquiv_symm_pointValue D₀ hE (index_sub D₀ hV i) w hwB hwA))
+  exact congrFun (congrArg comap hcomp) (pointValue i.D hwA)
+
 end Phi
 
 section Assembly
