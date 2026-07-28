@@ -255,6 +255,69 @@ noncomputable def VPreHom.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u
     rw [hcomp]
     exact (congr_fun comap_id _).symm
 
+/-! ### Corestriction of a morphism to an open containing its range -/
+
+section Corestrict
+
+variable {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶ X)
+  (U : Opens ↥(X.carrier))
+  (hrange : ∀ z : ↥(Z.carrier), (ConcreteCategory.hom f.base) z ∈ U)
+
+/-- The corestriction of the base map to an open containing its range. -/
+def corestrictBase : Z.carrier ⟶ TopCat.of ↥U :=
+  TopCat.ofHom ⟨fun z => ⟨(ConcreteCategory.hom f.base) z, hrange z⟩,
+    Continuous.subtype_mk (ConcreteCategory.hom f.base).continuous _⟩
+
+/-- The image of an open of `U` in the ambient space. -/
+def imgOfOpen (V : Opens ↥U) : Opens ↥(X.carrier) where
+  carrier := Subtype.val '' (V : Set ↥U)
+  is_open' := (U.2.isOpenEmbedding_subtypeVal).isOpenMap _ V.2
+
+/-- The preimage of an open of `U` agrees with the preimage of its image. -/
+theorem corestrict_preimage_eq (V : Opens ↥U) :
+    (Opens.map (corestrictBase f U hrange)).obj V
+      = (Opens.map f.base).obj (imgOfOpen U V) := by
+  refine Opens.ext (Set.ext fun z => ?_)
+  constructor
+  · intro hz
+    exact ⟨⟨_, hrange z⟩, hz, rfl⟩
+  · rintro ⟨y, hy, hyeq⟩
+    have hy' : y = ⟨(ConcreteCategory.hom f.base) z, hrange z⟩ := Subtype.ext hyeq
+    show (⟨(ConcreteCategory.hom f.base) z, hrange z⟩ : ↥U) ∈ V
+    exact hy' ▸ hy
+
+/-- The open inclusion of `U` as a `TopCat`-morphism. -/
+def openIncl : TopCat.of ↥U ⟶ X.carrier :=
+  TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+
+theorem openIncl_isOpenEmbedding :
+    Topology.IsOpenEmbedding (openIncl (X := X) U) :=
+  U.2.isOpenEmbedding_subtypeVal
+
+/-- The image functor of the open inclusion. -/
+def imgFunctor : Opens ↥U ⥤ Opens ↥(X.carrier) :=
+  (openIncl_isOpenEmbedding U).isOpenMap.functor
+
+theorem imgFunctor_obj (V : Opens ↥U) : (imgFunctor U).obj V = imgOfOpen U V := rfl
+
+/-- The corestricted preimage functor factors through the image functor. -/
+theorem corestrict_functor_eq :
+    (imgFunctor U) ⋙ (Opens.map f.base)
+      = Opens.map (corestrictBase f U hrange) := by
+  refine CategoryTheory.Functor.ext
+    (fun V => (corestrict_preimage_eq f U hrange V).symm) ?_
+  intro V V' i
+  exact Subsingleton.elim _ _
+
+/-- **The corestriction of a morphism to an open containing its range.** -/
+def corestrictHom : Z ⟶ X.restrict (openIncl_isOpenEmbedding U) where
+  base := corestrictBase f U hrange
+  c := Functor.whiskerLeft (imgFunctor U).op f.c ≫
+    eqToHom (congrArg (fun G : Opens ↥U ⥤ Opens ↥(Z.carrier) => G.op ⋙ Z.presheaf)
+      (corestrict_functor_eq f U hrange))
+
+end Corestrict
+
 end ValuationSpectrum
 
 end
