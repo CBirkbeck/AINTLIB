@@ -28,7 +28,8 @@ namespace MvPolynomial
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance projectiveSpacePoleSheafBaseChangeMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 local instance (priority := 10000) {n : ℕ} : DecidableEq (Fin n) :=

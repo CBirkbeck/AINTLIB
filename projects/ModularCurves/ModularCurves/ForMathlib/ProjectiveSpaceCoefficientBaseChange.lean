@@ -414,7 +414,7 @@ theorem isPullback_coefficientMap
     (homogeneousProjπ (R := R) (σ := Fin (d + 1)))
     (homogeneousProjπ (R := k) (σ := Fin (d + 1)))
     (Spec.map (CommRingCat.ofHom (algebraMap k R)))
-    (coordinateOpenCover k (Fin (d + 1)))
+    (coordinateSchemeOpenCover k (Fin (d + 1)))
   rintro (i : Fin (d + 1))
   let global := coefficientMap (algebraMap k R) d
   let toBaseR := homogeneousProjπ (R := R) (σ := Fin (d + 1))
@@ -443,7 +443,7 @@ theorem isPullback_coefficientMap
     (isPullback_coefficientChart k R i).flip
   let e :
       Spec (CommRingCat.of (ProjectiveCoordinateAway R i)) ≅
-        ((coordinateOpenCover k (Fin (d + 1))).pullback₁ global).X i :=
+        ((coordinateSchemeOpenCover k (Fin (d + 1))).pullback₁ global).X i :=
     hChart.isoPullback ≪≫
       pullbackSymmetry
         (coordinateChartMap k (Fin (d + 1)) i) global

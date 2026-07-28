@@ -69,10 +69,10 @@ abbrev coordinateAffineOpenCover
           irrelevant_toIdeal_le_span_range_X).ge
             (Set.mem_univ x))).choose_spec
 
-/-- The open cover underlying `coordinateAffineOpenCover`, with its index type definitionally
-equal to the coordinate type. -/
+/-- The scheme open cover underlying `coordinateAffineOpenCover`, with its
+index type definitionally equal to the coordinate type. -/
 @[simps! I₀ X f]
-def coordinateOpenCover
+def coordinateSchemeOpenCover
     (R : Type u) [CommRing R] (σ : Type) :
     (Proj (homogeneousSubmodule σ R)).OpenCover where
   I₀ := σ
@@ -89,7 +89,7 @@ lemma coordinateAffineOpenCover_opensRange
     (R : Type u) [CommRing R] (σ : Type) (i : σ) :
     @Scheme.Hom.opensRange _ _
         (coordinateChartMap R σ i)
-        ((coordinateOpenCover R σ).map_prop i) =
+        ((coordinateSchemeOpenCover R σ).map_prop i) =
       coordinateOpen (R := R) i :=
   Proj.opensRange_awayι
     (homogeneousSubmodule σ R)
@@ -192,12 +192,12 @@ def segreProductStandardOpenCover
     constructor
     · intro x
       obtain ⟨i, xi, hi⟩ :=
-        (coordinateOpenCover R (Fin (m + 1))).exists_eq
+        (coordinateSchemeOpenCover R (Fin (m + 1))).exists_eq
           (pullback.fst
             (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
             (homogeneousProjπ (R := R) (σ := Fin (n + 1))) x)
       obtain ⟨j, yj, hj⟩ :=
-        (coordinateOpenCover R (Fin (n + 1))).exists_eq
+        (coordinateSchemeOpenCover R (Fin (n + 1))).exists_eq
           (pullback.snd
             (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
             (homogeneousProjπ (R := R) (σ := Fin (n + 1))) x)
@@ -226,9 +226,9 @@ def segreProductStandardOpenCover
       exact ⟨⟨xi, hi⟩, ⟨yj, hj⟩⟩
     · intro ij
       letI : IsOpenImmersion (coordinateChartMap R (Fin (m + 1)) ij.1) :=
-        (coordinateOpenCover R (Fin (m + 1))).map_prop ij.1
+        (coordinateSchemeOpenCover R (Fin (m + 1))).map_prop ij.1
       letI : IsOpenImmersion (coordinateChartMap R (Fin (n + 1)) ij.2) :=
-        (coordinateOpenCover R (Fin (n + 1))).map_prop ij.2
+        (coordinateSchemeOpenCover R (Fin (n + 1))).map_prop ij.2
       change IsOpenImmersion
         (pullback.map
           (coordinateChartMap R (Fin (m + 1)) ij.1 ≫ homogeneousProjπ)
