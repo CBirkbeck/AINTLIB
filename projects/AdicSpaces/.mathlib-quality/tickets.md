@@ -2614,7 +2614,29 @@ valuations.
   of the image datum pulls back along `pieceEquiv` to the A-side point value
   of `E` (`eq_pointValue_of_comap_eq`: both continuous, both pulling back
   along `E.canonicalMap` to the same `Spa A` point).
-- ★ **WHAT IS LEFT (2026-07-28, exact)**: lift `comap_pieceEquiv_pointValue`
+- ★★★ **P5-K COMPLETE AT THE 𝒱 LEVEL 2026-07-28** — Wedhorn 8.15 in `𝒱`:
+  `Spa 𝒪_X(D₀)` IS the rational subset `R(T/s)` of `Spa(A, A⁺)` with its
+  structure sheaf, stalk locality and stalk valuations. The final chain:
+  * K10 `comap_phiHom_openValue` (+ K10b inverse) — the comparison
+    intertwines the OPEN values (choice-independence of `openValue` at an
+    index around the shadow, `phiHom_apply_component`, then K9);
+  * K11 `shadowPre`/`ambComp`/`spaCompHom` — the comparison as an actual
+    morphism `Spa B ⟶ Spa A` of presheafed spaces whose section map IS
+    `ambComp` by definition, so `stalkMap_germ` applies directly;
+  * K12 `comap_ringStalkMap_spaCompHom_stalkValue` — the STALK valuations
+    agree, both directions (forward: germ representatives + `stalkVle_elim`
+    + the open-value agreement + `stalkVle_intro`; backward: the B-side
+    shrink lands on an arbitrary open, pushed back by
+    `shadowImage`/`shadowPre_shadowImage` since `shadow` is an open
+    embedding, with a generalize-subst key for the Opens equality);
+  * K13 `spaVPreObjOf` + `isLocalHom_of_val_comap` + **`spaCompVPreHom`** —
+    the comparison is a `VPreHom`.
+- **REMAINING (assembly only)**: P5-5 (quotient leg `X|_{π V} ≅ 𝒴|_V`) and
+  P5-6 (`IsAdicSpace` + `isAdicSpace_xVObj`), plus the small step of turning
+  `spaCompVPreHom` into a 𝒱-ISO (its underlying presheafed-space map is
+  `spaRestrictIso`-composed-with-`ofRestrict`, an open immersion onto
+  `spaOpens D₀`; restrict the target to get an iso).
+- ★ **HISTORICAL — WHAT WAS LEFT (2026-07-28, exact)**: lift `comap_pieceEquiv_pointValue`
   from POINT values to STALK values. `stalkValue` is characterised by
   `comap_germ_stalkValue : comap (germ U v hvU) (stalkValue v) = openValue U
   hvU` (StructureSheafStalks ~830), and `openValue` is the limit of
