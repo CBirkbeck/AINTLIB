@@ -365,6 +365,8 @@ noncomputable def curveSectionRestrict (W : Opens ↥(yTop p F ϖ)) :
   (limitRestrict (yFunctor_le_curvePreimage_xImage p F ϖ W)).comp
     (frobFixed p F ϖ (xImage p F ϖ W)).subtype
 
+/-- The section comparison is continuous — it is a `limitRestrict` after the subring
+inclusion. The content of P5-5c is the continuity of the INVERSE, not of this map. -/
 theorem curveSectionRestrict_continuous (W : Opens ↥(yTop p F ϖ)) :
     Continuous (curveSectionRestrict p F ϖ W) :=
   (limitRestrict_continuous _).comp continuous_subtype_val
@@ -435,12 +437,16 @@ noncomputable def glueInvRaw (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) 
       (curvePreimage p F ϖ (xImage p F ϖ W)))) :=
   (exists_glue_extending p F ϖ W hdis s).choose
 
+/-- Every translate-component of the glue is the corresponding Frobenius transport of
+`s`. This is what makes the glue continuous: each component is continuous in `s`. -/
 theorem glueInvRaw_pieces (s : ↥(limitSections ((yFunctor p F ϖ).obj W)))
     (k : ℤ) :
     limitRestrict (yFunctor_translate_le p F ϖ W k) (glueInvRaw p F ϖ W hdis s)
       = translateFam p F ϖ W s k :=
   (exists_glue_extending p F ϖ W hdis s).choose_spec.1 k
 
+/-- The glued section is `φ`-invariant, so it really is a section of the curve's
+structure presheaf. -/
 theorem glueInvRaw_invariant (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
     glueInvRaw p F ϖ W hdis s ∈ frobFixed p F ϖ (xImage p F ϖ W) :=
   glue_invariant p F ϖ W s _ (glueInvRaw_pieces p F ϖ W hdis s)
@@ -450,6 +456,8 @@ noncomputable def glueInv (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
     ↥(frobFixed p F ϖ (xImage p F ϖ W)) :=
   ⟨glueInvRaw p F ϖ W hdis s, glueInvRaw_invariant p F ϖ W hdis s⟩
 
+/-- The glue is a right inverse of the section comparison: restricting it back to `W`
+recovers the original section. -/
 theorem curveSectionRestrict_glueInv
     (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
     curveSectionRestrict p F ϖ W (glueInv p F ϖ W hdis s) = s := by
@@ -487,6 +495,9 @@ theorem translateFam_continuous (k : ℤ) :
       (le_of_eq (yFunctor_frobOpens p F ϖ k W).symm)).comp
     (limitFrobHom_continuous p F k ((yFunctor p F ϖ).obj W))
 
+/-- **The glue is continuous.** The sheaf's `isEmbedding` field says the saturation's
+topology is induced by restriction to the translates, and by `glueInvRaw_pieces`
+each such component is a Frobenius transport of `s`, hence continuous in `s`. -/
 theorem glueInvRaw_continuous : Continuous (glueInvRaw p F ϖ W hdis) := by
   have hcont : Continuous (fun (s : ↥(limitSections ((yFunctor p F ϖ).obj W)))
       (m : ULift ℤ) => translateFam p F ϖ W s m.down) :=
@@ -503,6 +514,8 @@ theorem glueInvRaw_continuous : Continuous (glueInvRaw p F ϖ W hdis) := by
   exact (funext fun m : ULift ℤ =>
     glueInvRaw_pieces p F ϖ W hdis s m.down).symm
 
+/-- Continuity of the glue, as a map into the invariant sections (the subring carries
+the induced topology). -/
 theorem glueInv_continuous : Continuous (glueInv p F ϖ W hdis) :=
   continuous_induced_rng.mpr (glueInvRaw_continuous p F ϖ W hdis)
 
@@ -522,6 +535,8 @@ noncomputable def curveSectionEquiv :
   RingEquiv.ofBijective (curveSectionRestrict p F ϖ W)
     (curveSectionRestrict_bijective p F ϖ W hdis)
 
+/-- The equivalence's inverse IS the glue — the identification that transfers
+`glueInv_continuous` to `curveSectionEquiv.symm`. -/
 theorem curveSectionEquiv_symm_eq :
     ((curveSectionEquiv p F ϖ W hdis).symm : _ → _)
       = glueInv p F ϖ W hdis := by

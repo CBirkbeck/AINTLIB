@@ -40,10 +40,14 @@ variable (ϖ : PseudoUniformizer F)
 
 /-! ### (a) the base of the quotient leg is an open embedding -/
 
+/-- The quotient leg's base map is the projection, definitionally. -/
 theorem yRestrictToCurve_base_apply (V : Opens ↥(yTop p F ϖ)) (v : ↥V) :
     ConcreteCategory.hom (yRestrictToCurve p F ϖ V).toHom.base v
       = yTopToCurve p F ϖ v.1 := rfl
 
+/-- **The carrier half of the open immersion**: on a wandering `V` the projection is
+injective (distinct points of `V` are not in one `φ`-orbit), continuous, and open
+(the quotient map is open), hence an open embedding. -/
 theorem yRestrictToCurve_base_isOpenEmbedding (V : Opens ↥(yTop p F ϖ))
     (hdis : ∀ k : ℤ, k ≠ 0 →
       Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj V
@@ -274,6 +278,8 @@ theorem quotientLegVPreHom_toHom_eq :
       = (quotientLegIsoRestrictOpen p F ϖ V hdis).hom := rfl
 
 include hdis in
+/-- Consequence of `quotientLegVPreHom_toHom_eq`: the quotient leg's
+`𝒱^pre`-morphism is invertible, which is what `VPreHom.asIso` consumes. -/
 theorem isIso_quotientLegVPreHom_toHom :
     IsIso (quotientLegVPreHom p F ϖ V).toHom := by
   rw [quotientLegVPreHom_toHom_eq p F ϖ V hdis]

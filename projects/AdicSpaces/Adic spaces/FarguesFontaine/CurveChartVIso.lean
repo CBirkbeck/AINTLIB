@@ -148,6 +148,8 @@ noncomputable abbrev ySliceOfRestrict :
   (yPresheafedSpace p F ϖ).ofRestrict
     (ValuationSpectrum.openIncl_isOpenEmbedding (X := yPresheafedSpace p F ϖ) V)
 
+/-- The slice inclusion is the composite of the two restriction inclusions,
+definitionally. -/
 theorem ySliceIncl_eq :
     ySliceIncl p F ϖ V = ySliceOfRestrict p F ϖ V ≫ yAmbOfRestrict p F ϖ := rfl
 
@@ -329,15 +331,21 @@ noncomputable def windowSubVPreHom (hp : 1 < p) :
     (windowSubYSliceIso p F ϖ n D' u' hu' u hu hp).hom
     (windowSubYSliceIso_val_compat p F ϖ n D' u' hu' u hu hp)
 
+/-- The chart `𝒱^pre`-morphism and the presheafed-space isomorphism share an
+underlying map, by construction. -/
 theorem windowSubVPreHom_toHom (hp : 1 < p) :
     (windowSubVPreHom p F ϖ n D' u' hu' u hu hp).toHom
       = (windowSubYSliceIso p F ϖ n D' u' hu' u hu hp).hom := rfl
 
+/-- Consequence of `windowSubVPreHom_toHom`: the chart `𝒱^pre`-morphism is
+invertible. -/
 theorem isIso_windowSubVPreHom_toHom (hp : 1 < p) :
     IsIso (windowSubVPreHom p F ϖ n D' u' hu' u hu hp).toHom := by
   rw [windowSubVPreHom_toHom p F ϖ n D' u' hu' u hu hp]
   exact (windowSubYSliceIso p F ϖ n D' u' hu' u hu hp).isIso_hom
 
+/-- **The chart isomorphism of `𝒱^pre`**: `Spa(𝒪_{B_n}(D'))` is isomorphic, in
+Wedhorn's category, to the slice of `𝒴` it cuts out. -/
 noncomputable def windowSubVPreIso (hp : 1 < p) :
     (ValuationSpectrum.spaVObjTate (A := presheafValue D')).toVPreObj
       ≅ (yVPreObj p F ϖ).restrictOpen

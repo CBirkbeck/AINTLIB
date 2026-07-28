@@ -59,6 +59,8 @@ variable (X : VPreObj.{u}) (U : Opens ↥(X.toTopCat))
 def opensIncl : TopCat.of ↥U ⟶ X.toTopCat :=
   TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
 
+/-- The inclusion of an open subset is an open embedding — the input mathlib's
+`PresheafedSpace.restrict` needs. -/
 theorem opensIncl_isOpenEmbedding :
     Topology.IsOpenEmbedding (opensIncl X U) :=
   U.2.isOpenEmbedding_subtypeVal
@@ -137,6 +139,8 @@ noncomputable def VPreObj.restrictOpen : VPreObj where
 def restrictOpenFunctor : Opens ↥U ⥤ Opens ↥(X.toTopCat) :=
   (opensIncl_isOpenEmbedding X U).isOpenMap.functor
 
+/-- The open-image functor preserves suprema. Needed so that a cover of an open of
+`U` maps to a cover of the corresponding open of `X`. -/
 theorem restrictOpenFunctor_iSup {ι : Type*} (W : ι → Opens ↥U) :
     (restrictOpenFunctor X U).obj (iSup W)
       = ⨆ i, (restrictOpenFunctor X U).obj (W i) := by
@@ -145,6 +149,8 @@ theorem restrictOpenFunctor_iSup {ι : Type*} (W : ι → Opens ↥U) :
   rw [Opens.coe_iSup, Set.image_iUnion, Opens.coe_iSup]
   rfl
 
+/-- The open-image functor preserves binary intersections — the overlap half of the
+sheaf condition transported through the restriction. -/
 theorem restrictOpenFunctor_inf (W₁ W₂ : Opens ↥U) :
     (restrictOpenFunctor X U).obj (W₁ ⊓ W₂)
       = (restrictOpenFunctor X U).obj W₁ ⊓ (restrictOpenFunctor X U).obj W₂ := by
@@ -311,6 +317,9 @@ theorem corestrict_preimage_eq (V : Opens ↥U) :
 def openIncl : TopCat.of ↥U ⟶ X.carrier :=
   TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
 
+/-- The open inclusion is an open embedding. Stated at the `.carrier` spelling (not
+`.toTopCat`), which is what mathlib's `IsOpenImmersion.ofRestrict` instance needs:
+typeclass unification is reducible-only and `toTopCat` is a plain `def`. -/
 theorem openIncl_isOpenEmbedding :
     Topology.IsOpenEmbedding (openIncl (X := X) U) :=
   U.2.isOpenEmbedding_subtypeVal
@@ -319,6 +328,7 @@ theorem openIncl_isOpenEmbedding :
 def imgFunctor : Opens ↥U ⥤ Opens ↥(X.carrier) :=
   (openIncl_isOpenEmbedding U).isOpenMap.functor
 
+/-- The image functor computes the set-image open, definitionally. -/
 theorem imgFunctor_obj (V : Opens ↥U) : (imgFunctor U).obj V = imgOfOpen U V := rfl
 
 /-- The corestricted preimage functor factors through the image functor. -/
@@ -786,9 +796,12 @@ noncomputable def restrictHomIso :
       (openIncl_isOpenEmbedding (X := Y.toPresheafedSpace) (imgOpenOfHom f U)))
     ((range_restrict_comp f U).trans Subtype.range_val.symm)
 
+/-- The restricted morphism and the induced presheafed-space isomorphism have the
+same underlying map — both are mathlib's `IsOpenImmersion.lift`, so this is `rfl`. -/
 theorem restrictHom_toHom_eq :
     (VPreHom.restrictHom f U).toHom = (restrictHomIso f U).hom := rfl
 
+/-- Consequence of `restrictHom_toHom_eq`: the restricted morphism is invertible. -/
 theorem isIso_restrictHom_toHom : IsIso (VPreHom.restrictHom f U).toHom := by
   rw [restrictHom_toHom_eq f U]
   exact (restrictHomIso f U).isIso_hom
@@ -851,9 +864,13 @@ noncomputable def restrictRestrictHomIso :
       (openIncl_isOpenEmbedding (X := X.toPresheafedSpace) (imgOfOpen W U)))
     ((range_double_restrict X W U).trans Subtype.range_val.symm)
 
+/-- The transitivity morphism and its `isoOfRangeEq` counterpart share an underlying
+map (both are `IsOpenImmersion.lift`), so this is `rfl`. -/
 theorem restrictRestrictHom_toHom_eq :
     (restrictRestrictHom X W U).toHom = (restrictRestrictHomIso X W U).hom := rfl
 
+/-- Consequence of `restrictRestrictHom_toHom_eq`: the transitivity morphism is
+invertible. -/
 theorem isIso_restrictRestrictHom_toHom :
     IsIso (restrictRestrictHom X W U).toHom := by
   rw [restrictRestrictHom_toHom_eq X W U]
@@ -915,10 +932,15 @@ noncomputable def openImmersionRestrictIso :
       (openIncl_isOpenEmbedding (X := X.toPresheafedSpace) U))
     (hU.trans Subtype.range_val.symm)
 
+/-- The corestriction and the induced isomorphism onto the restriction share an
+underlying map, so this is `rfl`. This is what makes the chart step's
+invertibility free. -/
 theorem corestrictOfValCompat_toHom_eq :
     (VPreHom.corestrictOfValCompat f hval U hU).toHom
       = (openImmersionRestrictIso f U hU).hom := rfl
 
+/-- Consequence of `corestrictOfValCompat_toHom_eq`: the corestriction of a
+valuation-compatible open immersion is invertible. -/
 theorem isIso_corestrictOfValCompat :
     IsIso (VPreHom.corestrictOfValCompat f hval U hU).toHom := by
   rw [corestrictOfValCompat_toHom_eq f hval U hU]
