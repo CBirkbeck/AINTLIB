@@ -50,10 +50,18 @@ its elaboration profile — unchanged.
   the transition cocycle.
 -/
 
+-- v4.33 bump: `projModel` is `@[reducible]` over a `Proj`; the elaborator now unfolds it
+-- inside the `eqToHom (congrArg projModel _)` transports below, which blows up `whnf`
+-- without bound (25.6M heartbeats is not enough). Making it opaque here is the fix;
+-- nothing in this file needs to see through it.
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
+set_option maxHeartbeats 1600000
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
 
-set_option synthInstance.maxHeartbeats 800000
+set_option synthInstance.maxHeartbeats 25600000
 set_option maxSynthPendingDepth 5
 
 universe u
@@ -2475,13 +2483,8 @@ lemma gluePieceRange [IsAffine X] (a g : ↑Γ(X, ⊤))
         = hpb.isoPullback.hom ≫ pullback.fst (projModelπ W)
             (Spec.map (CommRingCat.ofHom (awayToSections a g)))
       from hpb.isoPullback_hom_fst.symm]
-  rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp]
-  simp only [hsurj.range_eq, Set.image_univ]
-  rw [show ((fun a_1 => (pullback.fst (projModelπ W)
-        (Spec.map (CommRingCat.ofHom (awayToSections a g)))) a_1) '' Set.univ)
-      = Set.range ⇑(pullback.fst (projModelπ W)
-        (Spec.map (CommRingCat.ofHom (awayToSections a g)))) from Set.image_univ]
-  rw [Scheme.Pullback.range_fst]
+  erw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp,
+    hsurj.range_eq, Set.image_univ, Scheme.Pullback.range_fst]
   rw [show Set.range ⇑(Spec.map (CommRingCat.ofHom (awayToSections a g)))
       = ↑(specBasicOpen (CommRingCat.of (Localization.Away a))
           (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)) from by
@@ -2790,7 +2793,7 @@ lemma chart_baseChange_fst {V : X.affineOpens} (Q : LocalPresentation C V)
   exact (cancel_epi (Q.restrict h).e.hom).mp goal2
 
 open Scheme LocalPresentation in
-set_option maxHeartbeats 12800000 in
+set_option maxHeartbeats 25600000 in
 /-- **(reversed `chartPiece_index_congr`)** Two presentations of `C` over the same away-affine,
 both with chart curve `W₀.map (awayToSections a g)` and trivial comparison, give the same
 native-glue piece. -/
@@ -2812,7 +2815,11 @@ lemma gluePiece_chart_congr [IsAffine X] (a g : ↑Γ(X, ⊤))
           rw [hIso]
       _ = eqToHom (congrArg projModel hQW').symm ≫ Q'.e.inv := by
           rw [← Category.assoc, eqToHom_trans]
-  conv_lhs => rw [← Category.assoc, key]
+  first
+    | erw [← Category.assoc, key]
+    | rw [← Category.assoc, key]
+    | simp only [← Category.assoc, key]
+    | rw [reassoc_of% key]
 
 /-- The composite localization map `A[1/a] → Γ(X, D((a·g₁)·(a·g₂)))` — restriction of
 `awayToSections a g₁` to the common away-affine. -/
@@ -2879,7 +2886,7 @@ theorem overlapMap_range [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤)) :
       rw [PrimeSpectrum.basicOpen_mul, hu] at h1
       exact top_le_iff.mp (h1 ▸ inf_le_left)
     rw [map_mul, map_mul, PrimeSpectrum.basicOpen_mul, PrimeSpectrum.basicOpen_mul, hunit,
-      top_inf_eq]; rfl
+      top_inf_eq]
   rw [← hopen]
   show Set.range ⇑(Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂))) = _
   exact PrimeSpectrum.localization_away_comap_range
@@ -2913,7 +2920,7 @@ theorem overlapRange [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤))
         = hpb.isoPullback.hom ≫ pullback.fst (projModelπ W)
             (Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂)))
       from hpb.isoPullback_hom_fst.symm]
-  rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp,
+  erw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp,
     Set.range_eq_univ.mpr hsurj, Set.image_univ, Scheme.Pullback.range_fst]
   rw [show Set.range ⇑(Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂)))
       = ↑(specBasicOpen (CommRingCat.of (Localization.Away a))
@@ -3000,7 +3007,6 @@ lemma bc_chart_reduce [IsAffine X] (a g : ↑Γ(X, ⊤))
   rw [projModelBaseChange_congr'' (sectionsMapLE (𝟙 X) hgV) hQW.symm]
   simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, eqToHom_trans, Category.id_comp]
   rw [chart_baseChange_fst Q hgV]
-  rfl
 
 open Scheme LocalPresentation in
 lemma reduceSide [IsAffine X] (a g : ↑Γ(X, ⊤))
