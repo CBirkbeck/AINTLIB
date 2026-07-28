@@ -2247,7 +2247,6 @@ theorem includeLeft_comp_transDouble :
   rw [transDouble, ← hleg, Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
     IsIso.hom_inv_id, Category.id_comp,
     fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl]
-  rfl
 
 /-- `transDouble` sends the right inclusion to `ψ`-conjugated right inclusion. -/
 theorem includeRight_comp_transDouble :

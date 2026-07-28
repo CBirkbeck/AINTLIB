@@ -57,7 +57,6 @@ theorem spec_coactionRing_isoSpec_inv :
   have hiso : P.hU.isoSpec.inv
       = (Scheme.Spec.mapIso P.U.topIso.symm.op).inv ≫ P.U.toScheme.isoSpec.inv := by
     rw [IsAffineOpen.isoSpec, Iso.trans_inv]
-    rfl
   rw [coactionRing_eq_appTop, Spec.map_comp, Spec.map_comp, hiso]
   simp only [Category.assoc, Functor.mapIso_inv, Iso.op_inv, Iso.symm_inv]
   -- cancel the `topIso` conjugation

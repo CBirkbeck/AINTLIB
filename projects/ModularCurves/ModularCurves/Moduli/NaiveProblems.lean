@@ -24,6 +24,11 @@ route (c) T-W7a — in flight on other lanes).
 set_option backward.defeqAttrib.useBackward true
 set_option backward.isDefEq.respectTransparency false
 
+-- v4.33 bump: the `≃+`-to-`AddMonoidHomClass` search for these point types exceeds the
+-- default instance budget, and the nested search does not inherit a per-declaration option.
+set_option synthInstance.maxHeartbeats 800000
+set_option maxSynthPendingDepth 5
+
 open AlgebraicGeometry CategoryTheory Polynomial
 
 universe u
@@ -34,20 +39,8 @@ section LevelModuli
 
 variable (R : CommRingCat.{u})
 
-/-- **(T-E4a, additivity of section-pullback — surfaced by the adversarial pass
-2026-07-06)** `pullSection` is a group homomorphism. NOT free: `EllHom` carries no
-group-compatibility field and the two curves' `grp` data are independent, so this
-consumes uniqueness of the group law with given unit (`abelEnrichment_unique`,
-GME Cor 2.2.5 — a pointed isomorphism onto the pullback is automatically a group
-isomorphism). Consumed downstream via `EllHom.pullSection_zsmul`
-(`Moduli/GammaHRepresentability.lean`, the `P_H` functor) and in
-`ModularCurve/YOneTatePoint.lean`; it restores the dependency edge from the level functors
-to the canonicity chain A6.δ that the earlier "nothing depends on it" amendment dropped. -/
-theorem EllHom.pullSection_add {X Y : EllObj R} (f : X ⟶ Y)
-    (P Q : Y.curve.Section) :
-    EllHom.pullSection R f (P + Q) =
-      EllHom.pullSection R f P + EllHom.pullSection R f Q :=
-  EllHom.pullSection_add_of_finitePresentation R f P Q
+-- `EllHom.pullSection_add` lives in `Moduli/Representability.lean` (dev's location);
+-- main had relocated it here, so the merge produced two copies.
 
 /-- **(Y1-D2 bridge)** A pulled section vanishes on the fibre over `τ` iff its `transportSection`
 (along the `Ell/R`-morphism's cartesian comparison iso `curveIsoPullback`) does — pure
@@ -71,6 +64,8 @@ private lemma pull_transportSection_eq_zero_iff {X Y : EllObj R} (f : X ⟶ Y) {
   rw [Subtype.ext_iff, Subtype.ext_iff, key, keyzero]
   exact (CategoryTheory.cancel_mono (EllHom.curveIsoPullback R f).hom).symm
 
+-- v4.33 bump: the `≃+`-to-`AddMonoidHomClass` search for these point types exceeds the
+-- default instance budget; the map arguments are already pinned explicitly below.
 /-- **(Y1-D2, naive-structure transport along `Ell/R`-morphisms)** For an `Ell/R`-morphism
 `f : X ⟶ Y` and a section `Q` of `Y.curve`, the pulled section `pullSection f Q` is naive-`Γ₁(N)`
 on `X.curve` iff the pulled *point* is naive-`Γ₁(N)` on the base-changed curve
@@ -192,11 +187,15 @@ private lemma isNaiveGammaOne_asSection_pull (N : ℕ) [NeZero N] {X Y : EllObj 
       constructor
       · intro h0
         have h1 := congrArg (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t) h0
-        rw [map_zsmul, baseChangeEquiv_pull_asSection, map_zero] at h1
+        rw [map_zsmul (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t),
+          baseChangeEquiv_pull_asSection,
+          map_zero (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t)] at h1
         exact h1
       · intro h0
         refine (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t).injective ?_
-        rw [map_zsmul, baseChangeEquiv_pull_asSection, map_zero, h0]
+        rw [map_zsmul (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t),
+          baseChangeEquiv_pull_asSection,
+          map_zero (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t), h0]
     obtain ⟨hk, hord⟩ := hfib k (t ≫ f.baseHom)
     exact ⟨(hbc (N : ℤ)).mpr hk, fun a ha haN h0 ↦ hord a ha haN ((hbc (a : ℤ)).mp h0)⟩
 
