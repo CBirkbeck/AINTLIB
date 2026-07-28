@@ -3106,6 +3106,34 @@ of existing `isoRestrict`s (`spaCompIsoRestrict` applies over `A_inf` thanks to 
 plus `restrictRestrictIso` / `restrictIsoOfIso` / `VPreHom.asIso`, NOT the dense-extension
 development the old P5-3/P5-4 sketches describe.
 
+### [P5-6d] The 𝒴-side chart as a 𝒱-isomorphism — THE LAST STEP (analysis 2026-07-28)
+
+Two halves, and the SECOND is the real one:
+
+**(i) the presheafed-space iso** `Spa(𝒪_{B_n}(D')) ≅ 𝒴|_{V}`. Route: both sides carry open
+immersions into the ambient `Spa(A_inf)` (`spaCompHom D' ≫ spaCompHom D₀` on the left — a
+composite of open immersions; `ofRestrict ≫ ofRestrict` on the right, since
+`yPresheafedSpace = yAmbientPresheafedSpace.restrict (yIncl_isOpenEmbedding)` BY DEFINITION),
+so `IsOpenImmersion.isoOfRangeEq` applies once the two ranges agree. DEFINE `V` as the
+`𝒴`-preimage of the composite's range (legitimate because that range lies in the big-window
+trace ⊆ `Y`), and the range condition holds by construction.
+
+**(ii) ⚠ promoting it to a `𝒱^pre`-iso — the genuine obstruction.** A presheafed-space
+isomorphism between two `𝒱^pre`-objects is NOT automatically a `𝒱^pre`-morphism: it must be
+checked to respect the stalk valuations. `VPreHom.asIso` (P5-6c) needs a `VPreHom` as input.
+The natural supplier is `SpaVIso.spaCompVPreHom` (P5-K13) — but it takes
+`hloc : ∀ v : ↥(Spa A A⁺), IsLocalRing …` and `hsupp` GLOBALLY over the base, and for
+`A := A_inf` those hold only over `Y` (`isLocalRing_stalk_Y`, `maximalIdeal_stalk_Y`).
+This is exactly external-review point 2 ("do not package `Spa(A_inf)` globally as a
+`VPreObj`"). RESOLUTION: restate the P5-K13 valuation compatibility **pointwise**, i.e.
+`∀ w, val-compat at w` given the stalk package only at `shadow w`, and then instantiate at
+points of `Y`. The proof of `spaCompVPreHom` is already pointwise in `w` — the global `hloc`
+/`hsupp` are only used to name the target `VPreObj`. So the work is:
+  * a `VPreObj` structure on `𝒴` viewed as `Spa(A_inf)|_Y` — ALREADY EXISTS as `yVPreObj`;
+  * `corestrictHom`/`liftToRestrict` the comparison into `𝒴` at the presheafed-space level
+    FIRST (per review point 2), then package with `VPreHom.corestrict` (P5-A3) using the
+    `Y`-local stalk facts. `VPreHom.corestrict` is exactly the tool built for this.
+
 ### ★ (superseded) P5-6 CAPSTONE ROADMAP (state as of 2026-07-28, after P5-5d)
 
 `IsAdicSpace (xVObj p F ϖ)` needs, for each `x : Curve`:
