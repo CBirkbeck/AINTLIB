@@ -224,17 +224,177 @@ instance : IsDomain (WPHead K w N) :=
 /-! ### Noetherianity via the finite free module structure
 ([WP] lem:finite-stage-normal-form: `𝒜_N ≅ ⊕_{ε ∈ {0,1}^N} k⟨W,Z⟩·Y^ε`) -/
 
-/-- The even Tate subalgebra `T_N = k⟨W, Z_1,…,Z_N⟩` of the head: allowed monomials
-with all `U`-exponents even (hence weight `0`).  [WP] eq:finite-stage-normal-form's
-coefficient ring. -/
+/-- Even head membership: in the head, with all `U`-exponents even (hence weight
+zero) — the exponent monoid of `T_N = K⟨W, Z_1,…,Z_N⟩`. -/
+def EvenHeadMem (t : ℕ →₀ ℕ) : Prop :=
+  HeadMem w N t ∧ ∀ n, n ≠ 0 → t n % 2 = 0
+
+variable {w N} in
+theorem EvenHeadMem.add {s t : ℕ →₀ ℕ} (hs : EvenHeadMem w N s)
+    (ht : EvenHeadMem w N t) : EvenHeadMem w N (s + t) :=
+  ⟨hs.1.add ht.1, fun n hn => by
+    rw [Finsupp.add_apply]
+    have h1 := hs.2 n hn
+    have h2 := ht.2 n hn
+    omega⟩
+
+theorem evenHeadMem_zero : EvenHeadMem w N (0 : ℕ →₀ ℕ) :=
+  ⟨⟨wpMem_zero w, fun _ _ => rfl⟩, fun _ _ => rfl⟩
+
 noncomputable def wpEvenSupport : Subring (Amb K) where
   carrier := {f | ∀ t : ℕ →₀ ℕ,
-    ¬ (HeadMem w N t ∧ ∀ n, n ≠ 0 → t n % 2 = 0) → MvPowerSeries.coeff t f.1 = 0}
-  zero_mem' := by sorry
-  one_mem' := by sorry
-  add_mem' := by sorry
-  neg_mem' := by sorry
-  mul_mem' := by sorry
+    ¬ EvenHeadMem w N t → MvPowerSeries.coeff t f.1 = 0}
+  zero_mem' := fun t _ => by
+    show MvPowerSeries.coeff t (0 : MvPowerSeries ℕ K) = 0
+    simp
+  one_mem' := fun t ht => by
+    show MvPowerSeries.coeff t (1 : MvPowerSeries ℕ K) = 0
+    classical
+    rcases eq_or_ne t 0 with rfl | h0
+    · exact absurd (evenHeadMem_zero w N) ht
+    · rw [MvPowerSeries.coeff_one, if_neg h0]
+  add_mem' := fun {f} {g} hf hg t ht => by
+    show MvPowerSeries.coeff t (f.1 + g.1) = 0
+    rw [map_add, hf t ht, hg t ht, add_zero]
+  neg_mem' := fun {f} hf t ht => by
+    show MvPowerSeries.coeff t (-f.1) = 0
+    rw [map_neg, hf t ht, neg_zero]
+  mul_mem' := fun {f} {g} hf hg t ht => by
+    show MvPowerSeries.coeff t (f.1 * g.1) = 0
+    classical
+    rw [MvPowerSeries.coeff_mul]
+    refine Finset.sum_eq_zero fun p hp => ?_
+    have hpt : p.1 + p.2 = t := Finset.HasAntidiagonal.mem_antidiagonal.mp hp
+    subst hpt
+    by_cases h1 : EvenHeadMem w N p.1
+    · by_cases h2 : EvenHeadMem w N p.2
+      · exact absurd (h1.add h2) ht
+      · rw [hg p.2 h2, mul_zero]
+    · rw [hf p.1 h1, zero_mul]
+
+/-! #### The exponent halving/unhalving bijection -/
+
+/-- The exponent embedding of `T_N`'s abstract monoid into the even head monoid:
+`s ↦ W^{s 0}·∏ U_i^{2·s i}` ([WP] eq:finite-stage-substitution `Z_n ↦ U_n²`,
+inverted). -/
+noncomputable def unhalve (s : Fin (N + 1) →₀ ℕ) : ℕ →₀ ℕ :=
+  Finsupp.single 0 (s 0) +
+    2 • (Finsupp.embDomain ⟨Fin.val, Fin.val_injective⟩ s).update 0 0
+
+variable {N} in
+theorem unhalve_apply (s : Fin (N + 1) →₀ ℕ) (n : ℕ) :
+    unhalve N s n =
+      if n = 0 then s 0 else if h : n < N + 1 then 2 * s ⟨n, h⟩ else 0 := by
+  classical
+  unfold unhalve
+  rw [Finsupp.add_apply, Finsupp.single_apply]
+  rcases eq_or_ne n 0 with rfl | h0
+  · rw [if_pos rfl, if_pos rfl]
+    rw [two_nsmul, Finsupp.add_apply, Finsupp.update_apply, if_pos rfl]
+    simp
+  · rw [if_neg (fun h => h0 h.symm), if_neg h0, zero_add]
+    rw [two_nsmul, Finsupp.add_apply, Finsupp.update_apply, if_neg h0]
+    by_cases hn : n < N + 1
+    · rw [dif_pos hn]
+      have hemb : Finsupp.embDomain ⟨Fin.val, Fin.val_injective⟩ s n = s ⟨n, hn⟩ :=
+        Finsupp.embDomain_apply_self ⟨Fin.val, Fin.val_injective⟩ s ⟨n, hn⟩
+      rw [hemb]
+      omega
+    · rw [dif_neg hn]
+      have : Finsupp.embDomain ⟨Fin.val, Fin.val_injective⟩ s n = 0 := by
+        rw [Finsupp.embDomain_of_notMem_range]
+        rintro ⟨i, hi⟩
+        exact hn (hi ▸ i.2)
+      rw [this]
+
+variable {N} in
+theorem unhalve_add (s t : Fin (N + 1) →₀ ℕ) :
+    unhalve N (s + t) = unhalve N s + unhalve N t := by
+  classical
+  ext n
+  rw [Finsupp.add_apply, unhalve_apply, unhalve_apply, unhalve_apply]
+  split_ifs <;> simp [Finsupp.add_apply] <;> ring
+
+variable {N} in
+theorem unhalve_injective : Function.Injective (unhalve N) := by
+  classical
+  intro s t hst
+  ext i
+  have h := congrArg (fun u : ℕ →₀ ℕ => u i.1) hst
+  rw [unhalve_apply, unhalve_apply] at h
+  rcases eq_or_ne (i : ℕ) 0 with h0 | h0
+  · have hi0 : i = 0 := Fin.ext h0
+    subst hi0
+    simpa using h
+  · rw [if_neg h0, if_neg h0, dif_pos i.2, dif_pos i.2] at h
+    have : s ⟨i.1, i.2⟩ = t ⟨i.1, i.2⟩ := by omega
+    simpa using this
+
+variable {w N} in
+theorem evenHeadMem_unhalve (s : Fin (N + 1) →₀ ℕ) : EvenHeadMem w N (unhalve N s) := by
+  classical
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · unfold WPMem
+    have hzero : wpWeight w (unhalve N s) = 0 := by
+      unfold wpWeight
+      refine Finset.sum_eq_zero fun n _ => ?_
+      rw [unhalve_apply]
+      rcases eq_or_ne n 0 with rfl | h0
+      · simp
+      · rw [if_neg h0]
+        by_cases hn : n < N + 1
+        · rw [dif_pos hn, if_neg]
+          rintro ⟨hpar, -⟩
+          omega
+        · rw [dif_neg hn, if_neg]
+          rintro ⟨hpar, -⟩
+          omega
+    rw [hzero]
+    exact Nat.zero_le _
+  · intro n hn
+    rw [unhalve_apply, if_neg (by omega), dif_neg (by omega)]
+  · intro n hn
+    rw [unhalve_apply, if_neg hn]
+    split_ifs <;> omega
+
+/-- The exponent halving: the inverse of `unhalve` on the even head monoid. -/
+noncomputable def halve (t : ℕ →₀ ℕ) : Fin (N + 1) →₀ ℕ :=
+  Finsupp.equivFunOnFinite.symm fun i : Fin (N + 1) =>
+    if i = 0 then t 0 else t i.1 / 2
+
+variable {N} in
+theorem halve_apply (t : ℕ →₀ ℕ) (i : Fin (N + 1)) :
+    halve N t i = if i = 0 then t 0 else t i.1 / 2 := rfl
+
+variable {w N} in
+theorem unhalve_halve {t : ℕ →₀ ℕ} (ht : EvenHeadMem w N t) :
+    unhalve N (halve N t) = t := by
+  classical
+  obtain ⟨⟨_, hbd⟩, hev⟩ := ht
+  ext n
+  rw [unhalve_apply]
+  rcases eq_or_ne n 0 with rfl | h0
+  · rw [if_pos rfl, halve_apply, if_pos rfl]
+  · rw [if_neg h0]
+    by_cases hn : n < N + 1
+    · rw [dif_pos hn, halve_apply, if_neg (by
+        intro h
+        exact h0 (by simpa using congrArg Fin.val h))]
+      have := hev n h0
+      show 2 * (t n / 2) = t n
+      omega
+    · rw [dif_neg hn]
+      exact (hbd n (by omega)).symm
+
+variable {w N} in
+/-- The even head monoid is exactly the range of `unhalve`. -/
+theorem evenHeadMem_iff_mem_range_unhalve (t : ℕ →₀ ℕ) :
+    EvenHeadMem w N t ↔ t ∈ Set.range (unhalve N) := by
+  constructor
+  · intro ht
+    exact ⟨halve N t, unhalve_halve ht⟩
+  · rintro ⟨s, rfl⟩
+    exact evenHeadMem_unhalve s
 
 /-- `T_N` is isometrically isomorphic to the Tate algebra `K⟨T_0,…,T_N⟩ = P K (N+1)`
 (the exponent-halving reindexing `(a, 2ν) ↦ (a, ν)`; [WP]
