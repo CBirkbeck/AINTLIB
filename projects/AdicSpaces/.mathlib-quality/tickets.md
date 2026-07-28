@@ -3127,6 +3127,19 @@ development the old P5-3/P5-4 sketches describe.
   `comap_canonicalMap_mem_rationalOpen_inter_spa` → `bigWindow_eq_rationalOpen_windowUnif`
   → `mem_Y_of_mem_bigWindow`.
 
+### ★★ THE CAPSTONE IS NOW TWO HYPOTHESES AWAY (2026-07-28)
+
+**`isAdicSpace_xVObj_of_windowCharts`** (`FarguesFontaine/CurveAdicSpace.lean`, axiom-clean,
+full gate green) proves `IsAdicSpace (xVObj p F ϖ)` from EXACTLY two inputs:
+
+* `hbasis` — the `windowSubOpen n D' …` are a neighbourhood basis of `𝒴`  → ticket **P5-6e**
+* `hviso` — each is `𝒱^pre`-isomorphic to `spaVObjTate (presheafValue D')` → ticket **P5-6d(ii)**
+
+Everything else is proven: the quotient leg (P5-5), `exists_disjoint_translates` +
+`disjoint_translates_mono` for wandering, `windowSubVChart` for the chart, `VObj.isoOfVPreIso`,
+and Wedhorn 8.22 itself. Also landed: `windowSubVChart_toVPreObj` — the chart's `𝒱`-object IS
+the P5-2 `spaVObjTate` package, by `rfl`.
+
 ### [P5-6e] The WANDERING chart selection — the OTHER remaining piece (scoped 2026-07-28)
 `isAdicSpace_xVObj_of_yCharts` needs, for each `y : 𝒴`, a chart neighbourhood that is
 **wandering**. `windowSubOpen n D' …` (P5-6d(i)) need not be. `curveAdicSpacePresentation`

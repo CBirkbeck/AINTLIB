@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FarguesFontaine.CurveQuotientLeg
 import «Adic spaces».AdicSpaceV
+import «Adic spaces».FarguesFontaine.CurveYSlice
+import «Adic spaces».FarguesFontaine.CurveVChart
 
 /-!
 # The adic Fargues–Fontaine curve is an adic space — the reduction
@@ -60,6 +62,76 @@ theorem isAdicSpace_xVObj_of_yCharts
   refine ⟨xImage p F ϖ V, ⟨fiberPoint p F ϖ x, hyV,
     yTopToCurve_fiberPoint p F ϖ x⟩, C, ⟨?_⟩⟩
   exact (quotientLegVObjIso p F ϖ V hdis).symm ≪≫ e
+
+
+/-! ### The window-chart form of the capstone
+
+Specialising `isAdicSpace_xVObj_of_yCharts` to the charts `windowSubOpen` that
+`CurveYSlice.lean` produces.  `CurveAdicPresentation.lean` and `CurveYSlice.lean`
+declare the window-chart ring facts as `local instance`s, so they are re-declared
+here. -/
+
+noncomputable local instance instTateWindow' (n : ℤ) :
+    IsTateRing (windowChartRing p F ϖ n) :=
+  isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+
+noncomputable local instance instStronglyNoetherianWindow' (n : ℤ) :
+    IsStronglyNoetherian (windowChartRing p F ϖ n) :=
+  isStronglyNoetherian_canonical_window p F ϖ n
+
+noncomputable local instance instNoetherianWindow' (n : ℤ) :
+    IsNoetherianRing (windowChartRing p F ϖ n) :=
+  IsStronglyNoetherian.isNoetherianRing _
+
+noncomputable local instance instTateSub' (n : ℤ)
+    (D' : RationalLocData (windowChartRing p F ϖ n)) :
+    IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+
+noncomputable local instance instSNSub' (n : ℤ)
+    (D' : RationalLocData (windowChartRing p F ϖ n)) :
+    IsStronglyNoetherian (presheafValue D') :=
+  presheafValue_isStronglyNoetherian_faithful D'
+
+/-- The window chart's `𝒱`-object is exactly the P5-2 `spaVObjTate` package. -/
+theorem windowSubVChart_toVPreObj (n : ℤ)
+    (D' : RationalLocData (windowChartRing p F ϖ n)) :
+    (windowSubVChart p F ϖ n D').toVObj.toVPreObj
+      = (ValuationSpectrum.spaVObjTate
+          (A := presheafValue D')).toVPreObj := rfl
+
+/-- **The adic Fargues–Fontaine curve is an adic space, given the two chart
+facts about `𝒴`**: that the window sub-opens are a neighbourhood basis, and that
+each of them is `𝒱`-isomorphic to its window sub-affinoid.
+
+Everything else — the quotient leg `𝒴|_V ≅ X|_{π V}` (P5-5), the wandering
+neighbourhoods, the chart package, and Wedhorn's Definition 8.22 itself — is
+already proven. -/
+theorem isAdicSpace_xVObj_of_windowCharts
+    (hbasis : ∀ (y : ↥(yTop p F ϖ)) (O : Opens ↥(yTop p F ϖ)), y ∈ O →
+      ∃ (n : ℤ) (D' : RationalLocData (windowChartRing p F ϖ n))
+        (u' : (presheafValue D')ˣ) (hu' : IsTopologicallyNilpotent
+          ((u' : (presheafValue D')ˣ) : presheafValue D'))
+        (u : (windowChartRing p F ϖ n)ˣ) (hu : IsTopologicallyNilpotent
+          ((u : (windowChartRing p F ϖ n)ˣ) : windowChartRing p F ϖ n)),
+        y ∈ windowSubOpen p F ϖ n D' u' hu' u hu ∧
+          windowSubOpen p F ϖ n D' u' hu' u hu ≤ O)
+    (hviso : ∀ (n : ℤ) (D' : RationalLocData (windowChartRing p F ϖ n))
+        (u' : (presheafValue D')ˣ) (hu' : IsTopologicallyNilpotent
+          ((u' : (presheafValue D')ˣ) : presheafValue D'))
+        (u : (windowChartRing p F ϖ n)ˣ) (hu : IsTopologicallyNilpotent
+          ((u : (windowChartRing p F ϖ n)ˣ) : windowChartRing p F ϖ n)),
+      Nonempty ((ValuationSpectrum.spaVObjTate (A := presheafValue D')).toVPreObj
+        ≅ (yVPreObj p F ϖ).restrictOpen
+            (windowSubOpen p F ϖ n D' u' hu' u hu))) :
+    ValuationSpectrum.IsAdicSpace (xVObj p F ϖ) := by
+  refine isAdicSpace_xVObj_of_yCharts p F ϖ (fun y => ?_)
+  obtain ⟨W₀, hyW₀, hdis₀⟩ := exists_disjoint_translates p F ϖ y
+  obtain ⟨n, D', u', hu', u, hu, hyV, hVW₀⟩ := hbasis y W₀ hyW₀
+  refine ⟨windowSubOpen p F ϖ n D' u' hu' u hu, hyV,
+    disjoint_translates_mono p F ϖ hVW₀ hdis₀,
+    windowSubVChart p F ϖ n D', ?_⟩
+  obtain ⟨e⟩ := hviso n D' u' hu' u hu
+  exact ⟨ValuationSpectrum.VObj.isoOfVPreIso e.symm⟩
 
 end FarguesFontaine
 
