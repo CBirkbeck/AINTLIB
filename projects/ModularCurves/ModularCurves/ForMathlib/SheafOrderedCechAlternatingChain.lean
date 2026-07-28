@@ -283,7 +283,9 @@ theorem orderedToCechAlternatingF_comp_π_of_not_injective
       _ = 0 := by rw [hz, zero_comp]
   rw [hpost, smul_zero]
 
-private theorem orderedToCechAlternatingF_comp_π_of_strictMono
+/-- On a strictly increasing tuple, alternating extension is the corresponding
+ordered projection. -/
+theorem orderedToCechAlternatingF_comp_π_of_strictMono
     (n : ℕ) (i : Fin (n + 1) → ι) (hi : StrictMono i) :
     orderedToCechAlternatingF F U n ≫
         Pi.π (cechTermFactor F U n) i =
