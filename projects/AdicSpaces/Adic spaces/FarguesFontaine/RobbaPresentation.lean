@@ -6447,6 +6447,72 @@ noncomputable def evalBallSubring
 
 end ImageBall
 
+section MonomialRoutes
+
+variable {σ₁ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+variable (hφb : ∀ x : Bloc p F ϖ,
+  ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+    : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+    : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
+
+include hφb in
+/-- **The denominator-slope route** (T910-M M2b-3i): a value-normalized
+monomial fraction's image is integral over the image ball — its `m`-th
+power is an evaluation value. -/
+theorem isIntegral_monomial_of_le_one
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m))
+    (i k : ℕ) (hik : i ≤ k) (c : OF F)
+    (hval : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k))
+      ≤ 1) :
+    IsIntegral (↥(evalBallSubring p F ϖ φ hφ hbmem hb))
+      (blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+          (sPow p F ϖ k))) := by
+  obtain ⟨U, hUball, hUeq⟩ := exists_evalBI_pow_mem_image_of_le p F ϖ
+    φ hφ hφb zb m hgen hbmem hb hbg i k hik c hval
+  refine isIntegral_of_pow_mem _ _ m hm ?_
+  refine ⟨U, hUball, ?_⟩
+  refine Subtype.ext ?_
+  show evalBI p F ϖ φ hφ hbmem hb U
+    = ((blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+          (sPow p F ϖ k)) ^ m : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  rw [hUeq]
+  rw [show ((blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+        (sPow p F ϖ k)) ^ m : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+    = ((blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+          (sPow p F ϖ k) ^ m) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) from by
+    rw [map_pow]]
+  rfl
+
+end MonomialRoutes
+
 end FarguesFontaine
 
 end
