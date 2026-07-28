@@ -288,6 +288,32 @@ theorem exists_invertible_tensor_idealModule_add_of_tensor_iso
     ⟨e.some ≪≫ (nonempty_tensorObj_unit_iso _).some.symm ≪≫
       tensorObjCongr (Iso.refl _) (pullbackUnitIso (pullback.snd E.π t)).symm⟩⟩
 
+/-- **The descent interface for the leaf.** Fix a ⊗-inverse `N` of `I(D_Q) ⊗ I(D_{Q'})`.
+Then triviality of the *discrepancy module* `(I(D_{Q+Q'}) ⊗ I(D_0)) ⊗ N` gives the leaf.
+
+This is the exact shape `Picard/GlueTrivialization.lean` and
+`ModularCurves.nonempty_unitObj_iso_of_normalized_glue` deliver — a single module shown to
+be trivial from cover-local generating sections — so it pins what GAP-A-1/GAP-A-2 have to
+produce. Nothing here is new mathematics: it is
+`Modules.nonempty_iso_of_tensorObj_unitObj` feeding the chart case. -/
+theorem exists_invertible_tensor_idealModule_add_of_discrepancy_trivial
+    (Q Q' : (E.baseChange t).Point (𝟙 T)) (N : (pullback E.π t).Modules)
+    (hN : Nonempty (tensorObj (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+          (idealModule (Scheme.Hom.ker Q'.1))) N ≅ unitObj (pullback E.π t)))
+    (htriv : Nonempty (tensorObj (tensorObj (idealModule (Scheme.Hom.ker (Q + Q').1))
+          (idealModule (Scheme.Hom.ker (baseChangeZero E.π E.zero E.zero_π t)))) N ≅
+        unitObj (pullback E.π t))) :
+    ∃ N' : T.Modules, IsInvertible N' ∧
+      Nonempty (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+            (idealModule (Scheme.Hom.ker Q'.1)) ≅
+          tensorObj
+            (tensorObj (idealModule (Scheme.Hom.ker (Q + Q').1))
+              (idealModule (Scheme.Hom.ker (baseChangeZero E.π E.zero E.zero_π t))))
+            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd E.π t)).obj
+              (unitObj T))) :=
+  exists_invertible_tensor_idealModule_add_of_tensor_iso E t Q Q'
+    (nonempty_iso_of_tensorObj_unitObj hN htriv)
+
 /-- Pure group algebra behind the reduction of the leaf to its module form: in a commutative
 group, the `κ`-shaped ratio of "numerator over product of numerators" is the ratio of the
 plain products. Stated over abstract elements so that no `sectionCls` term is ever
