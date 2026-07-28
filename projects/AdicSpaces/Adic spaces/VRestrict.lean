@@ -94,21 +94,6 @@ noncomputable def restrictRingStalkEquiv (x : ↥U) :
       ≃+* ToType (X.toPresheafedSpace.ringStalk (restrictPoint X U x)) :=
   (restrictRingStalkIso X U x).commRingCatIsoToRingEquiv
 
-/-- Maximal ideals transport through a ring equivalence of local rings
-(instance-explicit form).  This is mathlib's `IsLocalRing.maximalIdeal_comap`
-for the coercion of `e`, whose `IsLocalHom` instance is `isLocalHom_equiv`; the
-wrapper exists only to take the two `IsLocalRing` instances explicitly, which is
-what the stalk-package code needs. -/
-theorem maximalIdeal_comap_of_ringEquiv {R S : Type*} [CommRing R] [CommRing S]
-    (instR : IsLocalRing R) (instS : IsLocalRing S) (e : R ≃+* S) :
-    @IsLocalRing.maximalIdeal R _ instR
-      = (@IsLocalRing.maximalIdeal S _ instS).comap (e : R →+* S) := by
-  have := instR
-  have := instS
-  have : IsLocalHom (e : R →+* S) :=
-    ⟨fun a ha => (isLocalHom_equiv e).map_nonunit a ha⟩
-  exact (IsLocalRing.maximalIdeal_comap (e : R →+* S)).symm
-
 /-- The stalks of the restriction are local. -/
 theorem isLocalRing_restrictStalk (x : ↥U) :
     IsLocalRing (ToType ((restrictSpace X U).ringStalk x)) := by
@@ -130,8 +115,9 @@ noncomputable def VPreObj.restrictOpen : VPreObj where
     rw [supp_comap]
     rw [show (X.val (restrictPoint X U x)).supp
         = @IsLocalRing.maximalIdeal _ _ hAmb from X.val_supp _]
-    exact (maximalIdeal_comap_of_ringEquiv (isLocalRing_restrictStalk X U x)
-      hAmb (restrictRingStalkEquiv X U x)).symm
+    exact @IsLocalRing.maximalIdeal_comap _ _ _ (isLocalRing_restrictStalk X U x)
+      _ hAmb ((restrictRingStalkEquiv X U x : _ →+* _))
+      ⟨fun a ha => (isLocalHom_equiv (restrictRingStalkEquiv X U x)).map_nonunit a ha⟩
 
 /-! ### The open-image functor bookkeeping -/
 
@@ -248,7 +234,9 @@ noncomputable def VPreObj.ofIso {X : TopRingPresheafedSpace.{u}} {Y : VPreObj.{u
     rw [supp_comap]
     rw [show (Y.val (ConcreteCategory.hom e.hom.base x)).supp
         = @IsLocalRing.maximalIdeal _ _ hY from Y.val_supp _]
-    exact (maximalIdeal_comap_of_ringEquiv hX hY (isoStalkRingEquiv e x).symm).symm
+    exact @IsLocalRing.maximalIdeal_comap _ _ _ hX
+      _ hY (((isoStalkRingEquiv e x).symm : _ →+* _))
+      ⟨fun a ha => (isLocalHom_equiv (isoStalkRingEquiv e x).symm).map_nonunit a ha⟩
 
 /-- The isomorphism is a morphism of `𝒱^pre` onto the transported
 structure. -/

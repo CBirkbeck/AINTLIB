@@ -1589,8 +1589,9 @@ theorem yStalkValue_supp (y : ↥(yTop p F ϖ)) :
       = @IsLocalRing.maximalIdeal _ _ hSloc from
     (maximalIdeal_stalk_Y p F ϖ (ySpaPoint p F ϖ y)
       (ySpaPoint_mem_Y p F ϖ y)).symm]
-  exact (maximalIdeal_comap_ringEquiv (isLocalRing_yStalk p F ϖ y)
-    hSloc (yRingStalkEquiv p F ϖ y)).symm
+  exact @IsLocalRing.maximalIdeal_comap _ _ _ (isLocalRing_yStalk p F ϖ y)
+    _ hSloc (((yRingStalkEquiv p F ϖ y) : _ →+* _))
+    ⟨fun a ha => (isLocalHom_equiv (yRingStalkEquiv p F ϖ y)).map_nonunit a ha⟩
 
 /-- **The adic Fargues–Fontaine curve as an object of `𝒱^pre`**
 (D-iv, the pre-object): the `φ`-invariant structure presheaf on the
@@ -1609,8 +1610,9 @@ noncomputable def xVPreObj : VPreObj where
     rw [show (yStalkValue p F ϖ (fiberPoint p F ϖ x)).supp
         = @IsLocalRing.maximalIdeal _ _ hSloc from
       yStalkValue_supp p F ϖ (fiberPoint p F ϖ x)]
-    exact (maximalIdeal_comap_ringEquiv (isLocalRing_xStalk p F ϖ x)
-      hSloc (xStalkEquiv p F ϖ x)).symm
+    exact @IsLocalRing.maximalIdeal_comap _ _ _ (isLocalRing_xStalk p F ϖ x)
+      _ hSloc (((xStalkEquiv p F ϖ x) : _ →+* _))
+      ⟨fun a ha => (isLocalHom_equiv (xStalkEquiv p F ϖ x)).map_nonunit a ha⟩
 
 /-- Saturated preimages commute with binary intersections. -/
 theorem curvePreimage_inf (V₁ V₂ : Opens (Curve p F ϖ)) :

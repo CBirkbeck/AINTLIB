@@ -302,21 +302,6 @@ theorem isLocalRing_yStalk (x : yTop p F ϖ) :
     isLocalRing_stalk_Y p F ϖ (ySpaPoint p F ϖ x) (ySpaPoint_mem_Y p F ϖ x)
   exact (yRingStalkEquiv p F ϖ x).symm.isLocalRing
 
-/-- Maximal ideals transport through a ring equivalence of local rings
-(instance-explicit form).  This is mathlib's `IsLocalRing.maximalIdeal_comap`
-for the coercion of `e`, whose `IsLocalHom` instance is `isLocalHom_equiv`; the
-wrapper exists only to take the two `IsLocalRing` instances explicitly, which is
-what the stalk-package code needs. -/
-theorem maximalIdeal_comap_ringEquiv {R S : Type*} [CommRing R] [CommRing S]
-    (instR : IsLocalRing R) (instS : IsLocalRing S) (e : R ≃+* S) :
-    @IsLocalRing.maximalIdeal R _ instR
-      = (@IsLocalRing.maximalIdeal S _ instS).comap (e : R →+* S) := by
-  have := instR
-  have := instS
-  have : IsLocalHom (e : R →+* S) :=
-    ⟨fun a ha => (isLocalHom_equiv e).map_nonunit a ha⟩
-  exact (IsLocalRing.maximalIdeal_comap (e : R →+* S)).symm
-
 /-- **`𝒴` as an object of `𝒱^pre`** (Wedhorn Definition 8.5): the ambient
 structure presheaf restricted to the open subset `𝒴`, with the Wedhorn 8.14
 stalk package transported along the restriction stalk isomorphisms. -/
@@ -334,8 +319,9 @@ noncomputable def yVPreObj : VPreObj where
         = @IsLocalRing.maximalIdeal _ _ hSloc from
       (maximalIdeal_stalk_Y p F ϖ (ySpaPoint p F ϖ x)
         (ySpaPoint_mem_Y p F ϖ x)).symm]
-    exact (maximalIdeal_comap_ringEquiv (isLocalRing_yStalk p F ϖ x)
-      hSloc (yRingStalkEquiv p F ϖ x)).symm
+    exact @IsLocalRing.maximalIdeal_comap _ _ _ (isLocalRing_yStalk p F ϖ x)
+      _ hSloc (((yRingStalkEquiv p F ϖ x) : _ →+* _))
+      ⟨fun a ha => (isLocalHom_equiv (yRingStalkEquiv p F ϖ x)).map_nonunit a ha⟩
 
 /-- Each Big window is the rational open of its window chart datum. -/
 theorem bigWindow_eq_rationalOpen_windowUnif (n : ℤ) :
