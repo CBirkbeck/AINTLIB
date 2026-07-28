@@ -3197,7 +3197,23 @@ the P5-2 `spaVObjTate` package, by `rfl`.
   `Set.ext` + `rintro`; and `IsHuberRing (windowChartRing …)` is NOT found by search, use
   `haveI := (isTateRing_bigWindowChart …).toIsHuberRing`.
 
-### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — IN PROGRESS
+### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — REDUCED TO ONE IDENTITY
+
+★ **2026-07-28: `VPreObj.isoRestrictOfOpenImmersion` (VRestrict.lean, section `ChartStep`)
+removes all the packaging.** Signature:
+
+    (f : Z.toPresheafedSpace ⟶ X.toPresheafedSpace)
+    (hval : ∀ z, X.val (f.base z) = comap (ringStalkMap f z).hom' (Z.val z))
+    (U) (hU : Set.range f.base = ↑U) [IsOpenImmersion f] : Z ≅ X.restrictOpen U
+
+Locality of the stalk maps is free (`isLocalHom_of_val_comap`) and invertibility is free
+(the corestriction's underlying morphism IS the `isoOfRangeEq` hom, by `rfl`).
+
+**So the ENTIRE remaining content of Campaign 9 is the valuation identity `hval`** for the
+corestriction of `windowSubCompHom` into `𝒴`: chain the unconditional
+`comap_ringStalkMap_spaCompHom_stalkValue` twice (`ringStalkMap_comp` + `comap_comp`) and
+transport through the restriction comparison exactly as `val_compat_liftToRestrict` does.
+
 
 ⚠ **PROBE FINDING 2026-07-28 (saves a wrong start).** `windowSubYSliceIso …` is
 `isoOfRangeEq (windowSubCompHom …) (ySliceIncl p F ϖ V) …`, so its `hom` is
