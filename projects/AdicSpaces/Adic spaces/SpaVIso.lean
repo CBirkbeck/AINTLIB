@@ -798,6 +798,53 @@ theorem phiHom_naturality {V V' : Opens ↥(Spa A A⁺)}
       = phiHom D₀ hV' hVW' (limitRestrict hWW' x) :=
   rfl
 
+/-- The keystone comparison factors the canonical maps: the `A`-side
+canonical map of `E` followed by the comparison is the `B`-side canonical map
+of the image datum precomposed with `D₀`'s canonical map. -/
+theorem pieceEquiv_canonicalMap {E : RationalLocData A} (hE : E.IsRational)
+    (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) (a : A) :
+    pieceEquiv D₀ hE hE_sub (E.canonicalMap a)
+      = (imgDatum D₀ hE).canonicalMap (D₀.canonicalMap a) := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  rw [← restrictionMapHom_canonicalMap_generic D₀ E hE_sub a]
+  exact OpenKeystone.relativePiece_equiv_restrictionMap D₀ E hE_sub
+    (certExp D₀ hE) (certExp_spec D₀ hE) (D₀.canonicalMap a)
+
+/-- **The comparison intertwines the point valuations** (the stalk-valuation
+core): the `B`-side point value of the image datum pulls back along the
+keystone comparison to the `A`-side point value of `E`. -/
+theorem comap_pieceEquiv_pointValue [DecidableEq A]
+    {E : RationalLocData A} (hE : E.IsRational)
+    (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s)
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+    (hwB : (w : Spv (presheafValue D₀))
+      ∈ (rationalOpen (imgDatum D₀ hE).T (imgDatum D₀ hE).s
+        ∩ Spa (presheafValue D₀) (presheafValue D₀)⁺
+        : Set (Spv (presheafValue D₀))))
+    (hwA : comap D₀.canonicalMap (w : Spv (presheafValue D₀))
+      ∈ (rationalOpen E.T E.s ∩ Spa A A⁺ : Set (Spv A))) :
+    comap ((pieceEquiv D₀ hE hE_sub).toRingHom)
+        (pointValue (imgDatum D₀ hE) hwB)
+      = pointValue E hwA := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  refine eq_pointValue_of_comap_eq E hwA ?_ ?_
+  · exact comap_isContinuous (pieceEquiv_continuous D₀ hE hE_sub)
+      (pointValue_isContinuous (imgDatum D₀ hE) hwB)
+  · have hfac : ((pieceEquiv D₀ hE hE_sub).toRingHom).comp E.canonicalMap
+        = ((imgDatum D₀ hE).canonicalMap).comp D₀.canonicalMap :=
+      RingHom.ext (pieceEquiv_canonicalMap D₀ hE hE_sub)
+    have h1 := congr_fun (comap_comp E.canonicalMap
+      ((pieceEquiv D₀ hE hE_sub).toRingHom)) (pointValue (imgDatum D₀ hE) hwB)
+    have h2 := congr_fun (comap_comp D₀.canonicalMap
+      ((imgDatum D₀ hE).canonicalMap)) (pointValue (imgDatum D₀ hE) hwB)
+    rw [hfac] at h1
+    rw [h2] at h1
+    rw [show comap E.canonicalMap (comap ((pieceEquiv D₀ hE hE_sub).toRingHom)
+        (pointValue (imgDatum D₀ hE) hwB))
+        = comap D₀.canonicalMap (comap ((imgDatum D₀ hE).canonicalMap)
+            (pointValue (imgDatum D₀ hE) hwB)) from h1.symm]
+    rw [comap_pointValue (imgDatum D₀ hE) hwB]
+
 end Phi
 
 section Assembly
