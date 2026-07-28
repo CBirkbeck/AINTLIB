@@ -1093,6 +1093,167 @@ noncomputable def spaCompHom [DecidableEq A] :
           (leOfHom ((Opens.map (shadowMap D₀ u hu)).map f.unop))
           (limitRestrict inf_le_left x)).symm }
 
+/-- Germ naturality for the comparison morphism, in the concrete
+`spaRingPresheaf` spelling. -/
+theorem ringStalkMap_spaCompHom_germ [DecidableEq A]
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+    (U : Opens ↥(Spa A A⁺)) (hw : shadow D₀ w ∈ U)
+    (f : ↥(limitSections U)) :
+    (ringStalkMap (spaCompHom D₀ u hu) w).hom'
+        ((spaRingPresheaf A).germ U (shadow D₀ w) hw f)
+      = (spaRingPresheaf (presheafValue D₀)).germ (shadowPre D₀ u hu U) w hw
+          (ambComp D₀ u hu U f) := by
+  have h := AlgebraicGeometry.PresheafedSpace.stalkMap_germ_apply
+    (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map
+      (spaCompHom D₀ u hu)) U w hw f
+  exact h
+
+theorem shadow_injective (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
+    Function.Injective (shadow D₀) := by
+  intro w₁ w₂ h
+  have h1 : baseHomeo D₀ u hu w₁ = baseHomeo D₀ u hu w₂ := Subtype.ext h
+  exact (baseHomeo D₀ u hu).injective h1
+
+theorem shadow_isOpenMap (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀)) :
+    IsOpenMap (shadow D₀ (A := A)) := by
+  intro s hs
+  have h1 : shadow D₀ '' s = Subtype.val '' ((baseHomeo D₀ u hu) '' s) := by
+    rw [Set.image_image]
+    rfl
+  rw [h1]
+  exact ((spaOpens D₀).2.isOpenEmbedding_subtypeVal).isOpenMap _
+    ((baseHomeo D₀ u hu).isOpenMap _ hs)
+
+/-- Every open of `Spa B` is the shadow-preimage of an ambient open. -/
+def shadowImage (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀))
+    (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
+    Opens ↥(Spa A A⁺) where
+  carrier := shadow D₀ '' (W : Set ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+  is_open' := shadow_isOpenMap D₀ u hu _ W.2
+
+theorem shadowPre_shadowImage (u : (presheafValue D₀)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D₀)ˣ) : presheafValue D₀))
+    (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
+    shadowPre D₀ u hu (shadowImage D₀ u hu W) = W := by
+  refine Opens.ext (Set.ext fun w => ?_)
+  constructor
+  · rintro ⟨w', hw', heq⟩
+    exact (shadow_injective D₀ u hu heq) ▸ hw'
+  · exact fun hw => ⟨w, hw, rfl⟩
+
+theorem shadowPre_mono {U U' : Opens ↥(Spa A A⁺)} (h : U' ≤ U) :
+    shadowPre D₀ u hu U' ≤ shadowPre D₀ u hu U :=
+  fun w hw => h hw
+
+/-- Naturality of the ambient comparison. -/
+theorem ambComp_naturality [DecidableEq A] {U U' : Opens ↥(Spa A A⁺)}
+    (h : U' ≤ U) (x : ↥(limitSections U)) :
+    ambComp D₀ u hu U' (limitRestrict h x)
+      = limitRestrict (shadowPre_mono D₀ u hu h) (ambComp D₀ u hu U x) :=
+  (phiEquiv_symm_naturality D₀ _ _ (inf_le_inf_right (spaOpens D₀) h)
+    (shadowPre_paired D₀ u hu U) (shadowPre_paired D₀ u hu U')
+    (shadowPre_mono D₀ u hu h) (limitRestrict inf_le_left x)).symm
+
+/-- **The comparison morphism intertwines the stalk valuations** (P5-K12,
+the last mathematical step of Wedhorn 8.15 at the `𝒱` level). -/
+theorem comap_ringStalkMap_spaCompHom_stalkValue [DecidableEq A]
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
+    stalkValue (shadow D₀ w)
+      = comap (ringStalkMap (spaCompHom D₀ u hu) w).hom' (stalkValue w) := by
+  refine ValuationSpectrum.ext (funext₂ fun a b => propext ?_)
+  obtain ⟨U, hwU, f, g, hf, hg⟩ := exists_common_rep (shadow D₀ w) a b
+  subst hf
+  subst hg
+  constructor
+  · intro hab
+    obtain ⟨W, hwW, hWU, hvle⟩ := stalkVle_elim hab hwU rfl rfl
+    -- push the comparison down to `W`
+    have hBvle : (openValue (shadowPre D₀ u hu W)
+          (show w ∈ shadowPre D₀ u hu W from hwW)).vle
+        (ambComp D₀ u hu W (limitRestrict hWU f))
+        (ambComp D₀ u hu W (limitRestrict hWU g)) := by
+      have := comap_ambComp_openValue D₀ u hu W w hwW
+      rw [← this] at hvle
+      exact hvle
+    have hgerm := stalkVle_intro (v := w)
+      (U := shadowPre D₀ u hu W) (hvU := hwW) hBvle
+    -- rewrite the germs through naturality
+    have hnatf := ringStalkMap_spaCompHom_germ D₀ u hu w W hwW (limitRestrict hWU f)
+    have hnatg := ringStalkMap_spaCompHom_germ D₀ u hu w W hwW (limitRestrict hWU g)
+    have hresf := TopCat.Presheaf.germ_res_apply (spaRingPresheaf A)
+      (homOfLE hWU) (shadow D₀ w) hwW f
+    have hresg := TopCat.Presheaf.germ_res_apply (spaRingPresheaf A)
+      (homOfLE hWU) (shadow D₀ w) hwW g
+    show stalkVle w _ _
+    rw [show (ringStalkMap (spaCompHom D₀ u hu) w).hom'
+          ((spaRingPresheaf A).germ U (shadow D₀ w) hwU f)
+        = (spaRingPresheaf (presheafValue D₀)).germ (shadowPre D₀ u hu W) w hwW
+            (ambComp D₀ u hu W (limitRestrict hWU f)) from by
+        rw [← hnatf]; exact congrArg _ hresf.symm,
+      show (ringStalkMap (spaCompHom D₀ u hu) w).hom'
+          ((spaRingPresheaf A).germ U (shadow D₀ w) hwU g)
+        = (spaRingPresheaf (presheafValue D₀)).germ (shadowPre D₀ u hu W) w hwW
+            (ambComp D₀ u hu W (limitRestrict hWU g)) from by
+        rw [← hnatg]; exact congrArg _ hresg.symm]
+    exact hgerm
+  · intro hab
+    have hnatf := ringStalkMap_spaCompHom_germ D₀ u hu w U hwU f
+    have hnatg := ringStalkMap_spaCompHom_germ D₀ u hu w U hwU g
+    have hab' : stalkVle w
+        ((spaRingPresheaf (presheafValue D₀)).germ (shadowPre D₀ u hu U) w hwU
+          (ambComp D₀ u hu U f))
+        ((spaRingPresheaf (presheafValue D₀)).germ (shadowPre D₀ u hu U) w hwU
+          (ambComp D₀ u hu U g)) := by
+      rw [← hnatf, ← hnatg]
+      exact hab
+    obtain ⟨W', hwW', hW'sub, hvle⟩ := stalkVle_elim hab' hwU rfl rfl
+    -- descend to the ambient open `shadowImage W'`
+    set W : Opens ↥(Spa A A⁺) := shadowImage D₀ u hu W' with hW
+    have hWU : W ≤ U := by
+      rintro v ⟨w'', hw'', rfl⟩
+      exact hW'sub hw''
+    have hpre : shadowPre D₀ u hu W = W' := shadowPre_shadowImage D₀ u hu W'
+    have hwW : shadow D₀ w ∈ W := ⟨w, hwW', rfl⟩
+    have hkey : (openValue W hwW).vle (limitRestrict hWU f) (limitRestrict hWU g) := by
+      have h2 := comap_ambComp_openValue D₀ u hu W w (by rw [hpre]; exact hwW')
+      have hAf : ambComp D₀ u hu W (limitRestrict hWU f)
+          = limitRestrict (shadowPre_mono D₀ u hu hWU) (ambComp D₀ u hu U f) :=
+        ambComp_naturality D₀ u hu hWU f
+      have hAg : ambComp D₀ u hu W (limitRestrict hWU g)
+          = limitRestrict (shadowPre_mono D₀ u hu hWU) (ambComp D₀ u hu U g) :=
+        ambComp_naturality D₀ u hu hWU g
+      rw [← h2]
+      show (openValue (shadowPre D₀ u hu W)
+          (show w ∈ shadowPre D₀ u hu W from by rw [hpre]; exact hwW')).vle
+        (ambComp D₀ u hu W (limitRestrict hWU f))
+        (ambComp D₀ u hu W (limitRestrict hWU g))
+      rw [hAf, hAg]
+      have key : ∀ (Z : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+          (_ : Z = W') (hwZ : w ∈ Z)
+          (hZU : Z ≤ shadowPre D₀ u hu U),
+          (openValue Z hwZ).vle (limitRestrict hZU (ambComp D₀ u hu U f))
+            (limitRestrict hZU (ambComp D₀ u hu U g)) := by
+        intro Z hZ hwZ hZU
+        subst hZ
+        exact hvle
+      exact key (shadowPre D₀ u hu W) hpre _ (shadowPre_mono D₀ u hu hWU)
+    have hgerm := stalkVle_intro (v := shadow D₀ w) (U := W) (hvU := hwW) hkey
+    have hresf : (spaRingPresheaf A).germ W (shadow D₀ w) hwW
+        (limitRestrict hWU f)
+        = (spaRingPresheaf A).germ U (shadow D₀ w) hwU f :=
+      TopCat.Presheaf.germ_res_apply (spaRingPresheaf A)
+        (homOfLE hWU) (shadow D₀ w) hwW f
+    have hresg : (spaRingPresheaf A).germ W (shadow D₀ w) hwW
+        (limitRestrict hWU g)
+        = (spaRingPresheaf A).germ U (shadow D₀ w) hwU g :=
+      TopCat.Presheaf.germ_res_apply (spaRingPresheaf A)
+        (homOfLE hWU) (shadow D₀ w) hwW g
+    rw [hresf, hresg] at hgerm
+    exact hgerm
+
 end Assembly
 
 end SpaVIso
