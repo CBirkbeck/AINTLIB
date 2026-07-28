@@ -276,6 +276,56 @@ noncomputable def phiHom {V : Opens ↥(Spa A A⁺)} (hV : V ≤ spaOpens D₀)
       = (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm
           (limitEvalHom (idxOf D₀ hVW i) x) := rfl
 
+/-- **The image opens are a basis** (P5-K2): every `Spa B`-point of a rational
+open of `B` has a neighbourhood of the form `spaOpen_B (imgDatum E)` for a
+valid `A`-side datum `E` inside `D₀`, still inside the given rational open.
+
+Huber's approximation argument (`exists_A_level_open_presentation'`) captures
+the `B`-side conditions by an `A`-level open; the `A`-rational basis
+(`exists_isRational_spaOpen_subset_huber`) then produces `E`. -/
+theorem exists_imgDatum_subset [DecidableEq A]
+    (F : RationalLocData (presheafValue D₀))
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+    (hw : (w : Spv (presheafValue D₀)) ∈ rationalOpen F.T F.s) :
+    ∃ (E : RationalLocData A) (hE : E.IsRational),
+      rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s ∧
+      (w : Spv (presheafValue D₀)) ∈
+        rationalOpen (imgDatum D₀ hE).T (imgDatum D₀ hE).s ∧
+      rationalOpen (imgDatum D₀ hE).T (imgDatum D₀ hE).s
+        ⊆ rationalOpen F.T F.s := by
+  classical
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  obtain ⟨u, hu⟩ := (inferInstance : IsTateRing (presheafValue D₀)
+    ).exists_topologicallyNilpotent_unit
+  -- the `B`-side conditions defining `F` at `w`
+  have hmem : ∀ t ∈ insert F.s F.T,
+      (w : Spv (presheafValue D₀)) ∈ basicOpen t F.s := by
+    intro t ht
+    rcases Finset.mem_insert.mp ht with rfl | ht'
+    · exact ⟨vle_refl _, hw.2.2⟩
+    · exact ⟨hw.2.1 t ht', hw.2.2⟩
+  obtain ⟨Wset, hWopen, hWmem, hWcap⟩ := exists_A_level_open_presentation'
+    D₀ u hu w.2 (ι := presheafValue D₀) (fam := insert F.s F.T)
+    (F := fun t => t) (G := fun _ => F.s) hmem
+  -- the `A`-level open neighbourhood of the shadow, inside `D₀`
+  have hshadow : shadow D₀ w ∈ (Subtype.val ⁻¹' Wset ∩ spaOpen D₀
+      : Set ↥(Spa A A⁺)) :=
+    ⟨hWmem, (comap_canonicalMap_mem_rationalOpen_inter_spa D₀ w).1⟩
+  obtain ⟨E, hE, hEmem, hEsub⟩ := exists_isRational_spaOpen_subset_huber
+    (V := (Subtype.val ⁻¹' Wset ∩ spaOpen D₀ : Set ↥(Spa A A⁺)))
+    (IsOpen.inter (hWopen.preimage continuous_subtype_val) (isOpen_spaOpen D₀))
+    hshadow
+  refine ⟨E, hE, spaOpen_subset_iff.mp (hEsub.trans Set.inter_subset_right), ?_, ?_⟩
+  · exact (mem_imgDatum_iff D₀ hE w).mpr hEmem
+  · intro w' hw'
+    have hw'spa : w' ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ := hw'.1
+    have hshad : shadow D₀ ⟨w', hw'spa⟩ ∈ spaOpen E :=
+      (mem_imgDatum_iff D₀ hE ⟨w', hw'spa⟩).mp hw'
+    have hin : comap D₀.canonicalMap w' ∈ Wset := (hEsub hshad).1
+    have hcap := hWcap w' hw'spa hin
+    exact ⟨hw'spa, fun t ht => (hcap t (Finset.mem_insert_of_mem ht)).1,
+      (hcap F.s (Finset.mem_insert_self _ _)).2⟩
+
 end Phi
 
 end SpaVIso
