@@ -531,12 +531,10 @@ theorem range_openIncl_comp {X : TopRingPresheafedSpace.{u}}
 
 /-- The image of an open under an isomorphism of presheafed spaces. -/
 def imgOfIso {X Y : TopRingPresheafedSpace.{u}} (e : X ≅ Y)
-    (U : Opens ↥(X.carrier)) : Opens ↥(Y.carrier) where
-  carrier := (ConcreteCategory.hom e.hom.base) '' (U : Set ↥(X.carrier))
-  is_open' :=
-    have := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
-    (AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.base_open
-      (f := e.hom)).isOpenMap _ U.2
+    (U : Opens ↥(X.carrier)) : Opens ↥(Y.carrier) :=
+  have := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofIso e
+  (AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.base_open
+    (f := e.hom)).isOpenMap.functor.obj U
 
 /-- **Restriction transports along an isomorphism.** -/
 noncomputable def restrictIsoOfIso {X Y : TopRingPresheafedSpace.{u}} (e : X ≅ Y)
