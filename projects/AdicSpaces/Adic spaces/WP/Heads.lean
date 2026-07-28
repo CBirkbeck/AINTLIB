@@ -1063,6 +1063,136 @@ theorem isNoetherianRing_unitBall_WPHead (ϖ : Uniformizer K)
     ↥(FiniteJet.unitBall (WPHead K w N))
 
 variable {K} in
+/-! #### Generalized scale-bundle noetherianity (port of `CDVFNoetherian` to an
+arbitrary normed base) and isometric transport of restricted series -/
+
+section ScaleNoetherian
+
+variable {E : Type*} [NormedCommRing E] [IsUltrametricDist E] [NormOneClass E]
+  [CompleteSpace E]
+
+/-- `CDVFNoetherian.isNoetherianRing_unitBall_P`, generalized from the base field to
+any complete normed ultrametric base with a norm-scaling pseudouniformizer. -/
+theorem isNoetherianRing_unitBall_P_of_scale (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)
+    (ht0 : 0 < ‖t‖) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
+    (hE₀ : IsNoetherianRing (FiniteJet.unitBall E)) (m : ℕ) :
+    IsNoetherianRing ↥(FiniteJet.unitBall (FiniteJet.GraphKoszul.P E m)) := by
+  haveI := hE₀
+  haveI hcomp : IsNoetherianRing (AdicCompletion
+      (FiniteJet.GraphKoszul.I0 t ht1)
+      (MvPolynomial (Fin m) ↥(FiniteJet.unitBall E))) :=
+    AdicCompletion.isNoetherianRing_span_singleton _ _
+  exact isNoetherianRing_of_ringEquiv _
+    (FiniteJet.GraphKoszul.ballAdicEquiv (E := E) (m := m) t htu ht1 ht0 hscale).symm
+
+/-- `CDVFNoetherian.isNoetherianRing_P`, generalized to any scale-bundle base:
+`E⟨T₁,…,T_m⟩` is the localization of its noetherian unit ball at the scaling
+constant. -/
+theorem isNoetherianRing_P_of_scale (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)
+    (ht0 : 0 < ‖t‖) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
+    (hE₀ : IsNoetherianRing (FiniteJet.unitBall E)) (m : ℕ) :
+    IsNoetherianRing (FiniteJet.GraphKoszul.P E m) := by
+  haveI hball := isNoetherianRing_unitBall_P_of_scale t htu ht1 ht0 hscale hE₀ m
+  letI : Algebra ↥(FiniteJet.unitBall (FiniteJet.GraphKoszul.P E m))
+      (FiniteJet.GraphKoszul.P E m) :=
+    (FiniteJet.unitBall (FiniteJet.GraphKoszul.P E m)).subtype.toAlgebra
+  set s : ↥(FiniteJet.unitBall (FiniteJet.GraphKoszul.P E m)) :=
+    ⟨FiniteJet.GraphKoszul.polyToP (MvPolynomial.C t),
+      (FiniteJet.mem_unitBall_iff _ _).mpr (by
+        rw [FiniteJet.GraphKoszul.norm_tP t hscale]
+        exact ht1.le)⟩ with hs
+  haveI hloc : IsLocalization (Submonoid.powers s) (FiniteJet.GraphKoszul.P E m) := by
+    refine ⟨⟨?_, ?_, ?_⟩⟩
+    · rintro ⟨y, k, rfl⟩
+      show IsUnit ((FiniteJet.GraphKoszul.polyToP (MvPolynomial.C t) :
+        FiniteJet.GraphKoszul.P E m) ^ k)
+      exact (FiniteJet.GraphKoszul.isUnit_tP t htu).pow k
+    · intro F
+      obtain ⟨n, hn⟩ : ∃ n : ℕ, ‖t‖ ^ n * ‖F‖ ≤ 1 := by
+        rcases eq_or_ne ‖F‖ 0 with h0 | h0
+        · exact ⟨0, by rw [h0, mul_zero]; exact zero_le_one⟩
+        · have hpos : 0 < ‖F‖ := lt_of_le_of_ne (norm_nonneg F) (Ne.symm h0)
+          obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
+          exact ⟨n, by
+            calc ‖t‖ ^ n * ‖F‖ ≤ ‖F‖⁻¹ * ‖F‖ :=
+                  mul_le_mul_of_nonneg_right hn.le (norm_nonneg _)
+              _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)⟩
+      have hmem : ‖FiniteJet.GraphKoszul.polyToP (MvPolynomial.C t) ^ n * F‖ ≤ 1 := by
+        rw [FiniteJet.norm_pow_mul_of_scale (E := FiniteJet.GraphKoszul.P E m)
+          (fun G => by
+            rw [FiniteJet.GraphKoszul.norm_tP t hscale]
+            exact FiniteJet.GraphKoszul.norm_tP_mul t hscale G) n,
+          FiniteJet.GraphKoszul.norm_tP t hscale]
+        exact hn
+      refine ⟨(⟨FiniteJet.GraphKoszul.polyToP (MvPolynomial.C t) ^ n * F, hmem⟩,
+        ⟨s ^ n, n, rfl⟩), ?_⟩
+      show F * (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C t) :
+        FiniteJet.GraphKoszul.P E m) ^ n =
+        FiniteJet.GraphKoszul.polyToP (MvPolynomial.C t) ^ n * F
+      exact mul_comm F _
+    · intro x y h
+      refine ⟨1, ?_⟩
+      have hinj : Function.Injective
+          ((FiniteJet.unitBall (FiniteJet.GraphKoszul.P E m)).subtype) :=
+        Subtype.val_injective
+      rw [hinj h]
+  exact IsLocalization.isNoetherianRing (Submonoid.powers s)
+    (FiniteJet.GraphKoszul.P E m) hball
+
+end ScaleNoetherian
+
+section RestrictedTransport
+
+variable {R S : Type*} [NormedCommRing R] [IsUltrametricDist R]
+  [NormedCommRing S] [IsUltrametricDist S] {σ : Type*}
+
+/-- Norm-nonincreasing coefficientwise transport of radius-one restricted series
+along a ring homomorphism. -/
+noncomputable def mvRestrictedMapHom (φ : R →+* S) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) :
+    MvPowerSeries.Restricted R (fun _ : σ => (1 : ℝ)) →+*
+      MvPowerSeries.Restricted S (fun _ : σ => (1 : ℝ)) where
+  toFun F := ⟨MvPowerSeries.map φ F.1, by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    show Filter.Tendsto _ Filter.cofinite (nhds 0)
+    have h2 : Filter.Tendsto (fun t : σ →₀ ℕ =>
+        ‖MvPowerSeries.coeff t F.1‖ * t.prod ((fun _ : σ => (1 : ℝ)) · ^ ·))
+        Filter.cofinite (nhds 0) := F.2
+    refine squeeze_zero (fun t => ?_) (fun t => ?_) h2
+    · exact mul_nonneg (norm_nonneg _) (prod_weights_pos _ t).le
+    · rw [MvPowerSeries.coeff_map]
+      exact mul_le_mul_of_nonneg_right (hφ _) (prod_weights_pos _ t).le⟩
+  map_zero' := Subtype.ext (map_zero (MvPowerSeries.map φ))
+  map_one' := Subtype.ext (map_one (MvPowerSeries.map φ))
+  map_add' F G := Subtype.ext (map_add (MvPowerSeries.map φ) F.1 G.1)
+  map_mul' F G := Subtype.ext (map_mul (MvPowerSeries.map φ) F.1 G.1)
+
+@[simp] theorem mvRestrictedMapHom_coeff (φ : R →+* S) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖)
+    (F : MvPowerSeries.Restricted R (fun _ : σ => (1 : ℝ))) (t : σ →₀ ℕ) :
+    MvPowerSeries.coeff t ((mvRestrictedMapHom φ hφ F) :
+      MvPowerSeries.Restricted S (fun _ : σ => (1 : ℝ))).1 =
+      φ (MvPowerSeries.coeff t F.1) :=
+  MvPowerSeries.coeff_map φ t F.1
+
+/-- Isometric transport of radius-one restricted series along a ring isomorphism. -/
+noncomputable def mvRestrictedCongr (e : R ≃+* S) (he : ∀ x, ‖e x‖ = ‖x‖) :
+    MvPowerSeries.Restricted R (fun _ : σ => (1 : ℝ)) ≃+*
+      MvPowerSeries.Restricted S (fun _ : σ => (1 : ℝ)) := by
+  have he' : ∀ y, ‖e.symm y‖ = ‖y‖ := fun y => by
+    rw [← he (e.symm y), RingEquiv.apply_symm_apply]
+  refine RingEquiv.ofRingHom
+    (mvRestrictedMapHom (e : R →+* S) (fun x => (he x).le))
+    (mvRestrictedMapHom (e.symm : S →+* R) (fun y => (he' y).le)) ?_ ?_
+  · ext G
+    refine Subtype.ext (MvPowerSeries.ext fun t => ?_)
+    show e (e.symm (MvPowerSeries.coeff t G.1)) = MvPowerSeries.coeff t G.1
+    exact RingEquiv.apply_symm_apply e _
+  · ext F
+    refine Subtype.ext (MvPowerSeries.ext fun t => ?_)
+    show e.symm (e (MvPowerSeries.coeff t F.1)) = MvPowerSeries.coeff t F.1
+    exact RingEquiv.symm_apply_apply e _
+
+end RestrictedTransport
+
 /-- **The heads are strongly noetherian** ([WP] §6.4: "Since `𝒜_N` is affinoid" —
 the input to the head graph-Koszul bounds and to Wedhorn 8.28(b).  Proven for every
 Tate-variable count by the same finite-free-module argument at head
