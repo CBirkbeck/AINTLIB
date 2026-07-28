@@ -536,6 +536,59 @@ theorem curveSectionEquiv_symm_continuous :
       = glueInv p F ϖ W hdis from curveSectionEquiv_symm_eq p F ϖ W hdis]
   exact glueInv_continuous p F ϖ W hdis
 
+
+/-! ### The section map of the quotient leg (P5-5d)
+
+Both formulas below are `rfl`: `PresheafedSpace.comp_c_app` gives
+`piYHom.c.app ≫ pushforward (ofRestrict.c.app)`, `ofRestrict.c.app` is
+`presheaf.map (counit).op`, and `yPresheafedSpace.presheaf = (yFunctor).op ⋙
+structurePresheaf` turns that into exactly a `limitRestrict`; the `≤`-witness
+mismatch is absorbed by definitional proof irrelevance. -/
+
+variable (W' : Opens (Curve p F ϖ))
+
+/-- The `𝒴`-image of the slice `{y ∈ V : π y ∈ W}` sits inside the saturated
+preimage of `W`. -/
+theorem legOpen_le_curvePreimage (V : Opens ↥(yTop p F ϖ)) :
+    (ValuationSpectrum.restrictOpenFunctor (yVPreObj p F ϖ) V).obj
+        ((Opens.map (yRestrictToCurve p F ϖ V).toHom.base).obj W')
+      ≤ curvePreimage p F ϖ W' := by
+  rintro _ ⟨y, hy, rfl⟩
+  exact hy
+
+/-- **The section map of the quotient leg**: `c` at `W` sends an invariant
+section to its underlying `𝒴`-section, restricted to the slice
+`{y ∈ V : π y ∈ W}`. -/
+theorem yRestrictToCurve_c_app_apply (V : Opens ↥(yTop p F ϖ))
+    (t : ToType ((curveSpace p F ϖ).ringPresheaf.obj (op W'))) :
+    (ConcreteCategory.hom ((yRestrictToCurve p F ϖ V).toHom.c.app (op W'))) t
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map
+          (homOfLE (legOpen_le_curvePreimage p F ϖ W' V))))
+          (piComponent p F ϖ W' t) := rfl
+
+/-- **The slice is the expected intersection**: the source open of the quotient
+leg's `c` at `W` is `V ⊓ π⁻¹ W`. -/
+theorem legOpen_eq (V : Opens ↥(yTop p F ϖ)) :
+    (ValuationSpectrum.restrictOpenFunctor (yVPreObj p F ϖ) V).obj
+        ((Opens.map (yRestrictToCurve p F ϖ V).toHom.base).obj W')
+      = V ⊓ curvePreimage p F ϖ W' := by
+  refine Opens.ext (Set.ext fun v => ⟨?_, ?_⟩)
+  · rintro ⟨y, hy, rfl⟩
+    exact ⟨y.2, hy⟩
+  · rintro ⟨hv, hw⟩
+    exact ⟨⟨v, hv⟩, hw, rfl⟩
+
+/-- The section map of the quotient leg, with the slice spelled `V ⊓ π⁻¹ W`. -/
+theorem yRestrictToCurve_c_app_apply_inf (V : Opens ↥(yTop p F ϖ))
+    (t : ToType ((curveSpace p F ϖ).ringPresheaf.obj (op W'))) :
+    limitRestrict (le_of_eq (congrArg (yFunctor p F ϖ).obj
+          (legOpen_eq p F ϖ W' V).symm))
+        ((ConcreteCategory.hom
+          ((yRestrictToCurve p F ϖ V).toHom.c.app (op W'))) t)
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE
+          (inf_le_right : V ⊓ curvePreimage p F ϖ W' ≤ curvePreimage p F ϖ W'))))
+          (piComponent p F ϖ W' t) := rfl
+
 end FarguesFontaine
 
 end

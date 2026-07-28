@@ -3031,6 +3031,45 @@ noncomputable def quotientLegVPreHom (V : Opens ↥(yTop p F ϖ))
 - **Generality**: FF-specific (uses the φ-action); the underlying "free properly
   discontinuous quotient" statement could be generalized later.
 
+### [P5-6a] `IsAdicSpace` — Wedhorn Definition 8.22 — DONE 2026-07-28
+- **Status**: DONE, axiom-clean, full gate green | **File**: NEW `Adic spaces/AdicSpaceV.lean`
+- `AffinoidVChart extends AffinoidAdicPresentation` — the project ALREADY had a bundled
+  *sheafy* affinoid pair (`AffinoidAdicPresentation`, field `sheafy : IsLimitSheaf Ring`,
+  NO Tate/noetherian), so review point 5 costs nothing: the chart adds only the stalk
+  package (`isLocalRing_stalk`, `val_supp`) that makes `Spa` an object of 𝒱. Wedhorn proves
+  that package for every affinoid pair; here it is *carried as data* because our proof route
+  (`rationalShrink_tate`) is Tate-only — that keeps the DEFINITION faithful.
+- `AffinoidVChart.toVObj`, `AffinoidVChart.ofTate` (the P5-2 `spaVObjTate` package,
+  repackaged), and
+  `IsAdicSpace X := ∀ x, ∃ U ∋ x, ∃ C : AffinoidVChart, Nonempty (X.restrictOpen U ≅ C.toVObj)`.
+- **KEY DISCOVERY: `VPreObj` and `VObj` are ALREADY `CategoryTheory.Category` instances**
+  (`StructureSheaf.lean:533,579`), so `≅` is just `CategoryTheory.Iso` — no bespoke `VPreIso`
+  is needed, and `VPreHom.comp` is now an `abbrev` for the category's `≫` (zero duplicate
+  proof). NOTE: `≫` does NOT elaborate when the expected type is spelled `VPreHom X Z`;
+  the abbrev carries a `show X ⟶ Z from`.
+
+### [P5-5d] The quotient leg as an open immersion — IN PROGRESS
+- **LANDED 2026-07-28** (`CurveVMorphism.lean`), and the key formula is **`rfl`**:
+  `yRestrictToCurve_c_app_apply` — the leg's section map at `W` is
+  "underlying section of the invariant section, restricted to the slice
+  `{y ∈ V : π y ∈ W}`". Also `legOpen_le_curvePreimage`, `legOpen_eq`
+  (slice `= V ⊓ π⁻¹W`), `yRestrictToCurve_c_app_apply_inf`.
+  Why `rfl` works: `PresheafedSpace.comp_c_app` gives
+  `piYHom.c.app ≫ pushforward (ofRestrict.c.app)`, `ofRestrict.c.app` is
+  `presheaf.map (counit).op`, and `yPresheafedSpace.presheaf = (yFunctor).op ⋙
+  structurePresheaf` turns that into a `limitRestrict`; the `≤`-witness mismatch is
+  absorbed by definitional proof irrelevance.
+- **REMAINING**: `AlgebraicGeometry.PresheafedSpace.IsOpenImmersion (yRestrictToCurve V).toHom`
+  for wandering `V`.
+  * `base_open` — from `xImageHomeo` (`CurveAdicPresentation.lean:83`).
+  * `c_iso` — for `U : Opens ↥V` put `U' := restrictOpenFunctor _ V |>.obj U`; the image open
+    on the curve is `xImage U'`, the slice is `V ⊓ ⊔_k φ^k U' = U'` (wandering), so the c-app
+    IS `curveSectionRestrict U'` — and P5-5c gives it bijective with continuous inverse.
+    Turn that into `IsIso` in `CompleteTopCommRingCat` by the SAME pattern as
+    `SpaVIso.phiCatIso'` / `ambCompCatIso` (P5-OI).
+  * then `IsOpenImmersion.isoRestrict` gives `𝒴|_V ≅ X|_{xImage V}` in 𝒱^pre, and
+    `VObj`-level `≅` follows since both sides' sheaf conditions are already known.
+
 ### [P5-6] `IsAdicSpace` and `isAdicSpace_xVObj`
 - **Status**: blocked | **File**: new `Adic spaces/AdicSpaceV.lean` + FF capstone
 - **Depends on**: P5-5, P5-K (done)
