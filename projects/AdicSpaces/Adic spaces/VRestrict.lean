@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB AI contributors
 -/
 import «Adic spaces».StructureSheaf
+import Mathlib.Geometry.RingedSpace.OpenImmersion
 import «Adic spaces».AdicMorphismsCore
 
 /-!
@@ -315,6 +316,71 @@ def corestrictHom : Z ⟶ X.restrict (openIncl_isOpenEmbedding U) where
   c := Functor.whiskerLeft (imgFunctor U).op f.c ≫
     eqToHom (congrArg (fun G : Opens ↥U ⥤ Opens ↥(Z.carrier) => G.op ⋙ Z.presheaf)
       (corestrict_functor_eq f U hrange))
+
+/-- The restriction stalk comparison at the raw presheafed-space level. -/
+noncomputable def restrictRingStalkIsoRaw (x : ↥U) :
+    TopRingPresheafedSpace.ringStalk (X.restrict (openIncl_isOpenEmbedding U)) x
+      ≅ TopRingPresheafedSpace.ringStalk X
+        (ConcreteCategory.hom (openIncl U) x) :=
+  AlgebraicGeometry.PresheafedSpace.restrictStalkIso
+    (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.obj X)
+    (openIncl_isOpenEmbedding U) x
+
+/-- The range of the open inclusion is `U`. -/
+theorem range_openIncl :
+    Set.range (ConcreteCategory.hom (openIncl (X := X) U))
+      = (U : Set ↥(X.carrier)) :=
+  Subtype.range_val
+
+/-- **The corestriction of a morphism into an open containing its range**,
+via mathlib's `IsOpenImmersion.lift` at the restriction inclusion. -/
+noncomputable def liftToRestrict
+    (hr : Set.range (ConcreteCategory.hom f.base) ⊆ (U : Set ↥(X.carrier))) :
+    Z ⟶ X.restrict (openIncl_isOpenEmbedding U) :=
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.lift
+    (X.ofRestrict (openIncl_isOpenEmbedding U)) f
+    (by
+      have h : Set.range (ConcreteCategory.hom
+          (X.ofRestrict (openIncl_isOpenEmbedding U)).base)
+          = (U : Set ↥(X.carrier)) := range_openIncl U
+      rw [h]
+      exact hr)
+
+/-- The lift factors the original morphism. -/
+theorem liftToRestrict_fac
+    (hr : Set.range (ConcreteCategory.hom f.base) ⊆ (U : Set ↥(X.carrier))) :
+    liftToRestrict f U hr ≫ X.ofRestrict (openIncl_isOpenEmbedding U) = f :=
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.lift_fac _ _ _
+
+/-- The base of the lift, as a point of `U`. -/
+theorem liftToRestrict_base
+    (hr : Set.range (ConcreteCategory.hom f.base) ⊆ (U : Set ↥(X.carrier)))
+    (z : ↥(Z.carrier)) :
+    ConcreteCategory.hom (openIncl U)
+        (ConcreteCategory.hom (liftToRestrict f U hr).base z)
+      = ConcreteCategory.hom f.base z := by
+  have h := congrArg (fun g : Z ⟶ X => ConcreteCategory.hom g.base z)
+    (liftToRestrict_fac f U hr)
+  exact h
+
+/-- **The lift's stalk map factors the original one through the restriction
+stalk comparison.** The `eqToHom` is forced: the two source stalks sit at
+propositionally-equal points of `X`. -/
+theorem ringStalkMap_liftToRestrict
+    (hr : Set.range (ConcreteCategory.hom f.base) ⊆ (U : Set ↥(X.carrier)))
+    (z : ↥(Z.carrier)) :
+    ringStalkMap f z
+      = eqToHom (congrArg (TopRingPresheafedSpace.ringPresheaf X).stalk
+          (congrArg (fun g : Z ⟶ X => ConcreteCategory.hom g.base z)
+            (liftToRestrict_fac f U hr).symm)) ≫
+        ringStalkMap (liftToRestrict f U hr ≫
+          X.ofRestrict (openIncl_isOpenEmbedding U)) z := by
+  exact AlgebraicGeometry.PresheafedSpace.stalkMap.congr_hom
+    (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map f)
+    (CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map
+      (liftToRestrict f U hr ≫ X.ofRestrict (openIncl_isOpenEmbedding U)))
+    (congrArg CompleteTopCommRingCat.forgetToCommRingCat.mapPresheaf.map
+      (liftToRestrict_fac f U hr).symm) z
 
 end Corestrict
 
