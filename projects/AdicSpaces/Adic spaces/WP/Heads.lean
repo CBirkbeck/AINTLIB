@@ -38,56 +38,114 @@ variable (w : ℕ → ℕ) (N : ℕ)
 ([WP] lem:finite-stage-normal-form). -/
 noncomputable def wpHeadSupport : Subring (Amb K) where
   carrier := {f | ∀ t : ℕ →₀ ℕ, ¬ HeadMem w N t → MvPowerSeries.coeff t f.1 = 0}
-  zero_mem' := by sorry
-  one_mem' := by sorry
-  add_mem' := by sorry
-  neg_mem' := by sorry
-  mul_mem' := by sorry
+  zero_mem' := fun t _ => by
+    show MvPowerSeries.coeff t (0 : MvPowerSeries ℕ K) = 0
+    simp
+  one_mem' := fun t ht => by
+    show MvPowerSeries.coeff t (1 : MvPowerSeries ℕ K) = 0
+    classical
+    rcases eq_or_ne t 0 with rfl | h0
+    · exact absurd ⟨wpMem_zero w, fun n _ => rfl⟩ ht
+    · rw [MvPowerSeries.coeff_one, if_neg h0]
+  add_mem' := fun {f} {g} hf hg t ht => by
+    show MvPowerSeries.coeff t (f.1 + g.1) = 0
+    rw [map_add, hf t ht, hg t ht, add_zero]
+  neg_mem' := fun {f} hf t ht => by
+    show MvPowerSeries.coeff t (-f.1) = 0
+    rw [map_neg, hf t ht, neg_zero]
+  mul_mem' := fun {f} {g} hf hg t ht => by
+    show MvPowerSeries.coeff t (f.1 * g.1) = 0
+    classical
+    rw [MvPowerSeries.coeff_mul]
+    refine Finset.sum_eq_zero fun p hp => ?_
+    have hpt : p.1 + p.2 = t := Finset.HasAntidiagonal.mem_antidiagonal.mp hp
+    subst hpt
+    by_cases h1 : HeadMem w N p.1
+    · by_cases h2 : HeadMem w N p.2
+      · exact absurd (h1.add h2) ht
+      · rw [hg p.2 h2, mul_zero]
+    · rw [hf p.1 h1, zero_mul]
 
 /-- The `N`-th affinoid head `𝒜_N` ([WP] §6.1). -/
 abbrev WPHead : Type _ := ↥(wpHeadSupport K w N)
 
-theorem wpHeadSupport_le_wpSupport : wpHeadSupport K w N ≤ wpSupport K w := by sorry
+theorem wpHeadSupport_le_wpSupport : wpHeadSupport K w N ≤ wpSupport K w :=
+  fun f hf t ht => hf t fun hh => ht hh.1
 
 theorem wpHeadSupport_mono {N M : ℕ} (h : N ≤ M) :
-    wpHeadSupport K w N ≤ wpHeadSupport K w M := by sorry
+    wpHeadSupport K w N ≤ wpHeadSupport K w M :=
+  fun f hf t ht => hf t fun hh => ht (hh.mono h)
 
 /-- The isometric inclusion `𝒜_N →+* 𝒜` ([WP]: "The transition maps are isometric"). -/
 noncomputable def headIncl : WPHead K w N →+* WPA K w :=
   Subring.inclusion (wpHeadSupport_le_wpSupport K w N)
 
-@[simp] theorem norm_headIncl (x : WPHead K w N) : ‖headIncl K w N x‖ = ‖x‖ := by sorry
+@[simp] theorem norm_headIncl (x : WPHead K w N) : ‖headIncl K w N x‖ = ‖x‖ := rfl
 
 theorem isClosed_wpHeadSupport : IsClosed ((wpHeadSupport K w N : Set (Amb K))) := by
-  sorry
+  have h := isClosed_setOf_coeff_eq_zero (R := K) (σ := ℕ) {t | HeadMem w N t}
+  convert h using 1
+  ext g
+  exact Iff.rfl
 
 instance : CompleteSpace (WPHead K w N) :=
   (isClosed_wpHeadSupport K w N).completeSpace_coe
 
-instance : NormOneClass (WPHead K w N) := ⟨by sorry⟩
+instance : NormOneClass (WPHead K w N) :=
+  ⟨by rw [show ‖(1 : WPHead K w N)‖ = ‖((1 : WPHead K w N) : Amb K)‖ from rfl]
+      exact norm_one⟩
 
 /-- The constant embedding `K →+* 𝒜_N`. -/
-noncomputable def constHead : K →+* WPHead K w N := by sorry
+noncomputable def constHead : K →+* WPHead K w N where
+  toFun x :=
+    ⟨⟨MvPowerSeries.C x, MvPowerSeries.isRestrictedGauss_C _ _⟩, fun s hs => by
+      show MvPowerSeries.coeff s (MvPowerSeries.C (σ := ℕ) x) = 0
+      classical
+      rw [MvPowerSeries.coeff_C, if_neg (by
+        intro h; subst h; exact hs ⟨wpMem_zero w, fun n _ => rfl⟩)]⟩
+  map_one' := Subtype.ext (Subtype.ext (map_one (MvPowerSeries.C (σ := ℕ) (R := K))))
+  map_mul' x y := Subtype.ext (Subtype.ext (map_mul (MvPowerSeries.C (σ := ℕ)) x y))
+  map_zero' := Subtype.ext (Subtype.ext (map_zero (MvPowerSeries.C (σ := ℕ) (R := K))))
+  map_add' x y := Subtype.ext (Subtype.ext (map_add (MvPowerSeries.C (σ := ℕ)) x y))
+
+@[simp] theorem headIncl_constHead (x : K) :
+    headIncl K w N (constHead K w N x) = constA K w x := rfl
 
 variable {K w N} in
 /-- The pseudouniformizer of the head. -/
 noncomputable def piHead (ϖ : Uniformizer K) : WPHead K w N := constHead K w N ϖ.val
 
 variable {K w N} in
+theorem norm_piHead (ϖ : Uniformizer K) : ‖piHead (w := w) (N := N) ϖ‖ = ‖ϖ.val‖ := by
+  rw [show ‖piHead (w := w) (N := N) ϖ‖ =
+    ‖headIncl K w N (constHead K w N ϖ.val)‖ from rfl, headIncl_constHead,
+    norm_constA]
+
+variable {K w N} in
 theorem norm_piHead_lt_one (ϖ : Uniformizer K) : ‖piHead (w := w) (N := N) ϖ‖ < 1 := by
-  sorry
+  rw [norm_piHead]; exact ϖ.norm_val_lt_one
 
 variable {K w N} in
 theorem norm_piHead_pos (ϖ : Uniformizer K) : 0 < ‖piHead (w := w) (N := N) ϖ‖ := by
-  sorry
+  rw [norm_piHead]; exact ϖ.norm_val_pos
 
 variable {K w N} in
-theorem isUnit_piHead (ϖ : Uniformizer K) : IsUnit (piHead (w := w) (N := N) ϖ) := by
-  sorry
+theorem isUnit_piHead (ϖ : Uniformizer K) : IsUnit (piHead (w := w) (N := N) ϖ) :=
+  ϖ.isUnit_val.map (constHead K w N)
+
+variable {K w N} in
+theorem norm_constHead_mul (x : K) (f : WPHead K w N) :
+    ‖constHead K w N x * f‖ = ‖x‖ * ‖f‖ := by
+  rw [show ‖constHead K w N x * f‖ =
+      ‖headIncl K w N (constHead K w N x * f)‖ from rfl,
+    map_mul, headIncl_constHead, norm_constA_mul]
+  rfl
 
 variable {K w N} in
 theorem norm_piHead_mul (ϖ : Uniformizer K) (f : WPHead K w N) :
-    ‖piHead ϖ * f‖ = ‖piHead (w := w) (N := N) ϖ‖ * ‖f‖ := by sorry
+    ‖piHead ϖ * f‖ = ‖piHead (w := w) (N := N) ϖ‖ * ‖f‖ := by
+  rw [norm_piHead]
+  exact norm_constHead_mul ϖ.val f
 
 variable {K w N} in
 theorem isHuberRing_WPHead (ϖ : Uniformizer K) : IsHuberRing (WPHead K w N) :=
@@ -99,16 +157,31 @@ theorem isTateRing_WPHead (ϖ : Uniformizer K) : IsTateRing (WPHead K w N) :=
   FiniteJet.isTateRing_of_scale (piHead ϖ) (isUnit_piHead ϖ) (norm_piHead_lt_one ϖ)
     (norm_piHead_pos ϖ) (norm_piHead_mul ϖ)
 
+variable {K w N} in
+@[simp] theorem norm_constHead (x : K) : ‖constHead K w N x‖ = ‖x‖ := by
+  rw [show ‖constHead K w N x‖ = ‖headIncl K w N (constHead K w N x)‖ from rfl,
+    headIncl_constHead, norm_constA]
+
 /-- Unconditional Huber instance via a norm-window element (the
 `FJP/Over/Functoriality.lean:160` pattern — no uniformizer needed). -/
-instance : IsHuberRing (WPHead K w N) := by sorry
+instance : IsHuberRing (WPHead K w N) := by
+  obtain ⟨c, hcu, hc1, hc0⟩ := exists_norm_window' K
+  exact FiniteJet.isHuberRing_of_scale (constHead K w N c) (hcu.map (constHead K w N))
+    (by rw [norm_constHead]; exact hc1) (by rw [norm_constHead]; exact hc0)
+    (fun f => by rw [norm_constHead_mul, norm_constHead])
 
-instance : IsTateRing (WPHead K w N) := by sorry
+instance : IsTateRing (WPHead K w N) := by
+  obtain ⟨c, hcu, hc1, hc0⟩ := exists_norm_window' K
+  exact FiniteJet.isTateRing_of_scale (constHead K w N c) (hcu.map (constHead K w N))
+    (by rw [norm_constHead]; exact hc1) (by rw [norm_constHead]; exact hc0)
+    (fun f => by rw [norm_constHead_mul, norm_constHead])
 
-noncomputable instance : ValuationSpectrum.PlusSubring (WPHead K w N) := by sorry
+noncomputable instance : ValuationSpectrum.PlusSubring (WPHead K w N) :=
+  ⟨TopologicalRing.powerBoundedSubring.toSubring (WPHead K w N)⟩
 
 instance : ValuationSpectrum.IsRingOfIntegralElements
-    ((ValuationSpectrum.ringPlus (WPHead K w N) : Subring (WPHead K w N))) := by sorry
+    ((ValuationSpectrum.ringPlus (WPHead K w N) : Subring (WPHead K w N))) :=
+  FiniteJet.isRingOfIntegralElements_powerBounded
 
 instance : IsUniformAddGroup (WPHead K w N) :=
   SeminormedAddCommGroup.to_isUniformAddGroup
@@ -118,10 +191,35 @@ instance : @CompleteSpace (WPHead K w N)
   rw [IsUniformAddGroup.rightUniformSpace_eq]
   infer_instance
 
+variable {K w N} in
+theorem norm_wphead_mul (a b : WPHead K w N) : ‖a * b‖ = ‖a‖ * ‖b‖ := by
+  show ‖((a * b : WPHead K w N) : Amb K)‖ = _
+  rw [show ((a * b : WPHead K w N) : Amb K) = (a : Amb K) * (b : Amb K) from rfl,
+    norm_restricted_mul_general (fun x y => norm_mul x y)]
+  rfl
+
+instance : Nontrivial (WPHead K w N) := by
+  refine ⟨⟨0, 1, fun h => ?_⟩⟩
+  have h2 := congrArg (norm : WPHead K w N → ℝ) h
+  rw [norm_zero, norm_one] at h2
+  exact zero_ne_one h2
+
+instance : NoZeroDivisors (WPHead K w N) := by
+  refine ⟨fun {a b} hab => ?_⟩
+  by_contra hne
+  push_neg at hne
+  obtain ⟨ha, hb⟩ := hne
+  have hna : (0 : ℝ) < ‖a‖ := norm_pos_iff.mpr ha
+  have hnb : (0 : ℝ) < ‖b‖ := norm_pos_iff.mpr hb
+  have hm := norm_wphead_mul (K := K) (w := w) (N := N) a b
+  rw [hab, norm_zero] at hm
+  nlinarith
+
 /-- The heads are integral domains (isometric subrings of the multiplicative-norm
 ambient; [WP] thm:parity-rationally-reduced: "The affinoid algebra `𝒜_N` is a domain
 by lem:finite-stage-normal-form"). -/
-instance : IsDomain (WPHead K w N) := by sorry
+instance : IsDomain (WPHead K w N) :=
+  NoZeroDivisors.to_isDomain _
 
 /-! ### Noetherianity via the finite free module structure
 ([WP] lem:finite-stage-normal-form: `𝒜_N ≅ ⊕_{ε ∈ {0,1}^N} k⟨W,Z⟩·Y^ε`) -/
