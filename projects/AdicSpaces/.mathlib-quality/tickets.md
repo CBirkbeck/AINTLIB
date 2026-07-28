@@ -3103,6 +3103,28 @@ theorem isAdicSpace_xVObj : IsAdicSpace (xVObj p F ϖ)
 - Cadence rule: SpaVIso.lean has taken 14 proof tickets (K1–K14) with no cleanup;
   VRestrict.lean 4 (P5-1, K8a, K8b, P5-A). Two cleanups are overdue.
 
+### ★ ROUTE DISCOVERY 2026-07-28 — P5-3 and P5-4 are MUCH lighter than the board says
+The P5-3/P5-4 sketches below were written BEFORE P5-3b (OpenKeystone) and P5-OI landed and
+are now obsolete. Re-read `SpaVIso.lean`'s variable block: `spaCompHom_isOpenImmersion` and
+`spaCompIsoRestrict` require Tate / noetherian / strongly-noetherian **only of the VALUE ring
+`presheafValue D₀`** — the base `A` needs none of them. That is exactly what P5-3a/3b bought.
+So with `A := Ainf p F` and `D₀ :=` the window chart datum (value ring `B_n`, which IS Tate
+and strongly noetherian), `spaCompIsoRestrict` ALREADY gives
+
+    Spa(B_n) ≅ Spa(A_inf)|_{bigWindow n}
+
+as presheafed spaces, and a rational datum `D'` of `B_n` gives `Spa(𝒪_{B_n}(D')) ≅
+Spa(B_n)|_{spaOpens D'}`. The 𝒴-side leg of P5-6 is therefore a COMPOSITION of existing
+`isoRestrict`s:
+
+    Spa(C,C⁺) ≅ Spa(B_n)|_{D'} ≅ (Spa(A_inf)|_{bigWindow n})|_{…} ≅ Spa(A_inf)|_{V'} ≅ 𝒴|_{V'}
+
+**The one missing piece is restriction transitivity**: `(X.restrictOpen U).restrictOpen W ≅
+X.restrictOpen (imgOfOpen U W)` in 𝒱^pre (`VRestrict.lean` already has `imgOfOpen`,
+`restrictOpenFunctor`, `VPreObj.ofIso`, `isoStalkRingEquiv`). File that as **[P5-RT]** and do
+it before attempting P5-3/P5-4 as originally sketched. Do NOT build the dense-extension
+machinery the old P5-3 sketch describes — it is no longer on the critical path.
+
 ### [P5-4] Rational-in-chart 𝒱-iso (8.15 over the Tate chart) — now = P5-K instance (ii)
 - **Status**: open | **Depends**: P5-1, P5-2 | **File**: new (chart side)
 - **Statement**: for D' : RationalLocData A_W valid (A_W := windowChartRing n):
