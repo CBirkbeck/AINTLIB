@@ -2797,6 +2797,48 @@ valuations.
   (`genPiece_rel_forward/backward`, the roundtrips) never touches `hspan`
   except through `genPieceDatum`/`imagePieceDatum`, so (a)+(b) is the whole job.
 
+### ★ EXTERNAL REVIEW (ChatGPT gpt-5.6-sol, max effort, 2026-07-28) — BINDING CORRECTIONS
+
+Consulted on the whole remaining arc. Three substantive findings, two citation fixes:
+
+1. **`IsOpenImmersionV` as I defined it is TOO WEAK (real defect).** `c_bijective`
+   (a bijective ring hom on sections) does NOT give an isomorphism of topological
+   rings: counterexample `ℝ_discrete → ℝ_usual`, continuous and bijective, both
+   complete, both carrying the trivial valuation — a legitimate one-point 𝒱-object
+   pair with no inverse morphism. FIX: use mathlib's
+   `AlgebraicGeometry.PresheafedSpace.IsOpenImmersion`, whose `c_iso` field is
+   `IsIso` **in `CompleteTopCommRingCat`**, hence carries inverse continuity. Its API
+   (`isoRestrict`, `comp`, `ofRestrict`, `lift`, `isoOfRangeEq`, `to_iso`) then gives
+   the corestriction and composition for free. NOTE: nothing already proven is false —
+   `spaCompVPreHom_isOpenImmersion` is true as stated, and the continuity BOTH ways is
+   already proven (`phiHom_continuous`, `phiEquiv_symm_continuous`), so this is a
+   packaging repair, not new mathematics.
+2. **Do NOT try to package `Spa(A_inf)` globally as a `VPreObj`** (confirms the blocker
+   analysis): corestrict at the `TopRingPresheafedSpace` level FIRST — which is exactly
+   what `corestrictHom` (P5-A) does — and only then package as a `VPreHom` using the
+   `Y`-local stalk hypotheses.
+3. **P5-5 has an additional indispensable lemma I had missed**: having local stalks and
+   valuations with maximal support makes `X` an OBJECT of 𝒱, but does NOT make `π` a
+   MORPHISM of 𝒱. Needed: `v_{π(y)} = comap (π♯_y) (v_y)` for EVERY `y`, which requires
+   **independence of the choice of `fiberPoint`** — two lifts differ by `φ^k`, so use
+   `yFrobVPreHom k`'s `val_compat`, `π ∘ φ^k = π`, and `ringStalkMap_comp`. Also: the
+   section bijection of the quotient slice is NOT automatically a homeomorphism;
+   construct the inverse as a continuous hom from the start, by Hom-sheaf gluing with
+   test ring `T := 𝒪_𝒴(W₀)` (Frobenius transport gives compatible maps on the disjoint
+   translates; `yVObj.isSheafTopRings` glues them; corestrict to the invariants).
+4. **C1 simplification (adopt)**: choose the final rational open `V'` INSIDE the
+   wandering neighbourhood; then `V'` is itself wandering, so the quotient slice applies
+   directly to `V'` and no three-leg composition is needed:
+   `Spa(C, C⁺) ≃ 𝒴|_{V'} ≃ X|_{π(V')}`. Also: `C⁺` must be the rational-localization
+   ring of integral elements, not an arbitrary plus subring.
+5. `IsAdicSpace` should NOT be defined using only strongly-noetherian Tate affinoids —
+   that is strictly stronger than Wedhorn 8.22. Define it with sheafy affinoid pairs;
+   our FF witnesses happen to be strongly noetherian Tate.
+6. Citation corrections to check against the 2019 text: the local-stalk/support result
+   may be **Prop 8.6** (repo cites "Lemma 8.14"); the relative comparison **Remark 8.4 +
+   Prop 8.2**; **Prop 8.16** identifies the `+`-ring on a rational subset. VERIFY against
+   `refs/` before mass-editing docstrings — edition numbering may differ.
+
 ### [P5-A2] The corestricted stalk map factors through the restriction comparison
 - **Status**: open | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A (done)
 - **Type**: theorem
