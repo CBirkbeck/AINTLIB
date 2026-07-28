@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 import ModularCurves.ForMathlib.SchemeModuleBaseCechTrivialFlat
 
 /-!
@@ -384,7 +385,21 @@ theorem orderedBaseCechObject_isZero_of_card_le
   exact (ModuleCat.isZero_of_subsingleton
     (ModuleCat.of Γ(S, (⊤ : S.Opens))
       (orderedBaseCechTerm π M U n))).of_iso
-        (orderedBaseCechObjectIsoPi π M U n)
+      (orderedBaseCechObjectIsoPi π M U n)
+
+/-- The ordered Cech complex is exact in every degree at least the cardinality
+of its finite index type. -/
+theorem orderedBaseCechComplex_exactAt_of_card_le
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (n : ℕ) (h : Fintype.card ι ≤ n) :
+    (orderedBaseCechComplex π M U).ExactAt n := by
+  let C := orderedBaseCechComplex π M U
+  have hX : IsZero (C.X n) := by
+    dsimp only [C, orderedBaseCechComplex]
+    exact orderedBaseCechObject_isZero_of_card_le π M U n h
+  rw [HomologicalComplex.exactAt_iff_isZero_homology]
+  exact ShortComplex.isZero_homology_of_isZero_X₂ (C.sc n) hX
 
 /-- The underlying module of an ordered Cech object is subsingleton above the
 cardinality of the cover. -/

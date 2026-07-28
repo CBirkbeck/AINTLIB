@@ -58,27 +58,6 @@ private theorem orderedBaseCechComplex_exactAt_of_iso
   exact
     (HomologicalComplex.homologyMapIso (F.mapIso e) q).isZero_iff.mpr hN
 
-private theorem orderedBaseCechComplex_exactAt_of_card_le
-    [Fintype σ] [LinearOrder σ]
-    (M : (Proj (homogeneousSubmodule σ R)).Modules)
-    (q : ℕ) (hq : Fintype.card (ULift.{u} σ) ≤ q) :
-    (AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex
-      (homogeneousProjπ (R := R) (σ := σ)) M
-      (coordinateOpenCover (R := R) (σ := σ))).ExactAt q := by
-  let C :=
-    AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex
-      (homogeneousProjπ (R := R) (σ := σ)) M
-      (coordinateOpenCover (R := R) (σ := σ))
-  have hX : IsZero (C.X q) := by
-    dsimp only [C,
-      AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex]
-    exact
-      AlgebraicGeometry.Scheme.Modules.orderedBaseCechObject_isZero_of_card_le
-        (homogeneousProjπ (R := R) (σ := σ)) M
-        (coordinateOpenCover (R := R) (σ := σ)) q hq
-  rw [HomologicalComplex.exactAt_iff_isZero_homology]
-  exact ShortComplex.isZero_homology_of_isZero_X₂ (C.sc q) hX
-
 private theorem shortExact_exactAt_X3_of_exactAt_X2_X1
     {A : Type u} [Category A] [Abelian A]
     {ι : Type} {c : ComplexShape ι}
@@ -106,14 +85,17 @@ private theorem
   induction n generalizing M q with
   | zero =>
       refine ⟨0, fun N _ ↦ ?_⟩
-      apply orderedBaseCechComplex_exactAt_of_card_le
+      apply
+        AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex_exactAt_of_card_le
       simpa using hcard
   | succ n ih =>
       by_cases hq : Fintype.card (ULift.{u} σ) ≤ q + 1
       · refine ⟨0, fun N _ ↦ ?_⟩
-        exact orderedBaseCechComplex_exactAt_of_card_le
-          (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j N)
-          (q + 1) hq
+        exact
+          AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex_exactAt_of_card_le
+            (homogeneousProjπ (R := R) (σ := σ))
+            (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j N)
+            (coordinateOpenCover (R := R) (σ := σ)) (q + 1) hq
       · obtain ⟨r, d, N₀, f, hf⟩ :=
           exists_fin_coordinateNonnegativeTwist_quotient M j
         let L : Fin r → (Proj (homogeneousSubmodule σ R)).Modules :=
