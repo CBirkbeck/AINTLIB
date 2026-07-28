@@ -1,0 +1,132 @@
+/-
+Copyright (c) 2026. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+-/
+import «Adic spaces».WP.CoeffLocalization
+import «Adic spaces».WP.Reduced
+import Mathlib.RingTheory.Filtration
+import Mathlib.RingTheory.LocalProperties.Basic
+
+/-!
+# Head-localization reducedness — the BGR 7.3.2/10 sub-campaign
+
+Discharges the quarantined `HeadLocsReduced` hypothesis of the reducedness
+endpoints: every rational localization of every affinoid head of the
+weighted-parity algebra is reduced.  Classical source: [BGR, Corollary 7.3.2/10]
+via completed-local comparison and analytic unramifiedness; the head-specific
+route follows the 2026-07-28 plan review
+(`.mathlib-quality/wp-reduced/chatgpt-review-2026-07-28.md` and
+`hrw-decomposition.md`):
+
+* `isReduced_of_forall_completedLocal_reduced` (L2, mathlib-grade): a noetherian
+  ring whose completed local rings at all maximal ideals are reduced is reduced
+  (Krull intersection + locality of vanishing);
+* `headToQ` and `qHead_completedLocal_comparison` (L1): the completed local rings
+  of the graph model `QHead` agree with those of the head at contracted primes
+  (finite-level graph evaluation + inverse limits);
+* `head_completedLocal_reduced` (L3, the frontier), split into the `W ∉ 𝔭`
+  Z-elimination case (reduces to Tate-algebra completed locals) and the `W ∈ 𝔭`
+  quadratic-tower case;
+* `headLocsReduced` (L4): assembly through `headLocEquiv`.
+-/
+
+@[expose] public section
+
+set_option maxSynthPendingDepth 8
+
+namespace WeightedParity
+
+open ValuationSpectrum FiniteJetOver IsLocalRing
+
+/-! ### L2 — reducedness from reduced completed local rings (mathlib-grade) -/
+
+/-- The completed local ring of `R` at a prime `𝔭`: the maximal-adic completion of
+the localization. -/
+noncomputable abbrev completedLocal (R : Type*) [CommRing R] (𝔭 : Ideal R)
+    [𝔭.IsPrime] : Type _ :=
+  AdicCompletion (maximalIdeal (Localization.AtPrime 𝔭)) (Localization.AtPrime 𝔭)
+
+/-- **L2**: a noetherian commutative ring whose completed local rings at all maximal
+ideals are reduced is reduced ([hrw-decomposition] L2: Krull intersection makes
+`R_𝔪 → (R_𝔪)^` injective; vanishing at all maximal localizations is vanishing). -/
+theorem isReduced_of_forall_completedLocal_reduced (R : Type*) [CommRing R]
+    [IsNoetherianRing R]
+    (h : ∀ (𝔪 : Ideal R) (_ : 𝔪.IsMaximal), IsReduced (completedLocal R 𝔪)) :
+    IsReduced R := by sorry
+
+/-! ### L1 — the completed-local comparison for the graph model -/
+
+variable (K : Type*) [NontriviallyNormedField K] [IsUltrametricDist K] [CompleteSpace K]
+variable (w : ℕ → ℕ) (N : ℕ)
+
+variable {K w N} in
+/-- The canonical homomorphism from the head into its graph model (constants into
+`𝒜_N⟨T⟩`, then the quotient). -/
+noncomputable def headToQ (DH : RationalLocData (WPHead K w N)) :
+    WPHead K w N →+* QHead DH :=
+  (Ideal.Quotient.mk _).comp
+    ((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N) (m := DH.T.card)).comp
+      MvPolynomial.C)
+
+variable {K w N} in
+/-- **L1** ([hrw-decomposition]): for a maximal ideal `𝔮` of the graph model, the
+completed local ring of the head at the contraction agrees with that of the model
+at `𝔮`.  (Finite-level: mod every power of `𝔮` the graph variables evaluate
+uniquely since the denominator is a unit; then pass to inverse limits.) -/
+theorem qHead_completedLocal_comparison (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (𝔮 : Ideal (QHead DH)) (h𝔮 : 𝔮.IsMaximal) :
+    haveI : (𝔮.comap (headToQ DH)).IsPrime := 𝔮.comap_isPrime (headToQ DH)
+    Nonempty
+      (completedLocal (WPHead K w N) (𝔮.comap (headToQ DH)) ≃+*
+        completedLocal (QHead DH) 𝔮) := by sorry
+
+/-! ### L3 — reducedness of the head's completed local rings (the frontier) -/
+
+variable {K w N} in
+/-- **L3.a** (`W` invertible — the smooth chart): after inverting `W` the `Z`'s are
+eliminated (`Z_i = W^{−2wᵢ}Y_i²`) and the head agrees with the full Tate algebra
+`K⟨W, U_{≤N}⟩`; its completed local rings are reduced (classical Tate-algebra
+regularity — its own sub-decomposition when reached). -/
+theorem head_completedLocal_reduced_of_wa_notMem (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (𝔭 : Ideal (WPHead K w N)) (h𝔭 : 𝔭.IsPrime) (hW : WaHead K w N ∉ 𝔭) :
+    haveI := h𝔭
+    IsReduced (completedLocal (WPHead K w N) 𝔭) := by sorry
+
+variable {K w N} in
+/-- **L3.b** (`W ∈ 𝔭` — the singular point): all `Y_i ∈ 𝔭`, and the completed
+quadratic tower must be analyzed through the formal relations directly
+(characteristic-free; the deepest leaf of the campaign — see
+[hrw-decomposition] L3.b for the planned Φ-style formal-domain embedding). -/
+theorem head_completedLocal_reduced_of_wa_mem (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (𝔭 : Ideal (WPHead K w N)) (h𝔭 : 𝔭.IsPrime) (hW : WaHead K w N ∈ 𝔭) :
+    haveI := h𝔭
+    IsReduced (completedLocal (WPHead K w N) 𝔭) := by sorry
+
+variable {K w N} in
+/-- **L3**: every completed local ring of the head at a prime is reduced. -/
+theorem head_completedLocal_reduced (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (𝔭 : Ideal (WPHead K w N)) (h𝔭 : 𝔭.IsPrime) :
+    haveI := h𝔭
+    IsReduced (completedLocal (WPHead K w N) 𝔭) := by
+  by_cases hW : WaHead K w N ∈ 𝔭
+  · exact head_completedLocal_reduced_of_wa_mem ϖ hK₀ 𝔭 h𝔭 hW
+  · exact head_completedLocal_reduced_of_wa_notMem ϖ hK₀ 𝔭 h𝔭 hW
+
+/-! ### L4 — assembly -/
+
+variable {K} in
+/-- **The head-reducedness input, discharged** ([WP] thm:parity-rationally-reduced's
+citation of BGR 7.3.2/10, at the heads): every rational localization of every head
+is reduced.  Route: `presheafValue ≅ QHead` (W16); `QHead` noetherian; L2 reduces to
+completed locals of `QHead`; L1 compares them with completed locals of the head;
+L3 says the latter are reduced. -/
+theorem headLocsReduced (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
+    HeadLocsReduced K w := by sorry
+
+end WeightedParity

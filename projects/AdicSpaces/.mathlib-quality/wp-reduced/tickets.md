@@ -466,21 +466,45 @@ propext/Classical.choice/Quot.sound) before marking done.
 ### [CLEANUP-FINAL] /cleanup-all
 - Status: open | Depends: M1 | Type: cleanup
 
-### [HRW-0] Head-reducedness route adjudication (GATED — awaiting user sign-off)
-- Status: blocked (ChatGPT-5.6 adjudication RECEIVED 2026-07-28 — see
-  wp-reduced/chatgpt-review-2026-07-28.md: NO short route exists; routes (a)/(b)/(c)
-  all refuted with reasons (CM-transfer wall; char-2 inseparability; explicit
-  counterexample k⟨x,T⟩/(ϖT−x²) killing the mod-ϖ power-multiplicativity
-  criterion); char-2 TRUTH of the claim confirmed (BGR 7.3.2/10 has no
-  separability hypothesis).  Recommended sub-campaign = 4 lemmas:
-  (1) rationalLoc_completedLocalRingEquiv (Â_𝔭 ≅ P̂_𝔮 for subdomain maps, via the
-  graph presentation), (2) reduced_of_reduced_completedLocals (Krull
-  intersection), (3) head_completedLocal_reduced — THE wall (case split W ∉ 𝔭:
-  eliminate Z_i, regular; W ∈ 𝔭: explicit completed quadratic-tower analysis),
-  (4) assembly.  User decision needed: open this sub-campaign (est. multi-week)
-  or ship (3) conditionally long-term.)
-- The wall: discharge `HeadLocsReduced K w` (BGR 7.3.2/10 at the heads).  Candidate
-  routes in decomposition.md § HRW.  On adjudication: run `/develop --continue` to
-  cut its ticket tree (new files `WP/HeadReduced*.lean`), then the unconditional
-  endpoint wrappers replace the `hred` hypotheses in Main.lean AS NEW theorems
-  (`weightedParity_chainReduced_unconditional`) — the conditional forms stay.
+### [HRW-0] Head-reducedness route adjudication — RESOLVED
+- Status: done (2026-07-28: user authorized opening the BGR work; plan in
+  `hrw-decomposition.md`; skeleton `WP/HeadReduced.lean` builds; chain HRW-1..6
+  below replaces the gate.)
+
+### [HRW-1] L2 — reducedness from reduced completed locals (mathlib-grade)
+- Status: open | File: WP/HeadReduced.lean | Depends: none | Parallel: yes
+- Decls: `isReduced_of_forall_completedLocal_reduced`.
+- Sketch: nilpotent x; per maximal 𝔪: image nilpotent in the reduced completion ⇒
+  x/1 ∈ ⋂ (maxIdeal)ⁿ = ⊥ in R_𝔪 (`Ideal.iInf_pow_eq_bot_of_isLocalRing`, VERIFIED
+  Filtration.lean; R_𝔪 noetherian-local via localization instances); vanishing at all
+  maximals ⇒ x = 0 (`Ideal.mem_of_localization_maximal` at ⊥, VERIFIED
+  LocalProperties/Basic:539).  Leaf: express "image in completion vanishes ⇒ x ∈
+  every 𝔪ⁿ" via `AdicCompletion.of`'s level maps.  Sources: hrw-decomposition L2;
+  reviewer proof (3 sentences).
+### [HRW-2] L1.a — headToQ contraction behaviour
+- Status: open | File: WP/HeadReduced.lean | Depends: W15, W16
+- Decls: (headToQ is defined); new: maximality-or-primality lemmas for the
+  contraction 𝔮.comap (headToQ DH) per the adversarial note in hrw-decomposition
+  (do NOT silently assume the contraction maximal; L3 is stated at primes for this
+  reason).
+### [HRW-3] L1.b/c — finite-level graph evaluation + inverse limits
+- Status: open | File: WP/HeadReduced.lean | Depends: HRW-2
+- Decls: `qHead_completedLocal_comparison`.
+- Sketch: mod 𝔮ⁿ the denominator s is a unit (s ∉ 𝔮 as s is a unit of QHead) and
+  T_i = f_i/s is determined; surjectivity + kernel computation of the finite-level
+  comparison; AdicCompletion functoriality along the tower.  Frontier flagged:
+  finite-level commutative algebra, no mathlib precedent.
+### [HRW-4] L3.a — the W-invertible chart (Z-elimination → Tate locals)
+- Status: open | File: WP/HeadReduced.lean | Depends: none (statement-independent)
+- Decls: `head_completedLocal_reduced_of_wa_notMem` (+ its sub-decomposition when
+  opened: A_N[1/W] = K⟨W,U⟩[1/W] support identity; `tateAlgebra_completedLocal_
+  reduced` leaf — check the 828b Nullstellensatz artifacts first).
+### [HRW-5] L3.b — the singular quadratic tower (deepest leaf)
+- Status: open | File: WP/HeadReduced.lean | Depends: none (statement-independent)
+- Decls: `head_completedLocal_reduced_of_wa_mem`.  Requires its own decomposition
+  round when opened (planned route: explicit completed support model + Φ-style
+  formal-domain embedding; char-free).
+### [HRW-6] L4 — assembly + unconditional endpoints
+- Status: open | File: WP/HeadReduced.lean, WP/Main.lean | Depends: HRW-1..5, W16
+- Decls: `headLocsReduced`; then `weightedParity_chainReduced_unconditional` (+_of_dvr)
+  in Main.lean (NEW theorems; conditional forms stay).
