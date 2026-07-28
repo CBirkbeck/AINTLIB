@@ -782,6 +782,71 @@ noncomputable def VPreHom.restrictIso :
 
 end RestrictIso
 
+/-! ### Restriction transitivity in `𝒱^pre` -/
+
+section RestrictRestrict
+
+variable (X : VPreObj.{u}) (W : Opens ↥(X.toPresheafedSpace.carrier))
+  (U : Opens ↥W)
+
+/-- The double restriction inclusion has range the image open. -/
+theorem range_double_restrict :
+    Set.range (ConcreteCategory.hom
+        (((VPreHom.ofRestrictOpen (X := X.restrictOpen W) U).comp
+          (VPreHom.ofRestrictOpen (X := X) W)).toHom).base)
+      = ((imgOfOpen W U : Opens ↥(X.toPresheafedSpace.carrier))
+          : Set ↥(X.toPresheafedSpace.carrier)) :=
+  (range_val_val (α := ↥(X.toPresheafedSpace.carrier))
+    (W : Set ↥(X.toPresheafedSpace.carrier)) (U : Set ↥W)).trans
+    Subtype.range_coe
+
+/-- **Restriction transitivity as a `𝒱^pre`-morphism.** -/
+noncomputable def restrictRestrictHom :
+    VPreHom ((X.restrictOpen W).restrictOpen U) (X.restrictOpen (imgOfOpen W U)) :=
+  VPreHom.corestrict ((VPreHom.ofRestrictOpen (X := X.restrictOpen W) U).comp
+      (VPreHom.ofRestrictOpen (X := X) W))
+    (imgOfOpen W U) (le_of_eq (range_double_restrict X W U))
+
+/-- The induced presheafed-space isomorphism. -/
+noncomputable def restrictRestrictHomIso :
+    ((X.restrictOpen W).restrictOpen U).toPresheafedSpace
+      ≅ X.toPresheafedSpace.restrict
+          (openIncl_isOpenEmbedding (X := X.toPresheafedSpace) (imgOfOpen W U)) :=
+  letI _h1 : AlgebraicGeometry.PresheafedSpace.IsOpenImmersion
+      (((VPreHom.ofRestrictOpen (X := X.restrictOpen W) U).comp
+        (VPreHom.ofRestrictOpen (X := X) W)).toHom) :=
+    AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.comp
+      (f := (X.restrictOpen W).toPresheafedSpace.ofRestrict
+        (opensIncl_isOpenEmbedding (X.restrictOpen W) U))
+      (H := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofRestrict
+        (X.restrictOpen W).toPresheafedSpace
+        (opensIncl_isOpenEmbedding (X.restrictOpen W) U))
+      (g := X.toPresheafedSpace.ofRestrict (opensIncl_isOpenEmbedding X W))
+      (hg := AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.ofRestrict
+        X.toPresheafedSpace (opensIncl_isOpenEmbedding X W))
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
+    (f := ((VPreHom.ofRestrictOpen (X := X.restrictOpen W) U).comp
+      (VPreHom.ofRestrictOpen (X := X) W)).toHom)
+    (g := X.toPresheafedSpace.ofRestrict
+      (openIncl_isOpenEmbedding (X := X.toPresheafedSpace) (imgOfOpen W U)))
+    ((range_double_restrict X W U).trans Subtype.range_val.symm)
+
+theorem restrictRestrictHom_toHom_eq :
+    (restrictRestrictHom X W U).toHom = (restrictRestrictHomIso X W U).hom := rfl
+
+theorem isIso_restrictRestrictHom_toHom :
+    IsIso (restrictRestrictHom X W U).toHom := by
+  rw [restrictRestrictHom_toHom_eq X W U]
+  exact (restrictRestrictHomIso X W U).isIso_hom
+
+/-- **Restriction transitivity in `𝒱^pre`.** -/
+noncomputable def VPreObj.restrictRestrictIso :
+    (X.restrictOpen W).restrictOpen U ≅ X.restrictOpen (imgOfOpen W U) :=
+  letI := isIso_restrictRestrictHom_toHom X W U
+  VPreHom.asIso (restrictRestrictHom X W U)
+
+end RestrictRestrict
+
 end CorestrictV
 
 end ValuationSpectrum

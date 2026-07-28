@@ -189,6 +189,21 @@ noncomputable def VObj.restrictTopIso (X : VObj.{u}) : X.restrictOpen ⊤ ≅ X 
 theorem isAdicSpace_toVObj (C : AffinoidVChart.{u}) : IsAdicSpace C.toVObj :=
   fun x => ⟨⊤, trivial, C, ⟨VObj.restrictTopIso C.toVObj⟩⟩
 
+
+/-! ### Locality -/
+
+/-- **Being an adic space is a local property**: if every point has an open
+neighbourhood `W` with `X|_W` an adic space, then `X` is one. -/
+theorem IsAdicSpace.of_openCover {Z : VObj.{u}}
+    (h : ∀ x : ↥(Z.toTopCat), ∃ W : Opens ↥(Z.toTopCat), x ∈ W ∧
+      IsAdicSpace (Z.restrictOpen W)) : IsAdicSpace Z := by
+  intro x
+  obtain ⟨W, hxW, hW⟩ := h x
+  obtain ⟨U, hU, C, ⟨e⟩⟩ := hW ⟨x, hxW⟩
+  exact ⟨imgOfOpen W U, ⟨⟨x, hxW⟩, hU, rfl⟩, C,
+    ⟨(VObj.isoOfVPreIso
+      (VPreObj.restrictRestrictIso Z.toVPreObj W U)).symm ≪≫ e⟩⟩
+
 end ValuationSpectrum
 
 end
