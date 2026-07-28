@@ -452,4 +452,379 @@ private theorem orderedToCechAlternatingF_comp_d_comp_permutation
   simp only [zsmul_comp, smul_smul]
   rw [cechPermDelete_signed_coefficient]
 
+private theorem orderedToCechAlternatingF_comp_d_comp_π_of_not_injective
+    (n : ℕ) (i : Fin (n + 2) → ι) (hi : ¬ Function.Injective i) :
+    orderedToCechAlternatingF F U n ≫ cechDifferentialProductF F U n ≫
+        Pi.π (cechTermFactor F U (n + 1)) i = 0 := by
+  let p : (∏ᶜ cechTermFactor F U (n + 1)) ⟶
+      cechTermFactor F U (n + 1) i :=
+    Pi.π (cechTermFactor F U (n + 1)) i
+  change orderedToCechAlternatingF F U n ≫
+    (cechDifferentialProductF F U n ≫ p) = 0
+  let G : Fin (n + 2) →
+      ((∏ᶜ cechTermFactor F U n) ⟶ cechTermFactor F U (n + 1) i) :=
+    fun k => (-1 : ℤ) ^ (k : ℕ) •
+      (Pi.π (cechTermFactor F U n) (i ∘ k.succAbove) ≫
+        cechTermFactorRestriction F
+          (leOfHom
+            (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i)))
+  let T : Fin (n + 2) →
+      ((∏ᶜ orderedCechTermFactor F U n) ⟶
+        cechTermFactor F U (n + 1) i) :=
+    fun k => (-1 : ℤ) ^ (k : ℕ) •
+      (orderedToCechAlternatingF F U n ≫
+        Pi.π (cechTermFactor F U n) (i ∘ k.succAbove) ≫
+        cechTermFactorRestriction F
+          (leOfHom
+            (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i)))
+  have hd : cechDifferentialProductF F U n ≫ p = ∑ k, G k := by
+    dsimp only [p, G]
+    exact cechDifferential_comp_π F U n i
+  have hcomp :
+      orderedToCechAlternatingF F U n ≫ (∑ k, G k) =
+        ∑ k, orderedToCechAlternatingF F U n ≫ G k := by
+    simpa using comp_sum (Finset.univ : Finset (Fin (n + 2)))
+      (orderedToCechAlternatingF F U n) G
+  have hterms :
+      (∑ k, orderedToCechAlternatingF F U n ≫ G k) =
+        ∑ k, T k := by
+    apply Finset.sum_congr rfl
+    intro k _
+    let q : (∏ᶜ cechTermFactor F U n) ⟶
+        cechTermFactor F U (n + 1) i :=
+      Pi.π (cechTermFactor F U n) (i ∘ k.succAbove) ≫
+        cechTermFactorRestriction F
+          (leOfHom
+            (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i))
+    change orderedToCechAlternatingF F U n ≫
+      ((-1 : ℤ) ^ (k : ℕ) • q) =
+        (-1 : ℤ) ^ (k : ℕ) •
+          (orderedToCechAlternatingF F U n ≫ q)
+    exact comp_zsmul _ _ ((-1 : ℤ) ^ (k : ℕ))
+  rw [hd, hcomp, hterms]
+  by_cases hall : ∀ k : Fin (n + 2),
+      ¬ Function.Injective (i ∘ k.succAbove)
+  · apply Finset.sum_eq_zero
+    intro k _
+    let q : (∏ᶜ orderedCechTermFactor F U n) ⟶
+        cechTermFactor F U n (i ∘ k.succAbove) :=
+      orderedToCechAlternatingF F U n ≫
+        Pi.π (cechTermFactor F U n) (i ∘ k.succAbove)
+    let r : cechTermFactor F U n (i ∘ k.succAbove) ⟶
+        cechTermFactor F U (n + 1) i :=
+      cechTermFactorRestriction F
+        (leOfHom
+          (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i))
+    have hk := orderedToCechAlternatingF_comp_π_of_not_injective
+      F U n (i ∘ k.succAbove) (hall k)
+    change (-1 : ℤ) ^ (k : ℕ) • (q ≫ r) = 0
+    change q = 0 at hk
+    rw [hk, zero_comp, smul_zero]
+  · have hex : ∃ k : Fin (n + 2),
+        Function.Injective (i ∘ k.succAbove) := by
+      by_contra h
+      apply hall
+      intro k hk
+      exact h ⟨k, hk⟩
+    obtain ⟨k, hk⟩ := hex
+    obtain ⟨l, hlk, hil⟩ :=
+      exists_partner_of_delete_injective i hi k hk
+    have hkl : k ≠ l := hlk.symm
+    have hother (m : Fin (n + 2)) (hmk : m ≠ k) (hml : m ≠ l) :
+        T m = 0 := by
+      let q : (∏ᶜ orderedCechTermFactor F U n) ⟶
+          cechTermFactor F U n (i ∘ m.succAbove) :=
+        orderedToCechAlternatingF F U n ≫
+          Pi.π (cechTermFactor F U n) (i ∘ m.succAbove)
+      let r : cechTermFactor F U n (i ∘ m.succAbove) ⟶
+          cechTermFactor F U (n + 1) i :=
+        cechTermFactorRestriction F
+          (leOfHom
+            (((FormalCoproduct.mk _ U).mapPower m.succAbove).φ i))
+      have hm := delete_not_injective_of_ne
+        i k l m hkl hmk.symm hml.symm hil
+      have hz := orderedToCechAlternatingF_comp_π_of_not_injective
+        F U n (i ∘ m.succAbove) hm
+      change (-1 : ℤ) ^ (m : ℕ) • (q ≫ r) = 0
+      change q = 0 at hz
+      rw [hz, zero_comp, smul_zero]
+    have hrem : ((Finset.univ.erase l).erase k).sum T = 0 := by
+      apply Finset.sum_eq_zero
+      intro m hm
+      have hmk : m ≠ k := (Finset.mem_erase.mp hm).1
+      have hml : m ≠ l :=
+        (Finset.mem_erase.mp (Finset.mem_erase.mp hm).2).1
+      exact hother m hmk hml
+    have hk_mem : k ∈ Finset.univ.erase l :=
+      Finset.mem_erase.mpr ⟨hkl, Finset.mem_univ k⟩
+    calc
+      ∑ m, T m = (Finset.univ.erase l).sum T + T l :=
+        (Finset.sum_erase_add Finset.univ T (Finset.mem_univ l)).symm
+      _ = (((Finset.univ.erase l).erase k).sum T + T k) + T l := by
+        rw [Finset.sum_erase_add (Finset.univ.erase l) T hk_mem]
+      _ = T k + T l := by rw [hrem, zero_add]
+      _ = 0 := by
+        dsimp only [T]
+        exact orderedToCechAlternatingF_comp_coface_π_pair_cancel
+          F U n i k l hil.symm hkl
+
+private noncomputable def orderedCechCofaceProductF (n : ℕ)
+    (k : Fin (n + 2)) :
+    (∏ᶜ orderedCechTermFactor F U n) ⟶
+      ∏ᶜ orderedCechTermFactor F U (n + 1) :=
+  Pi.lift (fun i : OrderedCechIndex ι (n + 1) =>
+    Pi.π (orderedCechTermFactor F U n) (i.delete k) ≫
+      cechTermFactorRestriction F
+        (leOfHom (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i.1)))
+
+private theorem orderedCechCoface_eq_productF (n : ℕ)
+    (k : Fin (n + 2)) :
+    orderedCechCoface F U n k = orderedCechCofaceProductF F U n k :=
+  rfl
+
+private noncomputable def orderedCechDifferentialProductF (n : ℕ) :
+    (∏ᶜ orderedCechTermFactor F U n) ⟶
+      ∏ᶜ orderedCechTermFactor F U (n + 1) :=
+  ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+    orderedCechCofaceProductF F U n k
+
+private theorem orderedCechDifferential_eq_productF (n : ℕ) :
+    orderedCechDifferential F U n =
+      orderedCechDifferentialProductF F U n :=
+  rfl
+
+private theorem cechDifferentialProductF_comp_cechToOrderedF (n : ℕ) :
+    cechDifferentialProductF F U n ≫
+        (cechToOrderedF F U (n + 1) :
+          (∏ᶜ cechTermFactor F U (n + 1)) ⟶
+            ∏ᶜ orderedCechTermFactor F U (n + 1)) =
+      (cechToOrderedF F U n :
+          (∏ᶜ cechTermFactor F U n) ⟶
+            ∏ᶜ orderedCechTermFactor F U n) ≫
+        orderedCechDifferentialProductF F U n := by
+  have h := cechToOrderedF_comp_d F U n
+  change cechDifferentialProductF F U n ≫ cechToOrderedF F U (n + 1) =
+    cechToOrderedF F U n ≫ orderedCechDifferentialProductF F U n at h
+  exact h
+
+private theorem orderedToCechAlternatingF_comp_d_comp_π_of_strictMono
+    (n : ℕ) (i : Fin (n + 2) → ι) (hi : StrictMono i) :
+    orderedToCechAlternatingF F U n ≫ cechDifferentialProductF F U n ≫
+        Pi.π (cechTermFactor F U (n + 1)) i =
+      orderedCechDifferentialProductF F U n ≫
+        orderedToCechAlternatingF F U (n + 1) ≫
+          Pi.π (cechTermFactor F U (n + 1)) i := by
+  let p : (∏ᶜ cechTermFactor F U (n + 1)) ⟶
+      cechTermFactor F U (n + 1) i :=
+    Pi.π (cechTermFactor F U (n + 1)) i
+  let q : (∏ᶜ orderedCechTermFactor F U (n + 1)) ⟶
+      cechTermFactor F U (n + 1) i :=
+    Pi.π (orderedCechTermFactor F U (n + 1)) ⟨i, hi⟩
+  let Cn : (∏ᶜ cechTermFactor F U n) ⟶
+      ∏ᶜ orderedCechTermFactor F U n :=
+    cechToOrderedF F U n
+  let Csucc : (∏ᶜ cechTermFactor F U (n + 1)) ⟶
+      ∏ᶜ orderedCechTermFactor F U (n + 1) :=
+    cechToOrderedF F U (n + 1)
+  have hp : Csucc ≫ q = p := by
+    dsimp only [Csucc]
+    dsimp only [p, q]
+    exact cechToOrderedF_comp_π F U (n + 1) ⟨i, hi⟩
+  have ha : orderedToCechAlternatingF F U (n + 1) ≫ p = q := by
+    dsimp only [p, q]
+    exact orderedToCechAlternatingF_comp_π_of_strictMono
+      F U (n + 1) i hi
+  have hdc : cechDifferentialProductF F U n ≫ Csucc =
+      Cn ≫ orderedCechDifferentialProductF F U n := by
+    dsimp only [Cn, Csucc]
+    exact cechDifferentialProductF_comp_cechToOrderedF F U n
+  change orderedToCechAlternatingF F U n ≫
+      cechDifferentialProductF F U n ≫ p =
+    orderedCechDifferentialProductF F U n ≫
+      orderedToCechAlternatingF F U (n + 1) ≫ p
+  calc
+    orderedToCechAlternatingF F U n ≫
+        cechDifferentialProductF F U n ≫ p =
+      orderedToCechAlternatingF F U n ≫
+        (cechDifferentialProductF F U n ≫
+          Csucc) ≫ q := by
+        rw [Category.assoc, hp]
+    _ = orderedToCechAlternatingF F U n ≫
+        (Cn ≫
+          orderedCechDifferentialProductF F U n) ≫ q := by
+      exact congrArg
+        (fun t => orderedToCechAlternatingF F U n ≫ t ≫ q) hdc
+    _ = (orderedToCechAlternatingF F U n ≫
+          Cn) ≫
+        orderedCechDifferentialProductF F U n ≫ q := by
+      simp only [Category.assoc]
+    _ = orderedCechDifferentialProductF F U n ≫ q := by
+      have hret : orderedToCechAlternatingF F U n ≫ Cn =
+          𝟙 (∏ᶜ orderedCechTermFactor F U n) := by
+        dsimp only [Cn]
+        have h :=
+          orderedToCechAlternatingF_comp_cechToOrderedF F U n
+        change orderedToCechAlternatingF F U n ≫
+          cechToOrderedF F U n =
+            𝟙 (∏ᶜ orderedCechTermFactor F U n) at h
+        exact h
+      rw [hret]
+      exact Category.id_comp
+        (orderedCechDifferentialProductF F U n ≫ q)
+    _ = orderedCechDifferentialProductF F U n ≫
+        orderedToCechAlternatingF F U (n + 1) ≫ p := by
+      rw [ha]
+
+private theorem orderedToCechAlternatingF_comp_d_comp_π_of_injective
+    (n : ℕ) (i : Fin (n + 2) → ι) (hi : Function.Injective i) :
+    orderedToCechAlternatingF F U n ≫ cechDifferentialProductF F U n ≫
+        Pi.π (cechTermFactor F U (n + 1)) i =
+      orderedCechDifferentialProductF F U n ≫
+        orderedToCechAlternatingF F U (n + 1) ≫
+          Pi.π (cechTermFactor F U (n + 1)) i := by
+  let σ := Tuple.sort i
+  let j := i ∘ σ
+  have hj : StrictMono j :=
+    (Tuple.monotone_sort i).strictMono_of_injective
+      (hi.comp σ.injective)
+  let A : (∏ᶜ orderedCechTermFactor F U n) ⟶
+      ∏ᶜ cechTermFactor F U (n + 1) :=
+    orderedToCechAlternatingF F U n ≫ cechDifferentialProductF F U n
+  let B := orderedToCechAlternatingF F U (n + 1)
+  let D := orderedCechDifferentialProductF F U n
+  let P := cechPermutationF F U (n + 1) σ
+  let p : (∏ᶜ cechTermFactor F U (n + 1)) ⟶
+      cechTermFactor F U (n + 1) i :=
+    Pi.π (cechTermFactor F U (n + 1)) i
+  let pj : (∏ᶜ cechTermFactor F U (n + 1)) ⟶
+      cechTermFactor F U (n + 1) j :=
+    Pi.π (cechTermFactor F U (n + 1)) j
+  let q : (∏ᶜ orderedCechTermFactor F U (n + 1)) ⟶
+      cechTermFactor F U (n + 1) j :=
+    Pi.π (orderedCechTermFactor F U (n + 1)) ⟨j, hj⟩
+  let r : cechTermFactor F U (n + 1) j ⟶
+      cechTermFactor F U (n + 1) i :=
+    cechTermFactorRestriction F
+      (leOfHom (((FormalCoproduct.mk _ U).mapPower σ).φ i))
+  let s : ℤ := Equiv.Perm.sign σ
+  have hPp : P ≫ p = pj ≫ r := by
+    dsimp only [P, p, pj, r, j]
+    exact cechPermutationF_comp_π F U (n + 1) σ i
+  have hAperm :=
+    orderedToCechAlternatingF_comp_d_comp_permutation F U n σ
+  change A ≫ P = s • A at hAperm
+  have hrel : A ≫ pj ≫ r = s • (A ≫ p) := by
+    calc
+      A ≫ pj ≫ r = A ≫ (P ≫ p) := by rw [hPp]
+      _ = (A ≫ P) ≫ p := by simp only [Category.assoc]
+      _ = (s • A) ≫ p := by rw [hAperm]
+      _ = s • (A ≫ p) := by rw [zsmul_comp]
+  have hs : s * s = 1 := by
+    dsimp only [s]
+    exact Int.units_coe_mul_self (Equiv.Perm.sign σ)
+  have hrel' : A ≫ p = s • (A ≫ pj ≫ r) := by
+    calc
+      A ≫ p = s • (s • (A ≫ p)) := by
+        rw [smul_smul, hs, one_smul]
+      _ = s • (A ≫ pj ≫ r) := congrArg (s • ·) hrel.symm
+  have hstrict :=
+    orderedToCechAlternatingF_comp_d_comp_π_of_strictMono
+      F U n j hj
+  change A ≫ pj = D ≫ B ≫ pj at hstrict
+  have hBj := orderedToCechAlternatingF_comp_π_of_strictMono
+    F U (n + 1) j hj
+  change B ≫ pj = q at hBj
+  have hBi := orderedToCechAlternatingF_comp_π_of_injective
+    F U (n + 1) i hi
+  change B ≫ p = s • (q ≫ r) at hBi
+  have hstrict_r : (A ≫ pj) ≫ r = (D ≫ B ≫ pj) ≫ r :=
+    congrArg (fun f => f ≫ r) hstrict
+  have hDj : D ≫ B ≫ pj = D ≫ q :=
+    congrArg (D ≫ ·) hBj
+  have hDj_r : (D ≫ B ≫ pj) ≫ r = (D ≫ q) ≫ r :=
+    congrArg (fun f => f ≫ r) hDj
+  change A ≫ p = D ≫ B ≫ p
+  calc
+    A ≫ p = s • (A ≫ pj ≫ r) := hrel'
+    _ = s • ((D ≫ B ≫ pj) ≫ r) := congrArg (s • ·) hstrict_r
+    _ = s • ((D ≫ q) ≫ r) := congrArg (s • ·) hDj_r
+    _ = D ≫ (s • (q ≫ r)) := by
+      calc
+        s • ((D ≫ q) ≫ r) = s • (D ≫ (q ≫ r)) :=
+          congrArg (s • ·) (Category.assoc D q r)
+        _ = D ≫ (s • (q ≫ r)) :=
+          (comp_zsmul D (q ≫ r) s).symm
+    _ = D ≫ (B ≫ p) := by rw [hBi]
+    _ = D ≫ B ≫ p := by rfl
+
+private theorem orderedToCechAlternatingF_comp_product_d (n : ℕ) :
+    orderedToCechAlternatingF F U n ≫ cechDifferentialProductF F U n =
+      orderedCechDifferentialProductF F U n ≫
+        orderedToCechAlternatingF F U (n + 1) := by
+  apply Pi.hom_ext
+  intro i
+  let p : (∏ᶜ cechTermFactor F U (n + 1)) ⟶
+      cechTermFactor F U (n + 1) i :=
+    Pi.π (cechTermFactor F U (n + 1)) i
+  change (orderedToCechAlternatingF F U n ≫
+      cechDifferentialProductF F U n) ≫ p =
+    (orderedCechDifferentialProductF F U n ≫
+      orderedToCechAlternatingF F U (n + 1)) ≫ p
+  by_cases hi : Function.Injective i
+  · exact orderedToCechAlternatingF_comp_d_comp_π_of_injective
+      F U n i hi
+  · have hleft :=
+      orderedToCechAlternatingF_comp_d_comp_π_of_not_injective
+        F U n i hi
+    change (orderedToCechAlternatingF F U n ≫
+      cechDifferentialProductF F U n) ≫ p = 0 at hleft
+    have hright := orderedToCechAlternatingF_comp_π_of_not_injective
+      F U (n + 1) i hi
+    change orderedToCechAlternatingF F U (n + 1) ≫ p = 0 at hright
+    rw [hleft, Category.assoc, hright, comp_zero]
+
+/-- The alternating extension from ordered to native sheaf Cech cochains
+commutes with the Cech differentials. -/
+theorem orderedToCechAlternatingF_comp_d (n : ℕ) :
+    orderedToCechAlternatingF F U n ≫ cechDifferential F U n =
+      orderedCechDifferential F U n ≫
+        orderedToCechAlternatingF F U (n + 1) := by
+  change orderedToCechAlternatingF F U n ≫
+      cechDifferentialProductF F U n =
+    orderedCechDifferentialProductF F U n ≫
+      orderedToCechAlternatingF F U (n + 1)
+  exact orderedToCechAlternatingF_comp_product_d F U n
+
+/-- Alternating extension from the ordered sheaf Cech complex to the native
+sheaf Cech complex. -/
+noncomputable def orderedToCechAlternating :
+    orderedCechComplex F U ⟶ cechComplex F U :=
+  CochainComplex.ofHom (orderedToCechAlternatingF F U) fun n => by
+    rw [orderedCechComplex_d, cechComplex_d]
+    exact orderedToCechAlternatingF_comp_d F U n
+
+@[simp]
+theorem orderedToCechAlternating_f (n : ℕ) :
+    (orderedToCechAlternating F U).f n =
+      orderedToCechAlternatingF F U n :=
+  rfl
+
+/-- Alternating extension followed by projection is the identity chain map on
+the ordered sheaf Cech complex. -/
+theorem orderedToCechAlternating_comp_cechToOrdered :
+    orderedToCechAlternating F U ≫ cechToOrdered F U =
+      𝟙 (orderedCechComplex F U) := by
+  apply HomologicalComplex.hom_ext
+  intro n
+  exact orderedToCechAlternatingF_comp_cechToOrderedF F U n
+
+/-- Exactness of the native sheaf Cech complex descends to the ordered complex. -/
+theorem orderedCechComplex_exactAt_of_cechComplex_exactAt (n : ℕ)
+    (h : (cechComplex F U).ExactAt n) :
+    (orderedCechComplex F U).ExactAt n :=
+  h.of_retract
+    (orderedToCechAlternating F U)
+    (cechToOrdered F U)
+    (orderedToCechAlternating_comp_cechToOrdered F U)
+
 end TopCat.Sheaf
