@@ -163,16 +163,6 @@ variable [T2Space A] [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
 variable (D₀ : RationalLocData A) [IsTateRing (presheafValue D₀)]
   [IsNoetherianRing (presheafValue D₀)] [IsStronglyNoetherian (presheafValue D₀)]
 
-/-- The pairing of an `A`-side open with a `B`-side open through the
-canonical map: every valid `A`-datum inside `V` has its shadow-preimage
-inside `W`. This is the hypothesis-form of "`W` is the preimage of `V`". -/
-def Paired (V : Opens ↥(Spa A A⁺))
-    (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) : Prop :=
-  ∀ w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺),
-    ∀ hmem : comap D₀.canonicalMap (w : Spv (presheafValue D₀)) ∈ Spa A A⁺,
-      (⟨comap D₀.canonicalMap (w : Spv (presheafValue D₀)), hmem⟩
-        : ↥(Spa A A⁺)) ∈ V → w ∈ W
-
 /-- The `A`-shadow of a `Spa B`-point is a `Spa A`-point. -/
 theorem comap_mem_spa (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :
     comap D₀.canonicalMap (w : Spv (presheafValue D₀)) ∈ Spa A A⁺ :=
@@ -183,11 +173,24 @@ theorem comap_mem_spa (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)
 def shadow (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) : ↥(Spa A A⁺) :=
   ⟨comap D₀.canonicalMap (w : Spv (presheafValue D₀)), comap_mem_spa D₀ w⟩
 
+/-- `W` is the shadow-preimage of `V`: a `Spa B`-point lies in `W` exactly
+when its `A`-shadow lies in `V`. -/
+def Paired (V : Opens ↥(Spa A A⁺))
+    (W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) : Prop :=
+  ∀ w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺),
+    (shadow D₀ w ∈ V ↔ w ∈ W)
+
 theorem paired_apply {V : Opens ↥(Spa A A⁺)}
     {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
     (h : Paired D₀ V W) (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
     (hw : shadow D₀ w ∈ V) : w ∈ W :=
-  h w (comap_mem_spa D₀ w) hw
+  (h w).mp hw
+
+theorem paired_shadow {V : Opens ↥(Spa A A⁺)}
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (h : Paired D₀ V W) (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+    (hw : w ∈ W) : shadow D₀ w ∈ V :=
+  (h w).mpr hw
 
 /-- Under a pairing, a valid `A`-index of `V` produces a `B`-index of `W`. -/
 def idxOf {V : Opens ↥(Spa A A⁺)}
@@ -325,6 +328,88 @@ theorem exists_imgDatum_subset [DecidableEq A]
     have hcap := hWcap w' hw'spa hin
     exact ⟨hw'spa, fun t ht => (hcap t (Finset.mem_insert_of_mem ht)).1,
       (hcap F.s (Finset.mem_insert_self _ _)).2⟩
+
+/-- **The image opens cover** (P5-K2b): every point of `W` lies in the image
+open of some valid `A`-index of `V`. -/
+theorem exists_index_mem [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W)
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) (hw : w ∈ W) :
+    ∃ i : RationalIndex V, (w : Spv (presheafValue D₀))
+      ∈ rationalOpen (imgDatum D₀ i.isRational).T (imgDatum D₀ i.isRational).s := by
+  classical
+  obtain ⟨E, hE, hEmem, hEsub⟩ := exists_isRational_spaOpen_subset_huber
+    (V := (V : Set ↥(Spa A A⁺))) V.2 (paired_shadow D₀ hVW w hw)
+  exact ⟨⟨E, hE, hEsub⟩, (mem_imgDatum_iff D₀ hE w).mpr hEmem⟩
+
+/-- The `B`-side open of an `A`-index. -/
+def imgOpens {V : Opens ↥(Spa A A⁺)} (i : RationalIndex V) :
+    Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺) :=
+  spaOpens (imgDatum D₀ i.isRational)
+
+theorem imgOpens_le {V : Opens ↥(Spa A A⁺)}
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) (i : RationalIndex V) : imgOpens D₀ i ≤ W :=
+  (idxOf D₀ hVW i).subset
+
+theorem imgOpens_cover [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) :
+    (W : Set ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺))
+      ⊆ ⋃ i : RationalIndex V,
+          (imgOpens D₀ i : Set ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) := by
+  intro w hw
+  obtain ⟨i, hi⟩ := exists_index_mem D₀ hV hVW w hw
+  exact Set.mem_iUnion.mpr ⟨i, hi⟩
+
+/-- The projective-limit sheaf condition for the value ring. -/
+theorem isLimitSheaf_value : IsLimitSheaf (presheafValue D₀) := by
+  classical
+  haveI : IsNoetherianRing (presheafValue D₀) :=
+    IsStronglyNoetherian.isNoetherianRing (presheafValue D₀)
+  haveI : IsSheafy (presheafValue D₀) := isSheafy_of_stronglyNoetherian_828b
+  exact isLimitSheaf_of_isSheafy
+
+/-- **The comparison map kills nothing** (P5-K4): a `B`-side family whose
+`A`-side comparison vanishes vanishes on every image open, hence everywhere
+by separatedness of `𝒪_B` on the image-open cover. -/
+theorem phiHom_injective [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W) :
+    Function.Injective (phiHom D₀ hV hVW) := by
+  classical
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  refine (injective_iff_map_eq_zero _).mpr fun x hx => ?_
+  -- the components at image indices vanish
+  have hzero : ∀ i : RationalIndex V, limitEvalHom (idxOf D₀ hVW i) x = 0 := by
+    intro i
+    have h1 : (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)).symm
+        (limitEvalHom (idxOf D₀ hVW i) x) = 0 := by
+      rw [← phiHom_apply_component D₀ hV hVW x i, hx]
+      exact map_zero (limitEvalHom i)
+    exact ((RingEquiv.apply_symm_apply
+        (pieceEquiv D₀ i.isRational (index_sub D₀ hV i))
+        (limitEvalHom (idxOf D₀ hVW i) x)).symm.trans
+      (congrArg (pieceEquiv D₀ i.isRational (index_sub D₀ hV i)) h1)).trans
+      (map_zero _)
+  -- hence the restriction to every image open vanishes
+  refine (isLimitSheaf_value D₀).injective (U := imgOpens D₀ (A := A) (V := V))
+    (imgOpens_le D₀ hVW) (imgOpens_cover D₀ hV hVW) fun i => ?_
+  refine Subtype.ext (funext fun k => ?_)
+  show (x : ∀ j : RationalIndex W, presheafValue j.D)
+      (k.mono (imgOpens_le D₀ hVW i)) = _
+  have hsub : rationalOpen k.D.T k.D.s
+      ⊆ rationalOpen (idxOf D₀ hVW i).D.T (idxOf D₀ hVW i).D.s :=
+    spaOpen_subset_iff.mp k.subset
+  have hcompat := x.2 (idxOf D₀ hVW i) (k.mono (imgOpens_le D₀ hVW i)) hsub
+  rw [← hcompat]
+  show restrictionMap _ _ _ (limitEvalHom (idxOf D₀ hVW i) x) = _
+  rw [hzero i]
+  exact map_zero (restrictionMapHom (idxOf D₀ hVW i).D
+    (RationalIndex.mono (imgOpens_le D₀ hVW i) k).D hsub)
 
 end Phi
 
