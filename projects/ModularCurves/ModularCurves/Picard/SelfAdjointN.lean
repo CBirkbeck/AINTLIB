@@ -213,13 +213,57 @@ The left-hand side is written pre-arranged as `κ`'s numerator over the product 
 numerators — in a commutative group it equals the readable
 `[𝒪(Q+Q′)]·[𝒪(0)]·([𝒪(Q)]·[𝒪(Q′)])⁻¹`, but keeping it in this shape means `kappa_add`
 needs no rearrangement of these (very large) terms. -/
+theorem exists_invertible_tensor_idealModule_add (Q Q' : (E.baseChange t).Point (𝟙 T)) :
+    ∃ N : T.Modules, IsInvertible N ∧
+      Nonempty (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+            (idealModule (Scheme.Hom.ker Q'.1)) ≅
+          tensorObj
+            (tensorObj (idealModule (Scheme.Hom.ker (Q + Q').1))
+              (idealModule (Scheme.Hom.ker (baseChangeZero E.π E.zero E.zero_π t))))
+            ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd E.π t)).obj N)) := by
+  sorry
+
+/-- Pure group algebra behind the reduction of the leaf to its module form: in a commutative
+group, the `κ`-shaped ratio of "numerator over product of numerators" is the ratio of the
+plain products. Stated over abstract elements so that no `sectionCls` term is ever
+AC-normalised. -/
+private theorem kappa_ratio_algebra {G : Type*} [CommGroup G] (a b c d : G) :
+    (a * d⁻¹) * ((b * d⁻¹) * (c * d⁻¹))⁻¹ = (a * d) * (b * c)⁻¹ := by
+  group
+  simp only [mul_comm, mul_assoc, mul_left_comm]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(LEAF (i), Picard form — now derived)** The class-level statement, obtained from the
+module-level `exists_invertible_tensor_idealModule_add` by the Picard bookkeeping of
+`RelEffCartierDiv.exists_pic_map_of_nonempty_tensor_pullback_iso`. -/
 theorem exists_pic_map_snd_sectionCls_add (Q Q' : (E.baseChange t).Point (𝟙 T)) :
     ∃ M : Scheme.Pic T,
       (sectionCls E hsm t (Q + Q').1 (Q + Q').2 * (zeroCls E hsm t)⁻¹) *
           ((sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹) *
             (sectionCls E hsm t Q'.1 Q'.2 * (zeroCls E hsm t)⁻¹))⁻¹
         = Scheme.Pic.map (pullback.snd E.π t) M := by
-  sorry
+  haveI hsep : IsSeparated (pullback.snd E.π t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t ‹_›
+  have hsm' : SmoothOfRelativeDimension 1 (pullback.snd E.π t) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π t hsm
+  obtain ⟨N, hN, e⟩ := exists_invertible_tensor_idealModule_add E t Q Q'
+  refine ⟨(RelEffCartierDiv.exists_pic_map_of_nonempty_tensor_pullback_iso
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' Q.1 Q.2)
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' Q'.1 Q'.2)
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' (Q + Q').1 (Q + Q').2)
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm'
+      (baseChangeZero E.π E.zero E.zero_π t) (baseChangeZero_snd E.π E.zero E.zero_π t))
+    hN e).choose, ?_⟩
+  rw [kappa_ratio_algebra]
+  exact (RelEffCartierDiv.exists_pic_map_of_nonempty_tensor_pullback_iso
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' Q.1 Q.2)
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' Q'.1 Q'.2)
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' (Q + Q').1 (Q + Q').2)
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm'
+      (baseChangeZero E.π E.zero E.zero_π t) (baseChangeZero_snd E.π E.zero E.zero_π t))
+    hN e).choose_spec
 
 /-- `0^*` undoes `f^*`, so a class pulled back from the base is detected by the zero
 section. -/

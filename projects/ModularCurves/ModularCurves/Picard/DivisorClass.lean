@@ -108,6 +108,60 @@ theorem picClass_mul_eq_of_nonempty_tensor_iso [IsSeparated π]
           (D₄.isInvertible_idealModule h₄).isUnit_toSkeleton.unit)⁻¹ := by rw [hu]
     _ = D₃.picClass h₃ * D₄.picClass h₄ := mul_inv _ _
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The weakened multiplicativity — "differs by a class from the base".**
+
+`picClass_mul_eq_of_nonempty_tensor_iso` asks for an exact tensor isomorphism, which for
+the theorem of the square is *false*: `𝒪(D_Q) ⊗ 𝒪(D_{Q'})` and `𝒪(D_{Q+Q'}) ⊗ 𝒪(D_0)`
+differ by the pullback of the normal bundle `0^*𝒪(D_0) ≅ ω⁻¹` of the zero section. This is
+the form that survives: a tensor isomorphism up to `π^*N` gives an equality of class
+products up to `Pic.map π [N]`.
+
+Everything downstream only needs the *existence* of such an `M`, because
+`Ker(0^*) ∩ Im(π^*) = 1` kills it (`eq_of_mul_inv_eq_picMap_snd`). -/
+theorem exists_pic_map_of_nonempty_tensor_pullback_iso [IsSeparated π]
+    {D₁ D₂ D₃ D₄ : RelEffCartierDiv π}
+    (h₁ : IsOfficialCartier π D₁.ideal) (h₂ : IsOfficialCartier π D₂.ideal)
+    (h₃ : IsOfficialCartier π D₃.ideal) (h₄ : IsOfficialCartier π D₄.ideal)
+    {N : S.Modules} (hN : IsInvertible N)
+    (e : Nonempty (Modules.tensorObj (idealModule D₁.ideal) (idealModule D₂.ideal) ≅
+      Modules.tensorObj (Modules.tensorObj (idealModule D₃.ideal) (idealModule D₄.ideal))
+        ((Modules.pullback π).obj N))) :
+    ∃ M : Pic S,
+      (D₃.picClass h₃ * D₄.picClass h₄) * (D₁.picClass h₁ * D₂.picClass h₂)⁻¹
+        = Pic.map π M := by
+  letI := Modules.monoidalCategory C
+  letI := Modules.symmetricCategory C
+  letI := Modules.monoidalCategory S
+  letI := Modules.symmetricCategory S
+  refine ⟨hN.isUnit_toSkeleton.unit, ?_⟩
+  -- the inverse of a product of classes is the class of the tensor product of the ideals
+  have key : ∀ (Da Db : RelEffCartierDiv π) (ha : IsOfficialCartier π Da.ideal)
+      (hb : IsOfficialCartier π Db.ideal),
+      ((Da.picClass ha * Db.picClass hb)⁻¹ : Pic C).val
+        = toSkeleton (Modules.tensorObj (idealModule Da.ideal) (idealModule Db.ideal)) := by
+    intro Da Db ha hb
+    show (((Da.isInvertible_idealModule ha).isUnit_toSkeleton.unit⁻¹ *
+      (Db.isInvertible_idealModule hb).isUnit_toSkeleton.unit⁻¹)⁻¹).val = _
+    rw [← mul_inv, inv_inv, Units.val_mul, IsUnit.unit_spec, IsUnit.unit_spec,
+      ← Skeleton.toSkeleton_tensorObj]
+    exact (toSkeleton_eq_toSkeleton_iff.mpr (Modules.nonempty_tensorObj_iso_tensor _ _)).symm
+  -- the class of `π^*N` is `Pic.map π [N]`
+  have hpull : (Pic.map π hN.isUnit_toSkeleton.unit).val
+      = toSkeleton ((Modules.pullback π).obj N) := by
+    rw [Scheme.Pic.map_val, IsUnit.unit_spec]
+    exact Functor.mapSkeleton_obj_toSkeleton (Modules.pullback π) N
+  -- `e`, read in the group of classes
+  have hmain : ((D₁.picClass h₁ * D₂.picClass h₂)⁻¹ : Pic C)
+      = (D₃.picClass h₃ * D₄.picClass h₄)⁻¹ * Pic.map π hN.isUnit_toSkeleton.unit := by
+    refine Units.ext ?_
+    rw [key D₁ D₂ h₁ h₂, Units.val_mul, key D₃ D₄ h₃ h₄, hpull,
+      ← Skeleton.toSkeleton_tensorObj]
+    exact (toSkeleton_eq_toSkeleton_iff.mpr e).trans
+      (toSkeleton_eq_toSkeleton_iff.mpr (Modules.nonempty_tensorObj_iso_tensor _ _))
+  rw [hmain, mul_inv_cancel_left]
+
 end RelEffCartierDiv
 
 section Assembly
