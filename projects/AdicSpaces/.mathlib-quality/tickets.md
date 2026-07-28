@@ -3322,8 +3322,12 @@ X.restrictOpen (imgOfOpen U W)` in 𝒱^pre (`VRestrict.lean` already has `imgOf
 it before attempting P5-3/P5-4 as originally sketched. Do NOT build the dense-extension
 machinery the old P5-3 sketch describes — it is no longer on the critical path.
 
-### [P5-4] Rational-in-chart 𝒱-iso (8.15 over the Tate chart) — now = P5-K instance (ii)
-- **Status**: open | **Depends**: P5-1, P5-2 | **File**: new (chart side)
+### [P5-4] Rational-in-chart 𝒱-iso — SUPERSEDED 2026-07-28
+- **Status**: SUPERSEDED by `windowSubYSliceIso` (P5-6d(i)). The route-collapse note above
+  explains why: `spaCompIsoRestrict` needs Tate/noetherian only of the VALUE ring, so the
+  chart comparison is a composition of existing `isoRestrict`s. Do NOT build the machinery
+  the sketch below describes.
+- **(historical) Status**: open | **Depends**: P5-1, P5-2 | **File**: new (chart side)
 - **Statement**: for D' : RationalLocData A_W valid (A_W := windowChartRing n):
   `(spaVObjTate A_W).restrictOpen (spaOpens D') ≅ spaVObjTate (presheafValue D')`
   in 𝒱 (or VPreObj-iso + both sides' sheaf conditions).
@@ -3341,8 +3345,10 @@ machinery the old P5-3 sketch describes — it is no longer on the critical path
 - **NOTE**: do this BEFORE P5-3 — same shape, all tools exist; it
   establishes the presheaf-assembly pattern P5-3 mirrors.
 
-### [P5-3] Window transitivity 𝒱-iso (the FF-keystone, the hard one)
-- **Status**: open | **Depends**: P5-1, P5-2; pattern from P5-4
+### [P5-3] Window transitivity 𝒱-iso — SUPERSEDED 2026-07-28
+- **Status**: SUPERSEDED by `windowSubYSliceIso` (P5-6d(i)), same reason as P5-4. The
+  dense-extension development below is NOT on the critical path.
+- **(historical) Status**: open | **Depends**: P5-1, P5-2; pattern from P5-4
 - **Statement**: `(ambient Spa(A_inf)-VPreObj).restrictOpen (bigWindow-trace n)
   ≅ spaVObjTate (windowChartRing n)` in 𝒱^pre — equivalently 𝒴|_{trace n} ≅
   Spa(A_W) after composing with the 𝒴-definitional restriction.
@@ -3361,8 +3367,9 @@ machinery the old P5-3 sketch describes — it is no longer on the critical path
   exists_spanning_presentation_of_mem_basicOpens (Tate) as in X-ADIC-1.
 - **This is the substantive new mathematics of the campaign.**
 
-### [P5-5] The quotient leg: X|_{xImage V} ≅ 𝒴|_V for wandering V
-- **Status**: open | **Depends**: P5-1 | **File**: FarguesFontaine/ (new)
+### [P5-5] (duplicate, historical) The quotient leg — DONE, see the P5-5 entry above
+- **Status**: DONE 2026-07-28 (`quotientLegVObjIso`)
+- **(historical) Status**: open | **Depends**: P5-1 | **File**: FarguesFontaine/ (new)
 - **Statement**: for V ⊆ yTop open with pairwise-disjoint Frobenius
   translates: `(xVObj …).restrictOpen (xImage V) ≅ (yVObj …).restrictOpen V`
   in 𝒱.
@@ -3377,8 +3384,9 @@ machinery the old P5-3 sketch describes — it is no longer on the critical path
 - **NOTE**: this makes `isAdicSpace_yVObj` a corollary en route (𝒴 is an
   adic space via P5-3/P5-4 alone).
 
-### [P5-6] IsAdicSpace + the capstones
-- **Status**: open | **Depends**: P5-1..P5-5
+### [P5-6] (duplicate, historical) IsAdicSpace + the capstones
+- **Status**: `IsAdicSpace` DONE (P5-6a); the capstone is reduced to P5-6d(ii) + P5-6e
+- **(historical) Status**: open | **Depends**: P5-1..P5-5
 - **Statement**: `def IsAdicSpace (X : VObj) : Prop := ∀ x, ∃ (U : Opens _)
   (_ : x ∈ U) (data…), Nonempty ((X.restrictOpen U) ≅ spaVObjTate …)`;
   `theorem isAdicSpace_yVObj`; `theorem isAdicSpace_xVObj` — THE CURVE IS AN
