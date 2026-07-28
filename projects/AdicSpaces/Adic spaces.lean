@@ -159,6 +159,7 @@ import «Adic spaces».HomSheafPredicate
 import «Adic spaces».StructurePresheafBundled
 import «Adic spaces».AdicSpaceMorphisms
 import «Adic spaces».StructureSheaf
+import «Adic spaces».VRestrict
 import «Adic spaces».TateAcyclicity
 import «Adic spaces».TateAcyclicityFinalAssembly
 import «Adic spaces».TateAcyclicityResiduals
