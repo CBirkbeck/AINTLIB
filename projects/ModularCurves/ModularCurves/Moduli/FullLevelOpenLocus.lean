@@ -71,7 +71,10 @@ theorem fullLevelOpenSet_isOpen (hN : NIsInvertible S N) :
     (combPoint_killed E N (cd.1 : ℤ) (cd.2 : ℤ))).isClosed
 
 /-- The full-level open locus as a `Scheme.Opens` of the ambient `E[N] ×_S E[N]`. -/
-def fullLevelOpens (hN : NIsInvertible S N) :
+-- `private`: `GroupScheme/TorsionCombination.lean` defines the same name in the same
+-- namespace and both are imported together by the root index; this copy has no
+-- consumers outside this file (which itself has no dependents).
+private def fullLevelOpens (hN : NIsInvertible S N) :
     (pullback (E.torsionπ N) (E.torsionπ N)).Opens :=
   ⟨fullLevelOpenSet E N hN, fullLevelOpenSet_isOpen E N hN⟩
 

@@ -2842,7 +2842,11 @@ section PointCongr
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
 /-- Points over equal base morphisms, additively. -/
-noncomputable def EllipticCurve.pointCongr {T : Scheme.{u}} {g₁ g₂ : T ⟶ S} (h : g₁ = g₂) :
+-- `private`: `Moduli/KeystoneGeometricPoint.lean` carries the same definition under the
+-- same name (with `E` explicit) and both modules are imported together; the only
+-- consumers of this copy are in this file.
+private noncomputable def EllipticCurve.pointCongr {T : Scheme.{u}} {g₁ g₂ : T ⟶ S}
+    (h : g₁ = g₂) :
     E.Point g₁ ≃+ E.Point g₂ := h ▸ AddEquiv.refl _
 
 @[simp]

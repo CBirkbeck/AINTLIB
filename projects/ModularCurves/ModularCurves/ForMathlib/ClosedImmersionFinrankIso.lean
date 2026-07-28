@@ -29,13 +29,17 @@ namespace AlgebraicGeometry
 
 /-- `finrank` is compatible with restriction to an open of the target (`morphismRestrict` is
 a base change along the open immersion). -/
-lemma Scheme.Hom.finrank_morphismRestrict {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Opens)
+-- `private`: `ForMathlib/FinrankComp.lean` carries a copy of this under the same name,
+-- and both modules are imported together. Only this file uses this copy.
+private lemma Scheme.Hom.finrank_morphismRestrict {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Opens)
     [Flat f] [IsFinite f] (u : ↥U) :
     (f ∣_ U).finrank u = f.finrank (U.ι.base u) :=
   Scheme.Hom.finrank_of_isPullback _ _ _ _ (isPullback_morphismRestrict f U).flip u
 
 /-- `finrank` is transported by post-composition with an isomorphism of the target. -/
-lemma Scheme.Hom.finrank_comp_right_of_isIso {X Y Z : Scheme.{u}} (φ : X ⟶ Y) (e : Y ⟶ Z)
+-- `private`: `ForMathlib/FinrankComp.lean` carries a copy of this under the same name,
+-- and both modules are imported together. Only this file uses this copy.
+private lemma Scheme.Hom.finrank_comp_right_of_isIso {X Y Z : Scheme.{u}} (φ : X ⟶ Y) (e : Y ⟶ Z)
     [IsIso e] [Flat φ] [IsFinite φ] (y : Y) :
     φ.finrank y = (φ ≫ e).finrank (e.base y) := by
   haveI : Flat (φ ≫ e) := MorphismProperty.comp_mem _ _ _ ‹Flat φ› inferInstance
