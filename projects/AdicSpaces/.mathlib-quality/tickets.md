@@ -87,8 +87,15 @@ The recurring causes, and their fixes, in this codebase:
 * a goal whose *context* is expensive (every tactic step ≈ 1s, e.g. `IsAdic` over a
   subring-of-a-subring) → make the proof a one-step term over named lemmas.
 
-**Remaining**: `Groebner.lean` is down to ONE raise (2026-07-31 beastmode pass,
-commits 230b6d928..): `ideal_eq_span_groebner` keeps its 8M. REMOVED (all at the
+**COMPLETE 2026-07-28**: the last raise is GONE — `ideal_eq_span_groebner`'s 8M
+removed by stage-decomposition (NO GroebnerPackage structure needed): private
+`GRing` reducible abbrev + `exists_reduction_sequence` (the choose/iterate
+stage, with the norm-decay induction hoisted ONCE and shared) +
+`exists_combination_limit` (the per-column exists_rps_series_limit
+instantiation) + `gaussNorm_sub_combination_le` (the telescope/tail estimate)
++ a slim assembly; every piece compiles at the DEFAULT 200k. The library now
+has ZERO `maxHeartbeats` raises in `FarguesFontaine/`.
+Historical (the pre-decomposition state): `ideal_eq_span_groebner` kept 8M. REMOVED (all at the
 default 200k now): `exists_groebner_family` (split `exists_groebner_generator` +
 choose-projections + the `himg` abstract-predicate image bridge),
 `groebner_reduce` (the hidden furnace was `set ... with` — it KABSTRACTS the whole
@@ -368,7 +375,7 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L1.7–L1.8 ([Bhatt Cor. 3.2.3] verbatim quote there).
 
 ### [CLEANUP-1] /cleanup on PerfectoidFieldCharP.lean
-- **Status**: open | **Depends**: T103 (final per-file; 3 proof tickets).
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T103 (final per-file; 3 proof tickets).
 
 ### [T201] A_inf: Teichmüller lemmas + topological ring (L2.1–L2.2)
 - **Status**: done (beastmode 2026-07-25; axiom-clean) — `teichPi_pow` = `map_pow` of the
@@ -423,7 +430,7 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L2.6 (elementary; sandwich for the completeness transfer).
 
 ### [CLEANUP-2] /cleanup on AinfHuber.lean (after 3rd proof ticket on file)
-- **Status**: open (due — T201+T202+T203 done; deferred to after T205 per user
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work (due — T201+T202+T203 done; deferred to after T205 per user
   redirection 2026-07-25 "keep going with the FF constructions" — one cleanup pass when
   the file is sorry-free) | **Depends**: T203.
 
@@ -484,7 +491,7 @@ not weaken or strengthen hypotheses).
   as the formal p-direction anchor.
 
 ### [CLEANUP-3] /cleanup on AinfHuber.lean (final per-file)
-- **Status**: open | **Depends**: T205.
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T205.
 
 ### [T301] Frobenius identities (L3.1–L3.2, L3.5)
 - **Status**: done (beastmode 2026-07-25; axiom-clean) — `frob_natCast` = `map_natCast`;
@@ -533,7 +540,7 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L3.4–L3.7 ([SW §12.2] quote).
 
 ### [CLEANUP-4] /cleanup on FrobeniusAction.lean (final per-file)
-- **Status**: open | **Depends**: T303.
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T303.
 
 ### [T401] 𝒴: basic-open description and element facts (L4.1 + part of L4.4)
 - **Status**: done (board reconciliation 2026-07-26: content shipped in YSpace.lean during the M4/M5 waves; file is sorry-free and green) | **File**: FarguesFontaine/YSpace.lean | **Depends**: T201 | **Parallel**: with T30x
@@ -572,7 +579,7 @@ not weaken or strengthen hypotheses).
   (`chatgpt-reply-fargues-fontaine-2026-07-24.md`).
 
 ### [CLEANUP-5] /cleanup on YSpace.lean (after 3rd proof ticket on file)
-- **Status**: open | **Depends**: T403.
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T403.
 
 ### [T404] The κ-predicate core (L4.6, L5.1)
 - **Status**: done (beastmode 2026-07-25; axiom-clean; committed cf7ef820f) | **File**: YSpace.lean | **Depends**: T403, CLEANUP-5
@@ -626,7 +633,7 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L5.2–L5.4 ([Ked-AWS Rem 3.1.9]; [SW §12.2] κ∘φ = pκ).
 
 ### [CLEANUP-6] /cleanup on YSpace.lean (final per-file)
-- **Status**: open | **Depends**: T406.
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T406.
 
 ### [T501] Freeness and wandering (L6.1–L6.2)
 - **Status**: done (beastmode 2026-07-25; pure set-logic over T405/T406 as planned;
@@ -662,7 +669,7 @@ not weaken or strengthen hypotheses).
   and V_0 map isomorphically to their images in X_S and cover the latter").
 
 ### [CLEANUP-7] /cleanup on Curve.lean (after 3rd proof ticket on file)
-- **Status**: open | **Depends**: T503.
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T503.
 
 ### [T504] The curve is T0 (L7.4)
 - **Status**: done (beastmode 2026-07-25; commit 3d870f8d5) — chart-separation engine
@@ -703,10 +710,10 @@ not weaken or strengthen hypotheses).
   subspaces").
 
 ### [CLEANUP-8] /cleanup on Curve.lean (final per-file)
-- **Status**: open | **Depends**: T505 (or T504 if T505 blocked).
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T505 (or T504 if T505 blocked).
 
 ### [CLEANUP-ALL-1] /cleanup-all over the campaign so far
-- **Status**: open | **Depends**: T501, T502, CLEANUP-1..6 | blocks T503 (pre-milestone
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T501, T502, CLEANUP-1..6 | blocks T503 (pre-milestone
   pass per cadence rule).
 
 ### [T601] STRETCH (blocked-on-plan): 𝒴 is nonempty (L7.6)
@@ -715,7 +722,7 @@ not weaken or strengthen hypotheses).
 - **Statement**: `Y_nonempty`.
 
 ### [CLEANUP-FINAL] /cleanup-all over the whole campaign
-- **Status**: open | **Depends**: everything above (T601 excluded if still blocked).
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: everything above (T601 excluded if still blocked).
 
 ---
 
@@ -761,7 +768,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
   `Ideal.map_span` + image-of-pair).
 
 ### [CLEANUP-9] /cleanup on SpaQCviaSpvAI.lean (new R5 section)
-- **Status**: open | **Depends**: T704.
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T704.
 
 ### [T705] Windows as rational subsets (F1)
 - **Status**: done (2026-07-26; mem_rationalOpen_pair_iff engine per Wedhorn 7.30(5) +
@@ -787,7 +794,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
   F3 (compact transfer to ↥Y, toCurve-images, T503 covering).
 
 ### [CLEANUP-10] /cleanup on Curve.lean (final; supersedes CLEANUP-8's scope)
-- **Status**: open | **Depends**: T706.
+- **Status**: open — SUPERSEDED by the main-side worker system (CLAUDE.md): cleanup is fleet work on `main` via lane:cleanup issues after merge, not dev-branch producer work | **Depends**: T706.
 
 ---
 
@@ -1002,7 +1009,7 @@ non-Tate bases are supported.
 - **Depends**: ID1a-c, T911, TC2.
 
 ### [ID3] Y is pre-adic and sheafy on the charts
-- **Status**: open — DECOMPOSED 2026-07-27 into ID3a–ID3d | **Parent**: PLAN-GATE-2/PLAN-GATE-3 | **Type**: theorem block
+- **Status**: DONE 2026-07-28 (ID3a+b 2026-07-27; ID3c landed as isSheafy_canonical_window, YStalks.lean:534, during the D-track; ID3d = yAdicSpacePresentation, CurveAdicPresentation.lean, commit 8bc8cfc66 — 𝒴 locally affinoid in the honest carrier-level framing; the deeper 𝒱-level locality is the D-iv xVObj/yVObj layer, both done) | **Parent**: PLAN-GATE-2/PLAN-GATE-3 | **Type**: theorem block
 - **PLAN (2026-07-27, replaces the U_n/V_n-chart route)**: cover Y by the BIG
   windows `BigW_n := {κ ∈ [p^n, p^(n+1)]}` (n : ℤ). Since c = (p+1)/2 ∈ (1,p),
   `BigW_n = U_n ∪ V_n` EXACTLY, so the T405 covering gives `Y = ⋃ BigW_n`. Each
@@ -1031,17 +1038,17 @@ non-Tate bases are supported.
   the same vanishing) and `BigW_n(ϖ) = rationalOpen (chartT-in-ϖ_n p 1)
   (chartS-in-ϖ_n 1 1)` via mem_rationalOpen_chartData_iff at ϖ_n + the
   KGE/KLE cross-multiplication bridges ([ϖ_n]^{p^n} = [ϖ] as teichPi-powers).
-- **ID3c** (open): sheafiness per window. `IsSheafy (presheafValue
+- **ID3c** DONE (during the D-track: isSheafy_canonical_window, YStalks.lean:534): sheafiness per window. `IsSheafy (presheafValue
   (chartData-in-ϖ_n 1 1 p 1))` := isSheafy_presheafChart at ϖ_n, a := p,
   b := 1, hab : 1 ≤ p, ρ₂ := rhoRight-in-ϖ_n p 1 (apply DIRECTLY — do not
   restate the letI chain; see the isDefEq-trap note under PLAN-GATE-2).
-- **ID3d** (open): assembly — Y pre-adic + adic via covering locality (consult
+- **ID3d** DONE 2026-07-28 (yAdicSpacePresentation; the 𝒱-object layer is D-iv): assembly — Y pre-adic + adic via covering locality (consult
   the repo's Spa/8.27 framework for the exact statement shape; Wedhorn Rem 8.27;
   TC2). Needs T405 (the covering, Lane A) for `Y = ⋃ BigW_n`.
 - **Depends**: ID2 (done), ID3a-c mutually ordered, T405 for ID3d.
 
 ### [PLAN-GATE-2] Lane C assembly planning (identification theorem + sheafy instances)
-- **Status**: mostly DISCHARGED 2026-07-27 — the chart-identification theorem is
+- **Status**: DISCHARGED (2026-07-27 core; the two REMAINING items closed 2026-07-28 — (i) V₀ covered by BigW_0 per the ID3 BigWindow plan, ID3 DONE; (ii) Y-locality delivered by D-iv (yVObj/xVObj) + X-ADIC-1 + yAdicSpacePresentation) — the chart-identification theorem is
   ID2 (DONE: presheafChartRingEquivBISub + isSheafy_presheafChart, any (a,b) with
   0<b≤a at the exact interval ρ₁=|ϖ|, ρ₂^a=|ϖ|^b); U₀-instantiation endpoints
   proven (rhoRight/rhoRight_pos/rhoRight_lt_one/rhoRight_pow_exact +
@@ -1059,7 +1066,11 @@ non-Tate bases are supported.
   transported — equality with B^{I,+} not required.
 
 ### [PLAN-GATE-3] Lane D: 𝒳 as a locally v-ringed quotient (NEW per sol Q6)
-- **Status**: OPEN — interface survey done 2026-07-27 (beastmode); execution
+- **Status**: DISCHARGED 2026-07-30 by the D-track (D-i..D-iv COMPLETE: xVObj — the
+  curve as an object of Wedhorn's 𝒱 with local rings + stalk valuations, via the
+  quotient/descent route, NOT the chart-gluing route sketched below) and X-ADIC-1
+  (curveAdicSpacePresentation — locally affinoid). The gluing-route notes below are
+  historical. Interface survey 2026-07-27; execution
   decision recorded below | **Depends**: PLAN-GATE-2 (now discharged)
 - **INTERFACE SURVEY (2026-07-27)**: the repo's object layer is
   `VPreObj`/`VObj` (StructureSheaf.lean — valued presheafed spaces; VObj adds
@@ -2877,7 +2888,7 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   (Tate-algebra completeness — repo RestrictedPowerSeries API), `y = Σ_I a_I x_I`.
 
 ### [T908] λ_I, BI, three circles, coordinate continuity
-- **Status**: in_progress (beastmode 2026-07-26) | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T901, T902 (done)
+- **Status**: DONE ((a)+(b) 2026-07-26/27; (c) closed-as-scoped 2026-07-30 — Bloc-layer ℤ-coordinates in IntervalCoordinates.lean, completion-level functionals struck per the AD-8 resolution) | **File**: FarguesFontaine/IntervalRing.lean + IntervalCoordinates.lean | **Depends**: T901, T902 (done)
 - **DESIGN REVISION (2026-07-26, after §2+§3 completed)** — AD-7 is *implemented* by the
   product-of-completions trick rather than by SeminormedRing plumbing (mathlib has no
   `RingSeminorm → SeminormedRing` constructor, and our norms are NNReal-valued):
@@ -3156,7 +3167,7 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   the endpoint values `≤ ε`; ultrametric max gives `v(z.i) ≤ ε`; conclude `z = 0`.
 
 ### [T910] Lemma 4.9, first two presentations
-- **Status**: in_progress (beastmode 2026-07-27) | **File**: FarguesFontaine/RobbaPresentation.lean (new) | **Depends**: T907, T908
+- **Status**: DONE 2026-07-28 (cases 1+2 axiom-clean 2026-07-27: robba_case1_presentation + robba_case2_presentation; 'moreover' clause = T910-M COMPLETE in RobbaCorrespondence.lean; A^r third iso closed as not-needed — see the consumer assessment in the progress log) | **File**: FarguesFontaine/RobbaPresentation.lean + RobbaCorrespondence.lean | **Depends**: T907, T908
 - **OPENING PLAN (2026-07-27, after the D-track wall audit)**. The D-track's next
   steps (Y-b sheaf-on-Y, VObj-glue) hit two genuine infra walls: (i) Spa(A_inf)
   quasicompactness — the Tate-case closed-image route does not apply (A_inf not
@@ -3391,9 +3402,15 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   (fst literal; KERNEL-PERF: Prod.ext with bare rfl component forces
   kernel defeq through subring-coe-mul and times out — use
   congrArg-of-BISub_coe_mul/add), final assembly term-elim + subst.
-  T910 STATUS: both B-level cases DONE. REMAINING (follow-ups, assess
-  T911-consumer need first): the ρ ∈ p^ℚ plus-ring integral-closure
-  statement + the A^r-level third iso (A^r{T}/(pT−[z̄^n])). Historical:
+  T910 STATUS: both B-level cases DONE. Follow-ups RESOLVED 2026-07-28:
+  (1) the ρ ∈ p^ℚ plus-ring integral-closure statement = T910-M, COMPLETE
+  (mem_BIPlusIn_iff_isIntegral, RobbaCorrespondence.lean); (2) the A^r-level
+  third iso (A^r{T}/(pT−[z̄^n])) — CONSUMER ASSESSMENT: NO consumer. T911
+  (norm-exact lifts) and T912 (Theorem 4.10, isStronglyNoetherian_BISub)
+  both landed via the AD-9 case-3 route without it; no open ticket references
+  it; Kedlaya uses it only for his own 4.10-induction bookkeeping, which the
+  repo replaced. CLOSED as not-needed (re-open only if a future consumer
+  appears). Historical:
   the case-2 plan follows. (needed: Kedlaya's 4.10/4.11 subdivision
   induction presents BOTH halves — top-half by case 1, bottom-half by
   case 2). Paper: B^I{T/ρ⁻¹}/(T − [z̄⁻¹]) ≅ B^{I∩(0,log_c ρ]}; repo

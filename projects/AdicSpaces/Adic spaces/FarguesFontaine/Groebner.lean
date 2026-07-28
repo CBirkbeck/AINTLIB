@@ -2101,7 +2101,214 @@ theorem coe_RPS_neg {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (a : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
     ((-a : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = -((a : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) := rfl
 
-set_option maxHeartbeats 8000000 in
+/-- The Tate-algebra carrier of the Gröbner argument (local shorthand). -/
+private abbrev GRing (k : ℕ) {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :=
+  ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))
+
+/-- **The reduction sequence** (stage 1 of Lemma 3.9): iterating the
+one-round approximate generation produces a sequence with geometric norm
+decay and controlled coefficients. -/
+private theorem exists_reduction_sequence {ρ : NNReal} {hρ0 : 0 < ρ}
+    {hρ1 : ρ < 1} {ε : NNReal} {H : Ideal (GRing p F ϖ k hρ0 hρ1)}
+    {G : Finset (GRing p F ϖ k hρ0 hρ1)}
+    (hGH : ∀ g ∈ G, g ∈ H)
+    (hG0 : ∀ g ∈ G, ((g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0))
+    (hGtail : ∀ g ∈ G, ∀ K : Fin k →₀ ℕ,
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+          (leadIdxRPS p F ϖ hρ0 hρ1 (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+        < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+      Valued.v ((MvPowerSeries.coeff K (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+    (hGdeg : ∀ g ∈ G, ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)
+        = dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1 (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))))
+    (hGdom : ∀ J : Fin k →₀ ℕ, dIdx p F ϖ hρ0 hρ1 H J ≠ ⊤ →
+      ∃ g ∈ G, leadIdxRPS p F ϖ hρ0 hρ1 (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ J
+        ∧ dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1 (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+          = dIdx p F ϖ hρ0 hρ1 H J)
+    (hε0 : 0 < ε) (hε1 : ε < 1)
+    {y₀ : GRing p F ϖ k hρ0 hρ1} (hy₀H : y₀ ∈ H) {B : NNReal}
+    (hB : gaussNormRPS p F ϖ hρ0 hρ1
+      (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ B) :
+    ∃ (Y : ℕ → GRing p F ϖ k hρ0 hρ1)
+      (α : ℕ → GRing p F ϖ k hρ0 hρ1 → GRing p F ϖ k hρ0 hρ1),
+      Y 0 = y₀
+      ∧ (∀ l, Y (l + 1) = Y l - ∑ g ∈ G, α l g * g)
+      ∧ (∀ l, gaussNormRPS p F ϖ hρ0 hρ1
+          (Y l : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ l * B)
+      ∧ (∀ l, ∀ g ∈ G, gaussNormRPS p F ϖ hρ0 hρ1
+            (α l g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          * gaussNormRPS p F ϖ hρ0 hρ1
+            (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ l * B) := by
+  classical
+  have step : ∀ z : {z : GRing p F ϖ k hρ0 hρ1 // z ∈ H},
+      ∃ (a : GRing p F ϖ k hρ0 hρ1 → GRing p F ϖ k hρ0 hρ1)
+        (z' : {z : GRing p F ϖ k hρ0 hρ1 // z ∈ H}),
+        (z' : GRing p F ϖ k hρ0 hρ1) = (z : GRing p F ϖ k hρ0 hρ1) - ∑ g ∈ G, a g * g
+        ∧ (∀ g ∈ G, gaussNormRPS p F ϖ hρ0 hρ1
+              (a g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            * gaussNormRPS p F ϖ hρ0 hρ1
+              (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          ≤ gaussNormRPS p F ϖ hρ0 hρ1
+              ((z : GRing p F ϖ k hρ0 hρ1) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+        ∧ gaussNormRPS p F ϖ hρ0 hρ1
+            ((z' : GRing p F ϖ k hρ0 hρ1) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1
+              ((z : GRing p F ϖ k hρ0 hρ1) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
+    rintro ⟨z, hzH⟩
+    obtain ⟨a, hab, harem⟩ := approx_generation p F ϖ hGH hG0 hGtail hGdeg hGdom
+      hε0 hε1 hzH
+    refine ⟨a, ⟨z - ∑ g ∈ G, a g * g, ?_⟩, rfl, hab, harem⟩
+    exact Ideal.sub_mem H hzH
+      (Ideal.sum_mem H fun g hg => Ideal.mul_mem_left H _ (hGH g hg))
+  choose α' σ hσeq hαb hσn using step
+  have hYn : ∀ l, gaussNormRPS p F ϖ hρ0 hρ1
+      ((σ^[l] ⟨y₀, hy₀H⟩ : GRing p F ϖ k hρ0 hρ1)
+        : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ l * B := by
+    intro l
+    induction l with
+    | zero => rw [pow_zero, one_mul]; exact hB
+    | succ n ih =>
+      rw [Function.iterate_succ_apply' σ n ⟨y₀, hy₀H⟩]
+      refine le_trans (hσn (σ^[n] ⟨y₀, hy₀H⟩)) ?_
+      calc ε * gaussNormRPS p F ϖ hρ0 hρ1
+            ((σ^[n] ⟨y₀, hy₀H⟩ : GRing p F ϖ k hρ0 hρ1)
+              : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          ≤ ε * (ε ^ n * B) := mul_le_mul_of_nonneg_left ih zero_le
+        _ = ε ^ (n + 1) * B := by ring
+  refine ⟨fun l => (σ^[l] ⟨y₀, hy₀H⟩ : {z : GRing p F ϖ k hρ0 hρ1 // z ∈ H}),
+    fun l => α' (σ^[l] ⟨y₀, hy₀H⟩), rfl, ?_, hYn, ?_⟩
+  · intro l
+    exact (congrArg
+      (fun w : {z : GRing p F ϖ k hρ0 hρ1 // z ∈ H} => (w : GRing p F ϖ k hρ0 hρ1))
+      (Function.iterate_succ_apply' σ l ⟨y₀, hy₀H⟩)).trans
+      (hσeq (σ^[l] ⟨y₀, hy₀H⟩))
+  · intro l g hg
+    exact le_trans (hαb (σ^[l] ⟨y₀, hy₀H⟩) g hg) (hYn l)
+
+/-- **The coefficient limit** (stage 2 of Lemma 3.9): the partial sums of a
+geometrically-controlled coefficient column converge in the restricted-series
+ring. -/
+private theorem exists_combination_limit {ρ : NNReal} {hρ0 : 0 < ρ}
+    {hρ1 : ρ < 1} {ε B : NNReal} (hε1 : ε < 1)
+    (α : ℕ → GRing p F ϖ k hρ0 hρ1) (g : GRing p F ϖ k hρ0 hρ1)
+    (hgpos : 0 < gaussNormRPS p F ϖ hρ0 hρ1
+      (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+    (hAn : ∀ l, gaussNormRPS p F ϖ hρ0 hρ1
+          (α l : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        * gaussNormRPS p F ϖ hρ0 hρ1
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ l * B) :
+    ∃ U : GRing p F ϖ k hρ0 hρ1, ∀ (n : ℕ) (b : NNReal), 0 < b →
+      (∀ l, n ≤ l → ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1
+        (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ ≤ b) →
+      gaussNormRPS p F ϖ hρ0 hρ1
+        (((U - ∑ l ∈ Finset.range n, α l : GRing p F ϖ k hρ0 hρ1))
+          : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ b := by
+  refine exists_rps_series_limit p F ϖ (C := fun l =>
+    ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1
+      (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹) (fun l => ?_) ?_
+  · have hcancel : ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1
+        (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹
+        * gaussNormRPS p F ϖ hρ0 hρ1
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = ε ^ l * B := by
+      rw [mul_assoc, inv_mul_cancel₀ hgpos.ne', mul_one]
+    refine le_of_mul_le_mul_right ?_ hgpos
+    rw [hcancel]
+    exact hAn l
+  · have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
+      (zero_le : (0 : NNReal) ≤ ε) hε1).mul_const B
+    rw [zero_mul] at h1
+    have h2 := h1.mul_const ((gaussNormRPS p F ϖ hρ0 hρ1
+      (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹)
+    rwa [zero_mul] at h2
+
+/-- **The tail estimate** (stage 3 of Lemma 3.9): the distance from `y₀` to
+the limit combination is below every `ε ^ n * B`. -/
+private theorem gaussNorm_sub_combination_le {ρ : NNReal} {hρ0 : 0 < ρ}
+    {hρ1 : ρ < 1} {ε B : NNReal} (hε0 : 0 < ε) (hε1 : ε < 1) (hB0 : 0 < B)
+    {G : Finset (GRing p F ϖ k hρ0 hρ1)}
+    (hgpos : ∀ g : {g : GRing p F ϖ k hρ0 hρ1 // g ∈ G},
+      0 < gaussNormRPS p F ϖ hρ0 hρ1
+        ((g : GRing p F ϖ k hρ0 hρ1)
+          : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+    (y₀ : GRing p F ϖ k hρ0 hρ1)
+    (Y : ℕ → GRing p F ϖ k hρ0 hρ1)
+    (α : ℕ → GRing p F ϖ k hρ0 hρ1 → GRing p F ϖ k hρ0 hρ1)
+    (hY0 : Y 0 = y₀)
+    (hYeq : ∀ l, Y (l + 1) = Y l - ∑ g ∈ G, α l g * g)
+    (hYnorm : ∀ l, gaussNormRPS p F ϖ hρ0 hρ1
+      (Y l : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ l * B)
+    (U : {g : GRing p F ϖ k hρ0 hρ1 // g ∈ G} → GRing p F ϖ k hρ0 hρ1)
+    (hU : ∀ (g : {g : GRing p F ϖ k hρ0 hρ1 // g ∈ G}) (n : ℕ) (b : NNReal),
+      0 < b →
+      (∀ l, n ≤ l → ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1
+        ((g : GRing p F ϖ k hρ0 hρ1)
+          : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ ≤ b) →
+      gaussNormRPS p F ϖ hρ0 hρ1
+        (((U g - ∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)
+          : GRing p F ϖ k hρ0 hρ1))
+          : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ b)
+    (n : ℕ) :
+    gaussNormRPS p F ϖ hρ0 hρ1
+      (((y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
+        : GRing p F ϖ k hρ0 hρ1))
+        : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ n * B := by
+  classical
+  have htel : ∀ m, Y m
+      = y₀ - ∑ l ∈ Finset.range m, ∑ g ∈ G, α l g * g := by
+    intro m
+    induction m with
+    | zero =>
+      rw [hY0, Finset.range_zero, Finset.sum_empty, sub_zero]
+    | succ m ih =>
+      rw [hYeq m, ih, Finset.sum_range_succ]
+      ring
+  have hYn : Y n
+      = y₀ - ∑ i ∈ G.attach, (∑ l ∈ Finset.range n, α l (i : GRing p F ϖ k hρ0 hρ1))
+        * (i : GRing p F ϖ k hρ0 hρ1) := by
+    rw [htel n, sum_range_sum_attach_mul G n (fun l g => α l g) (fun g => g)]
+  have hsplit : (y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
+        : GRing p F ϖ k hρ0 hρ1)
+      = Y n + ∑ g ∈ G.attach,
+          ((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g)
+            * (g : GRing p F ϖ k hρ0 hρ1) := by
+    rw [hYn]
+    exact telescope_split G.attach y₀
+      (fun i => ∑ l ∈ Finset.range n, α l (i : GRing p F ϖ k hρ0 hρ1))
+      (fun i => U i) (fun i => (i : GRing p F ϖ k hρ0 hρ1))
+  rw [hsplit, coe_RPS_add]
+  refine le_trans (gaussNormRPS_add_le p F ϖ (Y n).2
+      (∑ g ∈ G.attach,
+        ((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g)
+          * (g : GRing p F ϖ k hρ0 hρ1)).2)
+    (max_le (hYnorm n) ?_)
+  refine gaussNormRPS_finset_sum_le p F ϖ G.attach _ _ fun g _ => ?_
+  rw [coe_RPS_mul]
+  refine le_trans (gaussNormRPS_mul_le p F ϖ
+    ((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g).2
+    (g : GRing p F ϖ k hρ0 hρ1).2) ?_
+  have hUb : gaussNormRPS p F ϖ hρ0 hρ1
+      ((((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g
+        : GRing p F ϖ k hρ0 hρ1))
+        : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+      ≤ ε ^ n * B * (gaussNormRPS p F ϖ hρ0 hρ1
+        ((g : GRing p F ϖ k hρ0 hρ1)
+          : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ := by
+    have h1 : ((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g
+          : GRing p F ϖ k hρ0 hρ1)
+        = -((U g - ∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)
+          : GRing p F ϖ k hρ0 hρ1)) := by
+      ring
+    rw [h1, coe_RPS_neg, gaussNormRPS_neg]
+    refine hU g n _ (mul_pos (mul_pos (pow_pos hε0 n) hB0)
+      (inv_pos.mpr (hgpos g))) fun l hl => ?_
+    refine mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right ?_ zero_le) zero_le
+    exact pow_le_pow_of_le_one zero_le hε1.le hl
+  refine le_trans (mul_le_mul_of_nonneg_right hUb zero_le) ?_
+  rw [mul_assoc, inv_mul_cancel₀ (hgpos g).ne', mul_one]
+
 /-- **Kedlaya Lemma 3.9**: the Gröbner generators generate the ideal. -/
 theorem ideal_eq_span_groebner {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {ε : NNReal} {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))} {G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
@@ -2125,157 +2332,66 @@ theorem ideal_eq_span_groebner {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     H = Ideal.span (G : Set ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) := by
   classical
   refine le_antisymm ?_ ?_
-  · -- every ideal element is a combination
-    intro y₀ hy₀H
-    set B := gaussNormRPS p F ϖ hρ0 hρ1 (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) with hB
-    by_cases hB0 : B = 0
+  · intro y₀ hy₀H
+    by_cases hB0 : gaussNormRPS p F ϖ hρ0 hρ1
+        (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = 0
     · have hy₀0 : y₀ = 0 :=
         Subtype.ext ((gaussNormRPS_eq_zero_iff p F ϖ y₀.2).mp hB0)
       rw [hy₀0]
       exact Ideal.zero_mem _
-    have hBpos : 0 < B := pos_iff_ne_zero.mpr hB0
-    -- one reduction round, as a function on the ideal
-    have step : ∀ z : {z : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) // z ∈ H},
-        ∃ (a : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) → ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) (z' : {z : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) // z ∈ H}),
-          (z' : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) = (z : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) - ∑ g ∈ G, a g * g
-          ∧ (∀ g ∈ G, gaussNormRPS p F ϖ hρ0 hρ1 ((a g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-              * gaussNormRPS p F ϖ hρ0 hρ1 ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-            ≤ gaussNormRPS p F ϖ hρ0 hρ1 (((z : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
-          ∧ gaussNormRPS p F ϖ hρ0 hρ1 (((z' : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-            ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 (((z : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
-      rintro ⟨z, hzH⟩
-      obtain ⟨a, hab, harem⟩ := approx_generation p F ϖ hGH hG0 hGtail hGdeg hGdom
-        hε0 hε1 hzH
-      refine ⟨a, ⟨z - ∑ g ∈ G, a g * g, ?_⟩, rfl, hab, harem⟩
-      exact Ideal.sub_mem H hzH
-        (Ideal.sum_mem H fun g hg => Ideal.mul_mem_left H _ (hGH g hg))
-    choose α σ hσeq hαb hσn using step
-    obtain ⟨Y, hY0, hYsucc⟩ : ∃ Y : ℕ → {z : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) // z ∈ H},
-        Y 0 = ⟨y₀, hy₀H⟩ ∧ ∀ l, Y (l + 1) = σ (Y l) :=
-      ⟨fun l => σ^[l] ⟨y₀, hy₀H⟩, rfl,
-        fun l => Function.iterate_succ_apply' σ l ⟨y₀, hy₀H⟩⟩
-    have hYeq : ∀ l, ((Y (l + 1) : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-        = (Y l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) - ∑ g ∈ G, α (Y l) g * g := by
-      intro l
-      rw [hYsucc l]
-      exact hσeq (Y l)
-    have hYnorm : ∀ l, gaussNormRPS p F ϖ hρ0 hρ1 (((Y l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ l * B := by
-      intro l
-      induction l with
-      | zero =>
-        rw [pow_zero, one_mul, hY0]
-      | succ n ih =>
-        rw [hYsucc n]
-        refine le_trans (hσn (Y n)) ?_
-        calc ε * gaussNormRPS p F ϖ hρ0 hρ1 (((Y n : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-            ≤ ε * (ε ^ n * B) := mul_le_mul_of_nonneg_left ih zero_le
-          _ = ε ^ (n + 1) * B := by ring
-    have hAnorm : ∀ (l : ℕ), ∀ g ∈ G, gaussNormRPS p F ϖ hρ0 hρ1 ((α (Y l) g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-        * gaussNormRPS p F ϖ hρ0 hρ1 ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ l * B := by
-      intro l g hg
-      exact le_trans (hαb (Y l) g hg) (hYnorm l)
-    -- telescoping
-    have htel : ∀ n, (Y n : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-        = y₀ - ∑ l ∈ Finset.range n, ∑ g ∈ G, α (Y l) g * g := by
-      intro n
-      induction n with
-      | zero =>
-        rw [hY0, Finset.range_zero, Finset.sum_empty, sub_zero]
-      | succ m ih =>
-        rw [hYeq m, ih, Finset.sum_range_succ]
-        ring
-    -- the coefficient series converge
-    have hgeo : Filter.Tendsto (fun l => ε ^ l * B) Filter.atTop (nhds 0) := by
-      have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
-        (zero_le : (0 : NNReal) ≤ ε) hε1).mul_const B
-      rwa [zero_mul] at h1
-    have hlim : ∀ g ∈ G, ∃ U : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)), ∀ (n : ℕ) (b : NNReal), 0 < b →
-        (∀ l, n ≤ l → ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1 ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ ≤ b) →
-        gaussNormRPS p F ϖ hρ0 hρ1 ((((U - ∑ l ∈ Finset.range n, α (Y l) g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) ≤ b := by
-      intro g hg
-      refine exists_rps_series_limit p F ϖ (C := fun l =>
-        ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1 ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹) (fun l => ?_) ?_
-      · have hgpos : 0 < gaussNormRPS p F ϖ hρ0 hρ1 ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
-          pos_iff_ne_zero.mpr (gaussNormRPS_ne_zero p F ϖ (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))).2 (hG0 g hg))
-        have hcancel : ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1
-            ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-              : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹
-            * gaussNormRPS p F ϖ hρ0 hρ1
-            ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-              : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = ε ^ l * B := by
-          rw [mul_assoc, inv_mul_cancel₀ hgpos.ne', mul_one]
-        refine le_of_mul_le_mul_right ?_ hgpos
-        rw [hcancel]
-        exact hAnorm l g hg
-      · have h2 := hgeo.mul_const ((gaussNormRPS p F ϖ hρ0 hρ1 ((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹)
-        rwa [zero_mul] at h2
-    -- pick the limits and assemble
-    have hlim' : ∀ g : {g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) // g ∈ G},
-        ∃ U : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)), ∀ (n : ℕ) (b : NNReal), 0 < b →
-          (∀ l, n ≤ l → ε ^ l * B * (gaussNormRPS p F ϖ hρ0 hρ1 (((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ ≤ b) →
-          gaussNormRPS p F ϖ hρ0 hρ1 ((((U - ∑ l ∈ Finset.range n, α (Y l) (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-            : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) ≤ b := fun g => hlim g.1 g.2
-    choose U hU using hlim'
-    have hgpos : ∀ g : {g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) // g ∈ G},
-        0 < gaussNormRPS p F ϖ hρ0 hρ1 (((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := fun g =>
-      pos_iff_ne_zero.mpr (gaussNormRPS_ne_zero p F ϖ (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))).2 (hG0 g.1 g.2))
-    -- the candidate combination
-    obtain ⟨T, hT⟩ : ∃ T : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)), T = ∑ g ∈ G.attach, U g * (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :=
-      ⟨_, rfl⟩
-    have hattach : ∀ l : ℕ, (∑ g ∈ G, α (Y l) g * g)
-        = ∑ g ∈ G.attach, α (Y l) (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) * (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :=
-      fun l => (Finset.sum_attach G (fun g => α (Y l) g * g)).symm
-    have hkey : ∀ n : ℕ, gaussNormRPS p F ϖ hρ0 hρ1 (((y₀ - T : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ n * B := by
-      intro n
-      obtain ⟨Rn, hRn⟩ : ∃ Rn : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)), Rn = ∑ g ∈ G.attach,
-          ((∑ l ∈ Finset.range n, α (Y l) (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) - U g) * (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :=
-        ⟨_, rfl⟩
-      have h1 : ∀ l ∈ Finset.range n, (∑ g ∈ G, α (Y l) g * g)
-          = ∑ g ∈ G, α (Y l) g * g := fun l _ => rfl
-      have hYn : (Y n : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-          = y₀ - ∑ i ∈ G.attach, (∑ l ∈ Finset.range n, α (Y l) (i : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))))
-            * (i : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) := by
-        rw [htel n, sum_range_sum_attach_mul G n (fun l g => α (Y l) g)
-          (fun g => g)]
-      have hsplit : (y₀ - T : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) = (Y n : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) + Rn := by
-        rw [hYn, hRn, hT]
-        exact telescope_split G.attach y₀
-          (fun i => ∑ l ∈ Finset.range n, α (Y l) (i : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))))
-          (fun i => U i) (fun i => (i : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))))
-      rw [hsplit, coe_RPS_add]
-      refine le_trans (gaussNormRPS_add_le p F ϖ (Y n : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))).2 Rn.2)
-        (max_le (hYnorm n) ?_)
-      rw [hRn]
-      refine gaussNormRPS_finset_sum_le p F ϖ G.attach _ _ fun g _ => ?_
-      rw [coe_RPS_mul]
-      refine le_trans (gaussNormRPS_mul_le p F ϖ
-        ((∑ l ∈ Finset.range n, α (Y l) (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) - U g).2 (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))).2) ?_
-      have hUb : gaussNormRPS p F ϖ hρ0 hρ1 ((((∑ l ∈ Finset.range n, α (Y l) (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) - U g
-            : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-          ≤ ε ^ n * B * (gaussNormRPS p F ϖ hρ0 hρ1 (((g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ := by
-        have h1 : ((∑ l ∈ Finset.range n, α (Y l) (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) - U g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-            = -((U g - ∑ l ∈ Finset.range n, α (Y l) (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) := by
-          ring
-        rw [h1, coe_RPS_neg, gaussNormRPS_neg]
-        refine hU g n _ (mul_pos (mul_pos (pow_pos hε0 n) hBpos)
-          (inv_pos.mpr (hgpos g))) fun l hl => ?_
-        refine mul_le_mul_of_nonneg_right
-          (mul_le_mul_of_nonneg_right ?_ zero_le) zero_le
-        exact pow_le_pow_of_le_one zero_le hε1.le hl
-      refine le_trans (mul_le_mul_of_nonneg_right hUb zero_le) ?_
-      rw [mul_assoc, inv_mul_cancel₀ (hgpos g).ne', mul_one]
-    have hzero : (y₀ - T : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) = 0 := by
-      have hnorm0 : gaussNormRPS p F ϖ hρ0 hρ1 (((y₀ - T : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = 0 := by
+    have hBpos : 0 < gaussNormRPS p F ϖ hρ0 hρ1
+        (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
+      pos_iff_ne_zero.mpr hB0
+    obtain ⟨Y, α, hY0, hYeq, hYnorm, hAnorm⟩ :=
+      exists_reduction_sequence p F ϖ hGH hG0 hGtail hGdeg hGdom hε0 hε1
+        hy₀H le_rfl
+    have hgpos : ∀ g : {g : GRing p F ϖ k hρ0 hρ1 // g ∈ G},
+        0 < gaussNormRPS p F ϖ hρ0 hρ1
+          ((g : GRing p F ϖ k hρ0 hρ1)
+            : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := fun g =>
+      pos_iff_ne_zero.mpr (gaussNormRPS_ne_zero p F ϖ
+        (g : GRing p F ϖ k hρ0 hρ1).2 (hG0 g.1 g.2))
+    have hlim : ∀ g : {g : GRing p F ϖ k hρ0 hρ1 // g ∈ G},
+        ∃ U : GRing p F ϖ k hρ0 hρ1, ∀ (n : ℕ) (b : NNReal), 0 < b →
+          (∀ l, n ≤ l → ε ^ l * gaussNormRPS p F ϖ hρ0 hρ1
+              (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            * (gaussNormRPS p F ϖ hρ0 hρ1
+              ((g : GRing p F ϖ k hρ0 hρ1)
+                : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ ≤ b) →
+          gaussNormRPS p F ϖ hρ0 hρ1
+            (((U - ∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)
+              : GRing p F ϖ k hρ0 hρ1))
+              : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ b := fun g =>
+      exists_combination_limit p F ϖ hε1
+        (fun l => α l (g : GRing p F ϖ k hρ0 hρ1))
+        (g : GRing p F ϖ k hρ0 hρ1) (hgpos g)
+        (fun l => hAnorm l (g : GRing p F ϖ k hρ0 hρ1) g.2)
+    choose U hU using hlim
+    have hkey := gaussNorm_sub_combination_le p F ϖ hε0 hε1 hBpos hgpos
+      y₀ Y α hY0 hYeq hYnorm U hU
+    have hzero : (y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
+        : GRing p F ϖ k hρ0 hρ1) = 0 := by
+      have hgeo : Filter.Tendsto (fun l => ε ^ l * gaussNormRPS p F ϖ hρ0 hρ1
+          (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+          Filter.atTop (nhds 0) := by
+        have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
+          (zero_le : (0 : NNReal) ≤ ε) hε1).mul_const
+          (gaussNormRPS p F ϖ hρ0 hρ1
+            (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+        rwa [zero_mul] at h1
+      have hnorm0 : gaussNormRPS p F ϖ hρ0 hρ1
+          (((y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
+            : GRing p F ϖ k hρ0 hρ1))
+            : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = 0 := by
         by_contra hne
-        have hpos : 0 < gaussNormRPS p F ϖ hρ0 hρ1 (((y₀ - T : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
-          pos_iff_ne_zero.mpr hne
+        have hpos := pos_iff_ne_zero.mpr hne
         obtain ⟨n, hn⟩ := Filter.eventually_atTop.mp
           (hgeo.eventually_lt_const hpos)
         exact absurd (lt_of_le_of_lt (hkey n) (hn n le_rfl)) (lt_irrefl _)
       exact Subtype.ext ((gaussNormRPS_eq_zero_iff p F ϖ
-        (y₀ - T : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))).2).mp hnorm0)
-    have hy₀T : y₀ = T := sub_eq_zero.mp hzero
-    rw [hy₀T, hT]
+        (y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
+          : GRing p F ϖ k hρ0 hρ1).2).mp hnorm0)
+    rw [sub_eq_zero.mp hzero]
     refine Ideal.sum_mem _ fun g _ => Ideal.mul_mem_left _ _ ?_
     exact Ideal.subset_span g.2
   · rw [Ideal.span_le]
