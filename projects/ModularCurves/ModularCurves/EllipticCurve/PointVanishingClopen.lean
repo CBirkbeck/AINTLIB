@@ -37,6 +37,9 @@ composite of the closed immersion `torsionι N` and the (proper, hence separated
 map `E.π`. -/
 instance isSeparated_torsionπ : IsSeparated (E.torsionπ N) := by
   haveI : IsSeparated E.π := E.proper.toIsSeparated
+  -- `IsSeparated (torsionι N)` goes through `Mono`, which needs the closed immersion in
+  -- scope explicitly on this pin.
+  haveI : IsClosedImmersion (E.torsionι N) := E.torsionι_isClosedImmersion N
   rw [← E.torsionι_π]
   infer_instance
 

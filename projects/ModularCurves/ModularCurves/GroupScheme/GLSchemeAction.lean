@@ -25,6 +25,11 @@ trivialisation infra it shares.
 open AlgebraicGeometry CategoryTheory Limits
 open scoped TensorProduct
 
+-- v4.33 bump: the `Scheme` category instance inside `appTop`/`pointToTorsion` arguments is
+-- no longer transparent enough for the `≫`-associativity rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 namespace ModularCurves

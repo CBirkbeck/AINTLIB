@@ -872,11 +872,21 @@ noncomputable def legendrePiece {R : CommRingCat.{u}} {X : EllObj R}
       (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
         (legendreClassifyingRingHom X L b hD h2)) (universalLegendre R)
 
+section OpaqueProjModelLegendre
+
+/- `projModel` is a `Proj`-of-graded-ring construction; `whnf` chases it inside the
+`eqToHom (congrArg projModel _)` transports of `legendrePiece_restrict` without bound (1.6M
+heartbeats did not close it on this pin). Opacity is the fix, so the heartbeat raise is
+gone; scoped because the `projModel*` API elsewhere in the file needs transparency. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-5, ≈E3b)** The piece maps are compatible with restriction: restrict
 a witness (adaptedness, Legendre form and markings all restrict) and the piece
+end OpaqueProjModelLegendre
+
 restricts (mirrors `chartPiece_restrict`; uniqueness = `legendre_witness_transVC_eq_one`). -/
 theorem legendrePiece_restrict {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}

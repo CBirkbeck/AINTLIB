@@ -790,7 +790,18 @@ theorem zsmul_pull_baseChange_asSection_iff {T : Scheme.{u}} (t : T ⟶ S) {k : 
     rw [Category.assoc, Point.asSection_val_fst]
     show τ ≫ t ≫ P.1 = (τ ≫ t) ≫ P.1
     rw [Category.assoc]
-  rw [← (Point.baseChangeEquiv E t τ).map_eq_zero_iff, map_zsmul, hbeq]
+  -- `map_zsmul` on the bare `≃+` sends the `AddMonoidHomClass` search into a 20k-heartbeat
+  -- stall on this pin; route it through `toAddMonoidHom`, where the instance is immediate.
+  have hzs : (Point.baseChangeEquiv E t τ) (a • Point.pull (E.baseChange t) τ
+        (Point.asSection E t (Point.pull E t P)))
+      = a • (Point.baseChangeEquiv E t τ) (Point.pull (E.baseChange t) τ
+        (Point.asSection E t (Point.pull E t P))) := by
+    first
+    | exact map_zsmul (Point.baseChangeEquiv E t τ).toAddMonoidHom _ a
+    | exact (Point.baseChangeEquiv E t τ).toAddMonoidHom.map_zsmul _ a
+    | exact AddEquiv.map_zsmul _ _ _
+    | exact map_zsmul _ _ a
+  rw [← (Point.baseChangeEquiv E t τ).map_eq_zero_iff, hzs, hbeq]
 
 /-- **(Y1-D1 bridge, killing)** The base-changed marked section is `a`-killed iff the pulled point
 is: `asSection E t` is injective (`asSection_val_fst`) and sends `0` to `0` (`asSection_zsmul` at

@@ -5,6 +5,10 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.Morphisms.Affine
+import Mathlib.AlgebraicGeometry.Morphisms.FlatDescent
+import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
+import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
@@ -116,5 +120,29 @@ instance stableAlong_quasiCompact {X Y : Scheme.{u}} (f : X ⟶ Y) :
 instance stableAlong_etale {X Y : Scheme.{u}} (f : X ⟶ Y) :
     MorphismProperty.IsStableUnderBaseChangeAlong (@Etale) f :=
   ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance zariskiLocalAtSource_flat : IsZariskiLocalAtSource (@Flat) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance zariskiLocalAtSource_locallyOfFinitePresentation :
+    IsZariskiLocalAtSource (@LocallyOfFinitePresentation) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance descendsAlong_etale_fppf :
+    MorphismProperty.DescendsAlong (@Etale)
+      (@Surjective ⊓ @Flat ⊓ @LocallyOfFinitePresentation) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance zariskiLocalAtTarget_smoothOfRelativeDimension (n : ℕ) :
+    IsZariskiLocalAtTarget (@SmoothOfRelativeDimension n) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance zariskiLocalAtTarget_isAffineHom : IsZariskiLocalAtTarget (@IsAffineHom) :=
+  inferInstance
 
 end ModularCurves.BumpCompat

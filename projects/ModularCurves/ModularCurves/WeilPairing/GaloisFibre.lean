@@ -21,6 +21,11 @@ recorded because every later comparison (torsion points, `μ_N`-points, the Weil
 factors through it.
 -/
 
+-- v4.33 bump: the `Scheme` category instance inside `appTop`/`pointToTorsion` arguments is
+-- no longer transparent enough for the `≫`-associativity rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 open CategoryTheory AlgebraicGeometry Limits

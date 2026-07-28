@@ -23,6 +23,11 @@ first assembled inside `QuotientProblem.lean`, where that machinery is not impor
 `section EngineMouth` was moved here verbatim — v10.327 import surgery, statements unchanged).
 -/
 
+-- v4.33 bump: the `Scheme` category instance inside `appTop`/`pointToTorsion` arguments is
+-- no longer transparent enough for the `≫`-associativity rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 open CategoryTheory Limits AlgebraicGeometry

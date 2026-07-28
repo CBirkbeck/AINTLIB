@@ -9,6 +9,7 @@ import ModularCurves.Moduli.DrinfeldRepresentability
 import ModularCurves.GroupScheme.TorsionEtaleTriv
 import ModularCurves.GroupScheme.TorsionCombination
 import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # [GHA3] Towards étaleness of the full-level space (KM 3.7.1, route β)
@@ -35,6 +36,11 @@ the descent shell); β2/β3 land against them.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
+
+-- v4.33 bump: the `Scheme` category instance inside these arguments is no longer
+-- transparent enough for the `≫`-associativity rewrites below.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
 
 universe u
 

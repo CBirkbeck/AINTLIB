@@ -8,6 +8,7 @@ import ModularCurves.Moduli.GammaH
 import Mathlib.AlgebraicGeometry.Sites.Fpqc
 import Mathlib.AlgebraicGeometry.Sites.BigZariski
 import Mathlib.CategoryTheory.Sites.Descent.IsStack
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The stack of elliptic curves: descent statements (the "stack bridge")

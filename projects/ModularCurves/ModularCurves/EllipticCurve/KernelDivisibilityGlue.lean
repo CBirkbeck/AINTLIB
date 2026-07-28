@@ -9,6 +9,7 @@ import ModularCurves.EllipticCurve.MulByHomFlat
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.LevelStructure.IsoTransport
 import ModularCurves.ForMathlib.BaseChangeAlongCompat
+import ModularCurves.LevelStructure.Factorization
 
 /-!
 # Kernel divisibility: from the chart to arbitrary records (BB-FLAT N5)
@@ -375,11 +376,8 @@ section Glue
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
 /-- Transport of points along an equality of base morphisms. -/
-noncomputable def Point.castBase {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g') :
-    E.Point g ≃+ E.Point g' := by subst h; exact AddEquiv.refl _
-
-@[simp] theorem Point.castBase_coe {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
-    (P : E.Point g) : (Point.castBase E h P).1 = P.1 := by subst h; rfl
+-- `Point.castBase` / `Point.castBase_coe` live in `LevelStructure/Factorization.lean`
+-- (imported above); both consumers of them sit downstream of that file, not of this one.
 
 @[simp] theorem Point.castBase_symm_coe {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
     (P : E.Point g') : ((Point.castBase E h).symm P).1 = P.1 := by subst h; rfl

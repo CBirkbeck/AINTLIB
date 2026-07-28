@@ -10,6 +10,7 @@ import ModularCurves.EllipticCurve.GroupLawDescent
 import Mathlib.RingTheory.Spectrum.Prime.Topology
 import Mathlib.AlgebraicGeometry.Gluing
 import Mathlib.AlgebraicGeometry.PullbackCarrier
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # [T-E5f] The Katz–Mazur recollement theorem
