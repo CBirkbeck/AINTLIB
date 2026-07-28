@@ -3103,6 +3103,28 @@ theorem isAdicSpace_xVObj : IsAdicSpace (xVObj p F ϖ)
 - Cadence rule: SpaVIso.lean has taken 14 proof tickets (K1–K14) with no cleanup;
   VRestrict.lean 4 (P5-1, K8a, K8b, P5-A). Two cleanups are overdue.
 
+### [P5-RT] Restriction transitivity — DONE 2026-07-28
+- **Status**: DONE, axiom-clean, full gate green | **File**: `Adic spaces/VRestrict.lean`
+- `range_val_val`, `range_openIncl_comp`, `restrictRestrictIso :
+  (X.restrict U).restrict W ≅ X.restrict (imgOfOpen U W)`, via mathlib's
+  `IsOpenImmersion.isoOfRangeEq` at the composite of two `ofRestrict`s (both are open
+  immersions, and `IsOpenImmersion.comp`/`ofRestrict` are mathlib instances).
+- **THE TRICK**: do NOT touch the goal with a tactic. `rw [range_openIncl …]` forces
+  `implicit`-transparency matching, where `W : Opens ↥U` and the restricted space's carrier
+  `Opens ↑↑(PresheafedSpace.restrict X ⋯)` are only *definitionally* equal, so
+  `Membership.mem W` becomes ill-typed. Instead prove a pure-`Set`/`Subtype` helper
+  (`range_val_val`) in the clean spelling and discharge the theorem in TERM MODE, where
+  `exact`-level defeq (default transparency) unfolds `TopCat.of`/`restrict`/`ofRestrict`/`≫`
+  silently. Also: the helper's RHS must be `Set.range (Subtype.val : ↥(Subtype.val '' W) → α)`,
+  NOT `Subtype.val '' W` — those two are not defeq, and the image spelling breaks the match.
+
+### [P5-6b] The FF affinoid charts are charts of 𝒱 — DONE 2026-07-28
+- **File**: NEW `Adic spaces/FarguesFontaine/CurveVChart.lean`;
+  `windowSubVChart n D' : AffinoidVChart` via `AffinoidVChart.ofTate` on
+  `presheafValue D'`. NOTE: `CurveAdicPresentation.lean` declares the
+  `IsTateRing`/`IsStronglyNoetherian`/`IsNoetherianRing` instances for `windowChartRing`
+  as **`local instance`**, so they must be re-declared in any new consumer file.
+
 ### ★ ROUTE DISCOVERY 2026-07-28 — P5-3 and P5-4 are MUCH lighter than the board says
 The P5-3/P5-4 sketches below were written BEFORE P5-3b (OpenKeystone) and P5-OI landed and
 are now obsolete. Re-read `SpaVIso.lean`'s variable block: `spaCompHom_isOpenImmersion` and

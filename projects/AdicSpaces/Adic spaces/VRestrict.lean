@@ -482,6 +482,44 @@ inclusion stalk maps, and locality is then read off the valuation. -/
 
 section CorestrictV
 
+/-! ### Restriction transitivity (P5-RT) -/
+
+/-- The range of the double inclusion `↥W → ↥U → α` of an open `W` of an open
+`U`, as the range of the inclusion of the image `Subtype.val '' W`. -/
+theorem range_val_val {α : Type u} (U : Set α) (W : Set ↥U) :
+    Set.range (fun w : ↥W => ((w : ↥U) : α))
+      = Set.range (Subtype.val : ↥(Subtype.val '' W : Set α) → α) := by
+  rw [Subtype.range_coe, show (fun w : ↥W => ((w : ↥U) : α))
+        = (Subtype.val : ↥U → α) ∘ (Subtype.val : ↥W → ↥U) from rfl,
+    Set.range_comp, Subtype.range_coe]
+
+/-- The composite inclusion of a double restriction has the same range as the
+inclusion of the image open. -/
+theorem range_openIncl_comp {X : TopRingPresheafedSpace.{u}}
+    (U : Opens ↥(X.carrier)) (W : Opens ↥U) :
+    Set.range (ConcreteCategory.hom
+        ((X.restrict (openIncl_isOpenEmbedding U)).ofRestrict
+            (openIncl_isOpenEmbedding W) ≫
+          X.ofRestrict (openIncl_isOpenEmbedding U)).base)
+      = Set.range (ConcreteCategory.hom
+          (X.ofRestrict (openIncl_isOpenEmbedding (imgOfOpen U W))).base) :=
+  range_val_val (α := ↥(X.carrier)) (U : Set ↥(X.carrier)) (W : Set ↥U)
+
+/-- **Restriction transitivity** (P5-RT): restricting twice is restricting to
+the image open. -/
+noncomputable def restrictRestrictIso {X : TopRingPresheafedSpace.{u}}
+    (U : Opens ↥(X.carrier)) (W : Opens ↥U) :
+    (X.restrict (openIncl_isOpenEmbedding U)).restrict
+        (openIncl_isOpenEmbedding W)
+      ≅ X.restrict (openIncl_isOpenEmbedding (imgOfOpen U W)) :=
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
+    ((X.restrict (openIncl_isOpenEmbedding U)).ofRestrict
+        (openIncl_isOpenEmbedding W) ≫
+      X.ofRestrict (openIncl_isOpenEmbedding U))
+    (X.ofRestrict (openIncl_isOpenEmbedding (imgOfOpen U W)))
+    (range_openIncl_comp U W)
+
+
 /-- **`𝒱` is a full subcategory of `𝒱^pre`**: an isomorphism of the underlying
 `𝒱^pre`-objects is an isomorphism of `𝒱`-objects. -/
 def VObj.isoOfVPreIso {X Y : VObj.{u}} (e : X.toVPreObj ≅ Y.toVPreObj) :
