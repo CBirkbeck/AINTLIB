@@ -297,11 +297,7 @@ noncomputable def LinearMap.baseChangeHomologyOneEquiv
       (kerBaseChangeComparison_comp_codRestrictToKer_baseChange A f g h)
   let eQuot : ((A ⊗[R] LinearMap.ker g) ⧸ p) ≃ₗ[A]
       ((LinearMap.ker (g.baseChange A)) ⧸ q) :=
-    @Submodule.Quotient.equiv A (A ⊗[R] LinearMap.ker g)
-      inferInstance inferInstance inferInstance
-      (LinearMap.ker (g.baseChange A))
-      (LinearMap.ker (g.baseChange A)).addCommGroup
-      (LinearMap.ker (g.baseChange A)).module p q e hpq
+    Submodule.Quotient.equiv p q e hpq
   exact eQuot.trans
     (ShortComplex.moduleCatHomologyIso
       (ShortComplex.moduleCatMk (f.baseChange A) (g.baseChange A)
