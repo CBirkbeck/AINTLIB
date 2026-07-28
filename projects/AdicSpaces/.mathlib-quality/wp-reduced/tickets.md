@@ -100,7 +100,8 @@ propext/Classical.choice/Quot.sound) before marking done.
 - Status: open | Depends: W4 (and W1, W2) | Type: cleanup
 
 ### [W5] UniformDomain.lean — uniform + domain + 𝒜° = 𝒜₀
-- Status: open | File: WP/UniformDomain.lean | Depends: W3, W4 | Parallel: with W6, W7
+- Status: done (2026-07-28; all 8 filled, FJP patterns adapted verbatim; endpoint
+  thm 6.2(1) uniform/domain/𝒜°=𝒜₀ now fully proven; axioms clean) | File: WP/UniformDomain.lean | Depends: W3, W4 | Parallel: with W6, W7
 - Decls: `norm_amb_mul`, `norm_wpa_mul`, `norm_wpa_pow`, `Nontrivial`,
   `NoZeroDivisors`, `isPowerBounded_wpa_iff`, `powerBoundedSubring_eq_unitBall`,
   `isUniform_WPA`.
