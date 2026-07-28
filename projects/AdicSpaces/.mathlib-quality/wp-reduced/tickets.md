@@ -195,7 +195,18 @@ propext/Classical.choice/Quot.sound) before marking done.
 - Status: open | Depends: W5, W6, W8 | Type: cleanup
 
 ### [W9] Tail.lean I — tail coefficients on 𝒜
-- Status: open | File: WP/Tail.lean | Depends: W7, W1 | Parallel: with W10
+- Status: done | File: WP/Tail.lean | Depends: W7, W1 | Parallel: with W10
+- Progress: DONE 2026-07-28.  All per sketch; `tailCoeff` built by the slice
+  superlevel pattern (gate `if HeadMem` + `finite_setOf_le_norm_coeff` preimage
+  along `add_left_injective (tailShift w μ)`).  Extra API: unconditional
+  `coeff_tailCoeff` (rfl), `tailShift_zero`, `coeff_tailCoeff_zero`,
+  `tailCoeff_zero_map/one/mul` feeding the `rhoHead` RingHom fields.  eTail laws
+  via mathlib `MvPowerSeries.coeff_mul_monomial`/`coeff_add_mul_monomial`/
+  `monomial_mul_monomial`/`X_pow_eq` (all exist) + the V double-subtype RingHom
+  (map_pow) for `(WaHead^k).1.1`.  GOTCHAS: Finsupp-apply `show` needs the
+  `( ... : ℕ →₀ ℕ) n` ascription; simp normalizes `if 0 = 0` to `if True` (use
+  `if_true` not `if_pos rfl`); `headIncl_WaHead` and `rhoHead_apply` are rfl.
+  Axioms clean on all 6 headliners.
 - Decls: `tailCoeff` (+`coeffA_tailCoeff`, `_add`, `norm_tailCoeff_le`,
   `tendsto_norm_tailCoeff_cofinite`, `norm_eq_iSup_tailCoeff`,
   `tailCoeff_injective`), `eTail` laws (`tailCoeff_headIncl_mul_eTail`),

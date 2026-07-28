@@ -1,1 +1,1 @@
-FOCUS: W9 (Tail I) — tailCoeff/eTail/rhoHead in WP/Tail.lean; HRW-1 just landed
+FOCUS: W10 (TailC0 ring) — CommRing/NormedCommRing/instances + single laws in WP/Tail.lean
