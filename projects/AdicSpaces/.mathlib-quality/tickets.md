@@ -2797,6 +2797,135 @@ valuations.
   (`genPiece_rel_forward/backward`, the roundtrips) never touches `hspan`
   except through `genPieceDatum`/`imagePieceDatum`, so (a)+(b) is the whole job.
 
+### [P5-A2] The corestricted stalk map factors through the restriction comparison
+- **Status**: open | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A (done)
+- **Type**: theorem
+- **Statement**:
+```lean
+theorem ringStalkMap_corestrictHom {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶ X)
+    (U : Opens ↥(X.carrier))
+    (hrange : ∀ z : ↥(Z.carrier), (ConcreteCategory.hom f.base) z ∈ U)
+    (z : ↥(Z.carrier)) :
+    ringStalkMap (corestrictHom f U hrange) z
+      = (restrictRingStalkIsoRaw U
+          (ConcreteCategory.hom (corestrictBase f U hrange) z)).hom
+        ≫ ringStalkMap f z
+```
+  where `restrictRingStalkIsoRaw U x : (X.restrict …).ringStalk x ≅ X.ringStalk (incl x)`
+  is `PresheafedSpace.restrictStalkIso` at the `CommRingCat`-image of `X`.
+- **Proof sketch**:
+  1. Reduce to germs. `TopCat.Presheaf.stalk_hom_ext` — two maps out of a stalk agree
+     iff they agree after every `germ V x hxV`.
+  2. LHS after `germ`: `stalkMap_germ` for the `CommRingCat`-image of `corestrictHom`
+     rewrites `germ ≫ ringStalkMap` into `c.app ≫ germ_Z (preimage)`.
+  3. RHS after `germ`: `restrictStalkIso_hom_eq_germ` turns `germ_restricted ≫ iso.hom`
+     into `germ_ambient (imgFunctor V)`; then `stalkMap_germ` for `f`.
+  4. The two sides now differ by the `eqToHom` transport inside `corestrictHom.c.app`,
+     which is `Z.presheaf.map (eqToHom (corestrict_preimage_eq …))`; absorb it with
+     `TopCat.Presheaf.germ_res_apply` / `eqToHom`-absorption on germs.
+  - **PERF/SPELLING WARNING (measured 2026-07-28)**: the categorical `rw`s fail on the
+    `TopCat.of ↥U` vs `↑(X.restrict …)` carrier spelling. Do the whole argument
+    ELEMENTWISE — `exists_germ_eq` to name a germ representative, then the `_apply`
+    variants (`stalkMap_germ_apply`, `restrictStalkIso_hom_eq_germ_apply`,
+    `germ_res_apply`) — exactly as `SpaVIso.comap_ringStalkMap_spaCompHom_stalkValue`
+    (K12) does. Four categorical attempts failed; the elementwise route is the one that
+    works in this codebase.
+- **Mathlib lemmas needed**: `TopCat.Presheaf.stalk_hom_ext`,
+  `AlgebraicGeometry.PresheafedSpace.stalkMap_germ` (+ `_apply`),
+  `AlgebraicGeometry.PresheafedSpace.restrictStalkIso_hom_eq_germ` (+ `_apply`),
+  `TopCat.Presheaf.germ_res_apply`, `TopCat.Presheaf.exists_germ_eq`.
+- **Sources**: Wedhorn, *Adic Spaces* (2019), Def 8.5/8.7 (𝒱-morphisms); mathlib
+  `Mathlib/Geometry/RingedSpace/Stalks.lean` for the restriction stalk comparison.
+- **Generality**: stated for arbitrary `TopRingPresheafedSpace`s — no Huber/Tate
+  hypotheses; it is pure presheafed-space theory.
+
+### [P5-A3] The corestriction as a 𝒱^pre-morphism
+- **Status**: blocked | **File**: `Adic spaces/VRestrict.lean` | **Depends on**: P5-A2
+- **Type**: def
+- **Statement**:
+```lean
+noncomputable def VPreHom.corestrict {Z X : VPreObj.{u}} (g : VPreHom Z X)
+    (U : Opens ↥(X.toTopCat))
+    (hrange : ∀ z, (ConcreteCategory.hom g.toHom.base) z ∈ U) :
+    VPreHom Z (X.restrictOpen U)
+```
+- **Proof sketch**:
+  1. `toHom := corestrictHom g.toHom U hrange`.
+  2. `isLocalHom_stalkMap`: by P5-A2 the stalk map is `(iso).hom ≫ ringStalkMap g.toHom`;
+     the first factor is an iso, the second is local by `g.isLocalHom_stalkMap`; composition
+     of a local hom after an iso is local (`RingHom.isLocalHom_comp`, or the valuation route
+     `SpaVIso.isLocalHom_of_val_comap`).
+  3. `val_compat`: `(X.restrictOpen U).val x` is by definition
+     `comap (restrictRingStalkEquiv x) (X.val (restrictPoint x))`; substitute `g.val_compat`
+     and then P5-A2, and the two `comap`s compose (`comap_comp` is definitional here).
+- **Mathlib lemmas needed**: `RingHom.isLocalHom_comp` (verify the exact name), `comap_comp`.
+- **Sources**: Wedhorn Def 8.7.
+- **Generality**: arbitrary `VPreObj`s.
+
+### [P5-5] The quotient leg: `𝒴|_V ≅ X|_{π V}` for wandering `V`
+- **Status**: blocked | **File**: `Adic spaces/FarguesFontaine/CurveObject.lean` (new section)
+- **Depends on**: P5-A3
+- **Type**: def + theorem
+- **Statement** (shape; the exact spelling follows `xImageHomeo`'s):
+```lean
+noncomputable def quotientLegVPreHom (V : Opens ↥(yTop p F ϖ))
+    (hdis : ∀ k : ℤ, k ≠ 0 → Disjoint ((Opens.map (yFrobTop p F ϖ k)).obj V : Set _) (V : Set _)) :
+    VPreHom ((yVPreObj p F ϖ).restrictOpen V) ((xVPreObj p F ϖ).restrictOpen (xImage p F ϖ V))
+```
+  together with the statement that it is an `IsOpenImmersionV` (indeed an iso).
+- **Proof sketch**:
+  1. Base: `xImageHomeo` (already proven — `π` restricted to a wandering `V` is a
+     homeomorphism onto `xImage V`).
+  2. Sections: for `W ≤ xImage V`, `𝒪_X(W)` is by definition the φ-invariant sections over
+     the saturated preimage `π⁻¹W`; that preimage is the disjoint union of the translates
+     `φ^k(W')` with `W' := π⁻¹W ∩ V`. An invariant section is determined by its `W'`-piece
+     (`invariant_pieces_eq`, already proven) and any section on `W'` extends invariantly
+     (the D-iv spread construction, already proven for the sheaf condition). So the
+     projection to the `W'`-piece is a ring bijection.
+  3. Stalks: `ringStalkMap_piYHom_bijective` is already proven; `xVPreObj.val` is DEFINED
+     as the transport of `yStalkValue` along `xStalkEquiv`, so `val_compat` is
+     `comap`-composition plus P5-A2 for the two restrictions.
+  - ⚠ Check first: `Disjoint (φ^k V) V` for all `k ≠ 0` gives
+    `Disjoint (φ^k V) (φ^l V)` for `k ≠ l` by applying `φ^{-l}` — needed for step 2's
+    "disjoint union" claim. `hdisV` in `curveAdicSpacePresentation` has the first form.
+- **Sources**: Fargues–Fontaine, *Courbes et fibrés vectoriels en théorie de Hodge p-adique*,
+  Ch. 2 (the curve as `𝒴/φ^ℤ`); Wedhorn Def 8.22 for the chart condition.
+- **Generality**: FF-specific (uses the φ-action); the underlying "free properly
+  discontinuous quotient" statement could be generalized later.
+
+### [P5-6] `IsAdicSpace` and `isAdicSpace_xVObj`
+- **Status**: blocked | **File**: new `Adic spaces/AdicSpaceV.lean` + FF capstone
+- **Depends on**: P5-5, P5-K (done)
+- **Type**: def + theorem
+- **Statement**:
+```lean
+def IsAdicSpace (X : VObj.{u}) : Prop :=
+  ∀ x : ↥(X.toTopCat), ∃ (R : Type u) (_ : CommRing R) (_ : TopologicalSpace R)
+    (_ : PlusSubring R) (_ : IsTateRing R) (_ : IsStronglyNoetherian R) …,
+    ∃ f : VPreHom (spaVObjTate (A := R)).toVPreObj X.toVPreObj,
+      IsOpenImmersionV f ∧ x ∈ Set.range (ConcreteCategory.hom f.toHom.base)
+
+theorem isAdicSpace_xVObj : IsAdicSpace (xVObj p F ϖ)
+```
+- **Proof sketch**: given `x`, take `y := fiberPoint x`; `exists_disjoint_translates` gives a
+  wandering `W₀ ∋ y`; `exists_window_subdatum_nbhd` gives a window index `n`, a rational
+  datum `D'` of the chart ring `B_n`, and `V ≤ W₀` with `Spa (presheafValue D') ≃ V`.
+  Compose: `Spa (presheafValue D') --P5-K--> Spa(B_n) --P5-K--> Spa(A_inf) --corestrict-->
+  𝒴 --P5-5--> X`. Each factor is an open immersion; composition of open immersions is an
+  open immersion (needs a small lemma: `IsOpenImmersionV.comp`).
+- **Mathlib lemmas needed**: none beyond the project's own.
+- **Sources**: Wedhorn Def 8.22.
+- **Generality**: `IsAdicSpace` is stated for arbitrary `VObj`.
+- **NOTE on faithfulness**: this is the open-immersion formulation of Def 8.22. The
+  equivalence with Wedhorn's "open cover by 𝒱-isomorphic-to-affinoid opens" is
+  P5-A3 + the fact that an open immersion onto its image is an iso onto the restriction;
+  record that as a follow-up once P5-A3 lands.
+
+### [CLEANUP-P5] /cleanup on Adic spaces/SpaVIso.lean and VRestrict.lean
+- **Status**: blocked | **Depends on**: P5-6 | **Type**: cleanup
+- Cadence rule: SpaVIso.lean has taken 14 proof tickets (K1–K14) with no cleanup;
+  VRestrict.lean 4 (P5-1, K8a, K8b, P5-A). Two cleanups are overdue.
+
 ### [P5-4] Rational-in-chart 𝒱-iso (8.15 over the Tate chart) — now = P5-K instance (ii)
 - **Status**: open | **Depends**: P5-1, P5-2 | **File**: new (chart side)
 - **Statement**: for D' : RationalLocData A_W valid (A_W := windowChartRing n):
