@@ -405,7 +405,9 @@ private noncomputable def presentationOfIsQuasicoherentOfIsAffine
   exact @SheafOfModules.Presentation.ofIsIso _ _ _ _ _ _ _ _
     e.hom e.isIso_hom P
 
-private theorem isQuasicoherent_over_of_restrict_of_isAffineOpen
+/-- On an affine open, quasicoherence after scheme-module restriction implies
+quasicoherence of the corresponding module on the over-site. -/
+theorem isQuasicoherent_over_of_restrict_of_isAffineOpen
     {X : Scheme.{u}} (M : X.Modules) (U : X.Opens) [IsAffine U]
     [(M.restrict U.ι).IsQuasicoherent] : (M.over U).IsQuasicoherent := by
   let N := M.restrict U.ι
