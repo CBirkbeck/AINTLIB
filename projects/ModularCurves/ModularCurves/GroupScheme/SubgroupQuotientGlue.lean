@@ -626,7 +626,7 @@ theorem exists_orbit_of_localQuotientOpenπ_eq [Module.Free P.baseRing P.groupRi
   have hq1' : (Spec.map P.coactionRing).base q' = P.hU.isoSpec.hom.base x := by
     have h := happ hswap₁ q
     simp only [Scheme.Hom.comp_apply] at h
-    rw [hq'def, ← h]
+    erw [hq'def, ← h]
     exact hq1
   have hq2' : (Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
       P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom)).base q'
@@ -663,7 +663,7 @@ theorem exists_orbit_of_localQuotientOpenπ_eq [Module.Free P.baseRing P.groupRi
       rw [← Scheme.Hom.comp_apply]
       have := happ P.hU.isoSpec.hom_inv_id y
       simpa using this
-    rw [hyy] at hbr
+    erw [hyy] at hbr
     exact hbr
 
 /-! ### Step S3 — the saturated image opens of the patch quotient -/
