@@ -1193,13 +1193,157 @@ noncomputable def mvRestrictedCongr (e : R ≃+* S) (he : ∀ x, ‖e x‖ = ‖
 
 end RestrictedTransport
 
+section PerK
+
+variable {K w N}
+variable (k : ℕ)
+
+open scoped Classical in
+/-- The coefficientwise `ε`-slice of a restricted series over the head. -/
+noncomputable def sliceP (ε : Fin N → Bool)
+    (F : FiniteJet.GraphKoszul.P (WPHead K w N) k) :
+    FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k := by
+  refine ⟨fun s : Fin k →₀ ℕ => slice ε (MvPowerSeries.coeff s F.1), ?_⟩
+  show MvPowerSeries.IsRestrictedGauss _ _
+  show Filter.Tendsto _ Filter.cofinite (nhds 0)
+  have h2 : Filter.Tendsto (fun s : Fin k →₀ ℕ =>
+      ‖MvPowerSeries.coeff s F.1‖ * s.prod ((fun _ : Fin k => (1 : ℝ)) · ^ ·))
+      Filter.cofinite (nhds 0) := F.2
+  refine squeeze_zero (fun s => ?_) (fun s => ?_) h2
+  · exact mul_nonneg (norm_nonneg _) (prod_weights_pos _ s).le
+  · exact mul_le_mul_of_nonneg_right (norm_slice_le ε _) (prod_weights_pos _ s).le
+
+@[simp] theorem sliceP_coeff (ε : Fin N → Bool)
+    (F : FiniteJet.GraphKoszul.P (WPHead K w N) k) (s : Fin k →₀ ℕ) :
+    MvPowerSeries.coeff s (sliceP k ε F).1 = slice ε (MvPowerSeries.coeff s F.1) :=
+  rfl
+
+/-- The coefficientwise inclusion of the even part into the head, at the `k`-th
+Tate extension. -/
+noncomputable def inclP : FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k →+*
+    FiniteJet.GraphKoszul.P (WPHead K w N) k :=
+  mvRestrictedMapHom (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N))
+    (fun x => le_of_eq rfl)
+
+/-- **The `k`-th Tate extension of the head is module-finite over that of the even
+part** (the parity-slice decomposition applied to every `T`-coefficient). -/
+theorem moduleFinite_P_head_over_even :
+    letI : Algebra (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+        (FiniteJet.GraphKoszul.P (WPHead K w N) k) := (inclP k).toAlgebra
+    Module.Finite (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k) := by
+  classical
+  letI : Algebra (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k) := (inclP k).toAlgebra
+  refine ⟨⟨Finset.univ.image fun ε : Fin N → Bool =>
+    FiniteJet.GraphKoszul.polyToP (MvPolynomial.C (Ypat K w N ε)), ?_⟩⟩
+  rw [eq_top_iff]
+  intro F _
+  have hCP : ∀ a : WPHead K w N,
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C a) :
+        FiniteJet.GraphKoszul.P (WPHead K w N) k).1 = MvPowerSeries.C a := by
+    intro a
+    refine MvPowerSeries.ext fun s => ?_
+    classical
+    rw [FiniteJet.GraphKoszul.coeff_polyToP, MvPowerSeries.coeff_C]
+    by_cases hs : s = (0 : Fin k →₀ ℕ)
+    · subst hs
+      simp
+    · rw [if_neg hs, MvPolynomial.coeff_C, if_neg (fun h => hs h.symm)]
+  have hident : (∑ ε : Fin N → Bool, inclP k (sliceP k ε F) *
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C (Ypat K w N ε))) = F := by
+    refine Subtype.ext (MvPowerSeries.ext fun s => ?_)
+    have hval : ((∑ ε : Fin N → Bool, inclP k (sliceP k ε F) *
+        FiniteJet.GraphKoszul.polyToP (MvPolynomial.C (Ypat K w N ε)) :
+        FiniteJet.GraphKoszul.P (WPHead K w N) k)).1 =
+        ∑ ε : Fin N → Bool, (inclP k (sliceP k ε F)).1 *
+          MvPowerSeries.C (Ypat K w N ε) := by
+      show (MvPowerSeries.isSubring
+          (R := WPHead K w N) (fun _ : Fin k => (1 : ℝ))).subtype
+          (∑ ε : Fin N → Bool, inclP k (sliceP k ε F) *
+            FiniteJet.GraphKoszul.polyToP (MvPolynomial.C (Ypat K w N ε))) = _
+      rw [map_sum]
+      refine Finset.sum_congr rfl fun ε _ => ?_
+      show ((inclP k (sliceP k ε F)) * FiniteJet.GraphKoszul.polyToP
+        (MvPolynomial.C (Ypat K w N ε)) :
+          FiniteJet.GraphKoszul.P (WPHead K w N) k).1 = _
+      rw [show ((inclP k (sliceP k ε F)) * FiniteJet.GraphKoszul.polyToP
+          (MvPolynomial.C (Ypat K w N ε)) :
+            FiniteJet.GraphKoszul.P (WPHead K w N) k).1 =
+          (inclP k (sliceP k ε F)).1 * (FiniteJet.GraphKoszul.polyToP
+            (MvPolynomial.C (Ypat K w N ε)) :
+              FiniteJet.GraphKoszul.P (WPHead K w N) k).1 from rfl, hCP]
+    rw [hval, map_sum]
+    have hterm : ∀ ε : Fin N → Bool,
+        MvPowerSeries.coeff s ((inclP k (sliceP k ε F)).1 *
+          MvPowerSeries.C (Ypat K w N ε)) =
+        (Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N))
+          (slice ε (MvPowerSeries.coeff s F.1)) * Ypat K w N ε := by
+      intro ε
+      rw [MvPowerSeries.coeff_mul_C]
+      rfl
+    rw [Finset.sum_congr rfl fun ε _ => hterm ε]
+    exact sum_slice_mul_Ypat (MvPowerSeries.coeff s F.1)
+  rw [← hident]
+  refine Submodule.sum_mem _ fun ε _ => ?_
+  have hsmul : inclP k (sliceP k ε F) *
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C (Ypat K w N ε)) =
+      (sliceP k ε F) •
+        FiniteJet.GraphKoszul.polyToP (MvPolynomial.C (Ypat K w N ε)) := by
+    rw [Algebra.smul_def]
+    rfl
+  rw [hsmul]
+  exact Submodule.smul_mem _ _ (Submodule.subset_span
+    (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ (Finset.mem_univ ε))))
+
+end PerK
+
+variable {K} in
 /-- **The heads are strongly noetherian** ([WP] §6.4: "Since `𝒜_N` is affinoid" —
 the input to the head graph-Koszul bounds and to Wedhorn 8.28(b).  Proven for every
 Tate-variable count by the same finite-free-module argument at head
 `K⟨W,Z,T_1,…,T_k⟩`; NEVER inferred from noetherianity (prior-B2 T-SUM-6/T-Q4). -/
 theorem isStronglyNoetherian_WPHead (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsStronglyNoetherian (WPHead K w N) := by sorry
+    IsStronglyNoetherian (WPHead K w N) := by
+  constructor
+  intro k
+  -- the base Tate algebra `P K (N+1)` with its own scale bundle
+  have hballP : IsNoetherianRing
+      ↥(FiniteJet.unitBall (FiniteJet.GraphKoszul.P K (N + 1))) :=
+    ϖ.isNoetherianRing_unitBall_P hK₀ (N + 1)
+  have hnormt : ‖(FiniteJet.GraphKoszul.polyToP (MvPolynomial.C ϖ.val) :
+      FiniteJet.GraphKoszul.P K (N + 1))‖ = ‖ϖ.val‖ :=
+    FiniteJet.GraphKoszul.norm_tP ϖ.val ϖ.norm_val_mul
+  haveI h1 : IsNoetherianRing
+      (FiniteJet.GraphKoszul.P (FiniteJet.GraphKoszul.P K (N + 1)) k) :=
+    isNoetherianRing_P_of_scale
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C ϖ.val))
+      ((FiniteJet.GraphKoszul.isUnit_tP ϖ.val ϖ.isUnit_val))
+      (by rw [hnormt]; exact ϖ.norm_val_lt_one)
+      (by rw [hnormt]; exact ϖ.norm_val_pos)
+      (fun G => by
+        rw [FiniteJet.GraphKoszul.norm_tP_mul ϖ.val ϖ.norm_val_mul G, hnormt])
+      hballP k
+  -- transport to the even part along the halving equiv
+  have heq' : ∀ y, ‖(evenSupportEquiv K w N).symm y‖ = ‖y‖ := fun y => by
+    rw [← norm_evenSupportEquiv K w N ((evenSupportEquiv K w N).symm y),
+      RingEquiv.apply_symm_apply]
+  haveI h2 : IsNoetherianRing
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k) :=
+    isNoetherianRing_of_ringEquiv _
+      (mvRestrictedCongr (σ := Fin k) (evenSupportEquiv K w N).symm heq')
+  -- module-finiteness of the head extension
+  letI : Algebra (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k) := (inclP k).toAlgebra
+  haveI h3 : Module.Finite (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k) :=
+    moduleFinite_P_head_over_even k
+  haveI h4 : IsNoetherianRing (FiniteJet.GraphKoszul.P (WPHead K w N) k) :=
+    IsNoetherianRing.of_finite (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k)
+  exact isNoetherianRing_of_ringEquiv _
+    (UnitDiscExample.restrictedGaussEquiv (WPHead K w N) k)
 
 variable {K} in
 /-- **The heads are sheafy** (Wedhorn 8.28(b) at the head;
@@ -1207,7 +1351,9 @@ variable {K} in
 `FJP/Over/SheafTransfer.lean:63`). -/
 theorem isSheafy_WPHead (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    ValuationSpectrum.IsSheafy (WPHead K w N) := by sorry
+    ValuationSpectrum.IsSheafy (WPHead K w N) := by
+  haveI := isStronglyNoetherian_WPHead (w := w) (N := N) ϖ hK₀
+  exact ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
 
 /-! ### Density of the heads ([WP] eq:A-completion-of-heads) -/
 

@@ -156,7 +156,12 @@ propext/Classical.choice/Quot.sound) before marking done.
   cover).  Sources: [WP] 739–787 (route change documented, decomposition.md E2).
 
 ### [W8] Heads.lean II — noetherian, strongly noetherian, sheafy, dense
-- Status: in_progress (2026-07-28: isNoetherianRing_WPHead DONE (equiv transport +
+- Status: done (2026-07-28: Heads.lean ZERO sorries. isNoetherianRing_WPHead +
+  unit-ball version (ball slices) + isStronglyNoetherian_WPHead (per-k: generalized
+  scale-bundle P-noetherianity isNoetherianRing_P_of_scale + mvRestrictedCongr
+  isometric transport + per-k slice module-finiteness moduleFinite_P_head_over_even)
+  + isSheafy_WPHead (828b) + exists_head_approx. All axiom-clean, build 3163 green.)
+- (superseded progress note: 2026-07-28: isNoetherianRing_WPHead DONE (equiv transport +
   of_finite, axiom-clean); exists_head_approx density DONE (superlevel truncation).
   REMAINING 3 sorries: isNoetherianRing_unitBall_WPHead (ball-level slice argument —
   mirror sum_slice_mul_Ypat with norm-1 generators over unitBall(even) after
