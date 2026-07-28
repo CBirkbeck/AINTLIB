@@ -847,6 +847,76 @@ noncomputable def VPreObj.restrictRestrictIso :
 
 end RestrictRestrict
 
+/-! ### The reusable chart step
+
+An open immersion between `𝒱^pre`-objects that respects the stalk valuations
+exhibits its source as the restriction of its target to its range.  This is the
+form in which Wedhorn 8.15 is consumed: given a chart comparison that is an open
+immersion of presheafed spaces plus the valuation identity, one gets a genuine
+`𝒱`-isomorphism onto the corresponding open — locality of the stalk maps and
+invertibility are both free. -/
+
+section ChartStep
+
+variable {Z X : VPreObj.{u}}
+  (f : Z.toPresheafedSpace ⟶ X.toPresheafedSpace)
+  (hval : ∀ z : ↥(Z.toTopCat), X.val (ConcreteCategory.hom f.base z)
+    = comap (ringStalkMap f z).hom' (Z.val z))
+
+/-- A presheafed-space morphism between `𝒱^pre`-objects that respects the stalk
+valuations is a `𝒱^pre`-morphism: locality of the stalk maps is automatic. -/
+noncomputable def VPreHom.ofValCompat : VPreHom Z X where
+  toHom := f
+  isLocalHom_stalkMap := fun z =>
+    isLocalHom_of_val_comap (X.isLocalRing_stalk _) (Z.isLocalRing_stalk z)
+      _ _ _ (hval z) (X.val_supp _) (Z.val_supp z)
+  val_compat := hval
+
+variable (U : Opens ↥(X.toPresheafedSpace.carrier))
+  (hU : Set.range (ConcreteCategory.hom f.base)
+    = ((U : Opens ↥(X.toPresheafedSpace.carrier))
+        : Set ↥(X.toPresheafedSpace.carrier)))
+
+/-- The corestriction of such a morphism onto its range. -/
+noncomputable def VPreHom.corestrictOfValCompat :
+    VPreHom Z (X.restrictOpen U) :=
+  VPreHom.corestrict (VPreHom.ofValCompat f hval) U (le_of_eq hU)
+
+variable [AlgebraicGeometry.PresheafedSpace.IsOpenImmersion f]
+
+/-- The induced presheafed-space isomorphism onto the restriction. -/
+noncomputable def openImmersionRestrictIso :
+    Z.toPresheafedSpace
+      ≅ X.toPresheafedSpace.restrict
+          (openIncl_isOpenEmbedding (X := X.toPresheafedSpace) U) :=
+  AlgebraicGeometry.PresheafedSpace.IsOpenImmersion.isoOfRangeEq
+    (f := f)
+    (g := X.toPresheafedSpace.ofRestrict
+      (openIncl_isOpenEmbedding (X := X.toPresheafedSpace) U))
+    (hU.trans Subtype.range_val.symm)
+
+theorem corestrictOfValCompat_toHom_eq :
+    (VPreHom.corestrictOfValCompat f hval U hU).toHom
+      = (openImmersionRestrictIso f U hU).hom := rfl
+
+theorem isIso_corestrictOfValCompat :
+    IsIso (VPreHom.corestrictOfValCompat f hval U hU).toHom := by
+  rw [corestrictOfValCompat_toHom_eq f hval U hU]
+  exact (openImmersionRestrictIso f U hU).isIso_hom
+
+/-- **An open immersion between `𝒱^pre`-objects that respects the stalk
+valuations exhibits its source as the restriction of its target to its range.**
+
+This is the reusable form of the Wedhorn-8.15 chart step: given a chart
+comparison that is an open immersion of presheafed spaces and satisfies the
+valuation identity, one gets a genuine `𝒱`-isomorphism onto the corresponding
+open, with locality of the stalk maps and invertibility both for free. -/
+noncomputable def VPreObj.isoRestrictOfOpenImmersion : Z ≅ X.restrictOpen U :=
+  letI := isIso_corestrictOfValCompat f hval U hU
+  VPreHom.asIso (VPreHom.corestrictOfValCompat f hval U hU)
+
+end ChartStep
+
 end CorestrictV
 
 end ValuationSpectrum
