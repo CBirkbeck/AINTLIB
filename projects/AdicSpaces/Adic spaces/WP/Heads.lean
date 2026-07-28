@@ -601,6 +601,109 @@ theorem norm_evenSupportEquiv (x : ↥(wpEvenSupport K w N)) :
       refine le_trans ?_ (le_ciSup ⟨‖x‖, Set.forall_mem_range.mpr hbddL⟩ 0)
       exact norm_nonneg _
 
+theorem wpEvenSupport_le_wpHeadSupport :
+    wpEvenSupport K w N ≤ wpHeadSupport K w N :=
+  fun f hf t ht => hf t fun hh => ht hh.1
+
+/-! #### Parity patterns and the free generators `Y^ε` -/
+
+/-- The exponent of the pattern monomial `Y^ε = ∏_{i : ε i} Y_{i+1}`
+([WP] eq:parity-factorization: `ν_n = 2q_n + ε_n`). -/
+noncomputable def patExp (ε : Fin N → Bool) : ℕ →₀ ℕ :=
+  ∑ i : Fin N, if ε i then Finsupp.single 0 (w (i.1 + 1)) + Finsupp.single (i.1 + 1) 1
+    else 0
+
+variable {w N} in
+theorem patExp_apply_zero (ε : Fin N → Bool) :
+    patExp w N ε 0 = ∑ i : Fin N, if ε i then w (i.1 + 1) else 0 := by
+  classical
+  unfold patExp
+  rw [Finset.sum_apply']
+  refine Finset.sum_congr rfl fun i _ => ?_
+  split_ifs with hi
+  · rw [Finsupp.add_apply, Finsupp.single_apply, Finsupp.single_apply,
+      if_pos rfl, if_neg (by omega), add_zero]
+  · simp
+
+variable {w N} in
+theorem patExp_apply_succ (ε : Fin N → Bool) (i : Fin N) :
+    patExp w N ε (i.1 + 1) = if ε i then 1 else 0 := by
+  classical
+  unfold patExp
+  rw [Finset.sum_apply']
+  rw [Finset.sum_eq_single i]
+  · split_ifs with hi
+    · rw [Finsupp.add_apply, Finsupp.single_apply, Finsupp.single_apply,
+        if_neg (by omega), if_pos rfl, zero_add]
+    · simp
+  · intro j _ hj
+    split_ifs with hj'
+    · rw [Finsupp.add_apply, Finsupp.single_apply, Finsupp.single_apply,
+        if_neg (by omega), if_neg (by
+          intro h
+          exact hj (Fin.ext (by omega))), add_zero]
+    · simp
+  · intro h
+    exact absurd (Finset.mem_univ _) h
+
+variable {w N} in
+theorem patExp_apply_out (ε : Fin N → Bool) {n : ℕ} (h0 : n ≠ 0)
+    (hbd : ¬ (1 ≤ n ∧ n ≤ N)) : patExp w N ε n = 0 := by
+  classical
+  unfold patExp
+  rw [Finset.sum_apply']
+  refine Finset.sum_eq_zero fun i _ => ?_
+  split_ifs with hi
+  · rw [Finsupp.add_apply, Finsupp.single_apply, Finsupp.single_apply,
+      if_neg (by omega), if_neg (by
+        intro h
+        have := i.isLt
+        omega), add_zero]
+  · simp
+
+variable {w N} in
+theorem headMem_patExp (ε : Fin N → Bool) : HeadMem w N (patExp w N ε) := by
+  classical
+  constructor
+  · unfold WPMem
+    have hw : wpWeight w (patExp w N ε) =
+        ∑ i : Fin N, if ε i then w (i.1 + 1) else 0 := by
+      have hsub : (patExp w N ε).support ⊆
+          insert 0 (Finset.univ.image fun i : Fin N => i.1 + 1) := by
+        intro n hn
+        rw [Finsupp.mem_support_iff] at hn
+        rw [Finset.mem_insert]
+        by_cases h0 : n = 0
+        · exact Or.inl h0
+        · refine Or.inr (Finset.mem_image.mpr ?_)
+          by_cases hbd : 1 ≤ n ∧ n ≤ N
+          · exact ⟨⟨n - 1, by omega⟩, Finset.mem_univ _,
+              by show n - 1 + 1 = n; omega⟩
+          · exact absurd (patExp_apply_out ε h0 hbd) hn
+      rw [wpWeight_eq_sum_subset w hsub, Finset.sum_insert (by
+        rw [Finset.mem_image]
+        rintro ⟨i, -, hi⟩
+        omega)]
+      have h0term : (if (patExp w N ε) 0 % 2 = 1 ∧ (0 : ℕ) ≠ 0 then w 0 else 0) = 0 := by
+        simp
+      rw [h0term, zero_add,
+        Finset.sum_image (fun i _ j _ h => Fin.ext (by omega))]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [patExp_apply_succ]
+      rcases hb : ε i with _ | _ <;> simp [hb]
+    rw [hw, patExp_apply_zero]
+  · intro n hn
+    exact patExp_apply_out ε (by omega) (by omega)
+
+/-- The pattern generator `Y^ε` as a head element. -/
+noncomputable def Ypat (ε : Fin N → Bool) : WPHead K w N :=
+  ⟨⟨MvPowerSeries.monomial (patExp w N ε) 1,
+    MvPowerSeries.isRestrictedGauss_monomial _ _ _⟩, fun s hs => by
+      show MvPowerSeries.coeff s (MvPowerSeries.monomial (patExp w N ε) 1) = 0
+      classical
+      rw [MvPowerSeries.coeff_monomial,
+        if_neg (by intro h; subst h; exact hs (headMem_patExp ε))]⟩
+
 /-- The head is a finite module over its even Tate subalgebra — the formal content of
 the rank-`2^N` free normal form [WP] eq:finite-stage-normal-form. -/
 theorem moduleFinite_head_over_even :
