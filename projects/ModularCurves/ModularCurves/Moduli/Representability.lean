@@ -648,22 +648,9 @@ noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R w
     · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.1)
     · exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop PQ.1.2)
 
-/-- **(T-E7 = Loeffler Thm 3.4.4 + Def 3.3.6; KM 5.x for the Drinfeld upgrade)** For
-`N ≥ 4` and `N` invertible in `R`, the naive `Γ₁(N)` problem is representable, and the
-representing base scheme is smooth and affine over `Spec R`.
-Loeffler (verbatim, Thm 3.4.4): "`Y₁(N)_{ℤ[1/N]}` is smooth over `ℤ[1/N]`."
-
-Notes (adversarial pass 2026-07-06): TRUE only after `IsNaiveGammaOne` gained its
-global killing clause (without it a `ℚ̄[ε]`-family gave pro-representation
-`ℚ̄[[t,s]]`, contradicting smooth + quasi-finite-over-j). General `R` follows from
-`ℤ[1/N]` by base change (`Smooth`, `IsAffineHom` stable). Affineness for general `N`
-is QUOTE-PARTIAL: Loeffler's `Spec` display is verbatim only for `N = 5`; attach the
-KM affine-over-the-j-line locator when the full text lands. -/
-theorem gammaOneNaive_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N)
-    (hinv : IsUnit (N : R)) :
-    (gammaOneNaiveProblem R N).Representable ∧
-      ∀ X : EllObj R, Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X) →
-        (Smooth X.structMap ∧ IsAffineHom X.structMap) := by sorry
+/- `gammaOneNaive_representable` is NOT restated here: the proved copy lives in
+`ModularCurve/YOneTatePoint.lean` (assembled from `gammaOneNaive_representable_assembly`),
+and this file only ever carried a `sorry`'d duplicate of it. -/
 
 /-- **(T-E9 = Loeffler Prop 3.8.2–3.8.3; KM 3.1/4.7/5.1)** For `N ≥ 3` and `N` invertible
 in `R`, the naive full-level problem `[Γ(N)]` is rigid and representable; the representing

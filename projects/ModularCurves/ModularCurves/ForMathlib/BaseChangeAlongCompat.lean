@@ -145,4 +145,9 @@ set_option backward.isDefEq.respectTransparency.types false in
 instance zariskiLocalAtTarget_isAffineHom : IsZariskiLocalAtTarget (@IsAffineHom) :=
   inferInstance
 
+set_option backward.isDefEq.respectTransparency.types false in
+instance stableUnderComposition_etale :
+    MorphismProperty.IsStableUnderComposition (@Etale) :=
+  inferInstance
+
 end ModularCurves.BumpCompat

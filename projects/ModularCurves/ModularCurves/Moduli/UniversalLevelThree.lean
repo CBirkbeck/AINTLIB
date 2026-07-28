@@ -1915,9 +1915,17 @@ noncomputable def E3Witness.restrict {R : CommRingCat.{u}} {X : EllObj R}
   hP := by have := w.hP.restrict h; rwa [map_zero] at this
   hQ := by have := w.hQ.restrict h; rwa [map_add] at this
 
+section OpaqueProjModelE3
+
+/- `projModel` is a `Proj`-of-graded-ring construction; `whnf` chases it inside the
+`eqToHom (congrArg projModel _)` transports of `e3Piece_restrict` without bound (1.6M
+heartbeats did not close it on this pin). Opacity is the fix, so the heartbeat raise is
+gone; scoped because the `projModel*` API elsewhere in the file needs transparency. -/
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] ModularCurves.projModel
+
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 10)** The pieces are compatible with restriction (KM Ex. 2.2.2
 uniqueness). -/
 theorem e3Piece_restrict {R : CommRingCat.{u}} {X : EllObj R}
@@ -1967,6 +1975,8 @@ theorem e3Piece_restrict {R : CommRingCat.{u}} {X : EllObj R}
   rw [← projModelBaseChange_comp',
     projModelBaseChange_congr_hom hσ.symm (universalE3 R),
     ← Category.assoc, eqToHom_trans]
+
+end OpaqueProjModelE3
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 /-- **(T-E15a stage 10)** The witness cover of the total space. -/

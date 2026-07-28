@@ -442,6 +442,7 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
     · intro tpt htpt
       obtain ⟨y, hy⟩ := htpt
       refine ⟨(E.torsionπ N).base tpt, ?_⟩
+      haveI : IsClosedImmersion (E.torsionι N) := E.torsionι_isClosedImmersion N
       have hinj : Function.Injective (E.torsionι N).base :=
         (Scheme.Hom.isClosedEmbedding (E.torsionι N)).injective
       apply hinj

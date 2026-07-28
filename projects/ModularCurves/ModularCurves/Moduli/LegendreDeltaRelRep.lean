@@ -7,6 +7,7 @@ import ModularCurves.LevelStructure.CombinationLevel
 import ModularCurves.Moduli.LegendreDelta
 import ModularCurves.Moduli.LevelLocusNatural
 import ModularCurves.Moduli.QuotientProblem
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Relative representability of the Legendre `δ`: the scale-torsor funnel
@@ -25,6 +26,10 @@ classifying equivalence (`Equiv.sigmaCongrLeft`/`sigmaCongrRight`).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
+
+-- v4.33 bump: component types coming from semireducible `baseChange*`/`pullback` defs are
+-- defeq only after delta, which `rw`/`simp` will not do at `implicit` transparency.
+set_option backward.isDefEq.respectTransparency.types false
 
 universe u v
 
