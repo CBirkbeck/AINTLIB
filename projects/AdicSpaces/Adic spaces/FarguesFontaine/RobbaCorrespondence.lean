@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB AI contributors
 -/
 import «Adic spaces».FarguesFontaine.RobbaPresentation
+import «Adic spaces».FarguesFontaine.IntervalCoordinates
 
 /-!
 # The plus-ring correspondence: integrality over the image ball
@@ -198,6 +199,147 @@ theorem isIntegral_blocToBI_of_wLoc_le_one
 
 end Master
 
+/-- Base enlargement of integrality along an inclusion of subrings, at an
+abstract ambient ring. -/
+private theorem isIntegral_of_subring_le {A : Type*} [CommRing A]
+    {S T : Subring A} (hST : S ≤ T) {z : A}
+    (h : IsIntegral ↥S z) : IsIntegral ↥T z := by
+  obtain ⟨q, hq, hev⟩ := h
+  refine ⟨q.map (Subring.inclusion hST), hq.map _, ?_⟩
+  rw [Polynomial.eval₂_map]
+  rw [show (algebraMap ↥T A).comp (Subring.inclusion hST)
+    = algebraMap ↥S A from RingHom.ext fun _ => rfl]
+  exact hev
+
+/-- An element decomposing as an integral part plus a subring member is
+integral, at an abstract ambient ring. -/
+private theorem isIntegral_add_of_mem {A : Type*} [CommRing A] (S : Subring A)
+    (u t z : A) (hz : z = u + t) (hu : IsIntegral ↥S u) (ht : t ∈ S) :
+    IsIntegral ↥S z := by
+  rw [hz]
+  exact hu.add (isIntegral_algebraMap (x := (⟨t, ht⟩ : ↥S)))
+
+section Sandwich
+
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+variable (hφb : ∀ x : Bloc p F ϖ,
+  ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+    : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+    : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
+
+set_option maxSynthPendingDepth 1 in
+/-- **The image ball sits inside the plus-ring**: every evaluation of a
+`wIRPS`-unit-ball series has interval norm at most one. -/
+theorem evalBallSubring_le_BIPlusIn
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1) :
+    evalBallSubring p F ϖ φ hφ hbmem hb
+      ≤ BIPlusIn p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 := by
+  rintro w ⟨f, hf, rfl⟩
+  refine (mem_BIPlusIn_iff p F ϖ).mpr ?_
+  rw [evalBIHom_coe p F ϖ φ hφ hbmem hb f]
+  refine wI_evalBI_le p F ϖ φ hφ hbmem hb f one_pos (fun l => ?_)
+  exact le_trans (wI_coeff_le_wIRPS p F ϖ f.2 _) hf
+
+set_option maxSynthPendingDepth 1 in
+include hφb in
+/-- **The plus-ring correspondence** (Kedlaya, *Noetherian properties of
+Fargues–Fontaine curves*, Lemma 4.9, the "moreover" clause; T910-M): under
+the norm-compatible base map, the unit ball `B^{I,+}` of the smaller
+interval is exactly the integral closure of the image ball. -/
+theorem mem_BIPlusIn_iff_isIntegral
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m))
+    (z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)) :
+    z ∈ BIPlusIn p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      ↔ IsIntegral ↥(evalBallSubring p F ϖ φ hφ hbmem hb) z := by
+  constructor
+  · intro hz
+    have hz1 : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ 1 :=
+      (mem_BIPlusIn_iff p F ϖ).mp hz
+    have hKinv0 : (0 : NNReal) < ρ₁ ^ m * ((σ₁ ^ m)⁻¹) :=
+      mul_pos (pow_pos hρ₁0 m) (inv_pos.mpr (pow_pos hσ₁0 m))
+    have hKinv1 : ρ₁ ^ m * ((σ₁ ^ m)⁻¹) ≤ 1 :=
+      le_trans (mul_le_mul_of_nonneg_right
+          (pow_le_pow_left₀ zero_le hρσ m) zero_le)
+        (le_of_eq (mul_inv_cancel₀ (pow_pos hσ₁0 m).ne'))
+    obtain ⟨x, hx⟩ := exists_BIProd_wI_le p F ϖ z.2 hKinv0
+    obtain ⟨⟨a, k⟩, hak⟩ := exists_mk'_sPow p F ϖ x
+    subst hak
+    have hxw : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))) ≤ 1 := by
+      have hsplit := wI_add_le p F
+        (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+          - ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+      rw [sub_add_cancel] at hsplit
+      exact le_trans hsplit (max_le (le_trans hx hKinv1) hz1)
+    rw [wI_BIProd p F, valued_BlocToHatK, valued_BlocToHatK] at hxw
+    have hint := isIntegral_blocToBI_of_wLoc_le_one p F ϖ φ hφ hφb
+      hρσ hσρ zb m hm hgen hbmem hb hbg a k
+      (le_trans (le_max_left _ _) hxw)
+      (le_trans (le_max_right _ _) hxw)
+    have hcoe : ((blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+          : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)) := rfl
+    have hdle : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (((z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+          : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        ≤ ρ₁ ^ m * ((σ₁ ^ m)⁻¹) := by
+      rw [AddSubgroupClass.coe_sub, hcoe, show
+        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+          - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+              (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+        = -(BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+              (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+            - ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        from (neg_sub _ _).symm]
+      rw [wI_neg p F]
+      exact hx
+    obtain ⟨U, hUeq, hUnorm⟩ := exists_evalBI_eq_of_le_inv p F ϖ φ hφ hφb
+      hρσ hσρ zb m hm hgen hbmem hb hbg
+      (z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))).2 hdle
+    refine isIntegral_add_of_mem _
+      (blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)))
+      (z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)))
+      z (by ring) hint ⟨U, hUnorm, Subtype.ext hUeq⟩
+  · intro h
+    exact BIPlusIn_isIntegrallyClosed p F ϖ z
+      (isIntegral_of_subring_le
+        (evalBallSubring_le_BIPlusIn p F ϖ φ hφ hbmem hb) h)
+
+end Sandwich
 end FarguesFontaine
 
 end
