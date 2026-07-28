@@ -3197,6 +3197,22 @@ the P5-2 `spaVObjTate` package, by `rfl`.
   `Set.ext` + `rintro`; and `IsHuberRing (windowChartRing …)` is NOT found by search, use
   `haveI := (isTateRing_bigWindowChart …).toIsHuberRing`.
 
+### ★ [P5-8.15] Wedhorn 8.15 at the `𝒱` level — DONE 2026-07-28
+`ValuationSpectrum.SpaVIso.spaCompVIso` (`SpaVIso.lean`, end of `section Assembly`):
+
+    Spa(𝒪_A(D₀)) ≅ Spa(A,A⁺)|_{spaOpens D₀}   in 𝒱^pre
+
+for ANY base `A` carrying a global stalk package (`hloc`/`hsupp`) — the adic spectrum of a
+rational localization IS the rational subset, with its structure sheaf and stalk valuations,
+not merely its topology. A five-line application of `VPreObj.isoRestrictOfOpenImmersion` to
+`spaCompHom_isOpenImmersion`, the unconditional `comap_ringStalkMap_spaCompHom_stalkValue`,
+and `range_shadow`.
+⚠ Pass the `IsOpenImmersion` instance POSITIONALLY with `@` — a `haveI` does NOT register,
+because instance search reconstructs `spaCompHom`'s own implicit instances differently.
+NOTE: a TATE base always has the package (`stalkShrink_tate`), so this applies verbatim over
+every window chart ring `B_n`; it does NOT apply over `A_inf`, whose stalks are local only
+over `Y` — which is exactly why the last step must corestrict into `𝒴` first.
+
 ### [P5-6d(ii)] Promote the 𝒴-side chart to a 𝒱-isomorphism — REDUCED TO ONE IDENTITY
 
 ★ **2026-07-28: `VPreObj.isoRestrictOfOpenImmersion` (VRestrict.lean, section `ChartStep`)
