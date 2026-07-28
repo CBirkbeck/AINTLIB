@@ -172,7 +172,8 @@ theorem algebraMap_comp_groupPatchComul :
       = G.π.appLE P.V P.groupOpen le_rfl
         ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
             (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)) from by
-    rw [← halg, ← CommRingCat.ofHom_comp]]
+    rw [← halg, ← CommRingCat.ofHom_comp]
+    rfl]
   -- the left inclusion is the transported first projection
   rw [← topIso_inv_fst_appTop_patchKunnethΓ G.π G.π P.hV P.isAffineOpen_groupOpen
     P.isAffineOpen_groupOpen rfl rfl]
@@ -2260,7 +2261,6 @@ theorem includeRight_comp_transDouble :
   rw [transDouble, ← hleg, Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
     IsIso.hom_inv_id, Category.id_comp,
     snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl]
-  rfl
 
 section CoassocTransport
 
