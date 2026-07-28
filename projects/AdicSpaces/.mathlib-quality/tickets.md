@@ -3073,6 +3073,37 @@ noncomputable def quotientLegVPreHom (V : Opens ↥(yTop p F ϖ))
   * `Opens.coe_iSup` + `Set.mem_iUnion` does NOT fire on an `Opens`-membership hypothesis;
     use `Opens.mem_iSup`.
 
+### ★ P5-6 CAPSTONE ROADMAP (state as of 2026-07-28, after P5-5d)
+
+`IsAdicSpace (xVObj p F ϖ)` needs, for each `x : Curve`:
+  `U := xImage V'` with `x ∈ U`, a chart `C : AffinoidVChart`, and `X|_U ≅ C.toVObj` in `𝒱`.
+
+`curveAdicSpacePresentation` (already proven) supplies, for each `x`, a wandering `W₀ ∋ fiberPoint x`,
+a window index `n`, a rational datum `D'` of `B_n := windowChartRing n`, and `V' ≤ W₀` with a
+HOMEOMORPHISM `Spa(presheafValue D') ≃ₜ V'`. Adopt review point 4: `V'` is itself wandering, so
+the quotient slice applies to `V'` directly — no three-leg composition.
+
+DONE:
+* the chart: `windowSubVChart n D' : AffinoidVChart` (P5-6b)
+* the quotient leg: `quotientLegIsoRestrict : 𝒴|_{V'} ≅ X|_{π V'}` (P5-5d) ★
+* `IsAdicSpace` itself (P5-6a), and `VObj.isoOfVPreIso` to promote 𝒱^pre-isos to 𝒱-isos
+* the restriction toolkit: `restrictRestrictIso` (P5-RT), `restrictIsoOfIso`
+
+REMAINING, in order:
+1. **[P5-6c] `VPreHom.asIso`** — the forgetful functor `𝒱^pre ⥤ TopRingPresheafedSpace` reflects
+   isomorphisms. Without it, `quotientLegIsoRestrict` (a presheafed-space iso) cannot be turned
+   into the `𝒱`-iso that 8.22 asks for. Route: `val_compat` for the inverse by
+   `comap_injective` along the (iso, hence surjective) stalk map of `f`, then `isLocalHom` from
+   `isLocalHom_of_val_comap`. ⚠ `ringStalkMap` is CONTRAVARIANT and `generalize`/`subst` on the
+   base point fails ("result is not type correct") — see the failed attempt in scratch r179.
+2. **[P5-6d] the 𝒴-side leg** `Spa(presheafValue D') ≅ 𝒴|_{V'}` as presheafed spaces. Per the
+   ROUTE DISCOVERY below this is a COMPOSITION of existing `isoRestrict`s plus `restrictRestrictIso`
+   / `restrictIsoOfIso` — `spaCompIsoRestrict` applies over `A_inf` because P5-3a/3b moved the
+   Tate/noetherian hypotheses onto the value ring. It is NOT the dense-extension development the
+   old P5-3/P5-4 sketches describe.
+3. **[P5-6e] `isAdicSpace_xVObj`** — assemble: `X|_{π V'} ≅ 𝒴|_{V'} ≅ Spa(presheafValue D')`,
+   promote with `VPreHom.asIso` + `VObj.isoOfVPreIso`, and take `C := windowSubVChart n D'`.
+
 ### [P5-6] `IsAdicSpace` and `isAdicSpace_xVObj`
 - **Status**: blocked | **File**: new `Adic spaces/AdicSpaceV.lean` + FF capstone
 - **Depends on**: P5-5, P5-K (done)
