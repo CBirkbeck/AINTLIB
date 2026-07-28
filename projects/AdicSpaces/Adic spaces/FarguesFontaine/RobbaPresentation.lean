@@ -6234,6 +6234,30 @@ theorem wIRPS_mul_le
   exact mul_le_mul (wI_coeff_le_wIRPS p F ϖ hf q.1)
     (wI_coeff_le_wIRPS p F ϖ hg q.2) zero_le zero_le
 
+/-- **Each Teichmüller monomial of a unit-ball fraction is in the unit
+ball** (T910-M M2b-1): the per-term Gauss bound in monomial form. -/
+theorem wLoc_mk'_monomial_le_one {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (x : Ainf p F) (k : ℕ)
+    (hw : wLoc p F ϖ hρ0 hρ1
+      (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)) ≤ 1) (i : ℕ) :
+    wLoc p F ϖ hρ0 hρ1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F x i))
+        (sPow p F ϖ k)) ≤ 1 := by
+  rw [wLoc_mk'_monomial p F ϖ hρ0 hρ1]
+  have hterm := gaussTerm_le_of_wLoc_mk'_le_one p F ϖ hρ0 hρ1 x k hw i
+  have hpos : (0 : NNReal) < (ρ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k :=
+    pow_pos (mul_pos hρ0 (vpi_pos p F ϖ)) k
+  calc ρ ^ i * perfectoidValuation p F ((teichCoeff p F x i : OF F) : F)
+      * (((ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹)
+      ≤ (ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k
+        * (((ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹) :=
+        mul_le_mul_of_nonneg_right hterm zero_le
+    _ = 1 := mul_inv_cancel₀ hpos.ne'
+
 end FarguesFontaine
 
 end
