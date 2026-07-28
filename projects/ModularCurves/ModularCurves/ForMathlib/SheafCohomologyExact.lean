@@ -100,6 +100,37 @@ lemma longSequence_exact₁ (x₁ : H S.X₁ n₁) (hx₁ : map S.f n₁ x₁ = 
     ∃ x₃ : H S.X₃ n₀, δ hS n₀ n₁ h x₃ = x₁ :=
   Ext.covariant_sequence_exact₁ _ _ _ hx₁ h
 
+include hS in
+/-- In a short exact sequence, vanishing of `H^q` of the right term and
+`H^(q+1)` of the middle term implies vanishing of `H^(q+1)` of the left
+term. -/
+lemma subsingleton_H_X₁_succ_of_shortExact (q : ℕ)
+    (hright : Subsingleton (H S.X₃ q))
+    (hmiddle : Subsingleton (H S.X₂ (q + 1))) :
+    Subsingleton (H S.X₁ (q + 1)) := by
+  letI : Subsingleton (H S.X₃ q) := hright
+  letI : Subsingleton (H S.X₂ (q + 1)) := hmiddle
+  refine subsingleton_of_forall_eq 0 fun x => ?_
+  obtain ⟨x₃, hx₃⟩ := longSequence_exact₁
+    hS q (q + 1) rfl x (Subsingleton.elim _ _)
+  rw [Subsingleton.elim x₃ 0, map_zero] at hx₃
+  exact hx₃.symm
+
+include hS in
+/-- In a short exact sequence, surjectivity on `H^q` from the middle to the
+right and vanishing of `H^(q+1)` of the middle imply vanishing of
+`H^(q+1)` of the left term. -/
+lemma subsingleton_H_X₁_succ_of_shortExact_of_surjective (q : ℕ)
+    (hsurj : Function.Surjective (map S.g q))
+    (hmiddle : Subsingleton (H S.X₂ (q + 1))) :
+    Subsingleton (H S.X₁ (q + 1)) := by
+  letI : Subsingleton (H S.X₂ (q + 1)) := hmiddle
+  refine subsingleton_of_forall_eq 0 fun x => ?_
+  obtain ⟨x₃, hx₃⟩ := longSequence_exact₁
+    hS q (q + 1) rfl x (Subsingleton.elim _ _)
+  obtain ⟨x₂, hx₂⟩ := hsurj x₃
+  rw [← hx₃, ← hx₂, longSequence_comp_zero₃]
+
 variable {T : C} (hT : Limits.IsTerminal T)
 
 open Opposite

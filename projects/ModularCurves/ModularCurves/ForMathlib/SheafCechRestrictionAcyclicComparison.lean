@@ -49,21 +49,6 @@ private theorem injectiveResolutionCokernel_subsingleton_H
     exact hF
   exact subsingleton_H_X₃_of_shortExact hS (q + 1) hmiddle hleft
 
-private theorem subsingleton_H_X₁_succ_of_shortExact
-    {S : ShortComplex (Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
-    (q : ℕ) (hright : Subsingleton (CategoryTheory.Sheaf.H S.X₃ q))
-    (hmiddle : Subsingleton (CategoryTheory.Sheaf.H S.X₂ (q + 1))) :
-    Subsingleton (CategoryTheory.Sheaf.H S.X₁ (q + 1)) := by
-  letI : AddCommGroup (CategoryTheory.Sheaf.H S.X₁ (q + 1)) :=
-    CategoryTheory.Abelian.Ext.instAddCommGroup
-  letI : Subsingleton (CategoryTheory.Sheaf.H S.X₃ q) := hright
-  letI : Subsingleton (CategoryTheory.Sheaf.H S.X₂ (q + 1)) := hmiddle
-  refine subsingleton_of_forall_eq 0 fun x ↦ ?_
-  obtain ⟨x₃, hx₃⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁
-    hS q (q + 1) rfl x (Subsingleton.elim _ _)
-  rw [Subsingleton.elim x₃ 0, map_zero] at hx₃
-  exact hx₃.symm
-
 private theorem injectiveResolution_subsingleton_H_of_cokernel
     (F : Sheaf AddCommGrpCat.{u} X) (q : ℕ)
     (hQ : Subsingleton (CategoryTheory.Sheaf.H
@@ -82,7 +67,8 @@ private theorem injectiveResolution_subsingleton_H_of_cokernel
     change Subsingleton (CategoryTheory.Sheaf.H
       (cokernel ((injectiveResolution (toSiteSheaf F)).ι.f 0)) (q + 1))
     exact hQ
-  exact subsingleton_H_X₁_succ_of_shortExact hS (q + 1) hright hmiddle
+  exact CategoryTheory.Sheaf.H.subsingleton_H_X₁_succ_of_shortExact
+    hS (q + 1) hright hmiddle
 
 private theorem injectiveResolutionCokernel_restrict_subsingleton_H
     (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X)
