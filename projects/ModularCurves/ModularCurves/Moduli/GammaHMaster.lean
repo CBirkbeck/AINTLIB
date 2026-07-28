@@ -861,9 +861,20 @@ theorem gammaH_hfree_of_orderOf_absurd (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ
       ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b := by
   intro hcon
   rw [gammaHAut_app_val] at hcon
-  have hcon2 := congrArg
-    (E.glSmul (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹) hcon
-  rw [← E.glSmul_mul, mul_inv_cancel, E.glSmul_one] at hcon2
+  -- re-view the action on `E` itself: the record projection `(⟨_, _, E⟩ : EllObj R).curve`
+  -- is `E` only up to iota, which `rw` will not do inside `hcon`.
+  have hconE : E.glSmul (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+      ((gammaFullNaiveProblem R N).map e.hom.op b) = b := hcon
+  -- `rw [← glSmul_mul]` will not fire against `hcon2` (its `L` slot is the moduli-problem
+  -- object type, defeq to `FullLevelPt N` but not syntactically it); as a standalone
+  -- `∀ L : E.FullLevelPt N` statement the rewrite matches.
+  have hcancel : ∀ L : E.FullLevelPt N,
+      E.glSmul (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹
+        (E.glSmul (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) L) = L := by
+    intro L
+    rw [← E.glSmul_mul, mul_inv_cancel, E.glSmul_one]
+  have hcon2 := (hcancel ((gammaFullNaiveProblem R N).map e.hom.op b)).symm.trans
+    (congrArg (E.glSmul (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹) hconE)
   have hu : (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹
       = (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) := by
     rw [show (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
