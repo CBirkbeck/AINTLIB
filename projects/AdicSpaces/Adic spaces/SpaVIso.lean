@@ -907,6 +907,27 @@ theorem comap_phiHom_openValue [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
     (comap_pieceEquiv_symm_pointValue D₀ hE (index_sub D₀ hV i) w hwB hwA))
   exact congrFun (congrArg comap hcomp) (pointValue i.D hwA)
 
+/-- **The inverse comparison intertwines the open values.** -/
+theorem comap_phiEquiv_symm_openValue [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
+    (hV : V ≤ spaOpens D₀)
+    {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
+    (hVW : Paired D₀ V W)
+    (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) (hw : w ∈ W) :
+    comap ((phiEquiv D₀ hV hVW).symm.toRingHom) (openValue W hw)
+      = openValue V (paired_shadow D₀ hVW w hw) := by
+  have hK := comap_phiHom_openValue D₀ hV hVW w hw
+  have hcomp : (phiHom D₀ hV hVW).comp
+      ((phiEquiv D₀ hV hVW).symm.toRingHom) = RingHom.id _ :=
+    RingHom.ext fun z => (phiEquiv D₀ hV hVW).apply_symm_apply z
+  rw [← hK]
+  rw [show comap ((phiEquiv D₀ hV hVW).symm.toRingHom)
+        (comap (phiHom D₀ hV hVW) (openValue V (paired_shadow D₀ hVW w hw)))
+      = comap ((phiHom D₀ hV hVW).comp
+          ((phiEquiv D₀ hV hVW).symm.toRingHom))
+        (openValue V (paired_shadow D₀ hVW w hw))
+    from rfl, hcomp]
+  exact congr_fun comap_id _
+
 end Phi
 
 section Assembly
