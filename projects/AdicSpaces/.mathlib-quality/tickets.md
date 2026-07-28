@@ -3048,27 +3048,30 @@ noncomputable def quotientLegVPreHom (V : Opens ↥(yTop p F ϖ))
   proof). NOTE: `≫` does NOT elaborate when the expected type is spelled `VPreHom X Z`;
   the abbrev carries a `show X ⟶ Z from`.
 
-### [P5-5d] The quotient leg as an open immersion — IN PROGRESS
-- **LANDED 2026-07-28** (`CurveVMorphism.lean`), and the key formula is **`rfl`**:
-  `yRestrictToCurve_c_app_apply` — the leg's section map at `W` is
-  "underlying section of the invariant section, restricted to the slice
-  `{y ∈ V : π y ∈ W}`". Also `legOpen_le_curvePreimage`, `legOpen_eq`
-  (slice `= V ⊓ π⁻¹W`), `yRestrictToCurve_c_app_apply_inf`.
-  Why `rfl` works: `PresheafedSpace.comp_c_app` gives
-  `piYHom.c.app ≫ pushforward (ofRestrict.c.app)`, `ofRestrict.c.app` is
-  `presheaf.map (counit).op`, and `yPresheafedSpace.presheaf = (yFunctor).op ⋙
-  structurePresheaf` turns that into a `limitRestrict`; the `≤`-witness mismatch is
-  absorbed by definitional proof irrelevance.
-- **REMAINING**: `AlgebraicGeometry.PresheafedSpace.IsOpenImmersion (yRestrictToCurve V).toHom`
-  for wandering `V`.
-  * `base_open` — from `xImageHomeo` (`CurveAdicPresentation.lean:83`).
-  * `c_iso` — for `U : Opens ↥V` put `U' := restrictOpenFunctor _ V |>.obj U`; the image open
-    on the curve is `xImage U'`, the slice is `V ⊓ ⊔_k φ^k U' = U'` (wandering), so the c-app
-    IS `curveSectionRestrict U'` — and P5-5c gives it bijective with continuous inverse.
-    Turn that into `IsIso` in `CompleteTopCommRingCat` by the SAME pattern as
-    `SpaVIso.phiCatIso'` / `ambCompCatIso` (P5-OI).
-  * then `IsOpenImmersion.isoRestrict` gives `𝒴|_V ≅ X|_{xImage V}` in 𝒱^pre, and
-    `VObj`-level `≅` follows since both sides' sheaf conditions are already known.
+### [P5-5d] The quotient leg is an open immersion — DONE 2026-07-28 ★
+- **Status**: DONE, axiom-clean, full gate green
+- **File**: NEW `Adic spaces/FarguesFontaine/CurveQuotientLeg.lean` (needs BOTH
+  `CurveVMorphism` and `CurveAdicPresentation` — the latter for
+  `yTopToCurve_injOn_of_disjoint_translates` and `isOpenQuotientMap_yTopToCurve`; no cycle).
+- **HEADLINE**: `quotientLegIsoRestrict : 𝒴|_V ≅ X|_{π V}` as presheafed spaces, for every
+  wandering `V`. This is the chart form of `X = 𝒴/φ^ℤ`.
+- Chain: `yRestrictToCurve_base_apply/_isOpenEmbedding` (carrier half),
+  `restrictOpenFunctor_obj_le`, `base_functor_obj_eq`, `disjoint_translates_mono`,
+  `inf_curvePreimage_xImage` (the slice `V ⊓ π⁻¹(π W) = W` collapse),
+  `curveSectionCatIso` (P5-5c's equiv + both continuities, exactly the `phiCatIso'` shape),
+  `isIso_of_eq_curveSectionRestrict`, `yRestrictToCurve_isOpenImmersion`.
+- **Four Lean lessons worth keeping**:
+  * It must be a `theorem`, NOT an `instance`: `hdis` occurs neither in the return type nor
+    in an instance-implicit argument, so it could never be synthesised. Consumers write
+    `letI := yRestrictToCurve_isOpenImmersion p F ϖ V hdis`.
+  * The `c`-app's TARGET TYPE mentions the slice, so `slice = W` cannot be `rw`n in place —
+    abstract the slice as a variable `Z` with `hZ : Z = W` plus the c-app formula as a
+    hypothesis, then `subst`. Afterwards the two `≤`-witnesses are proof-irrelevant.
+  * In `hg` write `g.1 t`, not `(ConcreteCategory.hom g) t`: with `g`'s type spelled
+    `CompleteTopCommRingCat.of X ⟶ CompleteTopCommRingCat.of Y` the carrier coercion is
+    already reduced and the `FunLike` instance cannot be resolved.
+  * `Opens.coe_iSup` + `Set.mem_iUnion` does NOT fire on an `Opens`-membership hypothesis;
+    use `Opens.mem_iSup`.
 
 ### [P5-6] `IsAdicSpace` and `isAdicSpace_xVObj`
 - **Status**: blocked | **File**: new `Adic spaces/AdicSpaceV.lean` + FF capstone
