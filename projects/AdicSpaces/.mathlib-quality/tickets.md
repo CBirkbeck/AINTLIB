@@ -3000,7 +3000,20 @@ theorem ringStalkMap_corestrictHom {Z X : TopRingPresheafedSpace.{u}} (f : Z ⟶
     `translateFam_continuous` with an explicit `show` unfolding `translateFam`, then
     `Continuous.congr` + `IsInducing.continuous_iff` pointwise.
 
-### [P5-5] The quotient leg: `𝒴|_V ≅ X|_{π V}` for wandering `V`
+### [P5-5] The quotient leg: `𝒴|_V ≅ X|_{π V}` — ★★ COMPLETE 2026-07-28 ★★
+- **Status**: DONE at the `𝒱`-level, axiom-clean, full gate green.
+- **`quotientLegVObjIso : (yVObj p F ϖ).restrictOpen V ≅ (xVObj p F ϖ).restrictOpen (xImage p F ϖ V)`**
+  for every wandering `V` — an isomorphism in Wedhorn's category, carrying the structure
+  sheaf, the stalk local rings and the stalk valuations, not merely the topology.
+  (`FarguesFontaine/CurveQuotientLeg.lean`.)
+- Final step: `quotientLegVPreHom` (P5-5b) and `quotientLegIsoRestrictOpen` have the SAME
+  underlying morphism — both are mathlib's `IsOpenImmersion.lift`, so
+  `quotientLegVPreHom_toHom_eq` is `rfl` — hence the `𝒱^pre`-morphism is invertible and
+  `VPreHom.asIso` (P5-6c) promotes it; `VObj.isoOfVPreIso` lifts to `𝒱`.
+- Sub-tickets P5-5a (`piYVPreHom`), P5-5b (`quotientLegVPreHom`), P5-5c (continuous inverse),
+  P5-5d (open immersion) are all DONE — see their entries above.
+
+### (superseded sketch) [P5-5] original plan
 - **Status**: blocked | **File**: `Adic spaces/FarguesFontaine/CurveObject.lean` (new section)
 - **Depends on**: P5-A3
 - **Type**: def + theorem

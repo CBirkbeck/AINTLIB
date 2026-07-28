@@ -254,6 +254,49 @@ noncomputable def quotientLegIsoRestrictOpen (V : Opens ↥(yTop p F ϖ))
         (X := (xVPreObj p F ϖ).toPresheafedSpace) (xImage p F ϖ V)))
     ((range_yRestrictToCurve_eq p F ϖ V).trans Subtype.range_val.symm)
 
+
+/-! ### The quotient leg as an isomorphism of `𝒱` (P5-5, the headline)
+
+`quotientLegVPreHom` (P5-5b) and `quotientLegIsoRestrictOpen` have the SAME
+underlying morphism — both are mathlib's `IsOpenImmersion.lift` — so the
+`𝒱^pre`-morphism is invertible, and `VPreHom.asIso` promotes it. -/
+
+variable (V : Opens ↥(yTop p F ϖ))
+  (hdis : ∀ k : ℤ, k ≠ 0 →
+    Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj V
+        : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+      ((V : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)))
+
+/-- The quotient leg's `𝒱^pre`-morphism and the open-immersion isomorphism have
+the same underlying map (both are mathlib's `IsOpenImmersion.lift`). -/
+theorem quotientLegVPreHom_toHom_eq :
+    (quotientLegVPreHom p F ϖ V).toHom
+      = (quotientLegIsoRestrictOpen p F ϖ V hdis).hom := rfl
+
+include hdis in
+theorem isIso_quotientLegVPreHom_toHom :
+    IsIso (quotientLegVPreHom p F ϖ V).toHom := by
+  rw [quotientLegVPreHom_toHom_eq p F ϖ V hdis]
+  exact (quotientLegIsoRestrictOpen p F ϖ V hdis).isIso_hom
+
+include hdis in
+/-- **THE QUOTIENT LEG IS AN ISOMORPHISM OF `𝒱^pre`** (P5-5): for a wandering
+open `V` of `𝒴`, the projection induces `𝒴|_V ≅ X|_{π V}` in Wedhorn's category
+— carrying the structure sheaf, the stalk local rings and the stalk valuations,
+not merely the topology. -/
+noncomputable def quotientLegVIso :
+    (yVPreObj p F ϖ).restrictOpen V
+      ≅ (xVPreObj p F ϖ).restrictOpen (xImage p F ϖ V) :=
+  letI := isIso_quotientLegVPreHom_toHom p F ϖ V hdis
+  ValuationSpectrum.VPreHom.asIso (quotientLegVPreHom p F ϖ V)
+
+include hdis in
+/-- **The quotient leg as an isomorphism of `𝒱`** (both sides are sheafy). -/
+noncomputable def quotientLegVObjIso :
+    (yVObj p F ϖ).restrictOpen V
+      ≅ (xVObj p F ϖ).restrictOpen (xImage p F ϖ V) :=
+  ValuationSpectrum.VObj.isoOfVPreIso (quotientLegVIso p F ϖ V hdis)
+
 end FarguesFontaine
 
 end
