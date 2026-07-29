@@ -442,6 +442,111 @@ theorem tailCoeff_mul (f g : WPA K w) (μ : TailIdx N) :
   refine le_trans (IsUltrametricDist.norm_add_le_max _ _) ?_
   exact max_le hA hB
 
+theorem tailCoeff_continuous (μ : TailIdx N) :
+    Continuous (tailCoeff K w N μ : WPA K w → WPHead K w N) := by
+  refine (LipschitzWith.of_dist_le_mul (K := 1) fun f g => ?_).continuous
+  rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← tailCoeff_sub]
+  exact norm_tailCoeff_le K w N μ _
+
+theorem tailCoeff_tsum {ι : Type*} (f : ι → WPA K w) (hf : Summable f)
+    (μ : TailIdx N) :
+    tailCoeff K w N μ (∑' i, f i) = ∑' i, tailCoeff K w N μ (f i) :=
+  ((hf.hasSum.map (tailCoeffHom μ) (tailCoeff_continuous μ)).tsum_eq).symm
+
+/-- The head twist of `𝒜`: the variable `W`, of norm `1`. -/
+noncomputable def waTwist : TwistElem (WPHead K w N) :=
+  ⟨WaHead K w N, le_of_eq norm_WaHead⟩
+
+/-- The decomposition series of a null coefficient family is summable. -/
+theorem summable_headIncl_eTail
+    (x : TailC0 w N (WPHead K w N) (waTwist (K := K) (w := w) (N := N))) :
+    Summable (fun μ : TailIdx N => headIncl K w N (x.1 μ) * eTail K w N μ) := by
+  apply summable_of_tendsto_cofinite_nonarch
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  refine .squeeze tendsto_const_nhds (by simpa using x.2) (fun μ => norm_nonneg _)
+    fun μ => ?_
+  refine le_trans (norm_mul_le _ _) ?_
+  have h1 : ‖eTail K w N μ‖ ≤ 1 := by
+    rw [show eTail K w N μ = wpMonomial K w (wpMem_tailShift w μ) 1 from rfl,
+      norm_wpMonomial, norm_one]
+  calc ‖headIncl K w N (x.1 μ)‖ * ‖eTail K w N μ‖
+      ≤ ‖x.1 μ‖ * 1 := by
+        rw [norm_headIncl]
+        exact mul_le_mul_of_nonneg_left h1 (norm_nonneg _)
+    _ = ‖x.1 μ‖ := mul_one _
+
+open scoped Classical in
+/-- Coefficient recovery for decomposition series. -/
+theorem tailCoeff_tsum_headIncl_eTail
+    (x : TailC0 w N (WPHead K w N) (waTwist (K := K) (w := w) (N := N)))
+    (ν : TailIdx N) :
+    tailCoeff K w N ν (∑' μ : TailIdx N, headIncl K w N (x.1 μ) * eTail K w N μ) =
+      x.1 ν := by
+  rw [tailCoeff_tsum _ (summable_headIncl_eTail x)]
+  rw [show (fun μ : TailIdx N =>
+      tailCoeff K w N ν (headIncl K w N (x.1 μ) * eTail K w N μ)) =
+    fun μ : TailIdx N => if ν = μ then x.1 μ else 0 from
+    funext fun μ => tailCoeff_headIncl_mul_eTail K w N μ ν (x.1 μ)]
+  rw [tsum_eq_single ν ?_]
+  · rw [if_pos rfl]
+  · intro μ hμ
+    rw [if_neg (fun h => hμ h.symm)]
+
+/-- **The isometric tail decomposition of `𝒜`** ([WP] eq:tail-decomposition), as a
+ring equivalence onto the `W`-twisted `c₀`-sum over the head. -/
+noncomputable def wpaTailEquiv :
+    WPA K w ≃+* TailC0 w N (WPHead K w N) (waTwist (K := K) (w := w) (N := N)) where
+  toFun f := ⟨fun μ => tailCoeff K w N μ f, tendsto_norm_tailCoeff_cofinite K w N f⟩
+  invFun x := ∑' μ : TailIdx N, headIncl K w N (x.1 μ) * eTail K w N μ
+  left_inv f := by
+    apply tailCoeff_injective K w N
+    funext ν
+    show tailCoeff K w N ν _ = tailCoeff K w N ν f
+    exact tailCoeff_tsum_headIncl_eTail _ ν
+  right_inv x := by
+    refine Subtype.ext (funext fun ν => ?_)
+    show tailCoeff K w N ν _ = x.1 ν
+    exact tailCoeff_tsum_headIncl_eTail x ν
+  map_add' f g := Subtype.ext (funext fun μ => tailCoeff_add K w N μ f g)
+  map_mul' f g := by
+    refine Subtype.ext (funext fun μ => ?_)
+    have hR := TailC0.mul_val (w := w) (N := N)
+      (ρ := waTwist (K := K) (w := w) (N := N))
+      (⟨fun μ => tailCoeff K w N μ f, tendsto_norm_tailCoeff_cofinite K w N f⟩ :
+        TailC0 w N (WPHead K w N) (waTwist (K := K) (w := w) (N := N)))
+      ⟨fun μ => tailCoeff K w N μ g, tendsto_norm_tailCoeff_cofinite K w N g⟩ μ
+    show tailCoeff K w N μ (f * g) = _
+    rw [hR, tailCoeff_mul f g μ]
+    rfl
+
+theorem wpaTailEquiv_apply_val (f : WPA K w) (μ : TailIdx N) :
+    ((wpaTailEquiv (K := K) (w := w) (N := N)) f).1 μ = tailCoeff K w N μ f := rfl
+
+theorem wpaTailEquiv_headIncl (x : WPHead K w N) :
+    (wpaTailEquiv (K := K) (w := w) (N := N)) (headIncl K w N x) =
+      TailC0.ofHead x := by
+  refine Subtype.ext (funext fun μ => ?_)
+  show tailCoeff K w N μ (headIncl K w N x) = (TailC0.ofHead x).1 μ
+  rw [show (TailC0.ofHead x : TailC0 w N (WPHead K w N) _).1 μ =
+    if μ = 0 then x else 0 from rfl]
+  by_cases hμ : μ = 0
+  · subst hμ
+    rw [if_pos rfl]
+    have h := rhoHead_headIncl K w N x
+    rw [rhoHead_apply] at h
+    exact h
+  · rw [if_neg hμ]
+    have h1 : headIncl K w N x = headIncl K w N x * eTail K w N 0 := by
+      rw [show eTail K w N 0 = wpMonomial K w (wpMem_tailShift w 0) 1 from rfl]
+      rw [show (wpMonomial K w (wpMem_tailShift w (0 : TailIdx N)) 1 : WPA K w) =
+        1 from ?_]
+      · rw [mul_one]
+      · refine Subtype.ext (Subtype.ext ?_)
+        show MvPowerSeries.monomial (tailShift w (0 : TailIdx N)) (1 : K) = 1
+        rw [tailShift_zero]
+        exact MvPowerSeries.monomial_zero_one
+    rw [h1, tailCoeff_headIncl_mul_eTail, if_neg hμ]
+
 end TailConv
 
 /-! ### The head graph model `QHead` -/

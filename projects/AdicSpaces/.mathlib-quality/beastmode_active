@@ -1,1 +1,1 @@
-FOCUS: W17 — wpaTailEquiv (surjectivity via nonarch sums) then coeffLocEquiv assembly
+FOCUS: W17 assembly — coeffLocEquiv via base := TailC0.map headConst ∘ wpaTailEquiv (Away.lift/extensionHom + rev summation)
