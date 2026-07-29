@@ -51,6 +51,26 @@ variable (K : Type*) [NontriviallyNormedField K] [IsUltrametricDist K] [Complete
 variable (w : ℕ → ℕ)
 
 variable {K w} in
+/-- A common head stage for every datum of a finite rational covering
+(shared W21/W22 infrastructure: `nonempty_headModelData_all` + a `Finset.sup`
+of the thresholds). -/
+theorem exists_common_headModel_stage (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
+    ∃ M : ℕ, (∃ model : HeadModelData C.base, model.N = M) ∧
+      ∀ D ∈ C.covers, ∃ model : HeadModelData D, model.N = M := by
+  classical
+  obtain ⟨Nb, hb⟩ := nonempty_headModelData_all ϖ hK₀ C.base hC.base
+  choose Np hp using fun (D : { D : RationalLocData (WPA K w) // D ∈ C.covers }) =>
+    nonempty_headModelData_all ϖ hK₀ D.1 (hC.piece D.2)
+  set M : ℕ := max Nb (C.covers.attach.sup Np) with hM_def
+  refine ⟨M, hb M (by rw [hM_def]; exact le_max_left _ _), fun D hD => ?_⟩
+  refine hp ⟨D, hD⟩ M ?_
+  rw [hM_def]
+  exact le_trans (Finset.le_sup (Finset.mem_attach _ ⟨D, hD⟩))
+    (le_max_right _ _)
+
+variable {K w} in
 /-- The embedding half of the sheaf condition for `𝒜` (the
 `productRestrictionSub_isEmbedding_JetA` shape, `FJP/Over/SheafTransfer.lean:667`). -/
 theorem productRestrictionSub_isEmbedding_WPA (ϖ : Uniformizer K)
