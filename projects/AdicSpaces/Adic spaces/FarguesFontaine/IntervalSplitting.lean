@@ -14,7 +14,7 @@ condition of the `Y`-presheaf on a split interval, Kedlaya-style):
 * **Endpoint projections** `biFstQ`/`biSndQ` of the rational-exponent interval
   ring `BIQ q₁ q₂` into the completed endpoint fields, with the dense-layer
   identities and the three restriction laws (shared-left, shared-right, middle
-  match). Consequence: `biResQ'_split_injective` — an element of `B^{[q₁,q₂]}`
+  match). Consequence: `biResQ_split_injective` — an element of `B^{[q₁,q₂]}`
   is determined by its restrictions to the two halves `[q₁,r]`, `[r,q₂]`.
 
 * **The Mittag-Leffler splitting** `exists_wLoc_split`: every element of
@@ -23,7 +23,7 @@ condition of the `Y`-presheaf on a split interval, Kedlaya-style):
   all radii `σ ≥ τ` (via `WittVector.init`/`tail` truncation of a numerator
   and per-term comparison of the Gauss sup-norms).
 
-* **The glued element** `biGlue` with `biResQ'_split_surjective`: together
+* **The glued element** `biGlue` with `biResQ_split_surjective`: together
   with the separation above, the split fiber-product theorem
   `B^{[q₁,q₂]} ≅ B^{[q₁,r]} ×_{hatK τ} B^{[r,q₂]}` — the sheaf axiom of the
   interval presheaf on a two-piece closed cover.
@@ -287,105 +287,105 @@ theorem biSndQ_blocToBI (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
 
 /-- **Restriction preserves a shared left endpoint**: the `q₁`-component of the
 restriction to `[q₁, r]` is the original `q₁`-component. -/
-theorem biFstQ_biResQ'_left (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biFstQ_biResQ_left (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁) :
     (biFstQ p F ϖ q₁ r h₁ hr).comp
-        (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm)
+        (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm)
       = biFstQ p F ϖ q₁ q₂ h₁ h₂ := by
   have hfun : ⇑((biFstQ p F ϖ q₁ r h₁ hr).comp
-      (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm))
+      (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm))
       = ⇑(biFstQ p F ϖ q₁ q₂ h₁ h₂) := by
     refine (denseRange_blocToBI p F ϖ
       (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
       (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
       ((biFstQ_continuous p F ϖ q₁ r h₁ hr).comp
-        (biResQ'_continuous p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
+        (biResQ_continuous p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
           ⟨hlt.le, le_rfl⟩ hrm))
       (biFstQ_continuous p F ϖ q₁ q₂ h₁ h₂) (funext fun z => ?_)
     show biFstQ p F ϖ q₁ r h₁ hr
-        (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+        (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
           (blocToBI p F ϖ _ _ _ _ z))
       = biFstQ p F ϖ q₁ q₂ h₁ h₂ (blocToBI p F ϖ _ _ _ _ z)
-    rw [biResQ'_blocToBI, biFstQ_blocToBI, biFstQ_blocToBI]
+    rw [biResQ_blocToBI, biFstQ_blocToBI, biFstQ_blocToBI]
   exact RingHom.ext fun x => congrFun hfun x
 
 /-- **Restriction preserves a shared right endpoint**: the `q₂`-component of the
 restriction to `[r, q₂]` is the original `q₂`-component. -/
-theorem biSndQ_biResQ'_right (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biSndQ_biResQ_right (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁) :
     (biSndQ p F ϖ r q₂ hr h₂).comp
-        (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩)
+        (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩)
       = biSndQ p F ϖ q₁ q₂ h₁ h₂ := by
   have hfun : ⇑((biSndQ p F ϖ r q₂ hr h₂).comp
-      (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩))
+      (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩))
       = ⇑(biSndQ p F ϖ q₁ q₂ h₁ h₂) := by
     refine (denseRange_blocToBI p F ϖ
       (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
       (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
       ((biSndQ_continuous p F ϖ r q₂ hr h₂).comp
-        (biResQ'_continuous p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
+        (biResQ_continuous p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
           ⟨le_rfl, hlt.le⟩))
       (biSndQ_continuous p F ϖ q₁ q₂ h₁ h₂) (funext fun z => ?_)
     show biSndQ p F ϖ r q₂ hr h₂
-        (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+        (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
           (blocToBI p F ϖ _ _ _ _ z))
       = biSndQ p F ϖ q₁ q₂ h₁ h₂ (blocToBI p F ϖ _ _ _ _ z)
-    rw [biResQ'_blocToBI, biSndQ_blocToBI, biSndQ_blocToBI]
+    rw [biResQ_blocToBI, biSndQ_blocToBI, biSndQ_blocToBI]
   exact RingHom.ext fun x => congrFun hfun x
 
 /-- **The middle components match**: the `r`-component of the restriction to
 `[q₁, r]` equals the `r`-component of the restriction to `[r, q₂]`. -/
-theorem biSndQ_biResQ'_middle (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biSndQ_biResQ_middle (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁) :
     (biSndQ p F ϖ q₁ r h₁ hr).comp
-        (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm)
+        (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm)
       = (biFstQ p F ϖ r q₂ hr h₂).comp
-          (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩) := by
+          (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩) := by
   have hfun : ⇑((biSndQ p F ϖ q₁ r h₁ hr).comp
-      (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm))
+      (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm))
       = ⇑((biFstQ p F ϖ r q₂ hr h₂).comp
-        (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩)) := by
+        (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩)) := by
     refine (denseRange_blocToBI p F ϖ
       (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
       (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
       ((biSndQ_continuous p F ϖ q₁ r h₁ hr).comp
-        (biResQ'_continuous p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
+        (biResQ_continuous p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
           ⟨hlt.le, le_rfl⟩ hrm))
       ((biFstQ_continuous p F ϖ r q₂ hr h₂).comp
-        (biResQ'_continuous p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
+        (biResQ_continuous p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
           ⟨le_rfl, hlt.le⟩))
       (funext fun z => ?_)
     show biSndQ p F ϖ q₁ r h₁ hr
-        (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+        (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
           (blocToBI p F ϖ _ _ _ _ z))
       = biFstQ p F ϖ r q₂ hr h₂
-          (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+          (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
             (blocToBI p F ϖ _ _ _ _ z))
-    rw [biResQ'_blocToBI, biResQ'_blocToBI, biSndQ_blocToBI, biFstQ_blocToBI]
+    rw [biResQ_blocToBI, biResQ_blocToBI, biSndQ_blocToBI, biFstQ_blocToBI]
   exact RingHom.ext fun x => congrFun hfun x
 
 /-- **Separation for a split interval**: an interval-ring element is determined
 by its restrictions to the two halves (its endpoint components are recovered by
 the shared-endpoint laws). -/
-theorem biResQ'_split_injective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_split_injective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
     {x y : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂)}
-    (hL : biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm x
-      = biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm y)
-    (hR : biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ x
-      = biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ y) :
+    (hL : biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm x
+      = biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm y)
+    (hR : biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ x
+      = biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ y) :
     x = y := by
   have hfst : biFstQ p F ϖ q₁ q₂ h₁ h₂ x = biFstQ p F ϖ q₁ q₂ h₁ h₂ y := by
     rw [← RingHom.congr_fun
-        (biFstQ_biResQ'_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) x,
+        (biFstQ_biResQ_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) x,
       ← RingHom.congr_fun
-        (biFstQ_biResQ'_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) y,
+        (biFstQ_biResQ_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) y,
       RingHom.comp_apply, RingHom.comp_apply, hL]
   have hsnd : biSndQ p F ϖ q₁ q₂ h₁ h₂ x = biSndQ p F ϖ q₁ q₂ h₁ h₂ y := by
     rw [← RingHom.congr_fun
-        (biSndQ_biResQ'_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) x,
+        (biSndQ_biResQ_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) x,
       ← RingHom.congr_fun
-        (biSndQ_biResQ'_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) y,
+        (biSndQ_biResQ_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) y,
       RingHom.comp_apply, RingHom.comp_apply, hR]
   exact Subtype.ext (Prod.ext hfst hsnd)
 
@@ -572,7 +572,7 @@ theorem tendsto_BIProd_of_valued_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁}
 sequence: if `f` has the correct outer component and the sequence converges to
 `f` jointly and to `g₁`'s middle component at the split radius, then the left
 restriction of `f` is `g₁`. -/
-theorem biResQ'_eq_left_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_eq_left_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
     (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂))
     (h : ℕ → Bloc p F ϖ)
@@ -583,35 +583,35 @@ theorem biResQ'_eq_left_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ :
     (hmid : Filter.Tendsto (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
       (vpiQ_lt_one p F ϖ hr) (h n)) Filter.atTop
       (nhds (biSndQ p F ϖ q₁ r h₁ hr g₁))) :
-    biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁ := by
+    biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁ := by
   have hA : Filter.Tendsto
       (fun n => (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
         (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (h n)
           : ↥(BIQ p F ϖ q₁ r h₁ hr)))
       Filter.atTop
-      (nhds (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+      (nhds (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
         f)) := by
     refine Filter.Tendsto.congr
-      (fun n => biResQ'_blocToBI p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
+      (fun n => biResQ_blocToBI p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
         ⟨hlt.le, le_rfl⟩ hrm (h n)) ?_
-    exact ((biResQ'_continuous p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
+    exact ((biResQ_continuous p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
       ⟨hlt.le, le_rfl⟩ hrm).tendsto _).comp htof
   refine Subtype.ext (Prod.ext ?_ ?_)
   · exact (RingHom.congr_fun
-      (biFstQ_biResQ'_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) f).trans hfst
+      (biFstQ_biResQ_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) f).trans hfst
   · have hm1 : Filter.Tendsto
         (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
           (h n)) Filter.atTop
         (nhds (biSndQ p F ϖ q₁ r h₁ hr
-          (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+          (biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
             f))) := by
       refine Filter.Tendsto.congr
         (fun n => biSndQ_blocToBI p F ϖ q₁ r h₁ hr (h n))
         (((biSndQ_continuous p F ϖ q₁ r h₁ hr).tendsto _).comp hA)
     exact tendsto_nhds_unique hm1 hmid
 
-/-- Mirror of `biResQ'_eq_left_of_tendsto` for the right half. -/
-theorem biResQ'_eq_right_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+/-- Mirror of `biResQ_eq_left_of_tendsto` for the right half. -/
+theorem biResQ_eq_right_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
     (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂)) (f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂))
     (h : ℕ → Bloc p F ϖ)
@@ -622,32 +622,32 @@ theorem biResQ'_eq_right_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ 
     (hmid : Filter.Tendsto (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
       (vpiQ_lt_one p F ϖ hr) (h n)) Filter.atTop
       (nhds (biFstQ p F ϖ r q₂ hr h₂ g₂))) :
-    biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ := by
+    biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ := by
   have hA : Filter.Tendsto
       (fun n => (blocToBI p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
         (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (h n)
           : ↥(BIQ p F ϖ r q₂ hr h₂)))
       Filter.atTop
-      (nhds (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+      (nhds (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
         f)) := by
     refine Filter.Tendsto.congr
-      (fun n => biResQ'_blocToBI p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
+      (fun n => biResQ_blocToBI p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
         ⟨le_rfl, hlt.le⟩ (h n)) ?_
-    exact ((biResQ'_continuous p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
+    exact ((biResQ_continuous p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
       ⟨le_rfl, hlt.le⟩).tendsto _).comp htof
   refine Subtype.ext (Prod.ext ?_ ?_)
   · have hm1 : Filter.Tendsto
         (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
           (h n)) Filter.atTop
         (nhds (biFstQ p F ϖ r q₂ hr h₂
-          (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+          (biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
             f))) := by
       refine Filter.Tendsto.congr
         (fun n => biFstQ_blocToBI p F ϖ r q₂ hr h₂ (h n))
         (((biFstQ_continuous p F ϖ r q₂ hr h₂).tendsto _).comp hA)
     exact tendsto_nhds_unique hm1 hmid
   · exact (RingHom.congr_fun
-      (biSndQ_biResQ'_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) f).trans hsnd
+      (biSndQ_biResQ_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) f).trans hsnd
 
 /-- **The joint approximating sequence** of a matching pair, at accuracy
 `2⁻¹ ^ n`. -/
@@ -799,13 +799,13 @@ theorem tendsto_glueSeq_biGlue (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 <
     (glueSeq_eps_tendsto))
 
 /-- **The left restriction of the glued element.** -/
-theorem biResQ'_biGlue_left (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_biGlue_left (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
     (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
     (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
-    biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+    biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
       (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch) = g₁ :=
-  biResQ'_eq_left_of_tendsto p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ _ _
+  biResQ_eq_left_of_tendsto p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ _ _
     (biGlue_fst p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
     (tendsto_glueSeq_biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
     (tendsto_hatK_of_valued_le p F
@@ -814,13 +814,13 @@ theorem biResQ'_biGlue_left (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q�
       (glueSeq_eps_tendsto))
 
 /-- **The right restriction of the glued element.** -/
-theorem biResQ'_biGlue_right (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_biGlue_right (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
     (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
     (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
-    biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+    biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
       (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch) = g₂ :=
-  biResQ'_eq_right_of_tendsto p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₂ _ _
+  biResQ_eq_right_of_tendsto p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₂ _ _
     (biGlue_snd p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
     (tendsto_glueSeq_biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
     (tendsto_hatK_of_valued_le p F
@@ -831,16 +831,16 @@ theorem biResQ'_biGlue_right (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q
 /-- **Gluing surjectivity for a split interval**: every matching pair of
 half-interval elements is the pair of restrictions of an interval-ring
 element. -/
-theorem biResQ'_split_surjective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_split_surjective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
     (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
     (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
     ∃ f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂),
-      biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁
-      ∧ biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ :=
+      biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁
+      ∧ biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ :=
   ⟨biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch,
-    biResQ'_biGlue_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch,
-    biResQ'_biGlue_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch⟩
+    biResQ_biGlue_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch,
+    biResQ_biGlue_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch⟩
 
 
 /-! ### Power-boundedness in the interval ring (the plus-reconciliation

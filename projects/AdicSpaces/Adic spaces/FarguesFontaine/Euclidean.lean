@@ -549,7 +549,7 @@ theorem bddAbove_range_of_tendsto_zero {f : ℕ → NNReal}
   · exact le_max_of_le_left (hK₀ n (by omega)).le
 
 /-- Total form of the `A^r` term bound (no nonvanishing hypothesis). -/
-theorem gaussTerm_teichCoeffAr_le' {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+theorem gaussTerm_teichCoeffAr_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (n : ℕ) :
     ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
       ≤ Valued.v x := by
@@ -558,7 +558,7 @@ theorem gaussTerm_teichCoeffAr_le' {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       Valuation (hatK p F hρ0 hρ1) NNReal)).mp h0
     rw [hx0, teichCoeffAr_zero, Valuation.map_zero, mul_zero]
     exact zero_le
-  · exact gaussTerm_teichCoeffAr_le p F ϖ hx h0 n
+  · exact gaussTerm_teichCoeffAr_le_of_ne_zero p F ϖ hx h0 n
 
 /-- **Digit comparison (DC⁺)**: coordinate differences on `A^r` are controlled by
 the value of the difference plus one `ρ`-damped term. The engine of Kedlaya's
@@ -661,8 +661,8 @@ theorem digit_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       rw [← mul_assoc, mul_comm (ρ ^ k) ρ, mul_assoc, nnreal_mul_max]
     rw [h3]
     refine mul_le_mul_of_nonneg_left (max_le ?_ ?_) zero_le
-    · exact le_trans (gaussTerm_teichCoeffAr_le' p F ϖ hx k) (le_max_left _ _)
-    · exact le_trans (gaussTerm_teichCoeffAr_le' p F ϖ hy k) (le_max_right _ _)
+    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hx k) (le_max_left _ _)
+    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hy k) (le_max_right _ _)
   rcases eq_or_ne M 0 with hM0 | hM0
   · have hvx : Valued.v x = 0 :=
       le_antisymm (le_trans (le_max_left _ _) hM0.le) zero_le
@@ -767,7 +767,7 @@ theorem degAr_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)
           ≤ Valued.v x := by
         rw [← hvy]
-        exact gaussTerm_teichCoeffAr_le' p F ϖ hy n
+        exact gaussTerm_teichCoeffAr_le p F ϖ hy n
       rcases max_cases
         (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
         (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
@@ -797,7 +797,7 @@ theorem degAr_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         rw [← hvy]
         exact hay ▸ hyle
       have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
-          ≤ Valued.v x := gaussTerm_teichCoeffAr_le' p F ϖ hx n
+          ≤ Valued.v x := gaussTerm_teichCoeffAr_le p F ϖ hx n
       rcases max_cases
         (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
         (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
@@ -1014,9 +1014,9 @@ theorem valued_mul_sub_PhiHatK_convF_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ
   rw [← hb] at hdy
   have hdc := tendsto_convF p F hdx hdy
   have hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ Valued.v x :=
-    fun n => gaussTerm_teichCoeffAr_le' p F ϖ hx n
+    fun n => gaussTerm_teichCoeffAr_le p F ϖ hx n
   have hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ Valued.v y :=
-    fun n => gaussTerm_teichCoeffAr_le' p F ϖ hy n
+    fun n => gaussTerm_teichCoeffAr_le p F ϖ hy n
   rcases eq_or_ne (Valued.v x * Valued.v y) 0 with hvv | hvv
   · -- degenerate: all convolution terms vanish, both sides of the difference do
     have hterm0 : ∀ n, ρ ^ n * perfectoidValuation p F (convF F a b n) = 0 := by
@@ -1189,9 +1189,9 @@ theorem valued_degAr_PhiHatK_convF {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [← hb] at hdy
   have hdc := tendsto_convF p F hdx hdy
   have hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ Valued.v x :=
-    fun n => gaussTerm_teichCoeffAr_le' p F ϖ hx n
+    fun n => gaussTerm_teichCoeffAr_le p F ϖ hx n
   have hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ Valued.v y :=
-    fun n => gaussTerm_teichCoeffAr_le' p F ϖ hy n
+    fun n => gaussTerm_teichCoeffAr_le p F ϖ hy n
   have hvx0 : Valued.v x ≠ 0 :=
     (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0
   have hvy0 : Valued.v y ≠ 0 :=
@@ -1434,7 +1434,7 @@ theorem valued_divStep_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     _ = ρ ^ (n + m) * perfectoidValuation p F
         (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m)) := by
         rw [mul_inv_cancel₀ hxm0, mul_one]
-    _ ≤ Valued.v y := gaussTerm_teichCoeffAr_le' p F ϖ hy (n + m)
+    _ ≤ Valued.v y := gaussTerm_teichCoeffAr_le p F ϖ hy (n + m)
 
 /-- One division step never increases the value. -/
 theorem valued_sub_divStep_mul_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
@@ -1544,8 +1544,8 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       rw [← mul_assoc, mul_comm (ρ ^ k) ρ, mul_assoc, nnreal_mul_max]
     rw [h3]
     refine mul_le_mul_of_nonneg_left (max_le ?_ ?_) zero_le
-    · exact le_trans (gaussTerm_teichCoeffAr_le' p F ϖ hx k) (le_max_left _ _)
-    · exact le_trans (gaussTerm_teichCoeffAr_le' p F ϖ hy k) (le_max_right _ _)
+    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hx k) (le_max_left _ _)
+    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hy k) (le_max_right _ _)
   rcases eq_or_ne M 0 with hM0 | hM0
   · have hvx : Valued.v x = 0 :=
       le_antisymm (le_trans (le_max_left _ _) hM0.le) zero_le
@@ -1558,9 +1558,9 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         (Valuation.map_sub (perfectoidValuation p F) (a k) (b k)) zero_le) ?_
       refine le_trans (nnreal_mul_max _ _ _).le (max_le ?_ ?_)
       · rw [← hvx]
-        exact gaussTerm_teichCoeffAr_le' p F ϖ hx k
+        exact gaussTerm_teichCoeffAr_le p F ϖ hx k
       · rw [← hvy]
-        exact gaussTerm_teichCoeffAr_le' p F ϖ hy k
+        exact gaussTerm_teichCoeffAr_le p F ϖ hy k
     have hsub0 : Valued.v (x - y) = 0 := by
       refine le_antisymm (le_trans (Valuation.map_sub _ _ _)
         (max_le hvx.le hvy.le)) zero_le
@@ -1724,7 +1724,7 @@ theorem gaussTerm_sub_convF_divStep_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ 
             * (ρ ^ (n - k₀) * perfectoidValuation p F
               (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
             ≤ Valued.v y * (ε * Valued.v x) :=
-          mul_le_mul (gaussTerm_teichCoeffAr_le' p F ϖ hy (k₀ + m))
+          mul_le_mul (gaussTerm_teichCoeffAr_le p F ϖ hy (k₀ + m))
             (hεx (n - k₀) hj) zero_le zero_le
         have h2 : Valued.v y * (ε * Valued.v x)
             = (ε * Valued.v y) * Valued.v x := by
@@ -1734,7 +1734,7 @@ theorem gaussTerm_sub_convF_divStep_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ 
       · -- k₀ > n - m, so k₀ + m > n ≥ N: the y-term is c-damped
         have hk : N < k₀ + m := by omega
         exact mul_le_mul (hw2 (k₀ + m) hk)
-          (gaussTerm_teichCoeffAr_le' p F ϖ hx (n - k₀)) zero_le zero_le
+          (gaussTerm_teichCoeffAr_le p F ϖ hx (n - k₀)) zero_le zero_le
     have hfinal : ρ ^ n * perfectoidValuation p F
         ((teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)
           / teichCoeffAr p F ϖ hρ0 hρ1 x m)
@@ -1798,11 +1798,11 @@ theorem descent_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   -- value of Φc
   have hzterms : ∀ k, ρ ^ k * perfectoidValuation p F (zc k) ≤ Valued.v z := by
     intro k
-    have h1 := gaussTerm_teichCoeffAr_le' p F ϖ hzmem k
+    have h1 := gaussTerm_teichCoeffAr_le p F ϖ hzmem k
     rwa [hfun] at h1
   have hxterms : ∀ k, ρ ^ k * perfectoidValuation p F
       (teichCoeffAr p F ϖ hρ0 hρ1 x k) ≤ Valued.v x :=
-    fun k => gaussTerm_teichCoeffAr_le' p F ϖ hx k
+    fun k => gaussTerm_teichCoeffAr_le p F ϖ hx k
   have hvΦc : Valued.v (PhiHatK p F ϖ hρ0 hρ1
       (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x))) ≤ Valued.v y := by
     rw [valued_PhiHatK p F ϖ hρ0 hρ1 hcseqdec]
@@ -1853,7 +1853,7 @@ theorem descent_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     refine le_trans (mul_le_mul_of_nonneg_left
       (Valuation.map_sub (perfectoidValuation p F) _ _) zero_le) ?_
     refine le_trans (nnreal_mul_max _ _ _).le (max_le ?_ ?_)
-    · exact gaussTerm_teichCoeffAr_le' p F ϖ hy k
+    · exact gaussTerm_teichCoeffAr_le p F ϖ hy k
     · exact le_trans (gaussTerm_convF_le p F zc _ hzterms hxterms k) hvzvx
   -- v((y − zx) − Φw) ≤ c
   have hkey : Valued.v ((y - z * x) - PhiHatK p F ϖ hρ0 hρ1 w) ≤ c := by

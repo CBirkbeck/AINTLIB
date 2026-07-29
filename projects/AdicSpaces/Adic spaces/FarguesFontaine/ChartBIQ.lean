@@ -326,7 +326,7 @@ noncomputable def windowResBIQ (n : ℕ) (r₁ r₂ : ℚ) (hr₁ : 0 < r₁)
     (hr₂m : 1 / (p ^ (n + 1) : ℚ) ≤ r₂ ∧ r₂ ≤ 1 / (p ^ n : ℚ)) :
     presheafValue (chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1)
       →+* ↥(BIQ p F ϖ r₁ r₂ hr₁ hr₂) :=
-  (biResQ' p F ϖ (1 / (p ^ n : ℚ)) (1 / (p ^ (n + 1) : ℚ)) r₁ r₂
+  (biResQ p F ϖ (1 / (p ^ n : ℚ)) (1 / (p ^ (n + 1) : ℚ)) r₁ r₂
       (invPowQ_pos p n) (invPowQ_pos p (n + 1)) hr₁ hr₂
       (invPow_succ_lt p n) hr₁m hr₂m).comp
     (chartRingEquivBIQ p F ϖ n).toRingHom
@@ -347,7 +347,7 @@ noncomputable def windowResBIQNeg (m : ℕ) (r₁ r₂ : ℚ) (hr₁ : 0 < r₁)
     (hr₂m : (p ^ m : ℚ) / (p : ℚ) ≤ r₂ ∧ r₂ ≤ (p ^ m : ℚ)) :
     presheafValue (chartData p F (pPowM p F ϖ m) 1 1 p 1)
       →+* ↥(BIQ p F ϖ r₁ r₂ hr₁ hr₂) :=
-  (biResQ' p F ϖ ((p ^ m : ℚ)) ((p ^ m : ℚ) / (p : ℚ)) r₁ r₂
+  (biResQ p F ϖ ((p ^ m : ℚ)) ((p ^ m : ℚ) / (p : ℚ)) r₁ r₂
       (powQ_pos p m) (powQ_div_pos p m) hr₁ hr₂
       (powQ_div_lt p m) hr₁m hr₂m).comp
     (chartRingEquivBIQNeg p F ϖ m).toRingHom

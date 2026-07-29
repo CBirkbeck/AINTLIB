@@ -709,7 +709,7 @@ theorem isClosed_ball {r : NNReal} (hr : 0 < r) :
 
 /-- **Term bound on `A^r`** (half of Kedlaya's (2.2.1) on the completion): every
 Gauss term of the limit coordinates is at most the completed-field value. -/
-theorem gaussTerm_teichCoeffAr_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+theorem gaussTerm_teichCoeffAr_le_of_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : Valued.v x ≠ 0)
     (n : ℕ) :
     ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n) ≤ Valued.v x := by

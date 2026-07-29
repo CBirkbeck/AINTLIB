@@ -255,7 +255,7 @@ noncomputable instance (i : DyadicIdx) : CommRing (dyadicVal p F ϖ i) := by
 /-- The restriction between nested dyadic indices. -/
 noncomputable def dyadicRes {i' i : DyadicIdx} (h : DyadicIdx.Nested p i' i) :
     dyadicVal p F ϖ i →+* dyadicVal p F ϖ i' :=
-  biResQ' p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p)
+  biResQ p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p)
     (i.q₁_pos p) (i.q₂_pos p) (i'.q₁_pos p) (i'.q₂_pos p)
     (i.q₂_lt_q₁ p) (h.mem₁ p) (h.mem₂ p)
 
@@ -475,14 +475,14 @@ theorem DyadicIdx.Nested.trans {i'' i' i : DyadicIdx}
 the identity. -/
 theorem dyadicRes_id (i : DyadicIdx) (h : DyadicIdx.Nested p i i) :
     dyadicRes p F ϖ h = RingHom.id (dyadicVal p F ϖ i) :=
-  biResQ'_id p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p) (i.q₂_lt_q₁ p)
+  biResQ_id p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p) (i.q₂_lt_q₁ p)
 
 /-- **Composition law for dyadic restriction.** -/
 theorem dyadicRes_comp {i'' i' i : DyadicIdx}
     (h₁ : DyadicIdx.Nested p i'' i') (h₂ : DyadicIdx.Nested p i' i) :
     (dyadicRes p F ϖ h₁).comp (dyadicRes p F ϖ h₂)
       = dyadicRes p F ϖ (h₁.trans p h₂) :=
-  biResQ'_comp p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p) (i''.q₁ p) (i''.q₂ p)
+  biResQ_comp p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p) (i''.q₁ p) (i''.q₂ p)
     (i.q₁_pos p) (i.q₂_pos p) (i'.q₁_pos p) (i'.q₂_pos p)
     (i''.q₁_pos p) (i''.q₂_pos p) (i.q₂_lt_q₁ p) (i'.q₂_lt_q₁ p)
     (h₂.mem₁ p) (h₂.mem₂ p) (h₁.mem₁ p) (h₁.mem₂ p)
@@ -519,17 +519,17 @@ theorem limitEvalTop_bijective (i₀ : DyadicIdx) :
 
 /-- **Unique gluing over a split interval** (`∃!`-package of the split
 fiber-product theorem). -/
-theorem biResQ'_split_existsUnique (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_split_existsUnique (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
     (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
     (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
     ∃! f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂),
-      biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁
-      ∧ biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ := by
-  obtain ⟨f, hfL, hfR⟩ := biResQ'_split_surjective p F ϖ q₁ q₂ r h₁ h₂ hr
+      biResQ p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁
+      ∧ biResQ p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ := by
+  obtain ⟨f, hfL, hfR⟩ := biResQ_split_surjective p F ϖ q₁ q₂ r h₁ h₂ hr
     hlt hrm g₁ g₂ hmatch
   refine ⟨f, ⟨hfL, hfR⟩, fun f' hf' => ?_⟩
-  exact biResQ'_split_injective p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm
+  exact biResQ_split_injective p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm
     (hf'.1.trans hfL.symm) (hf'.2.trans hfR.symm)
 
 /-- **Unique gluing over a split dyadic index**: a matching pair of sections
@@ -555,11 +555,11 @@ theorem exists_unique_dyadicRes_glue (i : DyadicIdx) (j : ℕ)
       ∧ (DyadicIdx.splitL i j hj hj').q₂ p ≤ i.q₁ p :=
     ⟨(DyadicIdx.splitL_nested p i j hj hj').1,
       (DyadicIdx.splitR_nested p i j hj hj').2⟩
-  obtain ⟨f, hfL, hfR⟩ := biResQ'_split_surjective p F ϖ (i.q₁ p) (i.q₂ p)
+  obtain ⟨f, hfL, hfR⟩ := biResQ_split_surjective p F ϖ (i.q₁ p) (i.q₂ p)
     ((DyadicIdx.splitL i j hj hj').q₂ p) (i.q₁_pos p) (i.q₂_pos p)
     ((DyadicIdx.splitL i j hj hj').q₂_pos p) (i.q₂_lt_q₁ p) hrm gL gR hmatch
   refine ⟨f, ⟨hfL, hfR⟩, fun f' hf' => ?_⟩
-  exact biResQ'_split_injective p F ϖ (i.q₁ p) (i.q₂ p)
+  exact biResQ_split_injective p F ϖ (i.q₁ p) (i.q₂ p)
     ((DyadicIdx.splitL i j hj hj').q₂ p) (i.q₁_pos p) (i.q₂_pos p)
     ((DyadicIdx.splitL i j hj hj').q₂_pos p) (i.q₂_lt_q₁ p) hrm
     (hf'.1.trans hfL.symm) (hf'.2.trans hfR.symm)
@@ -569,7 +569,7 @@ sections over the consecutive pieces `[q t, q (t+1)]` of a strictly increasing
 exponent chain are the restrictions of a unique section over the whole
 interval `[q 0, q (m+1)]` — the finite-chain sheaf axiom of the interval
 presheaf, by induction on the two-piece split theorem. -/
-theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
+theorem biResQ_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
     (hlt : ∀ t, q t < q (t + 1))
     (g : ∀ t, ↥(BIQ p F ϖ (q (t + 1)) (q t) (hq (t + 1)) (hq t)))
     (hmatch : ∀ t, biSndQ p F ϖ (q (t + 2)) (q (t + 1)) (hq (t + 2))
@@ -577,7 +577,7 @@ theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
       = biFstQ p F ϖ (q (t + 1)) (q t) (hq (t + 1)) (hq t) (g t)) :
     ∀ m : ℕ, ∃! f : ↥(BIQ p F ϖ (q (m + 1)) (q 0) (hq (m + 1)) (hq 0)),
       ∀ t, ∀ ht : t ≤ m,
-        biResQ' p F ϖ (q (m + 1)) (q 0) (q (t + 1)) (q t)
+        biResQ p F ϖ (q (m + 1)) (q 0) (q (t + 1)) (q t)
           (hq (m + 1)) (hq 0) (hq (t + 1)) (hq t)
           ((strictMono_nat_of_lt_succ hlt) (Nat.succ_pos m))
           ⟨(strictMono_nat_of_lt_succ hlt).monotone (Nat.zero_le (t + 1)),
@@ -591,16 +591,16 @@ theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
   | zero =>
     refine ⟨g 0, fun t ht => ?_, fun f' hf' => ?_⟩
     · obtain rfl : t = 0 := Nat.le_zero.mp ht
-      rw [biResQ'_id p F ϖ (q 1) (q 0) (hq 1) (hq 0) (hlt 0)]
+      rw [biResQ_id p F ϖ (q 1) (q 0) (hq 1) (hq 0) (hlt 0)]
       rfl
     · have h0 := hf' 0 le_rfl
-      rw [biResQ'_id p F ϖ (q 1) (q 0) (hq 1) (hq 0) (hlt 0)] at h0
+      rw [biResQ_id p F ϖ (q 1) (q 0) (hq 1) (hq 0) (hlt 0)] at h0
       exact h0
   | succ m ih =>
     obtain ⟨fm, hfm, hfmu⟩ := ih
     have hsm := strictMono_nat_of_lt_succ hlt
     -- the top endpoint of the inductive glue is the top endpoint of `g m`
-    have hcomp := biFstQ_biResQ'_left p F ϖ (q (m + 1)) (q 0) (q m)
+    have hcomp := biFstQ_biResQ_left p F ϖ (q (m + 1)) (q 0) (q m)
       (hq (m + 1)) (hq 0) (hq m) (hsm (Nat.succ_pos m))
       ⟨hsm.monotone (Nat.zero_le m), hsm.monotone (Nat.le_succ m)⟩
     have hend : biFstQ p F ϖ (q (m + 1)) (q 0) (hq (m + 1)) (hq 0) fm
@@ -613,7 +613,7 @@ theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
         (hq (m + 1)) (g (m + 1))
         = biFstQ p F ϖ (q (m + 1)) (q 0) (hq (m + 1)) (hq 0) fm :=
       (hmatch m).trans hend.symm
-    obtain ⟨f, ⟨hfL, hfR⟩, hfu⟩ := biResQ'_split_existsUnique p F ϖ
+    obtain ⟨f, ⟨hfL, hfR⟩, hfu⟩ := biResQ_split_existsUnique p F ϖ
       (q (m + 2)) (q 0) (q (m + 1)) (hq (m + 2)) (hq 0) (hq (m + 1))
       (hsm (Nat.succ_pos (m + 1)))
       ⟨hsm.monotone (Nat.zero_le (m + 1)),
@@ -624,7 +624,7 @@ theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
       · subst ht'
         exact hfL
       · have htm : t ≤ m := Nat.lt_succ_iff.mp (lt_of_le_of_ne ht ht')
-        have hcompres := biResQ'_comp p F ϖ (q (m + 2)) (q 0)
+        have hcompres := biResQ_comp p F ϖ (q (m + 2)) (q 0)
           (q (m + 1)) (q 0) (q (t + 1)) (q t)
           (hq (m + 2)) (hq 0) (hq (m + 1)) (hq 0) (hq (t + 1)) (hq t)
           (hsm (Nat.succ_pos (m + 1))) (hsm (Nat.succ_pos m))
@@ -641,14 +641,14 @@ theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
         rw [← h2]
         exact hfm t htm
     · refine hfu f' ⟨hf' (m + 1) le_rfl, ?_⟩
-      refine hfmu (biResQ' p F ϖ (q (m + 2)) (q 0) (q (m + 1)) (q 0)
+      refine hfmu (biResQ p F ϖ (q (m + 2)) (q 0) (q (m + 1)) (q 0)
         (hq (m + 2)) (hq 0) (hq (m + 1)) (hq 0)
         (hsm (Nat.succ_pos (m + 1)))
         ⟨hsm.monotone (Nat.zero_le (m + 1)),
           hsm.monotone (Nat.le_succ (m + 1))⟩
         ⟨le_rfl, hsm.monotone (Nat.zero_le (m + 2))⟩ f')
         (fun t ht => ?_)
-      have hcompres := biResQ'_comp p F ϖ (q (m + 2)) (q 0)
+      have hcompres := biResQ_comp p F ϖ (q (m + 2)) (q 0)
         (q (m + 1)) (q 0) (q (t + 1)) (q t)
         (hq (m + 2)) (hq 0) (hq (m + 1)) (hq 0) (hq (t + 1)) (hq t)
         (hsm (Nat.succ_pos (m + 1))) (hsm (Nat.succ_pos m))
@@ -692,7 +692,7 @@ instance (i : DyadicIdx) : CompleteSpace (dyadicVal p F ϖ i) :=
 theorem dyadicRes_continuous {i' i : DyadicIdx}
     (h : DyadicIdx.Nested p i' i) :
     Continuous (dyadicRes p F ϖ h) :=
-  biResQ'_continuous p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p)
+  biResQ_continuous p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p)
     (i.q₁_pos p) (i.q₂_pos p) (i'.q₁_pos p) (i'.q₂_pos p)
     (i.q₂_lt_q₁ p) (h.mem₁ p) (h.mem₂ p)
 

@@ -902,12 +902,14 @@ theorem windowV_disjoint {n m : ℤ} (h : n ≠ m) :
     _ < cFF p * (p : ℚ) ^ m :=
         mul_lt_mul_of_pos_right (one_lt_cFF hp1) (zpow_pos hp0 m)
 
-private theorem not_vle_pow_p_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
+/-- No power of `p` lies in the support of a point of `𝒴`. -/
+theorem not_vle_pow_p_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
     ¬ v.vle ((p : Ainf p F) ^ k) 0 := fun h =>
   v_p_ne_zero hv ((v.mem_supp_iff _).mp
     ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
 
-private theorem not_vle_pow_teichPi_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
+/-- No power of `[ϖ♭]` lies in the support of a point of `𝒴`. -/
+theorem not_vle_pow_teichPi_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
     ¬ v.vle (teichPi p F ϖ ^ k) 0 := fun h =>
   v_teichPi_ne_zero hv ((v.mem_supp_iff _).mp
     ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))

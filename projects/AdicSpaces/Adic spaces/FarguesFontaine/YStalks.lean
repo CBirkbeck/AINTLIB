@@ -895,25 +895,6 @@ theorem isSheafyOn_runChart (n : ℤ) (k : ℕ) :
       (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
       (fun E hE => span_image_runChart_eq_top p F ϖ n k E hE) C hC hCS f hf
 
-private theorem ainf_pair_spec' :
-    ∃ P : PairOfDefinition (Ainf p F), ∃ g₁ g₂ : P.A₀,
-      P.I = Ideal.span ({g₁, g₂} : Set P.A₀) ∧
-      (∀ x : P.A₀, (x : Ainf p F) ∈ (ringPlus (Ainf p F) : Subring (Ainf p F))) ∧
-      Iinf p F (IsTateRing.pseudoUniformizer (A := F)) =
-        Ideal.span ({(g₁ : Ainf p F), (g₂ : Ainf p F)} : Set (Ainf p F)) := by
-  refine ⟨pairOfDefinition_ofAdic (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
-      (Submodule.fg_span (Set.toFinite _)),
-    ⟨(p : Ainf p F), trivial⟩, ⟨teichPi p F (IsTateRing.pseudoUniformizer (A := F)),
-      trivial⟩, ?_, fun _ => trivial, ?_⟩
-  · show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F))) = _
-    rw [show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
-        = Ideal.map (Subring.topEquiv (R := Ainf p F)).symm.toRingHom
-          (Ideal.span {(p : Ainf p F),
-            teichPi p F (IsTateRing.pseudoUniformizer (A := F))}) from rfl,
-      Ideal.map_span, Set.image_insert_eq, Set.image_singleton]
-    rfl
-  · rfl
-
 /-- **Valid rational subsets of `Spa(A_inf, A_inf)` are quasi-compact**
 (Wedhorn 7.35(2) at the two-generator ideal `(p, [ϖ])`): openness of the
 tray span gives `I_inf ≤ √(span T)`. -/
@@ -922,7 +903,7 @@ theorem isCompact_subtype_rationalOpen_ainf (E : RationalLocData (Ainf p F))
     IsCompact (Subtype.val ⁻¹' rationalOpen E.T E.s
       : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
   classical
-  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := ainf_pair_spec' p F
+  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := exists_pairOfDefinition_Iinf p F
   refine isCompact_subtype_rationalOpen₂ P hpair hA₀le _ hIeq E.T E.s ?_
   obtain ⟨N, hN⟩ := (isAdic_iff.mp
       (isAdic_Iinf p F (IsTateRing.pseudoUniformizer (A := F)))).2

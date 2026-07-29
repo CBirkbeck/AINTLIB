@@ -238,16 +238,6 @@ theorem curve_eq_image_window_zero :
       exact ⟨y.1, hn, rfl⟩
     simpa using this
 
-private theorem not_vle_pow_p_zero' {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
-    ¬ v.vle ((p : Ainf p F) ^ k) 0 := fun h =>
-  v_p_ne_zero hv ((v.mem_supp_iff _).mp
-    ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
-
-private theorem not_vle_pow_teichPi_zero' {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ)
-    (k : ℕ) : ¬ v.vle (teichPi p F ϖ ^ k) 0 := fun h =>
-  v_teichPi_ne_zero hv ((v.mem_supp_iff _).mp
-    ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
-
 private theorem isOpen_windowU_Y (n : ℤ) :
     IsOpen {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} := by
   have heq : {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} =
@@ -259,7 +249,7 @@ private theorem isOpen_windowU_Y (n : ℤ) :
     simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage, windowU,
       basicOpen, KGE, KLE]
     exact ⟨fun ⟨_, h1, h2⟩ =>
-        ⟨⟨h1, not_vle_pow_p_zero' p F ϖ y.2 _⟩, ⟨h2, not_vle_pow_teichPi_zero' p F ϖ y.2 _⟩⟩,
+        ⟨⟨h1, not_vle_pow_p_zero p F ϖ y.2 _⟩, ⟨h2, not_vle_pow_teichPi_zero p F ϖ y.2 _⟩⟩,
       fun ⟨⟨h1, _⟩, ⟨h2, _⟩⟩ => ⟨y.2, h1, h2⟩⟩
   rw [heq]
   exact (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _)).inter
@@ -276,7 +266,7 @@ private theorem isOpen_windowV_Y (n : ℤ) :
     simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage, windowV,
       basicOpen, KGE, KLE]
     exact ⟨fun ⟨_, h1, h2⟩ =>
-        ⟨⟨h1, not_vle_pow_p_zero' p F ϖ y.2 _⟩, ⟨h2, not_vle_pow_teichPi_zero' p F ϖ y.2 _⟩⟩,
+        ⟨⟨h1, not_vle_pow_p_zero p F ϖ y.2 _⟩, ⟨h2, not_vle_pow_teichPi_zero p F ϖ y.2 _⟩⟩,
       fun ⟨⟨h1, _⟩, ⟨h2, _⟩⟩ => ⟨y.2, h1, h2⟩⟩
   rw [heq]
   exact (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _)).inter
@@ -399,7 +389,7 @@ private theorem windowU_zero_trace_eq :
   constructor
   · rintro ⟨hY, hge, hle⟩
     exact ⟨⟨hKGE.mp hge, fun h0 => v_p_ne_zero hY h0⟩,
-      ⟨hKLE.mp hle, fun h0 => not_vle_pow_teichPi_zero' p F ϖ hY _ h0⟩⟩
+      ⟨hKLE.mp hle, fun h0 => not_vle_pow_teichPi_zero p F ϖ hY _ h0⟩⟩
   · rintro ⟨⟨h₁, hs₁⟩, ⟨h₂, hs₂⟩⟩
     have hprime : ((v : Spv (Ainf p F)).supp).IsPrime := inferInstance
     have hY : (v : Spv (Ainf p F)) ∈ Y p F ϖ := by
@@ -434,8 +424,8 @@ private theorem windowV_zero_trace_eq :
     rw [show ((p : ℚ) ^ ((0 : ℤ) + 1)) = (p : ℚ) from by rw [zero_add, zpow_one], KLE]
   constructor
   · rintro ⟨hY, hge, hle⟩
-    exact ⟨⟨hKGE.mp hge, fun h0 => not_vle_pow_p_zero' p F ϖ hY _ h0⟩,
-      ⟨hKLE.mp hle, fun h0 => not_vle_pow_teichPi_zero' p F ϖ hY _ h0⟩⟩
+    exact ⟨⟨hKGE.mp hge, fun h0 => not_vle_pow_p_zero p F ϖ hY _ h0⟩,
+      ⟨hKLE.mp hle, fun h0 => not_vle_pow_teichPi_zero p F ϖ hY _ h0⟩⟩
   · rintro ⟨⟨h₁, hs₁⟩, ⟨h₂, hs₂⟩⟩
     have hprime : ((v : Spv (Ainf p F)).supp).IsPrime := inferInstance
     have hY : (v : Spv (Ainf p F)) ∈ Y p F ϖ := by
@@ -449,29 +439,6 @@ private theorem windowV_zero_trace_eq :
             rw [Rat.den_natCast]
             omega)))
     exact ⟨hY, hKGE.mpr h₁, hKLE.mpr h₂⟩
-
-/-- Quasicompactness of the closed-window hull: each window is contained in a
-quasicompact subset of `Spa(A_inf, A_inf)` cut out by the two `vle`-inequalities and the
-nonvanishing conditions (a rational-subset-shaped set, quasicompact by the Boolean
-product-embedding machinery of `SpaCompact`/`ValuationSpectrumCompact`). -/
-private theorem ainf_pair_spec :
-    ∃ P : PairOfDefinition (Ainf p F), ∃ g₁ g₂ : P.A₀,
-      P.I = Ideal.span ({g₁, g₂} : Set P.A₀) ∧
-      (∀ x : P.A₀, (x : Ainf p F) ∈ (ringPlus (Ainf p F) : Subring (Ainf p F))) ∧
-      Iinf p F (IsTateRing.pseudoUniformizer (A := F)) =
-        Ideal.span ({(g₁ : Ainf p F), (g₂ : Ainf p F)} : Set (Ainf p F)) := by
-  refine ⟨pairOfDefinition_ofAdic (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
-      (Submodule.fg_span (Set.toFinite _)),
-    ⟨(p : Ainf p F), trivial⟩, ⟨teichPi p F (IsTateRing.pseudoUniformizer (A := F)),
-      trivial⟩, ?_, fun _ => trivial, ?_⟩
-  · show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F))) = _
-    rw [show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
-        = Ideal.map (Subring.topEquiv (R := Ainf p F)).symm.toRingHom
-          (Ideal.span {(p : Ainf p F),
-            teichPi p F (IsTateRing.pseudoUniformizer (A := F))}) from rfl,
-      Ideal.map_span, Set.image_insert_eq, Set.image_singleton]
-    rfl
-  · rfl
 
 private theorem iinf_le_radical_of_pure_powers {T : Finset (Ainf p F)}
     (hp : ∃ n : ℕ, (p : Ainf p F) ^ n ∈ T)
@@ -498,7 +465,7 @@ theorem isCompact_windowU_zero :
       Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
   classical
   rw [windowU_zero_trace_eq]
-  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := ainf_pair_spec p F
+  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := exists_pairOfDefinition_Iinf p F
   refine isCompact_subtype_rationalOpen₂ P hpair hA₀le _ hIeq _ _ ?_
   refine iinf_le_radical_of_pure_powers p F ϖ ⟨1 + (cFF p).num.toNat, ?_⟩
     ⟨1 + (cFF p).den, by omega, ?_⟩
@@ -513,7 +480,7 @@ theorem isCompact_windowV_zero :
       Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
   classical
   rw [windowV_zero_trace_eq]
-  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := ainf_pair_spec p F
+  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := exists_pairOfDefinition_Iinf p F
   refine isCompact_subtype_rationalOpen₂ P hpair hA₀le _ hIeq _ _ ?_
   refine iinf_le_radical_of_pure_powers p F ϖ
     ⟨(cFF p).num.toNat + ((p : ℚ)).num.toNat, ?_⟩
@@ -568,12 +535,6 @@ instance instCompactSpaceCurve : CompactSpace (Curve p F ϖ) := by
   rw [← isCompact_univ_iff, ← curve_eq_image_window_zero p F ϖ]
   exact (hSU.image (isOpenQuotientMap_toCurve p F ϖ).continuous).union
     (hSV.image (isOpenQuotientMap_toCurve p F ϖ).continuous)
-
-/-- **The curve is nonempty** (equivalently `𝒴 ≠ ∅`): the `ρ = 1/2` Gauss point
-`w_ρ(Σ pⁿ[aₙ]) = sup ρⁿ|aₙ|` is a continuous multiplicative valuation on `A_inf`
-with `w(p·[ϖ]) = ρ·|ϖ| ≠ 0` (Fargues–Fontaine, *Courbes et fibrés vectoriels*,
-§1.4; Kedlaya 1004.0466, Lemma 4.1 for multiplicativity — see `GaussPoint.lean`). -/
-theorem Y_nonempty : (Y p F ϖ).Nonempty := Y_nonempty' p F ϖ
 
 end FarguesFontaine
 

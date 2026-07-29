@@ -19,7 +19,7 @@ The weighted Gauss value `w_ρ` (`GaussNorm.lean`) is bundled as a rank-1
 
 * `FarguesFontaine.gaussVal` : the bundled Gauss valuation.
 * `FarguesFontaine.gaussVal_isContinuous` : continuity in the sense of Wedhorn 7.7.
-* `FarguesFontaine.gaussPoint_mem_Y` / `FarguesFontaine.Y_nonempty'` : the Gauss point
+* `FarguesFontaine.gaussPoint_mem_Y` / `FarguesFontaine.Y_nonempty` : the Gauss point
   lies in `𝒴`.
 
 ## Sources
@@ -176,8 +176,11 @@ theorem gaussPoint_mem_Y {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
     rw [hbr, gaussVal_apply, gaussVal_apply, gaussValue_zero p F ρ] at hle
     exact gaussValue_p_teichPi_ne_zero p F ϖ hρ0 hρ1 (le_antisymm hle zero_le)
 
-/-- **`𝒴` is nonempty**: witnessed by the `ρ = 1/2` Gauss point. -/
-theorem Y_nonempty' : (Y p F ϖ).Nonempty := by
+/-- **`𝒴` is nonempty** (equivalently, the curve is nonempty): the `ρ = 1/2` Gauss point
+`w_ρ(Σ pⁿ[aₙ]) = sup ρⁿ|aₙ|` is a continuous multiplicative valuation on `A_inf`
+with `w(p·[ϖ]) = ρ·|ϖ| ≠ 0` (Fargues–Fontaine, *Courbes et fibrés vectoriels*,
+§1.4; Kedlaya 1004.0466, Lemma 4.1 for multiplicativity). -/
+theorem Y_nonempty : (Y p F ϖ).Nonempty := by
   have h0 : (0 : NNReal) < 2⁻¹ := by norm_num
   have h1 : (2⁻¹ : NNReal) < 1 := by
     rw [← NNReal.coe_lt_coe]

@@ -453,58 +453,6 @@ noncomputable def BIQ (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) :
   BISub p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
     (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
 
-/-- The affine interpolation parameter is in `[0, 1]` for exponents inside the
-interval. -/
-theorem theta_mem_unit {q₁ q₂ r : ℚ} (hlt : q₁ < q₂) (hr₁ : q₁ ≤ r)
-    (hr₂ : r ≤ q₂) :
-    (0 : ℝ) ≤ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ)
-      ∧ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ) ≤ 1 := by
-  have h1 : (0 : ℚ) ≤ (q₂ - r) / (q₂ - q₁) := by
-    apply div_nonneg <;> linarith
-  have h2 : (q₂ - r) / (q₂ - q₁) ≤ 1 := by
-    rw [div_le_one (by linarith)]
-    linarith
-  exact ⟨by exact_mod_cast h1, by exact_mod_cast h2⟩
-
-/-- **The rational-exponent restriction map** `B^{[q₁,q₂]} →+* B^{[r₁,r₂]}` for
-`r₁, r₂ ∈ [q₁, q₂]` (D-i-t4 substrate). -/
-noncomputable def biResQ (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
-    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₁ < q₂)
-    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂) :
-    ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) →+* ↥(BIQ p F ϖ r₁ r₂ hr₁ hr₂) :=
-  (biCongr p F ϖ (vpiQ_interpolate p F ϖ hlt.ne)
-      (vpiQ_interpolate p F ϖ hlt.ne)
-      (hρ₁0' := vpiQ_pos p F ϖ r₁) (hρ₁1' := vpiQ_lt_one p F ϖ hr₁)
-      (hρ₂0' := vpiQ_pos p F ϖ r₂) (hρ₂1' := vpiQ_lt_one p F ϖ hr₂)).toRingHom.comp
-    (biRes p F ϖ
-      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
-      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)
-      (theta_mem_unit hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit hlt hr₁m.1 hr₁m.2).2
-      (theta_mem_unit hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit hlt hr₂m.1 hr₂m.2).2
-      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
-          exact vpiQ_pos p F ϖ r₁)
-      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
-          exact vpiQ_lt_one p F ϖ hr₁)
-      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
-          exact vpiQ_pos p F ϖ r₂)
-      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
-          exact vpiQ_lt_one p F ϖ hr₂))
-
-
-/-- The rational-exponent restriction is the identity on the dense
-`Bloc`-layer. -/
-theorem biResQ_blocToBI (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
-    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₁ < q₂)
-    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂) (z : Bloc p F ϖ) :
-    biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
-        (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-          (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z)
-      = blocToBI p F ϖ (vpiQ_pos p F ϖ r₁) (vpiQ_lt_one p F ϖ hr₁)
-          (vpiQ_pos p F ϖ r₂) (vpiQ_lt_one p F ϖ hr₂) z := by
-  show (biCongr p F ϖ _ _) (biRes p F ϖ _ _ _ _ _ _ _ _
-    (blocToBI p F ϖ _ _ _ _ z)) = _
-  rw [biRes_blocToBI, biCongr_blocToBI]
-
 /-- The interval-restriction map is continuous. -/
 theorem biRes_continuous {θ₁ θ₂ : ℝ}
     (hθ₁0 : 0 ≤ θ₁) (hθ₁1 : θ₁ ≤ 1) (hθ₂0 : 0 ≤ θ₂) (hθ₂1 : θ₂ ≤ 1)
@@ -534,75 +482,6 @@ theorem biCongr_continuous (h₁ : ρ₁ = ρ₁') (h₂ : ρ₂ = ρ₂')
   subst h₁
   subst h₂
   exact continuous_id
-
-/-- The rational-exponent restriction map is continuous. -/
-theorem biResQ_continuous (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
-    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₁ < q₂)
-    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂) :
-    Continuous (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m) := by
-  rw [biResQ]
-  exact (biCongr_continuous p F ϖ (vpiQ_interpolate p F ϖ hlt.ne)
-      (vpiQ_interpolate p F ϖ hlt.ne)).comp
-    (biRes_continuous p F ϖ
-      (theta_mem_unit hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit hlt hr₁m.1 hr₁m.2).2
-      (theta_mem_unit hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit hlt hr₂m.1 hr₂m.2).2
-      _ _ _ _)
-
-/-- **Identity law**: restricting to the same interval is the identity. -/
-theorem biResQ_id (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) (hlt : q₁ < q₂) :
-    biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨le_refl q₁, hlt.le⟩
-        ⟨hlt.le, le_refl q₂⟩
-      = RingHom.id ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) := by
-  have hfun : ⇑(biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨le_refl q₁, hlt.le⟩
-      ⟨hlt.le, le_refl q₂⟩) = id := by
-    refine (denseRange_blocToBI p F ϖ
-      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
-      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
-      (biResQ_continuous p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt
-        ⟨le_refl q₁, hlt.le⟩ ⟨hlt.le, le_refl q₂⟩)
-      continuous_id (funext fun z => ?_)
-    show biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨le_refl q₁, hlt.le⟩
-        ⟨hlt.le, le_refl q₂⟩ (blocToBI p F ϖ _ _ _ _ z)
-      = blocToBI p F ϖ _ _ _ _ z
-    rw [biResQ_blocToBI]
-  exact RingHom.ext fun x => congrFun hfun x
-
-/-- **Composition law**: restrictions compose. -/
-theorem biResQ_comp (q₁ q₂ r₁ r₂ s₁ s₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
-    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hs₁ : 0 < s₁) (hs₂ : 0 < s₂)
-    (hlt : q₁ < q₂) (hlt' : r₁ < r₂)
-    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂)
-    (hs₁m : r₁ ≤ s₁ ∧ s₁ ≤ r₂) (hs₂m : r₁ ≤ s₂ ∧ s₂ ≤ r₂) :
-    (biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
-        (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
-      = biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
-          ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
-          ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩ := by
-  have hfun : ⇑((biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
-      (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
-      = ⇑(biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
-          ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
-          ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩) := by
-    refine (denseRange_blocToBI p F ϖ
-      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
-      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
-      ?_
-      (biResQ_continuous p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
-        ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
-        ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩)
-      (funext fun z => ?_)
-    · exact (biResQ_continuous p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt'
-          hs₁m hs₂m).comp
-        (biResQ_continuous p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
-    · show biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m
-          (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
-            (blocToBI p F ϖ _ _ _ _ z))
-        = biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
-            ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
-            ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩
-            (blocToBI p F ϖ _ _ _ _ z)
-      rw [biResQ_blocToBI, biResQ_blocToBI, biResQ_blocToBI]
-  exact RingHom.ext fun x => congrFun hfun x
 
 /-- The rational radii are antitone in the exponent. -/
 theorem vpiQ_antitone {q q' : ℚ} (h : q ≤ q') :
@@ -672,7 +551,7 @@ theorem vpiQ_pPow (m : ℕ) (hm : 0 < m) (q : ℚ) :
 
 /-- The affine parameter is in `[0,1]` for the decreasing-exponent
 orientation. -/
-theorem theta_mem_unit' {q₁ q₂ r : ℚ} (hlt : q₂ < q₁) (hr₁ : q₂ ≤ r)
+theorem theta_mem_unit {q₁ q₂ r : ℚ} (hlt : q₂ < q₁) (hr₁ : q₂ ≤ r)
     (hr₂ : r ≤ q₁) :
     (0 : ℝ) ≤ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ)
       ∧ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ) ≤ 1 := by
@@ -690,7 +569,7 @@ theorem theta_mem_unit' {q₁ q₂ r : ℚ} (hlt : q₂ < q₁) (hr₁ : q₂ �
 /-- **The rational-exponent restriction map, decreasing orientation**
 (`q₂ < q₁`, radius-ordered pairs): `B^{[q₁,q₂]} →+* B^{[r₁,r₂]}` for
 `r₁, r₂ ∈ [q₂, q₁]`. -/
-noncomputable def biResQ' (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+noncomputable def biResQ (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₂ < q₁)
     (hr₁m : q₂ ≤ r₁ ∧ r₁ ≤ q₁) (hr₂m : q₂ ≤ r₂ ∧ r₂ ≤ q₁) :
     ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) →+* ↥(BIQ p F ϖ r₁ r₂ hr₁ hr₂) :=
@@ -701,8 +580,8 @@ noncomputable def biResQ' (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 
     (biRes p F ϖ
       (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
       (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)
-      (theta_mem_unit' hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit' hlt hr₁m.1 hr₁m.2).2
-      (theta_mem_unit' hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit' hlt hr₂m.1 hr₂m.2).2
+      (theta_mem_unit hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit hlt hr₁m.1 hr₁m.2).2
+      (theta_mem_unit hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit hlt hr₂m.1 hr₂m.2).2
       (by rw [vpiQ_interpolate p F ϖ hlt.ne']
           exact vpiQ_pos p F ϖ r₁)
       (by rw [vpiQ_interpolate p F ϖ hlt.ne']
@@ -714,10 +593,10 @@ noncomputable def biResQ' (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 
 
 /-- The decreasing-orientation restriction is the identity on the dense
 `Bloc`-layer. -/
-theorem biResQ'_blocToBI (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_blocToBI (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₂ < q₁)
     (hr₁m : q₂ ≤ r₁ ∧ r₁ ≤ q₁) (hr₂m : q₂ ≤ r₂ ∧ r₂ ≤ q₁) (z : Bloc p F ϖ) :
-    biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
+    biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
         (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
           (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z)
       = blocToBI p F ϖ (vpiQ_pos p F ϖ r₁) (vpiQ_lt_one p F ϖ hr₁)
@@ -728,72 +607,72 @@ theorem biResQ'_blocToBI (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0
 
 
 /-- The decreasing-orientation restriction map is continuous. -/
-theorem biResQ'_continuous (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_continuous (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₂ < q₁)
     (hr₁m : q₂ ≤ r₁ ∧ r₁ ≤ q₁) (hr₂m : q₂ ≤ r₂ ∧ r₂ ≤ q₁) :
-    Continuous (biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m) := by
-  rw [biResQ']
+    Continuous (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m) := by
+  rw [biResQ]
   exact (biCongr_continuous p F ϖ (vpiQ_interpolate p F ϖ hlt.ne')
       (vpiQ_interpolate p F ϖ hlt.ne')).comp
     (biRes_continuous p F ϖ
-      (theta_mem_unit' hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit' hlt hr₁m.1 hr₁m.2).2
-      (theta_mem_unit' hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit' hlt hr₂m.1 hr₂m.2).2
+      (theta_mem_unit hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit hlt hr₁m.1 hr₁m.2).2
+      (theta_mem_unit hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit hlt hr₂m.1 hr₂m.2).2
       _ _ _ _)
 
 /-- **Identity law, decreasing orientation.** -/
-theorem biResQ'_id (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) (hlt : q₂ < q₁) :
-    biResQ' p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨hlt.le, le_refl q₁⟩
+theorem biResQ_id (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) (hlt : q₂ < q₁) :
+    biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨hlt.le, le_refl q₁⟩
         ⟨le_refl q₂, hlt.le⟩
       = RingHom.id ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) := by
-  have hfun : ⇑(biResQ' p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨hlt.le, le_refl q₁⟩
+  have hfun : ⇑(biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨hlt.le, le_refl q₁⟩
       ⟨le_refl q₂, hlt.le⟩) = id := by
     refine (denseRange_blocToBI p F ϖ
       (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
       (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
-      (biResQ'_continuous p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt
+      (biResQ_continuous p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt
         ⟨hlt.le, le_refl q₁⟩ ⟨le_refl q₂, hlt.le⟩)
       continuous_id (funext fun z => ?_)
-    show biResQ' p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨hlt.le, le_refl q₁⟩
+    show biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨hlt.le, le_refl q₁⟩
         ⟨le_refl q₂, hlt.le⟩ (blocToBI p F ϖ _ _ _ _ z)
       = blocToBI p F ϖ _ _ _ _ z
-    rw [biResQ'_blocToBI]
+    rw [biResQ_blocToBI]
   exact RingHom.ext fun x => congrFun hfun x
 
 /-- **Composition law, decreasing orientation.** -/
-theorem biResQ'_comp (q₁ q₂ r₁ r₂ s₁ s₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biResQ_comp (q₁ q₂ r₁ r₂ s₁ s₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hs₁ : 0 < s₁) (hs₂ : 0 < s₂)
     (hlt : q₂ < q₁) (hlt' : r₂ < r₁)
     (hr₁m : q₂ ≤ r₁ ∧ r₁ ≤ q₁) (hr₂m : q₂ ≤ r₂ ∧ r₂ ≤ q₁)
     (hs₁m : r₂ ≤ s₁ ∧ s₁ ≤ r₁) (hs₂m : r₂ ≤ s₂ ∧ s₂ ≤ r₁) :
-    (biResQ' p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
-        (biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
-      = biResQ' p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+    (biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
+        (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
+      = biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
           ⟨le_trans hr₂m.1 hs₁m.1, le_trans hs₁m.2 hr₁m.2⟩
           ⟨le_trans hr₂m.1 hs₂m.1, le_trans hs₂m.2 hr₁m.2⟩ := by
-  have hfun : ⇑((biResQ' p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
-      (biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
-      = ⇑(biResQ' p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+  have hfun : ⇑((biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
+      (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
+      = ⇑(biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
           ⟨le_trans hr₂m.1 hs₁m.1, le_trans hs₁m.2 hr₁m.2⟩
           ⟨le_trans hr₂m.1 hs₂m.1, le_trans hs₂m.2 hr₁m.2⟩) := by
     refine (denseRange_blocToBI p F ϖ
       (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
       (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
       ?_
-      (biResQ'_continuous p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+      (biResQ_continuous p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
         ⟨le_trans hr₂m.1 hs₁m.1, le_trans hs₁m.2 hr₁m.2⟩
         ⟨le_trans hr₂m.1 hs₂m.1, le_trans hs₂m.2 hr₁m.2⟩)
       (funext fun z => ?_)
-    · exact (biResQ'_continuous p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt'
+    · exact (biResQ_continuous p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt'
           hs₁m hs₂m).comp
-        (biResQ'_continuous p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
-    · show biResQ' p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m
-          (biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
+        (biResQ_continuous p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
+    · show biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m
+          (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
             (blocToBI p F ϖ _ _ _ _ z))
-        = biResQ' p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+        = biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
             ⟨le_trans hr₂m.1 hs₁m.1, le_trans hs₁m.2 hr₁m.2⟩
             ⟨le_trans hr₂m.1 hs₂m.1, le_trans hs₂m.2 hr₁m.2⟩
             (blocToBI p F ϖ _ _ _ _ z)
-      rw [biResQ'_blocToBI, biResQ'_blocToBI, biResQ'_blocToBI]
+      rw [biResQ_blocToBI, biResQ_blocToBI, biResQ_blocToBI]
   exact RingHom.ext fun x => congrFun hfun x
 
 end FarguesFontaine

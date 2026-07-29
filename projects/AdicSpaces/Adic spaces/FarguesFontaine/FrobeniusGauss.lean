@@ -733,20 +733,20 @@ theorem mulQ_lt {q₁ q₂ : ℚ} (h : q₂ < q₁) : (p : ℚ) * q₂ < (p : �
 
 /-- **The `φ`-restriction compatibility square** at the `BIQ`-level:
 Frobenius commutes with the interval restrictions. -/
-theorem biPhiQP_biResQ'_comm (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+theorem biPhiQP_biResQ_comm (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₂ < q₁)
     (hr₁m : q₂ ≤ r₁ ∧ r₁ ≤ q₁) (hr₂m : q₂ ≤ r₂ ∧ r₂ ≤ q₁)
     (z : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂)) :
     biPhiQP p F ϖ r₁ r₂ hr₁ hr₂
-        (biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m z)
-      = biResQ' p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
+        (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m z)
+      = biResQ p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
           ((p : ℚ) * r₁) ((p : ℚ) * r₂)
           (mulQ_pos p h₁) (mulQ_pos p h₂) (mulQ_pos p hr₁) (mulQ_pos p hr₂)
           (mulQ_lt p hlt) (mulQ_mem p hr₁m) (mulQ_mem p hr₂m)
           (biPhiQP p F ϖ q₁ q₂ h₁ h₂ z) := by
   have hfun : (⇑(biPhiQP p F ϖ r₁ r₂ hr₁ hr₂)
-      ∘ ⇑(biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
-      = (⇑(biResQ' p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
+      ∘ ⇑(biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
+      = (⇑(biResQ p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
           ((p : ℚ) * r₁) ((p : ℚ) * r₂)
           (mulQ_pos p h₁) (mulQ_pos p h₂) (mulQ_pos p hr₁) (mulQ_pos p hr₂)
           (mulQ_lt p hlt) (mulQ_mem p hr₁m) (mulQ_mem p hr₂m))
@@ -755,26 +755,26 @@ theorem biPhiQP_biResQ'_comm (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂
       (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
       (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
       ((biPhiQP_continuous p F ϖ r₁ r₂ hr₁ hr₂).comp
-        (biResQ'_continuous p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
-      ((biResQ'_continuous p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
+        (biResQ_continuous p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
+      ((biResQ_continuous p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
           ((p : ℚ) * r₁) ((p : ℚ) * r₂)
           (mulQ_pos p h₁) (mulQ_pos p h₂) (mulQ_pos p hr₁) (mulQ_pos p hr₂)
           (mulQ_lt p hlt) (mulQ_mem p hr₁m) (mulQ_mem p hr₂m)).comp
         (biPhiQP_continuous p F ϖ q₁ q₂ h₁ h₂))
       (funext fun w => ?_)
     show biPhiQP p F ϖ r₁ r₂ hr₁ hr₂
-        (biResQ' p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
+        (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
           (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
             (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) w))
-      = biResQ' p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
+      = biResQ p F ϖ ((p : ℚ) * q₁) ((p : ℚ) * q₂)
           ((p : ℚ) * r₁) ((p : ℚ) * r₂)
           (mulQ_pos p h₁) (mulQ_pos p h₂) (mulQ_pos p hr₁) (mulQ_pos p hr₂)
           (mulQ_lt p hlt) (mulQ_mem p hr₁m) (mulQ_mem p hr₂m)
           (biPhiQP p F ϖ q₁ q₂ h₁ h₂
             (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
               (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) w))
-    rw [biResQ'_blocToBI, biPhiQP_blocToBI, biPhiQP_blocToBI,
-      biResQ'_blocToBI]
+    rw [biResQ_blocToBI, biPhiQP_blocToBI, biPhiQP_blocToBI,
+      biResQ_blocToBI]
   exact congrFun hfun z
 
 end FarguesFontaine
