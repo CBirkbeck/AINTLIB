@@ -70,4 +70,45 @@ theorem bijective_restrict_pi_of_pairwise_disjoint {ι : Type*} (U : ι → Open
       (hcompat t)
     exact ⟨s, funext hs⟩
 
+/-- If two opens cover the space and sections on the second open and the overlap are
+subsingletons, then restriction to the first open is bijective. -/
+theorem bijective_restrict_of_sup_eq_top_of_subsingleton
+    {U V : Opens X} (hcover : U ⊔ V = ⊤)
+    [Nonempty (ToType (F.1.obj (op V)))]
+    [Subsingleton (ToType (F.1.obj (op V)))]
+    [Subsingleton (ToType (F.1.obj (op (U ⊓ V))))] :
+    Function.Bijective fun s : ToType (F.1.obj (op (⊤ : Opens X))) ↦
+      F.1.map (homOfLE le_top : U ⟶ ⊤).op s := by
+  constructor
+  · intro a b hab
+    apply F.eq_of_locally_eq₂ (homOfLE (le_top : U ≤ ⊤))
+      (homOfLE (le_top : V ≤ ⊤)) (by rw [hcover]) a b hab
+    exact Subsingleton.elim _ _
+  · intro a
+    let W : Fin 2 → Opens X := ![U, V]
+    let s : ∀ i, ToType (F.1.obj (op (W i)))
+      | 0 => a
+      | 1 => by
+          simpa only [W, Matrix.cons_val_one, Matrix.cons_val_zero] using
+            (Classical.choice (inferInstance : Nonempty (ToType (F.1.obj (op V)))))
+    have hcompatible : Presheaf.IsCompatible F.1 W s := by
+      simp only [Presheaf.IsCompatible, Fin.forall_fin_two, W,
+        Matrix.cons_val_one, Matrix.cons_val_zero]
+      refine ⟨⟨rfl, ?_⟩, ?_, rfl⟩
+      · exact Subsingleton.elim _ _
+      · haveI : Subsingleton (ToType (F.1.obj (op (V ⊓ U)))) := by
+          rw [inf_comm]
+          infer_instance
+        exact Subsingleton.elim _ _
+    have hcover' : (⊤ : Opens X) ≤ iSup W := by
+      rw [← hcover]
+      apply sup_le
+      · simpa only [W, Matrix.cons_val_zero] using le_iSup W 0
+      · simpa only [W, Matrix.cons_val_one, Matrix.cons_val_zero] using le_iSup W 1
+    obtain ⟨t, ht, -⟩ := F.existsUnique_gluing' W ⊤ (fun _ ↦ homOfLE le_top)
+      hcover' s hcompatible
+    refine ⟨t, ?_⟩
+    convert ht 0 using 1 <;>
+      simp only [W, s, Matrix.cons_val_zero] <;> rfl
+
 end TopCat.Sheaf

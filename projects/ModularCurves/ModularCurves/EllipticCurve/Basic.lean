@@ -131,6 +131,74 @@ lemma FibrewiseElliptic.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       rw [hA.isoPullback_hom_snd, hB.isoPullback_hom_snd, projModelZero_projModelπ]
       exact pullback.lift_snd _ _ _
 
+/-- Fibrewise ellipticity is preserved by isomorphisms of the total space over
+a fixed base. -/
+theorem FibrewiseElliptic.of_iso_over
+    {E₁ E₂ S : Scheme.{u}}
+    {π₁ : E₁ ⟶ S} {z₁ : S ⟶ E₁} {hz₁ : z₁ ≫ π₁ = 𝟙 S}
+    {π₂ : E₂ ⟶ S} {z₂ : S ⟶ E₂} {hz₂ : z₂ ≫ π₂ = 𝟙 S}
+    (h : FibrewiseElliptic π₁ z₁ hz₁) (e : E₂ ≅ E₁)
+    (hπ : e.hom ≫ π₁ = π₂) (hzc : z₂ ≫ e.hom = z₁) :
+    FibrewiseElliptic π₂ z₂ hz₂ := by
+  intro s
+  obtain ⟨W, hW, e₁, heπ, hez⟩ := h s
+  dsimp only [Scheme.Hom.fiber, Scheme.Hom.fiberToSpecResidueField,
+    sectionFiberPoint] at e₁ heπ hez ⊢
+  have hP₂ :
+      IsPullback
+        (pullback.fst π₂ (S.fromSpecResidueField s) ≫ e.hom)
+        (pullback.snd π₂ (S.fromSpecResidueField s))
+        π₁ (S.fromSpecResidueField s) := by
+    refine (IsPullback.of_hasPullback π₂ _).of_iso
+      (Iso.refl _) e (Iso.refl _) (Iso.refl _) ?_ ?_ ?_ ?_
+    · simp
+    · simp
+    · simpa using hπ.symm
+    · simp
+  set eP :
+      pullback π₂ (S.fromSpecResidueField s) ≅
+        pullback π₁ (S.fromSpecResidueField s) :=
+    hP₂.isoIsPullback _ _ (IsPullback.of_hasPullback π₁ _) with heP
+  have hsection :
+      pullback.lift (S.fromSpecResidueField s ≫ z₂) (𝟙 _)
+          (by simp [Category.assoc, hz₂]) ≫ eP.hom =
+        pullback.lift (S.fromSpecResidueField s ≫ z₁) (𝟙 _)
+          (by simp [Category.assoc, hz₁]) := by
+    rw [heP]
+    apply pullback.hom_ext
+    · rw [Category.assoc, IsPullback.isoIsPullback_hom_fst,
+        pullback.lift_fst_assoc, pullback.lift_fst,
+        Category.assoc, hzc]
+    · rw [Category.assoc, IsPullback.isoIsPullback_hom_snd,
+        pullback.lift_snd, pullback.lift_snd]
+  refine ⟨W, hW, eP ≪≫ e₁, ?_, ?_⟩
+  · rw [Iso.trans_hom, Category.assoc, heπ]
+    simpa only [heP] using
+      hP₂.isoIsPullback_hom_snd _ _
+        (IsPullback.of_hasPullback π₁ (S.fromSpecResidueField s))
+  · rw [Iso.trans_hom, ← Category.assoc, hsection, hez]
+
+/-- Fibrewise ellipticity is preserved by compatible isomorphisms of the total
+and base schemes. -/
+theorem FibrewiseElliptic.of_iso
+    {E₁ S₁ E₂ S₂ : Scheme.{u}}
+    {π₁ : E₁ ⟶ S₁} {z₁ : S₁ ⟶ E₁} {hz₁ : z₁ ≫ π₁ = 𝟙 S₁}
+    {π₂ : E₂ ⟶ S₂} {z₂ : S₂ ⟶ E₂} {hz₂ : z₂ ≫ π₂ = 𝟙 S₂}
+    (h : FibrewiseElliptic π₁ z₁ hz₁)
+    (eE : E₂ ≅ E₁) (eS : S₂ ≅ S₁)
+    (hπc : eE.hom ≫ π₁ = π₂ ≫ eS.hom)
+    (hzc : eS.hom ≫ z₁ = z₂ ≫ eE.hom) :
+    FibrewiseElliptic π₂ z₂ hz₂ := by
+  have hsq : IsPullback eE.hom π₂ π₁ eS.hom :=
+    IsPullback.of_horiz_isIso ⟨hπc⟩
+  refine (h.baseChange eS.hom).of_iso_over
+    hsq.isoPullback hsq.isoPullback_hom_snd ?_
+  apply pullback.hom_ext
+  · rw [Category.assoc, hsq.isoPullback_hom_fst,
+      pullback.lift_fst, ← hzc]
+  · rw [Category.assoc, hsq.isoPullback_hom_snd,
+      pullback.lift_snd, hz₂]
+
 /-- A family is locally Weierstrass if it is locally isomorphic, compatibly with its section,
 to the projective model of an elliptic Weierstrass curve. -/
 def LocallyWeierstrass {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) :

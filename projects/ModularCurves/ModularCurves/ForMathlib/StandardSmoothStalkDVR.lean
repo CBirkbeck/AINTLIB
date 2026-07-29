@@ -18,10 +18,10 @@ import Mathlib.RingTheory.Artinian.Ring
 import Mathlib.RingTheory.Unramified.LocalRing
 import Mathlib.RingTheory.Flat.Localization
 import Mathlib.RingTheory.Flat.Stability
-import Mathlib.RingTheory.Flat.TorsionFree
 import Mathlib.RingTheory.PrincipalIdealDomain
 import Mathlib.RingTheory.Ideal.Over
 import Mathlib.Algebra.Polynomial.FieldDivision
+import ModularCurves.ForMathlib.FlatNonZeroDivisor
 import ModularCurves.ForMathlib.PrincipalMaximalDVR
 
 /-!
@@ -330,23 +330,6 @@ private theorem stalkDVRAux_not_injective_algHom_polynomial {k C : Type u} [Fiel
     ¬ Function.Injective φ := fun hinj =>
   Polynomial.not_finite (FiniteDimensional.of_injective φ.toLinearMap hinj)
 
-/-- Over a flat algebra, the image of a nonzerodivisor under the structure map is again a
-nonzerodivisor. -/
-private theorem stalkDVRAux_algebraMap_mem_nonZeroDivisors {R O : Type u} [CommRing R]
-    [CommRing O] [Algebra R O] [Module.Flat R O] {p : R} (hp : p ∈ nonZeroDivisors R) :
-    algebraMap R O p ∈ nonZeroDivisors O := by
-  have hreg : IsSMulRegular O p := Module.Flat.isSMulRegular_of_nonZeroDivisors hp
-  rw [mem_nonZeroDivisors_iff]
-  constructor
-  · intro x hx
-    apply hreg
-    show p • x = p • 0
-    rw [smul_zero, Algebra.smul_def, hx]
-  · intro x hx
-    apply hreg
-    show p • x = p • 0
-    rw [smul_zero, Algebra.smul_def, mul_comm, hx]
-
 /-- A discrete valuation ring is never module-finite over a field: it would be Artinian,
 hence (being a domain) a field, contradicting that a DVR is not a field. -/
 private theorem stalkDVRAux_not_finite_of_isDiscreteValuationRing {k O : Type u} [Field k]
@@ -534,8 +517,11 @@ theorem exists_span_nonZeroDivisor_map_localizationAtPrime (q : Ideal A) [q.IsPr
     haveI : Module.Flat (Polynomial k) A' := Algebra.Smooth.flat _ _
     haveI : Module.Flat A' O := IsLocalization.flat O q'.primeCompl
     haveI : Module.Flat (Polynomial k) O := Module.Flat.trans (Polynomial k) A' O
-    have hπnzd : π ∈ nonZeroDivisors O :=
-      stalkDVRAux_algebraMap_mem_nonZeroDivisors (mem_nonZeroDivisors_of_ne_zero hp0)
+    have hπnzd : π ∈ nonZeroDivisors O := by
+      dsimp only [π]
+      exact RingHom.Flat.map_mem_nonZeroDivisors
+        (RingHom.flat_algebraMap_iff.mpr inferInstance)
+        (mem_nonZeroDivisors_of_ne_zero hp0)
     -- `O` is a noetherian local ring
     haveI : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing k A
     haveI : IsNoetherianRing O :=

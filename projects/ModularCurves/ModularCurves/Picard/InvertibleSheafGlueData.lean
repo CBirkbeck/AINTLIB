@@ -1,0 +1,609 @@
+import ModularCurves.Picard.InvertibleSheafFiniteStageModel
+import ModularCurves.Picard.PullbackPseudofunctorUnit
+import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
+
+/-!
+# Glue data from finite-stage invertible-sheaf cocycles
+
+This file records the coherence laws for the chart transition isomorphisms attached to an
+`AffineIntersectionUnitCocycle`. The statements retain the canonical pullback transports, so
+they can be used directly in a later effectivity construction on the glued scheme.
+-/
+
+universe u
+
+open CategoryTheory CategoryTheory.Limits
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+noncomputable section
+
+/-- The ordered affine overlap in the glue datum, regarded as the chosen pullback of the two
+chart maps into the glued scheme. -/
+def affineIntersectionChartChosenPullback
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    ChosenPullback (D.ι i) (D.ι j) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  exact
+    { pullback := D.V (i, j)
+      p₁ := D.f i j
+      p₂ := D.t i j ≫ D.f j i
+      condition := (D.glue_condition i j).symm
+      isLimit := D.vPullbackConeIsLimit i j }
+
+private def affineIntersectionTripleSwap {J : Type u} (i j k : J) :
+    Scheme.GlueData.affineIntersectionTripleIndex j i k ⟶
+      Scheme.GlueData.affineIntersectionTripleIndex i j k :=
+  homOfLE (by
+    classical
+    intro x hx
+    simpa [Scheme.GlueData.affineIntersectionTripleIndex, or_comm,
+      or_left_comm, or_assoc] using hx)
+
+private def affineIntersectionTripleSwapIndexIso {J : Type u} (i j k : J) :
+    Scheme.GlueData.affineIntersectionTripleIndex j i k ≅
+      Scheme.GlueData.affineIntersectionTripleIndex i j k where
+  hom := affineIntersectionTripleSwap i j k
+  inv := affineIntersectionTripleSwap j i k
+  hom_inv_id := Subsingleton.elim _ _
+  inv_hom_id := Subsingleton.elim _ _
+
+private def affineIntersectionRingHom
+    {A J : Type u} [CommRing A] (F : Finset J ⥤ CommAlgCat.{u} A)
+    {s t : Finset J} (f : s ⟶ t) :
+    CommRingCat.of (F.obj s) ⟶ CommRingCat.of (F.obj t) :=
+  CommRingCat.ofHom (F.map f).hom.toRingHom
+
+private lemma affineIntersectionRingHom_comp
+    {A J : Type u} [CommRing A] (F : Finset J ⥤ CommAlgCat.{u} A)
+    {r s t : Finset J} (f : r ⟶ s) (g : s ⟶ t) :
+    affineIntersectionRingHom F (f ≫ g) =
+      affineIntersectionRingHom F f ≫ affineIntersectionRingHom F g := by
+  ext x
+  exact ConcreteCategory.congr_hom (F.map_comp f g) x
+
+private def affineIntersectionTripleSwapIso
+    {A J : Type u} [CommRing A] (F : Finset J ⥤ CommAlgCat.{u} A)
+    (i j k : J) :
+    Spec (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k))) ≅
+      Spec (CommRingCat.of
+        (F.obj (Scheme.GlueData.affineIntersectionTripleIndex j i k))) :=
+  Scheme.Spec.mapIso (((forget₂ (CommAlgCat A) CommRingCat).mapIso
+    (F.mapIso (affineIntersectionTripleSwapIndexIso i j k))).op)
+
+/-- The canonical affine triple intersection is the pullback of the two adjacent ordered
+overlaps over their common middle chart. -/
+theorem affineIntersectionTripleIsPullbackMiddle
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j k : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let T := Spec (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))
+    let fLeft : T ⟶ D.V (i, j) :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toRingHom))
+    let fMiddle : T ⟶ D.V (j, k) :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toRingHom))
+    IsPullback fLeft fMiddle (D.t i j ≫ D.f j i) (D.f j k) := by
+  dsimp only
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let eP := affineIntersectionTripleSwapIso F i j k
+  let eX : D.V (i, j) ≅ D.V (j, i) :=
+    { hom := D.t i j
+      inv := D.t j i
+      hom_inv_id := D.t_inv i j
+      inv_hom_id := D.t_inv j i }
+  have h := (hpush j i k).op.flip.map Scheme.Spec
+  change IsPullback
+    (Spec.map (CommRingCat.ofHom ((F.map
+      (Scheme.GlueData.affineIntersectionPairToTripleLeft j i k)).hom.toRingHom)))
+    (Spec.map (CommRingCat.ofHom ((F.map
+      (Scheme.GlueData.affineIntersectionPairToTripleRight j i k)).hom.toRingHom)))
+    (Scheme.GlueData.affineIntersectionOverlapι F j i)
+    (Scheme.GlueData.affineIntersectionOverlapι F j k) at h
+  apply h.of_iso' eP eX (Iso.refl _) (Iso.refl _)
+  · change
+      Spec.map (affineIntersectionRingHom F
+          (affineIntersectionTripleSwapIndexIso i j k).hom) ≫
+          Spec.map (affineIntersectionRingHom F
+            (Scheme.GlueData.affineIntersectionPairToTripleLeft j i k)) =
+        Spec.map (affineIntersectionRingHom F
+            (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)) ≫
+          Spec.map (affineIntersectionRingHom F
+            (Scheme.GlueData.affineIntersectionPairSwap i j))
+    rw [← Spec.map_comp, ← Spec.map_comp,
+      ← affineIntersectionRingHom_comp, ← affineIntersectionRingHom_comp]
+    congr 1
+  · change
+      Spec.map (affineIntersectionRingHom F
+          (affineIntersectionTripleSwapIndexIso i j k).hom) ≫
+          Spec.map (affineIntersectionRingHom F
+            (Scheme.GlueData.affineIntersectionPairToTripleRight j i k)) =
+        Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k))
+    rw [← Spec.map_comp, ← affineIntersectionRingHom_comp]
+    congr 1
+  · rfl
+  · rfl
+
+/-- The canonical affine triple intersection as the chosen pullback of the adjacent ordered
+overlaps over their common middle chart. -/
+def affineIntersectionChartTripleMiddleChosenPullback
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j k : J) :
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    ChosenPullback (sq i j).p₂ (sq j k).p₁ := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let T := Spec (CommRingCat.of
+    (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))
+  let fLeft : T ⟶ D.V (i, j) :=
+    Spec.map (affineIntersectionRingHom F
+      (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k))
+  let fMiddle : T ⟶ D.V (j, k) :=
+    Spec.map (affineIntersectionRingHom F
+      (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k))
+  let hpb := affineIntersectionTripleIsPullbackMiddle hopen hpush i j k
+  exact
+    { pullback := T
+      p₁ := fLeft
+      p₂ := fMiddle
+      condition := hpb.w
+      isLimit := hpb.isLimit }
+
+/-- The canonical affine triple intersection, with its three maps to pair intersections,
+as the chosen triple pullback used by pseudofunctorial descent data. -/
+def affineIntersectionChartChosenPullback₃
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j k : J) :
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    ChosenPullback₃ (sq i j) (sq j k) (sq i k) := by
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let cp := affineIntersectionChartTripleMiddleChosenPullback hopen hpush i j k
+  let fRight : cp.pullback ⟶ (sq i k).pullback :=
+    Spec.map (affineIntersectionRingHom F
+      (Scheme.GlueData.affineIntersectionPairToTripleRight i j k))
+  refine
+    { chosenPullback := cp
+      l := ?_ }
+  have hf₁ : fRight ≫ (sq i k).p₁ = cp.p₁ ≫ (sq i j).p₁ := by
+    change
+      Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)) ≫
+        Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionSingletonToPair i k)) =
+      Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)) ≫
+        Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionSingletonToPair i j))
+    rw [← Spec.map_comp, ← Spec.map_comp,
+      ← affineIntersectionRingHom_comp, ← affineIntersectionRingHom_comp]
+    congr 1
+  have hf₂ : fRight ≫ (sq i k).p₂ = cp.p₂ ≫ (sq j k).p₂ := by
+    change
+      (Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)) ≫
+        Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionPairSwap i k))) ≫
+        Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionSingletonToPair k i)) =
+      (Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)) ≫
+        Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionPairSwap j k))) ≫
+        Spec.map (affineIntersectionRingHom F
+          (Scheme.GlueData.affineIntersectionSingletonToPair k j))
+    rw [← Spec.map_comp, ← Spec.map_comp,
+      ← affineIntersectionRingHom_comp, ← affineIntersectionRingHom_comp,
+      ← Spec.map_comp, ← Spec.map_comp,
+      ← affineIntersectionRingHom_comp, ← affineIntersectionRingHom_comp]
+    congr 1
+  exact
+    { f := fRight
+      f_p₁ := hf₁
+      f_p₂ := hf₂
+      f_p := by
+        rw [← (sq i k).hp₁, ← (sq i j).hp₁]
+        simpa only [Category.assoc] using
+          congrArg (fun f => f ≫
+            (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).ι i) hf₁ }
+
+private theorem diagonalFac
+    (D : Scheme.GlueData) (i : D.J) :
+    D.f i i = D.t i i ≫ D.f i i := by
+  rw [D.t_id, Category.id_comp]
+
+/-- Conjugating a chart transition by the canonical pullback-unit isomorphisms recovers its
+scalar transition automorphism on the ordered overlap. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIso_toUnit
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullbackUnitIso (D.f i j)).inv ≫
+        (c.chartTransitionIso hopen hpush i j).hom ≫
+        (pullbackUnitIso (D.t i j ≫ D.f j i)).hom =
+      (c.overlapTransitionIso i j).hom := by
+  dsimp only
+  rw [AffineIntersectionUnitCocycle.chartTransitionIso_hom]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id,
+    Category.comp_id]
+
+/-- The diagonal chart transition is the canonical transport along `t i i ≫ f i i = f i i`.
+This is the type-correct identity law for local module descent data. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIso_self
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (c.chartTransitionIso hopen hpush i i).hom =
+      ((pullbackCongr (diagonalFac D i)).app (unitObj (D.U i))).hom := by
+  dsimp only
+  rw [AffineIntersectionUnitCocycle.chartTransitionIso_hom,
+    c.overlapTransitionIso_self]
+  simp only [Iso.refl_hom]
+  rw [← cancel_mono (pullbackUnitIso
+    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i i ≫
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f i i)).hom]
+  simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  exact (ModularCurves.pullbackUnitIso_congrLow
+    (diagonalFac
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush) i)).symm
+
+private theorem pairSwapFac
+    (D : Scheme.GlueData) (i j : D.J) :
+    D.t i j ≫ (D.t j i ≫ D.f i j) = D.f i j := by
+  rw [← Category.assoc, D.t_inv, Category.id_comp]
+
+private theorem leftFromCoordinates
+    {C : Type u} [Category C] {O A N B M : C}
+    (u : A ≅ O) (e : N ≅ A) (a : N ≅ B) (v : B ≅ O)
+    (b : M ≅ B) (p : N ⟶ M) (q : B ⟶ B)
+    (hentry : u.inv ≫ e.inv ≫ a.hom = v.inv)
+    (hcoord : a.inv ≫ p ≫ b.hom = q) :
+    u.inv ≫ e.inv ≫ p ≫ b.hom = v.inv ≫ q := by
+  calc
+    u.inv ≫ e.inv ≫ p ≫ b.hom =
+        (u.inv ≫ e.inv ≫ a.hom) ≫
+          (a.inv ≫ p ≫ b.hom) := by
+            simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    _ = v.inv ≫ q := by rw [hentry, hcoord]
+
+/-- The inverse chart transition also recovers the inverse scalar automorphism after
+conjugation by the two pullback-unit isomorphisms. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIso_inv_toUnit
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullbackUnitIso (D.t i j ≫ D.f j i)).inv ≫
+        (c.chartTransitionIso hopen hpush i j).inv ≫
+        (pullbackUnitIso (D.f i j)).hom =
+      (c.overlapTransitionIso i j).inv := by
+  dsimp only
+  rw [AffineIntersectionUnitCocycle.chartTransitionIso_inv]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id,
+    Category.comp_id]
+
+/-- Pulling a chart transition back along the pair-swap map preserves its scalar-coordinate
+description. -/
+theorem AffineIntersectionUnitCocycle.pullback_chartTransitionIso_toUnit
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullback (D.t i j)).map (pullbackUnitIso (D.f j i)).inv ≫
+        (pullback (D.t i j)).map
+          (c.chartTransitionIso hopen hpush j i).hom ≫
+        ((pullback (D.t i j)).mapIso
+          (pullbackUnitIso (D.t j i ≫ D.f i j))).hom =
+      (pullback (D.t i j)).map (c.overlapTransitionIso j i).hom := by
+  dsimp only
+  have h := congrArg (fun k => (pullback
+      ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i j)).map k)
+    (c.chartTransitionIso_toUnit hopen hpush j i)
+  simpa only [Functor.map_comp, Functor.mapIso_hom] using h
+
+private theorem chartTransitionIso_swap_left
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullbackUnitIso (D.t i j ≫ D.f j i)).inv ≫
+        ((pullbackComp (D.t i j) (D.f j i)).app
+          (unitObj (D.U j))).inv ≫
+        (pullback (D.t i j)).map
+          (c.chartTransitionIso hopen hpush j i).hom ≫
+        ((pullback (D.t i j)).mapIso
+          (pullbackUnitIso (D.t j i ≫ D.f i j))).hom =
+      (pullbackUnitIso (D.t i j)).inv ≫
+        (pullback (D.t i j)).map (c.overlapTransitionIso j i).hom := by
+  dsimp only
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let u := pullbackUnitIso (D.t i j ≫ D.f j i)
+  let e := (pullbackComp (D.t i j) (D.f j i)).app (unitObj (D.U j))
+  let a := (pullback (D.t i j)).mapIso (pullbackUnitIso (D.f j i))
+  let v := pullbackUnitIso (D.t i j)
+  let b := (pullback (D.t i j)).mapIso
+    (pullbackUnitIso (D.t j i ≫ D.f i j))
+  let p := (pullback (D.t i j)).map
+    (c.chartTransitionIso hopen hpush j i).hom
+  let q := (pullback (D.t i j)).map (c.overlapTransitionIso j i).hom
+  have hcoord : a.inv ≫ p ≫ b.hom = q := by
+    simpa only [a, p, b, q, Functor.mapIso_hom,
+      Functor.mapIso_inv] using
+        (c.pullback_chartTransitionIso_toUnit hopen hpush i j)
+  exact leftFromCoordinates u e a v b p q
+    (unitCompEntry (D.t i j) (D.f j i)) hcoord
+
+private theorem chartTransitionIso_swap_right
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let h := pairSwapFac D i j
+    ((pullback (D.t i j)).mapIso
+          (pullbackUnitIso (D.t j i ≫ D.f i j))).inv ≫
+        ((pullbackComp (D.t i j) (D.t j i ≫ D.f i j)).app
+          (unitObj (D.U i))).hom ≫
+        ((pullbackCongr h).app (unitObj (D.U i))).hom ≫
+        (pullbackUnitIso (D.f i j)).hom =
+      (pullbackUnitIso (D.t i j)).hom := by
+  dsimp only
+  simpa only [Functor.mapIso_inv] using unitCompExit
+    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i j)
+    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t j i ≫
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f i j)
+    (pairSwapFac
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush) i j)
+
+private theorem composite_eq_of_conjugate
+    {C : Type u} [Category C] {A B Q O : C}
+    (u : A ≅ O) (w : Q ≅ O) (l : A ⟶ B) (r : B ⟶ Q)
+    (t : A ⟶ Q) (a : O ⟶ B) (q : B ⟶ B) (b : B ⟶ O)
+    (s : O ⟶ O)
+    (hl : u.inv ≫ l = a ≫ q) (hr : r ≫ w.hom = b)
+    (hs : a ≫ q ≫ b = s) (ht : u.inv ≫ t ≫ w.hom = s) :
+    l ≫ r = t := by
+  apply (cancel_epi u.inv).1
+  apply (cancel_mono w.hom).1
+  calc
+    (u.inv ≫ (l ≫ r)) ≫ w.hom =
+        (u.inv ≫ l) ≫ (r ≫ w.hom) := by
+          simp only [Category.assoc]
+    _ = (a ≫ q) ≫ b := by rw [hl, hr]
+    _ = a ≫ q ≫ b := Category.assoc _ _ _
+    _ = s := hs
+    _ = u.inv ≫ t ≫ w.hom := ht.symm
+    _ = (u.inv ≫ t) ≫ w.hom := (Category.assoc _ _ _).symm
+
+private noncomputable def chartTransitionIsoSwapLeftHom
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullback (D.t i j ≫ D.f j i)).obj (unitObj (D.U j)) ⟶
+      (pullback (D.t i j)).obj (unitObj (D.V (j, i))) :=
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  ((pullbackComp (D.t i j) (D.f j i)).app (unitObj (D.U j))).inv ≫
+    (pullback (D.t i j)).map
+      (c.chartTransitionIso hopen hpush j i).hom ≫
+    ((pullback (D.t i j)).mapIso
+      (pullbackUnitIso (D.t j i ≫ D.f i j))).hom
+
+private noncomputable def chartTransitionIsoSwapRightHom
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullback (D.t i j)).obj (unitObj (D.V (j, i))) ⟶
+      (pullback (D.f i j)).obj (unitObj (D.U i)) :=
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  (pullbackUnitIso (D.t i j)).hom ≫
+    (pullbackUnitIso (D.f i j)).inv
+
+/-- The reverse chart transition pulled back along the pair-swap map, with the entry and exit
+transports expressed in their canonical pullback-unit normal forms. -/
+noncomputable def AffineIntersectionUnitCocycle.chartTransitionIsoSwapHom
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullback (D.t i j ≫ D.f j i)).obj (unitObj (D.U j)) ⟶
+      (pullback (D.f i j)).obj (unitObj (D.U i)) :=
+  chartTransitionIsoSwapLeftHom c hopen hpush i j ≫
+    chartTransitionIsoSwapRightHom hopen hpush i j
+
+private theorem chartTransitionIsoSwapLeftHom_normalize
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullbackUnitIso (D.t i j ≫ D.f j i)).inv ≫
+        chartTransitionIsoSwapLeftHom c hopen hpush i j =
+      (pullbackUnitIso (D.t i j)).inv ≫
+        (pullback (D.t i j)).map (c.overlapTransitionIso j i).hom := by
+  dsimp only [chartTransitionIsoSwapLeftHom]
+  exact chartTransitionIso_swap_left c hopen hpush i j
+
+private theorem chartTransitionIsoSwapRightHom_normalize
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    chartTransitionIsoSwapRightHom hopen hpush i j ≫
+        (pullbackUnitIso (D.f i j)).hom =
+      (pullbackUnitIso (D.t i j)).hom := by
+  dsimp only [chartTransitionIsoSwapRightHom]
+  simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
+/-- Pulling the reverse chart transition along the pair-swap map gives the inverse of the
+original chart transition, with all composite-pullback transports made explicit in
+`chartTransitionIsoSwapHom`. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIsoSwapHom_eq_inv
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    c.chartTransitionIsoSwapHom hopen hpush i j =
+      (c.chartTransitionIso hopen hpush i j).inv := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  apply composite_eq_of_conjugate
+    (pullbackUnitIso (D.t i j ≫ D.f j i))
+    (pullbackUnitIso (D.f i j))
+    (chartTransitionIsoSwapLeftHom c hopen hpush i j)
+    (chartTransitionIsoSwapRightHom hopen hpush i j)
+    (c.chartTransitionIso hopen hpush i j).inv
+    (pullbackUnitIso (D.t i j)).inv
+    ((pullback (D.t i j)).map (c.overlapTransitionIso j i).hom)
+    (pullbackUnitIso (D.t i j)).hom
+    (c.overlapTransitionIso i j).inv
+  · exact chartTransitionIsoSwapLeftHom_normalize c hopen hpush i j
+  · exact chartTransitionIsoSwapRightHom_normalize hopen hpush i j
+  · exact c.overlapTransitionIso_swap i j
+  · exact c.chartTransitionIso_inv_toUnit hopen hpush i j
+
+private noncomputable def chartTransitionIsoCoordinatePullbackMiddle
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    (pullback g).obj (unitObj
+        ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j))) ⟶
+      (pullback g).obj (unitObj
+        ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j))) :=
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  (pullback g).map (pullbackUnitIso (D.f i j)).inv ≫
+    (pullback g).map (c.chartTransitionIso hopen hpush i j).hom ≫
+    (pullback g).map (pullbackUnitIso (D.t i j ≫ D.f j i)).hom
+
+private theorem chartTransitionIsoCoordinatePullbackMiddle_eq
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    chartTransitionIsoCoordinatePullbackMiddle c hopen hpush i j g =
+      (pullback g).map (c.overlapTransitionIso i j).hom := by
+  dsimp only [chartTransitionIsoCoordinatePullbackMiddle]
+  have h := congrArg (fun k => (pullback g).map k)
+    (c.chartTransitionIso_toUnit hopen hpush i j)
+  simpa only [Functor.map_comp] using h
+
+/-- A chart transition pulled back to a further overlap and expressed as an endomorphism of
+that overlap's unit sheaf. -/
+noncomputable def AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    unitObj T ⟶ unitObj T :=
+  (pullbackUnitIso g).inv ≫
+    chartTransitionIsoCoordinatePullbackMiddle c hopen hpush i j g ≫
+    (pullbackUnitIso g).hom
+
+/-- The pulled-back chart transition before simplifying it to the overlap transition
+function. This is the form used by the generic pullback descent coherence theorem. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_chartTransition
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    c.chartTransitionIsoCoordinatePullback hopen hpush i j g =
+      (pullbackUnitIso g).inv ≫
+        (((pullback g).mapIso (pullbackUnitIso (D.f i j))).inv ≫
+          (pullback g).map (c.chartTransitionIso hopen hpush i j).hom ≫
+          ((pullback g).mapIso
+            (pullbackUnitIso (D.t i j ≫ D.f j i))).hom) ≫
+        (pullbackUnitIso g).hom := by
+  rfl
+
+/-- In unit coordinates, a pulled-back chart transition is multiplication by the pulled-back
+overlap transition function. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_eq
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    c.chartTransitionIsoCoordinatePullback hopen hpush i j g =
+      (pullbackUnitIso g).inv ≫
+        (pullback g).map (c.overlapTransitionIso i j).hom ≫
+        (pullbackUnitIso g).hom := by
+  rw [chartTransitionIsoCoordinatePullback,
+    chartTransitionIsoCoordinatePullbackMiddle_eq]
+
+/-- The chart transitions satisfy the Cech equation after pullback to the canonical affine
+triple intersection. The middle map is the `(j,k)` leg induced by the glue-data triple
+transition. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_cocycle
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j k : J) :
+    let T := Spec (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))
+    let fLeft : T ⟶ Scheme.GlueData.affineIntersectionOverlap F i j :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toRingHom))
+    let fMiddle : T ⟶ Scheme.GlueData.affineIntersectionOverlap F j k :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toRingHom))
+    let fRight : T ⟶ Scheme.GlueData.affineIntersectionOverlap F i k :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toRingHom))
+    c.chartTransitionIsoCoordinatePullback hopen hpush i j fLeft ≫
+        c.chartTransitionIsoCoordinatePullback hopen hpush j k fMiddle =
+      c.chartTransitionIsoCoordinatePullback hopen hpush i k fRight := by
+  dsimp only
+  rw [c.chartTransitionIsoCoordinatePullback_eq,
+    c.chartTransitionIsoCoordinatePullback_eq,
+    c.chartTransitionIsoCoordinatePullback_eq]
+  exact c.overlapTransitionIso_cocycle i j k
+
+end
+
+
+end AlgebraicGeometry.Scheme.Modules

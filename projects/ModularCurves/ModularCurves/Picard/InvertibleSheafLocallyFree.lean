@@ -138,4 +138,97 @@ theorem IsInvertible.isFinitePresentation {M : X.Modules} (hM : IsInvertible M) 
   { exists_quasicoherentData :=
       ⟨(invertibleLocalGeneratorsData hM).quasiCoherentData, inferInstance⟩ }
 
+private noncomputable def freeCokernelPresentation (U : X.Opens)
+    (f : SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1} ⟶
+      SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1}) :
+    (Limits.cokernel f).Presentation :=
+  SheafOfModules.presentationOfIsCokernelFree f (Limits.cokernel.π f)
+    (Limits.cokernel.condition f) (Limits.cokernelIsCokernel f)
+
+private instance freeCokernelPresentation_isFinite (U : X.Opens)
+    (f : SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1} ⟶
+      SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1}) :
+    (freeCokernelPresentation U f).IsFinite where
+  isFiniteType_generators := by
+    constructor
+    dsimp only [freeCokernelPresentation,
+      SheafOfModules.presentationOfIsCokernelFree,
+      SheafOfModules.generatorsOfIsCokernelFree]
+    infer_instance
+  isFiniteType_relations := by
+    constructor
+    dsimp only [freeCokernelPresentation,
+      SheafOfModules.presentationOfIsCokernelFree,
+      SheafOfModules.relationsOfIsCokernelFree]
+    infer_instance
+
+private noncomputable def localFreeMap {M N : X.Modules} (f : M ⟶ N)
+    (U : X.Opens) (eM : (pullback U.ι).obj M ≅ unitObj U.toScheme)
+    (eN : (pullback U.ι).obj N ≅ unitObj U.toScheme) :
+    SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1} ⟶
+      SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1} :=
+  (localFreeTrivializationIso M U eM).hom ≫ f.over U ≫
+    (localFreeTrivializationIso N U eN).inv
+
+private noncomputable def localCokernelIso {M N : X.Modules} (f : M ⟶ N)
+    (U : X.Opens) (eM : (pullback U.ι).obj M ≅ unitObj U.toScheme)
+    (eN : (pullback U.ι).obj N ≅ unitObj U.toScheme) :
+    Limits.cokernel (localFreeMap f U eM eN) ≅ (Limits.cokernel f).over U := by
+  let F := SheafOfModules.overFunctor X.ringCatSheaf U
+  letI : F.IsLeftAdjoint :=
+    (SheafOfModules.overPushforwardOverAdj (R := X.ringCatSheaf) U).isLeftAdjoint
+  letI : F.PreservesZeroMorphisms :=
+    Functor.preservesZeroMorphisms_of_isLeftAdjoint F
+  exact Limits.cokernel.mapIso (f := localFreeMap f U eM eN) (f.over U)
+      (localFreeTrivializationIso M U eM)
+      (localFreeTrivializationIso N U eN) (by simp [localFreeMap]) ≪≫
+    (Limits.PreservesCokernel.iso F f).symm
+
+private noncomputable def localCokernelPresentation {M N : X.Modules} (f : M ⟶ N)
+    (U : X.Opens) (eM : (pullback U.ι).obj M ≅ unitObj U.toScheme)
+    (eN : (pullback U.ι).obj N ≅ unitObj U.toScheme) :
+    ((Limits.cokernel f).over U).Presentation :=
+  SheafOfModules.Presentation.ofIsIso (localCokernelIso f U eM eN).hom
+    (freeCokernelPresentation U (localFreeMap f U eM eN))
+
+private instance localCokernelPresentation_isFinite {M N : X.Modules} (f : M ⟶ N)
+    (U : X.Opens) (eM : (pullback U.ι).obj M ≅ unitObj U.toScheme)
+    (eN : (pullback U.ι).obj N ≅ unitObj U.toScheme) :
+    (localCokernelPresentation f U eM eN).IsFinite := by
+  dsimp only [localCokernelPresentation]
+  infer_instance
+
+/-- The cokernel of a morphism between invertible scheme modules is finitely presented. -/
+theorem IsInvertible.cokernel_isFinitePresentation {M N : X.Modules}
+    (hM : IsInvertible M) (hN : IsInvertible N) (f : M ⟶ N) :
+    (Limits.cokernel f).IsFinitePresentation := by
+  obtain ⟨ι, U, hU, htrivM⟩ := hM
+  obtain ⟨κ, V, hV, htrivN⟩ := hN
+  let W : ι × κ → X.Opens := fun ij => U ij.1 ⊓ V ij.2
+  have hW : iSup W = ⊤ := by
+    ext x
+    constructor
+    · intro _
+      trivial
+    · intro _
+      have hxU : x ∈ iSup U := by rw [hU]; trivial
+      have hxV : x ∈ iSup V := by rw [hV]; trivial
+      obtain ⟨i, hxi⟩ := Opens.mem_iSup.mp hxU
+      obtain ⟨j, hxj⟩ := Opens.mem_iSup.mp hxV
+      exact Opens.mem_iSup.mpr ⟨(i, j), hxi, hxj⟩
+  let q : (Limits.cokernel f).QuasicoherentData :=
+    { I := ι × κ
+      X := W
+      coversTop := (Opens.coversTop_iff (T := X) W).2 hW
+      presentation ij := localCokernelPresentation f (W ij)
+        (restrictTrivialization (show W ij ≤ U ij.1 from inf_le_left)
+          (htrivM ij.1).some)
+        (restrictTrivialization (show W ij ≤ V ij.2 from inf_le_right)
+          (htrivN ij.2).some) }
+  refine { exists_quasicoherentData := ⟨q, ?_⟩ }
+  constructor
+  intro ij
+  dsimp only [q]
+  infer_instance
+
 end AlgebraicGeometry.Scheme.Modules

@@ -3,8 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.Basic
+import Mathlib.Algebra.Polynomial.Basis
+import Mathlib.LinearAlgebra.Basis.Submodule
 import Mathlib.RingTheory.AdjoinRoot
+import Mathlib.RingTheory.AlgebraTower
+import ModularCurves.EllipticCurve.Basic
+import ModularCurves.ForMathlib.ProjToSpecZero
 
 /-!
 # The pole-order filtration and global sections of the projective Weierstrass model
@@ -222,6 +226,116 @@ theorem linearIndependent_one_coordX_coordY (W : WeierstrassCurve R) :
     simpa using congrArg (Polynomial.coeff · 0) hq
   intro i
   fin_cases i <;> assumption
+
+private abbrev PoleOrderIndex (n : ℕ) := Fin (n / 2 + 1) ⊕ Fin ((n - 1) / 2)
+
+private noncomputable def coordinateRingMonomialBasis (W : WeierstrassCurve R) :
+    Module.Basis (ℕ × Fin 2) R W.toAffine.CoordinateRing :=
+  (Polynomial.basisMonomials R).smulTower
+    (WeierstrassCurve.Affine.CoordinateRing.basis W.toAffine)
+
+private def poleOrderIndexEmbedding (n : ℕ) : PoleOrderIndex n ↪ ℕ × Fin 2 where
+  toFun
+    | Sum.inl i => (i, 0)
+    | Sum.inr i => (i, 1)
+  inj' := by
+    intro i j h
+    rcases i with i | i <;> rcases j with j | j
+    · simp only [Sum.inl.injEq]
+      exact Fin.ext (congrArg Prod.fst h)
+    · have := congrArg (fun q => (q.2 : ℕ)) h
+      simp at this
+    · have := congrArg (fun q => (q.2 : ℕ)) h
+      simp at this
+    · simp only [Sum.inr.injEq]
+      exact Fin.ext (congrArg Prod.fst h)
+
+@[simp]
+private lemma poleOrderIndexEmbedding_inl (n : ℕ) (i : Fin (n / 2 + 1)) :
+    poleOrderIndexEmbedding n (Sum.inl i) = ((i : ℕ), (0 : Fin 2)) := rfl
+
+@[simp]
+private lemma poleOrderIndexEmbedding_inr (n : ℕ) (i : Fin ((n - 1) / 2)) :
+    poleOrderIndexEmbedding n (Sum.inr i) = ((i : ℕ), (1 : Fin 2)) := rfl
+
+private noncomputable def poleOrderMonomial (W : WeierstrassCurve R) (n : ℕ) :
+    PoleOrderIndex n → W.toAffine.CoordinateRing
+  | Sum.inl i => coordX W ^ (i : ℕ)
+  | Sum.inr i => coordX W ^ (i : ℕ) * coordY W
+
+private lemma coordinateRingMonomialBasis_comp_embedding
+    (W : WeierstrassCurve R) (n : ℕ) :
+    coordinateRingMonomialBasis W ∘ poleOrderIndexEmbedding n = poleOrderMonomial W n := by
+  funext i
+  rcases i with i | i
+  · simp only [Function.comp_apply, poleOrderIndexEmbedding_inl, poleOrderMonomial,
+      coordinateRingMonomialBasis, Module.Basis.smulTower_apply,
+      Polynomial.coe_basisMonomials,
+      WeierstrassCurve.Affine.CoordinateRing.basis_zero]
+    rw [WeierstrassCurve.Affine.CoordinateRing.smul, mul_one]
+    change AdjoinRoot.mk W.toAffine.polynomial
+        (Polynomial.C (Polynomial.monomial (i : ℕ) 1)) = coordX W ^ (i : ℕ)
+    rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow]
+    simp only [map_one, one_mul]
+    rfl
+  · simp only [Function.comp_apply, poleOrderIndexEmbedding_inr, poleOrderMonomial,
+      coordinateRingMonomialBasis, Module.Basis.smulTower_apply,
+      Polynomial.coe_basisMonomials,
+      WeierstrassCurve.Affine.CoordinateRing.basis_one]
+    rw [WeierstrassCurve.Affine.CoordinateRing.smul]
+    change AdjoinRoot.mk W.toAffine.polynomial
+        (Polynomial.C (Polynomial.monomial (i : ℕ) 1)) * coordY W =
+      coordX W ^ (i : ℕ) * coordY W
+    rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow]
+    simp only [map_one, one_mul]
+    rfl
+
+private lemma range_poleOrderMonomial (W : WeierstrassCurve R) (n : ℕ) :
+    Set.range (poleOrderMonomial W n) =
+      {g | ∃ i : ℕ, 2 * i ≤ n ∧ g = coordX W ^ i} ∪
+        {g | ∃ i : ℕ, 2 * i + 3 ≤ n ∧ g = coordX W ^ i * coordY W} := by
+  ext g
+  constructor
+  · rintro ⟨i, rfl⟩
+    rcases i with i | i
+    · exact Or.inl ⟨i, by omega, rfl⟩
+    · exact Or.inr ⟨i, by omega, rfl⟩
+  · rintro (⟨i, hi, rfl⟩ | ⟨i, hi, rfl⟩)
+    · exact ⟨Sum.inl ⟨i, by omega⟩, rfl⟩
+    · exact ⟨Sum.inr ⟨i, by omega⟩, rfl⟩
+
+private noncomputable def poleOrderFiltrationBasisAux (W : WeierstrassCurve R) (n : ℕ) :
+    Module.Basis (PoleOrderIndex n) R (poleOrderFiltration W n) := by
+  let b := coordinateRingMonomialBasis W
+  let e := poleOrderIndexEmbedding n
+  have hli : LinearIndependent R (poleOrderMonomial W n) := by
+    rw [← coordinateRingMonomialBasis_comp_embedding W n]
+    exact b.linearIndependent.comp e e.injective
+  have hspan : Submodule.span R (Set.range (poleOrderMonomial W n)) =
+      poleOrderFiltration W n := by
+    rw [range_poleOrderMonomial]
+    rfl
+  exact (Module.Basis.span hli).map (LinearEquiv.ofEq _ _ hspan)
+
+private lemma card_poleOrderIndex {n : ℕ} (hn : 1 ≤ n) :
+    Fintype.card (PoleOrderIndex n) = n := by
+  simp only [PoleOrderIndex, Fintype.card_sum, Fintype.card_fin]
+  omega
+
+/-- For `n ≥ 1`, the monomials `xⁱ` of pole order `2i` and `xⁱy` of pole order
+`2i + 3` form an `R`-basis of the pole-order filtration `Fₙ`. -/
+noncomputable def poleOrderFiltrationBasis (W : WeierstrassCurve R) {n : ℕ} (hn : 1 ≤ n) :
+    Module.Basis (Fin n) R (poleOrderFiltration W n) :=
+  (poleOrderFiltrationBasisAux W n).reindex
+    (Fintype.equivFinOfCardEq (card_poleOrderIndex hn))
+
+/-- For a nonzero base ring and `n ≥ 1`, the pole-order filtration `Fₙ` has rank `n`. -/
+theorem poleOrderFiltration_finrank [Nontrivial R] (W : WeierstrassCurve R)
+    {n : ℕ} (hn : 1 ≤ n) : Module.finrank R (poleOrderFiltration W n) = n := by
+  let b := poleOrderFiltrationBasis W hn
+  letI : Module.Free R (poleOrderFiltration W n) := Module.Free.of_basis b
+  letI : Module.Finite R (poleOrderFiltration W n) := Module.Finite.of_basis b
+  rw [Module.finrank_eq_card_basis b, Fintype.card_fin]
 
 /-- The `s = X/Y` coordinate index of the infinity chart. -/
 abbrev infChartS : {j : Fin 3 // j ≠ 1} := ⟨0, by decide⟩
@@ -657,39 +771,6 @@ theorem chartY_sup_chartZ_eq_top (W : WeierstrassCurve R) :
   rw [chartOpensRange_eq_basicOpen, chartOpensRange_eq_basicOpen]
   exact basicOpen_X1_sup_basicOpen_X2_eq_top W
 
-/-- **(the `Γ`-bridge, ForMathlib-grade)** For a positive-degree homogeneous `f`, the
-global-sections map of `awayι` is restriction to the basic open followed by the canonical
-`awayToSection`-inverse: `Γ(awayι) ≫ ΓSpec = res ≫ (A_f)₀-identification`. -/
-private lemma Proj_awayι_appTop_ΓSpecIso {R₀ A : Type u} [CommRing R₀] [CommRing A]
-    [Algebra R₀ A] (𝒜 : ℕ → Submodule R₀ A) [GradedAlgebra 𝒜]
-    {m : ℕ} (f : A) (f_deg : f ∈ 𝒜 m) (hm : 0 < m) :
-    (Proj.awayι 𝒜 f f_deg hm).appTop ≫
-      (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousLocalization.Away 𝒜 f))).hom =
-    (Proj 𝒜).presheaf.map (homOfLE le_top).op ≫
-      (Proj.basicOpenIsoAway 𝒜 f f_deg hm).inv := by
-  rw [Iso.eq_comp_inv, Category.assoc]
-  have hσ : (Proj.basicOpenIsoAway 𝒜 f f_deg hm).hom = Proj.awayToSection 𝒜 f := rfl
-  rw [hσ]
-  have hhomTop : (Proj.basicOpenToSpec 𝒜 f).appTop ≫
-      (Proj.basicOpen 𝒜 f).topIso.hom =
-      (Scheme.ΓSpecIso _).hom ≫ Proj.awayToSection 𝒜 f := by
-    rw [show (Proj.basicOpenToSpec 𝒜 f).appTop =
-      (Proj.basicOpenToSpec 𝒜 f).app ⊤ from rfl]
-    rw [Proj.basicOpenToSpec_app_top, Category.assoc, Category.assoc,
-      Iso.inv_hom_id, Category.comp_id]
-  rw [← hhomTop, ← Proj.basicOpenIsoSpec_inv_ι 𝒜 f f_deg hm, Scheme.Hom.comp_appTop, Category.assoc]
-  rw [show Proj.basicOpenToSpec 𝒜 f =
-    (Proj.basicOpenIsoSpec 𝒜 f f_deg hm).hom from rfl]
-  rw [← Category.assoc ((Proj.basicOpenIsoSpec 𝒜 f f_deg hm).inv.appTop)]
-  rw [show (Proj.basicOpenIsoSpec 𝒜 f f_deg hm).inv.appTop ≫
-      (Proj.basicOpenIsoSpec 𝒜 f f_deg hm).hom.appTop = 𝟙 _ from by
-    rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id]
-    simp]
-  rw [Category.id_comp, Scheme.Opens.ι_appTop, Scheme.Opens.topIso_hom]
-  refine ((Proj 𝒜).presheaf.map_comp _ _).symm.trans
-    (congrArg ((Proj 𝒜).presheaf.map) ?_)
-  exact Quiver.Hom.unop_inj (Subsingleton.elim _ _)
-
 /-- **(the structure square)** The composite `R → Γ(model, ⊤) → Γ(model, D₊(F)) ≅ (A_F)₀`
 is the canonical grade-zero algebra map. -/
 lemma structure_section_square (W : WeierstrassCurve R) {m : ℕ}
@@ -701,33 +782,8 @@ lemma structure_section_square (W : WeierstrassCurve R) {m : ℕ}
     CommRingCat.ofHom ((HomogeneousLocalization.fromZeroRingHom
       (quotientGrading (projIdeal W)) (Submonoid.powers F)).comp
       (algebraMapGradeZero (projIdeal W))) := by
-  have hbridge := Proj_awayι_appTop_ΓSpecIso (quotientGrading (projIdeal W)) F F_deg hm
-  have hscheme : Proj.awayι (quotientGrading (projIdeal W)) F F_deg hm ≫ projModelπ W =
-      Spec.map (CommRingCat.ofHom ((HomogeneousLocalization.fromZeroRingHom
-        (quotientGrading (projIdeal W)) (Submonoid.powers F)).comp
-        (algebraMapGradeZero (projIdeal W)))) := by
-    rw [show projModelπ W = Proj.toSpecZero (quotientGrading (projIdeal W)) ≫
-      Spec.map (CommRingCat.ofHom (algebraMapGradeZero (projIdeal W))) from rfl]
-    rw [← Category.assoc, Proj.awayι_toSpecZero, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-  have hΓ := congrArg Scheme.Hom.appTop hscheme
-  rw [Scheme.Hom.comp_appTop] at hΓ
-  calc (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (projModelπ W).appTop ≫
-        (projModel W).presheaf.map (homOfLE le_top).op ≫
-        (Proj.basicOpenIsoAway (quotientGrading (projIdeal W)) F F_deg hm).inv
-      = (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ ((projModelπ W).appTop ≫
-          (Proj.awayι (quotientGrading (projIdeal W)) F F_deg hm).appTop) ≫
-          (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousLocalization.Away
-            (quotientGrading (projIdeal W)) F))).hom := by
-        rw [← hbridge]
-        simp only [Category.assoc]
-    _ = (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
-          (Spec.map (CommRingCat.ofHom ((HomogeneousLocalization.fromZeroRingHom
-            (quotientGrading (projIdeal W)) (Submonoid.powers F)).comp
-            (algebraMapGradeZero (projIdeal W))))).appTop ≫
-          (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousLocalization.Away
-            (quotientGrading (projIdeal W)) F))).hom := by rw [hΓ]
-    _ = _ := by
-        rw [Scheme.ΓSpecIso_naturality, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  exact Proj_structure_section_square (quotientGrading (projIdeal W))
+    (algebraMapGradeZero (projIdeal W)) F F_deg hm
 
 set_option backward.isDefEq.respectTransparency.types false in
 /-- Sections over a chart open are the chart's degree-zero localization: open-immersion

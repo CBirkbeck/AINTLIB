@@ -1,0 +1,115 @@
+/-
+Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: AINTLIB ModularCurves project
+
+ForMathlib (OURS, not vendored): upstream candidate.
+-/
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Morphisms.Separated
+import Mathlib.AlgebraicGeometry.Noetherian
+
+/-!
+# Scheme-theoretic images and separated-target extensionality
+
+The map to the scheme-theoretic image of a quasi-compact morphism is scheme-theoretically
+dominant. Consequently, precomposition by a scheme-theoretically dominant morphism detects
+equality between morphisms over a separated target, without a reducedness assumption.
+-/
+
+open CategoryTheory Limits
+
+universe u
+
+namespace AlgebraicGeometry
+
+variable {W X Y Z : Scheme.{u}}
+
+/-- The scheme-theoretic image of a quasi-compact morphism into a Noetherian scheme is
+Noetherian. -/
+lemma Scheme.Hom.image_isNoetherian (f : X ⟶ Y) [QuasiCompact f] [IsNoetherian Y] :
+    IsNoetherian f.image := by
+  haveI : LocallyOfFiniteType f.imageι := by infer_instance
+  haveI : IsLocallyNoetherian f.image :=
+    LocallyOfFiniteType.isLocallyNoetherian f.imageι
+  haveI : CompactSpace f.image :=
+    (quasiCompact_iff_compactSpace f.imageι).mp inferInstance
+  exact IsNoetherian.mk
+
+/-- The canonical map from the source of a quasi-compact morphism to its scheme-theoretic image
+is scheme-theoretically dominant. -/
+lemma Scheme.Hom.toImage_isSchemeTheoreticallyDominant (f : X ⟶ Y) [QuasiCompact f] :
+    IsSchemeTheoreticallyDominant f.toImage := by
+  rw [isSchemeTheoreticallyDominant_iff]
+  refine Scheme.IdealSheafData.ext_of_iSup_eq_top
+    (fun U : Y.affineOpens ↦
+      ⟨f.imageι ⁻¹ᵁ U.1, U.2.preimage f.imageι⟩)
+    (f.imageι.iSup_preimage_eq_top (iSup_affineOpens_eq_top Y)) ?_
+  intro U
+  rw [Scheme.Hom.ker_apply, Scheme.IdealSheafData.ideal_bot, Pi.bot_apply]
+  exact (RingHom.injective_iff_ker_eq_bot _).mp (f.toImage_app_injective U)
+
+/-- If a quasi-compact scheme-theoretically dominant morphism factors through an open
+immersion, its canonical lift to the open subscheme is scheme-theoretically dominant. -/
+lemma IsSchemeTheoreticallyDominant.lift_of_isOpenImmersion
+    (f : X ⟶ Y) (j : W ⟶ Y) [IsOpenImmersion j]
+    (H : Set.range f ⊆ Set.range j) [IsSchemeTheoreticallyDominant f]
+    [QuasiCompact f] :
+    IsSchemeTheoreticallyDominant (IsOpenImmersion.lift j f H) := by
+  exact IsSchemeTheoreticallyDominant.of_isPullback
+    (IsOpenImmersion.isPullback_lift_id f j H).flip
+
+/-- If a composite is scheme-theoretically dominant, then its second factor is
+scheme-theoretically dominant. -/
+lemma IsSchemeTheoreticallyDominant.of_comp (f : X ⟶ Y) (g : Y ⟶ Z)
+    [IsSchemeTheoreticallyDominant (f ≫ g)] :
+    IsSchemeTheoreticallyDominant g := by
+  rw [isSchemeTheoreticallyDominant_iff]
+  exact le_antisymm
+    ((Scheme.Hom.le_ker_comp f g).trans_eq (f ≫ g).ker_eq_bot) bot_le
+
+/-- The closed embedding of the scheme-theoretic image of a quasi-compact dominant morphism is
+surjective. -/
+lemma Scheme.Hom.imageι_surjective_of_isDominant (f : X ⟶ Y) [QuasiCompact f]
+    [IsDominant f] : Surjective f.imageι := by
+  have hrange : Set.range f ⊆ Set.range f.imageι := by
+    have hcomp : Set.range (f.toImage ≫ f.imageι) ⊆ Set.range f.imageι :=
+      Set.range_comp_subset_range f.toImage f.imageι
+    simpa only [f.toImage_imageι] using hcomp
+  haveI : IsDominant f.imageι := ⟨f.denseRange.mono hrange⟩
+  exact surjective_of_isDominant_of_isClosed_range f.imageι
+    f.imageι.isClosedEmbedding.isClosed_range
+
+/-- Morphisms over a separated target are equal if they agree after precomposition by a
+scheme-theoretically dominant morphism. -/
+lemma ext_of_isSchemeTheoreticallyDominant_of_isSeparated
+    {f g : X ⟶ Y} (s : Y ⟶ Z) [IsSeparated s]
+    (h : f ≫ s = g ≫ s) (ι : W ⟶ X) [IsSchemeTheoreticallyDominant ι]
+    (hU : ι ≫ f = ι ≫ g) : f = g := by
+  let X' : Over Z := Over.mk (f ≫ s)
+  let Y' : Over Z := Over.mk s
+  let U' : Over Z := Over.mk (ι ≫ f ≫ s)
+  let f' : X' ⟶ Y' := Over.homMk f
+  let g' : X' ⟶ Y' := Over.homMk g
+  let ι' : U' ⟶ X' := Over.homMk ι
+  have : IsSeparated Y'.hom := ‹_›
+  have hEq : ι' ≫ f' = ι' ≫ g' := by
+    ext1
+    exact hU
+  let l : U' ⟶ equalizer f' g' := equalizer.lift ι' hEq
+  have hlift : l.left ≫ (equalizer.ι f' g').left = ι := by
+    rw [← Over.comp_left, equalizer.lift_ι]
+    rfl
+  have hkerLe : (equalizer.ι f' g').left.ker ≤ ι.ker := by
+    rw [← hlift]
+    exact Scheme.Hom.le_ker_comp l.left (equalizer.ι f' g').left
+  have hker : (equalizer.ι f' g').left.ker = ⊥ :=
+    le_antisymm (hkerLe.trans_eq ι.ker_eq_bot) bot_le
+  haveI : IsClosedImmersion (equalizer.ι f' g').left :=
+    isClosedImmersion_equalizer_ι_left f' g'
+  haveI : IsIso (equalizer.ι f' g').left :=
+    IsClosedImmersion.isIso_iff_ker_eq_bot.mpr hker
+  rw [← cancel_epi (equalizer.ι f' g').left]
+  exact congr($(equalizer.condition f' g').left)
+
+end AlgebraicGeometry

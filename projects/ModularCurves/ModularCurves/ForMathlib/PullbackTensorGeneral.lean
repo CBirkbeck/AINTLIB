@@ -32,6 +32,95 @@ universe v₁ v₂ v₃ u₁ u₂ u₃ u w w'
 
 open CategoryTheory MonoidalCategory Functor
 
+namespace CategoryTheory
+
+variable {C : Type u₁} {D : Type u₂}
+  [Category.{v₁} C] [Category.{v₂} D]
+  [MonoidalCategory C] [MonoidalCategory D]
+  {L₁ L₂ : C ⥤ D} {R₁ R₂ : D ⥤ C}
+
+/-- Taking the mate of a monoidal natural transformation between right adjoints
+produces a monoidal natural transformation between the corresponding left adjoints. -/
+theorem conjugateEquiv_symm_isMonoidal
+    (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂)
+    [L₁.Monoidal] [L₂.Monoidal] [R₁.LaxMonoidal] [R₂.LaxMonoidal]
+    (hadj₁ : adj₁.IsMonoidal) (hadj₂ : adj₂.IsMonoidal)
+    (α : R₁ ⟶ R₂) (hα : α.IsMonoidal) :
+    ((conjugateEquiv adj₁ adj₂).symm α).IsMonoidal := by
+  letI := hadj₁
+  letI := hadj₂
+  letI := hα
+  let β : L₂ ⟶ L₁ :=
+    L₂.leftUnitor.inv ≫
+      Functor.whiskerRight adj₁.unit L₂ ≫
+      (Functor.associator L₁ R₁ L₂).hom ≫
+      Functor.whiskerLeft L₁ (Functor.whiskerRight α L₂) ≫
+      Functor.whiskerLeft L₁ adj₂.counit ≫
+      L₁.rightUnitor.hom
+  have hβ : β.IsMonoidal := by
+    dsimp only [β]
+    infer_instance
+  rw [show (conjugateEquiv adj₁ adj₂).symm α = β by
+    ext X
+    rw [conjugateEquiv_symm_apply_app]
+    simp only [β, NatTrans.comp_app, Functor.leftUnitor_inv_app,
+      Functor.whiskerRight_app, Functor.associator_hom_app,
+      Functor.whiskerLeft_app, Functor.rightUnitor_hom_app]
+    erw [Category.id_comp, Category.id_comp, Category.comp_id]]
+  exact hβ
+
+variable {E : Type u₃} [Category.{v₃} E] [MonoidalCategory E]
+
+/-- Monoidality of a natural transformation can be checked after precomposition
+with a monoidal localization functor. -/
+theorem NatTrans.IsMonoidal.of_whiskerLeft_localization
+    (L : C ⥤ D) (W : MorphismProperty C) [L.IsLocalization W]
+    [W.ContainsIdentities] [L.Monoidal]
+    {F G : D ⥤ E} [F.Monoidal] [G.Monoidal]
+    (τ : F ⟶ G) (h : (Functor.whiskerLeft L τ).IsMonoidal) :
+    τ.IsMonoidal := by
+  letI := h
+  refine { unit := ?_, tensor := fun X Y ↦ ?_ }
+  · have hu := NatTrans.IsMonoidal.unit
+      (τ := Functor.whiskerLeft L τ)
+    change (Functor.LaxMonoidal.ε F ≫
+        F.map (Functor.LaxMonoidal.ε L)) ≫
+      τ.app (L.obj (𝟙_ C)) =
+        Functor.LaxMonoidal.ε G ≫
+          G.map (Functor.LaxMonoidal.ε L) at hu
+    apply (cancel_mono (G.map (Functor.LaxMonoidal.ε L))).1
+    rw [Category.assoc, ← τ.naturality]
+    simpa only [Category.assoc] using hu
+  · let lhs : MonoidalCategory.curriedTensorPre F ⟶
+        MonoidalCategory.curriedTensorPost G :=
+      (Functor.curriedTensorPreIsoPost F).hom ≫
+        MonoidalCategory.curriedTensorPostFunctor.map τ
+    let rhs : MonoidalCategory.curriedTensorPre F ⟶
+        MonoidalCategory.curriedTensorPost G :=
+      MonoidalCategory.curriedTensorPreFunctor.map τ ≫
+        (Functor.curriedTensorPreIsoPost G).hom
+    have hcurried : lhs = rhs := by
+      apply Localization.natTrans₂_ext L L W W
+      intro A B
+      change Functor.LaxMonoidal.μ F (L.obj A) (L.obj B) ≫
+          τ.app (L.obj A ⊗ L.obj B) =
+        (τ.app (L.obj A) ⊗ₘ τ.app (L.obj B)) ≫
+          Functor.LaxMonoidal.μ G (L.obj A) (L.obj B)
+      apply (cancel_mono (G.map (Functor.LaxMonoidal.μ L A B))).1
+      rw [Category.assoc, ← τ.naturality]
+      have ht := NatTrans.IsMonoidal.tensor
+        (τ := Functor.whiskerLeft L τ) A B
+      simp only [Functor.LaxMonoidal.comp_μ,
+        Functor.whiskerLeft_app] at ht
+      rw [Category.assoc] at ht
+      conv_rhs at ht => rw [← Category.assoc]
+      change @Eq (F.obj (L.obj A) ⊗ F.obj (L.obj B) ⟶
+        G.obj (L.obj (A ⊗ B))) _ _ at ht
+      exact ht
+    exact NatTrans.congr_app (NatTrans.congr_app hcurried X) Y
+
+end CategoryTheory
+
 namespace PresheafOfModules
 
 section RestrictScalarsLax
@@ -184,6 +273,13 @@ noncomputable def pushforwardIsoFactored :
     pushforward.{u} φ ≅ pushforwardFactored φ :=
   NatIso.ofComponents (fun P => Iso.refl _) (fun f => by simp; rfl)
 
+/-- The comparison with the factored pushforward is the identity natural
+isomorphism after unfolding the definition of `pushforward`. -/
+lemma pushforwardIsoFactored_eq_refl :
+    pushforwardIsoFactored φ = Iso.refl (pushforward φ) := by
+  ext P
+  rfl
+
 /-- **[D-PresPB′-general], leaf B1 (lax structure on the factored pushforward).** -/
 @[implicit_reducible]
 noncomputable def pushforwardFactoredLaxMonoidal : (pushforwardFactored φ).LaxMonoidal :=
@@ -206,6 +302,18 @@ noncomputable def pullbackPushforwardFactoredAdjunction
     [(pushforward.{u} φ).IsRightAdjoint] :
     pullback.{u} φ ⊣ pushforwardFactored φ :=
   (pullbackPushforwardAdjunction.{u} φ).ofNatIsoRight (pushforwardIsoFactored φ)
+
+/-- Transporting the pullback--pushforward adjunction along the componentwise
+identity factored comparison recovers the original adjunction. -/
+lemma pullbackPushforwardFactoredAdjunction_eq
+    [(pushforward.{u} φ).IsRightAdjoint] :
+    pullbackPushforwardFactoredAdjunction φ =
+      pullbackPushforwardAdjunction φ := by
+  unfold pullbackPushforwardFactoredAdjunction
+  rw [pushforwardIsoFactored_eq_refl]
+  cases pullbackPushforwardAdjunction φ
+  ext
+  rfl
 
 /-- The unit of the transported adjunction agrees elementwise with the unit of the
 original pullback–pushforward adjunction (the comparison is componentwise the
@@ -251,6 +359,133 @@ lemma pushforwardFactored_μ_app_tmul
     (Functor.LaxMonoidal.μ (pushforwardFactored φ) M N).app V (x ⊗ₜ y) =
       (x ⊗ₜ y : ((pushforwardFactored φ).obj (M ⊗ N)).obj V) :=
   rfl
+
+/-- After applying the factored pushforward, the doctrinal pullback tensor comparison
+sends the adjunction-unit image of a pure tensor to the pure tensor of the two
+adjunction-unit images. -/
+theorem pushforwardFactored_map_pullback_δ_unit_tmul
+    [(pushforward.{u} φ).IsRightAdjoint]
+    (P Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
+    (V : Cᵒᵖ) (x : P.obj V) (y : Q.obj V) :
+    let PB := pullback.{u} φ
+    let PF := pushforwardFactored φ
+    let adj := pullbackPushforwardFactoredAdjunction φ
+    letI : PF.LaxMonoidal := pushforwardFactoredLaxMonoidal φ
+    letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+    ((PF.map (Functor.OplaxMonoidal.δ PB P Q)).app V)
+        ((adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y)) =
+      ((adj.unit.app P).app V x ⊗ₜ (adj.unit.app Q).app V y :
+        (PF.obj (PB.obj P ⊗ PB.obj Q)).obj V) := by
+  dsimp only
+  let PB := pullback.{u} φ
+  let PF := pushforwardFactored φ
+  let adj := pullbackPushforwardFactoredAdjunction φ
+  letI : PF.LaxMonoidal := pushforwardFactoredLaxMonoidal φ
+  letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+  letI : adj.IsMonoidal := inferInstance
+  have h := adj.unit_app_tensor_comp_map_δ P Q
+  have hV :
+      (adj.unit.app (P ⊗ Q)).app V ≫
+          ((PF.map (Functor.OplaxMonoidal.δ PB P Q)).app V) =
+        ((adj.unit.app P ⊗ₘ adj.unit.app Q).app V) ≫
+          ((Functor.LaxMonoidal.μ PF (PB.obj P) (PB.obj Q)).app V) := by
+    simpa only [comp_app] using congrArg (fun a => a.app V) h
+  have happ := congrArg (fun k => k (x ⊗ₜ y)) hV
+  change
+    ((PF.map (Functor.OplaxMonoidal.δ PB P Q)).app V)
+        ((adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y)) =
+      ((Functor.LaxMonoidal.μ PF (PB.obj P) (PB.obj Q)).app V)
+        ((adj.unit.app P ⊗ₘ adj.unit.app Q).app V (x ⊗ₜ y)) at happ
+  have htensor :
+      (adj.unit.app P ⊗ₘ adj.unit.app Q).app V (x ⊗ₜ y) =
+        ((adj.unit.app P).app V x ⊗ₜ (adj.unit.app Q).app V y :
+          (PF.obj (PB.obj P) ⊗ PF.obj (PB.obj Q)).obj V) :=
+    ModuleCat.MonoidalCategory.tensorHom_tmul
+      ((adj.unit.app P).app V) ((adj.unit.app Q).app V) x y
+  rw [htensor] at happ
+  rw [pushforwardFactored_μ_app_tmul] at happ
+  exact happ
+
+/-- At an object mapped by the site functor, the doctrinal pullback tensor comparison
+sends the adjunction-unit image of a pure tensor to the pure tensor of the two unit
+images. -/
+theorem pullback_δ_unit_tmul
+    [(pushforward.{u} φ).IsRightAdjoint]
+    (P Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
+    (V : Cᵒᵖ) (x : P.obj V) (y : Q.obj V) :
+    let PB := pullback.{u} φ
+    let adj := pullbackPushforwardFactoredAdjunction φ
+    letI : (pushforwardFactored φ).LaxMonoidal :=
+      pushforwardFactoredLaxMonoidal φ
+    letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+    (Functor.OplaxMonoidal.δ PB P Q).app (F.op.obj V)
+        (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+          (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y)) =
+      ((show (PB.obj P).obj (F.op.obj V) from
+          (adj.unit.app P).app V x) ⊗ₜ
+        (show (PB.obj Q).obj (F.op.obj V) from
+          (adj.unit.app Q).app V y) :
+        (PB.obj P ⊗ PB.obj Q).obj (F.op.obj V)) := by
+  dsimp only
+  exact pushforwardFactored_map_pullback_δ_unit_tmul φ P Q V x y
+
+/-- After module sheafification, the doctrinal presheaf-pullback tensor comparison
+sends the sheafification-unit image of an adjunction-unit pure tensor to the
+sheafification-unit image of the pure tensor of the two unit images. -/
+theorem sheafification_map_pullback_δ_unit_tmul
+    {K : GrothendieckTopology D}
+    [K.WEqualsLocallyBijective AddCommGrpCat.{u}]
+    [HasWeakSheafify K AddCommGrpCat.{u}]
+    (hR : Presheaf.IsSheaf K (R ⋙ forget₂ CommRingCat RingCat))
+    [(pushforward.{u} φ).IsRightAdjoint]
+    (P Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
+    (V : Cᵒᵖ) (x : P.obj V) (y : Q.obj V) :
+    let PB := pullback.{u} φ
+    let Rsh : Sheaf K RingCat.{u} := ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩
+    let L := sheafification.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+    let adj := pullbackPushforwardFactoredAdjunction φ
+    let shAdj := sheafificationAdjunction.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+    letI : (pushforwardFactored φ).LaxMonoidal :=
+      pushforwardFactoredLaxMonoidal φ
+    letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+    ((L.map (Functor.OplaxMonoidal.δ PB P Q)).val.app (F.op.obj V))
+        ((shAdj.unit.app (PB.obj (P ⊗ Q))).app (F.op.obj V)
+          (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+            (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) =
+      (shAdj.unit.app (PB.obj P ⊗ PB.obj Q)).app (F.op.obj V)
+        ((show (PB.obj P).obj (F.op.obj V) from
+            (adj.unit.app P).app V x) ⊗ₜ
+          (show (PB.obj Q).obj (F.op.obj V) from
+            (adj.unit.app Q).app V y)) := by
+  dsimp only
+  let PB := pullback.{u} φ
+  let Rsh : Sheaf K RingCat.{u} := ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩
+  let L := sheafification.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+  let adj := pullbackPushforwardFactoredAdjunction φ
+  let shAdj := sheafificationAdjunction.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+  letI : (pushforwardFactored φ).LaxMonoidal :=
+    pushforwardFactoredLaxMonoidal φ
+  letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+  have hδ := pullback_δ_unit_tmul φ P Q V x y
+  dsimp only at hδ
+  have hnat := shAdj.unit.naturality (Functor.OplaxMonoidal.δ PB P Q)
+  have happ := congrArg
+    (fun q => q.app (F.op.obj V)
+      (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+        (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) hnat
+  conv_lhs at happ => erw [comp_app, ModuleCat.comp_apply]
+  conv_rhs at happ => erw [comp_app, ModuleCat.comp_apply]
+  change
+    (shAdj.unit.app (PB.obj P ⊗ PB.obj Q)).app (F.op.obj V)
+        ((Functor.OplaxMonoidal.δ PB P Q).app (F.op.obj V)
+          (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+            (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) =
+      ((L.map (Functor.OplaxMonoidal.δ PB P Q)).val.app (F.op.obj V))
+        ((shAdj.unit.app (PB.obj (P ⊗ Q))).app (F.op.obj V)
+          (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+            (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) at happ
+  exact happ.symm.trans (congrArg
+    (fun z => (shAdj.unit.app (PB.obj P ⊗ PB.obj Q)).app (F.op.obj V) z) hδ)
 
 /-- **[D-PresPB′-general], leaves B1+B2 (fused milestone).** The presheaf pullback along an
 arbitrary ring comparison carries an oplax monoidal structure: transport the
@@ -1084,30 +1319,36 @@ variable {C' D' : Type u} [SmallCategory C'] [SmallCategory D']
   (φ₀ : (S ⋙ forget₂ CommRingCat RingCat) ⟶
     F.op ⋙ (R ⋙ forget₂ CommRingCat RingCat))
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaf A (descent).** If the presheaf-level pullback along `φ₀` is
 monoidal, then the sheaf-level pullback is monoidal for the localized monoidal structures:
 `functorMonoidalOfComp` along the sheafification localization, with the lifting supplied by
 mathlib's `sheafificationCompPullback`. -/
-theorem nonempty_sheafPullback_monoidal
+@[implicit_reducible]
+noncomputable def sheafPullbackMonoidal
     (hmono : (PresheafOfModules.pullback.{u} φ₀).Monoidal) :
     letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
     letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
-    Nonempty ((SheafOfModules.pullback.{u}
+    (SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
-          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal) := by
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal := by
   letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
   letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
-  letI := hmono
+  letI pullbackMonoidal : (PresheafOfModules.pullback.{u} φ₀).Monoidal := hmono
   letI : (Localization.Monoidal.toMonoidalCategory
       (L := PresheafOfModules.sheafification.{u}
         (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
       (W := PresheafOfModules.sheafificationW.{u}
         (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
       (Iso.refl _)).Monoidal := inferInstance
-  haveI : Localization.Lifting
+  letI compositeMonoidal : (PresheafOfModules.pullback.{u} φ₀ ⋙
+      Localization.Monoidal.toMonoidalCategory
+        (L := PresheafOfModules.sheafification.{u}
+          (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+        (W := PresheafOfModules.sheafificationW.{u}
+          (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+        (Iso.refl _)).Monoidal := inferInstance
+  letI lifting : Localization.Lifting
       (Localization.Monoidal.toMonoidalCategory
         (L := PresheafOfModules.sheafification.{u}
           (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
@@ -1131,7 +1372,8 @@ theorem nonempty_sheafPullback_monoidal
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
           ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩))⟩
-  exact ⟨(Localization.Monoidal.functorMonoidalOfComp
+  exact @Localization.Monoidal.functorMonoidalOfComp
+    _ _ _ _ _ _ _ _ _
     (Localization.Monoidal.toMonoidalCategory
       (L := PresheafOfModules.sheafification.{u}
         (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
@@ -1140,6 +1382,7 @@ theorem nonempty_sheafPullback_monoidal
       (Iso.refl _))
     (PresheafOfModules.sheafificationW.{u}
       (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+    _ _
     (SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
@@ -1150,11 +1393,18 @@ theorem nonempty_sheafPullback_monoidal
           (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
         (W := PresheafOfModules.sheafificationW.{u}
           (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
-        (Iso.refl _)) :
-    (SheafOfModules.pullback.{u}
+        (Iso.refl _)) compositeMonoidal _ lifting
+
+/-- The sheaf-level pullback monoidal structure exists. -/
+theorem nonempty_sheafPullback_monoidal
+    (hmono : (PresheafOfModules.pullback.{u} φ₀).Monoidal) :
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
+    Nonempty ((SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
-          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal)⟩
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal) :=
+  ⟨sheafPullbackMonoidal S hS R hR φ₀ hmono⟩
 
 end SheafDescent
 
@@ -1164,6 +1414,123 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X Y : Scheme.{u}}
 
+noncomputable local instance pullbackTensorPresheafPushforwardIsRightAdjoint
+    (f : Y ⟶ X) :
+    (PresheafOfModules.pushforward.{u} f.toRingCatSheafHom.hom).IsRightAdjoint := by
+  change (PresheafOfModules.pushforward.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)).IsRightAdjoint
+  exact PresheafOfModules.instIsRightAdjointPushforward
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+
+noncomputable local instance pullbackTensorSheafPushforwardIsRightAdjoint
+    (f : Y ⟶ X) :
+    (SheafOfModules.pushforward.{u} f.toRingCatSheafHom).IsRightAdjoint := by
+  change (Scheme.Modules.pushforward f).IsRightAdjoint
+  infer_instance
+
+/-- The inverse of the canonical comparison from sheafification of the underlying
+presheaf to a sheaf is the sheafification-adjunction unit on sections. -/
+theorem sheafifyValIso_inv_app_apply
+    (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
+    (sheafifyValIso M).inv.val.app (.op U) x =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app M.val).app (.op U) x := by
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let c := sheafifyValIso M
+  have htri := adj.right_triangle_components M
+  change adj.unit.app M.val ≫ c.hom.val = 𝟙 M.val at htri
+  have htriApply := congrArg (fun q => q.app (.op U) x) htri
+  conv_lhs at htriApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  change c.hom.val.app (.op U)
+      ((adj.unit.app M.val).app (.op U) x) = x at htriApply
+  have hcancel := congrArg (fun q => q.val.app (.op U) x) c.inv_hom_id
+  conv_lhs at hcancel =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  change c.hom.val.app (.op U) (c.inv.val.app (.op U) x) = x at hcancel
+  have hinj : Function.Injective (c.hom.val.app (.op U)) := by
+    apply Function.LeftInverse.injective
+    intro y
+    have hleft := congrArg (fun q => q.val.app (.op U) y) c.hom_inv_id
+    conv_lhs at hleft =>
+      erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+        ModuleCat.comp_apply]
+    exact hleft
+  exact hinj (hcancel.trans htriApply.symm)
+
+/-- The canonical presentation of sheaf pullback as sheafified presheaf pullback sends
+the pullback-adjunction unit of a section to the sheafification-unit image of the
+corresponding presheaf-pullback-adjunction unit. -/
+theorem pullbackIso_hom_unit_app_apply
+    (f : Y ⟶ X) (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
+    ((SheafOfModules.pullbackIso f.toRingCatSheafHom).hom.app M).val.app
+        (.op (f ⁻¹ᵁ U))
+        (((pullbackPushforwardAdjunction f).unit.app M).val.app (.op U) x) =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Y.ringCatSheaf.obj)).unit.app
+          ((PresheafOfModules.pullback
+            (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj M.val)).app
+        (.op (f ⁻¹ᵁ U))
+          (((PresheafOfModules.pullbackPushforwardAdjunction
+            (_root_.PresheafOfModules.schemeRingPresheafHom f)).unit.app M.val).app
+              (.op U) x) := by
+  let adj₁ := SheafOfModules.pullbackPushforwardAdjunction f.toRingCatSheafHom
+  let adj₂ := SheafOfModules.PullbackConstruction.adjunction f.toRingCatSheafHom
+  let e := SheafOfModules.pullbackIso f.toRingCatSheafHom
+  have he := Adjunction.homEquiv_leftAdjointUniq_hom_app adj₁ adj₂ M
+  change (adj₁.homEquiv _ _) (e.hom.app M) = adj₂.unit.app M at he
+  change adj₁.unit.app M ≫
+    (SheafOfModules.pushforward f.toRingCatSheafHom).map (e.hom.app M) =
+      adj₂.unit.app M at he
+  have happ := congrArg (fun q => q.val.app (.op U) x) he
+  conv_lhs at happ =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  exact happ
+
+/-- The comparison between pullback after sheafification and sheafification after
+presheaf pullback sends the unit of the first composite adjunction to the unit of the
+second, on elements. -/
+theorem sheafificationCompPullback_hom_unit_app_apply
+    (f : Y ⟶ X) (P : X.PresheafOfModules) (U : X.Opens)
+    (x : P.obj (.op U)) :
+    let LX := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+    let PB := PresheafOfModules.pullback
+      (_root_.PresheafOfModules.schemeRingPresheafHom f)
+    let shAdjX := PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)
+    let shAdjY := PresheafOfModules.sheafificationAdjunction
+      (𝟙 Y.ringCatSheaf.obj)
+    let preAdj := PresheafOfModules.pullbackPushforwardAdjunction
+      (_root_.PresheafOfModules.schemeRingPresheafHom f)
+    ((SheafOfModules.sheafificationCompPullback
+      f.toRingCatSheafHom).hom.app P).val.app (.op (f ⁻¹ᵁ U))
+        (((pullbackPushforwardAdjunction f).unit.app (LX.obj P)).val.app
+          (.op U) ((shAdjX.unit.app P).app (.op U) x)) =
+      (shAdjY.unit.app (PB.obj P)).app (.op (f ⁻¹ᵁ U))
+        ((preAdj.unit.app P).app (.op U) x) := by
+  dsimp only
+  let shAdjX := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let shAdjY := PresheafOfModules.sheafificationAdjunction
+    (𝟙 Y.ringCatSheaf.obj)
+  let pbAdj := SheafOfModules.pullbackPushforwardAdjunction
+    f.toRingCatSheafHom
+  let preAdj := PresheafOfModules.pullbackPushforwardAdjunction
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+  let adj₁ := shAdjX.comp pbAdj
+  let adj₂ := preAdj.comp shAdjY
+  let e := SheafOfModules.sheafificationCompPullback f.toRingCatSheafHom
+  have he := Adjunction.homEquiv_leftAdjointUniq_hom_app adj₁ adj₂ P
+  change (adj₁.homEquiv _ _) (e.hom.app P) = adj₂.unit.app P at he
+  rw [Adjunction.homEquiv_unit] at he
+  have happ := congrArg (fun q => q.app (.op U) x) he
+  conv_lhs at happ =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  exact happ
+
 /-- **[D-PresPB′-general], payoff packaging (leaves G3 + A).** The pullback of sheaves of
 modules along an arbitrary morphism of schemes is a monoidal functor for the (v10.97)
 localized-monoidal structures: the objectwise content is the general-`f` sheafified
@@ -1172,18 +1539,26 @@ free-yoneda generators by two single-variable presentation passes in the abelian
 `SheafOfModules`), packaged through `functorMonoidalOfComp` with the `Lifting` instance
 `sheafificationCompPullback`. Consumer: `Skeleton.monoidHom` then gives
 `Pic(f) : Pic X →* Pic Y` — the GME (2.16) Picard functor. -/
-theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
+@[implicit_reducible]
+noncomputable def pullbackMonoidal (f : Y ⟶ X) :
     letI := Modules.monoidalCategory X
     letI := Modules.monoidalCategory Y
-    Nonempty ((Modules.pullback f).Monoidal) := by
+    (Modules.pullback f).Monoidal := by
   letI := Modules.monoidalCategory X
   letI := Modules.monoidalCategory Y
-  exact (_root_.PresheafOfModules.nonempty_sheafPullback_monoidal
+  exact _root_.PresheafOfModules.sheafPullbackMonoidal
     (F := TopologicalSpace.Opens.map f.base)
     X.sheaf.obj X.ringCatSheaf.property Y.sheaf.obj Y.ringCatSheaf.property
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
-    (_root_.PresheafOfModules.pullbackMonoidal f) :
-    Nonempty ((Modules.pullback f).Monoidal))
+    (_root_.PresheafOfModules.pullbackMonoidal f)
+
+/-- Pullback of sheaves of modules admits the canonical monoidal structure constructed
+through presheaf pullback and sheafification. -/
+theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
+    letI := Modules.monoidalCategory X
+    letI := Modules.monoidalCategory Y
+    Nonempty ((Modules.pullback f).Monoidal) :=
+  ⟨pullbackMonoidal f⟩
 
 /-- **[PIC-P1b-MONO], leaf D-PresPB′ (general `f`), relocated from
 `PullbackTensorMonoidal` and closed** (respelled at the `CommRingCat`-derived clothing of

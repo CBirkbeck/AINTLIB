@@ -100,6 +100,68 @@ theorem isClosedImmersion_proj_map_quotientGradingHom :
     IsClosedImmersion.spec_of_surjective _ (away_map_quotientGradingHom_surjective I ht)
   infer_instance
 
+section SchemeKernel
+
+local instance : IsClosedImmersion
+    (Proj.map (quotientGradingHom I) (quotientGradingHom_irrelevant_le I)) :=
+  isClosedImmersion_proj_map_quotientGradingHom I
+
+/-- On a positive-degree basic open, the scheme-theoretic ideal of a homogeneous
+quotient is the image of the corresponding kernel between degree-zero away
+localizations. -/
+theorem ker_ideal_proj_map_quotientGradingHom_basicOpen
+    {s : A} (hs : s ∈ 𝒜 1) :
+    (Proj.map (quotientGradingHom I) (quotientGradingHom_irrelevant_le I)).ker.ideal
+        ⟨Proj.basicOpen 𝒜 s,
+          Proj.isAffineOpen_basicOpen 𝒜 s hs one_pos⟩ =
+      Ideal.map (Proj.basicOpenIsoAway 𝒜 s hs one_pos).hom.hom
+        (RingHom.ker (Away.map (quotientGradingHom I) s)) := by
+  rw [Scheme.Hom.ker_apply]
+  let f := Proj.map (quotientGradingHom I) (quotientGradingHom_irrelevant_le I)
+  let U := Proj.basicOpen 𝒜 s
+  let eA := Proj.basicOpenIsoAway 𝒜 s hs one_pos
+  let eB := Proj.basicOpenIsoAway (quotientGrading I) (quotientGradingHom I s)
+    (mk_mem_quotientGrading I hs) one_pos
+  let q := Away.map (quotientGradingHom I) s
+  let e := eA.commRingCatIsoToRingEquiv
+  change RingHom.ker (f.app U).hom = Ideal.map e (RingHom.ker q)
+  have hcomm : eA.hom ≫ f.app U = CommRingCat.ofHom q ≫
+      Proj.awayToSection (quotientGrading I) (quotientGradingHom I s) := by
+    dsimp only [eA, f, U, q]
+    simpa only [eA, Proj.basicOpenIsoAway_hom,
+      Scheme.Hom.app_eq_appLE, Proj.map_preimage_basicOpen] using
+      Proj.awayToSection_comp_appLE (quotientGradingHom I)
+        (quotientGradingHom_irrelevant_le I) hs
+  have hinjB : Function.Injective
+      (Proj.awayToSection (quotientGrading I) (quotientGradingHom I s)).hom := by
+    rw [← Proj.basicOpenIsoAway_hom (quotientGrading I) (quotientGradingHom I s)
+      (mk_mem_quotientGrading I hs) one_pos]
+    exact eB.commRingCatIsoToRingEquiv.injective
+  ext y
+  rw [Ideal.mem_map_of_equiv e y]
+  constructor
+  · intro hy
+    refine ⟨e.symm y, ?_, e.apply_symm_apply y⟩
+    rw [RingHom.mem_ker] at hy ⊢
+    apply hinjB
+    have happ := ConcreteCategory.congr_hom hcomm (e.symm y)
+    change (f.app U).hom (e (e.symm y)) =
+      (Proj.awayToSection (quotientGrading I) (quotientGradingHom I s)).hom
+        (q (e.symm y)) at happ
+    rw [e.apply_symm_apply, hy] at happ
+    rw [map_zero]
+    exact happ.symm
+  · rintro ⟨x, hx, rfl⟩
+    rw [RingHom.mem_ker] at hx ⊢
+    have happ := ConcreteCategory.congr_hom hcomm x
+    change (f.app U).hom (e x) =
+      (Proj.awayToSection (quotientGrading I) (quotientGradingHom I s)).hom (q x) at happ
+    rw [hx] at happ
+    rw [map_zero] at happ
+    exact happ
+
+end SchemeKernel
+
 section Kernel
 
 private lemma away_mk_shift {e : ℕ} {s : A} (hs : s ∈ 𝒜 e) (n m : ℕ) (p : A)

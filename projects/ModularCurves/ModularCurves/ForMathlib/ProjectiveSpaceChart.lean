@@ -53,6 +53,15 @@ lemma X_mem_homogeneousSubmodule_one (i : σ) :
     (X i : MvPolynomial σ R) ∈ homogeneousSubmodule σ R 1 :=
   (mem_homogeneousSubmodule _ _).mpr (isHomogeneous_X _ _)
 
+omit [DecidableEq σ] in
+/-- A variable in a multivariate polynomial ring is a nonzerodivisor over any
+commutative coefficient ring. -/
+lemma X_mem_nonzeroDivisors (i : σ) :
+    (X i : MvPolynomial σ R) ∈ nonZeroDivisors (MvPolynomial σ R) := by
+  rw [mem_nonZeroDivisors_iff_left]
+  intro p hp
+  exact X_mul_cancel_left_iff.mp (hp.trans (mul_zero (X i)).symm)
+
 /-- The dehomogenising evaluation `R[X] → R[u_j : j ≠ i]`, `X_i ↦ 1`, `X_j ↦ u_j`. -/
 noncomputable def dehomogenizeAux (i : σ) :
     MvPolynomial σ R →+* MvPolynomial {j : σ // j ≠ i} R :=
@@ -382,6 +391,26 @@ noncomputable def chartRingEquiv (i : σ) :
       MvPolynomial {j : σ // j ≠ i} R :=
   RingEquiv.ofRingHom (dehomogenizeAt R i) (homogenizeAt R i)
     (dehomogenizeAt_comp_homogenizeAt R i) (homogenizeAt_comp_dehomogenizeAt R i)
+
+/-- The projective chart equivalence sends `X_j / X_i` to its affine coordinate. -/
+@[simp]
+lemma chartRingEquiv_apply_awayVar (i : σ) (j : {j : σ // j ≠ i}) :
+    chartRingEquiv R i (awayVar R i j) = X j := by
+  change dehomogenizeAt R i (awayVar R i j) = X j
+  have hhom : homogenizeAt R i (X j) = awayVar R i j := by
+    rw [homogenizeAt, eval₂Hom_X']
+  rw [← hhom]
+  simpa only [RingHom.comp_apply, RingHom.id_apply] using
+    RingHom.congr_fun (dehomogenizeAt_comp_homogenizeAt R i) (X j)
+
+/-- Every affine coordinate `X_j / X_i` on a standard projective chart is a
+nonzerodivisor. -/
+lemma awayVar_mem_nonZeroDivisors (i : σ) (j : {j : σ // j ≠ i}) :
+    awayVar R i j ∈
+      nonZeroDivisors (Away (homogeneousSubmodule σ R) (X i : MvPolynomial σ R)) := by
+  apply mem_nonZeroDivisors_of_injective (chartRingEquiv R i).injective
+  rw [chartRingEquiv_apply_awayVar]
+  exact X_mem_nonzeroDivisors R j
 
 /-- Homogenising the dehomogenisation of a degree-`n` homogeneous polynomial gives
 `p / X_iⁿ`. -/

@@ -4,8 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.LinearAlgebra.TensorProduct.Finiteness
-import ModularCurves.Picard.Dual
+import ModularCurves.Picard.Evaluation
 import ModularCurves.Picard.PullbackTensorObj
+import ModularCurves.Picard.InvertibleSheaf
 
 /-!
 # The Picard comparison: cover-local invertibility ↔ ⊗-invertibility
@@ -28,11 +29,6 @@ Leaves (`Nonempty`-wrapped `Prop`s, v10.8 discipline):
   freeness of invertible modules — independent of the dual machinery).
 -/
 
--- v4.33 bump: opens/hom coercions are no longer transparent enough for the
--- `≫`-associativity and `comp_apply` rewrites below.
-set_option backward.defeqAttrib.useBackward true
-set_option backward.isDefEq.respectTransparency false
-
 universe u
 
 open CategoryTheory MonoidalCategory
@@ -43,83 +39,6 @@ open Opposite
 
 variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
   (R : Sheaf J RingCat.{u})
-
-/-- **[PAIR-1a]** A section of `M` over `U` as a section of the restriction of `M` to the
-over-site of `U` (mirror of `overUnitSection` at a general module). -/
-noncomputable def overSection (M : _root_.SheafOfModules R) (U : C)
-    (m : M.val.obj (op U)) : (M.over U).sections :=
-  PresheafOfModules.sectionsMk
-    (fun (V : (Over U)ᵒᵖ) => M.val.map V.unop.hom.op m)
-    (fun {V W : (Over U)ᵒᵖ} f => by
-      change M.val.map f.unop.left.op (M.val.map V.unop.hom.op m) =
-        M.val.map W.unop.hom.op m
-      rw [← PresheafOfModules.map_comp_apply, ← op_comp, Over.w])
-
-/-- Sections of the over-site restriction are exactly sections over `U`, by evaluation at
-the terminal object (mirror of `overUnitSectionEquiv` at a general module). -/
-noncomputable def overSectionEquiv (M : _root_.SheafOfModules R) (U : C) :
-    M.val.obj (op U) ≃ (M.over U).sections where
-  toFun := overSection R M U
-  invFun s := s.val (op (Over.mk (𝟙 U)))
-  left_inv m := by
-    change M.val.map (𝟙 U).op m = m
-    rw [op_id, M.val.map_id]
-    rfl
-  right_inv s := by
-    apply PresheafOfModules.sections_ext
-    intro V
-    change M.val.map V.unop.hom.op (s.val (op (Over.mk (𝟙 U)))) = s.val V
-    have h := s.property (Over.mkIdTerminal.from V.unop).op
-    change M.val.map (Over.mkIdTerminal.from V.unop).left.op
-      (s.val (op (Over.mk (𝟙 U)))) = s.val V at h
-    rw [Over.mkIdTerminal_from_left] at h
-    exact h
-
-@[simp]
-theorem overSection_apply (M : _root_.SheafOfModules R) (U : C)
-    (m : M.val.obj (op U)) (V : (Over U)ᵒᵖ) :
-    (overSection R M U m).val V = M.val.map V.unop.hom.op m :=
-  rfl
-
-/-- **[PAIR-1b]** Evaluation of a local linear functional (a section of the sheaf dual)
-against a section of `M`, landing in the structure sheaf: push the section into the
-over-site, apply the functional, and read off the unit-section at the terminal object. -/
-noncomputable def evalSection (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m : M.val.obj (op U)) : R.obj.obj (op U) :=
-  (overUnitSectionEquiv R U).symm
-    (_root_.SheafOfModules.sectionsMap φ (overSection R M U m))
-
-@[simp]
-theorem evalSection_eq (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m : M.val.obj (op U)) :
-    evalSection R M U φ m = φ.val.app (op (Over.mk (𝟙 U))) (M.val.map (𝟙 U).op m) :=
-  rfl
-
-theorem evalSection_add_right (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m m' : M.val.obj (op U)) :
-    evalSection R M U φ (m + m') = evalSection R M U φ m + evalSection R M U φ m' := by
-  simp only [evalSection_eq, map_add]
-
-theorem evalSection_smul_right (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
-    evalSection R M U φ (r • m) = r • evalSection R M U φ m := by
-  simp only [evalSection_eq]
-  rw [PresheafOfModules.map_smul]
-  erw [(φ.val.app (op (Over.mk (𝟙 U)))).hom.map_smul]
-  congr 1
-  rw [op_id, R.obj.map_id]
-  rfl
-
-theorem evalSection_add_left (M : _root_.SheafOfModules R) (U : C)
-    (φ ψ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m : M.val.obj (op U)) :
-    evalSection R M U (φ + ψ) m = evalSection R M U φ m + evalSection R M U ψ m := by
-  simp only [evalSection_eq]
-  rfl
 
 theorem evalSection_unit_mul (U : C) [∀ V, IsMulCommutative (R.obj.obj V)]
     (φ : (_root_.SheafOfModules.unit R).over U ⟶
@@ -152,41 +71,6 @@ theorem evalSection_unit_one (U : C)
   show R.obj.map (𝟙 U).op (1 : R.obj.obj (op U)) = (1 : R.obj.obj (op U))
   rw [op_id, R.obj.map_id]
   rfl
-
-theorem evalSection_smul_left (M : _root_.SheafOfModules R) (U : C)
-    [∀ V, IsMulCommutative (R.obj.obj V)]
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
-    evalSection R M U (letI := dualSectionsModule R M U; r • φ) m =
-      r • evalSection R M U φ m := by
-  show evalSection R M U (φ ≫ overUnitScalarEnd R U r) m = _
-  simp only [evalSection_eq]
-  show (overUnitScalarEnd R U r).val.app (op (Over.mk (𝟙 U)))
-    (φ.val.app (op (Over.mk (𝟙 U))) (M.val.map (𝟙 U).op m)) = _
-  rw [overUnitScalarEnd_app_apply]
-  simp only [Over.mk_hom]
-  have hr : (ConcreteCategory.hom (R.obj.map (𝟙 U).op)) r = r := by
-    rw [op_id, R.obj.map_id]
-    rfl
-  rw [smul_eq_mul]
-  erw [hr]
-  exact (mul_comm' r _).symm
-
-/-- **[PAIR-1c]** Naturality of the evaluation: evaluating the restricted functional on the
-restricted section is the restriction of the evaluation. -/
-theorem evalSection_naturality (M : _root_.SheafOfModules R) {U V : Cᵒᵖ} (i : U ⟶ V)
-    (φ : M.over U.unop ⟶ _root_.SheafOfModules.unit (R.over U.unop))
-    (m : M.val.obj U) :
-    evalSection R M V.unop (dualRestrict R M i φ) (M.val.map i m) =
-      R.obj.map i (evalSection R M U.unop φ m) := by
-  simp only [evalSection_eq]
-  dsimp [dualRestrict, _root_.SheafOfModules.overMapUnitIso, _root_.SheafOfModules.overMap,
-    _root_.SheafOfModules.pushforward, _root_.SheafOfModules.overFunctorMap]
-  simp
-  exact PresheafOfModules.naturality_apply φ.val
-    ((Over.homMk i.unop (by show i.unop ≫ 𝟙 (Opposite.unop U) = 𝟙 (Opposite.unop V) ≫ i.unop; simp) :
-      (Over.map i.unop).obj (Over.mk (𝟙 (Opposite.unop V))) ⟶
-        Over.mk (𝟙 (Opposite.unop U))).op) m
 
 /-- **Factorization of the evaluation through a trivialization**: for an isomorphism
 `ψ : M|ᵤ ≅ 𝒪|ᵤ` on the over-site, every functional is a scalar multiple of `ψ.hom`, and
@@ -285,7 +169,8 @@ theorem comp_eq_id_of_comp_eq_id {P : D} (v : 𝟙_ D ⟶ P) (w : P ⟶ 𝟙_ D)
     Category.id_comp, Iso.inv_hom_id]
 
 /-- **Split pairs against an invertible object are two-sided:** if `A` is ⊗-invertible
-and `a : 𝟙 ⟶ A`, `b : A ⟶ 𝟙` satisfy `a ≫ b = 𝟙`, then also `b ≫ a = 𝟙`. (The heart of
+and `a : 𝟙 ⟶ A`, `b : A ⟶ 𝟙` satisfy `a ≫ b = 𝟙`, then also `b ≫ a = 𝟙`.
+(The heart of
 "an invertible module with a unit pairing value is trivial": conjugate the idempotent
 `b ≫ a` into `End (𝟙_)`, where the split property and invertibility force it to be the
 identity.) -/
@@ -302,9 +187,8 @@ theorem whiskerRight_comp_eq_id_of_split {A B : D} (e : A ⊗ B ≅ 𝟙_ D)
         rw [← whiskerRight_tensor]
         have h2 : (ρ_ X).hom ≫ f ≫ (ρ_ Y).inv = f ▷ 𝟙_ D := by
           rw [rightUnitor_inv_naturality, Iso.hom_inv_id_assoc]
-        have hfin := (congrArg (fun t => t ≫ Y ◁ e'.inv) h2).trans
-          (whisker_exchange f e'.inv).symm
-        simpa only [Category.assoc] using hfin)
+        exact (congrArg (fun t => t ≫ Y ◁ e'.inv) h2).trans
+          (whisker_exchange f e'.inv).symm)
     exact (rightUnitorNatIso D).symm ≪≫ hcongr ≪≫ tensorRightTensor B A
   haveI : (tensorRight B).Faithful :=
     Functor.Faithful.of_comp (tensorRight B) (tensorRight A)
@@ -325,46 +209,6 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X : Scheme.{u}}
 
-local instance (X : Scheme.{u}) :
-    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
-  fun U ↦ by
-    change IsMulCommutative (X.presheaf.obj U)
-    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
-
-open ModularCurves.SheafOfModules in
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[PAIR-2]** The evaluation morphism of presheaves: `M ⊗ᵖ M^∨ ⟶ 𝒪ₓ`,
-pointwise the lift of the bilinear evaluation pairing. -/
-noncomputable def evPre (M : X.Modules) :
-    (M.val ⊗ (dualObj M).val :
-      _root_.PresheafOfModules (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶
-      𝟙_ (_root_.PresheafOfModules (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) where
-  app U := ModuleCat.ofHom (TensorProduct.lift (by
-    letI := dualSectionsModule X.ringCatSheaf M U.unop
-    letI : SMulCommClass ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U) :=
-      ⟨fun a b c => by
-        show a * (b * c) = b * (a * c)
-        rw [← mul_assoc, mul_comm' a b, mul_assoc]⟩
-    exact LinearMap.mk₂ ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-      (fun m φ => evalSection X.ringCatSheaf M U.unop φ m)
-      (fun m m' φ => evalSection_add_right X.ringCatSheaf M U.unop φ m m')
-      (fun r m φ => evalSection_smul_right X.ringCatSheaf M U.unop φ r m)
-      (fun m φ ψ => evalSection_add_left X.ringCatSheaf M U.unop φ ψ m)
-      (fun r m φ => evalSection_smul_left X.ringCatSheaf M U.unop φ r m)))
-  naturality {U V} i := by
-    refine ModuleCat.MonoidalCategory.tensor_ext (fun m φ => ?_)
-    exact ModularCurves.SheafOfModules.evalSection_naturality X.ringCatSheaf M i φ m
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[PAIR-2, sheaf level]** The evaluation morphism `M ⊗ M^∨ ⟶ 𝒪ₓ` on the sheafified
-tensor: the sheafification of `evPre`, collapsed onto the unit by the counit. -/
-noncomputable def ev (M : X.Modules) : tensorObj M (dualObj M) ⟶ unitObj X :=
-  (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map (evPre M) ≫
-    (sheafifyValIso (unitObj X)).hom
 /-- The identity morphism on `X`'s structure sheaf viewed in `RingCat`, the sheafification
 parameter that `Modules.monoidalCategory` is built from.  Named once here: it otherwise appears
 verbatim six times inside `nonempty_tensorObj_iso_tensor`. -/
@@ -372,9 +216,13 @@ private abbrev ringSheafId (X : Scheme.{u}) :=
   𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
     Sheaf _ RingCat.{u}).obj
 
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[CMP-T]** The hand-rolled sheafified tensor of `Picard/InvertibleSheaf.lean` agrees
 with the localized monoidal tensor: `tensorObj M N ≅ M ⊗ N` — both are the sheafification
 of the presheaf tensor of the underlying presheaves (`μIso` of the monoidal localization
@@ -421,96 +269,6 @@ theorem nonempty_unitObj_iso_unit :
   letI := Modules.monoidalCategory X
   exact ⟨(sheafifyValIso (unitObj X)).symm⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[PAIR-3 / CMP-LOC]** Being an isomorphism of `𝒪ₓ`-modules is Zariski-local: a
-morphism whose restriction to every member of an open cover is an isomorphism is an
-isomorphism. (Route: cover-local isomorphy makes the underlying presheaf map locally
-bijective, hence a `sheafificationW`-member, hence inverted by sheafification — and
-sheaves are local objects for the sheafification.) -/
-theorem sheafificationW_of_bijective_on_cover {A B : X.PresheafOfModules}
-    (g : A ⟶ B) {ι : Type u} (U : ι → X.Opens) (hU : iSup U = ⊤)
-    (hbij : ∀ (i : ι) (W : X.Opens), W ≤ U i →
-      Function.Bijective (g.app (Opposite.op W))) :
-    PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g := by
-  -- the cover-sieve is covering
-  have hsieve : ∀ (V : (TopologicalSpace.Opens ↥X)ᵒᵖ) (S : Sieve V.unop),
-      (∀ (i : ι) (W : X.Opens) (hWi : W ≤ U i) (hWV : W ≤ V.unop), S (homOfLE hWV)) →
-      S ∈ Opens.grothendieckTopology ↥X V.unop := by
-    intro V S hS
-    rw [Opens.mem_grothendieckTopology]
-    intro x hx
-    have hxT : x ∈ iSup U := by rw [hU]; trivial
-    obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hxT
-    exact ⟨V.unop ⊓ U i, homOfLE inf_le_left,
-      hS i (V.unop ⊓ U i) inf_le_right inf_le_left, ⟨hx, hi⟩⟩
-  -- locally bijective
-  haveI hinj : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
-      ((PresheafOfModules.toPresheaf _).map g) := by
-    constructor
-    intro V x y hxy
-    refine hsieve V _ (fun i W hWi hWV => ?_)
-    refine (hbij i W hWi).injective ?_
-    have hnx := PresheafOfModules.naturality_apply g (homOfLE hWV).op x
-    have hny := PresheafOfModules.naturality_apply g (homOfLE hWV).op y
-    calc g.app (Opposite.op W) (A.map (homOfLE hWV).op x)
-        = B.map (homOfLE hWV).op (g.app V x) := hnx
-      _ = B.map (homOfLE hWV).op (g.app V y) := by rw [show g.app V x =
-            g.app V y from hxy]
-      _ = g.app (Opposite.op W) (A.map (homOfLE hWV).op y) := hny.symm
-  haveI hsurj : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
-      ((PresheafOfModules.toPresheaf _).map g) := by
-    constructor
-    intro V s
-    refine hsieve (Opposite.op V) _ (fun i W hWi hWV => ?_)
-    obtain ⟨t, ht⟩ := (hbij i W hWi).surjective (B.map (homOfLE hWV).op s)
-    exact ⟨t, ht⟩
-  exact (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ g).mpr ⟨hinj, hsurj⟩
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[CMP-LOC, section form]** A morphism of `𝒪ₓ`-modules that is *bijective on every open
-inside a member of a cover* is an isomorphism.
-
-This is the engine of `isIso_of_isIso_restrict`, factored out so that a **global** morphism
-assembled by gluing sections can be tested directly, without first manufacturing cover-local
-isomorphisms of restricted modules. -/
-theorem isIso_of_bijective_app_on_cover {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
-    (U : ι → X.Opens) (hU : iSup U = ⊤)
-    (hbij : ∀ (i : ι) (W : X.Opens), W ≤ U i → Function.Bijective (g.app W)) :
-    IsIso g := by
-  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g.val :=
-    sheafificationW_of_bijective_on_cover g.val U hU hbij
-  rw [PresheafOfModules.sheafificationW_iff] at hw
-  have hnat := (PresheafOfModules.sheafificationAdjunction
-    (𝟙 X.ringCatSheaf.obj)).counit.naturality g
-  have hg : g = (sheafifyValIso A).inv ≫
-      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val ≫
-      (sheafifyValIso B).hom := by
-    rw [Iso.eq_inv_comp]
-    exact hnat.symm
-  rw [hg]
-  haveI : IsIso ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val) := hw
-  infer_instance
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[PAIR-3 / CMP-LOC]** Being an isomorphism of `𝒪ₓ`-modules is Zariski-local: a
-morphism whose restriction to every member of an open cover is an isomorphism is an
-isomorphism. -/
-theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
-    (U : ι → X.Opens) (hU : iSup U = ⊤)
-    (h : ∀ i, IsIso ((restrictFunctor (U i).ι).map g)) : IsIso g := by
-  refine isIso_of_bijective_app_on_cover g U hU (fun i W hW => ?_)
-  have h1 := Hom.isIso_iff_isIso_app.mp (h i) ((U i).ι ⁻¹ᵁ W)
-  have h2 : (U i).ι ''ᵁ ((U i).ι ⁻¹ᵁ W) = W := by
-    rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι,
-      inf_eq_right.mpr hW]
-  haveI : IsIso (g.app W) := by rw [← h2]; exact h1
-  exact (ConcreteCategory.isIso_iff_bijective (g.app W)).mp inferInstance
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[PAIR-4b]** The evaluation on the unit module is an isomorphism: the presheaf-level
 pairing is pointwise invertible (every endomorphism of the unit is a scalar), so the
 sheafified evaluation is a composition of isomorphisms. -/
@@ -547,7 +305,8 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
       (ModuleCat.Hom.hom ((ρ_ ((unitObj Y).val :
         _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).hom.app V)) z)
       h2)).symm)
-    show ModularCurves.SheafOfModules.evalSection Y.ringCatSheaf (unitObj Y) (Opposite.unop V) φ r =
+    show ModularCurves.SheafOfModules.evalSection Y.ringCatSheaf (unitObj Y)
+        (Opposite.unop V) φ r =
       (ConcreteCategory.hom (hd.hom.app V)) φ • r
     have hφ : (ConcreteCategory.hom (hd.hom.app V)) φ =
         ModularCurves.SheafOfModules.dualUnitSectionsEquiv Y.ringCatSheaf
@@ -559,16 +318,23 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
           (Opposite.unop V) φ).trans
           (((ModularCurves.SheafOfModules.dualUnitSectionsEquiv_apply Y.ringCatSheaf
             (Opposite.unop V) φ).symm).trans hφ.symm)))
-  haveI : IsIso (evPre (unitObj Y)) := by
+  let eTensor := tensorIso (Iso.refl ((unitObj Y).val :
+    _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))) hd
+  let eRight := ρ_ ((unitObj Y).val :
+    _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))
+  haveI : IsIso eTensor.hom := eTensor.isIso_hom
+  haveI : IsIso eRight.hom := eRight.isIso_hom
+  letI hEvPre : IsIso (evPre (unitObj Y)) := by
     rw [hfac]
-    infer_instance
-  haveI : IsIso ((PresheafOfModules.sheafification
-      (𝟙 Y.ringCatSheaf.obj)).map (evPre (unitObj Y))) :=
-    inferInstance
-  exact inferInstanceAs (IsIso (_ ≫ (sheafifyValIso (unitObj Y)).hom))
+    let eFac := eTensor ≪≫ eRight
+    change IsIso eFac.hom
+    exact eFac.isIso_hom
+  rw [ev_eq_sheafification_map]
+  let ePre := @asIso _ _ _ _ (evPre (unitObj Y)) hEvPre
+  exact IsIso.comp_isIso'
+    ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).mapIso ePre).isIso_hom
+    (sheafifyValIso (unitObj Y)).isIso_hom
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[PAIR-4′]** On an open where `M` trivializes, the component of the presheaf
 evaluation is bijective: conjugate the pairing by the trivialization and its induced
 dual-trivialization; the conjugated pairing is the unit multiplication (the component
@@ -591,6 +357,14 @@ theorem bijective_evPre_app_of_triv {M : X.Modules} {W : X.Opens}
       (ModularCurves.SheafOfModules.bijective_evalSection_iso X.ringCatSheaf M W ψ)
   letI : CommSemiring ↑(X.ringCatSheaf.obj.obj (Opposite.op W)) :=
     inferInstanceAs (CommSemiring ↑(X.sheaf.obj.obj (Opposite.op W)))
+  letI : Module ↑(X.ringCatSheaf.obj.obj (Opposite.op W))
+      ↑(M.val.obj (Opposite.op W)) :=
+    inferInstanceAs (Module ↑(X.sheaf.obj.obj (Opposite.op W))
+      ↑(M.val.obj (Opposite.op W)))
+  letI : Module ↑(X.ringCatSheaf.obj.obj (Opposite.op W))
+      ↑((dualObj M).val.obj (Opposite.op W)) :=
+    inferInstanceAs (Module ↑(X.sheaf.obj.obj (Opposite.op W))
+      ↑((dualObj M).val.obj (Opposite.op W)))
   -- the inverse component `c ↦ hL⁻¹ c ⊗ ψ.hom`, as a hom of module categories
   let k : (𝟙_ (_root_.PresheafOfModules
         (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).obj (Opposite.op W) ⟶
@@ -625,8 +399,6 @@ theorem bijective_evPre_app_of_triv {M : X.Modules} {W : X.Opens}
   haveI : IsIso ((evPre M).app (Opposite.op W)) := ⟨k, hik, hki⟩
   exact (ConcreteCategory.isIso_iff_bijective _).mp inferInstance
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-PAIR]** For an invertible module the evaluation pairing against the sheaf dual
 (consumed from `Picard/Dual.lean`) is an isomorphism onto the unit: the presheaf pairing
 is bijective on every open inside the trivializing cover
@@ -643,9 +415,11 @@ theorem nonempty_eval_iso {M : X.Modules} (hM : IsInvertible M) :
   haveI : IsIso ((PresheafOfModules.sheafification
       (𝟙 X.ringCatSheaf.obj)).map (evPre M)) := hw
   haveI : IsIso (ev M) := by
-    show IsIso ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map (evPre M) ≫
-      (sheafifyValIso (unitObj X)).hom)
-    infer_instance
+    let eSheaf := asIso ((PresheafOfModules.sheafification
+      (𝟙 X.ringCatSheaf.obj)).map (evPre M))
+    let eFinal := eSheaf ≪≫ sheafifyValIso (unitObj X)
+    change IsIso eFinal.hom
+    exact eFinal.isIso_hom
   exact ⟨asIso (ev M)⟩
 
 /-- **[PIC-P2-CMP], → direction.** A cover-locally trivial module is ⊗-invertible: the
@@ -663,8 +437,6 @@ theorem IsInvertible.isUnit_toSkeleton {M : X.Modules} (hM : IsInvertible M) :
   rw [← Skeleton.toSkeleton_tensorObj, Skeleton.one_eq]
   exact Quotient.sound ⟨eU.symm ≪≫ epair.symm ≪≫ eT⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-L1]** Unfolding a ⊗-unit: a ⊗-inverse module together with an isomorphism
 `M ⊗ N ≅ 𝒪ₓ` for the hand-rolled sheafified tensor (skeleton quotient unfold, then the
 [CMP-T]/[CMP-U] bridges backwards). -/
@@ -682,8 +454,29 @@ theorem exists_tensorObj_iso_unitObj_of_isUnit_toSkeleton {M : X.Modules}
   obtain ⟨eU⟩ := nonempty_unitObj_iso_unit (X := X)
   exact ⟨eT ≪≫ e ≪≫ eU.symm⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
+private noncomputable def tensorToSheafify (M N : X.Modules) :
+    (M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶ (tensorObj M N).val := by
+  exact (PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)
+
+private theorem tensorToSheafify_app_apply (M N : X.Modules) (V : X.Opens)
+    (t : (M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V)) :
+    (tensorToSheafify M N).app (Opposite.op V) t =
+      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+        (M.val ⊗ N.val : _root_.PresheafOfModules
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf).app (Opposite.op V) t :=
+  rfl
+
+private theorem tensorObj_val_map_apply (M N : X.Modules) {V W : X.Opens}
+    (i : Opposite.op V ⟶ Opposite.op W) (t : (tensorObj M N).val.obj (Opposite.op V)) :
+    (tensorObj M N).val.map i t =
+      (CategoryTheory.sheafify (Opens.grothendieckTopology ↥X)
+        (M.val ⊗ N.val : _root_.PresheafOfModules
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf).map i t :=
+  rfl
+
 /-- The pairing of an isomorphism `ε : M ⊗ N ≅ 𝒪ₓ` on presheaf-tensor elements over an
 open `V`: apply the sheafification unit, then `ε.hom`, landing in `𝒪(V)`. -/
 noncomputable def pairingElem {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
@@ -691,39 +484,27 @@ noncomputable def pairingElem {M N : X.Modules} (ε : tensorObj M N ≅ unitObj 
     (t : ((M.val ⊗ N.val : _root_.PresheafOfModules
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
     (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V) :=
-  ε.hom.val.app (Opposite.op V)
-    ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
-      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
-        (M.val ⊗ N.val : _root_.PresheafOfModules
-          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V) t)
+  ε.hom.val.app (Opposite.op V) ((tensorToSheafify M N).app (Opposite.op V) t)
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- The pairing is additive. -/
 theorem pairingElem_add {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
     (t t' : ((M.val ⊗ N.val : _root_.PresheafOfModules
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
     pairingElem ε V (t + t') = pairingElem ε V t + pairingElem ε V t' := by
   simp only [pairingElem, map_add]
+  rfl
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- The pairing is homogeneous (both layers are morphisms of modules). -/
 theorem pairingElem_smul {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
     (c : (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V))
     (t : ((M.val ⊗ N.val : _root_.PresheafOfModules
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
     pairingElem ε V (c • t) = c • pairingElem ε V t := by
-  refine (congrArg (ε.hom.val.app (Opposite.op V)) (_root_.map_smul
-    (ConcreteCategory.hom ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
-      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
-        (M.val ⊗ N.val : _root_.PresheafOfModules
-          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V)))
-    c t)).trans ?_
-  exact _root_.map_smul (ConcreteCategory.hom (ε.hom.val.app (Opposite.op V))) c _
+  have h₁ := ((tensorToSheafify M N).app (Opposite.op V)).hom.map_smul c t
+  have h₂ := (ε.hom.val.app (Opposite.op V)).hom.map_smul c
+    ((tensorToSheafify M N).app (Opposite.op V) t)
+  exact (congrArg (ε.hom.val.app (Opposite.op V)) h₁).trans h₂
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- The pairing is additive (both layers are morphisms of modules). -/
 theorem pairingElem_sum {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
     {ι : Type*} (s : Finset ι)
@@ -731,9 +512,8 @@ theorem pairingElem_sum {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V 
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
     pairingElem ε V (∑ i ∈ s, f i) = ∑ i ∈ s, pairingElem ε V (f i) := by
   simp only [pairingElem, map_sum]
+  rfl
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- The pairing commutes with restriction (naturality of both layers). -/
 theorem pairingElem_map {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
     {V W : X.Opens} (i : Opposite.op V ⟶ Opposite.op W)
@@ -744,14 +524,9 @@ theorem pairingElem_map {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map i (pairingElem ε V t) := by
   simp only [pairingElem]
   exact (congrArg (ε.hom.val.app (Opposite.op W))
-    (PresheafOfModules.naturality_apply (PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
-      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
-        (M.val ⊗ N.val : _root_.PresheafOfModules
-          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)) i t)).trans
+    (PresheafOfModules.naturality_apply (tensorToSheafify M N) i t)).trans
     (PresheafOfModules.naturality_apply ε.hom.val i _)
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-L2]** Around every point, an isomorphism `ε : M ⊗ N ≅ 𝒪ₓ` yields a section
 pair whose pairing is exactly `1`: locally lift the `ε`-preimage of the unit section
 through the sheafification, decompose the lift as a finite sum of pure tensors, use
@@ -791,15 +566,12 @@ theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅
     rfl
   -- the pairing of the lifted section is exactly 1
   have h1 : pairingElem ε V₀ τ = 1 := by
-    show ε.hom.val.app (Opposite.op V₀) ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
-      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
-        (M.val ⊗ N.val : _root_.PresheafOfModules
-          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V₀) τ) = _
-    have h2 : (PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
-        (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
-          (M.val ⊗ N.val : _root_.PresheafOfModules
-            (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V₀) τ =
-        (tensorObj M N).val.map iV₀.op ζ := hτ
+    show ε.hom.val.app (Opposite.op V₀)
+      ((tensorToSheafify M N).app (Opposite.op V₀) τ) = _
+    have h2 : (tensorToSheafify M N).app (Opposite.op V₀) τ =
+        (tensorObj M N).val.map iV₀.op ζ := by
+      exact (tensorToSheafify_app_apply M N V₀ τ).trans
+        (hτ.trans (tensorObj_val_map_apply M N iV₀.op ζ).symm)
     refine (congrArg (ε.hom.val.app (Opposite.op V₀)) h2).trans
       ((PresheafOfModules.naturality_apply ε.hom.val iV₀.op ζ).trans
         ((congrArg (X.ringCatSheaf.obj.map iV₀.op) hεone).trans ?_))
@@ -824,8 +596,14 @@ theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅
       refine Finset.sum_induction _ (· ∈ nonunits _)
         (fun a b ha hb => IsLocalRing.nonunits_add ha hb)
         (zero_mem_nonunits.mpr zero_ne_one) (fun p hp => mem_nonunits_iff.mpr (hall p hp))
-    rw [← h1', map_one] at hnon
-    exact (mem_nonunits_iff.mp hnon) isUnit_one
+    let a : X.presheaf.obj (Opposite.op V₀) :=
+      ∑ p ∈ S, pairingElem ε V₀ (p.1 ⊗ₜ p.2)
+    have ha : (1 : X.presheaf.obj (Opposite.op V₀)) = a := h1'
+    have hnonA : X.presheaf.germ V₀ x hxV₀ a ∈ nonunits (X.presheaf.stalk x) := by
+      simpa only [a] using hnon
+    have hga : X.presheaf.germ V₀ x hxV₀ a = 1 := by
+      rw [← map_one (ConcreteCategory.hom (X.presheaf.germ V₀ x hxV₀)), ha]
+    exact (mem_nonunits_iff.mp hnonA) (hga ▸ isUnit_one)
   obtain ⟨p, hpS, hpu⟩ := hpigeon
   -- the unit germ restricts to a unit on a smaller open
   obtain ⟨V, iV, hxV, hu⟩ :=
@@ -835,11 +613,21 @@ theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅
   let c : (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V) := b
   let m₁ : M.val.obj (Opposite.op V) := M.val.map iV.op p.1
   let n₁ : N.val.obj (Opposite.op V) := N.val.map iV.op p.2
+  letI : Module ↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V))
+      ↑(M.val.obj (Opposite.op V)) :=
+    inferInstanceAs (Module ↑(X.ringCatSheaf.obj.obj (Opposite.op V))
+      ↑(M.val.obj (Opposite.op V)))
+  letI : Module ↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V))
+      ↑(N.val.obj (Opposite.op V)) :=
+    inferInstanceAs (Module ↑(X.ringCatSheaf.obj.obj (Opposite.op V))
+      ↑(N.val.obj (Opposite.op V)))
   refine ⟨V, hxV, m₁, c • n₁, ?_⟩
   -- rescaling computation
-  have hbal : m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)]
+  have hbal : m₁ ⊗ₜ[
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)]
         (c • n₁) =
-      c • (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) :=
+      c • (m₁ ⊗ₜ[
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) :=
     TensorProduct.tmul_smul _ _ _
   have hres : pairingElem ε V
         (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) =
@@ -849,66 +637,83 @@ theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅
       (PresheafOfModules.Monoidal.tensorObj_map_tmul iV.op p.1 p.2).symm).trans
       (pairingElem_map ε iV.op (p.1 ⊗ₜ p.2))
   have hsm := pairingElem_smul ε V c
-    (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)
+    (m₁ ⊗ₜ[
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)
   calc pairingElem ε V
-        (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] (c • n₁))
+        (m₁ ⊗ₜ[
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] (c • n₁))
       = pairingElem ε V (c •
-          (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)) :=
+          (m₁ ⊗ₜ[
+            (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)) :=
         congrArg (pairingElem ε V) hbal
     _ = c • pairingElem ε V
-          (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) := hsm
+          (m₁ ⊗ₜ[
+            (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) := hsm
     _ = c • (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map iV.op
           (pairingElem ε V₀ (p.1 ⊗ₜ p.2)) :=
         congrArg (c • ·) hres
     _ = 1 := (smul_eq_mul c _).trans hb
 
 open ModularCurves.SheafOfModules in
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-L3a]** Pairing against a fixed section `n` of `N`, as a morphism on the
 over-site: componentwise `s ↦ ⟨s ⊗ n|_V⟩` for the pairing of `ε`. -/
 noncomputable def pairingHom {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
     {W : X.Opens} (n : N.val.obj (Opposite.op W)) :
-    M.over W ⟶ SheafOfModules.unit (X.ringCatSheaf.over W) :=
-  ⟨{ app := fun Vf => ModuleCat.ofHom
-      { toFun := fun s => pairingElem ε (Opposite.unop Vf).left
-          (s ⊗ₜ N.val.map (Opposite.unop Vf).hom.op n)
-        map_add' := fun s s' => (by
-          rw [TensorProduct.add_tmul]
-          exact pairingElem_add ε (Opposite.unop Vf).left _ _)
-        map_smul' := fun r s => (by
-          let r' : (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
-            (Opposite.op (Opposite.unop Vf).left) := r
-          show pairingElem ε (Opposite.unop Vf).left
-              ((r' • s) ⊗ₜ N.val.map (Opposite.unop Vf).hom.op n) = _
-          rw [← TensorProduct.smul_tmul']
-          exact pairingElem_smul ε (Opposite.unop Vf).left r' _) }
-     naturality := fun {Vf Vf'} i => (by
-      refine ModuleCat.hom_ext (LinearMap.ext fun s => ?_)
-      have hw : i.unop.left ≫ (Opposite.unop Vf).hom = (Opposite.unop Vf').hom :=
-        Over.w i.unop
-      have h₁ : N.val.map ((Opposite.unop Vf').hom).op n =
-          N.val.map (i.unop.left).op (N.val.map ((Opposite.unop Vf).hom).op n) := by
-        show N.val.presheaf.map ((Opposite.unop Vf').hom).op n =
-          N.val.presheaf.map (i.unop.left).op
-            (N.val.presheaf.map ((Opposite.unop Vf).hom).op n)
-        rw [← hw, op_comp, Functor.map_comp]
-        rfl
-      show pairingElem ε (Opposite.unop Vf').left
-          ((M.val.map (i.unop.left).op s) ⊗ₜ N.val.map ((Opposite.unop Vf').hom).op n) =
-        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map (i.unop.left).op
-          (pairingElem ε (Opposite.unop Vf).left
-            (s ⊗ₜ N.val.map ((Opposite.unop Vf).hom).op n))
-      refine (congrArg (fun t => pairingElem ε (Opposite.unop Vf').left
-          ((M.val.map (i.unop.left).op s) ⊗ₜ t)) h₁).trans ?_
-      refine (congrArg (pairingElem ε (Opposite.unop Vf').left)
-          (PresheafOfModules.Monoidal.tensorObj_map_tmul (i.unop.left).op s
-            (N.val.map ((Opposite.unop Vf).hom).op n)).symm).trans ?_
-      exact pairingElem_map ε (i.unop.left).op _) }⟩
+    M.over W ⟶ SheafOfModules.unit (X.ringCatSheaf.over W) := by
+  let component (Vf : (Over W)ᵒᵖ) :
+      (M.over W).val.obj Vf ⟶
+        (SheafOfModules.unit (X.ringCatSheaf.over W)).val.obj Vf := by
+    letI : Module ↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+        (Opposite.op (Opposite.unop Vf).left))
+        ↑(M.val.obj (Opposite.op (Opposite.unop Vf).left)) :=
+      inferInstanceAs (Module ↑(X.ringCatSheaf.obj.obj
+        (Opposite.op (Opposite.unop Vf).left))
+        ↑(M.val.obj (Opposite.op (Opposite.unop Vf).left)))
+    letI : Module ↑((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+        (Opposite.op (Opposite.unop Vf).left))
+        ↑(N.val.obj (Opposite.op (Opposite.unop Vf).left)) :=
+      inferInstanceAs (Module ↑(X.ringCatSheaf.obj.obj
+        (Opposite.op (Opposite.unop Vf).left))
+        ↑(N.val.obj (Opposite.op (Opposite.unop Vf).left)))
+    exact ConcreteCategory.ofHom
+      ((ε.hom.val.app (Opposite.op (Opposite.unop Vf).left)).hom.comp
+        (((tensorToSheafify M N).app (Opposite.op (Opposite.unop Vf).left)).hom.comp
+          ((TensorProduct.mk
+            ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+              (Opposite.op (Opposite.unop Vf).left))
+            (M.val.obj (Opposite.op (Opposite.unop Vf).left))
+            (N.val.obj (Opposite.op (Opposite.unop Vf).left))).flip
+              (N.val.map (Opposite.unop Vf).hom.op n))))
+  refine ⟨{ app := component, naturality := fun {Vf Vf'} i => ?_ }⟩
+  refine ModuleCat.hom_ext (LinearMap.ext fun s => ?_)
+  have hw : i.unop.left ≫ (Opposite.unop Vf).hom = (Opposite.unop Vf').hom :=
+    Over.w i.unop
+  have h₁ : N.val.map ((Opposite.unop Vf').hom).op n =
+      N.val.map (i.unop.left).op (N.val.map ((Opposite.unop Vf).hom).op n) := by
+    show N.val.presheaf.map ((Opposite.unop Vf').hom).op n =
+      N.val.presheaf.map (i.unop.left).op
+        (N.val.presheaf.map ((Opposite.unop Vf).hom).op n)
+    rw [← hw, op_comp, Functor.map_comp]
+    rfl
+  simp only [ModuleCat.comp_apply, ModuleCat.restrictScalars.map_apply]
+  have hM : (M.over W).val.map i s = M.val.map (i.unop.left).op s := rfl
+  have hO : (SheafOfModules.unit (X.ringCatSheaf.over W)).val.map i (component Vf s) =
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map (i.unop.left).op
+        (component Vf s) := rfl
+  rw [hM, hO]
+  change pairingElem ε (Opposite.unop Vf').left
+      ((M.val.map (i.unop.left).op s) ⊗ₜ N.val.map ((Opposite.unop Vf').hom).op n) =
+    (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map (i.unop.left).op
+      (pairingElem ε (Opposite.unop Vf).left
+        (s ⊗ₜ N.val.map ((Opposite.unop Vf).hom).op n))
+  refine (congrArg (fun t => pairingElem ε (Opposite.unop Vf').left
+      ((M.val.map (i.unop.left).op s) ⊗ₜ t)) h₁).trans ?_
+  refine (congrArg (pairingElem ε (Opposite.unop Vf').left)
+      (PresheafOfModules.Monoidal.tensorObj_map_tmul (i.unop.left).op s
+        (N.val.map ((Opposite.unop Vf).hom).op n)).symm).trans ?_
+  exact pairingElem_map ε (i.unop.left).op _
 
 open ModularCurves.SheafOfModules in
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-L3b]** When the pairing value of `(m, n)` is `1`, multiplication by `m`
 splits the pairing against `n`: the composite on the over-site is the identity of the
 unit. -/
@@ -923,7 +728,12 @@ theorem unitHomEquiv_symm_overSection_comp_pairingHom {M N : X.Modules}
     (congrArg (SheafOfModules.unit (X.ringCatSheaf.over W)).unitHomEquiv.symm ?_)
     (Equiv.symm_apply_apply _ (𝟙 _))
   refine PresheafOfModules.sections_ext _ _ (fun V => ?_)
-  show pairingElem ε (Opposite.unop V).left
+  rw [show (SheafOfModules.sectionsMap (pairingHom ε n)
+      (overSection X.ringCatSheaf M W m)).val V =
+      (pairingHom ε n).val.app V ((overSection X.ringCatSheaf M W m).val V) from rfl,
+    SheafOfModules.unitHomEquiv_apply_coe]
+  change (pairingHom ε n).val.app V (M.val.map (Opposite.unop V).hom.op m) = _
+  change pairingElem ε (Opposite.unop V).left
       ((M.val.map (Opposite.unop V).hom.op m) ⊗ₜ
         N.val.map (Opposite.unop V).hom.op n) = _
   exact (congrArg (pairingElem ε (Opposite.unop V).left)
@@ -936,8 +746,6 @@ theorem unitHomEquiv_symm_overSection_comp_pairingHom {M N : X.Modules}
           RingCat).map ((Opposite.unop V).hom).op)))))
 
 open ModularCurves.SheafOfModules in
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-L3]** A section pair with pairing value `1` trivializes `M` on `W`:
 pair-with-`n` and multiply-by-`m` are transported through the over-site equivalence and
 are mutually inverse — one composite by the sections computation, the other by the
@@ -980,7 +788,8 @@ theorem nonempty_pullback_iso_unitObj_of_pairingElem {M N : X.Modules}
   let e' : ((Modules.pullback W.ι).obj N ⊗ (Modules.pullback W.ι).obj M :
       (↑W : Scheme.{u}).Modules) ≅ 𝟙_ ((↑W : Scheme.{u}).Modules) :=
     (β_ ((Modules.pullback W.ι).obj N) ((Modules.pullback W.ι).obj M)) ≪≫ e
-  have hab : (eU.inv ≫ αs) ≫ (βs ≫ eU.hom) = 𝟙 (𝟙_ ((↑W : Scheme.{u}).Modules)) := by
+  have hab : (eU.inv ≫ αs) ≫ (βs ≫ eU.hom) =
+      𝟙 (𝟙_ ((↑W : Scheme.{u}).Modules)) := by
     simp only [Category.assoc]
     rw [← Category.assoc αs βs, hαβs, Category.id_comp, Iso.inv_hom_id]
   have hba := CategoryTheory.MonoidalCategory.whiskerRight_comp_eq_id_of_split e e'
@@ -991,8 +800,6 @@ theorem nonempty_pullback_iso_unitObj_of_pairingElem {M N : X.Modules}
     exact h3.symm.trans hba
   exact ⟨⟨βs, αs, hβαs, hαβs⟩⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-←]** A ⊗-invertible module is cover-locally trivial (Zariski-local freeness:
 around every point a pure-tensor decomposition of the unit section exhibits, over the
 local ring at the point, a unit pairing value, and rescaling gives a section pair with
@@ -1014,6 +821,32 @@ theorem isInvertible_iff_isUnit_toSkeleton (M : X.Modules) :
     letI := Modules.monoidalCategory X
     (IsInvertible M ↔ IsUnit (toSkeleton M)) :=
   ⟨fun hM => hM.isUnit_toSkeleton, fun hM => isInvertible_of_isUnit_toSkeleton hM⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[CMP-LOC, section form]** A morphism of `𝒪ₓ`-modules that is *bijective on every open
+inside a member of a cover* is an isomorphism.
+
+This is the engine of `isIso_of_isIso_restrict`, factored out so that a **global** morphism
+assembled by gluing sections can be tested directly, without first manufacturing cover-local
+isomorphisms of restricted modules. -/
+theorem isIso_of_bijective_app_on_cover {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
+    (U : ι → X.Opens) (hU : iSup U = ⊤)
+    (hbij : ∀ (i : ι) (W : X.Opens), W ≤ U i → Function.Bijective (g.app W)) :
+    IsIso g := by
+  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g.val :=
+    sheafificationW_of_bijective_on_cover g.val U hU hbij
+  rw [PresheafOfModules.sheafificationW_iff] at hw
+  have hnat := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).counit.naturality g
+  have hg : g = (sheafifyValIso A).inv ≫
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val ≫
+      (sheafifyValIso B).hom := by
+    rw [Iso.eq_inv_comp]
+    exact hnat.symm
+  rw [hg]
+  haveI : IsIso ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val) := hw
+  infer_instance
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
