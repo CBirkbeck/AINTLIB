@@ -7,6 +7,7 @@ import «Adic spaces».WP.Nonnoetherian
 import «Adic spaces».WP.Sheafy
 import «Adic spaces».WP.Chart
 import «Adic spaces».WP.Reduced
+import «Adic spaces».WP.HeadReduced
 
 /-!
 # The rationally stably reduced example — headline endpoints ([WP] thm 6.2)
@@ -91,6 +92,15 @@ theorem weightedParity_chainReduced (hred : HeadLocsReduced K idWeight)
   chainReduced_WPA hred ϖ hK₀ n
 
 variable {K} in
+/-- [WP] thm 6.2 (3), unconditional form (HRW-6 assembly; currently inherits the
+open L1/L3 head-leaf sorries transitively — the conditional form above is the
+fully verified statement until those land). -/
+theorem weightedParity_chainReduced_unconditional (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) (n : ℕ) :
+    ChainReduced (WPAid K) n :=
+  chainReduced_WPA (headLocsReduced ϖ hK₀) ϖ hK₀ n
+
+variable {K} in
 /-- [WP] thm 6.2 (4): the chart `ℬ = 𝒜⟨W/ϖ⟩` is an integral domain. -/
 theorem weightedParity_chart_isDomain (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
@@ -134,6 +144,11 @@ theorem weightedParity_stronglySheafy_of_dvr (s : ℕ) :
 theorem weightedParity_chainReduced_of_dvr (hred : HeadLocsReduced K idWeight)
     (n : ℕ) : ChainReduced (WPAid K) n :=
   weightedParity_chainReduced hred (Uniformizer.ofDVR K)
+    (FiniteJetOver.isNoetherianRing_unitBall K) n
+
+theorem weightedParity_chainReduced_unconditional_of_dvr (n : ℕ) :
+    ChainReduced (WPAid K) n :=
+  weightedParity_chainReduced_unconditional (Uniformizer.ofDVR K)
     (FiniteJetOver.isNoetherianRing_unitBall K) n
 
 theorem weightedParity_not_stablyUniform_of_dvr : ¬ IsStablyUniform (WPAid K) :=

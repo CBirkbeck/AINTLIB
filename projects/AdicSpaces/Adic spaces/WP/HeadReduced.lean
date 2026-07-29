@@ -192,14 +192,42 @@ theorem head_completedLocal_reduced (ϖ : Uniformizer K)
 
 /-! ### L4 — assembly -/
 
+variable {K w} in
+/-- L4-prep: the graph model is noetherian (transport of the faithful
+strongly-noetherian localization along `headLocEquiv`). -/
+theorem isNoetherianRing_qHead (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) {N : ℕ}
+    {DH : RationalLocData (WPHead K w N)} (hDH : DH.IsRational) :
+    IsNoetherianRing (QHead DH) := by
+  haveI := isStronglyNoetherian_WPHead (w := w) (N := N) ϖ hK₀
+  haveI : IsNoetherianRing (WPHead K w N) :=
+    IsStronglyNoetherian.isNoetherianRing (WPHead K w N)
+  haveI : IsNoetherianRing (presheafValue DH) :=
+    presheafValue_isNoetherianRing_faithful DH
+  exact isNoetherianRing_of_surjective (presheafValue DH) (QHead DH)
+    (headLocEquiv ϖ hK₀ DH hDH).toRingHom
+    (headLocEquiv ϖ hK₀ DH hDH).surjective
+
 variable {K} in
-/-- **The head-reducedness input, discharged** ([WP] thm:parity-rationally-reduced's
-citation of BGR 7.3.2/10, at the heads): every rational localization of every head
-is reduced.  Route: `presheafValue ≅ QHead` (W16); `QHead` noetherian; L2 reduces to
-completed locals of `QHead`; L1 compares them with completed locals of the head;
-L3 says the latter are reduced. -/
 theorem headLocsReduced (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    HeadLocsReduced K w := by sorry
+    HeadLocsReduced K w := by
+  intro N DH hDH
+  haveI hQnoeth : IsNoetherianRing (QHead DH) :=
+    isNoetherianRing_qHead ϖ hK₀ hDH
+  suffices h : IsReduced (QHead DH) by
+    exact isReduced_of_injective
+      (headLocEquiv ϖ hK₀ DH hDH).toRingHom
+      (headLocEquiv ϖ hK₀ DH hDH).injective
+  refine isReduced_of_forall_completedLocal_reduced _ ?_
+  intro 𝔮 h𝔮
+  haveI := h𝔮.isPrime
+  haveI hcp : (𝔮.comap (headToQ DH)).IsPrime :=
+    𝔮.comap_isPrime (headToQ DH)
+  obtain ⟨e⟩ := qHead_completedLocal_comparison ϖ hK₀ DH hDH 𝔮 h𝔮
+  haveI : IsReduced
+      (completedLocal (WPHead K w N) (𝔮.comap (headToQ DH))) :=
+    head_completedLocal_reduced ϖ hK₀ _ hcp
+  exact isReduced_of_injective e.symm.toRingHom e.symm.injective
 
 end WeightedParity
