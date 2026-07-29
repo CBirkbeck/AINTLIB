@@ -43,6 +43,61 @@ private theorem cechSingletonIntersection_eq
   · exact leOfHom (Limits.Pi.lift fun k : Fin 1 => homOfLE (by
       rw [Subsingleton.elim k 0]))
 
+private theorem finiteIntersectionOpen_insert
+    {X : Scheme.{u}} {ι : Type u} [DecidableEq ι]
+    (U : ι → X.Opens) (a : ι) (s : Finset ι) :
+    X.finiteIntersectionOpen U (insert a s) =
+      U a ⊓ X.finiteIntersectionOpen U s := by
+  rw [Scheme.finiteIntersectionOpen, Scheme.finiteIntersectionOpen]
+  apply le_antisymm
+  · refine le_inf
+      (iInf_le_of_le a (iInf_le_of_le (by simp) le_rfl)) ?_
+    refine le_iInf fun j => le_iInf fun hj => ?_
+    exact iInf_le_of_le j (iInf_le_of_le (by simp [hj]) le_rfl)
+  · refine le_iInf fun j => le_iInf fun hj => ?_
+    change j ∈ insert a s at hj
+    rcases Finset.mem_insert.mp hj with rfl | hj
+    · exact inf_le_left
+    · exact inf_le_right.trans
+        (iInf_le_of_le j (iInf_le_of_le hj le_rfl))
+
+private theorem preimage_finiteIntersectionOpen
+    {X Y : Scheme.{u}} {ι : Type u} [DecidableEq ι]
+    (f : Y ⟶ X) (U : ι → X.Opens) (s : Finset ι) :
+    Y.finiteIntersectionOpen (fun i => f ⁻¹ᵁ U i) s =
+      f ⁻¹ᵁ X.finiteIntersectionOpen U s := by
+  induction s using Finset.induction with
+  | empty =>
+      simp [Scheme.finiteIntersectionOpen]
+  | @insert a s _ ih =>
+      rw [finiteIntersectionOpen_insert _ _ _,
+        finiteIntersectionOpen_insert _ _ _,
+        Scheme.Hom.preimage_inf, ih]
+
+private theorem cechIntersection_eq_finiteIntersectionOpen
+    {X : Scheme.{u}} {ι : Type u} [Fintype ι] [DecidableEq ι]
+    (U : ι → X.Opens) (q : ℕ) (i : Fin (q + 1) → ι) :
+    (∏ᶜ fun k : Fin (q + 1) => U (i k)) =
+      X.finiteIntersectionOpen U (Finset.univ.image i) := by
+  rw [Scheme.finiteIntersectionOpen]
+  apply le_antisymm
+  · refine le_iInf fun j => le_iInf fun hj => ?_
+    rw [Finset.mem_coe] at hj
+    obtain ⟨k, _, rfl⟩ := Finset.mem_image.mp hj
+    exact leOfHom (Limits.Pi.π (fun k : Fin (q + 1) => U (i k)) k)
+  · exact leOfHom (Limits.Pi.lift fun k =>
+      homOfLE (iInf_le_of_le (i k)
+        (iInf_le_of_le (by simp) le_rfl)))
+
+private theorem cechPreimageIntersection_eq_finiteIntersectionOpen
+    {X Y : Scheme.{u}} {ι : Type u} [Fintype ι] [DecidableEq ι]
+    (f : Y ⟶ X) (U : ι → X.Opens) (q : ℕ) (i : Fin (q + 1) → ι) :
+    (∏ᶜ fun k : Fin (q + 1) => f ⁻¹ᵁ U (i k)) =
+      f ⁻¹ᵁ X.finiteIntersectionOpen U (Finset.univ.image i) := by
+  rw [cechIntersection_eq_finiteIntersectionOpen
+    (fun j => f ⁻¹ᵁ U j) q i]
+  exact preimage_finiteIntersectionOpen f U (Finset.univ.image i)
+
 private theorem affineOpen_preimage_preimage
     {Y X : Scheme.{u}} [X.IsSeparated]
     (f : Y ⟶ X) (V : Y.Opens) (hV : IsAffineOpen V)
