@@ -444,6 +444,30 @@ theorem tateExtToFlat_isRestrictedGauss (s : ℕ)
     exact ⟨rfl, hbig'⟩
 
 variable {K w} in
+/-- The flatten hom, corestricted to the shifted-weight algebra. -/
+noncomputable def tateExtToWPA (s : ℕ) :
+    ↥(restrictedMvPowerSeriesSubring s (WPA K w)) →+* WPA K (shiftWeight w s) where
+  toFun F := ⟨⟨tateExtToFlat (K := K) (w := w) s F,
+      tateExtToFlat_isRestrictedGauss s F⟩,
+    fun u hu => tateExtToFlat_support s F u hu⟩
+  map_one' := Subtype.ext (Subtype.ext (map_one
+    (tateExtToFlat (K := K) (w := w) s)))
+  map_mul' F G := Subtype.ext (Subtype.ext (map_mul
+    (tateExtToFlat (K := K) (w := w) s) F G))
+  map_zero' := Subtype.ext (Subtype.ext (map_zero
+    (tateExtToFlat (K := K) (w := w) s)))
+  map_add' F G := Subtype.ext (Subtype.ext (map_add
+    (tateExtToFlat (K := K) (w := w) s) F G))
+
+variable {K w} in
+theorem tateExtToWPA_injective (s : ℕ) :
+    Function.Injective (tateExtToWPA (K := K) (w := w) s) := by
+  intro F G hFG
+  refine tateExtToFlat_injective (K := K) (w := w) s ?_
+  have h1 := congrArg (fun z : WPA K (shiftWeight w s) => z.1.1) hFG
+  exact h1
+
+variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex
 of restricted power series; nested-vs-flat plumbing). -/
