@@ -1,5 +1,7 @@
 import ModularCurves.EllipticCurve.RelativeProjectiveTwistCechVanishing
 import ModularCurves.ForMathlib.RelativeProjectivePushforwardFiniteType
+import ModularCurves.ForMathlib.SchemeModuleOrderedAffineCechCohomology
+import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
 
 /-!
 # Cech vanishing for arbitrary relative projective coordinate twists
@@ -11,7 +13,7 @@ arbitrary finite-type quasicoherent source module and any projective coordinate.
 
 universe u
 
-open CategoryTheory Limits
+open CategoryTheory Limits TopologicalSpace
 
 noncomputable section
 
@@ -203,5 +205,65 @@ theorem coordinateTwist_eventually_orderedBaseCechComplex_exactAt_of_pos
   · have hqd : q - 1 < d := by omega
     have hP := hb n hn ⟨q - 1, hqd⟩
     simpa [P, Nat.sub_add_cancel hq] using hP
+
+/-- Over an affine open in a Noetherian stage, every positive intrinsic
+cohomology group of a sufficiently positive coordinate twist vanishes. -/
+theorem coordinateTwist_eventually_subsingleton_H_of_pos
+    [IsNoetherian S]
+    (h : IsRelativeProjectiveFactorization s f)
+    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
+    (j : Fin (h.chosenDimension + 1))
+    (U : S.Opens) (hU : IsAffineOpen U) :
+    ∃ b : ℕ, ∀ n : ℕ, b ≤ n → ∀ q : ℕ, 0 < q →
+      Subsingleton (CategoryTheory.Sheaf.H
+        ((M ⊗
+          (Scheme.Modules.pullback h.chosenProjectiveMap).obj
+            (coordinateHyperplanePoleSheafPower
+              (R := k) j n)).restrict (f ⁻¹ᵁ U).ι).sheaf q) := by
+  obtain ⟨b, hb⟩ :=
+    h.coordinateTwist_eventually_orderedBaseCechComplex_exactAt_of_pos
+      M j U hU
+  refine ⟨b, fun n hn q hq => ?_⟩
+  let g := h.chosenAffineProjectiveEmbedding U hU
+  letI : IsClosedImmersion g :=
+    h.chosenAffineProjectiveEmbedding_isClosedImmersion U hU
+  let P :=
+    coordinateHyperplanePoleSheafPower (R := k) j n
+  let L :=
+    (Scheme.Modules.pullback h.chosenProjectiveMap).obj P
+  have hP : Scheme.Modules.IsInvertible P :=
+    coordinateHyperplanePoleSheafPower_isInvertible j n
+  have hL : Scheme.Modules.IsInvertible L :=
+    hP.pullback h.chosenProjectiveMap
+  let T : X.Modules := M ⊗ L
+  letI : T.IsQuasicoherent :=
+    hL.tensorObj_isQuasicoherent
+  let N := T.restrict (f ⁻¹ᵁ U).ι
+  let C : ULift.{u} (Fin (h.chosenDimension + 1)) →
+      ((f ⁻¹ᵁ U).toScheme).Opens :=
+    fun i => g ⁻¹ᵁ coordinateOpenCover
+      (R := Γ(S, U))
+      (σ := Fin (h.chosenDimension + 1)) i
+  letI : N.IsQuasicoherent := inferInstance
+  letI : ((f ⁻¹ᵁ U).toScheme).IsSeparated := ⟨by
+    rw [← terminal.comp_from
+      (g ≫ homogeneousProjπ
+        (R := Γ(S, U))
+        (σ := Fin (h.chosenDimension + 1)))]
+    infer_instance⟩
+  have hC : IsOpenCover C :=
+    g.iSup_preimage_eq_top
+      (iSup_coordinateOpenCover_eq_top
+        (R := Γ(S, U))
+        (σ := Fin (h.chosenDimension + 1)))
+  have hCaff : ∀ i, IsAffineOpen (C i) :=
+    fun i => (coordinateOpenCover_isAffineOpen (R := Γ(S, U)) i).preimage g
+  have hExact := hb n hn q hq
+  have hVanish :=
+    (Scheme.Modules.orderedBaseCechComplex_exactAt_succ_iff_subsingleton_H_of_affine_openCover
+        (morphismRestrict f U ≫ hU.isoSpec.hom)
+        N C hC hCaff (q - 1)).1
+      (by simpa only [Nat.sub_add_cancel hq] using hExact)
+  simpa only [Nat.sub_add_cancel hq] using hVanish
 
 end AlgebraicGeometry.IsRelativeProjectiveFactorization
