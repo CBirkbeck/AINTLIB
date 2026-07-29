@@ -173,10 +173,6 @@ private theorem limitEvalHom_limitFrobHom (k : ℤ)
         E.D).symm)
         (limitEvalHom_apply (frobIndex p F k E) x).symm))
 
-private theorem comap_comp_apply {R S T' : Type*} [CommRing R] [CommRing S]
-    [CommRing T'] (f : R →+* S) (g : S →+* T') (w : Spv T') :
-    comap (g.comp f) w = comap f (comap g w) := rfl
-
 private theorem stepMid (k : ℤ)
     (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
     {v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
@@ -541,10 +537,6 @@ theorem ringStalkMap_yFrob_conj (k : ℤ) (x : yTop p F ϖ) :
   rw [limitFrobHom_bridge p F ϖ k V s] at hgerm
   exact hgerm
 
-private theorem comap_comp_apply' {R S T' : Type*} [CommRing R] [CommRing S]
-    [CommRing T'] (f : R →+* S) (g : S →+* T') (w : Spv T') :
-    comap (g.comp f) w = comap f (comap g w) := rfl
-
 /-- **The valuation compatibility of the `𝒴`-Frobenius** (VPreHom's
 `val_compat`-field): the stalk valuation at the image point is the pull-back
 of the stalk valuation along the Frobenius stalk transport. -/
@@ -570,14 +562,14 @@ theorem yFrob_val_compat (k : ℤ) (x : yTop p F ϖ) :
   refine (congrArg (ValuationSpectrum.comap
       (yRingStalkEquiv p F ϖ (yFrobTop p F ϖ k x)).toRingHom)
       hamb.symm).trans ?_
-  refine ((comap_comp_apply' (yRingStalkEquiv p F ϖ
+  refine ((comap_comp_apply (yRingStalkEquiv p F ϖ
       (yFrobTop p F ϖ k x)).toRingHom
       (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k)
         (ySpaPoint p F ϖ x)).hom
       (stalkValue (ySpaPoint p F ϖ x))).symm).trans ?_
   refine (congrArg (fun h => ValuationSpectrum.comap h
       (stalkValue (ySpaPoint p F ϖ x))) hsq'.symm).trans ?_
-  exact comap_comp_apply'
+  exact comap_comp_apply
     (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom'
     (yRingStalkEquiv p F ϖ x).toRingHom
     (stalkValue (ySpaPoint p F ϖ x))

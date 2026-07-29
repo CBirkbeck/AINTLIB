@@ -117,6 +117,11 @@ lemma comap_id : comap (RingHom.id A) = id := by ext v : 1; ext; rfl
 lemma comap_comp (φ : A →+* B) (ψ : B →+* C) :
     comap (ψ.comp φ) = comap φ ∘ comap ψ := by ext v : 1; ext; rfl
 
+/-- The pointwise form of `comap_comp`. -/
+lemma comap_comp_apply (φ : A →+* B) (ψ : B →+* C) (v : Spv C) :
+    comap (ψ.comp φ) v = comap φ (comap ψ v) :=
+  congrFun (comap_comp φ ψ) v
+
 /-- `comap φ` is injective when `φ` is surjective. -/
 lemma comap_injective {φ : A →+* B} (hφ : Function.Surjective φ) :
     Function.Injective (comap φ) := by
