@@ -1,1 +1,1 @@
-FOCUS: W18 compiles — module build + axioms + commit, then W19/HRW
+FOCUS: W19 — datum+headZeroEquiv done; now chartFwd (restrictedEval + graph-kernel + lift)

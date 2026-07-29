@@ -36,25 +36,45 @@ variable (K : Type*) [NontriviallyNormedField K] [IsUltrametricDist K] [Complete
 variable (w : ℕ → ℕ)
 
 variable {K w} in
+open scoped Classical in
+/-- The span of the chart pair is the unit ideal (`ϖ` is a unit; [WP] line 838:
+"It is a genuine rational datum: the ideal `(ϖ,W)` is open"). -/
+theorem span_chartPair_eq_top (ϖ : Uniformizer K) :
+    Ideal.span (({WaHead K w 0, piHead ϖ} : Finset (WPHead K w 0)) :
+      Set (WPHead K w 0)) = ⊤ := by
+  refine Ideal.eq_top_of_isUnit_mem _ (Ideal.subset_span ?_) (isUnit_piHead ϖ)
+  rw [Finset.coe_insert, Finset.coe_singleton]
+  exact Set.mem_insert_of_mem _ rfl
+
+variable {K w} in
+open scoped Classical in
 /-- The head chart datum `(W; ϖ)` on the `N = 0` head `K⟨W⟩`
 ([WP] §6.2: "the datum `(W;ϖ)`"; project convention `s ∈ T`). -/
 noncomputable def chartHeadDatum (ϖ : Uniformizer K) :
-    RationalLocData (WPHead K w 0) := by sorry
+    RationalLocData (WPHead K w 0) :=
+  genPieceDatum
+    (FiniteJet.unitBallPod (piHead ϖ) (isUnit_piHead ϖ) (norm_piHead_lt_one ϖ)
+      (norm_piHead_pos ϖ) (norm_piHead_mul ϖ))
+    {WaHead K w 0, piHead ϖ} (piHead ϖ) (span_chartPair_eq_top ϖ)
 
 variable {K w} in
 open scoped Classical in
 theorem chartHeadDatum_T (ϖ : Uniformizer K) :
-    (chartHeadDatum (w := w) ϖ).T = {WaHead K w 0, piHead ϖ} := by sorry
+    (chartHeadDatum (w := w) ϖ).T = {WaHead K w 0, piHead ϖ} := rfl
 
 variable {K w} in
 theorem chartHeadDatum_s (ϖ : Uniformizer K) :
-    (chartHeadDatum (w := w) ϖ).s = piHead ϖ := by sorry
+    (chartHeadDatum (w := w) ϖ).s = piHead ϖ := rfl
 
 variable {K w} in
 /-- The chart datum is rational (`ϖ` is a unit, so `span {W, ϖ} = ⊤`;
 [WP]: "It is a genuine rational datum: the ideal `(ϖ,W)` is open"). -/
 theorem chartHeadDatum_isRational (ϖ : Uniformizer K) :
-    (chartHeadDatum (w := w) ϖ).IsRational := by sorry
+    (chartHeadDatum (w := w) ϖ).IsRational := by
+  classical
+  refine RationalLocData.isRational_of_span_eq_top ?_
+  rw [chartHeadDatum_T]
+  exact span_chartPair_eq_top ϖ
 
 variable {K w} in
 /-- The chart datum on `𝒜` — the lift of the head chart datum
@@ -68,6 +88,62 @@ theorem chartDatum_isRational (ϖ : Uniformizer K) :
   liftDatum_isRational _ (chartHeadDatum_isRational ϖ)
 
 /-! ### The chart head localization is `K⟨X⟩` -/
+
+variable {K w} in
+/-- At stage `0` the head support IS the even support (no odd generators, so the
+evenness condition is vacuous). -/
+theorem wpHeadSupport_zero_eq_even :
+    wpHeadSupport K w 0 = wpEvenSupport K w 0 := by
+  refine SetLike.ext fun f => ?_
+  constructor
+  · intro hf
+    have hf' : ∀ t : ℕ →₀ ℕ, ¬ HeadMem w 0 t →
+        MvPowerSeries.coeff t f.1 = 0 := hf
+    show ∀ t : ℕ →₀ ℕ, ¬ EvenHeadMem w 0 t → MvPowerSeries.coeff t f.1 = 0
+    intro t ht
+    refine hf' t fun hh => ht ⟨hh, fun n hn => by
+      rw [hh.2 n (Nat.pos_of_ne_zero hn)]⟩
+  · intro hf
+    have hf' : ∀ t : ℕ →₀ ℕ, ¬ EvenHeadMem w 0 t →
+        MvPowerSeries.coeff t f.1 = 0 := hf
+    show ∀ t : ℕ →₀ ℕ, ¬ HeadMem w 0 t → MvPowerSeries.coeff t f.1 = 0
+    intro t ht
+    exact hf' t fun he => ht he.1
+
+variable {K w} in
+/-- The `N = 0` head is the one-variable Tate algebra (`evenSupportEquiv` at the
+degenerate stage). -/
+noncomputable def headZeroEquiv : WPHead K w 0 ≃+* FiniteJet.GraphKoszul.P K 1 :=
+  (RingEquiv.subringCongr (wpHeadSupport_zero_eq_even (K := K) (w := w))).trans
+    (evenSupportEquiv K w 0)
+
+variable {K w} in
+theorem norm_headZeroEquiv (x : WPHead K w 0) :
+    ‖headZeroEquiv (K := K) (w := w) x‖ = ‖x‖ := by
+  rw [headZeroEquiv, RingEquiv.trans_apply, norm_evenSupportEquiv]
+  rfl
+
+variable {K} in
+/-- `K⟨X⟩` is an integral domain (multiplicative Gauss norm). -/
+theorem isDomain_P_one : IsDomain (FiniteJet.GraphKoszul.P K 1) := by
+  have hmul : ∀ f g : FiniteJet.GraphKoszul.P K 1, ‖f * g‖ = ‖f‖ * ‖g‖ :=
+    fun f g => norm_restricted_mul_general (fun a b => norm_mul a b) f g
+  haveI : Nontrivial (FiniteJet.GraphKoszul.P K 1) := by
+    refine ⟨⟨0, 1, fun h => ?_⟩⟩
+    have h1 := congrArg (fun z : FiniteJet.GraphKoszul.P K 1 => ‖z‖) h
+    rw [show ‖(0 : FiniteJet.GraphKoszul.P K 1)‖ = 0 from norm_zero,
+      show ‖(1 : FiniteJet.GraphKoszul.P K 1)‖ = 1 from norm_one] at h1
+    linarith
+  haveI : NoZeroDivisors (FiniteJet.GraphKoszul.P K 1) := by
+    refine ⟨fun {a b} hab => ?_⟩
+    by_contra hcon
+    push_neg at hcon
+    have h1 : ‖a * b‖ = 0 := by rw [hab, norm_zero]
+    rw [hmul] at h1
+    rcases mul_eq_zero.mp h1 with h | h
+    · exact hcon.1 (norm_eq_zero.mp h)
+    · exact hcon.2 (norm_eq_zero.mp h)
+  exact NoZeroDivisors.to_isDomain _
 
 variable {K w} in
 /-- The chart head model: `K⟨W⟩⟨X⟩/(ϖX − W) ≅ K⟨X⟩` via `W ↦ ϖX` (the classical
