@@ -537,17 +537,6 @@ theorem tendsto_convF {ρ : NNReal} {a b : ℕ → F}
         Finset.le_sup (f := fun i => (ρ ^ i * perfectoidValuation p F (a i))
           * (ρ ^ (n - i) * perfectoidValuation p F (b (n - i)))) hi₀mem
 
-/-- Vanishing `NNReal` sequences have bounded range. -/
-theorem bddAbove_range_of_tendsto_zero {f : ℕ → NNReal}
-    (hf : Filter.Tendsto f Filter.atTop (nhds 0)) :
-    BddAbove (Set.range f) := by
-  obtain ⟨K₀, hK₀⟩ := Filter.eventually_atTop.mp (hf.eventually_lt_const one_pos)
-  refine ⟨max 1 ((Finset.range (K₀ + 1)).sup f), ?_⟩
-  rintro s ⟨n, rfl⟩
-  rcases lt_or_ge n (K₀ + 1) with hn | hn
-  · exact le_max_of_le_right (Finset.le_sup (Finset.mem_range.mpr hn))
-  · exact le_max_of_le_left (hK₀ n (by omega)).le
-
 /-- Total form of the `A^r` term bound (no nonvanishing hypothesis). -/
 theorem gaussTerm_teichCoeffAr_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (n : ℕ) :

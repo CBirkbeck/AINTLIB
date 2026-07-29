@@ -453,6 +453,20 @@ theorem neBot_comap_of_mem_ArSub {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   obtain ⟨u, rfl⟩ := hyr
   exact ⟨u, hyt⟩
 
+/-- **`v(pᴺ) = ρᴺ` in `hatK`.** The Gauss value is multiplicative and `v(p) = ρ`, so a
+power of `p` realises the corresponding power of `ρ` as a value.  Used wherever an element
+of prescribed value is needed to cut out a ball. -/
+private theorem valued_toHatK_p_pow {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (N : ℕ) :
+    Valued.v (toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ N)) = ρ ^ N := by
+  rw [valued_toHatK]
+  rw [show gaussValue p F ρ ((p : Ainf p F) ^ N)
+    = (gaussValue p F ρ (p : Ainf p F)) ^ N from map_pow (gaussVal p F hρ0 hρ1) _ N]
+  congr 1
+  calc gaussValue p F ρ (p : Ainf p F)
+      = gaussValue p F ρ ((p : Ainf p F) * 1) := by rw [mul_one]
+    _ = ρ * gaussValue p F ρ 1 := gaussValue_p_mul p F hρ1.le 1
+    _ = ρ := by rw [gaussValue_one p F hρ1.le, mul_one]
+
 /-- Pairs of approximants of any `x` are eventually `wAloc`-close (transfer of the
 completed-field entourages through `restrict_lt_iff` — comparisons between values of
 the same valuation only, no value-group computations). -/
@@ -464,15 +478,8 @@ theorem eventually_pair_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one hε hρ1
   set z₀ : hatK p F hρ0 hρ1 := toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ N) with hz₀
   have hvz₀ : Valued.v z₀ = ρ ^ N := by
-    rw [hz₀, valued_toHatK]
-    have : gaussValue p F ρ ((p : Ainf p F) ^ N)
-        = (gaussValue p F ρ (p : Ainf p F)) ^ N := map_pow (gaussVal p F hρ0 hρ1) _ N
-    rw [this]
-    congr 1
-    calc gaussValue p F ρ (p : Ainf p F)
-        = gaussValue p F ρ ((p : Ainf p F) * 1) := by rw [mul_one]
-      _ = ρ * gaussValue p F ρ 1 := gaussValue_p_mul p F hρ1.le 1
-      _ = ρ := by rw [gaussValue_one p F hρ1.le, mul_one]
+    rw [hz₀]
+    exact valued_toHatK_p_pow p F hρ0 hρ1 N
   have hvz₀ne : Valued.v z₀ ≠ 0 := by
     rw [hvz₀]
     exact (pow_pos hρ0 N).ne'
@@ -1176,6 +1183,79 @@ theorem PhiHatK_mem_ArSub {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ
     (AlocToHatK p F ϖ hρ0 hρ1).range).mem_of_tendsto
     (tendsto_PhiHatK p F ϖ hρ0 hρ1 hb) (Filter.Eventually.of_forall hmem)
 
+/-- Vanishing `NNReal` sequences have bounded range. -/
+theorem bddAbove_range_of_tendsto_zero {f : ℕ → NNReal}
+    (hf : Filter.Tendsto f Filter.atTop (nhds 0)) :
+    BddAbove (Set.range f) := by
+  obtain ⟨K₀, hK₀⟩ := Filter.eventually_atTop.mp (hf.eventually_lt_const one_pos)
+  refine ⟨max 1 ((Finset.range (K₀ + 1)).sup f), ?_⟩
+  rintro s ⟨n, rfl⟩
+  rcases lt_or_ge n (K₀ + 1) with hn | hn
+  · exact le_max_of_le_right (Finset.le_sup (Finset.mem_range.mpr hn))
+  · exact le_max_of_le_left (hK₀ n (by omega)).le
+
+include ϖ in
+/-- **If the reconstruction vanishes, so does every scaled coordinate.** Suppose
+`Φ b = 0`. If some term `ρⁿ·|bₙ|` were positive, pick `K` with `ρᴷ` below it; the partial
+sums converge to `0`, so eventually `‖s_N‖ < ρᴷ` — yet `‖s_N‖` is a sup over `range N`
+that already contains that term once `N > n`. Contradiction. -/
+private theorem ciSup_gaussTerm_eq_zero_of_valued_PhiHatK_eq_zero {ρ : NNReal}
+    (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F}
+    (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
+      Filter.atTop (nhds 0))
+    (h0 : Valued.v (PhiHatK p F ϖ hρ0 hρ1 b) = 0) :
+    (0 : NNReal) = ⨆ n, ρ ^ n * perfectoidValuation p F (b n) := by
+  set s : ℕ → hatK p F hρ0 hρ1 :=
+    fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N) with hs
+  have hsval : ∀ N, Valued.v (s N)
+      = (Finset.range N).sup (fun n => ρ ^ n * perfectoidValuation p F (b n)) := by
+    intro N
+    rw [hs, valued_AlocToHatK, wAloc_prefixAloc]
+  have htendsto := tendsto_PhiHatK p F ϖ hρ0 hρ1 hb
+  refine ((ciSup_le fun n => ?_).antisymm zero_le).symm
+  by_contra hpos
+  push Not at hpos
+  obtain ⟨K, hK⟩ := exists_pow_lt_of_lt_one hpos hρ1
+  -- eventually v (s N) < ρ^K < term n, but term n ≤ v (s N) for N > n
+  have hz : Valued.v (PhiHatK p F ϖ hρ0 hρ1 b) ≠ 0 → False := fun h => h h0
+  have hzero : PhiHatK p F ϖ hρ0 hρ1 b = 0 := by
+    by_contra hΦ
+    exact hΦ ((Valuation.zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mp h0)
+  rw [hzero] at htendsto
+  -- γ-ball at 0 with e-value ρ^K
+  set z₀ : hatK p F hρ0 hρ1 := toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ K) with hz₀
+  have hvz₀ : Valued.v z₀ = ρ ^ K := by
+    rw [hz₀]
+    exact valued_toHatK_p_pow p F hρ0 hρ1 K
+  have hrne : (Valued.v).restrict z₀ ≠ 0 := by
+    refine fun hr0 => ?_
+    have hpos2 := (Valuation.restrict_pos_iff (v := (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)) z₀).mpr
+      (by rw [hvz₀]; exact pow_pos hρ0 K)
+    exact absurd hpos2 (by rw [hr0]; exact lt_irrefl 0)
+  have hball : {z : hatK p F hρ0 hρ1 |
+      (Valued.v).restrict z < (Units.mk0 _ hrne : (MonoidWithZeroHom.ValueGroup₀
+        (.ofClass (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ).1}
+      ∈ nhds (0 : hatK p F hρ0 hρ1) := by
+    rw [Valued.mem_nhds]
+    refine ⟨Units.mk0 _ hrne, fun z hz => ?_⟩
+    simpa using hz
+  obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp (htendsto.eventually hball)
+  have hcontr := hN₂ (max N₂ (n + 1)) (le_max_left _ _)
+  have hvlt : Valued.v (s (max N₂ (n + 1))) < ρ ^ K := by
+    have h1 : (Valued.v).restrict (s (max N₂ (n + 1))) < (Valued.v).restrict z₀ :=
+      hcontr
+    have h2 := (Valuation.restrict_lt_iff (v := (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal))).mp h1
+    rwa [hvz₀] at h2
+  have hterm_le : ρ ^ n * perfectoidValuation p F (b n)
+      ≤ Valued.v (s (max N₂ (n + 1))) := by
+    rw [hsval]
+    exact Finset.le_sup (f := fun m => ρ ^ m * perfectoidValuation p F (b m))
+      (Finset.mem_range.mpr (lt_of_lt_of_le (Nat.lt_succ_self n) (le_max_right _ _)))
+  exact absurd (lt_of_le_of_lt hterm_le hvlt) (not_lt.mpr hK.le)
+
 /-- **The isometry identity for `Φ`**: the value of `Φ b` is the sup of the terms. -/
 theorem valued_PhiHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F}
     (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
@@ -1189,71 +1269,12 @@ theorem valued_PhiHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ �
     intro N
     rw [hs, valued_AlocToHatK, wAloc_prefixAloc]
   have hBterms : BddAbove (Set.range
-      (fun n => ρ ^ n * perfectoidValuation p F (b n))) := by
-    have hev : ∀ᶠ n in Filter.atTop,
-        ρ ^ n * perfectoidValuation p F (b n) < 1 := hb.eventually_lt_const one_pos
-    obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp hev
-    refine ⟨max 1 ((Finset.range (N₁ + 1)).sup
-      (fun n => ρ ^ n * perfectoidValuation p F (b n))), ?_⟩
-    rintro y ⟨n, rfl⟩
-    rcases lt_or_ge n (N₁ + 1) with hn | hn
-    · exact le_max_of_le_right (Finset.le_sup
-        (f := fun m => ρ ^ m * perfectoidValuation p F (b m))
-        (Finset.mem_range.mpr hn))
-    · exact le_max_of_le_left (hN₁ n (by omega)).le
+      (fun n => ρ ^ n * perfectoidValuation p F (b n))) :=
+    bddAbove_range_of_tendsto_zero hb
   have htendsto := tendsto_PhiHatK p F ϖ hρ0 hρ1 hb
   rcases eq_or_ne (Valued.v (PhiHatK p F ϖ hρ0 hρ1 b)) 0 with h0 | hne
-  · -- zero case: all terms vanish
-    rw [h0]
-    refine ((ciSup_le fun n => ?_).antisymm zero_le).symm
-    by_contra hpos
-    push Not at hpos
-    obtain ⟨K, hK⟩ := exists_pow_lt_of_lt_one hpos hρ1
-    -- eventually v (s N) < ρ^K < term n, but term n ≤ v (s N) for N > n
-    have hz : Valued.v (PhiHatK p F ϖ hρ0 hρ1 b) ≠ 0 → False := fun h => h h0
-    have hzero : PhiHatK p F ϖ hρ0 hρ1 b = 0 := by
-      by_contra hΦ
-      exact hΦ ((Valuation.zero_iff (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal)).mp h0)
-    rw [hzero] at htendsto
-    -- γ-ball at 0 with e-value ρ^K
-    set z₀ : hatK p F hρ0 hρ1 := toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ K) with hz₀
-    have hvz₀ : Valued.v z₀ = ρ ^ K := by
-      rw [hz₀, valued_toHatK]
-      rw [show gaussValue p F ρ ((p : Ainf p F) ^ K)
-        = (gaussValue p F ρ (p : Ainf p F)) ^ K from map_pow (gaussVal p F hρ0 hρ1) _ K]
-      congr 1
-      calc gaussValue p F ρ (p : Ainf p F)
-          = gaussValue p F ρ ((p : Ainf p F) * 1) := by rw [mul_one]
-        _ = ρ * gaussValue p F ρ 1 := gaussValue_p_mul p F hρ1.le 1
-        _ = ρ := by rw [gaussValue_one p F hρ1.le, mul_one]
-    have hrne : (Valued.v).restrict z₀ ≠ 0 := by
-      refine fun hr0 => ?_
-      have hpos2 := (Valuation.restrict_pos_iff (v := (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal)) z₀).mpr
-        (by rw [hvz₀]; exact pow_pos hρ0 K)
-      exact absurd hpos2 (by rw [hr0]; exact lt_irrefl 0)
-    have hball : {z : hatK p F hρ0 hρ1 |
-        (Valued.v).restrict z < (Units.mk0 _ hrne : (MonoidWithZeroHom.ValueGroup₀
-          (.ofClass (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ).1}
-        ∈ nhds (0 : hatK p F hρ0 hρ1) := by
-      rw [Valued.mem_nhds]
-      refine ⟨Units.mk0 _ hrne, fun z hz => ?_⟩
-      simpa using hz
-    obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp (htendsto.eventually hball)
-    have hcontr := hN₂ (max N₂ (n + 1)) (le_max_left _ _)
-    have hvlt : Valued.v (s (max N₂ (n + 1))) < ρ ^ K := by
-      have h1 : (Valued.v).restrict (s (max N₂ (n + 1))) < (Valued.v).restrict z₀ :=
-        hcontr
-      have h2 := (Valuation.restrict_lt_iff (v := (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal))).mp h1
-      rwa [hvz₀] at h2
-    have hterm_le : ρ ^ n * perfectoidValuation p F (b n)
-        ≤ Valued.v (s (max N₂ (n + 1))) := by
-      rw [hsval]
-      exact Finset.le_sup (f := fun m => ρ ^ m * perfectoidValuation p F (b m))
-        (Finset.mem_range.mpr (lt_of_lt_of_le (Nat.lt_succ_self n) (le_max_right _ _)))
-    exact absurd (lt_of_le_of_lt hterm_le hvlt) (not_lt.mpr hK.le)
+  · rw [h0]
+    exact ciSup_gaussTerm_eq_zero_of_valued_PhiHatK_eq_zero p F ϖ hρ0 hρ1 hb h0
   · -- nonzero case: v(s N) is eventually exactly v(Φ b)
     have hball2 : {z : hatK p F hρ0 hρ1 |
         Valued.v (z - PhiHatK p F ϖ hρ0 hρ1 b) < Valued.v (PhiHatK p F ϖ hρ0 hρ1 b)}
@@ -1349,15 +1370,8 @@ theorem valued_ball_mem_nhds {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one hε hρ1
   set z₀ : hatK p F hρ0 hρ1 := toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ N) with hz₀
   have hvz₀ : Valued.v z₀ = ρ ^ N := by
-    rw [hz₀, valued_toHatK]
-    have h0 : gaussValue p F ρ ((p : Ainf p F) ^ N)
-        = (gaussValue p F ρ (p : Ainf p F)) ^ N := map_pow (gaussVal p F hρ0 hρ1) _ N
-    rw [h0]
-    congr 1
-    calc gaussValue p F ρ (p : Ainf p F)
-        = gaussValue p F ρ ((p : Ainf p F) * 1) := by rw [mul_one]
-      _ = ρ * gaussValue p F ρ 1 := gaussValue_p_mul p F hρ1.le 1
-      _ = ρ := by rw [gaussValue_one p F hρ1.le, mul_one]
+    rw [hz₀]
+    exact valued_toHatK_p_pow p F hρ0 hρ1 N
   have hvz₀ne : Valued.v z₀ ≠ 0 := by
     rw [hvz₀]
     exact (pow_pos hρ0 N).ne'
