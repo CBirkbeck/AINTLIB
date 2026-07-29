@@ -29199,7 +29199,25 @@ given the `n = 1` case; `PoleSheafProjectiveBaseChangeHOne` supplies `n = 1` for
 model after affine base change). Deliverable: the two bases, over an arbitrary base scheme,
 in the shape (i) consumes.
 
-#### [GAP-A-4] the line and vertical as kernels of restriction — `state:todo`, dep GAP-A-3
+#### [GAP-A-4] the line and vertical as kernels of restriction — `state:todo`, dep GAP-A-3 (DONE)
+**Construction identified 2026-07-29 — every piece confirmed present, so this is assembly:**
+1. `D := sectionsDivisor π ![⟨P, hP⟩, ⟨Q, hQ⟩]` (`LevelStructure/CartierDivisor.lean:1663`)
+   is the degree-two divisor `[P] + [Q]`; `sectionsDivisor_ideal` gives
+   `D.ideal = ker P * ker Q` and `sectionsDivisor_degree` gives degree `2`.
+2. The restriction target: `idealModule D.ideal ⟶ unitObj C` tensored with
+   `sectionPoleSheafPower π z hz 3`, then `Q := cokernel` of
+   `idealModule D.ideal ⊗ 𝒪(3[0]) ⟶ 𝒪(3[0])`. The restriction map is `cokernel.π`.
+   (Avoids building quotient sheaves: uses `tensorObj`, `tensorObjCongr`, `cokernel`, and
+   the ideal-module-to-unit map — all present.)
+3. `lineSection`: a generator of `ker (Scheme.Modules.baseSectionsMap π (cokernel.π …))`
+   (`ForMathlib/SchemeModuleBaseCechZero.lean:31`). Rank one because the source is free of
+   rank 3 (GAP-A-3) and the target free of rank 2 (`D` has degree 2) — so the generator is
+   unique up to a unit of `Γ(S, ⊤)`, and **that unit is where `N` comes from**.
+4. Same shape one degree down for the vertical: `ker (π_*𝒪(2[0]) → 𝒪_{[R]})`, rank one from
+   rank 2 minus degree 1.
+Do NOT use `λ = (y_Q − y_P)/(x_Q − x_P)` — see the route note above.
+
+(original scope)
 `lineSection P Q : π_*𝒪(3[0])` spanning `ker (π_*𝒪(3[0]) → 𝒪_{[P]+[Q]})`, and
 `verticalSection R : π_*𝒪(2[0])` spanning `ker (π_*𝒪(2[0]) → 𝒪_{[R]})`; each rank one, so
 each a generator up to a unit on the base — which is where `N` comes from.
