@@ -1763,7 +1763,9 @@ private theorem kernel_sections_module_finite_of_isAffineOpen
     Module.IsNoetherian.finite _ _
   exact Module.Finite.equiv (kernelAppLinearEquivOverOpen f U.1).symm
 
-private noncomputable def generatingSectionsOverOfRestrict
+/-- Generating sections of a restriction give generating sections of the corresponding
+over-site module. -/
+noncomputable def generatingSectionsOverOfRestrict
     {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
     (G : (M.restrict U.ι).GeneratingSections) :
     (M.over U).GeneratingSections := by
@@ -1780,7 +1782,9 @@ private noncomputable def generatingSectionsOverOfRestrict
       (overEquiv U).inverse.mapIso ((overFunctorEquiv U).app M)
   exact (SheafOfModules.GeneratingSections.equivOfIso e).symm G'
 
-private theorem generatingSectionsOverOfRestrict_isFiniteType
+/-- The over-site generating sections induced from finite generating sections of a restriction
+are finite. -/
+theorem generatingSectionsOverOfRestrict_isFiniteType
     {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
     (G : (M.restrict U.ι).GeneratingSections) [G.IsFiniteType] :
     (generatingSectionsOverOfRestrict M U G).IsFiniteType where
