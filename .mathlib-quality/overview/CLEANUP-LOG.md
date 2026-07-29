@@ -65,8 +65,12 @@ reference it.** DO THIS when cleaning CurveAdicSpace.lean, then revisit here.
 
 | # | Declaration | File | Before | After | Helpers extracted |
 |---|---|---|---|---|---|
-| 1 | `exists_window_subdatum_nbhd` | CurveAdicPresentation | 235 | **79** | 6 |
-| 2 | `PhiHatK_teichCoeffAr` | ArCompletion | 200 | **167** | 3 |
+| 1 | `exists_window_subdatum_nbhd` | CurveAdicPresentation | 235 | **~45** | 7 |
+| 2 | `PhiHatK_teichCoeffAr` | ArCompletion | 200 | **5** | 11 |
+
+**Bar: no proof over 50 lines.**  My first pass stopped at 79 and 167 on the reasoning
+that "helpers would carry more hypotheses than content".  That is not a reason — it is
+simply what decomposing a tightly-coupled proof costs.  Corrected below.
 
 ## 1. `exists_window_subdatum_nbhd` 235 → 79 (−66%)
 
@@ -104,3 +108,107 @@ The residual 167 lines are the `hkey` ε-argument: choose ε′, a base approxim
 decay thresholds, a working index, a cap, a Hölder modulus, a late approximant, prefix
 splitting, then a three-term ultrametric chain. Each step consumes the previous one's
 witnesses; helpers here would carry 8–12 hypotheses apiece.
+
+
+## 2 (redone). `PhiHatK_teichCoeffAr` 200 -> 5, twelve declarations, all under 50
+
+| Declaration | Lines |
+|---|---|
+| `PhiHatK_teichCoeffAr` | 5 |
+| `valued_PhiHatK_teichCoeffAr_sub_le` | 43 |
+| `gaussValueF_sub_teich_prefix_le` | 40 |
+| `exists_base_approx_and_index` | 26 |
+| `tailValueF_alocToWittF_le` | 25 |
+| `exists_le_inv_pow` / `exists_holder_modulus_on_range` | 21 |
+| `eventually_teichCoeffF_sub_le` | 19 |
+| `gaussValueF_p_pow_teichmuller_sub_le` | 16 |
+| `eq_of_forall_valued_sub_le` | 9 |
+| `valued_sub_le_of_chain` | 7 |
+| `perfectoidValuation_toOF_pos` | 5 |
+
+**The move I had skipped: 157 of the 200 lines were a single `have hkey`.**  Lifting that
+one `have` to its own lemma made the theorem a 5-line consequence and gave the ε-argument
+a name to split further.  Always look for a dominant `have` before anything else.
+
+**The "too many hypotheses" objection never materialised.**  `exists_base_approx_and_index`
+takes 3 hypotheses and returns 5 facts; `tailValueF_alocToWittF_le` takes 5.  Ordinary.
+
+**The biggest single win came from MERGING, not splitting.**
+`exists_holder_modulus_on_range` absorbs the value cap, the Hölder modulus and the
+per-coordinate bound into one statement — *there is a δ that works uniformly across the
+first N coordinates* — removing 21 lines at once, and making five setup lines (`ϖF`, `c`,
+`hϖne`, `hc0`, `hclt`) dead as a side effect.  When several consecutive steps exist only to
+feed one conclusion, state the conclusion and swallow all of them.
+
+### Technique checklist for the remaining 105 targets
+1. Is one `have` most of the body?  Lift it first.
+2. Is the statement a conjunction?  Split it (audit item 12).
+3. Does a block appear twice (e.g. `hrest`/`hdrop`)?  Extract once, use twice.
+4. Do N consecutive steps exist only to feed one fact?  Merge them into one lemma stating
+   that fact — this beats splitting them individually.
+5. A chain with no seams still cuts: consecutive segments, each taking the previous
+   segment's outputs as hypotheses.  Hypothesis count is the cost, not a blocker.
+
+## 1 (redone). `exists_window_subdatum_nbhd` 235 -> 36
+
+The last cut was the one I had refused: lift the ENTIRE tail — build the neighbourhood and
+verify all three `refine` bullets — into `exists_windowNbhd_spec`. I had left the bullets
+inline because they "share too much local context". They do; the lemma takes 8 hypotheses
+and that is fine.
+
+Residual over the bar in this file (body lines, excluding signature):
+* `exists_windowNbhd_spec` 55 — the three bullets; splits again into y∈V / V≤O / homeo
+* `windowTraceHomeomorph` 67 — see the mathlib finding below
+
+### MATHLIB finding (audit item 13) — missed on the first pass
+`windowTraceHomeomorph` hand-rolls a homeomorphism between two subtypes: forward map,
+backward map, both inverse proofs, both continuity proofs — 67 lines.  Mathlib has
+**`Homeomorph.subtype`** (`Mathlib/Topology/Homeomorph/Lemmas.lean:161`):
+
+    def subtype {p : X → Prop} {q : Y → Prop} (h : X ≃ₜ Y) (h_iff : ∀ x, p x ↔ q (h x)) :
+        {x // p x} ≃ₜ {y // q y}
+
+which builds all six components from a single `iff`.  It does not collapse this def to one
+line — our two subtypes sit over *different* ambient types (`Spa B_n` and the `𝒴`-carrier),
+so only the chart leg is covered and the carrier-vs-window identification still needs
+building — but the chart leg should go through `Homeomorph.subtype` rather than by hand.
+**This is exactly what audit item 13 exists to catch, and I skipped it when first
+extracting the def.**
+
+## 3. `valued_degAr_PhiHatK_convF` 164 -> 7 declarations, all under 50
+
+| Declaration | Total |
+|---|---|
+| `valued_sum_antidiagonal_lt` | 25 |
+| `gaussTerm_mul_lt_of_ne_dominant` | 20 |
+| `gaussTerm_convF_attain` | 43 |
+| `gaussTerm_convF_lt_of_gt` | 17 |
+| `valued_PhiHatK_convF` | 17 |
+| `degAr_PhiHatK_convF` | 36 |
+| `valued_degAr_PhiHatK_convF` | 11 |
+
+Three techniques stacked:
+1. **Duplication inside the proof.** `hrest` and `hdrop` ran the same 20-line antidiagonal
+   argument — bound the sum by its sup, pick the maximiser, split `ρⁿ = ρ^k₀·ρ^(n−k₀)`,
+   apply the strict bound.  `valued_sum_antidiagonal_lt` replaces both.
+2. **The `∧`-split** (audit item 12), which I had talked myself out of: the conclusion is a
+   genuine conjunction of two independently-usable facts, so `valued_PhiHatK_convF` and
+   `degAr_PhiHatK_convF` are now separate public theorems and the bundled statement is a
+   4-line `⟨_, _⟩`.  Its one consumer still destructures it unchanged.
+3. Extracting the attainment and the drop as named facts about `convF`.
+
+Two Lean gotchas from this one:
+* `zero_le` in `NNReal` takes **no** explicit argument — `zero_le (ρ ^ n)` is a "function
+  expected" error.
+* **`set` only folds occurrences present when it runs.** `have hattain := …` obtained
+  *after* `set a := …` keeps the unfolded spelling and then will not match the folded goal.
+  Hoist such `have`s above the `set` block.
+
+### Metric note
+The bar is on **proof bodies**, not declarations.  `groebner_reduce` is 163 lines but ~72
+are signature + a six-fold conclusion; its body is ~90.  Measuring by body also confirms
+the statement of `groebner_reduce` must NOT be split — it is a shared-witness existential
+`∃ g m J, P₁ ∧ … ∧ P₆`, which `references/statement-splitting.md` explicitly exempts.
+
+### Remaining over-50 bodies (measured)
+ArCompletion 6, Euclidean 14, CurveAdicPresentation 2 — plus the rest of the 107.
