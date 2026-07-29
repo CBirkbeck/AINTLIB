@@ -410,6 +410,144 @@ theorem headLocFwdAlg_continuous (ϖ : Uniformizer K)
     rw [headLocFwdAlg_divByS ϖ DH hDH ht]
     exact FiniteJet.isPowerBounded_of_norm_le_one (norm_qX_le_one DH _)
 
+variable {K w N} in
+/-- The evaluation targets of the reverse bridge: the `T/s`-fractions in the
+completed localization. -/
+noncomputable def revB (DH : RationalLocData (WPHead K w N)) (i : Fin DH.T.card) :
+    presheafValue DH :=
+  DH.coeRingHom (divByS ((datumEnum DH i : ↥DH.T) : WPHead K w N) DH.s)
+
+variable {K w N} in
+theorem isPowerBounded_revB (DH : RationalLocData (WPHead K w N))
+    (i : Fin DH.T.card) : TopologicalRing.IsPowerBounded (revB DH i) := by
+  have hmem : divByS ((datumEnum DH i : ↥DH.T) : WPHead K w N) DH.s ∈
+      locSubring DH.P DH.T DH.s :=
+    divByS_mem_locSubring _ _ _ (datumEnum DH i).2
+  refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded DH).subset ?_
+  rintro _ ⟨n, rfl⟩
+  refine ⟨divByS ((datumEnum DH i : ↥DH.T) : WPHead K w N) DH.s ^ n,
+    pow_mem hmem n, ?_⟩
+  rw [map_pow]
+  rfl
+
+variable {K w N} in
+/-- The reverse bridge at the Tate-algebra level: `restrictedEval` at the
+`T/s`-fractions (the `chartEval` pattern, done generically by `WP/Evaluation`). -/
+noncomputable def headLocRevP (DH : RationalLocData (WPHead K w N)) :
+    P (WPHead K w N) DH.T.card →+* presheafValue DH :=
+  restrictedEval DH.canonicalMap (canonicalMap_continuous DH) (revB DH)
+    (fun i => isPowerBounded_revB DH i)
+
+variable {K w N} in
+theorem headLocRevP_continuous (DH : RationalLocData (WPHead K w N)) :
+    Continuous (headLocRevP DH) :=
+  restrictedEval_continuous DH.canonicalMap (canonicalMap_continuous DH) (revB DH)
+    (fun i => isPowerBounded_revB DH i)
+
+variable {K w N} in
+theorem headLocRevP_C (DH : RationalLocData (WPHead K w N)) (x : WPHead K w N) :
+    headLocRevP DH (polyToP (MvPolynomial.C x)) = DH.canonicalMap x := by
+  unfold headLocRevP
+  exact restrictedEval_C _ _ _ _ x
+
+variable {K w N} in
+theorem headLocRevP_X (DH : RationalLocData (WPHead K w N)) (i : Fin DH.T.card) :
+    headLocRevP DH (polyToP (MvPolynomial.X i)) = revB DH i := by
+  unfold headLocRevP
+  exact restrictedEval_X _ _ _ _ i
+
+variable {K w N} in
+/-- The graph relations die in the completed localization: `s·(t/s) = t`. -/
+theorem headLocRevP_graphRel (DH : RationalLocData (WPHead K w N))
+    (i : Fin DH.T.card) : headLocRevP DH (headGraphRel DH i) = 0 := by
+  have hsplit : headGraphRel DH i =
+      polyToP (MvPolynomial.C DH.s) * polyToP (MvPolynomial.X i) -
+        polyToP (MvPolynomial.C ((datumEnum DH i : ↥DH.T) : WPHead K w N)) := by
+    rw [headGraphRel, map_sub, map_mul]
+  rw [hsplit, map_sub, map_mul, headLocRevP_C, headLocRevP_X, headLocRevP_C]
+  have hloc : algebraMap (WPHead K w N) (Localization.Away DH.s) DH.s *
+      divByS ((datumEnum DH i : ↥DH.T) : WPHead K w N) DH.s =
+      algebraMap (WPHead K w N) (Localization.Away DH.s)
+        ((datumEnum DH i : ↥DH.T) : WPHead K w N) := by
+    rw [mul_comm, divByS]
+    exact IsLocalization.mk'_spec _ _ _
+  have hprod : DH.canonicalMap DH.s * revB DH i =
+      DH.coeRingHom (algebraMap (WPHead K w N) (Localization.Away DH.s) DH.s *
+        divByS ((datumEnum DH i : ↥DH.T) : WPHead K w N) DH.s) := by
+    rw [map_mul]
+    rfl
+  rw [hprod, hloc]
+  have hcan : DH.coeRingHom (algebraMap (WPHead K w N) (Localization.Away DH.s)
+      ((datumEnum DH i : ↥DH.T) : WPHead K w N)) =
+      DH.canonicalMap ((datumEnum DH i : ↥DH.T) : WPHead K w N) := rfl
+  rw [hcan]
+  exact sub_self _
+
+variable {K w N} in
+theorem headGraphIdeal_le_ker (DH : RationalLocData (WPHead K w N)) :
+    headGraphIdeal DH ≤ RingHom.ker (headLocRevP DH) := by
+  have hker_closed : IsClosed ((RingHom.ker (headLocRevP DH) :
+      Ideal (P (WPHead K w N) DH.T.card)) : Set (P (WPHead K w N) DH.T.card)) := by
+    have hset : ((RingHom.ker (headLocRevP DH) :
+        Ideal (P (WPHead K w N) DH.T.card)) : Set (P (WPHead K w N) DH.T.card)) =
+        headLocRevP DH ⁻¹' {0} := by
+      ext y
+      simp [RingHom.mem_ker]
+    rw [hset]
+    exact IsClosed.preimage (headLocRevP_continuous DH) isClosed_singleton
+  have hspan : (Ideal.span (Set.range (headGraphRel DH)) :
+      Set (P (WPHead K w N) DH.T.card)) ⊆
+      ((RingHom.ker (headLocRevP DH) : Ideal _) : Set _) := by
+    have h1 : Ideal.span (Set.range (headGraphRel DH)) ≤
+        RingHom.ker (headLocRevP DH) := by
+      rw [Ideal.span_le]
+      rintro _ ⟨i, rfl⟩
+      exact RingHom.mem_ker.mpr (headLocRevP_graphRel DH i)
+    exact fun x hx => h1 hx
+  intro x hx
+  have hx' : x ∈ closure ((Ideal.span (Set.range (headGraphRel DH)) : Ideal _) :
+      Set (P (WPHead K w N) DH.T.card)) := by
+    rw [← Ideal.coe_closure]
+    exact hx
+  exact closure_minimal hspan hker_closed hx'
+
+variable {K w N} in
+/-- The reverse bridge, descended to the graph model. -/
+noncomputable def headLocRev (DH : RationalLocData (WPHead K w N)) :
+    QHead DH →+* presheafValue DH :=
+  Ideal.Quotient.lift (headGraphIdeal DH) (headLocRevP DH)
+    (fun a ha => RingHom.mem_ker.mp (headGraphIdeal_le_ker DH ha))
+
+variable {K w N} in
+theorem headLocRev_mk (DH : RationalLocData (WPHead K w N))
+    (G : P (WPHead K w N) DH.T.card) :
+    headLocRev DH (Ideal.Quotient.mk (headGraphIdeal DH) G) = headLocRevP DH G :=
+  Ideal.Quotient.lift_mk _ _ _
+
+variable {K w N} in
+theorem headLocRev_continuous (DH : RationalLocData (WPHead K w N)) :
+    Continuous (headLocRev DH) := by
+  refine continuous_of_continuousAt_zero (headLocRev DH).toAddMonoidHom ?_
+  show Filter.Tendsto _ (nhds 0) (nhds _)
+  rw [show (headLocRev DH).toAddMonoidHom (0 : QHead DH) = 0 from map_zero _]
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  have hrevP := (headLocRevP_continuous DH).tendsto 0
+  rw [show headLocRevP DH 0 = 0 from map_zero _] at hrevP
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp (hrevP hU)
+  refine Filter.mem_of_superset (Metric.ball_mem_nhds 0 hδ0) fun q hq => ?_
+  rw [Set.mem_preimage]
+  rw [Metric.mem_ball, dist_zero_right] at hq
+  obtain ⟨G, hG, hGn⟩ := Ideal.Quotient.norm_mk_lt q
+    (show (0 : ℝ) < δ - ‖q‖ by linarith)
+  have hq' : headLocRev DH q = headLocRevP DH G := by
+    rw [← hG, headLocRev_mk]
+  show headLocRev DH q ∈ U
+  rw [hq']
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right]
+  calc ‖G‖ < ‖q‖ + (δ - ‖q‖) := hGn
+    _ = δ := by rw [add_sub_cancel]
+
 /-! ### The head bridge `presheafValue ≃ QHead` -/
 
 variable {K w N} in
