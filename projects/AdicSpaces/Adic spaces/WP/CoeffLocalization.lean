@@ -1162,6 +1162,82 @@ theorem liftDatum_isRational (DH : RationalLocData (WPHead K w N))
     (span_image_headIncl_eq_top DH hDH)
 
 variable {K w N} in
+theorem TailC0.map_ofHead {P Q : Type*} [NormedCommRing P] [IsUltrametricDist P]
+    [NormedCommRing Q] [IsUltrametricDist Q] {ρ : TwistElem P} {ρ' : TwistElem Q}
+    {w' : ℕ → ℕ} {N' : ℕ} (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
+    (hρ : φ ρ.val = ρ'.val) (p : P) :
+    TailC0.map (w' := w') (N' := N') φ hφ hρ (TailC0.ofHead p) =
+      TailC0.ofHead (φ p) := by
+  refine Subtype.ext (funext fun μ => ?_)
+  show φ ((TailC0.ofHead p : TailC0 w' N' P ρ).1 μ) =
+    (TailC0.ofHead (φ p) : TailC0 w' N' Q ρ').1 μ
+  rw [show (TailC0.ofHead p : TailC0 w' N' P ρ).1 μ = if μ = 0 then p else 0
+      from rfl,
+    show (TailC0.ofHead (φ p) : TailC0 w' N' Q ρ').1 μ = if μ = 0 then φ p else 0
+      from rfl]
+  split_ifs
+  · rfl
+  · exact map_zero φ
+
+variable {K w N} in
+theorem headConst_WaHead (DH : RationalLocData (WPHead K w N)) :
+    headConst DH (WaHead K w N) = (rhoQ DH).val := rfl
+
+variable {K w N} in
+theorem wpaTailEquiv_isometry (f g : WPA K w) :
+    dist ((wpaTailEquiv (K := K) (w := w) (N := N)) f)
+      ((wpaTailEquiv (K := K) (w := w) (N := N)) g) = dist f g := by
+  rw [dist_eq_norm, dist_eq_norm,
+    show (wpaTailEquiv (K := K) (w := w) (N := N)) f -
+        (wpaTailEquiv (K := K) (w := w) (N := N)) g =
+      (wpaTailEquiv (K := K) (w := w) (N := N)) (f - g) from (map_sub _ _ _).symm]
+  rw [show ‖(wpaTailEquiv (K := K) (w := w) (N := N)) (f - g)‖ =
+    ⨆ μ : TailIdx N, ‖tailCoeff K w N μ (f - g)‖ from rfl]
+  exact (norm_eq_iSup_tailCoeff K w N (f - g)).symm
+
+variable {K w N} in
+theorem wpaTailEquiv_continuous :
+    Continuous (wpaTailEquiv (K := K) (w := w) (N := N)) := by
+  refine (LipschitzWith.of_dist_le_mul (K := 1) fun f g => ?_).continuous
+  rw [NNReal.coe_one, one_mul, wpaTailEquiv_isometry]
+
+variable {K w N} in
+/-- The coefficientwise base homomorphism `𝒜 → ⊕̂ Q e_μ`. -/
+noncomputable def coeffBase (DH : RationalLocData (WPHead K w N)) :
+    WPA K w →+* TailC0 w N (QHead DH) (rhoQ DH) :=
+  (TailC0.map (headConst DH) (norm_headConst_le DH)
+      (headConst_WaHead DH)).comp
+    (wpaTailEquiv (K := K) (w := w) (N := N) : WPA K w ≃+* _).toRingHom
+
+variable {K w N} in
+theorem coeffBase_continuous (DH : RationalLocData (WPHead K w N)) :
+    Continuous (coeffBase DH) := by
+  rw [coeffBase, RingHom.coe_comp]
+  exact (TailC0.map_continuous (headConst DH) (norm_headConst_le DH)
+    (headConst_WaHead DH)).comp
+    (by exact wpaTailEquiv_continuous (K := K) (w := w) (N := N))
+
+variable {K w N} in
+theorem coeffBase_headIncl (DH : RationalLocData (WPHead K w N)) (x : WPHead K w N) :
+    coeffBase DH (headIncl K w N x) = TailC0.ofHead (headConst DH x) := by
+  rw [coeffBase, RingHom.comp_apply]
+  rw [show ((wpaTailEquiv (K := K) (w := w) (N := N) : WPA K w ≃+* _).toRingHom
+      (headIncl K w N x)) =
+    (wpaTailEquiv (K := K) (w := w) (N := N)) (headIncl K w N x) from rfl]
+  rw [wpaTailEquiv_headIncl]
+  exact TailC0.map_ofHead (headConst DH) (norm_headConst_le DH)
+    (headConst_WaHead DH) x
+
+variable {K w N} in
+theorem isUnit_coeffBase_s (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    IsUnit (coeffBase DH (headIncl K w N DH.s)) := by
+  rw [coeffBase_headIncl]
+  exact (isUnit_headConst_s ϖ DH hDH).map
+    (TailC0.ofHead (w := w) (N := N) (ρ := rhoQ DH) :
+      QHead DH →+* TailC0 w N (QHead DH) (rhoQ DH))
+
+variable {K w N} in
 /-- **Coefficientwise localization** ([WP] prop:coefficientwise-localization:
 "There is a canonical topological algebra isomorphism `𝒜_α ≅ ⊕̂^{c₀}_μ P e_μ`").
 The proof route: the graph ideal over `𝒜` is closed and computed coefficientwise via

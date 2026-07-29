@@ -1,1 +1,1 @@
-FOCUS: W17 assembly — coeffLocEquiv via base := TailC0.map headConst ∘ wpaTailEquiv (Away.lift/extensionHom + rev summation)
+FOCUS: W17 — coeffLocEquiv fwd (Away.lift coeffBase + locTopology_continuous_lift + extensionHom), then rev summation + roundtrips
