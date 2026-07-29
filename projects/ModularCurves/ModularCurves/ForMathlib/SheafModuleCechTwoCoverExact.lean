@@ -96,4 +96,40 @@ theorem moduleCechTwoCover_row_exactAt_one
       0 1 2 (by simp) (by simp)).1
   exact h
 
+/-- Native Cech exactness in an arbitrary positive degree for an outer Cech
+term is the corresponding positive-row condition in the two-cover
+bicomplex. -/
+theorem moduleCechTwoCover_row_exactAt
+    (q p : ℕ) (hp : 0 < p)
+    (h : ((cechComplexFunctor V).obj
+      (moduleCechTerm F U q).obj).ExactAt p) :
+    (ShortComplex.mk
+      (((moduleCechTwoCoverBicomplex F U V).X q).d (p - 1) p)
+      (((moduleCechTwoCoverBicomplex F U V).X q).d p (p + 1))
+      (((moduleCechTwoCoverBicomplex F U V).X q).d_comp_d
+        (p - 1) p (p + 1))).Exact := by
+  apply (HomologicalComplex.exactAt_iff'
+    ((moduleCechTwoCoverBicomplex F U V).X q)
+      (p - 1) p (p + 1)
+      ((ComplexShape.up ℕ).prev_eq' (by
+        exact ComplexShape.up'_mk 1 (p - 1) p (by omega)))
+      ((ComplexShape.up ℕ).next_eq' rfl)).1
+  exact h
+
+/-- Native Cech exactness in a positive degree for an outer Cech term is the
+corresponding positive-row condition in the two-cover bicomplex. -/
+theorem moduleCechTwoCover_row_exactAt_succ
+    (q n : ℕ)
+    (h : ((cechComplexFunctor V).obj
+      (moduleCechTerm F U q).obj).ExactAt (n + 1)) :
+    (ShortComplex.mk
+      (((moduleCechTwoCoverBicomplex F U V).X q).d n (n + 1))
+      (((moduleCechTwoCoverBicomplex F U V).X q).d (n + 1) (n + 2))
+      (((moduleCechTwoCoverBicomplex F U V).X q).d_comp_d
+        n (n + 1) (n + 2))).Exact := by
+  apply (HomologicalComplex.exactAt_iff'
+    ((moduleCechTwoCoverBicomplex F U V).X q)
+      n (n + 1) (n + 2) (by simp) (by simp)).1
+  exact h
+
 end TopCat.Sheaf

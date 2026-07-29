@@ -56,4 +56,50 @@ theorem moduleCechTwoCoverHorizontalEdge_quasiIsoAt_one
         F U V 1 hV)
       (moduleCechTwoCover_row_exactAt_one F U V 0 hrow)
 
+/-- The horizontal edge of the module-valued two-cover Cech bicomplex is a
+quasi-isomorphism in every positive degree when the required native Cech rows
+are exact on the two adjacent antidiagonals. -/
+theorem moduleCechTwoCoverHorizontalEdge_quasiIsoAt_succ
+    (hV : ⨆ i, V i = ⊤)
+    (n : ℕ)
+    (hrow_n : ∀ q p, q + p = n → 0 < p →
+      ((cechComplexFunctor V).obj
+        (moduleCechTerm F U q).obj).ExactAt p)
+    (hrow_succ : ∀ q p, q + p = n + 1 → 0 < p →
+      ((cechComplexFunctor V).obj
+        (moduleCechTerm F U q).obj).ExactAt p) :
+    QuasiIsoAt
+      ((moduleCechTwoCoverBicomplex F U V).totalUpNatHorizontalEdge
+        ((cechComplexFunctor U).obj F.obj)
+        (moduleCechTwoCoverHorizontalAugmentation F U V)
+        (moduleCechTwoCoverHorizontalAugmentation_comm F U V)
+        (moduleCechTwoCoverHorizontalAugmentation_comp_d F U V))
+      (n + 1) := by
+  letI : Mono
+      (moduleCechTwoCoverHorizontalAugmentation F U V (n + 1)) :=
+    moduleCechTwoCoverHorizontalAugmentation_mono
+      F U V (n + 1) hV
+  letI : Mono
+      (moduleCechTwoCoverHorizontalAugmentation F U V (n + 2)) :=
+    moduleCechTwoCoverHorizontalAugmentation_mono
+      F U V (n + 2) hV
+  apply
+    HomologicalComplex₂.totalUpNatHorizontalEdge_quasiIsoAt_succ_module
+      (moduleCechTwoCoverBicomplex F U V)
+      ((cechComplexFunctor U).obj F.obj)
+      (moduleCechTwoCoverHorizontalAugmentation F U V)
+      (moduleCechTwoCoverHorizontalAugmentation_comm F U V)
+      (moduleCechTwoCoverHorizontalAugmentation_comp_d F U V)
+      n
+      (moduleCechTwoCoverHorizontalAugmentedShortComplex_exact
+        F U V n hV)
+      (moduleCechTwoCoverHorizontalAugmentedShortComplex_exact
+        F U V (n + 1) hV)
+  · intro q p hqp hp
+    exact moduleCechTwoCover_row_exactAt F U V q p hp
+      (hrow_n q p hqp hp)
+  · intro q p hqp hp
+    exact moduleCechTwoCover_row_exactAt F U V q p hp
+      (hrow_succ q p hqp hp)
+
 end TopCat.Sheaf
