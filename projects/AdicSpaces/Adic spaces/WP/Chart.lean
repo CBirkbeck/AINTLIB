@@ -146,6 +146,192 @@ theorem isDomain_P_one : IsDomain (FiniteJet.GraphKoszul.P K 1) := by
   exact NoZeroDivisors.to_isDomain _
 
 variable {K w} in
+theorem WaHead_ne_piHead (ϖ : Uniformizer K) :
+    WaHead K w 0 ≠ piHead (w := w) (N := 0) ϖ := by
+  intro h
+  have h1 := congrArg (fun z : WPHead K w 0 => ‖z‖) h
+  rw [show ‖WaHead K w 0‖ = 1 from norm_WaHead,
+    show ‖piHead (w := w) (N := 0) ϖ‖ = ‖ϖ.val‖ from norm_piHead ϖ] at h1
+  have h2 := ϖ.norm_val_lt_one
+  rw [← h1] at h2
+  exact lt_irrefl 1 h2
+
+variable {K w} in
+/-- `headZeroEquiv` sends the head variable `W` to the Tate variable `X`. -/
+theorem headZeroEquiv_WaHead :
+    headZeroEquiv (K := K) (w := w) (WaHead K w 0) =
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0) := by
+  classical
+  refine Subtype.ext (MvPowerSeries.ext fun s => ?_)
+  rw [FiniteJet.GraphKoszul.coeff_polyToP]
+  show MvPowerSeries.coeff (unhalve 0 s)
+      (MvPowerSeries.monomial (Finsupp.single 0 1) (1 : K)) =
+    MvPolynomial.coeff s (MvPolynomial.X 0)
+  rw [MvPowerSeries.coeff_monomial, MvPolynomial.coeff_X']
+  have hiff : unhalve 0 s = Finsupp.single 0 1 ↔ Finsupp.single 0 1 = s := by
+    constructor
+    · intro h
+      have h0 : s 0 = 1 := by
+        have h2 := congrArg (fun u : ℕ →₀ ℕ => u 0) h
+        rwa [unhalve_apply, if_pos rfl, Finsupp.single_apply, if_pos rfl] at h2
+      refine (Finsupp.ext fun i => ?_).symm
+      have hi : i = 0 := Subsingleton.elim i 0
+      subst hi
+      rw [h0, Finsupp.single_apply, if_pos rfl]
+    · intro h
+      rw [← h]
+      refine Finsupp.ext fun n => ?_
+      rw [unhalve_apply]
+      rcases eq_or_ne n 0 with rfl | hn
+      · rw [if_pos rfl, Finsupp.single_apply, if_pos rfl,
+          Finsupp.single_apply, if_pos rfl]
+      · rw [if_neg hn, dif_neg (by omega), Finsupp.single_apply,
+          if_neg fun hc => hn hc.symm]
+  split_ifs with h1 h2 h2
+  · rfl
+  · exact absurd (hiff.mp h1) h2
+  · exact absurd (hiff.mpr h2) h1
+  · rfl
+
+variable {K w} in
+/-- `headZeroEquiv` fixes constants. -/
+theorem headZeroEquiv_constHead (x : K) :
+    headZeroEquiv (K := K) (w := w) (constHead K w 0 x) =
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C x) := by
+  classical
+  refine Subtype.ext (MvPowerSeries.ext fun s => ?_)
+  rw [FiniteJet.GraphKoszul.coeff_polyToP]
+  show MvPowerSeries.coeff (unhalve 0 s) (MvPowerSeries.C (σ := ℕ) x) =
+    MvPolynomial.coeff s (MvPolynomial.C x)
+  rw [MvPowerSeries.coeff_C, MvPolynomial.coeff_C]
+  have hiff : unhalve 0 s = 0 ↔ s = 0 := by
+    constructor
+    · intro h
+      have h0 : s 0 = 0 := by
+        have h2 := congrArg (fun u : ℕ →₀ ℕ => u 0) h
+        rwa [unhalve_apply, if_pos rfl, Finsupp.zero_apply] at h2
+      refine Finsupp.ext fun i => ?_
+      have hi : i = 0 := Subsingleton.elim i 0
+      subst hi
+      rw [Finsupp.zero_apply]
+      exact h0
+    · intro h
+      rw [h]
+      refine Finsupp.ext fun n => ?_
+      rw [unhalve_apply]
+      rcases eq_or_ne n 0 with rfl | hn
+      · simp
+      · rw [if_neg hn]
+        split_ifs with h1
+        · simp
+        · simp
+  split_ifs with h1 h2 h2
+  · rfl
+  · exact absurd (hiff.mp h1) (fun hc => h2 hc.symm)
+  · exact absurd (hiff.mpr h2.symm) h1
+  · rfl
+
+variable {K w} in
+theorem headZeroEquiv_continuous :
+    Continuous (headZeroEquiv (K := K) (w := w)) :=
+  AddMonoidHomClass.continuous_of_bound (headZeroEquiv (K := K) (w := w)) 1
+    fun x => by rw [one_mul]; exact le_of_eq (norm_headZeroEquiv x)
+
+variable {K w} in
+theorem headZeroEquiv_symm_continuous :
+    Continuous (headZeroEquiv (K := K) (w := w)).symm :=
+  AddMonoidHomClass.continuous_of_bound (headZeroEquiv (K := K) (w := w)).symm 1
+    fun y => by
+      rw [one_mul]
+      refine le_of_eq ?_
+      rw [← norm_headZeroEquiv ((headZeroEquiv (K := K) (w := w)).symm y),
+        RingEquiv.apply_symm_apply]
+
+variable {K} in
+theorem norm_polyToP_X1 :
+    ‖(FiniteJet.GraphKoszul.polyToP (MvPolynomial.X (0 : Fin 1)) :
+      FiniteJet.GraphKoszul.P K 1)‖ = 1 := by
+  rw [← headZeroEquiv_WaHead (K := K) (w := fun _ => 0), norm_headZeroEquiv]
+  exact norm_WaHead
+
+variable {K} in
+/-- The `X ↦ ϖX` rescaling of `K⟨X⟩` (a `restrictedEval` instance at the
+power-bounded tuple `(ϖX)`; [WP] §6.2's `W ↦ ϖX` normalization). -/
+noncomputable def chartRescale (ϖ : Uniformizer K) :
+    FiniteJet.GraphKoszul.P K 1 →+* FiniteJet.GraphKoszul.P K 1 :=
+  restrictedEval
+    ((FiniteJet.GraphKoszul.polyToP).comp
+      (MvPolynomial.C : K →+* MvPolynomial (Fin 1) K))
+    (AddMonoidHomClass.continuous_of_bound _ 1 fun x => by
+      rw [one_mul, RingHom.comp_apply]
+      exact le_of_eq
+        (FiniteJet.GraphKoszul.norm_tP x fun y => norm_mul x y))
+    (fun _ : Fin 1 => FiniteJet.GraphKoszul.polyToP
+      (MvPolynomial.C ϖ.val * MvPolynomial.X 0))
+    (fun _ => FiniteJet.isPowerBounded_of_norm_le_one (by
+      rw [map_mul, FiniteJet.GraphKoszul.norm_tP_mul ϖ.val
+        (fun y => norm_mul ϖ.val y), norm_polyToP_X1 (K := K), mul_one]
+      exact ϖ.norm_val_lt_one.le))
+
+variable {K} in
+theorem chartRescale_C (ϖ : Uniformizer K) (x : K) :
+    chartRescale (K := K) ϖ
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C x)) =
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C x) :=
+  restrictedEval_C _ _ _ _ x
+
+variable {K} in
+theorem chartRescale_X (ϖ : Uniformizer K) :
+    chartRescale (K := K) ϖ
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0)) =
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C ϖ.val * MvPolynomial.X 0) :=
+  restrictedEval_X _ _ _ _ 0
+
+variable {K} in
+theorem chartRescale_continuous (ϖ : Uniformizer K) :
+    Continuous (chartRescale (K := K) ϖ) :=
+  restrictedEval_continuous _ _ _ _
+
+variable {K w} in
+/-- The coefficient hom of the chart model: `K⟨W⟩ → K⟨X⟩`, `W ↦ ϖX`. -/
+noncomputable def chartCoeff (ϖ : Uniformizer K) :
+    WPHead K w 0 →+* FiniteJet.GraphKoszul.P K 1 :=
+  (chartRescale (K := K) ϖ).comp
+    (headZeroEquiv (K := K) (w := w)).toRingHom
+
+variable {K w} in
+theorem chartCoeff_WaHead (ϖ : Uniformizer K) :
+    chartCoeff (K := K) (w := w) ϖ (WaHead K w 0) =
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C ϖ.val * MvPolynomial.X 0) := by
+  rw [chartCoeff, RingHom.comp_apply,
+    show (headZeroEquiv (K := K) (w := w)).toRingHom (WaHead K w 0) =
+      headZeroEquiv (K := K) (w := w) (WaHead K w 0) from rfl,
+    headZeroEquiv_WaHead, chartRescale_X]
+
+variable {K w} in
+theorem chartCoeff_constHead (ϖ : Uniformizer K) (x : K) :
+    chartCoeff (K := K) (w := w) ϖ (constHead K w 0 x) =
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C x) := by
+  rw [chartCoeff, RingHom.comp_apply,
+    show (headZeroEquiv (K := K) (w := w)).toRingHom (constHead K w 0 x) =
+      headZeroEquiv (K := K) (w := w) (constHead K w 0 x) from rfl,
+    headZeroEquiv_constHead, chartRescale_C]
+
+variable {K w} in
+theorem chartCoeff_piHead (ϖ : Uniformizer K) :
+    chartCoeff (K := K) (w := w) ϖ (piHead ϖ) =
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.C ϖ.val) := by
+  rw [show piHead (w := w) (N := 0) ϖ = constHead K w 0 ϖ.val from rfl]
+  exact chartCoeff_constHead ϖ ϖ.val
+
+variable {K w} in
+theorem chartCoeff_continuous (ϖ : Uniformizer K) :
+    Continuous (chartCoeff (K := K) (w := w) ϖ) := by
+  rw [chartCoeff, RingHom.coe_comp]
+  exact (chartRescale_continuous ϖ).comp
+    (headZeroEquiv_continuous (K := K) (w := w))
+
+variable {K w} in
 /-- The chart head model: `K⟨W⟩⟨X⟩/(ϖX − W) ≅ K⟨X⟩` via `W ↦ ϖX` (the classical
 smooth chart; the univariate rescaling of `FJP/FiniteJetChart.lean:82`). -/
 noncomputable def chartQHeadEquiv (ϖ : Uniformizer K)
