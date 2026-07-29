@@ -235,12 +235,16 @@ private theorem moduleCechTermTopRawIso_hom_π
     moduleCechTermEvaluationIso_hom_π]
   exact congr_app (moduleCechTermForgetIso_hom_π F U n i) (op ⊤)
 
-private noncomputable def moduleCechTermFactorTopIso
+/-- Top sections of a restriction-pushforward Cech factor are the sections on
+its indexing open. -/
+noncomputable def moduleCechTermFactorTopIso
     (i : Fin (n + 1) → ι) :
     (moduleCechTermFactor F U n i).obj.obj (op ⊤) ≅
       F.obj.obj (op (∏ᶜ fun k : Fin (n + 1) => U (i k))) :=
-  eqToIso (by
-    rw [toRestrict_obj_obj_obj, Opens.functor_map_eq_inf, top_inf_eq])
+  F.obj.mapIso (eqToIso (congrArg op
+    ((Opens.functor_map_eq_inf
+      (∏ᶜ fun k : Fin (n + 1) => U (i k)) ⊤).trans
+        (top_inf_eq (∏ᶜ fun k : Fin (n + 1) => U (i k))))))
 
 /-- Top sections of a module-valued sheaf Cech term agree with the
 corresponding degree of the native module-valued Cech complex. -/
