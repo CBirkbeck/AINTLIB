@@ -29286,3 +29286,23 @@ group-law dependency; root-index the new module and audit its axioms.
 isomorphism using exactly the canonical pullback coherence maps. Its focused
 2,576-job build and style linter pass, and its axiom audit reports exactly
 `propext`, `Classical.choice`, and `Quot.sound`.
+
+### CLAIM (rule 5, OWNER-FLW-DIRECT-POLE-MODEL, `state:done`,
+codex/fibrewise-weierstrass-picard-tranche3-monoidal, 2026-07-29): add
+`sectionIteratedBaseChangeDirect`,
+`sectionIteratedBaseChangeDirect_snd`,
+`sectionIteratedBaseChangeDirect_assoc_inv`, and
+`sectionPoleSheafPowerDirectBaseChangeIso`. Given a pointed family only after
+one base change and an isomorphism from the once-pulled-back stage module to a
+pole-sheaf power, transport its further base change through
+`pullbackLeftPullbackSndIso` and identify the direct pullback of the stage
+module with the pole-sheaf power on the direct base-change family. Reuse
+`pullbackIteratedBaseChangeIso`, `sectionPoleSheafPowerBaseChangeIso`, and
+`sectionPoleSheafPowerPointedIso`; add no option, sorry, admit, axiom, unsafe
+declaration, Noetherianity, extra final hypothesis, Pic-zero route, or group
+law. Root-index the module and audit every public declaration.
+
+**Progress (2026-07-29): DONE.** The four declarations are in the
+root-indexed `EllipticCurve/PoleSheafIteratedBaseChange.lean`. The focused
+3,988-job build and style linter pass. Every declaration has exactly the
+expected `propext`, `Classical.choice`, and `Quot.sound` axioms.

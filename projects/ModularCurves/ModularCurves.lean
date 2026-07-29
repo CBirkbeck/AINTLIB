@@ -34,6 +34,7 @@ import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.PoleSheafFibreHOne
 import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafModelHOne
+import ModularCurves.EllipticCurve.PoleSheafIteratedBaseChange
 import ModularCurves.EllipticCurve.PoleSheafNoetherianStage
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
