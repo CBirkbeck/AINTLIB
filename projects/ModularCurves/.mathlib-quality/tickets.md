@@ -29093,3 +29093,114 @@ before implementing it**.
 Note: `ForMathlib/SheafCechHOneComparison.lean` has one failure in the merged tree (a
 `change` into `equiv₀`-shape). It is an orphan that nothing imports; it blocks none of the
 above.
+
+---
+
+## [GAP-A] RE-SCOPED 2026-07-29 after `/develop --continue` + external adversarial review
+
+Sources read this session (GME = Hida, *Geometric Modular Forms and Elliptic Curves*, scans
+in `refs/ModularCurves/`, PDF page = printed page + 10):
+
+- **GME Thm 2.2.1 (Abel), p. 108** — verbatim: *"An elliptic curve `E_{/S}` has a unique
+  structure of commutative group scheme having `0 : S → E` as the identity. If
+  `P, Q, R ∈ E(T)` … then `P + Q = R ⟺ I(P)⁻¹ ⊗ I(Q)⁻¹ ⊗ I(0) ≅ I(R)⁻¹ ⊗ f_T^*(L_0)` for an
+  invertible sheaf `L_0` on `T`."* Rearranged, this **is**
+  `exists_invertible_tensor_idealModule_add` with `N = L_0⁻¹`. Note the source itself carries
+  the `f_T^*` slack — confirming the design.
+- GME (2.15) p. 107 (`R¹f_*𝒪_E ≅ 𝒪_S`), Cor 2.1.6 p. 105 (relative Riemann–Roch),
+  Cor 2.1.7 p. 106 (`deg D ≥ 2g+1` ⟹ closed immersion — what codex's
+  `sectionPoleSheafPower_six_locallyWeierstrass_of_CartierGenerator` formalises).
+
+### Route CONSIDERED AND REJECTED: follow GME's Abel proof (`E ≅ Pic¹ ≅ Pic⁰`)
+
+Rejected on external review, four independent reasons:
+
+1. GME's rank-one pushforward is for an **arbitrary** fibrewise-degree-1 `L`, via Serre
+   duality + cohomology-and-base-change + relative Riemann–Roch. The codex pole-sheaf
+   monomial ladder computes `π_*𝒪(n[0])` only; it says nothing about an arbitrary `L`'s
+   transition data. Twisting `L ↦ L(m[0])` does not reduce one to the other, and reducing
+   `L` to `I(P)⁻¹ ⊗ f^*M` *is* Abel surjectivity — circular.
+2. GME Ch. 2 carries a standing **locally noetherian** hypothesis on the base (§2.1, p. 89).
+3. GME's injectivity step ("fibre by fibre injective, hence injective", p. 109) is **not
+   valid over a nonreduced base** — distinct infinitesimal sections of a smooth curve over
+   `k[ε]/(ε²)` can agree on every geometric fibre. Abel is injective on nonreduced test
+   schemes, but that needs an infinitesimal argument the printed proof does not give.
+4. GME's `Pic⁰` is the **degree-zero subfunctor**; our `picRel` is `Ker(0^*)`, which over a
+   field is all of `Pic(E)` and carries every degree. The route therefore needs a genuine
+   fibrewise-degree function for invertible sheaves plus degree arithmetic — new API that
+   does not exist here.
+
+Injectivity is load-bearing and cannot be dropped: surjectivity alone yields *some* `R` with
+the Picard relation, and nothing identifies it with the constructed `P + Q`. (The Yoneda step
+is fine and cheap — `CategoryTheory.GrpObj.ofRepresentableBy` turns a group-valued presheaf
+represented by `E` into a `GrpObj`, and `grpObj_mul_unique` then identifies it with ours.)
+
+### FALSIFIED CLAIM (was in committed code, now corrected)
+
+`exists_invertible_tensor_idealModule_add_of_tensor_iso`'s docstring claimed the **exact**
+tensor iso (`N = 𝒪_T`) is what a Weierstrass chart supplies, because the invariant
+differential trivialises `ω`. **False.** Take `E/k` elliptic, `T = E × E`, the constant family,
+`P(a,b) = a`, `Q(a,b) = b`. Then `ω_{E_T/T}` is trivial, yet pulling the exact identity back
+along the zero section forces `A + B ∼ C` with `A = {0}×E`, `B = E×{0}`, `C = {a+b=0}`, while
+`A² = B² = C² = 0` and `A·B = 1`, so `(A+B)² = 2 ≠ 0 = C²`. The obstruction is the
+Poincaré/biextension class, not `ω`, and it does not vanish on charts. The lemma is still
+true; only its motivation was wrong. Docstring corrected.
+
+### ROUTE ADOPTED: universal pair + local line/vertical, retaining `N = 0^*Δ`
+
+Target the **normalised** discrepancy. Set
+`Δ_{P,Q} = (I(P) ⊗ I(Q)) ⊗ (I(R) ⊗ I(0))⁻¹` with `R = P + Q`, and canonically
+`N := 0^*Δ_{P,Q}`. It suffices to prove `Δ_{P,Q} ⊗ f^*N⁻¹ ≅ 𝒪` — precisely the shape
+`nonempty_unitObj_iso_of_normalized_glue` (`Picard/RigidDescent.lean:65`) consumes, and
+`exists_invertible_tensor_idealModule_add_of_discrepancy_trivial` then closes the leaf.
+
+The function-field input, as fractional ideals:
+
+    (ℓ) = I(P)·I(Q)·I(−R)·I(0)⁻³        (ℓ = the line through P, Q)
+    (v) = I(R)·I(−R)·I(0)⁻²             (v = the vertical through R)
+  ⟹ (ℓ)(v)⁻¹ = I(P)·I(Q)·(I(R)·I(0))⁻¹
+
+**Do NOT build `ℓ` from `λ = (y_Q − y_P)/(x_Q − x_P)`.** That is not regular along the
+diagonal, the anti-diagonal, or the zero loci, and integrality of the universal base does not
+remove codimension-one poles. Two robust constructions, in preference order:
+
+- **(i) kernel-of-restriction (recommended).** Define the line through `P + Q` as the
+  **rank-one kernel** of the restriction map `π_*𝒪(3[0]) → 𝒪_{[P]+[Q]}` from the rank-three
+  pole module to the relative length-two divisor `[P] + [Q]`. This handles the tangent case
+  `P = Q` automatically. Do the analogous rank-one/degree-two construction for `v`. Only
+  pole degrees **2 and 3** are central — the degree-4/5/6 ladder is not needed here.
+- **(ii)** use the already-formalised complete Bosma–Lenstra addition-law cover, define `ℓ`
+  and `v` chart-locally, and let their transition ratios *construct* `N`.
+
+### Tickets
+
+#### [GAP-A-3] `π_*𝒪(2[0])` and `π_*𝒪(3[0])` free of ranks 2, 3 — `state:todo`
+From codex's ladder (`sectionPoleSheafPower_{four,five,six}_baseSectionsBasisOfCartierGenerator`
+and the lower stages) plus relative H¹ vanishing
+(`sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood`, arbitrary base,
+given the `n = 1` case; `PoleSheafProjectiveBaseChangeHOne` supplies `n = 1` for a projective
+model after affine base change). Deliverable: the two bases, over an arbitrary base scheme,
+in the shape (i) consumes.
+
+#### [GAP-A-4] the line and vertical as kernels of restriction — `state:todo`, dep GAP-A-3
+`lineSection P Q : π_*𝒪(3[0])` spanning `ker (π_*𝒪(3[0]) → 𝒪_{[P]+[Q]})`, and
+`verticalSection R : π_*𝒪(2[0])` spanning `ker (π_*𝒪(2[0]) → 𝒪_{[R]})`; each rank one, so
+each a generator up to a unit on the base — which is where `N` comes from.
+
+#### [GAP-A-5] the fractional-ideal identity — `state:todo`, dep GAP-A-4
+`div(ℓ) = [P] + [Q] + [−R] − 3[0]` and `div(v) = [R] + [−R] − 2[0]` as identities of
+invertible ideal sheaves, hence `Δ_{P,Q} ⊗ f^*N⁻¹ ≅ 𝒪`.
+
+#### [GAP-A-6] descent to arbitrary bases — `state:todo`, dep GAP-A-5
+Glue over the Weierstrass cover with `nonempty_unitObj_iso_of_normalized_glue` (overlap
+condition forced by zero-normalisation) and finish with
+`..._of_discrepancy_trivial`. **Blocker to clear first:** the module-level base-change bridge
+`nonempty_pullback_idealModule_ker_sectionBaseChange`
+(`Picard/IdealModulePullback.lean`) inherits `sorryAx` from `comap_ideal_eq_span_appLE` and
+`sheafificationW_idealPullHom` (same file, lines ~163 and ~184). Those two are the real
+prerequisite — see [GAP-A-7].
+
+#### [GAP-A-7] discharge the two `IdealModulePullback` sorries — `state:todo`
+`comap_ideal_eq_span_appLE` (the affine base-change kernel computation; the ring core
+`ker_algebraMap_tensorQuot_span` in the same file is already proved) and
+`sheafificationW_idealPullHom`. Without these, no universal-pair identity can be transported.

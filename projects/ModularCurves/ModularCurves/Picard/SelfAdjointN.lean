@@ -266,10 +266,19 @@ theorem exists_invertible_tensor_idealModule_add (Q Q' : (E.baseChange t).Point 
             ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd E.π t)).obj N)) := by
   sorry
 
-/-- **The chart case of the leaf.** When the discrepancy is *exactly* trivial the leaf holds
-with `N = 𝒪_T`. This is the shape a Weierstrass chart produces: there the invariant
-differential trivialises `ω_{E/T}`, hence the normal bundle `0^*𝒪(D_0)` of the zero section,
-and the obstruction that forces the general `π^*N` disappears. -/
+/-- **The `N = 𝒪_T` case of the leaf.** An exact tensor isomorphism gives the leaf with
+`N = 𝒪_T`. True as stated, but note the hypothesis is *strictly stronger than the leaf* and
+is NOT what a Weierstrass chart supplies.
+
+CORRECTION (2026-07-29, external review): an earlier version of this docstring claimed the
+exact iso holds wherever the invariant differential trivialises `ω_{E/T}`. That is **false**.
+Counterexample: `E/k` elliptic, `T = E × E`, the constant family `E_T = E × T`, with
+`P(a,b) = a`, `Q(a,b) = b`, so `R = P + Q` is `(a,b) ↦ a + b`. Here `ω_{E_T/T}` IS trivial.
+Pulling the exact identity back along the zero section would give `A + B ∼ C` on `T`, where
+`A = {0} × E`, `B = E × {0}` and `C = {a + b = 0}`; but `A² = B² = C² = 0` and `A·B = 1`, so
+`(A + B)² = 2 ≠ 0 = C²`. The obstruction is the Poincaré/biextension class, not just `ω`, and
+it survives on charts. Use `..._of_discrepancy_trivial` with the canonical
+`N = 0^*Δ` instead — that is the shape the descent machinery actually produces. -/
 theorem exists_invertible_tensor_idealModule_add_of_tensor_iso
     (Q Q' : (E.baseChange t).Point (𝟙 T))
     (e : Nonempty (tensorObj (idealModule (Scheme.Hom.ker Q.1))
