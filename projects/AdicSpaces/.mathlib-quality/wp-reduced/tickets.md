@@ -1129,6 +1129,15 @@ propext/Classical.choice/Quot.sound) before marking done.
   round when opened (planned route: explicit completed support model + Φ-style
   formal-domain embedding; char-free).
 ### [HRW-6] L4 — assembly + unconditional endpoints
-- Status: open | File: WP/HeadReduced.lean, WP/Main.lean | Depends: HRW-1..5, W16
+- Status: done (glue; 2026-07-30) | File: WP/HeadReduced.lean, WP/Main.lean | Depends: HRW-1..5, W16
+- **Progress**: `isNoetherianRing_qHead` (faithful strongly-noetherian
+  localization + surjective transport; needs the
+  IsStronglyNoetherian.isNoetherianRing haveI at the head) + `headLocsReduced`
+  assembly (L2 at QHead + L1 comparison + L3 case split — sorry-free GLUE,
+  transitively inherits the three open leaves) +
+  `weightedParity_chainReduced_unconditional`(+`_of_dvr`) in Main
+  (headLocsReduced takes w EXPLICITLY: `headLocsReduced idWeight ϖ hK₀`).
+  The wall is now EXACTLY: qHead_completedLocal_comparison (HRW-3),
+  head_completedLocal_reduced_of_wa_notMem (HRW-4), _of_wa_mem (HRW-5).
 - Decls: `headLocsReduced`; then `weightedParity_chainReduced_unconditional` (+_of_dvr)
   in Main.lean (NEW theorems; conditional forms stay).
