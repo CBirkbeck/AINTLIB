@@ -35,6 +35,7 @@ private theorem exists_later_proper_smooth_model_with_invertible_base_change_iso
     (yπ : Y ⟶ Spec (.of (Sstage i))) [LocallyOfFinitePresentation yπ]
     [QuasiCompact yπ] [IsSeparated yπ] [Smooth yπ]
     {L : Y.Modules} (hL : IsInvertible L) {N : X.Modules}
+    {xπ : X ⟶ Spec (.of A)}
     (hproper :
       letI : Algebra (Sstage i) A := (uA i).toRingHom.toAlgebra
       IsProper (pullback.fst
@@ -44,10 +45,11 @@ private theorem exists_later_proper_smooth_model_with_invertible_base_change_iso
       let stageToBase := Spec.map (CommRingCat.ofHom
         (algebraMap (Sstage i) A))
       ∃ φ : CategoryTheory.Limits.pullback yπ stageToBase ≅ X,
-        Nonempty
-          ((AlgebraicGeometry.Scheme.Modules.pullback
-              (pullback.fst yπ stageToBase)).obj L ≅
-            (AlgebraicGeometry.Scheme.Modules.pullback φ.hom).obj N)) :
+        φ.hom ≫ xπ = pullback.snd yπ stageToBase ∧
+          Nonempty
+            ((AlgebraicGeometry.Scheme.Modules.pullback
+                (pullback.fst yπ stageToBase)).obj L ≅
+              (AlgebraicGeometry.Scheme.Modules.pullback φ.hom).obj N)) :
     ∃ (j : ι) (Yj : Scheme.{u}) (yπj : Yj ⟶ Spec (.of (Sstage j)))
       (Lj : Yj.Modules),
       LocallyOfFinitePresentation yπj ∧ IsProper yπj ∧ Smooth yπj ∧
@@ -56,14 +58,15 @@ private theorem exists_later_proper_smooth_model_with_invertible_base_change_iso
           let stageToBase := Spec.map (CommRingCat.ofHom
             (algebraMap (Sstage j) A))
           ∃ φ : CategoryTheory.Limits.pullback yπj stageToBase ≅ X,
-            Nonempty
-              ((AlgebraicGeometry.Scheme.Modules.pullback
-                  (pullback.fst yπj stageToBase)).obj Lj ≅
-                (AlgebraicGeometry.Scheme.Modules.pullback φ.hom).obj N)) := by
+            φ.hom ≫ xπ = pullback.snd yπj stageToBase ∧
+              Nonempty
+                ((AlgebraicGeometry.Scheme.Modules.pullback
+                    (pullback.fst yπj stageToBase)).obj Lj ≅
+                  (AlgebraicGeometry.Scheme.Modules.pullback φ.hom).obj N)) := by
   classical
   letI : Algebra (Sstage i) A := (uA i).toRingHom.toAlgebra
   let gA := Spec.map (CommRingCat.ofHom (algebraMap (Sstage i) A))
-  obtain ⟨φ, E⟩ := hbase
+  obtain ⟨φ, hφ, E⟩ := hbase
   let Ei := Classical.choice E
   obtain ⟨j, hij, hproperj⟩ :=
     Scheme.Hom.exists_isProper_scalarExtension_of_isProper_baseChange H yπ hproper
@@ -113,6 +116,31 @@ private theorem exists_later_proper_smooth_model_with_invertible_base_change_iso
         rw [pullbackRightPullbackFstIso_hom_snd]
       _ = pullback.fst yπj gAj ≫ pullback.snd gj yπ := by
         rw [pullbackSymmetry_hom_comp_snd_assoc]
+  have heBase : e.hom ≫ pullback.snd yπ gA =
+      pullback.snd yπj gAj := by
+    have hcongr :
+        (pullback.congrHom (rfl : yπ = yπ) hg).hom ≫
+            pullback.snd yπ gA =
+          pullback.snd yπ (gAj ≫ gj) := by
+      simp only [pullback.congrHom_hom, pullback.map,
+        Category.comp_id]
+      exact pullback.lift_snd _ _ _
+    calc
+      e.hom ≫ pullback.snd yπ gA =
+          (pullbackSymmetry yπj gAj).hom ≫
+            (pullbackRightPullbackFstIso gj yπ gAj).hom ≫
+              (pullbackSymmetry (gAj ≫ gj) yπ).hom ≫
+                pullback.snd yπ (gAj ≫ gj) := by
+        simp only [e, Iso.trans_hom, Category.assoc, hcongr]
+      _ = (pullbackSymmetry yπj gAj).hom ≫
+            (pullbackRightPullbackFstIso gj yπ gAj).hom ≫
+              pullback.fst (gAj ≫ gj) yπ := by
+        rw [pullbackSymmetry_hom_comp_snd]
+      _ = (pullbackSymmetry yπj gAj).hom ≫
+            pullback.fst gAj yπj := by
+        rw [pullbackRightPullbackFstIso_hom_fst]
+      _ = pullback.snd yπj gAj := by
+        rw [pullbackSymmetry_hom_comp_fst]
   let φj := e ≪≫ φ
   let Ej :
       (AlgebraicGeometry.Scheme.Modules.pullback
@@ -125,14 +153,22 @@ private theorem exists_later_proper_smooth_model_with_invertible_base_change_iso
         e.hom (pullback.fst yπ gA)).app L).symm ≪≫
       (AlgebraicGeometry.Scheme.Modules.pullback e.hom).mapIso Ei ≪≫
       (AlgebraicGeometry.Scheme.Modules.pullbackComp e.hom φ.hom).app N
-  refine ⟨j, Yj, yπj, Lj, ?_, hproperj, ?_, hL.pullback qj, φj, ⟨Ej⟩⟩
+  refine ⟨j, Yj, yπj, Lj, ?_, hproperj, ?_, hL.pullback qj, φj, ?_, ⟨Ej⟩⟩
   · infer_instance
   · infer_instance
+  · calc
+      φj.hom ≫ xπ = e.hom ≫ (φ.hom ≫ xπ) := by
+        simp only [φj, Iso.trans_hom, Category.assoc]
+      _ = e.hom ≫ pullback.snd yπ gA := by rw [hφ]
+      _ = pullback.snd yπj gAj := heBase
+
+namespace IsInvertible
 
 /-- An invertible sheaf on a smooth proper, locally finitely presented family over an
 arbitrary affine base descends to a smooth proper model over a Noetherian ring. The
-family and sheaf both recover the original pair after base change. -/
-theorem IsInvertible.exists_noetherianStageModelOfFinitePresentationProperSmoothBaseChangeIso_of_isProper
+base-change isomorphism commutes with the structure maps and identifies the two
+invertible sheaves. -/
+theorem exists_noetherianProperSmoothModelBaseChangeIso_with_base_comp_of_isProper
     {X S : Scheme.{u}} {π : X ⟶ S} [IsProper π] [Smooth π] [IsAffine S]
     [LocallyOfFinitePresentation π] {N : X.Modules} (hN : IsInvertible N) :
     let A : Type u := Γ(S, (⊤ : S.Opens))
@@ -151,10 +187,11 @@ theorem IsInvertible.exists_noetherianStageModelOfFinitePresentationProperSmooth
             (algebraMap
               (Algebra.PresentationSystem.stage (ULift.{u} ℤ) A j) A))
           ∃ φ : CategoryTheory.Limits.pullback yπ stageToBase ≅ X,
-            Nonempty
-              ((AlgebraicGeometry.Scheme.Modules.pullback
-                  (pullback.fst yπ stageToBase)).obj L ≅
-                (AlgebraicGeometry.Scheme.Modules.pullback φ.hom).obj N)) := by
+            φ.hom ≫ π ≫ S.isoSpec.hom = pullback.snd yπ stageToBase ∧
+              Nonempty
+                ((AlgebraicGeometry.Scheme.Modules.pullback
+                    (pullback.fst yπ stageToBase)).obj L ≅
+                  (AlgebraicGeometry.Scheme.Modules.pullback φ.hom).obj N)) := by
   classical
   dsimp only
   letI : Algebra (ULift.{u} ℤ) Γ(S, (⊤ : S.Opens)) :=
@@ -212,7 +249,41 @@ theorem IsInvertible.exists_noetherianStageModelOfFinitePresentationProperSmooth
       exact isProper_of_eq hproperMBaseChange hsym.symm
     exact isProper_cancel_iso eSym (pullback.fst gA yπM) hcomp
   exact exists_later_proper_smooth_model_with_invertible_base_change_iso
-    H yπM hcM hproperMBaseChange' ⟨φM, hbaseM⟩
+    H yπM hcM hproperMBaseChange' ⟨φM, hφM, hbaseM⟩
+
+/-- An invertible sheaf on a smooth proper, locally finitely presented family over an
+arbitrary affine base descends to a smooth proper model over a Noetherian ring. The
+family and sheaf both recover the original pair after base change. -/
+theorem exists_noetherianStageModelOfFinitePresentationProperSmoothBaseChangeIso_of_isProper
+    {X S : Scheme.{u}} {π : X ⟶ S} [IsProper π] [Smooth π] [IsAffine S]
+    [LocallyOfFinitePresentation π] {N : X.Modules} (hN : IsInvertible N) :
+    let A : Type u := Γ(S, (⊤ : S.Opens))
+    letI : Algebra (ULift.{u} ℤ) A := ULift.algebra' ℤ A
+    ∃ (j : Algebra.PresentationSystem.Index (ULift.{u} ℤ) A)
+      (Y : Scheme.{u})
+      (yπ : Y ⟶ Spec (.of
+        (Algebra.PresentationSystem.stage (ULift.{u} ℤ) A j)))
+      (L : Y.Modules),
+      LocallyOfFinitePresentation yπ ∧ IsProper yπ ∧ Smooth yπ ∧
+        IsInvertible L ∧
+        (letI : Algebra
+            (Algebra.PresentationSystem.stage (ULift.{u} ℤ) A j) A :=
+            (Algebra.PresentationSystem.colimMap (ULift.{u} ℤ) A j).toRingHom.toAlgebra
+          let stageToBase := Spec.map (CommRingCat.ofHom
+            (algebraMap
+              (Algebra.PresentationSystem.stage (ULift.{u} ℤ) A j) A))
+          ∃ φ : CategoryTheory.Limits.pullback yπ stageToBase ≅ X,
+            Nonempty
+              ((AlgebraicGeometry.Scheme.Modules.pullback
+                  (pullback.fst yπ stageToBase)).obj L ≅
+                (AlgebraicGeometry.Scheme.Modules.pullback φ.hom).obj N)) := by
+  dsimp only
+  obtain ⟨j, Y, yπ, L, hfp, hproper, hsmooth, hL, φ, _, E⟩ :=
+    hN.exists_noetherianProperSmoothModelBaseChangeIso_with_base_comp_of_isProper
+      (π := π)
+  exact ⟨j, Y, yπ, L, hfp, hproper, hsmooth, hL, φ, E⟩
+
+end IsInvertible
 
 end
 
