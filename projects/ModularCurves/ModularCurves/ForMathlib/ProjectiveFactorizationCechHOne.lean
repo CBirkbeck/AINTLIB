@@ -5,7 +5,7 @@ Authors: AINTLIB ModularCurves project
 -/
 import ModularCurves.ForMathlib.ProjectiveFactorizationCechFinite
 import ModularCurves.ForMathlib.SchemeModuleCechTwoAffineCover
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOneFinite
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHomotopyEquiv
 
 /-!
 # Degree-one Cech finiteness from a projective factorization
@@ -28,18 +28,19 @@ namespace AlgebraicGeometry.IsProjectiveFactorization
 open TopCat TopCat.Sheaf
 
 /-- A finite-type quasicoherent module on a projectively factored scheme has
-finite native Cech homology in degree one on every finite affine cover. -/
-theorem baseModuleCech_homology_one_module_finite_of_affine_openCover
+finite native Cech homology in every positive degree on every finite affine
+cover. -/
+theorem baseModuleCech_homology_succ_module_finite_of_affine_openCover
     {X : Scheme.{u}} {R : Type u} [CommRing R] [IsNoetherianRing R]
     {f : X ⟶ Spec (.of R)}
     (hf : AlgebraicGeometry.IsProjectiveFactorization f)
     (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
     {κ : Type u} [Finite κ]
     (V : κ → X.Opens) (hV : IsOpenCover V)
-    (hVaff : ∀ i, IsAffineOpen (V i)) :
+    (hVaff : ∀ i, IsAffineOpen (V i)) (n : ℕ) :
     Module.Finite Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
       (((cechComplexFunctor V).obj
-        (Scheme.Modules.baseModuleTopSheaf f M).obj).homology 1) := by
+        (Scheme.Modules.baseModuleTopSheaf f M).obj).homology (n + 1)) := by
   letI : IsProper f := hf.isProper
   letI : X.IsSeparated := ⟨by
     rw [← terminal.comp_from f]
@@ -60,23 +61,40 @@ theorem baseModuleCech_homology_one_module_finite_of_affine_openCover
       (R := R) j).preimage i
   letI : Module.Finite
       Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
-      ((Scheme.Modules.orderedBaseCechComplex f M U).homology 1) :=
-    hfinite 1
+      ((Scheme.Modules.orderedBaseCechComplex f M U).homology (n + 1)) :=
+    hfinite (n + 1)
   letI : Module.Finite
       Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
-      ((Scheme.Modules.baseCechComplex f M U).homology 1) :=
-    Scheme.Modules.baseCechComplex_homology_one_module_finite_of_orderedBaseCechComplex
-      f M U
+      ((Scheme.Modules.baseCechComplex f M U).homology (n + 1)) :=
+    Scheme.Modules.baseCechComplex_homology_module_finite_of_orderedBaseCechComplex
+      f M U (n + 1)
   letI : Module.Finite
       Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
       (((cechComplexFunctor U).obj
-        (Scheme.Modules.baseModuleTopSheaf f M).obj).homology 1) := by
+        (Scheme.Modules.baseModuleTopSheaf f M).obj).homology (n + 1)) := by
     change Module.Finite
       Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
-      ((Scheme.Modules.baseCechComplex f M U).homology 1)
+      ((Scheme.Modules.baseCechComplex f M U).homology (n + 1))
     infer_instance
   apply
-    Scheme.Modules.baseModuleCech_homology_one_module_finite_of_affine_openCovers
-      f M U hU hUaff V hV hVaff
+    Scheme.Modules.baseModuleCech_homology_succ_module_finite_of_affine_openCovers
+      f M U hU hUaff V hV hVaff n
+
+/-- A finite-type quasicoherent module on a projectively factored scheme has
+finite native Cech homology in degree one on every finite affine cover. -/
+theorem baseModuleCech_homology_one_module_finite_of_affine_openCover
+    {X : Scheme.{u}} {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {f : X ⟶ Spec (.of R)}
+    (hf : AlgebraicGeometry.IsProjectiveFactorization f)
+    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
+    {κ : Type u} [Finite κ]
+    (V : κ → X.Opens) (hV : IsOpenCover V)
+    (hVaff : ∀ i, IsAffineOpen (V i)) :
+    Module.Finite Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+      (((cechComplexFunctor V).obj
+        (Scheme.Modules.baseModuleTopSheaf f M).obj).homology 1) := by
+  simpa using
+    hf.baseModuleCech_homology_succ_module_finite_of_affine_openCover
+      M V hV hVaff 0
 
 end AlgebraicGeometry.IsProjectiveFactorization
