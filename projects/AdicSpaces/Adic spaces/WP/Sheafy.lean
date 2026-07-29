@@ -341,6 +341,27 @@ theorem wpMem_shiftWeight_iff (w : ℕ → ℕ) (s : ℕ) (u : ℕ →₀ ℕ) :
     WPMem (shiftWeight w s) u ↔ WPMem w (slotInr s u) := by
   rw [WPMem, WPMem, wpWeight_shiftWeight_eq, slotInr_zero_apply]
 
+/-- The `inl`-pull of a flat exponent through the slot bijection. -/
+noncomputable def slotInl (s : ℕ) (u : ℕ →₀ ℕ) : Fin s →₀ ℕ :=
+  Finsupp.comapDomain Sum.inl (Finsupp.equivMapDomain (slotEquiv s) u)
+    Sum.inl_injective.injOn
+
+/-- A flat exponent is determined by its two slot pulls. -/
+theorem slot_ext (s : ℕ) {u₁ u₂ : ℕ →₀ ℕ} (hl : slotInl s u₁ = slotInl s u₂)
+    (hr : slotInr s u₁ = slotInr s u₂) : u₁ = u₂ := by
+  have h1 : Finsupp.equivMapDomain (slotEquiv s) u₁ =
+      Finsupp.equivMapDomain (slotEquiv s) u₂ := by
+    refine Finsupp.ext fun x => ?_
+    rcases x with i | m
+    · have := congrArg (fun v => v i) hl
+      simpa [slotInl, Finsupp.comapDomain_apply] using this
+    · have := congrArg (fun v => v m) hr
+      simpa [slotInr, Finsupp.comapDomain_apply] using this
+  have h2 := congrArg (Finsupp.equivMapDomain (slotEquiv s).symm) h1
+  rwa [← Finsupp.equivMapDomain_trans, ← Finsupp.equivMapDomain_trans,
+    Equiv.self_trans_symm, Finsupp.equivMapDomain_refl,
+    Finsupp.equivMapDomain_refl] at h2
+
 variable {K w} in
 /-- The flatten hom lands in the shifted-weight support: coefficients vanish off
 `WPMem (shiftWeight w s)` (the support condition of the nested `𝒜`-coefficient,
