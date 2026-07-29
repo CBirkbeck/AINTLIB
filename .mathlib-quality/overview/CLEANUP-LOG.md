@@ -212,3 +212,47 @@ the statement of `groebner_reduce` must NOT be split — it is a shared-witness 
 
 ### Remaining over-50 bodies (measured)
 ArCompletion 6, Euclidean 14, CurveAdicPresentation 2 — plus the rest of the 107.
+
+## 4-7. ArCompletion + Euclidean batch
+
+| Proof | Before | After |
+|---|---|---|
+| `exists_finite_teichmuller_sum_close` | 124 | under 50 |
+| `valued_PhiHatK` | 104 | under 50 |
+| `exists_windowNbhd_spec` | 55 | under 50 |
+| `gaussTerm_sub_convF_divStep_le` | 137 | ~32 |
+
+### The `--` comment seams are the author's own decomposition
+Euclidean's giants carry seams (`-- the exact cancellation`, `-- bound the erased sum
+termwise`, `-- multiply out the leading denominator`, `-- the two cases`).  Each marks
+exactly one extractable lemma.  On these files the boundaries do not need to be *found*,
+only *named*.  ArCompletion by contrast has almost no seams and needed segment-cutting.
+
+### Recurring shape: "bound a sum by its sup, pick the maximiser"
+Extracted three times now under different guises —
+`valued_sum_antidiagonal_lt` (strict, antidiagonal), the `hdrop`/`hrest` pair, and now
+`gaussTerm_sum_le` (non-strict, arbitrary index set).  **`gaussTerm_sum_le` is the general
+shape**; a later pass should express the others through it.
+
+### Duplication found only by decomposing
+Neither of these is visible to a name-based scan, because both copies are inline:
+* `v(pᴺ) = ρᴺ` — proved from scratch THREE times in ArCompletion (10 lines each).
+  Now `valued_toHatK_p_pow`.
+* `bddAbove_range_of_tendsto_zero` — declared in Euclidean, re-proved inline in
+  ArCompletion (which Euclidean imports, so which comes first).  Third instance of the
+  "lemma in the wrong file" pattern; moved to ArCompletion.
+
+### Errors made and corrected (all caught by the per-module build)
+* Sliced a helper body starting MID-STATEMENT, pulling signature lines into the proof.
+* Passed `le_trans hmN hn : m ≤ n` where the argument wanted `hn : N ≤ n`.
+* Inserted a helper anchored on a declaration LATER in the file → landed after its use.
+* `include hp in` where `hp` is the lemma's own parameter (`include` is section-vars only).
+* Ran two `lake build`s concurrently; the second deleted an `.olean` the first needed, and
+  the spurious failure masked a real compile error for one round.
+
+Always `lake build <module>` before the full gate — every one of the above surfaced there
+in ~1 minute instead of ~40.
+
+### Status
+7 of the original 107 over-50 proof bodies are under the bar.  Euclidean holds 13 of the
+remainder, including `valued_mul_sub_PhiHatK_convF_le` (135) and `descent_step` (133).

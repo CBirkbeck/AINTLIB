@@ -1573,6 +1573,115 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     rw [Valuation.map_sub_swap]
     exact hN₀
 
+/-- **The divided convolution reproduces `aₙ` exactly at `k = n − m`.** The `k = n − m`
+term is `a n / b m · b m = a n`, so subtracting it from `a n` leaves only the erased sum,
+negated — the exact cancellation that makes the division step work. -/
+private theorem sub_convF_divStep_eq (a b : ℕ → F) (m n : ℕ) (hmn : m ≤ n) (hbm : b m ≠ 0) :
+    a n - convF F (fun k => a (k + m) / b m) b n
+      = -(∑ k ∈ (Finset.range (n + 1)).erase (n - m),
+          (a (k + m) / b m) * b (n - k)) := by
+  rw [convF, ← Finset.add_sum_erase _ _
+      (Finset.mem_range.mpr (by omega : n - m < n + 1)),
+    show n - m + m = n from by omega, show n - (n - m) = m from by omega,
+    div_mul_cancel₀ _ hbm]
+  ring
+
+/-- **Multiplying out the leading denominator.** The scaled value of one
+divided-convolution term, times `‖x‖`, factors as the product of the two scaled coordinate
+values: the `xₘ` in the denominator cancels the `xₘ` inside `‖x‖ = ρᵐ·|xₘ|`. -/
+private theorem gaussTerm_divStep_mul_valued_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} {m n k₀ : ℕ} (hk₀n : k₀ ≤ n)
+    (hxattain : Valued.v x
+      = ρ ^ m * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))
+    (hxm0 : perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m) ≠ 0) :
+    ρ ^ n * perfectoidValuation p F
+        ((teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)
+          / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+        * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)) * Valued.v x
+      = (ρ ^ (k₀ + m) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+        * (ρ ^ (n - k₀) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀))) := by
+  rw [Valuation.map_mul, map_div₀, hxattain]
+  rw [show ρ ^ (k₀ + m) = ρ ^ k₀ * ρ ^ m from by rw [pow_add]]
+  rw [show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+    rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
+  rw [div_eq_mul_inv]
+  have hcancel2 : perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+      * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹ = 1 :=
+    mul_inv_cancel₀ hxm0
+  calc ρ ^ k₀ * ρ ^ (n - k₀) * (perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m))
+        * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹
+        * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+      * (ρ ^ m * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))
+      = (ρ ^ k₀ * ρ ^ m * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+        * (ρ ^ (n - k₀) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+        * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹) := by
+        ring
+    _ = (ρ ^ k₀ * ρ ^ m * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+        * (ρ ^ (n - k₀) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀))) := by
+        rw [hcancel2, mul_one]
+
+/-- **The two off-diagonal cases.** For `k₀ ≠ n − m`, either `k₀ < n − m`, so the
+`x`-coordinate sits past `deg x` and is `ε`-damped; or `k₀ > n − m`, so the `y`-coordinate
+sits past `N` and is `c`-damped.  Either way the product is at most `c·‖x‖`. -/
+private theorem gaussTerm_pair_le_of_ne {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) {ε c : NNReal} {m n k₀ N : ℕ}
+    (hεx : ∀ j, m < j → ρ ^ j * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 x j) ≤ ε * Valued.v x)
+    (hw1 : ε * Valued.v y ≤ c)
+    (hw2 : ∀ i, N < i → ρ ^ i * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 y i) ≤ c)
+    (hk₀ne : k₀ ≠ n - m) (hk₀n : k₀ ≤ n) (hmn : m ≤ n) (hnN : N ≤ n) :
+    (ρ ^ (k₀ + m) * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+      * (ρ ^ (n - k₀) * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+      ≤ c * Valued.v x := by
+  rcases lt_or_gt_of_ne hk₀ne with hcase | hcase
+  · -- k₀ < n - m, so n - k₀ > m: the x-term is ε-damped
+    have hj : m < n - k₀ := by omega
+    have h1 : (ρ ^ (k₀ + m) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+        * (ρ ^ (n - k₀) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+        ≤ Valued.v y * (ε * Valued.v x) :=
+      mul_le_mul (gaussTerm_teichCoeffAr_le p F ϖ hy (k₀ + m))
+        (hεx (n - k₀) hj) zero_le zero_le
+    have h2 : Valued.v y * (ε * Valued.v x)
+        = (ε * Valued.v y) * Valued.v x := by
+      ring
+    rw [h2] at h1
+    exact le_trans h1 (mul_le_mul_of_nonneg_right hw1 zero_le)
+  · -- k₀ > n - m, so k₀ + m > n ≥ N: the y-term is c-damped
+    have hk : N < k₀ + m := by omega
+    exact mul_le_mul (hw2 (k₀ + m) hk)
+      (gaussTerm_teichCoeffAr_le p F ϖ hx (n - k₀)) zero_le zero_le
+
+/-- **A scaled sum is bounded by its largest scaled term.** The valuation of a finite sum
+is at most the sup of the terms' valuations, so if every term of `∑_{k ∈ S} g k` scales
+below `c` at rate `ρⁿ`, so does the sum.  The empty sum is `0 ≤ c`. -/
+private theorem gaussTerm_sum_le {ρ c : NNReal} (n : ℕ) (S : Finset ℕ) (g : ℕ → F)
+    (h : ∀ k ∈ S, ρ ^ n * perfectoidValuation p F (g k) ≤ c) :
+    ρ ^ n * perfectoidValuation p F (∑ k ∈ S, g k) ≤ c := by
+  rcases Finset.eq_empty_or_nonempty S with hemp | hne
+  · rw [hemp, Finset.sum_empty, Valuation.map_zero, mul_zero]
+    exact zero_le
+  · refine le_trans (mul_le_mul_of_nonneg_left
+      (Valuation.map_sum_le _ fun k hk => Finset.le_sup
+        (f := fun k => perfectoidValuation p F (g k)) hk) zero_le) ?_
+    obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
+      (fun k => perfectoidValuation p F (g k))
+    rw [hk₀]
+    exact h k₀ hk₀mem
+
 /-- **The (2.8.2) coefficient analysis**: past the working index `N`, the pointwise
 difference between the coordinates of `y` and the quotient convolution is
 `c`-small — the exact cancellation at `j = m` removes `yₙ`, the `j > m` terms are
@@ -1605,130 +1714,26 @@ theorem gaussTerm_sub_convF_divStep_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ 
     exact hvx0 (hxattain.trans (by rw [h0, mul_zero]))
   have hmn : m ≤ n := le_trans hmN hn
   -- the exact cancellation: the k = n - m term of the convolution is yₙ
-  have hsplit : convF F (fun k => teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-      / teichCoeffAr p F ϖ hρ0 hρ1 x m) (teichCoeffAr p F ϖ hρ0 hρ1 x) n
-      = teichCoeffAr p F ϖ hρ0 hρ1 y n
-        + ∑ k ∈ (Finset.range (n + 1)).erase (n - m),
-          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k) := by
-    have hmem : n - m ∈ Finset.range (n + 1) :=
-      Finset.mem_range.mpr (by omega)
-    rw [convF, ← Finset.add_sum_erase _ _ hmem]
-    congr 1
-    have hidx1 : n - m + m = n := by omega
-    have hidx2 : n - (n - m) = m := by omega
-    rw [hidx1, hidx2, div_mul_cancel₀ _ (fun h0 => hxm0 (by rw [h0, map_zero]))]
-  rw [hsplit]
-  have hcancel : teichCoeffAr p F ϖ hρ0 hρ1 y n
-      - (teichCoeffAr p F ϖ hρ0 hρ1 y n
-        + ∑ k ∈ (Finset.range (n + 1)).erase (n - m),
-          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))
-      = -(∑ k ∈ (Finset.range (n + 1)).erase (n - m),
-          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k)) := by
-    ring
-  rw [hcancel, Valuation.map_neg]
+  rw [sub_convF_divStep_eq F _ _ m n hmn (fun h0 => hxm0 (by rw [h0, map_zero])),
+    Valuation.map_neg]
   -- bound the erased sum termwise
-  rcases Finset.eq_empty_or_nonempty ((Finset.range (n + 1)).erase (n - m))
-    with hemp | hne
-  · rw [hemp, Finset.sum_empty, Valuation.map_zero, mul_zero]
-    exact zero_le
-  · have h1 : perfectoidValuation p F
-        (∑ k ∈ (Finset.range (n + 1)).erase (n - m),
-          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))
-        ≤ ((Finset.range (n + 1)).erase (n - m)).sup
-          (fun k => perfectoidValuation p F
-            ((teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-              / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-            * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))) :=
-      Valuation.map_sum_le _ fun k hk => Finset.le_sup
-        (f := fun k => perfectoidValuation p F
-          ((teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))) hk
-    refine le_trans (mul_le_mul_of_nonneg_left h1 zero_le) ?_
-    obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
-      (fun k => perfectoidValuation p F
-        ((teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
-          / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-        * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k)))
-    rw [hk₀]
-    have hk₀ne : k₀ ≠ n - m := Finset.ne_of_mem_erase hk₀mem
-    have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp
-      (Finset.mem_range.mp (Finset.mem_of_mem_erase hk₀mem))
-    -- multiply out the leading denominator: the two-sided bound at scale v(x)
-    have hstep : ρ ^ n * perfectoidValuation p F
-        ((teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)
-          / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-        * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)) * Valued.v x
-        = (ρ ^ (k₀ + m) * perfectoidValuation p F
-            (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
-          * (ρ ^ (n - k₀) * perfectoidValuation p F
-            (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀))) := by
-      rw [Valuation.map_mul, map_div₀, hxattain]
-      rw [show ρ ^ (k₀ + m) = ρ ^ k₀ * ρ ^ m from by rw [pow_add]]
-      rw [show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
-        rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
-      rw [div_eq_mul_inv]
-      have hcancel2 : perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
-          * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹ = 1 :=
-        mul_inv_cancel₀ hxm0
-      calc ρ ^ k₀ * ρ ^ (n - k₀) * (perfectoidValuation p F
-            (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m))
-            * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹
-            * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
-          * (ρ ^ m * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))
-          = (ρ ^ k₀ * ρ ^ m * perfectoidValuation p F
-              (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
-            * (ρ ^ (n - k₀) * perfectoidValuation p F
-              (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
-            * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
-              * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹) := by
-            ring
-        _ = (ρ ^ k₀ * ρ ^ m * perfectoidValuation p F
-              (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
-            * (ρ ^ (n - k₀) * perfectoidValuation p F
-              (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀))) := by
-            rw [hcancel2, mul_one]
-    -- the two cases, both at scale c·v(x)
-    have hbound : (ρ ^ (k₀ + m) * perfectoidValuation p F
-          (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
-        * (ρ ^ (n - k₀) * perfectoidValuation p F
-          (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
-        ≤ c * Valued.v x := by
-      rcases lt_or_gt_of_ne hk₀ne with hcase | hcase
-      · -- k₀ < n - m, so n - k₀ > m: the x-term is ε-damped
-        have hj : m < n - k₀ := by omega
-        have h1 : (ρ ^ (k₀ + m) * perfectoidValuation p F
-              (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
-            * (ρ ^ (n - k₀) * perfectoidValuation p F
-              (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
-            ≤ Valued.v y * (ε * Valued.v x) :=
-          mul_le_mul (gaussTerm_teichCoeffAr_le p F ϖ hy (k₀ + m))
-            (hεx (n - k₀) hj) zero_le zero_le
-        have h2 : Valued.v y * (ε * Valued.v x)
-            = (ε * Valued.v y) * Valued.v x := by
-          ring
-        rw [h2] at h1
-        exact le_trans h1 (mul_le_mul_of_nonneg_right hw1 zero_le)
-      · -- k₀ > n - m, so k₀ + m > n ≥ N: the y-term is c-damped
-        have hk : N < k₀ + m := by omega
-        exact mul_le_mul (hw2 (k₀ + m) hk)
-          (gaussTerm_teichCoeffAr_le p F ϖ hx (n - k₀)) zero_le zero_le
-    have hfinal : ρ ^ n * perfectoidValuation p F
-        ((teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)
-          / teichCoeffAr p F ϖ hρ0 hρ1 x m)
-        * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)) * Valued.v x
-        ≤ c * Valued.v x := by
-      rw [hstep]
-      exact hbound
-    exact le_of_mul_le_mul_right hfinal hvxpos
+  refine gaussTerm_sum_le p F n _ _ fun k₀ hk₀mem => ?_
+  have hk₀ne : k₀ ≠ n - m := Finset.ne_of_mem_erase hk₀mem
+  have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp
+    (Finset.mem_range.mp (Finset.mem_of_mem_erase hk₀mem))
+  have hk₀ne : k₀ ≠ n - m := Finset.ne_of_mem_erase hk₀mem
+  have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp
+    (Finset.mem_range.mp (Finset.mem_of_mem_erase hk₀mem))
+  have hstep := gaussTerm_divStep_mul_valued_eq p F ϖ (y := y) hk₀n hxattain hxm0
+  have hbound := gaussTerm_pair_le_of_ne p F ϖ hx hy hεx hw1 hw2 hk₀ne hk₀n hmn hn
+  have hfinal : ρ ^ n * perfectoidValuation p F
+      ((teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)
+        / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+      * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)) * Valued.v x
+      ≤ c * Valued.v x := by
+    rw [hstep]
+    exact hbound
+  exact le_of_mul_le_mul_right hfinal hvxpos
 
 /-- **The descent step of Kedlaya Lemma 2.8**: one division step pushes every
 coordinate term from index `N` on below the threshold `c` — including index `N`
