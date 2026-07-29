@@ -119,6 +119,67 @@ theorem isPowerBounded_rhoHead {a : WPA K w} (M : ℕ)
   exact le_trans (norm_rhoHead_le (K := K) (w := w) (N := M) _) (hC n)
 
 variable {K w} in
+theorem plus_le_comap_rhoHead (M : ℕ) :
+    ((WPA K w)⁺ : Subring (WPA K w)) ≤
+      ((WPHead K w M)⁺ : Subring (WPHead K w M)).comap (rhoHead K w M) :=
+  fun _ ha => isPowerBounded_rhoHead M ha
+
+variable {K w} in
+theorem comap_rhoHead_mem_spa (M : ℕ) {v : Spv (WPHead K w M)}
+    (hv : v ∈ Spa (WPHead K w M) ((WPHead K w M)⁺)) :
+    ValuationSpectrum.comap (rhoHead K w M) v ∈ Spa (WPA K w) ((WPA K w)⁺) :=
+  comap_mem_spa (rhoHead_continuous M) (plus_le_comap_rhoHead M) hv
+
+variable {K w} in
+open scoped Classical in
+/-- Membership transfer along the `rhoHead` pullback: a head point lies in a head
+datum's rational subset iff its pullback lies in the lifted datum's ([WP]
+1156–1218, realized by the retraction instead of the split surjection — the
+project's models are `𝒜`-global). -/
+theorem comap_rhoHead_mem_iff (M : ℕ) (DH : RationalLocData (WPHead K w M))
+    (hDH : DH.IsRational) (v : Spv (WPHead K w M))
+    (hv : v ∈ Spa (WPHead K w M) ((WPHead K w M)⁺)) :
+    ValuationSpectrum.comap (rhoHead K w M) v ∈
+      rationalOpen (liftDatum DH hDH).T (liftDatum DH hDH).s ↔
+      v ∈ rationalOpen DH.T DH.s := by
+  constructor
+  · rintro ⟨-, hT, hs0⟩
+    refine ⟨hv, fun t ht => ?_, fun hc => ?_⟩
+    · have h1 := hT (headIncl K w M t) (by
+        rw [show (liftDatum DH hDH).T = DH.T.image (headIncl K w M) from rfl]
+        exact Finset.mem_image_of_mem _ ht)
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl] at h1
+      rw [comap_vle,
+        show rhoHead K w M (headIncl K w M t) = t from
+          rhoHead_headIncl (K := K) (w := w) (N := M) t,
+        show rhoHead K w M (headIncl K w M DH.s) = DH.s from
+          rhoHead_headIncl (K := K) (w := w) (N := M) DH.s] at h1
+      exact h1
+    · refine hs0 ?_
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl, comap_vle,
+        map_zero,
+        show rhoHead K w M (headIncl K w M DH.s) = DH.s from
+          rhoHead_headIncl (K := K) (w := w) (N := M) DH.s]
+      exact hc
+  · rintro ⟨-, hT, hs0⟩
+    refine ⟨comap_rhoHead_mem_spa M hv, fun t' ht' => ?_, fun hc => ?_⟩
+    · rw [show (liftDatum DH hDH).T = DH.T.image (headIncl K w M) from rfl]
+        at ht'
+      obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl, comap_vle,
+        show rhoHead K w M (headIncl K w M t) = t from
+          rhoHead_headIncl (K := K) (w := w) (N := M) t,
+        show rhoHead K w M (headIncl K w M DH.s) = DH.s from
+          rhoHead_headIncl (K := K) (w := w) (N := M) DH.s]
+      exact hT t ht
+    · refine hs0 ?_
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl, comap_vle,
+        map_zero,
+        show rhoHead K w M (headIncl K w M DH.s) = DH.s from
+          rhoHead_headIncl (K := K) (w := w) (N := M) DH.s] at hc
+      exact hc
+
+variable {K w} in
 /-- The embedding half of the sheaf condition for `𝒜` (the
 `productRestrictionSub_isEmbedding_JetA` shape, `FJP/Over/SheafTransfer.lean:667`). -/
 theorem productRestrictionSub_isEmbedding_WPA (ϖ : Uniformizer K)
