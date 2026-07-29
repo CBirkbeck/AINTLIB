@@ -341,6 +341,108 @@ theorem norm_qscale {M : ℕ} (DH : RationalLocData (WPHead K w M)) {c : K}
 
 variable {K w} in
 open scoped Classical in
+theorem qRestrict_continuous {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C) (D : ↥C.covers) :
+    Continuous (qRestrict ϖ hK₀ P D) := by
+  rw [qRestrict, RingHom.coe_comp, RingHom.coe_comp]
+  refine Continuous.comp (Continuous.comp ?_ ?_) ?_
+  · exact headLocEquiv_continuous ϖ hK₀ (P.DHp D) (P.hDHp D)
+  · letI : UniformSpace (Localization.Away P.DHb.s) := P.DHb.uniformSpace
+    letI : IsTopologicalRing (Localization.Away P.DHb.s) :=
+      P.DHb.isTopologicalRing
+    letI : IsUniformAddGroup (Localization.Away P.DHb.s) :=
+      P.DHb.isUniformAddGroup
+    exact UniformSpace.Completion.continuous_extension
+  · exact headLocEquiv_symm_continuous ϖ hK₀ P.DHb P.hDHb
+
+variable {K w} in
+open scoped Classical in
+/-- The head restriction is bounded (continuity at `0` + the exact
+nonarchimedean window scaling with `ℤ`-powers of the window constant). -/
+theorem qRestrict_bound {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C) (D : ↥C.covers) :
+    ∃ Cb : ℝ, 0 < Cb ∧ ∀ q : QHead P.DHb,
+      ‖qRestrict ϖ hK₀ P D q‖ ≤ Cb * ‖q‖ := by
+  classical
+  obtain ⟨c, hcu, hc1, hc0⟩ := exists_norm_window' K
+  have hcne : c ≠ 0 := fun h => by
+    rw [h, norm_zero] at hc0
+    exact lt_irrefl 0 hc0
+  have hcRne : ‖c‖ ≠ 0 := ne_of_gt hc0
+  have hcont := (qRestrict_continuous ϖ hK₀ P D).tendsto 0
+  rw [map_zero] at hcont
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp
+    (hcont (Metric.ball_mem_nhds 0 one_pos))
+  refine ⟨1 / (‖c‖ * δ), by positivity, fun q => ?_⟩
+  rcases eq_or_lt_of_le (norm_nonneg q) with hq0 | hq0
+  · rw [show q = 0 from by rw [← norm_eq_zero]; exact hq0.symm, map_zero,
+      norm_zero, norm_zero, mul_zero]
+  have hinv1 : (1 : ℝ) < ‖c‖⁻¹ := (one_lt_inv₀ hc0).mpr hc1
+  obtain ⟨n, hn⟩ := exists_mem_Ico_zpow
+    (x := ‖q‖ / δ) (by positivity) hinv1
+  rw [Set.mem_Ico] at hn
+  -- upper: ‖c‖^(n+1)·‖q‖ < δ
+  have hupper : ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ < δ := by
+    have h2 := hn.2
+    rw [div_lt_iff₀ hδ0] at h2
+    have h3 := mul_lt_mul_of_pos_left h2 (zpow_pos hc0 (n + 1))
+    rw [show ‖c‖ ^ (n + 1 : ℤ) * ((‖c‖⁻¹ : ℝ) ^ (n + 1 : ℤ) * δ) =
+      (‖c‖ * ‖c‖⁻¹) ^ (n + 1 : ℤ) * δ from by
+        rw [mul_zpow, mul_assoc],
+      mul_inv_cancel₀ hcRne, one_zpow, one_mul] at h3
+    exact h3
+  -- lower: δ·‖c‖ ≤ ‖c‖^(n+1)·‖q‖
+  have hlower : δ * ‖c‖ ≤ ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ := by
+    have h2 := hn.1
+    rw [le_div_iff₀ hδ0] at h2
+    have h3 := mul_le_mul_of_nonneg_left h2 (le_of_lt (zpow_pos hc0 (n + 1)))
+    rw [show ‖c‖ ^ (n + 1 : ℤ) * ((‖c‖⁻¹ : ℝ) ^ (n : ℤ) * δ) =
+      ‖c‖ ^ (n + 1 : ℤ) * (‖c‖ ^ (n : ℤ))⁻¹ * δ from by
+        rw [inv_zpow, mul_assoc],
+      show ‖c‖ ^ (n + 1 : ℤ) * (‖c‖ ^ (n : ℤ))⁻¹ =
+        ‖c‖ ^ (n + 1 - n : ℤ) from by
+        rw [zpow_sub₀ hcRne, div_eq_mul_inv],
+      show (n + 1 - n : ℤ) = 1 from by ring,
+      zpow_one] at h3
+    calc δ * ‖c‖ = ‖c‖ * δ := by ring
+      _ ≤ ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ := h3
+  -- the scaled element
+  set a : K := c ^ (n + 1 : ℤ) with ha_def
+  have hna : ‖a‖ = ‖c‖ ^ (n + 1 : ℤ) := by rw [ha_def, norm_zpow]
+  have hna0 : 0 < ‖a‖ := by rw [hna]; exact zpow_pos hc0 _
+  have hmem : ‖qRestrict ϖ hK₀ P D
+      (headConst P.DHb (constHead K w P.M a) * q)‖ < 1 := by
+    have h4 : headConst P.DHb (constHead K w P.M a) * q ∈
+        Metric.ball (0 : QHead P.DHb) δ := by
+      rw [Metric.mem_ball, dist_zero_right, norm_qscale P.DHb hna0 q, hna]
+      exact hupper
+    have h5 := hball h4
+    rw [Set.mem_preimage, Metric.mem_ball, dist_zero_right] at h5
+    exact h5
+  rw [map_mul, qRestrict_headConst,
+    norm_qscale (P.DHp D) hna0 _, hna] at hmem
+  -- extract the bound
+  have hpow : (0 : ℝ) < ‖c‖ ^ (n + 1 : ℤ) := zpow_pos hc0 _
+  have h6 : ‖qRestrict ϖ hK₀ P D q‖ < (‖c‖ ^ (n + 1 : ℤ))⁻¹ :=
+    calc ‖qRestrict ϖ hK₀ P D q‖ = (‖c‖ ^ (n + 1 : ℤ))⁻¹ *
+          (‖c‖ ^ (n + 1 : ℤ) * ‖qRestrict ϖ hK₀ P D q‖) := by
+          rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
+      _ < (‖c‖ ^ (n + 1 : ℤ))⁻¹ * 1 :=
+          mul_lt_mul_of_pos_left hmem (by positivity)
+      _ = (‖c‖ ^ (n + 1 : ℤ))⁻¹ := mul_one _
+  refine le_trans h6.le ?_
+  rw [one_div, inv_mul_eq_div, le_div_iff₀ (by positivity : (0:ℝ) < ‖c‖ * δ)]
+  calc (‖c‖ ^ (n + 1 : ℤ))⁻¹ * (‖c‖ * δ)
+      ≤ (‖c‖ ^ (n + 1 : ℤ))⁻¹ * (‖c‖ ^ (n + 1 : ℤ) * ‖q‖) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        calc ‖c‖ * δ = δ * ‖c‖ := by ring
+          _ ≤ ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ := hlower
+    _ = ‖q‖ := by rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
+
+variable {K w} in
+open scoped Classical in
 /-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
 with common-stage head data transfers to a rational covering on the head, with
 subset and covering properties by the `rhoHead` pullback. -/
