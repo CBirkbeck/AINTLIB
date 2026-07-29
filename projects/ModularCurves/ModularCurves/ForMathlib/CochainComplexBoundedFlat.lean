@@ -22,6 +22,50 @@ namespace ModularCurves
 
 variable {R : Type u} [CommRing R]
 
+/-- Flat scalar extension carries an explicit kernel/range homology quotient to the
+categorical homology of the base-changed short complex. -/
+noncomputable def LinearMap.baseChangeHomologyEquiv_of_flat
+    {P Q T : Type v}
+    [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
+    [Module R P] [Module R Q] [Module R T]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    (A : Type w) [CommRing A] [Algebra R A] [Module.Flat R A] :
+    (A ⊗[R]
+      (LinearMap.ker g ⧸
+        LinearMap.range (LinearMap.codRestrictToKer f g h))) ≃ₗ[A]
+      (ShortComplex.moduleCatMk
+        (f.baseChange A) (g.baseChange A)
+        (LinearMap.baseChange_comp_eq_zero f g h A)).homology := by
+  let p := LinearMap.range (LinearMap.codRestrictToKer f g h)
+  let eTensor :=
+    TensorProduct.AlgebraTensorModule.tensorQuotientEquiv
+      (R := R) A R A p
+  have hrange :
+      LinearMap.range
+          ((LinearMap.codRestrictToKer f g h).baseChange A) =
+        LinearMap.range
+          (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype) := by
+    change LinearMap.range
+        (TensorProduct.AlgebraTensorModule.lTensor A A
+          (LinearMap.codRestrictToKer f g h)) =
+      LinearMap.range
+        (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype)
+    apply SetLike.ext
+    intro x
+    change x ∈ LinearMap.range
+        (LinearMap.lTensor A (LinearMap.codRestrictToKer f g h)) ↔
+      x ∈ LinearMap.range (LinearMap.lTensor A p.subtype)
+    rw [LinearMap.lTensor_range A]
+  let eRange := Submodule.quotEquivOfEq
+    (LinearMap.range
+      (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype))
+    (LinearMap.range
+      ((LinearMap.codRestrictToKer f g h).baseChange A))
+    hrange.symm
+  let eHomology := LinearMap.baseChangeHomologyOneEquiv
+    f g h A (kerBaseChangeComparison_bijective_of_flat A g)
+  exact eTensor.trans eRange |>.trans eHomology
+
 /-- Flat scalar extension preserves finite generation of the homology of a short complex of
 modules. -/
 theorem ShortComplex.moduleFinite_baseChangeHomology_of_flat
@@ -33,40 +77,24 @@ theorem ShortComplex.moduleFinite_baseChangeHomology_of_flat
         (S.f.hom.baseChange A) (S.g.hom.baseChange A)
         (LinearMap.baseChange_comp_eq_zero S.f.hom S.g.hom
           (shortComplexModuleCatCompEqZero S) A)).homology := by
-  let p := LinearMap.range S.moduleCatToCycles
+  let h := shortComplexModuleCatCompEqZero S
   letI : Module.Finite R
-      (LinearMap.ker S.g.hom ⧸ p) :=
-    Module.Finite.quotient_range_moduleCatToCycles S
-  letI : Module.Finite A
-      (A ⊗[R] (LinearMap.ker S.g.hom ⧸ p)) :=
-    Module.Finite.base_change R A _
-  let eTensor :=
-    TensorProduct.AlgebraTensorModule.tensorQuotientEquiv
-      (R := R) A R A p
-  have hrange :
-      LinearMap.range (S.moduleCatToCycles.baseChange A) =
+      (LinearMap.ker S.g.hom ⧸
         LinearMap.range
-          (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype) := by
-    change LinearMap.range
-        (TensorProduct.AlgebraTensorModule.lTensor A A
-          S.moduleCatToCycles) =
-      LinearMap.range
-        (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype)
-    apply SetLike.ext
-    intro x
-    change x ∈ LinearMap.range
-        (LinearMap.lTensor A S.moduleCatToCycles) ↔
-      x ∈ LinearMap.range (LinearMap.lTensor A p.subtype)
-    rw [LinearMap.lTensor_range A]
-  let eRange := Submodule.quotEquivOfEq
-    (LinearMap.range
-      (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype))
-    (LinearMap.range (S.moduleCatToCycles.baseChange A))
-    hrange.symm
-  let eHomology := LinearMap.baseChangeHomologyOneEquiv
-    S.f.hom S.g.hom (shortComplexModuleCatCompEqZero S) A
-    (kerBaseChangeComparison_bijective_of_flat A S.g.hom)
-  exact Module.Finite.equiv (eTensor.trans eRange |>.trans eHomology)
+          (LinearMap.codRestrictToKer S.f.hom S.g.hom h)) := by
+    change Module.Finite R
+      (LinearMap.ker S.g.hom ⧸
+        LinearMap.range S.moduleCatToCycles)
+    exact Module.Finite.quotient_range_moduleCatToCycles S
+  letI : Module.Finite A
+      (A ⊗[R]
+        (LinearMap.ker S.g.hom ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer S.f.hom S.g.hom h))) :=
+    Module.Finite.base_change R A _
+  exact Module.Finite.equiv
+    (LinearMap.baseChangeHomologyEquiv_of_flat
+      S.f.hom S.g.hom h A)
 
 /-- Flat categorical extension of scalars preserves finite generation of short-complex
 homology. -/
