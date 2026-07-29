@@ -1136,8 +1136,13 @@ propext/Classical.choice/Quot.sound) before marking done.
   ofTensorProductEquivOfFiniteNoetherian + CRT-for-powers + Jacobson-radical
   nilpotence — ~500-1000 LOC), then head_completedLocal_reduced := transport.
   NO chart split, char-free. Lean-work can start BEFORE HRW-4 (all but the
-  final glue). First recon: is Q expressible as WPHead K 0 N-style (trivial
-  parity) and does a weight-rescale hom exist in the tateExt machinery?
+  final glue). RECON RESOLVED (hrw-decomposition "subring-coding
+  simplification"): Q = WPHead K (fun _ => 0) N exactly; the embedding IS
+  Subring.inclusion. (i) DONE: `wpHeadSupport_le_zero_weight`
+  (HeadReduced.lean). NEXT: (ii) the parity module decomposition
+  Q = Σ_ε P·U^ε (reuse the FormalReduced/Tail parity-splitting machinery),
+  then (iii) the semilocal completed decomposition per the L1-adjudication's
+  AdicCompletion.evalₐ toolkit.
 - Decls: `head_completedLocal_reduced_of_wa_mem`.  Requires its own decomposition
   round when opened (planned route: explicit completed support model + Φ-style
   formal-domain embedding; char-free).
