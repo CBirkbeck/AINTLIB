@@ -168,6 +168,81 @@ theorem moduleCechTermNativeProjectionLinearEquiv_apply
       moduleCechTermNativeProjectionLinearMap F U V q p x :=
   rfl
 
+/-- Positive-degree exactness for the native Cech complex of every
+restriction-pushforward factor implies exactness in the same degree for their
+sheaf product. -/
+theorem moduleCechTerm_cech_exactAt_succ_of_factors
+    (q n : ℕ)
+    (h : ∀ i : Fin (q + 1) → ι,
+      ((cechComplexFunctor V).obj
+        (moduleCechTermFactor F U q i).obj).ExactAt (n + 1)) :
+    ((cechComplexFunctor V).obj
+      (moduleCechTerm F U q).obj).ExactAt (n + 1) := by
+  rw [HomologicalComplex.exactAt_iff'
+      _ n (n + 1) (n + 2) (by simp) (by simp),
+    ShortComplex.moduleCat_exact_iff]
+  intro y hy
+  change
+    (((cechComplexFunctor V).obj
+      (moduleCechTerm F U q).obj).d (n + 1) (n + 2)).hom y = 0 at hy
+  have hpreimage : ∀ i : Fin (q + 1) → ι,
+      ∃ x : ((cechComplexFunctor V).obj
+          (moduleCechTermFactor F U q i).obj).X n,
+        (((cechComplexFunctor V).obj
+          (moduleCechTermFactor F U q i).obj).d n (n + 1)).hom x =
+          moduleCechTermNativeProjectionLinearMap
+            F U V q (n + 1) y i := by
+    intro i
+    have hi := h i
+    rw [HomologicalComplex.exactAt_iff'
+        _ n (n + 1) (n + 2) (by simp) (by simp),
+      ShortComplex.moduleCat_exact_iff] at hi
+    apply hi
+    calc
+      _ = (((cechComplexFunctor V).map
+            (Pi.π (moduleCechTermFactor F U q) i).hom).f
+              (n + 2)).hom
+          ((((cechComplexFunctor V).obj
+            (moduleCechTerm F U q).obj).d
+              (n + 1) (n + 2)).hom y) := by
+        exact ConcreteCategory.congr_hom
+          (((cechComplexFunctor V).map
+            (Pi.π (moduleCechTermFactor F U q) i).hom).comm
+              (n + 1) (n + 2)) y
+      _ = (((cechComplexFunctor V).map
+            (Pi.π (moduleCechTermFactor F U q) i).hom).f
+              (n + 2)).hom 0 :=
+        congrArg _ hy
+      _ = 0 := map_zero _
+  choose x hx using hpreimage
+  let x' := (moduleCechTermNativeProjectionLinearEquiv
+    F U V q n).symm x
+  refine ⟨x', ?_⟩
+  apply (moduleCechTermNativeProjectionLinearEquiv
+    F U V q (n + 1)).injective
+  funext i
+  change
+    moduleCechTermNativeProjectionLinearMap F U V q (n + 1)
+        ((((cechComplexFunctor V).obj
+          (moduleCechTerm F U q).obj).d n (n + 1)).hom x') i =
+      moduleCechTermNativeProjectionLinearMap F U V q (n + 1) y i
+  have hcoord := congrFun
+    ((moduleCechTermNativeProjectionLinearEquiv
+      F U V q n).apply_symm_apply x) i
+  rw [moduleCechTermNativeProjectionLinearEquiv_apply] at hcoord
+  calc
+    _ = (((cechComplexFunctor V).obj
+          (moduleCechTermFactor F U q i).obj).d n (n + 1)).hom
+        (moduleCechTermNativeProjectionLinearMap F U V q n x' i) := by
+      exact ConcreteCategory.congr_hom
+        (((cechComplexFunctor V).map
+          (Pi.π (moduleCechTermFactor F U q) i).hom).comm
+            n (n + 1)).symm x'
+    _ = (((cechComplexFunctor V).obj
+          (moduleCechTermFactor F U q i).obj).d n (n + 1)).hom (x i) :=
+      congrArg _ hcoord
+    _ = _ := hx i
+
 /-- Degree-one exactness for the native Cech complex of every
 restriction-pushforward factor implies degree-one exactness for their sheaf
 product. -/
@@ -178,61 +253,7 @@ theorem moduleCechTerm_cech_exactAt_one_of_factors
         (moduleCechTermFactor F U q i).obj).ExactAt 1) :
     ((cechComplexFunctor V).obj
       (moduleCechTerm F U q).obj).ExactAt 1 := by
-  rw [HomologicalComplex.exactAt_iff' _ 0 1 2 (by simp) (by simp),
-    ShortComplex.moduleCat_exact_iff]
-  intro y hy
-  change
-    (((cechComplexFunctor V).obj
-      (moduleCechTerm F U q).obj).d 1 2).hom y = 0 at hy
-  have hpreimage : ∀ i : Fin (q + 1) → ι,
-      ∃ x : ((cechComplexFunctor V).obj
-          (moduleCechTermFactor F U q i).obj).X 0,
-        (((cechComplexFunctor V).obj
-          (moduleCechTermFactor F U q i).obj).d 0 1).hom x =
-          moduleCechTermNativeProjectionLinearMap F U V q 1 y i := by
-    intro i
-    have hi := h i
-    rw [HomologicalComplex.exactAt_iff' _ 0 1 2 (by simp) (by simp),
-      ShortComplex.moduleCat_exact_iff] at hi
-    apply hi
-    calc
-      _ = (((cechComplexFunctor V).map
-            (Pi.π (moduleCechTermFactor F U q) i).hom).f 2).hom
-          ((((cechComplexFunctor V).obj
-            (moduleCechTerm F U q).obj).d 1 2).hom y) := by
-        exact ConcreteCategory.congr_hom
-          (((cechComplexFunctor V).map
-            (Pi.π (moduleCechTermFactor F U q) i).hom).comm 1 2) y
-      _ = (((cechComplexFunctor V).map
-            (Pi.π (moduleCechTermFactor F U q) i).hom).f 2).hom 0 :=
-        congrArg _ hy
-      _ = 0 := map_zero _
-  choose x hx using hpreimage
-  let x' := (moduleCechTermNativeProjectionLinearEquiv
-    F U V q 0).symm x
-  refine ⟨x', ?_⟩
-  apply (moduleCechTermNativeProjectionLinearEquiv
-    F U V q 1).injective
-  funext i
-  change
-    moduleCechTermNativeProjectionLinearMap F U V q 1
-        ((((cechComplexFunctor V).obj
-          (moduleCechTerm F U q).obj).d 0 1).hom x') i =
-      moduleCechTermNativeProjectionLinearMap F U V q 1 y i
-  have hcoord := congrFun
-    ((moduleCechTermNativeProjectionLinearEquiv
-      F U V q 0).apply_symm_apply x) i
-  rw [moduleCechTermNativeProjectionLinearEquiv_apply] at hcoord
-  calc
-    _ = (((cechComplexFunctor V).obj
-          (moduleCechTermFactor F U q i).obj).d 0 1).hom
-        (moduleCechTermNativeProjectionLinearMap F U V q 0 x' i) := by
-      exact ConcreteCategory.congr_hom
-        (((cechComplexFunctor V).map
-          (Pi.π (moduleCechTermFactor F U q) i).hom).comm 0 1).symm x'
-    _ = (((cechComplexFunctor V).obj
-          (moduleCechTermFactor F U q i).obj).d 0 1).hom (x i) :=
-      congrArg _ hcoord
-    _ = _ := hx i
+  simpa using moduleCechTerm_cech_exactAt_succ_of_factors
+    F U V q 0 h
 
 end TopCat.Sheaf
