@@ -261,6 +261,86 @@ theorem tateExtToFlat_coeff (s : ℕ)
       (MvPowerSeries.map (wpaVal (K := K) (w := w)) F.1) from rfl,
     tateExtAmbient_coeff, MvPowerSeries.coeff_map]
 
+/-- The `inr`-pull of a flat exponent through the slot bijection. -/
+noncomputable def slotInr (s : ℕ) (u : ℕ →₀ ℕ) : ℕ →₀ ℕ :=
+  Finsupp.comapDomain Sum.inr (Finsupp.equivMapDomain (slotEquiv s) u)
+    Sum.inr_injective.injOn
+
+theorem slotInr_apply (s : ℕ) (u : ℕ →₀ ℕ) (m : ℕ) :
+    slotInr s u m = u (if m = 0 then 0 else m + s) := by
+  rw [slotInr, Finsupp.comapDomain_apply, Finsupp.equivMapDomain_apply]
+  by_cases hm : m = 0
+  · subst hm
+    rw [if_pos rfl]
+    rfl
+  · rw [if_neg hm]
+    show u ((slotEquiv s).symm (Sum.inr m)) = u (m + s)
+    congr 1
+    show slotInv s (Sum.inr m) = m + s
+    simp only [slotInv]
+    rw [if_neg hm]
+
+theorem slotInr_zero_apply (s : ℕ) (u : ℕ →₀ ℕ) : slotInr s u 0 = u 0 := by
+  rw [slotInr_apply, if_pos rfl]
+
+/-- The parity weight at the shifted weight is computed by the `inr`-pull
+(the freed slots `1..s` have weight `0`). -/
+theorem wpWeight_shiftWeight_eq (w : ℕ → ℕ) (s : ℕ) (u : ℕ →₀ ℕ) :
+    wpWeight (shiftWeight w s) u = wpWeight w (slotInr s u) := by
+  classical
+  have hL : wpWeight (shiftWeight w s) u =
+      ∑ n ∈ u.support.filter (fun n => u n % 2 = 1 ∧ s < n), w (n - s) := by
+    rw [wpWeight, Finset.sum_filter]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    by_cases h1 : u n % 2 = 1 ∧ n ≠ 0
+    · rw [if_pos h1]
+      by_cases h2 : s < n
+      · rw [if_pos ⟨h1.1, h2⟩]
+        show (if n ≤ s then 0 else w (n - s)) = w (n - s)
+        rw [if_neg (by omega)]
+      · rw [if_neg (fun hc => h2 hc.2)]
+        show (if n ≤ s then 0 else w (n - s)) = 0
+        rw [if_pos (by omega)]
+    · rw [if_neg h1, if_neg (fun hc => h1 ⟨hc.1, by omega⟩)]
+  have hR : wpWeight w (slotInr s u) =
+      ∑ m ∈ (slotInr s u).support.filter
+        (fun m => slotInr s u m % 2 = 1 ∧ m ≠ 0), w m := by
+    rw [wpWeight, Finset.sum_filter]
+  rw [hL, hR]
+  refine Finset.sum_nbij' (fun n => n - s) (fun m => m + s) ?_ ?_ ?_ ?_ ?_
+  · intro n hn
+    rw [Finset.mem_filter] at hn ⊢
+    have hv : slotInr s u (n - s) = u n := by
+      rw [slotInr_apply, if_neg (by omega),
+        show n - s + s = n from by omega]
+    refine ⟨Finsupp.mem_support_iff.mpr ?_, ?_, by omega⟩
+    · rw [hv]
+      exact Finsupp.mem_support_iff.mp hn.1
+    · rw [hv]
+      exact hn.2.1
+  · intro m hm
+    rw [Finset.mem_filter] at hm ⊢
+    have hv : slotInr s u m = u (m + s) := by
+      rw [slotInr_apply, if_neg hm.2.2]
+    refine ⟨Finsupp.mem_support_iff.mpr ?_, ?_, by omega⟩
+    · rw [← hv]
+      exact Finsupp.mem_support_iff.mp hm.1
+    · rw [← hv]
+      exact hm.2.1
+  · intro n hn
+    rw [Finset.mem_filter] at hn
+    omega
+  · intro m hm
+    rw [Finset.mem_filter] at hm
+    omega
+  · intro n _
+    rfl
+
+/-- Membership transport for the support condition along the slot bijection. -/
+theorem wpMem_shiftWeight_iff (w : ℕ → ℕ) (s : ℕ) (u : ℕ →₀ ℕ) :
+    WPMem (shiftWeight w s) u ↔ WPMem w (slotInr s u) := by
+  rw [WPMem, WPMem, wpWeight_shiftWeight_eq, slotInr_zero_apply]
+
 variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex
