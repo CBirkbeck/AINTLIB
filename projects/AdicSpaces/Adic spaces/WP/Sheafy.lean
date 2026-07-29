@@ -1413,14 +1413,6 @@ theorem productRestrictionSub_injective_WPA (ϖ : Uniformizer K)
   rw [hz] at hz0
   exact sub_eq_zero.mp hz0
 
-variable {K w} in
-/-- The embedding half of the sheaf condition for `𝒜` (the
-`productRestrictionSub_isEmbedding_JetA` shape, `FJP/Over/SheafTransfer.lean:667`). -/
-theorem productRestrictionSub_isEmbedding_WPA (ϖ : Uniformizer K)
-    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
-    (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
-    Topology.IsEmbedding (productRestrictionSub (WPA K w) C) := by sorry
-
 set_option maxHeartbeats 3200000 in
 variable {K w} in
 /-- The gluing half of the sheaf condition for `𝒜` (the `gluing_JetA` shape,
@@ -1672,6 +1664,75 @@ theorem gluing_WPA (ϖ : Uniformizer K)
         RingEquiv.symm_apply_apply]] at h6
   exact (restrictionEquiv D.1 (liftDatum (P.DHp D) (P.hDHp D))
     (P.hopenp D)).injective h6
+
+variable {K w} in
+/-- The embedding half of the sheaf condition for `𝒜` (the
+`productRestrictionSub_isEmbedding_JetA` shape, `FJP/Over/SheafTransfer.lean:667`). -/
+theorem productRestrictionSub_isEmbedding_WPA (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
+    Topology.IsEmbedding (productRestrictionSub (WPA K w) C) := by
+  classical
+  refine ⟨?_, productRestrictionSub_injective_WPA ϖ hK₀ C hC⟩
+  letI instModPiD : ∀ D : ↥C.covers, Module (WPA K w) (presheafValue D.1) :=
+    fun D => RingHom.toModule (RationalLocData.canonicalMap D.1)
+  letI instModBase : Module (WPA K w) (presheafValue C.base) :=
+    RingHom.toModule (RationalLocData.canonicalMap C.base)
+  letI instModPi : Module (WPA K w) (∀ D : ↥C.covers, presheafValue D.1) :=
+    Pi.module _ _ _
+  let rho : presheafValue C.base →ₗ[WPA K w]
+      (∀ D : ↥C.covers, presheafValue D.1) :=
+    { toFun := productRestrictionSub (WPA K w) C
+      map_add' := fun x y => by
+        funext D
+        exact map_add (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)) x y
+      map_smul' := fun a x => by
+        funext D
+        show restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)
+            ((RationalLocData.canonicalMap C.base) a * x) =
+          (RationalLocData.canonicalMap D.1) a *
+            restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) x
+        rw [map_mul]
+        congr 1
+        exact productRestriction_comp_canonicalMap (A := WPA K w) C a D.1 D.2 }
+  have hrange : (LinearMap.range rho :
+      Set (∀ D : ↥C.covers, presheafValue D.1)) =
+      sectionEqualizer (WPA K w) C := by
+    ext s
+    constructor
+    · rintro ⟨x, rfl⟩
+      exact productRestrictionSub_mem_sectionEqualizer (WPA K w) C x
+    · intro hs
+      obtain ⟨x, hx⟩ := gluing_WPA ϖ hK₀ C hC s hs
+      exact ⟨x, funext fun D => hx D⟩
+  have hclosed : IsClosed
+      (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) := by
+    rw [hrange]; exact sectionEqualizer_isClosed (WPA K w) C
+  haveI : (uniformity (presheafValue C.base)).IsCountablyGenerated :=
+    presheafValue_uniformity_isCountablyGenerated (A := WPA K w) C.base
+  haveI : ∀ D : ↥C.covers,
+      (uniformity (presheafValue D.1)).IsCountablyGenerated :=
+    fun D => presheafValue_uniformity_isCountablyGenerated (A := WPA K w) D.1
+  haveI : ContinuousSMul (WPA K w) (presheafValue C.base) :=
+    ⟨continuous_mul.comp (((canonicalMap_continuous C.base).comp
+      continuous_fst).prodMk continuous_snd)⟩
+  haveI : ∀ D : ↥C.covers, ContinuousSMul (WPA K w) (presheafValue D.1) :=
+    fun D => ⟨continuous_mul.comp
+      (((canonicalMap_continuous D.1).comp continuous_fst).prodMk
+        continuous_snd)⟩
+  haveI : ContinuousSMul (WPA K w)
+      (∀ D : ↥C.covers, presheafValue D.1) := inferInstance
+  have hrho_cont : Continuous rho :=
+    continuous_pi fun D =>
+      restrictionMapHom_continuous C.base D.1 (C.hsubset D.1 D.2)
+  have hinj : Function.Injective (rho : presheafValue C.base → _) :=
+    fun x y h => productRestrictionSub_injective_WPA ϖ hK₀ C hC h
+  obtain ⟨u, hu⟩ :=
+    (inferInstance : IsTateRing (WPA K w)).exists_topologicallyNilpotent_unit
+  exact @isInducing_of_closedRange_of_topNilpUnit (WPA K w) _ _
+    (presheafValue C.base) _ instModBase _ _ _ _ _
+    (∀ D : ↥C.covers, presheafValue D.1) _ instModPi _ _ _ _ _ _
+    u hu u.isUnit rho hrho_cont hinj hclosed
 
 variable {K w} in
 /-- **`𝒜` is sheafy** — the finite-rational-cover form
