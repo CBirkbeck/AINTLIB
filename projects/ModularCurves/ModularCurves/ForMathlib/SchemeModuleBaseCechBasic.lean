@@ -70,6 +70,40 @@ theorem baseModulePresheaf_map_apply {X S : Scheme.{u}} (π : X ⟶ S)
     ((baseModulePresheaf π M).map f).hom x = M.presheaf.map f x :=
   rfl
 
+/-- The base-linear presheaf underlying a scheme module is a sheaf. -/
+theorem baseModulePresheaf_isSheaf {X S : Scheme.{u}} (π : X ⟶ S)
+    (M : X.Modules) :
+    Presheaf.IsSheaf (Opens.grothendieckTopology X)
+      (baseModulePresheaf π M) := by
+  rw [Presheaf.isSheaf_iff_isSheaf_forget _ _
+    (CategoryTheory.forget (ModuleCat.{u} Γ(S, (⊤ : S.Opens))))]
+  convert
+    (Presheaf.isSheaf_iff_isSheaf_forget _ _
+      (CategoryTheory.forget AddCommGrpCat.{u})).mp
+      (Scheme.Modules.isSheaf M) using 1
+  all_goals rfl
+
+/-- A scheme module, regarded as a sheaf of modules over the global
+functions on the base. -/
+noncomputable def baseModuleSheaf {X S : Scheme.{u}} (π : X ⟶ S)
+    (M : X.Modules) :
+    Sheaf (Opens.grothendieckTopology X)
+      (ModuleCat.{u} Γ(S, (⊤ : S.Opens))) :=
+  ⟨baseModulePresheaf π M, baseModulePresheaf_isSheaf π M⟩
+
+@[simp]
+theorem baseModuleSheaf_obj_coe {X S : Scheme.{u}} (π : X ⟶ S)
+    (M : X.Modules) (V : X.Opensᵒᵖ) :
+    ((baseModuleSheaf π M).obj.obj V : Type u) = M.presheaf.obj V :=
+  rfl
+
+@[simp]
+theorem baseModuleSheaf_map_apply {X S : Scheme.{u}} (π : X ⟶ S)
+    (M : X.Modules) {V W : X.Opensᵒᵖ} (f : V ⟶ W)
+    (x : M.presheaf.obj V) :
+    ((baseModuleSheaf π M).obj.map f).hom x = M.presheaf.map f x :=
+  rfl
+
 /-- Sections over source opens, functorially regarded as modules over the base ring. -/
 noncomputable def baseModulePresheafFunctor {X S : Scheme.{u}} (π : X ⟶ S) :
     X.Modules ⥤ X.Opensᵒᵖ ⥤ ModuleCat.{u} Γ(S, (⊤ : S.Opens)) :=
