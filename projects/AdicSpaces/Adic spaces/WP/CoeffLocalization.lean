@@ -215,6 +215,109 @@ theorem norm_tailTrunc_le (S : Finset (TailIdx N)) (f : WPA K w) :
   · rw [if_neg hν, norm_zero]
     exact norm_nonneg f
 
+/-- The bundled additive tail coefficient. -/
+noncomputable def tailCoeffHom (μ : TailIdx N) : WPA K w →+ WPHead K w N where
+  toFun := tailCoeff K w N μ
+  map_zero' := tailCoeff_zero_map K w N μ
+  map_add' := tailCoeff_add K w N μ
+
+theorem tailCoeffHom_apply (μ : TailIdx N) (f : WPA K w) :
+    tailCoeffHom μ f = tailCoeff K w N μ f := rfl
+
+/-- Product of two decomposition summands ([WP] eq:tail-multiplication as an
+identity of `𝒜`-elements). -/
+theorem headIncl_eTail_mul (x y : WPHead K w N) (ν lam : TailIdx N) :
+    (headIncl K w N x * eTail K w N ν) * (headIncl K w N y * eTail K w N lam) =
+      headIncl K w N (WaHead K w N ^
+          (wpWeight w ν.1 + wpWeight w lam.1 - wpWeight w (ν + lam).1) * (x * y)) *
+        eTail K w N (ν + lam) := by
+  have h1 : (headIncl K w N x * eTail K w N ν) *
+      (headIncl K w N y * eTail K w N lam) =
+      headIncl K w N (x * y) * (eTail K w N ν * eTail K w N lam) := by
+    rw [map_mul]
+    ring
+  have h2 : headIncl K w N (WaHead K w N ^
+      (wpWeight w ν.1 + wpWeight w lam.1 - wpWeight w (ν + lam).1) * (x * y)) =
+      headIncl K w N (WaHead K w N ^
+        (wpWeight w ν.1 + wpWeight w lam.1 - wpWeight w (ν + lam).1)) *
+        (headIncl K w N x * headIncl K w N y) := by
+    rw [map_mul, map_mul]
+  have h3 : headIncl K w N (x * y) = headIncl K w N x * headIncl K w N y :=
+    map_mul _ _ _
+  rw [h1, eTail_mul, h2, h3]
+  ring
+
+open scoped Classical in
+/-- The finite-truncation convolution formula. -/
+theorem tailCoeff_tailTrunc_mul (S T : Finset (TailIdx N)) (f g : WPA K w)
+    (μ : TailIdx N) :
+    tailCoeff K w N μ (tailTrunc S f * tailTrunc T g) =
+      ∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+        WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+          ((if p.1 ∈ S then tailCoeff K w N p.1 f else 0) *
+            (if p.2 ∈ T then tailCoeff K w N p.2 g else 0)) := by
+  classical
+  unfold tailTrunc
+  rw [Finset.sum_mul_sum]
+  rw [show tailCoeff K w N μ (∑ ν ∈ S, ∑ lam ∈ T,
+      (headIncl K w N (tailCoeff K w N ν f) * eTail K w N ν) *
+        (headIncl K w N (tailCoeff K w N lam g) * eTail K w N lam)) =
+    tailCoeffHom μ (∑ ν ∈ S, ∑ lam ∈ T,
+      (headIncl K w N (tailCoeff K w N ν f) * eTail K w N ν) *
+        (headIncl K w N (tailCoeff K w N lam g) * eTail K w N lam)) from rfl]
+  rw [map_sum]
+  have hterm : ∀ ν ∈ S, tailCoeffHom μ (∑ lam ∈ T,
+      (headIncl K w N (tailCoeff K w N ν f) * eTail K w N ν) *
+        (headIncl K w N (tailCoeff K w N lam g) * eTail K w N lam)) =
+      ∑ lam ∈ T, if μ = ν + lam then
+        WaHead K w N ^
+            (wpWeight w ν.1 + wpWeight w lam.1 - wpWeight w (ν + lam).1) *
+          (tailCoeff K w N ν f * tailCoeff K w N lam g) else 0 := by
+    intro ν _
+    rw [map_sum]
+    refine Finset.sum_congr rfl fun lam _ => ?_
+    rw [tailCoeffHom_apply, headIncl_eTail_mul, tailCoeff_headIncl_mul_eTail]
+  rw [Finset.sum_congr rfl hterm]
+  -- both sides as sums over the filtered pair set
+  rw [← Finset.sum_product']
+  rw [← Finset.sum_filter (s := S ×ˢ T)
+    (p := fun q : TailIdx N × TailIdx N => μ = q.1 + q.2)]
+  have hrhs : ∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+      WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+        ((if p.1 ∈ S then tailCoeff K w N p.1 f else 0) *
+          (if p.2 ∈ T then tailCoeff K w N p.2 g else 0)) =
+      ∑ p ∈ (Finset.HasAntidiagonal.antidiagonal μ).filter
+          (fun p : TailIdx N × TailIdx N => p.1 ∈ S ∧ p.2 ∈ T),
+        WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+          (tailCoeff K w N p.1 f * tailCoeff K w N p.2 g) := by
+    rw [Finset.sum_filter]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    by_cases h1 : p.1 ∈ S
+    · by_cases h2 : p.2 ∈ T
+      · rw [if_pos h1, if_pos h2, if_pos ⟨h1, h2⟩]
+      · rw [if_pos h1, if_neg h2,
+          if_neg (show ¬(p.1 ∈ S ∧ p.2 ∈ T) from fun hc => h2 hc.2),
+          mul_zero, mul_zero]
+    · rw [if_neg h1,
+        if_neg (show ¬(p.1 ∈ S ∧ p.2 ∈ T) from fun hc => h1 hc.1),
+        zero_mul, mul_zero]
+  rw [hrhs]
+  have hsets : (S ×ˢ T).filter (fun q : TailIdx N × TailIdx N => μ = q.1 + q.2) =
+      (Finset.HasAntidiagonal.antidiagonal μ).filter
+        (fun p : TailIdx N × TailIdx N => p.1 ∈ S ∧ p.2 ∈ T) := by
+    ext q
+    simp only [Finset.mem_filter, Finset.mem_product,
+      Finset.HasAntidiagonal.mem_antidiagonal]
+    constructor
+    · rintro ⟨⟨h1, h2⟩, h3⟩
+      exact ⟨h3.symm, h1, h2⟩
+    · rintro ⟨h3, h1, h2⟩
+      exact ⟨⟨h1, h2⟩, h3.symm⟩
+  rw [hsets]
+  refine Finset.sum_congr rfl fun p hp => ?_
+  rw [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal] at hp
+  rw [hp.1]
+
 end TailConv
 
 /-! ### The head graph model `QHead` -/
