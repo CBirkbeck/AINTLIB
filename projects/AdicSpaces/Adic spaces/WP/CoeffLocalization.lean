@@ -2101,7 +2101,9 @@ theorem nonempty_headModelData_all (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
     ∃ N₁ : ℕ, ∀ M₀ : ℕ, N₁ ≤ M₀ →
-      ∃ model : HeadModelData D, model.N = M₀ := by
+      ∃ (DH : RationalLocData (WPHead K w M₀)) (hDH : DH.IsRational),
+        rationalOpen (liftDatum DH hDH).T (liftDatum DH hDH).s =
+          rationalOpen D.T D.s := by
   classical
   -- the window scaling element, matching `wpaPod`'s choice
   set c : K := Classical.choose (exists_norm_window' K) with hc_def
@@ -2284,7 +2286,19 @@ theorem nonempty_headModelData_all (ϖ : Uniformizer K)
       rationalOpen D.T D.s := by
     rw [hmatch, PerturbSetup.rationalOpen_datum S]
     exact hropen₁
-  refine ⟨⟨N, DH, hDHrat, hopen,
+  exact ⟨DH, hDHrat, hopen⟩
+
+variable {K w} in
+/-- **Finite-head presentation of every rational localization**
+([WP] cor:finite-head-presentation) — the stage-free record form (the model
+equivalence assembled from `hopen` by `restrictionEquiv` + `coeffLocEquiv`). -/
+theorem nonempty_headModelData (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
+    Nonempty (HeadModelData D) := by
+  obtain ⟨N₁, hall⟩ := nonempty_headModelData_all ϖ hK₀ D hD
+  obtain ⟨DH, hDHrat, hopen⟩ := hall N₁ (le_refl _)
+  exact ⟨⟨N₁, DH, hDHrat, hopen,
     (restrictionEquiv D (liftDatum DH hDHrat) hopen).trans
       (coeffLocEquiv ϖ hK₀ DH hDHrat),
     by
@@ -2295,18 +2309,6 @@ theorem nonempty_headModelData_all (ϖ : Uniformizer K)
       rw [RingEquiv.symm_trans]
       rw [RingEquiv.coe_trans]
       exact (restrictionEquiv_symm_continuous D (liftDatum DH hDHrat)
-        hopen).comp (coeffLocEquiv_symm_continuous ϖ hK₀ DH hDHrat)⟩,
-    hN_def⟩
-
-variable {K w} in
-/-- **Finite-head presentation of every rational localization**
-([WP] cor:finite-head-presentation) — the stage-free form. -/
-theorem nonempty_headModelData (ϖ : Uniformizer K)
-    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
-    (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
-    Nonempty (HeadModelData D) := by
-  obtain ⟨N₁, hall⟩ := nonempty_headModelData_all ϖ hK₀ D hD
-  obtain ⟨model, -⟩ := hall N₁ (le_refl _)
-  exact ⟨model⟩
+        hopen).comp (coeffLocEquiv_symm_continuous ϖ hK₀ DH hDHrat)⟩⟩
 
 end WeightedParity

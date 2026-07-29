@@ -58,8 +58,13 @@ of the thresholds). -/
 theorem exists_common_headModel_stage (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
-    ∃ M : ℕ, (∃ model : HeadModelData C.base, model.N = M) ∧
-      ∀ D ∈ C.covers, ∃ model : HeadModelData D, model.N = M := by
+    ∃ M : ℕ, (∃ (DHb : RationalLocData (WPHead K w M)) (hDHb : DHb.IsRational),
+        rationalOpen (liftDatum DHb hDHb).T (liftDatum DHb hDHb).s =
+          rationalOpen C.base.T C.base.s) ∧
+      ∀ D ∈ C.covers,
+        ∃ (DH : RationalLocData (WPHead K w M)) (hDH : DH.IsRational),
+          rationalOpen (liftDatum DH hDH).T (liftDatum DH hDH).s =
+            rationalOpen D.T D.s := by
   classical
   obtain ⟨Nb, hb⟩ := nonempty_headModelData_all ϖ hK₀ C.base hC.base
   choose Np hp using fun (D : { D : RationalLocData (WPA K w) // D ∈ C.covers }) =>
