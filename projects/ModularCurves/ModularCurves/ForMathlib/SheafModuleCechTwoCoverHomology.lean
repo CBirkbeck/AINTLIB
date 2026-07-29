@@ -28,6 +28,50 @@ variable {R : Type u} [CommRing R] {X : TopCat.{u}}
 variable (F : Sheaf (ModuleCat.{u} R) X)
 variable {ι κ : Type u} (U : ι → Opens X) (V : κ → Opens X)
 
+/-- The positive-degree homology isomorphism between two native Cech
+complexes, obtained by composing their edge isomorphisms to the common total
+complex. -/
+noncomputable def moduleCechTwoCoverHomologySuccIso
+    (hU : ⨆ i, U i = ⊤)
+    (hV : ⨆ i, V i = ⊤)
+    (n : ℕ)
+    (hrow_n : ∀ q p, q + p = n → 0 < p →
+      ((cechComplexFunctor V).obj
+        (moduleCechTerm F U q).obj).ExactAt p)
+    (hrow_succ : ∀ q p, q + p = n + 1 → 0 < p →
+      ((cechComplexFunctor V).obj
+        (moduleCechTerm F U q).obj).ExactAt p)
+    (hcol_n : ∀ p q, p + q = n → 0 < q →
+      ∀ i : Fin (p + 1) → κ,
+        (moduleCechShortComplexApp F U (q - 1)
+          (∏ᶜ fun k : Fin (p + 1) => V (i k))).Exact)
+    (hcol_succ : ∀ p q, p + q = n + 1 → 0 < q →
+      ∀ i : Fin (p + 1) → κ,
+        (moduleCechShortComplexApp F U (q - 1)
+          (∏ᶜ fun k : Fin (p + 1) => V (i k))).Exact) :
+    ((cechComplexFunctor V).obj F.obj).homology (n + 1) ≅
+      ((cechComplexFunctor U).obj F.obj).homology (n + 1) := by
+  let hEdge :=
+    (moduleCechTwoCoverBicomplex F U V).totalUpNatHorizontalEdge
+      ((cechComplexFunctor U).obj F.obj)
+      (moduleCechTwoCoverHorizontalAugmentation F U V)
+      (moduleCechTwoCoverHorizontalAugmentation_comm F U V)
+      (moduleCechTwoCoverHorizontalAugmentation_comp_d F U V)
+  let vEdge :=
+    (moduleCechTwoCoverBicomplex F U V).totalUpNatVerticalEdge
+      ((cechComplexFunctor V).obj F.obj)
+      (moduleCechTwoCoverVerticalAugmentation F U V).f
+      (moduleCechTwoCoverVerticalAugmentation_comm F U V)
+      (moduleCechTwoCoverVerticalAugmentation_comp_d F U V)
+  letI : QuasiIsoAt hEdge (n + 1) :=
+    moduleCechTwoCoverHorizontalEdge_quasiIsoAt_succ
+      F U V hV n hrow_n hrow_succ
+  letI : QuasiIsoAt vEdge (n + 1) :=
+    moduleCechTwoCoverVerticalEdge_quasiIsoAt_succ
+      F U V hU n hcol_n hcol_succ
+  exact isoOfQuasiIsoAt vEdge (n + 1) ≪≫
+    (isoOfQuasiIsoAt hEdge (n + 1)).symm
+
 /-- The degree-one homology isomorphism between two native Cech complexes,
 obtained by composing their edge isomorphisms to the common total complex. -/
 noncomputable def moduleCechTwoCoverHomologyOneIso
