@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».WP.CoeffLocalization
+import «Adic spaces».WP.UniformDomain
 import «Adic spaces».WP.FormalReduced
 import «Adic spaces».AuditCleanWrappers
 import «Adic spaces».SheafyCompletionModel
@@ -231,12 +232,59 @@ theorem chainReduced_of_ringEquiv (n : ℕ) :
       exact key D h0
 
 variable {K w} in
+/-- **Existential transitivity of rational localization at `𝒜`** ([WP] 1267–1269
+"by transitivity of rational localization"; Huber Lemma 1.5(ii)–(iii) / Wedhorn
+Prop 8.2(2) + Rem 8.4, existential form per the 2026-07-29 ChatGPT-5.6-sol
+design): a rational localization of a rational localization of `𝒜` is
+bicontinuously a single rational localization of `𝒜`. -/
+theorem exists_transitivity_WPA (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (D : RationalLocData (WPA K w)) (hD : D.IsRational)
+    (E : RationalLocData (presheafValue D)) (hE : E.IsRational) :
+    ∃ (F : RationalLocData (WPA K w)) (_ : F.IsRational)
+      (e : presheafValue E ≃+* presheafValue F),
+      Continuous ⇑e ∧ Continuous ⇑e.symm := by sorry
+
+variable {K w} in
 /-- **Rational stable reducedness of `𝒜`, conditionally on the head input**
 ([WP] thm:rationally-reduced-example (3): "The ring `𝒜` is rationally stably
-reduced").  The induction re-applies the finite-head machinery at every stage: each
-localization is again a `TailC0` over a (further localized) head. -/
+reduced").  Induction with the invariant `Qₙ := ∀ D rational,
+ChainReduced (𝒪(D)) n`: the base is R3, the successor pulls a datum on `𝒪(D)`
+down to `𝒜` by `exists_transitivity_WPA` and transports the chain along the
+equivalence (`chainReduced_of_ringEquiv`). -/
 theorem chainReduced_WPA (hred : HeadLocsReduced K w) (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) (n : ℕ) :
-    ChainReduced (WPA K w) n := by sorry
+    ChainReduced (WPA K w) n := by
+  classical
+  have hQ : ∀ m : ℕ, ∀ (D : RationalLocData (WPA K w)), D.IsRational →
+      ChainReduced (presheafValue D) m := by
+    intro m
+    induction m with
+    | zero =>
+      intro D hD
+      exact isReduced_presheafValue_WPA hred ϖ hK₀ D hD
+    | succ m ih =>
+      intro D hD
+      refine ⟨isReduced_presheafValue_WPA hred ϖ hK₀ D hD, ?_⟩
+      intro E hE
+      obtain ⟨F, hF, e, hec, hec'⟩ :=
+        exists_transitivity_WPA ϖ hK₀ D hD E hE
+      haveI : IsTateRing (presheafValue D) :=
+        presheafValue_isTateRing_concrete D
+      haveI : IsTateRing (presheafValue E) :=
+        presheafValue_isTateRing_concrete E
+      haveI : IsTateRing (presheafValue F) :=
+        presheafValue_isTateRing_concrete F
+      exact chainReduced_of_ringEquiv m e.symm hec' (by
+        rw [RingEquiv.symm_symm]; exact hec) (ih F hF)
+  have hred0 : IsReduced (WPA K w) := ⟨fun x hx => by
+    obtain ⟨n, hn⟩ := hx
+    rcases n with _ | n
+    · rw [pow_zero] at hn; exact absurd hn one_ne_zero
+    · exact (pow_eq_zero_iff (Nat.succ_ne_zero n)).mp hn⟩
+  induction n with
+  | zero => exact hred0
+  | succ n _ =>
+    exact ⟨hred0, fun D hD => hQ n D hD⟩
 
 end WeightedParity
