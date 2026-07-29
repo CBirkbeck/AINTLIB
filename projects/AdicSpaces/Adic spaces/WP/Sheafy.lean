@@ -185,6 +185,123 @@ theorem comap_rhoHead_mem_iff (M : ℕ) (DH : RationalLocData (WPHead K w M))
       exact hc
 
 variable {K w} in
+/-- `headIncl` is continuous (it is isometric). -/
+theorem headIncl_continuous (M : ℕ) : Continuous (headIncl K w M) :=
+  (AddMonoidHomClass.isometry_of_norm (headIncl K w M)
+    (fun x => norm_headIncl (K := K) (w := w) (N := M) x)).continuous
+
+variable {K w} in
+/-- Norm bound extraction for power-bounded elements of the head
+(the `norm_bound_of_isPowerBounded` mirror at `P_M`). -/
+theorem norm_bound_of_isPowerBounded_head {M : ℕ} {a : WPHead K w M}
+    (ha : TopologicalRing.IsPowerBounded a) :
+    ∃ C : ℝ, 0 < C ∧ ∀ n : ℕ, ‖a ^ n‖ ≤ C := by
+  obtain ⟨V, hV, hSV⟩ := ha (Metric.ball 0 1) (Metric.ball_mem_nhds 0 one_pos)
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp hV
+  obtain ⟨c, hcu, hc1, hc0⟩ := exists_norm_window' K
+  have h1 : (0 : ℝ) < ‖constHead K w M c‖ := by
+    rw [norm_constHead]; exact hc0
+  obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one hδ0
+    (by rw [norm_constHead]; exact hc1 : ‖constHead K w M c‖ < 1)
+  have hnc : ‖constHead K w M c ^ k‖ = ‖constHead K w M c‖ ^ k := by
+    rw [← map_pow, norm_constHead, norm_pow, norm_constHead]
+  refine ⟨1 / ‖constHead K w M c‖ ^ k, by positivity, fun n => ?_⟩
+  have hmem : a ^ n * constHead K w M c ^ k ∈
+      Metric.ball (0 : WPHead K w M) 1 := by
+    refine hSV (Set.mul_mem_mul ⟨n, rfl⟩ (hball ?_))
+    rw [Metric.mem_ball, dist_zero_right, hnc]
+    exact hk
+  rw [Metric.mem_ball, dist_zero_right] at hmem
+  have hval : ‖a ^ n * constHead K w M c ^ k‖ =
+      ‖constHead K w M c‖ ^ k * ‖a ^ n‖ := by
+    rw [show constHead K w M c ^ k = constHead K w M (c ^ k) from by
+        rw [map_pow],
+      mul_comm (a ^ n), norm_constHead_mul]
+    rw [show ‖constHead K w M c‖ ^ k = ‖c‖ ^ k from by rw [norm_constHead],
+      norm_pow]
+  rw [hval] at hmem
+  rw [le_div_iff₀ (by positivity)]
+  calc ‖a ^ n‖ * ‖constHead K w M c‖ ^ k
+      = ‖constHead K w M c‖ ^ k * ‖a ^ n‖ := by ring
+    _ ≤ 1 := hmem.le
+
+variable {K w} in
+/-- `headIncl` sends power-bounded elements to power-bounded elements. -/
+theorem isPowerBounded_headIncl {M : ℕ} {a : WPHead K w M}
+    (ha : TopologicalRing.IsPowerBounded a) :
+    TopologicalRing.IsPowerBounded (headIncl K w M a) := by
+  obtain ⟨C, hC0, hC⟩ := norm_bound_of_isPowerBounded_head ha
+  refine isPowerBounded_of_forall_norm_le hC0 fun n => ?_
+  rw [← map_pow, norm_headIncl]
+  exact hC n
+
+variable {K w} in
+theorem plus_le_comap_headIncl (M : ℕ) :
+    ((WPHead K w M)⁺ : Subring (WPHead K w M)) ≤
+      ((WPA K w)⁺ : Subring (WPA K w)).comap (headIncl K w M) :=
+  fun _ ha => isPowerBounded_headIncl ha
+
+variable {K w} in
+theorem comap_headIncl_mem_spa (M : ℕ) {v : Spv (WPA K w)}
+    (hv : v ∈ Spa (WPA K w) ((WPA K w)⁺)) :
+    ValuationSpectrum.comap (headIncl K w M) v ∈
+      Spa (WPHead K w M) ((WPHead K w M)⁺) :=
+  comap_mem_spa (headIncl_continuous M) (plus_le_comap_headIncl M) hv
+
+variable {K w} in
+open scoped Classical in
+/-- Membership in a lifted datum's rational subset is head-membership of the
+`headIncl`-restriction (the counterpart of `comap_rhoHead_mem_iff` at an
+arbitrary `𝒜`-point). -/
+theorem mem_liftDatum_iff (M : ℕ) (DH : RationalLocData (WPHead K w M))
+    (hDH : DH.IsRational) (v : Spv (WPA K w))
+    (hv : v ∈ Spa (WPA K w) ((WPA K w)⁺)) :
+    v ∈ rationalOpen (liftDatum DH hDH).T (liftDatum DH hDH).s ↔
+      ValuationSpectrum.comap (headIncl K w M) v ∈
+        rationalOpen DH.T DH.s := by
+  constructor
+  · rintro ⟨-, hT, hs0⟩
+    refine ⟨comap_headIncl_mem_spa M hv, fun t ht => ?_, fun hc => ?_⟩
+    · rw [comap_vle]
+      have h1 := hT (headIncl K w M t) (by
+        rw [show (liftDatum DH hDH).T = DH.T.image (headIncl K w M) from rfl]
+        exact Finset.mem_image_of_mem _ ht)
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl] at h1
+      exact h1
+    · refine hs0 ?_
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl]
+      rw [comap_vle, map_zero] at hc
+      exact hc
+  · rintro ⟨-, hT, hs0⟩
+    refine ⟨hv, fun t' ht' => ?_, fun hc => ?_⟩
+    · rw [show (liftDatum DH hDH).T = DH.T.image (headIncl K w M) from rfl]
+        at ht'
+      obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      have h1 := hT t ht
+      rw [comap_vle] at h1
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl]
+      exact h1
+    · refine hs0 ?_
+      rw [comap_vle, map_zero]
+      rw [show (liftDatum DH hDH).s = headIncl K w M DH.s from rfl] at hc
+      exact hc
+
+variable {K w} in
+open scoped Classical in
+/-- Lifting is monotone on rational subsets: a head-level inclusion of
+rational opens lifts to the `𝒜`-level (the bridge that turns head refinements
+of pushed pieces into `𝒜`-refinements, [WP] 1156–1218). -/
+theorem liftDatum_mono {M : ℕ} (DH DH' : RationalLocData (WPHead K w M))
+    (hDH : DH.IsRational) (hDH' : DH'.IsRational)
+    (hsub : rationalOpen DH'.T DH'.s ⊆ rationalOpen DH.T DH.s) :
+    rationalOpen (liftDatum DH' hDH').T (liftDatum DH' hDH').s ⊆
+      rationalOpen (liftDatum DH hDH).T (liftDatum DH hDH).s := by
+  intro v hv
+  have hvspa : v ∈ Spa (WPA K w) ((WPA K w)⁺) := rationalOpen_subset_spa hv
+  exact (mem_liftDatum_iff M DH hDH v hvspa).mpr
+    (hsub ((mem_liftDatum_iff M DH' hDH' v hvspa).mp hv))
+
+variable {K w} in
 /-- A common-stage system of head data for a whole covering, with the
 rational-subset identifications — the carrier consumed by the embedding and
 gluing fields (shared W21/W22 infrastructure; [WP] 1156–1218). -/
