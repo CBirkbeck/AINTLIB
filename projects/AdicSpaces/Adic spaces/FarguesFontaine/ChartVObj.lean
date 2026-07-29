@@ -51,23 +51,6 @@ noncomputable def chartPlus (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
       hexact1 hexact2).symm.toRingHom)⟩
 
-/-- The chart value is Tate (named form of the ID2e transport). -/
-noncomputable def chartTate (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
-    (hexact1 : perfectoidValuation p F
-      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
-    (hexact2 : ρ₂ ^ a
-      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
-    IsTateRing (presheafValue (chartData p F ϖ 1 b a b)) :=
-  isTateRing_congr (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
-      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
-      hexact1 hexact2).symm
-    (presheafChartRingEquivBISub_symm_continuous p F ϖ (hρ₁0 := hρ₁0)
-      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
-      hexact1 hexact2)
-    (presheafChartRingEquivBISub_continuous p F ϖ (hρ₁0 := hρ₁0)
-      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
-      hexact1 hexact2)
-
 /-- **The chart `VObj`**: `Spa` of a Big-window chart of the Fargues–Fontaine
 `𝒴`, as an object of Wedhorn's category `𝒱` — the structure sheaf of
 topological rings with local stalks and stalk valuations, at the transported
@@ -80,7 +63,7 @@ noncomputable def chartVObj (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a
     VObj :=
   letI := chartPlus p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
     (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
-  haveI hT := chartTate p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+  haveI hT := isTateRing_presheafChart p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
     (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
   haveI : IsHuberRing (presheafValue (chartData p F ϖ 1 b a b)) :=
     hT.toIsHuberRing

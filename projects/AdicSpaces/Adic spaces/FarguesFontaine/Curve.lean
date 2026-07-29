@@ -157,6 +157,30 @@ actions are open quotient maps). -/
 theorem isOpenQuotientMap_toCurve : IsOpenQuotientMap (toCurve p F ϖ) :=
   MulAction.isOpenQuotientMap_quotientMk
 
+/-- **Injectivity of the quotient map on a wandering family.** If `W : ℤ → Set (Spv A_inf)`
+is `φ^ℤ`-equivariant in the shape `k • W n = W (n - k)` and pairwise disjoint across
+indices, then two points of `W n` in the same `φ^ℤ`-orbit are equal: a nonzero shift would
+land the point in a different member of the family, contradicting disjointness. -/
+private theorem injOn_toCurve_of_wandering (W : ℤ → Set (Spv (Ainf p F)))
+    (hsmul : ∀ k n : ℤ, (Multiplicative.ofAdd k) • W n = W (n - k))
+    (hdisj : ∀ n m : ℤ, n ≠ m → Disjoint (W n) (W m)) (n : ℤ) :
+    Set.InjOn (toCurve p F ϖ) {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ W n} := by
+  intro y₁ h₁ y₂ h₂ heq
+  have hrel : y₁ ∈ MulAction.orbit (Multiplicative ℤ) y₂ :=
+    MulAction.orbitRel_apply.mp (Quotient.eq''.mp heq)
+  obtain ⟨g, hg⟩ := MulAction.mem_orbit_iff.mp hrel
+  by_cases hk : Multiplicative.toAdd g = 0
+  · have hg1 : g = 1 := by
+      rw [← ofAdd_toAdd g, hk]
+      rfl
+    rw [hg1, one_smul] at hg
+    exact hg.symm
+  · exfalso
+    have h3 : (y₁.1 : Spv (Ainf p F)) ∈ W (n - Multiplicative.toAdd g) := by
+      rw [← hsmul (Multiplicative.toAdd g) n]
+      exact ⟨y₂.1, h₂, by rw [ofAdd_toAdd]; exact congrArg Subtype.val hg⟩
+    exact Set.disjoint_left.mp (hdisj _ _ (by omega)) h₁ h3
+
 /-- The quotient map is injective on each window `U_n`: two points of a window in the
 same `φ^ℤ`-orbit are equal (wandering + freeness).
 
@@ -164,42 +188,16 @@ Source: [Kedlaya-AWS, Rem. 3.1.9]: "The spaces U_0 and V_0 map isomorphically to
 images in X_S". -/
 theorem injOn_toCurve_windowU (n : ℤ) :
     Set.InjOn (toCurve p F ϖ)
-      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} := by
-  intro y₁ h₁ y₂ h₂ heq
-  have hrel : y₁ ∈ MulAction.orbit (Multiplicative ℤ) y₂ :=
-    MulAction.orbitRel_apply.mp (Quotient.eq''.mp heq)
-  obtain ⟨g, hg⟩ := MulAction.mem_orbit_iff.mp hrel
-  by_cases hk : Multiplicative.toAdd g = 0
-  · have hg1 : g = 1 := by
-      rw [← ofAdd_toAdd g, hk]
-      rfl
-    rw [hg1, one_smul] at hg
-    exact hg.symm
-  · exfalso
-    have h3 : (y₁.1 : Spv (Ainf p F)) ∈ windowU p F ϖ (n - Multiplicative.toAdd g) := by
-      rw [← zsmul_windowU p F ϖ (Multiplicative.toAdd g) n]
-      exact ⟨y₂.1, h₂, by rw [ofAdd_toAdd]; exact congrArg Subtype.val hg⟩
-    exact Set.disjoint_left.mp (windowU_disjoint p F ϖ (by omega)) h₁ h3
+      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} :=
+  injOn_toCurve_of_wandering p F ϖ (windowU p F ϖ) (zsmul_windowU p F ϖ)
+    (fun _ _ h => windowU_disjoint p F ϖ h) n
 
 /-- The quotient map is injective on each window `V_n`. -/
 theorem injOn_toCurve_windowV (n : ℤ) :
     Set.InjOn (toCurve p F ϖ)
-      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} := by
-  intro y₁ h₁ y₂ h₂ heq
-  have hrel : y₁ ∈ MulAction.orbit (Multiplicative ℤ) y₂ :=
-    MulAction.orbitRel_apply.mp (Quotient.eq''.mp heq)
-  obtain ⟨g, hg⟩ := MulAction.mem_orbit_iff.mp hrel
-  by_cases hk : Multiplicative.toAdd g = 0
-  · have hg1 : g = 1 := by
-      rw [← ofAdd_toAdd g, hk]
-      rfl
-    rw [hg1, one_smul] at hg
-    exact hg.symm
-  · exfalso
-    have h3 : (y₁.1 : Spv (Ainf p F)) ∈ windowV p F ϖ (n - Multiplicative.toAdd g) := by
-      rw [← zsmul_windowV p F ϖ (Multiplicative.toAdd g) n]
-      exact ⟨y₂.1, h₂, by rw [ofAdd_toAdd]; exact congrArg Subtype.val hg⟩
-    exact Set.disjoint_left.mp (windowV_disjoint p F ϖ (by omega)) h₁ h3
+      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} :=
+  injOn_toCurve_of_wandering p F ϖ (windowV p F ϖ) (zsmul_windowV p F ϖ)
+    (fun _ _ h => windowV_disjoint p F ϖ h) n
 
 /-- **Two charts cover the curve**: `𝒳 = im(U_0) ∪ im(V_0)`. Every `φ^ℤ`-orbit meets
 `U_0 ∪ V_0`, by the covering and the translation lemmas.

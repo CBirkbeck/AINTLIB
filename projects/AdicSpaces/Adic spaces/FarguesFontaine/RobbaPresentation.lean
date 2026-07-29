@@ -2481,37 +2481,8 @@ theorem NfstRPS_eq_iSup_coeffSeq
     NfstRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
       = ⨆ n : ℕ, Valued.v
           (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) := by
-  have hrange : Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
-        (((MvPowerSeries.coeff s f
-          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
-      = Set.range (fun n : ℕ => Valued.v
-        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)) := by
-    ext t
-    constructor
-    · rintro ⟨s, rfl⟩
-      refine ⟨s 0, ?_⟩
-      have hs : Finsupp.single (0 : Fin 1) (s 0) = s := by
-        refine Finsupp.ext fun i => ?_
-        rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
-      exact congrArg (fun s' : Fin 1 →₀ ℕ => Valued.v
-        (((MvPowerSeries.coeff s' f
-          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)) hs
-    · rintro ⟨n, rfl⟩
-      exact ⟨Finsupp.single (0 : Fin 1) n, rfl⟩
-  rw [NfstRPS, show (⨆ s : Fin 1 →₀ ℕ, Valued.v
-      (((MvPowerSeries.coeff s f
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
-    = sSup (Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
-      (((MvPowerSeries.coeff s f
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))) from rfl,
-    hrange]
-  rfl
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) :=
+  (surjective_single_fin_one.iSup_comp _).symm
 
 /-- The second-component norm as a sequence supremum. -/
 theorem NsndRPS_eq_iSup_coeffSeq
@@ -2519,37 +2490,8 @@ theorem NsndRPS_eq_iSup_coeffSeq
     NsndRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
       = ⨆ n : ℕ, Valued.v
           (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) := by
-  have hrange : Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
-        (((MvPowerSeries.coeff s f
-          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
-      = Set.range (fun n : ℕ => Valued.v
-        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) := by
-    ext t
-    constructor
-    · rintro ⟨s, rfl⟩
-      refine ⟨s 0, ?_⟩
-      have hs : Finsupp.single (0 : Fin 1) (s 0) = s := by
-        refine Finsupp.ext fun i => ?_
-        rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
-      exact congrArg (fun s' : Fin 1 →₀ ℕ => Valued.v
-        (((MvPowerSeries.coeff s' f
-          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) hs
-    · rintro ⟨n, rfl⟩
-      exact ⟨Finsupp.single (0 : Fin 1) n, rfl⟩
-  rw [NsndRPS, show (⨆ s : Fin 1 →₀ ℕ, Valued.v
-      (((MvPowerSeries.coeff s f
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
-    = sSup (Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
-      (((MvPowerSeries.coeff s f
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))) from rfl,
-    hrange]
-  rfl
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) :=
+  (surjective_single_fin_one.iSup_comp _).symm
 
 /-- **The presentation generator** `T − C g` as a restricted series. -/
 noncomputable def GeltElt (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :

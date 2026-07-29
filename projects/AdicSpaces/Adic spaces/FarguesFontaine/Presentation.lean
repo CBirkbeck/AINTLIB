@@ -736,6 +736,14 @@ theorem tendsto_cauchy_product {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
 def coeffSeq {A : Type*} [CommRing A] (f : MvPowerSeries (Fin 1) A) (n : ℕ) : A :=
   MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) f
 
+/-- The reindexing behind `coeffSeq`: every exponent in `Fin 1 →₀ ℕ` is a
+`Finsupp.single 0 n`. Combined with `Function.Surjective.iSup_comp` this turns any
+supremum over one-variable exponents into a supremum over `ℕ`. -/
+theorem surjective_single_fin_one :
+    Function.Surjective (fun n : ℕ => Finsupp.single (0 : Fin 1) n) := fun s =>
+  ⟨s 0, Finsupp.ext fun i => by
+    rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]⟩
+
 @[simp]
 theorem coeffSeq_zero {A : Type*} [CommRing A] (n : ℕ) :
     coeffSeq (0 : MvPowerSeries (Fin 1) A) n = 0 := by
