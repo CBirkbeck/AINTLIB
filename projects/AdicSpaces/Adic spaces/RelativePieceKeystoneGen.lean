@@ -37,11 +37,6 @@ namespace GenKeystone
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
-/-- `A₀` of the faithful concrete pair (the `[IsTateRing A]`-binder on
-`concretePair_A₀'` is vestigial — the statement is `rfl`). -/
-theorem concretePair_A₀' (D₀ : RationalLocData A) :
-    (presheafValue_concretePair D₀).A₀ = presheafValue_ringOfDef D₀ := rfl
-
 set_option linter.unusedSectionVars false in
 /-- The span of the image of an ideal-generating set is the unit ideal. -/
 theorem span_image_canonicalMap_eq_top
@@ -242,41 +237,17 @@ theorem genPiece_rel_forward_witness
       rw [← map_mul, algebraMap_s_mul_divByS]
     exact hu.mul_left_cancel (h1.trans hz)
   have hps : ∀ p : A, D₀.canonicalMap p =
-      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) := by
-    intro p
-    rw [show D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) =
-      D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) D₀.s *
-        divByS p D₀.s) from by rw [map_mul]; rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
+    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
-      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ := by
-    intro p hp
-    rw [concretePair_A₀']
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · have h1 : divByS D₀.s D₀.s = 1 := by
-        unfold divByS
-        exact IsLocalization.mk'_self (M := Submonoid.powers D₀.s)
-          (S := Localization.Away D₀.s) ⟨1, pow_one D₀.s⟩
-      rw [h1, map_one]
-      exact one_mem _
-    · exact subset_closure ⟨⟨divByS p D₀.s,
-        divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
+    fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- the B-side `q/t`-identity: `canMap_B (canMap q) = canMap_B (canMap t) · coe ((im q)/(im t))`
+  -- the same `p/s`-factorisation as `hps`, one level up: `DB.s` is `D₀.canonicalMap t` by rfl
   have hqt : ∀ q : A, DB.canonicalMap (D₀.canonicalMap q) =
       DB.canonicalMap (D₀.canonicalMap t) *
-        DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) := by
-    intro q
-    rw [show DB.canonicalMap (D₀.canonicalMap t) *
-        DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) =
-      DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.canonicalMap t) * divByS (D₀.canonicalMap q) DB.s) from by
-      rw [map_mul]; rfl]
-    rw [show algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.canonicalMap t) = algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        DB.s from rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+        DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) := fun q =>
+    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS DB (D₀.canonicalMap q)
   -- the witness membership for the `q`-factor
   have hq_mem : ∀ q ∈ insert t T,
       divByS (D₀.canonicalMap q) DB.s ∈ locSubring DB.P DB.T DB.s := by

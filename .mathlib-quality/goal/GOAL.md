@@ -322,3 +322,51 @@ Both copies have exactly one user each: the `hA₀` block being collapsed. So st
 
 Collapse shape (minimal blast radius): keep each `have hX : <same statement> :=` and replace only
 its proof with `fun p hp => <new lemma> …`. 13L → 3L, 8L → 3L; the rest of every proof is untouched.
+
+### Batch 2 RESULT — and the lesson that dedup ≠ the 50-LOC bar
+
+Applied as planned. Net **−105 lines** (−138 duplication, +33 for the two new lemmas and their
+docstrings). All three Keystone files and WCA build.
+
+| what | before | after |
+|---|---|---|
+| `hA₀` (7 copies) | 13-14L each | 3L each |
+| `hps` (7 copies) | 8L each | 3L each (one is 6L, see below) |
+| `hqt` (3 copies) | 14L each | 4L each |
+| `concretePair_A₀'` twins | 2 declarations | deleted (orphaned by the collapse) |
+| `presheafValue_concretePair_A₀` | `[IsTateRing A]` | binder dropped (drop-test: body is `rfl`) |
+
+**But the over-50 count did not move: 380 before, 380 after.** Every one of those blocks sits
+inside a proof that is 100-250 lines long, so removing 10 lines from it changes nothing about
+the bar. Batch 1 crossed three thresholds only by luck — the copies there happened to live in
+51-56 line proofs.
+
+**So the two objectives are separate.** Deduplication is worth doing on its own merits (single
+source of truth, and it is most of what `/cleanup` means), but **it will not discharge task 2**.
+To move the over-50 count I have to decompose the large proofs directly. Remaining dedup work
+stays catalogued in `DEDUP-INLINE.md` and gets picked up per-file during task 3.
+
+#### Two gotchas from batch 2
+
+**1. Never key a bulk collapse on a `have`'s FIRST line.** My script matched
+`have hps : ∀ p : A, D₀.canonicalMap p =` and replaced 7 blocks — but one of them
+(`WedhornCechAcyclicity.lean:3027`) continues `D₀.canonicalMap DI.s * …`, not `D₀.s`. Different
+statement, and the original proof had an extra `have hs : DI.s = D₀.s * 1 := rfl; rw [hs, mul_one]`
+step to bridge it. Caught by auditing the second line of all 7 afterwards; recovered the original
+from `git show HEAD:<path>`. **Match the whole statement, or verify every hit afterwards.**
+
+**2. `Finset.insert` needs `[DecidableEq A]`.** The first draft of
+`coeRingHom_divByS_mem_concretePair_A₀` took `p ∈ insert D.s D.T` and failed to synthesize
+`Insert A (Finset A)` — the callers only have it because they run `classical`. Taking
+`[DecidableEq A]` instead would risk a diamond (the caller's `Classical.decEq` instance vs the
+one synthesised at the call, making the two `insert` terms non-syntactically-equal). Fixed by
+stating the hypothesis as the disjunction `p = D.s ∨ p ∈ D.T` — which is what the proof's first
+step (`Finset.mem_insert.mp`) produced anyway. **Prefer a disjunction to a `Finset.insert`
+membership in a shared lemma's hypotheses.**
+
+#### Assessed and deliberately skipped
+
+Group #17 (`hT_pb`, 4 copies, 21L): each copy is `intro t ht; rw [Finset.mem_singleton.mp ht];
+exact TopologicalRing.isPowerBounded_one` — 3 lines of clear tactic code. A shared lemma would
+save 2 lines per site and add a declaration. Not worth it. (A `▸` one-liner would save the same
+and is direction-fragile.) Recorded so it is not re-litigated.

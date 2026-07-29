@@ -57,6 +57,41 @@ theorem algebraMap_s_mul_divByS (D : RationalLocData A) (t : A) :
   apply IsLocalization.mk'_eq_of_eq
   simp [mul_comm]
 
+set_option linter.unusedSectionVars false in
+/-- **`canonicalMap` factors through `s`**: `canonicalMap p = canonicalMap s · coe (p/s)`,
+because `s · (p/s) = p` already holds in the localization.
+
+Used at both levels of the relative-piece stack: at the `A`-level for `D₀`, and at the
+`B`-level for the image datum (where `p` is itself a `D₀.canonicalMap q`). -/
+theorem canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS
+    (D : RationalLocData A) (p : A) :
+    D.canonicalMap p = D.canonicalMap D.s * D.coeRingHom (divByS p D.s) := by
+  rw [show D.canonicalMap D.s * D.coeRingHom (divByS p D.s) =
+    D.coeRingHom (algebraMap A (Localization.Away D.s) D.s * divByS p D.s) from by
+      rw [map_mul]; rfl]
+  rw [algebraMap_s_mul_divByS]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- For `p` either `D.s` or a member of `D.T`, the image `coe (p/s)` lies in the ring of
+definition of `presheafValue_concretePair D`: the `p = s` case gives `1`, and otherwise
+`p/s ∈ locSubring`.
+
+The hypothesis is a disjunction rather than `p ∈ insert D.s D.T` so that the lemma needs no
+`[DecidableEq A]`; callers holding the `insert` form pass `Finset.mem_insert.mp hp`. -/
+theorem coeRingHom_divByS_mem_concretePair_A₀
+    (D : RationalLocData A) {p : A} (hp : p = D.s ∨ p ∈ D.T) :
+    D.coeRingHom (divByS p D.s) ∈ (presheafValue_concretePair D).A₀ := by
+  rw [presheafValue_concretePair_A₀]
+  rcases hp with rfl | hp'
+  · have h1 : divByS D.s D.s = 1 := by
+      unfold divByS
+      exact IsLocalization.mk'_self (M := Submonoid.powers D.s)
+        (S := Localization.Away D.s) ⟨1, pow_one D.s⟩
+    rw [h1, map_one]
+    exact one_mem _
+  · exact subset_closure ⟨⟨divByS p D.s, divByS_mem_locSubring D.P D.T D.s hp'⟩, rfl⟩
+
 omit [PlusSubring A] [IsHuberRing A] in
 /-- **Absorption (Wedhorn §8.1-style)**: a high power of the ideal of definition
 multiplies any finitely many fixed ring elements into `A₀` (continuity of
@@ -325,41 +360,17 @@ theorem genPiece_rel_forward_witness
       rw [← map_mul, algebraMap_s_mul_divByS]
     exact hu.mul_left_cancel (h1.trans hz)
   have hps : ∀ p : A, D₀.canonicalMap p =
-      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) := by
-    intro p
-    rw [show D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) =
-      D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) D₀.s *
-        divByS p D₀.s) from by rw [map_mul]; rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
+    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
-      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ := by
-    intro p hp
-    rw [presheafValue_concretePair_A₀]
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · have h1 : divByS D₀.s D₀.s = 1 := by
-        unfold divByS
-        exact IsLocalization.mk'_self (M := Submonoid.powers D₀.s)
-          (S := Localization.Away D₀.s) ⟨1, pow_one D₀.s⟩
-      rw [h1, map_one]
-      exact one_mem _
-    · exact subset_closure ⟨⟨divByS p D₀.s,
-        divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
+    fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- the B-side `q/t`-identity: `canMap_B (canMap q) = canMap_B (canMap t) · coe ((im q)/(im t))`
+  -- the same `p/s`-factorisation as `hps`, one level up: `DB.s` is `D₀.canonicalMap t` by rfl
   have hqt : ∀ q : A, DB.canonicalMap (D₀.canonicalMap q) =
       DB.canonicalMap (D₀.canonicalMap t) *
-        DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) := by
-    intro q
-    rw [show DB.canonicalMap (D₀.canonicalMap t) *
-        DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) =
-      DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.canonicalMap t) * divByS (D₀.canonicalMap q) DB.s) from by
-      rw [map_mul]; rfl]
-    rw [show algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.canonicalMap t) = algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        DB.s from rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+        DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) := fun q =>
+    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS DB (D₀.canonicalMap q)
   -- the witness membership for the `q`-factor
   have hq_mem : ∀ q ∈ insert t T,
       divByS (D₀.canonicalMap q) DB.s ∈ locSubring DB.P DB.T DB.s := by

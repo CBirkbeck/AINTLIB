@@ -3029,26 +3029,11 @@ private theorem unitCover_relPlus_forward_witness
     intro p
     have hs : DI.s = D₀.s * 1 := rfl
     rw [hs, mul_one]
-    rw [show D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) =
-      D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) D₀.s *
-        divByS p D₀.s) from by rw [map_mul]; rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+    exact canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀ p
   -- the `p/s`-elements lie in the B-pair's `A₀`
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
-      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ := by
-    intro p hp
-    rw [presheafValue_concretePair_A₀]
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · -- `p = D₀.s`: `divByS s s = 1`
-      have h1 : divByS D₀.s D₀.s = 1 := by
-        unfold divByS
-        exact IsLocalization.mk'_self (M := Submonoid.powers D₀.s)
-          (S := Localization.Away D₀.s) ⟨1, pow_one D₀.s⟩
-      rw [h1, map_one]
-      exact one_mem _
-    · exact subset_closure ⟨⟨divByS p D₀.s,
-        divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
+    fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- decompose `t = p · q`
   have ht' : t ∈ ((insert D₀.s D₀.T).product
       (insert (1 : A) ({f} : Finset A))).image (fun p : A × A => p.1 * p.2) := ht
@@ -3699,13 +3684,8 @@ private theorem unitCover_relMinus_forward_witness
     exact hu.mul_left_cancel (h1.trans hw)
   -- the universal `p/s`-relation in `B`
   have hps : ∀ p : A, D₀.canonicalMap p =
-      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) := by
-    intro p
-    rw [show D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) =
-      D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) D₀.s *
-        divByS p D₀.s) from by rw [map_mul]; rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
+    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
   -- the `1/b`-identity in `presheafValue DB`
   have hinv : DB.canonicalMap (D₀.canonicalMap f) *
       DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s) = 1 := by
@@ -3718,18 +3698,8 @@ private theorem unitCover_relMinus_forward_witness
     rw [map_one, map_one]
   -- the `p/s`-elements lie in the B-pair's `A₀`
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
-      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ := by
-    intro p hp
-    rw [presheafValue_concretePair_A₀]
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · have h1 : divByS D₀.s D₀.s = 1 := by
-        unfold divByS
-        exact IsLocalization.mk'_self (M := Submonoid.powers D₀.s)
-          (S := Localization.Away D₀.s) ⟨1, pow_one D₀.s⟩
-      rw [h1, map_one]
-      exact one_mem _
-    · exact subset_closure ⟨⟨divByS p D₀.s,
-        divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
+    fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- decompose `t = p · q`, `q ∈ insert f {1}` (`coUnitDatum` has `s = f`, `T = {1}`)
   have ht' : t ∈ ((insert D₀.s D₀.T).product
       (insert f ({1} : Finset A))).image (fun p : A × A => p.1 * p.2) := ht
@@ -4448,26 +4418,11 @@ private theorem unitCover_relOverlap_forward_witness
       rw [← map_mul, algebraMap_s_mul_divByS]
     exact hu.mul_left_cancel (h1.trans hw)
   have hps : ∀ p : A, D₀.canonicalMap p =
-      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) := by
-    intro p
-    rw [show D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) =
-      D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) D₀.s *
-        divByS p D₀.s) from by rw [map_mul]; rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
+    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
-      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ := by
-    intro p hp
-    rw [presheafValue_concretePair_A₀]
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · have h1 : divByS D₀.s D₀.s = 1 := by
-        unfold divByS
-        exact IsLocalization.mk'_self (M := Submonoid.powers D₀.s)
-          (S := Localization.Away D₀.s) ⟨1, pow_one D₀.s⟩
-      rw [h1, map_one]
-      exact one_mem _
-    · exact subset_closure ⟨⟨divByS p D₀.s,
-        divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
+    fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- splitting of `divByS` along a product numerator
   have hsplit : ∀ p' q' : A, divByS (p' * q') D₀.s =
       divByS p' D₀.s * algebraMap A (Localization.Away D₀.s) q' := by
@@ -9157,26 +9112,11 @@ private theorem genPiece_relOverlap_forward_witness
       rw [← map_mul, algebraMap_s_mul_divByS]
     exact hu.mul_left_cancel (h1.trans hz)
   have hps : ∀ p : A, D₀.canonicalMap p =
-      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) := by
-    intro p
-    rw [show D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) =
-      D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) D₀.s *
-        divByS p D₀.s) from by rw [map_mul]; rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
+    canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
-      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ := by
-    intro p hp
-    rw [presheafValue_concretePair_A₀]
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · have h1 : divByS D₀.s D₀.s = 1 := by
-        unfold divByS
-        exact IsLocalization.mk'_self (M := Submonoid.powers D₀.s)
-          (S := Localization.Away D₀.s) ⟨1, pow_one D₀.s⟩
-      rw [h1, map_one]
-      exact one_mem _
-    · exact subset_closure ⟨⟨divByS p D₀.s,
-        divByS_mem_locSubring D₀.P D₀.T D₀.s hp'⟩, rfl⟩
+      D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
+    fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- the EII-merge identity
   have hmerge : ∀ u : presheafValue D₀,
       EII.canonicalMap (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) *

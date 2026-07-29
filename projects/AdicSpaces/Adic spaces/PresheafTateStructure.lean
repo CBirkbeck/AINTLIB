@@ -883,10 +883,12 @@ theorem presheafValue_concretePair_eq
 
 omit [PlusSubring A] in
 /-- `A₀` of the faithful concrete pair equals `presheafValue_ringOfDef D₀`
-(definitionally). -/
-theorem presheafValue_concretePair_A₀
-    [IsTateRing A]
-    (D₀ : RationalLocData A) :
+(definitionally).
+
+No `[IsTateRing A]`: the statement is `rfl`, so the binder was vestigial. It used to be
+there, which forced the general-relative-piece files (which do not carry that instance) to
+each clone this lemma as `concretePair_A₀'`; dropping it collapses all three into this one. -/
+theorem presheafValue_concretePair_A₀ (D₀ : RationalLocData A) :
     (presheafValue_concretePair D₀).A₀ = presheafValue_ringOfDef D₀ :=
   rfl
 
