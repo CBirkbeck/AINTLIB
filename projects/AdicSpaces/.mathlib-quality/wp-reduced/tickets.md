@@ -428,7 +428,35 @@ propext/Classical.choice/Quot.sound) before marking done.
   quotient-map nonexpansiveness.  Sources: [WP] 1057–1064, eq:graph-model 172–175.
 
 ### [W16] CoeffLocalization II — the head bridge
-- Status: open | File: WP/CoeffLocalization.lean | Depends: W15, W14
+- Status: done | File: WP/CoeffLocalization.lean | Depends: W15, W14
+- Progress: DONE 2026-07-29 (four staged commits).  (A) `headConst` (norm ≤,
+  continuous), `qX` (a WRAPPER DEF with codomain QHead — bare mk-terms break
+  HMul-synthesis at the opaque alias: type-ASCRIPTION does NOT survive
+  instance-search's reducible-transparency, a named def does), the closure-
+  membership via `Ideal.coe_closure` + `subset_closure` (NO `Ideal.le_closure`),
+  `headConst_datumEnum` (the graph relation), `isUnit_headConst_s` via
+  `exists_integral_bezout'` (NEW hT1-free prime version in Perturbation — proof
+  identical, the entries were never normalized) at the piHead scale-bundle +
+  `Finset.sum_coe_sort` + `Equiv.sum_comp` reindex + `isUnit_of_mul_isUnit_left`.
+  (B) fwd: `IsLocalization.Away.lift` + `locTopology_continuous_lift` (the
+  chartFwd criterion, LocalizationTopology:360); `headLocFwdAlg_divByS` by
+  `IsUnit.mul_right_cancel` off `IsLocalization.mk'_spec`; power-bounds via
+  `norm_qX_le_one` + `FiniteJet.isPowerBounded_of_norm_le_one` (NEW import
+  FJP.FiniteJetFunctoriality).  (C) rev: `restrictedEval` at
+  `revB i := coeRingHom (divByS t_i s)` (power-bounded by the gChart pattern —
+  `CompletionLocalization.coeRingHom_image_locSubring_isBounded`, NO
+  HasLocLift/IsROIE needed); relations die by `mk'_spec`; kernel ⊇ closure by
+  `closure_minimal` against the closed kernel; descent `Ideal.Quotient.lift`;
+  continuity by ε-lifts (`Ideal.Quotient.norm_mk_lt` — NORM-INSTANCE-ATOM WARNING:
+  their SeminormedCommRing-path ‖q‖ vs the ambient instance's are defeq but
+  distinct atoms for linarith/rw — bridge with a CALC whose RHS you write
+  yourself).  (D) equiv: roundtrips via `IsLocalization.ringHom_ext` +
+  `DenseRange.equalizer` on coe/polyToP-dense images; `RingHom.congr_fun`;
+  `Subtype.coe_eta` + `Equiv.symm_apply_apply` for the enum roundtrip; auto-rfl
+  after rw fails on instance-path-mixed `+` — append `rfl`.  hK₀ is UNUSED
+  (closure-model absorbed it) but kept (canonical statement).
+  STALE-OLEAN GOTCHA: after editing an upstream file's API, `lake build` it before
+  `lake env lean` on the consumer.  Axioms clean ×4.
 - Decls: `headLocEquiv` (+`_continuous`, `_symm_continuous`).
 - Sketch: s is a unit in QHead ([WP] Bezout trick, lem:koszul proof 427–432:
   t^ℓ = s·(a₀ + ∑ a_i T_i) mod the graph ideal, t a unit); fwd :=

@@ -551,6 +551,121 @@ theorem headLocRev_continuous (DH : RationalLocData (WPHead K w N)) :
 /-! ### The head bridge `presheafValue ≃ QHead` -/
 
 variable {K w N} in
+/-- The forward bridge on the completion. -/
+noncomputable def headLocFwd (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    presheafValue DH →+* QHead DH := by
+  letI := DH.uniformSpace
+  letI : IsTopologicalRing (Localization.Away DH.s) := DH.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away DH.s) := DH.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom (headLocFwdAlg ϖ DH hDH)
+    (headLocFwdAlg_continuous ϖ DH hDH)
+
+variable {K w N} in
+theorem headLocFwd_coe (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (a : Localization.Away DH.s) :
+    headLocFwd ϖ DH hDH (DH.coeRingHom a) = headLocFwdAlg ϖ DH hDH a := by
+  letI := DH.uniformSpace
+  letI : IsTopologicalRing (Localization.Away DH.s) := DH.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away DH.s) := DH.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe (headLocFwdAlg ϖ DH hDH)
+    (headLocFwdAlg_continuous ϖ DH hDH) a
+
+variable {K w N} in
+theorem headLocFwd_continuous (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    Continuous (headLocFwd ϖ DH hDH) := by
+  letI := DH.uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
+variable {K w N} in
+theorem continuous_mk_headGraphIdeal (DH : RationalLocData (WPHead K w N)) :
+    Continuous (Ideal.Quotient.mk (headGraphIdeal DH)) := by
+  refine (LipschitzWith.of_dist_le_mul (K := 1) fun a b => ?_).continuous
+  rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
+  exact Ideal.Quotient.norm_mk_le _ _
+
+variable {K w N} in
+/-- The composite `rev ∘ fwdAlg` is the completion map (agreement on the
+localization generators). -/
+theorem headLocRev_comp_fwdAlg (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    (headLocRev DH).comp (headLocFwdAlg ϖ DH hDH) = DH.coeRingHom := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers DH.s) ?_
+  ext x
+  rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply,
+    headLocFwdAlg_algebraMap]
+  rw [show headConst DH x =
+    Ideal.Quotient.mk (headGraphIdeal DH) (polyToP (MvPolynomial.C x)) from rfl]
+  rw [headLocRev_mk, headLocRevP_C]
+  rfl
+
+variable {K w N} in
+theorem headLocRev_headLocFwd (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (x : presheafValue DH) :
+    headLocRev DH (headLocFwd ϖ DH hDH x) = x := by
+  letI := DH.uniformSpace
+  have hdense : DenseRange (⇑DH.coeRingHom) :=
+    @UniformSpace.Completion.denseRange_coe _ DH.uniformSpace
+  have hfun : ⇑(headLocRev DH) ∘ ⇑(headLocFwd ϖ DH hDH) =
+      (id : presheafValue DH → presheafValue DH) := by
+    refine hdense.equalizer
+      ((headLocRev_continuous DH).comp (headLocFwd_continuous ϖ DH hDH))
+      continuous_id ?_
+    funext l
+    show headLocRev DH (headLocFwd ϖ DH hDH (DH.coeRingHom l)) = DH.coeRingHom l
+    rw [headLocFwd_coe]
+    exact RingHom.congr_fun (headLocRev_comp_fwdAlg ϖ DH hDH) l
+  exact congrFun hfun x
+
+variable {K w N} in
+/-- The forward bridge sends the `T/s`-fraction to the corresponding variable. -/
+theorem headLocFwd_revB (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (i : Fin DH.T.card) :
+    headLocFwd ϖ DH hDH (revB DH i) = qX DH i := by
+  rw [revB, headLocFwd_coe, headLocFwdAlg_divByS ϖ DH hDH (datumEnum DH i).2]
+  congr 1
+  rw [show (⟨((datumEnum DH i : ↥DH.T) : WPHead K w N), (datumEnum DH i).2⟩ :
+    ↥DH.T) = datumEnum DH i from Subtype.coe_eta _ _]
+  exact Equiv.symm_apply_apply _ _
+
+variable {K w N} in
+theorem headLocFwd_headLocRev (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) (q : QHead DH) :
+    headLocFwd ϖ DH hDH (headLocRev DH q) = q := by
+  obtain ⟨G, rfl⟩ := Ideal.Quotient.mk_surjective (I := headGraphIdeal DH) q
+  rw [headLocRev_mk]
+  have hpoly : ∀ Q : MvPolynomial (Fin DH.T.card) (WPHead K w N),
+      headLocFwd ϖ DH hDH (headLocRevP DH (polyToP Q)) =
+        Ideal.Quotient.mk (headGraphIdeal DH) (polyToP Q) := by
+    intro Q
+    induction Q using MvPolynomial.induction_on with
+    | C x =>
+      rw [headLocRevP_C,
+        show DH.canonicalMap x = DH.coeRingHom
+          (algebraMap (WPHead K w N) (Localization.Away DH.s) x) from rfl,
+        headLocFwd_coe, headLocFwdAlg_algebraMap]
+      rfl
+    | add p q hp hq =>
+      rw [map_add, map_add, map_add, map_add, hp, hq]
+      rfl
+    | mul_X p i hp =>
+      rw [map_mul, map_mul, map_mul, map_mul, hp, headLocRevP_X,
+        headLocFwd_revB]
+      rfl
+  have h1 : ⇑((headLocFwd ϖ DH hDH).comp (headLocRevP DH)) =
+      ⇑(Ideal.Quotient.mk (headGraphIdeal DH)) := by
+    refine denseRange_polyToP.equalizer
+      ((headLocFwd_continuous ϖ DH hDH).comp (headLocRevP_continuous DH))
+      (continuous_mk_headGraphIdeal DH) ?_
+    funext Q
+    exact hpoly Q
+  exact congrFun h1 G
+
+variable {K w N} in
 /-- **The head graph-model bridge**: the completed rational localization of the
 strongly noetherian head is its graph quotient ([WP] eq:graph-model
 `E_α ≅ P_E/J̄_{E,α}`; forward via `IsLocalization.Away.lift` — `s` is a unit in the
@@ -559,19 +674,27 @@ gadget `restrictedEval` at the power-bounded tuple `T_i ↦ t_i/s`). -/
 noncomputable def headLocEquiv (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
-    presheafValue DH ≃+* QHead DH := by sorry
+    presheafValue DH ≃+* QHead DH :=
+  { toFun := headLocFwd ϖ DH hDH
+    invFun := headLocRev DH
+    left_inv := headLocRev_headLocFwd ϖ DH hDH
+    right_inv := headLocFwd_headLocRev ϖ DH hDH
+    map_mul' := map_mul _
+    map_add' := map_add _ }
 
 variable {K w N} in
 theorem headLocEquiv_continuous (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
-    Continuous (headLocEquiv ϖ hK₀ DH hDH) := by sorry
+    Continuous (headLocEquiv ϖ hK₀ DH hDH) :=
+  headLocFwd_continuous ϖ DH hDH
 
 variable {K w N} in
 theorem headLocEquiv_symm_continuous (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
-    Continuous (headLocEquiv ϖ hK₀ DH hDH).symm := by sorry
+    Continuous (headLocEquiv ϖ hK₀ DH hDH).symm :=
+  headLocRev_continuous DH
 
 /-! ### The lifted datum and the coefficientwise model over `𝒜` -/
 
