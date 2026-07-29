@@ -91,6 +91,19 @@ theorem baseCechTupleRestriction_comp
       (F.map_comp a b).symm
     _ = F.map c := congrArg F.map (Subsingleton.elim _ _)
 
+/-- Tuple restriction agrees with any map between the same two intersection opens. -/
+theorem baseCechTupleRestriction_eq_map
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m : ℕ}
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι)
+    (h : Set.range j ⊆ Set.range i)
+    (a : (∏ᶜ fun k : Fin (n + 1) => U (i k)) ⟶
+      ∏ᶜ fun k : Fin (m + 1) => U (j k)) :
+    baseCechTupleRestriction π M U i j h =
+      (baseModulePresheaf π M).map a.op := by
+  apply congrArg (baseModulePresheaf π M).map
+  exact Subsingleton.elim _ _
+
 /-- One basis entry in a tuple row, with unsupported entries discarded. -/
 noncomputable def baseCechTupleRowBasis
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
@@ -326,6 +339,38 @@ theorem CechTupleSupportNonincreasing.comp
   intro i
   exact CechTupleSupportNonincreasing.map_supportedBy
     hg (f (Finsupp.single i 1)) (Set.range i) (hf i)
+
+/-- The tuple deletion boundary does not enlarge support. -/
+theorem cechTupleBoundary_supportNonincreasing
+    {ι : Type u} (n : ℕ) :
+    CechTupleSupportNonincreasing
+      (cechTupleBoundary (ι := ι) n) := by
+  intro i
+  apply cechTupleBoundary_supportedBy
+  exact CechTupleChain.supportedBy_single i 1 Subset.rfl
+
+/-- The sorted-tuple projection does not enlarge support. -/
+theorem cechTupleAlternatingProjection_supportNonincreasing
+    {ι : Type u} [LinearOrder ι] (n : ℕ) :
+    CechTupleSupportNonincreasing
+      (cechTupleAlternatingProjection (ι := ι) n) := by
+  intro i
+  apply cechTupleAlternatingProjection_supportedBy
+  exact CechTupleChain.supportedBy_single i 1 Subset.rfl
+
+/-- The lower-degree term in the tuple homotopy does not enlarge support. -/
+theorem cechTupleAlternatingHomotopyPrevious_supportNonincreasing
+    {ι : Type u} [LinearOrder ι] (n : ℕ) :
+    CechTupleSupportNonincreasing
+      (cechTupleAlternatingHomotopyPrevious (ι := ι) n) := by
+  intro i
+  cases n with
+  | zero =>
+      exact CechTupleChain.supportedBy_zero
+  | succ n =>
+      apply cechTupleAlternatingHomotopy_supportedBy
+      apply cechTupleBoundary_supportedBy
+      exact CechTupleChain.supportedBy_single i 1 Subset.rfl
 
 /-- Extensionality for a map into one native base-Cech degree, using its concrete tuple factors. -/
 theorem baseCechHom_ext
@@ -587,6 +632,76 @@ theorem baseCechTupleMapF_comp
     _ = (baseCechTupleMapF π M U g hg ≫
           baseCechTupleMapF π M U f hf) ≫ p :=
       (Category.assoc _ _ _).symm
+
+/-- Deleting an entry does not introduce a new tuple index. -/
+theorem cechTupleDelete_range_subset
+    {ι : Type u} {n : ℕ} (i : Fin (n + 2) → ι)
+    (k : Fin (n + 2)) :
+    Set.range (cechTupleDelete i k) ⊆ Set.range i := by
+  rintro x ⟨l, rfl⟩
+  exact ⟨k.succAbove l, rfl⟩
+
+/-- The restriction lift of the tuple boundary is the native base-Cech differential. -/
+theorem baseCechTupleMapF_boundary
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n : ℕ) :
+    baseCechTupleMapF π M U
+        (cechTupleBoundary (ι := ι) n)
+        (cechTupleBoundary_supportNonincreasing n) =
+      (baseCechComplex π M U).d n (n + 1) := by
+  apply baseCechHom_ext π M U (n + 1)
+  intro i
+  let p : (baseCechComplex π M U).X (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    Pi.π (fun q : Fin (n + 2) → ι =>
+      baseCechFactor π M U (n + 1) q) i
+  let t : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U (n + 1) i :=
+    ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+      (Pi.π (fun q : Fin (n + 1) → ι =>
+          baseCechFactor π M U n q)
+            (cechTupleDelete i k) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op)
+  have hcomponent :
+      baseCechTupleMapComponent π M U
+          (cechTupleBoundary (ι := ι) n)
+          (cechTupleBoundary_supportNonincreasing n) i = t := by
+    change baseCechTupleRow π M U i
+        (cechTupleBoundary n (Finsupp.single i 1)) = t
+    rw [cechTupleBoundary_single, one_smul]
+    unfold cechTupleBoundaryBasis
+    rw [map_sum]
+    apply Finset.sum_congr rfl
+    intro k _
+    let h := cechTupleDelete_range_subset i k
+    rw [baseCechTupleRow_single_of_subset
+      π M U i (cechTupleDelete i k)
+        ((-1 : ℤ) ^ (k : ℕ)) h]
+    congr 2
+  calc
+    baseCechTupleMapF π M U (cechTupleBoundary n)
+          (cechTupleBoundary_supportNonincreasing n) ≫ p =
+        baseCechTupleMapComponent π M U (cechTupleBoundary n)
+          (cechTupleBoundary_supportNonincreasing n) i := by
+      dsimp only [p]
+      exact baseCechTupleMapF_comp_π π M U
+        (cechTupleBoundary n)
+          (cechTupleBoundary_supportNonincreasing n) i
+    _ = t := hcomponent
+    _ = (baseCechComplex π M U).d n (n + 1) ≫ p := by
+      dsimp only [t, p]
+      rw [baseCechComplex_d_comp_π]
+      apply Finset.sum_congr rfl
+      intro k _
+      have hδ :
+          (SimplexCategory.δ k).toOrderHom.toFun =
+            k.succAbove := by
+        change (⇑(ConcreteCategory.hom (SimplexCategory.δ k))) =
+          k.succAbove
+        exact SimplexCategory.coe_δ k
+      rw [hδ]
+      rfl
 
 end
 
