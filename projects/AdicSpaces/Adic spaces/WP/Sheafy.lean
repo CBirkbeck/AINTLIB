@@ -342,6 +342,21 @@ theorem wpMem_shiftWeight_iff (w : ℕ → ℕ) (s : ℕ) (u : ℕ →₀ ℕ) :
   rw [WPMem, WPMem, wpWeight_shiftWeight_eq, slotInr_zero_apply]
 
 variable {K w} in
+/-- The flatten hom lands in the shifted-weight support: coefficients vanish off
+`WPMem (shiftWeight w s)` (the support condition of the nested `𝒜`-coefficient,
+transported along the slot bijection). -/
+theorem tateExtToFlat_support (s : ℕ)
+    (F : ↥(restrictedMvPowerSeriesSubring s (WPA K w))) (u : ℕ →₀ ℕ)
+    (hu : ¬ WPMem (shiftWeight w s) u) :
+    MvPowerSeries.coeff u (tateExtToFlat (K := K) (w := w) s F) = 0 := by
+  rw [tateExtToFlat_coeff]
+  have hX := (MvPowerSeries.coeff
+    (Finsupp.comapDomain Sum.inl (Finsupp.equivMapDomain (slotEquiv s) u)
+      Sum.inl_injective.injOn) F.1).2
+  exact hX (slotInr s u)
+    (fun hc => hu ((wpMem_shiftWeight_iff w s u).mpr hc))
+
+variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex
 of restricted power series; nested-vs-flat plumbing). -/
