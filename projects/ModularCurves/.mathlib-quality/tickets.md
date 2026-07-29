@@ -29174,7 +29174,24 @@ remove codimension-one poles. Two robust constructions, in preference order:
 
 ### Tickets
 
-#### [GAP-A-3] `π_*𝒪(2[0])` and `π_*𝒪(3[0])` free of ranks 2, 3 — `state:todo`
+#### [GAP-A-3] `π_*𝒪(2[0])` and `π_*𝒪(3[0])` free of ranks 2, 3 — **`state:done`** 2026-07-29
+**Progress**: DONE. `EllipticCurve/PoleSheafRankTwoThree.lean` —
+`sectionPoleSheafPower_{two,three}_baseSectionsBasisOfCartierGenerator`, both axiom-clean
+(propext / Classical.choice / Quot.sound), added to the root index. They are thin wrappers of
+codex's generic ladder step `sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator`,
+phrased with the *normalised-coordinate* hypothesis
+(`..._succ_baseSectionsCoordinateOfCartierGenerator … = 1`), which is what
+`FibrewiseElliptic.exists_sectionPoleSheafPower_baseChange_projectiveClosed_local_xy` already
+produces — so no bridging is needed at the use site (the coordinate is *definitionally* the
+iso-composite, so `exact` discharges it; `simp` does not, on this pin).
+Inputs found already present rather than built: the rank-one `bOne` is constructed
+Zariski-locally by `PoleSheafPowerOneAwayBaseChangeBasis.lean`, and the `H¹` vanishing by
+`FibrewiseElliptic.sectionPoleSheafPower_baseChange_projectiveClosed_subsingleton_H_one`.
+NOTE for GAP-A-4/5: codex's local-xy producer carries `[IsNoetherianRing R]`. Harmless for
+the adopted route — the universal base `Spec ℤ[a₁..a₆][Δ⁻¹]` is noetherian, and base change
+away from it does not need the hypothesis.
+
+(original scope)
 From codex's ladder (`sectionPoleSheafPower_{four,five,six}_baseSectionsBasisOfCartierGenerator`
 and the lower stages) plus relative H¹ vanishing
 (`sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood`, arbitrary base,

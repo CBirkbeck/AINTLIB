@@ -37,6 +37,7 @@ import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+import ModularCurves.EllipticCurve.PoleSheafRankTwoThree
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.SectionRigidity
 import ModularCurves.EllipticCurve.Torsion
