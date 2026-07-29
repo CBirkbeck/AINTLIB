@@ -14,6 +14,88 @@ universe u
 
 namespace HomologicalComplex₂
 
+private theorem up_prev_succ (n : ℕ) :
+    (ComplexShape.up ℕ).prev (n + 1) = n :=
+  (ComplexShape.up ℕ).prev_eq' rfl
+
+private theorem up_next_succ (n : ℕ) :
+    (ComplexShape.up ℕ).next (n + 1) = n + 2 :=
+  (ComplexShape.up ℕ).next_eq' rfl
+
+private noncomputable def abCyclesMkAt
+    (L : CochainComplex AddCommGrpCat.{u} ℕ) (n : ℕ)
+    (x : L.X (n + 1))
+    (hx : L.d (n + 1) (n + 2) x = 0) :
+    L.cycles (n + 1) :=
+  (L.cyclesIsoSc' n (n + 1) (n + 2)
+    (up_prev_succ n) (up_next_succ n)).inv
+      ((L.sc' n (n + 1) (n + 2)).abCyclesIso.inv ⟨x, hx⟩)
+
+@[simp]
+private theorem i_abCyclesMkAt
+    (L : CochainComplex AddCommGrpCat.{u} ℕ) (n : ℕ)
+    (x : L.X (n + 1))
+    (hx : L.d (n + 1) (n + 2) x = 0) :
+    L.iCycles (n + 1) (abCyclesMkAt L n x hx) = x := by
+  have h₁ := congrArg
+    (fun g ↦ g ((L.sc' n (n + 1) (n + 2)).abCyclesIso.inv ⟨x, hx⟩))
+    (L.cyclesIsoSc'_inv_iCycles n (n + 1) (n + 2)
+      (up_prev_succ n) (up_next_succ n))
+  simp only [ConcreteCategory.comp_apply] at h₁
+  have h₂ := (L.sc' n (n + 1) (n + 2)).abCyclesIso_inv_apply_iCycles
+    ⟨x, hx⟩
+  exact h₁.trans h₂
+
+private theorem homologyπ_abCyclesMkAt_eq_of_sub_eq_boundary
+    (L : CochainComplex AddCommGrpCat.{u} ℕ) (n : ℕ)
+    (x y : L.X (n + 1))
+    (hx : L.d (n + 1) (n + 2) x = 0)
+    (hy : L.d (n + 1) (n + 2) y = 0)
+    (b : L.X n) (hxy : x - y = L.d n (n + 1) b) :
+    L.homologyπ (n + 1) (abCyclesMkAt L n x hx) =
+      L.homologyπ (n + 1) (abCyclesMkAt L n y hy) := by
+  rw [← sub_eq_zero, ← map_sub]
+  have hcycles :
+      abCyclesMkAt L n x hx - abCyclesMkAt L n y hy =
+        L.toCycles n (n + 1) b := by
+    apply (AddCommGrpCat.mono_iff_injective
+      (L.iCycles (n + 1))).mp inferInstance
+    simp only [map_sub, i_abCyclesMkAt]
+    have h := congrArg (fun f ↦ f b)
+      (L.toCycles_i n (n + 1))
+    exact hxy.trans (by
+      simpa only [ConcreteCategory.comp_apply] using h.symm)
+  rw [hcycles]
+  have h := congrArg (fun f ↦ f b)
+    (L.toCycles_comp_homologyπ n (n + 1))
+  simpa only [ConcreteCategory.comp_apply, AddCommGrpCat.hom_zero,
+    AddMonoidHom.zero_apply] using h
+
+private theorem homologyMap_abCyclesMkAt
+    {L M : CochainComplex AddCommGrpCat.{u} ℕ} (f : L ⟶ M)
+    (n : ℕ) (x : L.X (n + 1))
+    (hx : L.d (n + 1) (n + 2) x = 0)
+    (hfx : M.d (n + 1) (n + 2) (f.f (n + 1) x) = 0) :
+    HomologicalComplex.homologyMap f (n + 1)
+        (L.homologyπ (n + 1) (abCyclesMkAt L n x hx)) =
+      M.homologyπ (n + 1)
+        (abCyclesMkAt M n (f.f (n + 1) x) hfx) := by
+  have hcycles :
+      HomologicalComplex.cyclesMap f (n + 1)
+          (abCyclesMkAt L n x hx) =
+        abCyclesMkAt M n (f.f (n + 1) x) hfx := by
+    apply (AddCommGrpCat.mono_iff_injective
+      (M.iCycles (n + 1))).mp inferInstance
+    have h := congrArg
+      (fun g ↦ g (abCyclesMkAt L n x hx))
+      (HomologicalComplex.cyclesMap_i f (n + 1))
+    simpa only [ConcreteCategory.comp_apply, i_abCyclesMkAt] using h
+  have h := congrArg
+    (fun g ↦ g (abCyclesMkAt L n x hx))
+    (HomologicalComplex.homologyπ_naturality
+      (φ := f) (i := n + 1))
+  simpa only [ConcreteCategory.comp_apply, hcycles] using h
+
 variable (K : HomologicalComplex₂ AddCommGrpCat.{u} (.up ℕ) (.up ℕ))
 variable [K.HasTotal (.up ℕ)]
 
@@ -102,5 +184,68 @@ theorem exists_horizontalEdge_cycle_sub_boundary
   rw [hedge]
   exact (K.ιTotal_horizontalAxis_eq_of_components_lt_eq_zero
     (n + 1) y (fun q hq ↦ hb q hq)).symm
+
+/-- The horizontal-edge map is surjective on homology in every positive degree
+when the corresponding positive vertical rows are exact. -/
+theorem totalUpNatHorizontalEdge_homologyMap_surjective_of_positive
+    (A : CochainComplex AddCommGrpCat.{u} ℕ)
+    (e : ∀ q, A.X q ⟶ (K.X q).X 0)
+    (he : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e q ≫ (K.d q q').f 0 = A.d q q' ≫ e q')
+    (w : ∀ q, e q ≫ (K.X q).d 0 1 = 0)
+    (n : ℕ)
+    (hrowAxis : (ShortComplex.mk (e (n + 1))
+      ((K.X (n + 1)).d 0 1) (w (n + 1))).Exact)
+    (hrowPositive : ∀ q p, q + p = n + 1 → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact)
+    [Mono (e (n + 2))] :
+    Function.Surjective (HomologicalComplex.homologyMap
+      (K.totalUpNatHorizontalEdge A e he w) (n + 1)) := by
+  let T := K.total (.up ℕ)
+  let edge := K.totalUpNatHorizontalEdge A e he w
+  intro ξ
+  have hπ : Function.Surjective (T.homologyπ (n + 1)) :=
+    (AddCommGrpCat.epi_iff_surjective
+      (T.homologyπ (n + 1))).mp inferInstance
+  obtain ⟨xc, rfl⟩ := hπ ξ
+  let x : T.X (n + 1) := T.iCycles (n + 1) xc
+  have hx : T.d (n + 1) (n + 2) x = 0 := by
+    have h := congrArg (fun g ↦ g xc)
+      (T.iCycles_d (n + 1) (n + 2))
+    simpa only [x, ConcreteCategory.comp_apply, AddCommGrpCat.hom_zero,
+      AddMonoidHom.zero_apply] using h
+  obtain ⟨a, b, haCycle, hdiff⟩ :=
+    K.exists_horizontalEdge_cycle_sub_boundary A e he w n hrowAxis
+      hrowPositive x hx
+  have hedgeCycle :
+      T.d (n + 1) (n + 2) (edge.f (n + 1) a) = 0 := by
+    have h := congrArg (fun g ↦ g a)
+      (edge.comm (n + 1) (n + 2))
+    simpa only [ConcreteCategory.comp_apply, haCycle, map_zero] using h
+  have hxc : abCyclesMkAt T n x hx = xc := by
+    apply (AddCommGrpCat.mono_iff_injective
+      (T.iCycles (n + 1))).mp inferInstance
+    simp only [i_abCyclesMkAt, x]
+  have hdiff' :
+      x - edge.f (n + 1) a = T.d n (n + 1) b := by
+    rw [← hdiff]
+    abel
+  refine ⟨A.homologyπ (n + 1)
+    (abCyclesMkAt A n a haCycle), ?_⟩
+  calc
+    HomologicalComplex.homologyMap edge (n + 1)
+        (A.homologyπ (n + 1)
+          (abCyclesMkAt A n a haCycle)) =
+      T.homologyπ (n + 1)
+        (abCyclesMkAt T n (edge.f (n + 1) a) hedgeCycle) :=
+        homologyMap_abCyclesMkAt edge n a haCycle hedgeCycle
+    _ = T.homologyπ (n + 1)
+        (abCyclesMkAt T n x hx) :=
+      (homologyπ_abCyclesMkAt_eq_of_sub_eq_boundary
+        T n x (edge.f (n + 1) a) hx hedgeCycle b hdiff').symm
+    _ = T.homologyπ (n + 1) xc := by rw [hxc]
 
 end HomologicalComplex₂
