@@ -788,4 +788,130 @@ theorem exists_integral_bezout (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)
       rw [if_pos hx, mul_assoc], ← Finset.mul_sum]
     rw [show ∑ x ∈ D.T, c x * x = 1 from hc, mul_one]
 
+/-! ### Datum changes that preserve the rational subset
+([WP] cor:finite-head-presentation, step 1) -/
+
+/-- Adjoining `s` to `T` does not change the rational subset. -/
+theorem rationalOpen_insert_self (T : Finset E) (s : E) [DecidableEq E] :
+    rationalOpen (insert s T) s = rationalOpen T s := by
+  ext v
+  letI : ValuativeRel E := v.toValuativeRel
+  set w := ValuativeRel.valuation E with hw
+  have hvle : ∀ g h : E, v.vle g h ↔ w g ≤ w h := fun g h =>
+    Valuation.Compatible.vle_iff_le (v := w) g h
+  constructor
+  · rintro ⟨hspa, hT, hs0⟩
+    exact ⟨hspa, fun t ht => hT t (Finset.mem_insert_of_mem ht), hs0⟩
+  · rintro ⟨hspa, hT, hs0⟩
+    refine ⟨hspa, fun t ht => ?_, hs0⟩
+    rcases Finset.mem_insert.mp ht with rfl | ht'
+    · exact (hvle t t).mpr (le_refl _)
+    · exact hT t ht'
+
+private theorem gv_le_of_mul_le_mul_left {Γ₀ : Type*}
+    [LinearOrderedCommGroupWithZero Γ₀] {a b c : Γ₀} (hc : c ≠ 0)
+    (h : c * a ≤ c * b) : a ≤ b := by
+  have h1 := mul_le_mul_left h c⁻¹
+  rwa [mul_right_comm, mul_inv_cancel₀ hc, one_mul, mul_right_comm,
+    mul_inv_cancel₀ hc, one_mul] at h1
+
+/-- Scaling both `T` and `s` by a unit does not change the rational subset
+([WP] cor:finite-head-presentation: replace `(T, s)` by `(ϖ^k T, ϖ^k s)`). -/
+theorem rationalOpen_unitSMul (c : E) (hc : IsUnit c) (T : Finset E) (s : E)
+    [DecidableEq E] :
+    rationalOpen (T.image (c * ·)) (c * s) = rationalOpen T s := by
+  ext v
+  letI : ValuativeRel E := v.toValuativeRel
+  set w := ValuativeRel.valuation E with hw
+  have hvle : ∀ g h : E, v.vle g h ↔ w g ≤ w h := fun g h =>
+    Valuation.Compatible.vle_iff_le (v := w) g h
+  have hc0 : w c ≠ 0 := (hc.map w).ne_zero
+  constructor
+  · rintro ⟨hspa, hT, hs0⟩
+    refine ⟨hspa, fun t ht => ?_, fun hcon => ?_⟩
+    · have h1 := hT (c * t) (Finset.mem_image_of_mem _ ht)
+      rw [hvle, map_mul, map_mul] at h1
+      exact (hvle t s).mpr (gv_le_of_mul_le_mul_left hc0 h1)
+    · refine hs0 ?_
+      rw [hvle, map_zero] at hcon ⊢
+      rw [map_mul]
+      rw [le_zero_iff] at hcon ⊢
+      rw [hcon, mul_zero]
+  · rintro ⟨hspa, hT, hs0⟩
+    refine ⟨hspa, fun t' ht' => ?_, fun hcon => ?_⟩
+    · obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      have h1 := (hvle t s).mp (hT t ht)
+      rw [hvle, map_mul, map_mul, mul_comm (w c) (w t), mul_comm (w c) (w s)]
+      exact mul_le_mul_left h1 (w c)
+    · refine hs0 ?_
+      rw [hvle, map_zero, le_zero_iff, map_mul] at hcon
+      rcases mul_eq_zero.mp hcon with h0 | h0
+      · exact absurd h0 hc0
+      · rw [hvle, map_zero, le_zero_iff]
+        exact h0
+
+/-! ### The restriction equivalence at equal rational subsets -/
+
+/-- Any two rational data cutting the same rational subset have canonically
+isomorphic completed localizations (the [WP] lem:small-perturbation mechanism,
+decoupled from the perturbation: restriction maps both ways). -/
+noncomputable def restrictionEquiv [IsHuberRing E] [HasLocLiftPowerBounded E]
+    (D D' : RationalLocData E)
+    (h : rationalOpen D'.T D'.s = rationalOpen D.T D.s) :
+    presheafValue D ≃+* presheafValue D' :=
+  { toFun := restrictionMapHom D D' h.le
+    invFun := restrictionMapHom D' D h.ge
+    left_inv := fun x => by
+      have hcomp := congr_fun (restrictionMap_comp D D' D h.le h.ge) x
+      have hid : restrictionMap D D (h.ge.trans h.le) = id := restrictionMap_id D
+      rw [hid] at hcomp
+      exact hcomp
+    right_inv := fun x => by
+      have hcomp := congr_fun (restrictionMap_comp D' D D' h.ge h.le) x
+      have hid : restrictionMap D' D' (h.le.trans h.ge) = id := restrictionMap_id D'
+      rw [hid] at hcomp
+      exact hcomp
+    map_mul' := map_mul _
+    map_add' := map_add _ }
+
+theorem restrictionEquiv_continuous [IsHuberRing E] [HasLocLiftPowerBounded E]
+    (D D' : RationalLocData E)
+    (h : rationalOpen D'.T D'.s = rationalOpen D.T D.s) :
+    Continuous (restrictionEquiv D D' h) := by
+  show Continuous (restrictionMapHom D D' h.le)
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  exact UniformSpace.Completion.continuous_extension
+
+theorem restrictionEquiv_symm_continuous [IsHuberRing E] [HasLocLiftPowerBounded E]
+    (D D' : RationalLocData E)
+    (h : rationalOpen D'.T D'.s = rationalOpen D.T D.s) :
+    Continuous (restrictionEquiv D D' h).symm := by
+  show Continuous (restrictionMapHom D' D h.ge)
+  letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D'.s) := D'.isUniformAddGroup
+  exact UniformSpace.Completion.continuous_extension
+
+theorem restrictionEquiv_canonicalMap [IsHuberRing E] [HasLocLiftPowerBounded E]
+    (D D' : RationalLocData E)
+    (h : rationalOpen D'.T D'.s = rationalOpen D.T D.s) (x : E) :
+    restrictionEquiv D D' h (D.canonicalMap x) = D'.canonicalMap x := by
+  show restrictionMapHom D D' h.le (D.canonicalMap x) = D'.canonicalMap x
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  have h1 := UniformSpace.Completion.extensionHom_coe
+    (restrictionMapAlg D D' h.le)
+    (restrictionMapAlg_continuous D D' h.le)
+    (algebraMap E (Localization.Away D.s) x)
+  have h2 : restrictionMapAlg D D' h.le
+      (algebraMap E (Localization.Away D.s) x) = D'.canonicalMap x := by
+    show IsLocalization.Away.lift D.s
+      (HasLocLiftPowerBounded.isUnit_canonicalMap_s D D' h.le)
+      (algebraMap E (Localization.Away D.s) x) = D'.canonicalMap x
+    rw [IsLocalization.Away.lift_eq]
+  exact h1.trans h2
+
 end WeightedParity

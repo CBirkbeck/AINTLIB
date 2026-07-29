@@ -2052,6 +2052,30 @@ structure HeadModelData (D : RationalLocData (WPA K w)) : Type _ where
   he' : Continuous e.symm
 
 variable {K w} in
+/-- Uniform head approximation of a finite set at a common stage
+(`exists_head_approx` + `wpHeadSupport_mono` upcasting). -/
+theorem exists_head_approx_finset (ϖ : Uniformizer K) (S : Finset (WPA K w))
+    (m : ℕ) (hS1 : ∀ x ∈ S, ‖x‖ ≤ 1) :
+    ∃ (N : ℕ) (g : WPA K w → WPHead K w N),
+      ∀ x ∈ S, ‖x - headIncl K w N (g x)‖ ≤ ‖ϖ.val‖ ^ m := by
+  classical
+  have hex : ∀ x : WPA K w, ∃ (N : ℕ) (g : WPHead K w N),
+      ‖x - headIncl K w N g‖ ≤ ‖ϖ.val‖ ^ m * ‖x‖ := fun x =>
+    exists_head_approx ϖ x m
+  choose Nf gf hgf using hex
+  refine ⟨S.sup Nf, fun x => if hx : x ∈ S then
+    Subring.inclusion (wpHeadSupport_mono (K := K) (w := w) (Finset.le_sup hx))
+      (gf x) else 0, fun x hx => ?_⟩
+  simp only [dif_pos hx]
+  rw [show headIncl K w (S.sup Nf)
+      (Subring.inclusion (wpHeadSupport_mono (K := K) (w := w)
+        (Finset.le_sup hx)) (gf x)) = headIncl K w (Nf x) (gf x) from rfl]
+  calc ‖x - headIncl K w (Nf x) (gf x)‖ ≤ ‖ϖ.val‖ ^ m * ‖x‖ := hgf x
+    _ ≤ ‖ϖ.val‖ ^ m * 1 :=
+        mul_le_mul_of_nonneg_left (hS1 x hx) (pow_nonneg (norm_nonneg _) m)
+    _ = ‖ϖ.val‖ ^ m := mul_one _
+
+variable {K w} in
 /-- **Finite-head presentation of every rational localization**
 ([WP] cor:finite-head-presentation: perturb the datum into a head via density of the
 heads and lem:small-perturbation; the retracted Bezout relation makes the perturbed
@@ -2059,6 +2083,197 @@ datum rational in the head; conclude by prop:coefficientwise-localization). -/
 theorem nonempty_headModelData (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
-    Nonempty (HeadModelData D) := by sorry
+    Nonempty (HeadModelData D) := by
+  classical
+  -- the window scaling element, matching `wpaPod`'s choice
+  set c : K := Classical.choose (exists_norm_window' K) with hc_def
+  have hcspec := Classical.choose_spec (exists_norm_window' K)
+  set t : WPA K w := constA K w c with ht_def
+  have htu : IsUnit t := hcspec.1.map (constA K w)
+  have ht1 : ‖t‖ < 1 := by rw [ht_def, norm_constA]; exact hcspec.2.1
+  have ht0 : 0 < ‖t‖ := by rw [ht_def, norm_constA]; exact hcspec.2.2
+  have hscale : ∀ f : WPA K w, ‖t * f‖ = ‖t‖ * ‖f‖ := fun f => by
+    rw [ht_def, norm_constA_mul, norm_constA]
+  have htkscale : ∀ (k : ℕ) (f : WPA K w), ‖t ^ k * f‖ = ‖t‖ ^ k * ‖f‖ :=
+    fun k f => FiniteJet.norm_pow_mul_of_scale hscale k f
+  -- scale everything into the unit ball
+  set T₀ : Finset (WPA K w) := insert D.s D.T with hT₀_def
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, ∀ x ∈ T₀, ‖t ^ k * x‖ ≤ 1 := by
+    set M : ℝ := ∑ x ∈ T₀, ‖x‖ with hM_def
+    have hM0 : 0 ≤ M := Finset.sum_nonneg fun x _ => norm_nonneg _
+    have hMx : ∀ x ∈ T₀, ‖x‖ ≤ M := fun x hx =>
+      Finset.single_le_sum (fun y _ => norm_nonneg y) hx
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, ‖t‖ ^ k * M ≤ 1 := by
+      rcases eq_or_lt_of_le hM0 with h0 | hMpos
+      · exact ⟨0, by rw [← h0, mul_zero]; exact zero_le_one⟩
+      · obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one (div_pos one_pos hMpos) ht1
+        exact ⟨k, ((lt_div_iff₀ hMpos).mp hk).le⟩
+    refine ⟨k, fun x hx => ?_⟩
+    rw [htkscale]
+    calc ‖t‖ ^ k * ‖x‖ ≤ ‖t‖ ^ k * M :=
+          mul_le_mul_of_nonneg_left (hMx x hx) (pow_nonneg ht0.le k)
+      _ ≤ 1 := hk
+  set T₁ : Finset (WPA K w) := T₀.image (t ^ k * ·) with hT₁_def
+  have hspan₁ : Ideal.span (T₁ : Set (WPA K w)) = ⊤ := by
+    have hsT0 : Ideal.span (T₀ : Set (WPA K w)) = ⊤ := by
+      refine top_le_iff.mp ?_
+      rw [← hD.span_eq_top]
+      refine Ideal.span_mono ?_
+      rw [hT₀_def, Finset.coe_insert]
+      exact Set.subset_insert _ _
+    have h1 : (1 : WPA K w) ∈ Ideal.span (T₀ : Set (WPA K w)) := by
+      rw [hsT0]; trivial
+    obtain ⟨cf, -, hcf⟩ := Submodule.mem_span_finset.mp h1
+    have hmem : t ^ k ∈ Ideal.span (T₁ : Set (WPA K w)) := by
+      have hkey : t ^ k = ∑ x ∈ T₀, cf x * (t ^ k * x) := by
+        rw [Finset.sum_congr rfl fun x _ =>
+          show cf x * (t ^ k * x) = t ^ k * (cf x * x) from by ring,
+          ← Finset.mul_sum, show (∑ x ∈ T₀, cf x * x) = 1 from hcf, mul_one]
+      rw [hkey]
+      refine Ideal.sum_mem _ fun x hx =>
+        Ideal.mul_mem_left _ _ (Ideal.subset_span ?_)
+      rw [hT₁_def]
+      exact Finset.mem_coe.mpr (Finset.mem_image_of_mem _ hx)
+    exact Ideal.eq_top_of_isUnit_mem _ hmem (htu.pow k)
+  set D₁ : RationalLocData (WPA K w) :=
+    genPieceDatum (wpaPod K w) T₁ (t ^ k * D.s) hspan₁ with hD₁_def
+  have hropen₁ : rationalOpen D₁.T D₁.s = rationalOpen D.T D.s := by
+    rw [show D₁.T = T₁ from rfl, show D₁.s = t ^ k * D.s from rfl, hT₁_def,
+      hT₀_def, rationalOpen_unitSMul (t ^ k) (htu.pow k)]
+    exact rationalOpen_insert_self D.T D.s
+  have hD₁rat : D₁.IsRational :=
+    RationalLocData.isRational_of_span_eq_top
+      (by rw [show D₁.T = T₁ from rfl]; exact hspan₁)
+  obtain ⟨ℓ, a, ha1, hbez⟩ :=
+    exists_integral_bezout' t htu ht1 ht0 hscale D₁ hD₁rat
+  obtain ⟨m, hm⟩ : ∃ m : ℕ, ‖ϖ.val‖ ^ m ≤ ‖t‖ ^ (ℓ + 1) := by
+    obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one (pow_pos ht0 (ℓ + 1))
+      ϖ.norm_val_lt_one
+    exact ⟨m, hm.le⟩
+  have hT₁1 : ∀ x ∈ T₁, ‖x‖ ≤ 1 := by
+    intro x hx
+    rw [hT₁_def] at hx
+    obtain ⟨y, hy, rfl⟩ := Finset.mem_image.mp hx
+    exact hk y hy
+  obtain ⟨N, g, hg⟩ := exists_head_approx_finset ϖ T₁ m hT₁1
+  -- the perturbation setup: perturb the scaled datum into the `N`-th head
+  set S : PerturbSetup (WPA K w) :=
+    { t := t, htu := htu, ht1 := ht1, ht0 := ht0, hscale := hscale
+      D := D₁
+      hsT := by
+        rw [show D₁.T = T₁ from rfl, show D₁.s = t ^ k * D.s from rfl, hT₁_def,
+          hT₀_def]
+        exact Finset.mem_image_of_mem _ (Finset.mem_insert_self _ _)
+      hT1 := by rw [show D₁.T = T₁ from rfl]; exact hT₁1
+      ℓ := ℓ, a := a, ha1 := ha1
+      hbez := hbez
+      pert := fun x => if x ∈ T₁ then headIncl K w N (g x) else x
+      hpert1 := by
+        intro x hx
+        rw [show D₁.T = T₁ from rfl] at hx
+        rw [if_pos hx]
+        calc ‖headIncl K w N (g x)‖
+            = ‖x + (headIncl K w N (g x) - x)‖ := by
+              rw [show x + (headIncl K w N (g x) - x) = headIncl K w N (g x)
+                from by ring]
+          _ ≤ max ‖x‖ ‖headIncl K w N (g x) - x‖ :=
+              IsUltrametricDist.norm_add_le_max _ _
+          _ ≤ 1 := by
+              refine max_le (hT₁1 x hx) ?_
+              rw [norm_sub_rev]
+              exact le_trans (hg x hx) (le_trans hm
+                (pow_le_one₀ ht0.le ht1.le))
+      hpert := by
+        intro x hx
+        rw [show D₁.T = T₁ from rfl] at hx
+        rw [if_pos hx, norm_sub_rev]
+        exact le_trans (hg x hx) hm
+      hplus := fun y hy => FiniteJet.isPowerBounded_of_norm_le_one hy }
+    with hS_def
+  obtain ⟨h, hh1, hpbez⟩ := PerturbSetup.exists_perturbed_bezout S
+  -- the head datum: retract the primed Bezout along `rhoHead`
+  set TH : Finset (WPHead K w N) := T₁.image g with hTH_def
+  have hretract : ∑ x ∈ T₁, rhoHead K w N (a x) * g x =
+      constHead K w N c ^ ℓ *
+        (1 + constHead K w N c * rhoHead K w N h) := by
+    have h1 := congrArg (rhoHead K w N) hpbez
+    rw [map_sum] at h1
+    rw [Finset.sum_congr rfl fun x hx => show
+        rhoHead K w N (a x * S.pert x) = rhoHead K w N (a x) * g x from by
+      rw [map_mul, show S.pert x =
+          if x ∈ T₁ then headIncl K w N (g x) else x from rfl,
+        if_pos (show x ∈ T₁ from hx), rhoHead_headIncl]] at h1
+    rw [map_mul, map_pow, map_add, map_one, map_mul] at h1
+    rw [show rhoHead K w N t = constHead K w N c from by
+      rw [ht_def, ← headIncl_constHead, rhoHead_headIncl]] at h1
+    exact h1
+  have hspanH : Ideal.span (TH : Set (WPHead K w N)) = ⊤ := by
+    have hmem : constHead K w N c ^ ℓ *
+        (1 + constHead K w N c * rhoHead K w N h) ∈
+        Ideal.span (TH : Set (WPHead K w N)) := by
+      rw [← hretract]
+      refine Ideal.sum_mem _ fun x hx =>
+        Ideal.mul_mem_left _ _ (Ideal.subset_span ?_)
+      rw [hTH_def]
+      exact Finset.mem_coe.mpr (Finset.mem_image_of_mem _ hx)
+    refine Ideal.eq_top_of_isUnit_mem _ hmem
+      (IsUnit.mul ((hcspec.1.map (constHead K w N)).pow ℓ) ?_)
+    have hnorm : ‖-(constHead K w N c * rhoHead K w N h)‖ < 1 := by
+      rw [norm_neg]
+      calc ‖constHead K w N c * rhoHead K w N h‖
+          = ‖c‖ * ‖rhoHead K w N h‖ := by rw [norm_constHead_mul]
+        _ ≤ ‖c‖ * 1 := mul_le_mul_of_nonneg_left
+            (le_trans (norm_rhoHead_le (K := K) (w := w) (N := N) h) hh1)
+            (norm_nonneg _)
+        _ = ‖c‖ := mul_one _
+        _ < 1 := hcspec.2.1
+    have hu : IsUnit (1 - -(constHead K w N c * rhoHead K w N h)) :=
+      (Units.oneSub _ hnorm).isUnit
+    rwa [sub_neg_eq_add] at hu
+  set DH : RationalLocData (WPHead K w N) := genPieceDatum
+    (FiniteJet.unitBallPod (constHead K w N c)
+      (hcspec.1.map (constHead K w N))
+      (by rw [norm_constHead]; exact hcspec.2.1)
+      (by rw [norm_constHead]; exact hcspec.2.2)
+      (fun f => by rw [norm_constHead_mul, norm_constHead]))
+    TH (g (t ^ k * D.s)) hspanH with hDH_def
+  have hDHrat : DH.IsRational :=
+    RationalLocData.isRational_of_span_eq_top
+      (by rw [show DH.T = TH from rfl]; exact hspanH)
+  -- the lifted datum agrees with the perturbed datum
+  have hmatch : liftDatum DH hDHrat = S.datum := by
+    refine RationalLocData.ext_of_fields rfl ?_ ?_
+    · rw [show (liftDatum DH hDHrat).T = DH.T.image (headIncl K w N) from rfl,
+        PerturbSetup.datum_T, show DH.T = TH from rfl, hTH_def,
+        Finset.image_image, show S.D.T = T₁ from rfl]
+      refine (Finset.image_congr fun x hx => ?_).symm
+      rw [show S.pert x = if x ∈ T₁ then headIncl K w N (g x) else x from rfl,
+        if_pos (show x ∈ T₁ from hx)]
+      rfl
+    · rw [show (liftDatum DH hDHrat).s = headIncl K w N DH.s from rfl,
+        PerturbSetup.datum_s, show DH.s = g (t ^ k * D.s) from rfl,
+        show S.D.s = t ^ k * D.s from rfl,
+        show S.pert (t ^ k * D.s) =
+          if t ^ k * D.s ∈ T₁ then headIncl K w N (g (t ^ k * D.s))
+          else t ^ k * D.s from rfl]
+      rw [if_pos]
+      rw [hT₁_def, hT₀_def]
+      exact Finset.mem_image_of_mem _ (Finset.mem_insert_self _ _)
+  have hopen : rationalOpen (liftDatum DH hDHrat).T (liftDatum DH hDHrat).s =
+      rationalOpen D.T D.s := by
+    rw [hmatch, PerturbSetup.rationalOpen_datum S]
+    exact hropen₁
+  exact ⟨⟨N, DH, hDHrat, hopen,
+    (restrictionEquiv D (liftDatum DH hDHrat) hopen).trans
+      (coeffLocEquiv ϖ hK₀ DH hDHrat),
+    by
+      rw [RingEquiv.coe_trans]
+      exact (coeffLocEquiv_continuous ϖ hK₀ DH hDHrat).comp
+        (restrictionEquiv_continuous D (liftDatum DH hDHrat) hopen),
+    by
+      rw [RingEquiv.symm_trans]
+      rw [RingEquiv.coe_trans]
+      exact (restrictionEquiv_symm_continuous D (liftDatum DH hDHrat)
+        hopen).comp (coeffLocEquiv_symm_continuous ϖ hK₀ DH hDHrat)⟩⟩
 
 end WeightedParity

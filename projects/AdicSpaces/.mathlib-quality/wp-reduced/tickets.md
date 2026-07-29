@@ -520,7 +520,28 @@ propext/Classical.choice/Quot.sound) before marking done.
   route + Away.lift/extensionHom bridges (all tools in place).
 
 ### [W18] CoeffLocalization IV — every localization has finite-head form
-- Status: open | File: WP/CoeffLocalization.lean | Depends: W17, W13
+- Status: done (2026-07-29) | File: WP/CoeffLocalization.lean | Depends: W17, W13
+- **Progress**: COMPLETE sorry-free + axiom-clean (module 3155 jobs). CoeffLocalization.lean
+  now has ZERO sorries. Delivered (beyond plan): generic `restrictionEquiv` +
+  continuities + canonicalMap law (Perturbation.lean — the lem:small-perturbation
+  restriction-map mechanism decoupled from the perturbation, needs [IsHuberRing E]
+  [HasLocLiftPowerBounded E]); `rationalOpen_insert_self` and `rationalOpen_unitSMul`
+  (Spa-pointwise via toValuativeRel + vle_iff_le + (hc.map w).ne_zero unit-nonvanishing
+  + gv-cancellation b⁻¹-trick); `exists_head_approx_finset` (common stage via
+  Finset.sup + Subring.inclusion (wpHeadSupport_mono) upcast, headIncl-compat is rfl);
+  `nonempty_headModelData` = one assembly proof: window element c (SAME
+  Classical.choose as wpaPod so the pod-component of the datum-match is rfl by
+  proof-irrelevance), sum-of-norms scale exponent k, D1 := genPieceDatum (wpaPod)
+  (insert D.s D.T scaled) , Bezout via exists_integral_bezout', precision m with
+  |varpi|^m <= |t|^(l+1), PerturbSetup with pert := ite-headIncl-approx, head datum DH
+  over TH := T1.image g with rationality by rhoHead-retracting the primed Bezout
+  (rhoHead t = constHead c via <- headIncl_constHead + rhoHead_headIncl; 1-unit via
+  ascribed-type Units.oneSub have), datum-match by RationalLocData.ext_of_fields rfl +
+  Finset.image_image/image_congr + if_pos, e := (restrictionEquiv D _ hopen).trans
+  (coeffLocEquiv ...) with RingEquiv.coe_trans/symm_trans continuities.
+  GOTCHAS: mem_span_finset gives smul-form (show-from mul-form coercion, bezout'
+  idiom); dif_pos needs simp only (beta-redex); norm_rhoHead_le K w N section-explicit;
+  build the Perturbation olean BEFORE compiling the consumer (stale-olean unknowns).
 - Decls: `nonempty_headModelData` (via `HeadModelData`).
 - Sketch: [WP] 1107–1127: scale D's entries into the unit ball (podCongr + Bezout
   scaling from W12); `exists_head_approx` (W8) at precision ℓ+1; PerturbSetup with

@@ -1,1 +1,1 @@
-FOCUS: W17 COMPLETE (coeffLocEquiv record + laws all green) — axiom-check + commit, then W18 nonempty_headModelData
+FOCUS: W18 compiles — module build + axioms + commit, then W19/HRW
