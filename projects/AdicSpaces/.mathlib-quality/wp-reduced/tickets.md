@@ -1129,6 +1129,18 @@ propext/Classical.choice/Quot.sound) before marking done.
   height_add_one_le_of_lt_of_isPrime + height_eq_zero_iff_eq_bot + gcongr for
   ℕ∞); leaf 10 DONE (AdicNakayama.lean — topological Nakayama +
   isPrecomplete_pi + ideal_smul_top_self/_pi; mathlib had NO Pi-instance).
+  PROGRESS 2: leaf 4a+4b DONE (AdicNakayama.lean: tower division
+  exists_eq_of_mul_of_component_one_eq_zero + toQuotientSpan/ker/
+  quotientSpanEquiv — the principal completion mod generator ≅ base mod
+  generator, generic). MAJOR DISCOVERY: leaf 5 ALREADY EXISTS
+  (Uniformizer.isNoetherianRing_unitBall_P, CDVFNoetherian.lean, via
+  GraphKoszul.ballAdicEquiv : unitBall (P K m) ≃+* AdicCompletion (I0 ϖ)
+  (MvPolynomial (Fin m) 𝒪_K)); leaf 3's IsLocalization is INLINE in
+  isNoetherianRing_P (extract); leaf 1 free at the ϖ-layer; leaf 2 =
+  mem_unitBall_iff. So T°/ϖ ≅ k[X] = ballAdicEquiv-transport of
+  quotientSpanEquiv + MvPolynomial.quotientEquivQuotientMvPolynomial
+  (+ Ideal.map C-span alignment; I0 = span {C ⟨ϖ,_⟩} per
+  RestrictedGaussAdic:353).
   REMAINING leaves: 1 (DVR bridge), 2-5 (T°-plumbing; leaf 5 noetherianity of
   T° — probe the vendored Coram argument), 6 (B-assembly), 8-9 (KrullDimLE-0
   + finite_iff_krullDimLE_zero), 11 (IsPrecomplete 𝒪_K + IsHausdorff B +
