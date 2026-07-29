@@ -262,15 +262,14 @@ noncomputable def moduleCechFixedFactorNativeSectionsComplexIso
       (moduleCechTermFactor F U q i) V).symm ≪≫
     moduleCechFixedFactorSectionsComplexIso F U V q i
 
-/-- Degree-one exactness for a fixed factor is equivalent to degree-one
-exactness of the original sheaf Cech complex evaluated on its indexing
-open. -/
-theorem moduleCechFixedFactorNative_exactAt_one_iff
-    (q : ℕ) (i : Fin (q + 1) → ι) :
+/-- Exactness for a fixed factor is equivalent to exactness of the original
+sheaf Cech complex evaluated on its indexing open, in every degree. -/
+theorem moduleCechFixedFactorNative_exactAt_iff
+    (q : ℕ) (i : Fin (q + 1) → ι) (p : ℕ) :
     ((cechComplexFunctor V).obj
-        (moduleCechTermFactor F U q i).obj).ExactAt 1 ↔
+        (moduleCechTermFactor F U q i).obj).ExactAt p ↔
       (moduleCechSectionsComplex F V
-        (∏ᶜ fun k : Fin (q + 1) => U (i k))).ExactAt 1 := by
+        (∏ᶜ fun k : Fin (q + 1) => U (i k))).ExactAt p := by
   constructor
   · intro h
     exact h.of_iso
@@ -279,6 +278,31 @@ theorem moduleCechFixedFactorNative_exactAt_one_iff
     exact h.of_iso
       (moduleCechFixedFactorNativeSectionsComplexIso F U V q i).symm
 
+/-- Degree-one exactness for a fixed factor is equivalent to degree-one
+exactness of the original sheaf Cech complex evaluated on its indexing
+open. -/
+theorem moduleCechFixedFactorNative_exactAt_one_iff
+    (q : ℕ) (i : Fin (q + 1) → ι) :
+    ((cechComplexFunctor V).obj
+        (moduleCechTermFactor F U q i).obj).ExactAt 1 ↔
+      (moduleCechSectionsComplex F V
+        (∏ᶜ fun k : Fin (q + 1) => U (i k))).ExactAt 1 :=
+  moduleCechFixedFactorNative_exactAt_iff F U V q i 1
+
+/-- Exactness of an evaluated Cech short complex on a factor's indexing open
+implies native exactness in the corresponding positive degree for that
+factor. -/
+theorem moduleCechFixedFactorNative_exactAt_succ_of_app_exact
+    (q : ℕ) (i : Fin (q + 1) → ι) (n : ℕ)
+    (h : (moduleCechShortComplexApp F V n
+      (∏ᶜ fun k : Fin (q + 1) => U (i k))).Exact) :
+    ((cechComplexFunctor V).obj
+      (moduleCechTermFactor F U q i).obj).ExactAt (n + 1) := by
+  apply (moduleCechFixedFactorNative_exactAt_iff
+    F U V q i (n + 1)).2
+  exact (moduleCechShortComplexApp_exact_iff_sectionsComplex_exactAt
+    F V (∏ᶜ fun k : Fin (q + 1) => U (i k)) n).1 h
+
 /-- Exactness of the evaluated Cech short complex on a factor's indexing
 open implies native degree-one exactness for that factor. -/
 theorem moduleCechFixedFactorNative_exactAt_one_of_app_exact
@@ -286,10 +310,8 @@ theorem moduleCechFixedFactorNative_exactAt_one_of_app_exact
     (h : (moduleCechShortComplexApp F V 0
       (∏ᶜ fun k : Fin (q + 1) => U (i k))).Exact) :
     ((cechComplexFunctor V).obj
-      (moduleCechTermFactor F U q i).obj).ExactAt 1 := by
-  apply (moduleCechFixedFactorNative_exactAt_one_iff
-    F U V q i).2
-  exact (moduleCechShortComplexApp_exact_iff_sectionsComplex_exactAt
-    F V (∏ᶜ fun k : Fin (q + 1) => U (i k)) 0).1 h
+      (moduleCechTermFactor F U q i).obj).ExactAt 1 :=
+  moduleCechFixedFactorNative_exactAt_succ_of_app_exact
+    F U V q i 0 h
 
 end TopCat.Sheaf
