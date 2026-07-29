@@ -1,1 +1,1 @@
-FOCUS: W17 rev — coeffRev := Σ-qToLift(x_μ)·E_μ (summability, ring-laws via Cauchy product, roundtrips)
+FOCUS: W17 final — coeffRev ring-laws (Cauchy product over TailIdx antidiagonal) + roundtrips + coeffLocEquiv record

@@ -1482,6 +1482,61 @@ theorem qToLift_continuous (DH : RationalLocData (WPHead K w N))
   exact (headToLift_continuous DH hDH).comp (headLocRev_continuous DH)
 
 variable {K w N} in
+/-- The decomposition monomials in the completed lifted localization. -/
+noncomputable def liftE (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (μ : TailIdx N) : presheafValue (liftDatum DH hDH) :=
+  (liftDatum DH hDH).canonicalMap (eTail K w N μ)
+
+variable {K w N} in
+theorem liftE_zero (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    liftE DH hDH 0 = 1 := by
+  rw [liftE, show eTail K w N 0 = 1 from ?_, map_one]
+  refine Subtype.ext (Subtype.ext ?_)
+  show MvPowerSeries.monomial (tailShift w (0 : TailIdx N)) (1 : K) = 1
+  rw [tailShift_zero]
+  exact MvPowerSeries.monomial_zero_one
+
+variable {K w N} in
+theorem isBounded_range_liftE (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) :
+    TopologicalRing.IsBounded (Set.range (liftE DH hDH)) := by
+  refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+    (liftDatum DH hDH)).subset ?_
+  rintro _ ⟨μ, rfl⟩
+  refine ⟨algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+    (eTail K w N μ), ?_, rfl⟩
+  refine algebraMap_A₀_subset_locSubring _ _ _ ⟨eTail K w N μ, ?_, rfl⟩
+  show eTail K w N μ ∈ (wpaPod K w).A₀
+  show eTail K w N μ ∈ FiniteJet.unitBall (WPA K w)
+  rw [FiniteJet.mem_unitBall_iff]
+  rw [show eTail K w N μ = wpMonomial K w (wpMem_tailShift w μ) 1 from rfl,
+    norm_wpMonomial, norm_one]
+
+variable {K w N} in
+theorem summable_revFamily (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (x : TailC0 w N (QHead DH) (rhoQ DH)) :
+    Summable (fun μ : TailIdx N => qToLift DH hDH (x.1 μ) * liftE DH hDH μ) := by
+  apply summable_of_tendsto_cofinite_nonarch
+  have hq : Filter.Tendsto (fun μ : TailIdx N => qToLift DH hDH (x.1 μ))
+      Filter.cofinite (nhds 0) := by
+    have h1 := (qToLift_continuous DH hDH).tendsto 0
+    rw [map_zero] at h1
+    exact h1.comp (tendsto_zero_iff_norm_tendsto_zero.mpr x.2)
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  obtain ⟨V, hV, hMV⟩ := isBounded_range_liftE DH hDH U hU
+  refine Filter.mem_of_superset (Filter.tendsto_def.mp hq V hV) fun μ hμ => ?_
+  rw [Set.mem_preimage] at hμ ⊢
+  rw [mul_comm]
+  exact hMV (Set.mul_mem_mul ⟨μ, rfl⟩ hμ)
+
+variable {K w N} in
+/-- The reverse coefficientwise bridge: summation of the decomposition series. -/
+noncomputable def coeffRevFun (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (x : TailC0 w N (QHead DH) (rhoQ DH)) :
+    presheafValue (liftDatum DH hDH) :=
+  ∑' μ : TailIdx N, qToLift DH hDH (x.1 μ) * liftE DH hDH μ
+
+variable {K w N} in
 /-- **Coefficientwise localization** ([WP] prop:coefficientwise-localization:
 "There is a canonical topological algebra isomorphism `𝒜_α ≅ ⊕̂^{c₀}_μ P e_μ`").
 The proof route: the graph ideal over `𝒜` is closed and computed coefficientwise via
