@@ -67,7 +67,101 @@ theorem baseCechTupleRestriction_self
       congrArg F.map (Subsingleton.elim _ _)
     _ = 𝟙 _ := F.map_id _
 
-/-- A tuple chain defines a finite row of restriction maps, with unsupported entries discarded. -/
+/-- Tuple-factor restrictions compose along inclusions of index ranges. -/
+theorem baseCechTupleRestriction_comp
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m l : ℕ}
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι)
+    (k : Fin (l + 1) → ι) (hkj : Set.range k ⊆ Set.range j)
+    (hji : Set.range j ⊆ Set.range i) :
+    baseCechTupleRestriction π M U j k hkj ≫
+        baseCechTupleRestriction π M U i j hji =
+      baseCechTupleRestriction π M U i k (hkj.trans hji) := by
+  let F := baseModulePresheaf π M
+  let a := (homOfLE
+    (cechTupleIntersection_le_of_range_subset U j k hkj)).op
+  let b := (homOfLE
+    (cechTupleIntersection_le_of_range_subset U i j hji)).op
+  let c := (homOfLE
+    (cechTupleIntersection_le_of_range_subset U i k
+      (hkj.trans hji))).op
+  change F.map a ≫ F.map b = F.map c
+  calc
+    F.map a ≫ F.map b = F.map (a ≫ b) :=
+      (F.map_comp a b).symm
+    _ = F.map c := congrArg F.map (Subsingleton.elim _ _)
+
+/-- One basis entry in a tuple row, with unsupported entries discarded. -/
+noncomputable def baseCechTupleRowBasis
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m : ℕ}
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι) :
+    (baseCechComplex π M U).X m ⟶ baseCechFactor π M U n i := by
+  classical
+  let p : (baseCechComplex π M U).X m ⟶
+      baseCechFactor π M U m j :=
+    Pi.π (fun q : Fin (m + 1) → ι =>
+      baseCechFactor π M U m q) j
+  exact if h : Set.range j ⊆ Set.range i then
+    p ≫ baseCechTupleRestriction π M U i j h
+  else 0
+
+theorem baseCechTupleRowBasis_of_subset
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m : ℕ}
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι)
+    (h : Set.range j ⊆ Set.range i) :
+    baseCechTupleRowBasis π M U i j =
+      Pi.π (fun q : Fin (m + 1) → ι =>
+          baseCechFactor π M U m q) j ≫
+        baseCechTupleRestriction π M U i j h := by
+  classical
+  simp [baseCechTupleRowBasis, h]
+  congr
+
+theorem baseCechTupleRowBasis_of_not_subset
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m : ℕ}
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι)
+    (h : ¬Set.range j ⊆ Set.range i) :
+    baseCechTupleRowBasis π M U i j = 0 := by
+  classical
+  simp [baseCechTupleRowBasis, h]
+
+/-- A supported row-basis entry composes with tuple-factor restriction. -/
+theorem baseCechTupleRowBasis_comp_restriction
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m l : ℕ}
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι)
+    (k : Fin (l + 1) → ι) (hkj : Set.range k ⊆ Set.range j)
+    (hji : Set.range j ⊆ Set.range i) :
+    baseCechTupleRowBasis π M U j k ≫
+        baseCechTupleRestriction π M U i j hji =
+      baseCechTupleRowBasis π M U i k := by
+  let p : (baseCechComplex π M U).X l ⟶
+      baseCechFactor π M U l k :=
+    Pi.π (fun q : Fin (l + 1) → ι =>
+      baseCechFactor π M U l q) k
+  calc
+    baseCechTupleRowBasis π M U j k ≫
+          baseCechTupleRestriction π M U i j hji =
+        (p ≫ baseCechTupleRestriction π M U j k hkj) ≫
+          baseCechTupleRestriction π M U i j hji := by
+      rw [baseCechTupleRowBasis_of_subset π M U j k hkj]
+      rfl
+    _ = p ≫
+        (baseCechTupleRestriction π M U j k hkj ≫
+          baseCechTupleRestriction π M U i j hji) :=
+      Category.assoc _ _ _
+    _ = p ≫ baseCechTupleRestriction π M U i k
+        (hkj.trans hji) := by
+      rw [baseCechTupleRestriction_comp]
+    _ = baseCechTupleRowBasis π M U i k := by
+      rw [baseCechTupleRowBasis_of_subset
+        π M U i k (hkj.trans hji)]
+      rfl
+
+/-- A tuple chain defines a finite row of restriction maps. -/
 noncomputable def baseCechTupleRow
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} (U : ι → X.Opens) {n m : ℕ}
@@ -75,14 +169,9 @@ noncomputable def baseCechTupleRow
     CechTupleChain ι m →ₗ[ℤ]
       ((baseCechComplex π M U).X m ⟶ baseCechFactor π M U n i) :=
   by
-    classical
     exact Finsupp.lsum ℤ fun j =>
-      LinearMap.toSpanSingleton ℤ _ <|
-        if h : Set.range j ⊆ Set.range i then
-          Pi.π (fun q : Fin (m + 1) → ι =>
-              baseCechFactor π M U m q) j ≫
-            baseCechTupleRestriction π M U i j h
-        else 0
+      LinearMap.toSpanSingleton ℤ _
+        (baseCechTupleRowBasis π M U i j)
 
 theorem baseCechTupleRow_single_of_subset
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
@@ -93,9 +182,10 @@ theorem baseCechTupleRow_single_of_subset
       a • (Pi.π (fun q : Fin (m + 1) → ι =>
           baseCechFactor π M U m q) j ≫
         baseCechTupleRestriction π M U i j h) := by
-  classical
-  simp [baseCechTupleRow, h]
-  congr
+  rw [baseCechTupleRow, Finsupp.lsum_single,
+    LinearMap.toSpanSingleton_apply,
+    baseCechTupleRowBasis_of_subset π M U i j h]
+  rfl
 
 theorem baseCechTupleRow_single_of_not_subset
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
@@ -103,8 +193,32 @@ theorem baseCechTupleRow_single_of_not_subset
     (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι) (a : ℤ)
     (h : ¬Set.range j ⊆ Set.range i) :
     baseCechTupleRow π M U i (Finsupp.single j a) = 0 := by
+  rw [baseCechTupleRow, Finsupp.lsum_single,
+    LinearMap.toSpanSingleton_apply,
+    baseCechTupleRowBasis_of_not_subset π M U i j h,
+    smul_zero]
+
+/-- Postcomposing a tuple row with restriction only changes its target tuple. -/
+theorem baseCechTupleRow_comp_restriction
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m l : ℕ}
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι)
+    (hji : Set.range j ⊆ Set.range i) (x : CechTupleChain ι l)
+    (hx : CechTupleChain.SupportedBy x (Set.range j)) :
+    baseCechTupleRow π M U j x ≫
+        baseCechTupleRestriction π M U i j hji =
+      baseCechTupleRow π M U i x := by
   classical
-  simp [baseCechTupleRow, h]
+  rw [baseCechTupleRow, baseCechTupleRow,
+    Finsupp.lsum_apply, Finsupp.lsum_apply]
+  rw [Finsupp.sum, Finsupp.sum, sum_comp]
+  apply Finset.sum_congr rfl
+  intro k hk
+  have hkj := hx hk
+  simp only [LinearMap.toSpanSingleton_apply]
+  rw [zsmul_comp,
+    baseCechTupleRowBasis_comp_restriction
+      π M U i j k hkj hji]
 
 /-- One row of the restriction matrix associated to a support-nonincreasing tuple-chain map. -/
 noncomputable def baseCechTupleMapComponent
@@ -163,6 +277,55 @@ theorem CechTupleSupportNonincreasing.neg
     CechTupleSupportNonincreasing (-f) := by
   intro i
   simpa using (hf i).smul (-1)
+
+/-- A linear map out of a free integral module is the sum of its values on basis vectors. -/
+theorem linearMap_apply_eq_finsupp_sum_single
+    {α N : Type u} [AddCommGroup N]
+    (f : (α →₀ ℤ) →ₗ[ℤ] N) (x : α →₀ ℤ) :
+    f x = x.sum fun i a => a • f (Finsupp.single i 1) := by
+  classical
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x y hx hy =>
+      rw [map_add, hx, hy,
+        Finsupp.sum_add_index (by simp) (by simp [add_smul])]
+  | single i a =>
+      calc
+        f (Finsupp.single i a) =
+            a • f (Finsupp.single i 1) := by
+          simpa using f.map_smul a (Finsupp.single i 1)
+        _ = (Finsupp.single i a).sum
+            (fun j b => b • f (Finsupp.single j 1)) := by
+          simp
+
+/-- A support-nonincreasing map preserves any prescribed containing support. -/
+theorem CechTupleSupportNonincreasing.map_supportedBy
+    {ι : Type u} {n m : ℕ}
+    {f : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m}
+    (hf : CechTupleSupportNonincreasing f)
+    (x : CechTupleChain ι n) (N : Set ι)
+    (hx : CechTupleChain.SupportedBy x N) :
+    CechTupleChain.SupportedBy (f x) N := by
+  rw [linearMap_apply_eq_finsupp_sum_single]
+  change CechTupleChain.SupportedBy
+    (∑ i ∈ x.support,
+      x i • f (Finsupp.single i 1)) N
+  apply CechTupleChain.supportedBy_sum x.support _
+  intro i hi
+  exact CechTupleChain.SupportedBy.smul
+    (CechTupleChain.SupportedBy.mono (hf i) (hx hi)) (x i)
+
+/-- A composite of support-nonincreasing tuple-chain maps is support-nonincreasing. -/
+theorem CechTupleSupportNonincreasing.comp
+    {ι : Type u} {n m l : ℕ}
+    {f : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m}
+    {g : CechTupleChain ι m →ₗ[ℤ] CechTupleChain ι l}
+    (hg : CechTupleSupportNonincreasing g)
+    (hf : CechTupleSupportNonincreasing f) :
+    CechTupleSupportNonincreasing (g.comp f) := by
+  intro i
+  exact CechTupleSupportNonincreasing.map_supportedBy
+    hg (f (Finsupp.single i 1)) (Set.range i) (hf i)
 
 /-- Extensionality for a map into one native base-Cech degree, using its concrete tuple factors. -/
 theorem baseCechHom_ext
