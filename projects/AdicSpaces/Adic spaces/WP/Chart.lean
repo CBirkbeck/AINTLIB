@@ -332,6 +332,152 @@ theorem chartCoeff_continuous (ϖ : Uniformizer K) :
     (headZeroEquiv_continuous (K := K) (w := w))
 
 variable {K w} in
+open scoped Classical in
+/-- The forward chart evaluation on the polynomial model: coefficients through
+`chartCoeff`, `X_i ↦ X` at the `W`-entry and `X_i ↦ 1` at the `ϖ`-entry. -/
+noncomputable def chartFwdP (ϖ : Uniformizer K) :
+    FiniteJet.GraphKoszul.P (WPHead K w 0) (chartHeadDatum (w := w) ϖ).T.card →+*
+      FiniteJet.GraphKoszul.P K 1 :=
+  restrictedEval (chartCoeff (K := K) (w := w) ϖ) (chartCoeff_continuous ϖ)
+    (fun i => if ((datumEnum (chartHeadDatum (w := w) ϖ) i :
+        ↥(chartHeadDatum (w := w) ϖ).T) : WPHead K w 0) = WaHead K w 0 then
+      FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0) else 1)
+    (fun i => by
+      split_ifs
+      · exact FiniteJet.isPowerBounded_of_norm_le_one
+          (le_of_eq (norm_polyToP_X1 (K := K)))
+      · exact FiniteJet.isPowerBounded_of_norm_le_one (le_of_eq norm_one))
+
+variable {K w} in
+open scoped Classical in
+theorem chartFwdP_C (ϖ : Uniformizer K) (x : WPHead K w 0) :
+    chartFwdP (K := K) (w := w) ϖ
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C x)) =
+      chartCoeff (K := K) (w := w) ϖ x :=
+  restrictedEval_C _ _ _ _ x
+
+variable {K w} in
+open scoped Classical in
+theorem chartFwdP_X (ϖ : Uniformizer K)
+    (i : Fin (chartHeadDatum (w := w) ϖ).T.card) :
+    chartFwdP (K := K) (w := w) ϖ
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X i)) =
+      (if ((datumEnum (chartHeadDatum (w := w) ϖ) i :
+          ↥(chartHeadDatum (w := w) ϖ).T) : WPHead K w 0) = WaHead K w 0 then
+        FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0) else 1) :=
+  restrictedEval_X _ _ _ _ i
+
+variable {K w} in
+theorem chartFwdP_continuous (ϖ : Uniformizer K) :
+    Continuous (chartFwdP (K := K) (w := w) ϖ) :=
+  restrictedEval_continuous _ _ _ _
+
+variable {K w} in
+open scoped Classical in
+/-- The forward evaluation kills the graph relations (`ϖ·X − ϖX = 0` at the
+`W`-entry, `ϖ·1 − ϖ = 0` at the `ϖ`-entry). -/
+theorem chartFwdP_graphRel (ϖ : Uniformizer K)
+    (i : Fin (chartHeadDatum (w := w) ϖ).T.card) :
+    chartFwdP (K := K) (w := w) ϖ
+      (headGraphRel (chartHeadDatum (w := w) ϖ) i) = 0 := by
+  rw [headGraphRel, map_sub, map_mul, map_sub, map_mul, chartFwdP_C, chartFwdP_C,
+    chartFwdP_X]
+  rw [show (chartHeadDatum (w := w) ϖ).s = piHead ϖ from rfl, chartCoeff_piHead]
+  rcases Finset.mem_insert.mp
+    (datumEnum (chartHeadDatum (w := w) ϖ) i).2 with h | h
+  · rw [h, chartCoeff_WaHead, if_pos rfl, ← map_mul, sub_self]
+  · rw [Finset.mem_singleton] at h
+    rw [h, chartCoeff_piHead,
+      if_neg fun hc => WaHead_ne_piHead ϖ hc.symm, mul_one, sub_self]
+
+variable {K w} in
+open scoped Classical in
+theorem chartGraphIdeal_le_ker (ϖ : Uniformizer K) :
+    headGraphIdeal (chartHeadDatum (w := w) ϖ) ≤
+      RingHom.ker (chartFwdP (K := K) (w := w) ϖ) := by
+  have hker_closed : IsClosed ((RingHom.ker (chartFwdP (K := K) (w := w) ϖ) :
+      Ideal (FiniteJet.GraphKoszul.P (WPHead K w 0)
+        (chartHeadDatum (w := w) ϖ).T.card)) :
+      Set (FiniteJet.GraphKoszul.P (WPHead K w 0)
+        (chartHeadDatum (w := w) ϖ).T.card)) := by
+    have hset : ((RingHom.ker (chartFwdP (K := K) (w := w) ϖ) :
+        Ideal (FiniteJet.GraphKoszul.P (WPHead K w 0)
+          (chartHeadDatum (w := w) ϖ).T.card)) :
+        Set (FiniteJet.GraphKoszul.P (WPHead K w 0)
+          (chartHeadDatum (w := w) ϖ).T.card)) =
+        chartFwdP (K := K) (w := w) ϖ ⁻¹' {0} := by
+      ext y
+      simp [RingHom.mem_ker]
+    rw [hset]
+    exact IsClosed.preimage (chartFwdP_continuous ϖ) isClosed_singleton
+  have hspan : (Ideal.span (Set.range (headGraphRel
+      (chartHeadDatum (w := w) ϖ))) : Set _) ⊆
+      ((RingHom.ker (chartFwdP (K := K) (w := w) ϖ) :
+        Ideal (FiniteJet.GraphKoszul.P (WPHead K w 0)
+          (chartHeadDatum (w := w) ϖ).T.card)) :
+        Set (FiniteJet.GraphKoszul.P (WPHead K w 0)
+          (chartHeadDatum (w := w) ϖ).T.card)) := by
+    have h1 : Ideal.span (Set.range (headGraphRel (chartHeadDatum (w := w) ϖ))) ≤
+        RingHom.ker (chartFwdP (K := K) (w := w) ϖ) := by
+      rw [Ideal.span_le]
+      rintro _ ⟨i, rfl⟩
+      exact RingHom.mem_ker.mpr (chartFwdP_graphRel ϖ i)
+    exact fun x hx => h1 hx
+  intro x hx
+  have hx' : x ∈ closure ((Ideal.span (Set.range (headGraphRel
+      (chartHeadDatum (w := w) ϖ))) :
+      Ideal (FiniteJet.GraphKoszul.P (WPHead K w 0)
+        (chartHeadDatum (w := w) ϖ).T.card)) :
+      Set (FiniteJet.GraphKoszul.P (WPHead K w 0)
+        (chartHeadDatum (w := w) ϖ).T.card)) := by
+    rw [← Ideal.coe_closure]
+    exact hx
+  exact closure_minimal hspan hker_closed hx'
+
+variable {K w} in
+/-- The forward chart model map on the graph quotient. -/
+noncomputable def chartFwd (ϖ : Uniformizer K) :
+    QHead (chartHeadDatum (w := w) ϖ) →+* FiniteJet.GraphKoszul.P K 1 :=
+  Ideal.Quotient.lift (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+    (chartFwdP (K := K) (w := w) ϖ)
+    (fun a ha => RingHom.mem_ker.mp (chartGraphIdeal_le_ker ϖ ha))
+
+variable {K w} in
+theorem chartFwd_mk (ϖ : Uniformizer K)
+    (G : FiniteJet.GraphKoszul.P (WPHead K w 0)
+      (chartHeadDatum (w := w) ϖ).T.card) :
+    chartFwd (K := K) (w := w) ϖ
+      (Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ)) G) =
+      chartFwdP (K := K) (w := w) ϖ G :=
+  rfl
+
+variable {K w} in
+theorem chartFwd_continuous (ϖ : Uniformizer K) :
+    Continuous (chartFwd (K := K) (w := w) ϖ) := by
+  refine continuous_of_continuousAt_zero (chartFwd (K := K) (w := w) ϖ).toAddMonoidHom ?_
+  show Filter.Tendsto _ (nhds 0) (nhds _)
+  rw [show (chartFwd (K := K) (w := w) ϖ).toAddMonoidHom
+    (0 : QHead (chartHeadDatum (w := w) ϖ)) = 0 from map_zero _]
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  have hfwdP := (chartFwdP_continuous (K := K) (w := w) ϖ).tendsto 0
+  rw [show chartFwdP (K := K) (w := w) ϖ 0 = 0 from map_zero _] at hfwdP
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp (hfwdP hU)
+  refine Filter.mem_of_superset (Metric.ball_mem_nhds 0 hδ0) fun q hq => ?_
+  rw [Set.mem_preimage]
+  rw [Metric.mem_ball, dist_zero_right] at hq
+  obtain ⟨G, hG, hGn⟩ := Ideal.Quotient.norm_mk_lt q
+    (show (0 : ℝ) < δ - ‖q‖ by linarith)
+  have hq' : chartFwd (K := K) (w := w) ϖ q =
+      chartFwdP (K := K) (w := w) ϖ G := by
+    rw [← hG, chartFwd_mk]
+  show chartFwd (K := K) (w := w) ϖ q ∈ U
+  rw [hq']
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right]
+  calc ‖G‖ < ‖q‖ + (δ - ‖q‖) := hGn
+    _ = δ := by rw [add_sub_cancel]
+
+variable {K w} in
 /-- The chart head model: `K⟨W⟩⟨X⟩/(ϖX − W) ≅ K⟨X⟩` via `W ↦ ϖX` (the classical
 smooth chart; the univariate rescaling of `FJP/FiniteJetChart.lean:82`). -/
 noncomputable def chartQHeadEquiv (ϖ : Uniformizer K)
