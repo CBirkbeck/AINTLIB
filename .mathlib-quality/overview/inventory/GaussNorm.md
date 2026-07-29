@@ -357,3 +357,266 @@ Toolkit for the ultrametric inequality, after [Kedlaya, *New methods for (φ,Γ)
 
 ---
 *Part 1 ends here (line 497). Part 2 begins with `exists_level_rep` at line 499.*
+
+## Part 2 — lines 499–923
+
+### `private theorem exists_level_rep`
+- **Type**: `(hρ1 : ρ ≤ 1) (x y : Ainf p F) (n : ℕ) → ∃ b : ℕ → OF F, ∃ L : List (Ainf p F), x + y = (∑ i ∈ Finset.range n, teichmuller p (b i) * p ^ i) + p ^ n * L.sum ∧ (∀ i < n, ρ ^ i * v (b i) ≤ max (w x) (w y)) ∧ ∀ z ∈ L, ρ ^ n * w z ≤ max (w x) (w y)`
+- **What**: For every truncation level `n`, the sum `x + y` can be written as a length-`n` Teichmüller expansion whose digits `b i` already obey the target bound `ρ^i · v(b i) ≤ max (w x) (w y)`, plus `p^n` times a list of remainders each still obeying the (`ρ^n`-scaled) bound. This is Kedlaya's inductive normal form (4.1.1)/(4.1.2).
+- **How**: Induction on `n`. Base case takes the two-element list `[x, y]` and the zero digit function. The successor step is exactly Kedlaya's two operations run in sequence: `exists_list_head_split` peels one Teichmüller head off every list member, `exists_fold_teichmuller_heads` collapses all those heads into a single digit `c`, and the digit function is extended by `Function.update b n c` (the prefix sum is re-associated by `Finset.sum_range_succ` plus `Function.update_of_ne`/`Function.update_self`).
+- **Hypotheses**: `ρ ≤ 1`.
+- **Uses from project**: `exists_list_head_split`, `exists_fold_teichmuller_heads`, `gaussValue`, `perfectoidValuation`, `Ainf`, `OF`
+- **Used by**: `gaussValue_add_le`
+- **Visibility**: private
+- **Lines**: 499-550 (proof, 39 lines)
+- **Notes**: >30-line proof; the technical heart of the whole ultrametric argument, and the only consumer of the two private list lemmas from part 1.
+
+### `theorem gaussValue_add_le`
+- **Type**: `(hρ1 : ρ ≤ 1) (x y : Ainf p F) → gaussValue p F ρ (x + y) ≤ max (gaussValue p F ρ x) (gaussValue p F ρ y)`
+- **What**: **The ultrametric inequality** `w(x + y) ≤ max (w x) (w y)` for the weighted Gauss value (Kedlaya, Lemma 4.1 / Lemma 2.3(a)).
+- **How**: `ciSup_le` reduces to bounding each term `ρ^j · v (teichCoeff (x+y) j)`. Instantiate `exists_level_rep` at level `j + 1`; then `teichCoeff_sum_range_add` identifies the `j`-th Teichmüller coordinate of `x + y` with the digit `b j` of that representation, whose bound is part of the conclusion of `exists_level_rep`.
+- **Hypotheses**: `ρ ≤ 1`.
+- **Uses from project**: `gaussValue`, `gaussTerm`, `teichCoeff`, `exists_level_rep`, `teichCoeff_sum_range_add`, `Ainf`
+- **Used by**: `gaussValue_list_sum_le`, `gaussValue_finset_sum_le`, `gaussValue_mul_le` (×3), `gaussValue_sub_le`, `gaussValue_add_eq_of_lt`, `gaussValue_mul`
+- **Visibility**: public
+- **Lines**: 552-563 (proof, 6 lines)
+- **Notes**: headline result of the file's first half; 5 further uses elsewhere in the project.
+
+### `theorem teichCoeff_p_pow_mul`
+- **Type**: `(x : Ainf p F) (n k : ℕ) → teichCoeff p F (p ^ n * x) (n + k) = teichCoeff p F x k`
+- **What**: Multiplying by `p^n` shifts the Teichmüller coordinates by `n`: the `(n+k)`-th coordinate of `p^n · x` is the `k`-th coordinate of `x`.
+- **How**: Induction on `n`, reduced to the one-step claim `teichCoeff (p·y) (j+1) = teichCoeff y j`. That step uses `WittVector.mul_charP_coeff_succ` (in characteristic `p`, `(y·p).coeff (j+1) = (y.coeff j)^p`) and then cancels the extra Frobenius power against the inverse-Frobenius twist in `teichCoeff` via `RingEquiv.symm_apply_apply`.
+- **Hypotheses**: none beyond the ambient `CharP F p` / perfectoid setting.
+- **Uses from project**: `teichCoeff`, `Ainf`, `OF`
+- **Used by**: `gaussValue_mul` (line 852)
+- **Visibility**: public
+- **Lines**: 565-583 (proof, 18 lines)
+- **Notes**: none.
+
+### `theorem gaussValue_p_pow_mul`
+- **Type**: `(hρ1 : ρ ≤ 1) (n : ℕ) (x : Ainf p F) → gaussValue p F ρ (p ^ n * x) = ρ ^ n * gaussValue p F ρ x`
+- **What**: The Gauss value scales by exactly `ρ^n` under multiplication by `p^n` — the iterated form of `w(p·x) = ρ·w(x)`.
+- **How**: Induction on `n`, splitting `p^(m+1)·x = p·(p^m·x)` by `ring` and applying the one-step lemma `gaussValue_p_mul` followed by the induction hypothesis.
+- **Hypotheses**: `ρ ≤ 1`.
+- **Uses from project**: `gaussValue`, `gaussValue_p_mul`, `Ainf`
+- **Used by**: `gaussValue_teichmuller_mul_p_pow`, `gaussValue_mul_le` (×2), `gaussValue_shift_tail_le`
+- **Visibility**: public
+- **Lines**: 585-593 (proof, 8 lines)
+- **Notes**: 2 further uses elsewhere in the project.
+
+### `theorem gaussValue_list_sum_le`
+- **Type**: `(hρ1 : ρ ≤ 1) (B : NNReal) (L : List (Ainf p F)) (hL : ∀ z ∈ L, gaussValue p F ρ z ≤ B) → gaussValue p F ρ L.sum ≤ B`
+- **What**: Ultrametric bound for list sums: if every member of a list has Gauss value at most `B`, so does the sum.
+- **How**: Induction on the list, using `gaussValue_add_le` on `w :: rest` and `max_le` to combine the head bound with the induction hypothesis.
+- **Hypotheses**: `ρ ≤ 1`; uniform bound `B` on every member.
+- **Uses from project**: `gaussValue`, `gaussValue_add_le`, `Ainf`
+- **Used by**: unused in file
+- **Visibility**: public
+- **Lines**: 595-604 (proof, 8 lines)
+- **Notes**: not an instance and not `@[simp]` — genuinely unused, both in this file and elsewhere in the project; the `Finset` twin `gaussValue_finset_sum_le` is the one actually consumed.
+
+### `theorem exists_iter_split`
+- **Type**: `(x : Ainf p F) (n : ℕ) → ∃ X : Ainf p F, x = (∑ i ∈ Finset.range n, teichmuller p (teichCoeff p F x i) * p ^ i) + p ^ n * X ∧ ∀ k, teichCoeff p F X k = teichCoeff p F x (n + k)`
+- **What**: Iterated head split of a single element: `x` equals its own length-`n` Teichmüller prefix plus `p^n` times a tail `X`, and the tail's Teichmüller coordinates are exactly the `n`-shifted coordinates of `x`.
+- **How**: The decomposition itself is `exists_eq_sum_teichCoeff_add`; the coordinate identification is the new content. Splitting `x` again at level `k+1` inside `X` and re-assembling by `Finset.sum_range_add` gives a *single* length-`n+k+1` expansion of `x` whose digits are the glued family, and `teichCoeff_sum_range_add` then reads off the `(n+k)`-th coordinate of `x` as `teichCoeff X k`.
+- **Hypotheses**: none.
+- **Uses from project**: `teichCoeff`, `exists_eq_sum_teichCoeff_add`, `teichCoeff_sum_range_add`, `Ainf`
+- **Used by**: `gaussValue_mul_le` (×2), `gaussValue_mul` (×2)
+- **Visibility**: public
+- **Lines**: 606-655 (proof, 48 lines)
+- **Notes**: >30-line proof; the glued digit family is a `dite` on `i < n`, so much of the length is `dif_pos`/`dif_neg`/`omega` index bookkeeping.
+
+### `theorem gaussValue_finset_sum_le`
+- **Type**: `{ι : Type*} (hρ1 : ρ ≤ 1) (B : NNReal) (s : Finset ι) (f : ι → Ainf p F) (hf : ∀ i ∈ s, gaussValue p F ρ (f i) ≤ B) → gaussValue p F ρ (∑ i ∈ s, f i) ≤ B`
+- **What**: Ultrametric bound for finite sums indexed by a `Finset`: a uniform bound on the summands bounds the sum.
+- **How**: `Finset.induction_on`, with the insert step handled by `gaussValue_add_le` on `f a + ∑ rest` and `max_le`.
+- **Hypotheses**: `ρ ≤ 1`; uniform bound `B` on the summands over `s`.
+- **Uses from project**: `gaussValue`, `gaussValue_add_le`, `Ainf`
+- **Used by**: `gaussValue_mul_le` (×2, nested for a double sum), `gaussValue_mul`
+- **Visibility**: public
+- **Lines**: 657-667 (proof, 9 lines)
+- **Notes**: needs `classical` for the `Finset.induction_on` decidability.
+
+### `theorem gaussValue_teichmuller_mul_p_pow`
+- **Type**: `(hρ1 : ρ ≤ 1) (a : OF F) (i : ℕ) → gaussValue p F ρ (teichmuller p a * p ^ i) = ρ ^ i * perfectoidValuation p F (a : F)`
+- **What**: The Gauss value of a single term `[a]·p^i` of a Teichmüller expansion is exactly `ρ^i · v(a)`.
+- **How**: Commute the product and chain the two computed values: `gaussValue_p_pow_mul` for the `p^i` factor and `gaussValue_teichmuller` for the Teichmüller factor.
+- **Hypotheses**: `ρ ≤ 1`.
+- **Uses from project**: `gaussValue`, `gaussValue_p_pow_mul`, `gaussValue_teichmuller`, `perfectoidValuation`, `Ainf`, `OF`
+- **Used by**: `gaussValue_mul` (line 898)
+- **Visibility**: public
+- **Lines**: 669-673 (proof, 1 line)
+- **Notes**: none.
+
+### `theorem gaussValue_mul_le`
+- **Type**: `(hρ1 : ρ < 1) (x y : Ainf p F) → gaussValue p F ρ (x * y) ≤ gaussValue p F ρ x * gaussValue p F ρ y`
+- **What**: **Submultiplicativity** `w(x·y) ≤ w(x)·w(y)` for `0 ≤ ρ < 1` (Kedlaya, Lemma 4.1).
+- **How**: Prove the family of approximate bounds `w(x·y) ≤ max (w x · w y) (ρ^(n+1))` for every `n`: split `x` and `y` at level `n+1` by `exists_iter_split`, expand `x·y` into the prefix-prefix product plus three `p^(n+1)`-divisible terms, bound the prefix product by a double `gaussValue_finset_sum_le` over `Finset.sum_mul_sum` (each term evaluated by `gaussValue_p_pow_mul` + `gaussValue_teichmuller` and bounded by two copies of `gaussTerm_le_gaussValue`), and bound each tail by `ρ^(n+1)` via `gaussValue_le_one`. Then let `n → ∞`: `exists_pow_lt_of_lt_one` makes `ρ^(N+1)` smaller than any hypothetical excess, contradiction.
+- **Hypotheses**: `ρ < 1` (strict — needed for `ρ^n → 0`).
+- **Uses from project**: `gaussValue`, `teichCoeff`, `exists_iter_split`, `gaussValue_finset_sum_le`, `gaussValue_p_pow_mul`, `gaussValue_teichmuller`, `gaussTerm_le_gaussValue`, `gaussValue_add_le`, `gaussValue_le_one`, `perfectoidValuation`, `Ainf`, `OF`
+- **Used by**: `gaussValue_neg`, `gaussValue_mul` (×3)
+- **Visibility**: public
+- **Lines**: 675-744 (proof, 68 lines)
+- **Notes**: >30-line proof (the longest in part 2 after `gaussValue_mul`); 3 further uses elsewhere in the project.
+
+### `theorem gaussValue_neg`
+- **Type**: `(hρ1 : ρ < 1) (x : Ainf p F) → gaussValue p F ρ (-x) = gaussValue p F ρ x`
+- **What**: The Gauss value is invariant under negation.
+- **How**: `-z = (-1)·z`, so `gaussValue_mul_le` plus `gaussValue_le_one` applied to `-1` gives `w(-z) ≤ w(z)` for all `z`; antisymmetry follows by applying that inequality to `-x` and rewriting `neg_neg`.
+- **Hypotheses**: `ρ < 1` (inherited from `gaussValue_mul_le`).
+- **Uses from project**: `gaussValue`, `gaussValue_mul_le`, `gaussValue_le_one`, `Ainf`
+- **Used by**: `gaussValue_sub_le`
+- **Visibility**: public
+- **Lines**: 746-757 (proof, 10 lines)
+- **Notes**: none.
+
+### `theorem gaussValue_sub_le`
+- **Type**: `(hρ1 : ρ < 1) (x y : Ainf p F) → gaussValue p F ρ (x - y) ≤ max (gaussValue p F ρ x) (gaussValue p F ρ y)`
+- **What**: The ultrametric inequality in subtractive form, `w(x - y) ≤ max (w x) (w y)`.
+- **How**: `sub_eq_add_neg` then `gaussValue_add_le` on `x + (-y)`, and `gaussValue_neg` rewrites `w(-y)` to `w(y)`.
+- **Hypotheses**: `ρ < 1` (needed only because `gaussValue_neg` needs it).
+- **Uses from project**: `gaussValue`, `gaussValue_add_le`, `gaussValue_neg`, `Ainf`
+- **Used by**: `gaussValue_add_eq_of_lt`
+- **Visibility**: public
+- **Lines**: 759-764 (proof, 3 lines)
+- **Notes**: 1 further use elsewhere in the project.
+
+### `theorem gaussValue_add_eq_of_lt`
+- **Type**: `(hρ1 : ρ < 1) {A B : Ainf p F} (hAB : gaussValue p F ρ B < gaussValue p F ρ A) → gaussValue p F ρ (A + B) = gaussValue p F ρ A`
+- **What**: The isosceles / "all triangles are isosceles" principle: perturbing by a strictly smaller element leaves the Gauss value unchanged.
+- **How**: `≤` is `gaussValue_add_le` with `max_le`. For `≥`, write `A = (A + B) - B` and apply `gaussValue_sub_le`; a `max_cases` split rules out the branch where the max is `w B`, since that would give `w A ≤ w B < w A`.
+- **Hypotheses**: `ρ < 1`; strict domination `w B < w A`.
+- **Uses from project**: `gaussValue`, `gaussValue_add_le`, `gaussValue_sub_le`, `Ainf`
+- **Used by**: `gaussValue_mul`
+- **Visibility**: public
+- **Lines**: 766-779 (proof, 12 lines)
+- **Notes**: none.
+
+### `theorem gaussValue_pos_of_ne_zero`
+- **Type**: `(hρ0 : 0 < ρ) (hρ1 : ρ ≤ 1) {x : Ainf p F} (hx : x ≠ 0) → 0 < gaussValue p F ρ x`
+- **What**: Positivity / nondegeneracy: a nonzero Witt vector has strictly positive Gauss value when `0 < ρ ≤ 1`.
+- **How**: `WittVector.ext` yields some coordinate `x.coeff m ≠ 0`; then `teichCoeff_eq_zero_iff` and `Valuation.zero_iff` show `v (teichCoeff x m) ≠ 0`, so the single term `gaussTerm ρ x m = ρ^m · v(...)` is positive, and `gaussTerm_le_gaussValue` transfers positivity to the supremum.
+- **Hypotheses**: `0 < ρ` (else all terms could vanish), `ρ ≤ 1` (for the sup bound), `x ≠ 0`.
+- **Uses from project**: `gaussValue`, `gaussTerm`, `teichCoeff`, `teichCoeff_eq_zero_iff`, `gaussTerm_le_gaussValue`, `perfectoidValuation`, `Ainf`
+- **Used by**: `gaussValue_mul` (×2)
+- **Visibility**: public
+- **Lines**: 781-795 (proof, 13 lines)
+- **Notes**: 2 further uses elsewhere in the project.
+
+### `theorem teichCoeff_zero_eq`
+- **Type**: `(W : Ainf p F) → teichCoeff p F W 0 = W.coeff 0`
+- **What**: The `0`-th Teichmüller coordinate is just the `0`-th Witt coordinate (no Frobenius twist at level `0`).
+- **How**: Unfold `teichCoeff`; the inverse-Frobenius power is `θ^{-0} = id`, closed by `simp`.
+- **Hypotheses**: none.
+- **Uses from project**: `teichCoeff`, `Ainf`
+- **Used by**: `gaussValue_mul` (×3, in `hmul0`)
+- **Visibility**: public
+- **Lines**: 797-799 (proof, 2 lines)
+- **Notes**: the only declaration in part 2 with no docstring; 2 further uses elsewhere in the project.
+
+### `private theorem gaussValue_shift_tail_le`
+- **Type**: `(hρ1 : ρ ≤ 1) {x X : Ainf p F} {n : ℕ} (hcoords : ∀ k, teichCoeff p F X k = teichCoeff p F x (n + k)) → gaussValue p F ρ (p ^ n * X) ≤ gaussValue p F ρ x`
+- **What**: If `X` carries the `n`-shifted Teichmüller coordinates of `x`, then the tail `p^n · X` has Gauss value at most that of `x` — the sup over a shifted subfamily is dominated by the full sup.
+- **How**: `gaussValue_p_pow_mul` turns the left side into `ρ^n · w X`; `NNReal.mul_iSup` pushes the scalar inside, and `ciSup_le` reduces to the term identity `ρ^n · gaussTerm X i = gaussTerm x (n + i)` (from `hcoords` and `pow_add`), which is bounded by `gaussTerm_le_gaussValue`.
+- **Hypotheses**: `ρ ≤ 1`; the coordinate-shift hypothesis `hcoords` (supplied by `exists_iter_split`).
+- **Uses from project**: `gaussValue`, `gaussTerm`, `teichCoeff`, `gaussValue_p_pow_mul`, `gaussTerm_le_gaussValue`, `Ainf`
+- **Used by**: `gaussValue_mul` (×2)
+- **Visibility**: private
+- **Lines**: 801-812 (proof, 10 lines)
+- **Notes**: none.
+
+### `theorem gaussValue_mul`
+- **Type**: `(hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x y : Ainf p F) → gaussValue p F ρ (x * y) = gaussValue p F ρ x * gaussValue p F ρ y`
+- **What**: **Multiplicativity** `w(x·y) = w(x)·w(y)` for `0 < ρ < 1` (Kedlaya, Lemma 4.1 / Lemma 2.3(b)) — the Gauss value is a multiplicative seminorm, which is what makes it a point of `𝒴`.
+- **How**: The classical "leading-term" argument. Discard the zero cases; `exists_gaussValue_eq_gaussTerm` gives *first* indices `j`, `k` attaining the suprema (`Nat.find`, with `Nat.find_min` giving strict inequality below them). Split off the prefixes with `exists_iter_split` and set `x' = p^j X`, `y' = p^k Y`; the `(j+k)`-th term of `x'·y'` is computed exactly by `teichCoeff_p_pow_mul`, `teichCoeff_zero_eq`, `WittVector.mul_coeff_zero` and `Valuation.map_mul` to be `w(x)·w(y)`, and the reverse bound is `gaussValue_mul_le` + `gaussValue_shift_tail_le`, so `w(x'y') = w(x)·w(y)` exactly. A helper `hprefix` shows each prefix `x - x'` has strictly smaller value (`gaussValue_finset_sum_le` against `Finset.sup_lt_iff` over the strictly-smaller earlier terms), hence the perturbation `x(y - y') + (x - x')y'` is strictly below `w(x)·w(y)`, and `gaussValue_add_eq_of_lt` finishes.
+- **Hypotheses**: `0 < ρ` (positivity, so the sup is attained and nonzero) and `ρ < 1` (needed for attainment and for `gaussValue_mul_le`).
+- **Uses from project**: `gaussValue`, `gaussTerm`, `teichCoeff`, `gaussValue_pos_of_ne_zero`, `exists_gaussValue_eq_gaussTerm`, `gaussTerm_le_gaussValue`, `exists_iter_split`, `gaussValue_shift_tail_le`, `teichCoeff_p_pow_mul`, `teichCoeff_zero_eq`, `gaussValue_mul_le`, `gaussValue_finset_sum_le`, `gaussValue_teichmuller_mul_p_pow`, `gaussValue_add_le`, `gaussValue_add_eq_of_lt`, `perfectoidValuation`, `Ainf`, `OF`
+- **Used by**: unused in file (terminal result)
+- **Visibility**: public
+- **Lines**: 814-919 (proof, 104 lines)
+- **Notes**: >30-line proof and by far the longest in the file; it is the file's capstone theorem and has 3 consumers elsewhere in the project. Contains an inlined general helper `hprefix` (a `have` of full lemma shape, applied twice) that is a natural `/decompose-proof` extraction candidate.
+
+---
+
+### File Summary (whole file, lines 1–923)
+
+**Totals.** 47 declarations: **4 `def`s** (`perfectoidValuation`, `teichCoeff`, `gaussTerm`,
+`gaussValue`), **43 theorems**, **0 instances**, 0 structures/classes. **5 are `private`**
+(`valuation_teichCoeff_teichmuller_add_le_left`, `exists_list_head_split`,
+`exists_fold_teichmuller_heads`, `exists_level_rep`, `gaussValue_shift_tail_le`); the other 42 are
+public. **3 carry `@[simp]`** (`teichCoeff_zero_vector`, `gaussValue_zero`, `gaussValue_one`).
+Structurally the file is three layers: definitions + basic bounds (56–212), the
+Teichmüller-expansion/uniqueness toolkit (220–497), and the seminorm axioms
+(499–919: ultrametric, submultiplicativity, multiplicativity).
+
+**Key API used by 3+ in-file consumers.**
+- `gaussValue`, `gaussTerm`, `teichCoeff`, `perfectoidValuation` — the four defs, used pervasively.
+- `gaussValue_add_le` (7 in-file consumers, plus 5 elsewhere in the project) — the ultrametric
+  inequality; the single most-used lemma of the second half.
+- `gaussTerm_le_gaussValue` (6 in-file consumers: `mul_gaussValue_le_of_tail`,
+  `exists_list_head_split`, `gaussValue_pos_of_ne_zero`, `gaussValue_mul_le`,
+  `gaussValue_shift_tail_le`, `gaussValue_mul`) — the "one term bounds the sup" workhorse.
+- `teichCoeff_sum_range_add` (4: `exists_head_split`, `teichCoeff_teichmuller_mul`,
+  `gaussValue_add_le`, `exists_iter_split`) — coordinate uniqueness for truncated expansions.
+- `bddAbove_range_gaussTerm` (4: `gaussValue_one`, `gaussValue_teichmuller`, `gaussValue_p_mul`,
+  `exists_gaussValue_eq_gaussTerm`) — the boundedness side condition every `ciSup` argument needs.
+- `gaussValue_p_pow_mul` (3: `gaussValue_teichmuller_mul_p_pow`, `gaussValue_mul_le`,
+  `gaussValue_shift_tail_le`).
+- `exists_eq_sum_teichCoeff_add` (3: `exists_head_split`, `teichCoeff_teichmuller_mul`,
+  `exists_iter_split`) and `gaussTerm_le_one` (3: `gaussValue_le_one`,
+  `bddAbove_range_gaussTerm`, `gaussValue_p_mul`).
+
+**Unused declarations (no in-file consumer).**
+- `@[simp] theorem teichCoeff_zero_vector`, `@[simp] theorem gaussValue_zero`,
+  `@[simp] theorem gaussValue_one` — **`@[simp]`, therefore NOT dead**: they are consumed by the
+  simp set rather than by name (`gaussValue_zero`/`gaussValue_one` additionally have named uses
+  elsewhere in the project).
+- `theorem gaussValue_mul` — terminal capstone, not an instance/simp lemma, but consumed **outside**
+  the file (`GaussPoint.lean` uses it as `map_mul'` of the Gauss point; `UniformizerEquivariance.lean`
+  uses it too). Not dead.
+- `theorem coe_p_ne_zero` — plain theorem, no `@[simp]`, no instance, **0 uses in the file and 0
+  elsewhere in the project**: genuinely dead.
+- `theorem gaussValue_list_sum_le` — plain theorem, **0 uses in the file and 0 elsewhere**: genuinely
+  dead; its `Finset` twin `gaussValue_finset_sum_le` is the one actually consumed (3 in-file uses).
+
+**Declarations with `sorry`.** None — the file is sorry-free end to end.
+
+**Declarations with `set_option`.** None — no `maxHeartbeats`/`maxRecDepth` bumps anywhere in the
+file.
+
+**Proofs longer than 30 lines (9 total, 4 in part 1 / 4 in part 2, plus one at exactly 30).**
+| declaration | proof lines |
+|---|---|
+| `gaussValue_mul` | 104 |
+| `gaussValue_mul_le` | 68 |
+| `exists_iter_split` | 48 |
+| `exists_level_rep` | 39 |
+| `valuation_teichCoeff_teichmuller_add_le_left` | 33 |
+| `gaussValue_p_mul` | 32 |
+| `exists_gaussValue_eq_gaussTerm` | 32 |
+| `exists_head_split` | 32 |
+| `exists_fold_teichmuller_heads` | 30 (exactly at the threshold) |
+
+The four longest are all in the second half and all belong to the multiplicativity chain.
+`gaussValue_mul` in particular contains an inlined general helper `hprefix` (stated as a full
+∀-quantified `have` and applied twice) that is a natural `/decompose-proof` extraction candidate.
+
+**Repeated proof preamble (3+ proofs).** The opener
+```
+  rw [gaussValue]
+  refine … (ciSup_le fun n => ?_) …
+```
+is repeated verbatim (up to the bound variable name and the surrounding `le_antisymm`) in **5**
+proofs: `gaussValue_zero` (112–113), `gaussValue_one` (119–120), `gaussValue_teichmuller`
+(132–133), `gaussValue_teichmuller_add_le` (421–422), `gaussValue_add_le` (557–558). A
+`gaussValue_le_iff` / `gaussValue_le_of_forall_gaussTerm_le` helper (`w x ≤ B ↔ ∀ n, gaussTerm ρ x n ≤ B`)
+would absorb all five and is the clearest dedup opportunity in the file. A second, smaller
+repetition — `induction n with | zero => simp | succ m ih =>` followed verbatim by
+`have hsplit : (p : Ainf p F) ^ (m + 1) * x = (p : Ainf p F) * ((p : Ainf p F) ^ m * x) := by ring`
+— occurs in **2** proofs (`teichCoeff_p_pow_mul` 580, `gaussValue_p_pow_mul` 590), below the
+3-proof threshold but worth noting.
+
+**Cross-file note.** `nnreal_mul_max` (part 1, line 411) is a general `NNReal` fact with no
+Fargues–Fontaine content and is used from four other files in the project (`WittF.lean` ×4,
+`Groebner.lean`, `Euclidean.lean`) — a mathlib-upstreaming / relocation candidate rather than
+GaussNorm API.

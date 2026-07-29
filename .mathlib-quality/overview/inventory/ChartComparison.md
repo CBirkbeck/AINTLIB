@@ -77,7 +77,7 @@ Local instance (line 76): `DecidableEq (Ainf p F) := Classical.decEq _` (unnamed
 - **How**: Rewrites density as `closure = univ` and pushes it through the subtype embedding using `Topology.IsEmbedding.subtypeVal.closure_eq_preimage_closure_image`; the image of the range is shown equal to `Set.range (BIProd …)` (using `blocEquivAwayChartS` and its `RingEquiv.apply_symm_apply` in both directions), and the closure of that range is `BISub` by definition (`rfl`).
 - **Hypotheses**: `0 < b`; radii hypotheses.
 - **Uses from project**: `chartToBI`, `chartToBI_coe`, `blocEquivAwayChartS`, `BIProd`, `BISub`, `hatK`
-- **Used by**: unused in file (headline export; consumed downstream for the `𝒪_Y(U) ≅ B^I` identification)
+- **Used by**: `chartBIPkg` (the `dense` field)
 - **Visibility**: public
 - **Lines**: 104–133 (proof ≈ 25 lines)
 - **Notes**: >10-line proof; the `himg` sub-proof duplicates `range_chartToBIProd` (lines 249–263) almost verbatim — see the repeated-preamble note in the summary.
@@ -132,7 +132,7 @@ Local instance (line 76): `DecidableEq (Ainf p F) := Classical.decEq _` (unnamed
 - **How**: For uniform additive groups a topological inducing additive map is uniformly inducing — `AddMonoidHom.isUniformInducing_of_isInducing` applied to `isInducing_chartToBI`, with the two `IsUniformAddGroup` instances supplied by `chartIsUniformAddGroup` and `isUniformAddGroup_BISub`.
 - **Hypotheses**: `0 < a`, `0 < b`, `b ≤ a`, exactness `hexact1`, `hexact2`.
 - **Uses from project**: `chartToBI`, `chartUniformity`, `chartIsUniformAddGroup`, `isUniformAddGroup_BISub`, `isInducing_chartToBI`, `BISub`, `chartS`
-- **Used by**: unused in file (headline export named in the module docstring)
+- **Used by**: `chartBIPkg` (the `isUniformInducing` field)
 - **Visibility**: public
 - **Lines**: 230–247 (proof ≈ 10 lines)
 - **Notes**: `[]`
@@ -143,7 +143,7 @@ Local instance (line 76): `DecidableEq (Ainf p F) := Classical.decEq _` (unnamed
 - **How**: Double inclusion via the ring equivalence `blocEquivAwayChartS`: forward by composing, backward by feeding `(blocEquivAwayChartS …).symm y` and cancelling with `RingEquiv.apply_symm_apply`.
 - **Hypotheses**: `0 < b`; radii hypotheses.
 - **Uses from project**: `chartToBIProd`, `BIProd`, `blocEquivAwayChartS`
-- **Used by**: (see later chunks)
+- **Used by**: `presheafChartToBIProd_mem_BISub`
 - **Visibility**: public
 - **Lines**: 249–263 (proof ≈ 10 lines)
 - **Notes**: this is the standalone form of the `himg` block inside `denseRange_chartToBI`.
@@ -224,3 +224,163 @@ Local instance (line 76): `DecidableEq (Ainf p F) := Classical.decEq _` (unnamed
 - **Visibility**: public
 - **Lines**: 388–433 (proof ≈ 32 lines)
 - **Notes**: >30-line proof; the `hdense := @UniformSpace.Completion.denseRange_coe _ (chartData p F ϖ 1 b a b).uniformSpace` opener repeats from `presheafChartToBIProd_mem_BISub`.
+
+### `def presheafChartRingEquivBISub`
+- **Type**: `(a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a) (hexact1 : v(ϖ) = ρ₁) (hexact2 : ρ₂ ^ a = v(ϖ) ^ b) : presheafValue (chartData p F ϖ 1 b a b) ≃+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)`
+- **What**: **ID2d, the comparison theorem** — `𝒪_Y(U) ≅ B^I` as topological rings at the exact chart interval (Kedlaya Lemma 4.9 case 3 over the `A_inf`-base).
+- **How**: Takes `presheafChartToBI` as the forward ring hom and the *inverse of the uniform equivalence* `chartCompletionUniformEquiv⁻¹` as the backward map; the two inverse laws follow from `presheafChartToBI_eq_compare` (which says the two forward maps coincide) plus `UniformEquiv.symm_apply_apply` / `UniformEquiv.apply_symm_apply`, and `map_mul'`/`map_add'` are inherited from the ring hom.
+- **Hypotheses**: `0 < a`, `0 < b`, `b ≤ a`, exactness `hexact1`, `hexact2`; `include hρ₁0 hρ₂0`.
+- **Uses from project**: `presheafChartToBI`, `chartCompletionUniformEquiv`, `presheafChartToBI_eq_compare`, `vpi_le_rho2_of_exact`, `rho1_pow_le_of_exact`, `chartData`, `presheafValue`, `BISub`
+- **Used by**: `presheafChartRingEquivBISub_continuous`, `presheafChartRingEquivBISub_symm_continuous`, `isSheafy_presheafChart`
+- **Visibility**: public, `noncomputable`
+- **Lines**: 436–475 (structure literal ≈ 29 lines)
+- **Notes**: the file's headline theorem; hand-built `≃+*` rather than `RingEquiv.ofBijective` because the inverse must be the *uniform* inverse (so it is continuous).
+
+### `theorem presheafChartRingEquivBISub_continuous`
+- **Type**: `(a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a) (hexact1 …) (hexact2 …) : Continuous (presheafChartRingEquivBISub …)`
+- **What**: The comparison isomorphism `𝒪_Y(U) → B^I` is continuous.
+- **How**: Its underlying map is the corestriction of a `UniformSpace.Completion.extension`, so `Continuous.subtype_mk` applied to `UniformSpace.Completion.continuous_extension` (at the chart datum's uniform space) suffices.
+- **Hypotheses**: `0 < a`, `0 < b`, `b ≤ a`, exactness.
+- **Uses from project**: `presheafChartRingEquivBISub`, `chartData`, `RationalLocData.uniformSpace`
+- **Used by**: `isSheafy_presheafChart`
+- **Visibility**: public
+- **Lines**: 477–487 (term-mode, 3 lines)
+- **Notes**: `[]`
+
+### `theorem presheafChartRingEquivBISub_symm_continuous`
+- **Type**: `(a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a) (hexact1 …) (hexact2 …) : Continuous (presheafChartRingEquivBISub …).symm`
+- **What**: The inverse comparison isomorphism `B^I → 𝒪_Y(U)` is continuous — so together with the previous lemma the comparison is a topological ring isomorphism.
+- **How**: The inverse is by construction the underlying map of `(chartCompletionUniformEquiv …).symm`, so its `UniformEquiv.continuous` field gives the result directly.
+- **Hypotheses**: `0 < a`, `0 < b`, `b ≤ a`, exactness.
+- **Uses from project**: `presheafChartRingEquivBISub`, `chartCompletionUniformEquiv`
+- **Used by**: `isSheafy_presheafChart`
+- **Visibility**: public
+- **Lines**: 489–498 (term-mode, 2 lines)
+- **Notes**: `[]`
+
+### `theorem isSheafy_presheafChart`
+- **Type**: `(a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a) (hexact1 …) (hexact2 …) : letI … ; ValuationSpectrum.IsSheafy (presheafValue (chartData p F ϖ 1 b a b))` (statement carries four `letI` instance packages in its telescope: the transported `PlusSubring`, `IsHuberRing`, right-uniformity `CompleteSpace`, and `IsRingOfIntegralElements`)
+- **What**: **ID2e — the chart presheaf value is sheafy**: `𝒪_Y(U)` is a sheafy Huber pair, obtained by transporting sheafiness of `B^I` across the comparison isomorphism.
+- **How**: Sets `e := (presheafChartRingEquivBISub …).symm` with continuity both ways from the two continuity lemmas; installs the `B^I`-side instance package (`BIPlusIn` as plus subring, `completeSpace_right_BISub`, `isRingOfIntegralElements_BIPlusIn`), proves `B^I` itself sheafy via `isSheafy_BISub` at `j = n = 1` (needing `ρ₁ ≤ ρ₂` from `vpi_le_rho2_of_exact` and the bound `wI (BIProd (teichPowOverP …)) ≤ 1` from `wI_teichPowOverP_le_one` + `perfectoidValuation_pow_toOF`), upgrades the target to a Tate ring via `isTateRing_congr e he he'`, mirrors the instance package across `e` (`Subring.map`, `IsRingOfIntegralElements.map`, `completeSpace_right_presheafValue`), and concludes with `ValuationSpectrum.isSheafy_mapRingEquiv e he he' rfl`.
+- **Hypotheses**: `0 < a`, `0 < b`, `b ≤ a`, exactness `hexact1`, `hexact2`; `include hρ₁0 hρ₂0`.
+- **Uses from project**: `presheafChartRingEquivBISub`, `presheafChartRingEquivBISub_continuous`, `presheafChartRingEquivBISub_symm_continuous`, `isTateRing_congr`, `completeSpace_right_presheafValue`, `completeSpace_right_BISub`, `isSheafy_BISub`, `BISub`, `BIPlusIn`, `BIProd`, `BIProd_mem_BISub`, `isRingOfIntegralElements_BIPlusIn`, `wI`, `wI_teichPowOverP_le_one`, `teichPowOverP`, `perfectoidValuation_pow_toOF`, `vpi_le_rho2_of_exact`, `ValuationSpectrum.isSheafy_mapRingEquiv`, `ValuationSpectrum.PlusSubring`, `ValuationSpectrum.ringPlus`, `chartData`, `presheafValue`
+- **Used by**: unused in file (terminal result of the module)
+- **Visibility**: public
+- **Lines**: 500–591 (statement ≈ 42 lines, proof ≈ 50 lines)
+- **Notes**: >30-line proof **and** >30-line statement — by far the largest declaration in the file; the `letI` instance package appears twice (once in the statement telescope, once inside the proof) because the statement must expose the instances it is stated relative to.
+
+### `def rhoRight`
+- **Type**: `(a b : ℕ) : NNReal`
+- **What**: The right endpoint `|ϖ|^{b/a}` of the `U₀`-chart interval, as a real (rpow) power of the perfectoid valuation of the pseudo-uniformizer.
+- **How**: `perfectoidValuation p F ϖ ^ ((b : ℝ) / (a : ℝ))` using `NNReal.rpow`.
+- **Hypotheses**: none (defined for all `a b : ℕ`; positivity/`< 1` are separate lemmas).
+- **Uses from project**: `perfectoidValuation`, `PseudoUniformizer.toOF`, `OF`
+- **Used by**: `rhoRight_pos`, `rhoRight_lt_one`, `rhoRight_pow_exact`
+- **Visibility**: public, `noncomputable`
+- **Lines**: 593–597 (def, 2 lines)
+- **Notes**: this is what supplies a genuine `ρ₂` satisfying the exactness hypothesis `ρ₂ ^ a = |ϖ| ^ b` for arbitrary `a`, `b`.
+
+### `theorem vpi_pos`
+- **Type**: `0 < perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)`
+- **What**: The perfectoid valuation of a pseudo-uniformizer is strictly positive.
+- **How**: `pos_iff_ne_zero` plus `Valuation.ne_zero_iff`, reducing to `ϖ ≠ 0`, which is `PseudoUniformizer.toOF_ne_zero` after `Subtype.ext`.
+- **Hypotheses**: `ϖ` a pseudo-uniformizer (nonzero by definition).
+- **Uses from project**: `perfectoidValuation`, `PseudoUniformizer.toOF`, `PseudoUniformizer.toOF_ne_zero`, `OF`
+- **Used by**: `rhoRight_pos`
+- **Visibility**: public
+- **Lines**: 599–602 (proof 2 lines)
+- **Notes**: `[]`
+
+### `theorem rhoRight_pos`
+- **Type**: `(a b : ℕ) : 0 < rhoRight p F ϖ a b`
+- **What**: The chart interval's right endpoint is strictly positive.
+- **How**: Unfold `rhoRight` and apply `NNReal.rpow_pos` to `vpi_pos`.
+- **Hypotheses**: none beyond the ambient variables.
+- **Uses from project**: `rhoRight`, `vpi_pos`
+- **Used by**: unused in file (supplies `hρ₂0` for downstream instantiations)
+- **Visibility**: public
+- **Lines**: 604–606 (proof 2 lines)
+- **Notes**: `[]`
+
+### `theorem rhoRight_lt_one`
+- **Type**: `(a b : ℕ) (ha : 0 < a) (hb : 0 < b) : rhoRight p F ϖ a b < 1`
+- **What**: The chart interval's right endpoint is `< 1`.
+- **How**: `NNReal.rpow_lt_one` applied to `perfectoidValuation_toOF_lt_one` (the base is `< 1`) with the exponent `b / a > 0` discharged by `positivity` after casting `ha`, `hb` to `ℝ`.
+- **Hypotheses**: `0 < a`, `0 < b` (needed for a strictly positive exponent).
+- **Uses from project**: `rhoRight`, `perfectoidValuation_toOF_lt_one`
+- **Used by**: unused in file (supplies `hρ₂1` for downstream instantiations)
+- **Visibility**: public
+- **Lines**: 608–614 (proof 5 lines)
+- **Notes**: `[]`
+
+### `theorem rhoRight_pow_exact`
+- **Type**: `(a b : ℕ) (ha : 0 < a) : rhoRight p F ϖ a b ^ a = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b`
+- **What**: `rhoRight` satisfies exactly the `hexact2` hypothesis `ρ₂ ^ a = |ϖ| ^ b` demanded by every comparison result above.
+- **How**: Converts the natural power to an rpow (`NNReal.rpow_natCast`), merges exponents with `NNReal.rpow_mul`, cancels `(b/a) * a = b` by `div_mul_cancel₀` using `a ≠ 0`, and converts back.
+- **Hypotheses**: `0 < a` (so `(a : ℝ) ≠ 0` for the cancellation).
+- **Uses from project**: `rhoRight`, `perfectoidValuation`, `PseudoUniformizer.toOF`
+- **Used by**: unused in file (the key instantiation lemma for `hexact2` downstream)
+- **Visibility**: public
+- **Lines**: 616–622 (proof 3 lines)
+- **Notes**: `[]`
+
+### `theorem two_le_p_add_one`
+- **Type**: `2 ≤ p + 1`
+- **What**: For a prime `p`, `2 ≤ p + 1`.
+- **How**: `Nat.Prime.two_le` from the `Fact (Nat.Prime p)` instance, then `omega`.
+- **Hypotheses**: `[Fact (Nat.Prime p)]`.
+- **Uses from project**: `[]`
+- **Used by**: unused in file
+- **Visibility**: public
+- **Lines**: 625–628 (proof 2 lines)
+- **Notes**: arithmetic scrap unrelated to the chart comparison — a candidate for deletion or relocation.
+
+---
+
+### File Summary
+
+**Total declarations: 29 top-level** — **6 defs** (`chartToBI`, `chartBIPkg`, `chartCompletionUniformEquiv`, `presheafChartToBI`, `presheafChartRingEquivBISub`, `rhoRight`; all `noncomputable`), **23 theorems**, **0 named instances**, **0 structures/classes/abbrevs**. Plus **1 anonymous local instance** at line 76 (`noncomputable local instance : DecidableEq (Ainf p F) := Classical.decEq _`).
+
+**Key API used by 3+ other declarations (in-file):**
+- `chartToBI` (line 88) — 7 in-file consumers (`chartToBI_coe`, `denseRange_chartToBI`, `tendsto_chartToBI`, `comap_nhds_zero_chartToBI_le`, `comap_nhds_zero_chartToBI`, `isInducing_chartToBI`, `isUniformInducing_chartToBI`) plus `chartBIPkg`. The load-bearing definition of the module.
+- `presheafChartRingEquivBISub` (line 440) — 3 in-file consumers (`_continuous`, `_symm_continuous`, `isSheafy_presheafChart`); 4 downstream files.
+- `vpi_le_rho2_of_exact` / `rho1_pow_le_of_exact` (lines 349 / 367) — 3 in-file consumers each (`presheafChartToBI_eq_compare`, `presheafChartRingEquivBISub`, and — for the former — `isSheafy_presheafChart`); both also used downstream.
+- `chartCompletionUniformEquiv` (line 334) — 3 in-file consumers (`presheafChartToBI_eq_compare`, `presheafChartRingEquivBISub`, `presheafChartRingEquivBISub_symm_continuous`).
+- `presheafChartToBI` (line 374) — 3 in-file consumers.
+- From other project files, the imported workhorses appearing 3+ times: `chartData`, `chartS`, `BISub`, `BIProd`, `chartUniformity`, `blocEquivAwayChartS` (10 occurrences), `perfectoidValuation`/`PseudoUniformizer.toOF`.
+
+**Declarations unused inside this file** (none are instances or `@[simp]`, so in-file-unused = genuinely terminal or export-only; downstream usage checked by grep over `projects/`):
+| decl | kind | downstream consumers |
+|---|---|---|
+| `isTateRing_congr` | theorem (not an instance, not `@[simp]`) | used in `ChartVObj.lean`, `ChartSpa.lean` — **live** |
+| `completeSpace_right_presheafValue` | theorem | `ChartVObj.lean`, `CurveVChart.lean`, `YStalks.lean`, `CurveAdicPresentation.lean` — **live** |
+| `isSheafy_presheafChart` | theorem (terminal result ID2e) | `ChartVObj.lean`, `BigWindows.lean`, `YStalks.lean` — **live** |
+| `rhoRight_pos` | theorem | `ChartBIQ.lean`, `YStalks.lean`, `CurveAdicPresentation.lean`, `ChartSpa.lean` — **live** |
+| `rhoRight_lt_one` | theorem | same four files — **live** |
+| `rhoRight_pow_exact` | theorem | `ChartBIQ.lean`, `YStalks.lean`, `ChartSpa.lean` — **live** |
+| `two_le_p_add_one` | theorem | **NONE anywhere** — genuinely dead; an off-topic `omega` scrap (`2 ≤ p + 1`) that belongs nowhere near a chart-comparison file. Deletion candidate. |
+
+Additionally, several declarations are used *only* in-file and have **no downstream consumers** — the internal scaffolding of the comparison: `chartToBIProd_mem_BISub`, `chartToBI_coe`, `denseRange_chartToBI`, `tendsto_chartToBI`, `comap_nhds_zero_chartToBI_le`, `comap_nhds_zero_chartToBI`, `isInducing_chartToBI`, `isUniformInducing_chartToBI`, `range_chartToBIProd`, `presheafChartToBIProd_mem_BISub`. These are correctly public (they are the documented intermediate API named in the module docstring) but could be `private` if the docstring's promises were relaxed.
+
+**Declarations with `sorry`:** none. The file is sorry-free (`grep -nE "sorry|admit"` → no matches).
+
+**Declarations with `set_option`:** none per-declaration. There is a single **file-level** `set_option linter.overlappingInstances false` at line 33 — a known project-wide issue in this codebase (double `variable` instance binders), not a per-proof workaround. **No `maxHeartbeats` / `maxRecDepth` bumps anywhere** in the file, consistent with the project's no-heartbeat-bump rule.
+
+**Proofs > 30 lines (3 declarations):**
+1. `presheafChartToBIProd_mem_BISub` — lines 265–307, **≈ 31-line proof**.
+2. `presheafChartToBI_eq_compare` — lines 388–433, **≈ 32-line proof**.
+3. `isSheafy_presheafChart` — lines 500–591, **≈ 50-line proof on top of a ≈ 42-line statement** (the statement itself carries four `letI` instance packages). By a wide margin the largest declaration; the prime `/decompose-proof` target in this file.
+
+Also noteworthy though under the bar: `presheafChartRingEquivBISub` is a **29-line structure literal** (lines 436–475), and `denseRange_chartToBI` a 25-line proof (104–133).
+
+**REPEATED PROOF PREAMBLES / duplicated blocks.** This file has the same disease as `ArCompletion.lean`, though at smaller scale. Ranked by extractable value:
+
+1. **The four-instance `letI` package for a "`B^I`-like Huber pair" — 3 verbatim occurrences, ≈ 60 extractable lines.** The block
+   `letI : ValuationSpectrum.PlusSubring _ := ⟨…⟩` + `letI : @CompleteSpace _ (IsTopologicalAddGroup.rightUniformSpace _) := …` + `letI : IsRingOfIntegralElements (ValuationSpectrum.ringPlus _) := …` (plus, in two of the three, an `IsHuberRing`/`IsTateRing` instance) appears **three times**: in the *statement* telescope of `isSheafy_presheafChart` (lines 509–540), for the `B^I` side inside its proof (lines 554–563), and for the `presheafValue` side inside its proof (lines 580–590). Counts confirm it: `ValuationSpectrum.PlusSubring` ×3, `IsRingOfIntegralElements` ×3, `IsTopologicalAddGroup.rightUniformSpace` ×4. **This is the ArCompletion-style pattern** — the right fix is one `def`/abbreviation packaging "the Huber-pair instance bundle of a ring `R` with plus-subring `P`", plus a transport lemma along a bicontinuous `≃+*`, which would collapse `isSheafy_presheafChart` from ~92 lines to ~15.
+2. **`letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) := chartUniformity p F ϖ a b` — 3 occurrences** (lines 218–219 in `isInducing_chartToBI`, 239–240 in `isUniformInducing_chartToBI`, 277–278 in `presheafChartToBIProd_mem_BISub`). Meets the 3+ bar. Cheap fix: a section-level `letI`/`attribute`, or make `chartUniformity` a scoped instance.
+3. **The `set vπ … ; hne : a*b ≠ 0 ; le_of_pow_le_pow_left₀ ; calc vπ^(a*b) ≤ … = ρ₂^(a*b)` block — 2 verbatim occurrences** (lines 188–199 inside `comap_nhds_zero_chartToBI`, and lines 354–363 = the whole of `vpi_le_rho2_of_exact`). *Below the 3+ bar but a pure duplicate*: `comap_nhds_zero_chartToBI` should simply call `vpi_le_rho2_of_exact`, which was extracted 150 lines later and then never used to replace the original. Likewise its `hr1` block (lines 200–202) is *character-for-character* `rho1_pow_le_of_exact` (lines 370–371). **≈ 14 lines removable with zero risk.**
+4. **The range-identification double-inclusion via `blocEquivAwayChartS` + `RingEquiv.apply_symm_apply` — 2 occurrences** (the `himg` `have` at lines 114–126 inside `denseRange_chartToBI`, and the whole of `range_chartToBIProd` at lines 254–263). Again the standalone lemma exists but the earlier proof does not call it. **≈ 12 lines removable.**
+5. **`have hdense := @UniformSpace.Completion.denseRange_coe _ (chartData p F ϖ 1 b a b).uniformSpace` — 2 occurrences** (lines 280–281, 402–403); and **`Continuous.subtype_mk (@UniformSpace.Completion.continuous_extension _ (chartData p F ϖ 1 b a b).uniformSpace _ _ _ _) _` — 2 occurrences** (lines 405–407, 485–487). Two small extractable helpers (`denseRange_chartCoe`, `continuous_presheafChartToBI`); the second is already `presheafChartRingEquivBISub_continuous`, just inlined in the earlier proof.
+6. **Named-argument boilerplate `(hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)` — 68 occurrences.** Not a *proof* preamble, but it is the single largest source of line-count in the file. It exists only because `hρ₁0 hρ₁1 hρ₂0 hρ₂1` are declared as **implicit** `variable`s (line 74). Making them instance-implicit or bundling `(ρ₁, ρ₂)` with their constraints into a single `ChartRadii` structure would cut the file's length by roughly a third with no mathematical change. This is the highest-leverage cleanup available here.
+
+**Net extractable estimate:** roughly **90–110 lines** from items 1–5 (with item 1 alone worth ~60), plus a further large reduction from the item-6 signature refactor.

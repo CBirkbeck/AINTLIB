@@ -122,6 +122,30 @@ Two large-file inventory workers (Presentation, ArCompletion) died on transient
 (read ~350-line chunk -> write immediately -> next chunk) rather than accumulating the
 whole inventory before writing. Use that pattern for all remaining large files.
 
+## DEDUP PASS — COMPLETE (2026-07-29). See `DEDUP.md`.
+
+Ran ahead of the rest of Phase 2 because the user asked for it directly. Four systematic
+scans over all 46 files / 1463 declaration bodies; **all deletable duplication is gone**.
+
+| Commit | What |
+|---|---|
+| `f3eae1ab3` | `comap_comp_apply` hoisted to ValuationSpectrum (2 byte-identical private copies) |
+| `8ef7c94bc` | the primed/unprimed twin sweep — 14 pairs classified, net −11 declarations |
+| `c3f17193e` | last same-body duplication (`Nfst`/`Nsnd` via mathlib, U/V wandering lemma, `chartTate`) |
+| `db9177ae8` | `valued_ball_mem_nhds`: one lemma instead of three copies across three files |
+| `c4e4cfe6f` | the 73-line Euclidean copy → `valued_prefix_sub_sub_le` |
+
+Every commit gated on a separate `lake build '«Adic spaces»'` (3365 jobs, 0 errors, 0
+sorries) with `#print axioms` on all touched declarations; `isAdicSpace_xVObj` axiom-clean
+throughout.
+
+**Handed back to the user as decisions, not done silently:**
+- the subscript-`₂` family in RobbaPresentation (~600 lines, largest and riskiest
+  opportunity in the folder) — needs a statement change, `/generalise` lane
+- the remaining `_fst`/`_snd`, U/V, `_left`/`_right` twins — same reason
+- the 29 uncited dead declarations identified before the dedup pass — several are
+  meaningful named results, so deletion is an owner call
+
 ## Phase 2 — deep analysis (Steps 4–8), sequential after inventory
 - Step 4 Mathlib API audit (most important)
 - Step 5 Moral duplications (pairwise table REQUIRED)

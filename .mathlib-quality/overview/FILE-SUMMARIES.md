@@ -245,3 +245,35 @@ two are mutually inverse.  Payoff is Kedlaya (2.2.1) on the completion —
   2. the `u*[w]^k = a` localization-and-cancel-`c^k` preamble — **7 copies**
   3. the `B <= (c^-1)^m` value cap (2 copies) and the `BddAbove`-from-`c0` block (2 copies)
   Extracting these three helpers should remove 200+ lines AND shrink the decompose targets.
+
+## FrobeniusValuation.lean — 22 decls (1 def, 21 theorems; 4 private), 626 lines
+Frobenius is compatible with the valuation data, in three ascending layers: rational-loc value
+rings -> open valuations on limit sections -> stalks on the ambient Spa.  The curve-side
+statement reduces to the ambient one through a conjugation square
+(`ringStalkMap_yFrob_conj`), giving `yFrob_val_compat`; locality then follows from
+support = maximal ideal, packaged as `yFrobVPreHom` (goal D-iii).
+- Spine: `comap_presheafValueRingEquivHuber_symm_pointValue` -> `stepMid` ->
+  `comap_limitFrobHom_openValue` -> `openValue_vle_frobTransport` ->
+  `comap_ringStalkMap_ambientFrob_stalkValue` -> `yFrob_val_compat` -> `yFrob_isLocalHom`
+  -> `yFrobVPreHom`
+- Key API: `ringStalkMap_ambientFrob_germ` (5), `spaFrob_mem_frobIndex_datum` (4),
+  `stalkVle_congr` (3)
+- **BYTE-IDENTICAL DUPLICATE**: private `comap_comp_apply` (L176-178) and
+  `comap_comp_apply'` (L544-546) — same statement, same `rfl`, different names.
+  Straight dedup: delete one, retarget L573/580.
+- Unused in-file: `comap_presheafValueRingEquivHuber_pointValue` (plain theorem, NOT an
+  instance/simp — needs a repo-wide check before calling it dead); `yFrobVPreHom` is the
+  terminal export.
+- Extractable: a germ-conversion block x4 (~20 lines) all inside
+  `comap_ringStalkMap_ambientFrob_stalkValue` — one private helper collapses all four.
+- sorry: none.  No maxHeartbeats — cost controlled by SPLITTING
+  (`spaFrob_mem_frobIndex_datum` is documented "split for kernel budget").
+- Proofs >30 lines: 4.  Largest `comap_ringStalkMap_ambientFrob_stalkValue` (87)
+
+## CALIBRATION — the "extract preambles first" insight is FILE-SPECIFIC, not universal
+ArCompletion: 200+ extractable lines from 3 repeated preambles -> extract before decomposing.
+FrobeniusValuation: a mechanical 3-6 line window scan found NO verbatim 3+ occurrence block;
+realistic extractable total ~40-50 lines.  Its long proofs are long because of DEFEQ PLUMBING
+(multi-line `show` blocks respelling elaborated categorical terms, `rfl`-`have`s), which
+extraction does not help — those want /decompose-proof or are irreducible.
+=> Phase 4 must decide extract-vs-decompose PER FILE from its inventory, not by a global rule.
