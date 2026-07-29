@@ -5,6 +5,7 @@ Authors: AINTLIB ModularCurves project
 -/
 import ModularCurves.ForMathlib.PullbackTensorGeneral
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+import ModularCurves.ForMathlib.SchemeModuleSupport
 
 /-!
 # Quasicoherence after tensoring by an invertible sheaf
@@ -14,7 +15,7 @@ opens identifies the restriction of its tensor product with the restriction of
 the other factor, so quasicoherence descends from the affine refinement.
 -/
 
-open CategoryTheory MonoidalCategory TopologicalSpace
+open CategoryTheory CategoryTheory.Limits MonoidalCategory TopologicalSpace
 
 universe u
 
@@ -44,6 +45,37 @@ private noncomputable def tensorRestrictIso
       (Iso.refl _ ⊗ᵢ
         (sheafifyValIso (unitObj U.toScheme)).symm) ≪≫
       ρ_ (M.restrict U.ι)
+
+/-- Tensoring a zero scheme module by an invertible scheme module is zero. -/
+theorem IsInvertible.tensorObj_isZero
+    {M L : X.Modules} (hL : IsInvertible L) (hM : IsZero M) :
+    IsZero (M ⊗ L) := by
+  apply isZero_of_forall_underlyingStalk_isZero
+  intro x
+  obtain ⟨κ, U, hU, htriv⟩ := hL
+  have hx : x ∈ ⨆ i, U i := by
+    rw [hU]
+    trivial
+  obtain ⟨i, hxi⟩ :=
+    TopologicalSpace.Opens.mem_iSup.mp hx
+  let xi : (U i).toScheme := ⟨x, hxi⟩
+  obtain ⟨eL⟩ := htriv i
+  let eL' : L.restrict (U i).ι ≅ unitObj (U i).toScheme :=
+    (restrictFunctorIsoPullback (U i).ι).app L ≪≫ eL
+  let e :
+      (M ⊗ L).restrict (U i).ι ≅ M.restrict (U i).ι :=
+    tensorRestrictIso (M := M) (L := L) (U i) eL'
+  have hM' : IsZero (M.restrict (U i).ι) :=
+    (restrictFunctor (U i).ι).map_isZero hM
+  have hML' : IsZero ((M ⊗ L).restrict (U i).ι) :=
+    e.isZero_iff.mpr hM'
+  have hStalk' :
+      IsZero ((underlyingStalkFunctor xi).obj
+        ((M ⊗ L).restrict (U i).ι)) :=
+    (underlyingStalkFunctor xi).map_isZero hML'
+  exact
+    ((restrictStalkNatIso (U i).ι xi).app
+      (M ⊗ L)).isZero_iff.mp hStalk'
 
 /-- Tensoring a quasicoherent scheme module by an invertible scheme module
 preserves quasicoherence. -/

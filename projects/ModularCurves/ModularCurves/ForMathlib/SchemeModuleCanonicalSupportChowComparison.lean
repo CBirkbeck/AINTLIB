@@ -1,8 +1,11 @@
 import ModularCurves.EllipticCurve.ProjectiveCoordinatePullbackTwistMap
 import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowChart
+import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
+import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
 import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
 import ModularCurves.ForMathlib.SchemeModulePushforwardMapRestrictionIso
 import ModularCurves.ForMathlib.SchemeModulePullbackQuasicoherent
+import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
 import ModularCurves.ForMathlib.SchemeModuleRestrictionIsoMonotone
 import ModularCurves.ForMathlib.RelativeProjectivePushforwardFiniteType
 import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
@@ -18,7 +21,7 @@ on that locus.
 
 universe u
 
-open CategoryTheory MonoidalCategory
+open CategoryTheory CategoryTheory.Limits MonoidalCategory
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -123,6 +126,27 @@ theorem coordinateComodel_isFiniteType
   exact C.relativeProjective.isFiniteType_pushforward
     (C.coordinateTwist n)
 
+/-- The coordinate comodel has closed stalk support contained in that of
+the original model. -/
+theorem coordinateComodel_closedStalkSupport_le
+    (C : SupportAdaptedChowChart xπ M) (n : ℕ)
+    [M.IsQuasicoherent] [M.IsFiniteType] :
+    closedStalkSupport (C.coordinateComodel n) ≤
+      closedStalkSupport M := by
+  let P :=
+    MvPolynomial.coordinateHyperplanePoleSheafPower
+      (R := R) C.coordinate n
+  let L :=
+    (pullback C.relativeProjective.chosenProjectiveMap).obj P
+  have hP : IsInvertible P :=
+    MvPolynomial.coordinateHyperplanePoleSheafPower_isInvertible
+      C.coordinate n
+  have hL : IsInvertible L :=
+    hP.pullback C.relativeProjective.chosenProjectiveMap
+  exact
+    closedStalkSupport_pushforward_pullback_tensor_le
+      C.cover M L hL
+
 /-- The adjunction unit followed by multiplication with the selected projective coordinate. -/
 noncomputable def coordinateComparison
     (C : SupportAdaptedChowChart xπ M) (n : ℕ) :
@@ -180,6 +204,58 @@ theorem coordinateComparison_restrict_isIso
           (pushforward C.cover).map α))
   rw [Functor.map_comp]
   exact IsIso.comp_isIso' hUnit hPushforward
+
+/-- On a locally Noetherian stage, both residuals of the coordinate
+comparison have strictly smaller closed stalk support than the model. -/
+theorem coordinateComparison_residual_closedStalkSupport_lt
+    [IsLocallyNoetherian X]
+    (C : SupportAdaptedChowChart xπ M) (n : ℕ)
+    [M.IsQuasicoherent] [M.IsFiniteType] :
+    closedStalkSupport
+          (kernel
+            (Abelian.factorThruImage (C.coordinateComparison n))) <
+        closedStalkSupport M ∧
+      closedStalkSupport
+          (cokernel
+            (Abelian.image.ι (C.coordinateComparison n))) <
+        closedStalkSupport M := by
+  letI : (C.coordinateComodel n).IsQuasicoherent :=
+    C.coordinateComodel_isQuasicoherent n
+  letI : (C.coordinateComodel n).IsFiniteType :=
+    C.coordinateComodel_isFiniteType n
+  have hResidual :=
+    comparisonResidual_isFiniteType_and_isQuasicoherent
+      (C.coordinateComparison n)
+  letI :
+      (kernel
+        (Abelian.factorThruImage
+          (C.coordinateComparison n))).IsFiniteType :=
+    hResidual.1.1
+  letI :
+      (kernel
+        (Abelian.factorThruImage
+          (C.coordinateComparison n))).IsQuasicoherent :=
+    hResidual.1.2
+  letI :
+      (cokernel
+        (Abelian.image.ι
+          (C.coordinateComparison n))).IsFiniteType :=
+    hResidual.2.1
+  letI :
+      (cokernel
+        (Abelian.image.ι
+          (C.coordinateComparison n))).IsQuasicoherent :=
+    hResidual.2.2
+  letI :
+      IsIso
+        ((restrictFunctor C.openSubscheme.ι).map
+          (C.coordinateComparison n)) :=
+    C.coordinateComparison_restrict_isIso n
+  obtain ⟨x, hx⟩ := C.supportPoint
+  exact
+    comparisonResidual_closedStalkSupport_lt
+      C.openSubscheme.ι (C.coordinateComparison n)
+      (C.coordinateComodel_closedStalkSupport_le n) x hx
 
 end SupportAdaptedChowChart
 
