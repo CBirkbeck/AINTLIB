@@ -893,6 +893,198 @@ theorem cechTupleAlternatingHomotopy_linear_identity
     LinearMap.neg_apply, LinearMap.id_apply, sub_eq_add_neg]
     using cechTupleAlternatingHomotopy_identity n x
 
+/-- The support-preserving tuple homotopy lifted to native base-Cech cochains. -/
+noncomputable def baseCechAlternatingHomotopyF
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    (baseCechComplex π M U).X (n + 1) ⟶
+      (baseCechComplex π M U).X n :=
+  baseCechTupleMapF π M U
+    (cechTupleAlternatingHomotopy n)
+    (cechTupleAlternatingHomotopy_supportNonincreasing n)
+
+/-- The lifted lower-degree term `H d` in the native base-Cech homotopy identity. -/
+noncomputable def baseCechAlternatingHomotopyPreviousF
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    (baseCechComplex π M U).X n ⟶
+      (baseCechComplex π M U).X n :=
+  baseCechTupleMapF π M U
+    (cechTupleAlternatingHomotopyPrevious n)
+    (cechTupleAlternatingHomotopyPrevious_supportNonincreasing n)
+
+/-- The lifted tuple homotopy connects the ordered alternating retract to the identity. -/
+theorem baseCechAlternatingHomotopy_identity
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    (baseCechComplex π M U).d n (n + 1) ≫
+          baseCechAlternatingHomotopyF π M U n +
+        baseCechAlternatingHomotopyPreviousF π M U n =
+      baseCechToOrderedF π M U n ≫
+          orderedToBaseCechAlternatingF π M U n -
+        𝟙 (baseCechComplex π M U).X n := by
+  let hdh :=
+    CechTupleSupportNonincreasing.comp
+      (cechTupleBoundary_supportNonincreasing (ι := ι) n)
+      (cechTupleAlternatingHomotopy_supportNonincreasing n)
+  let hl :=
+    CechTupleSupportNonincreasing.add hdh
+      (cechTupleAlternatingHomotopyPrevious_supportNonincreasing n)
+  let hr :=
+    CechTupleSupportNonincreasing.add
+      (cechTupleAlternatingProjection_supportNonincreasing n)
+      (CechTupleSupportNonincreasing.neg
+        (cechTupleSupportNonincreasing_id (ι := ι) (n := n)))
+  have hlinear :=
+    cechTupleAlternatingHomotopy_linear_identity
+      (ι := ι) n
+  have hlift :
+      baseCechTupleMapF π M U
+          ((cechTupleBoundary n).comp
+              (cechTupleAlternatingHomotopy n) +
+            cechTupleAlternatingHomotopyPrevious n) hl =
+        baseCechTupleMapF π M U
+          (cechTupleAlternatingProjection n +
+            -(LinearMap.id :
+              CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι n)) hr := by
+    exact baseCechTupleMapF_congr π M U _ _ hl hr hlinear
+  have hcomp :
+      baseCechTupleMapF π M U
+          ((cechTupleBoundary n).comp
+            (cechTupleAlternatingHomotopy n)) hdh =
+        baseCechTupleMapF π M U
+            (cechTupleBoundary n)
+            (cechTupleBoundary_supportNonincreasing n) ≫
+          baseCechTupleMapF π M U
+            (cechTupleAlternatingHomotopy n)
+            (cechTupleAlternatingHomotopy_supportNonincreasing n) := by
+    exact baseCechTupleMapF_comp π M U
+      (cechTupleAlternatingHomotopy n)
+      (cechTupleBoundary n)
+      (cechTupleAlternatingHomotopy_supportNonincreasing n)
+      (cechTupleBoundary_supportNonincreasing n)
+  calc
+    (baseCechComplex π M U).d n (n + 1) ≫
+          baseCechAlternatingHomotopyF π M U n +
+        baseCechAlternatingHomotopyPreviousF π M U n =
+      baseCechTupleMapF π M U
+          ((cechTupleBoundary n).comp
+              (cechTupleAlternatingHomotopy n)) hdh +
+        baseCechTupleMapF π M U
+          (cechTupleAlternatingHomotopyPrevious n)
+          (cechTupleAlternatingHomotopyPrevious_supportNonincreasing n) := by
+      rw [hcomp, baseCechTupleMapF_boundary]
+      rfl
+    _ = baseCechTupleMapF π M U
+          ((cechTupleBoundary n).comp
+              (cechTupleAlternatingHomotopy n) +
+            cechTupleAlternatingHomotopyPrevious n) hl := by
+      exact (baseCechTupleMapF_add π M U _ _ _ _).symm
+    _ = baseCechTupleMapF π M U
+          (cechTupleAlternatingProjection n +
+            -(LinearMap.id :
+              CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι n)) hr := hlift
+    _ = baseCechTupleMapF π M U
+          (cechTupleAlternatingProjection n)
+          (cechTupleAlternatingProjection_supportNonincreasing n) +
+        baseCechTupleMapF π M U
+          (-(LinearMap.id :
+            CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι n))
+          (CechTupleSupportNonincreasing.neg
+            cechTupleSupportNonincreasing_id) := by
+      exact baseCechTupleMapF_add π M U _ _ _ _
+    _ = baseCechTupleMapF π M U
+          (cechTupleAlternatingProjection n)
+          (cechTupleAlternatingProjection_supportNonincreasing n) +
+        -baseCechTupleMapF π M U
+          (LinearMap.id :
+            CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι n)
+          cechTupleSupportNonincreasing_id := by
+      rw [baseCechTupleMapF_neg]
+    _ = baseCechToOrderedF π M U n ≫
+          orderedToBaseCechAlternatingF π M U n -
+        𝟙 (baseCechComplex π M U).X n := by
+      rw [baseCechTupleMapF_alternatingProjection,
+        baseCechTupleMapF_id]
+      simp only [sub_eq_add_neg]
+
+/-- The degree-zero lifted homotopy vanishes. -/
+@[simp]
+theorem baseCechAlternatingHomotopyF_zero
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) :
+    baseCechAlternatingHomotopyF π M U 0 = 0 := by
+  change baseCechTupleMapF π M U
+      (0 : CechTupleChain ι 0 →ₗ[ℤ] CechTupleChain ι 1) _ = 0
+  exact baseCechTupleMapF_zero π M U 0 1
+
+/-- The degree-zero lower homotopy term vanishes. -/
+@[simp]
+theorem baseCechAlternatingHomotopyPreviousF_zero
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) :
+    baseCechAlternatingHomotopyPreviousF π M U 0 = 0 := by
+  change baseCechTupleMapF π M U
+      (0 : CechTupleChain ι 0 →ₗ[ℤ] CechTupleChain ι 0) _ = 0
+  exact baseCechTupleMapF_zero π M U 0 0
+
+/-- In positive degree the lower homotopy term is `H d`. -/
+theorem baseCechAlternatingHomotopyPreviousF_succ
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    baseCechAlternatingHomotopyPreviousF π M U (n + 1) =
+      baseCechAlternatingHomotopyF π M U n ≫
+        (baseCechComplex π M U).d n (n + 1) := by
+  change baseCechTupleMapF π M U
+      ((cechTupleAlternatingHomotopy n).comp
+        (cechTupleBoundary n)) _ =
+    baseCechAlternatingHomotopyF π M U n ≫
+      (baseCechComplex π M U).d n (n + 1)
+  calc
+    baseCechTupleMapF π M U
+          ((cechTupleAlternatingHomotopy n).comp
+            (cechTupleBoundary n)) _ =
+        baseCechTupleMapF π M U
+            (cechTupleAlternatingHomotopy n)
+            (cechTupleAlternatingHomotopy_supportNonincreasing n) ≫
+          baseCechTupleMapF π M U
+            (cechTupleBoundary n)
+            (cechTupleBoundary_supportNonincreasing n) := by
+      exact baseCechTupleMapF_comp π M U
+        (cechTupleBoundary n)
+        (cechTupleAlternatingHomotopy n)
+        (cechTupleBoundary_supportNonincreasing n)
+        (cechTupleAlternatingHomotopy_supportNonincreasing n)
+    _ = baseCechAlternatingHomotopyF π M U n ≫
+          (baseCechComplex π M U).d n (n + 1) := by
+      rw [baseCechTupleMapF_boundary]
+      rfl
+
+/-- The base-Cech alternating homotopy equation in degree zero. -/
+theorem baseCechAlternatingHomotopy_identity_zero
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) :
+    (baseCechComplex π M U).d 0 1 ≫
+        baseCechAlternatingHomotopyF π M U 0 =
+      baseCechToOrderedF π M U 0 ≫
+          orderedToBaseCechAlternatingF π M U 0 -
+        𝟙 (baseCechComplex π M U).X 0 := by
+  simpa using baseCechAlternatingHomotopy_identity π M U 0
+
+/-- The base-Cech alternating homotopy equation in positive degree. -/
+theorem baseCechAlternatingHomotopy_identity_succ
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    (baseCechComplex π M U).d (n + 1) (n + 2) ≫
+          baseCechAlternatingHomotopyF π M U (n + 1) +
+        baseCechAlternatingHomotopyF π M U n ≫
+          (baseCechComplex π M U).d n (n + 1) =
+      baseCechToOrderedF π M U (n + 1) ≫
+          orderedToBaseCechAlternatingF π M U (n + 1) -
+        𝟙 (baseCechComplex π M U).X (n + 1) := by
+  rw [← baseCechAlternatingHomotopyPreviousF_succ π M U n]
+  exact baseCechAlternatingHomotopy_identity π M U (n + 1)
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
