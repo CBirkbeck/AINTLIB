@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».WP.CoeffLocalization
+import «Adic spaces».MvTateAlgebraTopology
 import «Adic spaces».WP.Chart
 import «Adic spaces».SheafyRing
 import «Adic spaces».StructureSheaf
@@ -2273,6 +2274,137 @@ noncomputable def tateExtEquiv (s : ℕ) :
     ↥(restrictedMvPowerSeriesSubring s (WPA K w)) ≃+* WPA K (shiftWeight w s) :=
   RingEquiv.ofBijective (tateExtToWPA (K := K) (w := w) s)
     ⟨tateExtToWPA_injective s, tateExtToWPA_surjective s⟩
+
+variable {K w} in
+/-- **W24b forward continuity**: the Tate-extension flatten is continuous from
+the canonical mv-Tate-algebra topology to the Gauss topology — every basis
+neighbourhood maps into a norm ball, coefficientwise through the pair of
+definition's `isAdic` cofinality (no norm characterization of the opaque
+principal pair is needed). -/
+theorem tateExtToWPA_continuous (s : ℕ) :
+    @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' (A := WPA K w) s) _
+      (⇑(tateExtToWPA (K := K) (w := w) s)) := by
+  classical
+  letI := MvTateAlgebra.mvTateAlgebraTopology' (A := WPA K w) s
+  haveI hTR : IsTopologicalRing
+      ↥(restrictedMvPowerSeriesSubring s (WPA K w)) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (A := WPA K w) s
+  refine continuous_of_tendsto_nhds_zero
+    (tateExtToWPA (K := K) (w := w) s) ?_
+  rw [Metric.tendsto_nhds]
+  intro ε hε
+  set P₀ := (IsTateRing.principalPair (WPA K w)).toPairOfDefinition with hP₀
+  obtain ⟨k, -, hk⟩ := P₀.hasBasis_nhds_zero.mem_iff.mp
+    (Metric.ball_mem_nhds (0 : WPA K w)
+      (by positivity : (0 : ℝ) < ε / 2))
+  refine Filter.eventually_of_mem
+    ((MvTateAlgebra.mvTateAlgBasis' (A := WPA K w) s).hasBasis_nhds_zero.mem_of_mem
+      (i := k) trivial) fun y hy => ?_
+  rw [dist_zero_right]
+  have hcoeff : ∀ u : ℕ →₀ ℕ,
+      ‖coeffA K (shiftWeight w s) u
+        (tateExtToWPA (K := K) (w := w) s y)‖ ≤ ε / 2 := by
+    intro u
+    have h1 : coeffA K (shiftWeight w s) u
+        (tateExtToWPA (K := K) (w := w) s y) =
+        MvPowerSeries.coeff (slotInr s u)
+          (wpaVal (K := K) (w := w)
+            (MvPowerSeries.coeff (slotInl s u) y.val)) :=
+      tateExtToFlat_coeff s y u
+    rw [h1]
+    refine le_trans
+      (norm_coeffA_le K w (slotInr s u)
+        (MvPowerSeries.coeff (slotInl s u) y.val)) ?_
+    obtain ⟨b, hbk, hbeq⟩ := MvTateAlgebra.mvTateAlgNhd_coeff_mem s P₀ k hy (slotInl s u)
+    have hmem : MvPowerSeries.coeff (slotInl s u) y.val ∈
+        Subtype.val '' ((P₀.I ^ k : Ideal P₀.A₀) : Set P₀.A₀) :=
+      ⟨b, hbk, hbeq⟩
+    have h2 := hk hmem
+    rw [Metric.mem_ball, dist_zero_right] at h2
+    exact h2.le
+  have hnorm : ‖tateExtToWPA (K := K) (w := w) s y‖ ≤ ε / 2 := by
+    rw [norm_eq_iSup_coeffA]
+    exact Real.iSup_le hcoeff (by positivity)
+  linarith
+
+variable {K w} in
+/-- **W24b backward continuity**: the inverse of the Tate-extension flatten is
+continuous from the Gauss topology to the canonical mv-Tate-algebra topology —
+each basis target absorbs a norm ball through the openness of the ideal-power
+images, coefficientwise via the slot recombination. -/
+theorem tateExtEquiv_symm_continuous (s : ℕ) :
+    @Continuous _ _ _ (MvTateAlgebra.mvTateAlgebraTopology' (A := WPA K w) s)
+      (⇑(tateExtEquiv (K := K) (w := w) s).symm) := by
+  classical
+  letI := MvTateAlgebra.mvTateAlgebraTopology' (A := WPA K w) s
+  haveI hTR : IsTopologicalRing
+      ↥(restrictedMvPowerSeriesSubring s (WPA K w)) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (A := WPA K w) s
+  refine continuous_of_tendsto_nhds_zero
+    (tateExtEquiv (K := K) (w := w) s).symm ?_
+  rw [(MvTateAlgebra.mvTateAlgBasis' (A := WPA K w) s).hasBasis_nhds_zero.tendsto_right_iff]
+  rintro k -
+  set P₀ := (IsTateRing.principalPair (WPA K w)).toPairOfDefinition with hP₀
+  obtain ⟨ε, hε0, hball⟩ := Metric.mem_nhds_iff.mp
+    (P₀.hasBasis_nhds_zero.mem_of_mem (i := k) trivial)
+  refine Filter.eventually_of_mem
+    (Metric.ball_mem_nhds (0 : WPA K (shiftWeight w s)) hε0) fun F hF => ?_
+  rw [Metric.mem_ball, dist_zero_right] at hF
+  set G := (tateExtEquiv (K := K) (w := w) s).symm F with hGdef
+  have hGF : tateExtToWPA (K := K) (w := w) s G = F :=
+    (tateExtEquiv (K := K) (w := w) s).apply_symm_apply F
+  have hcl : ∀ l : Fin s →₀ ℕ, ∃ b : P₀.A₀, b ∈ P₀.I ^ k ∧
+      (b : WPA K w) = MvPowerSeries.coeff l G.val := by
+    intro l
+    have hnl : ‖MvPowerSeries.coeff l G.val‖ < ε := by
+      have h2 : ∀ v : ℕ →₀ ℕ,
+          coeffA K w v (MvPowerSeries.coeff l G.val) =
+          coeffA K (shiftWeight w s) (slotRecomb s l v) F := by
+        intro v
+        have h3 := tateExtToFlat_coeff s G (slotRecomb s l v)
+        have h4 : Finsupp.comapDomain Sum.inl
+            (Finsupp.equivMapDomain (slotEquiv s) (slotRecomb s l v))
+            Sum.inl_injective.injOn = l := slotInl_slotRecomb s l v
+        have h5 : Finsupp.comapDomain Sum.inr
+            (Finsupp.equivMapDomain (slotEquiv s) (slotRecomb s l v))
+            Sum.inr_injective.injOn = v := slotInr_slotRecomb s l v
+        rw [h4, h5] at h3
+        have h6 : coeffA K (shiftWeight w s) (slotRecomb s l v)
+            (tateExtToWPA (K := K) (w := w) s G) =
+            MvPowerSeries.coeff v
+              (wpaVal (K := K) (w := w)
+                (MvPowerSeries.coeff l G.val)) := h3
+        rw [hGF] at h6
+        exact h6.symm
+      rw [norm_eq_iSup_coeffA]
+      refine lt_of_le_of_lt
+        (Real.iSup_le (fun v => ?_) (norm_nonneg F)) hF
+      rw [h2 v]
+      exact norm_coeffA_le K (shiftWeight w s) (slotRecomb s l v) F
+    have hmem := hball (by
+      rw [Metric.mem_ball, dist_zero_right]; exact hnl)
+    obtain ⟨b, hbk, hbeq⟩ := hmem
+    exact ⟨b, hbk, hbeq⟩
+  have hpair : G ∈ MvTateAlgebra.mvPairSubring s P₀ := by
+    intro l
+    obtain ⟨b, hbk, hbeq⟩ := hcl l
+    rw [← hbeq]
+    exact b.2
+  exact MvTateAlgebra.mvTateAlgNhd_of_coeff_mem_principal s P₀ k
+    (IsTateRing.principalPair (WPA K w)).π
+    (IsTateRing.principalPair (WPA K w)).I_eq_span
+    (IsTateRing.principalPair (WPA K w)).π_isUnit hpair hcl
+
+variable {K w} in
+/-- **W24b: the Tate-extension flatten is a bicontinuous ring equivalence**
+for the canonical mv-Tate-algebra topology ([WP]
+eq:strong-sheafy-decomposition at the topological level). -/
+theorem tateExtEquiv_bicontinuous (s : ℕ) :
+    @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' (A := WPA K w) s) _
+      (⇑(tateExtEquiv (K := K) (w := w) s)) ∧
+    @Continuous _ _ _ (MvTateAlgebra.mvTateAlgebraTopology' (A := WPA K w) s)
+      (⇑(tateExtEquiv (K := K) (w := w) s).symm) :=
+  ⟨tateExtToWPA_continuous s, tateExtEquiv_symm_continuous s⟩
 
 -- The topological refinement of `tateExtEquiv` (bicontinuity for the project's
 -- Tate-algebra topology on `restrictedMvPowerSeriesSubring`, cf.
