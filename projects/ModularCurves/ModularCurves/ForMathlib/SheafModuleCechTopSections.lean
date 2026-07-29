@@ -120,97 +120,100 @@ private theorem moduleCechTermForgetIso_hom_π
           (Discrete.functor (moduleCechTermFactor F U n)) ⟨i⟩)
   exact hcombined
 
-private noncomputable def moduleCechTermForgetTopIso :
-    (moduleCechTerm F U n).obj.obj (op ⊤) ≅
-      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)).obj
+private noncomputable def moduleCechTermForgetSectionsIso
+    (W : Opens X) :
+    (moduleCechTerm F U n).obj.obj (op W) ≅
+      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)).obj
         (∏ᶜ fun i : Fin (n + 1) → ι =>
           (moduleCechTermFactor F U n i).obj) :=
-  ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)).mapIso
+  ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)).mapIso
     (moduleCechTermForgetIso F U n)
 
-private noncomputable def moduleCechTermEvaluationDiagramIso :
+private noncomputable def moduleCechTermEvaluationDiagramIso
+    (W : Opens X) :
     (Discrete.functor fun i : Fin (n + 1) → ι =>
         (moduleCechTermFactor F U n i).obj) ⋙
-        (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤) ≅
+        (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W) ≅
       Discrete.functor fun i : Fin (n + 1) → ι =>
-        (moduleCechTermFactor F U n i).obj.obj (op ⊤) :=
+        (moduleCechTermFactor F U n i).obj.obj (op W) :=
   Discrete.natIso fun _ => Iso.refl _
 
-private noncomputable def moduleCechTermEvaluationIso :
-    ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)).obj
+private noncomputable def moduleCechTermEvaluationIso
+    (W : Opens X) :
+    ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)).obj
         (∏ᶜ fun i : Fin (n + 1) → ι =>
           (moduleCechTermFactor F U n i).obj) ≅
       ∏ᶜ fun i : Fin (n + 1) → ι =>
-        (moduleCechTermFactor F U n i).obj.obj (op ⊤) := by
+        (moduleCechTermFactor F U n i).obj.obj (op W) := by
   letI : HasLimit ((Discrete.functor fun i : Fin (n + 1) → ι =>
       (moduleCechTermFactor F U n i).obj) ⋙
-        (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)) :=
-    hasLimit_of_iso (moduleCechTermEvaluationDiagramIso F U n).symm
+        (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)) :=
+    hasLimit_of_iso (moduleCechTermEvaluationDiagramIso F U n W).symm
   exact preservesLimitIso
-      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤))
+      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W))
       (Discrete.functor fun i : Fin (n + 1) → ι =>
         (moduleCechTermFactor F U n i).obj) ≪≫
-    HasLimit.isoOfNatIso (moduleCechTermEvaluationDiagramIso F U n)
+    HasLimit.isoOfNatIso (moduleCechTermEvaluationDiagramIso F U n W)
 
 private theorem moduleCechTermEvaluationIso_hom_π
-    (i : Fin (n + 1) → ι) :
-    (moduleCechTermEvaluationIso F U n).hom ≫
+    (W : Opens X) (i : Fin (n + 1) → ι) :
+    (moduleCechTermEvaluationIso F U n W).hom ≫
         Pi.π (fun j : Fin (n + 1) → ι =>
-          (moduleCechTermFactor F U n j).obj.obj (op ⊤)) i =
-      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)).map
+          (moduleCechTermFactor F U n j).obj.obj (op W)) i =
+      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)).map
         (Pi.π (fun j : Fin (n + 1) → ι =>
           (moduleCechTermFactor F U n j).obj) i) := by
-  change (moduleCechTermEvaluationIso F U n).hom ≫
+  change (moduleCechTermEvaluationIso F U n W).hom ≫
       limit.π (Discrete.functor fun j : Fin (n + 1) → ι =>
-        (moduleCechTermFactor F U n j).obj.obj (op ⊤)) ⟨i⟩ =
-    ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)).map
+        (moduleCechTermFactor F U n j).obj.obj (op W)) ⟨i⟩ =
+    ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)).map
       (limit.π (Discrete.functor fun j : Fin (n + 1) → ι =>
         (moduleCechTermFactor F U n j).obj) ⟨i⟩)
   letI : HasLimit ((Discrete.functor fun i : Fin (n + 1) → ι =>
       (moduleCechTermFactor F U n i).obj) ⋙
-        (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)) :=
-    hasLimit_of_iso (moduleCechTermEvaluationDiagramIso F U n).symm
+        (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)) :=
+    hasLimit_of_iso (moduleCechTermEvaluationDiagramIso F U n W).symm
   have hnat :
       (HasLimit.isoOfNatIso
-          (moduleCechTermEvaluationDiagramIso F U n)).hom ≫
+          (moduleCechTermEvaluationDiagramIso F U n W)).hom ≫
           limit.π (Discrete.functor fun j : Fin (n + 1) → ι =>
-            (moduleCechTermFactor F U n j).obj.obj (op ⊤)) ⟨i⟩ =
+            (moduleCechTermFactor F U n j).obj.obj (op W)) ⟨i⟩ =
         limit.π ((Discrete.functor fun j : Fin (n + 1) → ι =>
           (moduleCechTermFactor F U n j).obj) ⋙
-            (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)) ⟨i⟩ := by
+            (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)) ⟨i⟩ := by
     calc
       _ = limit.π ((Discrete.functor fun j : Fin (n + 1) → ι =>
             (moduleCechTermFactor F U n j).obj) ⋙
-              (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)) ⟨i⟩ ≫
-          (moduleCechTermEvaluationDiagramIso F U n).hom.app ⟨i⟩ :=
+              (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)) ⟨i⟩ ≫
+          (moduleCechTermEvaluationDiagramIso F U n W).hom.app ⟨i⟩ :=
         HasLimit.isoOfNatIso_hom_π
-          (moduleCechTermEvaluationDiagramIso F U n) ⟨i⟩
+          (moduleCechTermEvaluationDiagramIso F U n W) ⟨i⟩
       _ = _ := Category.comp_id _
   have hpreserves :
       (preservesLimitIso
-          ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤))
+          ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W))
           (Discrete.functor fun j : Fin (n + 1) → ι =>
             (moduleCechTermFactor F U n j).obj)).hom ≫
           limit.π ((Discrete.functor fun j : Fin (n + 1) → ι =>
             (moduleCechTermFactor F U n j).obj) ⋙
-              (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)) ⟨i⟩ =
-        ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)).map
+              (evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)) ⟨i⟩ =
+        ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)).map
           (limit.π (Discrete.functor fun j : Fin (n + 1) → ι =>
             (moduleCechTermFactor F U n j).obj) ⟨i⟩) :=
     preservesLimitIso_hom_π
-      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤))
+      ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W))
       (Discrete.functor fun j : Fin (n + 1) → ι =>
         (moduleCechTermFactor F U n j).obj) ⟨i⟩
   have hcombined :
       (preservesLimitIso
-          ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤))
+          ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W))
           (Discrete.functor fun j : Fin (n + 1) → ι =>
             (moduleCechTermFactor F U n j).obj)).hom ≫
           ((HasLimit.isoOfNatIso
-              (moduleCechTermEvaluationDiagramIso F U n)).hom ≫
+              (moduleCechTermEvaluationDiagramIso F U n W)).hom ≫
             limit.π (Discrete.functor fun j : Fin (n + 1) → ι =>
-              (moduleCechTermFactor F U n j).obj.obj (op ⊤)) ⟨i⟩) =
-        ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op ⊤)).map
+              (moduleCechTermFactor F U n j).obj.obj (op W)) ⟨i⟩) =
+        ((evaluation (Opens X)ᵒᵖ (ModuleCat R)).obj (op W)).map
           (limit.π (Discrete.functor fun j : Fin (n + 1) → ι =>
             (moduleCechTermFactor F U n j).obj) ⟨i⟩) := by
     rw [hnat]
@@ -218,22 +221,99 @@ private theorem moduleCechTermEvaluationIso_hom_π
   simpa only [moduleCechTermEvaluationIso, Iso.trans_hom,
     Category.assoc] using hcombined
 
+private noncomputable def moduleCechTermSectionsRawIso
+    (W : Opens X) :
+    (moduleCechTerm F U n).obj.obj (op W) ≅
+      ∏ᶜ fun i : Fin (n + 1) → ι =>
+        (moduleCechTermFactor F U n i).obj.obj (op W) :=
+  moduleCechTermForgetSectionsIso F U n W ≪≫
+    moduleCechTermEvaluationIso F U n W
+
+private theorem moduleCechTermSectionsRawIso_hom_π
+    (W : Opens X) (i : Fin (n + 1) → ι) :
+    (moduleCechTermSectionsRawIso F U n W).hom ≫
+        Pi.π (fun j : Fin (n + 1) → ι =>
+          (moduleCechTermFactor F U n j).obj.obj (op W)) i =
+      (Pi.π (moduleCechTermFactor F U n) i).hom.app (op W) := by
+  rw [moduleCechTermSectionsRawIso, Iso.trans_hom, Category.assoc,
+    moduleCechTermEvaluationIso_hom_π]
+  exact congr_app (moduleCechTermForgetIso_hom_π F U n i) (op W)
+
 private noncomputable def moduleCechTermTopRawIso :
     (moduleCechTerm F U n).obj.obj (op ⊤) ≅
       ∏ᶜ fun i : Fin (n + 1) → ι =>
         (moduleCechTermFactor F U n i).obj.obj (op ⊤) :=
-  moduleCechTermForgetTopIso F U n ≪≫
-    moduleCechTermEvaluationIso F U n
+  moduleCechTermSectionsRawIso F U n ⊤
 
 private theorem moduleCechTermTopRawIso_hom_π
     (i : Fin (n + 1) → ι) :
     (moduleCechTermTopRawIso F U n).hom ≫
         Pi.π (fun j : Fin (n + 1) → ι =>
           (moduleCechTermFactor F U n j).obj.obj (op ⊤)) i =
-      (Pi.π (moduleCechTermFactor F U n) i).hom.app (op ⊤) := by
-  rw [moduleCechTermTopRawIso, Iso.trans_hom, Category.assoc,
-    moduleCechTermEvaluationIso_hom_π]
-  exact congr_app (moduleCechTermForgetIso_hom_π F U n i) (op ⊤)
+      (Pi.π (moduleCechTermFactor F U n) i).hom.app (op ⊤) :=
+  moduleCechTermSectionsRawIso_hom_π F U n ⊤ i
+
+/-- Sections of a restriction-pushforward Cech factor on `W` are the
+sections on its intersection with the indexing open. -/
+noncomputable def moduleCechTermFactorSectionsIso
+    (W : Opens X) (i : Fin (n + 1) → ι) :
+    (moduleCechTermFactor F U n i).obj.obj (op W) ≅
+      F.obj.obj
+        (op (W ⊓ ∏ᶜ fun k : Fin (n + 1) => U (i k))) :=
+  F.obj.mapIso (eqToIso (congrArg op
+    (Opens.functor_map_eq_inf
+      (∏ᶜ fun k : Fin (n + 1) => U (i k)) W)))
+
+/-- Sections on `W` of a module-valued sheaf Cech term are the product of
+sections on the intersections of `W` with its tuple opens. -/
+noncomputable def moduleCechTermSectionsIso
+    (W : Opens X) :
+    (moduleCechTerm F U n).obj.obj (op W) ≅
+      ∏ᶜ fun i : Fin (n + 1) → ι =>
+        F.obj.obj
+          (op (W ⊓ ∏ᶜ fun k : Fin (n + 1) => U (i k))) :=
+  moduleCechTermSectionsRawIso F U n W ≪≫
+    Pi.mapIso (moduleCechTermFactorSectionsIso F U n W)
+
+/-- The arbitrary-sections comparison commutes with every product
+projection. -/
+theorem moduleCechTermSectionsIso_hom_π
+    (W : Opens X) (i : Fin (n + 1) → ι) :
+    (moduleCechTermSectionsIso F U n W).hom ≫
+        Pi.π (fun j : Fin (n + 1) → ι =>
+          F.obj.obj
+            (op (W ⊓ ∏ᶜ fun k : Fin (n + 1) => U (j k)))) i =
+      (Pi.π (moduleCechTermFactor F U n) i).hom.app (op W) ≫
+        (moduleCechTermFactorSectionsIso F U n W i).hom := by
+  calc
+    _ = ((moduleCechTermSectionsRawIso F U n W).hom ≫
+          (Pi.mapIso
+            (moduleCechTermFactorSectionsIso F U n W)).hom) ≫
+        Pi.π (fun j : Fin (n + 1) → ι =>
+          F.obj.obj
+            (op (W ⊓ ∏ᶜ fun k : Fin (n + 1) => U (j k)))) i := by
+      rfl
+    _ = (moduleCechTermSectionsRawIso F U n W).hom ≫
+        ((Pi.mapIso
+          (moduleCechTermFactorSectionsIso F U n W)).hom ≫
+            Pi.π (fun j : Fin (n + 1) → ι =>
+              F.obj.obj
+                (op (W ⊓ ∏ᶜ fun k : Fin (n + 1) => U (j k)))) i) :=
+      Category.assoc _ _ _
+    _ = (moduleCechTermSectionsRawIso F U n W).hom ≫
+        (Pi.π (fun j : Fin (n + 1) → ι =>
+            (moduleCechTermFactor F U n j).obj.obj (op W)) i ≫
+          (moduleCechTermFactorSectionsIso F U n W i).hom) := by
+      rw [Pi.mapIso_hom_π]
+    _ = ((moduleCechTermSectionsRawIso F U n W).hom ≫
+          Pi.π (fun j : Fin (n + 1) → ι =>
+            (moduleCechTermFactor F U n j).obj.obj (op W)) i) ≫
+        (moduleCechTermFactorSectionsIso F U n W i).hom :=
+      (Category.assoc _ _ _).symm
+    _ = _ := congrArg
+      (fun f => f ≫
+        (moduleCechTermFactorSectionsIso F U n W i).hom)
+      (moduleCechTermSectionsRawIso_hom_π F U n W i)
 
 /-- Top sections of a restriction-pushforward Cech factor are the sections on
 its indexing open. -/
