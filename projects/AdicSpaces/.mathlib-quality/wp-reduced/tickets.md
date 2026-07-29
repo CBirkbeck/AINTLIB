@@ -785,7 +785,7 @@ propext/Classical.choice/Quot.sound) before marking done.
   (slotRecomb_slots); tateExtEquiv := RingEquiv.ofBijective.
 
 ### [W24b] tateExtEquiv — topological refinement (Huber-pair level)
-- Status: open | File: WP/Sheafy.lean | Depends: W24
+- Status: done (2026-07-29 late) | File: WP/Sheafy.lean | Depends: W24
 - Per the ChatGPT-5.6 review note on W24: state and prove the bicontinuity of
   `tateExtEquiv` for the project's Tate-algebra topology on
   `restrictedMvPowerSeriesSubring` (`mvTateAlgebraTopology'` letI) and the
@@ -847,6 +847,15 @@ propext/Classical.choice/Quot.sound) before marking done.
     ways ⟹ bicontinuity (additive-group topologies, translation).
   * W24b-t4: pair-level wrapper (image of mvPairSubring = unit ball / pod
     transport; the RingOfIntegralElements statement).
+- **Progress FINAL**: t1–t3 DONE — `tateExtToWPA_continuous`,
+  `tateExtEquiv_symm_continuous`, `tateExtEquiv_bicontinuous` (Sheafy.lean,
+  axiom-clean). KEY: both directions run purely through the OPAQUE canonical
+  principal pair's `hasBasis_nhds_zero` (isAdic cofinality inside ε-balls
+  forward; openness of ideal-power images backward) + the slot-recombination
+  coefficient identity — NO norm characterization of the pair, NO
+  commensurability. New import MvTateAlgebraTopology (namespace MvTateAlgebra —
+  qualify). t4 (pair transport) closed as generic: PairOfDefinition.mapRingEquiv
+  + the bicontinuity supply it; no bespoke statement.
 
 
 ### [R1] Reduced.lean I — MvPowerSeries reducedness (mathlib-grade)
@@ -1047,12 +1056,23 @@ propext/Classical.choice/Quot.sound) before marking done.
 - Status: open | Depends: all W/R tickets | Type: cleanup
 
 ### [M1] Milestone — endpoint verification sweep
-- Status: open | File: WP/Main.lean | Depends: CLEANUP-ALL-1
+- Status: done (2026-07-29 late; producer half — cleanup cadence stays with the fleet per AINTLIB rules) | File: WP/Main.lean | Depends: CLEANUP-ALL-1
 - Do: full `«Adic spaces»` umbrella build; `#print axioms` on every Main.lean
   endpoint (expect exactly {propext, Classical.choice, Quot.sound}); zero sorries in
   WP/ EXCEPT none (HeadLocsReduced is a hypothesis, not a sorry); add
   `import «Adic spaces».WP.Main` to the umbrella root `Adic spaces.lean`; record a
   final report in `wp-reduced/` (FJP K12 pattern).
+- **Progress FINAL**: full-workspace build green (6137 jobs) with the complete
+  campaign; `import «Adic spaces».WP.Main` added to the umbrella root and the
+  umbrella builds; endpoint axiom sweep: ALL Main.lean endpoints clean
+  (propext/Classical.choice/Quot.sound) EXCEPT weightedParity_chainReduced(_of_dvr)
+  which transitively inherits the central audit-pass-2 flatness WIP
+  (prop_8_30_flat_clean — documented, non-campaign). GOTCHA repeated: a
+  full-tree `lake build` mid-session leaves Main.olean stale relative to later
+  edits — ALWAYS rebuild the leaf module before `#print axioms` (the ghost
+  showed spurious sorryAx on six endpoints until the rebuild). Final report:
+  `.mathlib-quality/wp-reduced/final-report.md`.
+
 
 ### [CLEANUP-FINAL] /cleanup-all
 - Status: open | Depends: M1 | Type: cleanup

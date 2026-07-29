@@ -188,3 +188,4 @@ import «Adic spaces».ScottishBook.Stated.Problem036
 import «Adic spaces».ScottishBook.Stated.Problem037
 import «Adic spaces».ScottishBook.Stated.Problem038
 import «Adic spaces».ScottishBook.Stated.Problem039
+import «Adic spaces».WP.Main
