@@ -101,6 +101,34 @@ theorem moduleCechTwoCover_col_exactAt_one
   intro i
   exact hcol i
 
+/-- Pointwise exactness of an arbitrary positive outer Cech differential pair
+on the degree-`p` inner tuple opens is the corresponding column condition in
+the two-cover bicomplex. -/
+theorem moduleCechTwoCover_col_exactAt
+    (p q : ℕ) (hq : 0 < q)
+    (hcol : ∀ i : Fin (p + 1) → κ,
+      (moduleCechShortComplexApp F U (q - 1)
+        (∏ᶜ fun k : Fin (p + 1) => V (i k))).Exact) :
+    (ShortComplex.mk
+      (((moduleCechTwoCoverBicomplex F U V).d (q - 1) q).f p)
+      (((moduleCechTwoCoverBicomplex F U V).d q (q + 1)).f p)
+      ((moduleCechTwoCoverBicomplex F U V).d_f_comp_d_f
+        (q - 1) q (q + 1) p)).Exact := by
+  cases q with
+  | zero => omega
+  | succ q =>
+      rw [Nat.add_sub_cancel]
+      simp only [moduleCechTwoCoverBicomplex_d_f,
+        moduleCechComplex_d]
+      change (moduleNativeCechMapShortComplex
+        (moduleCechDifferential F U q).hom
+        (moduleCechDifferential F U (q + 1)).hom
+        (congrArg (fun f => f.hom)
+          (moduleCechDifferential_comp F U q)) V p).Exact
+      apply moduleNativeCechMapShortComplex_exact
+      intro i
+      exact hcol i
+
 /-- The vertical edge of the module-valued two-cover bicomplex is a
 degree-one quasi-isomorphism under the one required pointwise Cech exactness
 condition. -/
@@ -133,5 +161,51 @@ theorem moduleCechTwoCoverVerticalEdge_quasiIsoAt_one
       (moduleCechTwoCoverVerticalAugmentedShortComplex_exact
         F U V 1 hU)
       (moduleCechTwoCover_col_exactAt_one F U V hcol)
+
+/-- The vertical edge of the module-valued two-cover Cech bicomplex is a
+quasi-isomorphism in every positive degree when the required pointwise outer
+Cech differential pairs are exact on the two adjacent antidiagonals. -/
+theorem moduleCechTwoCoverVerticalEdge_quasiIsoAt_succ
+    (hU : ⨆ i, U i = ⊤)
+    (n : ℕ)
+    (hcol_n : ∀ p q, p + q = n → 0 < q →
+      ∀ i : Fin (p + 1) → κ,
+        (moduleCechShortComplexApp F U (q - 1)
+          (∏ᶜ fun k : Fin (p + 1) => V (i k))).Exact)
+    (hcol_succ : ∀ p q, p + q = n + 1 → 0 < q →
+      ∀ i : Fin (p + 1) → κ,
+        (moduleCechShortComplexApp F U (q - 1)
+          (∏ᶜ fun k : Fin (p + 1) => V (i k))).Exact) :
+    QuasiIsoAt
+      ((moduleCechTwoCoverBicomplex F U V).totalUpNatVerticalEdge
+        ((cechComplexFunctor V).obj F.obj)
+        (moduleCechTwoCoverVerticalAugmentation F U V).f
+        (moduleCechTwoCoverVerticalAugmentation_comm F U V)
+        (moduleCechTwoCoverVerticalAugmentation_comp_d F U V))
+      (n + 1) := by
+  letI : Mono
+      ((moduleCechTwoCoverVerticalAugmentation F U V).f (n + 1)) :=
+    moduleCechTwoCoverVerticalAugmentation_mono F U V (n + 1) hU
+  letI : Mono
+      ((moduleCechTwoCoverVerticalAugmentation F U V).f (n + 2)) :=
+    moduleCechTwoCoverVerticalAugmentation_mono F U V (n + 2) hU
+  apply
+    HomologicalComplex₂.totalUpNatVerticalEdge_quasiIsoAt_succ_module
+      (moduleCechTwoCoverBicomplex F U V)
+      ((cechComplexFunctor V).obj F.obj)
+      (moduleCechTwoCoverVerticalAugmentation F U V).f
+      (moduleCechTwoCoverVerticalAugmentation_comm F U V)
+      (moduleCechTwoCoverVerticalAugmentation_comp_d F U V)
+      n
+      (moduleCechTwoCoverVerticalAugmentedShortComplex_exact
+        F U V n hU)
+      (moduleCechTwoCoverVerticalAugmentedShortComplex_exact
+        F U V (n + 1) hU)
+  · intro p q hpq hq
+    exact moduleCechTwoCover_col_exactAt F U V p q hq
+      (hcol_n p q hpq hq)
+  · intro p q hpq hq
+    exact moduleCechTwoCover_col_exactAt F U V p q hq
+      (hcol_succ p q hpq hq)
 
 end TopCat.Sheaf

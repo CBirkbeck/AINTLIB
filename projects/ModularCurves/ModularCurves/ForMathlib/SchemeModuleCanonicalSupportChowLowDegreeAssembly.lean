@@ -10,19 +10,19 @@ import ModularCurves.ForMathlib.SchemeInducingOpenLift
 import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowLowDegreeFinite
 import ModularCurves.ForMathlib.SchemeModuleComparisonCoherent
 import ModularCurves.ForMathlib.SchemeModuleComparisonSupport
-import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforwardFinite
 import ModularCurves.ForMathlib.SchemeModulePushforwardMapRestrictionIso
 import ModularCurves.ForMathlib.SchemeModulePushforwardPullbackSupport
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
-# Low-degree-finite Chow comodels on canonical support thickenings
+# Cech-finite Chow comodels on canonical support thickenings
 
 A positive coordinate comodel on a support-adapted Chow chart is pushed
 through the canonical closed support immersion. The resulting coherent
-module has finite ordered Cech homology in degrees zero and one, while
-both residuals of its comparison with the original module have strictly
-smaller closed stalk support.
+module has finite ordered Cech homology in every degree, while both residuals
+of its comparison with the original module have strictly smaller closed stalk
+support.
 -/
 
 open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
@@ -33,6 +33,27 @@ universe u
 
 namespace AlgebraicGeometry.Scheme.Modules
 namespace CanonicalSupportThickening
+
+/-- A coherent comparison target with finite ordered Cech homology in every
+degree and support-decreasing residuals. -/
+def IsChowComodel
+    {X S : Scheme.{u}} (π : X ⟶ S)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
+    (F E : X.Modules) (β : F ⟶ E) : Prop :=
+  E.IsFiniteType ∧ E.IsQuasicoherent ∧
+    OrderedBaseCechHomologyFinite π U E ∧
+    (kernel (Abelian.factorThruImage β)).IsFiniteType ∧
+    (kernel (Abelian.factorThruImage β)).IsQuasicoherent ∧
+    (cokernel (Abelian.image.ι β)).IsFiniteType ∧
+    (cokernel (Abelian.image.ι β)).IsQuasicoherent ∧
+    (IsZero (kernel (Abelian.factorThruImage β)) ∨
+      closedStalkSupport
+          (kernel (Abelian.factorThruImage β)) <
+        closedStalkSupport F) ∧
+    (IsZero (cokernel (Abelian.image.ι β)) ∨
+      closedStalkSupport
+          (cokernel (Abelian.image.ι β)) <
+        closedStalkSupport F)
 
 /-- A coherent comparison target with finite ordered Cech homology in
 degrees zero and one and support-decreasing residuals. -/
@@ -64,30 +85,6 @@ private def ResidualSupportsLt
     closedStalkSupport
         (cokernel (Abelian.image.ι β)) <
       closedStalkSupport F
-
-private theorem orderedBaseCechLowDegreeFinite_pushforward
-    {X Y S : Scheme.{u}} (f : X ⟶ Y) (π : Y ⟶ S)
-    (M : X.Modules) {ι : Type u} [LinearOrder ι]
-    (U : ι → Y.Opens)
-    (h : OrderedBaseCechLowDegreeFinite (f ≫ π)
-      (fun i => f ⁻¹ᵁ U i) M) :
-    OrderedBaseCechLowDegreeFinite π U
-      ((pushforward f).obj M) := by
-  constructor
-  · let e := HomologicalComplex.homologyMapIso
-      (orderedBaseCechComplexPushforwardIso f π M U) 0
-    letI : Module.Finite Γ(S, (⊤ : S.Opens))
-        ((orderedBaseCechComplex (f ≫ π) M
-          (fun i => f ⁻¹ᵁ U i)).homology 0) :=
-      h.1
-    exact Module.Finite.equiv e.toLinearEquiv
-  · let e := HomologicalComplex.homologyMapIso
-      (orderedBaseCechComplexPushforwardIso f π M U) 1
-    letI : Module.Finite Γ(S, (⊤ : S.Opens))
-        ((orderedBaseCechComplex (f ≫ π) M
-          (fun i => f ⁻¹ᵁ U i)).homology 1) :=
-      h.2
-    exact Module.Finite.equiv e.toLinearEquiv
 
 private theorem closedStalkSupport_pushforward_canonicalSupport_le
     {X : Scheme.{u}} {F : X.Modules}
@@ -188,7 +185,7 @@ private theorem pushedComparison_residualSupports_lt
     (closedStalkSupport_pushforward_canonicalSupport_le A E₀)
     y hy
 
-private structure SupportChowLowDegreeData
+private structure SupportChowData
     {R : Type u} [CommRing R]
     {X : Scheme.{u}} (xπ : X ⟶ Spec (.of R))
     {F : X.Modules} (A : CanonicalSupportThickening F)
@@ -197,8 +194,8 @@ private structure SupportChowLowDegreeData
   comparison : A.modelModule ⟶ E₀
   finiteType : E₀.IsFiniteType
   quasicoherent : E₀.IsQuasicoherent
-  lowDegreeFinite :
-    OrderedBaseCechLowDegreeFinite
+  homologyFinite :
+    OrderedBaseCechHomologyFinite
       (A.inclusion ≫ xπ) (fun i => A.inclusion ⁻¹ᵁ U i) E₀
   comparisonOpen : A.supportScheme.Opens
   comparisonIsIso :
@@ -225,7 +222,7 @@ private theorem nonempty_canonicalSupportAdaptedChowChart
     A.nonempty_supportAdaptedChowChart_of_not_isZero
       xπ hmodel
 
-private theorem nonempty_supportChowLowDegreeData_of_chart
+private theorem nonempty_supportChowData_of_chart
     {R : Type u} [CommRing R] [IsNoetherianRing R]
     {X : Scheme.{u}}
     {xπ : X ⟶ Spec (.of R)}
@@ -238,7 +235,7 @@ private theorem nonempty_supportChowLowDegreeData_of_chart
     (hUaff : ∀ i, IsAffineOpen (U i))
     (C : SupportAdaptedChowChart
       (A.inclusion ≫ xπ) A.modelModule) :
-    Nonempty (SupportChowLowDegreeData xπ A U) := by
+    Nonempty (SupportChowData xπ A U) := by
   letI : A.modelModule.IsFiniteType :=
     isFiniteType_pullback A.inclusion F
   letI : A.modelModule.IsQuasicoherent :=
@@ -251,7 +248,7 @@ private theorem nonempty_supportChowLowDegreeData_of_chart
     intro i
     exact (hUaff i).preimage A.inclusion
   obtain ⟨n, hn⟩ :=
-    C.exists_coordinateComodel_orderedBaseCechLowDegreeFinite
+    C.exists_coordinateComodel_orderedBaseCechHomologyFinite
       W hW hWaff
   let E₀ := C.coordinateComodel n
   let β₀ : A.modelModule ⟶ E₀ :=
@@ -265,12 +262,12 @@ private theorem nonempty_supportChowLowDegreeData_of_chart
     comparison := β₀
     finiteType := inferInstance
     quasicoherent := inferInstance
-    lowDegreeFinite := hn
+    homologyFinite := hn
     comparisonOpen := C.openSubscheme
     comparisonIsIso := C.coordinateComparison_restrict_isIso n
     point := Classical.choose C.supportPoint }⟩
 
-private theorem nonempty_supportChowLowDegreeData
+private theorem nonempty_supportChowData
     {R : Type u} [CommRing R] [IsNoetherianRing R]
     {X : Scheme.{u}} [IsNoetherian X] [X.IsSeparated]
     {xπ : X ⟶ Spec (.of R)}
@@ -281,7 +278,7 @@ private theorem nonempty_supportChowLowDegreeData
     (U : ι → X.Opens) (hU : IsOpenCover U)
     (hUaff : ∀ i, IsAffineOpen (U i))
     (hF : ¬ IsZero F) :
-    Nonempty (SupportChowLowDegreeData xπ A U) := by
+    Nonempty (SupportChowData xπ A U) := by
   classical
   obtain ⟨C⟩ :=
     nonempty_canonicalSupportAdaptedChowChart
@@ -300,12 +297,12 @@ private theorem nonempty_supportChowLowDegreeData
     rw [← terminal.comp_from (A.inclusion ≫ xπ)]
     infer_instance⟩
   exact
-    nonempty_supportChowLowDegreeData_of_chart
+    nonempty_supportChowData_of_chart
       A U hU hUaff C
 
 /-- A nonzero coherent module on a Noetherian proper scheme admits a
-low-degree-finite support-decreasing Chow comodel. -/
-theorem exists_chowComodel_orderedBaseCechLowDegreeFinite
+support-decreasing Chow comodel with finite Cech homology in every degree. -/
+theorem exists_chowComodel_orderedBaseCechHomologyFinite
     {R : Type u} [CommRing R] [IsNoetherianRing R]
     {X : Scheme.{u}} [IsNoetherian X] [X.IsSeparated]
     {xπ : X ⟶ Spec (.of R)}
@@ -317,10 +314,10 @@ theorem exists_chowComodel_orderedBaseCechLowDegreeFinite
     (hUaff : ∀ i, IsAffineOpen (U i))
     (hF : ¬ IsZero F) :
     ∃ (E : X.Modules) (β : F ⟶ E),
-      IsLowDegreeChowComodel xπ U F E β := by
+      IsChowComodel xπ U F E β := by
   classical
   obtain ⟨D⟩ :=
-    nonempty_supportChowLowDegreeData
+    nonempty_supportChowData
       (xπ := xπ) (F := F) A U hU hUaff hF
   let E := (pushforward A.inclusion).obj D.E₀
   let β : F ⟶ E :=
@@ -335,9 +332,10 @@ theorem exists_chowComodel_orderedBaseCechLowDegreeFinite
   letI : E.IsFiniteType := hEfiniteType
   letI : E.IsQuasicoherent := hEquasicoherent
   have hEcech :
-      OrderedBaseCechLowDegreeFinite xπ U E := by
-    exact orderedBaseCechLowDegreeFinite_pushforward
-      A.inclusion xπ D.E₀ U D.lowDegreeFinite
+      OrderedBaseCechHomologyFinite xπ U E := by
+    exact
+      (OrderedBaseCechHomologyFinite.pushforward_iff
+        A.inclusion xπ D.E₀ U).1 D.homologyFinite
   have hresidual :=
     comparisonResidual_isFiniteType_and_isQuasicoherent β
   letI :
@@ -366,6 +364,44 @@ theorem exists_chowComodel_orderedBaseCechLowDegreeFinite
       hresidual.1.1, hresidual.1.2,
       hresidual.2.1, hresidual.2.2,
       Or.inr hdrops.1, Or.inr hdrops.2⟩
+
+/-- A nonzero coherent module on a Noetherian proper scheme admits a
+low-degree-finite support-decreasing Chow comodel. -/
+theorem exists_chowComodel_orderedBaseCechLowDegreeFinite
+    {R : Type u} [CommRing R] [IsNoetherianRing R]
+    {X : Scheme.{u}} [IsNoetherian X] [X.IsSeparated]
+    {xπ : X ⟶ Spec (.of R)}
+    [LocallyOfFinitePresentation xπ] [IsProper xπ]
+    {F : X.Modules} [F.IsFiniteType] [F.IsQuasicoherent]
+    (A : CanonicalSupportThickening F)
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U)
+    (hUaff : ∀ i, IsAffineOpen (U i))
+    (hF : ¬ IsZero F) :
+    ∃ (E : X.Modules) (β : F ⟶ E),
+      IsLowDegreeChowComodel xπ U F E β := by
+  obtain ⟨E, β, h⟩ :=
+    exists_chowComodel_orderedBaseCechHomologyFinite
+      (xπ := xπ) (F := F) A U hU hUaff hF
+  change E.IsFiniteType ∧ E.IsQuasicoherent ∧
+    OrderedBaseCechHomologyFinite xπ U E ∧
+    (kernel (Abelian.factorThruImage β)).IsFiniteType ∧
+    (kernel (Abelian.factorThruImage β)).IsQuasicoherent ∧
+    (cokernel (Abelian.image.ι β)).IsFiniteType ∧
+    (cokernel (Abelian.image.ι β)).IsQuasicoherent ∧
+    (IsZero (kernel (Abelian.factorThruImage β)) ∨
+      closedStalkSupport
+          (kernel (Abelian.factorThruImage β)) <
+        closedStalkSupport F) ∧
+    (IsZero (cokernel (Abelian.image.ι β)) ∨
+      closedStalkSupport
+          (cokernel (Abelian.image.ι β)) <
+        closedStalkSupport F) at h
+  obtain ⟨hEfinite, hEqc, hEcech, hKfinite, hKqc,
+      hQfinite, hQqc, hKdrop, hQdrop⟩ := h
+  exact
+    ⟨E, β, hEfinite, hEqc, ⟨hEcech 0, hEcech 1⟩,
+      hKfinite, hKqc, hQfinite, hQqc, hKdrop, hQdrop⟩
 
 end CanonicalSupportThickening
 end AlgebraicGeometry.Scheme.Modules

@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.TensorProduct.RightExactness
 import Mathlib.LinearAlgebra.TensorProduct.Tower
 import Mathlib.RingTheory.Flat.EquationalCriterion
 import Mathlib.RingTheory.Flat.Equalizer
+import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 import Mathlib.RingTheory.LocalRing.Module
 import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 import Mathlib.RingTheory.Support
@@ -691,6 +692,50 @@ section Exactness
 
 variable {T : Type*} [AddCommGroup T] [Module R T]
 
+/-- In an algebra tower, exactness after iterated base change is equivalent to exactness
+after direct base change. -/
+theorem LinearMap.baseChange_baseChange_exact_iff
+    (A : Type*) (B : Type*)
+    [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] [Algebra A B]
+    [IsScalarTower R A B]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) :
+    Function.Exact
+        ((f.baseChange A).baseChange B)
+        ((g.baseChange A).baseChange B) ↔
+      Function.Exact (f.baseChange B) (g.baseChange B) := by
+  let eP := AlgebraTensorModule.cancelBaseChange R A B B P
+  let eQ := AlgebraTensorModule.cancelBaseChange R A B B Q
+  let eT := AlgebraTensorModule.cancelBaseChange R A B B T
+  have hf :
+      f.baseChange B ∘ₗ eP.toLinearMap =
+        eQ.toLinearMap ∘ₗ (f.baseChange A).baseChange B := by
+    rw [LinearMap.baseChange_baseChange]
+    ext x
+    simp [eP, eQ]
+  have hg :
+      g.baseChange B ∘ₗ eQ.toLinearMap =
+        eT.toLinearMap ∘ₗ (g.baseChange A).baseChange B := by
+    rw [LinearMap.baseChange_baseChange]
+    ext x
+    simp [eQ, eT]
+  exact (Function.Exact.iff_of_ladder_linearEquiv hf hg).symm
+
+/-- Exactness after base change can be checked after a further faithfully flat
+scalar extension. -/
+theorem LinearMap.baseChange_exact_iff_of_faithfullyFlat
+    (A : Type*) (B : Type*)
+    [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] [Algebra A B]
+    [IsScalarTower R A B] [Module.FaithfullyFlat A B]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) :
+    Function.Exact (f.baseChange A) (g.baseChange A) ↔
+      Function.Exact (f.baseChange B) (g.baseChange B) := by
+  rw [← LinearMap.baseChange_baseChange_exact_iff A B f g]
+  simpa only [LinearMap.baseChange_eq_ltensor] using
+    (Module.FaithfullyFlat.lTensor_exact_iff_exact A B
+      (f.baseChange A) (g.baseChange A)).symm
+
 /-- An exact pair remains exact after arbitrary algebra base change when the target and
 the cokernel of the second map are flat. -/
 theorem LinearMap.baseChange_exact_of_exact_of_flat_coker
@@ -795,6 +840,49 @@ theorem LinearMap.exact_of_forall_field_baseChange_exact_of_finite
   rw [← LinearMap.range_eq_top, ← Submodule.Quotient.subsingleton_iff]
   exact hcoker
 
+/-- Over a local ring, exactness of a pair can be checked on the residue field when its
+homology is finite and formation of the second kernel commutes with base change. -/
+theorem LinearMap.exact_of_residueField_baseChange_exact_of_finite
+    [IsLocalRing R]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    [Module.Flat R T] [Module.Flat R (T ⧸ LinearMap.range g)]
+    [Module.Finite R
+      (LinearMap.ker g ⧸ LinearMap.range (LinearMap.codRestrictToKer f g h))]
+    (hresidue : Function.Exact
+      (f.baseChange (IsLocalRing.ResidueField R))
+      (g.baseChange (IsLocalRing.ResidueField R))) :
+    Function.Exact f g := by
+  apply (LinearMap.codRestrictToKer_surjective_iff_exact f g h).mp
+  have hcoker : Subsingleton
+      (LinearMap.ker g ⧸
+        LinearMap.range (LinearMap.codRestrictToKer f g h)) := by
+    apply (IsLocalRing.subsingleton_tensorProduct
+      (R := R)
+      (M := LinearMap.ker g ⧸
+        LinearMap.range (LinearMap.codRestrictToKer f g h))).mp
+    apply (baseChange_surjective_iff_subsingleton_coker
+      (IsLocalRing.ResidueField R)
+      (LinearMap.codRestrictToKer f g h)).mp
+    have hcomparison :=
+      kerBaseChangeComparison_bijective
+        (IsLocalRing.ResidueField R) g
+    have hcomposition : Function.Surjective
+        (kerBaseChangeComparison (IsLocalRing.ResidueField R) g ∘ₗ
+          (LinearMap.codRestrictToKer f g h).baseChange
+            (IsLocalRing.ResidueField R)) := by
+      rw [kerBaseChangeComparison_comp_codRestrictToKer_baseChange]
+      exact
+        (LinearMap.codRestrictToKer_surjective_iff_exact _ _ _).mpr
+          hresidue
+    intro y
+    obtain ⟨x, hx⟩ :=
+      hcomposition
+        (kerBaseChangeComparison (IsLocalRing.ResidueField R) g y)
+    refine ⟨x, hcomparison.injective ?_⟩
+    simpa only [LinearMap.comp_apply] using hx
+  rw [← LinearMap.range_eq_top, ← Submodule.Quotient.subsingleton_iff]
+  exact hcoker
+
 /-- Over a Noetherian ring, the middle module of an exact pair is finite when the two
 surrounding modules are finite. This is the module-theoretic sandwich used in long exact
 cohomology sequences. -/
@@ -867,6 +955,71 @@ theorem LinearMap.exact_of_bounded_flat_forall_field_baseChange_exact_of_finite_
     (n : ℕ) (hn : n < N) :
     Function.Exact (d n) (d (n + 1)) :=
   (boundedFlatCokerAndExactOfFiniteHomology M d N hcomp hfinite hfield n hn.le).2 hn
+
+private theorem boundedFlatCokerAndExactOfFiniteHomologyAtResidue
+    [IsLocalRing R]
+    (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+    (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfinite : ∀ n, n < N →
+      Module.Finite R
+        (LinearMap.ker (d (n + 1)) ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer (d n) (d (n + 1)) (hcomp n))))
+    (hresidue : ∀ n, n < N →
+      Function.Exact
+        ((d n).baseChange (IsLocalRing.ResidueField R))
+        ((d (n + 1)).baseChange (IsLocalRing.ResidueField R)))
+    (n : ℕ) (hn : n ≤ N) :
+    Module.Flat R (M (n + 1) ⧸ LinearMap.range (d n)) ∧
+      (n < N → Function.Exact (d n) (d (n + 1))) := by
+  induction hn using Nat.decreasingInduction with
+  | self =>
+      exact ⟨inferInstance, fun hn ↦ (Nat.lt_irrefl N hn).elim⟩
+  | @of_succ k hk ih =>
+      letI : Module.Flat R
+          (M (k + 2) ⧸ LinearMap.range (d (k + 1))) := ih.1
+      letI : Module.Finite R
+          (LinearMap.ker (d (k + 1)) ⧸
+            LinearMap.range
+              (LinearMap.codRestrictToKer
+                (d k) (d (k + 1)) (hcomp k))) :=
+        hfinite k hk
+      have hexact : Function.Exact (d k) (d (k + 1)) :=
+        LinearMap.exact_of_residueField_baseChange_exact_of_finite
+          (d k) (d (k + 1)) (hcomp k) (hresidue k hk)
+      letI : Module.Flat R (LinearMap.range (d (k + 1))) :=
+        Module.Flat.of_flat_quotient _
+      let e : (M (k + 1) ⧸ LinearMap.range (d k)) ≃ₗ[R]
+          LinearMap.range (d (k + 1)) :=
+        Submodule.quotEquivOfEq
+            (LinearMap.range (d k)) (LinearMap.ker (d (k + 1)))
+            (LinearMap.exact_iff.mp hexact).symm ≪≫ₗ
+          LinearMap.quotKerEquivRange (d (k + 1))
+      exact ⟨Module.Flat.of_linearEquiv e, fun _ ↦ hexact⟩
+
+/-- A bounded complex of flat modules with finite explicit homology over a local ring is
+exact when its residue-field base change is exact. -/
+theorem LinearMap.exact_of_bounded_flat_residueField_baseChange_exact_of_finite_homology
+    [IsLocalRing R]
+    (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+    (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfinite : ∀ n, n < N →
+      Module.Finite R
+        (LinearMap.ker (d (n + 1)) ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer (d n) (d (n + 1)) (hcomp n))))
+    (hresidue : ∀ n, n < N →
+      Function.Exact
+        ((d n).baseChange (IsLocalRing.ResidueField R))
+        ((d (n + 1)).baseChange (IsLocalRing.ResidueField R)))
+    (n : ℕ) (hn : n < N) :
+    Function.Exact (d n) (d (n + 1)) :=
+  (boundedFlatCokerAndExactOfFiniteHomologyAtResidue
+    M d N hcomp hfinite hresidue n hn.le).2 hn
 
 end Exactness
 
