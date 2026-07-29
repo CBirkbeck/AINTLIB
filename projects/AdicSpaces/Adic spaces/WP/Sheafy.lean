@@ -258,6 +258,60 @@ theorem PushedHeadData.cover_isRational {C : RationalCoveringData (WPA K w)}
 
 variable {K w} in
 open scoped Classical in
+theorem PushedHeadData.piece_subset {C : RationalCoveringData (WPA K w)}
+    (P : PushedHeadData C) (D : ↥C.covers) :
+    rationalOpen (P.DHp D).T (P.DHp D).s ⊆
+      rationalOpen P.DHb.T P.DHb.s :=
+  P.cover.hsubset (P.DHp D)
+    (Finset.mem_image_of_mem _ (Finset.mem_attach _ _))
+
+variable {K w} in
+open scoped Classical in
+/-- The head-level restriction between graph models along a pushed covering
+piece (the `headLocEquiv`-conjugated restriction map;
+[WP] eq:cover-coefficientwise's coefficient hom). -/
+noncomputable def qRestrict {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C) (D : ↥C.covers) :
+    QHead P.DHb →+* QHead (P.DHp D) :=
+  ((headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).toRingHom.comp
+    (restrictionMapHom P.DHb (P.DHp D) (P.piece_subset D))).comp
+    (headLocEquiv ϖ hK₀ P.DHb P.hDHb).symm.toRingHom
+
+variable {K w} in
+open scoped Classical in
+/-- `qRestrict` matches the head constants (the generator law of the
+naturality square). -/
+theorem qRestrict_headConst {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C) (D : ↥C.covers) (x : WPHead K w P.M) :
+    qRestrict ϖ hK₀ P D (headConst P.DHb x) =
+      headConst (P.DHp D) x := by
+  have h1 : (headLocEquiv ϖ hK₀ P.DHb P.hDHb).symm (headConst P.DHb x) =
+      P.DHb.canonicalMap x := by
+    have h2 : headLocEquiv ϖ hK₀ P.DHb P.hDHb (P.DHb.canonicalMap x) =
+        headConst P.DHb x := by
+      rw [show headLocEquiv ϖ hK₀ P.DHb P.hDHb (P.DHb.canonicalMap x) =
+        headLocFwd ϖ P.DHb P.hDHb (P.DHb.canonicalMap x) from rfl,
+        show P.DHb.canonicalMap x = P.DHb.coeRingHom
+          (algebraMap (WPHead K w P.M) (Localization.Away P.DHb.s) x) from rfl,
+        headLocFwd_coe, headLocFwdAlg_algebraMap]
+    rw [← h2, RingEquiv.symm_apply_apply]
+  show headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)
+    (restrictionMapHom P.DHb (P.DHp D) (P.piece_subset D)
+      ((headLocEquiv ϖ hK₀ P.DHb P.hDHb).symm (headConst P.DHb x))) =
+    headConst (P.DHp D) x
+  rw [h1, restrictionMapHom_canonicalMap_generic]
+  rw [show headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)
+      ((P.DHp D).canonicalMap x) =
+    headLocFwd ϖ (P.DHp D) (P.hDHp D) ((P.DHp D).canonicalMap x) from rfl,
+    show (P.DHp D).canonicalMap x = (P.DHp D).coeRingHom
+      (algebraMap (WPHead K w P.M) (Localization.Away (P.DHp D).s) x)
+      from rfl,
+    headLocFwd_coe, headLocFwdAlg_algebraMap]
+
+variable {K w} in
+open scoped Classical in
 /-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
 with common-stage head data transfers to a rational covering on the head, with
 subset and covering properties by the `rhoHead` pullback. -/
