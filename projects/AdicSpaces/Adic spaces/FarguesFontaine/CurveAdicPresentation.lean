@@ -260,6 +260,215 @@ theorem mem_Y_of_mem_bigWindow (hp : 1 < p) {v : Spv (Ainf p F)} (n : ℤ)
   rw [Y_eq_iUnion_bigWindow p F ϖ hp]
   exact Set.mem_iUnion.mpr ⟨n, hv⟩
 
+/-- **Basic opens form a basis of `Spv B`**, packaged the way callers need it: a point of
+an open `Q` lies in a finite intersection of basic opens that is itself inside `Q`. The
+family is returned as a `Finset` of sets together with a choice of numerator/denominator
+pair realising each member — exactly the shape
+`exists_spanning_presentation_of_mem_basicOpens` consumes. -/
+private theorem exists_finset_basicOpen_mem_subset {B : Type*} [CommRing B]
+    {Q : Set (Spv B)} (hQ : IsOpen Q) {w : Spv B} (hw : w ∈ Q) :
+    ∃ (fam : Finset (Set (Spv B))) (FG : Set (Spv B) → B × B),
+      (∀ e ∈ fam, w ∈ basicOpen (FG e).1 (FG e).2) ∧
+      (⋂ e ∈ fam, basicOpen (FG e).1 (FG e).2) ⊆ Q := by
+  classical
+  have hbasis := TopologicalSpace.isTopologicalBasis_of_subbasis
+    (t := (instTopologicalSpace : TopologicalSpace (Spv B)))
+    (s := {U : Set (Spv B) | ∃ f s, U = basicOpen f s}) rfl
+  obtain ⟨t, ht, hwt, htQ⟩ := hbasis.exists_subset_of_mem_open hw hQ
+  obtain ⟨fam₀, ⟨hfam₀_fin, hfam₀_sub⟩, rfl⟩ := ht
+  have hFG : ∀ e : Set (Spv B), ∃ q : B × B, e ∈ fam₀ → e = basicOpen q.1 q.2 := by
+    intro e
+    by_cases he : e ∈ fam₀
+    · obtain ⟨f, s, hfs⟩ := hfam₀_sub he
+      exact ⟨(f, s), fun _ => hfs⟩
+    · exact ⟨(0, 0), fun h => absurd h he⟩
+  choose FG hFGspec using hFG
+  refine ⟨hfam₀_fin.toFinset, FG, fun e he => ?_, fun v hv => htQ fun e he₀ => ?_⟩
+  · have he₀ : e ∈ fam₀ := hfam₀_fin.mem_toFinset.mp he
+    rw [← hFGspec e he₀]
+    exact hwt e he₀
+  · rw [hFGspec e he₀]
+    exact Set.mem_iInter₂.mp hv e (hfam₀_fin.mem_toFinset.mpr he₀)
+
+
+/-- **The window-trace homeomorphism** — the second leg of the chart comparison. The
+chart homeomorphism `h_n = spaChartHomeoWindow` carries the rational open `R` on
+`Spa B_n` across to the neighbourhood that `G₂` cuts out on the `𝒴`-carrier; `hG₂eq`
+says exactly that `G₂` lifts the `h_n`-image of `R`'s trace. Both sides are subtypes of
+nested subtypes, so all four components are written out, but the content is only that
+`h_n` and `h_n.symm` are mutually inverse and continuous. -/
+private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
+    (R : Set (Spv (windowChartRing p F ϖ n))) (G₂ : Set (Spv (Ainf p F)))
+    (hG₂eq : Subtype.val ⁻¹' G₂ = ⇑(spaChartHomeoWindow p F ϖ hp n) ''
+      (Subtype.val ⁻¹' R : Set ↥(Spa (windowChartRing p F ϖ n)
+        (ringPlus (windowChartRing p F ϖ n))))) :
+    ↥(R ∩ Spa (windowChartRing p F ϖ n) (windowChartRing p F ϖ n)⁺) ≃ₜ
+      ↥({z : ↥(yTop p F ϖ) |
+            ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+              : Spv (Ainf p F)) ∈ G₂}
+          ∩ {z : ↥(yTop p F ϖ) |
+            ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+              : Spv (Ainf p F)) ∈ bigWindow p F ϖ n}) := by
+  set Bn := windowChartRing p F ϖ n with hBn
+  set h_n := spaChartHomeoWindow p F ϖ hp n with hhn
+  set RT : Set ↥(Spa Bn (ringPlus Bn)) := Subtype.val ⁻¹' R with hRT
+  have hIM' : ⇑h_n '' RT = ⇑h_n.symm ⁻¹' RT := h_n.toEquiv.image_eq_preimage_symm RT
+  refine Homeomorph.mk (Equiv.mk
+  (fun r => ⟨⟨⟨((h_n ⟨(r : Spv Bn), r.2.2⟩
+      : ↥(bigWindow p F ϖ n
+        ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+      (h_n ⟨(r : Spv Bn), r.2.2⟩).2.2⟩,
+      mem_Y_of_mem_bigWindow p F ϖ hp n
+        (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩,
+    (Set.ext_iff.mp hG₂eq (h_n ⟨(r : Spv Bn), r.2.2⟩)).mpr
+      (Set.mem_image_of_mem _ (show (⟨(r : Spv Bn), r.2.2⟩
+        : ↥(Spa Bn (ringPlus Bn))) ∈ RT from r.2.1)),
+    (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩)
+  (fun z => ⟨((h_n.symm ⟨((ySpaPoint p F ϖ z.1
+      : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+      z.2.2, (ySpaPoint p F ϖ z.1).2⟩
+      : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
+    (show h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩ ∈ RT from by
+      have h1 : (⟨((ySpaPoint p F ϖ z.1
+          : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+          z.2.2, (ySpaPoint p F ϖ z.1).2⟩
+          : ↥(bigWindow p F ϖ n
+            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) ∈ ⇑h_n '' RT :=
+        (Set.ext_iff.mp hG₂eq _).mp z.2.1
+      rw [hIM'] at h1
+      exact h1),
+    (h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩).2⟩)
+    (fun r => ?_) (fun z => ?_)) ?_ ?_
+  · -- left inverse
+    refine Subtype.ext ?_
+    have key : ∀ (m : ↥(bigWindow p F ϖ n
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))),
+        m = h_n ⟨(r : Spv Bn), r.2.2⟩ →
+        ((h_n.symm m : ↥(Spa Bn (ringPlus Bn))) : Spv Bn) = (r : Spv Bn) := by
+      intro m hm
+      rw [hm, h_n.symm_apply_apply]
+    exact key _ (Subtype.ext rfl)
+  · -- right inverse
+    refine Subtype.ext (Subtype.ext (Subtype.ext ?_))
+    set mz : ↥(bigWindow p F ϖ n
+        ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+      ⟨((ySpaPoint p F ϖ z.1
+        : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+        z.2.2, (ySpaPoint p F ϖ z.1).2⟩ with hmzdef
+    have h1 : (⟨((h_n.symm mz : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
+        (h_n.symm mz).2⟩ : ↥(Spa Bn (ringPlus Bn))) = h_n.symm mz :=
+      Subtype.ext rfl
+    exact (congrArg (fun w : ↥(Spa Bn (ringPlus Bn)) =>
+        ((h_n w : ↥(bigWindow p F ϖ n
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F))) h1).trans
+      (congrArg (fun m : ↥(bigWindow p F ϖ n
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) => (m : Spv (Ainf p F)))
+        (h_n.apply_symm_apply mz))
+  · -- continuity, forward
+    refine Continuous.subtype_mk (Continuous.subtype_mk
+      (Continuous.subtype_mk ?_ _) _) _
+    exact continuous_subtype_val.comp (h_n.continuous.comp
+      (Continuous.subtype_mk continuous_subtype_val _))
+  · -- continuity, backward
+    refine Continuous.subtype_mk ?_ _
+    refine continuous_subtype_val.comp (h_n.symm.continuous.comp ?_)
+    refine Continuous.subtype_mk ?_ _
+    exact continuous_subtype_val.comp
+      (continuous_subtype_val.comp continuous_subtype_val)
+
+/-- **Rational opens over a window chart are a neighbourhood basis of `Spa B_n`.** Given
+a point `w₀` and an open `Q ⊆ Spv B_n` containing it, there is a rational localisation
+datum `D'` over the window chart whose rational open contains `w₀` and lies inside `Q`.
+
+The datum is assembled from a finite family of basic opens around `w₀`
+(`exists_finset_basicOpen_mem_subset`), which
+`exists_spanning_presentation_of_mem_basicOpens` converts into a single spanning
+presentation; `genPieceDatum` then turns that presentation into the datum. -/
+private theorem exists_rationalLocData_mem_subset (n : ℤ)
+    {Q : Set (Spv (windowChartRing p F ϖ n))} (hQ : IsOpen Q)
+    (w₀ : ↥(Spa (windowChartRing p F ϖ n) (ringPlus (windowChartRing p F ϖ n))))
+    (hw₀Q : (w₀ : Spv (windowChartRing p F ϖ n)) ∈ Q) :
+    ∃ D' : RationalLocData (windowChartRing p F ϖ n),
+      (w₀ : Spv (windowChartRing p F ϖ n)) ∈ rationalOpen D'.T D'.s ∧
+      ∀ v : Spv (windowChartRing p F ϖ n), v ∈ rationalOpen D'.T D'.s → v ∈ Q := by
+  classical
+  set Bn := windowChartRing p F ϖ n with hBn
+  haveI : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+  obtain ⟨fam, FG, hmem, hfamQ⟩ := exists_finset_basicOpen_mem_subset hQ hw₀Q
+  obtain ⟨uB, huB⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := Bn)
+  obtain ⟨f, g, hspan, hwmem, hsub⟩ :=
+    exists_spanning_presentation_of_mem_basicOpens (B := Bn)
+      (ϖ := (uB : Bn)) uB.isUnit huB w₀.2
+      (fam := fam) (F := fun e => (FG e).1) (G := fun e => (FG e).2) hmem
+  set T' : Finset Bn := insert g ((insert none (fam.image some)).image f) with hT'
+  set D' : RationalLocData Bn := genPieceDatum
+    (presheafValue_concretePair (chartData p F (windowUnif p F ϖ n) 1 1 p 1))
+    T' g hspan with hD'
+  -- the datum's rational set agrees with the indexed one, so both claims transfer
+  have hReq : rationalOpen D'.T D'.s ∩ Spa Bn Bn⁺
+      = indexedRationalSet Bn (insert none (fam.image some)) f g := by
+    rw [indexedRationalSet_eq_rationalOpen]
+    rw [show D'.T = T' from rfl, show D'.s = g from rfl, hT',
+      rationalOpen_insert_self]
+  have hw₀R : (w₀ : Spv Bn) ∈ rationalOpen D'.T D'.s := by
+    have h1 : (w₀ : Spv Bn) ∈ rationalOpen D'.T D'.s ∩ Spa Bn Bn⁺ := by
+      rw [hReq]
+      exact hwmem
+    exact h1.1
+  exact ⟨D', hw₀R, fun v hv =>
+    hfamQ (hsub (by rw [← hReq]; exact ⟨hv, rationalOpen_subset_spa hv⟩))⟩
+
+/-- **The chart-side trace of a neighbourhood.** An open `O₂ ⊆ Spv A_inf` pulls back
+along the window chart homeomorphism to an open of `Spv B_n`, characterised pointwise on
+`Spa B_n`. This is the only thing callers need from the pullback — the intermediate
+subtype-level opens never escape. -/
+private theorem exists_isOpen_chart_trace (hp : 1 < p) (n : ℤ)
+    {O₂ : Set (Spv (Ainf p F))} (hO₂ : IsOpen O₂) :
+    ∃ Q : Set (Spv (windowChartRing p F ϖ n)), IsOpen Q ∧
+      ∀ r : ↥(Spa (windowChartRing p F ϖ n) (ringPlus (windowChartRing p F ϖ n))),
+        (r : Spv (windowChartRing p F ϖ n)) ∈ Q ↔
+          ((spaChartHomeoWindow p F ϖ hp n r : ↥(bigWindow p F ϖ n
+            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)) ∈ O₂ := by
+  have hPMopen : IsOpen {m : ↥(bigWindow p F ϖ n
+      ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) | (m : Spv (Ainf p F)) ∈ O₂} :=
+    IsOpen.preimage continuous_subtype_val hO₂
+  have hPopen : IsOpen (spaChartHomeoWindow p F ϖ hp n ⁻¹'
+      {m | (m : Spv (Ainf p F)) ∈ O₂}) :=
+    IsOpen.preimage (spaChartHomeoWindow p F ϖ hp n).continuous hPMopen
+  obtain ⟨Q, hQ, hQeq⟩ := isOpen_induced_iff.mp hPopen
+  exact ⟨Q, hQ, fun r => Set.ext_iff.mp hQeq r⟩
+
+/-- **The window neighbourhood cut out by a chart-side open.** For `G₂ ⊆ Spv A_inf` open,
+this is the set of carrier points whose underlying valuation lies in `G₂` *and* in the
+`n`-th big window. Intersecting with the window is what makes the chart homeomorphism
+applicable; `G₂` alone would not be contained in a single chart. -/
+private def windowNbhd (n : ℤ) {G₂ : Set (Spv (Ainf p F))} (hG₂ : IsOpen G₂) :
+    Opens ↥(yTop p F ϖ) :=
+  ⟨{z : ↥(yTop p F ϖ) |
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ G₂}
+    ∩ {z : ↥(yTop p F ϖ) |
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ bigWindow p F ϖ n},
+   IsOpen.inter
+     (IsOpen.preimage (continuous_subtype_val.comp continuous_subtype_val) hG₂)
+     (isOpen_yTop_windowTrace p F ϖ n)⟩
+
+/-- **Opens of the `𝒴`-carrier come from opens of `Spv A_inf`.** The carrier sits inside
+`Spa(A_inf, A_inf⁺)` which sits inside `Spv A_inf`, so an open of the carrier is cut out
+by an open of `Spv A_inf` — this peels both induced topologies in one step, which is what
+callers actually need (the intermediate `Spa`-level open is never used). -/
+private theorem exists_isOpen_mem_yTop_iff (O : Opens ↥(yTop p F ϖ)) :
+    ∃ O₂ : Set (Spv (Ainf p F)), IsOpen O₂ ∧ ∀ z : ↥(yTop p F ϖ), z ∈ O ↔
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ O₂ := by
+  obtain ⟨O₁, hO₁, hO₁eq⟩ := isOpen_induced_iff.mp O.2
+  obtain ⟨O₂, hO₂, hO₂eq⟩ := isOpen_induced_iff.mp hO₁
+  refine ⟨O₂, hO₂, fun z => ⟨fun hz => ?_, fun hz => ?_⟩⟩
+  · exact (Set.ext_iff.mp hO₂eq (ySpaPoint p F ϖ z)).mpr ((Set.ext_iff.mp hO₁eq z).mpr hz)
+  · exact (Set.ext_iff.mp hO₁eq z).mp ((Set.ext_iff.mp hO₂eq (ySpaPoint p F ϖ z)).mp hz)
+
+
 /-- **The rational-neighbourhood selection** (X-ADIC-1 A2): every open
 neighbourhood of a point of the `𝒴`-carrier contains an open neighbourhood
 homeomorphic to the adic spectrum of a rational-subdatum value ring over a
@@ -287,98 +496,16 @@ theorem exists_window_subdatum_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
     ⟨((ySpaPoint p F ϖ y : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
         : Spv (Ainf p F)), hbw, (ySpaPoint p F ϖ y).2⟩ with hm₀
   set w₀ := h_n.symm m₀ with hw₀
-  -- lift `O` to an Spv-open through the double subtype
-  obtain ⟨O₁, hO₁, hO₁eq⟩ := isOpen_induced_iff.mp O.2
-  obtain ⟨O₂, hO₂, hO₂eq⟩ := isOpen_induced_iff.mp hO₁
-  have hOmem : ∀ z : ↥(yTop p F ϖ), z ∈ O ↔
-      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-        : Spv (Ainf p F)) ∈ O₂ := by
-    intro z
-    constructor
-    · intro hz
-      have h1 : z ∈ Subtype.val ⁻¹' O₁ :=
-        (Set.ext_iff.mp hO₁eq z).mpr hz
-      have h2 : ySpaPoint p F ϖ z ∈ Subtype.val ⁻¹' O₂ :=
-        (Set.ext_iff.mp hO₂eq (ySpaPoint p F ϖ z)).mpr h1
-      exact h2
-    · intro hz
-      have h1 : ySpaPoint p F ϖ z ∈ O₁ :=
-        (Set.ext_iff.mp hO₂eq (ySpaPoint p F ϖ z)).mp hz
-      exact (Set.ext_iff.mp hO₁eq z).mp h1
-  -- the chart-side open around `w₀`
-  have hPMopen : IsOpen {m : ↥(bigWindow p F ϖ n
-      ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) | (m : Spv (Ainf p F)) ∈ O₂} :=
-    IsOpen.preimage continuous_subtype_val hO₂
-  have hPopen : IsOpen (h_n ⁻¹' {m | (m : Spv (Ainf p F)) ∈ O₂}) :=
-    IsOpen.preimage h_n.continuous hPMopen
-  have hw₀P : w₀ ∈ h_n ⁻¹' {m | (m : Spv (Ainf p F)) ∈ O₂} := by
-    show (h_n w₀ : Spv (Ainf p F)) ∈ O₂
+  -- lift `O` to an `Spv`-open through both induced topologies
+  obtain ⟨O₂, hO₂, hOmem⟩ := exists_isOpen_mem_yTop_iff p F ϖ O
+  -- pull `O₂` back to an open of `Spv B_n`, and locate `w₀` in it
+  obtain ⟨Q, hQ, hQmem⟩ := exists_isOpen_chart_trace p F ϖ hp n hO₂
+  have hw₀Q : (w₀ : Spv Bn) ∈ Q := (hQmem w₀).mpr (by
     rw [hw₀, h_n.apply_symm_apply]
-    exact (hOmem y).mp hyO
-  -- lift to an Spv(B_n)-open
-  obtain ⟨Q, hQ, hQeq⟩ := isOpen_induced_iff.mp hPopen
-  have hw₀Q : (w₀ : Spv Bn) ∈ Q :=
-    (Set.ext_iff.mp hQeq w₀).mpr hw₀P
-  -- the basic-open basis of Spv(B_n)
-  have hbasis := TopologicalSpace.isTopologicalBasis_of_subbasis
-    (t := (instTopologicalSpace : TopologicalSpace (Spv Bn)))
-    (s := {U : Set (Spv Bn) | ∃ f s, U = basicOpen f s}) rfl
-  obtain ⟨t, ht, hwt, htQ⟩ := hbasis.exists_subset_of_mem_open hw₀Q hQ
-  obtain ⟨fam₀, ⟨hfam₀_fin, hfam₀_sub⟩, rfl⟩ := ht
-  have hFG : ∀ e : Set (Spv Bn), ∃ q : Bn × Bn, e ∈ fam₀ →
-      e = basicOpen q.1 q.2 := by
-    intro e
-    by_cases he : e ∈ fam₀
-    · obtain ⟨f, s, hfs⟩ := hfam₀_sub he
-      exact ⟨(f, s), fun _ => hfs⟩
-    · exact ⟨(0, 0), fun h => absurd h he⟩
-  choose FG hFGspec using hFG
-  set fam : Finset (Set (Spv Bn)) := hfam₀_fin.toFinset with hfam
-  have hmem : ∀ e ∈ fam, (w₀ : Spv Bn) ∈ basicOpen (FG e).1 (FG e).2 := by
-    intro e he
-    have he₀ : e ∈ fam₀ := by
-      rwa [hfam, Set.Finite.mem_toFinset] at he
-    rw [← hFGspec e he₀]
-    exact hwt e he₀
-  -- the spanning presentation
-  obtain ⟨uB, huB⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := Bn)
-  obtain ⟨f, g, hspan, hwmem, hsub⟩ :=
-    exists_spanning_presentation_of_mem_basicOpens (B := Bn)
-      (ϖ := (uB : Bn)) uB.isUnit huB w₀.2
-      (fam := fam) (F := fun e => (FG e).1) (G := fun e => (FG e).2) hmem
-  -- the rational datum over the window chart
-  set T' : Finset Bn := insert g ((insert none (fam.image some)).image f)
-    with hT'
-  set D' : RationalLocData Bn := genPieceDatum
-    (presheafValue_concretePair (chartData p F (windowUnif p F ϖ n) 1 1 p 1))
-    T' g hspan with hD'
+    exact (hOmem y).mp hyO)
+  -- a rational datum over the window chart, cutting out a neighbourhood inside `Q`
+  obtain ⟨D', hw₀R, hRsub⟩ := exists_rationalLocData_mem_subset p F ϖ n hQ w₀ hw₀Q
   refine ⟨D', ?_⟩
-  -- the rational set agrees with the indexed one
-  have hReq : rationalOpen D'.T D'.s ∩ Spa Bn Bn⁺
-      = indexedRationalSet Bn (insert none (fam.image some)) f g := by
-    rw [indexedRationalSet_eq_rationalOpen]
-    rw [show D'.T = T' from rfl, show D'.s = g from rfl, hT',
-      rationalOpen_insert_self]
-  -- membership of the base point in the rational set
-  have hw₀R : (w₀ : Spv Bn) ∈ rationalOpen D'.T D'.s := by
-    have h1 : (w₀ : Spv Bn) ∈ rationalOpen D'.T D'.s ∩ Spa Bn Bn⁺ := by
-      rw [hReq]
-      exact hwmem
-    exact h1.1
-  -- the rational set is contained in the O₂-side
-  have hRsub : ∀ v : Spv Bn, v ∈ rationalOpen D'.T D'.s → v ∈ Q := by
-    intro v hv
-    have h1 : v ∈ indexedRationalSet Bn (insert none (fam.image some)) f g := by
-      rw [← hReq]
-      exact ⟨hv, rationalOpen_subset_spa hv⟩
-    have h2 := hsub h1
-    refine htQ ?_
-    intro e he₀
-    have he : e ∈ fam := by
-      rw [hfam, Set.Finite.mem_toFinset]
-      exact he₀
-    rw [hFGspec e he₀]
-    exact Set.mem_iInter₂.mp h2 e he
   -- the window-side image of the rational trace
   set RT : Set ↥(Spa Bn (ringPlus Bn)) :=
     Subtype.val ⁻¹' rationalOpen D'.T D'.s with hRT
@@ -388,16 +515,7 @@ theorem exists_window_subdatum_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
   have hIMopen : IsOpen IM := h_n.isOpenMap RT hRTopen
   obtain ⟨G₂, hG₂, hG₂eq⟩ := isOpen_induced_iff.mp hIMopen
   -- the neighbourhood on the 𝒴-carrier
-  refine ⟨⟨{z : ↥(yTop p F ϖ) |
-      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-        : Spv (Ainf p F)) ∈ G₂}
-      ∩ {z : ↥(yTop p F ϖ) |
-        ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-          : Spv (Ainf p F)) ∈ bigWindow p F ϖ n},
-    IsOpen.inter
-      (IsOpen.preimage
-        (continuous_subtype_val.comp continuous_subtype_val) hG₂)
-      (isOpen_yTop_windowTrace p F ϖ n)⟩, ?_, ?_, ?_⟩
+  refine ⟨windowNbhd p F ϖ n hG₂, ?_, ?_, ?_⟩
   · -- y ∈ V
     have hm₀IM : m₀ ∈ IM := by
       have h1 : m₀ = h_n w₀ := (h_n.apply_symm_apply m₀).symm
@@ -417,86 +535,21 @@ theorem exists_window_subdatum_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
     have hmzO₂ : (mz : Spv (Ainf p F)) ∈ O₂ := by
       rw [hIM] at hmzIM
       obtain ⟨r, hrRT, hrmz⟩ := hmzIM
-      have hrP : r ∈ h_n ⁻¹' {m | (m : Spv (Ainf p F)) ∈ O₂} :=
-        (Set.ext_iff.mp hQeq r).mp (hRsub _ hrRT)
-      have h2 : (h_n r : Spv (Ainf p F)) ∈ O₂ := hrP
+      have h2 : (h_n r : Spv (Ainf p F)) ∈ O₂ := (hQmem r).mp (hRsub _ hrRT)
       rwa [hrmz] at h2
     exact (hOmem z).mpr hmzO₂
   · -- the homeomorphism
     haveI : IsHuberRing Bn :=
       (isTateRing_bigWindowChart p F (windowUnif p F ϖ n)).toIsHuberRing
     haveI : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
-    have hIM' : IM = ⇑h_n.symm ⁻¹' RT := by
-      rw [hIM]
-      exact h_n.toEquiv.image_eq_preimage_symm RT
     set e₁ := spaPresheafValueHomeomorphRationalOpen' D'
       (IsTateRing.exists_topologicallyNilpotent_unit
         (A := presheafValue D')).choose
       (IsTateRing.exists_topologicallyNilpotent_unit
         (A := presheafValue D')).choose_spec with he₁
     -- the second leg: the rational trace is carried onto `V`
-    refine ⟨e₁.trans (Homeomorph.mk (Equiv.mk
-      (fun r => ⟨⟨⟨((h_n ⟨(r : Spv Bn), r.2.2⟩
-          : ↥(bigWindow p F ϖ n
-            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
-          (h_n ⟨(r : Spv Bn), r.2.2⟩).2.2⟩,
-          mem_Y_of_mem_bigWindow p F ϖ hp n
-            (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩,
-        (Set.ext_iff.mp hG₂eq (h_n ⟨(r : Spv Bn), r.2.2⟩)).mpr
-          (Set.mem_image_of_mem _ (show (⟨(r : Spv Bn), r.2.2⟩
-            : ↥(Spa Bn (ringPlus Bn))) ∈ RT from r.2.1)),
-        (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩)
-      (fun z => ⟨((h_n.symm ⟨((ySpaPoint p F ϖ z.1
-          : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
-          z.2.2, (ySpaPoint p F ϖ z.1).2⟩
-          : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
-        (show h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩ ∈ RT from by
-          have h1 : (⟨((ySpaPoint p F ϖ z.1
-              : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
-              z.2.2, (ySpaPoint p F ϖ z.1).2⟩
-              : ↥(bigWindow p F ϖ n
-                ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) ∈ IM :=
-            (Set.ext_iff.mp hG₂eq _).mp z.2.1
-          rw [hIM'] at h1
-          exact h1),
-        (h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩).2⟩)
-      (fun r => ?_) (fun z => ?_)) ?_ ?_)⟩
-    · -- left inverse
-      refine Subtype.ext ?_
-      have key : ∀ (m : ↥(bigWindow p F ϖ n
-            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))),
-          m = h_n ⟨(r : Spv Bn), r.2.2⟩ →
-          ((h_n.symm m : ↥(Spa Bn (ringPlus Bn))) : Spv Bn) = (r : Spv Bn) := by
-        intro m hm
-        rw [hm, h_n.symm_apply_apply]
-      exact key _ (Subtype.ext rfl)
-    · -- right inverse
-      refine Subtype.ext (Subtype.ext (Subtype.ext ?_))
-      set mz : ↥(bigWindow p F ϖ n
-          ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
-        ⟨((ySpaPoint p F ϖ z.1
-          : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
-          z.2.2, (ySpaPoint p F ϖ z.1).2⟩ with hmzdef
-      have h1 : (⟨((h_n.symm mz : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
-          (h_n.symm mz).2⟩ : ↥(Spa Bn (ringPlus Bn))) = h_n.symm mz :=
-        Subtype.ext rfl
-      exact (congrArg (fun w : ↥(Spa Bn (ringPlus Bn)) =>
-          ((h_n w : ↥(bigWindow p F ϖ n
-            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F))) h1).trans
-        (congrArg (fun m : ↥(bigWindow p F ϖ n
-            ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) => (m : Spv (Ainf p F)))
-          (h_n.apply_symm_apply mz))
-    · -- continuity, forward
-      refine Continuous.subtype_mk (Continuous.subtype_mk
-        (Continuous.subtype_mk ?_ _) _) _
-      exact continuous_subtype_val.comp (h_n.continuous.comp
-        (Continuous.subtype_mk continuous_subtype_val _))
-    · -- continuity, backward
-      refine Continuous.subtype_mk ?_ _
-      refine continuous_subtype_val.comp (h_n.symm.continuous.comp ?_)
-      refine Continuous.subtype_mk ?_ _
-      exact continuous_subtype_val.comp
-        (continuous_subtype_val.comp continuous_subtype_val)
+    refine ⟨e₁.trans (windowTraceHomeomorph p F ϖ hp n (rationalOpen D'.T D'.s) G₂
+      (by rw [hG₂eq, hIM, hRT]))⟩
 
 
 /-- **THE ADIC FARGUES–FONTAINE CURVE IS LOCALLY AFFINOID** (X-ADIC-1, the
