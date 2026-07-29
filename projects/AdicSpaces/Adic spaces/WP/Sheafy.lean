@@ -378,6 +378,72 @@ theorem tateExtToFlat_support (s : ℕ)
     (fun hc => hu ((wpMem_shiftWeight_iff w s u).mpr hc))
 
 variable {K w} in
+/-- The flatten hom is Gauss-restricted at radius 1 (joint cofiniteness of the
+nested coefficient families: outer nullity of the `𝒜`-coefficients, inner
+Gauss-nullity of each, glued along the slot split). -/
+theorem tateExtToFlat_isRestrictedGauss (s : ℕ)
+    (F : ↥(restrictedMvPowerSeriesSubring s (WPA K w))) :
+    MvPowerSeries.IsRestrictedGauss (fun _ : ℕ => (1 : ℝ))
+      (tateExtToFlat (K := K) (w := w) s F) := by
+  classical
+  refine Metric.tendsto_nhds.mpr fun ε hε => ?_
+  rw [Filter.eventually_cofinite]
+  have hT : {t : Fin s →₀ ℕ |
+      ε ≤ ‖(MvPowerSeries.coeff t F.1 : WPA K w)‖}.Finite := by
+    have h2 : MvPowerSeries.IsRestricted F.1 := F.2
+    have h3 := Metric.tendsto_nhds.mp h2 ε hε
+    rw [Filter.eventually_cofinite] at h3
+    refine h3.subset fun t ht => ?_
+    rw [Set.mem_setOf_eq] at ht ⊢
+    intro hc
+    rw [dist_zero_right] at hc
+    linarith
+  have hper : ∀ t : Fin s →₀ ℕ, {u : ℕ →₀ ℕ | slotInl s u = t ∧
+      ε ≤ ‖MvPowerSeries.coeff (slotInr s u)
+        ((MvPowerSeries.coeff t F.1 : WPA K w)).1.1‖}.Finite := by
+    intro t
+    have h4 : {v : ℕ →₀ ℕ | ε ≤ ‖MvPowerSeries.coeff v
+        ((MvPowerSeries.coeff t F.1 : WPA K w)).1.1‖}.Finite := by
+      have h5 := ((MvPowerSeries.coeff t F.1 : WPA K w)).1.2
+      have h6 := Metric.tendsto_nhds.mp h5 ε hε
+      rw [Filter.eventually_cofinite] at h6
+      refine h6.subset fun v hv => ?_
+      rw [Set.mem_setOf_eq] at hv ⊢
+      intro hc
+      rw [dist_zero_right,
+        show (v.prod fun _ k => (1 : ℝ) ^ k) = 1 from by simp, mul_one,
+        Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] at hc
+      linarith
+    refine Set.Finite.of_finite_image (f := fun u => slotInr s u)
+      (h4.subset ?_) ?_
+    · rintro _ ⟨u, ⟨hul, hur⟩, rfl⟩
+      exact hur
+    · intro u₁ h₁ u₂ h₂ hr
+      rw [Set.mem_setOf_eq] at h₁ h₂
+      exact slot_ext s (h₁.1.trans h₂.1.symm) hr
+  refine Set.Finite.subset (Set.Finite.biUnion hT fun t _ => hper t) ?_
+  intro u hu
+  rw [Set.mem_setOf_eq] at hu
+  have hbig : ε ≤ ‖MvPowerSeries.coeff u
+      (tateExtToFlat (K := K) (w := w) s F)‖ := by
+    by_contra hc
+    push_neg at hc
+    refine hu ?_
+    rw [dist_zero_right,
+      show (u.prod fun _ k => (1 : ℝ) ^ k) = 1 from by simp, mul_one,
+      Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
+    exact hc
+  rw [tateExtToFlat_coeff] at hbig
+  have hbig' : ε ≤ ‖MvPowerSeries.coeff (slotInr s u)
+      ((MvPowerSeries.coeff (slotInl s u) F.1 : WPA K w)).1.1‖ := hbig
+  refine Set.mem_biUnion (x := slotInl s u) ?_ ?_
+  · show ε ≤ ‖(MvPowerSeries.coeff (slotInl s u) F.1 : WPA K w)‖
+    refine le_trans hbig' ?_
+    exact norm_coeffA_le (K := K) (w := w) _ _
+  · rw [Set.mem_setOf_eq]
+    exact ⟨rfl, hbig'⟩
+
+variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex
 of restricted power series; nested-vs-flat plumbing). -/
