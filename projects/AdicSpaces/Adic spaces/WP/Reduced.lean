@@ -9,6 +9,7 @@ import «Adic spaces».AuditCleanWrappers
 import «Adic spaces».SheafyCompletionModel
 import «Adic spaces».PresheafFunctoriality
 import «Adic spaces».RingEquivPresheafTransport
+import «Adic spaces».RationalTransitivity
 import «Adic spaces».PresheafTateStructure
 
 /-!
@@ -179,13 +180,15 @@ def ChainReduced : (A : Type _) → [inst : CommRing A] → [inst : TopologicalS
   | A, _, _, _, (n + 1) => IsReduced A ∧ ∀ D : RationalLocData A, D.IsRational →
       ChainReduced (presheafValue D) n
 
+universe uCRA uCRB
+
 /-- **`ChainReduced` transports along bicontinuous ring equivalences** (the
 [WP] induction's change-of-model step; 2026-07-29 ChatGPT-5.6 route review):
 pull each rational datum back along `e.symm`, apply the chain hypothesis there,
 and move the completed localizations across `presheafValueRingEquivOfRingEquiv`
 using the valid-datum roundtrip. -/
 theorem chainReduced_of_ringEquiv (n : ℕ) :
-    ∀ {A : Type u_A} {B : Type u_B} [CommRing A] [TopologicalSpace A]
+    ∀ {A : Type uCRA} {B : Type uCRB} [CommRing A] [TopologicalSpace A]
       [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTateRing B]
       (e : A ≃+* B), Continuous ⇑e → Continuous ⇑e.symm →
       ChainReduced A n → ChainReduced B n := by
@@ -243,7 +246,10 @@ theorem exists_transitivity_WPA (ϖ : Uniformizer K)
     (E : RationalLocData (presheafValue D)) (hE : E.IsRational) :
     ∃ (F : RationalLocData (WPA K w)) (_ : F.IsRational)
       (e : presheafValue E ≃+* presheafValue F),
-      Continuous ⇑e ∧ Continuous ⇑e.symm := by sorry
+      Continuous ⇑e ∧ Continuous ⇑e.symm := by
+  classical
+  haveI : HasLocLiftPowerBounded (WPA K w) := hasLocLiftPowerBounded_faithful
+  exact ValuationSpectrum.exists_rationalLocalization_transitivity D hD E hE
 
 variable {K w} in
 /-- **Rational stable reducedness of `𝒜`, conditionally on the head input**
