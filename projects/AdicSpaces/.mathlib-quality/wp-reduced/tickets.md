@@ -671,6 +671,21 @@ propext/Classical.choice/Quot.sound) before marking done.
   cover to the maximal-pair subspace, do NOT identify U with it);
   (iv) per-piece model-compatibility squares (restriction maps vs coeffLocEquiv).
   Sources: [WP] 1135–1218.
+- **(ii)+(iii) DONE 2026-07-29**: PushedHeadData structure + nonempty + .cover
+  (RationalCoveringData on the head via the pullback) + .cover_isRational — all
+  first-try compiles, committed.
+- **(iv) design (2026-07-29)**: the compat square via the QHead-level restriction
+  `qRestrict := headLocEquiv-i ∘ restrictionMapHom-head(P.cover.hsubset) ∘
+  headLocEquiv-b.symm : QHead DHb →+* QHead (DHp D)` (nonexpansiveness for
+  TailC0.map from the model isometries; twist-compat qRestrict rhoQ-b = rhoQ-i
+  via the canonicalMap-laws on W-images); the naturality square
+  `TailC0.map qRestrict ∘ coeffLocEquiv-b = coeffLocEquiv-i ∘ restriction` by the
+  density equalizer (both continuous ring homs agree on canonicalMap-images:
+  coeffLocEquiv_canonicalMap_headIncl + restrictionMapHom_canonicalMap_generic).
+  **W21-injectivity walk** (needs (iv)): z vanishing on pieces → model
+  coefficients q_mu ∈ QHead DHb have all P.cover-restrictions vanishing (the
+  square) → transport along headLocEquiv-b.symm to presheafValue DHb →
+  isSheafy_WPHead.separationSub at P.cover gives q_mu = 0 → e_base z = 0 → z = 0.
 - Decls: `productRestrictionSub_isEmbedding_WPA`.
 - Sketch: injectivity: a section vanishing on all pieces has all coefficientwise
   head restrictions vanishing on the pushed head cover (W18 models + head
