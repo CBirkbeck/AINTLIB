@@ -66,6 +66,48 @@ noncomputable def LinearMap.baseChangeHomologyEquiv_of_flat
     f g h A (kerBaseChangeComparison_bijective_of_flat A g)
   exact eTensor.trans eRange |>.trans eHomology
 
+/-- Under flat scalar extension, exactness of a pair is equivalent to vanishing of the
+tensor extension of its explicit homology. -/
+theorem LinearMap.baseChange_exact_iff_subsingleton_tensor_homology_of_flat
+    {P Q T : Type v}
+    [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
+    [Module R P] [Module R Q] [Module R T]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    (A : Type w) [CommRing A] [Algebra R A] [Module.Flat R A] :
+    Function.Exact (f.baseChange A) (g.baseChange A) ↔
+      Subsingleton
+        (A ⊗[R]
+          (LinearMap.ker g ⧸
+            LinearMap.range
+              (LinearMap.codRestrictToKer f g h))) := by
+  let S := ShortComplex.moduleCatMk
+    (f.baseChange A) (g.baseChange A)
+    (LinearMap.baseChange_comp_eq_zero f g h A)
+  let e := LinearMap.baseChangeHomologyEquiv_of_flat f g h A
+  constructor
+  · intro hexact
+    have hS : S.Exact :=
+      (ShortComplex.ShortExact.moduleCat_exact_iff_function_exact S).mpr
+        hexact
+    have hzero : Limits.IsZero S.homology :=
+      (S.exact_iff_isZero_homology).mp hS
+    have hsub : Subsingleton S.homology :=
+      ModuleCat.isZero_iff_subsingleton.mp hzero
+    exact (Equiv.subsingleton_congr e.toEquiv).mpr hsub
+  · intro hsub
+    letI : Subsingleton
+        (A ⊗[R]
+          (LinearMap.ker g ⧸
+            LinearMap.range
+              (LinearMap.codRestrictToKer f g h))) := hsub
+    letI : Subsingleton S.homology :=
+      (Equiv.subsingleton_congr e.toEquiv).mp inferInstance
+    have hzero : Limits.IsZero S.homology :=
+      ModuleCat.isZero_iff_subsingleton.mpr inferInstance
+    exact
+      (ShortComplex.ShortExact.moduleCat_exact_iff_function_exact S).mp
+        ((S.exact_iff_isZero_homology).mpr hzero)
+
 /-- Exactness of a pair with finite homology after localization at a prime spreads to a
 principal neighborhood of that prime. -/
 theorem LinearMap.exists_away_baseChange_exact_of_localizationAtPrime_of_finite_homology
@@ -87,22 +129,9 @@ theorem LinearMap.exists_away_baseChange_exact_of_localizationAtPrime_of_finite_
   let H :=
     LinearMap.ker g ⧸
       LinearMap.range (LinearMap.codRestrictToKer f g h)
-  let Sp := ShortComplex.moduleCatMk
-    (f.baseChange (Localization.AtPrime p))
-    (g.baseChange (Localization.AtPrime p))
-    (LinearMap.baseChange_comp_eq_zero f g h
-      (Localization.AtPrime p))
-  have hSp : Sp.Exact :=
-    (ShortComplex.ShortExact.moduleCat_exact_iff_function_exact Sp).mpr
-      hexact
-  have hzero : Limits.IsZero Sp.homology :=
-    (Sp.exact_iff_isZero_homology).mp hSp
-  letI : Subsingleton Sp.homology :=
-    ModuleCat.isZero_iff_subsingleton.mp hzero
-  let ep := LinearMap.baseChangeHomologyEquiv_of_flat
-    f g h (Localization.AtPrime p)
   letI : Subsingleton ((Localization.AtPrime p) ⊗[R] H) :=
-    (Equiv.subsingleton_congr ep.toEquiv).mpr inferInstance
+    (LinearMap.baseChange_exact_iff_subsingleton_tensor_homology_of_flat
+      f g h (Localization.AtPrime p)).mp hexact
   letI : Subsingleton (LocalizedModule p.primeCompl H) :=
     (LocalizedModule.equivTensorProduct
       p.primeCompl H).toEquiv.subsingleton_congr.mpr inferInstance
@@ -111,22 +140,9 @@ theorem LinearMap.exists_away_baseChange_exact_of_localizationAtPrime_of_finite_
   have htensor : Subsingleton (Localization.Away r ⊗[R] H) :=
     (LocalizedModule.equivTensorProduct
       (Submonoid.powers r) H).toEquiv.subsingleton_congr.mp haway
-  let Sr := ShortComplex.moduleCatMk
-    (f.baseChange (Localization.Away r))
-    (g.baseChange (Localization.Away r))
-    (LinearMap.baseChange_comp_eq_zero f g h
-      (Localization.Away r))
-  let er := LinearMap.baseChangeHomologyEquiv_of_flat
-    f g h (Localization.Away r)
-  letI : Subsingleton (Localization.Away r ⊗[R] H) := htensor
-  letI : Subsingleton Sr.homology :=
-    (Equiv.subsingleton_congr er.toEquiv).mp inferInstance
-  have hzeroAway : Limits.IsZero Sr.homology :=
-    ModuleCat.isZero_iff_subsingleton.mpr inferInstance
-  have hSr : Sr.Exact :=
-    (Sr.exact_iff_isZero_homology).mpr hzeroAway
   exact ⟨r, hr,
-    (ShortComplex.ShortExact.moduleCat_exact_iff_function_exact Sr).mp hSr⟩
+    (LinearMap.baseChange_exact_iff_subsingleton_tensor_homology_of_flat
+      f g h (Localization.Away r)).mpr htensor⟩
 
 /-- Flat scalar extension preserves finite generation of the homology of a short complex of
 modules. -/
