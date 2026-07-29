@@ -33,7 +33,9 @@ noncomputable def moduleCechTopSectionsAugmentation :
   (moduleCechAugmentation F U).hom.app (op ⊤) ≫
     (moduleCechTermTopSectionsIso F U 0).hom
 
-private theorem moduleCechTopSectionsAugmentation_π
+/-- The projection of the top-sections Cech augmentation to one cover member
+is the ordinary restriction map. -/
+theorem moduleCechTopSectionsAugmentation_π
     (i : Fin 1 → ι) :
     moduleCechTopSectionsAugmentation F U ≫
         Pi.π (fun j : Fin 1 → ι =>
