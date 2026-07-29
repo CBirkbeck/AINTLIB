@@ -1312,11 +1312,13 @@ theorem tendsto_gaussTermF_alocToWittF {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ 
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hgeo
     (fun n => zero_le) hbound
 
-/-- Approximants are eventually within any prescribed value of their target. -/
-theorem eventually_valued_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+/-- **Closed value balls are neighbourhoods.** For every `ε > 0`, the set
+`{z | v (z - x) ≤ ε}` is a neighbourhood of `x`. The witness is `v(pᴺ) = ρᴺ < ε`: it is a
+nonzero element of the value group, so the open ball it cuts out sits inside the closed
+`ε`-ball. -/
+theorem valued_ball_mem_nhds {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (x : hatK p F hρ0 hρ1) {ε : NNReal} (hε : 0 < ε) :
-    ∀ᶠ u in Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x),
-      Valued.v (AlocToHatK p F ϖ hρ0 hρ1 u - x) ≤ ε := by
+    {z : hatK p F hρ0 hρ1 | Valued.v (z - x) ≤ ε} ∈ nhds x := by
   obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one hε hρ1
   set z₀ : hatK p F hρ0 hρ1 := toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ N) with hz₀
   have hvz₀ : Valued.v z₀ = ρ ^ N := by
@@ -1345,17 +1347,25 @@ theorem eventually_valued_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       (Valued.v).restrict (z - x) < γ.1} ∈ nhds x := by
     rw [Valued.mem_nhds]
     exact ⟨γ, fun z hz => hz⟩
-  refine Filter.eventually_comap.mpr (Filter.Eventually.mono hball ?_)
-  intro z hz u hu
+  refine Filter.mem_of_superset hball ?_
+  intro z hz
   have hcast : (Units.mk0 ((Valued.v).restrict z₀) hrne).1
       = (Valued.v).restrict z₀ := rfl
-  rw [hγ, hcast] at hz
+  rw [Set.mem_setOf_eq, hγ, hcast] at hz
   have hlt : Valued.v (z - x) < Valued.v z₀ :=
     (Valuation.restrict_lt_iff (v := (Valued.v :
       Valuation (hatK p F hρ0 hρ1) NNReal))).mp hz
-  rw [hu]
   rw [hvz₀] at hlt
   exact le_of_lt (lt_of_lt_of_le hlt hN.le)
+
+/-- Approximants are eventually within any prescribed value of their target. -/
+theorem eventually_valued_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (x : hatK p F hρ0 hρ1) {ε : NNReal} (hε : 0 < ε) :
+    ∀ᶠ u in Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x),
+      Valued.v (AlocToHatK p F ϖ hρ0 hρ1 u - x) ≤ ε :=
+  Filter.eventually_comap.mpr
+    (Filter.Eventually.mono (valued_ball_mem_nhds p F x hε)
+      fun _ hz _ hu => by rw [hu]; exact hz)
 
 /-- **Limit coordinates decay** (the decay-closure crux applied to `A^r`): for every
 `x ∈ A^r` the scaled limit coordinates `ρⁿ·|xₙ|` tend to `0`. The proof perturbs a
@@ -1444,45 +1454,8 @@ theorem tendsto_gaussTerm_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ 
 theorem eventually_valued_sub_le_of_tendsto {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {ι : Type*} {l : Filter ι} {g : ι → hatK p F hρ0 hρ1} {y : hatK p F hρ0 hρ1}
     (hg : Filter.Tendsto g l (nhds y)) {ε : NNReal} (hε : 0 < ε) :
-    ∀ᶠ i in l, Valued.v (g i - y) ≤ ε := by
-  obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one hε hρ1
-  set z₀ : hatK p F hρ0 hρ1 := toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ N) with hz₀
-  have hvz₀ : Valued.v z₀ = ρ ^ N := by
-    rw [hz₀, valued_toHatK]
-    have h0 : gaussValue p F ρ ((p : Ainf p F) ^ N)
-        = (gaussValue p F ρ (p : Ainf p F)) ^ N := map_pow (gaussVal p F hρ0 hρ1) _ N
-    rw [h0]
-    congr 1
-    calc gaussValue p F ρ (p : Ainf p F)
-        = gaussValue p F ρ ((p : Ainf p F) * 1) := by rw [mul_one]
-      _ = ρ * gaussValue p F ρ 1 := gaussValue_p_mul p F hρ1.le 1
-      _ = ρ := by rw [gaussValue_one p F hρ1.le, mul_one]
-  have hvz₀ne : Valued.v z₀ ≠ 0 := by
-    rw [hvz₀]
-    exact (pow_pos hρ0 N).ne'
-  have hrne : (Valued.v).restrict z₀ ≠ 0 := by
-    refine fun h0 => hvz₀ne ?_
-    rcases eq_or_ne (Valued.v z₀) 0 with h | h
-    · exact h
-    · exact absurd ((Valuation.restrict_pos_iff (v := (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal)) z₀).mpr (pos_iff_ne_zero.mpr h))
-        (by rw [h0]; exact lt_irrefl 0)
-  set γ : (MonoidWithZeroHom.ValueGroup₀ (.ofClass (Valued.v :
-      Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ := Units.mk0 _ hrne with hγ
-  have hball : ∀ᶠ z in nhds y, (Valued.v).restrict (z - y) < γ.1 := by
-    have h1 : {z : hatK p F hρ0 hρ1 | (Valued.v).restrict (z - y) < γ.1} ∈ nhds y := by
-      rw [Valued.mem_nhds]
-      exact ⟨γ, fun z hz => hz⟩
-    exact h1
-  refine (hg.eventually hball).mono fun i hi => ?_
-  have hcast : (Units.mk0 ((Valued.v).restrict z₀) hrne).1
-      = (Valued.v).restrict z₀ := rfl
-  rw [hγ, hcast] at hi
-  have hlt : Valued.v (g i - y) < Valued.v z₀ :=
-    (Valuation.restrict_lt_iff (v := (Valued.v :
-      Valuation (hatK p F hρ0 hρ1) NNReal))).mp hi
-  rw [hvz₀] at hlt
-  exact le_of_lt (lt_of_lt_of_le hlt hN.le)
+    ∀ᶠ i in l, Valued.v (g i - y) ≤ ε :=
+  hg.eventually (valued_ball_mem_nhds p F y hε)
 
 /-- **The series realization** (T903 step 5; Kedlaya (2.2.1) on the completion,
 existence direction): every element of `A^r` is `Φ` of its limit coordinates,

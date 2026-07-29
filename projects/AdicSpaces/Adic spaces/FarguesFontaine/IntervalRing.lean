@@ -216,18 +216,6 @@ theorem BISub_snd_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ
     exact ⟨x, rfl⟩
   exact closure_mono hsub (himg ⟨z, hz', rfl⟩)
 
-/-- Value balls around a point are neighborhoods. -/
-theorem valued_ball_mem_nhds {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
-    (z : hatK p F hρ0 hρ1) {ε : NNReal} (hε : 0 < ε) :
-    {w : hatK p F hρ0 hρ1 | Valued.v (w - z) ≤ ε} ∈ nhds z := by
-  have hcont : ContinuousAt (fun w : hatK p F hρ0 hρ1 => w - z) z :=
-    (continuous_id.sub continuous_const).continuousAt
-  have h0 : {y : hatK p F hρ0 hρ1 | Valued.v y ≤ ε}
-      ∈ nhds ((fun w : hatK p F hρ0 hρ1 => w - z) z) := by
-    rw [show (fun w : hatK p F hρ0 hρ1 => w - z) z = 0 from sub_self z]
-    exact valued_ball_mem_nhds_zero p F (hρ0 := hρ0) (hρ1 := hρ1) hε
-  exact hcont h0
-
 /-- **Quantitative density**: every element of `B^I` is `wI`-approximated by the image
 of `Bloc`. -/
 theorem exists_BIProd_wI_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}

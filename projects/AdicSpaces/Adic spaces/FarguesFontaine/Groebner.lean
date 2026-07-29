@@ -52,48 +52,12 @@ variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 variable (ϖ : PseudoUniformizer F)
 
-/-- Closed value balls in `hatK` are neighborhoods of `0`. -/
+/-- Closed value balls in `hatK` are neighborhoods of `0`: the `x = 0` case of
+`valued_ball_mem_nhds`. -/
 theorem valued_ball_mem_nhds_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {ε : NNReal} (hε : 0 < ε) :
     {z : hatK p F hρ0 hρ1 | Valued.v z ≤ ε} ∈ nhds (0 : hatK p F hρ0 hρ1) := by
-  obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one hε hρ1
-  set z₀ : hatK p F hρ0 hρ1 := toHatK p F hρ0 hρ1 ((p : Ainf p F) ^ N) with hz₀
-  have hvz₀ : Valued.v z₀ = ρ ^ N := by
-    rw [hz₀, valued_toHatK]
-    have h0 : gaussValue p F ρ ((p : Ainf p F) ^ N)
-        = (gaussValue p F ρ (p : Ainf p F)) ^ N := map_pow (gaussVal p F hρ0 hρ1) _ N
-    rw [h0]
-    congr 1
-    calc gaussValue p F ρ (p : Ainf p F)
-        = gaussValue p F ρ ((p : Ainf p F) * 1) := by rw [mul_one]
-      _ = ρ * gaussValue p F ρ 1 := gaussValue_p_mul p F hρ1.le 1
-      _ = ρ := by rw [gaussValue_one p F hρ1.le, mul_one]
-  have hvz₀ne : Valued.v z₀ ≠ 0 := by
-    rw [hvz₀]
-    exact (pow_pos hρ0 N).ne'
-  have hrne : (Valued.v).restrict z₀ ≠ 0 := by
-    refine fun h0 => hvz₀ne ?_
-    rcases eq_or_ne (Valued.v z₀) 0 with h | h
-    · exact h
-    · exact absurd ((Valuation.restrict_pos_iff (v := (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal)) z₀).mpr (pos_iff_ne_zero.mpr h))
-        (by rw [h0]; exact lt_irrefl 0)
-  set γ : (MonoidWithZeroHom.ValueGroup₀ (.ofClass (Valued.v :
-      Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ := Units.mk0 _ hrne with hγ
-  have hball : {z : hatK p F hρ0 hρ1 |
-      (Valued.v).restrict (z - 0) < γ.1} ∈ nhds (0 : hatK p F hρ0 hρ1) := by
-    rw [Valued.mem_nhds]
-    exact ⟨γ, fun z hz => hz⟩
-  refine Filter.mem_of_superset hball ?_
-  intro z hz
-  have hcast : (Units.mk0 ((Valued.v).restrict z₀) hrne).1
-      = (Valued.v).restrict z₀ := rfl
-  rw [Set.mem_setOf_eq, hγ, hcast, sub_zero] at hz
-  have hlt : Valued.v z < Valued.v z₀ :=
-    (Valuation.restrict_lt_iff (v := (Valued.v :
-      Valuation (hatK p F hρ0 hρ1) NNReal))).mp hz
-  rw [hvz₀] at hlt
-  exact le_of_lt (lt_of_lt_of_le hlt hN.le)
+  simpa using valued_ball_mem_nhds p F (0 : hatK p F hρ0 hρ1) hε
 
 /-- Every neighborhood of `0` in `hatK` contains a closed value ball. -/
 theorem exists_valued_ball_subset {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}

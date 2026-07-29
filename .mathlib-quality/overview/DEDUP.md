@@ -96,6 +96,39 @@ which is a defect in itself. Deleted; its single call site now uses the theorem.
 After D9 there is **no same-body duplication left anywhere in the folder**, under
 either normalisation.
 
+### D10 — `valued_ball_mem_nhds`: one fact living in three files
+
+The repeated-block scan flagged a 24-line block shared by `ArCompletion.lean` (×2) and
+`Groebner.lean`. Following it up turned out to expose a three-way split of a single fact:
+
+| File | What it had | Import order |
+|---|---|---|
+| `ArCompletion` | the ball construction **inlined twice**, inside `eventually_valued_sub_le` and `eventually_valued_sub_le_of_tendsto` | earliest |
+| `Groebner` | `valued_ball_mem_nhds_zero` — the construction, centred at `0` | via Euclidean |
+| `IntervalRing` | `valued_ball_mem_nhds` — the general centre, derived from the `0` case by translating along `w ↦ w - z` | via Groebner |
+
+ArCompletion inlined the argument twice **because the named lemma lived in files that
+come after it**. The fix inverts the dependency: the construction is done once, for a
+general centre, in ArCompletion (the earliest of the three), and the two special cases
+become corollaries.
+
+* `ArCompletion.valued_ball_mem_nhds` — the general statement, proved directly.
+* `Groebner.valued_ball_mem_nhds_zero` — now `by simpa using valued_ball_mem_nhds …`
+  (42 lines → 6). Its 5 consumers are untouched.
+* `IntervalRing.valued_ball_mem_nhds` — deleted as redundant; its 6 consumers now
+  resolve to ArCompletion's identical statement.
+* ArCompletion's two theorems became 2-line and 1-line term proofs.
+
+Two things worth remembering from this one:
+
+1. **The first attempt deleted an unrelated theorem.** The replacement range spanned
+   both target theorems, but `tendsto_gaussTerm_teichCoeffAr` sits *between* them. The
+   build caught it. Ranges spanning more than one declaration must be split.
+2. **The lemma already existed under the name I was about to introduce.** IntervalRing's
+   `valued_ball_mem_nhds` has a byte-identical statement, in the same namespace — a
+   silent collision. Always grep the intended name across the folder before adding it,
+   not just the concept.
+
 ## Scan 3 — repeated blocks *inside* proofs
 
 Whole-declaration scans miss copy-paste that lives inside proof bodies. Indexed every
