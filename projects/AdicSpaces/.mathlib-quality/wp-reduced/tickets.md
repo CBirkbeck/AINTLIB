@@ -1139,7 +1139,15 @@ propext/Classical.choice/Quot.sound) before marking done.
   final glue). RECON RESOLVED (hrw-decomposition "subring-coding
   simplification"): Q = WPHead K (fun _ => 0) N exactly; the embedding IS
   Subring.inclusion. (i) DONE: `wpHeadSupport_le_zero_weight`
-  (HeadReduced.lean). NEXT (ii): the finiteness route via the EVEN subring —
+  (HeadReduced.lean). (ii) DONE 2026-07-30: `parityExp/parityMonomialZ/
+  paritySlice/headSeries/parity_decomposition/module_finite_zero_head` —
+  direct parity-splitting (the even-subring detour was unnecessary);
+  gotchas: split_ifs splits ALL ifs (use by_cases per if); rw-if_neg's
+  side-goal ordering (provide the ¬-proof inline); set-with-hEt cannot be
+  rewritten under dependent ⟨Et, proof⟩-pairs (state a membership iff up
+  front); coeff-of-raw-fun-series show-idiom works (MvPowerSeries = function
+  type); Restricted-coe is opaque — use a .1.1-projection RingHom
+  (headSeries). Earlier note about the even-subring route kept for reference:
   Heads.lean already has wpEvenSupport (T_N = K⟨W,Z⟩, WEIGHT-INDEPENDENT:
   even exponents have wpWeight 0) + evenSupportEquiv (≅ Tate algebra
   P K (N+1), isometric) + halve/unhalve; the paper's finite-stage-normal-form
