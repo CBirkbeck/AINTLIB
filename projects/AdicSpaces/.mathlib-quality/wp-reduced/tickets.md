@@ -621,7 +621,30 @@ propext/Classical.choice/Quot.sound) before marking done.
   `isUniform_of_ringEquiv` (FiniteJetChart:1537).  Sources: [WP] 928–943.
 
 ### [W21] Sheafy.lean I — the embedding field
-- Status: open | File: WP/Sheafy.lean | Depends: W18 | Parallel: with W22
+- Status: open | File: WP/Sheafy.lean | Depends: W18, W21a | Parallel: with W22
+- **Recon note (2026-07-29)**: the FJP template
+  (SheafTransfer:83 productRestrictionSub_injective_JetA + :667 embedding) pushes
+  the vanishing section to the Milnor-pair components via PUSHED COVERINGS + their
+  separations. The WP-analogue needs the pushed HEAD cover — shared W21/W22
+  infrastructure, split out as W21a below. The embedding-half (OMT assembly:
+  sectionEqualizer_isClosed + isInducing_of_closedRange_of_topNilpUnit +
+  countably-generated uniformity) transfers near-verbatim at A := WPA once
+  injectivity is in hand.
+
+### [W21a] The pushed head cover (shared W21/W22 infrastructure)
+- Status: open | File: WP/Sheafy.lean | Depends: W18
+- Decls (planned): (i) `nonempty_headModelData_family` — common stage M for ALL
+  data of a finite rational covering (iterate W18's perturbation at a common
+  precision; alternatively upcast per-datum models along N ≤ M — needs a
+  HeadModelData stage-upcast: castHead-transport of QHead/TailC0 along
+  wpHeadSupport_mono, possibly easier to re-run W18 with a floor stage M);
+  (ii) the pushed covering data on WPHead M (base + pieces), rationality;
+  (iii) the covering property on Spa(head) via the split spectrum map
+  ([WP] eq:split-spectrum-map — the isometric pair rho_M/iota gives a section of
+  Spa(E,E°) → Spa(P_M,P_M°); the paper warns: work with the restriction of the
+  cover to the maximal-pair subspace, do NOT identify U with it);
+  (iv) per-piece model-compatibility squares (restriction maps vs coeffLocEquiv).
+  Sources: [WP] 1135–1218.
 - Decls: `productRestrictionSub_isEmbedding_WPA`.
 - Sketch: injectivity: a section vanishing on all pieces has all coefficientwise
   head restrictions vanishing on the pushed head cover (W18 models + head
