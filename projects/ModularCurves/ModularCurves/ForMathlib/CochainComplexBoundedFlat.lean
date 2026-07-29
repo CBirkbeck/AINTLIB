@@ -429,6 +429,62 @@ theorem
     LinearMap.exact_of_bounded_flat_residueField_baseChange_exact_of_finite_homology
       M d N hcomp hfinite hresidueLocal q hq
 
+/-- Exactness of all residue-fibre pairs in a bounded flat cochain complex with finite
+homology spreads to one common principal neighborhood. -/
+theorem
+  HomologicalComplex.exists_away_functionExact_of_residueField_exact_of_finite_homology
+    (C : CochainComplex (ModuleCat.{v} R) ℕ)
+    [∀ q, Module.Flat R (C.X q)]
+    [∀ q, Module.Finite R (C.homology q)]
+    (N : ℕ) [Subsingleton (C.X (N + 1))]
+    (p : Ideal R) [p.IsPrime]
+    (hresidue : ∀ q, q < N →
+      Function.Exact
+        ((C.d q (q + 1)).hom.baseChange p.ResidueField)
+        ((C.d (q + 1) (q + 2)).hom.baseChange p.ResidueField)) :
+    ∃ r : R, r ∉ p ∧
+      ∀ q, q < N →
+        Function.Exact
+          ((C.d q (q + 1)).hom.baseChange (Localization.Away r))
+          ((C.d (q + 1) (q + 2)).hom.baseChange
+            (Localization.Away r)) := by
+  let M : ℕ → Type v := fun i ↦ C.X i
+  let d : ∀ i, M i →ₗ[R] M (i + 1) :=
+    fun i ↦ (C.d i (i + 1)).hom
+  have hcomp : ∀ i, d (i + 1) ∘ₗ d i = 0 := by
+    intro i
+    exact shortComplexModuleCatCompEqZero
+      (C.sc' i (i + 1) (i + 2))
+  have hfinite : ∀ i, i < N →
+      Module.Finite R
+        (LinearMap.ker (d (i + 1)) ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer
+              (d i) (d (i + 1)) (hcomp i))) := by
+    intro i _
+    let S := C.sc' i (i + 1) (i + 2)
+    have hprev : (ComplexShape.up ℕ).prev (i + 1) = i :=
+      CochainComplex.prev_nat_succ i
+    have hnext : (ComplexShape.up ℕ).next (i + 1) = i + 2 := by
+      rw [CochainComplex.next]
+      omega
+    letI : Module.Finite R S.homology :=
+      Module.Finite.equiv
+        (C.homologyIsoSc' i (i + 1) (i + 2)
+          hprev hnext).toLinearEquiv
+    exact Module.Finite.quotient_range_moduleCatToCycles S
+  have hlocal : ∀ i, i < N →
+      Function.Exact
+        ((d i).baseChange (Localization.AtPrime p))
+        ((d (i + 1)).baseChange (Localization.AtPrime p)) := by
+    intro i hi
+    exact
+      HomologicalComplex.functionExact_localizationAtPrime_of_residueField_exact_of_finite_homology
+        C N p hresidue i hi
+  exact
+    LinearMap.exists_away_baseChange_exact_of_bounded_localizationAtPrime_of_finite_homology
+      M d N hcomp hfinite p hlocal
+
 /-- Finite degree-zero homology of a cochain complex gives a finite kernel of its first
 differential. -/
 theorem HomologicalComplex.finite_kernel_zero_of_finite_homology
