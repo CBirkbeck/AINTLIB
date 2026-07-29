@@ -406,4 +406,109 @@ theorem exists_boundary_of_horizontalEdge_eq_total_boundary
     _ = (K.d n (n + 1)).f 0 β := by rw [hc]
     _ = e (n + 1) a := hea.symm
 
+private theorem exists_boundary_of_homologyπ_abCyclesMkAt_eq_zero
+    (L : CochainComplex AddCommGrpCat.{u} ℕ) (n : ℕ)
+    (x : L.X (n + 1))
+    (hx : L.d (n + 1) (n + 2) x = 0)
+    (hzero : L.homologyπ (n + 1)
+      (abCyclesMkAt L n x hx) = 0) :
+    ∃ b : L.X n, L.d n (n + 1) b = x := by
+  let S := ShortComplex.mk
+    (L.toCycles n (n + 1)) (L.homologyπ (n + 1))
+      (L.toCycles_comp_homologyπ n (n + 1))
+  have hExact : S.Exact :=
+    ShortComplex.exact_of_g_is_cokernel _
+      (L.homologyIsCokernel n (n + 1) (up_prev_succ n))
+  obtain ⟨b, hb⟩ :=
+    (S.ab_exact_iff.mp hExact) (abCyclesMkAt L n x hx) hzero
+  refine ⟨b, ?_⟩
+  have h := congrArg (fun f ↦ f b)
+    (L.toCycles_i n (n + 1))
+  have hb' := congrArg (fun z ↦ L.iCycles (n + 1) z) hb
+  simpa only [S, ConcreteCategory.comp_apply, i_abCyclesMkAt] using
+    h.symm.trans hb'
+
+/-- The horizontal-edge map is injective on homology in every positive degree
+when the corresponding positive vertical rows are exact. -/
+theorem totalUpNatHorizontalEdge_homologyMap_injective_of_positive
+    (A : CochainComplex AddCommGrpCat.{u} ℕ)
+    (e : ∀ q, A.X q ⟶ (K.X q).X 0)
+    (he : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e q ≫ (K.d q q').f 0 = A.d q q' ≫ e q')
+    (w : ∀ q, e q ≫ (K.X q).d 0 1 = 0)
+    (n : ℕ)
+    (hrowAxis : (ShortComplex.mk (e n)
+      ((K.X n).d 0 1) (w n)).Exact)
+    (hrowPositive : ∀ q p, q + p = n → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact)
+    [Mono (e (n + 1))] :
+    Function.Injective (HomologicalComplex.homologyMap
+      (K.totalUpNatHorizontalEdge A e he w) (n + 1)) := by
+  let T := K.total (.up ℕ)
+  let edge := K.totalUpNatHorizontalEdge A e he w
+  intro ξ η hξη
+  rw [← sub_eq_zero]
+  have hmapzero :
+      HomologicalComplex.homologyMap edge (n + 1) (ξ - η) = 0 := by
+    rw [map_sub, hξη, sub_self]
+  have hπ : Function.Surjective (A.homologyπ (n + 1)) :=
+    (AddCommGrpCat.epi_iff_surjective
+      (A.homologyπ (n + 1))).mp inferInstance
+  obtain ⟨ac, hac⟩ := hπ (ξ - η)
+  let a : A.X (n + 1) := A.iCycles (n + 1) ac
+  have haCycle : A.d (n + 1) (n + 2) a = 0 := by
+    have h := congrArg (fun g ↦ g ac)
+      (A.iCycles_d (n + 1) (n + 2))
+    simpa only [a, ConcreteCategory.comp_apply, AddCommGrpCat.hom_zero,
+      AddMonoidHom.zero_apply] using h
+  have hedgeCycle :
+      T.d (n + 1) (n + 2) (edge.f (n + 1) a) = 0 := by
+    have h := congrArg (fun g ↦ g a)
+      (edge.comm (n + 1) (n + 2))
+    simpa only [ConcreteCategory.comp_apply, haCycle, map_zero] using h
+  have hac' : abCyclesMkAt A n a haCycle = ac := by
+    apply (AddCommGrpCat.mono_iff_injective
+      (A.iCycles (n + 1))).mp inferInstance
+    simp only [i_abCyclesMkAt, a]
+  have hedgeClassZero :
+      T.homologyπ (n + 1)
+        (abCyclesMkAt T n (edge.f (n + 1) a) hedgeCycle) = 0 := by
+    calc
+      _ = HomologicalComplex.homologyMap edge (n + 1)
+          (A.homologyπ (n + 1)
+            (abCyclesMkAt A n a haCycle)) :=
+        (homologyMap_abCyclesMkAt edge n a haCycle hedgeCycle).symm
+      _ = HomologicalComplex.homologyMap edge (n + 1) (ξ - η) := by
+        rw [hac', hac]
+      _ = 0 := hmapzero
+  obtain ⟨b, hb⟩ :=
+    exists_boundary_of_homologyπ_abCyclesMkAt_eq_zero
+      T n (edge.f (n + 1) a) hedgeCycle hedgeClassZero
+  obtain ⟨c, hc⟩ :=
+    K.exists_boundary_of_horizontalEdge_eq_total_boundary
+      A e he w n hrowAxis hrowPositive a b hb.symm
+  have hzeroCycle : A.d (n + 1) (n + 2) (0 : A.X (n + 1)) = 0 := by
+    simp
+  have habZero : abCyclesMkAt A n 0 hzeroCycle = 0 := by
+    apply (AddCommGrpCat.mono_iff_injective
+      (A.iCycles (n + 1))).mp inferInstance
+    simp only [i_abCyclesMkAt, map_zero]
+  have haClassZero :
+      A.homologyπ (n + 1) (abCyclesMkAt A n a haCycle) = 0 := by
+    calc
+      _ = A.homologyπ (n + 1)
+          (abCyclesMkAt A n 0 hzeroCycle) :=
+        homologyπ_abCyclesMkAt_eq_of_sub_eq_boundary
+          A n a 0 haCycle hzeroCycle c
+            (by simpa only [sub_zero] using hc.symm)
+      _ = 0 := by rw [habZero, map_zero]
+  calc
+    ξ - η = A.homologyπ (n + 1) ac := hac.symm
+    _ = A.homologyπ (n + 1)
+        (abCyclesMkAt A n a haCycle) := by rw [hac']
+    _ = 0 := haClassZero
+
 end HomologicalComplex₂
