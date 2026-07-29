@@ -1,0 +1,147 @@
+import ModularCurves.ForMathlib.TotalComplexUpNatDecomposition
+import Mathlib.Algebra.Homology.ConcreteCategory
+
+/-!
+# Component elimination in first-quadrant total complexes
+
+Convert the total-cycle equation into vertical closedness of one bidegree
+component, and compute the projections of a one-bidegree correction boundary.
+-/
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
+
+universe u
+
+namespace HomologicalComplex₂
+
+variable (K : HomologicalComplex₂ AddCommGrpCat.{u} (.up ℕ) (.up ℕ))
+variable [K.HasTotal (.up ℕ)]
+
+/-- If the component immediately to the left is zero, the next component of a
+total cycle is vertically closed. -/
+theorem cycle_vertical_of_left_component_eq_zero
+    (n q p : ℕ) (hqp : q + p = n)
+    (x : (K.total (.up ℕ)).X n)
+    (hx : (K.total (.up ℕ)).d n (n + 1) x = 0)
+    (hleft : q = 0 ∨ K.πTotalUpNat (q - 1) (p + 1) n x = 0) :
+    (K.X q).d p (p + 1) (K.πTotalUpNat q p n x) = 0 := by
+  have h := congrArg (fun f ↦ f x)
+    (K.total_d_πTotalUpNat n q (p + 1) (by omega))
+  simp only [ConcreteCategory.comp_apply, hx, map_zero] at h
+  have hhorizontal :
+      (if _hq : 0 < q then
+          K.πTotalUpNat (q - 1) (p + 1) n ≫
+            (K.d (q - 1) q).f (p + 1)
+        else 0) x = 0 := by
+    split
+    · obtain hq | hleft := hleft
+      · omega
+      · simp [hleft]
+    · simp
+  rw [AddCommGrpCat.hom_add_apply, hhorizontal, zero_add] at h
+  rcases Int.units_eq_one_or ((-1 : ℤˣ) ^ q) with hs | hs
+  · simpa [hs] using h.symm
+  · simpa [hs] using h.symm
+
+/-- The vertical projection of the boundary of one bidegree component. -/
+theorem total_boundary_π_vertical
+    (n q p : ℕ) (hqp : q + p = n)
+    (b : (K.X q).X p) :
+    K.πTotalUpNat q (p + 1) (n + 1)
+        ((K.total (.up ℕ)).d n (n + 1)
+          (K.ιTotalOrZero (.up ℕ) q p n b)) =
+      ((-1 : ℤˣ) ^ q) • ((K.X q).d p (p + 1) b) := by
+  subst n
+  rw [K.ιTotalOrZero_eq (.up ℕ) q p (q + p) rfl]
+  have h := congrArg (fun f ↦ f b)
+    (K.ιTotal_d_upNat_assoc q p
+      (K.πTotalUpNat q (p + 1) (q + p + 1)))
+  calc
+    _ = (((-1 : ℤˣ) ^ q) • (K.X q).d p (p + 1)) b := by
+      simpa [ConcreteCategory.comp_apply] using h
+    _ = _ := by
+      rcases Int.units_eq_one_or ((-1 : ℤˣ) ^ q) with hs | hs
+      · simp [hs]
+      · simp [hs]
+
+/-- Multiplying a correcting component by its Koszul sign makes its vertical
+boundary project without a sign. -/
+theorem total_boundary_π_vertical_negOnePow
+    (n q p : ℕ) (hqp : q + p = n)
+    (b : (K.X q).X p) :
+    K.πTotalUpNat q (p + 1) (n + 1)
+        ((K.total (.up ℕ)).d n (n + 1)
+          (K.ιTotalOrZero (.up ℕ) q p n
+            (((-1 : ℤˣ) ^ q) • b))) =
+      (K.X q).d p (p + 1) b := by
+  rw [K.total_boundary_π_vertical n q p hqp]
+  rcases Int.units_eq_one_or ((-1 : ℤˣ) ^ q) with hs | hs
+  · simp [hs]
+  · simp [hs]
+
+/-- The horizontal projection of the boundary of one bidegree component. -/
+theorem total_boundary_π_horizontal
+    (n q p : ℕ) (hqp : q + p = n)
+    (b : (K.X q).X p) :
+    K.πTotalUpNat (q + 1) p (n + 1)
+        ((K.total (.up ℕ)).d n (n + 1)
+          (K.ιTotalOrZero (.up ℕ) q p n b)) =
+      (K.d q (q + 1)).f p b := by
+  subst n
+  rw [K.ιTotalOrZero_eq (.up ℕ) q p (q + p) rfl]
+  have h := congrArg (fun f ↦ f b)
+    (K.ιTotal_d_upNat_assoc q p
+      (K.πTotalUpNat (q + 1) p (q + p + 1)))
+  simpa [ConcreteCategory.comp_apply] using h
+
+/-- A one-bidegree correction boundary has zero projection in every strictly
+earlier horizontal degree. -/
+theorem total_boundary_π_eq_zero_of_lt
+    (n q p i j : ℕ) (hqp : q + p = n) (hij : i + j = n + 1)
+    (hi : i < q) (b : (K.X q).X p) :
+    K.πTotalUpNat i j (n + 1)
+        ((K.total (.up ℕ)).d n (n + 1)
+          (K.ιTotalOrZero (.up ℕ) q p n b)) = 0 := by
+  have h := congrArg
+    (fun f ↦ f (K.ιTotalOrZero (.up ℕ) q p n b))
+    (K.total_d_πTotalUpNat n i j hij)
+  rw [K.ιTotalOrZero_eq (.up ℕ) q p n hqp] at h ⊢
+  by_cases hi0 : 0 < i
+  · have hqi : q ≠ i - 1 := by omega
+    have hzHorizontal :
+        K.πTotalUpNat (i - 1) j n
+            (K.ιTotal (.up ℕ) q p n hqp b) = 0 := by
+      change
+        (K.ιTotal (.up ℕ) q p n hqp ≫
+          K.πTotalUpNat (i - 1) j n) b = 0
+      simp [hqi]
+    by_cases hj0 : 0 < j
+    · have hqi' : q ≠ i := by omega
+      have hzVertical :
+          K.πTotalUpNat i (j - 1) n
+              (K.ιTotal (.up ℕ) q p n hqp b) = 0 := by
+        change
+          (K.ιTotal (.up ℕ) q p n hqp ≫
+            K.πTotalUpNat i (j - 1) n) b = 0
+        simp [hqi']
+      rcases Int.units_eq_one_or ((-1 : ℤˣ) ^ i) with hs | hs
+      · simpa [hi0, hj0, hs, ConcreteCategory.comp_apply, hzHorizontal,
+          hzVertical] using h
+      · simpa [hi0, hj0, hs, ConcreteCategory.comp_apply, hzHorizontal,
+          hzVertical] using h
+    · simpa [hi0, hj0, ConcreteCategory.comp_apply, hzHorizontal] using h
+  · by_cases hj0 : 0 < j
+    · have hqi : q ≠ i := by omega
+      have hzVertical :
+          K.πTotalUpNat i (j - 1) n
+              (K.ιTotal (.up ℕ) q p n hqp b) = 0 := by
+        change
+          (K.ιTotal (.up ℕ) q p n hqp ≫
+            K.πTotalUpNat i (j - 1) n) b = 0
+        simp [hqi]
+      rcases Int.units_eq_one_or ((-1 : ℤˣ) ^ i) with hs | hs
+      · simpa [hi0, hj0, hs, ConcreteCategory.comp_apply, hzVertical] using h
+      · simpa [hi0, hj0, hs, ConcreteCategory.comp_apply, hzVertical] using h
+    · omega
+
+end HomologicalComplex₂
