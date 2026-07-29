@@ -29348,3 +29348,25 @@ map through the kernel residue field and reflects exactness by faithful
 flatness. The focused 4,356-job build, style checker, style linter, and full
 9,535-job root build pass. Both public declarations have exactly the expected
 `propext`, `Classical.choice`, and `Quot.sound` axioms.
+
+### CLAIM (rule 5, OWNER-FLW-STAGE-POLE-CECH-SPREAD,
+`state:done`,
+codex/fibrewise-weierstrass-picard-tranche3-monoidal, 2026-07-29): add
+`FibrewiseElliptic.exists_away_orderedBaseCech_exact_of_poleSheafModel`.
+For a proper, flat, locally finitely presented family over a Noetherian affine
+stage, a stage invertible sheaf whose pullback is the simple-pole sheaf, and a
+fixed finite ordered affine cover, spread the just-proved kernel-residue-field
+exactness to one principal neighborhood. Derive Noetherianity and separatedness
+of the total stage scheme internally. Reuse
+`IsInvertible.exists_away_orderedBaseCech_exact_of_residueField_exact`; add no
+option, sorry, admit, axiom, unsafe declaration, Noetherianity or other extra
+hypothesis to the final comparison, Pic-zero route, group law, alternate Cech
+construction, or duplicate spreading abstraction.
+
+**Progress (2026-07-29): DONE.** The theorem is in the root-indexed
+`EllipticCurve/PoleSheafNoetherianStageCech.lean`. It derives the total stage
+scheme's separatedness, compactness, local Noetherianity, and Noetherianity,
+then applies the landed proper-Cech residue spreading theorem to the exactness
+proved in the preceding claim. Its focused 4,582-job build, style checker,
+style linter, and full 9,535-job root build pass. Its axiom audit reports
+exactly `propext`, `Classical.choice`, and `Quot.sound`.
