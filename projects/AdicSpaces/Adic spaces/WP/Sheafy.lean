@@ -311,6 +311,35 @@ theorem qRestrict_headConst {C : RationalCoveringData (WPA K w)}
     headLocFwd_coe, headLocFwdAlg_algebraMap]
 
 variable {K w} in
+/-- Scalar scaling of the graph-model quotient norm: the easy half
+(submultiplicativity + the nonexpansive constants). -/
+theorem norm_qscale_le {M : ℕ} (DH : RationalLocData (WPHead K w M)) (c : K)
+    (q : QHead DH) :
+    ‖headConst DH (constHead K w M c) * q‖ ≤ ‖c‖ * ‖q‖ := by
+  refine le_trans (norm_mul_le _ _) ?_
+  refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg q)
+  refine le_trans (norm_headConst_le DH _) ?_
+  exact le_of_eq (by rw [norm_constHead])
+
+variable {K w} in
+/-- Exact scalar scaling of the graph-model quotient norm. -/
+theorem norm_qscale {M : ℕ} (DH : RationalLocData (WPHead K w M)) {c : K}
+    (hc0 : 0 < ‖c‖) (q : QHead DH) :
+    ‖headConst DH (constHead K w M c) * q‖ = ‖c‖ * ‖q‖ := by
+  have hcne : c ≠ 0 := fun h => by
+    rw [h, norm_zero] at hc0
+    exact lt_irrefl 0 hc0
+  refine le_antisymm (norm_qscale_le DH c q) ?_
+  have h1 := norm_qscale_le DH c⁻¹ (headConst DH (constHead K w M c) * q)
+  rw [← mul_assoc, ← map_mul, ← map_mul, inv_mul_cancel₀ hcne, map_one,
+    map_one, one_mul, norm_inv] at h1
+  calc ‖c‖ * ‖q‖
+      ≤ ‖c‖ * (‖c‖⁻¹ * ‖headConst DH (constHead K w M c) * q‖) :=
+        mul_le_mul_of_nonneg_left h1 hc0.le
+    _ = ‖headConst DH (constHead K w M c) * q‖ := by
+        rw [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hc0), one_mul]
+
+variable {K w} in
 open scoped Classical in
 /-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
 with common-stage head data transfers to a rational covering on the head, with
