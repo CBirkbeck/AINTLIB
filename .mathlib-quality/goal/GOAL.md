@@ -52,3 +52,46 @@ Largest single proofs: `wedhorn_lemma_834_propA3_part1_gluing` 450 ·
 
 ## Progress
 Full detail per file appended below as work lands.
+
+---
+
+## Task 1 — heartbeat removal
+
+### Scope corrections found while starting
+* `FarguesFontaine/RobbaCorrespondence.lean`'s 3 hits are `maxSynthPendingDepth 1` —
+  **reductions**, not raises. Not in scope. (104 -> 101)
+* `Vendored/` is third-party: William Coram's code vendored 2026-07-04 pending its own
+  mathlib PR. Modifying it would diverge from upstream and complicate that PR. Its 2 raises
+  stay, documented. (101 -> 99)
+
+### Done
+| File | raises removed | how |
+|---|---|---|
+| ExampleUnitDisc.lean | 1 | removed; proof compiles as-is |
+| LaurentOverlap.lean | 1 | required a real fix — see below |
+
+### TECHNIQUE: typed `have` + forward rewriting beats goal rewriting
+`LaurentOverlap.TA_B_bivariate_to_outerQuotient_evalHom₂_one_sub_algMap_b_Y_eq_zero`
+timed out at `isDefEq` (200k) once the raise came off.  The cost was
+`rw [show (1 : _) = Ideal.Quotient.mk I 1 from rfl]` on the GOAL: that makes the elaborator
+search the goal for a `1` and check it defeq to `mk 1`, across a Tate algebra over a
+quotient.  Swapping the `rfl` for `← map_one` moved the timeout but did not remove it.
+
+The fix inverts the direction:
+
+    have key : mk I (1 - algebraMap _ _ (mk J X) * X) = 0 := by
+      rw [Ideal.Quotient.eq_zero_iff_mem]; unfold outerLaurentOverlapIdeal
+      exact Ideal.subset_span rfl
+    rw [map_sub, map_one, map_mul] at key      -- forward, on a pinned type
+    exact key
+
+State the identity on a LIFTED element with its type pinned by the `have`, then push the
+ring-hom maps forward through it.  Forward rewriting on a known expression has nothing to
+search.  **Compiles at default heartbeats.**
+
+Also removed: a `have h_eq : <expr> = <same expr> := rfl` followed by `rw [h_eq]` — a
+literally reflexive no-op, and part of what the elaborator was paying for.
+
+**Generalise this**: most `isDefEq` timeouts in this codebase are goal-directed rewriting
+against quotient/algebraMap chains.  Try the typed-`have`-and-push-forward shape before
+anything else.

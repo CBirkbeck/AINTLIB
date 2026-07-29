@@ -222,7 +222,6 @@ theorem gaussNorm_fin_zero {S : Type*} [NormedRing S] (g : MvPowerSeries (Fin 0)
 
 variable (R : Type*) [NormedCommRing R] [IsUltrametricDist R]
 
-set_option maxHeartbeats 800000 in
 /-- **Flattening** (generic form): if `B` is norm-isomorphic to one-variable restricted
 series over `R`, then `m`-variable restricted series over `B` are `(m+1)`-variable
 restricted series over `R`, norm-preservingly.  Stated over an abstract normed ring `B`

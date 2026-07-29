@@ -3064,7 +3064,6 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_algMap_b_sub_X_eq_zero
   rw [quotient_algebraMap_b_eq_X]
   exact sub_self _
 
-set_option maxHeartbeats 800000 in
 -- Bumped from default: backward quotient hom assembly through bivariate
 -- Laurent overlap typeclass chain requires elevated heartbeats.
 /-- Kernel lemma for `bivariateOverlapIdeal` generator `1 - algMap b · TA₂.Y`:
@@ -3087,20 +3086,19 @@ theorem TA_B_bivariate_to_outerQuotient_evalHom₂_one_sub_algMap_b_Y_eq_zero
           ((algebraMap B ↥(TateAlgebra B)) b))) *
     outerQuotient_XoutTgt b = 0
   unfold outerQuotient_XoutTgt
-  rw [quotient_algebraMap_b_eq_X, show (1 : _) =
-      Ideal.Quotient.mk (outerLaurentOverlapIdeal b) 1 from rfl,
-    ← map_mul, ← map_sub, Ideal.Quotient.eq_zero_iff_mem]
-  have h_eq : (1 : ↥(TateAlgebra (LaurentCover.B₁_gen b))) -
-      algebraMap (LaurentCover.B₁_gen b) ↥(TateAlgebra (LaurentCover.B₁_gen b))
-        ((Ideal.Quotient.mk (plusFSubXIdeal B b)) TateAlgebra.X) *
-      TateAlgebra.X =
-        (1 : ↥(TateAlgebra (LaurentCover.B₁_gen b))) -
-          algebraMap (LaurentCover.B₁_gen b) ↥(TateAlgebra (LaurentCover.B₁_gen b))
-            ((Ideal.Quotient.mk (plusFSubXIdeal B b)) TateAlgebra.X) *
-          TateAlgebra.X := rfl
-  rw [h_eq]
-  unfold outerLaurentOverlapIdeal
-  exact Ideal.subset_span rfl
+  rw [quotient_algebraMap_b_eq_X]
+  -- Build the identity on a LIFTED element with its type pinned, then push the ring-hom
+  -- maps forward through it.  Rewriting the goal instead would make the elaborator search
+  -- for a `1` to unfold as `mk 1`, which is what blew the `isDefEq` budget here.
+  have key : (Ideal.Quotient.mk (outerLaurentOverlapIdeal b))
+      ((1 : ↥(TateAlgebra (LaurentCover.B₁_gen b)))
+        - algebraMap (LaurentCover.B₁_gen b) ↥(TateAlgebra (LaurentCover.B₁_gen b))
+            ((Ideal.Quotient.mk (plusFSubXIdeal B b)) TateAlgebra.X) * TateAlgebra.X) = 0 := by
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    unfold outerLaurentOverlapIdeal
+    exact Ideal.subset_span rfl
+  rw [map_sub, map_one, map_mul] at key
+  exact key
 
 /-- **Specialized Laurent-overlap quotient bridge, backward direction**:
 `TA₂ B ⧸ bivariateOverlapIdeal b →+* TA(B₁_gen b) ⧸ outerLaurentOverlapIdeal b`.
