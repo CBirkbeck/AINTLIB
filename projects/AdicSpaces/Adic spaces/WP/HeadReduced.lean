@@ -99,6 +99,19 @@ noncomputable def headToQ (DH : RationalLocData (WPHead K w N)) :
     ((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N) (m := DH.T.card)).comp
       MvPolynomial.C)
 
+variable {K w} in
+/-- **HRW-5(i)**: weight monotonicity of the head support — the zero-weight head
+is the FULL restricted Tate algebra `K⟨W, U_{≤N}⟩`, and every weighted head sits
+inside it as a subring ([hrw-decomposition] "subring-coding simplification":
+the paper's finite embedding `Y_i ↦ W^{wᵢ}U_i, Z_i ↦ U_i²` is, in the ambient
+support coding, literally this inclusion). -/
+theorem wpHeadSupport_le_zero_weight (N : ℕ) :
+    wpHeadSupport K w N ≤ wpHeadSupport K (fun _ => 0) N := by
+  intro f hf t ht
+  refine hf t fun hh => ht ⟨?_, hh.2⟩
+  show WPMem (fun _ => 0) t
+  simp [WPMem, wpWeight]
+
 variable {K w N} in
 /-- `headToQ` is the model's constant embedding (definitional identification with
 the W15 layer). -/
