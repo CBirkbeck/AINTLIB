@@ -635,6 +635,276 @@ theorem coeffLoc_restriction_square {C : RationalCoveringData (WPA K w)}
 
 variable {K w} in
 open scoped Classical in
+/-- The head-level restriction between graph models along a pushed covering
+piece (the `headLocEquiv`-conjugated restriction map;
+[WP] eq:cover-coefficientwise's coefficient hom). -/
+noncomputable def qRestrictP {M : ℕ}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH DH' : RationalLocData (WPHead K w M)) (hDH : DH.IsRational)
+    (hDH' : DH'.IsRational)
+    (hsub : rationalOpen DH'.T DH'.s ⊆ rationalOpen DH.T DH.s) :
+    QHead DH →+* QHead DH' :=
+  ((headLocEquiv ϖ hK₀ DH' hDH').toRingHom.comp
+    (restrictionMapHom DH DH' hsub)).comp
+    (headLocEquiv ϖ hK₀ DH hDH).symm.toRingHom
+
+
+variable {K w} in
+open scoped Classical in
+/-- `qRestrict` matches the head constants (the generator law of the
+naturality square). -/
+theorem qRestrictP_headConst {M : ℕ}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH DH' : RationalLocData (WPHead K w M)) (hDH : DH.IsRational)
+    (hDH' : DH'.IsRational)
+    (hsub : rationalOpen DH'.T DH'.s ⊆ rationalOpen DH.T DH.s) (x : WPHead K w M) :
+    qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub (headConst DH x) =
+      headConst DH' x := by
+  have h1 : (headLocEquiv ϖ hK₀ DH hDH).symm (headConst DH x) =
+      DH.canonicalMap x := by
+    have h2 : headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap x) =
+        headConst DH x := by
+      rw [show headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap x) =
+        headLocFwd ϖ DH hDH (DH.canonicalMap x) from rfl,
+        show DH.canonicalMap x = DH.coeRingHom
+          (algebraMap (WPHead K w M) (Localization.Away DH.s) x) from rfl,
+        headLocFwd_coe, headLocFwdAlg_algebraMap]
+    rw [← h2, RingEquiv.symm_apply_apply]
+  show headLocEquiv ϖ hK₀ DH' hDH'
+    (restrictionMapHom DH DH' hsub
+      ((headLocEquiv ϖ hK₀ DH hDH).symm (headConst DH x))) =
+    headConst DH' x
+  rw [h1, restrictionMapHom_canonicalMap_generic]
+  rw [show headLocEquiv ϖ hK₀ DH' hDH'
+      (DH'.canonicalMap x) =
+    headLocFwd ϖ DH' hDH' (DH'.canonicalMap x) from rfl,
+    show DH'.canonicalMap x = DH'.coeRingHom
+      (algebraMap (WPHead K w M) (Localization.Away DH'.s) x)
+      from rfl,
+    headLocFwd_coe, headLocFwdAlg_algebraMap]
+
+
+variable {K w} in
+open scoped Classical in
+theorem qRestrictP_continuous {M : ℕ}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH DH' : RationalLocData (WPHead K w M)) (hDH : DH.IsRational)
+    (hDH' : DH'.IsRational)
+    (hsub : rationalOpen DH'.T DH'.s ⊆ rationalOpen DH.T DH.s) :
+    Continuous (qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub) := by
+  rw [qRestrictP, RingHom.coe_comp, RingHom.coe_comp]
+  refine Continuous.comp (Continuous.comp ?_ ?_) ?_
+  · exact headLocEquiv_continuous ϖ hK₀ DH' hDH'
+  · letI : UniformSpace (Localization.Away DH.s) := DH.uniformSpace
+    letI : IsTopologicalRing (Localization.Away DH.s) :=
+      DH.isTopologicalRing
+    letI : IsUniformAddGroup (Localization.Away DH.s) :=
+      DH.isUniformAddGroup
+    exact UniformSpace.Completion.continuous_extension
+  · exact headLocEquiv_symm_continuous ϖ hK₀ DH hDH
+
+variable {K w} in
+open scoped Classical in
+/-- The head restriction is bounded (continuity at `0` + the exact
+nonarchimedean window scaling with `ℤ`-powers of the window constant). -/
+theorem qRestrictP_bound {M : ℕ}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH DH' : RationalLocData (WPHead K w M)) (hDH : DH.IsRational)
+    (hDH' : DH'.IsRational)
+    (hsub : rationalOpen DH'.T DH'.s ⊆ rationalOpen DH.T DH.s) :
+    ∃ Cb : ℝ, 0 < Cb ∧ ∀ q : QHead DH,
+      ‖qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub q‖ ≤ Cb * ‖q‖ := by
+  classical
+  obtain ⟨c, hcu, hc1, hc0⟩ := exists_norm_window' K
+  have hcne : c ≠ 0 := fun h => by
+    rw [h, norm_zero] at hc0
+    exact lt_irrefl 0 hc0
+  have hcRne : ‖c‖ ≠ 0 := ne_of_gt hc0
+  have hcont := (qRestrictP_continuous ϖ hK₀ DH DH' hDH hDH' hsub).tendsto 0
+  rw [map_zero] at hcont
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp
+    (hcont (Metric.ball_mem_nhds 0 one_pos))
+  refine ⟨1 / (‖c‖ * δ), by positivity, fun q => ?_⟩
+  rcases eq_or_lt_of_le (norm_nonneg q) with hq0 | hq0
+  · rw [show q = 0 from by rw [← norm_eq_zero]; exact hq0.symm, map_zero,
+      norm_zero, norm_zero, mul_zero]
+  have hinv1 : (1 : ℝ) < ‖c‖⁻¹ := (one_lt_inv₀ hc0).mpr hc1
+  obtain ⟨n, hn⟩ := exists_mem_Ico_zpow
+    (x := ‖q‖ / δ) (by positivity) hinv1
+  rw [Set.mem_Ico] at hn
+  -- upper: ‖c‖^(n+1)·‖q‖ < δ
+  have hupper : ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ < δ := by
+    have h2 := hn.2
+    rw [div_lt_iff₀ hδ0] at h2
+    have h3 := mul_lt_mul_of_pos_left h2 (zpow_pos hc0 (n + 1))
+    rw [show ‖c‖ ^ (n + 1 : ℤ) * ((‖c‖⁻¹ : ℝ) ^ (n + 1 : ℤ) * δ) =
+      (‖c‖ * ‖c‖⁻¹) ^ (n + 1 : ℤ) * δ from by
+        rw [mul_zpow, mul_assoc],
+      mul_inv_cancel₀ hcRne, one_zpow, one_mul] at h3
+    exact h3
+  -- lower: δ·‖c‖ ≤ ‖c‖^(n+1)·‖q‖
+  have hlower : δ * ‖c‖ ≤ ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ := by
+    have h2 := hn.1
+    rw [le_div_iff₀ hδ0] at h2
+    have h3 := mul_le_mul_of_nonneg_left h2 (le_of_lt (zpow_pos hc0 (n + 1)))
+    rw [show ‖c‖ ^ (n + 1 : ℤ) * ((‖c‖⁻¹ : ℝ) ^ (n : ℤ) * δ) =
+      ‖c‖ ^ (n + 1 : ℤ) * (‖c‖ ^ (n : ℤ))⁻¹ * δ from by
+        rw [inv_zpow, mul_assoc],
+      show ‖c‖ ^ (n + 1 : ℤ) * (‖c‖ ^ (n : ℤ))⁻¹ =
+        ‖c‖ ^ (n + 1 - n : ℤ) from by
+        rw [zpow_sub₀ hcRne, div_eq_mul_inv],
+      show (n + 1 - n : ℤ) = 1 from by ring,
+      zpow_one] at h3
+    calc δ * ‖c‖ = ‖c‖ * δ := by ring
+      _ ≤ ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ := h3
+  -- the scaled element
+  set a : K := c ^ (n + 1 : ℤ) with ha_def
+  have hna : ‖a‖ = ‖c‖ ^ (n + 1 : ℤ) := by rw [ha_def, norm_zpow]
+  have hna0 : 0 < ‖a‖ := by rw [hna]; exact zpow_pos hc0 _
+  have hmem : ‖qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub
+      (headConst DH (constHead K w M a) * q)‖ < 1 := by
+    have h4 : headConst DH (constHead K w M a) * q ∈
+        Metric.ball (0 : QHead DH) δ := by
+      rw [Metric.mem_ball, dist_zero_right, norm_qscale DH hna0 q, hna]
+      exact hupper
+    have h5 := hball h4
+    rw [Set.mem_preimage, Metric.mem_ball, dist_zero_right] at h5
+    exact h5
+  rw [map_mul, qRestrictP_headConst,
+    norm_qscale DH' hna0 _, hna] at hmem
+  -- extract the bound
+  have hpow : (0 : ℝ) < ‖c‖ ^ (n + 1 : ℤ) := zpow_pos hc0 _
+  have h6 : ‖qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub q‖ < (‖c‖ ^ (n + 1 : ℤ))⁻¹ :=
+    calc ‖qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub q‖ = (‖c‖ ^ (n + 1 : ℤ))⁻¹ *
+          (‖c‖ ^ (n + 1 : ℤ) * ‖qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub q‖) := by
+          rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
+      _ < (‖c‖ ^ (n + 1 : ℤ))⁻¹ * 1 :=
+          mul_lt_mul_of_pos_left hmem (by positivity)
+      _ = (‖c‖ ^ (n + 1 : ℤ))⁻¹ := mul_one _
+  refine le_trans h6.le ?_
+  rw [one_div, inv_mul_eq_div, le_div_iff₀ (by positivity : (0:ℝ) < ‖c‖ * δ)]
+  calc (‖c‖ ^ (n + 1 : ℤ))⁻¹ * (‖c‖ * δ)
+      ≤ (‖c‖ ^ (n + 1 : ℤ))⁻¹ * (‖c‖ ^ (n + 1 : ℤ) * ‖q‖) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        calc ‖c‖ * δ = δ * ‖c‖ := by ring
+          _ ≤ ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ := hlower
+    _ = ‖q‖ := by rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
+
+
+variable {K w} in
+open scoped Classical in
+theorem qRestrictP_rhoQ {M : ℕ}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH DH' : RationalLocData (WPHead K w M)) (hDH : DH.IsRational)
+    (hDH' : DH'.IsRational)
+    (hsub : rationalOpen DH'.T DH'.s ⊆ rationalOpen DH.T DH.s) :
+    qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub (rhoQ DH).val = (rhoQ DH').val := by
+  rw [show (rhoQ DH).val = headConst DH (WaHead K w M) from rfl,
+    qRestrictP_headConst]
+  rfl
+
+
+variable {K w} in
+open scoped Classical in
+/-- **The bundled naturality square** ([WP] eq:cover-coefficientwise): the model
+transports of the restriction map are coefficientwise `qRestrict`. -/
+theorem coeffLoc_restriction_squareP {M : ℕ}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH DH' : RationalLocData (WPHead K w M)) (hDH : DH.IsRational)
+    (hDH' : DH'.IsRational)
+    (hsub : rationalOpen DH'.T DH'.s ⊆ rationalOpen DH.T DH.s)
+    (hlift : rationalOpen (liftDatum DH' hDH').T (liftDatum DH' hDH').s ⊆
+      rationalOpen (liftDatum DH hDH).T (liftDatum DH hDH).s) {Cb : ℝ} (hCb : 0 ≤ Cb)
+    (hb : ∀ q, ‖qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub q‖ ≤ Cb * ‖q‖) :
+    (TailC0.mapC (qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub) hb
+        (qRestrictP_rhoQ ϖ hK₀ DH DH' hDH hDH' hsub)).comp
+      (coeffLocEquiv ϖ hK₀ DH hDH).toRingHom =
+    (coeffLocEquiv ϖ hK₀ DH' hDH').toRingHom.comp
+      (restrictionMapHom (liftDatum DH hDH)
+        (liftDatum DH' hDH') hlift) := by
+  classical
+  letI := (liftDatum DH hDH).uniformSpace
+  have hdense : DenseRange (⇑(liftDatum DH hDH).coeRingHom) :=
+    @UniformSpace.Completion.denseRange_coe _
+      (liftDatum DH hDH).uniformSpace
+  -- the algebraic-layer identity
+  have halg : (TailC0.mapC (qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub) hb
+      (qRestrictP_rhoQ ϖ hK₀ DH DH' hDH hDH' hsub)).comp
+        (coeffFwdAlg ϖ DH hDH) =
+      (coeffFwd ϖ DH' hDH').comp
+        (restrictionMapAlg (liftDatum DH hDH)
+          (liftDatum DH' hDH') hlift) := by
+    refine IsLocalization.ringHom_ext
+      (Submonoid.powers (liftDatum DH hDH).s) ?_
+    ext f
+    rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply,
+      RingHom.comp_apply, coeffFwdAlg_algebraMap]
+    rw [show restrictionMapAlg (liftDatum DH hDH)
+        (liftDatum DH' hDH') hlift
+        (algebraMap (WPA K w)
+          (Localization.Away (liftDatum DH hDH).s) f) =
+      (liftDatum DH' hDH').canonicalMap f from by
+        rw [← restrictionMapHom_coe_wpa]
+        exact restrictionMapHom_canonicalMap_generic _ _ _ f]
+    rw [show (liftDatum DH' hDH').canonicalMap f =
+      (liftDatum DH' hDH').coeRingHom
+        (algebraMap (WPA K w)
+          (Localization.Away (liftDatum DH' hDH').s) f) from rfl,
+      coeffFwd_coe, coeffFwdAlg_algebraMap]
+    refine Subtype.ext (funext fun μ => ?_)
+    show qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub ((coeffBase DH f).1 μ) =
+      (coeffBase DH' f).1 μ
+    rw [show (coeffBase DH f).1 μ =
+      headConst DH ((wpaTailEquiv (K := K) (w := w) (N := M) f).1 μ)
+      from rfl, qRestrictP_headConst]
+    rfl
+  -- lift to the completions by density
+  refine RingHom.ext fun z => ?_
+  have hfun : ⇑((TailC0.mapC (qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub) hb
+      (qRestrictP_rhoQ ϖ hK₀ DH DH' hDH hDH' hsub)).comp
+        (coeffLocEquiv ϖ hK₀ DH hDH).toRingHom) =
+      ⇑((coeffLocEquiv ϖ hK₀ DH' hDH').toRingHom.comp
+        (restrictionMapHom (liftDatum DH hDH)
+          (liftDatum DH' hDH') hlift)) := by
+    refine hdense.equalizer ?_ ?_ ?_
+    · rw [RingHom.coe_comp]
+      refine Continuous.comp ?_ ?_
+      · exact AddMonoidHomClass.continuous_of_bound
+          (TailC0.mapC (qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub) hb
+            (qRestrictP_rhoQ ϖ hK₀ DH DH' hDH hDH' hsub)) Cb
+          (TailC0.norm_mapC_le _ hCb _ _)
+      · exact coeffLocEquiv_continuous ϖ hK₀ DH hDH
+    · rw [RingHom.coe_comp]
+      refine Continuous.comp ?_ ?_
+      · exact coeffLocEquiv_continuous ϖ hK₀ DH' hDH'
+      · letI : UniformSpace (Localization.Away (liftDatum DH hDH).s) :=
+          (liftDatum DH hDH).uniformSpace
+        letI : IsTopologicalRing
+            (Localization.Away (liftDatum DH hDH).s) :=
+          (liftDatum DH hDH).isTopologicalRing
+        letI : IsUniformAddGroup
+            (Localization.Away (liftDatum DH hDH).s) :=
+          (liftDatum DH hDH).isUniformAddGroup
+        exact UniformSpace.Completion.continuous_extension
+    · funext l
+      show TailC0.mapC (qRestrictP ϖ hK₀ DH DH' hDH hDH' hsub) hb (qRestrictP_rhoQ ϖ hK₀ DH DH' hDH hDH' hsub)
+        (coeffLocEquiv ϖ hK₀ DH hDH
+          ((liftDatum DH hDH).coeRingHom l)) =
+        coeffLocEquiv ϖ hK₀ DH' hDH'
+          (restrictionMapHom (liftDatum DH hDH)
+            (liftDatum DH' hDH') hlift
+            ((liftDatum DH hDH).coeRingHom l))
+      rw [show coeffLocEquiv ϖ hK₀ DH hDH
+          ((liftDatum DH hDH).coeRingHom l) =
+        coeffFwd ϖ DH hDH
+          ((liftDatum DH hDH).coeRingHom l) from rfl, coeffFwd_coe]
+      rw [restrictionMapHom_coe_wpa]
+      exact RingHom.congr_fun halg l
+  exact congrFun hfun z
+
+
+variable {K w} in
+open scoped Classical in
 /-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
 with common-stage head data transfers to a rational covering on the head, with
 subset and covering properties by the `rhoHead` pullback. -/
@@ -676,6 +946,123 @@ theorem exists_pushedHeadCover (ϖ : Uniformizer K)
     intro DH' hDH'
     obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hDH'
     exact hDHp D
+
+variable {K w} in
+open scoped Classical in
+/-- **Separation for `𝒜`** ([WP] 1135–1155): a section vanishing on all pieces
+vanishes — walk the model coefficients through the naturality square and apply
+the head separation on the pushed covering. -/
+theorem productRestrictionSub_injective_WPA (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
+    Function.Injective (productRestrictionSub (WPA K w) C) := by
+  classical
+  intro x y hxy
+  set z := x - y with hz
+  have hres : ∀ D : ↥C.covers,
+      restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) z = 0 := by
+    intro D
+    have hDx := congrFun hxy D
+    rw [hz, map_sub,
+      show restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) x =
+        productRestrictionSub (WPA K w) C x D from rfl,
+      show restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) y =
+        productRestrictionSub (WPA K w) C y D from rfl, hDx, sub_self]
+  obtain ⟨P⟩ := nonempty_pushedHeadData ϖ hK₀ C hC
+  haveI hSheafHead : ValuationSpectrum.IsSheafy (WPHead K w P.M) :=
+    isSheafy_WPHead (w := w) (N := P.M) ϖ hK₀
+  set eb := restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb with heb
+  set zb := coeffLocEquiv ϖ hK₀ P.DHb P.hDHb (eb z) with hzb
+  have hcoeff : ∀ (μ : TailIdx P.M) (D : ↥C.covers),
+      qRestrict ϖ hK₀ P D (TailC0.coeff μ zb) = 0 := by
+    intro μ D
+    obtain ⟨Cb, hCb0, hbD⟩ := qRestrict_bound ϖ hK₀ P D
+    have hzero : restrictionMapHom (liftDatum P.DHb P.hDHb)
+        (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D) (eb z) = 0 := by
+      have hc1 := congr_fun (restrictionMap_comp C.base
+        (liftDatum P.DHb P.hDHb) (liftDatum (P.DHp D) (P.hDHp D))
+        P.hopenb.le (P.lift_subset D)) z
+      have hc2 := congr_fun (restrictionMap_comp C.base D.1
+        (liftDatum (P.DHp D) (P.hDHp D)) (C.hsubset D.1 D.2)
+        (P.hopenp D).le) z
+      rw [show eb z = restrictionMapHom C.base (liftDatum P.DHb P.hDHb)
+        P.hopenb.le z from rfl]
+      rw [show restrictionMapHom (liftDatum P.DHb P.hDHb)
+          (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D)
+          (restrictionMapHom C.base (liftDatum P.DHb P.hDHb)
+            P.hopenb.le z) =
+        restrictionMap C.base (liftDatum (P.DHp D) (P.hDHp D))
+          ((P.lift_subset D).trans P.hopenb.le) z from hc1]
+      rw [show restrictionMap C.base (liftDatum (P.DHp D) (P.hDHp D))
+          ((P.lift_subset D).trans P.hopenb.le) z =
+        restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+          (P.hopenp D).le
+          (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) z)
+        from hc2.symm]
+      rw [hres D, map_zero]
+    have hsq := RingHom.congr_fun
+      (coeffLoc_restriction_square ϖ hK₀ P D hCb0.le hbD) (eb z)
+    rw [RingHom.comp_apply, RingHom.comp_apply, hzero, map_zero] at hsq
+    have h2 := congrArg (fun t => TailC0.coeff μ t) hsq
+    exact h2.trans rfl
+  have hqz : ∀ μ : TailIdx P.M, TailC0.coeff μ zb = 0 := by
+    intro μ
+    set pμ := (headLocEquiv ϖ hK₀ P.DHb P.hDHb).symm (TailC0.coeff μ zb)
+      with hpμ
+    have hpres : ∀ D' : ↥(P.cover.covers),
+        restrictionMapHom P.cover.base D'.1
+          (P.cover.hsubset D'.1 D'.2) pμ = 0 := by
+      rintro ⟨D', hD'⟩
+      obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hD'
+      have h3 := hcoeff μ D
+      rw [qRestrict, RingHom.comp_apply, RingHom.comp_apply] at h3
+      have h5 := congrArg
+        (headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm h3
+      rw [show (headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+          ((headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).toRingHom
+            (restrictionMapHom P.DHb (P.DHp D) (P.piece_subset D)
+              ((headLocEquiv ϖ hK₀ P.DHb P.hDHb).symm.toRingHom
+                (TailC0.coeff μ zb)))) =
+        restrictionMapHom P.DHb (P.DHp D) (P.piece_subset D)
+          ((headLocEquiv ϖ hK₀ P.DHb P.hDHb).symm.toRingHom
+            (TailC0.coeff μ zb)) from
+        RingEquiv.symm_apply_apply _ _, map_zero] at h5
+      exact h5
+    have h6 : productRestrictionSub (WPHead K w P.M) P.cover pμ =
+        productRestrictionSub (WPHead K w P.M) P.cover 0 := by
+      funext D'
+      rw [show productRestrictionSub (WPHead K w P.M) P.cover pμ D' =
+        restrictionMapHom P.cover.base D'.1
+          (P.cover.hsubset D'.1 D'.2) pμ from rfl, hpres D',
+        show productRestrictionSub (WPHead K w P.M) P.cover 0 D' =
+          restrictionMapHom P.cover.base D'.1
+            (P.cover.hsubset D'.1 D'.2) 0 from rfl, map_zero]
+    have h7 := ValuationSpectrum.IsSheafy.separationSub
+      (A := WPHead K w P.M) P.cover P.cover_isRational h6
+    have h7' : pμ = (0 : presheafValue P.DHb) := h7
+    have h8 := congrArg (headLocEquiv ϖ hK₀ P.DHb P.hDHb) h7'
+    rw [hpμ] at h8
+    rw [RingEquiv.apply_symm_apply, map_zero] at h8
+    exact h8
+  have hzb0 : zb = 0 := by
+    refine Subtype.ext (funext fun μ => ?_)
+    exact hqz μ
+  have hz0 : z = 0 := by
+    have h10 : coeffLocEquiv ϖ hK₀ P.DHb P.hDHb (eb z) = 0 := by
+      rw [← hzb]
+      exact hzb0
+    have h11 := congrArg (coeffLocEquiv ϖ hK₀ P.DHb P.hDHb).symm h10
+    rw [RingEquiv.symm_apply_apply, map_zero] at h11
+    have h12 := congrArg
+      (restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb).symm h11
+    rw [show (restrictionEquiv C.base (liftDatum P.DHb P.hDHb)
+        P.hopenb).symm (eb z) =
+      (restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb).symm
+        (restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb z)
+      from rfl, RingEquiv.symm_apply_apply, map_zero] at h12
+    exact h12
+  rw [hz] at hz0
+  exact sub_eq_zero.mp hz0
 
 variable {K w} in
 /-- The embedding half of the sheaf condition for `𝒜` (the
