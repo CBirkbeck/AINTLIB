@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».WP.Algebra
+import «Adic spaces».FJP.RestrictedGaussAdic
 import «Adic spaces».Presheaf
 import «Adic spaces».RelativePieceKeystone
 
@@ -399,18 +400,70 @@ namespace PerturbSetup
 
 variable [DecidableEq E]
 
+/-- The primed integral Bezout relation ([WP] lem:small-perturbation, proof):
+`∑ a_x·pert x = t^ℓ·(1 + t·h)` with `‖h‖ ≤ 1`. -/
+theorem exists_perturbed_bezout (S : PerturbSetup E) :
+    ∃ h : E, ‖h‖ ≤ 1 ∧
+      ∑ x ∈ S.D.T, S.a x * S.pert x = S.t ^ S.ℓ * (1 + S.t * h) := by
+  classical
+  have hsplit : ∑ x ∈ S.D.T, S.a x * S.pert x =
+      S.t ^ S.ℓ + ∑ x ∈ S.D.T, S.a x * (S.pert x - x) := by
+    rw [← S.hbez, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun x hx => ?_
+    ring
+  have hr : ‖∑ x ∈ S.D.T, S.a x * (S.pert x - x)‖ ≤ ‖S.t‖ ^ (S.ℓ + 1) := by
+    refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg
+      (pow_nonneg S.ht0.le _) fun x hx => ?_
+    calc ‖S.a x * (S.pert x - x)‖ ≤ ‖S.a x‖ * ‖S.pert x - x‖ := norm_mul_le _ _
+      _ ≤ 1 * ‖S.t‖ ^ (S.ℓ + 1) := by
+          exact mul_le_mul (S.ha1 x) (S.hpert x hx) (norm_nonneg _) zero_le_one
+      _ = ‖S.t‖ ^ (S.ℓ + 1) := one_mul _
+  obtain ⟨h, hh1, hEq⟩ := FiniteJet.GraphKoszul.exists_norm_le_one_eq_pow_mul
+    S.htu S.ht0 S.hscale (S.ℓ + 1) _ hr
+  refine ⟨h, hh1, ?_⟩
+  rw [hsplit, hEq, pow_succ]
+  ring
+
+/-- The perturbed entries still generate the unit ideal (the primed Bezout
+combination is a unit: `t^ℓ·(1 + t·h)` with `1 + t·h` a geometric-series unit). -/
+theorem span_pertImage_eq_top (S : PerturbSetup E) :
+    Ideal.span ((S.D.T.image S.pert : Finset E) : Set E) = ⊤ := by
+  classical
+  obtain ⟨h, hh1, hsum⟩ := exists_perturbed_bezout S
+  have hmem : (S.t ^ S.ℓ * (1 + S.t * h)) ∈
+      Ideal.span ((S.D.T.image S.pert : Finset E) : Set E) := by
+    rw [← hsum]
+    refine Ideal.sum_mem _ fun x hx => ?_
+    exact Ideal.mul_mem_left _ _ (Ideal.subset_span
+      (Finset.mem_coe.mpr (Finset.mem_image_of_mem S.pert hx)))
+  have hu : IsUnit (S.t ^ S.ℓ * (1 + S.t * h)) := by
+    refine IsUnit.mul (S.htu.pow S.ℓ) ?_
+    have hnorm : ‖-(S.t * h)‖ < 1 := by
+      rw [norm_neg]
+      calc ‖S.t * h‖ = ‖S.t‖ * ‖h‖ := S.hscale h
+        _ ≤ ‖S.t‖ * 1 := mul_le_mul_of_nonneg_left hh1 S.ht0.le
+        _ = ‖S.t‖ := mul_one _
+        _ < 1 := S.ht1
+    have hunit : IsUnit (1 - -(S.t * h)) := (Units.oneSub _ hnorm).isUnit
+    rwa [sub_neg_eq_add] at hunit
+  exact Ideal.eq_top_of_isUnit_mem _ hmem hu
+
 /-- The perturbed rational datum `α'` ([WP] lem:small-perturbation), with the
 unit-ball pair of definition. -/
-noncomputable def datum (S : PerturbSetup E) : RationalLocData E := by
-  have := S; sorry
+noncomputable def datum (S : PerturbSetup E) : RationalLocData E :=
+  genPieceDatum (FiniteJet.unitBallPod S.t S.htu S.ht1 S.ht0 S.hscale)
+    (S.D.T.image S.pert) (S.pert S.D.s) (span_pertImage_eq_top S)
 
-theorem datum_T (S : PerturbSetup E) : S.datum.T = S.D.T.image S.pert := by sorry
+theorem datum_T (S : PerturbSetup E) : S.datum.T = S.D.T.image S.pert := rfl
 
-theorem datum_s (S : PerturbSetup E) : S.datum.s = S.pert S.D.s := by sorry
+theorem datum_s (S : PerturbSetup E) : S.datum.s = S.pert S.D.s := rfl
 
 /-- The perturbed datum is rational ([WP]: "`α'` is a rational datum" — the primed
 integral Bezout relation `∑ a_j d_j' = ϖ^ℓ(1 + ϖH)` with `1 + ϖH` a unit of `E₀`). -/
-theorem datum_isRational (S : PerturbSetup E) : S.datum.IsRational := by sorry
+theorem datum_isRational (S : PerturbSetup E) : S.datum.IsRational :=
+  RationalLocData.isRational_of_span_eq_top (by
+    rw [datum_T]
+    exact span_pertImage_eq_top S)
 
 /-- Perturbation does not change the rational subset ([WP]: "`α` and `α'` define the
 same rational subset of `Spa(E,E⁺)`" — at every point of the subset
@@ -442,6 +495,34 @@ relation `ϖ^ℓ = ∑ a_j d_j, a_j ∈ 𝒜₀`"). -/
 theorem exists_integral_bezout (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)
     (ht0 : 0 < ‖t‖) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
     (D : RationalLocData E) (hD : D.IsRational) (hT1 : ∀ x ∈ D.T, ‖x‖ ≤ 1) :
-    ∃ (ℓ : ℕ) (a : E → E), (∀ x, ‖a x‖ ≤ 1) ∧ ∑ x ∈ D.T, a x * x = t ^ ℓ := by sorry
+    ∃ (ℓ : ℕ) (a : E → E), (∀ x, ‖a x‖ ≤ 1) ∧ ∑ x ∈ D.T, a x * x = t ^ ℓ := by
+  classical
+  haveI : IsTateRing E := FiniteJet.isTateRing_of_scale t htu ht1 ht0 hscale
+  have h1 : (1 : E) ∈ Ideal.span (D.T : Set E) := by
+    rw [hD.span_eq_top]
+    trivial
+  obtain ⟨c, -, hc⟩ := Submodule.mem_span_finset.mp h1
+  set M := ∑ x ∈ D.T, ‖c x‖ with hM
+  have hM0 : 0 ≤ M := Finset.sum_nonneg fun x _ => norm_nonneg _
+  have hMx : ∀ x ∈ D.T, ‖c x‖ ≤ M := fun x hx =>
+    Finset.single_le_sum (fun y _ => norm_nonneg (c y)) hx
+  obtain ⟨ℓ, hℓ⟩ : ∃ ℓ : ℕ, ‖t‖ ^ ℓ * M ≤ 1 := by
+    rcases eq_or_lt_of_le hM0 with h0 | hMpos
+    · exact ⟨0, by rw [← h0, mul_zero]; exact zero_le_one⟩
+    · obtain ⟨ℓ, hℓ⟩ := exists_pow_lt_of_lt_one (div_pos one_pos hMpos) ht1
+      exact ⟨ℓ, ((lt_div_iff₀ hMpos).mp hℓ).le⟩
+  refine ⟨ℓ, fun x => if x ∈ D.T then t ^ ℓ * c x else 0, fun x => ?_, ?_⟩
+  · show ‖if x ∈ D.T then t ^ ℓ * c x else 0‖ ≤ 1
+    by_cases hx : x ∈ D.T
+    · rw [if_pos hx, FiniteJet.norm_pow_mul_of_scale hscale]
+      calc ‖t‖ ^ ℓ * ‖c x‖ ≤ ‖t‖ ^ ℓ * M :=
+            mul_le_mul_of_nonneg_left (hMx x hx) (pow_nonneg ht0.le ℓ)
+        _ ≤ 1 := hℓ
+    · rw [if_neg hx, norm_zero]
+      exact zero_le_one
+  · rw [Finset.sum_congr rfl fun x hx => by
+      show (if x ∈ D.T then t ^ ℓ * c x else 0) * x = t ^ ℓ * (c x * x)
+      rw [if_pos hx, mul_assoc], ← Finset.mul_sum]
+    rw [show ∑ x ∈ D.T, c x * x = 1 from hc, mul_one]
 
 end WeightedParity
