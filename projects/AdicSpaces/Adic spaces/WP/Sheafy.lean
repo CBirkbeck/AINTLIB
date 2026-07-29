@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».WP.CoeffLocalization
+import «Adic spaces».WP.Chart
 import «Adic spaces».SheafyRing
 import «Adic spaces».StructureSheaf
 import «Adic spaces».SheafyEndpoints
@@ -69,6 +70,53 @@ theorem exists_common_headModel_stage (ϖ : Uniformizer K)
   rw [hM_def]
   exact le_trans (Finset.le_sup (Finset.mem_attach _ ⟨D, hD⟩))
     (le_max_right _ _)
+
+variable {K w} in
+theorem rhoHead_continuous (M : ℕ) :
+    Continuous (rhoHead K w M) :=
+  AddMonoidHomClass.continuous_of_bound (rhoHead K w M) 1 fun f => by
+    rw [one_mul]
+    exact norm_rhoHead_le (K := K) (w := w) (N := M) f
+
+variable {K w} in
+/-- Norm bound extraction for power-bounded elements of `𝒜` (topological
+boundedness at the unit ball against a scaling constant). -/
+theorem norm_bound_of_isPowerBounded {a : WPA K w}
+    (ha : TopologicalRing.IsPowerBounded a) :
+    ∃ C : ℝ, 0 < C ∧ ∀ n : ℕ, ‖a ^ n‖ ≤ C := by
+  obtain ⟨V, hV, hSV⟩ := ha (Metric.ball 0 1) (Metric.ball_mem_nhds 0 one_pos)
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp hV
+  obtain ⟨c, hcu, hc1, hc0⟩ := exists_norm_window' K
+  have h1 : (0 : ℝ) < ‖constA K w c‖ := by rw [norm_constA]; exact hc0
+  obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one hδ0
+    (by rw [norm_constA]; exact hc1 : ‖constA K w c‖ < 1)
+  have hnc : ‖constA K w c ^ k‖ = ‖constA K w c‖ ^ k := by
+    rw [← map_pow, norm_constA, norm_pow, norm_constA]
+  refine ⟨1 / ‖constA K w c‖ ^ k, by positivity, fun n => ?_⟩
+  have hmem : a ^ n * constA K w c ^ k ∈ Metric.ball (0 : WPA K w) 1 := by
+    refine hSV (Set.mul_mem_mul ⟨n, rfl⟩ (hball ?_))
+    rw [Metric.mem_ball, dist_zero_right, hnc]
+    exact hk
+  rw [Metric.mem_ball, dist_zero_right] at hmem
+  have hval : ‖a ^ n * constA K w c ^ k‖ = ‖constA K w c‖ ^ k * ‖a ^ n‖ := by
+    rw [show constA K w c ^ k = constA K w (c ^ k) from by rw [map_pow],
+      mul_comm (a ^ n), norm_constA_mul]
+    rw [show ‖constA K w c‖ ^ k = ‖c‖ ^ k from by rw [norm_constA],
+      norm_pow]
+  rw [hval] at hmem
+  rw [le_div_iff₀ (by positivity)]
+  calc ‖a ^ n‖ * ‖constA K w c‖ ^ k = ‖constA K w c‖ ^ k * ‖a ^ n‖ := by ring
+    _ ≤ 1 := hmem.le
+
+variable {K w} in
+/-- `rhoHead` sends power-bounded elements to power-bounded elements. -/
+theorem isPowerBounded_rhoHead {a : WPA K w} (M : ℕ)
+    (ha : TopologicalRing.IsPowerBounded a) :
+    TopologicalRing.IsPowerBounded (rhoHead K w M a) := by
+  obtain ⟨C, hC0, hC⟩ := norm_bound_of_isPowerBounded ha
+  refine isPowerBounded_of_forall_norm_le hC0 fun n => ?_
+  rw [← map_pow]
+  exact le_trans (norm_rhoHead_le (K := K) (w := w) (N := M) _) (hC n)
 
 variable {K w} in
 /-- The embedding half of the sheaf condition for `𝒜` (the
