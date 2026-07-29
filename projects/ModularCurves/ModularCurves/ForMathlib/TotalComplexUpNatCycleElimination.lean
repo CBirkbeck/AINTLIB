@@ -18,17 +18,18 @@ namespace HomologicalComplex₂
 variable (K : HomologicalComplex₂ AddCommGrpCat.{u} (.up ℕ) (.up ℕ))
 variable [K.HasTotal (.up ℕ)]
 
-/-- If the component immediately to the left is zero, the next component of a
-total cycle is vertically closed. -/
-theorem cycle_vertical_of_left_component_eq_zero
+/-- If the relevant component of the total differential and the component
+immediately to the left both vanish, the next component is vertically closed. -/
+theorem component_vertical_of_left_component_eq_zero
     (n q p : ℕ) (hqp : q + p = n)
     (x : (K.total (.up ℕ)).X n)
-    (hx : (K.total (.up ℕ)).d n (n + 1) x = 0)
+    (hd : K.πTotalUpNat q (p + 1) (n + 1)
+      ((K.total (.up ℕ)).d n (n + 1) x) = 0)
     (hleft : q = 0 ∨ K.πTotalUpNat (q - 1) (p + 1) n x = 0) :
     (K.X q).d p (p + 1) (K.πTotalUpNat q p n x) = 0 := by
   have h := congrArg (fun f ↦ f x)
     (K.total_d_πTotalUpNat n q (p + 1) (by omega))
-  simp only [ConcreteCategory.comp_apply, hx, map_zero] at h
+  simp only [ConcreteCategory.comp_apply] at h
   have hhorizontal :
       (if _hq : 0 < q then
           K.πTotalUpNat (q - 1) (p + 1) n ≫
@@ -39,10 +40,22 @@ theorem cycle_vertical_of_left_component_eq_zero
       · omega
       · simp [hleft]
     · simp
-  rw [AddCommGrpCat.hom_add_apply, hhorizontal, zero_add] at h
+  rw [hd, AddCommGrpCat.hom_add_apply, hhorizontal, zero_add] at h
   rcases Int.units_eq_one_or ((-1 : ℤˣ) ^ q) with hs | hs
   · simpa [hs] using h.symm
   · simpa [hs] using h.symm
+
+/-- If the component immediately to the left is zero, the next component of a
+total cycle is vertically closed. -/
+theorem cycle_vertical_of_left_component_eq_zero
+    (n q p : ℕ) (hqp : q + p = n)
+    (x : (K.total (.up ℕ)).X n)
+    (hx : (K.total (.up ℕ)).d n (n + 1) x = 0)
+    (hleft : q = 0 ∨ K.πTotalUpNat (q - 1) (p + 1) n x = 0) :
+    (K.X q).d p (p + 1) (K.πTotalUpNat q p n x) = 0 := by
+  apply K.component_vertical_of_left_component_eq_zero
+    n q p hqp x _ hleft
+  rw [hx, map_zero]
 
 /-- The vertical projection of the boundary of one bidegree component. -/
 theorem total_boundary_π_vertical
@@ -145,13 +158,15 @@ theorem total_boundary_π_eq_zero_of_lt
       · simpa [hi0, hj0, hs, ConcreteCategory.comp_apply, hzVertical] using h
     · omega
 
-/-- Exactness in the positive part of every vertical row lets us alter a total
-cycle by a boundary so that all components before a prescribed horizontal
-cutoff vanish. -/
-theorem exists_boundary_killing_components_lt
+/-- Exactness in the positive part of every vertical row lets us kill initial
+components of an element whenever the corresponding components of its
+differential vanish. -/
+theorem exists_boundary_killing_components_lt_of_differential_components_eq_zero
     (n r : ℕ) (hr : r ≤ n + 1)
     (x : (K.total (.up ℕ)).X (n + 1))
-    (hx : (K.total (.up ℕ)).d (n + 1) (n + 2) x = 0)
+    (hd : ∀ q, q < r →
+      K.πTotalUpNat q (n + 2 - q) (n + 2)
+        ((K.total (.up ℕ)).d (n + 1) (n + 2) x) = 0)
     (hrow : ∀ q p, q + p = n + 1 → 0 < p →
       (ShortComplex.mk
         ((K.X q).d (p - 1) p)
@@ -168,7 +183,7 @@ theorem exists_boundary_killing_components_lt
       omega
   | succ r ih =>
       have hr' : r ≤ n + 1 := by omega
-      obtain ⟨b, hb⟩ := ih hr'
+      obtain ⟨b, hb⟩ := ih hr' (fun q hq ↦ hd q (by omega))
       let p := n + 1 - r
       have hp : 0 < p := by
         dsimp [p]
@@ -177,17 +192,17 @@ theorem exists_boundary_killing_components_lt
         dsimp [p]
         omega
       let y := x - (K.total (.up ℕ)).d n (n + 1) b
-      have hy : (K.total (.up ℕ)).d (n + 1) (n + 2) y = 0 := by
-        have hd := congrArg (fun f ↦ f b)
+      have hdy :
+          (K.total (.up ℕ)).d (n + 1) (n + 2) y =
+            (K.total (.up ℕ)).d (n + 1) (n + 2) x := by
+        have hd₂ := congrArg (fun f ↦ f b)
           ((K.total (.up ℕ)).d_comp_d n (n + 1) (n + 2))
-        have hd' :
+        have hd₂' :
             (K.total (.up ℕ)).d (n + 1) (n + 2)
                 ((K.total (.up ℕ)).d n (n + 1) b) = 0 := by
           simpa only [ConcreteCategory.comp_apply, AddCommGrpCat.hom_zero,
-            AddMonoidHom.zero_apply] using hd
-        simp only [y, map_sub, hx]
-        rw [hd']
-        simp
+            AddMonoidHom.zero_apply] using hd₂
+        simp only [y, map_sub, hd₂', sub_zero]
       have hleft :
           r = 0 ∨ K.πTotalUpNat (r - 1) (p + 1) (n + 1) y = 0 := by
         by_cases hzero : r = 0
@@ -200,9 +215,19 @@ theorem exists_boundary_killing_components_lt
           rw [hdeg] at hprev
           change K.πTotalUpNat (r - 1) (p + 1) (n + 1) y = 0 at hprev
           exact hprev
+      have htarget : n + 2 - r = p + 1 := by
+        dsimp [p]
+        omega
+      have hdCurrent :
+          K.πTotalUpNat r (p + 1) (n + 2)
+            ((K.total (.up ℕ)).d (n + 1) (n + 2) y) = 0 := by
+        rw [hdy]
+        have h := hd r (by omega)
+        rw [htarget] at h
+        exact h
       have hv :=
-        K.cycle_vertical_of_left_component_eq_zero
-          (n + 1) r p hsum y hy hleft
+        K.component_vertical_of_left_component_eq_zero
+          (n + 1) r p hsum y hdCurrent hleft
       obtain ⟨c, hc⟩ :=
         ((ShortComplex.mk
           ((K.X r).d (p - 1) p)
@@ -264,6 +289,28 @@ theorem exists_boundary_killing_components_lt
                 (K.ιTotalOrZero (.up ℕ) r (p - 1) n
                   (((-1 : ℤˣ) ^ r) • c))) = 0
         rw [hit, sub_zero]
+
+/-- Exactness in the positive part of every vertical row lets us alter a total
+cycle by a boundary so that all components before a prescribed horizontal
+cutoff vanish. -/
+theorem exists_boundary_killing_components_lt
+    (n r : ℕ) (hr : r ≤ n + 1)
+    (x : (K.total (.up ℕ)).X (n + 1))
+    (hx : (K.total (.up ℕ)).d (n + 1) (n + 2) x = 0)
+    (hrow : ∀ q p, q + p = n + 1 → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact) :
+    ∃ b : (K.total (.up ℕ)).X n,
+      ∀ q, q < r →
+        K.πTotalUpNat q (n + 1 - q) (n + 1)
+          (x - (K.total (.up ℕ)).d n (n + 1) b) = 0 := by
+  apply
+    K.exists_boundary_killing_components_lt_of_differential_components_eq_zero
+      n r hr x _ hrow
+  intro q hq
+  rw [hx, map_zero]
 
 private theorem totalUpNat_decomposition_apply
     (n : ℕ) (x : (K.total (.up ℕ)).X n) :
