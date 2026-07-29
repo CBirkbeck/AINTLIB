@@ -1421,6 +1421,7 @@ theorem productRestrictionSub_isEmbedding_WPA (ϖ : Uniformizer K)
     (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
     Topology.IsEmbedding (productRestrictionSub (WPA K w) C) := by sorry
 
+set_option maxHeartbeats 3200000 in
 variable {K w} in
 /-- The gluing half of the sheaf condition for `𝒜` (the `gluing_JetA` shape,
 `FJP/Over/SheafTransfer.lean:376`; [WP] proof of thm:parity-strongly-sheafy,
@@ -1434,7 +1435,243 @@ theorem gluing_WPA (ϖ : Uniformizer K)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
       restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂)) :
     ∃ x : presheafValue C.base, ∀ D : ↥C.covers,
-      restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by sorry
+      restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
+  classical
+  obtain ⟨P⟩ := nonempty_pushedHeadData ϖ hK₀ C hC
+  haveI hSheafHead : ValuationSpectrum.IsSheafy (WPHead K w P.M) :=
+    isSheafy_WPHead (w := w) (N := P.M) ϖ hK₀
+  -- the pushed per-coefficient families ([WP] eq:head-cech)
+  set g : TailIdx P.M → ∀ D' : ↥(P.cover.covers), presheafValue D'.1 :=
+    fun μ D' => (Finset.mem_image.mp D'.2).choose_spec.2 ▸
+      ((headLocEquiv ϖ hK₀ (P.DHp (Finset.mem_image.mp D'.2).choose)
+          (P.hDHp (Finset.mem_image.mp D'.2).choose)).symm
+        (TailC0.coeff μ (pieceModel ϖ hK₀ P
+          (Finset.mem_image.mp D'.2).choose
+          (f (Finset.mem_image.mp D'.2).choose)))) with hg
+  have hgres : ∀ (μ : TailIdx P.M) (D' : ↥(P.cover.covers))
+      (D₃ : RationalLocData (WPHead K w P.M))
+      (h₃ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D'.1.T D'.1.s),
+      restrictionMap D'.1 D₃ h₃ (g μ D') =
+        restrictionMap (P.DHp (Finset.mem_image.mp D'.2).choose) D₃
+          (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]; exact h₃)
+          ((headLocEquiv ϖ hK₀ (P.DHp (Finset.mem_image.mp D'.2).choose)
+              (P.hDHp (Finset.mem_image.mp D'.2).choose)).symm
+            (TailC0.coeff μ (pieceModel ϖ hK₀ P
+              (Finset.mem_image.mp D'.2).choose
+              (f (Finset.mem_image.mp D'.2).choose)))) := by
+    intro μ D' D₃ h₃
+    show restrictionMap D'.1 D₃ h₃
+      ((Finset.mem_image.mp D'.2).choose_spec.2 ▸ _) = _
+    rw [restrictionMap_cast _ _ (Finset.mem_image.mp D'.2).choose_spec.2]
+    have hcomp := congrFun (restrictionMap_comp
+      (P.DHp (Finset.mem_image.mp D'.2).choose) D'.1 D₃
+      (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]) h₃)
+      ((headLocEquiv ϖ hK₀ (P.DHp (Finset.mem_image.mp D'.2).choose)
+          (P.hDHp (Finset.mem_image.mp D'.2).choose)).symm
+        (TailC0.coeff μ (pieceModel ϖ hK₀ P
+          (Finset.mem_image.mp D'.2).choose
+          (f (Finset.mem_image.mp D'.2).choose))))
+    simp only [Function.comp_apply] at hcomp
+    exact hcomp
+  -- per-μ vertex gluing at the head
+  have hglue : ∀ μ : TailIdx P.M, ∃ q : presheafValue P.cover.base,
+      ∀ D' : ↥(P.cover.covers),
+        restrictionMap P.cover.base D'.1 (P.cover.hsubset D'.1 D'.2) q =
+          g μ D' :=
+    fun μ => ValuationSpectrum.IsSheafy.gluing (A := WPHead K w P.M)
+      P.cover P.cover_isRational (g μ) (by
+        intro D₁' D₂' D₃ h₃₁ h₃₂
+        rw [hgres μ D₁' D₃ h₃₁, hgres μ D₂' D₃ h₃₂]
+        exact pushedCompat_head ϖ hK₀ P f hcompat μ _ _ D₃ _ _)
+  choose q hq using hglue
+  set q2 : TailIdx P.M → presheafValue P.DHb := fun μ => q μ with hq2def
+  have hq2 : ∀ (μ : TailIdx P.M) (D' : ↥(P.cover.covers)),
+      restrictionMap (D := P.DHb) D'.1 (P.cover.hsubset D'.1 D'.2) (q2 μ) =
+        g μ D' := hq
+  -- the value of the pushed family at a canonical piece index
+  have hmemp : ∀ d : ↥C.covers, P.DHp d ∈ P.cover.covers := fun d =>
+    Finset.mem_image_of_mem _ (Finset.mem_attach _ _)
+  have hgd : ∀ (μ : TailIdx P.M) (d : ↥C.covers),
+      g μ ⟨P.DHp d, hmemp d⟩ =
+        (headLocEquiv ϖ hK₀ (P.DHp d) (P.hDHp d)).symm
+          (TailC0.coeff μ (pieceModel ϖ hK₀ P d (f d))) := by
+    intro μ d
+    have hself := hgres μ ⟨P.DHp d, hmemp d⟩ (P.DHp d) (subset_refl _)
+    rw [congrFun (restrictionMap_id (P.DHp d)) _] at hself
+    simp only [id_eq] at hself
+    rw [hself]
+    have hpc := pushedCompat_head ϖ hK₀ P f hcompat μ
+      (Finset.mem_image.mp (hmemp d)).choose d (P.DHp d)
+      (by rw [(Finset.mem_image.mp (hmemp d)).choose_spec.2])
+      (subset_refl _)
+    rw [hpc, congrFun (restrictionMap_id (P.DHp d)) _]
+    simp only [id_eq]
+  -- nullity of the glued family, via the inducing head embedding
+  have hembed : Topology.IsEmbedding
+      (productRestrictionSub (WPHead K w P.M) P.cover) :=
+    ValuationSpectrum.IsSheafy.embedding (A := WPHead K w P.M)
+      P.cover P.cover_isRational
+  have hq0 : Filter.Tendsto q Filter.cofinite (nhds 0) := by
+    rw [hembed.isInducing.tendsto_nhds_iff]
+    have h0img : productRestrictionSub (WPHead K w P.M) P.cover 0 = 0 :=
+      funext fun D' => map_zero _
+    rw [h0img]
+    rw [tendsto_pi_nhds]
+    intro D'
+    refine Filter.Tendsto.congr
+      (f₁ := fun μ => g μ D') (fun μ => (hq μ D').symm) ?_
+    -- the fixed-piece family tends to 0
+    have hcast : ∀ μ, g μ D' =
+        restrictionMap (P.DHp (Finset.mem_image.mp D'.2).choose) D'.1
+          (by rw [(Finset.mem_image.mp D'.2).choose_spec.2])
+          ((headLocEquiv ϖ hK₀ (P.DHp (Finset.mem_image.mp D'.2).choose)
+              (P.hDHp (Finset.mem_image.mp D'.2).choose)).symm
+            (TailC0.coeff μ (pieceModel ϖ hK₀ P
+              (Finset.mem_image.mp D'.2).choose
+              (f (Finset.mem_image.mp D'.2).choose)))) := by
+      intro μ
+      have hself := hgres μ D' D'.1 (subset_refl _)
+      rw [congrFun (restrictionMap_id D'.1) _] at hself
+      simp only [id_eq] at hself
+      exact hself
+    refine Filter.Tendsto.congr (fun μ => (hcast μ).symm) ?_
+    have hnull : Filter.Tendsto
+        (fun μ => TailC0.coeff μ (pieceModel ϖ hK₀ P
+          (Finset.mem_image.mp D'.2).choose
+          (f (Finset.mem_image.mp D'.2).choose)))
+        Filter.cofinite (nhds 0) := by
+      rw [tendsto_zero_iff_norm_tendsto_zero]
+      exact (pieceModel ϖ hK₀ P (Finset.mem_image.mp D'.2).choose
+        (f (Finset.mem_image.mp D'.2).choose)).2
+    have hsymm0 := ((headLocEquiv_symm_continuous ϖ hK₀
+      (P.DHp (Finset.mem_image.mp D'.2).choose)
+      (P.hDHp (Finset.mem_image.mp D'.2).choose)).tendsto 0).comp hnull
+    rw [map_zero] at hsymm0
+    have hres0 := ((restrictionMapHom_continuous
+      (P.DHp (Finset.mem_image.mp D'.2).choose) D'.1
+      (by rw [(Finset.mem_image.mp D'.2).choose_spec.2])).tendsto 0).comp
+      hsymm0
+    rw [map_zero] at hres0
+    exact hres0
+  -- assemble the base model element
+  have hq'0 : Filter.Tendsto q2 Filter.cofinite (nhds 0) := hq0
+  set Z : TailC0 w P.M (QHead P.DHb) (rhoQ P.DHb) :=
+    ⟨fun μ => headLocEquiv ϖ hK₀ P.DHb P.hDHb (q2 μ), by
+      have h1 := ((headLocEquiv_continuous ϖ hK₀ P.DHb P.hDHb).tendsto
+        0).comp hq'0
+      rw [map_zero] at h1
+      have h2 := h1.norm
+      rwa [norm_zero] at h2⟩ with hZ
+  set x : presheafValue C.base :=
+    (restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb).symm
+      ((coeffLocEquiv ϖ hK₀ P.DHb P.hDHb).symm Z) with hx
+  refine ⟨x, fun D => ?_⟩
+  -- the base model of x is Z
+  have hebx : coeffLocEquiv ϖ hK₀ P.DHb P.hDHb
+      (restrictionMapHom C.base (liftDatum P.DHb P.hDHb) P.hopenb.le x) =
+      Z := by
+    rw [hx]
+    rw [show restrictionMapHom C.base (liftDatum P.DHb P.hDHb) P.hopenb.le
+        ((restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb).symm
+          ((coeffLocEquiv ϖ hK₀ P.DHb P.hDHb).symm Z)) =
+      (restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb)
+        ((restrictionEquiv C.base (liftDatum P.DHb P.hDHb) P.hopenb).symm
+          ((coeffLocEquiv ϖ hK₀ P.DHb P.hDHb).symm Z)) from rfl,
+      RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+  -- coefficientwise comparison of the piece models
+  obtain ⟨Cb, hCb0, hb⟩ := qRestrict_bound ϖ hK₀ P D
+  have hsq := RingHom.congr_fun
+    (coeffLoc_restriction_square ϖ hK₀ P D hCb0.le hb)
+    (restrictionMapHom C.base (liftDatum P.DHb P.hDHb) P.hopenb.le x)
+  -- identify the right-hand side with the piece model of the restriction
+  have hcomp₁ := congr_fun (restrictionMap_comp C.base
+    (liftDatum P.DHb P.hDHb) (liftDatum (P.DHp D) (P.hDHp D))
+    P.hopenb.le (P.lift_subset D)) x
+  have hcomp₂ := congr_fun (restrictionMap_comp C.base D.1
+    (liftDatum (P.DHp D) (P.hDHp D)) (C.hsubset D.1 D.2)
+    (P.hopenp D).le) x
+  simp only [Function.comp_apply] at hcomp₁ hcomp₂
+  have hpm : pieceModel ϖ hK₀ P D
+      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) =
+      TailC0.mapC (qRestrict ϖ hK₀ P D) hb (qRestrict_rhoQ ϖ hK₀ P D) Z := by
+    rw [← hebx]
+    rw [show TailC0.mapC (qRestrict ϖ hK₀ P D) hb (qRestrict_rhoQ ϖ hK₀ P D)
+        (coeffLocEquiv ϖ hK₀ P.DHb P.hDHb
+          (restrictionMapHom C.base (liftDatum P.DHb P.hDHb)
+            P.hopenb.le x)) =
+      coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)
+        (restrictionMapHom (liftDatum P.DHb P.hDHb)
+          (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D)
+          (restrictionMapHom C.base (liftDatum P.DHb P.hDHb)
+            P.hopenb.le x)) from hsq]
+    rw [show restrictionMapHom (liftDatum P.DHb P.hDHb)
+        (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D)
+        (restrictionMapHom C.base (liftDatum P.DHb P.hDHb)
+          P.hopenb.le x) =
+      restrictionMap C.base (liftDatum (P.DHp D) (P.hDHp D))
+        ((P.lift_subset D).trans P.hopenb.le) x from hcomp₁]
+    rw [show restrictionMap C.base (liftDatum (P.DHp D) (P.hDHp D))
+        ((P.lift_subset D).trans P.hopenb.le) x =
+      restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+        (P.hopenp D).le
+        (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) x)
+      from hcomp₂.symm]
+    rfl
+  -- the coefficients of mapC Z are the piece coefficients of f D
+  have hcoeffs : ∀ μ : TailIdx P.M,
+      qRestrict ϖ hK₀ P D (TailC0.coeff μ Z) =
+        TailC0.coeff μ (pieceModel ϖ hK₀ P D (f D)) := by
+    intro μ
+    have hrq : restrictionMap (D := P.DHb) (P.DHp D)
+        (P.cover.hsubset (P.DHp D) (hmemp D)) (q2 μ) =
+        (headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+          (TailC0.coeff μ (pieceModel ϖ hK₀ P D (f D))) := by
+      rw [hq2 μ ⟨P.DHp D, hmemp D⟩]
+      exact hgd μ D
+    have h5 := congrArg (headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)) hrq
+    rw [RingEquiv.apply_symm_apply] at h5
+    rw [show qRestrict ϖ hK₀ P D (TailC0.coeff μ Z) =
+      (headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D))
+        (restrictionMapHom P.DHb (P.DHp D) (P.piece_subset D)
+          ((headLocEquiv ϖ hK₀ P.DHb P.hDHb).symm
+            (headLocEquiv ϖ hK₀ P.DHb P.hDHb (q2 μ)))) from rfl,
+      RingEquiv.symm_apply_apply]
+    exact h5
+  -- conclude: the piece models agree, hence the sections agree
+  have hpmeq : pieceModel ϖ hK₀ P D
+      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) =
+      pieceModel ϖ hK₀ P D (f D) := by
+    rw [hpm]
+    refine Subtype.ext (funext fun μ => ?_)
+    exact hcoeffs μ
+  have h6 := congrArg (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm hpmeq
+  rw [show (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+      (pieceModel ϖ hK₀ P D
+        (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x)) =
+    restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D)) (P.hopenp D).le
+      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) from by
+      rw [show (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+          (pieceModel ϖ hK₀ P D
+            (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x)) =
+        (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+          (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)
+            (restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+              (P.hopenp D).le
+              (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x)))
+        from rfl, RingEquiv.symm_apply_apply],
+    show (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+      (pieceModel ϖ hK₀ P D (f D)) =
+    restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D)) (P.hopenp D).le
+      (f D) from by
+      rw [show (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+          (pieceModel ϖ hK₀ P D (f D)) =
+        (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+          (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)
+            (restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+              (P.hopenp D).le (f D))) from rfl,
+        RingEquiv.symm_apply_apply]] at h6
+  exact (restrictionEquiv D.1 (liftDatum (P.DHp D) (P.hDHp D))
+    (P.hopenp D)).injective h6
 
 variable {K w} in
 /-- **`𝒜` is sheafy** — the finite-rational-cover form

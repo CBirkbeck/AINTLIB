@@ -1,1 +1,1 @@
-FOCUS: W22 — (a) pair-generalized qRestrictP machinery DONE; (b) liftDatum_mono via mem_rationalOpen_liftDatum_iff (comap-headIncl characterization, mirror comap_rhoHead_mem_iff proof); (c) compat-transfer + per-mu head gluing + inducing-nullity + assembly per ticket.
+FOCUS: W22 gluing_WPA DONE. NEXT: W21 embedding mirror (productRestrictionSub_isEmbedding_WPA = FJP SheafTransfer:667 verbatim at WPA: injective ✓ + gluing ✓ -> range=equalizer -> closed -> OMT inducing); then isSheafy_WPA + W23 wrappers.
