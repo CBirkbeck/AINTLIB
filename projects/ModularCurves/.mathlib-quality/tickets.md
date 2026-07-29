@@ -29239,3 +29239,33 @@ prerequisite — see [GAP-A-7].
 `comap_ideal_eq_span_appLE` (the affine base-change kernel computation; the ring core
 `ker_algebraMap_tensorQuot_span` in the same file is already proved) and
 `sheafificationW_idealPullHom`. Without these, no universal-pair identity can be transported.
+
+### COORDINATION (2026-07-29, OWNER-FLW): `codex/fibrewise-weierstrass-affine-chart-base-change`
+is superseded and must not be merged. Main already contains the Cartier-divisor development
+under the post-rename `KerPrincipal.*`, `SectionsIdeal.*`, and related APIs. Port only the
+Hopf/coaction characteristic-polynomial block from `ForMathlib/CoactionCharpoly.lean`, the
+addition-chart spec points from `EllipticCurve/AdditionSpecPoints.lean`, the base-change
+plumbing from `EllipticCurve/GroupLawAxioms.lean`, and the eight
+`sectionPoleSheafPower*Trivialization` lemmas individually into main's later
+`PoleSheaf.lean`. Close the stacked Line A PRs as superseded after those bounded ports.
+
+### CLAIM (rule 5, OWNER-FLW-ORDERED-CECH-BASE-CHANGE-EXACT-IFF, `state:done`,
+codex/fibrewise-weierstrass-picard-tranche3-monoidal, 2026-07-29): add
+`cochainComplex_functionExact_iff_exactAt` and
+`AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex_baseChange_exact_iff_of_iso`.
+First identify exactness of two consecutive differentials of a module cochain complex with
+categorical exactness at the intervening positive degree. Then, for affine base change and an
+isomorphism from the pulled-back quasicoherent module to a target module, prove that exactness
+of the algebraically base-changed ordered Cech differentials is equivalent to exactness of the
+target module's ordered Cech differentials on the pulled-back cover. Reuse the landed
+scalar-extension conversion, ordered Cech base-change chain isomorphism, and ordered Cech
+functoriality. Add no flatness, finiteness, boundedness, cover triviality, geometry beyond the
+existing affine/separated/quasicoherent API, Noetherianity, fibrewise or final hypothesis,
+option, sorry, admit, axiom, unsafe declaration, alternate Cech construction, Pic-zero route,
+or group law.
+
+**Progress (2026-07-29): DONE.** The first theorem is in
+`ForMathlib/CochainComplexBaseChangeExactAt.lean`; the second is in the root-indexed
+`ForMathlib/SchemeModuleOrderedBaseCechBaseChangeExact.lean`. Focused builds and the
+9,532-job `lake build ModularCurves` pass. Both declarations have exactly the expected
+`propext`, `Classical.choice`, and `Quot.sound` axioms.
