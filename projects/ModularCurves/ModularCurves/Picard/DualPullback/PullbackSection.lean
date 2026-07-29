@@ -7,6 +7,12 @@ Component formulas for isomorphisms and the pullback-adjunction unit on a top-op
 module section.
 -/
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the steps below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 open AlgebraicGeometry CategoryTheory Opposite
@@ -65,8 +71,14 @@ theorem topSectionHom_app_top_apply_one (M : X.Modules)
     exact Equiv.apply_symm_apply M.unitHomEquiv s
   have hv := congrArg (fun t ↦ t.val (.op (⊤ : X.Opens))) he
   rw [hv]
-  change M.val.map (homOfLE (le_top : (⊤ : X.Opens) ≤ ⊤)).op x = x
-  simp
+  -- the restriction is along the identity of `⊤`; phrase it on `M.presheaf`, where
+  -- functoriality carries no `restrictScalars` coherence
+  change M.presheaf.map (homOfLE (le_top : (⊤ : X.Opens) ≤ ⊤)).op x = x
+  first
+  | simp
+  | (rw [show (homOfLE (le_top : (⊤ : X.Opens) ≤ ⊤)).op = 𝟙 _ from Subsingleton.elim _ _,
+      CategoryTheory.Functor.map_id]; rfl)
+  | (rw [show (homOfLE (le_top : (⊤ : X.Opens) ≤ ⊤)).op = 𝟙 _ from Subsingleton.elim _ _]; simp)
 
 theorem pullback_unit_unit_app_top_apply_oneT (f : Y ⟶ X) :
     ((pullbackPushforwardAdjunction f).unit.app (unitObj X)).val.app
