@@ -1238,6 +1238,114 @@ theorem isUnit_coeffBase_s (ϖ : Uniformizer K)
       QHead DH →+* TailC0 w N (QHead DH) (rhoQ DH))
 
 variable {K w N} in
+/-- The algebraic forward map of the coefficientwise bridge. -/
+noncomputable def coeffFwdAlg (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    Localization.Away (liftDatum DH hDH).s →+*
+      TailC0 w N (QHead DH) (rhoQ DH) :=
+  IsLocalization.Away.lift (liftDatum DH hDH).s
+    (show IsUnit (coeffBase DH (liftDatum DH hDH).s) from
+      isUnit_coeffBase_s ϖ DH hDH)
+
+variable {K w N} in
+theorem coeffFwdAlg_algebraMap (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) (f : WPA K w) :
+    coeffFwdAlg ϖ DH hDH
+      (algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s) f) =
+      coeffBase DH f :=
+  IsLocalization.Away.lift_eq _ _ f
+
+variable {K w N} in
+/-- The forward map sends the lifted `t/s`-fraction to `ofHead` of the
+corresponding graph variable. -/
+theorem coeffFwdAlg_divByS (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    {t₀ : WPHead K w N} (ht₀ : t₀ ∈ DH.T) :
+    coeffFwdAlg ϖ DH hDH (divByS (headIncl K w N t₀) (liftDatum DH hDH).s) =
+      TailC0.ofHead (qX DH ((datumEnum DH).symm ⟨t₀, ht₀⟩)) := by
+  have hu : IsUnit (coeffBase DH (liftDatum DH hDH).s) :=
+    isUnit_coeffBase_s ϖ DH hDH
+  refine hu.mul_right_cancel ?_
+  have h1 : divByS (headIncl K w N t₀) (liftDatum DH hDH).s *
+      algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+        (liftDatum DH hDH).s =
+      algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+        (headIncl K w N t₀) := by
+    rw [divByS]
+    exact IsLocalization.mk'_spec _ _ _
+  rw [← coeffFwdAlg_algebraMap ϖ DH hDH (liftDatum DH hDH).s, ← map_mul, h1,
+    coeffFwdAlg_algebraMap]
+  have henum : coeffBase DH (headIncl K w N t₀) =
+      TailC0.ofHead (headConst DH DH.s) *
+        TailC0.ofHead (qX DH ((datumEnum DH).symm ⟨t₀, ht₀⟩)) := by
+    rw [coeffBase_headIncl]
+    have h2 := headConst_datumEnum DH ((datumEnum DH).symm ⟨t₀, ht₀⟩)
+    rw [Equiv.apply_symm_apply] at h2
+    rw [show ((⟨t₀, ht₀⟩ : ↥DH.T) : WPHead K w N) = t₀ from rfl] at h2
+    rw [h2, map_mul]
+  have hcs : coeffBase DH (liftDatum DH hDH).s =
+      TailC0.ofHead (headConst DH DH.s) := coeffBase_headIncl DH DH.s
+  rw [henum, coeffFwdAlg_algebraMap, hcs]
+  exact mul_comm _ _
+
+variable {K w N} in
+theorem coeffFwdAlg_continuous (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    @Continuous _ _ (liftDatum DH hDH).topology _ (coeffFwdAlg ϖ DH hDH) := by
+  classical
+  refine locTopology_continuous_lift (liftDatum DH hDH).P (liftDatum DH hDH).T
+    (liftDatum DH hDH).s (liftDatum DH hDH).hopen _ ?_ ?_
+  · have h_eq : (coeffFwdAlg ϖ DH hDH).comp
+        (algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)) =
+        coeffBase DH :=
+      RingHom.ext fun f => coeffFwdAlg_algebraMap ϖ DH hDH f
+    rw [show ⇑((coeffFwdAlg ϖ DH hDH).comp
+        (algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s))) =
+      ⇑(coeffBase DH) from congrArg _ h_eq]
+    exact coeffBase_continuous DH
+  · intro t ht
+    rw [show (liftDatum DH hDH).T = DH.T.image (headIncl K w N) from rfl] at ht
+    obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+    rw [coeffFwdAlg_divByS ϖ DH hDH ht₀]
+    refine FiniteJet.isPowerBounded_of_norm_le_one ?_
+    rw [TailC0.norm_ofHead]
+    exact norm_qX_le_one DH _
+
+variable {K w N} in
+/-- The forward coefficientwise bridge on the completion. -/
+noncomputable def coeffFwd (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    presheafValue (liftDatum DH hDH) →+* TailC0 w N (QHead DH) (rhoQ DH) := by
+  letI := (liftDatum DH hDH).uniformSpace
+  letI : IsTopologicalRing (Localization.Away (liftDatum DH hDH).s) :=
+    (liftDatum DH hDH).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (liftDatum DH hDH).s) :=
+    (liftDatum DH hDH).isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom (coeffFwdAlg ϖ DH hDH)
+    (coeffFwdAlg_continuous ϖ DH hDH)
+
+variable {K w N} in
+theorem coeffFwd_coe (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (a : Localization.Away (liftDatum DH hDH).s) :
+    coeffFwd ϖ DH hDH ((liftDatum DH hDH).coeRingHom a) =
+      coeffFwdAlg ϖ DH hDH a := by
+  letI := (liftDatum DH hDH).uniformSpace
+  letI : IsTopologicalRing (Localization.Away (liftDatum DH hDH).s) :=
+    (liftDatum DH hDH).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (liftDatum DH hDH).s) :=
+    (liftDatum DH hDH).isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe (coeffFwdAlg ϖ DH hDH)
+    (coeffFwdAlg_continuous ϖ DH hDH) a
+
+variable {K w N} in
+theorem coeffFwd_continuous (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    Continuous (coeffFwd ϖ DH hDH) := by
+  letI := (liftDatum DH hDH).uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
+variable {K w N} in
 /-- **Coefficientwise localization** ([WP] prop:coefficientwise-localization:
 "There is a canonical topological algebra isomorphism `𝒜_α ≅ ⊕̂^{c₀}_μ P e_μ`").
 The proof route: the graph ideal over `𝒜` is closed and computed coefficientwise via

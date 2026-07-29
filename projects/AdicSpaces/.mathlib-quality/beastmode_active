@@ -1,1 +1,1 @@
-FOCUS: W17 — coeffLocEquiv fwd (Away.lift coeffBase + locTopology_continuous_lift + extensionHom), then rev summation + roundtrips
+FOCUS: W17 — rev half: coeffRev summation (headLocRev-lift per coefficient + tsum) + roundtrips + equiv record
