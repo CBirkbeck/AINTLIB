@@ -20,6 +20,23 @@ namespace ModularCurves
 
 variable {R : Type u} [CommRing R]
 
+/-- Exactness of consecutive differentials in a module cochain complex is categorical
+exactness at the intervening positive degree. -/
+theorem cochainComplex_functionExact_iff_exactAt
+    (K : CochainComplex (ModuleCat.{v} R) ℕ) (q : ℕ) :
+    Function.Exact (K.d q (q + 1)).hom
+      (K.d (q + 1) (q + 2)).hom ↔ K.ExactAt (q + 1) := by
+  have hprev : (ComplexShape.up ℕ).prev (q + 1) = q :=
+    CochainComplex.prev_nat_succ q
+  have hnext : (ComplexShape.up ℕ).next (q + 1) = q + 2 := by
+    rw [CochainComplex.next]
+    omega
+  rw [HomologicalComplex.exactAt_iff'
+    (K := K) (i := q) (j := q + 1) (k := q + 2) hprev hnext]
+  exact
+    (ShortComplex.ShortExact.moduleCat_exact_iff_function_exact
+      (K.sc' q (q + 1) (q + 2))).symm
+
 /-- Exactness of algebraically base-changed consecutive differentials is
 categorical exactness at the corresponding positive degree after extension of
 scalars. -/
