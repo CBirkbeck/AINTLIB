@@ -248,4 +248,162 @@ theorem totalUpNatHorizontalEdge_homologyMap_surjective_of_positive
         T n x (edge.f (n + 1) a) hx hedgeCycle b hdiff').symm
     _ = T.homologyπ (n + 1) xc := by rw [hxc]
 
+private theorem horizontalEdge_π_eq_zero_of_lt
+    (A : CochainComplex AddCommGrpCat.{u} ℕ)
+    (e : ∀ q, A.X q ⟶ (K.X q).X 0)
+    (he : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e q ≫ (K.d q q').f 0 = A.d q q' ≫ e q')
+    (w : ∀ q, e q ≫ (K.X q).d 0 1 = 0)
+    (d q p : ℕ) (hqp : q + p = d) (hq : q < d)
+    (a : A.X d) :
+    K.πTotalUpNat q p d
+      ((K.totalUpNatHorizontalEdge A e he w).f d a) = 0 := by
+  have h := congrArg (fun f ↦ f a)
+    (K.totalUpNatHorizontalEdge_f A e he w d)
+  rw [h]
+  change
+    (K.ιTotal (.up ℕ) d 0 d rfl ≫
+      K.πTotalUpNat q p d) (e d a) = 0
+  have hdq : d ≠ q := by omega
+  simp [hdq]
+
+private theorem horizontalEdge_π_horizontalAxis
+    (A : CochainComplex AddCommGrpCat.{u} ℕ)
+    (e : ∀ q, A.X q ⟶ (K.X q).X 0)
+    (he : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e q ≫ (K.d q q').f 0 = A.d q q' ≫ e q')
+    (w : ∀ q, e q ≫ (K.X q).d 0 1 = 0)
+    (d : ℕ) (a : A.X d) :
+    K.πTotalUpNat d 0 d
+      ((K.totalUpNatHorizontalEdge A e he w).f d a) = e d a := by
+  have h := congrArg (fun f ↦ f a)
+    (K.totalUpNatHorizontalEdge_f A e he w d)
+  rw [h]
+  change
+    (K.ιTotal (.up ℕ) d 0 d rfl ≫
+      K.πTotalUpNat d 0 d) (e d a) = e d a
+  simp
+
+/-- If a positive-degree horizontal-edge element is a total boundary, then the
+original element is already a boundary in the augmenting complex. -/
+theorem exists_boundary_of_horizontalEdge_eq_total_boundary
+    (A : CochainComplex AddCommGrpCat.{u} ℕ)
+    (e : ∀ q, A.X q ⟶ (K.X q).X 0)
+    (he : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e q ≫ (K.d q q').f 0 = A.d q q' ≫ e q')
+    (w : ∀ q, e q ≫ (K.X q).d 0 1 = 0)
+    (n : ℕ)
+    (hrowAxis : (ShortComplex.mk (e n)
+      ((K.X n).d 0 1) (w n)).Exact)
+    (hrowPositive : ∀ q p, q + p = n → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact)
+    [Mono (e (n + 1))]
+    (a : A.X (n + 1)) (b : (K.total (.up ℕ)).X n)
+    (hb : (K.totalUpNatHorizontalEdge A e he w).f (n + 1) a =
+      (K.total (.up ℕ)).d n (n + 1) b) :
+    ∃ c : A.X n, A.d n (n + 1) c = a := by
+  let T := K.total (.up ℕ)
+  let edge := K.totalUpNatHorizontalEdge A e he w
+  have hedgeZero :
+      ∀ q, q < n + 1 →
+        K.πTotalUpNat q (n + 1 - q) (n + 1)
+          (edge.f (n + 1) a) = 0 := by
+    intro q hq
+    exact K.horizontalEdge_π_eq_zero_of_lt A e he w
+      (n + 1) q (n + 1 - q) (by omega) hq a
+  obtain ⟨b', hb'Components, hb'Differential⟩ :
+      ∃ b' : T.X n,
+        (∀ q, q < n →
+          K.πTotalUpNat q (n - q) n b' = 0) ∧
+        T.d n (n + 1) b' = edge.f (n + 1) a := by
+    cases n with
+    | zero =>
+        refine ⟨b, ?_, hb.symm⟩
+        intro q hq
+        omega
+    | succ m =>
+        have hdSupport :
+            ∀ q, q < m + 1 →
+              K.πTotalUpNat q (m + 2 - q) (m + 2)
+                (T.d (m + 1) (m + 2) b) = 0 := by
+          intro q hq
+          rw [← hb]
+          exact hedgeZero q (by omega)
+        obtain ⟨c, hc⟩ :=
+          K.exists_boundary_killing_components_lt_of_differential_components_eq_zero
+            m (m + 1) (by omega) b hdSupport hrowPositive
+        let b' := b - T.d m (m + 1) c
+        refine ⟨b', hc, ?_⟩
+        have hd := congrArg (fun f ↦ f c)
+          (T.d_comp_d m (m + 1) (m + 2))
+        have hd' : T.d (m + 1) (m + 2)
+            (T.d m (m + 1) c) = 0 := by
+          simpa only [ConcreteCategory.comp_apply, AddCommGrpCat.hom_zero,
+            AddMonoidHom.zero_apply] using hd
+        simp only [b', map_sub, hd', sub_zero]
+        exact hb.symm
+  let β := K.πTotalUpNat n 0 n b'
+  have haxis :
+      K.ιTotal (.up ℕ) n 0 n rfl β = b' :=
+    K.ιTotal_horizontalAxis_eq_of_components_lt_eq_zero
+      n b' hb'Components
+  have hdVertical :
+      K.πTotalUpNat n 1 (n + 1) (T.d n (n + 1) b') = 0 := by
+    rw [hb'Differential]
+    exact K.horizontalEdge_π_eq_zero_of_lt A e he w
+      (n + 1) n 1 (by omega) (by omega) a
+  have hleft :
+      n = 0 ∨ K.πTotalUpNat (n - 1) 1 n b' = 0 := by
+    by_cases hn : n = 0
+    · exact Or.inl hn
+    · right
+      have h := hb'Components (n - 1) (by omega)
+      have hdeg : n - (n - 1) = 1 := by omega
+      rw [hdeg] at h
+      exact h
+  have hβVertical :
+      (K.X n).d 0 1 β = 0 :=
+    K.component_vertical_of_left_component_eq_zero
+      n n 0 (by omega) b' hdVertical hleft
+  obtain ⟨c, hc⟩ :=
+    ((ShortComplex.mk (e n) ((K.X n).d 0 1) (w n)).ab_exact_iff.mp
+      hrowAxis) β hβVertical
+  have hedgeAxis :
+      K.πTotalUpNat (n + 1) 0 (n + 1)
+        (edge.f (n + 1) a) = e (n + 1) a :=
+    K.horizontalEdge_π_horizontalAxis A e he w (n + 1) a
+  have hboundaryAxis :
+      K.πTotalUpNat (n + 1) 0 (n + 1)
+          (T.d n (n + 1)
+            (K.ιTotal (.up ℕ) n 0 n rfl β)) =
+        (K.d n (n + 1)).f 0 β := by
+    simpa only [K.ιTotalOrZero_eq (.up ℕ) n 0 n rfl] using
+      K.total_boundary_π_horizontal n n 0 (by omega) β
+  have hea :
+      e (n + 1) a = (K.d n (n + 1)).f 0 β := by
+    calc
+      _ = K.πTotalUpNat (n + 1) 0 (n + 1)
+          (edge.f (n + 1) a) := hedgeAxis.symm
+      _ = K.πTotalUpNat (n + 1) 0 (n + 1)
+          (T.d n (n + 1) b') := by rw [hb'Differential]
+      _ = K.πTotalUpNat (n + 1) 0 (n + 1)
+          (T.d n (n + 1)
+            (K.ιTotal (.up ℕ) n 0 n rfl β)) := by rw [haxis]
+      _ = _ := hboundaryAxis
+  have hnat :
+      (K.d n (n + 1)).f 0 (e n c) =
+        e (n + 1) (A.d n (n + 1) c) := by
+    have h := congrArg (fun f ↦ f c) (he n (n + 1) rfl)
+    simpa only [ConcreteCategory.comp_apply] using h
+  refine ⟨c, ?_⟩
+  apply (AddCommGrpCat.mono_iff_injective (e (n + 1))).mp inferInstance
+  calc
+    e (n + 1) (A.d n (n + 1) c) =
+        (K.d n (n + 1)).f 0 (e n c) := hnat.symm
+    _ = (K.d n (n + 1)).f 0 β := by rw [hc]
+    _ = e (n + 1) a := hea.symm
+
 end HomologicalComplex₂
