@@ -182,3 +182,22 @@ projected when I recommended running it first.  Import reachability *is* worth c
 mechanically (it correctly ruled TateAcyclicity's copy out of scope).
 
 Corrected expectation: the 486 decompositions are the work; there is no shortcut around them.
+
+## Task 2 — decomposition plan for `wedhorn_lemma_834_propA3_part1_gluing`
+WedhornCechAcyclicity.lean:7666-8119 (454 lines).  Author's own numbered Steps:
+
+| Step | lines | span | produces | note |
+|---|---|---|---|---|
+| 1-2 | 49 | 7736-7784 | `gVj` + compatibility | restricted family at each Vj |
+| 3-4 | 8 | 7785-7792 | `yVj` | apply acyclic-gluing, then cast |
+| **5** | **147** | 7793-7939 | `h_yV_compat` | **extract first** — compatibility of yV on V |
+| 6-7 | 6 | 7940-7945 | `x` | apply V-gluing, cast to C.base |
+| **8** | **174** | 7946-8119 | the goal | **extract second** — verify x|D = f D per D |
+
+Steps 5 and 8 are 321 of the 454 lines.  Extract both and the residue is ~70 (still over 50,
+so Steps 1-2 come out next).
+
+**Apply the data-flow rule** (CLEANUP-LOG.md): Step 5 defines `h_yV_compat`, consumed by
+Step 6; Step 8 is terminal.  So Step 5's lemma must RETURN the compatibility fact, and
+Step 8's can take everything as hypotheses.  Do NOT lift a Step boundary without checking
+what it defines for later Steps.
