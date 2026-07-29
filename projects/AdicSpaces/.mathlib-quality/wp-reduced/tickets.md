@@ -621,7 +621,7 @@ propext/Classical.choice/Quot.sound) before marking done.
   `isUniform_of_ringEquiv` (FiniteJetChart:1537).  Sources: [WP] 928–943.
 
 ### [W21] Sheafy.lean I — the embedding field
-- Status: open | File: WP/Sheafy.lean | Depends: W18, W21a | Parallel: with W22
+- Status: done | File: WP/Sheafy.lean | Depends: W18, W21a | Parallel: with W22
 - **Recon note (2026-07-29)**: the FJP template
   (SheafTransfer:83 productRestrictionSub_injective_JetA + :667 embedding) pushes
   the vanishing section to the Milnor-pair components via PUSHED COVERINGS + their
@@ -632,7 +632,7 @@ propext/Classical.choice/Quot.sound) before marking done.
   injectivity is in hand.
 
 ### [W21a] The pushed head cover (shared W21/W22 infrastructure)
-- Status: in_progress (2026-07-29; (i) done, (ii)-(iv) designed) | File: WP/Sheafy.lean | Depends: W18
+- Status: done (2026-07-29; (i) done, (ii)-(iv) designed) | File: WP/Sheafy.lean | Depends: W18
 - **Progress**: (i) DONE — `exists_head_approx_finset_all` (approximation at every
   stage above a threshold, inclusion-upcast), `nonempty_headModelData_all` (the
   exact-stage ∀-M primitive; W18's proof re-threaded — set-before-obtain so g is
@@ -716,7 +716,7 @@ propext/Classical.choice/Quot.sound) before marking done.
   pair.  Sources: [WP] 1135–1218.
 
 ### [W22] Sheafy.lean II — the gluing field
-- Status: open | File: WP/Sheafy.lean | Depends: W18
+- Status: done | File: WP/Sheafy.lean | Depends: W18
 - Decls: `gluing_WPA`.
 - Sketch: [WP] 1156–1218 (decomposition.md E2): common head for the whole cover
   (finitely many data — iterate W18's perturbation with a common M); cover transfer
@@ -729,14 +729,38 @@ propext/Classical.choice/Quot.sound) before marking done.
   C-bound (eq:coefficientwise-gluing-bound) ⇒ null glued family ⇒ TailC0 element ⇒
   pull back along coeffLocEquiv; uniqueness from W21.  Expect maxHeartbeats bumps
   (FJP gluing needed 6400000).  Sources: [WP] 1156–1218.
+- **Progress**: DONE 2026-07-29, axiom-clean. Route DIFFERS from the ticket
+  sketch in one load-bearing way: NO OMT-bounded-inverse / C-bound was needed —
+  nullity of the glued family comes from the head embedding's IsInducing
+  (tendsto_nhds_iff) + componentwise limits (tendsto_pi_nhds) + per-piece
+  TailC0-nullity, transported through headLocEquiv/restrictionMapHom
+  continuity. Infrastructure built: pair-generalized qRestrictP +
+  coeffLoc_restriction_squareP (textual mirror of the P-forms), liftDatum_mono
+  (via mem_liftDatum_iff, the headIncl-comap membership characterization, with
+  the head norm-bound mirror norm_bound_of_isPowerBounded_head),
+  interDatumHead (+ intersection formula + rationality, the FJP interDatum
+  mirror at P_M), pushedCompat_head (factor arbitrary D₃ through the rational
+  intersection — the pushedCompatB pattern, NO lift of D₃), pieceModel,
+  and the choice/restrictionMap_cast pushed-family idiom (hgres/hgd from FJP
+  gluing_JetA). Gotchas: 𝓝-notation not open (use nhds); set_option must
+  precede the variable-in chain, not sit between doc-comment and theorem;
+  destructuring D' : ↥P.cover.covers breaks mem_image.mp at implicit
+  transparency — keep it packed; tendsto_zero_iff_norm_tendsto_zero is used
+  forward.
 
 ### [W23] Sheafy.lean III — wrappers
-- Status: open | File: WP/Sheafy.lean | Depends: W21, W22 | Type: theorems
+- Status: done | File: WP/Sheafy.lean | Depends: W21, W22 | Type: theorems
 - Decls: `wp_isSheafyFor`, `wp_isSheafyComplete`, `wp_structurePresheaf_isSheaf_all`.
 - Sketch: verbatim the FJP wrapper chain (SheafyEndpoints:95/175/213):
   letI/haveI prefix; `isLimitSheaf_of_isSheafy` (SheafyPair:550);
   `isSheafyFor_iff_isSheafyComplete` (RelativeStandardRefinement:201);
   `isSheafyFor_structurePresheaf_isSheaf` (SheafyEndpoints:53).
+- **Progress**: DONE 2026-07-29, axiom-clean — verbatim FJP SheafyEndpoints
+  chain (isLimitSheaf_of_isSheafy pivot, isSheafyFor_iff_isSheafyComplete,
+  isSheafyFor_structurePresheaf_isSheaf). All of [WP] thm 6.2(2) is proven:
+  isSheafy_WPA + wp_isSheafyFor + wp_isSheafyComplete +
+  wp_structurePresheaf_isSheaf_all, plus the strong-sheafiness shifted-weight
+  statement. Sheafy.lean has ZERO sorries.
 
 ### [W24] tateExtEquiv — the Tate-extension bridge
 - Status: done (2026-07-29, bare ring equiv; W24b spawned for topology) | File: WP/Sheafy.lean
