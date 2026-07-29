@@ -90,4 +90,45 @@ theorem total_d_upNat_decomposition (n : ℕ) :
       intro qp hqp
       rw [Category.assoc, K.ιTotalOrZero_d_upNat]
 
+/-- Projection of the total differential to one target bidegree is the sum of
+the incoming horizontal and signed vertical differentials. -/
+theorem total_d_πTotalUpNat (n q p : ℕ) (hqp : q + p = n + 1) :
+    (K.total (.up ℕ)).d n (n + 1) ≫ K.πTotalUpNat q p (n + 1) =
+      (if _hq : 0 < q then
+          K.πTotalUpNat (q - 1) p n ≫ (K.d (q - 1) q).f p
+        else 0) +
+      ((-1 : ℤˣ) ^ q) •
+        (if _hp : 0 < p then
+          K.πTotalUpNat q (p - 1) n ≫ (K.X q).d (p - 1) p
+        else 0) := by
+  apply HomologicalComplex₂.total.hom_ext
+  intro a b hab
+  change a + b = n at hab
+  subst n
+  by_cases ha : a + 1 = q
+  · have hb : b = p := by omega
+    subst q p
+    by_cases hb0 : 0 < b
+    · simp [hb0, Category.assoc, K.ιTotal_d_upNat_assoc]
+    · simp [hb0, K.ιTotal_d_upNat_assoc]
+  · by_cases hav : a = q
+    · have hb : b + 1 = p := by omega
+      subst q p
+      by_cases ha0 : 0 < a
+      · simp [ha0, Category.assoc, K.ιTotal_d_upNat_assoc]
+      · simp [ha0, K.ιTotal_d_upNat_assoc]
+    · by_cases hq : 0 < q
+      · have haq : a ≠ q - 1 := by omega
+        by_cases hp : 0 < p
+        · have hbp : b ≠ p - 1 := by omega
+          simp [ha, hav, hq, hp, haq, Category.assoc,
+            K.ιTotal_d_upNat_assoc]
+        · simp [ha, hav, hq, hp, haq, Category.assoc,
+            K.ιTotal_d_upNat_assoc]
+      · by_cases hp : 0 < p
+        · have hbp : b ≠ p - 1 := by omega
+          simp [ha, hav, hq, hp, Category.assoc,
+            K.ιTotal_d_upNat_assoc]
+        · omega
+
 end HomologicalComplex₂
