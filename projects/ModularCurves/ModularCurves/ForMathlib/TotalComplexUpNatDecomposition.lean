@@ -41,4 +41,29 @@ theorem totalUpNat_decomposition (n : ℕ) :
   · intro hnot
     exact (hnot (Finset.mem_antidiagonal.mpr h)).elim
 
+/-- The signed total differential formula, with inclusions extended by zero away
+from the corresponding total degrees. -/
+@[reassoc]
+theorem ιTotalOrZero_d_upNat (q p n : ℕ) :
+    K.ιTotalOrZero (.up ℕ) q p n ≫
+        (K.total (.up ℕ)).d n (n + 1) =
+      (K.d q (q + 1)).f p ≫
+          K.ιTotalOrZero (.up ℕ) (q + 1) p (n + 1) +
+        ((-1 : ℤˣ) ^ q) • ((K.X q).d p (p + 1) ≫
+          K.ιTotalOrZero (.up ℕ) q (p + 1) (n + 1)) := by
+  by_cases h : q + p = n
+  · subst n
+    rw [K.ιTotalOrZero_eq (.up ℕ) q p (q + p) rfl,
+      K.ιTotalOrZero_eq (.up ℕ) (q + 1) p (q + p + 1)
+        (by change q + 1 + p = q + p + 1; omega),
+      K.ιTotalOrZero_eq (.up ℕ) q (p + 1) (q + p + 1)
+        (by change q + (p + 1) = q + p + 1; omega)]
+    exact K.ιTotal_d_upNat q p
+  · have h₁ : q + 1 + p ≠ n + 1 := by omega
+    have h₂ : q + (p + 1) ≠ n + 1 := by omega
+    rw [K.ιTotalOrZero_eq_zero (.up ℕ) q p n h,
+      K.ιTotalOrZero_eq_zero (.up ℕ) (q + 1) p (n + 1) h₁,
+      K.ιTotalOrZero_eq_zero (.up ℕ) q (p + 1) (n + 1) h₂]
+    simp
+
 end HomologicalComplex₂
