@@ -1004,12 +1004,59 @@ theorem gaussValueF_prefix_mul_sub_convPartial_le {ρ : NNReal} (hρ0 : 0 < ρ)
         ring
     _ ≤ T := hT q.1 q.2 hqN
 
-/-- **The product decomposition** (sol (13), Kedlaya's leading-term control): a
-product on `A^r` differs from the `Φ`-series of the coordinate convolution by at
-most `ρ·v(x)v(y)`. -/
-theorem valued_mul_sub_PhiHatK_convF_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
-    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
-    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) :
+/-- **Past the joint threshold, one factor is already `ρ`-damped.** If `i + j ≥ Ka + Kb`
+then `i ≥ Ka` or `j ≥ Kb`; that factor is below `ρ·A` (resp. `ρ·B`) while the other is
+bounded by its own norm, so the product is at most `ρ·(A·B)`. -/
+private theorem gaussTerm_mul_le_of_add_le {ρ : NNReal} {a b : ℕ → F} {A B : NNReal}
+    {Ka Kb i j : ℕ}
+    (hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ A)
+    (hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ B)
+    (hKa : ∀ n, Ka ≤ n → ρ ^ n * perfectoidValuation p F (a n) < ρ * A)
+    (hKb : ∀ n, Kb ≤ n → ρ ^ n * perfectoidValuation p F (b n) < ρ * B)
+    (hij : Ka + Kb ≤ i + j) :
+    (ρ ^ i * perfectoidValuation p F (a i))
+        * (ρ ^ j * perfectoidValuation p F (b j))
+      ≤ ρ * (A * B) := by
+  rcases (by omega : Ka ≤ i ∨ Kb ≤ j) with hcase | hcase
+  · calc (ρ ^ i * perfectoidValuation p F (a i))
+          * (ρ ^ j * perfectoidValuation p F (b j))
+        ≤ (ρ ^ i * perfectoidValuation p F (a i)) * B :=
+          mul_le_mul_of_nonneg_left (hB j) zero_le
+      _ ≤ (ρ * A) * B := mul_le_mul_of_nonneg_right (hKa i hcase).le zero_le
+      _ = ρ * (A * B) := by ring
+  · calc (ρ ^ i * perfectoidValuation p F (a i))
+          * (ρ ^ j * perfectoidValuation p F (b j))
+        ≤ A * (ρ ^ j * perfectoidValuation p F (b j)) :=
+          mul_le_mul_of_nonneg_right (hA i) zero_le
+      _ ≤ A * (ρ * B) := mul_le_mul_of_nonneg_left (hKb j hcase).le zero_le
+      _ = ρ * (A * B) := by ring
+
+/-- **Prefix sums of the limit coordinates converge back to the element.** -/
+private theorem tendsto_prefixAloc_AlocToHatK {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) :
+    Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
+      (prefixAloc p F ϖ (teichCoeffAr p F ϖ hρ0 hρ1 x) N)) Filter.atTop (nhds x) := by
+  have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 (tendsto_gaussTerm_teichCoeffAr p F ϖ hx)
+  rwa [PhiHatK_teichCoeffAr p F ϖ hx] at h1
+
+/-- **A four-term ultrametric chain.** If `a → s → t → u → z` are each within `ε`, so is
+`a → z`. -/
+private theorem valued_sub_le_of_chain₄ {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {a s t u z : hatK p F hρ0 hρ1} {ε : NNReal} (h1 : Valued.v (a - s) ≤ ε)
+    (h2 : Valued.v (s - t) ≤ ε) (h3 : Valued.v (t - u) ≤ ε) (h4 : Valued.v (u - z) ≤ ε) :
+    Valued.v (a - z) ≤ ε := by
+  rw [show a - z = (a - s) + ((s - t) + ((t - u) + (u - z))) from by ring]
+  exact le_trans (Valuation.map_add _ _ _) (max_le h1
+    (le_trans (Valuation.map_add _ _ _) (max_le h2
+      (le_trans (Valuation.map_add _ _ _) (max_le h3 h4)))))
+
+/-- **The product is `ρ`-close to the reconstruction of the convolution** (nondegenerate
+case).  Compare `x·y` to `Φ(a∗b)` through a four-term chain: prefix products, the partial
+convolution, the convolution's own prefix, and the limit.  The middle comparison is
+controlled by `gaussTerm_mul_le_of_add_le` past a joint threshold. -/
+private theorem valued_mul_sub_PhiHatK_convF_le_of_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ}
+    {hρ1 : ρ < 1} {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (hvv : Valued.v x * Valued.v y ≠ 0) :
     Valued.v (x * y - PhiHatK p F ϖ hρ0 hρ1
         (convF F (teichCoeffAr p F ϖ hρ0 hρ1 x) (teichCoeffAr p F ϖ hρ0 hρ1 y)))
       ≤ ρ * (Valued.v x * Valued.v y) := by
@@ -1024,129 +1071,42 @@ theorem valued_mul_sub_PhiHatK_convF_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ
     fun n => gaussTerm_teichCoeffAr_le p F ϖ hx n
   have hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ Valued.v y :=
     fun n => gaussTerm_teichCoeffAr_le p F ϖ hy n
-  rcases eq_or_ne (Valued.v x * Valued.v y) 0 with hvv | hvv
-  · -- degenerate: all convolution terms vanish, both sides of the difference do
-    have hterm0 : ∀ n, ρ ^ n * perfectoidValuation p F (convF F a b n) = 0 := by
-      intro n
-      refine le_antisymm ?_ zero_le
-      have h1 : perfectoidValuation p F (convF F a b n)
-          ≤ (Finset.range (n + 1)).sup
-            (fun k => perfectoidValuation p F (a k * b (n - k))) := by
-        rw [convF]
-        exact Valuation.map_sum_le _ fun k hk => Finset.le_sup
-          (f := fun k => perfectoidValuation p F (a k * b (n - k))) hk
-      refine le_trans (mul_le_mul_of_nonneg_left h1 zero_le) ?_
-      rw [← hvv]
-      rcases Finset.eq_empty_or_nonempty (Finset.range (n + 1)) with hemp | hne
-      · exact absurd hemp
-          (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero n)).ne_empty
-      obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
-        (fun k => perfectoidValuation p F (a k * b (n - k)))
-      rw [hk₀]
-      have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk₀mem)
-      calc ρ ^ n * perfectoidValuation p F (a k₀ * b (n - k₀))
-          = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
-            * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
-            rw [Valuation.map_mul,
-              show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
-                rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
-            ring
-        _ ≤ Valued.v x * Valued.v y :=
-            mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
-    have hΦ0 : Valued.v (PhiHatK p F ϖ hρ0 hρ1 (convF F a b)) = 0 := by
-      rw [valued_PhiHatK p F ϖ hρ0 hρ1 hdc]
-      exact le_antisymm (ciSup_le fun n => (hterm0 n).le) zero_le
-    have hvxy : Valued.v (x * y) = 0 := by
-      rw [Valuation.map_mul]
-      exact hvv
-    refine le_trans (le_trans (Valuation.map_sub _ _ _) (max_le hvxy.le hΦ0.le))
-      zero_le
-  · -- main branch
-    have hvx0 : Valued.v x ≠ 0 := fun h => hvv (by rw [h, zero_mul])
-    have hvy0 : Valued.v y ≠ 0 := fun h => hvv (by rw [h, mul_zero])
-    have hρvv : 0 < ρ * (Valued.v x * Valued.v y) :=
-      mul_pos hρ0 (pos_iff_ne_zero.mpr hvv)
-    -- the three convergences
-    have hrx : PhiHatK p F ϖ hρ0 hρ1 a = x := by
-      rw [ha]
-      exact PhiHatK_teichCoeffAr p F ϖ hx
-    have hry : PhiHatK p F ϖ hρ0 hρ1 b = y := by
-      rw [hb]
-      exact PhiHatK_teichCoeffAr p F ϖ hy
-    have hSx : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
-        (prefixAloc p F ϖ a N)) Filter.atTop (nhds x) := by
-      have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdx
-      rwa [hrx] at h1
-    have hSy : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
-        (prefixAloc p F ϖ b N)) Filter.atTop (nhds y) := by
-      have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdy
-      rwa [hry] at h1
-    have hSxy := hSx.mul hSy
-    have hSc := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdc
-    have ev1 := eventually_valued_sub_le_of_tendsto p F
-      (hρ0 := hρ0) (hρ1 := hρ1) hSxy hρvv
-    have ev2 := eventually_valued_sub_le_of_tendsto p F
-      (hρ0 := hρ0) (hρ1 := hρ1) hSc hρvv
-    -- the tail threshold for (I₁)
-    have hvxpos : 0 < Valued.v x := pos_iff_ne_zero.mpr hvx0
-    have hvypos : 0 < Valued.v y := pos_iff_ne_zero.mpr hvy0
-    have hρvx : 0 < ρ * Valued.v x := mul_pos hρ0 hvxpos
-    have hρvy : 0 < ρ * Valued.v y := mul_pos hρ0 hvypos
-    obtain ⟨Ka, hKa⟩ := Filter.eventually_atTop.mp (hdx.eventually_lt_const hρvx)
-    obtain ⟨Kb, hKb⟩ := Filter.eventually_atTop.mp (hdy.eventually_lt_const hρvy)
-    have hT : ∀ N, Ka + Kb ≤ N → ∀ i j : ℕ, N ≤ i + j →
-        (ρ ^ i * perfectoidValuation p F (a i))
-          * (ρ ^ j * perfectoidValuation p F (b j))
-        ≤ ρ * (Valued.v x * Valued.v y) := by
-      intro N hN i j hij
-      have hcase : Ka ≤ i ∨ Kb ≤ j := by
-        by_contra hcon
-        push Not at hcon
-        omega
-      rcases hcase with hcase | hcase
-      · calc (ρ ^ i * perfectoidValuation p F (a i))
-              * (ρ ^ j * perfectoidValuation p F (b j))
-            ≤ (ρ ^ i * perfectoidValuation p F (a i)) * Valued.v y :=
-              mul_le_mul_of_nonneg_left (hB j) zero_le
-          _ ≤ (ρ * Valued.v x) * Valued.v y :=
-              mul_le_mul_of_nonneg_right (hKa i hcase).le zero_le
-          _ = ρ * (Valued.v x * Valued.v y) := by ring
-      · calc (ρ ^ i * perfectoidValuation p F (a i))
-              * (ρ ^ j * perfectoidValuation p F (b j))
-            ≤ Valued.v x * (ρ ^ j * perfectoidValuation p F (b j)) :=
-              mul_le_mul_of_nonneg_right (hA i) zero_le
-          _ ≤ Valued.v x * (ρ * Valued.v y) :=
-              mul_le_mul_of_nonneg_left (hKb j hcase).le zero_le
-          _ = ρ * (Valued.v x * Valued.v y) := by ring
-    obtain ⟨N, hNall⟩ :=
-      ((ev1.and ev2).and (Filter.eventually_ge_atTop (Ka + Kb))).exists
-    obtain ⟨⟨hN1, hN2⟩, hNge⟩ := hNall
-    -- the four-term chain
-    have hchain : x * y - PhiHatK p F ϖ hρ0 hρ1 (convF F a b)
-        = (x * y - AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N)
-            * AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N))
-          + ((AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N)
-              * AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N)
-            - AlocToHatK p F ϖ hρ0 hρ1 (convPartialAloc p F ϖ a b N))
-          + ((AlocToHatK p F ϖ hρ0 hρ1 (convPartialAloc p F ϖ a b N)
-              - AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ (convF F a b) N))
-            + (AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ (convF F a b) N)
-              - PhiHatK p F ϖ hρ0 hρ1 (convF F a b)))) := by
-      ring
-    rw [hchain]
-    refine le_trans (Valuation.map_add _ _ _) (max_le ?_ ?_)
-    · rw [Valuation.map_sub_swap]
-      exact hN1
-    refine le_trans (Valuation.map_add _ _ _) (max_le ?_ ?_)
-    · rw [← map_mul, ← map_sub, valued_AlocToHatK,
-        ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub, map_mul]
-      exact gaussValueF_prefix_mul_sub_convPartial_le p F ϖ hρ0 hρ1 a b N
-        (hT N hNge)
-    refine le_trans (Valuation.map_add _ _ _) (max_le ?_ ?_)
-    · rw [← map_sub, valued_AlocToHatK,
-        ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub]
-      exact gaussValueF_convPartial_sub_prefix_le p F ϖ hρ0 hρ1 a b hA hB N
-    · exact hN2
+  have hρvv : 0 < ρ * (Valued.v x * Valued.v y) :=
+    mul_pos hρ0 (pos_iff_ne_zero.mpr hvv)
+  -- the three convergences
+  have hSx := tendsto_prefixAloc_AlocToHatK p F ϖ hx
+  have hSy := tendsto_prefixAloc_AlocToHatK p F ϖ hy
+  rw [← ha] at hSx
+  rw [← hb] at hSy
+  have hvxpos : 0 < Valued.v x :=
+    pos_iff_ne_zero.mpr fun h => hvv (by rw [h, zero_mul])
+  have hvypos : 0 < Valued.v y :=
+    pos_iff_ne_zero.mpr fun h => hvv (by rw [h, mul_zero])
+  obtain ⟨Ka, hKa⟩ := Filter.eventually_atTop.mp
+    (hdx.eventually_lt_const (mul_pos hρ0 hvxpos))
+  obtain ⟨Kb, hKb⟩ := Filter.eventually_atTop.mp
+    (hdy.eventually_lt_const (mul_pos hρ0 hvypos))
+  obtain ⟨N, ⟨hN1, hN2⟩, hNge⟩ :=
+    (((eventually_valued_sub_le_of_tendsto p F (hρ0 := hρ0) (hρ1 := hρ1)
+        (hSx.mul hSy) hρvv).and
+      (eventually_valued_sub_le_of_tendsto p F (hρ0 := hρ0) (hρ1 := hρ1)
+        (tendsto_PhiHatK p F ϖ hρ0 hρ1 hdc) hρvv)).and
+      (Filter.eventually_ge_atTop (Ka + Kb))).exists
+  -- the four-term chain
+  refine valued_sub_le_of_chain₄ p F
+    (s := AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N)
+      * AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N))
+    (t := AlocToHatK p F ϖ hρ0 hρ1 (convPartialAloc p F ϖ a b N))
+    (u := AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ (convF F a b) N))
+    (by rw [Valuation.map_sub_swap]; exact hN1) ?_ ?_ hN2
+  · rw [← map_mul, ← map_sub, valued_AlocToHatK,
+      ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub, map_mul]
+    exact gaussValueF_prefix_mul_sub_convPartial_le p F ϖ hρ0 hρ1 a b N 
+      fun i j hij => gaussTerm_mul_le_of_add_le p F hA hB hKa hKb
+        (le_trans hNge hij)
+  · rw [← map_sub, valued_AlocToHatK,
+      ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub]
+    exact gaussValueF_convPartial_sub_prefix_le p F ϖ hρ0 hρ1 a b hA hB N
 
 /-- Scaled convolution terms are bounded by the product of the input bounds. -/
 theorem gaussTerm_convF_le {ρ : NNReal} (a b : ℕ → F) {A B : NNReal}
@@ -1174,6 +1134,40 @@ theorem gaussTerm_convF_le {ρ : NNReal} (a b : ℕ → F) {A B : NNReal}
             rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
         ring
     _ ≤ A * B := mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
+
+/-- **The product decomposition** (sol (13), Kedlaya's leading-term control): a
+product on `A^r` differs from the `Φ`-series of the coordinate convolution by at
+most `ρ·v(x)v(y)`. -/
+theorem valued_mul_sub_PhiHatK_convF_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) :
+    Valued.v (x * y - PhiHatK p F ϖ hρ0 hρ1
+        (convF F (teichCoeffAr p F ϖ hρ0 hρ1 x) (teichCoeffAr p F ϖ hρ0 hρ1 y)))
+      ≤ ρ * (Valued.v x * Valued.v y) := by
+  set a : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 x with ha
+  set b : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 y with hb
+  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
+  rw [← ha] at hdx
+  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
+  rw [← hb] at hdy
+  have hdc := tendsto_convF p F hdx hdy
+  have hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ Valued.v x :=
+    fun n => gaussTerm_teichCoeffAr_le p F ϖ hx n
+  have hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ Valued.v y :=
+    fun n => gaussTerm_teichCoeffAr_le p F ϖ hy n
+  rcases eq_or_ne (Valued.v x * Valued.v y) 0 with hvv | hvv
+  · -- degenerate: all convolution terms vanish, both sides of the difference do
+    have hterm0 : ∀ n, ρ ^ n * perfectoidValuation p F (convF F a b n) = 0 :=
+      fun n => le_antisymm (hvv ▸ gaussTerm_convF_le p F a b hA hB n) zero_le
+    have hΦ0 : Valued.v (PhiHatK p F ϖ hρ0 hρ1 (convF F a b)) = 0 := by
+      rw [valued_PhiHatK p F ϖ hρ0 hρ1 hdc]
+      exact le_antisymm (ciSup_le fun n => (hterm0 n).le) zero_le
+    have hvxy : Valued.v (x * y) = 0 := by
+      rw [Valuation.map_mul]
+      exact hvv
+    refine le_trans (le_trans (Valuation.map_sub _ _ _) (max_le hvxy.le hΦ0.le))
+      zero_le
+  · exact valued_mul_sub_PhiHatK_convF_le_of_ne_zero p F ϖ hx hy hvv
 
 /-- **Off-diagonal antidiagonal products are strictly dominated.** For nonzero `x, y ∈ A^r`
 with dominant indices `m = deg x` and `l = deg y`, an antidiagonal pair `(k, n − k)` missing

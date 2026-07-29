@@ -256,3 +256,35 @@ in ~1 minute instead of ~40.
 ### Status
 7 of the original 107 over-50 proof bodies are under the bar.  Euclidean holds 13 of the
 remainder, including `valued_mul_sub_PhiHatK_convF_le` (135) and `descent_step` (133).
+
+## 8. `valued_mul_sub_PhiHatK_convF_le` 135 -> under 50
+
+Six extractions: `gaussTerm_mul_le_of_add_le` (past the joint threshold one factor is
+already ρ-damped), `tendsto_prefixAloc_AlocToHatK`, `valued_sub_le_of_chain₄`,
+`valued_mul_sub_PhiHatK_convF_le_of_ne_zero` (the whole nondegenerate branch), plus two
+inlinings.
+
+### FOURTH instance of the misplaced-lemma pattern — this time WITHIN one file
+`gaussTerm_convF_le` was declared at Euclidean:1152 while the proof at Euclidean:1010
+needed it and therefore inlined its 27-line argument.  Moving the declaration ABOVE the
+consumer collapsed that to 2 lines.
+
+So the pattern is declaration ORDER, not merely file order.  A targeted sweep is pure
+profit: for every over-long proof, check whether the fact it is proving inline already
+exists later in the same file.
+
+### Honest accounting — the folder count moves slower than the proof tally
+107 -> 103 over-50 bodies while 8 proofs came under the bar.  Decomposing one long proof
+does not remove one entry: it removes the original and can add back a helper that is
+itself over 50 until cut again.  `valued_mul_sub_PhiHatK_convF_le_of_ne_zero` needed FOUR
+successive trims (lift the branch -> inline the single-use `hT` -> merge the convergence
+bookkeeping -> name the positivity facts) before it came under.
+
+**Budget accordingly: expect ~1.5-2 extraction rounds per proof, not one.**
+
+### Done so far (8)
+235->36, 200->5, 164->11, 137->~32, 135->under, 124->under, 104->under, 55->under.
+
+### Remaining 103 — Euclidean 12, ArCompletion 5, CurveAdicPresentation 1, rest elsewhere
+Biggest: `descent_step` 133 (NINE comment seams), `exact_division` 115, `digit_sub_le` 94
+(no seams — will need segment cutting like the ArCompletion chains).
