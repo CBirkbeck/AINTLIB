@@ -374,7 +374,7 @@ theorem podCongrEquiv_canonicalMap (D D' : RationalLocData E) (hT : D.T = D'.T)
 relation `∑_{x ∈ T} a_x·x = t^ℓ` with unit-ball coefficients, and a perturbation
 `pert` moving each entry by at most `‖t‖^{ℓ+1}`. -/
 structure PerturbSetup (E : Type*) [NormedCommRing E] [IsUltrametricDist E]
-    [NormOneClass E] : Type _ where
+    [NormOneClass E] [ValuationSpectrum.PlusSubring E] : Type _ where
   /-- The pseudouniformizer. -/
   t : E
   htu : IsUnit t
@@ -395,6 +395,11 @@ structure PerturbSetup (E : Type*) [NormedCommRing E] [IsUltrametricDist E]
   pert : E → E
   hpert1 : ∀ x ∈ D.T, ‖pert x‖ ≤ 1
   hpert : ∀ x ∈ D.T, ‖pert x - x‖ ≤ ‖t‖ ^ (ℓ + 1)
+  /-- The chosen ring of definition (the unit ball) lies in `E⁺` ([WP] line 949:
+  "choose a closed ring of definition `E₀ ⊆ E⁺`" — restored 2026-07-29; the first
+  skeleton dropped this source hypothesis, without which the `Spa`-point estimates
+  of `rationalOpen_datum` are unavailable). -/
+  hplus : ∀ x : E, ‖x‖ ≤ 1 → x ∈ ((E⁺ : Subring E) : Set E)
 
 namespace PerturbSetup
 
@@ -465,11 +470,155 @@ theorem datum_isRational (S : PerturbSetup E) : S.datum.IsRational :=
     rw [datum_T]
     exact span_pertImage_eq_top S)
 
+private theorem gv_mul_lt_of_lt_one {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {a b : Γ₀} (ha : a < 1) (hb : b ≠ 0) : a * b < b := by
+  by_contra hcon
+  push_neg at hcon
+  have h1 := mul_le_mul_left hcon b⁻¹
+  rw [mul_inv_cancel₀ hb, mul_assoc, mul_inv_cancel₀ hb, mul_one] at h1
+  exact absurd ha (not_lt.mpr h1)
+
+/-- The scaling pseudouniformizer is topologically nilpotent. -/
+theorem t_isTopologicallyNilpotent (S : PerturbSetup E) :
+    IsTopologicallyNilpotent S.t := by
+  show Filter.Tendsto (S.t ^ ·) Filter.atTop (nhds 0)
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  have hn : ∀ n : ℕ, ‖S.t ^ n‖ = ‖S.t‖ ^ n := fun n => by
+    have h := FiniteJet.norm_pow_mul_of_scale S.hscale n 1
+    rwa [mul_one, norm_one, mul_one] at h
+  exact (Filter.tendsto_congr hn).mpr
+    (tendsto_pow_atTop_nhds_zero_of_lt_one S.ht0.le S.ht1)
+
 /-- Perturbation does not change the rational subset ([WP]: "`α` and `α'` define the
 same rational subset of `Spa(E,E⁺)`" — at every point of the subset
 `|ϖ|^ℓ ≤ |g(x)|`, and the perturbations have value `≤ |ϖ|^{ℓ+1} < |g(x)|`). -/
 theorem rationalOpen_datum (S : PerturbSetup E) :
-    rationalOpen S.datum.T S.datum.s = rationalOpen S.D.T S.D.s := by sorry
+    rationalOpen S.datum.T S.datum.s = rationalOpen S.D.T S.D.s := by
+  classical
+  rw [datum_T, datum_s]
+  ext v
+  constructor
+  · rintro ⟨hspa, hT', hs0'⟩
+    letI : ValuativeRel E := v.toValuativeRel
+    set w := ValuativeRel.valuation E with hw
+    have hvle : ∀ g h : E, v.vle g h ↔ w g ≤ w h := fun g h =>
+      Valuation.Compatible.vle_iff_le (v := w) g h
+    have hble : ∀ f : E, ‖f‖ ≤ 1 → w f ≤ 1 := fun f hf => by
+      have h1 := (hvle f 1).mp (hspa.2 f (S.hplus f hf))
+      rwa [map_one] at h1
+    have hwt1 : w S.t < 1 := by
+      refine lt_of_not_ge fun hge => ?_
+      refine not_vle_one_of_mem_spa_of_topologicallyNilpotent hspa
+        (t_isTopologicallyNilpotent S) ?_
+      rw [hvle, map_one]
+      exact hge
+    have hwT' : ∀ x ∈ S.D.T, w (S.pert x) ≤ w (S.pert S.D.s) := fun x hx =>
+      (hvle _ _).mp (hT' (S.pert x) (Finset.mem_image_of_mem S.pert hx))
+    have hws0' : w (S.pert S.D.s) ≠ 0 := by
+      intro h0
+      refine hs0' ?_
+      rw [hvle, map_zero, h0]
+    -- the primed Bezout gives w(t)^ℓ ≤ w(pert s)
+    obtain ⟨h, hh1, hsum⟩ := exists_perturbed_bezout S
+    have hone : w (1 + S.t * h) = 1 := by
+      have hlt : w (S.t * h) < w 1 := by
+        rw [map_one, map_mul]
+        calc w S.t * w h ≤ w S.t * 1 := mul_le_mul_right (hble h hh1) _
+          _ = w S.t := mul_one _
+          _ < 1 := hwt1
+      rw [Valuation.map_add_eq_of_lt_left _ hlt, map_one]
+    have hpow : w S.t ^ S.ℓ ≤ w (S.pert S.D.s) := by
+      have hle : w (∑ x ∈ S.D.T, S.a x * S.pert x) ≤ w (S.pert S.D.s) := by
+        refine Valuation.map_sum_le _ fun x hx => ?_
+        rw [map_mul]
+        calc w (S.a x) * w (S.pert x) ≤ 1 * w (S.pert S.D.s) :=
+              mul_le_mul' (hble _ (S.ha1 x)) (hwT' x hx)
+          _ = w (S.pert S.D.s) := one_mul _
+      rw [hsum, map_mul, hone, mul_one, map_pow] at hle
+      exact hle
+    have hsmall : ∀ x ∈ S.D.T, w (S.pert x - x) < w (S.pert S.D.s) := by
+      intro x hx
+      obtain ⟨y, hy1, hyEq⟩ := FiniteJet.GraphKoszul.exists_norm_le_one_eq_pow_mul
+        S.htu S.ht0 S.hscale (S.ℓ + 1) _ (S.hpert x hx)
+      rw [hyEq, map_mul, map_pow, pow_succ]
+      calc w S.t ^ S.ℓ * w S.t * w y ≤ w S.t ^ S.ℓ * w S.t * 1 :=
+            mul_le_mul_right (hble y hy1) _
+        _ = w S.t * w S.t ^ S.ℓ := by rw [mul_one, mul_comm]
+        _ ≤ w S.t * w (S.pert S.D.s) := mul_le_mul_right hpow _
+        _ < w (S.pert S.D.s) := gv_mul_lt_of_lt_one hwt1 hws0'
+    have hs_eq : w S.D.s = w (S.pert S.D.s) := by
+      have h1 : w (S.D.s - S.pert S.D.s) < w (S.pert S.D.s) := by
+        have := hsmall S.D.s S.hsT
+        rwa [← Valuation.map_neg, neg_sub] at this
+      have h2 := Valuation.map_add_eq_of_lt_left w (y := S.D.s - S.pert S.D.s) h1
+      rwa [add_sub_cancel] at h2
+    refine ⟨hspa, fun x hx => ?_, fun hvle0 => ?_⟩
+    · rw [hvle]
+      have hx' : w x ≤ w (S.pert S.D.s) := by
+        have h1 : w (x - S.pert x) < w (S.pert S.D.s) := by
+          have := hsmall x hx
+          rwa [← Valuation.map_neg, neg_sub] at this
+        calc w x = w (S.pert x + (x - S.pert x)) := by rw [add_sub_cancel]
+          _ ≤ max (w (S.pert x)) (w (x - S.pert x)) := Valuation.map_add _ _ _
+          _ ≤ w (S.pert S.D.s) := max_le (hwT' x hx) h1.le
+      rw [← hs_eq] at hx'
+      exact hx'
+    · rw [hvle, map_zero] at hvle0
+      exact hws0' (by rw [← hs_eq]; exact le_antisymm hvle0 zero_le)
+  · rintro ⟨hspa, hT, hs0⟩
+    letI : ValuativeRel E := v.toValuativeRel
+    set w := ValuativeRel.valuation E with hw
+    have hvle : ∀ g h : E, v.vle g h ↔ w g ≤ w h := fun g h =>
+      Valuation.Compatible.vle_iff_le (v := w) g h
+    have hble : ∀ f : E, ‖f‖ ≤ 1 → w f ≤ 1 := fun f hf => by
+      have h1 := (hvle f 1).mp (hspa.2 f (S.hplus f hf))
+      rwa [map_one] at h1
+    have hwt1 : w S.t < 1 := by
+      refine lt_of_not_ge fun hge => ?_
+      refine not_vle_one_of_mem_spa_of_topologicallyNilpotent hspa
+        (t_isTopologicallyNilpotent S) ?_
+      rw [hvle, map_one]
+      exact hge
+    have hwT : ∀ x ∈ S.D.T, w x ≤ w S.D.s := fun x hx =>
+      (hvle _ _).mp (hT x hx)
+    have hws0 : w S.D.s ≠ 0 := by
+      intro h0
+      refine hs0 ?_
+      rw [hvle, map_zero, h0]
+    have hpow : w S.t ^ S.ℓ ≤ w S.D.s := by
+      have hle : w (∑ x ∈ S.D.T, S.a x * x) ≤ w S.D.s := by
+        refine Valuation.map_sum_le _ fun x hx => ?_
+        rw [map_mul]
+        calc w (S.a x) * w x ≤ 1 * w S.D.s :=
+              mul_le_mul' (hble _ (S.ha1 x)) (hwT x hx)
+          _ = w S.D.s := one_mul _
+      rw [S.hbez, map_pow] at hle
+      exact hle
+    have hsmall : ∀ x ∈ S.D.T, w (S.pert x - x) < w S.D.s := by
+      intro x hx
+      obtain ⟨y, hy1, hyEq⟩ := FiniteJet.GraphKoszul.exists_norm_le_one_eq_pow_mul
+        S.htu S.ht0 S.hscale (S.ℓ + 1) _ (S.hpert x hx)
+      rw [hyEq, map_mul, map_pow, pow_succ]
+      calc w S.t ^ S.ℓ * w S.t * w y ≤ w S.t ^ S.ℓ * w S.t * 1 :=
+            mul_le_mul_right (hble y hy1) _
+        _ = w S.t * w S.t ^ S.ℓ := by rw [mul_one, mul_comm]
+        _ ≤ w S.t * w S.D.s := mul_le_mul_right hpow _
+        _ < w S.D.s := gv_mul_lt_of_lt_one hwt1 hws0
+    have hs_eq : w (S.pert S.D.s) = w S.D.s := by
+      have h2 := Valuation.map_add_eq_of_lt_left w
+        (y := S.pert S.D.s - S.D.s) (x := S.D.s) (hsmall S.D.s S.hsT)
+      rwa [add_sub_cancel] at h2
+    refine ⟨hspa, fun t' ht' => ?_, fun hvle0 => ?_⟩
+    · obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp ht'
+      rw [hvle]
+      have hx' : w (S.pert x) ≤ w S.D.s := by
+        calc w (S.pert x) = w (x + (S.pert x - x)) := by rw [add_sub_cancel]
+          _ ≤ max (w x) (w (S.pert x - x)) := Valuation.map_add _ _ _
+          _ ≤ w S.D.s := max_le (hwT x hx) (hsmall x hx).le
+      rw [hs_eq]
+      exact hx'
+    · rw [hvle, map_zero] at hvle0
+      exact hws0 (by rw [← hs_eq]; exact le_antisymm hvle0 zero_le)
 
 /-- **The canonical isomorphism of completed localizations** ([WP]
 lem:small-perturbation: "their completed rational localizations are canonically

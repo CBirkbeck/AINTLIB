@@ -280,7 +280,7 @@ propext/Classical.choice/Quot.sound) before marking done.
   Sources: [WP] 1286–1297, 917–926.
 
 ### [W12] Perturbation.lean I — data, rationality, subsets
-- Status: in_progress | File: WP/Perturbation.lean | Depends: W3, W4 | Parallel: with W9-W11
+- Status: done | File: WP/Perturbation.lean | Depends: W3, W4 | Parallel: with W9-W11
 - Progress 2026-07-29: SUB-TICKET W12a (pod-independence, spawned per Tier A2)
   COMPLETE: `locTopology_pod_eq` (general-datum pod-independence — NEW math, no
   repo precedent; the global case was CompletionModelIndependence).  Route: every
@@ -297,8 +297,26 @@ propext/Classical.choice/Quot.sound) before marking done.
   GOTCHAS: AddSubgroup.closure_induction case names are mem/zero/add/neg (NOT
   one/mul/inv); `Submodule.mem_toAddSubgroup` doesn't exist — membership in
   `.toAddSubgroup` is accepted defeq (pass the Ideal-membership directly).
-  REMAINING: datum/datum_T/datum_s, datum_isRational, rationalOpen_datum,
-  exists_integral_bezout.
+  DONE 2026-07-29 (all of W12): datum := genPieceDatum(unitBallPod, image pert,
+  pert s, span-top) — datum_T/datum_s rfl; primed Bezout Σa·pert = t^ℓ(1+th) via
+  ultrametric sum bound (`IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg`) +
+  ball division; unit via `Units.oneSub (−(t·h))` + `sub_neg_eq_add`;
+  exists_integral_bezout via `Submodule.mem_span_finset` + t^ℓ-scaling (M := Σ‖c‖,
+  `exists_pow_lt_of_lt_one` + `lt_div_iff₀`; beta-`show` before if-rewrites).
+  rationalOpen_datum: STATEMENT-FAITHFULNESS FIX — added `hplus : unit ball ⊆ E⁺`
+  field + [PlusSubring E] binder to PerturbSetup ([WP] line 949 "E₀ ⊆ E⁺" was
+  dropped in skeletonization; without it the Spa estimates are unprovable).  Proof
+  at the canonical valuation (`Valuation.Compatible.vle_iff_le` bridge, Cor732
+  pattern): w(t)<1 from `not_vle_one_of_mem_spa_of_topologicallyNilpotent`
+  (SpaCompact) + t topologically nilpotent (norm-powers); w(t^ℓ) ≤ w(s) via
+  `Valuation.map_sum_le` over the (primed) Bezout with w(1+th)=1
+  (`Valuation.map_add_eq_of_lt_left`); w(pert−x) < w(s) by ball-division +
+  strict-mul helper `gv_mul_lt_of_lt_one` (b⁻¹-cancellation — NO MulRightStrictMono
+  in Γ₀, and `ring` is UNAVAILABLE in Γ₀ (no addition)); w(pert s) = w(s) by
+  add_eq_of_lt_left; both inclusions symmetric.  2026-mathlib renames:
+  `mul_le_mul_left'`→`mul_le_mul_right` (h) (c) for c*a≤c*b, `mul_le_mul_right'`→
+  `mul_le_mul_left`, `zero_le'`→`zero_le`.  Axioms clean ×5.
+  NEW import: FJP.RestrictedGaussAdic (ball division).
 - Decls: `podCongrEquiv` (+3 laws), `PerturbSetup.datum` (+`datum_T`, `datum_s`),
   `datum_isRational`, `rationalOpen_datum`, `exists_integral_bezout`.
 - Sketch: podCongr — SEARCH FIRST (`CompletionModelIndependence`,
