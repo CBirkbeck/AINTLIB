@@ -29269,3 +29269,20 @@ or group law.
 `ForMathlib/SchemeModuleOrderedBaseCechBaseChangeExact.lean`. Focused builds and the
 9,532-job `lake build ModularCurves` pass. Both declarations have exactly the expected
 `propext`, `Classical.choice`, and `Quot.sound` axioms.
+
+### CLAIM (rule 5, OWNER-FLW-ITERATED-MODULE-PULLBACK, `state:done`,
+codex/fibrewise-weierstrass-picard-tranche3-monoidal, 2026-07-29): add
+`AlgebraicGeometry.Scheme.Modules.pullbackIteratedBaseChangeIso`. For a scheme
+morphism `f : X ⟶ S`, successive base changes `t : T ⟶ S` and `u : U ⟶ T`,
+and `M : X.Modules`, identify direct pullback of `M` along the first projection
+over `u ≫ t` with iterated pullback along both first projections, transported
+through `pullbackLeftPullbackSndIso f t u`. Use only `pullbackComp`,
+`pullbackCongr`, and the canonical pullback associator. Add no option, sorry,
+admit, axiom, unsafe declaration, geometric hypothesis, Pic-zero route, or
+group-law dependency; root-index the new module and audit its axioms.
+
+**Progress (2026-07-29): DONE.** The root-indexed module
+`ForMathlib/SchemeModulePullbackIteratedBaseChange.lean` defines the claimed
+isomorphism using exactly the canonical pullback coherence maps. Its focused
+2,576-job build and style linter pass, and its axiom audit reports exactly
+`propext`, `Classical.choice`, and `Quot.sound`.
