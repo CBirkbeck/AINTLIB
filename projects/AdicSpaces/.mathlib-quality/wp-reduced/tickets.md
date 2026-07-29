@@ -1139,9 +1139,17 @@ propext/Classical.choice/Quot.sound) before marking done.
   final glue). RECON RESOLVED (hrw-decomposition "subring-coding
   simplification"): Q = WPHead K (fun _ => 0) N exactly; the embedding IS
   Subring.inclusion. (i) DONE: `wpHeadSupport_le_zero_weight`
-  (HeadReduced.lean). NEXT: (ii) the parity module decomposition
-  Q = Σ_ε P·U^ε (reuse the FormalReduced/Tail parity-splitting machinery),
-  then (iii) the semilocal completed decomposition per the L1-adjudication's
+  (HeadReduced.lean). NEXT (ii): the finiteness route via the EVEN subring —
+  Heads.lean already has wpEvenSupport (T_N = K⟨W,Z⟩, WEIGHT-INDEPENDENT:
+  even exponents have wpWeight 0) + evenSupportEquiv (≅ Tate algebra
+  P K (N+1), isometric) + halve/unhalve; the paper's finite-stage-normal-form
+  𝒜_N ≅ ⊕_ε T_N·Y^ε gives BOTH P (at w) and Q (at 0) as module-finite over
+  the SAME T_N ⊆ P, hence Q finite over P with the T_N-generators (a subring
+  chain triviality). Check whether the ⊕-decomposition itself is formalized
+  (grep normal-form in Heads) — if only the even-equiv exists, prove the
+  spanning statement `Q = Σ_{ε ∈ {0,1}^N} span-over-T_N of U^ε` directly by
+  parity-splitting of coefficients (halve/unhalve pattern). Then (iii) the
+  semilocal completed decomposition per the L1-adjudication's
   AdicCompletion.evalₐ toolkit.
 - Decls: `head_completedLocal_reduced_of_wa_mem`.  Requires its own decomposition
   round when opened (planned route: explicit completed support model + Φ-style
