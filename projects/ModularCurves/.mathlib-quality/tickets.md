@@ -29058,3 +29058,38 @@ classical theorem, stream IRR).
 ### PROGRESS (OWNER-FLW-INTEGRATION-TRANCHE-3, 2026-07-13): the option-free core through `dualRestrictIso`, `dualPullbackHom`, `dualPullbackHom_naturality`, and `dualPullbackIsoOfIsInvertible` is reconciled and builds under both its focused target and `lake build ModularCurves`. The umbrella build exposed that `PoleSheaf.lean` already carried the generic `UnitPullback` declarations; it now imports the standalone module and drops the duplicate definitions and proofs, removing two pre-existing backward-elaboration option wrappers without changing the pole-sheaf API. The transitive axiom audit reports only `propext`, `Classical.choice`, and `Quot.sound`; source guards find no option, sorry, axiom, unsafe declaration, noetherianity, or extra hypothesis in the new stack. The monoidal-unit trivialization and completed `PicComparison` criterion remain pending in this tranche.
 
 ### CLAIM (rule 5, OWNER-FLW-SEPARATED-STAGE, codex/fibrewise-weierstrass-picard-tranche3-monoidal, 2026-07-16): prove `Scheme.Hom.isSeparatedAffineIntersectionFunctor_affineIntersectionFunctor_of_isProper`, `AffineIntersectionUnitCocycle.exists_modelWithAffineIntersectionConditionsAndSeparated`, and `IsInvertible.exists_finiteStageModelOfFinitePresentationSeparatedBaseChangeIso_of_isProper`; synchronize open, pushout, separated, cocycle, and line-bundle base-change data at one finite stage, with no option, Noetherianity, extra geometric hypothesis, sorry, axiom, unsafe declaration, Pic-zero route, or duplicate tensor infrastructure.
+
+---
+
+## [GAP-A] update after the codex merge (2026-07-29)
+
+`codex/fibrewise-weierstrass-picard-tranche3-monoidal` is merged into `dev/modular-curves`.
+Verified in the merged tree, **axiom-clean** (propext / Classical.choice / Quot.sound only):
+
+- `sectionPoleSheafPower_six_baseSectionsBasisOfCartierGenerator`
+  (`EllipticCurve/PoleSheafMonomialBasis.lean`) — explicit basis of `π_*𝒪(6·D_0)` from a
+  Cartier generator; ditto degrees 4 and 5.
+- `sectionPoleSheafPower_projModel_subsingleton_H_one`
+  (`EllipticCurve/PoleSheafModelHOne.lean`) — `H¹` of the pole sheaves on a projective
+  Weierstrass model vanishes.
+- `sectionPoleSheafPower_six_locallyWeierstrass_of_CartierGenerator`
+  (`EllipticCurve/PoleSheafWeierstrassComparison.lean`) — the codex campaign's own target,
+  `FibrewiseElliptic → LocallyWeierstrass` via the degree-6 pole sheaf.
+
+**Consequence for GAP-A-1.** The chart identity needs `ℓ = y − λx − ν ∈ Γ(𝒪(3D_0))` and
+`v = x − x_{P+Q} ∈ Γ(𝒪(2D_0))`; the monomial-basis lemmas now supply exactly that calculus,
+so the identity `I(D_P)·I(D_Q)·I(D_{−(P+Q)}) = (ℓ)` can be proved in the pole-sheaf
+filtration rather than by hand. Use `PoleSheafWeierstrassChartIdeal` /
+`PoleSheafCartierTrivialization` for the ideal side and the `*BaseChange` files
+(`PoleSheafPowerOneBaseChange`, `PoleSheafFiltrationBaseChange`,
+`PoleSheafPushforwardBaseChangeLinearEquiv`) for the descent.
+
+**Consequence for the route.** With `H¹` vanishing available, revisit whether the
+universal-pair detour is still needed at all: the obstacle was that fibrewise triviality
+does not descend over a non-reduced base, and a genuine seesaw needs cohomology-and-base-
+change. That is now much closer than when the route was written, so **re-scope GAP-A-1
+before implementing it**.
+
+Note: `ForMathlib/SheafCechHOneComparison.lean` has one failure in the merged tree (a
+`change` into `equiv₀`-shape). It is an orphan that nothing imports; it blocks none of the
+above.
