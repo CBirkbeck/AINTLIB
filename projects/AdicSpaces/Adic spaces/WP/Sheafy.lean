@@ -185,6 +185,50 @@ theorem comap_rhoHead_mem_iff (M : ℕ) (DH : RationalLocData (WPHead K w M))
       exact hc
 
 variable {K w} in
+open scoped Classical in
+/-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
+with common-stage head data transfers to a rational covering on the head, with
+subset and covering properties by the `rhoHead` pullback. -/
+theorem exists_pushedHeadCover (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
+    ∃ (M : ℕ) (C' : RationalCoveringData (WPHead K w M)), C'.IsRational := by
+  classical
+  obtain ⟨M, ⟨DHb, hDHb, hopenb⟩, hp⟩ :=
+    exists_common_headModel_stage ϖ hK₀ C hC
+  choose DHp hDHp hopenp using fun (D : ↥C.covers) => hp D.1 D.2
+  refine ⟨M, ⟨DHb, C.covers.attach.image DHp, ?_, ?_⟩, ?_, ?_⟩
+  · -- hsubset
+    intro DH' hDH'
+    obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hDH'
+    intro v hv
+    have hvspa : v ∈ Spa (WPHead K w M) ((WPHead K w M)⁺) := hv.1
+    have h1 := (comap_rhoHead_mem_iff M (DHp D) (hDHp D) v hvspa).mpr hv
+    rw [hopenp D] at h1
+    have h2 := C.hsubset D.1 D.2 h1
+    rw [← hopenb] at h2
+    exact (comap_rhoHead_mem_iff M DHb hDHb v hvspa).mp h2
+  · -- hcover
+    intro v hv
+    have hvspa : v ∈ Spa (WPHead K w M) ((WPHead K w M)⁺) := hv.1
+    have h1 := (comap_rhoHead_mem_iff M DHb hDHb v hvspa).mpr hv
+    rw [hopenb] at h1
+    obtain ⟨D, hD, hmem⟩ := C.hcover _ h1
+    refine ⟨DHp ⟨D, hD⟩, Finset.mem_image_of_mem _ (Finset.mem_attach _ _), ?_⟩
+    have h2 : ValuationSpectrum.comap (rhoHead K w M) v ∈
+        rationalOpen (liftDatum (DHp ⟨D, hD⟩) (hDHp ⟨D, hD⟩)).T
+          (liftDatum (DHp ⟨D, hD⟩) (hDHp ⟨D, hD⟩)).s := by
+      rw [hopenp ⟨D, hD⟩]
+      exact hmem
+    exact (comap_rhoHead_mem_iff M (DHp ⟨D, hD⟩) (hDHp ⟨D, hD⟩) v hvspa).mp h2
+  · -- base rational
+    exact hDHb
+  · -- pieces rational
+    intro DH' hDH'
+    obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hDH'
+    exact hDHp D
+
+variable {K w} in
 /-- The embedding half of the sheaf condition for `𝒜` (the
 `productRestrictionSub_isEmbedding_JetA` shape, `FJP/Over/SheafTransfer.lean:667`). -/
 theorem productRestrictionSub_isEmbedding_WPA (ϖ : Uniformizer K)
