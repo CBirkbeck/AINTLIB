@@ -830,6 +830,24 @@ propext/Classical.choice/Quot.sound) before marking done.
   realizing `shiftWeight` (variables 1..s ↦ freed slots); support condition
   transported (freed slots weight 0).  This is the campaign's one pure-plumbing
   ticket; budget the Coram-Fubini idioms (maxSynthPendingDepth 8, maxHeartbeats).
+- **Leaf plan for the TOPOLOGICAL stage (2026-07-29 late; the algebraic stage
+  = W24 is done)**:
+  * W24b-t1 `mem_mvTateAlgNhd_iff_norm` (at A := WPA K w, canonical
+    IsTateRing.principalPair): membership in the basis nhd `mvTateAlgNhd s P₀ k`
+    ⟺ every MvPowerSeries-coefficient has norm ≤ ‖t₀‖^k (t₀ = the principal
+    generator). Ingredients: mvTateAlgNhd_preimage_eq +
+    mvPairIdeal-power-membership ⟺ coefficientwise I₀^k (a
+    mem_span_unitBall_pow_iff-analogue at the mv-pair; check what the
+    isAdic-subspace proof uses), and the WPA-norm-characterization of
+    I₀^k-membership (principal ⟹ ‖·‖ ≤ ‖t₀‖^k, unitBallPod-style).
+  * W24b-t2: WPA-(shiftWeight)-ball ⟺ coefficient-sup bound
+    (norm_eq_iSup_coeffA + Real.iSup_le-iff with BddAbove from norm_coeffA_le).
+  * W24b-t3: transport t1 ⟺ t2 along the flatten's coefficient bijection
+    (tateExtToFlat_coeff + the slotEquiv pair split) ⟹ continuity at 0 both
+    ways ⟹ bicontinuity (additive-group topologies, translation).
+  * W24b-t4: pair-level wrapper (image of mvPairSubring = unit ball / pod
+    transport; the RingOfIntegralElements statement).
+
 
 ### [R1] Reduced.lean I — MvPowerSeries reducedness (mathlib-grade)
 - Status: done | File: WP/Reduced.lean | Depends: none | Parallel: yes (early)
