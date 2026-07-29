@@ -553,7 +553,33 @@ propext/Classical.choice/Quot.sound) before marking done.
 - Status: open | Depends: W18 | Type: cleanup
 
 ### [W19] Chart.lean I — datum, head model, domain, reduced
-- Status: open | File: WP/Chart.lean | Depends: W15, W16, W17, W11
+- Status: done (2026-07-29) | File: WP/Chart.lean | Depends: W15, W16, W17, W11
+- **Progress**: COMPLETE sorry-free + axiom-clean (module 3157 jobs; only the two W20
+  decls remain sorried in the file). Delivered: chartHeadDatum block (genPieceDatum at
+  the piHead unit-ball pod; span {W,pi} = top); wpHeadSupport_zero_eq_even (stage-0
+  evenness vacuous) + headZeroEquiv (subringCongr.trans evenSupportEquiv) + norm;
+  isDomain_P_one (multiplicative Gauss norm, W2); headZeroEquiv_WaHead/_constHead
+  (unhalve-coefficient computations); chartRescale (X -> piX as restrictedEval at K),
+  chartCoeff = rescale o headZeroEquiv + value laws; chartFwdP (restrictedEval with
+  ite-tuple (X or 1) per datumEnum entry) + graph-kernel + chartFwd quotient-lift +
+  continuity; chartRev (X -> [X_W]); BOTH roundtrips (polyToP-density equalizers;
+  rev o chartCoeff = headConst by density THROUGH headZeroEquiv — the W-relation
+  [W] = [pi][X_W] realizes W -> piX; the pi-entry kills by unit cancellation qX = 1);
+  chartQHeadEquiv record; norm_restrictedEval_le (NEW generic nonexpansiveness in a
+  Chart-local NormBound section — Evaluation.lean's B is deliberately norm-free, so
+  it CANNOT live there; explicit `hone` hypothesis instead of NormOneClass B) =>
+  chartQHeadEquiv_norm by the two-sided nonexpansive sandwich (NO division identity
+  needed: fwd via norm_mk_lt representatives + le_of_forall_pos_le_add, rev via the
+  roundtrip); isDomain_chartQHead (Injective.isDomain along toRingHom);
+  isDomain_chart (rhoQ.val <> 0 by pushing to K<X> and norm-positivity;
+  isDomain_tailC0 w 0 + coeffLocEquiv-transport); isReduced_chart (domain => reduced).
+  GOTCHAS: `variable {K w} in` DROPS binders unused in the STATEMENT (w-free lemmas
+  need w-instantiation inside proofs, e.g. (w := fun _ => 0)); Set-coercion of an
+  Ideal needs the FULL Set-type spelled out (Set _ metavar blocks coercion);
+  mixed alias-instance `x + x`/`x * 1` goals need explicit `rfl` (simp/rw auto-rfl
+  both fail); Function.Injective.isDomain wants .toRingHom not an ascription;
+  isDomain_tailC0 takes w N explicitly; long unicode heredocs to python break —
+  ALWAYS use Write-tool script files.
 - Decls: `chartHeadDatum` (+`_T`, `_s`, `_isRational`), `chartQHeadEquiv`
   (+`_norm`), `isDomain_chartQHead`, `isDomain_chart`, `isReduced_chart`.
 - Sketch: datum := ⟨unitBallPod (piHead-bundle), {WaHead, piHead}, piHead,

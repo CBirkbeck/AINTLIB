@@ -718,18 +718,127 @@ noncomputable def chartQHeadEquiv (ϖ : Uniformizer K)
     map_mul' := map_mul _
     map_add' := map_add _ }
 
+section NormBound
+
+variable {E : Type*} [NormedCommRing E] [IsUltrametricDist E] [NormOneClass E]
+  [CompleteSpace E]
+variable {B : Type*} [NormedCommRing B] [IsUltrametricDist B] [CompleteSpace B]
+variable {m : ℕ}
+
+/-- The evaluation is nonexpansive when the coefficient hom is and the tuple lies
+in the unit ball (each Cauchy term is bounded by the Gauss norm; ultrametric
+partial sums stay in the closed ball). -/
+theorem norm_restrictedEval_le (φ : E →+* B) (hφ : Continuous φ)
+    (hφ1 : ∀ x, ‖φ x‖ ≤ ‖x‖) (b : Fin m → B)
+    (hb : ∀ i, TopologicalRing.IsPowerBounded (b i))
+    (hb1 : ∀ i, ‖b i‖ ≤ 1) (hone : ‖(1 : B)‖ ≤ 1)
+    (F : FiniteJet.GraphKoszul.P E m) :
+    ‖restrictedEval φ hφ b hb F‖ ≤ ‖F‖ := by
+  classical
+  have hterm : ∀ t : Fin m →₀ ℕ,
+      ‖φ (MvPowerSeries.coeff t F.1) * ∏ i, b i ^ t i‖ ≤ ‖F‖ := by
+    intro t
+    have hprod : ‖∏ i, b i ^ t i‖ ≤ 1 := by
+      refine Finset.prod_induction _ (fun x => ‖x‖ ≤ 1)
+        (fun x y hx hy => le_trans (norm_mul_le x y)
+          (mul_le_one₀ hx (norm_nonneg y) hy)) hone (fun i _ => ?_)
+      have hb' : ∀ n : ℕ, ‖b i ^ n‖ ≤ 1 := by
+        intro n
+        cases n with
+        | zero => rw [pow_zero]; exact hone
+        | succ k =>
+            exact le_trans (norm_pow_le' (b i) k.succ_pos)
+              (pow_le_one₀ (norm_nonneg _) (hb1 i))
+      exact hb' (t i)
+    calc ‖φ (MvPowerSeries.coeff t F.1) * ∏ i, b i ^ t i‖
+        ≤ ‖φ (MvPowerSeries.coeff t F.1)‖ * ‖∏ i, b i ^ t i‖ := norm_mul_le _ _
+      _ ≤ ‖MvPowerSeries.coeff t F.1‖ * 1 :=
+          mul_le_mul (hφ1 _) hprod (norm_nonneg _) (norm_nonneg _)
+      _ = ‖MvPowerSeries.coeff t F.1‖ := mul_one _
+      _ ≤ ‖F‖ := FiniteJet.GraphKoszul.norm_coeff_le_gauss F t
+  have hHasSum := (summable_evalFamily φ hφ b hb F).hasSum
+  have hball : IsClosed {x : B | ‖x‖ ≤ ‖F‖} :=
+    isClosed_le continuous_norm continuous_const
+  exact hball.mem_of_tendsto hHasSum (Filter.Eventually.of_forall fun s =>
+    IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg (norm_nonneg F)
+      fun t _ => hterm t)
+
+end NormBound
+
+variable {K w} in
+theorem norm_chartRescale_le (ϖ : Uniformizer K)
+    (y : FiniteJet.GraphKoszul.P K 1) :
+    ‖chartRescale (K := K) ϖ y‖ ≤ ‖y‖ := by
+  refine norm_restrictedEval_le (E := K) (B := FiniteJet.GraphKoszul.P K 1)
+    _ _ (fun x => ?_) _ _ (fun i => ?_) (le_of_eq norm_one) y
+  · rw [RingHom.comp_apply]
+    exact le_of_eq (FiniteJet.GraphKoszul.norm_tP x fun z => norm_mul x z)
+  · rw [map_mul, FiniteJet.GraphKoszul.norm_tP_mul ϖ.val
+      (fun z => norm_mul ϖ.val z), norm_polyToP_X1 (K := K), mul_one]
+    exact ϖ.norm_val_lt_one.le
+
+variable {K w} in
+theorem norm_chartCoeff_le (ϖ : Uniformizer K) (x : WPHead K w 0) :
+    ‖chartCoeff (K := K) (w := w) ϖ x‖ ≤ ‖x‖ := by
+  rw [chartCoeff, RingHom.comp_apply]
+  refine le_trans (norm_chartRescale_le ϖ _) ?_
+  exact le_of_eq (norm_headZeroEquiv x)
+
+variable {K w} in
+theorem norm_chartFwdP_le (ϖ : Uniformizer K)
+    (G : FiniteJet.GraphKoszul.P (WPHead K w 0)
+      (chartHeadDatum (w := w) ϖ).T.card) :
+    ‖chartFwdP (K := K) (w := w) ϖ G‖ ≤ ‖G‖ := by
+  classical
+  refine norm_restrictedEval_le (E := WPHead K w 0)
+    (B := FiniteJet.GraphKoszul.P K 1) _ _ (norm_chartCoeff_le ϖ) _ _
+    (fun i => ?_) (le_of_eq norm_one) G
+  split_ifs
+  · exact le_of_eq (norm_polyToP_X1 (K := K))
+  · exact le_of_eq norm_one
+
+variable {K w} in
+theorem norm_chartRev_le (ϖ : Uniformizer K)
+    (y : FiniteJet.GraphKoszul.P K 1) :
+    ‖chartRev (K := K) (w := w) ϖ y‖ ≤ ‖y‖ := by
+  have hone : ‖(1 : QHead (chartHeadDatum (w := w) ϖ))‖ ≤ 1 := by
+    refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+    exact le_of_eq norm_one
+  refine norm_restrictedEval_le (E := K)
+    (B := QHead (chartHeadDatum (w := w) ϖ)) _ _ (fun a => ?_) _ _
+    (fun i => norm_qX_le_one _ _) hone y
+  rw [RingHom.comp_apply]
+  exact le_trans (norm_headConst_le _ _) (le_of_eq (by rw [norm_constHead]))
+
 variable {K w} in
 theorem chartQHeadEquiv_norm (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (x : QHead (chartHeadDatum (w := w) ϖ)) :
-    ‖chartQHeadEquiv ϖ hK₀ x‖ = ‖x‖ := by sorry
+    ‖chartQHeadEquiv ϖ hK₀ x‖ = ‖x‖ := by
+  refine le_antisymm ?_ ?_
+  · refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨G, hG, hGn⟩ := Ideal.Quotient.norm_mk_lt x hε
+    calc ‖chartQHeadEquiv ϖ hK₀ x‖
+        = ‖chartFwdP (K := K) (w := w) ϖ G‖ := by
+          rw [show chartQHeadEquiv ϖ hK₀ x = chartFwd (K := K) (w := w) ϖ x
+            from rfl, ← hG, chartFwd_mk]
+      _ ≤ ‖G‖ := norm_chartFwdP_le ϖ G
+      _ ≤ ‖x‖ + ε := hGn.le
+  · have h1 : ‖x‖ = ‖chartRev (K := K) (w := w) ϖ
+        (chartFwd (K := K) (w := w) ϖ x)‖ := by
+      rw [chartRev_chartFwd]
+    rw [h1]
+    exact norm_chartRev_le ϖ _
 
 variable {K w} in
 /-- The chart head localization is an integral domain (transport from `K⟨X⟩`, whose
 Gauss norm is multiplicative). -/
 theorem isDomain_chartQHead (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsDomain (QHead (chartHeadDatum (w := w) ϖ)) := by sorry
+    IsDomain (QHead (chartHeadDatum (w := w) ϖ)) := by
+  haveI := isDomain_P_one (K := K)
+  exact Function.Injective.isDomain (chartQHeadEquiv ϖ hK₀).toRingHom
+    (chartQHeadEquiv ϖ hK₀).injective
 
 /-! ### `ℬ` is a domain ([WP] prop:weighted-chart-domain-nonuniform, first half) -/
 
@@ -741,7 +850,41 @@ domain" — realized through the `Φ`-embedding of the `TailC0` model into
 `MvPowerSeries` over the domain `K⟨X⟩`). -/
 theorem isDomain_chart (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsDomain (presheafValue (chartDatum (w := w) ϖ)) := by sorry
+    IsDomain (presheafValue (chartDatum (w := w) ϖ)) := by
+  haveI hQ : IsDomain (QHead (chartHeadDatum (w := w) ϖ)) :=
+    isDomain_chartQHead ϖ hK₀
+  have hρ0 : (rhoQ (chartHeadDatum (w := w) ϖ)).val ≠ 0 := by
+    intro h0
+    have h1 := congrArg (chartFwd (K := K) (w := w) ϖ) h0
+    rw [map_zero] at h1
+    rw [show (rhoQ (chartHeadDatum (w := w) ϖ)).val =
+      headConst (chartHeadDatum (w := w) ϖ) (WaHead K w 0) from rfl,
+      show headConst (chartHeadDatum (w := w) ϖ) (WaHead K w 0) =
+        Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+          (FiniteJet.GraphKoszul.polyToP
+            (MvPolynomial.C (WaHead K w 0))) from rfl,
+      chartFwd_mk, chartFwdP_C, chartCoeff_WaHead] at h1
+    have h2 := congrArg (fun z : FiniteJet.GraphKoszul.P K 1 => ‖z‖) h1
+    rw [show ‖FiniteJet.GraphKoszul.polyToP
+        (MvPolynomial.C ϖ.val * MvPolynomial.X (0 : Fin 1))‖ =
+      ‖ϖ.val‖ * ‖FiniteJet.GraphKoszul.polyToP
+        (MvPolynomial.X (0 : Fin 1))‖ from by
+        rw [map_mul]
+        exact FiniteJet.GraphKoszul.norm_tP_mul ϖ.val
+          (fun z => norm_mul ϖ.val z) _,
+      norm_polyToP_X1 (K := K), mul_one, norm_zero] at h2
+    exact absurd h2.symm (ne_of_lt ϖ.norm_val_pos)
+  haveI hT : IsDomain (TailC0 w 0 (QHead (chartHeadDatum (w := w) ϖ))
+      (rhoQ (chartHeadDatum (w := w) ϖ))) := by
+    refine isDomain_tailC0 w 0 _ fun x hx => ?_
+    rcases mul_eq_zero.mp hx with h | h
+    · exact absurd h hρ0
+    · exact h
+  exact Function.Injective.isDomain
+    (coeffLocEquiv ϖ hK₀ (chartHeadDatum (w := w) ϖ)
+      (chartHeadDatum_isRational ϖ)).toRingHom
+    (coeffLocEquiv ϖ hK₀ (chartHeadDatum (w := w) ϖ)
+      (chartHeadDatum_isRational ϖ)).injective
 
 /-! ### `ℬ` is not uniform ([WP] prop:weighted-chart-domain-nonuniform, second half) -/
 
@@ -780,6 +923,8 @@ contrast with the FJP example ([WP] rem:second-example-relation: "Its bad chart
 remains a domain"). -/
 theorem isReduced_chart (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsReduced (presheafValue (chartDatum (w := w) ϖ)) := by sorry
+    IsReduced (presheafValue (chartDatum (w := w) ϖ)) := by
+  haveI := isDomain_chart (w := w) ϖ hK₀
+  infer_instance
 
 end WeightedParity
