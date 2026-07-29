@@ -495,12 +495,113 @@ theorem tateExtToWPA_injective (s : ℕ) :
   exact h1
 
 variable {K w} in
+/-- The value-level coefficient family of a shifted-weight element is null. -/
+theorem shiftg_coeff_null (s : ℕ) (g : WPA K (shiftWeight w s)) :
+    Filter.Tendsto (fun u : ℕ →₀ ℕ => MvPowerSeries.coeff u g.1.1)
+      Filter.cofinite (nhds 0) := by
+  have hg : Filter.Tendsto (fun u : ℕ →₀ ℕ =>
+      ‖MvPowerSeries.coeff u g.1.1‖ * u.prod fun _ k => (1 : ℝ) ^ k)
+      Filter.cofinite (nhds 0) := g.1.2
+  rw [show (fun u : ℕ →₀ ℕ => ‖MvPowerSeries.coeff u g.1.1‖ *
+      u.prod fun _ k => (1 : ℝ) ^ k) =
+    (fun u : ℕ →₀ ℕ => ‖MvPowerSeries.coeff u g.1.1‖) from
+    funext fun u => by simp] at hg
+  exact tendsto_zero_iff_norm_tendsto_zero.mpr hg
+
+variable {K w} in
+/-- The unflatten of a shifted-weight element: the `t`-th coefficient in `𝒜`. -/
+noncomputable def unflattenCoeff (s : ℕ) (g : WPA K (shiftWeight w s))
+    (t : Fin s →₀ ℕ) : WPA K w :=
+  ⟨⟨fun v => MvPowerSeries.coeff (slotRecomb s t v) g.1.1, by
+      have hinj : Function.Injective (fun v => slotRecomb s t v) := by
+        intro v₁ v₂ hv
+        have h1 := congrArg (slotInr s) hv
+        rwa [slotInr_slotRecomb, slotInr_slotRecomb] at h1
+      have hfib := (shiftg_coeff_null s g).comp hinj.tendsto_cofinite
+      show Filter.Tendsto (fun v : ℕ →₀ ℕ =>
+        ‖MvPowerSeries.coeff (slotRecomb s t v) g.1.1‖ *
+          v.prod fun _ k => (1 : ℝ) ^ k) Filter.cofinite (nhds 0)
+      rw [show (fun v : ℕ →₀ ℕ =>
+          ‖MvPowerSeries.coeff (slotRecomb s t v) g.1.1‖ *
+            v.prod fun _ k => (1 : ℝ) ^ k) =
+        (fun v : ℕ →₀ ℕ =>
+          ‖MvPowerSeries.coeff (slotRecomb s t v) g.1.1‖) from
+        funext fun v => by simp]
+      exact tendsto_zero_iff_norm_tendsto_zero.mp hfib⟩,
+    fun v hv => by
+      refine g.2 (slotRecomb s t v) ?_
+      intro hc
+      have h2 := (wpMem_shiftWeight_iff w s (slotRecomb s t v)).mp hc
+      rw [slotInr_slotRecomb] at h2
+      exact hv h2⟩
+
+variable {K w} in
+theorem unflatten_isRestricted (s : ℕ) (g : WPA K (shiftWeight w s)) :
+    MvPowerSeries.IsRestricted
+      (fun t : Fin s →₀ ℕ => unflattenCoeff (K := K) (w := w) s g t) := by
+  classical
+  refine Metric.tendsto_nhds.mpr fun ε hε => ?_
+  rw [Filter.eventually_cofinite]
+  have hε2 : 0 < ε / 2 := by linarith
+  have hg : {u : ℕ →₀ ℕ |
+      ε / 2 ≤ ‖MvPowerSeries.coeff u g.1.1‖}.Finite := by
+    have h6 := Metric.tendsto_nhds.mp (shiftg_coeff_null s g) (ε / 2) hε2
+    rw [Filter.eventually_cofinite] at h6
+    refine h6.subset fun u hu => ?_
+    rw [Set.mem_setOf_eq] at hu ⊢
+    intro hc
+    rw [dist_zero_right] at hc
+    linarith
+  refine Set.Finite.subset (hg.image (slotInl s)) ?_
+  intro t ht
+  rw [Set.mem_setOf_eq] at ht
+  have hnorm : ε ≤ ‖unflattenCoeff (K := K) (w := w) s g t‖ := by
+    by_contra hc
+    push_neg at hc
+    refine ht ?_
+    rw [dist_zero_right]
+    exact hc
+  -- extract a fiber witness ≥ ε/2
+  have hwit : ∃ v : ℕ →₀ ℕ,
+      ε / 2 ≤ ‖MvPowerSeries.coeff (slotRecomb s t v) g.1.1‖ := by
+    by_contra hc
+    push_neg at hc
+    have hle : ‖unflattenCoeff (K := K) (w := w) s g t‖ ≤ ε / 2 := by
+      rw [norm_eq_iSup_coeffA]
+      refine ciSup_le fun v => ?_
+      exact (hc v).le
+    linarith
+  obtain ⟨v, hv⟩ := hwit
+  refine ⟨slotRecomb s t v, ?_, ?_⟩
+  · rw [Set.mem_setOf_eq]
+    exact hv
+  · exact slotInl_slotRecomb s t v
+
+variable {K w} in
+theorem tateExtToWPA_surjective (s : ℕ) :
+    Function.Surjective (tateExtToWPA (K := K) (w := w) s) := by
+  classical
+  intro g
+  refine ⟨⟨fun t => unflattenCoeff (K := K) (w := w) s g t,
+    unflatten_isRestricted s g⟩, ?_⟩
+  refine Subtype.ext (Subtype.ext ?_)
+  refine MvPowerSeries.ext fun u => ?_
+  show MvPowerSeries.coeff u (tateExtToFlat (K := K) (w := w) s
+    ⟨fun t => unflattenCoeff (K := K) (w := w) s g t,
+      unflatten_isRestricted s g⟩) = MvPowerSeries.coeff u g.1.1
+  rw [tateExtToFlat_coeff]
+  show MvPowerSeries.coeff (slotRecomb s (slotInl s u) (slotInr s u)) g.1.1 =
+    MvPowerSeries.coeff u g.1.1
+  rw [slotRecomb_slots]
+
+variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex
 of restricted power series; nested-vs-flat plumbing). -/
 noncomputable def tateExtEquiv (s : ℕ) :
-    ↥(restrictedMvPowerSeriesSubring s (WPA K w)) ≃+* WPA K (shiftWeight w s) := by
-  sorry
+    ↥(restrictedMvPowerSeriesSubring s (WPA K w)) ≃+* WPA K (shiftWeight w s) :=
+  RingEquiv.ofBijective (tateExtToWPA (K := K) (w := w) s)
+    ⟨tateExtToWPA_injective s, tateExtToWPA_surjective s⟩
 
 -- The topological refinement of `tateExtEquiv` (bicontinuity for the project's
 -- Tate-algebra topology on `restrictedMvPowerSeriesSubring`, cf.

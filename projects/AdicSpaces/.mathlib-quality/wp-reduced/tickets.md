@@ -656,7 +656,37 @@ propext/Classical.choice/Quot.sound) before marking done.
   `isSheafyFor_structurePresheaf_isSheaf` (SheafyEndpoints:53).
 
 ### [W24] tateExtEquiv — the Tate-extension bridge
-- Status: in_progress (2026-07-29) | File: WP/Sheafy.lean | Depends: W3 | Parallel: yes
+- Status: done (2026-07-29, bare ring equiv; W24b spawned for topology) | File: WP/Sheafy.lean
+- **Progress**: the BARE ring equivalence `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` is
+  COMPLETE sorry-free + axiom-clean (module 3161 jobs). Full delivered chain:
+  slotTo/slotInv/slotEquiv (0 ↦ inr 0, 1..s ↦ inl, >s ↦ inr shifted);
+  tateExtAmbient (Xia sumAlgEquiv + mathlib renameEquiv) with coefficient law
+  (embDomain identity via the mapDomain route — embDomain_apply is DITE-shaped,
+  avoid); wpaVal (double subtype); tateExtToFlat + injectivity + coeff law;
+  slotInr/slotInl/slot_ext/slotRecomb + roundtrip laws;
+  wpWeight_shiftWeight_eq (filter-normalized sums + sum_nbij' along n ↦ n−s) and
+  wpMem_shiftWeight_iff; tateExtToFlat_support (3b) and
+  tateExtToFlat_isRestrictedGauss (3c joint cofiniteness: outer null + per-t inner
+  Gauss-null glued along the slot split; Set.Finite.of_finite_image needs (f := ·),
+  Set.mem_biUnion needs (x := ·)); tateExtToWPA (two-layer corestriction) +
+  injectivity; the unflatten (unflattenCoeff per-t with fiber-null via
+  Injective.tendsto_cofinite composition — value-level nullity shiftg_coeff_null
+  extracted first since g.1.2 displays as subring-membership, ascribe the
+  Tendsto-have; support via wpMem_shiftWeight_iff reversed;
+  unflatten_isRestricted via the ε/2 fiber-witness against norm_eq_iSup_coeffA and
+  the slotInl-image of the finite big-set) + the coeff-ext roundtrip
+  (slotRecomb_slots); tateExtEquiv := RingEquiv.ofBijective.
+
+### [W24b] tateExtEquiv — topological refinement (Huber-pair level)
+- Status: open | File: WP/Sheafy.lean | Depends: W24
+- Per the ChatGPT-5.6 review note on W24: state and prove the bicontinuity of
+  `tateExtEquiv` for the project's Tate-algebra topology on
+  `restrictedMvPowerSeriesSubring` (`mvTateAlgebraTopology'` letI) and the
+  ring-of-definition/plus-subring transport (isometry of the flatten: the Gauss
+  norm is a coefficient-sup, invariant under the slot reindex — sup-of-sup
+  collapse along slot_ext/slotRecomb). Needed by the strong-sheafiness statement
+  in the project's Tate-extension vocabulary at the PAIR level; the bare
+  `wp_stronglySheafy`-wrapper only needs W21-23.
 - **Progress (design settled 2026-07-29, implementation starting)**: route =
   ambient-first flatten, then restrict. Stage 1 (exponent/variable plumbing):
   slotEquiv : ℕ ≃ (Fin s ⊕ ℕ) sending 0 ↦ inr 0, i ∈ [1..s] ↦ inl (i-1),
