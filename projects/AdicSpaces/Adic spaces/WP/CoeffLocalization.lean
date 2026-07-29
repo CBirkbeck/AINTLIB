@@ -6,6 +6,7 @@ import «Adic spaces».WP.Tail
 import «Adic spaces».WP.Perturbation
 import «Adic spaces».WP.Evaluation
 import «Adic spaces».FJP.KoszulStrictClosed
+import «Adic spaces».FJP.FiniteJetFunctoriality
 
 /-!
 # Coefficientwise localization ([WP] §6.4, prop:coefficientwise-localization)
@@ -325,6 +326,89 @@ theorem isUnit_headConst_s (ϖ : Uniformizer K)
     ((isUnit_piHead ϖ).map (headConst DH)).pow ℓ
   rw [hmap] at htu
   exact isUnit_of_mul_isUnit_left htu
+
+variable {K w N} in
+/-- The Gauss norm of a Tate variable in the head model is at most `1`. -/
+theorem norm_qX_le_one (DH : RationalLocData (WPHead K w N)) (i : Fin DH.T.card) :
+    ‖qX DH i‖ ≤ 1 := by
+  classical
+  refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+  rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine Real.iSup_le (fun t => ?_) zero_le_one
+  rw [FiniteJet.finsupp_prod_one, mul_one, coeff_polyToP, MvPolynomial.coeff_X']
+  split_ifs
+  · exact le_of_eq norm_one
+  · rw [norm_zero]
+    exact zero_le_one
+
+variable {K w N} in
+/-- The algebraic forward map of the head bridge: `IsLocalization.Away.lift` along
+the graph-model Bezout unit. -/
+noncomputable def headLocFwdAlg (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    Localization.Away DH.s →+* QHead DH :=
+  IsLocalization.Away.lift DH.s (isUnit_headConst_s ϖ DH hDH)
+
+variable {K w N} in
+theorem headLocFwdAlg_algebraMap (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) (x : WPHead K w N) :
+    headLocFwdAlg ϖ DH hDH (algebraMap (WPHead K w N) (Localization.Away DH.s) x) =
+      headConst DH x :=
+  IsLocalization.Away.lift_eq _ _ x
+
+variable {K w N} in
+/-- The forward map sends `t/s` to the corresponding Tate variable. -/
+theorem headLocFwdAlg_divByS (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    {t : WPHead K w N} (ht : t ∈ DH.T) :
+    headLocFwdAlg ϖ DH hDH (divByS t DH.s) =
+      qX DH ((datumEnum DH).symm ⟨t, ht⟩) := by
+  have hu := isUnit_headConst_s ϖ DH hDH
+  refine hu.mul_right_cancel ?_
+  have hspec : headLocFwdAlg ϖ DH hDH (divByS t DH.s) * headConst DH DH.s =
+      headConst DH t := by
+    have h1 : divByS t DH.s *
+        algebraMap (WPHead K w N) (Localization.Away DH.s) DH.s =
+        algebraMap (WPHead K w N) (Localization.Away DH.s) t := by
+      rw [divByS]
+      exact IsLocalization.mk'_spec _ _ _
+    calc headLocFwdAlg ϖ DH hDH (divByS t DH.s) * headConst DH DH.s
+        = headLocFwdAlg ϖ DH hDH (divByS t DH.s) *
+            headLocFwdAlg ϖ DH hDH
+              (algebraMap (WPHead K w N) (Localization.Away DH.s) DH.s) := by
+          rw [headLocFwdAlg_algebraMap]
+      _ = headLocFwdAlg ϖ DH hDH (divByS t DH.s *
+            algebraMap (WPHead K w N) (Localization.Away DH.s) DH.s) :=
+          (map_mul _ _ _).symm
+      _ = headLocFwdAlg ϖ DH hDH
+            (algebraMap (WPHead K w N) (Localization.Away DH.s) t) := by rw [h1]
+      _ = headConst DH t := headLocFwdAlg_algebraMap ϖ DH hDH t
+  rw [hspec]
+  have henum : ((datumEnum DH ((datumEnum DH).symm ⟨t, ht⟩) : ↥DH.T) :
+      WPHead K w N) = t := by
+    rw [Equiv.apply_symm_apply]
+  calc headConst DH t
+      = headConst DH ((datumEnum DH ((datumEnum DH).symm ⟨t, ht⟩) : ↥DH.T) :
+          WPHead K w N) := by rw [henum]
+    _ = headConst DH DH.s * qX DH ((datumEnum DH).symm ⟨t, ht⟩) :=
+        headConst_datumEnum DH _
+    _ = qX DH ((datumEnum DH).symm ⟨t, ht⟩) * headConst DH DH.s := mul_comm _ _
+
+variable {K w N} in
+theorem headLocFwdAlg_continuous (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    @Continuous _ _ DH.topology _ (headLocFwdAlg ϖ DH hDH) := by
+  refine locTopology_continuous_lift DH.P DH.T DH.s DH.hopen _ ?_ ?_
+  · have h_eq : (headLocFwdAlg ϖ DH hDH).comp
+        (algebraMap (WPHead K w N) (Localization.Away DH.s)) = headConst DH :=
+      RingHom.ext fun x => headLocFwdAlg_algebraMap ϖ DH hDH x
+    rw [show ⇑((headLocFwdAlg ϖ DH hDH).comp
+        (algebraMap (WPHead K w N) (Localization.Away DH.s))) = ⇑(headConst DH)
+      from congrArg _ h_eq]
+    exact headConst_continuous DH
+  · intro t ht
+    rw [headLocFwdAlg_divByS ϖ DH hDH ht]
+    exact FiniteJet.isPowerBounded_of_norm_le_one (norm_qX_le_one DH _)
 
 /-! ### The head bridge `presheafValue ≃ QHead` -/
 
