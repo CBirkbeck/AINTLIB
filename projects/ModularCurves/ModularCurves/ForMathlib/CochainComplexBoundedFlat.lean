@@ -13,12 +13,74 @@ explicit kernels and quotients used by the algebraic base-change API.
 -/
 
 open CategoryTheory
+open TensorProduct
 
 universe u v
 
 namespace ModularCurves
 
 variable {R : Type u} [CommRing R]
+
+/-- Flat scalar extension preserves finite generation of the homology of a short complex of
+modules. -/
+theorem ShortComplex.moduleFinite_baseChangeHomology_of_flat
+    (S : ShortComplex (ModuleCat.{v} R))
+    (A : Type v) [CommRing A] [Algebra R A] [Module.Flat R A]
+    [Module.Finite R S.homology] :
+    Module.Finite A
+      (ShortComplex.moduleCatMk
+        (S.f.hom.baseChange A) (S.g.hom.baseChange A)
+        (LinearMap.baseChange_comp_eq_zero S.f.hom S.g.hom
+          (shortComplexModuleCatCompEqZero S) A)).homology := by
+  let p := LinearMap.range S.moduleCatToCycles
+  letI : Module.Finite R
+      (LinearMap.ker S.g.hom ⧸ p) :=
+    Module.Finite.quotient_range_moduleCatToCycles S
+  letI : Module.Finite A
+      (A ⊗[R] (LinearMap.ker S.g.hom ⧸ p)) :=
+    Module.Finite.base_change R A _
+  let eTensor :=
+    TensorProduct.AlgebraTensorModule.tensorQuotientEquiv
+      (R := R) A R A p
+  have hrange :
+      LinearMap.range (S.moduleCatToCycles.baseChange A) =
+        LinearMap.range
+          (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype) := by
+    change LinearMap.range
+        (TensorProduct.AlgebraTensorModule.lTensor A A
+          S.moduleCatToCycles) =
+      LinearMap.range
+        (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype)
+    apply SetLike.ext
+    intro x
+    change x ∈ LinearMap.range
+        (LinearMap.lTensor A S.moduleCatToCycles) ↔
+      x ∈ LinearMap.range (LinearMap.lTensor A p.subtype)
+    rw [LinearMap.lTensor_range A]
+  let eRange := Submodule.quotEquivOfEq
+    (LinearMap.range
+      (TensorProduct.AlgebraTensorModule.lTensor A A p.subtype))
+    (LinearMap.range (S.moduleCatToCycles.baseChange A))
+    hrange.symm
+  let eHomology := LinearMap.baseChangeHomologyOneEquiv
+    S.f.hom S.g.hom (shortComplexModuleCatCompEqZero S) A
+    (kerBaseChangeComparison_bijective_of_flat A S.g.hom)
+  exact Module.Finite.equiv (eTensor.trans eRange |>.trans eHomology)
+
+/-- Flat categorical extension of scalars preserves finite generation of short-complex
+homology. -/
+theorem ShortComplex.moduleFinite_map_extendScalars_homology_of_flat
+    (S : ShortComplex (ModuleCat.{v} R))
+    (A : Type v) [CommRing A] [Algebra R A] [Module.Flat R A]
+    [Module.Finite R S.homology] :
+    Module.Finite A
+      ((S.map
+        (ModuleCat.extendScalars.{u, v, v} (algebraMap R A))).homology) := by
+  letI :=
+    ModularCurves.ShortComplex.moduleFinite_baseChangeHomology_of_flat S A
+  exact Module.Finite.equiv
+    (ShortComplex.homologyMapIso
+      (shortComplexModuleCatMkBaseChangeIso S A)).toLinearEquiv
 
 /-- A bounded cochain complex of flat modules with finite homology is exact over the base when
 it is exact after every field base change. -/
