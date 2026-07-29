@@ -318,6 +318,130 @@ theorem tailCoeff_tailTrunc_mul (S T : Finset (TailIdx N)) (f g : WPA K w)
   rw [Finset.mem_filter, Finset.HasAntidiagonal.mem_antidiagonal] at hp
   rw [hp.1]
 
+/-- The norm of `W` in the head is `1`. -/
+theorem norm_WaHead : ‖WaHead K w N‖ = 1 := by
+  rw [← norm_headIncl K w N (WaHead K w N), headIncl_WaHead]
+  show ‖wpMonomial K w (wpMem_single_zero w 1) 1‖ = 1
+  rw [norm_wpMonomial, norm_one]
+
+theorem norm_WaHead_pow_le_one (e : ℕ) : ‖WaHead K w N ^ e‖ ≤ 1 := by
+  rcases Nat.eq_zero_or_pos e with rfl | he
+  · rw [pow_zero]
+    exact le_of_eq norm_one
+  · refine le_trans (norm_pow_le' _ he) ?_
+    rw [norm_WaHead, one_pow]
+
+open scoped Classical in
+/-- **The tail convolution formula** ([WP] eq:tail-multiplication in full):
+the tail coefficients of a product are the `W`-twisted convolution of the tail
+coefficients.  Proved from the finite-truncation case by density of the
+isometric decomposition. -/
+theorem tailCoeff_mul (f g : WPA K w) (μ : TailIdx N) :
+    tailCoeff K w N μ (f * g) =
+      ∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+        WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+          (tailCoeff K w N p.1 f * tailCoeff K w N p.2 g) := by
+  classical
+  refine eq_of_forall_dist_le fun ε hε => ?_
+  rw [dist_eq_norm]
+  set M := max (max ‖f‖ ‖g‖) 1 with hMdef
+  have hM1 : (1 : ℝ) ≤ M := le_max_right _ _
+  have hMf : ‖f‖ ≤ M := le_trans (le_max_left _ _) (le_max_left _ _)
+  have hMg : ‖g‖ ≤ M := le_trans (le_max_right _ _) (le_max_left _ _)
+  have hM0 : (0 : ℝ) < M := lt_of_lt_of_le one_pos hM1
+  obtain ⟨S, hS⟩ := exists_tailTrunc_close (N := N) f (div_pos hε hM0)
+  obtain ⟨T, hT⟩ := exists_tailTrunc_close (N := N) g (div_pos hε hM0)
+  set F := tailTrunc S f with hFdef
+  set G := tailTrunc T g with hGdef
+  have hFn : ‖F‖ ≤ M := le_trans (norm_tailTrunc_le S f) hMf
+  have hGn : ‖G‖ ≤ M := le_trans (norm_tailTrunc_le T g) hMg
+  have hdivM : ε / M * M = ε := div_mul_cancel₀ ε hM0.ne'
+  -- middle identity: the finite formula with gates folded into truncations
+  have hmid : tailCoeff K w N μ (F * G) =
+      ∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+        WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+          (tailCoeff K w N p.1 F * tailCoeff K w N p.2 G) := by
+    rw [tailCoeff_tailTrunc_mul]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [tailCoeff_tailTrunc, tailCoeff_tailTrunc]
+  -- error term A: the product moves by at most ε
+  have hA : ‖tailCoeff K w N μ (f * g) - tailCoeff K w N μ (F * G)‖ ≤ ε := by
+    rw [← tailCoeff_sub]
+    refine le_trans (norm_tailCoeff_le K w N μ _) ?_
+    have hsplit : f * g - F * G = (f - F) * g + F * (g - G) := by ring
+    rw [hsplit]
+    refine le_trans (IsUltrametricDist.norm_add_le_max _ _) ?_
+    refine max_le ?_ ?_
+    · refine le_trans (norm_mul_le _ _) ?_
+      calc ‖f - F‖ * ‖g‖ ≤ ε / M * M :=
+            mul_le_mul hS hMg (norm_nonneg _) (div_pos hε hM0).le
+        _ = ε := hdivM
+    · refine le_trans (norm_mul_le _ _) ?_
+      calc ‖F‖ * ‖g - G‖ ≤ M * (ε / M) :=
+            mul_le_mul hFn hT (norm_nonneg _) (le_trans (norm_nonneg _) hFn)
+        _ = ε := by rw [mul_comm]; exact hdivM
+  -- error term B: each summand moves by at most ε
+  have hB : ‖(∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+      WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+        (tailCoeff K w N p.1 F * tailCoeff K w N p.2 G)) -
+      ∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+        WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+          (tailCoeff K w N p.1 f * tailCoeff K w N p.2 g)‖ ≤ ε := by
+    rw [← Finset.sum_sub_distrib]
+    refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hε.le
+      fun p _ => ?_
+    rw [← mul_sub]
+    refine le_trans (norm_mul_le _ _) ?_
+    refine le_trans (mul_le_mul_of_nonneg_right (norm_WaHead_pow_le_one _)
+      (norm_nonneg _)) ?_
+    rw [one_mul]
+    have hsplit : tailCoeff K w N p.1 F * tailCoeff K w N p.2 G -
+        tailCoeff K w N p.1 f * tailCoeff K w N p.2 g =
+        (tailCoeff K w N p.1 F - tailCoeff K w N p.1 f) * tailCoeff K w N p.2 G +
+          tailCoeff K w N p.1 f *
+            (tailCoeff K w N p.2 G - tailCoeff K w N p.2 g) := by ring
+    rw [hsplit]
+    refine le_trans (IsUltrametricDist.norm_add_le_max _ _) ?_
+    refine max_le ?_ ?_
+    · refine le_trans (norm_mul_le _ _) ?_
+      calc ‖tailCoeff K w N p.1 F - tailCoeff K w N p.1 f‖ *
+            ‖tailCoeff K w N p.2 G‖
+          ≤ ε / M * M := by
+            refine mul_le_mul ?_ (le_trans (norm_tailCoeff_le K w N p.2 G) hGn)
+              (norm_nonneg _) (div_pos hε hM0).le
+            rw [← tailCoeff_sub]
+            exact le_trans (norm_tailCoeff_le K w N p.1 _)
+              (by rw [norm_sub_rev]; exact hS)
+        _ = ε := hdivM
+    · refine le_trans (norm_mul_le _ _) ?_
+      calc ‖tailCoeff K w N p.1 f‖ *
+            ‖tailCoeff K w N p.2 G - tailCoeff K w N p.2 g‖
+          ≤ M * (ε / M) := by
+            refine mul_le_mul (le_trans (norm_tailCoeff_le K w N p.1 f) hMf) ?_
+              (norm_nonneg _) hM0.le
+            rw [← tailCoeff_sub]
+            exact le_trans (norm_tailCoeff_le K w N p.2 _)
+              (by rw [norm_sub_rev]; exact hT)
+        _ = ε := by rw [mul_comm]; exact hdivM
+  -- assemble
+  have hdecomp : tailCoeff K w N μ (f * g) -
+      ∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+        WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+          (tailCoeff K w N p.1 f * tailCoeff K w N p.2 g) =
+      (tailCoeff K w N μ (f * g) - tailCoeff K w N μ (F * G)) +
+        ((∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+          WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w μ.1) *
+            (tailCoeff K w N p.1 F * tailCoeff K w N p.2 G)) -
+          ∑ p ∈ Finset.HasAntidiagonal.antidiagonal μ,
+            WaHead K w N ^ (wpWeight w p.1.1 + wpWeight w p.2.1 -
+              wpWeight w μ.1) *
+              (tailCoeff K w N p.1 f * tailCoeff K w N p.2 g)) := by
+    rw [hmid]
+    ring
+  rw [hdecomp]
+  refine le_trans (IsUltrametricDist.norm_add_le_max _ _) ?_
+  exact max_le hA hB
+
 end TailConv
 
 /-! ### The head graph model `QHead` -/
@@ -410,13 +534,6 @@ theorem polyToP_C_val (x : WPHead K w N) {m : ℕ} :
   rcases eq_or_ne t 0 with rfl | ht
   · rfl
   · rw [if_neg (fun h => ht h.symm), if_neg ht]
-
-variable {K w N} in
-/-- The norm of `W` in the head is `1`. -/
-theorem norm_WaHead : ‖WaHead K w N‖ = 1 := by
-  rw [← norm_headIncl K w N (WaHead K w N), headIncl_WaHead]
-  show ‖wpMonomial K w (wpMem_single_zero w 1) 1‖ = 1
-  rw [norm_wpMonomial, norm_one]
 
 variable {K w N} in
 /-- The twist element of the head model: the image of `W` (norm `≤ 1` since the

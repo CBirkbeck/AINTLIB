@@ -482,6 +482,22 @@ propext/Classical.choice/Quot.sound) before marking done.
   the TailC0 target (ofHead ∘ head-rev per coefficient + summability W14).
   Sources: [WP] 1036–1095.
 
+### [W17-KEYSTONE progress note 2026-07-29]
+- `tailCoeff_mul` PROVEN (the full [WP] eq:tail-multiplication): route = finite
+  tail-truncations (`tailTrunc` + coeff/norm laws + `exists_tailTrunc_close` off
+  W9's cofinite-tendsto) → finite case by W9-algebra (`headIncl_eTail_mul` from
+  eTail_mul with atom-splitting map_muls for `ring`; double-sum → `sum_product'` →
+  `sum_filter` → a Finset-equality of filtered pair-sets) → density limit
+  (`eq_of_forall_dist_le`, ε/M-truncations, ultrametric two-term splits).
+  GOTCHAS: `ring` treats hI(x·y) vs hIx·hIy as distinct atoms — pre-split with
+  map_mul-haves; `if_neg`-lambdas against ∧-conditions need `show ¬(_ ∧ _) from` 
+  (bare lambdas elaborate against a whnf-reduced condition); forward-references:
+  norm_WaHead had to move before the TailConv section.
+  NEXT for W17-core: wpaTailEquiv (hom := tailCoeff-family, mul := tailCoeff_mul,
+  inj := tailCoeff_injective; surjectivity via nonarch summation of
+  headIncl·eTail-series) then coeffLocEquiv := (TailC0.map headConst) ∘ wpaTailEquiv
+  route + Away.lift/extensionHom bridges (all tools in place).
+
 ### [W18] CoeffLocalization IV — every localization has finite-head form
 - Status: open | File: WP/CoeffLocalization.lean | Depends: W17, W13
 - Decls: `nonempty_headModelData` (via `HeadModelData`).
