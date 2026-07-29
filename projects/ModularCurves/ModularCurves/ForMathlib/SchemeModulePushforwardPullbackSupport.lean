@@ -35,7 +35,7 @@ noncomputable local instance pushforwardPullbackSupportMonoidal
 
 /-- A source module that vanishes over the inverse image of the support
 complement of `M` has pushforward support contained in the support of `M`. -/
-private theorem closedStalkSupport_pushforward_le_of_isZero_restrict
+theorem closedStalkSupport_pushforward_le_of_isZero_restrict
     {X Y : Scheme.{u}} (f : X ⟶ Y) (M : Y.Modules)
     [M.IsFiniteType] [M.IsQuasicoherent] (N : X.Modules)
     (hNzero :
