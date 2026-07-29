@@ -686,6 +686,25 @@ propext/Classical.choice/Quot.sound) before marking done.
   coefficients q_mu ∈ QHead DHb have all P.cover-restrictions vanishing (the
   square) → transport along headLocEquiv-b.symm to presheafValue DHb →
   isSheafy_WPHead.separationSub at P.cover gives q_mu = 0 → e_base z = 0 → z = 0.
+- **(iv) square — refined route (2026-07-29, after a draft round)**: the POINTWISE
+  square needs fraction-handling (the mu-projection is not multiplicative, so the
+  density reduction to algebraMap-generators does not close over the
+  localization); the BUNDLED square (TailC0.map of qRestrict ∘ coeffLocEquiv-b =
+  coeffLocEquiv-i ∘ restriction, by IsLocalization.ringHom_ext + completion
+  density on RING homs) is the right carrier — but TailC0.map requires a norm-1
+  coefficient hom, and qRestrict is only CONTINUOUS (headLocEquiv-general-M has
+  no isometry; presheafValue carries no norm). ROUTE: (a) `bound_of_continuous`:
+  a continuous additive map between the normed QHeads is C-BOUNDED for some C
+  (continuity at 0 + nonarchimedean constHead-scalar scaling — mirror
+  norm_bound_of_isPowerBounded's window argument); (b) `TailC0.mapC` — the
+  C-bounded variant of TailC0.map (same null-preservation with a C-factor;
+  same hrho twist-compat: qRestrict rhoQ-b = rhoQ-i via qRestrict_headConst at
+  WaHead since rhoQ.val = headConst WaHead rfl); (c) the bundled square by
+  ringHom_ext (Submonoid.powers (liftDatum-b).s) on the algebraic layer +
+  DenseRange.equalizer on the completion (both sides continuous ring homs
+  presheafValue(liftDatum-b) → TailC0-i; generator agreement =
+  coeffBase-computations + qRestrict_headConst); the pointwise corollary by
+  applying TailC0.coeff mu. All ingredients present except (a)+(b) (~150 lines).
 - Decls: `productRestrictionSub_isEmbedding_WPA`.
 - Sketch: injectivity: a section vanishing on all pieces has all coefficientwise
   head restrictions vanishing on the pushed head cover (W18 models + head
