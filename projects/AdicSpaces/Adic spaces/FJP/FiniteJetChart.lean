@@ -821,7 +821,6 @@ theorem norm_jB_Wa : ‖jB F (Wa F)‖ = 1 := by
         rw [h1, jB_Wa_snd, norm_zero]
         exact max_eq_left zero_le_one
 
-set_option maxHeartbeats 800000 in
 /-- Continuity of the chart's localization lift (universal property; the generators map
 to norm-`≤ 1` elements of 𝓑). -/
 theorem chartLocHom_continuous :
@@ -1362,7 +1361,6 @@ theorem chartFwd_canonicalMap (a : JetA F) :
     (algebraMap (JetA F) (Localization.Away (chartDatum F).s) a)) = thetaChart F a
   rw [chartFwd_coe, chartLocHom_algebraMap]
 
-set_option maxHeartbeats 800000 in
 /-- **Roundtrip I**: `chartRev ∘ chartFwd = id` (agreement on the dense localization via
 `chartRev_theta`, then density). -/
 theorem chartRev_chartFwd (x : presheafValue (chartDatum F)) :
@@ -1422,7 +1420,6 @@ theorem theta_constKW (g : PowerSeries.Restricted K (1 : ℝ)) :
   · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
 
-set_option maxHeartbeats 800000 in
 /-- **Roundtrip II, disc component**: `chartFwd ∘ chartEval = inl` (polynomial density:
 constants via `θ`-on-constants, `X ↦ W/ϖ ↦ jB(W)`). -/
 theorem chartFwd_chartEval (f : PowerSeries.Restricted K (1 : ℝ)) :

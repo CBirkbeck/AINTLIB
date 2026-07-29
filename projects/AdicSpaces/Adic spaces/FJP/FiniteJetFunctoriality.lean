@@ -399,7 +399,6 @@ theorem bridgeLocHom_divByS (hD : D.IsRational) (i : Fin e.m) :
   rw [mul_comm (bridgeBase D e D.s) (bridgeLocHom D e hD (divByS (e.f i) D.s))]
   exact happ
 
-set_option maxHeartbeats 800000 in
 /-- Continuity of the loc-level forward map (universal property; the generators map to
 the norm-≤-1 variables `X̄ᵢ`, which are power-bounded). -/
 theorem bridgeLocHom_continuous (hD : D.IsRational) :
@@ -836,7 +835,6 @@ theorem bridgeLocHomC_divByS (hD : D.IsRational) (i : Fin e.m) :
     (bridgeLocHomC D e hD (divByS (iotaC F (e.f i)) (pushDatumC D hD).s))]
   exact happ
 
-set_option maxHeartbeats 800000 in
 theorem bridgeLocHomC_continuous (hD : D.IsRational) :
     @Continuous _ _ (pushDatumC D hD).topology _ (bridgeLocHomC D e hD) := by
   refine locTopology_continuous_lift (pushDatumC D hD).P (pushDatumC D hD).T
@@ -997,7 +995,6 @@ theorem bridgeLocHomB_divByS (hD : D.IsRational) (i : Fin e.m) :
     (bridgeLocHomB D e hD (divByS (jB F (e.f i)) (pushDatumB D hD).s))]
   exact happ
 
-set_option maxHeartbeats 800000 in
 theorem bridgeLocHomB_continuous (hD : D.IsRational) :
     @Continuous _ _ (pushDatumB D hD).topology _ (bridgeLocHomB D e hD) := by
   refine locTopology_continuous_lift (pushDatumB D hD).P (pushDatumB D hD).T
@@ -1028,7 +1025,6 @@ theorem isClosed_IB' : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := by
     (by rw [norm_tB]; exact norm_t_lt_one F) (by rw [norm_tB]; exact norm_t_pos F)
     (norm_tB_mul F) (isNoetherianRing_unitBall_PB F e.m) (rB F e.m D.s e.f)
 
-set_option synthInstance.maxHeartbeats 800000 in
 /-- The 𝓑-side forward bridge `𝒪_𝓑(D_B) → 𝓑_α`. -/
 noncomputable def bridgeFwdB (hD : D.IsRational) :
     presheafValue (pushDatumB D hD) →+* locB F e.m D.s e.f := by
@@ -1047,7 +1043,6 @@ noncomputable def bridgeFwdB (hD : D.IsRational) :
     (locB F e.m D.s e.f) _ _ _ _
     (bridgeLocHomB D e hD) (bridgeLocHomB_continuous D e hD) _ _
 
-set_option synthInstance.maxHeartbeats 800000 in
 theorem bridgeFwdB_coe (hD : D.IsRational) (a : Localization.Away (pushDatumB D hD).s) :
     bridgeFwdB D e hD ((pushDatumB D hD).coeRingHom a) = bridgeLocHomB D e hD a := by
   haveI hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
@@ -1065,7 +1060,6 @@ theorem bridgeFwdB_coe (hD : D.IsRational) (a : Localization.Away (pushDatumB D 
     (locB F e.m D.s e.f) _ _ _ _
     (bridgeLocHomB D e hD) (bridgeLocHomB_continuous D e hD) _ _ a
 
-set_option synthInstance.maxHeartbeats 800000 in
 theorem bridgeFwdB_continuous (hD : D.IsRational) :
     Continuous (bridgeFwdB D e hD) := by
   letI := (pushDatumB D hD).uniformSpace
@@ -1174,7 +1168,6 @@ theorem bridgeLocHomD_divByS (hD : D.IsRational) (i : Fin e.m) :
     (bridgeLocHomD D e hD (divByS (rhoC F (iotaC F (e.f i))) (pushDatumD D hD).s))]
   exact happ
 
-set_option maxHeartbeats 800000 in
 theorem bridgeLocHomD_continuous (hD : D.IsRational) :
     @Continuous _ _ (pushDatumD D hD).topology _ (bridgeLocHomD D e hD) := by
   refine locTopology_continuous_lift (pushDatumD D hD).P (pushDatumD D hD).T
@@ -1207,7 +1200,6 @@ theorem isClosed_ID' : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := by
     (by rw [norm_tD]; exact norm_t_lt_one F) (by rw [norm_tD]; exact norm_t_pos F)
     (norm_tD_mul F) (isNoetherianRing_unitBall_PD F e.m) (rD F e.m D.s e.f)
 
-set_option synthInstance.maxHeartbeats 800000 in
 /-- The 𝓓-side forward bridge `𝒪_𝓓(D_D) → 𝓓_α`. -/
 noncomputable def bridgeFwdD (hD : D.IsRational) :
     presheafValue (pushDatumD D hD) →+* locD F e.m D.s e.f := by
@@ -1226,7 +1218,6 @@ noncomputable def bridgeFwdD (hD : D.IsRational) :
     (locD F e.m D.s e.f) _ _ _ _
     (bridgeLocHomD D e hD) (bridgeLocHomD_continuous D e hD) _ _
 
-set_option synthInstance.maxHeartbeats 800000 in
 theorem bridgeFwdD_coe (hD : D.IsRational) (a : Localization.Away (pushDatumD D hD).s) :
     bridgeFwdD D e hD ((pushDatumD D hD).coeRingHom a) = bridgeLocHomD D e hD a := by
   haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
@@ -1244,7 +1235,6 @@ theorem bridgeFwdD_coe (hD : D.IsRational) (a : Localization.Away (pushDatumD D 
     (locD F e.m D.s e.f) _ _ _ _
     (bridgeLocHomD D e hD) (bridgeLocHomD_continuous D e hD) _ _ a
 
-set_option synthInstance.maxHeartbeats 800000 in
 theorem bridgeFwdD_continuous (hD : D.IsRational) :
     Continuous (bridgeFwdD D e hD) := by
   letI := (pushDatumD D hD).uniformSpace
@@ -1894,7 +1884,6 @@ theorem graphBridgeA_symm_continuous (D : RationalLocData (JetA F)) (hD : D.IsRa
     (e : DatumEnum D) : Continuous (graphBridgeA D hD e).symm :=
   bridgeRev_continuous D e
 
-set_option synthInstance.maxHeartbeats 400000 in
 open GraphKoszul in
 /-- The 𝓑-side naturality square (mirror of `graphBridge_natural_C`, consumed by the
 transfer): `bridgeFwdB ∘ presheafValueMapB = locJB ∘ graphBridgeA`. -/
@@ -1946,7 +1935,6 @@ theorem graphBridge_natural_B (D : RationalLocData (JetA F)) (hD : D.IsRational)
       (by funext a; exact DFunLike.congr_fun hcomp a)
   exact DFunLike.ext _ _ fun x => congrFun h_eq x
 
-set_option synthInstance.maxHeartbeats 400000 in
 open GraphKoszul in
 /-- The bridge intertwines the covariant maps with the coefficientwise localized square
 ([FJP] Lemma 4.6 / Lemma 5.1 naturality, 𝓒 side; analogous statements for 𝓑, 𝓓 are

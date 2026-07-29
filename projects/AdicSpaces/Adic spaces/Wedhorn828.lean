@@ -3057,8 +3057,6 @@ theorem coUnitDatum_span_le_ker
   rw [hmul, sub_self]
 
 omit [CompatiblePlusSubring A] in
-set_option maxHeartbeats 1000000 in
-set_option maxSynthPendingDepth 8 in
 set_option linter.unusedSectionVars false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
 `A⟨ζ⟩ ⧸ (b − ζ)` is complete Hausdorff (the principal ideal is closed by Prop 6.17
@@ -3206,7 +3204,6 @@ theorem unitDatum_ker_le_span
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
 
 omit [CompatiblePlusSubring A] in
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- `⊆` of (8.2.1)-minus — the completion comparison, mirror of
 `unitDatum_ker_le_span`. Here `s = b` and the lift exists because `b` is a unit
@@ -3434,7 +3431,6 @@ noncomputable def unitDatum_quotEquiv
       (unitDatum_ker_eq_span P b))
 
 omit [CompatiblePlusSubring A] in
-set_option maxSynthPendingDepth 8 in
 set_option linter.unusedSectionVars false in
 /-- **Wedhorn Example 6.39, minus form (any strongly noetherian Tate base)**:
 `O_X(R(1/b)) ≃+* A⟨η⟩/(1 − bη)`. -/

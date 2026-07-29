@@ -206,7 +206,6 @@ theorem norm_JetA_pow (a : JetA F) (n : ℕ) : ‖a ^ n‖ = ‖a‖ ^ n := by
   | zero => simp
   | succ m ih => rw [pow_succ, pow_succ, norm_JetA_mul, ih]
 
-set_option maxHeartbeats 1000000 in
 /-- Power-boundedness in 𝓐 is having norm at most one ([FJP] Prop 2.3: "If `v(a) < 0` …
 `a` is not power-bounded. If `v(a) ≥ 0`, all powers of `a` lie in 𝒜₀. Thus the valuation
 formulation gives directly `𝒜° = 𝒜₀`"). (`maxHeartbeats`: subtype-instance whnf; cleanup
@@ -232,7 +231,8 @@ theorem isPowerBounded_JetA_iff (a : JetA F) :
     have hge : (1 : ℝ) ≤ ‖a‖ ^ n * ‖tA F‖ ^ m := by
       have hpos : (0 : ℝ) < ‖tA F‖ ^ m := pow_pos (norm_tA_pos F) m
       calc (1 : ℝ) = (‖tA F‖ ^ m)⁻¹ * ‖tA F‖ ^ m := (inv_mul_cancel₀ (ne_of_gt hpos)).symm
-        _ ≤ ‖a‖ ^ n * ‖tA F‖ ^ m := by gcongr
+        _ ≤ ‖a‖ ^ n * ‖tA F‖ ^ m :=
+            mul_le_mul_of_nonneg_right hn.le hpos.le
     exact absurd hmem (not_lt.mpr hge)
   · intro h
     intro U hU
@@ -249,7 +249,6 @@ theorem isPowerBounded_JetA_iff (a : JetA F) :
       _ = ‖y‖ := one_mul _
       _ < ε := hy
 
-set_option maxHeartbeats 1000000 in
 /-- The power-bounded subring of 𝓐 is bounded — **𝓐 is uniform**
 ([FJP] Prop 2.3: "The ring 𝒜 is a complete uniform Tate k-algebra"). -/
 theorem isUniform_JetA : TopologicalRing.IsUniform (JetA F) := by

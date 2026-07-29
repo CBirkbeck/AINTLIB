@@ -341,6 +341,9 @@ theorem pairMapBC_injective (D : RationalLocData (JetA F)) (hD : D.IsRational)
   rw [← sub_eq_zero]
   exact hz0
 
+-- GOAL-DEFERRED(task 1): load-bearing until `gluing_JetA` is decomposed (279-line
+-- body; largest raise in the codebase at 6.4M).  `whnf` times out even at 1.6M, so
+-- splitting the proof is the only real fix.  Tracked on the task-2 list.
 set_option maxHeartbeats 6400000 in
 include hC hcompat in
 /-- The gluing transfer ([FJP] Lemma 5.2, gluing half). -/
@@ -628,6 +631,8 @@ theorem gluing_JetA :
 
 end Gluing
 
+-- GOAL-DEFERRED(task 1): load-bearing; revisit after `gluing_JetA` is split, since
+-- this proof shares its subtype-instance whnf cost.
 set_option maxHeartbeats 1600000 in
 /-- The embedding transfer ([FJP] Lemma 5.2, topological half; Theorem 5.3's "the Banach
 open mapping theorem makes the continuous bijection onto that image a homeomorphism" —

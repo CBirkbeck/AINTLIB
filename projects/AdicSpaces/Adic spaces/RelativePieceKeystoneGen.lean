@@ -198,7 +198,6 @@ theorem genPiece_rel_forwardLocHom_algebraMap
   rw [genPiece_rel_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **General relative piece, per-generator witnesses (G1-4)**: every
 `t' ∈ T_inter` (a product `p·q`, `p ∈ insert D₀.s D₀.T`, `q ∈ insert t T`) has a
@@ -321,7 +320,6 @@ theorem genPiece_rel_forward_witness
   rw [map_mul (DB.canonicalMap), hqt q]
   ring
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G1-5: forward continuity. -/
 theorem genPiece_rel_forwardCompletion_continuous
@@ -493,7 +491,6 @@ theorem genPiece_rel_canonicalMap_q_eq
     _ = DI.canonicalMap D₀.s * (DI.canonicalMap t *
         DI.coeRingHom (divByS (D₀.s * q) DI.s)) := by ring
 
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- G1-7e: backward continuity (each image-generator `(im q)/(im t)` lands on the
 ring-of-definition element `(D₀.s·q)/s_inter`). -/
@@ -701,7 +698,6 @@ theorem genPiece_rel_locRoundtrip2
   rw [genPiece_rel_locRestriction_algebraMap, genPiece_rel_forwardLocHom_algebraMap]
   rfl
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G1-8e: `backward ∘ forward = id`. -/
 theorem genPiece_rel_backward_forward
@@ -733,7 +729,6 @@ theorem genPiece_rel_backward_forward
   rw [genPiece_rel_forward_coe, genPiece_rel_backward_coe]
   exact RingHom.congr_fun (genPiece_rel_locRoundtrip1 D₀ T t hspan) a
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G1-8f: forward-restriction intertwining (the Prop 8.2 naturality). -/
 theorem genPiece_rel_forward_restriction
@@ -776,7 +771,6 @@ theorem genPiece_rel_forward_restriction
   rw [genPiece_rel_forward_coe]
   exact congrArg _ (RingHom.congr_fun (genPiece_rel_locRoundtrip2 D₀ T t hspan) z)
 
-set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
 /-- G1-8g: `forward ∘ backward = id`. -/
 theorem genPiece_rel_forward_backward
