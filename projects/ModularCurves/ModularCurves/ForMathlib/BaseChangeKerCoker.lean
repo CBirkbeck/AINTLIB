@@ -691,6 +691,35 @@ section Exactness
 
 variable {T : Type*} [AddCommGroup T] [Module R T]
 
+/-- In an algebra tower, exactness after iterated base change is equivalent to exactness
+after direct base change. -/
+theorem LinearMap.baseChange_baseChange_exact_iff
+    (A : Type*) (B : Type*)
+    [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] [Algebra A B]
+    [IsScalarTower R A B]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) :
+    Function.Exact
+        ((f.baseChange A).baseChange B)
+        ((g.baseChange A).baseChange B) ↔
+      Function.Exact (f.baseChange B) (g.baseChange B) := by
+  let eP := AlgebraTensorModule.cancelBaseChange R A B B P
+  let eQ := AlgebraTensorModule.cancelBaseChange R A B B Q
+  let eT := AlgebraTensorModule.cancelBaseChange R A B B T
+  have hf :
+      f.baseChange B ∘ₗ eP.toLinearMap =
+        eQ.toLinearMap ∘ₗ (f.baseChange A).baseChange B := by
+    rw [LinearMap.baseChange_baseChange]
+    ext x
+    simp [eP, eQ]
+  have hg :
+      g.baseChange B ∘ₗ eQ.toLinearMap =
+        eT.toLinearMap ∘ₗ (g.baseChange A).baseChange B := by
+    rw [LinearMap.baseChange_baseChange]
+    ext x
+    simp [eQ, eT]
+  exact (Function.Exact.iff_of_ladder_linearEquiv hf hg).symm
+
 /-- An exact pair remains exact after arbitrary algebra base change when the target and
 the cokernel of the second map are flat. -/
 theorem LinearMap.baseChange_exact_of_exact_of_flat_coker
