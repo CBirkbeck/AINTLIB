@@ -66,4 +66,28 @@ theorem ιTotalOrZero_d_upNat (q p n : ℕ) :
       K.ιTotalOrZero_eq_zero (.up ℕ) q (p + 1) (n + 1) h₂]
     simp
 
+/-- The total differential is the finite antidiagonal sum of its horizontal and
+signed vertical bidegree components. -/
+theorem total_d_upNat_decomposition (n : ℕ) :
+    (K.total (.up ℕ)).d n (n + 1) =
+      ∑ qp ∈ Finset.antidiagonal n,
+        K.πTotalUpNat qp.1 qp.2 n ≫
+          ((K.d qp.1 (qp.1 + 1)).f qp.2 ≫
+              K.ιTotalOrZero (.up ℕ) (qp.1 + 1) qp.2 (n + 1) +
+            ((-1 : ℤˣ) ^ qp.1) • ((K.X qp.1).d qp.2 (qp.2 + 1) ≫
+              K.ιTotalOrZero (.up ℕ) qp.1 (qp.2 + 1) (n + 1))) := by
+  calc
+    _ = (𝟙 _ : (K.total (.up ℕ)).X n ⟶ _) ≫
+        (K.total (.up ℕ)).d n (n + 1) := by simp
+    _ = (∑ qp ∈ Finset.antidiagonal n,
+          K.πTotalUpNat qp.1 qp.2 n ≫
+            K.ιTotalOrZero (.up ℕ) qp.1 qp.2 n) ≫
+        (K.total (.up ℕ)).d n (n + 1) := by
+      rw [K.totalUpNat_decomposition n]
+    _ = _ := by
+      rw [Preadditive.sum_comp]
+      apply Finset.sum_congr rfl
+      intro qp hqp
+      rw [Category.assoc, K.ιTotalOrZero_d_upNat]
+
 end HomologicalComplex₂
