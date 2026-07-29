@@ -29003,3 +29003,51 @@ discrepancy module off with `Modules.nonempty_iso_of_tensorObj_unitObj`. Output:
 
 Not needed, contrary to the earlier plan: a general reduced **seesaw** theorem. The
 reducedness enters only through GAP-A-1's universal-pair argument.
+
+
+---
+
+## [YRHO-AUDIT] What actually blocks an axiom-clean `yRho_representable` (2026-07-29)
+
+`ModularCurves.yRho_representable` (`ModularCurve/RhoPoints.lean:321`) is **assembled and
+compiles**; `#print axioms` shows `sorryAx`, so the statement is structurally complete and
+what remains is upstream. Its dependency closure is 263 modules carrying
+**62 sorry-bearing declarations**, by file (largest first):
+
+- `WeilPairing/Basic.lean` — lines 47, 51, 72, 83, 94, 104, 114, 125, 138, 152
+- `EllipticCurve/EndomorphismDegree.lean` — lines 216, 373, 444, 450, 468, 474, 483
+- `LevelStructure/Factorization.lean` — lines 1614, 1767, 2411, 2426, 2435, 2443
+- `Moduli/GammaH.lean` — lines 486, 500, 514, 1116, 1129
+- `LevelStructure/ExactOrder.lean` — lines 123, 835, 916, 947
+- `ModularCurve/YFullRoute.lean` — lines 207, 719, 779
+- `Moduli/Coarse.lean` — lines 82, 88, 109
+- `EllipticCurve/GroupLaw.lean` — lines 80, 85
+- `ForMathlib/SmoothDescent.lean` — lines 126, 317
+- `GroupScheme/DeligneOrder.lean` — lines 173, 2089
+- `LevelStructure/Basic.lean` — lines 121, 203
+- `LevelStructure/CartierDivisor.lean` — lines 2050, 2858
+- `ModularCurve/YRho.lean` — lines 2482, 8740
+- `Moduli/EllCategory.lean` — lines 294, 311
+- `Moduli/LegendreTorsor.lean` — lines 274, 332
+- `Moduli/SqrtCoverGlue.lean` — lines 630, 720
+- `EllipticCurve/RigiditySpreadingOut.lean` — lines 87
+- `EllipticCurve/WeierstrassModel.lean` — lines 2986
+- `Moduli/GammaHRepresentability.lean` — lines 676
+- `Moduli/Groupoid.lean` — lines 72
+- `Moduli/Representability.lean` — lines 663
+- `Moduli/Stack.lean` — lines 74
+
+Reading of the table: the single largest block is **`WeilPairing/Basic.lean` (10)** — which
+is exactly what DS4 Gap A / `Picard/SelfAdjointN.lean` exists to supply, so Gap A is on the
+critical path for Y(ρ̄), not a side quest. After that: `EndomorphismDegree` (7),
+`Factorization` (6), `GammaH` (5), `ExactOrder` (4).
+
+Caveat: membership in the import closure is an over-approximation — some of these will not
+be reachable from `yRho_representable` itself. Bisect with `#print axioms` on intermediate
+results before working one (see the `sorry-grep-and-axiom-audit` note: blockers often sit in
+a needlessly general lemma).
+
+Separately, `YRho.lean` itself has two sorries left: `:2482` (the `weilPairing`
+base-change compatibility — Gap A again) and `:8740` `yRho_geometricallyIrreducible`
+(Buzzard p. 33–34, "proved complex-analytically by uniformising the ℂ-points"; a deep
+classical theorem, stream IRR).
