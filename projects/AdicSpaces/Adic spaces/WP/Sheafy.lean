@@ -1148,6 +1148,156 @@ theorem exists_pushedHeadCover (ϖ : Uniformizer K)
 
 variable {K w} in
 open scoped Classical in
+/-- The piece model of a section: transport to the lifted datum (equal opens)
+and take the coefficientwise model ([WP] 1156–1218). -/
+noncomputable def pieceModel {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C) (D : ↥C.covers) (x : presheafValue D.1) :
+    TailC0 w P.M (QHead (P.DHp D)) (rhoQ (P.DHp D)) :=
+  coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)
+    (restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+      (P.hopenp D).le x)
+
+variable {K w} in
+open scoped Classical in
+/-- **The pushed Čech compatibility** ([WP] 1156–1218): the per-coefficient
+head sections of a compatible family are compatible on the pushed covering —
+factor an arbitrary `D₃` through the rational head intersection, then compare
+there via the naturality square and the `𝒜`-level compatibility at the lifted
+intersection. -/
+theorem pushedCompat_head {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C)
+    (f : ∀ D : ↥C.covers, presheafValue D.1)
+    (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData (WPA K w))
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (μ : TailIdx P.M) (D₁ D₂ : ↥C.covers)
+    (D₃ : RationalLocData (WPHead K w P.M))
+    (h₃₁ : rationalOpen D₃.T D₃.s ⊆
+      rationalOpen (P.DHp D₁).T (P.DHp D₁).s)
+    (h₃₂ : rationalOpen D₃.T D₃.s ⊆
+      rationalOpen (P.DHp D₂).T (P.DHp D₂).s) :
+    restrictionMap (P.DHp D₁) D₃ h₃₁
+      ((headLocEquiv ϖ hK₀ (P.DHp D₁) (P.hDHp D₁)).symm
+        (TailC0.coeff μ (pieceModel ϖ hK₀ P D₁ (f D₁)))) =
+    restrictionMap (P.DHp D₂) D₃ h₃₂
+      ((headLocEquiv ϖ hK₀ (P.DHp D₂) (P.hDHp D₂)).symm
+        (TailC0.coeff μ (pieceModel ϖ hK₀ P D₂ (f D₂)))) := by
+  classical
+  set I := interDatumHead (P.DHp D₁) (P.DHp D₂) (P.hDHp D₁) (P.hDHp D₂)
+    with hI
+  have hIrat : I.IsRational :=
+    interDatumHead_isRational (P.hDHp D₁) (P.hDHp D₂)
+  have hIopen := rationalOpen_interDatumHead (P.DHp D₁) (P.DHp D₂)
+    (P.hDHp D₁) (P.hDHp D₂)
+  have hsubI₁ : rationalOpen I.T I.s ⊆
+      rationalOpen (P.DHp D₁).T (P.DHp D₁).s := by
+    rw [hI, hIopen]; exact Set.inter_subset_left
+  have hsubI₂ : rationalOpen I.T I.s ⊆
+      rationalOpen (P.DHp D₂).T (P.DHp D₂).s := by
+    rw [hI, hIopen]; exact Set.inter_subset_right
+  have h₃I : rationalOpen D₃.T D₃.s ⊆ rationalOpen I.T I.s := by
+    rw [hI, hIopen]; exact Set.subset_inter h₃₁ h₃₂
+  have hlift₁ : rationalOpen (liftDatum I hIrat).T (liftDatum I hIrat).s ⊆
+      rationalOpen (liftDatum (P.DHp D₁) (P.hDHp D₁)).T
+        (liftDatum (P.DHp D₁) (P.hDHp D₁)).s :=
+    liftDatum_mono (P.DHp D₁) I (P.hDHp D₁) hIrat hsubI₁
+  have hlift₂ : rationalOpen (liftDatum I hIrat).T (liftDatum I hIrat).s ⊆
+      rationalOpen (liftDatum (P.DHp D₂) (P.hDHp D₂)).T
+        (liftDatum (P.DHp D₂) (P.hDHp D₂)).s :=
+    liftDatum_mono (P.DHp D₂) I (P.hDHp D₂) hIrat hsubI₂
+  -- the lifted-intersection restrictions of the two sections agree
+  have hxeq : restrictionMapHom (liftDatum (P.DHp D₁) (P.hDHp D₁))
+      (liftDatum I hIrat) hlift₁
+      (restrictionMapHom D₁.1 (liftDatum (P.DHp D₁) (P.hDHp D₁))
+        (P.hopenp D₁).le (f D₁)) =
+    restrictionMapHom (liftDatum (P.DHp D₂) (P.hDHp D₂))
+      (liftDatum I hIrat) hlift₂
+      (restrictionMapHom D₂.1 (liftDatum (P.DHp D₂) (P.hDHp D₂))
+        (P.hopenp D₂).le (f D₂)) := by
+    have hc₁ := congr_fun (restrictionMap_comp D₁.1
+      (liftDatum (P.DHp D₁) (P.hDHp D₁)) (liftDatum I hIrat)
+      (P.hopenp D₁).le hlift₁) (f D₁)
+    have hc₂ := congr_fun (restrictionMap_comp D₂.1
+      (liftDatum (P.DHp D₂) (P.hDHp D₂)) (liftDatum I hIrat)
+      (P.hopenp D₂).le hlift₂) (f D₂)
+    simp only [Function.comp_apply] at hc₁ hc₂
+    rw [show restrictionMapHom (liftDatum (P.DHp D₁) (P.hDHp D₁))
+        (liftDatum I hIrat) hlift₁
+        (restrictionMapHom D₁.1 (liftDatum (P.DHp D₁) (P.hDHp D₁))
+          (P.hopenp D₁).le (f D₁)) =
+      restrictionMap D₁.1 (liftDatum I hIrat)
+        (hlift₁.trans (P.hopenp D₁).le) (f D₁) from hc₁]
+    rw [show restrictionMapHom (liftDatum (P.DHp D₂) (P.hDHp D₂))
+        (liftDatum I hIrat) hlift₂
+        (restrictionMapHom D₂.1 (liftDatum (P.DHp D₂) (P.hDHp D₂))
+          (P.hopenp D₂).le (f D₂)) =
+      restrictionMap D₂.1 (liftDatum I hIrat)
+        (hlift₂.trans (P.hopenp D₂).le) (f D₂) from hc₂]
+    exact hcompat D₁ D₂ (liftDatum I hIrat)
+      (hlift₁.trans (P.hopenp D₁).le) (hlift₂.trans (P.hopenp D₂).le)
+  -- the head-restriction of a piece coefficient is the model coefficient of
+  -- the lifted restriction (one side of the naturality square)
+  have hside : ∀ (D : ↥C.covers)
+      (hsubI : rationalOpen I.T I.s ⊆
+        rationalOpen (P.DHp D).T (P.DHp D).s)
+      (hlift : rationalOpen (liftDatum I hIrat).T (liftDatum I hIrat).s ⊆
+        rationalOpen (liftDatum (P.DHp D) (P.hDHp D)).T
+          (liftDatum (P.DHp D) (P.hDHp D)).s),
+      restrictionMapHom (P.DHp D) I hsubI
+        ((headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+          (TailC0.coeff μ (pieceModel ϖ hK₀ P D (f D)))) =
+      (headLocEquiv ϖ hK₀ I hIrat).symm
+        (TailC0.coeff μ (coeffLocEquiv ϖ hK₀ I hIrat
+          (restrictionMapHom (liftDatum (P.DHp D) (P.hDHp D))
+            (liftDatum I hIrat) hlift
+            (restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+              (P.hopenp D).le (f D))))) := by
+    intro D hsubI hlift
+    obtain ⟨Cb, hCb0, hb⟩ := qRestrictP_bound ϖ hK₀ (P.DHp D) I
+      (P.hDHp D) hIrat hsubI
+    have hsq := RingHom.congr_fun
+      (coeffLoc_restriction_squareP ϖ hK₀ (P.DHp D) I (P.hDHp D) hIrat
+        hsubI hlift hCb0.le hb)
+      (restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+        (P.hopenp D).le (f D))
+    have h2 := congrArg (fun t => TailC0.coeff μ t) hsq
+    have h3 : qRestrictP ϖ hK₀ (P.DHp D) I (P.hDHp D) hIrat hsubI
+        (TailC0.coeff μ (pieceModel ϖ hK₀ P D (f D))) =
+      TailC0.coeff μ (coeffLocEquiv ϖ hK₀ I hIrat
+        (restrictionMapHom (liftDatum (P.DHp D) (P.hDHp D))
+          (liftDatum I hIrat) hlift
+          (restrictionMapHom D.1 (liftDatum (P.DHp D) (P.hDHp D))
+            (P.hopenp D).le (f D)))) := h2.trans rfl
+    have h4 := congrArg (headLocEquiv ϖ hK₀ I hIrat).symm h3
+    rw [show (headLocEquiv ϖ hK₀ I hIrat).symm
+        (qRestrictP ϖ hK₀ (P.DHp D) I (P.hDHp D) hIrat hsubI
+          (TailC0.coeff μ (pieceModel ϖ hK₀ P D (f D)))) =
+      (headLocEquiv ϖ hK₀ I hIrat).symm
+        ((headLocEquiv ϖ hK₀ I hIrat)
+          (restrictionMapHom (P.DHp D) I hsubI
+            ((headLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).symm
+              (TailC0.coeff μ (pieceModel ϖ hK₀ P D (f D))))))
+      from rfl, RingEquiv.symm_apply_apply] at h4
+    exact h4
+  have hs₁ := hside D₁ hsubI₁ hlift₁
+  have hs₂ := hside D₂ hsubI₂ hlift₂
+  rw [hxeq] at hs₁
+  -- factor the D₃ restrictions through I
+  have hfac₁ := congrFun (restrictionMap_comp (P.DHp D₁) I D₃ hsubI₁ h₃I)
+    ((headLocEquiv ϖ hK₀ (P.DHp D₁) (P.hDHp D₁)).symm
+      (TailC0.coeff μ (pieceModel ϖ hK₀ P D₁ (f D₁))))
+  have hfac₂ := congrFun (restrictionMap_comp (P.DHp D₂) I D₃ hsubI₂ h₃I)
+    ((headLocEquiv ϖ hK₀ (P.DHp D₂) (P.hDHp D₂)).symm
+      (TailC0.coeff μ (pieceModel ϖ hK₀ P D₂ (f D₂))))
+  simp only [Function.comp_apply] at hfac₁ hfac₂
+  rw [← hfac₁, ← hfac₂]
+  exact congrArg (restrictionMap I D₃ h₃I) (hs₁.trans hs₂.symm)
+
+variable {K w} in
+open scoped Classical in
 /-- **Separation for `𝒜`** ([WP] 1135–1155): a section vanishing on all pieces
 vanishes — walk the model coefficients through the naturality square and apply
 the head separation on the pushed covering. -/
