@@ -656,7 +656,32 @@ propext/Classical.choice/Quot.sound) before marking done.
   `isSheafyFor_structurePresheaf_isSheaf` (SheafyEndpoints:53).
 
 ### [W24] tateExtEquiv — the Tate-extension bridge
-- Status: open | File: WP/Sheafy.lean | Depends: W3 | Parallel: yes (any time)
+- Status: in_progress (2026-07-29) | File: WP/Sheafy.lean | Depends: W3 | Parallel: yes
+- **Progress (design settled 2026-07-29, implementation starting)**: route =
+  ambient-first flatten, then restrict. Stage 1 (exponent/variable plumbing):
+  slotEquiv : ℕ ≃ (Fin s ⊕ ℕ) sending 0 ↦ inr 0, i ∈ [1..s] ↦ inl (i-1),
+  n > s ↦ inr (n-s) (realizes shiftWeight: freed slots 1..s get weight 0);
+  ambient flatten `MvPowerSeries (Fin s) (MvPowerSeries ℕ K) ≃+*
+  MvPowerSeries (Fin s ⊕ ℕ) K ≃+* MvPowerSeries ℕ K` via
+  Vendored/XiaMvPowerSeriesEquiv.sumAlgEquiv (symm) + a rename-along-slotEquiv
+  RingEquiv (check Xia for a renameEquiv; else hand-roll coeff-precompose along
+  Finsupp.domCongr slotEquiv — multiplicativity via antidiagonal-image under the
+  ADDITIVE equiv Finsupp.domCongr + Finsupp.sumFinsuppAddEquivProdFinsupp).
+  Stage 2 (restriction/support): the composite sends
+  restrictedMvPowerSeriesSubring s (WPA K w) (unfold via restrictedGaussEquiv,
+  ExampleUnitDisc:111, to MvPowerSeries.Restricted at radius 1) INTO the
+  wpSupport (shiftWeight w s)-subring: (i) coefficient-support conditions
+  transport along slotEquiv (wpWeight-shift arithmetic: wpWeight (shiftWeight w s)
+  of an interleaved exponent = wpWeight w of the u-part; slots 1..s contribute 0);
+  (ii) restrictedness: nested tendsto-cofinite (outer Fin-s null with WPA-coeff
+  norms) ⟺ flat tendsto-cofinite — the ε-argument: outer-null + each-coefficient
+  restricted, uniformly — the joint-cofinite lemma (the one analytic step; mirror
+  the tailC0ToMvPowerSeries-restrictedness proofs in Tail.lean W11). Stage 3:
+  assemble the subring-restricted RingEquiv; the topological refinement
+  (mvTateAlgebraTopology' bicontinuity, per the ChatGPT-5.6 note: Huber-PAIR-level
+  with isometry) STATED at the end once the bare equiv compiles — isometry via
+  Gauss-norm coefficient-sup invariance under reindex (sup-reindex-invariance).
+  Vendored Fubini (CoramRestrictedIso.finSuccEquiv) NOT needed on this route.
 - Decls: `tateExtEquiv` (+ its topological refinement, to be STATED during the
   ticket per the in-file note: bicontinuity for `mvTateAlgebraTopology'`).
 - [ChatGPT-5.6 review]: the bridge must be a topological/normed HUBER-PAIR-level
