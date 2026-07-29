@@ -5,6 +5,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».WP.CoeffLocalization
 import «Adic spaces».WP.FormalReduced
 import «Adic spaces».AuditCleanWrappers
+import «Adic spaces».SheafyCompletionModel
+import «Adic spaces».PresheafFunctoriality
 
 /-!
 # Rational stable reducedness ([WP] §6.6)
@@ -55,7 +57,80 @@ head (a domain), head localization is flat (Wedhorn 8.30,
 theorem rhoQ_regular {N : ℕ} (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
-    ∀ x : QHead DH, (rhoQ DH).val * x = 0 → x = 0 := by sorry
+    ∀ x : QHead DH, (rhoQ DH).val * x = 0 → x = 0 := by
+  classical
+  haveI hNoeth : IsNoetherianRing (WPHead K w N) :=
+    isNoetherianRing_WPHead (w := w) (N := N) ϖ hK₀
+  haveI hSN : IsStronglyNoetherian (WPHead K w N) :=
+    isStronglyNoetherian_WPHead (w := w) (N := N) ϖ hK₀
+  -- the restriction from the global datum is flat
+  have hsub : rationalOpen DH.T DH.s ⊆
+      rationalOpen (globalLocData DH.P).T (globalLocData DH.P).s := by
+    rw [show (globalLocData DH.P).T = {1} from rfl,
+      show (globalLocData DH.P).s = 1 from rfl, rationalOpen_singleton_one]
+    exact rationalOpen_subset_spa
+  letI : Algebra (presheafValue (globalLocData DH.P)) (presheafValue DH) :=
+    (restrictionMapHom (globalLocData DH.P) DH hsub).toAlgebra
+  haveI hflat : Module.Flat (presheafValue (globalLocData DH.P))
+      (presheafValue DH) :=
+    prop_8_30_flat_clean_proof (globalLocData DH.P) DH hsub
+  -- `W` is regular upstairs: transport along the complete-ring equivalence
+  set e0 := completeRingEquivCompletionModel (A := WPHead K w N) DH.P with he0
+  have hW0 : WaHead K w N ≠ 0 := by
+    intro h0
+    have h1 := congrArg (fun z : WPHead K w N => ‖z‖) h0
+    rw [show ‖WaHead K w N‖ = 1 from norm_WaHead, norm_zero] at h1
+    linarith
+  have hcW0 : (globalLocData DH.P).canonicalMap (WaHead K w N) ≠ 0 := by
+    intro h0
+    refine hW0 (e0.injective ?_)
+    rw [map_zero]
+    exact h0
+  haveI hdomW : IsDomain (WPHead K w N) := inferInstance
+  haveI hdom : IsDomain (presheafValue (globalLocData DH.P)) := by
+    have h := Function.Injective.isDomain e0.symm.toRingHom e0.symm.injective
+    exact h
+  have hreg0 : IsSMulRegular (presheafValue (globalLocData DH.P))
+      ((globalLocData DH.P).canonicalMap (WaHead K w N)) := by
+    intro a b hab
+    exact mul_left_cancel₀ hcW0 hab
+  -- flat transport of regularity
+  have hregS : IsSMulRegular (presheafValue DH)
+      (algebraMap (presheafValue (globalLocData DH.P)) (presheafValue DH)
+        ((globalLocData DH.P).canonicalMap (WaHead K w N))) :=
+    hreg0.of_flat
+  -- the transported element is the canonical `W`
+  have hcan : algebraMap (presheafValue (globalLocData DH.P)) (presheafValue DH)
+      ((globalLocData DH.P).canonicalMap (WaHead K w N)) =
+      DH.canonicalMap (WaHead K w N) := by
+    show restrictionMapHom (globalLocData DH.P) DH hsub
+      ((globalLocData DH.P).canonicalMap (WaHead K w N)) =
+      DH.canonicalMap (WaHead K w N)
+    exact restrictionMapHom_canonicalMap_generic (globalLocData DH.P) DH hsub
+      (WaHead K w N)
+  -- transport to `QHead` along the head bridge
+  intro x hx
+  set e := headLocEquiv ϖ hK₀ DH hDH with he
+  have hρ : (rhoQ DH).val = e (DH.canonicalMap (WaHead K w N)) := by
+    rw [he, show headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap (WaHead K w N)) =
+      headLocFwd ϖ DH hDH (DH.canonicalMap (WaHead K w N)) from rfl,
+      show DH.canonicalMap (WaHead K w N) = DH.coeRingHom
+        (algebraMap (WPHead K w N) (Localization.Away DH.s) (WaHead K w N))
+        from rfl,
+      headLocFwd_coe, headLocFwdAlg_algebraMap]
+    rfl
+  have h5 : DH.canonicalMap (WaHead K w N) * e.symm x = 0 := by
+    have h6 := congrArg e.symm hx
+    rw [map_mul, map_zero, hρ, RingEquiv.symm_apply_apply] at h6
+    exact h6
+  have h8 : e.symm x = 0 := by
+    refine hregS ?_
+    simp only [smul_eq_mul]
+    rw [hcan, mul_zero]
+    exact h5
+  have h10 := congrArg e h8
+  rw [RingEquiv.apply_symm_apply, map_zero] at h10
+  exact h10
 
 /-! ### The quarantined head-reducedness input (BGR 7.3.2/10) -/
 
@@ -78,7 +153,17 @@ head input.  Route: finite-head model + `Φ`-embedding + `rhoQ_regular` +
 theorem isReduced_presheafValue_WPA (hred : HeadLocsReduced K w)
     (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
-    IsReduced (presheafValue D) := by sorry
+    IsReduced (presheafValue D) := by
+  classical
+  obtain ⟨M⟩ := nonempty_headModelData ϖ hK₀ D hD
+  haveI hredQ : IsReduced (QHead M.DH) := by
+    haveI hP : IsReduced (presheafValue M.DH) := hred M.N M.DH M.hDH
+    exact isReduced_of_injective (headLocEquiv ϖ hK₀ M.DH M.hDH).symm.toRingHom
+      (headLocEquiv ϖ hK₀ M.DH M.hDH).symm.injective
+  haveI hredT : IsReduced (TailC0 w M.N (QHead M.DH) (rhoQ M.DH)) := by
+    refine isReduced_tailC0 w M.N _ ?_
+    exact rhoQ_regular ϖ hK₀ M.DH M.hDH
+  exact isReduced_of_injective M.e.toRingHom M.e.injective
 
 /-- Finite chains of rational localizations, and reducedness all the way down
 ([WP] def:rationally-stably-reduced: "every finite iterated rational localization is
