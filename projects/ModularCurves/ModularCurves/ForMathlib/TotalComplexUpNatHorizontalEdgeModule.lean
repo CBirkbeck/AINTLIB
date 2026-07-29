@@ -1,4 +1,5 @@
 import ModularCurves.ForMathlib.TotalComplexModuleForget
+import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdgeHigher
 import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 
 /-!
@@ -167,5 +168,97 @@ theorem totalUpNatHorizontalEdge_quasiIsoAt_one_module
   exact
     (HomologicalComplex.quasiIsoAt_map_iff_of_preservesHomology
       edge moduleForgetToAddCommGrp 1).mp hMapped
+
+/-- The horizontal edge of a module-valued first-quadrant bicomplex is a
+quasi-isomorphism in every positive degree under exactness of the two adjacent
+vertical antidiagonals. -/
+theorem totalUpNatHorizontalEdge_quasiIsoAt_succ_module
+    (A : CochainComplex (ModuleCat.{u} R) ℕ)
+    (e : ∀ q, A.X q ⟶ (K.X q).X 0)
+    (he : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e q ≫ (K.d q q').f 0 = A.d q q' ≫ e q')
+    (w : ∀ q, e q ≫ (K.X q).d 0 1 = 0)
+    (n : ℕ)
+    (hrowAxis_n : (ShortComplex.mk (e n)
+      ((K.X n).d 0 1) (w n)).Exact)
+    (hrowAxis_succ : (ShortComplex.mk (e (n + 1))
+      ((K.X (n + 1)).d 0 1) (w (n + 1))).Exact)
+    (hrowPositive_n : ∀ q p, q + p = n → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact)
+    (hrowPositive_succ : ∀ q p, q + p = n + 1 → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact)
+    [Mono (e (n + 1))] [Mono (e (n + 2))] :
+    QuasiIsoAt (K.totalUpNatHorizontalEdge A e he w) (n + 1) := by
+  let A' := moduleForgetComplex A
+  let K' := moduleForgetBicomplex K
+  let e' : ∀ q, A'.X q ⟶ (K'.X q).X 0 :=
+    fun q => moduleForgetToAddCommGrp.map (e q)
+  have he' : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e' q ≫ (K'.d q q').f 0 = A'.d q q' ≫ e' q' :=
+    moduleForgetHorizontal_comm K A e he
+  have w' : ∀ q, e' q ≫ (K'.X q).d 0 1 = 0 :=
+    moduleForgetHorizontal_zero K e w
+  have hrowAxis_n' : (ShortComplex.mk
+      (e' n) ((K'.X n).d 0 1) (w' n)).Exact :=
+    moduleForgetHorizontal_row_exact (e n) ((K.X n).d 0 1)
+      (w n) hrowAxis_n
+  have hrowAxis_succ' : (ShortComplex.mk
+      (e' (n + 1)) ((K'.X (n + 1)).d 0 1) (w' (n + 1))).Exact :=
+    moduleForgetHorizontal_row_exact
+      (e (n + 1)) ((K.X (n + 1)).d 0 1)
+      (w (n + 1)) hrowAxis_succ
+  have hrowPositive_n' : ∀ q p, q + p = n → 0 < p →
+      (ShortComplex.mk
+        ((K'.X q).d (p - 1) p)
+        ((K'.X q).d p (p + 1))
+        ((K'.X q).d_comp_d (p - 1) p (p + 1))).Exact := by
+    intro q p hqp hp
+    exact moduleForgetHorizontal_row_exact
+      ((K.X q).d (p - 1) p) ((K.X q).d p (p + 1))
+      ((K.X q).d_comp_d (p - 1) p (p + 1))
+      (hrowPositive_n q p hqp hp)
+  have hrowPositive_succ' : ∀ q p, q + p = n + 1 → 0 < p →
+      (ShortComplex.mk
+        ((K'.X q).d (p - 1) p)
+        ((K'.X q).d p (p + 1))
+        ((K'.X q).d_comp_d (p - 1) p (p + 1))).Exact := by
+    intro q p hqp hp
+    exact moduleForgetHorizontal_row_exact
+      ((K.X q).d (p - 1) p) ((K.X q).d p (p + 1))
+      ((K.X q).d_comp_d (p - 1) p (p + 1))
+      (hrowPositive_succ q p hqp hp)
+  letI : Mono (e' (n + 1)) := Functor.map_mono
+    moduleForgetToAddCommGrp (e (n + 1))
+  letI : Mono (e' (n + 2)) := Functor.map_mono
+    moduleForgetToAddCommGrp (e (n + 2))
+  let edge := K.totalUpNatHorizontalEdge A e he w
+  let edge' := K'.totalUpNatHorizontalEdge A' e' he' w'
+  haveI : QuasiIsoAt edge' (n + 1) :=
+    K'.totalUpNatHorizontalEdge_quasiIsoAt_succ
+      A' e' he' w' n hrowAxis_n' hrowAxis_succ'
+        hrowPositive_n' hrowPositive_succ'
+  let mappedEdge :=
+    (moduleForgetToAddCommGrp.mapHomologicalComplex (.up ℕ)).map edge
+  have hcompat :
+      mappedEdge ≫ (moduleTotalForgetIso K).hom = edge' :=
+    moduleForget_map_totalUpNatHorizontalEdge_comp K A e he w
+  haveI : QuasiIsoAt (moduleTotalForgetIso K).hom (n + 1) :=
+    quasiIsoAt_of_isIso _ _
+  haveI : QuasiIsoAt
+      (mappedEdge ≫ (moduleTotalForgetIso K).hom) (n + 1) := by
+    rw [hcompat]
+    infer_instance
+  have hMapped : QuasiIsoAt mappedEdge (n + 1) :=
+    quasiIsoAt_of_comp_right mappedEdge
+      (moduleTotalForgetIso K).hom (n + 1)
+  exact
+    (HomologicalComplex.quasiIsoAt_map_iff_of_preservesHomology
+      edge moduleForgetToAddCommGrp (n + 1)).mp hMapped
 
 end HomologicalComplex₂
