@@ -2,7 +2,10 @@ import ModularCurves.EllipticCurve.ProjectiveCoordinatePullbackTwistMap
 import ModularCurves.ForMathlib.SchemeModuleCanonicalSupportChowChart
 import ModularCurves.ForMathlib.SchemeModuleOpenUnitIso
 import ModularCurves.ForMathlib.SchemeModulePushforwardMapRestrictionIso
+import ModularCurves.ForMathlib.SchemeModulePullbackQuasicoherent
 import ModularCurves.ForMathlib.SchemeModuleRestrictionIsoMonotone
+import ModularCurves.ForMathlib.RelativeProjectivePushforwardFiniteType
+import ModularCurves.Picard.InvertibleSheafTensorQuasicoherent
 
 /-!
 # Coordinate-twist comparisons on support-adapted Chow charts
@@ -44,10 +47,81 @@ noncomputable def coordinateTwist
       (MvPolynomial.coordinateHyperplanePoleSheafPower
         (R := R) C.coordinate n)
 
+/-- The coordinate twist of a quasicoherent model is quasicoherent. -/
+theorem coordinateTwist_isQuasicoherent
+    (C : SupportAdaptedChowChart xπ M) (n : ℕ)
+    [M.IsQuasicoherent] :
+    (C.coordinateTwist n).IsQuasicoherent := by
+  let P :=
+    MvPolynomial.coordinateHyperplanePoleSheafPower
+      (R := R) C.coordinate n
+  let L :=
+    (pullback C.relativeProjective.chosenProjectiveMap).obj P
+  have hP : IsInvertible P :=
+    MvPolynomial.coordinateHyperplanePoleSheafPower_isInvertible
+      C.coordinate n
+  have hL : IsInvertible L :=
+    hP.pullback C.relativeProjective.chosenProjectiveMap
+  letI : C.pulledBackModel.IsQuasicoherent := by
+    dsimp only [pulledBackModel]
+    exact isQuasicoherent_pullback C.cover M
+  change (C.pulledBackModel ⊗ L).IsQuasicoherent
+  exact hL.tensorObj_isQuasicoherent
+
+/-- The coordinate twist of a finite-type quasicoherent model is finite type. -/
+theorem coordinateTwist_isFiniteType
+    (C : SupportAdaptedChowChart xπ M) (n : ℕ)
+    [M.IsQuasicoherent] [M.IsFiniteType] :
+    (C.coordinateTwist n).IsFiniteType := by
+  let P :=
+    MvPolynomial.coordinateHyperplanePoleSheafPower
+      (R := R) C.coordinate n
+  let L :=
+    (pullback C.relativeProjective.chosenProjectiveMap).obj P
+  have hP : IsInvertible P :=
+    MvPolynomial.coordinateHyperplanePoleSheafPower_isInvertible
+      C.coordinate n
+  have hL : IsInvertible L :=
+    hP.pullback C.relativeProjective.chosenProjectiveMap
+  letI : C.pulledBackModel.IsQuasicoherent := by
+    dsimp only [pulledBackModel]
+    exact isQuasicoherent_pullback C.cover M
+  letI : C.pulledBackModel.IsFiniteType := by
+    dsimp only [pulledBackModel]
+    exact isFiniteType_pullback C.cover M
+  change (C.pulledBackModel ⊗ L).IsFiniteType
+  exact hL.tensorObj_isFiniteType
+
 /-- The coordinate-twisted model pushed down along the support-adapted Chow cover. -/
 noncomputable def coordinateComodel
     (C : SupportAdaptedChowChart xπ M) (n : ℕ) : X.Modules :=
   (pushforward C.cover).obj (C.coordinateTwist n)
+
+/-- The coordinate comodel of a quasicoherent model is quasicoherent. -/
+theorem coordinateComodel_isQuasicoherent
+    (C : SupportAdaptedChowChart xπ M) (n : ℕ)
+    [M.IsQuasicoherent] :
+    (C.coordinateComodel n).IsQuasicoherent := by
+  letI : IsProper C.cover :=
+    C.relativeProjective.isProper
+  letI : (C.coordinateTwist n).IsQuasicoherent :=
+    C.coordinateTwist_isQuasicoherent n
+  exact isQuasicoherent_pushforward_of_isProper
+    C.cover (C.coordinateTwist n)
+
+/-- On a locally Noetherian target, the coordinate comodel of a finite-type
+quasicoherent model is finite type. -/
+theorem coordinateComodel_isFiniteType
+    [IsLocallyNoetherian X]
+    (C : SupportAdaptedChowChart xπ M) (n : ℕ)
+    [M.IsQuasicoherent] [M.IsFiniteType] :
+    (C.coordinateComodel n).IsFiniteType := by
+  letI : (C.coordinateTwist n).IsQuasicoherent :=
+    C.coordinateTwist_isQuasicoherent n
+  letI : (C.coordinateTwist n).IsFiniteType :=
+    C.coordinateTwist_isFiniteType n
+  exact C.relativeProjective.isFiniteType_pushforward
+    (C.coordinateTwist n)
 
 /-- The adjunction unit followed by multiplication with the selected projective coordinate. -/
 noncomputable def coordinateComparison

@@ -24,7 +24,8 @@ noncomputable section
 
 variable {X : Scheme.{u}}
 
-noncomputable local instance (Y : Scheme.{u}) : MonoidalCategory Y.Modules :=
+noncomputable local instance invertibleSheafTensorMonoidal
+    (Y : Scheme.{u}) : MonoidalCategory Y.Modules :=
   monoidalCategory Y
 
 private noncomputable def tensorRestrictIso
