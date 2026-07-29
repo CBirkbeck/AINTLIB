@@ -9,6 +9,7 @@ component, and compute the projections of a one-bidegree correction boundary.
 -/
 
 open CategoryTheory CategoryTheory.Limits CategoryTheory.Preadditive
+open scoped BigOperators
 
 universe u
 
@@ -263,5 +264,56 @@ theorem exists_boundary_killing_components_lt
                 (K.ιTotalOrZero (.up ℕ) r (p - 1) n
                   (((-1 : ℤˣ) ^ r) • c))) = 0
         rw [hit, sub_zero]
+
+private theorem totalUpNat_decomposition_apply
+    (n : ℕ) (x : (K.total (.up ℕ)).X n) :
+    ∑ qp ∈ Finset.antidiagonal n,
+      K.ιTotalOrZero (.up ℕ) qp.1 qp.2 n
+        (K.πTotalUpNat qp.1 qp.2 n x) = x := by
+  classical
+  have sum_apply
+      (s : Finset (ℕ × ℕ))
+      (f : ℕ × ℕ → ((K.total (.up ℕ)).X n ⟶
+        (K.total (.up ℕ)).X n)) :
+      (∑ qp ∈ s, f qp) x = ∑ qp ∈ s, f qp x := by
+    let ev : (((K.total (.up ℕ)).X n ⟶
+        (K.total (.up ℕ)).X n) →+ (K.total (.up ℕ)).X n) :=
+      { toFun := fun g ↦ g x
+        map_zero' := rfl
+        map_add' := fun _ _ ↦ rfl }
+    exact map_sum ev f s
+  have h := congrArg (fun f ↦ f x) (K.totalUpNat_decomposition n)
+  rw [sum_apply] at h
+  simpa only [ConcreteCategory.comp_apply, CategoryTheory.id_apply] using h
+
+/-- If every component before the horizontal axis vanishes, a total-complex
+element is the inclusion of its horizontal-axis component. -/
+theorem ιTotal_horizontalAxis_eq_of_components_lt_eq_zero
+    (n : ℕ) (x : (K.total (.up ℕ)).X n)
+    (hx : ∀ q, q < n →
+      K.πTotalUpNat q (n - q) n x = 0) :
+    K.ιTotal (.up ℕ) n 0 n rfl
+        (K.πTotalUpNat n 0 n x) = x := by
+  classical
+  calc
+    _ = ∑ qp ∈ Finset.antidiagonal n,
+        K.ιTotalOrZero (.up ℕ) qp.1 qp.2 n
+          (K.πTotalUpNat qp.1 qp.2 n x) := by
+      rw [Finset.sum_eq_single (n, 0)]
+      · rw [K.ιTotalOrZero_eq (.up ℕ) n 0 n rfl]
+      · rintro ⟨q, p⟩ hmem hne
+        have hsum : q + p = n := Finset.mem_antidiagonal.mp hmem
+        have hq : q < n := by
+          by_contra hnq
+          have hqn : q = n := by omega
+          subst q
+          have hp : p = 0 := by omega
+          exact hne (Prod.ext rfl hp)
+        have hp : p = n - q := by omega
+        subst p
+        rw [hx q hq, map_zero]
+      · intro hnot
+        exact (hnot (Finset.mem_antidiagonal.mpr (by omega))).elim
+    _ = x := K.totalUpNat_decomposition_apply n x
 
 end HomologicalComplex₂
