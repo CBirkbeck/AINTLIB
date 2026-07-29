@@ -15,6 +15,7 @@ explicit kernels and quotients used by the algebraic base-change API.
 
 open CategoryTheory
 open TensorProduct
+open scoped BigOperators
 
 universe u v w
 
@@ -143,6 +144,86 @@ theorem LinearMap.exists_away_baseChange_exact_of_localizationAtPrime_of_finite_
   exact ⟨r, hr,
     (LinearMap.baseChange_exact_iff_subsingleton_tensor_homology_of_flat
       f g h (Localization.Away r)).mpr htensor⟩
+
+/-- Exactness in a finite range after localization at a prime spreads to one common
+principal neighborhood when every explicit homology module in that range is finite. -/
+theorem LinearMap.exists_away_baseChange_exact_of_bounded_localizationAtPrime_of_finite_homology
+    (M : ℕ → Type v)
+    [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+    (d : ∀ n, M n →ₗ[R] M (n + 1))
+    (N : ℕ)
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfinite : ∀ n, n < N →
+      Module.Finite R
+        (LinearMap.ker (d (n + 1)) ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer
+              (d n) (d (n + 1)) (hcomp n))))
+    (p : Ideal R) [p.IsPrime]
+    (hexact : ∀ n, n < N →
+      Function.Exact
+        ((d n).baseChange (Localization.AtPrime p))
+        ((d (n + 1)).baseChange (Localization.AtPrime p))) :
+    ∃ r : R, r ∉ p ∧
+      ∀ n, n < N →
+        Function.Exact
+          ((d n).baseChange (Localization.Away r))
+          ((d (n + 1)).baseChange (Localization.Away r)) := by
+  let H : Fin N → Type v := fun i ↦
+    LinearMap.ker (d (i + 1)) ⧸
+      LinearMap.range
+        (LinearMap.codRestrictToKer
+          (d i) (d (i + 1)) (hcomp i))
+  letI hFinite (i : Fin N) : Module.Finite R (H i) :=
+    hfinite i i.isLt
+  letI hLocal (i : Fin N) :
+      Subsingleton (LocalizedModule p.primeCompl (H i)) := by
+    have htensor :
+        Subsingleton ((Localization.AtPrime p) ⊗[R] H i) :=
+      (LinearMap.baseChange_exact_iff_subsingleton_tensor_homology_of_flat
+        (d i) (d (i + 1)) (hcomp i)
+        (Localization.AtPrime p)).mp
+          (hexact i i.isLt)
+    exact
+      (LocalizedModule.equivTensorProduct
+        p.primeCompl (H i)).toEquiv.subsingleton_congr.mpr htensor
+  choose r hr haway using fun i : Fin N ↦
+    LocalizedModule.exists_subsingleton_away (M := H i) p
+  let s : R := ∏ i, r i
+  have hs : s ∉ p := by
+    exact p.primeCompl.prod_mem fun i _ ↦ hr i
+  refine ⟨s, hs, ?_⟩
+  intro n hn
+  let i : Fin N := ⟨n, hn⟩
+  have hsupp :
+      Module.support R (H i) ⊆
+        PrimeSpectrum.zeroLocus {r i} :=
+    LocalizedModule.subsingleton_iff_support_subset.mp (haway i)
+  have hsuppS :
+      Module.support R (H i) ⊆
+        PrimeSpectrum.zeroLocus {s} := by
+    intro x hx
+    have hri : r i ∈ x.asIdeal := by
+      simpa using hsupp hx
+    have hdiv : r i ∣ s := by
+      dsimp only [s]
+      exact Finset.dvd_prod_of_mem (fun j ↦ r j)
+        (Finset.mem_univ i)
+    obtain ⟨t, ht⟩ := hdiv
+    have hst : s ∈ x.asIdeal := by
+      rw [ht]
+      exact x.asIdeal.mul_mem_right t hri
+    simpa using hst
+  have hawayS : Subsingleton (LocalizedModule.Away s (H i)) :=
+    LocalizedModule.subsingleton_iff_support_subset.mpr hsuppS
+  have htensorS : Subsingleton (Localization.Away s ⊗[R] H i) :=
+    (LocalizedModule.equivTensorProduct
+      (Submonoid.powers s) (H i)).toEquiv.subsingleton_congr.mp
+        hawayS
+  exact
+    (LinearMap.baseChange_exact_iff_subsingleton_tensor_homology_of_flat
+      (d n) (d (n + 1)) (hcomp n)
+      (Localization.Away s)).mpr htensorS
 
 /-- Flat scalar extension preserves finite generation of the homology of a short complex of
 modules. -/
