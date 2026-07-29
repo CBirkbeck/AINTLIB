@@ -271,3 +271,49 @@ In the PROJECT's coding the finite embedding is TRIVIAL to define:
   ~500-1000 LOC commutative algebra: A := P_𝔪, C := (P∖𝔪)⁻¹Q finite over A,
   Ĉ^{𝔪C} ≅ ∏ (C_𝔫)^, AdicCompletion.map_exact-injectivity), (iv) glue with
   the Tate leaf (HRW-4) at w = 0.
+
+
+## L1 ADJUDICATED (2026-07-30 ChatGPT-5.6-xhigh — supersedes the openness-pivot draft)
+
+The openness pivot was WRONG: 𝔮ⁿ is CLOSED but NOT open (B/𝔮ⁿ is a
+finite-dimensional K-Banach space — Hausdorff, never discrete; a discrete
+nonzero K-vector space would force K discrete). The mod-power collapse has a
+different mechanism:
+
+**The correct L1 chain** (all before localization!):
+1. A → B := 𝒪_A(D) is FLAT — this is Wedhorn 8.30 = the central audit-pass-2
+   WIP (prop_8_30_flat_clean)! L1 therefore ALSO funnels through it.
+2. TRIVIAL SPECIAL FIBRE (the analytic heart): B ⊗_A κ(𝔭) ≅ κ(𝔭) at a point
+   of the rational subset — via affinoid base change
+   B/𝔭B ≅ κ(𝔭)⟨T⟩/(s̄T−f̄) and continuous evaluation T_i ↦ f̄_i/s̄ ∈ κ(𝔭)
+   (needs κ(𝔭) finite/normed — Nullstellensatz-adjacent). Corollaries:
+   𝔭B = 𝔮, κ(𝔭) ≅ κ(𝔮).
+3. FLAT-SPECIAL-FIBRE INDUCTION (elementary, NO noetherian): R→S flat,
+   J = IS, R/I ≅ S/J ⇒ R/Iⁿ ≅ S/Jⁿ ∀n (five lemma on
+   0 → Iⁿ/Iⁿ⁺¹ → R/Iⁿ⁺¹ → R/Iⁿ → 0 tensored).
+4. Inverse limits: AdicCompletion.evalₐ / surjective_evalₐ / ext_evalₐ +
+   a `adicCompletionEquivOfQuotientPowEquiv` wrapper (new glue).
+5. Graph algebra: C := A[T]/(sT−f), 𝔮₀ := 𝔮 ∩ C: C_s ≅ A_s, C/𝔭C ≅ A/𝔭 ⇒
+   𝔮₀ = 𝔭C and A_𝔭 ≅ C_𝔮₀ (ordinary commutative algebra).
+WARNING recorded: NO "completion mod arbitrary J" descent —
+k[x,y]^(x)/(y) = k⟦x⟧ ≠ k[x]; Artin–Rees does not give it. Also B is NOT the
+I-adic completion of abstract C (ϖ is a unit in C; completion happens at C₀).
+
+**Lean leaf list (ChatGPT-provided, mathlib-support enumerated)**:
+- quotient_pow_equiv_of_flat (Module.Flat + lTensor_exact five-lemma induction)
+- adicCompletionEquivOfQuotientPowEquiv (evalₐ-API wrapper)
+- RationalLocalization.map_comap_maximal + residueFieldEquiv (the NEW analytic
+  heart: 8.30-flatness + rational residue base change)
+- graphAtPrimeEquiv (thin polynomial-elimination wrapper)
+- completedAtMaximalEquiv (assembly)
+Mathlib available: Module.Flat(.lTensor_exact), IsLocalization.flat/
+instFlatAtPrime, AdicCompletion.evalₐ/surjective_evalₐ/ext_evalₐ/map_exact/
+map_injective/map_surjective, LocalRing completion API.
+
+**REVISED WALL BOTTLENECK MAP**: everything funnels into ONE analytic cluster:
+{affinoid Nullstellensatz (HRW-4-N1), closedness of ideals, 8.30-flatness
+(central WIP), trivial special fibre}. The algebra around it (L1 induction,
+semilocal decomposition, parity finiteness) is elementary and can be built
+NOW. Recommended execution order: HRW-5(i,ii) parity module decomposition →
+L1's quotient_pow_equiv_of_flat + graphAtPrimeEquiv (no analytic deps) →
+HRW-4-N1 Nullstellensatz decompose round (the long pole) → fibre + assembly.
