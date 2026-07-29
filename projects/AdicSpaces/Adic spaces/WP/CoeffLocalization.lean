@@ -2097,10 +2097,11 @@ variable {K w} in
 ([WP] cor:finite-head-presentation: perturb the datum into a head via density of the
 heads and lem:small-perturbation; the retracted Bezout relation makes the perturbed
 datum rational in the head; conclude by prop:coefficientwise-localization). -/
-theorem nonempty_headModelData (ϖ : Uniformizer K)
+theorem nonempty_headModelData_all (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
-    Nonempty (HeadModelData D) := by
+    ∃ N₁ : ℕ, ∀ M₀ : ℕ, N₁ ≤ M₀ →
+      ∃ model : HeadModelData D, model.N = M₀ := by
   classical
   -- the window scaling element, matching `wpaPod`'s choice
   set c : K := Classical.choose (exists_norm_window' K) with hc_def
@@ -2172,7 +2173,10 @@ theorem nonempty_headModelData (ϖ : Uniformizer K)
     rw [hT₁_def] at hx
     obtain ⟨y, hy, rfl⟩ := Finset.mem_image.mp hx
     exact hk y hy
-  obtain ⟨N, g, hg⟩ := exists_head_approx_finset ϖ T₁ m hT₁1
+  obtain ⟨Nthr, hall⟩ := exists_head_approx_finset_all ϖ T₁ m hT₁1
+  refine ⟨Nthr, fun M₀ hM₀ => ?_⟩
+  set N : ℕ := M₀ with hN_def
+  obtain ⟨g, hg⟩ := hall N (by rw [hN_def]; exact hM₀)
   -- the perturbation setup: perturb the scaled datum into the `N`-th head
   set S : PerturbSetup (WPA K w) :=
     { t := t, htu := htu, ht1 := ht1, ht0 := ht0, hscale := hscale
@@ -2280,7 +2284,7 @@ theorem nonempty_headModelData (ϖ : Uniformizer K)
       rationalOpen D.T D.s := by
     rw [hmatch, PerturbSetup.rationalOpen_datum S]
     exact hropen₁
-  exact ⟨⟨N, DH, hDHrat, hopen,
+  refine ⟨⟨N, DH, hDHrat, hopen,
     (restrictionEquiv D (liftDatum DH hDHrat) hopen).trans
       (coeffLocEquiv ϖ hK₀ DH hDHrat),
     by
@@ -2291,6 +2295,18 @@ theorem nonempty_headModelData (ϖ : Uniformizer K)
       rw [RingEquiv.symm_trans]
       rw [RingEquiv.coe_trans]
       exact (restrictionEquiv_symm_continuous D (liftDatum DH hDHrat)
-        hopen).comp (coeffLocEquiv_symm_continuous ϖ hK₀ DH hDHrat)⟩⟩
+        hopen).comp (coeffLocEquiv_symm_continuous ϖ hK₀ DH hDHrat)⟩,
+    hN_def⟩
+
+variable {K w} in
+/-- **Finite-head presentation of every rational localization**
+([WP] cor:finite-head-presentation) — the stage-free form. -/
+theorem nonempty_headModelData (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (D : RationalLocData (WPA K w)) (hD : D.IsRational) :
+    Nonempty (HeadModelData D) := by
+  obtain ⟨N₁, hall⟩ := nonempty_headModelData_all ϖ hK₀ D hD
+  obtain ⟨model, -⟩ := hall N₁ (le_refl _)
+  exact ⟨model⟩
 
 end WeightedParity
