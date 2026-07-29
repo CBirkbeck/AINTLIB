@@ -237,16 +237,24 @@ theorem parity_decomposition (q : WPHead K (fun _ => 0) N) :
         (paritySlice (w := w) N E.1 q).1.1 *
           MvPowerSeries.monomial (parityExp E.1) (1 : K) := rfl
     rw [hmul, MvPowerSeries.coeff_mul_monomial]
-    split_ifs with hle
-    · show (if (∀ n, n ≠ 0 → (t - parityExp E.1) n % 2 = 0) ∧
-          (∀ n, N < n → (t - parityExp E.1) n = 0) then
-        MvPowerSeries.coeff ((t - parityExp E.1) + parityExp E.1) q.1.1
-        else 0) * 1 = _
-      rw [tsub_add_cancel_of_le hle, mul_one]
-      split_ifs with hcond
-      · rw [one_mul]
-      · rw [zero_mul]
-    · rw [if_neg (by tauto), zero_mul]
+    by_cases hle : parityExp E.1 ≤ t
+    · rw [if_pos hle]
+      have hsl : MvPowerSeries.coeff (t - parityExp E.1)
+          (paritySlice (w := w) N E.1 q).1.1 =
+          if (∀ n, n ≠ 0 → (t - parityExp E.1) n % 2 = 0) ∧
+             (∀ n, N < n → (t - parityExp E.1) n = 0) then
+            MvPowerSeries.coeff t q.1.1 else 0 := by
+        show (if (∀ n, n ≠ 0 → (t - parityExp E.1) n % 2 = 0) ∧
+            (∀ n, N < n → (t - parityExp E.1) n = 0) then
+          MvPowerSeries.coeff ((t - parityExp E.1) + parityExp E.1) q.1.1
+          else 0) = _
+        rw [tsub_add_cancel_of_le hle]
+      rw [hsl, mul_one]
+      by_cases hcond : (∀ n, n ≠ 0 → (t - parityExp E.1) n % 2 = 0) ∧
+          (∀ n, N < n → (t - parityExp E.1) n = 0)
+      · rw [if_pos hcond, if_pos ⟨hle, hcond⟩, one_mul]
+      · rw [if_neg hcond, if_neg (by tauto), zero_mul]
+    · rw [if_neg hle, if_neg (by tauto), zero_mul]
   rw [Finset.sum_congr rfl hterm, ← Finset.sum_mul]
   show MvPowerSeries.coeff t q.1.1 = _
   by_cases hq0 : MvPowerSeries.coeff t q.1.1 = 0
@@ -256,14 +264,16 @@ theorem parity_decomposition (q : WPHead K (fun _ => 0) N) :
       exact hq0 (q.2 t hc)
     set Et : Finset ℕ :=
       t.support.filter (fun n => n ≠ 0 ∧ t n % 2 = 1) with hEt
+    have hmemEt : ∀ n, n ∈ Et ↔ (t n ≠ 0 ∧ n ≠ 0 ∧ t n % 2 = 1) := by
+      intro n
+      rw [hEt, Finset.mem_filter, Finsupp.mem_support_iff]
     have hEtIcc : Et ∈ (Finset.Icc 1 N).powerset := by
       rw [Finset.mem_powerset]
       intro n hn
-      rw [hEt, Finset.mem_filter] at hn
-      obtain ⟨hsupp, hn0, -⟩ := hn
+      obtain ⟨hne, hn0, -⟩ := (hmemEt n).mp hn
       refine Finset.mem_Icc.mpr ⟨by omega, ?_⟩
       by_contra hgt
-      exact absurd (hhead.2 n (by omega)) (Finsupp.mem_support_iff.mp hsupp)
+      exact hne (hhead.2 n (by omega))
     rw [Finset.sum_eq_single_of_mem (⟨Et, hEtIcc⟩ :
         {x // x ∈ (Finset.Icc 1 N).powerset}) (Finset.mem_attach _ _)]
     · rw [if_pos, one_mul]
@@ -271,32 +281,26 @@ theorem parity_decomposition (q : WPHead K (fun _ => 0) N) :
       · intro n
         rw [parityExp_apply]
         split_ifs with hn
-        · rw [hEt, Finset.mem_filter] at hn
-          have := hn.2.2
+        · have := ((hmemEt n).mp hn).2.2
           omega
         · omega
       · intro n hn0
         rw [Finsupp.tsub_apply, parityExp_apply]
         by_cases hmem : n ∈ Et
         · rw [if_pos hmem]
-          rw [hEt, Finset.mem_filter] at hmem
-          have := hmem.2.2
+          have := ((hmemEt n).mp hmem).2.2
           omega
         · rw [if_neg hmem]
-          have hcon : ¬ (n ≠ 0 ∧ t n % 2 = 1) := by
-            intro hcon
-            exact hmem (by
-              rw [hEt, Finset.mem_filter]
-              exact ⟨Finsupp.mem_support_iff.mpr (by omega), hcon⟩)
+          have hcon : ¬ (t n ≠ 0 ∧ n ≠ 0 ∧ t n % 2 = 1) :=
+            fun hc => hmem ((hmemEt n).mpr hc)
           push_neg at hcon
-          have := hcon hn0
-          omega
+          rcases eq_or_ne (t n) 0 with h0 | h0
+          · omega
+          · have := hcon h0 hn0
+            omega
       · intro n hn
-        rw [Finsupp.tsub_apply, parityExp_apply, hhead.2 n hn, if_neg]
-        · rfl
-        · intro hmem
-          rw [hEt, Finset.mem_filter] at hmem
-          exact absurd (hhead.2 n hn) (Finsupp.mem_support_iff.mp hmem.1)
+        rw [Finsupp.tsub_apply, parityExp_apply, hhead.2 n hn,
+          if_neg (fun hmem => ((hmemEt n).mp hmem).1 (hhead.2 n hn))]
     · rintro ⟨E, hE⟩ - hne
       rw [if_neg]
       rintro ⟨hle, heven, -⟩
@@ -312,11 +316,9 @@ theorem parity_decomposition (q : WPHead K (fun _ => 0) N) :
         have htn : 1 ≤ t n := le_trans (le_of_eq hεn.symm) (hle n)
         have hpar := heven n (by omega)
         rw [Finsupp.tsub_apply, hεn] at hpar
-        rw [hEt, Finset.mem_filter]
-        exact ⟨Finsupp.mem_support_iff.mpr (by omega), by omega, by omega⟩
+        exact (hmemEt n).mpr ⟨by omega, by omega, by omega⟩
       · intro hnEt
-        rw [hEt, Finset.mem_filter] at hnEt
-        obtain ⟨-, hn0, hodd⟩ := hnEt
+        obtain ⟨hne0, hn0, hodd⟩ := (hmemEt n).mp hnEt
         by_contra hnE
         have hpar := heven n hn0
         rw [Finsupp.tsub_apply, parityExp_apply, if_neg hnE] at hpar
