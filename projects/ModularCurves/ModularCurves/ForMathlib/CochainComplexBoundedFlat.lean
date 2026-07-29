@@ -119,6 +119,53 @@ theorem HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange
   exact LinearMap.exact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology
     M d N hcomp hfinite hfield q hq
 
+/-- A bounded flat cochain complex with finite homology over a local ring is exact when its
+residue-field base change is exact. -/
+theorem
+  HomologicalComplex.functionExact_of_bounded_flat_residueField_baseChange_exact_of_finite_homology
+    [IsLocalRing R]
+    (C : CochainComplex (ModuleCat.{v} R) ℕ)
+    [∀ q, Module.Flat R (C.X q)]
+    [∀ q, Module.Finite R (C.homology q)]
+    (N : ℕ) [Subsingleton (C.X (N + 1))]
+    (hresidue : ∀ q, q < N →
+      Function.Exact
+        ((C.d q (q + 1)).hom.baseChange (IsLocalRing.ResidueField R))
+        ((C.d (q + 1) (q + 2)).hom.baseChange
+          (IsLocalRing.ResidueField R)))
+    (q : ℕ) (hq : q < N) :
+    Function.Exact
+      (C.d q (q + 1)).hom
+      (C.d (q + 1) (q + 2)).hom := by
+  let M : ℕ → Type v := fun i ↦ C.X i
+  let d : ∀ i, M i →ₗ[R] M (i + 1) :=
+    fun i ↦ (C.d i (i + 1)).hom
+  have hcomp : ∀ i, d (i + 1) ∘ₗ d i = 0 := by
+    intro i
+    exact shortComplexModuleCatCompEqZero
+      (C.sc' i (i + 1) (i + 2))
+  have hfinite : ∀ i, i < N →
+      Module.Finite R
+        (LinearMap.ker (d (i + 1)) ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer
+              (d i) (d (i + 1)) (hcomp i))) := by
+    intro i _
+    let S := C.sc' i (i + 1) (i + 2)
+    have hprev : (ComplexShape.up ℕ).prev (i + 1) = i :=
+      CochainComplex.prev_nat_succ i
+    have hnext : (ComplexShape.up ℕ).next (i + 1) = i + 2 := by
+      rw [CochainComplex.next]
+      omega
+    letI : Module.Finite R S.homology :=
+      Module.Finite.equiv
+        (C.homologyIsoSc' i (i + 1) (i + 2)
+          hprev hnext).toLinearEquiv
+    exact Module.Finite.quotient_range_moduleCatToCycles S
+  exact
+    LinearMap.exact_of_bounded_flat_residueField_baseChange_exact_of_finite_homology
+      M d N hcomp hfinite hresidue q hq
+
 /-- Finite degree-zero homology of a cochain complex gives a finite kernel of its first
 differential. -/
 theorem HomologicalComplex.finite_kernel_zero_of_finite_homology
