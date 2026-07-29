@@ -187,6 +187,32 @@ noncomputable def tateExtAmbient (s : ℕ) :
   ((MvPowerSeries.sumAlgEquiv (Fin s) ℕ K).symm.trans
     (MvPowerSeries.renameEquiv K (slotEquiv s).symm)).toRingEquiv
 
+variable {K} in
+/-- Coefficients of the ambient flatten: transport the exponent through
+`slotEquiv` and read the nested coefficient. -/
+theorem tateExtAmbient_coeff (s : ℕ)
+    (F : MvPowerSeries (Fin s) (MvPowerSeries ℕ K)) (u : ℕ →₀ ℕ) :
+    MvPowerSeries.coeff u (tateExtAmbient (K := K) s F) =
+      MvPowerSeries.coeff
+        (Finsupp.comapDomain Sum.inr (Finsupp.equivMapDomain (slotEquiv s) u)
+          Sum.inr_injective.injOn)
+        (MvPowerSeries.coeff
+          (Finsupp.comapDomain Sum.inl (Finsupp.equivMapDomain (slotEquiv s) u)
+            Sum.inl_injective.injOn) F) := by
+  have hu : u = Finsupp.embDomain (slotEquiv s).symm.toEmbedding
+      (Finsupp.equivMapDomain (slotEquiv s) u) := by
+    rw [Finsupp.embDomain_eq_mapDomain,
+      show (⇑((slotEquiv s).symm.toEmbedding) : (Fin s ⊕ ℕ) → ℕ) =
+        ⇑(slotEquiv s).symm from rfl,
+      ← Finsupp.equivMapDomain_eq_mapDomain, ← Finsupp.equivMapDomain_trans,
+      Equiv.self_trans_symm, Finsupp.equivMapDomain_refl]
+  show MvPowerSeries.coeff u
+    (MvPowerSeries.rename (⇑((slotEquiv s).symm.toEmbedding))
+      ((MvPowerSeries.sumAlgEquiv (Fin s) ℕ K).symm F)) = _
+  conv_lhs => rw [hu]
+  rw [MvPowerSeries.coeff_embDomain_rename]
+  rfl
+
 variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex

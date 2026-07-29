@@ -1,1 +1,1 @@
-FOCUS: W24 stage 2 — build Psi : restrictedSubring s (WPA) ->+* MvPowerSeries N K := tateExtAmbient after coefficientwise val-map; then range = shiftWeight-support-restricted; then corestrict ofBijective; coeff-law of tateExtAmbient first (sumAlgEquiv-symm coeff + renameEquiv-coeff via domCongr slotEquiv)
+FOCUS: W24 stage 2 cont — Psi hom (subtype-val coeff-map + tateExtAmbient), range = shiftWeight-support+restricted, corestrict ofBijective; coeff-law DONE (tateExtAmbient_coeff)
