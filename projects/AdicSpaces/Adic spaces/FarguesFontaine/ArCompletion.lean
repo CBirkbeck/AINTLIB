@@ -1457,6 +1457,62 @@ theorem eventually_valued_sub_le_of_tendsto {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 
     ∀ᶠ i in l, Valued.v (g i - y) ≤ ε :=
   hg.eventually (valued_ball_mem_nhds p F y hε)
 
+include ϖ in
+/-- **A single Teichmüller piece is small.** If `[a] − [b]` already has Gauss value at
+most `ε`, then so does `pⁱ · ([a] − [b])` for every `i`: multiplying by `pⁱ` scales the
+Gauss value by `ρ ^ i ≤ 1`. This is what makes the prefix bound uniform in the index. -/
+private theorem gaussValueF_p_pow_teichmuller_sub_le {ρ : NNReal} (hρ1 : ρ < 1)
+    {ε : NNReal} (a b : F) (i : ℕ)
+    (hHo : gaussValueF p F ρ
+      (WittVector.teichmuller p a - WittVector.teichmuller p b) ≤ ε) :
+    BddAbove (Set.range (gaussTermF p F ρ ((p : WittVector p F) ^ i *
+        (WittVector.teichmuller p a - WittVector.teichmuller p b))))
+      ∧ gaussValueF p F ρ ((p : WittVector p F) ^ i *
+        (WittVector.teichmuller p a - WittVector.teichmuller p b)) ≤ ε := by
+  have hBsub := bddAbove_gaussTermF_teichmuller_sub p F hρ1 ϖ a b
+  refine ⟨bddAbove_gaussTermF_p_pow_mul p F hBsub i, ?_⟩
+  rw [gaussValueF_p_pow_mul p F hBsub i]
+  calc ρ ^ i * gaussValueF p F ρ
+        (WittVector.teichmuller p a - WittVector.teichmuller p b)
+      ≤ 1 * ε := mul_le_mul (pow_le_one₀ zero_le hρ1.le) hHo zero_le zero_le
+    _ = ε := one_mul _
+
+/-- **Every `NNReal` is dominated by a power of `c⁻¹`** when `0 < c < 1`, and that power
+can be taken `≥ 1`. Used to cap a finite sup of coordinate values by a single scale, so
+that one Hölder modulus works uniformly across the prefix. -/
+private theorem exists_le_inv_pow {c : NNReal} (hc0 : 0 < c) (hc1 : c < 1) (s : NNReal) :
+    ∃ m : ℕ, s ≤ (c⁻¹) ^ m ∧ (1 : NNReal) ≤ (c⁻¹) ^ m := by
+  obtain ⟨m, hm⟩ : ∃ m : ℕ, s ≤ (c⁻¹) ^ m := by
+    rcases eq_or_ne s 0 with h0 | hne0
+    · exact ⟨0, by rw [h0]; exact zero_le⟩
+    · obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one
+        (inv_pos.mpr (pos_iff_ne_zero.mpr hne0)) hc1
+      refine ⟨m, ?_⟩
+      rw [inv_pow]
+      have h1 : s * c ^ m < 1 := by
+        have h2 := mul_lt_mul_of_pos_left hm (pos_iff_ne_zero.mpr hne0)
+        rwa [mul_inv_cancel₀ hne0] at h2
+      exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero m hc0.ne')).mpr h1)
+  refine ⟨m, hm, ?_⟩
+  rw [inv_pow]
+  calc (1 : NNReal) = c ^ m * (c ^ m)⁻¹ :=
+        (mul_inv_cancel₀ (pow_ne_zero m hc0.ne')).symm
+    _ ≤ 1 * (c ^ m)⁻¹ := mul_le_mul_of_nonneg_right
+        (pow_le_one₀ zero_le hc1.le) zero_le
+    _ = (c ^ m)⁻¹ := one_mul _
+
+/-- **Squeeze to zero in `hatK`**: two elements whose difference has value below every
+positive bound are equal. The valuation is `NNReal`-valued, so halving the (nonzero)
+value would contradict the hypothesis at that smaller bound. -/
+private theorem eq_of_forall_valued_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {a b : hatK p F hρ0 hρ1} (h : ∀ ε : NNReal, 0 < ε → Valued.v (a - b) ≤ ε) : a = b := by
+  have hzero : Valued.v (a - b) = 0 := by
+    by_contra hne0
+    exact absurd (lt_of_le_of_lt (h _ (div_pos (pos_iff_ne_zero.mpr hne0) two_pos))
+      (NNReal.half_lt_self hne0)) (lt_irrefl _)
+  exact sub_eq_zero.mp ((Valuation.zero_iff (Valued.v :
+    Valuation (hatK p F hρ0 hρ1) NNReal)).mp hzero)
+
 /-- **The series realization** (T903 step 5; Kedlaya (2.2.1) on the completion,
 existence direction): every element of `A^r` is `Φ` of its limit coordinates,
 `x = Σₙ pⁿ·[xₙ]`. The quantitative core compares, for one late approximant `u`,
@@ -1502,24 +1558,7 @@ theorem PhiHatK_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     -- value cap for the Hölder modulus
     set capB : NNReal := (Finset.range N).sup
       (fun i => perfectoidValuation p F (b i)) with hcap
-    obtain ⟨m, hm⟩ : ∃ m : ℕ, capB ≤ (c⁻¹) ^ m := by
-      rcases eq_or_ne capB 0 with h0 | hne0
-      · exact ⟨0, by rw [h0]; exact zero_le⟩
-      · obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one
-          (inv_pos.mpr (pos_iff_ne_zero.mpr hne0)) hclt
-        refine ⟨m, ?_⟩
-        rw [inv_pow]
-        have h1 : capB * c ^ m < 1 := by
-          have h2 := mul_lt_mul_of_pos_left hm (pos_iff_ne_zero.mpr hne0)
-          rwa [mul_inv_cancel₀ hne0] at h2
-        exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero m hc0.ne')).mpr h1)
-    have hcap1 : (1 : NNReal) ≤ (c⁻¹) ^ m := by
-      rw [inv_pow]
-      calc (1 : NNReal) = c ^ m * (c ^ m)⁻¹ :=
-            (mul_inv_cancel₀ (pow_ne_zero m hc0.ne')).symm
-        _ ≤ 1 * (c ^ m)⁻¹ := mul_le_mul_of_nonneg_right
-            (pow_le_one₀ zero_le hclt.le) zero_le
-        _ = (c ^ m)⁻¹ := one_mul _
+    obtain ⟨m, hm, hcap1⟩ := exists_le_inv_pow hc0 hclt capB
     -- the Hölder modulus
     obtain ⟨δ, hδ0, hδ⟩ := gaussValueF_teichmuller_sub_le_of_le_scaled p F hρ0 hρ1
       ϖ m hε'0 hε'1
@@ -1597,16 +1636,9 @@ theorem PhiHatK_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         rw [h1]
         refine le_trans (Valuation.map_add _ _ _) (max_le ?_ hbi_cap)
         exact le_trans hci_close (le_trans (min_le_right δ 1) hcap1)
-      have hHo := hδ (teichCoeffF p F wu i) (b i) hci_cap hbi_cap
-        (le_trans hci_close (min_le_left δ 1))
-      have hBsub := bddAbove_gaussTermF_teichmuller_sub p F hρ1 ϖ
-        (teichCoeffF p F wu i) (b i)
-      refine ⟨bddAbove_gaussTermF_p_pow_mul p F hBsub i, ?_⟩
-      rw [gaussValueF_p_pow_mul p F hBsub i]
-      calc ρ ^ i * gaussValueF p F ρ (WittVector.teichmuller p (teichCoeffF p F wu i)
-            - WittVector.teichmuller p (b i))
-          ≤ 1 * ε' := mul_le_mul (pow_le_one₀ zero_le hρ1.le) hHo zero_le zero_le
-        _ = ε' := one_mul _
+      exact gaussValueF_p_pow_teichmuller_sub_le p F ϖ hρ1 (teichCoeffF p F wu i) (b i) i
+        (hδ (teichCoeffF p F wu i) (b i) hci_cap hbi_cap
+          (le_trans hci_close (min_le_left δ 1)))
     have hsum := gaussValueF_finset_sum_le p F hρ0 hρ1 ε' (Finset.range N)
       (fun i => (p : WittVector p F) ^ i *
         (WittVector.teichmuller p (teichCoeffF p F wu i)
@@ -1651,16 +1683,7 @@ theorem PhiHatK_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     rw [hchain]
     refine le_trans (Valuation.map_add _ _ _) (le_trans (max_le hΦS ?_) hε'ε)
     exact le_trans (Valuation.map_add _ _ _) (max_le hSNu hux)
-  -- values below every positive bound vanish
-  have hzero : Valued.v (PhiHatK p F ϖ hρ0 hρ1 b - x) = 0 := by
-    by_contra hne0
-    have hpos : 0 < Valued.v (PhiHatK p F ϖ hρ0 hρ1 b - x) :=
-      pos_iff_ne_zero.mpr hne0
-    have hhalf := hkey (Valued.v (PhiHatK p F ϖ hρ0 hρ1 b - x) / 2)
-      (div_pos hpos two_pos)
-    exact absurd (lt_of_le_of_lt hhalf (NNReal.half_lt_self hne0)) (lt_irrefl _)
-  exact sub_eq_zero.mp ((Valuation.zero_iff (Valued.v :
-    Valuation (hatK p F hρ0 hρ1) NNReal)).mp hzero)
+  exact eq_of_forall_valued_sub_le p F hkey
 
 /-- **The value formula on `A^r`** (Kedlaya (2.2.1) on the completion): the value of
 any element of `A^r` is the sup of its scaled coordinate values. -/

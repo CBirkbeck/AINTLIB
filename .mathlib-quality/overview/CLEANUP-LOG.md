@@ -56,3 +56,51 @@ reference it.** DO THIS when cleaning CurveAdicSpace.lean, then revisit here.
   `X_S = 𝒴_(0,∞)(S)/φ^ℤ` for `S` any perfectoid space in char `p`. Ours is
   `S = Spa(F, 𝒪_F)`. Restating over a perfectoid base would touch every definition in
   the campaign — user approval required.
+
+---
+
+# /decompose-proof pass — biggest proofs first
+
+107 bodies exceed 60 lines. Working down from the largest.
+
+| # | Declaration | File | Before | After | Helpers extracted |
+|---|---|---|---|---|---|
+| 1 | `exists_window_subdatum_nbhd` | CurveAdicPresentation | 235 | **79** | 6 |
+| 2 | `PhiHatK_teichCoeffAr` | ArCompletion | 200 | **167** | 3 |
+
+## 1. `exists_window_subdatum_nbhd` 235 → 79 (−66%)
+
+Six named `private` helpers, all placed above it; statement byte-unchanged.
+The valuable one is `exists_rationalLocData_mem_subset` — **rational opens over a window
+chart are a neighbourhood basis** — which was the mathematical content of the middle
+third of the old proof, previously inlined and unnameable.
+
+Also `exists_isOpen_mem_yTop_iff`, `exists_isOpen_chart_trace`,
+`exists_finset_basicOpen_mem_subset` (basic opens are a basis of `Spv B`, in the exact
+shape `exists_spanning_presentation_of_mem_basicOpens` consumes), `windowNbhd`,
+`windowTraceHomeomorph`.
+
+The extraction exposed dead code (`hIM'` became unused once the homeomorphism moved out)
+and let the `V ≤ O` bullet shrink, because the new `hQmem` is a pointwise iff rather than
+a set equality needing a two-step unfold.
+
+## 2. `PhiHatK_teichCoeffAr` 200 → 167 (−17%)
+
+A much harder target: unlike #1 it is a *linear chain* of `have`s, each feeding the next,
+so there are few independent seams. Three genuinely generic lemmas came out:
+
+* `exists_le_inv_pow` — every `NNReal` is dominated by a power of `c⁻¹` when `0 < c < 1`,
+  and that power can be taken `≥ 1`. (21 lines of inline algebra → one call.)
+* `eq_of_forall_valued_sub_le` — squeeze-to-zero in `hatK`. Reusable; this "value below
+  every positive bound" step recurs across the file.
+* `gaussValueF_p_pow_teichmuller_sub_le` — one Teichmüller piece is small, uniformly in
+  the index (the `ρ ^ i ≤ 1` factor).
+
+Gotcha worth remembering: `gaussValueF_p_pow_teichmuller_sub_le` needs `ϖ` in its *proof*
+but not its *statement*, so Lean did not auto-include the section variable — it needs an
+explicit `include ϖ in`.
+
+The residual 167 lines are the `hkey` ε-argument: choose ε′, a base approximant and its
+decay thresholds, a working index, a cap, a Hölder modulus, a late approximant, prefix
+splitting, then a three-term ultrametric chain. Each step consumes the previous one's
+witnesses; helpers here would carry 8–12 hypotheses apiece.
