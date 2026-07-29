@@ -472,6 +472,122 @@ theorem baseCechTupleMapF_neg
     _ = (-baseCechTupleMapF π M U f hf) ≫ p :=
       by rw [neg_comp]
 
+/-- A lifted tuple map commutes with one supported tuple-row basis vector. -/
+theorem baseCechTupleMapF_comp_row_single
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m l : ℕ}
+    (g : CechTupleChain ι m →ₗ[ℤ] CechTupleChain ι l)
+    (hg : CechTupleSupportNonincreasing g)
+    (i : Fin (n + 1) → ι) (j : Fin (m + 1) → ι)
+    (hji : Set.range j ⊆ Set.range i) :
+    baseCechTupleMapF π M U g hg ≫
+        baseCechTupleRow π M U i (Finsupp.single j 1) =
+      baseCechTupleRow π M U i
+        (g (Finsupp.single j 1)) := by
+  let p : (baseCechComplex π M U).X m ⟶
+      baseCechFactor π M U m j :=
+    Pi.π (fun q : Fin (m + 1) → ι =>
+      baseCechFactor π M U m q) j
+  have hrow :
+      baseCechTupleRow π M U i (Finsupp.single j 1) =
+        p ≫ baseCechTupleRestriction π M U i j hji := by
+    rw [baseCechTupleRow_single_of_subset
+      π M U i j 1 hji, one_zsmul]
+    rfl
+  have hproj :
+      baseCechTupleMapF π M U g hg ≫ p =
+        baseCechTupleMapComponent π M U g hg j := by
+    dsimp only [p]
+    exact baseCechTupleMapF_comp_π π M U g hg j
+  calc
+    baseCechTupleMapF π M U g hg ≫
+          baseCechTupleRow π M U i (Finsupp.single j 1) =
+        baseCechTupleMapF π M U g hg ≫
+          (p ≫ baseCechTupleRestriction π M U i j hji) := by
+      rw [hrow]
+    _ = (baseCechTupleMapF π M U g hg ≫ p) ≫
+        baseCechTupleRestriction π M U i j hji :=
+      (Category.assoc _ _ _).symm
+    _ = baseCechTupleMapComponent π M U g hg j ≫
+        baseCechTupleRestriction π M U i j hji := by
+      rw [hproj]
+    _ = baseCechTupleRow π M U j
+          (g (Finsupp.single j 1)) ≫
+        baseCechTupleRestriction π M U i j hji := rfl
+    _ = baseCechTupleRow π M U i
+        (g (Finsupp.single j 1)) :=
+      baseCechTupleRow_comp_restriction π M U i j hji
+        (g (Finsupp.single j 1)) (hg j)
+
+/-- A lifted tuple map commutes with every supported tuple row. -/
+theorem baseCechTupleMapF_comp_row
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m l : ℕ}
+    (g : CechTupleChain ι m →ₗ[ℤ] CechTupleChain ι l)
+    (hg : CechTupleSupportNonincreasing g)
+    (i : Fin (n + 1) → ι) (x : CechTupleChain ι m)
+    (hx : CechTupleChain.SupportedBy x (Set.range i)) :
+    baseCechTupleMapF π M U g hg ≫
+        baseCechTupleRow π M U i x =
+      baseCechTupleRow π M U i (g x) := by
+  classical
+  have hsource := linearMap_apply_eq_finsupp_sum_single
+    (baseCechTupleRow π M U i) x
+  have htarget := linearMap_apply_eq_finsupp_sum_single
+    ((baseCechTupleRow π M U i).comp g) x
+  change baseCechTupleRow π M U i (g x) =
+    x.sum (fun j a => a • baseCechTupleRow π M U i
+      (g (Finsupp.single j 1))) at htarget
+  rw [hsource, htarget]
+  rw [Finsupp.sum, Finsupp.sum, comp_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  rw [comp_zsmul,
+    baseCechTupleMapF_comp_row_single π M U g hg i j (hx hj)]
+
+/-- Lifting support-nonincreasing tuple maps reverses their composition. -/
+theorem baseCechTupleMapF_comp
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m l : ℕ}
+    (f : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m)
+    (g : CechTupleChain ι m →ₗ[ℤ] CechTupleChain ι l)
+    (hf : CechTupleSupportNonincreasing f)
+    (hg : CechTupleSupportNonincreasing g) :
+    baseCechTupleMapF π M U (g.comp f)
+        (CechTupleSupportNonincreasing.comp hg hf) =
+      baseCechTupleMapF π M U g hg ≫
+        baseCechTupleMapF π M U f hf := by
+  apply baseCechHom_ext π M U n
+  intro i
+  let p : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U n i :=
+    Pi.π (fun q : Fin (n + 1) → ι =>
+      baseCechFactor π M U n q) i
+  calc
+    baseCechTupleMapF π M U (g.comp f)
+          (CechTupleSupportNonincreasing.comp hg hf) ≫ p =
+        baseCechTupleMapComponent π M U (g.comp f)
+          (CechTupleSupportNonincreasing.comp hg hf) i := by
+      dsimp only [p]
+      exact baseCechTupleMapF_comp_π π M U (g.comp f)
+        (CechTupleSupportNonincreasing.comp hg hf) i
+    _ = baseCechTupleRow π M U i
+        (g (f (Finsupp.single i 1))) := rfl
+    _ = baseCechTupleMapF π M U g hg ≫
+        baseCechTupleRow π M U i
+          (f (Finsupp.single i 1)) :=
+      (baseCechTupleMapF_comp_row π M U g hg i
+        (f (Finsupp.single i 1)) (hf i)).symm
+    _ = baseCechTupleMapF π M U g hg ≫
+        baseCechTupleMapComponent π M U f hf i := rfl
+    _ = baseCechTupleMapF π M U g hg ≫
+        (baseCechTupleMapF π M U f hf ≫ p) := by
+      dsimp only [p]
+      rw [baseCechTupleMapF_comp_π]
+    _ = (baseCechTupleMapF π M U g hg ≫
+          baseCechTupleMapF π M U f hf) ≫ p :=
+      (Category.assoc _ _ _).symm
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
