@@ -1754,14 +1754,23 @@ variable {K w} in
 `finiteJet_isSheafyFor` pivot, `FJP/Over/SheafyEndpoints.lean:95`). -/
 theorem wp_isSheafyFor (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsSheafyFor (WPA K w) (wpPlus K w) := by sorry
+    IsSheafyFor (WPA K w) (wpPlus K w) := by
+  classical
+  letI := (wpPlus K w).toPlusSubring
+  haveI : IsRingOfIntegralElements ((WPA K w)⁺ : Subring (WPA K w)) :=
+    (wpPlus K w).2
+  haveI : HasLocLiftPowerBounded (WPA K w) := hasLocLiftPowerBounded_faithful
+  haveI : ValuationSpectrum.IsSheafy (WPA K w) := isSheafy_WPA ϖ hK₀
+  show IsLimitSheaf (WPA K w)
+  exact isLimitSheaf_of_isSheafy
 
 variable {K w} in
 /-- **All-pairs sheafiness** (via the unconditional `A⁺`-independence
 `isSheafyFor_iff_isSheafyComplete`). -/
 theorem wp_isSheafyComplete (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    IsSheafyComplete (WPA K w) := by sorry
+    IsSheafyComplete (WPA K w) :=
+  (isSheafyFor_iff_isSheafyComplete (wpPlus K w)).mp (wp_isSheafyFor ϖ hK₀)
 
 variable {K w} in
 theorem wp_isSheafyFor_all (ϖ : Uniformizer K)
@@ -1780,7 +1789,8 @@ theorem wp_structurePresheaf_isSheaf_all (ϖ : Uniformizer K)
     letI := Bplus.toPlusSubring
     haveI : IsRingOfIntegralElements ((WPA K w)⁺ : Subring (WPA K w)) := Bplus.2
     haveI : HasLocLiftPowerBounded (WPA K w) := hasLocLiftPowerBounded_faithful
-    (ValuationSpectrum.structurePresheaf (WPA K w)).IsSheaf := by sorry
+    (ValuationSpectrum.structurePresheaf (WPA K w)).IsSheaf :=
+  isSheafyFor_structurePresheaf_isSheaf Bplus (wp_isSheafyFor_all ϖ hK₀ Bplus)
 
 /-! ### Strong sheafiness ([WP] thm:parity-strongly-sheafy, last paragraph) -/
 
