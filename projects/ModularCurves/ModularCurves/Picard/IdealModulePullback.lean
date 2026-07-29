@@ -206,4 +206,47 @@ theorem nonempty_pullback_idealModule {X' X : Scheme.{u}} (f : X' ⟶ X)
     asIso ((PresheafOfModules.sheafification (𝟙 X'.ringCatSheaf.obj)).map
       (idealPullHom f J)) ≪≫ sheafifyValIso (idealModule (J.comap f))⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-change transport for the ideal module of a section divisor.** The module
+pullback of `I(D_z)` along the base-change projection is the ideal module of the
+base-changed section's divisor.
+
+Both local-principality hypotheses of `nonempty_pullback_idealModule` come for free from
+`RelEffCartierDiv.sectionDivisor_isOfficial` (upstairs, and downstairs after
+base-changing the smoothness), so this is the usable form: it is what lets an identity
+between ideal modules proved over the *universal* pair of points be transported to an
+arbitrary base. -/
+theorem nonempty_pullback_idealModule_ker_sectionBaseChange {C S T : Scheme.{u}}
+    {π : C ⟶ S} [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) :
+    Nonempty ((Modules.pullback (Limits.pullback.fst π t)).obj
+          (idealModule (Scheme.Hom.ker z)) ≅
+        idealModule (Scheme.Hom.ker
+          (Limits.pullback.lift (t ≫ z) (𝟙 T)
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) :
+            T ⟶ Limits.pullback π t))) := by
+  haveI hsep : IsSeparated (Limits.pullback.snd π t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) π t ‹_›
+  have hsm' : SmoothOfRelativeDimension 1 (Limits.pullback.snd π t) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) π t hsm
+  have hker := ModularCurves.RelEffCartierDiv.ker_sectionBaseChange z hz t
+  -- both local-principality hypotheses, stated at the `Scheme.Hom.ker` form the pullback
+  -- comparison wants (`(sectionDivisor _ z hz).ideal` is `z.ker`, but only definitionally)
+  have hJ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(C, V.1),
+      (Scheme.Hom.ker z).ideal V = Ideal.span {f} ∧ f ∈ nonZeroDivisors Γ(C, V.1) :=
+    (ModularCurves.RelEffCartierDiv.sectionDivisor_isOfficial hsm z hz).locallyPrincipal
+  have hJ' : ∀ c : ↥(Limits.pullback π t), ∃ V : (Limits.pullback π t).affineOpens,
+      c ∈ V.1 ∧ ∃ f : Γ(Limits.pullback π t, V.1),
+        ((Scheme.Hom.ker z).comap (Limits.pullback.fst π t)).ideal V = Ideal.span {f} ∧
+          f ∈ nonZeroDivisors Γ(Limits.pullback π t, V.1) := by
+    rw [← hker]
+    exact (ModularCurves.RelEffCartierDiv.sectionDivisor_isOfficial hsm'
+      (Limits.pullback.lift (t ≫ z) (𝟙 T)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]))
+      (Limits.pullback.lift_snd _ _ _)).locallyPrincipal
+  exact ⟨(nonempty_pullback_idealModule (Limits.pullback.fst π t) (Scheme.Hom.ker z)
+    hJ hJ').some ≪≫ eqToIso (congrArg idealModule hker.symm)⟩
+
 end AlgebraicGeometry.Scheme.Modules
