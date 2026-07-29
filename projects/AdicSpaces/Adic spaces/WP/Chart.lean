@@ -60,7 +60,7 @@ variable {K w} in
 /-- The chart datum on `𝒜` — the lift of the head chart datum
 (entries `W, ϖ`; [WP] §6.2). -/
 noncomputable def chartDatum (ϖ : Uniformizer K) : RationalLocData (WPA K w) :=
-  liftDatum (chartHeadDatum ϖ)
+  liftDatum (chartHeadDatum ϖ) (chartHeadDatum_isRational ϖ)
 
 variable {K w} in
 theorem chartDatum_isRational (ϖ : Uniformizer K) :
