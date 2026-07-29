@@ -696,7 +696,18 @@ propext/Classical.choice/Quot.sound) before marking done.
   candidate (`/mathlibable` after landing).
 
 ### [R2] Reduced.lean II — W-regularity of head localizations
-- Status: open | File: WP/Reduced.lean | Depends: W15, W16
+- Status: done (2026-07-29) | File: WP/Reduced.lean | Depends: W15, W16
+- **Progress**: COMPLETE. Head is a domain by inferInstance (subring of MvPowerSeries
+  over K); completeRingEquivCompletionModel (SheafyCompletionModel — NEW import)
+  identifies presheafValue (globalLocData DH.P) with the head, giving regularity of
+  canonicalMap W upstairs by domain cancellation; prop_8_30_flat_clean_proof at
+  (globalLocData DH.P, DH) with rationalOpen_singleton_one + rationalOpen_subset_spa;
+  IsSMulRegular.of_flat transports; restrictionMapHom_canonicalMap_generic
+  (PresheafFunctoriality — NEW import; do NOT hand-roll the Away.lift show — its
+  implicit-instance elaboration gets stuck) identifies the element; headLocEquiv
+  pushes to QHead. GOTCHA: state IsDomain-transport haves at the presheafValue-form
+  (exact-coercion bridges the CompletionModel alias); smul-goals under
+  Function.Injective beta-redexes need `simp only [smul_eq_mul]` first.
 - Decls: `rhoQ_regular`.
 - Sketch [ChatGPT-5.6 review: route confirmed characteristic-free; use
   `Module.Flat.isSMulRegular_of_isRegular`]: transport to presheafValue via
@@ -710,7 +721,10 @@ propext/Classical.choice/Quot.sound) before marking done.
   `lsmul WaHead`; adapter details in decomposition.md (adversarial log item).
 
 ### [R3] Reduced.lean III — conditional single-step reducedness
-- Status: open | File: WP/Reduced.lean | Depends: W18, W11, R1, R2
+- Status: done (2026-07-29) | File: WP/Reduced.lean | Depends: W18, W11, R1, R2
+- **Progress**: COMPLETE — exactly the planned assembly (headModelData + headLocEquiv
+  transport of hred + isReduced_tailC0 w M.N + rhoQ_regular + M.e-transport).
+  isReduced_tailC0/isDomain_tailC0 take w N explicitly.
 - Decls: `isReduced_presheafValue_WPA`.
 - Sketch: W18 model e : presheafValue D ≅ TailC0 (QHead DH); hred gives
   IsReduced (presheafValue DH) ⇒ (headLocEquiv transport) IsReduced (QHead DH);
@@ -718,7 +732,39 @@ propext/Classical.choice/Quot.sound) before marking done.
   (`isReduced_of_injective` e.injective).  Sources: [WP] 1267–1297.
 
 ### [R4] Reduced.lean IV — chains
-- Status: open | File: WP/Reduced.lean | Depends: R3, W18
+- Status: blocked (2026-07-29) | File: WP/Reduced.lean | Depends: R3, W18, R4a, R4b
+- **Progress**: BLOCKED on new math — the paper's proof ([WP] 1267-1269) opens with
+  "By transitivity of rational localization, it is enough to treat one rational
+  localization", and the project deliberately has NO iterated-localization
+  composition theorem (Reduced.lean docstring). The ChainReduced recursion therefore
+  needs the finite-head-class closure: localizations OF the TailC0-over-head model.
+  That requires either (i) the composition/transitivity theorem for rational
+  localizations, or (ii) a W17-analogue over the model (sub-tickets below). The n=0
+  and n=1 cases are already available (isDomain-of-W5 / R3); the sorry stays until
+  R4a/R4b land.
+
+### [R4a] Coefficientwise localization over the model (the FH-closure engine)
+- Status: open | File: WP/CoeffLocalization.lean (extension) | Depends: W17, W18
+- Decls (planned): model-level analogues of exists_head_approx (density of the
+  M-head images in TailC0 via canonicalMap-density + head density in the base),
+  PerturbSetup instantiation at E := TailC0-model (the Perturbation machinery is
+  already E-generic), and the W17-analogue: a rational localization of
+  TailC0 w N (QHead DH) rho at a datum with entries in the image of the M-heads
+  (M >= N) is again TailC0 w M (QHead DH') rho' — [WP]
+  prop:coefficientwise-localization re-run with the base replaced by the model
+  (the proof is coefficientwise-generic; the paper's transitivity shortcut
+  replaced by the direct re-run). ALTERNATIVE (adjudicate first): formalize
+  transitivity of rational localization (Huber-standard;
+  presheafValue-composition along rationalOpen-inclusion of composed data) —
+  possibly SHORTER and reusable project-wide; consult ChatGPT-5.6 before cutting
+  the tree.
+
+### [R4b] ChainReduced transport along bicontinuous ring isos
+- Status: open | File: WP/Reduced.lean | Depends: none
+- Decls (planned): RationalLocData pushforward along a bicontinuous e : A ≃+* B
+  (pod image subring + T image + s image; hopen through bicontinuity),
+  presheafValue-equivalence of a datum and its pushforward, and
+  `ChainReduced.of_ringEquiv`. Mechanical but fiddly; independent of R4a.
 - Decls: `chainReduced_WPA` (+ the transport helper it needs: ChainReduced along a
   bicontinuous ring iso with datum pushforward — state during ticket as a private
   lemma; datum transport via `RationalLocData` field-wise pushforward along e).
