@@ -23,6 +23,37 @@ noncomputable section
 
 universe u
 
+namespace AlgebraicGeometry.Scheme.Modules
+
+/-- Restriction along an open immersion preserves finite-type quasicoherent modules. -/
+theorem isFiniteType_restrict_of_isOpenImmersion
+    {X Y : Scheme.{u}} (i : X ⟶ Y) [IsOpenImmersion i]
+    (M : Y.Modules) [M.IsQuasicoherent] [M.IsFiniteType] :
+    (M.restrict i).IsFiniteType := by
+  let N := M.restrict i
+  letI : N.IsQuasicoherent := inferInstance
+  apply isFiniteType_of_sections_module_finite N
+  intro U
+  let V : Y.affineOpens :=
+    ⟨i ''ᵁ U.1, U.2.image_of_isOpenImmersion i⟩
+  have hfinite : Module.Finite Γ(Y, V.1) Γ(M, V.1) :=
+    sections_module_finite_of_isFiniteType_of_isAffineOpen M V
+  let σ : Γ(X, U.1) →+* Γ(Y, i ''ᵁ U.1) :=
+    (i.appIso U.1).inv.hom
+  letI : RingHomSurjective σ :=
+    ⟨(i.appIso U.1).symm.commRingCatIsoToRingEquiv.surjective⟩
+  let e : Γ(N, U.1) →ₛₗ[σ] Γ(M, i ''ᵁ U.1) :=
+    { toFun := (M.restrictAppIso i U.1).hom
+      map_add' := (M.restrictAppIso i U.1).hom.hom.map_add
+      map_smul' := by
+        intro r x
+        exact smul_restrictAppIso_hom_apply i M U.1 r x }
+  have he : Function.Bijective e :=
+    ConcreteCategory.bijective_of_isIso (M.restrictAppIso i U.1).hom
+  exact (e.finite_iff_of_bijective he).mpr hfinite
+
+end AlgebraicGeometry.Scheme.Modules
+
 namespace AlgebraicGeometry.IsRelativeProjectiveFactorization
 
 private theorem baseSections_module_finite_of_comp_isIso
@@ -52,32 +83,6 @@ private theorem baseSections_module_finite_of_comp_isIso
       map_smul' := by intro r x; rfl }
   exact (e.finite_iff_of_bijective Function.bijective_id).mp hRestrict
 
-private theorem isFiniteType_restrict_of_isOpenImmersion
-    {X Y : Scheme.{u}} (i : X ⟶ Y) [IsOpenImmersion i]
-    (M : Y.Modules) [M.IsQuasicoherent] [M.IsFiniteType] :
-    (M.restrict i).IsFiniteType := by
-  let N := M.restrict i
-  letI : N.IsQuasicoherent := inferInstance
-  apply Scheme.Modules.isFiniteType_of_sections_module_finite N
-  intro U
-  let V : Y.affineOpens :=
-    ⟨i ''ᵁ U.1, U.2.image_of_isOpenImmersion i⟩
-  have hfinite : Module.Finite Γ(Y, V.1) Γ(M, V.1) :=
-    Scheme.Modules.sections_module_finite_of_isFiniteType_of_isAffineOpen M V
-  let σ : Γ(X, U.1) →+* Γ(Y, i ''ᵁ U.1) :=
-    (i.appIso U.1).inv.hom
-  letI : RingHomSurjective σ :=
-    ⟨(i.appIso U.1).symm.commRingCatIsoToRingEquiv.surjective⟩
-  let e : Γ(N, U.1) →ₛₗ[σ] Γ(M, i ''ᵁ U.1) :=
-    { toFun := (M.restrictAppIso i U.1).hom
-      map_add' := (M.restrictAppIso i U.1).hom.hom.map_add
-      map_smul' := by
-        intro r x
-        exact Scheme.Modules.smul_restrictAppIso_hom_apply i M U.1 r x }
-  have he : Function.Bijective e :=
-    ConcreteCategory.bijective_of_isIso (M.restrictAppIso i U.1).hom
-  exact (e.finite_iff_of_bijective he).mpr hfinite
-
 private theorem restrictedBaseSections_module_finite
     {k : Type u} [CommRing k] {X S : Scheme.{u}}
     {s : S ⟶ Spec (.of k)} {f : X ⟶ S}
@@ -95,7 +100,8 @@ private theorem restrictedBaseSections_module_finite
   let fU := morphismRestrict f U.1
   let MU := M.restrict (f ⁻¹ᵁ U.1).ι
   letI : MU.IsFiniteType :=
-    isFiniteType_restrict_of_isOpenImmersion (f ⁻¹ᵁ U.1).ι M
+    Scheme.Modules.isFiniteType_restrict_of_isOpenImmersion
+      (f ⁻¹ᵁ U.1).ι M
   let hf := h.isProjectiveFactorization_affineOpen U.1 U.2
   have hfinite : Module.Finite
       Γ(Spec (.of Γ(S, U.1)), (⊤ : (Spec (.of Γ(S, U.1))).Opens))
