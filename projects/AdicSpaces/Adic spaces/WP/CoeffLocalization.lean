@@ -50,20 +50,83 @@ variable {P Q : Type*} [NormedCommRing P] [IsUltrametricDist P]
   [NormedCommRing Q] [IsUltrametricDist Q] {ρ : TwistElem P} {ρ' : TwistElem Q}
   {w' : ℕ → ℕ} {N' : ℕ}
 
+/-- The underlying coefficientwise transport. -/
+noncomputable def TailC0.mapFun (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
+    (x : TailC0 w' N' P ρ) : TailC0 w' N' Q ρ' :=
+  ⟨fun μ => φ (x.1 μ), by
+    refine .squeeze tendsto_const_nhds (by simpa using x.2)
+      (fun μ => norm_nonneg _) fun μ => hφ (x.1 μ)⟩
+
+theorem TailC0.mapFun_val (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
+    (x : TailC0 w' N' P ρ) (μ : TailIdx N') :
+    (TailC0.mapFun (ρ' := ρ') φ hφ x).1 μ = φ (x.1 μ) := rfl
+
+theorem TailC0.mapFun_one (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖) :
+    TailC0.mapFun (w' := w') (N' := N') (ρ := ρ) (ρ' := ρ') φ hφ 1 = 1 := by
+  refine Subtype.ext (funext fun μ => ?_)
+  rw [TailC0.mapFun_val, TailC0.one_val, TailC0.one_val]
+  split_ifs
+  · exact map_one φ
+  · exact map_zero φ
+
+theorem TailC0.mapFun_zero (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖) :
+    TailC0.mapFun (w' := w') (N' := N') (ρ := ρ) (ρ' := ρ') φ hφ 0 = 0 := by
+  refine Subtype.ext (funext fun μ => ?_)
+  rw [TailC0.mapFun_val, show ((0 : TailC0 w' N' P ρ)).1 μ = 0 from rfl,
+    show ((0 : TailC0 w' N' Q ρ')).1 μ = 0 from rfl]
+  exact map_zero φ
+
+theorem TailC0.mapFun_add (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
+    (x y : TailC0 w' N' P ρ) :
+    TailC0.mapFun (ρ' := ρ') φ hφ (x + y) =
+      TailC0.mapFun (ρ' := ρ') φ hφ x + TailC0.mapFun (ρ' := ρ') φ hφ y := by
+  refine Subtype.ext (funext fun μ => ?_)
+  rw [TailC0.mapFun_val, show ((x + y) : TailC0 w' N' P ρ).1 μ = x.1 μ + y.1 μ
+    from rfl]
+  rw [show ((TailC0.mapFun (ρ' := ρ') φ hφ x + TailC0.mapFun (ρ' := ρ') φ hφ y :
+      TailC0 w' N' Q ρ')).1 μ =
+    (TailC0.mapFun (ρ' := ρ') φ hφ x).1 μ + (TailC0.mapFun (ρ' := ρ') φ hφ y).1 μ
+    from rfl, TailC0.mapFun_val, TailC0.mapFun_val]
+  exact map_add φ _ _
+
+theorem TailC0.mapFun_mul (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
+    (hρ : φ ρ.val = ρ'.val) (x y : TailC0 w' N' P ρ) :
+    TailC0.mapFun (ρ' := ρ') φ hφ (x * y) =
+      TailC0.mapFun (ρ' := ρ') φ hφ x * TailC0.mapFun (ρ' := ρ') φ hφ y := by
+  classical
+  refine Subtype.ext (funext fun τ => ?_)
+  rw [TailC0.mapFun_val, TailC0.mul_val, TailC0.mul_val, map_sum]
+  refine Finset.sum_congr rfl fun p _ => ?_
+  rw [map_mul, map_mul, map_pow, hρ, TailC0.mapFun_val, TailC0.mapFun_val]
+
 /-- Coefficientwise functoriality of the twisted `c₀`-sum along a bounded twist-
 compatible homomorphism ([WP] eq:coefficientwise-restriction: "the induced restriction
 sends `∑ p_μ e_μ ↦ ∑ (p_μ|_Q) e_μ`"). -/
 noncomputable def TailC0.map (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
     (hρ : φ ρ.val = ρ'.val) :
-    TailC0 w' N' P ρ →+* TailC0 w' N' Q ρ' := by sorry
+    TailC0 w' N' P ρ →+* TailC0 w' N' Q ρ' where
+  toFun := TailC0.mapFun (ρ' := ρ') φ hφ
+  map_one' := TailC0.mapFun_one φ hφ
+  map_mul' := TailC0.mapFun_mul φ hφ hρ
+  map_zero' := TailC0.mapFun_zero φ hφ
+  map_add' := TailC0.mapFun_add φ hφ
 
 @[simp] theorem TailC0.coeff_map (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
     (hρ : φ ρ.val = ρ'.val) (x : TailC0 w' N' P ρ) (μ : TailIdx N') :
-    TailC0.coeff μ (TailC0.map φ hφ hρ x) = φ (TailC0.coeff μ x) := by sorry
+    TailC0.coeff μ (TailC0.map φ hφ hρ x) = φ (TailC0.coeff μ x) := rfl
 
 theorem TailC0.map_continuous (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
     (hρ : φ ρ.val = ρ'.val) :
-    Continuous (TailC0.map (w' := w') (N' := N') φ hφ hρ) := by sorry
+    Continuous (TailC0.map (w' := w') (N' := N') φ hφ hρ) := by
+  refine (LipschitzWith.of_dist_le_mul (K := 1) fun x y => ?_).continuous
+  rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm]
+  rw [show TailC0.map (w' := w') (N' := N') φ hφ hρ x -
+      TailC0.map (w' := w') (N' := N') φ hφ hρ y =
+    TailC0.map (w' := w') (N' := N') φ hφ hρ (x - y) from (map_sub _ _ _).symm]
+  rw [TailC0.norm_def, TailC0.norm_def]
+  refine ciSup_le fun μ => ?_
+  refine le_trans (hφ _) ?_
+  exact TailC0.norm_coeff_le _ μ
 
 end Map
 
@@ -72,7 +135,8 @@ end Map
 variable {K w N} in
 /-- A chosen enumeration of the entries of a head rational datum. -/
 noncomputable def datumEnum (DH : RationalLocData (WPHead K w N)) :
-    Fin DH.T.card ≃ ↥DH.T := by sorry
+    Fin DH.T.card ≃ ↥DH.T :=
+  (Fintype.equivFinOfCardEq (Fintype.card_coe DH.T)).symm
 
 variable {K w N} in
 /-- The graph relations `s·T_i − t_i` of a head datum in `𝒜_N⟨T_1,…,T_m⟩`
@@ -83,37 +147,103 @@ noncomputable def headGraphRel (DH : RationalLocData (WPHead K w N)) :
     MvPolynomial.C ((datumEnum DH i : ↥DH.T) : WPHead K w N))
 
 variable {K w N} in
+/-- The graph ideal of a head datum, taken CLOSED: the topological closure of the
+span of the graph relations.  Under strong noetherianity of the head
+([WP] lem:koszul, via `hK₀`) the span is already closed and the closure collapses
+(`FiniteJet.GraphKoszul.isClosed_graphIdeal` + `Ideal.closure_eq_of_isClosed`);
+quotienting by the closure keeps the quotient norm a genuine norm without carrying
+`hK₀` in the instance layer. -/
+noncomputable def headGraphIdeal (DH : RationalLocData (WPHead K w N)) :
+    Ideal (P (WPHead K w N) DH.T.card) :=
+  (Ideal.span (Set.range (headGraphRel DH))).closure
+
+variable {K w N} in
 /-- The head graph-model quotient `Q = 𝒜_N⟨T⟩/(sT_i − t_i)` ([WP] eq:graph-model;
-the ideal is closed by [WP] lem:koszul at the strongly noetherian head, so no
-separated quotient is needed). -/
+the ideal is closed by [WP] lem:koszul at the strongly noetherian head — the
+`headGraphIdeal` closure is cosmetic there). -/
 noncomputable def QHead (DH : RationalLocData (WPHead K w N)) : Type _ :=
-  P (WPHead K w N) DH.T.card ⧸ Ideal.span (Set.range (headGraphRel DH))
+  P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH
 
 variable {K w N} in
 noncomputable instance instCommRingQHead {DH : RationalLocData (WPHead K w N)} :
     CommRing (QHead DH) :=
-  inferInstanceAs
-    (CommRing (P (WPHead K w N) DH.T.card ⧸ Ideal.span (Set.range (headGraphRel DH))))
+  inferInstanceAs (CommRing (P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH))
+
+variable {K w N} in
+theorem isClosed_headGraphIdeal (DH : RationalLocData (WPHead K w N)) :
+    IsClosed ((headGraphIdeal DH : Ideal (P (WPHead K w N) DH.T.card)) :
+      Set (P (WPHead K w N) DH.T.card)) :=
+  isClosed_closure
 
 variable {K w N} in
 /-- The quotient norm makes `QHead` a normed ring (the graph ideal is closed:
 [WP] lem:koszul clause 3 / `FiniteJet.GraphKoszul.isClosed_graphIdeal`). -/
 noncomputable instance instNormedCommRingQHead {DH : RationalLocData (WPHead K w N)} :
-    NormedCommRing (QHead DH) := by sorry
+    NormedCommRing (QHead DH) :=
+  haveI : IsClosed ((headGraphIdeal DH : Ideal (P (WPHead K w N) DH.T.card)) :
+      Set (P (WPHead K w N) DH.T.card)) := isClosed_headGraphIdeal DH
+  inferInstanceAs
+    (NormedCommRing (P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH))
 
 variable {K w N} in
 instance instUltraQHead {DH : RationalLocData (WPHead K w N)} :
-    IsUltrametricDist (QHead DH) := by sorry
+    IsUltrametricDist (QHead DH) := by
+  refine IsUltrametricDist.isUltrametricDist_of_forall_norm_add_le_max_norm
+    fun x y => ?_
+  refine le_of_forall_pos_le_add fun ε hε => ?_
+  obtain ⟨a, ha, han⟩ := Ideal.Quotient.norm_mk_lt x hε
+  obtain ⟨b, hb, hbn⟩ := Ideal.Quotient.norm_mk_lt y hε
+  have hxy : x + y = Ideal.Quotient.mk (headGraphIdeal DH) (a + b) := by
+    rw [map_add, ha, hb]
+    rfl
+  rw [hxy]
+  refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+  refine le_trans (IsUltrametricDist.norm_add_le_max a b) ?_
+  calc max ‖a‖ ‖b‖ ≤ max (‖x‖ + ε) (‖y‖ + ε) := max_le_max han.le hbn.le
+    _ = max ‖x‖ ‖y‖ + ε := max_add_add_right _ _ _
 
 variable {K w N} in
 instance instCompleteQHead {DH : RationalLocData (WPHead K w N)} :
-    CompleteSpace (QHead DH) := by sorry
+    CompleteSpace (QHead DH) :=
+  QuotientAddGroup.completeSpace_left (P (WPHead K w N) DH.T.card)
+    (headGraphIdeal DH).toAddSubgroup
+
+variable {K w N} in
+/-- The constant embedding of the head into its Tate algebra sends `C x` to the
+constant series (the W8 `hCP` fact, packaged). -/
+theorem polyToP_C_val (x : WPHead K w N) {m : ℕ} :
+    ((polyToP (MvPolynomial.C x) : P (WPHead K w N) m)).1 =
+      MvPowerSeries.C x := by
+  classical
+  refine MvPowerSeries.ext fun t => ?_
+  rw [coeff_polyToP, MvPowerSeries.coeff_C, MvPolynomial.coeff_C]
+  rcases eq_or_ne t 0 with rfl | ht
+  · rfl
+  · rw [if_neg (fun h => ht h.symm), if_neg ht]
+
+variable {K w N} in
+/-- The norm of `W` in the head is `1`. -/
+theorem norm_WaHead : ‖WaHead K w N‖ = 1 := by
+  rw [← norm_headIncl K w N (WaHead K w N), headIncl_WaHead]
+  show ‖wpMonomial K w (wpMem_single_zero w 1) 1‖ = 1
+  rw [norm_wpMonomial, norm_one]
 
 variable {K w N} in
 /-- The twist element of the head model: the image of `W` (norm `≤ 1` since the
 quotient map is norm-nonincreasing). -/
-noncomputable def rhoQ (DH : RationalLocData (WPHead K w N)) : TwistElem (QHead DH) := by
-  sorry
+noncomputable def rhoQ (DH : RationalLocData (WPHead K w N)) : TwistElem (QHead DH) where
+  val := Ideal.Quotient.mk (headGraphIdeal DH)
+    (polyToP (MvPolynomial.C (WaHead K w N)))
+  norm_le_one := by
+    classical
+    refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+    rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+    refine Real.iSup_le (fun t => ?_) zero_le_one
+    rw [FiniteJet.finsupp_prod_one, mul_one, polyToP_C_val, MvPowerSeries.coeff_C]
+    split_ifs
+    · rw [norm_WaHead]
+    · rw [norm_zero]
+      exact zero_le_one
 
 /-! ### The head bridge `presheafValue ≃ QHead` -/
 

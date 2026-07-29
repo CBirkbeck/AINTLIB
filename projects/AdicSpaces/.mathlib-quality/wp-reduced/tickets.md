@@ -395,7 +395,25 @@ propext/Classical.choice/Quot.sound) before marking done.
 - Status: open | Depends: W9–W14 | Type: cleanup
 
 ### [W15] CoeffLocalization I — the QHead normed quotient
-- Status: open | File: WP/CoeffLocalization.lean | Depends: W8 | Type: def+instances
+- Status: done | File: WP/CoeffLocalization.lean | Depends: W8 | Type: def+instances
+- Progress: DONE 2026-07-29.  ARCHITECTURE AMENDMENT: `QHead` now quotients by
+  `headGraphIdeal := (span graph rels).closure` (`Ideal.closure`) — the instances
+  can't carry (ϖ, hK₀), and quotient-by-closure is normed UNCONDITIONALLY
+  (`Ideal.Quotient.normedCommRing` [IsClosed] with `isClosed_closure`); under hK₀
+  the closure collapses via `isClosed_graphIdeal` + `Ideal.closure_eq_of_isClosed`
+  (W16 will use that).  Ultra on the quotient by ε-lifts
+  (`Ideal.Quotient.norm_mk_lt` ×2 + `max_add_add_right`; the `rw [map_add, ha, hb]`
+  does NOT auto-rfl-close — append `rfl`).  CompleteSpace: the
+  `Submodule.Quotient.completeSpace` instance FAILS on the P-alias (Module (P) (P)
+  diamond inside the unifier despite standalone synth!) — use mathlib's own cast
+  `QuotientAddGroup.completeSpace_left M I.toAddSubgroup` directly.  rhoQ := mk
+  (polyToP (C WaHead)) with `Ideal.Quotient.norm_mk_le` (NOT the Submodule-form —
+  Module-diamond) + new `polyToP_C_val` (the W8 hCP fact packaged; MvPolynomial vs
+  MvPowerSeries coeff_C orientations differ, and the t=0 branch auto-reduces —
+  plain `rfl`) + `norm_WaHead` (via norm_headIncl + headIncl_WaHead).
+  datumEnum := `(Fintype.equivFinOfCardEq (Fintype.card_coe _)).symm`.
+  TailC0.map by the mapFun+standalone-laws pattern (W11 Φ-pattern); continuity by
+  LipschitzWith 1.  Axioms clean ×7.
 - Decls: `datumEnum`, `TailC0.map` (+2 laws), QHead `NormedCommRing`,
   `IsUltrametricDist`, `CompleteSpace`, `rhoQ`.
 - Sketch: datumEnum := `(Finset.equivFin _).symm`-flavoured choice; graph ideal
