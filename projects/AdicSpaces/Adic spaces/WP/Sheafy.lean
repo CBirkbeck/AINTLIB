@@ -443,6 +443,33 @@ theorem tateExtToFlat_isRestrictedGauss (s : ℕ)
   · rw [Set.mem_setOf_eq]
     exact ⟨rfl, hbig'⟩
 
+/-- Recombine slot parts into a flat exponent. -/
+noncomputable def slotRecomb (s : ℕ) (t : Fin s →₀ ℕ) (v : ℕ →₀ ℕ) : ℕ →₀ ℕ :=
+  Finsupp.equivMapDomain (slotEquiv s).symm
+    (Finsupp.sumFinsuppEquivProdFinsupp.symm (t, v))
+
+theorem equivMapDomain_slotRecomb (s : ℕ) (t : Fin s →₀ ℕ) (v : ℕ →₀ ℕ) :
+    Finsupp.equivMapDomain (slotEquiv s) (slotRecomb s t v) =
+      Finsupp.sumFinsuppEquivProdFinsupp.symm (t, v) := by
+  rw [slotRecomb, ← Finsupp.equivMapDomain_trans, Equiv.symm_trans_self,
+    Finsupp.equivMapDomain_refl]
+
+theorem slotInl_slotRecomb (s : ℕ) (t : Fin s →₀ ℕ) (v : ℕ →₀ ℕ) :
+    slotInl s (slotRecomb s t v) = t := by
+  refine Finsupp.ext fun i => ?_
+  rw [slotInl, Finsupp.comapDomain_apply, equivMapDomain_slotRecomb]
+  exact Finsupp.sumFinsuppEquivProdFinsupp_symm_inl _ i
+
+theorem slotInr_slotRecomb (s : ℕ) (t : Fin s →₀ ℕ) (v : ℕ →₀ ℕ) :
+    slotInr s (slotRecomb s t v) = v := by
+  refine Finsupp.ext fun m => ?_
+  rw [slotInr, Finsupp.comapDomain_apply, equivMapDomain_slotRecomb]
+  exact Finsupp.sumFinsuppEquivProdFinsupp_symm_inr _ m
+
+theorem slotRecomb_slots (s : ℕ) (u : ℕ →₀ ℕ) :
+    slotRecomb s (slotInl s u) (slotInr s u) = u :=
+  slot_ext s (slotInl_slotRecomb s _ _) (slotInr_slotRecomb s _ _)
+
 variable {K w} in
 /-- The flatten hom, corestricted to the shifted-weight algebra. -/
 noncomputable def tateExtToWPA (s : ℕ) :
