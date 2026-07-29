@@ -308,7 +308,22 @@ propext/Classical.choice/Quot.sound) before marking done.
   `Completion` uniqueness.  Sources: [WP] 989–1010.
 
 ### [W14] Evaluation.lean — summability + restrictedEval
-- Status: open | File: WP/Evaluation.lean | Depends: none | Parallel: yes (early)
+- Status: done | File: WP/Evaluation.lean | Depends: none | Parallel: yes (early)
+- Progress: DONE 2026-07-29.  Mathlib's SummationFilter-era names: summability =
+  `(NonarchimedeanAddGroup.summable_iff_tendsto_cofinite_zero f).mpr`; Cauchy
+  product = `tsum_mul_tsum_of_nonarchimedean` + `Summable.mul_of_nonarchimedean`;
+  regroup pairs→antidiagonal by a hand-rolled `sigmaAntidiagEquiv` +
+  `Equiv.summable_iff`/`Equiv.tsum_eq` + `Summable.tsum_sigma` +
+  `Finset.tsum_subtype` (to_additive-generated names don't grep — PROBE with
+  #check).  Monomial-set boundedness via `isBounded_closure_finset_of_isPowerBounded`
+  (Bounded.lean:453) + Subring.prod_mem/pow_mem.  evalFun laws proven standalone
+  then bundled (evalFun_mul needs maxHeartbeats 1000000).  Continuity: open-subgroup
+  U₀ + bounded-monomials V₁ + φ-preimage δ-ball; tsum ∈ U₀ by
+  `IsClosed.mem_of_tendsto` on partial sums (`sum_mem`) — `continuous_of_continuousAt_zero`
+  on the AddMonoidHom.  Density: general-E port of FJP `polyToP_denseRange`
+  (superlevel truncation); uniqueness via `MvPolynomial.induction_on` (cases
+  C/add/mul_X) + `DenseRange.equalizer`.  hφb is UNUSED by the construction (kept:
+  statement canonical).  Axioms clean ×6.
 - Decls: `summable_of_tendsto_cofinite_nonarch`, `restrictedEval` (+`_C`, `_X`,
   `_continuous`, `_unique`).
 - Sketch: SEARCH FIRST `Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean`
