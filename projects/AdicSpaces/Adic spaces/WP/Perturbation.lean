@@ -620,21 +620,99 @@ theorem rationalOpen_datum (S : PerturbSetup E) :
     · rw [hvle, map_zero] at hvle0
       exact hws0 (by rw [← hs_eq]; exact le_antisymm hvle0 zero_le)
 
+variable [IsRingOfIntegralElements (E⁺ : Subring E)]
+
+/-- The faithful loc-lift package holds in the `PerturbSetup` context (the Huber/Tate
+structure comes from the scaling pseudouniformizer; `E⁺` is a ring of integral
+elements per the Huber-pair convention of [WP] §6.3). -/
+theorem hasLocLiftPowerBounded (S : PerturbSetup E) :
+    haveI : IsHuberRing E :=
+      FiniteJet.isHuberRing_of_scale S.t S.htu S.ht1 S.ht0 S.hscale
+    HasLocLiftPowerBounded E := by
+  haveI : IsHuberRing E :=
+    FiniteJet.isHuberRing_of_scale S.t S.htu S.ht1 S.ht0 S.hscale
+  haveI : IsTateRing E :=
+    FiniteJet.isTateRing_of_scale S.t S.htu S.ht1 S.ht0 S.hscale
+  haveI : @CompleteSpace E (IsTopologicalAddGroup.rightUniformSpace E) := by
+    rw [IsUniformAddGroup.rightUniformSpace_eq]
+    infer_instance
+  exact hasLocLiftPowerBounded_faithful
+
 /-- **The canonical isomorphism of completed localizations** ([WP]
 lem:small-perturbation: "their completed rational localizations are canonically
 isomorphic" — `g'/g` is a 1-unit with power-bounded inverse; both universal-property
 maps exist and are mutually inverse). -/
 noncomputable def equiv (S : PerturbSetup E) :
-    presheafValue S.D ≃+* presheafValue S.datum := by sorry
+    presheafValue S.D ≃+* presheafValue S.datum := by
+  haveI : IsHuberRing E :=
+    FiniteJet.isHuberRing_of_scale S.t S.htu S.ht1 S.ht0 S.hscale
+  haveI : HasLocLiftPowerBounded E := S.hasLocLiftPowerBounded
+  exact
+    { toFun := restrictionMapHom S.D S.datum (rationalOpen_datum S).le
+      invFun := restrictionMapHom S.datum S.D (rationalOpen_datum S).ge
+      left_inv := fun x => by
+        have h := congr_fun (restrictionMap_comp S.D S.datum S.D
+          (rationalOpen_datum S).le (rationalOpen_datum S).ge) x
+        have hid : restrictionMap S.D S.D
+            (((rationalOpen_datum S).ge).trans (rationalOpen_datum S).le) = id :=
+          restrictionMap_id S.D
+        rw [hid] at h
+        exact h
+      right_inv := fun x => by
+        have h := congr_fun (restrictionMap_comp S.datum S.D S.datum
+          (rationalOpen_datum S).ge (rationalOpen_datum S).le) x
+        have hid : restrictionMap S.datum S.datum
+            (((rationalOpen_datum S).le).trans (rationalOpen_datum S).ge) = id :=
+          restrictionMap_id S.datum
+        rw [hid] at h
+        exact h
+      map_mul' := map_mul _
+      map_add' := map_add _ }
 
-theorem equiv_continuous (S : PerturbSetup E) : Continuous S.equiv := by sorry
+theorem equiv_continuous (S : PerturbSetup E) : Continuous S.equiv := by
+  haveI : IsHuberRing E :=
+    FiniteJet.isHuberRing_of_scale S.t S.htu S.ht1 S.ht0 S.hscale
+  haveI : HasLocLiftPowerBounded E := S.hasLocLiftPowerBounded
+  show Continuous (restrictionMapHom S.D S.datum (rationalOpen_datum S).le)
+  letI : UniformSpace (Localization.Away S.D.s) := S.D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away S.D.s) := S.D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away S.D.s) := S.D.isUniformAddGroup
+  exact UniformSpace.Completion.continuous_extension
 
-theorem equiv_symm_continuous (S : PerturbSetup E) : Continuous S.equiv.symm := by sorry
+theorem equiv_symm_continuous (S : PerturbSetup E) : Continuous S.equiv.symm := by
+  haveI : IsHuberRing E :=
+    FiniteJet.isHuberRing_of_scale S.t S.htu S.ht1 S.ht0 S.hscale
+  haveI : HasLocLiftPowerBounded E := S.hasLocLiftPowerBounded
+  show Continuous (restrictionMapHom S.datum S.D (rationalOpen_datum S).ge)
+  letI : UniformSpace (Localization.Away S.datum.s) := S.datum.uniformSpace
+  letI : IsTopologicalRing (Localization.Away S.datum.s) := S.datum.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away S.datum.s) := S.datum.isUniformAddGroup
+  exact UniformSpace.Completion.continuous_extension
 
 /-- The perturbation isomorphism commutes with the canonical maps from `E`
 ("Both composites restrict to the identity on `E`"). -/
 theorem equiv_canonicalMap (S : PerturbSetup E) (x : E) :
-    S.equiv (S.D.canonicalMap x) = S.datum.canonicalMap x := by sorry
+    S.equiv (S.D.canonicalMap x) = S.datum.canonicalMap x := by
+  haveI : IsHuberRing E :=
+    FiniteJet.isHuberRing_of_scale S.t S.htu S.ht1 S.ht0 S.hscale
+  haveI : HasLocLiftPowerBounded E := S.hasLocLiftPowerBounded
+  show restrictionMapHom S.D S.datum (rationalOpen_datum S).le
+    (S.D.canonicalMap x) = S.datum.canonicalMap x
+  letI : UniformSpace (Localization.Away S.D.s) := S.D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away S.D.s) := S.D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away S.D.s) := S.D.isUniformAddGroup
+  have h := UniformSpace.Completion.extensionHom_coe
+    (restrictionMapAlg S.D S.datum (rationalOpen_datum S).le)
+    (restrictionMapAlg_continuous S.D S.datum (rationalOpen_datum S).le)
+    (algebraMap E (Localization.Away S.D.s) x)
+  have h2 : restrictionMapAlg S.D S.datum (rationalOpen_datum S).le
+      (algebraMap E (Localization.Away S.D.s) x) = S.datum.canonicalMap x := by
+    show IsLocalization.Away.lift S.D.s
+      (HasLocLiftPowerBounded.isUnit_canonicalMap_s S.D S.datum
+        (rationalOpen_datum S).le)
+      (algebraMap E (Localization.Away S.D.s) x) = S.datum.canonicalMap x
+    rw [IsLocalization.Away.lift_eq]
+  exact h.trans h2
 
 end PerturbSetup
 

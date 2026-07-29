@@ -332,7 +332,25 @@ propext/Classical.choice/Quot.sound) before marking done.
   unit ball (norm-window archimedean argument).  Sources: [WP] 949–987.
 
 ### [W13] Perturbation.lean II — the localization isomorphism
-- Status: open | File: WP/Perturbation.lean | Depends: W12 | Type: def+theorems
+- Status: done | File: WP/Perturbation.lean | Depends: W12 | Type: def+theorems
+- Progress: DONE 2026-07-29.  MAJOR SIMPLIFICATION vs sketch: NO bespoke
+  Away-lift/1-unit construction — the rationalOpen EQUALITY (W12) feeds the
+  existing restriction-map machinery (Presheaf.lean `restrictionMapHom` +
+  `restrictionMap_comp` + `restrictionMap_id`), giving equiv := restrictions both
+  ways, inverses by functoriality + id-law (proof-irrelevance makes the
+  ⊆-proof-args interchangeable — `restrictionMap_id S.D` is EXACT against the
+  trans-proof).  The [HasLocLiftPowerBounded E] input: the faithful THEOREM-form
+  `hasLocLiftPowerBounded_faithful` (FaithfulLocLift:399 — no IsNoetherianRing,
+  unlike the instance-form!) with haveI-chain: isHuberRing_of_scale +
+  isTateRing_of_scale + right-uniformity CompleteSpace via
+  `IsUniformAddGroup.rightUniformSpace_eq` (the WPA Algebra.lean:279 pattern) —
+  NonarchimedeanRing/T2 auto-synthesize for normed ultrametric E.
+  SOURCE-FAITHFULNESS: added section-variable [IsRingOfIntegralElements (E⁺)]
+  (the Huber-PAIR convention of [WP] §6.3 — E⁺ is a ring of integral elements by
+  definition).  equiv_canonicalMap via `UniformSpace.Completion.extensionHom_coe`
+  + `IsLocalization.Away.lift_eq` (NOT .AwayMap.lift_eq).  All Prop-classes →
+  instance-route mismatches are proof-irrelevant (the show-forms typecheck).
+  Perturbation.lean 0 sorries; axioms clean ×5.
 - Decls: `PerturbSetup.equiv` (+`_continuous`, `_symm_continuous`,
   `_canonicalMap`).
 - Sketch: [WP] 989–1010: q := t^ℓ/g ∈ E_α power-bounded; g'/g = 1 + t·h₀q a 1-unit
