@@ -244,3 +244,30 @@ completions) — never shortcut via the global domain fact alone.
   head_completedLocal_reduced). Independent of N1-N4 except the final glue.
 - HRW-3 (unchanged): the L1 comparison; the drafted openness-pivot question
   still needs its own adjudication round.
+
+
+## HRW-5 subring-coding simplification (2026-07-30 recon)
+
+In the PROJECT's coding the finite embedding is TRIVIAL to define:
+- WPMem w t := wpWeight w t ≤ t 0, HeadMem w N := WPMem w ∧ support ≤ N.
+- At w' := 0: wpWeight 0 t = 0 ≤ t 0 always ⇒ **WPHead K 0 N is the FULL
+  restricted Tate algebra K⟨W, U_1..U_N⟩** (variable 0 = W).
+- WPMem w t ⇒ WPMem 0 t ⇒ **wpHeadSupport K w N ≤ wpHeadSupport K 0 N and the
+  embedding P ↪ Q is literally `Subring.inclusion`** (the W18 pattern
+  `Subring.inclusion (wpHeadSupport_mono …)` — check the exact mono-lemma
+  covers weight-comparison, else 3-line new mono lemma).
+- The paper's presentation dictionary: W = X_0, Y_n = X_0^{w n}·X_n
+  (weight-tight monomial), Z_n = X_n² — Y_n² = W^{2w n}Z_n automatic.
+- MODULE-FINITENESS in this coding: every Q-monomial splits as
+  (even part) × U^ε with the even part X^{2⌊t/2⌋}W^{t0} ∈ P (wpWeight of an
+  even exponent is 0 ≤ t0) ⇒ **Q = Σ_{ε ∈ {0,1}^{[1..N]}} P·U^ε** — the
+  parity-support decomposition ALREADY used by the domain/FormalReduced
+  machinery. U_n² = X_n² ∈ P directly.
+- Q is strongly noetherian Tate BY INSTANTIATION: isStronglyNoetherian_WPHead
+  at (w := 0) — zero new analytic work.
+- So HRW-5 = (i) the mono-inclusion (trivial), (ii) the finite module
+  decomposition (parity-splitting, ~150-300 LOC using existing support
+  machinery), (iii) the semilocal completed decomposition (the genuinely new
+  ~500-1000 LOC commutative algebra: A := P_𝔪, C := (P∖𝔪)⁻¹Q finite over A,
+  Ĉ^{𝔪C} ≅ ∏ (C_𝔫)^, AdicCompletion.map_exact-injectivity), (iv) glue with
+  the Tate leaf (HRW-4) at w = 0.
