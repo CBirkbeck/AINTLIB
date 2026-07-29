@@ -939,7 +939,7 @@ propext/Classical.choice/Quot.sound) before marking done.
   IsTateRing at values: `presheafValue_isTateRing_concrete` (no noetherianity).
 
 ### [R4d] Generic existential transitivity of rational localization (ROUTE (i))
-- Status: open | File: new `RationalTransitivity.lean` (generic, non-WP) | Depends: —
+- Status: done (2026-07-29 late) | File: new `RationalTransitivity.lean` (generic, non-WP) | Depends: —
 - Statement: for a complete Tate `A` with the presheaf pack and rational `D` on
   `A`, `E` on `B := presheafValue D`, there EXIST `F` rational on `A` and a
   bicontinuous `presheafValue E ≃+* presheafValue F` (existential only — no
@@ -1007,6 +1007,23 @@ propext/Classical.choice/Quot.sound) before marking done.
   1044–1052, 1123–1127).  If the invariant-class bookkeeping resists, fall back to
   strengthening R3's statement to "IsReduced ∧ Nonempty (HeadModelData-successor)"
   (B2-stop if neither lands — this is the one genuinely-new induction design).
+- **Progress FINAL**: DONE — `RationalTransitivity.lean` (generic, ValuationSpectrum
+  namespace): rationalOpenEqEquiv (+continuities), imgDatum_interRational_rationalOpen,
+  exists_rationalLocalization_transitivity. The perturbation/clearing/padding
+  had ALREADY been implemented in the library as `exists_downstairs_rationalDatum`
+  (SpaRationalSubsetCorrespondence.lean:132, sorry-free axiom-clean) — found by
+  the ChatGPT-5.6 codex workspace scan; the keystone (RelativeDescent:634) is
+  the Wedhorn 8.2(2)/8.4 half. `exists_transitivity_WPA` :=
+  the generic theorem + hasLocLiftPowerBounded_faithful.
+  `chainReduced_WPA` therefore COMPLETE — [WP] thm 6.2(3) done conditionally on
+  HeadLocsReduced. Axiom caveat: the chain transitively inherits the central
+  library's audit-pass-2 flatness WIP (prop_8_30_flat_clean,
+  WedhornStronglyNoetherian — a pre-existing documented main-library sorry,
+  consumed via R2's Wedhorn-8.30 wrapper; NOT WP-campaign work; it will clear
+  when the audit lane lands). Gotchas: auto-bound universes (u_A) are rejected
+  by lake-build (explicit `universe` decl BEFORE the docstring — `universe X in`
+  between doc and theorem is a parse error); RingEquiv.trans-coe continuity
+  goals need show-λ-forms.
 
 ### [CLEANUP-ALL-1] /cleanup-all over WP/ (pre-milestone)
 - Status: open | Depends: all W/R tickets | Type: cleanup
