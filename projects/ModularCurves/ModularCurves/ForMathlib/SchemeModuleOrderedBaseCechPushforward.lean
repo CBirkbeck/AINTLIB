@@ -119,7 +119,7 @@ noncomputable def baseCechFactorPushforwardIso
     baseModulePresheafPushforwardAppIso f π M
       (∏ᶜ fun k : Fin (n + 1) => U (i k))
 
-private theorem baseCechFactorPushforwardIso_naturality
+theorem baseCechFactorPushforwardIso_naturality
     {X Y S : Scheme.{u}} (f : X ⟶ Y) (π : Y ⟶ S) (M : X.Modules)
     {ι : Type u} (U : ι → Y.Opens) (n : ℕ) (k : Fin (n + 2))
     (i : Fin (n + 2) → ι) :
