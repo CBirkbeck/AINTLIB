@@ -560,6 +560,75 @@ theorem gaussTerm_teichCoeffAr_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact zero_le
   · exact gaussTerm_teichCoeffAr_le_of_ne_zero p F ϖ hx h0 n
 
+/-- **The uniform prefix bound.** For `x, y ∈ A^r` with digit sequences `a`, `b` and
+digitwise difference `e = a - b`, every `Φ`-prefix of `a - b - e` has value at most
+`ρ·max(‖x‖,‖y‖)`. Termwise `[aₖ] - [bₖ] - [aₖ - bₖ]` carries the Teichmüller bound
+`ρ·max(|aₖ|,|bₖ|)`, which the `A^r` coordinate bound turns into `ρ·max(‖x‖,‖y‖)`
+uniformly in `k`; the Gauss norm of a finite sum is then the max of the terms. -/
+private theorem valued_prefix_sub_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (N : ℕ) :
+    Valued.v (AlocToHatK p F ϖ hρ0 hρ1
+        (prefixAloc p F ϖ (teichCoeffAr p F ϖ hρ0 hρ1 x) N
+          - prefixAloc p F ϖ (teichCoeffAr p F ϖ hρ0 hρ1 y) N
+          - prefixAloc p F ϖ (fun k => teichCoeffAr p F ϖ hρ0 hρ1 x k
+              - teichCoeffAr p F ϖ hρ0 hρ1 y k) N))
+      ≤ ρ * max (Valued.v x) (Valued.v y) := by
+  set a : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 x with ha
+  set b : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 y with hb
+  set e : ℕ → F := fun k => a k - b k with he
+  set M := max (Valued.v x) (Valued.v y) with hM
+  rw [valued_AlocToHatK, ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub,
+    map_sub, alocToWittF_prefixAloc, alocToWittF_prefixAloc,
+    alocToWittF_prefixAloc]
+  have hdistrib : (∑ k ∈ Finset.range N,
+        WittVector.teichmuller p (a k) * (p : WittVector p F) ^ k)
+      - (∑ k ∈ Finset.range N,
+        WittVector.teichmuller p (b k) * (p : WittVector p F) ^ k)
+      - (∑ k ∈ Finset.range N,
+        WittVector.teichmuller p (e k) * (p : WittVector p F) ^ k)
+      = ∑ k ∈ Finset.range N, (p : WittVector p F) ^ k
+        * (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
+          - WittVector.teichmuller p (a k - b k)) := by
+    rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    have hek : WittVector.teichmuller p (e k)
+        = WittVector.teichmuller p (a k - b k) := rfl
+    rw [hek]
+    ring
+  rw [hdistrib]
+  refine (gaussValueF_finset_sum_le p F hρ0 hρ1 (ρ * M) (Finset.range N)
+    _ fun k _ => ?_).2
+  have hBtriple : BddAbove (Set.range (gaussTermF p F ρ
+      (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
+        - WittVector.teichmuller p (a k - b k)))) := by
+    have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1
+      (bddAbove_gaussTermF_add p F hρ0 hρ1
+        (bddAbove_gaussTermF_teichmuller p F (a k))
+        (bddAbove_gaussTermF_neg p F hρ0 hρ1
+          (bddAbove_gaussTermF_teichmuller p F (b k))))
+      (bddAbove_gaussTermF_neg p F hρ0 hρ1
+        (bddAbove_gaussTermF_teichmuller p F (a k - b k)))
+    have h2 : WittVector.teichmuller p (a k) + -WittVector.teichmuller p (b k)
+        + -WittVector.teichmuller p (a k - b k)
+        = WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
+          - WittVector.teichmuller p (a k - b k) := by
+      ring
+    rwa [h2] at h1
+  refine ⟨bddAbove_gaussTermF_p_pow_mul p F hBtriple k, ?_⟩
+  rw [gaussValueF_p_pow_mul p F hBtriple k]
+  refine le_trans (mul_le_mul_of_nonneg_left
+    (gaussValueF_teichmuller_sub_sub_le p F hρ1.le (a k) (b k)) zero_le) ?_
+  have h3 : ρ ^ k * (ρ * max (perfectoidValuation p F (a k))
+      (perfectoidValuation p F (b k)))
+      = ρ * max (ρ ^ k * perfectoidValuation p F (a k))
+        (ρ ^ k * perfectoidValuation p F (b k)) := by
+    rw [← mul_assoc, mul_comm (ρ ^ k) ρ, mul_assoc, nnreal_mul_max]
+  rw [h3]
+  refine mul_le_mul_of_nonneg_left (max_le ?_ ?_) zero_le
+  · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hx k) (le_max_left _ _)
+  · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hy k) (le_max_right _ _)
+
 /-- **Digit comparison (DC⁺)**: coordinate differences on `A^r` are controlled by
 the value of the difference plus one `ρ`-damped term. The engine of Kedlaya's
 Remark 2.7 at a single radius. -/
@@ -611,58 +680,7 @@ theorem digit_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   have hSe := tendsto_PhiHatK p F ϖ hρ0 hρ1 hde
   have hPNval : ∀ N : ℕ, Valued.v (AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ a N - prefixAloc p F ϖ b N - prefixAloc p F ϖ e N))
-      ≤ ρ * M := by
-    intro N
-    rw [valued_AlocToHatK, ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub,
-      map_sub, alocToWittF_prefixAloc, alocToWittF_prefixAloc,
-      alocToWittF_prefixAloc]
-    have hdistrib : (∑ k ∈ Finset.range N,
-          WittVector.teichmuller p (a k) * (p : WittVector p F) ^ k)
-        - (∑ k ∈ Finset.range N,
-          WittVector.teichmuller p (b k) * (p : WittVector p F) ^ k)
-        - (∑ k ∈ Finset.range N,
-          WittVector.teichmuller p (e k) * (p : WittVector p F) ^ k)
-        = ∑ k ∈ Finset.range N, (p : WittVector p F) ^ k
-          * (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
-            - WittVector.teichmuller p (a k - b k)) := by
-      rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
-      refine Finset.sum_congr rfl fun k _ => ?_
-      have hek : WittVector.teichmuller p (e k)
-          = WittVector.teichmuller p (a k - b k) := rfl
-      rw [hek]
-      ring
-    rw [hdistrib]
-    refine (gaussValueF_finset_sum_le p F hρ0 hρ1 (ρ * M) (Finset.range N)
-      _ fun k _ => ?_).2
-    have hBtriple : BddAbove (Set.range (gaussTermF p F ρ
-        (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
-          - WittVector.teichmuller p (a k - b k)))) := by
-      have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1
-        (bddAbove_gaussTermF_add p F hρ0 hρ1
-          (bddAbove_gaussTermF_teichmuller p F (a k))
-          (bddAbove_gaussTermF_neg p F hρ0 hρ1
-            (bddAbove_gaussTermF_teichmuller p F (b k))))
-        (bddAbove_gaussTermF_neg p F hρ0 hρ1
-          (bddAbove_gaussTermF_teichmuller p F (a k - b k)))
-      have h2 : WittVector.teichmuller p (a k) + -WittVector.teichmuller p (b k)
-          + -WittVector.teichmuller p (a k - b k)
-          = WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
-            - WittVector.teichmuller p (a k - b k) := by
-        ring
-      rwa [h2] at h1
-    refine ⟨bddAbove_gaussTermF_p_pow_mul p F hBtriple k, ?_⟩
-    rw [gaussValueF_p_pow_mul p F hBtriple k]
-    refine le_trans (mul_le_mul_of_nonneg_left
-      (gaussValueF_teichmuller_sub_sub_le p F hρ1.le (a k) (b k)) zero_le) ?_
-    have h3 : ρ ^ k * (ρ * max (perfectoidValuation p F (a k))
-        (perfectoidValuation p F (b k)))
-        = ρ * max (ρ ^ k * perfectoidValuation p F (a k))
-          (ρ ^ k * perfectoidValuation p F (b k)) := by
-      rw [← mul_assoc, mul_comm (ρ ^ k) ρ, mul_assoc, nnreal_mul_max]
-    rw [h3]
-    refine mul_le_mul_of_nonneg_left (max_le ?_ ?_) zero_le
-    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hx k) (le_max_left _ _)
-    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hy k) (le_max_right _ _)
+      ≤ ρ * M := fun N => valued_prefix_sub_sub_le p F ϖ hx hy N
   rcases eq_or_ne M 0 with hM0 | hM0
   · have hvx : Valued.v x = 0 :=
       le_antisymm (le_trans (le_max_left _ _) hM0.le) zero_le
@@ -1494,58 +1512,7 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   have hSe := tendsto_PhiHatK p F ϖ hρ0 hρ1 hde
   have hPNval : ∀ N : ℕ, Valued.v (AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ a N - prefixAloc p F ϖ b N - prefixAloc p F ϖ e N))
-      ≤ ρ * M := by
-    intro N
-    rw [valued_AlocToHatK, ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub,
-      map_sub, alocToWittF_prefixAloc, alocToWittF_prefixAloc,
-      alocToWittF_prefixAloc]
-    have hdistrib : (∑ k ∈ Finset.range N,
-          WittVector.teichmuller p (a k) * (p : WittVector p F) ^ k)
-        - (∑ k ∈ Finset.range N,
-          WittVector.teichmuller p (b k) * (p : WittVector p F) ^ k)
-        - (∑ k ∈ Finset.range N,
-          WittVector.teichmuller p (e k) * (p : WittVector p F) ^ k)
-        = ∑ k ∈ Finset.range N, (p : WittVector p F) ^ k
-          * (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
-            - WittVector.teichmuller p (a k - b k)) := by
-      rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
-      refine Finset.sum_congr rfl fun k _ => ?_
-      have hek : WittVector.teichmuller p (e k)
-          = WittVector.teichmuller p (a k - b k) := rfl
-      rw [hek]
-      ring
-    rw [hdistrib]
-    refine (gaussValueF_finset_sum_le p F hρ0 hρ1 (ρ * M) (Finset.range N)
-      _ fun k _ => ?_).2
-    have hBtriple : BddAbove (Set.range (gaussTermF p F ρ
-        (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
-          - WittVector.teichmuller p (a k - b k)))) := by
-      have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1
-        (bddAbove_gaussTermF_add p F hρ0 hρ1
-          (bddAbove_gaussTermF_teichmuller p F (a k))
-          (bddAbove_gaussTermF_neg p F hρ0 hρ1
-            (bddAbove_gaussTermF_teichmuller p F (b k))))
-        (bddAbove_gaussTermF_neg p F hρ0 hρ1
-          (bddAbove_gaussTermF_teichmuller p F (a k - b k)))
-      have h2 : WittVector.teichmuller p (a k) + -WittVector.teichmuller p (b k)
-          + -WittVector.teichmuller p (a k - b k)
-          = WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
-            - WittVector.teichmuller p (a k - b k) := by
-        ring
-      rwa [h2] at h1
-    refine ⟨bddAbove_gaussTermF_p_pow_mul p F hBtriple k, ?_⟩
-    rw [gaussValueF_p_pow_mul p F hBtriple k]
-    refine le_trans (mul_le_mul_of_nonneg_left
-      (gaussValueF_teichmuller_sub_sub_le p F hρ1.le (a k) (b k)) zero_le) ?_
-    have h3 : ρ ^ k * (ρ * max (perfectoidValuation p F (a k))
-        (perfectoidValuation p F (b k)))
-        = ρ * max (ρ ^ k * perfectoidValuation p F (a k))
-          (ρ ^ k * perfectoidValuation p F (b k)) := by
-      rw [← mul_assoc, mul_comm (ρ ^ k) ρ, mul_assoc, nnreal_mul_max]
-    rw [h3]
-    refine mul_le_mul_of_nonneg_left (max_le ?_ ?_) zero_le
-    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hx k) (le_max_left _ _)
-    · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hy k) (le_max_right _ _)
+      ≤ ρ * M := fun N => valued_prefix_sub_sub_le p F ϖ hx hy N
   rcases eq_or_ne M 0 with hM0 | hM0
   · have hvx : Valued.v x = 0 :=
       le_antisymm (le_trans (le_max_left _ _) hM0.le) zero_le

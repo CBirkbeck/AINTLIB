@@ -160,6 +160,62 @@ The `ArCompletion` ↔ `Groebner` cross-file repeats (24×3 and 10×4) are the m
 interesting: shared setup living in two files that should almost certainly be one
 lemma in the earlier one.
 
+## Scan 4 — subscript-`₂` twins (the biggest parallel structure in the folder)
+
+Scan 2 only looked for the prime `'`. Re-running it for a `₂` suffix (both `foo₂` and
+`foo₂_tail`) found **30 twin pairs, all in RobbaPresentation.lean** — an entire parallel
+copy of the `evalBI` / correction-chain / kernel-is-a-span machinery, roughly 1200 lines.
+
+**These are NOT deletable duplication.** They are the two cases of Kedlaya's
+rational-subset argument, run for two genuinely different generators:
+
+* `teichPowGen zb m = [z̄]/pᵐ` — cuts the interval at `|z̄|^{1/m}` **from below**
+* `teichPowGen₂ zb m = pᵐ/[z̄]` — cuts it **from above**
+
+and their unit structure differs accordingly (`(isUnit_p_image …).unit⁻¹ ^ m` versus
+`Ring.inverse` of the Teichmüller image). Every `₂` lemma is a real theorem about a real
+second object, not a copy.
+
+It is nevertheless *moral* duplication in the `/overview` Step 5 sense, and a large one.
+Token-diffing six of the pairs (326 lines per side) shows how mechanical the copy is:
+
+| Pair | Lines | Token similarity | What actually differs |
+|---|---|---|---|
+| `exists_correction_chain_BI` | 94 | 86% | `ρ₁` ↔ `σ₁` |
+| `exists_correction_sequence_BI` | 40 | 82% | `ρ₁` ↔ `σ₁` |
+| `evalBI_partial_succ` | 14 | 81% | `σ₁` ↔ `ρ₁` |
+| `exists_correction_step_BI` | 86 | 76% | `ρ₁` ↔ `σ₁` |
+| `surjective_evalBIHom` | 67 | 74% | `ρ₁` ↔ `σ₁` |
+| `ker_evalBIHom_eq_span` | 25 | 30% | `.snd` ↔ `.fst` |
+
+So the split runs along exactly two axes: **which interval endpoint** (`ρ` vs `σ`) and
+**which component** of `hatK × hatK` (`.fst` vs `.snd`). A unification would parametrise
+the development over a component projection together with the corresponding generator —
+the same obstacle as the `_fst`/`_snd` pairs, since the two components land in *different*
+types, so it is a statement-level change.
+
+That is a `/generalise`-lane restructuring of a 6578-line file on the critical path, so it
+is deliberately **not** attempted as part of a dedup pass. Flagged for a decision: it is
+the largest single cleanup opportunity in the folder (~600 lines), and also the riskiest.
+
+## Complete twin census (after a generic suffix/opposite-pair scan)
+
+Rather than guess at markers, the final scan tried every plausible one against the full
+declaration list. The folder's parallel structure is now fully mapped:
+
+| Family | Pairs | Status |
+|---|---|---|
+| `₂` | 30 | Kedlaya's two cases — real second objects. `/generalise` candidate, ~600 lines |
+| `_fst` / `_snd` | 9 | project into **different types**; unifying changes statements |
+| `U` / `V` (windows) | 4 | 1 unified (`injOn_toCurve_of_wandering`); 3 have data-specific bodies |
+| `'` | 3 | all verified **legitimate** variants — keep |
+| `_left` / `_right` | 2 | genuine opposite pair |
+| `_le` / `_ge` | 1 | genuine opposite pair |
+| `_aux` | 1 | legitimate helper split |
+
+Everything still listed is **parallel structure that needs a statement change to unify** —
+`/generalise`-lane work, not dedup. All *deletable* duplication is gone.
+
 ## Remaining — structural duplication (NOT yet done; needs a design decision)
 
 These are *moral* duplications (`/overview` Step 5): parallel proofs that differ only
