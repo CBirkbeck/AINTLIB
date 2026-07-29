@@ -35,6 +35,8 @@ structure SupportAdaptedChowChart
   cover : source ⟶ X
   relativeProjective :
     IsRelativeProjectiveFactorization xπ cover
+  sourceProjective :
+    IsProjectiveFactorization (cover ≫ xπ)
   surjective : Surjective cover
   openSubscheme : X.Opens
   coordinate :
@@ -137,6 +139,9 @@ theorem nonempty_supportAdaptedChowChart_of_not_isZero
         Scheme.FiniteAffineImageCover.chowObj aπ U hU
       cover := cover
       relativeProjective := hrelative
+      sourceProjective :=
+        Scheme.FiniteAffineImageCover.chowSourceπ_isProjectiveFactorization
+          aπ U hU hcover'
       surjective :=
         Scheme.FiniteAffineImageCover.chowToTarget_surjective
           aπ U hU hcover' hDense i
