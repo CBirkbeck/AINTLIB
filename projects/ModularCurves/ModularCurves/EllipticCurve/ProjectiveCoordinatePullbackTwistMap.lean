@@ -29,7 +29,8 @@ variable {R : Type u} {σ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance projectiveCoordinatePullbackTwistMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 /-- Pullback of the canonical coordinate morphism `O -> O(n)`. -/

@@ -23,7 +23,8 @@ universe u
 
 namespace AlgebraicGeometry.Scheme.Modules
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance projectiveCoordinateTensorMapMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 /-- Tensor a module with a morphism from the structure module. -/
@@ -68,7 +69,8 @@ variable {R : Type u} {σ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance projectiveCoordinateTwistMapMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 private theorem coordinateHyperplanePoleUnitHom_over_self_isIso

@@ -24,7 +24,8 @@ variable {R : Type u} {σ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance projectiveSpaceTwistShiftMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 /-- The recursively defined positive powers satisfy `O(m+n) ≅ O(m) ⊗ O(n)`. -/

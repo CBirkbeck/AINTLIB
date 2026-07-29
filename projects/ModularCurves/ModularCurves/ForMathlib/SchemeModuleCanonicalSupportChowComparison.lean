@@ -27,7 +27,8 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
 
-noncomputable local instance (X : Scheme.{u}) :
+noncomputable local instance supportAdaptedChowComparisonMonoidalCategory
+    (X : Scheme.{u}) :
     MonoidalCategory X.Modules :=
   monoidalCategory X
 
