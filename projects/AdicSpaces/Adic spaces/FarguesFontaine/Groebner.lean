@@ -184,53 +184,6 @@ def gaussNormRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
   ⨆ s : Fin k →₀ ℕ, Valued.v ((MvPowerSeries.coeff s f :
     ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
 
-/-- Restricted series have attained Gauss norm (at some coefficient), provided they
-are nonzero. -/
-theorem exists_gaussNormRPS_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
-    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
-    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
-    ∃ s₀ : Fin k →₀ ℕ, gaussNormRPS p F ϖ hρ0 hρ1 f
-        = Valued.v ((MvPowerSeries.coeff s₀ f : ↥(ArSub p F ϖ hρ0 hρ1))
-          : hatK p F hρ0 hρ1)
-      ∧ ∀ s, Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
-          : hatK p F hρ0 hρ1)
-        ≤ Valued.v ((MvPowerSeries.coeff s₀ f : ↥(ArSub p F ϖ hρ0 hρ1))
-          : hatK p F hρ0 hρ1) := by
-  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf
-  have hne : gaussNormRPS p F ϖ hρ0 hρ1 f ≠ 0 := by
-    intro h0
-    refine hf0 (MvPowerSeries.ext fun s => ?_)
-    have h1 : Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
-        : hatK p F hρ0 hρ1) = 0 := by
-      have hB : BddAbove (Set.range (fun s : Fin k →₀ ℕ =>
-          Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
-            : hatK p F hρ0 hρ1))) := by
-        refine ⟨max 1 (((hfin 1 one_pos).toFinset).sup (fun s =>
-          Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
-            : hatK p F hρ0 hρ1))), ?_⟩
-        rintro t ⟨s, rfl⟩
-        rcases le_or_gt (Valued.v ((MvPowerSeries.coeff s f :
-            ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) 1 with h1 | h1
-        · exact le_max_of_le_left h1
-        · refine le_max_of_le_right (Finset.le_sup
-            (f := fun s => Valued.v ((MvPowerSeries.coeff s f :
-              ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) ?_)
-          rw [Set.Finite.mem_toFinset]
-          exact h1
-      have h2 := le_ciSup hB s
-      rw [show (⨆ s : Fin k →₀ ℕ, Valued.v ((MvPowerSeries.coeff s f :
-          ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1))
-        = gaussNormRPS p F ϖ hρ0 hρ1 f from rfl, h0] at h2
-      exact le_antisymm h2 zero_le
-    have h3 : ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
-        : hatK p F hρ0 hρ1) = 0 :=
-      (Valuation.zero_iff (Valued.v :
-        Valuation (hatK p F hρ0 hρ1) NNReal)).mp h1
-    rw [map_zero]
-    exact Subtype.ext h3
-  obtain ⟨s₀, hs₀, hdom⟩ := exists_iSup_eq_of_finite_above hfin hne
-  exact ⟨s₀, hs₀, hdom⟩
-
 /-- Nonzero restricted series have nonzero Gauss norm. -/
 theorem gaussNormRPS_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
@@ -264,6 +217,24 @@ theorem gaussNormRPS_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       Valuation (hatK p F hρ0 hρ1) NNReal)).mp (le_antisymm h2 zero_le)
   rw [map_zero]
   exact Subtype.ext h3
+
+/-- Restricted series have attained Gauss norm (at some coefficient), provided they
+are nonzero. -/
+theorem exists_gaussNormRPS_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    ∃ s₀ : Fin k →₀ ℕ, gaussNormRPS p F ϖ hρ0 hρ1 f
+        = Valued.v ((MvPowerSeries.coeff s₀ f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+      ∧ ∀ s, Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        ≤ Valued.v ((MvPowerSeries.coeff s₀ f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) := by
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf
+  have hne : gaussNormRPS p F ϖ hρ0 hρ1 f ≠ 0 :=
+    gaussNormRPS_ne_zero p F ϖ hf hf0
+  obtain ⟨s₀, hs₀, hdom⟩ := exists_iSup_eq_of_finite_above hfin hne
+  exact ⟨s₀, hs₀, hdom⟩
 
 /-- **The attainment set** of a series: the multi-indices realizing the Gauss norm. -/
 def attainSetRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)

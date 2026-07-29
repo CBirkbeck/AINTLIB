@@ -1619,6 +1619,23 @@ theorem tailValueF_eq_of_coords {σ : NNReal} {x X : WittVector p F} {N : ℕ}
   rw [gaussTermF, gaussTermF, hc k, pow_add]
   ring
 
+/-- Coordinate shifts preserve bounded terms. -/
+theorem bddAbove_gaussTermF_of_coords_shift {σ : NNReal} (hσ0 : 0 < σ)
+    {x X : WittVector p F} {N : ℕ}
+    (hc : ∀ k, teichCoeffF p F X k = teichCoeffF p F x (N + k))
+    (hB : BddAbove (Set.range (gaussTermF p F σ x))) :
+    BddAbove (Set.range (gaussTermF p F σ X)) := by
+  obtain ⟨M, hM⟩ := hB
+  refine ⟨(σ ^ N)⁻¹ * M, ?_⟩
+  rintro s ⟨k, rfl⟩
+  have h1 : σ ^ N * gaussTermF p F σ X k = gaussTermF p F σ x (N + k) := by
+    rw [gaussTermF, gaussTermF, hc k, pow_add]
+    ring
+  have h2 : σ ^ N * gaussTermF p F σ X k ≤ M := h1.le.trans (hM ⟨N + k, rfl⟩)
+  rw [← one_mul (gaussTermF p F σ X k), ← inv_mul_cancel₀ (pow_pos hσ0 N).ne',
+    mul_assoc]
+  exact mul_le_mul_of_nonneg_left h2 zero_le
+
 /-- **The moving-prefix tail estimate** (sol-consult (1)): the tail of a sum is
 controlled by the tails and the scaled head bound. -/
 theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
@@ -1663,28 +1680,10 @@ theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
         ≤ 1 * M := mul_le_mul (pow_le_one₀ zero_le hσ1.le) (hCdig k) zero_le zero_le
       _ = M := one_mul M
   -- boundedness of the tail witnesses
-  have hBX : BddAbove (Set.range (gaussTermF p F σ X)) := by
-    obtain ⟨Mx, hMx⟩ := hBx
-    refine ⟨(σ ^ N)⁻¹ * Mx, ?_⟩
-    rintro s ⟨k, rfl⟩
-    have h1 : σ ^ N * gaussTermF p F σ X k = gaussTermF p F σ x (N + k) := by
-      rw [gaussTermF, gaussTermF, hXc k, pow_add]
-      ring
-    have h2 : σ ^ N * gaussTermF p F σ X k ≤ Mx := h1.le.trans (hMx ⟨N + k, rfl⟩)
-    rw [← one_mul (gaussTermF p F σ X k),
-      ← inv_mul_cancel₀ (pow_pos hσ0 N).ne', mul_assoc]
-    exact mul_le_mul_of_nonneg_left h2 zero_le
-  have hBY : BddAbove (Set.range (gaussTermF p F σ Y)) := by
-    obtain ⟨My, hMy⟩ := hBy
-    refine ⟨(σ ^ N)⁻¹ * My, ?_⟩
-    rintro s ⟨k, rfl⟩
-    have h1 : σ ^ N * gaussTermF p F σ Y k = gaussTermF p F σ y (N + k) := by
-      rw [gaussTermF, gaussTermF, hYc k, pow_add]
-      ring
-    have h2 : σ ^ N * gaussTermF p F σ Y k ≤ My := h1.le.trans (hMy ⟨N + k, rfl⟩)
-    rw [← one_mul (gaussTermF p F σ Y k),
-      ← inv_mul_cancel₀ (pow_pos hσ0 N).ne', mul_assoc]
-    exact mul_le_mul_of_nonneg_left h2 zero_le
+  have hBX : BddAbove (Set.range (gaussTermF p F σ X)) :=
+    bddAbove_gaussTermF_of_coords_shift p F hσ0 hXc hBx
+  have hBY : BddAbove (Set.range (gaussTermF p F σ Y)) :=
+    bddAbove_gaussTermF_of_coords_shift p F hσ0 hYc hBy
   -- the exact tail identity Z = C + X + Y
   have hcongr : ∀ i < N, teichCoeffF p F (x + y) i = teichCoeffF p F A i := by
     intro i hi
@@ -1986,23 +1985,6 @@ theorem tendsto_gaussTermF_of_w_approx {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ 
     · exact lt_trans (hN₁ n hN₁n) hba
     · exact lt_trans (hN₂ n hN₂n) hba
     · exact lt_trans hj₀ hba
-
-/-- Coordinate shifts preserve bounded terms. -/
-theorem bddAbove_gaussTermF_of_coords_shift {σ : NNReal} (hσ0 : 0 < σ)
-    {x X : WittVector p F} {N : ℕ}
-    (hc : ∀ k, teichCoeffF p F X k = teichCoeffF p F x (N + k))
-    (hB : BddAbove (Set.range (gaussTermF p F σ x))) :
-    BddAbove (Set.range (gaussTermF p F σ X)) := by
-  obtain ⟨M, hM⟩ := hB
-  refine ⟨(σ ^ N)⁻¹ * M, ?_⟩
-  rintro s ⟨k, rfl⟩
-  have h1 : σ ^ N * gaussTermF p F σ X k = gaussTermF p F σ x (N + k) := by
-    rw [gaussTermF, gaussTermF, hc k, pow_add]
-    ring
-  have h2 : σ ^ N * gaussTermF p F σ X k ≤ M := h1.le.trans (hM ⟨N + k, rfl⟩)
-  rw [← one_mul (gaussTermF p F σ X k), ← inv_mul_cancel₀ (pow_pos hσ0 N).ne',
-    mul_assoc]
-  exact mul_le_mul_of_nonneg_left h2 zero_le
 
 /-- **The tail-of-prefix identity**: the value of `x` minus its `N`-th Teichmüller
 prefix is exactly the tail value `T_N(x)`. -/

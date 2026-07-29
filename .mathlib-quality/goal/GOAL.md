@@ -136,3 +136,25 @@ RobbaPresentation 17 · TateAcyclicityFinalAssembly 14 · Euclidean 12 · Embedd
 
 `wedhorn_lemma_834_propA3_part1_gluing` (454 lines) carries **48 comment seams with
 numbered Steps 1-8** — the author's own decomposition.  Highly tractable: name the steps.
+
+### Misplaced-lemma sweep (run before decomposition — cheap, and shrinks the work)
+
+Script: `scratchpad/misplaced.py`.  Indexes every top-level lemma statement (3597 of them),
+then scans every inline `have <n> : <stmt>` for a statement matching one.  Results: **89
+matches**, of which **4 declared later in the SAME file** (the pure-win category).
+
+Adjudicated:
+| Case | Verdict |
+|---|---|
+| `WittF:1666/1677` vs `bddAbove_gaussTermF_of_coords_shift` (1991) | **REAL, fixed** — the 11-line argument was written out inline TWICE (`hBX`, `hBY`) while the lemma sat 325 lines later. 22 lines -> 4. |
+| `Groebner:200` vs `gaussNormRPS_ne_zero` (235) | **REAL, fixed** — 31-line inline copy -> 2 lines. |
+| `IntervalRing:1157` vs `wI_le_of_approx` | **FALSE POSITIVE** — the `have hb … := hz` is a one-liner; the matcher only matched the conclusion. |
+| `PresheafTateStructure:127` vs `locSubring_induced_eq_adicTopology` (309) | **REAL but CIRCULAR** — the inline `have key` is a step *inside* `locSubring_subspace_eq_adic` (118), and the later lemma proves the same fact *from* that finished theorem. Moving it up fails (its own dependency is in between). Fix = extract the shared step above both, not relocate. Queued. |
+
+The 85 cross-file matches need filtering: many are `have h : P := the_lemma …`, which is not
+duplication.  Filter for `have … := by` with a multi-line body that does not mention the
+lemma's name.
+
+**Mover limitation to remember**: relocating a lemma upward requires checking the lemma's
+OWN dependencies are still above it.  `move_lemma.py` does not check this — it broke
+PresheafTateStructure exactly this way, caught by the module build.
