@@ -68,7 +68,8 @@ private def moduleTotalForgetDiagramIso (n : ℕ) :
         (ComplexShape.π (.up ℕ) (.up ℕ) (.up ℕ)) n) :=
   Discrete.natIso fun _ => Iso.refl _
 
-private def moduleTotalForgetXIso (n : ℕ) :
+/-- The degreewise isomorphism underlying `moduleTotalForgetIso`. -/
+def moduleTotalForgetXIso (n : ℕ) :
     moduleForgetToAddCommGrp.obj ((K.total (.up ℕ)).X n) ≅
       (((moduleForgetBicomplex K).total (.up ℕ)).X n) :=
   preservesColimitIso moduleForgetToAddCommGrp
@@ -77,8 +78,10 @@ private def moduleTotalForgetXIso (n : ℕ) :
           (ComplexShape.π (.up ℕ) (.up ℕ) (.up ℕ)) n)) ≪≫
     HasColimit.isoOfNatIso (moduleTotalForgetDiagramIso K n)
 
+/-- The degreewise total-complex comparison sends a forgotten coproduct
+injection to the corresponding injection of the forgotten bicomplex. -/
 @[reassoc]
-private theorem moduleForget_map_ιTotal_moduleTotalForgetXIso_hom
+theorem moduleForget_map_ιTotal_moduleTotalForgetXIso_hom
     (i j n : ℕ)
     (h : ComplexShape.π (.up ℕ) (.up ℕ) (.up ℕ) (i, j) = n) :
     moduleForgetToAddCommGrp.map
