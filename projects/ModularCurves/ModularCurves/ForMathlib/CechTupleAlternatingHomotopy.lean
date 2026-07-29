@@ -558,6 +558,349 @@ theorem cechTupleAlternatingProjection_boundary
   | single i a =>
       exact cechTupleAlternatingProjection_boundary_single_smul n i a
 
+/-- Conrad's recursive chain homotopy from the identity to signed sorting. -/
+def cechTupleAlternatingHomotopy {ι : Type u} [LinearOrder ι] :
+    (n : ℕ) → CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι (n + 1)
+  | 0 => 0
+  | n + 1 =>
+      cechTupleLinearExtension fun i =>
+        cechTuplePrependChain (i 0) (n + 1)
+          (cechTupleAlternatingProjectionBasis (n + 1) i -
+            Finsupp.single i 1 -
+            cechTupleAlternatingHomotopy n
+              (cechTupleBoundaryBasis n i))
+
+@[simp]
+theorem cechTupleAlternatingHomotopy_zero
+    {ι : Type u} [LinearOrder ι] :
+    cechTupleAlternatingHomotopy (ι := ι) 0 = 0 :=
+  rfl
+
+@[simp]
+theorem cechTupleAlternatingHomotopy_succ_single
+    {ι : Type u} [LinearOrder ι] (n : ℕ)
+    (i : Fin (n + 2) → ι) (a : ℤ) :
+    cechTupleAlternatingHomotopy (n + 1) (Finsupp.single i a) =
+      a • cechTuplePrependChain (i 0) (n + 1)
+        (cechTupleAlternatingProjectionBasis (n + 1) i -
+          Finsupp.single i 1 -
+          cechTupleAlternatingHomotopy n
+            (cechTupleBoundaryBasis n i)) := by
+  simp [cechTupleAlternatingHomotopy, cechTupleLinearExtension]
+
+/-- The lower-degree term `h∂` in the tuple-chain homotopy identity. -/
+def cechTupleAlternatingHomotopyPrevious
+    {ι : Type u} [LinearOrder ι] :
+    (n : ℕ) → CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι n
+  | 0 => 0
+  | n + 1 =>
+      (cechTupleAlternatingHomotopy n).comp (cechTupleBoundary n)
+
+@[simp]
+theorem cechTupleAlternatingHomotopyPrevious_zero
+    {ι : Type u} [LinearOrder ι] :
+    cechTupleAlternatingHomotopyPrevious (ι := ι) 0 = 0 :=
+  rfl
+
+@[simp]
+theorem cechTupleAlternatingHomotopyPrevious_succ_apply
+    {ι : Type u} [LinearOrder ι] (n : ℕ)
+    (x : CechTupleChain ι (n + 1)) :
+    cechTupleAlternatingHomotopyPrevious (n + 1) x =
+      cechTupleAlternatingHomotopy n (cechTupleBoundary n x) :=
+  rfl
+
+theorem cechTupleAlternatingProjection_zero
+    {ι : Type u} [LinearOrder ι] (x : CechTupleChain ι 0) :
+    cechTupleAlternatingProjection 0 x = x := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x y hx hy => simp [hx, hy]
+  | single i a =>
+      have hi : StrictMono i := by
+        intro k l hkl
+        omega
+      rw [cechTupleAlternatingProjection_single,
+        cechTupleAlternatingProjectionBasis_of_strictMono i hi]
+      simp
+
+private theorem cechTupleAlternatingHomotopyPrevious_boundaryBasis
+    {ι : Type u} [LinearOrder ι] (n : ℕ)
+    (i : Fin (n + 2) → ι) :
+    cechTupleAlternatingHomotopyPrevious n
+        (cechTupleBoundaryBasis n i) = 0 := by
+  cases n with
+  | zero => rfl
+  | succ n =>
+      change cechTupleAlternatingHomotopy n
+        (cechTupleBoundary n (cechTupleBoundaryBasis (n + 1) i)) = 0
+      have hsq := cechTupleBoundary_boundary (ι := ι) n
+        (Finsupp.single i 1)
+      simp only [cechTupleBoundary_single, one_smul] at hsq
+      rw [hsq, map_zero]
+
+/-- Conrad's recursive homotopy satisfies `∂h + h∂ = p - 1`. -/
+theorem cechTupleAlternatingHomotopy_identity
+    {ι : Type u} [LinearOrder ι] (n : ℕ)
+    (x : CechTupleChain ι n) :
+    cechTupleBoundary n (cechTupleAlternatingHomotopy n x) +
+        cechTupleAlternatingHomotopyPrevious n x =
+      cechTupleAlternatingProjection n x - x := by
+  induction n with
+  | zero =>
+      simp [cechTupleAlternatingProjection_zero]
+  | succ n ih =>
+      induction x using Finsupp.induction_linear with
+      | zero => simp
+      | add x y hx hy =>
+          simp only [map_add]
+          calc
+            (cechTupleBoundary (n + 1))
+                  (cechTupleAlternatingHomotopy (n + 1) x) +
+                (cechTupleBoundary (n + 1))
+                  (cechTupleAlternatingHomotopy (n + 1) y) +
+              (cechTupleAlternatingHomotopyPrevious (n + 1) x +
+                cechTupleAlternatingHomotopyPrevious (n + 1) y) =
+                ((cechTupleBoundary (n + 1))
+                    (cechTupleAlternatingHomotopy (n + 1) x) +
+                  cechTupleAlternatingHomotopyPrevious (n + 1) x) +
+                ((cechTupleBoundary (n + 1))
+                    (cechTupleAlternatingHomotopy (n + 1) y) +
+                  cechTupleAlternatingHomotopyPrevious (n + 1) y) := by
+                    abel
+            _ = (cechTupleAlternatingProjection (n + 1) x - x) +
+                (cechTupleAlternatingProjection (n + 1) y - y) := by
+                  rw [hx, hy]
+            _ = cechTupleAlternatingProjection (n + 1) x +
+                  cechTupleAlternatingProjection (n + 1) y -
+                (x + y) := by
+                  abel
+      | single i a =>
+          let ω :=
+            cechTupleAlternatingProjectionBasis (n + 1) i -
+              Finsupp.single i 1 -
+              cechTupleAlternatingHomotopy n
+                (cechTupleBoundaryBasis n i)
+          have hp := cechTupleAlternatingProjection_boundary
+            (ι := ι) n (Finsupp.single i 1)
+          simp only [cechTupleAlternatingProjection_single,
+            cechTupleBoundary_single, one_smul] at hp
+          have hih := ih (cechTupleBoundaryBasis n i)
+          rw [cechTupleAlternatingHomotopyPrevious_boundaryBasis,
+            add_zero] at hih
+          have hcycle : cechTupleBoundary n ω = 0 := by
+            dsimp only [ω]
+            rw [map_sub, map_sub, hp, hih]
+            simp only [cechTupleBoundary_single, one_smul]
+            abel
+          have hcon := cechTuplePrepend_contraction (i 0) n ω
+          rw [hcycle, map_zero, add_zero] at hcon
+          have hunit :
+              cechTupleBoundary (n + 1)
+                    (cechTupleAlternatingHomotopy (n + 1)
+                      (Finsupp.single i 1)) +
+                  cechTupleAlternatingHomotopyPrevious (n + 1)
+                    (Finsupp.single i 1) =
+                cechTupleAlternatingProjection (n + 1)
+                    (Finsupp.single i 1) -
+                  Finsupp.single i 1 := by
+            rw [cechTupleAlternatingHomotopy_succ_single, one_smul,
+              cechTupleAlternatingHomotopyPrevious_succ_apply,
+              cechTupleBoundary_single, one_smul,
+              cechTupleAlternatingProjection_single, one_smul]
+            change cechTupleBoundary (n + 1)
+                (cechTuplePrependChain (i 0) (n + 1) ω) +
+                cechTupleAlternatingHomotopy n
+                  (cechTupleBoundaryBasis n i) =
+              cechTupleAlternatingProjectionBasis (n + 1) i -
+                Finsupp.single i 1
+            rw [hcon]
+            dsimp only [ω]
+            abel
+          have h := congrArg (fun y => a • y) hunit
+          simpa [smul_sub, Finsupp.smul_single] using h
+
+namespace CechTupleChain
+
+/-- Every tuple occurring in a chain uses indices from `N`. -/
+def SupportedBy {ι : Type u} {n : ℕ}
+    (x : CechTupleChain ι n) (N : Set ι) : Prop :=
+  ∀ ⦃i⦄, i ∈ x.support → Set.range i ⊆ N
+
+theorem supportedBy_zero {ι : Type u} {n : ℕ} {N : Set ι} :
+    SupportedBy (0 : CechTupleChain ι n) N := by
+  intro i hi
+  simp at hi
+
+theorem SupportedBy.add {ι : Type u} {n : ℕ} {N : Set ι}
+    {x y : CechTupleChain ι n} (hx : SupportedBy x N)
+    (hy : SupportedBy y N) :
+    SupportedBy (x + y) N := by
+  classical
+  intro i hi
+  rcases Finset.mem_union.mp (Finsupp.support_add hi) with hi | hi
+  · exact hx hi
+  · exact hy hi
+
+theorem SupportedBy.sub {ι : Type u} {n : ℕ} {N : Set ι}
+    {x y : CechTupleChain ι n} (hx : SupportedBy x N)
+    (hy : SupportedBy y N) :
+    SupportedBy (x - y) N := by
+  classical
+  intro i hi
+  rcases Finset.mem_union.mp (Finsupp.support_sub hi) with hi | hi
+  · exact hx hi
+  · exact hy hi
+
+theorem SupportedBy.smul {ι : Type u} {n : ℕ} {N : Set ι}
+    {x : CechTupleChain ι n} (hx : SupportedBy x N) (a : ℤ) :
+    SupportedBy (a • x) N := by
+  intro i hi
+  exact hx (Finsupp.support_smul hi)
+
+theorem SupportedBy.mono {ι : Type u} {n : ℕ} {N N' : Set ι}
+    {x : CechTupleChain ι n} (hx : SupportedBy x N)
+    (hNN' : N ⊆ N') :
+    SupportedBy x N' := by
+  intro i hi
+  exact (hx hi).trans hNN'
+
+theorem supportedBy_single {ι : Type u} {n : ℕ} {N : Set ι}
+    (i : Fin (n + 1) → ι) (a : ℤ) (hi : Set.range i ⊆ N) :
+    SupportedBy (Finsupp.single i a) N := by
+  intro j hj
+  have hji := Finsupp.support_single_subset hj
+  simp only [Finset.mem_singleton] at hji
+  subst j
+  exact hi
+
+theorem supportedBy_sum {ι : Type u} {n : ℕ} {N : Set ι}
+    {κ : Type*} (s : Finset κ) (f : κ → CechTupleChain ι n)
+    (hf : ∀ k ∈ s, SupportedBy (f k) N) :
+    SupportedBy (∑ k ∈ s, f k) N := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [supportedBy_zero]
+  | @insert k s hk ih =>
+      rw [Finset.sum_insert hk]
+      exact (hf k (Finset.mem_insert_self k s)).add
+        (ih fun l hl => hf l (Finset.mem_insert_of_mem hl))
+
+theorem supportedBy_linearExtension
+    {ι : Type u} {n m : ℕ} {N : Set ι}
+    (f : (Fin (n + 1) → ι) → CechTupleChain ι m)
+    (x : CechTupleChain ι n)
+    (hf : ∀ i ∈ x.support, SupportedBy (f i) N) :
+    SupportedBy (cechTupleLinearExtension f x) N := by
+  classical
+  intro j hj
+  rw [cechTupleLinearExtension, Finsupp.lsum_apply] at hj
+  change j ∈ (x.sum fun i a => a • f i).support at hj
+  obtain ⟨i, hi, hj⟩ :=
+    Finset.mem_biUnion.mp (Finsupp.support_sum hj)
+  exact hf i hi (Finsupp.support_smul hj)
+
+end CechTupleChain
+
+theorem cechTupleBoundaryBasis_supportedBy
+    {ι : Type u} (n : ℕ) (i : Fin (n + 2) → ι) :
+    CechTupleChain.SupportedBy (cechTupleBoundaryBasis n i)
+      (Set.range i) := by
+  unfold cechTupleBoundaryBasis
+  refine CechTupleChain.supportedBy_sum Finset.univ _ ?_
+  intro k _
+  apply CechTupleChain.supportedBy_single
+  rintro x ⟨l, rfl⟩
+  exact ⟨k.succAbove l, rfl⟩
+
+theorem cechTupleAlternatingProjectionBasis_supportedBy
+    {ι : Type u} [LinearOrder ι] (n : ℕ)
+    (i : Fin (n + 1) → ι) :
+    CechTupleChain.SupportedBy
+      (cechTupleAlternatingProjectionBasis n i) (Set.range i) := by
+  by_cases hi : Function.Injective i
+  · rw [cechTupleAlternatingProjectionBasis_of_injective i hi]
+    apply CechTupleChain.supportedBy_single
+    rintro x ⟨k, rfl⟩
+    exact ⟨Tuple.sort i k, rfl⟩
+  · rw [cechTupleAlternatingProjectionBasis_of_not_injective i hi]
+    exact CechTupleChain.supportedBy_zero
+
+theorem cechTuplePrependChain_supportedBy
+    {ι : Type u} (i₀ : ι) (n : ℕ)
+    (x : CechTupleChain ι n) (N : Set ι)
+    (hi₀ : i₀ ∈ N) (hx : CechTupleChain.SupportedBy x N) :
+    CechTupleChain.SupportedBy (cechTuplePrependChain i₀ n x) N := by
+  rw [cechTuplePrependChain]
+  apply CechTupleChain.supportedBy_linearExtension
+  intro i hi
+  apply CechTupleChain.supportedBy_single
+  rintro y ⟨k, rfl⟩
+  induction k using Fin.cases with
+  | zero => exact hi₀
+  | succ l => exact hx hi ⟨l, rfl⟩
+
+theorem cechTupleBoundary_supportedBy
+    {ι : Type u} (n : ℕ) (x : CechTupleChain ι (n + 1))
+    (N : Set ι) (hx : CechTupleChain.SupportedBy x N) :
+    CechTupleChain.SupportedBy (cechTupleBoundary n x) N := by
+  rw [cechTupleBoundary]
+  apply CechTupleChain.supportedBy_linearExtension
+  intro i hi
+  exact (cechTupleBoundaryBasis_supportedBy n i).mono (hx hi)
+
+theorem cechTupleAlternatingProjection_supportedBy
+    {ι : Type u} [LinearOrder ι] (n : ℕ)
+    (x : CechTupleChain ι n) (N : Set ι)
+    (hx : CechTupleChain.SupportedBy x N) :
+    CechTupleChain.SupportedBy
+      (cechTupleAlternatingProjection n x) N := by
+  rw [cechTupleAlternatingProjection]
+  apply CechTupleChain.supportedBy_linearExtension
+  intro i hi
+  exact (cechTupleAlternatingProjectionBasis_supportedBy n i).mono (hx hi)
+
+theorem cechTupleAlternatingHomotopy_supportedBy
+    {ι : Type u} [LinearOrder ι] (n : ℕ)
+    (x : CechTupleChain ι n) (N : Set ι)
+    (hx : CechTupleChain.SupportedBy x N) :
+    CechTupleChain.SupportedBy
+      (cechTupleAlternatingHomotopy n x) N := by
+  induction n generalizing N with
+  | zero =>
+      change CechTupleChain.SupportedBy 0 N
+      exact CechTupleChain.supportedBy_zero
+  | succ n ih =>
+      rw [cechTupleAlternatingHomotopy]
+      apply CechTupleChain.supportedBy_linearExtension
+      intro i hi
+      have hiN : Set.range i ⊆ N := hx hi
+      have hp :=
+        (cechTupleAlternatingProjectionBasis_supportedBy (n + 1) i).mono hiN
+      have hsingle :=
+        (CechTupleChain.supportedBy_single i 1 (Subset.rfl)).mono hiN
+      have hboundary :=
+        (cechTupleBoundaryBasis_supportedBy n i).mono hiN
+      have hh := ih _ _ hboundary
+      apply cechTuplePrependChain_supportedBy
+      · exact hiN ⟨0, rfl⟩
+      · exact (hp.sub hsingle).sub hh
+
+/-- A free tuple-chain map does not introduce new tuple indices. -/
+def CechTupleSupportNonincreasing
+    {ι : Type u} {n m : ℕ}
+    (f : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m) : Prop :=
+  ∀ i : Fin (n + 1) → ι,
+    CechTupleChain.SupportedBy (f (Finsupp.single i 1)) (Set.range i)
+
+theorem cechTupleAlternatingHomotopy_supportNonincreasing
+    {ι : Type u} [LinearOrder ι] (n : ℕ) :
+    CechTupleSupportNonincreasing
+      (cechTupleAlternatingHomotopy (ι := ι) n) := by
+  intro i
+  apply cechTupleAlternatingHomotopy_supportedBy
+  exact CechTupleChain.supportedBy_single i 1 Subset.rfl
+
 end
 
 end ModularCurves
