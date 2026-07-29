@@ -33,22 +33,339 @@ open ValuationSpectrum
 variable {E : Type*} [NormedCommRing E] [IsUltrametricDist E] [NormOneClass E]
   [CompleteSpace E] [ValuationSpectrum.PlusSubring E]
 
+/-! ### Pod-independence of the localization topology (spawned sub-ticket W12a)
+
+`CompletionModelIndependence` proves the whole-space case (`T = {1}`, `s = 1`);
+here the general-datum case: every element of a `P'`-basic neighborhood is a
+`ℤ`-combination of terms `φ(a')·τ` with `a'` in a power of `I'` and `τ` a
+`T/s`-monomial; `A`-level absorption (both pods present `𝓝_A 0`) replaces the
+`I'`-power element by an `I`-power element, and the `τ`-multiplier is absorbed by
+the `P`-side ideal. -/
+
+section PodIndependence
+
+open Filter Topology
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+
+/-- The multiplicative monoid of `T/s`-monomials. -/
+private noncomputable def tsMonoid (T : Finset A) (s : A) :
+    Submonoid (Localization.Away s) :=
+  Submonoid.closure (Set.range fun t : T => divByS (t : A) s)
+
+private theorem tsMonoid_le_locSubring (P : PairOfDefinition A) (T : Finset A)
+    (s : A) {τ : Localization.Away s} (hτ : τ ∈ tsMonoid T s) :
+    τ ∈ locSubring P T s := by
+  induction hτ using Submonoid.closure_induction with
+  | mem x hx =>
+    obtain ⟨t, rfl⟩ := hx
+    exact divByS_mem_locSubring P T s t.2
+  | one => exact one_mem _
+  | mul x y _ _ hx hy => exact mul_mem hx hy
+
+/-- Normal-form generators: `φ(a)·τ` with `a ∈ A₀` and `τ` a `T/s`-monomial. -/
+private def normalSet (P : PairOfDefinition A) (T : Finset A) (s : A) :
+    Set (Localization.Away s) :=
+  {x | ∃ a ∈ P.A₀, ∃ τ ∈ tsMonoid T s,
+    x = algebraMap A (Localization.Away s) a * τ}
+
+private theorem normalSet_mul_self (P : PairOfDefinition A) (T : Finset A) (s : A)
+    {x y : Localization.Away s} (hx : x ∈ normalSet P T s)
+    (hy : y ∈ normalSet P T s) : x * y ∈ normalSet P T s := by
+  obtain ⟨a, ha, τ, hτ, rfl⟩ := hx
+  obtain ⟨b, hb, σ, hσ, rfl⟩ := hy
+  exact ⟨a * b, mul_mem ha hb, τ * σ, mul_mem hτ hσ, by rw [map_mul]; ring⟩
+
+private theorem mul_mem_closure_normalSet (P : PairOfDefinition A) (T : Finset A)
+    (s : A) {x y : Localization.Away s}
+    (hx : x ∈ AddSubgroup.closure (normalSet P T s))
+    (hy : y ∈ AddSubgroup.closure (normalSet P T s)) :
+    x * y ∈ AddSubgroup.closure (normalSet P T s) := by
+  induction hx using AddSubgroup.closure_induction with
+  | mem a ha =>
+    induction hy using AddSubgroup.closure_induction with
+    | mem b hb => exact AddSubgroup.subset_closure (normalSet_mul_self P T s ha hb)
+    | zero => rw [mul_zero]; exact zero_mem _
+    | add b c _ _ ihb ihc => rw [mul_add]; exact add_mem ihb ihc
+    | neg b _ ihb => rw [mul_neg]; exact neg_mem ihb
+  | zero => rw [zero_mul]; exact zero_mem _
+  | add a b _ _ iha ihb => rw [add_mul]; exact add_mem iha ihb
+  | neg a _ iha => rw [neg_mul]; exact neg_mem iha
+
+private theorem locSubring_subset_closure_normalSet (P : PairOfDefinition A)
+    (T : Finset A) (s : A) {r : Localization.Away s} (hr : r ∈ locSubring P T s) :
+    r ∈ AddSubgroup.closure (normalSet P T s) := by
+  induction hr using Subring.closure_induction with
+  | mem x hx =>
+    rcases hx with ⟨a, ha, rfl⟩ | ⟨t, rfl⟩
+    · exact AddSubgroup.subset_closure ⟨a, ha, 1, one_mem _, (mul_one _).symm⟩
+    · exact AddSubgroup.subset_closure ⟨1, one_mem _,
+        divByS (t : A) s, Submonoid.subset_closure ⟨t, rfl⟩, by rw [map_one, one_mul]⟩
+  | zero => exact zero_mem _
+  | one => exact AddSubgroup.subset_closure ⟨1, one_mem _, 1, one_mem _, by
+      rw [map_one, one_mul]⟩
+  | add x y _ _ hx hy => exact add_mem hx hy
+  | neg x _ hx => exact neg_mem hx
+  | mul x y _ _ hx hy => exact mul_mem_closure_normalSet P T s hx hy
+
+/-- `A`-level absorption between two pods: both `Iⁿ`-image families present
+`𝓝_A 0`. -/
+private theorem pod_absorb (P P' : PairOfDefinition A) (n : ℕ) :
+    ∃ m : ℕ, (Subtype.val '' ((P'.I ^ m : Ideal P'.A₀) : Set P'.A₀) : Set A) ⊆
+      Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) := by
+  have hmem : (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀)) ∈ 𝓝 (0 : A) :=
+    P.hasBasis_nhds_zero.mem_of_mem (i := n) trivial
+  obtain ⟨m, -, hm⟩ := P'.hasBasis_nhds_zero.mem_iff.mp hmem
+  exact ⟨m, hm⟩
+
+/-- A single normal-form multiple of an absorbed `I`-power image lies in the
+`P`-side basic neighborhood. -/
+private theorem term_mem_locNhd (P : PairOfDefinition A) (T : Finset A) (s : A)
+    (n : ℕ) (c : P.A₀) (hc : c ∈ P.I ^ n) {τ : Localization.Away s}
+    (hτ : τ ∈ tsMonoid T s) :
+    algebraMap A (Localization.Away s) (c : A) * τ ∈ locNhd P T s n := by
+  refine AddSubgroup.mem_map.mpr ⟨algebraMapD P T s c * ⟨τ, tsMonoid_le_locSubring P T s hτ⟩, ?_, rfl⟩
+  have h1 : algebraMapD P T s c ∈ (locIdeal P T s) ^ n := by
+    rw [locIdeal, ← Ideal.map_pow]
+    exact Ideal.mem_map_of_mem _ hc
+  exact Ideal.mul_mem_right _ _ h1
+
+/-- The `P'`-basic neighborhoods are absorbed by the `P`-basic ones. -/
+private theorem locNhd_absorb (P P' : PairOfDefinition A) (T : Finset A) (s : A)
+    (n : ℕ) : ∃ m : ℕ, (locNhd P' T s m : Set (Localization.Away s)) ⊆
+      locNhd P T s n := by
+  classical
+  obtain ⟨m, hm⟩ := pod_absorb P P' n
+  refine ⟨m, ?_⟩
+  rintro x hx
+  obtain ⟨d, hd, rfl⟩ := AddSubgroup.mem_map.mp hx
+  rw [Submodule.mem_toAddSubgroup, locIdeal, ← Ideal.map_pow,
+    ← Ideal.span_eq (P'.I ^ m), Ideal.map_span] at hd
+  have key : ∀ (d : locSubring P' T s)
+      (_ : d ∈ Ideal.span (⇑(algebraMapD P' T s) ''
+        ((P'.I ^ m : Ideal P'.A₀) : Set P'.A₀))),
+      ∀ r ∈ AddSubgroup.closure (normalSet P' T s),
+        r * (d : Localization.Away s) ∈ locNhd P T s n := by
+    intro d hd
+    induction hd using Submodule.span_induction with
+    | mem d hdmem =>
+      obtain ⟨c', hc', rfl⟩ := hdmem
+      intro r hr
+      induction hr using AddSubgroup.closure_induction with
+      | mem y hy =>
+        obtain ⟨a, ha, τ, hτ, rfl⟩ := hy
+        have hprod : (⟨a, ha⟩ * c' : P'.A₀) ∈ P'.I ^ m :=
+          Ideal.mul_mem_left _ _ hc'
+        obtain ⟨c₀, hc₀, hval⟩ := hm ⟨⟨a, ha⟩ * c', hprod, rfl⟩
+        have hcast : (algebraMap A (Localization.Away s) a * τ) *
+            ((algebraMapD P' T s c' : locSubring P' T s) : Localization.Away s) =
+            algebraMap A (Localization.Away s) ((c₀ : P.A₀) : A) * τ := by
+          have h1 : ((algebraMapD P' T s c' : locSubring P' T s) :
+              Localization.Away s) =
+              algebraMap A (Localization.Away s) (c' : A) := rfl
+          rw [h1, hval]
+          show algebraMap A (Localization.Away s) a * τ *
+              algebraMap A (Localization.Away s) (c' : A) =
+            algebraMap A (Localization.Away s) (a * (c' : A)) * τ
+          rw [map_mul]
+          ring
+        rw [hcast]
+        exact term_mem_locNhd P T s n c₀ hc₀ hτ
+      | zero =>
+        rw [zero_mul]
+        exact zero_mem _
+      | add y z _ _ ihy ihz =>
+        rw [add_mul]
+        exact add_mem ihy ihz
+      | neg y _ ihy =>
+        rw [neg_mul]
+        exact neg_mem ihy
+    | zero =>
+      intro r hr
+      rw [show ((0 : locSubring P' T s) : Localization.Away s) = 0 from rfl,
+        mul_zero]
+      exact zero_mem _
+    | add d e _ _ ihd ihe =>
+      intro r hr
+      rw [show ((d + e : locSubring P' T s) : Localization.Away s) =
+        (d : Localization.Away s) + e from rfl, mul_add]
+      exact add_mem (ihd r hr) (ihe r hr)
+    | smul u d _ ihd =>
+      intro r hr
+      rw [show ((u • d : locSubring P' T s) : Localization.Away s) =
+        (u : Localization.Away s) * d from rfl, ← mul_assoc]
+      exact ihd (r * (u : Localization.Away s))
+        (mul_mem_closure_normalSet P' T s hr
+          (locSubring_subset_closure_normalSet P' T s u.2))
+  have h1 : (1 : Localization.Away s) ∈ AddSubgroup.closure (normalSet P' T s) :=
+    AddSubgroup.subset_closure ⟨1, one_mem _, 1, one_mem _, by rw [map_one, one_mul]⟩
+  have hfin := key d hd 1 h1
+  rwa [one_mul] at hfin
+
+/-- **Pod-independence of the localization topology** for a general rational datum
+(Wedhorn §6.1 pushed through the §8.1 construction; generalizes
+`locTopology_globalLocData_eq`). -/
+theorem locTopology_pod_eq (P P' : PairOfDefinition A) (T : Finset A) (s : A)
+    (h : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
+      divByS (↑b : A) s ∈ locSubring P T s)
+    (h' : ∃ N : ℕ, ∀ b : P'.A₀, b ∈ P'.I ^ N →
+      divByS (↑b : A) s ∈ locSubring P' T s) :
+    locTopology P T s h = locTopology P' T s h' := by
+  have h₁ := (locBasis P T s h).toRingFilterBasis.isTopologicalRing
+  have h₂ := (locBasis P' T s h').toRingFilterBasis.isTopologicalRing
+  refine IsTopologicalAddGroup.ext
+    (@IsTopologicalRing.to_topologicalAddGroup _ _ (locTopology P T s h) h₁)
+    (@IsTopologicalRing.to_topologicalAddGroup _ _ (locTopology P' T s h') h₂) ?_
+  refine Filter.HasBasis.ext ((locBasis P T s h).hasBasis_nhds_zero)
+    ((locBasis P' T s h').hasBasis_nhds_zero) ?_ ?_
+  · intro n _
+    obtain ⟨m, hm⟩ := locNhd_absorb P P' T s n
+    exact ⟨m, trivial, hm⟩
+  · intro n _
+    obtain ⟨m, hm⟩ := locNhd_absorb P' P T s n
+    exact ⟨m, trivial, hm⟩
+
+end PodIndependence
+
+section PodCongr
+
+private theorem podCongr_cross_continuous (P P' : PairOfDefinition E) (T : Finset E)
+    (s : E)
+    (h : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P T s)
+    (h' : ∃ N : ℕ, ∀ b : P'.A₀, b ∈ P'.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P' T s) :
+    @Continuous _ _ (⟨P, T, s, h⟩ : RationalLocData E).topology _
+      (⇑((⟨P', T, s, h'⟩ : RationalLocData E).coeRingHom)) := by
+  have heq : (⟨P, T, s, h⟩ : RationalLocData E).topology =
+      (⟨P', T, s, h'⟩ : RationalLocData E).topology :=
+    locTopology_pod_eq P P' T s h h'
+  rw [show (⟨P, T, s, h⟩ : RationalLocData E).topology = _ from heq]
+  exact @UniformSpace.Completion.continuous_coe _
+    (⟨P', T, s, h'⟩ : RationalLocData E).uniformSpace
+
+private noncomputable def podCongrHomAux (P P' : PairOfDefinition E) (T : Finset E)
+    (s : E)
+    (h : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P T s)
+    (h' : ∃ N : ℕ, ∀ b : P'.A₀, b ∈ P'.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P' T s) :
+    presheafValue (⟨P, T, s, h⟩ : RationalLocData E) →+*
+      presheafValue (⟨P', T, s, h'⟩ : RationalLocData E) := by
+  letI : UniformSpace (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).uniformSpace
+  letI : IsTopologicalRing (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom
+    ((⟨P', T, s, h'⟩ : RationalLocData E).coeRingHom)
+    (podCongr_cross_continuous P P' T s h h')
+
+private theorem podCongrHomAux_coe (P P' : PairOfDefinition E) (T : Finset E)
+    (s : E)
+    (h : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P T s)
+    (h' : ∃ N : ℕ, ∀ b : P'.A₀, b ∈ P'.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P' T s)
+    (l : Localization.Away s) :
+    podCongrHomAux P P' T s h h'
+        ((⟨P, T, s, h⟩ : RationalLocData E).coeRingHom l) =
+      (⟨P', T, s, h'⟩ : RationalLocData E).coeRingHom l := by
+  letI : UniformSpace (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).uniformSpace
+  letI : IsTopologicalRing (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe _ _ l
+
+private theorem podCongrHomAux_continuous (P P' : PairOfDefinition E) (T : Finset E)
+    (s : E)
+    (h : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P T s)
+    (h' : ∃ N : ℕ, ∀ b : P'.A₀, b ∈ P'.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P' T s) :
+    Continuous (podCongrHomAux P P' T s h h') := by
+  letI : UniformSpace (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
+private theorem podCongrHomAux_roundtrip (P P' : PairOfDefinition E) (T : Finset E)
+    (s : E)
+    (h : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P T s)
+    (h' : ∃ N : ℕ, ∀ b : P'.A₀, b ∈ P'.I ^ N →
+      divByS (↑b : E) s ∈ locSubring P' T s)
+    (x : presheafValue (⟨P, T, s, h⟩ : RationalLocData E)) :
+    podCongrHomAux P' P T s h' h (podCongrHomAux P P' T s h h' x) = x := by
+  letI : UniformSpace (Localization.Away s) :=
+    (⟨P, T, s, h⟩ : RationalLocData E).uniformSpace
+  have hdense : DenseRange (⇑((⟨P, T, s, h⟩ : RationalLocData E).coeRingHom)) :=
+    @UniformSpace.Completion.denseRange_coe _
+      (⟨P, T, s, h⟩ : RationalLocData E).uniformSpace
+  have hfun : ⇑(podCongrHomAux P' P T s h' h) ∘ ⇑(podCongrHomAux P P' T s h h') =
+      (id : presheafValue (⟨P, T, s, h⟩ : RationalLocData E) → _) := by
+    refine hdense.equalizer ?_ continuous_id ?_
+    · exact (podCongrHomAux_continuous P' P T s h' h).comp
+        (podCongrHomAux_continuous P P' T s h h')
+    · funext l
+      show podCongrHomAux P' P T s h' h (podCongrHomAux P P' T s h h'
+        ((⟨P, T, s, h⟩ : RationalLocData E).coeRingHom l)) =
+        (⟨P, T, s, h⟩ : RationalLocData E).coeRingHom l
+      rw [podCongrHomAux_coe P P' T s h h' l]
+      exact podCongrHomAux_coe P' P T s h' h l
+  exact congr_fun hfun x
+
+end PodCongr
+
 /-- Pod-independence of the completed rational localization for Tate rings: two data
 with the same `(T, s)` have canonically isomorphic presheaf values.  (Any two rings of
 definition of a Tate ring are commensurable; search first —
 `CompletionModelIndependence` provides the global case.) -/
 noncomputable def podCongrEquiv (D D' : RationalLocData E) (hT : D.T = D'.T)
-    (hs : D.s = D'.s) : presheafValue D ≃+* presheafValue D' := by sorry
+    (hs : D.s = D'.s) : presheafValue D ≃+* presheafValue D' := by
+  obtain ⟨P, T, s, h⟩ := D
+  obtain ⟨P', T', s', h'⟩ := D'
+  dsimp only at hT hs
+  subst hT
+  subst hs
+  exact
+    { toFun := podCongrHomAux P P' T s h h'
+      invFun := podCongrHomAux P' P T s h' h
+      left_inv := podCongrHomAux_roundtrip P P' T s h h'
+      right_inv := podCongrHomAux_roundtrip P' P T s h' h
+      map_mul' := map_mul _
+      map_add' := map_add _ }
 
 theorem podCongrEquiv_continuous (D D' : RationalLocData E) (hT : D.T = D'.T)
-    (hs : D.s = D'.s) : Continuous (podCongrEquiv D D' hT hs) := by sorry
+    (hs : D.s = D'.s) : Continuous (podCongrEquiv D D' hT hs) := by
+  obtain ⟨P, T, s, h⟩ := D
+  obtain ⟨P', T', s', h'⟩ := D'
+  dsimp only at hT hs
+  subst hT
+  subst hs
+  exact podCongrHomAux_continuous P P' T s h h'
 
 theorem podCongrEquiv_symm_continuous (D D' : RationalLocData E) (hT : D.T = D'.T)
-    (hs : D.s = D'.s) : Continuous (podCongrEquiv D D' hT hs).symm := by sorry
+    (hs : D.s = D'.s) : Continuous (podCongrEquiv D D' hT hs).symm := by
+  obtain ⟨P, T, s, h⟩ := D
+  obtain ⟨P', T', s', h'⟩ := D'
+  dsimp only at hT hs
+  subst hT
+  subst hs
+  exact podCongrHomAux_continuous P' P T s h' h
 
 theorem podCongrEquiv_canonicalMap (D D' : RationalLocData E) (hT : D.T = D'.T)
     (hs : D.s = D'.s) (x : E) :
-    podCongrEquiv D D' hT hs (D.canonicalMap x) = D'.canonicalMap x := by sorry
+    podCongrEquiv D D' hT hs (D.canonicalMap x) = D'.canonicalMap x := by
+  obtain ⟨P, T, s, h⟩ := D
+  obtain ⟨P', T', s', h'⟩ := D'
+  dsimp only at hT hs
+  subst hT
+  subst hs
+  exact podCongrHomAux_coe P P' T s h h'
+    (algebraMap E (Localization.Away s) x)
 
 /-- The bundled data of a small perturbation of a rational datum
 ([WP] lem:small-perturbation): a norm-scaling pseudouniformizer `t`, a rational datum

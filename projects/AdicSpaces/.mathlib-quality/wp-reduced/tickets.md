@@ -280,7 +280,25 @@ propext/Classical.choice/Quot.sound) before marking done.
   Sources: [WP] 1286–1297, 917–926.
 
 ### [W12] Perturbation.lean I — data, rationality, subsets
-- Status: open | File: WP/Perturbation.lean | Depends: W3, W4 | Parallel: with W9-W11
+- Status: in_progress | File: WP/Perturbation.lean | Depends: W3, W4 | Parallel: with W9-W11
+- Progress 2026-07-29: SUB-TICKET W12a (pod-independence, spawned per Tier A2)
+  COMPLETE: `locTopology_pod_eq` (general-datum pod-independence — NEW math, no
+  repo precedent; the global case was CompletionModelIndependence).  Route: every
+  element of a `P'`-basic nbhd is a ℤ-combination of `φ(a')·τ` (a' ∈ I'-power, τ a
+  T/s-monomial) — `tsMonoid` + `normalSet` + AddSubgroup-closure normal form (the
+  Subring.closure-mul case via a double AddSubgroup.closure_induction);
+  A-level absorption from the two `hasBasis_nhds_zero`; the strengthened
+  span-induction predicate `∀ r ∈ closure(normalSet), r·d ∈ locNhd P n` makes the
+  smul-case compositional (multiply r by u.val, stay in the closure).  Then
+  `podCongrEquiv` + continuous/symm_continuous/canonicalMap all by the
+  compareHom pattern (extensionHom across equal topologies + DenseRange.equalizer),
+  with the RationalLocData-destructure/subst/iota trick for the laws (obtain both,
+  dsimp at hT hs, subst — the record projections iota-reduce cleanly).
+  GOTCHAS: AddSubgroup.closure_induction case names are mem/zero/add/neg (NOT
+  one/mul/inv); `Submodule.mem_toAddSubgroup` doesn't exist — membership in
+  `.toAddSubgroup` is accepted defeq (pass the Ideal-membership directly).
+  REMAINING: datum/datum_T/datum_s, datum_isRational, rationalOpen_datum,
+  exists_integral_bezout.
 - Decls: `podCongrEquiv` (+3 laws), `PerturbSetup.datum` (+`datum_T`, `datum_s`),
   `datum_isRational`, `rationalOpen_datum`, `exists_integral_bezout`.
 - Sketch: podCongr — SEARCH FIRST (`CompletionModelIndependence`,
