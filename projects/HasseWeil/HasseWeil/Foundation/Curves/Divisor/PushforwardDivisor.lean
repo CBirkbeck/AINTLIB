@@ -569,6 +569,19 @@ private theorem degree_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPoi
   have hcoh : @Module.finrank C₂.FunctionField C₁.FunctionField _ _
       (FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField).toModule = φ.degree :=
     finrank_functionField_eq_degree φ cd
+  -- `relNorm_algebraMap`'s exponent is the *coordinate-ring* `finrank`, so pull `hcoh` down the
+  -- fraction-field tower with `IsFractionRing.finrank_eq`.
+  letI algFF : Algebra C₂.FunctionField C₁.FunctionField :=
+    FractionRing.liftAlgebra C₂.CoordinateRing C₁.FunctionField
+  haveI towerFF : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField :=
+    FractionRing.isScalarTower_liftAlgebra C₂.CoordinateRing C₁.FunctionField
+  haveI towerCR : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
+  have hcohCR : @Module.finrank C₂.CoordinateRing C₁.CoordinateRing _ _ modCR = φ.degree :=
+    (IsFractionRing.finrank_eq C₂.CoordinateRing C₂.FunctionField C₁.CoordinateRing
+      C₁.FunctionField).symm.trans hcoh
   have hfact0 := Ideal.map_algebraMap_eq_finsetProd_pow (R := C₁.CoordinateRing)
     (S := C₂.CoordinateRing) (p := p) hp0
   have hfact : Ideal.map (algebraMap C₂.CoordinateRing C₁.CoordinateRing) p =
@@ -578,7 +591,7 @@ private theorem degree_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPoi
     obtain ⟨hP'_prime, hP'_over⟩ := Set.mem_toFinset.mp hP'
     rw [Ideal.ramificationIdx'_eq_ramificationIdx p P' hp0]
   have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
-  rw [Ideal.relNorm_algebraMap C₁.CoordinateRing p, hcoh, map_prod] at hrel
+  rw [Ideal.relNorm_algebraMap C₁.CoordinateRing p, hcohCR, map_prod] at hrel
   have hrhs : ∏ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset,
       Ideal.relNorm C₂.CoordinateRing (P' ^ p.ramificationIdx' P') =
       p ^ (∑ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, sfn P' * p.ramificationIdx' P') := by

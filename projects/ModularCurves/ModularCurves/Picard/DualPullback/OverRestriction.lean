@@ -186,7 +186,6 @@ theorem overRestrictionStage2_app_apply
   dsimp only [overRestrictionStage2, restrictOpenCompMap,
     restrictOpenCompIso, overMapCompOverEquiv, Iso.trans_hom,
     NatTrans.comp_app]
-  simp only [Iso.trans_hom, NatTrans.comp_app]
   erw [sheafOfModules_comp_app_apply]
   erw [sheafOfModules_comp_app_apply]
   erw [sheafOfModules_comp_app_apply]

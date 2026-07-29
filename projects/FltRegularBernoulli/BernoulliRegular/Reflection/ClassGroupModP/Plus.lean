@@ -123,24 +123,15 @@ key composition identity `relNorm (I.map (algebraMap (𝓞 K⁺) (𝓞 K))) =
 I ^ [K : K⁺]` is the shipped mathlib `Ideal.relNorm_algebraMap`. -/
 
 omit [IsCMField K] in
-attribute [local instance] FractionRing.liftAlgebra in
-/-- **`finrank` of the fraction-ring extension `FracRing(𝓞 K⁺) → FracRing(𝓞 K)`
-equals `[K : K⁺] = 2`.** -/
-private theorem finrank_fractionRing_ringOfIntegers_K_over_Kplus
+/-- **`finrank` of the ring-of-integers extension `𝓞 K⁺ → 𝓞 K` equals `[K : K⁺] = 2`.**
+
+This is the exponent `Ideal.relNorm_algebraMap` reports; `IsFractionRing.finrank_eq` identifies it
+with the field degree `[K : K⁺]`, which is `2` by `finrank_K_over_Kplus`. -/
+private theorem finrank_ringOfIntegers_K_over_Kplus
     [NumberField.IsCMField K] :
-    Module.finrank
-      (FractionRing (𝓞 (NumberField.maximalRealSubfield K)))
-      (FractionRing (𝓞 K)) = 2 := by
-  rw [Algebra.finrank_eq_of_equiv_equiv
-    (FractionRing.algEquiv (𝓞 (NumberField.maximalRealSubfield K))
-      (NumberField.maximalRealSubfield K)).toRingEquiv
-    (FractionRing.algEquiv (𝓞 K) K).toRingEquiv]
-  · exact finrank_K_over_Kplus K
-  · ext z
-    exact IsFractionRing.algEquiv_commutes
-      (FractionRing.algEquiv (𝓞 (NumberField.maximalRealSubfield K))
-        (NumberField.maximalRealSubfield K))
-      (FractionRing.algEquiv (𝓞 K) K) z
+    Module.finrank (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) = 2 :=
+  (IsFractionRing.finrank_eq (𝓞 (NumberField.maximalRealSubfield K))
+    (NumberField.maximalRealSubfield K) (𝓞 K) K).symm.trans (finrank_K_over_Kplus K)
 
 omit [IsCMField K] in
 /-- **`Ideal.relNorm` of a non-zero ideal is non-zero.** Wrapper for
@@ -164,7 +155,7 @@ private theorem relNorm_algebraMap_eq_sq
       I ^ 2 := by
   rw [Ideal.relNorm_algebraMap]
   congr 1
-  exact finrank_fractionRing_ringOfIntegers_K_over_Kplus K
+  exact finrank_ringOfIntegers_K_over_Kplus K
 
 omit [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
 /-- **SP-2a UNCONDITIONAL via the norm trick.**
@@ -233,9 +224,9 @@ theorem classGroupMap_modP_injective_unconditional [NumberField.IsCMField K]
     simp only [map_mul, map_pow, Ideal.relNorm_singleton,
       Ideal.relNorm_algebraMap] at h_relNorm_eq
     -- Now h_relNorm_eq : span {intNorm x} * (relNorm J)^p =
-    --                    span {intNorm y} * I^(finrank (FracRing _) (FracRing _))
+    --                    span {intNorm y} * I^(finrank (𝓞 K⁺) (𝓞 K))
     -- Use finrank = 2 to convert.
-    rw [finrank_fractionRing_ringOfIntegers_K_over_Kplus K] at h_relNorm_eq
+    rw [finrank_ringOfIntegers_K_over_Kplus K] at h_relNorm_eq
     -- Convert mk0 I ^ 2 and mk0 ⟨...⟩ ^ p into mk0 of powers using MonoidHom.map_pow.
     rw [← map_pow ClassGroup.mk0 I 2,
         ← map_pow ClassGroup.mk0

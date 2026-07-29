@@ -444,7 +444,7 @@ private theorem norm_eq_prod_real_emb_mul_prod_complex {K : Type*} [Field K] [Nu
         · rw [Ne, eq_comm, ← ComplexEmbedding.isReal_iff, ← isReal_iff]; exact hw
     have hemb : (algebraMap ℚ ℂ) (Algebra.norm ℚ y) = ∏ ψ : K →+* ℂ, ψ y := by
       rw [Algebra.norm_eq_prod_embeddings ℚ ℂ y]
-      exact (Fintype.prod_equiv RingHom.equivRatAlgHom (fun ψ : K →+* ℂ ↦ ψ y)
+      exact (Fintype.prod_equiv (RingHom.equivRatAlgHom K ℂ) (fun ψ : K →+* ℂ ↦ ψ y)
         (fun σ : K →ₐ[ℚ] ℂ ↦ σ y) (fun ψ ↦ by simp [RingHom.equivRatAlgHom_apply])).symm
     rw [show ((Algebra.norm ℚ y : ℝ) : ℂ) = (algebraMap ℚ ℂ) (Algebra.norm ℚ y) by
         rw [eq_ratCast (algebraMap ℚ ℂ), Complex.ofReal_ratCast], hemb,

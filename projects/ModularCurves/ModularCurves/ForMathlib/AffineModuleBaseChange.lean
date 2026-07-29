@@ -718,7 +718,6 @@ private theorem affinePullbackΓCoreIso_hom
   dsimp [affinePullbackΓCoreIso, affinePullbackΓNatTrans,
     affineUnitΓNatTrans, affineTildePullbackΓNatTrans,
     affineCounitPullbackΓNatTrans]
-  rfl
 
 private theorem affinePullbackΓCoreIso_naturality
     {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X)

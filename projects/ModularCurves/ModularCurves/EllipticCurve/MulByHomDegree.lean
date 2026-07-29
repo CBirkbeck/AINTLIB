@@ -1454,8 +1454,8 @@ lemma towerBC {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
   haveI hInt : Algebra.IsIntegral ↑R ↑S := Algebra.IsIntegral.of_finite _ _
   haveI hAlgebraic : Algebra.IsAlgebraic ↑R ↑S := Algebra.IsIntegral.isAlgebraic
   -- the core: finrank over the fraction fields = finrank over the opens
-  have hcore := Algebra.IsAlgebraic.finrank_of_isFractionRing
-    (R := ↑R) (R' := ((projModel W).functionField : CommRingCat)) (S := ↑S) (S' := KE)
+  have hcore := IsFractionRing.finrank_eq
+    (A := ↑R) (K := ((projModel W).functionField : CommRingCat)) (B := ↑S) (L := KE)
   rw [← hcore]
   -- the degree: `modKpMKE`-finrank transports along `e` to the ψ-module finrank = degree
   have hC := Algebra.finrank_eq_of_equiv_equiv

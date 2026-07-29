@@ -661,9 +661,10 @@ theorem Modules.globalSections_module_finite_of_generatingSections_of_isAffine
   have hsurj : Function.Surjective (f.val.app (op ⊤)).hom := by
     exact @Modules.isQuasicoherent_surjective_of_epi X inferInstance
       L M f inferInstance inferInstance hf
-  exact @Module.Finite.of_surjective
-    _ _ _ _ _ _ _ _ _ _ _ RingHomSurjective.ids hL
-    (f.val.app (op ⊤)).hom hsurj
+  -- bump: `Module.Finite.of_surjective` now takes the finiteness as an instance-implicit
+  -- `[hM]` and the semilinear map next, so the old positional `@`-application with counted
+  -- underscores no longer lines up (`RingHomSurjective.ids` landed in `hM`'s slot).
+  exact Module.Finite.of_surjective (hM := hL) (f.val.app (op ⊤)).hom hsurj
 
 private theorem Modules.module_finite_restrict_of_over_generators
     (M : X.Modules) [M.IsQuasicoherent]

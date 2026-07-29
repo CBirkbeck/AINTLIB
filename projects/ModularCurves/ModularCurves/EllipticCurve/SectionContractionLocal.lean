@@ -585,8 +585,8 @@ private theorem sectionContractionTail_tensorSection
         pairMap ≫ e.hom := by
     dsimp only [pairMap, e, tensorUnitStructureIso, Iso.trans_hom,
       tensorIso_hom, Iso.refl_hom, Iso.symm_hom]
-    rw [Iso.trans_hom, tensorIso_hom, Iso.refl_hom, Iso.symm_hom]
-    simp only [MonoidalCategory.id_tensorHom]
+    -- `tensorIso_hom` is no longer a `dsimp` lemma, so the `⊗ᵢ` survives the `dsimp only`.
+    simp only [tensorIso_hom, Iso.refl_hom, Iso.symm_hom, MonoidalCategory.id_tensorHom]
   have hmap := tensorSection_map (𝟙 M) pairing U x lp
   change pairMap.val.app (.op U) source = _ at hmap
   have hidM : ((𝟙 M : M ⟶ M).val.app (.op U)) x = x := rfl

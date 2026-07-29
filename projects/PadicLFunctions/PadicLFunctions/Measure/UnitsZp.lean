@@ -80,14 +80,14 @@ noncomputable def extendByZero : C(ℤ_[p]ˣ, ℤ_[p]) →ₗ[ℤ_[p]] C(ℤ_[p]
       intro x
       by_cases hx : IsUnit x
       · refine ContinuousOn.continuousAt ?_ ((isClopen_units p).isOpen.mem_nhds hx)
-        rw [continuousOn_iff_continuous_restrict]
-        have hres : Set.restrict {x : ℤ_[p] | IsUnit x}
+        rw [continuousOn_iff_continuous_domRestrict]
+        have hres : Set.domRestrict {x : ℤ_[p] | IsUnit x}
               (fun x => if h : IsUnit x then g h.unit else 0)
             = ⇑g ∘ ⇑(unitsHomeo p).symm := by
           funext y
           rcases y with ⟨y, hy⟩
           have hy' : IsUnit y := hy
-          simp only [Set.restrict_apply, Function.comp_apply, dif_pos hy']
+          simp only [Set.domRestrict_apply, Function.comp_apply, dif_pos hy']
           rfl
         rw [hres]
         exact (map_continuous g).comp (unitsHomeo p).symm.continuous
