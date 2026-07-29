@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.TensorProduct.RightExactness
 import Mathlib.LinearAlgebra.TensorProduct.Tower
 import Mathlib.RingTheory.Flat.EquationalCriterion
 import Mathlib.RingTheory.Flat.Equalizer
+import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 import Mathlib.RingTheory.LocalRing.Module
 import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 import Mathlib.RingTheory.Support
@@ -719,6 +720,21 @@ theorem LinearMap.baseChange_baseChange_exact_iff
     ext x
     simp [eQ, eT]
   exact (Function.Exact.iff_of_ladder_linearEquiv hf hg).symm
+
+/-- Exactness after base change can be checked after a further faithfully flat
+scalar extension. -/
+theorem LinearMap.baseChange_exact_iff_of_faithfullyFlat
+    (A : Type*) (B : Type*)
+    [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] [Algebra A B]
+    [IsScalarTower R A B] [Module.FaithfullyFlat A B]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) :
+    Function.Exact (f.baseChange A) (g.baseChange A) ↔
+      Function.Exact (f.baseChange B) (g.baseChange B) := by
+  rw [← LinearMap.baseChange_baseChange_exact_iff A B f g]
+  simpa only [LinearMap.baseChange_eq_ltensor] using
+    (Module.FaithfullyFlat.lTensor_exact_iff_exact A B
+      (f.baseChange A) (g.baseChange A)).symm
 
 /-- An exact pair remains exact after arbitrary algebra base change when the target and
 the cokernel of the second map are flat. -/
