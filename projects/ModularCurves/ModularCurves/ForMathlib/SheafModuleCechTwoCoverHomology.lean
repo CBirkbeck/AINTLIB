@@ -59,6 +59,37 @@ noncomputable def moduleCechTwoCoverHomologyOneIso
   exact isoOfQuasiIsoAt vEdge 1 ≪≫
     (isoOfQuasiIsoAt hEdge 1).symm
 
+/-- The two native Cech complexes are exact in degree one simultaneously
+under the hypotheses of the two-cover comparison. -/
+theorem moduleCechTwoCover_exactAt_one_iff
+    (hU : ⨆ i, U i = ⊤)
+    (hV : ⨆ i, V i = ⊤)
+    (hrow : ((cechComplexFunctor V).obj
+      (moduleCechTerm F U 0).obj).ExactAt 1)
+    (hcol : ∀ i : Fin 1 → κ,
+      (moduleCechShortComplexApp F U 0
+        (∏ᶜ fun k : Fin 1 => V (i k))).Exact) :
+    ((cechComplexFunctor V).obj F.obj).ExactAt 1 ↔
+      ((cechComplexFunctor U).obj F.obj).ExactAt 1 := by
+  let hEdge :=
+    (moduleCechTwoCoverBicomplex F U V).totalUpNatHorizontalEdge
+      ((cechComplexFunctor U).obj F.obj)
+      (moduleCechTwoCoverHorizontalAugmentation F U V)
+      (moduleCechTwoCoverHorizontalAugmentation_comm F U V)
+      (moduleCechTwoCoverHorizontalAugmentation_comp_d F U V)
+  let vEdge :=
+    (moduleCechTwoCoverBicomplex F U V).totalUpNatVerticalEdge
+      ((cechComplexFunctor V).obj F.obj)
+      (moduleCechTwoCoverVerticalAugmentation F U V).f
+      (moduleCechTwoCoverVerticalAugmentation_comm F U V)
+      (moduleCechTwoCoverVerticalAugmentation_comp_d F U V)
+  letI : QuasiIsoAt hEdge 1 :=
+    moduleCechTwoCoverHorizontalEdge_quasiIsoAt_one F U V hV hrow
+  letI : QuasiIsoAt vEdge 1 :=
+    moduleCechTwoCoverVerticalEdge_quasiIsoAt_one F U V hU hcol
+  exact (exactAt_iff_of_quasiIsoAt vEdge 1).trans
+    (exactAt_iff_of_quasiIsoAt hEdge 1).symm
+
 /-- Finite generation of native Cech homology in degree one is independent of
 the chosen cover under the hypotheses of the two-cover comparison. -/
 theorem moduleCechTwoCover_homology_one_module_finite
