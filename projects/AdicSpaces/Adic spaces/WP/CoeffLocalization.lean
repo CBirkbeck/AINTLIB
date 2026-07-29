@@ -2076,6 +2076,23 @@ theorem exists_head_approx_finset (ϖ : Uniformizer K) (S : Finset (WPA K w))
     _ = ‖ϖ.val‖ ^ m := mul_one _
 
 variable {K w} in
+/-- Uniform head approximation at every sufficiently large stage (the
+`wpHeadSupport_mono` upcast of `exists_head_approx_finset`; shared W21/W22
+infrastructure — a finite cover needs ONE common stage). -/
+theorem exists_head_approx_finset_all (ϖ : Uniformizer K)
+    (S : Finset (WPA K w)) (m : ℕ) (hS1 : ∀ x ∈ S, ‖x‖ ≤ 1) :
+    ∃ N₀ : ℕ, ∀ M : ℕ, N₀ ≤ M → ∃ g : WPA K w → WPHead K w M,
+      ∀ x ∈ S, ‖x - headIncl K w M (g x)‖ ≤ ‖ϖ.val‖ ^ m := by
+  obtain ⟨N, g, hg⟩ := exists_head_approx_finset ϖ S m hS1
+  refine ⟨N, fun M hM => ⟨fun x =>
+    Subring.inclusion (wpHeadSupport_mono (K := K) (w := w) hM) (g x),
+    fun x hx => ?_⟩⟩
+  rw [show headIncl K w M (Subring.inclusion
+      (wpHeadSupport_mono (K := K) (w := w) hM) (g x)) =
+    headIncl K w N (g x) from rfl]
+  exact hg x hx
+
+variable {K w} in
 /-- **Finite-head presentation of every rational localization**
 ([WP] cor:finite-head-presentation: perturb the datum into a head via density of the
 heads and lem:small-perturbation; the retracted Bezout relation makes the perturbed
