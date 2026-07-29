@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».WP.CoeffLocalization
 import «Adic spaces».WP.Reduced
 import «Adic spaces».Uniform
+import «Adic spaces».FJP.FiniteJetChart
 
 /-!
 # The bad chart `ℬ = 𝒜⟨W/ϖ⟩` ([WP] §6.2)
@@ -889,6 +890,101 @@ theorem isDomain_chart (ϖ : Uniformizer K)
 /-! ### `ℬ` is not uniform ([WP] prop:weighted-chart-domain-nonuniform, second half) -/
 
 variable {K w} in
+/-- The tail generator `δ_n = U_n` at stage `0` (`n ≥ 1`). -/
+noncomputable def tailDelta (n : ℕ) (hn : 1 ≤ n) : TailIdx 0 :=
+  ⟨Finsupp.single n 1, fun m hm => by
+    rw [Finsupp.single_apply, if_neg (by omega)]⟩
+
+/-- Power-boundedness from a uniform norm bound on all powers. -/
+theorem isPowerBounded_of_forall_norm_le {R : Type*} [SeminormedCommRing R]
+    {x : R} {C : ℝ} (hC : 0 < C) (h : ∀ n : ℕ, ‖x ^ n‖ ≤ C) :
+    TopologicalRing.IsPowerBounded x := by
+  intro U hU
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  refine ⟨Metric.ball 0 (ε / C), Metric.ball_mem_nhds 0 (by positivity), ?_⟩
+  rintro z ⟨s, ⟨n, rfl⟩, y, hy, rfl⟩
+  rw [Metric.mem_ball, dist_zero_right] at hy
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right]
+  calc ‖x ^ n * y‖ ≤ ‖x ^ n‖ * ‖y‖ := norm_mul_le _ _
+    _ ≤ C * ‖y‖ := mul_le_mul_of_nonneg_right (h n) (norm_nonneg y)
+    _ < C * (ε / C) := mul_lt_mul_of_pos_left hy hC
+    _ = ε := mul_div_cancel₀ _ (ne_of_gt hC)
+
+variable {K w} in
+/-- Norms in the chart head model are computed in `K⟨X⟩`. -/
+theorem norm_qHead_eq (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (x : QHead (chartHeadDatum (w := w) ϖ)) :
+    ‖x‖ = ‖chartFwd (K := K) (w := w) ϖ x‖ :=
+  (chartQHeadEquiv_norm ϖ hK₀ x).symm
+
+variable {K w} in
+/-- The chart head model has multiplicative norm (transport of the Gauss norm). -/
+theorem norm_qHead_mul (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (x y : QHead (chartHeadDatum (w := w) ϖ)) :
+    ‖x * y‖ = ‖x‖ * ‖y‖ := by
+  rw [norm_qHead_eq ϖ hK₀, norm_qHead_eq ϖ hK₀ x, norm_qHead_eq ϖ hK₀ y, map_mul]
+  exact norm_restricted_mul_general (fun a b => norm_mul a b) _ _
+
+variable {K w} in
+theorem norm_qHead_one (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
+    ‖(1 : QHead (chartHeadDatum (w := w) ϖ))‖ = 1 := by
+  rw [norm_qHead_eq ϖ hK₀, map_one]
+  exact norm_one
+
+variable {K w} in
+theorem norm_qHead_pow (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (x : QHead (chartHeadDatum (w := w) ϖ)) (e : ℕ) :
+    ‖x ^ e‖ = ‖x‖ ^ e := by
+  induction e with
+  | zero => rw [pow_zero, pow_zero]; exact norm_qHead_one ϖ hK₀
+  | succ k ih => rw [pow_succ, pow_succ, norm_qHead_mul ϖ hK₀, ih]
+
+variable {K w} in
+theorem norm_qHeadConst (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) (a : K) :
+    ‖headConst (chartHeadDatum (w := w) ϖ) (constHead K w 0 a)‖ = ‖a‖ := by
+  rw [norm_qHead_eq ϖ hK₀,
+    show headConst (chartHeadDatum (w := w) ϖ) (constHead K w 0 a) =
+      Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+        (FiniteJet.GraphKoszul.polyToP
+          (MvPolynomial.C (constHead K w 0 a))) from rfl,
+    chartFwd_mk, chartFwdP_C, chartCoeff_constHead]
+  exact FiniteJet.GraphKoszul.norm_tP a (fun z => norm_mul a z)
+
+variable {K w} in
+theorem norm_rhoQVal (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
+    ‖(rhoQ (chartHeadDatum (w := w) ϖ)).val‖ = ‖ϖ.val‖ := by
+  rw [norm_qHead_eq ϖ hK₀,
+    show (rhoQ (chartHeadDatum (w := w) ϖ)).val =
+      Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+        (FiniteJet.GraphKoszul.polyToP
+          (MvPolynomial.C (WaHead K w 0))) from rfl,
+    chartFwd_mk, chartFwdP_C, chartCoeff_WaHead, map_mul,
+    FiniteJet.GraphKoszul.norm_tP_mul ϖ.val (fun z => norm_mul ϖ.val z),
+    norm_polyToP_X1 (K := K), mul_one]
+
+variable {K w} in
+theorem norm_one_tailC0_le (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
+    ‖(1 : TailC0 w 0 (QHead (chartHeadDatum (w := w) ϖ))
+      (rhoQ (chartHeadDatum (w := w) ϖ)))‖ ≤ 1 := by
+  rw [TailC0.norm_eq_iSup_coeff]
+  refine ciSup_le fun τ => ?_
+  rw [show TailC0.coeff τ (1 : TailC0 w 0 (QHead (chartHeadDatum (w := w) ϖ))
+    (rhoQ (chartHeadDatum (w := w) ϖ))) =
+    (if τ = 0 then 1 else 0) from TailC0.one_val τ]
+  split_ifs
+  · exact le_of_eq (norm_qHead_one ϖ hK₀)
+  · rw [norm_zero]
+    exact zero_le_one
+
+variable {K w} in
 /-- The `T_n` family is power-bounded but unbounded in the `TailC0` chart model
 ([WP] eq:Tn-power-norms: `‖T_n^{2r}‖ = 1`, `‖T_n^{2r+1}‖ = |ϖ|^{−n}`; "The family
 `(T_n)` is not bounded: if `ϖ^N T_n ∈ ℬ₀` then … `N ≥ n`").  Requires the weight
@@ -897,7 +993,84 @@ theorem not_isUniform_chartModel (hwu : ∀ M : ℕ, ∃ n : ℕ, 1 ≤ n ∧ M 
     (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
     ¬ IsUniform
       (TailC0 w 0 (QHead (chartHeadDatum (w := w) ϖ))
-        (rhoQ (chartHeadDatum ϖ))) := by sorry
+        (rhoQ (chartHeadDatum ϖ))) := by
+  classical
+  intro hU
+  obtain ⟨V, hV, hSV⟩ := hU.isBounded_powerBounded (Metric.ball 0 1)
+    (Metric.ball_mem_nhds 0 one_pos)
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp hV
+  obtain ⟨c, hc0, hcδ⟩ := NormedField.exists_norm_lt (α := K) hδ0
+  obtain ⟨m₀, hm₀⟩ := exists_pow_lt_of_lt_one hc0 ϖ.norm_val_lt_one
+  obtain ⟨n, hn1, hnw⟩ := hwu m₀
+  set qc := headConst (chartHeadDatum (w := w) ϖ) (constHead K w 0 c) with hqc
+  set an := headConst (chartHeadDatum (w := w) ϖ)
+    (constHead K w 0 ((ϖ.val ^ w n)⁻¹)) with han
+  set Tn := TailC0.single (w := w) (ρ := rhoQ (chartHeadDatum (w := w) ϖ))
+    (tailDelta n hn1) an with hTn
+  have hδ1 : (tailDelta n hn1).1 = Finsupp.single n 1 := rfl
+  have hδ2 : (tailDelta n hn1 + tailDelta n hn1).1 = Finsupp.single n 2 := by
+    rw [TailIdx.add_val, hδ1, ← Finsupp.single_add]
+  have hE : wpWeight w (tailDelta n hn1).1 + wpWeight w (tailDelta n hn1).1 -
+      wpWeight w (tailDelta n hn1 + tailDelta n hn1).1 = 2 * w n := by
+    rw [hδ1, hδ2, wpWeight_single, wpWeight_single,
+      if_pos ⟨by omega, by omega⟩, if_neg (fun hc => absurd hc.1 (by decide))]
+    omega
+  have hT2 : Tn * Tn = TailC0.single (tailDelta n hn1 + tailDelta n hn1)
+      ((rhoQ (chartHeadDatum (w := w) ϖ)).val ^
+        (wpWeight w (tailDelta n hn1).1 + wpWeight w (tailDelta n hn1).1 -
+          wpWeight w (tailDelta n hn1 + tailDelta n hn1).1) * (an * an)) := by
+    rw [hTn, TailC0.single_mul_single]
+  have hT2norm : ‖Tn * Tn‖ = 1 := by
+    rw [hT2, TailC0.norm_single, norm_qHead_mul ϖ hK₀, norm_qHead_pow ϖ hK₀,
+      norm_rhoQVal ϖ hK₀, hE, norm_qHead_mul ϖ hK₀, han,
+      norm_qHeadConst ϖ hK₀, norm_inv, norm_pow]
+    have hne : ‖ϖ.val‖ ^ w n ≠ 0 := ne_of_gt (pow_pos ϖ.norm_val_pos _)
+    field_simp
+    ring
+  have hTnnorm : ‖Tn‖ = (‖ϖ.val‖ ^ w n)⁻¹ := by
+    rw [hTn, TailC0.norm_single, han, norm_qHeadConst ϖ hK₀, norm_inv, norm_pow]
+  have hTnpow : ∀ k : ℕ, ‖Tn ^ k‖ ≤ max 1 ((‖ϖ.val‖ ^ w n)⁻¹) := by
+    intro k
+    induction k using Nat.twoStepInduction with
+    | zero => rw [pow_zero]; exact le_max_of_le_left (norm_one_tailC0_le ϖ hK₀)
+    | one => rw [pow_one]; exact le_max_of_le_right (le_of_eq hTnnorm)
+    | more k ih _ =>
+        rw [pow_succ, pow_succ, mul_assoc]
+        refine le_trans (norm_mul_le _ _) ?_
+        rw [hT2norm, mul_one]
+        exact ih
+  have hTnpb : Tn ∈ powerBoundedSubring (TailC0 w 0
+      (QHead (chartHeadDatum (w := w) ϖ)) (rhoQ (chartHeadDatum (w := w) ϖ))) :=
+    isPowerBounded_of_forall_norm_le
+      (lt_of_lt_of_le one_pos (le_max_left _ _)) hTnpow
+  set v := TailC0.ofHead (w := w) (ρ := rhoQ (chartHeadDatum (w := w) ϖ)) qc
+    with hv
+  have hvV : v ∈ V := by
+    refine hball ?_
+    rw [Metric.mem_ball, dist_zero_right, hv, TailC0.norm_ofHead, hqc,
+      norm_qHeadConst ϖ hK₀]
+    exact hcδ
+  have hmem := hSV (Set.mul_mem_mul hTnpb hvV)
+  rw [Metric.mem_ball, dist_zero_right] at hmem
+  have hprod : Tn * v = TailC0.single (tailDelta n hn1) (an * qc) := by
+    rw [hTn, hv, show TailC0.ofHead (w := w)
+        (ρ := rhoQ (chartHeadDatum (w := w) ϖ)) qc =
+      TailC0.single 0 qc from rfl, TailC0.single_mul_single,
+      show tailDelta n hn1 + 0 = tailDelta n hn1 from add_zero _,
+      show wpWeight w (tailDelta n hn1).1 + wpWeight w (0 : TailIdx 0).1 -
+        wpWeight w (tailDelta n hn1).1 = 0 from by
+          rw [TailIdx.zero_val, wpWeight_zero]; omega, pow_zero, one_mul]
+  have hnorm : ‖Tn * v‖ = (‖ϖ.val‖ ^ w n)⁻¹ * ‖c‖ := by
+    rw [hprod, TailC0.norm_single, norm_qHead_mul ϖ hK₀, han,
+      norm_qHeadConst ϖ hK₀, hqc, norm_qHeadConst ϖ hK₀, norm_inv, norm_pow]
+  rw [hnorm] at hmem
+  have hle : ‖ϖ.val‖ ^ w n ≤ ‖c‖ :=
+    le_trans (pow_le_pow_of_le_one ϖ.norm_val_pos.le
+      ϖ.norm_val_lt_one.le hnw) hm₀.le
+  have hge : (1 : ℝ) ≤ (‖ϖ.val‖ ^ w n)⁻¹ * ‖c‖ := by
+    rw [inv_mul_eq_div, le_div_iff₀ (pow_pos ϖ.norm_val_pos _), one_mul]
+    exact hle
+  linarith
 
 variable {K w} in
 /-- **The bad chart is not uniform** ([WP] prop:weighted-chart-domain-nonuniform:
@@ -906,7 +1079,15 @@ coefficientwise-localization model, the `not_isUniform_chart` pattern of
 `FJP/Over/Chart.lean:1459`). -/
 theorem not_isUniform_chart (hwu : ∀ M : ℕ, ∃ n : ℕ, 1 ≤ n ∧ M ≤ w n)
     (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    ¬ IsUniform (presheafValue (chartDatum (w := w) ϖ)) := by sorry
+    ¬ IsUniform (presheafValue (chartDatum (w := w) ϖ)) := fun h =>
+  not_isUniform_chartModel hwu ϖ hK₀
+    (FiniteJet.isUniform_of_ringEquiv
+      (coeffLocEquiv ϖ hK₀ (chartHeadDatum (w := w) ϖ)
+        (chartHeadDatum_isRational ϖ))
+      (coeffLocEquiv_continuous ϖ hK₀ (chartHeadDatum (w := w) ϖ)
+        (chartHeadDatum_isRational ϖ))
+      (coeffLocEquiv_symm_continuous ϖ hK₀ (chartHeadDatum (w := w) ϖ)
+        (chartHeadDatum_isRational ϖ)) h)
 
 variable {K w} in
 /-- **`𝒜` is not stably uniform** ([WP] thm 6.2, "In particular, failure of stable

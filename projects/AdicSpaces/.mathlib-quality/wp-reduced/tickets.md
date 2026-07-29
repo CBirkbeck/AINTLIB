@@ -593,7 +593,23 @@ propext/Classical.choice/Quot.sound) before marking done.
   regular in a domain.  Sources: [WP] 857–926.
 
 ### [W20] Chart.lean II — nonuniformity and ¬stable-uniformity
-- Status: open | File: WP/Chart.lean | Depends: W17, W19
+- Status: done (2026-07-29) | File: WP/Chart.lean | Depends: W17, W19
+- **Progress**: COMPLETE sorry-free + axiom-clean — Chart.lean has ZERO sorries; [WP]
+  thm 6.2(4) (`not_isStablyUniform_WPA`) is proven. Route: norm-transfer helpers
+  (norm_qHead_eq/mul/one/pow via chartQHeadEquiv_norm — the multiplicative Gauss norm
+  transported to QHead kills ALL twist computations), norm_qHeadConst, norm_rhoQVal
+  (= |varpi|); tailDelta n (single n 1 at stage 0); T_n := single delta_n
+  (headConst-of (varpi^(w n))^{-1}); T_n*T_n collapses to norm 1 (parity weight:
+  wpWeight_single at k=2 vanishes, exponent 2*w n exactly compensates the
+  coefficient); powers bounded by max 1 |varpi|^{-w n} via Nat.twoStepInduction
+  (case names zero/one/more!) + isPowerBounded_of_forall_norm_le (C-general mirror
+  of the norm_le_one version); nonuniformity: unit ball absorption + small scalar
+  (NormedField.exists_norm_lt) + hwu picks n with w n >= m0 so
+  |varpi|^{w n} <= |c| makes ||T_n * v|| >= 1 inside the ball — contradiction;
+  transport along coeffLocEquiv by FiniteJet.isUniform_of_ringEquiv (needed NEW
+  import of FJP.FiniteJetChart in Chart.lean — not in the closure before).
+  eq:Tn-power-norms realized as the T² collapse + submultiplicativity (no exact
+  odd-power formula needed).
 - Decls: `not_isUniform_chartModel`, `not_isUniform_chart`
   (`not_isStablyUniform_WPA` is already real in the skeleton).
 - Sketch: T_n := `TailC0.single δ_n (c_n)` with c_n := (chartQHeadEquiv⁻¹ of the
