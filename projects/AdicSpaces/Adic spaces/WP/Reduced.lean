@@ -7,6 +7,8 @@ import «Adic spaces».WP.FormalReduced
 import «Adic spaces».AuditCleanWrappers
 import «Adic spaces».SheafyCompletionModel
 import «Adic spaces».PresheafFunctoriality
+import «Adic spaces».RingEquivPresheafTransport
+import «Adic spaces».PresheafTateStructure
 
 /-!
 # Rational stable reducedness ([WP] §6.6)
@@ -175,6 +177,58 @@ def ChainReduced : (A : Type _) → [inst : CommRing A] → [inst : TopologicalS
   | A, _, _, _, 0 => IsReduced A
   | A, _, _, _, (n + 1) => IsReduced A ∧ ∀ D : RationalLocData A, D.IsRational →
       ChainReduced (presheafValue D) n
+
+/-- **`ChainReduced` transports along bicontinuous ring equivalences** (the
+[WP] induction's change-of-model step; 2026-07-29 ChatGPT-5.6 route review):
+pull each rational datum back along `e.symm`, apply the chain hypothesis there,
+and move the completed localizations across `presheafValueRingEquivOfRingEquiv`
+using the valid-datum roundtrip. -/
+theorem chainReduced_of_ringEquiv (n : ℕ) :
+    ∀ {A : Type u_A} {B : Type u_B} [CommRing A] [TopologicalSpace A]
+      [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTateRing B]
+      (e : A ≃+* B), Continuous ⇑e → Continuous ⇑e.symm →
+      ChainReduced A n → ChainReduced B n := by
+  induction n with
+  | zero =>
+    intro A B _ _ _ _ _ _ e he he' h
+    haveI : IsReduced A := h
+    exact isReduced_of_injective e.symm.toRingHom e.symm.injective
+  | succ n ih =>
+    intro A B _ _ _ _ _ _ e he he' h
+    refine ⟨?_, ?_⟩
+    · haveI : IsReduced A := h.1
+      exact isReduced_of_injective e.symm.toRingHom e.symm.injective
+    · intro D hD
+      have hDA : (D.mapRationalRingEquiv e.symm he' he hD).IsRational :=
+        mapRationalRingEquiv_isRational e.symm he' he D hD
+      have hchainA : ChainReduced
+          (presheafValue (D.mapRationalRingEquiv e.symm he' he hD)) n :=
+        h.2 (D.mapRationalRingEquiv e.symm he' he hD) hDA
+      have he2 : Continuous ⇑e.symm.symm := by
+        rw [RingEquiv.symm_symm]; exact he
+      have h0 : (D.mapRationalRingEquiv e.symm he' he
+          hD).mapRationalRingEquiv e he he' hDA = D :=
+        RationalLocData.mapRationalRingEquiv_symm_map e.symm he' he2 D hD hDA
+      haveI := presheafValue_isTateRing_concrete
+        (D.mapRationalRingEquiv e.symm he' he hD)
+      haveI := presheafValue_isTateRing_concrete D
+      have key : ∀ D₂ : RationalLocData B,
+          (D.mapRationalRingEquiv e.symm he' he
+            hD).mapRationalRingEquiv e he he' hDA = D₂ →
+          ChainReduced (presheafValue D₂) n := by
+        intro D₂ h02
+        cases h02
+        haveI := presheafValue_isTateRing_concrete
+          ((D.mapRationalRingEquiv e.symm he' he
+            hD).mapRationalRingEquiv e he he' hDA)
+        exact ih (presheafValueRingEquivOfRingEquiv e he he'
+            (D.mapRationalRingEquiv e.symm he' he hD) hDA)
+          (presheafValueRingEquivOfRingEquiv_continuous e he he'
+            (D.mapRationalRingEquiv e.symm he' he hD) hDA)
+          (presheafValueRingEquivOfRingEquiv_symm_continuous e he he'
+            (D.mapRationalRingEquiv e.symm he' he hD) hDA)
+          hchainA
+      exact key D h0
 
 variable {K w} in
 /-- **Rational stable reducedness of `𝒜`, conditionally on the head input**

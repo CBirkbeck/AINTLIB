@@ -906,7 +906,7 @@ propext/Classical.choice/Quot.sound) before marking done.
   R4a/R4b land.
 
 ### [R4a] Coefficientwise localization over the model (the FH-closure engine)
-- Status: open | File: WP/CoeffLocalization.lean (extension) | Depends: W17, W18
+- Status: superseded (2026-07-29 ChatGPT-5.6-sol adjudication: ROUTE (i) — generic existential transitivity — chosen over the model re-run; see R4d) | File: WP/CoeffLocalization.lean (extension) | Depends: W17, W18
 - Decls (planned): model-level analogues of exists_head_approx (density of the
   M-head images in TailC0 via canonicalMap-density + head density in the base),
   PerturbSetup instantiation at E := TailC0-model (the Perturbation machinery is
@@ -922,11 +922,55 @@ propext/Classical.choice/Quot.sound) before marking done.
   the tree.
 
 ### [R4b] ChainReduced transport along bicontinuous ring isos
-- Status: open | File: WP/Reduced.lean | Depends: none
+- Status: done (2026-07-29) | File: WP/Reduced.lean | Depends: none
 - Decls (planned): RationalLocData pushforward along a bicontinuous e : A ≃+* B
   (pod image subring + T image + s image; hopen through bicontinuity),
   presheafValue-equivalence of a datum and its pushforward, and
   `ChainReduced.of_ringEquiv`. Mechanical but fiddly; independent of R4a.
+- **Progress**: DONE — `chainReduced_of_ringEquiv` (WP/Reduced.lean) via the
+  PRE-EXISTING generic transport file `RingEquivPresheafTransport.lean`
+  (mapRationalRingEquiv + presheafValueRingEquivOfRingEquiv + the valid-datum
+  roundtrip — discovered by the ChatGPT-5.6 codex workspace scan; no pod
+  transport had to be built). Induction on n with ∀-quantified types; the
+  datum-roundtrip's e.symm.symm-slot needs an explicit
+  `he2 : Continuous ⇑e.symm.symm` bridge (rw [RingEquiv.symm_symm]), and the
+  final transport avoids ill-typed rw-motives via generalize-then-cases
+  (`key : ∀ D₂, map-map = D₂ → ChainReduced (presheafValue D₂) n`).
+  IsTateRing at values: `presheafValue_isTateRing_concrete` (no noetherianity).
+
+### [R4d] Generic existential transitivity of rational localization (ROUTE (i))
+- Status: open | File: new `RationalTransitivity.lean` (generic, non-WP) | Depends: —
+- Statement: for a complete Tate `A` with the presheaf pack and rational `D` on
+  `A`, `E` on `B := presheafValue D`, there EXIST `F` rational on `A` and a
+  bicontinuous `presheafValue E ≃+* presheafValue F` (existential only — no
+  canonical composition, no associativity; 2026-07-29 ChatGPT-5.6-sol design).
+- Sketch (Huber Lemma 1.5(ii)-(iii) / Wedhorn Prop 8.2(2)+Rem 8.4; Cont.Val.
+  Prop 3.9 via perturbation Lemma 3.10):
+  1. PERTURB `E`'s entries (numerators AND denominator, simultaneously) into the
+     dense image of the algebraic localization `C ≃ A[1/s]`
+     (`UniformSpace.Completion.denseRange_coe`), preserving the rational open
+     and with equivalent completed localizations — the W18 PerturbSetup
+     machinery instantiated at `B` (it is E-generic).
+  2. CLEAR DENOMINATORS: common `k`, lifts `ι(h_j/s^k)`, `ι(q/s^k)`; scale by
+     the unit `ι(s)^k` (`rationalOpen_unitSMul`) → datum `(ι H; ι q)`, insert q.
+  3. Δ-PADDING (span-⊤ does NOT descend from B): `Δ = {π^m}`, `π` the tnu unit,
+     `m` from `exists_pow_dominated_finset`/`exists_zero_nbhd_lt_on_qc`
+     (Wedhorn 7.31, Cor732.lean — EXISTS) on the quasi-compact locus where `q`
+     doesn't vanish; `S := H ∪ {q} ∪ Δ` spans ⊤ and the open is unchanged.
+  4. F := the intersection datum of `(T̄/s)` and `(S/q)` — REUSE the generic
+     `RationalLocData.interDatum` + `interDatum_rationalOpen` +
+     `interTray_span_eq_top` (RationalIntersection.lean — EXISTS; my
+     interDatumHead in WP/Sheafy duplicates it at the head — fleet-dedup note).
+  5. UNIVERSAL PROPERTY both ways: in `𝒪_B(scaled-E)`: ι(s), ι(q) units and
+     (t·h)/(s·q) = (t/s)(h/q) power-bounded → Φ : 𝒪_A(F) → 𝒪_B(Ẽ⁺); in
+     `𝒪_A(F)`: s,q units (IsUnit.mul_iff), t/s = tq/sq, h/q = sh/sq with
+     tq, sh ∈ F.T → Ψ backwards; density-uniqueness roundtrips
+     (restrictionMapHom_canonicalMap_generic + DenseRange.equalizer).
+- Then [R4-final]: invariant Q_n := ∀ D rational, ChainReduced (presheafValue D) n;
+  Q_0 = R3; successor: E on 𝒪(D) → F + equivalence → reducedness from R3(F) +
+  depth from Q_n(F) transported by `chainReduced_of_ringEquiv`; assemble
+  `chainReduced_WPA` with IsReduced 𝒜.
+
 - Decls: `chainReduced_WPA` (+ the transport helper it needs: ChainReduced along a
   bicontinuous ring iso with datum pushforward — state during ticket as a private
   lemma; datum transport via `RationalLocData` field-wise pushforward along e).
