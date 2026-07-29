@@ -1,5 +1,6 @@
 import ModularCurves.ForMathlib.TotalComplexUpNatCycleElimination
 import ModularCurves.ForMathlib.TotalComplexUpNatHorizontalEdge
+import Mathlib.Algebra.Homology.QuasiIso
 
 /-!
 # Higher-degree horizontal-edge comparison
@@ -510,5 +511,41 @@ theorem totalUpNatHorizontalEdge_homologyMap_injective_of_positive
     _ = A.homologyπ (n + 1)
         (abCyclesMkAt A n a haCycle) := by rw [hac']
     _ = 0 := haClassZero
+
+/-- The horizontal-edge map is a quasi-isomorphism in every positive degree
+when the two adjacent positive vertical rows are exact. -/
+theorem totalUpNatHorizontalEdge_quasiIsoAt_succ
+    (A : CochainComplex AddCommGrpCat.{u} ℕ)
+    (e : ∀ q, A.X q ⟶ (K.X q).X 0)
+    (he : ∀ q q', (ComplexShape.up ℕ).Rel q q' →
+      e q ≫ (K.d q q').f 0 = A.d q q' ≫ e q')
+    (w : ∀ q, e q ≫ (K.X q).d 0 1 = 0)
+    (n : ℕ)
+    (hrowAxis_n : (ShortComplex.mk (e n)
+      ((K.X n).d 0 1) (w n)).Exact)
+    (hrowAxis_succ : (ShortComplex.mk (e (n + 1))
+      ((K.X (n + 1)).d 0 1) (w (n + 1))).Exact)
+    (hrowPositive_n : ∀ q p, q + p = n → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact)
+    (hrowPositive_succ : ∀ q p, q + p = n + 1 → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact)
+    [Mono (e (n + 1))] [Mono (e (n + 2))] :
+    QuasiIsoAt (K.totalUpNatHorizontalEdge A e he w) (n + 1) := by
+  rw [quasiIsoAt_iff_isIso_homologyMap]
+  let f := HomologicalComplex.homologyMap
+    (K.totalUpNatHorizontalEdge A e he w) (n + 1)
+  haveI : Mono f := (AddCommGrpCat.mono_iff_injective f).mpr
+    (K.totalUpNatHorizontalEdge_homologyMap_injective_of_positive
+      A e he w n hrowAxis_n hrowPositive_n)
+  haveI : Epi f := (AddCommGrpCat.epi_iff_surjective f).mpr
+    (K.totalUpNatHorizontalEdge_homologyMap_surjective_of_positive
+      A e he w n hrowAxis_succ hrowPositive_succ)
+  exact isIso_of_mono_of_epi f
 
 end HomologicalComplex₂
