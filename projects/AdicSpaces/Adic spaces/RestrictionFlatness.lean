@@ -124,29 +124,10 @@ theorem iteratedMinus_B_flat_of_canonical
       (locSubring (iteratedMinusDatum_B P D₀ f).P (iteratedMinusDatum_B P D₀ f).T
         (iteratedMinusDatum_B P D₀ f).s) := hlocSubring_Noeth_B
   -- Discharge `hb` and `hT_pb` for `T = {1}`, `s = D₀.canonicalMap f`.
+  -- `D.T = {1}`, so `1 ∈ D.T`.
   have hb : TopologicalRing.IsPowerBounded
-      (invS (iteratedMinusDatum_B P D₀ f)) := by
-    -- `D.T = {1}`, so `1 ∈ D.T`. Use `invS_isPowerBounded_of_one_mem_T`.
-    have h1_mem : (1 : presheafValue D₀) ∈ (iteratedMinusDatum_B P D₀ f).T :=
-      Finset.mem_singleton_self 1
-    -- `invS D = D.coeRingHom (divByS 1 D.s)` (factor through completion).
-    have hinvS_eq : invS (iteratedMinusDatum_B P D₀ f) =
-        (iteratedMinusDatum_B P D₀ f).coeRingHom
-          (divByS 1 (iteratedMinusDatum_B P D₀ f).s) := by
-      set D : RationalLocData (presheafValue D₀) := iteratedMinusDatum_B P D₀ f
-      have h1 : D.canonicalMap D.s * invS D = 1 := canonicalMap_s_mul_invS D
-      have halg : algebraMap (presheafValue D₀) (Localization.Away D.s) D.s *
-          divByS 1 D.s = 1 := by
-        rw [← invSelf_eq_divByS, IsLocalization.Away.mul_invSelf]
-      have h2 : D.canonicalMap D.s * D.coeRingHom (divByS 1 D.s) = 1 := by
-        change D.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away D.s) D.s) *
-          D.coeRingHom (divByS 1 D.s) = 1
-        rw [← map_mul, halg, map_one]
-      have hu : IsUnit (D.canonicalMap D.s) := isUnit_s_in_presheafValue D
-      exact hu.mul_left_cancel (h1.trans h2.symm)
-    rw [hinvS_eq]
-    exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T
-      (iteratedMinusDatum_B P D₀ f) h1_mem
+      (invS (iteratedMinusDatum_B P D₀ f)) :=
+    isPowerBounded_invS_of_one_mem_T _ (Finset.mem_singleton_self 1)
   have hT_pb : ∀ t ∈ (iteratedMinusDatum_B P D₀ f).T,
       TopologicalRing.IsPowerBounded t := by
     intro t ht

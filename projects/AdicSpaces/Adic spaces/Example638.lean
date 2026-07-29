@@ -1096,28 +1096,11 @@ section Example638MinusForward
 
 variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
 
-omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] in
-/-- `invS D = D.coeRingHom (divByS 1 D.s)`: both are the inverse of
-`D.canonicalMap D.s` in `presheafValue D`, hence equal. -/
-theorem invS_eq_coeRingHom_divByS_one (D : RationalLocData A) :
-    invS D = D.coeRingHom (divByS 1 D.s) := by
-  have h1 : D.canonicalMap D.s * invS D = 1 := canonicalMap_s_mul_invS D
-  have halg : algebraMap A (Localization.Away D.s) D.s * divByS 1 D.s = 1 := by
-    rw [← invSelf_eq_divByS, IsLocalization.Away.mul_invSelf]
-  have h2 : D.canonicalMap D.s * D.coeRingHom (divByS 1 D.s) = 1 := by
-    change D.coeRingHom (algebraMap A (Localization.Away D.s) D.s) *
-      D.coeRingHom (divByS 1 D.s) = 1
-    rw [← map_mul, halg, map_one]
-  have hu : IsUnit (D.canonicalMap D.s) := isUnit_s_in_presheafValue D
-  exact hu.mul_left_cancel (h1.trans h2.symm)
-
 /-- `invS` in the trivial minus datum is power-bounded (via `1 ∈ D.T = {1}`). -/
 theorem invS_isPowerBounded_in_trivialMinus
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B) :
-    TopologicalRing.IsPowerBounded (invS (trivialMinusDatum B P b)) := by
-  rw [invS_eq_coeRingHom_divByS_one]
-  exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T
-    (trivialMinusDatum B P b) (Finset.mem_singleton_self 1)
+    TopologicalRing.IsPowerBounded (invS (trivialMinusDatum B P b)) :=
+  isPowerBounded_invS_of_one_mem_T _ (Finset.mem_singleton_self 1)
 
 /-- The generic evaluation hom `TateAlgebra B →+* presheafValue (trivialMinusDatum P b)`
 sending `X ↦ invS = 1 / canonicalMap b`, via `tateEvalPresheafHom`. -/

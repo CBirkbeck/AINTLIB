@@ -8,8 +8,30 @@ proof over 50 LOC; run the **full** `/cleanup` on **every** lemma. Full budget, 
     files                      376
     lines                  231,153
     declarations             7,926   <- each needs full /cleanup
-    proof bodies > 50 LOC      486   across 140 files
+    proof bodies > 50 LOC      383   across 124 files   <- CORRECTED, see below
     heartbeat raises           104   across 13 files
+
+### MEASUREMENT BUG (found 2026-07-29) — the over-50 count was inflated by 103
+
+My first script took the **first** `:=` at/after the declaration line as the signature/body
+boundary. But signatures legitimately contain `:=`:
+
+```lean
+theorem tate_quotPresentation_canonicalMap
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;  -- <-- HERE
+      CompleteSpace A]
+```
+
+That instance binder made a **19-line** body measure as **51**. Same for default arguments and
+any `:= by` nested inside a binder type. Fix: track bracket depth over `( ) [ ] { } ⟨ ⟩` and
+accept only a `:=` at depth 0 — `scratchpad/scope2.py`. Real count **383**, not 486; 103 of the
+"over-50" proofs were never over 50. Corrected worst files:
+
+    WedhornCechAcyclicity 40 · RobbaPresentation 17 · LaurentRefinementCore 13 ·
+    Euclidean 12 · FiniteJetGraphKoszul 8 · TateAlgebra 8 · TateAlgebraTopology 8 · WittF 8
+
+**Lesson for any future scan of Lean source: a declaration's signature can contain `:=`.**
+Never split on the first one.
 
 ## Order of work, and why
 
@@ -17,7 +39,7 @@ proof over 50 LOC; run the **full** `/cleanup` on **every** lemma. Full budget, 
 genuinely slow — and slow proofs are exactly the ones needing decomposition. So this pass
 generates the priority list for task 2 instead of duplicating it.
 
-**2. Decompose the 486**, largest first, batched per file to amortise the ~40 min full-build
+**2. Decompose the 383**, largest first, batched per file to amortise the ~40 min full-build
 gate. Budget ~1.5-2 extraction rounds per proof (measured, see CLEANUP-LOG.md).
 
 **3. Full /cleanup per declaration**, file by file.
@@ -43,12 +65,13 @@ Values: `maxHeartbeats` 1000000 (x53), 1600000 (x26), 800000 (x9), 6400000, 4000
 **KEEP `maxSynthPendingDepth 1` (x3) — that is a REDUCTION, not a raise.**
 
 ## Worst files for over-50 proofs
-WedhornCechAcyclicity 55 · LaurentRefinementCore 28 · RobbaPresentation 17 ·
-TateAcyclicityFinalAssembly 14 · Euclidean 12 · EmbeddingTopo 11
+(corrected figures — see the measurement-bug note above)
+WedhornCechAcyclicity 40 · RobbaPresentation 17 · LaurentRefinementCore 13 ·
+Euclidean 12 · FiniteJetGraphKoszul 8 · TateAlgebra 8 · TateAlgebraTopology 8 · WittF 8
 
-Largest single proofs: `wedhorn_lemma_834_propA3_part1_gluing` 450 ·
-`isIntegral_of_forall_continuous_valuation_le_one` 405 ·
-`exists_lift_norm_le_of_closed_range` 389 · `tateAlgebra_flat` 352
+Largest single proofs: `isIntegral_of_forall_continuous_valuation_le_one` 405 ·
+`exists_lift_norm_le_of_closed_range` 389 · `wedhorn_lemma_834_propA3_part1_gluing` 386 ·
+`tateAlgebra_flat` 352 · `gluing_JetA` 279
 
 ## Progress
 Full detail per file appended below as work lands.
@@ -130,9 +153,9 @@ placing a `set_option` between an `include ... in` and its declaration breaks th
 
 ## Task 2 — decompose the over-50 proofs
 
-Re-measured: **486** bodies over 50 across 140 files (whole tree; the FarguesFontaine 103
-is a subset).  Worst: WedhornCechAcyclicity 55 · LaurentRefinementCore 28 ·
-RobbaPresentation 17 · TateAcyclicityFinalAssembly 14 · Euclidean 12 · EmbeddingTopo 11.
+Re-measured (corrected script): **383** bodies over 50 across 124 files (whole tree; the
+FarguesFontaine set is a subset).  Worst: WedhornCechAcyclicity 40 · RobbaPresentation 17 ·
+LaurentRefinementCore 13 · Euclidean 12.
 
 `wedhorn_lemma_834_propA3_part1_gluing` (454 lines) carries **48 comment seams with
 numbered Steps 1-8** — the author's own decomposition.  Highly tractable: name the steps.
@@ -201,3 +224,101 @@ so Steps 1-2 come out next).
 Step 6; Step 8 is terminal.  So Step 5's lemma must RETURN the compatibility fact, and
 Step 8's can take everything as hypotheses.  Do NOT lift a Step boundary without checking
 what it defines for later Steps.
+
+## Task 2 — the `invS` power-bounded family (2026-07-29): 8 duplications → 1 lemma
+
+Started on the cheapest band (51-60 LOC) and the first target, `iteratedMinus_B_flat_of_canonical`
+(RestrictionFlatness.lean:67), turned out to be the visible tip of a **whole-tree duplication**.
+
+### What was actually there
+
+The fact `invS D = D.coeRingHom (divByS 1 D.s)` (unit-cancellation: both are inverse to
+`D.canonicalMap D.s`) plus its corollary "`invS D` is power-bounded when `1 ∈ D.T`" was written
+out **8 separate times**:
+
+| Site | form |
+|---|---|
+| `Example638.lean:1102` | the named general lemma `invS_eq_coeRingHom_divByS_one` (+13 users) |
+| `TateAcyclicityFinalAssembly.lean:2487` | `..._of_one_mem_T_general` — **dead, 0 call sites** |
+| `TateAcyclicityFinalAssembly.lean:2517` | `..._of_one_mem_T_minimal` — strictly weaker, 1 call site |
+| `RestrictionFlatness.lean:133` | inline, 23 lines |
+| `LaurentRefinementCore.lean:2962` | inline, 19 lines |
+| `LaurentRefinementCore.lean:3280` | inline, 19 lines (byte-identical) |
+| `LaurentRefinementCore.lean:3486` | inline, 19 lines (byte-identical) |
+| `Wedhorn828.lean:3000` | inline, `coUnitDatum`-specialised |
+
+Plus 8 more sites spelling the corollary as `rw [invS_eq_coeRingHom_divByS_one]` +
+`exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T …` — 3-4 lines each.
+
+### Why it happened (worth remembering)
+
+Two independent causes, both invisible to a name-based duplicate scan:
+
+1. **Wrong home.** `invS` lives in `PresheafIdentification.lean`; the boundedness engine
+   (`CompletionLocalization.invS_isPowerBounded_of_one_mem_T`) lives in `CompletionLocalization.lean`
+   — and **neither file imports the other**. So no single one of them could host a lemma about
+   `IsPowerBounded (invS D)`. The general lemma ended up in `Example638.lean` (a file about one
+   specific Wedhorn example) and the corollary in `TateAcyclicityFinalAssembly.lean` (the *last*
+   file), i.e. as far downstream as possible from the 8 places that needed it.
+2. **Typeclass anxiety.** The B-level (base = `presheafValue D₀`) has no
+   `HasLocLiftPowerBounded` instance, so rather than weaken the hypotheses once, two more
+   copies were made — `_general` and `_minimal` — differing only in typeclass set. `_minimal`
+   strictly subsumes `_general` (`IsHuberRing extends IsTopologicalRing`), so `_general` was
+   dead on arrival.
+
+### The fix
+
+`PresheafTateStructure.lean` is the **unique** file importing both `PresheafIdentification` and
+`CompletionLocalization`, and all 9 duplicating sites reach it transitively (254 of 376 modules
+depend on it). Both lemmas now live there, stated over a bare `[CommRing R] [TopologicalSpace R]
+[IsTopologicalRing R]` — the weakest set, so they apply at the B-level too:
+
+    invS_eq_coeRingHom_divByS_one      -- moved up from Example638
+    isPowerBounded_invS_of_one_mem_T   -- new; replaces _general and _minimal
+
+Removed: `_general` + `_minimal` (53 lines, one of them dead), 4 inline copies (80 lines),
+8 `rw`+`exact` pairs collapsed to single term-mode calls. Net declaration count 7926 → 7925.
+
+**Three over-50 proofs came under the bar as a side effect** — `iteratedMinus_B_flat_of_canonical`
+(RestrictionFlatness), `laurentMinusBridge` and `laurentMinusBridge_restrictionMap`
+(LaurentRefinementCore). Tree total **383 → 380**; LaurentRefinementCore 13 → 11.
+`iteratedMinus_forwardHom_comp_backwardHom` (57) is untouched by this — a separate target.
+
+### Method note
+
+Grepping for the lemma *name* finds nothing when the copies are anonymous `have`s. What found
+this was grepping for a **distinctive sub-expression of the statement** — `coeRingHom (divByS 1`
+— which matches the inline copies and the named lemma alike. Do that for every helper extracted
+from now on: search the tree for the statement's shape, not its name.
+
+**And: a name collision on `lake build` is a dedup signal, not just an error.** The build failing
+with "`invS_eq_coeRingHom_divByS_one` has already been declared" is what revealed copy #8.
+
+## Task 2 — batch 2 (planned, ready to apply): the Keystone preamble
+
+Scan: `scratchpad/repeated_haves.py` → **36 real groups, 910 duplicated lines** across the tree,
+catalogued in `.mathlib-quality/goal/DEDUP-INLINE.md`. Batch 2 takes the top three groups, which
+are one copy-pasted proof preamble (`hF_alg` / `hps` / `hA₀` / `hqt`, same `have` names,
+consecutive lines) shared by `RelativePieceKeystone{,Gen,Open}` and WedhornCechAcyclicity.
+
+**Home: `RelativePieceKeystone.lean`, after `algebraMap_s_mul_divByS` (line 47).** Verified: Gen,
+Open and WCA all reach it. Its section vars are `[CommRing A] [TopologicalSpace A]
+[IsTopologicalRing A] [PlusSubring A] [IsHuberRing A]` — deliberately **no `[IsTateRing A]`**,
+which matters (see the `concretePair_A₀'` note below).
+
+| group | copies | lines | new lemma |
+|---|---|---|---|
+| #2 + #5 | 6 + 3 | 90 | `canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS` — `canonicalMap p = canonicalMap s * coe (p/s)`. **#5 (`hqt`) is the SAME identity one level up** (B-side, `p := D₀.canonicalMap q`), i.e. the same fact proved twice inside one proof. |
+| #0 | 7 | 92 | `coeRingHom_divByS_mem_concretePair_A₀` — `p ∈ insert D.s D.T → coe (p/s) ∈ (presheafValue_concretePair D).A₀` |
+| #17 | 4 | 21 | `hT_pb` companion: `T = {1}` ⟹ every `t ∈ T` power-bounded. Second half of the `hb` proofs already fixed in batch 1. |
+
+Checked first, per the rule: **no existing named lemma** covers #2 or #17. For #0 there is
+`presheafValue_concretePair_A₀` (PresheafTateStructure:887) but it carries `[IsTateRing A]`, which
+Gen/Open do not have — so they each cloned it as **`concretePair_A₀'`, byte-identical in
+`RelativePieceKeystoneGen.lean:42` and `RelativePieceKeystoneOpen.lean:157`**, docstring included
+(the docstring itself says the `[IsTateRing A]` binder is "vestigial — the statement is `rfl`").
+Both copies have exactly one user each: the `hA₀` block being collapsed. So state the new lemma
+**without** `[IsTateRing A]`, proving the `A₀` rewrite by `show … from rfl`, and delete both twins.
+
+Collapse shape (minimal blast radius): keep each `have hX : <same statement> :=` and replace only
+its proof with `fun p hp => <new lemma> …`. 13L → 3L, 8L → 3L; the rest of every proof is untouched.

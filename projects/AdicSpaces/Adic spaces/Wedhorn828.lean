@@ -738,10 +738,8 @@ private theorem presheafValue_globalLocData_isNoetherianRing (P : PairOfDefiniti
   letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI hAc : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
   -- `invS (globalLocData P)` is power-bounded since `1 ∈ {1} = (globalLocData P).T`.
-  have hb : TopologicalRing.IsPowerBounded (invS (globalLocData P)) := by
-    rw [invS_eq_coeRingHom_divByS_one]
-    exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T
-      (globalLocData P) (Finset.mem_singleton_self 1)
+  have hb : TopologicalRing.IsPowerBounded (invS (globalLocData P)) :=
+    isPowerBounded_invS_of_one_mem_T _ (Finset.mem_singleton_self 1)
   -- Every `t ∈ (globalLocData P).T = {1}` is power-bounded.
   have hT_pb : ∀ t ∈ (globalLocData P).T, TopologicalRing.IsPowerBounded t := by
     intro t ht

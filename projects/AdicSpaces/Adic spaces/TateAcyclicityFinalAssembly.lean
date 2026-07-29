@@ -2478,59 +2478,6 @@ theorem RationalCoveringData.separation_via_normalizedLaurent
     exact hagree D hD
   exact sub_eq_zero.mp hzero
 
-/-! ### Helper: `invS D` is power-bounded when `1 ∈ D.T`
-
-For any rational locale `D` over any base where `1 ∈ D.T`, the unit
-`invS D = (D.canonicalMap D.s)⁻¹` is power-bounded in `presheafValue D`'s
-topology. Generalises the per-piece argument used in
-`iteratedMinus_B_flat_of_canonical`. -/
-theorem invS_isPowerBounded_of_one_mem_T_general
-    {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
-    [IsHuberRing A] [HasLocLiftPowerBounded A]
-    (D : RationalLocData A) (h1 : (1 : A) ∈ D.T) :
-    TopologicalRing.IsPowerBounded (invS D) := by
-  -- invS D = D.coeRingHom (divByS 1 D.s) (via the unit-cancellation identity).
-  have hinvS_eq : invS D = D.coeRingHom (divByS (1 : A) D.s) := by
-    have h1_eq : D.canonicalMap D.s * invS D = 1 := canonicalMap_s_mul_invS D
-    have halg : algebraMap A (Localization.Away D.s) D.s * divByS (1 : A) D.s = 1 := by
-      rw [← invSelf_eq_divByS, IsLocalization.Away.mul_invSelf]
-    have h2 : D.canonicalMap D.s * D.coeRingHom (divByS (1 : A) D.s) = 1 := by
-      change D.coeRingHom (algebraMap A (Localization.Away D.s) D.s) *
-        D.coeRingHom (divByS (1 : A) D.s) = 1
-      rw [← map_mul, halg, map_one]
-    exact (isUnit_s_in_presheafValue D).mul_left_cancel (h1_eq.trans h2.symm)
-  rw [hinvS_eq]
-  exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T D h1
-
-/-! ### Helper: minimal `invS_isPowerBounded_of_one_mem_T`
-
-Mirrors `invS_isPowerBounded_of_one_mem_T_general` but drops the
-`[PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]` typeclass
-constraints. The proof body only uses `canonicalMap`, `coeRingHom`,
-`divByS`, and `CompletionLocalization.invS_isPowerBounded_of_one_mem_T`,
-each of which requires only `[CommRing A] [TopologicalSpace A]
-[IsTopologicalRing A]`.
-
-This allows the discharge to work at the B-level (B = presheafValue
-C.base) without needing a `HasLocLiftPowerBounded (presheafValue C.base)`
-preservation theorem (T-LOCLIFT-PRESERVATION). -/
-theorem invS_isPowerBounded_of_one_mem_T_minimal
-    {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    (D : RationalLocData A) (h1 : (1 : A) ∈ D.T) :
-    TopologicalRing.IsPowerBounded (invS D) := by
-  have hinvS_eq : invS D = D.coeRingHom (divByS (1 : A) D.s) := by
-    have h1_eq : D.canonicalMap D.s * invS D = 1 := canonicalMap_s_mul_invS D
-    have halg : algebraMap A (Localization.Away D.s) D.s * divByS (1 : A) D.s = 1 := by
-      rw [← invSelf_eq_divByS, IsLocalization.Away.mul_invSelf]
-    have h2 : D.canonicalMap D.s * D.coeRingHom (divByS (1 : A) D.s) = 1 := by
-      change D.coeRingHom (algebraMap A (Localization.Away D.s) D.s) *
-        D.coeRingHom (divByS (1 : A) D.s) = 1
-      rw [← map_mul, halg, map_one]
-    exact (CompletionLocalization.isUnit_s_in_presheafValue D).mul_left_cancel
-      (h1_eq.trans h2.symm)
-  rw [hinvS_eq]
-  exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T D h1
-
 /-! ### Helper: `canonicalMap a` is power-bounded for `a ∈ P.A₀`
 
 For any rational locale `D` and any element `a ∈ D.P.A₀` (the ring of
@@ -3286,7 +3233,7 @@ theorem tateAcyclicity_via_normalizedLaurent_autoTPB
 
 For each `f ∈ C.base.P.A₀`, the relative datum's `T` contains `1` (via
 `canonicalMap 1 = 1` and `1 ∈ (laurentMinusNormalizedDatum C.base f).T`).
-Applying `invS_isPowerBounded_of_one_mem_T_minimal` gives power-boundedness
+Applying `isPowerBounded_invS_of_one_mem_T` gives power-boundedness
 of `invS (relativeRationalLocData_laurentNormalized ...)`. -/
 theorem hb_per_f_auto_normalizedLaurent
     [IsRingOfIntegralElements (A⁺)]
@@ -3312,7 +3259,7 @@ theorem hb_per_f_auto_normalizedLaurent
   intro f hf
   letI : LaurentNormalized (laurentMinusNormalizedDatum C.base f) :=
     laurentMinusNormalizedDatum_isLaurentNormalized C.base f hf
-  apply invS_isPowerBounded_of_one_mem_T_minimal
+  apply isPowerBounded_invS_of_one_mem_T
   change 1 ∈ (relativeRationalLocData_laurentNormalized C.base
     (laurentMinusNormalizedDatum C.base f)
     (laurentMinusNormalized_subset C.base f)).T

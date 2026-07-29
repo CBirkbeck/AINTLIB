@@ -3037,4 +3037,33 @@ theorem presheafValue_isHuberRing_huber (D₀ : RationalLocData A) :
     IsHuberRing (presheafValue D₀) where
   exists_pairOfDefinition := ⟨presheafValue_concretePair D₀⟩
 
+/-! ### Power-boundedness of `invS` when `1 ∈ T`
+
+Both lemmas below are stated over a bare topological ring `R`, deliberately *weaker* than
+this file's ambient `[PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]`. That
+matters for the iterated (B-level) constructions, where the base is itself a
+`presheafValue` and no `HasLocLiftPowerBounded` instance is available. -/
+
+/-- `invS D` is the image of `divByS 1 D.s` under `D.coeRingHom`: both are inverse to the
+unit `D.canonicalMap D.s`, so they agree by cancellation. -/
+theorem invS_eq_coeRingHom_divByS_one {R : Type*} [CommRing R] [TopologicalSpace R]
+    [IsTopologicalRing R] (D : RationalLocData R) :
+    invS D = D.coeRingHom (divByS (1 : R) D.s) := by
+  have halg : algebraMap R (Localization.Away D.s) D.s * divByS (1 : R) D.s = 1 := by
+    rw [← invSelf_eq_divByS, IsLocalization.Away.mul_invSelf]
+  have h2 : D.canonicalMap D.s * D.coeRingHom (divByS (1 : R) D.s) = 1 := by
+    change D.coeRingHom (algebraMap R (Localization.Away D.s) D.s) *
+      D.coeRingHom (divByS (1 : R) D.s) = 1
+    rw [← map_mul, halg, map_one]
+  exact (isUnit_s_in_presheafValue D).mul_left_cancel
+    ((canonicalMap_s_mul_invS D).trans h2.symm)
+
+/-- **`invS D` is power-bounded when `1 ∈ D.T`.** The inverse `1/s` then lies in
+`locSubring`, whose `coeRingHom`-image is bounded. -/
+theorem isPowerBounded_invS_of_one_mem_T {R : Type*} [CommRing R] [TopologicalSpace R]
+    [IsTopologicalRing R] (D : RationalLocData R) (h1 : (1 : R) ∈ D.T) :
+    TopologicalRing.IsPowerBounded (invS D) := by
+  rw [invS_eq_coeRingHom_divByS_one]
+  exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T D h1
+
 end ValuationSpectrum

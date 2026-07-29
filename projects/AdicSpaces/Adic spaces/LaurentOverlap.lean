@@ -224,10 +224,8 @@ after rewriting `invS D = D.coeRingHom (divByS 1 D.s)` via
 `invS_eq_coeRingHom_divByS_one`. -/
 theorem invS_isPowerBounded_in_overlap
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B) :
-    TopologicalRing.IsPowerBounded (invS (overlapDatum B P b)) := by
-  rw [invS_eq_coeRingHom_divByS_one]
-  exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T
-    (overlapDatum B P b) (one_mem_overlapDatum_T B P b)
+    TopologicalRing.IsPowerBounded (invS (overlapDatum B P b)) :=
+  isPowerBounded_invS_of_one_mem_T _ (one_mem_overlapDatum_T B P b)
 
 /-- **`canonicalMap b · invS = 1`** in `presheafValue (overlapDatum B P b)`.
 

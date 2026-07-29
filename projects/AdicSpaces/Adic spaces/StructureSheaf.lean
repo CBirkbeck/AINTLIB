@@ -1145,10 +1145,8 @@ theorem presheafValue_flat_of_laurentMinus
     @Module.Flat A (presheafValue D) _ _
       (RingHom.toModule (RationalLocData.canonicalMap D)) := by
   -- `hb` follows from `invS_isPowerBounded_of_one_mem_T` since `1 ∈ D.T`.
-  have hb : TopologicalRing.IsPowerBounded (invS D) := by
-    rw [invS_eq_coeRingHom_divByS_one]
-    exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T D
-      LaurentNormalized.one_mem_T
+  have hb : TopologicalRing.IsPowerBounded (invS D) :=
+    isPowerBounded_invS_of_one_mem_T D LaurentNormalized.one_mem_T
   -- `hT_pb`: `T = {1}` collapses `∀ t ∈ T, IsPowerBounded t` to `IsPowerBounded 1`.
   have hT_pb : ∀ t ∈ D.T, TopologicalRing.IsPowerBounded t := by
     intro t ht

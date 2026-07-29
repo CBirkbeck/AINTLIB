@@ -1322,9 +1322,8 @@ theorem prop_8_30_basic_laurent_step_flat
     rw [hXbar, relativeRationalLocData_laurentNormalized_T E D' hsub]
     rw [show (1 : presheafValue E) = E.canonicalMap (1 : A) from (map_one E.canonicalMap).symm]
     exact Finset.mem_image_of_mem _ LaurentNormalized.one_mem_T
-  have hb : TopologicalRing.IsPowerBounded (invS Xbar) := by
-    rw [invS_eq_coeRingHom_divByS_one]
-    exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T Xbar hone_mem
+  have hb : TopologicalRing.IsPowerBounded (invS Xbar) :=
+    isPowerBounded_invS_of_one_mem_T Xbar hone_mem
   -- `hT_pb`: each `t ∈ Xbar.T = D'.T.image E.canonicalMap` is `E.canonicalMap t'` with `t' ∈ E.P.A₀`.
   -- Power-boundedness of `E.canonicalMap t'` for `t' ∈ E.P.A₀`: all powers of `algebraMap t'` stay
   -- in `locSubring`, whose `coeRingHom`-image is bounded (inlined `canonicalMap_isPowerBounded_of_mem_A₀`,

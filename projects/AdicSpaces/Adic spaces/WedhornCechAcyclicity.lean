@@ -5606,9 +5606,8 @@ private noncomputable def unitCover_example639Minus
   -- `D := R(1/b) = coUnitDatum P_B b`, with `T = {1}`, `s = b`.
   let D := unitCover_minusDatum_B D₀ f
   have h1T : (1 : presheafValue D₀) ∈ D.T := Finset.mem_singleton_self 1
-  have hb : TopologicalRing.IsPowerBounded (invS D) := by
-    rw [invS_eq_coeRingHom_divByS_one]
-    exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T D h1T
+  have hb : TopologicalRing.IsPowerBounded (invS D) :=
+    isPowerBounded_invS_of_one_mem_T D h1T
   have hAc : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
@@ -5641,9 +5640,8 @@ private theorem unitCover_example639Minus_canonicalMap
   -- which is defeq to `(epsilonHom_gen b x).2` (ideal `oneSubfXIdeal b` = `B₂_gen`'s span).
   set D := unitCover_minusDatum_B D₀ f with hD
   have h1T : (1 : presheafValue D₀) ∈ D.T := Finset.mem_singleton_self 1
-  have hb : TopologicalRing.IsPowerBounded (invS D) := by
-    rw [invS_eq_coeRingHom_divByS_one]
-    exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T D h1T
+  have hb : TopologicalRing.IsPowerBounded (invS D) :=
+    isPowerBounded_invS_of_one_mem_T D h1T
   have hAc : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
@@ -5929,9 +5927,8 @@ private theorem unitCover_example639Minus_symm_continuous
     presheafValue_isStronglyNoetherian_faithful D₀
   have h1T : (1 : presheafValue D₀) ∈ (unitCover_minusDatum_B D₀ f).T :=
     Finset.mem_singleton_self 1
-  have hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)) := by
-    rw [invS_eq_coeRingHom_divByS_one]
-    exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T _ h1T
+  have hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)) :=
+    isPowerBounded_invS_of_one_mem_T _ h1T
   exact tateQuotientToPresheafHom_continuous_of_tate (unitCover_minusDatum_B D₀ f) hb
 
 set_option linter.unusedSectionVars false in
@@ -6541,9 +6538,8 @@ private theorem unitCover_sq_minus_dense
     rintro _ ⟨q, rfl⟩
     have h1T : (1 : presheafValue D₀) ∈ (unitCover_minusDatum_B D₀ f).T :=
       Finset.mem_singleton_self 1
-    have hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)) := by
-      rw [invS_eq_coeRingHom_divByS_one]
-      exact CompletionLocalization.invS_isPowerBounded_of_one_mem_T _ h1T
+    have hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)) :=
+      isPowerBounded_invS_of_one_mem_T _ h1T
     have hcomp : ((restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
         ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
           (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
