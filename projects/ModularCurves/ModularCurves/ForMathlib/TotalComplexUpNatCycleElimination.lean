@@ -144,4 +144,124 @@ theorem total_boundary_π_eq_zero_of_lt
       · simpa [hi0, hj0, hs, ConcreteCategory.comp_apply, hzVertical] using h
     · omega
 
+/-- Exactness in the positive part of every vertical row lets us alter a total
+cycle by a boundary so that all components before a prescribed horizontal
+cutoff vanish. -/
+theorem exists_boundary_killing_components_lt
+    (n r : ℕ) (hr : r ≤ n + 1)
+    (x : (K.total (.up ℕ)).X (n + 1))
+    (hx : (K.total (.up ℕ)).d (n + 1) (n + 2) x = 0)
+    (hrow : ∀ q p, q + p = n + 1 → 0 < p →
+      (ShortComplex.mk
+        ((K.X q).d (p - 1) p)
+        ((K.X q).d p (p + 1))
+        ((K.X q).d_comp_d (p - 1) p (p + 1))).Exact) :
+    ∃ b : (K.total (.up ℕ)).X n,
+      ∀ q, q < r →
+        K.πTotalUpNat q (n + 1 - q) (n + 1)
+          (x - (K.total (.up ℕ)).d n (n + 1) b) = 0 := by
+  induction r with
+  | zero =>
+      refine ⟨0, ?_⟩
+      intro q hq
+      omega
+  | succ r ih =>
+      have hr' : r ≤ n + 1 := by omega
+      obtain ⟨b, hb⟩ := ih hr'
+      let p := n + 1 - r
+      have hp : 0 < p := by
+        dsimp [p]
+        omega
+      have hsum : r + p = n + 1 := by
+        dsimp [p]
+        omega
+      let y := x - (K.total (.up ℕ)).d n (n + 1) b
+      have hy : (K.total (.up ℕ)).d (n + 1) (n + 2) y = 0 := by
+        have hd := congrArg (fun f ↦ f b)
+          ((K.total (.up ℕ)).d_comp_d n (n + 1) (n + 2))
+        have hd' :
+            (K.total (.up ℕ)).d (n + 1) (n + 2)
+                ((K.total (.up ℕ)).d n (n + 1) b) = 0 := by
+          simpa only [ConcreteCategory.comp_apply, AddCommGrpCat.hom_zero,
+            AddMonoidHom.zero_apply] using hd
+        simp only [y, map_sub, hx]
+        rw [hd']
+        simp
+      have hleft :
+          r = 0 ∨ K.πTotalUpNat (r - 1) (p + 1) (n + 1) y = 0 := by
+        by_cases hzero : r = 0
+        · exact Or.inl hzero
+        · right
+          have hprev := hb (r - 1) (by omega)
+          have hdeg : n + 1 - (r - 1) = p + 1 := by
+            dsimp [p]
+            omega
+          rw [hdeg] at hprev
+          change K.πTotalUpNat (r - 1) (p + 1) (n + 1) y = 0 at hprev
+          exact hprev
+      have hv :=
+        K.cycle_vertical_of_left_component_eq_zero
+          (n + 1) r p hsum y hy hleft
+      obtain ⟨c, hc⟩ :=
+        ((ShortComplex.mk
+          ((K.X r).d (p - 1) p)
+          ((K.X r).d p (p + 1))
+          ((K.X r).d_comp_d (p - 1) p (p + 1))).ab_exact_iff.mp
+            (hrow r p hsum hp))
+          (K.πTotalUpNat r p (n + 1) y) hv
+      have hsource : r + (p - 1) = n := by omega
+      let t : (K.total (.up ℕ)).X n :=
+        K.ιTotalOrZero (.up ℕ) r (p - 1) n
+          (((-1 : ℤˣ) ^ r) • c)
+      refine ⟨b + t, ?_⟩
+      intro i hi
+      have hy' :
+          x - (K.total (.up ℕ)).d n (n + 1) (b + t) =
+            y - (K.total (.up ℕ)).d n (n + 1) t := by
+        simp only [map_add, y]
+        abel
+      rw [hy']
+      by_cases hir : i = r
+      · subst i
+        change
+          K.πTotalUpNat r p (n + 1)
+            (y - (K.total (.up ℕ)).d n (n + 1) t) = 0
+        rw [map_sub]
+        change
+          K.πTotalUpNat r p (n + 1) y -
+            K.πTotalUpNat r p (n + 1)
+              ((K.total (.up ℕ)).d n (n + 1)
+                (K.ιTotalOrZero (.up ℕ) r (p - 1) n
+                  (((-1 : ℤˣ) ^ r) • c))) = 0
+        have hpsucc : p - 1 + 1 = p := by omega
+        have hboundary :
+            K.πTotalUpNat r p (n + 1)
+                ((K.total (.up ℕ)).d n (n + 1)
+                  (K.ιTotalOrZero (.up ℕ) r (p - 1) n
+                    (((-1 : ℤˣ) ^ r) • c))) =
+              (K.X r).d (p - 1) p c := by
+          have h :=
+            K.total_boundary_π_vertical_negOnePow n r (p - 1)
+              hsource c
+          rw [hpsucc] at h
+          exact h
+        rw [hboundary, hc, sub_self]
+      · have hir' : i < r := by omega
+        have hiy := hb i hir'
+        have hit :=
+          K.total_boundary_π_eq_zero_of_lt
+            n r (p - 1) i (n + 1 - i) hsource (by omega) hir'
+              (((-1 : ℤˣ) ^ r) • c)
+        change
+          K.πTotalUpNat i (n + 1 - i) (n + 1)
+            (y - (K.total (.up ℕ)).d n (n + 1) t) = 0
+        rw [map_sub, hiy]
+        change
+          0 -
+            K.πTotalUpNat i (n + 1 - i) (n + 1)
+              ((K.total (.up ℕ)).d n (n + 1)
+                (K.ιTotalOrZero (.up ℕ) r (p - 1) n
+                  (((-1 : ℤˣ) ^ r) • c))) = 0
+        rw [hit, sub_zero]
+
 end HomologicalComplex₂
