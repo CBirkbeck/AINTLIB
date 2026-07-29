@@ -717,6 +717,42 @@ theorem equiv_canonicalMap (S : PerturbSetup E) (x : E) :
 end PerturbSetup
 
 /-- Existence of an integral Bezout relation for a rational datum in a normed Tate
+ring, without any normalization of the entries (the coefficients absorb the
+scaling; [WP] cor:finite-head-presentation, first step). -/
+theorem exists_integral_bezout' (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)
+    (ht0 : 0 < ‖t‖) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
+    (D : RationalLocData E) (hD : D.IsRational) :
+    ∃ (ℓ : ℕ) (a : E → E), (∀ x, ‖a x‖ ≤ 1) ∧ ∑ x ∈ D.T, a x * x = t ^ ℓ := by
+  classical
+  haveI : IsTateRing E := FiniteJet.isTateRing_of_scale t htu ht1 ht0 hscale
+  have h1 : (1 : E) ∈ Ideal.span (D.T : Set E) := by
+    rw [hD.span_eq_top]
+    trivial
+  obtain ⟨c, -, hc⟩ := Submodule.mem_span_finset.mp h1
+  set M := ∑ x ∈ D.T, ‖c x‖ with hM
+  have hM0 : 0 ≤ M := Finset.sum_nonneg fun x _ => norm_nonneg _
+  have hMx : ∀ x ∈ D.T, ‖c x‖ ≤ M := fun x hx =>
+    Finset.single_le_sum (fun y _ => norm_nonneg (c y)) hx
+  obtain ⟨ℓ, hℓ⟩ : ∃ ℓ : ℕ, ‖t‖ ^ ℓ * M ≤ 1 := by
+    rcases eq_or_lt_of_le hM0 with h0 | hMpos
+    · exact ⟨0, by rw [← h0, mul_zero]; exact zero_le_one⟩
+    · obtain ⟨ℓ, hℓ⟩ := exists_pow_lt_of_lt_one (div_pos one_pos hMpos) ht1
+      exact ⟨ℓ, ((lt_div_iff₀ hMpos).mp hℓ).le⟩
+  refine ⟨ℓ, fun x => if x ∈ D.T then t ^ ℓ * c x else 0, fun x => ?_, ?_⟩
+  · show ‖if x ∈ D.T then t ^ ℓ * c x else 0‖ ≤ 1
+    by_cases hx : x ∈ D.T
+    · rw [if_pos hx, FiniteJet.norm_pow_mul_of_scale hscale]
+      calc ‖t‖ ^ ℓ * ‖c x‖ ≤ ‖t‖ ^ ℓ * M :=
+            mul_le_mul_of_nonneg_left (hMx x hx) (pow_nonneg ht0.le ℓ)
+        _ ≤ 1 := hℓ
+    · rw [if_neg hx, norm_zero]
+      exact zero_le_one
+  · rw [Finset.sum_congr rfl fun x hx => by
+      show (if x ∈ D.T then t ^ ℓ * c x else 0) * x = t ^ ℓ * (c x * x)
+      rw [if_pos hx, mul_assoc], ← Finset.mul_sum]
+    rw [show ∑ x ∈ D.T, c x * x = 1 from hc, mul_one]
+
+/-- Existence of an integral Bezout relation for a rational datum in a normed Tate
 ring ([WP] cor:finite-head-presentation, first step: "Choose an integral Bezout
 relation `ϖ^ℓ = ∑ a_j d_j, a_j ∈ 𝒜₀`"). -/
 theorem exists_integral_bezout (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)

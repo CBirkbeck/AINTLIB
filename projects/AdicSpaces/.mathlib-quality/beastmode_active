@@ -1,1 +1,1 @@
-FOCUS: W16 — headLocEquiv (presheafValue ≃ QHead): Bezout s-unit + restrictedEval reverse
+FOCUS: W16 stage B — headLocFwdAlg via Away.lift + locTopology_continuous_lift; then rev via restrictedEval

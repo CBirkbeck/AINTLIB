@@ -245,6 +245,87 @@ noncomputable def rhoQ (DH : RationalLocData (WPHead K w N)) : TwistElem (QHead 
     · rw [norm_zero]
       exact zero_le_one
 
+variable {K w N} in
+/-- The constant map into the head graph model. -/
+noncomputable def headConst (DH : RationalLocData (WPHead K w N)) :
+    WPHead K w N →+* QHead DH :=
+  (Ideal.Quotient.mk (headGraphIdeal DH)).comp
+    ((polyToP (E := WPHead K w N) (m := DH.T.card)).comp
+      (MvPolynomial.C : WPHead K w N →+* MvPolynomial (Fin DH.T.card) (WPHead K w N)))
+
+variable {K w N} in
+theorem norm_headConst_le (DH : RationalLocData (WPHead K w N)) (x : WPHead K w N) :
+    ‖headConst DH x‖ ≤ ‖x‖ := by
+  classical
+  show ‖(Ideal.Quotient.mk (headGraphIdeal DH) (polyToP (MvPolynomial.C x)) :
+    QHead DH)‖ ≤ ‖x‖
+  refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+  rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine Real.iSup_le (fun t => ?_) (norm_nonneg x)
+  rw [FiniteJet.finsupp_prod_one, mul_one, polyToP_C_val, MvPowerSeries.coeff_C]
+  split_ifs
+  · exact le_refl _
+  · rw [norm_zero]
+    exact norm_nonneg x
+
+variable {K w N} in
+theorem headConst_continuous (DH : RationalLocData (WPHead K w N)) :
+    Continuous (headConst DH) :=
+  AddMonoidHomClass.continuous_of_bound (headConst DH) 1 fun x => by
+    rw [one_mul]
+    exact norm_headConst_le DH x
+
+variable {K w N} in
+/-- The image of the `i`-th Tate variable in the head graph model. -/
+noncomputable def qX (DH : RationalLocData (WPHead K w N)) (i : Fin DH.T.card) :
+    QHead DH :=
+  Ideal.Quotient.mk (headGraphIdeal DH) (polyToP (MvPolynomial.X i))
+
+variable {K w N} in
+/-- The defining relation of the graph model: `headConst t = headConst s · mk(X i)`
+for the `i`-th entry. -/
+theorem headConst_datumEnum (DH : RationalLocData (WPHead K w N))
+    (i : Fin DH.T.card) :
+    headConst DH ((datumEnum DH i : ↥DH.T) : WPHead K w N) =
+      headConst DH DH.s * qX DH i := by
+  have hrel : Ideal.Quotient.mk (headGraphIdeal DH) (headGraphRel DH i) = 0 := by
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    show headGraphRel DH i ∈ headGraphIdeal DH
+    rw [headGraphIdeal, ← SetLike.mem_coe, Ideal.coe_closure]
+    exact subset_closure (Ideal.subset_span ⟨i, rfl⟩)
+  rw [headGraphRel, map_sub, map_sub, sub_eq_zero] at hrel
+  rw [show headConst DH ((datumEnum DH i : ↥DH.T) : WPHead K w N) =
+    Ideal.Quotient.mk (headGraphIdeal DH)
+      (polyToP (MvPolynomial.C ((datumEnum DH i : ↥DH.T) : WPHead K w N))) from rfl]
+  rw [← hrel, map_mul, map_mul]
+  rfl
+
+variable {K w N} in
+/-- `s` is a unit in the head graph model ([WP] lem:koszul's Bezout trick:
+`t^ℓ = s·(∑ a_i T_i)` mod the graph ideal, and `t` is a unit). -/
+theorem isUnit_headConst_s (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    IsUnit (headConst DH DH.s) := by
+  classical
+  obtain ⟨ℓ, a, ha1, hbez⟩ := exists_integral_bezout' (piHead ϖ) (isUnit_piHead ϖ)
+    (norm_piHead_lt_one ϖ) (norm_piHead_pos ϖ) (norm_piHead_mul ϖ) DH hDH
+  have hmap : headConst DH (piHead ϖ) ^ ℓ =
+      headConst DH DH.s * ∑ i : Fin DH.T.card,
+        headConst DH (a ((datumEnum DH i : ↥DH.T) : WPHead K w N)) * qX DH i := by
+    rw [← map_pow, ← hbez, map_sum]
+    rw [← Finset.sum_coe_sort DH.T
+      (fun x => headConst DH (a x * x))]
+    rw [← Equiv.sum_comp (datumEnum DH)
+      (fun y : ↥DH.T => headConst DH (a (y : WPHead K w N) * (y : WPHead K w N)))]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [map_mul, headConst_datumEnum]
+    ring
+  have htu : IsUnit (headConst DH (piHead ϖ) ^ ℓ) :=
+    ((isUnit_piHead ϖ).map (headConst DH)).pow ℓ
+  rw [hmap] at htu
+  exact isUnit_of_mul_isUnit_left htu
+
 /-! ### The head bridge `presheafValue ≃ QHead` -/
 
 variable {K w N} in

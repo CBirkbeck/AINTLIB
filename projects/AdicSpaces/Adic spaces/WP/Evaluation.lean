@@ -180,9 +180,11 @@ theorem evalFun_mul (φ : E →+* B) (hφ : Continuous φ) (b : Fin m → B)
 /-- **Evaluation of restricted power series at a power-bounded tuple**: the universal
 property of `E⟨T_1,…,T_m⟩` (Huber's (1.2); the generic form of the `chartEval`
 construction, `FJP/Over/Chart.lean`).  Requires the coefficient images to be null and
-the target monoid `{b^t}` bounded — both from `hb` and continuity of `φ`. -/
+the target monoid `{b^t}` bounded — both from `hb` and continuity of `φ`.
+(2026-07-29: the skeleton's extra bounded-image hypothesis on `φ` was dropped —
+Huber (1.2) needs only continuity and power-boundedness, and the construction
+never used it.) -/
 noncomputable def restrictedEval (φ : E →+* B) (hφ : Continuous φ)
-    (hφb : ∀ S : Set E, Bornology.IsBounded S → IsBounded (φ '' S))
     (b : Fin m → B) (hb : ∀ i, IsPowerBounded (b i)) :
     P E m →+* B where
   toFun := evalFun φ b
@@ -192,15 +194,13 @@ noncomputable def restrictedEval (φ : E →+* B) (hφ : Continuous φ)
   map_add' := evalFun_add φ hφ b hb
 
 theorem restrictedEval_apply (φ : E →+* B) (hφ : Continuous φ)
-    (hφb : ∀ S : Set E, Bornology.IsBounded S → IsBounded (φ '' S))
     (b : Fin m → B) (hb : ∀ i, IsPowerBounded (b i)) (F : P E m) :
-    restrictedEval φ hφ hφb b hb F =
+    restrictedEval φ hφ b hb F =
       ∑' t : Fin m →₀ ℕ, φ (MvPowerSeries.coeff t F.1) * ∏ i, b i ^ t i := rfl
 
 @[simp] theorem restrictedEval_C (φ : E →+* B) (hφ : Continuous φ)
-    (hφb : ∀ S : Set E, Bornology.IsBounded S → IsBounded (φ '' S))
     (b : Fin m → B) (hb : ∀ i, IsPowerBounded (b i)) (x : E) :
-    restrictedEval φ hφ hφb b hb (polyToP (MvPolynomial.C x)) = φ x := by
+    restrictedEval φ hφ b hb (polyToP (MvPolynomial.C x)) = φ x := by
   classical
   rw [restrictedEval_apply, tsum_eq_single (0 : Fin m →₀ ℕ) ?_]
   · rw [coeff_polyToP, MvPolynomial.coeff_C, if_pos rfl,
@@ -211,9 +211,8 @@ theorem restrictedEval_apply (φ : E →+* B) (hφ : Continuous φ)
       zero_mul]
 
 @[simp] theorem restrictedEval_X (φ : E →+* B) (hφ : Continuous φ)
-    (hφb : ∀ S : Set E, Bornology.IsBounded S → IsBounded (φ '' S))
     (b : Fin m → B) (hb : ∀ i, IsPowerBounded (b i)) (i : Fin m) :
-    restrictedEval φ hφ hφb b hb (polyToP (MvPolynomial.X i)) = b i := by
+    restrictedEval φ hφ b hb (polyToP (MvPolynomial.X i)) = b i := by
   classical
   rw [restrictedEval_apply, tsum_eq_single (Finsupp.single i 1) ?_]
   · rw [coeff_polyToP, MvPolynomial.coeff_X', if_pos rfl, map_one, one_mul,
@@ -227,13 +226,12 @@ theorem restrictedEval_apply (φ : E →+* B) (hφ : Continuous φ)
       zero_mul]
 
 theorem restrictedEval_continuous (φ : E →+* B) (hφ : Continuous φ)
-    (hφb : ∀ S : Set E, Bornology.IsBounded S → IsBounded (φ '' S))
     (b : Fin m → B) (hb : ∀ i, IsPowerBounded (b i)) :
-    Continuous (restrictedEval φ hφ hφb b hb) := by
+    Continuous (restrictedEval φ hφ b hb) := by
   classical
-  refine continuous_of_continuousAt_zero (restrictedEval φ hφ hφb b hb).toAddMonoidHom ?_
+  refine continuous_of_continuousAt_zero (restrictedEval φ hφ b hb).toAddMonoidHom ?_
   show Tendsto _ (𝓝 0) (𝓝 _)
-  rw [show (restrictedEval φ hφ hφb b hb).toAddMonoidHom (0 : P E m) = 0 from
+  rw [show (restrictedEval φ hφ b hb).toAddMonoidHom (0 : P E m) = 0 from
     map_zero _]
   refine Filter.tendsto_def.mpr fun U hU => ?_
   obtain ⟨U₀, hU₀⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
@@ -297,21 +295,20 @@ theorem denseRange_polyToP :
 /-- Uniqueness of the evaluation extension on the closure of the polynomial subring
 (the polynomials are dense in `E⟨T⟩`, [FJP] (4.4)). -/
 theorem restrictedEval_unique (φ : E →+* B) (hφ : Continuous φ)
-    (hφb : ∀ S : Set E, Bornology.IsBounded S → IsBounded (φ '' S))
     (b : Fin m → B) (hb : ∀ i, IsPowerBounded (b i))
     (ψ : P E m →+* B) (hψ : Continuous ψ)
     (hψC : ∀ x : E, ψ (polyToP (MvPolynomial.C x)) = φ x)
     (hψX : ∀ i, ψ (polyToP (MvPolynomial.X i)) = b i) :
-    ψ = restrictedEval φ hφ hφb b hb := by
+    ψ = restrictedEval φ hφ b hb := by
   have hpoly : ∀ Q : MvPolynomial (Fin m) E,
-      ψ (polyToP Q) = restrictedEval φ hφ hφb b hb (polyToP Q) := by
+      ψ (polyToP Q) = restrictedEval φ hφ b hb (polyToP Q) := by
     intro Q
     induction Q using MvPolynomial.induction_on with
     | C x => rw [hψC, restrictedEval_C]
     | add p q hp hq => rw [map_add, map_add, map_add, hp, hq]
     | mul_X p i hp => rw [map_mul, map_mul, map_mul, hp, hψX, restrictedEval_X]
-  have hfun : ⇑ψ = ⇑(restrictedEval φ hφ hφb b hb) :=
-    denseRange_polyToP.equalizer hψ (restrictedEval_continuous φ hφ hφb b hb)
+  have hfun : ⇑ψ = ⇑(restrictedEval φ hφ b hb) :=
+    denseRange_polyToP.equalizer hψ (restrictedEval_continuous φ hφ b hb)
       (funext hpoly)
   exact RingHom.ext fun F => congrFun hfun F
 
