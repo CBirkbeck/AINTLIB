@@ -158,3 +158,27 @@ lemma's name.
 **Mover limitation to remember**: relocating a lemma upward requires checking the lemma's
 OWN dependencies are still above it.  `move_lemma.py` does not check this — it broke
 PresheafTateStructure exactly this way, caught by the module build.
+
+### Misplaced-lemma sweep: FINAL YIELD — smaller than I projected
+
+Filtered pass (`misplaced2.py`: `by` proof, >=4 lines, not already delegating) cut 89 raw
+matches to **12 candidates / 141 lines**.  Adjudicating those 12 by hand:
+
+* **2 REAL, fixed** (53 lines): WittF `bddAbove_gaussTermF_of_coords_shift` (three copies of
+  one fact), Groebner `gaussNormRPS_ne_zero`.
+* **1 REAL but circular**, queued: PresheafTateStructure — needs the shared step extracted
+  above both, not a relocation.
+* **The rest are FALSE POSITIVES**, and the failure mode is instructive:
+  `productRestrictionSub_injective_of_flat_and_lifting` (Cor832:370) appeared to be inlined
+  three times (26L + 14L + 4L).  It is not.  The conclusion matches
+  (`Function.Injective (productRestrictionSub A C)`) but the proofs derive it from
+  **different hypotheses** — the lemma needs flatness + Spa-lifting; SheafyPair proves it
+  from `IsLimitSheaf`.  Independent proofs of one conclusion, not duplication.
+
+**Lesson: conclusion-matching over-reports badly.**  A statement match is necessary but far
+from sufficient — you must also check the lemma's HYPOTHESES are available at the use site.
+That is not cheaply automatable, so this sweep is a ~2-fix tool, not the free win I
+projected when I recommended running it first.  Import reachability *is* worth checking
+mechanically (it correctly ruled TateAcyclicity's copy out of scope).
+
+Corrected expectation: the 486 decompositions are the work; there is no shortcut around them.
