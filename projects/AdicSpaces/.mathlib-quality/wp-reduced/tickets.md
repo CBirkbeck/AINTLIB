@@ -1120,11 +1120,19 @@ propext/Classical.choice/Quot.sound) before marking done.
   finite-level commutative algebra, no mathlib precedent.
 ### [HRW-4] THE TATE LEAF (retitled 2026-07-30; was: L3.a Z-elimination)
 - Status: open | File: new (TateAlgebraCompletedLocal.lean, generic) | Depends: none
-- REARCHITECTED per hrw-decomposition "L3 REARCHITECTED": completed locals of
-  K⟨X_1..X_d⟩ at maximals are domains, via N1 affinoid Nullstellensatz (BGR
-  6.1.2/3, ~500-1000 LOC — open with its own decompose round) + N2
-  rationalization/faithfully-flat-cofinal + N3 truncated-Taylor B̂_𝔫 ≅ L⟦T⟧ +
-  N4 transport. ~1350-2750 LOC total. The ONLY analytic leaf of the wall.
+- REARCHITECTED TWICE — final plan = hrw-decomposition "THE TATE LEAF
+  DECOMPOSED" (DVR integral-model route, NO Weierstrass, 11 leaves,
+  ~500-850 LOC + downstream). PROGRESS 2026-07-30: leaf 7 DONE
+  (NoetherianGDomain.lean — the G-domain lemma: collapse/minimal-prime/
+  maximality forms; gotchas: Submonoid.powers-membership is a beta-redex,
+  ascribe before rw; ⋆ not an identifier char; height API =
+  height_add_one_le_of_lt_of_isPrime + height_eq_zero_iff_eq_bot + gcongr for
+  ℕ∞); leaf 10 DONE (AdicNakayama.lean — topological Nakayama +
+  isPrecomplete_pi + ideal_smul_top_self/_pi; mathlib had NO Pi-instance).
+  REMAINING leaves: 1 (DVR bridge), 2-5 (T°-plumbing; leaf 5 noetherianity of
+  T° — probe the vendored Coram argument), 6 (B-assembly), 8-9 (KrullDimLE-0
+  + finite_iff_krullDimLE_zero), 11 (IsPrecomplete 𝒪_K + IsHausdorff B +
+  localize), 12-14 (scalar extension + Taylor + completed base change).
 - Decls: `head_completedLocal_reduced_of_wa_notMem` (+ its sub-decomposition when
   opened: A_N[1/W] = K⟨W,U⟩[1/W] support identity; `tateAlgebra_completedLocal_
   reduced` leaf — check the 828b Nullstellensatz artifacts first).
