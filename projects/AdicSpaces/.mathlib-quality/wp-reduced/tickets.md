@@ -632,7 +632,33 @@ propext/Classical.choice/Quot.sound) before marking done.
   injectivity is in hand.
 
 ### [W21a] The pushed head cover (shared W21/W22 infrastructure)
-- Status: open | File: WP/Sheafy.lean | Depends: W18
+- Status: in_progress (2026-07-29; (i) done, (ii)-(iv) designed) | File: WP/Sheafy.lean | Depends: W18
+- **Progress**: (i) DONE — `exists_head_approx_finset_all` (approximation at every
+  stage above a threshold, inclusion-upcast), `nonempty_headModelData_all` (the
+  exact-stage ∀-M primitive; W18's proof re-threaded — set-before-obtain so g is
+  typed at N; original derived), `exists_common_headModel_stage` (Finset.sup of
+  attached thresholds — base and every piece modeled at ONE M). All compiled
+  first-try, committed.
+- **Design decision for (ii)-(iii) (2026-07-29, supersedes the split-map sketch)**:
+  the paper's split-surjection eq:split-spectrum-map serves ITS in-U formulation
+  (E := O(U), coefficient projection E → P_M). The project's HeadModelData are
+  𝒜-GLOBAL (hopen : rationalOpen (liftDatum DH).T/s = rationalOpen D.T/s in
+  Spa 𝒜), which admits a DIRECT transfer: pull head-points back along
+  `rhoHead : 𝒜 →+* WPHead M` (the norm-nonincreasing retraction, W9).
+  For v ∈ Spa(WPHead M, °): v ∘ ρ is a Spa(𝒜, °)-point (power-bounded goes to
+  power-bounded under ρ by norm_rhoHead_le), and on liftDatum-entries
+  v(ρ(headIncl t)) = v(t) by rhoHead_headIncl — so membership transfers
+  DEFINITIONALLY: v ∈ rationalOpen(DH_i) ↔ v∘ρ ∈ rationalOpen(liftDatum DH_i)
+  = rationalOpen(D_i) (model.hopen). hsubset and hcover of the pushed covering
+  both follow by this pullback + C's own hsubset/hcover. NO split surjection,
+  NO maximal-pair subspace needed for the covering-data construction. (The
+  split-map may still be needed for W22's Čech-equalizer boundedness transfer —
+  keep the [WP] 1156–1218 reference alive there.) Remaining: (ii) build
+  `pushedHeadCover (C) (models) : RationalCoveringData (WPHead K w M)` with the
+  Spv-comap machinery (AdicSpectrum comap; check the project's Spv-pullback API
+  for Spa-membership + vle-compat along ring homs), (iii) its IsRational (models'
+  hDH), (iv) the per-piece compat squares (restriction vs coeffLocEquiv,
+  [WP] eq:cover-coefficientwise naturality).
 - Decls (planned): (i) `nonempty_headModelData_family` — common stage M for ALL
   data of a finite rational covering (iterate W18's perturbation at a common
   precision; alternatively upcast per-datum models along N ≤ M — needs a
