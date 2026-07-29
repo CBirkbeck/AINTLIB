@@ -970,6 +970,31 @@ propext/Classical.choice/Quot.sound) before marking done.
   Q_0 = R3; successor: E on 𝒪(D) → F + equivalence → reducedness from R3(F) +
   depth from Q_n(F) transported by `chainReduced_of_ringEquiv`; assemble
   `chainReduced_WPA` with IsReduced 𝒜.
+- **Progress (2026-07-29 night)**: [R4-final] DONE — `chainReduced_WPA` compiles
+  via the Q_n induction; the ONLY remaining sorry of the R-track is
+  `exists_transitivity_WPA` (this ticket's target). REFINED FINDINGS from the
+  first implementation probe:
+  * The W18 `PerturbSetup` is NORMED (pseudouniformizer with exact scaling,
+    norm-1 unit ball in E⁺) — instantiating it at the model TailC0 requires the
+    model's SPA/HUBER STACK (PlusSubring, IsTateRing, HasLocLiftPowerBounded,
+    rational-open compactness), which DOES NOT EXIST — the model was only ever a
+    normed comparison object. Two options: (α) build the model Spa-stack
+    (W15/W16-scale arc), or (β) build a TOPOLOGICAL perturbation variant at
+    B := presheafValue D directly (B has IsTateRing via
+    presheafValue_isTateRing_concrete; Huber Cont.Val. 3.10 is topological).
+  * Δ-PADDING pb-dissolution trick: insert the padding numerator ϖ^m ON THE
+    B-SIDE first (equal-open by Wedhorn 7.31 domination at B on the compact
+    locus + generic equal-open restrictionEquiv), THEN pull down — the
+    (t·ϖ^m)/(sq)-power-bounded witness for Φ then comes from the DATUM
+    structure itself (numerator fractions are canonically pb), avoiding any
+    Spa-pb-transfer (which is UNAVAILABLE — 𝒜 is not stably uniform!).
+  * B-side compactness: `isCompact_subtype_rationalOpen` needs a PRINCIPAL
+    ideal-of-definition; B's `presheafValue_concretePair` has
+    I = Ideal.map (…) (locIdeal P T s) — principality UNVERIFIED (probe
+    locIdeal's def; the SpaCompactNoHArch:389 consumer shows the usage shape).
+  * NEXT: run a /develop --decompose-style leaf pass on this ticket (route α
+    vs β adjudication with quotes from Huber Cont.Val. 3.9/3.10) before
+    implementing further.
 
 - Decls: `chainReduced_WPA` (+ the transport helper it needs: ChainReduced along a
   bicontinuous ring iso with datum pushforward — state during ticket as a private
