@@ -15,7 +15,7 @@ explicit kernels and quotients used by the algebraic base-change API.
 open CategoryTheory
 open TensorProduct
 
-universe u v
+universe u v w
 
 namespace ModularCurves
 
@@ -25,7 +25,7 @@ variable {R : Type u} [CommRing R]
 modules. -/
 theorem ShortComplex.moduleFinite_baseChangeHomology_of_flat
     (S : ShortComplex (ModuleCat.{v} R))
-    (A : Type v) [CommRing A] [Algebra R A] [Module.Flat R A]
+    (A : Type w) [CommRing A] [Algebra R A] [Module.Flat R A]
     [Module.Finite R S.homology] :
     Module.Finite A
       (ShortComplex.moduleCatMk
