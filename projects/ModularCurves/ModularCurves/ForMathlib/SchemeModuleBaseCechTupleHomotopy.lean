@@ -829,6 +829,70 @@ theorem baseCechTupleMapF_alternatingProjection
       π M U n i hi]
     simp
 
+/-- The zero tuple-chain map does not enlarge support. -/
+theorem cechTupleSupportNonincreasing_zero
+    {ι : Type u} {n m : ℕ} :
+    CechTupleSupportNonincreasing
+      (0 : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m) := by
+  intro i
+  change CechTupleChain.SupportedBy 0 (Set.range i)
+  exact CechTupleChain.supportedBy_zero
+
+/-- The restriction lift sends the zero tuple-chain map to zero. -/
+theorem baseCechTupleMapF_zero
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n m : ℕ) :
+    baseCechTupleMapF π M U
+        (0 : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m)
+        cechTupleSupportNonincreasing_zero = 0 := by
+  apply baseCechHom_ext π M U n
+  intro i
+  let p : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U n i :=
+    Pi.π (fun q : Fin (n + 1) → ι =>
+      baseCechFactor π M U n q) i
+  calc
+    baseCechTupleMapF π M U 0
+          cechTupleSupportNonincreasing_zero ≫ p =
+        baseCechTupleMapComponent π M U 0
+          cechTupleSupportNonincreasing_zero i := by
+      dsimp only [p]
+      exact baseCechTupleMapF_comp_π π M U 0
+        cechTupleSupportNonincreasing_zero i
+    _ = 0 := by
+      change baseCechTupleRow π M U i
+        ((0 : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m)
+          (Finsupp.single i 1)) = 0
+      simp
+    _ = 0 ≫ p := by simp
+
+/-- Equal support-nonincreasing tuple maps have equal restriction lifts. -/
+theorem baseCechTupleMapF_congr
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) {n m : ℕ}
+    (f g : CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι m)
+    (hf : CechTupleSupportNonincreasing f)
+    (hg : CechTupleSupportNonincreasing g) (hfg : f = g) :
+    baseCechTupleMapF π M U f hf =
+      baseCechTupleMapF π M U g hg := by
+  subst g
+  rfl
+
+/-- The tuple homotopy identity as an equality of integral linear maps. -/
+theorem cechTupleAlternatingHomotopy_linear_identity
+    {ι : Type u} [LinearOrder ι] (n : ℕ) :
+    (cechTupleBoundary n).comp
+          (cechTupleAlternatingHomotopy n) +
+        cechTupleAlternatingHomotopyPrevious n =
+      cechTupleAlternatingProjection n +
+        -(LinearMap.id :
+          CechTupleChain ι n →ₗ[ℤ] CechTupleChain ι n) := by
+  apply LinearMap.ext
+  intro x
+  simpa only [LinearMap.add_apply, LinearMap.comp_apply,
+    LinearMap.neg_apply, LinearMap.id_apply, sub_eq_add_neg]
+    using cechTupleAlternatingHomotopy_identity n x
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
