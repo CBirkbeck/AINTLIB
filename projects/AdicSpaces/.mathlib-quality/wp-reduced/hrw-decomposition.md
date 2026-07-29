@@ -182,3 +182,65 @@ reviewer: build the map H/𝔭ⁿ-side → Q/𝔮ⁿ from headToQ (functoriality
 Bottom line: L1.b decomposes into (I'-openness/surjectivity mod powers) +
 (II'-kernel) + (iii-limits); (I') hinges on OPENNESS OF 𝔮 — adjudicate before
 any Lean is written.
+
+
+## L3 REARCHITECTED (2026-07-30 ChatGPT-5.6-xhigh adjudication — supersedes the L3.a/L3.b chart split)
+
+**The finite-embedding shortcut**: P := WPHead K w N embeds FINITELY into the
+full Tate algebra Q := K⟨W, U_0..U_N⟩ via Y_i ↦ W^{w_i}·U_i, Z_i ↦ U_i²
+(injective by the existing support argument; Q is P-module-finite with basis
+{U^ε : ε ∈ {0,1}^{N+1}}). For 𝔪 maximal in P: A := P_𝔪, C := (P∖𝔪)⁻¹Q is
+semilocal finite over A; noetherian completion exactness
+(`AdicCompletion.map_exact` + `ofTensorProductEquivOfFiniteNoetherian`) gives
+Â ↪ Ĉ^{𝔪C} ≅ ∏_j (C_{𝔫_j})^ (semilocal decomposition: Jacobson-radical
+nilpotence mod 𝔪C + CRT for powers + completion-of-products — a modest
+hand-build, ~500-1000 LOC). Each C_{𝔫_j} is a LOCAL RING OF THE FULL TATE
+ALGEBRA Q ⇒ reduced (domain) by THE TATE LEAF. isReduced_of_injective closes.
+NO chart split, NO char-2 special-casing (char-2: Q/P radicial over the
+singular locus — one point above, giving DOMAIN there; char≠2: several points
+= the genuine formal branches — reduced only, as it must be).
+
+**THE TATE LEAF** (the one remaining analytic input): completed locals of
+K⟨X_1..X_d⟩ at maximals are domains. Adjudicated least-work route
+(~1350-2750 LOC, 6-11 sessions):
+1. Affinoid Nullstellensatz (BGR 6.1.2/3): residue fields finite over K
+   (500-1000 LOC — the big sub-leaf).
+2. Scalar-extend to B := L⟨X⟩ (L := A/𝔪 finite); the point rationalizes:
+   𝔫 = (X_i − x_i) maximal over 𝔪.
+3. A_𝔪 → B_𝔫 faithfully flat local + cofinal adic topologies
+   (𝔫^e ⊆ 𝔪B_𝔫 via the zero-dimensional finite fibre).
+4. ⇒ Â_𝔪 ↪ B̂_𝔫.
+5. B̂_𝔫 ≅ L⟦T_1..T_d⟧ by truncated Taylor at the rational point
+   (B_𝔫/𝔫^r ≅ L[T]/(T)^r levelwise; inverse limits).
+6. MvPowerSeries L is a domain (mathlib NoZeroDivisors) ⇒ done.
+Explicitly AVOID: coefficient fields, Cohen structure, completion-of-regular-
+is-regular, associated-graded theory (route (iii) is sound but costlier:
+gr-domain ⇒ completion-domain via projection-kernel filtration + initial
+forms — reusable infra if ever wanted; mathlib has NEITHER
+gr(regular) ≅ Sym(m/m²) NOR the gr-criterion today).
+
+**L3.b truth clarified**: at the ORIGIN the completed local IS a domain in
+every characteristic (parity-support embedding into F⟦W,T⟧, Y_i ↦ W^{w_i}T_i,
+Z_i ↦ T_i² — disjoint parity supports); at general singular points char ≠ 2
+it is REDUCED with several branches (Y² − W^{2w}(c+T) splits); char 2 domain
+after purely-inseparable rationalization (V := Y − W^w·d, V² = W^{2w}T).
+The finite-embedding route makes all of this automatic.
+
+**CM/Serre route (d) adjudicated AGAINST**: mathematically fine (W is a
+non-zero-divisor mod the relations via the U^ε-free basis ⇒ minimal primes
+avoid W ⇒ ∂/∂Z-Jacobian unit there, char-free) but mathlib has no
+R_0+S_1/CM/unmixedness framework — 2500-5000 LOC. Rejected.
+
+**Warning recorded**: "P is a domain" does NOT imply completed locals
+generically reduced (noetherian local domains can have nonreduced
+completions) — never shortcut via the global domain fact alone.
+
+### Revised ticket map
+- HRW-4 (retitled): THE TATE LEAF — open with its own decomposition round:
+  N1 affinoid Nullstellensatz; N2 rationalization+flat-local-cofinal; N3 the
+  L⟦T⟧-completion; N4 transport. Start with N1's decompose.
+- HRW-5 (retitled): the finite-embedding semilocal reduction (P ↪ Q,
+  module-finiteness, semilocal completed decomposition, assembly into
+  head_completedLocal_reduced). Independent of N1-N4 except the final glue.
+- HRW-3 (unchanged): the L1 comparison; the drafted openness-pivot question
+  still needs its own adjudication round.
