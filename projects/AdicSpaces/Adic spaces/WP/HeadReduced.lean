@@ -112,6 +112,87 @@ theorem wpHeadSupport_le_zero_weight (N : ℕ) :
   show WPMem (fun _ => 0) t
   simp [WPMem, wpWeight]
 
+/-! ### HRW-5(ii) — the parity module decomposition of the zero-weight head
+
+`K⟨W,U⟩ = ⊕_{E ⊆ {1,…,N}} 𝒜_N·U^E` ([WP] lem:finite-stage-normal-form at both
+weights; [hrw-decomposition] "subring-coding simplification"): the zero-weight
+head is module-finite over every weighted head through the square-free parity
+monomials.  This is the finiteness half of the semilocal reduction. -/
+
+section ParityDecomposition
+
+variable {K w} (N : ℕ)
+
+/-- The square-free exponent of a parity pattern `E ⊆ {1,…,N}`. -/
+noncomputable def parityExp (E : Finset ℕ) : ℕ →₀ ℕ :=
+  Finsupp.indicator E fun _ _ => 1
+
+theorem parityExp_apply (E : Finset ℕ) (n : ℕ) :
+    parityExp E n = if n ∈ E then 1 else 0 := by
+  classical
+  rw [parityExp, Finsupp.indicator_apply]
+  split_ifs <;> rfl
+
+/-- The square-free parity monomial `U^E` in the zero-weight head. -/
+noncomputable def parityMonomialZ (E : Finset ℕ)
+    (hE : E ⊆ Finset.Icc 1 N) : WPHead K (fun _ => 0) N :=
+  ⟨⟨MvPowerSeries.monomial (parityExp E) (1 : K),
+      MvPowerSeries.isRestrictedGauss_monomial _ _ _⟩, fun t ht => by
+    show MvPowerSeries.coeff t
+      (MvPowerSeries.monomial (parityExp E) (1 : K)) = 0
+    classical
+    rw [MvPowerSeries.coeff_monomial, if_neg]
+    rintro rfl
+    refine ht ⟨by simp [WPMem, wpWeight], fun n hn => ?_⟩
+    rw [parityExp_apply, if_neg]
+    intro hnE
+    exact absurd (Finset.mem_Icc.mp (hE hnE)).2 (by omega)⟩
+
+/-- The `E`-slice of a zero-weight head element: the even-off-`0` coefficients
+shifted by the parity exponent, as a weighted-head element (even exponents have
+parity weight zero). -/
+noncomputable def paritySlice (E : Finset ℕ)
+    (q : WPHead K (fun _ => 0) N) : WPHead K w N := by
+  classical
+  refine ⟨⟨(fun s : ℕ →₀ ℕ =>
+    if (∀ n, n ≠ 0 → s n % 2 = 0) ∧ (∀ n, N < n → s n = 0) then
+      MvPowerSeries.coeff (s + parityExp E) q.1.1 else 0 :
+      MvPowerSeries ℕ K), ?_⟩, ?_⟩
+  · -- restrictedness: a dominated, injectively reindexed subfamily
+    have hw1 : ∀ u : ℕ →₀ ℕ, (u.prod fun _ e => (1 : ℝ) ^ e) = 1 := fun u => by
+      simp [Finsupp.prod]
+    have hq2 : Filter.Tendsto (fun t : ℕ →₀ ℕ =>
+        ‖MvPowerSeries.coeff t q.1.1‖ * t.prod fun _ e => (1 : ℝ) ^ e)
+        Filter.cofinite (nhds 0) := q.1.2
+    have hinj : Function.Injective (fun s : ℕ →₀ ℕ => s + parityExp E) :=
+      fun s₁ s₂ h => by simpa using congrArg (fun u => u - parityExp E) h
+    have hcomp := hq2.comp hinj.tendsto_cofinite
+    show Filter.Tendsto _ Filter.cofinite (nhds 0)
+    refine squeeze_zero
+      (fun s => mul_nonneg (norm_nonneg _) (by rw [hw1 s]; norm_num))
+      (fun s => ?_) hcomp
+    show ‖(if (∀ n, n ≠ 0 → s n % 2 = 0) ∧ (∀ n, N < n → s n = 0) then
+        MvPowerSeries.coeff (s + parityExp E) q.1.1 else 0 : K)‖ *
+        (s.prod fun _ e => (1 : ℝ) ^ e) ≤
+      ‖MvPowerSeries.coeff (s + parityExp E) q.1.1‖ *
+        ((s + parityExp E).prod fun _ e => (1 : ℝ) ^ e)
+    rw [hw1, hw1, mul_one, mul_one]
+    split_ifs with hcond
+    · exact le_of_eq rfl
+    · simp
+  · -- head support at the weight `w`
+    intro t ht
+    show (if (∀ n, n ≠ 0 → t n % 2 = 0) ∧ (∀ n, N < n → t n = 0) then
+      MvPowerSeries.coeff (t + parityExp E) q.1.1 else 0) = 0
+    rw [if_neg]
+    rintro ⟨heven, hbdd⟩
+    refine ht ⟨?_, fun n hn => hbdd n hn⟩
+    show wpWeight w t ≤ t 0
+    rw [wpWeight_eq_zero_of_even heven]
+    omega
+
+end ParityDecomposition
+
 variable {K w N} in
 /-- `headToQ` is the model's constant embedding (definitional identification with
 the W15 layer). -/
