@@ -492,6 +492,149 @@ end MapC
 
 variable {K w} in
 open scoped Classical in
+theorem PushedHeadData.lift_subset {C : RationalCoveringData (WPA K w)}
+    (P : PushedHeadData C) (D : ↥C.covers) :
+    rationalOpen (liftDatum (P.DHp D) (P.hDHp D)).T
+      (liftDatum (P.DHp D) (P.hDHp D)).s ⊆
+      rationalOpen (liftDatum P.DHb P.hDHb).T (liftDatum P.DHb P.hDHb).s := by
+  rw [P.hopenp D, P.hopenb]
+  exact C.hsubset D.1 D.2
+
+variable {K w} in
+theorem restrictionMapHom_coe_wpa (D D' : RationalLocData (WPA K w))
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (l : Localization.Away D.s) :
+    restrictionMapHom D D' h (D.coeRingHom l) = restrictionMapAlg D D' h l := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D'.s) := D'.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe
+    (restrictionMapAlg D D' h) (restrictionMapAlg_continuous D D' h) l
+
+variable {K w} in
+open scoped Classical in
+theorem qRestrict_rhoQ {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C) (D : ↥C.covers) :
+    qRestrict ϖ hK₀ P D (rhoQ P.DHb).val = (rhoQ (P.DHp D)).val := by
+  rw [show (rhoQ P.DHb).val = headConst P.DHb (WaHead K w P.M) from rfl,
+    qRestrict_headConst]
+  rfl
+
+/-- The `mapC` norm bound: the coefficient bound passes to the sup norm. -/
+theorem TailC0.norm_mapC_le {P Q : Type*} [NormedCommRing P]
+    [IsUltrametricDist P] [NormedCommRing Q] [IsUltrametricDist Q]
+    {ρP : TwistElem P} {ρQ' : TwistElem Q} {w' : ℕ → ℕ} {N' : ℕ}
+    (φ : P →+* Q) {Cb : ℝ} (hCb : 0 ≤ Cb)
+    (hφ : ∀ p, ‖φ p‖ ≤ Cb * ‖p‖) (hρ : φ ρP.val = ρQ'.val)
+    (x : TailC0 w' N' P ρP) :
+    ‖TailC0.mapC (ρP := ρP) (ρQ' := ρQ') φ hφ hρ x‖ ≤ Cb * ‖x‖ := by
+  rw [TailC0.norm_eq_iSup_coeff]
+  refine ciSup_le fun μ => ?_
+  rw [show TailC0.coeff μ (TailC0.mapC (ρP := ρP) (ρQ' := ρQ') φ hφ hρ x) =
+    φ (x.1 μ) from rfl]
+  refine le_trans (hφ (x.1 μ)) ?_
+  exact mul_le_mul_of_nonneg_left (TailC0.norm_coeff_le x μ) hCb
+
+variable {K w} in
+open scoped Classical in
+/-- **The bundled naturality square** ([WP] eq:cover-coefficientwise): the model
+transports of the restriction map are coefficientwise `qRestrict`. -/
+theorem coeffLoc_restriction_square {C : RationalCoveringData (WPA K w)}
+    (ϖ : Uniformizer K) (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (P : PushedHeadData C) (D : ↥C.covers) {Cb : ℝ} (hCb : 0 ≤ Cb)
+    (hb : ∀ q, ‖qRestrict ϖ hK₀ P D q‖ ≤ Cb * ‖q‖) :
+    (TailC0.mapC (qRestrict ϖ hK₀ P D) hb
+        (qRestrict_rhoQ ϖ hK₀ P D)).comp
+      (coeffLocEquiv ϖ hK₀ P.DHb P.hDHb).toRingHom =
+    (coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).toRingHom.comp
+      (restrictionMapHom (liftDatum P.DHb P.hDHb)
+        (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D)) := by
+  classical
+  letI := (liftDatum P.DHb P.hDHb).uniformSpace
+  have hdense : DenseRange (⇑(liftDatum P.DHb P.hDHb).coeRingHom) :=
+    @UniformSpace.Completion.denseRange_coe _
+      (liftDatum P.DHb P.hDHb).uniformSpace
+  -- the algebraic-layer identity
+  have halg : (TailC0.mapC (qRestrict ϖ hK₀ P D) hb
+      (qRestrict_rhoQ ϖ hK₀ P D)).comp
+        (coeffFwdAlg ϖ P.DHb P.hDHb) =
+      (coeffFwd ϖ (P.DHp D) (P.hDHp D)).comp
+        (restrictionMapAlg (liftDatum P.DHb P.hDHb)
+          (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D)) := by
+    refine IsLocalization.ringHom_ext
+      (Submonoid.powers (liftDatum P.DHb P.hDHb).s) ?_
+    ext f
+    rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply,
+      RingHom.comp_apply, coeffFwdAlg_algebraMap]
+    rw [show restrictionMapAlg (liftDatum P.DHb P.hDHb)
+        (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D)
+        (algebraMap (WPA K w)
+          (Localization.Away (liftDatum P.DHb P.hDHb).s) f) =
+      (liftDatum (P.DHp D) (P.hDHp D)).canonicalMap f from by
+        rw [← restrictionMapHom_coe_wpa]
+        exact restrictionMapHom_canonicalMap_generic _ _ _ f]
+    rw [show (liftDatum (P.DHp D) (P.hDHp D)).canonicalMap f =
+      (liftDatum (P.DHp D) (P.hDHp D)).coeRingHom
+        (algebraMap (WPA K w)
+          (Localization.Away (liftDatum (P.DHp D) (P.hDHp D)).s) f) from rfl,
+      coeffFwd_coe, coeffFwdAlg_algebraMap]
+    refine Subtype.ext (funext fun μ => ?_)
+    show qRestrict ϖ hK₀ P D ((coeffBase P.DHb f).1 μ) =
+      (coeffBase (P.DHp D) f).1 μ
+    rw [show (coeffBase P.DHb f).1 μ =
+      headConst P.DHb ((wpaTailEquiv (K := K) (w := w) (N := P.M) f).1 μ)
+      from rfl, qRestrict_headConst]
+    rfl
+  -- lift to the completions by density
+  refine RingHom.ext fun z => ?_
+  have hfun : ⇑((TailC0.mapC (qRestrict ϖ hK₀ P D) hb
+      (qRestrict_rhoQ ϖ hK₀ P D)).comp
+        (coeffLocEquiv ϖ hK₀ P.DHb P.hDHb).toRingHom) =
+      ⇑((coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)).toRingHom.comp
+        (restrictionMapHom (liftDatum P.DHb P.hDHb)
+          (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D))) := by
+    refine hdense.equalizer ?_ ?_ ?_
+    · rw [RingHom.coe_comp]
+      refine Continuous.comp ?_ ?_
+      · exact AddMonoidHomClass.continuous_of_bound
+          (TailC0.mapC (qRestrict ϖ hK₀ P D) hb
+            (qRestrict_rhoQ ϖ hK₀ P D)) Cb
+          (TailC0.norm_mapC_le _ hCb _ _)
+      · exact coeffLocEquiv_continuous ϖ hK₀ P.DHb P.hDHb
+    · rw [RingHom.coe_comp]
+      refine Continuous.comp ?_ ?_
+      · exact coeffLocEquiv_continuous ϖ hK₀ (P.DHp D) (P.hDHp D)
+      · letI : UniformSpace (Localization.Away (liftDatum P.DHb P.hDHb).s) :=
+          (liftDatum P.DHb P.hDHb).uniformSpace
+        letI : IsTopologicalRing
+            (Localization.Away (liftDatum P.DHb P.hDHb).s) :=
+          (liftDatum P.DHb P.hDHb).isTopologicalRing
+        letI : IsUniformAddGroup
+            (Localization.Away (liftDatum P.DHb P.hDHb).s) :=
+          (liftDatum P.DHb P.hDHb).isUniformAddGroup
+        exact UniformSpace.Completion.continuous_extension
+    · funext l
+      show TailC0.mapC (qRestrict ϖ hK₀ P D) hb (qRestrict_rhoQ ϖ hK₀ P D)
+        (coeffLocEquiv ϖ hK₀ P.DHb P.hDHb
+          ((liftDatum P.DHb P.hDHb).coeRingHom l)) =
+        coeffLocEquiv ϖ hK₀ (P.DHp D) (P.hDHp D)
+          (restrictionMapHom (liftDatum P.DHb P.hDHb)
+            (liftDatum (P.DHp D) (P.hDHp D)) (P.lift_subset D)
+            ((liftDatum P.DHb P.hDHb).coeRingHom l))
+      rw [show coeffLocEquiv ϖ hK₀ P.DHb P.hDHb
+          ((liftDatum P.DHb P.hDHb).coeRingHom l) =
+        coeffFwd ϖ P.DHb P.hDHb
+          ((liftDatum P.DHb P.hDHb).coeRingHom l) from rfl, coeffFwd_coe]
+      rw [restrictionMapHom_coe_wpa]
+      exact RingHom.congr_fun halg l
+  exact congrFun hfun z
+
+variable {K w} in
+open scoped Classical in
 /-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
 with common-stage head data transfers to a rational covering on the head, with
 subset and covering properties by the `rhoHead` pullback. -/
