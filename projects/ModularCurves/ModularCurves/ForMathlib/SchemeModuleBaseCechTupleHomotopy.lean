@@ -703,6 +703,132 @@ theorem baseCechTupleMapF_boundary
       rw [hδ]
       rfl
 
+/-- The restriction lift of signed sorting is projection to ordered tuples followed by
+alternating extension. -/
+theorem baseCechTupleMapF_alternatingProjection
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    baseCechTupleMapF π M U
+        (cechTupleAlternatingProjection (ι := ι) n)
+        (cechTupleAlternatingProjection_supportNonincreasing n) =
+      baseCechToOrderedF π M U n ≫
+        orderedToBaseCechAlternatingF π M U n := by
+  apply baseCechHom_ext π M U n
+  intro i
+  let p : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U n i :=
+    Pi.π (fun q : Fin (n + 1) → ι =>
+      baseCechFactor π M U n q) i
+  change baseCechTupleMapF π M U
+      (cechTupleAlternatingProjection n)
+        (cechTupleAlternatingProjection_supportNonincreasing n) ≫ p =
+    (baseCechToOrderedF π M U n ≫
+      orderedToBaseCechAlternatingF π M U n) ≫ p
+  rw [Category.assoc]
+  by_cases hi : Function.Injective i
+  · let s := Tuple.sort i
+    let j := i ∘ s
+    have hj : StrictMono j :=
+      (Tuple.monotone_sort i).strictMono_of_injective
+        (hi.comp s.injective)
+    let pj : (baseCechComplex π M U).X n ⟶
+        baseCechFactor π M U n j :=
+      Pi.π (fun q : Fin (n + 1) → ι =>
+        baseCechFactor π M U n q) j
+    let q : orderedBaseCechObject π M U n ⟶
+        baseCechFactor π M U n j :=
+      Pi.π (fun t : OrderedCechIndex ι n =>
+        baseCechFactor π M U n t.1) ⟨j, hj⟩
+    have hji : Set.range j ⊆ Set.range i := by
+      rintro x ⟨k, rfl⟩
+      exact ⟨s k, rfl⟩
+    let r : baseCechFactor π M U n j ⟶
+        baseCechFactor π M U n i :=
+      baseCechTupleRestriction π M U i j hji
+    have hr :
+        r = (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower s).φ i).op := by
+      dsimp only [r]
+      exact baseCechTupleRestriction_eq_map π M U i j hji
+        (((FormalCoproduct.mk _ U).mapPower s).φ i)
+    have hleft :
+        baseCechTupleMapF π M U
+            (cechTupleAlternatingProjection n)
+            (cechTupleAlternatingProjection_supportNonincreasing n) ≫ p =
+          (Equiv.Perm.sign s : ℤ) • (pj ≫ r) := by
+      calc
+        baseCechTupleMapF π M U
+              (cechTupleAlternatingProjection n)
+              (cechTupleAlternatingProjection_supportNonincreasing n) ≫ p =
+            baseCechTupleMapComponent π M U
+              (cechTupleAlternatingProjection n)
+              (cechTupleAlternatingProjection_supportNonincreasing n) i := by
+          dsimp only [p]
+          exact baseCechTupleMapF_comp_π π M U
+            (cechTupleAlternatingProjection n)
+              (cechTupleAlternatingProjection_supportNonincreasing n) i
+        _ = baseCechTupleRow π M U i
+              (cechTupleAlternatingProjectionBasis n i) := by
+          change baseCechTupleRow π M U i
+              (cechTupleAlternatingProjection n
+                (Finsupp.single i 1)) =
+            baseCechTupleRow π M U i
+              (cechTupleAlternatingProjectionBasis n i)
+          rw [cechTupleAlternatingProjection_single, one_smul]
+        _ = baseCechTupleRow π M U i
+              (Finsupp.single j (Equiv.Perm.sign s : ℤ)) := by
+          rw [cechTupleAlternatingProjectionBasis_of_injective i hi]
+        _ = (Equiv.Perm.sign s : ℤ) • (pj ≫ r) := by
+          exact baseCechTupleRow_single_of_subset
+            π M U i j (Equiv.Perm.sign s : ℤ) hji
+    have hproj : baseCechToOrderedF π M U n ≫ q = pj := by
+      dsimp only [q, pj]
+      exact baseCechToOrderedF_comp_π π M U n ⟨j, hj⟩
+    have halt :
+        orderedToBaseCechAlternatingF π M U n ≫ p =
+          (Equiv.Perm.sign s : ℤ) • (q ≫ r) := by
+      rw [hr]
+      exact orderedToBaseCechAlternatingF_comp_π_of_injective
+        π M U n i hi
+    rw [hleft]
+    calc
+      (Equiv.Perm.sign s : ℤ) • (pj ≫ r) =
+          (Equiv.Perm.sign s : ℤ) •
+            ((baseCechToOrderedF π M U n ≫ q) ≫ r) := by
+        rw [hproj]
+      _ = baseCechToOrderedF π M U n ≫
+          ((Equiv.Perm.sign s : ℤ) • (q ≫ r)) := by
+        simp only [comp_zsmul, Category.assoc]
+      _ = baseCechToOrderedF π M U n ≫
+          (orderedToBaseCechAlternatingF π M U n ≫ p) := by
+        rw [halt]
+  · have hleft :
+        baseCechTupleMapF π M U
+            (cechTupleAlternatingProjection n)
+            (cechTupleAlternatingProjection_supportNonincreasing n) ≫ p = 0 := by
+      calc
+        baseCechTupleMapF π M U
+              (cechTupleAlternatingProjection n)
+              (cechTupleAlternatingProjection_supportNonincreasing n) ≫ p =
+            baseCechTupleMapComponent π M U
+              (cechTupleAlternatingProjection n)
+              (cechTupleAlternatingProjection_supportNonincreasing n) i := by
+          dsimp only [p]
+          exact baseCechTupleMapF_comp_π π M U
+            (cechTupleAlternatingProjection n)
+              (cechTupleAlternatingProjection_supportNonincreasing n) i
+        _ = 0 := by
+          change baseCechTupleRow π M U i
+              (cechTupleAlternatingProjection n
+                (Finsupp.single i 1)) = 0
+          rw [cechTupleAlternatingProjection_single, one_smul,
+            cechTupleAlternatingProjectionBasis_of_not_injective i hi,
+            map_zero]
+    rw [hleft]
+    rw [orderedToBaseCechAlternatingF_comp_π_of_not_injective
+      π M U n i hi]
+    simp
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
