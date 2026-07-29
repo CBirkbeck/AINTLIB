@@ -95,3 +95,44 @@ literally reflexive no-op, and part of what the elaborator was paying for.
 **Generalise this**: most `isDefEq` timeouts in this codebase are goal-directed rewriting
 against quotient/algebraMap chains.  Try the typed-`have`-and-push-forward shape before
 anything else.
+
+### Task 1 COMPLETE (bar 5 deferrals): 94 of 99 raises removed
+
+| File | removed | proof changes needed |
+|---|---|---|
+| WedhornCechAcyclicity | 53 of 56 | **none** |
+| RelativePieceKeystone{,Gen,Open} | 18 | none |
+| FJP/FiniteJetFunctoriality | 12 | none |
+| Wedhorn828 | 4 | none |
+| FJP/FiniteJetChart | 3 | none |
+| FJP/FiniteJetUniformDomain | 2 | 1 real fix (gcongr -> explicit term) |
+| LaurentOverlap + ExampleUnitDisc | 2 | 1 real fix (rewrite direction) |
+
+**89 of 94 removals required NO proof change.**  These raises were litter — added during
+proof development, never removed after the proof was golfed.  The file with 56 needed 3.
+
+### The 5 remaining, all GOAL-DEFERRED in-source, all on the task-2 list
+| Decl | raise | note |
+|---|---|---|
+| `gluing_JetA` | 6.4M | 279-line body; times out even at 1.6M |
+| `productRestrictionSub_isEmbedding_JetA` | 1.6M | shares its subtype-instance whnf cost |
+| `genPiece_relative_overlap_square₁`/`₂` | 1.6M | on the over-50 list |
+| `imageCover` | 4M | on the over-50 list |
+
+They come off as a by-product of decomposing those proofs.
+
+### GOTCHA: finding a declaration's preamble start
+I broke this twice.  To insert above a declaration you must scan back over: attributes
+`@[...]`, `include`/`omit ... in`, `set_option ... in` — and **when you hit a line ending
+`-/`, jump to its opening `/--`**.  A docstring BODY line beginning with `--` looks exactly
+like an attribute line to a naive scanner, so I spliced raises *inside* docstrings; and
+placing a `set_option` between an `include ... in` and its declaration breaks the binding.
+
+## Task 2 — decompose the over-50 proofs
+
+Re-measured: **486** bodies over 50 across 140 files (whole tree; the FarguesFontaine 103
+is a subset).  Worst: WedhornCechAcyclicity 55 · LaurentRefinementCore 28 ·
+RobbaPresentation 17 · TateAcyclicityFinalAssembly 14 · Euclidean 12 · EmbeddingTopo 11.
+
+`wedhorn_lemma_834_propA3_part1_gluing` (454 lines) carries **48 comment seams with
+numbered Steps 1-8** — the author's own decomposition.  Highly tractable: name the steps.
