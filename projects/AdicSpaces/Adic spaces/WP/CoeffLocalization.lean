@@ -131,6 +131,92 @@ theorem TailC0.map_continuous (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p
 
 end Map
 
+/-! ### The tail convolution formula ([WP] eq:tail-multiplication, full form) -/
+
+section TailConv
+
+variable {K w N}
+
+theorem tailCoeff_neg (μ : TailIdx N) (f : WPA K w) :
+    tailCoeff K w N μ (-f) = -tailCoeff K w N μ f := by
+  have h := (tailCoeff_add K w N μ f (-f)).symm
+  rw [add_neg_cancel, tailCoeff_zero_map] at h
+  exact eq_neg_of_add_eq_zero_left (by rwa [add_comm] at h)
+
+theorem tailCoeff_sub (μ : TailIdx N) (f g : WPA K w) :
+    tailCoeff K w N μ (f - g) = tailCoeff K w N μ f - tailCoeff K w N μ g := by
+  rw [sub_eq_add_neg, tailCoeff_add, tailCoeff_neg, sub_eq_add_neg]
+
+/-- Finite tail truncation: the partial sum of the isometric decomposition
+`𝒜 ≅ ⊕̂ 𝒜_N e_μ` over a finite set of tail indices. -/
+noncomputable def tailTrunc (S : Finset (TailIdx N)) (f : WPA K w) : WPA K w :=
+  ∑ μ ∈ S, headIncl K w N (tailCoeff K w N μ f) * eTail K w N μ
+
+open scoped Classical in
+theorem tailCoeff_tailTrunc (S : Finset (TailIdx N)) (f : WPA K w) (ν : TailIdx N) :
+    tailCoeff K w N ν (tailTrunc S f) =
+      if ν ∈ S then tailCoeff K w N ν f else 0 := by
+  classical
+  unfold tailTrunc
+  induction S using Finset.induction with
+  | empty =>
+    rw [Finset.sum_empty, tailCoeff_zero_map, if_neg (Finset.notMem_empty ν)]
+  | insert μ S hμS ih =>
+    rw [Finset.sum_insert hμS, tailCoeff_add, ih, tailCoeff_headIncl_mul_eTail]
+    by_cases hν : ν = μ
+    · subst hν
+      rw [if_pos rfl, if_neg hμS, add_zero, if_pos (Finset.mem_insert_self ν S)]
+    · rw [if_neg hν, zero_add]
+      by_cases hνS : ν ∈ S
+      · rw [if_pos hνS, if_pos (Finset.mem_insert_of_mem hνS)]
+      · rw [if_neg hνS, if_neg (by
+          intro hmem
+          rcases Finset.mem_insert.mp hmem with h | h
+          · exact hν h
+          · exact hνS h)]
+
+theorem norm_sub_tailTrunc_le (S : Finset (TailIdx N)) (f : WPA K w) {ε : ℝ}
+    (hε : 0 ≤ ε) (hS : ∀ ν ∉ S, ‖tailCoeff K w N ν f‖ ≤ ε) :
+    ‖f - tailTrunc S f‖ ≤ ε := by
+  classical
+  rw [norm_eq_iSup_tailCoeff]
+  refine ciSup_le fun ν => ?_
+  rw [tailCoeff_sub, tailCoeff_tailTrunc]
+  by_cases hν : ν ∈ S
+  · rw [if_pos hν, sub_self, norm_zero]
+    exact hε
+  · rw [if_neg hν, sub_zero]
+    exact hS ν hν
+
+theorem exists_tailTrunc_close (f : WPA K w) {ε : ℝ} (hε : 0 < ε) :
+    ∃ S : Finset (TailIdx N), ‖f - tailTrunc S f‖ ≤ ε := by
+  classical
+  have h := tendsto_norm_tailCoeff_cofinite K w N f
+  rw [Metric.tendsto_nhds] at h
+  have h1 := h ε hε
+  rw [Filter.eventually_cofinite] at h1
+  refine ⟨h1.toFinset, norm_sub_tailTrunc_le _ f hε.le fun ν hν => ?_⟩
+  by_contra hgt
+  push_neg at hgt
+  refine hν ?_
+  rw [Set.Finite.mem_toFinset, Set.mem_setOf_eq, Real.dist_eq, sub_zero,
+    abs_of_nonneg (norm_nonneg _), not_lt]
+  exact hgt.le
+
+theorem norm_tailTrunc_le (S : Finset (TailIdx N)) (f : WPA K w) :
+    ‖tailTrunc S f‖ ≤ ‖f‖ := by
+  classical
+  rw [norm_eq_iSup_tailCoeff]
+  refine ciSup_le fun ν => ?_
+  rw [tailCoeff_tailTrunc]
+  by_cases hν : ν ∈ S
+  · rw [if_pos hν]
+    exact norm_tailCoeff_le K w N ν f
+  · rw [if_neg hν, norm_zero]
+    exact norm_nonneg f
+
+end TailConv
+
 /-! ### The head graph model `QHead` -/
 
 variable {K w N} in
