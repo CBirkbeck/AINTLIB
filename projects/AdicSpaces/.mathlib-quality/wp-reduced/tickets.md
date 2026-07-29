@@ -1100,7 +1100,13 @@ propext/Classical.choice/Quot.sound) before marking done.
   every 𝔪ⁿ" via `AdicCompletion.of`'s level maps.  Sources: hrw-decomposition L2;
   reviewer proof (3 sentences).
 ### [HRW-2] L1.a — headToQ contraction behaviour
-- Status: open | File: WP/HeadReduced.lean | Depends: W15, W16
+- Status: done (2026-07-29 late) | File: WP/HeadReduced.lean | Depends: W15, W16
+- **Progress**: `headToQ_eq_headConst` (rfl — headToQ duplicates W15's
+  headConst), `isUnit_headToQ_s` (the W16 law headLocEquiv∘canonicalMap =
+  headConst + isUnit_canonicalMap_s at (DH, DH, refl) + IsUnit.map), and
+  `s_notMem_comap_headToQ` (units avoid proper primes; the adversarial-note-safe
+  PRIMALITY form — maximality of the contraction deliberately not claimed).
+  Compiled first try, axiom-clean paths only.
 - Decls: (headToQ is defined); new: maximality-or-primality lemmas for the
   contraction 𝔮.comap (headToQ DH) per the adversarial note in hrw-decomposition
   (do NOT silently assume the contraction maximal; L3 is stated at primes for this

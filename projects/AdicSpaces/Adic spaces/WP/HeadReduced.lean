@@ -100,6 +100,48 @@ noncomputable def headToQ (DH : RationalLocData (WPHead K w N)) :
       MvPolynomial.C)
 
 variable {K w N} in
+/-- `headToQ` is the model's constant embedding (definitional identification with
+the W15 layer). -/
+theorem headToQ_eq_headConst (DH : RationalLocData (WPHead K w N)) :
+    headToQ DH = headConst DH := rfl
+
+variable {K w N} in
+/-- **L1.a** ([hrw-decomposition], HRW-2): the denominator's image in the graph
+model is a unit — the canonical-map unit transported along `headLocEquiv`
+(the W16 law `headLocEquiv ∘ canonicalMap = headConst`). -/
+theorem isUnit_headToQ_s (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    IsUnit (headToQ DH DH.s) := by
+  haveI : HasLocLiftPowerBounded (WPHead K w N) := hasLocLiftPowerBounded_faithful
+  have h1 : headToQ DH DH.s =
+      headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap DH.s) := by
+    rw [show headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap DH.s) =
+      headLocFwd ϖ DH hDH (DH.canonicalMap DH.s) from rfl,
+      show DH.canonicalMap DH.s = DH.coeRingHom
+        (algebraMap (WPHead K w N) (Localization.Away DH.s) DH.s) from rfl,
+      headLocFwd_coe, headLocFwdAlg_algebraMap]
+    rfl
+  rw [h1]
+  exact (isUnit_canonicalMap_s DH DH (subset_refl _)).map
+    (headLocEquiv ϖ hK₀ DH hDH)
+
+variable {K w N} in
+/-- **L1.a** (HRW-2): the denominator avoids the contraction of every proper
+prime of the graph model — the fibre of the contraction lies in the localization
+locus (the adversarial-note-safe primality form; maximality of the contraction
+is deliberately NOT claimed). -/
+theorem s_notMem_comap_headToQ (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (𝔮 : Ideal (QHead DH)) (h𝔮 : 𝔮.IsPrime) :
+    DH.s ∉ 𝔮.comap (headToQ DH) := by
+  intro hmem
+  rw [Ideal.mem_comap] at hmem
+  exact h𝔮.ne_top (Ideal.eq_top_of_isUnit_mem _ hmem
+    (isUnit_headToQ_s ϖ hK₀ DH hDH))
+
+variable {K w N} in
 /-- **L1** ([hrw-decomposition]): for a maximal ideal `𝔮` of the graph model, the
 completed local ring of the head at the contraction agrees with that of the model
 at `𝔮`.  (Finite-level: mod every power of `𝔮` the graph variables evaluate
