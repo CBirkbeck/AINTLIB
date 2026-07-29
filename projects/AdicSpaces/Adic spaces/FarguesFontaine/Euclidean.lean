@@ -618,6 +618,22 @@ private theorem valued_prefix_sub_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : �
   · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hx k) (le_max_left _ _)
   · exact le_trans (gaussTerm_teichCoeffAr_le p F ϖ hy k) (le_max_right _ _)
 
+/-- **Pointwise differences of decaying sequences decay.** The scaled value of `aₖ − bₖ` is
+at most the max of the two scaled values (ultrametric), and the max of two null sequences
+is null. -/
+private theorem tendsto_gaussTerm_sub {ρ : NNReal} {a b : ℕ → F}
+    (ha : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (a k))
+      Filter.atTop (nhds 0))
+    (hb : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (b k))
+      Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (a k - b k))
+      Filter.atTop (nhds 0) :=
+  tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
+    (by simpa using ha.max hb) (fun _ => zero_le) fun k =>
+      le_trans (mul_le_mul_of_nonneg_left
+        (Valuation.map_sub (perfectoidValuation p F) (a k) (b k)) zero_le)
+        (nnreal_mul_max _ _ _).le
+
 /-- **Digit comparison (DC⁺)**: coordinate differences on `A^r` are controlled by
 the value of the difference plus one `ρ`-damped term. The engine of Kedlaya's
 Remark 2.7 at a single radius. -/
@@ -635,21 +651,7 @@ theorem digit_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
   rw [← hb] at hdy
   have hde : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (e k))
-      Filter.atTop (nhds 0) := by
-    have hbound : ∀ k, ρ ^ k * perfectoidValuation p F (e k)
-        ≤ max (ρ ^ k * perfectoidValuation p F (a k))
-            (ρ ^ k * perfectoidValuation p F (b k)) := by
-      intro k
-      refine le_trans (mul_le_mul_of_nonneg_left
-        (Valuation.map_sub (perfectoidValuation p F) (a k) (b k)) zero_le) ?_
-      exact (nnreal_mul_max _ _ _).le
-    have hmax := hdx.max hdy
-    have hmax' : Filter.Tendsto (fun k => max
-        (ρ ^ k * perfectoidValuation p F (a k))
-        (ρ ^ k * perfectoidValuation p F (b k))) Filter.atTop (nhds 0) := by
-      simpa using hmax
-    exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hmax'
-      (fun k => zero_le) hbound
+      Filter.atTop (nhds 0) := tendsto_gaussTerm_sub p F hdx hdy
   set M := max (Valued.v x) (Valued.v y) with hM
   have hΦe := valued_PhiHatK p F ϖ hρ0 hρ1 hde
   have hrx : PhiHatK p F ϖ hρ0 hρ1 a = x := by
@@ -1811,23 +1813,7 @@ theorem descent_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact mul_le_mul_of_nonneg_left (max_le le_rfl hvΦc) zero_le
   -- w decays and Φw is admissible
   have hwdec : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (w k))
-      Filter.atTop (nhds 0) := by
-    have hbound : ∀ k, ρ ^ k * perfectoidValuation p F (w k)
-        ≤ max (ρ ^ k * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y k))
-          (ρ ^ k * perfectoidValuation p F
-            (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x) k)) := by
-      intro k
-      refine le_trans (mul_le_mul_of_nonneg_left
-        (Valuation.map_sub (perfectoidValuation p F) _ _) zero_le) ?_
-      exact (nnreal_mul_max _ _ _).le
-    have hmax' : Filter.Tendsto (fun k => max
-        (ρ ^ k * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y k))
-        (ρ ^ k * perfectoidValuation p F
-          (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x) k)))
-        Filter.atTop (nhds 0) := by
-      simpa using hydec.max hcseqdec
-    exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hmax'
-      (fun k => zero_le) hbound
+      Filter.atTop (nhds 0) := tendsto_gaussTerm_sub p F hydec hcseqdec
   have hΦwmem := PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 hwdec
   have hΦwcoords : ∀ k, teichCoeffAr p F ϖ hρ0 hρ1
       (PhiHatK p F ϖ hρ0 hρ1 w) k = w k :=
