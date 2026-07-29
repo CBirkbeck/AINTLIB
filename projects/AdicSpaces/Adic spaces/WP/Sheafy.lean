@@ -133,6 +133,60 @@ theorem isSheafy_WPA_shiftWeight (ϖ : Uniformizer K)
     ValuationSpectrum.IsSheafy (WPA K (shiftWeight w s)) :=
   isSheafy_WPA ϖ hK₀
 
+/-- The forward slot map of the Tate-extension bridge. -/
+def slotTo (s : ℕ) (n : ℕ) : Fin s ⊕ ℕ :=
+  if h : 1 ≤ n ∧ n ≤ s then Sum.inl ⟨n - 1, by omega⟩
+  else if n = 0 then Sum.inr 0 else Sum.inr (n - s)
+
+/-- The inverse slot map. -/
+def slotInv (s : ℕ) : Fin s ⊕ ℕ → ℕ
+  | Sum.inl i => i.1 + 1
+  | Sum.inr m => if m = 0 then 0 else m + s
+
+/-- The interleaving slot bijection of the Tate-extension bridge: `0 ↦ inr 0`,
+`i ∈ [1..s] ↦ inl (i−1)`, `n > s ↦ inr (n−s)` (the exponent-side realization of
+`shiftWeight`: the freed slots `1..s` carry the new Tate variables). -/
+def slotEquiv (s : ℕ) : ℕ ≃ (Fin s ⊕ ℕ) where
+  toFun := slotTo s
+  invFun := slotInv s
+  left_inv n := by
+    simp only [slotTo]
+    split_ifs with h1 h2
+    · show n - 1 + 1 = n
+      omega
+    · show (if (0 : ℕ) = 0 then 0 else 0 + s) = n
+      rw [if_pos rfl]
+      omega
+    · show (if n - s = 0 then 0 else n - s + s) = n
+      rw [if_neg (by omega)]
+      omega
+  right_inv x := by
+    rcases x with i | m
+    · show slotTo s (i.1 + 1) = Sum.inl i
+      simp only [slotTo]
+      rw [dif_pos ⟨by omega, by have := i.2; omega⟩]
+      congr 1
+    · by_cases hm : m = 0
+      · subst hm
+        show slotTo s (if (0 : ℕ) = 0 then 0 else 0 + s) = Sum.inr 0
+        rw [if_pos rfl]
+        simp [slotTo]
+      · show slotTo s (if m = 0 then 0 else m + s) = Sum.inr m
+        rw [if_neg hm]
+        simp only [slotTo]
+        rw [dif_neg (by omega), if_neg (by omega)]
+        congr 1
+        omega
+
+variable {K} in
+/-- Stage 1 of the Tate-extension bridge: the ambient flatten
+`(MvPowerSeries ℕ K)⟦Fin s⟧ ≅ K⟦Fin s ⊕ ℕ⟧ ≅ K⟦ℕ⟧` (Xia `sumAlgEquiv` +
+mathlib `renameEquiv` along `slotEquiv`). -/
+noncomputable def tateExtAmbient (s : ℕ) :
+    MvPowerSeries (Fin s) (MvPowerSeries ℕ K) ≃+* MvPowerSeries ℕ K :=
+  ((MvPowerSeries.sumAlgEquiv (Fin s) ℕ K).symm.trans
+    (MvPowerSeries.renameEquiv K (slotEquiv s).symm)).toRingEquiv
+
 variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex

@@ -1,1 +1,1 @@
-FOCUS: W24 tateExtEquiv — recon (restrictedMvPowerSeriesSubring + restrictedGaussEquiv + shiftWeight + interleave order-iso plan)
+FOCUS: W24 stage 2 — build Psi : restrictedSubring s (WPA) ->+* MvPowerSeries N K := tateExtAmbient after coefficientwise val-map; then range = shiftWeight-support-restricted; then corestrict ofBijective; coeff-law of tateExtAmbient first (sumAlgEquiv-symm coeff + renameEquiv-coeff via domCongr slotEquiv)
