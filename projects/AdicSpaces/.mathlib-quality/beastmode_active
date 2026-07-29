@@ -1,1 +1,1 @@
-FOCUS: W17 final — coeffRev ring-laws (Cauchy product over TailIdx antidiagonal) + roundtrips + coeffLocEquiv record
+FOCUS: W17 COMPLETE (coeffLocEquiv record + laws all green) — axiom-check + commit, then W18 nonempty_headModelData

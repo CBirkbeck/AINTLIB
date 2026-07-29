@@ -1537,6 +1537,443 @@ noncomputable def coeffRevFun (DH : RationalLocData (WPHead K w N))
   ∑' μ : TailIdx N, qToLift DH hDH (x.1 μ) * liftE DH hDH μ
 
 variable {K w N} in
+/-- `qToLift` sends head constants to lifted constants. -/
+theorem qToLift_headConst (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (y : WPHead K w N) :
+    qToLift DH hDH (headConst DH y) = liftConst DH hDH y := by
+  rw [qToLift, RingHom.comp_apply]
+  rw [show headConst DH y =
+    Ideal.Quotient.mk (headGraphIdeal DH) (polyToP (MvPolynomial.C y)) from rfl]
+  rw [headLocRev_mk, headLocRevP_C]
+  rw [show DH.canonicalMap y = DH.coeRingHom
+    (algebraMap (WPHead K w N) (Localization.Away DH.s) y) from rfl]
+  rw [headToLift_coe, headToLiftAlg_algebraMap]
+
+variable {K w N} in
+/-- The twist goes to the lifted `W`. -/
+theorem qToLift_rhoQ (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    qToLift DH hDH (rhoQ DH).val = liftConst DH hDH (WaHead K w N) := by
+  rw [show (rhoQ DH).val = headConst DH (WaHead K w N) from rfl]
+  exact qToLift_headConst DH hDH (WaHead K w N)
+
+variable {K w N} in
+/-- The lifted monomials obey the twisted multiplication rule. -/
+theorem liftE_mul (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (μ ν : TailIdx N) :
+    liftE DH hDH μ * liftE DH hDH ν =
+      liftConst DH hDH (WaHead K w N ^
+        (wpWeight w μ.1 + wpWeight w ν.1 - wpWeight w (μ + ν).1)) *
+        liftE DH hDH (μ + ν) := by
+  rw [liftE, liftE, liftE, ← map_mul, eTail_mul]
+  rw [show liftConst DH hDH (WaHead K w N ^
+      (wpWeight w μ.1 + wpWeight w ν.1 - wpWeight w (μ + ν).1)) =
+    (liftDatum DH hDH).canonicalMap (headIncl K w N (WaHead K w N ^
+      (wpWeight w μ.1 + wpWeight w ν.1 - wpWeight w (μ + ν).1))) from rfl]
+  rw [← map_mul]
+
+/-- The sigma-antidiagonal parametrization of pairs of tail indices. -/
+noncomputable def sigmaTailAntidiagEquiv (N : ℕ) :
+    (Σ τ : TailIdx N, ↥(Finset.HasAntidiagonal.antidiagonal τ)) ≃
+      (TailIdx N × TailIdx N) where
+  toFun x := x.2.1
+  invFun p := ⟨p.1 + p.2, ⟨p, Finset.HasAntidiagonal.mem_antidiagonal.mpr rfl⟩⟩
+  left_inv x := by
+    obtain ⟨τ, ⟨p, hp⟩⟩ := x
+    have ht : p.1 + p.2 = τ := Finset.HasAntidiagonal.mem_antidiagonal.mp hp
+    subst ht
+    rfl
+  right_inv p := rfl
+
+variable {K w N} in
+theorem coeffRevFun_apply (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (x : TailC0 w N (QHead DH) (rhoQ DH)) :
+    coeffRevFun DH hDH x =
+      ∑' μ : TailIdx N, qToLift DH hDH (x.1 μ) * liftE DH hDH μ := rfl
+
+variable {K w N} in
+set_option maxHeartbeats 16000000 in
+/-- Multiplicativity of the reverse bridge (the Cauchy product matches the
+twisted convolution). -/
+theorem coeffRevFun_mul (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (x y : TailC0 w N (QHead DH) (rhoQ DH)) :
+    coeffRevFun DH hDH (x * y) = coeffRevFun DH hDH x * coeffRevFun DH hDH y := by
+  classical
+  rw [coeffRevFun_apply DH hDH (x * y), coeffRevFun_apply DH hDH x,
+    coeffRevFun_apply DH hDH y]
+  rw [tsum_mul_tsum_of_nonarchimedean (summable_revFamily DH hDH x)
+    (summable_revFamily DH hDH y)]
+  have hterm : ∀ τ : TailIdx N,
+      qToLift DH hDH ((x * y).1 τ) * liftE DH hDH τ =
+      ∑ p ∈ Finset.HasAntidiagonal.antidiagonal τ,
+        (qToLift DH hDH (x.1 p.1) * liftE DH hDH p.1) *
+          (qToLift DH hDH (y.1 p.2) * liftE DH hDH p.2) := by
+    intro τ
+    calc qToLift DH hDH ((x * y).1 τ) * liftE DH hDH τ
+        = (∑ p ∈ Finset.HasAntidiagonal.antidiagonal τ, qToLift DH hDH
+            ((rhoQ DH).val ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w τ.1) *
+              (x.1 p.1 * y.1 p.2))) * liftE DH hDH τ := by
+          rw [TailC0.mul_val, map_sum]
+      _ = ∑ p ∈ Finset.HasAntidiagonal.antidiagonal τ, qToLift DH hDH
+            ((rhoQ DH).val ^ (wpWeight w p.1.1 + wpWeight w p.2.1 - wpWeight w τ.1) *
+              (x.1 p.1 * y.1 p.2)) * liftE DH hDH τ := Finset.sum_mul _ _ _
+      _ = ∑ p ∈ Finset.HasAntidiagonal.antidiagonal τ,
+            (qToLift DH hDH (x.1 p.1) * liftE DH hDH p.1) *
+              (qToLift DH hDH (y.1 p.2) * liftE DH hDH p.2) := by
+          refine Finset.sum_congr rfl fun p hp => ?_
+          have hpt : p.1 + p.2 = τ := Finset.HasAntidiagonal.mem_antidiagonal.mp hp
+          rw [map_mul, map_mul, map_pow, qToLift_rhoQ]
+          have hE := liftE_mul DH hDH p.1 p.2
+          rw [hpt] at hE
+          rw [show (qToLift DH hDH (x.1 p.1) * liftE DH hDH p.1) *
+              (qToLift DH hDH (y.1 p.2) * liftE DH hDH p.2) =
+            (qToLift DH hDH (x.1 p.1) * qToLift DH hDH (y.1 p.2)) *
+              (liftE DH hDH p.1 * liftE DH hDH p.2) from by ring]
+          rw [hE, ← map_pow]
+          ring
+  rw [tsum_congr hterm]
+  have hsum := (summable_revFamily DH hDH x).mul_of_nonarchimedean
+    (summable_revFamily DH hDH y)
+  have h1 := Equiv.tsum_eq (sigmaTailAntidiagEquiv N)
+    (fun p : TailIdx N × TailIdx N =>
+      (qToLift DH hDH (x.1 p.1) * liftE DH hDH p.1) *
+        (qToLift DH hDH (y.1 p.2) * liftE DH hDH p.2))
+  have h2 := Summable.tsum_sigma
+    ((Equiv.summable_iff (sigmaTailAntidiagEquiv N)).mpr hsum)
+  exact Eq.trans (tsum_congr fun τ => (Finset.tsum_subtype
+    (Finset.HasAntidiagonal.antidiagonal τ)
+    (fun p : TailIdx N × TailIdx N =>
+      (qToLift DH hDH (x.1 p.1) * liftE DH hDH p.1) *
+        (qToLift DH hDH (y.1 p.2) * liftE DH hDH p.2))).symm)
+    (h1.symm.trans h2).symm
+
+variable {K w N} in
+theorem coeffRevFun_one (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : coeffRevFun DH hDH 1 = 1 := by
+  classical
+  rw [coeffRevFun_apply, tsum_eq_single (0 : TailIdx N) ?_]
+  · rw [show ((1 : TailC0 w N (QHead DH) (rhoQ DH))).1 0 = 1 from by
+      rw [TailC0.one_val, if_pos rfl], map_one, one_mul, liftE_zero]
+  · intro μ hμ
+    rw [show ((1 : TailC0 w N (QHead DH) (rhoQ DH))).1 μ = 0 from by
+      rw [TailC0.one_val, if_neg hμ], map_zero, zero_mul]
+
+variable {K w N} in
+theorem coeffRevFun_add (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (x y : TailC0 w N (QHead DH) (rhoQ DH)) :
+    coeffRevFun DH hDH (x + y) =
+      coeffRevFun DH hDH x + coeffRevFun DH hDH y := by
+  have h : HasSum (fun μ : TailIdx N =>
+      qToLift DH hDH ((x + y).1 μ) * liftE DH hDH μ)
+      (coeffRevFun DH hDH x + coeffRevFun DH hDH y) := by
+    have h0 := ((summable_revFamily DH hDH x).hasSum).add
+      ((summable_revFamily DH hDH y).hasSum)
+    rw [show (fun μ : TailIdx N =>
+        qToLift DH hDH ((x + y).1 μ) * liftE DH hDH μ) =
+      (fun μ : TailIdx N => qToLift DH hDH (x.1 μ) * liftE DH hDH μ +
+        qToLift DH hDH (y.1 μ) * liftE DH hDH μ) from funext fun μ => by
+          rw [show (x + y).1 μ = x.1 μ + y.1 μ from rfl, map_add, add_mul]]
+    exact h0
+  exact h.tsum_eq
+
+variable {K w N} in
+/-- The reverse coefficientwise bridge as a ring homomorphism. -/
+noncomputable def coeffRev (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) :
+    TailC0 w N (QHead DH) (rhoQ DH) →+* presheafValue (liftDatum DH hDH) :=
+  RingHom.mk' ⟨⟨coeffRevFun DH hDH, coeffRevFun_one DH hDH⟩,
+    coeffRevFun_mul DH hDH⟩ (coeffRevFun_add DH hDH)
+
+variable {K w N} in
+theorem coeffRev_apply (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (x : TailC0 w N (QHead DH) (rhoQ DH)) :
+    coeffRev DH hDH x = coeffRevFun DH hDH x := rfl
+
+variable {K w N} in
+theorem coeffRev_continuous (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : Continuous (coeffRev DH hDH) := by
+  classical
+  refine continuous_of_continuousAt_zero (coeffRev DH hDH).toAddMonoidHom ?_
+  show Filter.Tendsto _ (nhds 0) (nhds _)
+  rw [show (coeffRev DH hDH).toAddMonoidHom
+    (0 : TailC0 w N (QHead DH) (rhoQ DH)) = 0 from map_zero _]
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  obtain ⟨U₀, hU₀⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
+  obtain ⟨V₁, hV₁, hMV₁⟩ := isBounded_range_liftE DH hDH U₀
+    (U₀.isOpen.mem_nhds U₀.zero_mem)
+  have hpre : ⇑(qToLift DH hDH) ⁻¹' V₁ ∈ nhds (0 : QHead DH) := by
+    have h1 := (qToLift_continuous DH hDH).tendsto 0
+    rw [map_zero] at h1
+    exact h1 hV₁
+  obtain ⟨δ, hδ0, hball⟩ := Metric.mem_nhds_iff.mp hpre
+  refine Filter.mem_of_superset (Metric.ball_mem_nhds 0 hδ0) fun x hx => ?_
+  rw [Set.mem_preimage]
+  refine hU₀ ?_
+  have hxnorm : ‖x‖ < δ := by rwa [Metric.mem_ball, dist_zero_right] at hx
+  have hterm : ∀ μ : TailIdx N, qToLift DH hDH (x.1 μ) * liftE DH hDH μ ∈
+      (U₀ : Set (presheafValue (liftDatum DH hDH))) := by
+    intro μ
+    have hc : qToLift DH hDH (x.1 μ) ∈ V₁ := hball (by
+      rw [Metric.mem_ball, dist_zero_right]
+      exact lt_of_le_of_lt (TailC0.norm_coeff_le x μ) hxnorm)
+    have hin := hMV₁ (Set.mul_mem_mul ⟨μ, rfl⟩ hc)
+    rwa [mul_comm] at hin
+  have hHasSum := (summable_revFamily DH hDH x).hasSum
+  exact U₀.isClosed.mem_of_tendsto hHasSum
+    (Filter.Eventually.of_forall fun s => sum_mem fun μ _ => hterm μ)
+
+variable {K w N} in
+theorem TailC0.map_single {P Q : Type*} [NormedCommRing P] [IsUltrametricDist P]
+    [NormedCommRing Q] [IsUltrametricDist Q] {ρ : TwistElem P} {ρ' : TwistElem Q}
+    {w' : ℕ → ℕ} {N' : ℕ} (φ : P →+* Q) (hφ : ∀ p, ‖φ p‖ ≤ ‖p‖)
+    (hρ : φ ρ.val = ρ'.val) (μ : TailIdx N') (p : P) :
+    TailC0.map (w' := w') (N' := N') φ hφ hρ (TailC0.single μ p) =
+      TailC0.single μ (φ p) := by
+  refine Subtype.ext (funext fun ν => ?_)
+  show φ ((TailC0.single μ p : TailC0 w' N' P ρ).1 ν) =
+    (TailC0.single μ (φ p) : TailC0 w' N' Q ρ').1 ν
+  rw [TailC0.single_val, TailC0.single_val]
+  split_ifs
+  · rfl
+  · exact map_zero φ
+
+variable {K w N} in
+/-- `wpaTailEquiv` sends the decomposition monomial `e_μ` to the single at `μ`. -/
+theorem wpaTailEquiv_eTail (μ : TailIdx N) :
+    wpaTailEquiv (K := K) (w := w) (N := N) (eTail K w N μ) =
+      TailC0.single μ (1 : WPHead K w N) := by
+  refine Subtype.ext (funext fun ν => ?_)
+  show tailCoeff K w N ν (eTail K w N μ) =
+    (TailC0.single μ (1 : WPHead K w N) :
+      TailC0 w N (WPHead K w N) (waTwist (K := K) (w := w) (N := N))).1 ν
+  rw [TailC0.single_val,
+    show eTail K w N μ = headIncl K w N 1 * eTail K w N μ from by
+      rw [map_one, one_mul]]
+  exact tailCoeff_headIncl_mul_eTail (K := K) (w := w) (N := N) μ ν 1
+
+variable {K w N} in
+/-- The forward bridge sends lifted decomposition monomials to singles. -/
+theorem coeffFwd_liftE (ϖ : Uniformizer K) (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (μ : TailIdx N) :
+    coeffFwd ϖ DH hDH (liftE DH hDH μ) = TailC0.single μ (1 : QHead DH) := by
+  rw [liftE, show (liftDatum DH hDH).canonicalMap (eTail K w N μ) =
+    (liftDatum DH hDH).coeRingHom (algebraMap (WPA K w)
+      (Localization.Away (liftDatum DH hDH).s) (eTail K w N μ)) from rfl,
+    coeffFwd_coe, coeffFwdAlg_algebraMap]
+  rw [coeffBase, RingHom.comp_apply]
+  rw [show ((wpaTailEquiv (K := K) (w := w) (N := N) : WPA K w ≃+* _).toRingHom
+      (eTail K w N μ)) =
+    (wpaTailEquiv (K := K) (w := w) (N := N)) (eTail K w N μ) from rfl]
+  rw [wpaTailEquiv_eTail]
+  refine Subtype.ext (funext fun ν => ?_)
+  show headConst DH ((TailC0.single (w := w)
+      (ρ := waTwist (K := K) (w := w) (N := N)) μ (1 : WPHead K w N)).1 ν) =
+    (TailC0.single (w := w) (ρ := rhoQ DH) μ (1 : QHead DH)).1 ν
+  rw [TailC0.single_val, TailC0.single_val]
+  split_ifs
+  · exact map_one _
+  · exact map_zero _
+
+variable {K w N} in
+/-- **Forward-inverts-reverse at the coefficient level**: `coeffFwd ∘ qToLift` is the
+head inclusion `ofHead` (polynomial-density chase mirroring `headLocFwd_headLocRev`). -/
+theorem coeffFwd_qToLift (ϖ : Uniformizer K) (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (q : QHead DH) :
+    coeffFwd ϖ DH hDH (qToLift DH hDH q) = TailC0.ofHead q := by
+  obtain ⟨G, rfl⟩ := Ideal.Quotient.mk_surjective (I := headGraphIdeal DH) q
+  rw [show qToLift DH hDH (Ideal.Quotient.mk (headGraphIdeal DH) G) =
+    headToLift DH hDH (headLocRev DH (Ideal.Quotient.mk (headGraphIdeal DH) G))
+    from rfl, headLocRev_mk]
+  have hpoly : ∀ Q : MvPolynomial (Fin DH.T.card) (WPHead K w N),
+      coeffFwd ϖ DH hDH (headToLift DH hDH (headLocRevP DH (polyToP Q))) =
+        (TailC0.ofHead (w := w) (N := N) (ρ := rhoQ DH) :
+          QHead DH →+* TailC0 w N (QHead DH) (rhoQ DH))
+          (Ideal.Quotient.mk (headGraphIdeal DH) (polyToP Q)) := by
+    intro Q
+    induction Q using MvPolynomial.induction_on with
+    | C x =>
+      rw [headLocRevP_C,
+        show DH.canonicalMap x = DH.coeRingHom
+          (algebraMap (WPHead K w N) (Localization.Away DH.s) x) from rfl,
+        headToLift_coe, headToLiftAlg_algebraMap,
+        show liftConst DH hDH x = (liftDatum DH hDH).coeRingHom
+          (algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+            (headIncl K w N x)) from rfl,
+        coeffFwd_coe, coeffFwdAlg_algebraMap, coeffBase_headIncl]
+      rfl
+    | add p q hp hq =>
+      simp only [map_add, hp, hq]
+      exact (map_add (TailC0.ofHead (w := w) (N := N) (ρ := rhoQ DH) :
+        QHead DH →+* TailC0 w N (QHead DH) (rhoQ DH)) _ _).symm
+    | mul_X p i hp =>
+      simp only [map_mul, hp, headLocRevP_X]
+      rw [show revB DH i = DH.coeRingHom (divByS
+          ((datumEnum DH i : ↥DH.T) : WPHead K w N) DH.s) from rfl,
+        headToLift_coe, headToLiftAlg_divByS DH hDH (datumEnum DH i).2,
+        coeffFwd_coe, coeffFwdAlg_divByS ϖ DH hDH (datumEnum DH i).2]
+      rw [show (⟨((datumEnum DH i : ↥DH.T) : WPHead K w N),
+        (datumEnum DH i).2⟩ : ↥DH.T) = datumEnum DH i from Subtype.coe_eta _ _,
+        Equiv.symm_apply_apply]
+      exact (map_mul (TailC0.ofHead (w := w) (N := N) (ρ := rhoQ DH) :
+        QHead DH →+* TailC0 w N (QHead DH) (rhoQ DH)) _ _).symm
+  have h1 : ⇑((coeffFwd ϖ DH hDH).comp ((headToLift DH hDH).comp
+      (headLocRevP DH))) =
+      ⇑((TailC0.ofHead (w := w) (N := N) (ρ := rhoQ DH) :
+          QHead DH →+* TailC0 w N (QHead DH) (rhoQ DH)).comp
+        (Ideal.Quotient.mk (headGraphIdeal DH))) := by
+    refine denseRange_polyToP.equalizer
+      ((coeffFwd_continuous ϖ DH hDH).comp ((headToLift_continuous DH hDH).comp
+        (headLocRevP_continuous DH)))
+      ((AddMonoidHomClass.continuous_of_bound
+        (TailC0.ofHead (w := w) (N := N) (ρ := rhoQ DH) :
+          QHead DH →+* TailC0 w N (QHead DH) (rhoQ DH)) 1 fun p => by
+            rw [one_mul]
+            exact le_of_eq (TailC0.norm_ofHead p)).comp
+        (continuous_mk_headGraphIdeal DH)) ?_
+    funext Q
+    exact hpoly Q
+  exact congrFun h1 G
+
+variable {K w N} in
+theorem coeffRevFun_single (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (μ : TailIdx N) (q : QHead DH) :
+    coeffRevFun DH hDH (TailC0.single μ q) =
+      qToLift DH hDH q * liftE DH hDH μ := by
+  classical
+  rw [coeffRevFun_apply, tsum_eq_single μ ?_]
+  · rw [TailC0.single_val, if_pos rfl]
+  · intro ν hν
+    rw [TailC0.single_val, if_neg hν, map_zero, zero_mul]
+
+/-- Every null family is the sum of its singles ([WP] eq:coefficient-family). -/
+theorem TailC0.hasSum_single {P : Type*} [NormedCommRing P] [IsUltrametricDist P]
+    {ρ : TwistElem P} {w' : ℕ → ℕ} {N' : ℕ} (x : TailC0 w' N' P ρ) :
+    HasSum (fun μ : TailIdx N' => TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)) x := by
+  classical
+  refine Metric.tendsto_nhds.mpr fun ε hε => ?_
+  have hε2 : 0 < ε / 2 := by linarith
+  have hfin : {μ : TailIdx N' | ¬ dist ‖x.1 μ‖ (0 : ℝ) < ε / 2}.Finite := by
+    have h1 := Metric.tendsto_nhds.mp x.2 (ε / 2) hε2
+    rwa [Filter.eventually_cofinite] at h1
+  refine Filter.eventually_atTop.mpr ⟨hfin.toFinset, fun F hF => ?_⟩
+  rw [dist_eq_norm]
+  have hcoeff : ∀ ν : TailIdx N',
+      ((∑ μ ∈ F, TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)) - x).1 ν =
+      (if ν ∈ F then x.1 ν else 0) - x.1 ν := by
+    intro ν
+    rw [show ((∑ μ ∈ F, TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)) - x).1 ν =
+      (∑ μ ∈ F, TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)).1 ν - x.1 ν from rfl]
+    congr 1
+    rw [show (∑ μ ∈ F, TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)).1 ν =
+      ∑ μ ∈ F, (TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)).1 ν from
+        map_sum (⟨⟨fun y : TailC0 w' N' P ρ => y.1 ν, rfl⟩,
+          fun a b => rfl⟩ : TailC0 w' N' P ρ →+ P) _ F]
+    rw [show (∑ μ ∈ F, (TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)).1 ν) =
+      ∑ μ ∈ F, if ν = μ then x.1 μ else 0 from
+        Finset.sum_congr rfl fun μ _ => TailC0.single_val μ (x.1 μ) ν]
+    exact Finset.sum_ite_eq F ν fun μ => x.1 μ
+  refine lt_of_le_of_lt (show _ ≤ ε / 2 from ?_) (by linarith)
+  rw [TailC0.norm_eq_iSup_coeff]
+  refine ciSup_le fun ν => ?_
+  rw [show TailC0.coeff ν ((∑ μ ∈ F, TailC0.single (w := w') (ρ := ρ) μ (x.1 μ))
+    - x) = ((∑ μ ∈ F, TailC0.single (w := w') (ρ := ρ) μ (x.1 μ)) - x).1 ν
+    from rfl, hcoeff ν]
+  by_cases hν : ν ∈ F
+  · rw [if_pos hν, sub_self, norm_zero]
+    exact hε2.le
+  · rw [if_neg hν, zero_sub, norm_neg]
+    have hν0 : ν ∉ hfin.toFinset := fun hc => hν (hF hc)
+    rw [Set.Finite.mem_toFinset, Set.mem_setOf_eq, not_not] at hν0
+    rw [dist_zero_right] at hν0
+    exact le_of_lt (lt_of_le_of_lt (le_abs_self _)
+      (by rwa [Real.norm_eq_abs] at hν0))
+
+variable {K w N} in
+/-- Forward-after-reverse is the identity on the abstract model. -/
+theorem coeffFwd_coeffRev (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (x : TailC0 w N (QHead DH) (rhoQ DH)) :
+    coeffFwd ϖ DH hDH (coeffRev DH hDH x) = x := by
+  have hmap := ((summable_revFamily DH hDH x).hasSum).map
+    (coeffFwd ϖ DH hDH) (coeffFwd_continuous ϖ DH hDH)
+  have hfun : (⇑(coeffFwd ϖ DH hDH) ∘ fun μ : TailIdx N =>
+      qToLift DH hDH (x.1 μ) * liftE DH hDH μ) =
+      (fun μ : TailIdx N => TailC0.single (w := w) (ρ := rhoQ DH) μ (x.1 μ)) := by
+    funext μ
+    show coeffFwd ϖ DH hDH (qToLift DH hDH (x.1 μ) * liftE DH hDH μ) = _
+    rw [map_mul, coeffFwd_qToLift, coeffFwd_liftE]
+    rw [show (TailC0.ofHead (x.1 μ) : TailC0 w N (QHead DH) (rhoQ DH)) =
+      TailC0.single 0 (x.1 μ) from rfl, TailC0.single_mul_single]
+    simp only [zero_add, TailIdx.zero_val, wpWeight_zero, Nat.sub_self,
+      pow_zero, one_mul, mul_one]
+  rw [hfun] at hmap
+  exact hmap.unique (TailC0.hasSum_single x)
+
+variable {K w N} in
+/-- The reverse bridge undoes the coefficientwise base map. -/
+theorem coeffRev_coeffBase (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (f : WPA K w) :
+    coeffRev DH hDH (coeffBase DH f) = (liftDatum DH hDH).canonicalMap f := by
+  have hf : (∑' μ : TailIdx N, headIncl K w N
+      ((wpaTailEquiv (K := K) (w := w) (N := N) f).1 μ) * eTail K w N μ) = f :=
+    (wpaTailEquiv (K := K) (w := w) (N := N)).symm_apply_apply f
+  have hmap := ((summable_headIncl_eTail
+      (wpaTailEquiv (K := K) (w := w) (N := N) f)).hasSum).map
+    ((liftDatum DH hDH).canonicalMap) (canonicalMap_continuous (liftDatum DH hDH))
+  rw [hf] at hmap
+  have hfun : (⇑((liftDatum DH hDH).canonicalMap) ∘ fun μ : TailIdx N =>
+      headIncl K w N ((wpaTailEquiv (K := K) (w := w) (N := N) f).1 μ) *
+        eTail K w N μ) =
+      (fun μ : TailIdx N => qToLift DH hDH ((coeffBase DH f).1 μ) *
+        liftE DH hDH μ) := by
+    funext μ
+    show (liftDatum DH hDH).canonicalMap (headIncl K w N
+      ((wpaTailEquiv (K := K) (w := w) (N := N) f).1 μ) * eTail K w N μ) = _
+    rw [map_mul]
+    rw [show (liftDatum DH hDH).canonicalMap (headIncl K w N
+        ((wpaTailEquiv (K := K) (w := w) (N := N) f).1 μ)) =
+      liftConst DH hDH ((wpaTailEquiv (K := K) (w := w) (N := N) f).1 μ)
+        from rfl]
+    rw [show (liftDatum DH hDH).canonicalMap (eTail K w N μ) = liftE DH hDH μ
+      from rfl]
+    rw [← qToLift_headConst DH hDH]
+    rfl
+  rw [hfun] at hmap
+  exact ((summable_revFamily DH hDH (coeffBase DH f)).hasSum).unique hmap
+
+variable {K w N} in
+theorem coeffRev_comp_fwdAlg (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
+    (coeffRev DH hDH).comp (coeffFwdAlg ϖ DH hDH) =
+      (liftDatum DH hDH).coeRingHom := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers (liftDatum DH hDH).s) ?_
+  ext f
+  rw [RingHom.comp_apply, RingHom.comp_apply, RingHom.comp_apply,
+    coeffFwdAlg_algebraMap]
+  exact coeffRev_coeffBase DH hDH f
+
+variable {K w N} in
+/-- Reverse-after-forward is the identity on the completed localization. -/
+theorem coeffRev_coeffFwd (ϖ : Uniformizer K)
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (a : presheafValue (liftDatum DH hDH)) :
+    coeffRev DH hDH (coeffFwd ϖ DH hDH a) = a := by
+  letI := (liftDatum DH hDH).uniformSpace
+  have hdense : DenseRange (⇑(liftDatum DH hDH).coeRingHom) :=
+    @UniformSpace.Completion.denseRange_coe _ (liftDatum DH hDH).uniformSpace
+  have hfun : ⇑(coeffRev DH hDH) ∘ ⇑(coeffFwd ϖ DH hDH) =
+      (id : presheafValue (liftDatum DH hDH) →
+        presheafValue (liftDatum DH hDH)) := by
+    refine hdense.equalizer
+      ((coeffRev_continuous DH hDH).comp (coeffFwd_continuous ϖ DH hDH))
+      continuous_id ?_
+    funext l
+    show coeffRev DH hDH (coeffFwd ϖ DH hDH
+      ((liftDatum DH hDH).coeRingHom l)) = (liftDatum DH hDH).coeRingHom l
+    rw [coeffFwd_coe]
+    exact RingHom.congr_fun (coeffRev_comp_fwdAlg ϖ DH hDH) l
+  exact congrFun hfun a
+
+variable {K w N} in
 /-- **Coefficientwise localization** ([WP] prop:coefficientwise-localization:
 "There is a canonical topological algebra isomorphism `𝒜_α ≅ ⊕̂^{c₀}_μ P e_μ`").
 The proof route: the graph ideal over `𝒜` is closed and computed coefficientwise via
@@ -1545,20 +1982,27 @@ forward/backward maps by `IsLocalization.Away.lift` + `restrictedEval`. -/
 noncomputable def coeffLocEquiv (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
-    presheafValue (liftDatum DH hDH) ≃+* TailC0 w N (QHead DH) (rhoQ DH) := by
-  sorry
+    presheafValue (liftDatum DH hDH) ≃+* TailC0 w N (QHead DH) (rhoQ DH) :=
+  { toFun := coeffFwd ϖ DH hDH
+    invFun := coeffRev DH hDH
+    left_inv := coeffRev_coeffFwd ϖ DH hDH
+    right_inv := coeffFwd_coeffRev ϖ DH hDH
+    map_mul' := map_mul _
+    map_add' := map_add _ }
 
 variable {K w N} in
 theorem coeffLocEquiv_continuous (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
-    Continuous (coeffLocEquiv ϖ hK₀ DH hDH) := by sorry
+    Continuous (coeffLocEquiv ϖ hK₀ DH hDH) :=
+  coeffFwd_continuous ϖ DH hDH
 
 variable {K w N} in
 theorem coeffLocEquiv_symm_continuous (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) :
-    Continuous (coeffLocEquiv ϖ hK₀ DH hDH).symm := by sorry
+    Continuous (coeffLocEquiv ϖ hK₀ DH hDH).symm :=
+  coeffRev_continuous DH hDH
 
 variable {K w N} in
 /-- Compatibility of the two bridges on canonical images of head elements: the
@@ -1568,7 +2012,21 @@ theorem coeffLocEquiv_canonicalMap_headIncl (ϖ : Uniformizer K)
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational) (x : WPHead K w N) :
     coeffLocEquiv ϖ hK₀ DH hDH
       ((liftDatum DH hDH).canonicalMap (headIncl K w N x)) =
-      TailC0.ofHead (headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap x)) := by sorry
+      TailC0.ofHead (headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap x)) := by
+  rw [show coeffLocEquiv ϖ hK₀ DH hDH
+      ((liftDatum DH hDH).canonicalMap (headIncl K w N x)) =
+    coeffFwd ϖ DH hDH ((liftDatum DH hDH).canonicalMap (headIncl K w N x))
+      from rfl]
+  rw [show (liftDatum DH hDH).canonicalMap (headIncl K w N x) =
+    (liftDatum DH hDH).coeRingHom (algebraMap (WPA K w)
+      (Localization.Away (liftDatum DH hDH).s) (headIncl K w N x)) from rfl,
+    coeffFwd_coe, coeffFwdAlg_algebraMap, coeffBase_headIncl]
+  congr 1
+  rw [show headLocEquiv ϖ hK₀ DH hDH (DH.canonicalMap x) =
+    headLocFwd ϖ DH hDH (DH.canonicalMap x) from rfl,
+    show DH.canonicalMap x = DH.coeRingHom (algebraMap (WPHead K w N)
+      (Localization.Away DH.s) x) from rfl,
+    headLocFwd_coe, headLocFwdAlg_algebraMap]
 
 /-! ### Every rational localization of `𝒜` is of finite-head form
 ([WP] cor:finite-head-presentation) -/

@@ -469,7 +469,28 @@ propext/Classical.choice/Quot.sound) before marking done.
   images.  Sources: [WP] 149–181, 1057–1064.
 
 ### [W17] CoeffLocalization III — the coefficientwise model over 𝒜
-- Status: open | File: WP/CoeffLocalization.lean | Depends: W16, W9, W10
+- Status: done (2026-07-29) | File: WP/CoeffLocalization.lean | Depends: W16, W9, W10
+- **Progress**: COMPLETE, all decls sorry-free + axiom-clean (propext/Choice/Quot.sound;
+  module builds, 3155 jobs). Delivered: tailCoeff_mul keystone, wpaTailEquiv, coeffBase,
+  coeffFwdAlg/coeffFwd, qToLift chain, liftE/summable_revFamily/coeffRevFun + ring laws,
+  coeffRev hom + open-subgroup continuity (restrictedEval pattern), coeffFwd_qToLift
+  (MvPolynomial.induction_on density chase), coeffFwd_liftE, TailC0.hasSum_single
+  (metric eps/2 singles decomposition), coeffRev_coeffBase (HasSum.map along canonicalMap
+  + uniqueness), both roundtrips (equalizer on Completion.denseRange_coe), the
+  coeffLocEquiv record + continuities + coeffLocEquiv_canonicalMap_headIncl.
+  GOTCHAS (bank): (1) coeffRevFun_mul whnf-RUNAWAY (16M heartbeats insufficient) caused
+  by ASCRIBED have-types over Completion-typed tsums: my elaboration vs the lemma's
+  forces an instance-path defeq descending into Completion.map2/IsDenseInducing.extend/
+  Classical.epsilon (diagnostics: HMul.hMul 2.1M unfolds, Filter.sets 1.2M). FIX: bare
+  `have :=` (no ascriptions) + directed Eq.trans-chain; only comp-unfold/beta defeqs
+  remain. (2) Finset.sum_mul HO-pattern fails over the TailIdx def-alias: calc step with
+  both sides self-written + `Finset.sum_mul _ _ _` (expected-type-driven). (3) simp
+  map_mul/map_add do not fire on the ascribed `(TailC0.ofHead ... : QHead ->+* ...)`
+  hom-form: finish with directed `(map_mul hom _ _).symm`. (4) mk-terms typed at the RAW
+  quotient break instance search (keyed on the QHead alias): pin P via `(rho := rhoQ DH)`
+  in the ofHead ascription (isUnit_coeffBase_s idiom). (5) `lake build "Adic spaces"`
+  does NOT rebuild WP modules: build '<<Adic spaces>>.WP.CoeffLocalization' explicitly
+  before #print axioms (stale-olean sorryAx/unknown-constant ghosts).
 - Decls: `liftDatum` (+`_T`, `_s`, `_isRational`), `coeffLocEquiv` (+`_continuous`,
   `_symm_continuous`, `coeffLocEquiv_canonicalMap_headIncl`).
 - Sketch: the heart ([WP] 1054–1095; decomposition.md E2). Key steps: (i) tail
