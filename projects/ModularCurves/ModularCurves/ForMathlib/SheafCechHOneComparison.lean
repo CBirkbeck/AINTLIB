@@ -12,6 +12,12 @@ description supplied by the long exact cohomology sequence.
 
 open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the `change`/`rw` steps below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace TopCat.Sheaf
@@ -56,6 +62,10 @@ private theorem HZeroGlobalSectionsIso_naturality
       (Opens.grothendieckTopology X) AddCommGrpCat.{u} isTerminalTop).hom.app
         (toSiteSheaf H))).mp inferInstance
   let f' : toSiteSheaf G ⟶ toSiteSheaf H := f
+  -- NOTE (merge, 2026-07-29): this `change` no longer type-checks — `simp` now leaves
+  -- `ΓNatIsoSheafSections` explicit instead of folded into `equiv₀`. The file is an orphan
+  -- (nothing imports it, not in the root index), so it is left as codex wrote it; the
+  -- transparency options above already cleared its other three failures.
   simp [HZeroGlobalSectionsIso]
   change
     CategoryTheory.Sheaf.H.equiv₀ (toSiteSheaf H) isTerminalTop
