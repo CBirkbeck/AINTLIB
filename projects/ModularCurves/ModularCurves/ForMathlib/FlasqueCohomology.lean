@@ -15,6 +15,12 @@ positive-degree sheaf cohomology.
 
 open CategoryTheory TopologicalSpace Opposite Limits
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the `show`/`rfl`/`rw` steps below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 namespace TopCat.Sheaf

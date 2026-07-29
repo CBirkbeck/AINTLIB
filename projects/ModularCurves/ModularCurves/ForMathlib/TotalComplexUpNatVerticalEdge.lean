@@ -9,6 +9,12 @@ flipped bicomplex and transporting along mathlib's total-complex symmetry.
 
 open CategoryTheory CategoryTheory.Preadditive
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the `show`/`rfl`/`rw` steps below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe v u
 
 namespace HomologicalComplex₂
@@ -40,7 +46,6 @@ theorem totalUpNatVerticalEdge_f
   rw [K.flip.totalUpNatHorizontalEdge_f]
   rw [Category.assoc, K.ιTotal_totalFlipIso_f_hom]
   simp
-  congr
 
 section
 

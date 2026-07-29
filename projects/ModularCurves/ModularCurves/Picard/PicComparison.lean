@@ -29,6 +29,12 @@ Leaves (`Nonempty`-wrapped `Prop`s, v10.8 discipline):
   freeness of invertible modules — independent of the dual machinery).
 -/
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the `show`/`rfl`/`rw` steps below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u
 
 open CategoryTheory MonoidalCategory
@@ -187,8 +193,9 @@ theorem whiskerRight_comp_eq_id_of_split {A B : D} (e : A ⊗ B ≅ 𝟙_ D)
         rw [← whiskerRight_tensor]
         have h2 : (ρ_ X).hom ≫ f ≫ (ρ_ Y).inv = f ▷ 𝟙_ D := by
           rw [rightUnitor_inv_naturality, Iso.hom_inv_id_assoc]
-        exact (congrArg (fun t => t ≫ Y ◁ e'.inv) h2).trans
-          (whisker_exchange f e'.inv).symm)
+        have h3 := (congrArg (fun t => t ≫ Y ◁ e'.inv) h2).trans
+          (whisker_exchange f e'.inv).symm
+        simpa only [Category.assoc] using h3)
     exact (rightUnitorNatIso D).symm ≪≫ hcongr ≪≫ tensorRightTensor B A
   haveI : (tensorRight B).Faithful :=
     Functor.Faithful.of_comp (tensorRight B) (tensorRight A)
@@ -492,7 +499,6 @@ theorem pairingElem_add {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V 
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
     pairingElem ε V (t + t') = pairingElem ε V t + pairingElem ε V t' := by
   simp only [pairingElem, map_add]
-  rfl
 
 /-- The pairing is homogeneous (both layers are morphisms of modules). -/
 theorem pairingElem_smul {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
@@ -512,7 +518,6 @@ theorem pairingElem_sum {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V 
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
     pairingElem ε V (∑ i ∈ s, f i) = ∑ i ∈ s, pairingElem ε V (f i) := by
   simp only [pairingElem, map_sum]
-  rfl
 
 /-- The pairing commutes with restriction (naturality of both layers). -/
 theorem pairingElem_map {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)

@@ -11,6 +11,12 @@ abelian groups.
 
 open CategoryTheory Limits Opposite TopologicalSpace Topology
 
+-- v4.33 bump: neither the category instances nor the semireducible component types are
+-- transparent enough for the `show`/`rfl`/`rw` steps below at `implicit` transparency.
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
 universe u v w
 
 variable (C : Type v) [Category.{w} C] {X Y : TopCat.{u}} {f : Y ⟶ X}
@@ -44,7 +50,6 @@ lemma toRestrict_app_hom_app :
     ((toRestrict C U).app F).hom.app (op V) =
       F.obj.map (U.isOpenEmbedding.isOpenMap.adjunction.counit.app V).op := by
   simp
-  rfl
 
 private lemma restrict_comp_sheafToPresheaf_preservesFiniteLimits
     {X Y : TopCat.{u}} {f : Y ⟶ X} (hf : IsOpenEmbedding f) :
