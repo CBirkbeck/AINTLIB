@@ -185,6 +185,78 @@ theorem comap_rhoHead_mem_iff (M : ℕ) (DH : RationalLocData (WPHead K w M))
       exact hc
 
 variable {K w} in
+/-- A common-stage system of head data for a whole covering, with the
+rational-subset identifications — the carrier consumed by the embedding and
+gluing fields (shared W21/W22 infrastructure; [WP] 1156–1218). -/
+structure PushedHeadData (C : RationalCoveringData (WPA K w)) where
+  /-- The common head stage. -/
+  M : ℕ
+  /-- The base head datum. -/
+  DHb : RationalLocData (WPHead K w M)
+  hDHb : DHb.IsRational
+  hopenb : rationalOpen (liftDatum DHb hDHb).T (liftDatum DHb hDHb).s =
+    rationalOpen C.base.T C.base.s
+  /-- The per-piece head data. -/
+  DHp : ↥C.covers → RationalLocData (WPHead K w M)
+  hDHp : ∀ D, (DHp D).IsRational
+  hopenp : ∀ D, rationalOpen (liftDatum (DHp D) (hDHp D)).T
+    (liftDatum (DHp D) (hDHp D)).s = rationalOpen (D : ↥C.covers).1.T
+      (D : ↥C.covers).1.s
+
+variable {K w} in
+theorem nonempty_pushedHeadData (ϖ : Uniformizer K)
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (C : RationalCoveringData (WPA K w)) (hC : C.IsRational) :
+    Nonempty (PushedHeadData C) := by
+  classical
+  obtain ⟨M, ⟨DHb, hDHb, hopenb⟩, hp⟩ :=
+    exists_common_headModel_stage ϖ hK₀ C hC
+  choose DHp hDHp hopenp using fun (D : ↥C.covers) => hp D.1 D.2
+  exact ⟨⟨M, DHb, hDHb, hopenb, DHp, hDHp, hopenp⟩⟩
+
+variable {K w} in
+open scoped Classical in
+/-- The head covering data associated to a pushed system. -/
+noncomputable def PushedHeadData.cover {C : RationalCoveringData (WPA K w)}
+    (P : PushedHeadData C) : RationalCoveringData (WPHead K w P.M) where
+  base := P.DHb
+  covers := C.covers.attach.image P.DHp
+  hsubset := by
+    intro DH' hDH'
+    obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hDH'
+    intro v hv
+    have hvspa : v ∈ Spa (WPHead K w P.M) ((WPHead K w P.M)⁺) := hv.1
+    have h1 := (comap_rhoHead_mem_iff P.M (P.DHp D) (P.hDHp D) v hvspa).mpr hv
+    rw [P.hopenp D] at h1
+    have h2 := C.hsubset D.1 D.2 h1
+    rw [← P.hopenb] at h2
+    exact (comap_rhoHead_mem_iff P.M P.DHb P.hDHb v hvspa).mp h2
+  hcover := by
+    intro v hv
+    have hvspa : v ∈ Spa (WPHead K w P.M) ((WPHead K w P.M)⁺) := hv.1
+    have h1 := (comap_rhoHead_mem_iff P.M P.DHb P.hDHb v hvspa).mpr hv
+    rw [P.hopenb] at h1
+    obtain ⟨D, hD, hmem⟩ := C.hcover _ h1
+    refine ⟨P.DHp ⟨D, hD⟩,
+      Finset.mem_image_of_mem _ (Finset.mem_attach _ _), ?_⟩
+    have h2 : ValuationSpectrum.comap (rhoHead K w P.M) v ∈
+        rationalOpen (liftDatum (P.DHp ⟨D, hD⟩) (P.hDHp ⟨D, hD⟩)).T
+          (liftDatum (P.DHp ⟨D, hD⟩) (P.hDHp ⟨D, hD⟩)).s := by
+      rw [P.hopenp ⟨D, hD⟩]
+      exact hmem
+    exact (comap_rhoHead_mem_iff P.M (P.DHp ⟨D, hD⟩) (P.hDHp ⟨D, hD⟩) v
+      hvspa).mp h2
+
+variable {K w} in
+open scoped Classical in
+theorem PushedHeadData.cover_isRational {C : RationalCoveringData (WPA K w)}
+    (P : PushedHeadData C) : P.cover.IsRational := by
+  refine ⟨P.hDHb, ?_⟩
+  intro DH' hDH'
+  obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hDH'
+  exact P.hDHp D
+
+variable {K w} in
 open scoped Classical in
 /-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
 with common-stage head data transfers to a rational covering on the head, with
