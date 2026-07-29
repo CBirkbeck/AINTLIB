@@ -1,1 +1,1 @@
-FOCUS: W17 — rev half: coeffRev summation (headLocRev-lift per coefficient + tsum) + roundtrips + equiv record
+FOCUS: W17 rev — coeffRev := Σ-qToLift(x_μ)·E_μ (summability, ring-laws via Cauchy product, roundtrips)

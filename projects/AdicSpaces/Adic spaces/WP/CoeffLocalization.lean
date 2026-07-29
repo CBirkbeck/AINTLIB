@@ -1346,6 +1346,142 @@ theorem coeffFwd_continuous (ϖ : Uniformizer K)
   exact UniformSpace.Completion.continuous_extension
 
 variable {K w N} in
+/-- The base of the head-to-lifted-presheaf comparison: constants of the head into
+the completed lifted localization. -/
+noncomputable def liftConst (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : WPHead K w N →+* presheafValue (liftDatum DH hDH) :=
+  ((liftDatum DH hDH).canonicalMap).comp (headIncl K w N : WPHead K w N →+* WPA K w)
+
+variable {K w N} in
+theorem liftConst_continuous (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : Continuous (liftConst DH hDH) := by
+  rw [liftConst, RingHom.coe_comp]
+  refine (canonicalMap_continuous (liftDatum DH hDH)).comp ?_
+  refine AddMonoidHomClass.continuous_of_bound
+    (headIncl K w N : WPHead K w N →+* WPA K w) 1 fun x => ?_
+  rw [one_mul, norm_headIncl]
+
+variable {K w N} in
+theorem isUnit_liftConst_s (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : IsUnit (liftConst DH hDH DH.s) :=
+  isUnit_s_in_presheafValue (liftDatum DH hDH)
+
+variable {K w N} in
+/-- The algebraic head-to-lifted comparison. -/
+noncomputable def headToLiftAlg (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) :
+    Localization.Away DH.s →+* presheafValue (liftDatum DH hDH) :=
+  IsLocalization.Away.lift DH.s (isUnit_liftConst_s DH hDH)
+
+variable {K w N} in
+theorem headToLiftAlg_algebraMap (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (x : WPHead K w N) :
+    headToLiftAlg DH hDH
+      (algebraMap (WPHead K w N) (Localization.Away DH.s) x) =
+      liftConst DH hDH x :=
+  IsLocalization.Away.lift_eq _ _ x
+
+variable {K w N} in
+/-- The comparison sends head fractions to lifted fractions. -/
+theorem headToLiftAlg_divByS (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) {t₀ : WPHead K w N} (ht₀ : t₀ ∈ DH.T) :
+    headToLiftAlg DH hDH (divByS t₀ DH.s) =
+      (liftDatum DH hDH).coeRingHom
+        (divByS (headIncl K w N t₀) (liftDatum DH hDH).s) := by
+  have hu := isUnit_liftConst_s DH hDH
+  refine hu.mul_right_cancel ?_
+  have h1 : divByS t₀ DH.s *
+      algebraMap (WPHead K w N) (Localization.Away DH.s) DH.s =
+      algebraMap (WPHead K w N) (Localization.Away DH.s) t₀ := by
+    rw [divByS]
+    exact IsLocalization.mk'_spec _ _ _
+  rw [← headToLiftAlg_algebraMap DH hDH DH.s, ← map_mul, h1,
+    headToLiftAlg_algebraMap, headToLiftAlg_algebraMap]
+  have h2 : divByS (headIncl K w N t₀) (liftDatum DH hDH).s *
+      algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+        (liftDatum DH hDH).s =
+      algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+        (headIncl K w N t₀) := by
+    rw [divByS]
+    exact IsLocalization.mk'_spec _ _ _
+  have h3 : liftConst DH hDH DH.s =
+      (liftDatum DH hDH).coeRingHom
+        (algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+          (liftDatum DH hDH).s) := rfl
+  have h4 : liftConst DH hDH t₀ = (liftDatum DH hDH).coeRingHom
+      (algebraMap (WPA K w) (Localization.Away (liftDatum DH hDH).s)
+        (headIncl K w N t₀)) := rfl
+  rw [h4, h3, ← map_mul, h2]
+
+variable {K w N} in
+theorem headToLiftAlg_continuous (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) :
+    @Continuous _ _ DH.topology _ (headToLiftAlg DH hDH) := by
+  classical
+  refine locTopology_continuous_lift DH.P DH.T DH.s DH.hopen _ ?_ ?_
+  · have h_eq : (headToLiftAlg DH hDH).comp
+        (algebraMap (WPHead K w N) (Localization.Away DH.s)) =
+        liftConst DH hDH :=
+      RingHom.ext fun x => headToLiftAlg_algebraMap DH hDH x
+    rw [show ⇑((headToLiftAlg DH hDH).comp
+        (algebraMap (WPHead K w N) (Localization.Away DH.s))) =
+      ⇑(liftConst DH hDH) from congrArg _ h_eq]
+    exact liftConst_continuous DH hDH
+  · intro t ht
+    rw [headToLiftAlg_divByS DH hDH ht]
+    have hmem : divByS (headIncl K w N t) (liftDatum DH hDH).s ∈
+        locSubring (liftDatum DH hDH).P (liftDatum DH hDH).T
+          (liftDatum DH hDH).s := by
+      refine divByS_mem_locSubring _ _ _ ?_
+      rw [show (liftDatum DH hDH).T = DH.T.image (headIncl K w N) from rfl]
+      exact Finset.mem_image_of_mem _ ht
+    refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+      (liftDatum DH hDH)).subset ?_
+    rintro _ ⟨n, rfl⟩
+    refine ⟨divByS (headIncl K w N t) (liftDatum DH hDH).s ^ n,
+      pow_mem hmem n, ?_⟩
+    rw [map_pow]
+
+variable {K w N} in
+/-- The head-to-lifted-presheaf comparison on completions. -/
+noncomputable def headToLift (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) :
+    presheafValue DH →+* presheafValue (liftDatum DH hDH) := by
+  letI := DH.uniformSpace
+  letI : IsTopologicalRing (Localization.Away DH.s) := DH.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away DH.s) := DH.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom (headToLiftAlg DH hDH)
+    (headToLiftAlg_continuous DH hDH)
+
+variable {K w N} in
+theorem headToLift_coe (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) (a : Localization.Away DH.s) :
+    headToLift DH hDH (DH.coeRingHom a) = headToLiftAlg DH hDH a := by
+  letI := DH.uniformSpace
+  letI : IsTopologicalRing (Localization.Away DH.s) := DH.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away DH.s) := DH.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe (headToLiftAlg DH hDH)
+    (headToLiftAlg_continuous DH hDH) a
+
+variable {K w N} in
+theorem headToLift_continuous (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : Continuous (headToLift DH hDH) := by
+  letI := DH.uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
+variable {K w N} in
+/-- The per-coefficient reverse hom `Q → 𝒪(lifted)`. -/
+noncomputable def qToLift (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : QHead DH →+* presheafValue (liftDatum DH hDH) :=
+  (headToLift DH hDH).comp (headLocRev DH)
+
+variable {K w N} in
+theorem qToLift_continuous (DH : RationalLocData (WPHead K w N))
+    (hDH : DH.IsRational) : Continuous (qToLift DH hDH) := by
+  rw [qToLift, RingHom.coe_comp]
+  exact (headToLift_continuous DH hDH).comp (headLocRev_continuous DH)
+
+variable {K w N} in
 /-- **Coefficientwise localization** ([WP] prop:coefficientwise-localization:
 "There is a canonical topological algebra isomorphism `𝒜_α ≅ ⊕̂^{c₀}_μ P e_μ`").
 The proof route: the graph ideal over `𝒜` is closed and computed coefficientwise via
