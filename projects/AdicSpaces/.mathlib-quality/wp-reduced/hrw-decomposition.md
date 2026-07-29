@@ -317,3 +317,69 @@ semilocal decomposition, parity finiteness) is elementary and can be built
 NOW. Recommended execution order: HRW-5(i,ii) parity module decomposition →
 L1's quotient_pow_equiv_of_flat + graphAtPrimeEquiv (no analytic deps) →
 HRW-4-N1 Nullstellensatz decompose round (the long pole) → fibre + assembly.
+
+
+## THE TATE LEAF DECOMPOSED (2026-07-30 ChatGPT-5.6-xhigh — the N1 round; NO Weierstrass)
+
+The noetherian-unit-ball hypothesis makes 𝒪_K a DVR (noetherian valuation ring
+dichotomy) — the affinoid Nullstellensatz then goes through the INTEGRAL MODEL,
+avoiding Weierstrass division, Noether normalization, closed maximal ideals,
+and Banach-field machinery entirely. Polynomial-density and Berkovich routes
+ADJUDICATED AGAINST (density gives a subRING not subfield — the maximality of
+the polynomial contraction IS the hard analytic content; spectrum routes just
+reformulate the Zariski lemma).
+
+**The 11-leaf plan (total ~500-850 LOC)** for `Module.Finite K (T_d/𝔪)`:
+1. DVR bridge: noetherian 𝒪_K + nontrivial norm ⇒ IsDiscreteValuationRing,
+   uniformizer π (‖π‖<1, not unit). [Mathlib IsDiscreteValuationRing.TFAE +
+   small normed-field bridge, 15-40 LOC]
+2. T° := unit ball of T_d = restricted series with 𝒪_K coefficients
+   (mem ↔ ∀ n, ‖coeff n‖ ≤ 1). [project-available, 10-30]
+3. T°[1/π] ≃ T_d (∀f ∃N, π^N f ∈ T°). [new plumbing, 40-80]
+4. T°/πT° ≅ k[X_1..X_d] (restricted coefficients die mod π cofinitely). [new, 50-100]
+5. IsNoetherianRing T° — REUSE the vendored leading-term proof over the
+   noetherian coefficient ring (NOT derivable from noetherianity of T!).
+   [essential; check the Coram/vendored argument's generality, 50-200]
+6. For maximal 𝔪: I := 𝔪 ∩ T°, B := T°/I: domain, noetherian, π ≠ 0,
+   ¬IsUnit π in B (1−πg is a unit in T by geometric series!), B[1/π] ≅ T/𝔪.
+   [assembly, 50-100]
+7. **G-domain lemma** (the main algebra leaf, general): B noetherian domain,
+   π ≠ 0 non-unit, B[1/π] a field ⇒ KrullDimLE 1 B ∧ KrullDimLE 0 (B/π):
+   primes avoiding π are 0 (field localization); minimal primes over (π)
+   finite + height ≤ 1 (principal ideal theorem:
+   Ideal.height_le_one_of_isPrincipal_of_mem_minimalPrimes); any nonzero prime
+   gets trapped by finite prime avoidance (Ideal.subset_union_prime_finite).
+   [new, 120-220]
+8. C := B/πB: FiniteType k (via leaf 4) + KrullDimLE 0 (via 7). [25-50]
+9. Module.Finite k C := Module.finite_iff_krullDimLE_zero. [Mathlib, 5-15]
+10. **Topological Nakayama** (reusable): [IsPrecomplete J R] [IsHausdorff J M]
+    [Module.Finite (R/J) (M/JM)] ⇒ Module.Finite R M — lift generators,
+    coordinatewise precomplete R^n, surjective_of_mkQ_comp_surjective,
+    Module.Finite.of_surjective. [new, 60-120]
+11. IsPrecomplete (π) 𝒪_K (complete K, norm=π-adic) + IsHausdorff (π) B
+    (Krull intersection, IsHausdorff.of_isDomain?) ⇒ Module.Finite 𝒪_K B ⇒
+    localize: Module.Finite K (T/𝔪). [mixed, 50-100]
+
+**Downstream (leaves 12-14, the completed-local step)**: finite scalar
+extension T_L = L⟨X⟩ is FINITE FREE over T_K via a K-basis of L
+(coefficientwise split; Basis ι T_K T_L; Free/Finite/Flat/FaithfullyFlat
+instances all from mathlib generics); the L-rational point translates to the
+origin (X ↦ X + a) and (T_L)_𝔫^ ≅ L⟦Y⟧ by Taylor; the caution: the completed
+base-change needs AdicCompletion.ofTensorProductEquivOfFiniteNoetherian + the
+"𝔪(T_L)_𝔫-adic = 𝔫-adic" cofinality (radicals agree). Faithful flatness +
+domain L⟦Y⟧ ⇒ (T_K)_𝔪^ domain.
+
+Mathlib inventory confirmed by the round: finite_of_finite_type_of_isJacobsonRing
+(polynomial Zariski — NOT needed on this route but available),
+Ideal.finite_minimalPrimes_of_isNoetherianRing,
+Ideal.height_le_one_of_isPrincipal_of_mem_minimalPrimes,
+Ideal.subset_union_prime_finite, Ring.krullDimLE_zero_iff,
+Module.finite_iff_krullDimLE_zero, IsPrecomplete/IsHausdorff API,
+surjective_of_mkQ_comp_surjective, Module.Finite.of_isLocalization,
+exists_finite_inj_algHom_of_fg (Noether normalization, theorem-form).
+
+Execution note: leaf 7 (G-domain) + leaf 10 (topological Nakayama) are
+GENERIC — build them first in a new generic file (TateAlgebraNullstellensatz.lean
+or split); leaves 2-5 are the T°-plumbing block; leaf 5's noetherianity of T°
+is the one leaf whose cost depends on the vendored argument's reusability —
+probe it early.

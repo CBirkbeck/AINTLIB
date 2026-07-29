@@ -191,6 +191,167 @@ noncomputable def paritySlice (E : Finset ℕ)
     rw [wpWeight_eq_zero_of_even heven]
     omega
 
+open scoped Classical in
+/-- The double-projection to the ambient series ring, as a ring hom (the
+`Restricted`/support subtype coercions are definitionally transparent). -/
+def headSeries : WPHead K (fun _ => 0) N →+* MvPowerSeries ℕ K where
+  toFun x := x.1.1
+  map_one' := rfl
+  map_mul' _ _ := rfl
+  map_zero' := rfl
+  map_add' _ _ := rfl
+
+open scoped Classical in
+/-- **The parity reconstruction** ([WP] lem:finite-stage-normal-form): every
+zero-weight head element is the sum, over square-free parity patterns, of its
+slices (weighted-head elements) times the parity monomials. -/
+theorem parity_decomposition (q : WPHead K (fun _ => 0) N) :
+    q = ∑ E ∈ (Finset.Icc 1 N).powerset.attach,
+      Subring.inclusion (wpHeadSupport_le_zero_weight (K := K) (w := w) N)
+          (paritySlice N E.1 q) *
+        parityMonomialZ N E.1 (Finset.mem_powerset.mp E.2) := by
+  classical
+  have hser : Function.Injective (headSeries (K := K) N) := by
+    intro a b h
+    exact Subtype.ext (Subtype.ext h)
+  refine hser ?_
+  rw [map_sum (headSeries (K := K) N)]
+  refine MvPowerSeries.ext fun t => ?_
+  rw [map_sum (MvPowerSeries.coeff t)]
+  have hterm : ∀ E ∈ (Finset.Icc 1 N).powerset.attach,
+      MvPowerSeries.coeff t (headSeries (K := K) N
+        (Subring.inclusion
+            (wpHeadSupport_le_zero_weight (K := K) (w := w) N)
+              (paritySlice N E.1 q) *
+          parityMonomialZ N E.1 (Finset.mem_powerset.mp E.2))) =
+      (if parityExp E.1 ≤ t ∧
+          (∀ n, n ≠ 0 → (t - parityExp E.1) n % 2 = 0) ∧
+          (∀ n, N < n → (t - parityExp E.1) n = 0) then 1 else 0) *
+        MvPowerSeries.coeff t q.1.1 := by
+    intro E _
+    have hmul : headSeries (K := K) N
+        (Subring.inclusion
+            (wpHeadSupport_le_zero_weight (K := K) (w := w) N)
+              (paritySlice N E.1 q) *
+          parityMonomialZ N E.1 (Finset.mem_powerset.mp E.2)) =
+        (paritySlice (w := w) N E.1 q).1.1 *
+          MvPowerSeries.monomial (parityExp E.1) (1 : K) := rfl
+    rw [hmul, MvPowerSeries.coeff_mul_monomial]
+    split_ifs with hle
+    · show (if (∀ n, n ≠ 0 → (t - parityExp E.1) n % 2 = 0) ∧
+          (∀ n, N < n → (t - parityExp E.1) n = 0) then
+        MvPowerSeries.coeff ((t - parityExp E.1) + parityExp E.1) q.1.1
+        else 0) * 1 = _
+      rw [tsub_add_cancel_of_le hle, mul_one]
+      split_ifs with hcond
+      · rw [one_mul]
+      · rw [zero_mul]
+    · rw [if_neg (by tauto), zero_mul]
+  rw [Finset.sum_congr rfl hterm, ← Finset.sum_mul]
+  show MvPowerSeries.coeff t q.1.1 = _
+  by_cases hq0 : MvPowerSeries.coeff t q.1.1 = 0
+  · rw [hq0, mul_zero]
+  · have hhead : HeadMem (fun _ => 0) N t := by
+      by_contra hc
+      exact hq0 (q.2 t hc)
+    set Et : Finset ℕ :=
+      t.support.filter (fun n => n ≠ 0 ∧ t n % 2 = 1) with hEt
+    have hEtIcc : Et ∈ (Finset.Icc 1 N).powerset := by
+      rw [Finset.mem_powerset]
+      intro n hn
+      rw [hEt, Finset.mem_filter] at hn
+      obtain ⟨hsupp, hn0, -⟩ := hn
+      refine Finset.mem_Icc.mpr ⟨by omega, ?_⟩
+      by_contra hgt
+      exact absurd (hhead.2 n (by omega)) (Finsupp.mem_support_iff.mp hsupp)
+    rw [Finset.sum_eq_single_of_mem (⟨Et, hEtIcc⟩ :
+        {x // x ∈ (Finset.Icc 1 N).powerset}) (Finset.mem_attach _ _)]
+    · rw [if_pos, one_mul]
+      refine ⟨?_, ?_, ?_⟩
+      · intro n
+        rw [parityExp_apply]
+        split_ifs with hn
+        · rw [hEt, Finset.mem_filter] at hn
+          have := hn.2.2
+          omega
+        · omega
+      · intro n hn0
+        rw [Finsupp.tsub_apply, parityExp_apply]
+        by_cases hmem : n ∈ Et
+        · rw [if_pos hmem]
+          rw [hEt, Finset.mem_filter] at hmem
+          have := hmem.2.2
+          omega
+        · rw [if_neg hmem]
+          have hcon : ¬ (n ≠ 0 ∧ t n % 2 = 1) := by
+            intro hcon
+            exact hmem (by
+              rw [hEt, Finset.mem_filter]
+              exact ⟨Finsupp.mem_support_iff.mpr (by omega), hcon⟩)
+          push_neg at hcon
+          have := hcon hn0
+          omega
+      · intro n hn
+        rw [Finsupp.tsub_apply, parityExp_apply, hhead.2 n hn, if_neg]
+        · rfl
+        · intro hmem
+          rw [hEt, Finset.mem_filter] at hmem
+          exact absurd (hhead.2 n hn) (Finsupp.mem_support_iff.mp hmem.1)
+    · rintro ⟨E, hE⟩ - hne
+      rw [if_neg]
+      rintro ⟨hle, heven, -⟩
+      refine hne (Subtype.ext ?_)
+      show E = Et
+      refine Finset.ext fun n => ?_
+      constructor
+      · intro hnE
+        have hn1 : 1 ≤ n := (Finset.mem_Icc.mp
+          (Finset.mem_powerset.mp hE hnE)).1
+        have hεn : parityExp E n = 1 := by
+          rw [parityExp_apply, if_pos hnE]
+        have htn : 1 ≤ t n := le_trans (le_of_eq hεn.symm) (hle n)
+        have hpar := heven n (by omega)
+        rw [Finsupp.tsub_apply, hεn] at hpar
+        rw [hEt, Finset.mem_filter]
+        exact ⟨Finsupp.mem_support_iff.mpr (by omega), by omega, by omega⟩
+      · intro hnEt
+        rw [hEt, Finset.mem_filter] at hnEt
+        obtain ⟨-, hn0, hodd⟩ := hnEt
+        by_contra hnE
+        have hpar := heven n hn0
+        rw [Finsupp.tsub_apply, parityExp_apply, if_neg hnE] at hpar
+        omega
+
+open scoped Classical in
+/-- **HRW-5(ii)**: the zero-weight head (the full Tate algebra `K⟨W,U_{≤N}⟩`)
+is module-finite over the weighted head through the inclusion, generated by
+the square-free parity monomials. -/
+theorem module_finite_zero_head :
+    letI : Algebra (WPHead K w N) (WPHead K (fun _ => 0) N) :=
+      (Subring.inclusion
+        (wpHeadSupport_le_zero_weight (K := K) (w := w) N)).toAlgebra
+    Module.Finite (WPHead K w N) (WPHead K (fun _ => 0) N) := by
+  classical
+  letI : Algebra (WPHead K w N) (WPHead K (fun _ => 0) N) :=
+    (Subring.inclusion
+      (wpHeadSupport_le_zero_weight (K := K) (w := w) N)).toAlgebra
+  refine ⟨⟨(Finset.Icc 1 N).powerset.attach.image
+    (fun E => parityMonomialZ N E.1 (Finset.mem_powerset.mp E.2)), ?_⟩⟩
+  rw [eq_top_iff]
+  intro q _
+  rw [parity_decomposition (w := w) N q]
+  refine Submodule.sum_mem _ fun E hE => ?_
+  have hsmul : Subring.inclusion
+      (wpHeadSupport_le_zero_weight (K := K) (w := w) N)
+        (paritySlice N E.1 q) *
+      parityMonomialZ N E.1 (Finset.mem_powerset.mp E.2) =
+      paritySlice N E.1 q •
+        parityMonomialZ N E.1 (Finset.mem_powerset.mp E.2) :=
+    (Algebra.smul_def _ _).symm
+  rw [hsmul]
+  exact Submodule.smul_mem _ _ (Submodule.subset_span
+    (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ hE)))
+
 end ParityDecomposition
 
 variable {K w N} in
