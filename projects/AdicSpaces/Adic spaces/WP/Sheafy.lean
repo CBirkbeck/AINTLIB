@@ -214,6 +214,54 @@ theorem tateExtAmbient_coeff (s : ℕ)
   rfl
 
 variable {K w} in
+/-- The coefficient-value hom `𝒜 → K⟦U⟧` (two subtype layers). -/
+noncomputable def wpaVal : WPA K w →+* MvPowerSeries ℕ K :=
+  ((MvPowerSeries.isSubring (R := K) (fun _ : ℕ => (1 : ℝ))).subtype).comp
+    ((wpSupport K w).subtype)
+
+variable {K w} in
+theorem wpaVal_injective : Function.Injective (wpaVal (K := K) (w := w)) := by
+  intro a b hab
+  have h1 : a.1.1 = b.1.1 := hab
+  exact Subtype.ext (Subtype.ext h1)
+
+variable {K w} in
+/-- The flatten hom on the nested Tate extension (stage 2 of the bridge). -/
+noncomputable def tateExtToFlat (s : ℕ) :
+    ↥(restrictedMvPowerSeriesSubring s (WPA K w)) →+* MvPowerSeries ℕ K :=
+  ((tateExtAmbient (K := K) s).toRingHom.comp
+    (MvPowerSeries.map (wpaVal (K := K) (w := w)))).comp
+    (restrictedMvPowerSeriesSubring s (WPA K w)).subtype
+
+variable {K w} in
+theorem tateExtToFlat_injective (s : ℕ) :
+    Function.Injective (tateExtToFlat (K := K) (w := w) s) := by
+  rw [tateExtToFlat, RingHom.coe_comp, RingHom.coe_comp]
+  refine Function.Injective.comp (Function.Injective.comp ?_ ?_) ?_
+  · exact (tateExtAmbient (K := K) s).injective
+  · exact MvPowerSeries.map_injective (wpaVal_injective (K := K) (w := w))
+  · exact Subring.subtype_injective _
+
+variable {K w} in
+/-- Coefficients of the flatten hom: nested coefficient values at the
+slot-transported exponent. -/
+theorem tateExtToFlat_coeff (s : ℕ)
+    (F : ↥(restrictedMvPowerSeriesSubring s (WPA K w))) (u : ℕ →₀ ℕ) :
+    MvPowerSeries.coeff u (tateExtToFlat (K := K) (w := w) s F) =
+      MvPowerSeries.coeff
+        (Finsupp.comapDomain Sum.inr (Finsupp.equivMapDomain (slotEquiv s) u)
+          Sum.inr_injective.injOn)
+        (wpaVal (K := K) (w := w)
+          (MvPowerSeries.coeff
+            (Finsupp.comapDomain Sum.inl
+              (Finsupp.equivMapDomain (slotEquiv s) u)
+              Sum.inl_injective.injOn) F.1)) := by
+  rw [show tateExtToFlat (K := K) (w := w) s F =
+    tateExtAmbient (K := K) s
+      (MvPowerSeries.map (wpaVal (K := K) (w := w)) F.1) from rfl,
+    tateExtAmbient_coeff, MvPowerSeries.coeff_map]
+
+variable {K w} in
 /-- The bridge between the project's Tate extension of `𝒜` and the shifted-weight
 weighted-parity algebra: `𝒜⟨V_1,…,V_s⟩ ≅ WPA (shiftWeight w s)` (Fubini + reindex
 of restricted power series; nested-vs-flat plumbing). -/
