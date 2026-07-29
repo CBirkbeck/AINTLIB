@@ -52,16 +52,17 @@ theorem moduleCechShortComplexApp_exact_of_restrict_subsingleton_H
     (moduleCechShortComplexApp_exact_iff_baseCechComplex_restrict
       π M U W 0).2 hbase
 
-/-- For a finite affine cover, the module-valued Cech short complex evaluated
-on an affine open is exact in degree one. -/
-theorem moduleCechShortComplexApp_exact_of_affine_openCover
+/-- For a finite affine cover, every positive-degree module-valued Cech short
+complex evaluated on an affine open is exact. -/
+theorem moduleCechShortComplexApp_exact_of_affine_openCover_succ
     {X S : Scheme.{u}} [X.IsSeparated]
     (π : X ⟶ S) (M : X.Modules) [M.IsQuasicoherent]
     {ι : Type u} [Finite ι]
     (U : ι → X.Opens) (hU : IsOpenCover U)
     (hUaff : ∀ i, IsAffineOpen (U i))
-    (W : X.Opens) (hWaff : IsAffineOpen W) :
-    (moduleCechShortComplexApp (baseModuleTopSheaf π M) U 0 W).Exact := by
+    (W : X.Opens) (hWaff : IsAffineOpen W) (n : ℕ) :
+    (moduleCechShortComplexApp
+      (baseModuleTopSheaf π M) U n W).Exact := by
   let MW := M.restrict W.ι
   let UW : ι → W.toScheme.Opens := fun i => W.ι ⁻¹ᵁ U i
   letI : IsAffine W.toScheme := hWaff
@@ -75,14 +76,29 @@ theorem moduleCechShortComplexApp_exact_of_affine_openCover
       Scheme.Opens.opensRange_ι]
     exact hWaff.inf (hUaff i)
   have hnative :
-      ((cechComplexFunctor UW).obj MW.sheaf.obj).ExactAt 1 :=
+      ((cechComplexFunctor UW).obj MW.sheaf.obj).ExactAt (n + 1) :=
     cechComplex_exactAt_succ_of_affine_openCover
-      MW UW hUW hUWaff 0 (affine_subsingleton_H MW 0)
+      MW UW hUW hUWaff n (affine_subsingleton_H MW n)
   have hbase :
-      (baseCechComplex (W.ι ≫ π) MW UW).ExactAt 1 :=
-    (baseCechComplex_exactAt_iff (W.ι ≫ π) MW UW 1).2 hnative
+      (baseCechComplex (W.ι ≫ π) MW UW).ExactAt (n + 1) :=
+    (baseCechComplex_exactAt_iff
+      (W.ι ≫ π) MW UW (n + 1)).2 hnative
   exact
     (moduleCechShortComplexApp_exact_iff_baseCechComplex_restrict
-      π M U W 0).2 hbase
+      π M U W n).2 hbase
+
+/-- For a finite affine cover, the module-valued Cech short complex evaluated
+on an affine open is exact in degree one. -/
+theorem moduleCechShortComplexApp_exact_of_affine_openCover
+    {X S : Scheme.{u}} [X.IsSeparated]
+    (π : X ⟶ S) (M : X.Modules) [M.IsQuasicoherent]
+    {ι : Type u} [Finite ι]
+    (U : ι → X.Opens) (hU : IsOpenCover U)
+    (hUaff : ∀ i, IsAffineOpen (U i))
+    (W : X.Opens) (hWaff : IsAffineOpen W) :
+    (moduleCechShortComplexApp
+      (baseModuleTopSheaf π M) U 0 W).Exact :=
+  moduleCechShortComplexApp_exact_of_affine_openCover_succ
+    π M U hU hUaff W hWaff 0
 
 end AlgebraicGeometry.Scheme.Modules
