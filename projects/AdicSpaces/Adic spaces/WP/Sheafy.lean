@@ -302,6 +302,88 @@ theorem liftDatum_mono {M : ℕ} (DH DH' : RationalLocData (WPHead K w M))
     (hsub ((mem_liftDatum_iff M DH' hDH' v hvspa).mp hv))
 
 variable {K w} in
+open scoped Classical in
+/-- The product (intersection) datum of two rational head data (the
+`interDatum` mirror at `P_M`; [WP] 1156–1218 "the intersections are again
+rational"). -/
+noncomputable def interDatumHead {M : ℕ}
+    (DH₁ DH₂ : RationalLocData (WPHead K w M))
+    (h₁ : DH₁.IsRational) (h₂ : DH₂.IsRational) :
+    RationalLocData (WPHead K w M) where
+  P := DH₁.P
+  T := (insert DH₁.s DH₁.T ×ˢ insert DH₂.s DH₂.T).image fun p => p.1 * p.2
+  s := DH₁.s * DH₂.s
+  hopen := genPiece_hopen DH₁.P
+    ((insert DH₁.s DH₁.T ×ˢ insert DH₂.s DH₂.T).image fun p => p.1 * p.2)
+    (DH₁.s * DH₂.s)
+    (FiniteJet.span_mul_image_eq_top (FiniteJet.span_insert_eq_top DH₁.s h₁.span_eq_top)
+      (FiniteJet.span_insert_eq_top DH₂.s h₂.span_eq_top))
+
+variable {K w} in
+open scoped Classical in
+theorem interDatumHead_isRational {M : ℕ}
+    {DH₁ DH₂ : RationalLocData (WPHead K w M)}
+    (h₁ : DH₁.IsRational) (h₂ : DH₂.IsRational) :
+    (interDatumHead DH₁ DH₂ h₁ h₂).IsRational :=
+  RationalLocData.isRational_of_span_eq_top
+    (FiniteJet.span_mul_image_eq_top (FiniteJet.span_insert_eq_top DH₁.s h₁.span_eq_top)
+      (FiniteJet.span_insert_eq_top DH₂.s h₂.span_eq_top))
+
+variable {K w} in
+open scoped Classical in
+/-- The intersection formula for the head product datum. -/
+theorem rationalOpen_interDatumHead {M : ℕ}
+    (DH₁ DH₂ : RationalLocData (WPHead K w M))
+    (h₁ : DH₁.IsRational) (h₂ : DH₂.IsRational) :
+    rationalOpen (interDatumHead DH₁ DH₂ h₁ h₂).T
+        (interDatumHead DH₁ DH₂ h₁ h₂).s =
+      rationalOpen DH₁.T DH₁.s ∩ rationalOpen DH₂.T DH₂.s := by
+  ext v
+  constructor
+  · rintro ⟨hspa, hvle, hs0⟩
+    have hs₁0 : ¬ v.vle DH₁.s 0 := fun h0 => hs0 (by
+      have := v.mul_vle_mul_left h0 DH₂.s
+      rwa [zero_mul] at this)
+    have hs₂0 : ¬ v.vle DH₂.s 0 := fun h0 => hs0 (by
+      have := v.mul_vle_mul_left h0 DH₁.s
+      rw [zero_mul, mul_comm DH₂.s DH₁.s] at this
+      exact this)
+    refine ⟨⟨hspa, fun t ht => ?_, hs₁0⟩, ⟨hspa, fun t ht => ?_, hs₂0⟩⟩
+    · have hpair : t * DH₂.s ∈ (interDatumHead DH₁ DH₂ h₁ h₂).T :=
+        Finset.mem_image.mpr ⟨(t, DH₂.s), Finset.mem_product.mpr
+          ⟨Finset.mem_insert_of_mem ht, Finset.mem_insert_self _ _⟩, rfl⟩
+      exact v.vle_mul_cancel hs₂0 (hvle _ hpair)
+    · have hpair : DH₁.s * t ∈ (interDatumHead DH₁ DH₂ h₁ h₂).T :=
+        Finset.mem_image.mpr ⟨(DH₁.s, t), Finset.mem_product.mpr
+          ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem ht⟩, rfl⟩
+      have h' := hvle _ hpair
+      rw [show DH₁.s * t = t * DH₁.s from mul_comm _ _,
+        show (interDatumHead DH₁ DH₂ h₁ h₂).s = DH₂.s * DH₁.s from
+          mul_comm _ _] at h'
+      exact v.vle_mul_cancel hs₁0 h'
+  · rintro ⟨⟨hspa, hvle₁, hs₁0⟩, ⟨-, hvle₂, hs₂0⟩⟩
+    have hvle₁' : ∀ t₁ ∈ insert DH₁.s DH₁.T, v.vle t₁ DH₁.s := by
+      intro t₁ ht₁
+      rcases Finset.mem_insert.mp ht₁ with h | h
+      · subst h; exact (v.vle_total _ _).elim id id
+      · exact hvle₁ t₁ h
+    have hvle₂' : ∀ t₂ ∈ insert DH₂.s DH₂.T, v.vle t₂ DH₂.s := by
+      intro t₂ ht₂
+      rcases Finset.mem_insert.mp ht₂ with h | h
+      · subst h; exact (v.vle_total _ _).elim id id
+      · exact hvle₂ t₂ h
+    refine ⟨hspa, fun t' ht' => ?_, fun h0 => ?_⟩
+    · obtain ⟨⟨t₁, t₂⟩, hmem, rfl⟩ := Finset.mem_image.mp ht'
+      obtain ⟨ht₁, ht₂⟩ := Finset.mem_product.mp hmem
+      have ha := v.mul_vle_mul_left (hvle₁' t₁ ht₁) t₂
+      have hb := v.mul_vle_mul_left (hvle₂' t₂ ht₂) DH₁.s
+      rw [mul_comm t₂ DH₁.s, mul_comm DH₂.s DH₁.s] at hb
+      exact v.vle_trans ha hb
+    · rw [show (interDatumHead DH₁ DH₂ h₁ h₂).s = DH₁.s * DH₂.s from rfl,
+        show (0 : WPHead K w M) = 0 * DH₂.s from (zero_mul _).symm] at h0
+      exact hs₁0 (v.vle_mul_cancel hs₂0 h0)
+
+variable {K w} in
 /-- A common-stage system of head data for a whole covering, with the
 rational-subset identifications — the carrier consumed by the embedding and
 gluing fields (shared W21/W22 infrastructure; [WP] 1156–1218). -/
