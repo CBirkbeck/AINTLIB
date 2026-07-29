@@ -478,11 +478,245 @@ theorem chartFwd_continuous (ϖ : Uniformizer K) :
     _ = δ := by rw [add_sub_cancel]
 
 variable {K w} in
+open scoped Classical in
+theorem WaHead_mem_chartT (ϖ : Uniformizer K) :
+    WaHead K w 0 ∈ (chartHeadDatum (w := w) ϖ).T := by
+  rw [chartHeadDatum_T]
+  exact Finset.mem_insert_self _ _
+
+variable {K w} in
+/-- The reverse chart model map: `X ↦ [X_W]`, constants through `headConst`. -/
+noncomputable def chartRev (ϖ : Uniformizer K) :
+    FiniteJet.GraphKoszul.P K 1 →+* QHead (chartHeadDatum (w := w) ϖ) :=
+  restrictedEval
+    ((headConst (chartHeadDatum (w := w) ϖ)).comp (constHead K w 0))
+    (AddMonoidHomClass.continuous_of_bound _ 1 fun a => by
+      rw [one_mul, RingHom.comp_apply]
+      exact le_trans (norm_headConst_le _ _) (le_of_eq (by rw [norm_constHead])))
+    (fun _ : Fin 1 => qX (chartHeadDatum (w := w) ϖ)
+      ((datumEnum (chartHeadDatum (w := w) ϖ)).symm
+        ⟨WaHead K w 0, WaHead_mem_chartT ϖ⟩))
+    (fun _ => FiniteJet.isPowerBounded_of_norm_le_one (norm_qX_le_one _ _))
+
+variable {K w} in
+theorem chartRev_C (ϖ : Uniformizer K) (a : K) :
+    chartRev (K := K) (w := w) ϖ
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C a)) =
+      headConst (chartHeadDatum (w := w) ϖ) (constHead K w 0 a) :=
+  restrictedEval_C _ _ _ _ a
+
+variable {K w} in
+theorem chartRev_X (ϖ : Uniformizer K) :
+    chartRev (K := K) (w := w) ϖ
+      (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0)) =
+      qX (chartHeadDatum (w := w) ϖ)
+        ((datumEnum (chartHeadDatum (w := w) ϖ)).symm
+          ⟨WaHead K w 0, WaHead_mem_chartT ϖ⟩) :=
+  restrictedEval_X _ _ _ _ 0
+
+variable {K w} in
+theorem chartRev_continuous (ϖ : Uniformizer K) :
+    Continuous (chartRev (K := K) (w := w) ϖ) :=
+  restrictedEval_continuous _ _ _ _
+
+variable {K w} in
+/-- Forward after reverse is the identity on `K⟨X⟩`. -/
+theorem chartFwd_chartRev (ϖ : Uniformizer K)
+    (y : FiniteJet.GraphKoszul.P K 1) :
+    chartFwd (K := K) (w := w) ϖ (chartRev (K := K) (w := w) ϖ y) = y := by
+  classical
+  have h1 : ⇑((chartFwd (K := K) (w := w) ϖ).comp
+      (chartRev (K := K) (w := w) ϖ)) =
+      (id : FiniteJet.GraphKoszul.P K 1 → FiniteJet.GraphKoszul.P K 1) := by
+    refine denseRange_polyToP.equalizer
+      ((chartFwd_continuous ϖ).comp (chartRev_continuous ϖ)) continuous_id ?_
+    funext Q
+    show chartFwd (K := K) (w := w) ϖ
+      (chartRev (K := K) (w := w) ϖ (FiniteJet.GraphKoszul.polyToP Q)) =
+      FiniteJet.GraphKoszul.polyToP Q
+    induction Q using MvPolynomial.induction_on with
+    | C a =>
+      rw [chartRev_C, show headConst (chartHeadDatum (w := w) ϖ)
+          (constHead K w 0 a) =
+        Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+          (FiniteJet.GraphKoszul.polyToP
+            (MvPolynomial.C (constHead K w 0 a))) from rfl,
+        chartFwd_mk, chartFwdP_C, chartCoeff_constHead]
+    | add p q hp hq => simp only [map_add, hp, hq]
+    | mul_X p i hp =>
+      have hi : i = 0 := Subsingleton.elim i 0
+      subst hi
+      rw [map_mul, map_mul, map_mul, hp, chartRev_X,
+        show qX (chartHeadDatum (w := w) ϖ)
+          ((datumEnum (chartHeadDatum (w := w) ϖ)).symm
+            ⟨WaHead K w 0, WaHead_mem_chartT ϖ⟩) =
+        Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+          (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X
+            ((datumEnum (chartHeadDatum (w := w) ϖ)).symm
+              ⟨WaHead K w 0, WaHead_mem_chartT ϖ⟩))) from rfl,
+        chartFwd_mk, chartFwdP_X, Equiv.apply_symm_apply, if_pos rfl, ← map_mul]
+  exact congrFun h1 y
+
+variable {K w} in
+/-- The reverse map undoes the coefficient hom (density of polynomials in `K⟨W⟩`
+through `headZeroEquiv`). -/
+theorem chartRev_chartCoeff (ϖ : Uniformizer K) (x : WPHead K w 0) :
+    chartRev (K := K) (w := w) ϖ (chartCoeff (K := K) (w := w) ϖ x) =
+      headConst (chartHeadDatum (w := w) ϖ) x := by
+  classical
+  have hdense : DenseRange (⇑(headZeroEquiv (K := K) (w := w)).symm ∘
+      ⇑(FiniteJet.GraphKoszul.polyToP (E := K) (m := 1))) :=
+    DenseRange.comp (Function.Surjective.denseRange
+      (headZeroEquiv (K := K) (w := w)).symm.surjective) denseRange_polyToP
+      (headZeroEquiv_symm_continuous (K := K) (w := w))
+  have h1 : ⇑((chartRev (K := K) (w := w) ϖ).comp
+      (chartCoeff (K := K) (w := w) ϖ)) =
+      ⇑(headConst (chartHeadDatum (w := w) ϖ)) := by
+    refine hdense.equalizer
+      ((chartRev_continuous ϖ).comp (chartCoeff_continuous ϖ))
+      (AddMonoidHomClass.continuous_of_bound
+        (headConst (chartHeadDatum (w := w) ϖ)) 1
+        fun q => by rw [one_mul]; exact norm_headConst_le _ q) ?_
+    funext Q
+    show chartRev (K := K) (w := w) ϖ (chartCoeff (K := K) (w := w) ϖ
+      ((headZeroEquiv (K := K) (w := w)).symm
+        (FiniteJet.GraphKoszul.polyToP Q))) =
+      headConst (chartHeadDatum (w := w) ϖ)
+        ((headZeroEquiv (K := K) (w := w)).symm
+          (FiniteJet.GraphKoszul.polyToP Q))
+    rw [show chartCoeff (K := K) (w := w) ϖ
+        ((headZeroEquiv (K := K) (w := w)).symm
+          (FiniteJet.GraphKoszul.polyToP Q)) =
+      chartRescale (K := K) ϖ (FiniteJet.GraphKoszul.polyToP Q) from by
+        rw [chartCoeff, RingHom.comp_apply,
+          show (headZeroEquiv (K := K) (w := w)).toRingHom
+            ((headZeroEquiv (K := K) (w := w)).symm
+              (FiniteJet.GraphKoszul.polyToP Q)) =
+          headZeroEquiv (K := K) (w := w)
+            ((headZeroEquiv (K := K) (w := w)).symm
+              (FiniteJet.GraphKoszul.polyToP Q)) from rfl,
+          RingEquiv.apply_symm_apply]]
+    induction Q using MvPolynomial.induction_on with
+    | C a =>
+      rw [chartRescale_C, chartRev_C,
+        show (headZeroEquiv (K := K) (w := w)).symm
+          (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C a)) =
+        constHead K w 0 a from by
+          rw [← headZeroEquiv_constHead (K := K) (w := w) a,
+            RingEquiv.symm_apply_apply]]
+    | add p q hp hq => simp only [map_add, hp, hq]
+    | mul_X p i hp =>
+      have hi : i = 0 := Subsingleton.elim i 0
+      subst hi
+      rw [map_mul, map_mul, map_mul, hp, chartRescale_X, map_mul, map_mul,
+        chartRev_C, chartRev_X]
+      have hrel := headConst_datumEnum (chartHeadDatum (w := w) ϖ)
+        ((datumEnum (chartHeadDatum (w := w) ϖ)).symm
+          ⟨WaHead K w 0, WaHead_mem_chartT ϖ⟩)
+      rw [Equiv.apply_symm_apply] at hrel
+      rw [show constHead K w 0 ϖ.val = (chartHeadDatum (w := w) ϖ).s from rfl,
+        ← hrel,
+        show ((⟨WaHead K w 0, WaHead_mem_chartT ϖ⟩ :
+          ↥(chartHeadDatum (w := w) ϖ).T) : WPHead K w 0) = WaHead K w 0 from rfl,
+        show (headZeroEquiv (K := K) (w := w)).symm
+          (FiniteJet.GraphKoszul.polyToP p *
+            FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0)) =
+        (headZeroEquiv (K := K) (w := w)).symm
+            (FiniteJet.GraphKoszul.polyToP p) *
+          (headZeroEquiv (K := K) (w := w)).symm
+            (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0)) from map_mul _ _ _,
+        show (headZeroEquiv (K := K) (w := w)).symm
+          (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X 0)) =
+        WaHead K w 0 from by
+          rw [← headZeroEquiv_WaHead (K := K) (w := w),
+            RingEquiv.symm_apply_apply], map_mul]
+  exact congrFun h1 x
+
+variable {K w} in
+set_option maxHeartbeats 1000000 in
+/-- Reverse after forward is the identity on the graph quotient. -/
+theorem chartRev_chartFwd (ϖ : Uniformizer K)
+    (q : QHead (chartHeadDatum (w := w) ϖ)) :
+    chartRev (K := K) (w := w) ϖ (chartFwd (K := K) (w := w) ϖ q) = q := by
+  classical
+  obtain ⟨G, rfl⟩ := Ideal.Quotient.mk_surjective
+    (I := headGraphIdeal (chartHeadDatum (w := w) ϖ)) q
+  rw [chartFwd_mk]
+  have hpoly : ∀ Q : MvPolynomial
+      (Fin (chartHeadDatum (w := w) ϖ).T.card) (WPHead K w 0),
+      chartRev (K := K) (w := w) ϖ (chartFwdP (K := K) (w := w) ϖ
+        (FiniteJet.GraphKoszul.polyToP Q)) =
+        Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+          (FiniteJet.GraphKoszul.polyToP Q) := by
+    intro Q
+    induction Q using MvPolynomial.induction_on with
+    | C x =>
+      rw [chartFwdP_C, chartRev_chartCoeff]
+      rfl
+    | add p q hp hq =>
+      simp only [map_add, hp, hq]
+      rfl
+    | mul_X p i hp =>
+      rw [map_mul, map_mul, map_mul, hp, chartFwdP_X]
+      rcases Finset.mem_insert.mp
+        (datumEnum (chartHeadDatum (w := w) ϖ) i).2 with h | h
+      · rw [if_pos h, chartRev_X]
+        have hi : ((datumEnum (chartHeadDatum (w := w) ϖ)).symm
+            ⟨WaHead K w 0, WaHead_mem_chartT ϖ⟩) = i := by
+          rw [← Equiv.symm_apply_apply
+            (datumEnum (chartHeadDatum (w := w) ϖ)) i]
+          congr 1
+          exact Subtype.ext h.symm
+        rw [hi]
+        rfl
+      · rw [Finset.mem_singleton] at h
+        rw [if_neg (by rw [h]; exact fun hc => WaHead_ne_piHead ϖ hc.symm),
+          map_one]
+        have hrel := headConst_datumEnum (chartHeadDatum (w := w) ϖ) i
+        rw [show ((datumEnum (chartHeadDatum (w := w) ϖ) i :
+            ↥(chartHeadDatum (w := w) ϖ).T) : WPHead K w 0) = piHead ϖ from h,
+          show (chartHeadDatum (w := w) ϖ).s = piHead ϖ from rfl] at hrel
+        have hu : IsUnit (headConst (chartHeadDatum (w := w) ϖ) (piHead ϖ)) := by
+          have h0 := isUnit_headConst_s ϖ (chartHeadDatum (w := w) ϖ)
+            (chartHeadDatum_isRational ϖ)
+          rwa [show (chartHeadDatum (w := w) ϖ).s = piHead ϖ from rfl] at h0
+        have hqX1 : qX (chartHeadDatum (w := w) ϖ) i = 1 := by
+          refine hu.mul_left_cancel ?_
+          rw [mul_one, ← hrel]
+        rw [show Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+            (FiniteJet.GraphKoszul.polyToP p *
+              FiniteJet.GraphKoszul.polyToP (MvPolynomial.X i)) =
+          Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+              (FiniteJet.GraphKoszul.polyToP p) *
+            Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+              (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X i))
+            from map_mul _ _ _,
+          show Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))
+            (FiniteJet.GraphKoszul.polyToP (MvPolynomial.X i)) =
+          qX (chartHeadDatum (w := w) ϖ) i from rfl, hqX1]
+        rfl
+  have h1 : ⇑((chartRev (K := K) (w := w) ϖ).comp
+      (chartFwdP (K := K) (w := w) ϖ)) =
+      ⇑(Ideal.Quotient.mk (headGraphIdeal (chartHeadDatum (w := w) ϖ))) := by
+    refine denseRange_polyToP.equalizer
+      ((chartRev_continuous ϖ).comp (chartFwdP_continuous ϖ))
+      (continuous_mk_headGraphIdeal (chartHeadDatum (w := w) ϖ)) ?_
+    funext Q
+    exact hpoly Q
+  exact congrFun h1 G
+
+variable {K w} in
 /-- The chart head model: `K⟨W⟩⟨X⟩/(ϖX − W) ≅ K⟨X⟩` via `W ↦ ϖX` (the classical
 smooth chart; the univariate rescaling of `FJP/FiniteJetChart.lean:82`). -/
 noncomputable def chartQHeadEquiv (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
-    QHead (chartHeadDatum (w := w) ϖ) ≃+* FiniteJet.GraphKoszul.P K 1 := by sorry
+    QHead (chartHeadDatum (w := w) ϖ) ≃+* FiniteJet.GraphKoszul.P K 1 :=
+  { toFun := chartFwd (K := K) (w := w) ϖ
+    invFun := chartRev (K := K) (w := w) ϖ
+    left_inv := chartRev_chartFwd ϖ
+    right_inv := chartFwd_chartRev ϖ
+    map_mul' := map_mul _
+    map_add' := map_add _ }
 
 variable {K w} in
 theorem chartQHeadEquiv_norm (ϖ : Uniformizer K)
