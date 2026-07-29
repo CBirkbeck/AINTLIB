@@ -288,3 +288,29 @@ bookkeeping -> name the positivity facts) before it came under.
 ### Remaining 103 — Euclidean 12, ArCompletion 5, CurveAdicPresentation 1, rest elsewhere
 Biggest: `descent_step` 133 (NINE comment seams), `exact_division` 115, `digit_sub_le` 94
 (no seams — will need segment cutting like the ArCompletion chains).
+
+## 9. `descent_step` 133 -> 94 (in progress)
+
+Two cuts so far: `tendsto_gaussTerm_sub` (shared with digit_sub_le) and
+`valued_sub_divStep_sub_PhiHatK_le` (the residue after one division step is c-small).
+
+### Extraction boundaries follow DATA FLOW, not comment seams
+My first attempt lifted the whole `-- piece 1` .. `-- DC⁺ transfer` region, because the
+comments delimited it.  That broke the caller: the region *defines* `hΦwmem`,
+`hΦwcoords` and `hvΦw`, which `descent_step` uses later in the DC⁺ transfer and the final
+assembly.
+
+**Check what a block DEFINES that is used after it, not only what it consumes.**  A
+comment-delimited region often introduces bindings the rest of the proof depends on, so
+the extraction boundary is where the data flow closes, not where the comment sits.
+
+The fix abstracted in the other direction: the lemma takes `Φc` as an ARBITRARY element of
+`A^r`, constrained only by `hwdef` (that `w` is the pointwise coordinate difference), and
+the `w`/`Φw` block stays in the caller.  The result is a better lemma than the block it
+replaced — stated over a general `Φc` it says plainly what is true, rather than being tied
+to the specific convolution reconstruction.
+
+### Still to cut in descent_step (94 -> under 50)
+setup (~28) · value ladders + E-error + value of Φc (~26) · w/Φw block (~15) ·
+DC⁺ transfer + R3 + assemble (~25).  The value-ladder region and the assemble tail are the
+two obvious next candidates.
