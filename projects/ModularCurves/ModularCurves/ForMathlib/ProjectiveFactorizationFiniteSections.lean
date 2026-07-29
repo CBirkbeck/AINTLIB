@@ -81,4 +81,45 @@ theorem baseSections_module_finite
       f M U hU
   exact Module.Finite.equiv e.symm.toLinearEquiv
 
+private theorem finite_cycles_zero_of_finite_kernel
+    {A : Type u} [CommRing A]
+    (C : CochainComplex (ModuleCat.{u} A) ℕ)
+    [Module.Finite A (LinearMap.ker (C.d 0 1).hom)] :
+    Module.Finite A (C.cycles 0) := by
+  let S := C.sc' 0 0 1
+  have hprev : (ComplexShape.up ℕ).prev 0 = 0 :=
+    CochainComplex.prev_nat_zero
+  have hnext : (ComplexShape.up ℕ).next 0 = 1 := by simp
+  let e :
+      C.cycles 0 ≃ₗ[A] LinearMap.ker (C.d 0 1).hom :=
+    (C.cyclesIsoSc' 0 0 1 hprev hnext).toLinearEquiv.trans
+      S.moduleCatCyclesIso.toLinearEquiv
+  exact Module.Finite.equiv e.symm
+
+/-- Degree-zero ordered base-Cech homology of a finite-type
+quasicoherent module on a projective scheme is finite for every
+ordered open cover. -/
+theorem orderedBaseCechComplex_homology_zero_module_finite
+    (hf : AlgebraicGeometry.IsProjectiveFactorization f)
+    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) :
+    Module.Finite Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+      ((Scheme.Modules.orderedBaseCechComplex f M U).homology 0) := by
+  let C := Scheme.Modules.orderedBaseCechComplex f M U
+  letI : Module.Finite Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+      (Scheme.Modules.baseSections f M) :=
+    hf.baseSections_module_finite M
+  let e :=
+    Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+      f M U hU
+  letI : Module.Finite Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+      (LinearMap.ker (C.d 0 1).hom) :=
+    Module.Finite.equiv e.toLinearEquiv
+  letI : Module.Finite Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+      (C.cycles 0) :=
+    finite_cycles_zero_of_finite_kernel C
+  exact Module.Finite.of_surjective (C.homologyπ 0).hom
+    ((ModuleCat.epi_iff_surjective (C.homologyπ 0)).mp inferInstance)
+
 end AlgebraicGeometry.IsProjectiveFactorization
