@@ -441,6 +441,55 @@ theorem qRestrict_bound {C : RationalCoveringData (WPA K w)}
           _ ≤ ‖c‖ ^ (n + 1 : ℤ) * ‖q‖ := hlower
     _ = ‖q‖ := by rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
 
+section MapC
+
+variable {P Q : Type*} [NormedCommRing P] [IsUltrametricDist P]
+  [NormedCommRing Q] [IsUltrametricDist Q] {ρP : TwistElem P} {ρQ' : TwistElem Q}
+  {w' : ℕ → ℕ} {N' : ℕ}
+
+/-- The `C`-bounded coefficientwise map of null families (`TailC0.map` for
+bounded — not necessarily nonexpansive — coefficient homs). -/
+noncomputable def TailC0.mapC (φ : P →+* Q) {Cb : ℝ}
+    (hφ : ∀ p, ‖φ p‖ ≤ Cb * ‖p‖) (hρ : φ ρP.val = ρQ'.val) :
+    TailC0 w' N' P ρP →+* TailC0 w' N' Q ρQ' where
+  toFun x := ⟨fun μ => φ (x.1 μ), by
+    refine Filter.Tendsto.squeeze tendsto_const_nhds ?_
+      (fun μ => norm_nonneg _) (fun μ => hφ (x.1 μ))
+    have h2 := (x.2).const_mul Cb
+    rwa [mul_zero] at h2⟩
+  map_one' := by
+    refine Subtype.ext (funext fun μ => ?_)
+    show φ ((1 : TailC0 w' N' P ρP).1 μ) = (1 : TailC0 w' N' Q ρQ').1 μ
+    rw [TailC0.one_val, TailC0.one_val]
+    split_ifs
+    · exact map_one φ
+    · exact map_zero φ
+  map_mul' x y := by
+    refine Subtype.ext (funext fun τ => ?_)
+    show φ ((x * y).1 τ) = _
+    rw [TailC0.mul_val, map_sum]
+    refine Eq.trans (Finset.sum_congr rfl fun p _ => ?_)
+      (TailC0.mul_val _ _ τ).symm
+    rw [map_mul, map_mul, map_pow, hρ]
+  map_zero' := by
+    refine Subtype.ext (funext fun μ => ?_)
+    show φ ((0 : TailC0 w' N' P ρP).1 μ) = (0 : TailC0 w' N' Q ρQ').1 μ
+    rw [show ((0 : TailC0 w' N' P ρP)).1 μ = 0 from rfl,
+      show ((0 : TailC0 w' N' Q ρQ')).1 μ = 0 from rfl]
+    exact map_zero φ
+  map_add' x y := by
+    refine Subtype.ext (funext fun μ => ?_)
+    show φ ((x + y).1 μ) = _
+    rw [show (x + y).1 μ = x.1 μ + y.1 μ from rfl, map_add]
+    rfl
+
+theorem TailC0.mapC_val (φ : P →+* Q) {Cb : ℝ}
+    (hφ : ∀ p, ‖φ p‖ ≤ Cb * ‖p‖) (hρ : φ ρP.val = ρQ'.val)
+    (x : TailC0 w' N' P ρP) (μ : TailIdx N') :
+    (TailC0.mapC φ hφ hρ x).1 μ = φ (x.1 μ) := rfl
+
+end MapC
+
 variable {K w} in
 open scoped Classical in
 /-- **The pushed head covering** ([WP] 1156–1218): a rational covering of `𝒜`
