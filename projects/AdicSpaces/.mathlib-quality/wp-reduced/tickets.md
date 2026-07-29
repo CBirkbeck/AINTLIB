@@ -1118,13 +1118,26 @@ propext/Classical.choice/Quot.sound) before marking done.
   T_i = f_i/s is determined; surjectivity + kernel computation of the finite-level
   comparison; AdicCompletion functoriality along the tower.  Frontier flagged:
   finite-level commutative algebra, no mathlib precedent.
-### [HRW-4] L3.a — the W-invertible chart (Z-elimination → Tate locals)
-- Status: open | File: WP/HeadReduced.lean | Depends: none (statement-independent)
+### [HRW-4] THE TATE LEAF (retitled 2026-07-30; was: L3.a Z-elimination)
+- Status: open | File: new (TateAlgebraCompletedLocal.lean, generic) | Depends: none
+- REARCHITECTED per hrw-decomposition "L3 REARCHITECTED": completed locals of
+  K⟨X_1..X_d⟩ at maximals are domains, via N1 affinoid Nullstellensatz (BGR
+  6.1.2/3, ~500-1000 LOC — open with its own decompose round) + N2
+  rationalization/faithfully-flat-cofinal + N3 truncated-Taylor B̂_𝔫 ≅ L⟦T⟧ +
+  N4 transport. ~1350-2750 LOC total. The ONLY analytic leaf of the wall.
 - Decls: `head_completedLocal_reduced_of_wa_notMem` (+ its sub-decomposition when
   opened: A_N[1/W] = K⟨W,U⟩[1/W] support identity; `tateAlgebra_completedLocal_
   reduced` leaf — check the 828b Nullstellensatz artifacts first).
-### [HRW-5] L3.b — the singular quadratic tower (deepest leaf)
-- Status: open | File: WP/HeadReduced.lean | Depends: none (statement-independent)
+### [HRW-5] The finite-embedding semilocal reduction (retitled 2026-07-30; was: L3.b)
+- Status: open | File: WP/HeadReduced.lean (+ helpers) | Depends: HRW-4 (final glue only)
+- REARCHITECTED: P ↪ Q := K⟨W,U⟩ finite (Y_i ↦ W^{w_i}U_i, Z_i ↦ U_i²;
+  support-injective; U^ε-module-basis), semilocal completed decomposition
+  Â ↪ ∏ (Q-locals)^ (AdicCompletion.map_exact +
+  ofTensorProductEquivOfFiniteNoetherian + CRT-for-powers + Jacobson-radical
+  nilpotence — ~500-1000 LOC), then head_completedLocal_reduced := transport.
+  NO chart split, char-free. Lean-work can start BEFORE HRW-4 (all but the
+  final glue). First recon: is Q expressible as WPHead K 0 N-style (trivial
+  parity) and does a weight-rescale hom exist in the tateExt machinery?
 - Decls: `head_completedLocal_reduced_of_wa_mem`.  Requires its own decomposition
   round when opened (planned route: explicit completed support model + Φ-style
   formal-domain embedding; char-free).
