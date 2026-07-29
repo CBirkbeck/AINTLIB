@@ -29322,3 +29322,29 @@ Cech complex, Pic-zero route, or group law.
 `EllipticCurve/PoleSheafBaseCechHigher.lean`. Its focused 4,350-job build and
 style linter pass, and its axiom audit reports exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
+
+### CLAIM (rule 5, OWNER-FLW-STAGE-POLE-CECH-RESIDUE,
+`state:done`,
+codex/fibrewise-weierstrass-picard-tranche3-monoidal, 2026-07-29): add
+`FibrewiseElliptic.orderedBaseCech_baseChange_exact_of_poleSheafModel` and
+`FibrewiseElliptic.orderedBaseCech_residueField_exact_of_poleSheafModel`.
+Given a pole-sheaf model after one base change, transport fibrewise ellipticity,
+relative smoothness, and the pole model through one further base change and the
+canonical pullback associator. Use this to prove exactness of the stage ordered
+base-Cech differentials after scalar extension to the field-valued base, then
+reflect exactness to the residue field of the kernel prime by faithful flatness.
+Reuse `sectionPoleSheafPowerDirectBaseChangeIso`,
+`orderedBaseCechComplex_baseChange_exact_iff_of_iso`, and
+`LinearMap.baseChange_exact_iff_of_faithfullyFlat`. Add no option, sorry, admit,
+axiom, unsafe declaration, Noetherianity, extra final hypothesis, Pic-zero route,
+group law, alternate Cech construction, or duplicate pullback infrastructure;
+root-index the module and audit both public declarations.
+
+**Progress (2026-07-29): DONE.** The root-indexed
+`EllipticCurve/PoleSheafNoetherianStageCech.lean` proves both targets. The
+first transports smoothness, fibrewise ellipticity, the pole model, and Cech
+exactness to the direct field-valued base change; the second factors the stage
+map through the kernel residue field and reflects exactness by faithful
+flatness. The focused 4,356-job build, style checker, style linter, and full
+9,535-job root build pass. Both public declarations have exactly the expected
+`propext`, `Classical.choice`, and `Quot.sound` axioms.
