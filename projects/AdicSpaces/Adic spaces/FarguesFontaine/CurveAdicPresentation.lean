@@ -454,6 +454,38 @@ private def windowNbhd (n : ℤ) {G₂ : Set (Spv (Ainf p F))} (hG₂ : IsOpen G
      (IsOpen.preimage (continuous_subtype_val.comp continuous_subtype_val) hG₂)
      (isOpen_yTop_windowTrace p F ϖ n)⟩
 
+/-- **The window neighbourhood sits inside `O`.** A carrier point of the neighbourhood has
+its valuation in `G₂`, hence in the `h_n`-image of the rational trace; that preimage point
+lies in `R`, which is contained in the chart-side trace `Q` of `O`. -/
+private theorem windowNbhd_le (hp : 1 < p) (n : ℤ)
+    {R : Set (Spv (windowChartRing p F ϖ n))} {G₂ : Set (Spv (Ainf p F))} (hG₂ : IsOpen G₂)
+    (hGrel : Subtype.val ⁻¹' G₂ = ⇑(spaChartHomeoWindow p F ϖ hp n) ''
+      (Subtype.val ⁻¹' R : Set ↥(Spa (windowChartRing p F ϖ n)
+        (ringPlus (windowChartRing p F ϖ n)))))
+    (O : Opens ↥(yTop p F ϖ)) {O₂ : Set (Spv (Ainf p F))}
+    (hOmem : ∀ z : ↥(yTop p F ϖ), z ∈ O ↔
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ O₂)
+    {Q : Set (Spv (windowChartRing p F ϖ n))}
+    (hQmem : ∀ r : ↥(Spa (windowChartRing p F ϖ n)
+        (ringPlus (windowChartRing p F ϖ n))),
+      (r : Spv (windowChartRing p F ϖ n)) ∈ Q ↔
+        ((spaChartHomeoWindow p F ϖ hp n r : ↥(bigWindow p F ϖ n
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)) ∈ O₂)
+    (hRsub : ∀ v : Spv (windowChartRing p F ϖ n), v ∈ R → v ∈ Q) :
+    windowNbhd p F ϖ n hG₂ ≤ O := by
+  intro z hz
+  obtain ⟨hzG₂, hzbw⟩ := hz
+  obtain ⟨r, hrRT, hrmz⟩ := (Set.ext_iff.mp hGrel
+    (⟨((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F)), hzbw, (ySpaPoint p F ϖ z).2⟩ :
+      ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F))))).mp hzG₂
+  refine (hOmem z).mpr ?_
+  have h2 : ((spaChartHomeoWindow p F ϖ hp n r : ↥(bigWindow p F ϖ n
+      ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)) ∈ O₂ :=
+    (hQmem r).mp (hRsub _ hrRT)
+  rwa [hrmz] at h2
+
 /-- **The rational trace cuts out a good neighbourhood.** Given a rational datum `D'` over
 the window chart whose rational open contains the chart-image of `y` and lies inside the
 chart-side trace `Q` of `O`, the image of that rational open on the `𝒴`-carrier is an open
@@ -515,19 +547,7 @@ private theorem exists_windowNbhd_spec (hp : 1 < p) (n : ℤ) (y : ↥(yTop p F 
       (Set.ext_iff.mp hG₂eq m₀).mpr hm₀IM
     exact ⟨hm₀G₂, hbw⟩
   · -- V ≤ O
-    intro z hz
-    obtain ⟨hzG₂, hzbw⟩ := hz
-    set mz : ↥(bigWindow p F ϖ n
-        ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
-      ⟨((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
-        : Spv (Ainf p F)), hzbw, (ySpaPoint p F ϖ z).2⟩ with hmz
-    have hmzIM : mz ∈ IM := (Set.ext_iff.mp hG₂eq mz).mp hzG₂
-    have hmzO₂ : (mz : Spv (Ainf p F)) ∈ O₂ := by
-      rw [hIM] at hmzIM
-      obtain ⟨r, hrRT, hrmz⟩ := hmzIM
-      have h2 : (h_n r : Spv (Ainf p F)) ∈ O₂ := (hQmem r).mp (hRsub _ hrRT)
-      rwa [hrmz] at h2
-    exact (hOmem z).mpr hmzO₂
+    exact windowNbhd_le p F ϖ hp n hG₂ (by rw [hG₂eq, hIM, hRT]) O hOmem hQmem hRsub
   · -- the homeomorphism
     haveI : IsHuberRing Bn :=
       (isTateRing_bigWindowChart p F (windowUnif p F ϖ n)).toIsHuberRing
