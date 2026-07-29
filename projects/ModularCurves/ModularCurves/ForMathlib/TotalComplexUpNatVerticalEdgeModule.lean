@@ -55,4 +55,49 @@ theorem totalUpNatVerticalEdge_quasiIsoAt_one_module
   change QuasiIsoAt (edge ≫ (K.totalFlipIso (.up ℕ)).hom) 1
   infer_instance
 
+/-- The vertical edge of a module-valued first-quadrant bicomplex is a
+quasi-isomorphism in every positive degree under exactness of the two adjacent
+horizontal antidiagonals. -/
+theorem totalUpNatVerticalEdge_quasiIsoAt_succ_module
+    (B : CochainComplex (ModuleCat.{u} R) ℕ)
+    (e : ∀ p, B.X p ⟶ (K.X 0).X p)
+    (he : ∀ p p', (ComplexShape.up ℕ).Rel p p' →
+      e p ≫ (K.X 0).d p p' = B.d p p' ≫ e p')
+    (w : ∀ p, e p ≫ (K.d 0 1).f p = 0)
+    (n : ℕ)
+    (hcolAxis_n : (ShortComplex.mk (e n)
+      ((K.d 0 1).f n) (w n)).Exact)
+    (hcolAxis_succ : (ShortComplex.mk (e (n + 1))
+      ((K.d 0 1).f (n + 1)) (w (n + 1))).Exact)
+    (hcolPositive_n : ∀ p q, p + q = n → 0 < q →
+      (ShortComplex.mk
+        ((K.d (q - 1) q).f p)
+        ((K.d q (q + 1)).f p)
+        (K.d_f_comp_d_f (q - 1) q (q + 1) p)).Exact)
+    (hcolPositive_succ : ∀ p q, p + q = n + 1 → 0 < q →
+      (ShortComplex.mk
+        ((K.d (q - 1) q).f p)
+        ((K.d q (q + 1)).f p)
+        (K.d_f_comp_d_f (q - 1) q (q + 1) p)).Exact)
+    [Mono (e (n + 1))] [Mono (e (n + 2))] :
+    QuasiIsoAt (K.totalUpNatVerticalEdge B e he w) (n + 1) := by
+  let edge := K.flip.totalUpNatHorizontalEdge B e he w
+  letI : Mono
+      (show B.X (n + 1) ⟶ (K.flip.X (n + 1)).X 0 from e (n + 1)) := by
+    change Mono (e (n + 1))
+    infer_instance
+  letI : Mono
+      (show B.X (n + 2) ⟶ (K.flip.X (n + 2)).X 0 from e (n + 2)) := by
+    change Mono (e (n + 2))
+    infer_instance
+  haveI : QuasiIsoAt edge (n + 1) :=
+    totalUpNatHorizontalEdge_quasiIsoAt_succ_module
+      K.flip B e he w n hcolAxis_n hcolAxis_succ
+        hcolPositive_n hcolPositive_succ
+  haveI : QuasiIsoAt (K.totalFlipIso (.up ℕ)).hom (n + 1) :=
+    quasiIsoAt_of_isIso _ _
+  change QuasiIsoAt
+    (edge ≫ (K.totalFlipIso (.up ℕ)).hom) (n + 1)
+  infer_instance
+
 end HomologicalComplex₂
