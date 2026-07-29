@@ -29306,3 +29306,19 @@ law. Root-index the module and audit every public declaration.
 root-indexed `EllipticCurve/PoleSheafIteratedBaseChange.lean`. The focused
 3,988-job build and style linter pass. Every declaration has exactly the
 expected `propext`, `Classical.choice`, and `Quot.sound` axioms.
+
+### CLAIM (rule 5, OWNER-FLW-FIELD-BASE-CECH-EXACT,
+`state:done`,
+codex/fibrewise-weierstrass-picard-tranche3-monoidal, 2026-07-29): add
+`FibrewiseElliptic.sectionPoleSheafPower_orderedBaseCech_differential_exact_of_isField`.
+When the global-section ring of the affine base is a field, reflect the
+already-proved exactness after field scalar extension across faithfully flat
+base change by the identity algebra, obtaining exactness of the original
+ordered base-Cech differentials. Add no option, sorry, admit, axiom, unsafe
+declaration, finiteness, Noetherianity, extra final hypothesis, alternate
+Cech complex, Pic-zero route, or group law.
+
+**Progress (2026-07-29): DONE.** The theorem is in
+`EllipticCurve/PoleSheafBaseCechHigher.lean`. Its focused 4,350-job build and
+style linter pass, and its axiom audit reports exactly `propext`,
+`Classical.choice`, and `Quot.sound`.

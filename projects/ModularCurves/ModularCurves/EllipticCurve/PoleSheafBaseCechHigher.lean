@@ -412,6 +412,37 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_field_orderedBaseCech_differenti
   exact h.sectionPoleSheafPower_residueField_orderedBaseCech_differential_exact
     hsm z hz U hU hUaff s hn q
 
+/-- If the affine base has a field as its global-section ring, the consecutive
+positive-degree differentials of the bounded ordered Cech complex of
+`O(n[0])` are exact without any further scalar extension. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_orderedBaseCech_differential_exact_of_isField
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (hField : IsField Γ(S, (⊤ : S.Opens)))
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    {n : ℕ} (hn : 1 ≤ n) (q : ℕ) :
+    let C := Scheme.Modules.orderedBaseCechComplex π
+      (sectionPoleSheafPower π z hz n) U
+    Function.Exact
+      (C.d q (q + 1)).hom
+      (C.d (q + 1) (q + 2)).hom := by
+  dsimp only
+  let R := Γ(S, (⊤ : S.Opens))
+  letI : Field R := hField.toField
+  let C := Scheme.Modules.orderedBaseCechComplex π
+    (sectionPoleSheafPower π z hz n) U
+  have hbase : Function.Exact
+      ((C.d q (q + 1)).hom.baseChange R)
+      ((C.d (q + 1) (q + 2)).hom.baseChange R) :=
+    h.sectionPoleSheafPower_field_orderedBaseCech_differential_exact
+      hsm z hz U hU hUaff R hn q
+  exact (Module.FaithfullyFlat.lTensor_exact_iff_exact R R
+    (C.d q (q + 1)).hom (C.d (q + 1) (q + 2)).hom).mp (by
+      simpa only [LinearMap.baseChange_eq_ltensor] using hbase)
+
 /-- For `n ≥ 1`, a fibrewise elliptic family has a finite ordered affine Cech
 model for `O(n[0])` which is termwise flat, bounded, and exact in positive
 degrees after every field base change. -/
