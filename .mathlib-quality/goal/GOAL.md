@@ -370,3 +370,51 @@ Group #17 (`hT_pb`, 4 copies, 21L): each copy is `intro t ht; rw [Finset.mem_sin
 exact TopologicalRing.isPowerBounded_one` — 3 lines of clear tactic code. A shared lemma would
 save 2 lines per site and add a declaration. Not worth it. (A `▸` one-liner would save the same
 and is direction-fragile.) Recorded so it is not re-litigated.
+
+## Task 2 — batch 3: the 405-line headliner, decomposed
+
+`isIntegral_of_forall_continuous_valuation_le_one` (Presheaf.lean) — the largest sorry-free
+proof in the tree — was **405 lines and 30 top-level steps, of which one `have` was 371 lines.**
+That is the dominant-`have` shape again (cf. `PhiHatK_teichCoeffAr`, 157 of 200). Three cuts,
+each following the author's own phase labels:
+
+| declaration | body | note |
+|---|---|---|
+| `isIntegral_of_forall_continuous_valuation_le_one` | 405 → **39** | the contraposition + the final contradiction |
+| `exists_continuous_valuation_of_notMem_integralClosure` | **36** | Wedhorn 7.18 / [Hu2] Lemma 3.3; assembles A with B+C |
+| `exists_valuationSubring_of_notMem_integralClosure` | 138 | Phase A, the refined Stacks 090P |
+| `exists_continuous_valuation_of_valuationSubring_of_span_eq` | 182 | Phases B+C, standard (`S.Nonempty`) case |
+
+Net: one 405-line proof became **two under the bar and two named, documented, independently
+tractable** targets. All four are public with real docstrings — these are literature results
+(Wedhorn 7.18, its Phase A, its Phase B+C), not private scaffolding, so they earn visibility.
+
+### The method that made this cheap
+
+`scratchpad/skeleton.py <file> <decl>` prints every tactic step at the proof's base indentation
+with its line span. That one view exposes the whole decomposition: a 371-line step against 29
+one-line steps is unmissable, and after the first cut the same view showed a 137-line Phase-A
+`have` and a 180-line `by_cases` branch. **Run it before reading any long proof.**
+
+Data flow was checked per cut by grepping the block for every context binder (script prints
+USED/unused with a reference count). Each cut turned out to need only hypotheses the parent
+already had — which is why all three lifted with no plumbing. It also found that `hx_ne_zero`
+was consumed by *neither* phase: dead code, deleted.
+
+### Two gotchas
+
+**1. `Type _` in an extracted existential breaks universe inference.** The `have` read
+`∃ (Γ₀ : Type _) …`, and inside the parent Lean resolved that metavariable from context. As a
+standalone theorem it cannot: `failed to infer universe levels`, plus three
+`Type u_3` vs `Type u_4` mismatches where `V.ValueGroup` appeared. Fix: bind the universe
+explicitly — `{R : Type u}` and `∃ (Γ₀ : Type u)`. **Any extraction whose statement mentions
+`Type _` needs its universe pinned.**
+
+**2. Stale planning comments outlive the thing they planned.** The parent carried 28 lines of
+F3/F4/F5/F6 construction notes ending "*we assert the existence of V … as a sub-sorry capturing
+Phase A*" — but there is no sorry, and the notes now duplicate the extracted lemma's docstring.
+The theorem docstring made the same false claim ("*isolates this gap to a single sub-sorry inside
+the main proof*"), and a third comment said "*For now, handle via sorry (minor edge case)*" over a
+real `by_cases` proof. Deleting the block took the assembler from 60 lines to **36** — under the
+bar on comment removal alone. **When decomposing, the stale-comment sweep is part of the cut, and
+docstrings that describe a proof as unfinished must be re-read against the actual proof.**

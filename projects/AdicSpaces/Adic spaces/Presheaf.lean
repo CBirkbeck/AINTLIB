@@ -2024,6 +2024,438 @@ theorem isIntegral_of_forall_valuation_le_one
   have : V.valuation (ι x) ≤ V.valuation (ι 1) := hw_x
   simpa only [map_one] using this
 
+/-- **Phase A of Wedhorn Lemma 7.18** (a refined Stacks 090P): if `x` misses the integral
+closure `R₀` of `B` in `K = Frac R`, some valuation subring `V ⊇ R₀` still misses `x` *and*
+is strictly less than `1` on the image of the ideal of definition `P.I`.
+
+The strict bound on `P.I` is the whole point — it is what later makes the induced valuation
+*continuous*. It is obtained by building a `LocalSubring` from `R₀` localised at a maximal
+ideal containing both the conductor of `x` and the image of `P.I`, then dominating that local
+ring by a valuation subring; `P.I` lands in the maximal ideal, hence in `V.nonunits`. -/
+theorem exists_valuationSubring_of_notMem_integralClosure
+    {R : Type u} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
+    [IsDomain R]
+    (P : PairOfDefinition R)
+    {B : Subring R} (hB_open : IsOpen (B : Set R))
+    (hA₀B : (P.A₀ : Set R) ⊆ B)
+    (x : R)
+    (hx_notin : algebraMap R (FractionRing R) x ∉
+      (integralClosure B (FractionRing R)).toSubring) :
+    ∃ V : ValuationSubring (FractionRing R),
+      (integralClosure B (FractionRing R)).toSubring ≤ V.toSubring ∧
+      algebraMap R (FractionRing R) x ∉ V ∧
+      ∀ (a : P.A₀), a ∈ P.I →
+        V.valuation (algebraMap R (FractionRing R) (P.A₀.subtype a)) < 1 := by
+  let ι := algebraMap R (FractionRing R)
+  let K := FractionRing R
+  let R₀ := (integralClosure B K).toSubring
+  -- Phase A: Refined Stacks 090P using LocalSubring domination.
+  -- Map P.A₀ into R₀ via ι.
+  have hA₀_to_R₀ : ∀ (a : P.A₀), ι (P.A₀.subtype a) ∈ R₀ := fun a ↦
+    (Subalgebra.algebraMap_mem (integralClosure B K) ⟨P.A₀.subtype a, hA₀B a.property⟩ :
+      ι (P.A₀.subtype a) ∈ (integralClosure B K : Set K))
+  -- F3: Define image of P.I as an ideal of R₀.
+  -- Map P.I generators to R₀ and take the ideal they span.
+  let ι_R₀ : P.A₀ →+* R₀ :=
+    { toFun := fun a ↦ ⟨ι (P.A₀.subtype a), hA₀_to_R₀ a⟩
+      map_one' := Subtype.ext (map_one ι)
+      map_mul' := fun a b ↦ Subtype.ext (map_mul ι _ _)
+      map_zero' := Subtype.ext (map_zero ι)
+      map_add' := fun a b ↦ Subtype.ext (map_add ι _ _) }
+  let I_img : Ideal R₀ := Ideal.map ι_R₀ P.I
+  -- F3: Define conductor of ι x in R₀.
+  -- S(x) = { s ∈ R₀ : (s : K) * (ι x) ∈ R₀ }
+  -- This is proper because 1 · (ι x) = ι x ∉ R₀.
+  let S_x : Ideal R₀ :=
+    { carrier := { s : R₀ | (s : K) * ι x ∈ R₀ }
+      add_mem' := fun {a b} ha hb ↦ by
+        change (↑(a + b) : K) * ι x ∈ R₀
+        rw [Subring.coe_add, add_mul]; exact R₀.add_mem ha hb
+      zero_mem' := by change (0 : K) * ι x ∈ R₀; rw [zero_mul]; exact R₀.zero_mem
+      smul_mem' := fun r s hs ↦ by
+        change (↑(r • s) : K) * ι x ∈ R₀
+        simp only [smul_eq_mul, Subring.coe_mul, mul_assoc]
+        exact R₀.mul_mem r.property hs }
+  -- S_x is proper (since 1 · ι x = ι x ∉ R₀).
+  have hS_x_proper : S_x ≠ ⊤ := by
+    intro heq
+    have h1 : (1 : R₀) ∈ S_x := heq ▸ Submodule.mem_top
+    have : ((1 : R₀) : K) * ι x ∈ R₀ := h1
+    simp only [Subring.coe_one, one_mul] at this
+    exact hx_notin this
+  -- Key lemma: I_img^n ⊆ S_x for some n (from continuity of multiplication by x).
+  -- Since B is open and multiplication by x is continuous, μ_x⁻¹(B) is a
+  -- neighborhood of 0. By the pair of definition, ∃ n with I^n ⊆ μ_x⁻¹(B).
+  -- Then x · I^n ⊆ B, so for any b ∈ I^n: ι_R₀(b) · ι(x) = ι(b · x) ∈ R₀.
+  -- Since S_x is an ideal and the generators of I_img^n are in S_x, I_img^n ⊆ S_x.
+  have hI_pow_le_Sx : ∃ n : ℕ, I_img ^ n ≤ S_x := by
+    -- Continuity of multiplication by x: μ_x⁻¹(B) is a nbhd of 0.
+    have hcont_mul : Continuous (x * · : R → R) := continuous_const_mul x
+    have h0_mem : (0 : R) ∈ (x * ·) ⁻¹' (B : Set R) := by
+      simp only [Set.mem_preimage, mul_zero]; exact B.zero_mem
+    obtain ⟨n, -, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp
+      ((hB_open.preimage hcont_mul).mem_nhds h0_mem)
+    refine ⟨n, ?_⟩
+    -- For a ∈ P.I^n: x * P.A₀.subtype a ∈ B, so ι_R₀ a · ι x ∈ R₀.
+    have hgen : ∀ a ∈ P.I ^ n, ι_R₀ a ∈ S_x := by
+      intro a ha
+      change (ι_R₀ a : K) * ι x ∈ R₀
+      change ι (P.A₀.subtype a) * ι x ∈ R₀
+      rw [← map_mul]
+      have hmem : x * P.A₀.subtype a ∈ B := hn ⟨a, ha, rfl⟩
+      rw [mul_comm] at hmem
+      exact Subalgebra.algebraMap_mem (integralClosure B K) ⟨P.A₀.subtype a * x, hmem⟩
+    -- I_img^n = map ι_R₀ (P.I^n) by Ideal.map_pow. Each element maps into S_x.
+    rw [← Ideal.map_pow]
+    exact Ideal.map_le_iff_le_comap.mpr (fun a ha ↦ hgen a ha)
+  -- Find maximal ideal 𝔪 ⊇ S_x (proper since 1 ∉ S_x).
+  obtain ⟨𝔪, h𝔪_max, h𝔪_le⟩ := S_x.exists_le_maximal hS_x_proper
+  haveI : 𝔪.IsPrime := h𝔪_max.isPrime
+  -- Since 𝔪 is prime and I_img^n ⊆ S_x ⊆ 𝔪, we get I_img ⊆ 𝔪.
+  have hI_le_m : I_img ≤ 𝔪 :=
+    have ⟨n, hn⟩ := hI_pow_le_Sx
+    Ideal.IsPrime.le_of_pow_le (hn.trans h𝔪_le)
+  -- F6: Construct local subring at 𝔪.
+  let L := LocalSubring.ofPrime R₀ 𝔪
+  -- ι x ∉ L.toSubring: if ι x = a/s with a ∈ R₀, s ∉ 𝔪, then
+  -- s · ι x = a ∈ R₀, so s ∈ S_x ⊆ 𝔪, contradiction.
+  have hx_notL : ι x ∉ L.toSubring := by
+    intro hmem
+    obtain ⟨⟨a, ⟨s, hs⟩⟩, heq⟩ := IsLocalization.surj 𝔪.primeCompl (⟨ι x, hmem⟩ : L.toSubring)
+    have h1 := congr_arg Subtype.val heq
+    simp only [Subring.coe_mul] at h1
+    have halg : ∀ (y : R₀), (↑((algebraMap R₀ L.toSubring) y) : K) = (y : K) := fun _ ↦ rfl
+    rw [halg s, halg a] at h1
+    have hs_cond : s ∈ S_x := show (s : K) * ι x ∈ R₀ by
+      rw [mul_comm, h1]; exact a.property
+    exact hs (h𝔪_le hs_cond)
+  -- R₀ is integrally closed in K (it's the integral closure).
+  -- Localization preserves integrally closed (standard commutative algebra).
+  haveI : IsIntegrallyClosedIn L.toSubring K := by
+    -- Localization of R₀ (integrally closed in K) at 𝔪 is still IC in K.
+    rw [Subring.isIntegrallyClosedIn_iff]
+    intro x hx
+    -- Clear denominators: ∃ m ∈ 𝔪.primeCompl, m • x integral over R₀.
+    obtain ⟨⟨m, hm⟩, hmx⟩ :=
+      hx.exists_multiple_integral_of_isLocalization 𝔪.primeCompl x
+    -- Since R₀ is IC in K, m • x ∈ R₀.
+    have hmx_R₀ : m • x ∈ R₀ := Subring.isIntegrallyClosedIn_iff.mp inferInstance hmx
+    -- m • x ∈ R₀ ⊆ L.toSubring.
+    have hmx_L : m • x ∈ L.toSubring := LocalSubring.le_ofPrime R₀ 𝔪 hmx_R₀
+    -- algebraMap R₀ L.toSubring m is a unit (m ∉ 𝔪 → invertible in localization).
+    have hu := IsLocalization.map_units L.toSubring (⟨m, hm⟩ : 𝔪.primeCompl)
+    -- x = (algebraMap R₀ K m)⁻¹ * (m • x), both factors in L.toSubring.
+    -- The inverse of algebraMap m exists in L.toSubring since m maps to a unit.
+    -- x = (algebraMap m)⁻¹ * (m • x), both factors in L.toSubring.
+    -- The smul m • x unfolds to algebraMap R₀ K m * x in the field K.
+    have hsmul : m • x = algebraMap R₀ K m * x := by
+      rw [Algebra.smul_def]
+    -- Coercion compatibility: algebraMap R₀ L.toSubring m coerces to m in K.
+    have halg_coe : (↑(algebraMap R₀ L.toSubring m) : K) = algebraMap R₀ K m := rfl
+    -- Let u_inv be the inverse of the unit algebraMap R₀ L.toSubring m.
+    set u_L := hu.unit
+    have hu_inv_mul : (↑(u_L⁻¹) : L.toSubring) * (algebraMap R₀ L.toSubring m) = 1 := by
+      exact_mod_cast u_L.inv_val
+    have hu_inv_mul_K : (↑(↑(u_L⁻¹) : L.toSubring) : K) *
+        (↑(algebraMap R₀ L.toSubring m) : K) = 1 := by
+      have := congr_arg (↑· : L.toSubring → K) hu_inv_mul
+      simpa [map_mul, map_one] using this
+    have hx_eq : x = (↑(↑(u_L⁻¹) : L.toSubring) : K) * (m • x) := by
+      rw [hsmul, ← halg_coe, ← mul_assoc, hu_inv_mul_K, one_mul]
+    rw [hx_eq]; exact L.toSubring.mul_mem (↑(u_L⁻¹) : L.toSubring).property hmx_L
+  -- Apply Stacks 090P part 2.
+  obtain ⟨V, hV_dom, hx_notV⟩ :=
+    LocalSubring.exists_le_valuationSubring_of_isIntegrallyClosedIn hx_notL
+  refine ⟨V, ?_, hx_notV, ?_⟩
+  · -- R₀ ≤ V: from L ≤ V (domination) and R₀ ≤ L (ofPrime inclusion).
+    exact (LocalSubring.le_ofPrime R₀ 𝔪).trans hV_dom.1
+  · -- ∀ a ∈ P.I, V.valuation(ι a) < 1.
+    -- Domination: 𝔪 → maxIdeal(V). Since I_img ⊆ 𝔪, image(P.I) ⊆ V.nonunits.
+    intro a ha
+    have ha_I_img : ι_R₀ a ∈ I_img := Ideal.mem_map_of_mem ι_R₀ ha
+    have ha_m : ι_R₀ a ∈ 𝔪 := hI_le_m ha_I_img
+    change V.valuation (ι_R₀ a : K) < 1
+    have ha_in_L : (ι_R₀ a : K) ∈ L.toSubring :=
+      LocalSubring.le_ofPrime R₀ 𝔪 (ι_R₀ a).property
+    have ha_in_V : (ι_R₀ a : K) ∈ V.toSubring := hV_dom.1 ha_in_L
+    rw [← ValuationSubring.valuation_lt_one_iff V ⟨_, ha_in_V⟩]
+    have ha_maxL : ⟨(ι_R₀ a : K), ha_in_L⟩ ∈ IsLocalRing.maximalIdeal L.toSubring :=
+      (IsLocalization.AtPrime.to_map_mem_maximal_iff L.toSubring 𝔪 (ι_R₀ a)).mpr ha_m
+    haveI : IsLocalHom (Subring.inclusion hV_dom.1) := hV_dom.2
+    exact map_nonunit (Subring.inclusion hV_dom.1) _ ha_maxL
+
+/-- **Phases B and C of Wedhorn Lemma 7.18**, the standard case: given a valuation subring
+`V` that dominates the integral closure of `B`, misses `x`, and is `< 1` on the ideal of
+definition, and given a NONEMPTY generating set `S` of `P.I`, the comap of `V.valuation`
+along `R → Frac R` coarsens to a *continuous* valuation on `R` that is `≤ 1` on `B` and
+`> 1` at `x`.
+
+Phase B coarsens via `convexGenerated` + `restrictToConvex` so the value group becomes
+`MulArchimedean`; phase C extends from `P.A₀` to `R` via `vExtFun`. Continuity then follows
+from `Valuation.isContinuous_of_le_one_and_pow_cofinal` with `g = S.sup' hSne …`, which is
+`< 1` precisely because `V` is strictly below `1` on `P.I` — and nonemptiness of `S` is what
+makes that `sup'` available. The degenerate `P.I = ⊥` case needs none of this and is handled
+directly in the caller. -/
+theorem exists_continuous_valuation_of_valuationSubring_of_span_eq
+    {R : Type u} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
+    [IsDomain R]
+    (P : PairOfDefinition R)
+    {B : Subring R} (hA₀B : (P.A₀ : Set R) ⊆ B)
+    (x : R)
+    (V : ValuationSubring (FractionRing R))
+    (hV_le : (integralClosure B (FractionRing R)).toSubring ≤ V.toSubring)
+    (hx_notV : algebraMap R (FractionRing R) x ∉ V)
+    (hI_lt_one : ∀ (a : P.A₀), a ∈ P.I →
+      V.valuation (algebraMap R (FractionRing R) (P.A₀.subtype a)) < 1)
+    {S : Finset P.A₀} (hS : Ideal.span (S : Set P.A₀) = P.I) (hSne : S.Nonempty) :
+    ∃ (Γ₀ : Type u) (_ : LinearOrderedCommGroupWithZero Γ₀)
+      (wVal : Valuation R Γ₀),
+      (∀ b ∈ B, wVal b ≤ 1) ∧ 1 < wVal x ∧ wVal.IsContinuous := by
+  let ι := algebraMap R (FractionRing R)
+  let K := FractionRing R
+  -- g_max < 1 strictly from hI_lt_one.
+  set g_max := S.sup' hSne (fun s ↦ V.valuation (ι (P.A₀.subtype s)))
+  have hg_lt1 : g_max < 1 := by
+    rw [Finset.sup'_lt_iff]
+    intro s hs
+    exact hI_lt_one s (hS ▸ Ideal.subset_span (Finset.mem_coe.mpr hs))
+  -- Need g_max ≠ 0 for the Units.mk0 construction.
+  -- g_max = 0 iff ALL generators map to support of V. This would mean
+  -- P.I maps entirely to supp(V), so the ideal of definition has no
+  -- "non-trivial" topologically nilpotent element modulo supp(V).
+  -- For now, handle via sorry (minor edge case).
+  by_cases hg_ne0 : g_max = 0
+  · -- Edge case: g_max = 0 means ALL P.I generators have V-value 0.
+    -- V.valuation.comap ι is trivially continuous: I^n maps to {0} ⊂ {< γ}.
+    have hle_A₀ : ∀ (a : P.A₀), (V.valuation.comap ι) (P.A₀.subtype a) ≤ 1 :=
+      fun a ↦ by
+        change V.valuation (ι (P.A₀.subtype a : R)) ≤ 1
+        rw [ValuationSubring.valuation_le_one_iff]
+        exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K)
+          ⟨_, hA₀B a.property⟩)
+    refine ⟨V.ValueGroup, inferInstance, V.valuation.comap ι, ?_, ?_, ?_⟩
+    · -- v ≤ 1 on B
+      intro b hb; change V.valuation (ι b) ≤ 1
+      rw [ValuationSubring.valuation_le_one_iff]
+      exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩)
+    · -- 1 < v(x)
+      exact not_le.mp (show ¬ V.valuation (ι x) ≤ 1 by
+        rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV)
+    · -- Continuity: g_max = 0 means V.valuation(ι(I^n)) ≤ 0 < γ.
+      apply Valuation.isContinuous_of_ideal_pow_lt P (V.valuation.comap ι)
+      intro γ hγ; refine ⟨1, fun a ha ↦ ?_⟩; rw [pow_one] at ha
+      change V.valuation (ι (P.A₀.subtype a)) < γ
+      have h2 : V.valuation (ι (P.A₀.subtype a)) ≤ g_max := by
+        have : (fun s ↦ V.valuation (ι (P.A₀.subtype s))) a ≤ g_max :=
+          PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
+            (V.valuation.comap ι) hle_A₀ hS
+            (fun s hs ↦ Finset.le_sup' (f := fun s ↦ V.valuation (ι (P.A₀.subtype s))) hs) ha
+        exact this
+      rw [hg_ne0] at h2; exact lt_of_le_of_lt h2 hγ
+  · -- Main case: g_max ≠ 0 and g_max < 1.
+    -- Following Lemma 7.45: restrictToConvex on A₀ + extend to R.
+    -- Step 1: Build v₀ on A₀ and prove it's ≤ 1.
+    set v₀_A₀ : Valuation P.A₀ V.ValueGroup :=
+      (V.valuation.comap ι).comap P.A₀.subtype with v₀_A₀_def
+    have hle_A₀ : ∀ (a : P.A₀), v₀_A₀ a ≤ 1 := fun a ↦ by
+      change V.valuation (ι (P.A₀.subtype a)) ≤ 1
+      rw [ValuationSubring.valuation_le_one_iff]
+      exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨_, hA₀B a.property⟩)
+    -- Step 2: Find generator achieving g_max.
+    obtain ⟨t₀, ht₀_S, ht₀_val⟩ :=
+      Finset.exists_mem_eq_sup' hSne (fun s ↦ V.valuation (ι (P.A₀.subtype s)))
+    have ht₀_I : t₀ ∈ P.I := hS ▸ Ideal.subset_span (Finset.mem_coe.mpr ht₀_S)
+    have ha₀_val_eq : v₀_A₀ t₀ = g_max := ht₀_val.symm
+    have hv₀_ne : v₀_A₀ t₀ ≠ 0 := ha₀_val_eq ▸ hg_ne0
+    -- Step 3: Define u_max, H_gen, v_r.
+    set u_max := Units.mk0 g_max hg_ne0
+    have hu_lt1 : (u_max : V.ValueGroup) < 1 := hg_lt1
+    have hu_inv_gt1 : (1 : V.ValueGroupˣ) < u_max⁻¹ := one_lt_inv_of_inv hu_lt1
+    set H_gen := ConvexSubgroup.convexGenerated hu_inv_gt1
+    have hu_mem : u_max ∈ H_gen := by
+      rw [show u_max = (u_max⁻¹)⁻¹ from (inv_inv u_max).symm]
+      exact inv_mem (ConvexSubgroup.self_mem_convexGenerated hu_inv_gt1)
+    have hu_a₀_mem : Units.mk0 (v₀_A₀ t₀) hv₀_ne ∈ H_gen :=
+      (Units.ext ha₀_val_eq : Units.mk0 (v₀_A₀ t₀) hv₀_ne = u_max) ▸ hu_mem
+    set v_r := v₀_A₀.restrictToConvex H_gen hle_A₀ with v_r_def
+    -- Step 4: v_r(t₀) ≠ 0 and topological nilpotency.
+    have hv_r_ne : v_r t₀ ≠ 0 := ne_of_gt
+      (Valuation.restrictToConvex_pos_of_mem v₀_A₀ H_gen hle_A₀ hv₀_ne hu_a₀_mem)
+    set s := (P.A₀.subtype t₀ : R)
+    have hs_nil : IsTopologicallyNilpotent s := P.isTopologicallyNilpotent_of_mem ht₀_I
+    have hs_A₀ : s ∈ P.A₀ := Subtype.coe_prop t₀
+    -- Step 5: Extend v_r from A₀ to R.
+    obtain ⟨v_ext, ⟨h_ext, h_ext_at⟩⟩ :=
+      PairOfDefinition.exists_valuation_extension P v_r hs_A₀ hs_nil hv_r_ne
+    -- Step 6: Package the result.
+    refine ⟨WithZero H_gen.toSubgroup, inferInstance, v_ext, ?_, ?_, ?_⟩
+    · -- v_ext ≤ 1 on B.
+      intro b hb
+      obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil b
+      rw [h_ext_at b n hn]
+      have hval_b : V.valuation (ι b) ≤ 1 :=
+        (ValuationSubring.valuation_le_one_iff V _).mpr
+          (hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩))
+      have hb_le : v₀_A₀ ⟨s ^ n * b, hn⟩ ≤ v₀_A₀ (t₀ ^ n) := by
+        change V.valuation (ι (s ^ n * b)) ≤ V.valuation (ι (P.A₀.subtype (t₀ ^ n)))
+        simp only [map_mul, map_pow, Subring.coe_subtype]
+        calc V.valuation (ι s) ^ n * V.valuation (ι b)
+            ≤ V.valuation (ι s) ^ n * 1 := mul_le_mul_right hval_b _
+          _ = V.valuation (ι s) ^ n := mul_one _
+      have ht_pow_ne : v₀_A₀ (t₀ ^ n) ≠ 0 := by
+        rw [show (t₀ ^ n : P.A₀) = t₀ ^ n from rfl, map_pow]
+        exact pow_ne_zero n hv₀_ne
+      have ht_pow_mem : Units.mk0 (v₀_A₀ (t₀ ^ n)) ht_pow_ne ∈ H_gen := by
+        have : Units.mk0 (v₀_A₀ (t₀ ^ n)) ht_pow_ne =
+            (Units.mk0 (v₀_A₀ t₀) hv₀_ne) ^ n :=
+          Units.ext (map_pow v₀_A₀ t₀ n)
+        rw [this]; exact Subgroup.pow_mem H_gen.toSubgroup hu_a₀_mem n
+      have h_mono : v_r ⟨s ^ n * b, hn⟩ ≤ v_r (t₀ ^ n) :=
+        Valuation.restrictToConvex_mono_of_le_one v₀_A₀ H_gen hle_A₀
+          hb_le ht_pow_ne ht_pow_mem
+      have hv_r_pow : v_r (t₀ ^ n) = v_r t₀ ^ n := map_pow v_r t₀ n
+      have hcancel : v_r t₀ ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n = 1 := by
+        have : ⟨s, hs_A₀⟩ = t₀ := Subtype.ext rfl
+        rw [this, ← mul_pow, mul_inv_cancel₀ hv_r_ne, one_pow]
+      calc v_r ⟨s ^ n * b, hn⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n
+          ≤ v_r (t₀ ^ n) * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
+            apply mul_le_mul_left h_mono
+        _ = v_r t₀ ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by rw [hv_r_pow]
+        _ = 1 := hcancel
+    · -- 1 < v_ext(x): use extension formula.
+      obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil x
+      rw [h_ext_at x n hn]
+      have hsn_A₀ : s ^ n ∈ P.A₀ := P.A₀.pow_mem (Subtype.coe_prop t₀) n
+      have hsn_eq : (⟨s ^ n, hsn_A₀⟩ : P.A₀) = t₀ ^ n := Subtype.ext rfl
+      have hv₀_lt : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ < v₀_A₀ ⟨s ^ n * x, hn⟩ := by
+        change V.valuation (ι (s ^ n)) < V.valuation (ι (s ^ n * x))
+        rw [show ι (s ^ n * x) = ι s ^ n * ι x from by rw [map_mul, map_pow],
+            show ι (s ^ n) = ι s ^ n from map_pow ι s n, map_mul, map_pow]
+        exact lt_mul_of_one_lt_right
+          (pow_pos (zero_lt_iff.mpr (ha₀_val_eq ▸ hg_ne0)) n)
+          (not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV))
+      have hsnx_ne : v₀_A₀ ⟨s ^ n * x, hn⟩ ≠ 0 :=
+        ne_of_gt (lt_of_le_of_lt zero_le hv₀_lt)
+      have hv₀_sn_eq : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ = (v₀_A₀ t₀) ^ n := by
+        exact hsn_eq ▸ map_pow v₀_A₀ t₀ n
+      have hsn_ne : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ ≠ 0 := by
+        rw [hv₀_sn_eq]; exact pow_ne_zero n hv₀_ne
+      have hsn_mem : Units.mk0 (v₀_A₀ ⟨s ^ n, hsn_A₀⟩) hsn_ne ∈ H_gen := by
+        have heq : Units.mk0 (v₀_A₀ ⟨s ^ n, hsn_A₀⟩) hsn_ne =
+            (Units.mk0 (v₀_A₀ t₀) hv₀_ne) ^ n := Units.ext hv₀_sn_eq
+        rw [heq]; exact Subgroup.pow_mem H_gen.toSubgroup hu_a₀_mem n
+      have hsnx_mem : Units.mk0 (v₀_A₀ ⟨s ^ n * x, hn⟩) hsnx_ne ∈ H_gen :=
+        H_gen.convex hsn_mem (one_mem H_gen)
+          (Units.val_le_val.mp hv₀_lt.le) (Units.val_le_val.mp (hle_A₀ _))
+      have h_r_lt : v_r ⟨s ^ n, hsn_A₀⟩ < v_r ⟨s ^ n * x, hn⟩ := by
+        have h1 : v_r ⟨s ^ n, hsn_A₀⟩ =
+            v₀_A₀.restrictToConvex H_gen hle_A₀ ⟨s ^ n, hsn_A₀⟩ := rfl
+        have h2 : v_r ⟨s ^ n * x, hn⟩ =
+            v₀_A₀.restrictToConvex H_gen hle_A₀ ⟨s ^ n * x, hn⟩ := rfl
+        rw [h1, Valuation.restrictToConvex_unfold, dif_neg hsn_ne, dif_pos hsn_mem,
+            h2, Valuation.restrictToConvex_unfold, dif_neg hsnx_ne, dif_pos hsnx_mem]
+        exact WithZero.coe_lt_coe.mpr (Subtype.mk_lt_mk.mpr (Units.val_lt_val.mp hv₀_lt))
+      have hvr_sn : v_r ⟨s ^ n, hsn_A₀⟩ = (v_r ⟨s, hs_A₀⟩) ^ n := by
+        rw [show (⟨s ^ n, hsn_A₀⟩ : P.A₀) = ⟨s, hs_A₀⟩ ^ n from Subtype.ext rfl, map_pow]
+      have hvr_s_eq : v_r ⟨s, hs_A₀⟩ = v_r t₀ := congrArg v_r (Subtype.ext rfl)
+      calc 1 = (v_r ⟨s, hs_A₀⟩) ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
+              rw [← mul_pow, hvr_s_eq, mul_inv_cancel₀ hv_r_ne, one_pow]
+        _ = v_r ⟨s ^ n, hsn_A₀⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by rw [hvr_sn]
+        _ < v_r ⟨s ^ n * x, hn⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
+            apply mul_lt_mul_of_pos_right h_r_lt
+            exact pow_pos (inv_pos_of_pos (zero_lt_iff.mpr hv_r_ne)) n
+    · -- Continuity via isContinuous_of_le_one_and_pow_cofinal.
+      set g_cont : WithZero H_gen.toSubgroup :=
+        ((⟨u_max, hu_mem⟩ : H_gen.toSubgroup) : WithZero H_gen.toSubgroup)
+      have hg_bound : ∀ a : P.A₀, a ∈ P.I → v_ext (P.A₀.subtype a) ≤ g_cont := by
+        intro a ha; rw [h_ext a, v_r_def]
+        by_cases hv_eq : v₀_A₀ a = 0
+        · rw [Valuation.restrictToConvex_unfold, dif_pos hv_eq]; exact bot_le
+        · by_cases hm : Units.mk0 (v₀_A₀ a) hv_eq ∈ H_gen
+          · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_pos hm]
+            exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
+              (Units.val_le_val.mp (PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
+                (V.valuation.comap ι) (fun a ↦ hle_A₀ a) hS
+                (fun t ht ↦ Finset.le_sup'
+                  (f := fun t ↦ V.valuation (ι (P.A₀.subtype t))) ht) ha)))
+          · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_neg hm]; exact bot_le
+      have h_le_ext : ∀ a : P.A₀, v_ext (P.A₀.subtype a) ≤ 1 := by
+        intro a; rw [h_ext a]
+        exact Valuation.restrictToConvex_le_one v₀_A₀ H_gen hle_A₀ a
+      have h_cofinal : ∀ γ : WithZero H_gen.toSubgroup, 0 < γ →
+          ∃ n : ℕ, g_cont ^ n < γ := by
+        intro γ hγ
+        obtain ⟨n, hn⟩ := ConvexSubgroup.withZero_inv_pow_cofinal_of_convexGenerated
+          hu_inv_gt1 γ hγ
+        exact ⟨n, by
+          convert hn using 2
+          exact WithZero.coe_inj.mpr (Subtype.ext (inv_inv u_max).symm)⟩
+      exact Valuation.isContinuous_of_le_one_and_pow_cofinal P v_ext h_le_ext
+        hg_bound h_cofinal
+
+/-- **Wedhorn Lemma 7.18 / [Hu2] Lemma 3.3**: if `x` is not integral over the open subring
+`B` — equivalently, its image misses the integral closure of `B` in `Frac R` — then some
+*continuous* valuation on `R` is bounded by `1` on `B` yet exceeds `1` at `x`.
+
+The construction, in three phases:
+
+1. a refined Stacks 090P: build a `LocalSubring` from `integralClosure B (Frac R)` at a
+   maximal ideal containing both the conductor of `x` and the image of `P.I`, and dominate
+   it by a valuation subring `V` with `ι x ∉ V` and `image (P.I) ⊆ V.nonunits`;
+2. coarsen via `convexGenerated` + `restrictToConvex` to get a `MulArchimedean` value group,
+   which is what makes the continuity criterion applicable;
+3. extend from `P.A₀` to `R` via `vExtFun`.
+
+Extracted from `isIntegral_of_forall_continuous_valuation_le_one`, where it was a single
+371-line `have` inside a 405-line proof. -/
+theorem exists_continuous_valuation_of_notMem_integralClosure
+    {R : Type u} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
+    [IsDomain R]
+    (P : PairOfDefinition R)
+    {B : Subring R} (hB_open : IsOpen (B : Set R))
+    (hA₀B : (P.A₀ : Set R) ⊆ B)
+    (x : R)
+    (hx_notin : algebraMap R (FractionRing R) x ∉
+      (integralClosure B (FractionRing R)).toSubring) :
+    ∃ (Γ₀ : Type u) (_ : LinearOrderedCommGroupWithZero Γ₀)
+      (wVal : Valuation R Γ₀),
+      (∀ b ∈ B, wVal b ≤ 1) ∧ 1 < wVal x ∧ wVal.IsContinuous := by
+  let ι := algebraMap R (FractionRing R)
+  let K := FractionRing R
+  let R₀ := (integralClosure B K).toSubring
+  -- Phase A: a valuation subring dominating `R₀` that still misses `ι x` and is strictly
+  -- below `1` on the image of `P.I` (the strict bound is what buys continuity later).
+  have hV_refined : ∃ V : ValuationSubring K,
+      R₀ ≤ V.toSubring ∧ ι x ∉ V ∧
+      ∀ (a : P.A₀), a ∈ P.I → V.valuation (ι (P.A₀.subtype a)) < 1 :=
+    exists_valuationSubring_of_notMem_integralClosure P hB_open hA₀B x hx_notin
+  obtain ⟨V, hV_le, hx_notV, hI_lt_one⟩ := hV_refined
+  -- Phase B+C: Coarsen + extend to get a continuous valuation on R.
+  -- Following the Lemma 7.45 pattern (exists_spa_point_via_restrictToConvex).
+  obtain ⟨S, hS⟩ := P.fg
+  by_cases hSne : S.Nonempty
+  · -- Nonempty `P.I`: the standard case, phases B and C.
+    exact exists_continuous_valuation_of_valuationSubring_of_span_eq
+      P hA₀B x V hV_le hx_notV hI_lt_one hS hSne
+  · -- Empty P.I: degenerate case.
+    rw [Finset.not_nonempty_iff_eq_empty] at hSne
+    have hI_bot : P.I = ⊥ := by
+      rw [← hS, hSne, Finset.coe_empty, Ideal.span_empty]
+    -- With I = ⊥, every valuation is trivially continuous.
+    refine ⟨V.ValueGroup, inferInstance, V.valuation.comap ι, ?_, ?_, ?_⟩
+    · intro b hb
+      change V.valuation (ι b) ≤ 1
+      rw [ValuationSubring.valuation_le_one_iff]
+      exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩)
+    · change 1 < V.valuation (ι x)
+      exact not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV)
+    · apply Valuation.isContinuous_of_ideal_pow_lt P (V.valuation.comap ι)
+      intro γ hγ; refine ⟨1, fun a ha ↦ ?_⟩
+      rw [pow_one] at ha
+      have : a ∈ (⊥ : Ideal P.A₀) := hI_bot ▸ ha
+      rw [Ideal.mem_bot] at this; subst this
+      simp only [map_zero]; exact hγ
+
 /-- **Topology-aware valuative criterion for integrality (Wedhorn Proposition 7.18).**
 Let `R` be a topological integral domain with a pair of definition `P` and `B` a
 subring of `R` containing the ring of definition `P.A₀`. If `v(x) ≤ 1` for every
@@ -2051,10 +2483,11 @@ to *continuous* valuations only. See Wedhorn Prop 7.18 / [Hu2, Lemma 3.3].
 6. Apply the hypothesis `hvle` to get `w.vle x 1`.
 7. Contradict `ι x ∉ V`.
 
-**Status:** The construction in step 2 (refined Stacks 090P producing `V` with
-`I ⊆ V.nonunits`) and the cofinality in step 5(c) together constitute Wedhorn
-Lemma 7.22, which requires substantial additional infrastructure. The current
-proof structure isolates this gap to a single sub-sorry inside the main proof.
+Steps 2-5 — the refined Stacks 090P producing `V` with `I ⊆ V.nonunits`, and the
+cofinality that needs `MulArchimedean` — are Wedhorn Lemma 7.22, and are discharged
+by `exists_continuous_valuation_of_notMem_integralClosure` above. (An earlier
+revision of this docstring described that construction as an unfilled sub-sorry;
+it is proved, and the proof is what was extracted.)
 
 See `docs/plans/2026-04-08-wedhorn-7-10-plan.md` for the detailed plan. -/
 theorem isIntegral_of_forall_continuous_valuation_le_one
@@ -2089,377 +2522,11 @@ theorem isIntegral_of_forall_continuous_valuation_le_one
   --       valuation with MulArchimedean value group;
   --   (c) Extension via vExtFun from P.A₀ to R.
   -- See docs/plans/2026-04-10-wedhorn-7-18-fill-plan.md for the detailed plan.
+  -- Step 2: a continuous valuation witnessing `v x > 1` (Wedhorn 7.18 / [Hu2] Lemma 3.3).
   have hV_exists : ∃ (Γ₀ : Type _) (_ : LinearOrderedCommGroupWithZero Γ₀)
       (wVal : Valuation R Γ₀),
-      (∀ b ∈ B, wVal b ≤ 1) ∧ 1 < wVal x ∧ wVal.IsContinuous := by
-    -- ============================================================
-    -- CONSTRUCTION (Wedhorn 7.18 / [Hu2] Lemma 3.3)
-    -- ============================================================
-    -- Phase A: Refined Stacks 090P with P.I in nonunits.
-    --
-    -- Let R₀ = integralClosure(B) in K. We need V ⊇ R₀ with ι x ∉ V
-    -- AND image(P.I) ⊆ V.nonunits (for strict bound).
-    -- Strategy: build a LocalSubring from R₀ at a maximal ideal containing
-    -- the conductor of x AND image of P.I, then apply Stacks 090P part 2.
-    let K := FractionRing R
-    let R₀ := (integralClosure B K).toSubring
-    -- The conductor of x: {s ∈ R₀ : s · (ι x) ∈ R₀}.
-    -- This equals Submodule.colon (R₀.toSubmodule viewed in K) {ι x}.
-    -- For simplicity, encode via Ideal.comap of the multiplication-by-x map.
-    -- Since R is a domain and ι is injective, ι x ≠ 0.
-    have hx_ne_zero : ι x ≠ 0 := by
-      intro h; exact hx_notin (h ▸ R₀.zero_mem)
-    -- F3: The conductor S(x) as an ideal of R₀.
-    -- S(x) = { s ∈ R₀ : s * (ι x) ∈ R₀ }
-    -- This is proper because 1 * (ι x) = ι x ∉ R₀.
-    -- F4/F5: Combined with image(P.I), the sum S(x) + I_img is proper.
-    -- This requires P.I generators to be in the Jacobson radical of R₀
-    -- (Wedhorn Lemma 7.22: topologically nilpotent → Jacobson radical for
-    -- bounded subrings, using the geometric series argument).
-    -- F6: Apply LocalSubring.exists_le_valuationSubring_of_isIntegrallyClosedIn.
-    --
-    -- For now, we assert the existence of V with the required properties
-    -- as a sub-sorry capturing Phase A:
-    have hV_refined : ∃ V : ValuationSubring K,
-        R₀ ≤ V.toSubring ∧ ι x ∉ V ∧
-        ∀ (a : P.A₀), a ∈ P.I → V.valuation (ι (P.A₀.subtype a)) < 1 := by
-      -- Phase A: Refined Stacks 090P using LocalSubring domination.
-      -- Map P.A₀ into R₀ via ι.
-      have hA₀_to_R₀ : ∀ (a : P.A₀), ι (P.A₀.subtype a) ∈ R₀ := fun a ↦
-        (Subalgebra.algebraMap_mem (integralClosure B K) ⟨P.A₀.subtype a, hA₀B a.property⟩ :
-          ι (P.A₀.subtype a) ∈ (integralClosure B K : Set K))
-      -- F3: Define image of P.I as an ideal of R₀.
-      -- Map P.I generators to R₀ and take the ideal they span.
-      let ι_R₀ : P.A₀ →+* R₀ :=
-        { toFun := fun a ↦ ⟨ι (P.A₀.subtype a), hA₀_to_R₀ a⟩
-          map_one' := Subtype.ext (map_one ι)
-          map_mul' := fun a b ↦ Subtype.ext (map_mul ι _ _)
-          map_zero' := Subtype.ext (map_zero ι)
-          map_add' := fun a b ↦ Subtype.ext (map_add ι _ _) }
-      let I_img : Ideal R₀ := Ideal.map ι_R₀ P.I
-      -- F3: Define conductor of ι x in R₀.
-      -- S(x) = { s ∈ R₀ : (s : K) * (ι x) ∈ R₀ }
-      -- This is proper because 1 · (ι x) = ι x ∉ R₀.
-      let S_x : Ideal R₀ :=
-        { carrier := { s : R₀ | (s : K) * ι x ∈ R₀ }
-          add_mem' := fun {a b} ha hb ↦ by
-            change (↑(a + b) : K) * ι x ∈ R₀
-            rw [Subring.coe_add, add_mul]; exact R₀.add_mem ha hb
-          zero_mem' := by change (0 : K) * ι x ∈ R₀; rw [zero_mul]; exact R₀.zero_mem
-          smul_mem' := fun r s hs ↦ by
-            change (↑(r • s) : K) * ι x ∈ R₀
-            simp only [smul_eq_mul, Subring.coe_mul, mul_assoc]
-            exact R₀.mul_mem r.property hs }
-      -- S_x is proper (since 1 · ι x = ι x ∉ R₀).
-      have hS_x_proper : S_x ≠ ⊤ := by
-        intro heq
-        have h1 : (1 : R₀) ∈ S_x := heq ▸ Submodule.mem_top
-        have : ((1 : R₀) : K) * ι x ∈ R₀ := h1
-        simp only [Subring.coe_one, one_mul] at this
-        exact hx_notin this
-      -- Key lemma: I_img^n ⊆ S_x for some n (from continuity of multiplication by x).
-      -- Since B is open and multiplication by x is continuous, μ_x⁻¹(B) is a
-      -- neighborhood of 0. By the pair of definition, ∃ n with I^n ⊆ μ_x⁻¹(B).
-      -- Then x · I^n ⊆ B, so for any b ∈ I^n: ι_R₀(b) · ι(x) = ι(b · x) ∈ R₀.
-      -- Since S_x is an ideal and the generators of I_img^n are in S_x, I_img^n ⊆ S_x.
-      have hI_pow_le_Sx : ∃ n : ℕ, I_img ^ n ≤ S_x := by
-        -- Continuity of multiplication by x: μ_x⁻¹(B) is a nbhd of 0.
-        have hcont_mul : Continuous (x * · : R → R) := continuous_const_mul x
-        have h0_mem : (0 : R) ∈ (x * ·) ⁻¹' (B : Set R) := by
-          simp only [Set.mem_preimage, mul_zero]; exact B.zero_mem
-        obtain ⟨n, -, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp
-          ((_hB_open.preimage hcont_mul).mem_nhds h0_mem)
-        refine ⟨n, ?_⟩
-        -- For a ∈ P.I^n: x * P.A₀.subtype a ∈ B, so ι_R₀ a · ι x ∈ R₀.
-        have hgen : ∀ a ∈ P.I ^ n, ι_R₀ a ∈ S_x := by
-          intro a ha
-          change (ι_R₀ a : K) * ι x ∈ R₀
-          change ι (P.A₀.subtype a) * ι x ∈ R₀
-          rw [← map_mul]
-          have hmem : x * P.A₀.subtype a ∈ B := hn ⟨a, ha, rfl⟩
-          rw [mul_comm] at hmem
-          exact Subalgebra.algebraMap_mem (integralClosure B K) ⟨P.A₀.subtype a * x, hmem⟩
-        -- I_img^n = map ι_R₀ (P.I^n) by Ideal.map_pow. Each element maps into S_x.
-        rw [← Ideal.map_pow]
-        exact Ideal.map_le_iff_le_comap.mpr (fun a ha ↦ hgen a ha)
-      -- Find maximal ideal 𝔪 ⊇ S_x (proper since 1 ∉ S_x).
-      obtain ⟨𝔪, h𝔪_max, h𝔪_le⟩ := S_x.exists_le_maximal hS_x_proper
-      haveI : 𝔪.IsPrime := h𝔪_max.isPrime
-      -- Since 𝔪 is prime and I_img^n ⊆ S_x ⊆ 𝔪, we get I_img ⊆ 𝔪.
-      have hI_le_m : I_img ≤ 𝔪 :=
-        have ⟨n, hn⟩ := hI_pow_le_Sx
-        Ideal.IsPrime.le_of_pow_le (hn.trans h𝔪_le)
-      -- F6: Construct local subring at 𝔪.
-      let L := LocalSubring.ofPrime R₀ 𝔪
-      -- ι x ∉ L.toSubring: if ι x = a/s with a ∈ R₀, s ∉ 𝔪, then
-      -- s · ι x = a ∈ R₀, so s ∈ S_x ⊆ 𝔪, contradiction.
-      have hx_notL : ι x ∉ L.toSubring := by
-        intro hmem
-        obtain ⟨⟨a, ⟨s, hs⟩⟩, heq⟩ := IsLocalization.surj 𝔪.primeCompl (⟨ι x, hmem⟩ : L.toSubring)
-        have h1 := congr_arg Subtype.val heq
-        simp only [Subring.coe_mul] at h1
-        have halg : ∀ (y : R₀), (↑((algebraMap R₀ L.toSubring) y) : K) = (y : K) := fun _ ↦ rfl
-        rw [halg s, halg a] at h1
-        have hs_cond : s ∈ S_x := show (s : K) * ι x ∈ R₀ by
-          rw [mul_comm, h1]; exact a.property
-        exact hs (h𝔪_le hs_cond)
-      -- R₀ is integrally closed in K (it's the integral closure).
-      -- Localization preserves integrally closed (standard commutative algebra).
-      haveI : IsIntegrallyClosedIn L.toSubring K := by
-        -- Localization of R₀ (integrally closed in K) at 𝔪 is still IC in K.
-        rw [Subring.isIntegrallyClosedIn_iff]
-        intro x hx
-        -- Clear denominators: ∃ m ∈ 𝔪.primeCompl, m • x integral over R₀.
-        obtain ⟨⟨m, hm⟩, hmx⟩ :=
-          hx.exists_multiple_integral_of_isLocalization 𝔪.primeCompl x
-        -- Since R₀ is IC in K, m • x ∈ R₀.
-        have hmx_R₀ : m • x ∈ R₀ := Subring.isIntegrallyClosedIn_iff.mp inferInstance hmx
-        -- m • x ∈ R₀ ⊆ L.toSubring.
-        have hmx_L : m • x ∈ L.toSubring := LocalSubring.le_ofPrime R₀ 𝔪 hmx_R₀
-        -- algebraMap R₀ L.toSubring m is a unit (m ∉ 𝔪 → invertible in localization).
-        have hu := IsLocalization.map_units L.toSubring (⟨m, hm⟩ : 𝔪.primeCompl)
-        -- x = (algebraMap R₀ K m)⁻¹ * (m • x), both factors in L.toSubring.
-        -- The inverse of algebraMap m exists in L.toSubring since m maps to a unit.
-        -- x = (algebraMap m)⁻¹ * (m • x), both factors in L.toSubring.
-        -- The smul m • x unfolds to algebraMap R₀ K m * x in the field K.
-        have hsmul : m • x = algebraMap R₀ K m * x := by
-          rw [Algebra.smul_def]
-        -- Coercion compatibility: algebraMap R₀ L.toSubring m coerces to m in K.
-        have halg_coe : (↑(algebraMap R₀ L.toSubring m) : K) = algebraMap R₀ K m := rfl
-        -- Let u_inv be the inverse of the unit algebraMap R₀ L.toSubring m.
-        set u_L := hu.unit
-        have hu_inv_mul : (↑(u_L⁻¹) : L.toSubring) * (algebraMap R₀ L.toSubring m) = 1 := by
-          exact_mod_cast u_L.inv_val
-        have hu_inv_mul_K : (↑(↑(u_L⁻¹) : L.toSubring) : K) *
-            (↑(algebraMap R₀ L.toSubring m) : K) = 1 := by
-          have := congr_arg (↑· : L.toSubring → K) hu_inv_mul
-          simpa [map_mul, map_one] using this
-        have hx_eq : x = (↑(↑(u_L⁻¹) : L.toSubring) : K) * (m • x) := by
-          rw [hsmul, ← halg_coe, ← mul_assoc, hu_inv_mul_K, one_mul]
-        rw [hx_eq]; exact L.toSubring.mul_mem (↑(u_L⁻¹) : L.toSubring).property hmx_L
-      -- Apply Stacks 090P part 2.
-      obtain ⟨V, hV_dom, hx_notV⟩ :=
-        LocalSubring.exists_le_valuationSubring_of_isIntegrallyClosedIn hx_notL
-      refine ⟨V, ?_, hx_notV, ?_⟩
-      · -- R₀ ≤ V: from L ≤ V (domination) and R₀ ≤ L (ofPrime inclusion).
-        exact (LocalSubring.le_ofPrime R₀ 𝔪).trans hV_dom.1
-      · -- ∀ a ∈ P.I, V.valuation(ι a) < 1.
-        -- Domination: 𝔪 → maxIdeal(V). Since I_img ⊆ 𝔪, image(P.I) ⊆ V.nonunits.
-        intro a ha
-        have ha_I_img : ι_R₀ a ∈ I_img := Ideal.mem_map_of_mem ι_R₀ ha
-        have ha_m : ι_R₀ a ∈ 𝔪 := hI_le_m ha_I_img
-        change V.valuation (ι_R₀ a : K) < 1
-        have ha_in_L : (ι_R₀ a : K) ∈ L.toSubring :=
-          LocalSubring.le_ofPrime R₀ 𝔪 (ι_R₀ a).property
-        have ha_in_V : (ι_R₀ a : K) ∈ V.toSubring := hV_dom.1 ha_in_L
-        rw [← ValuationSubring.valuation_lt_one_iff V ⟨_, ha_in_V⟩]
-        have ha_maxL : ⟨(ι_R₀ a : K), ha_in_L⟩ ∈ IsLocalRing.maximalIdeal L.toSubring :=
-          (IsLocalization.AtPrime.to_map_mem_maximal_iff L.toSubring 𝔪 (ι_R₀ a)).mpr ha_m
-        haveI : IsLocalHom (Subring.inclusion hV_dom.1) := hV_dom.2
-        exact map_nonunit (Subring.inclusion hV_dom.1) _ ha_maxL
-    obtain ⟨V, hV_le, hx_notV, hI_lt_one⟩ := hV_refined
-    -- Phase B+C: Coarsen + extend to get a continuous valuation on R.
-    -- Following the Lemma 7.45 pattern (exists_spa_point_via_restrictToConvex).
-    obtain ⟨S, hS⟩ := P.fg
-    by_cases hSne : S.Nonempty
-    · -- Nonempty P.I: standard case.
-      -- g_max < 1 strictly from hI_lt_one.
-      set g_max := S.sup' hSne (fun s ↦ V.valuation (ι (P.A₀.subtype s)))
-      have hg_lt1 : g_max < 1 := by
-        rw [Finset.sup'_lt_iff]
-        intro s hs
-        exact hI_lt_one s (hS ▸ Ideal.subset_span (Finset.mem_coe.mpr hs))
-      -- Need g_max ≠ 0 for the Units.mk0 construction.
-      -- g_max = 0 iff ALL generators map to support of V. This would mean
-      -- P.I maps entirely to supp(V), so the ideal of definition has no
-      -- "non-trivial" topologically nilpotent element modulo supp(V).
-      -- For now, handle via sorry (minor edge case).
-      by_cases hg_ne0 : g_max = 0
-      · -- Edge case: g_max = 0 means ALL P.I generators have V-value 0.
-        -- V.valuation.comap ι is trivially continuous: I^n maps to {0} ⊂ {< γ}.
-        have hle_A₀ : ∀ (a : P.A₀), (V.valuation.comap ι) (P.A₀.subtype a) ≤ 1 :=
-          fun a ↦ by
-            change V.valuation (ι (P.A₀.subtype a : R)) ≤ 1
-            rw [ValuationSubring.valuation_le_one_iff]
-            exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K)
-              ⟨_, hA₀B a.property⟩)
-        refine ⟨V.ValueGroup, inferInstance, V.valuation.comap ι, ?_, ?_, ?_⟩
-        · -- v ≤ 1 on B
-          intro b hb; change V.valuation (ι b) ≤ 1
-          rw [ValuationSubring.valuation_le_one_iff]
-          exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩)
-        · -- 1 < v(x)
-          exact not_le.mp (show ¬ V.valuation (ι x) ≤ 1 by
-            rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV)
-        · -- Continuity: g_max = 0 means V.valuation(ι(I^n)) ≤ 0 < γ.
-          apply Valuation.isContinuous_of_ideal_pow_lt P (V.valuation.comap ι)
-          intro γ hγ; refine ⟨1, fun a ha ↦ ?_⟩; rw [pow_one] at ha
-          change V.valuation (ι (P.A₀.subtype a)) < γ
-          have h2 : V.valuation (ι (P.A₀.subtype a)) ≤ g_max := by
-            have : (fun s ↦ V.valuation (ι (P.A₀.subtype s))) a ≤ g_max :=
-              PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
-                (V.valuation.comap ι) hle_A₀ hS
-                (fun s hs ↦ Finset.le_sup' (f := fun s ↦ V.valuation (ι (P.A₀.subtype s))) hs) ha
-            exact this
-          rw [hg_ne0] at h2; exact lt_of_le_of_lt h2 hγ
-      · -- Main case: g_max ≠ 0 and g_max < 1.
-        -- Following Lemma 7.45: restrictToConvex on A₀ + extend to R.
-        -- Step 1: Build v₀ on A₀ and prove it's ≤ 1.
-        set v₀_A₀ : Valuation P.A₀ V.ValueGroup :=
-          (V.valuation.comap ι).comap P.A₀.subtype with v₀_A₀_def
-        have hle_A₀ : ∀ (a : P.A₀), v₀_A₀ a ≤ 1 := fun a ↦ by
-          change V.valuation (ι (P.A₀.subtype a)) ≤ 1
-          rw [ValuationSubring.valuation_le_one_iff]
-          exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨_, hA₀B a.property⟩)
-        -- Step 2: Find generator achieving g_max.
-        obtain ⟨t₀, ht₀_S, ht₀_val⟩ :=
-          Finset.exists_mem_eq_sup' hSne (fun s ↦ V.valuation (ι (P.A₀.subtype s)))
-        have ht₀_I : t₀ ∈ P.I := hS ▸ Ideal.subset_span (Finset.mem_coe.mpr ht₀_S)
-        have ha₀_val_eq : v₀_A₀ t₀ = g_max := ht₀_val.symm
-        have hv₀_ne : v₀_A₀ t₀ ≠ 0 := ha₀_val_eq ▸ hg_ne0
-        -- Step 3: Define u_max, H_gen, v_r.
-        set u_max := Units.mk0 g_max hg_ne0
-        have hu_lt1 : (u_max : V.ValueGroup) < 1 := hg_lt1
-        have hu_inv_gt1 : (1 : V.ValueGroupˣ) < u_max⁻¹ := one_lt_inv_of_inv hu_lt1
-        set H_gen := ConvexSubgroup.convexGenerated hu_inv_gt1
-        have hu_mem : u_max ∈ H_gen := by
-          rw [show u_max = (u_max⁻¹)⁻¹ from (inv_inv u_max).symm]
-          exact inv_mem (ConvexSubgroup.self_mem_convexGenerated hu_inv_gt1)
-        have hu_a₀_mem : Units.mk0 (v₀_A₀ t₀) hv₀_ne ∈ H_gen :=
-          (Units.ext ha₀_val_eq : Units.mk0 (v₀_A₀ t₀) hv₀_ne = u_max) ▸ hu_mem
-        set v_r := v₀_A₀.restrictToConvex H_gen hle_A₀ with v_r_def
-        -- Step 4: v_r(t₀) ≠ 0 and topological nilpotency.
-        have hv_r_ne : v_r t₀ ≠ 0 := ne_of_gt
-          (Valuation.restrictToConvex_pos_of_mem v₀_A₀ H_gen hle_A₀ hv₀_ne hu_a₀_mem)
-        set s := (P.A₀.subtype t₀ : R)
-        have hs_nil : IsTopologicallyNilpotent s := P.isTopologicallyNilpotent_of_mem ht₀_I
-        have hs_A₀ : s ∈ P.A₀ := Subtype.coe_prop t₀
-        -- Step 5: Extend v_r from A₀ to R.
-        obtain ⟨v_ext, ⟨h_ext, h_ext_at⟩⟩ :=
-          PairOfDefinition.exists_valuation_extension P v_r hs_A₀ hs_nil hv_r_ne
-        -- Step 6: Package the result.
-        refine ⟨WithZero H_gen.toSubgroup, inferInstance, v_ext, ?_, ?_, ?_⟩
-        · -- v_ext ≤ 1 on B.
-          intro b hb
-          obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil b
-          rw [h_ext_at b n hn]
-          have hval_b : V.valuation (ι b) ≤ 1 :=
-            (ValuationSubring.valuation_le_one_iff V _).mpr
-              (hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩))
-          have hb_le : v₀_A₀ ⟨s ^ n * b, hn⟩ ≤ v₀_A₀ (t₀ ^ n) := by
-            change V.valuation (ι (s ^ n * b)) ≤ V.valuation (ι (P.A₀.subtype (t₀ ^ n)))
-            simp only [map_mul, map_pow, Subring.coe_subtype]
-            calc V.valuation (ι s) ^ n * V.valuation (ι b)
-                ≤ V.valuation (ι s) ^ n * 1 := mul_le_mul_right hval_b _
-              _ = V.valuation (ι s) ^ n := mul_one _
-          have ht_pow_ne : v₀_A₀ (t₀ ^ n) ≠ 0 := by
-            rw [show (t₀ ^ n : P.A₀) = t₀ ^ n from rfl, map_pow]
-            exact pow_ne_zero n hv₀_ne
-          have ht_pow_mem : Units.mk0 (v₀_A₀ (t₀ ^ n)) ht_pow_ne ∈ H_gen := by
-            have : Units.mk0 (v₀_A₀ (t₀ ^ n)) ht_pow_ne =
-                (Units.mk0 (v₀_A₀ t₀) hv₀_ne) ^ n :=
-              Units.ext (map_pow v₀_A₀ t₀ n)
-            rw [this]; exact Subgroup.pow_mem H_gen.toSubgroup hu_a₀_mem n
-          have h_mono : v_r ⟨s ^ n * b, hn⟩ ≤ v_r (t₀ ^ n) :=
-            Valuation.restrictToConvex_mono_of_le_one v₀_A₀ H_gen hle_A₀
-              hb_le ht_pow_ne ht_pow_mem
-          have hv_r_pow : v_r (t₀ ^ n) = v_r t₀ ^ n := map_pow v_r t₀ n
-          have hcancel : v_r t₀ ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n = 1 := by
-            have : ⟨s, hs_A₀⟩ = t₀ := Subtype.ext rfl
-            rw [this, ← mul_pow, mul_inv_cancel₀ hv_r_ne, one_pow]
-          calc v_r ⟨s ^ n * b, hn⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n
-              ≤ v_r (t₀ ^ n) * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
-                apply mul_le_mul_left h_mono
-            _ = v_r t₀ ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by rw [hv_r_pow]
-            _ = 1 := hcancel
-        · -- 1 < v_ext(x): use extension formula.
-          obtain ⟨n, hn⟩ := P.exists_pow_mul_mem_A₀ hs_nil x
-          rw [h_ext_at x n hn]
-          have hsn_A₀ : s ^ n ∈ P.A₀ := P.A₀.pow_mem (Subtype.coe_prop t₀) n
-          have hsn_eq : (⟨s ^ n, hsn_A₀⟩ : P.A₀) = t₀ ^ n := Subtype.ext rfl
-          have hv₀_lt : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ < v₀_A₀ ⟨s ^ n * x, hn⟩ := by
-            change V.valuation (ι (s ^ n)) < V.valuation (ι (s ^ n * x))
-            rw [show ι (s ^ n * x) = ι s ^ n * ι x from by rw [map_mul, map_pow],
-                show ι (s ^ n) = ι s ^ n from map_pow ι s n, map_mul, map_pow]
-            exact lt_mul_of_one_lt_right
-              (pow_pos (zero_lt_iff.mpr (ha₀_val_eq ▸ hg_ne0)) n)
-              (not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV))
-          have hsnx_ne : v₀_A₀ ⟨s ^ n * x, hn⟩ ≠ 0 :=
-            ne_of_gt (lt_of_le_of_lt zero_le hv₀_lt)
-          have hv₀_sn_eq : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ = (v₀_A₀ t₀) ^ n := by
-            exact hsn_eq ▸ map_pow v₀_A₀ t₀ n
-          have hsn_ne : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ ≠ 0 := by
-            rw [hv₀_sn_eq]; exact pow_ne_zero n hv₀_ne
-          have hsn_mem : Units.mk0 (v₀_A₀ ⟨s ^ n, hsn_A₀⟩) hsn_ne ∈ H_gen := by
-            have heq : Units.mk0 (v₀_A₀ ⟨s ^ n, hsn_A₀⟩) hsn_ne =
-                (Units.mk0 (v₀_A₀ t₀) hv₀_ne) ^ n := Units.ext hv₀_sn_eq
-            rw [heq]; exact Subgroup.pow_mem H_gen.toSubgroup hu_a₀_mem n
-          have hsnx_mem : Units.mk0 (v₀_A₀ ⟨s ^ n * x, hn⟩) hsnx_ne ∈ H_gen :=
-            H_gen.convex hsn_mem (one_mem H_gen)
-              (Units.val_le_val.mp hv₀_lt.le) (Units.val_le_val.mp (hle_A₀ _))
-          have h_r_lt : v_r ⟨s ^ n, hsn_A₀⟩ < v_r ⟨s ^ n * x, hn⟩ := by
-            have h1 : v_r ⟨s ^ n, hsn_A₀⟩ =
-                v₀_A₀.restrictToConvex H_gen hle_A₀ ⟨s ^ n, hsn_A₀⟩ := rfl
-            have h2 : v_r ⟨s ^ n * x, hn⟩ =
-                v₀_A₀.restrictToConvex H_gen hle_A₀ ⟨s ^ n * x, hn⟩ := rfl
-            rw [h1, Valuation.restrictToConvex_unfold, dif_neg hsn_ne, dif_pos hsn_mem,
-                h2, Valuation.restrictToConvex_unfold, dif_neg hsnx_ne, dif_pos hsnx_mem]
-            exact WithZero.coe_lt_coe.mpr (Subtype.mk_lt_mk.mpr (Units.val_lt_val.mp hv₀_lt))
-          have hvr_sn : v_r ⟨s ^ n, hsn_A₀⟩ = (v_r ⟨s, hs_A₀⟩) ^ n := by
-            rw [show (⟨s ^ n, hsn_A₀⟩ : P.A₀) = ⟨s, hs_A₀⟩ ^ n from Subtype.ext rfl, map_pow]
-          have hvr_s_eq : v_r ⟨s, hs_A₀⟩ = v_r t₀ := congrArg v_r (Subtype.ext rfl)
-          calc 1 = (v_r ⟨s, hs_A₀⟩) ^ n * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
-                  rw [← mul_pow, hvr_s_eq, mul_inv_cancel₀ hv_r_ne, one_pow]
-            _ = v_r ⟨s ^ n, hsn_A₀⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by rw [hvr_sn]
-            _ < v_r ⟨s ^ n * x, hn⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n := by
-                apply mul_lt_mul_of_pos_right h_r_lt
-                exact pow_pos (inv_pos_of_pos (zero_lt_iff.mpr hv_r_ne)) n
-        · -- Continuity via isContinuous_of_le_one_and_pow_cofinal.
-          set g_cont : WithZero H_gen.toSubgroup :=
-            ((⟨u_max, hu_mem⟩ : H_gen.toSubgroup) : WithZero H_gen.toSubgroup)
-          have hg_bound : ∀ a : P.A₀, a ∈ P.I → v_ext (P.A₀.subtype a) ≤ g_cont := by
-            intro a ha; rw [h_ext a, v_r_def]
-            by_cases hv_eq : v₀_A₀ a = 0
-            · rw [Valuation.restrictToConvex_unfold, dif_pos hv_eq]; exact bot_le
-            · by_cases hm : Units.mk0 (v₀_A₀ a) hv_eq ∈ H_gen
-              · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_pos hm]
-                exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
-                  (Units.val_le_val.mp (PairOfDefinition.valuation_le_on_ideal_of_le_on_generators
-                    (V.valuation.comap ι) (fun a ↦ hle_A₀ a) hS
-                    (fun t ht ↦ Finset.le_sup'
-                      (f := fun t ↦ V.valuation (ι (P.A₀.subtype t))) ht) ha)))
-              · rw [Valuation.restrictToConvex_unfold, dif_neg hv_eq, dif_neg hm]; exact bot_le
-          have h_le_ext : ∀ a : P.A₀, v_ext (P.A₀.subtype a) ≤ 1 := by
-            intro a; rw [h_ext a]
-            exact Valuation.restrictToConvex_le_one v₀_A₀ H_gen hle_A₀ a
-          have h_cofinal : ∀ γ : WithZero H_gen.toSubgroup, 0 < γ →
-              ∃ n : ℕ, g_cont ^ n < γ := by
-            intro γ hγ
-            obtain ⟨n, hn⟩ := ConvexSubgroup.withZero_inv_pow_cofinal_of_convexGenerated
-              hu_inv_gt1 γ hγ
-            exact ⟨n, by
-              convert hn using 2
-              exact WithZero.coe_inj.mpr (Subtype.ext (inv_inv u_max).symm)⟩
-          exact Valuation.isContinuous_of_le_one_and_pow_cofinal P v_ext h_le_ext
-            hg_bound h_cofinal
-    · -- Empty P.I: degenerate case.
-      rw [Finset.not_nonempty_iff_eq_empty] at hSne
-      have hI_bot : P.I = ⊥ := by
-        rw [← hS, hSne, Finset.coe_empty, Ideal.span_empty]
-      -- With I = ⊥, every valuation is trivially continuous.
-      refine ⟨V.ValueGroup, inferInstance, V.valuation.comap ι, ?_, ?_, ?_⟩
-      · intro b hb
-        change V.valuation (ι b) ≤ 1
-        rw [ValuationSubring.valuation_le_one_iff]
-        exact hV_le (Subalgebra.algebraMap_mem (integralClosure B K) ⟨b, hb⟩)
-      · change 1 < V.valuation (ι x)
-        exact not_le.mp (by rw [ValuationSubring.valuation_le_one_iff]; exact hx_notV)
-      · apply Valuation.isContinuous_of_ideal_pow_lt P (V.valuation.comap ι)
-        intro γ hγ; refine ⟨1, fun a ha ↦ ?_⟩
-        rw [pow_one] at ha
-        have : a ∈ (⊥ : Ideal P.A₀) := hI_bot ▸ ha
-        rw [Ideal.mem_bot] at this; subst this
-        simp only [map_zero]; exact hγ
+      (∀ b ∈ B, wVal b ≤ 1) ∧ 1 < wVal x ∧ wVal.IsContinuous :=
+    exists_continuous_valuation_of_notMem_integralClosure P _hB_open hA₀B x hx_notin
   -- Step 3: Derive contradiction from the continuous valuation.
   obtain ⟨Γ₀, _, wVal, hw_B_val, hx_gt, hwVal_cont⟩ := hV_exists
   let w : ValuativeRel R := ValuativeRel.ofValuation wVal
