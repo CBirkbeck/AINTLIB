@@ -106,8 +106,7 @@ theorem tateEvalPresheafHom_bivariate_continuous_canonical
     (canonicalMap_continuous D).continuousAt.preimage_mem_nhds (by rwa [map_zero])
   let P_B := (IsTateRing.principalPair B).toPairOfDefinition
   obtain ⟨N, -, hN⟩ := P_B.hasBasis_nhds_zero.mem_iff.mp hcmU
-  have hbasis : ((@nhds _ τ (0 : ↥(TateAlgebra₂ B))).HasBasis
-      (fun _ : ℕ => True) fun n =>
+  have hbasis : ((@nhds _ τ (0 : ↥(TateAlgebra₂ B))).HasBasis (fun _ : ℕ => True) fun n =>
         (TateAlgebra.tateAlgNhd₂ P_B n : Set ↥(TateAlgebra₂ B))) :=
     TateAlgebra.tateAlgBasis'₂.hasBasis_nhds_zero
   apply hbasis.mem_iff.mpr
@@ -128,8 +127,7 @@ theorem tateEvalPresheafHom_bivariate_continuous_canonical
     rw [← hbeq]
     exact ⟨b', hbI, rfl⟩
   have hhs : HasSum (TateAlgebraWedhorn.evalTerm₂ D.canonicalMap f_canon f_invS h)
-      (example638Bivariate_evalHom B P b h) :=
-    (TateAlgebraWedhorn.evalTerm₂_summable D.canonicalMap
+      (example638Bivariate_evalHom B P b h) := (TateAlgebraWedhorn.evalTerm₂_summable D.canonicalMap
       (canonicalMap_continuous D) f_canon f_invS hb_canon hb_invS h).hasSum
   refine hW_closed.mem_of_tendsto hhs <| Filter.Eventually.of_forall fun s => ?_
   exact W.toAddSubgroup.sum_mem fun k _ => hterm_mem k
