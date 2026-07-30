@@ -521,3 +521,24 @@ B. head-side: localize P↪Q at max 𝔪, faithfully-flat levelwise injection +
 C. L1 at maximals (FlatCompletion + graph fibre; 8.30-conditional).
 D. Rewire headLocsReduced (contraction maximality via QHead residue
    finiteness — 6.38 presentation + module_finite_residue_of_finite_extension).
+
+## BLOCK B REORIENTED (2026-07-30, post-block-A session)
+
+Block A DONE (isReduced_adicCompletion_localization_tate + normalClosure
+corollary, axiom-clean). B2 zeroHeadTateEquiv DONE. Transport engine DONE
+(localRingCongr / completedLocalCongr / completedLocalLocalizationEquiv).
+
+CORRECTION to the old B-plan line: the head is NOT free over the zero-head
+(base singular); freeness runs head-over-T_N (paper lem:finite-stage-normal-form).
+The maximal-case head reducedness splits per L3.a/L3.b:
+- W ∉ 𝔭 (UNCONDITIONAL): uniform shift M := ∑_{n≤N} w n gives
+  W^M·(zero-head) ⊆ w-head, so Localization.Away (W, w-head) is an
+  IsLocalization.Away (W) over the ZERO-head ⇒ Away-rings agree ⇒
+  completedLocal (w-head) 𝔭 ≅ completedLocal (zero-head) 𝔭'' (engine twice)
+  ≅ completedLocal (P K (N+1)) _ (B2 + completedLocalCongr) ⇒ reduced (block A).
+- W ∈ 𝔭 (THE DEEP LEAF): quadratic-tower analysis, unchanged.
+- D-prep contraction-maximality: QHead-maximal residues are K-finite via
+  head⟨T⟩ finite over T_N⟨T⟩ (Tate) + module_finite_residue +
+  module_finite_residue_of_finite_extension + comap_isMaximal_of_finite_residue.
+- C (L1) stays 8.30-conditional (central sorry) — build elementary leaves
+  (quotient_pow_equiv_of_flat, graphAtPrimeEquiv) unconditionally.
