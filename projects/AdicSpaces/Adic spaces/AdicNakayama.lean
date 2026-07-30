@@ -285,6 +285,20 @@ noncomputable def AdicCompletion.quotientSpanEquiv {a : R}
     (RingHom.quotientKerEquivOfSurjective
       (AdicCompletion.toQuotientSpan_surjective a))
 
+/-- Computation law for `quotientSpanEquiv` on canonical images. -/
+theorem AdicCompletion.quotientSpanEquiv_mk_of {a : R}
+    (ha : a ∈ nonZeroDivisors R) (x : R) :
+    AdicCompletion.quotientSpanEquiv ha
+      (Ideal.Quotient.mk _ (AdicCompletion.of (Ideal.span {a}) R x)) =
+    Ideal.Quotient.mk _ x := by
+  show (RingHom.quotientKerEquivOfSurjective
+      (AdicCompletion.toQuotientSpan_surjective a))
+      ((Ideal.quotEquivOfEq (AdicCompletion.ker_toQuotientSpan ha).symm)
+        (Ideal.Quotient.mk _ (AdicCompletion.of (Ideal.span {a}) R x))) =
+    Ideal.Quotient.mk _ x
+  rw [Ideal.quotEquivOfEq_mk, RingHom.quotientKerEquivOfSurjective_apply_mk,
+    AdicCompletion.toQuotientSpan_of]
+
 end PrincipalAdicDivision
 
 end AdicNakayama

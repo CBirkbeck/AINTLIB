@@ -146,4 +146,69 @@ noncomputable def unitBallPResidueEquiv :
       rfl))).trans
     (MvPolynomial.quotientEquivQuotientMvPolynomial _).symm.toRingEquiv
 
+/-- Computation law: the quotient identification acts as the identity on
+polynomial classes. -/
+theorem unitBallPQuotientEquiv_mk
+    (ht_nzd : (tConstPoly (E := E) (m := m) t ht1) ∈
+      nonZeroDivisors (MvPolynomial (Fin m) ↥(unitBall E)))
+    (q : MvPolynomial (Fin m) ↥(unitBall E)) :
+    unitBallPQuotientEquiv t htu ht1 ht0 hscale ht_nzd
+      (Ideal.Quotient.mk _ (polyBallRes (E := E) (m := m) q)) =
+    Ideal.Quotient.mk _ q := by
+  show AdicCompletion.quotientSpanEquiv ht_nzd
+      ((Ideal.quotientEquiv
+        (Ideal.span {tConstBall (E := E) (m := m) t ht1})
+        (Ideal.span {AdicCompletion.of (I0 (E := E) (m := m) t ht1)
+          (MvPolynomial (Fin m) ↥(unitBall E))
+          (tConstPoly (E := E) (m := m) t ht1)})
+        (ballAdicEquiv t htu ht1 ht0 hscale)
+        (by
+          rw [Ideal.map_span, Set.image_singleton]
+          exact congrArg (fun z => Ideal.span {z})
+            (ballAdicEquiv_polyBallRes t htu ht1 ht0 hscale
+              (tConstPoly (E := E) (m := m) t ht1)).symm))
+        (Ideal.Quotient.mk _ (polyBallRes (E := E) (m := m) q))) =
+    Ideal.Quotient.mk _ q
+  rw [Ideal.quotientEquiv_mk, ballAdicEquiv_polyBallRes]
+  exact AdicCompletion.quotientSpanEquiv_mk_of ht_nzd q
+
+/-- Computation law: the residue identification sends the class of a constant
+to the constant of the class. -/
+theorem unitBallPResidueEquiv_mk_C (d : ↥(unitBall E)) :
+    unitBallPResidueEquiv t htu ht1 ht0 hscale
+      (Ideal.Quotient.mk _ (polyBallRes (E := E) (m := m)
+        (MvPolynomial.C d))) =
+    MvPolynomial.C (Ideal.Quotient.mk
+      (Ideal.span {(⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+        ↥(unitBall E))}) d) := by
+  show (MvPolynomial.quotientEquivQuotientMvPolynomial
+      (σ := Fin m)
+      (Ideal.span {(⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+        ↥(unitBall E))})).symm.toRingEquiv
+      ((Ideal.quotEquivOfEq (show
+          Ideal.span {tConstPoly (E := E) (m := m) t ht1} =
+          Ideal.map MvPolynomial.C (Ideal.span
+            {(⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+              ↥(unitBall E))}) from by
+        rw [Ideal.map_span, Set.image_singleton]
+        rfl))
+        ((unitBallPQuotientEquiv t htu ht1 ht0 hscale
+          (tConstPoly_mem_nonZeroDivisors t ht1 htu))
+          (Ideal.Quotient.mk _ (polyBallRes (E := E) (m := m)
+            (MvPolynomial.C d))))) = _
+  rw [unitBallPQuotientEquiv_mk, Ideal.quotEquivOfEq_mk]
+  show Ideal.Quotient.lift
+      (Ideal.map MvPolynomial.C (Ideal.span
+        {(⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+          ↥(unitBall E))}) :
+        Ideal (MvPolynomial (Fin m) ↥(unitBall E)))
+      (MvPolynomial.eval₂Hom
+        (MvPolynomial.C.comp (Ideal.Quotient.mk (Ideal.span
+          {(⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+            ↥(unitBall E))}))) MvPolynomial.X)
+      (fun _ ha => MvPolynomial.eval₂_C_mk_eq_zero ha)
+      (Ideal.Quotient.mk _ (MvPolynomial.C d)) =
+    MvPolynomial.C (Ideal.Quotient.mk _ d)
+  rw [Ideal.Quotient.lift_mk, MvPolynomial.eval₂Hom_C, RingHom.comp_apply]
+
 end FiniteJet.GraphKoszul

@@ -523,6 +523,32 @@ theorem module_finite_specialFibre (hK₀ : IsNoetherianRing (unitBall K)) :
     (SpecialFibre (m := m) ϖ 𝔪)).mpr
     (krullDimLE_zero_specialFibre (m := m) ϖ 𝔪 hK₀)
 
+/-- **The constants compatibility**: the polynomial presentation of the
+special fibre restricts on constants to the reduction of the unit-ball
+constants. -/
+theorem fibreFromPoly_C_mk (d : ↥(unitBall K)) :
+    fibreFromPoly (m := m) ϖ 𝔪
+      (MvPolynomial.C (Ideal.Quotient.mk (Ideal.span {piUnitBall ϖ}) d)) =
+    Ideal.Quotient.mk (Ideal.span {piBar (m := m) ϖ 𝔪})
+      (Ideal.Quotient.mk (ballContraction (m := m) 𝔪)
+        (polyBallRes (E := K) (m := m) (MvPolynomial.C d))) := by
+  have hfwd := unitBallPResidueEquiv_mk_C (E := K) (m := m) ϖ.val
+    ϖ.isUnit_val ϖ.norm_val_lt_one ϖ.norm_val_pos ϖ.norm_val_mul d
+  have hsymm : (unitBallPResidueEquiv (E := K) (m := m) ϖ.val ϖ.isUnit_val
+      ϖ.norm_val_lt_one ϖ.norm_val_pos ϖ.norm_val_mul).symm
+      (MvPolynomial.C (Ideal.Quotient.mk (Ideal.span {piUnitBall ϖ}) d)) =
+      Ideal.Quotient.mk _ (polyBallRes (E := K) (m := m)
+        (MvPolynomial.C d)) := by
+    rw [RingEquiv.symm_apply_eq]
+    exact hfwd.symm
+  show toSpecialFibre (m := m) ϖ 𝔪
+      ((unitBallPResidueEquiv (E := K) (m := m) ϖ.val ϖ.isUnit_val
+        ϖ.norm_val_lt_one ϖ.norm_val_pos ϖ.norm_val_mul).symm
+        (MvPolynomial.C (Ideal.Quotient.mk (Ideal.span {piUnitBall ϖ}) d))) =
+    _
+  rw [hsymm]
+  rfl
+
 /-- The unit-ball constants hom into the integral model. -/
 noncomputable def ballToModel : ↥(unitBall K) →+* IntegralModel (m := m) 𝔪 :=
   (Ideal.Quotient.mk (ballContraction (m := m) 𝔪)).comp
@@ -649,9 +675,19 @@ theorem module_finite_integralModel
       -- a k-scalar is the image of a unit-ball scalar
       obtain ⟨d, hd⟩ := Ideal.Quotient.mk_surjective c
       have hsc : c • a = d • a := by
-        show (algebraMap (ResidueK ϖ) (SpecialFibre (m := m) ϖ 𝔪) c) * a =
-          (algebraMap ↥(unitBall K) (SpecialFibre (m := m) ϖ 𝔪) d) * a
-        sorry
+        obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective a
+        have h5 : c • (Ideal.Quotient.mk
+            (Ideal.span {piBar (m := m) ϖ 𝔪}) b) =
+            fibreFromPoly (m := m) ϖ 𝔪 (MvPolynomial.C c) *
+              Ideal.Quotient.mk (Ideal.span {piBar (m := m) ϖ 𝔪}) b := rfl
+        have h6 : d • (Ideal.Quotient.mk
+            (Ideal.span {piBar (m := m) ϖ 𝔪}) b) =
+            Ideal.Quotient.mk (Ideal.span {piBar (m := m) ϖ 𝔪})
+              (d • b) := rfl
+        have h7 : (d • b : IntegralModel (m := m) 𝔪) =
+            ballToModel (m := m) 𝔪 d * b := rfl
+        rw [h5, h6, h7, ← hd, fibreFromPoly_C_mk, map_mul]
+        rfl
       rw [hsc]
       exact Submodule.smul_mem _ _ ha
   exact Module.Finite.equiv (e1.trans e2).symm

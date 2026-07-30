@@ -1,1 +1,1 @@
-FOCUS: HRW-4 leaf 11b-d — coherence + Hausdorff + Nakayama draft applied; expect a sorry at the k-scalar-vs-ball-scalar compat (the residue-equiv polynomial law unitBallPResidueEquiv_mk_polyBallRes still to prove); compile now, then discharge the compat.
+FOCUS: HRW-4 leaf 11e — compat chain (quotientSpanEquiv_mk_of + unitBallPQuotientEquiv_mk + unitBallPResidueEquiv_mk_C + fibreFromPoly_C_mk + hsc discharge) applied; compiling the three files; then 11f = localize to Module.Finite K (P/𝔪).
