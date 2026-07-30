@@ -696,3 +696,23 @@ integrality; ε∘headToQ = mk gives the SPLIT; exactness ker ε = 𝔭Q needs
 the collapse — next adjudication candidate: split + dimension/local-ring
 argument vs direct density). NEXT: recon mvEvalHomBounded instantiation
 over κ(𝔭)-spectral for ε.
+
+## BETA closedness pointers (recon while adjudication ksi9an56m runs)
+
+- `mvTate_isClosed_ideal` (MvTateAlgebraTopology:991, PUBLIC): every ideal of
+  ↥(restrictedMvPowerSeriesSubring n A) closed in mvTateAlgebraTopology', for
+  [IsTateRing A][T2Space A][IsStronglyNoetherian A] + right-uniform complete.
+  Head qualifies (isStronglyNoetherian_WPHead + Uniformizer Tate package).
+- CARRIER MISMATCH: QHead uses P (head) k (Coram gauss-Restricted); the
+  closedness engine uses restrictedMvPowerSeriesSubring (Wedhorn828 root ns);
+  bridge `toTopRestricted` exists (TatePointEval used it for mvEvalHomBounded).
+  Topology comparison machinery in TopologyComparison.lean.
+- isClosed_headGraphIdeal (CoeffLocalization:594) is stated for the P-form
+  norm topology — so a P-form closedness statement for 𝔭·P(head)k is the
+  natural target; truncation-convergence is a gauss-norm fact
+  (truncTotal/denseRange_polyToP machinery generic-E?).
+- Planned truncation argument (pending adjudication): truncations of F with
+  coefficients in 𝔭 are polynomials = finite 𝔭-combinations ∈ 𝔭·A⟨T⟩;
+  truncations → F in gauss norm; 𝔭·A⟨T⟩ closed ⟹ F ∈ 𝔭·A⟨T⟩ ⟹
+  coefficientwise-𝔭 = extension ideal; then R2 base-change via bounded
+  section (finite-dim norm equivalence) + pointIdeal machinery closes BETA.
