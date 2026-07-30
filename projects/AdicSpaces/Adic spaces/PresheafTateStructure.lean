@@ -114,6 +114,52 @@ theorem presheafValue_ringOfDef_isOpen (D₀ : RationalLocData A) :
     (Filter.mem_of_superset (hbasis_compl.mem_of_mem (i := 0) trivial) (hclosure_sub 0))
 
 omit [PlusSubring A] in
+/-- Extracted from `locSubring_subspace_eq_adic`, where it was the dominant `have`
+(37 lines of a 59-line body). -/
+private theorem locSubring_induced_eq_adic_key (D₀ : RationalLocData A) :
+    TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology =
+      (locIdeal D₀.P D₀.T D₀.s).adicTopology := by
+  letI : TopologicalSpace (Localization.Away D₀.s) := D₀.topology
+  letI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
+  letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
+  letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have htag_ind : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s)
+      (TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology) _ :=
+    @IsTopologicalRing.to_topologicalAddGroup _ _
+      (TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology)
+      (Subring.instIsTopologicalRing (locSubring D₀.P D₀.T D₀.s))
+  have htag_adic : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s)
+      (locIdeal D₀.P D₀.T D₀.s).adicTopology _ :=
+    @IsTopologicalRing.to_topologicalAddGroup _ _ (locIdeal D₀.P D₀.T D₀.s).adicTopology
+      (RingFilterBasis.isTopologicalRing
+        (locIdeal D₀.P D₀.T D₀.s).adic_basis.toRing_subgroups_basis.toRingFilterBasis)
+  apply @IsTopologicalAddGroup.ext (locSubring D₀.P D₀.T D₀.s) _ _ _ htag_ind htag_adic
+  have hbasis_loc := (locBasis D₀.P D₀.T D₀.s D₀.hopen).hasBasis_nhds_zero
+  have hpreimage_eq : ∀ n : ℕ,
+      (locSubring D₀.P D₀.T D₀.s).subtype ⁻¹'
+        (locNhd D₀.P D₀.T D₀.s n : Set (Localization.Away D₀.s)) =
+      ((locIdeal D₀.P D₀.T D₀.s ^ n : Ideal (locSubring D₀.P D₀.T D₀.s)) :
+        Set (locSubring D₀.P D₀.T D₀.s)) := by
+    intro n; ext ⟨x, hx_mem⟩; constructor
+    · rintro ⟨d, hd, hd_eq⟩
+      have : d = ⟨x, hx_mem⟩ := Subtype.val_injective (by
+        change d.val = x; change d.val = _ at hd_eq; exact hd_eq)
+      exact this ▸ hd
+    · intro hx; exact ⟨⟨x, hx_mem⟩, hx, rfl⟩
+  have hbasis_ind :
+      (@nhds (locSubring D₀.P D₀.T D₀.s)
+        (TopologicalSpace.induced
+          (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology)
+        0).HasBasis
+      (fun _ : ℕ ↦ True) (fun n ↦ ((locIdeal D₀.P D₀.T D₀.s ^ n :
+        Ideal (locSubring D₀.P D₀.T D₀.s)) : Set (locSubring D₀.P D₀.T D₀.s))) := by
+    rw [nhds_induced, show ((locSubring D₀.P D₀.T D₀.s).subtype :
+        (locSubring D₀.P D₀.T D₀.s) → Localization.Away D₀.s) 0 = 0 from map_zero _]
+    exact (hbasis_loc.comap (locSubring D₀.P D₀.T D₀.s).subtype).congr
+      (fun _ ↦ Iff.rfl) (fun n _ ↦ hpreimage_eq n)
+  ext U; rw [hbasis_ind.mem_iff, (locIdeal D₀.P D₀.T D₀.s).hasBasis_nhds_zero_adic.mem_iff]
+
+omit [PlusSubring A] in
 /-- The subspace uniformity on `locSubring` equals the `locIdeal`-adic uniformity. -/
 theorem locSubring_subspace_eq_adic (D₀ : RationalLocData A) :
     UniformSpace.comap (locSubring D₀.P D₀.T D₀.s).subtype D₀.uniformSpace =
@@ -125,42 +171,8 @@ theorem locSubring_subspace_eq_adic (D₀ : RationalLocData A) :
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
   letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
   have key : TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology =
-      (locIdeal D₀.P D₀.T D₀.s).adicTopology := by
-    have htag_ind : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s)
-        (TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology) _ :=
-      @IsTopologicalRing.to_topologicalAddGroup _ _
-        (TopologicalSpace.induced (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology)
-        (Subring.instIsTopologicalRing (locSubring D₀.P D₀.T D₀.s))
-    have htag_adic : @IsTopologicalAddGroup (locSubring D₀.P D₀.T D₀.s)
-        (locIdeal D₀.P D₀.T D₀.s).adicTopology _ :=
-      @IsTopologicalRing.to_topologicalAddGroup _ _ (locIdeal D₀.P D₀.T D₀.s).adicTopology
-        (RingFilterBasis.isTopologicalRing
-          (locIdeal D₀.P D₀.T D₀.s).adic_basis.toRing_subgroups_basis.toRingFilterBasis)
-    apply @IsTopologicalAddGroup.ext (locSubring D₀.P D₀.T D₀.s) _ _ _ htag_ind htag_adic
-    have hbasis_loc := (locBasis D₀.P D₀.T D₀.s D₀.hopen).hasBasis_nhds_zero
-    have hpreimage_eq : ∀ n : ℕ,
-        (locSubring D₀.P D₀.T D₀.s).subtype ⁻¹'
-          (locNhd D₀.P D₀.T D₀.s n : Set (Localization.Away D₀.s)) =
-        ((locIdeal D₀.P D₀.T D₀.s ^ n : Ideal (locSubring D₀.P D₀.T D₀.s)) :
-          Set (locSubring D₀.P D₀.T D₀.s)) := by
-      intro n; ext ⟨x, hx_mem⟩; constructor
-      · rintro ⟨d, hd, hd_eq⟩
-        have : d = ⟨x, hx_mem⟩ := Subtype.val_injective (by
-          change d.val = x; change d.val = _ at hd_eq; exact hd_eq)
-        exact this ▸ hd
-      · intro hx; exact ⟨⟨x, hx_mem⟩, hx, rfl⟩
-    have hbasis_ind :
-        (@nhds (locSubring D₀.P D₀.T D₀.s)
-          (TopologicalSpace.induced
-            (locSubring D₀.P D₀.T D₀.s).subtype D₀.topology)
-          0).HasBasis
-        (fun _ : ℕ ↦ True) (fun n ↦ ((locIdeal D₀.P D₀.T D₀.s ^ n :
-          Ideal (locSubring D₀.P D₀.T D₀.s)) : Set (locSubring D₀.P D₀.T D₀.s))) := by
-      rw [nhds_induced, show ((locSubring D₀.P D₀.T D₀.s).subtype :
-          (locSubring D₀.P D₀.T D₀.s) → Localization.Away D₀.s) 0 = 0 from map_zero _]
-      exact (hbasis_loc.comap (locSubring D₀.P D₀.T D₀.s).subtype).congr
-        (fun _ ↦ Iff.rfl) (fun n _ ↦ hpreimage_eq n)
-    ext U; rw [hbasis_ind.mem_iff, (locIdeal D₀.P D₀.T D₀.s).hasBasis_nhds_zero_adic.mem_iff]
+      (locIdeal D₀.P D₀.T D₀.s).adicTopology :=
+    locSubring_induced_eq_adic_key D₀
   apply UniformSpace.ext; rw [uniformity_comap]
   change Filter.comap (Prod.map (locSubring D₀.P D₀.T D₀.s).subtype
       (locSubring D₀.P D₀.T D₀.s).subtype)

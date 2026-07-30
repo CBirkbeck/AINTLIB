@@ -605,3 +605,75 @@ docstring and its `theorem`, giving `unexpected token '/--'; expected 'lemma'`. 
 whole docstring-plus-declaration block, or scan back over `/-- … -/`, attributes, `include`/`omit
 … in` and `set_option … in` as recorded earlier. Any batch inserter must do this or it will
 corrupt every target that has a docstring — which is most of them.
+
+## Task 2 — `scratchpad/lift_have.py`: the batch inserter, and four defects it exposed
+
+Doing the one-cut lifts by hand was costing a wrong build each time, so the transformation is now
+a tool:
+
+    lift_have.py <file> <parent_decl> <new_lemma_name> "<section prefix>" [--write]
+
+It finds the parent's dominant `have`, emits `private theorem <new>` with the parent's binder text
+**verbatim** and the `have`'s stated type as the conclusion, moves the proof unchanged, and
+replaces the `have` with a call. Building it surfaced four defects worth recording — three of
+them were live bugs in my earlier hand-work or in the scanner:
+
+**1. `:= by` is not the boundary of a `have`.** A `have` may be closed by a *term*:
+`have hsplit : <22 lines of type> := fun z => rfl`. Searching forward for a literal `':= by'`
+then overruns into a later declaration and captures an **empty proof** — which, written out,
+would have silently deleted the body. Use the `:=` at bracket depth 0 inside the `have`'s block.
+
+**2. Span ≠ proof size — the scanner was manufacturing false targets.** `dominance.py` ranked by
+the step's *span*, so a `have` with a 22-line type and a one-line proof scored as a 22-line
+"dominant step". Extracting it relocates a long TYPE and shrinks nothing. `liftable.py` now
+splits at the depth-0 `:=` and reports proof lines; the mechanical queue went 10 → **8**, and the
+**2 rejected were exactly `ringStalkMap_piYHom_germ` / `ringStalkMap_yFrob_germ`** — the pair I
+was about to "fix".
+
+**3. Anonymous `letI`/`haveI` instance setup is invisible to a named-binder scan.**
+`locSubring_subspace_eq_adic` opens with four `letI : TopologicalSpace/UniformSpace … := D₀.…`
+lines. The lifted lemma lost them and failed with `failed to synthesize instance of type class
+TopologicalSpace (Localization.Away D₀.s)`. The tool now carries that preamble into the extracted
+lemma. (This is why the FiniteJetFunctoriality pair worked earlier — it happened not to need its
+instances in the lifted block.)
+
+**4. Modifier lines belong to the declaration, not the file.** `omit [PlusSubring A] in`,
+`include … in`, `set_option … in`, `open … in` must be **replicated** on the extracted lemma, and
+the insertion must go above the whole preamble including them.
+
+Also: the instance preamble sits at the parent's *base* indent, which is already the new lemma's
+proof base — it must NOT be dedented, unlike the `have`'s proof which is one level deeper. Getting
+that wrong put `letI` at column 0 (`unexpected token 'letI'; expected command`).
+
+### Landed: 3 of 6 attempted. The tool's classification is UNSOUND — do not trust it blind.
+
+Green and kept:
+
+* `locSubring_subspace_eq_adic` (PresheafTateStructure) — 60 → 26 + 37
+* `telescope_down_bound` (RobbaPresentation) — 63 → 40 + 26
+* `RationalLocData.isClosed_powerBoundedSubring` (Presheaf) — 52 → 34 + 21
+
+**Reverted after failing the gate — three separate holes in the "no proof-locals" test:**
+
+| target | failure | hole |
+|---|---|---|
+| `iteratedPlus_forwardToCompletion_continuous` | `failed to synthesize TopologicalSpace (Localization.Away (iteratedPlusDatum_B …).s)` | parent carries `set_option backward.isDefEq.respectTransparency false`; its elaboration context does not survive extraction |
+| `gaussNorm_sub_combination_le` | `g has type ?m.14 but is expected to have type GRing p F ϖ k hρ0 hρ1` | section variables (`g`, `k`, `hρ0`, `hρ1`) my scope tracker missed, so the call passed too few arguments |
+| `chartPlus_le_completedPlusSubring_of_dense` | `Unknown identifier hseq` | a proof-local introduced by a binder form the regex list does not match |
+
+So the regex "does this `have` touch proof-locals?" test is **necessary but far from
+sufficient**. Three distinct context dependencies escape it: elaboration `set_option`s on the
+parent, section variables in files with rich `variable` blocks, and binder forms the pattern list
+misses. A sound version would have to *elaborate* the candidate lemma, not pattern-match it.
+
+**Working rule from this:** the tool is a drafting aid, not a batch processor. One target, one
+module build, then keep or revert. Two of the eight (`gaussTermF_mul_le`, `isInducing_`) the tool
+cannot even parse.
+
+### A second, costlier lesson: a failed multi-target `lake build` does NOT verify the others
+
+I built five modified modules in one `lake build A B C D E`. It reported errors in
+`PresheafTateStructure` only, and I read that as "the other four are fine". They were not built at
+all — they import `PresheafTateStructure`, so the broken dependency skipped them, and their
+failures surfaced only two full gates later. **Never read a multi-target build's silence about a
+target as success; confirm the target actually compiled.**

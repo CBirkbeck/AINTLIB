@@ -2342,6 +2342,42 @@ theorem coeffSeq_Gelt_mul {A : Type*} [CommRing A] (gB : A)
       tsub_zero,
       coeffSeq]
 
+/-- Extracted from `telescope_down_bound`, where it was the dominant `have`
+(26 lines of a 62-line body). -/
+private theorem telescope_down_bound_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (g : hatK p F hρ0 hρ1) (hg : Valued.v g ≤ 1)
+    (X Y : ℕ → hatK p F hρ0 hρ1)
+    (hrec : ∀ n, Y n = (if 1 ≤ n then X (n - 1) else 0) - g * X n)
+    (hbdd : BddAbove (Set.range (fun n => Valued.v (Y n))))
+    (hX0 : Filter.Tendsto (fun n => Valued.v (X n)) Filter.atTop (nhds 0))
+    (m : ℕ) :
+    ∀ M : ℕ, X m
+      = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
+      + g ^ M * X (m + M) := by
+  intro M
+  induction M with
+  | zero =>
+    rw [Finset.sum_range_zero, pow_zero, one_mul, Nat.add_zero, zero_add]
+  | succ M ih =>
+    have hstep : X (m + M) = Y (m + M + 1) + g * X (m + M + 1) := by
+      have h := hrec (m + M + 1)
+      rw [if_pos (Nat.succ_le_succ (Nat.zero_le _)),
+        Nat.add_sub_cancel] at h
+      rw [h]
+      ring
+    calc X m = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
+          + g ^ M * X (m + M) := ih
+      _ = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
+          + (g ^ M * Y (m + M + 1) + g ^ (M + 1) * X (m + M + 1)) := by
+          rw [hstep]
+          ring
+      _ = (∑ j ∈ Finset.range (M + 1), g ^ j * Y (m + 1 + j))
+          + g ^ (M + 1) * X (m + (M + 1)) := by
+          rw [Finset.sum_range_succ]
+          rw [show m + 1 + M = m + M + 1 from by omega,
+            show m + (M + 1) = m + M + 1 from by omega]
+          ring
+
 /-- **The downward telescope bound** (Kedlaya's `t ≥ t₀` branch): under the
 shift-minus-scale recursion with a contracting scale, every `X`-value is
 bounded by the `Y`-supremum. -/
@@ -2356,30 +2392,8 @@ theorem telescope_down_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   -- the finite telescope identity
   have htel : ∀ M : ℕ, X m
       = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
-        + g ^ M * X (m + M) := by
-    intro M
-    induction M with
-    | zero =>
-      rw [Finset.sum_range_zero, pow_zero, one_mul, Nat.add_zero, zero_add]
-    | succ M ih =>
-      have hstep : X (m + M) = Y (m + M + 1) + g * X (m + M + 1) := by
-        have h := hrec (m + M + 1)
-        rw [if_pos (Nat.succ_le_succ (Nat.zero_le _)),
-          Nat.add_sub_cancel] at h
-        rw [h]
-        ring
-      calc X m = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
-            + g ^ M * X (m + M) := ih
-        _ = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
-            + (g ^ M * Y (m + M + 1) + g ^ (M + 1) * X (m + M + 1)) := by
-            rw [hstep]
-            ring
-        _ = (∑ j ∈ Finset.range (M + 1), g ^ j * Y (m + 1 + j))
-            + g ^ (M + 1) * X (m + (M + 1)) := by
-            rw [Finset.sum_range_succ]
-            rw [show m + 1 + M = m + M + 1 from by omega,
-              show m + (M + 1) = m + M + 1 from by omega]
-            ring
+      + g ^ M * X (m + M) :=
+    telescope_down_bound_step p F g hg X Y hrec hbdd hX0 m
   -- per-M ultrametric bound
   have hbound : ∀ M : ℕ, Valued.v (X m)
       ≤ max (⨆ n, Valued.v (Y n)) (Valued.v (X (m + M))) := by

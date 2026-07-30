@@ -610,6 +610,32 @@ theorem RationalLocData.nonarchimedeanAddGroup_presheafValue (D : RationalLocDat
       exact ⟨hbasis.openAddSubgroup n, hVU⟩)
   exact @instNonarchimedeanAddGroupCompletion _ _ D.uniformSpace D.isUniformAddGroup hag_loc
 
+/-- Extracted from `RationalLocData.isClosed_powerBoundedSubring`, where it was the dominant `have`
+(21 lines of a 51-line body). -/
+private theorem isClosed_powerBoundedSubring_isOpen_key (D : RationalLocData A) :
+    IsOpen (D.completedLocSubring : Set (presheafValue D)) := by
+  haveI hag : NonarchimedeanAddGroup (presheafValue D) := D.nonarchimedeanAddGroup_presheafValue
+  letI := D.uniformSpace
+  letI := D.isUniformAddGroup
+  letI := D.isTopologicalRing
+  have hbasis := (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero
+  have hbasis_compl : (nhds (0 : presheafValue D)).HasBasis (fun _ : ℕ ↦ True)
+      (fun n ↦ closure
+        (⇑D.coeRingHom '' (locNhd D.P D.T D.s n : Set (Localization.Away D.s)))) :=
+    (map_zero D.coeRingHom : D.coeRingHom 0 = 0) ▸
+      hbasis.hasBasis_of_isDenseInducing UniformSpace.Completion.isDenseInducing_coe
+  have himage_sub : ⇑D.coeRingHom '' (locNhd D.P D.T D.s 1 : Set (Localization.Away D.s)) ⊆
+      (D.completedLocSubring : Set (presheafValue D)) := by
+    rintro _ ⟨y, hy, rfl⟩
+    obtain ⟨d, _, rfl⟩ := hy
+    exact Subring.le_topologicalClosure _ ⟨d.1, d.2, rfl⟩
+  have hClosed : IsClosed (D.completedLocSubring : Set (presheafValue D)) :=
+    Subring.isClosed_topologicalClosure _
+  change IsOpen ((D.completedLocSubring).toAddSubgroup : Set (presheafValue D))
+  exact AddSubgroup.isOpen_of_mem_nhds _
+    (Filter.mem_of_superset (hbasis_compl.mem_of_mem (i := 1) trivial)
+      (closure_minimal himage_sub hClosed))
+
 /-- `(𝒪_X(D))°` is closed: it contains the open subring `completedLocSubring` (a bounded
 open subring — Wedhorn 6.1.2 at the completion), hence is an open, and therefore closed,
 additive subgroup. -/
@@ -618,27 +644,8 @@ theorem RationalLocData.isClosed_powerBoundedSubring (D : RationalLocData A) :
   haveI hag : NonarchimedeanAddGroup (presheafValue D) := D.nonarchimedeanAddGroup_presheafValue
   -- (i) `completedLocSubring` is open: it contains `closure (coe '' locNhd 1)`, a
   -- `0`-neighbourhood of the completion.
-  have hopen : IsOpen (D.completedLocSubring : Set (presheafValue D)) := by
-    letI := D.uniformSpace
-    letI := D.isUniformAddGroup
-    letI := D.isTopologicalRing
-    have hbasis := (locBasis D.P D.T D.s D.hopen).hasBasis_nhds_zero
-    have hbasis_compl : (nhds (0 : presheafValue D)).HasBasis (fun _ : ℕ ↦ True)
-        (fun n ↦ closure
-          (⇑D.coeRingHom '' (locNhd D.P D.T D.s n : Set (Localization.Away D.s)))) :=
-      (map_zero D.coeRingHom : D.coeRingHom 0 = 0) ▸
-        hbasis.hasBasis_of_isDenseInducing UniformSpace.Completion.isDenseInducing_coe
-    have himage_sub : ⇑D.coeRingHom '' (locNhd D.P D.T D.s 1 : Set (Localization.Away D.s)) ⊆
-        (D.completedLocSubring : Set (presheafValue D)) := by
-      rintro _ ⟨y, hy, rfl⟩
-      obtain ⟨d, _, rfl⟩ := hy
-      exact Subring.le_topologicalClosure _ ⟨d.1, d.2, rfl⟩
-    have hClosed : IsClosed (D.completedLocSubring : Set (presheafValue D)) :=
-      Subring.isClosed_topologicalClosure _
-    change IsOpen ((D.completedLocSubring).toAddSubgroup : Set (presheafValue D))
-    exact AddSubgroup.isOpen_of_mem_nhds _
-      (Filter.mem_of_superset (hbasis_compl.mem_of_mem (i := 1) trivial)
-        (closure_minimal himage_sub hClosed))
+  have hopen : IsOpen (D.completedLocSubring : Set (presheafValue D)) :=
+    isClosed_powerBoundedSubring_isOpen_key D
   -- (ii) `completedLocSubring` is bounded: the closure of the bounded image of `locSubring`.
   have hbounded : TopologicalRing.IsBounded (D.completedLocSubring : Set (presheafValue D)) := by
     have himg := D.isBounded_image_coeRingHom
