@@ -3219,3 +3219,44 @@ The shared 6-line section-statement appears in both signatures, written once in 
 cheapest modules in the library, a pleasant contrast to the 10-minute ones).
 
 Running total: **232** (486 baseline → 290 pre-split → 274 post-split → 232).
+
+## A fourth filter: the seam must produce STATED goals, not implicit ones
+
+`Groebner.groebner_reduce` (−39, 3 deps) passed all three filters but is not liftable. Its bullets are
+`?_` goals from
+
+    refine ⟨hgd.choose, ⟨…⟩, …, hgd.choose_spec.1, ?_, rfl, ?_, ?_, ?_⟩
+
+so each branch's *statement is implicit* — it is a component of a long existential-with-conjunction
+that appears nowhere in the source. Extracting means transcribing those components by hand from the
+theorem's conclusion, which is both error-prone and self-defeating (the transcription is most of the
+saving).
+
+**Filter 4: require the seam-introducing tactic to be one that yields goals already written down** —
+`constructor` on a stated iff, `rcases`/`by_cases`/`cases`/`induction` (which keep the goal and split
+the *hypotheses*), or a two-hole `refine ⟨?_, ?_⟩`. **Reject any proof whose branches sit under a
+`refine ⟨…⟩` with more than two `?_`.**
+
+That is the real distinction between the seams that worked and the ones that did not:
+
+* `Euclidean.hsets`, `CechCohomology.hasGluing_iff_section` — `constructor` on a stated iff, so each
+  branch's statement *is* one direction of the theorem. Both landed first try.
+* `Groebner.groebner_reduce` — `refine ⟨…, ?_, ?_, ?_⟩`, statements implicit. Rejected.
+
+**27 → 12 → 6 vetted candidates.** The survivors, in dependency order:
+
+    deps 0  need − 4  22+29  rcases n with _ | n'    LaurentRefinementTree.balancedLeafBase_isUnit…
+    deps 1  need −11  17+43  by_cases hik : i ≤ k    ChartVObj.monomial_symm_blocToBI_mem_completedPlus…
+    deps 3  need −43  36+37  rcases lt_max_iff.mp    SheafyBI.wI_le_one_of_isPowerBounded
+    deps 4  need −30  45+28  constructor             ChartData.mem_rationalOpen_chartData_iff
+    deps 5  need −20  20+46  rcases lt_or_ge         Euclidean.division_descent
+    deps 6  need −10  15+29  constructor             SpaQCviaSpvAI.ιSpvR_retractionSingle_eq
+
+**Note on `SheafyBI` specifically** (examined, not yet done): its two branches prove `False` under
+`hbig` from `rcases lt_max_iff.mp hlt`, with only 3 deps — but one of them, `hVsub`, comes from
+`obtain ⟨V, hV, hVsub⟩ := h _ (wI_ball_mem_nhds_BISub …)`, i.e. its type is an unfolded
+`IsPowerBounded` set-product containment that must be transcribed into the helper signature. Both
+branches use it identically as `hVsub ⟨a ^ n, ⟨n, rfl⟩, _, hqm, rfl⟩`, so the better shape is to pass
+the *combined* consequence (`∀ n, a^n * pEltB^m ∈ ball`) as a single hypothesis rather than `hVsub`
+and `hqm` separately. **Where a helper would need an awkward unfolded type, pass the consequence the
+body actually uses instead of the hypothesis it came from.**
