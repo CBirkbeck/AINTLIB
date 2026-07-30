@@ -115,6 +115,181 @@ theorem isNoetherianRing_integralModel
     (Ideal.Quotient.mk (ballContraction (m := m) 𝔪))
     Ideal.Quotient.mk_surjective
 
+/-- A ring isomorphic to a field is a field. -/
+theorem isField_of_ringEquiv {A B : Type*} [CommRing A] [CommRing B]
+    (e : A ≃+* B) (hB : IsField B) : IsField A := by
+  refine ⟨?_, mul_comm, ?_⟩
+  · obtain ⟨x, y, hxy⟩ := hB.exists_pair_ne
+    exact ⟨e.symm x, e.symm y, fun h => hxy (by
+      have := congrArg e h
+      simpa using this)⟩
+  · intro a ha
+    have hea : e a ≠ 0 := fun h0 => ha (by
+      have := congrArg e.symm h0
+      simpa using this)
+    obtain ⟨b, hb⟩ := hB.mul_inv_cancel hea
+    refine ⟨e.symm b, ?_⟩
+    have h1 : e (a * e.symm b) = 1 := by
+      rw [map_mul, RingEquiv.apply_symm_apply, hb]
+    have := congrArg e.symm h1
+    simpa using this
+
+theorem piBall_notMem_ballContraction :
+    piBall (m := m) ϖ ∉ ballContraction (m := m) 𝔪 := by
+  intro hmem
+  have hmem' : (unitBall (P K m)).subtype (piBall (m := m) ϖ) ∈ 𝔪 := hmem
+  have hunit : IsUnit ((unitBall (P K m)).subtype (piBall (m := m) ϖ)) := by
+    show IsUnit ((piBall (m := m) ϖ) : P K m)
+    rw [piBall_coe]
+    exact isUnit_tP ϖ.val ϖ.isUnit_val
+  exact h𝔪.ne_top (Ideal.eq_top_of_isUnit_mem _ hmem' hunit)
+
+/-- The scaling constant in the integral model. -/
+noncomputable abbrev piBar : IntegralModel (m := m) 𝔪 :=
+  Ideal.Quotient.mk _ (piBall (m := m) ϖ)
+
+theorem piBar_ne_zero : piBar (m := m) ϖ 𝔪 ≠ 0 := by
+  rw [Ne, Ideal.Quotient.eq_zero_iff_mem]
+  exact piBall_notMem_ballContraction ϖ 𝔪
+
+/-- The scaling constant is not a unit of the integral model: an inverse would
+exhibit `1 - ϖ·g ∈ 𝔪` with `‖ϖ·g‖ < 1`, contradicting the Neumann series. -/
+theorem not_isUnit_piBar : ¬ IsUnit (piBar (m := m) ϖ 𝔪) := by
+  rintro ⟨u, hu⟩
+  obtain ⟨g, hg⟩ := Ideal.Quotient.mk_surjective
+    ((↑u⁻¹ : IntegralModel (m := m) 𝔪))
+  have h1 : Ideal.Quotient.mk (ballContraction (m := m) 𝔪)
+      (1 - piBall (m := m) ϖ * g) = 0 := by
+    rw [map_sub, map_one, map_mul, hg]
+    rw [show Ideal.Quotient.mk (ballContraction (m := m) 𝔪)
+        (piBall (m := m) ϖ) = piBar (m := m) ϖ 𝔪 from rfl, ← hu]
+    rw [Units.mul_inv]
+    exact sub_self 1
+  have h2 : (1 - piBall (m := m) ϖ * g) ∈ ballContraction (m := m) 𝔪 :=
+    Ideal.Quotient.eq_zero_iff_mem.mp h1
+  have h2' : (unitBall (P K m)).subtype (1 - piBall (m := m) ϖ * g) ∈ 𝔪 := h2
+  have h3 : IsUnit ((unitBall (P K m)).subtype
+      (1 - piBall (m := m) ϖ * g)) := by
+    have h4 : (unitBall (P K m)).subtype (1 - piBall (m := m) ϖ * g) =
+        1 - ((piBall (m := m) ϖ : P K m)) * ((g : ↥(unitBall (P K m))) :
+          P K m) := rfl
+    rw [h4]
+    have hnorm : ‖((piBall (m := m) ϖ : P K m)) * ((g :
+        ↥(unitBall (P K m))) : P K m)‖ < 1 := by
+      refine lt_of_le_of_lt (norm_mul_le _ _) ?_
+      have hπ : ‖((piBall (m := m) ϖ : P K m))‖ = ‖ϖ.val‖ := by
+        rw [piBall_coe]
+        exact norm_tP ϖ.val ϖ.norm_val_mul
+      have hgle : ‖((g : ↥(unitBall (P K m))) : P K m)‖ ≤ 1 :=
+        (mem_unitBall_iff _ _).mp g.2
+      calc ‖((piBall (m := m) ϖ : P K m))‖ *
+            ‖((g : ↥(unitBall (P K m))) : P K m)‖
+          ≤ ‖((piBall (m := m) ϖ : P K m))‖ * 1 :=
+            mul_le_mul_of_nonneg_left hgle (norm_nonneg _)
+        _ = ‖ϖ.val‖ := by rw [mul_one, hπ]
+        _ < 1 := ϖ.norm_val_lt_one
+    have hnil : IsTopologicallyNilpotent
+        (((piBall (m := m) ϖ : P K m)) * ((g : ↥(unitBall (P K m))) :
+          P K m)) :=
+      tendsto_pow_atTop_nhds_zero_of_norm_lt_one hnorm
+    exact hnil.isUnit_one_sub
+  exact h𝔪.ne_top (Ideal.eq_top_of_isUnit_mem _ h2' h3)
+
+/-- The integral model maps to the residue field. -/
+noncomputable def modelToResidue :
+    IntegralModel (m := m) 𝔪 →+* (P K m ⧸ 𝔪) :=
+  Ideal.quotientMap 𝔪 (unitBall (P K m)).subtype le_rfl
+
+theorem modelToResidue_mk (b : ↥(unitBall (P K m))) :
+    modelToResidue (m := m) 𝔪 (Ideal.Quotient.mk _ b) =
+      Ideal.Quotient.mk 𝔪 ((unitBall (P K m)).subtype b) := rfl
+
+/-- **The residue field is the localization of the integral model at the
+scaling constant** ([hrw-decomposition] Tate leaf 6): units, surjectivity via
+the ball localization, and injectivity mod the contraction. -/
+theorem isLocalization_residue :
+    letI : Algebra (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪) :=
+      (modelToResidue (m := m) 𝔪).toAlgebra
+    IsLocalization (Submonoid.powers (piBar (m := m) ϖ 𝔪))
+      (P K m ⧸ 𝔪) := by
+  letI : Algebra (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪) :=
+    (modelToResidue (m := m) 𝔪).toAlgebra
+  letI : Algebra ↥(unitBall (P K m)) (P K m) :=
+    (unitBall (P K m)).subtype.toAlgebra
+  haveI hloc : IsLocalization (Submonoid.powers (piBall (m := m) ϖ))
+      (P K m) := isLocalization_powers_piBall ϖ
+  refine ⟨⟨?_, ?_, ?_⟩⟩
+  · rintro ⟨y, k, rfl⟩
+    have h5 : algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪)
+        ((piBar (m := m) ϖ 𝔪) ^ k) =
+        Ideal.Quotient.mk 𝔪
+          (((piBall (m := m) ϖ) ^ k : ↥(unitBall (P K m))) : P K m) := by
+      rw [map_pow]
+      rw [show algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪)
+          (piBar (m := m) ϖ 𝔪) =
+        Ideal.Quotient.mk 𝔪 ((piBall (m := m) ϖ : ↥(unitBall (P K m))) :
+          P K m) from rfl]
+      rw [← map_pow]
+      rw [show ((((piBall (m := m) ϖ) : ↥(unitBall (P K m))) : P K m)) ^ k =
+        (((piBall (m := m) ϖ) ^ k : ↥(unitBall (P K m))) : P K m) from
+        (SubmonoidClass.coe_pow _ _).symm]
+    rw [h5]
+    refine IsUnit.map _ ?_
+    rw [SubmonoidClass.coe_pow, piBall_coe]
+    exact (isUnit_tP ϖ.val ϖ.isUnit_val).pow k
+  · intro z
+    obtain ⟨F, rfl⟩ := Ideal.Quotient.mk_surjective z
+    obtain ⟨⟨b, sPow⟩, hb⟩ := IsLocalization.surj
+      (Submonoid.powers (piBall (m := m) ϖ)) (S := P K m) F
+    obtain ⟨n, hn⟩ := sPow.2
+    refine ⟨(Ideal.Quotient.mk _ b, ⟨(piBar (m := m) ϖ 𝔪) ^ n, n, rfl⟩), ?_⟩
+    have h6 : algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪)
+        ((piBar (m := m) ϖ 𝔪) ^ n) =
+        Ideal.Quotient.mk 𝔪 ((sPow : ↥(unitBall (P K m))) : P K m) := by
+      rw [map_pow]
+      rw [show algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪)
+          (piBar (m := m) ϖ 𝔪) =
+        Ideal.Quotient.mk 𝔪 ((piBall (m := m) ϖ : ↥(unitBall (P K m))) :
+          P K m) from rfl]
+      rw [← map_pow, ← hn]
+      rw [show ((((piBall (m := m) ϖ) : ↥(unitBall (P K m))) : P K m)) ^ n =
+        (((piBall (m := m) ϖ) ^ n : ↥(unitBall (P K m))) : P K m) from
+        (SubmonoidClass.coe_pow _ _).symm]
+    have h7 : algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪)
+        (Ideal.Quotient.mk _ b) =
+        Ideal.Quotient.mk 𝔪 ((b : ↥(unitBall (P K m))) : P K m) := rfl
+    rw [h6, h7]
+    show Ideal.Quotient.mk 𝔪 F * Ideal.Quotient.mk 𝔪 _ = _
+    rw [← map_mul]
+    have hb' : F * ((sPow : ↥(unitBall (P K m))) : P K m) =
+        ((b : ↥(unitBall (P K m))) : P K m) := hb
+    rw [hb']
+  · intro x y h
+    obtain ⟨bx, rfl⟩ := Ideal.Quotient.mk_surjective x
+    obtain ⟨by', rfl⟩ := Ideal.Quotient.mk_surjective y
+    refine ⟨1, ?_⟩
+    have h8 : Ideal.Quotient.mk 𝔪 ((bx : ↥(unitBall (P K m))) : P K m) =
+        Ideal.Quotient.mk 𝔪 ((by' : ↥(unitBall (P K m))) : P K m) := h
+    have h9 : ((bx : ↥(unitBall (P K m))) : P K m) -
+        ((by' : ↥(unitBall (P K m))) : P K m) ∈ 𝔪 :=
+      Ideal.Quotient.eq.mp h8
+    have h10 : bx - by' ∈ ballContraction (m := m) 𝔪 := h9
+    rw [OneMemClass.coe_one, one_mul, one_mul]
+    exact Ideal.Quotient.eq.mpr h10
+
+/-- **The localization of the integral model away from the scaling constant is
+a field** — it is the residue field of the maximal ideal. -/
+theorem isField_localization_away_piBar :
+    IsField (Localization.Away (piBar (m := m) ϖ 𝔪)) := by
+  letI : Algebra (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪) :=
+    (modelToResidue (m := m) 𝔪).toAlgebra
+  haveI hres := isLocalization_residue (m := m) ϖ 𝔪
+  letI : Field (P K m ⧸ 𝔪) := Ideal.Quotient.field 𝔪
+  have e := IsLocalization.algEquiv
+    (Submonoid.powers (piBar (m := m) ϖ 𝔪))
+    (Localization.Away (piBar (m := m) ϖ 𝔪)) (P K m ⧸ 𝔪)
+  exact isField_of_ringEquiv e.toRingEquiv (Field.toIsField _)
+
 end MaximalIdeal
 
 end FiniteJet.GraphKoszul
