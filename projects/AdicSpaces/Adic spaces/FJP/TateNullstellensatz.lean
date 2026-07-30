@@ -849,6 +849,91 @@ theorem module_finite_residue_of_finite_extension
     (Ideal.quotientMapₐ 𝔫 (IsScalarTower.toAlgHom K A S) le_rfl).toLinearMap
     hinj
 
+
+
 end Descent
+
+section IntegralRelations
+
+variable (ϖ : FiniteJetOver.Uniformizer K)
+variable [IsDiscreteValuationRing 𝒪[K]]
+variable (𝔮 : Ideal (P K m)) [h𝔮 : 𝔮.IsMaximal]
+
+/-- The variables lie in the unit ball of the Tate algebra. -/
+theorem norm_polyToP_X_le_one (i : Fin m) :
+    ‖(polyToP (MvPolynomial.X i) : P K m)‖ ≤ 1 := by
+  have h1 : (polyToP (MvPolynomial.X i) : P K m) =
+      polyBall (E := K) (m := m) (MvPolynomial.X i) := by
+    rw [show polyBall (E := K) (m := m) (MvPolynomial.X i) =
+      polyToP (MvPolynomial.map (FiniteJet.unitBall K).subtype
+        (MvPolynomial.X i)) from rfl, MvPolynomial.map_X]
+  rw [h1]
+  exact norm_polyBall_le_one _
+
+/-- The composite of the model maps is the constants map. -/
+theorem modelToResidue_comp_ballToModel :
+    (modelToResidue (m := m) 𝔮).comp (ballToModel (m := m) 𝔮) =
+      (constantsToResidue 𝔮 : K →+* (P K m ⧸ 𝔮)).comp
+        (FiniteJet.unitBall K).subtype := by
+  refine RingHom.ext fun c => ?_
+  show modelToResidue (m := m) 𝔮 (ballToModel (m := m) 𝔮 c) = _
+  rw [show ballToModel (m := m) 𝔮 c = Ideal.Quotient.mk _
+    (polyBallRes (E := K) (m := m) (MvPolynomial.C c)) from rfl,
+    modelToResidue_mk]
+  rw [show (FiniteJet.unitBall (P K m)).subtype
+      (polyBallRes (E := K) (m := m) (MvPolynomial.C c)) =
+    polyBall (E := K) (m := m) (MvPolynomial.C c) from rfl]
+  rw [show polyBall (E := K) (m := m) (MvPolynomial.C c) =
+    polyToP (E := K) (m := m) (MvPolynomial.C (c : K)) from by
+      rw [show polyBall (E := K) (m := m) (MvPolynomial.C c) =
+        polyToP (MvPolynomial.map (FiniteJet.unitBall K).subtype
+          (MvPolynomial.C c)) from rfl, MvPolynomial.map_C]
+      rfl]
+  rfl
+
+include ϖ in
+/-- **The integral-model monic relations for the variables**: each variable
+image in the residue field satisfies a monic relation over the unit ball. -/
+theorem exists_monic_ball_relation_X
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) (i : Fin m) :
+    ∃ p : Polynomial ↥(FiniteJet.unitBall K), p.Monic ∧
+      Polynomial.eval₂
+        (((constantsToResidue 𝔮 : K →+* (P K m ⧸ 𝔮))).comp
+          (FiniteJet.unitBall K).subtype)
+        (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.X i))) p = 0 := by
+  letI : Algebra ↥(FiniteJet.unitBall K) (IntegralModel (m := m) 𝔮) :=
+    (ballToModel (m := m) 𝔮).toAlgebra
+  haveI hfinB := module_finite_integralModel (m := m) ϖ 𝔮 hK₀
+  haveI : Algebra.IsIntegral ↥(FiniteJet.unitBall K)
+      (IntegralModel (m := m) 𝔮) := Algebra.IsIntegral.of_finite _ _
+  set XB : ↥(FiniteJet.unitBall (P K m)) :=
+    ⟨polyToP (MvPolynomial.X i),
+      (FiniteJet.mem_unitBall_iff _ _).mpr (norm_polyToP_X_le_one i)⟩
+    with hXB
+  set b : IntegralModel (m := m) 𝔮 := Ideal.Quotient.mk _ XB with hb
+  have hint : IsIntegral ↥(FiniteJet.unitBall K) b :=
+    Algebra.IsIntegral.isIntegral b
+  obtain ⟨p, hpmonic, hpev⟩ := hint
+  refine ⟨p, hpmonic, ?_⟩
+  -- push the relation along the residue map
+  have hpush : modelToResidue (m := m) 𝔮
+      (Polynomial.eval₂ (ballToModel (m := m) 𝔮) b p) = 0 := by
+    have h2 : Polynomial.eval₂ (ballToModel (m := m) 𝔮) b p =
+        Polynomial.eval₂ (algebraMap ↥(FiniteJet.unitBall K)
+          (IntegralModel (m := m) 𝔮)) b p := rfl
+    rw [h2, hpev, _root_.map_zero]
+  have h3 : modelToResidue (m := m) 𝔮
+      (Polynomial.eval₂ (ballToModel (m := m) 𝔮) b p) =
+      Polynomial.eval₂ ((modelToResidue (m := m) 𝔮).comp
+        (ballToModel (m := m) 𝔮)) (modelToResidue (m := m) 𝔮 b) p :=
+    Polynomial.hom_eval₂ _ _ _ _
+  rw [h3, modelToResidue_comp_ballToModel] at hpush
+  have h4 : modelToResidue (m := m) 𝔮 b =
+      Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.X i)) := by
+    rw [hb, modelToResidue_mk]
+    rfl
+  rwa [h4] at hpush
+
+end IntegralRelations
 
 end FiniteJet.GraphKoszul
