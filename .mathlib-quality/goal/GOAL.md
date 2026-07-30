@@ -2271,3 +2271,115 @@ term requires `DecidableEq`/`Decidable` before classifying a block as zero-threa
 
 Doing this properly needs the helper to take the datum itself as a parameter (so the caller's
 instance travels with it) rather than reconstructing it — a different and larger refactor than a lift.
+
+## Task 2 — `WedhornBanachTheorem._sub_lemma_L4_3_strict_via_closed_image` 72 → 48 (251 → 250)
+
+`hf_cont` (26 lines) lifted to `continuous_of_moduleFinite_of_topNilpUnit`: **a linear map out of a
+finitely generated topological module is continuous**, given a topologically nilpotent unit in the
+base. Pick a finite generating set, build the surjection `ν : (Fin n → A) → M`, which is open by the
+faithful OMT `wedhorn_6_16_of_topNilpUnit` hence a quotient map; continuity of `f ∘ ν` (a finite sum
+of scalar multiples) then transfers to `f`.
+
+This is a genuinely reusable statement — it is BGR §3.7.3/2 in the σ-compact-free form this file
+needs, and it was buried inside a proof about open maps.
+
+**The refined zero-threading check paid off immediately.** The previous attempt
+(`RelativePieceKeystone`) died on `DecidableEq` baked in by an enclosing `classical`; here the check
+"does the target term need `DecidableEq`/`Decidable`?" came back clean, and the lift went through.
+
+**Signature fitting took three iterations, all of the benign kind** — each error named exactly one
+missing instance, and each addition fixed exactly that one:
+
+    CompleteSpace (Fin n → A)      -> add [CompleteSpace A] [(uniformity A).IsCountablyGenerated] [T2Space A]
+    ContinuousSMul A (Fin n → A)   -> add [IsTopologicalRing A]
+
+Worth distinguishing from the `RelativePieceKeystone` failure: **iterating is fine when each error
+names a new missing instance; it is a dead end when the same error recurs in different forms** (there,
+the `DecidableEq` mismatch reappeared as a synthesis failure, then a defeq failure, then a parse
+failure). The former converges, the latter does not — and that is the signal to revert.
+
+Note the helper needs the **Pi-instance closure**: `Fin n → A` inherits `CompleteSpace`,
+`IsCountablyGenerated`, `ContinuousSMul` from `A`, so every `A`-side instance the OMT wants must be
+in the helper's binders even though the *statement* never mentions `Fin n → A`. **When a lift's proof
+builds an auxiliary product/function type, its instances come from the base and must be threaded even
+though they are invisible in the signature.**
+
+Module build green (2006 jobs).
+
+Running total: **250** (486 baseline → 290 pre-split → 274 post-split → 250).
+
+## Task 2 — `PerfectoidFieldCharP.isAdicComplete_span_toOF` 67 → 45 (250 → 249)
+
+Bottom-up again: the scan nominates `hprec` (60 lines), whose wholesale lift would be a 59-line
+helper. Measured inside it — `hf'` 4, **`hsmall` 23**, `hCauchy` 10, `hSopen` 3, `htend` 3 — and
+lifted `hsmall`.
+
+`exists_forall_sub_mem_of_adicPrecision`: if `f m - f n ∈ I ^ m` whenever `m ≤ n`, then the
+differences eventually lie in any neighbourhood of `0` in `F`. The bound combines topological
+nilpotence of `ϖ` with boundedness of the power-bounded subring.
+
+**Design choice that kept the body verbatim:** `hsmall` rewrites with `hI` (from
+`set I := Ideal.span {…} with hI`) in its second tactic. Rather than state the helper on the
+unfolded span — which would have required editing that `rw` and every downstream step — the helper
+takes **`(I : Ideal (OF F))` together with `(hI : I = Ideal.span {…})`**. The 23 lines then transfer
+unchanged and the call site is one line.
+
+This is the counterpart to the GaussNorm rule. There, the block unfolded its own `set` and the helper
+was stated on the unfolded form. Here, doing that would have meant rewriting the body, and — as the
+reverted `RelativePieceKeystone` attempt showed — reconstructing a `set`-bound term in a helper can
+also drag in instances baked in by the caller. **Passing the bound value *and* its defining equation
+as parameters is the safer general move: the body needs no edits and the caller's term travels with
+it.**
+
+The four `haveI := IsPerfectoidRing.…` instance lines the enclosing proof establishes had to be
+repeated in the helper — same lesson as the Pi-instance closure in `WedhornBanachTheorem`: **a lift
+inherits none of the enclosing proof's `haveI`/`letI` context and must re-establish whatever its body
+depends on.**
+
+Running total: **249** (486 baseline → 290 pre-split → 274 post-split → 249).
+
+### Scoped: the `hf_alg` pair, take two (same-file helper instead of shared)
+
+The `hf_alg` blocks in `LaurentRefinementCore` (blk 21, need −16) and `IteratedOverlapEquiv`
+(blk 19, need −14) have topped the ranked list for several rounds. The earlier attempt failed because
+it aimed at a **shared** lemma in `PresheafIdentification` and died on `IsHuberRing (presheafValue D₀)`
+not being in scope at the call site.
+
+A **same-file `private` helper** sidesteps that entirely — no cross-file instance question, just repeat
+the enclosing theorem's binders. Feasibility now checked:
+
+* saving is a clean −20 / −18 (the whole `have` becomes one line), which clears both bars;
+* the helper lands at ≈39 lines, under the limit;
+* **but** the enclosing proof opens with a **10-line `letI` preamble** (topology / `IsTopologicalRing` /
+  `IsTopologicalAddGroup` on both `Localization.Away (laurentPlusDatum D₀ f).s` and
+  `Localization.Away (iteratedPlusDatum_B P D₀ f).s`) that the helper must duplicate, since a lift
+  inherits no `letI` context. That preamble is also still needed by the rest of the enclosing proof,
+  so it cannot simply move.
+
+So this trades ~10 duplicated instance lines for −20 on the over-50 count, twice. Worth doing, but it
+is a deliberate trade rather than a free win — recorded here so the next pass can make that call with
+the numbers in hand rather than rediscovering them.
+
+### Correction to the `hf_alg` scoping — the preamble is 41 lines, not 10
+
+Re-reading before acting: the `letI` preamble in `iteratedPlus_forwardToCompletion_continuous` runs
+**lines 1141–1181, i.e. ~41 lines**, not the ~10 I estimated from the first screenful. Duplicating it
+wholesale would give a helper of roughly 21 + 41 + 8 = **70 lines** — worse than the problem.
+
+What makes the lift work anyway: `hf_alg`'s body needs only the **topology** instances, not the
+`IsTopologicalRing` / `IsTopologicalAddGroup` / `UniformSpace` / `IsUniformAddGroup` /
+`NonarchimedeanRing` ones that the *rest* of the enclosing proof requires. Three `letI`s suffice:
+
+    Localization.Away (laurentPlusDatum D₀ f).s          -- source of the algebraMap
+    Localization.Away (1 : presheafValue D₀)             -- topB
+    Localization.Away (iteratedPlusDatum_B P D₀ f).s     -- := topB
+
+so the helper lands at ≈34 lines.
+
+**Rule: when duplicating an instance preamble into a helper, port only what the lifted body uses, not
+the whole preamble.** The enclosing proof's preamble is sized for the whole proof; a single block
+almost always needs a fraction of it. Estimating the cost from the preamble's total length (as I did
+last round) overstates it badly enough to reject a viable lift.
+
+Also a reminder to myself: **read to the actual end of a block before quoting its size.** The "10
+lines" figure came from the first screenful of a `sed` window that happened to cut off mid-preamble.
