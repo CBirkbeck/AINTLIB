@@ -154,9 +154,10 @@ theorem exists_artinRees_pullback (ϖ : Uniformizer K)
 
 end FiniteEmbedding
 
-/-- **L3.b at maximals — the deep leaf** ([WP] §6 quadratic tower;
-[hrw-decomposition] L3.b): the completed local ring of the head at a maximal
-ideal containing `W`.  WIP frontier. -/
+set_option maxHeartbeats 3200000 in
+/-- **L3.b at maximals — resolved by the finite-embedding semilocal route**
+(the [hrw-decomposition] L3-rearchitecture; uniform in `W`): block-A mirror
+along `headToZeroHead` with Artin–Rees cofinality. -/
 theorem head_completedLocal_reduced_of_isMaximal_of_wa_mem
     (ϖ : Uniformizer K) [hdvr : IsDiscreteValuationRing 𝒪[K]]
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
@@ -164,7 +165,197 @@ theorem head_completedLocal_reduced_of_isMaximal_of_wa_mem
     (hW : WaHead K w N ∈ 𝔭) :
     haveI := h𝔭.isPrime
     IsReduced (completedLocal (WPHead K w N) 𝔭) := by
-  sorry
+  classical
+  haveI := h𝔭.isPrime
+  letI : Algebra (WPHead K w N) (WPHead K (fun _ => 0) N) :=
+    (headToZeroHead w N).toAlgebra
+  haveI hart : IsArtinianRing (WPHead K (fun _ => 0) N ⧸
+      Ideal.map (headToZeroHead w N) 𝔭) :=
+    isArtinianRing_zeroHead_fibre w N 𝔭
+  haveI hmaxN : ∀ 𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭),
+      (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫).IsMaximal :=
+    fun 𝔫 => overMaximal_isMaximal _ 𝔫
+  -- notation: E-maps for the localization levels
+  -- the levelwise family into the fibre-maximal localizations
+  set g : ∀ r : ℕ,
+      (Localization.AtPrime 𝔭 ⧸
+        (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔭)) ^ r) →+*
+      ∀ 𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭),
+        (Localization.AtPrime
+            (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫) ⧸
+          (IsLocalRing.maximalIdeal (Localization.AtPrime
+            (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫))) ^ r) :=
+    fun r =>
+    (RingHom.pi fun 𝔫 =>
+      ((IsLocalization.AtPrime.equivQuotMaximalIdealPow
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)
+          (Localization.AtPrime
+            (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫))
+          r).toRingEquiv.toRingHom.comp
+        ((Ideal.Quotient.factor
+          (pow_le_pow_left' (le_overMaximal _ 𝔫) r)).comp
+          (levelMap (B := WPHead K (fun _ => 0) N) 𝔭 r)))).comp
+      ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+        (Localization.AtPrime 𝔭) r).symm.toRingEquiv.toRingHom)
+    with hgdef
+  -- the levelMap mk-law in the inclusion spelling
+  have hlm : ∀ (n : ℕ) (a : WPHead K w N),
+      levelMap (B := WPHead K (fun _ => 0) N) 𝔭 n
+        (Ideal.Quotient.mk (𝔭 ^ n) a) =
+      Ideal.Quotient.mk ((Ideal.map (headToZeroHead w N) 𝔭) ^ n)
+        (headToZeroHead w N a) := fun n a =>
+    levelMap_mk (B := WPHead K (fun _ => 0) N) 𝔭 n a
+  -- component evaluation on mk-representatives
+  have hcomp_mk : ∀ (r : ℕ) (a : WPHead K w N)
+      (𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭)),
+      g r (IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+        (Localization.AtPrime 𝔭) r (Ideal.Quotient.mk _ a)) 𝔫 =
+      IsLocalization.AtPrime.equivQuotMaximalIdealPow
+        (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)
+        (Localization.AtPrime
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)) r
+        (Ideal.Quotient.mk _ (headToZeroHead w N a)) := by
+    intro r a 𝔫
+    rw [hgdef]
+    show (IsLocalization.AtPrime.equivQuotMaximalIdealPow
+        (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)
+        (Localization.AtPrime
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)) r)
+      ((Ideal.Quotient.factor
+        (pow_le_pow_left' (le_overMaximal _ 𝔫) r))
+        ((levelMap (B := WPHead K (fun _ => 0) N) 𝔭 r)
+          ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+            (Localization.AtPrime 𝔭) r).symm
+            (IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+              (Localization.AtPrime 𝔭) r
+              (Ideal.Quotient.mk _ a))))) = _
+    rw [AlgEquiv.symm_apply_apply, hlm, Ideal.Quotient.factor_mk]
+  -- localization equivalences commute with factor maps (both levels)
+  have hEfacP : ∀ {a b : ℕ} (hab : a ≤ b) (c : WPHead K w N),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab)
+        (IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+          (Localization.AtPrime 𝔭) b (Ideal.Quotient.mk _ c)) =
+      IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+        (Localization.AtPrime 𝔭) a (Ideal.Quotient.mk _ c) := by
+    intro a b hab c
+    rw [IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk,
+      Ideal.Quotient.factor_mk,
+      IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk]
+  have hEfacN : ∀ (𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭))
+      {a b : ℕ} (hab : a ≤ b) (c : WPHead K (fun _ => 0) N),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab)
+        (IsLocalization.AtPrime.equivQuotMaximalIdealPow
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)
+          (Localization.AtPrime
+            (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)) b
+          (Ideal.Quotient.mk _ c)) =
+      IsLocalization.AtPrime.equivQuotMaximalIdealPow
+        (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)
+        (Localization.AtPrime
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)) a
+        (Ideal.Quotient.mk _ c) := by
+    intro 𝔫 a b hab c
+    rw [IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk,
+      Ideal.Quotient.factor_mk,
+      IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk]
+  -- transition compatibility
+  have hcompat : ∀ {a b : ℕ} (hab : a ≤ b)
+      (x : Localization.AtPrime 𝔭 ⧸
+        (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔭)) ^ b)
+      (𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭)),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (g b x 𝔫) =
+        g a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x) 𝔫 := by
+    intro a b hab x 𝔫
+    obtain ⟨c, hc⟩ := Ideal.Quotient.mk_surjective
+      ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+        (Localization.AtPrime 𝔭) b).symm x)
+    have hx : x = IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+        (Localization.AtPrime 𝔭) b (Ideal.Quotient.mk _ c) := by
+      rw [hc, AlgEquiv.apply_symm_apply]
+    rw [hx, hcomp_mk, hEfacP hab, hcomp_mk]
+    exact hEfacN 𝔫 hab (headToZeroHead w N c)
+  -- cofinality: fibre nilpotence + Artin-Rees
+  obtain ⟨e, he1, hpow⟩ := exists_pow_iInf_overMaximal_le
+    (Ideal.map (headToZeroHead w N) 𝔭)
+  obtain ⟨k, hAR⟩ := exists_artinRees_pullback w N ϖ hK₀ 𝔭
+  have hcof : ∀ r : ℕ, ∃ s : ℕ, ∃ hrs : r ≤ s,
+      ∀ y : Localization.AtPrime 𝔭 ⧸
+        (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔭)) ^ s,
+      g s y = 0 →
+        Ideal.Quotient.factor (Ideal.pow_le_pow_right hrs) y = 0 := by
+    intro r
+    refine ⟨e * (r + k), le_trans (Nat.le_add_right r k)
+      (Nat.le_mul_of_pos_left (r + k) he1), ?_⟩
+    intro y hy
+    obtain ⟨c, hc⟩ := Ideal.Quotient.mk_surjective
+      ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+        (Localization.AtPrime 𝔭) (e * (r + k))).symm y)
+    have hyeq : y = IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔭
+        (Localization.AtPrime 𝔭) (e * (r + k))
+        (Ideal.Quotient.mk _ c) := by
+      rw [hc, AlgEquiv.apply_symm_apply]
+    have hmem : ∀ 𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭),
+        headToZeroHead w N c ∈
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫) ^
+            (e * (r + k)) := by
+      intro 𝔫
+      have h1 : g (e * (r + k)) y 𝔫 = 0 := congrFun hy 𝔫
+      rw [hyeq, hcomp_mk] at h1
+      have h2 := congrArg
+        (IsLocalization.AtPrime.equivQuotMaximalIdealPow
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)
+          (Localization.AtPrime
+            (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫))
+          (e * (r + k))).symm h1
+      rw [AlgEquiv.symm_apply_apply, _root_.map_zero,
+        Ideal.Quotient.eq_zero_iff_mem] at h2
+      exact h2
+    have hiInf : headToZeroHead w N c ∈
+        ((⨅ 𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭),
+          overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫) ^ e) ^
+          (r + k) := by
+      rw [← pow_mul, Ideal.iInf_pow_eq_iInf_pow _
+        (fun p q hpq => pairwise_coprime_overMaximal _ hpq)]
+      exact (Submodule.mem_iInf _).mpr hmem
+    have hQr : headToZeroHead w N c ∈
+        (Ideal.map (headToZeroHead w N) 𝔭) ^ (r + k) :=
+      pow_le_pow_left' hpow (r + k) hiInf
+    have h6 : c ∈ 𝔭 ^ r := hAR r c hQr
+    rw [hyeq, hEfacP (le_trans (Nat.le_add_right r k)
+      (Nat.le_mul_of_pos_left (r + k) he1)),
+      Ideal.Quotient.eq_zero_iff_mem.mpr h6, _root_.map_zero]
+  -- the factors are reduced: zero-head completed locals via block A
+  haveI hredF : ∀ 𝔫 : fibreMaximals (Ideal.map (headToZeroHead w N) 𝔭),
+      IsReduced (AdicCompletion
+        (IsLocalRing.maximalIdeal (Localization.AtPrime
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)))
+        (Localization.AtPrime
+          (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫))) := by
+    intro 𝔫
+    haveI := (hmaxN 𝔫).isPrime
+    set 𝔮P : Ideal (FiniteJet.GraphKoszul.P K (N + 1)) :=
+      (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫).map
+        (((zeroHeadTateEquiv N).symm :
+          WPHead K (fun _ => 0) N ≃+* FiniteJet.GraphKoszul.P K (N + 1)) :
+          WPHead K (fun _ => 0) N →+* FiniteJet.GraphKoszul.P K (N + 1))
+      with h𝔮Pdef
+    haveI h𝔮Pmax : 𝔮P.IsMaximal := by
+      rw [h𝔮Pdef, Ideal.map_comap_of_equiv]
+      exact Ideal.comap_isMaximal_of_surjective _
+        ((zeroHeadTateEquiv N).symm.symm.surjective)
+    haveI h𝔮Pprime : 𝔮P.IsPrime := h𝔮Pmax.isPrime
+    haveI hredP : IsReduced (completedLocal
+        (FiniteJet.GraphKoszul.P K (N + 1)) 𝔮P) :=
+      FiniteJet.GraphKoszul.isReduced_adicCompletion_localization ϖ 𝔮P hK₀
+    have e₄ := completedLocalCongr ((zeroHeadTateEquiv N).symm :
+      WPHead K (fun _ => 0) N ≃+* FiniteJet.GraphKoszul.P K (N + 1))
+      (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫)
+    exact isReduced_of_injective e₄.toRingHom e₄.injective
+  exact AdicCompletion.isReduced_of_levelwisePi_cofinal
+    (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔭))
+    (fun 𝔫 => IsLocalRing.maximalIdeal (Localization.AtPrime
+      (overMaximal (Ideal.map (headToZeroHead w N) 𝔭) 𝔫))) g
+    (fun {a b} hab x 𝔫 => hcompat hab x 𝔫) hcof
 
 /-- **L3 at maximals**: every completed local ring of the head at a maximal
 ideal is reduced. -/
