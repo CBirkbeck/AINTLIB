@@ -196,4 +196,26 @@ theorem module_finite_residue_head (ϖ : Uniformizer K)
   exact Module.Finite.trans (↥(wpEvenSupport K w N) ⧸ 𝔪ₑ)
     (WPHead K w N ⧸ 𝔭)
 
+section KappaAlias
+
+variable (𝔭 : Ideal (WPHead K w N))
+
+/-- The residue field of the head at `𝔭`, as a type alias carrying the
+SPECTRAL structures only (the raw quotient keeps the quotient-topology
+instances; the alias is instance-isolated). -/
+def KappaP : Type _ := WPHead K w N ⧸ 𝔭
+
+variable [h𝔭 : 𝔭.IsMaximal]
+
+noncomputable instance : Field (KappaP w N 𝔭) :=
+  Ideal.Quotient.field 𝔭
+noncomputable instance : Algebra K (KappaP w N 𝔭) :=
+  ((Ideal.Quotient.mk 𝔭).comp (constHead K w N)).toAlgebra
+
+/-- The residue map onto the alias. -/
+noncomputable def mkKappaP : WPHead K w N →+* KappaP w N 𝔭 :=
+  Ideal.Quotient.mk 𝔭
+
+end KappaAlias
+
 end WeightedParity
