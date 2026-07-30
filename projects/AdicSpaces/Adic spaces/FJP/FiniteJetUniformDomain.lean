@@ -148,11 +148,11 @@ end GenericMult
 /-- The Gauss norm on `𝒞 = L⟨Q⟩` is multiplicative ([FJP] Prop 2.3: "The Laurent Gauss norm
 on 𝒞 = L⟨Q⟩ is multiplicative"). -/
 theorem norm_JetC_mul (f g : JetC F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
-  norm_restricted_mul (norm_L_mul F) (fun x hx => norm_L_eq_zero F hx) f g
+  norm_restricted_mul (norm_L_mul F) (fun _x hx => norm_L_eq_zero F hx) f g
 
 /-- Multiplicativity of the `K⟨W⟩` Gauss norm (base of `𝓑`). -/
 theorem norm_KW_mul (f g : PowerSeries.Restricted K (1 : ℝ)) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
-  norm_restricted_mul norm_mul (fun x hx => norm_eq_zero.mp hx) f g
+  norm_restricted_mul norm_mul (fun _x hx => norm_eq_zero.mp hx) f g
 
 instance : Nontrivial (JetC F) := by
   refine ⟨⟨0, 1, fun h => ?_⟩⟩
@@ -272,7 +272,7 @@ section JetIff
 /-- The jet-power norm bound: over a multiplicative base, `‖xⁿ‖ ≤ max 1 ‖x.snd‖` whenever
 `‖x.fst‖ ≤ 1` ([FJP] (5.2): "is bounded independently of `n`"). -/
 theorem norm_pow_le_of_fst_le {R : Type*} [NormedCommRing R] [IsUltrametricDist R]
-    [NormOneClass R] (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖)
+    [NormOneClass R] (_hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖)
     (x : DualNumber R) (hx : ‖x.fst‖ ≤ 1) (n : ℕ) :
     ‖x ^ n‖ ≤ max 1 ‖x.snd‖ := by
   have hxeq : x = TrivSqZeroExt.inl x.fst + TrivSqZeroExt.inr x.snd :=

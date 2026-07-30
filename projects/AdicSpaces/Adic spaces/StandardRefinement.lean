@@ -144,7 +144,7 @@ theorem mem_genCoverPieces (D₀ : RationalLocData A) (hD₀ : D₀.IsRational)
 
 /-- The tray-condition of a generated piece specializes to a product comparison. -/
 theorem genCover_tray_cond {D₀ : RationalLocData A} {hD₀ : D₀.IsRational}
-    {F : Finset A} {hF : Ideal.span (F : Set A) = ⊤} {f : A} (hfF : f ∈ F)
+    {F : Finset A} {hF : Ideal.span (F : Set A) = ⊤} {f : A} (_hfF : f ∈ F)
     {v : Spv A}
     (hv : ∀ t ∈ (D₀.interRational (genPieceDatum D₀.P F f hF) hD₀
         (RationalLocData.isRational_of_span_eq_top hF)).T,

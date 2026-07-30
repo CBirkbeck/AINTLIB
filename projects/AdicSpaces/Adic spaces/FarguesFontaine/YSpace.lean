@@ -315,7 +315,7 @@ private theorem cross_eq {q : ℚ} (hq : 0 < q) {a b : ℕ} (hb : 0 < b)
 /-- Representation-independence of `KGE`: for any fraction `a/b = q` with `b > 0`,
 `KGE q v ↔ v([ϖ]^b) ≤ v(p^a)`. This is the denominator-clearing workhorse
 (cross-multiplication inside the value monoid). -/
-theorem KGE_iff {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q)
+theorem KGE_iff {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q)
     {a b : ℕ} (hb : 0 < b) (hab : q = (a : ℚ) / b) :
     KGE p F ϖ q v ↔ v.vle (teichPi p F ϖ ^ b) ((p : Ainf p F) ^ a) := by
   letI : ValuativeRel (Ainf p F) := v.toValuativeRel
@@ -326,7 +326,7 @@ theorem KGE_iff {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q
   exact pow_le_pow_iff_cross (cross_eq hq hb hab) hb.ne' q.den_nz
 
 /-- Representation-independence of `KLE`, as for `KGE_iff`. -/
-theorem KLE_iff {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q)
+theorem KLE_iff {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q)
     {a b : ℕ} (hb : 0 < b) (hab : q = (a : ℚ) / b) :
     KLE p F ϖ q v ↔ v.vle ((p : Ainf p F) ^ a) (teichPi p F ϖ ^ b) := by
   letI : ValuativeRel (Ainf p F) := v.toValuativeRel
@@ -348,7 +348,7 @@ theorem KLE_iff {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q
 
 /-- Totality: at every positive rational `q`, either `κ(v) ≥ q` or `κ(v) ≤ q`
 (linearity of the valuative order). -/
-theorem KGE_or_KLE {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q) :
+theorem KGE_or_KLE {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (_hq : 0 < q) :
     KGE p F ϖ q v ∨ KLE p F ϖ q v :=
   v.vle_total _ _
 
@@ -700,7 +700,7 @@ private theorem vle_theta_iff_ge {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' :
 
 /-- Core `KLE`-shape transport, mirror of `vle_theta_iff_ge`. -/
 private theorem vle_theta_iff_le {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' : ℕ}
-    (hα : α ≠ 0) (hα' : α' ≠ 0) (hβ : β ≠ 0)
+    (hα : α ≠ 0) (hα' : α' ≠ 0) (_hβ : β ≠ 0)
     (hcross : α' * (p ^ k.toNat * β) = (α * p ^ (-k).toNat) * β') :
     w.vle ((p : Ainf p F) ^ α) (WittVector.teichmuller p
         ((_root_.frobeniusEquiv (OF F) p ^ k : RingAut (OF F))

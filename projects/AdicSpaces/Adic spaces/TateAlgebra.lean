@@ -1701,7 +1701,7 @@ private theorem muMap_middle_exact
     {n m : ℕ}
     (u : (Fin n → A) →ₗ[A] (Fin m → A)) (hu_cont : Continuous u)
     (p : (Fin m → A) →ₗ[A] M) (hp_cont : Continuous p)
-    (hp_surj : Function.Surjective p)
+    (_hp_surj : Function.Surjective p)
     (hrange : LinearMap.range u = LinearMap.ker p)
     (c : ↥(restrictedModule A (Fin m → A)))
     (hc : restrictedModule.map p hp_cont c = 0) :

@@ -209,7 +209,7 @@ def splitL (i : DyadicIdx) (j : ℕ) (hj : i.j₂ < j) (hj' : j < i.j₁) :
   ⟨i.s, i.j₁, j, lt_trans i.hj₂ hj, hj'⟩
 
 /-- The right piece of a middle split of a dyadic index. -/
-def splitR (i : DyadicIdx) (j : ℕ) (hj : i.j₂ < j) (hj' : j < i.j₁) :
+def splitR (i : DyadicIdx) (j : ℕ) (hj : i.j₂ < j) (_hj' : j < i.j₁) :
     DyadicIdx :=
   ⟨i.s, j, i.j₂, i.hj₂, hj⟩
 

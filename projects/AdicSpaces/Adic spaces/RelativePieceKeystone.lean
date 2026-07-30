@@ -2231,7 +2231,7 @@ reduction, the genuine Remark 7.55 chain). -/
 theorem prop_8_30_remark755_chain
     (D D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
-    (hD : D.IsRational) (hD' : D'.IsRational)
+    (_hD : D.IsRational) (hD' : D'.IsRational)
     [IsTateRing (presheafValue D)]
     [IsNoetherianRing (presheafValue D)]
     [IsHuberRing (presheafValue D)]
@@ -2480,7 +2480,7 @@ Wedhorn Prop 6.18). Delegates to the single canonical inducing residual
 `productRestrictionSub_isInducing_tate` (`StructureSheaf.lean`, the 6.18-OMT leaf); inducing
 is purely topological, so the Def-7.29 hypothesis `hC` is not needed. -/
 theorem cor_8_32_productRestrictionSub_isInducing (C : RationalCoveringData A)
-    (hC : C.IsRational) :
+    (_hC : C.IsRational) :
     Topology.IsInducing (productRestrictionSub A C) :=
   productRestrictionSub_isInducing_tate (A := A) C
 

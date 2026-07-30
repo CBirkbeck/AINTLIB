@@ -522,7 +522,7 @@ theorem comap_canonicalMap_mem_rationalOpen_inter_spa
     comap D.canonicalMap w.val ∈
       (rationalOpen D.T D.s ∩ Spa A A⁺ : Set (Spv A)) :=
   ⟨⟨comap_canonicalMap_mem_spa D w,
-      fun t ht => D.comap_canonicalMap_vle w.property.2 ht,
+      fun _t ht => D.comap_canonicalMap_vle w.property.2 ht,
       D.comap_canonicalMap_not_vle_s_zero⟩,
     comap_canonicalMap_mem_spa D w⟩
 

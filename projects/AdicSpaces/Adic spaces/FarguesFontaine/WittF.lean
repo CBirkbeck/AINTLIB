@@ -111,7 +111,7 @@ theorem valuation_teichCoeff_teichmuller_sub_pow_le (x y : OF F) (k : ℕ) :
 /-- **ε–δ continuity of the Teichmüller section** for the Gauss value: given `ε > 0`
 there is `δ > 0` such that `v(a−b) ≤ δ` forces `w_ρ([a]−[b]) ≤ ε`. Not Lipschitz —
 the exponents `p^{-k}` appear via `valuation_teichCoeff_teichmuller_sub_pow_le`. -/
-theorem gaussValue_teichmuller_sub_le_of_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+theorem gaussValue_teichmuller_sub_le_of_le {ρ : NNReal} (_hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     {ε : NNReal} (hε0 : 0 < ε) (hε1 : ε ≤ 1) :
     ∃ δ : NNReal, 0 < δ ∧ ∀ a b : OF F,
       perfectoidValuation p F ((a - b : OF F) : F) ≤ δ →
@@ -1787,7 +1787,7 @@ theorem bddAbove_of_tendsto_gaussTermF {σ : NNReal} {x : WittVector p F}
 
 /-- **Head-bound decay** (sol (8), the split-max argument): for decaying `x`,
 `H_N(x) → 0`. -/
-theorem tendsto_headBoundF_of_tendsto {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+theorem tendsto_headBoundF_of_tendsto {σ : NNReal} (_hσ0 : 0 < σ) (hσ1 : σ < 1)
     {x : WittVector p F}
     (hdecay : Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0)) :
     Filter.Tendsto (fun N => headBoundF p F σ x N) Filter.atTop (nhds 0) := by

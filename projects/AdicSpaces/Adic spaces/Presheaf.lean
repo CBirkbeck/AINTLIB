@@ -1716,7 +1716,7 @@ rule). -/
 theorem restrictionMapAlg_continuous_of_huber_completion
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsHuberRing A]
-    (D D' : RationalLocData A) (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (D D' : RationalLocData A) (_h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
     (hu_can : IsUnit (D'.canonicalMap D.s))
     (_hpb : ∀ t ∈ D.T, @TopologicalRing.IsPowerBounded (presheafValue D') _ inferInstance
       (IsLocalization.Away.lift D.s hu_can (divByS t D.s))) :

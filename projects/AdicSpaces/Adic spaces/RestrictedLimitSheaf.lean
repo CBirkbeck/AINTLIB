@@ -86,7 +86,7 @@ theorem RationalLocData.rationalOpen_subset_of_trace {S : Set (Spv A)}
 `exists_finite_rational_refinement`): compactness supplied as a hypothesis,
 the basis from `exists_isRational_spaOpen_subset_huber`. -/
 theorem exists_finite_rational_refinement_huber (D : RationalLocData A)
-    (hD : D.IsRational) (hcomp : IsCompact (spaOpen D))
+    (_hD : D.IsRational) (hcomp : IsCompact (spaOpen D))
     {ι : Type*} (U : ι → Set ↥(Spa A A⁺)) (hUopen : ∀ i, IsOpen (U i))
     (hUcov : spaOpen D ⊆ ⋃ i, U i) :
     ∃ t : Finset (RefinementIndex D U),
@@ -485,7 +485,7 @@ theorem isLimitSheafOn_of_isSheafyOn {A : Type u} [CommRing A]
     {S : Set (Spv A)} (hOn : IsSheafyOn S)
     (hcomp : ∀ D : RationalLocData A, D.IsRational → IsCompact (spaOpen D)) :
     IsLimitSheafOn S :=
-  { injective := fun {V} hVS {ι U} hle hcov {x y} h =>
+  { injective := fun {V} hVS {ι U} hle hcov {_x _y} h =>
       limitRestrict_injective_on hOn hcomp hVS hle hcov h
     glue := fun {V} hVS {ι U} hle hcov s hs =>
       exists_limitSections_glue_on hOn hcomp hVS hle hcov s hs

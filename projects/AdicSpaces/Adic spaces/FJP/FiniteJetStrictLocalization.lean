@@ -311,7 +311,7 @@ in `P_R`, the map in (4.9) is a strict isomorphism of Banach spaces, and the dif
 sequence `0 → I_R → I_B ⊕ I_C → I_D → 0` is strict exact."  Constants: (4.11)–(4.16). -/
 
 /-- Right strict surjectivity of the ideal row ([FJP] (4.11)). -/
-theorem ideal_row_surjective (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+theorem ideal_row_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     ∃ Cs : ℝ, 1 ≤ Cs ∧ ∀ y ∈ ID F m g f,
       ∃ xc ∈ IC F m g f, extRhoC F m xc = y ∧ ‖xc‖ ≤ Cs * ‖y‖ := by
   classical
@@ -969,7 +969,7 @@ theorem loc_pair_isEmbedding (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
 
 /-- `𝓒_α → 𝓓_α` is a continuous open surjection ([FJP] Prop 4.5: "`C_α → D_α` is a strict
 surjection"). -/
-theorem locRhoC_surjective (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+theorem locRhoC_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Function.Surjective (locRhoC F m g f) := by
   intro d
   obtain ⟨pd, rfl⟩ := Ideal.Quotient.mk_surjective d
@@ -991,7 +991,7 @@ theorem extRhoC_isOpenMap : IsOpenMap (extRhoC F m) := by
   · rw [map_add, hc]
     ring
 
-theorem locRhoC_isOpenMap (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+theorem locRhoC_isOpenMap (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     IsOpenMap (locRhoC F m g f) := by
   intro U hU
   have hmkC_cont : Continuous (Ideal.Quotient.mk (IC F m g f)) := by

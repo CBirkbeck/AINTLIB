@@ -1178,7 +1178,7 @@ strictly below `c` as well.
 The valuation of a sum is at most the sup of the terms, so it suffices to bound the
 maximising term — and that term is one of the pairs the hypothesis covers. The empty sum
 is handled separately, where the bound is just `0 < c`. -/
-private theorem valued_sum_antidiagonal_lt {ρ : NNReal} (hρ0 : 0 < ρ) {c : NNReal}
+private theorem valued_sum_antidiagonal_lt {ρ : NNReal} (_hρ0 : 0 < ρ) {c : NNReal}
     (hc : 0 < c) (a b : ℕ → F) (n : ℕ) (S : Finset ℕ) (hSn : ∀ k ∈ S, k ≤ n)
     (hlt : ∀ k ∈ S, (ρ ^ k * perfectoidValuation p F (a k))
       * (ρ ^ (n - k) * perfectoidValuation p F (b (n - k))) < c) :
@@ -1404,7 +1404,7 @@ def divStep {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x y : hatK p F hρ0 h
       (degAr p F ϖ hρ0 hρ1 x))
 
 theorem divStep_mem {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
-    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    {x y : hatK p F hρ0 hρ1} (_hx : x ∈ ArSub p F ϖ hρ0 hρ1)
     (hy : y ∈ ArSub p F ϖ hρ0 hρ1) :
     divStep p F ϖ hρ0 hρ1 x y ∈ ArSub p F ϖ hρ0 hρ1 :=
   PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 (tendsto_div_shift p F ϖ hy _ _)
@@ -1849,7 +1849,7 @@ already `ε·V`-small, remainder degree below `deg x`. Strong induction on `K`: 
 descent step shrinks the window by one. -/
 theorem division_descent {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0)
-    {ε V : NNReal} (hρε : ρ ≤ ε) (hε1 : ε < 1)
+    {ε V : NNReal} (hρε : ρ ≤ ε) (_hε1 : ε < 1)
     (hεx : ∀ j, degAr p F ϖ hρ0 hρ1 x < j
       → ρ ^ j * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x j)
         ≤ ε * Valued.v x) :

@@ -2011,9 +2011,9 @@ private theorem exists_correction_chain_BI_step
     (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
       (teichPowGen p F ϖ zb m₀))
     {z : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
-    (hz : z ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (_hz : z ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
     {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1)
-    (hzW : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 z ≤ W) :
+    (_hzW : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 z ≤ W) :
     ∀ (m : ℕ)
       (r : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)),
       r ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 →
@@ -2347,11 +2347,11 @@ theorem coeffSeq_Gelt_mul {A : Type*} [CommRing A] (gB : A)
 /-- Extracted from `telescope_down_bound`, where it was the dominant `have`
 (26 lines of a 62-line body). -/
 private theorem telescope_down_bound_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
-    (g : hatK p F hρ0 hρ1) (hg : Valued.v g ≤ 1)
+    (g : hatK p F hρ0 hρ1) (_hg : Valued.v g ≤ 1)
     (X Y : ℕ → hatK p F hρ0 hρ1)
     (hrec : ∀ n, Y n = (if 1 ≤ n then X (n - 1) else 0) - g * X n)
-    (hbdd : BddAbove (Set.range (fun n => Valued.v (Y n))))
-    (hX0 : Filter.Tendsto (fun n => Valued.v (X n)) Filter.atTop (nhds 0))
+    (_hbdd : BddAbove (Set.range (fun n => Valued.v (Y n))))
+    (_hX0 : Filter.Tendsto (fun n => Valued.v (X n)) Filter.atTop (nhds 0))
     (m : ℕ) :
     ∀ M : ℕ, X m
       = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
@@ -3993,7 +3993,7 @@ theorem resIHomTop_blocToBI {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
 /-- **Every intermediate radius is a geometric interpolant** of the interval
 endpoints. -/
 theorem exists_interpolant {ρ₁ σ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁)
-    (hρσ : ρ₁ ≤ σ) (hσρ : σ ≤ ρ₂) (hρ₂1 : ρ₂ < 1) :
+    (hρσ : ρ₁ ≤ σ) (hσρ : σ ≤ ρ₂) (_hρ₂1 : ρ₂ < 1) :
     ∃ θ : ℝ, 0 ≤ θ ∧ θ ≤ 1 ∧ ρ₁ ^ θ * ρ₂ ^ (1 - θ) = σ := by
   have hσ0 : 0 < σ := lt_of_lt_of_le hρ₁0 hρσ
   have hρ₂0 : 0 < ρ₂ := lt_of_lt_of_le hσ0 hσρ
@@ -5003,9 +5003,9 @@ private theorem exists_correction_chain_BI₂_step
     (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
       (teichPowGen₂ p F ϖ zb m₀))
     {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
-    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (_hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
     {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1)
-    (hzW : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z ≤ W) :
+    (_hzW : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z ≤ W) :
     ∀ (m : ℕ)
       (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)),
       r ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 →
@@ -5816,7 +5816,7 @@ theorem exists_evalBI_pow_norm_exact
         : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
         : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
       = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
-    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (zb : OF F) (m : ℕ) (_hm : 0 < m)
     (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
     {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
     (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)

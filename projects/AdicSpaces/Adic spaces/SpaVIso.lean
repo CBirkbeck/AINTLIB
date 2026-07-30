@@ -358,7 +358,7 @@ theorem exists_imgDatum_subset [DecidableEq A]
 /-- **The image opens cover** (P5-K2b): every point of `W` lies in the image
 open of some valid `A`-index of `V`. -/
 theorem exists_index_mem [DecidableEq A] {V : Opens ↥(Spa A A⁺)}
-    (hV : V ≤ spaOpens D₀)
+    (_hV : V ≤ spaOpens D₀)
     {W : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)}
     (hVW : Paired D₀ V W)
     (w : ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) (hw : w ∈ W) :
@@ -1161,7 +1161,7 @@ theorem shadowPre_shadowImage (u : (presheafValue D₀)ˣ)
 
 theorem shadowPre_mono {U U' : Opens ↥(Spa A A⁺)} (h : U' ≤ U) :
     shadowPre D₀ u hu U' ≤ shadowPre D₀ u hu U :=
-  fun w hw => h hw
+  fun _w hw => h hw
 
 /-- Naturality of the ambient comparison. -/
 theorem ambComp_naturality [DecidableEq A] {U U' : Opens ↥(Spa A A⁺)}
@@ -1397,7 +1397,7 @@ theorem ambCompCatIso_hom [DecidableEq A] (W : Opens ↥(Spa A A⁺))
     (hW : W ≤ spaOpens D₀) :
     (ambCompCatIso D₀ u hu W hW).hom
       = ⟨ambComp D₀ u hu W, ambComp_continuous D₀ u hu W⟩ :=
-  Subtype.ext (RingHom.ext fun x => rfl)
+  Subtype.ext (RingHom.ext fun _x => rfl)
 
 theorem shadowImage_le [DecidableEq A]
     (U : Opens ↥(Spa (presheafValue D₀) (presheafValue D₀)⁺)) :

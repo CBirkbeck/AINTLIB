@@ -326,8 +326,8 @@ def yFrobNat (k : ℤ) :
     (yPresheafedSpace p F ϖ).presheaf
       ⟶ (Opens.map (yFrobTop p F ϖ k)).op ⋙ (yPresheafedSpace p F ϖ).presheaf where
   app V := ⟨yLimitFrobHom p F ϖ k V.unop, yLimitFrobHom_continuous p F ϖ k V.unop⟩
-  naturality V V' i := Subtype.ext (RingHom.ext fun x => Subtype.ext
-    (funext fun E => rfl))
+  naturality V _V' _i := Subtype.ext (RingHom.ext fun _x => Subtype.ext
+    (funext fun _E => rfl))
 
 /-- **The Frobenius endomorphism of the `𝒴`-presheafed space** (D-iii-3b). -/
 def yFrobHom (k : ℤ) :

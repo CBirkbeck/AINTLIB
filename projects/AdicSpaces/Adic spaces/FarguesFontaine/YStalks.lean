@@ -42,7 +42,7 @@ core over the non-Tate ambient `A_inf`): the concrete Tate structure of the
 completed localization comes from `𝒴`-interiority (`YB1`), everything else is
 the Tate-free machinery. -/
 theorem rationalShrink_Y
-    (D : RationalLocData (Ainf p F)) (hD : D.IsRational)
+    (D : RationalLocData (Ainf p F)) (_hD : D.IsRational)
     (hDY : rationalOpen D.T D.s ⊆ Y p F ϖ)
     (v' : Spv (Ainf p F))
     (hv : v' ∈ (rationalOpen D.T D.s
@@ -579,7 +579,7 @@ def runWindow (n : ℤ) (k : ℕ) : Set (Spv (Ainf p F)) :=
 /-- **The run window is the rational open of the `(p^{k+1}, 1)`-chart in the
 window uniformizer** (nonnegative side): generalizes
 `bigWindow_eq_rationalOpen_ofNat` from `a = p` to `a = p^{k+1}`. -/
-theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (hp : 1 < p) :
+theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (_hp : 1 < p) :
     runWindow p F ϖ (n : ℤ) k
       = rationalOpen
           (chartT p F (PseudoUniformizer.frobRoot p F ϖ n) (p ^ (k + 1)) 1)
@@ -643,7 +643,7 @@ theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (hp : 1 < p) :
 
 /-- **The run window is a rational open (negative side)**: as
 `runWindow_eq_rationalOpen_ofNat`, at the `p^m`-th power uniformizer. -/
-theorem runWindow_eq_rationalOpen_neg (m k : ℕ) (hp : 1 < p) :
+theorem runWindow_eq_rationalOpen_neg (m k : ℕ) (_hp : 1 < p) :
     runWindow p F ϖ (-(m : ℤ)) k
       = rationalOpen
           (chartT p F (PseudoUniformizer.pPow F ϖ (p ^ m)

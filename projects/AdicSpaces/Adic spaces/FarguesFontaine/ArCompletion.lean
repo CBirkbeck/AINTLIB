@@ -838,7 +838,7 @@ theorem wAloc_alocTeich {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (c : F) :
 `O_F` has all Gauss terms `≤ 1`, and multiplying by `p` scales the Gauss value by `ρ`; so
 `pᴹ · w` has Gauss value at most `ρᴹ`.  Proved by induction on `M`, carrying the
 boundedness alongside since `gaussValueF_p_mul` needs it. -/
-private theorem gaussValueF_p_pow_mul_map_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+private theorem gaussValueF_p_pow_mul_map_le {ρ : NNReal} (_hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     (z : WittVector p (OF F)) (M : ℕ) :
     BddAbove (Set.range (gaussTermF p F ρ ((p : WittVector p F) ^ M *
         WittVector.map ((powerBoundedSubring.toSubring F).subtype) z)))
@@ -1304,7 +1304,7 @@ theorem valued_PhiHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ �
 
 /-- **`Aloc`-images decay geometrically**: the Gauss terms of `alocToWittF u` are
 bounded by `ρⁿ·c^{-k}` for the `[ϖ]^k`-denominator of `u`, hence tend to `0`. -/
-theorem tendsto_gaussTermF_alocToWittF {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+theorem tendsto_gaussTermF_alocToWittF {ρ : NNReal} (_hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     (u : Aloc p F ϖ) :
     Filter.Tendsto (gaussTermF p F ρ (alocToWittF p F ϖ u)) Filter.atTop (nhds 0) := by
   obtain ⟨⟨a, y⟩, hu⟩ := IsLocalization.surj (M := Submonoid.powers (teichPi p F ϖ)) u

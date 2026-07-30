@@ -98,7 +98,7 @@ theorem pow_mul_gaussValue_tail_le {σ τ : NNReal} (hστ : σ ≤ τ) (hτ1 : 
 /-- **The initial bound** (Mittag-Leffler principal part): for radii `τ ≤ σ`,
 the `σ`-Gauss value of the `k`-initial part is controlled by the `τ`-Gauss
 value. -/
-theorem pow_mul_gaussValue_init_le {σ τ : NNReal} (hτσ : τ ≤ σ) (hσ1 : σ ≤ 1)
+theorem pow_mul_gaussValue_init_le {σ τ : NNReal} (hτσ : τ ≤ σ) (_hσ1 : σ ≤ 1)
     (hτ1 : τ ≤ 1) (x : Ainf p F) (k : ℕ) :
     τ ^ k * gaussValue p F σ (WittVector.init k x)
       ≤ σ ^ k * gaussValue p F τ x := by

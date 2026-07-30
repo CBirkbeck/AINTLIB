@@ -1191,7 +1191,7 @@ leading coefficient's degree strictly drops. -/
 theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNReal}
     {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
     {G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
-    (hGH : ∀ g ∈ G, g ∈ H)
+    (_hGH : ∀ g ∈ G, g ∈ H)
     (hG0 : ∀ g ∈ G, ((g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0))
     (hGtail : ∀ g ∈ G, ∀ K : Fin k →₀ ℕ,
       (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
@@ -1535,7 +1535,7 @@ instance instFintypeDegLexSeg (M : Fin k →₀ ℕ) : Fintype (degLexSeg M) :=
 instance instLinearOrderDegLexSeg (M : Fin k →₀ ℕ) : LinearOrder (degLexSeg M) :=
   LinearOrder.lift'
     (fun K : degLexSeg M => (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K.1)
-    (fun a b h => Subtype.ext
+    (fun _a _b h => Subtype.ext
       ((MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn.injective h))
 
 theorem degLexSeg_lt_iff {M : Fin k →₀ ℕ} {a b : degLexSeg M} :

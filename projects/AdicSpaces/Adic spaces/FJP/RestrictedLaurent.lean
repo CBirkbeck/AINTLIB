@@ -949,7 +949,7 @@ theorem ofRestricted_norm [CompleteSpace R] [NormOneClass R]
   nonnegEquiv_norm f
 
 theorem ofRestricted_injective [CompleteSpace R] [NormOneClass R] :
-    Function.Injective (ofRestricted (R := R)) := fun f g h =>
+    Function.Injective (ofRestricted (R := R)) := fun _f _g h =>
   (nonnegEquiv (R := R)).injective (Subtype.ext h)
 
 end Nonneg
@@ -1278,7 +1278,7 @@ instance : NormOneClass (PowerSeries.Restricted R (1 : ℝ)) :=
 noncomputable def coeffHom (m : ℤ) : RestrictedLaurent R →+ R where
   toFun f := f.coeff m
   map_zero' := rfl
-  map_add' f g := rfl
+  map_add' f _g := rfl
 
 /-- The norm of the nonpositive truncation is bounded by the norm. -/
 theorem norm_truncNonpos_le (h : RestrictedLaurent R) : ‖truncNonpos h‖ ≤ ‖h‖ := by

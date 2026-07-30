@@ -132,7 +132,7 @@ theorem keystoneAlgO_algebraMap (a : A) :
 
 /-- The forward lift sends the `t/s`-generators to the image datum's own
 `t/s`-lifts (uniqueness of division by the unit `can E.s`). -/
-theorem keystoneAlgO_divByS {t : A} (ht : t ∈ E.T) :
+theorem keystoneAlgO_divByS {t : A} (_ht : t ∈ E.T) :
     keystoneAlgO D₀ hspanE (divByS t E.s) =
       IsLocalization.Away.lift (imgDatumO D₀ E hspanE).s
         (isUnit_canonicalMap_s (A := presheafValue D₀) _ _ subset_rfl)
@@ -277,7 +277,7 @@ theorem keystoneInvAlgO_algebraMap (b : presheafValue D₀) :
     (restriction_isUnit_imgSO D₀ hspanE hE) b
 
 /-- The backward lift sends the image `t/s`-generators to the `A`-side `t/s`-lifts. -/
-theorem keystoneInvAlgO_divByS {t : A} (ht : t ∈ E.T) :
+theorem keystoneInvAlgO_divByS {t : A} (_ht : t ∈ E.T) :
     keystoneInvAlgO D₀ hspanE hE
       (divByS (D₀.canonicalMap t) (imgDatumO D₀ E hspanE).s) =
       IsLocalization.Away.lift E.s
@@ -865,7 +865,7 @@ theorem imgFamily_agreement
       Ideal.span ((E.T.image D₀.canonicalMap
         : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
     (C : RationalCoveringData A) (hC : C.IsRational)
-    (hCD₀ : rationalOpen C.base.T C.base.s ⊆ rationalOpen D₀.T D₀.s)
+    (_hCD₀ : rationalOpen C.base.T C.base.s ⊆ rationalOpen D₀.T D₀.s)
     (f : ∀ D : ↥C.covers, presheafValue D.1)
     (hf : ∀ (D₁ D₂ : ↥C.covers)
        (D₃ : RationalLocData A)

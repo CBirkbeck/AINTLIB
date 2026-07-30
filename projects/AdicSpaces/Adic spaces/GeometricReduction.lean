@@ -2689,7 +2689,7 @@ the `S.erase f₀` transfer requires the localised Prop 7.14 (see doc
 block above). -/
 theorem RationalCoveringData.noCommonZero_plusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
-    (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
+    (_hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
@@ -2707,7 +2707,7 @@ theorem RationalCoveringData.noCommonZero_plusHalf_of_refines_span_top
 the plus-half version via `laurentMinus_subset`. -/
 theorem RationalCoveringData.noCommonZero_minusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
-    (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
+    (_hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
@@ -2752,7 +2752,7 @@ for every `v ∈ Spa A A⁺` with `v(f₀) = 0` (i.e., `v.vle f₀ 0`), some
 v(f) ≠ 0`; the witness cannot be `f₀` since `v(f₀) = 0`. -/
 theorem RationalCoveringData.noCommonZero_erase_of_f₀_zero
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
-    (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
+    (_hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤)

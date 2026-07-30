@@ -957,7 +957,7 @@ theorem zavyalov_candidate_family_h_span_from_no_common_zero
     [DecidableEq A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺ : Subring A)] (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀]
-    (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
+    (_hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_no_common_zero : ∀ v ∈ Spa A A⁺,

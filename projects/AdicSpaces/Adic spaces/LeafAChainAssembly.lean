@@ -59,7 +59,7 @@ theorem prop_8_30_remark755_chain_assembled
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     (D D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
-    (hD : D.IsRational) (hD' : D'.IsRational) :
+    (_hD : D.IsRational) (hD' : D'.IsRational) :
     @Module.Flat (presheafValue D) (presheafValue D') _ _
       (restrictionMapHom D D' h).toModule := by
   haveI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D

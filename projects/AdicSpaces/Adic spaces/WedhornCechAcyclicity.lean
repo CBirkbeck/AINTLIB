@@ -592,8 +592,8 @@ noncomputable def laurentCoverOf [DecidableEq A] (D₀ : RationalLocData A)
     (fs : List A) : RationalCoveringData A where
   base := D₀
   covers := laurentLeaves D₀ fs
-  hsubset D hD := laurentLeaves_subset fs D₀ hD
-  hcover v hv := laurentLeaves_cover fs D₀ hv
+  hsubset _D hD := laurentLeaves_subset fs D₀ hD
+  hcover _v hv := laurentLeaves_cover fs D₀ hv
 
 @[simp] theorem laurentCoverOf_base [DecidableEq A] (D₀ : RationalLocData A)
     (fs : List A) : (laurentCoverOf D₀ fs).base = D₀ := rfl
@@ -1309,8 +1309,8 @@ noncomputable def laurentProdCoverOf [DecidableEq A] (D₀ : RationalLocData A)
     (fs : List A) : RationalCoveringData A where
   base := D₀
   covers := laurentProdLeaves D₀ fs
-  hsubset D hD := laurentProdLeaves_subset fs D₀ hD
-  hcover v hv := laurentProdLeaves_cover fs D₀ hv
+  hsubset _D hD := laurentProdLeaves_subset fs D₀ hD
+  hcover _v hv := laurentProdLeaves_cover fs D₀ hv
 
 @[simp] theorem laurentProdCoverOf_base [DecidableEq A] (D₀ : RationalLocData A)
     (fs : List A) : (laurentProdCoverOf D₀ fs).base = D₀ := rfl

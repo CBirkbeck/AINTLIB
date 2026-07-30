@@ -814,7 +814,7 @@ noncomputable def stalkValuativeRel (v : ↥(Spa A A⁺)) :
   mul_vle_mul_left := stalkVle_mul_left
   vle_mul_cancel := stalkVle_mul_cancel
   not_vle_one_zero := not_stalkVle_one_zero v
-  vle_mul_comm := fun {x y} => stalkVle_mul_comm
+  vle_mul_comm := fun {_x _y} => stalkVle_mul_comm
 
 /-- **The valuation of the point on the stalk** of the structure presheaf. -/
 noncomputable def stalkValue (v : ↥(Spa A A⁺)) :

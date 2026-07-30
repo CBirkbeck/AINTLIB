@@ -652,7 +652,7 @@ theorem continuous_toProp_rcoord (I : Ideal A) :
 /-- Extracted from `isInducing_ιSpvPropR_spa`: its dominant `have` together with the prologue that
 introduces the locals that `have` consumes. -/
 private theorem isInducing_ιSpvPropR_spa_induced_eq [IsTopologicalRing A] (P : PairOfDefinition A)
-    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
+    (I : Ideal A) (_hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
     TopologicalSpace.induced
       (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) Pi.topologicalSpace =
       TopologicalSpace.generateFrom

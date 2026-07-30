@@ -2611,3 +2611,60 @@ site.** I checked the cheap thing that felt like diligence and skipped the one t
 in an earlier pass as pre-existing and out of scope), and now unused-binders (flagged binders can be
 explicitly referenced). Task 3's 3,860 warnings are **not** 3,860 units of pending mechanical work;
 the residue is per-declaration judgement, one build each.
+
+## Task 3 — the unused-binder class, done properly this time (71 of 96)
+
+Applied the check I should have run first: for each flagged binder, take the **enclosing
+declaration** and count whole-word occurrences of the identifier. Exactly one occurrence means the
+only mention *is* the binding site, so prefixing with `_` is inert. More than one means the binder is
+referenced and renaming breaks it.
+
+    SAFE   (occurs exactly once)  71
+    UNSAFE (occurs 2–3 times)     25
+
+**The partition exactly reproduces last round's failures**: `Presheaf.lean:1287 hp` (2×, used by
+`haveI := hp` at 1291) and `TateAlgebraTopology.lean:1560/1666/2758 hnoeth` (3×/2×/2×) all land in the
+UNSAFE bucket, alongside `SpvAI.h_le_AOO` and `Example638.hnoeth`. So the 96-site blanket application
+was 25 renames wrong out of 96 — and the use-count check catches every one.
+
+That is the difference between the two verifications:
+
+* **position check** (what I did first): does `(line, col)` contain the reported name? — 96/96 passed,
+  and told me nothing, because it only confirms the *warning* was located correctly;
+* **use check** (what was needed): does the name occur anywhere in the declaration besides the binding
+  site? — separates 71 safe from 25 unsafe.
+
+Applied the 71 across 28 files; the 25 are left alone, and they are genuinely *not* fixable this way —
+the linter's "not explicitly referenced" is simply wrong about them (`haveI := hp` is an explicit
+by-name reference), so they are a linter false positive rather than pending work.
+
+**Revised task-3 position: the warning surface is ~3,860, of which the mechanically-safe residue is
+these 71 renames.** Everything else is per-declaration judgement: `unusedSectionVars` omits break
+instance derivation paths, `overlappingInstances` was ruled out earlier as pre-existing, the 110
+`sorry`s are producers' WIP, and 25 unused-binder hints are false positives.
+
+Build note: `lake build` of a single FarguesFontaine module exceeded the 10-minute foreground cap
+(exit 143) — with 28 files touched across the library the full gate is the right instrument anyway.
+
+## Task 2 — two more by join (246 → 244), and a wasted-edit gotcha
+
+`TopologyComparison.polynomial_quotient_in_range` 51 → 50 and
+`ValuationContinuity.exists_packaged_enlarged_domination_of_subRel` 52 → 50, via pure
+expression-continuation joins (tactic-block joins excluded outright now, per the anchoring
+unsoundness found earlier).
+
+**First attempt changed the files and moved the count by zero.** The join search ran from the
+*theorem* line, so the joins it picked were in the **signature** — and `scope_code.py` measures the
+**body** (everything after the top-level `:=`). Two files modified, three lines joined, no effect on
+the metric.
+
+**Rule: a join only counts if it is strictly after `sig_end`.** The measurement's own signature-end
+computation (bracket-depth scan for a depth-0 `:=`) has to be reused by the *edit* tool, not just the
+*measure* tool. Any edit aimed at a metric must be scoped to the same region the metric reads —
+otherwise it is invisible to the thing it was meant to move.
+
+Recovery was clean because the two files had no other pending changes: reverted both with
+`git show HEAD:… > …`, confirmed via the safe-binder list that neither carried a rename to preserve,
+then re-ran with the range starting at `sig_end + 1`. Body joins available: 1 and 7; needed 1 and 2.
+
+Running total: **244** (486 baseline → 290 pre-split → 274 post-split → 244).
