@@ -1190,6 +1190,51 @@ theorem teichCoeffF_eq_of_sub_eq_pow_mul {a b : WittVector p F} {N j : ℕ} (hj 
     exact WittVector.mul_pow_charP_coeff_zero K hi
   exact hcoeffs j hj
 
+/-- **A single cross piece is bounded by the product of the Gauss values.** The piece
+`([xᵢ]·pⁱ)·([yⱼ]·pʲ)` collapses to `[xᵢyⱼ]·p^{i+j}`, whose value is exactly
+`ρ^{i+j}·|xᵢ|·|yⱼ|`; regrouping gives `(ρⁱ|xᵢ|)·(ρʲ|yⱼ|) ≤ wF(x)·wF(y)`. -/
+private theorem bddAbove_and_gaussValueF_cross_le {ρ : NNReal} {x y : WittVector p F}
+    (hBx : BddAbove (Set.range (gaussTermF p F ρ x)))
+    (hBy : BddAbove (Set.range (gaussTermF p F ρ y))) (i j : ℕ) :
+    BddAbove (Set.range (gaussTermF p F ρ
+        ((WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i) *
+          (WittVector.teichmuller p (teichCoeffF p F y j) *
+            (p : WittVector p F) ^ j))))
+      ∧ gaussValueF p F ρ
+          ((WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i) *
+            (WittVector.teichmuller p (teichCoeffF p F y j) *
+              (p : WittVector p F) ^ j))
+        ≤ gaussValueF p F ρ x * gaussValueF p F ρ y := by
+  have hterm : (WittVector.teichmuller p (teichCoeffF p F x i) *
+      (p : WittVector p F) ^ i) *
+      (WittVector.teichmuller p (teichCoeffF p F y j) * (p : WittVector p F) ^ j)
+      = WittVector.teichmuller p (teichCoeffF p F x i * teichCoeffF p F y j) *
+        (p : WittVector p F) ^ (i + j) := by
+    rw [map_mul, pow_add]
+    ring
+  rw [hterm]
+  constructor
+  · rw [mul_comm]
+    exact bddAbove_gaussTermF_p_pow_mul p F
+      (bddAbove_gaussTermF_teichmuller p F _) _
+  · rw [mul_comm, gaussValueF_p_pow_mul p F
+      (bddAbove_gaussTermF_teichmuller p F _), gaussValueF_teichmuller,
+      Valuation.map_mul, pow_add]
+    have h1 : ρ ^ i * perfectoidValuation p F (teichCoeffF p F x i)
+        ≤ gaussValueF p F ρ x := by
+      have h := gaussTermF_le_gaussValueF p F hBx i
+      rwa [gaussTermF] at h
+    have h2 : ρ ^ j * perfectoidValuation p F (teichCoeffF p F y j)
+        ≤ gaussValueF p F ρ y := by
+      have h := gaussTermF_le_gaussValueF p F hBy j
+      rwa [gaussTermF] at h
+    calc ρ ^ i * ρ ^ j * (perfectoidValuation p F (teichCoeffF p F x i) *
+            perfectoidValuation p F (teichCoeffF p F y j))
+        = (ρ ^ i * perfectoidValuation p F (teichCoeffF p F x i)) *
+          (ρ ^ j * perfectoidValuation p F (teichCoeffF p F y j)) := by ring
+      _ ≤ gaussValueF p F ρ x * gaussValueF p F ρ y :=
+          mul_le_mul h1 h2 zero_le zero_le
+
 /-- **Submultiplicativity over `W(F)`**, term-by-term: every term of `x·y` is bounded
 by `wF(x)·wF(y)`. Proof by truncation: the `n`-th digit of `x·y` equals the `n`-th
 digit of the product of the length-`(n+1)` prefixes (congruence mod `p^{n+1}`), and
@@ -1218,37 +1263,7 @@ theorem gaussTermF_mul_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     (fun q => (WittVector.teichmuller p (teichCoeffF p F x q.1) *
         (p : WittVector p F) ^ q.1) *
       (WittVector.teichmuller p (teichCoeffF p F y q.2) * (p : WittVector p F) ^ q.2))
-    (by
-      rintro ⟨i, j⟩ -
-      have hterm : (WittVector.teichmuller p (teichCoeffF p F x i) *
-          (p : WittVector p F) ^ i) *
-          (WittVector.teichmuller p (teichCoeffF p F y j) * (p : WittVector p F) ^ j)
-          = WittVector.teichmuller p (teichCoeffF p F x i * teichCoeffF p F y j) *
-            (p : WittVector p F) ^ (i + j) := by
-        rw [map_mul, pow_add]
-        ring
-      rw [hterm]
-      constructor
-      · rw [mul_comm]
-        exact bddAbove_gaussTermF_p_pow_mul p F
-          (bddAbove_gaussTermF_teichmuller p F _) _
-      · rw [mul_comm, gaussValueF_p_pow_mul p F
-          (bddAbove_gaussTermF_teichmuller p F _), gaussValueF_teichmuller,
-          Valuation.map_mul, pow_add]
-        have h1 : ρ ^ i * perfectoidValuation p F (teichCoeffF p F x i)
-            ≤ gaussValueF p F ρ x := by
-          have h := gaussTermF_le_gaussValueF p F hBx i
-          rwa [gaussTermF] at h
-        have h2 : ρ ^ j * perfectoidValuation p F (teichCoeffF p F y j)
-            ≤ gaussValueF p F ρ y := by
-          have h := gaussTermF_le_gaussValueF p F hBy j
-          rwa [gaussTermF] at h
-        calc ρ ^ i * ρ ^ j * (perfectoidValuation p F (teichCoeffF p F x i) *
-                perfectoidValuation p F (teichCoeffF p F y j))
-            = (ρ ^ i * perfectoidValuation p F (teichCoeffF p F x i)) *
-              (ρ ^ j * perfectoidValuation p F (teichCoeffF p F y j)) := by ring
-          _ ≤ gaussValueF p F ρ x * gaussValueF p F ρ y :=
-              mul_le_mul h1 h2 zero_le zero_le)
+    (fun q _ => bddAbove_and_gaussValueF_cross_le p F hBx hBy q.1 q.2)
   have hPxPy : Px * Py = ∑ q ∈ (Finset.range (n + 1)) ×ˢ (Finset.range (n + 1)),
       (WittVector.teichmuller p (teichCoeffF p F x q.1) * (p : WittVector p F) ^ q.1) *
       (WittVector.teichmuller p (teichCoeffF p F y q.2) *

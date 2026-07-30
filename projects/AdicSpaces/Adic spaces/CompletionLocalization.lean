@@ -501,6 +501,20 @@ open Pointwise
 omit [PlusSubring A] [IsHuberRing A] [IsTateRing A]
     [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     in
+/-- **Ideal absorption**: `locSubring · locNhd k ⊆ locNhd k`, since `locNhd k` is the
+image of the `k`-th power of `locIdeal` and an ideal absorbs its own ring. -/
+private theorem locSubring_mul_locNhd_subset (D : RationalLocData A) (k : ℕ) :
+    (locSubring D.P D.T D.s : Set (Localization.Away D.s)) *
+      (locNhd D.P D.T D.s k : Set (Localization.Away D.s)) ⊆
+      (locNhd D.P D.T D.s k : Set (Localization.Away D.s)) := by
+  intro x hx
+  obtain ⟨d, hd, v, hv, rfl⟩ := Set.mem_mul.mp hx
+  obtain ⟨jv, hjv, rfl⟩ := hv
+  exact ⟨⟨d, hd⟩ * jv, Ideal.mul_mem_left _ _ hjv, MulMemClass.coe_mul ..⟩
+
+omit [PlusSubring A] [IsHuberRing A] [IsTateRing A]
+    [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    in
 /-- The image of `locSubring` under `coeRingHom` is bounded in `presheafValue D`.
 Proof: `locSubring * locNhd k ⊆ locNhd k` (ideal absorption), so
 `(coe '' locSubring) * (coe '' locNhd k) ⊆ coe '' locNhd k` by the ring hom
@@ -519,13 +533,7 @@ theorem coeRingHom_image_locSubring_isBounded (D : RationalLocData A) :
   letI : TopologicalSpace (Localization.Away D.s) := D.topology
   have hbasis := locBasis D.P D.T D.s D.hopen
   -- Ideal absorption: locSubring * locNhd k ⊆ locNhd k
-  have habsorb : ∀ k, (locSubring D.P D.T D.s : Set (Localization.Away D.s)) *
-      (locNhd D.P D.T D.s k : Set (Localization.Away D.s)) ⊆
-      (locNhd D.P D.T D.s k : Set (Localization.Away D.s)) := by
-    intro k x hx
-    obtain ⟨d, hd, v, hv, rfl⟩ := Set.mem_mul.mp hx
-    obtain ⟨jv, hjv, rfl⟩ := hv
-    exact ⟨⟨d, hd⟩ * jv, Ideal.mul_mem_left _ _ hjv, MulMemClass.coe_mul ..⟩
+  have habsorb := locSubring_mul_locNhd_subset D
   intro U hU
   -- Step 1: Find a closed W ∈ nhds 0 with W ⊆ U (completion is regular as a uniform space)
   obtain ⟨W, hW_nhds, hW_closed, hWU⟩ := exists_mem_nhds_isClosed_subset hU
