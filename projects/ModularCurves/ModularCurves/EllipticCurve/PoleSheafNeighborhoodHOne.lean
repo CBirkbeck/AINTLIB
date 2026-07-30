@@ -571,6 +571,239 @@ theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_poleOneBasis
                     (Scheme.Modules.baseSections π'
                       (sectionPoleSheafPower π' z' hz' 1)),
                   bOne 0 = sectionPoleSheafPowerOneSection π' z' hz') := by
-  sorry
+  classical
+  -- the Noetherian stage model
+  letI : Algebra (ULift.{u} ℤ) Γ(S, (⊤ : S.Opens)) :=
+    ULift.algebra' ℤ Γ(S, (⊤ : S.Opens))
+  obtain ⟨j, Y, yπ, L, hfp, hproperY, hsmoothY, hL, φ, zA, hzA, hproperA, hπA, hzAφ,
+    hsmA, hfibA, ⟨e⟩⟩ :=
+    FibrewiseElliptic.exists_noetherianPoleSheafModel hsm z hz h
+  haveI := hfp
+  haveI := hproperY
+  haveI := hsmoothY
+  haveI := hproperA
+  let Bst : Type u :=
+    Algebra.PresentationSystem.stage (ULift.{u} ℤ) Γ(S, (⊤ : S.Opens)) j
+  letI : Algebra Bst Γ(S, (⊤ : S.Opens)) :=
+    (Algebra.PresentationSystem.colimMap (ULift.{u} ℤ)
+      Γ(S, (⊤ : S.Opens)) j).toRingHom.toAlgebra
+  let gA : Spec (.of Γ(S, (⊤ : S.Opens))) ⟶ Spec (.of Bst) :=
+    Spec.map (CommRingCat.ofHom
+      (algebraMap Bst Γ(S, (⊤ : S.Opens))))
+  haveI : IsNoetherianRing Bst := inferInstance
+  haveI : Y.IsSeparated := ⟨by rw [← terminal.comp_from yπ]; infer_instance⟩
+  haveI : CompactSpace Y := (quasiCompact_iff_compactSpace yπ).mp inferInstance
+  letI : L.IsQuasicoherent := hL.isQuasicoherent
+  -- a finite ordered affine cover of the stage total space
+  obtain ⟨ι, hιfin, V, hV, hVaff⟩ := Y.exists_finite_affine_openCover
+  letI : Fintype ι := Fintype.ofFinite ι
+  letI : LinearOrder ι := LinearOrder.lift' (Fintype.equivFin ι)
+    (Fintype.equivFin ι).injective
+  -- the residue-field point over the chosen base point
+  let sA : Spec (.of Γ(S, (⊤ : S.Opens))) := S.isoSpec.hom.base s
+  let u : Spec ((Spec (.of Γ(S, (⊤ : S.Opens)))).residueField sA) ⟶
+      Spec (.of Γ(S, (⊤ : S.Opens))) :=
+    (Spec (.of Γ(S, (⊤ : S.Opens)))).fromSpecResidueField sA
+  have hField := isField_gamma_spec_residueField (Spec (.of Γ(S, (⊤ : S.Opens)))) sA
+  -- spread the stage Čech exactness to a principal neighborhood of `sA`'s image
+  obtain ⟨r, hrp, hexact⟩ :=
+    FibrewiseElliptic.exists_away_orderedBaseCech_exact_of_poleSheafModel L hL gA zA
+      hzA hsmA hfibA e u hField V hV hVaff
+  -- the corresponding basic open of `S` contains `s`
+  have hrne : (u ≫ gA).appTop.hom r ≠ 0 := fun h0 => hrp (RingHom.mem_ker.mpr h0)
+  let a : Γ(S, (⊤ : S.Opens)) := ((S.isoSpec.hom ≫ gA).appTop).hom r
+  obtain ⟨w⟩ : Nonempty (Spec ((Spec (.of Γ(S, (⊤ : S.Opens)))).residueField sA)) :=
+    inferInstanceAs (Nonempty (PrimeSpectrum _))
+  have hmem₀ : (u ≫ gA).base w ∈ (Spec (.of Bst)).basicOpen r :=
+    mem_basicOpen_of_appTop_ne_zero (u ≫ gA) hField w r hrne
+  have hbase : (S.isoSpec.hom ≫ gA).base s = (u ≫ gA).base w := by
+    have hw : u.base w = sA := Scheme.fromSpecResidueField_apply sA w
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply, hw]
+  have hmem : s ∈ S.basicOpen a := by
+    rw [← Scheme.preimage_basicOpen_top]
+    have hthis := hmem₀
+    rwa [← hbase] at hthis
+  -- the restricted base and the direct stage family over it
+  let T' : Scheme.{u} := (S.basicOpen a).toScheme
+  let v : T' ⟶ S := (S.basicOpen a).ι
+  let u' : T' ⟶ Spec (.of Γ(S, (⊤ : S.Opens))) := v ≫ S.isoSpec.hom
+  haveI : IsAffineOpen (S.basicOpen a) := (isAffineOpen_top S).basicOpen a
+  haveI : IsAffine T' := ‹IsAffineOpen (S.basicOpen a)›
+  let π' : pullback yπ (u' ≫ gA) ⟶ T' := pullback.snd yπ (u' ≫ gA)
+  let z' : T' ⟶ pullback yπ (u' ≫ gA) :=
+    sectionIteratedBaseChangeDirect yπ gA zA hzA u'
+  have hz' : z' ≫ π' = 𝟙 T' := sectionIteratedBaseChangeDirect_snd yπ gA zA hzA u'
+  haveI : IsProper π' := inferInstance
+  have hsm' : SmoothOfRelativeDimension 1 π' :=
+    smoothOfRelativeDimension_pullback_snd_comp yπ gA u' hsmA
+  have h' : FibrewiseElliptic π' z' hz' :=
+    fibrewiseElliptic_pullback_snd_comp yπ gA zA hzA hfibA u'
+  -- the pole model on the direct family
+  have eD := sectionPoleSheafPowerDirectBaseChangeIso gA zA hzA hsmA L e u'
+  -- the localization tower `Γ(Spec Bst) → (Away r) → Γ(T')`
+  letI : Algebra Γ(Spec (.of Bst), (⊤ : (Spec (.of Bst)).Opens))
+      Γ(T', (⊤ : T'.Opens)) := (u' ≫ gA).appTop.hom.toAlgebra
+  have hunit : IsUnit ((u' ≫ gA).appTop.hom r) := by
+    have hsplit : ((u' ≫ gA).appTop).hom r =
+        (v.appTop).hom (((S.isoSpec.hom ≫ gA).appTop).hom r) := by
+      simp only [u', Scheme.Hom.comp_appTop, CommRingCat.hom_comp, RingHom.comp_apply,
+        Category.assoc]
+    have h1 : IsUnit ((S.presheaf.map (homOfLE (S.basicOpen_le a)).op).hom a) :=
+      AlgebraicGeometry.RingedSpace.isUnit_res_basicOpen S.toRingedSpace a
+    have happ : (v.appTop).hom a = ((S.basicOpen a).topIso.inv).hom
+        ((S.presheaf.map (homOfLE (S.basicOpen_le a)).op).hom a) := by
+      rw [opens_ι_appTop]
+      rfl
+    rw [hsplit, happ]
+    exact h1.map ((S.basicOpen a).topIso.inv).hom
+  letI : Algebra (Localization.Away r) Γ(T', (⊤ : T'.Opens)) :=
+    (IsLocalization.Away.lift r hunit).toAlgebra
+  haveI : IsScalarTower Γ(Spec (.of Bst), (⊤ : (Spec (.of Bst)).Opens))
+      (Localization.Away r) Γ(T', (⊤ : T'.Opens)) := by
+    refine IsScalarTower.of_algebraMap_eq fun x => ?_
+    exact congrFun (congrArg DFunLike.coe
+      (IsLocalization.Away.lift_comp (x := r)
+        (g := (u' ≫ gA).appTop.hom) hunit).symm) x
+  -- flatness, boundedness, and the universal transport of the spread exactness
+  let C := Scheme.Modules.orderedBaseCechComplex yπ L V
+  letI : ∀ q, Module.Flat Γ(Spec (.of Bst), (⊤ : (Spec (.of Bst)).Opens)) (C.X q) :=
+    fun q => Scheme.Modules.orderedBaseCechObject_flat_of_isInvertible yπ L hL V hVaff q
+  letI : Subsingleton (C.X (Fintype.card ι + 1)) :=
+    Scheme.Modules.orderedBaseCechObject_subsingleton_of_card_le yπ L V
+      (Fintype.card ι + 1) (Nat.le_succ _)
+  have hexactT' : ∀ q, q < Fintype.card ι →
+      Function.Exact
+        ((C.d q (q + 1)).hom.baseChange Γ(T', (⊤ : T'.Opens)))
+        ((C.d (q + 1) (q + 2)).hom.baseChange Γ(T', (⊤ : T'.Opens))) := fun q hq =>
+    LinearMap.baseChange_exact_of_bounded_flat_baseChange_exact
+      (fun n => C.X n) (fun n => (C.d n (n + 1)).hom) (Fintype.card ι)
+      (Localization.Away r) Γ(T', (⊤ : T'.Opens))
+      (fun p hp => hexact p hp) q hq
+  -- convert to intrinsic Čech exactness of the direct family
+  let MT := sectionPoleSheafPower π' z' hz' 1
+  let UT := fun i => pullback.fst yπ (u' ≫ gA) ⁻¹ᵁ V i
+  have hUT : IsOpenCover UT :=
+    Scheme.Hom.iSup_preimage_eq_top (pullback.fst yπ (u' ≫ gA)) hV
+  have hUTaff : ∀ i, IsAffineOpen (UT i) := fun i =>
+    IsAffineOpen.preimage_pullback_fst yπ (u' ≫ gA) (hVaff i)
+  -- the cover is nonempty because the total space has a point over `s`
+  have hNpos : 0 < Fintype.card ι := by
+    have ht0 : (⟨s, hmem⟩ : T') ∈ (⊤ : T'.Opens) := trivial
+    have hy : ∃ i, (z' ≫ pullback.fst yπ (u' ≫ gA)).base ⟨s, hmem⟩ ∈ V i := by
+      have hmemTop : (z' ≫ pullback.fst yπ (u' ≫ gA)).base ⟨s, hmem⟩ ∈ iSup V := by
+        rw [show iSup V = ⊤ from hV]
+        trivial
+      exact TopologicalSpace.Opens.mem_iSup.mp hmemTop
+    obtain ⟨i, -⟩ := hy
+    exact Fintype.card_pos_iff.mpr ⟨i⟩
+  have hDexact : ∀ q, q < Fintype.card ι →
+      Function.Exact
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d q (q + 1)).hom
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d (q + 1) (q + 2)).hom :=
+    fun q hq =>
+      (Scheme.Modules.orderedBaseCechComplex_baseChange_exact_iff_of_iso yπ (u' ≫ gA)
+        L V hVaff MT eD q).mp (hexactT' q hq)
+  letI : MT.IsQuasicoherent := sectionPoleSheafPower_isQuasicoherent hsm' z' hz' 1
+  have hMTinv : Scheme.Modules.IsInvertible MT :=
+    sectionPoleSheafPower_isInvertible hsm' z' hz' 1
+  haveI : (pullback yπ (u' ≫ gA)).IsSeparated :=
+    ⟨by rw [← terminal.comp_from π']; infer_instance⟩
+  have hDflat : ∀ q, Module.Flat Γ((S.basicOpen a).toScheme,
+      (⊤ : (S.basicOpen a).toScheme.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q) := fun q =>
+    Scheme.Modules.orderedBaseCechObject_flat_of_isInvertible π' MT hMTinv UT hUTaff q
+  have hDbdd : ∀ q, Fintype.card ι ≤ q → Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q) := fun q hq =>
+    Scheme.Modules.orderedBaseCechObject_subsingleton_of_card_le π' MT UT q hq
+  -- the pointed identification with the restricted original family
+  obtain ⟨eC, hCπ, hCz⟩ :=
+    exists_pointedIso_direct_pullback yπ gA S.isoSpec φ hπA zA hzA z hz hzAφ v
+  -- ===== [FLW-2b] steps 1–9 (board recipe) =====
+  -- names: Bst-stage ring Γ(Spec ·,⊤) is `B₀` below; C-stage complex `C`; leg ring `K₀`
+  classical
+  let B₀ := Γ(Spec (.of Bst), (⊤ : (Spec (.of Bst)).Opens))
+  let K₀ := Γ((S.basicOpen a).toScheme,
+    (⊤ : (S.basicOpen a).toScheme.Opens))
+  -- (1) kernel base change B₀ → Away r is bijective (flat)
+  have hker1 : Function.Bijective (ModularCurves.kerBaseChangeComparison
+      (Localization.Away r) ((C.d 0 1).hom)) :=
+    ModularCurves.kerBaseChangeComparison_bijective_of_flat _ _
+  -- (2) kernel base change (Away r) → K₀ of the Away-r complex is bijective (flat coker)
+  letI : ∀ n, Module.Flat (Localization.Away r)
+      (Localization.Away r ⊗[B₀] (C.X n)) := fun n =>
+    Module.Flat.baseChange _ _ _
+  letI : Subsingleton
+      (Localization.Away r ⊗[B₀] (C.X (Fintype.card ι + 1))) :=
+    TensorProduct.subsingleton_right _ _
+  letI : Module.Flat (Localization.Away r)
+      ((Localization.Away r ⊗[B₀] (C.X 1)) ⧸
+        LinearMap.range ((C.d 0 1).hom.baseChange (Localization.Away r))) :=
+    Module.Flat.quotient_range_of_bounded_exact
+      (fun n => Localization.Away r ⊗[B₀] (C.X n))
+      (fun n => (C.d n (n + 1)).hom.baseChange (Localization.Away r))
+      (Fintype.card ι) (fun n hn => hexact n hn) 0 (Nat.zero_le _)
+  have hker2 : Function.Bijective (ModularCurves.kerBaseChangeComparison K₀
+      ((C.d 0 1).hom.baseChange (Localization.Away r))) :=
+    ModularCurves.kerBaseChangeComparison_bijective _ _
+  -- (3) tower composite B₀ → K₀
+  have hker3 : Function.Bijective
+      (ModularCurves.kerBaseChangeComparison K₀ ((C.d 0 1).hom)) :=
+    kerBaseChangeComparison_bijective_of_tower ((C.d 0 1).hom)
+      (Localization.Away r) K₀ hker1 hker2
+  -- (4) global sections of the direct family via the stage
+  have eSec := Scheme.Modules.baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison
+    yπ (u' ≫ gA) L V hV hVaff hker3
+  have eSecMT := (Scheme.Modules.baseSectionsMapIso π'
+    (sectionPoleSheafPowerDirectBaseChangeIso gA zA hzA hsmA L e u')).toLinearEquiv
+  -- (5) finiteness through the Noetherian stage
+  letI : IsLocallyNoetherian Y := LocallyOfFiniteType.isLocallyNoetherian yπ
+  letI : AlgebraicGeometry.IsNoetherian Y := { }
+  letI : L.IsFinitePresentation := hL.isFinitePresentation
+  letI : L.IsFiniteType :=
+    SheafOfModules.instIsFiniteTypeOfIsFinitePresentation L
+  have hHomFin := Scheme.Modules.orderedBaseCechHomologyFinite_of_isProper
+    (xπ := yπ) V hV hVaff L
+  letI : Module.Finite B₀ (C.homology 0) := hHomFin 0
+  letI : Module.Finite B₀ (LinearMap.ker (C.d 0 1).hom) :=
+    ModularCurves.HomologicalComplex.finite_kernel_zero_of_finite_homology C
+  letI : Module.Finite B₀ (Scheme.Modules.baseSections yπ L) :=
+    Module.Finite.equiv
+      (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+        yπ L V hV).toLinearEquiv.symm
+  letI : Module.Finite K₀ (K₀ ⊗[B₀] Scheme.Modules.baseSections yπ L) :=
+    Module.Finite.base_change _ _ _
+  letI hFinMT : Module.Finite K₀ (Scheme.Modules.baseSections π' MT) :=
+    Module.Finite.equiv (eSec.trans eSecMT)
+  -- (6) flatness of the sections module from the package complex
+  letI : ∀ n, Module.Flat K₀
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X n) := hDflat
+  letI : Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X (Fintype.card ι + 1)) :=
+    hDbdd _ (Nat.le_succ _)
+  letI : Module.Flat K₀ (LinearMap.ker
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d 0 1).hom) :=
+    Module.Flat.ker_of_bounded_exact_at
+      (fun n => (Scheme.Modules.orderedBaseCechComplex π' MT UT).X n)
+      (fun n => ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d n (n + 1)).hom)
+      (Fintype.card ι) hDexact 0 (Nat.zero_le _)
+  letI hFlatMT : Module.Flat K₀ (Scheme.Modules.baseSections π' MT) :=
+    Module.Flat.of_linearEquiv
+      (Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+        π' MT UT hUT).toLinearEquiv
+  -- (7)+(8)+(9): rank one and nonvanishing fibres give the normalized basis
+  have hbasis : ∃ bOne : Module.Basis (Fin 1) K₀
+      (Scheme.Modules.baseSections π' MT),
+      bOne 0 = sectionPoleSheafPowerOneSection π' z' hz' := by
+    sorry
+  obtain ⟨bOne, hbOne⟩ := hbasis
+  exact ⟨a, hmem, pullback yπ (u' ≫ gA), π', z', hz', inferInstance, hsm', h',
+    ⟨eC, hCπ, hCz⟩,
+    (Scheme.Modules.baseCechComplex_exactAt_one_iff_subsingleton_H π' MT UT hUT
+      hUTaff).mp
+      (Scheme.Modules.baseCechComplex_exactAt_one_of_orderedBaseCechComplex_exactAt_one
+        π' MT UT
+        ((ModularCurves.cochainComplex_functionExact_iff_exactAt
+          (Scheme.Modules.orderedBaseCechComplex π' MT UT) 0).mp (hDexact 0 hNpos))),
+    bOne, hbOne⟩
 
 end ModularCurves
