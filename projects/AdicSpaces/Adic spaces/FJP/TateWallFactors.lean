@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».FJP.TateTaylor
 import «Adic spaces».FJP.TateScalarExtension
 import «Adic spaces».FJP.TateNullstellensatz
+import «Adic spaces».FJP.SpectralExtension
 import Mathlib.FieldTheory.Normal.Defs
 
 /-!
@@ -175,6 +176,138 @@ theorem constP_residue_surjective (𝔮 : Ideal (P K m)) [h𝔮 : 𝔮.IsMaximal
   rw [map_mul, map_mul]
   congr 1
   exact (hl j).symm
+
+/-- Base change carries the variables to the variables. -/
+theorem mapP_polyToP_X (i : Fin m) :
+    mapP (m := m) hext (polyToP (MvPolynomial.X i)) =
+      polyToP (MvPolynomial.X i) := by
+  refine Subtype.ext ?_
+  rw [mapP_coe]
+  show MvPowerSeries.map (algebraMap K L)
+    ((MvPolynomial.X i : MvPolynomial (Fin m) K) : MvPowerSeries (Fin m) K) =
+    ((MvPolynomial.X i : MvPolynomial (Fin m) L) : MvPowerSeries (Fin m) L)
+  rw [MvPolynomial.coe_X, MvPolynomial.coe_X]
+  exact MvPowerSeries.map_X _ _
+
+include hext in
+/-- The generic ultrametric ball bound along a norm-extending embedding. -/
+theorem norm_le_one_of_monic_poly_hext {x : L}
+    {p : Polynomial ↥(FiniteJet.unitBall K)} (hp : p.Monic)
+    (hev : Polynomial.eval₂
+      ((algebraMap K L).comp (FiniteJet.unitBall K).subtype) x p = 0) :
+    ‖x‖ ≤ 1 := by
+  set f : ↥(FiniteJet.unitBall K) →+* L :=
+    (algebraMap K L).comp (FiniteJet.unitBall K).subtype with hf
+  rcases Nat.eq_zero_or_pos p.natDegree with h0 | hn
+  · exfalso
+    have hone : p = 1 := hp.natDegree_eq_zero.mp h0
+    rw [hone, Polynomial.eval₂_one] at hev
+    exact one_ne_zero hev
+  have hsum := Polynomial.eval₂_eq_sum_range (p := p) f x
+  rw [hev] at hsum
+  rw [Finset.sum_range_succ, hp.coeff_natDegree, map_one, one_mul] at hsum
+  have hx : x ^ p.natDegree = ∑ i ∈ Finset.range p.natDegree,
+      (f (-(p.coeff i))) * x ^ i := by
+    have h4 : x ^ p.natDegree =
+        -∑ i ∈ Finset.range p.natDegree, f (p.coeff i) * x ^ i := by
+      linear_combination -hsum
+    rw [h4, ← Finset.sum_neg_distrib]
+    exact Finset.sum_congr rfl fun i _ => by rw [map_neg]; ring
+  refine FiniteJet.SpectralExtension.norm_le_one_of_pow_eq_sum hn
+    (fun i => ?_) hx
+  have h5 : f (-(p.coeff i)) = algebraMap K L
+      (((-(p.coeff i) : ↥(FiniteJet.unitBall K)) : K)) := rfl
+  rw [h5, hext]
+  exact (FiniteJet.mem_unitBall_iff _ _).mp (-(p.coeff i)).2
+
+include hext in
+/-- **The wall factors are point ideals**: every maximal of `P L m` over a
+finite-residue maximal of `P K m`, with `L` normal splitting the residue and
+the variable images integral over the unit ball, is the point ideal of its
+coordinate images. -/
+theorem exists_pointIdeal_of_isMaximal_over
+    (𝔮 : Ideal (P K m)) [h𝔮 : 𝔮.IsMaximal]
+    (𝔫 : Ideal (P L m)) [h𝔫 : 𝔫.IsMaximal]
+    (hover : Ideal.comap (mapP (m := m) hext) 𝔫 = 𝔮)
+    (ψ : (P K m ⧸ 𝔮) →+* L)
+    (hψK : ∀ c : K, ψ (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.C c))) =
+      algebraMap K L c)
+    (hfinq :
+      letI : Algebra K (P K m ⧸ 𝔮) := (constantsToResidue 𝔮).toAlgebra
+      Module.Finite K (P K m ⧸ 𝔮))
+    (hint : ∀ i : Fin m, ∃ p : Polynomial ↥(FiniteJet.unitBall K),
+      p.Monic ∧ Polynomial.eval₂
+        (((constantsToResidue 𝔮 : K →+* (P K m ⧸ 𝔮))).comp
+          (FiniteJet.unitBall K).subtype)
+        (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.X i))) p = 0) :
+    ∃ (x : Fin m → L) (hx : ∀ i, ‖x i‖ ≤ 1),
+      𝔫 = pointIdeal (m := m) x hx := by
+  have hsurj := constP_residue_surjective (m := m) hext 𝔮 𝔫 hover ψ hψK hfinq
+  -- coordinates
+  have hcoord : ∀ i : Fin m, ∃ xi : L,
+      (Ideal.Quotient.mk 𝔫) (constP (m := m) xi) =
+        (Ideal.Quotient.mk 𝔫) (polyToP (MvPolynomial.X i)) := by
+    intro i
+    obtain ⟨xi, hxi⟩ := hsurj ((Ideal.Quotient.mk 𝔫)
+      (polyToP (MvPolynomial.X i)))
+    exact ⟨xi, hxi⟩
+  choose x hxeq using hcoord
+  -- norm bounds via the transported integral relations
+  have hkill : ∀ a ∈ 𝔮, (Ideal.Quotient.mk 𝔫).comp
+      (mapP (m := m) hext) a = 0 := by
+    intro a ha
+    rw [← hover, Ideal.mem_comap] at ha
+    exact Ideal.Quotient.eq_zero_iff_mem.mpr ha
+  have hchi_inj : Function.Injective
+      ((Ideal.Quotient.mk 𝔫).comp (constP (m := m) : L →+* P L m)) := by
+    letI : Field (P L m ⧸ 𝔫) := Ideal.Quotient.field 𝔫
+    exact RingHom.injective _
+  have hx : ∀ i, ‖x i‖ ≤ 1 := by
+    intro i
+    obtain ⟨p, hpmono, hpev⟩ := hint i
+    refine norm_le_one_of_monic_poly_hext hext (p := p) hpmono ?_
+    set χ : L →+* (P L m ⧸ 𝔫) :=
+      (Ideal.Quotient.mk 𝔫).comp (constP (m := m)) with hχ
+    set ρ : (P K m ⧸ 𝔮) →+* (P L m ⧸ 𝔫) :=
+      Ideal.Quotient.lift 𝔮 ((Ideal.Quotient.mk 𝔫).comp
+        (mapP (m := m) hext)) hkill with hρdef
+    refine hchi_inj ?_
+    rw [map_zero]
+    have h6 : χ (Polynomial.eval₂
+        ((algebraMap K L).comp (FiniteJet.unitBall K).subtype) (x i) p) =
+        Polynomial.eval₂ (χ.comp ((algebraMap K L).comp
+          (FiniteJet.unitBall K).subtype)) (χ (x i)) p :=
+      Polynomial.hom_eval₂ _ _ _ _
+    have h7 : ρ (Polynomial.eval₂
+        (((constantsToResidue 𝔮 : K →+* (P K m ⧸ 𝔮))).comp
+          (FiniteJet.unitBall K).subtype)
+        (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.X i))) p) =
+        Polynomial.eval₂ (ρ.comp (((constantsToResidue 𝔮 :
+          K →+* (P K m ⧸ 𝔮))).comp (FiniteJet.unitBall K).subtype))
+          (ρ (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.X i)))) p :=
+      Polynomial.hom_eval₂ _ _ _ _
+    have hcomp : ρ.comp (((constantsToResidue 𝔮 :
+        K →+* (P K m ⧸ 𝔮))).comp (FiniteJet.unitBall K).subtype) =
+        χ.comp ((algebraMap K L).comp (FiniteJet.unitBall K).subtype) := by
+      refine RingHom.ext fun c => ?_
+      show ρ (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.C (c : K)))) =
+        χ (algebraMap K L (c : K))
+      rw [show ρ (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.C (c : K)))) =
+        (Ideal.Quotient.mk 𝔫) (mapP (m := m) hext
+          (polyToP (MvPolynomial.C (c : K)))) from rfl, mapP_constP]
+      rfl
+    have hXtrans : ρ (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.X i))) =
+        χ (x i) := by
+      rw [show ρ (Ideal.Quotient.mk 𝔮 (polyToP (MvPolynomial.X i))) =
+        (Ideal.Quotient.mk 𝔫) (mapP (m := m) hext
+          (polyToP (MvPolynomial.X i))) from rfl, mapP_polyToP_X]
+      exact (hxeq i).symm
+    rw [h6, ← hcomp, ← hXtrans, ← h7, hpev, map_zero]
+  refine ⟨x, hx, ?_⟩
+  refine eq_pointIdeal_of_isMaximal_of_span_le 𝔫 x hx ?_
+  intro i
+  rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, sub_eq_zero]
+  exact (hxeq i).symm
 
 end Residue
 
