@@ -32,4 +32,43 @@ theorem isClosed_ideal_of_noetherian_normed {C : Type*} [NormedCommRing C]
     IsNoetherian.noetherian _
   exact Module.Finite.iff_fg.mpr hfg
 
+/-- Bounded sets push forward along continuous open ring homomorphisms. -/
+theorem TopologicalRing.IsBounded.image_of_isOpenMap {A B : Type*}
+    [CommRing A] [TopologicalSpace A] [CommRing B] [TopologicalSpace B]
+    (φ : A →+* B) (hcont : Continuous φ) (hopen : IsOpenMap φ)
+    {S : Set A} (hS : TopologicalRing.IsBounded S) :
+    TopologicalRing.IsBounded (⇑φ '' S) := by
+  intro U' hU'
+  have hpre : φ ⁻¹' U' ∈ nhds (0 : A) := by
+    have h0 : φ 0 = 0 := map_zero φ
+    exact ContinuousAt.preimage_mem_nhds hcont.continuousAt (h0 ▸ hU')
+  obtain ⟨V, hV, hSV⟩ := hS (φ ⁻¹' U') hpre
+  refine ⟨⇑φ '' V, ?_, ?_⟩
+  · have h1 := hopen.image_mem_nhds hV
+    rwa [map_zero φ] at h1
+  · rintro z hz
+    obtain ⟨y, ⟨x, hxS, rfl⟩, w, ⟨v, hvV, rfl⟩, rfl⟩ := Set.mem_mul.mp hz
+    have h2 : x * v ∈ φ ⁻¹' U' := hSV (Set.mul_mem_mul hxS hvV)
+    rw [← map_mul]
+    exact h2
+
+/-- Power-bounded elements push forward along continuous open ring
+homomorphisms. -/
+theorem TopologicalRing.IsPowerBounded.image_of_isOpenMap {A B : Type*}
+    [CommRing A] [TopologicalSpace A] [CommRing B] [TopologicalSpace B]
+    (φ : A →+* B) (hcont : Continuous φ) (hopen : IsOpenMap φ)
+    {x : A} (hx : TopologicalRing.IsPowerBounded x) :
+    TopologicalRing.IsPowerBounded (φ x) := by
+  have hrange : Set.range ((φ x) ^ · : ℕ → B) =
+      ⇑φ '' Set.range (x ^ · : ℕ → A) := by
+    ext y
+    constructor
+    · rintro ⟨n, rfl⟩
+      exact ⟨x ^ n, ⟨n, rfl⟩, map_pow φ x n⟩
+    · rintro ⟨-, ⟨n, rfl⟩, rfl⟩
+      exact ⟨n, (map_pow φ x n).symm⟩
+  show TopologicalRing.IsBounded (Set.range ((φ x) ^ · : ℕ → B))
+  rw [hrange]
+  exact TopologicalRing.IsBounded.image_of_isOpenMap φ hcont hopen hx
+
 end WeightedParity
