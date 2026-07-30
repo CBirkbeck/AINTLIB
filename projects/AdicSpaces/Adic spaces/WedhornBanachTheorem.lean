@@ -1011,6 +1011,49 @@ theorem _sub_lemma_L4_2_continuous_via_OMT
   -- f continuous via quotient map.
   exact hν_quot.continuous_iff.mpr hfν_cont
 
+/-- **A linear map out of a finitely generated topological module is continuous**, given a
+topologically nilpotent unit in the base (BGR §3.7.3/2 via the faithful OMT). Pick a finite
+generating set `s`, build the surjection `ν : (Fin n → A) → M`; `ν` is open by
+`wedhorn_6_16_of_topNilpUnit`, hence a quotient map, and continuity of `f ∘ ν` — a finite sum
+of scalar multiples — transfers to `f`. -/
+private theorem continuous_of_moduleFinite_of_topNilpUnit
+    {A : Type u} [CommRing A] [UniformSpace A] [IsUniformAddGroup A]
+      [CompleteSpace A] [(uniformity A).IsCountablyGenerated] [T2Space A]
+      [IsTopologicalRing A]
+    {M : Type*} [AddCommGroup M] [Module A M] [Module.Finite A M]
+      [UniformSpace M] [IsUniformAddGroup M] [CompleteSpace M]
+      [(uniformity M).IsCountablyGenerated] [T2Space M] [ContinuousSMul A M]
+    {N : Type*} [AddCommGroup N] [Module A N] [UniformSpace N] [IsUniformAddGroup N]
+      [CompleteSpace N] [(uniformity N).IsCountablyGenerated] [T2Space N]
+      [ContinuousSMul A N]
+    {ϖ : A} (hϖ_nil : IsTopologicallyNilpotent ϖ) (hϖu : IsUnit ϖ)
+    (f : M →ₗ[A] N) : Continuous f := by
+  obtain ⟨n, s, hs⟩ := Module.Finite.exists_fin (R := A) (M := M)
+  let ν : (Fin n → A) →ₗ[A] M :=
+    { toFun := fun a => ∑ i, a i • s i
+      map_add' := fun x y => by
+        simp only [Pi.add_apply, add_smul, Finset.sum_add_distrib]
+      map_smul' := fun a x => by
+        simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply, Finset.smul_sum,
+          smul_smul] }
+  have hν_cont : Continuous ν := by
+    change Continuous fun a : (Fin n → A) => ∑ i, a i • s i
+    exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
+  have hν_surj : Function.Surjective ν := by
+    intro m
+    have hm : m ∈ Submodule.span A (Set.range s) := hs ▸ Submodule.mem_top
+    rw [Submodule.mem_span_range_iff_exists_fun] at hm
+    obtain ⟨c, hc⟩ := hm
+    exact ⟨c, hc⟩
+  have hν_open : IsOpenMap ν :=
+    wedhorn_6_16_of_topNilpUnit hϖ_nil hϖu ν hν_cont hν_surj
+  have hν_quot : Topology.IsQuotientMap ν := hν_open.isQuotientMap hν_cont hν_surj
+  have hfν_cont : Continuous (f ∘ ν) := by
+    change Continuous fun a : (Fin n → A) => f (∑ i, a i • s i)
+    simp only [map_sum, map_smul]
+    exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
+  exact hν_quot.continuous_iff.mpr hfν_cont
+
 /-- **Sub-lemma L4.3 — A-linear map is open onto image (strict)**.
 
 **Source** (BGR §3.7.3/Proposition 4, p. 165, verbatim):
@@ -1095,32 +1138,8 @@ theorem _sub_lemma_L4_3_strict_via_closed_image
   -- is unavailable here). Pick a finite generating set `s : Fin n → M`, build the
   -- surjection `ν : (Fin n → A) → M`, which is open by the faithful OMT, hence a
   -- quotient map; then `f = (f ∘ ν) ∘ ν⁻¹` is continuous.
-  have hf_cont : Continuous f := by
-    obtain ⟨n, s, hs⟩ := Module.Finite.exists_fin (R := A) (M := M)
-    let ν : (Fin n → A) →ₗ[A] M :=
-      { toFun := fun a => ∑ i, a i • s i
-        map_add' := fun x y => by
-          simp only [Pi.add_apply, add_smul, Finset.sum_add_distrib]
-        map_smul' := fun a x => by
-          simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply, Finset.smul_sum,
-            smul_smul] }
-    have hν_cont : Continuous ν := by
-      change Continuous fun a : (Fin n → A) => ∑ i, a i • s i
-      exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
-    have hν_surj : Function.Surjective ν := by
-      intro m
-      have hm : m ∈ Submodule.span A (Set.range s) := hs ▸ Submodule.mem_top
-      rw [Submodule.mem_span_range_iff_exists_fun] at hm
-      obtain ⟨c, hc⟩ := hm
-      exact ⟨c, hc⟩
-    have hν_open : IsOpenMap ν :=
-      wedhorn_6_16_of_topNilpUnit hϖ_nil ϖ.isUnit ν hν_cont hν_surj
-    have hν_quot : Topology.IsQuotientMap ν := hν_open.isQuotientMap hν_cont hν_surj
-    have hfν_cont : Continuous (f ∘ ν) := by
-      change Continuous fun a : (Fin n → A) => f (∑ i, a i • s i)
-      simp only [map_sum, map_smul]
-      exact continuous_finsetSum _ fun i _ => (continuous_apply i).smul continuous_const
-    exact hν_quot.continuous_iff.mpr hfν_cont
+  have hf_cont : Continuous f :=
+    continuous_of_moduleFinite_of_topNilpUnit hϖ_nil ϖ.isUnit f
   -- Step 4b: `f.rangeRestrict` is continuous (Subtype.val ∘ f.rangeRestrict = f).
   have hf_rangeRestrict_cont : Continuous (f.rangeRestrict : M →ₗ[A] LinearMap.range f) :=
     Topology.IsInducing.subtypeVal.continuous_iff.mpr hf_cont
