@@ -3004,6 +3004,23 @@ private theorem base_s_mem_annihilator_radical {A : Type*} [CommRing A]
   exact hDs_notin (Ideal.IsPrime.mem_of_pow_mem hp_prime k
     (hp_ann (Ideal.subset_span hk)))
 
+/-- Pointwise equality of the restricted images transfers to the algebra-level
+restriction maps. -/
+private theorem restrictionMapAlg_eq_of_pointwise [HasLocLiftPowerBounded A]
+    (C : RationalCoveringData A) (x' y' : Localization.Away C.base.s)
+    (hpt : ∀ D : C.covers,
+      restrictionMap C.base D (C.hsubset D D.prop) (C.base.coeRingHom x')
+        = restrictionMap C.base D (C.hsubset D D.prop) (C.base.coeRingHom y')) :
+    ∀ (D : RationalLocData A) (hD : D ∈ C.covers),
+      restrictionMapAlg C.base D (C.hsubset D hD) x'
+        = restrictionMapAlg C.base D (C.hsubset D hD) y' := by
+  intro D hD
+  have h := hpt ⟨D, hD⟩
+  simp only at h
+  have hx := restrictionMapHom_coe C.base D (C.hsubset D hD) x'
+  have hy := restrictionMapHom_coe C.base D (C.hsubset D hD) y'
+  rwa [hx.symm, hy.symm]
+
 /-- Product restriction is injective for discrete rings (Theorem 8.28(c)). -/
 theorem productRestriction_injective_discrete {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
@@ -3016,15 +3033,7 @@ theorem productRestriction_injective_discrete {A : Type*} [CommRing A]
   obtain ⟨x', rfl⟩ := hbij_base.2 x
   obtain ⟨y', rfl⟩ := hbij_base.2 y
   suffices h : x' = y' by rw [h]
-  have hmap_eq : ∀ (D : RationalLocData A) (hD : D ∈ C.covers),
-      restrictionMapAlg C.base D (C.hsubset D hD) x' =
-      restrictionMapAlg C.base D (C.hsubset D hD) y' := by
-    intro D hD
-    have h := congr_fun hxy ⟨D, hD⟩
-    simp only at h
-    have hx := restrictionMapHom_coe C.base D (C.hsubset D hD) x'
-    have hy := restrictionMapHom_coe C.base D (C.hsubset D hD) y'
-    rwa [hx.symm, hy.symm]
+  have hmap_eq := restrictionMapAlg_eq_of_pointwise C x' y' (congr_fun hxy)
   rw [← sub_eq_zero]
   set z := x' - y'
   have hz_zero : ∀ (D : RationalLocData A) (hD : D ∈ C.covers),
