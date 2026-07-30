@@ -2987,3 +2987,47 @@ width, so it genuinely is not reachable this way — it needs the shared-inner-s
 two textually-identical `by_cases` branches.
 
 Running total: **236** (486 baseline → 290 pre-split → 274 post-split → 236).
+
+## Task 2 — `WedhornCechAcyclicity.ratio_laurent_refines_unitGen_cover` 60 → 49 (236 → 235, pending build)
+
+`hcmp` (24 lines) lifted to `ratio_pairwise_comparable_on_leaf`: **on any leaf of the ratio-Laurent
+cover, the sign dichotomy for `f/g` makes every pair of units comparable.**
+
+Dependency count was the deciding factor and was checked *before* writing anything: 3 locals
+(`V'`, `hV''`, `ratios`) plus 3 theorem binders (`C`, `units`, `h_units`) = 6, comfortably under the
+~10 threshold that killed `wLoc_le_of_interior_bound`. Uses the pass-the-value-and-its-equation
+pattern for `ratios`/`hratios` (from `set … with hratios`, and the body opens `rw [hratios]`).
+
+**Procedure note: this module is the 13.4k-line one that takes ~10 minutes to build**, so the usual
+"apply, build, read the error, iterate" loop costs ~10 min per round here. Compensated by reading the
+*entire* block and the enclosing signature first — including the `letI`-CompleteSpace instance binder,
+which had to be reproduced verbatim in the helper — rather than discovering the signature
+requirements one build at a time. **On slow modules, front-load the reading; on fast ones, iterate.**
+
+Running total: **235** (486 baseline → 290 pre-split → 274 post-split → 235).
+
+### Scoped: `RelativeDescentHuber.isEmbedding_productRestrictionSub_of_imgCovering` (−15)
+
+`hcomp` (27 lines) references only 3 locals (`g`, `hcertB`, `hcertP`), so the dependency count passes.
+The complication is `g`: it is `set`-bound to an **8-line lambda**, and the block unfolds it
+*definitionally* via `show ((…).choose_spec.choose_spec.symm ▸ (keystoneHomO …)) = _` rather than by
+`rw [hgdef]`.
+
+By the discriminator recorded earlier (definitional bridge → state the helper plainly; instance-
+carrying bridge → pass the term), the definitional route says state it on the concrete lambda. But
+that means **reproducing the 8-line lambda inside the helper's statement**, which is the cost here
+whichever way it is done:
+
+* state plainly → the lambda appears in the helper's conclusion;
+* pass `g` + `hgdef` and `subst` → the lambda appears in `hgdef`'s type.
+
+Either way ~8 lines of the saving are given back, so the realistic gain is ~22 against a need of 15 —
+still positive, but this is the first case where the *definition being lifted over* is itself large
+enough to matter.
+
+**New wrinkle worth recording: the discriminator assumes the bridged term is small.** When a
+`set`-bound value is a multi-line lambda, both branches of the discriminator cost its full text, and
+the lift is worth doing only if the block is substantially larger than the definition. Here 27 vs 8
+clears it; a 12-line block over an 8-line lambda would not.
+
+Deferred this round only because the gate was mid-flight and the edit wants a careful single pass.
