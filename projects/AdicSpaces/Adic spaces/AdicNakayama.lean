@@ -459,4 +459,178 @@ noncomputable def AdicCompletion.congrOfInterleaved (I J : Ideal A) (c : ℕ)
 
 end InterleavedCongr
 
+section PiSplit
+
+variable {A : Type*} [CommRing A] {ι : Type*} [Fintype ι]
+
+/-- Powers commute with intersections of pairwise-comaximal families. -/
+theorem Ideal.iInf_pow_eq_iInf_pow (f : ι → Ideal A)
+    (hf : Pairwise fun i j => IsCoprime (f i) (f j)) (r : ℕ) :
+    (⨅ i, f i) ^ r = ⨅ i, (f i) ^ r := by
+  classical
+  have h1 : ∏ i, f i = ⨅ i, f i := by
+    have h0 := Ideal.prod_eq_iInf_of_pairwise_isCoprime
+      (s := Finset.univ) (J := f) (fun i _ j _ hij => hf hij)
+    simpa using h0
+  have h2 : ∏ i, (f i) ^ r = ⨅ i, (f i) ^ r := by
+    have h0 := Ideal.prod_eq_iInf_of_pairwise_isCoprime
+      (s := Finset.univ) (J := fun i => (f i) ^ r)
+      (fun i _ j _ hij => (hf hij).pow)
+    simpa using h0
+  rw [← h1, ← h2, ← Finset.prod_pow]
+
+/-- The levelwise Chinese remainder identification for the split (hand-rolled
+lift to keep elaboration cheap). -/
+noncomputable def AdicCompletion.splitLevel (f : ι → Ideal A)
+    (hf : Pairwise fun i j => IsCoprime (f i) (f j)) (r : ℕ) :
+    (A ⧸ (⨅ i, f i) ^ r) ≃+* ∀ i, A ⧸ (f i) ^ r := by
+  classical
+  refine RingEquiv.ofBijective
+    (Ideal.Quotient.lift ((⨅ i, f i) ^ r)
+      (Pi.ringHom fun i => Ideal.Quotient.mk ((f i) ^ r)) ?_) ⟨?_, ?_⟩
+  · intro a ha
+    rw [Ideal.iInf_pow_eq_iInf_pow f hf r] at ha
+    funext i
+    show Ideal.Quotient.mk ((f i) ^ r) a = 0
+    exact Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_iInf.mp ha i)
+  · intro x y hxy
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective y
+    rw [Ideal.Quotient.lift_mk, Ideal.Quotient.lift_mk] at hxy
+    refine Ideal.Quotient.eq.mpr ?_
+    rw [Ideal.iInf_pow_eq_iInf_pow f hf r]
+    refine Ideal.mem_iInf.mpr fun i => ?_
+    have h1 := congrFun hxy i
+    show a - b ∈ (f i) ^ r
+    exact Ideal.Quotient.eq.mp h1
+  · intro u
+    obtain ⟨a, ha⟩ := Ideal.pi_quotient_surjective
+      (I := fun i => (f i) ^ r) (fun _ _ hij => (hf hij).pow) u
+    refine ⟨Ideal.Quotient.mk _ a, ?_⟩
+    rw [Ideal.Quotient.lift_mk]
+    funext i
+    exact ha i
+
+theorem AdicCompletion.splitLevel_mk (f : ι → Ideal A)
+    (hf : Pairwise fun i j => IsCoprime (f i) (f j)) (r : ℕ) (y : A) :
+    AdicCompletion.splitLevel f hf r (Ideal.Quotient.mk _ y) =
+      fun i => Ideal.Quotient.mk _ y := rfl
+
+set_option maxHeartbeats 4000000 in
+/-- **The adic completion splits along a finite pairwise-comaximal
+family.** -/
+noncomputable def AdicCompletion.piSplit (f : ι → Ideal A)
+    (hf : Pairwise fun i j => IsCoprime (f i) (f j)) :
+    AdicCompletion (⨅ i, f i) A ≃+* ∀ i, AdicCompletion (f i) A where
+  toFun x := fun i => ⟨fun r => (AdicCompletion.levelEquiv (f i) r).symm
+      ((AdicCompletion.splitLevel f hf r
+        (AdicCompletion.levelEquiv (⨅ i, f i) r (x.1 r))) i), by
+    intro a b hab
+    have h3 := AdicCompletion.levelEquiv_transitionMap (f i) hab
+      ((AdicCompletion.levelEquiv (f i) b).symm
+        ((AdicCompletion.splitLevel f hf b
+          (AdicCompletion.levelEquiv (⨅ i, f i) b (x.1 b))) i))
+    rw [RingEquiv.apply_symm_apply] at h3
+    refine (RingEquiv.eq_symm_apply _).mpr ?_
+    rw [h3]
+    obtain ⟨y, hy⟩ := Ideal.Quotient.mk_surjective
+      (AdicCompletion.levelEquiv (⨅ i, f i) b (x.1 b))
+    have h4 := AdicCompletion.levelEquiv_transitionMap (⨅ i, f i) hab (x.1 b)
+    rw [x.2 hab, ← hy, Ideal.Quotient.factor_mk] at h4
+    rw [← hy, AdicCompletion.splitLevel_mk, h4,
+      AdicCompletion.splitLevel_mk]
+    rw [Ideal.Quotient.factor_mk]⟩
+  invFun y := ⟨fun r => (AdicCompletion.levelEquiv (⨅ i, f i) r).symm
+      ((AdicCompletion.splitLevel f hf r).symm
+        (fun i => AdicCompletion.levelEquiv (f i) r ((y i).1 r))), by
+    intro a b hab
+    obtain ⟨z, hz⟩ := Ideal.Quotient.mk_surjective
+      ((AdicCompletion.splitLevel f hf b).symm
+        (fun i => AdicCompletion.levelEquiv (f i) b ((y i).1 b)))
+    have hz2 : (fun i => AdicCompletion.levelEquiv (f i) b ((y i).1 b)) =
+        fun i => Ideal.Quotient.mk _ z := by
+      rw [← AdicCompletion.splitLevel_mk f hf b z, hz,
+        RingEquiv.apply_symm_apply]
+    have h3 := AdicCompletion.levelEquiv_transitionMap (⨅ i, f i) hab
+      ((AdicCompletion.levelEquiv (⨅ i, f i) b).symm
+        ((AdicCompletion.splitLevel f hf b).symm
+          (fun i => AdicCompletion.levelEquiv (f i) b ((y i).1 b))))
+    rw [RingEquiv.apply_symm_apply] at h3
+    refine (RingEquiv.eq_symm_apply _).mpr ?_
+    rw [h3, ← hz, Ideal.Quotient.factor_mk]
+    -- the a-level tuple is the constant-z tuple
+    have h5 : (fun i => AdicCompletion.levelEquiv (f i) a ((y i).1 a)) =
+        fun i => Ideal.Quotient.mk _ z := by
+      funext i
+      have h6 := AdicCompletion.levelEquiv_transitionMap (f i) hab ((y i).1 b)
+      rw [(y i).2 hab] at h6
+      have h7 := congrFun hz2 i
+      rw [h7, Ideal.Quotient.factor_mk] at h6
+      exact h6
+    rw [h5, ← AdicCompletion.splitLevel_mk f hf a z,
+      RingEquiv.symm_apply_apply]⟩
+  left_inv x := by
+    refine Subtype.ext (funext fun r => ?_)
+    show (AdicCompletion.levelEquiv (⨅ i, f i) r).symm
+      ((AdicCompletion.splitLevel f hf r).symm
+        (fun i => AdicCompletion.levelEquiv (f i) r
+          ((AdicCompletion.levelEquiv (f i) r).symm
+            ((AdicCompletion.splitLevel f hf r
+              (AdicCompletion.levelEquiv (⨅ i, f i) r (x.1 r))) i)))) = x.1 r
+    have h8 : (fun i => AdicCompletion.levelEquiv (f i) r
+        ((AdicCompletion.levelEquiv (f i) r).symm
+          ((AdicCompletion.splitLevel f hf r
+            (AdicCompletion.levelEquiv (⨅ i, f i) r (x.1 r))) i))) =
+        AdicCompletion.splitLevel f hf r
+          (AdicCompletion.levelEquiv (⨅ i, f i) r (x.1 r)) := by
+      funext i
+      rw [RingEquiv.apply_symm_apply]
+    rw [h8, RingEquiv.symm_apply_apply, RingEquiv.symm_apply_apply]
+  right_inv y := by
+    refine funext fun i => Subtype.ext (funext fun r => ?_)
+    show (AdicCompletion.levelEquiv (f i) r).symm
+      ((AdicCompletion.splitLevel f hf r
+        (AdicCompletion.levelEquiv (⨅ i, f i) r
+          ((AdicCompletion.levelEquiv (⨅ i, f i) r).symm
+            ((AdicCompletion.splitLevel f hf r).symm
+              (fun j => AdicCompletion.levelEquiv (f j) r
+                ((y j).1 r)))))) i) = (y i).1 r
+    rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+    rw [RingEquiv.symm_apply_apply]
+  map_mul' x y := by
+    refine funext fun i => Subtype.ext (funext fun r => ?_)
+    show (AdicCompletion.levelEquiv (f i) r).symm
+      ((AdicCompletion.splitLevel f hf r
+        (AdicCompletion.levelEquiv (⨅ i, f i) r ((x * y).1 r))) i) = _
+    rw [show (x * y).1 r = x.1 r * y.1 r from rfl, map_mul, map_mul]
+    rw [show ∀ (u v : ∀ j, A ⧸ (f j) ^ r), (u * v) i = u i * v i from
+      fun u v => rfl, map_mul]
+    rfl
+  map_add' x y := by
+    refine funext fun i => Subtype.ext (funext fun r => ?_)
+    show (AdicCompletion.levelEquiv (f i) r).symm
+      ((AdicCompletion.splitLevel f hf r
+        (AdicCompletion.levelEquiv (⨅ i, f i) r ((x + y).1 r))) i) = _
+    rw [show (x + y).1 r = x.1 r + y.1 r from rfl, map_add, map_add]
+    rw [show ∀ (u v : ∀ j, A ⧸ (f j) ^ r), (u + v) i = u i + v i from
+      fun u v => rfl, map_add]
+    rfl
+
+/-- **The semilocal completion decomposition**: if `Q` lies under finitely
+many pairwise-comaximal ideals whose intersection is nilpotent modulo `Q`,
+the `Q`-adic completion is the product of the completions at the family. -/
+noncomputable def AdicCompletion.semilocalSplit (Q : Ideal A)
+    (𝔫 : ι → Ideal A) (hpair : Pairwise fun i j => IsCoprime (𝔫 i) (𝔫 j))
+    (hle : ∀ i, Q ≤ 𝔫 i) (e : ℕ) (he : 1 ≤ e)
+    (hnil : (⨅ i, 𝔫 i) ^ e ≤ Q) :
+    AdicCompletion Q A ≃+* ∀ i, AdicCompletion (𝔫 i) A :=
+  (AdicCompletion.congrOfInterleaved Q (⨅ i, 𝔫 i) e he
+    (fun r => by
+      rw [pow_mul]
+      exact pow_le_pow_left' hnil r)
+    (fun r => pow_le_pow_left' (le_iInf hle) r)).trans
+    (AdicCompletion.piSplit 𝔫 hpair)
+
+end PiSplit
+
 end AdicNakayama
