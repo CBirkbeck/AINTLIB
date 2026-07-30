@@ -630,3 +630,24 @@ NEXT (fully specified): stage-2 of HeadTResidue —
     fills comap_headToQ_isMaximal (HeadReducedMaximal) → then the ONLY
     remaining live-chain sorry is qHead_completedLocal_comparison (L1,
     8.30-conditional by design).
+
+## THE TOWER CLOSES (2026-07-30 session end-state)
+
+comap_headToQ_isMaximal + module_finite_residue_headT AXIOM-CLEAN.
+Stage-2d gotchas: QHead def-alias diamond (instCommRingQHead vs Quotient.ring)
+— work ENTIRELY in the unfolded (P⧸graph)-world (set-based transparent retype
+`set 𝔮' : Ideal (P⧸graph) := 𝔮`; have-retype for the IsMaximal; membership-level
+Ideal.ext-fun-Iff.rfl transport for the final comap-identification; named
+(h𝔫 :=)/(hfin :=) instance-passing into comap_isMaximal_of_finite_residue;
+docstring must FOLLOW set_option-in, not precede).
+
+**LIVE-CHAIN STATE**: weightedParity_chainReduced_unconditional (thm 6.2(3))
+depends on sorryAx ONLY through qHead_completedLocal_comparison (HeadReduced:413)
+= L1, 8.30-conditional BY DESIGN (central prop_8_30_flat_clean noeth-A₀ sorry,
+another producer's WIP). Everything else this campaign owns is proven:
+block A (Tate completed locals reduced) + normalClosure corollary;
+L3-at-maximals BOTH W-cases (finite-embedding semilocal mirror + Artin-Rees);
+D-rewire live in Main; the restricted Fubini; the T_N⟨T⟩-tower Nullstellensatz.
+Remaining optional: L1 elementary leaves (quotient_pow_equiv_of_flat +
+graphAtPrimeEquiv + trivial-fibre) to pre-build against the 8.30 landing;
+PARKED (statement-protected): the 3 general-prime L3/L1 forms (Rees-gated).
