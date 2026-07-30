@@ -716,3 +716,33 @@ over κ(𝔭)-spectral for ε.
   truncations → F in gauss norm; 𝔭·A⟨T⟩ closed ⟹ F ∈ 𝔭·A⟨T⟩ ⟹
   coefficientwise-𝔭 = extension ideal; then R2 base-change via bounded
   section (finite-dim norm equivalence) + pointIdeal machinery closes BETA.
+
+## BETA ADJUDICATED (ChatGPT-5.6-sol max, 2026-07-30): route R1' — evaluation + closed kernel + density
+
+Split-alone INSUFFICIENT (counterexample κ → κ[ε]/(ε²): split, finite, local,
+flat, NOT onto — no pigeonhole). The winning route (no R2 base-change, no
+flatness, never compute ker):
+S := A⟨T⟩ (A = head, on the restrictedMvPowerSeriesSubring carrier where the
+canonical-topology machinery lives), Φ : S ↠ Q/𝔭Q canonical, C := S/ker Φ ≅
+Q/𝔭Q (RingHom.quotientKerEquivOfSurjective).
+1. ker Φ CLOSED (mvTate_isClosed_ideal, MvTateAlgebraTopology:991 — needs
+   [IsTateRing A][T2Space A][IsStronglyNoetherian A] + right-uniform complete;
+   head qualifies) ⟹ C Hausdorff.
+2. Polynomial formula Φ(P) = j(P̄(b)) via lift u of s̄⁻¹ (us−1 ∈ 𝔭 ⟹
+   [T_i] = [u f_i] = j(b_i)) + MvPolynomial.ringHom_ext.
+3. r : C → κ from the evaluation ε (mvEvalHomBounded; continuity =
+   mvEvalHomBounded_continuous Wedhorn828:1143, canonical topology);
+   j : κ → C constants (continuous via the BOUNDED K-linear section κ → A —
+   finite-dim automatic continuity); r∘j = id ⟹ range j closed
+   (Function.LeftInverse.isClosed_range).
+4. mvPolynomialToTate_denseRange (canonical topology, exists) + step-2 ⟹
+   range j dense ⟹ range j = C ⟹ j surjective ⟹ BETA surjectivity;
+   injectivity already free. CAVEAT: keep ALL topology in
+   mvTateAlgebraTopology' — no gauss mixing (or use the comparison).
+Then the L1 assembly chain (recorded earlier) with (α)-flatness threaded
+8.30-conditionally closes qHead_completedLocal_comparison.
+Fallback if instance-wiring explodes: R2 (truncation lemmas ALREADY BANKED in
+FJP/RestrictedTruncation.lean; univariate precedent
+TateAlgebra.mem_ideal_map_of_forall_coeff_mem:2573).
+Carrier note: QHead is on the P-form; bridge toTopRestricted (TatePointEval)
+transports the purely algebraic surjectivity statement.
