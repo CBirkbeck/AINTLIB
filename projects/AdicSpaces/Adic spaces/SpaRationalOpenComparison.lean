@@ -4,8 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».Presheaf
 import «Adic spaces».PresheafIdentification
-import «Adic spaces».WedhornSpaRationalOpenLiftWrapper
 import «Adic spaces».CompletedResidueField
+import «Adic spaces».WedhornLocalizationPlus
+import «Adic spaces».WedhornLocalizationLiftContinuityBounded
 import Mathlib.Topology.Algebra.UniformRing
 import Mathlib.RingTheory.Valuation.Integral
 

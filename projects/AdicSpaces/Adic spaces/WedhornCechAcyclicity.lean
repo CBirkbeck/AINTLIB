@@ -6,12 +6,17 @@ import «Adic spaces».CechCohomology
 import «Adic spaces».LaurentRefinementCore
 import «Adic spaces».Presheaf
 import «Adic spaces».StructureSheaf
-import «Adic spaces».TateAcyclicityResiduals
+import «Adic spaces».PrincipalPairAdicComplete
 import «Adic spaces».AuditCleanWrappers
 import «Adic spaces».SpaCompactNoHArch
 import «Adic spaces».Wedhorn828
 import «Adic spaces».RelativePieceKeystone
 import «Adic spaces».WedhornBanachTheorem
+import «Adic spaces».LaurentRefinementTree
+import «Adic spaces».EmbeddingTopo
+import «Adic spaces».LocalBasis
+import «Adic spaces».WedhornCoverNormalization
+import «Adic spaces».SpvCompletionExtension
 
 -- Faithfulness scoping (2026-07-03): within THIS file — the 8.28(b) assembly — the
 -- sorry-carrying `HasLocLiftPowerBounded` instances must not be synthesized; every

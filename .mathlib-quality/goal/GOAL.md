@@ -1454,3 +1454,127 @@ Three single-use bindings inlined, each used exactly once immediately after bein
 
 The file is full of B/C mirror pairs (`hcontB`/`hcontC`, `hsubB`/`hsubC`, `hxB`/`hxC`), so each
 golf applies twice — the recurring dividend of this codebase's mirror structure.
+
+## CORRECTION — attempt 1 was wrong; the direct-importer scan was the bug
+
+Attempt 1 (117 modules) **failed the build gate** on `StructureSheaf`:
+
+    StructureSheaf.lean:891  Unknown identifier `rationalCovering_hasSeparation`   (×3)
+    StructureSheaf.lean:1583 Unknown identifier `rationalCovering_hasGluing`       (×3)
+    StructureSheaf.lean:1496 Unknown identifier `presheafValue_subsingleton_of_s_eq_zero` (×3)
+
+Root cause: the usage scan only inspected modules that **directly** `import` a cluster module
+(`if any(f'.{m}' in raw …)`). `StructureSheaf` imports `LaurentRefinement`, which imported
+`LaurentRefinementAcyclic` — so `StructureSheaf` consumes those three declarations *transitively*,
+with no direct import to reveal it. Cutting the prose-only `LaurentRefinement` edge was correct
+about that file and still broke its downstream consumer.
+
+**Lesson (generalises well beyond this task): "who imports X" is not "who uses X."** In Lean,
+transitive imports make every ancestor's declarations visible, so a module can depend on X while
+naming X nowhere in its import block. To decide whether a module is removable, build a **uses-graph**
+— map every declared name to its defining module, tokenise each consumer's comment-stripped code,
+and resolve each token against the consumer's *import closure* — then ask who needs it. The
+import graph over-reports coupling (prose-only imports) and under-reports it (transitive use) at the
+same time.
+
+Attempt 2 was recomputed that way:
+
+    ACY   = name-matched acyclicity candidates (Wedhorn*, TateAcyclicity*, LaurentRefinementAcyclic, CechCohomology)
+    MOVE  = ACY \ usesClosure(everything outside ACY)
+
+Generous candidate set is fine — the subtraction does the work. It correctly sorted the many
+`Wedhorn*` modules that are **general Huber/Tate infrastructure, not acyclicity**
+(`Wedhorn828`, `WedhornBanachTheorem`, `WedhornCoverNormalization`, `WedhornLocTopologyLinear`, …)
+into STAY. It also keeps `EmbeddingTopo` / `LocalBasis` / `HubnerSeparation`, which attempt 1 had
+wrongly swept out as collateral.
+
+**Final: MOVE 111 modules / 44,128 lines (19.4% of the library). STAY 15 of the 126 candidates.**
+Independent check: kept modules referencing a name declared *only* in the move set = **0**.
+
+### The honest caveat the owner needs
+
+`LaurentRefinementAcyclic` (456 lines) **cannot leave**: `StructureSheaf`, `Cor832` and
+`StandardCover` use `rationalCovering_hasGluing` and `rationalCovering_hasSeparation`, and **both
+rest on `sorryAx`**. So the FJP/FF tree still contains sorried acyclicity lemmas after the split;
+no amount of file-moving fixes that — it needs those two discharged, or their consumers restated.
+What *is* true is that the FJP/FF **headline theorems** are axiom-clean, so the sorries sit in the
+modules, not under the results the owner cares about. (`tateAcyclicity` itself, the headline, is
+referenced only in prose and does leave with the branch.)
+
+`WedhornCechAcyclicity` (13,391 lines) also stays — despite the name it carries the **proven**
+`isSheafy_of_stronglyNoetherian_828b` that 11 modules consume, and it is sorry-free.
+
+## The third bug: IMPORT CONDUITS
+
+Attempt 2 (111 modules, uses-graph verified) **also failed**, in two files:
+
+    WedhornLocalizationPlus.lean:89     Unknown identifier `PlusSubring`
+    SpaRationalOpenComparison.lean:81   Unknown identifier `localizationAwayPlusSubring`
+    SpaRationalOpenComparison.lean:89   Unknown identifier `valuationLocalizationLift_of_bounded`
+
+Neither failure was a missing *declaration* — every one of those names is declared in a module that
+**stays**. The failures were missing *paths*. Both files reached their definers only **through** the
+module whose import I stripped:
+
+    WedhornLocalizationPlus --(stripped)--> WedhornPrelocalizationTransfer --> RationalSubsets --> … --> AdicSpectrum   (PlusSubring)
+    SpaRationalOpenComparison --(stripped)--> WedhornSpaRationalOpenLiftWrapper --> … --> WedhornLocalizationPlus       (localizationAwayPlusSubring)
+
+**Lesson: a removable module can still be load-bearing as an import conduit.** "Nothing uses any
+declaration in X" licenses deleting X's *contents*, but not silently deleting the *edge* to X — that
+edge may be the only route by which a kept definer is visible. When you strip an import, you must
+re-add direct imports for everything the file reached through it. Three distinct failure modes now,
+all invisible to the obvious check:
+
+1. **prose-only import** — import present, nothing used (over-reports coupling)
+2. **transitive use** — declaration used, no direct import (under-reports coupling)
+3. **import conduit** — neither used nor useless: the edge carries visibility for *other* modules
+
+A fourth, specific to this library and already in the notes: `WedhornLocalizationPlus.lean:31`
+appears to declare `class PlusSubring`, but that text is **inside a docstring code fence** — the file
+merely quotes the real definition at `AdicSpectrum.lean:95` in an API-audit recap. The uses-graph got
+this right because it strips comments before harvesting declaration names; a plain `grep` for
+`^class PlusSubring` does not, and reported two definers. (`PlusSubring` genuinely *is* declared
+twice — root-level and as `ValuationSpectrum.PlusSubring` — but only one of the two greps was real.)
+
+Attempted global detection of lost visibility (resolve every token against the post-strip closure)
+was **abandoned as unusable**: it flags `W`, `add`, `comp`, `ext`, `map`, `f`, `n` — section
+variables, structure fields, local binders and mathlib names — thousands of false positives, because
+token-level resolution cannot see Lean's scoping. **The build is the only reliable arbiter for
+conduit breakage.** Fix applied: restore the lost visibility with direct imports
+(`WedhornCechAcyclicity` +5, `WedhornLocalizationPlus` +1, `SpaRationalOpenComparison` +2).
+
+## Post-split re-measurement of all three tasks
+
+The split removed 111 modules / 44,128 lines, so every baseline moved. Re-measured on the
+post-split tree (266 modules, 186,919 lines — down from 376 / 227,923):
+
+| task | baseline | pre-split | **post-split** |
+|---|---|---|---|
+| 1 — in-scope raises | 5 | 2 | **2** (both already `GOAL-DEFERRED`) |
+| 2 — proofs over 50 code lines | 486 raw | 290 | **274** (272 sorry-free) |
+| 3 — declarations | 7926 | 7926 | **7243** |
+
+Task 1 is at its floor. The only two in-scope raises left are the documented ones:
+
+* `WedhornCechAcyclicity.lean:11204` — 4,000,000, `imageCover`; needs the
+  `RationalCoveringData.covers : Finset` → indexed-family design change (owner call).
+  Split-def-from-packaging was tried and failed; recorded in-source.
+* `FJP/FiniteJetSheafTransfer.lean:481` — 1,600,000, `gluing_JetA`; diffuse cost, ladder recorded
+  in-source (200k fails, 400k fails, 1.6M passes).
+
+The three `set_option maxSynthPendingDepth 1 in` in `FarguesFontaine/RobbaCorrespondence.lean` are
+**reductions**, deliberately kept per the goal. Two raises inside `Vendored/` are third-party, skipped.
+
+**Measurement gotcha:** `grep 'maxSynthPendingDepth 1$'` finds nothing — the lines end `... 1 in`,
+so the anchor must account for the `in` suffix. A `$`-anchored grep silently reported 0 kept
+reductions.
+
+Task 2's remaining 274 are concentrated: **36 in `WedhornCechAcyclicity.lean`** alone (13.4k lines,
+stays on this branch), then Euclidean 10, RobbaPresentation 9, FiniteJetGraphKoszul 8,
+LaurentRefinementCore 8. The five cheapest (raw ≤ 55, so a couple of lines move both metrics):
+
+    code 52 raw 53  tateEvalPresheafHom_bivariate_continuous_can  BivariateContinuity.lean:76
+    code 53 raw 54  productRestrictionSub_isEmbedding_JetA        FJP/FiniteJetSheafTransfer.lean:667
+    code 54 raw 55  plusLocToQuotient_continuous                  Example638.lean:474
+    code 54 raw 55  jB                                            FJP/FiniteJetRings.lean:326
+    code 53 raw 55  gaussValue_le_of_mem_Iinf_pow                 FarguesFontaine/ChartData.lean:800
