@@ -796,4 +796,30 @@ theorem module_finite_residue (hK₀ : IsNoetherianRing (unitBall K)) :
 
 end Residue
 
+section Descent
+
+variable {K A S : Type*} [Field K] [CommRing A] [CommRing S]
+variable [Algebra K A] [Algebra K S]
+
+/-- **Contractions of finite-residue maximals are maximal**: if the residue
+ring at a maximal ideal is module-finite over the base field, the
+contraction along any algebra map is maximal (the finite-dimensional domain
+quotient is a field). -/
+theorem comap_isMaximal_of_finite_residue (f : A →ₐ[K] S)
+    (𝔫 : Ideal S) [h𝔫 : 𝔫.IsMaximal] [hfin : Module.Finite K (S ⧸ 𝔫)] :
+    (𝔫.comap (f : A →+* S)).IsMaximal := by
+  haveI hcp : (𝔫.comap (f : A →+* S)).IsPrime := 𝔫.comap_isPrime _
+  have hinj : Function.Injective (Ideal.quotientMapₐ 𝔫 f le_rfl) :=
+    Ideal.quotientMap_injective
+  haveI : Module.Finite K (A ⧸ 𝔫.comap (f : A →+* S)) :=
+    Module.Finite.of_injective
+      (Ideal.quotientMapₐ 𝔫 f le_rfl).toLinearMap hinj
+  haveI : Algebra.IsIntegral K (A ⧸ 𝔫.comap (f : A →+* S)) :=
+    Algebra.IsIntegral.of_finite _ _
+  have hfield : IsField (A ⧸ 𝔫.comap (f : A →+* S)) :=
+    isField_of_isIntegral_of_isField' (Field.toIsField K)
+  exact Ideal.Quotient.maximal_of_isField _ hfield
+
+end Descent
+
 end FiniteJet.GraphKoszul
