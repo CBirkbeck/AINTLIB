@@ -1409,3 +1409,48 @@ Use Python/Lean semantics for any line-length check in this codebase; `awk`/`wc 
 `FarguesFontaine/Groebner.lean` already carries **73 lines over 100 characters** — a pre-existing
 `style.longLine` violation at scale, untouched by this pass (every other file in the batch has 0-2).
 Worth its own pass; not mixed into a decomposition batch.
+
+## `lake env lean` — RETRACTION: it is NOT a sound pre-check for this library
+
+I promoted `lake env lean <file>` two passes ago as the fast verification loop. That was too
+strong a claim, and this pass found the reason it fails here.
+
+**`lake env lean` does not apply the lakefile's per-library `leanOptions`.** In `lakefile.toml`:
+
+```toml
+name = "«Adic spaces»"
+[lean_lib.leanOptions]
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+```
+
+Without `maxSynthPendingDepth = 3`, instance synthesis behaves differently, so any file in this
+library whose elaboration depends on it reports spurious failures. On
+`FJP/FiniteJetStrictLocalization.lean` it produced
+
+    968:26: Application type mismatch … hcont … @Continuous (locA F m g f) …
+    1039:2: failed to synthesize T2Space (locA F m g f)
+            (deterministic) timeout at `typeclass`, maximum heartbeats (20000)
+
+both hundreds of lines away from the edit, and `lake build` of the same module was **green**.
+
+So there are now **three** distinct ways `lake env lean` lies here:
+1. a dependency olean is **stale** (edited-but-unbuilt import) — instance/unification noise;
+2. a dependency olean **does not exist** (module outside the default target) — hard error;
+3. the lakefile's per-library `leanOptions` are **not applied** — synthesis-dependent failures
+   anywhere in the file.
+
+**Revised rule: `lake env lean` is a syntax/parse check only.** It reliably catches the things a
+join or a line-split can break (unexpected token, missing `}`, bad indentation). It cannot be
+trusted for anything elaboration-dependent; for that, use `lake build <module>`.
+
+## Task 2 — targeted golf: `isClosed_IA` 53 → 50
+
+Three single-use bindings inlined, each used exactly once immediately after being introduced:
+
+* `hxB`'s inner `h1` → folded into the `closure_mono` application
+* `hxC`'s inner `h1` → same, mirrored
+* `have heq : xa = x := …` + `rw [← heq]` → `rw [← ext_pair_injective F m (Prod.ext hJ hI)]`
+
+The file is full of B/C mirror pairs (`hcontB`/`hcontC`, `hsubB`/`hsubC`, `hxB`/`hxC`), so each
+golf applies twice — the recurring dividend of this codebase's mirror structure.

@@ -649,18 +649,15 @@ theorem isClosed_IA (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
       rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
       exact Ideal.subset_span ⟨i, rfl⟩
     exact hmap (Ideal.mem_map_of_mem _ hy)
-  have hxB : extJB F m x ∈ (IB F m g f : Set (PB F m)) := by
-    have h1 : extJB F m x ∈ closure (extJB F m '' (IA F m g f : Set (PA F m))) :=
-      image_closure_subset_closure_image hcontB ⟨x, hx, rfl⟩
-    exact hIBclosed.closure_eq ▸ closure_mono hsubB h1
-  have hxC : extIotaC F m x ∈ (IC F m g f : Set (PC F m)) := by
-    have h1 : extIotaC F m x ∈ closure (extIotaC F m '' (IA F m g f : Set (PA F m))) :=
-      image_closure_subset_closure_image hcontC ⟨x, hx, rfl⟩
-    exact hICclosed.closure_eq ▸ closure_mono hsubC h1
+  have hxB : extJB F m x ∈ (IB F m g f : Set (PB F m)) :=
+    hIBclosed.closure_eq ▸ closure_mono hsubB
+      (image_closure_subset_closure_image hcontB ⟨x, hx, rfl⟩)
+  have hxC : extIotaC F m x ∈ (IC F m g f : Set (PC F m)) :=
+    hICclosed.closure_eq ▸ closure_mono hsubC
+      (image_closure_subset_closure_image hcontC ⟨x, hx, rfl⟩)
   obtain ⟨xa, hxa, hJ, hI, -⟩ := hpull (extJB F m x) hxB (extIotaC F m x) hxC
     (ext_square_commutes F m x)
-  have heq : xa = x := ext_pair_injective F m (Prod.ext hJ hI)
-  rw [← heq]
+  rw [← ext_pair_injective F m (Prod.ext hJ hI)]
   exact hxa
 
 /-! ### Proposition 4.5 — strict Milnor localization
