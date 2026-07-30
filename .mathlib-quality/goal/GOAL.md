@@ -2576,3 +2576,38 @@ warning classes are therefore known-not-actionable**, which is worth stating pla
 leaving 3,860 warnings looking like 3,860 units of pending work.
 
 Reverted via `git show HEAD:… > …`; `SpaVIso` rebuilt green (3062 jobs), `git diff HEAD` empty.
+
+## Task 3 — the unused-binder class is ALSO not mechanically fixable (tried, reverted)
+
+Having ruled out the 549 `unusedSectionVars`, tried the other actionable-looking class: **96
+unused-binder hints** ("Variable name `x` is not explicitly referenced… prefix the name with `_` to
+silence"). Prefixing with `_` looked strictly safe — unlike `omit`, it *preserves the binding*, so
+even implicit uses keep working, and it is the linter's own suggested fix.
+
+Extracted all 96 sites from the gate log, **verified every one by checking that the reported
+(line, column) actually contains the reported identifier** — 96/96 matched — then applied the prefix
+across 33 files. **The build broke.** Reverted all 33; both spot-checked modules rebuild green
+(`Presheaf` 2579, `TateAlgebraTopology` 2580) and `git diff HEAD` is empty.
+
+The clearest failure, `Presheaf.lean`:
+
+    1287|     (p : Ideal A) (hp : p.IsPrime) (_hp_notOpen : ¬IsOpen (p : Set A))
+    …
+    1291|   haveI := hp                                   ← explicit, by name
+
+The linter reports `hp` at 1287:19 as "not explicitly referenced", yet it is named at 1291. (Note
+`_hp_notOpen` on the same line — the underscore treatment has been applied here before, so the file
+is not naive about this.) Same shape for `hnoeth` in `TateAlgebraTopology` (flagged at 1560:5, used at
+1578:39).
+
+**Lesson: position-verification is not use-verification.** Confirming that the reported coordinates
+contain the reported name proves only that the *warning* was located correctly — it says nothing about
+whether the binder is referenced elsewhere. A safe mechanical rename needs the opposite check: **grep
+the enclosing declaration for the identifier and skip if it appears anywhere other than the binding
+site.** I checked the cheap thing that felt like diligence and skipped the one that mattered.
+
+**All three of the large warning classes are now empirically not-mechanically-fixable:**
+`unusedSectionVars` (omitting removes instance *derivation paths*), `overlappingInstances` (ruled out
+in an earlier pass as pre-existing and out of scope), and now unused-binders (flagged binders can be
+explicitly referenced). Task 3's 3,860 warnings are **not** 3,860 units of pending mechanical work;
+the residue is per-declaration judgement, one build each.
