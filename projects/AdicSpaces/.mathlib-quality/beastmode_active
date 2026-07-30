@@ -1,1 +1,1 @@
-FOCUS: tower assembly for comap_headToQ_isMaximal — evenT_equiv := mvRestrictedCongr(evenSupportEquiv) trans restrictedFubini.symm; residue-finiteness transport; K-constants plumbing
+FOCUS: HeadTResidue stage 2 (a)-(d) per hrw TOWER PROGRESS spec — then comap_headToQ_isMaximal fills, leaving only L1-conditional
