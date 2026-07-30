@@ -366,4 +366,97 @@ noncomputable def AdicCompletion.congrPow (I : Ideal A) (J : Ideal B)
 
 end LevelwiseCongr
 
+section InterleavedCongr
+
+variable {A : Type*} [CommRing A]
+
+/-- **Adic completions along interleaved towers**: if `J^(c·r) ≤ I^r ≤ J^r`
+for all `r` with `1 ≤ c`, the two adic completions agree (cofinal
+filtrations). -/
+noncomputable def AdicCompletion.congrOfInterleaved (I J : Ideal A) (c : ℕ)
+    (hc : 1 ≤ c)
+    (h1 : ∀ r : ℕ, J ^ (c * r) ≤ I ^ r) (h2 : ∀ r : ℕ, I ^ r ≤ J ^ r) :
+    AdicCompletion I A ≃+* AdicCompletion J A where
+  toFun x := ⟨fun r => (AdicCompletion.levelEquiv J r).symm
+      (Ideal.Quotient.factor (h2 r)
+        (AdicCompletion.levelEquiv I r (x.1 r))), by
+    intro a b hab
+    have h3 := AdicCompletion.levelEquiv_transitionMap J hab
+      ((AdicCompletion.levelEquiv J b).symm (Ideal.Quotient.factor (h2 b)
+        (AdicCompletion.levelEquiv I b (x.1 b))))
+    rw [RingEquiv.apply_symm_apply] at h3
+    refine (RingEquiv.eq_symm_apply _).mpr ?_
+    rw [h3]
+    obtain ⟨y, hy⟩ := Ideal.Quotient.mk_surjective
+      (AdicCompletion.levelEquiv I b (x.1 b))
+    have h4 := AdicCompletion.levelEquiv_transitionMap I hab (x.1 b)
+    rw [x.2 hab, ← hy] at h4
+    rw [← hy, Ideal.Quotient.factor_mk, Ideal.Quotient.factor_mk, h4,
+      Ideal.Quotient.factor_mk, Ideal.Quotient.factor_mk]⟩
+  invFun y := ⟨fun r => (AdicCompletion.levelEquiv I r).symm
+      (Ideal.Quotient.factor (h1 r)
+        (AdicCompletion.levelEquiv J (c * r) (y.1 (c * r)))), by
+    intro a b hab
+    have h3 := AdicCompletion.levelEquiv_transitionMap I hab
+      ((AdicCompletion.levelEquiv I b).symm (Ideal.Quotient.factor (h1 b)
+        (AdicCompletion.levelEquiv J (c * b) (y.1 (c * b)))))
+    rw [RingEquiv.apply_symm_apply] at h3
+    refine (RingEquiv.eq_symm_apply _).mpr ?_
+    rw [h3]
+    obtain ⟨z, hz⟩ := Ideal.Quotient.mk_surjective
+      (AdicCompletion.levelEquiv J (c * b) (y.1 (c * b)))
+    have h4 := AdicCompletion.levelEquiv_transitionMap J
+      (Nat.mul_le_mul_left c hab) (y.1 (c * b))
+    rw [y.2 (Nat.mul_le_mul_left c hab), ← hz] at h4
+    rw [← hz, Ideal.Quotient.factor_mk, Ideal.Quotient.factor_mk, h4,
+      Ideal.Quotient.factor_mk, Ideal.Quotient.factor_mk]⟩
+  left_inv x := by
+    refine Subtype.ext (funext fun r => ?_)
+    show (AdicCompletion.levelEquiv I r).symm
+      (Ideal.Quotient.factor (h1 r)
+        ((AdicCompletion.levelEquiv J (c * r))
+          ((AdicCompletion.levelEquiv J (c * r)).symm
+            (Ideal.Quotient.factor (h2 (c * r))
+              (AdicCompletion.levelEquiv I (c * r) (x.1 (c * r))))))) = x.1 r
+    rw [RingEquiv.apply_symm_apply]
+    refine (RingEquiv.symm_apply_eq _).mpr ?_
+    obtain ⟨y, hy⟩ := Ideal.Quotient.mk_surjective
+      (AdicCompletion.levelEquiv I (c * r) (x.1 (c * r)))
+    have hrcr : r ≤ c * r := Nat.le_mul_of_pos_left r
+      (Nat.lt_of_lt_of_le Nat.zero_lt_one hc)
+    have h4 := AdicCompletion.levelEquiv_transitionMap I hrcr (x.1 (c * r))
+    rw [x.2 hrcr, ← hy, Ideal.Quotient.factor_mk] at h4
+    rw [← hy, Ideal.Quotient.factor_mk, Ideal.Quotient.factor_mk, h4]
+  right_inv y := by
+    refine Subtype.ext (funext fun r => ?_)
+    show (AdicCompletion.levelEquiv J r).symm
+      (Ideal.Quotient.factor (h2 r)
+        ((AdicCompletion.levelEquiv I r)
+          ((AdicCompletion.levelEquiv I r).symm
+            (Ideal.Quotient.factor (h1 r)
+              (AdicCompletion.levelEquiv J (c * r) (y.1 (c * r))))))) = y.1 r
+    rw [RingEquiv.apply_symm_apply]
+    refine (RingEquiv.symm_apply_eq _).mpr ?_
+    obtain ⟨z, hz⟩ := Ideal.Quotient.mk_surjective
+      (AdicCompletion.levelEquiv J (c * r) (y.1 (c * r)))
+    have hrcr : r ≤ c * r := Nat.le_mul_of_pos_left r
+      (Nat.lt_of_lt_of_le Nat.zero_lt_one hc)
+    have h4 := AdicCompletion.levelEquiv_transitionMap J hrcr (y.1 (c * r))
+    rw [y.2 hrcr, ← hz, Ideal.Quotient.factor_mk] at h4
+    rw [← hz, Ideal.Quotient.factor_mk, Ideal.Quotient.factor_mk, h4]
+  map_mul' x y := Subtype.ext (funext fun r => by
+    show (AdicCompletion.levelEquiv J r).symm
+      (Ideal.Quotient.factor (h2 r)
+        (AdicCompletion.levelEquiv I r ((x * y).1 r))) = _
+    rw [show (x * y).1 r = x.1 r * y.1 r from rfl, map_mul, map_mul, map_mul]
+    rfl)
+  map_add' x y := Subtype.ext (funext fun r => by
+    show (AdicCompletion.levelEquiv J r).symm
+      (Ideal.Quotient.factor (h2 r)
+        (AdicCompletion.levelEquiv I r ((x + y).1 r))) = _
+    rw [show (x + y).1 r = x.1 r + y.1 r from rfl, map_add, map_add, map_add]
+    rfl)
+
+end InterleavedCongr
+
 end AdicNakayama
