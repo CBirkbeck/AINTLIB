@@ -1,1 +1,1 @@
-FOCUS: HRW-4 leaf 11e — compat chain (quotientSpanEquiv_mk_of + unitBallPQuotientEquiv_mk + unitBallPResidueEquiv_mk_C + fibreFromPoly_C_mk + hsc discharge) applied; compiling the three files; then 11f = localize to Module.Finite K (P/𝔪).
+FOCUS: HRW-4 leaf 11e (Nullstellensatz endpoint module_finite_residue) applied; compiling; on green commit + move to leaves 12-14 (finite scalar extension L⟨X⟩/K⟨X⟩ + Taylor + completed base change → completed locals of Tate algebras are domains).

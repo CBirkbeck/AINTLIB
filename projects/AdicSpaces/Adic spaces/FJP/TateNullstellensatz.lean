@@ -692,6 +692,108 @@ theorem module_finite_integralModel
       exact Submodule.smul_mem _ _ ha
   exact Module.Finite.equiv (e1.trans e2).symm
 
+/-- The Tate residue ring as a `K`-algebra through the constants. -/
+noncomputable def constantsToResidue : K →+* (P K m ⧸ 𝔪) :=
+  (Ideal.Quotient.mk 𝔪).comp
+    ((polyToP (E := K) (m := m)).comp
+      (MvPolynomial.C : K →+* MvPolynomial (Fin m) K))
+
+include ϖ in
+/-- **The affinoid Nullstellensatz** ([hrw-decomposition] Tate leaf 11,
+endpoint): the residue ring of the Tate algebra at a maximal ideal is a
+finite `K`-module — the localization unit is absorbed into the `K`-scalars.
+-/
+theorem module_finite_residue (hK₀ : IsNoetherianRing (unitBall K)) :
+    letI : Algebra K (P K m ⧸ 𝔪) :=
+      (constantsToResidue (m := m) 𝔪).toAlgebra
+    Module.Finite K (P K m ⧸ 𝔪) := by
+  letI : Algebra K (P K m ⧸ 𝔪) :=
+    (constantsToResidue (m := m) 𝔪).toAlgebra
+  letI : Algebra ↥(unitBall K) (IntegralModel (m := m) 𝔪) :=
+    (ballToModel (m := m) 𝔪).toAlgebra
+  letI : Algebra (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪) :=
+    (modelToResidue (m := m) 𝔪).toAlgebra
+  haveI hloc := isLocalization_residue (m := m) ϖ 𝔪
+  haveI hfinB := module_finite_integralModel (m := m) ϖ 𝔪 hK₀
+  obtain ⟨T, hT⟩ := hfinB.fg_top
+  -- every image of the integral model lies in the K-span of the generators
+  have hmem : ∀ b : IntegralModel (m := m) 𝔪,
+      modelToResidue (m := m) 𝔪 b ∈
+        Submodule.span K ((T.image
+          (fun b => modelToResidue (m := m) 𝔪 b) : Finset _) : Set _) := by
+    intro b
+    have hb0 : b ∈ (⊤ : Submodule ↥(unitBall K)
+        (IntegralModel (m := m) 𝔪)) := Submodule.mem_top
+    rw [← hT] at hb0
+    refine Submodule.span_induction ?_ ?_ ?_ ?_ hb0
+    · intro t ht
+      exact Submodule.subset_span (Finset.mem_coe.mpr
+        (Finset.mem_image_of_mem _ ht))
+    · rw [_root_.map_zero]
+      exact Submodule.zero_mem _
+    · intro a b _ _ ha hb'
+      rw [map_add]
+      exact Submodule.add_mem _ ha hb'
+    · intro c x _ hx
+      have h8 : modelToResidue (m := m) 𝔪 (c • x) =
+          (c : K) • modelToResidue (m := m) 𝔪 x := by
+        have h9 : c • x = ballToModel (m := m) 𝔪 c * x := rfl
+        rw [h9, map_mul]
+        have h10 : modelToResidue (m := m) 𝔪 (ballToModel (m := m) 𝔪 c) =
+            constantsToResidue (m := m) 𝔪 (c : K) := by
+          rw [show ballToModel (m := m) 𝔪 c = Ideal.Quotient.mk _
+            (polyBallRes (E := K) (m := m) (MvPolynomial.C c)) from rfl,
+            modelToResidue_mk]
+          rw [show (unitBall (P K m)).subtype
+              (polyBallRes (E := K) (m := m) (MvPolynomial.C c)) =
+            polyBall (E := K) (m := m) (MvPolynomial.C c) from rfl]
+          rw [show polyBall (E := K) (m := m) (MvPolynomial.C c) =
+            polyToP (E := K) (m := m) (MvPolynomial.C (c : K)) from by
+              rw [polyBall, RingHom.comp_apply, MvPolynomial.map_C]
+              rfl]
+          rfl
+        rw [h10]
+        rfl
+      rw [h8]
+      exact Submodule.smul_mem _ _ hx
+  refine ⟨⟨T.image (fun b => modelToResidue (m := m) 𝔪 b), ?_⟩⟩
+  rw [eq_top_iff]
+  intro z _
+  obtain ⟨⟨b, sPow⟩, hb⟩ := IsLocalization.surj
+    (Submonoid.powers (piBar (m := m) ϖ 𝔪)) (S := P K m ⧸ 𝔪) z
+  obtain ⟨n, hn⟩ := sPow.2
+  have hn' : (piBar (m := m) ϖ 𝔪) ^ n =
+      (sPow : IntegralModel (m := m) 𝔪) := hn
+  have h11 : algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪)
+      (sPow : IntegralModel (m := m) 𝔪) =
+      constantsToResidue (m := m) 𝔪 (ϖ.val ^ n) := by
+    rw [← hn']
+    rw [show (algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪) :
+      IntegralModel (m := m) 𝔪 →+* (P K m ⧸ 𝔪)) =
+      modelToResidue (m := m) 𝔪 from rfl]
+    rw [map_pow, map_pow]
+    refine congrArg (· ^ n) ?_
+    rw [show piBar (m := m) ϖ 𝔪 = Ideal.Quotient.mk _
+      (piBall (m := m) ϖ) from rfl, modelToResidue_mk]
+    rw [show (unitBall (P K m)).subtype (piBall (m := m) ϖ) =
+      ((piBall (m := m) ϖ : ↥(unitBall (P K m))) : P K m) from rfl,
+      piBall_coe]
+    rfl
+  have hne : (ϖ.val ^ n : K) ≠ 0 := pow_ne_zero _ ϖ.val_ne_zero
+  have hz : z = ((ϖ.val ^ n)⁻¹ : K) •
+      (modelToResidue (m := m) 𝔪 b) := by
+    have h12 : ((ϖ.val ^ n)⁻¹ : K) • (modelToResidue (m := m) 𝔪 b) =
+        constantsToResidue (m := m) 𝔪 ((ϖ.val ^ n)⁻¹) *
+          modelToResidue (m := m) 𝔪 b := rfl
+    rw [h12]
+    have h13 : modelToResidue (m := m) 𝔪 b =
+        algebraMap (IntegralModel (m := m) 𝔪) (P K m ⧸ 𝔪) b := rfl
+    rw [h13, ← hb, h11]
+    rw [← mul_assoc, mul_comm (constantsToResidue (m := m) 𝔪 _) z,
+      mul_assoc, ← map_mul, inv_mul_cancel₀ hne, map_one, mul_one]
+  rw [hz]
+  exact Submodule.smul_mem _ _ (hmem b)
+
 end Residue
 
 end FiniteJet.GraphKoszul
