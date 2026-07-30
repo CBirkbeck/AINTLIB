@@ -443,3 +443,49 @@ REMAINING: leaf 14 (FlatCompletion at P K m → mapP → P L m: FaithfullyFlat
 from free+nontrivial, level-1 surjectivity at 𝔪 via the rationalized point,
 maximal-to-point-ideal comparison), HRW-5(iii) semilocal, L1-specific leaves,
 wall assembly.
+
+## L3 NON-MAXIMAL ADJUDICATION (2026-07-30, ChatGPT-5.6-xhigh)
+
+The L3 sorried statements quantify over ALL primes 𝔭. VERDICT: the all-primes
+form needs Rees's analytically-unramified localization theorem (2,000-5,000+
+LOC, absent from mathlib; alternatives via power-series regularity chains or
+excellence are 3,000-10,000+). Localizing the maximal completion is NOT an iso
+(k(y)⟦x⟧ vs k((y))⟦x⟧ residue counterexample) — only an injection needing the
+same missing input. RECOMMENDED (adopted): prove the wall at MAXIMAL primes
+only; at the consumer the contracted ideal IS maximal by residue-finiteness
+descent (comap_isMaximal_of_finite_residue — BUILT, compiled) and every prime
+of Q over a maximal of P is maximal (Ideal.isMaximal_of_isIntegral_of_
+isMaximal_comap + module-finiteness). The three general-form sorries stay
+PARKED pending a future Rees development; the assembly headLocsReduced is to
+be rewired through maximal-only versions and becomes sorry-free.
+
+## Wall-glue execution state (2026-07-30, latest)
+
+NEW sorry-free + committed since the leaf-13 record:
+- AdicCompletion.congrOfInterleaved (cofinal towers), Ideal.iInf_pow_eq_iInf_pow,
+  splitLevel (hand-rolled CRT lift; .trans form hits a whnf blowup — avoid),
+  AdicCompletion.piSplit, AdicCompletion.semilocalSplit (AdicNakayama.lean).
+- AdicCompletion.localizationEquiv (completedLocal bridge; mathlib
+  equivQuotMaximalIdealPow is ready-made levelwise).
+- comap_isMaximal_of_finite_residue + module_finite_residue_of_finite_extension
+  (TateNullstellensatz.lean Descent section).
+- AdicCompletion.fibreSplit (SemilocalFibre.lean): Q-adic completion =
+  product over the finitely many maximals over Q, for Artinian fibre
+  (IsArtinianRing.setOf_isMaximal_finite + isNilpotent_jacobson_bot).
+
+REMAINING (the endgame, all planned):
+1. `head_completedLocal_reduced_of_isMaximal`: localize P↪Q at max 𝔪;
+   FaithfullyFlat (free parity basis); levelwise injection (levelMap_injective);
+   fibreSplit of C at 𝔪C (C⧸𝔪C Artinian via IsArtinianRing.of_finite over
+   κ(𝔪)); factors = completions of Q at maximal 𝔮 (isMaximal_of_isIntegral…);
+   per-factor: the LEVELWISE chain (avoid P-completions! diamond):
+   Loc-side completion → Q⧸𝔮^r levels → levelMap (mapP, faithfully flat free)
+   injective into Q_L⧸(𝔮Q_L)^r → interleave+splitLevel LEVELWISE to point
+   powers → levelPointEquiv → MvPoly⧸J^r; assemble one injection into
+   ∏ AdicCompletion (idealOfVars) (MvPolynomial L) (clean ends only);
+   isDomain_adicCompletion_idealOfVars ⇒ reduced ⇒ pull back.
+2. L1 at maximals: FlatCompletion at headToQ-localized (8.30-flatness input,
+   conditional on central audit) + graph trivial fibre (level-1 surjectivity).
+3. Rewire headLocsReduced: 𝔮-max-QHead ⇒ comap maximal (needs QHead residue
+   finiteness: 6.38-presentation of presheafValue + quotient + lying-over
+   descent) ⇒ invoke maximal-only L3/L1 versions.
