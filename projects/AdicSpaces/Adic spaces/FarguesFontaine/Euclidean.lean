@@ -97,6 +97,41 @@ theorem exists_attaining_coeff {a b : F}
   · refine ⟨b, fun h0 => hmax ?_, heq.symm, hle.le, le_rfl⟩
     rw [heq, h0, Valuation.map_zero]
 
+/-- Both entries vanish when the maximum of their valuations does. -/
+private theorem eq_zero_of_max_perfectoidValuation_eq_zero {a b : F}
+    (hmax : max (perfectoidValuation p F a) (perfectoidValuation p F b) = 0) :
+    a = 0 ∧ b = 0 := by
+  refine ⟨(Valuation.zero_iff (perfectoidValuation p F)).mp (le_antisymm ?_ zero_le),
+    (Valuation.zero_iff (perfectoidValuation p F)).mp (le_antisymm ?_ zero_le)⟩
+  · rw [← hmax]
+    exact le_max_left _ _
+  · rw [← hmax]
+    exact le_max_right _ _
+
+/-- **Normalisation step.** If `a` is dominated by a nonzero `c`, then `a * c⁻¹` is
+integral, so it lifts to `O_F`. -/
+private theorem exists_integral_mul_inv {a c : F}
+    (hvc0 : perfectoidValuation p F c ≠ 0)
+    (hac : perfectoidValuation p F a ≤ perfectoidValuation p F c) :
+    ∃ x : OF F, ((x : F)) = a * c⁻¹ := by
+  have hnorm : perfectoidValuation p F (a * c⁻¹) ≤ 1 := by
+    rw [Valuation.map_mul, map_inv₀]
+    calc perfectoidValuation p F a * (perfectoidValuation p F c)⁻¹
+        ≤ perfectoidValuation p F c * (perfectoidValuation p F c)⁻¹ :=
+          mul_le_mul_of_nonneg_right hac zero_le
+      _ = 1 := mul_inv_cancel₀ hvc0
+  exact (perfectoidValuation_integers p F).exists_of_le_one hnorm
+
+/-- **The scaling step.** Once a discrepancy is exhibited as `[c] * map E` with `E`
+integral and `E.coeff 0 = 0`, its Gauss value is at most `v c * ρ`. -/
+private theorem gaussValueF_le_of_teichmuller_mul_map {ρ : NNReal} (hρ1 : ρ ≤ 1) {c : F}
+    {E : Ainf p F} (h0 : E.coeff 0 = 0) {t : WittVector p F}
+    (hkey : WittVector.teichmuller p c
+      * WittVector.map ((powerBoundedSubring.toSubring F).subtype) E = t) :
+    gaussValueF p F ρ t ≤ perfectoidValuation p F c * ρ := by
+  rw [← hkey, gaussValueF_teichmuller_mul]
+  exact mul_le_mul_of_nonneg_left (gaussValueF_map_le_of_coeff_zero p F hρ1 h0) zero_le
+
 /-- **Witt homogeneity (2.8.1), binary sum form**: the discrepancy between the sum of
 two Teichmüller lifts and the Teichmüller lift of the sum is `ρ`-small relative to
 the entries. -/
@@ -106,16 +141,7 @@ theorem gaussValueF_teichmuller_add_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
       ≤ ρ * max (perfectoidValuation p F a) (perfectoidValuation p F b) := by
   rcases eq_or_ne (max (perfectoidValuation p F a) (perfectoidValuation p F b)) 0
     with hmax | hmax
-  · have ha : a = 0 := by
-      refine (Valuation.zero_iff (perfectoidValuation p F)).mp
-        (le_antisymm ?_ zero_le)
-      rw [← hmax]
-      exact le_max_left _ _
-    have hb : b = 0 := by
-      refine (Valuation.zero_iff (perfectoidValuation p F)).mp
-        (le_antisymm ?_ zero_le)
-      rw [← hmax]
-      exact le_max_right _ _
+  · obtain ⟨ha, hb⟩ := eq_zero_of_max_perfectoidValuation_eq_zero p F hmax
     have hexpr : WittVector.teichmuller p a + WittVector.teichmuller p b
         - WittVector.teichmuller p (a + b) = 0 := by
       rw [ha, hb, add_zero, WittVector.teichmuller_zero, add_zero, sub_zero]
@@ -123,22 +149,8 @@ theorem gaussValueF_teichmuller_add_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
     exact zero_le
   · obtain ⟨c, hc0, hcmax, hac, hbc⟩ := exists_attaining_coeff p F hmax
     have hvc0 : perfectoidValuation p F c ≠ 0 := (Valuation.ne_zero_iff _).mpr hc0
-    have hanorm : perfectoidValuation p F (a * c⁻¹) ≤ 1 := by
-      rw [Valuation.map_mul, map_inv₀]
-      calc perfectoidValuation p F a * (perfectoidValuation p F c)⁻¹
-          ≤ perfectoidValuation p F c * (perfectoidValuation p F c)⁻¹ :=
-            mul_le_mul_of_nonneg_right hac zero_le
-        _ = 1 := mul_inv_cancel₀ hvc0
-    have hbnorm : perfectoidValuation p F (b * c⁻¹) ≤ 1 := by
-      rw [Valuation.map_mul, map_inv₀]
-      calc perfectoidValuation p F b * (perfectoidValuation p F c)⁻¹
-          ≤ perfectoidValuation p F c * (perfectoidValuation p F c)⁻¹ :=
-            mul_le_mul_of_nonneg_right hbc zero_le
-        _ = 1 := mul_inv_cancel₀ hvc0
-    obtain ⟨aInt, haInt⟩ := (perfectoidValuation_integers p F).exists_of_le_one hanorm
-    obtain ⟨bInt, hbInt⟩ := (perfectoidValuation_integers p F).exists_of_le_one hbnorm
-    have haInt' : ((aInt : OF F) : F) = a * c⁻¹ := haInt
-    have hbInt' : ((bInt : OF F) : F) = b * c⁻¹ := hbInt
+    obtain ⟨aInt, haInt'⟩ := exists_integral_mul_inv p F hvc0 hac
+    obtain ⟨bInt, hbInt'⟩ := exists_integral_mul_inv p F hvc0 hbc
     set E : Ainf p F := WittVector.teichmuller p aInt + WittVector.teichmuller p bInt
       - WittVector.teichmuller p (aInt + bInt) with hE
     have h0 : E.coeff 0 = 0 := by
@@ -153,7 +165,6 @@ theorem gaussValueF_teichmuller_add_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
         rw [hca, hcb, hcab]
         ring
       exact h1
-    have hmaster := gaussValueF_map_le_of_coeff_zero p F hρ1 h0
     have hkey : WittVector.teichmuller p c
         * WittVector.map ((powerBoundedSubring.toSubring F).subtype) E
         = WittVector.teichmuller p a + WittVector.teichmuller p b
@@ -173,13 +184,8 @@ theorem gaussValueF_teichmuller_add_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
       have h3 : c * (a * c⁻¹ + b * c⁻¹) = a + b := by
         field_simp
       rw [h1, h2, h3]
-    rw [← hkey, gaussValueF_teichmuller_mul]
-    calc perfectoidValuation p F c * gaussValueF p F ρ
-          (WittVector.map ((powerBoundedSubring.toSubring F).subtype) E)
-        ≤ perfectoidValuation p F c * ρ :=
-          mul_le_mul_of_nonneg_left hmaster zero_le
-      _ = ρ * max (perfectoidValuation p F a) (perfectoidValuation p F b) := by
-          rw [mul_comm, hcmax]
+    refine le_trans (gaussValueF_le_of_teichmuller_mul_map p F hρ1 h0 hkey) ?_
+    rw [mul_comm, hcmax]
 
 /-- **Witt homogeneity (2.8.1), binary difference form** (same scaling proof — the
 zeroth coordinate is a ring homomorphism, killing the signs). -/
@@ -189,16 +195,7 @@ theorem gaussValueF_teichmuller_sub_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
       ≤ ρ * max (perfectoidValuation p F a) (perfectoidValuation p F b) := by
   rcases eq_or_ne (max (perfectoidValuation p F a) (perfectoidValuation p F b)) 0
     with hmax | hmax
-  · have ha : a = 0 := by
-      refine (Valuation.zero_iff (perfectoidValuation p F)).mp
-        (le_antisymm ?_ zero_le)
-      rw [← hmax]
-      exact le_max_left _ _
-    have hb : b = 0 := by
-      refine (Valuation.zero_iff (perfectoidValuation p F)).mp
-        (le_antisymm ?_ zero_le)
-      rw [← hmax]
-      exact le_max_right _ _
+  · obtain ⟨ha, hb⟩ := eq_zero_of_max_perfectoidValuation_eq_zero p F hmax
     have hexpr : WittVector.teichmuller p a - WittVector.teichmuller p b
         - WittVector.teichmuller p (a - b) = 0 := by
       rw [ha, hb, sub_zero, WittVector.teichmuller_zero, sub_zero, sub_self]
@@ -206,22 +203,8 @@ theorem gaussValueF_teichmuller_sub_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
     exact zero_le
   · obtain ⟨c, hc0, hcmax, hac, hbc⟩ := exists_attaining_coeff p F hmax
     have hvc0 : perfectoidValuation p F c ≠ 0 := (Valuation.ne_zero_iff _).mpr hc0
-    have hanorm : perfectoidValuation p F (a * c⁻¹) ≤ 1 := by
-      rw [Valuation.map_mul, map_inv₀]
-      calc perfectoidValuation p F a * (perfectoidValuation p F c)⁻¹
-          ≤ perfectoidValuation p F c * (perfectoidValuation p F c)⁻¹ :=
-            mul_le_mul_of_nonneg_right hac zero_le
-        _ = 1 := mul_inv_cancel₀ hvc0
-    have hbnorm : perfectoidValuation p F (b * c⁻¹) ≤ 1 := by
-      rw [Valuation.map_mul, map_inv₀]
-      calc perfectoidValuation p F b * (perfectoidValuation p F c)⁻¹
-          ≤ perfectoidValuation p F c * (perfectoidValuation p F c)⁻¹ :=
-            mul_le_mul_of_nonneg_right hbc zero_le
-        _ = 1 := mul_inv_cancel₀ hvc0
-    obtain ⟨aInt, haInt⟩ := (perfectoidValuation_integers p F).exists_of_le_one hanorm
-    obtain ⟨bInt, hbInt⟩ := (perfectoidValuation_integers p F).exists_of_le_one hbnorm
-    have haInt' : ((aInt : OF F) : F) = a * c⁻¹ := haInt
-    have hbInt' : ((bInt : OF F) : F) = b * c⁻¹ := hbInt
+    obtain ⟨aInt, haInt'⟩ := exists_integral_mul_inv p F hvc0 hac
+    obtain ⟨bInt, hbInt'⟩ := exists_integral_mul_inv p F hvc0 hbc
     set E : Ainf p F := WittVector.teichmuller p aInt - WittVector.teichmuller p bInt
       - WittVector.teichmuller p (aInt - bInt) with hE
     have h0 : E.coeff 0 = 0 := by
@@ -236,7 +219,6 @@ theorem gaussValueF_teichmuller_sub_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
         rw [hca, hcb, hcab]
         ring
       exact h1
-    have hmaster := gaussValueF_map_le_of_coeff_zero p F hρ1 h0
     have hkey : WittVector.teichmuller p c
         * WittVector.map ((powerBoundedSubring.toSubring F).subtype) E
         = WittVector.teichmuller p a - WittVector.teichmuller p b
@@ -256,13 +238,8 @@ theorem gaussValueF_teichmuller_sub_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
       have h3 : c * (a * c⁻¹ - b * c⁻¹) = a - b := by
         field_simp
       rw [h1, h2, h3]
-    rw [← hkey, gaussValueF_teichmuller_mul]
-    calc perfectoidValuation p F c * gaussValueF p F ρ
-          (WittVector.map ((powerBoundedSubring.toSubring F).subtype) E)
-        ≤ perfectoidValuation p F c * ρ :=
-          mul_le_mul_of_nonneg_left hmaster zero_le
-      _ = ρ * max (perfectoidValuation p F a) (perfectoidValuation p F b) := by
-          rw [mul_comm, hcmax]
+    refine le_trans (gaussValueF_le_of_teichmuller_mul_map p F hρ1 h0 hkey) ?_
+    rw [mul_comm, hcmax]
 
 /-- **Witt homogeneity (2.8.1), `n`-ary form**: the discrepancy between a finite sum
 of Teichmüller lifts and the Teichmüller lift of the sum is `ρ`-small relative to a

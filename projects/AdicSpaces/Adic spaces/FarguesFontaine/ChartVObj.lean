@@ -551,6 +551,71 @@ theorem mk_monomial_mem_of_large (a k i : ℕ) (hik : k * a + k ≤ i) (c : OF F
   · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
   · exact Set.mem_union_left _ ⟨_, rfl⟩
 
+/-- The inverse of the image of `p` cancels its `n`-th power. -/
+private theorem pInv_pow_mul_p_pow (n : ℕ) :
+    ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ n
+      * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ n = 1 := by
+  have h := (isUnit_p_image p F ϖ).unit.inv_mul
+  rw [(isUnit_p_image p F ϖ).unit_spec] at h
+  rw [← mul_pow, h, one_pow]
+
+/-- **Normal form for a monomial fraction.** Once the numerator's Teichmüller
+argument is written as `ϖ^k * c'`, the fraction `p^i[c]/(p[ϖ])^k` collapses to
+`[c']` times a power of the inverse of the image of `p`. -/
+private theorem mk_monomial_eq_teich_mul_pInv_pow {k i : ℕ} (hik : i ≤ k) {c c' : OF F}
+    (hc'eq : c = (PseudoUniformizer.toOF F ϖ : OF F) ^ k * c') :
+    IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+        * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i) := by
+  rw [IsLocalization.mk'_eq_iff_eq_mul]
+  calc (algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c))
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+        * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p c')) := by
+        rw [hc'eq, map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+          map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+          map_mul (WittVector.teichmuller p),
+          map_pow (WittVector.teichmuller p),
+          map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+          map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+        rfl
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+        * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+        * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
+          * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+          * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k) := by
+        rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p c')
+            * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+            * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
+              * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+              * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k)
+          = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+            * (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+              * algebraMap (Ainf p F) (Bloc p F ϖ)
+                ((p : Ainf p F)) ^ (k - i))
+            * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+              * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k)
+          from by ring, pInv_pow_mul_p_pow p F ϖ (k - i), mul_one]
+        ring
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+        * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (((p : Ainf p F) * teichPi p F ϖ) ^ k) := by
+        congr 1
+        rw [map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+          map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)), mul_pow]
+        rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F)) ^ (k - i)
+            * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+          = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ k from by
+          rw [← pow_add]
+          congr 1
+          omega]
+
 /-- **(M1'') Small-exponent monomials are chart-subring elements**: for
 `i ≤ k` with the left-endpoint bound `|c| ≤ |ϖ|^{2k−i}`, the monomial
 fraction `p^i[c]/(p[ϖ])^k` is an `m1`-form element. -/
@@ -591,69 +656,7 @@ theorem mk_monomial_mem_of_le (a k i : ℕ) (hik : i ≤ k) (c : OF F)
       rw [show k + (k - i) = 2 * k - i from by omega]
       exact hc
     exact le_of_mul_le_mul_left h2 (pow_pos hπpos k)
-  have hcancel : ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
-      * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i) = 1 := by
-    have h := (isUnit_p_image p F ϖ).unit.inv_mul
-    rw [(isUnit_p_image p F ϖ).unit_spec] at h
-    calc ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
-        * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
-        = (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ))
-          * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F))) ^ (k - i) :=
-          (mul_pow _ _ _).symm
-      _ = 1 := by rw [h, one_pow]
-  have hkey : IsLocalization.mk' (Bloc p F ϖ)
-      ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
-      = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
-        * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i) := by
-    rw [IsLocalization.mk'_eq_iff_eq_mul]
-    have hsplitp : (k : ℕ) = i + (k - i) := by omega
-    calc (algebraMap (Ainf p F) (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i * WittVector.teichmuller p c))
-        = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
-          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k
-            * algebraMap (Ainf p F) (Bloc p F ϖ)
-              (WittVector.teichmuller p c')) := by
-          rw [hc'eq, map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
-            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
-            map_mul (WittVector.teichmuller p),
-            map_pow (WittVector.teichmuller p),
-            map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
-            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
-          rfl
-      _ = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
-          * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
-          * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
-            * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
-            * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k) := by
-          rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
-              (WittVector.teichmuller p c')
-              * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
-              * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
-                * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
-                * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k)
-            = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
-              * (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
-                * algebraMap (Ainf p F) (Bloc p F ϖ)
-                  ((p : Ainf p F)) ^ (k - i))
-              * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
-                * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k)
-            from by ring, hcancel, mul_one]
-          ring
-      _ = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
-          * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
-          * algebraMap (Ainf p F) (Bloc p F ϖ)
-            (((p : Ainf p F) * teichPi p F ϖ) ^ k) := by
-          congr 1
-          rw [map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
-            map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)), mul_pow]
-          rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
-              ((p : Ainf p F)) ^ (k - i)
-              * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
-            = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ k from by
-            rw [← pow_add]
-            congr 1
-            omega]
-  rw [hkey]
+  rw [mk_monomial_eq_teich_mul_pInv_pow p F ϖ hik hc'eq]
   exact teich_div_p_pow_mem_chartSubring p F ϖ a 1 (k - i) c' hc'
 
 /-- **(M2'') Middle-zone monomials: the `a`-th power identity** (`b = 1`):

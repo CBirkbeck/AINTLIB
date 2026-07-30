@@ -795,6 +795,23 @@ theorem map_locSubring_le_blocUnitBall (a b : ℕ) (hb : 0 < b)
   rw [map_locSubring_chartData p F ϖ a b hb]
   exact closure_chart_le_blocUnitBall p F ϖ a b hπ1 hπ2 hr1 hr2
 
+/-- **The Gauss value of a chart monomial** `p^i · [ϖ]^m` is `ρ^i · |ϖ|^m`. -/
+private theorem gaussValue_p_pow_mul_teichPi_pow {ρ : NNReal} (hρ1 : ρ < 1) (i m : ℕ) :
+    gaussValue p F ρ ((p : Ainf p F) ^ i * teichPi p F ϖ ^ m)
+      = ρ ^ i * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ m := by
+  rw [show (p : Ainf p F) ^ i * teichPi p F ϖ ^ m
+      = (p : Ainf p F) ^ i * (teichPi p F ϖ ^ m * 1) from by ring,
+    gaussValue_p_pow_mul p F hρ1.le i, mul_one]
+  congr 1
+  rw [show teichPi p F ϖ ^ m
+      = WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ) ^ m)
+      from by rw [map_pow]; rfl,
+    gaussValue_teichmuller p F hρ1.le]
+  rw [show (((PseudoUniformizer.toOF F ϖ) ^ m : OF F) : F)
+      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ m from by
+    push_cast; rfl, map_pow]
+
 /-- **Elements of `I_inf^n` have Gauss value at most `max(ρ, |ϖ|)^n`** (each
 degree-`n` monomial does, and the bound-set is an ideal). -/
 theorem gaussValue_le_of_mem_Iinf_pow {ρ : NNReal} (hρ1 : ρ < 1) (n : ℕ)
@@ -831,21 +848,7 @@ theorem gaussValue_le_of_mem_Iinf_pow {ρ : NNReal} (hρ1 : ρ < 1) (n : ℕ)
     obtain ⟨i, hi, rfl⟩ := hx
     rw [Finset.mem_coe, Finset.mem_range] at hi
     show gaussValue p F ρ ((p : Ainf p F) ^ i * teichPi p F ϖ ^ (n - i)) ≤ q ^ n
-    have hval : gaussValue p F ρ ((p : Ainf p F) ^ i * teichPi p F ϖ ^ (n - i))
-        = ρ ^ i * perfectoidValuation p F
-            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (n - i) := by
-      rw [show (p : Ainf p F) ^ i * teichPi p F ϖ ^ (n - i)
-          = (p : Ainf p F) ^ i * (teichPi p F ϖ ^ (n - i) * 1) from by ring,
-        gaussValue_p_pow_mul p F hρ1.le i, mul_one]
-      congr 1
-      rw [show teichPi p F ϖ ^ (n - i)
-          = WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ) ^ (n - i))
-          from by rw [map_pow]; rfl,
-        gaussValue_teichmuller p F hρ1.le]
-      rw [show (((PseudoUniformizer.toOF F ϖ) ^ (n - i) : OF F) : F)
-          = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (n - i) from by
-        push_cast; rfl, map_pow]
-    rw [hval]
+    rw [gaussValue_p_pow_mul_teichPi_pow p F ϖ hρ1 i (n - i)]
     calc ρ ^ i * perfectoidValuation p F
           ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (n - i)
         ≤ q ^ i * q ^ (n - i) := by

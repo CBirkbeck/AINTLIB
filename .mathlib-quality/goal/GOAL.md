@@ -1578,3 +1578,164 @@ LaurentRefinementCore 8. The five cheapest (raw ≤ 55, so a couple of lines mov
     code 54 raw 55  plusLocToQuotient_continuous                  Example638.lean:474
     code 54 raw 55  jB                                            FJP/FiniteJetRings.lean:326
     code 53 raw 55  gaussValue_le_of_mem_Iinf_pow                 FarguesFontaine/ChartData.lean:800
+
+## Task 2 — the mirror-twin route: `Euclidean.lean` 10 → 8 (274 → 272)
+
+`gaussValueF_teichmuller_add_sub_le` (L103) and `gaussValueF_teichmuller_sub_sub_le` (L186) were
+both **exactly 76 code lines** — that equality was the tell. They are byte-identical except
+`add`↔`sub` at the operation sites; the second's docstring even says "same scaling proof". Three
+shared blocks extracted, each used by *both* twins, so every line saved counts twice:
+
+| helper | replaces | saved / twin |
+|---|---|---|
+| `eq_zero_of_max_perfectoidValuation_eq_zero` | the `ha`/`hb` degenerate branch (10 lines) | 9 |
+| `exists_integral_mul_inv` | `hanorm`+`hbnorm`+2 `obtain`+2 `haInt'` (18 lines) | 16 |
+| `gaussValueF_le_of_teichmuller_mul_map` | `hmaster` + the closing `rw`/`calc` (8 lines) | 6 |
+
+76 → 45 each; both dropped off the over-50 list. `lake build '«Adic spaces».FarguesFontaine.Euclidean'`
+→ 0 errors, 3026 jobs. The three new warnings (2 `unusedSectionVars`, 3 `overlappingInstances`) match
+the pattern already on every neighbouring declaration in the file, so no new lint class.
+
+`exists_integral_mul_inv` is the reusable one — it is the normalisation step "if `v a ≤ v c` with
+`v c ≠ 0` then `a * c⁻¹` lifts to `O_F`", which recurs throughout the Kedlaya §2 material.
+
+### Finding the twins mechanically
+
+Rather than eyeball, hash every window of 6 consecutive code lines inside each over-50 proof and
+group by which proofs share it. 1,279 repeated 6-line blocks across the 270 in-scope proofs; ranking
+by the number of overlapping windows surfaces the genuine twins immediately:
+
+    112 windows  WedhornCechAcyclicity: tate_backward_exists / tate_ker_le_of_backward
+    110 windows  NonTateRationalOpenHomeomorph / SpaRationalOpenHomeomorph: exists_A_level_open_presentation(')
+     94 windows  FaithfulLocLift / HuberLocLift: mem_plus_of_forall_spa_vle_one(_huber)
+     63 windows  RestrictedLimitSheaf / SheafyPair: exists_limitSections_glue(_on)
+     63 windows  RelativePieceKeystone / …Gen: relativePiece_equiv_restrict_square
+     49 windows  Wedhorn828: coUnitDatum_ker_le_span / unitDatum_ker_le_span
+
+**Same-file pairs are much cheaper than cross-file pairs** — the helper has an obvious home and needs
+no import-order reasoning (cross-file pairs need the earliest common consumer; cf. the
+lemma-in-wrong-file trap where a later file forces an earlier one to inline a nameless copy).
+
+**Assessed and rejected for now:** the `Wedhorn828` pair. `difflib` puts their shared content at 78
+lines (runs of 17/15/12/10/7/7), but they are 115 and 133 code lines, so they need −65 and −83, and
+the shared runs close over ~10 locals (`β`, `Φ`, `aI`, `D`, `hβ_cont`, `hΦ_cont`, `hΦ_alg`,
+`hβ_coe`, `hψ_alg`) *plus* one hypothesis that genuinely differs (`hmk_bX` vs `hψ_div`). That is a
+real decomposition, not a mechanical one — logged rather than half-done.
+
+## Assessed and rejected: the over-100-character lines
+
+556 lines exceed 100 characters (453 code, 103 comment) across 39 files — `WedhornCechAcyclicity` 107,
+`RelativePieceKeystone` 96, `FarguesFontaine/Groebner` 73, `RelativePieceKeystoneOpen` 56,
+`RelativePieceKeystoneGen` 50. **`linter.style.longLine` is not enabled for this library** (builds
+emit `overlappingInstances` and `unusedSectionVars`, never `style.longLine`), so these are latent
+rather than failing. Rewrapping 556 lines of expert-written proof term across 39 files is large
+churn with real breakage risk and nothing forcing it — deliberately not done. (Measured in Python:
+`awk 'length($0)>100'` counts *bytes* and over-reports badly on this Unicode-heavy source.)
+
+## Task 2 — the dominance scan, and `ChartVObj.mk_monomial_mem_of_le` 92 → 33 (272 → 271)
+
+New triage tool, and the most productive one so far: for each over-50 proof, split the body into
+**top-level blocks** (lines at the body's base indentation, each running to the next base-indent
+line) and ask whether lifting the single biggest block would alone cross the bar.
+
+**143 of the 270 in-scope proofs qualify.** That is the tractable pool; the rest need genuine
+multi-way decomposition.
+
+Caveat when reading the output: the "biggest block" is only liftable when it is a `have`. Blocks
+headed by `| succ k ih =>`, `· rintro …`, `refine ⟨{`, `map_mul' F G := …` are induction/bullet/
+structure-field branches, not extractable lemmas — `TopologyComparison.polynomial_quotient_in_range`
+(need −1, biggest 42) is an induction branch, not a one-line win.
+
+### `mk_monomial_mem_of_le` (92 code lines, need −42)
+
+Two helpers, extracted bottom-up because the obvious single lift is **itself over 50**:
+
+* `pInv_pow_mul_p_pow (n)` — `p⁻¹ⁿ · pⁿ = 1` in `Bloc`. Replaces a 10-line `hcancel` whose `calc`
+  was just `(mul_pow _ _ _).symm` then `rw [h, one_pow]`; as a standalone it collapses to
+  `rw [← mul_pow, h, one_pow]` — **6 lines**.
+* `mk_monomial_eq_teich_mul_pInv_pow` — the normal form `p^i[c]/(p[ϖ])^k = [c'] · (p⁻¹)^(k−i)`
+  given `c = ϖ^k · c'`. This is the 52-line `hkey`; using the first helper brings it to **43**.
+
+`mk_monomial_mem_of_le` is then `hπpos`, `hck`, `obtain c'`, `hc'`, one `rw`, one `exact` — **33
+lines**. Also dropped: the now-dead `have hsplitp : k = i + (k - i) := by omega`.
+
+**The load-bearing lesson: when the dominant `have` is bigger than 50 itself, lift its inner atoms
+FIRST, then lift the have.** A single-level lift here would have traded one over-50 proof for
+another. The order is bottom-up, not top-down.
+
+### Assessed and rejected: `p_div_teich_pow_a_mem_chartSubring` (82, need −32)
+
+Same shape — a 44-line `hkey` — but its `hkey` closes over four locally-proved atoms (`hIT` 6,
+`h1` 12, `h2` 3, `hda` 4). Self-contained the helper is 44 + 25 = **68 lines**, still over. It needs
+a *second* level (`h1` generalises to "`[c']^a = [ϖ]^n · [c'']` given `c'^a = ϖ^n c''`", which is
+worth having) — real work, logged rather than half-done.
+
+Running total: task 2 at **271** (from 274 post-split, 290 pre-split, 486 at baseline).
+
+## Task 2 — `ChartData.gaussValue_le_of_mem_Iinf_pow` 53 → 39 (271 → 270)
+
+The inner `hval` (15 lines) was a self-contained fact with no dependence on the surrounding
+`BdIdeal` construction, so it lifted directly with one generalisation: the original computed the
+Gauss value at the exponent `n - i`, and the helper takes an arbitrary `m`.
+
+    private theorem gaussValue_p_pow_mul_teichPi_pow (hρ1 : ρ < 1) (i m : ℕ) :
+        gaussValue p F ρ ((p : Ainf p F) ^ i * teichPi p F ϖ ^ m)
+          = ρ ^ i * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ m
+
+`have hval : … := by …` + `rw [hval]` (15 lines) collapses to a single `rw [… i (n - i)]`.
+Worth having on its own terms — it is the Gauss value of a chart monomial, the basic computation the
+whole `chartMonomials` development rests on. Module build green (3100 jobs).
+
+## Assessed and rejected: `FJP.syzygy_graph_of_isUnit` (55, need −5)
+
+Its dominant block (`hpush`, 18 lines) closes over **twelve** locals
+(`g f u hg hCg c ρ α hr hαρ w k`) — as a standalone lemma the hypothesis list costs more than the
+lift saves. The real lead here is different: inside `hpush`, the two `by_cases` branches
+(`i < k` and `k < i`) are **textually identical** apart from the comparison direction, so the win is
+a shared inner step rather than an extracted lemma. Not a clean 5-line change; logged.
+
+## A wall-clock correction worth recording
+
+I had been reading a gate "stuck" at 3347/3351 across many polls as a stall. `ps -o etime` showed the
+build had only been running **3m23s** — polling turns complete in seconds, so a dozen polls span a
+couple of minutes of real time, nothing like the ~10 minutes `WedhornCechAcyclicity` needs. **Check
+`ps -o etime` before concluding a build has hung, and prefer the completion notification to polling.**
+
+The same `ps` also surfaced two things about this machine:
+
+* a second `lake build` (`FLT.Claude.Final.Basic`, toolchain v4.32.0-rc1) running in a *different*
+  worktree — it cannot clobber our oleans, but it competes for CPU and roughly explains why gates
+  here are slower than the module builds suggest;
+* a **stale waiter from a previous session**, elapsed 2 days, spinning on exactly the
+  `until … ! pgrep -qf "lake build"; do sleep 10; done` pattern the working rules prohibit leaving
+  behind. Reported to the owner rather than killed.
+
+## Task 2 — `IntervalRing.wLoc_rpow_interpolate` 55 → 40 (270 → 269)
+
+The best kind of candidate: `hdenint` (16 lines) is **pure `NNReal` arithmetic** with no dependence
+on `Bloc`, `gaussValue`, `x`, or any of the localisation data around it. It mentions only
+`ρ₁ ρ₂ c θ k` and `hc0 : 0 < c`, so it lifted with no hypothesis threading at all:
+
+    private theorem mul_rpow_interpolate_pow {ρ₁ ρ₂ c : NNReal} (hc0 : 0 < c) (θ : ℝ) (k : ℕ) :
+        ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c) ^ k = ((ρ₁ * c) ^ k) ^ θ * ((ρ₂ * c) ^ k) ^ (1 - θ)
+
+and the 16-line `have` becomes `have hdenint := mul_rpow_interpolate_pow (ρ₁ := ρ₁) (ρ₂ := ρ₂) hc0 θ k`.
+Named arguments are needed because `ρ₁`/`ρ₂` are implicit and appear only under `rpow`, which is not
+a unifiable position from the expected type alone.
+
+Note this helper mentions **none** of the file's section variables (`p`, `F`, `ϖ`), so unlike the
+`ChartVObj`/`Euclidean` helpers it picks up no `unusedSectionVars` warning — a side benefit of
+extracting the genuinely context-free part.
+
+### The ranking this suggests for the remaining 267
+
+Order candidate `have`s by **how much surrounding context they mention**, not by size:
+
+1. *context-free* (pure arithmetic / pure order facts) — lift with zero threading. Best value.
+2. *mentions only the theorem's own binders* — lift with a short hypothesis list.
+3. *mentions locally-derived data* (`set`/`obtain` results) — lift, but the data must become
+   parameters plus the equation that characterises it (e.g. `hc'eq` in `ChartVObj`).
+4. *closes over many locals* (≥ ~8) — the hypothesis list costs more than the lift saves; look for a
+   shared inner step instead (cf. `FJP.syzygy_graph_of_isUnit`).
+
+Running total: **269** (486 baseline → 290 pre-split → 274 post-split → 269).
