@@ -777,7 +777,7 @@ theorem restrictIdealSingle_cofinal_of_not_mem (w : Valuation A Γ₀) (g : A) (
         obtain ⟨n, hn⟩ := hgen h hh
         exact ⟨n, lt_of_le_of_lt (pow_le_pow_left' hle n) hn⟩
       · -- `w c > 1` ⇒ `mk0 w c ∈ cΓ_v`; Prop 1.20.
-        push_neg at hwc1
+        push Not at hwc1
         have hcmem : Units.mk0 (w c) hvc ∈ Valuation.cGamma w :=
           Valuation.mem_cGamma_iff.mpr ⟨c, hwc1.le, hvc,
             (inv_le_one'.mpr (Units.val_le_val.mp hwc1.le)).trans (Units.val_le_val.mp hwc1.le),

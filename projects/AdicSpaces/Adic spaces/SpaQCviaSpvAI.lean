@@ -110,15 +110,15 @@ theorem restrictToConvexBounded_le_of_le
     w.restrictToConvexBounded H hH_ge g ≤ w.restrictToConvexBounded H hH_ge h := by
   by_cases hg0 : w g = 0
   · rw [Valuation.restrictToConvexBounded_apply_zero w H hH_ge hg0]
-    exact zero_le'
+    exact zero_le
   by_cases hgm : Units.mk0 (w g) hg0 ∈ H
   · -- `g` in the window; then `h` is too (else `w g ≤ w h < 1` sandwiches `w h` in `H`).
-    have hh0 : w h ≠ 0 := fun h0 => hg0 (le_antisymm (h0 ▸ hle) zero_le')
+    have hh0 : w h ≠ 0 := fun h0 => hg0 (le_antisymm (h0 ▸ hle) zero_le)
     have hhm : Units.mk0 (w h) hh0 ∈ H := by
       by_contra hhm
       have hh_lt : w h < 1 := by
         by_contra hge
-        push_neg at hge
+        push Not at hge
         exact hhm (hH_ge h hh0 hge)
       exact hhm (H.convex hgm (one_mem H)
         (Units.val_le_val.mp (by simpa using hle))
@@ -128,7 +128,7 @@ theorem restrictToConvexBounded_le_of_le
     exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr (Units.val_le_val.mp
       (by simpa using hle)))
   · rw [Valuation.restrictToConvexBounded_apply_not_mem w H hH_ge hg0 hgm]
-    exact zero_le'
+    exact zero_le
 
 /-- Order transfer DOWN (specialization): ordered restricted values with nonzero upper
 value give back `w g ≤ w h ≠ 0`. -/
@@ -148,7 +148,7 @@ theorem restrictToConvexBounded_le_reflect
   refine ⟨?_, hh0⟩
   by_cases hg0 : w g = 0
   · rw [hg0]
-    exact zero_le'
+    exact zero_le
   by_cases hgm : Units.mk0 (w g) hg0 ∈ H
   · rw [Valuation.restrictToConvexBounded_apply_mem w H hH_ge hg0 hgm,
       Valuation.restrictToConvexBounded_apply_mem w H hH_ge hh0 hhm] at hle
@@ -156,10 +156,10 @@ theorem restrictToConvexBounded_le_reflect
     simpa using Units.val_le_val.mpr h1
   · -- `g` outside the window with `w h < w g < 1` would sandwich `w g` in `H`.
     by_contra hlt
-    push_neg at hlt
+    push Not at hlt
     have hg_lt : w g < 1 := by
       by_contra hge
-      push_neg at hge
+      push Not at hge
       exact hgm (hH_ge g hg0 hge)
     exact hgm (H.convex hhm (one_mem H)
       (Units.val_le_val.mp (by simpa using hlt.le))
@@ -224,7 +224,7 @@ theorem cGammaSingle_univ_of_isInSpvAI {Γ₀ : Type*} [LinearOrderedCommGroupWi
   intro a ha
   by_cases h_ge : 1 ≤ w a
   · exact Valuation.vUnit_mem_cGammaSingle hg h_ge ha
-  · push_neg at h_ge
+  · push Not at h_ge
     rcases h with h_cof | h_micr
     · -- cofinality of `v(g)` sandwiches `v(a)` between `(mk0 v(g))^n` and `1`.
       obtain ⟨n, hn⟩ :=
@@ -255,7 +255,7 @@ theorem restrictToConvexBounded_isEquiv_of_univ {R : Type*} [CommRing R] {Γ₀ 
   intro r s
   by_cases hr : w r = 0
   · rw [Valuation.restrictToConvexBounded_apply_zero w H hH_ge hr, hr]
-    simp only [zero_le']
+    simp only [zero_le]
   · rw [Valuation.restrictToConvexBounded_apply_mem w H hH_ge hr (huniv r hr)]
     by_cases hs : w s = 0
     · rw [Valuation.restrictToConvexBounded_apply_zero w H hH_ge hs, hs]
@@ -521,7 +521,7 @@ theorem image_ιSpvR_spa_eq [IsTopologicalRing A] (P : PairOfDefinition A) {π :
       simpa using h2
     have h_lt_pi : wv ((π : A)) < 1 := by
       by_contra hge
-      push_neg at hge
+      push Not at hge
       have hge' : wv 1 ≤ wv ((π : A)) := by
         rw [map_one]
         exact hge

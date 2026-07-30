@@ -90,7 +90,7 @@ theorem vle_pow_iff {v : Spv (Ainf p F)} {k : ℕ} (hk : 0 < k) (x y : Ainf p F)
       ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
     fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
   rw [hbridge, hbridge, map_pow, map_pow]
-  exact pow_le_pow_iff_left₀ zero_le' zero_le' hk.ne'
+  exact pow_le_pow_iff_left₀ zero_le zero_le hk.ne'
 
 /-- **The Big windows** `{v : κ(v) ∈ [p^n, p^{n+1}]}`. -/
 def bigWindow (n : ℤ) : Set (Spv (Ainf p F)) :=

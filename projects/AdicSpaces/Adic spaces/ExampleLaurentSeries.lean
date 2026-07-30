@@ -213,7 +213,7 @@ theorem O_subset_powerBounded :
   refine (isBounded_O F).subset ?_
   rintro - ⟨k, rfl⟩
   rw [SetLike.mem_coe, mem_O_iff, map_pow]
-  exact pow_le_one₀ zero_le' hx
+  exact pow_le_one₀ zero_le hx
 
 instance : ValuationSpectrum.PlusSubring K := ⟨O F⟩
 
@@ -413,7 +413,7 @@ theorem exists_t_pow_mul_integral (f : MvPowerSeries (Fin k) K)
     have hlt : Valued.v (MvPowerSeries.coeff s f) < 1 := by
       have := fun h => hs (Set.Finite.mem_toFinset _ |>.mpr h)
       by_contra hge
-      push_neg at hge
+      push Not at hge
       refine this ?_
       rw [Set.mem_compl_iff, Set.mem_preimage, Set.mem_setOf_eq, sub_zero]
       intro hlt1

@@ -2763,16 +2763,43 @@ theorem isUnit_canonicalMap_s_of_discrete {A : Type*} [CommRing A] [TopologicalS
   rw [← heq] at hunit_pow
   exact isUnit_of_mul_isUnit_right hunit_pow
 
+/-- Over a discrete base the localization's uniformity is discrete: its uniformity filter
+is the principal filter of the diagonal.
+
+Extracted from `isPowerBounded_of_discrete_presheafValue`, where it was the dominant
+`have`. The one-line `htop` it consumed is re-derived here. -/
+private theorem uniformSpace_eq_bot_of_discrete
+    {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [DiscreteTopology A] [PlusSubring A] [IsHuberRing A]
+    (D' : RationalLocData A) :
+    D'.uniformSpace = ⊥ := by
+  have htop : D'.topology = ⊥ := locTopology_eq_bot_of_discrete D'
+  suffices h : D'.uniformSpace.uniformity = Filter.principal SetRel.id by
+    exact UniformSpace.ext (h.trans bot_uniformity.symm)
+  change Filter.comap (fun p : Localization.Away D'.s × Localization.Away D'.s ↦
+    p.2 - p.1) (@nhds (Localization.Away D'.s) D'.topology 0) =
+      Filter.principal SetRel.id
+  have hpure : @nhds (Localization.Away D'.s) D'.topology 0 = pure 0 := by
+    rw [htop]
+    letI : TopologicalSpace (Localization.Away D'.s) := ⊥
+    haveI : DiscreteTopology (Localization.Away D'.s) := ⟨rfl⟩
+    exact congr_fun (nhds_discrete _) 0
+  rw [hpure, Filter.comap_pure]
+  ext s
+  simp only [Filter.mem_principal]
+  constructor
+  · intro h ⟨a, b⟩ (hab : a = b); exact h (show b - a = 0 by rw [hab, sub_self])
+  · intro h ⟨a, b⟩ (hab : b - a = 0); exact h (sub_eq_zero.mp hab).symm
+
 /-- **(Pass-4 audit, blocker-2 discrete-PB helper)** When `A` has discrete
 topology, `D'.uniformSpace = ⊥`, so the completion `presheafValue D'` has
 discrete topology too. Hence every element is trivially power-bounded.
 
 Discharge plan: `D'.uniformSpace = ⊥` (proved inline below), completion
 of discrete uniform is discrete, IsBounded on discrete is trivial via
-`{0} * V ⊆ U` pattern with `V = {0}`. Body pending the
-`nhds (0 : Completion _) = pure 0` derivation (Mathlib uses
-`UniformSpace.Completion.continuous_coe` + discrete-uniform-completion
-identification). -/
+`{0} * V ⊆ U` pattern with `V = {0}`. The `D'.uniformSpace = ⊥` step is
+`uniformSpace_eq_bot_of_discrete` above. This proof is complete — an earlier revision of this
+docstring described the body as pending. -/
 theorem isPowerBounded_of_discrete_presheafValue
     {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [DiscreteTopology A] [PlusSubring A] [IsHuberRing A]
@@ -2782,24 +2809,7 @@ theorem isPowerBounded_of_discrete_presheafValue
   -- bijection + uniform-embedding chain from `coeRingHom_bijective_of_discrete`
   -- + `discreteTopology_presheafValue`; the latter is `private` in
   -- TateAcyclicity.lean which is downstream, so we cannot import it here).
-  have htop : D'.topology = ⊥ := locTopology_eq_bot_of_discrete D'
-  have hbot : D'.uniformSpace = ⊥ := by
-    suffices h : D'.uniformSpace.uniformity = Filter.principal SetRel.id by
-      exact UniformSpace.ext (h.trans bot_uniformity.symm)
-    change Filter.comap (fun p : Localization.Away D'.s × Localization.Away D'.s ↦
-      p.2 - p.1) (@nhds (Localization.Away D'.s) D'.topology 0) =
-        Filter.principal SetRel.id
-    have hpure : @nhds (Localization.Away D'.s) D'.topology 0 = pure 0 := by
-      rw [htop]
-      letI : TopologicalSpace (Localization.Away D'.s) := ⊥
-      haveI : DiscreteTopology (Localization.Away D'.s) := ⟨rfl⟩
-      exact congr_fun (nhds_discrete _) 0
-    rw [hpure, Filter.comap_pure]
-    ext s
-    simp only [Filter.mem_principal]
-    constructor
-    · intro h ⟨a, b⟩ (hab : a = b); exact h (show b - a = 0 by rw [hab, sub_self])
-    · intro h ⟨a, b⟩ (hab : b - a = 0); exact h (sub_eq_zero.mp hab).symm
+  have hbot : D'.uniformSpace = ⊥ := uniformSpace_eq_bot_of_discrete D'
   letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
   haveI : DiscreteUniformity (Localization.Away D'.s) := ⟨hbot⟩
   -- DiscreteUniformity → DiscreteTopology automatically (mathlib instance).

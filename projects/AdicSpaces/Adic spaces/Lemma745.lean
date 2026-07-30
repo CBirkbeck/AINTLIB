@@ -733,7 +733,7 @@ theorem withZeroUnitsSplit_monotone (Γ₀ : Type*) [LinearOrderedCommGroupWithZ
   intro a b hab
   rcases eq_or_ne a 0 with rfl | ha
   · simp
-  have hb : b ≠ 0 := fun h ↦ ha (le_antisymm (h ▸ hab) (zero_le' (a := a)))
+  have hb : b ≠ 0 := fun h ↦ ha (le_antisymm (h ▸ hab) (zero_le (a := a)))
   rw [withZeroUnitsSplit_apply_ne ha, withZeroUnitsSplit_apply_ne hb, WithZero.coe_le_coe,
     ← Units.val_le_val]
   simpa using hab
@@ -802,7 +802,7 @@ theorem exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime'
   -- A generator of the ideal of definition outside the support.
   have hex : ∃ b ∈ P.I, (P.A₀.subtype b : A) ∉ x₀.supp := by
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     exact hx₀_an (Ideal.map_le_iff_le_comap.mpr fun b hb ↦ hcon b hb)
   obtain ⟨b, hb_I, hb_supp⟩ := hex
   set i : A := P.A₀.subtype b with hi_def

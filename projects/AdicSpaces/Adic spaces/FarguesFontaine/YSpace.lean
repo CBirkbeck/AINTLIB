@@ -297,8 +297,8 @@ variable {p F ϖ}
 private theorem pow_le_pow_iff_cross {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
     {x y : Γ₀} {a b c d : ℕ} (hcross : a * d = c * b) (hb : b ≠ 0) (hd : d ≠ 0) :
     x ^ d ≤ y ^ c ↔ x ^ b ≤ y ^ a := by
-  rw [← pow_le_pow_iff_left₀ (zero_le') (zero_le') hb (a := x ^ d) (b := y ^ c),
-    ← pow_le_pow_iff_left₀ (zero_le') (zero_le') hd (a := x ^ b) (b := y ^ a),
+  rw [← pow_le_pow_iff_left₀ (zero_le) (zero_le) hb (a := x ^ d) (b := y ^ c),
+    ← pow_le_pow_iff_left₀ (zero_le) (zero_le) hd (a := x ^ b) (b := y ^ a),
     ← pow_mul, ← pow_mul, ← pow_mul, ← pow_mul, mul_comm d b, ← hcross]
 
 /-- The cross-multiplication identity behind representation-independence: for `0 < q`
@@ -475,7 +475,7 @@ theorem KGE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
       rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq).le]
     exact_mod_cast h2 ▸ h3 ▸ h1
   rw [KGE, hbridge, map_pow, map_pow] at h ⊢
-  rw [← pow_le_pow_iff_left₀ (zero_le') (zero_le') q.den_nz
+  rw [← pow_le_pow_iff_left₀ (zero_le) (zero_le) q.den_nz
     (a := ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den)
     (b := ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat)]
   calc (ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den) ^ q.den
@@ -517,7 +517,7 @@ theorem KLE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
       rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq).le]
     exact_mod_cast h2 ▸ h3 ▸ h1
   rw [KLE, hbridge, map_pow, map_pow] at h ⊢
-  rw [← pow_le_pow_iff_left₀ (zero_le') (zero_le') q.den_nz
+  rw [← pow_le_pow_iff_left₀ (zero_le) (zero_le) q.den_nz
     (a := ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat)
     (b := ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den)]
   calc (ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat) ^ q.den

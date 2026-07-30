@@ -124,7 +124,7 @@ theorem isClosed_setOf_vle_one [TopologicalSpace B] [IsTopologicalRing B]
   have hmem : (0 : B) ∈ {h : B | ValuativeRel.valuation B h
       < ValuativeRel.valuation B a} := by
     simp only [Set.mem_setOf_eq, map_zero]
-    exact lt_of_le_of_lt zero_le' hlt
+    exact lt_of_le_of_lt zero_le hlt
   have htrans : (fun h : B => a + h) '' {h : B | ValuativeRel.valuation B h
       < ValuativeRel.valuation B a} ∈ nhds a := by
     have hopen : IsOpen ((fun h : B => a + h) '' {h : B |
@@ -168,7 +168,7 @@ theorem vle_one_of_isIntegral {w : Spv B} {S : Subring B}
     have hx0 : x = 0 := by
       rw [← mul_one x, show (1 : B) = 0 from heval, mul_zero]
     rw [hx0, map_zero]
-    exact zero_le'
+    exact zero_le
   have hexp : ∑ i ∈ Finset.range (n + 1), S.subtype (p.coeff i) * x ^ i
       = 0 := by
     rw [← Polynomial.eval₂_eq_sum_range]
@@ -213,7 +213,7 @@ theorem vle_zero_one {w : Spv B} : w.vle (0 : B) 1 := by
     Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation B) x y
   refine (hbridge 0 1).mpr ?_
   rw [map_zero]
-  exact zero_le'
+  exact zero_le
 
 /-- The `≤ 1`-elements are multiplicatively stable. -/
 theorem vle_one_mul {w : Spv B} {a b : B} (ha : w.vle a 1) (hb : w.vle b 1) :

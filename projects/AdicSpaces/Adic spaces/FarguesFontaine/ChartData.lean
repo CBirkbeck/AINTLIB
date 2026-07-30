@@ -1530,7 +1530,7 @@ theorem mem_chartSubring_of_wI_le (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
           * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'),
         mul_mem (pow_mem hmemU _) (hmemAm _),
         chart_term_low_eq p F ϖ k m hmk _ c' hc'⟩
-    · push_neg at hmk
+    · push Not at hmk
       obtain ⟨c', hc'⟩ := exists_teichCoeff_factor_high p F ϖ
         (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
         a b k m ha hmk hexact2 A hx hwI

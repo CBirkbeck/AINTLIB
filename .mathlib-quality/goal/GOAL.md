@@ -731,3 +731,50 @@ error (`Unknown identifier hφb`) showed the section-variable prefix was wrong t
 **Rule:** the re-derive trick is safe for a `have`, and unsafe for a `set`/`let` whose folding the
 statement depends on. For those, the abbreviation must become an explicit parameter of the
 extracted lemma together with its defining equation — or the statement must be written unfolded.
+
+## Task 2 — suspect classification: only 1 of 64 targets is cheap
+
+`scratchpad/classify.py` extends the screen by asking, for each proof-local suspect, **how it is
+introduced** — because that decides the cost:
+
+| introduced by | what the extraction must do |
+|---|---|
+| a short `have` | **re-derive it** inside the lemma (safe; this is the whole trick) |
+| `set` / `let` | **unsafe to re-derive** — folding is positional (see the `BI` failure above). Must become an explicit parameter + defining equation |
+| `obtain` / `rcases` / `intro` / `choose` / `fun` | must be threaded as a hypothesis, and its type is written down **nowhere** — it has to be read off the destructured term's source |
+
+Across the 64 targets that have suspects and a real proof body, suspect-kind frequency is
+
+    unknown 57 · have 48 · set 32 · obtain 24 · intro 16 · fun 11 · haveI 3 · by_cases 1
+
+and **exactly 1 target has all-`have`, all-short suspects**. That was
+`isPowerBounded_of_discrete_presheafValue`, done below. Everything else needs either a `set`
+parameterisation or a destructured hypothesis whose type must be reconstructed by hand.
+
+### Landed
+
+* `isPowerBounded_of_discrete_presheafValue` (Presheaf.lean) 53 → 36, extracting
+  `uniformSpace_eq_bot_of_discrete` (17). Its single suspect `htop` was a one-line
+  `locTopology_eq_bot_of_discrete D'`, re-derived inside.
+
+Also corrected a **stale docstring** on that theorem, which claimed *"Body pending the
+`nhds (0 : Completion _) = pure 0` derivation"*. There is no `sorry`; the proof is complete. That
+is the fourth stale "unfinished" claim found this campaign (cf. the three on
+`isIntegral_of_forall_continuous_valuation_le_one`). **When touching any declaration, re-read its
+docstring against the actual proof** — these claims are actively misleading about what is done.
+
+## Task 3 — first mechanical pass (deprecations)
+
+| item | result |
+|---|---|
+| `λ` → `fun` | **n/a: all 30 occurrences are prose** — Kedlaya's Gauss norm `λ_r`, the difference map `λ`, `ker λ`. None is a Lean lambda. Checking first was the right call (recorded gotcha). |
+| `$` → `<\|` | n/a: 0 occurrences |
+| `zero_le'` → `zero_le` | **20 sites**, 6 files |
+| `push_neg` → `push Not` | **16 sites**, 11 files |
+
+36 deprecation sites fixed across 12 files. Remaining deprecations visible in the build log, for a
+later pass: `PowerSeries.derivative` (4), `HahnSeries.embDomain_of_notMem_range` (3),
+`Derivation.leibniz` (2), `RingHom.pi` (2), `Finsupp.mapDomain_of_notMem_range` (1),
+`Polynomial.finsetSum_coeff` (1), `IsLocalization.under_map_of_isPrime_disjoint` (1),
+`continuous_mul_const` (1) — plus one project-internal `@[deprecated]` marked RETIRED (2 uses)
+that wants a real repoint, not a rename.

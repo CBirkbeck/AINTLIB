@@ -934,7 +934,7 @@ theorem hspan_top_of_spanTop_presheafValue
       ∃ D : { D // D ∈ C.covers }, C.base.canonicalMap D.1.s ∉ p := by
   intro p hp
   by_contra hall
-  push_neg at hall
+  push Not at hall
   -- Every `canonicalMap D.s` lies in p (for D ∈ C.covers).
   have hsub : ((fun D : RationalLocData A =>
       C.base.canonicalMap D.s) '' (C.covers : Set _)) ⊆ (p : Set _) := by

@@ -420,7 +420,7 @@ theorem OD_subset_powerBounded :
 theorem norm_le_one_of_isPowerBounded {a : D F}
     (h : TopologicalRing.IsPowerBounded a) : ‖a‖ ≤ 1 := by
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   obtain ⟨V, hV, hVsub⟩ := h (Metric.ball 0 1) (Metric.ball_mem_nhds 0 one_pos)
   obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hV
   obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hδ (norm_tD_lt_one F)

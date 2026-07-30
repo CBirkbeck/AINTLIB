@@ -7071,7 +7071,7 @@ theorem exists_mem_rationalOpen_of_spanTop [DecidableEq A] (T : Finset A)
     ∃ t ∈ T, v ∈ rationalOpen T t := by
   have hnz : ∃ t ∈ T, ¬ v.vle t 0 := by
     by_contra h
-    push_neg at h
+    push Not at h
     have hle : Ideal.span (T : Set A) ≤ v.supp :=
       Ideal.span_le.mpr fun t ht => (v.mem_supp_iff t).mpr (h t ht)
     rw [hspan] at hle
@@ -7114,7 +7114,7 @@ theorem noCommonZero_of_idealGen
     ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0 := by
   intro v _hv
   by_contra h
-  push_neg at h
+  push Not at h
   -- h : ∀ t ∈ T, v.vle t 0, i.e., every t ∈ T is in v.supp.
   have h_sub : (T : Set A) ⊆ (v.supp : Set A) := by
     intro t ht
@@ -7317,7 +7317,7 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
   · obtain ⟨t, ht, hbranch⟩ := hplus
     exact ⟨t, ht, fun v hv => harith₁ t v (hbranch v hv)⟩
   · -- all generators carry the `≤`-branch ⟹ the leaf is empty (dominance), vacuous
-    push_neg at hplus
+    push Not at hplus
     obtain ⟨t₀, ht₀⟩ := hT
     refine ⟨t₀, ht₀, fun v hv => ?_⟩
     exfalso
@@ -11867,7 +11867,7 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
       obtain ⟨x, hx, y, hy, rfl⟩ := Finset.mem_mul.mp ht
       have hxy : x ∉ Tpos_at Vj₁ ∨ y ∉ Tpos_at Vj₂ := by
         by_contra h
-        push_neg at h
+        push Not at h
         exact htpos (Finset.mul_mem_mul h.1 h.2)
       rcases hxy with hxn | hyn
       · exact Set.eq_empty_of_subset_empty
