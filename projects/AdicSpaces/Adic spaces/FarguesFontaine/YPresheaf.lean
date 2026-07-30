@@ -77,13 +77,10 @@ theorem intervalTrace_dyadic_eq_rationalOpen (s j₁ j₂ : ℕ)
   have hp0 : (0 : ℚ) < p := by exact_mod_cast hppos
   have hpk : 0 < p ^ s := pow_pos hppos s
   set ϖ' := PseudoUniformizer.frobRoot p F ϖ s with hϖ'def
-  have hteich : teichPi p F ϖ' ^ p ^ s = teichPi p F ϖ :=
-    teichPi_frobRoot_pow p F ϖ s
-  have hYeq : Y p F ϖ' = Y p F ϖ :=
-    Y_eq_of_teichPi_pow p F ϖ hpk hteich
+  have hteich : teichPi p F ϖ' ^ p ^ s = teichPi p F ϖ := teichPi_frobRoot_pow p F ϖ s
+  have hYeq : Y p F ϖ' = Y p F ϖ := Y_eq_of_teichPi_pow p F ϖ hpk hteich
   ext v
-  have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 j₁ 1 j₂
-    one_pos hj₁ one_pos hj₂ v
+  have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 j₁ 1 j₂ one_pos hj₁ one_pos hj₂ v
   rw [show 1 + 1 - 1 = 1 from by omega] at hiff
   rw [hiff, hYeq]
   have hq1 : (0 : ℚ) < 1 / ((j₁ : ℚ) / ((p : ℚ) ^ s)) := by
@@ -92,8 +89,7 @@ theorem intervalTrace_dyadic_eq_rationalOpen (s j₁ j₂ : ℕ)
   have hq2 : (0 : ℚ) < 1 / ((j₂ : ℚ) / ((p : ℚ) ^ s)) := by
     have : (0 : ℚ) < (j₂ : ℚ) := by exact_mod_cast hj₂
     positivity
-  have hab1 : 1 / ((j₁ : ℚ) / ((p : ℚ) ^ s))
-      = ((p ^ s : ℕ) : ℚ) / ((j₁ : ℕ) : ℚ) := by
+  have hab1 : 1 / ((j₁ : ℚ) / ((p : ℚ) ^ s)) = ((p ^ s : ℕ) : ℚ) / ((j₁ : ℕ) : ℚ) := by
     push_cast
     rw [one_div_div]
   have hab2 : 1 / ((j₂ : ℚ) / ((p : ℚ) ^ s))

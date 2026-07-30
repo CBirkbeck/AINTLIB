@@ -198,42 +198,34 @@ theorem wLoc_le_of_interior_bound (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1)
   change x * algebraMap (Ainf p F) (Bloc p F ϖ) (y : Ainf p F)
     = algebraMap (Ainf p F) (Bloc p F ϖ) a at hxy
   obtain ⟨k, hk⟩ := y.2
-  set cϖ : NNReal := perfectoidValuation p F
-    ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hcϖ
+  set cϖ : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hcϖ
   have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
     fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
   have hcϖ0 : 0 < cϖ := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
   have hval : ∀ (τ : NNReal) (hτ0 : 0 < τ) (hτ1 : τ < 1),
       wLoc p F ϖ hτ0 hτ1 x * (τ * cϖ) ^ k = gaussValue p F τ a := by
     intro τ hτ0 hτ1
-    have h1 : x * algebraMap (Ainf p F) (Bloc p F ϖ)
-        (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+    have h1 : x * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
         = algebraMap (Ainf p F) (Bloc p F ϖ) a := by
       rw [show ((p : Ainf p F) * teichPi p F ϖ) ^ k = (y : Ainf p F) from hk]
       exact hxy
     have h2 := congrArg (wLoc p F ϖ hτ0 hτ1) h1
-    rw [Valuation.map_mul, map_pow, Valuation.map_pow, wLoc_algebraMap,
+    rwa [Valuation.map_mul, map_pow, Valuation.map_pow, wLoc_algebraMap,
       wLoc_algebraMap, gaussValue_p_teichPi p F ϖ hτ1] at h2
-    exact h2
   -- per-term limit bound at the target radius
   have hterm2 : ∀ n : ℕ,
-      σ ^ n * perfectoidValuation p F ((teichCoeff p F a n : OF F) : F)
-        ≤ ε * (σ * cϖ) ^ k := by
+      σ ^ n * perfectoidValuation p F ((teichCoeff p F a n : OF F) : F) ≤ ε * (σ * cϖ) ^ k := by
     intro n
     have hL : Filter.Tendsto
         (fun m => (ρ₁ ^ (θseq m) * ρ₂ ^ (1 - θseq m)) ^ n
           * perfectoidValuation p F ((teichCoeff p F a n : OF F) : F))
         Filter.atTop
-        (nhds (σ ^ n
-          * perfectoidValuation p F ((teichCoeff p F a n : OF F) : F))) :=
+        (nhds (σ ^ n * perfectoidValuation p F ((teichCoeff p F a n : OF F) : F))) :=
       (hτ.pow n).mul_const _
-    have hR : Filter.Tendsto
-        (fun m => ε * ((ρ₁ ^ (θseq m) * ρ₂ ^ (1 - θseq m)) * cϖ) ^ k)
-        Filter.atTop (nhds (ε * (σ * cϖ) ^ k)) :=
-      (((hτ.mul_const cϖ).pow k).const_mul ε)
+    have hR : Filter.Tendsto (fun m => ε * ((ρ₁ ^ (θseq m) * ρ₂ ^ (1 - θseq m)) * cϖ) ^ k)
+        Filter.atTop (nhds (ε * (σ * cϖ) ^ k)) := (((hτ.mul_const cϖ).pow k).const_mul ε)
     refine le_of_tendsto_of_tendsto' hL hR fun m => ?_
-    obtain ⟨hm0, hm1⟩ := rpow_interpolate_lt_one hρ₁0 hρ₁1 hρ₂0 hρ₂1
-      (hθs0 m).le (hθs1 m).le
+    obtain ⟨hm0, hm1⟩ := rpow_interpolate_lt_one hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hθs0 m).le (hθs1 m).le
     have hle1 : (ρ₁ ^ (θseq m) * ρ₂ ^ (1 - θseq m)) ^ n
         * perfectoidValuation p F ((teichCoeff p F a n : OF F) : F)
         ≤ gaussValue p F (ρ₁ ^ (θseq m) * ρ₂ ^ (1 - θseq m)) a := by
@@ -242,8 +234,7 @@ theorem wLoc_le_of_interior_bound (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1)
     have hle2 : gaussValue p F (ρ₁ ^ (θseq m) * ρ₂ ^ (1 - θseq m)) a
         ≤ ε * ((ρ₁ ^ (θseq m) * ρ₂ ^ (1 - θseq m)) * cϖ) ^ k := by
       rw [← hval _ hm0 hm1]
-      exact mul_le_mul_of_nonneg_right
-        (h (θseq m) (hθs0 m) (hθs1 m) hm0 hm1) zero_le
+      exact mul_le_mul_of_nonneg_right (h (θseq m) (hθs0 m) (hθs1 m) hm0 hm1) zero_le
     exact le_trans hle1 hle2
   have hsup : gaussValue p F σ a ≤ ε * (σ * cϖ) ^ k := by
     rw [gaussValue]

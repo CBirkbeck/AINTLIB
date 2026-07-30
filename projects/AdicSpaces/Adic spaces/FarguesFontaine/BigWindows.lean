@@ -43,6 +43,19 @@ theorem teichPi_frobRoot_pow (s : ℕ) :
   rw [teichPi_pow, PseudoUniformizer.toOF_frobRoot, frobRootOF_pow]
   rfl
 
+/-- A `ℤ`-power of a natural number, rewritten in the `T / s` shape the chart-membership
+lemmas expect: `a ^ z = (a ^ m : ℕ) / (1 : ℕ)` whenever the exponent `z` is the cast of `m`.
+
+The `hz` hypothesis is what lets one lemma serve every call site: the exponents appearing in
+the window lemmas are `(n : ℤ)`, `(n : ℤ) + 1` and `(n : ℤ) + k + 1`, each a natural cast,
+discharged by `rfl` or `by push_cast; ring`. -/
+theorem natCast_zpow_eq_natCast_div_one (a m : ℕ) (z : ℤ) (hz : z = (m : ℤ)) :
+    (a : ℚ) ^ z = ((a ^ m : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
+  subst hz
+  push_cast
+  rw [zpow_natCast]
+  ring
+
 /-- The Teichmüller identity of the power: `[ϖ^m] = [ϖ]^m`. -/
 theorem teichPi_pPow (m : ℕ) (hm : 0 < m) :
     teichPi p F (PseudoUniformizer.pPow F ϖ m hm) = teichPi p F ϖ ^ m := by
@@ -156,14 +169,8 @@ theorem bigWindow_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
   rw [hiff, hYeq]
   have hq1 : (0 : ℚ) < (p : ℚ) ^ (n : ℤ) := zpow_pos hp0 _
   have hq2 : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + 1) := zpow_pos hp0 _
-  have hab1 : (p : ℚ) ^ (n : ℤ) = ((p ^ n : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
-    push_cast
-    rw [zpow_natCast]
-    ring
-  have hab2 : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
-    push_cast
-    rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
-    ring
+  have hab1 := natCast_zpow_eq_natCast_div_one p n (n : ℤ) rfl
+  have hab2 := natCast_zpow_eq_natCast_div_one p (n + 1) ((n : ℤ) + 1) (by push_cast; ring)
   constructor
   · rintro ⟨hY, hge, hle⟩
     have hgev := (KGE_iff hY hq1 one_pos hab1).mp hge
@@ -282,10 +289,8 @@ theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
   have hp0 : (0 : ℚ) < p := by exact_mod_cast hppos
   have hpk : 0 < p ^ n := pow_pos hppos n
   set ϖ' := PseudoUniformizer.frobRoot p F ϖ n with hϖ'def
-  have hteich : teichPi p F ϖ' ^ p ^ n = teichPi p F ϖ :=
-    teichPi_frobRoot_pow p F ϖ n
-  have hYeq : Y p F ϖ' = Y p F ϖ :=
-    Y_eq_of_teichPi_pow p F ϖ hpk hteich
+  have hteich : teichPi p F ϖ' ^ p ^ n = teichPi p F ϖ := teichPi_frobRoot_pow p F ϖ n
+  have hYeq : Y p F ϖ' = Y p F ϖ := Y_eq_of_teichPi_pow p F ϖ hpk hteich
   rw [bigWindow_inter_succ p F ϖ (n : ℤ) hp]
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' p 1 p 1
@@ -294,10 +299,7 @@ theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
     at hiff
   rw [hiff, hYeq]
   have hq : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + 1) := zpow_pos hp0 _
-  have hab : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
-    push_cast
-    rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
-    ring
+  have hab := natCast_zpow_eq_natCast_div_one p (n + 1) ((n : ℤ) + 1) (by push_cast; ring)
   constructor
   · rintro ⟨hY, hge, hle⟩
     have hgev := (KGE_iff hY hq one_pos hab).mp hge

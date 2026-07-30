@@ -2044,8 +2044,7 @@ theorem iteratedMinus_backwardLocHom_generator_powerBounded
   -- (laurentMinus).coeRingHom(divByS D₀.s (D₀.s * f))`, which is in
   -- `coeRingHom '' locSubring (laurentMinus)`.
   -- In `Loc_A(D₀.s * f)`, `divByS D₀.s (D₀.s*f)` is the inverse of `algebraMap f`.
-  have hinv_src : divByS D₀.s (D₀.s * f) *
-      algebraMap A (Localization.Away (D₀.s * f)) f = 1 := by
+  have hinv_src : divByS D₀.s (D₀.s * f) * algebraMap A (Localization.Away (D₀.s * f)) f = 1 := by
     unfold divByS
     rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
           (S := Localization.Away (D₀.s * f)) f,
@@ -2055,13 +2054,11 @@ theorem iteratedMinus_backwardLocHom_generator_powerBounded
   have hinv_target : (laurentMinusDatum D₀ f).coeRingHom
       (divByS D₀.s (D₀.s * f)) * (laurentMinusDatum D₀ f).canonicalMap f = 1 := by
     have h : (laurentMinusDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f)) *
-        (laurentMinusDatum D₀ f).coeRingHom
-          (algebraMap A (Localization.Away (D₀.s * f)) f) =
+        (laurentMinusDatum D₀ f).coeRingHom (algebraMap A (Localization.Away (D₀.s * f)) f) =
         (laurentMinusDatum D₀ f).coeRingHom 1 := by
       rw [← map_mul]
       exact congrArg _ hinv_src
-    rw [map_one] at h
-    exact h
+    rwa [map_one] at h
   have hu_cf : IsUnit ((laurentMinusDatum D₀ f).canonicalMap f) :=
     canonicalMap_f_isUnit_in_laurentMinus D₀ f
   -- `backward(divByS 1 (canonicalMap f)) = ((laurentMinus).canonicalMap f)⁻¹`.
@@ -2085,9 +2082,8 @@ theorem iteratedMinus_backwardLocHom_generator_powerBounded
           ← IsLocalization.mk'_mul, mul_one, one_mul]
       exact IsLocalization.mk'_self _ _
     have := congrArg (iteratedMinus_backwardLocHom D₀ f hsub) hprod
-    rw [map_mul, map_one, iteratedMinus_backwardLocHom_algebraMap,
+    rwa [map_mul, map_one, iteratedMinus_backwardLocHom_algebraMap,
       restrictionMapHom_canonicalMap] at this
-    exact this
   rw [hbwd_eq]
   -- Step 2: `divByS D₀.s (D₀.s * f) ∈ locSubring (laurentMinus)`, because
   -- `D₀.s = 1 * D₀.s ∈ (laurentMinus).T` (via `LaurentNormalized.one_mem_T`).
@@ -2097,8 +2093,7 @@ theorem iteratedMinus_backwardLocHom_generator_powerBounded
     · exact Finset.mem_insert_of_mem LaurentNormalized.one_mem_T
     · exact Finset.mem_insert_self _ _
   have hdiv_mem : divByS D₀.s (D₀.s * f) ∈
-      locSubring (laurentMinusDatum D₀ f).P (laurentMinusDatum D₀ f).T
-        (laurentMinusDatum D₀ f).s :=
+      locSubring (laurentMinusDatum D₀ f).P (laurentMinusDatum D₀ f).T (laurentMinusDatum D₀ f).s :=
     divByS_mem_locSubring _ _ _ hDs_mem
   -- Step 3: `coeRingHom '' locSubring` is bounded; powers stay in it.
   apply (CompletionLocalization.coeRingHom_image_locSubring_isBounded

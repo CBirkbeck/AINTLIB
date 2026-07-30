@@ -11199,23 +11199,78 @@ theorem isOXAcyclic_of_isGeneratedBy_ring_units [DecidableEq A]
       hVP
 
 
--- GOAL-DEFERRED(task 1): load-bearing, and NOT fixable by the usual moves.  Evidence:
---   * It is not a tactic step.  `imageCover` is a structure instance; with the raise removed
---     the timeout lands inside the `covers` FIELD, on the `Finset.image` at col 41.
---   * The cost is the `DecidableEq (RationalLocData (presheafValue C.base))` that
---     `Finset.image` demands.  It can only be `Classical.decEq`, and `whnf` grinds through it
---     because `Finset.image` is computationally relevant (it dedups).
---   * SPLIT-DEF-FROM-PACKAGING WAS TRIED AND FAILS (2026-07-30).  Lifting the family into its
---     own `def imageCoverCovers` does not help: `RationalLocData B` needs instances on `B`, so
---     the split def must either carry `haveI`s in its RETURN TYPE -- which times out at
---     `isDefEq` on the ascription itself, worse than the original -- or take them as instance
---     binders, which relocates the identical `Finset.image` cost without shrinking it.  Do not
---     retry this; the attempt also cascaded 6 downstream errors.
--- The real fix is a DESIGN change: `RationalCoveringData.covers` is a `Finset`, which is what
--- forces a `DecidableEq` on a heavy structure.  An indexed family (or a `Set` plus a finiteness
--- field) would need no decidability at all.  That is a statement change -> `/generalise`, not
--- this pass.  Removed from the task-2 list: there is no proof body here to decompose.
-set_option maxHeartbeats 4000000 in
+-- `imageCover` needed `set_option maxHeartbeats 4000000` until the three-way split below.
+-- History, so the wrong diagnosis is not repeated:
+--   * the cost was blamed on the `DecidableEq (RationalLocData (presheafValue C.base))` that
+--     `Finset.image` demands, and a split of the whole `covers` family was tried and failed;
+--   * that was the WRONG CULPRIT.  With the raise removed the error is `isDefEq` (not `whnf`)
+--     and it points at the `hspan` argument of the PER-ELEMENT `imagePieceDatum` application,
+--     not at the `Finset.image` wrapper -- so relocating the family changed nothing.
+-- Splitting at the finer grain fixes it: `imageCoverPiece` gives the single element map its
+-- own declaration and hence its own budget, and `imageCoverCovers` is then just an image of
+-- an opaque constant.  Everything now compiles at the DEFAULT 200k.
+-- Note `imageCoverCovers` binds its `DecidableEq` with `letI`, so it has NO usable equation
+-- theorem: consumers must go through `mem_imageCoverCovers` / `exists_of_mem_imageCoverCovers`
+-- rather than `rw [imageCoverCovers]`.  Do not reintroduce a raise here.
+set_option linter.unusedSectionVars false in
+/-- The pieces of `imageCover`: the image data `R_B(im D.T / im D.s)`, one for each piece
+`D` of `C`.
+
+Split out of `imageCover` so that the `Finset.image` — and the classical `DecidableEq` on
+`RationalLocData (presheafValue C.base)` it demands — is elaborated once, in a declaration of
+its own, rather than inside the `covers` field of a structure instance whose `hsubset` and
+`hcover` fields mention `covers` in their *types* and so force `whnf` straight back through
+it.  Note the return type needs no local instances: `CommRing`, `TopologicalSpace`,
+`IsTopologicalRing` and `PlusSubring` on `presheafValue _` are all global instances. -/
+private noncomputable def imageCoverPiece [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCoveringData A) (hC : C.IsRational) (D : RationalLocData A)
+    (hD : D ∈ C.covers) :
+    RationalLocData (presheafValue C.base) :=
+  imagePieceDatum C.base D.T D.s ((hC.piece hD).span_eq_top)
+
+private noncomputable def imageCoverCovers [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCoveringData A) (hC : C.IsRational) :
+    Finset (RationalLocData (presheafValue C.base)) :=
+  letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
+  C.covers.attach.image (fun D => imageCoverPiece C hC D.1 D.2)
+
+set_option linter.unusedSectionVars false in
+/-- Membership in `imageCoverCovers`, stated so consumers never unfold the definition. -/
+private theorem mem_imageCoverCovers [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCoveringData A) (hC : C.IsRational)
+    (D : RationalLocData A) (hD : D ∈ C.covers) :
+    imageCoverPiece C hC D hD ∈ imageCoverCovers C hC := by
+  letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
+  exact Finset.mem_image.mpr ⟨⟨D, hD⟩, Finset.mem_attach _ _, rfl⟩
+
+set_option linter.unusedSectionVars false in
+/-- Every element of `imageCoverCovers` is the image piece of some piece of `C`.  Stated as a
+lemma because `imageCoverCovers` binds its `DecidableEq` with `letI`, so it has no usable
+equation theorem to `rw` with. -/
+private theorem exists_of_mem_imageCoverCovers [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCoveringData A) (hC : C.IsRational)
+    (E : RationalLocData (presheafValue C.base)) (hE : E ∈ imageCoverCovers C hC) :
+    ∃ D : {D : RationalLocData A // D ∈ C.covers}, imageCoverPiece C hC D.1 D.2 = E := by
+  letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
+  obtain ⟨D, -, h⟩ := Finset.mem_image.mp hE
+  exact ⟨D, h⟩
+
 set_option linter.unusedSectionVars false in
 /-- **The R2 image cover** (Wedhorn Prop 8.2 + Remark 8.4 + Prop 8.16, the
 "we may assume X = V" reduction): a Def-7.29 rational covering `C` of
@@ -11243,8 +11298,7 @@ noncomputable def imageCover [DecidableEq A]
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair C.base)
-    covers := C.covers.attach.image (fun D =>
-      imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
+    covers := imageCoverCovers C hC
     hsubset := by
       intro E hE v hv
       exact ⟨hv.1, fun x hx => by
@@ -11256,9 +11310,8 @@ noncomputable def imageCover [DecidableEq A]
       have hv := comap_canonicalMap_mem_rationalOpen C.base
         (canonicalMap_continuous C.base) hw_spa
       obtain ⟨D, hD, hvD⟩ := C.hcover _ hv
-      refine ⟨imagePieceDatum C.base D.T D.s ((hC.piece hD).span_eq_top),
-        Finset.mem_image.mpr ⟨⟨D, hD⟩, Finset.mem_attach _ _, rfl⟩, ?_⟩
-      rw [imagePieceDatum_mem_rationalOpen_iff]
+      refine ⟨imageCoverPiece C hC D hD, mem_imageCoverCovers C hC D hD, ?_⟩
+      rw [imageCoverPiece, imagePieceDatum_mem_rationalOpen_iff]
       exact ⟨hw_spa, hvD⟩ }
 
 -- DELETED (T-ROIE-2, 2026-06-18): `completedPlusSubring_le_ringOfDef` claimed
@@ -12867,8 +12920,8 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
   refine every_rational_cover_is_OXAcyclic_whole_space (imageCover C hC)
     (globalLocData_isRational _) (fun E hE => ?_) ?_
   case _ =>
-    rw [imageCover, Finset.mem_image] at hE
-    obtain ⟨⟨D, hD⟩, -, rfl⟩ := hE
+    obtain ⟨⟨D, hD⟩, rfl⟩ := exists_of_mem_imageCoverCovers C hC _ hE
+    rw [imageCoverPiece]
     exact imagePieceDatum_isRational C.base D.T D.s ((hC.piece hD).span_eq_top)
   intro w hw
   exact ⟨hw, fun x hx => by
@@ -13192,13 +13245,13 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
     have hy0 : y = 0 := by
       refine hCB.separation y ?_
       intro E hE
-      obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hE
+      obtain ⟨D, rfl⟩ := exists_of_mem_imageCoverCovers C hC _ hE
       rw [show restrictionMap (imageCover C hC).base
-          (imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
+          (imageCoverPiece C hC D.1 D.2)
           ((imageCover C hC).hsubset _ hE) y =
-        (imagePieceDatum C.base D.1.T D.1.s
-          ((hC.piece D.2).span_eq_top)).canonicalMap x from
+        (imageCoverPiece C hC D.1 D.2).canonicalMap x from
         restrictionMapHom_canonicalMap _ _ _ x]
+      rw [imageCoverPiece]
       rw [← relativePiece_equiv_restrictionMap C.base D.1 (C.hsubset D.1 D.2)
         ((hC.piece D.2).span_eq_top) x]
       rw [hx D.1 D.2]

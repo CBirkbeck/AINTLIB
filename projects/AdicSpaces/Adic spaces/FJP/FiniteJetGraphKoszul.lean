@@ -481,19 +481,15 @@ theorem syzygy_graph_of_isUnit (g : D) (hg : IsUnit g) (f : Fin m → D)
       d2 (fun i => (X i : MvPolynomial (Fin m) D)) w k := by
     unfold d2
     rw [map_sub, map_sum, map_sum]
+    -- the two summands are `i < k` / `k < i` mirrors of one another: `split_ifs` takes both
+    -- `dite`s (left and right of the equation share the condition) in one step
     congr 1 <;> refine Finset.sum_congr rfl fun i _ => ?_
-    · by_cases hik : i < k
-      · rw [dif_pos hik, dif_pos hik]
-        dsimp only
+    all_goals
+      split_ifs with hik
+      · dsimp only
         rw [hr i, map_mul, map_mul, map_mul, AlgEquiv.apply_symm_apply, hαρ,
           mul_mul_mul_comm, ← map_mul, IsUnit.val_inv_mul, map_one, one_mul]
-      · rw [dif_neg hik, dif_neg hik, map_zero]
-    · by_cases hik : k < i
-      · rw [dif_pos hik, dif_pos hik]
-        dsimp only
-        rw [hr i, map_mul, map_mul, map_mul, AlgEquiv.apply_symm_apply, hαρ,
-          mul_mul_mul_comm, ← map_mul, IsUnit.val_inv_mul, map_one, one_mul]
-      · rw [dif_neg hik, dif_neg hik, map_zero]
+      · rw [map_zero]
   rw [hpush]
   exact congrFun hw k
 

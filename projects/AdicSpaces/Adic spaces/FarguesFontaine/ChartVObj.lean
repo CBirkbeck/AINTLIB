@@ -982,18 +982,13 @@ theorem monomial_symm_blocToBI_mem_completedPlusSubring (a : ℕ) (ha : 0 < a)
       ((PseudoUniformizer.toOF F ϖ : OF F) : F) := vpi_pos p F ϖ
   by_cases hik : i ≤ k
   · -- zone M1
-    refine symm_blocToBI_mem_completedPlusSubring_of_mem p F ϖ a 1 ha
-      one_pos ha hexact1 hexact2 ?_
+    refine symm_blocToBI_mem_completedPlusSubring_of_mem p F ϖ a 1 ha one_pos ha hexact1 hexact2 ?_
     refine mk_monomial_mem_of_le p F ϖ a k i hik c ?_
     rw [← hexact1] at hc1
-    rw [show (perfectoidValuation p F
-          ((PseudoUniformizer.toOF F ϖ : OF F) : F)
-        * perfectoidValuation p F
-          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k
-      = perfectoidValuation p F
-          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
-        * perfectoidValuation p F
-          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (2 * k - i) from by
+    rw [show (perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
+        * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (2 * k - i) from by
       rw [← sq, ← pow_mul, ← pow_add]
       congr 1
       omega] at hc1
@@ -1002,22 +997,17 @@ theorem monomial_symm_blocToBI_mem_completedPlusSubring (a : ℕ) (ha : 0 < a)
     · -- zone M2: i = k + d with 0 < d ≤ ka
       have hd : i - k ≤ k * a := by omega
       have hca : perfectoidValuation p F (c : F) ^ a
-          ≤ perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+          ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
             ^ (k * a - (i - k)) := by
         have hstep := pow_le_pow_left' hc2 a
         rw [show (ρ₂ ^ i * perfectoidValuation p F (c : F)) ^ a
-            = perfectoidValuation p F
-                ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
+            = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
               * perfectoidValuation p F (c : F) ^ a from by
           rw [mul_pow, ← pow_mul, mul_comm i a, pow_mul, hexact2, pow_one]]
           at hstep
-        rw [show ((ρ₂ * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) ^ a
-            = perfectoidValuation p F
-                ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
-              * perfectoidValuation p F
-                ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        rw [show ((ρ₂ * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) ^ a
+            = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
+              * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
                 ^ (k * a - (i - k)) from by
           rw [← pow_mul, mul_pow,
             show ρ₂ ^ (k * a) = (ρ₂ ^ a) ^ k from by
@@ -1031,8 +1021,7 @@ theorem monomial_symm_blocToBI_mem_completedPlusSubring (a : ℕ) (ha : 0 < a)
       refine symm_blocToBI_mem_completedPlusSubring_of_pow_mem p F ϖ a 1 ha
         one_pos ha hexact1 hexact2 ha ?_
       rw [hc'']
-      refine mul_mem (pow_mem (Subring.subset_closure ?_) _)
-        (Subring.subset_closure ?_)
+      refine mul_mem (pow_mem (Subring.subset_closure ?_) _) (Subring.subset_closure ?_)
       · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
       · exact Set.mem_union_left _ ⟨_, rfl⟩
     · -- zone M3

@@ -453,32 +453,193 @@ private theorem mapBD_eq_mapCD_of_pushed_gluing
   -- finish with the 𝓓-coherence at the piece
   exact DFunLike.congr_fun (mapBD_mapB_eq_mapCD_mapC d.1 (hC.piece d.2)) (f d)
 
--- GOAL-DEFERRED(task 1): 6.4M -> 1.6M, and now for a DIFFERENT reason than before.
--- Two per-step `whnf` blow-ups were the bulk of the old cost and are fixed:
---   * `hgBres`/`hgCres` rewrote `restrictionMap_cast` into a goal holding a
---     `choose_spec`-transport, so `rw` had to `kabstract` + `whnf` the chosen datum.
---     Replaced by `restrictionMap_cast_restrictionMap` (PresheafFunctoriality), which
---     `subst`s the equality instead: free, and it serves both vertices.
---   * `hgBd`/`hgCd` used `rw [congrFun (restrictionMap_id ..)] at h` where `simp only`
---     does the same job without kabstract.
--- What is left is NOT a single hot step -- with those gone the only error is the
--- whole-declaration budget (`348:0`), i.e. the CUMULATIVE cost of a 259-line proof.
--- So the remaining fix is genuinely decomposition: extract `hDmatch` (84 lines) and the
--- two closing bullets, each of which then gets its own 200k budget.  Verified ladder:
--- 200k fails, 400k fails, 1.6M passes.  Tracked on the task-2 list.
--- GOAL-DEFERRED(task 1): 6.4M -> 1.6M.  History, so the ladder is not re-climbed:
---   * two per-step `whnf` blow-ups fixed earlier (`restrictionMap_cast_restrictionMap` for
---     `hgBres`/`hgCres`; `simp only` for `hgBd`/`hgCd`) -- after those, no single hot step
---     remains, only the whole-declaration budget;
---   * `hDmatch` (84 lines) extracted to `mapBD_eq_mapCD_of_pushed_gluing`, taking the body
---     from 257 to 173 lines.
--- Even so the cost is DIFFUSE, not concentrated: measured 200k fails, 400k fails, 1.6M passes
--- at 173 lines.  It is dozens of `restrictionMap`/`presheafValueMap` rewrites over completions,
--- each individually affordable.  The next real cut is the closing `pairMapBC_injective` pair
--- (two 19-line B/C mirror bullets) -- one lemma should serve both -- but their goals are the
--- `?_`s of `pairMapBC_injective` and so are not written down anywhere; deriving them is the
--- prerequisite.  Tracked on the task-2 list.
-set_option maxHeartbeats 1600000 in
+-- `gluing_JetA` needed `set_option maxHeartbeats 1600000` until the decomposition below.
+-- History, so the ladder is not re-climbed:
+--   * two per-step `whnf` blow-ups fixed first (`restrictionMap_cast_restrictionMap` for the
+--     transport rewrites; `simp only` in place of `rw [congrFun ..] at h`);
+--   * `hDmatch` (84 lines) extracted to `mapBD_eq_mapCD_of_pushed_gluing`.
+-- After those the cost was purely CUMULATIVE (the error pointed at the declaration head, not
+-- at any inner step), so the fix was to give each stage its own declaration and hence its own
+-- budget: the pushed families `pushedFamilyB`/`C` became real defs, and their properties, the
+-- two vertex gluings and the closing piecewise identification each became a lemma.  A closing
+-- bullet also turned out to re-derive `pushedFamily*_apply_piece` verbatim, so the same
+-- expensive rewrite was being elaborated twice.  The proof now compiles at the DEFAULT 200k;
+-- do not reintroduce a raise here.
+/-- The family on the pushed 𝓑-covering induced by `f`: on a piece of `pushCoveringB C hC`,
+choose a preimage piece of `C` and take the 𝓑-push of `f` there, transported along the
+chosen equality. -/
+private noncomputable def pushedFamilyB :
+    ∀ D' : ↥(pushCoveringB C hC).covers, presheafValue D'.1 := fun D' =>
+  (Finset.mem_image.mp D'.2).choose_spec.2 ▸
+    presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
+      (hC.piece (Finset.mem_image.mp D'.2).choose.2)
+      (f (Finset.mem_image.mp D'.2).choose)
+
+/-- The 𝓒-mirror of `pushedFamilyB`. -/
+private noncomputable def pushedFamilyC :
+    ∀ D' : ↥(pushCoveringC C hC).covers, presheafValue D'.1 := fun D' =>
+  (Finset.mem_image.mp D'.2).choose_spec.2 ▸
+    presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
+      (hC.piece (Finset.mem_image.mp D'.2).choose.2)
+      (f (Finset.mem_image.mp D'.2).choose)
+
+/-- Restricting a `pushedFamilyB` value factors through the chosen preimage piece: the
+`choose_spec` transport is eliminated by `restrictionMap_cast_restrictionMap`. -/
+private theorem pushedFamilyB_restrictionMap
+    (D' : ↥(pushCoveringB C hC).covers) (D₃ : RationalLocData (JetB F))
+    (h₃ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D'.1.T D'.1.s) :
+    restrictionMap D'.1 D₃ h₃ (pushedFamilyB C hC f D') =
+      restrictionMap (pushDatumB (Finset.mem_image.mp D'.2).choose.1
+          (hC.piece (Finset.mem_image.mp D'.2).choose.2)) D₃
+        (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]; exact h₃)
+        (presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
+          (hC.piece (Finset.mem_image.mp D'.2).choose.2)
+          (f (Finset.mem_image.mp D'.2).choose)) := by
+  show restrictionMap D'.1 D₃ h₃
+    ((Finset.mem_image.mp D'.2).choose_spec.2 ▸
+      presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
+        (hC.piece (Finset.mem_image.mp D'.2).choose.2)
+        (f (Finset.mem_image.mp D'.2).choose)) = _
+  exact restrictionMap_cast_restrictionMap _ D₃ h₃ _
+
+/-- The 𝓒-mirror of `pushedFamilyB_restrictionMap`. -/
+private theorem pushedFamilyC_restrictionMap
+    (D' : ↥(pushCoveringC C hC).covers) (D₃ : RationalLocData (JetC F))
+    (h₃ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D'.1.T D'.1.s) :
+    restrictionMap D'.1 D₃ h₃ (pushedFamilyC C hC f D') =
+      restrictionMap (pushDatumC (Finset.mem_image.mp D'.2).choose.1
+          (hC.piece (Finset.mem_image.mp D'.2).choose.2)) D₃
+        (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]; exact h₃)
+        (presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
+          (hC.piece (Finset.mem_image.mp D'.2).choose.2)
+          (f (Finset.mem_image.mp D'.2).choose)) := by
+  show restrictionMap D'.1 D₃ h₃
+    ((Finset.mem_image.mp D'.2).choose_spec.2 ▸
+      presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
+        (hC.piece (Finset.mem_image.mp D'.2).choose.2)
+        (f (Finset.mem_image.mp D'.2).choose)) = _
+  exact restrictionMap_cast_restrictionMap _ D₃ h₃ _
+
+include hcompat in
+/-- At the canonical piece `pushDatumB d.1 (hC.piece d.2)`, the pushed family is exactly the
+𝓑-push of `f d` — independent of which preimage the choice picked, by `hcompat`. -/
+private theorem pushedFamilyB_apply_piece (d : ↥C.covers) :
+    pushedFamilyB C hC f ⟨pushDatumB d.1 (hC.piece d.2),
+      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ =
+      presheafValueMapB d.1 (hC.piece d.2) (f d) := by
+  have hselfB := pushedFamilyB_restrictionMap C hC f ⟨pushDatumB d.1 (hC.piece d.2),
+      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
+    (pushDatumB d.1 (hC.piece d.2)) (subset_refl _)
+  simp only [restrictionMap_id, id_eq] at hselfB
+  rw [hselfB,
+    pushedCompatB C hC f hcompat
+      (Finset.mem_image.mp (Finset.mem_image.mpr
+        ⟨d, Finset.mem_attach _ _, rfl⟩ : pushDatumB d.1 (hC.piece d.2) ∈
+          (pushCoveringB C hC).covers)).choose d
+      (pushDatumB d.1 (hC.piece d.2)) _ (subset_refl _)]
+  exact congrFun (restrictionMap_id (pushDatumB d.1 (hC.piece d.2))) _
+
+include hcompat in
+/-- The 𝓒-mirror of `pushedFamilyB_apply_piece`. -/
+private theorem pushedFamilyC_apply_piece (d : ↥C.covers) :
+    pushedFamilyC C hC f ⟨pushDatumC d.1 (hC.piece d.2),
+      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ =
+      presheafValueMapC d.1 (hC.piece d.2) (f d) := by
+  have hselfC := pushedFamilyC_restrictionMap C hC f ⟨pushDatumC d.1 (hC.piece d.2),
+      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
+    (pushDatumC d.1 (hC.piece d.2)) (subset_refl _)
+  simp only [restrictionMap_id, id_eq] at hselfC
+  rw [hselfC,
+    pushedCompatC C hC f hcompat
+      (Finset.mem_image.mp (Finset.mem_image.mpr
+        ⟨d, Finset.mem_attach _ _, rfl⟩ : pushDatumC d.1 (hC.piece d.2) ∈
+          (pushCoveringC C hC).covers)).choose d
+      (pushDatumC d.1 (hC.piece d.2)) _ (subset_refl _)]
+  exact congrFun (restrictionMap_id (pushDatumC d.1 (hC.piece d.2))) _
+
+include hcompat in
+/-- **The 𝓑-vertex gluing**: the pushed family is compatible (by `pushedCompatB`, after
+`pushedFamilyB_restrictionMap` clears the transports), so sheafiness of `JetB` glues it. -/
+private theorem exists_gluing_pushedFamilyB :
+    ∃ bB : presheafValue (pushCoveringB C hC).base,
+      ∀ D' : ↥(pushCoveringB C hC).covers,
+        restrictionMap (pushCoveringB C hC).base D'.1
+          ((pushCoveringB C hC).hsubset D'.1 D'.2) bB = pushedFamilyB C hC f D' := by
+  haveI : IsSheafy (JetB F) := isSheafy_JetB F
+  exact IsSheafy.gluing (A := JetB F) (pushCoveringB C hC)
+    (pushCoveringB_isRational hC) (pushedFamilyB C hC f) (by
+      intro D₁' D₂' D₃ h₃₁ h₃₂
+      rw [pushedFamilyB_restrictionMap C hC f D₁' D₃ h₃₁,
+        pushedFamilyB_restrictionMap C hC f D₂' D₃ h₃₂]
+      exact pushedCompatB C hC f hcompat _ _ D₃ _ _)
+
+include hcompat in
+/-- The 𝓒-mirror of `exists_gluing_pushedFamilyB`. -/
+private theorem exists_gluing_pushedFamilyC :
+    ∃ bC : presheafValue (pushCoveringC C hC).base,
+      ∀ D' : ↥(pushCoveringC C hC).covers,
+        restrictionMap (pushCoveringC C hC).base D'.1
+          ((pushCoveringC C hC).hsubset D'.1 D'.2) bC = pushedFamilyC C hC f D' := by
+  haveI : IsSheafy (JetC F) := isSheafy_JetC F
+  exact IsSheafy.gluing (A := JetC F) (pushCoveringC C hC)
+    (pushCoveringC_isRational hC) (pushedFamilyC C hC f) (by
+      intro D₁' D₂' D₃ h₃₁ h₃₂
+      rw [pushedFamilyC_restrictionMap C hC f D₁' D₃ h₃₁,
+        pushedFamilyC_restrictionMap C hC f D₂' D₃ h₃₂]
+      exact pushedCompatC C hC f hcompat _ _ D₃ _ _)
+
+include hcompat in
+/-- **The piecewise identification** ([FJP] Lemma 5.2, closing step of the gluing half): a
+candidate section `x` whose 𝓑- and 𝓒-pushes are the two vertex gluings restricts, at every
+piece `d`, to `f d`.
+
+Both vertices are checked separately and combined by `pairMapBC_injective`; the two bullets
+are 𝓑/𝓒 mirrors of one another. Extracted from `gluing_JetA` so that it carries its own
+elaboration budget. -/
+private theorem restrictionMap_eq_of_vertex_pushes
+    (x : presheafValue C.base)
+    (bB : presheafValue (pushCoveringB C hC).base)
+    (bC : presheafValue (pushCoveringC C hC).base)
+    (hbB : ∀ D' : ↥(pushCoveringB C hC).covers,
+      restrictionMap (pushCoveringB C hC).base D'.1
+        ((pushCoveringB C hC).hsubset D'.1 D'.2) bB = pushedFamilyB C hC f D')
+    (hbC : ∀ D' : ↥(pushCoveringC C hC).covers,
+      restrictionMap (pushCoveringC C hC).base D'.1
+        ((pushCoveringC C hC).hsubset D'.1 D'.2) bC = pushedFamilyC C hC f D')
+    (hmapBx : presheafValueMapB C.base hC.base x = bB)
+    (hmapCx : presheafValueMapC C.base hC.base x = bC)
+    (d : ↥C.covers) :
+    restrictionMap C.base d.1 (C.hsubset d.1 d.2) x = f d := by
+  have hpushB : rationalOpen (pushDatumB d.1 (hC.piece d.2)).T
+      (pushDatumB d.1 (hC.piece d.2)).s ⊆
+      rationalOpen (pushDatumB C.base hC.base).T (pushDatumB C.base hC.base).s :=
+    (pushCoveringB C hC).hsubset _
+      (Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩)
+  have hpushC : rationalOpen (pushDatumC d.1 (hC.piece d.2)).T
+      (pushDatumC d.1 (hC.piece d.2)).s ⊆
+      rationalOpen (pushDatumC C.base hC.base).T (pushDatumC C.base hC.base).s :=
+    (pushCoveringC C hC).hsubset _
+      (Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩)
+  refine pairMapBC_injective d.1 (hC.piece d.2) ?_ ?_
+  · rw [presheafValueMapB_restriction C.base d.1 hC.base (hC.piece d.2)
+      (C.hsubset d.1 d.2) hpushB x, hmapBx]
+    rw [show restrictionMap (pushDatumB C.base hC.base)
+        (pushDatumB d.1 (hC.piece d.2)) hpushB bB =
+        pushedFamilyB C hC f ⟨pushDatumB d.1 (hC.piece d.2),
+          Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from
+      hbB ⟨pushDatumB d.1 (hC.piece d.2),
+        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩]
+    exact pushedFamilyB_apply_piece C hC f hcompat d
+  · rw [presheafValueMapC_restriction C.base d.1 hC.base (hC.piece d.2)
+      (C.hsubset d.1 d.2) hpushC x, hmapCx]
+    rw [show restrictionMap (pushDatumC C.base hC.base)
+        (pushDatumC d.1 (hC.piece d.2)) hpushC bC =
+        pushedFamilyC C hC f ⟨pushDatumC d.1 (hC.piece d.2),
+          Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from
+      hbC ⟨pushDatumC d.1 (hC.piece d.2),
+        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩]
+    exact pushedFamilyC_apply_piece C hC f hcompat d
+
 include hC hcompat in
 /-- The gluing transfer ([FJP] Lemma 5.2, gluing half). -/
 theorem gluing_JetA :
@@ -489,96 +650,15 @@ theorem gluing_JetA :
   haveI : IsSheafy (JetC F) := isSheafy_JetC F
   haveI : IsSheafy (JetD F) := isSheafy_JetD F
   set e := datumEnum C.base with he
-  -- the pushed families (choice-based; casts eliminated by `restrictionMap_cast`)
-  set gB : ∀ D' : ↥(pushCoveringB C hC).covers, presheafValue D'.1 := fun D' =>
-    (Finset.mem_image.mp D'.2).choose_spec.2 ▸
-      presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
-        (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-        (f (Finset.mem_image.mp D'.2).choose) with hgB
-  set gC : ∀ D' : ↥(pushCoveringC C hC).covers, presheafValue D'.1 := fun D' =>
-    (Finset.mem_image.mp D'.2).choose_spec.2 ▸
-      presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
-        (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-        (f (Finset.mem_image.mp D'.2).choose) with hgC
-  -- restriction of a pushed-family value factors through the chosen piece
-  have hgBres : ∀ (D' : ↥(pushCoveringB C hC).covers) (D₃ : RationalLocData (JetB F))
-      (h₃ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D'.1.T D'.1.s),
-      restrictionMap D'.1 D₃ h₃ (gB D') =
-        restrictionMap (pushDatumB (Finset.mem_image.mp D'.2).choose.1
-            (hC.piece (Finset.mem_image.mp D'.2).choose.2)) D₃
-          (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]; exact h₃)
-          (presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
-            (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-            (f (Finset.mem_image.mp D'.2).choose)) := by
-    intro D' D₃ h₃
-    show restrictionMap D'.1 D₃ h₃
-      ((Finset.mem_image.mp D'.2).choose_spec.2 ▸
-        presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
-          (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-          (f (Finset.mem_image.mp D'.2).choose)) = _
-    exact restrictionMap_cast_restrictionMap _ D₃ h₃ _
-  have hgCres : ∀ (D' : ↥(pushCoveringC C hC).covers) (D₃ : RationalLocData (JetC F))
-      (h₃ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D'.1.T D'.1.s),
-      restrictionMap D'.1 D₃ h₃ (gC D') =
-        restrictionMap (pushDatumC (Finset.mem_image.mp D'.2).choose.1
-            (hC.piece (Finset.mem_image.mp D'.2).choose.2)) D₃
-          (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]; exact h₃)
-          (presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
-            (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-            (f (Finset.mem_image.mp D'.2).choose)) := by
-    intro D' D₃ h₃
-    show restrictionMap D'.1 D₃ h₃
-      ((Finset.mem_image.mp D'.2).choose_spec.2 ▸
-        presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
-          (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-          (f (Finset.mem_image.mp D'.2).choose)) = _
-    exact restrictionMap_cast_restrictionMap _ D₃ h₃ _
-  -- the pushed-family value at the canonical piece element is the piece push
-  have hgBd : ∀ d : ↥C.covers, gB ⟨pushDatumB d.1 (hC.piece d.2),
-      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ =
-      presheafValueMapB d.1 (hC.piece d.2) (f d) := by
-    intro d
-    have hselfB := hgBres ⟨pushDatumB d.1 (hC.piece d.2),
-        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-      (pushDatumB d.1 (hC.piece d.2)) (subset_refl _)
-    simp only [restrictionMap_id, id_eq] at hselfB
-    rw [hselfB,
-      pushedCompatB C hC f hcompat
-        (Finset.mem_image.mp (Finset.mem_image.mpr
-          ⟨d, Finset.mem_attach _ _, rfl⟩ : pushDatumB d.1 (hC.piece d.2) ∈
-            (pushCoveringB C hC).covers)).choose d
-        (pushDatumB d.1 (hC.piece d.2)) _ (subset_refl _)]
-    exact congrFun (restrictionMap_id (pushDatumB d.1 (hC.piece d.2))) _
-  have hgCd : ∀ d : ↥C.covers, gC ⟨pushDatumC d.1 (hC.piece d.2),
-      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ =
-      presheafValueMapC d.1 (hC.piece d.2) (f d) := by
-    intro d
-    have hselfC := hgCres ⟨pushDatumC d.1 (hC.piece d.2),
-        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-      (pushDatumC d.1 (hC.piece d.2)) (subset_refl _)
-    simp only [restrictionMap_id, id_eq] at hselfC
-    rw [hselfC,
-      pushedCompatC C hC f hcompat
-        (Finset.mem_image.mp (Finset.mem_image.mpr
-          ⟨d, Finset.mem_attach _ _, rfl⟩ : pushDatumC d.1 (hC.piece d.2) ∈
-            (pushCoveringC C hC).covers)).choose d
-        (pushDatumC d.1 (hC.piece d.2)) _ (subset_refl _)]
-    exact congrFun (restrictionMap_id (pushDatumC d.1 (hC.piece d.2))) _
-  -- vertex gluing at 𝓑
-  obtain ⟨bB, hbB⟩ := IsSheafy.gluing (A := JetB F) (pushCoveringB C hC)
-    (pushCoveringB_isRational hC) gB (by
-      intro D₁' D₂' D₃ h₃₁ h₃₂
-      rw [hgBres D₁' D₃ h₃₁, hgBres D₂' D₃ h₃₂]
-      exact pushedCompatB C hC f hcompat _ _ D₃ _ _)
-  -- vertex gluing at 𝓒
-  obtain ⟨bC, hbC⟩ := IsSheafy.gluing (A := JetC F) (pushCoveringC C hC)
-    (pushCoveringC_isRational hC) gC (by
-      intro D₁' D₂' D₃ h₃₁ h₃₂
-      rw [hgCres D₁' D₃ h₃₁, hgCres D₂' D₃ h₃₂]
-      exact pushedCompatC C hC f hcompat _ _ D₃ _ _)
+  -- the pushed families, their vertex gluings and the closing identification are all
+  -- standalone now, so each carries its own elaboration budget
+  obtain ⟨bB, hbB⟩ := exists_gluing_pushedFamilyB C hC f hcompat
+  obtain ⟨bC, hbC⟩ := exists_gluing_pushedFamilyC C hC f hcompat
   -- 𝓓-matching by 𝓓-separation on the pushed covering
   have hDmatch : mapBD C.base hC.base bB = mapCD C.base hC.base bC :=
-    mapBD_eq_mapCD_of_pushed_gluing C hC f gB gC bB bC hbB hbC hgBd hgCd
+    mapBD_eq_mapCD_of_pushed_gluing C hC f (pushedFamilyB C hC f) (pushedFamilyC C hC f)
+      bB bC hbB hbC (pushedFamilyB_apply_piece C hC f hcompat)
+      (pushedFamilyC_apply_piece C hC f hcompat)
   -- transport through the base bridges: loc-level row exactness gives the pullback
   have hloc : locRhoB F e.m C.base.s e.f (bridgeFwdB C.base e hC.base bB) =
       locRhoC F e.m C.base.s e.f (bridgeFwdC C.base e hC.base bC) := by
@@ -607,57 +687,8 @@ theorem gluing_JetA :
         locIotaC F e.m C.base.s e.f (graphBridgeA C.base hC.base e x) :=
       DFunLike.congr_fun (graphBridge_natural_C C.base hC.base e) x
     rw [hnat, hAx, hwC]
-  refine ⟨x, fun d => ?_⟩
-  -- identify the restrictions piecewise via the joint vertex injectivity
-  have hpushB : rationalOpen (pushDatumB d.1 (hC.piece d.2)).T
-      (pushDatumB d.1 (hC.piece d.2)).s ⊆
-      rationalOpen (pushDatumB C.base hC.base).T (pushDatumB C.base hC.base).s :=
-    (pushCoveringB C hC).hsubset _
-      (Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩)
-  have hpushC : rationalOpen (pushDatumC d.1 (hC.piece d.2)).T
-      (pushDatumC d.1 (hC.piece d.2)).s ⊆
-      rationalOpen (pushDatumC C.base hC.base).T (pushDatumC C.base hC.base).s :=
-    (pushCoveringC C hC).hsubset _
-      (Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩)
-  refine pairMapBC_injective d.1 (hC.piece d.2) ?_ ?_
-  · rw [presheafValueMapB_restriction C.base d.1 hC.base (hC.piece d.2)
-      (C.hsubset d.1 d.2) hpushB x, hmapBx]
-    have hbBd := hbB ⟨pushDatumB d.1 (hC.piece d.2),
-      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-    rw [show restrictionMap (pushDatumB C.base hC.base)
-        (pushDatumB d.1 (hC.piece d.2)) hpushB bB =
-        gB ⟨pushDatumB d.1 (hC.piece d.2),
-          Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from hbBd]
-    have hselfB := hgBres ⟨pushDatumB d.1 (hC.piece d.2),
-        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-      (pushDatumB d.1 (hC.piece d.2)) (subset_refl _)
-    simp only [restrictionMap_id, id_eq] at hselfB
-    rw [hselfB,
-      pushedCompatB C hC f hcompat
-        (Finset.mem_image.mp (Finset.mem_image.mpr
-          ⟨d, Finset.mem_attach _ _, rfl⟩ : pushDatumB d.1 (hC.piece d.2) ∈
-            (pushCoveringB C hC).covers)).choose d
-        (pushDatumB d.1 (hC.piece d.2)) _ (subset_refl _)]
-    exact congrFun (restrictionMap_id (pushDatumB d.1 (hC.piece d.2))) _
-  · rw [presheafValueMapC_restriction C.base d.1 hC.base (hC.piece d.2)
-      (C.hsubset d.1 d.2) hpushC x, hmapCx]
-    have hbCd := hbC ⟨pushDatumC d.1 (hC.piece d.2),
-      Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-    rw [show restrictionMap (pushDatumC C.base hC.base)
-        (pushDatumC d.1 (hC.piece d.2)) hpushC bC =
-        gC ⟨pushDatumC d.1 (hC.piece d.2),
-          Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from hbCd]
-    have hselfC := hgCres ⟨pushDatumC d.1 (hC.piece d.2),
-        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-      (pushDatumC d.1 (hC.piece d.2)) (subset_refl _)
-    simp only [restrictionMap_id, id_eq] at hselfC
-    rw [hselfC,
-      pushedCompatC C hC f hcompat
-        (Finset.mem_image.mp (Finset.mem_image.mpr
-          ⟨d, Finset.mem_attach _ _, rfl⟩ : pushDatumC d.1 (hC.piece d.2) ∈
-            (pushCoveringC C hC).covers)).choose d
-        (pushDatumC d.1 (hC.piece d.2)) _ (subset_refl _)]
-    exact congrFun (restrictionMap_id (pushDatumC d.1 (hC.piece d.2))) _
+  exact ⟨x, fun d => restrictionMap_eq_of_vertex_pushes C hC f hcompat x bB bC hbB hbC
+    hmapBx hmapCx d⟩
 
 end Gluing
 

@@ -492,15 +492,13 @@ theorem plusLocToQuotient_continuous (P : PairOfDefinition B) (b : B) :
     constructor; intro U hU
     have hcont : @Continuous _ _ instTopologicalSpaceTateAlgebra
         (quotientPlusFSubXIdealTopology B b)
-        (Ideal.Quotient.mk (plusFSubXIdeal B b)) :=
-      continuous_quotient_mk'
+        (Ideal.Quotient.mk (plusFSubXIdeal B b)) := continuous_quotient_mk'
     have hU' : (Ideal.Quotient.mk (plusFSubXIdeal B b)) ⁻¹' (U : Set _) ∈
         @nhds _ instTopologicalSpaceTateAlgebra (0 : ↥(TateAlgebra B)) :=
       hcont.continuousAt.preimage_mem_nhds hU
     obtain ⟨V, hVU⟩ := @NonarchimedeanRing.is_nonarchimedean _ _ _ hNA_tate _ hU'
     exact ⟨{
-      toAddSubgroup := V.toAddSubgroup.map
-        (Ideal.Quotient.mk (plusFSubXIdeal B b)).toAddMonoidHom
+      toAddSubgroup := V.toAddSubgroup.map (Ideal.Quotient.mk (plusFSubXIdeal B b)).toAddMonoidHom
       isOpen' := @QuotientRing.isOpenMap_coe _ instTopologicalSpaceTateAlgebra _
         (plusFSubXIdeal B b) instIsTopologicalRingTateAlgebra _ V.isOpen
     }, fun x hx => by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
@@ -509,10 +507,8 @@ theorem plusLocToQuotient_continuous (P : PairOfDefinition B) (b : B) :
     (plusLocToQuotient B b)
   · change @Continuous _ _ _ (quotientPlusFSubXIdealTopology B b)
         ((plusLocToQuotient B b).comp (algebraMap B (Localization.Away (1 : B))))
-    have heq : (plusLocToQuotient B b).comp
-        (algebraMap B (Localization.Away (1 : B))) =
-        (Ideal.Quotient.mk (plusFSubXIdeal B b)).comp
-          (algebraMap B ↥(TateAlgebra B)) := by
+    have heq : (plusLocToQuotient B b).comp (algebraMap B (Localization.Away (1 : B))) =
+        (Ideal.Quotient.mk (plusFSubXIdeal B b)).comp (algebraMap B ↥(TateAlgebra B)) := by
       ext a
       simp only [RingHom.comp_apply]
       exact plusLocToQuotient_algebraMap B b a

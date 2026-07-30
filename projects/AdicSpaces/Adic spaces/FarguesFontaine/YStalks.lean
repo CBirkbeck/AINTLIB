@@ -600,16 +600,9 @@ theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (_hp : 1 < p) :
   rw [runWindow, Set.mem_setOf_eq, hiff, hYeq]
   have hq1 : (0 : ℚ) < (p : ℚ) ^ (n : ℤ) := zpow_pos hp0 _
   have hq2 : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + k + 1) := zpow_pos hp0 _
-  have hab1 : (p : ℚ) ^ (n : ℤ) = ((p ^ n : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
-    push_cast
-    rw [zpow_natCast]
-    ring
-  have hab2 : (p : ℚ) ^ ((n : ℤ) + k + 1)
-      = ((p ^ (n + k + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
-    push_cast
-    rw [show (n : ℤ) + k + 1 = ((n + k + 1 : ℕ) : ℤ) from by push_cast; ring,
-      zpow_natCast]
-    ring
+  have hab1 := natCast_zpow_eq_natCast_div_one p n (n : ℤ) rfl
+  have hab2 := natCast_zpow_eq_natCast_div_one p (n + k + 1) ((n : ℤ) + k + 1)
+    (by push_cast; ring)
   have hmul : p ^ (k + 1) * p ^ n = p ^ (n + k + 1) := by
     rw [← pow_add]
     ring_nf

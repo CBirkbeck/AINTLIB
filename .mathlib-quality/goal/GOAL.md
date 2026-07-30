@@ -3305,3 +3305,247 @@ the `rcases`, and join the two 2-line `exact ih …` calls. Statement unchanged,
     from *other* files, so a failing build read as green — the `✖` and the missing `.olean` were
     the only tells. Same class as the recorded "never pipe a verify build through `tail`".
     → **Grep the build for errors ALONE.** Never mix warnings into the same capped window.
+
+## TASK 1 COMPLETE — both remaining heartbeat raises removed (2026-07-30)
+
+User re-prioritised: kill the raises first, via `/decompose-proof` or by passing implicit
+arguments explicitly. **Both in-scope raises are now gone.** Remaining `set_option`s in scope
+are the three `maxSynthPendingDepth 1` (reductions — keep) and `Vendored/` (skipped).
+
+### FJP/FiniteJetSheafTransfer.lean — `gluing_JetA`, 1.6M → default 200k
+
+The recorded ladder (200k/400k fail, 1.6M passes) was real but the deferral was premature.
+Diagnosis first, per the rule: **delete the raise and read WHERE it fails.** The error pointed
+at the declaration head (`482:0`), i.e. CUMULATIVE cost → decomposition, not a hot step.
+
+Four cuts, each giving a stage its own budget:
+  1. **A duplicated block, found by reading rather than measuring.** The closing `pairMapBC_-
+     injective` bullets re-derived `hgBd`/`hgCd` VERBATIM (11 lines each) — the same expensive
+     `pushedCompatB/C` rewrite elaborated twice in one budget. Each collapsed to `exact hgBd d`.
+  2. `pushedFamilyB`/`C` — the choice-based pushed families became real `def`s.
+  3. their two properties each became a lemma (`…_restrictionMap`, `…_apply_piece`).
+  4. the two `IsSheafy.gluing` calls and the closing piecewise identification became lemmas.
+Body 178 → ~35 lines. Axiom-clean, statement unchanged.
+  → **The old note said the closing bullets were blocked because "their goals are the `?_`s of
+    `pairMapBC_injective` and are not written down anywhere". That was a false blocker**: I did
+    not need the `?_` goals — the whole `fun d` goal IS written down, it is the theorem's own
+    conclusion. Extracting one level OUT sidestepped the unwritten level.
+
+### WedhornCechAcyclicity.lean — `imageCover`, 4M → default 200k
+
+The deferral note here had the **wrong culprit**, and it had been used to justify "not fixable
++ needs a design change (Finset → indexed family), owner call". Both wrong.
+  * Note claimed: cost is `DecidableEq (RationalLocData …)` that `Finset.image` demands, `whnf`
+    grinding through `Classical.decEq`; and that splitting the family had been tried and failed
+    because `RationalLocData B` needs `haveI`s in the return type.
+  * **Actually:** `CommRing`/`TopologicalSpace`/`IsTopologicalRing`/`PlusSubring` on
+    `presheafValue _` are all GLOBAL instances (Presheaf.lean:306-320, 886), so the return type
+    needs no `haveI` at all. And with the raise removed the error is **`isDefEq`, not `whnf`**,
+    pointing at the `hspan` argument of the PER-ELEMENT `imagePieceDatum` application — not at
+    the `Finset.image` wrapper. Relocating the whole family therefore changed nothing, which is
+    exactly what the earlier attempt observed but misattributed.
+Fix = split at the finer grain: `imageCoverPiece` (the single element map) gets its own
+declaration and budget; `imageCoverCovers` is then an image of an opaque constant.
+  → **Gotcha this created:** `imageCoverCovers` binds its `DecidableEq` with `letI`, so it has
+    NO usable equation theorem — `rw [imageCoverCovers]` fails with "Failed to rewrite using
+    equation theorems". Consumers go through `mem_imageCoverCovers` /
+    `exists_of_mem_imageCoverCovers` instead. Three downstream sites were rewired.
+
+**Method note worth keeping: both deferrals were wrong, and in the same way** — each recorded a
+plausible cause inferred from the *shape* of the code, then reasoned from that cause to "not
+fixable". Re-running the cheap experiment (delete the raise, read the error's TACTIC KIND and
+COLUMN) contradicted the recorded cause in both cases. `whnf` vs `isDefEq` in the error text is
+the discriminator: it says whether the cost is unfolding a term or unifying an argument.
+
+### Task 2 — next batch designed (pending the task-1 gate)
+
+Measured **227** (225 in scope) after task 1: the three joins cleared 3 and `gluing_JetA`'s
+decomposition cleared a 4th. **77 of the 225 are in `FJP/` + `FarguesFontaine/`** — the cone the
+owner cares about — so that is where this batch goes.
+
+Three proofs share a shape worth one helper rather than three edits:
+`bigWindow_eq_rationalOpen_ofNat` (need 4), `bigWindow_inter_succ_eq_rationalOpen_ofNat`
+(need 5), `runWindow_eq_rationalOpen_ofNat` (need 6). Each contains a 4–5 line `have hab… :
+(p:ℚ)^z = ((p^m:ℕ):ℚ)/((1:ℕ):ℚ)` cast block, twice in two of them.
+
+Helper (fully generic in the base, so it binds NO section variable and cannot trip
+`unusedSectionVars`):
+```
+theorem natCast_zpow_eq_natCast_div_one (a m : ℕ) {z : ℤ} (hz : z = (m : ℤ)) :
+    (a : ℚ) ^ z = ((a ^ m : ℕ) : ℚ) / ((1 : ℕ) : ℚ)
+```
+The `hz` witness is what makes one lemma serve all five call sites — the exponents differ
+(`(n:ℤ)`, `(n:ℤ)+1`, `(n:ℤ)+k+1`) but each is a natural cast, discharged by `rfl` or
+`by push_cast; ring`.
+
+**Checked before designing, and it changed the plan:** the identical 9-line preamble in all
+three (`hppos`/`hp0`/`hpk`/`set ϖ'`/`hteich`/`hYeq`) looked like a second, bigger shared
+helper — but `hpk` and `hteich` each have 6 occurrences per proof, used well past the `hYeq`
+derivation (`vle_pow_iff hpk`, `rw [hteich]`). Only the 2-line `hYeq` is actually liftable, so
+the preamble helper is worth ~1 line, not 4. Counting occurrences before extracting is what
+caught this; the "identical preamble" reading came from the shape alone.
+Net: the cast helper clears #1 and #3 outright; #2 needs it plus the `hYeq` lift plus one join.
+
+### Batch: the three `*_eq_rationalOpen_ofNat` window proofs — 227 → 224
+
+One helper (`natCast_zpow_eq_natCast_div_one`, in BigWindows.lean) replaced five 4–5 line
+`have hab… : (p:ℚ)^z = ((p^m:ℕ):ℚ)/((1:ℕ):ℚ)` cast blocks across three proofs. Two cleared on
+the helper alone; `bigWindow_inter_succ_…` needed the helper plus two joins. All axiom-clean,
+statements unchanged. YStalks reaches the helper transitively (it already used
+`teichPi_frobRoot_pow` from BigWindows), so no import was added.
+
+**GOTCHA (cost one build) — an implicit determined only by the conclusion.** The helper was
+first written with `{z : ℤ}` implicit, fixed by `hz : z = (m : ℤ)`. Every call site is
+`have hab := natCast_zpow_eq_natCast_div_one p n rfl` — a `have` with NO type ascription, so
+there is no expected type to solve `z` from. The `by push_cast; ring` then ran against the
+goal `?m.327 = 1 + ↑n` — a metavariable LHS — and failed with "unsolved goals", which also
+cascaded into a bogus-looking failure of the whole enclosing proof at the `:= by` column.
+  → **This is the recorded "implicit variable only in the conclusion" pattern** (it had been
+    hit before, in ChartVObj). The tell is a `?m.NNN` on one side of an unsolved goal.
+    `have h := f …` infers nothing; an implicit that only the *conclusion* mentions must be
+    made explicit. Fixed by taking `(z : ℤ)` explicitly.
+  → Corollary for reading errors: when a `have := …` is malformed, Lean reports BOTH the inner
+    tactic failure and an "unsolved goals" at the enclosing declaration's `:= by`. The second
+    is noise; fix the first.
+
+### New technique: `rw […] at h` + `exact h` → `rwa […] at h`
+
+Idiomatic mathlib, always safe (`rwa` *is* `rw` then `assumption`), and drops one line.
+Scanned all remaining over-50 proofs: **39 carry it, 67 lines total.** Implemented as
+`scratchpad/apply_rwa.py`, which fires only when the `exact` names the SAME hypothesis the
+`rw` targeted and is the immediately following line — anything looser could be closing a
+different goal.
+
+Landed with joins: `wLoc_le_of_interior_bound` (8 joins + 1 rwa = need 9) and
+`iteratedMinus_backwardLocHom_generator_powerBounded` (3 joins + 2 rwa = need 5).
+Note `wLoc_le_of_interior_bound` had been **rejected twice** earlier — once for extraction
+(15 local deps) and once as join-only (1 line short). The cheap techniques compose; the
+rejection was of a technique, not of the proof.
+
+### Task-2 status: 224 → 221, and the cheap seam is now exhausted
+
+**Zero** remaining proofs clear on joins + rwa combined. Every one of the 219 in-scope
+survivors needs genuine decomposition (median deficit 35; 67 of them need 61+ lines). From
+here the work is per-proof: read the mathematics, find the reusable sub-result, extract it.
+The mechanical passes are done — this is the honest boundary between them and real work.
+
+### Process note: the Bash `timeout` parameter caps at 600000 ms
+Passing 2400000 does NOT give 40 minutes — it is clamped to 10 minutes and the build is killed
+mid-flight (exit 143), which reads like a build hang. Long builds (this project's full gate,
+and the big modules) MUST be backgrounded with `run_in_background`, not given a large timeout.
+
+### Dedup found while decomposing: `wittMap_teichPi` ×5 in ArCompletion.lean
+
+Extracting a helper out of `gaussValueF_alocToWittF` surfaced that the SAME 6-line
+`have hone : WittVector.map (…).subtype (teichPi p F ϖ) = WittVector.teichmuller p …` block is
+inlined **five times** in ArCompletion.lean (≈L222/312/783/912/1327). Now one theorem
+(`wittMap_teichPi`) plus `alocToWittF_algebraMap_teichPi_pow` built on it.
+
+Two things this cost me, both worth remembering:
+  1. **`str.replace(a, b, 1)` replaced the WRONG occurrence.** The block I meant to rewrite was
+     in `gaussValueF_alocToWittF` (L~312), but the first occurrence in the file is in the
+     EARLIER `gaussTermF_alocToWittF_le` (L~222). I also inserted the helper just above
+     `gaussValueF_alocToWittF` — so the rewritten earlier proof referenced a lemma defined 60
+     lines later. **Never anchor a replacement on "first occurrence" in a file that may hold
+     duplicates — that is exactly the case dedup work puts you in.** Grep the count first.
+  2. **Position the helper above its FIRST consumer, not above the proof you happen to be
+     editing.** This is the recorded "lemma declared later forces earlier files/proofs to
+     inline it" pattern, in-file form: the inlined copies are anonymous `have`s, so a
+     name-based scan finds nothing — only the repeated-block scan does.
+
+The copies differ in how the target is spelled (`ϖF`, a `set` local, vs `((ϖ.val : Fˣ) : F)`),
+so a direct `rw [wittMap_teichPi …]` would not match syntactically under `set`. Keeping the
+local `have` but proving it *by* the helper (`:= wittMap_teichPi p F ϖ`) sidesteps that
+entirely — term-mode checks up to defeq, `rw` does not.
+
+### Batch summary (task 1 complete + task 2: 232 → 220)
+
+| step | measure |
+|---|---|
+| both in-scope heartbeat raises removed (`gluing_JetA` 1.6M, `imageCover` 4M) | task 1 **done** |
+| `balancedLeafBase_isUnit_get_of_false` (lift duplicated `have`) | 232 → 231 |
+| 3 joins (`plusLocToQuotient_continuous`, `intervalTrace_dyadic_…`, `monomial_symm_…`) | 231 → 228 |
+| `gluing_JetA` decomposition (side effect of task 1) | 228 → 227 |
+| 3 window proofs via `natCast_zpow_eq_natCast_div_one` | 227 → 224 |
+| `syzygy_graph_of_isUnit` (mirror-bullet `split_ifs` merge) | 224 → 223 |
+| `wLoc_le_of_interior_bound`, `iteratedMinus_backwardLocHom_…` (joins + rwa) | 223 → 221 |
+| `gaussValueF_alocToWittF` (helper extraction + ×5 dedup + rwa + joins) | 221 → 220 |
+
+All modules built individually; every new/edited declaration axiom-clean; no `sorry` added; no
+raise added. **218 in scope remain, all needing genuine decomposition.**
+
+Note on `split_ifs`: it merged the mirror bullets here but TIMED OUT on the same-looking merge
+in `LaurentTree.balancedLeafBase_isUnit_get_of_false`. So it is not a rule either way — the
+`Fin`-comparison condition here is cheap, the `balancedLeafBase_cons` datum there is not.
+Build it before believing it, in both directions.
+
+## FINDING: 174 lines of repeated instance preamble in WedhornCechAcyclicity.lean
+
+A body-scoped repeated-block scan (the ArCompletion ×5 find prompted running it tree-wide)
+turns up the largest duplication in the project: the same `haveI` preamble appears ~30 times
+in WedhornCechAcyclicity.lean — **174 `haveI` lines** in total.
+
+```
+haveI hTateB  : IsTateRing (presheafValue D₀)          := presheafValue_isTateRing_faithful D₀
+haveI hNoethB : IsNoetherianRing (presheafValue D₀)    := presheafValue_isNoetherianRing_faithful D₀
+haveI hSNB    : IsStronglyNoetherian (presheafValue D₀):= presheafValue_isStronglyNoetherian_faithful D₀
+haveI hHuberB : IsHuberRing (presheafValue D₀)         := hTateB.toIsHuberRing
+haveI : @CompleteSpace (presheafValue D₀) (IsTopologicalAddGroup.rightUniformSpace _) := …
+```
+
+**Root cause: all four facts are `theorem`s, not `instance`s** (Wedhorn828.lean:932/2018/2804,
+PresheafTateStructure.lean:982), so every proof that needs them has to re-introduce them by
+hand. This is the same shape as the ArCompletion find, one level up: a missing registration
+forces every consumer to inline the same block.
+
+Why this matters for task 2 as well as task 3: that one file holds **35 of the 218** remaining
+over-50 proofs, and their deficits start at 9, 11, 17, 18… — a 5-7 line preamble per proof is a
+large fraction of several of them.
+
+**Plan, and the risk that shapes it.** The three ring-theoretic facts are Prop-valued (they are
+`theorem`s, so they cannot carry data — no diamond risk) and are the safe ones to register.
+The `CompleteSpace` one is NOT: it is stated at a *specific, non-canonical* uniformity
+(`IsTopologicalAddGroup.rightUniformSpace`), so registering it globally would either not fire or
+would fight the canonical `UniformSpace (presheafValue D)` instance (Presheaf.lean:316). That
+one stays a `haveI`. `IsHuberRing` should then follow from `IsTateRing` automatically.
+Sequencing: land the current verified batch FIRST — this file is 11k+ lines and builds slowly,
+so it deserves its own isolated change and gate.
+
+**NOTE — the first version of this scan was wrong and would have wasted the finding.** Scanning
+raw line-windows reported ~1357 "duplicated blocks", all of them *signature* binder preambles
+(`[T2Space A]`, `[NonarchimedeanRing A] …`) repeated across sibling lemmas — normal, correct
+Lean, not duplication at all. Only after scoping every window to the proof BODY (reusing
+`body_span`) did the real in-proof duplication surface. A dedup scan that is not body-scoped
+mostly reports typeclass binders.
+
+### The WedhornCechAcyclicity preamble: verified deletable, exact plan
+
+Checked *before* editing (the `hpk`/`hteich` lesson: count occurrences first, because an
+"obviously duplicated" preamble often binds names used later):
+
+| binding | bound | other uses | verdict |
+|---|---|---|---|
+| anonymous `haveI :` | 137 | — | deletable |
+| `hNoethB` | 49 | **0** | deletable |
+| `hSNB` | 32 | **0** | deletable |
+| `hHuberB` | 31 | **0** | deletable |
+| `hTateB` | 88 | 71 | all 71 are `hTateB.toIsHuberRing` — i.e. inside the deletable `hHuberB` lines themselves |
+
+So `hTateB` has **no** use outside the preamble: the whole block goes. ~250 lines.
+
+Plan (own change, own gate — the file is 11k+ lines):
+1. `attribute [local instance]` on the three Prop-class facts at the top of the file. `local`
+   deliberately: it confines the blast radius to this file for a first cut, instead of changing
+   global instance resolution for every consumer of Wedhorn828/RestrictedPowerSeries.
+2. Delete the preamble blocks (including wrapped `:=` values).
+3. KEEP the `@CompleteSpace (presheafValue D₀) (…rightUniformSpace…)` `haveI` — non-canonical
+   uniformity, must not be a global instance.
+4. `IsHuberRing` needs no registration: `class IsTateRing … extends IsHuberRing`, so it comes
+   free once `IsTateRing (presheafValue D)` is an instance.
+
+Soundness: all four are `Prop` classes (they are `theorem`s, so they cannot carry data), and the
+instance head `IsTateRing (presheafValue ?D)` is narrow with its premise on `A`, not on
+`presheafValue D` — no diamond, no loop.
+
+Expected: 2 over-50 proofs cleared outright, three more dropping 17/18/20 → 6/6/9, and the
+largest single block of duplication in the project removed.
