@@ -802,6 +802,29 @@ theorem alocToWittF_convPartialAloc (a b : ℕ → F) (N : ℕ) :
   refine congrArg _ (Finset.sum_congr rfl fun k _ => ?_)
   rw [alocToWittF_alocTeich]
 
+/-- **The scaled convolution bound**: `ρⁿ · sup_{k ≤ n} |aₖ·b_{n−k}| ≤ A·B`, given the
+per-index bounds on `a` and `b`. The `Finset.sup` over a nonempty range is attained,
+and at the attained index `k₀` the factor `ρⁿ` splits as `ρ^{k₀}·ρ^{n−k₀}`. -/
+private theorem pow_mul_sup_convolution_le {ρ : NNReal} {a b : ℕ → F} {A B : NNReal}
+    (hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ A)
+    (hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ B) (n : ℕ) :
+    ρ ^ n * (Finset.range (n + 1)).sup
+        (fun k => perfectoidValuation p F (a k * b (n - k))) ≤ A * B := by
+  rcases Finset.eq_empty_or_nonempty (Finset.range (n + 1)) with hemp | hne
+  · exact absurd hemp (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero n)).ne_empty
+  · obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
+      (fun k => perfectoidValuation p F (a k * b (n - k)))
+    rw [hk₀]
+    have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk₀mem)
+    calc ρ ^ n * perfectoidValuation p F (a k₀ * b (n - k₀))
+        = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
+          * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
+          rw [Valuation.map_mul,
+            show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+              rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
+          ring
+      _ ≤ A * B := mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
+
 /-- **The Witt-addition error of the convolution partials** (sol step 3): the
 partials differ from the convolution prefixes by at most `ρ·v(x)v(y)` — uniformly
 in `N`. -/
@@ -860,22 +883,7 @@ theorem gaussValueF_convPartial_sub_prefix_le {ρ : NNReal} (hρ0 : 0 < ρ)
         - WittVector.teichmuller p (convF F a b n)) ≤ ρ * Bn := hq
   refine le_trans (mul_le_mul_of_nonneg_left hqconv zero_le) ?_
   -- ρⁿ·(ρ·Bₙ) ≤ ρ·(A·B): reduces to ρⁿ·Bₙ ≤ A·B via the attained index
-  have hscaled : ρ ^ n * Bn ≤ A * B := by
-    rw [hBn]
-    rcases Finset.eq_empty_or_nonempty (Finset.range (n + 1)) with hemp | hne
-    · exact absurd hemp (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero n)).ne_empty
-    · obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
-        (fun k => perfectoidValuation p F (a k * b (n - k)))
-      rw [hk₀]
-      have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk₀mem)
-      calc ρ ^ n * perfectoidValuation p F (a k₀ * b (n - k₀))
-          = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
-            * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
-            rw [Valuation.map_mul,
-              show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
-                rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
-            ring
-        _ ≤ A * B := mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
+  have hscaled : ρ ^ n * Bn ≤ A * B := by rw [hBn]; exact pow_mul_sup_convolution_le p F hA hB n
   calc ρ ^ n * (ρ * Bn) = ρ * (ρ ^ n * Bn) := by ring
     _ ≤ ρ * (A * B) := mul_le_mul_of_nonneg_left hscaled zero_le
 

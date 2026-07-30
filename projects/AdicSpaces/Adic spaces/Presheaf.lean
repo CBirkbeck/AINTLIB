@@ -2626,8 +2626,7 @@ theorem locLift_vle_one_at_spa {A : Type*} [CommRing A]
     rw [h_eq_s, h_eq_t] at h2
     exact h2
   -- Step 2: Construct the pullback valuation w on A
-  set w : ValuativeRel A :=
-    ValuativeRel.comap (algebraMap A (Localization.Away D'.s)) v
+  set w : ValuativeRel A := ValuativeRel.comap (algebraMap A (Localization.Away D'.s)) v
   -- Step 3: Show w satisfies rational-open conditions for D'.T/D'.s
   -- w.vle t' D'.s for t' ∈ D'.T
   have hw_rat : ∀ t' ∈ D'.T, w.vle t' D'.s := by
