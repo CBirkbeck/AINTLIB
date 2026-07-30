@@ -1047,7 +1047,7 @@ theorem polyKW_denseRange : DenseRange (polyKW F) := by
       f.1 - ((∑ n ∈ hfin.toFinset,
         Polynomial.monomial n (PowerSeries.coeff n f.1) : Polynomial K) :
         PowerSeries K) from rfl,
-    map_sub, Polynomial.coeff_coe, Polynomial.finset_sum_coeff]
+    map_sub, Polynomial.coeff_coe, Polynomial.finsetSum_coeff]
   by_cases hn : ε / 2 ≤ ‖PowerSeries.coeff n f.1‖
   · rw [Finset.sum_eq_single n
       (fun b _ hb => by rw [Polynomial.coeff_monomial, if_neg hb])

@@ -778,3 +778,77 @@ later pass: `PowerSeries.derivative` (4), `HahnSeries.embDomain_of_notMem_range`
 `Polynomial.finsetSum_coeff` (1), `IsLocalization.under_map_of_isPrime_disjoint` (1),
 `continuous_mul_const` (1) — plus one project-internal `@[deprecated]` marked RETIRED (2 uses)
 that wants a real repoint, not a rename.
+
+## Task 2 — the `set`-suspect technique, solved (the BI pair, second attempt)
+
+`exists_correction_chain_BI` / `BI₂` were the only targets whose suspects were all `set`/`have`,
+and they failed last pass. All three causes are now understood, and the fixes compose:
+
+**1. A `set` suspect must stay a `set` inside the extracted lemma — and then the lemma's
+conclusion has to be written UNFOLDED.** `set K := e with hKdef` folds `e → K` in whatever exists
+when it runs. In the parent it runs *before* the `have`, so the `have`'s statement is stored
+folded (`((K)⁻¹) * …`). Copy that folded statement into a standalone lemma and the body no longer
+matches, because there the `set` has nothing to fold: `invalid 'calc' step, left-hand side is …`.
+Writing the conclusion with `K` expanded and putting `set K := e with hKdef` at the top of the
+lemma reproduces the parent's context exactly, and the body transfers verbatim.
+
+Do NOT instead make `K` an opaque parameter: facts produced *inside* the body (here `hfnorm`,
+from `exists_correction_step_BI`) mention `e` unfolded, and only `set`'s definitional
+transparency makes them match `K`. An opaque parameter breaks that.
+
+**2. Section-variable HYPOTHESES need an explicit `include`.** `hφb` is used only in the proof,
+never in the statement, so Lean does not auto-include it — the parent carries `include hφb in`,
+and the extracted lemma needs its own. This was the `Unknown identifier hφb` from last pass.
+
+**3. Keeping the `have`'s type ascription at the call site defeats the purpose.** With the
+18-line statement re-stated as `have hstep : <18 lines> := <lemma> args`, the parents were still
+**54** lines. Dropping to `have hstep := <lemma> args` took them to **37** — the lemma's unfolded
+conclusion is defeq to the folded one, since `K` is a local definition. Always collapse the
+ascription after extracting, or the extraction buys nothing.
+
+| declaration | was | now |
+|---|---|---|
+| `exists_correction_chain_BI` | 68 | **37** + `exists_correction_chain_BI_step` (19) |
+| `exists_correction_chain_BI₂` | 68 | **37** + `exists_correction_chain_BI₂_step` (19) |
+
+Over-50 count 374 → **372**.
+
+## FINDING (owner-facing): `tateAcyclicity` is not proved
+
+Chasing the last deprecation warnings turned up something that matters more than the warnings.
+Two project-internal lemmas are marked
+
+    @[deprecated "RETIRED — false; use productRestriction_injective_tate_via_prime_extension_closed"]
+    @[deprecated "RETIRED — false in general; use per-E via productRestriction_faithfullyFlat_tate"]
+
+and their bodies say *"Statement preserved as a named sorry only to keep legacy callers
+compiling"*. They still have three live consumers, and `#print axioms` confirms all of them rest
+on `sorryAx`:
+
+    ValuationSpectrum.tateAcyclicity_gluing_via_refinement   sorryAx
+    ValuationSpectrum.tateAcyclicity                         sorryAx
+    ValuationSpectrum.restrictionMap_isLocalization           sorryAx
+
+So **`tateAcyclicity` — a headline result — is not proved**, and it depends on a lemma its own
+author annotated as false. Repointing the three consumers at the replacement routes named in the
+deprecation messages is real mathematical work, and `sorry`s are the owning producer's WIP, so
+this pass does not touch them. Recording it because nothing in the file names warns a reader that
+`tateAcyclicity` is unproved.
+
+## Task 3 — deprecations, second pass
+
+In-scope (non-`Vendored/`) mathlib renames applied:
+
+| site | change |
+|---|---|
+| `Bounded.lean:583` | `continuous_mul_right` → `continuous_mul_const` |
+| `Cor832.lean:578` | `IsLocalization.comap_map_of_isPrime_disjoint` → `…under_map_of_isPrime_disjoint` |
+| `FarguesFontaine/FrobeniusLimit.lean:74,250` | `Pi.ringHom` → `RingHom.pi` |
+| `FJP/FiniteJetChart.lean:1050` | `Polynomial.finset_sum_coeff` → `Polynomial.finsetSum_coeff` |
+
+The earlier "21 remaining" figure was too pessimistic: it counted the whole workspace build, which
+includes HasseWeil and LeanModularForms. AdicSpaces itself had only these 4 plus 3 in `Vendored/`
+(skipped, third-party) and the 3 RETIRED uses above.
+
+**Process note:** `Bash`'s `timeout` is capped at 600000 ms. Passing 1800000 does not extend it —
+the build is killed at 10 minutes with exit 143. Long builds must be backgrounded.

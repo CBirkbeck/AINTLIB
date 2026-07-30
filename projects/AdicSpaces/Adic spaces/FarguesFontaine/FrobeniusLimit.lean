@@ -71,7 +71,7 @@ def limitFrobPiHom (k : ℤ)
     (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
     (∀ j : RationalIndex W, presheafValue j.D)
       →+* (∀ E : RationalIndex (frobOpens p F k W), presheafValue E.D) :=
-  Pi.ringHom fun E =>
+  RingHom.pi fun E =>
     ((presheafValueRingEquivHuber (frobPow p F (-k))
         (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
         E.D).symm.toRingHom).comp
@@ -247,7 +247,7 @@ def yLimitFrobPiHom (k : ℤ) (V : Opens ↥(yTop p F ϖ)) :
     (∀ j : RationalIndex ((yFunctor p F ϖ).obj V), presheafValue j.D)
       →+* (∀ E : RationalIndex ((yFunctor p F ϖ).obj
             ((Opens.map (yFrobTop p F ϖ k)).obj V)), presheafValue E.D) :=
-  Pi.ringHom fun E =>
+  RingHom.pi fun E =>
     ((presheafValueRingEquivHuber (frobPow p F (-k))
         (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
         E.D).symm.toRingHom).comp

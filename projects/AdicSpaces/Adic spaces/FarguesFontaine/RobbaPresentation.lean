@@ -2019,6 +2019,63 @@ theorem evalBI_partial_succ
   rw [Finset.sum_range_succ, evalBI_add p F ϖ φ hφ hbmem hb, sub_sub]
 
 include hφb in
+/-- The single correction step behind `exists_correction_chain_BI`.
+
+Extracted from `exists_correction_chain_BI`, where it was the dominant `have`. The conclusion is
+written with `K` UNFOLDED on purpose: the `set K` below folds it, reproducing exactly
+the context the body was written against. Re-deriving `hK0` and `set K` here rather
+than threading them in is what keeps the body verbatim. -/
+private theorem exists_correction_chain_BI_step
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m₀)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀))
+    {z : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1)
+    (hzW : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 z ≤ W) :
+    ∀ (m : ℕ)
+      (r : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)),
+      r ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 →
+      wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
+      ∃ f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      ((σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹))⁻¹)
+      * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ W * (2⁻¹ : NNReal) ^ m
+      ∧ (r - evalBI p F ϖ φ hφ hbmem hb f)
+      ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      ∧ wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (r - evalBI p F ϖ φ hφ hbmem hb f)
+      ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
+  have hK0 : (0 : NNReal) < σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
+    mul_pos (pow_pos hσ₁0 m₀) (inv_pos.mpr (pow_pos hρ₁0 m₀))
+  set K : NNReal := σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) with hKdef
+  intro m r hrmem hrbnd
+  obtain ⟨f, hfnorm, hfmem, hfres⟩ := exists_correction_step_BI p F ϖ
+    φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hW0 hWle m r hrmem hrbnd
+  refine ⟨f, ?_, hfmem, hfres⟩
+  calc ((K)⁻¹)
+        * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((f : ↥(restrictedMvPowerSeriesSubring 1
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ ((K)⁻¹)
+        * (K * (W * (2⁻¹ : NNReal) ^ m)) :=
+        mul_le_mul_right hfnorm _
+    _ = W * (2⁻¹ : NNReal) ^ m := by
+        rw [← mul_assoc, inv_mul_cancel₀ hK0.ne', one_mul]
+
+include hφb in
 /-- **The correction sequence** (case 1): successive approximation with
 geometrically shrinking residuals and `K`-scaled round norms. -/
 theorem exists_correction_chain_BI
@@ -2049,39 +2106,8 @@ theorem exists_correction_chain_BI
   have hK0 : (0 : NNReal) < σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
     mul_pos (pow_pos hσ₁0 m₀) (inv_pos.mpr (pow_pos hρ₁0 m₀))
   set K : NNReal := σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) with hKdef
-  have hstep : ∀ (m : ℕ)
-      (r : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)),
-      r ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 →
-      wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
-      ∃ f : ↥(restrictedMvPowerSeriesSubring 1
-        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
-        ((K)⁻¹)
-            * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-              ((f : ↥(restrictedMvPowerSeriesSubring 1
-                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-                : MvPowerSeries (Fin 1)
-                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          ≤ W * (2⁻¹ : NNReal) ^ m
-        ∧ (r - evalBI p F ϖ φ hφ hbmem hb f)
-            ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-        ∧ wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-            (r - evalBI p F ϖ φ hφ hbmem hb f)
-          ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
-    intro m r hrmem hrbnd
-    obtain ⟨f, hfnorm, hfmem, hfres⟩ := exists_correction_step_BI p F ϖ
-      φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hW0 hWle m r hrmem hrbnd
-    refine ⟨f, ?_, hfmem, hfres⟩
-    calc ((K)⁻¹)
-          * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-            ((f : ↥(restrictedMvPowerSeriesSubring 1
-              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-              : MvPowerSeries (Fin 1)
-                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        ≤ ((K)⁻¹)
-          * (K * (W * (2⁻¹ : NNReal) ^ m)) :=
-          mul_le_mul_right hfnorm _
-      _ = W * (2⁻¹ : NNReal) ^ m := by
-          rw [← mul_assoc, inv_mul_cancel₀ hK0.ne', one_mul]
+  -- the per-step correction, with its `K`-scaled round-norm bound
+  have hstep := exists_correction_chain_BI_step p F ϖ φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz hW0 hWle hzW
   obtain ⟨u, r, hr0, hrrec, hCbnd, hrmem, hrbnd⟩ :=
     exists_chain (fun v => v ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
       (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1)
@@ -5012,6 +5038,63 @@ theorem evalBI_partial_succ₂
   rw [Finset.sum_range_succ, evalBI_add p F ϖ φ hφ hbmem hb, sub_sub]
 
 include hφb in
+/-- The single correction step behind `exists_correction_chain_BI₂`.
+
+Extracted from `exists_correction_chain_BI₂`, where it was the dominant `have`. The conclusion is
+written with `K` UNFOLDED on purpose: the `set K` below folds it, reproducing exactly
+the context the body was written against. Re-deriving `hK0` and `set K` here rather
+than threading them in is what keeps the body verbatim. -/
+private theorem exists_correction_chain_BI₂_step
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀))
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1)
+    (hzW : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z ≤ W) :
+    ∀ (m : ℕ)
+      (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)),
+      r ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 →
+      wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
+      ∃ f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      ((ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹))⁻¹)
+      * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ W * (2⁻¹ : NNReal) ^ m
+      ∧ (r - evalBI p F ϖ φ hφ hbmem hb f)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      ∧ wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (r - evalBI p F ϖ φ hφ hbmem hb f)
+      ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
+  have hK0 : (0 : NNReal) < ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) :=
+    mul_pos (pow_pos hρ₂0 m₀) (inv_pos.mpr (pow_pos hσ₂0 m₀))
+  set K : NNReal := ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) with hKdef
+  intro m r hrmem hrbnd
+  obtain ⟨f, hfnorm, hfmem, hfres⟩ := exists_correction_step_BI₂ p F ϖ
+    φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hW0 hWle m r hrmem hrbnd
+  refine ⟨f, ?_, hfmem, hfres⟩
+  calc ((K)⁻¹)
+        * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((f : ↥(restrictedMvPowerSeriesSubring 1
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ ((K)⁻¹)
+        * (K * (W * (2⁻¹ : NNReal) ^ m)) :=
+        mul_le_mul_right hfnorm _
+    _ = W * (2⁻¹ : NNReal) ^ m := by
+        rw [← mul_assoc, inv_mul_cancel₀ hK0.ne', one_mul]
+
+include hφb in
 /-- **The correction sequence** (case 2): successive approximation with
 geometrically shrinking residuals and `K`-scaled round norms. -/
 theorem exists_correction_chain_BI₂
@@ -5042,39 +5125,8 @@ theorem exists_correction_chain_BI₂
   have hK0 : (0 : NNReal) < ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) :=
     mul_pos (pow_pos hρ₂0 m₀) (inv_pos.mpr (pow_pos hσ₂0 m₀))
   set K : NNReal := ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) with hKdef
-  have hstep : ∀ (m : ℕ)
-      (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)),
-      r ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 →
-      wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
-      ∃ f : ↥(restrictedMvPowerSeriesSubring 1
-        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
-        ((K)⁻¹)
-            * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-              ((f : ↥(restrictedMvPowerSeriesSubring 1
-                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-                : MvPowerSeries (Fin 1)
-                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          ≤ W * (2⁻¹ : NNReal) ^ m
-        ∧ (r - evalBI p F ϖ φ hφ hbmem hb f)
-            ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-        ∧ wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
-            (r - evalBI p F ϖ φ hφ hbmem hb f)
-          ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
-    intro m r hrmem hrbnd
-    obtain ⟨f, hfnorm, hfmem, hfres⟩ := exists_correction_step_BI₂ p F ϖ
-      φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hW0 hWle m r hrmem hrbnd
-    refine ⟨f, ?_, hfmem, hfres⟩
-    calc ((K)⁻¹)
-          * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-            ((f : ↥(restrictedMvPowerSeriesSubring 1
-              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-              : MvPowerSeries (Fin 1)
-                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        ≤ ((K)⁻¹)
-          * (K * (W * (2⁻¹ : NNReal) ^ m)) :=
-          mul_le_mul_right hfnorm _
-      _ = W * (2⁻¹ : NNReal) ^ m := by
-          rw [← mul_assoc, inv_mul_cancel₀ hK0.ne', one_mul]
+  -- the per-step correction, with its `K`-scaled round-norm bound
+  have hstep := exists_correction_chain_BI₂_step p F ϖ φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz hW0 hWle hzW
   obtain ⟨u, r, hr0, hrrec, hCbnd, hrmem, hrbnd⟩ :=
     exists_chain (fun v => v ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
       (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1)

@@ -575,7 +575,7 @@ theorem hSpa_surj_from_spanTop
     IsLocalization.isPrime_of_isPrime_disjoint
       (Submonoid.powers (C.base.canonicalMap D.1.s))
       (presheafValue D.1) p hp hdisj, ?_⟩
-  have hcomap := IsLocalization.comap_map_of_isPrime_disjoint
+  have hcomap := IsLocalization.under_map_of_isPrime_disjoint
     (Submonoid.powers (C.base.canonicalMap D.1.s))
     (presheafValue D.1) hp hdisj
   -- `Ideal.under (presheafValue C.base)` unfolds to `Ideal.comap (algebraMap …)`, and the

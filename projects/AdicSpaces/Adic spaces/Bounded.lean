@@ -580,7 +580,7 @@ theorem IsBounded.closure [IsTopologicalRing A] [NonarchimedeanAddGroup A] {S : 
   have hSv : S ⊆ (fun y ↦ y * v) ⁻¹' (G : Set A) :=
     fun s hs ↦ hSV (Set.mul_mem_mul hs hv)
   have hclosed : IsClosed ((fun y ↦ y * v) ⁻¹' (G : Set A)) :=
-    G.isClosed.preimage (continuous_mul_right v)
+    G.isClosed.preimage (continuous_mul_const v)
   exact hGU (closure_minimal hSv hclosed hx)
 
 end TopologicalRing
