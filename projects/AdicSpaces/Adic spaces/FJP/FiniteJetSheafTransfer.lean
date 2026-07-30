@@ -661,6 +661,19 @@ theorem gluing_JetA :
 
 end Gluing
 
+/-- The range of `productRestrictionSub` is exactly the section equalizer: one inclusion is
+`productRestrictionSub_mem_sectionEqualizer`, the other is gluing. -/
+private theorem range_productRestrictionSub_eq_sectionEqualizer
+    (C : RationalCoveringData (JetA F)) (hC : C.IsRational) :
+    Set.range (productRestrictionSub (JetA F) C) = sectionEqualizer (JetA F) C := by
+  ext s
+  constructor
+  · rintro ⟨x, rfl⟩
+    exact productRestrictionSub_mem_sectionEqualizer (JetA F) C x
+  · intro hs
+    obtain ⟨x, hx⟩ := gluing_JetA C hC s hs
+    exact ⟨x, funext fun D => hx D⟩
+
 /-- The embedding transfer ([FJP] Lemma 5.2, topological half; Theorem 5.3's "the Banach
 open mapping theorem makes the continuous bijection onto that image a homeomorphism" —
 the σ-compact-free 828b-assembly mirrored at 𝓐). -/
@@ -689,14 +702,8 @@ theorem productRestrictionSub_isEmbedding_JetA (C : RationalCoveringData (JetA F
         congr 1
         exact productRestriction_comp_canonicalMap (A := JetA F) C a D.1 D.2 }
   have hrange : (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) =
-      sectionEqualizer (JetA F) C := by
-    ext s
-    constructor
-    · rintro ⟨x, rfl⟩
-      exact productRestrictionSub_mem_sectionEqualizer (JetA F) C x
-    · intro hs
-      obtain ⟨x, hx⟩ := gluing_JetA C hC s hs
-      exact ⟨x, funext fun D => hx D⟩
+      sectionEqualizer (JetA F) C :=
+    range_productRestrictionSub_eq_sectionEqualizer C hC
   have hclosed : IsClosed
       (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) := by
     rw [hrange]; exact sectionEqualizer_isClosed (JetA F) C

@@ -2788,3 +2788,52 @@ Reverted with `git show HEAD:… > …` and redone with per-block dedent and the
 first try afterwards (3047 jobs), and again after the joins.
 
 Running total: **243** (486 baseline → 290 pre-split → 274 post-split → 243).
+
+## Task 2 — `Presheaf.productRestriction_injective_discrete` 56 → 48 (243 → 242)
+
+`hmap_eq` (9 lines) lifted to `restrictionMapAlg_eq_of_pointwise`: pointwise equality of the
+restricted images transfers to the algebra-level restriction maps. Green first try.
+
+**The design choice that made the call site one line:** the block opens with
+`have h := congr_fun hxy ⟨D, hD⟩`, i.e. it immediately converts the function-level hypothesis into a
+*pointwise* one. So the helper takes the **pointwise** form as its hypothesis, and the caller supplies
+`congr_fun hxy` — pushing the conversion to the call site rather than reproducing it inside:
+
+    have hmap_eq := restrictionMapAlg_eq_of_pointwise C x' y' (congr_fun hxy)
+
+Stating the helper with the function-level hypothesis instead would have needed the awkward
+post-`obtain` type (where `x` has become `C.base.coeRingHom x'`) written out in the signature.
+
+**Generalises the `set`-unfolding rule to hypotheses:** when a block's first step *transforms* an
+incoming hypothesis (`congr_fun`, `Finset.mem_image.mp`, `mem_span_range_iff…mp`), state the helper
+on the **transformed** form and let the caller apply the transformation. The helper gets the simpler
+signature and the call site stays one line.
+
+Running total: **242** (486 baseline → 290 pre-split → 274 post-split → 242).
+
+## Task 2 — `FJP.productRestrictionSub_isEmbedding_JetA` 53 → 47 (242 → 241, pending build)
+
+`hrange` (9 lines) lifted to `range_productRestrictionSub_eq_sectionEqualizer`: the range of
+`productRestrictionSub` is exactly the section equalizer — one inclusion is
+`productRestrictionSub_mem_sectionEqualizer`, the other is gluing.
+
+**This was previously logged as blocked, and the block dissolved on re-reading.** The earlier note
+said the lift needed `rho` (a local `let`) threaded as a parameter, with `Set.range ⇑rho` vs
+`LinearMap.range rho` coercion friction. The resolution is to not mention `rho` at all: state the
+helper on the **concrete function** `Set.range (productRestrictionSub (JetA F) C)`, and let the *call
+site* supply the defeq — which it can, precisely because `rho` is a `let` whose `toFun` is
+`productRestrictionSub (JetA F) C`.
+
+    have hrange : (LinearMap.range rho : Set …) = sectionEqualizer (JetA F) C :=
+      range_productRestrictionSub_eq_sectionEqualizer C hC
+
+**The general point, which now has three instances (`GaussNorm`, `Presheaf`, here): push the
+conversion to the call site.** Whether the thing to convert is a `set`-bound value, an incoming
+hypothesis, or a `let`-bound bundled structure, the helper should be stated on the *plain* underlying
+object; the caller is the place that has the definitional information to bridge the gap. Stating the
+helper in the caller's dressed-up vocabulary is what creates the threading problem.
+
+Note the contrast with `RelativePieceKeystone.hT_pb`, where the opposite was needed (pass the term in,
+because the caller's `classical` had baked an instance into it). The discriminator: **if the bridge is
+definitional (`let`, `rfl`), state the helper plainly and let the call site bridge; if the bridge
+carries an instance the helper cannot reconstruct, pass the term.**
