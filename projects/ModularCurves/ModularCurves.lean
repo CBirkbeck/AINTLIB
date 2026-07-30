@@ -37,6 +37,7 @@ import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafIteratedBaseChange
 import ModularCurves.EllipticCurve.PoleSheafNoetherianStage
 import ModularCurves.EllipticCurve.PoleSheafNoetherianStageCech
+import ModularCurves.EllipticCurve.PoleSheafNeighborhoodHOne
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
@@ -55,6 +56,7 @@ import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.CechTupleAlternatingHomotopy
 import ModularCurves.ForMathlib.ClosedImmersionFinrankIso
 import ModularCurves.ForMathlib.CochainComplexBaseChangeExactAt
+import ModularCurves.ForMathlib.CochainComplexFlatBaseChangeExact
 import ModularCurves.ForMathlib.Coaction
 import ModularCurves.ForMathlib.ComoduleCoinvariants
 import ModularCurves.ForMathlib.FiniteAffineOpenCover

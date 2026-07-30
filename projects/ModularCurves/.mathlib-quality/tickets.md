@@ -29570,3 +29570,55 @@ root-index every new module; axiom-audit every public theorem.
 6. Cadence: [CLEANUP-21] Picard/ after GAP-A-6 · [CLEANUP-22] EllipticCurve/PoleSheaf*
    after FLW-6 · [CLEANUP-23] WeilPairing/ after WP-REG. ⌈15/3⌉ = 5 ≥ 3 ✓ (per-file rule
    satisfied: the three touched trees each get one).
+
+### CLAIM (rule 5, FLW-1, dev/modular-curves, 2026-07-30): stage Čech exactness descends
+to a principal neighborhood of any point of the ORIGINAL affine base. Exact target:
+
+```lean
+theorem FibrewiseElliptic.exists_mem_basicOpen_orderedBaseCech_exact
+    {X S : Scheme.{u}} {π : X ⟶ S} [IsAffine S] [IsProper π]
+    (hsm : SmoothOfRelativeDimension 1 π) (z : S ⟶ X) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz) (s : S) :
+    ∃ a : Γ(S, ⊤), s ∈ S.basicOpen a ∧
+      -- the restricted family over the basic open
+      ∀ ... (finite ordered affine cover V of the restriction) ...,
+        (positive-degree exactness of the ordered base-Čech differentials of
+         𝒪([0]) restricted over S.basicOpen a)
+```
+
+(final hypothesis/conclusion shape to be locked at the natural API boundary while
+writing — the deliverable is: basic open `S' ∋ s` + exactness statement consumable by
+`PoleSheafBaseCechHOne`'s H¹ bridge; NO Noetherian hypothesis.)
+Route (handover §7 steps 1–9): `exists_noetherianPoleSheafModel` at S; the κ(s)-point
+`U := Spec κ(s)` via `S.fromSpecResidueField`-composite; `IsField Γ(U,⊤)`;
+`exists_away_orderedBaseCech_exact_of_poleSheafModel` gives `r ∉ p = ker((u ≫ gA).appTop)`;
+`r ∉ p` ⟺ image of `r` invertible at `s` ⟹ `s ∈ basicOpen (algebraMap B A r)`; transport
+exactness along `A → Localization.Away (algebraMap B A r)` = `Localization.Away r ⊗_B A`
+scalar tower + `orderedBaseCechComplex_baseChange_exact_iff_of_iso` + the direct pole-model
+iso `sectionPoleSheafPowerDirectBaseChangeIso`. **Progress**: claimed 2026-07-30.
+
+### [FLW-1] — **DONE 2026-07-30** (dev/modular-curves)
+`FibrewiseElliptic.exists_mem_basicOpen_pointedIso_subsingleton_H_one`
+(`EllipticCurve/PoleSheafNeighborhoodHOne.lean`, root-indexed): around every point of an
+affine smooth proper fibrewise elliptic family there is a **basic open** of the base over
+which a pointed family — identified with the restricted original family by an explicit
+pointed iso (`eC` + π/z-compat, for the FLW-6 `LocallyWeierstrass.of_iso` crossing) — is
+proper, smooth-rel-1, fibrewise elliptic, and has `Subsingleton (H¹(𝒪([0])))`. NO
+Noetherian hypothesis. Axiom-clean (propext/choice/Quot.sound).
+New supporting API:
+- `ForMathlib/CochainComplexFlatBaseChangeExact.lean` (root-indexed):
+  `LinearMap.baseChange_exact_of_bounded_flat_baseChange_exact` — bounded flat complexes
+  have UNIVERSAL positive-tail exactness (flat-coker splice + tower collapse); the forward
+  companion of `baseChange_exact_iff_of_faithfullyFlat`. Plus
+  `TensorProduct.subsingleton_right`.
+- `isField_gamma_spec_residueField`, `mem_basicOpen_of_appTop_ne_zero` (evaluation
+  naturality + field-unit argument) in the new EllipticCurve file.
+- un-privatised `smoothOfRelativeDimension_pullback_snd_comp`,
+  `fibrewiseElliptic_pullback_snd_comp` (PoleSheafNoetherianStageCech).
+Route as claimed: stage model → residue-point spread at `s` → `r ∉ ker` ⟹ `s ∈ D(a)`,
+`a := (isoSpec ≫ gA).appTop r` → universal flat transport down `Γ(Spec B) → B_r → Γ(D(a))`
+(algebra := `tD.appTop.toAlgebra`, `IsLocalization.Away.lift` tower) →
+`orderedBaseCechComplex_baseChange_exact_iff_of_iso` at the direct family with
+`sectionPoleSheafPowerDirectBaseChangeIso` → ordered→unordered→`H¹` bridges.
+**Progress**: full root build queued; FLW-2 next (wire H¹ = 0 for n = 1..6 via the landed
+successor induction `sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood`).
