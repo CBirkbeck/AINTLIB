@@ -1,1 +1,1 @@
-FOCUS: tower CLOSED. Optional next: L1 elementary leaves (quotient_pow_equiv_of_flat five-lemma, graphAtPrimeEquiv, trivial-fibre statement) pre-building against central 8.30; else board-drained for this campaign scope
+FOCUS: fill levelMap_bijective_of_flat_of_levelOne (FJP/QuotientPowFlat.lean) — surjectivity via FlatCompletion telescoping ladder (check exists_sub_mem_pow hypotheses), injectivity via five-lemma induction on graded SES tensored (Module.Flat.lTensor_exact); then graphAtPrimeEquiv + trivial-fibre statement; the L1 assembly stays 8.30-conditional

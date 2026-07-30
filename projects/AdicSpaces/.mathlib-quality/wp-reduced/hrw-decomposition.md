@@ -651,3 +651,18 @@ D-rewire live in Main; the restricted Fubini; the T_N⟨T⟩-tower Nullstellensa
 Remaining optional: L1 elementary leaves (quotient_pow_equiv_of_flat +
 graphAtPrimeEquiv + trivial-fibre) to pre-build against the 8.30 landing;
 PARKED (statement-protected): the 3 general-prime L3/L1 forms (Rees-gated).
+
+## quotient_pow_equiv_of_flat PLAN (banked skeleton FJP/QuotientPowFlat.lean)
+
+Surjectivity: FREE — FlatCompletion's ladder is already parametrized by the
+level-one surjectivity section-variable h1 (levelMap_surjective h1-surj n).
+Injectivity (induction on n; heart = graded step): a ∈ Iⁿ with
+algebraMap a ∈ J^{n+1} ⟹ a ∈ I^{n+1}:
+(i) flat: (Iⁿ/I^{n+1}) ⊗[A] B injects stage (Module.Flat.lTensor_exact /
+lTensor_injective on Iⁿ/I^{n+1}-related SES);
+(ii) a⊗1 dies in (Iⁿ/I^{n+1})⊗B since image ∈ J^{n+1} = image of I^{n+1}⊗B;
+(iii) I-kills ⟹ (Iⁿ/I^{n+1})⊗_A B = (Iⁿ/I^{n+1})⊗_{A/I}(B/J);
+(iv) h1-iso B/J ≅ A/I collapses scalars: M ⊗_{A/I} (A/I) ≅ M ⟹ ā = 0.
+~200-300 lines tensor bookkeeping; mathlib: quotTensorEquivQuotSMul /
+Algebra.TensorProduct pieces, lTensor-exactness. n=0 base: I^0 = ⊤,
+subsingleton source.
