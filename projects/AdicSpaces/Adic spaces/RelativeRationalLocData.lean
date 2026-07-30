@@ -1191,8 +1191,7 @@ theorem relativeLaurentNormalized_forwardHom_comp_backwardHom
     relativeRationalLocData_laurentNormalized E D hsub
   letI : UniformSpace (Localization.Away D_at_E_data.s) := D_at_E_data.uniformSpace
   letI : UniformSpace (Localization.Away (E.canonicalMap D.s)) := D_at_E_data.uniformSpace
-  letI : IsUniformAddGroup (Localization.Away D_at_E_data.s) :=
-    D_at_E_data.isUniformAddGroup
+  letI : IsUniformAddGroup (Localization.Away D_at_E_data.s) := D_at_E_data.isUniformAddGroup
   letI : IsUniformAddGroup (Localization.Away (E.canonicalMap D.s)) :=
     D_at_E_data.isUniformAddGroup
   letI : IsTopologicalRing (Localization.Away D_at_E_data.s) :=

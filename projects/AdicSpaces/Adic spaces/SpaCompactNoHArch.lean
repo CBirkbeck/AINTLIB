@@ -107,8 +107,7 @@ lemma exists_uniform_pow_vle_on_compact
   -- The open cover: `U N` = `{w ∈ ↥(Spa A A⁺) : w.1.vle (π^N) a}`, intersected with K.
   -- Each open in `↥(Spa A A⁺)` since `basicOpen` is open in Spv and
   -- the subtype map is continuous.
-  let U : ℕ → Set ↥(Spa A A⁺) := fun N ↦
-    Subtype.val ⁻¹' (basicOpen (π ^ N) a : Set (Spv A))
+  let U : ℕ → Set ↥(Spa A A⁺) := fun N ↦ Subtype.val ⁻¹' (basicOpen (π ^ N) a : Set (Spv A))
   have hU_open : ∀ N, IsOpen (U N) := fun N ↦
     (isOpen_basicOpen _ _).preimage continuous_subtype_val
   -- The cover is monotone increasing (`U N ⊆ U (N+1)` via `v.vle (π^(N+1)) (π^N)`).
