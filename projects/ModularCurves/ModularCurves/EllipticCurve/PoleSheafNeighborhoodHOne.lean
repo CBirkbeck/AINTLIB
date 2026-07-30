@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
 import ModularCurves.EllipticCurve.PoleSheafNoetherianStageCech
 import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChangeHOne
 import ModularCurves.ForMathlib.CochainComplexFlatBaseChangeExact
+import ModularCurves.ForMathlib.PrescribedLocalizedBasis
 
 /-!
 # Local `H¹` vanishing for the simple-pole sheaf (FLW-1)
@@ -794,7 +795,32 @@ theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_poleOneBasis
   have hbasis : ∃ bOne : Module.Basis (Fin 1) K₀
       (Scheme.Modules.baseSections π' MT),
       bOne 0 = sectionPoleSheafPowerOneSection π' z' hz' := by
-    sorry
+    -- transport rank and fibre data through the kernel identification
+    let eKer := Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+      π' MT UT hUT
+    refine Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero
+      (sectionPoleSheafPowerOneSection π' z' hz') ?_ ?_
+    · -- rankAtStalk = 1 at every maximal, mirroring BaseChangeKerCoker:1204
+      intro p hp
+      rw [Module.rankAtStalk_eq]
+      let κp := (⟨p, hp.isPrime⟩ : PrimeSpectrum K₀).asIdeal.ResidueField
+      have hbij := kerBaseChangeComparison_bijective_of_orderedBaseCech_package
+        π' MT UT hDflat hDbdd hDexact κp
+      let eFib : (⟨p, hp.isPrime⟩ : PrimeSpectrum K₀).asIdeal.Fiber
+          (Scheme.Modules.baseSections π' MT) ≃ₗ[κp]
+          LinearMap.ker
+            (((Scheme.Modules.orderedBaseCechComplex π' MT UT).d 0 1).hom.baseChange
+              κp) :=
+        ((eKer.toLinearEquiv.baseChange K₀ κp _ _).trans
+          (LinearEquiv.ofBijective
+            (ModularCurves.kerBaseChangeComparison κp
+              ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d 0 1).hom) hbij))
+      exact eFib.finrank_eq.trans
+        (h'.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank
+          hsm' z' hz' UT hUT hUTaff κp (le_refl 1))
+    · -- the canonical section has nonzero fibre at every maximal
+      intro p hp
+      sorry
   obtain ⟨bOne, hbOne⟩ := hbasis
   exact ⟨a, hmem, pullback yπ (u' ≫ gA), π', z', hz', inferInstance, hsm', h',
     ⟨eC, hCπ, hCz⟩,
