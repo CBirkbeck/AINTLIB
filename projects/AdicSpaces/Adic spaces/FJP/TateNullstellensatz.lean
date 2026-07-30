@@ -6,6 +6,7 @@ import «Adic spaces».FJP.TateBallResidue
 import «Adic spaces».FJP.CDVFNoetherian
 import «Adic spaces».NoetherianGDomain
 import «Adic spaces».GeometricSeries
+import Mathlib.RingTheory.Jacobson.Artinian
 import «Adic spaces».Bounded
 
 /-!
@@ -22,7 +23,7 @@ Nakayama lifts finiteness to `B`, and localization finishes.
 
 @[expose] public section
 
-open scoped Classical
+open scoped Classical NormedField Valued
 
 namespace FiniteJet.GraphKoszul
 
@@ -341,5 +342,122 @@ theorem krullDimLE_zero_specialFibre
   exact q.zero_mem
 
 end MaximalIdeal
+
+section Residue
+
+variable [IsDiscreteValuationRing ↥(Valued.integer K)]
+
+/-- The uniformizer as a unit-ball element, in the residue-equivalence's
+membership form. -/
+noncomputable abbrev piUnitBall : ↥(unitBall K) :=
+  ⟨ϖ.val, (mem_unitBall_iff (E := K) ϖ.val).mpr ϖ.norm_val_lt_one.le⟩
+
+/-- The uniformizer span is maximal in the unit ball (transport of the DVR
+maximal ideal along `unitBallEquivInteger`). -/
+theorem span_piUnitBall_isMaximal :
+    (Ideal.span {piUnitBall ϖ}).IsMaximal := by
+  have hmax : (Ideal.span {ϖ.elem}).IsMaximal := by
+    have h1 : IsLocalRing.maximalIdeal ↥(Valued.integer K) =
+        Ideal.span {ϖ.elem} :=
+      (IsDiscreteValuationRing.irreducible_iff_uniformizer ϖ.elem).mp
+        ϖ.irreducible
+    rw [← h1]
+    exact IsLocalRing.maximalIdeal.isMaximal _
+  haveI := hmax
+  have hmap : Ideal.map (FiniteJetOver.unitBallEquivInteger K).toRingHom
+      (Ideal.span {piUnitBall ϖ}) = Ideal.span {ϖ.elem} := by
+    rw [Ideal.map_span, Set.image_singleton]
+    refine congrArg (fun z => Ideal.span {z}) ?_
+    refine Subtype.ext ?_
+    show ((FiniteJetOver.unitBallEquivInteger K) (piUnitBall ϖ) :
+      Valued.integer K).1 = (ϖ.elem : K)
+    rfl
+  have h2 : Ideal.span {piUnitBall ϖ} =
+      Ideal.comap (FiniteJetOver.unitBallEquivInteger K).toRingHom
+        (Ideal.span {ϖ.elem}) := by
+    rw [← hmap, Ideal.comap_map_of_bijective
+      (f := (FiniteJetOver.unitBallEquivInteger K).toRingHom)
+      ((FiniteJetOver.unitBallEquivInteger K).bijective)]
+  rw [h2]
+  exact Ideal.comap_isMaximal_of_surjective _
+    (FiniteJetOver.unitBallEquivInteger K).surjective
+
+/-- The residue field of the base. -/
+noncomputable abbrev ResidueK : Type _ :=
+  ↥(unitBall K) ⧸ Ideal.span {piUnitBall ϖ}
+
+noncomputable instance : CommRing (ResidueK ϖ) := Ideal.Quotient.commRing _
+
+noncomputable instance : Field (ResidueK ϖ) :=
+  haveI := span_piUnitBall_isMaximal ϖ
+  Ideal.Quotient.field _
+
+variable (𝔪 : Ideal (P K m)) [h𝔪 : 𝔪.IsMaximal]
+
+/-- The factor map from the Tate residue ring onto the special fibre. -/
+noncomputable def toSpecialFibre :
+    (↥(unitBall (P K m)) ⧸ Ideal.span {piBall (m := m) ϖ}) →+*
+      SpecialFibre (m := m) ϖ 𝔪 :=
+  Ideal.Quotient.lift (Ideal.span {piBall (m := m) ϖ})
+    ((Ideal.Quotient.mk (Ideal.span {piBar (m := m) ϖ 𝔪})).comp
+      (Ideal.Quotient.mk (ballContraction (m := m) 𝔪)))
+    (by
+      intro a ha
+      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp ha
+      rw [← hc]
+      rw [RingHom.comp_apply, map_mul]
+      rw [show Ideal.Quotient.mk (ballContraction (m := m) 𝔪)
+          (piBall (m := m) ϖ) = piBar (m := m) ϖ 𝔪 from rfl]
+      rw [map_mul]
+      rw [show Ideal.Quotient.mk (Ideal.span {piBar (m := m) ϖ 𝔪})
+          (piBar (m := m) ϖ 𝔪) = 0 from
+        Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _)]
+      rw [mul_zero])
+
+theorem toSpecialFibre_surjective :
+    Function.Surjective (toSpecialFibre (m := m) ϖ 𝔪) := by
+  intro z
+  obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective z
+  obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective b
+  exact ⟨Ideal.Quotient.mk _ x, rfl⟩
+
+/-- The polynomial presentation of the special fibre over the residue field. -/
+noncomputable def fibreFromPoly :
+    MvPolynomial (Fin m) (ResidueK ϖ) →+* SpecialFibre (m := m) ϖ 𝔪 :=
+  (toSpecialFibre (m := m) ϖ 𝔪).comp
+    (unitBallPResidueEquiv (E := K) (m := m) ϖ.val ϖ.isUnit_val
+      ϖ.norm_val_lt_one ϖ.norm_val_pos ϖ.norm_val_mul).symm.toRingHom
+
+theorem fibreFromPoly_surjective :
+    Function.Surjective (fibreFromPoly (m := m) ϖ 𝔪) :=
+  (toSpecialFibre_surjective (m := m) ϖ 𝔪).comp
+    (unitBallPResidueEquiv (E := K) (m := m) ϖ.val ϖ.isUnit_val
+      ϖ.norm_val_lt_one ϖ.norm_val_pos ϖ.norm_val_mul).symm.surjective
+
+/-- **Leaf 9: the special fibre is a finite module over the residue field**
+(finite type via the polynomial presentation, zero-dimensional by the
+G-domain lemma, hence finite by the Artinian criterion). -/
+theorem module_finite_specialFibre (hK₀ : IsNoetherianRing (unitBall K)) :
+    letI : Algebra (ResidueK ϖ) (SpecialFibre (m := m) ϖ 𝔪) :=
+      ((fibreFromPoly (m := m) ϖ 𝔪).comp
+        (MvPolynomial.C : ResidueK ϖ →+* MvPolynomial (Fin m)
+          (ResidueK ϖ))).toAlgebra
+    Module.Finite (ResidueK ϖ) (SpecialFibre (m := m) ϖ 𝔪) := by
+  letI : Algebra (ResidueK ϖ) (SpecialFibre (m := m) ϖ 𝔪) :=
+    ((fibreFromPoly (m := m) ϖ 𝔪).comp
+      (MvPolynomial.C : ResidueK ϖ →+* MvPolynomial (Fin m)
+        (ResidueK ϖ))).toAlgebra
+  haveI hft : Algebra.FiniteType (ResidueK ϖ)
+      (SpecialFibre (m := m) ϖ 𝔪) :=
+    Algebra.FiniteType.of_surjective
+      (⟨fibreFromPoly (m := m) ϖ 𝔪, fun c => rfl⟩ :
+        MvPolynomial (Fin m) (ResidueK ϖ) →ₐ[ResidueK ϖ]
+          SpecialFibre (m := m) ϖ 𝔪)
+      (fibreFromPoly_surjective (m := m) ϖ 𝔪)
+  exact (Module.finite_iff_krullDimLE_zero (ResidueK ϖ)
+    (SpecialFibre (m := m) ϖ 𝔪)).mpr
+    (krullDimLE_zero_specialFibre (m := m) ϖ 𝔪 hK₀)
+
+end Residue
 
 end FiniteJet.GraphKoszul
