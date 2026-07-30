@@ -29683,3 +29683,20 @@ Then:
 NOTE (cleanup, not now): my `baseChange_exact_of_bounded_flat_baseChange_exact` duplicates
 the composite of landed `LinearMap.baseChange_exact_of_bounded_exact` (BaseChangeKerCoker
 docstring :50) at R := Away r + tower collapse — consolidate in [CLEANUP-22].
+
+### [FLW-2a] — **DONE 2026-07-30** (all in `EllipticCurve/PoleSheafNeighborhoodHOne.lean`)
+- `exists_mem_basicOpen_pointedIso_orderedBaseCech_package` (FLW-1 refactor; H¹ thm rederived)
+- `kerBaseChangeComparison_bijective_of_orderedBaseCech_package`
+- `baseSectionsBaseChangeEquiv_of_orderedBaseCech_package`
+- `sectionPoleSheafPowerPushforwardBaseChange_app_top_isIso_of_orderedBaseCech_package`
+  (general-base mirror of the projectiveClosed IsIso; mediator
+  `(baseModulePresheafIdTopIso N).symm` inserted into eSourceIso — the projective file's
+  composition relied on Spec-side defeq unavailable generally).
+All axioms: propext/choice/Quot.sound. **NEXT [FLW-2b]**: localized rank-1 basis `bA` at
+each prime of the package base + `hbA` normalization; route (board [FLW-2a] REFINED):
+LowDegree replacement for finite/projective + `rankAtStalk` = 1 via
+`sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank`; away-splitting via
+`exists_away_baseChange_surjective_of_residueField`; then [FLW-2c] feed
+`exists_sectionPoleSheafPowerOne_away_baseChange_basis_of_localized_basis_of_isProper`
+(needs the IsIso just proved at t := Spec (Away b) ≫ isoSpec.inv — NOTE that t's shape:
+compose with S.isoSpec.inv, matching the producer's `let t`), then [FLW-6] assembly.

@@ -34,6 +34,7 @@ cross back at the `LocallyWeierstrass` level (`LocallyWeierstrass.of_iso`).
 -/
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace TensorProduct
+open scoped ChangeOfRings
 
 universe u
 
@@ -396,5 +397,144 @@ noncomputable def baseSectionsBaseChangeEquiv_of_orderedBaseCech_package
     π' t MT UT hUT hUTaff
     (kerBaseChangeComparison_bijective_of_orderedBaseCech_package
       π' MT UT hflat hbdd hexact Γ(T'', (⊤ : T''.Opens)))
+
+/-- The pole-sheaf pushforward base-change morphism is an isomorphism on global sections
+for every affine base change, given a termwise-flat, bounded, positive-tail-exact ordered
+base-Čech complex for the simple-pole sheaf. General-base mirror of
+`sectionPoleSheafPowerPushforwardBaseChange_projectiveClosed_app_top_isIso`. -/
+theorem sectionPoleSheafPowerPushforwardBaseChange_app_top_isIso_of_orderedBaseCech_package
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsAffine S] [IsAffine T] [IsProper π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → C.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (hflat : ∀ q, Module.Flat Γ(S, (⊤ : S.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π
+        (sectionPoleSheafPower π z hz 1) U).X q))
+    (hbdd : ∀ q, Fintype.card ι ≤ q → Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π
+        (sectionPoleSheafPower π z hz 1) U).X q))
+    (hexact : ∀ q, q < Fintype.card ι →
+      Function.Exact
+        ((Scheme.Modules.orderedBaseCechComplex π
+          (sectionPoleSheafPower π z hz 1) U).d q (q + 1)).hom
+        ((Scheme.Modules.orderedBaseCechComplex π
+          (sectionPoleSheafPower π z hz 1) U).d (q + 1) (q + 2)).hom)
+    (t : T ⟶ S) :
+    IsIso ((sectionPoleSheafPowerPushforwardBaseChange hsm z hz t 1).val.app
+      (.op (⊤ : T.Opens))) := by
+  let M := sectionPoleSheafPower π z hz 1
+  let N := (Scheme.Modules.pushforward π).obj M
+  let g := pullback.fst π t
+  let πT := pullback.snd π t
+  let zT := sectionBaseChange z hz t
+  let hzT := sectionBaseChange_snd z hz t
+  let MT := sectionPoleSheafPower πT zT hzT 1
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  letI : C.IsSeparated := ⟨by
+    rw [← terminal.comp_from π]
+    infer_instance⟩
+  letI : M.IsQuasicoherent := sectionPoleSheafPower_isQuasicoherent hsm z hz 1
+  letI : N.IsQuasicoherent :=
+    sectionPoleSheafPowerPushforward_isQuasicoherent hsm z hz 1
+  let ePush := Scheme.Modules.baseSectionsPushforwardTopIso π M
+  let eSourceIso :=
+    (ModuleCat.extendScalars t.appTop.hom).mapIso
+        (ePush ≪≫ (Scheme.Modules.baseModulePresheafIdTopIso N).symm) ≪≫
+      Scheme.Modules.affinePullbackΓIso t N
+  let eSource :
+      A ⊗[B] Scheme.Modules.baseSections π M ≃ₗ[A]
+        Γ((Scheme.Modules.pullback t).obj N, (⊤ : T.Opens)) :=
+    eSourceIso.toLinearEquiv
+  let eGen : A ⊗[B] Scheme.Modules.baseSections π M ≃ₗ[A]
+      Scheme.Modules.baseSections πT MT :=
+    (baseSectionsBaseChangeEquiv_of_orderedBaseCech_package π t M U hU hUaff
+      hflat hbdd hexact).trans
+      (Scheme.Modules.baseSectionsMapIso πT
+        (sectionPoleSheafPowerBaseChangeIso hsm z hz t 1)).toLinearEquiv
+  let eTargetTopIso :=
+    Scheme.Modules.baseSectionsPushforwardTopIso πT MT ≪≫
+      (Scheme.Modules.baseModulePresheafIdTopIso
+        ((Scheme.Modules.pushforward πT).obj MT)).symm
+  let eTargetTop :
+      Scheme.Modules.baseSections πT MT ≃ₗ[A]
+        Γ((Scheme.Modules.pushforward πT).obj MT, (⊤ : T.Opens)) :=
+    eTargetTopIso.toLinearEquiv
+  let eTarget := eGen.trans eTargetTop
+  let φ := sectionPoleSheafPowerPushforwardBaseChange hsm z hz t 1
+  let φTop :
+      Γ((Scheme.Modules.pullback t).obj N, (⊤ : T.Opens)) →ₗ[A]
+        Γ((Scheme.Modules.pushforward πT).obj MT, (⊤ : T.Opens)) :=
+    (φ.val.app (.op (⊤ : T.Opens))).hom
+  have hSource (s : Scheme.Modules.baseSections π M) :
+      eSource ((1 : A) ⊗ₜ[B] s) =
+        Scheme.Modules.affinePullbackUnitTop t N
+          (Scheme.Modules.pushforwardTopSection π M s) := by
+    change (Scheme.Modules.affinePullbackΓIso t N).hom
+        (((ModuleCat.extendScalars t.appTop.hom).map
+            (ePush ≪≫ (Scheme.Modules.baseModulePresheafIdTopIso N).symm).hom)
+          ((1 : Γ(T, (⊤ : T.Opens)))
+            ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] s)) = _
+    rw [ModuleCat.ExtendScalars.map_tmul
+      (f := t.appTop.hom) (ePush ≪≫ (Scheme.Modules.baseModulePresheafIdTopIso N).symm).hom
+        (1 : Γ(T, (⊤ : T.Opens))) s]
+    rw [show (ePush ≪≫ (Scheme.Modules.baseModulePresheafIdTopIso N).symm).hom s =
+        Scheme.Modules.pushforwardTopSection π M s from rfl]
+    exact Scheme.Modules.affinePullbackΓIso_hom_one_tmul t N
+      (Scheme.Modules.pushforwardTopSection π M s)
+  have hTarget (s : Scheme.Modules.baseSections π M) :
+      eTarget ((1 : A) ⊗ₜ[B] s) =
+        Scheme.Modules.pushforwardTopSection πT MT
+          (eGen ((1 : A) ⊗ₜ[B] s)) := by
+    change (Scheme.Modules.baseModulePresheafIdTopIso
+        ((Scheme.Modules.pushforward πT).obj MT)).inv
+        ((Scheme.Modules.baseSectionsPushforwardTopIso πT MT).hom
+          (eGen ((1 : A) ⊗ₜ[B] s))) = _
+    rw [Scheme.Modules.baseSectionsPushforwardTopIso_hom_apply]
+    rfl
+  have hGenOne (s : Scheme.Modules.baseSections π M) :
+      eGen ((1 : A) ⊗ₜ[B] s) =
+        (sectionPoleSheafPowerBaseChangeIso hsm z hz t 1).hom.val.app (.op ⊤)
+          (Scheme.Modules.affinePullbackUnitTop g M s) := by
+    change (Scheme.Modules.baseSectionsMapIso πT
+        (sectionPoleSheafPowerBaseChangeIso hsm z hz t 1)).hom
+        ((baseSectionsBaseChangeEquiv_of_orderedBaseCech_package π t M U hU hUaff
+          hflat hbdd hexact) ((1 : A) ⊗ₜ[B] s)) = _
+    rw [show (baseSectionsBaseChangeEquiv_of_orderedBaseCech_package π t M U hU hUaff
+        hflat hbdd hexact) ((1 : A) ⊗ₜ[B] s) =
+          Scheme.Modules.affinePullbackUnitTop g M s from
+      Scheme.Modules.baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison_one_tmul
+        π t M U hU hUaff _ s]
+    exact Scheme.Modules.baseSectionsMapIso_hom_apply πT
+      (sectionPoleSheafPowerBaseChangeIso hsm z hz t 1) _
+  have hOne (s : Scheme.Modules.baseSections π M) :
+      (φTop.comp eSource.toLinearMap) ((1 : A) ⊗ₜ[B] s) =
+        eTarget ((1 : A) ⊗ₜ[B] s) := by
+    rw [LinearMap.comp_apply]
+    change φTop (eSource ((1 : A) ⊗ₜ[B] s)) = eTarget ((1 : A) ⊗ₜ[B] s)
+    rw [hSource, hTarget, hGenOne]
+    exact sectionPoleSheafPowerPushforwardBaseChange_app_top_pullbackUnit
+      hsm z hz t 1 s
+  have hcomp : φTop.comp eSource.toLinearMap = eTarget.toLinearMap := by
+    ext q
+    induction q using TensorProduct.induction_on with
+    | zero => rw [map_zero, map_zero]
+    | tmul a s =>
+        rw [show a ⊗ₜ[B] s = a • ((1 : A) ⊗ₜ[B] s) by
+          rw [TensorProduct.smul_tmul']
+          simp]
+        simp only [map_smul]
+        exact congrArg (fun y => a • y) (hOne s)
+    | add x y hx hy => rw [map_add, map_add, hx, hy]
+  rw [ConcreteCategory.isIso_iff_bijective]
+  change Function.Bijective φTop
+  apply (Function.Bijective.of_comp_iff φTop eSource.bijective).mp
+  have hfun : φTop ∘ eSource = eTarget := by
+    funext q
+    exact LinearMap.congr_fun hcomp q
+  rw [hfun]
+  exact eTarget.bijective
 
 end ModularCurves
