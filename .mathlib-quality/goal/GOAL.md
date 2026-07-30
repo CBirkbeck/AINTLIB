@@ -1870,3 +1870,42 @@ see whether a proof is decomposable at all; use the ranked score to choose which
 Module builds green first (`LaurentOverlap` 2694 jobs, `TopologyComparison` 2620 jobs).
 
 Running total: **265** (486 baseline → 290 pre-split → 274 post-split → 265).
+
+## A real bug in the triage tooling — Unicode identifiers (found and fixed)
+
+The ranked scan's token regex started with an **ASCII-only** character class
+(`[A-Za-z_][A-Za-z0-9_.'₀-₉]*`). Consequences in this codebase, where Greek-named
+hypotheses are everywhere:
+
+* `hρsyz` tokenised as just `h` — the rest of the name was silently dropped;
+* bare `α`, `ρ`, `θ` matched **nothing at all** (first char outside the class).
+
+So every proof whose `have`s mention Greek-named locals was scored as having **fewer local
+dependencies than it really has**, i.e. the scan systematically over-promoted the hardest candidates.
+`FiniteJetGraphKoszul.syzygy_graph_of_isUnit`'s `hcoord` sat at the top of the "zero locals" list
+while actually depending on `hρsyz`, `α` and `hαρ`.
+
+Fix: make the first character `[^\W\d]` (any Unicode word char that is not a digit) and let `\w` carry
+the tail — Python's `re` is Unicode-aware for `str` by default. Re-ranking demoted three queued
+candidates and promoted the genuinely context-free ones.
+
+**This is the third time an ASCII-only regex has produced a wrong count in this campaign** (the
+declaration-name undercount 7947→7978, and the byte-vs-character long-line over-report). Standing rule
+for any tooling written against this source: **never anchor an identifier pattern on `[A-Za-z_]`, and
+never measure width in bytes.**
+
+## Task 2 — `StructurePresheafBundled.glue'` 54 → 45 (265 → 264)
+
+`hkey` (12 lines) lifted to `limitRestrict_eq_of_le`. Two details worth keeping:
+
+* The block's bound hypothesis `hUji : U j ≤ U i` is **never used** in the body, so the helper omits
+  it — but `hkey` is consumed downstream at its original type, so the call site keeps the shape and
+  discards the argument: `fun i j hUij _ => limitRestrict_eq_of_le s hs i j hUij`. **Preserving the
+  local `have`'s type while replacing only its body means no downstream use site has to change** —
+  cheaper and safer than rewriting the callers.
+* `U`, `ι`, `V` are section variables of the `IsLimitSheaf` namespace, so the helper inherits them;
+  only `s` and `hs` had to be threaded.
+
+Module build green (3006 jobs) before the gate.
+
+Running total: **264** (486 baseline → 290 pre-split → 274 post-split → 264).

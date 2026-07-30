@@ -170,6 +170,24 @@ theorem injective' (h : IsLimitSheaf A) (hle : ∀ i, U i ≤ V)
   rintro ⟨W, i, rfl⟩
   exact hxy i
 
+/-- **Well-definedness core for gluing**: on two cover members that refine each
+other, the section at one restricts to the section at the other. -/
+private theorem limitRestrict_eq_of_le
+    (s : ∀ i, ↥(limitSections (U i)))
+    (hs : ∀ i j, limitRestrict (inf_le_left (a := U i) (b := U j)) (s i) =
+                 limitRestrict (inf_le_right (a := U i) (b := U j)) (s j))
+    (i j : ι) (hUij : U i ≤ U j) :
+    limitRestrict hUij (s j) = s i := by
+  have h₁ : U i ≤ U i ⊓ U j := le_inf le_rfl hUij
+  calc limitRestrict hUij (s j)
+      = limitRestrict h₁ (limitRestrict (inf_le_right (a := U i) (b := U j)) (s j)) :=
+        (limitRestrict_limitRestrict h₁ inf_le_right (s j)).symm
+    _ = limitRestrict h₁ (limitRestrict (inf_le_left (a := U i) (b := U j)) (s i)) := by
+        rw [hs i j]
+    _ = limitRestrict (h₁.trans inf_le_left) (s i) :=
+        limitRestrict_limitRestrict h₁ inf_le_left (s i)
+    _ = s i := limitRestrict_self _ (s i)
+
 /-- Gluing for covers indexed in an arbitrary universe. -/
 theorem glue' (h : IsLimitSheaf A) (hle : ∀ i, U i ≤ V)
     (hcov : (V : Set ↥(Spa A A⁺)) ⊆ ⋃ i, (U i : Set ↥(Spa A A⁺)))
@@ -181,17 +199,8 @@ theorem glue' (h : IsLimitSheaf A) (hle : ∀ i, U i ≤ V)
   -- the well-definedness core: sections at equal cover members agree after
   -- restriction along the equality
   have hkey : ∀ (i j : ι) (hUij : U i ≤ U j), U j ≤ U i →
-      limitRestrict hUij (s j) = s i := by
-    intro i j hUij hUji
-    have h₁ : U i ≤ U i ⊓ U j := le_inf le_rfl hUij
-    calc limitRestrict hUij (s j)
-        = limitRestrict h₁ (limitRestrict (inf_le_right (a := U i) (b := U j)) (s j)) :=
-          (limitRestrict_limitRestrict h₁ inf_le_right (s j)).symm
-      _ = limitRestrict h₁ (limitRestrict (inf_le_left (a := U i) (b := U j)) (s i)) := by
-          rw [hs i j]
-      _ = limitRestrict (h₁.trans inf_le_left) (s i) :=
-          limitRestrict_limitRestrict h₁ inf_le_left (s i)
-      _ = s i := limitRestrict_self _ (s i)
+      limitRestrict hUij (s j) = s i :=
+    fun i j hUij _ => limitRestrict_eq_of_le s hs i j hUij
   have hle' : ∀ W : RangeIndex U, W.1 ≤ V := by
     rintro ⟨W, i, rfl⟩; exact hle i
   have hcov' : (V : Set ↥(Spa A A⁺)) ⊆
