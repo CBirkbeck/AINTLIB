@@ -3061,3 +3061,102 @@ FarguesFontaine, `D₀` here, `p F` in Euclidean — the pattern is pervasive an
 iterations.
 
 Running total: **234** (486 baseline → 290 pre-split → 274 post-split → 234).
+
+## Assessed and rejected: `WedhornCechAcyclicity.genRestrictedCover_separation` (−17)
+
+`hy0` is 25 lines with only 4 locals, so it passes the dependency test. It fails on **preamble**:
+
+* the enclosing proof opens with a **16-line `haveI` block** deriving seven instances on
+  `presheafValue D₀` (`IsTateRing`, `IsNoetherianRing`, `IsStronglyNoetherian`, `IsHuberRing`,
+  two `CompleteSpace` forms, `HasLocLiftPowerBounded`), none of which is automatic — that is why they
+  are written out;
+* `hy0`'s body needs `RationalLocData (presheafValue D₀)` to typecheck, so it needs essentially all of
+  them; the minimal-preamble rule cannot trim much here;
+* `hBsep`'s type is itself ~6 lines in the signature.
+
+Estimate: 14 (preamble) + 25 (body) + ~12 (signature) ≈ **51 lines** — over the bar by one, on the
+module that costs ~10 minutes per build iteration. **Rejected on the arithmetic, not attempted.**
+
+Also of note: this theorem's *statement* is written under `haveI … ;` bindings (the instances appear
+before the `∀` in the conclusion). That is a shape worth remembering — such a theorem cannot have its
+hypotheses lifted without carrying those instance definitions along, because they are part of what
+makes the statement elaborate at all.
+
+**Pattern across the last three rejections** (`wLoc_le_of_interior_bound` 15 deps,
+`RelativePieceKeystone.hT_pb` classical-baked instance, this one 16-line preamble): the line count is
+almost never the binding constraint at this stage. What kills a lift is *context* — dependencies,
+instances, or preamble. **Check those three before the line arithmetic, not after.**
+
+## Task 2 — `Euclidean.degAr_eq_of_valued_sub_lt` 77 → 47 (234 → 233)
+
+`hsets` is 66 lines, so a single lift would give a 65-line helper — over the bar. But its content is
+an `ext n / simp only / constructor` followed by **two branches of 30 and 29 lines**, which are the
+two directions of an iff. Extracted **each branch as its own helper**:
+
+* `valued_eq_teichCoeffAr_forward` — an index attaining `|x|` attains `|y|`;
+* `valued_eq_teichCoeffAr_backward` — the converse.
+
+Both share an identical 7-line parameter block (`hx hy hvy hBA hδ n` over `x y ρ`), written once and
+reused. `hsets` collapses from 66 lines to 6. Green first try.
+
+**This is the shape the "very large block" cases have been waiting for.** `hkey` (109),
+`hgen` (57), and `hsets` (66) all resisted a single lift because the helper would itself be over 50 —
+but a block whose bulk is *two symmetric branches* splits naturally into two helpers, each safely
+under, with the skeleton left behind costing only ~6 lines. **When a block is too big to lift whole,
+look for an `iff`/`rcases`/`constructor` seam before concluding it needs multi-level surgery.**
+
+Note the branches are *near*-mirrors, not identical: forward uses `Valuation.map_add` with
+`x = y + (x−y)`, backward uses `Valuation.map_sub` with `y = x − (x−y)`, and their `h6` steps differ.
+So one shared helper would have needed an awkward abstraction over add/sub — **two helpers sharing a
+parameter block beat one helper abstracting the difference.**
+
+Running total: **233** (486 baseline → 290 pre-split → 274 post-split → 233).
+
+## The seam scan — 27 proofs where the two-branch split applies directly
+
+Turned the `Euclidean.hsets` technique into a search. For every over-50 proof, find pairs of `·`
+bullets at the same indentation, measure each branch, and keep the pairs where **both branches are
+12–46 lines** (so each becomes a helper safely under 50) and `n1 + n2 − 4 ≥ need`.
+
+**93 symmetric bullet-pairs exist; 27 satisfy the both-fit condition.** Head of the list:
+
+    need  −4   22+29  LaurentRefinementTree.balancedLeafBase_isUnit…
+    need  −5   20+34  HuberRings.PairOfDefinition.adjoin
+    need  −6   21+27  ContinuousValuations.le_of_isContinuous_of_denseRange…
+    need −10   15+29  SpaQCviaSpvAI.ιSpvR_retractionSingle_eq
+    need −11   16+16  WedhornCechAcyclicity.genPiece_relOverlap_baseHom_isUnit
+    need −13   14+14  ChartVObj.chartPlus_le_completedPlusSubring_of_dense
+    need −15   20+45  CechCohomology.hasGluing_iff_section
+    need −18   16+31  FiniteJetGraphKoszul.d2_koszul_single
+
+**The both-fit filter is what makes this list actionable**, and it is why the biggest proofs are
+*absent* from it: `TateAlgebra.tateAlgebra_flat` (187+55), `Presheaf.exists_continuous_valuation…`
+(27+141), `WedhornCechAcyclicity.isOXAcyclic_interProd` (19+126) all have a seam, but one branch is
+itself far over 50 — those need the split applied *recursively* to the oversized branch first.
+
+**One caveat found while starting on `ChartVObj.chartPlus_le_completedPlusSubring_of_dense`:** its two
+14-line branches are exact `.1`/`.2` mirrors, but each ends `rw [show … from rfl, Valuation.map_sub_swap,
+BIProd_fst] at h1` — consuming a hypothesis whose type was fixed by a 6-line ascription
+(`have hmax : … := hball n`). That is the load-bearing-ascription hazard already recorded: the `rw`
+matches syntactically against the ascribed type. So this pair needs the ascription carried into the
+helper rather than dropped — worth knowing before someone treats the 27 as uniformly mechanical.
+
+### Refinement to the seam list: branches that run *after* an `unfold`
+
+`FiniteJetGraphKoszul.d2_koszul_single` (need −18) is on the 27-list with branches 16+31(+17 — it is a
+`lt_trichotomy`, so three, and the scan only reported the adjacent pair). Extracting the 31-line
+middle branch alone would suffice on line count.
+
+**But the branches operate on the goal *after* `funext k; unfold d2; dsimp only`.** A helper would
+have to state that unfolded goal explicitly — a large and ugly type — or re-derive it, which
+reintroduces the unfold inside the helper and changes what the branch's first tactic sees.
+
+**So the seam list needs one more filter: the branch bodies must be liftable at the *stated* goal, not
+a tactic-transformed one.** Cheap check — look at what precedes the `rcases`/`constructor`: if it is
+`intro`/`refine` the branches are usually liftable; if it is `unfold`/`simp only`/`dsimp`/`change`,
+the goal has been rewritten and the helper's statement is no longer the theorem's vocabulary.
+
+`Euclidean.hsets` (the one that worked) passes this test — its branches sit under
+`ext n; simp only [Set.mem_setOf_eq]; constructor`, and `Set.mem_setOf_eq` only strips set-builder
+notation, leaving the goal in the source vocabulary (`Valued.v x = ρ ^ n * …`), which is exactly what
+the two helpers state.

@@ -700,6 +700,87 @@ theorem valued_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   have h2 : y = x + -(x - y) := by ring
   rw [h2, Valuation.map_add_eq_of_lt_left _ h1]
 
+/-- Forward half of the leading-index set equality: an index attaining `|x|` attains `|y|`. -/
+private theorem valued_eq_teichCoeffAr_forward
+    {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {x y : hatK p F hρ0 hρ1}
+    (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hy : y ∈ ArSub p F ϖ hρ0 hρ1)
+    (hvy : Valued.v y = Valued.v x)
+    (hBA : max (Valued.v (x - y)) (ρ * Valued.v x) < Valued.v x)
+    (hδ : ∀ n, ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+        - teichCoeffAr p F ϖ hρ0 hρ1 y n)
+      ≤ max (Valued.v (x - y)) (ρ * Valued.v x)) (n : ℕ)
+    (hax : Valued.v x = ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)) :
+    Valued.v y = ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n) := by
+  have hxle : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+      ≤ max (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
+        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+          - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
+    have h4 : teichCoeffAr p F ϖ hρ0 hρ1 x n
+        = teichCoeffAr p F ϖ hρ0 hρ1 y n + (teichCoeffAr p F ϖ hρ0 hρ1 x n
+          - teichCoeffAr p F ϖ hρ0 hρ1 y n) := by
+      ring
+    conv_lhs => rw [h4]
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (Valuation.map_add _ _ _) zero_le) ?_
+    exact (nnreal_mul_max _ _ _).le
+  have h5 : Valued.v x ≤ max
+      (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
+      (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+        - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := hax ▸ hxle
+  have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)
+      ≤ Valued.v x := by
+    rw [← hvy]
+    exact gaussTerm_teichCoeffAr_le p F ϖ hy n
+  rcases max_cases
+    (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
+    (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+      - teichCoeffAr p F ϖ hρ0 hρ1 y n)) with ⟨heq, -⟩ | ⟨heq, -⟩
+  · rw [heq] at h5
+    rw [hvy]
+    exact (le_antisymm h6 h5).symm
+  · rw [heq] at h5
+    exact absurd (lt_of_le_of_lt (le_trans h5 (hδ n)) hBA) (lt_irrefl _)
+
+/-- Backward half of the leading-index set equality. -/
+private theorem valued_eq_teichCoeffAr_backward
+    {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {x y : hatK p F hρ0 hρ1}
+    (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hy : y ∈ ArSub p F ϖ hρ0 hρ1)
+    (hvy : Valued.v y = Valued.v x)
+    (hBA : max (Valued.v (x - y)) (ρ * Valued.v x) < Valued.v x)
+    (hδ : ∀ n, ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+        - teichCoeffAr p F ϖ hρ0 hρ1 y n)
+      ≤ max (Valued.v (x - y)) (ρ * Valued.v x)) (n : ℕ)
+    (hay : Valued.v y = ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)) :
+    Valued.v x = ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n) := by
+  have hyle : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)
+      ≤ max (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
+        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+          - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
+    have h4 : teichCoeffAr p F ϖ hρ0 hρ1 y n
+        = teichCoeffAr p F ϖ hρ0 hρ1 x n - (teichCoeffAr p F ϖ hρ0 hρ1 x n
+          - teichCoeffAr p F ϖ hρ0 hρ1 y n) := by
+      ring
+    conv_lhs => rw [h4]
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (Valuation.map_sub _ _ _) zero_le) ?_
+    exact (nnreal_mul_max _ _ _).le
+  have h5 : Valued.v x ≤ max
+      (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
+      (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+        - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
+    rw [← hvy]
+    exact hay ▸ hyle
+  have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+      ≤ Valued.v x := gaussTerm_teichCoeffAr_le p F ϖ hx n
+  rcases max_cases
+    (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
+    (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+      - teichCoeffAr p F ϖ hρ0 hρ1 y n)) with ⟨heq, -⟩ | ⟨heq, -⟩
+  · rw [heq] at h5
+    exact (le_antisymm h6 h5).symm
+  · rw [heq] at h5
+    exact absurd (lt_of_le_of_lt (le_trans h5 (hδ n)) hBA) (lt_irrefl _)
+
 /-- **Remark 2.7 (leading-support stability)**: a perturbation strictly below the
 value changes no radius-`ρ` attaining index — the degrees agree. -/
 theorem degAr_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
@@ -723,65 +804,8 @@ theorem degAr_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     ext n
     simp only [Set.mem_setOf_eq]
     constructor
-    · intro hax
-      have hxle : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
-          ≤ max (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
-            (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
-              - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
-        have h4 : teichCoeffAr p F ϖ hρ0 hρ1 x n
-            = teichCoeffAr p F ϖ hρ0 hρ1 y n + (teichCoeffAr p F ϖ hρ0 hρ1 x n
-              - teichCoeffAr p F ϖ hρ0 hρ1 y n) := by
-          ring
-        conv_lhs => rw [h4]
-        refine le_trans (mul_le_mul_of_nonneg_left
-          (Valuation.map_add _ _ _) zero_le) ?_
-        exact (nnreal_mul_max _ _ _).le
-      have h5 : Valued.v x ≤ max
-          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
-          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
-            - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := hax ▸ hxle
-      have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)
-          ≤ Valued.v x := by
-        rw [← hvy]
-        exact gaussTerm_teichCoeffAr_le p F ϖ hy n
-      rcases max_cases
-        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
-        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
-          - teichCoeffAr p F ϖ hρ0 hρ1 y n)) with ⟨heq, -⟩ | ⟨heq, -⟩
-      · rw [heq] at h5
-        rw [hvy]
-        exact (le_antisymm h6 h5).symm
-      · rw [heq] at h5
-        exact absurd (lt_of_le_of_lt (le_trans h5 (hδ n)) hBA) (lt_irrefl _)
-    · intro hay
-      have hyle : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)
-          ≤ max (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
-            (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
-              - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
-        have h4 : teichCoeffAr p F ϖ hρ0 hρ1 y n
-            = teichCoeffAr p F ϖ hρ0 hρ1 x n - (teichCoeffAr p F ϖ hρ0 hρ1 x n
-              - teichCoeffAr p F ϖ hρ0 hρ1 y n) := by
-          ring
-        conv_lhs => rw [h4]
-        refine le_trans (mul_le_mul_of_nonneg_left
-          (Valuation.map_sub _ _ _) zero_le) ?_
-        exact (nnreal_mul_max _ _ _).le
-      have h5 : Valued.v x ≤ max
-          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
-          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
-            - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
-        rw [← hvy]
-        exact hay ▸ hyle
-      have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
-          ≤ Valued.v x := gaussTerm_teichCoeffAr_le p F ϖ hx n
-      rcases max_cases
-        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
-        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
-          - teichCoeffAr p F ϖ hρ0 hρ1 y n)) with ⟨heq, -⟩ | ⟨heq, -⟩
-      · rw [heq] at h5
-        exact (le_antisymm h6 h5).symm
-      · rw [heq] at h5
-        exact absurd (lt_of_le_of_lt (le_trans h5 (hδ n)) hBA) (lt_irrefl _)
+    · exact valued_eq_teichCoeffAr_forward p F ϖ hx hy hvy hBA hδ n
+    · exact valued_eq_teichCoeffAr_backward p F ϖ hx hy hvy hBA hδ n
   rw [degAr, degAr, hsets]
 
 /-- The `Aloc` partial sums of the double series `Σₙ pⁿ·Σ_{i+j=n}[aᵢbⱼ]` (Kedlaya's
