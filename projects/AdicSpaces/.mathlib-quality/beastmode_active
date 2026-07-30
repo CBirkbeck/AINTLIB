@@ -1,1 +1,1 @@
-FOCUS: fill restrictedRenameEquiv (kwToTate-pattern both directions, rename_rename+rename_id comp laws) then restrictedSumEquiv (sumAlgEquiv + sup-norm gauss transport, norm_eq/gaussNorm) then comap_headToQ tower assembly
+FOCUS: Fubini leg 2 restrictedSumEquiv — sumAlgEquiv underlying + gauss both ways via norm_eq/gaussNorm sup-argument (coeff_sumToIter law); then P K (k+m) tower into comap_headToQ_isMaximal

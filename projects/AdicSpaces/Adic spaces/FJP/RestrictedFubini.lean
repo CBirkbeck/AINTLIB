@@ -91,6 +91,117 @@ noncomputable def restrictedRenameEquiv {σ τ : Type*} (e : σ ≃ τ) :
       rw [coeff_rename_equiv e.symm, Equiv.symm_symm]
       exact MvPowerSeries.coeff_embDomain_rename e.toEmbedding F.1 t))
 
+/-- Generic radius-one decay criterion (any normed coefficient ring). -/
+theorem isRestrictedGauss_one_iff' {R : Type*} [NormedRing R] {σ : Type*}
+    (f : MvPowerSeries σ R) :
+    MvPowerSeries.IsRestrictedGauss (fun _ : σ => (1 : ℝ)) f ↔
+      Filter.Tendsto (fun t : σ →₀ ℕ => MvPowerSeries.coeff t f)
+        Filter.cofinite (nhds 0) := by
+  have hp : (fun t : σ →₀ ℕ =>
+      ‖MvPowerSeries.coeff t f‖ * t.prod ((fun _ : σ => (1 : ℝ)) · ^ ·)) =
+      fun t : σ →₀ ℕ => ‖MvPowerSeries.coeff t f‖ := by
+    funext t
+    rw [show t.prod ((fun _ : σ => (1 : ℝ)) · ^ ·) = 1 from by
+      simp [Finsupp.prod], mul_one]
+  rw [MvPowerSeries.IsRestrictedGauss, hp,
+    ← tendsto_zero_iff_norm_tendsto_zero]
+
+/-- The underlying coefficient inclusion of the Tate algebra. -/
+noncomputable def pValHom (m : ℕ) : P K m →+* MvPowerSeries (Fin m) K where
+  toFun x := x.1
+  map_one' := rfl
+  map_mul' _ _ := rfl
+  map_zero' := rfl
+  map_add' _ _ := rfl
+
+theorem pValHom_injective (m : ℕ) :
+    Function.Injective (pValHom (K := K) m) :=
+  fun _ _ h => Subtype.ext h
+
+/-- The forward sum transport: outer series with restricted coefficients. -/
+noncomputable def sumToRestrictedFun (m k : ℕ)
+    (F : MvPowerSeries.Restricted K (fun _ : Fin k ⊕ Fin m => (1 : ℝ))) :
+    MvPowerSeries (Fin k) (P K m) := fun y =>
+  ⟨MvPowerSeries.coeff y
+    (MvPowerSeries.sumToIter (Fin k) (Fin m) K F.1), by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    rw [isRestrictedGauss_one_iff']
+    have hF := (isRestrictedGauss_one_iff' F.1).mp F.2
+    have hinj : Function.Injective
+        (fun x : Fin m →₀ ℕ => Finsupp.sumElim y x) := by
+      intro x₁ x₂ h
+      have h2 := congrArg (fun u : Fin k ⊕ Fin m →₀ ℕ =>
+        Finsupp.comapDomain Sum.inr u Sum.inr_injective.injOn) h
+      simpa [Finsupp.comapDomain_inr_sumElim] using h2
+    have hpt : ∀ x : Fin m →₀ ℕ,
+        MvPowerSeries.coeff x (MvPowerSeries.coeff y
+          (MvPowerSeries.sumToIter (Fin k) (Fin m) K F.1)) =
+        MvPowerSeries.coeff (Finsupp.sumElim y x) F.1 := fun x =>
+      MvPowerSeries.coeff_sumToIter y x F.1
+    rw [funext hpt]
+    exact hF.comp hinj.tendsto_cofinite⟩
+
+set_option maxHeartbeats 800000 in
+/-- The forward sum transport has restricted coefficients decaying in the
+sup norm. -/
+theorem isRestrictedGauss_sumToRestrictedFun (m k : ℕ)
+    (F : MvPowerSeries.Restricted K (fun _ : Fin k ⊕ Fin m => (1 : ℝ))) :
+    MvPowerSeries.IsRestrictedGauss (fun _ : Fin k => (1 : ℝ))
+      (sumToRestrictedFun m k F) := by
+  rw [isRestrictedGauss_one_iff']
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  rw [Filter.mem_cofinite]
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  have hFdecay := (isRestrictedGauss_one_iff' F.1).mp F.2
+  have hS : {p : Fin k ⊕ Fin m →₀ ℕ |
+      ¬ ‖MvPowerSeries.coeff p F.1‖ < ε / 2}.Finite := by
+    have h2 := Filter.tendsto_def.mp hFdecay (Metric.ball 0 (ε / 2))
+      (Metric.ball_mem_nhds 0 (by positivity))
+    rw [Filter.mem_cofinite] at h2
+    refine h2.subset ?_
+    intro p hp
+    simp only [Set.mem_compl_iff, Set.mem_preimage, Metric.mem_ball,
+      dist_zero_right] at hp ⊢
+    exact hp
+  refine Set.Finite.subset (Set.Finite.image
+    (fun p : Fin k ⊕ Fin m →₀ ℕ =>
+      Finsupp.comapDomain Sum.inl p Sum.inl_injective.injOn) hS) ?_
+  intro y hy
+  simp only [Set.mem_compl_iff, Set.mem_preimage] at hy
+  have hnorm : ε ≤
+      ‖MvPowerSeries.coeff y (sumToRestrictedFun m k F)‖ := by
+    by_contra hlt
+    push_neg at hlt
+    refine hy (hball ?_)
+    simpa [Metric.mem_ball, dist_zero_right] using hlt
+  by_cases hex : ∃ x : Fin m →₀ ℕ, ε / 2 ≤
+      ‖MvPowerSeries.coeff (Finsupp.sumElim y x) F.1‖
+  · obtain ⟨x, hx⟩ := hex
+    refine ⟨Finsupp.sumElim y x, ?_, ?_⟩
+    · simp only [Set.mem_setOf_eq]
+      exact not_lt.mpr hx
+    · show Finsupp.comapDomain Sum.inl (Finsupp.sumElim y x)
+        Sum.inl_injective.injOn = y
+      exact Finsupp.comapDomain_inl_sumElim y x
+  · push_neg at hex
+    exfalso
+    rw [MvRestricted.norm_eq] at hnorm
+    have hbound : MvPowerSeries.gaussNorm (norm : K → ℝ)
+        (fun _ : Fin m => (1 : ℝ))
+        (MvPowerSeries.coeff y (sumToRestrictedFun m k F)).1 ≤ ε / 2 := by
+      rw [MvPowerSeries.gaussNorm]
+      refine Real.iSup_le (fun x => ?_) (by positivity)
+      have h3 : (x.prod ((fun _ : Fin m => (1 : ℝ)) · ^ ·)) = 1 := by
+        simp [Finsupp.prod]
+      rw [h3, mul_one]
+      have h4 : MvPowerSeries.coeff x
+          (MvPowerSeries.coeff y (sumToRestrictedFun m k F)).1 =
+          MvPowerSeries.coeff (Finsupp.sumElim y x) F.1 :=
+        MvPowerSeries.coeff_sumToIter y x F.1
+      rw [h4]
+      exact (hex x).le
+    linarith
+
 /-- **The restricted sum–iterate transport**: restricted series in a sum of
 variables are restricted series with restricted coefficients. -/
 noncomputable def restrictedSumEquiv (m k : ℕ) :
