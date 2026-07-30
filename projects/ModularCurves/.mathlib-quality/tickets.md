@@ -29700,3 +29700,59 @@ LowDegree replacement for finite/projective + `rankAtStalk` = 1 via
 `exists_sectionPoleSheafPowerOne_away_baseChange_basis_of_localized_basis_of_isProper`
 (needs the IsIso just proved at t := Spec (Away b) ≫ isoSpec.inv — NOTE that t's shape:
 compose with S.isoSpec.inv, matching the producer's `let t`), then [FLW-6] assembly.
+
+### [FLW-2b] DESIGN LOCKED (2026-07-30): produce (bOne, hbOne) INSIDE the package proof
+Extend `exists_mem_basicOpen_pointedIso_orderedBaseCech_package` with a final conjunct
+`∃ bOne : Basis (Fin 1) Γ(T') (baseSections π' MT), bOne 0 = sectionPoleSheafPowerOneSection
+π' z' hz'`, via `Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero`
+(PrescribedLocalizedBasis:231; needs [Finite] [Flat] + rankAtStalk = 1 at maximals +
+fiber-image of the canonical section ≠ 0 at maximals). Inputs, all in-scope in the proof:
+- Flat: baseSections = ker(D.d01) (baseSectionsIsoKernelOrderedBaseCechDifferential) +
+  `Module.Flat.ker_of_bounded_exact_at` (D flat/bounded/tail-exact ✓).
+- Finite: two-step through B_r := Localization.Away r (Noetherian!): C_Br := C_stage ⊗ B_r
+  is flat+bounded+tail-exact (the spread) with homology finite over B_r (stage
+  `orderedBaseCechHomologyFinite_of_isProper` + localization-finite) ⟹ ker(C_Br.d01)
+  finite (`HomologicalComplex.finite_kernel_zero_of_finite_homology`,
+  CochainComplexBoundedFlat:490); ker commutes along B_r → Γ(T')
+  (`kerBaseChangeComparison_bijective` flat-coker route) ⟹ baseSections π' MT ≃ Γ(T') ⊗
+  finite ⟹ finite.
+- rankAtStalk = 1: hker at A := κ(p) (my package-hker) + field kernel-finrank
+  (`sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank`, BaseCechHigher:360) +
+  rankAtStalk-vs-residue-finrank bridge for finite flat (mathlib name to hunt:
+  `Module.rankAtStalk_eq...residueField`?).
+- fiber ≠ 0: canonical section ↦ fibre-family canonical section under the comparison
+  (general analogue of `sectionPoleSheafPowerOne_projectiveClosed_baseSectionsBaseChange_eq`
+  — from `baseSectionsBaseChange..._one_tmul` + the pole-BC iso's OneSection-compat; grep
+  `OneSection` compat in PoleSheafPushforwardBaseChangeLinearEquiv (htargetRaw at :235?) and
+  PoleSheaf files) + field-level: a dim-1 space where the canonical section is a
+  basis/nonzero (hunt `OneSection` ne_zero/basis over fields — else derive from
+  `..._kernel_finrank` + the succ-quotient normalization).
+Then [FLW-2c] is UNNEEDED in away-form — bOne comes global-on-T'. FLW-6 consumes the
+package + Cartier producer directly.
+
+### [FLW-2b] ingredient confirmations (final, 2026-07-30):
+- `sectionPoleSheafPower_baseSectionsBaseChangeLinearEquivOfAppTopIso` + its OneSection
+  one-tmul lemma (PoleSheafPushforwardBaseChangeLinearEquiv:32-74) are GENERAL given
+  `[IsIso (pushforwardBC .appTop)]` — which [FLW-2a]'s new theorem supplies at ANY leg.
+- `sectionPoleSheafPowerOneSection_ne_zero` (PoleSheafPowerOneSection:49, needs
+  [Nonempty C-total]) for the κ(p)-fibre family ⟹ fiber-image ≠ 0 via the equiv.
+- rank: package-hker at κ(p) + `sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank`
+  (BaseCechHigher:360; check exact hypothesis shape) + finite-flat
+  rankAtStalk↔residue-finrank bridge (mathlib name to hunt).
+So: extend the package theorem with the bOne conjunct; then [FLW-6]:
+per-point: package (H¹ + bOne + family + eC) ∧ Cartier producer
+(`exists_affineBaseChange_sectionCartierGenerator` on the ORIGINAL family at s — its V
+intersects/shrinks with basicOpen a: run the package on the V-RESTRICTED family instead,
+or re-run Cartier on the package family at the point ⟨s,hmem⟩ — the latter is cleaner:
+its output V' ⊆ T' is a further affine shrink; the package data restricts along
+V'.ι via ANOTHER package application... NO — simplest: Cartier FIRST on (π,z) at s giving
+V ∋ s; then apply the WHOLE package theorem to the V-restricted family (affine V ✓, proper
+smooth fibrewise ✓ transported); Cartier data restricts from V to basicOpen-a-of-V along
+the ι (ker-comap + span-comap: `RelEffCartierDiv.ker_sectionBaseChange` +
+`ideal_comap_affineOpens_span` — both used inside the Cartier producer itself ✓ same moves);
+then `sectionPoleSheafPower_locallyWeierstrass_of_CartierGenerator` on the direct family;
+cross to the V-restricted original via eC + `LocallyWeierstrass.of_iso`; LocallyWeierstrass
+of (π,z) at s follows since its defining ∃ is on S-affine-opens (compose the two shrinks:
+basicOpen-a-of-V is an affine open of V hence of S — `IsAffineOpen` transitivity via
+`Scheme.Opens.ι`-image: an affine open of an open subscheme is an affine open of S).
+Then `locallyWeierstrass_iff_abstractConditions` assembly (landed pieces per handover §8.5).
