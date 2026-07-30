@@ -186,4 +186,134 @@ theorem pointIdeal_origin_eq_span :
 
 end OriginIdeal
 
+section Translation
+
+/-- The constants embedding into the Tate algebra. -/
+noncomputable def constP : L →+* P L m :=
+  (polyToP (E := L) (m := m)).comp
+    (MvPolynomial.C : L →+* MvPolynomial (Fin m) L)
+
+theorem norm_constP (c : L) : ‖constP (m := m) c‖ = ‖c‖ :=
+  norm_tP c (fun z => norm_mul c z)
+
+theorem constP_isometry : Isometry (constP (L := L) (m := m)) := by
+  refine Isometry.of_dist_eq fun a b => ?_
+  rw [dist_eq_norm, dist_eq_norm, ← map_sub]
+  exact norm_constP (a - b)
+
+/-- The unit ball of a seminormed commutative ring is bounded. -/
+theorem isBounded_closedUnitBall_ring {S : Type*} [SeminormedCommRing S] :
+    TopologicalRing.IsBounded {y : S | ‖y‖ ≤ 1} := by
+  intro U hU
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  refine ⟨Metric.ball 0 ε, Metric.ball_mem_nhds 0 hε, ?_⟩
+  rintro z ⟨s, hs, v, hv, rfl⟩
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right] at hv ⊢
+  calc ‖s * v‖ ≤ ‖s‖ * ‖v‖ := norm_mul_le s v
+    _ ≤ 1 * ‖v‖ := mul_le_mul_of_nonneg_right hs (norm_nonneg v)
+    _ = ‖v‖ := one_mul _
+    _ < ε := hv
+
+variable (x : Fin m → L) (hx : ∀ i, ‖x i‖ ≤ 1)
+
+/-- The translated generator `Xᵢ + xᵢ`. -/
+noncomputable def transGen (i : Fin m) : P L m :=
+  polyToP (MvPolynomial.X i + MvPolynomial.C (x i))
+
+include hx in
+/-- Monomials in the translated generators stay in the unit ball. -/
+theorem norm_transGen_prod_le (v : Fin m →₀ ℕ) :
+    ‖∏ i, transGen (m := m) x i ^ (v i)‖ ≤ 1 := by
+  have h1 : (∏ i, transGen (m := m) x i ^ (v i)) =
+      polyBall (E := L) (m := m)
+        (∏ i, (MvPolynomial.X i + MvPolynomial.C
+          (⟨x i, (FiniteJet.mem_unitBall_iff (E := L) (x i)).mpr (hx i)⟩ :
+            ↥(FiniteJet.unitBall L))) ^ (v i)) := by
+    rw [map_prod]
+    refine Finset.prod_congr rfl fun i _ => ?_
+    rw [map_pow]
+    refine congrArg (· ^ (v i)) ?_
+    rw [show polyBall (E := L) (m := m)
+        (MvPolynomial.X i + MvPolynomial.C
+          (⟨x i, (FiniteJet.mem_unitBall_iff (E := L) (x i)).mpr (hx i)⟩ :
+            ↥(FiniteJet.unitBall L))) =
+      polyToP (MvPolynomial.map (FiniteJet.unitBall L).subtype
+        (MvPolynomial.X i + MvPolynomial.C
+          (⟨x i, (FiniteJet.mem_unitBall_iff (E := L) (x i)).mpr (hx i)⟩ :
+            ↥(FiniteJet.unitBall L)))) from rfl]
+    rw [_root_.map_add, MvPolynomial.map_X, MvPolynomial.map_C]
+    rfl
+  rw [h1]
+  exact norm_polyBall_le_one _
+
+include hx in
+theorem isBounded_transGen_pow (i : Fin m) :
+    TopologicalRing.IsBounded
+      (Set.range (transGen (m := m) x i ^ · : ℕ → P L m)) := by
+  refine isBounded_closedUnitBall_ring.subset ?_
+  rintro _ ⟨n, rfl⟩
+  have h2 := norm_transGen_prod_le (m := m) x hx (Finsupp.single i n)
+  rw [Finset.prod_eq_single i (fun j _ hj => by
+      rw [Finsupp.single_apply, if_neg (fun h => hj h.symm), pow_zero])
+    (by simp)] at h2
+  rw [Finsupp.single_apply, if_pos rfl] at h2
+  exact h2
+
+/-- **The translation homomorphism** `F(X) ↦ F(X + x)`. -/
+noncomputable def transHom : P L m →+* P L m :=
+  (mvEvalHomBounded (constP (L := L) (m := m)) constP_isometry.continuous
+    (transGen (m := m) x) (isBounded_transGen_pow x hx)).comp
+    (toTopRestricted (m := m))
+
+/-- The translation acts on polynomials as polynomial translation. -/
+theorem transHom_polyToP (q : MvPolynomial (Fin m) L) :
+    transHom (m := m) x hx (polyToP q) =
+      polyToP (MvPolynomial.eval₂ MvPolynomial.C
+        (fun i => MvPolynomial.X i + MvPolynomial.C (x i)) q) := by
+  have hcomp : (transHom (m := m) x hx).comp
+      (polyToP (E := L) (m := m)) =
+      (polyToP (E := L) (m := m)).comp
+        (MvPolynomial.eval₂Hom
+          (MvPolynomial.C : L →+* MvPolynomial (Fin m) L)
+          (fun i => MvPolynomial.X i + MvPolynomial.C (x i))) := by
+    refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+    · show transHom (m := m) x hx (polyToP (MvPolynomial.C c)) =
+        polyToP (MvPolynomial.eval₂Hom _ _ (MvPolynomial.C c))
+      rw [MvPolynomial.eval₂Hom_C]
+      show mvEvalHomBounded (constP (L := L) (m := m))
+          constP_isometry.continuous (transGen (m := m) x)
+          (isBounded_transGen_pow x hx)
+          (toTopRestricted (m := m) (polyToP (MvPolynomial.C c))) =
+        constP (m := m) c
+      have h1 : toTopRestricted (m := m) (polyToP (MvPolynomial.C c)) =
+          algebraMap L ↥(restrictedMvPowerSeriesSubring m L) c := by
+        refine Subtype.ext ?_
+        show ((MvPolynomial.C c : MvPolynomial (Fin m) L) :
+          MvPowerSeries (Fin m) L) =
+          (MvPowerSeries.C c : MvPowerSeries (Fin m) L)
+        exact MvPolynomial.coe_C c
+      rw [h1]
+      exact mvEvalHomBounded_algebraMap _ _ _ _ c
+    · show transHom (m := m) x hx (polyToP (MvPolynomial.X i)) =
+        polyToP (MvPolynomial.eval₂Hom _ _ (MvPolynomial.X i))
+      rw [MvPolynomial.eval₂Hom_X']
+      show mvEvalHomBounded (constP (L := L) (m := m))
+          constP_isometry.continuous (transGen (m := m) x)
+          (isBounded_transGen_pow x hx)
+          (toTopRestricted (m := m) (polyToP (MvPolynomial.X i))) =
+        transGen (m := m) x i
+      have h1 : toTopRestricted (m := m) (polyToP (MvPolynomial.X i)) =
+          (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
+            ↥(restrictedMvPowerSeriesSubring m L)) := by
+        refine Subtype.ext ?_
+        show ((MvPolynomial.X i : MvPolynomial (Fin m) L) :
+          MvPowerSeries (Fin m) L) = MvPowerSeries.X i
+        exact MvPolynomial.coe_X i
+      rw [h1]
+      exact mvEvalHomBounded_X _ _ _ _ i
+  exact RingHom.congr_fun hcomp q
+
+end Translation
+
 end FiniteJet.GraphKoszul
