@@ -1269,3 +1269,49 @@ site works because the surrounding `.trans` chain forces the type. **−22 lines
 
 So the collapsible case is specifically **single-use, term-position, and either unapplied or applied
 to `_` with the type forced by context** — which is what the `hsplit` pair was. The rest stay.
+
+## Task 2 — canonical measure switched to CODE lines; join rule corrected
+
+**`scratchpad/scope_code.py` is now the canonical task-2 measure** (bodies over 50 lines of
+non-blank, non-`--` code). Current state:
+
+    over 50 CODE lines:  310   (2 sorry-bearing -> 308 in scope)
+    over 50 RAW lines:   349
+    of the 308, RAW <= 55 too (cheapest to act on):  19
+
+Worst files by code lines: WedhornCechAcyclicity 36 · RobbaPresentation 12 · Euclidean 12 ·
+FiniteJetGraphKoszul 8 · LaurentRefinementCore 8 · WittF 7 · Groebner 7 · ChartVObj 7.
+
+### The join rule was too strict — `:=` can sit on a continuation line
+
+`joinable.py` compared the value's indentation against the **`:=` line's** indentation. But the
+`:=` often sits on a *continuation* of the statement:
+
+```lean
+  have hcoeF : Filter.Tendsto
+      (UniformSpace.Completion.coe' : R → _) F (nhds xinv) :=      -- indent 6
+    Filter.tendsto_comap                                            -- indent 4
+```
+
+The value is *less* indented than the `:=` line yet plainly inside the construct, so the join is
+valid and was being rejected. Fixed by comparing against the **construct's base indent** — scan
+back to the first line indented less than the `:=` line. That reopened a pool I had declared empty
+last pass: **3 more proofs crossed** (7 joins).
+
+    ne_zero_of_unit_completion               SpvCompletionExtension   (3 joins)
+    iteratedPlus_forwardHom_comp_backwardHom LaurentRefinementCore    (1 join)
+    hC1_K / hC1_strong chain                 WedhornStrengthenedCompactExtraction (3 joins)
+
+Lesson: "the mechanical pool is empty" was a statement about my *detector*, not the code. Before
+concluding a pattern is exhausted, check whether the detector's guards are tighter than the
+language requires.
+
+### `lake env lean` limitation, sharper than recorded
+
+It fails outright when a dependency's olean **does not exist** (as opposed to being stale):
+
+    error: object file '…/WedhornCompactExtraction.olean' of module … does not exist
+
+That happens for modules outside the default build target, which a full `lake build` never
+produces. So the fast loop covers most files but not all; when it reports a missing-olean error,
+that is not a defect in the edit and the file needs a real `lake build <module>`.

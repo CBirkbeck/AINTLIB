@@ -106,16 +106,13 @@ theorem mk_S_D_of_C1Strong_and_compactness
     isCompact_preimage_rationalOpen_of_tate_pseudouniformizer
       P hA₀_le π hI hπ_tn hπ_unit hArch D.T D.s
   -- Lift the strengthened pointwise C1 hypothesis to a Subtype-indexed witness.
-  have hC1_K : ∀ w : K, ∃ f : A,
-      (w.1.1 : Spv A) ∈ rationalOpen (insert f C.base.T) C.base.s ∧
+  have hC1_K : ∀ w : K, ∃ f : A, (w.1.1 : Spv A) ∈ rationalOpen (insert f C.base.T) C.base.s ∧
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s ∧
-      ¬ (w.1.1 : Spv A).vle f 0 :=
-    fun w => hC1_strong w.1.1 w.2
+      ¬ (w.1.1 : Spv A).vle f 0 := fun w => hC1_strong w.1.1 w.2
   -- Choose a witness function g : K → A.
   let g : K → A := fun w => Classical.choose (hC1_K w)
   have hg_self : ∀ w : K, (w.1.1 : Spv A) ∈
-      rationalOpen (insert (g w) C.base.T) C.base.s :=
-    fun w => (Classical.choose_spec (hC1_K w)).1
+      rationalOpen (insert (g w) C.base.T) C.base.s := fun w => (Classical.choose_spec (hC1_K w)).1
   have hg_sub : ∀ w : K,
       rationalOpen (insert (g w) C.base.T) C.base.s ⊆ rationalOpen D.T D.s :=
     fun w => (Classical.choose_spec (hC1_K w)).2.1

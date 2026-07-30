@@ -1563,8 +1563,7 @@ theorem iteratedPlus_forwardHom_comp_backwardHom
       presheafValue (iteratedPlusDatum_B P D₀ f) :=
     (iteratedPlus_forwardHom P D₀ f).comp (iteratedPlus_backwardLocHom D₀ f hsub)
   let rhsHom : Localization.Away (iteratedPlusDatum_B P D₀ f).s →+*
-      presheafValue (iteratedPlusDatum_B P D₀ f) :=
-    (iteratedPlusDatum_B P D₀ f).coeRingHom
+      presheafValue (iteratedPlusDatum_B P D₀ f) := (iteratedPlusDatum_B P D₀ f).coeRingHom
   suffices h : lhsHom = rhsHom by
     have := congr_fun (congrArg DFunLike.coe h) y
     change lhsHom y = rhsHom y
