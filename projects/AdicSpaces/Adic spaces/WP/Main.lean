@@ -8,6 +8,7 @@ import «Adic spaces».WP.Sheafy
 import «Adic spaces».WP.Chart
 import «Adic spaces».WP.Reduced
 import «Adic spaces».WP.HeadReduced
+import «Adic spaces».WP.HeadReducedMaximal
 
 /-!
 # The rationally stably reduced example — headline endpoints ([WP] thm 6.2)
@@ -98,7 +99,7 @@ fully verified statement until those land). -/
 theorem weightedParity_chainReduced_unconditional (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) (n : ℕ) :
     ChainReduced (WPAid K) n :=
-  chainReduced_WPA (headLocsReduced idWeight ϖ hK₀) ϖ hK₀ n
+  chainReduced_WPA (headLocsReduced' idWeight ϖ hK₀) ϖ hK₀ n
 
 variable {K} in
 /-- [WP] thm 6.2 (4): the chart `ℬ = 𝒜⟨W/ϖ⟩` is an integral domain. -/

@@ -1,1 +1,1 @@
-FOCUS: block B — headAwayEquiv DONE; next: head residue finiteness (evenSupport-Tate iso + T_N-tower) then wa_notMem assembly + D-rewire
+FOCUS: W-notMem DONE axiom-clean. Next: QHead contraction-maximality (evenSupportEquiv tower) for D-rewire; then maximal-only wa_mem statement + rewire; then deep leaf L3.b
