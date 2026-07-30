@@ -84,4 +84,18 @@ noncomputable def completedLocalLocalizationEquiv (M : Submonoid A)
 
 end LocalizationInvariance
 
+section CongrOfEq
+
+variable {A : Type*} [CommRing A]
+
+/-- Transport of completed locals along an equality of primes (the prime
+instances are proof-irrelevant). -/
+noncomputable def completedLocalCongrOfEq {𝔭 𝔮 : Ideal A}
+    [𝔭.IsPrime] [𝔮.IsPrime] (h : 𝔭 = 𝔮) :
+    completedLocal A 𝔭 ≃+* completedLocal A 𝔮 := by
+  subst h
+  exact RingEquiv.refl _
+
+end CongrOfEq
+
 end WeightedParity
