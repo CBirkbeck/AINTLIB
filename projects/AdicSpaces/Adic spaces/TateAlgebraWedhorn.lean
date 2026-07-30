@@ -181,8 +181,7 @@ This follows because the T-topology is induced from the product topology on
 `MvPowerSeries`, which has a nonarchimedean structure inherited from `A`. -/
 theorem tateTopologyT_nonarchimedean (f : A) :
     @NonarchimedeanRing ↥(TateAlgebra A) _ (tateTopologyT f) := by
-  letI : TopologicalSpace (MvPowerSeries (Fin 1) A) :=
-    WithPiTopology.instTopologicalSpace A
+  letI : TopologicalSpace (MvPowerSeries (Fin 1) A) := WithPiTopology.instTopologicalSpace A
   haveI : IsTopologicalRing (MvPowerSeries (Fin 1) A) :=
     WithPiTopology.instIsTopologicalRing (Fin 1) A
   letI : TopologicalSpace ↥(TateAlgebra A) := tateTopologyT f
