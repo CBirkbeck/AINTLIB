@@ -2238,3 +2238,36 @@ multi-line edits** — regexes over Lean blocks are hard to anchor and fail in w
 misread as "no such block".
 
 Running total: **251** (486 baseline → 290 pre-split → 274 post-split → 251).
+
+## Attempted and REVERTED: `RelativePieceKeystone.prop_8_30_basic_laurent_step_flat` (−20)
+
+`hT_pb` (24 lines) looked ideal: it opens `rw [hXbar, relativeRationalLocData_laurentNormalized_T …]`,
+i.e. it unfolds its own `set` immediately, which by the GaussNorm rule means `Xbar` is not a real
+dependency and the helper can be stated on the concrete datum. Four build iterations, all failing on
+the **same underlying issue**, so reverted (`git show HEAD:… > …`, rebuilt green at 3000 jobs).
+
+The chain, each step revealing the next:
+
+1. **Docstring insertion (4th occurrence).** Anchoring on `theorem prop_8_30_…` spliced the helper
+   *between* the theorem's docstring and the theorem → `unexpected token '/--'; expected 'lemma'`.
+   Fixed by walking back over the whole preamble to the docstring's opening. **The anchor for
+   inserting a declaration is never the `theorem` line — it is the start of its docstring.**
+2. `failed to synthesize DecidableEq (presheafValue E)` — `relativeRationalLocData_laurentNormalized`'s
+   `.T` is a `Finset.image`, and the enclosing proof's `classical` is what supplies the instance.
+   A helper has no such context.
+3. Adding `[DecidableEq (presheafValue E)]` (after `E` is bound — it cannot precede its own subject)
+   then gives **`synthesized type class instance is not definitionally equal to expression inferred by
+   typing rules`**: the instance baked into the datum by the caller's `classical` is
+   `Classical.decEq`, not an arbitrary bound instance, so the two `.T` terms do not match.
+4. `open scoped Classical in` before the declaration then fails to parse where a docstring already
+   sits between it and the theorem.
+
+**The real lesson, worth more than the −20:** a `set`-bound value whose *type* is built with
+`Finset.image` (or anything else needing `DecidableEq`) carries the ambient `classical` instance into
+its very definition. Such a block is **not** context-free even when it `rw`s its own binding away —
+the GaussNorm rule ("a block that unfolds its own `set` has no real dependency on it") holds only
+when the unfolded form needs no instances the enclosing proof supplied. **Check whether the target
+term requires `DecidableEq`/`Decidable` before classifying a block as zero-threading.**
+
+Doing this properly needs the helper to take the datum itself as a parameter (so the caller's
+instance travels with it) rather than reconstructing it — a different and larger refactor than a lift.
