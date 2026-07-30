@@ -291,4 +291,61 @@ theorem isReduced_adicCompletion_localization_tate
 
 end BlockA
 
+section NormalClosureInstantiation
+
+variable (ϖ : FiniteJetOver.Uniformizer K)
+variable [hdvr : IsDiscreteValuationRing 𝒪[K]]
+
+set_option maxHeartbeats 1600000 in
+include ϖ hdvr in
+/-- **Block A, instantiated at the normal closure of the residue field**:
+over a complete discretely-valued ultrametric base with noetherian unit
+ball, the completed local ring of the Tate algebra at ANY maximal ideal is
+reduced. -/
+theorem isReduced_adicCompletion_localization
+    (𝔮 : Ideal (P K m)) [h𝔮 : 𝔮.IsMaximal]
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) :
+    IsReduced (AdicCompletion
+      (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔮))
+      (Localization.AtPrime 𝔮)) := by
+  letI : Field (P K m ⧸ 𝔮) := Ideal.Quotient.field 𝔮
+  letI : Algebra K (P K m ⧸ 𝔮) :=
+    (constantsToResidue (m := m) 𝔮).toAlgebra
+  haveI hfd : Module.Finite K (P K m ⧸ 𝔮) :=
+    module_finite_residue (m := m) ϖ 𝔮 hK₀
+  letI algN : Algebra K
+      ↥(normalClosure K (P K m ⧸ 𝔮)
+        (AlgebraicClosure (P K m ⧸ 𝔮))) := inferInstance
+  haveI fdN : FiniteDimensional K
+      ↥(normalClosure K (P K m ⧸ 𝔮)
+        (AlgebraicClosure (P K m ⧸ 𝔮))) := inferInstance
+  haveI nrmN : Normal K
+      ↥(normalClosure K (P K m ⧸ 𝔮)
+        (AlgebraicClosure (P K m ⧸ 𝔮))) := inferInstance
+  letI nfN : NormedField
+      ↥(normalClosure K (P K m ⧸ 𝔮)
+        (AlgebraicClosure (P K m ⧸ 𝔮))) :=
+    extNormedField K _
+  haveI udN : IsUltrametricDist
+      ↥(normalClosure K (P K m ⧸ 𝔮)
+        (AlgebraicClosure (P K m ⧸ 𝔮))) :=
+    extUltrametric K _
+  haveI csN : CompleteSpace
+      ↥(normalClosure K (P K m ⧸ 𝔮)
+        (AlgebraicClosure (P K m ⧸ 𝔮))) :=
+    extCompleteSpace K _
+  exact @isReduced_adicCompletion_localization_tate K _ _ _
+    ↥(normalClosure K (P K m ⧸ 𝔮) (AlgebraicClosure (P K m ⧸ 𝔮)))
+    nfN udN csN algN fdN nrmN m
+    (fun c => @ext_norm_algebraMap K _ _ _
+      ↥(normalClosure K (P K m ⧸ 𝔮) (AlgebraicClosure (P K m ⧸ 𝔮)))
+      _ algN fdN c) 𝔮 h𝔮
+    (algebraMap (P K m ⧸ 𝔮) _)
+    (fun c => (IsScalarTower.algebraMap_apply K (P K m ⧸ 𝔮)
+      ↥(normalClosure K (P K m ⧸ 𝔮)
+        (AlgebraicClosure (P K m ⧸ 𝔮))) c).symm)
+    hfd (fun i => exists_monic_ball_relation_X (m := m) ϖ 𝔮 hK₀ i)
+
+end NormalClosureInstantiation
+
 end FiniteJet.GraphKoszul

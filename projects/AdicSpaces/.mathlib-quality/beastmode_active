@@ -1,1 +1,1 @@
-FOCUS: block A stage 3 — full assembly compiling (bi261xpf9); next: fix errors / commit / normalClosure corollary / blocks B-D
+FOCUS: block A DONE axiom-clean. Next: normalClosure instantiation corollary (probe order in hrw-decomposition.md), then blocks B (head localization) / C (L1 maximals) / D (headLocsReduced rewire)
