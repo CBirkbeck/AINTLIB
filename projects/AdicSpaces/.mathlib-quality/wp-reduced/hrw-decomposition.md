@@ -383,3 +383,31 @@ GENERIC — build them first in a new generic file (TateAlgebraNullstellensatz.l
 or split); leaves 2-5 are the T°-plumbing block; leaf 5's noetherianity of T°
 is the one leaf whose cost depends on the vendored argument's reusability —
 probe it early.
+
+## TATE LEAF execution state (2026-07-30 late)
+
+DONE sorry-free + axiom-clean + committed:
+- Leaves 1-11 COMPLETE ⇒ `module_finite_residue` (TateNullstellensatz.lean):
+  **the affinoid Nullstellensatz** — Module.Finite K (P K m ⧸ 𝔪), via integral
+  model + G-domain + topological Nakayama + K-scalar unit absorption.
+- Leaf 12 COMPLETE (SpectralExtension.lean + TateScalarExtension.lean):
+  spectral-norm package (extNormedField/extUltrametric/extCompleteSpace/
+  ext_norm_algebraMap + ext_norm_le_one_of_monic_poly — direct ultrametric
+  integrality bound, no minpoly descent) + P L m ≃ₗ[P K m] (ι → P K m)
+  (scalarExtensionEquiv via bounded coordinate functionals) + finite/free.
+- Leaf 13a COMPLETE (TatePointEval.lean): pointEval (mvEvalHomBounded ∘
+  toTopRestricted bridge), constants/X laws, pointIdeal maximal, residue ≅ L.
+- L1 ENGINE COMPLETE (FlatCompletion.lean): adicCompletionEquivOfFaithfullyFlat
+  (faithfully flat + level-1 surjective ⇒ all levels bijective ⇒ completions
+  iso). + AdicCompletion.congrLevel/congrPow (AdicNakayama.lean).
+
+REMAINING:
+- Leaf 13b: 𝔫_x = span(X_i − x_i) (division) + Taylor comparison ⇒
+  AdicCompletion (pointIdeal x) (P L m) is a DOMAIN. ChatGPT adjudication of
+  least-work shape pending (translation-to-origin vs direct division).
+- Leaf 14: instantiate FlatCompletion at P K m → P L m (need FaithfullyFlat
+  from free+nontrivial; level-1 surjectivity at 𝔪 → rationalized point;
+  𝔪-cofinality) ⇒ (P K m)^𝔪-adic ↪ ∏-of-domains form.
+- HRW-5(iii) semilocal decomposition; L1-specific leaves (graph flatness via
+  prop_8_30_flat_clean — conditional on central audit-pass-2 trio;
+  𝔪ₐB = 𝔪_B small lemma; level-1 graph evaluation).
