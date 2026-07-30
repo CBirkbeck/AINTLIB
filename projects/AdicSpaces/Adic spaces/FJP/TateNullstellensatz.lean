@@ -523,6 +523,139 @@ theorem module_finite_specialFibre (hK₀ : IsNoetherianRing (unitBall K)) :
     (SpecialFibre (m := m) ϖ 𝔪)).mpr
     (krullDimLE_zero_specialFibre (m := m) ϖ 𝔪 hK₀)
 
+/-- The unit-ball constants hom into the integral model. -/
+noncomputable def ballToModel : ↥(unitBall K) →+* IntegralModel (m := m) 𝔪 :=
+  (Ideal.Quotient.mk (ballContraction (m := m) 𝔪)).comp
+    ((polyBallRes (E := K) (m := m)).comp
+      (MvPolynomial.C : ↥(unitBall K) →+*
+        MvPolynomial (Fin m) ↥(unitBall K)))
+
+theorem ballToModel_piUnitBall :
+    ballToModel (m := m) 𝔪 (piUnitBall ϖ) = piBar (m := m) ϖ 𝔪 := rfl
+
+/-- **The scalar coherence**: the uniformizer-power submodules of the integral
+model over the unit ball are the powers of the reduced scaling ideal. -/
+theorem span_smul_top_model (n : ℕ) :
+    letI : Algebra ↥(unitBall K) (IntegralModel (m := m) 𝔪) :=
+      (ballToModel (m := m) 𝔪).toAlgebra
+    ((Ideal.span {piUnitBall ϖ}) ^ n • ⊤ :
+      Submodule ↥(unitBall K) (IntegralModel (m := m) 𝔪)) =
+    (((Ideal.span {piBar (m := m) ϖ 𝔪}) ^ n :
+      Ideal (IntegralModel (m := m) 𝔪))).restrictScalars ↥(unitBall K) := by
+  letI : Algebra ↥(unitBall K) (IntegralModel (m := m) 𝔪) :=
+    (ballToModel (m := m) 𝔪).toAlgebra
+  refine le_antisymm (Submodule.smul_le.mpr fun a ha x _ => ?_) fun x hx => ?_
+  · rw [Ideal.span_singleton_pow, Ideal.mem_span_singleton'] at ha
+    obtain ⟨c, hc⟩ := ha
+    rw [Submodule.restrictScalars_mem, Ideal.span_singleton_pow,
+      Ideal.mem_span_singleton']
+    refine ⟨ballToModel (m := m) 𝔪 c * x, ?_⟩
+    have h1 : a • x = ballToModel (m := m) 𝔪 a * x := rfl
+    rw [h1, ← hc, map_mul, map_pow, ballToModel_piUnitBall]
+    ring
+  · rw [Submodule.restrictScalars_mem, Ideal.span_singleton_pow,
+      Ideal.mem_span_singleton'] at hx
+    obtain ⟨y, hy⟩ := hx
+    rw [← hy]
+    have h2 : y * piBar (m := m) ϖ 𝔪 ^ n = (piUnitBall ϖ ^ n) • y := by
+      have h3 : (piUnitBall ϖ ^ n) • y =
+          ballToModel (m := m) 𝔪 (piUnitBall ϖ ^ n) * y := rfl
+      rw [h3, map_pow, ballToModel_piUnitBall]
+      ring
+    rw [h2]
+    exact Submodule.smul_mem_smul (Ideal.pow_mem_pow
+      (Ideal.mem_span_singleton_self _) n) Submodule.mem_top
+
+/-- **Leaf 11c: the integral model is uniformizer-adically Hausdorff** (Krull
+intersection in the noetherian domain). -/
+theorem isHausdorff_model (hK₀ : IsNoetherianRing (unitBall K)) :
+    letI : Algebra ↥(unitBall K) (IntegralModel (m := m) 𝔪) :=
+      (ballToModel (m := m) 𝔪).toAlgebra
+    IsHausdorff (Ideal.span {piUnitBall ϖ}) (IntegralModel (m := m) 𝔪) := by
+  letI : Algebra ↥(unitBall K) (IntegralModel (m := m) 𝔪) :=
+    (ballToModel (m := m) 𝔪).toAlgebra
+  haveI := isNoetherianRing_integralModel ϖ 𝔪 hK₀
+  constructor
+  intro x hx
+  have hall : ∀ n : ℕ, x ∈ ((Ideal.span {piBar (m := m) ϖ 𝔪}) ^ n :
+      Ideal (IntegralModel (m := m) 𝔪)) := by
+    intro n
+    have h1 := hx n
+    rw [SModEq.zero, span_smul_top_model (m := m) ϖ 𝔪 n,
+      Submodule.restrictScalars_mem] at h1
+    exact h1
+  have hne : (Ideal.span {piBar (m := m) ϖ 𝔪} :
+      Ideal (IntegralModel (m := m) 𝔪)) ≠ ⊤ := by
+    rw [Ne, Ideal.span_singleton_eq_top]
+    exact not_isUnit_piBar ϖ 𝔪
+  have hbot := Ideal.iInf_pow_eq_bot_of_isDomain
+    (I := Ideal.span {piBar (m := m) ϖ 𝔪}) hne
+  have hmem : x ∈ (⨅ n : ℕ, (Ideal.span {piBar (m := m) ϖ 𝔪}) ^ n :
+      Ideal (IntegralModel (m := m) 𝔪)) :=
+    Ideal.mem_iInf.mpr hall
+  rw [hbot] at hmem
+  simpa using hmem
+
+include ϖ in
+/-- **Leaf 11d: the integral model is a finite module over the unit ball**
+(topological Nakayama over the finite special fibre). -/
+theorem module_finite_integralModel
+    (hK₀ : IsNoetherianRing (unitBall K)) :
+    letI : Algebra ↥(unitBall K) (IntegralModel (m := m) 𝔪) :=
+      (ballToModel (m := m) 𝔪).toAlgebra
+    Module.Finite ↥(unitBall K) (IntegralModel (m := m) 𝔪) := by
+  letI : Algebra ↥(unitBall K) (IntegralModel (m := m) 𝔪) :=
+    (ballToModel (m := m) 𝔪).toAlgebra
+  haveI := isPrecomplete_span_piUnitBall ϖ
+  haveI := isHausdorff_model (m := m) ϖ 𝔪 hK₀
+  refine Module.Finite.of_finite_quotient_smul_top_of_isPrecomplete
+    (Ideal.span {piUnitBall ϖ}) ?_
+  -- identify the quotient with the special fibre as unit-ball modules
+  have hEq : ((Ideal.span {piUnitBall ϖ}) • ⊤ :
+      Submodule ↥(unitBall K) (IntegralModel (m := m) 𝔪)) =
+      (((Ideal.span {piBar (m := m) ϖ 𝔪}) :
+        Ideal (IntegralModel (m := m) 𝔪))).restrictScalars ↥(unitBall K) := by
+    have h4 := span_smul_top_model (m := m) ϖ 𝔪 1
+    rw [pow_one, pow_one] at h4
+    exact h4
+  let e1 := Submodule.quotEquivOfEq _ _ hEq
+  let e2 := Submodule.Quotient.restrictScalarsEquiv ↥(unitBall K)
+    ((Ideal.span {piBar (m := m) ϖ 𝔪}) :
+      Ideal (IntegralModel (m := m) 𝔪))
+  -- finiteness of the special fibre over the unit ball, elementwise
+  have hfin : Module.Finite ↥(unitBall K)
+      (IntegralModel (m := m) 𝔪 ⧸
+        ((Ideal.span {piBar (m := m) ϖ 𝔪}) :
+          Ideal (IntegralModel (m := m) 𝔪))) := by
+    haveI hfinK := module_finite_specialFibre (m := m) ϖ 𝔪 hK₀
+    -- pull generators: k-span-⊤ + k = unit-ball image ⇒ unit-ball span-⊤
+    letI : Algebra (ResidueK ϖ) (SpecialFibre (m := m) ϖ 𝔪) :=
+      ((fibreFromPoly (m := m) ϖ 𝔪).comp
+        (MvPolynomial.C : ResidueK ϖ →+* MvPolynomial (Fin m)
+          (ResidueK ϖ))).toAlgebra
+    obtain ⟨T, hT⟩ := hfinK.fg_top
+    refine ⟨⟨T, ?_⟩⟩
+    rw [eq_top_iff]
+    intro z _
+    have hz : z ∈ Submodule.span (ResidueK ϖ) (T : Set _) := by
+      rw [hT]; exact Submodule.mem_top
+    refine Submodule.span_induction ?_ ?_ ?_ ?_ hz
+    · intro t ht
+      exact Submodule.subset_span ht
+    · exact Submodule.zero_mem _
+    · intro a b _ _ ha hb
+      exact Submodule.add_mem _ ha hb
+    · intro c a _ ha
+      -- a k-scalar is the image of a unit-ball scalar
+      obtain ⟨d, hd⟩ := Ideal.Quotient.mk_surjective c
+      have hsc : c • a = d • a := by
+        show (algebraMap (ResidueK ϖ) (SpecialFibre (m := m) ϖ 𝔪) c) * a =
+          (algebraMap ↥(unitBall K) (SpecialFibre (m := m) ϖ 𝔪) d) * a
+        sorry
+      rw [hsc]
+      exact Submodule.smul_mem _ _ ha
+  exact Module.Finite.equiv (e1.trans e2).symm
+
 end Residue
 
 end FiniteJet.GraphKoszul
