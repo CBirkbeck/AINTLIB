@@ -1086,35 +1086,13 @@ theorem ringStalkMap_piYHom_germ (y : ↥(yTop p F ϖ))
       ⋙ CompleteTopCommRingCat.forgetToCommRingCat) V y hy
     ((Functor.whiskerRight (piYHom p F ϖ).c
       CompleteTopCommRingCat.forgetToCommRingCat).app (op V) t)
-  have hsplit : ∀ z : ToType (TopCat.Presheaf.stalk
-      ((curveSpace p F ϖ).presheaf
-        ⋙ CompleteTopCommRingCat.forgetToCommRingCat)
-      (ConcreteCategory.hom (piYHom p F ϖ).base y)),
-      (ConcreteCategory.hom
-        ((TopCat.Presheaf.stalkFunctor CommRingCat
-            (ConcreteCategory.hom (piYHom p F ϖ).base y)).map
-          (Functor.whiskerRight (piYHom p F ϖ).c
-            CompleteTopCommRingCat.forgetToCommRingCat)
-          ≫ TopCat.Presheaf.stalkPushforward CommRingCat
-              (piYHom p F ϖ).base
-              ((yPresheafedSpace p F ϖ).presheaf
-                ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y)) z
-      = (ConcreteCategory.hom (TopCat.Presheaf.stalkPushforward CommRingCat
-          (piYHom p F ϖ).base
-          ((yPresheafedSpace p F ϖ).presheaf
-            ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y))
-        ((ConcreteCategory.hom ((TopCat.Presheaf.stalkFunctor CommRingCat
-            (ConcreteCategory.hom (piYHom p F ϖ).base y)).map
-          (Functor.whiskerRight (piYHom p F ϖ).c
-            CompleteTopCommRingCat.forgetToCommRingCat))) z) :=
-    fun z => rfl
   exact (congrArg (fun h => (ConcreteCategory.hom h)
       ((ConcreteCategory.hom (TopCat.Presheaf.germ
         ((curveSpace p F ϖ).presheaf
           ⋙ CompleteTopCommRingCat.forgetToCommRingCat) V
         (ConcreteCategory.hom (piYHom p F ϖ).base y) hy)) t))
       hunfold).trans
-    ((hsplit _).trans ((congrArg (ConcreteCategory.hom
+    (rfl.trans ((congrArg (ConcreteCategory.hom
       (TopCat.Presheaf.stalkPushforward CommRingCat (piYHom p F ϖ).base
         ((yPresheafedSpace p F ϖ).presheaf
           ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y)) h1).trans h2))

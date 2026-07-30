@@ -1220,3 +1220,52 @@ stale, so it is only trustworthy right after a green build.)
 
 Two of the joined lines end in `by`, which moves where the tactic block's anchor line sits; that
 was the specific thing worth checking, and it typechecked.
+
+## SCOPE FINDING: 39 of the "over-50" proofs are over only because of COMMENTS
+
+`scope2.py` counts raw body lines, so documentation counts as proof length. Measuring code lines
+(non-blank, not starting `--`) separately:
+
+    over-50 by raw body lines:            351
+    of those, <= 50 lines of CODE:         39
+    TRUE denominator (code > 50):         312
+
+    total comment+blank lines inside over-50 proofs: 3288
+
+The extreme case is `isSheafy_ofStronglyNoetherianTate_flat` (StructureSheaf.lean): **110 raw
+lines, 8 of code, 102 of comment**. Others: `tateAcyclicity` 62/9, `relativeRationalLocData_hopen_proof`
+85/26, `idealOfDef_pow_val_isClosed` 81/30.
+
+"Decomposing" those means either deleting documentation — which `/cleanup` explicitly forbids (the
+no-comments-in-proofs rule was *reversed* after maintainer feedback) — or splitting an 8-line proof
+into two 4-line proofs, which is absurd. So the engineering call: **these 39 are not task-2 work.**
+The bar is about proof complexity, and a proof with 8 lines of code is not complex. Task 2's real
+target is the 312 with more than 50 lines of code, and progress should be quoted against that.
+
+## Task 2 — the `rfl`-`have` anti-pattern
+
+`ringStalkMap_piYHom_germ` / `ringStalkMap_yFrob_germ` (a mirror pair) each opened with
+
+```lean
+have hsplit : ∀ z : ToType (…), <22 lines of type> := fun z => rfl
+```
+
+used exactly once, as `(hsplit _)`. The statement is pure noise: it exists only to *name* a
+definitional equality that `rfl` proves in place. Deleting the block and writing `rfl` at the use
+site works because the surrounding `.trans` chain forces the type. **−22 lines each; both proofs
+52 → 30.** Over-50 count 351 → 349.
+
+### Survey of the same pattern tree-wide, and why most of it does not collapse
+
+139 `have` blocks of ≥4 lines have `rfl` (or `fun x => rfl`) as their entire proof, totalling
+**1252 lines**. Of those, 35 are single-use (286 lines), and they split:
+
+* **19 are used inside `rw [h]` / `simp only [h]`** (137 lines) — these cannot become bare `rfl`.
+  Rewriting is *syntactic*: it fires on the stated equation even though both sides are defeq, so
+  the statement is load-bearing there.
+* **16 are used in term position** (149 lines) — but 12 of those are *applied* (`hchase (D₀.s * q)`,
+  `hclass₁ p hp`, `hmerge (…)`): an application of a `∀`-statement cannot collapse to bare `rfl`,
+  because the argument has nowhere to go.
+
+So the collapsible case is specifically **single-use, term-position, and either unapplied or applied
+to `_` with the type forced by context** — which is what the `hsplit` pair was. The rest stay.
