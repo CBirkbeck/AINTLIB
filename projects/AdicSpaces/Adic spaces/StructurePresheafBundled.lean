@@ -673,6 +673,41 @@ theorem structurePresheaf_isSheafOfTopologicalRings_iff :
         _ = limitRestrict hVeq.le (g₀ t) := hstep
   · exact structurePresheaf_isSheafOfTopologicalRings A
 
+variable (A) in
+/-- **The standard formulation, over `TopCommRingCat`**: the public structure
+presheaf, pushed along the forgetful functor into the category of plain topological
+commutative rings, satisfies mathlib's categorical sheaf condition **iff** the pair
+is sheafy. The categorical condition tests `Hom(E, −)`-gluing along the objects of
+the value category; over `TopCommRingCat` those are exactly Wedhorn's arbitrary
+topological test rings (Remark 8.20), so — unlike the `CompleteTopCommRingCat`-valued
+condition, where only the forward implication `structurePresheaf_isSheaf` is
+available — this is an equivalence. -/
+theorem structurePresheaf_forgetToTopCommRingCat_isSheaf_iff :
+    TopCat.Presheaf.IsSheaf
+        (structurePresheaf A ⋙ CompleteTopCommRingCat.forgetToTopCommRingCat) ↔
+      IsLimitSheaf A :=
+  (TopCat.Presheaf.isSheafOfTopologicalRings_iff_forgetToTopCommRingCat_isSheaf
+        (structurePresheaf A)).symm.trans
+    (structurePresheaf_isSheafOfTopologicalRings_iff A)
+
+variable (A) in
+/-- **The finite rational-cover criterion is exactly mathlib's sheaf condition over
+`TopCommRingCat`** — the full chain endpoint
+`IsSheafy ↔ IsLimitSheaf ↔ IsSheafOfTopologicalRings ↔ categorical IsSheaf`:
+the project's rational-basis criterion `IsSheafy A` holds iff the bundled public
+structure presheaf, viewed in `TopCommRingCat` through the forgetful functor,
+satisfies mathlib's `IsSheaf`. -/
+theorem isSheafy_iff_structurePresheaf_forgetToTopCommRingCat_isSheaf
+    [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A] :
+    IsSheafy A ↔
+      TopCat.Presheaf.IsSheaf
+        (structurePresheaf A ⋙ CompleteTopCommRingCat.forgetToTopCommRingCat) :=
+  isSheafy_iff_isLimitSheaf.trans
+    (structurePresheaf_forgetToTopCommRingCat_isSheaf_iff A).symm
+
 /-! ### Affinoid and adic presentations (towards Definitions 8.21/8.22) -/
 
 /-- **A presentation of an affinoid adic space** (honest naming, P5 repair
