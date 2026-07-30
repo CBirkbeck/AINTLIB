@@ -489,3 +489,35 @@ REMAINING (the endgame, all planned):
 3. Rewire headLocsReduced: 𝔮-max-QHead ⇒ comap maximal (needs QHead residue
    finiteness: 6.38-presentation of presheafValue + quotient + lying-over
    descent) ⇒ invoke maximal-only L3/L1 versions.
+
+## Factor identification COMPLETE (2026-07-30, latest)
+
+TateWallFactors.lean sorry-free + axiom-clean (3246 green):
+- exists_eq_algebraMap_of_splits (root picking in domains),
+- mapP_constP / mapP_polyToP_X (base-change constant/variable laws),
+- norm_le_one_of_monic_poly_hext (generic hext ball bound),
+- constP_residue_surjective (residues of maximals over finite-residue
+  maximals are exactly L, via Normal.splits + root picking),
+- exists_pointIdeal_of_isMaximal_over (**the wall factors ARE point
+  ideals**: coordinates + ball bounds + translated-span identification).
+Also in TateTaylor.lean: pointIdeal_eq_span + eq_pointIdeal_of_isMaximal_of_span_le.
+Plus: mapLevelwise + mapLevelwise_injective + isReduced_of_levelwise_injective
+(SemilocalFibre.lean) — the reduced-transport engine.
+
+REMAINING (final assembly blocks):
+A. The Q-side reduced statement at maximal 𝔮 (chain assembly): compose
+   mapLevelwise families: Q⧸𝔮^r → (mapP levelMaps, injective by faithfully
+   flat free) → Q_L⧸(𝔮Q_L)^r → (fibreSplit-levelwise or direct product of
+   factor quotients) → per-factor Q_L⧸(pointIdeal)^r → (levelPointEquiv) →
+   MvPoly⧸J^r; target ∏ AdicCompletion (idealOfVars) (MvPolynomial L) reduced
+   (isDomain_adicCompletion_idealOfVars + Pi). Inputs to discharge at
+   instantiation: hint (integral-model monic relations for X-images — from
+   module_finite_integralModel/B-integrality), ψ + hψK (residue embedding into
+   the normal closure — normalClosure machinery), hfinq (module_finite_residue),
+   hext (ext_norm_algebraMap at the normalClosure letI package), lying-over
+   comaps (Ideal.exists_ideal_over_maximal / comap computations).
+B. head-side: localize P↪Q at max 𝔪, faithfully-flat levelwise injection +
+   fibreSplit; per-factor localization-composition to Q-maximals; feed A.
+C. L1 at maximals (FlatCompletion + graph fibre; 8.30-conditional).
+D. Rewire headLocsReduced (contraction maximality via QHead residue
+   finiteness — 6.38 presentation + module_finite_residue_of_finite_extension).
