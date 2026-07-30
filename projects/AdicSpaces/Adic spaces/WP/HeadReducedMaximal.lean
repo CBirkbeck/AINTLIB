@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».WP.HeadReducedNotMem
+import «Adic spaces».WP.HeadTResidue
 import «Adic spaces».FJP.CDVFDichotomy
 
 /-!
@@ -372,15 +373,141 @@ theorem head_completedLocal_reduced_of_isMaximal
   · exact head_completedLocal_reduced_of_isMaximal_of_wa_notMem
       w N ϖ hK₀ 𝔭 h𝔭 hW
 
-/-- **D-prep — contraction maximality** ([hrw-decomposition]): the
-contraction of a `QHead`-maximal to the head is maximal (residue finiteness
-through the `T_N⟨T⟩`-tower Nullstellensatz).  WIP frontier. -/
+set_option maxHeartbeats 1600000 in
+/-- **D-prep — contraction maximality**: the contraction of a
+`QHead`-maximal to the head is maximal (residue finiteness through the
+`T_N⟨T⟩`-tower Nullstellensatz and the restricted Fubini). -/
 theorem comap_headToQ_isMaximal (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
     (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
     (𝔮 : Ideal (QHead DH)) (h𝔮 : 𝔮.IsMaximal) :
     (𝔮.comap (headToQ DH)).IsMaximal := by
-  sorry
+  classical
+  haveI hdvr : IsDiscreteValuationRing 𝒪[K] :=
+    ϖ.isDiscreteValuationRing hK₀
+  -- move into the unfolded quotient ring once and for all
+  set 𝔮' : Ideal (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+      headGraphIdeal DH) := 𝔮 with h𝔮'def
+  have h𝔮'max : 𝔮'.IsMaximal := h𝔮
+  haveI := h𝔮'max
+  set 𝔮₀ : Ideal (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card) :=
+    𝔮'.comap (Ideal.Quotient.mk (headGraphIdeal DH)) with h𝔮₀def
+  haveI h𝔮₀max : 𝔮₀.IsMaximal :=
+    Ideal.comap_isMaximal_of_surjective _ Ideal.Quotient.mk_surjective
+  letI : Algebra K
+      (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸ 𝔮₀) :=
+    ((Ideal.Quotient.mk 𝔮₀).comp
+      (((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+        (m := DH.T.card)).comp MvPolynomial.C).comp
+        (constHead K w N))).toAlgebra
+  haveI hfinT : Module.Finite K
+      (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸ 𝔮₀) :=
+    module_finite_residue_headT w N DH.T.card ϖ hK₀ 𝔮₀
+  -- the residue rings agree
+  set φ : FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card →+*
+      ((FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+        headGraphIdeal DH) ⧸ 𝔮') :=
+    (Ideal.Quotient.mk 𝔮').comp
+      (Ideal.Quotient.mk (headGraphIdeal DH)) with hφdef
+  have hφsurj : Function.Surjective φ := by
+    rw [hφdef]
+    show Function.Surjective
+      (⇑(Ideal.Quotient.mk 𝔮') ∘ ⇑(Ideal.Quotient.mk (headGraphIdeal DH)))
+    exact Function.Surjective.comp Ideal.Quotient.mk_surjective
+      Ideal.Quotient.mk_surjective
+  have hker : RingHom.ker φ = 𝔮₀ := by
+    refine Ideal.ext fun x => ?_
+    constructor
+    · intro hx
+      rw [RingHom.mem_ker] at hx
+      have hx2 : Ideal.Quotient.mk 𝔮'
+          (Ideal.Quotient.mk (headGraphIdeal DH) x) = 0 := hx
+      rw [Ideal.Quotient.eq_zero_iff_mem] at hx2
+      rw [h𝔮₀def]
+      exact Ideal.mem_comap.mpr hx2
+    · intro hx
+      rw [h𝔮₀def, Ideal.mem_comap] at hx
+      rw [RingHom.mem_ker]
+      show Ideal.Quotient.mk 𝔮'
+        (Ideal.Quotient.mk (headGraphIdeal DH) x) = 0
+      rw [Ideal.Quotient.eq_zero_iff_mem]
+      exact hx
+  letI : Algebra K ((FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+      headGraphIdeal DH) ⧸ 𝔮') :=
+    ((Ideal.Quotient.mk 𝔮').comp
+      ((Ideal.Quotient.mk (headGraphIdeal DH)).comp
+        (((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+          (m := DH.T.card)).comp MvPolynomial.C).comp
+          (constHead K w N)))).toAlgebra
+  set E : (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸ 𝔮₀) ≃+*
+      ((FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+        headGraphIdeal DH) ⧸ 𝔮') :=
+    (Ideal.quotEquivOfEq hker.symm).trans
+      (RingHom.quotientKerEquivOfSurjective hφsurj) with hEdef
+  have hEc : ∀ c : K,
+      E (algebraMap K
+        (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸ 𝔮₀) c) =
+      algebraMap K ((FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+        headGraphIdeal DH) ⧸ 𝔮') c := by
+    intro c
+    show E (Ideal.Quotient.mk 𝔮₀
+      (FiniteJet.GraphKoszul.polyToP
+        (MvPolynomial.C (constHead K w N c)))) = _
+    rw [hEdef]
+    show (RingHom.quotientKerEquivOfSurjective hφsurj)
+      ((Ideal.quotEquivOfEq hker.symm)
+        (Ideal.Quotient.mk 𝔮₀ (FiniteJet.GraphKoszul.polyToP
+          (MvPolynomial.C (constHead K w N c))))) = _
+    rw [Ideal.quotEquivOfEq_mk,
+      RingHom.quotientKerEquivOfSurjective_apply_mk]
+    rfl
+  have hlin : ∀ (c : K)
+      (x : FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸ 𝔮₀),
+      E (c • x) = c • E x := by
+    intro c x
+    rw [Algebra.smul_def, Algebra.smul_def, map_mul, hEc]
+  haveI hfinQ : Module.Finite K
+      ((FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+        headGraphIdeal DH) ⧸ 𝔮') :=
+    Module.Finite.equiv
+      ({ toFun := ⇑E,
+         invFun := ⇑E.symm,
+         left_inv := E.left_inv,
+         right_inv := E.right_inv,
+         map_add' := fun a b => map_add E a b,
+         map_smul' := fun c x => by
+           rw [RingHom.id_apply]
+           exact hlin c x } :
+        (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸ 𝔮₀) ≃ₗ[K]
+          ((FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+            headGraphIdeal DH) ⧸ 𝔮'))
+  letI : Algebra K (WPHead K w N) := (constHead K w N).toAlgebra
+  letI : Algebra K (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+      headGraphIdeal DH) :=
+    ((Ideal.Quotient.mk (headGraphIdeal DH)).comp
+      (((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+        (m := DH.T.card)).comp MvPolynomial.C).comp
+        (constHead K w N))).toAlgebra
+  have hfinal : (𝔮'.comap ((Ideal.Quotient.mk (headGraphIdeal DH)).comp
+      (((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+        (m := DH.T.card)).comp MvPolynomial.C)))).IsMaximal := by
+    have h9 := FiniteJet.GraphKoszul.comap_isMaximal_of_finite_residue
+      (h𝔫 := h𝔮'max) (hfin := hfinQ)
+      ({ (Ideal.Quotient.mk (headGraphIdeal DH)).comp
+          (((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+            (m := DH.T.card)).comp MvPolynomial.C)) with
+         commutes' := fun c => rfl } :
+        WPHead K w N →ₐ[K]
+          (FiniteJet.GraphKoszul.P (WPHead K w N) DH.T.card ⧸
+            headGraphIdeal DH)) 𝔮'
+    exact h9
+  have hid : 𝔮.comap (headToQ DH) =
+      𝔮'.comap ((Ideal.Quotient.mk (headGraphIdeal DH)).comp
+        ((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+          (m := DH.T.card)).comp MvPolynomial.C)) :=
+    Ideal.ext fun x => Iff.rfl
+  rw [hid]
+  exact hfinal
 
 /-- **L4 through maximals**: the head-localization reducedness hypothesis,
 by the maximal-ideal route. -/
