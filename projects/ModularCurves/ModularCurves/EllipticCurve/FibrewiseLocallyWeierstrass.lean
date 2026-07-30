@@ -34,6 +34,27 @@ universe u
 
 namespace ModularCurves
 
+/-- **(chart lift)** A Weierstrass chart of the restriction of a pointed family to an
+affine open lifts to a Weierstrass chart of the family itself. Tools per the board
+`[FLW-6] chart-lift factorization`: `Scheme.Hom.isoImage` (+ `isoImage_hom_ι`),
+`Scheme.Hom.appIso`, `IsAffineOpen.image_of_isOpenImmersion`, `WeierstrassCurve.map`
+(elliptic instance), `projModelBaseChangeOf` + `isPullback_projModelBaseChangeOf`,
+`isoSpec_appLE_bridge`, and the `IsPullback.of_iso`/`isoPullback` choreography of
+`exists_pointedIso_direct_pullback`. -/
+private theorem lw_point_of_baseChange_affineOpen
+    {E S : Scheme.{u}} {π : E ⟶ S} {z : S ⟶ E} {hz : z ≫ π = 𝟙 S}
+    (W : S.affineOpens) {s : S} (hs : s ∈ W.1)
+    (hLW : LocallyWeierstrass (pullback.snd π W.1.ι)
+      (sectionBaseChange z hz W.1.ι) (sectionBaseChange_snd z hz W.1.ι)) :
+    ∃ (U : S.affineOpens) (_ : s ∈ U.1) (Wc : WeierstrassCurve Γ(S, U.1)),
+      Wc.IsElliptic ∧
+      ∃ e : pullback π U.1.ι ≅ projModel Wc,
+        e.hom ≫ projModelπ Wc = pullback.snd π U.1.ι ≫ U.2.isoSpec.hom ∧
+        (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e.hom =
+          projModelZero Wc := by
+  sorry
+
 /-- **(FLW-6, affine case)** A smooth proper fibrewise elliptic family over an affine
 base is locally Weierstrass. -/
 theorem FibrewiseElliptic.locallyWeierstrass_of_isAffine
@@ -50,7 +71,24 @@ theorem FibrewiseElliptic.locallyWeierstrass
     (hsm : SmoothOfRelativeDimension 1 π) (hproper : IsProper π)
     (h : FibrewiseElliptic π z hz) :
     LocallyWeierstrass π z hz := by
-  sorry
+  intro s
+  -- an affine open of the base around the point
+  obtain ⟨_, ⟨V, hVaff, rfl⟩, hsV, -⟩ :=
+    S.isBasis_affineOpens.exists_subset_of_mem_open (Set.mem_univ s)
+      (isOpen_univ (X := S))
+  let Vaff : S.affineOpens := ⟨V, hVaff⟩
+  haveI : IsAffine Vaff.1.toScheme := hVaff
+  haveI : IsProper (pullback.snd π Vaff.1.ι) :=
+    MorphismProperty.pullback_snd _ _ hproper
+  have hsmV : SmoothOfRelativeDimension 1 (pullback.snd π Vaff.1.ι) :=
+    (smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
+      (IsPullback.of_hasPullback π Vaff.1.ι) hsm
+  have hV : FibrewiseElliptic (pullback.snd π Vaff.1.ι)
+      (sectionBaseChange z hz Vaff.1.ι)
+      (sectionBaseChange_snd z hz Vaff.1.ι) :=
+    h.baseChange Vaff.1.ι
+  exact lw_point_of_baseChange_affineOpen Vaff hsV
+    (FibrewiseElliptic.locallyWeierstrass_of_isAffine hsmV inferInstance hV)
 
 /-- **(FLW final 2, handover §3)** A pointed family is locally Weierstrass exactly when
 it is smooth of relative dimension one, proper, and fibrewise elliptic. -/
