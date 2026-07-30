@@ -549,6 +549,44 @@ noncomputable def iteratedOverlap_forwardToCompletion
   (iteratedOverlapDatum_B P D₀ f hLocLift_B).coeRingHom.comp
     (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B)
 
+/-- The composite `iteratedOverlap_forwardLocHom_to_B ∘ algebraMap A` is continuous for the
+`B`-datum topology: it equals `algebraMap_B ∘ D₀.canonicalMap`, and both factors are
+continuous. -/
+private theorem iteratedOverlap_forwardLocHom_to_B_comp_algebraMap_continuous
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
+    (D₀ : RationalLocData A) [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
+    [LaurentNormalized D₀] (f : A)
+    (hLocLift_B : letI : IsTateRing (presheafValue D₀) :=
+        presheafValue_isTateRing P D₀
+      HasLocLiftPowerBounded (presheafValue D₀)) :
+    @Continuous _ _ _ (iteratedOverlapDatum_B P D₀ f hLocLift_B).topology
+      ((iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B).comp
+        (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s)))) := by
+  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  letI : TopologicalSpace (Localization.Away ((laurentOverlapDatum D₀ f).s)) :=
+    (laurentOverlapDatum D₀ f).topology
+  letI topB : TopologicalSpace
+      (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
+    (iteratedOverlapDatum_B P D₀ f hLocLift_B).topology
+  -- composite equals `algebraMap_B ∘ canonicalMap A`.
+  have heq : (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B).comp
+      (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s))) =
+      (algebraMap (presheafValue D₀)
+        (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s))).comp
+        D₀.canonicalMap := by
+    ext a
+    simp only [RingHom.comp_apply]
+    exact iteratedOverlap_forwardLocHom_to_B_algebraMap P D₀ f hLocLift_B a
+  rw [show ⇑((iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B).comp
+      (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s)))) =
+    ⇑((algebraMap (presheafValue D₀)
+        (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s))).comp
+        D₀.canonicalMap) from
+    congr_arg _ heq]
+  exact (algebraMap_continuous_loc (iteratedOverlapDatum_B P D₀ f hLocLift_B)).comp
+    (canonicalMap_continuous D₀)
+
 /-- Continuity of `iteratedOverlap_forwardToCompletion` from `(laurentOverlap).topology`
 to the completion. -/
 theorem iteratedOverlap_forwardToCompletion_continuous
@@ -604,26 +642,7 @@ theorem iteratedOverlap_forwardToCompletion_continuous
       (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B) from
     hcoe.comp hlift
   -- Apply `locTopology_continuous_lift` to the forward loc hom.
-  have hf_alg : @Continuous _ _ _ (iteratedOverlapDatum_B P D₀ f hLocLift_B).topology
-      ((iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B).comp
-        (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s)))) := by
-    -- composite equals `algebraMap_B ∘ canonicalMap A`.
-    have heq : (iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B).comp
-        (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s))) =
-        (algebraMap (presheafValue D₀)
-          (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s))).comp
-          D₀.canonicalMap := by
-      ext a
-      simp only [RingHom.comp_apply]
-      exact iteratedOverlap_forwardLocHom_to_B_algebraMap P D₀ f hLocLift_B a
-    rw [show ⇑((iteratedOverlap_forwardLocHom_to_B P D₀ f hLocLift_B).comp
-        (algebraMap A (Localization.Away ((laurentOverlapDatum D₀ f).s)))) =
-      ⇑((algebraMap (presheafValue D₀)
-          (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s))).comp
-          D₀.canonicalMap) from
-      congr_arg _ heq]
-    exact (algebraMap_continuous_loc (iteratedOverlapDatum_B P D₀ f hLocLift_B)).comp
-      (canonicalMap_continuous D₀)
+  have hf_alg := iteratedOverlap_forwardLocHom_to_B_comp_algebraMap_continuous P D₀ f hLocLift_B
   exact locTopology_continuous_lift (laurentOverlapDatum D₀ f).P
     (laurentOverlapDatum D₀ f).T (laurentOverlapDatum D₀ f).s
     (laurentOverlapDatum D₀ f).hopen

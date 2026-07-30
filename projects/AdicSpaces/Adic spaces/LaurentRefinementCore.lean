@@ -1128,6 +1128,41 @@ theorem iteratedPlus_forwardLocHom_generators_powerBounded
     exact algebraMap_mem_locSubring _ _ _ hcoe_mem
 
 set_option backward.isDefEq.respectTransparency false in
+/-- The composite `iteratedPlus_forwardLocHom ∘ algebraMap A` is continuous for the
+`B`-datum topology: it equals `algebraMap_B ∘ D₀.canonicalMap`, and both factors are
+continuous. -/
+private theorem iteratedPlus_forwardLocHom_comp_algebraMap_continuous
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
+    (D₀ : RationalLocData A) [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
+    [LaurentNormalized D₀] (f : A) :
+    @Continuous _ _ _ (iteratedPlusDatum_B P D₀ f).topology
+      ((iteratedPlus_forwardLocHom D₀).comp
+        (algebraMap A (Localization.Away (laurentPlusDatum D₀ f).s))) := by
+  letI : TopologicalSpace (Localization.Away (laurentPlusDatum D₀ f).s) :=
+    (laurentPlusDatum D₀ f).topology
+  letI topB : TopologicalSpace (Localization.Away (1 : presheafValue D₀)) :=
+    (iteratedPlusDatum_B P D₀ f).topology
+  letI : TopologicalSpace (Localization.Away (iteratedPlusDatum_B P D₀ f).s) := topB
+  have heq : (iteratedPlus_forwardLocHom D₀).comp
+      (algebraMap A (Localization.Away (laurentPlusDatum D₀ f).s)) =
+      (algebraMap (presheafValue D₀)
+        (Localization.Away (iteratedPlusDatum_B P D₀ f).s)).comp D₀.canonicalMap := by
+    ext a
+    simp only [RingHom.comp_apply]
+    change iteratedPlus_forwardLocHom D₀
+        (algebraMap A (Localization.Away D₀.s) a) =
+      algebraMap (presheafValue D₀) (Localization.Away (1 : presheafValue D₀))
+        (D₀.canonicalMap a)
+    exact iteratedPlus_forwardLocHom_algebraMap D₀ a
+  rw [show ⇑((iteratedPlus_forwardLocHom D₀).comp
+      (algebraMap A (Localization.Away (laurentPlusDatum D₀ f).s))) =
+    ⇑((algebraMap (presheafValue D₀)
+        (Localization.Away (iteratedPlusDatum_B P D₀ f).s)).comp D₀.canonicalMap) from
+    congr_arg _ heq]
+  exact (algebraMap_continuous_loc (iteratedPlusDatum_B P D₀ f)).comp
+    (canonicalMap_continuous D₀)
+
 /-- Continuity of the forward uncompleted hom to the completion (plus branch). -/
 theorem iteratedPlus_forwardToCompletion_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1179,27 +1214,7 @@ theorem iteratedPlus_forwardToCompletion_continuous
   suffices hlift : @Continuous _ _ (laurentPlusDatum D₀ f).topology
       (iteratedPlusDatum_B P D₀ f).topology (iteratedPlus_forwardLocHom D₀) by
     exact hcoe.comp hlift
-  have hf_alg : @Continuous _ _ _ (iteratedPlusDatum_B P D₀ f).topology
-      ((iteratedPlus_forwardLocHom D₀).comp
-        (algebraMap A (Localization.Away (laurentPlusDatum D₀ f).s))) := by
-    have heq : (iteratedPlus_forwardLocHom D₀).comp
-        (algebraMap A (Localization.Away (laurentPlusDatum D₀ f).s)) =
-        (algebraMap (presheafValue D₀)
-          (Localization.Away (iteratedPlusDatum_B P D₀ f).s)).comp D₀.canonicalMap := by
-      ext a
-      simp only [RingHom.comp_apply]
-      change iteratedPlus_forwardLocHom D₀
-          (algebraMap A (Localization.Away D₀.s) a) =
-        algebraMap (presheafValue D₀) (Localization.Away (1 : presheafValue D₀))
-          (D₀.canonicalMap a)
-      exact iteratedPlus_forwardLocHom_algebraMap D₀ a
-    rw [show ⇑((iteratedPlus_forwardLocHom D₀).comp
-        (algebraMap A (Localization.Away (laurentPlusDatum D₀ f).s))) =
-      ⇑((algebraMap (presheafValue D₀)
-          (Localization.Away (iteratedPlusDatum_B P D₀ f).s)).comp D₀.canonicalMap) from
-      congr_arg _ heq]
-    exact (algebraMap_continuous_loc (iteratedPlusDatum_B P D₀ f)).comp
-      (canonicalMap_continuous D₀)
+  have hf_alg := iteratedPlus_forwardLocHom_comp_algebraMap_continuous P D₀ f
   have hpow := iteratedPlus_forwardLocHom_generators_powerBounded P D₀ f
   exact locTopology_continuous_lift (laurentPlusDatum D₀ f).P
     (laurentPlusDatum D₀ f).T (laurentPlusDatum D₀ f).s
