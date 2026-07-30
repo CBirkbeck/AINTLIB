@@ -1092,7 +1092,7 @@ theorem weilPairing_pair_order (K : Type) [Field K] [IsAlgClosed K]
     rw [hto, pow_mul, hpow, one_pow]
   have hzero : (d : ℤ) • Q' = 0 := by
     have hzp : (d : ℤ) • Q' = E.zeroPoint t := by
-      refine E.weilPairingEval_nondegenerate K t ((d : ℤ) • Q')
+      refine E.weilPairingEval_nondegenerate K hNK t ((d : ℤ) • Q')
         ((E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ) ?_
       intro y hy
       have hyz : (N : ℤ) • y = 0 :=
@@ -4666,7 +4666,12 @@ theorem strPt_pull_comb (D : GaloisRepData N) [Fact (1 < N)]
     rw [hb0, hb1, one_pow, one_pow, mul_one]
   -- nondegeneracy
   have hzp := (X'.curve.baseChange (strPr D X')).weilPairingEval_nondegenerate
-    kk t
+    kk
+    (by
+      haveI : CharZero kk := charZero_of_injective_algebraMap
+        (algebraMap ℚ kk).injective
+      exact Nat.cast_ne_zero.mpr (NeZero.ne N))
+    t
     (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
       (EllipticCurve.Point.asSection X'.curve (strPr D X')
         (strPt D str v)) -

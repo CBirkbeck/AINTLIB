@@ -105,14 +105,21 @@ theorem weilPairingEval_self {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
     (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
     (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by sorry
 
-/-- **(T-C3 = KM 2.8, fibrewise nondegeneracy)** On every geometric point of `S`, the
-pairing is nondegenerate: a torsion point pairing trivially with everything is zero.
-(The full perfectness — `E[N] ≅` Cartier dual of `E[N]` — needs the Cartier-duality
-vocabulary, API gap AG-CD; this fibrewise form is its faithful surrogate, sufficient for
-the `Y(ρ,p)` application, and is where the comparison with the HasseWeil field-level
-pairing enters — `T-C4`.) Source: KM 2.8; Silverman III.8.1(c). -/
+/-- **(T-C3 = KM 2.8, fibrewise nondegeneracy — `N` invertible)** On a geometric point of
+`S` where `N` is invertible, the pairing is nondegenerate: a torsion point pairing
+trivially with everything is zero.
+
+The hypothesis `(N : k) ≠ 0` is **necessary**: for `k = k̄` of characteristic `p ∣ N` and
+`E/k` ordinary, `E[p](k)` has a nonzero (étale) point while `μ_p(k) = {1}`, so every
+pairing *value* is `1` — pointwise nondegeneracy fails, and only the scheme-theoretic
+perfectness `E[N] ≅ E[N]^D` (Cartier duality, API gap AG-CD) survives. This fibrewise
+form is perfectness's faithful surrogate when `N` is invertible, sufficient for the
+`Y(ρ,p)` application over `ℚ`, and is where the comparison with the HasseWeil field-level
+pairing enters — `T-C4`. Source: KM 2.8; Silverman III.8.1(c) (which carries the same
+invertibility, via `char K ∤ N`). Statement fixed 2026-07-30 (adversarial review):
+added `hNk`. -/
 theorem weilPairingEval_nondegenerate {N : ℕ} [NeZero N]
-    (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S)
+    (k : Type u) [Field k] [IsAlgClosed k] (hNk : (N : k) ≠ 0) (t : Spec (.of k) ⟶ S)
     (x : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
     (h : ∀ (y : E.Point t) (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
       (E.weilPairingEval x y hx hy : Γ(Spec (.of k), ⊤)) = 1) :

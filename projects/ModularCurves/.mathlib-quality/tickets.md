@@ -29370,3 +29370,203 @@ then applies the landed proper-Cech residue spreading theorem to the exactness
 proved in the preceding claim. Its focused 4,582-job build, style checker,
 style linter, and full 9,535-job root build pass. Its axiom audit reports
 exactly `propext`, `Classical.choice`, and `Quot.sound`.
+---
+
+## [PLAN 2026-07-30] Two-prong endgame: DS4 Weil pairing (= Y(ρ̄)) + FLW comparison
+
+Recorded by `/develop --continue` 2026-07-30 on `dev/modular-curves` = `main` = `fa3c5e6ee`
+(post-bump, whole workspace green, 10685 jobs). Adversarially reviewed by ChatGPT 5.6-sol
+(max effort, repo-grounded); its corrections are integrated below and marked ⟦REV⟧.
+
+### Ground truth (SUPERSEDES the [YRHO-AUDIT] 62-decl table of 2026-07-29)
+
+Exact proof-term audit (environment metaprogram walking `getUsedConstantsAsSet` from
+`yRho_representable`, 86 418 constants visited): the **sorry cone is 9 declarations, all
+Weil pairing** —
+
+    EllipticCurve.weilPairing            (the DS4 def itself)
+    weilPairing_over
+    weilPairingEval_add_left
+    weilPairingEval_add_right
+    weilPairingEval_zsmul_right
+    weilPairingEval_nondegenerate
+    weilPairingEval_restrict
+    weilPairingEval_symplectic
+    weilPairing_torsionMapOfEllHom       (YRho.lean:2482)
+
+Axiom-clean already: `ModuliProblem.exists_representableBy_isAffine_baseChange_three` (the
+whole [ENGINE]), `naiveLevelThreeRepresentableBy`, `exists_levelThreeTorsorData`. The other
+91 sorry-bearing declarations in the project (NIsogeny 19, EndomorphismDegree 7,
+Factorization 6, GammaH 5, ExactOrder 4, Coarse 3, …) are **NOT load-bearing for Y(ρ̄)** —
+the import closure was an over-approximation. They stay boarded for their own goals
+(Y₀-towers, coarse spaces, irreducibility) but are OFF this critical path.
+`weilPairingEval_self` / `weilPairingEval_mul` are not in the cone but are registered DS4
+specs — proved in WP-REG with the same machinery. `yRho_geometricallyIrreducible` (:8740)
+is NOT in the cone (separate stream IRR).
+
+Consequence: **finishing Y(ρ̄) = constructing the Weil pairing.** Critical path:
+GAP-A-7 → GAP-A-4 → GAP-A-5 → GAP-A-6 → WP-κ → WP-C2 → WP-PIN → WP-REG/WP-BC.
+
+### ⟦REV⟧ Register statement fix EXECUTED 2026-07-30
+
+`weilPairingEval_nondegenerate` was **false as registered** (no characteristic
+restriction): for `k = k̄` of char `p ∣ N` and `E/k` ordinary, `E[p](k) ≠ 0` while
+`μ_p(k) = {1}`, so every pairing value is 1. Pointwise nondegeneracy needs `N` invertible;
+only scheme-theoretic perfectness `E[N] ≅ E[N]^D` (AG-CD) survives integrally. Fixed by
+adding `(hNk : (N : k) ≠ 0)`; both consumers (`RhoSections.lean:1095` — enclosing theorem
+already had `hNK`; `:4668` — `kk` is a `ℚ`-algebra, discharged by `CharZero`) repaired.
+Matches Silverman III.8.1(c)'s standing `char K ∤ N`.
+
+### Prong WP — the Weil pairing (DS4; GME 2.6.4 Chain C + KM 2.8, reviewed route)
+
+Sub-chain 1 (= GAP-A, recipes above, with ⟦REV⟧ strengthenings):
+
+- **[GAP-A-7]** the two `Picard/IdealModulePullback` sorries (`comap_ideal_eq_span_appLE`,
+  `sheafificationW_idealPullHom`). First — blocks all universal-pair transport.
+- **[GAP-A-4]** line ℓ and vertical v as rank-one kernels. ⟦REV⟧ hardenings:
+  (a) the restriction target is the **twisted** module `π_*(𝒪(3[0])|_D)`, i.e. the board's
+  `coker(idealModule D.ideal ⊗ 𝒪(3[0]) → 𝒪(3[0]))` — never `π_*𝒪_D` (no canonical
+  trivialization of `L|_D`, and none exists when `P` or `Q` meets `0`);
+  (b) prove **surjectivity** of `π_*𝒪(3[0]) → π_*(𝒪(3[0])|_D)` and local freeness rank 2
+  of the target: fibrewise `deg 𝒪(3[0])(−D) = 1 ⟹ H¹ = 0` (Riemann–Roch input already in
+  the fibre files) ⟹ fibrewise surjective; cohomology-and-base-change + Nakayama kills the
+  cokernel; the target locally free ⟹ the sequence locally split ⟹ **kernel invertible and
+  base-change compatible**. Same for `v` with `deg 𝒪(2[0])(−[R]) = 1`.
+  All degenerate configurations (P = Q tangent, P or Q = 0, P + Q = 0) are then uniform —
+  `D = [P] + [Q]` is the scheme-theoretic Cartier sum (P = Q gives the thickening `2[P]`,
+  kernel = first-order vanishing = tangency; P + Q = 0 gives v = the canonical section `1`
+  with zero-divisor `2[0]`, div(v) = 0 — consistent).
+- **[GAP-A-5]** the divisor identities. ⟦REV⟧ split into:
+  - **[GAP-A-5a]** ℓ is a *relative regular section* of `𝒪(3[0])`, so `Z(ℓ)` is a relative
+    effective Cartier divisor, finite locally free of degree 3, containing `[P]+[Q]`
+    (kernel condition); form the **residual** Cartier divisor `Z(ℓ) − ([P]+[Q])`, degree 1,
+    = the image of a unique section `R'` (Stacks 0B8V/0CPG shapes; the project's
+    `RelEffCartierDiv` sum/degree API).
+  - **[GAP-A-5b]** the identification `R' = −(P+Q)` **for the project's Bosma–Lenstra group
+    law**. Geometric-fibre equality is NOT sufficient over non-reduced `T`. Prove it on the
+    **universal pair** — the integral universal Weierstrass two-point space (`B = C ×_U C`
+    over the Weierstrass-parameter base, reduced/integral), where chord-and-tangent
+    identifies the residual generically and separatedness extends generic equality — then
+    base-change to arbitrary `T` (the T-RED0 pattern; the reducedness argument enters ONLY
+    here). Alternative: direct universal polynomial addition identities from the landed
+    `AdditionSpecPoints`/`GroupLawAxioms` charts.
+  - **[GAP-A-5c]** assembly: `div(ℓ) = [P]+[Q]+[−R]−3[0]`, `div(v) = [R]+[−R]−2[0]` ⟹
+    `(ℓ)/(v)` trivializes `Δ_{P,Q} ⊗ f^*N⁻¹` on the chart, zero-normalized.
+- **[GAP-A-6]** descent: glue with `nonempty_unitObj_iso_of_normalized_glue`
+  (`Picard/RigidDescent.lean:65`; overlap forced by zero-normalization via
+  `f_*𝒪 = 𝒪` + `eq_one_of_pullback_eq_one`), close with
+  `exists_invertible_tensor_idealModule_add_of_discrepancy_trivial` ⟹
+  **`exists_invertible_tensor_idealModule_add` CLOSED**. ⟦REV⟧ confirms the Δ/N = 0^*Δ
+  normalization design and the gluing rigidity argument as correct.
+
+Sub-chain 2 (the pairing; ⟦REV⟧-corrected construction):
+
+- **[WP-κ]** `exists_pic_map_snd_picMap_mulByHom_kappa` (SelfAdjointN.lean:483, (★)) from
+  the leaf + landed κ bookkeeping (`kappa_ratio_algebra`, `kappa_neg`, `kappa_zsmul`,
+  `exists_pic_map_snd_sectionCls_add`).
+- **[WP-C2]** the construction. Fix once and for all
+  `L_Q^rig := 𝒪([Q]−[0]) ⊗ f^*(0^*𝒪([Q]−[0]))⁻¹` with its canonical rigidification
+  `0^*L_Q^rig ≅ 𝒪_T`. (★′) supplies a trivialization `s_Q : [N]^*L_Q^rig ≅ 𝒪`;
+  **normalize it along zero** (`0^*s_Q = 1`) — then `s_Q` is UNIQUE (two rigidified
+  trivializations differ by a unit of `Γ(E_T,𝒪) = Γ(T,𝒪)` forced to 1 along 0 — this is
+  `eq_one_of_pullback_eq_one`). ⟦REV⟧ the translation identity is
+  `[N] ∘ t_P = [N]` (NOT `t_P ∘ [N] = [N]`): so `t_P^*[N]^*L = [N]^*L` canonically, and
+  `t_P^*s_Q / s_Q` is a global unit `h(P) ∈ Γ(T,𝒪)^×`; set `e_N(P,Q) := h(P)`.
+  Order of proofs (KM 2.8): (1) 𝔾_m-valued pairing; (2) bilinearity —
+  **slot 1 needs NO theorem of the square**: `t_{P+P'}^* s_Q = t_{P'}^* t_P^* s_Q`
+  directly; slot 2 = the canonical zero-normalized iso
+  `L_{Q+Q'}^rig ≅ L_Q^rig ⊗ L_{Q'}^rig` (= GAP-A) + uniqueness of rigidified
+  trivializations; (3) `e_N(P,Q)^N = e_N(NP,Q) = e_N(0,Q) = 1` ⟹ lands in μ_N;
+  (4) Yoneda: functoriality-in-T of the unique-normalized construction (no per-T choices)
+  makes it a natural transformation `E[N](−) × E[N](−) → 𝔾_m(−)` factoring through μ_N =
+  an S-morphism `E[N] ×_S E[N] ⟶ μ_N` (`muNPointsEquiv` dictionary landed). Fills
+  `weilPairing` + `weilPairing_over`. ⟦REV⟧ replaces "check on geometric points" over
+  nilpotents everywhere by: rigidified uniqueness + `f_*𝒪 = 𝒪` + base-change naturality.
+  **Pin the sign convention** (𝒪([Q]−[0]) vs 𝒪([0]−[Q]) inverts the pairing; Conrad's
+  Abelian-varieties notes §8 warns the autoduality convention differs from Silverman's
+  divisor convention) — the pin is WP-PIN's comparison, do not choose independently twice.
+- **[WP-PIN]** normalisation pin = T-C4/T-G2-M1: fibrewise comparison with HasseWeil's
+  proven field pairing over char-0 fields via `exists_finiteEtaleHom_of_galoisEquivariant`
+  (`WeilPairing/EtaleDescent.lean:309`) — GME C.3: the gluing-unit pairing IS Silverman
+  III.8's function-theoretic pairing on geometric fibres.
+- **[WP-REG]** the register specs: `add_left`/`add_right`/`zsmul_right` from WP-C2's
+  bilinearity; `restrict` (T-C2a) near-definitional from functoriality-in-T;
+  `symplectic` (T-C2c) from bilinearity + alternation + basis expansion;
+  `mul` (T-C2b) from the construction's compatibility with `N ∣ NM`;
+  `nondegenerate` (T-C3, now with `hNk`) via WP-PIN's fibrewise anchor (N invertible ⟹
+  E[N], μ_N finite étale, Silverman III.8.1(c) applies);
+  ⟦REV⟧ **`self` (alternation) is NOT free from bilinearity** — needs the genuine
+  symmetry argument, KM 2.8.3 route (or biextension symmetry); own sub-ticket.
+- **[WP-BC]** `weilPairing_torsionMapOfEllHom` (KM 2.8.4.2): functoriality of the
+  construction in the curve along `EllHom`s (torsion, μ_N, rigidified sheaves all map).
+
+### Prong FLW — `FibrewiseElliptic ⟺ LocallyWeierstrass` (codex handover 2026-07-29 §7–8)
+
+Final targets exactly as handover §3: `FibrewiseElliptic.locallyWeierstrass` and
+`locallyWeierstrass_iff_abstractConditions`. ⟦REV⟧ verdict: architecture sound; the
+hardening points below are all ALREADY LANDED — cited per point.
+
+- **[FLW-1]** (immediate frontier, handover §7 steps 1–9) stage exactness → original base:
+  affine S, `s : S`: `exists_noetherianPoleSheafModel` → residue-field point of `s` →
+  `exists_away_orderedBaseCech_exact_of_poleSheafModel` (U := the κ(s)-point) → translate
+  `r ∉ p` into non-vanishing at `s` → replace `D(r) ⊆ Spec B` by
+  `D(algebraMap B A r) ∋ s` via the localization scalar-tower →
+  `orderedBaseCechComplex_baseChange_exact_iff_of_iso` transports exactness. Deliverable:
+  affine basic-open `S' ∋ s` + finite ordered affine cover `V` of `E|_{S'}` with the
+  ordered base-Čech complex of `𝒪([0])|` exact in the needed positive degrees. NO
+  Noetherian hypothesis in the statement. ⟦REV⟧ the non-flat return base change is safe
+  precisely because the spreading theorem records termwise flatness + universal exactness
+  (`IsInvertible.exists_away_orderedBaseCech_exact_of_residueField_exact`,
+  `Picard/InvertibleSheafProperCechResidueSpread.lean:23`) — do not weaken that interface.
+  (Exact Lean statement to be claimed on the board at pickup, handover §7 discipline.)
+- **[FLW-2]** Čech ⟹ `Subsingleton (H (sectionPoleSheafPower π' z' hz' 1).sheaf 1)`
+  locally + finite-projective base sections. ⟦REV⟧ **n = 1 suffices**: the successor
+  sequence `0 → 𝒪((n−1)[0]) → 𝒪(n[0]) → z_*z^*𝒪(n[0]) → 0` has affine-over-S quotient
+  (a normal-bundle power), so H¹ vanishing propagates upward — this induction is landed as
+  `sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood`
+  (`PoleSheafSuccessorHOne.lean:136`), and the consumer
+  `sectionPoleSheafPower_locallyWeierstrass_of_CartierGenerator`
+  (`PoleSheafWeierstrassComparison.lean:110`) already takes only the n = 1 input.
+  Consume: `PoleSheafCechHOne`, `AcyclicAffineCechComparison`,
+  `SheafCechInjectiveComparison`, `PoleSheafBaseCechHOne`,
+  `LowDegreeFiniteProjectiveReplacement`, `BaseChangeKerCoker`.
+- **[FLW-3]** Cartier generator: ⟦REV⟧ there is NO global single-affine-U statement over
+  affine S (obstruction = the conormal line bundle `z^*I_{[0]}` need not be free);
+  the correct per-point shrink is landed as
+  `exists_affineBaseChange_sectionCartierGenerator`
+  (`PoleSheafSuccessorSections.lean:453`). Work = wiring only.
+- **[FLW-4]** Weierstrass relation in rank 6: landed (`PoleSheafMonomialBasis` ladder;
+  ⟦REV⟧ the unit-normalization concern is already handled the right way — via equal
+  leading-pole coordinates in `gr₆`, landed as
+  `sectionPoleSheafPower_six_baseSectionsBasis_repr_y_sq_last_of_CartierGenerator`,
+  `PoleSheafWeierstrassRelation.lean:45`).
+- **[FLW-5]** ℙ² closed immersion + pointed iso: landed scheme-theoretically
+  (⟦REV⟧-checked, no fibrewise-injectivity gap) as
+  `sectionPoleSheafPower_six_exists_projModelIso_of_relation`
+  (`PoleSheafWeierstrassMapSectionNeighborhood.lean:181`) and the comparison
+  `sectionPoleSheafPower_six_locallyWeierstrass_of_CartierGenerator`
+  (`PoleSheafWeierstrassComparison.lean:63`). Work = discharging its hypotheses from
+  FLW-1/2/3 per point.
+- **[FLW-6]** assembly: `FibrewiseElliptic.locallyWeierstrass` (per-point; the def is
+  per-point so base-locality is built in), then `locallyWeierstrass_iff_abstractConditions`
+  from it + landed `LocallyWeierstrass.fibrewiseElliptic`,
+  `isProper_of_locallyWeierstrass`, `smoothOfRelativeDimension_of_locallyWeierstrass`.
+  ⟦REV⟧ `Δ(W)` a unit has no non-Noetherian obstruction (nonzero in every residue field ⟹
+  in no maximal ideal); `LocallyWeierstrass`'s `W.IsElliptic` field makes the ⟸ direction
+  honest.
+
+Drift guards (handover §4, binding): no Noetherianity in the final statements; no
+`CohomologyPackage`/axiom/sorry/set_option; no Pic⁰/Abel/group-law route for FLW; no
+assumed projective presentation in the converse; consume landed APIs, never rebuild;
+root-index every new module; axiom-audit every public theorem.
+
+### Order of work (single worker, beastmode)
+
+1. FLW-1 (fully specified frontier; unblocks the FLW chain)
+2. GAP-A-7 (small, unblocks WP transport)
+3. FLW-2 wiring → FLW-3/5 hypothesis discharge → FLW-6 (finishes goal 2)
+4. GAP-A-4 → 5a/5b/5c → 6 → WP-κ (closes SelfAdjointN)
+5. WP-C2 → WP-PIN → WP-REG (incl. alternation sub-ticket) → WP-BC (Y(ρ̄) axiom-clean)
+6. Cadence: [CLEANUP-21] Picard/ after GAP-A-6 · [CLEANUP-22] EllipticCurve/PoleSheaf*
+   after FLW-6 · [CLEANUP-23] WeilPairing/ after WP-REG. ⌈15/3⌉ = 5 ≥ 3 ✓ (per-file rule
+   satisfied: the three touched trees each get one).
