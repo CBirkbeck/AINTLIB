@@ -2756,3 +2756,35 @@ the way and then stall four lines short; it needs a third lift from the other 41
 Count the branch arms that survive — `saving = blk − (skeleton lines + one call per branch)`. For a
 `Subring.closure_induction` that floor is ~13 lines regardless of how much the branches shrink. My
 earlier estimate assumed the block collapsed to a single call, which is only true for a plain `have`.
+
+## Task 2 — `StructureSheafStalks.aplus_le_comap_restrictionMapHom` 98 → 50 (244 → 243)
+
+The three-lift plan from the corrected arithmetic, executed. Two helpers off the
+`Subring.closure_induction`'s `| mem` branch, plus 5 body joins to close the residual gap:
+
+* `vle_one_of_algebraMap_Aplus` — the `A⁺`-image generators, `ha : a ∈ (A⁺ : Set A)`;
+* `vle_one_of_divByS_gen` — the `t/s` generators, cancelling against the unit `ρ'(D.s)`.
+
+Generator shapes come straight from
+`RationalLocData.locPlusSubring = Subring.closure (algebraMap '' A⁺ ∪ Set.range (divByS · D.s))`,
+which is what fixes the two `rcases` patterns.
+
+98 → 55 from the extractions (**43**, matching the corrected `skeleton-is-not-free` estimate of ~44,
+not the original optimistic 49), then → **50** with 5 expression-continuation joins. Crucially the
+joins were chosen from *outside* `hgen`, so they survive the extraction — 5 of the 7 available were,
+which is exactly why the plan closed.
+
+**Two mistakes on the first attempt, both mechanical, both caught by the module build:**
+
+1. **Wrong dedent.** Case bodies sit at indent 8/10 inside a `·` bullet; a helper body needs indent 2.
+   Stripping 8 uniformly put the `A⁺` body at column 0 → `unexpected token 'have'; expected command`.
+   **The dedent amount differs per case** (10 for the `have`-wrapped one, 8 for the bullet-direct one),
+   so it must be computed per block, not assumed.
+2. **Kept a `have h2 : … := by` wrapper while dropping its `exact h2`.** When the extracted case is
+   `have h : <goal> := by <proof>` followed by `exact h`, the helper's statement *is* `<goal>` — so the
+   body is `<proof>` alone. Copying the whole block leaves the goal unproved (`unsolved goals`).
+
+Reverted with `git show HEAD:… > …` and redone with per-block dedent and the inner proof only; green
+first try afterwards (3047 jobs), and again after the joins.
+
+Running total: **243** (486 baseline → 290 pre-split → 274 post-split → 243).

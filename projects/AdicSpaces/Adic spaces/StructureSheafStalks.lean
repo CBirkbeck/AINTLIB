@@ -237,6 +237,66 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     CompleteSpace A]
   [IsRingOfIntegralElements (A⁺ : Subring A)] [HasLocLiftPowerBounded A]
 
+/-- The `A⁺`-image generators of `locPlusSubring` are bounded by 1 after restriction. -/
+private theorem vle_one_of_algebraMap_Aplus (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (w'' : Spv (presheafValue D'))
+    (hw'' : w'' ∈ Spa (presheafValue D') (presheafValue D')⁺)
+    {a : A} (ha : a ∈ (A⁺ : Set A)) :
+    w''.vle (restrictionMapHom D D' h
+        (D.coeRingHom (algebraMap A (Localization.Away D.s) a)))
+      (restrictionMapHom D D' h (D.coeRingHom 1)) := by
+  rw [map_one, map_one]
+  rw [show D.coeRingHom (algebraMap A (Localization.Away D.s) a)
+      = D.canonicalMap a from rfl,
+    restrictionMapHom_canonicalMap_generic D D' h a]
+  exact hw''.2 _ (D'.canonicalMap_Aplus_le_completedPlusSubring a ha)
+
+/-- The `t/s` generators of `locPlusSubring` are bounded by 1 after restriction, by
+cancelling against the unit `ρ'(D.s)`. -/
+private theorem vle_one_of_divByS_gen (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (w'' : Spv (presheafValue D'))
+    (hv''D : comap D'.canonicalMap w'' ∈ rationalOpen D.T D.s)
+    (t : D.T) :
+    w''.vle (restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s)))
+      (restrictionMapHom D D' h (D.coeRingHom 1)) := by
+  refine (show w''.vle (restrictionMapHom D D' h
+      (D.coeRingHom (divByS (t : A) D.s)))
+      (restrictionMapHom D D' h (D.coeRingHom 1)) → _ from fun hh => hh) ?_
+  rw [map_one, map_one]
+  have hs0 : ¬ w''.vle (D'.canonicalMap D.s) 0 := by
+    intro hcon
+    refine hv''D.2.2 ?_
+    show w''.vle (D'.canonicalMap D.s) (D'.canonicalMap 0)
+    rw [map_zero]
+    exact hcon
+  have hkey : restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
+      * D'.canonicalMap D.s = D'.canonicalMap (t : A) := by
+    calc restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
+        * D'.canonicalMap D.s
+        = restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
+          * restrictionMapHom D D' h (D.canonicalMap D.s) := by
+          rw [restrictionMapHom_canonicalMap_generic D D' h D.s]
+      _ = restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s)
+          * D.canonicalMap D.s) := (map_mul _ _ _).symm
+      _ = restrictionMapHom D D' h (D.canonicalMap (t : A)) := by
+          congr 1
+          show D.coeRingHom (divByS (t : A) D.s)
+              * D.coeRingHom (algebraMap A (Localization.Away D.s) D.s)
+            = D.coeRingHom (algebraMap A (Localization.Away D.s) (t : A))
+          rw [← map_mul, mul_comm, algebraMap_s_mul_divByS D (t : A)]
+      _ = D'.canonicalMap (t : A) :=
+          restrictionMapHom_canonicalMap_generic D D' h (t : A)
+  have hvt : w''.vle (D'.canonicalMap (t : A)) (D'.canonicalMap D.s) :=
+    hv''D.2.1 (t : A) t.2
+  have hprod : w''.vle (restrictionMapHom D D' h
+      (D.coeRingHom (divByS (t : A) D.s)) * D'.canonicalMap D.s)
+      (1 * D'.canonicalMap D.s) := by
+    rw [hkey, one_mul]
+    exact hvt
+  exact w''.vle_mul_cancel hs0 hprod
+
 /-- **Plus functoriality of the restriction maps** (the `σ(B⁺) ⊆ B'⁺` half of
 Wedhorn Prop 8.2(3)): the canonical plus subring of a completed rational
 localization maps into that of any smaller one. Proof: by the Spa
@@ -252,19 +312,16 @@ theorem aplus_le_comap_restrictionMapHom (D D' : RationalLocData A)
   show restrictionMapHom D D' h x ∈ ((presheafValue D')⁺ : Subring _)
   refine mem_plus_of_forall_spa_vle_one_huber D' _ (fun w'' hw'' => ?_)
   have hwcont : (comap (restrictionMapHom D D' h) w'').IsContinuous :=
-    comap_isContinuous (restrictionMapHom_continuous D D' h)
-      ((mem_spa_iff _).mp hw'').1
+    comap_isContinuous (restrictionMapHom_continuous D D' h) ((mem_spa_iff _).mp hw'').1
   have hred : (comap (restrictionMapHom D D' h) w'').vle x 1 →
       w''.vle (restrictionMapHom D D' h x) 1 := by
     intro hh
-    have h1 : w''.vle (restrictionMapHom D D' h x)
-        (restrictionMapHom D D' h 1) := hh
+    have h1 : w''.vle (restrictionMapHom D D' h x) (restrictionMapHom D D' h 1) := hh
     rwa [map_one] at h1
   refine hred ?_
   -- the base point of `w''`, inside both rationals
   have hv''D' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
-  have hv''D : comap D'.canonicalMap w'' ∈ rationalOpen D.T D.s :=
-    h hv''D'.1
+  have hv''D : comap D'.canonicalMap w'' ∈ rationalOpen D.T D.s := h hv''D'.1
   -- generator bounds at the localization level
   have hgen : ∀ y ∈ D.locPlusSubring,
       (comap D.coeRingHom (comap (restrictionMapHom D D' h) w'')).vle y 1 := by
@@ -273,59 +330,15 @@ theorem aplus_le_comap_restrictionMapHom (D D' : RationalLocData A)
     | mem z hz =>
       rcases hz with ⟨a, ha, rfl⟩ | ⟨t, rfl⟩
       · -- an `A⁺`-image
-        have h2 : w''.vle (restrictionMapHom D D' h
-            (D.coeRingHom (algebraMap A (Localization.Away D.s) a)))
-            (restrictionMapHom D D' h (D.coeRingHom 1)) := by
-          rw [map_one, map_one]
-          rw [show D.coeRingHom (algebraMap A (Localization.Away D.s) a)
-              = D.canonicalMap a from rfl,
-            restrictionMapHom_canonicalMap_generic D D' h a]
-          exact hw''.2 _ (D'.canonicalMap_Aplus_le_completedPlusSubring a ha)
-        exact h2
-      · -- a `t/s`-generator: the multiplicative cancel against `ρ'(D.s)`
-        refine (show w''.vle (restrictionMapHom D D' h
-            (D.coeRingHom (divByS (t : A) D.s)))
-            (restrictionMapHom D D' h (D.coeRingHom 1)) → _ from fun hh => hh) ?_
-        rw [map_one, map_one]
-        have hs0 : ¬ w''.vle (D'.canonicalMap D.s) 0 := by
-          intro hcon
-          refine hv''D.2.2 ?_
-          show w''.vle (D'.canonicalMap D.s) (D'.canonicalMap 0)
-          rw [map_zero]
-          exact hcon
-        have hkey : restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
-            * D'.canonicalMap D.s = D'.canonicalMap (t : A) := by
-          calc restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
-              * D'.canonicalMap D.s
-              = restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s))
-                * restrictionMapHom D D' h (D.canonicalMap D.s) := by
-                rw [restrictionMapHom_canonicalMap_generic D D' h D.s]
-            _ = restrictionMapHom D D' h (D.coeRingHom (divByS (t : A) D.s)
-                * D.canonicalMap D.s) := (map_mul _ _ _).symm
-            _ = restrictionMapHom D D' h (D.canonicalMap (t : A)) := by
-                congr 1
-                show D.coeRingHom (divByS (t : A) D.s)
-                    * D.coeRingHom (algebraMap A (Localization.Away D.s) D.s)
-                  = D.coeRingHom (algebraMap A (Localization.Away D.s) (t : A))
-                rw [← map_mul, mul_comm, algebraMap_s_mul_divByS D (t : A)]
-            _ = D'.canonicalMap (t : A) :=
-                restrictionMapHom_canonicalMap_generic D D' h (t : A)
-        have hvt : w''.vle (D'.canonicalMap (t : A)) (D'.canonicalMap D.s) :=
-          hv''D.2.1 (t : A) t.2
-        have hprod : w''.vle (restrictionMapHom D D' h
-            (D.coeRingHom (divByS (t : A) D.s)) * D'.canonicalMap D.s)
-            (1 * D'.canonicalMap D.s) := by
-          rw [hkey, one_mul]
-          exact hvt
-        exact w''.vle_mul_cancel hs0 hprod
+        exact vle_one_of_algebraMap_Aplus D D' h w'' hw'' ha
+      · exact vle_one_of_divByS_gen D D' h w'' hv''D t
     | one => exact vle_refl 1
     | zero => exact vle_zero_one
     | mul a b _ _ iha ihb => exact vle_one_mul iha ihb
     | add a b _ _ iha ihb => exact (comap _ _).vle_add iha ihb
     | neg a _ iha => exact vle_one_neg iha
   -- integral closure at the localization
-  have hIntCl : ∀ z ∈ (integralClosure ↥(D.locPlusSubring)
-      (Localization.Away D.s)).toSubring,
+  have hIntCl : ∀ z ∈ (integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring,
       (comap D.coeRingHom (comap (restrictionMapHom D D' h) w'')).vle z 1 := by
     intro z hz
     rw [Subalgebra.mem_toSubring] at hz
@@ -335,8 +348,7 @@ theorem aplus_le_comap_restrictionMapHom (D D' : RationalLocData A)
       (comap (restrictionMapHom D D' h) w'').vle y 1 := by
     intro y hy
     have hsub : (((integralClosure ↥(D.locPlusSubring)
-        (Localization.Away D.s)).toSubring.map D.coeRingHom)
-          : Set (presheafValue D)) ⊆
+        (Localization.Away D.s)).toSubring.map D.coeRingHom) : Set (presheafValue D)) ⊆
         {y | (comap (restrictionMapHom D D' h) w'').vle y 1} := by
       rintro _ ⟨z, hz, rfl⟩
       have h1 := hIntCl z hz
