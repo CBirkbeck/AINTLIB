@@ -2536,3 +2536,43 @@ So the mechanically-cheap tail really is exhausted at **246**. What remains is: 
 of the four very large blocks (`hkey` 109, `hgen` 57, `hprec`-style), (b) the four true mirror pairs,
 each needing two lifts per proof plus a `rfl` workaround, (c) `TateAlgebraTopology`'s −74 pair, which
 wants a genuine shared completeness lemma. All are real work with real payoff; none is a one-shot edit.
+
+## Task 3 — measured the warning surface, and REJECTED the biggest class as unsafe
+
+With task 2's cheap tail exhausted, measured task 3 from the gate log. **3,860 warnings**, by class:
+
+     549  automatically included section variable(s) unused    <- biggest actionable-looking class
+     110  declaration uses `sorry`                             <- producers' WIP, out of scope
+      96  unused-variable hints ("binding can be removed…")
+     ~350 Overlapping instance parameters (many decls)         <- known pre-existing, ruled out earlier
+
+The 549 `unusedSectionVars` span **83 files / 549 declarations**, 308 of them fixable with a single
+`omit`. Most-cited: `[HasLocLiftPowerBounded A]` ×163, `[IsHuberRing A]` ×110, `[IsTopologicalRing A]`
+×90, `[IsRingOfIntegralElements A⁺]` ×80.
+
+**Tried it on `SpaVIso.lean` (38 declarations) and it broke the build — reverted.**
+
+All 38 inserted cleanly (the codebase convention puts `omit … in` *before* the docstring, and long
+lists wrap at 100 chars with 4-space continuation, matching existing usage). But the module then
+failed with six `failed to synthesize` errors, the first being:
+
+    SpaVIso.lean:114:5: failed to synthesize instance of type class
+      UniformSpace A
+
+**`UniformSpace A` was never omitted.** Omitting `[IsHuberRing A]` removed the *derivation path* to
+it — the linter judged it unused *in the statement*, but instance synthesis elsewhere in the file
+reached `UniformSpace A` through it.
+
+**Conclusion: `linter.unusedSectionVars` is a hint, not a fact, and its suggested `omit` is not a safe
+mechanical rewrite in this codebase.** An instance can be unused in a declaration's *statement* while
+still being the only route by which another instance is synthesised in its *proof* — or in a
+neighbouring declaration. Acting on the class en masse is unsound; acting on it per-declaration costs
+one build each (≈3-5 min × 549), which is not a sensible trade for warning-count reduction with no
+functional change.
+
+This matches the earlier ruling on `linter.overlappingInstances` (recorded in the cleanup memory as a
+pre-existing project-wide warning whose fix is out of cleanup scope). **Two of the three largest
+warning classes are therefore known-not-actionable**, which is worth stating plainly rather than
+leaving 3,860 warnings looking like 3,860 units of pending work.
+
+Reverted via `git show HEAD:… > …`; `SpaVIso` rebuilt green (3062 jobs), `git diff HEAD` empty.
