@@ -301,4 +301,69 @@ theorem AdicCompletion.quotientSpanEquiv_mk_of {a : R}
 
 end PrincipalAdicDivision
 
+section LevelwiseCongr
+
+variable {A B : Type*} [CommRing A] [CommRing B]
+
+/-- Levelwise identification of the adic quotients with ideal-power
+quotients. -/
+noncomputable def AdicCompletion.levelEquiv (I : Ideal A) (n : ℕ) :
+    (A ⧸ (I ^ n • ⊤ : Ideal A)) ≃+* (A ⧸ I ^ n) :=
+  Ideal.quotEquivOfEq (ideal_smul_top_self (I ^ n))
+
+theorem AdicCompletion.levelEquiv_transitionMap (I : Ideal A) {a b : ℕ}
+    (hab : a ≤ b) (x : A ⧸ (I ^ b • ⊤ : Ideal A)) :
+    AdicCompletion.levelEquiv I a (AdicCompletion.transitionMap I A hab x) =
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab)
+        (AdicCompletion.levelEquiv I b x) := by
+  obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective x
+  have h1 : AdicCompletion.transitionMap I A hab
+      (Ideal.Quotient.mk ((I ^ b • ⊤ : Ideal A)) y) =
+      Ideal.Quotient.mk ((I ^ a • ⊤ : Ideal A)) y := rfl
+  rw [h1, AdicCompletion.levelEquiv, AdicCompletion.levelEquiv,
+    Ideal.quotEquivOfEq_mk, Ideal.quotEquivOfEq_mk, Ideal.Quotient.factor_mk]
+
+/-- Adic completions along levelwise-compatible ring equivalences. -/
+noncomputable def AdicCompletion.congrLevel (I : Ideal A) (J : Ideal B)
+    (F : ∀ n : ℕ, (A ⧸ (I ^ n • ⊤ : Ideal A)) ≃+*
+      (B ⧸ (J ^ n • ⊤ : Ideal B)))
+    (hF : ∀ {a b : ℕ} (hab : a ≤ b) (x : A ⧸ (I ^ b • ⊤ : Ideal A)),
+      AdicCompletion.transitionMap J B hab (F b x) =
+        F a (AdicCompletion.transitionMap I A hab x)) :
+    AdicCompletion I A ≃+* AdicCompletion J B where
+  toFun x := ⟨fun n => F n (x.1 n), fun {a b} hab => by
+    rw [hF hab, x.2 hab]⟩
+  invFun y := ⟨fun n => (F n).symm (y.1 n), fun {a b} hab => by
+    have h1 := hF hab ((F b).symm (y.1 b))
+    rw [RingEquiv.apply_symm_apply, y.2 hab] at h1
+    exact ((F a).symm_apply_eq.mpr h1).symm⟩
+  left_inv x := Subtype.ext (funext fun n => (F n).symm_apply_apply _)
+  right_inv y := Subtype.ext (funext fun n => (F n).apply_symm_apply _)
+  map_mul' x y := Subtype.ext (funext fun n => map_mul (F n) (x.1 n) (y.1 n))
+  map_add' x y := Subtype.ext (funext fun n => map_add (F n) (x.1 n) (y.1 n))
+
+/-- **Levelwise power-quotient equivalences induce an equivalence of adic
+completions.** -/
+noncomputable def AdicCompletion.congrPow (I : Ideal A) (J : Ideal B)
+    (e : ∀ n : ℕ, (A ⧸ I ^ n) ≃+* (B ⧸ J ^ n))
+    (hcomp : ∀ {a b : ℕ} (hab : a ≤ b) (x : A ⧸ I ^ b),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (e b x) =
+        e a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x)) :
+    AdicCompletion I A ≃+* AdicCompletion J B :=
+  AdicCompletion.congrLevel I J
+    (fun n => ((AdicCompletion.levelEquiv I n).trans (e n)).trans
+      (AdicCompletion.levelEquiv J n).symm)
+    (fun {a b} hab x => by
+      simp only [RingEquiv.trans_apply]
+      have h2 := AdicCompletion.levelEquiv_transitionMap J hab
+        ((AdicCompletion.levelEquiv J b).symm
+          (e b (AdicCompletion.levelEquiv I b x)))
+      rw [RingEquiv.apply_symm_apply] at h2
+      rw [hcomp hab] at h2
+      have h3 := AdicCompletion.levelEquiv_transitionMap I hab x
+      rw [← h3] at h2
+      exact (RingEquiv.eq_symm_apply _).mpr h2)
+
+end LevelwiseCongr
+
 end AdicNakayama
