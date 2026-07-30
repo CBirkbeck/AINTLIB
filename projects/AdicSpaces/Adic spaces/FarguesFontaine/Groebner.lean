@@ -1067,27 +1067,9 @@ theorem exists_groebner_family {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     have hIe : dIdx p F ϖ hρ0 hρ1 H q.1 ≤ ((q.2 : ℕ) : ℕ∞) := hqmin.1
     rw [← hqfst]
     exact ne_top_of_le_ne_top (WithTop.natCast_ne_top q.2) hIe
-  have hex : ∀ I : {I : Fin k →₀ ℕ // I ∈ T},
-      ∃ (x : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-        (e : NNReal),
-        x ∈ H ∧ ((x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0)
-          ∧ leadIdxRPS p F ϖ hρ0 hρ1
-              (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = I.1
-          ∧ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
-                (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-                : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)
-              = dIdx p F ϖ hρ0 hρ1 H I.1)
-          ∧ e < 1
-          ∧ (∀ K : Fin k →₀ ℕ,
-              (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn I.1
-                < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
-              Valued.v ((MvPowerSeries.coeff K
-                  (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-                  : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
-                ≤ e * gaussNormRPS p F ϖ hρ0 hρ1
-                  (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) :=
-    fun I => exists_groebner_generator p F ϖ H I.1 (hdIT I.1 I.2)
-  choose X E hXH hX0 hXlead hXdeg hElt hEtail using hex
+  choose X E hXH hX0 hXlead hXdeg hElt hEtail using
+    fun I : {I : Fin k →₀ ℕ // I ∈ T} =>
+      exists_groebner_generator p F ϖ H I.1 (hdIT I.1 I.2)
   have himg : ∀ (P : ↥(restrictedMvPowerSeriesSubring k
         ↥(ArSub p F ϖ hρ0 hρ1)) → Prop),
       (∀ I : {I : Fin k →₀ ℕ // I ∈ T}, P (X I)) →

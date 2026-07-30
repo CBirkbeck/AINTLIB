@@ -2837,3 +2837,85 @@ Note the contrast with `RelativePieceKeystone.hT_pb`, where the opposite was nee
 because the caller's `classical` had baked an instance into it). The discriminator: **if the bridge is
 definitional (`let`, `rfl`), state the helper plainly and let the call site bridge; if the bridge
 carries an instance the helper cannot reconstruct, pass the term.**
+
+## Task 2 — `RationalBasisHuber.genPiece_hopen_of_pow_le` 58 → 49 (241 → 240)
+
+`hGamb` (10 lines) lifted to `generators_mem_span`: generators of `I^M` land in `span T` after
+mapping down to `A`, given the power-containment hypothesis. Uses the pass-the-value-and-its-equation
+pattern — `G` and `hG` both come from `obtain ⟨G, hG⟩ := P.fg.pow`, and the body rewrites with `hG`.
+
+**One iteration, and the failure is a reusable detail: I wrote the equation backwards.** Stated
+`hG : P.I ^ M = Ideal.span ↑G`, which gives
+
+    rewrite failed: did not find `Ideal.span ↑G` in target `↑g ∈ P.I ^ M`
+
+because `rw [← hG]` then tries to replace the span (absent) rather than the power (present).
+`Submodule.FG` is `∃ S, Ideal.span ↑S = I` — **span on the LEFT**. So the hypothesis is
+`hG : Ideal.span (G : Set P.A₀) = P.I ^ M`.
+
+**Rule for the pass-the-equation pattern: copy the orientation from the *producing* lemma, don't
+infer it from how the body reads.** `obtain ⟨G, hG⟩ := P.fg.pow` fixes the direction; a `rw [← hG]`
+in the body tells you the body wants the reverse of that, which is easy to mistake for the statement's
+direction. Checking `Submodule.FG`'s definition would have got it right first time.
+
+Running total: **240** (486 baseline → 290 pre-split → 274 post-split → 240).
+
+## I BROKE THE ONE-BUILD RULE — and this is exactly what it looks like
+
+Started `lake build '«Adic spaces».FarguesFontaine.ChartVObj'` while the batch-22 **gate was still
+running**. The module build rewrote `ChartVObj.olean` underneath the gate, which then failed with:
+
+    FrobeniusValuation.lean:5:0: failed to open file
+      '…/.lake/build/lib/lean/Adic spaces/FarguesFontaine/ChartVObj.olean': No such file or directory
+
+**This is not a Lean error and not a regression** — it is the documented consequence of two concurrent
+`lake build`s in one workspace, and the gate's verdict is simply void. The tell is unmistakable once
+seen: a `failed to open file … .olean: No such file or directory` naming a module that the *other*
+build was writing, rather than a `.lean` file with a line and column.
+
+Why I slipped: the gate was at 3341/3351 and I read that as "effectively finished". **Nearly-done is
+not done** — a gate holds oleans until it exits, and the last few jobs are precisely the large modules
+whose oleans everything else depends on.
+
+Standing correction to my own procedure: **check for a running `lake` before every build, not just
+before gates.** `pgrep -f "lake build"` costs nothing; a corrupted gate costs a full rebuild. The FLT
+build in a sibling worktree is safe to ignore (different toolchain, different `.lake`), but anything
+matching `lake build «Adic spaces»` is ours and must be allowed to exit first.
+
+Recovery: let the corrupted gate finish, then re-run it from a quiet workspace. No source change is
+needed — the tree is correct; only the verification was invalidated.
+
+## Task 2 — `ChartVObj` and `Groebner` (240 → 238)
+
+**`ChartVObj.mk_monomial_mem_of_large` 63 → 49.** `hkey` (48 lines) lifted to
+`mk_monomial_eq_chartFracP_pow_mul`. Its three prerequisites (`hsplit` 1, `hIT` 5, `hfrac` 4) stay in
+the caller and are **passed as hypotheses** — proving them inside would have pushed the helper to ~56
+lines, over the bar.
+
+One iteration: I made `c` implicit, but it appears **only in the conclusion**, so
+`have hkey := helper …` had nothing to infer it from → `don't know how to synthesize implicit
+argument c`, plus a cascade of "unsolved goals" further down that vanished once `c` was fixed.
+**Rule: a variable that appears only in the conclusion must be explicit** when the call site is a
+bare `have h := f …` with no expected type. (And: a cascade of downstream errors after one
+"can't synthesize" is usually all one root cause — fix the first and re-read.)
+
+**`Groebner.exists_groebner_family` 64 → 46, by MERGE not lift.** `hex` is 20 lines of which **19 are
+a type ascription**; the proof is a single `fun I => exists_groebner_generator p F ϖ H I.1 (hdIT I.1 I.2)`.
+Extracting it would just relocate the ascription. Inlining the term into its sole consumer —
+
+    choose X E hXH hX0 hXlead hXdeg hElt hEtail using
+      fun I : {I : Fin k →₀ ℕ // I ∈ T} => exists_groebner_generator p F ϖ H I.1 (hdIT I.1 I.2)
+
+— deletes the ascription outright: 21 lines → 3.
+
+**Worth generalising: when a `have`'s body is a single term and its type is inferable from that term,
+the ascription is pure overhead — merge, never lift.** Lifting converts N lines of ascription into N
+lines of helper signature and gains nothing. The tell is a `have` whose body is one `fun …` / one
+application, with a single downstream consumer.
+
+Counter-example in the same family, deliberately NOT done: `BivariateContinuity.hbasis` has the same
+shape (4-line ascription, one-term proof) but its ascription pins `@nhds _ τ` — the `letI` topology
+instance — so deleting it risks re-elaborating at a different instance. **An ascription that mentions
+a `letI`/`haveI`-bound instance is load-bearing, not overhead.**
+
+Running total: **238**.

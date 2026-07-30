@@ -41,6 +41,22 @@ theorem divByS_eq_sum_of_span {T : Finset A} {t x : A} (c : A → A)
   refine Finset.sum_congr rfl fun t' _ => ?_
   rw [map_mul, mul_assoc, ← hone]
 
+/-- Generators of `I^M` land in `span T` after mapping down to `A`, given the
+power-containment hypothesis. -/
+private theorem generators_mem_span (P : PairOfDefinition A) (T : Finset A) (M : ℕ)
+    (hle : (Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) ^ M
+      ≤ Ideal.span (T : Set A))
+    (G : Finset P.A₀) (hG : Ideal.span (G : Set P.A₀) = P.I ^ M) :
+    ∀ g : ↥(G : Set P.A₀), ((↑(↑g : P.A₀) : A)) ∈ Ideal.span (T : Set A) := by
+  intro g
+  refine hle ?_
+  have hgI : ((g : P.A₀)) ∈ P.I ^ M := by
+    rw [← hG]
+    exact Ideal.subset_span g.2
+  have hmap := Ideal.mem_map_of_mem (P.A₀.subtype) hgI
+  rw [Ideal.map_pow] at hmap
+  exact hmap
+
 /-- **The `hopen`-condition at open span** (the general-Huber replacement
 for `genPiece_hopen`'s `span T = ⊤`): a power of the ambient ideal of
 definition inside `span T` suffices. A₀-side generator decomposition of
@@ -60,16 +76,7 @@ theorem genPiece_hopen_of_pow_le (P : PairOfDefinition A) (T : Finset A)
     exact ⟨c, by
       rw [← hc]
       exact Finset.sum_congr rfl fun t' _ => (smul_eq_mul _ _)⟩
-  have hGamb : ∀ g : ↥(G : Set P.A₀),
-      ((↑(↑g : P.A₀) : A)) ∈ Ideal.span (T : Set A) := by
-    intro g
-    refine hle ?_
-    have hgI : ((g : P.A₀)) ∈ P.I ^ M := by
-      rw [← hG]
-      exact Ideal.subset_span g.2
-    have hmap := Ideal.mem_map_of_mem (P.A₀.subtype) hgI
-    rw [Ideal.map_pow] at hmap
-    exact hmap
+  have hGamb := generators_mem_span P T M hle G hG
   choose c hc using fun g : ↥(G : Set P.A₀) => hgen _ (hGamb g)
   haveI : Fintype ↥(G : Set P.A₀) := G.finite_toSet.fintype
   obtain ⟨N, hN⟩ := pod_absorb_finset_mul_pow P
