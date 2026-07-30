@@ -820,6 +820,35 @@ theorem comap_isMaximal_of_finite_residue (f : A →ₐ[K] S)
     isField_of_isIntegral_of_isField' (Field.toIsField K)
   exact Ideal.Quotient.maximal_of_isField _ hfield
 
+/-- **Residue finiteness descends along module-finite extensions** (lying
+over): if every maximal residue of `S` is finite over `K` and `S` is a
+module-finite faithful `A`-algebra, every maximal residue of `A` is finite
+over `K`. -/
+theorem module_finite_residue_of_finite_extension
+    [Algebra A S] [Module.Finite A S] [FaithfulSMul A S]
+    [IsScalarTower K A S]
+    (hres : ∀ (𝔫 : Ideal S), 𝔫.IsMaximal → Module.Finite K (S ⧸ 𝔫))
+    (𝔪 : Ideal A) (h𝔪 : 𝔪.IsMaximal) : Module.Finite K (A ⧸ 𝔪) := by
+  haveI := h𝔪
+  haveI : Algebra.IsIntegral A S := Algebra.IsIntegral.of_finite A S
+  obtain ⟨𝔫, h𝔫, h𝔫c⟩ := Ideal.exists_ideal_over_maximal_of_isIntegral 𝔪
+    (by
+      rw [(RingHom.injective_iff_ker_eq_bot _).mp
+        (FaithfulSMul.algebraMap_injective A S)]
+      exact bot_le)
+  haveI := h𝔫
+  haveI := hres 𝔫 h𝔫
+  have h1 : (𝔪 : Ideal A) =
+      𝔫.comap ((IsScalarTower.toAlgHom K A S : A →ₐ[K] S) : A →+* S) :=
+    h𝔫c.symm
+  rw [h1]
+  have hinj : Function.Injective
+      (Ideal.quotientMapₐ 𝔫 (IsScalarTower.toAlgHom K A S) le_rfl) :=
+    Ideal.quotientMap_injective
+  exact Module.Finite.of_injective
+    (Ideal.quotientMapₐ 𝔫 (IsScalarTower.toAlgHom K A S) le_rfl).toLinearMap
+    hinj
+
 end Descent
 
 end FiniteJet.GraphKoszul
