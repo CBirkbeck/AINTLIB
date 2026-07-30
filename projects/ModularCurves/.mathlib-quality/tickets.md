@@ -29756,3 +29756,40 @@ of (π,z) at s follows since its defining ∃ is on S-affine-opens (compose the 
 basicOpen-a-of-V is an affine open of V hence of S — `IsAffineOpen` transitivity via
 `Scheme.Opens.ι`-image: an affine open of an open subscheme is an affine open of S).
 Then `locallyWeierstrass_iff_abstractConditions` assembly (landed pieces per handover §8.5).
+
+### [FLW-2b] progress: `kerBaseChangeComparison_bijective_of_tower` LANDED (2026-07-30,
+CochainComplexFlatBaseChangeExact.lean). Remaining fill of
+`exists_mem_basicOpen_pointedIso_poleOneBasis` (the one sorry in
+PoleSheafNeighborhoodHOne.lean), inside a copy of the package proof body:
+1. hkerBr : Bijective (kerBCC (Away r) (C_stage.d01)) — `kerBaseChangeComparison_bijective_of_flat`
+   (Away r flat over Γ(Spec Bst)).
+2. hkerT'overBr : Bijective (kerBCC Γ(T') ((C_stage.d01).baseChange (Away r))) — flat-coker route:
+   terms flat over Away r (Flat.baseChange), Subsingleton bound (TensorProduct.subsingleton_right),
+   coker flat (`Module.Flat.quotient_range_of_bounded_exact` on the Away-r complex with the
+   spread hexact), then `kerBaseChangeComparison_bijective`.
+3. hkerT' := kerBaseChangeComparison_bijective_of_tower (A := Away r) (K := Γ(T',⊤)) 1 2.
+4. eSec : Γ(T') ⊗_B baseSections yπ L ≃ baseSections π'' ((pullback fst).obj L) :=
+   `baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison yπ tD L V hV hVaff hkerT'`;
+   then ≫ `baseSectionsMapIso π' eD` to land on baseSections π' MT.
+5. Finite: `orderedBaseCechHomologyFinite_of_isProper` (stage) at q=0 +
+   `HomologicalComplex.finite_kernel_zero_of_finite_homology` + stage kerIso
+   (`baseSectionsIsoKernelOrderedBaseCechDifferential yπ L V hV`) ⟹ Finite B (baseSections yπ L)
+   ⟹ Finite Γ(T') (Γ(T') ⊗ …) (Module.Finite.baseChange) ⟹ transport along eSec-chain.
+6. Flat: kerIso at π'/UT + `Module.Flat.ker_of_bounded_exact_at` (package data).
+7. rankAtStalk = 1 at maximals: for p maximal, K := κ(p): finrank K (K ⊗ M) via
+   kerBCC-equiv (package-hker at K, i.e. `kerBaseChangeComparison_bijective_of_orderedBaseCech_package`)
+   + `sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank` (hn := le_refl 1);
+   bridge rankAtStalk ↔ finrank κ(p) fiber: hunt mathlib
+   (`Module.rankAtStalk_eq_finrank_residueField`-shaped for finite+flat; if absent, use
+   `Module.rankAtStalk` def + `Module.finrank_baseChange`-style localization compare —
+   BaseChangeKerCoker:599 used `Module.finrank_baseChange`).
+8. fiber ≠ 0 at maximals: K := κ(p)-leg t_K := Spec κ(p) ⟶ T' (fromSpecResidueField-composite);
+   letI IsIso := `sectionPoleSheafPowerPushforwardBaseChange_app_top_isIso_of_orderedBaseCech_package`
+   (package data, t := t_K); equiv := `sectionPoleSheafPower_baseSectionsBaseChangeLinearEquivOfAppTopIso`;
+   one-tmul (PushforwardBaseChangeLinearEquiv:60-74) sends 1⊗OneSection ↦ OneSection of the
+   κ(p)-family, ≠ 0 by `sectionPoleSheafPowerOneSection_ne_zero` (Nonempty total: the
+   κ(p)-family has the section zT over Spec κ(p) which is nonempty) ⟹ 1⊗x ≠ 0 in the
+   K-fiber; align K-fiber (p.Fiber M = p.ResidueField ⊗ M) with the equiv's source.
+9. `Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero` ⟹ (bOne, hbOne). Note
+   its hx wants `(1 : p.ResidueField) ⊗ₜ x ≠ 0` in `p.Fiber M` — the Fiber-vs-⊗ alignment
+   is definitional (Ideal.Fiber := ResidueField ⊗ M presumably; check its def).
