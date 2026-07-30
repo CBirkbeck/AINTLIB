@@ -1,1 +1,1 @@
-FOCUS: block A DONE axiom-clean. Next: normalClosure instantiation corollary (probe order in hrw-decomposition.md), then blocks B (head localization) / C (L1 maximals) / D (headLocsReduced rewire)
+FOCUS: block B — B2 zeroHeadTateEquiv compiling (bijnaac0i); then B3 parity-freeness, B1 completedLocal_congr, B4 generic fibre mirrors, B5 head assembly, C L1-comparison, D rewire
