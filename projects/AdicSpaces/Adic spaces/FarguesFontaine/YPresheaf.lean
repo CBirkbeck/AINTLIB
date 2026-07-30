@@ -378,6 +378,29 @@ theorem gaussVal_teichPi_pow {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : 
   rw [Valuation.map_pow, gaussVal_apply, teichPi,
     gaussValue_teichmuller p F hρ1.le]
 
+/-- **The Gauss point at radius `vpiQ q` compares `[ϖ]^{r.num}` against `p^{r.den}`
+exactly as `q` compares against `r`.** -/
+private theorem gaussVal_vle_teichPi_pow_p_pow_iff {q r : ℚ} (hq : 0 < q) (hr : 0 < r) :
+    (ofValuation (gaussVal p F (vpiQ_pos p F ϖ q)
+        (vpiQ_lt_one p F ϖ hq))).vle
+        (teichPi p F ϖ ^ r.num.toNat) ((p : Ainf p F) ^ r.den)
+      ↔ q ≤ r := by
+  have hnum : 0 < r.num := Rat.num_pos.mpr hr
+  have hden : (0 : ℚ) < (r.den : ℚ) := by exact_mod_cast r.den_pos
+  have hcast : ((r.num.toNat : ℕ) : ℚ) = (r.num : ℚ) := by
+    exact_mod_cast congrArg Int.cast (Int.toNat_of_nonneg hnum.le)
+  show gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
+      (teichPi p F ϖ ^ r.num.toNat)
+    ≤ gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
+        ((p : Ainf p F) ^ r.den) ↔ _
+  rw [gaussVal_teichPi_pow, gaussVal_p_pow,
+    show perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        ^ r.num.toNat = vpiQ p F ϖ ((r.num.toNat : ℕ) : ℚ) from
+      (vpiQ_natCast p F ϖ r.num.toNat).symm,
+    vpiQ_pow p F ϖ q r.den, vpiQ_le_vpiQ_iff p F ϖ, hcast]
+  rw [show (q * (r.den : ℚ) ≤ (r.num : ℚ)) ↔ q ≤ r from by
+    rw [← le_div_iff₀ hden, Rat.num_div_den]]
+
 /-- **Gauss points detect the interval**: the Gauss point at radius `vpiQ q`
 lies in the `(q₁, q₂)`-trace iff `q ∈ [q₂, q₁]`. -/
 theorem gaussPoint_mem_intervalTrace_iff {q q₁ q₂ : ℚ}
@@ -406,21 +429,7 @@ theorem gaussPoint_mem_intervalTrace_iff {q q₁ q₂ : ℚ}
   have hq₂inv : (0 : ℚ) < 1 / q₂ := by positivity
   have htoNat₁ : 0 < q₁.num.toNat := by omega
   have htoNat₂ : 0 < q₂.num.toNat := by omega
-  have hcompute₁ : (ofValuation (gaussVal p F (vpiQ_pos p F ϖ q)
-        (vpiQ_lt_one p F ϖ hq))).vle
-        (teichPi p F ϖ ^ q₁.num.toNat) ((p : Ainf p F) ^ q₁.den)
-      ↔ q ≤ q₁ := by
-    show gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
-        (teichPi p F ϖ ^ q₁.num.toNat)
-      ≤ gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
-          ((p : Ainf p F) ^ q₁.den) ↔ _
-    rw [gaussVal_teichPi_pow, gaussVal_p_pow,
-      show perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
-          ^ q₁.num.toNat = vpiQ p F ϖ ((q₁.num.toNat : ℕ) : ℚ) from
-        (vpiQ_natCast p F ϖ q₁.num.toNat).symm,
-      vpiQ_pow p F ϖ q q₁.den, vpiQ_le_vpiQ_iff p F ϖ, hcast₁]
-    rw [show (q * (q₁.den : ℚ) ≤ (q₁.num : ℚ)) ↔ q ≤ q₁ from by
-      rw [← le_div_iff₀ hden₁, Rat.num_div_den]]
+  have hcompute₁ := gaussVal_vle_teichPi_pow_p_pow_iff p F ϖ hq hq₁
   have hcompute₂ : (ofValuation (gaussVal p F (vpiQ_pos p F ϖ q)
         (vpiQ_lt_one p F ϖ hq))).vle
         ((p : Ainf p F) ^ q₂.den) (teichPi p F ϖ ^ q₂.num.toNat)
