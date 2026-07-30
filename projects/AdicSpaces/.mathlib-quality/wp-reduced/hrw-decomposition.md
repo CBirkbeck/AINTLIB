@@ -559,3 +559,30 @@ evenSupportEquiv T_N-tower: even≅P K (N+1) Heads:567 + Module.Finite even head
 Heads:930 + head⟨T⟩/T_N⟨T⟩ layer + Descent lemmas) + maximal-only wa_mem
 statement + rewire headLocsReduced; (2) THE DEEP LEAF: W∈𝔭 maximal quadratic
 tower (L3.b); (3) C: L1 elementary leaves + 8.30-conditional assembly.
+
+## WA_MEM DISCHARGE PLAN (2026-07-30, per the L3-REARCHITECTURE — no new analytics!)
+
+The finite-embedding route covers ALL head-maximals uniformly (subsumes the
+case split): for 𝔪 maximal in the w-head, run the BLOCK-A-ASSEMBLY-MIRROR
+with A-side := head, B-side := zero-head (headToZeroHead; module_finite_zero_head),
+factors := fibreMaximals of 𝔪·zero-head:
+  g_r : Loc𝔪⧸max^r →(equivQuotMaximalIdealPow.symm)→ head⧸𝔪^r →(levelMap)→
+  zero-head⧸(𝔪Z)^r →(factor per 𝔫)→ zero-head⧸𝔫^r →(equivQuotMaximalIdealPow)→
+  ∏ Loc𝔫⧸max𝔫^r  [mapLevelwisePi]
+- compat: mk-chases (block-A hcompat mirror).
+- cofinality WITHOUT faithful flatness: kernel-chase gives a-image ∈ (⨅𝔫)^s
+  ⊆ (𝔪Z)^{s'} (nilpotence exists_pow_iInf_overMaximal_le + iInf_pow_eq_iInf_pow
+  ✓ built) then ARTIN-REES for the pair (head ⊆ zero-head as finite module):
+  𝔪^s·Z ∩ head ⊆ 𝔪^{s−c} (mathlib RingTheory.Filtration stable-filtration
+  Artin-Rees; find exact name) ⟹ factor-to-r kills. Needs head-noetherian
+  (isStronglyNoetherian_WPHead → IsNoetherianRing ✓) + Z module-finite ✓.
+  NOTE: levelMap-kernel step needs comap((𝔪Z)^s) ≤ 𝔪^{s−c} which IS the
+  Artin-Rees statement (a ∈ head with image in 𝔪^s·Z).
+- per-factor: 𝔫 max (comap_zeroHead_isMaximal ✓ built — comap-chase via the
+  semilocal fibre structure overMaximal/comap_overMaximal-mirror) →
+  completedLocal zero-head 𝔫 reduced (zeroHeadTateEquiv + block A ✓ built).
+- targets reduced ⟹ isReduced_of_levelwisePi_cofinal (✓ built) closes
+  head_completedLocal_reduced_of_isMaximal_of_wa_mem (state proof for the
+  mem-case only; statement untouched).
+Also fibre-Artinian mirror: isArtinianRing (zero-head ⧸ 𝔪Z) via
+module_finite_zero_head + Quotient-field (isArtinianRing_fibre pattern ✓).
