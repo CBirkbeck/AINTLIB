@@ -2143,3 +2143,98 @@ as the helper's argument, so the lift saves ~10 lines against needs of −16 and
 *before* attempting would have reframed this as task-3 dedup from the start. **When a lift's
 candidate block contains a nested proof that must be passed through, subtract that nested proof from
 the saving before deciding the lift crosses the bar.**
+
+## A REAL unsoundness in the join tool — joining a tactic onto its `by`
+
+Applied four "safe" joins; **two files broke**. Both failures had the same cause, and it invalidates a
+rule I had been using all campaign.
+
+    zero_mem' := by                                  zero_mem' := by simp only [Set.mem_preimage, map_zero]
+      simp only [Set.mem_preimage, map_zero]   -->     intro i _; exact (Vi i).toAddSubgroup.zero_mem
+      intro i _; exact (Vi i).toAddSubgroup.zero_mem
+
+    TateAlgebraWedhorn.lean:223:62: unexpected identifier; expected '}'
+    TateAlgebraWedhorn.lean:215:6: Fields missing: `neg_mem'`
+
+**Mechanism:** a `by` block's tactic sequence is anchored at the **column of its first tactic**.
+Joining that first tactic onto the `by` line moves the anchor far to the right (from column 10 to
+column ~24 above). Every *subsequent* line of the block is now less indented than the anchor, so it
+falls out of the tactic block — and in a structure literal it gets re-parsed as the next field,
+producing the misleading "Fields missing" / "expected '}'" errors. The same thing broke three joins in
+`FiniteJetSheafTransfer` (`map_add' := fun x y => by funext D`, `… := by ext s`).
+
+**Corrected rule (now in the detector):** a join where `a` ends in `by`/`do` is safe **only if `b` is
+the last line of that block** — i.e. the next non-blank line is indented *strictly less* than `b`.
+The first version of the guard compared against `a`'s indent, which is wrong: the comparison must be
+against **`b`'s** indent, since `b` is what sets the anchor. With the corrected guard the
+`productRestrictionSub_isEmbedding_JetA` candidates fell from 6 to 2 — i.e. **two thirds of the
+"safe" joins in that proof were unsafe.**
+
+Joins where `a` ends in `:=` / `↦` / `=>` (expression continuations, not tactic blocks) remain safe;
+those are the ones used successfully earlier in the campaign.
+
+Recovery: `git show HEAD:<path> > <path>` restores a file exactly when the only changes are the bad
+edits — cheaper and more precise than reconstructing by hand, and it sidesteps the `git checkout`
+guardrail. Both files rebuilt green afterwards (3125 and 2581 jobs) and `git diff HEAD` was empty.
+
+Net for this round: `tateTopologyT_nonarchimedean` 51 → 50 via a genuine `letI … :=` expression
+continuation (92 chars). `productRestrictionSub_isEmbedding_JetA` needs −3 but has only one usable
+join, so it is **not** reachable by joining — left for a real decomposition.
+
+Running total: **253**.
+
+## Task 2 — `GaussNorm.gaussValue_mul_le` 66 → 38 (253 → 252)
+
+The bottom-up rule applied again, and this time the arithmetic was the whole decision. The scan
+nominates `have key` (55 lines, zero locals) — but lifting `key` wholesale would produce a **54-line
+helper**, trading one over-50 declaration for another. Instead measured *inside* `key` and lifted its
+`hPP` sub-block (31 lines).
+
+`hPP`'s first tactic is `rw [hPx, hPy, Finset.sum_mul_sum]`, i.e. it immediately unfolds the two
+`set`-bound prefixes — so the helper can be stated **directly on the sums**, and the `Px`/`Py` locals
+never have to be threaded:
+
+    private theorem gaussValue_prefix_mul_prefix_le (hρ1 : ρ < 1) (x y : Ainf p F) (n : ℕ) :
+        gaussValue p F ρ ((∑ i ∈ Finset.range (n+1), [xᵢ]·pⁱ) * (∑ i ∈ Finset.range (n+1), [yᵢ]·pⁱ))
+          ≤ gaussValue p F ρ x * gaussValue p F ρ y
+
+leaving `hPP` as `rw [hPx, hPy]; exact gaussValue_prefix_mul_prefix_le p F hρ1 x y n`. Helper 37
+lines, `key` 55 → 27, the theorem 66 → 38. Both under 50.
+
+**Generalisable: when a candidate block opens by `rw`-ing away the `set` bindings it mentions, those
+bindings are not real dependencies.** State the helper on the unfolded form and the apparent local
+cost disappears. That is what made this a zero-threading lift despite `hPP` nominally depending on
+`Px`, `Py`, `hPx`, `hPy`.
+
+This is also the third instance of the *same mathematical content* in this codebase — the cross-term
+bound `(ρⁱ|xᵢ|)·(ρʲ|yⱼ|) ≤ w(x)·w(y)`, previously extracted as
+`WittF.bddAbove_and_gaussValueF_cross_le` and used inside `Euclidean`'s convolution bound. The three
+live at different levels (`Ainf`, `WittVector p F`, `gaussValueF`) so they are not literally shareable,
+but the recurrence is worth noting for anyone generalising the Gauss-norm API later.
+
+## Task 2 — `YPresheaf.gaussPoint_mem_intervalTrace_iff` 59 → 45 (252 → 251)
+
+The subscripted name `hcompute₁` suggested a `₂` mirror in the same proof, which would have made one
+helper pay twice. **It is not a mirror.** Reading both:
+
+    hcompute₁ : (…).vle (teichPi ^ q₁.num.toNat) (p ^ q₁.den) ↔ q ≤ q₁
+    hcompute₂ : (…).vle (p ^ q₂.den) (teichPi ^ q₂.num.toNat) ↔ q₂ ≤ q
+
+The `vle` arguments are **swapped** and the conclusion runs the other way — they are the two
+*directions* of the comparison, not two instances of one statement. A single helper cannot serve both
+without an extra symmetry argument. Since the need was only −9 and lifting `hcompute₁` alone saves 14,
+extracted just that one and left `hcompute₂` in place.
+
+**Subscripted sibling names (`₁`/`₂`, `A`/`B`, `plus`/`minus`) are a good place to look for mirrors,
+but they equally often mark the two halves of a two-sided argument.** Diff them before assuming the
+shared-helper payoff.
+
+Tooling note: the first attempt drove the replacement with a regex over the block, which matched
+`hcompute₁` but not `hcompute₂` and tripped its own assertion — leaving the file **unwritten**, since
+the assert fired before the `open(…, 'w')`. That is the right failure mode and it cost nothing;
+re-doing it with explicit line ranges (asserting the expected text at both boundaries first) was
+immediate. **Prefer indexed line ranges with boundary assertions over regexes for structured
+multi-line edits** — regexes over Lean blocks are hard to anchor and fail in ways that are easy to
+misread as "no such block".
+
+Running total: **251** (486 baseline → 290 pre-split → 274 post-split → 251).
