@@ -1205,8 +1205,7 @@ private theorem ciSup_gaussTerm_eq_zero_of_valued_PhiHatK_eq_zero {ρ : NNReal}
       Filter.atTop (nhds 0))
     (h0 : Valued.v (PhiHatK p F ϖ hρ0 hρ1 b) = 0) :
     (0 : NNReal) = ⨆ n, ρ ^ n * perfectoidValuation p F (b n) := by
-  set s : ℕ → hatK p F hρ0 hρ1 :=
-    fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N) with hs
+  set s : ℕ → hatK p F hρ0 hρ1 := fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N) with hs
   have hsval : ∀ N, Valued.v (s N)
       = (Finset.range N).sup (fun n => ρ ^ n * perfectoidValuation p F (b n)) := by
     intro N

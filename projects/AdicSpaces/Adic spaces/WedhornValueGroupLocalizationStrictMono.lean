@@ -127,8 +127,7 @@ theorem mapValueGroupWithZero_surjective_of_localization
     (w : Spv (Localization.Away s))
     (hws : ¬ w.vle (algebraMap A (Localization.Away s) s) 0) :
     letI : ValuativeRel (Localization.Away s) := w.toValuativeRel
-    letI : ValuativeRel A :=
-      (comap (algebraMap A (Localization.Away s)) w).toValuativeRel
+    letI : ValuativeRel A := (comap (algebraMap A (Localization.Away s)) w).toValuativeRel
     Function.Surjective
       (ValuativeExtension.mapValueGroupWithZero A (Localization.Away s))
 ```

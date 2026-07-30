@@ -1145,3 +1145,46 @@ occurs 7 times outside the Keystone triple (Lemma745, SpaRationalSubsetCorrespon
 SpvCompletionExtension, ValuationPrimeConvex, ArCompletion, Groebner). Each saves 1-2 lines and
 **none is inside an over-50 proof**, so golfing them advances nothing measurable. Left alone —
 noted so a future pass does not re-derive the search.
+
+## Task 2 — the continuation join: 7 proofs in one batch, zero semantic risk
+
+Building on last pass's golf approach, the cheapest golf of all is mechanisable.
+`scratchpad/joinable.py` finds **continuation joins**: a construct split across two lines where
+the second is a pure continuation, and the joined line still fits 100 chars. The joined line holds
+*exactly the same tokens*, so no proof can change meaning — this is the only fully-safe way to
+remove a line.
+
+Accepted shape (deliberately narrow):
+
+* line ends in `:=`, successor is more-indented, joined length ≤ 100, **and line k+2 is not also
+  more-indented** — that last guard matters: if the value spans several lines, pulling only the
+  first one up is a reshape, not a join.
+* neither line carries a `--` comment (the join would swallow the rest of the line).
+* `:= by` is *excluded* by construction, since it does not end in `:=`.
+
+Result: of 364 over-50 proofs, **7 cross the bar on `:=`-joins alone**, needing 9 joins in total.
+Applied, bottom-up per file, only as many as each proof needs:
+
+    ciSup_gaussTerm_eq_zero_of_valued_PhiHatK_eq_zero   ArCompletion
+    glue_piece_eq                                       CurveObject
+    uniformContinuous_frobToBI                          FrobeniusGauss
+    SpvAI.exists_subbasic_mem_nhds                      SpvAITopology
+    genPiece_relOverlap_forwardCompletion_continuous    WedhornCechAcyclicity  (3 joins)
+    sigma_factored_supplier_via_localized_cor732        WedhornSigmaFactoredSupplier…
+    mapValueGroupWithZero_surjective_of_localization     WedhornValueGroupLocalization…
+
+Over-50 count **364 → 357**. All nine joined lines are single statements of 80-97 chars
+(`set s : … := fun N => … with hs`, `haveI : IsNoetherianRing … := …`, etc.).
+
+A further **6** proofs could cross if comma/open-bracket continuations were joined too. Those are
+left for now: a `,`-terminated line inside a term is safe to join, but the detector cannot yet
+distinguish that from other uses of a trailing comma, and the gain is not worth a wrong guess.
+
+### Where this leaves the three routes
+
+| route | cost | availability |
+|---|---|---|
+| continuation join | ~free, scriptable, zero risk | 7 done; 6 more behind a better comma detector |
+| targeted golf (read the proof, remove 2-4 lines) | one read per proof | ~46 left in the 51-55 band |
+| extract a self-contained `have` | one read + one module build | rare now |
+| author a reconstructed `?_` goal | expensive | the 203-strong bulk |

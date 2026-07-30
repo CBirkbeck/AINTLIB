@@ -999,8 +999,7 @@ theorem glue_piece_eq (W : Opens ↥(yTop p F ϖ))
           (limitRestrict (le_of_eq (piece_shift p F ϖ m W))
             (translateFam p F ϖ W s (1 + m))) := hL4
     _ = translateFam p F ϖ W s (1 + m) := hL5.trans hL6
-    _ = limitRestrict (yFunctor_translate_le p F ϖ W (1 + m)) g :=
-        (hg (1 + m)).symm
+    _ = limitRestrict (yFunctor_translate_le p F ϖ W (1 + m)) g := (hg (1 + m)).symm
     _ = limitRestrict (piece_le_frobOpens_sat p F ϖ m W)
           (limitRestrict (le_of_eq
             (frobOpens_yFunctor_curvePreimage p F ϖ 1 (xImage p F ϖ W)))

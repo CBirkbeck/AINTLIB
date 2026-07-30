@@ -300,8 +300,7 @@ theorem sigma_factored_supplier_via_localized_cor732
     (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) s ∈ locSubring P T s) :
     letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-    letI : PlusSubring (Localization.Away s) :=
-      localizationLocSubringPlusSubring P T s
+    letI : PlusSubring (Localization.Away s) := localizationLocSubringPlusSubring P T s
     letI : DecidableEq (Localization.Away s) := Classical.decEq _
     ∀ (π_loc : (locPairOfDefinition P T s hopen).A₀)
       (_hI_loc : (locPairOfDefinition P T s hopen).I = Ideal.span {π_loc})

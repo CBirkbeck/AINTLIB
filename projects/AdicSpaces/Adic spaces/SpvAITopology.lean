@@ -1191,8 +1191,7 @@ theorem SpvAI.exists_subbasic_mem_nhds [DecidableEq A] (I : Ideal A)
     obtain ⟨T₁, b₁, rfl⟩ := hs
     obtain ⟨T₂, b₂, rfl⟩ := ht
     rw [hT_eq T₁ b₁, hT_eq T₂ b₂]
-    have hb₁_in : b₁ ∈ T₁ ∪ {b₁} :=
-      Finset.mem_union_right T₁ (Finset.mem_singleton_self b₁)
+    have hb₁_in : b₁ ∈ T₁ ∪ {b₁} := Finset.mem_union_right T₁ (Finset.mem_singleton_self b₁)
     have hb₂_in : b₂ ∈ T₂ ∪ {b₂} :=
       Finset.mem_union_right T₂ (Finset.mem_singleton_self b₂)
     have h_int :=

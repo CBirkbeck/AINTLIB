@@ -145,8 +145,7 @@ theorem uniformContinuous_frobToBI
     (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
     @UniformContinuous _ _ (blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) _
       ((blocToBI p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1).comp (frobBloc p F ϖ)) := by
-  letI : UniformSpace (Bloc p F ϖ) :=
-    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  letI : UniformSpace (Bloc p F ϖ) := blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
   haveI : IsUniformAddGroup (Bloc p F ϖ) :=
     isUniformAddGroup_blocWI p F ϖ
   haveI : IsUniformAddGroup ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) :=
