@@ -746,3 +746,28 @@ FJP/RestrictedTruncation.lean; univariate precedent
 TateAlgebra.mem_ideal_map_of_forall_coeff_mem:2573).
 Carrier note: QHead is on the P-form; bridge toTopRestricted (TatePointEval)
 transports the purely algebraic surjectivity statement.
+
+## BETA implementation state (WP/GraphFibreBeta.lean started)
+
+Brick 1 DONE: isClosed_ideal_of_noetherian_normed (faithful engine
+ValuationSpectrum.fg_topologicalClosure_isClosed + noetherian FG-closure +
+ContinuousSMul := ⟨continuous_mul⟩; metric instances automatic). Gives 𝔭-closed
+in head + 𝔮-closed in QHead immediately (both normed noetherian Tate ✓
+isTateRing instance Heads:174 + isStronglyNoetherian; QHead noetherian via
+isNoetherianRing_qHead + instNormedCommRingQHead).
+REMAINING BRICKS (mapped): (ii) κ(𝔭)-package (spectral normed field via
+extNormedField on constHead-algebra; quotient-norm instance on A⧸𝔭 from
+𝔭-closed; g := mk continuous; id : quotient-norm → spectral continuous by
+LinearMap.continuous_of_finiteDimensional both ways / norm equivalence);
+(iii) b-boundedness ‖f̄/s̄‖_spec ≤ 1 (t̄ᵢ power-bounded in κ(𝔮)-quotient-norm
+[lifts Tᵢⁿ gauss ≤ 1] + 𝔮-closed norm-equivalence + spectral ≤ 1 via
+integrality/limit characterization; isometric κ(𝔭) ↪ κ(𝔮) spectral
+compatibility); (iv) ε := mvEvalHomBounded g hg b hb + polynomial formula
+(MvPolynomial.ringHom_ext, s̄⁻¹-lift u, us−1 ∈ 𝔭); (v) Φ + ker-closed
+(brick 1 on... NOTE ker Φ is an ideal of S-carrier with mvTateAlgebraTopology' —
+use mvTate_isClosed_ideal directly, NOT brick 1, for S) + C Hausdorff;
+(vi) j continuous + Function.LeftInverse.isClosed_range;
+(vii) mvPolynomialToTate_denseRange + DenseRange.comp; (viii) transport to
+P-form levelMap-bijectivity via toTopRestricted-equiv (generalize to E,
+underlying-identity) and assemble with QuotientPowFlat + localizationEquiv
+into qHead_completedLocal_comparison (flatness threaded 8.30-conditional).
