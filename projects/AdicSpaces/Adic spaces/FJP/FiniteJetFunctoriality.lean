@@ -1750,6 +1750,44 @@ theorem locRhoC_continuous : Continuous (locRhoC F e.m D.s e.f) :=
     rw [one_mul]; exact norm_locRhoC_le D e x
 
 open GraphKoszul in
+/-- The `ρ`-naturality square of `locRhoB_bridgeFwdB`, verified on the image of
+`coeRingHom` — i.e. on the localization, where `IsLocalization.ringHom_ext` reduces it to a
+check on `algebraMap`. The parent then transports it along `denseRange_coe`. -/
+private theorem locRhoB_bridgeFwdB_comp_coeRingHom (hD : D.IsRational) :
+    ((locRhoB F e.m D.s e.f).comp (bridgeFwdB D e hD)).comp
+      (pushDatumB D hD).coeRingHom =
+      ((bridgeFwdD D e hD).comp (mapBD D hD)).comp (pushDatumB D hD).coeRingHom := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumB D hD).s) ?_
+  refine RingHom.ext fun b => ?_
+  simp only [RingHom.comp_apply]
+  rw [show (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
+      (Localization.Away (pushDatumB D hD).s) b) =
+      (pushDatumB D hD).canonicalMap b from rfl,
+    show bridgeFwdB D e hD ((pushDatumB D hD).canonicalMap b) =
+      bridgeBaseB D e b from by
+      rw [show (pushDatumB D hD).canonicalMap b =
+        (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
+          (Localization.Away (pushDatumB D hD).s) b) from rfl,
+        bridgeFwdB_coe, bridgeLocHomB_algebraMap],
+    show mapBD D hD ((pushDatumB D hD).canonicalMap b) =
+      (pushDatumD D hD).canonicalMap (rhoB F b) from
+      presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
+    show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoB F b)) =
+      bridgeBaseD D e (rhoB F b) from by
+      rw [show (pushDatumD D hD).canonicalMap (rhoB F b) =
+        (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
+          (Localization.Away (pushDatumD D hD).s) (rhoB F b)) from rfl,
+        bridgeFwdD_coe, bridgeLocHomD_algebraMap]]
+  rw [show bridgeBaseB D e b =
+      Ideal.Quotient.mk (IB F e.m D.s e.f) (polyToP (MvPolynomial.C b)) from rfl,
+    locRhoB_mk,
+    show extRhoB F e.m (polyToP (MvPolynomial.C b)) =
+      polyToP (MvPolynomial.map (rhoB F) (MvPolynomial.C b)) from
+      mapRestricted_polyToP _ _ _ (MvPolynomial.C b),
+    MvPolynomial.map_C]
+  rfl
+
+open GraphKoszul in
 /-- `ρ`-naturality, 𝓑-side: `locRhoB ∘ fwdB = fwdD ∘ mapBD`. -/
 theorem locRhoB_bridgeFwdB (hD : D.IsRational) :
     (locRhoB F e.m D.s e.f).comp (bridgeFwdB D e hD) =
@@ -1765,38 +1803,7 @@ theorem locRhoB_bridgeFwdB (hD : D.IsRational) :
   have hdense : DenseRange ((pushDatumB D hD).coeRingHom :
       Localization.Away (pushDatumB D hD).s → presheafValue (pushDatumB D hD)) :=
     UniformSpace.Completion.denseRange_coe
-  have hcomp : ((locRhoB F e.m D.s e.f).comp (bridgeFwdB D e hD)).comp
-      (pushDatumB D hD).coeRingHom =
-      ((bridgeFwdD D e hD).comp (mapBD D hD)).comp (pushDatumB D hD).coeRingHom := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumB D hD).s) ?_
-    refine RingHom.ext fun b => ?_
-    simp only [RingHom.comp_apply]
-    rw [show (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
-        (Localization.Away (pushDatumB D hD).s) b) =
-        (pushDatumB D hD).canonicalMap b from rfl,
-      show bridgeFwdB D e hD ((pushDatumB D hD).canonicalMap b) =
-        bridgeBaseB D e b from by
-        rw [show (pushDatumB D hD).canonicalMap b =
-          (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
-            (Localization.Away (pushDatumB D hD).s) b) from rfl,
-          bridgeFwdB_coe, bridgeLocHomB_algebraMap],
-      show mapBD D hD ((pushDatumB D hD).canonicalMap b) =
-        (pushDatumD D hD).canonicalMap (rhoB F b) from
-        presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
-      show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoB F b)) =
-        bridgeBaseD D e (rhoB F b) from by
-        rw [show (pushDatumD D hD).canonicalMap (rhoB F b) =
-          (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
-            (Localization.Away (pushDatumD D hD).s) (rhoB F b)) from rfl,
-          bridgeFwdD_coe, bridgeLocHomD_algebraMap]]
-    rw [show bridgeBaseB D e b =
-        Ideal.Quotient.mk (IB F e.m D.s e.f) (polyToP (MvPolynomial.C b)) from rfl,
-      locRhoB_mk,
-      show extRhoB F e.m (polyToP (MvPolynomial.C b)) =
-        polyToP (MvPolynomial.map (rhoB F) (MvPolynomial.C b)) from
-        mapRestricted_polyToP _ _ _ (MvPolynomial.C b),
-      MvPolynomial.map_C]
-    rfl
+  have hcomp := locRhoB_bridgeFwdB_comp_coeRingHom D e hD
   have h_eq : ⇑((locRhoB F e.m D.s e.f).comp (bridgeFwdB D e hD)) =
       ⇑((bridgeFwdD D e hD).comp (mapBD D hD)) :=
     hdense.equalizer
@@ -1804,6 +1811,44 @@ theorem locRhoB_bridgeFwdB (hD : D.IsRational) :
       ((bridgeFwdD_continuous D e hD).comp (mapBD_continuous D hD))
       (by funext a; exact DFunLike.congr_fun hcomp a)
   exact DFunLike.ext _ _ fun x => congrFun h_eq x
+
+open GraphKoszul in
+/-- The `ρ`-naturality square of `locRhoC_bridgeFwdC`, verified on the image of
+`coeRingHom` — i.e. on the localization, where `IsLocalization.ringHom_ext` reduces it to a
+check on `algebraMap`. The parent then transports it along `denseRange_coe`. -/
+private theorem locRhoC_bridgeFwdC_comp_coeRingHom (hD : D.IsRational) :
+    ((locRhoC F e.m D.s e.f).comp (bridgeFwdC D e hD)).comp
+      (pushDatumC D hD).coeRingHom =
+      ((bridgeFwdD D e hD).comp (mapCD D hD)).comp (pushDatumC D hD).coeRingHom := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumC D hD).s) ?_
+  refine RingHom.ext fun b => ?_
+  simp only [RingHom.comp_apply]
+  rw [show (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
+      (Localization.Away (pushDatumC D hD).s) b) =
+      (pushDatumC D hD).canonicalMap b from rfl,
+    show bridgeFwdC D e hD ((pushDatumC D hD).canonicalMap b) =
+      bridgeBaseC D e b from by
+      rw [show (pushDatumC D hD).canonicalMap b =
+        (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
+          (Localization.Away (pushDatumC D hD).s) b) from rfl,
+        bridgeFwdC_coe, bridgeLocHomC_algebraMap],
+    show mapCD D hD ((pushDatumC D hD).canonicalMap b) =
+      (pushDatumD D hD).canonicalMap (rhoC F b) from
+      presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
+    show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoC F b)) =
+      bridgeBaseD D e (rhoC F b) from by
+      rw [show (pushDatumD D hD).canonicalMap (rhoC F b) =
+        (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
+          (Localization.Away (pushDatumD D hD).s) (rhoC F b)) from rfl,
+        bridgeFwdD_coe, bridgeLocHomD_algebraMap]]
+  rw [show bridgeBaseC D e b =
+      Ideal.Quotient.mk (IC F e.m D.s e.f) (polyToP (MvPolynomial.C b)) from rfl,
+    locRhoC_mk,
+    show extRhoC F e.m (polyToP (MvPolynomial.C b)) =
+      polyToP (MvPolynomial.map (rhoC F) (MvPolynomial.C b)) from
+      mapRestricted_polyToP _ _ _ (MvPolynomial.C b),
+    MvPolynomial.map_C]
+  rfl
 
 open GraphKoszul in
 /-- `ρ`-naturality, 𝓒-side: `locRhoC ∘ fwdC = fwdD ∘ mapCD`. -/
@@ -1821,38 +1866,7 @@ theorem locRhoC_bridgeFwdC (hD : D.IsRational) :
   have hdense : DenseRange ((pushDatumC D hD).coeRingHom :
       Localization.Away (pushDatumC D hD).s → presheafValue (pushDatumC D hD)) :=
     UniformSpace.Completion.denseRange_coe
-  have hcomp : ((locRhoC F e.m D.s e.f).comp (bridgeFwdC D e hD)).comp
-      (pushDatumC D hD).coeRingHom =
-      ((bridgeFwdD D e hD).comp (mapCD D hD)).comp (pushDatumC D hD).coeRingHom := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumC D hD).s) ?_
-    refine RingHom.ext fun b => ?_
-    simp only [RingHom.comp_apply]
-    rw [show (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
-        (Localization.Away (pushDatumC D hD).s) b) =
-        (pushDatumC D hD).canonicalMap b from rfl,
-      show bridgeFwdC D e hD ((pushDatumC D hD).canonicalMap b) =
-        bridgeBaseC D e b from by
-        rw [show (pushDatumC D hD).canonicalMap b =
-          (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
-            (Localization.Away (pushDatumC D hD).s) b) from rfl,
-          bridgeFwdC_coe, bridgeLocHomC_algebraMap],
-      show mapCD D hD ((pushDatumC D hD).canonicalMap b) =
-        (pushDatumD D hD).canonicalMap (rhoC F b) from
-        presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
-      show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoC F b)) =
-        bridgeBaseD D e (rhoC F b) from by
-        rw [show (pushDatumD D hD).canonicalMap (rhoC F b) =
-          (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
-            (Localization.Away (pushDatumD D hD).s) (rhoC F b)) from rfl,
-          bridgeFwdD_coe, bridgeLocHomD_algebraMap]]
-    rw [show bridgeBaseC D e b =
-        Ideal.Quotient.mk (IC F e.m D.s e.f) (polyToP (MvPolynomial.C b)) from rfl,
-      locRhoC_mk,
-      show extRhoC F e.m (polyToP (MvPolynomial.C b)) =
-        polyToP (MvPolynomial.map (rhoC F) (MvPolynomial.C b)) from
-        mapRestricted_polyToP _ _ _ (MvPolynomial.C b),
-      MvPolynomial.map_C]
-    rfl
+  have hcomp := locRhoC_bridgeFwdC_comp_coeRingHom D e hD
   have h_eq : ⇑((locRhoC F e.m D.s e.f).comp (bridgeFwdC D e hD)) =
       ⇑((bridgeFwdD D e hD).comp (mapCD D hD)) :=
     hdense.equalizer

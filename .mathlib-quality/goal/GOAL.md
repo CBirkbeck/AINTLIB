@@ -565,3 +565,43 @@ In-scope raises: **2**, both now with a full in-source diagnosis and a verified 
 diffuse decomposition. Nothing else in the tree carries a raise except `Vendored/`
 (third-party, 1 heartbeat + 1 `maxSynthPendingDepth 8`) and the three
 `maxSynthPendingDepth 1` reductions, which stay.
+
+## Task 2 — the cheap-win queue: a scan that finds the one-cut proofs
+
+Two new scanners replace guesswork about which proof to attack next.
+
+**`scratchpad/dominance.py`** — for each over-50 proof, prints the span of its largest
+top-level step and what fraction of the body that is, plus whether that step is a
+`have` (statement written down → the extracted signature can be **copied**) or a
+bullet / `by_cases` branch (goal is a `?_` → the signature must be **reconstructed**, much
+riskier). Of 375 proofs, **45 have a dominant `have` at ≥45% of the body**.
+
+**`scratchpad/liftable.py`** — narrows that to the ones where a single cut puts *both* halves
+under 50 (**81 proofs**, i.e. −81 available on the count), then reports, per target, which
+*proof-local* bindings the dominant `have` actually touches. Zero locals ⇒ the `have` refers only
+to the theorem's own binders and lifts mechanically: copy the parent's binder list verbatim, copy
+the `have`'s statement as the conclusion, move the body. **13 targets** are in that class.
+
+This is the useful contrast with `gluing_JetA`: there the dominant step was 33% of the body and
+the residual cost was diffuse, so cutting it did not finish the job. The dominance figure predicts
+that in advance.
+
+### Landed from the queue (3 proofs, net −3)
+
+| parent | was | now | extracted lemma |
+|---|---|---|---|
+| `locRhoB_bridgeFwdB` | 51 | 20 | `locRhoB_bridgeFwdB_comp_coeRingHom` (30) |
+| `locRhoC_bridgeFwdC` | 51 | 20 | `locRhoC_bridgeFwdC_comp_coeRingHom` (30) |
+| `exists_translateFam_glue` | 63 | 44 | `translateFam_pairwise_compat` (19) |
+
+The first two are a B/C mirror pair and took one script run. All six declarations are now under
+the bar.
+
+### GOTCHA (hit again — third time this campaign)
+
+Inserting a lemma "above the parent" must use the **preamble-start scan**, not the `theorem` line:
+anchoring on `theorem exists_translateFam_glue …` spliced the new lemma *between* the parent's
+docstring and its `theorem`, giving `unexpected token '/--'; expected 'lemma'`. Anchor on the
+whole docstring-plus-declaration block, or scan back over `/-- … -/`, attributes, `include`/`omit
+… in` and `set_option … in` as recorded earlier. Any batch inserter must do this or it will
+corrupt every target that has a docstring — which is most of them.

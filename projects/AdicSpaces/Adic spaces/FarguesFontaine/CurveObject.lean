@@ -539,6 +539,46 @@ theorem yFunctor_translate_le (W : Opens ↥(yTop p F ϖ)) (k : ℤ) :
   leOfHom ((yFunctor p F ϖ).map
     (homOfLE (translate_le_curvePreimage_xImage p F ϖ W k)))
 
+/-- Translates of a section along distinct Frobenius shifts agree on their overlaps —
+vacuously: by `hdis` the overlaps are empty, so their `limitSections` are subsingletons, and
+the diagonal case is `rfl`.
+
+Extracted from `exists_translateFam_glue`, where it was the dominant `have`. -/
+private theorem translateFam_pairwise_compat (W : Opens ↥(yTop p F ϖ))
+    (hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    ∀ i j : ℤ,
+      limitRestrict (inf_le_left
+        (a := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W))
+        (b := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ j)).obj W)))
+        (translateFam p F ϖ W s i)
+      = limitRestrict (inf_le_right
+          (a := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W))
+          (b := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ j)).obj W)))
+          (translateFam p F ϖ W s j) := by
+  intro i j
+  by_cases hij : i = j
+  · subst hij
+    rfl
+  · have hsub : Subsingleton ↥(limitSections
+        ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W)
+          ⊓ (yFunctor p F ϖ).obj
+            ((Opens.map (yFrobTop p F ϖ j)).obj W))) := by
+      refine ValuationSpectrum.limitSections_subsingleton_of_empty
+        (Set.eq_empty_of_forall_notMem fun v hv => ?_)
+      obtain ⟨hvi, hvj⟩ := hv
+      obtain ⟨y₁, hy₁, hy₁v⟩ := hvi
+      obtain ⟨y₂, hy₂, hy₂v⟩ := hvj
+      have hyy : y₁ = y₂ :=
+        Subtype.val_injective (hy₁v.trans hy₂v.symm)
+      subst hyy
+      exact Set.disjoint_left.mp
+        (translates_pairwise_disjoint p F ϖ hdis hij) hy₁ hy₂
+    exact hsub.elim _ _
+
 /-- **The glued invariant-candidate section over the saturation**
 (D-iv-3(ii-c β)): the translate family glues — compatibility is trivial on
 the diagonal and vacuous elsewhere (disjoint translates). -/
@@ -569,34 +609,7 @@ theorem exists_translateFam_glue (W : Opens ↥(yTop p F ϖ))
     rw [Opens.coe_iSup] at hy'
     obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy'
     exact Set.mem_iUnion.mpr ⟨k, ⟨y, hk, rfl⟩⟩
-  have hcompat : ∀ i j : ℤ,
-      limitRestrict (inf_le_left
-        (a := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W))
-        (b := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ j)).obj W)))
-        (translateFam p F ϖ W s i)
-      = limitRestrict (inf_le_right
-          (a := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W))
-          (b := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ j)).obj W)))
-          (translateFam p F ϖ W s j) := by
-    intro i j
-    by_cases hij : i = j
-    · subst hij
-      rfl
-    · have hsub : Subsingleton ↥(limitSections
-          ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W)
-            ⊓ (yFunctor p F ϖ).obj
-              ((Opens.map (yFrobTop p F ϖ j)).obj W))) := by
-        refine ValuationSpectrum.limitSections_subsingleton_of_empty
-          (Set.eq_empty_of_forall_notMem fun v hv => ?_)
-        obtain ⟨hvi, hvj⟩ := hv
-        obtain ⟨y₁, hy₁, hy₁v⟩ := hvi
-        obtain ⟨y₂, hy₂, hy₂v⟩ := hvj
-        have hyy : y₁ = y₂ :=
-          Subtype.val_injective (hy₁v.trans hy₂v.symm)
-        subst hyy
-        exact Set.disjoint_left.mp
-          (translates_pairwise_disjoint p F ϖ hdis hij) hy₁ hy₂
-      exact hsub.elim _ _
+  have hcompat := translateFam_pairwise_compat p F ϖ W hdis s
   have hcov' : (((yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W))
       : Opens ↥(SpaTop (Ainf p F))) : Set ↥(SpaTop (Ainf p F)))
       ⊆ ⋃ k : ULift ℤ, (((yFunctor p F ϖ).obj
