@@ -11186,13 +11186,22 @@ theorem isOXAcyclic_of_isGeneratedBy_ring_units [DecidableEq A]
       hVP
 
 
--- GOAL-DEFERRED(task 1): load-bearing.  Unlike the two G3b squares (fixed by dropping the
--- placeholder args on `restrictionMapHom_continuous`), the cost here is NOT a tactic step:
--- `imageCover` is a structure instance and the hot spot is inside the `covers` FIELD
--- (`(hC.piece D.2).span_eq_top`, at col 41), elaborated with the whole `haveI`/`letI`
--- instance stack in scope.  The fix is the split-def-from-packaging refactor -- define the
--- covers family as its own `def` with its own instance preamble, then package -- not a
--- decomposition of a proof body.  Tracked on the task-2 list.
+-- GOAL-DEFERRED(task 1): load-bearing, and NOT fixable by the usual moves.  Evidence:
+--   * It is not a tactic step.  `imageCover` is a structure instance; with the raise removed
+--     the timeout lands inside the `covers` FIELD, on the `Finset.image` at col 41.
+--   * The cost is the `DecidableEq (RationalLocData (presheafValue C.base))` that
+--     `Finset.image` demands.  It can only be `Classical.decEq`, and `whnf` grinds through it
+--     because `Finset.image` is computationally relevant (it dedups).
+--   * SPLIT-DEF-FROM-PACKAGING WAS TRIED AND FAILS (2026-07-30).  Lifting the family into its
+--     own `def imageCoverCovers` does not help: `RationalLocData B` needs instances on `B`, so
+--     the split def must either carry `haveI`s in its RETURN TYPE -- which times out at
+--     `isDefEq` on the ascription itself, worse than the original -- or take them as instance
+--     binders, which relocates the identical `Finset.image` cost without shrinking it.  Do not
+--     retry this; the attempt also cascaded 6 downstream errors.
+-- The real fix is a DESIGN change: `RationalCoveringData.covers` is a `Finset`, which is what
+-- forces a `DecidableEq` on a heavy structure.  An indexed family (or a `Set` plus a finiteness
+-- field) would need no decidability at all.  That is a statement change -> `/generalise`, not
+-- this pass.  Removed from the task-2 list: there is no proof body here to decompose.
 set_option maxHeartbeats 4000000 in
 set_option linter.unusedSectionVars false in
 /-- **The R2 image cover** (Wedhorn Prop 8.2 + Remark 8.4 + Prop 8.16, the

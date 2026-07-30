@@ -520,3 +520,48 @@ Remaining structure, for the next pass:
 either passing `step` in or lifting both together. The natural split is the textbook one:
 one lemma for the δ-ball lifting (`step` + `key`), leaving the Baire setup and the window
 argument in the parent.
+
+## Task 1 — the last two raises: one closed as out-of-scope, one reduced
+
+### `imageCover` (4M): split-def-from-packaging TRIED AND FAILED
+
+The previous entry recorded split-def-from-packaging as "the fix". **It is not.** Attempted
+2026-07-30 and reverted:
+
+* Lifting the family into `def imageCoverCovers` requires instances on `presheafValue C.base`
+  for `RationalLocData` to typecheck. Two ways to supply them, both bad:
+  - `haveI`s in the **return type** — times out at `isDefEq` on the ascription itself, i.e.
+    strictly worse than the original, and cascaded 6 downstream errors;
+  - instance **binders** — relocates the identical `Finset.image` cost without shrinking it.
+* The real cost is the `DecidableEq (RationalLocData (presheafValue C.base))` that
+  `Finset.image` demands. It can only be `Classical.decEq`, and `whnf` grinds it because
+  `Finset.image` is computationally relevant (it dedups).
+
+**Root cause is a design choice, not a proof defect:** `RationalCoveringData.covers` is a
+`Finset`, which is what forces decidable equality on a heavy structure. An indexed family, or a
+`Set` plus a finiteness field, needs no decidability at all. That is a statement change →
+`/generalise`, out of scope for this pass. **Removed from the task-2 list** — there is no proof
+body here. The in-source note now records the failed attempt so it is not retried.
+
+### `gluing_JetA` (6.4M → 1.6M): `hDmatch` extracted, but the cost is diffuse
+
+`hDmatch` (84 lines) is now `mapBD_eq_mapCD_of_pushed_gluing`; body 257 → 173. The signature
+compiled first try, which is worth noting as a method result: doing a **verbatim** extraction —
+move the body unchanged, dedent, and turn the six consumed bindings into hypotheses — puts all
+the risk in the signature, where a mistake is a type error, instead of in the proof, where a
+mistake is a silent change. Types for the hypotheses came from reading `IsSheafy.gluing`'s
+field signature rather than guessing.
+
+Measured ladder at 173 lines: **200k fails, 400k fails, 1.6M passes.** So this is not one hot
+step but dozens of individually-affordable `restrictionMap`/`presheafValueMap` rewrites over
+completions. Next real cut: the closing `pairMapBC_injective` pair — two 19-line B/C mirror
+bullets, one lemma should serve both — but their goals are the `?_`s of `pairMapBC_injective`
+and are written down nowhere, so deriving them is the prerequisite.
+
+### Task 1 status
+
+In-scope raises: **2**, both now with a full in-source diagnosis and a verified ladder.
+`imageCover` is blocked on a design decision (owner call); `gluing_JetA` is a tractable but
+diffuse decomposition. Nothing else in the tree carries a raise except `Vendored/`
+(third-party, 1 heartbeat + 1 `maxSynthPendingDepth 8`) and the three
+`maxSynthPendingDepth 1` reductions, which stay.
