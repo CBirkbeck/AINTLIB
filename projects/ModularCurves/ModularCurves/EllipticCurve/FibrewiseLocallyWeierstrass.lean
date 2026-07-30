@@ -61,7 +61,43 @@ private theorem lw_point_of_baseChange_affineOpen
         (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
             (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e.hom =
           projModelZero Wc := by
-  sorry
+  classical
+  obtain ⟨U', hsU', Wc, hell, e₁, heπ, hez⟩ := hpt
+  haveI : IsAffine W.1.toScheme := W.2
+  -- the image affine open, the ring identification, and the transported curve
+  refine ⟨⟨W.1.ι ''ᵁ U'.1, U'.2.image_of_isOpenImmersion W.1.ι⟩,
+    ⟨⟨s, hs⟩, hsU', rfl⟩, Wc.map (W.1.ι.appIso U'.1).inv.hom, inferInstance, ?_⟩
+  set U : S.affineOpens :=
+    ⟨W.1.ι ''ᵁ U'.1, U'.2.image_of_isOpenImmersion W.1.ι⟩ with hU
+  have hmap : (Wc.map (W.1.ι.appIso U'.1).inv.hom).map
+      (W.1.ι.appIso U'.1).hom.hom = Wc := by
+    rw [WeierstrassCurve.map_map, ← CommRingCat.hom_comp, Iso.inv_hom_id,
+      CommRingCat.hom_id, WeierstrassCurve.map_id]
+  set β := projModelBaseChangeOf (W.1.ι.appIso U'.1).hom.hom
+    (Wc.map (W.1.ι.appIso U'.1).inv.hom) Wc hmap with hβdef
+  have hβsq := isPullback_projModelBaseChangeOf (W.1.ι.appIso U'.1).hom.hom
+    (Wc.map (W.1.ι.appIso U'.1).inv.hom) Wc hmap
+  haveI : IsIso (Spec.map (CommRingCat.ofHom (W.1.ι.appIso U'.1).hom.hom)) := by
+    have : CommRingCat.ofHom (W.1.ι.appIso U'.1).hom.hom =
+        (W.1.ι.appIso U'.1).hom := rfl
+    rw [this]
+    infer_instance
+  haveI : IsIso β := by
+    rw [show β = hβsq.isoPullback.hom ≫ pullback.fst _ _ from
+      hβsq.isoPullback_hom_fst.symm]
+    infer_instance
+  -- the scheme-level identification of the two restricted total spaces
+  set eIm := W.1.ι.isoImage U'.1 with heIm
+  have hι : U'.1.ι ≫ W.1.ι = eIm.hom ≫ U.1.ι :=
+    (Scheme.Hom.isoImage_hom_ι W.1.ι U'.1).symm
+  set ψ₁ := pullbackLeftPullbackSndIso π W.1.ι U'.1.ι with hψ₁
+  set ψ₂ := pullback.congrHom (rfl : π = π) hι with hψ₂
+  set ψ₃ := (pullbackLeftPullbackSndIso π U.1.ι eIm.hom).symm with hψ₃
+  haveI : IsIso (pullback.fst (pullback.snd π U.1.ι) eIm.hom) := inferInstance
+  set ψ₄ := asIso (pullback.fst (pullback.snd π U.1.ι) eIm.hom) with hψ₄
+  refine ⟨ψ₄.symm ≪≫ ψ₃.symm ≪≫ ψ₂.symm ≪≫ ψ₁.symm ≪≫ e₁ ≪≫ asIso β, ?_, ?_⟩
+  · sorry
+  · sorry
 
 /-- **(FLW-6, affine case)** A smooth proper fibrewise elliptic family over an affine
 base is locally Weierstrass. -/
