@@ -64,4 +64,54 @@ theorem LinearMap.baseChange_exact_of_bounded_flat_baseChange_exact
       (LinearMap.ext fun y ↦ (hexact q hq).apply_apply_eq_zero y) (hexact q hq)
   exact (LinearMap.baseChange_baseChange_exact_iff A C (d q) (d (q + 1))).mp hAC
 
+/-- Bijectivity of the kernel base-change comparison composes along an algebra tower. -/
+theorem kerBaseChangeComparison_bijective_of_tower
+    {R : Type u} [CommRing R] {P Q : Type u} [AddCommGroup P] [AddCommGroup Q]
+    [Module R P] [Module R Q] (f : P →ₗ[R] Q)
+    (A K : Type u) [CommRing A] [CommRing K] [Algebra R A] [Algebra R K]
+    [Algebra A K] [IsScalarTower R A K]
+    (hA : Function.Bijective (ModularCurves.kerBaseChangeComparison A f))
+    (hK : Function.Bijective
+      (ModularCurves.kerBaseChangeComparison K (f.baseChange A))) :
+    Function.Bijective (ModularCurves.kerBaseChangeComparison K f) := by
+  classical
+  let eCancel := TensorProduct.AlgebraTensorModule.cancelBaseChange R A K K
+    (LinearMap.ker f)
+  let eA : K ⊗[A] (A ⊗[R] LinearMap.ker f) ≃ₗ[K]
+      K ⊗[A] LinearMap.ker (f.baseChange A) :=
+    (LinearEquiv.ofBijective (ModularCurves.kerBaseChangeComparison A f)
+      hA).baseChange A K _ _
+  let eK : K ⊗[A] LinearMap.ker (f.baseChange A) ≃ₗ[K]
+      LinearMap.ker ((f.baseChange A).baseChange K) :=
+    LinearEquiv.ofBijective
+      (ModularCurves.kerBaseChangeComparison K (f.baseChange A)) hK
+  let eBB := ModularCurves.LinearMap.baseChangeBaseChangeKernelEquiv A K f
+  have hfac : ∀ x, ModularCurves.kerBaseChangeComparison K f x =
+      eBB (eK (eA (eCancel.symm x))) := by
+    intro x
+    induction x with
+    | zero => simp only [map_zero]
+    | add x y hx hy => simp only [map_add, hx, hy]
+    | tmul k m =>
+        apply Subtype.ext
+        show k ⊗ₜ[R] (m : P) = _
+        simp only [eCancel, eA, eK, eBB,
+          TensorProduct.AlgebraTensorModule.cancelBaseChange_symm_tmul,
+          LinearEquiv.baseChange_tmul, LinearEquiv.ofBijective_apply,
+          ModularCurves.LinearMap.baseChangeBaseChangeKernelEquiv,
+          LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk,
+          ModularCurves.kerBaseChangeComparison_coe, LinearMap.baseChange_tmul,
+          Submodule.coe_subtype,
+          TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul, one_smul]
+        simp
+  constructor
+  · intro x y hxy
+    have := congrArg (fun q => eCancel (eA.symm (eK.symm (eBB.symm q))))
+      ((hfac x).symm.trans ((hfac y).symm ▸ hxy))
+    simpa using this
+  · intro y
+    refine ⟨eCancel (eA.symm (eK.symm (eBB.symm y))), ?_⟩
+    rw [hfac]
+    simp
+
 end ModularCurves
