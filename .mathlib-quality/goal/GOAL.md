@@ -1058,3 +1058,50 @@ tautology on its own. That needs per-site checking, not a bulk rename, so it is 
 
 The 3 remaining `· change …` no-ops still need the bullet restructured rather than the line
 deleted.
+
+## Task 2 — authoring pass: the leaked-local class, and the LIMIT of the set-unfold recipe
+
+With the mechanical queue exhausted, this pass attacked the 17 targets where a prologue local
+leaks to the parent. Two attempts, one success, and the failure pins down a boundary worth having.
+
+### The over-extension insight
+
+`extend.py` proposes swallowing the prologue, but that is an **upper bound**, not the right cut.
+For `isNoetherianRing_unitBall_restricted_dualNumber` it proposed swallowing `hcoeffle`; in fact
+the dominant `have` (`hEball`) **does not use `hcoeffle` at all** — the suspect was a false
+positive from an identifier appearing on both sides. Both `have`s turned out independently
+self-contained (only the theorem's `S`/`m`), so the right move was **two separate extractions**,
+no prologue swallowed and nothing threaded:
+
+    isNoetherianRing_unitBall_restricted_dualNumber   69 → 48
+      + norm_coeff_le_norm_restricted   (6)
+      + norm_epsRestricted_le_one      (17)
+
+Both are genuinely useful named lemmas. **Always check whether the dominant `have` really uses the
+prologue local before assuming it must move.**
+
+### THE LIMIT: the set-unfold recipe fails when the parent consumes the `have` by `rw`
+
+`wI_partial_cauchy_diff`'s dominant `have` (`hcauchy`) does use the `set`-bound `g`, so I applied
+the recipe that worked for `K` and `g_val`: conclusion written with `g` expanded, `set g … with hg`
+re-introduced inside the lemma. It failed:
+
+    Tactic `rewrite` failed: Did not find an occurrence of the pattern
+    Application type mismatch … (at `wI_sum_le p F _ g`)
+
+The reason is exactly the difference from the earlier successes. In the `K` case the extracted
+`have` was passed as an *argument* (`exists_chain … hstep`), and argument passing unifies up to
+defeq, so folded-vs-unfolded did not matter. Here the parent does `rw [hprod, hcauchy, …]`, and
+**`rw` is syntactic**: the lemma's unfolded RHS cannot match the goal's folded `g`. Reverted.
+
+**Rule:** the set-unfold recipe is safe when the extracted `have` is *consumed as a term*, and
+unsafe when it is *consumed by `rw`/`simp only [h]`*. For the latter the abbreviation must stay
+folded on both sides, which means the `set` cannot move into the lemma — so those targets need the
+`set` hoisted above the parent as a real definition, or the rewrite restated. Neither is
+mechanical.
+
+### Gotcha
+
+The `have hcoeffle : … := fun y s => by …` form puts its proof at indent **4**, not 2, because the
+body sits inside the `fun`. Dedenting by 4 (as for a normal `have`) drops it to column 0 and gives
+`unexpected token 'have'; expected command`. Dedent by 2.

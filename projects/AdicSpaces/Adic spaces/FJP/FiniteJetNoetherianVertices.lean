@@ -543,6 +543,37 @@ theorem isNoetherianRing_unitBall_restricted_univariate (R : Type*) [NormedCommR
       rw [RingEquiv.apply_symm_apply] at h
       exact h.symm) hballs
 
+/-- Every coefficient of a restricted power series is bounded by its Gauss norm. -/
+private theorem norm_coeff_le_norm_restricted
+    (S : Type*) [NormedCommRing S] [IsUltrametricDist S] [NormOneClass S] (m : ℕ)
+    (y : MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ)))
+    (s : Fin m →₀ ℕ) : ‖MvPowerSeries.coeff s y.1‖ ≤ ‖y‖ := by
+  have hb := MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ y) s
+  rw [finsupp_prod_one, mul_one] at hb
+  rw [MvRestricted.norm_eq]
+  exact hb
+
+/-- The `ε` of the dual numbers, as a restricted power series, lies in the unit ball. -/
+private theorem norm_epsRestricted_le_one
+    (S : Type*) [NormedCommRing S] [IsUltrametricDist S] [NormOneClass S] (m : ℕ)
+    : ‖(epsRestricted (S := S) m)‖ ≤ 1 := by
+  rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine Real.iSup_le (fun s => ?_) zero_le_one
+  rw [finsupp_prod_one, mul_one]
+  show ‖MvPowerSeries.coeff s (MvPowerSeries.C (σ := Fin m) (R := DualNumber S)
+    DualNumber.eps)‖ ≤ 1
+  rw [MvPowerSeries.coeff_C]
+  split
+  · rw [JetNorm.norm_def]
+    refine max_le ?_ ?_
+    · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).fst‖ ≤ 1
+      rw [TrivSqZeroExt.fst_inr, norm_zero]
+      exact zero_le_one
+    · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).snd‖ ≤ 1
+      rw [TrivSqZeroExt.snd_inr, norm_one]
+  · rw [norm_zero]
+    exact zero_le_one
+
 /-- Ball version of the dual-number flattening: the unit ball of `(DualNumber S)⟨T⃗⟩` is
 noetherian whenever the ball of `S⟨T⃗⟩` is (the `ε`-polynomial surjection restricts to
 balls). -/
@@ -554,29 +585,8 @@ theorem isNoetherianRing_unitBall_restricted_dualNumber
       (MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ)))) := by
   classical
   haveI := h
-  have hcoeffle : ∀ (y : MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ)))
-      (s : Fin m →₀ ℕ), ‖MvPowerSeries.coeff s y.1‖ ≤ ‖y‖ := fun y s => by
-    have hb := MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ y) s
-    rw [finsupp_prod_one, mul_one] at hb
-    rw [MvRestricted.norm_eq]
-    exact hb
-  have hEball : ‖(epsRestricted (S := S) m)‖ ≤ 1 := by
-    rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
-    refine Real.iSup_le (fun s => ?_) zero_le_one
-    rw [finsupp_prod_one, mul_one]
-    show ‖MvPowerSeries.coeff s (MvPowerSeries.C (σ := Fin m) (R := DualNumber S)
-      DualNumber.eps)‖ ≤ 1
-    rw [MvPowerSeries.coeff_C]
-    split
-    · rw [JetNorm.norm_def]
-      refine max_le ?_ ?_
-      · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).fst‖ ≤ 1
-        rw [TrivSqZeroExt.fst_inr, norm_zero]
-        exact zero_le_one
-      · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).snd‖ ≤ 1
-        rw [TrivSqZeroExt.snd_inr, norm_one]
-    · rw [norm_zero]
-      exact zero_le_one
+  have hcoeffle := fun y s => norm_coeff_le_norm_restricted S m y s
+  have hEball := norm_epsRestricted_le_one S m
   refine isNoetherianRing_of_surjective
     (Polynomial ↥(unitBall (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ))))) _
     (Polynomial.eval₂RingHom
