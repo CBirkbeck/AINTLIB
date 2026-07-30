@@ -29875,3 +29875,30 @@ Cartier producer at s → apply poleOneBasis to the V-restricted family → n=1 
    projModel-transport along the ring iso (`projModelBaseChange` + its π/zero compat
    lemmas — grep `projModelBaseChange_` in ModelVariableChange/ModelGroupUniq; IsIso for
    a ring iso). π/z field-chases through the three components.
+
+### [FLW-6] chart-lift factorization + last name-hunts (2026-07-30):
+FACTOR one private lemma powering both sorries — "LW-chart lifts along an affine open
+inclusion": given W : S.affineOpens, s ∈ W, and the chart ⟨U', hsU', Wc, hell, e₁, heπ,
+hez⟩ of the W-restricted family at ⟨s,hs⟩, produce the S-level chart at s. Tools (all
+verified in-tree/mathlib): `Scheme.Hom.appIso` (Γ(S, ι''U') ≅ Γ(W-scheme,U'));
+`IsAffineOpen.image_of_isOpenImmersion`; mathlib `(W.map f).IsElliptic` instance
+(Weierstrass:448); `projModelBaseChangeOf f W₀ W h : projModel W ⟶ projModel W₀` +
+`isPullback_projModelBaseChangeOf` (AdditionBaseChange:88/97) — recognizes projModel Wc
+as pullback of projModel W_S along Spec f (f := (appIso).hom ring map, W_S := Wc.map
+(appIso.inv)); `Scheme.Hom.ker_comp_of_isIso` (mathlib IdealSheaf/Functorial) for the X2
+ker-transport. The pullback-side: pullback π Uimg.ι ≅ pullback πW U'.ι via the
+`IsPullback.of_iso`+`isoPullback` choreography (template: `exists_pointedIso_direct_pullback`,
+PoleSheafNeighborhoodHOne). Compose: chart-iso := (that) ≪≫ e₁ ≪≫ (the
+isPullback-derived iso projModel Wc ≅ projModel W_S — from isPullback_projModelBaseChangeOf
+with the OTHER pullback square... or directly: e₁ lands in projModel Wc and the DEF of
+LocallyWeierstrass at S-level accepts ANY curve over Γ(S,Uimg): take Wc-transported and
+build e via pasting the two IsPullback squares: IsPullback (pullback π Uimg.ι-cone legs)
+over (projModelπ W_S, Spec f-leg…) — the clean route: both `pullback π Uimg.ι` and
+`projModel W_S`?? — NO: W_S lives over Γ(S,Uimg) and `projModel W_S`'s base is
+Spec Γ(S,Uimg), NOT Uimg.toScheme; the LocallyWeierstrass def's e-field composes with
+`U.2.isoSpec.hom` (see def at Basic:204-213: e.hom ≫ projModelπ W = pullback.snd ≫
+U.2.isoSpec.hom) — SO the isoSpec enters THERE canonically; the e₁ chart of the
+W-family already has this shape over U'.2.isoSpec; the lift must relate
+Uimg.2.isoSpec with U'.2.isoSpec via Spec (appIso) — one more square:
+Uimg.isoSpec ≫ Spec.map (appIso-inv?) = (img≅U'-scheme iso) ≫ U'.isoSpec — hunt
+`IsAffineOpen.isoSpec`-naturality (`isoSpec_hom`, `IsAffineOpen.isoSpec_ι`…) at fill.
