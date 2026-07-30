@@ -2383,3 +2383,156 @@ last round) overstates it badly enough to reject a viable lift.
 
 Also a reminder to myself: **read to the actual end of a block before quoting its size.** The "10
 lines" figure came from the first screenful of a `sed` window that happened to cut off mid-preamble.
+
+## Task 2 — the `hf_alg` pair, finally landed (249 → 247)
+
+Both proofs that have topped the ranked worklist for six rounds:
+
+* `LaurentRefinementCore.iteratedPlus_forwardToCompletion_continuous` 66 → 45
+* `IteratedOverlapEquiv.iteratedOverlap_forwardToCompletion_continuous` 64 → 44
+
+Each `hf_alg` became a one-line call to a **same-file `private` helper**. Both built green on the
+first try.
+
+**Why this worked after the earlier attempt was reverted.** That attempt aimed at a *shared* lemma in
+`PresheafIdentification` covering all three call sites, and died on `IsHuberRing (presheafValue D₀)`
+not being in scope where it was applied. A same-file helper simply repeats the enclosing theorem's own
+binders, so the instance question never arises. **Prefer a per-file helper over a shared one when the
+shared version needs instances that are not uniformly in scope** — three near-copies of a short
+statement beat one lemma that cannot be applied.
+
+**And the minimal-preamble rule is what made it fit.** The enclosing proofs open with ~41 and ~35
+lines of `letI`/`haveI` setup. Porting all of it would have produced ~70-line helpers. `hf_alg`'s body
+needs only the *topology* instances — three `letI`s in one file, two plus two `haveI`s in the other —
+giving helpers of ~34 lines.
+
+Net effect on the file: `LaurentRefinementCore` +34/−20, `IteratedOverlapEquiv` +33/−19. The
+duplication is a few instance lines; what is bought is two proofs off the list and two named,
+documented statements ("the composite `φ ∘ algebraMap A` is continuous because it equals
+`algebraMap_B ∘ canonicalMap`") that were previously anonymous blocks.
+
+Module builds green (2686 and 2695 jobs).
+
+Running total: **247** (486 baseline → 290 pre-split → 274 post-split → 247).
+
+## Task 2 — `RelativePieceKeystone.hT_pb` retried with the pass-the-term fix (247 → 246, pending build)
+
+This is the lift that was **reverted** several rounds ago after four failed iterations. The diagnosis
+then was correct and the fix comes straight from the `PerfectoidFieldCharP` round:
+
+The failure was that `relativeRationalLocData_laurentNormalized … .T` is a `Finset.image`, so it needs
+`DecidableEq (presheafValue E)` — and the enclosing proof's `classical` does not merely *supply* that
+instance, it **bakes `Classical.decEq` into the datum term**. Every attempt to *reconstruct* the datum
+inside the helper (bare, then with an instance binder, then with `open scoped Classical in`) produced a
+term that was not defeq to the caller's.
+
+The fix is not to reconstruct it at all: take **`Xbar` itself as a parameter, together with
+`hXbar : Xbar = relativeRationalLocData_laurentNormalized E D' hsub`**. The caller passes its own term,
+so the baked-in instance travels with it, and the 24-line body transfers verbatim (its opening
+`rw [hXbar, …]` still works because `hXbar` is now a hypothesis rather than a `set`-equation).
+
+    private theorem forall_mem_T_isPowerBounded_of_eq
+        (E D' : RationalLocData A) [LaurentNormalized D'] (hsub : …) (hD'_T_pb : …)
+        (Xbar : RationalLocData (presheafValue E))
+        (hXbar : Xbar = relativeRationalLocData_laurentNormalized E D' hsub) :
+        ∀ t ∈ Xbar.T, TopologicalRing.IsPowerBounded t
+
+**This closes the loop on a rule that has now been confirmed three times.** When a lifted block
+mentions a `set`-bound value:
+
+* if the block `rw`s the binding away *and the unfolded form needs no caller-supplied instances*,
+  state the helper on the unfolded form (GaussNorm);
+* **otherwise pass the value and its defining equation as parameters** (PerfectoidFieldCharP, and now
+  RelativePieceKeystone).
+
+The second is the safe default, and it is specifically what rescues the `DecidableEq`/`classical` case
+that defeated the first attempt.
+
+### It built — and the complete fix needed BOTH halves
+
+The retry went green (3000 jobs) on the second iteration, and the two halves were both necessary:
+
+1. **Pass `Xbar` + `hXbar` as parameters** — fixes the *statement*: the caller's term carries the
+   `Classical.decEq` its `classical` baked into the `Finset.image`, so nothing has to be reconstructed
+   and there is no defeq clash.
+2. **`classical` as the helper's first tactic** — fixes the *body*: the `rw` with
+   `relativeRationalLocData_laurentNormalized_T` needs `DecidableEq (presheafValue E)` in its own
+   right, independently of `Xbar`.
+
+The first attempt (reverted) tried only reconstruction-flavoured variants of (1) — bare, instance
+binder, `open scoped Classical in` — and never separated the two needs. Seeing the error **move from
+line 1258 (signature) to line 1267 (body)** was the signal that (1) had worked and a second, distinct
+problem remained. That is the same "is the error new or the same one in a new mask?" test recorded
+earlier, and here it correctly said *keep going* where four rounds ago it said *revert*.
+
+**Generalised rule: a `classical`-derived instance can be needed in two independent places — the
+statement (via a term the caller built) and the body (via a lemma the proof applies). Passing the term
+fixes only the first; the body needs its own `classical`.**
+
+Task 2: **246**. The proof reverted several rounds ago is now decomposed and green.
+
+## Scoped: the remaining true mirror pairs (name-similarity ≥ 0.62 at equal size)
+
+Re-ran the mirror scan on the current 244, now filtering same-size pairs by **name similarity**
+(`difflib` ratio) rather than size alone — size collision on its own was shown earlier to be noise:
+
+    sim 1.00  code  72  need −22  RelativePieceKeystone{Gen,Open}  genPiece_rel_forward_witness
+    sim 1.00  code  94  need −44  RelativePieceKeystone{Gen,Open}  relativePiece_equiv_restrict_square
+    sim 0.99  code 124  need −74  TateAlgebraTopology (SAME FILE)  tateAlgebraTopology'_completeSpace / ₂-variant
+    sim 0.79  code  87  need −37  SpaVIso / FrobeniusValuation     comap_ringStalkMap_*_stalkValue
+
+`genPiece_rel_forward_witness` examined in detail: the Gen and Open versions share **79 of 94 lines**,
+differing only in parametrisation (`hspan` vs `M`/`hle`, `genPieceDatum` vs `genPieceDatumOpen`,
+`imagePieceDatum` vs `imagePieceDatumOpen`). Everything downstream runs through three `set`-bound
+locals `DI`, `DB`, `F`, so a helper parameterised over *those* would be generic in the Gen/Open
+distinction and could serve both files at once.
+
+**Two concrete obstacles, both worth knowing before anyone starts:**
+
+1. **No single block covers the −22.** Top-level blocks are `hF_alg` 5, `hF_div` 9, `hqt` 4,
+   `hq_mem` 14. The largest saves 13. Crossing the bar needs *two* lifts per proof, not one.
+2. **`hq_mem` contains `show (DB.s : presheafValue D₀) = D₀.canonicalMap q from rfl`** — a
+   *definitional* identity about `DB.s`. Passing `DB` as an opaque parameter breaks that `rfl`; the
+   helper would need `hDB` and the `rfl` rewritten into a rewrite. So the pass-the-term technique that
+   rescued `RelativePieceKeystone.hT_pb` does **not** transfer unmodified here.
+
+**Generalisable caveat: a block that relies on `rfl`/`from rfl` against a `set`-bound value is using
+that value *definitionally*, not just referentially.** Such a block resists both lift styles — stating
+on the unfolded form drags in the caller's instances, and passing the term abstractly destroys the
+`rfl`. Check for `from rfl` / `rfl`-closing steps before classifying a mirror pair as cheap.
+
+The `TateAlgebraTopology` same-file pair (need −74 each) is the largest remaining single opportunity
+but needs a genuine shared completeness lemma, not a lift.
+
+## The worklist now carries an `rfl` flag — and the cheap tail is genuinely exhausted
+
+Added `rfl`-dependence to the candidate ranking (count of `rfl` tokens inside the block), since a
+`rfl` against a `set`-bound value resists both lift styles. Current low-local candidates:
+
+     loc need blk  rfl | target
+      1  −13  16   —   | LaurentRefinementCore.laurentCover_isEmbedding_presheaf  hcomp_eq
+      2   −5   6   —   | FiniteJetGraphKoszul.syzygy_graph_of_isUnit              hr
+      2  −97 109   —   | RestrictionInjective.resIHom_injective                   hkey
+      1   −7  15  ×2   | FiniteJetGraphKoszul.exists_d1_lift                      hrange
+      1  −14  17  ×2   | Presentation.wI_partial_cauchy_diff                      hcauchy
+      2   −3   9  ×1   | FiniteJetSheafTransfer.productRestrictionSub_isEmbedding hrange
+      2  −48  57  ×3   | StructureSheafStalks.aplus_le_comap_restrictionMapHom    hgen
+
+**A correction to the saving formula I have been using.** I had been assuming `saving = blk − 1`,
+i.e. the call site collapses to one line. That is only true when the `have`'s *statement* is short
+enough to carry the call on the same line. `syzygy_graph_of_isUnit.hr` is the counterexample:
+blk 6, need −5, but its statement line is ~90 characters (`have hr : ∀ i, (C g * X i - C (f i) :
+MvPolynomial (Fin m) D) = C g * ρ i := fun i => by`), so the call needs a second line and the saving
+is **4, not 5** — one short. **The formula is `saving = blk − (lines the call site occupies)`, and
+that is 2 whenever the statement plus `:= …` exceeds 100 characters.**
+
+Of the three `rfl`-free candidates: `hcomp_eq` is dominated by a verbose `Prod.map (τ_plus : …)
+(τ_minus : …)` ascription that is *duplicated verbatim* in the `h_alg_inducing` block above it (so the
+real fix there is a local abbreviation, not a lift, and `set` folding makes that a different kind of
+edit); `hr` is one line short as computed above; `hkey` at blk 109 needs the bottom-up treatment
+because a wholesale lift would itself be a 108-line helper.
+
+So the mechanically-cheap tail really is exhausted at **246**. What remains is: (a) bottom-up splits
+of the four very large blocks (`hkey` 109, `hgen` 57, `hprec`-style), (b) the four true mirror pairs,
+each needing two lifts per proof plus a `rfl` workaround, (c) `TateAlgebraTopology`'s −74 pair, which
+wants a genuine shared completeness lemma. All are real work with real payoff; none is a one-shot edit.

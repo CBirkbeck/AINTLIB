@@ -1251,6 +1251,42 @@ variable [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A
 -- thread it explicitly. (Diamond-free: `IsRingOfIntegralElements` is an all-`Prop` class.)
 variable [IsRingOfIntegralElements (A⁺)]
 
+/-- Every generator of the normalised relative datum is power-bounded, given that the
+source generators lie in `E.P.A₀`. The datum is taken as a parameter together with its
+defining equation, so the caller's term — and the `DecidableEq` its `classical` baked into
+the `Finset.image` — travels with it. -/
+private theorem forall_mem_T_isPowerBounded_of_eq
+    (E D' : RationalLocData A) [LaurentNormalized D']
+    (hsub : rationalOpen D'.T D'.s ⊆ rationalOpen E.T E.s)
+    (hD'_T_pb : ∀ t' ∈ D'.T, t' ∈ E.P.A₀)
+    (Xbar : RationalLocData (presheafValue E))
+    (hXbar : Xbar = relativeRationalLocData_laurentNormalized E D' hsub) :
+    ∀ t ∈ Xbar.T, TopologicalRing.IsPowerBounded t := by
+  classical
+  intro t ht
+  rw [hXbar, relativeRationalLocData_laurentNormalized_T E D' hsub,
+    Finset.mem_image] at ht
+  obtain ⟨t', ht'_mem, rfl⟩ := ht
+  have ha : t' ∈ E.P.A₀ := hD'_T_pb t' ht'_mem
+  have hcm : E.canonicalMap t' =
+      E.coeRingHom (algebraMap A (Localization.Away E.s) t') := rfl
+  rw [hcm]
+  have hmem : algebraMap A (Localization.Away E.s) t' ∈ locSubring E.P E.T E.s :=
+    algebraMap_mem_locSubring E.P E.T E.s ha
+  have hpow : ∀ n : ℕ, (algebraMap A (Localization.Away E.s) t') ^ n ∈
+      locSubring E.P E.T E.s :=
+    fun n => (locSubring E.P E.T E.s).pow_mem hmem n
+  have hrange : Set.range
+      ((E.coeRingHom (algebraMap A (Localization.Away E.s) t')) ^ · :
+        ℕ → presheafValue E) ⊆
+      E.coeRingHom '' (locSubring E.P E.T E.s :
+        Set (Localization.Away E.s)) := by
+    rintro _ ⟨n, rfl⟩
+    change (E.coeRingHom (algebraMap A (Localization.Away E.s) t')) ^ n ∈ _
+    rw [← map_pow]
+    exact ⟨(algebraMap A (Localization.Away E.s) t') ^ n, hpow n, rfl⟩
+  exact (CompletionLocalization.coeRingHom_image_locSubring_isBounded E).subset hrange
+
 /-- **Faithful per-step flatness for Prop 8.30 (Remark 7.55 basic-Laurent step).**
 
 For a `LaurentNormalized` rational locale `D'` rationally contained in `E`, the restriction
@@ -1335,30 +1371,7 @@ theorem prop_8_30_basic_laurent_step_flat
   -- Power-boundedness of `E.canonicalMap t'` for `t' ∈ E.P.A₀`: all powers of `algebraMap t'` stay
   -- in `locSubring`, whose `coeRingHom`-image is bounded (inlined `canonicalMap_isPowerBounded_of_mem_A₀`,
   -- `TateAcyclicityFinalAssembly.lean:2524`, to avoid an import cycle — that file is downstream).
-  have hT_pb : ∀ t ∈ Xbar.T, TopologicalRing.IsPowerBounded t := by
-    intro t ht
-    rw [hXbar, relativeRationalLocData_laurentNormalized_T E D' hsub,
-      Finset.mem_image] at ht
-    obtain ⟨t', ht'_mem, rfl⟩ := ht
-    have ha : t' ∈ E.P.A₀ := hD'_T_pb t' ht'_mem
-    have hcm : E.canonicalMap t' =
-        E.coeRingHom (algebraMap A (Localization.Away E.s) t') := rfl
-    rw [hcm]
-    have hmem : algebraMap A (Localization.Away E.s) t' ∈ locSubring E.P E.T E.s :=
-      algebraMap_mem_locSubring E.P E.T E.s ha
-    have hpow : ∀ n : ℕ, (algebraMap A (Localization.Away E.s) t') ^ n ∈
-        locSubring E.P E.T E.s :=
-      fun n => (locSubring E.P E.T E.s).pow_mem hmem n
-    have hrange : Set.range
-        ((E.coeRingHom (algebraMap A (Localization.Away E.s) t')) ^ · :
-          ℕ → presheafValue E) ⊆
-        E.coeRingHom '' (locSubring E.P E.T E.s :
-          Set (Localization.Away E.s)) := by
-      rintro _ ⟨n, rfl⟩
-      change (E.coeRingHom (algebraMap A (Localization.Away E.s) t')) ^ n ∈ _
-      rw [← map_pow]
-      exact ⟨(algebraMap A (Localization.Away E.s) t') ^ n, hpow n, rfl⟩
-    exact (CompletionLocalization.coeRingHom_image_locSubring_isBounded E).subset hrange
+  have hT_pb := forall_mem_T_isPowerBounded_of_eq E D' hsub hD'_T_pb Xbar hXbar
   -- `hA_complete`: completeness of `B` w.r.t. the right-uniform structure.
   have hA_complete : @CompleteSpace (presheafValue E)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue E)) :=
