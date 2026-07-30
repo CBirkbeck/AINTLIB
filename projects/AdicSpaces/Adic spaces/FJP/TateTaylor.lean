@@ -314,6 +314,316 @@ theorem transHom_polyToP (q : MvPolynomial (Fin m) L) :
       exact mvEvalHomBounded_X _ _ _ _ i
   exact RingHom.congr_fun hcomp q
 
+section Bounds
+
+/-- Coefficient norms are bounded by the Gauss norm. -/
+theorem norm_coeff_le_norm (F : P L m) (v : Fin m →₀ ℕ) :
+    ‖MvPowerSeries.coeff v F.1‖ ≤ ‖F‖ := by
+  have h1 := MvPowerSeries.le_gaussNorm norm
+    (fun _ : Fin m => (1 : ℝ)) F.1 (MvRestricted.hasGaussNorm _ F) v
+  rw [MvRestricted.norm_eq]
+  calc ‖MvPowerSeries.coeff v F.1‖ =
+      ‖MvPowerSeries.coeff v F.1‖ *
+        (v.prod fun i k => (fun _ : Fin m => (1 : ℝ)) i ^ k) := by
+        rw [weight_one, mul_one]
+    _ ≤ _ := h1
+
+/-- **The translation is 1-Lipschitz** (nonarchimedean series bound). -/
+theorem norm_transHom_le (F : P L m) :
+    ‖transHom (m := m) x hx F‖ ≤ ‖F‖ := by
+  show ‖∑' v, mvEvalTerm (constP (L := L) (m := m)) (transGen (m := m) x)
+    (toTopRestricted (m := m) F) v‖ ≤ ‖F‖
+  have hsum := mvEvalTerm_summable (constP (L := L) (m := m))
+    constP_isometry.continuous (transGen (m := m) x)
+    (isBounded_transGen_pow x hx) (toTopRestricted (m := m) F)
+  have hterm : ∀ v : Fin m →₀ ℕ,
+      ‖mvEvalTerm (constP (L := L) (m := m)) (transGen (m := m) x)
+        (toTopRestricted (m := m) F) v‖ ≤ ‖F‖ := by
+    intro v
+    show ‖constP (m := m) (MvPowerSeries.coeff v F.1) *
+      ∏ i, transGen (m := m) x i ^ (v i)‖ ≤ ‖F‖
+    calc ‖constP (m := m) (MvPowerSeries.coeff v F.1) *
+        ∏ i, transGen (m := m) x i ^ (v i)‖ ≤
+        ‖constP (m := m) (MvPowerSeries.coeff v F.1)‖ *
+          ‖∏ i, transGen (m := m) x i ^ (v i)‖ := norm_mul_le _ _
+      _ ≤ ‖constP (m := m) (MvPowerSeries.coeff v F.1)‖ * 1 :=
+          mul_le_mul_of_nonneg_left (norm_transGen_prod_le x hx v)
+            (norm_nonneg _)
+      _ = ‖MvPowerSeries.coeff v F.1‖ := by rw [mul_one, norm_constP]
+      _ ≤ ‖F‖ := norm_coeff_le_norm F v
+  refine le_of_tendsto hsum.hasSum.norm ?_
+  filter_upwards with t
+  exact IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg
+    (norm_nonneg F) (fun v _ => hterm v)
+
+include hx in
+theorem transHom_lipschitz :
+    LipschitzWith 1 (transHom (m := m) x hx) := by
+  refine LipschitzWith.of_dist_le_mul fun F G => ?_
+  rw [dist_eq_norm, dist_eq_norm, ← map_sub, NNReal.coe_one, one_mul]
+  exact norm_transHom_le x hx (F - G)
+
+include hx in
+/-- Evaluation at a point is 1-Lipschitz. -/
+theorem norm_pointEval_le (F : P L m) :
+    ‖pointEval (m := m) x hx F‖ ≤ ‖F‖ := by
+  show ‖∑' v, mvEvalTerm (RingHom.id L) x
+    (toTopRestricted (m := m) F) v‖ ≤ ‖F‖
+  have hsum := mvEvalTerm_summable (RingHom.id L) continuous_id x
+    (fun i => isBounded_range_pow (hx i)) (toTopRestricted (m := m) F)
+  have hterm : ∀ v : Fin m →₀ ℕ,
+      ‖mvEvalTerm (RingHom.id L) x (toTopRestricted (m := m) F) v‖ ≤
+        ‖F‖ := by
+    intro v
+    show ‖RingHom.id L (MvPowerSeries.coeff v F.1) * ∏ i, x i ^ (v i)‖ ≤ ‖F‖
+    have hprod : ‖∏ i, x i ^ (v i)‖ ≤ 1 := by
+      rw [show ‖∏ i, x i ^ (v i)‖ = ∏ i, ‖x i‖ ^ (v i) from by
+        rw [norm_prod]
+        exact Finset.prod_congr rfl fun i _ => norm_pow _ _]
+      exact Finset.prod_le_one (fun i _ => by positivity)
+        (fun i _ => pow_le_one₀ (norm_nonneg _) (hx i))
+    calc ‖RingHom.id L (MvPowerSeries.coeff v F.1) * ∏ i, x i ^ (v i)‖ =
+        ‖MvPowerSeries.coeff v F.1‖ * ‖∏ i, x i ^ (v i)‖ := norm_mul _ _
+      _ ≤ ‖MvPowerSeries.coeff v F.1‖ * 1 :=
+          mul_le_mul_of_nonneg_left hprod (norm_nonneg _)
+      _ = ‖MvPowerSeries.coeff v F.1‖ := mul_one _
+      _ ≤ ‖F‖ := norm_coeff_le_norm F v
+  refine le_of_tendsto hsum.hasSum.norm ?_
+  filter_upwards with t
+  exact IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg
+    (norm_nonneg F) (fun v _ => hterm v)
+
+include hx in
+theorem pointEval_lipschitz :
+    LipschitzWith 1 (pointEval (m := m) x hx) := by
+  refine LipschitzWith.of_dist_le_mul fun F G => ?_
+  rw [dist_eq_norm, dist_eq_norm, ← map_sub, NNReal.coe_one, one_mul]
+  exact norm_pointEval_le x hx (F - G)
+
+end Bounds
+
+section Density
+
+/-- **Polynomials are dense in the Tate algebra** (truncation tails vanish in
+the Gauss norm). -/
+theorem denseRange_polyToP :
+    DenseRange (polyToP (E := L) (m := m)) := by
+  rw [Metric.denseRange_iff]
+  intro F ε hε
+  have hF : Filter.Tendsto (fun t : Fin m →₀ ℕ =>
+      ‖MvPowerSeries.coeff t F.1‖) cofinite (nhds 0) := by
+    have h0 := F.2
+    have h1 : Filter.Tendsto (fun t : Fin m →₀ ℕ =>
+        ‖MvPowerSeries.coeff t F.1‖ *
+          t.prod fun j k => (fun _ : Fin m => (1 : ℝ)) j ^ k)
+        cofinite (nhds 0) := h0
+    simpa only [weight_one, mul_one] using h1
+  have hfin : {t : Fin m →₀ ℕ | ¬ ‖MvPowerSeries.coeff t F.1‖ < ε / 2}.Finite := by
+    have h2 := hF.eventually (eventually_lt_nhds (by positivity : (0:ℝ) < ε / 2))
+    simpa using h2
+  set n := (hfin.toFinset.sup fun t => Finsupp.degree t) + 1 with hn
+  refine ⟨MvPowerSeries.truncTotal n F.1, ?_⟩
+  rw [dist_eq_norm]
+  have hcoeff : ∀ t : Fin m →₀ ℕ,
+      ‖MvPowerSeries.coeff t
+        ((F - polyToP (MvPowerSeries.truncTotal n F.1)).1)‖ ≤ ε / 2 := by
+    intro t
+    have hco : MvPowerSeries.coeff t
+        ((F - polyToP (MvPowerSeries.truncTotal n F.1)).1) =
+        MvPowerSeries.coeff t F.1 -
+          (MvPowerSeries.truncTotal n F.1).coeff t := by
+      have h3 : ((F - polyToP (MvPowerSeries.truncTotal n F.1)).1) =
+          F.1 - ((MvPowerSeries.truncTotal n F.1 :
+            MvPolynomial (Fin m) L) : MvPowerSeries (Fin m) L) := rfl
+      rw [h3, map_sub, MvPolynomial.coeff_coe]
+    rcases lt_or_ge (Finsupp.degree t) n with hdeg | hdeg
+    · have h5 : (MvPowerSeries.truncTotal n F.1).coeff t =
+          MvPowerSeries.coeff t F.1 :=
+        MvPowerSeries.coeff_truncTotal F.1 hdeg
+      rw [hco, h5, sub_self, norm_zero]
+      positivity
+    · have h5 : (MvPowerSeries.truncTotal n F.1).coeff t = 0 :=
+        MvPowerSeries.coeff_truncTotal_eq_zero F.1 hdeg
+      rw [hco, h5, sub_zero]
+      by_contra hbig
+      push_neg at hbig
+      have hmem : t ∈ hfin.toFinset := by
+        rw [Set.Finite.mem_toFinset]
+        exact not_lt.mpr hbig.le
+      have h4 : Finsupp.degree t ≤ n - 1 := by
+        rw [hn]
+        simpa using Finset.le_sup hmem
+      omega
+  have hnorm : ‖F - polyToP (MvPowerSeries.truncTotal n F.1)‖ ≤ ε / 2 := by
+    rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+    refine ciSup_le fun t => ?_
+    rw [weight_one, mul_one]
+    exact hcoeff t
+  linarith
+
+end Density
+
+section Equiv
+
+include hx in
+theorem norm_neg_point (i : Fin m) : ‖(-x) i‖ ≤ 1 := by
+  show ‖-(x i)‖ ≤ 1
+  rw [norm_neg]
+  exact hx i
+
+include hx in
+/-- The two translations compose to the identity. -/
+theorem transHom_comp_neg :
+    (transHom (m := m) x hx).comp
+      (transHom (m := m) (-x) (norm_neg_point x hx)) = RingHom.id (P L m) := by
+  have hpoly : ∀ q : MvPolynomial (Fin m) L,
+      transHom (m := m) x hx
+        (transHom (m := m) (-x) (norm_neg_point x hx) (polyToP q)) =
+        polyToP q := by
+    intro q
+    rw [transHom_polyToP, transHom_polyToP]
+    congr 1
+    have hcomp : (MvPolynomial.eval₂Hom
+        (MvPolynomial.C : L →+* MvPolynomial (Fin m) L)
+        (fun i => MvPolynomial.X i + MvPolynomial.C (x i))).comp
+        (MvPolynomial.eval₂Hom
+          (MvPolynomial.C : L →+* MvPolynomial (Fin m) L)
+          (fun i => MvPolynomial.X i + MvPolynomial.C ((-x) i))) =
+        RingHom.id (MvPolynomial (Fin m) L) := by
+      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+      · simp
+      · simp only [RingHom.coe_comp, Function.comp_apply,
+          MvPolynomial.eval₂Hom_X', RingHom.id_apply]
+        rw [map_add, MvPolynomial.eval₂Hom_X', MvPolynomial.eval₂Hom_C]
+        show MvPolynomial.X i + MvPolynomial.C (x i) +
+          MvPolynomial.C (-(x i)) = MvPolynomial.X i
+        rw [map_neg]
+        ring
+    exact RingHom.congr_fun hcomp q
+  have heq : ((transHom (m := m) x hx).comp
+      (transHom (m := m) (-x) (norm_neg_point x hx)) :
+        P L m → P L m) = (RingHom.id (P L m) : P L m → P L m) := by
+    refine denseRange_polyToP.equalizer ?_ continuous_id ?_
+    · exact ((transHom_lipschitz x hx).comp
+        (transHom_lipschitz (-x) (norm_neg_point x hx))).continuous
+    · funext q
+      exact hpoly q
+  exact RingHom.ext fun F => congrFun heq F
+
+include hx in
+theorem transHom_neg_comp :
+    (transHom (m := m) (-x) (norm_neg_point x hx)).comp
+      (transHom (m := m) x hx) = RingHom.id (P L m) := by
+  have hpoly : ∀ q : MvPolynomial (Fin m) L,
+      transHom (m := m) (-x) (norm_neg_point x hx)
+        (transHom (m := m) x hx (polyToP q)) = polyToP q := by
+    intro q
+    rw [transHom_polyToP, transHom_polyToP]
+    congr 1
+    have hcomp : (MvPolynomial.eval₂Hom
+        (MvPolynomial.C : L →+* MvPolynomial (Fin m) L)
+        (fun i => MvPolynomial.X i + MvPolynomial.C ((-x) i))).comp
+        (MvPolynomial.eval₂Hom
+          (MvPolynomial.C : L →+* MvPolynomial (Fin m) L)
+          (fun i => MvPolynomial.X i + MvPolynomial.C (x i))) =
+        RingHom.id (MvPolynomial (Fin m) L) := by
+      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+      · simp
+      · simp only [RingHom.coe_comp, Function.comp_apply,
+          MvPolynomial.eval₂Hom_X', RingHom.id_apply]
+        rw [map_add, MvPolynomial.eval₂Hom_X', MvPolynomial.eval₂Hom_C]
+        show MvPolynomial.X i + MvPolynomial.C (-(x i)) +
+          MvPolynomial.C (x i) = MvPolynomial.X i
+        rw [map_neg]
+        ring
+    exact RingHom.congr_fun hcomp q
+  have heq : ((transHom (m := m) (-x) (norm_neg_point x hx)).comp
+      (transHom (m := m) x hx) :
+        P L m → P L m) = (RingHom.id (P L m) : P L m → P L m) := by
+    refine denseRange_polyToP.equalizer ?_ continuous_id ?_
+    · exact ((transHom_lipschitz (-x) (norm_neg_point x hx)).comp
+        (transHom_lipschitz x hx)).continuous
+    · funext q
+      exact hpoly q
+  exact RingHom.ext fun F => congrFun heq F
+
+/-- **The translation ring equivalence.** -/
+noncomputable def transEquiv : P L m ≃+* P L m :=
+  { transHom (m := m) x hx with
+    invFun := transHom (m := m) (-x) (norm_neg_point x hx)
+    left_inv := fun F => RingHom.congr_fun (transHom_neg_comp x hx) F
+    right_inv := fun F => RingHom.congr_fun (transHom_comp_neg x hx) F }
+
+theorem transEquiv_apply (F : P L m) :
+    transEquiv (m := m) x hx F = transHom (m := m) x hx F := rfl
+
+include hx in
+/-- **Evaluation conjugacy**: evaluating at `x` is evaluating the translate at
+the origin. -/
+theorem pointEval_origin_comp_transHom :
+    (pointEval (m := m) (fun _ => (0 : L)) (fun i => norm_origin_le i)).comp
+      (transHom (m := m) x hx) = pointEval (m := m) x hx := by
+  have hpoly : ∀ q : MvPolynomial (Fin m) L,
+      pointEval (m := m) (fun _ => (0 : L)) (fun i => norm_origin_le i)
+        (transHom (m := m) x hx (polyToP q)) =
+        pointEval (m := m) x hx (polyToP q) := by
+    intro q
+    rw [transHom_polyToP]
+    have hlaw : ∀ (y : Fin m → L) (hy : ∀ i, ‖y i‖ ≤ 1),
+        (pointEval (m := m) y hy).comp (polyToP (E := L) (m := m)) =
+        MvPolynomial.eval₂Hom (RingHom.id L) y := by
+      intro y hy
+      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+      · show pointEval (m := m) y hy (polyToP (MvPolynomial.C c)) = _
+        rw [pointEval_polyToP_C, MvPolynomial.eval₂Hom_C]
+        rfl
+      · show pointEval (m := m) y hy (polyToP (MvPolynomial.X i)) = _
+        rw [pointEval_polyToP_X, MvPolynomial.eval₂Hom_X']
+    have h5 := RingHom.congr_fun (hlaw (fun _ => (0 : L))
+      (fun i => norm_origin_le i))
+      (MvPolynomial.eval₂ MvPolynomial.C
+        (fun i => MvPolynomial.X i + MvPolynomial.C (x i)) q)
+    have h6 := RingHom.congr_fun (hlaw x hx) q
+    have h5' : pointEval (m := m) (fun _ => (0 : L))
+        (fun i => norm_origin_le i)
+        (polyToP (MvPolynomial.eval₂ MvPolynomial.C
+          (fun i => MvPolynomial.X i + MvPolynomial.C (x i)) q)) =
+        MvPolynomial.eval₂Hom (RingHom.id L) (fun _ => (0 : L))
+          (MvPolynomial.eval₂ MvPolynomial.C
+            (fun i => MvPolynomial.X i + MvPolynomial.C (x i)) q) := h5
+    have h6' : pointEval (m := m) x hx (polyToP q) =
+        MvPolynomial.eval₂Hom (RingHom.id L) x q := h6
+    show pointEval (m := m) (fun _ => (0 : L)) (fun i => norm_origin_le i)
+      (polyToP (MvPolynomial.eval₂ MvPolynomial.C
+        (fun i => MvPolynomial.X i + MvPolynomial.C (x i)) q)) = _
+    rw [h5', h6']
+    -- polynomial identity: eval-at-0 of the translate is eval-at-x
+    have hcomp : (MvPolynomial.eval₂Hom (RingHom.id L)
+        (fun _ => (0 : L))).comp
+        (MvPolynomial.eval₂Hom
+          (MvPolynomial.C : L →+* MvPolynomial (Fin m) L)
+          (fun i => MvPolynomial.X i + MvPolynomial.C (x i))) =
+        MvPolynomial.eval₂Hom (RingHom.id L) x := by
+      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+      · simp
+      · simp only [RingHom.coe_comp, Function.comp_apply,
+          MvPolynomial.eval₂Hom_X']
+        rw [map_add, MvPolynomial.eval₂Hom_X', MvPolynomial.eval₂Hom_C]
+        simp
+    exact RingHom.congr_fun hcomp q
+  have heq : ((pointEval (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i)).comp (transHom (m := m) x hx) :
+        P L m → L) = (pointEval (m := m) x hx : P L m → L) := by
+    refine denseRange_polyToP.equalizer ?_
+      (pointEval_lipschitz x hx).continuous ?_
+    · exact ((pointEval_lipschitz (fun _ => (0 : L))
+        (fun i => norm_origin_le i)).comp (transHom_lipschitz x hx)).continuous
+    · funext q
+      exact hpoly q
+  exact RingHom.ext fun F => congrFun heq F
+
+end Equiv
+
 end Translation
 
 end FiniteJet.GraphKoszul
