@@ -2098,3 +2098,48 @@ This has now cost time **five times** in this campaign. Two rules, both now stan
 
 Distinguishing the two matters: a genuine gate failure means reverting or repairing an edit, while
 this one means re-running the identical command from the right directory.
+
+## Attempted and REVERTED: the `hf_alg` shared lemma (instance plumbing blocks it)
+
+Tried to land the three-file dedup identified above. The lemma itself is fine and **compiled**
+(`PresheafIdentification`, 2614 jobs):
+
+    theorem continuous_comp_algebraMap_of_eq_canonicalMap (D₀ : RationalLocData A)
+        [PlusSubring (presheafValue D₀)] [IsHuberRing (presheafValue D₀)]
+        [HasLocLiftPowerBounded (presheafValue D₀)] [NonarchimedeanRing (presheafValue D₀)]
+        (E : RationalLocData (presheafValue D₀)) {s : A}
+        (φ : Localization.Away s →+* Localization.Away E.s)
+        (heq : ⇑(φ.comp (algebraMap A (Localization.Away s)))
+          = ⇑((algebraMap (presheafValue D₀) (Localization.Away E.s)).comp D₀.canonicalMap)) :
+        @Continuous A _ _ E.topology ⇑(φ.comp (algebraMap A (Localization.Away s))) := by
+      letI : TopologicalSpace (Localization.Away E.s) := E.topology   -- REQUIRED, see below
+      rw [heq]
+      exact (algebraMap_continuous_loc E).comp (canonicalMap_continuous D₀)
+
+Three findings worth keeping, in the order they were learned:
+
+1. **A `B = presheafValue D₀` + `▸` indirection does not work** — `subst` fails ("did not find
+   equation for eliminating hB") because the equation's RHS is not a local variable. State the
+   lemma directly at `presheafValue D₀`.
+2. **The `letI` is load-bearing.** Without it: `failed to synthesize TopologicalSpace
+   (Localization.Away E.s)`. The goal supplies `E.topology` *explicitly* as `@Continuous … E.topology`,
+   but `.comp` needs the intermediate space's topology as a genuine **instance**. Supplying a
+   topology positionally does not make it available to instance search inside the proof.
+3. **The blocker, at the call site rather than the lemma:** applying it in
+   `LaurentRefinementCore.iteratedPlus_forwardToCompletion_continuous` fails with
+   `failed to synthesize IsHuberRing (presheafValue D₀)`. That instance is not in scope there even
+   though `iteratedPlusDatum_B P D₀ f : RationalLocData (presheafValue D₀)` nominally requires it —
+   so the datum is being built through a path that supplies the instances some other way.
+   Resolving this needs tracing how `iteratedPlusDatum_B` obtains its instances, which is real
+   archaeology, not a mechanical edit.
+
+**Reverted both the lemma and the call site** rather than land an unused declaration or leave the
+duplication half-removed; the working tree was restored byte-identically to the committed state (no
+rebuild needed, confirmed by an empty `git diff HEAD`).
+
+**Also worth recording: this dedup would NOT have advanced task 2 anyway.** The arithmetic:
+the inner `heq` proof (6 lines in `LaurentRefinementCore`, 5 in `IteratedOverlapEquiv`) must survive
+as the helper's argument, so the lift saves ~10 lines against needs of −16 and −14. Checking that
+*before* attempting would have reframed this as task-3 dedup from the start. **When a lift's
+candidate block contains a nested proof that must be passed through, subtract that nested proof from
+the saving before deciding the lift crosses the bar.**
