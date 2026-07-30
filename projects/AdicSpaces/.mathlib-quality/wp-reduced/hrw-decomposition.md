@@ -586,3 +586,20 @@ factors := fibreMaximals of 𝔪·zero-head:
   mem-case only; statement untouched).
 Also fibre-Artinian mirror: isArtinianRing (zero-head ⧸ 𝔪Z) via
 module_finite_zero_head + Quotient-field (isArtinianRing_fibre pattern ✓).
+
+## L3 COMPLETE AT MAXIMALS (2026-07-30, the deep leaf discharged)
+
+`head_completedLocal_reduced_of_isMaximal` (+ `_of_wa_mem`) AXIOM-CLEAN.
+The wa_mem proof = block-A mirror along headToZeroHead: mapLevelwisePi family
+(equivQuotMaximalIdealPow.symm → levelMap → factor-per-fibre-maximal →
+equivQuotMaximalIdealPow at overMaximal), compat by mk-chases, cofinality by
+fibre nilpotence + iInf_pow + `exists_artinRees_pullback` (mathlib
+Ideal.exists_pow_inf_eq_pow_smul on the range-submodule of the inclusion;
+s := e·(r+k)), factors reduced via completedLocalCongr zeroHeadTateEquiv.symm
++ block-A corollary. maxHeartbeats 3200000. Gotchas: term-level haveI needs
+`;` not newline (else parses as application); ∀-shaped haveI instance for the
+fibre-maximals DID work here (both for type-elab and the final instance-arg).
+
+REMAINING FRONTIER (exactly two): comap_headToQ_isMaximal (T_N⟨T⟩-tower
+residue finiteness) and qHead_completedLocal_comparison (L1; 8.30-conditional
+by design). headLocsReduced' (live in Main) sorryAx-depends on exactly these.
