@@ -1,1 +1,1 @@
-FOCUS: HRW-4 leaf 12 main — TateScalarExtension.lean (mapP + coordSeries + piToP + scalarExtensionEquiv + finite/free) written, compiling; then leaf 13 Taylor at the origin, leaf 14 assembly.
+FOCUS: HRW-4 leaf 13a — TatePointEval.lean (pointEval via mvEvalHomBounded + bridge; pointIdeal maximal, residue = L) compiling; next 13b = Taylor substitution into MvPowerSeries L (S := series with product topology) or the kernel-generators division.
