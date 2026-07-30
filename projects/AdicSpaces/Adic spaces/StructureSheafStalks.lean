@@ -169,8 +169,7 @@ theorem vle_one_of_isIntegral {w : Spv B} {S : Subring B}
       rw [← mul_one x, show (1 : B) = 0 from heval, mul_zero]
     rw [hx0, map_zero]
     exact zero_le
-  have hexp : ∑ i ∈ Finset.range (n + 1), S.subtype (p.coeff i) * x ^ i
-      = 0 := by
+  have hexp : ∑ i ∈ Finset.range (n + 1), S.subtype (p.coeff i) * x ^ i = 0 := by
     rw [← Polynomial.eval₂_eq_sum_range]
     exact heval
   rw [Finset.sum_range_succ] at hexp
@@ -178,8 +177,7 @@ theorem vle_one_of_isIntegral {w : Spv B} {S : Subring B}
     rw [show p.coeff n = 1 from hmonic.coeff_natDegree]
     exact map_one _
   rw [hcn, one_mul] at hexp
-  have hxn : x ^ n
-      = -∑ i ∈ Finset.range n, S.subtype (p.coeff i) * x ^ i :=
+  have hxn : x ^ n = -∑ i ∈ Finset.range n, S.subtype (p.coeff i) * x ^ i :=
     eq_neg_of_add_eq_zero_left ((add_comm _ _).trans hexp)
   have hbound : v (x ^ n) ≤ v x ^ (n - 1) := by
     rw [hxn, Valuation.map_neg]
@@ -190,16 +188,13 @@ theorem vle_one_of_isIntegral {w : Spv B} {S : Subring B}
       have hm := hS (S.subtype (p.coeff i)) (SetLike.coe_mem _)
       have := (hbridge _ 1).mp hm
       rwa [map_one] at this
-    have hpow : v x ^ i ≤ v x ^ (n - 1) :=
-      pow_le_pow_right₀ h1.le (by
+    have hpow : v x ^ i ≤ v x ^ (n - 1) := pow_le_pow_right₀ h1.le (by
         have := Finset.mem_range.mp hi
         omega)
-    calc v (S.subtype (p.coeff i)) * v x ^ i
-        ≤ 1 * v x ^ (n - 1) := mul_le_mul' hci hpow
+    calc v (S.subtype (p.coeff i)) * v x ^ i ≤ 1 * v x ^ (n - 1) := mul_le_mul' hci hpow
       _ = v x ^ (n - 1) := one_mul _
   rw [Valuation.map_pow] at hbound
-  have hstrict : v x ^ (n - 1) < v x ^ n :=
-    pow_lt_pow_right₀ h1 (by omega)
+  have hstrict : v x ^ (n - 1) < v x ^ n := pow_lt_pow_right₀ h1 (by omega)
   exact absurd hbound (not_le_of_gt hstrict)
 
 /-- Reflexivity of `vle`. -/

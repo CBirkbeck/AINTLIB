@@ -2190,8 +2190,7 @@ private theorem gaussNorm_sub_combination_le {ρ : NNReal} {hρ0 : 0 < ρ}
         : GRing p F ϖ k hρ0 hρ1))
         : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ ε ^ n * B := by
   classical
-  have htel : ∀ m, Y m
-      = y₀ - ∑ l ∈ Finset.range m, ∑ g ∈ G, α l g * g := by
+  have htel : ∀ m, Y m = y₀ - ∑ l ∈ Finset.range m, ∑ g ∈ G, α l g * g := by
     intro m
     induction m with
     | zero =>
@@ -2199,22 +2198,18 @@ private theorem gaussNorm_sub_combination_le {ρ : NNReal} {hρ0 : 0 < ρ}
     | succ m ih =>
       rw [hYeq m, ih, Finset.sum_range_succ]
       ring
-  have hYn : Y n
-      = y₀ - ∑ i ∈ G.attach, (∑ l ∈ Finset.range n, α l (i : GRing p F ϖ k hρ0 hρ1))
+  have hYn : Y n = y₀ - ∑ i ∈ G.attach, (∑ l ∈ Finset.range n, α l (i : GRing p F ϖ k hρ0 hρ1))
         * (i : GRing p F ϖ k hρ0 hρ1) := by
     rw [htel n, sum_range_sum_attach_mul G n (fun l g => α l g) (fun g => g)]
-  have hsplit : (y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
-        : GRing p F ϖ k hρ0 hρ1)
-      = Y n + ∑ g ∈ G.attach,
-          ((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g)
+  have hsplit : (y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1) : GRing p F ϖ k hρ0 hρ1)
+      = Y n + ∑ g ∈ G.attach, ((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g)
             * (g : GRing p F ϖ k hρ0 hρ1) := by
     rw [hYn]
     exact telescope_split G.attach y₀
       (fun i => ∑ l ∈ Finset.range n, α l (i : GRing p F ϖ k hρ0 hρ1))
       (fun i => U i) (fun i => (i : GRing p F ϖ k hρ0 hρ1))
   rw [hsplit, coe_RPS_add]
-  refine le_trans (gaussNormRPS_add_le p F ϖ (Y n).2
-      (∑ g ∈ G.attach,
+  refine le_trans (gaussNormRPS_add_le p F ϖ (Y n).2 (∑ g ∈ G.attach,
         ((∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)) - U g)
           * (g : GRing p F ϖ k hρ0 hρ1)).2)
     (max_le (hYnorm n) ?_)

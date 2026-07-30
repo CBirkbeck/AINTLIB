@@ -804,12 +804,9 @@ theorem example638Plus_forward_backward_eq_id
     (example638Plus_forwardHom B P b).comp
       (example638Plus_backwardHom B P b hA_complete hnoeth) =
       RingHom.id _ := by
-  letI : UniformSpace (Localization.Away (1 : B)) :=
-    (trivialPlusDatum B P b).uniformSpace
-  letI : IsUniformAddGroup (Localization.Away (1 : B)) :=
-    (trivialPlusDatum B P b).isUniformAddGroup
-  letI : IsTopologicalRing (Localization.Away (1 : B)) :=
-    (trivialPlusDatum B P b).isTopologicalRing
+  letI : UniformSpace (Localization.Away (1 : B)) := (trivialPlusDatum B P b).uniformSpace
+  letI : IsUniformAddGroup (Localization.Away (1 : B)) := (trivialPlusDatum B P b).isUniformAddGroup
+  letI : IsTopologicalRing (Localization.Away (1 : B)) := (trivialPlusDatum B P b).isTopologicalRing
   letI : UniformSpace (Localization.Away (trivialPlusDatum B P b).s) :=
     (trivialPlusDatum B P b).uniformSpace
   letI : IsUniformAddGroup (Localization.Away (trivialPlusDatum B P b).s) :=
@@ -830,16 +827,12 @@ theorem example638Plus_forward_backward_eq_id
     quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
   apply RingHom.ext
   intro y
-  change example638Plus_forwardHom B P b
-    (example638Plus_backwardHom B P b hA_complete hnoeth y) = y
-  refine @UniformSpace.Completion.ext' _ _
-    (presheafValue (trivialPlusDatum B P b)) _ _ _ _
-    (hcont_forward.comp
-      UniformSpace.Completion.continuous_extension)
+  change example638Plus_forwardHom B P b (example638Plus_backwardHom B P b hA_complete hnoeth y) = y
+  refine @UniformSpace.Completion.ext' _ _ (presheafValue (trivialPlusDatum B P b)) _ _ _ _
+    (hcont_forward.comp UniformSpace.Completion.continuous_extension)
     continuous_id ?_ y
   intro a
-  change example638Plus_forwardHom B P b
-    (example638Plus_backwardHom B P b hA_complete hnoeth
+  change example638Plus_forwardHom B P b (example638Plus_backwardHom B P b hA_complete hnoeth
       (UniformSpace.Completion.coeRingHom a)) = UniformSpace.Completion.coeRingHom a
   have hbwd : example638Plus_backwardHom B P b hA_complete hnoeth
       (UniformSpace.Completion.coeRingHom a) =

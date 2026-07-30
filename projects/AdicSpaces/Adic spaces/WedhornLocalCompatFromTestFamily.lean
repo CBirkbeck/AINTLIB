@@ -1141,44 +1141,36 @@ theorem multi_bound_via_cover_refinement_factorization
         ∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
           w.vle t' (1 : Localization.Away s)) :
     letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-    letI : PlusSubring (Localization.Away s) :=
-      localizationLocSubringPlusSubring P T s
+    letI : PlusSubring (Localization.Away s) := localizationLocSubringPlusSubring P T s
     letI : DecidableEq (Localization.Away s) := Classical.decEq _
-    ∀ w ∈ Spa (Localization.Away s) (Localization.Away s)⁺,
-      w.vle ((σ_loc : Localization.Away s) *
+    ∀ w ∈ Spa (Localization.Away s) (Localization.Away s)⁺, w.vle ((σ_loc : Localization.Away s) *
           (∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t))
         (algebraMap A (Localization.Away s) s) →
       w.vle (∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t)
             (algebraMap A (Localization.Away s) s_D) := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
+  letI : PlusSubring (Localization.Away s) := localizationLocSubringPlusSubring P T s
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro w hw_spa hw_f
   letI : ValuativeRel (Localization.Away s) := w.toValuativeRel
   -- Step 1: Substitute the factorization in f-membership.
   set P_im := ∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t with hP_im_def
-  have hf' : w.vle ((σ_loc : Localization.Away s) * P_im)
-      ((σ_loc : Localization.Away s) *
+  have hf' : w.vle ((σ_loc : Localization.Away s) * P_im) ((σ_loc : Localization.Away s) *
         (algebraMap A (Localization.Away s) s_D * P_im)) := by
-    rw [show (σ_loc : Localization.Away s) *
-            (algebraMap A (Localization.Away s) s_D * P_im) =
+    rw [show (σ_loc : Localization.Away s) * (algebraMap A (Localization.Away s) s_D * P_im) =
           (σ_loc : Localization.Away s) *
             algebraMap A (Localization.Away s) s_D * P_im from by ring,
       ← h_factorization]
     exact hw_f
   -- Step 2: Cancel σ_loc on the left via vle_iff_mul_unit_left.
-  have hP_im_chain : w.vle P_im
-      (algebraMap A (Localization.Away s) s_D * P_im) :=
-    (vle_iff_mul_unit_left w σ_loc P_im
-      (algebraMap A (Localization.Away s) s_D * P_im)).mp hf'
+  have hP_im_chain : w.vle P_im (algebraMap A (Localization.Away s) s_D * P_im) :=
+    (vle_iff_mul_unit_left w σ_loc P_im (algebraMap A (Localization.Away s) s_D * P_im)).mp hf'
   -- Step 3: Per-element integrality + Spv.vle_prod_of_pointwise →
   -- product is integral at w (∏ ≤ 1).
   have hP_im_int : w.vle P_im (1 : Localization.Away s) := by
     have h_pw : ∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
         w.vle t' (1 : Localization.Away s) := h_T_D_image_int w hw_spa
-    have h_prod : w.vle
-        (∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t)
+    have h_prod : w.vle (∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t)
         (∏ _t ∈ T_D.image (algebraMap A (Localization.Away s)),
           (1 : Localization.Away s)) :=
       Spv.vle_prod_of_pointwise w (T_D.image (algebraMap A (Localization.Away s)))

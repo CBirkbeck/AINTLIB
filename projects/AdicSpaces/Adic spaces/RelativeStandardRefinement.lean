@@ -108,24 +108,20 @@ theorem exists_spanTop_standard_refinement_of_rationalCovering_nonempty
       C.covers hC.2 C.hcover
   set S₀ : Finset A := distinguishedProducts LP with hS₀
   -- no common zero of `S₀` on `U` (feeds the dominating unit + shows σ-piece empty)
-  have hncz : ∀ y : ↥(Spa A A⁺), (y.1 : Spv A) ∈ U →
-      ∃ f ∈ S₀, ¬ (y.1 : Spv A).vle f 0 := by
+  have hncz : ∀ y : ↥(Spa A A⁺), (y.1 : Spv A) ∈ U → ∃ f ∈ S₀, ¬ (y.1 : Spv A).vle f 0 := by
     intro y hy
-    obtain ⟨s', hs', _, _, hvs0⟩ :=
-      distinguishedProducts_cover LP hts h1 y.2 (hcovLP y.1 hy)
+    obtain ⟨s', hs', _, _, hvs0⟩ := distinguishedProducts_cover LP hts h1 y.2 (hcovLP y.1 hy)
     exact ⟨s', hs', hvs0⟩
   -- Step 5: dominating unit σ over the compact preimage of `U`
   have hUcpt : IsCompact (Subtype.val ⁻¹' U : Set ↥(Spa A A⁺)) :=
     isCompact_preimage_rationalOpen_noHArch
       (IsRingOfIntegralElements.isOpen (B := (A⁺ : Subring A))) C.base hC.base
-  obtain ⟨σ, hσ⟩ :=
-    exists_dominating_unit_noHArch_finset_on (A := A) hUcpt S₀
+  obtain ⟨σ, hσ⟩ := exists_dominating_unit_noHArch_finset_on (A := A) hUcpt S₀
       (fun y hy => hncz y hy)
   -- Step 6: `S := insert σ S₀`
   refine ⟨insert (σ : A) S₀, ?_, ?_⟩
   · -- Step 7: `S` spans the unit ideal (σ is a unit and belongs to `S`)
-    exact Ideal.eq_top_of_isUnit_mem _
-      (Ideal.subset_span (Finset.mem_insert_self _ _)) σ.isUnit
+    exact Ideal.eq_top_of_isUnit_mem _ (Ideal.subset_span (Finset.mem_insert_self _ _)) σ.isUnit
   · intro f hf
     -- the product identity, localized to `U`
     have hpieq : U ∩ rationalOpen S₀ f = U ∩
@@ -147,8 +143,7 @@ theorem exists_spanTop_standard_refinement_of_rationalCovering_nonempty
       refine ⟨E, hE, ?_⟩
       -- `U ∩ R(S/f) ⊆ U ∩ R(S₀/f) = U ∩ R(P/f) ⊆ R(P/f) ⊆ R(p) ⊆ R(E)`
       calc rationalOpen C.base.T C.base.s ∩ rationalOpen (insert (σ : A) S₀) f
-          ⊆ U ∩ rationalOpen S₀ f :=
-            Set.inter_subset_inter_right _
+          ⊆ U ∩ rationalOpen S₀ f := Set.inter_subset_inter_right _
               (rationalOpen_subset_of_numerator_subset (Finset.subset_insert _ _) f)
         _ = U ∩ rationalOpen (transversalProducts (LP.map Prod.fst)) f := hpieq
         _ ⊆ rationalOpen (transversalProducts (LP.map Prod.fst)) f :=

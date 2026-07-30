@@ -167,8 +167,7 @@ theorem stalkShrink_Y
     refine hx ⟨U, hvU, f, 0, rfl, germ_zero U hvU, hcon⟩
   -- choose a Y-interior rational index inside `U`
   obtain ⟨E, hErat, hvE, hEsub⟩ := exists_isRational_spaOpen_subset_huber
-    (V := (show Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))
-        from (U : Set ↥(SpaTop (Ainf p F))))
+    (V := (show Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) from (U : Set ↥(SpaTop (Ainf p F))))
       ∩ Subtype.val ⁻¹' (Y p F ϖ))
     ((show IsOpen (show Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))
         from (U : Set ↥(SpaTop (Ainf p F)))) from U.2).inter
@@ -180,22 +179,18 @@ theorem stalkShrink_Y
     have hmem : (⟨w, hwspa⟩ : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
         ∈ spaOpen E := mem_spaOpen.mpr hw
     exact (hEsub hmem).2
-  set i : RationalIndex U :=
-    ⟨E, hErat, hEsub.trans Set.inter_subset_left⟩ with hidef
+  set i : RationalIndex U := ⟨E, hErat, hEsub.trans Set.inter_subset_left⟩ with hidef
   have hvi : (v : Spv (Ainf p F)) ∈ (rationalOpen i.D.T i.D.s
-      ∩ Spa (Ainf p F) (ringPlus (Ainf p F)) : Set (Spv (Ainf p F))) :=
-    ⟨mem_spaOpen.mp hvE, v.2⟩
+      ∩ Spa (Ainf p F) (ringPlus (Ainf p F)) : Set (Spv (Ainf p F))) := ⟨mem_spaOpen.mp hvE, v.2⟩
   have hcoh := comap_limitEvalHom_pointValue hvU i hvi
   have hnzD : ¬ (pointValue i.D hvi).vle (limitEvalHom i f) 0 := by
     intro hcon
     refine hnz ?_
     rw [← hcoh]
-    exact (comap_vle (limitEvalHom i) (pointValue i.D hvi) f 0).mpr (by
-      rwa [map_zero])
+    exact (comap_vle (limitEvalHom i) (pointValue i.D hvi) f 0).mpr (by rwa [map_zero])
   obtain ⟨D', hD', hsub, hD'Y, hvD', hunit⟩ := rationalShrink_Y p F ϖ
     i.D i.isRational hEY (v : Spv (Ainf p F)) hvi (limitEvalHom i f) hnzD
-  have hW'U : spaOpens D' ≤ U :=
-    (spaOpen_subset_of_rationalOpen_subset hsub).trans i.subset
+  have hW'U : spaOpens D' ≤ U := (spaOpen_subset_of_rationalOpen_subset hsub).trans i.subset
   have hvW' : v ∈ spaOpens D' := mem_spaOpen.mpr hvD'
   have hcomp : limitEval hD' (limitRestrict hW'U f)
       = restrictionMapHom i.D D' hsub (limitEvalHom i f) :=
@@ -208,8 +203,7 @@ theorem stalkShrink_Y
     rwa [show (limitEval hD').symm.toRingHom (limitEval hD'
         (limitRestrict hW'U f)) = limitRestrict hW'U f from
       (limitEval hD').symm_apply_apply _] at h2
-  have hgerm : (spaRingPresheaf (Ainf p F)).germ (spaOpens D') v hvW'
-      (limitRestrict hW'U f)
+  have hgerm : (spaRingPresheaf (Ainf p F)).germ (spaOpens D') v hvW' (limitRestrict hW'U f)
       = (spaRingPresheaf (Ainf p F)).germ U v hvU f :=
     germ_limitRestrict hW'U hvW' f
   rw [← hgerm]

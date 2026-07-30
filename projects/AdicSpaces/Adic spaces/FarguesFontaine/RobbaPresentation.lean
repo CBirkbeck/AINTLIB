@@ -1005,21 +1005,18 @@ theorem exists_twist (zb c : OF F)
     ∃ (j : ℕ) (c' : OF F), c = zb ^ j * c'
       ∧ perfectoidValuation p F (zb : F)
         < perfectoidValuation p F (c' : F) := by
-  have hcpos : 0 < perfectoidValuation p F (c : F) :=
-    pos_iff_ne_zero.mpr hc0
+  have hcpos : 0 < perfectoidValuation p F (c : F) := pos_iff_ne_zero.mpr hc0
   -- some power of `zb` drops strictly below `|c|`
   obtain ⟨j₀, hj₀⟩ := NNReal.exists_pow_lt_of_lt_one hcpos hzb1
   -- the largest `j ≤ j₀` with `|c| ≤ |zb|^j`
   set P : ℕ → Prop := fun j => perfectoidValuation p F (c : F)
     ≤ perfectoidValuation p F (zb : F) ^ j with hP
   have hP0 : P 0 := by
-    show perfectoidValuation p F (c : F)
-      ≤ perfectoidValuation p F (zb : F) ^ 0
+    show perfectoidValuation p F (c : F) ≤ perfectoidValuation p F (zb : F) ^ 0
     rw [pow_zero]
     exact perfectoidValuation_le_one p F c
   have hnot : ¬ P j₀ := by
-    show ¬ (perfectoidValuation p F (c : F)
-      ≤ perfectoidValuation p F (zb : F) ^ j₀)
+    show ¬ (perfectoidValuation p F (c : F) ≤ perfectoidValuation p F (zb : F) ^ j₀)
     exact not_le.mpr hj₀
   set j := Nat.findGreatest P j₀ with hj
   have hPj : P j := Nat.findGreatest_spec (Nat.zero_le j₀) hP0
@@ -1029,16 +1026,13 @@ theorem exists_twist (zb c : OF F)
     · exact absurd (h ▸ hPj) hnot
   have hnext : ¬ P (j + 1) := by
     intro hcon
-    exact Nat.findGreatest_is_greatest (Nat.lt_succ_self j)
-      (Nat.succ_le_of_lt hjlt) hcon
+    exact Nat.findGreatest_is_greatest (Nat.lt_succ_self j) (Nat.succ_le_of_lt hjlt) hcon
   -- divisibility from the value comparison
-  have hdvd := (perfectoidValuation_integers p F).dvd_of_le
-    (x := c) (y := zb ^ j) ?_
+  have hdvd := (perfectoidValuation_integers p F).dvd_of_le (x := c) (y := zb ^ j) ?_
   · obtain ⟨c', hc'⟩ := hdvd
     refine ⟨j, c', hc', ?_⟩
     -- multiplicativity gives |c| = |zb|^j·|c'|; maximality gives the bound
-    have hval : perfectoidValuation p F (c : F)
-        = perfectoidValuation p F (zb : F) ^ j
+    have hval : perfectoidValuation p F (c : F) = perfectoidValuation p F (zb : F) ^ j
           * perfectoidValuation p F (c' : F) := by
       rw [hc']
       rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
@@ -1049,13 +1043,11 @@ theorem exists_twist (zb c : OF F)
     have hlt : perfectoidValuation p F (zb : F) ^ (j + 1)
         < perfectoidValuation p F (c : F) := not_le.mp hnext
     rw [hval, pow_succ] at hlt
-    have hzjpos : 0 < perfectoidValuation p F (zb : F) ^ j :=
-      pow_pos (pos_iff_ne_zero.mpr hzb0) j
+    have hzjpos : 0 < perfectoidValuation p F (zb : F) ^ j := pow_pos (pos_iff_ne_zero.mpr hzb0) j
     exact lt_of_mul_lt_mul_left (by rwa [mul_comm] at hlt ⊢) zero_le
   · show perfectoidValuation p F
         ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
-      ≤ perfectoidValuation p F
-        ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ j))
+      ≤ perfectoidValuation p F ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ j))
     rw [show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
         = (c : F) from rfl,
       show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ j))
@@ -3662,14 +3654,11 @@ theorem surjective_evalBIHom
       (teichPowGen p F ϖ zb m₀)) :
     Function.Surjective (evalBIHom p F ϖ φ hφ hbmem hb) := by
   intro zsub
-  obtain ⟨k, hk⟩ := exists_p_scaling p F ϖ
-    ((zsub : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+  obtain ⟨k, hk⟩ := exists_p_scaling p F ϖ ((zsub : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
       : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
-  have hz'mem : pImage p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 ^ k
-      * ((zsub : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+  have hz'mem : pImage p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 ^ k * ((zsub : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
         : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
-      ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 :=
-    mul_mem (pow_mem (BIProd_mem_BISub p F ϖ _) k) zsub.2
+      ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 := mul_mem (pow_mem (BIProd_mem_BISub p F ϖ _) k) zsub.2
   obtain ⟨U', hU'eq, -⟩ := exists_evalBI_eq_of_le_one p F ϖ φ hφ hφb
     hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz'mem hk
   refine ⟨GeltEltM0 p F ϖ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
@@ -3681,24 +3670,20 @@ theorem surjective_evalBIHom
   have hvpalg : ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k
       * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k = 1 := by
     rw [← mul_pow, hinv, one_pow]
-  have h1 : pImage p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 ^ k
-      = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+  have h1 : pImage p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 ^ k = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
         (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) :=
     (map_pow (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
       (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) k).symm
-  have h2 : BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+  have h2 : BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
       * BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
         (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) = 1 :=
     ((map_mul (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
         (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
         (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k)).symm).trans
-      ((congrArg (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1) hvpalg).trans
-        (map_one _))
+      ((congrArg (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1) hvpalg).trans (map_one _))
   have hfinal : BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
         (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
-      * (pImage p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 ^ k
-        * ((zsub : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      * (pImage p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 ^ k * ((zsub : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
           : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)))
       = ((zsub : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
           : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
@@ -5378,14 +5363,11 @@ theorem surjective_evalBIHom₂
       (teichPowGen₂ p F ϖ zb m₀)) :
     Function.Surjective (evalBIHom p F ϖ φ hφ hbmem hb) := by
   intro zsub
-  obtain ⟨k, hk⟩ := exists_p_scaling₂ p F ϖ
-    ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+  obtain ⟨k, hk⟩ := exists_p_scaling₂ p F ϖ ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
       : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
-  have hz'mem : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k
-      * ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+  have hz'mem : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k * ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
-      ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 :=
-    mul_mem (pow_mem (BIProd_mem_BISub p F ϖ _) k) zsub.2
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 := mul_mem (pow_mem (BIProd_mem_BISub p F ϖ _) k) zsub.2
   obtain ⟨U', hU'eq, -⟩ := exists_evalBI_eq_of_le_one₂ p F ϖ φ hφ hφb
     hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz'mem hk
   refine ⟨GeltEltM0 p F ϖ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
@@ -5397,20 +5379,17 @@ theorem surjective_evalBIHom₂
   have hvpalg : ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k
       * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k = 1 := by
     rw [← mul_pow, hinv, one_pow]
-  have h1 : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k
-      = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+  have h1 : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
         (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) :=
     (map_pow (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
       (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) k).symm
-  have h2 : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+  have h2 : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
       * BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
         (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) = 1 :=
     ((map_mul (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
         (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
         (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k)).symm).trans
-      ((congrArg (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1) hvpalg).trans
-        (map_one _))
+      ((congrArg (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1) hvpalg).trans (map_one _))
   have hfinal : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
         (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
       * (pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k

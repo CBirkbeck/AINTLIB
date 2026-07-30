@@ -1361,3 +1361,51 @@ without rebuilding. A real `lake build '«Adic spaces».FarguesFontaine.ArComple
 **green**. So: when the fast loop reports an instance/unification error in a file that imports
 another file you just edited, that is the stale-olean artifact, not a defect — confirm with
 `lake build` before reverting anything.
+
+## Task 2 — join pool drained: 80 joins across 10 files
+
+Applied the remaining 13 proofs in the sound pool: 80 joins across 10 files. **One file had to be
+reverted** — see the third unsoundness below — leaving **75 joins across 9 files**:
+RobbaPresentation 21, Euclidean 10, CurveObject 8, WedhornLocalCompatFromTestFamily 8,
+Example638 7, YStalks 6, Groebner 5, RelativeStandardRefinement 5, StructureSheafStalks 5.
+
+### THIRD unsoundness: a join must not leave an unclosed `{`
+
+`ChartData.lean` failed the gate with
+
+    ChartData.lean:808:92: unexpected identifier; expected '}'
+    ChartData.lean:808:36: Fields missing: `add_mem'`, `zero_mem'`, `smul_mem'`
+
+The join was
+
+```lean
+  set BdIdeal : Ideal (Ainf p F) :=
+    { carrier := {w : Ainf p F | gaussValue p F ρ w ≤ q ^ n}
+      zero_mem' := by …
+```
+→ `set BdIdeal : Ideal (Ainf p F) := { carrier := {w … }` with `zero_mem'` left behind.
+
+Structure-instance and `where` fields are separated by **newline** and aligned by **column**. Moving
+the `{` rightwards puts every following field outside the braces. This is the same family as the
+`by`-block guard — `a` opens a block whose reference column matters — but `{` was not in the opener
+list. Fixed by refusing any join whose result leaves `{` unbalanced.
+
+That is now three distinct openers the rule must respect: `by`/`do`/`=>` (guarded by requiring a
+single-line block), a leading `·`/`.`/`|` on either line, and an unclosed `{`. Each was found by a
+different failure mode — assert, assert, and a failed gate.
+
+### GOTCHA: `awk 'length($0)>100'` counts BYTES, not characters
+
+Checking for newly-over-long lines with awk reported 23 new violations and looked like a real
+regression. It is not: macOS `awk`'s `length()` is byte-oriented, and these files are dense with
+multi-byte characters (`ϖ`, `ρ`, `∑`, `⟨`). Lean's `linter.style.longLine` counts **characters**.
+Recounting in Python (code points, same as Lean): **79 over-long lines before, 79 after** — the
+joins added none, exactly as the ≤100 assert in `apply_joins.py` guarantees.
+
+Use Python/Lean semantics for any line-length check in this codebase; `awk`/`wc -c` will lie.
+
+### Incidental task-3 finding
+
+`FarguesFontaine/Groebner.lean` already carries **73 lines over 100 characters** — a pre-existing
+`style.longLine` violation at scale, untouched by this pass (every other file in the batch has 0-2).
+Worth its own pass; not mixed into a decomposition batch.

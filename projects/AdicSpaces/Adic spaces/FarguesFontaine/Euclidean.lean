@@ -285,28 +285,23 @@ theorem gaussValueF_teichmuller_sum_sub_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 :
     have hfa : perfectoidValuation p F (f a) ≤ B := hf a (Finset.mem_insert_self a t)
     have hft : ∀ i ∈ t, perfectoidValuation p F (f i) ≤ B :=
       fun i hi => hf i (Finset.mem_insert_of_mem hi)
-    have hS : perfectoidValuation p F (∑ i ∈ t, f i) ≤ B :=
-      Valuation.map_sum_le _ hft
+    have hS : perfectoidValuation p F (∑ i ∈ t, f i) ≤ B := Valuation.map_sum_le _ hft
     rw [Finset.sum_insert ha, Finset.sum_insert ha]
-    have hsplit : (WittVector.teichmuller p (f a)
-          + ∑ i ∈ t, WittVector.teichmuller p (f i))
+    have hsplit : (WittVector.teichmuller p (f a) + ∑ i ∈ t, WittVector.teichmuller p (f i))
         - WittVector.teichmuller p (f a + ∑ i ∈ t, f i)
-        = (WittVector.teichmuller p (f a)
-            + WittVector.teichmuller p (∑ i ∈ t, f i)
+        = (WittVector.teichmuller p (f a) + WittVector.teichmuller p (∑ i ∈ t, f i)
             - WittVector.teichmuller p (f a + ∑ i ∈ t, f i))
           + ((∑ i ∈ t, WittVector.teichmuller p (f i))
             - WittVector.teichmuller p (∑ i ∈ t, f i)) := by
       ring
     rw [hsplit]
     have hBsum : BddAbove (Set.range (gaussTermF p F ρ
-        (∑ i ∈ t, WittVector.teichmuller p (f i)))) :=
-      (gaussValueF_finset_sum_le p F hρ0 hρ1 B t
+        (∑ i ∈ t, WittVector.teichmuller p (f i)))) := (gaussValueF_finset_sum_le p F hρ0 hρ1 B t
         (fun i => WittVector.teichmuller p (f i))
         (fun i hi => ⟨bddAbove_gaussTermF_teichmuller p F (f i), by
           rw [gaussValueF_teichmuller]
           exact hft i hi⟩)).1
-    have hB1 : BddAbove (Set.range (gaussTermF p F ρ
-        (WittVector.teichmuller p (f a)
+    have hB1 : BddAbove (Set.range (gaussTermF p F ρ (WittVector.teichmuller p (f a)
           + WittVector.teichmuller p (∑ i ∈ t, f i)
           - WittVector.teichmuller p (f a + ∑ i ∈ t, f i)))) := by
       have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1
@@ -570,24 +565,19 @@ private theorem valued_prefix_sub_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : �
   rw [valued_AlocToHatK, ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub,
     map_sub, alocToWittF_prefixAloc, alocToWittF_prefixAloc,
     alocToWittF_prefixAloc]
-  have hdistrib : (∑ k ∈ Finset.range N,
-        WittVector.teichmuller p (a k) * (p : WittVector p F) ^ k)
-      - (∑ k ∈ Finset.range N,
-        WittVector.teichmuller p (b k) * (p : WittVector p F) ^ k)
-      - (∑ k ∈ Finset.range N,
-        WittVector.teichmuller p (e k) * (p : WittVector p F) ^ k)
+  have hdistrib : (∑ k ∈ Finset.range N, WittVector.teichmuller p (a k) * (p : WittVector p F) ^ k)
+      - (∑ k ∈ Finset.range N, WittVector.teichmuller p (b k) * (p : WittVector p F) ^ k)
+      - (∑ k ∈ Finset.range N, WittVector.teichmuller p (e k) * (p : WittVector p F) ^ k)
       = ∑ k ∈ Finset.range N, (p : WittVector p F) ^ k
         * (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
           - WittVector.teichmuller p (a k - b k)) := by
     rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun k _ => ?_
-    have hek : WittVector.teichmuller p (e k)
-        = WittVector.teichmuller p (a k - b k) := rfl
+    have hek : WittVector.teichmuller p (e k) = WittVector.teichmuller p (a k - b k) := rfl
     rw [hek]
     ring
   rw [hdistrib]
-  refine (gaussValueF_finset_sum_le p F hρ0 hρ1 (ρ * M) (Finset.range N)
-    _ fun k _ => ?_).2
+  refine (gaussValueF_finset_sum_le p F hρ0 hρ1 (ρ * M) (Finset.range N) _ fun k _ => ?_).2
   have hBtriple : BddAbove (Set.range (gaussTermF p F ρ
       (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
         - WittVector.teichmuller p (a k - b k)))) := by

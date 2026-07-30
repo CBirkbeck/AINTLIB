@@ -1124,13 +1124,11 @@ theorem ringStalkMap_piYHom_surjective (y : ↥(yTop p F ϖ)) :
     Function.Surjective
       (ValuationSpectrum.ringStalkMap (piYHom p F ϖ) y).hom := by
   intro a
-  obtain ⟨U, hyU, f, rfl⟩ :=
-    ((yPresheafedSpace p F ϖ).ringPresheaf).exists_germ_eq a
+  obtain ⟨U, hyU, f, rfl⟩ := ((yPresheafedSpace p F ϖ).ringPresheaf).exists_germ_eq a
   obtain ⟨W₀, hyW₀, hdis₀⟩ := exists_disjoint_translates p F ϖ y
   set W : Opens ↥(yTop p F ϖ) := U ⊓ W₀ with hWdef
   have hyW : y ∈ W := ⟨hyU, hyW₀⟩
-  have hdis : ∀ k : ℤ, k ≠ 0 →
-      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+  have hdis : ∀ k : ℤ, k ≠ 0 → Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
           : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
         ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)) := by
     intro k hk
@@ -1138,13 +1136,11 @@ theorem ringStalkMap_piYHom_surjective (y : ↥(yTop p F ϖ)) :
     · intro z hz
       exact (hz : z ∈ (Opens.map (yFrobTop p F ϖ k)).obj (U ⊓ W₀)).2
     · exact fun z hz => (hz : z ∈ (U ⊓ W₀ : Opens _)).2
-  set fW := limitRestrict
-    (leOfHom ((yFunctor p F ϖ).map (homOfLE
+  set fW := limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE
       (inf_le_left : W ≤ U)))) f with hfWdef
   obtain ⟨t, ht0⟩ := exists_invariant_extension p F ϖ W hdis fW
   have hmem : yTopToCurve p F ϖ y ∈ xImage p F ϖ W := ⟨y, hyW, rfl⟩
-  refine ⟨(curveSpace p F ϖ).ringPresheaf.germ (xImage p F ϖ W)
-    (yTopToCurve p F ϖ y) hmem t, ?_⟩
+  refine ⟨(curveSpace p F ϖ).ringPresheaf.germ (xImage p F ϖ W) (yTopToCurve p F ϖ y) hmem t, ?_⟩
   rw [ringStalkMap_piYHom_germ p F ϖ y (xImage p F ϖ W) hmem t]
   -- the zero-translate membership of y
   have hy0 : y ∈ (Opens.map (yFrobTop p F ϖ 0)).obj W := by
@@ -1152,10 +1148,8 @@ theorem ringStalkMap_piYHom_surjective (y : ↥(yTop p F ϖ)) :
     rw [yFrobTop_zero p F ϖ y]
     exact hyW
   -- chase both germs down to the zero translate
-  have h1 := yGerm_limitRestrict p F ϖ
-    (translate_le_curvePreimage_xImage p F ϖ W 0) hy0 t.1
-  have h2 := yGerm_limitRestrict p F ϖ
-    (le_of_eq (map_yFrobTop_zero p F ϖ W)) hy0 fW
+  have h1 := yGerm_limitRestrict p F ϖ (translate_le_curvePreimage_xImage p F ϖ W 0) hy0 t.1
+  have h2 := yGerm_limitRestrict p F ϖ (le_of_eq (map_yFrobTop_zero p F ϖ W)) hy0 fW
   have h3 := yGerm_limitRestrict p F ϖ (inf_le_left : W ≤ U) hyW f
   have hchain : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
       ((Opens.map (yTopToCurveTop p F ϖ)).obj (xImage p F ϖ W)) y hmem)
@@ -1164,14 +1158,12 @@ theorem ringStalkMap_piYHom_surjective (y : ↥(yTop p F ϖ)) :
     have e1 : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
         ((Opens.map (yTopToCurveTop p F ϖ)).obj (xImage p F ϖ W)) y hmem)
         (piComponent p F ϖ (xImage p F ϖ W) t)
-        = ((yPresheafedSpace p F ϖ).ringPresheaf.germ
-            ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
+        = ((yPresheafedSpace p F ϖ).ringPresheaf.germ ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
           (limitRestrict (yFunctor_translate_le p F ϖ W 0) t.1) := h1.symm
     have e2 : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
         ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
         (limitRestrict (yFunctor_translate_le p F ϖ W 0) t.1)
-        = ((yPresheafedSpace p F ϖ).ringPresheaf.germ
-            ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
+        = ((yPresheafedSpace p F ϖ).ringPresheaf.germ ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
           (limitRestrict (yFunctor_translate_zero_le p F ϖ W) fW) :=
       congrArg _ ht0
     have e3 : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
