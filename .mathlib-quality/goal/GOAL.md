@@ -3031,3 +3031,33 @@ the lift is worth doing only if the block is substantially larger than the defin
 clears it; a 12-line block over an 8-line lambda would not.
 
 Deferred this round only because the gate was mid-flight and the edit wants a careful single pass.
+
+## Task 2 — `RelativeDescentHuber.isEmbedding_productRestrictionSub_of_imgCovering` 65 → 49 (235 → 234)
+
+`hcomp` (27 lines) lifted to `keystone_comp_productRestrictionSub_eq`: restricting on `A` then
+applying the keystone map agrees with applying the keystone map then restricting on the image
+covering. Executed as scoped — `g` passed with `hgdef` and the helper opening `subst hgdef`, since
+the block unfolds `g` definitionally via `show` rather than by rewriting.
+
+The predicted cost materialised exactly: the 8-line lambda had to be written out in `hgdef`'s type,
+so the helper is ~40 lines and the net saving ~22 against a need of 15. **Scoping it first meant the
+edit was a single deliberate pass rather than a discovery process** — worth doing whenever the lift
+involves a definition big enough to change the arithmetic.
+
+One iteration, and it is the **fourth occurrence of the same gotcha**: `D₀` is an *explicit* section
+variable, so the call needs `keystone_comp_… D₀ C hcertB hcertP g hgdef`, not `… C hcertB hcertP …`.
+Lean reported it as
+
+    Application type mismatch: the argument C has type RationalCoveringData A
+    but is expected to have type RationalLocData ?m
+
+which reads like a confusion about `C` but is really a *missing leading argument*. The fix is the rule
+already recorded for `wI_le_of_le_of_sub_le`: **copy an existing call site's argument shape** — here
+`keystoneHomO D₀ hcertB`, two lines away, shows `D₀` leading.
+
+**Standing check before writing any helper call in this codebase: grep one existing use of a
+neighbouring lemma in the same file and count its leading section-variable arguments.** `p F ϖ` in
+FarguesFontaine, `D₀` here, `p F` in Euclidean — the pattern is pervasive and has now cost four
+iterations.
+
+Running total: **234** (486 baseline → 290 pre-split → 274 post-split → 234).

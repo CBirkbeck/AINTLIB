@@ -1205,6 +1205,59 @@ theorem productRestrictionSub_continuous_local (C : RationalCoveringData A) :
 
 variable [DecidableEq (RationalLocData (presheafValue D₀))]
 
+/-- **The comparison square on products.** Restricting on `A` and then applying the
+keystone map agrees with applying the keystone map and then restricting on the image
+covering. -/
+private theorem keystone_comp_productRestrictionSub_eq
+    [IsSheafy (presheafValue D₀)]
+    [T2Space (presheafValue D₀)] [NonarchimedeanRing (presheafValue D₀)]
+    [letI : UniformSpace (presheafValue D₀) :=
+        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
+      CompleteSpace (presheafValue D₀)]
+    [IsRingOfIntegralElements ((presheafValue D₀)⁺)]
+    (C : RationalCoveringData A)
+    (hcertB : Ideal.span ((C.base.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (g : (∀ D : ↥C.covers, presheafValue D.1) →
+      (∀ D' : ↥(imgCoveringO D₀ C hcertB hcertP).covers, presheafValue D'.1))
+    (hgdef : g = fun s D' =>
+      ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm ▸
+        (keystoneHomO D₀
+          (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+          (s ⟨((mem_imgCoversO D₀ C hcertP).mp D'.2).choose,
+            ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose⟩))) :
+    g ∘ productRestrictionSub A C
+      = productRestrictionSub (presheafValue D₀)
+          (imgCoveringO D₀ C hcertB hcertP)
+        ∘ (keystoneHomO D₀ hcertB) := by
+  subst hgdef
+  funext x D'
+  show (((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm ▸
+      (keystoneHomO D₀ _ (restrictionMap C.base _ _ x))) = _
+  rw [restrictionMap_cast _ _
+    ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm _]
+  have hsq := keystone_restriction_squareO D₀ hcertB
+    (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+    (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+    x
+  rw [hsq]
+  have hc := congr_fun (restrictionMap_comp
+    (imgDatumO D₀ C.base hcertB)
+    (imgDatumO D₀ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose
+      (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
+    D'.1
+    (imgDatumO_rationalOpen_subset D₀ hcertB
+      (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+      (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
+    (le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
+      ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec)))
+    (keystoneHomO D₀ hcertB x)
+  simp only [Function.comp_apply] at hc
+  exact hc
+
 /-- **The embedding transport** (the topological half of the single-`D₀`
 sheaf transport): the product restriction of an interior covering is a
 topological embedding, provided the completion at `D₀` is a sheafy Tate
@@ -1244,33 +1297,7 @@ theorem isEmbedding_productRestrictionSub_of_imgCovering
     exact (continuous_cast_presheafValue D₀ _).comp
       ((keystoneHomO_continuous D₀ _).comp (continuous_apply _))
   -- the composite is the B-side product restriction after the base keystone
-  have hcomp : g ∘ productRestrictionSub A C
-      = productRestrictionSub (presheafValue D₀)
-          (imgCoveringO D₀ C hcertB hcertP)
-        ∘ (keystoneHomO D₀ hcertB) := by
-    funext x D'
-    show (((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm ▸
-        (keystoneHomO D₀ _ (restrictionMap C.base _ _ x))) = _
-    rw [restrictionMap_cast _ _
-      ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec.symm _]
-    have hsq := keystone_restriction_squareO D₀ hcertB
-      (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
-      (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
-      x
-    rw [hsq]
-    have hc := congr_fun (restrictionMap_comp
-      (imgDatumO D₀ C.base hcertB)
-      (imgDatumO D₀ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose
-        (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
-      D'.1
-      (imgDatumO_rationalOpen_subset D₀ hcertB
-        (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
-        (C.hsubset _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
-      (le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
-        ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec)))
-      (keystoneHomO D₀ hcertB x)
-    simp only [Function.comp_apply] at hc
-    exact hc
+  have hcomp := keystone_comp_productRestrictionSub_eq D₀ C hcertB hcertP g hgdef
   -- the composite is an embedding: B-side embedding after the base homeo
   have hkeyhomeo : Topology.IsEmbedding (keystoneHomO D₀ hcertB) := by
     have h : Topology.IsEmbedding
