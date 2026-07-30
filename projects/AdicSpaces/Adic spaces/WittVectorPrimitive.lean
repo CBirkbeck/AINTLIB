@@ -172,14 +172,12 @@ theorem WittVector.IsPrimitive.mul_left_cancel {ξ : 𝕎 k} {ϖ : k} {α : 𝕎
           intro h
           rw [pow_succ, ← mul_assoc] at h
           exact ihm (WittVector.eq_zero_of_p_mul_eq_zero _ h)
-      have hξy : ξ * y = 0 :=
-        cancel_p_pow _ i <| by rw [hxy] at h; linear_combination h
+      have hξy : ξ * y = 0 := cancel_p_pow _ i <| by rw [hxy] at h; linear_combination h
       -- Step B: y.coeff 0 = 0
       have hy0 : y.coeff 0 = 0 := by
         have h0 := WittVector.mul_coeff_zero ξ y
         rw [hξy, WittVector.zero_coeff] at h0
-        exact (mul_eq_zero.mp h0.symm).resolve_left
-          (IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα)
+        exact (mul_eq_zero.mp h0.symm).resolve_left (IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα)
       -- Step C: x.coeff i = y.coeff 0 ^ (p^i) = 0
       have hcoeff := WittVector.mul_pow_charP_coeff_succ y (m := 0) (n := i)
       simp only [zero_add] at hcoeff

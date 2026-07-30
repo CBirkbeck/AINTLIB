@@ -682,8 +682,7 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
     (hsub : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s) :
     letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
     letI : DecidableEq (presheafValue E) := Classical.decEq _
-    @Continuous _ _ D.topology
-      (relativeRationalLocData_laurentNormalized E D hsub).topology
+    @Continuous _ _ D.topology (relativeRationalLocData_laurentNormalized E D hsub).topology
       (relativeLaurentNormalized_forwardInnerLocHom E D hsub) := by
   letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
@@ -693,8 +692,7 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
   letI tgtTop : TopologicalSpace (Localization.Away D_at_E_data.s) := D_at_E_data.topology
   letI : TopologicalSpace (Localization.Away (E.canonicalMap D.s)) := tgtTop
   letI : IsTopologicalRing (Localization.Away D_at_E_data.s) := D_at_E_data.isTopologicalRing
-  letI : IsTopologicalRing (Localization.Away (E.canonicalMap D.s)) :=
-    D_at_E_data.isTopologicalRing
+  letI : IsTopologicalRing (Localization.Away (E.canonicalMap D.s)) := D_at_E_data.isTopologicalRing
   letI : IsTopologicalAddGroup (Localization.Away D_at_E_data.s) :=
     D_at_E_data.isTopologicalAddGroup
   letI : IsTopologicalAddGroup (Localization.Away (E.canonicalMap D.s)) :=
@@ -715,8 +713,7 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
           E.canonicalMap := by
       ext a
       simp only [RingHom.comp_apply]
-      exact IsLocalization.Away.lift_eq D.s
-        (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub) a
+      exact IsLocalization.Away.lift_eq D.s (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub) a
     rw [heq]
     exact (algebraMap_continuous_loc D_at_E_data).comp (canonicalMap_continuous E)
   -- hpow: forwardInner(divByS t D.s) is power-bounded for t ∈ D.T.
@@ -1143,8 +1140,7 @@ theorem relativeLaurentNormalized_forwardHom_restrictionMapHom
   haveI : T2Space (presheafValue D_at_E_data) := presheafValueT2Space _
   set f : presheafValue E → presheafValue D_at_E_data := fun b =>
     relativeLaurentNormalized_forwardHom E D hsub (restrictionMapHom E D hsub b)
-  set g : presheafValue E → presheafValue D_at_E_data := fun b =>
-    D_at_E_data.canonicalMap b
+  set g : presheafValue E → presheafValue D_at_E_data := fun b => D_at_E_data.canonicalMap b
   change f b = g b
   refine UniformSpace.Completion.ext' (f := f) (g := g) ?_ ?_ ?_ b
   · exact (UniformSpace.Completion.continuous_extension).comp

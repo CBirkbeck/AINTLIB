@@ -688,8 +688,7 @@ theorem tendsto_cauchy_product {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
     fun j => le_trans (hM' j) (le_max_right _ _)
   have hdiff : Filter.Tendsto (fun n =>
       (∑ i ∈ Finset.range n, A i * b ^ i) * (∑ j ∈ Finset.range n, A' j * b ^ j)
-        - ∑ l ∈ Finset.range n,
-          (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
+        - ∑ l ∈ Finset.range n, (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
       Filter.atTop (nhds 0) := by
     refine tendsto_zero_of_wI_tendsto_zero p F ?_
     refine tendsto_order.mpr ⟨fun c hc => absurd hc (not_lt.mpr zero_le), fun δ hδ => ?_⟩
@@ -709,10 +708,8 @@ theorem tendsto_cauchy_product {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
       rw [zero_mul]
       exact hδ
     · have hδ2 : (0 : NNReal) < δ / 2 := half_pos hδ
-      obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp
-        (hA0.eventually_le_const (div_pos hδ2 hMM0))
-      obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp
-        (hA'0.eventually_le_const (div_pos hδ2 hMM0))
+      obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp (hA0.eventually_le_const (div_pos hδ2 hMM0))
+      obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp (hA'0.eventually_le_const (div_pos hδ2 hMM0))
       refine ⟨2 * max N₁ N₂, fun n hn => ?_⟩
       refine lt_of_le_of_lt (wI_partial_cauchy_diff p F hb A A' (N₀ := max N₁ N₂)
         (N := n) hn hMA hMA'
@@ -2347,8 +2344,7 @@ theorem isRestricted_liftAssembly {k : ℕ}
   rw [isRestricted_iff_valued]
   intro ε hε
   have hT : {I : Fin k →₀ ℕ | ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
-      ((MvPowerSeries.coeff I (g : MvPowerSeries (Fin k)
-        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ((MvPowerSeries.coeff I (g : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
         : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}.Finite :=
     wI_finite_of_isRestricted p F ϖ g.2 hε

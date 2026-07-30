@@ -168,8 +168,7 @@ theorem exists_delta_teichCoeff_sub (n : ℕ) {ρ : NNReal} (hρ0 : 0 < ρ) (hρ
       exact (RingHom.map_sub WittVector.constantCoeff a b).symm
     rw [h00]
     have hterm : perfectoidValuation p F ((teichCoeff p F (a - b) 0 : OF F) : F)
-        = gaussTerm p F ρ (a - b) 0 := by
-      rw [gaussTerm, pow_zero, one_mul]
+        = gaussTerm p F ρ (a - b) 0 := by rw [gaussTerm, pow_zero, one_mul]
     rw [hterm]
     exact (gaussTerm_le_gaussValue p F hρ1.le (a - b) 0).trans hab
   | succ n ih =>
@@ -196,21 +195,18 @@ theorem exists_delta_teichCoeff_sub (n : ℕ) {ρ : NNReal} (hρ0 : 0 < ρ) (hρ
         exact (RingHom.map_sub WittVector.constantCoeff a b).symm
       rw [h00]
       have hterm : perfectoidValuation p F ((teichCoeff p F (a - b) 0 : OF F) : F)
-          = gaussTerm p F ρ (a - b) 0 := by
-        rw [gaussTerm, pow_zero, one_mul]
+          = gaussTerm p F ρ (a - b) 0 := by rw [gaussTerm, pow_zero, one_mul]
       rw [hterm]
       exact (gaussTerm_le_gaussValue p F hρ1.le (a - b) 0).trans
         (hab.trans ((min_le_left _ _).trans (min_le_right _ _)))
     have hT : gaussValue p F ρ (WittVector.teichmuller p (teichCoeff p F a 0)
-        - WittVector.teichmuller p (teichCoeff p F b 0)) ≤ min (ρ * δn) 1 :=
-      hδT _ _ h0
+        - WittVector.teichmuller p (teichCoeff p F b 0)) ≤ min (ρ * δn) 1 := hδT _ _ h0
     have hw : ρ * gaussValue p F ρ (x' - y') ≤ ρ * δn := by
       rw [← gaussValue_p_mul p F hρ1.le, hsub]
       exact (gaussValue_sub_le p F hρ1 _ _).trans (max_le
         (hab.trans ((min_le_left _ _).trans (min_le_left _ _)))
         (hT.trans (min_le_left _ _)))
-    have hxy' : gaussValue p F ρ (x' - y') ≤ δn :=
-      le_of_mul_le_mul_left hw hρ0
+    have hxy' : gaussValue p F ρ (x' - y') ≤ δn := le_of_mul_le_mul_left hw hρ0
     have hres := hδn x' y' hxy'
     rwa [hx'c n, hy'c n] at hres
 
@@ -870,17 +866,14 @@ theorem bddAbove_gaussTermF_teichmuller_sub {ρ : NNReal} (hρ1 : ρ < 1)
   have hclt : c < 1 := perfectoidValuation_toOF_lt_one p F ϖ
   obtain ⟨m, hm⟩ : ∃ m : ℕ, max (perfectoidValuation p F a) (perfectoidValuation p F b)
       ≤ (c⁻¹) ^ m := by
-    rcases eq_or_ne (max (perfectoidValuation p F a) (perfectoidValuation p F b)) 0
-      with h0 | hpos
+    rcases eq_or_ne (max (perfectoidValuation p F a) (perfectoidValuation p F b)) 0 with h0 | hpos
     · exact ⟨0, by rw [h0, pow_zero]; exact zero_le⟩
     · have hmaxpos : 0 < (max (perfectoidValuation p F a)
-          (perfectoidValuation p F b))⁻¹ :=
-        inv_pos.mpr (pos_iff_ne_zero.mpr hpos)
+          (perfectoidValuation p F b))⁻¹ := inv_pos.mpr (pos_iff_ne_zero.mpr hpos)
       obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hmaxpos hclt
       refine ⟨m, ?_⟩
       rw [inv_pow]
-      have h1 : max (perfectoidValuation p F a) (perfectoidValuation p F b) * c ^ m
-          < 1 := by
+      have h1 : max (perfectoidValuation p F a) (perfectoidValuation p F b) * c ^ m < 1 := by
         have h2 := mul_lt_mul_of_pos_left hm (pos_iff_ne_zero.mpr hpos)
         rwa [mul_inv_cancel₀ hpos] at h2
       exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero m hc0.ne')).mpr h1)

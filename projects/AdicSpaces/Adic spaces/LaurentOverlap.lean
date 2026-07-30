@@ -1224,15 +1224,13 @@ theorem example638Bivariate_forward_backward_eq_id
     TateAlgebra.quotientBivariateOverlapIdealTopology b
   letI : IsTopologicalRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalRing b
-  letI : IsTopologicalAddGroup
-      (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+  letI : IsTopologicalAddGroup (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b
   letI : UniformSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotientBivariateOverlapIdealUniformSpace b
   letI hQ_uniformAddGroup : @IsUniformAddGroup _
       (TateAlgebra.quotientBivariateOverlapIdealUniformSpace b) _ :=
-    @isUniformAddGroup_of_addCommGroup _ _
-      (TateAlgebra.quotientBivariateOverlapIdealTopology b)
+    @isUniformAddGroup_of_addCommGroup _ _ (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       (TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b)
   haveI : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
     TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
@@ -1240,8 +1238,7 @@ theorem example638Bivariate_forward_backward_eq_id
   intro y
   change example638Bivariate_forwardHom B P b
     (example638Bivariate_backwardHom B P b hA_complete hnoeth y) = y
-  refine @UniformSpace.Completion.ext' _ _
-    (presheafValue (overlapDatum B P b)) _ _ _ _
+  refine @UniformSpace.Completion.ext' _ _ (presheafValue (overlapDatum B P b)) _ _ _ _
     (hcont_forward.comp UniformSpace.Completion.continuous_extension)
     continuous_id ?_ y
   intro a
@@ -1261,8 +1258,7 @@ theorem example638Bivariate_forward_backward_eq_id
     exact this
   apply IsLocalization.ringHom_ext (Submonoid.powers (overlapDatum B P b).s)
   ext c
-  change example638Bivariate_forwardHom B P b
-      (bivariateLocToQuotient_atOverlap B P b
+  change example638Bivariate_forwardHom B P b (bivariateLocToQuotient_atOverlap B P b
         (algebraMap B (Localization.Away (overlapDatum B P b).s) c)) =
     (overlapDatum B P b).coeRingHom (algebraMap B _ c)
   rw [bivariateLocToQuotient_atOverlap_algebraMap]

@@ -705,8 +705,7 @@ theorem locSubring_exists_denominator_clearance
     · -- Generator `divByS t.val s`, `t : ↥T`: take `(β, E) := (t.val, 1)`.
       refine ⟨⟨t.val, hT t.val t.property⟩, 1, ?_⟩
       rw [pow_one]
-      exact IsLocalization.mk'_spec (Localization.Away s) (t.val : A)
-        ⟨s, Submonoid.mem_powers s⟩
+      exact IsLocalization.mk'_spec (Localization.Away s) (t.val : A) ⟨s, Submonoid.mem_powers s⟩
   | zero =>
     exact ⟨0, 0, by simp⟩
   | one =>
@@ -723,11 +722,9 @@ theorem locSubring_exists_denominator_clearance
       rw [pow_add, map_mul, ← mul_assoc, h₁, ← map_mul]
     have h2' : z * algebraMap A (Localization.Away s) (s ^ (E₁ + E₂)) =
         algebraMap A (Localization.Away s) ((β₂ : A) * s ^ E₁) := by
-      rw [show E₁ + E₂ = E₂ + E₁ from by omega, pow_add, map_mul,
-          ← mul_assoc, h₂, ← map_mul]
+      rw [show E₁ + E₂ = E₂ + E₁ from by omega, pow_add, map_mul, ← mul_assoc, h₂, ← map_mul]
     change (y + z) * algebraMap A (Localization.Away s) (s ^ (E₁ + E₂)) =
-        algebraMap A (Localization.Away s)
-          ((β₁ : A) * s ^ E₂ + (β₂ : A) * s ^ E₁)
+        algebraMap A (Localization.Away s) ((β₁ : A) * s ^ E₂ + (β₂ : A) * s ^ E₁)
     rw [add_mul, h1', h2', ← map_add]
   | mul y z _ _ hy hz =>
     obtain ⟨β₁, E₁, h₁⟩ := hy
@@ -735,8 +732,7 @@ theorem locSubring_exists_denominator_clearance
     refine ⟨β₁ * β₂, E₁ + E₂, ?_⟩
     change (y * z) * algebraMap A (Localization.Away s) (s ^ (E₁ + E₂)) =
         algebraMap A (Localization.Away s) (((β₁ * β₂ : P.A₀) : A))
-    rw [show ((β₁ * β₂ : P.A₀) : A) = (β₁ : A) * (β₂ : A) from rfl,
-        map_mul, pow_add, map_mul]
+    rw [show ((β₁ * β₂ : P.A₀) : A) = (β₁ : A) * (β₂ : A) from rfl, map_mul, pow_add, map_mul]
     calc (y * z) * (algebraMap A (Localization.Away s) (s ^ E₁) *
                     algebraMap A (Localization.Away s) (s ^ E₂))
         = (y * algebraMap A (Localization.Away s) (s ^ E₁)) *

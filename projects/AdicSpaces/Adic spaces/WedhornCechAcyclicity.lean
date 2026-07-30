@@ -6808,8 +6808,7 @@ theorem unitCover_isOXAcyclic
   · -- Separation = injectivity of the product restriction (Wedhorn Cor 8.32,
     -- faithful flatness route, `cor_8_32_productRestrictionSub_injective`).
     intro x hx
-    apply cor_8_32_productRestrictionSub_injective (unitCover D₀ f)
-      (unitCover_isRational D₀ f hD₀)
+    apply cor_8_32_productRestrictionSub_injective (unitCover D₀ f) (unitCover_isRational D₀ f hD₀)
     funext D
     change restrictionMap (unitCover D₀ f).base D.1 ((unitCover D₀ f).hsubset D.1 D.2) x =
       restrictionMap (unitCover D₀ f).base D.1 ((unitCover D₀ f).hsubset D.1 D.2) 0
@@ -7573,8 +7572,7 @@ theorem wedhorn_lemma_834_propA3_part1_separation
   -- restrictionMap V.base V_j (g x) = restrictionMap C.base V_j x (via cast).
   have hsub_C : rationalOpen V_j.T V_j.s ⊆ rationalOpen C.base.T C.base.s := by
     rw [← h_V_base]; exact V.hsubset V_j hV_j
-  have h_cast :
-      restrictionMap V.base V_j (V.hsubset V_j hV_j) (g x) =
+  have h_cast : restrictionMap V.base V_j (V.hsubset V_j hV_j) (g x) =
       restrictionMap C.base V_j hsub_C x :=
     RationalCoveringData.presheafValueCast_restrictionMap C.base V.base
       h_V_base V_j hsub_C (V.hsubset V_j hV_j) x
@@ -7595,8 +7593,7 @@ theorem wedhorn_lemma_834_propA3_part1_separation
     (C_restr_at ⟨V_j, hV_j⟩).base h_base.symm D' hsub_Vj
     ((C_restr_at ⟨V_j, hV_j⟩).hsubset D' hD')
     (restrictionMap C.base V_j hsub_C x)]
-  have h_factored :
-      restrictionMap V_j D' hsub_Vj (restrictionMap C.base V_j hsub_C x) =
+  have h_factored : restrictionMap V_j D' hsub_Vj (restrictionMap C.base V_j hsub_C x) =
       restrictionMap C.base D' (hsub_Vj.trans hsub_C) x :=
     congr_fun (restrictionMap_comp (A := A) C.base V_j D' hsub_C hsub_Vj) x
   rw [h_factored]

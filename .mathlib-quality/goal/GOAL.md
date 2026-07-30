@@ -1315,3 +1315,49 @@ It fails outright when a dependency's olean **does not exist** (as opposed to be
 That happens for modules outside the default build target, which a full `lake build` never
 produces. So the fast loop covers most files but not all; when it reports a missing-olean error,
 that is not a defect in the edit and the file needs a real `lake build <module>`.
+
+## Task 2 — the general continuation join, and TWO unsoundnesses caught before they shipped
+
+Following last pass's lesson (a detector's guards can be tighter than the language), I generalised
+the join rule from "line ends in `:=`/`,`/bracket" to "`b` continues `a`". Measuring the ceiling
+first: **111 of 344 proofs could cross if any ≤100-char continuation join were allowed** — so the
+pool was worth opening. This is also what `/cleanup`'s LINE PACKING gate asks for: *every line where
+`current + 1 + next-token ≤ 100` must be repacked*.
+
+Generalising naively was wrong twice, and both were caught by asserts rather than by a build:
+
+**1. `> base_ind` is unsound for ordinary lines.** Last pass I relaxed the indent test to compare
+against the *construct's base* instead of the `:=` line, to catch a `:=` sitting on a continuation
+line. Applying that relaxation to *every* line breaks:
+
+```lean
+  have hterm_mem : ∀ n, … := by
+    intro n                    -- indent 4
+    change …                   -- indent 4, a SIBLING tactic
+```
+
+base is 2, so `change` looks like a continuation of `intro n` and the join yields
+`intro n change …`. Fix: require `ib > ia` in general, and allow `> base_ind` **only** when `a`
+ends in `:=`/`:= by`.
+
+**2. A line that OPENS a bullet block is not joinable.** `  · intro hs` has leading whitespace 2,
+but the block's tactics sit at column 4 — so a sibling tactic there is "more indented than `a`" and
+looks like a continuation. Fix: refuse when `a` starts with `·`, `.` or `|` (previously only `b`
+was checked).
+
+With both guards the sound pool is **26 proofs** (not the 87 the unsound version claimed). Applied
+the 14 needing ≤4 joins: **36 joins across 10 files**, plus the 7 `:= by` joins found earlier in the
+pass (WittF, PresheafTateStructure).
+
+### `lake env lean` false red — confirmed the recorded rule
+
+`ArCompletion.lean` came back with 4 errors of the form
+
+    Tactic `rewrite` failed … @UniformSpace.toTopologicalSpace ?m Valued.toUniformSpace
+    … in the target expression
+
+but its joins are token-identical, and `ArCompletion` imports `WittF`, which this same batch edited
+without rebuilding. A real `lake build '«Adic spaces».FarguesFontaine.ArCompletion'` came back
+**green**. So: when the fast loop reports an instance/unification error in a file that imports
+another file you just edited, that is the stale-olean artifact, not a defect — confirm with
+`lake build` before reverting anything.

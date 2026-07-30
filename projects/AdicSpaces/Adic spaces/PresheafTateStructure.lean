@@ -1954,14 +1954,12 @@ private theorem cross_localization_preimage_in_sup_ker_no_noeth
   refine ⟨m, ?_⟩
   intro a ha
   -- Use IsLocalization.Away.surj to get (k_a, α) with `a · algebraMap (D₀.s^k_a) = algebraMap α`.
-  obtain ⟨k_a, α, hsec⟩ :=
-    IsLocalization.Away.surj (S := Localization.Away D₀.s) D₀.s a
+  obtain ⟨k_a, α, hsec⟩ := IsLocalization.Away.surj (S := Localization.Away D₀.s) D₀.s a
   -- Convert (algebraMap D₀.s)^k_a to algebraMap (D₀.s^k_a) via `map_pow`.
   rw [← map_pow] at hsec
   -- Normal form: a = algebraMap α * (divByS 1 D₀.s)^k_a.
   have h_a_eq : a = algebraMap A (Localization.Away D₀.s) α *
-      (divByS (1 : A) D₀.s) ^ k_a :=
-    away_eq_algebraMap_mul_invS_pow D₀.s a α k_a hsec
+      (divByS (1 : A) D₀.s) ^ k_a := away_eq_algebraMap_mul_invS_pow D₀.s a α k_a hsec
   -- Apply saturation: get α' with the desired properties.
   rw [h_a_eq] at ha
   obtain ⟨α', hα'_pow, hα'_ker⟩ := h_sat α k_a ha
@@ -1976,8 +1974,7 @@ private theorem cross_localization_preimage_in_sup_ker_no_noeth
     algebraMap_PI_pow_mem_locNhd D₀.P D₀.T D₀.s (n + k_a * N₀) α' hα'_pow
   have h_b_locNhd : b ∈ locNhd D₀.P D₀.T D₀.s n := by
     have h_eq : b = (divByS (1 : A) D₀.s) ^ k_a *
-        algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) := by
-      rw [hb_def]; ring
+        algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) := by rw [hb_def]; ring
     rw [h_eq]
     exact locNhd_invS_pow_step_of_hopen D₀.P D₀.T D₀.s N₀ hN₀_spec n k_a h_alg_α'
   -- a - b ∈ ker(locLift) by hα'_ker.

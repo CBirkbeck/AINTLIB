@@ -311,15 +311,12 @@ noncomputable def primeOfConvexSubgroup (A : ValuationSubring K)
       · have hua := ha hva
         have hub := hb hvb
         have hva_lt1 : Units.mk0 (A.valuation (a : K)) hva < 1 :=
-          lt_of_le_of_ne (A.valuation_le_one a)
-            (fun heq => hua (heq ▸ C.toSubgroup.one_mem))
+          lt_of_le_of_ne (A.valuation_le_one a) (fun heq => hua (heq ▸ C.toSubgroup.one_mem))
         have hvb_lt1 : Units.mk0 (A.valuation (b : K)) hvb < 1 :=
-          lt_of_le_of_ne (A.valuation_le_one b)
-            (fun heq => hub (heq ▸ C.toSubgroup.one_mem))
+          lt_of_le_of_ne (A.valuation_le_one b) (fun heq => hub (heq ▸ C.toSubgroup.one_mem))
         intro hmem
         have hab_le : A.valuation ((a + b : A) : K) ≤
-            max (A.valuation (a : K)) (A.valuation (b : K)) :=
-          Valuation.map_add A.valuation _ _
+            max (A.valuation (a : K)) (A.valuation (b : K)) := Valuation.map_add A.valuation _ _
         have ha_lt := C.lt_of_not_mem_of_lt_one hua hva_lt1 hmem
         have hb_lt := C.lt_of_not_mem_of_lt_one hub hvb_lt1 hmem
         rcases le_max_iff.mp hab_le with h | h
@@ -341,8 +338,7 @@ noncomputable def primeOfConvexSubgroup (A : ValuationSubring K)
         rw [coe_smul_val, Valuation.map_mul]
         exact le_of_le_of_eq (mul_le_mul_left (A.valuation_le_one c) _) (one_mul _)
       have hlt := C.lt_of_not_mem_of_lt_one hua hva_lt1 hmem
-      exact absurd (hca_le : (Units.mk0 _ hne : A.ValueGroupˣ) ≤ Units.mk0 _ hva)
-        (not_le_of_gt hlt)
+      exact absurd (hca_le : (Units.mk0 _ hne : A.ValueGroupˣ) ≤ Units.mk0 _ hva) (not_le_of_gt hlt)
   zero_mem' := fun h => absurd (map_zero _) h
 
 /-- Membership in `primeOfConvexSubgroup` spelled out. -/

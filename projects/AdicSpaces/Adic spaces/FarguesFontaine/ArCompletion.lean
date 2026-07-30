@@ -485,16 +485,14 @@ theorem eventually_pair_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact (pow_pos hρ0 N).ne'
   have hrne : (Valued.v).restrict z₀ ≠ 0 := by
     refine fun h0 => hvz₀ne ?_
-    have := (Valuation.restrict_pos_iff (v := (Valued.v :
-      Valuation (hatK p F hρ0 hρ1) NNReal)) z₀)
+    have := (Valuation.restrict_pos_iff (v := (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)) z₀)
     rcases eq_or_ne (Valued.v z₀) 0 with h | h
     · exact h
     · exact absurd (this.mpr (pos_iff_ne_zero.mpr h)) (by rw [h0]; exact lt_irrefl 0)
   set γ : (MonoidWithZeroHom.ValueGroup₀ (.ofClass (Valued.v :
       Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ := Units.mk0 _ hrne with hγ
   have hcauchy : (nhds x) ×ˢ (nhds x) ≤ uniformity (hatK p F hρ0 hρ1) := cauchy_nhds.2
-  have hball := (Valued.hasBasis_uniformity (hatK p F hρ0 hρ1) NNReal).mem_of_mem
-    (i := γ) trivial
+  have hball := (Valued.hasBasis_uniformity (hatK p F hρ0 hρ1) NNReal).mem_of_mem (i := γ) trivial
   have hev := hcauchy hball
   have hev2 : ∀ᶠ q in (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x)) ×ˢ
       (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x)),
@@ -506,8 +504,7 @@ theorem eventually_pair_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
             (AlocToHatK p F ϖ hρ0 hρ1 q.1, AlocToHatK p F ϖ hρ0 hρ1 q.2))
           ((nhds x) ×ˢ (nhds x)) := Filter.prod_comap_comap_eq
     rw [hcomap]
-    exact Filter.eventually_comap.mpr (Filter.Eventually.mono hev
-      (by
+    exact Filter.eventually_comap.mpr (Filter.Eventually.mono hev (by
         rintro ⟨a, b⟩ hab ⟨u, u'⟩ huu'
         have h1 : AlocToHatK p F ϖ hρ0 hρ1 u = a := congrArg Prod.fst huu'
         have h2 : AlocToHatK p F ϖ hρ0 hρ1 u' = b := congrArg Prod.snd huu'
@@ -519,8 +516,7 @@ theorem eventually_pair_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       - (AlocToHatK p F ϖ hρ0 hρ1 u)) < Valued.v z₀ := by
     have := hq
     rw [hγ] at this
-    have hcast : (Units.mk0 ((Valued.v).restrict z₀) hrne).1
-        = (Valued.v).restrict z₀ := rfl
+    have hcast : (Units.mk0 ((Valued.v).restrict z₀) hrne).1 = (Valued.v).restrict z₀ := rfl
     rw [hcast] at this
     exact (Valuation.restrict_lt_iff (v := (Valued.v :
       Valuation (hatK p F hρ0 hρ1) NNReal))).mp this
