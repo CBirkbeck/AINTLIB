@@ -237,4 +237,128 @@ theorem AdicCompletion.isReduced_of_levelwise_cofinal (I : Ideal A)
 
 end MapLevelwise
 
+section MapLevelwisePi
+
+variable {A : Type*} [CommRing A] {ι : Type*}
+variable {B : ι → Type*} [∀ i, CommRing (B i)]
+
+/-- **Completion homomorphism into a product from levelwise data.** -/
+noncomputable def AdicCompletion.mapLevelwisePi (I : Ideal A)
+    (J : ∀ i, Ideal (B i))
+    (g : ∀ r : ℕ, A ⧸ I ^ r →+* ∀ i, B i ⧸ (J i) ^ r)
+    (hcompat : ∀ {a b : ℕ} (hab : a ≤ b) (x : A ⧸ I ^ b) (i : ι),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (g b x i) =
+        g a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x) i) :
+    AdicCompletion I A →+* ∀ i, AdicCompletion (J i) (B i) where
+  toFun x := fun i => ⟨fun r => (AdicCompletion.levelEquiv (J i) r).symm
+      (g r (AdicCompletion.levelEquiv I r (x.1 r)) i), by
+    intro a b hab
+    have h3 := AdicCompletion.levelEquiv_transitionMap (J i) hab
+      ((AdicCompletion.levelEquiv (J i) b).symm
+        (g b (AdicCompletion.levelEquiv I b (x.1 b)) i))
+    rw [RingEquiv.apply_symm_apply] at h3
+    refine (RingEquiv.eq_symm_apply _).mpr ?_
+    rw [h3, hcompat hab]
+    have h4 := AdicCompletion.levelEquiv_transitionMap I hab (x.1 b)
+    rw [x.2 hab] at h4
+    rw [← h4]⟩
+  map_one' := funext fun i => Subtype.ext (funext fun r => by
+    show (AdicCompletion.levelEquiv (J i) r).symm
+      (g r (AdicCompletion.levelEquiv I r
+        ((1 : AdicCompletion I A).1 r)) i) =
+      ((1 : AdicCompletion (J i) (B i))).1 r
+    rw [show ((1 : AdicCompletion I A)).1 r = 1 from rfl,
+      show ((1 : AdicCompletion (J i) (B i))).1 r = 1 from rfl,
+      map_one, map_one]
+    show (AdicCompletion.levelEquiv (J i) r).symm
+      ((1 : ∀ j, B j ⧸ (J j) ^ r) i) = 1
+    rw [show (1 : ∀ j, B j ⧸ (J j) ^ r) i = 1 from rfl, map_one])
+  map_mul' x y := funext fun i => Subtype.ext (funext fun r => by
+    show (AdicCompletion.levelEquiv (J i) r).symm
+      (g r (AdicCompletion.levelEquiv I r ((x * y).1 r)) i) = _
+    rw [show (x * y).1 r = x.1 r * y.1 r from rfl, map_mul, map_mul]
+    rw [show (g r (AdicCompletion.levelEquiv I r (x.1 r)) *
+        g r (AdicCompletion.levelEquiv I r (y.1 r))) i =
+      g r (AdicCompletion.levelEquiv I r (x.1 r)) i *
+        g r (AdicCompletion.levelEquiv I r (y.1 r)) i from rfl, map_mul]
+    rfl)
+  map_zero' := funext fun i => Subtype.ext (funext fun r => by
+    show (AdicCompletion.levelEquiv (J i) r).symm
+      (g r (AdicCompletion.levelEquiv I r
+        ((0 : AdicCompletion I A).1 r)) i) =
+      ((0 : AdicCompletion (J i) (B i))).1 r
+    rw [show ((0 : AdicCompletion I A)).1 r = 0 from rfl,
+      show ((0 : AdicCompletion (J i) (B i))).1 r = 0 from rfl,
+      _root_.map_zero, _root_.map_zero]
+    show (AdicCompletion.levelEquiv (J i) r).symm
+      ((0 : ∀ j, B j ⧸ (J j) ^ r) i) = 0
+    rw [show (0 : ∀ j, B j ⧸ (J j) ^ r) i = 0 from rfl, _root_.map_zero])
+  map_add' x y := funext fun i => Subtype.ext (funext fun r => by
+    show (AdicCompletion.levelEquiv (J i) r).symm
+      (g r (AdicCompletion.levelEquiv I r ((x + y).1 r)) i) = _
+    rw [show (x + y).1 r = x.1 r + y.1 r from rfl, map_add, map_add]
+    rw [show (g r (AdicCompletion.levelEquiv I r (x.1 r)) +
+        g r (AdicCompletion.levelEquiv I r (y.1 r))) i =
+      g r (AdicCompletion.levelEquiv I r (x.1 r)) i +
+        g r (AdicCompletion.levelEquiv I r (y.1 r)) i from rfl, map_add]
+    rfl)
+
+theorem AdicCompletion.mapLevelwisePi_injective_of_cofinal (I : Ideal A)
+    (J : ∀ i, Ideal (B i))
+    (g : ∀ r : ℕ, A ⧸ I ^ r →+* ∀ i, B i ⧸ (J i) ^ r)
+    (hcompat : ∀ {a b : ℕ} (hab : a ≤ b) (x : A ⧸ I ^ b) (i : ι),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (g b x i) =
+        g a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x) i)
+    (hcof : ∀ r : ℕ, ∃ s : ℕ, ∃ hrs : r ≤ s, ∀ y : A ⧸ I ^ s, g s y = 0 →
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hrs) y = 0) :
+    Function.Injective
+      (AdicCompletion.mapLevelwisePi I J g hcompat) := by
+  intro x y hxy
+  suffices h : ∀ z : AdicCompletion I A,
+      AdicCompletion.mapLevelwisePi I J g hcompat z = 0 → z = 0 by
+    have h1 : AdicCompletion.mapLevelwisePi I J g hcompat (x - y) = 0 := by
+      rw [map_sub, hxy, sub_self]
+    exact sub_eq_zero.mp (h _ h1)
+  intro z hz
+  refine Subtype.ext (funext fun r => ?_)
+  obtain ⟨s, hrs, hkill⟩ := hcof r
+  have hzs : g s (AdicCompletion.levelEquiv I s (z.1 s)) = 0 := by
+    funext i
+    have h3 : (AdicCompletion.levelEquiv (J i) s).symm
+        (g s (AdicCompletion.levelEquiv I s (z.1 s)) i) =
+        ((0 : AdicCompletion (J i) (B i))).1 s :=
+      congrFun (congrArg Subtype.val (congrFun hz i)) s
+    rw [show ((0 : AdicCompletion (J i) (B i))).1 s = 0 from rfl] at h3
+    have h4 := congrArg (AdicCompletion.levelEquiv (J i) s) h3
+    rw [RingEquiv.apply_symm_apply, _root_.map_zero] at h4
+    exact h4
+  have h5 := hkill _ hzs
+  have h6 := AdicCompletion.levelEquiv_transitionMap I hrs (z.1 s)
+  rw [z.2 hrs] at h6
+  have h7 : AdicCompletion.levelEquiv I r (z.1 r) = 0 := by
+    rw [h6]
+    exact h5
+  have h8 : z.1 r = 0 := by
+    have h9 := congrArg (AdicCompletion.levelEquiv I r).symm h7
+    rwa [RingEquiv.symm_apply_apply, _root_.map_zero] at h9
+  rw [h8]
+  rfl
+
+/-- **Reducedness from a cofinally injective levelwise map into a product of
+completions.** -/
+theorem AdicCompletion.isReduced_of_levelwisePi_cofinal (I : Ideal A)
+    (J : ∀ i, Ideal (B i))
+    (g : ∀ r : ℕ, A ⧸ I ^ r →+* ∀ i, B i ⧸ (J i) ^ r)
+    (hcompat : ∀ {a b : ℕ} (hab : a ≤ b) (x : A ⧸ I ^ b) (i : ι),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (g b x i) =
+        g a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x) i)
+    (hcof : ∀ r : ℕ, ∃ s : ℕ, ∃ hrs : r ≤ s, ∀ y : A ⧸ I ^ s, g s y = 0 →
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hrs) y = 0)
+    [∀ i, IsReduced (AdicCompletion (J i) (B i))] :
+    IsReduced (AdicCompletion I A) :=
+  isReduced_of_injective (AdicCompletion.mapLevelwisePi I J g hcompat)
+    (AdicCompletion.mapLevelwisePi_injective_of_cofinal I J g hcompat hcof)
+
+end MapLevelwisePi
+
 end SemilocalFibre
