@@ -29803,3 +29803,24 @@ LinearEquiv.ofBijective (kerBaseChangeComparison κ(p) (D.d01).hom)
 IS `κ(p) ⊗ M` by def (same as in the :1220 proof) ✓. The step-8 one-tmul target aligns via
 the kerIso: x = OneSection viewed in baseSections; the ≠0 transfers through the equiv chain
 (all are LinearEquivs, injective ✓).
+
+### [FLW-2b] step-8 final route (mirror `PoleSheafPowerOneProjectiveBaseChange:25-80`):
+Goal: `(1 : κ(p)) ⊗ₜ OneSection ≠ 0` in `p.Fiber (baseSections π' MT)` (p maximal in K₀).
+Route: `1 ⊗ₜ x ≠ 0` ⟸ its image under an INJECTIVE map is ≠ 0. Use eFib-style composite at
+κp := p.ResidueField — but for the ≠0 use instead the GEOMETRIC equiv at the κp-leg:
+t_K := Spec.map (CommRingCat.ofHom (algebraMap K₀ κp)) ≫ (S.basicOpen a).toScheme.isoSpec.inv
+: Spec (.of κp) ⟶ T'. Algebra alignment Γ(Spec κp,⊤) ↔ κp via ΓSpecIso +
+`affineFieldFactor_residue_isScalarTower`-style tower (BaseCechHigher:375-388 verbatim
+pattern — it builds exactly this leg + algebra for an arbitrary field-algebra K of Γ(S,⊤)).
+Then EITHER (i) `sectionPoleSheafPower_baseSectionsBaseChangeLinearEquivOfAppTopIso` (IsIso
+from my package-IsIso theorem at t_K) + its one-tmul (PushforwardBaseChangeLinearEquiv:60-74:
+equiv(1⊗OneSection) = OneSection of the κp-family) + `sectionPoleSheafPowerOneSection_ne_zero`
+(Nonempty total: `Nonempty.map (fun x => zT x) inferInstance` pattern; Nonempty (Spec κp) ✓)
+— but its tensor is over Γ(T',⊤)→Γ(Spec κp,⊤) not κp: bridge `1 ⊗ₜ[K₀] x`-in-Fiber to
+`1 ⊗ₜ[K₀] x`-in-(Γ(Spec κp,⊤) ⊗ …) along the ΓSpecIso ring equiv (map_ne_zero of the
+LinearEquiv.baseChange along the ring iso — `LinearEquiv.restrictScalars`-of-ringEquiv or
+`TensorProduct.congr` with the ΓSpecIso-module equiv); OR (ii) stay algebraic: the eFib
+composite of step 7 maps `1 ⊗ x` to `kerBCC κp (1 ⊗ eKer x)` whose coe is
+`1 ⊗ₜ (eKer x : D.X 0)`; reduce ≠0 to `1 ⊗ₜ[K₀] (eKer x) ≠ 0` in `κp ⊗ D.X 0`, i.e. the
+0-cochain of OneSection (its UT-restrictions) not in p·(D.X 0) — no: that's false-ish
+reasoning; the honest content is geometric ⟹ use (i).
