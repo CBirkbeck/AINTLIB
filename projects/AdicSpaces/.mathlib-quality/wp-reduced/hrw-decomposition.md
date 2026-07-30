@@ -542,3 +542,20 @@ The maximal-case head reducedness splits per L3.a/L3.b:
   module_finite_residue_of_finite_extension + comap_isMaximal_of_finite_residue.
 - C (L1) stays 8.30-conditional (central sorry) — build elementary leaves
   (quotient_pow_equiv_of_flat, graphAtPrimeEquiv) unconditionally.
+
+## W∉𝔭 MAXIMAL CASE DONE (2026-07-30 cont.)
+
+`head_completedLocal_reduced_of_isMaximal_of_wa_notMem` (HeadReducedNotMem.lean)
+axiom-clean, 3288 green. Chain: map_isMaximal_of_away + comap_map disjoint →
+completedLocalLocalizationEquiv → completedLocalCongr headAwayEquiv →
+contract (comap_zeroHead_isMaximal via module_finite_zero_head integrality;
+comap-chase via AlgEquiv.commutes + comap_comap) → completedLocalCongr
+zeroHeadTateEquiv.symm → block A corollary. completedLocalCongrOfEq added
+(Prop-instance proof-irrelevance subst trick) for the dependent-instance
+rewrite wall.
+
+REMAINING: (1) D-rewire: QHead-contraction maximality (residue-finiteness via
+evenSupportEquiv T_N-tower: even≅P K (N+1) Heads:567 + Module.Finite even head
+Heads:930 + head⟨T⟩/T_N⟨T⟩ layer + Descent lemmas) + maximal-only wa_mem
+statement + rewire headLocsReduced; (2) THE DEEP LEAF: W∈𝔭 maximal quadratic
+tower (L3.b); (3) C: L1 elementary leaves + 8.30-conditional assembly.
