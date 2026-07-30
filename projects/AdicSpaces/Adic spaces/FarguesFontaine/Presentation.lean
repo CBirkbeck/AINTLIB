@@ -2133,6 +2133,63 @@ theorem exists_evalAr_eq_of_correction (h12 : ρ₁ ≤ ρ₂)
       (z - evalAr p F ϖ h12 hbmem hb U) = 0 := le_antisymm hle0 zero_le
   exact ⟨U, (sub_eq_zero.mp ((wI_eq_zero_iff p F _).mp h0)).symm, hUnorm⟩
 
+/-- The single correction step behind `exists_correction_sequence`: any `BISub`-element
+bounded by `W · 2⁻ᵐ` admits a lift `f` whose Gauss norm is within that bound and which
+improves the bound to `W · 2⁻⁽ᵐ⁺¹⁾`.
+
+Extracted from `exists_correction_sequence`, where it was the dominant `have` (38 lines
+of a 62-line body). The two `norm_num` facts about `2⁻¹` that it used are re-proved here
+rather than threaded in as hypotheses. -/
+private theorem exists_correction_step_of_wI_le (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (hexact : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁)
+    {W : NNReal} (hW : 0 < W) :
+    ∀ (m : ℕ) (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)),
+      r ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 →
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
+      ∃ f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      gaussNormRPS p F ϖ hρ₂0 hρ₂1
+      (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      ≤ W * (2⁻¹ : NNReal) ^ m
+      ∧ (r - evalAr p F ϖ h12 hbmem hb f) ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ∧ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (r - evalAr p F ϖ h12 hbmem hb f)
+      ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
+  have hhalf1 : ((2 : NNReal)⁻¹) ≤ 1 := by norm_num
+  have hhalf0 : (0 : NNReal) < 2⁻¹ := by norm_num
+  intro m r hrmem hrbnd
+  have hε : (0 : NNReal) < W * (2⁻¹ : NNReal) ^ (m + 1) :=
+    mul_pos hW (pow_pos hhalf0 _)
+  obtain ⟨x, hxapp⟩ := exists_BIProd_approx p F ϖ hrmem hε
+  obtain ⟨f, hfeval, hfnorm⟩ :=
+    exists_evalAr_lift_bloc p F ϖ h12 j n hbmem hb hexact x
+  have hxle : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ m := by
+    have hrw : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        = r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) := by ring
+    calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+        = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)) := by rw [← hrw]
+      _ ≤ max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
+          (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (-(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x))) := wI_add_le p F _ _
+      _ = max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
+          (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)) := by rw [wI_neg]
+      _ ≤ W * (2⁻¹ : NNReal) ^ m := by
+          refine max_le hrbnd (le_trans hxapp ?_)
+          exact mul_le_mul_of_nonneg_left
+            (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ m)) zero_le
+  refine ⟨f, le_trans hfnorm hxle, ?_, ?_⟩
+  · rw [hfeval]
+    exact sub_mem hrmem (BIProd_mem_BISub p F ϖ x)
+  · rw [hfeval]
+    exact hxapp
+
 /-- **The correction sequence**: successive approximation of an element of `B^I` by
 values of the presentation map, each round shrinking the residual by `2⁻¹` with
 Gauss-norm control (the engine behind closedness of the image). -/
@@ -2155,46 +2212,17 @@ theorem exists_correction_sequence (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
       ∧ ∀ m, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
           (z - evalAr p F ϖ h12 hbmem hb (∑ l ∈ Finset.range m, u l))
             ≤ W * (2⁻¹ : NNReal) ^ m := by
-  have hhalf1 : ((2 : NNReal)⁻¹) ≤ 1 := by norm_num
-  have hhalf0 : (0 : NNReal) < 2⁻¹ := by norm_num
   have hstep : ∀ (m : ℕ) (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)),
       r ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 →
       wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
       ∃ f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
-        gaussNormRPS p F ϖ hρ₂0 hρ₂1
-            (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
-          ≤ W * (2⁻¹ : NNReal) ^ m
-        ∧ (r - evalAr p F ϖ h12 hbmem hb f) ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        ∧ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (r - evalAr p F ϖ h12 hbmem hb f)
-          ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
-    intro m r hrmem hrbnd
-    have hε : (0 : NNReal) < W * (2⁻¹ : NNReal) ^ (m + 1) :=
-      mul_pos hW (pow_pos hhalf0 _)
-    obtain ⟨x, hxapp⟩ := exists_BIProd_approx p F ϖ hrmem hε
-    obtain ⟨f, hfeval, hfnorm⟩ :=
-      exists_evalAr_lift_bloc p F ϖ h12 j n hbmem hb hexact x
-    have hxle : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ m := by
-      have hrw : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
-          = r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) := by ring
-      calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
-          = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
-            (r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)) := by rw [← hrw]
-        _ ≤ max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
-            (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
-              (-(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x))) := wI_add_le p F _ _
-        _ = max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
-            (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
-              (r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)) := by rw [wI_neg]
-        _ ≤ W * (2⁻¹ : NNReal) ^ m := by
-            refine max_le hrbnd (le_trans hxapp ?_)
-            exact mul_le_mul_of_nonneg_left
-              (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ m)) zero_le
-    refine ⟨f, le_trans hfnorm hxle, ?_, ?_⟩
-    · rw [hfeval]
-      exact sub_mem hrmem (BIProd_mem_BISub p F ϖ x)
-    · rw [hfeval]
-      exact hxapp
+      gaussNormRPS p F ϖ hρ₂0 hρ₂1
+      (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      ≤ W * (2⁻¹ : NNReal) ^ m
+      ∧ (r - evalAr p F ϖ h12 hbmem hb f) ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ∧ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (r - evalAr p F ϖ h12 hbmem hb f)
+      ≤ W * (2⁻¹ : NNReal) ^ (m + 1) :=
+    exists_correction_step_of_wI_le p F ϖ h12 j n hbmem hb hexact hW
   obtain ⟨u, r, hr0, hrrec, hCbnd, hrmem, hrbnd⟩ :=
     exists_chain (fun w => w ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
       (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1)

@@ -677,3 +677,57 @@ I built five modified modules in one `lake build A B C D E`. It reported errors 
 all — they import `PresheafTateStructure`, so the broken dependency skipped them, and their
 failures surfaced only two full gates later. **Never read a multi-target build's silence about a
 target as success; confirm the target actually compiled.**
+
+## Task 2 — DEFINITIVE: there is no mechanically-liftable class. Stop looking for one.
+
+The "81 one-cut targets, 13 of them mechanical" figure from two passes ago was an artifact of an
+unsound test, and I have now measured how unsound. `scratchpad/screen.py` replaces the
+binder-pattern heuristic with one that cannot miss a local:
+
+    suspects = identifiers in the `have` block
+             ∩ identifiers appearing in the proof body BEFORE the have
+             − identifiers in the parent's signature
+
+A proof-local must be introduced earlier in the same proof, so this catches it regardless of the
+binder form. Result on the 75 current one-cut targets:
+
+    survive with zero suspects:  1   (and it is the one `lift_have.py` cannot parse)
+    rejected for suspect locals: 74
+    suspect-count histogram: {1:4, 2:5, 3:9, 4:9, 5:8, 6:6, 7:7, 8:5, 9:4, 10:3, 11:3, 12:3,
+                              13:3, 14:1, 15:1, 19:2, 20:1}
+
+So **essentially every over-50 proof in this codebase threads proof-locals into its big step.**
+That is what the earlier regex was blind to, and it is why 8 of the 11 batch attempts failed. The
+median target needs 4–5 locals plumbed. There is no cheap batch; each target is individual work of
+the `hDmatch` kind — read the locals, write the signature, verify.
+
+`liftable.py` is superseded by `screen.py`. Keep both for the record but trust `screen.py`.
+
+### What DOES work: re-derive short locals instead of threading them
+
+The one clean win this pass came from a technique worth naming. When the dominant `have`'s local
+dependencies are **short, written-down** facts, do not add them as hypotheses — **re-prove them
+inside the extracted lemma**. For `exists_correction_sequence` the two suspects were
+`hhalf0 : (0:NNReal) < 2⁻¹` and `hhalf1 : (2:NNReal)⁻¹ ≤ 1`, both `by norm_num`; the extracted
+lemma just proves them again, and they are deleted from the parent (they had no other use).
+
+    exists_correction_sequence   62 → 33  +  exists_correction_step_of_wI_le (31)
+
+Compiled first try. Over-50 count 376 → 375.
+
+### Why the same trick FAILED on the `exists_correction_chain_BI` pair
+
+Worth recording because it looked identical. Their locals were `hK0` (a `have`) and `K` (a
+`set K : NNReal := σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) with hKdef`). Re-deriving both inside the lemma gives
+
+    invalid 'calc' step, left-hand side is …
+
+because **`set` folds only the occurrences that exist when it runs** (already recorded as a
+gotcha, and it bites exactly here). In the parent, `set K` runs *before* `hstep`, so `K` is folded
+into `hstep`'s own statement; in the extracted lemma the conclusion is fixed first, so `set K`
+folds nothing and the body's `((K)⁻¹)` no longer matches the statement's unfolded form. A second
+error (`Unknown identifier hφb`) showed the section-variable prefix was wrong too.
+
+**Rule:** the re-derive trick is safe for a `have`, and unsafe for a `set`/`let` whose folding the
+statement depends on. For those, the abbreviation must become an explicit parameter of the
+extracted lemma together with its defining equation — or the statement must be written unfolded.
