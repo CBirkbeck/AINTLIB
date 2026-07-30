@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.TatePointEval
+import «Adic spaces».AdicNakayama
 
 /-!
 # The Taylor comparison for Tate algebras at rational points
@@ -623,6 +624,252 @@ theorem pointEval_origin_comp_transHom :
   exact RingHom.ext fun F => congrFun heq F
 
 end Equiv
+
+section OrderLemma
+
+/-- **Coefficient vanishing below `r` gives membership in the `r`-th power of
+the origin ideal** — iterating the zero-point decomposition. -/
+theorem mem_pow_pointIdeal_origin_of_coeff_eq_zero :
+    ∀ (r : ℕ) (F : P L m),
+      (∀ d : Fin m →₀ ℕ, Finsupp.degree d < r →
+        MvPowerSeries.coeff d F.1 = 0) →
+      F ∈ (pointIdeal (m := m) (fun _ => (0 : L))
+        (fun i => norm_origin_le i)) ^ r := by
+  intro r
+  induction r with
+  | zero =>
+      intro F _
+      rw [pow_zero]
+      simp
+  | succ k ih =>
+      intro F hF
+      have h0 : MvPowerSeries.coeff 0 F.1 = 0 :=
+        hF 0 (by rw [map_zero]; exact Nat.succ_pos k)
+      have hdec := origin_decomposition F
+      rw [h0, map_zero, map_zero, zero_add] at hdec
+      rw [hdec]
+      refine Ideal.sum_mem _ fun i _ => ?_
+      have hGi : originSlice i F ∈ (pointIdeal (m := m) (fun _ => (0 : L))
+          (fun i => norm_origin_le i)) ^ k := by
+        refine ih _ ?_
+        intro d hd
+        rw [originSlice_coeff]
+        by_cases hcond : ∀ j < i, d j = 0
+        · rw [if_pos hcond]
+          refine hF _ ?_
+          rw [map_add, Finsupp.degree_single]
+          omega
+        · rw [if_neg hcond]
+      have hXi : polyToP (MvPolynomial.X i) ∈
+          pointIdeal (m := m) (fun _ => (0 : L))
+            (fun i => norm_origin_le i) := by
+        rw [pointIdeal_origin_eq_span]
+        exact Ideal.subset_span ⟨i, rfl⟩
+      have h6 := Ideal.mul_mem_mul hXi hGi
+      rwa [← pow_succ'] at h6
+
+end OrderLemma
+
+section LevelEquivs
+
+/-- The truncation homomorphism into the polynomial level quotient. -/
+noncomputable def truncQuot (r : ℕ) :
+    P L m →+* MvPolynomial (Fin m) L ⧸
+      (MvPolynomial.idealOfVars (Fin m) L) ^ r :=
+  ((MvPowerSeries.truncTotalAlgHom (Fin m) L r).toRingHom).comp
+    (seriesP (m := m))
+
+theorem truncQuot_apply (r : ℕ) (F : P L m) :
+    truncQuot (m := m) r F =
+      Ideal.Quotient.mk _ (MvPowerSeries.truncTotal r F.1) := rfl
+
+theorem truncQuot_polyToP (r : ℕ) (q : MvPolynomial (Fin m) L) :
+    truncQuot (m := m) r (polyToP q) = Ideal.Quotient.mk _ q := by
+  show (MvPowerSeries.truncTotalAlgHom (Fin m) L r)
+    ((q : MvPolynomial (Fin m) L) : MvPowerSeries (Fin m) L) = _
+  exact (MvPowerSeries.truncTotalAlgHom (Fin m) L r).commutes q
+
+/-- The origin ideal is the mapped variable ideal. -/
+theorem pointIdeal_origin_eq_map :
+    pointIdeal (m := m) (fun _ => (0 : L)) (fun i => norm_origin_le i) =
+      (MvPolynomial.idealOfVars (Fin m) L).map
+        (polyToP (E := L) (m := m)) := by
+  rw [pointIdeal_origin_eq_span]
+  show _ = Ideal.map _ (Ideal.span (Set.range MvPolynomial.X))
+  rw [Ideal.map_span]
+  congr 1
+  rw [← Set.range_comp]
+  rfl
+
+theorem pow_pointIdeal_le_ker_truncQuot (r : ℕ) :
+    (pointIdeal (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i)) ^ r ≤
+      RingHom.ker (truncQuot (m := m) r) := by
+  rw [pointIdeal_origin_eq_map, ← Ideal.map_pow,
+    Ideal.map_le_iff_le_comap]
+  intro q hq
+  rw [Ideal.mem_comap, RingHom.mem_ker, truncQuot_polyToP]
+  exact Ideal.Quotient.eq_zero_iff_mem.mpr hq
+
+/-- The difference from the truncation lies in the ideal power. -/
+theorem sub_polyToP_truncTotal_mem (r : ℕ) (F : P L m) :
+    F - polyToP (MvPowerSeries.truncTotal r F.1) ∈
+      (pointIdeal (m := m) (fun _ => (0 : L))
+        (fun i => norm_origin_le i)) ^ r := by
+  refine mem_pow_pointIdeal_origin_of_coeff_eq_zero r _ ?_
+  intro d hd
+  have hco : MvPowerSeries.coeff d
+      ((F - polyToP (MvPowerSeries.truncTotal r F.1)).1) =
+      MvPowerSeries.coeff d F.1 -
+        (MvPowerSeries.truncTotal r F.1).coeff d := by
+    have h3 : ((F - polyToP (MvPowerSeries.truncTotal r F.1)).1) =
+        F.1 - ((MvPowerSeries.truncTotal r F.1 :
+          MvPolynomial (Fin m) L) : MvPowerSeries (Fin m) L) := rfl
+    rw [h3, map_sub, MvPolynomial.coeff_coe]
+  have h5 : (MvPowerSeries.truncTotal r F.1).coeff d =
+      MvPowerSeries.coeff d F.1 :=
+    MvPowerSeries.coeff_truncTotal F.1 hd
+  rw [hco, h5, sub_self]
+
+/-- **The level equivalence at the origin**: the Tate level quotients are the
+polynomial level quotients. -/
+noncomputable def levelZeroEquiv (r : ℕ) :
+    (P L m ⧸ (pointIdeal (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i)) ^ r) ≃+*
+    (MvPolynomial (Fin m) L ⧸
+      (MvPolynomial.idealOfVars (Fin m) L) ^ r) := by
+  refine RingEquiv.ofRingHom
+    (Ideal.Quotient.lift _ (truncQuot (m := m) r)
+      (fun a ha => RingHom.mem_ker.mp
+        (pow_pointIdeal_le_ker_truncQuot r ha)))
+    (Ideal.quotientMap ((pointIdeal (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i)) ^ r) (polyToP (E := L) (m := m)) (by
+      rw [pointIdeal_origin_eq_map, ← Ideal.map_pow]
+      exact Ideal.le_comap_map)) ?_ ?_
+  · -- hom ∘ inv = id on the polynomial side
+    refine RingHom.ext fun z => ?_
+    obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective z
+    rw [RingHom.comp_apply, RingHom.id_apply, Ideal.quotientMap_mk,
+      Ideal.Quotient.lift_mk, truncQuot_polyToP]
+  · -- inv ∘ hom = id on the Tate side
+    refine RingHom.ext fun z => ?_
+    obtain ⟨F, rfl⟩ := Ideal.Quotient.mk_surjective z
+    rw [RingHom.comp_apply, RingHom.id_apply, Ideal.Quotient.lift_mk,
+      truncQuot_apply, Ideal.quotientMap_mk]
+    refine (Ideal.Quotient.eq (I := (pointIdeal (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i)) ^ r)).mpr ?_
+    have h7 := sub_polyToP_truncTotal_mem (m := m) r F
+    exact (Ideal.neg_mem_iff _).mp (by simpa using h7)
+
+end LevelEquivs
+
+section Assembly
+
+include hx in
+/-- The point ideal is the pullback of the origin ideal under translation. -/
+theorem pointIdeal_eq_comap :
+    pointIdeal (m := m) x hx =
+      Ideal.comap (transHom (m := m) x hx)
+        (pointIdeal (m := m) (fun _ => (0 : L))
+          (fun i => norm_origin_le i)) := by
+  ext F
+  show pointEval (m := m) x hx F = 0 ↔
+    pointEval (m := m) (fun _ => (0 : L)) (fun i => norm_origin_le i)
+      (transHom (m := m) x hx F) = 0
+  rw [show pointEval (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i) (transHom (m := m) x hx F) =
+    pointEval (m := m) x hx F from
+    RingHom.congr_fun (pointEval_origin_comp_transHom x hx) F]
+
+include hx in
+/-- The translation carries the point ideal powers to the origin ideal
+powers. -/
+theorem map_transEquiv_pow_pointIdeal (r : ℕ) :
+    ((pointIdeal (m := m) x hx) ^ r).map
+      ((transEquiv (m := m) x hx : P L m ≃+* P L m) :
+        P L m →+* P L m) =
+      (pointIdeal (m := m) (fun _ => (0 : L))
+        (fun i => norm_origin_le i)) ^ r := by
+  rw [Ideal.map_pow]
+  congr 1
+  rw [pointIdeal_eq_comap x hx]
+  have hsurj : Function.Surjective
+      ((transEquiv (m := m) x hx : P L m ≃+* P L m) :
+        P L m →+* P L m) := (transEquiv (m := m) x hx).surjective
+  rw [show Ideal.comap (transHom (m := m) x hx)
+      (pointIdeal (m := m) (fun _ => (0 : L))
+        (fun i => norm_origin_le i)) =
+    Ideal.comap ((transEquiv (m := m) x hx : P L m ≃+* P L m) :
+      P L m →+* P L m)
+      (pointIdeal (m := m) (fun _ => (0 : L))
+        (fun i => norm_origin_le i)) from rfl]
+  exact Ideal.map_comap_of_surjective _ hsurj _
+
+/-- The level equivalence at `x`. -/
+noncomputable def levelPointEquiv (r : ℕ) :
+    (P L m ⧸ (pointIdeal (m := m) x hx) ^ r) ≃+*
+    (MvPolynomial (Fin m) L ⧸
+      (MvPolynomial.idealOfVars (Fin m) L) ^ r) :=
+  (Ideal.quotientEquiv ((pointIdeal (m := m) x hx) ^ r)
+    ((pointIdeal (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i)) ^ r) (transEquiv (m := m) x hx)
+    (map_transEquiv_pow_pointIdeal (m := m) x hx r).symm).trans
+    (levelZeroEquiv r)
+
+set_option maxHeartbeats 1000000 in
+include hx in
+theorem levelPointEquiv_mk (r : ℕ) (F : P L m) :
+    levelPointEquiv (m := m) x hx r (Ideal.Quotient.mk _ F) =
+      Ideal.Quotient.mk _
+        (MvPowerSeries.truncTotal r
+          ((transHom (m := m) x hx F).1)) := by
+  show levelZeroEquiv r (Ideal.quotientEquiv
+    ((pointIdeal (m := m) x hx) ^ r)
+    ((pointIdeal (m := m) (fun _ => (0 : L))
+      (fun i => norm_origin_le i)) ^ r) (transEquiv (m := m) x hx)
+    (map_transEquiv_pow_pointIdeal (m := m) x hx r).symm
+    (Ideal.Quotient.mk _ F)) = _
+  rw [Ideal.quotientEquiv_mk]
+  show Ideal.Quotient.lift _ (truncQuot (m := m) r)
+    (fun a ha => RingHom.mem_ker.mp
+      (pow_pointIdeal_le_ker_truncQuot r ha))
+    (Ideal.Quotient.mk _ (transEquiv (m := m) x hx F)) = _
+  rw [Ideal.Quotient.lift_mk, truncQuot_apply]
+  rfl
+
+include hx in
+/-- **The levelwise factor compatibility** of the Taylor level equivalences:
+they commute with the quotient transition maps (mathlib's truncation-tail
+lemma). -/
+theorem levelPointEquiv_factor {a b : ℕ} (hab : a ≤ b)
+    (z : P L m ⧸ (pointIdeal (m := m) x hx) ^ b) :
+    Ideal.Quotient.factor (Ideal.pow_le_pow_right hab)
+      (levelPointEquiv (m := m) x hx b z) =
+    levelPointEquiv (m := m) x hx a
+      (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) z) := by
+  obtain ⟨F, rfl⟩ := Ideal.Quotient.mk_surjective z
+  rw [levelPointEquiv_mk, Ideal.Quotient.factor_mk,
+    Ideal.Quotient.factor_mk, levelPointEquiv_mk]
+  refine (Ideal.Quotient.eq
+    (I := (MvPolynomial.idealOfVars (Fin m) L) ^ a)).mpr ?_
+  exact MvPowerSeries.truncTotal_sub_truncTotal_mem_pow_idealOfVars
+    hab le_rfl _
+
+/-- **The polynomial-side completion is a domain** (mathlib's power-series
+identification). The wall assembly composes `levelPointEquiv` with its
+localization-side counterpart and lands here, so the completed local rings of
+the Tate algebra at rational points inherit the domain property without ever
+forming the diamond-infected completion over `P` itself. -/
+theorem isDomain_adicCompletion_idealOfVars :
+    IsDomain (AdicCompletion (MvPolynomial.idealOfVars (Fin m) L)
+      (MvPolynomial (Fin m) L)) := by
+  haveI : IsDomain (MvPowerSeries (Fin m) L) :=
+    NoZeroDivisors.to_isDomain _
+  exact MulEquiv.isDomain (MvPowerSeries (Fin m) L)
+    ((MvPowerSeries.toAdicCompletionAlgEquiv
+      (Fin m) L).symm.toRingEquiv.toMulEquiv)
+
+end Assembly
 
 end Translation
 

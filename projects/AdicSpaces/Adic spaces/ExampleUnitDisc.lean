@@ -78,9 +78,9 @@ section Bridge
 variable (R : Type*) [NormedCommRing R] [IsUltrametricDist R] (k : ℕ)
 
 /-- `CommRing` on the (vendored, normed) restricted subring over a commutative base. -/
-noncomputable instance : CommRing (MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ))) :=
-  { (inferInstance : Ring (MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ)))) with
-    mul_comm := fun a b => Subtype.ext (mul_comm a.1 b.1) }
+noncomputable instance (priority := 50) :
+    CommRing (MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ))) :=
+  inferInstance
 
 /-- Radius-one Gauss restrictedness is the topological restrictedness over a normed
 ultrametric base. -/

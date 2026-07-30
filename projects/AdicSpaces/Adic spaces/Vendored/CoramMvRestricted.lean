@@ -148,4 +148,11 @@ noncomputable
 instance (c : σ → ℝ) : Ring (Restricted R c) :=
   Subring.toRing (isSubring c)
 
+/-- Commutative ring structure over a commutative base, through the single
+canonical subring path (keeps the `Ring` instance definitionally aligned). -/
+noncomputable
+instance (priority := 50) {R' : Type*} [NormedCommRing R'] [IsUltrametricDist R']
+    (c : σ → ℝ) : CommRing (Restricted R' c) :=
+  inferInstanceAs (CommRing ↥(isSubring (R := R') c))
+
 end MvPowerSeries
