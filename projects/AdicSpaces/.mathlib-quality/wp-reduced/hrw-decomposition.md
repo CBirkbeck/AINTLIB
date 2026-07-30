@@ -411,3 +411,35 @@ REMAINING:
 - HRW-5(iii) semilocal decomposition; L1-specific leaves (graph flatness via
   prop_8_30_flat_clean — conditional on central audit-pass-2 trio;
   𝔪ₐB = 𝔪_B small lemma; level-1 graph evaluation).
+
+## Leaf 13 COMPLETE (2026-07-30, very late)
+
+TateTaylor.lean sorry-free + axiom-clean (3195-job build green):
+- 13b-1: origin_decomposition (least-nonzero-coordinate slices, combinatorial),
+  pointEval_origin, pointIdeal_origin_eq_span.
+- 13b-2: constP isometry, transGen power-bounds via polyBall, transHom engine,
+  transHom_polyToP (ringHom_ext), 1-Lipschitz bounds (le_gaussNorm + nonarch
+  sum bounds + le_of_tendsto on hasSum.norm), denseRange_polyToP (truncation
+  tails), transEquiv (both composite identities by DenseRange.equalizer),
+  pointEval_origin_comp_transHom.
+- 13b-3/4: mem_pow_pointIdeal_origin_of_coeff_eq_zero (iterated decomposition),
+  levelZeroEquiv (P/𝔫₀ʳ ≃+* L[X]/Jʳ via truncTotalAlgHom ∘ seriesP vs
+  quotientMap polyToP; RingEquiv.ofRingHom), levelPointEquiv (translation
+  transport), levelPointEquiv_factor (truncTotal_sub_truncTotal…),
+  isDomain_adicCompletion_idealOfVars (toAdicCompletionAlgEquiv + MulEquiv.isDomain).
+
+**ARCHITECTURE DECISION (forced by instance diamond)**: the completion over P
+itself (AdicCompletion (pointIdeal) (P L m)) is NOT formed — P carries a
+CommRing/Ring instance diamond (Coram instRingRestricted vs the subring-path
+CommRing; now aligned as far as possible: general low-priority CommRing in
+CoramMvRestricted, UnitDisc instance an alias — world rebuilt green) that
+defeats Module-self synthesis inside AdicCompletion applications. The WALL
+ASSEMBLY must instead compose levelwise: completedLocal (Localization side,
+clean instances) → levelPointEquiv-chain → A/Jʳ (polynomial side, clean) and
+apply AdicCompletion.congrPow ONCE between the two clean ends, then
+isDomain_adicCompletion_idealOfVars. All the levelwise pieces exist.
+
+REMAINING: leaf 14 (FlatCompletion at P K m → mapP → P L m: FaithfullyFlat
+from free+nontrivial, level-1 surjectivity at 𝔪 via the rationalized point,
+maximal-to-point-ideal comparison), HRW-5(iii) semilocal, L1-specific leaves,
+wall assembly.
