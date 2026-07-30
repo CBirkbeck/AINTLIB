@@ -1,1 +1,1 @@
-FOCUS: [FLW-6] implement the chart-lift private lemma in FibrewiseLocallyWeierstrass.lean (recipe + all names under ### [FLW-6] chart-lift factorization), then (a)-(f) of the affine case, then final-1 = W-choice + affine case + chart-lift.
+FOCUS: [FLW-6 leaf 2] locallyWeierstrass_of_isAffine — implementing (a)-(f) per board recipe; then leaf 1 chart-lift

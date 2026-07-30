@@ -1,0 +1,1 @@
+FOCUS: [FLW-6 leaf 2] locallyWeierstrass_of_isAffine — implementing (a)-(f) per board recipe (projects/ModularCurves/.mathlib-quality/tickets.md ### [FLW-6] state); then leaf 1 chart-lift (lw_point_of_baseChange_affineOpen, tools in its docstring)
