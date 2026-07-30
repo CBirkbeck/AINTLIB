@@ -1022,7 +1022,7 @@ theorem flat_quotient_fSubX [DiscreteTopology A] [IsNoetherianRing A] (f : A) :
     congr 1
     have h := congr_fun (congr_arg DFunLike.coe (quotientFSubXToA_comp_AToQuotientFSubX f)) a
     simp only [RingHom.comp_apply, RingHom.id_apply] at h
-    convert h using 1 <;> first | rfl | simp
+    convert h using 1 <;> rfl
   exact Module.Flat.of_linearEquiv
     { e.toAddEquiv with
       map_smul' := hsmul }

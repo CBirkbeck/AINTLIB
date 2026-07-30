@@ -193,7 +193,7 @@ theorem mem_powerBoundedSubring (P : PairOfDefinition A) {a : A} (ha : a ∈ P.A
 /-- A pair of definition makes `A` a non-archimedean additive group: the images of the powers
 `Iⁿ` of the ideal of definition form an open additive-subgroup basis at `0`
 (Corollary 6.4(1) of Wedhorn). -/
-def nonarchimedeanAddGroup (P : PairOfDefinition A) : NonarchimedeanAddGroup A where
+theorem nonarchimedeanAddGroup (P : PairOfDefinition A) : NonarchimedeanAddGroup A where
   is_nonarchimedean := by
     intro U hU
     obtain ⟨n, -, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp hU

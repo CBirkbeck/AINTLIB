@@ -248,7 +248,7 @@ theorem locNhd_leftMul (P : PairOfDefinition A) (T : Finset A) (s : A)
       exact hj₁ (locNhd_invS_step P T s N hN j₁ _ hy)
 
 /-- The `RingSubgroupsBasis` for the localization topology on `Aₛ`. -/
-noncomputable def locBasis (P : PairOfDefinition A) (T : Finset A) (s : A)
+theorem locBasis (P : PairOfDefinition A) (T : Finset A) (s : A)
     (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) s ∈ locSubring P T s) :
     RingSubgroupsBasis (locNhd P T s) :=

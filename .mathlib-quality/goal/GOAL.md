@@ -1008,3 +1008,53 @@ its own leaves a `,` alone on a line — invisible to any single-line regex. Fix
 over the joined file text (`,\n,` → `,`, a line that is only `,` → deleted, `[\n,` → `[`,
 `,\n]` → `]`), iterated to a fixed point. The script also refuses to write a file where a
 `simp only` set would end up empty (that hit `PresheafTateStructure.lean`, left untouched).
+
+## Task 3 — second mechanical tranche: `def` → `theorem`, and what must NOT be converted
+
+The linter flags 21 `Definition X is a proposition; use theorem instead of def`. Auditing them
+before touching any split the list cleanly, and the split is the useful part:
+
+**12 must NOT be converted.** They carry `@[reducible]` (several also `@[instance 1000]`) and are
+named `instIsTopologicalRingTateAlgebra`, `RationalLocData.isTopologicalRing`,
+`instT2SpaceTateAlgebra₂`, … — i.e. they *supply instances by name*, and their reducibility is
+load-bearing for instance resolution and defeq. `theorem` is irreducible, so converting them
+risks exactly the `isDefEq` walls this codebase is already prone to. Left alone, with the reason
+recorded here so the warning is not "fixed" by a future pass.
+
+**9 looked like plain `def`s** returning Prop-valued structures, with **zero**
+`unfold`/`delta`/`simp [..]` uses anywhere in the tree (checked by grep first). I converted 8 —
+and **6 of those had to be reverted**, because the gate failed with 14 errors:
+
+    TateAlgebraTopology.lean:876:0: cannot omit referenced section variable `inst✝¹`
+    TateAlgebraTopology.lean:1475:5: unsolved goals            (and 12 more)
+
+**`def` → `theorem` changes SECTION-VARIABLE INCLUSION.** A `theorem` includes only the section
+variables its statement mentions; a `def` includes more. Files that carry explicit `omit … in`
+lines — `TateAlgebraTopology.lean` and `MvTateAlgebraTopology.lean` both do — then try to omit a
+variable that is now referenced, which is an error. The grep for `unfold`/`simp` was necessary but
+nowhere near sufficient: the risk was never unfolding, it was binder inclusion.
+
+Kept (verified green): `nonarchimedeanAddGroup` (HuberRings), `locBasis` (LocalizationTopology).
+Reverted: `tateAlgBasis`, `tateAlgBasis'`, `tateAlgBasis₂`, `tateAlgBasis'₂` (TateAlgebraTopology),
+`mvTateAlgBasis`, `mvTateAlgBasis'` (MvTateAlgebraTopology). `isLocAway_of_isUnit`'s declaration
+line did not match the pattern and was never touched.
+
+**Rule: before converting `def` → `theorem`, check whether the file uses `omit … in`.** If it
+does, the conversion is not mechanical.
+
+I also repeated a mistake I had already recorded: I pre-checked with
+`lake build HuberRings LocalizationTopology`, which passed, and treated that as covering the
+batch. It covered those two modules only — the same masking that cost three gates several passes
+ago. A pre-check must build *every* touched module, or it verifies nothing about the rest.
+
+Also: `convert h using 1 <;> first | rfl | simp` → `convert h using 1 <;> rfl`, the linter having
+reported the `simp` alternative as never executed.
+
+### Deferred, with reasons
+
+`simpa` → `simp` (7 sites). The linter's suggestion drops the `using <term>`, which **changes the
+proof term** — `simpa using isOpen_univ` becomes `simp`, which only works if the goal is a simp
+tautology on its own. That needs per-site checking, not a bulk rename, so it is not in this batch.
+
+The 3 remaining `· change …` no-ops still need the bullet restructured rather than the line
+deleted.
