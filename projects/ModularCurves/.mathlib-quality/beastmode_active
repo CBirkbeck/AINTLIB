@@ -1,1 +1,1 @@
-FOCUS: [FLW-6] — final assembly per board recipe: Cartier V at s, poleOneBasis on V-restriction, n=1 comparison, of_iso crossing, the two final theorems
+FOCUS: [FLW-6] two sorries in FibrewiseLocallyWeierstrass.lean; full recipes (a)-(g) + globalization on board under ### [FLW-6] state. Next action: implement 1(a)-(f) in locallyWeierstrass_of_isAffine.

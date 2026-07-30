@@ -29838,3 +29838,40 @@ Cartier producer at s → apply poleOneBasis to the V-restricted family → n=1 
 (hHOne ✓ bOne/hbOne ✓ Cartier data restricted from V to the basic open) → cross with
 `LocallyWeierstrass.of_iso` via eC → `FibrewiseElliptic.locallyWeierstrass` →
 `locallyWeierstrass_iff_abstractConditions`.
+
+### [FLW-6] state (2026-07-30): iff DONE mod forward; two sorries left in
+`EllipticCurve/FibrewiseLocallyWeierstrass.lean`:
+1. `FibrewiseElliptic.locallyWeierstrass_of_isAffine` — per point s:
+   (a) `exists_affineBaseChange_sectionCartierGenerator hsm z hz s` → V ∋ s + (U, hU, r,
+   hspan, hnzd) on `pullback π V.1.ι` =: (πV, zV := sectionBaseChange z hz V.1.ι);
+   (b) `exists_mem_basicOpen_pointedIso_poleOneBasis` (hsmV := base-change stability;
+   hV-fib := h.baseChange; [IsAffine V]) at ⟨s, hsV⟩ → a/basicOpen + E'/π''/z''/hz''/
+   hsm''/h''/eC(hCπ,hCz) + hH1 + (bOne,hbOne);
+   (c) X1: restrict (U,r) along ι_a : (V.basicOpen a) ↪ V to `pullback πV ι_a` — verbatim
+   the producer's own moves: `RelEffCartierDiv.ker_sectionBaseChange` (zV-ker comap fst) +
+   `affinePullbackSection` + `ideal_comap_affineOpens_span` + the producer's nzd-transport
+   (read its tail for the nzd lemma name);
+   (d) X2: cross to E' along eC: U'' := eC.hom ⁻¹ᵁ U-restr (affine: `IsAffineOpen.preimage`
+   of iso/open-immersion), z''-preimage-⊤ via `Scheme.Hom.comp_preimage` + hCz; r'' :=
+   eC.hom.app _ r-restr; ker/span: z''.ker = (z''≫eC.hom).ker.comap eC.hom (hunt the
+   comap-of-ker-along-iso lemma in LevelStructure/CartierDivisor or SectionRigidity —
+   `Scheme.Hom.ker` functoriality; the Cartier producer's `hker` line is the model);
+   nzd: app of iso preserves nonZeroDivisors (ring iso ✓);
+   (e) `sectionPoleSheafPower_locallyWeierstrass_of_CartierGenerator` on (π'',z'') with
+   hH1 + bOne/hbOne + (U'',r'') → LW π'' z'' hz'';
+   (f) `LocallyWeierstrass.of_iso_over` (e := eC.symm; eC.inv ≫ π'' = pullback.snd from
+   hCπ; sBC ≫ eC.inv = z'' from hCz) → LW of `pullback πV ι_a`-family;
+   (g) LW at the point: the chart U₁ produced lives on (V.basicOpen a)-level; lift twice
+   (basicOpen a → V → S) by the globalization move (2) below, OR simpler: since
+   LocallyWeierstrass is per-point ∃, prove instead the per-point statement of LW π z hz
+   at s directly: the (g)-lift = one application of move (2) at each of the two levels.
+2. `FibrewiseElliptic.locallyWeierstrass` (globalization move): per s, affine W ∋ s
+   (`S.isBasis_affineOpens.exists_subset_of_mem_open` at ⊤), affine case on the
+   W-restriction, then lift the chart: Uimg := ⟨W.ι ''ᵁ U'.1,
+   `IsAffineOpen.image_of_isOpenImmersion`⟩; curve transport W_S := Wc.map
+   ((W.ι.appIso U'.1).inv.hom) (mathlib `Scheme.Hom.appIso`; `(W.map f).IsElliptic`
+   instance ✓ mathlib Weierstrass:448); iso: pullback π Uimg.ι ≅ pullback πW U'.ι
+   (IsPullback.of_iso choreography as in `exists_pointedIso_direct_pullback`) ≪≫ e₁ ≪≫
+   projModel-transport along the ring iso (`projModelBaseChange` + its π/zero compat
+   lemmas — grep `projModelBaseChange_` in ModelVariableChange/ModelGroupUniq; IsIso for
+   a ring iso). π/z field-chases through the three components.
