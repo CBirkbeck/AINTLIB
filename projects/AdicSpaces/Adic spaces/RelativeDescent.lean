@@ -226,11 +226,7 @@ theorem keystoneAlg_divByS {t : A} (ht : t ∈ E.T) :
         (isUnit_canonicalMap_s (A := presheafValue D₀) _ _ subset_rfl)
         (divByS (D₀.canonicalMap t) (imgDatum D₀ E hspanE).s) := by
   refine (imgCanonical_isUnit_s D₀ hspanE).mul_left_cancel ?_
-  have hspec : algebraMap A (Localization.Away E.s) E.s * divByS t E.s =
-      algebraMap A (Localization.Away E.s) t := by
-    unfold divByS
-    exact IsLocalization.mk'_spec' (Localization.Away E.s) t
-      (⟨E.s, ⟨1, pow_one E.s⟩⟩ : Submonoid.powers E.s)
+  have hspec := algebraMap_mul_divByS t E.s
   have hL : (imgCanonical D₀ hspanE) E.s * keystoneAlg D₀ hspanE (divByS t E.s) =
       (imgDatum D₀ E hspanE).canonicalMap (D₀.canonicalMap t) := by
     calc (imgCanonical D₀ hspanE) E.s * keystoneAlg D₀ hspanE (divByS t E.s)
@@ -245,16 +241,7 @@ theorem keystoneAlg_divByS {t : A} (ht : t ∈ E.T) :
           rw [hspec]
       _ = (imgDatum D₀ E hspanE).canonicalMap (D₀.canonicalMap t) :=
           keystoneAlg_algebraMap D₀ hspanE t
-  have hspecB : algebraMap (presheafValue D₀)
-        (Localization.Away (imgDatum D₀ E hspanE).s) (imgDatum D₀ E hspanE).s *
-        divByS (D₀.canonicalMap t) (imgDatum D₀ E hspanE).s =
-      algebraMap (presheafValue D₀) (Localization.Away (imgDatum D₀ E hspanE).s)
-        (D₀.canonicalMap t) := by
-    unfold divByS
-    exact IsLocalization.mk'_spec' (Localization.Away (imgDatum D₀ E hspanE).s)
-      (D₀.canonicalMap t)
-      (⟨(imgDatum D₀ E hspanE).s, ⟨1, pow_one _⟩⟩ :
-        Submonoid.powers (imgDatum D₀ E hspanE).s)
+  have hspecB := algebraMap_mul_divByS (D₀.canonicalMap t) (imgDatum D₀ E hspanE).s
   have hR : (imgCanonical D₀ hspanE) E.s *
       IsLocalization.Away.lift (imgDatum D₀ E hspanE).s
         (isUnit_canonicalMap_s (A := presheafValue D₀) _ _ subset_rfl)
@@ -384,20 +371,8 @@ theorem keystoneInvAlg_divByS {t : A} (ht : t ∈ E.T) :
         (HasLocLiftPowerBounded.isUnit_canonicalMap_s E E (fun _ hv => hv))
         (divByS t E.s) := by
   refine (restriction_isUnit_imgS D₀ hspanE hE).mul_left_cancel ?_
-  have hspecB : algebraMap (presheafValue D₀)
-        (Localization.Away (imgDatum D₀ E hspanE).s) (imgDatum D₀ E hspanE).s *
-        divByS (D₀.canonicalMap t) (imgDatum D₀ E hspanE).s =
-      algebraMap (presheafValue D₀) (Localization.Away (imgDatum D₀ E hspanE).s)
-        (D₀.canonicalMap t) := by
-    unfold divByS
-    exact IsLocalization.mk'_spec' _ (D₀.canonicalMap t)
-      (⟨(imgDatum D₀ E hspanE).s, ⟨1, pow_one _⟩⟩ :
-        Submonoid.powers (imgDatum D₀ E hspanE).s)
-  have hspecA : algebraMap A (Localization.Away E.s) E.s * divByS t E.s =
-      algebraMap A (Localization.Away E.s) t := by
-    unfold divByS
-    exact IsLocalization.mk'_spec' (Localization.Away E.s) t
-      (⟨E.s, ⟨1, pow_one E.s⟩⟩ : Submonoid.powers E.s)
+  have hspecB := algebraMap_mul_divByS (D₀.canonicalMap t) (imgDatum D₀ E hspanE).s
+  have hspecA := algebraMap_mul_divByS t E.s
   have hL : (restrictionMapHom D₀ E hE) (imgDatum D₀ E hspanE).s *
       keystoneInvAlg D₀ hspanE hE
         (divByS (D₀.canonicalMap t) (imgDatum D₀ E hspanE).s) =

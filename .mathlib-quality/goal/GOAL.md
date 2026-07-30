@@ -1909,3 +1909,44 @@ never measure width in bytes.**
 Module build green (3006 jobs) before the gate.
 
 Running total: **264** (486 baseline → 290 pre-split → 274 post-split → 264).
+
+## Task 2 + 3 together — one missing general lemma closed FOUR over-50 proofs (264 → 260)
+
+The best result of the campaign so far, and it came from dedup rather than decomposition.
+
+The ranked worklist put four proofs adjacent: `keystoneAlg_divByS` and `keystoneInvAlg_divByS` in
+`RelativeDescent.lean`, and their exact mirrors `keystoneAlgO_divByS` / `keystoneInvAlgO_divByS` in
+`RelativeDescentHuber.lean` — all four at 62 code lines, all needing −12. Reading them showed each
+contained **two** copies of the same elementary fact, written out inline:
+
+    have hspec  : algebraMap A (Localization.Away E.s) E.s * divByS t E.s = algebraMap A … t
+    have hspecB : algebraMap (presheafValue D₀) (Localization.Away …) … * divByS … = algebraMap … t
+
+i.e. *clearing the denominator*, `s · (t/s) = t`. Eight inline copies across the two files, each 5–9
+lines of `unfold divByS; exact IsLocalization.mk'_spec' …`. **No general lemma existed** — the
+`divByS_*` family in `LocalizationTopology.lean` had `divByS_eq_algebraMap` (the `s = 1` case) but not
+the spec itself.
+
+Added one lemma next to its siblings:
+
+    theorem algebraMap_mul_divByS {R : Type*} [CommRing R] [TopologicalSpace R] (t s : R) :
+        algebraMap R (Localization.Away s) s * divByS t s = algebraMap R (Localization.Away s) t
+
+**Design point that made it pay twice over:** stated with its **own** ring binder rather than the
+ambient section variable `A`. The `hspec` copies are at `A`, the `hspecB` copies at
+`presheafValue D₀`; a lemma tied to the section variable would have covered only half the sites. `divByS`
+itself needs `[CommRing] [TopologicalSpace]`, so those are the binders to repeat.
+
+Result: eight inline copies → eight one-line `have`s. Two proofs went straight under 50, the other two
+landed at exactly 51 and were finished by joining the replacement's two lines into one (83 and 84
+characters — checked against the 100 limit, not assumed).
+
+**The lesson to carry forward: before decomposing a cluster of same-size proofs, look for a missing
+general lemma.** Four proofs, 62 lines each, all needing −12, is not four decomposition problems —
+it is one absent lemma. Searching for the *statement shape* rather than a name is what found it
+(the `divByS_*` greps by name showed nothing relevant; grepping the `mk'_spec'` + `unfold divByS`
+body pattern showed eight hits).
+
+Module builds green first (`RelativeDescent` 3039 jobs, `RelativeDescentHuber` 3041 jobs).
+
+Running total: **260** (486 baseline → 290 pre-split → 274 post-split → 260).

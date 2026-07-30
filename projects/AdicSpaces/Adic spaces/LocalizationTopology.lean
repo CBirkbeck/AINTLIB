@@ -47,6 +47,17 @@ theorem divByS_eq_algebraMap (t : A) :
   exact IsLocalization.mk'_one (M := Submonoid.powers (1 : A))
     (S := Localization.Away (1 : A)) t
 
+/-- **Clearing the denominator**: `s · (t/s) = t` in `Localization.Away s`.
+
+Stated with its own ring binder rather than the section variable `A`, so it applies
+equally at `A` and at `presheafValue D` — both occur in the descent files. -/
+theorem algebraMap_mul_divByS {R : Type*} [CommRing R] [TopologicalSpace R] (t s : R) :
+    algebraMap R (Localization.Away s) s * divByS t s =
+      algebraMap R (Localization.Away s) t := by
+  unfold divByS
+  exact IsLocalization.mk'_spec' (Localization.Away s) t
+    (⟨s, ⟨1, pow_one s⟩⟩ : Submonoid.powers s)
+
 /-- The ring of definition `D = A₀[t₁/s, …, tₙ/s]` of `Localization.Away s`
 (§8.1 of Wedhorn). -/
 noncomputable def locSubring (P : PairOfDefinition A) (T : Finset A)
