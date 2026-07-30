@@ -3183,3 +3183,39 @@ cheaply (reading, not building).
 For a −6, note also that two 13-line helpers is arguably worse than the block they replace; the
 extraction bar should scale with the deficit. **Small deficits want joins or merges; extraction is for
 blocks with genuine shared or mathematical content.**
+
+## The vetted shortlist — all three filters applied at once
+
+Rather than examine seam candidates one at a time, applied every filter in a single scan:
+
+1. both branches 12–46 lines, and `n1 + n2 − 4 ≥ need`;
+2. the three non-blank lines before the seam contain no goal-rewriting tactic
+   (`unfold` / `dsimp` / `change` / `rw` / `simp only […]` other than `Set.mem_setOf_eq`);
+3. dependency count across both branches ≤ 8.
+
+**27 → 12 vetted candidates**, sorted by dependency count. Head of the list:
+
+    deps 0  need − 4  22+29  LaurentRefinementTree.balancedLeafBase_isUnit…
+    deps 0  need −15  20+45  CechCohomology.hasGluing_iff_section
+    deps 1  need −11  17+43  ChartVObj.monomial_symm_blocToBI_mem_completedPlus…
+    deps 3  need −39  26+20  Groebner.groebner_reduce
+    deps 3  need −43  36+37  SheafyBI.wI_le_one_of_isPowerBounded
+    deps 4  need −30  45+28  ChartData.mem_rationalOpen_chartData_iff
+
+**Doing the filtering in bulk is strictly better than per-candidate triage** — the three rejections
+last round cost a read each and were discovered serially; this reproduces all of them (and 12 more)
+in one pass, and orders what survives by the metric that actually predicts difficulty.
+
+## Task 2 — `CechCohomology.hasGluing_iff_section` 65 → 45 (233 → 232)
+
+First off the vetted list, chosen for **zero local dependencies** — its branches use only the theorem
+binders `F` and `U`. Split into the two directions:
+
+* `section_of_hasGluing` — gluing gives compatible sections (20 lines);
+* `hasGluing_of_section` — compatible sections give gluing (44 lines).
+
+The shared 6-line section-statement appears in both signatures, written once in the script and reused.
+`constructor` + two one-line bullets replaces 64 lines. Green first try (1121 jobs — this is one of the
+cheapest modules in the library, a pleasant contrast to the 10-minute ones).
+
+Running total: **232** (486 baseline → 290 pre-split → 274 post-split → 232).

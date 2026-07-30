@@ -853,6 +853,93 @@ omit [Fintype ι] in
 theorem face_one_eval (τ : Fin 2 → ι) : FiniteCover.face 1 τ 0 = τ 0 := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+/-- Forward direction of `hasGluing_iff_section`: gluing gives compatible sections. -/
+private theorem section_of_hasGluing (F : AbPresheaf X) (U : FiniteCover X ι)
+    (hglue : HasGluing F U) :
+    ∀ (g : ∀ i, F.obj (U.sets i)),
+      (∀ i i', F.res (Set.inter_subset_left :
+          U.sets i ∩ U.sets i' ⊆ U.sets i) (g i) =
+        F.res (Set.inter_subset_right :
+          U.sets i ∩ U.sets i' ⊆ U.sets i') (g i')) →
+      ∃ x : F.obj Set.univ, ∀ i, F.res (Set.subset_univ (U.sets i)) x = g i
+ := by
+  intro g hg
+  have hdf : cechDiff F U 0
+      (fun σ => F.res (U.inter_subset_sets σ 0) (g (σ 0))) = 0 := by
+    funext τ
+    rw [cechDiff_zero_apply, F.res_comp, F.res_comp]
+    have hsub : U.inter τ ⊆ U.sets (τ 0) ∩ U.sets (τ 1) := (U.inter_fin_two τ).le
+    have key := congrArg (F.res hsub) (hg (τ 0) (τ 1))
+    rw [F.res_comp, F.res_comp] at key
+    exact sub_eq_zero_of_eq key.symm
+  obtain ⟨x, hx⟩ := hglue _ hdf
+  refine ⟨x, fun i => ?_⟩
+  have hxi := congr_fun hx (fun _ => i)
+  simp only [cechAug] at hxi
+  have e1 : U.inter (fun _ => i) = U.sets i := U.inter_fin_one (fun _ => i)
+  have tL := F.res_congr e1 (U.inter_subset_univ (fun _ => i))
+    (Set.subset_univ (U.sets i)) x
+  have tR := F.res_congr e1 (U.inter_subset_sets (fun _ => i) 0)
+    (subset_refl (U.sets i)) (g i)
+  rw [F.res_id] at tR
+  rw [← tL, ← tR, hxi]
+
+/-- Backward direction of `hasGluing_iff_section`: compatible sections give gluing. -/
+private theorem hasGluing_of_section (F : AbPresheaf X) (U : FiniteCover X ι)
+    (hsec :
+    ∀ (g : ∀ i, F.obj (U.sets i)),
+      (∀ i i', F.res (Set.inter_subset_left :
+          U.sets i ∩ U.sets i' ⊆ U.sets i) (g i) =
+        F.res (Set.inter_subset_right :
+          U.sets i ∩ U.sets i' ⊆ U.sets i') (g i')) →
+      ∃ x : F.obj Set.univ, ∀ i, F.res (Set.subset_univ (U.sets i)) x = g i
+) : HasGluing F U := by
+  intro f hf
+  obtain ⟨x, hx⟩ := hsec
+    (fun i => F.res ((U.inter_fin_one (fun _ => i)).symm.le) (f (fun _ => i)))
+    (fun i i' => by
+      have hfeq : F.res (U.inter_face_subset 0 ![i, i'])
+            (f (FiniteCover.face 0 ![i, i'])) =
+          F.res (U.inter_face_subset 1 ![i, i'])
+            (f (FiniteCover.face 1 ![i, i'])) := by
+        have h := congr_fun hf ![i, i']
+        rw [cechDiff_zero_apply] at h
+        exact sub_eq_zero.mp h
+      have e0 : FiniteCover.face 0 (![i, i'] : Fin 2 → ι) = (fun _ => i') := by
+        funext k
+        rw [Fin.fin_one_eq_zero k]
+        rfl
+      have e1 : FiniteCover.face 1 (![i, i'] : Fin 2 → ι) = (fun _ => i) := by
+        funext k
+        rw [Fin.fin_one_eq_zero k]
+        rfl
+      have hsub : U.sets i ∩ U.sets i' ⊆ U.inter ![i, i'] :=
+        (U.inter_fin_two ![i, i']).ge
+      have key := congrArg (F.res hsub) hfeq
+      rw [F.res_comp, F.res_comp] at key
+      change F.res (Set.inter_subset_left : U.sets i ∩ U.sets i' ⊆ U.sets i)
+            (F.res ((U.inter_fin_one (fun _ => i)).symm.le) (f (fun _ => i))) =
+          F.res (Set.inter_subset_right : U.sets i ∩ U.sets i' ⊆ U.sets i')
+            (F.res ((U.inter_fin_one (fun _ => i')).symm.le) (f (fun _ => i')))
+      rw [F.res_comp, F.res_comp,
+        ← F.res_section_eq f (hsub.trans (U.inter_face_subset 1 ![i, i'])) _ e1,
+        ← key,
+        F.res_section_eq f (hsub.trans (U.inter_face_subset 0 ![i, i'])) _ e0])
+  refine ⟨x, ?_⟩
+  funext σ
+  simp only [cechAug]
+  have hσ : (fun _ : Fin 1 => σ 0) = σ :=
+    funext fun k => by rw [Subsingleton.elim k 0]
+  have step1 : F.res (U.inter_subset_univ σ) x =
+      F.res (U.inter_subset_sets σ 0)
+        (F.res (Set.subset_univ (U.sets (σ 0))) x) := (F.res_comp _ _ x).symm
+  rw [step1, hx (σ 0)]
+  change F.res (U.inter_subset_sets σ 0)
+      (F.res ((U.inter_fin_one (fun _ => σ 0)).symm.le) (f (fun _ => σ 0))) = f σ
+  rw [F.res_comp]
+  exact (F.res_section_eq f _ (subset_refl (U.inter σ)) hσ).trans (F.res_id (f σ))
+
+
 /-- **Gluing in section form**: compatible `0`-cochains glue iff every
 section family that agrees on pairwise intersections comes from a global
 section. -/
@@ -865,71 +952,8 @@ theorem hasGluing_iff_section (F : AbPresheaf X) (U : FiniteCover X ι) :
           U.sets i ∩ U.sets i' ⊆ U.sets i') (g i')) →
       ∃ x : F.obj Set.univ, ∀ i, F.res (Set.subset_univ (U.sets i)) x = g i := by
   constructor
-  · intro hglue g hg
-    have hdf : cechDiff F U 0
-        (fun σ => F.res (U.inter_subset_sets σ 0) (g (σ 0))) = 0 := by
-      funext τ
-      rw [cechDiff_zero_apply, F.res_comp, F.res_comp]
-      have hsub : U.inter τ ⊆ U.sets (τ 0) ∩ U.sets (τ 1) := (U.inter_fin_two τ).le
-      have key := congrArg (F.res hsub) (hg (τ 0) (τ 1))
-      rw [F.res_comp, F.res_comp] at key
-      exact sub_eq_zero_of_eq key.symm
-    obtain ⟨x, hx⟩ := hglue _ hdf
-    refine ⟨x, fun i => ?_⟩
-    have hxi := congr_fun hx (fun _ => i)
-    simp only [cechAug] at hxi
-    have e1 : U.inter (fun _ => i) = U.sets i := U.inter_fin_one (fun _ => i)
-    have tL := F.res_congr e1 (U.inter_subset_univ (fun _ => i))
-      (Set.subset_univ (U.sets i)) x
-    have tR := F.res_congr e1 (U.inter_subset_sets (fun _ => i) 0)
-      (subset_refl (U.sets i)) (g i)
-    rw [F.res_id] at tR
-    rw [← tL, ← tR, hxi]
-  · intro hsec f hf
-    obtain ⟨x, hx⟩ := hsec
-      (fun i => F.res ((U.inter_fin_one (fun _ => i)).symm.le) (f (fun _ => i)))
-      (fun i i' => by
-        have hfeq : F.res (U.inter_face_subset 0 ![i, i'])
-              (f (FiniteCover.face 0 ![i, i'])) =
-            F.res (U.inter_face_subset 1 ![i, i'])
-              (f (FiniteCover.face 1 ![i, i'])) := by
-          have h := congr_fun hf ![i, i']
-          rw [cechDiff_zero_apply] at h
-          exact sub_eq_zero.mp h
-        have e0 : FiniteCover.face 0 (![i, i'] : Fin 2 → ι) = (fun _ => i') := by
-          funext k
-          rw [Fin.fin_one_eq_zero k]
-          rfl
-        have e1 : FiniteCover.face 1 (![i, i'] : Fin 2 → ι) = (fun _ => i) := by
-          funext k
-          rw [Fin.fin_one_eq_zero k]
-          rfl
-        have hsub : U.sets i ∩ U.sets i' ⊆ U.inter ![i, i'] :=
-          (U.inter_fin_two ![i, i']).ge
-        have key := congrArg (F.res hsub) hfeq
-        rw [F.res_comp, F.res_comp] at key
-        change F.res (Set.inter_subset_left : U.sets i ∩ U.sets i' ⊆ U.sets i)
-              (F.res ((U.inter_fin_one (fun _ => i)).symm.le) (f (fun _ => i))) =
-            F.res (Set.inter_subset_right : U.sets i ∩ U.sets i' ⊆ U.sets i')
-              (F.res ((U.inter_fin_one (fun _ => i')).symm.le) (f (fun _ => i')))
-        rw [F.res_comp, F.res_comp,
-          ← F.res_section_eq f (hsub.trans (U.inter_face_subset 1 ![i, i'])) _ e1,
-          ← key,
-          F.res_section_eq f (hsub.trans (U.inter_face_subset 0 ![i, i'])) _ e0])
-    refine ⟨x, ?_⟩
-    funext σ
-    simp only [cechAug]
-    have hσ : (fun _ : Fin 1 => σ 0) = σ :=
-      funext fun k => by rw [Subsingleton.elim k 0]
-    have step1 : F.res (U.inter_subset_univ σ) x =
-        F.res (U.inter_subset_sets σ 0)
-          (F.res (Set.subset_univ (U.sets (σ 0))) x) := (F.res_comp _ _ x).symm
-    rw [step1, hx (σ 0)]
-    change F.res (U.inter_subset_sets σ 0)
-        (F.res ((U.inter_fin_one (fun _ => σ 0)).symm.le) (f (fun _ => σ 0))) = f σ
-    rw [F.res_comp]
-    exact (F.res_section_eq f _ (subset_refl (U.inter σ)) hσ).trans (F.res_id (f σ))
-
+  · intro hglue; exact section_of_hasGluing F U hglue
+  · intro hsec; exact hasGluing_of_section F U hsec
 end SectionForm
 
 section ProductAcyclicity
