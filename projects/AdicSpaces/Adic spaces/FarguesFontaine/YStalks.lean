@@ -615,7 +615,6 @@ theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (hp : 1 < p) :
     push_cast
     rw [show (n : ℤ) + k + 1 = ((n + k + 1 : ℕ) : ℤ) from by push_cast; ring,
       zpow_natCast]
-    push_cast
     ring
   have hmul : p ^ (k + 1) * p ^ n = p ^ (n + k + 1) := by
     rw [← pow_add]

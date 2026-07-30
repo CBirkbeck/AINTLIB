@@ -290,7 +290,7 @@ theorem exists_eq_sum_teichCoeffF_add (x : WittVector p F) (N : ℕ) :
   · obtain ⟨w, hw⟩ := WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff x n
     refine ⟨w, ?_⟩
     have hIic : Finset.Iic n = Finset.range (n + 1) := by
-      ext m; simp [Nat.lt_succ_iff]
+      ext m; simp []
     have hsum : (∑ i ∈ Finset.range (n + 1),
         WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
         = ∑ i ≤ n, WittVector.teichmuller p

@@ -105,7 +105,6 @@ theorem bigWindow_eq_union (n : ℤ) (hp : 1 < p) :
   have hc0 : (0 : ℚ) < cFF p := zero_lt_one.trans hc1
   have hcp : cFF p ≤ (p : ℚ) := by
     rw [cFF, div_le_iff₀ (by norm_num : (0 : ℚ) < 2)]
-    push_cast
     linarith [hpQ]
   ext v
   constructor
@@ -164,7 +163,6 @@ theorem bigWindow_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
   have hab2 : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
     push_cast
     rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
-    push_cast
     ring
   constructor
   · rintro ⟨hY, hge, hle⟩
@@ -299,7 +297,6 @@ theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
   have hab : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
     push_cast
     rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
-    push_cast
     ring
   constructor
   · rintro ⟨hY, hge, hle⟩

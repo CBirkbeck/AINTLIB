@@ -991,7 +991,7 @@ theorem negateAux_mul (f g : RestrictedLaurent R) :
       ∑' a : ℤ, f.coeff (-a) * g.coeff (-(m - a)) := coeff_mul _ _ m
   rw [coeff_negateAux, coeff_mul, h1, ← (Equiv.neg ℤ).tsum_eq]
   refine tsum_congr fun a => ?_
-  simp only [Equiv.neg_apply, coeff_negateAux, neg_neg]
+  simp only [Equiv.neg_apply]
   rw [show -(m - a) = -m - -a by ring]
 
 /-- The index-negation automorphism `W ↦ W⁻¹` of the restricted Laurent ring. -/

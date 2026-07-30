@@ -130,7 +130,7 @@ theorem denseRange_chartToBI (b : ℕ) (hb : 0 < b) :
         : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := rfl
   rw [hclos]
   ext w
-  simp [w.2]
+  simp []
 
 
 /-- The corestricted chart map is continuous at zero for the chart topology. -/

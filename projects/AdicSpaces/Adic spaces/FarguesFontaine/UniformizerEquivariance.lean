@@ -277,7 +277,7 @@ theorem denseRange_blocToBI :
         : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := rfl
   rw [hclos]
   ext w
-  simp [w.2]
+  simp []
 
 
 /-- The `wI`-uniformity makes `Bloc` a uniform additive group. -/

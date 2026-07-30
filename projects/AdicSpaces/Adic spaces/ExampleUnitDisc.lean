@@ -92,11 +92,11 @@ theorem isRestrictedGauss_one_iff (f : MvPowerSeries (Fin k) R) :
   · intro h
     rw [tendsto_zero_iff_norm_tendsto_zero]
     refine h.congr fun t => ?_
-    simp [Finsupp.prod_pow]
+    simp []
   · intro h
     rw [tendsto_zero_iff_norm_tendsto_zero] at h
     refine h.congr fun t => ?_
-    simp [Finsupp.prod_pow]
+    simp []
 
 /-- The two restricted subrings coincide. -/
 theorem restrictedGauss_eq_restricted :

@@ -315,7 +315,6 @@ private theorem fSubX_saturated_faithful (f : A) (I : Ideal A) (h : ↥(TateAlge
       exact noeth_mem_ideal_of_mul_shift f I (fun k ↦ TateAlgebra.coeff (n + 1 + k) h)
         (by simp only [Nat.add_zero]; exact hf_succ)
         (fun k ↦ by
-          change TateAlgebra.coeff (n + 1 + k) h - f * TateAlgebra.coeff (n + 1 + (k + 1)) h ∈ I
           rw [show n + 1 + (k + 1) = (n + 1 + k) + 1 from by omega]
           exact hstep (n + 1 + k))
   exact mem_idealMap_of_forall_coeff_mem I h hall
@@ -1910,7 +1909,7 @@ private theorem example638_kerLift_comp_backward (D : RationalLocData A)
   refine @UniformSpace.Completion.ext' (Localization.Away D.s) D.uniformSpace
     (presheafValue D) _ _ _ _ hcont continuous_id ?_ x
   intro a
-  simp only [Function.comp, id]
+  simp only [id]
   change example638_kerLift D (example638_quotBackward D hA_complete hker (D.coeRingHom a)) =
     D.coeRingHom a
   rw [example638_quotBackward_coe D hA_complete hker a, example638_kerLift_locToQuot_apply]

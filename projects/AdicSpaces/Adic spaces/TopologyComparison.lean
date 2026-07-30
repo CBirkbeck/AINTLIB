@@ -296,7 +296,7 @@ private theorem artinReesNhd_mem_nhds (P : PairOfDefinition A) (s : A) (C M N : 
   have hG_eq : artinReesNhd P s C M N =
       ⋂ (i : Fin (N + 1)), {g | s ^ (i : ℕ) * TateAlgebra.coeff (i : ℕ) g ∈
         Subtype.val '' ((P.I ^ (M + (N - (i : ℕ)) * C) : Ideal P.A₀) : Set P.A₀)} := by
-    ext g; simp only [artinReesNhd, Set.mem_iInter, Set.mem_setOf_eq]
+    ext g; simp only [Set.mem_iInter, Set.mem_setOf_eq]
     constructor
     · intro hg ⟨i, hi⟩; exact hg i (by omega)
     · intro hg n hn; exact hg ⟨n, by omega⟩
@@ -947,8 +947,7 @@ theorem presheafValueTateQuotientEquiv_symm_algebraMap (D : RationalLocData A)
     (presheafValueTateQuotientEquiv D hb hcs ht0 hcont_eval hdense).symm
       ((Ideal.Quotient.mk _) (algebraMap A _ a)) =
       D.canonicalMap a := by
-  simp only [presheafValueTateQuotientEquiv, RingEquiv.symm_mk,
-    RingEquiv.coe_mk, Equiv.coe_fn_mk]
+  simp only [presheafValueTateQuotientEquiv, RingEquiv.symm_mk]
   exact tateQuotientToPresheafHom_algebraMap D hb a
 
 end CompletionIsomorphism
@@ -2363,8 +2362,7 @@ theorem presheafValueCanonicalQuotientEquiv_symm_algebraMap (D : RationalLocData
     (presheafValueCanonicalQuotientEquiv D hb hA_complete hnoeth hT_pb hcont_eval).symm
       ((Ideal.Quotient.mk _) (algebraMap A _ a)) =
       D.canonicalMap a := by
-  simp only [presheafValueCanonicalQuotientEquiv, RingEquiv.symm_mk,
-    RingEquiv.coe_mk, Equiv.coe_fn_mk]
+  simp only [presheafValueCanonicalQuotientEquiv, RingEquiv.symm_mk]
   exact tateQuotientToPresheafHom_algebraMap D hb a
 
 /-! ### Step 8: Banach OMP -> Topological Isomorphism

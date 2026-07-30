@@ -931,7 +931,7 @@ theorem AToQuotientFSubX_comp_quotientFSubXToA [DiscreteTopology A] (f : A) :
   rw [← RingHom.cancel_right (Ideal.Quotient.mk_surjective)]
   ext p
   simp only [RingHom.comp_apply, RingHom.id_apply, AToQuotientFSubX,
-    quotientFSubXToA, Ideal.Quotient.lift_mk]
+    quotientFSubXToA]
   symm
   rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem]
   exact sub_algebraMap_evalFHom_mem_ideal_fSubX f p
@@ -1136,8 +1136,8 @@ theorem locToQuotientOneSubfX_comp_quotientOneSubfXToLoc [DiscreteTopology A] (f
       RingHom.id _ := by
   rw [← RingHom.cancel_right (Ideal.Quotient.mk_surjective)]
   ext p
-  simp only [RingHom.comp_apply, RingHom.id_apply, quotientOneSubfXToLoc,
-    Ideal.Quotient.lift_mk]
+  simp only [RingHom.comp_apply, RingHom.id_apply, quotientOneSubfXToLoc
+    ]
   have loc_alg : ∀ (a : A),
       locToQuotientOneSubfX f (algebraMap A _ a) =
         (Ideal.Quotient.mk _) (algebraMap A _ a) :=
@@ -2798,7 +2798,6 @@ theorem fSubX_saturated
       exact noeth_mem_ideal_of_mul_shift f I (fun k ↦ coeff (n + 1 + k) h)
         (by simp only [Nat.add_zero]; exact hf_succ)
         (fun k ↦ by
-          change coeff (n + 1 + k) h - f * coeff (n + 1 + (k + 1)) h ∈ I
           rw [show n + 1 + (k + 1) = (n + 1 + k) + 1 from by omega]
           exact hstep (n + 1 + k))
   -- Step 5: Conclude h ∈ Ideal.map I.

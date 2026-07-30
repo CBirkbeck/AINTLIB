@@ -175,7 +175,6 @@ noncomputable def laurentMinusDatum (D₀ : RationalLocData A) (f : A) :
     rw [show 2 * N₀ = N₀ + N₀ from by omega, pow_add] at hb
     refine Submodule.mul_induction_on hb ?_ ?_
     · intro c hc d hd
-      change divByS (↑(c * d) : A) _ ∈ _
       rw [show (c * d : D₀.P.A₀).val = c.val * d.val from rfl,
         divByS_factor' _ _ D₀.s f, divByS_factor2' _ D₀.s f]
       exact (locSubring _ _ _).mul_mem (divByS_mul_f_mem' hN₀ f hc)
@@ -367,7 +366,6 @@ noncomputable def RationalLocData.interSamePair (D₁ D₂ : RationalLocData A)
     rw [pow_add] at hb
     refine Submodule.mul_induction_on hb ?_ ?_
     · intro c hc d hd
-      change divByS (↑(c * d) : A) (D₁.s * D₂.s) ∈ _
       rw [show ((c * d : D₁.P.A₀) : A) = (c : A) * (d : A) from rfl,
         divByS_factor' (c : A) (d : A) D₁.s D₂.s]
       exact (locSubring _ _ _).mul_mem

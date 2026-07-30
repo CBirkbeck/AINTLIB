@@ -111,7 +111,7 @@ theorem continuous_frob : Continuous (frob p F) := by
   rw [ContinuousAt, map_zero,
     (Ideal.hasBasis_nhds_zero_adic _).tendsto_iff (Ideal.hasBasis_nhds_zero_adic _)]
   refine fun n _ => ⟨n, trivial, fun x hx => ?_⟩
-  simp only [SetLike.mem_coe, Ideal.smul_eq_mul, Ideal.mul_top] at hx ⊢
+  simp only [SetLike.mem_coe] at hx ⊢
   exact map_frob_Iinf_pow_le p F _ n (Ideal.mem_map_of_mem _ hx)
 
 /-- `φ⁻¹` is continuous for the `(p,[ϖ])`-adic topology. -/
@@ -120,7 +120,7 @@ theorem continuous_frob_symm : Continuous (frob p F).symm := by
   rw [ContinuousAt, map_zero,
     (Ideal.hasBasis_nhds_zero_adic _).tendsto_iff (Ideal.hasBasis_nhds_zero_adic _)]
   refine fun n _ => ⟨(p + 1) * n, trivial, fun x hx => ?_⟩
-  simp only [SetLike.mem_coe, Ideal.smul_eq_mul, Ideal.mul_top] at hx ⊢
+  simp only [SetLike.mem_coe] at hx ⊢
   obtain ⟨y, hy, hxy⟩ := (Ideal.mem_map_iff_of_surjective _ (frob p F).surjective).mp
     (Iinf_pow_succ_mul_le_map_frob p F _ n hx)
   rw [← hxy]

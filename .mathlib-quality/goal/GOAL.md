@@ -938,3 +938,73 @@ Two consequences worth recording:
 * **The declaration count was UNDERCOUNTED.** It is **7978**, not 7947 — and by extension the
   original 7926 baseline for task 3 was also low. Declarations whose name begins with a Greek
   letter were skipped entirely, not merely mis-named.
+
+## Task 2 — the mechanical queue is EXHAUSTED (measured, not guessed)
+
+`scratchpad/candidates.py` now applies every precondition learned across this campaign in one
+pass — dominant-`have`, one-cut-fits, real proof body, suspects closable by extending, prologue is
+`have`/`set`/`let` only, no prologue local leaking to the parent, parent sorry-free. Run against
+the current 368:
+
+    368 over-50 proofs -> 0 pass every precondition
+
+    rejections:
+      203  the dominant step is NOT a named `have` (a bullet, `obtain`, `refine`, `calc` …)
+       77  suspects not closable by extending the cut
+       34  prologue contains obtain/intro/refine
+       25  a prologue local is still used by the parent after the block
+       13  one cut does not make both halves fit
+       12  statement-heavy (long TYPE, short proof)
+        3  sorry-bearing (producer's WIP)
+
+So the 25 targets the earlier passes worked through were the entire mechanically-extractable
+population. **The remaining 368 need authoring**, in three distinct flavours:
+
+* **203** have a non-`have` dominant step. A bullet or `by_cases` branch has a `?_` goal that is
+  written down nowhere, so its lemma statement must be *reconstructed* from the surrounding
+  `refine`. That is the `pairMapBC_injective` situation already recorded for `gluing_JetA`.
+* **77 + 34** need a destructured hypothesis threaded out, or the conclusion re-stated as an `∃`
+  bundling a locally-obtained witness.
+* **25** need the extracted lemma to return its prologue local as well (a conjunction, or a second
+  lemma).
+
+None of that is mechanical, and none of it should be attempted by a script. Recording the
+breakdown so the next pass does not re-derive it.
+
+## Task 3 — mechanical sweep from the build's own linter output
+
+The build is the authoritative `/cleanup` worklist. AdicSpaces (excluding `Vendored/`) reports:
+
+| count | warning | verdict |
+|---|---|---|
+| 3047 | `Overlapping instance parameters` | out of scope — a project-wide variable-block issue, already recorded as not-a-per-file defect |
+| 550 | `automatically included section variable(s) unused` | needs per-theorem `omit`; large, deferred |
+| 119 | `declaration uses sorry` | producer's WIP |
+| 96 | `Variable name X is not explicitly referenced` | signature churn; deferred |
+| **45** | `This simp argument is unused` | **fixed** |
+| 21 | `Definition X is a proposition; use theorem` | next pass |
+| **15** | `'<tac>' tactic does nothing` | **11 fixed, 4 left** (see below) |
+| 7 | `try simp instead of simpa` | next pass |
+
+**56 fixes across 22 files**, all pure removals the compiler had already certified inert.
+
+4 left by hand on purpose: three are `· change …` where the no-op *is* the bullet's only tactic,
+so deleting the line would orphan the bullet; one is `convert h using 1 <;> first | rfl | simp`,
+where `simp` is a fallback alternative and removing it changes what the combinator does.
+
+### GOTCHA: separator normalisation after deleting a list element must be WHOLE-FILE
+
+First attempt normalised commas per line and broke `HuberRings.lean`:
+
+```
+simp only [a, PairOfDefinition.restrictRingHom, uK, vL,
+  SubmonoidClass.coe_pow,
+  ,
+  , map_pow, ← pow_mul]
+```
+
+A `simp only [...]` list often spans several lines, so removing a token that occupied a line of
+its own leaves a `,` alone on a line — invisible to any single-line regex. Fixed by normalising
+over the joined file text (`,\n,` → `,`, a line that is only `,` → deleted, `[\n,` → `[`,
+`,\n]` → `]`), iterated to a fixed point. The script also refuses to write a file where a
+`simp only` set would end up empty (that hit `PresheafTateStructure.lean`, left untouched).

@@ -182,7 +182,7 @@ theorem _root_.MvPowerSeries.finSucc_forward_map_add (R : Type u) [CommRing R] (
     MvPowerSeries.finSucc_forwardFun R n (p + q) =
       MvPowerSeries.finSucc_forwardFun R n p + MvPowerSeries.finSucc_forwardFun R n q := by
   ext k m
-  simp only [MvPowerSeries.finSucc_forwardFun, PowerSeries.coeff_mk, map_add,
+  simp only [MvPowerSeries.finSucc_forwardFun, map_add,
     MvPowerSeries.coeff_apply]
   rfl
 

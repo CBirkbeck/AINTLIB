@@ -392,7 +392,7 @@ theorem ker_evalₐ_eq {R : Type*} [CommRing R] (I : Ideal R)
   · intro x hx; rw [RingHom.mem_ker] at hx
     have hxn : x.val n = 0 := by
       unfold AdicCompletion.evalₐ at hx
-      simp only [AlgHom.comp_apply, AlgHom.ofLinearMap_apply] at hx
+      simp only [AlgHom.comp_apply] at hx
       exact (Ideal.quotientEquivAlgOfEq R (ideal_smul_top_eq_self I n)).injective
         (hx.trans (map_zero _).symm)
     have hmkQ : AdicCompletion.map I (I ^ n • ⊤ : Submodule R R).mkQ x = 0 := by

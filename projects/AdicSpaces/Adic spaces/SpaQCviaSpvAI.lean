@@ -1048,7 +1048,6 @@ theorem image_ιSpvR_spa_eq₂ [IsTopologicalRing A] (P : PairOfDefinition A)
         calc wv ((P.A₀.subtype a))
             = wv ((c₁ : A) * (g₁ : A) + (c₂ : A) * (g₂ : A)) := by
               rw [← hc]
-              push_cast
               rfl
           _ ≤ max (wv ((c₁ : A) * (g₁ : A))) (wv ((c₂ : A) * (g₂ : A))) :=
               Valuation.map_add _ _ _

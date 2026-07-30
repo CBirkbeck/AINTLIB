@@ -90,7 +90,7 @@ theorem smul_mem_spa (hstab : ∀ (g : G) (a : A), a ∈ A⁺ → g • a ∈ A�
   refine ⟨smul_mem_cont (G := G) hv.1 g, fun f hf => ?_⟩
   change (comap (MulSemiringAction.toRingHom G A g⁻¹) v).vle f 1
   rw [comap_vle]
-  simp only [MulSemiringAction.toRingHom, RingHom.coe_mk, map_one]
+  simp only [MulSemiringAction.toRingHom, map_one]
   exact hv.2 (g⁻¹ • f) (hstab g⁻¹ f hf)
 
 end SpaAction

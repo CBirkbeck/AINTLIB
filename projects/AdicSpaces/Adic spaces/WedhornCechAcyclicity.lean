@@ -1526,7 +1526,7 @@ private theorem datum_ker_le_span_of_unit_mod
         IsLocalization.mk' (Localization.Away D.s) ((D.T.equivFin.symm i : D.T) : A)
           (1 : Submonoid.powers D.s) from (IsLocalization.mk'_one _ _).symm]
       apply IsLocalization.mk'_eq_of_eq
-      simp [mul_comm]
+      simp []
     have h1 : ψ (algebraMap A (Localization.Away D.s) D.s) *
         ψ (divByS ((D.T.equivFin.symm i : D.T) : A) D.s) =
         Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
@@ -2579,7 +2579,7 @@ private theorem unitCover_overlapEval_gen1 [IsTateRing A] [IsNoetherianRing A]
         (1 : Submonoid.powers (unitCover_overlapDatum_B D₀ f).s) from
       (IsLocalization.mk'_one _ _).symm]
     apply IsLocalization.mk'_eq_of_eq
-    simp only [Submonoid.coe_one, mul_one, unitCover_overlapDatum_s D₀ f]
+    simp only [Submonoid.coe_one, unitCover_overlapDatum_s D₀ f]
     ring
   rw [hdiv, sub_self, map_zero]
 
@@ -6208,8 +6208,8 @@ private theorem unitCover_sq_plus_dense
             ↥(TateAlgebra (presheafValue D₀)) →+* ↥(TateAlgebra₂ (presheafValue D₀))))).comp
           (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1) := by
       refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
-      · simp only [RingHom.comp_apply, RingHom.coe_comp, Function.comp_apply,
-          RingEquiv.toRingHom_eq_coe, RingEquiv.coe_toRingHom]
+      · simp only [RingHom.comp_apply,
+          RingEquiv.toRingHom_eq_coe]
         rw [MvTateAlgebra.mvPolynomialToTate_C (A := presheafValue D₀) 1 c]
         erw [unitCover_example638Plus_symm_mk D₀ f]
         erw [example638_evalHom_algebraMap]
@@ -6250,8 +6250,8 @@ private theorem unitCover_sq_plus_dense
             (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
           (RationalLocData.interSamePair_subset_left _ _ _)
           (RationalLocData.interSamePair_subset_left _ _ _)) c
-      · simp only [RingHom.comp_apply, RingHom.coe_comp, Function.comp_apply,
-          RingEquiv.toRingHom_eq_coe, RingEquiv.coe_toRingHom]
+      · simp only [RingHom.comp_apply,
+          RingEquiv.toRingHom_eq_coe]
         have hi : i = 0 := Subsingleton.elim i 0
         subst hi
         rw [MvTateAlgebra.mvPolynomialToTate_X (A := presheafValue D₀) 1 0]

@@ -121,7 +121,7 @@ theorem rescaleRestricted_const (a : K) (ha : ‖a‖ ≤ 1) (r : K) :
   rw [PowerSeries.coeff_rescale]
   cases n with
   | zero => simp
-  | succ k => simp [PowerSeries.coeff_C]
+  | succ k => simp []
 
 /-- `jB` sends the pseudouniformizer to the pseudouniformizer. -/
 theorem jB_tA : jB F (tA F) = tB F := by
@@ -362,7 +362,7 @@ noncomputable def yQ (n : ℕ) : JetA F :=
     · simp only [qCoeff_zero_mul, hq0, mul_zero]
       exact zero_mem _
     · simp only [qCoeff_one_mul, qCoeff_zero_mul, hq0, mul_zero, zero_mul,
-        add_zero, zero_add]
+        add_zero]
       exact zero_mem _⟩
 
 /-- The collapse identity in 𝓐: `Wⁿ · (W⁻ⁿQ²) = Q²`. -/
@@ -537,8 +537,8 @@ noncomputable def yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 
     constructor
     · simp only [qCoeff_zero_mul, hy0, mul_zero]
       exact zero_mem _
-    · simp only [qCoeff_one_mul, qCoeff_zero_mul, hy0, hy1, mul_zero, zero_mul,
-        add_zero, zero_add]
+    · simp only [qCoeff_one_mul, hy0, hy1, mul_zero,
+        add_zero]
       exact zero_mem _⟩
 
 theorem Wa_pow_mul_yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)

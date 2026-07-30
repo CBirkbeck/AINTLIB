@@ -253,7 +253,6 @@ theorem bigWindow_inter_succ_eq_rationalOpen_left (n : ℕ) (hp : 1 < p) :
   have hab : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
     push_cast
     rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
-    push_cast
     ring
   constructor
   · rintro ⟨hY, hge, hle⟩

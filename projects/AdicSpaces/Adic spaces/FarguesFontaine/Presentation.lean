@@ -1024,8 +1024,8 @@ theorem antidiagonal_cons {k : ℕ} (n : ℕ) (I : Fin k →₀ ℕ) :
           simp only [Prod.mk.injEq]
           exact ⟨⟨ha1, ha2⟩, hb1, hb2⟩⟩ := by
   ext q
-  simp only [Finset.mem_antidiagonal, Finset.mem_map, Finset.mem_product,
-    Function.Embedding.coeFn_mk]
+  simp only [Finset.mem_antidiagonal, Finset.mem_map, Finset.mem_product
+    ]
   constructor
   · intro hq
     refine ⟨((q.1 0, q.2 0), (Finsupp.tail q.1, Finsupp.tail q.2)), ⟨?_, ?_⟩, ?_⟩

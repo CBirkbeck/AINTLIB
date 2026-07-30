@@ -1245,7 +1245,7 @@ theorem deltaMap_gen_comp_epsilonHom_gen (a : A) :
   show posLift f _ - negLift f _ = 0
   apply sub_eq_zero.mpr
   -- posLift and negLift agree on constants: both reduce to algebraMap in B₁₂
-  simp only [posLift, negLift, Ideal.Quotient.lift_mk, RingHom.comp_apply]
+  simp only [posLift, negLift]
   -- posEmbHom and negEmbHom agree on constants from A
   exact congrArg (quotLaurent f)
     (show posEmbHom (algebraMap A _ a) = negEmbHom (algebraMap A _ a) from
@@ -1584,7 +1584,7 @@ theorem deltaMap_gen_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space 
   obtain ⟨⟨g, h⟩, hgh⟩ := lambdaMap_surjective htop ℓ
   refine ⟨(Ideal.Quotient.mk _ g, Ideal.Quotient.mk _ h), ?_⟩
   change posLift f (Ideal.Quotient.mk _ g) - negLift f (Ideal.Quotient.mk _ h) = _
-  simp only [posLift, negLift, Ideal.Quotient.lift_mk, RingHom.comp_apply, ← map_sub]
+  simp only [posLift, negLift]
   exact congrArg (quotLaurent f) hgh
 
 set_option backward.isDefEq.respectTransparency false in
