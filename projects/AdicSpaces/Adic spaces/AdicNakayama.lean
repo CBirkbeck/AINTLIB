@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Mathlib.RingTheory.AdicCompletion.Functoriality
+import Mathlib.RingTheory.Localization.AtPrime.Basic
 
 /-!
 # Topological Nakayama: finiteness from a finite adic quotient
@@ -632,5 +633,35 @@ noncomputable def AdicCompletion.semilocalSplit (Q : Ideal A)
     (AdicCompletion.piSplit 𝔫 hpair)
 
 end PiSplit
+
+section LocalizationInvariance
+
+open IsLocalRing
+
+variable {A : Type*} [CommRing A] (p : Ideal A) [p.IsMaximal]
+variable (Rₚ : Type*) [CommRing Rₚ] [Algebra A Rₚ]
+  [IsLocalization.AtPrime Rₚ p] [IsLocalRing Rₚ]
+
+/-- **Localization invariance of the maximal-adic completion**: completing at
+a maximal ideal agrees with completing the localization at its maximal
+ideal. -/
+noncomputable def AdicCompletion.localizationEquiv :
+    AdicCompletion p A ≃+* AdicCompletion (maximalIdeal Rₚ) Rₚ :=
+  AdicCompletion.congrPow p (maximalIdeal Rₚ)
+    (fun n => (IsLocalization.AtPrime.equivQuotMaximalIdealPow
+      p Rₚ n).toRingEquiv)
+    (fun {a b} hab x => by
+      obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective x
+      show Ideal.Quotient.factor (Ideal.pow_le_pow_right hab)
+        ((IsLocalization.AtPrime.equivQuotMaximalIdealPow p Rₚ b)
+          (Ideal.Quotient.mk _ y)) =
+        (IsLocalization.AtPrime.equivQuotMaximalIdealPow p Rₚ a)
+          (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab)
+            (Ideal.Quotient.mk _ y))
+      rw [IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk,
+        Ideal.Quotient.factor_mk, Ideal.Quotient.factor_mk,
+        IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk])
+
+end LocalizationInvariance
 
 end AdicNakayama

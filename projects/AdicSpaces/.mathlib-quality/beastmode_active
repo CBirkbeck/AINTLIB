@@ -1,1 +1,1 @@
-FOCUS: HRW semilocal core — AdicCompletion.congrOfInterleaved (cofinal towers) compiling in AdicNakayama; next = CRT product splitting (AdicCompletion (inf of pairwise-coprime maximal-powers) = product of completions), then the Artinian-Jacobson application.
+FOCUS: HRW wall glue — semilocalSplit DONE axiom-clean; next generic piece = localization invariance AdicCompletion q A = AdicCompletion (maxIdeal) (Localization.AtPrime q) for q maximal (levelwise A/q^n = A_q/(qA_q)^n + congrPow); then instantiate the wall chain.
