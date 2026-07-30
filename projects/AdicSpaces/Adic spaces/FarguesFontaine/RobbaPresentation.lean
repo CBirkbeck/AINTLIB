@@ -2781,6 +2781,60 @@ theorem kerSol_rec_generic {A : Type*} [CommRing A] (g V : A)
     calc 0 - g * -(V * y 0) = (g * V) * y 0 := by ring
       _ = y 0 := by rw [hinv, one_mul]
 
+/-- **Tail bound on the partial sums.** If the full series vanishes and the coefficients
+are eventually below `δ/2`, then every partial sum past `N` is bounded by
+`|g|^(n+1) · (δ/2)`. -/
+private theorem partialSum_le_of_tendsto_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (g : hatK p F hρ0 hρ1) (hg : Valued.v g ≤ 1) (hg0 : (0 : NNReal) < Valued.v g)
+    (y : ℕ → hatK p F hρ0 hρ1)
+    (hvan : Filter.Tendsto (fun n => ∑ i ∈ Finset.range (n + 1), y i * g ^ i)
+      Filter.atTop (nhds 0))
+    {δ : NNReal} (hδ2 : (0 : NNReal) < δ / 2) {N : ℕ}
+    (hN : ∀ b, N ≤ b → Valued.v (y b) ≤ δ / 2) (n : ℕ) (hn : N ≤ n) :
+    Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i)
+      ≤ Valued.v g ^ (n + 1) * (δ / 2) := by
+  have htail : ∀ M, n ≤ M → Valued.v
+      ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
+        - ∑ i ∈ Finset.range (n + 1), y i * g ^ i)
+      ≤ Valued.v g ^ (n + 1) * (δ / 2) := by
+    intro M hM
+    rw [show (∑ i ∈ Finset.range (M + 1), y i * g ^ i)
+        - ∑ i ∈ Finset.range (n + 1), y i * g ^ i
+      = ∑ i ∈ Finset.Ico (n + 1) (M + 1), y i * g ^ i from
+      (Finset.sum_Ico_eq_sub _ (by omega)).symm]
+    refine Valuation.map_sum_le _ (fun i hi => ?_)
+    obtain ⟨hi1, -⟩ := Finset.mem_Ico.mp hi
+    rw [Valuation.map_mul, Valuation.map_pow]
+    calc Valued.v (y i) * Valued.v g ^ i
+        ≤ (δ / 2) * Valued.v g ^ i := by
+          refine mul_le_mul_of_nonneg_right ?_ zero_le
+          exact hN i (by omega)
+      _ ≤ (δ / 2) * Valued.v g ^ (n + 1) := by
+          refine mul_le_mul_of_nonneg_left ?_ zero_le
+          exact pow_le_pow_of_le_one zero_le hg hi1
+      _ = Valued.v g ^ (n + 1) * (δ / 2) := mul_comm _ _
+  -- let M → ∞ through the vanishing
+  have hε : (0 : NNReal) < Valued.v g ^ (n + 1) * (δ / 2) :=
+    mul_pos (pow_pos hg0 _) hδ2
+  obtain ⟨M, hM, hSM⟩ : ∃ M, n ≤ M ∧ Valued.v
+      (∑ i ∈ Finset.range (M + 1), y i * g ^ i)
+      ≤ Valued.v g ^ (n + 1) * (δ / 2) := by
+    obtain ⟨M₀, hM₀⟩ := Filter.eventually_atTop.mp
+      (hvan.eventually (valued_ball_mem_nhds_zero p F
+        (hρ0 := hρ0) (hρ1 := hρ1) hε))
+    exact ⟨max n M₀, le_max_left _ _, hM₀ _ (le_max_right _ _)⟩
+  calc Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i)
+      = Valued.v ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
+        - ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
+          - ∑ i ∈ Finset.range (n + 1), y i * g ^ i)) := by
+        congr 1
+        ring
+    _ ≤ max (Valued.v (∑ i ∈ Finset.range (M + 1), y i * g ^ i))
+        (Valued.v ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
+          - ∑ i ∈ Finset.range (n + 1), y i * g ^ i)) :=
+        Valuation.map_sub _ _ _
+    _ ≤ Valued.v g ^ (n + 1) * (δ / 2) := max_le hSM (htail M hM)
+
 /-- **Kernel-solution decay, contracting scale** (the top-radius component):
 with `v(g) ≤ 1` and the vanishing of the full series, the solution values
 decay. -/
@@ -2811,49 +2865,7 @@ theorem kerSol_decay_of_le_one {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [Filter.eventually_atTop]
   refine ⟨N, fun n hn => ?_⟩
   -- the tail bound on the partial sum
-  have hS : Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i)
-      ≤ Valued.v g ^ (n + 1) * (δ / 2) := by
-    have htail : ∀ M, n ≤ M → Valued.v
-        ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
-          - ∑ i ∈ Finset.range (n + 1), y i * g ^ i)
-        ≤ Valued.v g ^ (n + 1) * (δ / 2) := by
-      intro M hM
-      rw [show (∑ i ∈ Finset.range (M + 1), y i * g ^ i)
-          - ∑ i ∈ Finset.range (n + 1), y i * g ^ i
-        = ∑ i ∈ Finset.Ico (n + 1) (M + 1), y i * g ^ i from
-        (Finset.sum_Ico_eq_sub _ (by omega)).symm]
-      refine Valuation.map_sum_le _ (fun i hi => ?_)
-      obtain ⟨hi1, -⟩ := Finset.mem_Ico.mp hi
-      rw [Valuation.map_mul, Valuation.map_pow]
-      calc Valued.v (y i) * Valued.v g ^ i
-          ≤ (δ / 2) * Valued.v g ^ i := by
-            refine mul_le_mul_of_nonneg_right ?_ zero_le
-            exact hN i (by omega)
-        _ ≤ (δ / 2) * Valued.v g ^ (n + 1) := by
-            refine mul_le_mul_of_nonneg_left ?_ zero_le
-            exact pow_le_pow_of_le_one zero_le hg hi1
-        _ = Valued.v g ^ (n + 1) * (δ / 2) := mul_comm _ _
-    -- let M → ∞ through the vanishing
-    have hε : (0 : NNReal) < Valued.v g ^ (n + 1) * (δ / 2) :=
-      mul_pos (pow_pos hg0 _) hδ2
-    obtain ⟨M, hM, hSM⟩ : ∃ M, n ≤ M ∧ Valued.v
-        (∑ i ∈ Finset.range (M + 1), y i * g ^ i)
-        ≤ Valued.v g ^ (n + 1) * (δ / 2) := by
-      obtain ⟨M₀, hM₀⟩ := Filter.eventually_atTop.mp
-        (hvan.eventually (valued_ball_mem_nhds_zero p F
-          (hρ0 := hρ0) (hρ1 := hρ1) hε))
-      exact ⟨max n M₀, le_max_left _ _, hM₀ _ (le_max_right _ _)⟩
-    calc Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i)
-        = Valued.v ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
-          - ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
-            - ∑ i ∈ Finset.range (n + 1), y i * g ^ i)) := by
-          congr 1
-          ring
-      _ ≤ max (Valued.v (∑ i ∈ Finset.range (M + 1), y i * g ^ i))
-          (Valued.v ((∑ i ∈ Finset.range (M + 1), y i * g ^ i)
-            - ∑ i ∈ Finset.range (n + 1), y i * g ^ i)) :=
-          Valuation.map_sub _ _ _
-      _ ≤ Valued.v g ^ (n + 1) * (δ / 2) := max_le hSM (htail M hM)
+  have hS := partialSum_le_of_tendsto_zero p F g hg hg0 y hvan hδ2 hN n hn
   calc Valued.v (-(V ^ (n + 1) * ∑ i ∈ Finset.range (n + 1), y i * g ^ i))
       = Valued.v V ^ (n + 1)
         * Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i) := by

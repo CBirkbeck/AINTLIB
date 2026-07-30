@@ -2919,3 +2919,71 @@ instance — so deleting it risks re-elaborating at a different instance. **An a
 a `letI`/`haveI`-bound instance is load-bearing, not overhead.**
 
 Running total: **238**.
+
+## Task 2 — `RobbaPresentation.kerSol_decay_of_le_one` 69 → 50 (238 → 237)
+
+`hS` (43 lines) lifted to `partialSum_le_of_tendsto_zero`, a genuinely reusable statement: **if the
+full series vanishes and the coefficients are eventually below `δ/2`, every partial sum past `N` is
+bounded by `|g|^(n+1) · (δ/2)`.** Nine parameters — at the upper end of what is worth threading, but
+against a 43-line block the trade is clearly favourable.
+
+One iteration, and the diagnosis was handed to me by the error:
+
+    2811:25: omega could not prove the goal:
+      a possible counterexample may satisfy the constraints
+        d ≥ 0 / c ≥ 0 / c - d ≤ -1 / b ≥ 0 / b - c ≤ -1 / a ≥ 0 / a - b ≥ 0
+
+The call is `hN i (by omega)`, needing `N ≤ i`; the block has `hi1 : n + 1 ≤ i` from
+`Finset.mem_Ico`, but I had dropped **`hn : N ≤ n`** from the signature, so the chain `N ≤ n < i`
+was broken. Adding `(hn : N ≤ n)` fixed it.
+
+**`omega`'s counterexample dump is the best diagnostic in this whole campaign for a missing
+hypothesis** — it prints exactly the constraint set it had, so the absent link is visible by
+inspection rather than guesswork. When a lifted block ends in `by omega` / `by linarith`, check first
+that every ordering hypothesis the enclosing proof established has been threaded.
+
+Module build green (3131 jobs; this module exceeds the 10-minute foreground cap, so it must be
+backgrounded).
+
+Running total: **237** (486 baseline → 290 pre-split → 274 post-split → 237).
+
+## Assessed and rejected: `RestrictionInjective.wLoc_le_of_interior_bound` (−9)
+
+`hterm2` is 29 lines, so the line arithmetic is comfortable (saves 28 against a need of 9). But
+counting what the block actually references gives **15 dependencies**:
+
+    a, cϖ, h, hval, hθs0, hθs1, hρ₁0, hρ₁1, hρ₂0, hρ₂1, hτ, k, ε, θseq, σ
+
+A helper with fifteen parameters is worse than the 29-line block it replaces — the signature becomes
+the thing that needs decomposing, and every call site has to marshal all of it. **The line count says
+yes and the dependency count says no; the dependency count wins.**
+
+This is the same category as `FJP.syzygy_graph_of_isUnit`'s `hpush` (12 locals) and
+`Presentation.wI_partial_cauchy_diff`'s `hcauchy` (5, plus a `set`). For reference, the lifts that
+worked this session sat at 1–9 parameters, and the 9-parameter one
+(`partialSum_le_of_tendsto_zero`) was justified only by a 43-line block.
+
+**Working threshold: above ~10 threaded dependencies, stop looking for a lift and look for a
+different decomposition** — a shared inner step, a missing general lemma, or splitting the enclosing
+theorem's statement. Recorded so the next pass does not re-derive the same arithmetic.
+
+## Task 2 — `BivariateContinuity.tateEvalPresheafHom_bivariate_continuous_canonical` 52 → 50 (237 → 236)
+
+Two expression-continuation joins, no extraction. Notable because the *obvious* edit here was one I
+had already rejected: `hbasis` is a 4-line ascription over a one-term proof, which by the
+merge-not-lift rule looks like pure overhead — but its ascription pins `@nhds _ τ`, a `letI`-bound
+topology instance, so deleting it risks re-elaborating at a different instance.
+
+Joining *inside* the ascription instead is token-identical and keeps the instance pinned, which gets
+the same two lines with none of the risk.
+
+**Method note: widening the join-width limit from 96 to 100 turned 1 available join into 2** — and 2
+was exactly the requirement. The 96 was my own conservative margin, not the project's rule (mathlib's
+limit is 100). Worth remembering that a self-imposed safety margin can be the only thing blocking a
+proof, and is worth re-examining before concluding "not reachable by joins".
+
+`syzygy_graph_of_isUnit` (need −5) was checked the same way and has **zero** body joins at either
+width, so it genuinely is not reachable this way — it needs the shared-inner-step treatment for its
+two textually-identical `by_cases` branches.
+
+Running total: **236** (486 baseline → 290 pre-split → 274 post-split → 236).
