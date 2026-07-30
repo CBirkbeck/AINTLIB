@@ -895,3 +895,46 @@ All compiled first try. Two observations that made them cheap:
 are `let`-bound in the parent. As with `set`, the extracted lemma's conclusion must spell them out
 (`algebraMap A _ ((↑hπ_unit.unit⁻¹ : A) ^ n) * y ∈ pairSubring P`) and re-introduce the `let`s at
 the top of the proof, so the body's `change …  g_val …` steps still work by defeq.
+
+## Task 2 — `scratchpad/lift_block.py`, and two more preconditions the tool now enforces
+
+The extend-upward technique is now a tool: `lift_block.py <file> <parent> <newname> <cut> <have>`.
+It moves the block from `cut` to the end of the dominant `have` into a lemma, carries the prologue
+verbatim, replicates `include`/`omit`/`set_option … in` modifiers, computes the section-variable
+prefix for the call, and emits `have <h> := <lemma> args` with **no** type ascription.
+
+Building it turned up two more preconditions, both now asserted rather than discovered by a build:
+
+**1. A prologue local must not be used by the parent AFTER the block.** The prologue moves into
+the lemma, so its locals stop existing in the parent. `isNoetherianRing_unitBall_restricted_dualNumber`
+failed with `Unknown identifier hcoeffle` — a prologue `have` still referenced 40 lines later.
+Reverted. Either the block must be extended to cover those uses too, or the local threaded back
+out of the lemma. The tool now refuses instead of breaking the file.
+
+**2. `have_line` is a separate argument from `cut`.** My first version assumed the dominant `have`
+was the block's *last* base-indent step. It usually is not — there are further steps after it that
+stay in the parent — so the tool was extracting the wrong span.
+
+### Landed (2 of 3 attempted)
+
+| parent | was | now |
+|---|---|---|
+| `tendsto_gaussTermF_add_of_tendsto` (WittF) | 51 | 16 + `gaussTermF_add_le_max_of_tendsto` (38) |
+| `isInducing_ιSpvPropR_spa` (SpaQCviaSpvAI) | 84 | 41 + `isInducing_ιSpvPropR_spa_induced_eq` (46) |
+
+`berkeley_6_2_8` (Tilting.lean) was in the automatic set but is **sorry-bearing** — out of scope,
+producer's WIP. Worth re-checking that on every candidate: the auto filter does not look for it.
+
+## SCANNER BUG (found while doing the above): declaration names were being truncated
+
+`isInducing_ιSpvPropR_spa` was reported by `dominance.py` as `isInducing_`, and `lift_block.py`
+then could not find the declaration. Cause: `scope2.py`'s `DECL` name class was
+`[A-Za-z_][A-Za-z0-9_'!?.₀-₉«»]*` — **ASCII plus subscripts only**, so it stops at a Greek letter.
+Lean names here use Greek freely (`ι`, `σ`, `ρ`, `φ`, `ϖ`). Widened to `[^\s({\[:]+`.
+
+Two consequences worth recording:
+
+* Any earlier report of a name ending in `_` was a truncation, not the real name.
+* **The declaration count was UNDERCOUNTED.** It is **7978**, not 7947 — and by extension the
+  original 7926 baseline for task 3 was also low. Declarations whose name begins with a Greek
+  letter were skipped entirely, not merely mis-named.

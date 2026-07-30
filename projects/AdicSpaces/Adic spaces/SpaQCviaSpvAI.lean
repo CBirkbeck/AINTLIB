@@ -649,6 +649,57 @@ theorem continuous_toProp_rcoord (I : Ideal A) :
     (continuous_of_discreteTopology (f := fun b : Bool => b = true)).comp
       (continuous_apply p)
 
+/-- Extracted from `isInducing_ιSpvPropR_spa`: its dominant `have` together with the prologue that
+introduces the locals that `have` consumes. -/
+private theorem isInducing_ιSpvPropR_spa_induced_eq [IsTopologicalRing A] (P : PairOfDefinition A)
+    (I : Ideal A) (hIeq : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) :
+    TopologicalSpace.induced
+      (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) Pi.topologicalSpace =
+      TopologicalSpace.generateFrom
+      {U | ∃ p : RCoord A I, U = Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2} := by
+  rw [show (Pi.topologicalSpace : TopologicalSpace (RCoord A I → Prop)) =
+      ⨅ p, TopologicalSpace.induced (fun r : RCoord A I → Prop => r p) sierpinskiSpace
+      from rfl]
+  rw [induced_iInf]
+  have hcoord : ∀ p : RCoord A I,
+      TopologicalSpace.induced ((fun r : RCoord A I → Prop => r p) ∘
+        (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A))) sierpinskiSpace =
+        TopologicalSpace.generateFrom {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2} := by
+    intro p
+    rw [show sierpinskiSpace = TopologicalSpace.generateFrom {{True}} from rfl,
+        induced_generateFrom_eq]
+    congr 1
+    ext U
+    simp only [Set.image_singleton, Set.mem_singleton_iff]
+    constructor
+    · rintro rfl
+      ext v
+      simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff,
+        eq_iff_iff, iff_true, ιSpvPropR, ιSpvR_eq_true_iff]
+      constructor
+      · rintro ⟨h1, h2⟩
+        exact ⟨v.2, h1, h2⟩
+      · rintro ⟨-, h1, h2⟩
+        exact ⟨h1, h2⟩
+    · rintro rfl
+      ext v
+      simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff,
+        eq_iff_iff, iff_true, ιSpvPropR, ιSpvR_eq_true_iff]
+      constructor
+      · rintro ⟨-, h1, h2⟩
+        exact ⟨h1, h2⟩
+      · rintro ⟨h1, h2⟩
+        exact ⟨v.2, h1, h2⟩
+  simp_rw [induced_compose, hcoord]
+  rw [show (⨅ p : RCoord A I, TopologicalSpace.generateFrom
+        {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2}) =
+      TopologicalSpace.generateFrom
+        (⋃ p : RCoord A I, {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2}) from
+      generateFrom_iUnion.symm]
+  congr 1
+  ext U
+  simp only [Set.mem_iUnion, Set.mem_singleton_iff, Set.mem_setOf_eq]
+
 /-- **The `R`-profile is inducing on `Spa A A⁺`** (Wedhorn 7.35(2): side-condition
 rational subsets form a basis of the subspace topology; one direction is
 `rationalOpen_isOpen`, the other is the basis lemma above). -/
@@ -657,52 +708,7 @@ theorem isInducing_ιSpvPropR_spa [IsTopologicalRing A] (P : PairOfDefinition A)
     Topology.IsInducing (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) := by
   classical
   refine ⟨?_⟩
-  have hstep1 : TopologicalSpace.induced
-      (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) Pi.topologicalSpace =
-      TopologicalSpace.generateFrom
-        {U | ∃ p : RCoord A I, U = Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2} := by
-    rw [show (Pi.topologicalSpace : TopologicalSpace (RCoord A I → Prop)) =
-        ⨅ p, TopologicalSpace.induced (fun r : RCoord A I → Prop => r p) sierpinskiSpace
-        from rfl]
-    rw [induced_iInf]
-    have hcoord : ∀ p : RCoord A I,
-        TopologicalSpace.induced ((fun r : RCoord A I → Prop => r p) ∘
-          (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A))) sierpinskiSpace =
-          TopologicalSpace.generateFrom {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2} := by
-      intro p
-      rw [show sierpinskiSpace = TopologicalSpace.generateFrom {{True}} from rfl,
-          induced_generateFrom_eq]
-      congr 1
-      ext U
-      simp only [Set.image_singleton, Set.mem_singleton_iff]
-      constructor
-      · rintro rfl
-        ext v
-        simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff,
-          eq_iff_iff, iff_true, ιSpvPropR, ιSpvR_eq_true_iff]
-        constructor
-        · rintro ⟨h1, h2⟩
-          exact ⟨v.2, h1, h2⟩
-        · rintro ⟨-, h1, h2⟩
-          exact ⟨h1, h2⟩
-      · rintro rfl
-        ext v
-        simp only [Set.mem_preimage, Function.comp_apply, Set.mem_singleton_iff,
-          eq_iff_iff, iff_true, ιSpvPropR, ιSpvR_eq_true_iff]
-        constructor
-        · rintro ⟨-, h1, h2⟩
-          exact ⟨h1, h2⟩
-        · rintro ⟨h1, h2⟩
-          exact ⟨v.2, h1, h2⟩
-    simp_rw [induced_compose, hcoord]
-    rw [show (⨅ p : RCoord A I, TopologicalSpace.generateFrom
-          {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2}) =
-        TopologicalSpace.generateFrom
-          (⋃ p : RCoord A I, {Subtype.val ⁻¹' rationalOpen p.1.1 p.1.2}) from
-        generateFrom_iUnion.symm]
-    congr 1
-    ext U
-    simp only [Set.mem_iUnion, Set.mem_singleton_iff, Set.mem_setOf_eq]
+  have hstep1 := isInducing_ιSpvPropR_spa_induced_eq P I hIeq
   have hstep2 : (instTopologicalSpaceSubtype : TopologicalSpace ↥(Spa A A⁺)) =
       TopologicalSpace.generateFrom
         ((Set.preimage (Subtype.val : ↥(Spa A A⁺) → Spv A)) ''
