@@ -290,6 +290,56 @@ theorem isField_localization_away_piBar :
     (Localization.Away (piBar (m := m) ϖ 𝔪)) (P K m ⧸ 𝔪)
   exact isField_of_ringEquiv e.toRingEquiv (Field.toIsField _)
 
+/-- The special fibre of the integral model. -/
+noncomputable abbrev SpecialFibre : Type _ :=
+  IntegralModel (m := m) 𝔪 ⧸
+    Ideal.span {piBar (m := m) ϖ 𝔪}
+
+noncomputable instance : CommRing (SpecialFibre (m := m) ϖ 𝔪) :=
+  Ideal.Quotient.commRing _
+
+/-- **Leaf 8a (the G-domain payoff)**: the special fibre is zero-dimensional —
+every prime of `B` over `ϖ` is nonzero, hence maximal. -/
+theorem krullDimLE_zero_specialFibre
+    (hK₀ : IsNoetherianRing (unitBall K)) :
+    Ring.KrullDimLE 0 (SpecialFibre (m := m) ϖ 𝔪) := by
+  haveI hBnoeth : IsNoetherianRing (IntegralModel (m := m) 𝔪) :=
+    isNoetherianRing_integralModel ϖ 𝔪 hK₀
+  rw [Ring.krullDimLE_zero_iff]
+  intro q hq
+  haveI := hq
+  set J : Ideal (IntegralModel (m := m) 𝔪) :=
+    q.comap (Ideal.Quotient.mk (Ideal.span {piBar (m := m) ϖ 𝔪})) with hJ
+  haveI hJprime : J.IsPrime := Ideal.comap_isPrime _ _
+  have hπJ : piBar (m := m) ϖ 𝔪 ∈ J := by
+    rw [hJ, Ideal.mem_comap]
+    rw [show Ideal.Quotient.mk (Ideal.span {piBar (m := m) ϖ 𝔪})
+        (piBar (m := m) ϖ 𝔪) = 0 from
+      Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.mem_span_singleton_self _)]
+    exact q.zero_mem
+  have hJ0 : J ≠ ⊥ := fun h0 => piBar_ne_zero ϖ 𝔪 (by
+    rw [h0] at hπJ
+    simpa using hπJ)
+  have hJmax : J.IsMaximal :=
+    Ideal.isMaximal_of_isPrime_of_ne_bot_of_isField_away
+      (piBar_ne_zero ϖ 𝔪) (not_isUnit_piBar ϖ 𝔪)
+      (isField_localization_away_piBar ϖ 𝔪) J hJprime hJ0
+  -- transport maximality through the surjective quotient correspondence
+  have hqmap : q = J.map (Ideal.Quotient.mk
+      (Ideal.span {piBar (m := m) ϖ 𝔪})) := by
+    rw [hJ]
+    exact (Ideal.map_comap_of_surjective _
+      Ideal.Quotient.mk_surjective q).symm
+  rw [hqmap]
+  haveI := hJmax
+  refine Ideal.IsMaximal.map_of_surjective_of_ker_le
+    Ideal.Quotient.mk_surjective (m := J) ?_
+  rw [Ideal.mk_ker, hJ]
+  intro x hx
+  rw [Ideal.mem_comap]
+  rw [Ideal.Quotient.eq_zero_iff_mem.mpr hx]
+  exact q.zero_mem
+
 end MaximalIdeal
 
 end FiniteJet.GraphKoszul
