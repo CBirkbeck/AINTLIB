@@ -537,4 +537,40 @@ theorem sectionPoleSheafPowerPushforwardBaseChange_app_top_isIso_of_orderedBaseC
   rw [hfun]
   exact eTarget.bijective
 
+/-- **(FLW-2b skeleton — proof route locked on the board; all ingredients landed.)**
+Around every point there is a basic open with the full package AND a normalized rank-one
+basis of the first pole module of the direct family. Fill per `[FLW-2b] DESIGN LOCKED`:
+extend the package proof — Finite via the `Localization.Away r` two-step
+(`orderedBaseCechHomologyFinite_of_isProper` + `finite_kernel_zero_of_finite_homology` +
+`kerBaseChangeComparison_bijective`); Flat via `Module.Flat.ker_of_bounded_exact_at`;
+rankAtStalk = 1 via package-hker at `κ(p)` +
+`sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank`; fiber ≠ 0 via
+`sectionPoleSheafPower_baseSectionsBaseChangeLinearEquivOfAppTopIso` (IsIso from
+`sectionPoleSheafPowerPushforwardBaseChange_app_top_isIso_of_orderedBaseCech_package`)
++ its OneSection one-tmul + `sectionPoleSheafPowerOneSection_ne_zero`; assemble with
+`Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero`. -/
+theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_poleOneBasis
+    {X S : Scheme.{u}} {π : X ⟶ S} [IsAffine S] [IsProper π]
+    (hsm : SmoothOfRelativeDimension 1 π) (z : S ⟶ X) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz) (s : S) :
+    ∃ a : Γ(S, (⊤ : S.Opens)), s ∈ S.basicOpen a ∧
+      ∃ (E' : Scheme.{u}) (π' : E' ⟶ (S.basicOpen a).toScheme)
+        (z' : (S.basicOpen a).toScheme ⟶ E') (hz' : z' ≫ π' = 𝟙 _)
+        (hproper' : IsProper π'),
+        SmoothOfRelativeDimension 1 π' ∧
+          ∃ h' : FibrewiseElliptic π' z' hz',
+            (∃ eC : E' ≅ pullback π (S.basicOpen a).ι,
+              eC.hom ≫ pullback.snd π (S.basicOpen a).ι = π' ∧
+                z' ≫ eC.hom = sectionBaseChange z hz (S.basicOpen a).ι) ∧
+              (letI : IsProper π' := hproper'
+              Subsingleton (CategoryTheory.Sheaf.H
+                (sectionPoleSheafPower π' z' hz' 1).sheaf 1) ∧
+                ∃ bOne : Module.Basis (Fin 1)
+                    Γ((S.basicOpen a).toScheme,
+                      (⊤ : (S.basicOpen a).toScheme.Opens))
+                    (Scheme.Modules.baseSections π'
+                      (sectionPoleSheafPower π' z' hz' 1)),
+                  bOne 0 = sectionPoleSheafPowerOneSection π' z' hz') := by
+  sorry
+
 end ModularCurves
