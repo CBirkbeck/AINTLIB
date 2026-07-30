@@ -803,8 +803,7 @@ theorem exists_rps_series_limit_BI
             ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
           : MvPowerSeries (Fin k)
             ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ b := by
-  have hcol : ∀ K : Fin k →₀ ℕ,
-      ∃ S : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+  have hcol : ∀ K : Fin k →₀ ℕ, ∃ S : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
       ∀ (n : ℕ) (b : NNReal), 0 < b → (∀ l, n ≤ l → C l ≤ b) →
       wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
         (((S : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
@@ -4679,8 +4678,7 @@ theorem exists_monomial_lift_package₂ {ρ₁ σ₂ ρ₂ : NNReal}
   have hK1 : (1 : NNReal) ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
     calc (1 : NNReal) = σ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
         (mul_inv_cancel₀ (pow_pos hσ₂0 m).ne').symm
-      _ ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
-        mul_le_mul_left (pow_le_pow_left' hσρ m) _
+      _ ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) := mul_le_mul_left (pow_le_pow_left' hσρ m) _
   by_cases hik : k < i
   · set j := (i - k) / m with hj
     have hmj : m * j ≤ i - k := by
@@ -4710,22 +4708,18 @@ theorem exists_monomial_lift_package₂ {ρ₁ σ₂ ρ₂ : NNReal}
       (vc' := perfectoidValuation p F ((c * zb ^ j : OF F) : F))
       hρ₁0 hσ₂0 hρ₂0 (vpi_pos p F ϖ) hρσ hσρ (m := m) (e := e) (k := k)
       (j := j) hval hke hwin
-    refine ⟨j, e, c * zb ^ j,
-      by
+    refine ⟨j, e, c * zb ^ j, by
         rw [show e = i - m * j from he]
         exact mk'_monomial_twist_factor₂ p F ϖ zb hzb m i j k hji c,
       ?_, ?_⟩
-    · rw [wLoc_mk'_monomial p F ϖ hρ₂0 hρ₂1,
-        wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1]
+    · rw [wLoc_mk'_monomial p F ϖ hρ₂0 hρ₂1, wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1]
       rw [show i = e + m * j from hie]
       exact hcmp.2
-    · rw [wLoc_mk'_monomial p F ϖ hρ₁0 hρ₁1 e k,
-        wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1 i k]
+    · rw [wLoc_mk'_monomial p F ϖ hρ₁0 hρ₁1 e k, wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1 i k]
       rw [show i = e + m * j from hie]
       exact le_trans hcmp.1 (le_max_left _ _)
   · refine ⟨0, i, c, by rw [pow_zero, one_mul], ?_, ?_⟩
-    · rw [wLoc_mk'_monomial p F ϖ hρ₂0 hρ₂1,
-        wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1]
+    · rw [wLoc_mk'_monomial p F ϖ hρ₂0 hρ₂1, wLoc_mk'_monomial p F ϖ hσ₂0 hσ₂1]
       refine le_trans (numerator_formula_le₂ hσ₂0 hρ₂0 (vpi_pos p F ϖ)
         hσρ (not_lt.mp hik)) ?_
       exact le_mul_of_one_le_left zero_le hK1

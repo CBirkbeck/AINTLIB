@@ -351,8 +351,7 @@ theorem isPowerBounded_dualNumber_iff {R : Type*} [NormedCommRing R] [IsUltramet
     intro U hU
     obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
     have hC : (0 : ℝ) < max 1 ‖x.snd‖ + 1 := by positivity
-    refine ⟨Metric.ball 0 (ε / (max 1 ‖x.snd‖ + 1)),
-      Metric.ball_mem_nhds 0 (by positivity), ?_⟩
+    refine ⟨Metric.ball 0 (ε / (max 1 ‖x.snd‖ + 1)), Metric.ball_mem_nhds 0 (by positivity), ?_⟩
     rintro z ⟨s, ⟨k, rfl⟩, y, hy, rfl⟩
     rw [Metric.mem_ball, dist_zero_right] at hy
     refine hball ?_

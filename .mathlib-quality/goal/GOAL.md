@@ -1188,3 +1188,35 @@ distinguish that from other uses of a trailing comma, and the gain is not worth 
 | targeted golf (read the proof, remove 2-4 lines) | one read per proof | ~46 left in the 51-55 band |
 | extract a self-contained `have` | one read + one module build | rare now |
 | author a reconstructed `?_` goal | expensive | the 203-strong bulk |
+
+## Task 2 — comma/bracket joins: 6 more, and a faster verification loop
+
+Last pass held back the comma/open-bracket joins for lack of detector confidence. The missing
+argument is simple: **a line ending in `,` or an open bracket cannot be a complete tactic**, so its
+successor is necessarily a continuation of the same term. That means the indentation test can be
+relaxed from strictly-greater to greater-or-equal for those, where for a `:=` line the value must
+still be strictly more indented. One extra guard: refuse to join onto a line starting `·`, `.` or
+`|`, which would be a bullet or a `first`/`match` alternative rather than a continuation.
+
+With that, **6 more proofs cross the bar** (12 joins):
+
+    CechCohomology (2) · FiniteJetUniformDomain (1) · RestrictedLaurent (2) ·
+    RobbaPresentation (6) · LaurentRefinementCore (1)
+
+Over-50 count **357 → 351**. The `:=`-only pool is now empty; these were the remaining 6.
+
+### Verification: `lake env lean <file>` is the right pre-check for edits like this
+
+Module builds are the wrong tool for a 5-file syntactic change: five `lake build` invocations cost
+more than the gate itself, and building them together is the masking trap. Since all dependencies
+were current from the previous green gate, `lake env lean <file>` typechecks a single changed file
+against existing oleans in a fraction of the time and writes nothing. All five came back with zero
+errors before the gate was started.
+
+That is worth keeping as the standard loop for edits that cannot change dependencies:
+**edit → `lake env lean` each touched file → one full gate.** (The caveat from earlier in the
+campaign still applies: `lake env lean` gives spurious errors when a dependency's oleans are
+stale, so it is only trustworthy right after a green build.)
+
+Two of the joined lines end in `by`, which moves where the tactic block's anchor line sits; that
+was the specific thing worth checking, and it typechecked.

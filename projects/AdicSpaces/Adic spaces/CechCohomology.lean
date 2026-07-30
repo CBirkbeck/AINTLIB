@@ -1026,16 +1026,14 @@ theorem isDegreeZeroAcyclic_prod (F : AbPresheaf X)
     exact hy (i, j)
   · rw [hasGluing_iff_section]
     intro fp hfp
-    have hfp' : ∀ (i₁ i₂ : ι) (j₁ j₂ : κ),
-        F.res (Set.inter_subset_left : (U.sets i₁ ∩ V.sets j₁) ∩
+    have hfp' : ∀ (i₁ i₂ : ι) (j₁ j₂ : κ), F.res (Set.inter_subset_left : (U.sets i₁ ∩ V.sets j₁) ∩
             (U.sets i₂ ∩ V.sets j₂) ⊆ U.sets i₁ ∩ V.sets j₁) (fp (i₁, j₁)) =
         F.res (Set.inter_subset_right : (U.sets i₁ ∩ V.sets j₁) ∩
             (U.sets i₂ ∩ V.sets j₂) ⊆ U.sets i₂ ∩ V.sets j₂) (fp (i₂, j₂)) :=
       fun i₁ i₂ j₁ j₂ => hfp (i₁, j₁) (i₂, j₂)
     choose g hg using fun i =>
       hV0glue i (fun j => fp (i, j)) (fun j j' => hfp' i i j j')
-    have hgcoc : ∀ i i',
-        F.res (Set.inter_subset_left : U.sets i ∩ U.sets i' ⊆ U.sets i) (g i) =
+    have hgcoc : ∀ i i', F.res (Set.inter_subset_left : U.sets i ∩ U.sets i' ⊆ U.sets i) (g i) =
         F.res (Set.inter_subset_right : U.sets i ∩ U.sets i' ⊆ U.sets i') (g i') := by
       intro i i'
       have hz : F.res (Set.inter_subset_left : U.sets i ∩ U.sets i' ⊆ U.sets i) (g i) -

@@ -845,14 +845,12 @@ theorem ofPowerSeries_mul (f g : PowerSeries.Restricted R (1 : ℝ)) :
         omega
       · intro p hp
         rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
-        rw [coeff_ofPowerSeries, coeff_ofPowerSeries,
-          if_pos (by omega : (0 : ℤ) ≤ ((p.1 : ℕ) : ℤ)),
+        rw [coeff_ofPowerSeries, coeff_ofPowerSeries, if_pos (by omega : (0 : ℤ) ≤ ((p.1 : ℕ) : ℤ)),
           if_pos (by omega : (0 : ℤ) ≤ a - ((p.1 : ℕ) : ℤ)), Int.toNat_natCast,
           show (a - ((p.1 : ℕ) : ℤ)).toNat = p.2 by omega]
     exact hbij
   · -- negative index: both sides vanish
-    have hz : ∀ x : ℤ,
-        (ofPowerSeries f).coeff x * (ofPowerSeries g).coeff (a - x) = 0 := by
+    have hz : ∀ x : ℤ, (ofPowerSeries f).coeff x * (ofPowerSeries g).coeff (a - x) = 0 := by
       intro x
       rcases lt_or_ge x 0 with hx | hx
       · rw [coeff_ofPowerSeries, if_neg (by omega), zero_mul]

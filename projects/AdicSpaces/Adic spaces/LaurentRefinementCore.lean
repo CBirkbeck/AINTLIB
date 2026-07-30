@@ -3450,8 +3450,7 @@ theorem laurentMinusBridge_isInducing
   have hb : TopologicalRing.IsPowerBounded
       (invS (iteratedMinusDatum_B P D₀ f)) :=
     isPowerBounded_invS_of_one_mem_T _ (Finset.mem_singleton_self 1)
-  have hT_pb : ∀ t ∈ (iteratedMinusDatum_B P D₀ f).T,
-      TopologicalRing.IsPowerBounded t := by
+  have hT_pb : ∀ t ∈ (iteratedMinusDatum_B P D₀ f).T, TopologicalRing.IsPowerBounded t := by
     intro t ht
     rw [Finset.mem_singleton.mp ht]
     exact TopologicalRing.isPowerBounded_one
