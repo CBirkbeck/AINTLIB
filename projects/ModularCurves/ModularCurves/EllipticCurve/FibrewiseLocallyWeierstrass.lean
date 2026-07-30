@@ -129,19 +129,36 @@ theorem FibrewiseElliptic.locallyWeierstrass_of_isAffine
   -- (d) cross the Cartier data to the direct family along the pointed identification
   obtain ⟨eC, hCπ, hCz⟩ := hiso
   haveI : IsIso eC.hom := inferInstance
-  have hU₂aff : IsAffineOpen (eC.hom ⁻¹ᵁ U₁.1) := by
-    sorry
+  have hU₂aff : IsAffineOpen (eC.hom ⁻¹ᵁ U₁.1) := U₁.2.preimage eC.hom
   set U₂ : E'.affineOpens := ⟨eC.hom ⁻¹ᵁ U₁.1, hU₂aff⟩ with hU₂
   have hz''U₂ : z'' ⁻¹ᵁ U₂.1 = ⊤ := by
     rw [hU₂]
     rw [← Scheme.Hom.comp_preimage, hCz, hzatop]
-  set r₂ : Γ(E', U₂.1) := (eC.hom.app U₁.1).hom r₁ with hr₂
+  set r₂ : Γ(E', U₂.1) := affinePullbackSection eC.hom U₂ U₁ le_rfl r₁ with hr₂
   have hker₂ : z''.ker = za.ker.comap eC.hom := by
-    sorry
+    haveI : IsClosedImmersion
+        (za ≫ pullback.snd (pullback.snd π V.1.ι) ιa) := by
+      rw [sectionBaseChange_snd]
+      infer_instance
+    haveI : IsClosedImmersion za :=
+      IsClosedImmersion.of_comp za (pullback.snd (pullback.snd π V.1.ι) ιa)
+    have hsq : z'' ≫ eC.hom = 𝟙 _ ≫ za := by
+      rw [Category.id_comp, hCz]
+    have hlift_fst : pullback.lift z'' (𝟙 _) hsq ≫ pullback.fst eC.hom za = z'' :=
+      pullback.lift_fst _ _ _
+    haveI : IsIso (pullback.snd eC.hom za) :=
+      inferInstance
+    haveI : IsIso (pullback.lift z'' (𝟙 _) hsq) := by
+      have hsnd : pullback.lift z'' (𝟙 _) hsq ≫ pullback.snd eC.hom za = 𝟙 _ :=
+        pullback.lift_snd _ _ _
+      exact (IsIso.of_isIso_fac_right hsnd)
+    rw [← hlift_fst, Scheme.Hom.ker_comp_of_isIso,
+      Scheme.IdealSheafData.ker_fst_of_isClosedImmersion]
   have hspan₂ : z''.ker.ideal U₂ = Ideal.span {r₂} := by
-    sorry
-  have hnzd₂ : r₂ ∈ nonZeroDivisors Γ(E', U₂.1) := by
-    sorry
+    rw [hker₂]
+    exact ideal_comap_affineOpens_span _ eC.hom U₂ U₁ le_rfl r₁ hspan₁
+  have hnzd₂ : r₂ ∈ nonZeroDivisors Γ(E', U₂.1) :=
+    affinePullbackSection_mem_nonZeroDivisors eC.hom U₂ U₁ le_rfl hnzd₁
   -- (e) the Weierstrass comparison on the direct family
   have hLW'' : LocallyWeierstrass π'' z'' hz'' :=
     sectionPoleSheafPower_locallyWeierstrass_of_CartierGenerator hsm'' z'' hz'' h''
