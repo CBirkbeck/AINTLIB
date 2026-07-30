@@ -1105,3 +1105,43 @@ mechanical.
 The `have hcoeffle : … := fun y s => by …` form puts its proof at indent **4**, not 2, because the
 body sits inside the `fun`. Dedenting by 4 (as for a normal `have`) drops it to column 0 and gives
 `unexpected token 'have'; expected command`. Dedent by 2.
+
+## Task 2 — a THIRD approach: golf the 51-55 band instead of extracting
+
+Extraction is not the only way under the bar. **53 of the 367 remaining proofs are 51-55 lines**,
+so they need 1-5 lines removed, not a lemma. Reading a 51-line proof for two removable lines is
+much cheaper than reconstructing a `?_` goal, and it leaves no new declaration behind.
+
+`genPiece_rel_backwardLocHom_continuous` exists in all three of
+`RelativePieceKeystone{,Gen,Open}` — a mirror **triple**. One anti-pattern golfed in all three:
+
+```lean
+have hw' : w ∈ T.image D₀.canonicalMap := hw     -- re-ascribe
+rw [Finset.mem_image] at hw'                      -- rewrite
+obtain ⟨q, hq, rfl⟩ := hw'                        -- destructure
+```
+→ `obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp (hw : w ∈ T.image D₀.canonicalMap)`
+
+−2 lines each. Gen and Open: 51 → **49**. The base variant is 3 lines longer (it derives
+`IsTateRing`/`IsNoetherianRing` inline where Gen/Open take them as instance binders), so it needed
+two more:
+
+* `have hbdd := …coeRingHom_image_locSubring_isBounded DI` + `refine hbdd.subset ?_` →
+  `refine (…coeRingHom_image_locSubring_isBounded DI).subset ?_`   (single use, so the binding
+  earned nothing)
+* a `haveI hNoethB : … :=` / value split across two lines, rejoined — 99 chars, inside the limit.
+
+Base: 54 → **50**.
+
+Deliberately NOT golfed: the `rw [show (DB.s : presheafValue D₀) = D₀.canonicalMap t from rfl]`
+step. Merging that into the neighbouring `rw` list would save a line but this is exactly the
+goal-directed-rewrite-with-`rfl` shape that already cost a heartbeat raise in `LaurentOverlap`
+(recorded in the task-1 section). Not worth one line.
+
+### A tree-wide search for the same anti-pattern found only 7 more sites
+
+`have h' : T := h` immediately followed by `rw [..] at h'`, with exactly one later use of `h'`,
+occurs 7 times outside the Keystone triple (Lemma745, SpaRationalSubsetCorrespondence, SpvAI,
+SpvCompletionExtension, ValuationPrimeConvex, ArCompletion, Groebner). Each saves 1-2 lines and
+**none is inside an over-50 proof**, so golfing them advances nothing measurable. Left alone —
+noted so a future pass does not re-derive the search.

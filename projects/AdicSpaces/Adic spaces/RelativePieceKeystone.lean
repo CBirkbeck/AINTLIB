@@ -588,8 +588,7 @@ theorem genPiece_rel_backwardLocHom_continuous
       (genPiece_rel_backwardLocHom D₀ T t hspan) := by
   classical
   haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
+  haveI hNoethB : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
   set DI := (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl) with hDI
   set DB := (imagePieceDatum D₀ T t hspan) with hDB
   change @Continuous _ _ (locTopology DB.P DB.T DB.s DB.hopen) _
@@ -603,9 +602,7 @@ theorem genPiece_rel_backwardLocHom_continuous
     rw [heq]
     exact restrictionMapHom_continuous D₀ DI _
   · intro w hw
-    have hw' : w ∈ T.image D₀.canonicalMap := hw
-    rw [Finset.mem_image] at hw'
-    obtain ⟨q, hq, rfl⟩ := hw'
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp (hw : w ∈ T.image D₀.canonicalMap)
     have hu_b : IsUnit (genPiece_rel_backwardLocHom D₀ T t hspan
         (algebraMap (presheafValue D₀) (Localization.Away DB.s) DB.s)) := by
       rw [genPiece_rel_backwardLocHom_algebraMap]
@@ -630,8 +627,7 @@ theorem genPiece_rel_backwardLocHom_continuous
       rw [restrictionMapHom_canonicalMap, restrictionMapHom_canonicalMap]
       exact genPiece_rel_canonicalMap_q_eq D₀ T t hspan q
     rw [hwit]
-    have hbdd := CompletionLocalization.coeRingHom_image_locSubring_isBounded DI
-    refine hbdd.subset ?_
+    refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded DI).subset ?_
     rintro _ ⟨k, rfl⟩
     refine ⟨divByS (D₀.s * q) DI.s ^ k, pow_mem (divByS_mem_locSubring DI.P DI.T DI.s
       ?_) k, by rw [map_pow]⟩

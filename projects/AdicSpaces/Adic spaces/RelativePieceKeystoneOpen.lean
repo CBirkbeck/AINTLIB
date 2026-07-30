@@ -573,9 +573,7 @@ theorem genPiece_rel_backwardLocHom_continuous
     rw [heq]
     exact restrictionMapHom_continuous D₀ DI _
   · intro w hw
-    have hw' : w ∈ T.image D₀.canonicalMap := hw
-    rw [Finset.mem_image] at hw'
-    obtain ⟨q, hq, rfl⟩ := hw'
+    obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp (hw : w ∈ T.image D₀.canonicalMap)
     have hu_b : IsUnit (genPiece_rel_backwardLocHom D₀ T t M hle
         (algebraMap (presheafValue D₀) (Localization.Away DB.s) DB.s)) := by
       rw [genPiece_rel_backwardLocHom_algebraMap]
