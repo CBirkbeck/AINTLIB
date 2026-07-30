@@ -590,6 +590,56 @@ because it's the product of `y` (a restricted series) with the constant
 series `π^{-n}` in `TateAlgebra A`.
 -/
 
+/-- The `π^n`-divided series of a `pairSubring` element whose coefficients all lie in
+`P.I ^ n` again has all coefficients in `P.A₀`.
+
+Extracted from `tateAlgNhd_of_coeff_mem_principal`, where it was the dominant `have`. The
+conclusion is written with `πinv` and `g_val` UNFOLDED because both are `let`-bound in the
+parent; the `let`s are re-introduced below so the body transfers verbatim. -/
+private theorem divided_mem_pairSubring_of_coeff_mem_pow
+    (P : PairOfDefinition A) (n : ℕ) (π : P.A₀) (hπ_gen : P.I = Ideal.span {π})
+    (hπ_unit : IsUnit ((π : A)))
+    {y : ↥(TateAlgebra A)}
+    (hy_coeff : ∀ l : Fin 1 →₀ ℕ, ∃ b : P.A₀, b ∈ P.I ^ n ∧
+      (b : A) = MvPowerSeries.coeff l y.val) :
+    algebraMap A ↥(TateAlgebra A) ((↑hπ_unit.unit⁻¹ : A) ^ n) * y ∈ pairSubring P := by
+  classical
+  let πinv : A := ↑hπ_unit.unit⁻¹
+  have hπinv_mul : (π : A) * πinv = 1 := hπ_unit.mul_val_inv
+  have hπinv_pow : (π : A) ^ n * πinv ^ n = 1 := by
+    rw [← mul_pow, hπinv_mul, one_pow]
+  -- Step 2: P.I ^ n = span {π^n}
+  have hpow : (P.I ^ n : Ideal P.A₀) = Ideal.span {π ^ n} := by
+    rw [hπ_gen, Ideal.span_singleton_pow]
+  -- Step 3: Define the "divided" series g = (C πinv^n) * y in TateAlgebra A.
+  let g_val : ↥(TateAlgebra A) := algebraMap A ↥(TateAlgebra A) (πinv ^ n) * y
+  -- Step 4: g_val ∈ pairSubring P (all coefficients are in P.A₀)
+  intro l
+  -- coeff l g_val = πinv^n * coeff l y.val
+  have hcoeff_g : MvPowerSeries.coeff l g_val.val = πinv ^ n * MvPowerSeries.coeff l y.val := by
+    change MvPowerSeries.coeff l
+      (((algebraMap A ↥(TateAlgebra A)) (πinv ^ n) * y).val) = _
+    change MvPowerSeries.coeff l
+      ((MvPowerSeries.C (πinv ^ n) : MvPowerSeries (Fin 1) A) * y.val) = _
+    rw [MvPowerSeries.coeff_C_mul]
+  change MvPowerSeries.coeff l g_val.val ∈ P.A₀
+  rw [hcoeff_g]
+  -- coeff l y.val = (b_l : A) for b_l ∈ P.I^n = span{π^n}, so b_l = a_l * π^n
+  obtain ⟨b, hb_mem, hb_eq⟩ := hy_coeff l
+  rw [← hb_eq]
+  rw [hpow] at hb_mem
+  obtain ⟨a, ha_eq⟩ := Ideal.mem_span_singleton.mp hb_mem
+  -- b = π^n * a (Ideal.mem_span_singleton gives the multiple form)
+  rw [ha_eq]
+  -- Goal: πinv^n * ((π^n * a : P.A₀) : A) ∈ P.A₀
+  change πinv ^ n * ((π ^ n * a : P.A₀) : A) ∈ P.A₀
+  have : πinv ^ n * ((π ^ n * a : P.A₀) : A) = (a : A) := by
+    push_cast
+    rw [show πinv ^ n * ((π : A) ^ n * (a : A)) = ((π : A) ^ n * πinv ^ n) * (a : A) by ring,
+      hπinv_pow, one_mul]
+  rw [this]
+  exact a.property
+
 omit [IsTopologicalRing A] in
 /-- **Sub-task D (principal case):** if `P.I = (π)` for some `π ∈ P.A₀` that
 is a unit in `A`, and `y ∈ pairSubring P` has all coefficients in the image
@@ -618,32 +668,8 @@ theorem tateAlgNhd_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
   -- Step 3: Define the "divided" series g = (C πinv^n) * y in TateAlgebra A.
   let g_val : ↥(TateAlgebra A) := algebraMap A ↥(TateAlgebra A) (πinv ^ n) * y
   -- Step 4: g_val ∈ pairSubring P (all coefficients are in P.A₀)
-  have hg_in : g_val ∈ pairSubring P := by
-    intro l
-    -- coeff l g_val = πinv^n * coeff l y.val
-    have hcoeff_g : MvPowerSeries.coeff l g_val.val = πinv ^ n * MvPowerSeries.coeff l y.val := by
-      change MvPowerSeries.coeff l
-        (((algebraMap A ↥(TateAlgebra A)) (πinv ^ n) * y).val) = _
-      change MvPowerSeries.coeff l
-        ((MvPowerSeries.C (πinv ^ n) : MvPowerSeries (Fin 1) A) * y.val) = _
-      rw [MvPowerSeries.coeff_C_mul]
-    change MvPowerSeries.coeff l g_val.val ∈ P.A₀
-    rw [hcoeff_g]
-    -- coeff l y.val = (b_l : A) for b_l ∈ P.I^n = span{π^n}, so b_l = a_l * π^n
-    obtain ⟨b, hb_mem, hb_eq⟩ := hy_coeff l
-    rw [← hb_eq]
-    rw [hpow] at hb_mem
-    obtain ⟨a, ha_eq⟩ := Ideal.mem_span_singleton.mp hb_mem
-    -- b = π^n * a (Ideal.mem_span_singleton gives the multiple form)
-    rw [ha_eq]
-    -- Goal: πinv^n * ((π^n * a : P.A₀) : A) ∈ P.A₀
-    change πinv ^ n * ((π ^ n * a : P.A₀) : A) ∈ P.A₀
-    have : πinv ^ n * ((π ^ n * a : P.A₀) : A) = (a : A) := by
-      push_cast
-      rw [show πinv ^ n * ((π : A) ^ n * (a : A)) = ((π : A) ^ n * πinv ^ n) * (a : A) by ring,
-        hπinv_pow, one_mul]
-    rw [this]
-    exact a.property
+  have hg_in : g_val ∈ pairSubring P :=
+    divided_mem_pairSubring_of_coeff_mem_pow P n π hπ_gen hπ_unit hy_coeff
   -- Step 5: y = pairConstantHom(π^n) * g_in_subring in pairSubring P.
   let g_in_subring : ↥(pairSubring P) := ⟨g_val, hg_in⟩
   have hy_eq : (⟨y, hy_pair⟩ : ↥(pairSubring P)) = pairConstantHom P (π ^ n) * g_in_subring := by
@@ -1998,6 +2024,50 @@ theorem tateAlgebra₂_coeff_eventually_in_pow (P : PairOfDefinition A)
 
 /-! #### Phase 2 Sub-task D: bivariate reverse coefficient characterization -/
 
+/-- The bivariate counterpart of `divided_mem_pairSubring_of_coeff_mem_pow`.
+
+Extracted from `tateAlgNhd₂_of_coeff_mem_principal`, where it was the dominant `have`;
+same shape as the univariate case, with the conclusion written with `πinv`/`g_val`
+unfolded because both are `let`-bound in the parent. -/
+private theorem divided_mem_pairSubring₂_of_coeff_mem_pow
+    (P : PairOfDefinition A) (n : ℕ) (π : P.A₀) (hπ_gen : P.I = Ideal.span {π})
+    (hπ_unit : IsUnit ((π : A)))
+    {y : ↥(TateAlgebra₂ A)}
+    (hy_coeff : ∀ l : Fin 2 →₀ ℕ, ∃ b : P.A₀, b ∈ P.I ^ n ∧
+      (b : A) = MvPowerSeries.coeff l y.val) :
+    algebraMap A ↥(TateAlgebra₂ A) ((↑hπ_unit.unit⁻¹ : A) ^ n) * y ∈ pairSubring₂ P := by
+  classical
+  let πinv : A := ↑hπ_unit.unit⁻¹
+  have hπinv_mul : (π : A) * πinv = 1 := hπ_unit.mul_val_inv
+  have hπinv_pow : (π : A) ^ n * πinv ^ n = 1 := by
+    rw [← mul_pow, hπinv_mul, one_pow]
+  have hpow : (P.I ^ n : Ideal P.A₀) = Ideal.span {π ^ n} := by
+    rw [hπ_gen, Ideal.span_singleton_pow]
+  let g_val : ↥(TateAlgebra₂ A) := algebraMap A ↥(TateAlgebra₂ A) (πinv ^ n) * y
+  intro l
+  have hcoeff_g : MvPowerSeries.coeff l g_val.val =
+      πinv ^ n * MvPowerSeries.coeff l y.val := by
+    change MvPowerSeries.coeff l
+      (((algebraMap A ↥(TateAlgebra₂ A)) (πinv ^ n) * y).val) = _
+    change MvPowerSeries.coeff l
+      ((MvPowerSeries.C (πinv ^ n) : MvPowerSeries (Fin 2) A) * y.val) = _
+    rw [MvPowerSeries.coeff_C_mul]
+  change MvPowerSeries.coeff l g_val.val ∈ P.A₀
+  rw [hcoeff_g]
+  obtain ⟨b, hb_mem, hb_eq⟩ := hy_coeff l
+  rw [← hb_eq]
+  rw [hpow] at hb_mem
+  obtain ⟨a, ha_eq⟩ := Ideal.mem_span_singleton.mp hb_mem
+  rw [ha_eq]
+  change πinv ^ n * ((π ^ n * a : P.A₀) : A) ∈ P.A₀
+  have : πinv ^ n * ((π ^ n * a : P.A₀) : A) = (a : A) := by
+    push_cast
+    rw [show πinv ^ n * ((π : A) ^ n * (a : A)) =
+        ((π : A) ^ n * πinv ^ n) * (a : A) by ring,
+      hπinv_pow, one_mul]
+  rw [this]
+  exact a.property
+
 omit [IsTopologicalRing A] in
 /-- **Bivariate Sub-task D (principal case):** if `P.I = (π)` with `π` a unit
 in `A`, and `y ∈ pairSubring₂ P` has all bivariate coefficients in the image
@@ -2018,30 +2088,8 @@ theorem tateAlgNhd₂_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
   have hpow : (P.I ^ n : Ideal P.A₀) = Ideal.span {π ^ n} := by
     rw [hπ_gen, Ideal.span_singleton_pow]
   let g_val : ↥(TateAlgebra₂ A) := algebraMap A ↥(TateAlgebra₂ A) (πinv ^ n) * y
-  have hg_in : g_val ∈ pairSubring₂ P := by
-    intro l
-    have hcoeff_g : MvPowerSeries.coeff l g_val.val =
-        πinv ^ n * MvPowerSeries.coeff l y.val := by
-      change MvPowerSeries.coeff l
-        (((algebraMap A ↥(TateAlgebra₂ A)) (πinv ^ n) * y).val) = _
-      change MvPowerSeries.coeff l
-        ((MvPowerSeries.C (πinv ^ n) : MvPowerSeries (Fin 2) A) * y.val) = _
-      rw [MvPowerSeries.coeff_C_mul]
-    change MvPowerSeries.coeff l g_val.val ∈ P.A₀
-    rw [hcoeff_g]
-    obtain ⟨b, hb_mem, hb_eq⟩ := hy_coeff l
-    rw [← hb_eq]
-    rw [hpow] at hb_mem
-    obtain ⟨a, ha_eq⟩ := Ideal.mem_span_singleton.mp hb_mem
-    rw [ha_eq]
-    change πinv ^ n * ((π ^ n * a : P.A₀) : A) ∈ P.A₀
-    have : πinv ^ n * ((π ^ n * a : P.A₀) : A) = (a : A) := by
-      push_cast
-      rw [show πinv ^ n * ((π : A) ^ n * (a : A)) =
-          ((π : A) ^ n * πinv ^ n) * (a : A) by ring,
-        hπinv_pow, one_mul]
-    rw [this]
-    exact a.property
+  have hg_in : g_val ∈ pairSubring₂ P :=
+    divided_mem_pairSubring₂_of_coeff_mem_pow P n π hπ_gen hπ_unit hy_coeff
   let g_in_subring : ↥(pairSubring₂ P) := ⟨g_val, hg_in⟩
   have hy_eq : (⟨y, hy_pair⟩ : ↥(pairSubring₂ P)) =
       pairConstantHom₂ P (π ^ n) * g_in_subring := by

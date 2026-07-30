@@ -452,6 +452,60 @@ private theorem coeff_X_pow_ne' {k n : ℕ} (h : k ≠ n) :
     | succ k =>
       rw [TateAlgebra.coeff_succ_X_mul]; exact ih (by omega)
 
+/-- From `(1 - f·X)·q = a·Xⁿ`, the base case: the constant coefficient of `q`.
+
+Extracted from `coeff_of_oneSubfX_eq_aXn`, where it was a `have` using only that
+theorem's own binders. -/
+private theorem coeff_zero_of_oneSubfX_eq_aXn
+    (f a : A) (n : ℕ)
+    (q : ↥(TateAlgebra A))
+    (h : (1 - algebraMap A _ f * TateAlgebra.X) * q =
+      algebraMap A _ a * TateAlgebra.X ^ n) :
+    TateAlgebra.coeff 0 q =
+      if (0 : ℕ) = n then a else 0 := by
+  have hc : TateAlgebra.coeff 0
+      ((1 - algebraMap A _ f * TateAlgebra.X) * q) =
+      TateAlgebra.coeff 0 q := by
+    rw [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
+      TateAlgebra.coeff_algebraMap_mul,
+      TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero]
+  rw [h] at hc; rw [← hc, TateAlgebra.coeff_algebraMap_mul]
+  split
+  · next heq => subst heq; rw [coeff_X_pow_eq', mul_one]
+  · next hne => rw [coeff_X_pow_ne' hne, mul_zero]
+
+/-- From `(1 - f·X)·q = a·Xⁿ`, the one-step recursion for the coefficients of `q`.
+
+Extracted from `coeff_of_oneSubfX_eq_aXn`, where it was a `have` using only that
+theorem's own binders. -/
+private theorem coeff_succ_of_oneSubfX_eq_aXn
+    (f a : A) (n : ℕ)
+    (q : ↥(TateAlgebra A))
+    (h : (1 - algebraMap A _ f * TateAlgebra.X) * q =
+      algebraMap A _ a * TateAlgebra.X ^ n) :
+    ∀ m, TateAlgebra.coeff (m + 1) q =
+      f * TateAlgebra.coeff m q +
+      (if m + 1 = n then a else 0) := by
+  intro m
+  have hc : TateAlgebra.coeff (m + 1) q -
+      f * TateAlgebra.coeff m q =
+      TateAlgebra.coeff (m + 1)
+        (algebraMap A _ a * TateAlgebra.X ^ n) := by
+    have : TateAlgebra.coeff (m + 1)
+        ((1 - algebraMap A _ f * TateAlgebra.X) * q) =
+        TateAlgebra.coeff (m + 1) q -
+          f * TateAlgebra.coeff m q := by
+      rw [sub_mul, one_mul, mul_assoc,
+        TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul,
+        TateAlgebra.coeff_succ_X_mul]
+    rw [← h, this]
+  rw [TateAlgebra.coeff_algebraMap_mul] at hc
+  by_cases hmn : m + 1 = n
+  · subst hmn; rw [coeff_X_pow_eq', mul_one] at hc
+    rw [if_pos rfl, sub_eq_iff_eq_add.mp hc]; ring
+  · rw [coeff_X_pow_ne' hmn, mul_zero] at hc
+    rw [if_neg hmn, sub_eq_zero.mp hc, add_zero]
+
 omit [IsTopologicalRing A] in
 /-- If `(1 - fX) * q = algebraMap(a) * X^n` in `A⟨X⟩`, then
 `coeff k q = 0` for `k < n` and `coeff (n+k) q = f^k * a` for
@@ -472,39 +526,12 @@ theorem coeff_of_oneSubfX_eq_aXn (f a : A) (n : ℕ)
     (∀ k, k < n → TateAlgebra.coeff k q = 0) ∧
     (∀ k, TateAlgebra.coeff (n + k) q = f ^ k * a) := by
   have h_base : TateAlgebra.coeff 0 q =
-      if (0 : ℕ) = n then a else 0 := by
-    have hc : TateAlgebra.coeff 0
-        ((1 - algebraMap A _ f * TateAlgebra.X) * q) =
-        TateAlgebra.coeff 0 q := by
-      rw [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
-        TateAlgebra.coeff_algebraMap_mul,
-        TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero]
-    rw [h] at hc; rw [← hc, TateAlgebra.coeff_algebraMap_mul]
-    split
-    · next heq => subst heq; rw [coeff_X_pow_eq', mul_one]
-    · next hne => rw [coeff_X_pow_ne' hne, mul_zero]
+      if (0 : ℕ) = n then a else 0 :=
+    coeff_zero_of_oneSubfX_eq_aXn f a n q h
   have h_step : ∀ m, TateAlgebra.coeff (m + 1) q =
       f * TateAlgebra.coeff m q +
-        (if m + 1 = n then a else 0) := by
-    intro m
-    have hc : TateAlgebra.coeff (m + 1) q -
-        f * TateAlgebra.coeff m q =
-        TateAlgebra.coeff (m + 1)
-          (algebraMap A _ a * TateAlgebra.X ^ n) := by
-      have : TateAlgebra.coeff (m + 1)
-          ((1 - algebraMap A _ f * TateAlgebra.X) * q) =
-          TateAlgebra.coeff (m + 1) q -
-            f * TateAlgebra.coeff m q := by
-        rw [sub_mul, one_mul, mul_assoc,
-          TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul,
-          TateAlgebra.coeff_succ_X_mul]
-      rw [← h, this]
-    rw [TateAlgebra.coeff_algebraMap_mul] at hc
-    by_cases hmn : m + 1 = n
-    · subst hmn; rw [coeff_X_pow_eq', mul_one] at hc
-      rw [if_pos rfl, sub_eq_iff_eq_add.mp hc]; ring
-    · rw [coeff_X_pow_ne' hmn, mul_zero] at hc
-      rw [if_neg hmn, sub_eq_zero.mp hc, add_zero]
+      (if m + 1 = n then a else 0) :=
+    coeff_succ_of_oneSubfX_eq_aXn f a n q h
   have hlt : ∀ k, k < n → TateAlgebra.coeff k q = 0 := by
     intro k hk; induction k with
     | zero => rw [h_base, if_neg (by omega)]

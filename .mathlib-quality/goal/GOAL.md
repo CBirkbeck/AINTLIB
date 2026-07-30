@@ -852,3 +852,46 @@ includes HasseWeil and LeanModularForms. AdicSpaces itself had only these 4 plus
 
 **Process note:** `Bash`'s `timeout` is capped at 600000 ms. Passing 1800000 does not extend it —
 the build is killed at 10 minutes with exit 143. Long builds must be backgrounded.
+
+## Task 2 — THE UNBLOCKING MOVE: extend the cut upward
+
+The blocker was a dominant `have` depending on locals introduced by `obtain`/`intro`/`fun`, whose
+types are written down nowhere. The way round it is not to thread them at all: **extract the
+contiguous block from the first line that introduces a suspect down to the end of the `have`.**
+The suspects are then introduced *inside* the lemma, so they stop being suspects; the extra lines
+are prologue and the `have`'s statement is still the conclusion.
+
+`scratchpad/extend.py` iterates that (extend one base-indent step, re-compute suspects, repeat)
+and reports whether both halves still fit. On 148 dominant-have targets:
+
+    39 become suspect-free by extending, with both halves ≤ 50
+    24 of those have a prologue of ONLY `have`/`set`/`let` steps  ← verbatim-extractable
+
+The 15 excluded ones have `obtain`/`rintro`/`refine`/`subst` in the prologue, which means the
+`have`'s statement mentions a locally-obtained witness. Those need the conclusion re-authored as
+an `∃` — real design work, not extraction. Worth knowing the split: **24 mechanical, 15 authoring.**
+
+### Landed (3 parents, 4 new lemmas)
+
+| parent | was | now | extracted |
+|---|---|---|---|
+| `tateAlgNhd_of_coeff_mem_principal` | 72 | **48** | `divided_mem_pairSubring_of_coeff_mem_pow` (37) |
+| `tateAlgNhd₂_of_coeff_mem_principal` | 60 | **38** | `divided_mem_pairSubring₂_of_coeff_mem_pow` (32) |
+| `coeff_of_oneSubfX_eq_aXn` | 55 | **~25** | `coeff_zero_…` + `coeff_succ_of_oneSubfX_eq_aXn` |
+
+All compiled first try. Two observations that made them cheap:
+
+* The `Fin 1`/`Fin 2` pair is another **mirror** — identical shape, so the second cost almost
+  nothing once the first was done. Mirrors keep paying; look for a `₂`/`κ`/`Minus` twin whenever
+  a target is finished.
+* For `coeff_of_oneSubfX_eq_aXn`, `extend.py` proposed one 34-line block, but inspection showed
+  its two `have`s (`h_base`, `h_step`) are *independently* self-contained — each uses only the
+  theorem's binders. Extracting them as **two** small lemmas beats one combined block. The
+  extension analysis gives an upper bound on what must move, not the best cut.
+
+### The `let`-in-conclusion rule (same family as the `set` rule)
+
+`tateAlgNhd_of_coeff_mem_principal`'s `have` was `g_val ∈ pairSubring P` where `g_val` and `πinv`
+are `let`-bound in the parent. As with `set`, the extracted lemma's conclusion must spell them out
+(`algebraMap A _ ((↑hπ_unit.unit⁻¹ : A) ^ n) * y ∈ pairSubring P`) and re-introduce the `let`s at
+the top of the proof, so the body's `change …  g_val …` steps still work by defeq.
