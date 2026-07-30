@@ -202,12 +202,152 @@ theorem isRestrictedGauss_sumToRestrictedFun (m k : ℕ)
       exact (hex x).le
     linarith
 
+theorem map_pValHom_sumToRestrictedFun (m k : ℕ)
+    (F : MvPowerSeries.Restricted K (fun _ : Fin k ⊕ Fin m => (1 : ℝ))) :
+    MvPowerSeries.map (pValHom m) (sumToRestrictedFun m k F) =
+      MvPowerSeries.sumToIter (Fin k) (Fin m) K F.1 :=
+  MvPowerSeries.ext fun y => by
+    rw [MvPowerSeries.coeff_map]
+    rfl
+
+set_option maxHeartbeats 800000 in
+/-- The inverse transport preserves radius-one restrictedness. -/
+theorem isRestrictedGauss_iterToSum (m k : ℕ)
+    (G : MvPowerSeries.Restricted (P K m) (fun _ : Fin k => (1 : ℝ))) :
+    MvPowerSeries.IsRestrictedGauss (fun _ : Fin k ⊕ Fin m => (1 : ℝ))
+      ((MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K).symm
+        (MvPowerSeries.map (pValHom m) G.1)) := by
+  rw [isRestrictedGauss_one_iff']
+  refine Filter.tendsto_def.mpr fun U hU => ?_
+  rw [Filter.mem_cofinite]
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  have hGdecay := (isRestrictedGauss_one_iff' G.1).mp G.2
+  have hO : {y : Fin k →₀ ℕ |
+      ¬ ‖MvPowerSeries.coeff y G.1‖ < ε}.Finite := by
+    have h2 := Filter.tendsto_def.mp hGdecay (Metric.ball 0 ε)
+      (Metric.ball_mem_nhds 0 hε)
+    rw [Filter.mem_cofinite] at h2
+    refine h2.subset ?_
+    intro y hy
+    simp only [Set.mem_compl_iff, Set.mem_preimage, Metric.mem_ball,
+      dist_zero_right] at hy ⊢
+    exact hy
+  have hpt : ∀ p : Fin k ⊕ Fin m →₀ ℕ,
+      MvPowerSeries.coeff p
+        ((MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K).symm
+          (MvPowerSeries.map (pValHom m) G.1)) =
+      MvPowerSeries.coeff
+        (Finsupp.comapDomain Sum.inr p Sum.inr_injective.injOn)
+        (MvPowerSeries.coeff
+          (Finsupp.comapDomain Sum.inl p Sum.inl_injective.injOn)
+          G.1).1 := by
+    intro p
+    rw [MvPowerSeries.coeff_sumAlgEquiv_symm_apply,
+      MvPowerSeries.coeff_map]
+    rfl
+  have hIy : ∀ y : Fin k →₀ ℕ, {x : Fin m →₀ ℕ |
+      ¬ ‖MvPowerSeries.coeff x
+        (MvPowerSeries.coeff y G.1).1‖ < ε}.Finite := by
+    intro y
+    have hres := (isRestrictedGauss_one_iff'
+      ((MvPowerSeries.coeff y G.1).1)).mp (MvPowerSeries.coeff y G.1).2
+    have h2 := Filter.tendsto_def.mp hres (Metric.ball 0 ε)
+      (Metric.ball_mem_nhds 0 hε)
+    rw [Filter.mem_cofinite] at h2
+    refine h2.subset ?_
+    intro x hx
+    simp only [Set.mem_compl_iff, Set.mem_preimage, Metric.mem_ball,
+      dist_zero_right] at hx ⊢
+    exact hx
+  refine Set.Finite.subset (Set.Finite.biUnion hO fun y _ =>
+    Set.Finite.image (fun x : Fin m →₀ ℕ => Finsupp.sumElim y x)
+      (hIy y)) ?_
+  intro p hp
+  simp only [Set.mem_compl_iff, Set.mem_preimage] at hp
+  set y := Finsupp.comapDomain Sum.inl p Sum.inl_injective.injOn with hydef
+  set x := Finsupp.comapDomain Sum.inr p Sum.inr_injective.injOn with hxdef
+  have hval : ε ≤ ‖MvPowerSeries.coeff x
+      (MvPowerSeries.coeff y G.1).1‖ := by
+    by_contra hlt
+    push_neg at hlt
+    refine hp (hball ?_)
+    rw [Metric.mem_ball, dist_zero_right, hpt p]
+    exact hlt
+  have hyO : y ∈ {y : Fin k →₀ ℕ |
+      ¬ ‖MvPowerSeries.coeff y G.1‖ < ε} := by
+    simp only [Set.mem_setOf_eq, not_lt]
+    calc ε ≤ ‖MvPowerSeries.coeff x (MvPowerSeries.coeff y G.1).1‖ := hval
+      _ ≤ ‖MvPowerSeries.coeff y G.1‖ := by
+        rw [MvRestricted.norm_eq]
+        have h5 := MvPowerSeries.le_gaussNorm
+          (v := (norm : K → ℝ)) (c := fun _ : Fin m => (1 : ℝ))
+          (f := (MvPowerSeries.coeff y G.1).1)
+          (MvRestricted.hasGaussNorm _ _) x
+        rw [show (x.prod ((fun _ : Fin m => (1 : ℝ)) · ^ ·)) = 1 from by
+          simp [Finsupp.prod], mul_one] at h5
+        exact h5
+  refine Set.mem_biUnion hyO ?_
+  refine ⟨x, ?_, ?_⟩
+  · simp only [Set.mem_setOf_eq, not_lt]
+    exact hval
+  · show Finsupp.sumElim
+      (Finsupp.comapDomain Sum.inl p Sum.inl_injective.injOn)
+      (Finsupp.comapDomain Sum.inr p Sum.inr_injective.injOn) = p
+    exact Finsupp.comapDomain_sumElim_comapDomain p
+
 /-- **The restricted sum–iterate transport**: restricted series in a sum of
 variables are restricted series with restricted coefficients. -/
 noncomputable def restrictedSumEquiv (m k : ℕ) :
     MvPowerSeries.Restricted K (fun _ : Fin k ⊕ Fin m => (1 : ℝ)) ≃+*
-      MvPowerSeries.Restricted (P K m) (fun _ : Fin k => (1 : ℝ)) := by
-  sorry
+      MvPowerSeries.Restricted (P K m) (fun _ : Fin k => (1 : ℝ)) where
+  toFun F := ⟨sumToRestrictedFun m k F,
+    isRestrictedGauss_sumToRestrictedFun m k F⟩
+  invFun G := ⟨(MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K).symm
+      (MvPowerSeries.map (pValHom m) G.1),
+    isRestrictedGauss_iterToSum m k G⟩
+  left_inv F := Subtype.ext (by
+    show (MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K).symm
+      (MvPowerSeries.map (pValHom m) (sumToRestrictedFun m k F)) = F.1
+    rw [map_pValHom_sumToRestrictedFun]
+    exact AlgEquiv.symm_apply_apply _ F.1)
+  right_inv G := Subtype.ext (MvPowerSeries.ext fun y => Subtype.ext (by
+    show MvPowerSeries.coeff y (MvPowerSeries.sumToIter (Fin k) (Fin m) K
+      ((MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K).symm
+        (MvPowerSeries.map (pValHom m) G.1))) =
+      (MvPowerSeries.coeff y G.1).1
+    have h1 : MvPowerSeries.sumToIter (Fin k) (Fin m) K
+        ((MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K).symm
+          (MvPowerSeries.map (pValHom m) G.1)) =
+        MvPowerSeries.map (pValHom m) G.1 := by
+      show (MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K)
+        ((MvPowerSeries.sumAlgEquiv (Fin k) (Fin m) K).symm
+          (MvPowerSeries.map (pValHom m) G.1)) =
+        MvPowerSeries.map (pValHom m) G.1
+      exact AlgEquiv.apply_symm_apply _ _
+    rw [h1, MvPowerSeries.coeff_map]
+    rfl))
+  map_mul' F G := Subtype.ext (MvPowerSeries.map_injective
+    (pValHom_injective m) (by
+      show MvPowerSeries.map (pValHom m)
+        (sumToRestrictedFun m k (F * G)) =
+        MvPowerSeries.map (pValHom m)
+          (sumToRestrictedFun m k F * sumToRestrictedFun m k G)
+      rw [map_pValHom_sumToRestrictedFun,
+        show ((F * G : MvPowerSeries.Restricted K
+          (fun _ : Fin k ⊕ Fin m => (1 : ℝ)))).1 = F.1 * G.1 from rfl,
+        _root_.map_mul, _root_.map_mul, map_pValHom_sumToRestrictedFun,
+        map_pValHom_sumToRestrictedFun]))
+  map_add' F G := Subtype.ext (MvPowerSeries.map_injective
+    (pValHom_injective m) (by
+      show MvPowerSeries.map (pValHom m)
+        (sumToRestrictedFun m k (F + G)) =
+        MvPowerSeries.map (pValHom m)
+          (sumToRestrictedFun m k F + sumToRestrictedFun m k G)
+      rw [map_pValHom_sumToRestrictedFun,
+        show ((F + G : MvPowerSeries.Restricted K
+          (fun _ : Fin k ⊕ Fin m => (1 : ℝ)))).1 = F.1 + G.1 from rfl,
+        _root_.map_add, _root_.map_add, map_pValHom_sumToRestrictedFun,
+        map_pValHom_sumToRestrictedFun]))
 
 /-- **The restricted Fubini** `K⟨X₁..X_{k+m}⟩ ≅ (K⟨X₁..X_m⟩)⟨T₁..T_k⟩`. -/
 noncomputable def restrictedFubini (m k : ℕ) :
