@@ -771,3 +771,23 @@ use mvTate_isClosed_ideal directly, NOT brick 1, for S) + C Hausdorff;
 P-form levelMap-bijectivity via toTopRestricted-equiv (generalize to E,
 underlying-identity) and assemble with QuotientPowFlat + localizationEquiv
 into qHead_completedLocal_comparison (flatness threaded 8.30-conditional).
+
+## BETA bricks (ii)/(iii) LIGHTENED (no norm inequalities!)
+
+Both reduce to fin-dim topology uniqueness + boundedness transfer:
+(ii) g-continuity: mk : A → (A⧸𝔭, QUOTIENT topology) continuous always;
+  id : (A⧸𝔭, quotient-top) → κ(𝔭)-spectral is K-LINEAR FROM a fin-dim
+  Hausdorff space (𝔭 closed via brick 1 ⟹ T2) ⟹ continuous by
+  LinearMap.continuous_of_finiteDimensional. Instances needed: quotient
+  topology on the Submodule/Ideal quotient + IsTopologicalAddGroup +
+  ContinuousSMul K + T2-of-closed.
+(iii) b-power-boundedness: NO ‖b‖ ≤ 1 needed. TopologicalRing.IsBounded
+  (range (bᵢ^·)) in κ(𝔭)-spectral: bᵢ-image in κ(𝔮) is t̄ᵢ (graph relation);
+  range(t̄ᵢⁿ) = mk-image of range(Tᵢⁿ) which is gauss-bounded in QHead ⟹
+  bounded in the quotient topology (continuous-additive image of bounded);
+  quotient-top on QHead⧸𝔮 = spectral-top of κ(𝔮) (same uniqueness argument,
+  𝔮 closed via brick 1) ⟹ t̄-power-bounded in κ(𝔮)-spectral; pull back along
+  the fin-dim embedding κ(𝔭) ↪ κ(𝔮) (continuous both ways by fin-dim ⟹
+  homeomorphism onto image ⟹ boundedness reflects). Needs: IsBounded-image
+  lemma for continuous ring-homs + the embedding-reflects-bounded lemma
+  (both small; check TopologicalRing.IsBounded API in the tree).
