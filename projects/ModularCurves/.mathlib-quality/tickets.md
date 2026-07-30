@@ -29793,3 +29793,13 @@ PoleSheafNeighborhoodHOne.lean), inside a copy of the package proof body:
 9. `Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero` ⟹ (bOne, hbOne). Note
    its hx wants `(1 : p.ResidueField) ⊗ₜ x ≠ 0` in `p.Fiber M` — the Fiber-vs-⊗ alignment
    is definitional (Ideal.Fiber := ResidueField ⊗ M presumably; check its def).
+
+### [FLW-2b] step-7 pattern confirmed verbatim (mirror BaseChangeKerCoker:1204-1228):
+`rw [Module.rankAtStalk_eq]` (mathlib Flat/Rank; needs [Finite]+[Flat] — both from steps
+5/6) then `e : p.asIdeal.Fiber M ≃ₗ[κ(p)] ker ((D.d01).baseChange κ(p)) :=
+LinearEquiv.ofBijective (kerBaseChangeComparison κ(p) (D.d01).hom)
+(kerBaseChangeComparison_bijective_of_orderedBaseCech_package … κ(p))` then
+`e.finrank_eq.trans (field_kernel_finrank …)`. Step 8's Fiber alignment: `p.asIdeal.Fiber M`
+IS `κ(p) ⊗ M` by def (same as in the :1220 proof) ✓. The step-8 one-tmul target aligns via
+the kerIso: x = OneSection viewed in baseSections; the ≠0 transfers through the equiv chain
+(all are LinearEquivs, injective ✓).
