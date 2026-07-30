@@ -1,1 +1,1 @@
-FOCUS: block A assembly — (1) mapLevelwise_injective_of_cofinal variant; (2) hint-extraction (integral-model monic relations for X-images); (3) the Q-side reduced theorem at maximal q composing equivQuotMaximalIdealPow.symm -> levelMap(mapP) -> factor-to-fibre-maximal-powers -> levelPointEquiv -> Pi MvPoly/J^r; injective by cofinality; target Pi of polynomial completions reduced.
+FOCUS: block A stage 3 — full assembly compiling (bi261xpf9); next: fix errors / commit / normalClosure corollary / blocks B-D

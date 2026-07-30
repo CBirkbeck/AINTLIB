@@ -122,8 +122,14 @@ theorem isReduced_adicCompletion_localization_tate
     IsReduced (AdicCompletion
       (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔮))
       (Localization.AtPrime 𝔮)) := by
-  letI : Algebra (P K m) (P L m) := (mapP (m := m) hext).toAlgebra
-  haveI hfree : Module.Free (P K m) (P L m) :=
+  letI cK : CommRing (P K m) := inferInstance
+  letI cL : CommRing (P L m) := inferInstance
+  letI gL : AddCommGroup (P L m) := cL.toRing.toAddCommGroup
+  letI aKL : Algebra (P K m) (P L m) := (mapP (m := m) hext).toAlgebra
+  letI modKL : @Module (P K m) (P L m) cK.toRing.toSemiring
+      gL.toAddCommMonoid := Algebra.toModule
+  haveI hfree : @Module.Free (P K m) (P L m) cK.toRing.toSemiring
+      gL.toAddCommMonoid modKL :=
     module_free_mapP (m := m) hext
   haveI hfin : Module.Finite (P K m) (P L m) :=
     module_finite_mapP (m := m) hext
@@ -137,6 +143,9 @@ theorem isReduced_adicCompletion_localization_tate
       show ((1 : P L m)).1 = 1 from rfl, _root_.map_zero,
       MvPowerSeries.coeff_one, if_pos rfl] at h2
     exact one_ne_zero h2.symm
+  haveI hff : @Module.FaithfullyFlat (P K m) (P L m) cK gL modKL :=
+    @Module.FaithfullyFlat.instOfNontrivialOfFree (P K m) (P L m)
+      cK gL modKL ‹Nontrivial (P L m)› hfree
   haveI hart : IsArtinianRing
       (P L m ⧸ Ideal.map (mapP (m := m) hext) 𝔮) :=
     isArtinianRing_fibre (m := m) hext 𝔮
@@ -171,7 +180,114 @@ theorem isReduced_adicCompletion_localization_tate
       ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
         (Localization.AtPrime 𝔮) r).symm.toRingEquiv.toRingHom)
     with hgdef
-  sorry
+  -- the levelMap mk-law in the mapP spelling
+  have hlm : ∀ (n : ℕ) (G' : P K m),
+      levelMap (B := P L m) 𝔮 n (Ideal.Quotient.mk (𝔮 ^ n) G') =
+        Ideal.Quotient.mk ((Ideal.map (mapP (m := m) hext) 𝔮) ^ n)
+          (mapP (m := m) hext G') := fun n G' =>
+    levelMap_mk (B := P L m) 𝔮 n G'
+  -- the component evaluation on localization-side mk-representatives
+  have hcomp_mk : ∀ (r : ℕ) (G : P K m)
+      (𝔫 : fibreMaximals (Ideal.map (mapP (m := m) hext) 𝔮)),
+      g r (IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+        (Localization.AtPrime 𝔮) r (Ideal.Quotient.mk _ G)) 𝔫 =
+      levelPointEquiv (m := m) (xf 𝔫) (hxf 𝔫) r
+        (Ideal.Quotient.mk _ (mapP (m := m) hext G)) := by
+    intro r G 𝔫
+    rw [hgdef]
+    show levelPointEquiv (m := m) (xf 𝔫) (hxf 𝔫) r
+      ((Ideal.quotEquivOfEq (congrArg (· ^ r) (hfeq 𝔫)))
+        ((Ideal.Quotient.factor
+          (pow_le_pow_left' (le_overMaximal _ 𝔫) r))
+          ((levelMap (B := P L m) 𝔮 r)
+            ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+              (Localization.AtPrime 𝔮) r).symm
+              (IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+                (Localization.AtPrime 𝔮) r
+                (Ideal.Quotient.mk _ G)))))) = _
+    rw [AlgEquiv.symm_apply_apply, hlm, Ideal.Quotient.factor_mk,
+      Ideal.quotEquivOfEq_mk]
+  -- the localization equivalences commute with the factor maps
+  have hEfac : ∀ {a b : ℕ} (hab : a ≤ b) (G : P K m),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab)
+        (IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+          (Localization.AtPrime 𝔮) b (Ideal.Quotient.mk _ G)) =
+      IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+        (Localization.AtPrime 𝔮) a (Ideal.Quotient.mk _ G) := by
+    intro a b hab G
+    rw [IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk,
+      Ideal.Quotient.factor_mk,
+      IsLocalization.AtPrime.equivQuotMaximalIdealPow_apply_mk]
+  -- transition compatibility of the family
+  have hcompat : ∀ {a b : ℕ} (hab : a ≤ b)
+      (x : Localization.AtPrime 𝔮 ⧸
+        (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔮)) ^ b)
+      (𝔫 : fibreMaximals (Ideal.map (mapP (m := m) hext) 𝔮)),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (g b x 𝔫) =
+        g a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x) 𝔫 := by
+    intro a b hab x 𝔫
+    obtain ⟨G, hG⟩ := Ideal.Quotient.mk_surjective
+      ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+        (Localization.AtPrime 𝔮) b).symm x)
+    have hx : x = IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+        (Localization.AtPrime 𝔮) b (Ideal.Quotient.mk _ G) := by
+      rw [hG, AlgEquiv.apply_symm_apply]
+    rw [hx, hcomp_mk, hEfac hab, hcomp_mk,
+      levelPointEquiv_factor (xf 𝔫) (hxf 𝔫) hab, Ideal.Quotient.factor_mk]
+  -- fibre nilpotence: the kernels of the family are cofinal
+  obtain ⟨e, he1, hpow⟩ := exists_pow_iInf_overMaximal_le
+    (Ideal.map (mapP (m := m) hext) 𝔮)
+  have hcof : ∀ r : ℕ, ∃ s : ℕ, ∃ hrs : r ≤ s,
+      ∀ y : Localization.AtPrime 𝔮 ⧸
+        (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔮)) ^ s,
+      g s y = 0 →
+        Ideal.Quotient.factor (Ideal.pow_le_pow_right hrs) y = 0 := by
+    intro r
+    refine ⟨e * r, Nat.le_mul_of_pos_left r he1, ?_⟩
+    intro y hy
+    obtain ⟨G, hG⟩ := Ideal.Quotient.mk_surjective
+      ((IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+        (Localization.AtPrime 𝔮) (e * r)).symm y)
+    have hyeq : y = IsLocalization.AtPrime.equivQuotMaximalIdealPow 𝔮
+        (Localization.AtPrime 𝔮) (e * r) (Ideal.Quotient.mk _ G) := by
+      rw [hG, AlgEquiv.apply_symm_apply]
+    have hmem : ∀ 𝔫 : fibreMaximals (Ideal.map (mapP (m := m) hext) 𝔮),
+        mapP (m := m) hext G ∈
+          (overMaximal (Ideal.map (mapP (m := m) hext) 𝔮) 𝔫) ^ (e * r) := by
+      intro 𝔫
+      have h1 : g (e * r) y 𝔫 = 0 := congrFun hy 𝔫
+      rw [hyeq, hcomp_mk] at h1
+      have h2 := congrArg
+        (levelPointEquiv (m := m) (xf 𝔫) (hxf 𝔫) (e * r)).symm h1
+      rw [RingEquiv.symm_apply_apply, _root_.map_zero,
+        Ideal.Quotient.eq_zero_iff_mem, ← hfeq 𝔫] at h2
+      exact h2
+    have hiInf : mapP (m := m) hext G ∈
+        ((⨅ 𝔫 : fibreMaximals (Ideal.map (mapP (m := m) hext) 𝔮),
+          overMaximal (Ideal.map (mapP (m := m) hext) 𝔮) 𝔫) ^ e) ^ r := by
+      rw [← pow_mul, Ideal.iInf_pow_eq_iInf_pow _
+        (fun p q hpq => pairwise_coprime_overMaximal _ hpq)]
+      exact (Submodule.mem_iInf _).mpr hmem
+    have hQr : mapP (m := m) hext G ∈
+        (Ideal.map (mapP (m := m) hext) 𝔮) ^ r :=
+      pow_le_pow_left' hpow r hiInf
+    have h5 : levelMap (B := P L m) 𝔮 r
+        (Ideal.Quotient.mk (𝔮 ^ r) G) = 0 := by
+      rw [levelMap_mk, Ideal.Quotient.eq_zero_iff_mem]
+      exact hQr
+    have h6 : Ideal.Quotient.mk (𝔮 ^ r) G = (0 : P K m ⧸ 𝔮 ^ r) :=
+      levelMap_injective (B := P L m) 𝔮 r
+        (h5.trans (_root_.map_zero (levelMap (B := P L m) 𝔮 r)).symm)
+    rw [hyeq, hEfac (Nat.le_mul_of_pos_left r he1), h6, _root_.map_zero]
+  -- the target factors are reduced: they are domains
+  haveI hpolred : IsReduced (AdicCompletion
+      (MvPolynomial.idealOfVars (Fin m) L) (MvPolynomial (Fin m) L)) := by
+    haveI := isDomain_adicCompletion_idealOfVars (L := L) (m := m)
+    exact isReduced_of_noZeroDivisors
+  exact AdicCompletion.isReduced_of_levelwisePi_cofinal
+    (IsLocalRing.maximalIdeal (Localization.AtPrime 𝔮))
+    (fun _ => MvPolynomial.idealOfVars (Fin m) L) g
+    (fun {a b} hab x 𝔫 => hcompat hab x 𝔫) hcof
 
 end BlockA
 
