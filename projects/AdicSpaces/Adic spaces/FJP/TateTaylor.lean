@@ -869,6 +869,109 @@ theorem isDomain_adicCompletion_idealOfVars :
     ((MvPowerSeries.toAdicCompletionAlgEquiv
       (Fin m) L).symm.toRingEquiv.toMulEquiv)
 
+/-- The point ideal is spanned by the translated variables. -/
+theorem pointIdeal_eq_span (x : Fin m → L) (hx : ∀ i, ‖x i‖ ≤ 1) :
+    pointIdeal (m := m) x hx =
+      Ideal.span (Set.range fun i : Fin m =>
+        polyToP (MvPolynomial.X i) - constP (m := m) (x i)) := by
+  have h1 : pointIdeal (m := m) x hx =
+      Ideal.comap (transHom (m := m) x hx)
+        (pointIdeal (m := m) (fun _ => (0 : L))
+          (fun i => norm_origin_le i)) := pointIdeal_eq_comap x hx
+  rw [h1, pointIdeal_origin_eq_span]
+  refine le_antisymm ?_ ?_
+  · -- comap of the span is contained in the span of the preimages
+    intro F hF
+    rw [Ideal.mem_comap] at hF
+    -- F = σ₋ₓ (σₓ F); σₓ F ∈ span Xᵢ; pull back through the equivalence
+    have h2 : F = transHom (m := m) (-x) (norm_neg_point x hx)
+        (transHom (m := m) x hx F) :=
+      (RingHom.congr_fun (transHom_neg_comp x hx) F).symm
+    rw [h2]
+    have h3 : (transHom (m := m) x hx F) ∈
+        Ideal.span (Set.range fun i : Fin m => polyToP (MvPolynomial.X i)) :=
+      hF
+    -- the image of the span under σ₋ₓ lands in the translated span
+    have h4 : ∀ G ∈ Ideal.span
+        (Set.range fun i : Fin m => polyToP (MvPolynomial.X i)),
+        transHom (m := m) (-x) (norm_neg_point x hx) G ∈
+          Ideal.span (Set.range fun i : Fin m =>
+            polyToP (MvPolynomial.X i) - constP (m := m) (x i)) := by
+      intro G hG
+      refine Submodule.span_induction ?_ ?_ ?_ ?_ hG
+      · rintro _ ⟨i, rfl⟩
+        rw [transHom_polyToP]
+        have h5 : MvPolynomial.eval₂ MvPolynomial.C
+            (fun j => MvPolynomial.X j + MvPolynomial.C ((-x) j))
+            (MvPolynomial.X i) =
+            MvPolynomial.X i + MvPolynomial.C (-(x i)) := by
+          rw [MvPolynomial.eval₂_X]
+          rfl
+        rw [h5]
+        have h6 : polyToP (MvPolynomial.X i + MvPolynomial.C (-(x i))) =
+            polyToP (MvPolynomial.X i) - constP (m := m) (x i) := by
+          rw [map_add]
+          have h7 : polyToP (MvPolynomial.C (-(x i))) =
+              -(constP (m := m) (x i)) := by
+            rw [show (MvPolynomial.C (-(x i)) :
+              MvPolynomial (Fin m) L) = -(MvPolynomial.C (x i)) from by
+              rw [map_neg], map_neg]
+            rfl
+          rw [h7]
+          ring
+        rw [h6]
+        exact Ideal.subset_span ⟨i, rfl⟩
+      · rw [map_zero]
+        exact Ideal.zero_mem _
+      · intro a b _ _ ha hb
+        rw [map_add]
+        exact Ideal.add_mem _ ha hb
+      · intro c a _ ha
+        rw [smul_eq_mul, map_mul]
+        exact Ideal.mul_mem_left _ _ ha
+    exact h4 _ h3
+  · -- the generators evaluate to zero
+    rw [Ideal.span_le]
+    rintro _ ⟨i, rfl⟩
+    rw [SetLike.mem_coe, Ideal.mem_comap]
+    show transHom (m := m) x hx
+      (polyToP (MvPolynomial.X i) - constP (m := m) (x i)) ∈ _
+    rw [map_sub, transHom_polyToP]
+    have h8 : MvPolynomial.eval₂ MvPolynomial.C
+        (fun j => MvPolynomial.X j + MvPolynomial.C (x j))
+        (MvPolynomial.X i) =
+        MvPolynomial.X i + MvPolynomial.C (x i) := by
+      rw [MvPolynomial.eval₂_X]
+    rw [h8]
+    have h9 : transHom (m := m) x hx (constP (m := m) (x i)) =
+        constP (m := m) (x i) := by
+      show transHom (m := m) x hx (polyToP (MvPolynomial.C (x i))) = _
+      rw [transHom_polyToP, MvPolynomial.eval₂_C]
+      rfl
+    rw [h9]
+    have h10 : polyToP (MvPolynomial.X i + MvPolynomial.C (x i)) -
+        constP (m := m) (x i) = polyToP (MvPolynomial.X i) := by
+      rw [map_add]
+      show polyToP (MvPolynomial.X i) + polyToP (MvPolynomial.C (x i)) -
+        polyToP (MvPolynomial.C (x i)) = _
+      ring
+    rw [h10]
+    exact Ideal.subset_span ⟨i, rfl⟩
+
+/-- **Maximal ideals with base-field residue are point ideals**: a maximal
+ideal containing the translated variables at its own coordinate images is the
+point ideal there. -/
+theorem eq_pointIdeal_of_isMaximal_of_span_le (𝔫 : Ideal (P L m))
+    [h𝔫 : 𝔫.IsMaximal] (x : Fin m → L) (hx : ∀ i, ‖x i‖ ≤ 1)
+    (hgen : ∀ i, polyToP (MvPolynomial.X i) - constP (m := m) (x i) ∈ 𝔫) :
+    𝔫 = pointIdeal (m := m) x hx := by
+  have h1 : pointIdeal (m := m) x hx ≤ 𝔫 := by
+    rw [pointIdeal_eq_span]
+    rw [Ideal.span_le]
+    rintro _ ⟨i, rfl⟩
+    exact hgen i
+  exact ((pointIdeal_isMaximal (m := m) x hx).eq_of_le h𝔫.ne_top h1).symm
+
 end Assembly
 
 end Translation
