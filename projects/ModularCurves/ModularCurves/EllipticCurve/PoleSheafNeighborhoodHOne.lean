@@ -106,11 +106,13 @@ private theorem exists_pointedIso_direct_pullback
         IsPullback.isoPullback_hom_snd, pullback.lift_snd,
         pullback.lift_snd_assoc]
 
-/-- **(FLW-1)** Around every point of an affine smooth proper fibrewise elliptic family
-there is a basic open of the base over which the simple-pole sheaf of a pointed family —
-isomorphic, compatibly with the projection and the section, to the restricted original
-family — has vanishing first cohomology. No Noetherian hypothesis on the base. -/
-theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_subsingleton_H_one
+/-- **(FLW-1 package)** Around every point of an affine smooth proper fibrewise elliptic
+family there is a basic open of the base carrying a pointed family — identified with the
+restricted original family — whose simple-pole sheaf admits a finite ordered affine cover
+with a termwise-flat, bounded, positive-tail-exact ordered base-Čech complex. This is the
+raw package; `exists_mem_basicOpen_pointedIso_subsingleton_H_one` reads off `H¹ = 0`, and
+the FLW-2 chain reads off base-change of global sections. -/
+theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_orderedBaseCech_package
     {X S : Scheme.{u}} {π : X ⟶ S} [IsAffine S] [IsProper π]
     (hsm : SmoothOfRelativeDimension 1 π) (z : S ⟶ X) (hz : z ≫ π = 𝟙 S)
     (h : FibrewiseElliptic π z hz) (s : S) :
@@ -124,8 +126,24 @@ theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_subsingleton_H_one
               eC.hom ≫ pullback.snd π (S.basicOpen a).ι = π' ∧
                 z' ≫ eC.hom = sectionBaseChange z hz (S.basicOpen a).ι) ∧
               (letI : IsProper π' := hproper'
-              Subsingleton (CategoryTheory.Sheaf.H
-                (sectionPoleSheafPower π' z' hz' 1).sheaf 1)) := by
+              ∃ (ι : Type u) (_ : Fintype ι) (_ : LinearOrder ι)
+                (UT : ι → E'.Opens),
+                IsOpenCover UT ∧ (∀ i, IsAffineOpen (UT i)) ∧
+                  0 < Fintype.card ι ∧
+                    (∀ q, Module.Flat Γ((S.basicOpen a).toScheme,
+                      (⊤ : (S.basicOpen a).toScheme.Opens))
+                      ((Scheme.Modules.orderedBaseCechComplex π'
+                        (sectionPoleSheafPower π' z' hz' 1) UT).X q)) ∧
+                      (∀ q, Fintype.card ι ≤ q → Subsingleton
+                        ((Scheme.Modules.orderedBaseCechComplex π'
+                          (sectionPoleSheafPower π' z' hz' 1) UT).X q)) ∧
+                        ∀ q, q < Fintype.card ι →
+                          Function.Exact
+                            ((Scheme.Modules.orderedBaseCechComplex π'
+                              (sectionPoleSheafPower π' z' hz' 1) UT).d q (q + 1)).hom
+                            ((Scheme.Modules.orderedBaseCechComplex π'
+                              (sectionPoleSheafPower π' z' hz' 1) UT).d
+                                (q + 1) (q + 2)).hom) := by
   classical
   -- the Noetherian stage model
   letI : Algebra (ULift.{u} ℤ) Γ(S, (⊤ : S.Opens)) :=
@@ -251,24 +269,73 @@ theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_subsingleton_H_one
       exact TopologicalSpace.Opens.mem_iSup.mp hmemTop
     obtain ⟨i, -⟩ := hy
     exact Fintype.card_pos_iff.mpr ⟨i⟩
-  have hD1 :=
-    (Scheme.Modules.orderedBaseCechComplex_baseChange_exact_iff_of_iso yπ (u' ≫ gA) L V
-      hVaff MT eD 0).mp (hexactT' 0 hNpos)
-  have hDexactAt :
-      (Scheme.Modules.orderedBaseCechComplex π' MT UT).ExactAt 1 :=
-    (ModularCurves.cochainComplex_functionExact_iff_exactAt
-      (Scheme.Modules.orderedBaseCechComplex π' MT UT) 0).mp hD1
+  have hDexact : ∀ q, q < Fintype.card ι →
+      Function.Exact
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d q (q + 1)).hom
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d (q + 1) (q + 2)).hom :=
+    fun q hq =>
+      (Scheme.Modules.orderedBaseCechComplex_baseChange_exact_iff_of_iso yπ (u' ≫ gA)
+        L V hVaff MT eD q).mp (hexactT' q hq)
   letI : MT.IsQuasicoherent := sectionPoleSheafPower_isQuasicoherent hsm' z' hz' 1
-  have hBC : (Scheme.Modules.baseCechComplex π' MT UT).ExactAt 1 :=
-    Scheme.Modules.baseCechComplex_exactAt_one_of_orderedBaseCechComplex_exactAt_one
-      π' MT UT hDexactAt
-  have hH1 : Subsingleton (CategoryTheory.Sheaf.H MT.sheaf 1) :=
-    (Scheme.Modules.baseCechComplex_exactAt_one_iff_subsingleton_H π' MT UT hUT
-      hUTaff).mp hBC
+  have hMTinv : Scheme.Modules.IsInvertible MT :=
+    sectionPoleSheafPower_isInvertible hsm' z' hz' 1
+  haveI : (pullback yπ (u' ≫ gA)).IsSeparated :=
+    ⟨by rw [← terminal.comp_from π']; infer_instance⟩
+  have hDflat : ∀ q, Module.Flat Γ((S.basicOpen a).toScheme,
+      (⊤ : (S.basicOpen a).toScheme.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q) := fun q =>
+    Scheme.Modules.orderedBaseCechObject_flat_of_isInvertible π' MT hMTinv UT hUTaff q
+  have hDbdd : ∀ q, Fintype.card ι ≤ q → Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q) := fun q hq =>
+    Scheme.Modules.orderedBaseCechObject_subsingleton_of_card_le π' MT UT q hq
   -- the pointed identification with the restricted original family
   obtain ⟨eC, hCπ, hCz⟩ :=
     exists_pointedIso_direct_pullback yπ gA S.isoSpec φ hπA zA hzA z hz hzAφ v
   exact ⟨a, hmem, pullback yπ (u' ≫ gA), π', z', hz', inferInstance, hsm', h',
-    ⟨eC, hCπ, hCz⟩, hH1⟩
+    ⟨eC, hCπ, hCz⟩, ι, inferInstance, inferInstance, UT, hUT, hUTaff, hNpos,
+    hDflat, hDbdd, hDexact⟩
+
+/-- **(FLW-1)** Around every point of an affine smooth proper fibrewise elliptic family
+there is a basic open of the base over which the simple-pole sheaf of a pointed family —
+isomorphic, compatibly with the projection and the section, to the restricted original
+family — has vanishing first cohomology. No Noetherian hypothesis on the base. -/
+theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_subsingleton_H_one
+    {X S : Scheme.{u}} {π : X ⟶ S} [IsAffine S] [IsProper π]
+    (hsm : SmoothOfRelativeDimension 1 π) (z : S ⟶ X) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz) (s : S) :
+    ∃ a : Γ(S, (⊤ : S.Opens)), s ∈ S.basicOpen a ∧
+      ∃ (E' : Scheme.{u}) (π' : E' ⟶ (S.basicOpen a).toScheme)
+        (z' : (S.basicOpen a).toScheme ⟶ E') (hz' : z' ≫ π' = 𝟙 _)
+        (hproper' : IsProper π'),
+        SmoothOfRelativeDimension 1 π' ∧
+          ∃ h' : FibrewiseElliptic π' z' hz',
+            (∃ eC : E' ≅ pullback π (S.basicOpen a).ι,
+              eC.hom ≫ pullback.snd π (S.basicOpen a).ι = π' ∧
+                z' ≫ eC.hom = sectionBaseChange z hz (S.basicOpen a).ι) ∧
+              (letI : IsProper π' := hproper'
+              Subsingleton (CategoryTheory.Sheaf.H
+                (sectionPoleSheafPower π' z' hz' 1).sheaf 1)) := by
+  obtain ⟨a, hmem, E', π', z', hz', hproper', hsm', h', heC, ι, hfin, hord, UT, hUT,
+    hUTaff, hpos, hflat, hbdd, hexact⟩ :=
+    FibrewiseElliptic.exists_mem_basicOpen_pointedIso_orderedBaseCech_package
+      hsm z hz h s
+  letI : IsProper π' := hproper'
+  letI : Fintype ι := hfin
+  letI : LinearOrder ι := hord
+  refine ⟨a, hmem, E', π', z', hz', hproper', hsm', h', heC, ?_⟩
+  have hDexactAt :
+      (Scheme.Modules.orderedBaseCechComplex π'
+        (sectionPoleSheafPower π' z' hz' 1) UT).ExactAt 1 :=
+    (ModularCurves.cochainComplex_functionExact_iff_exactAt
+      (Scheme.Modules.orderedBaseCechComplex π'
+        (sectionPoleSheafPower π' z' hz' 1) UT) 0).mp (hexact 0 hpos)
+  letI : (sectionPoleSheafPower π' z' hz' 1).IsQuasicoherent :=
+    sectionPoleSheafPower_isQuasicoherent hsm' z' hz' 1
+  have hBC : (Scheme.Modules.baseCechComplex π'
+      (sectionPoleSheafPower π' z' hz' 1) UT).ExactAt 1 :=
+    Scheme.Modules.baseCechComplex_exactAt_one_of_orderedBaseCechComplex_exactAt_one
+      π' (sectionPoleSheafPower π' z' hz' 1) UT hDexactAt
+  exact (Scheme.Modules.baseCechComplex_exactAt_one_iff_subsingleton_H π'
+    (sectionPoleSheafPower π' z' hz' 1) UT hUT hUTaff).mp hBC
 
 end ModularCurves

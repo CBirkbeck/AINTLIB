@@ -29622,3 +29622,64 @@ Route as claimed: stage model → residue-point spread at `s` → `r ∉ ker` �
 `sectionPoleSheafPowerDirectBaseChangeIso` → ordered→unordered→`H¹` bridges.
 **Progress**: full root build queued; FLW-2 next (wire H¹ = 0 for n = 1..6 via the landed
 successor induction `sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood`).
+
+### [FLW-2] sub-chain (boarded 2026-07-30 after FLW-1; producer signatures verified in-tree)
+The n=1 comparison `sectionPoleSheafPower_locallyWeierstrass_of_CartierGenerator`
+(PoleSheafWeierstrassComparison:110) consumes: [IsAffine S], hsm/z/hz/h, Cartier data
+(U, hU, r, hspan, hnzd), `hHOne`, and a normalized rank-1 basis (bOne, hbOne). FLW-1
+supplies hHOne per basic open. Cartier data per point: landed
+(`exists_affineBaseChange_sectionCartierGenerator`, SuccessorSections:453 — produces an
+affine V ∋ s and the data on the V-restricted family). Remaining bricks, all general-base:
+- **[FLW-2a]** baseSections base-change linear equiv + pushforward-BC IsIso over an away
+  shrink: baseSections = ker(d01) of the ordered base-Čech complex
+  (`sectionPoleSheafPower_baseSectionsIsoKernelOrderedBaseCechDifferential`,
+  PoleSheafBaseCechHOne:93); the complex is flat/bounded with exactness after base change
+  (FLW-1 machinery / `exists_sectionPoleSheafPower_orderedBaseCech_flat_bounded_field_exact`);
+  kernel commutes with BC by `kerLTensorComparison_bijective_of_bounded_exact`
+  (BaseChangeKerCoker:320); conclude IsIso of
+  `sectionPoleSheafPowerPushforwardBaseChange` on appTop mirroring the projective proof
+  (`..._projectiveClosed_app_top_isIso`, PoleSheafProjectiveBaseChange:990).
+- **[FLW-2b]** localized rank-1 basis `bA` on the canonical section around each prime:
+  rank-1 fibrewise from `..._kernel_finrank` (BaseCechHigher:360/486); away-splitting via
+  `LinearMap.exists_away_baseChange_surjective_of_residueField` (BaseChangeKerCoker:369)
+  + finite-projective replacement (`LowDegreeFiniteProjectiveReplacement`).
+- **[FLW-2c]** feed 2a+2b into the landed
+  `exists_sectionPoleSheafPowerOne_away_baseChange_basis_of_localized_basis_of_isProper`
+  (PowerOneAwayBaseChangeBasis:30) → per-prime normalized bOne over Spec (Away a).
+- **[FLW-6]** per-point assembly: intersect the Cartier V, FLW-1's D(a), and 2c's shrink;
+  apply the n=1 comparison on the common direct family; cross with
+  `LocallyWeierstrass.of_iso` via FLW-1's eC; conclude
+  `FibrewiseElliptic.locallyWeierstrass`, then `locallyWeierstrass_iff_abstractConditions`.
+
+### [FLW-2a] REFINED PLAN (2026-07-30, mid-session; all producers verified):
+Refactor `PoleSheafNeighborhoodHOne.lean`: new theorem
+`exists_mem_basicOpen_pointedIso_orderedBaseCech_package` = FLW-1's exact skeleton but
+returning the RICHER package: ∃ a ∋ s, family data + eC + ∃ (ι, Fintype, LinearOrder,
+UT cover, affine), with (i) ∀ q, Flat Γ(T') (D.X q), (ii) ∀ q ≥ card ι, Subsingleton
+(D.X q), (iii) ∀ q < card ι, Function.Exact (D.d q (q+1)).hom (D.d (q+1) (q+2)).hom —
+where D := orderedBaseCechComplex π' MT UT (T' := basicOpen a, MT := pole sheaf 1).
+(FLW-1's H¹ theorem then = package + the two bridges; keep it, re-derive from package.)
+Then:
+- hker for ANY affine leg t : T'' ⟶ T': `Flat (D.X 1 ⧸ range (D.d 0 1))` via
+  `Module.Flat.quotient_range_of_bounded_exact`, then `kerBaseChangeComparison_bijective`
+  (BaseChangeKerCoker; the flat-coker form used inside `baseChange_exact_of_exact_of_flat_coker`).
+- baseSections-BC equiv at any leg: `baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison`
+  (SchemeModuleBaseSectionsBaseChange:26) with hker.
+- pushforward-BC IsIso: mirror `..._projectiveClosed_app_top_isIso`
+  (PoleSheafProjectiveBaseChange:990) replacing eProjective by the equiv above.
+- FLW-2b rank-1: `Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact`
+  (BaseChangeKerCoker:1204) — CAVEAT: lives in the finite-projective-complex section;
+  if its section variables demand [Module.Finite/Projective (M n)] the Čech terms don't
+  satisfy them — then route instead through `LowDegreeFiniteProjectiveReplacement`'s
+  KZero/KOne comparison (:528-537, :799+) which exists precisely for this; check section
+  variables FIRST. Residue-kernel finrank = 1 input:
+  `sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank` (BaseCechHigher:360).
+- bA from finite-projective + rankAtStalk ≡ 1 + canonical section spanning residues:
+  the away-splitting is `LinearMap.exists_away_baseChange_surjective_of_residueField`
+  (BaseChangeKerCoker:369) + injectivity from projective-split; the canonical section's
+  residue-span: derive from `hbOne`-fibre form (grep `sectionPoleSheafPowerOneSection`
+  residue lemmas — likely in PoleSheafBaseCechHOne :199-352 kernel-finrank cluster).
+- FLW-2c: feed into `exists_sectionPoleSheafPowerOne_away_baseChange_basis_of_localized_basis_of_isProper`.
+NOTE (cleanup, not now): my `baseChange_exact_of_bounded_flat_baseChange_exact` duplicates
+the composite of landed `LinearMap.baseChange_exact_of_bounded_exact` (BaseChangeKerCoker
+docstring :50) at R := Away r + tower collapse — consolidate in [CLEANUP-22].
