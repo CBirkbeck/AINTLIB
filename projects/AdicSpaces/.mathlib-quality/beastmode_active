@@ -1,1 +1,1 @@
-FOCUS: Fubini leg 2 restrictedSumEquiv — sumAlgEquiv underlying + gauss both ways via norm_eq/gaussNorm sup-argument (coeff_sumToIter law); then P K (k+m) tower into comap_headToQ_isMaximal
+FOCUS: tower assembly for comap_headToQ_isMaximal — evenT_equiv := mvRestrictedCongr(evenSupportEquiv) trans restrictedFubini.symm; residue-finiteness transport; K-constants plumbing
