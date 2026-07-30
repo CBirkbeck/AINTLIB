@@ -182,6 +182,59 @@ theorem AdicCompletion.isReduced_of_levelwise_injective (I : Ideal A)
   isReduced_of_injective (AdicCompletion.mapLevelwise I J g hcompat)
     (AdicCompletion.mapLevelwise_injective I J g hcompat hinj)
 
+/-- **Injectivity from cofinal levelwise kernels**: if kernel elements at a
+cofinal level die under the transition maps, the induced completion map is
+injective. -/
+theorem AdicCompletion.mapLevelwise_injective_of_cofinal (I : Ideal A)
+    (J : Ideal B) (g : ∀ r : ℕ, A ⧸ I ^ r →+* B ⧸ J ^ r)
+    (hcompat : ∀ {a b : ℕ} (hab : a ≤ b) (x : A ⧸ I ^ b),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (g b x) =
+        g a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x))
+    (hcof : ∀ r : ℕ, ∃ s : ℕ, ∃ hrs : r ≤ s, ∀ y : A ⧸ I ^ s, g s y = 0 →
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hrs) y = 0) :
+    Function.Injective (AdicCompletion.mapLevelwise I J g hcompat) := by
+  intro x y hxy
+  suffices h : ∀ z : AdicCompletion I A,
+      AdicCompletion.mapLevelwise I J g hcompat z = 0 → z = 0 by
+    have h1 : AdicCompletion.mapLevelwise I J g hcompat (x - y) = 0 := by
+      rw [map_sub, hxy, sub_self]
+    exact sub_eq_zero.mp (h _ h1)
+  intro z hz
+  refine Subtype.ext (funext fun r => ?_)
+  obtain ⟨s, hrs, hkill⟩ := hcof r
+  have hzs : g s (AdicCompletion.levelEquiv I s (z.1 s)) = 0 := by
+    have h3 : (AdicCompletion.levelEquiv J s).symm
+        (g s (AdicCompletion.levelEquiv I s (z.1 s))) =
+        ((0 : AdicCompletion J B)).1 s :=
+      congrFun (congrArg Subtype.val hz) s
+    rw [show ((0 : AdicCompletion J B)).1 s = 0 from rfl] at h3
+    have h4 := congrArg (AdicCompletion.levelEquiv J s) h3
+    rwa [RingEquiv.apply_symm_apply, _root_.map_zero] at h4
+  have h5 := hkill _ hzs
+  have h6 := AdicCompletion.levelEquiv_transitionMap I hrs (z.1 s)
+  rw [z.2 hrs] at h6
+  have h7 : AdicCompletion.levelEquiv I r (z.1 r) = 0 := by
+    rw [h6]
+    exact h5
+  have h8 : z.1 r = 0 := by
+    have h9 := congrArg (AdicCompletion.levelEquiv I r).symm h7
+    rwa [RingEquiv.symm_apply_apply, _root_.map_zero] at h9
+  rw [h8]
+  rfl
+
+/-- **Reducedness from a cofinally injective levelwise map.** -/
+theorem AdicCompletion.isReduced_of_levelwise_cofinal (I : Ideal A)
+    (J : Ideal B) (g : ∀ r : ℕ, A ⧸ I ^ r →+* B ⧸ J ^ r)
+    (hcompat : ∀ {a b : ℕ} (hab : a ≤ b) (x : A ⧸ I ^ b),
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) (g b x) =
+        g a (Ideal.Quotient.factor (Ideal.pow_le_pow_right hab) x))
+    (hcof : ∀ r : ℕ, ∃ s : ℕ, ∃ hrs : r ≤ s, ∀ y : A ⧸ I ^ s, g s y = 0 →
+      Ideal.Quotient.factor (Ideal.pow_le_pow_right hrs) y = 0)
+    [IsReduced (AdicCompletion J B)] :
+    IsReduced (AdicCompletion I A) :=
+  isReduced_of_injective (AdicCompletion.mapLevelwise I J g hcompat)
+    (AdicCompletion.mapLevelwise_injective_of_cofinal I J g hcompat hcof)
+
 end MapLevelwise
 
 end SemilocalFibre
