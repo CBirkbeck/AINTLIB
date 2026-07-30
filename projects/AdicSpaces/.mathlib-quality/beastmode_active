@@ -1,1 +1,1 @@
-FOCUS: frontier = comap_headToQ_isMaximal (T_N-tower: check Heads:1233; even-T coefficient transport; restricted Fubini via Xia) + L1 leaves. L3-maximal DONE axiom-clean.
+FOCUS: fill restrictedRenameEquiv (kwToTate-pattern both directions, rename_rename+rename_id comp laws) then restrictedSumEquiv (sumAlgEquiv + sup-norm gauss transport, norm_eq/gaussNorm) then comap_headToQ tower assembly
