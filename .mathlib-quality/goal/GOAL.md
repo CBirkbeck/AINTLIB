@@ -3260,3 +3260,48 @@ branches use it identically as `hVsub ⟨a ^ n, ⟨n, rfl⟩, _, hqm, rfl⟩`, s
 the *combined* consequence (`∀ n, a^n * pEltB^m ∈ ball`) as a single hypothesis rather than `hVsub`
 and `hqm` separately. **Where a helper would need an awkward unfolded type, pass the consequence the
 body actually uses instead of the hypothesis it came from.**
+
+### Batch: LaurentTree.balancedLeafBase_isUnit_get_of_false (54 → 49 code) — 232 → 231
+
+The last survivor of the seam-scan. **It was not a seam case at all.** The right fix was the
+cheapest technique on the list (lift the dominant/duplicated `have`), not extraction.
+
+**Seam-scan post-mortem — the filter progression was 93 → 27 → 12 → 6 → 3 → 1, and the
+final candidate then turned out to want a *different* technique entirely.** Every tightening
+step was a correction to a filter that was admitting garbage:
+  1. both branches must fit (93 → 27)
+  2. + local-dep / need / size filters (27 → 12)
+  3. + branches must have STATED goals, not `refine`-implicit ones (12 → 6)
+  4. + helper size is `branch + signature`, so require `max(n1,n2) + sig_len ≤ 50` (6 → 3)
+  5. + **comments must be excluded from the pre-seam window** (3 → 1) — a comment line was
+     counting toward the 3-line window and pushing a goal-rewriting `rw` outside it.
+**Conclusion to carry forward: the two-branch seam split is a genuinely rare shape here.**
+Do not build more seam-scan tooling; the remaining 231 are lift/merge/join cases or refusals.
+
+**NEW GOTCHA (Lean, load-bearing structure): `split_ifs` can be catastrophically slower than
+the explicit `if_neg` / `if_pos` + `simpa` it replaces.** This proof's two sign-branches are
+near-identical (they differ only `laurentMinusDatum` ↔ `laurentPlusDatum`), and the file's own
+neighbouring proof (`leaves_ofBalancedList_mem`, L636-639) uses `rw [..._cons]; split_ifs` for
+exactly that shape — so the merge looked obviously right and idiomatic. It **times out**:
+`(deterministic) timeout at 'whnf'` at the `split_ifs`, 200k heartbeats. The original author's
+two-branch form was load-bearing for *elaboration*, not just readability. Reverted; recorded
+the reason in-source so the next reader does not retry the merge.
+  → **A duplicated-looking pair of branches is not proof that a merge elaborates.** Build the
+    merge before believing it, and when it fails, keep the structure and take the smaller win.
+
+What actually landed (−5): lift the `hσk'` `have` — verbatim-identical in both branches — above
+the `rcases`, and join the two 2-line `exact ih …` calls. Statement unchanged, axiom-clean.
+
+**NEW GOTCHA (process, ×2 — both cost a wasted build):**
+  - **The concurrency guard was matching itself.** `pgrep -f "lake build"` matches the *shell
+    running the guard*, because that shell's own command line contains the string — permanent
+    false "BUILD RUNNING". `pgrep -x lake` is no good either: it matches every editor
+    `lake serve` LSP process, and `lsof +D .lake/build` matches the LSP holding oleans open
+    forever. Correct guard = `ps` for `bin/lake build`, then `lsof -a -d cwd -p <pid>` to keep
+    only processes whose **cwd is this worktree** (a build in a sibling project cannot clobber
+    our oleans).
+  - **`grep -E "error|warning" | head -20` hid a real error.** The 20 lines filled entirely with
+    the pre-existing project-wide warnings (`overlappingInstances`, `sorry`, `unusedSectionVars`)
+    from *other* files, so a failing build read as green — the `✖` and the missing `.olean` were
+    the only tells. Same class as the recorded "never pipe a verify build through `tail`".
+    → **Grep the build for errors ALONE.** Never mix warnings into the same capped window.

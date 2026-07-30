@@ -743,9 +743,15 @@ theorem LaurentTree.balancedLeafBase_isUnit_get_of_false
         restrictionMapHom_canonicalMap (laurentMinusDatum D₀ f) leafB h_subset f
       rw [← h_comp]
       exact RingHom.isUnit_map _ h_unit_at_lm
-    · -- k = n'.succ: recurse on rest with the shifted sign-function.
+    · -- k = n'.succ: recurse on rest with the shifted sign-function. The two
+      -- sign branches differ only in the datum; `hσk'` is common to both, so it
+      -- is established once before the split. (Splitting the cons-unfold with
+      -- `split_ifs` instead of `if_neg`/`if_pos` makes `whnf` diverge here.)
       have h_get : (f :: rest).get ⟨n'.succ, hn⟩ = rest.get ⟨n', Nat.lt_of_succ_lt_succ hn⟩ := rfl
       rw [h_get]
+      have hσk' : (fun (k : Fin rest.length) ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
+          ⟨n', Nat.lt_of_succ_lt_succ hn⟩ = false := by
+        simpa using hσk
       rcases h0 : σ ⟨0, Nat.succ_pos _⟩ with _ | _
       · -- σ 0 = false (so the cons unfold gives laurentMinus)
         have h_unfold : LaurentTree.balancedLeafBase D₀ (f :: rest) σ =
@@ -754,11 +760,7 @@ theorem LaurentTree.balancedLeafBase_isUnit_get_of_false
           rw [LaurentTree.balancedLeafBase_cons]
           exact if_neg (by simpa using h0)
         rw [h_unfold]
-        have hσk' : (fun (k : Fin rest.length) ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
-            ⟨n', Nat.lt_of_succ_lt_succ hn⟩ = false := by
-          simpa using hσk
-        exact ih (laurentMinusDatum D₀ f) _
-          ⟨n', Nat.lt_of_succ_lt_succ hn⟩ hσk'
+        exact ih (laurentMinusDatum D₀ f) _ ⟨n', Nat.lt_of_succ_lt_succ hn⟩ hσk'
       · -- σ 0 = true (cons unfold gives laurentPlus)
         have h_unfold : LaurentTree.balancedLeafBase D₀ (f :: rest) σ =
             LaurentTree.balancedLeafBase (laurentPlusDatum D₀ f) rest
@@ -766,11 +768,7 @@ theorem LaurentTree.balancedLeafBase_isUnit_get_of_false
           rw [LaurentTree.balancedLeafBase_cons]
           exact if_pos (by simpa using h0)
         rw [h_unfold]
-        have hσk' : (fun (k : Fin rest.length) ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
-            ⟨n', Nat.lt_of_succ_lt_succ hn⟩ = false := by
-          simpa using hσk
-        exact ih (laurentPlusDatum D₀ f) _
-          ⟨n', Nat.lt_of_succ_lt_succ hn⟩ hσk'
+        exact ih (laurentPlusDatum D₀ f) _ ⟨n', Nat.lt_of_succ_lt_succ hn⟩ hσk'
 
 /-- The plus-pieces enumerated along the minus-chain. Each entry is
 `laurentPlusDatum (minusBase k) f_{k+1}` where `minusBase k` is the
