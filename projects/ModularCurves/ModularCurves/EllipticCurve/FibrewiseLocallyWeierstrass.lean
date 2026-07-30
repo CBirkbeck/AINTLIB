@@ -34,6 +34,27 @@ universe u
 
 namespace ModularCurves
 
+set_option backward.isDefEq.respectTransparency false in
+set_option backward.isDefEq.respectTransparency.types false in
+/-- `isoSpec` intertwines the global-sections identification of an open immersion's
+image with the scheme-level image identification. -/
+private theorem isoSpec_appIso_bridge {S : Scheme.{u}} (W : S.affineOpens)
+    (U' : W.1.toScheme.affineOpens) :
+    U'.2.isoSpec.hom ≫ Spec.map (W.1.ι.appIso U'.1).hom =
+      (W.1.ι.isoImage U'.1).hom ≫
+        (U'.2.image_of_isOpenImmersion W.1.ι).isoSpec.hom := by
+  have hVle : U'.1 ≤ W.1.ι ⁻¹ᵁ (W.1.ι ''ᵁ U'.1) :=
+    le_of_eq (Scheme.Hom.preimage_image_eq W.1.ι U'.1).symm
+  have happLE : (W.1.ι.appIso U'.1).hom =
+      W.1.ι.appLE (W.1.ι ''ᵁ U'.1) U'.1 hVle :=
+    Scheme.Hom.appIso_hom' W.1.ι U'.1
+  rw [happLE,
+    isoSpec_appLE_bridge W.1.ι ⟨W.1.ι ''ᵁ U'.1, U'.2.image_of_isOpenImmersion W.1.ι⟩
+      U' hVle]
+  congr 1
+  rw [← cancel_mono (W.1.ι ''ᵁ U'.1).ι, Category.assoc, morphismRestrict_ι,
+    ← Category.assoc, Scheme.homOfLE_ι, Scheme.Hom.isoImage_hom_ι]
+
 /-- **(chart lift)** A Weierstrass chart of the restriction of a pointed family to an
 affine open lifts to a Weierstrass chart of the family itself. Tools per the board
 `[FLW-6] chart-lift factorization`: `Scheme.Hom.isoImage` (+ `isoImage_hom_ι`),
@@ -95,9 +116,44 @@ private theorem lw_point_of_baseChange_affineOpen
   set ψ₃ := (pullbackLeftPullbackSndIso π U.1.ι eIm.hom).symm with hψ₃
   haveI : IsIso (pullback.fst (pullback.snd π U.1.ι) eIm.hom) := inferInstance
   set ψ₄ := asIso (pullback.fst (pullback.snd π U.1.ι) eIm.hom) with hψ₄
+  -- the two shared bridge identities
+  have hVle : U'.1 ≤ W.1.ι ⁻¹ᵁ U.1 :=
+    le_of_eq (Scheme.Hom.preimage_image_eq W.1.ι U'.1).symm
+  have hbridge : U'.2.isoSpec.hom ≫
+      Spec.map (W.1.ι.appIso U'.1).hom =
+      eIm.hom ≫ U.2.isoSpec.hom :=
+    isoSpec_appIso_bridge W U'
+  have hψ₄snd : ψ₄.inv ≫ pullback.snd (pullback.snd π U.1.ι) eIm.hom =
+      pullback.snd π U.1.ι ≫ eIm.inv := by
+    rw [← cancel_mono eIm.hom, Category.assoc, Category.assoc,
+      ← pullback.condition, ← Category.assoc, hψ₄]
+    simp
+  have hofHom : CommRingCat.ofHom (W.1.ι.appIso U'.1).hom.hom =
+      (W.1.ι.appIso U'.1).hom := rfl
   refine ⟨ψ₄.symm ≪≫ ψ₃.symm ≪≫ ψ₂.symm ≪≫ ψ₁.symm ≪≫ e₁ ≪≫ asIso β, ?_, ?_⟩
-  · sorry
-  · sorry
+  · -- π-compatibility: chase the second projection down the iso chain
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+    have hβw : β ≫ projModelπ (Wc.map (W.1.ι.appIso U'.1).inv.hom) =
+        projModelπ Wc ≫ Spec.map (W.1.ι.appIso U'.1).hom := by
+      rw [← hofHom]
+      exact hβsq.w
+    rw [hβw, reassoc_of% heπ, hbridge]
+    rw [hψ₁, reassoc_of% (pullbackLeftPullbackSndIso_inv_snd_snd π W.1.ι U'.1.ι)]
+    have hψ₂snd : ψ₂.inv ≫ pullback.snd π (U'.1.ι ≫ W.1.ι) =
+        pullback.snd π (eIm.hom ≫ U.1.ι) := by
+      rw [hψ₂]
+      simp only [pullback.congrHom_inv]
+      rw [pullback.lift_snd, Category.comp_id]
+    rw [reassoc_of% hψ₂snd]
+    have hψ₃snd : ψ₃.inv ≫ pullback.snd π (eIm.hom ≫ U.1.ι) =
+        pullback.snd (pullback.snd π U.1.ι) eIm.hom := by
+      rw [hψ₃, Iso.symm_inv]
+      exact pullbackLeftPullbackSndIso_hom_snd π U.1.ι eIm.hom
+    rw [reassoc_of% hψ₃snd, reassoc_of% hψ₄snd]
+    simp only [Iso.inv_hom_id_assoc]
+    rfl
+  · -- zero-section compatibility
+    sorry
 
 /-- **(FLW-6, affine case)** A smooth proper fibrewise elliptic family over an affine
 base is locally Weierstrass. -/
