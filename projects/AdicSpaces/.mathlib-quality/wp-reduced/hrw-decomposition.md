@@ -666,3 +666,33 @@ lTensor_injective on Iⁿ/I^{n+1}-related SES);
 ~200-300 lines tensor bookkeeping; mathlib: quotTensorEquivQuotSMul /
 Algebra.TensorProduct pieces, lTensor-exactness. n=0 base: I^0 = ⊤,
 subsingleton source.
+
+## L1 ELEMENTARY LEAVES DONE + ASSEMBLY CHAIN SIMPLIFIED (2026-07-30 cont.)
+
+FJP/QuotientPowFlat.lean AXIOM-CLEAN: levelOnePlainEquiv/levelOneSymmLin,
+mem_smul_top_of_val_mem_mul (∃-strengthened mul_induction), mem_pow_succ_of_flat
+(THE GRADED STEP: φ := lid∘rTensor(subtype) injective by
+Flat.rTensor_preserves_injective_linearMap; u ∈ range(ι.rTensor B) by
+φ-injectivity + smul_top_eq_map induction; collapse ψ := tensorQuotEquivQuotSMul
+∘ lTensor(levelOneSymmLin) ∘ lTensor(mkₐ); TensorProduct.ext' kills the
+I^{n+1}-part), comap_pow_le_of_flat_of_levelOne,
+levelMap_bijective_of_flat_of_levelOne, adicCompletionEquivOfFlatOfLevelOne.
+Gotchas: needs `open scoped TensorProduct`; ∘ₗ-coe vs ∘ needs show;
+ladder h1-var is named (h1 : Surjective (levelMap I 1)).
+
+**SIMPLIFIED L1 ASSEMBLY (no localized flatness!)**: for 𝔮 QHead-maximal,
+𝔭 := comap headToQ 𝔮 (MAXIMAL ✓ comap_headToQ_isMaximal):
+completedLocal head 𝔭 ≅ AdicCompletion 𝔭 head        [localizationEquiv.symm ✓]
+  ≅ AdicCompletion (𝔭·QHead) QHead                    [adicCompletionEquivOfFlatOfLevelOne]
+  = AdicCompletion 𝔮 QHead                            [𝔭Q = 𝔮, FREE from β + maximality]
+  ≅ completedLocal QHead 𝔮                            [localizationEquiv ✓]
+Inputs: (α) Module.Flat head QHead — 8.30-transported (conditional);
+(β) BIJECTIVE level one head⧸𝔭 → QHead⧸𝔭·QHead. β-injectivity is FREE
+(comap 𝔭Q ⊆ comap 𝔮 = 𝔭 + le_comap). β-SURJECTIVITY = the analytic heart:
+the evaluation ε : QHead → κ(𝔭) via the FJP evaluation engine over the
+SPECTRAL-normed finite residue field (κ(𝔭)-finite ✓ from the tower;
+T̄ᵢ ↦ f̄ᵢ/s̄ bounded: |f̄| ≤ |s̄| from the graph relation s̄T̄=f̄ + ‖T̄‖≤1
+integrality; ε∘headToQ = mk gives the SPLIT; exactness ker ε = 𝔭Q needs
+the collapse — next adjudication candidate: split + dimension/local-ring
+argument vs direct density). NEXT: recon mvEvalHomBounded instantiation
+over κ(𝔭)-spectral for ε.
