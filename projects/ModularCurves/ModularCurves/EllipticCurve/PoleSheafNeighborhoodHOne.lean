@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
 import ModularCurves.EllipticCurve.PoleSheafNoetherianStageCech
 import ModularCurves.EllipticCurve.PoleSheafProjectiveBaseChangeHOne
 import ModularCurves.ForMathlib.CochainComplexFlatBaseChangeExact
+import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChangeLinearEquiv
 import ModularCurves.ForMathlib.PrescribedLocalizedBasis
 
 /-!
@@ -538,6 +539,99 @@ theorem sectionPoleSheafPowerPushforwardBaseChange_app_top_isIso_of_orderedBaseC
   rw [hfun]
   exact eTarget.bijective
 
+section
+
+set_option allowUnsafeReducibility true in
+attribute [local irreducible] AlgebraicGeometry.Scheme.isoSpec
+
+set_option maxRecDepth 8192 in
+/-- The pure tensor of the canonical first-pole section with the unit of any field over
+the base is nonzero: the geometric leg to `Spec κ` identifies it with the canonical
+section of the fibre family, which is nonzero. (`maxRecDepth` raised for the deep
+`Γ(Spec κ)`-tensor terms — a term-depth limit, not an elaboration budget.) -/
+private theorem one_tmul_oneSection_ne_zero_of_field
+    {E' T' : Scheme.{u}} {π' : E' ⟶ T'} [IsAffine T'] [IsProper π']
+    (hsm' : SmoothOfRelativeDimension 1 π')
+    (z' : T' ⟶ E') (hz' : z' ≫ π' = 𝟙 T')
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (UT : ι → E'.Opens)
+    (hUT : IsOpenCover UT) (hUTaff : ∀ i, IsAffineOpen (UT i))
+    (hDflat : ∀ q, Module.Flat Γ(T', (⊤ : T'.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π'
+        (sectionPoleSheafPower π' z' hz' 1) UT).X q))
+    (hDbdd : ∀ q, Fintype.card ι ≤ q → Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π'
+        (sectionPoleSheafPower π' z' hz' 1) UT).X q))
+    (hDexact : ∀ q, q < Fintype.card ι →
+      Function.Exact
+        ((Scheme.Modules.orderedBaseCechComplex π'
+          (sectionPoleSheafPower π' z' hz' 1) UT).d q (q + 1)).hom
+        ((Scheme.Modules.orderedBaseCechComplex π'
+          (sectionPoleSheafPower π' z' hz' 1) UT).d (q + 1) (q + 2)).hom)
+    (κ : Type u) [Field κ] [Algebra Γ(T', (⊤ : T'.Opens)) κ] :
+    (1 : κ) ⊗ₜ[Γ(T', (⊤ : T'.Opens))]
+        (sectionPoleSheafPowerOneSection π' z' hz' :
+          Scheme.Modules.baseSections π'
+            (sectionPoleSheafPower π' z' hz' 1)) ≠ 0 := by
+  let tK : Spec (.of κ) ⟶ T' :=
+    Spec.map (CommRingCat.ofHom
+      (algebraMap Γ(T', (⊤ : T'.Opens)) κ)) ≫ T'.isoSpec.inv
+  letI : ((Scheme.Modules.pushforward π').obj
+      (sectionPoleSheafPower π' z' hz' 1)).IsQuasicoherent :=
+    sectionPoleSheafPowerPushforward_isQuasicoherent hsm' z' hz' 1
+  haveI := sectionPoleSheafPowerPushforwardBaseChange_app_top_isIso_of_orderedBaseCech_package
+    hsm' z' hz' UT hUT hUTaff hDflat hDbdd hDexact tK
+  letI : Algebra Γ(T', (⊤ : T'.Opens))
+      Γ(Spec (.of κ), (⊤ : (Spec (.of κ)).Opens)) := tK.appTop.hom.toAlgebra
+  letI : Algebra κ Γ(Spec (.of κ), (⊤ : (Spec (.of κ)).Opens)) :=
+    (Scheme.ΓSpecIso (.of κ)).inv.hom.toAlgebra
+  letI : IsScalarTower Γ(T', (⊤ : T'.Opens)) κ
+      Γ(Spec (.of κ), (⊤ : (Spec (.of κ)).Opens)) :=
+    IsScalarTower.of_algebraMap_eq'
+      (Scheme.specMap_algebraMap_isoSpec_inv_appTop (S := T') κ)
+  letI : Nonempty (pullback π' tK : Scheme.{u}) :=
+    Nonempty.map (fun x : Spec (.of κ) => sectionBaseChange z' hz' tK x)
+      inferInstance
+  have hsmK : SmoothOfRelativeDimension 1 (pullback.snd π' tK) :=
+    (smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
+      (IsPullback.of_hasPullback π' tK) hsm'
+  have htarget : sectionPoleSheafPowerOneSection (pullback.snd π' tK)
+      (sectionBaseChange z' hz' tK) (sectionBaseChange_snd z' hz' tK) ≠ 0 :=
+    sectionPoleSheafPowerOneSection_ne_zero hsmK _ _
+  let eBC := sectionPoleSheafPower_baseSectionsBaseChangeLinearEquivOfAppTopIso
+    (π := π') hsm' z' hz' tK 1
+  have hpure : eBC ((1 : Γ(Spec (.of κ), (⊤ : (Spec (.of κ)).Opens)))
+      ⊗ₜ[Γ(T', (⊤ : T'.Opens))]
+        (sectionPoleSheafPowerOneSection π' z' hz' :
+          Scheme.Modules.baseSections π'
+            (sectionPoleSheafPower π' z' hz' 1))) =
+      sectionPoleSheafPowerOneSection (pullback.snd π' tK)
+        (sectionBaseChange z' hz' tK) (sectionBaseChange_snd z' hz' tK) :=
+    sectionPoleSheafPowerOne_baseSectionsBaseChangeLinearEquivOfAppTopIso_one_tmul
+      (π := π') hsm' z' hz' tK
+  have hKne : (1 : Γ(Spec (.of κ), (⊤ : (Spec (.of κ)).Opens)))
+      ⊗ₜ[Γ(T', (⊤ : T'.Opens))]
+        (sectionPoleSheafPowerOneSection π' z' hz' :
+          Scheme.Modules.baseSections π'
+            (sectionPoleSheafPower π' z' hz' 1)) ≠ 0 := by
+    intro h0
+    apply htarget
+    have h2 := congrArg eBC h0
+    rw [hpure, map_zero] at h2
+    exact h2
+  intro h0
+  apply hKne
+  have h1 := congrArg
+    (LinearMap.rTensor
+      (Scheme.Modules.baseSections π' (sectionPoleSheafPower π' z' hz' 1))
+      ((Algebra.linearMap κ
+        Γ(Spec (.of κ), (⊤ : (Spec (.of κ)).Opens))).restrictScalars
+          Γ(T', (⊤ : T'.Opens)))) h0
+  rw [map_zero, LinearMap.rTensor_tmul, LinearMap.restrictScalars_apply,
+    Algebra.linearMap_apply, map_one] at h1
+  exact h1
+
+end
+
 /-- **(FLW-2b skeleton — proof route locked on the board; all ingredients landed.)**
 Around every point there is a basic open with the full package AND a normalized rank-one
 basis of the first pole module of the direct family. Fill per `[FLW-2b] DESIGN LOCKED`:
@@ -819,12 +913,9 @@ theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_poleOneBasis
         (h'.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank
           hsm' z' hz' UT hUT hUTaff κp (le_refl 1))
     · -- the canonical section has nonzero fibre at every maximal
-      -- (step 8; route (i) on the board — the geometric-leg attempt hit whnf timeouts
-      -- in the equivOfAppTopIso elaboration; retry with the tK-lets hoisted and the
-      -- rTensor transport replaced by a `TensorProduct.congr`-free argument, or opacify
-      -- `Scheme.isoSpec` locally per the playbook)
       intro p hp
-      sorry
+      exact one_tmul_oneSection_ne_zero_of_field hsm' z' hz' UT hUT hUTaff
+        hDflat hDbdd hDexact p.ResidueField
   obtain ⟨bOne, hbOne⟩ := hbasis
   exact ⟨a, hmem, pullback yπ (u' ≫ gA), π', z', hz', inferInstance, hsm', h',
     ⟨eC, hCπ, hCz⟩,

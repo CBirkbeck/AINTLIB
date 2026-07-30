@@ -29824,3 +29824,17 @@ composite of step 7 maps `1 ⊗ x` to `kerBCC κp (1 ⊗ eKer x)` whose coe is
 `1 ⊗ₜ (eKer x : D.X 0)`; reduce ≠0 to `1 ⊗ₜ[K₀] (eKer x) ≠ 0` in `κp ⊗ D.X 0`, i.e. the
 0-cochain of OneSection (its UT-restrictions) not in p·(D.X 0) — no: that's false-ish
 reasoning; the honest content is geometric ⟹ use (i).
+
+### [FLW-2b] — **DONE 2026-07-30** (`EllipticCurve/PoleSheafNeighborhoodHOne.lean`, 0 sorries)
+`FibrewiseElliptic.exists_mem_basicOpen_pointedIso_poleOneBasis` — the FLW-1 package PLUS
+H¹ = 0 PLUS a normalized rank-one basis (bOne 0 = OneSection) of `π'_*𝒪([0])` over the
+basic open, axiom-verified (propext/choice/Quot.sound). Step 8 landed via the standalone
+`one_tmul_oneSection_ne_zero_of_field` (abstract field-leg; `maxRecDepth 8192` scoped to
+that one private lemma for the deep `Γ(Spec κ)`-tensor TERMS — a depth knob, not a budget;
+the earlier whnf/isDefEq storms were cured by the type-ascribed `hpure` + explicit-function
+`congrArg`, per the stall-patterns playbook). **NEXT [FLW-6]**: per the board recipe —
+Cartier producer at s → apply poleOneBasis to the V-restricted family → n=1 comparison
+`sectionPoleSheafPower_locallyWeierstrass_of_CartierGenerator` on the direct family
+(hHOne ✓ bOne/hbOne ✓ Cartier data restricted from V to the basic open) → cross with
+`LocallyWeierstrass.of_iso` via eC → `FibrewiseElliptic.locallyWeierstrass` →
+`locallyWeierstrass_iff_abstractConditions`.
