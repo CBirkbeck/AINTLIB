@@ -482,3 +482,41 @@ Never assume a deferred raise needs the expensive fix. `lake build` with the rai
 the exact `line:col` of the hot step, which distinguishes the three cases cheaply: one bad tactic
 step (fix it), cumulative cost (decompose), or a def field (restructure). Two of five turned out
 to be one-line fixes and a third was pure litter.
+
+## Task 2 — `exists_lift_norm_le_of_closed_range`: the mirror-pair pattern
+
+389-line body (FJP/FiniteJetGraphKoszul.lean), an ultrametric Banach open-mapping argument.
+The `skeleton.py` view showed ~100 lines of small *scaling helpers* ahead of the two big pieces,
+and four of those helpers were **mirror pairs** — the same proof twice, differing only in an
+index type or in `t` versus `t⁻¹`:
+
+| helpers | differ only in | replaced by |
+|---|---|---|
+| `hpitpow` / `hpitpowκ` | index `ι` vs `κ` | `pi_norm_pow_mul_of_scale` |
+| `hpitinvpow` / `hpitinvpowι` | index, and `c := t⁻¹` | the same lemma |
+| `hequiv_pow` / `hequivinv_pow` | `c := t` vs `c := t⁻¹` | `map_pow_mul_of_equivariant` |
+
+Plus the sub-fact `‖t ^ n‖ = ‖t‖ ^ n` was re-derived **four times** inline → `norm_pow_of_scale`.
+
+Three new lemmas, six blocks collapsed to one-liners: body **389 → 346**, and each new lemma is
+generic (arbitrary index type, arbitrary scaling element) so it can serve other FJP proofs.
+Both `▸`-based specialisations (`htinvnorm ▸ pi_norm_pow_mul_of_scale htinvscale' n u`) compiled
+first try.
+
+**The pattern to look for:** in a proof over a map `(ι → A) →+ (κ → A)`, any helper stated for
+one index type almost certainly has a twin for the other. Make the index a parameter and both
+copies collapse. Same for anything stated for a unit and again for its inverse — parameterise
+over the element.
+
+### Still over the bar: 346 lines
+
+Remaining structure, for the next pass:
+
+    59L  have key   : δ-small elements of the range lift with norm ≤ R
+    39L  have step  : the approximation step at scale k  (used 10x, incl. inside `key`)
+   121L  the `y ≠ 0` bullet: the [δ‖t‖, δ) window argument
+
+`step` is used both inside `key` and in the closing bullet, so `key` cannot be lifted without
+either passing `step` in or lifting both together. The natural split is the textbook one:
+one lemma for the δ-ball lifting (`step` + `key`), leaving the Baire setup and the window
+argument in the parent.

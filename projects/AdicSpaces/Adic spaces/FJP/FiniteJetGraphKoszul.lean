@@ -752,6 +752,44 @@ theorem pi_norm_add_le_max (u v : ι → A) : ‖u + v‖ ≤ max ‖u‖ ‖v�
   refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
   exact max_le_max (norm_le_pi_norm u i) (norm_le_pi_norm v i)
 
+/-- A scaling element's powers have the norm one expects. -/
+theorem norm_pow_of_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x‖) (n : ℕ) :
+    ‖c ^ n‖ = ‖c‖ ^ n := by
+  have h := norm_pow_mul_of_scale (E := A) hc n (1 : A)
+  rwa [mul_one, norm_one, mul_one] at h
+
+/-- Sup norms of tuples scale exactly under a *power* of a scaling element — the `pow`
+companion to `pi_norm_scale`.
+
+The index type is a parameter, so this one statement covers both tuple spaces of a map
+`(ι → A) →+ (κ → A)`; the four copies it replaced in
+`exists_lift_norm_le_of_closed_range` differed only in `ι` versus `κ` and in `c := t`
+versus `c := t⁻¹`. -/
+theorem pi_norm_pow_mul_of_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x‖) (n : ℕ)
+    (u : ι → A) : ‖fun i => c ^ n * u i‖ = ‖c‖ ^ n * ‖u‖ := by
+  have hc' : ∀ x : A, ‖c ^ n * x‖ = ‖c ^ n‖ * ‖x‖ := fun x => by
+    rw [norm_pow_mul_of_scale (E := A) hc n x, norm_pow_of_scale hc n]
+  rw [pi_norm_scale hc' u, norm_pow_of_scale hc n]
+
+/-- A `c`-equivariant additive map between tuple spaces is `c ^ n`-equivariant.
+
+Stated for an arbitrary scaling element so that one lemma covers both the equivariance
+hypothesis of a map and the equivariance of its inverse-scaling companion. -/
+theorem map_pow_mul_of_equivariant {c : A} (f : (ι → A) →+ (κ → A))
+    (hf : ∀ u, f (fun i => c * u i) = fun k => c * f u k) :
+    ∀ (n : ℕ) (u : ι → A), f (fun i => c ^ n * u i) = fun k => c ^ n * f u k := by
+  intro n
+  induction n with
+  | zero => intro u; simp
+  | succ n ih =>
+    intro u
+    have hstep : (fun i => c ^ (n + 1) * u i) = fun i => c * (c ^ n * u i) :=
+      funext fun i => by ring
+    rw [hstep, hf, ih u]
+    funext k
+    show c * (c ^ n * f u k) = c ^ (n + 1) * f u k
+    ring
+
 /-- **Ultrametric Banach open mapping with constants** ([FJP] Lemma 4.2's strictness;
 Huber [4, Lemma 2.4(ii)]): a continuous `t`-equivariant additive map between finite tuple
 spaces over a complete ultrametric normed ring lifts elements of its closed range with a
@@ -858,31 +896,11 @@ theorem exists_lift_norm_le_of_closed_range
     rw [h1]
     show f (fun i => tinv * u i) k = tinv * (t * f (fun i => tinv * u i) k)
     rw [hcancel']
-  have hequiv_pow : ∀ (n : ℕ) (u), f (fun i => t ^ n * u i) = fun k => t ^ n * f u k := by
-    intro n
-    induction n with
-    | zero => intro u; simp
-    | succ n ih =>
-      intro u
-      have hstep : (fun i => t ^ (n + 1) * u i) = fun i => t * (t ^ n * u i) :=
-        funext fun i => by ring
-      rw [hstep, hequiv, ih u]
-      funext k
-      show t * (t ^ n * f u k) = t ^ (n + 1) * f u k
-      ring
+  have hequiv_pow : ∀ (n : ℕ) (u), f (fun i => t ^ n * u i) = fun k => t ^ n * f u k :=
+    map_pow_mul_of_equivariant f hequiv
   have hequivinv_pow : ∀ (n : ℕ) (u), f (fun i => tinv ^ n * u i) =
-      fun k => tinv ^ n * f u k := by
-    intro n
-    induction n with
-    | zero => intro u; simp
-    | succ n ih =>
-      intro u
-      have hstep : (fun i => tinv ^ (n + 1) * u i) = fun i => tinv * (tinv ^ n * u i) :=
-        funext fun i => by ring
-      rw [hstep, hequivinv, ih u]
-      funext k
-      show tinv * (tinv ^ n * f u k) = tinv ^ (n + 1) * f u k
-      ring
+      fun k => tinv ^ n * f u k :=
+    map_pow_mul_of_equivariant f hequivinv
   have htinvnorm : ‖tinv‖ = ‖t‖⁻¹ := by
     have h := htinvscale 1
     rwa [mul_one, norm_one, mul_one] at h
@@ -894,38 +912,15 @@ theorem exists_lift_norm_le_of_closed_range
     rwa [htinvnorm] at h
   have htpow : ∀ (n : ℕ) (x : A), ‖t ^ n * x‖ = ‖t‖ ^ n * ‖x‖ := fun n x =>
     norm_pow_mul_of_scale (E := A) hscale n x
-  have hpitpow : ∀ (n : ℕ) (u : ι → A), ‖fun i => t ^ n * u i‖ = ‖t‖ ^ n * ‖u‖ := by
-    intro n u
-    have hnpow : ‖t ^ n‖ = ‖t‖ ^ n := by
-      have h := htpow n 1
-      rwa [mul_one, norm_one, mul_one] at h
-    have hc : ∀ x : A, ‖t ^ n * x‖ = ‖t ^ n‖ * ‖x‖ := fun x => by
-      rw [htpow, hnpow]
-    rw [pi_norm_scale hc u, hnpow]
-  have hpitinvpow : ∀ (n : ℕ) (u : κ → A), ‖fun k => tinv ^ n * u k‖ = (‖t‖⁻¹) ^ n * ‖u‖ := by
-    intro n u
-    have hnpow : ‖tinv ^ n‖ = (‖t‖⁻¹) ^ n := by
-      have h := htinvpow n 1
-      rwa [mul_one, norm_one, mul_one] at h
-    have hc : ∀ x : A, ‖tinv ^ n * x‖ = ‖tinv ^ n‖ * ‖x‖ := fun x => by
-      rw [htinvpow, hnpow]
-    rw [pi_norm_scale hc u, hnpow]
-  have hpitpowκ : ∀ (n : ℕ) (u : κ → A), ‖fun k => t ^ n * u k‖ = ‖t‖ ^ n * ‖u‖ := by
-    intro n u
-    have hnpow : ‖t ^ n‖ = ‖t‖ ^ n := by
-      have h := htpow n 1
-      rwa [mul_one, norm_one, mul_one] at h
-    have hc : ∀ x : A, ‖t ^ n * x‖ = ‖t ^ n‖ * ‖x‖ := fun x => by rw [htpow, hnpow]
-    rw [pi_norm_scale hc u, hnpow]
+  have hpitpow : ∀ (n : ℕ) (u : ι → A), ‖fun i => t ^ n * u i‖ = ‖t‖ ^ n * ‖u‖ :=
+    fun n u => pi_norm_pow_mul_of_scale hscale n u
+  have hpitinvpow : ∀ (n : ℕ) (u : κ → A), ‖fun k => tinv ^ n * u k‖ = (‖t‖⁻¹) ^ n * ‖u‖ :=
+    fun n u => htinvnorm ▸ pi_norm_pow_mul_of_scale htinvscale' n u
+  have hpitpowκ : ∀ (n : ℕ) (u : κ → A), ‖fun k => t ^ n * u k‖ = ‖t‖ ^ n * ‖u‖ :=
+    fun n u => pi_norm_pow_mul_of_scale hscale n u
   have hpitinvpowι : ∀ (n : ℕ) (u : ι → A),
-      ‖fun i => tinv ^ n * u i‖ = (‖t‖⁻¹) ^ n * ‖u‖ := by
-    intro n u
-    have hnpow : ‖tinv ^ n‖ = (‖t‖⁻¹) ^ n := by
-      have h := htinvpow n 1
-      rwa [mul_one, norm_one, mul_one] at h
-    have hc : ∀ x : A, ‖tinv ^ n * x‖ = ‖tinv ^ n‖ * ‖x‖ := fun x => by
-      rw [htinvpow, hnpow]
-    rw [pi_norm_scale hc u, hnpow]
+      ‖fun i => tinv ^ n * u i‖ = (‖t‖⁻¹) ^ n * ‖u‖ :=
+    fun n u => htinvnorm ▸ pi_norm_pow_mul_of_scale htinvscale' n u
   -- the approximation step at scale `k`
   have step : ∀ (k : ℕ) (z : κ → A), z ∈ Set.range f → ‖z‖ < δ * ‖t‖ ^ k →
       ∃ u : ι → A, ‖u‖ ≤ R * ‖t‖ ^ k ∧ (z - f u) ∈ Set.range f ∧
