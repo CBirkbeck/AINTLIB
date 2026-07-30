@@ -1,1 +1,1 @@
-FOCUS: L1 engine FlatCompletion.lean (levelMap bijective via faithfully-flat comap-map + telescoped level-1 splitting; adicCompletionEquivOfFaithfullyFlat) compiling; ChatGPT adjudication of leaf-13b division route pending in background.
+FOCUS: HRW-4 leaf 13b — TateTaylor.lean part 1 (origin decomposition + pointIdeal_origin_eq_span) compiling; adjudicated route: + translation Lipschitz-equiv + level isos P/n0^r = A/J^r + liftRingHom into toAdicCompletionAlgEquiv; then leaf 14.
