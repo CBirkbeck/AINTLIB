@@ -33,7 +33,7 @@ to the restricted original family; downstream consumers work with the direct fam
 cross back at the `LocallyWeierstrass` level (`LocallyWeierstrass.of_iso`).
 -/
 
-open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace TensorProduct
 
 universe u
 
@@ -337,5 +337,64 @@ theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_subsingleton_H_one
       π' (sectionPoleSheafPower π' z' hz' 1) UT hDexactAt
   exact (Scheme.Modules.baseCechComplex_exactAt_one_iff_subsingleton_H π'
     (sectionPoleSheafPower π' z' hz' 1) UT hUT hUTaff).mp hBC
+
+/-- For a termwise-flat, bounded, positive-tail-exact ordered base-Čech complex, the
+degree-zero kernel — the global sections — commutes with every algebra base change. -/
+theorem kerBaseChangeComparison_bijective_of_orderedBaseCech_package
+    {E' T' : Scheme.{u}} (π' : E' ⟶ T') (MT : E'.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (UT : ι → E'.Opens)
+    (hflat : ∀ q, Module.Flat Γ(T', (⊤ : T'.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q))
+    (hbdd : ∀ q, Fintype.card ι ≤ q → Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q))
+    (hexact : ∀ q, q < Fintype.card ι →
+      Function.Exact
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d q (q + 1)).hom
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d (q + 1) (q + 2)).hom)
+    (A : Type u) [CommRing A] [Algebra Γ(T', (⊤ : T'.Opens)) A] :
+    Function.Bijective (ModularCurves.kerBaseChangeComparison A
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d 0 1).hom) := by
+  letI : ∀ q, Module.Flat Γ(T', (⊤ : T'.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q) := hflat
+  letI : Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X (Fintype.card ι + 1)) :=
+    hbdd _ (Nat.le_succ _)
+  letI : Module.Flat Γ(T', (⊤ : T'.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X 1 ⧸
+        LinearMap.range
+          ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d 0 1).hom) :=
+    Module.Flat.quotient_range_of_bounded_exact
+      (fun q => (Scheme.Modules.orderedBaseCechComplex π' MT UT).X q)
+      (fun q => ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d q (q + 1)).hom)
+      (Fintype.card ι) hexact 0 (Nat.zero_le _)
+  exact ModularCurves.kerBaseChangeComparison_bijective A
+    ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d 0 1).hom
+/-- Global sections of a module with a termwise-flat, bounded, positive-tail-exact
+ordered base-Čech complex commute with every affine base change of the base. -/
+noncomputable def baseSectionsBaseChangeEquiv_of_orderedBaseCech_package
+    {E' T' T'' : Scheme.{u}} (π' : E' ⟶ T') (t : T'' ⟶ T') (MT : E'.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (UT : ι → E'.Opens)
+    (hUT : IsOpenCover UT) (hUTaff : ∀ i, IsAffineOpen (UT i))
+    [E'.IsSeparated] [IsAffine T'] [IsAffine T''] [MT.IsQuasicoherent]
+    (hflat : ∀ q, Module.Flat Γ(T', (⊤ : T'.Opens))
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q))
+    (hbdd : ∀ q, Fintype.card ι ≤ q → Subsingleton
+      ((Scheme.Modules.orderedBaseCechComplex π' MT UT).X q))
+    (hexact : ∀ q, q < Fintype.card ι →
+      Function.Exact
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d q (q + 1)).hom
+        ((Scheme.Modules.orderedBaseCechComplex π' MT UT).d (q + 1) (q + 2)).hom) :
+    letI : Algebra Γ(T', (⊤ : T'.Opens)) Γ(T'', (⊤ : T''.Opens)) :=
+      t.appTop.hom.toAlgebra
+    Γ(T'', (⊤ : T''.Opens)) ⊗[Γ(T', (⊤ : T'.Opens))]
+        Scheme.Modules.baseSections π' MT ≃ₗ[Γ(T'', (⊤ : T''.Opens))]
+      Scheme.Modules.baseSections (pullback.snd π' t)
+        ((Scheme.Modules.pullback (pullback.fst π' t)).obj MT) := by
+  letI : Algebra Γ(T', (⊤ : T'.Opens)) Γ(T'', (⊤ : T''.Opens)) :=
+    t.appTop.hom.toAlgebra
+  exact Scheme.Modules.baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison
+    π' t MT UT hUT hUTaff
+    (kerBaseChangeComparison_bijective_of_orderedBaseCech_package
+      π' MT UT hflat hbdd hexact Γ(T'', (⊤ : T''.Opens)))
 
 end ModularCurves
