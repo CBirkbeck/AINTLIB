@@ -1,1 +1,1 @@
-FOCUS: HeadTResidue stage 2 (a)-(d) per hrw TOWER PROGRESS spec — then comap_headToQ_isMaximal fills, leaving only L1-conditional
+FOCUS: tower 2c/2d — head-T layer (comap along inclP maximal via moduleFinite_P_head_over_even integrality; quotient-finite generator argument; Module.Finite.trans) then QHead assembly (double-quotient residue iso + comap_isMaximal_of_finite_residue with headToQ as K-algebra hom) filling comap_headToQ_isMaximal

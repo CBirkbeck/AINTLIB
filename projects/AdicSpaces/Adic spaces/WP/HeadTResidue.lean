@@ -231,6 +231,127 @@ theorem module_finite_residue_evenT (ϖ : Uniformizer K)
       (P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ) →ₗ[K]
         (P K (k + (N + 1)) ⧸ 𝔪')) hinj
 
+/-- The even-into-head inclusion sends constants to constants. -/
+theorem inclP_constPE_evenConst (c : K) :
+    inclP (K := K) (w := w) (N := N) k (constPE k (evenConst w N c)) =
+      FiniteJet.GraphKoszul.polyToP
+        (MvPolynomial.C (constHead K w N c)) := by
+  refine Subtype.ext (MvPowerSeries.ext fun s => ?_)
+  have h1 : MvPowerSeries.coeff s
+      ((inclP (K := K) (w := w) (N := N) k
+        (constPE k (evenConst w N c)))).1 =
+      Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)
+        (MvPowerSeries.coeff s ((constPE k (evenConst w N c))).1) :=
+    mvRestrictedMapHom_coeff _ _ _ _
+  rw [h1]
+  show Subring.inclusion (wpEvenSupport_le_wpHeadSupport K w N)
+      (MvPowerSeries.coeff s (MvPowerSeries.C (evenConst w N c))) =
+    MvPowerSeries.coeff s
+      ((MvPolynomial.C (constHead K w N c) :
+        MvPolynomial (Fin k) (WPHead K w N)) :
+        MvPowerSeries (Fin k) (WPHead K w N))
+  rw [MvPolynomial.coe_C]
+  classical
+  rw [MvPowerSeries.coeff_C, MvPowerSeries.coeff_C]
+  by_cases hs : s = 0
+  · subst hs
+    rw [if_pos rfl, if_pos rfl]
+    rfl
+  · rw [if_neg hs, if_neg hs, _root_.map_zero]
+
+set_option maxHeartbeats 1600000 in
+/-- **Maximal residues of the head's Tate extension are `K`-finite**
+(contract along the even inclusion, apply the even Nullstellensatz, climb
+back up the finite extension). -/
+theorem module_finite_residue_headT (ϖ : Uniformizer K)
+    [hdvr : IsDiscreteValuationRing 𝒪[K]]
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (𝔮₀ : Ideal (FiniteJet.GraphKoszul.P (WPHead K w N) k))
+    [h𝔮₀ : 𝔮₀.IsMaximal] :
+    letI : Algebra K (FiniteJet.GraphKoszul.P (WPHead K w N) k ⧸ 𝔮₀) :=
+      ((Ideal.Quotient.mk 𝔮₀).comp
+        (((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+          (m := k)).comp MvPolynomial.C).comp
+          (constHead K w N))).toAlgebra
+    Module.Finite K (FiniteJet.GraphKoszul.P (WPHead K w N) k ⧸ 𝔮₀) := by
+  letI : Algebra K (FiniteJet.GraphKoszul.P (WPHead K w N) k ⧸ 𝔮₀) :=
+    ((Ideal.Quotient.mk 𝔮₀).comp
+      (((FiniteJet.GraphKoszul.polyToP (E := WPHead K w N)
+        (m := k)).comp MvPolynomial.C).comp
+        (constHead K w N))).toAlgebra
+  classical
+  letI : Algebra (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k) :=
+    (inclP (K := K) (w := w) (N := N) k).toAlgebra
+  haveI hfin : Module.Finite
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k) :=
+    moduleFinite_P_head_over_even (K := K) (w := w) (N := N) (k := k)
+  haveI hint : Algebra.IsIntegral
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k) :=
+    Algebra.IsIntegral.of_finite _ _
+  set 𝔮₁ : Ideal (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k) :=
+    𝔮₀.comap (inclP (K := K) (w := w) (N := N) k) with h𝔮₁def
+  haveI h𝔮₁max : 𝔮₁.IsMaximal :=
+    Ideal.isMaximal_comap_of_isIntegral_of_isMaximal 𝔮₀
+  letI : Algebra K
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k ⧸ 𝔮₁) :=
+    ((Ideal.Quotient.mk 𝔮₁).comp
+      ((constPE k).comp (evenConst w N))).toAlgebra
+  haveI heven : Module.Finite K
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k ⧸ 𝔮₁) :=
+    module_finite_residue_evenT w N k ϖ hK₀ 𝔮₁
+  letI : Algebra
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k ⧸ 𝔮₁)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k ⧸ 𝔮₀) :=
+    (Ideal.quotientMap 𝔮₀ (inclP (K := K) (w := w) (N := N) k)
+      (le_of_eq h𝔮₁def)).toAlgebra
+  haveI hfin2 : Module.Finite
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k ⧸ 𝔮₁)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k ⧸ 𝔮₀) := by
+    obtain ⟨T, hT⟩ := hfin.fg_top
+    refine ⟨⟨T.image (Ideal.Quotient.mk 𝔮₀), ?_⟩⟩
+    rw [eq_top_iff]
+    intro z _
+    obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective z
+    have hb : b ∈ Submodule.span
+        (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k)
+        (T : Set _) := by
+      rw [hT]
+      exact Submodule.mem_top
+    refine Submodule.span_induction ?_ ?_ ?_ ?_ hb
+    · intro t ht
+      exact Submodule.subset_span (Finset.mem_coe.mpr
+        (Finset.mem_image_of_mem _ ht))
+    · rw [_root_.map_zero]
+      exact Submodule.zero_mem _
+    · intro u v _ _ hu hv
+      rw [_root_.map_add]
+      exact Submodule.add_mem _ hu hv
+    · intro a x _ hx
+      have h5 : Ideal.Quotient.mk 𝔮₀ (a • x) =
+          (Ideal.Quotient.mk 𝔮₁ a) • (Ideal.Quotient.mk 𝔮₀ x) := by
+        show Ideal.Quotient.mk 𝔮₀
+          (inclP (K := K) (w := w) (N := N) k a * x) = _
+        rw [map_mul]
+        rfl
+      rw [h5]
+      exact Submodule.smul_mem _ _ hx
+  haveI htower : IsScalarTower K
+      (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k ⧸ 𝔮₁)
+      (FiniteJet.GraphKoszul.P (WPHead K w N) k ⧸ 𝔮₀) := by
+    refine IsScalarTower.of_algebraMap_eq fun c => ?_
+    show Ideal.Quotient.mk 𝔮₀ (FiniteJet.GraphKoszul.polyToP
+      (MvPolynomial.C (constHead K w N c))) =
+      Ideal.quotientMap 𝔮₀ (inclP (K := K) (w := w) (N := N) k)
+        (le_of_eq h𝔮₁def)
+        (Ideal.Quotient.mk 𝔮₁ (constPE k (evenConst w N c)))
+    rw [Ideal.quotientMap_mk, inclP_constPE_evenConst]
+  exact Module.Finite.trans
+    (FiniteJet.GraphKoszul.P ↥(wpEvenSupport K w N) k ⧸ 𝔮₁)
+    (FiniteJet.GraphKoszul.P (WPHead K w N) k ⧸ 𝔮₀)
+
 end ResidueTransport
 
 end WeightedParity
