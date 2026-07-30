@@ -141,4 +141,96 @@ theorem evenTEquiv_evenConst (c : K) :
 
 end Constants
 
+section ResidueTransport
+
+open scoped Valued
+
+/-- **Maximal residues of the even Tate extension are `K`-finite** (transport
+of the affinoid Nullstellensatz along `evenTEquiv`). -/
+theorem module_finite_residue_evenT (ϖ : Uniformizer K)
+    [hdvr : IsDiscreteValuationRing 𝒪[K]]
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (𝔪ₑ : Ideal (P ↥(wpEvenSupport K w N) k)) [h𝔪 : 𝔪ₑ.IsMaximal] :
+    letI : Algebra K (P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ) :=
+      ((Ideal.Quotient.mk 𝔪ₑ).comp
+        ((constPE k).comp (evenConst w N))).toAlgebra
+    Module.Finite K (P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ) := by
+  letI : Algebra K (P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ) :=
+    ((Ideal.Quotient.mk 𝔪ₑ).comp
+      ((constPE k).comp (evenConst w N))).toAlgebra
+  classical
+  -- push the ideal to the big Tate algebra
+  set 𝔪' : Ideal (P K (k + (N + 1))) :=
+    𝔪ₑ.map (((evenTEquiv w N k) :
+      P ↥(wpEvenSupport K w N) k ≃+* P K (k + (N + 1))) :
+      P ↥(wpEvenSupport K w N) k →+* P K (k + (N + 1))) with h𝔪'def
+  haveI h𝔪'max : 𝔪'.IsMaximal := by
+    rw [h𝔪'def, Ideal.map_comap_of_equiv]
+    exact Ideal.comap_isMaximal_of_surjective _
+      ((evenTEquiv w N k).symm.surjective)
+  -- the Nullstellensatz on the big side
+  letI : Algebra K (P K (k + (N + 1)) ⧸ 𝔪') :=
+    (FiniteJet.GraphKoszul.constantsToResidue
+      (m := k + (N + 1)) 𝔪').toAlgebra
+  haveI hbig : Module.Finite K (P K (k + (N + 1)) ⧸ 𝔪') :=
+    FiniteJet.GraphKoszul.module_finite_residue
+      (m := k + (N + 1)) ϖ 𝔪' hK₀
+  -- the quotient equivalence
+  have hle : 𝔪ₑ ≤ Ideal.comap (((evenTEquiv w N k) :
+      P ↥(wpEvenSupport K w N) k ≃+* P K (k + (N + 1))) :
+      P ↥(wpEvenSupport K w N) k →+* P K (k + (N + 1))) 𝔪' :=
+    Ideal.le_comap_map
+  set e : (P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ) →+*
+      (P K (k + (N + 1)) ⧸ 𝔪') :=
+    Ideal.quotientMap 𝔪' (((evenTEquiv w N k) :
+      P ↥(wpEvenSupport K w N) k ≃+* P K (k + (N + 1))) :
+      P ↥(wpEvenSupport K w N) k →+* P K (k + (N + 1))) hle with hedef
+  have hinj : Function.Injective e := by
+    rw [hedef]
+    refine Ideal.quotientMap_injective' ?_
+    rw [h𝔪'def]
+    have hcm : Ideal.comap (((evenTEquiv w N k) :
+        P ↥(wpEvenSupport K w N) k ≃+* P K (k + (N + 1))) :
+        P ↥(wpEvenSupport K w N) k →+* P K (k + (N + 1)))
+        (Ideal.map (((evenTEquiv w N k) :
+          P ↥(wpEvenSupport K w N) k ≃+* P K (k + (N + 1))) :
+          P ↥(wpEvenSupport K w N) k →+* P K (k + (N + 1))) 𝔪ₑ) = 𝔪ₑ :=
+      Ideal.comap_map_of_bijective _ (evenTEquiv w N k).bijective
+    rw [hcm]
+  -- e is K-linear for the constants structures
+  have hcomm : ∀ c : K, e (algebraMap K
+      (P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ) c) =
+      algebraMap K (P K (k + (N + 1)) ⧸ 𝔪') c := by
+    intro c
+    show e (Ideal.Quotient.mk 𝔪ₑ (constPE k (evenConst w N c))) =
+      Ideal.Quotient.mk 𝔪'
+        (FiniteJet.GraphKoszul.polyToP (MvPolynomial.C c))
+    rw [hedef, Ideal.quotientMap_mk]
+    rw [show ((evenTEquiv w N k :
+        P ↥(wpEvenSupport K w N) k ≃+* P K (k + (N + 1))) :
+        P ↥(wpEvenSupport K w N) k →+* P K (k + (N + 1)))
+        (constPE k (evenConst w N c)) =
+      constPE (k + (N + 1)) c from evenTEquiv_evenConst w N k c]
+    congr 1
+    refine Subtype.ext ?_
+    show MvPowerSeries.C c =
+      ((MvPolynomial.C c : MvPolynomial (Fin (k + (N + 1))) K) :
+        MvPowerSeries (Fin (k + (N + 1))) K)
+    exact (MvPolynomial.coe_C c).symm
+  -- transport the finiteness along the K-linear injection
+  have hlin : ∀ (c : K) (x : P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ),
+      e (c • x) = c • e x := by
+    intro c x
+    rw [Algebra.smul_def, Algebra.smul_def, map_mul, hcomm]
+  exact Module.Finite.of_injective
+    ({ toFun := ⇑e,
+       map_add' := fun a b => map_add e a b,
+       map_smul' := fun c x => by
+         rw [RingHom.id_apply]
+         exact hlin c x } :
+      (P ↥(wpEvenSupport K w N) k ⧸ 𝔪ₑ) →ₗ[K]
+        (P K (k + (N + 1)) ⧸ 𝔪')) hinj
+
+end ResidueTransport
+
 end WeightedParity
