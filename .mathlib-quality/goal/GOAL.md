@@ -3160,3 +3160,26 @@ the goal has been rewritten and the helper's statement is no longer the theorem'
 `ext n; simp only [Set.mem_setOf_eq]; constructor`, and `Set.mem_setOf_eq` only strips set-builder
 notation, leaving the goal in the source vocabulary (`Valued.v x = ρ ^ n * …`), which is exactly what
 the two helpers state.
+
+### The `unfold`-filter earns its keep immediately
+
+Applied the new filter to the next three seam candidates and it rejected two of them:
+
+* **`YStalks.runWindow_eq_rationalOpen_ofNat`** (−6, branches 13+13) — the branches sit under
+  `rw [runWindow, Set.mem_setOf_eq, hiff, hYeq]`, which rewrites the goal into a different vocabulary
+  (and `hiff` is itself a local `have`). A helper would have to state the *rewritten* iff, not the
+  theorem's. **Rejected by the filter, before writing anything.**
+* **`ContinuousValuations.le_of_isContinuous_of_denseRange_of_le`** (−6, branches 21+27) — passes the
+  vocabulary test (branches are `by_cases` under `by_contra`, so each proves `False`), but needs ~11
+  parameters including the local `hex`. Rejected on dependency count.
+* **`ChartVObj.chartPlus_le_completedPlusSubring_of_dense`** (−13) — load-bearing ascription, recorded
+  above.
+
+So of the 27 seam candidates, the first four examined break down as: 1 done (`Euclidean`), 3 rejected
+for three *different* reasons. **The 27 is an upper bound on a worklist, not a queue of 27 wins** —
+expect roughly the same hit rate as elsewhere, with the filters paying for themselves by rejecting
+cheaply (reading, not building).
+
+For a −6, note also that two 13-line helpers is arguably worse than the block they replace; the
+extraction bar should scale with the deficit. **Small deficits want joins or merges; extraction is for
+blocks with genuine shared or mathematical content.**
