@@ -323,6 +323,26 @@ theorem rpow_interpolate_lt_one {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (h�
         _ = ρ₁ ^ θ := mul_one _
         _ < 1 := h1
 
+/-- **The denominator interpolates exactly.** Pure `NNReal` arithmetic:
+`((ρ₁^θ · ρ₂^{1−θ}) · c)^k = ((ρ₁c)^k)^θ · ((ρ₂c)^k)^{1−θ}`. -/
+private theorem mul_rpow_interpolate_pow {ρ₁ ρ₂ c : NNReal} (hc0 : 0 < c) (θ : ℝ) (k : ℕ) :
+    ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c) ^ k
+      = ((ρ₁ * c) ^ k) ^ θ * ((ρ₂ * c) ^ k) ^ (1 - θ) := by
+  have hcsplit : c = c ^ θ * c ^ (1 - θ) := by
+    rw [← NNReal.rpow_add hc0.ne']
+    simp
+  have hbase : (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c
+      = (ρ₁ * c) ^ θ * (ρ₂ * c) ^ (1 - θ) := by
+    rw [NNReal.mul_rpow, NNReal.mul_rpow]
+    calc (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c
+        = (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * (c ^ θ * c ^ (1 - θ)) := by rw [← hcsplit]
+      _ = ρ₁ ^ θ * c ^ θ * (ρ₂ ^ (1 - θ) * c ^ (1 - θ)) := by ring
+  rw [hbase, mul_pow, ← NNReal.rpow_natCast ((ρ₁ * c) ^ θ) k,
+    ← NNReal.rpow_natCast ((ρ₂ * c) ^ (1 - θ)) k,
+    ← NNReal.rpow_natCast ((ρ₁ * c)) k, ← NNReal.rpow_natCast ((ρ₂ * c)) k,
+    ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul]
+  ring_nf
+
 /-- **Three circles on `Bloc`** (Kedlaya Lemma 4.4): the extended Gauss valuation at
 an interpolated radius is bounded by the interpolated endpoint values. -/
 theorem wLoc_rpow_interpolate {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
@@ -357,22 +377,7 @@ theorem wLoc_rpow_interpolate {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ�
     rw [map_mul, wLoc_algebraMap, wLoc_algebraMap, hden hσ0 hσ1] at happ
     exact happ
   -- the denominator interpolates exactly
-  have hdenint : ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c) ^ k
-      = ((ρ₁ * c) ^ k) ^ θ * ((ρ₂ * c) ^ k) ^ (1 - θ) := by
-    have hcsplit : c = c ^ θ * c ^ (1 - θ) := by
-      rw [← NNReal.rpow_add hc0.ne']
-      simp
-    have hbase : (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c
-        = (ρ₁ * c) ^ θ * (ρ₂ * c) ^ (1 - θ) := by
-      rw [NNReal.mul_rpow, NNReal.mul_rpow]
-      calc (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c
-          = (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * (c ^ θ * c ^ (1 - θ)) := by rw [← hcsplit]
-        _ = ρ₁ ^ θ * c ^ θ * (ρ₂ ^ (1 - θ) * c ^ (1 - θ)) := by ring
-    rw [hbase, mul_pow, ← NNReal.rpow_natCast ((ρ₁ * c) ^ θ) k,
-      ← NNReal.rpow_natCast ((ρ₂ * c) ^ (1 - θ)) k,
-      ← NNReal.rpow_natCast ((ρ₁ * c)) k, ← NNReal.rpow_natCast ((ρ₂ * c)) k,
-      ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul]
-    ring_nf
+  have hdenint := mul_rpow_interpolate_pow (ρ₁ := ρ₁) (ρ₂ := ρ₂) hc0 θ k
   -- combine
   have hdenne : ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c) ^ k ≠ 0 :=
     pow_ne_zero k (mul_pos hmid0 hc0).ne'

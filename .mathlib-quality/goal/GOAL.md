@@ -1739,3 +1739,27 @@ Order candidate `have`s by **how much surrounding context they mention**, not by
    shared inner step instead (cf. `FJP.syzygy_graph_of_isUnit`).
 
 Running total: **269** (486 baseline → 290 pre-split → 274 post-split → 269).
+
+## Assessed and rejected: `ChartVObj.chartPlus_le_completedPlusSubring_of_dense` (63, need −13)
+
+Its dominant block `htend` (34 lines) is two near-identical mirror branches — `.1` / `le_max_left` /
+`BIProd_fst` against `.2` / `le_max_right` / `BIProd_snd`. The obvious −12 is to delete the 6-line
+
+    have hmax : max (Valued.v (…)) (Valued.v (…)) ≤ (2 : NNReal)⁻¹ ^ n := hball n
+    have h1 := le_trans (le_max_left _ _) hmax
+
+ascription from each branch and write `have h1 := le_trans (le_max_left _ _) (hball n)` directly.
+
+**Why that is a trap, and a gotcha to remember generally:** `have h : T := e` gives `h` the type `T`
+*syntactically*, not `e`'s inferred type — the two need only be defeq. The very next tactic is
+
+    rw [show (…) = (…) from rfl, Valuation.map_sub_swap, BIProd_fst] at h1
+
+and `rw` matches **syntactically**. A long explicit ascription in front of a `rw ... at` is very often
+load-bearing precisely because it normalises the hypothesis into the shape the `rw` pattern expects;
+deleting it can make the rewrite fail even though the term is unchanged. So an ascription-removal
+golf is *not* a safe mechanical edit when a `rw`/`simp only ... at` consumes the hypothesis — it needs
+a build, and here the honest lift is `htend` as a whole (parameterised over `z`, `hseq`, `hball`),
+which is a larger piece of work than this pass had verified budget for.
+
+Recorded rather than attempted blind, per the no-unverified-edits rule.
