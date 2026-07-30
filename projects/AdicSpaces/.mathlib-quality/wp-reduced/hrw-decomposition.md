@@ -603,3 +603,30 @@ fibre-maximals DID work here (both for type-elab and the final instance-arg).
 REMAINING FRONTIER (exactly two): comap_headToQ_isMaximal (T_N⟨T⟩-tower
 residue finiteness) and qHead_completedLocal_comparison (L1; 8.30-conditional
 by design). headLocsReduced' (live in Main) sorryAx-depends on exactly these.
+
+## TOWER PROGRESS (2026-07-30 latest)
+
+restrictedFubini DONE sorry-free (FJP/RestrictedFubini.lean): P K (k+m) ≃+*
+P (P K m) k — restrictedRenameEquiv (coeff_rename_equiv/embDomain_symm_embDomain)
++ restrictedSumEquiv (sumToRestrictedFun with sup-norm escape arguments both
+ways; pValHom map-injectivity discharges ALL hom-laws; sumAlgEquiv-coe show-fix
+for apply_symm; Finsupp.comapDomain_inl/inr_sumElim + comapDomain_sumElim_comapDomain
+mathlib names). evenTEquiv DONE (WP/HeadTResidue.lean): P ↥even k ≃+* P K (k+N+1)
+via mvRestrictedCongr(evenSupportEquiv, norm_evenSupportEquiv) trans Fubini.symm.
+
+NEXT (fully specified): stage-2 of HeadTResidue —
+(a) constants-compat: evenTEquiv (polyToP (C a)) = image-constants chain
+    (mvRestrictedCongr coefficientwise + Xia sumToIter_C symm-direction);
+(b) module_finite_residue_evenT: transport module_finite_residue (m := k+N+1)
+    along Ideal.quotientEquiv evenTEquiv with the K-linearity from (a)
+    (LinearEquiv-package + Module.Finite.equiv);
+(c) head⟨T⟩: comap along inclP k maximal (moduleFinite_P_head_over_even →
+    Algebra.IsIntegral → Ideal.isMaximal_comap_of_isIntegral_of_isMaximal);
+    head⟨T⟩⧸𝔮₀ finite over evenT⧸comap (generator-argument 4th copy);
+    Module.Finite.trans + IsScalarTower.of_algebraMap_eq;
+(d) QHead: 𝔮₀ := comap mk max (comap_isMaximal_of_surjective); residue-iso
+    QHead⧸𝔮 ≅ head⟨T⟩⧸𝔮₀ (RingHom.quotientKerEquivOfSurjective / DoubleQuot);
+    comap_isMaximal_of_finite_residue with headToQ as →ₐ[K] via constHead;
+    fills comap_headToQ_isMaximal (HeadReducedMaximal) → then the ONLY
+    remaining live-chain sorry is qHead_completedLocal_comparison (L1,
+    8.30-conditional by design).
