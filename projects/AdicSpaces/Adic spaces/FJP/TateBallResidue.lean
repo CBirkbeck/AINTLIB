@@ -87,4 +87,63 @@ noncomputable def unitBallPQuotientEquiv
   · -- the principal adic quotient, aligned at I0 = span {tConstPoly}
     exact AdicCompletion.quotientSpanEquiv ht_nzd
 
+/-- A nonzerodivisor constant is a nonzerodivisor polynomial. -/
+theorem C_mem_nonZeroDivisors_mvPolynomial {R : Type*} [CommRing R]
+    {σ : Type*} {r : R} (hr : r ∈ nonZeroDivisors R) :
+    (MvPolynomial.C r : MvPolynomial σ R) ∈
+      nonZeroDivisors (MvPolynomial σ R) := by
+  obtain ⟨hrl, -⟩ := mem_nonZeroDivisors_iff.mp hr
+  have hcore : ∀ p : MvPolynomial σ R, MvPolynomial.C r * p = 0 → p = 0 := by
+    intro p hp
+    refine MvPolynomial.ext _ _ fun d => ?_
+    have h1 := congrArg (MvPolynomial.coeff d) hp
+    rw [MvPolynomial.coeff_C_mul, MvPolynomial.coeff_zero] at h1
+    rw [MvPolynomial.coeff_zero]
+    exact hrl _ h1
+  exact mem_nonZeroDivisors_iff.mpr
+    ⟨hcore, fun p hp => hcore p (by rwa [mul_comm] at hp)⟩
+
+/-- The scaling unit is a nonzerodivisor of the unit ball. -/
+theorem tUnitBall_mem_nonZeroDivisors (htu : IsUnit t) :
+    (⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ : ↥(unitBall E)) ∈
+      nonZeroDivisors ↥(unitBall E) := by
+  have hcore : ∀ x : ↥(unitBall E),
+      x * (⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ : ↥(unitBall E)) = 0 →
+      x = 0 := by
+    intro x hx
+    have h1 : (x : E) * t = 0 := congrArg Subtype.val hx
+    have h2 : (x : E) = 0 := by
+      have h3 := congrArg (· * (↑htu.unit⁻¹ : E)) h1
+      simpa [mul_assoc, IsUnit.mul_val_inv] using h3
+    exact Subtype.ext h2
+  exact mem_nonZeroDivisors_iff.mpr
+    ⟨fun x hx => hcore x (by rwa [mul_comm] at hx), hcore⟩
+
+/-- The polynomial scaling constant is a nonzerodivisor. -/
+theorem tConstPoly_mem_nonZeroDivisors (htu : IsUnit t) :
+    (tConstPoly (E := E) (m := m) t ht1) ∈
+      nonZeroDivisors (MvPolynomial (Fin m) ↥(unitBall E)) :=
+  C_mem_nonZeroDivisors_mvPolynomial
+    (tUnitBall_mem_nonZeroDivisors t ht1 htu)
+
+/-- **The residue ring of the integral Tate algebra is a polynomial ring over
+the residue ring of the base** ([hrw-decomposition] Tate leaf 4, final form):
+`E⟨T⟩° ⧸ (t) ≃+* (E° ⧸ (t))[T₁,…,T_m]`. -/
+noncomputable def unitBallPResidueEquiv :
+    (↥(unitBall (P E m)) ⧸
+      Ideal.span {tConstBall (E := E) (m := m) t ht1}) ≃+*
+    MvPolynomial (Fin m) (↥(unitBall E) ⧸
+      Ideal.span {(⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+        ↥(unitBall E))}) :=
+  ((unitBallPQuotientEquiv t htu ht1 ht0 hscale
+      (tConstPoly_mem_nonZeroDivisors t ht1 htu)).trans
+    (Ideal.quotEquivOfEq (show
+        Ideal.span {tConstPoly (E := E) (m := m) t ht1} =
+        Ideal.map MvPolynomial.C (Ideal.span
+          {(⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+            ↥(unitBall E))}) from by
+      rw [Ideal.map_span, Set.image_singleton]
+      rfl))).trans
+    (MvPolynomial.quotientEquivQuotientMvPolynomial _).symm.toRingEquiv
+
 end FiniteJet.GraphKoszul
