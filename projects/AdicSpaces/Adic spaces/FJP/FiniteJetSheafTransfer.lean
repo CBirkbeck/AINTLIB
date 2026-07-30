@@ -341,10 +341,20 @@ theorem pairMapBC_injective (D : RationalLocData (JetA F)) (hD : D.IsRational)
   rw [← sub_eq_zero]
   exact hz0
 
--- GOAL-DEFERRED(task 1): load-bearing until `gluing_JetA` is decomposed (279-line
--- body; largest raise in the codebase at 6.4M).  `whnf` times out even at 1.6M, so
--- splitting the proof is the only real fix.  Tracked on the task-2 list.
-set_option maxHeartbeats 6400000 in
+-- GOAL-DEFERRED(task 1): 6.4M -> 1.6M, and now for a DIFFERENT reason than before.
+-- Two per-step `whnf` blow-ups were the bulk of the old cost and are fixed:
+--   * `hgBres`/`hgCres` rewrote `restrictionMap_cast` into a goal holding a
+--     `choose_spec`-transport, so `rw` had to `kabstract` + `whnf` the chosen datum.
+--     Replaced by `restrictionMap_cast_restrictionMap` (PresheafFunctoriality), which
+--     `subst`s the equality instead: free, and it serves both vertices.
+--   * `hgBd`/`hgCd` used `rw [congrFun (restrictionMap_id ..)] at h` where `simp only`
+--     does the same job without kabstract.
+-- What is left is NOT a single hot step -- with those gone the only error is the
+-- whole-declaration budget (`348:0`), i.e. the CUMULATIVE cost of a 259-line proof.
+-- So the remaining fix is genuinely decomposition: extract `hDmatch` (84 lines) and the
+-- two closing bullets, each of which then gets its own 200k budget.  Verified ladder:
+-- 200k fails, 400k fails, 1.6M passes.  Tracked on the task-2 list.
+set_option maxHeartbeats 1600000 in
 include hC hcompat in
 /-- The gluing transfer ([FJP] Lemma 5.2, gluing half). -/
 theorem gluing_JetA :
@@ -382,16 +392,7 @@ theorem gluing_JetA :
         presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
           (hC.piece (Finset.mem_image.mp D'.2).choose.2)
           (f (Finset.mem_image.mp D'.2).choose)) = _
-    rw [restrictionMap_cast _ _ (Finset.mem_image.mp D'.2).choose_spec.2]
-    have := congrFun (restrictionMap_comp
-      (pushDatumB (Finset.mem_image.mp D'.2).choose.1
-        (hC.piece (Finset.mem_image.mp D'.2).choose.2)) D'.1 D₃
-      (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]) h₃)
-      (presheafValueMapB (Finset.mem_image.mp D'.2).choose.1
-        (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-        (f (Finset.mem_image.mp D'.2).choose))
-    simp only [Function.comp_apply] at this
-    exact this
+    exact restrictionMap_cast_restrictionMap _ D₃ h₃ _
   have hgCres : ∀ (D' : ↥(pushCoveringC C hC).covers) (D₃ : RationalLocData (JetC F))
       (h₃ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D'.1.T D'.1.s),
       restrictionMap D'.1 D₃ h₃ (gC D') =
@@ -407,16 +408,7 @@ theorem gluing_JetA :
         presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
           (hC.piece (Finset.mem_image.mp D'.2).choose.2)
           (f (Finset.mem_image.mp D'.2).choose)) = _
-    rw [restrictionMap_cast _ _ (Finset.mem_image.mp D'.2).choose_spec.2]
-    have := congrFun (restrictionMap_comp
-      (pushDatumC (Finset.mem_image.mp D'.2).choose.1
-        (hC.piece (Finset.mem_image.mp D'.2).choose.2)) D'.1 D₃
-      (by rw [(Finset.mem_image.mp D'.2).choose_spec.2]) h₃)
-      (presheafValueMapC (Finset.mem_image.mp D'.2).choose.1
-        (hC.piece (Finset.mem_image.mp D'.2).choose.2)
-        (f (Finset.mem_image.mp D'.2).choose))
-    simp only [Function.comp_apply] at this
-    exact this
+    exact restrictionMap_cast_restrictionMap _ D₃ h₃ _
   -- the pushed-family value at the canonical piece element is the piece push
   have hgBd : ∀ d : ↥C.covers, gB ⟨pushDatumB d.1 (hC.piece d.2),
       Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ =
@@ -425,8 +417,7 @@ theorem gluing_JetA :
     have hselfB := hgBres ⟨pushDatumB d.1 (hC.piece d.2),
         Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
       (pushDatumB d.1 (hC.piece d.2)) (subset_refl _)
-    rw [congrFun (restrictionMap_id (pushDatumB d.1 (hC.piece d.2))) _] at hselfB
-    simp only [id_eq] at hselfB
+    simp only [restrictionMap_id, id_eq] at hselfB
     rw [hselfB,
       pushedCompatB C hC f hcompat
         (Finset.mem_image.mp (Finset.mem_image.mpr
@@ -441,8 +432,7 @@ theorem gluing_JetA :
     have hselfC := hgCres ⟨pushDatumC d.1 (hC.piece d.2),
         Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
       (pushDatumC d.1 (hC.piece d.2)) (subset_refl _)
-    rw [congrFun (restrictionMap_id (pushDatumC d.1 (hC.piece d.2))) _] at hselfC
-    simp only [id_eq] at hselfC
+    simp only [restrictionMap_id, id_eq] at hselfC
     rw [hselfC,
       pushedCompatC C hC f hcompat
         (Finset.mem_image.mp (Finset.mem_image.mpr
@@ -599,8 +589,7 @@ theorem gluing_JetA :
     have hselfB := hgBres ⟨pushDatumB d.1 (hC.piece d.2),
         Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
       (pushDatumB d.1 (hC.piece d.2)) (subset_refl _)
-    rw [congrFun (restrictionMap_id (pushDatumB d.1 (hC.piece d.2))) _] at hselfB
-    simp only [id_eq] at hselfB
+    simp only [restrictionMap_id, id_eq] at hselfB
     rw [hselfB,
       pushedCompatB C hC f hcompat
         (Finset.mem_image.mp (Finset.mem_image.mpr
@@ -619,8 +608,7 @@ theorem gluing_JetA :
     have hselfC := hgCres ⟨pushDatumC d.1 (hC.piece d.2),
         Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
       (pushDatumC d.1 (hC.piece d.2)) (subset_refl _)
-    rw [congrFun (restrictionMap_id (pushDatumC d.1 (hC.piece d.2))) _] at hselfC
-    simp only [id_eq] at hselfC
+    simp only [restrictionMap_id, id_eq] at hselfC
     rw [hselfC,
       pushedCompatC C hC f hcompat
         (Finset.mem_image.mp (Finset.mem_image.mpr
@@ -631,9 +619,6 @@ theorem gluing_JetA :
 
 end Gluing
 
--- GOAL-DEFERRED(task 1): load-bearing; revisit after `gluing_JetA` is split, since
--- this proof shares its subtype-instance whnf cost.
-set_option maxHeartbeats 1600000 in
 /-- The embedding transfer ([FJP] Lemma 5.2, topological half; Theorem 5.3's "the Banach
 open mapping theorem makes the continuous bijection onto that image a homeomorphism" —
 the σ-compact-free 828b-assembly mirrored at 𝓐). -/

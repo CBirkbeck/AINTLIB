@@ -418,3 +418,67 @@ the main proof*"), and a third comment said "*For now, handle via sorry (minor e
 real `by_cases` proof. Deleting the block took the assembler from 60 lines to **36** — under the
 bar on comment removal alone. **When decomposing, the stale-comment sweep is part of the cut, and
 docstrings that describe a proof as unfinished must be re-read against the actual proof.**
+
+## Task 1 — the 5 deferred raises revisited: 5 → 2
+
+Came back to the five `GOAL-DEFERRED` raises with the empirical method (remove the raise, read
+*where* it times out) instead of assuming they all needed decomposition. Three came off.
+
+| decl | before | after | what it actually was |
+|---|---|---|---|
+| `productRestrictionSub_isEmbedding_JetA` | 1.6M | **none** | litter — came off once the module's whnf pressure dropped |
+| `genPiece_relative_overlap_square₁` | 1.6M | **none** | one bad tactic step (below) |
+| `genPiece_relative_overlap_square₂` | 1.6M | **none** | the same step, mirrored |
+| `gluing_JetA` | 6.4M | 1.6M | two bad steps fixed; the rest is cumulative → needs decomposition |
+| `imageCover` | 4M | 4M | not a proof step at all → needs split-def-from-packaging |
+
+### The single most valuable finding: `_ _ _` on a lemma whose proof is one term
+
+Both G3b squares died at
+
+    · exact (restrictionMapHom_continuous _ _ _).comp
+        UniformSpace.Completion.continuous_extension
+
+`restrictionMapHom_continuous`'s own body (Presheaf.lean:1888) is *literally*
+`UniformSpace.Completion.continuous_extension`. So those three placeholders bought nothing and
+cost everything: the elaborator had to solve `Continuous (restrictionMapHom ?D ?D' ?h)` against
+a goal full of nested `interSamePair` chains — `isDefEq` blew past 200k. The sibling bullet in
+the very same proof already used the bare `continuous_extension`. Making bullet 2 match bullet 1
+removed **two 1.6M raises**.
+
+**Generalise:** when a lemma's proof is a single term, invoking it with placeholder arguments is
+strictly worse than inlining that term — you pay a metavariable unification against the whole
+goal for zero abbreviation. Look for `(foo _ _ _)` in any proof that needs a raise.
+
+### `gluing_JetA`: 6.4M → 1.6M, and the reason changed
+
+Two per-step blow-ups, both of the "rewrite against a `Classical.choose_spec` transport" family:
+
+1. `hgBres`/`hgCres` did `rw [restrictionMap_cast _ _ …choose_spec.2]`, forcing `kabstract` +
+   `whnf` of the chosen datum. Replaced by a new lemma —
+   **`restrictionMap_cast_restrictionMap`** (PresheafFunctoriality.lean): restricting a
+   transported value restricts straight from the source datum, proved by `subst` so it is free.
+   It serves *both* vertices, so this also killed a 25-line B/C mirror duplication (10 lines → 1
+   in each).
+2. `hgBd`/`hgCd` used `rw [congrFun (restrictionMap_id ..)] at h` where `simp only` does the
+   same job without kabstract — the rule already recorded as "**`simp only` NOT `rw`** for these
+   goals". 4 sites, 4 lines.
+
+After both, the *only* remaining error is the whole-declaration budget (`348:0`) — no single hot
+step. Verified ladder: 200k fails, 400k fails, 1.6M passes. So the residue is genuinely
+cumulative and decomposition is the real fix (extract `hDmatch`, 84 lines, plus the two closing
+bullets). The in-source note now records this precisely instead of the old guess.
+
+### `imageCover` is not a proof at all
+
+Worth flagging because it was mis-filed on the task-2 list: `imageCover` is a **structure
+instance**, and its hot spot (`11217:41`) is inside the `covers` *field*, elaborated with the
+whole `haveI`/`letI` stack in scope. No proof body to decompose. The fix is split-def-from-
+packaging: give the covers family its own `def` and instance preamble, then package.
+
+### Method note
+
+Never assume a deferred raise needs the expensive fix. `lake build` with the raise deleted names
+the exact `line:col` of the hot step, which distinguishes the three cases cheaply: one bad tactic
+step (fix it), cumulative cost (decompose), or a def field (restructure). Two of five turned out
+to be one-line fixes and a third was pure litter.

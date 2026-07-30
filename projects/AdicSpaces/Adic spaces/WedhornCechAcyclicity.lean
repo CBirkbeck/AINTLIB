@@ -10039,9 +10039,6 @@ private noncomputable def genPiece_relative_overlap_equiv
     (RingHom.ext (genPiece_relOverlap_forward_backward D₀ T hspan t₁ t₂))
     (RingHom.ext (genPiece_relOverlap_backward_forward D₀ T hspan t₁ t₂))
 
--- GOAL-DEFERRED(task 1): load-bearing raise.  This proof is on the task-2 over-50
--- list; decomposing it is the real fix, not this option.
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **G3b square (left)**: restricting `O_X(D₀∩R(T/t₁))` into the double intersection
 commutes with the relative identifications. -/
@@ -10160,7 +10157,7 @@ private theorem genPiece_relative_overlap_square₁
     ?_ ?_ ?_) g
   · exact UniformSpace.Completion.continuous_extension.comp
       UniformSpace.Completion.continuous_extension
-  · exact (restrictionMapHom_continuous _ _ _).comp
+  · exact UniformSpace.Completion.continuous_extension.comp
       UniformSpace.Completion.continuous_extension
   · rintro _ ⟨y, rfl⟩
     show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
@@ -10245,9 +10242,6 @@ private theorem genPiece_relative_overlap_square₁
       exact hcomp a
     exact RingHom.congr_fun hhom y
 
--- GOAL-DEFERRED(task 1): load-bearing raise.  This proof is on the task-2 over-50
--- list; decomposing it is the real fix, not this option.
-set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 /-- **G3b square (right)**: the `t₂`-side square. The B-side restriction is from the
 `t₂`-piece into the SAME double piece (`interSamePair` of the pair in the `t₁,t₂`-order,
@@ -10376,7 +10370,7 @@ private theorem genPiece_relative_overlap_square₂
     ?_ ?_ ?_) g
   · exact UniformSpace.Completion.continuous_extension.comp
       UniformSpace.Completion.continuous_extension
-  · exact (restrictionMapHom_continuous _ _ _).comp
+  · exact UniformSpace.Completion.continuous_extension.comp
       UniformSpace.Completion.continuous_extension
   · rintro _ ⟨y, rfl⟩
     show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
@@ -11192,8 +11186,13 @@ theorem isOXAcyclic_of_isGeneratedBy_ring_units [DecidableEq A]
       hVP
 
 
--- GOAL-DEFERRED(task 1): load-bearing raise.  This proof is on the task-2 over-50
--- list; decomposing it is the real fix, not this option.
+-- GOAL-DEFERRED(task 1): load-bearing.  Unlike the two G3b squares (fixed by dropping the
+-- placeholder args on `restrictionMapHom_continuous`), the cost here is NOT a tactic step:
+-- `imageCover` is a structure instance and the hot spot is inside the `covers` FIELD
+-- (`(hC.piece D.2).span_eq_top`, at col 41), elaborated with the whole `haveI`/`letI`
+-- instance stack in scope.  The fix is the split-def-from-packaging refactor -- define the
+-- covers family as its own `def` with its own instance preamble, then package -- not a
+-- decomposition of a proof body.  Tracked on the task-2 list.
 set_option maxHeartbeats 4000000 in
 set_option linter.unusedSectionVars false in
 /-- **The R2 image cover** (Wedhorn Prop 8.2 + Remark 8.4 + Prop 8.16, the

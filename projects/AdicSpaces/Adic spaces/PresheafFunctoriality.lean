@@ -77,6 +77,22 @@ theorem restrictionMap_cast {A : Type*} [CommRing A] [TopologicalSpace A]
   subst heq
   exact (congrFun (restrictionMap_id E₁) v).symm
 
+/-- **Restricting a transported value** restricts straight from the source datum:
+`restrictionMap E₂ E₃ h (heq ▸ v) = restrictionMap E₁ E₃ _ v`.
+
+`subst` collapses this to `rfl`, so it is free. Prefer it to rewriting with
+`restrictionMap_cast`: when the transport comes from a `Classical.choose_spec` (as it does for
+the pushed families of a covering), `rw` has to `kabstract` the goal and `whnf` the chosen
+datum, which is exactly the blow-up that costs whole millions of heartbeats. -/
+theorem restrictionMap_cast_restrictionMap {A : Type*} [CommRing A] [TopologicalSpace A]
+    [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+    {E₁ E₂ : RationalLocData A} (heq : E₁ = E₂) (E₃ : RationalLocData A)
+    (h₃ : rationalOpen E₃.T E₃.s ⊆ rationalOpen E₂.T E₂.s) (v : presheafValue E₁) :
+    restrictionMap E₂ E₃ h₃ (heq ▸ v) =
+      restrictionMap E₁ E₃ (by rw [heq]; exact h₃) v := by
+  subst heq
+  rfl
+
 section CovariantPush
 
 variable {R S : Type*} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
