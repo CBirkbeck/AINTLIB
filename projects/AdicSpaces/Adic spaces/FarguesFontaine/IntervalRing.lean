@@ -148,6 +148,25 @@ theorem wI_neg {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1
     rw [show (-z).2 = -z.2 from rfl, Valuation.map_neg]
   rw [h1, h2]
 
+/-- **Ultrametric transfer of a bound**: if both `r` and the deviation `r - y` are
+within `B`, then so is `y`. This is `wI_add_le` + `wI_neg` applied to
+`y = r + -(r - y)`; it is the standard way a bound on an approximant is inherited by
+what it approximates. -/
+theorem wI_le_of_le_of_sub_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {B : NNReal}
+    (r y : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    (hr : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r ≤ B)
+    (hsub : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (r - y) ≤ B) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 y ≤ B := by
+  have hrw : y = r + -(r - y) := by ring
+  calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 y
+      = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (r + -(r - y)) := by rw [← hrw]
+    _ ≤ max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
+        (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (-(r - y))) := wI_add_le p F _ _
+    _ = max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
+        (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (r - y)) := by rw [wI_neg]
+    _ ≤ B := max_le hr hsub
+
 /-- The interval norm vanishes only at `0`. -/
 theorem wI_eq_zero_iff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
     {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}

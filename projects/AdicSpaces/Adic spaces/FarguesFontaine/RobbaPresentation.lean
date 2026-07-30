@@ -1926,25 +1926,10 @@ theorem exists_correction_step_BI
   -- the Bloc approximant
   obtain ⟨x, hxapp⟩ := exists_BIProd_approx p F ϖ hrmem hε
   have hxle : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-      (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ n := by
-    have hrw : BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x
-        = r + -(r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x) := by ring
-    calc (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-          (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x))
-        = wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-          (r + -(r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)) := by
-          rw [← hrw]
-      _ ≤ max (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 r)
-          (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-            (-(r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x))) :=
-          wI_add_le p F _ _
-      _ = max (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 r)
-          (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-            (r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)) := by rw [wI_neg]
-      _ ≤ W * (2⁻¹ : NNReal) ^ n := by
-          refine max_le hrbnd (le_trans hxapp ?_)
-          exact mul_le_mul_of_nonneg_left
-            (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ n)) zero_le
+      (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ n :=
+    wI_le_of_le_of_sub_le p F _ _ hrbnd (le_trans hxapp
+      (mul_le_mul_of_nonneg_left
+        (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ n)) zero_le))
   -- destructure the approximant as a fraction
   obtain ⟨⟨w, s⟩, rfl⟩ := IsLocalization.mk'_surjective
     (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))
@@ -4933,25 +4918,10 @@ theorem exists_correction_step_BI₂
   -- the Bloc approximant
   obtain ⟨x, hxapp⟩ := exists_BIProd_approx p F ϖ hrmem hε
   have hxle : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
-      (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ n := by
-    have hrw : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x
-        = r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x) := by ring
-    calc (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
-          (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x))
-        = wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
-          (r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x)) := by
-          rw [← hrw]
-      _ ≤ max (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r)
-          (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
-            (-(r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x))) :=
-          wI_add_le p F _ _
-      _ = max (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r)
-          (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
-            (r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x)) := by rw [wI_neg]
-      _ ≤ W * (2⁻¹ : NNReal) ^ n := by
-          refine max_le hrbnd (le_trans hxapp ?_)
-          exact mul_le_mul_of_nonneg_left
-            (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ n)) zero_le
+      (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ n :=
+    wI_le_of_le_of_sub_le p F _ _ hrbnd (le_trans hxapp
+      (mul_le_mul_of_nonneg_left
+        (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ n)) zero_le))
   -- destructure the approximant as a fraction
   obtain ⟨⟨w, s⟩, rfl⟩ := IsLocalization.mk'_surjective
     (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))

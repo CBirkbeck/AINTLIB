@@ -1950,3 +1950,55 @@ body pattern showed eight hits).
 Module builds green first (`RelativeDescent` 3039 jobs, `RelativeDescentHuber` 3041 jobs).
 
 Running total: **260** (486 baseline → 290 pre-split → 274 post-split → 260).
+
+## Task 2 — same-size clustering as a triage signal, applied to `RobbaPresentation`
+
+Generalising the `divByS` win: group the remaining over-50 proofs by **exact code-line count**.
+216 of 258 land in some same-size cluster, so size collision *alone* is far too weak a signal — many
+unrelated proofs happen to be 64 or 65 lines. The usable signal is **same size AND mirrored names**:
+
+    RobbaPresentation      exists_correction_step_BI / _BI₂                 both 57   (same file)
+    TateAlgebraTopology    tateAlgebraTopology'_completeSpace / ₂-variant   both 124  (same file)
+    RelativePieceKeystone{Gen,Open}  relativePiece_equiv_restrict_square    both 94
+    RelativePieceKeystone{,Gen,Open} genPiece_rel_forward_witness           75/72/72
+    SpaVIso / FrobeniusValuation     comap_ringStalkMap_*_stalkValue        both 87
+    FaithfulLocLift / HuberLocLift   mem_plus_of_forall_spa_vle_one(_huber) 158/147
+
+Took the cheapest: `exists_correction_step_BI` and `_BI₂`, both 57, need −7 each. `difflib` says they
+share 43 of 85 lines and differ **only** in which radius quadruple is threaded
+(`hσ₁0 hσ₁1 hρ₂0 hρ₂1` vs `hρ₁0 hρ₁1 hσ₂0 hσ₂1`), plus `teichPowGen`/`teichPowGen₂` and
+`exists_evalBI_approx_bloc`/`…₂`.
+
+The shared 21-line `hxle` block is a **generic ultrametric fact** with no dependence on the radius
+pair at all — "if `r` and the deviation `r - y` are both within `B`, so is `y`", i.e. `wI_add_le` +
+`wI_neg` applied to `y = r + -(r - y)`. Added it beside its siblings in `IntervalRing.lean`:
+
+    theorem wI_le_of_le_of_sub_le (r y : hatK … × hatK …)
+        (hr : wI … r ≤ B) (hsub : wI … (r - y) ≤ B) : wI … y ≤ B
+
+Each 21-line `hxle` becomes a 5-line term. This is the standard "a bound on an approximant is
+inherited by what it approximates" step, so it should recur.
+
+**Gotcha (cost one build): `p` and `F` are EXPLICIT section variables in the FarguesFontaine files.**
+The neighbouring lemmas are called `wI_add_le p F _ _`, and my new lemma likewise needs
+`wI_le_of_le_of_sub_le p F _ _ hrbnd …`. Omitting them makes Lean read the first real argument as
+the `r : hatK × hatK` positional and report a confusing "argument `hrbnd` … expected to have type
+`hatK … × hatK …`". **When adding a lemma next to existing ones, copy an existing call site's
+argument shape rather than inferring it from the signature.**
+
+Result: `exists_correction_step_BI` and `_BI₂` both dropped under 50. Module builds green
+(`IntervalRing` 3034 jobs, `RobbaPresentation` 3131 jobs). Running total: **258**.
+
+## Correction — the `loc` score is a LOWER BOUND, not a count
+
+`Presentation.wI_partial_cauchy_diff` is scored `loc 1` (`g`), but reading the block shows it closes
+over **five** locals: `L`, `g`, `hne`, `z`, `h12`. The under-report comes from shapes the
+introduction patterns miss — chiefly `set X := … with hX` (the `with`-bound equation name), names
+bound by sibling `obtain`/`refine … fun` further up, and hypotheses of the enclosing theorem that the
+binder regex already undercounts.
+
+So the ranked score is usable for *ordering* candidates but must not be trusted as a fact:
+**always read the block before committing to a lift.** Both halves of the score are now known to be
+lower bounds — `bnd` (binder regex stops at the first bracket group) and `loc` (missed introduction
+forms). The one number that has proved reliable is `blk` (the block's line count), because it is
+pure indentation arithmetic with no identifier parsing involved.
