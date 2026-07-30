@@ -1763,3 +1763,110 @@ a build, and here the honest lift is `htend` as a whole (parameterised over `z`,
 which is a larger piece of work than this pass had verified budget for.
 
 Recorded rather than attempted blind, per the no-unverified-edits rule.
+
+## Task 2 — the ranked worklist, and two more decomposed (269 → 267)
+
+The ranking heuristic from the previous pass is now a tool: for each over-50 proof, find the
+top-level `have` blocks that are big enough to cross the bar on their own, then score each by how
+many **locally-introduced** names it references (locals harvested from `have`/`set`/`let`/`obtain`/
+`choose`/`intro`/`rintro` occurring *earlier* in the same body) versus how many of the theorem's own
+**binders** it needs. Locals are the expensive kind; binders are cheap because they become helper
+parameters directly.
+
+**109 liftable `have` blocks** across the 265 in-scope proofs. Sorted by local-context cost, the head
+of the list is all `loc 0` — liftable with no threading at all. That ordering is the worklist.
+
+Two done from the top of it:
+
+* **`WittF.gaussTermF_mul_le` 65 → 35.** The 37-line `hpieces` was an application of
+  `gaussValueF_finset_sum_le` whose *side condition* — a 31-line `(by rintro ⟨i, j⟩ - …)` — was the
+  real content. Checking that lemma's signature showed the obligation is
+  `∀ i ∈ s, BddAbove (Set.range (gaussTermF … (f i))) ∧ gaussValueF … (f i) ≤ B`, so the extraction is
+  exactly the per-term conjunction: `bddAbove_and_gaussValueF_cross_le`. The whole side condition
+  becomes `(fun q _ => bddAbove_and_gaussValueF_cross_le p F hBx hBy q.1 q.2)`.
+  **Generalisable move: when a big `have` is `lemma_application (by <30 lines>)`, read the applied
+  lemma's signature and lift the side condition — its statement is already written for you.**
+* **`CompletionLocalization.coeRingHom_image_locSubring_isBounded` 55 → 49.** `habsorb` (7 lines) was
+  ideal absorption, `locSubring · locNhd k ⊆ locNhd k`, with no dependence on the two `letI`
+  topology/uniformity instances above it — so it lifted verbatim as
+  `locSubring_mul_locNhd_subset`, and `∀ k` became the helper's explicit `(k : ℕ)` so the call site
+  is just `have habsorb := locSubring_mul_locNhd_subset D`.
+  Placement detail: the consumer carries `omit [PlusSubring A] [IsHuberRing A] … in`, and that
+  attaches to **one** declaration only, so the helper needed its own copy of the `omit` line rather
+  than being slipped in between the `omit` and its theorem.
+
+Both verified by module build before the gate (`WittF` 2933 jobs, `CompletionLocalization` 2641 jobs,
+0 errors each).
+
+**Scan caveat found:** the binder-counting regex undercounts — it reported `bnd 0` for
+`coeRingHom_image_locSubring_isBounded`, whose `D : RationalLocData A` is very much a binder, because
+the pattern stops at the first bracket group. The `loc` count is the reliable half of the score; treat
+`bnd` as a lower bound and read the signature before writing the helper.
+
+Running total: **267** (486 baseline → 290 pre-split → 274 post-split → 267).
+
+## Task 2 — `LaurentOverlap.tateAlgebra_polynomial_decomp` 59 → 46 (267 → 266)
+
+`hRHS_val_eq` (13 lines) lifted to `tateAlgebra_sum_coeff_mul_X_pow_val`: the underlying power
+series of a truncated coefficient expansion is the corresponding sum of coefficient-monomials.
+Depends only on `g` and `N`, and the enclosing theorem carries its typeclasses explicitly
+(`{A : Type*} [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]` — *not* section variables
+here), so the helper repeats them rather than inheriting.
+
+**Deliberately lifted only one of the two candidate blocks.** The sibling `hsum_val` is equally
+self-contained, but its *statement* contains `if l = Finsupp.single 0 i then … else 0`, and the
+enclosing proof's `classical` sits in the **body** — decidability for an `if` in a helper's statement
+must be resolvable at statement-elaboration time, where a body-level `classical` does not reach. That
+would need `[DecidableEq (Fin 1 →₀ ℕ)]` or `open Classical in`, so it is a different (and riskier)
+edit than it looks. One lift was sufficient anyway: −13 against a need of −9.
+
+**Gotcha for the general list: `classical` in a proof body does not license a decidable `if` in an
+extracted helper's statement.** When a candidate `have`'s statement mentions `if`/`ite`, check where
+the decidability comes from before lifting.
+
+## Assessed and rejected: the `hf_alg` cross-file pair
+
+`LaurentRefinementCore.iteratedPlus_forwardToCompletion…` and
+`IteratedOverlapEquiv.iteratedOverlap_forwardToCompletion…` both carry an `hf_alg` of the same shape —
+"the composite `φ ∘ algebraMap` is continuous because it equals `algebraMap_B ∘ canonicalMap`". Two
+independent reasons not to do it now:
+
+1. **No common home.** Neither file imports the other (checked both directions), so a shared helper
+   needs a new module or an existing common ancestor — the no-possible-home case, which requires
+   computing the transitive closure rather than picking the earlier file.
+2. **Neither lift crosses its own bar.** Factoring out the generic part saves ~12 and ~10 lines
+   against needs of −16 and −14. It would be real cleanup (the shape is genuinely duplicated) but it
+   does not reduce the over-50 count, so it belongs to a dedup pass rather than this one.
+
+Running total: **266** (486 baseline → 290 pre-split → 274 post-split → 266).
+
+## Task 2 — `TopologyComparison.tateEvalPresheafHom_continuous_canonical` 53 → 49 (266 → 265)
+
+Not an extraction — a **merge**, which is cheaper and was the right tool here. `hsum` (4 lines,
+`Summable …`) had exactly one use: `have hsum_val := hsum.hasSum` inside `hhs`. Inlining it and
+dropping the `hsum_val` staging line turns 9 code lines into 5:
+
+    have hhs : HasSum (TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h)
+        (tateEvalPresheafHom D hb h) := by
+      change HasSum _ (∑' n, TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h n)
+      exact (TateAlgebraWedhorn.evalTerm_summable D.canonicalMap
+        (canonicalMap_continuous D) (invS D) hb h).hasSum
+
+Confirms the CLEANUP-LOG ranking: **merging beats splitting** when a `have` is single-use, and it
+should be tried before reaching for a helper. Grep the name's use count first — a single-use `have`
+whose only role is to name an intermediate is a merge, not a lift.
+
+### Two scans, two different jobs — don't confuse them
+
+* the **dominance** scan finds the biggest top-level block (no local scoring);
+* the **ranked** scan scores blocks by local-context cost.
+
+`TopologyComparison` shows why the distinction matters: dominance nominated `hterm_mem` (16 lines,
+need −3), which looks like the obvious lift, but it closes over seven locals
+(`W hUW hN hh N P h`) and belongs in the expensive category. The ranked scan nominated `hhs`/`hsum`
+(5 and 4 lines, zero locals) — much smaller, but enough for a −3 and nearly free. **Use dominance to
+see whether a proof is decomposable at all; use the ranked score to choose which block to touch.**
+
+Module builds green first (`LaurentOverlap` 2694 jobs, `TopologyComparison` 2620 jobs).
+
+Running total: **265** (486 baseline → 290 pre-split → 274 post-split → 265).

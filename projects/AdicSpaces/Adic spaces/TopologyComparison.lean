@@ -2630,16 +2630,12 @@ theorem tateEvalPresheafHom_continuous_canonical
   --   (a) each partial sum is in W (W is a subgroup),
   --   (b) partial sums tend to tsum (since summable),
   --   (c) W is closed (open subgroup).
-  have hsum : Summable
-      (TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h) :=
-    TateAlgebraWedhorn.evalTerm_summable D.canonicalMap
-      (canonicalMap_continuous D) (invS D) hb h
   -- tsum is the limit of partial sums over finite sets (for unconditional summation).
   have hhs : HasSum (TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h)
       (tateEvalPresheafHom D hb h) := by
-    have hsum_val := hsum.hasSum
     change HasSum _ (∑' n, TateAlgebraWedhorn.evalTerm D.canonicalMap (invS D) h n)
-    exact hsum_val
+    exact (TateAlgebraWedhorn.evalTerm_summable D.canonicalMap
+      (canonicalMap_continuous D) (invS D) hb h).hasSum
   -- Apply IsClosed.mem_of_tendsto with the HasSum and eventually-in-W.
   refine hW_closed.mem_of_tendsto hhs.tendsto_sum_nat ?_
   -- Eventually: partial sums are in W (they are, in fact, always in W by subgroup).

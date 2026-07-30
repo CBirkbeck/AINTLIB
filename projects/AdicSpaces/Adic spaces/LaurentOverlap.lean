@@ -3198,6 +3198,24 @@ theorem Finsupp_fin1_decomp (l : Fin 1 →₀ ℕ) :
   fin_cases i
   simp
 
+/-- The underlying power series of a truncated coefficient expansion is the
+corresponding sum of coefficient-monomials. -/
+private theorem tateAlgebra_sum_coeff_mul_X_pow_val
+    {A : Type*} [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]
+    (g : ↥(TateAlgebra A)) (N : ℕ) :
+    ((∑ i ∈ Finset.range N,
+        algebraMap A ↥(TateAlgebra A)
+          (MvPowerSeries.coeff (Finsupp.single 0 i) g.val) *
+          TateAlgebra.X ^ i : ↥(TateAlgebra A)).val) =
+      ∑ i ∈ Finset.range N,
+        MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) i)
+          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) i) g.val) := by
+  change (Subring.subtype _) _ = _
+  rw [map_sum]
+  apply Finset.sum_congr rfl
+  intros i _
+  exact TateAlgebra_monomial_val _ i
+
 /-- **Polynomial decomposition (univariate)**: for `g : TateAlgebra A` with
 coefficients vanishing for indices `n 0 ≥ N`, `g` equals the Finset.sum of its
 coefficient-monomials. Univariate analog of `tateAlgebra₂_polynomial_decomp`.
@@ -3213,19 +3231,7 @@ theorem tateAlgebra_polynomial_decomp
   classical
   apply Subtype.ext
   funext l
-  have hRHS_val_eq : ((∑ i ∈ Finset.range N,
-        algebraMap A ↥(TateAlgebra A)
-          (MvPowerSeries.coeff (Finsupp.single 0 i) g.val) *
-          TateAlgebra.X ^ i : ↥(TateAlgebra A)).val) =
-      ∑ i ∈ Finset.range N,
-        MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) i)
-          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) i) g.val) := by
-    change (Subring.subtype _) _ = _
-    rw [map_sum]
-    apply Finset.sum_congr rfl
-    intros i _
-    exact TateAlgebra_monomial_val _ i
-  rw [hRHS_val_eq]
+  rw [tateAlgebra_sum_coeff_mul_X_pow_val g N]
   have hsum_val : (∑ i ∈ Finset.range N,
         MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) i)
           (MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) i) g.val)) l =
