@@ -1118,8 +1118,7 @@ private theorem polynomial_quotient_in_range (s : A) (g : ↥(TateAlgebra A))
           locToQuotientOneSubfX_gen_invSelf, hgk_def, ← map_pow, ← map_mul]⟩
     -- g - gk has coefficients zero above degree k.
     -- Helper: coeff m (X ^ j) = δ_{m,j} for TateAlgebra.
-    have hcoeff_X_pow : ∀ m j : ℕ,
-        TateAlgebra.coeff m (TateAlgebra.X ^ j : ↥(TateAlgebra A)) =
+    have hcoeff_X_pow : ∀ m j : ℕ, TateAlgebra.coeff m (TateAlgebra.X ^ j : ↥(TateAlgebra A)) =
         if m = j then 1 else 0 := by
       intro m j; revert m; induction j with
       | zero => intro m; simp [pow_zero, TateAlgebra.coeff, TateAlgebra.toIndex,

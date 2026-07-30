@@ -1294,8 +1294,7 @@ theorem exists_packaged_enlarged_domination_of_subResiduals
           (Ideal.Quotient.mk 𝔭)) s)⁻¹ ∈ V.toSubring) := by
   haveI : IsDomain (A ⧸ 𝔭) := Ideal.Quotient.isDomain 𝔭
   -- Apply enlarged domination to get V₀.
-  obtain ⟨V₀, hR'_le_V₀, hnonunits_V₀⟩ :=
-    P.exists_valuationSubring_of_prime_enlarged
+  obtain ⟨V₀, hR'_le_V₀, hnonunits_V₀⟩ := P.exists_valuationSubring_of_prime_enlarged
       (R' := P.rationalEnlargedSubring 𝔭 T s)
       (P.range_le_rationalEnlargedSubring 𝔭 T s) hR'_proper
   -- Extract height-1 Q from sub-residual (b).
@@ -1313,8 +1312,7 @@ theorem exists_packaged_enlarged_domination_of_subResiduals
     intro x hx_image
     obtain ⟨y, hy_I, hy_eq⟩ := hx_image
     -- Transfer range-level I-image membership to R'-level via the manager's lemma.
-    have hy_R' :
-        (⟨y.1, (P.range_le_rationalEnlargedSubring 𝔭 T s) y.2⟩ :
+    have hy_R' : (⟨y.1, (P.range_le_rationalEnlargedSubring 𝔭 T s) y.2⟩ :
             P.rationalEnlargedSubring 𝔭 T s) ∈
         Ideal.map ((P.toFractionQuotient 𝔭).codRestrict
           (P.rationalEnlargedSubring 𝔭 T s)

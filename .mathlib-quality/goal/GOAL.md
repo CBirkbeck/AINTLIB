@@ -2668,3 +2668,91 @@ Recovery was clean because the two files had no other pending changes: reverted 
 then re-ran with the range starting at `sig_end + 1`. Body joins available: 1 and 7; needed 1 and 2.
 
 Running total: **244** (486 baseline → 290 pre-split → 274 post-split → 244).
+
+---
+
+# CAMPAIGN STATE (all three tasks), for the next session
+
+## Task 1 — AT ITS FLOOR
+
+Two in-scope raises remain, both marked `GOAL-DEFERRED` in-source with their diagnoses:
+
+* `WedhornCechAcyclicity.lean:11204` — 4,000,000, `imageCover`. Needs the
+  `RationalCoveringData.covers : Finset` → indexed-family design change. **Owner call.**
+  Split-def-from-packaging was tried and failed; recorded in-source.
+* `FJP/FiniteJetSheafTransfer.lean:481` — 1,600,000, `gluing_JetA`. Diffuse cost; the ladder
+  (200k fails, 400k fails, 1.6M passes) is recorded in-source.
+
+Kept deliberately: three `set_option maxSynthPendingDepth 1 in` in
+`FarguesFontaine/RobbaCorrespondence.lean` (reductions). Skipped: `Vendored/` (third-party).
+
+## Task 2 — 486 → 244
+
+486 baseline → 290 (pre-split) → 274 (post-split) → **244**. Twenty batches, each module-built then
+full-gate green before commit. No statement changed, no `sorry` added, no heartbeat raise added.
+
+Remaining work, all scoped with numbers in this file:
+
+* **bottom-up splits of very large blocks** — `RestrictionInjective.resIHom_injective` (`hkey` 109,
+  largest inner block only 31, so it needs several lifts); `StructureSheafStalks.…` (`hgen` 57, which
+  is one 48-line induction branch — its two generator sub-cases extract, taking it 57 → ~8);
+* **four true mirror pairs** (name-similarity ≥ 0.62 at equal size) — the `RelativePieceKeystone`
+  Gen/Open pair needs two lifts per proof *and* a `rfl`-on-`set`-value workaround;
+* **`TateAlgebraTopology`'s −74 pair**, which wants a genuine shared completeness lemma, not a lift.
+
+## Task 3 — surveyed; the safe residue is DONE
+
+Warning surface ≈3,860. Only one class was mechanically safe, and it is now applied:
+**71 unused-binder renames (that class 96 → 25)**.
+
+The rest is **not** pending mechanical work, each ruled out with evidence:
+
+| class | count | why not |
+|---|---|---|
+| `unusedSectionVars` | 549 | omitting removes instance *derivation paths* (`UniformSpace A` failed after omitting `IsHuberRing A`) |
+| `overlappingInstances` | ~350 | pre-existing project-wide; ruled out in an earlier pass |
+| `declaration uses sorry` | 110 | owning producers' WIP — never fleet work |
+| unused-binder | 25 | linter false positives (`haveI := hp` *is* an explicit reference) |
+
+## The techniques that actually worked, in order of yield
+
+1. **A missing general lemma, not decomposition.** Four proofs of *identical* length all needing the
+   same cut = one absent lemma (`algebraMap_mul_divByS`), inlined eight times. Search by **statement
+   shape**, not by name.
+2. **Bottom-up lifting.** If the dominant `have` is itself over 50, lift its inner atom first — a
+   one-level lift just trades one violation for another.
+3. **Pass the `set`-bound value *and* its defining equation.** Rescues the case where an enclosing
+   `classical` bakes `Classical.decEq` into a term; reconstructing it in the helper can never be defeq.
+4. **Per-file helpers over shared ones** when the shared version needs instances not uniformly in scope.
+5. **Port only the preamble the lifted body uses**, not the whole `letI` block.
+6. **Merges and expression-continuation joins** for small deficits — never a helper for a −1.
+
+## Correction to the `StructureSheafStalks` scoping — the split does NOT suffice alone
+
+Worked the arithmetic properly before starting, and it contradicts my earlier note ("`hgen` 57 → ~8").
+
+`aplus_le_comap_restrictionMapHom` is 98 code lines, needs −48. `hgen` is 57 of them, and is a single
+`Subring.closure_induction` whose `| mem` branch splits into two generator sub-cases:
+
+* `⟨a, ha, rfl⟩` with `ha : a ∈ (A⁺ : Set A)` — the `A⁺`-image case, ~9 lines;
+* `⟨t, rfl⟩` with `t : ↥D.T` — the `t/s`-generator case, ~35 lines.
+
+Both extract cleanly (types now confirmed: `w'' : Spv (presheafValue D')`,
+`hw'' : w'' ∈ Spa (presheafValue D') (presheafValue D')⁺`,
+`hv''D : comap D'.canonicalMap w'' ∈ rationalOpen D.T D.s`, generators per
+`RationalLocData.locPlusSubring = Subring.closure (algebraMap '' A⁺ ∪ Set.range (divByS · D.s))`).
+
+**But the residue is 13 lines, not 8** — the induction skeleton keeps `intro`, `induction … with`,
+`rcases`, two `exact`s, and the five remaining branches (`one`, `zero`, `mul`, `add`, `neg`):
+
+    intro y hy / induction hy using Subring.closure_induction with
+    | mem z hz => rcases hz with ⟨a, ha, rfl⟩ | ⟨t, rfl⟩ / two exacts
+    | one | zero | mul | add | neg
+
+So the saving is **44, not 49**, leaving the proof at **54** — still over. Two helpers get it most of
+the way and then stall four lines short; it needs a third lift from the other 41 lines of the proof.
+
+**Generalisable: when the block being emptied is an `induction`/`match`, the skeleton is not free.**
+Count the branch arms that survive — `saving = blk − (skeleton lines + one call per branch)`. For a
+`Subring.closure_induction` that floor is ~13 lines regardless of how much the branches shrink. My
+earlier estimate assumed the block collapsed to a single call, which is only true for a plain `have`.
