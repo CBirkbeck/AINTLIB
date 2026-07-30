@@ -1,1 +1,1 @@
-FOCUS: HRW-4 leaf 11e (Nullstellensatz endpoint module_finite_residue) applied; compiling; on green commit + move to leaves 12-14 (finite scalar extension L⟨X⟩/K⟨X⟩ + Taylor + completed base change → completed locals of Tate algebras are domains).
+FOCUS: HRW-4 leaves 12-14 — SpectralExtension.lean (12a instances + 12b integral bound) written, compiling; next = leaf 12 main (P L m free-finite over P K m via coordinate functionals), then 13 Taylor at origin, then 14 base-change assembly.
