@@ -791,3 +791,19 @@ Both reduce to fin-dim topology uniqueness + boundedness transfer:
   homeomorphism onto image ⟹ boundedness reflects). Needs: IsBounded-image
   lemma for continuous ring-homs + the embedding-reflects-bounded lemma
   (both small; check TopologicalRing.IsBounded API in the tree).
+
+## BETA brick (ii) design: KappaP type alias
+
+Mathlib has ALL quotient instances (QuotientModule.Quotient.topologicalSpace,
+Submodule.continuous_mkQ/isOpenMap_mkQ/topologicalAddGroup_quotient/
+continuousSMul_quotient/t3_quotient_of_isClosed). To avoid two TopologicalSpace
+instances on one type: alias `KappaP 𝔭 := WPHead⧸𝔭` carrying ONLY the spectral
+package (Field via Quotient.field, Algebra K via constHead-composite,
+FiniteDimensional from the residue tower, extNormedField spectral); the
+ambient `WPHead⧸𝔭` keeps the quotient-topology instances. Bridge = identity
+ring hom; continuity = continuous_mkQ then
+LinearMap.continuous_of_finiteDimensional on the identity (source =
+quotient-top head⧸𝔭: T2 via t3_quotient_of_isClosed + brick-1 closedness;
+FiniteDimensional transported along the identity; ContinuousSMul K via
+continuousSMul_quotient needing ContinuousSMul K head — constants isometric).
+Same alias pattern for κ(𝔮) on the QHead side.
