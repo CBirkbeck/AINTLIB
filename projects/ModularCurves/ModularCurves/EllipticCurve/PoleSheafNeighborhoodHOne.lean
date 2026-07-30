@@ -819,6 +819,10 @@ theorem FibrewiseElliptic.exists_mem_basicOpen_pointedIso_poleOneBasis
         (h'.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank
           hsm' z' hz' UT hUT hUTaff κp (le_refl 1))
     · -- the canonical section has nonzero fibre at every maximal
+      -- (step 8; route (i) on the board — the geometric-leg attempt hit whnf timeouts
+      -- in the equivOfAppTopIso elaboration; retry with the tK-lets hoisted and the
+      -- rTensor transport replaced by a `TensorProduct.congr`-free argument, or opacify
+      -- `Scheme.isoSpec` locally per the playbook)
       intro p hp
       sorry
   obtain ⟨bOne, hbOne⟩ := hbasis
