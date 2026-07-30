@@ -392,6 +392,71 @@ noncomputable instance : Field (ResidueK ϖ) :=
   haveI := span_piUnitBall_isMaximal ϖ
   Ideal.Quotient.field _
 
+/-- Norm characterization of the uniformizer-power submodules of the unit
+ball: divisibility is a norm bound (the field norm divides exactly). -/
+theorem mem_span_piUnitBall_pow_iff (k : ℕ) (x : ↥(unitBall K)) :
+    x ∈ ((Ideal.span {piUnitBall ϖ}) ^ k • ⊤ :
+      Submodule ↥(unitBall K) ↥(unitBall K)) ↔
+    ‖(x : K)‖ ≤ ‖ϖ.val‖ ^ k := by
+  rw [ideal_smul_top_self, Ideal.span_singleton_pow]
+  constructor
+  · intro hx
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hx
+    rw [← hc]
+    have h1 : ((c * piUnitBall ϖ ^ k : ↥(unitBall K)) : K) =
+        (c : K) * ϖ.val ^ k := rfl
+    rw [h1, norm_mul, norm_pow]
+    calc ‖(c : K)‖ * ‖ϖ.val‖ ^ k ≤ 1 * ‖ϖ.val‖ ^ k :=
+          mul_le_mul_of_nonneg_right ((mem_unitBall_iff _ _).mp c.2)
+            (by positivity)
+      _ = ‖ϖ.val‖ ^ k := one_mul _
+  · intro hx
+    have hπk : (ϖ.val : K) ^ k ≠ 0 := pow_ne_zero _ ϖ.val_ne_zero
+    have hc1 : ‖(x : K) / ϖ.val ^ k‖ ≤ 1 := by
+      rw [norm_div, norm_pow, div_le_one (pow_pos ϖ.norm_val_pos k)]
+      exact hx
+    refine Ideal.mem_span_singleton'.mpr
+      ⟨⟨(x : K) / ϖ.val ^ k, (mem_unitBall_iff _ _).mpr hc1⟩, ?_⟩
+    refine Subtype.ext ?_
+    show ((x : K) / ϖ.val ^ k) * (ϖ.val ^ k) = (x : K)
+    rw [div_mul_cancel₀ _ hπk]
+
+/-- **Leaf 11a: the unit ball is precomplete at the uniformizer** — adic
+Cauchy sequences are norm Cauchy sequences, which converge by completeness of
+`K`, with limits in the closed ball and adically close to the tail. -/
+theorem isPrecomplete_span_piUnitBall :
+    IsPrecomplete (Ideal.span {piUnitBall ϖ}) ↥(unitBall K) := by
+  constructor
+  intro f hf
+  have hdiff : ∀ {a b : ℕ}, a ≤ b →
+      ‖((f a : ↥(unitBall K)) : K) - ((f b : ↥(unitBall K)) : K)‖ ≤
+        ‖ϖ.val‖ ^ a := by
+    intro a b hab
+    have h1 := hf hab
+    rw [SModEq.sub_mem] at h1
+    have h2 := (mem_span_piUnitBall_pow_iff ϖ a (f a - f b)).mp h1
+    exact h2
+  have hcauchy : CauchySeq (fun n => ((f n : ↥(unitBall K)) : K)) := by
+    refine cauchySeq_of_le_geometric ‖ϖ.val‖ 1 ϖ.norm_val_lt_one fun n => ?_
+    rw [dist_eq_norm, one_mul]
+    exact hdiff (Nat.le_succ n)
+  obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete hcauchy
+  have hLball : ‖L‖ ≤ 1 := by
+    refine le_of_tendsto (hL.norm) ?_
+    filter_upwards with n
+    exact (mem_unitBall_iff _ _).mp (f n).2
+  refine ⟨⟨L, (mem_unitBall_iff _ _).mpr hLball⟩, fun n => ?_⟩
+  rw [SModEq.sub_mem]
+  rw [mem_span_piUnitBall_pow_iff]
+  have htail : Filter.Tendsto
+      (fun j => ‖((f n : ↥(unitBall K)) : K) -
+        ((f j : ↥(unitBall K)) : K)‖) Filter.atTop
+      (nhds ‖((f n : ↥(unitBall K)) : K) - L‖) := by
+    exact ((tendsto_const_nhds.sub hL).norm)
+  refine le_of_tendsto htail ?_
+  filter_upwards [Filter.eventually_ge_atTop n] with j hj
+  exact hdiff hj
+
 variable (𝔪 : Ideal (P K m)) [h𝔪 : 𝔪.IsMaximal]
 
 /-- The factor map from the Tate residue ring onto the special fibre. -/
