@@ -154,22 +154,19 @@ theorem restrictedModule_map_surjective
   classical
   intro ⟨g, hg⟩
   -- Reduce to finding h with f ∘ h = g and h → 0 cofinitely.
-  suffices ∃ h : (Fin 1 →₀ ℕ) → M,
-      (∀ s, f (h s) = g s) ∧ Tendsto h cofinite (nhds 0) by
+  suffices ∃ h : (Fin 1 →₀ ℕ) → M, (∀ s, f (h s) = g s) ∧ Tendsto h cofinite (nhds 0) by
     obtain ⟨h, hfh, hh⟩ := this
     exact ⟨⟨h, hh⟩, by apply Subtype.ext; funext s; exact hfh s⟩
   -- Step 1: Obtain an antitone basis of open additive subgroups of M.
   obtain ⟨W, _, hW⟩ := (Filter.HasBasis.mk (fun U ↦ ⟨fun hU ↦
     let ⟨V, hV⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
-    ⟨V, trivial, hV⟩, fun ⟨V, _, hV⟩ ↦
-    mem_nhds_iff.mpr ⟨(V : Set M), hV, V.isOpen, V.zero_mem⟩⟩) :
+    ⟨V, trivial, hV⟩, fun ⟨V, _, hV⟩ ↦ mem_nhds_iff.mpr ⟨(V : Set M), hV, V.isOpen, V.zero_mem⟩⟩) :
     (nhds (0 : M)).HasBasis (fun _ : OpenAddSubgroup M ↦ True)
       (fun V ↦ (V : Set M))).exists_antitone_subbasis
   -- Step 2: Sₙ = {s | g s ∉ f(Wₙ)} is finite for each n.
   have hS_fin : ∀ n, {s : Fin 1 →₀ ℕ | g s ∉ f '' (W n : Set M)}.Finite := by
     intro n
-    exact mem_cofinite.mp (hg ((hf_open _ (W n).isOpen).mem_nhds
-      ⟨0, (W n).zero_mem, map_zero f⟩))
+    exact mem_cofinite.mp (hg ((hf_open _ (W n).isOpen).mem_nhds ⟨0, (W n).zero_mem, map_zero f⟩))
   -- Step 3: g s ∈ f(Wₙ) for all n implies g s = 0 (Hausdorff argument).
   have hzero : ∀ s, (∀ n, g s ∈ f '' (W n : Set M)) → g s = 0 :=
     fun s hs ↦ eq_zero_of_mem_image_all f.toAddMonoidHom hf_cont W hW (g s) hs
@@ -177,8 +174,7 @@ theorem restrictedModule_map_surjective
   -- For each s: if g s ∈ f(Wₙ) for all n, then g s = 0 and h s := 0.
   -- Otherwise let k(s) = min{n | g s ∉ f(Wₙ)}.
   -- If k(s) = 0, take any lift. If k(s) ≥ 1, lift in W_{k(s)-1}.
-  set h : (Fin 1 →₀ ℕ) → M := fun s ↦
-    if hall : ∀ n, g s ∈ f '' (W n : Set M) then 0
+  set h : (Fin 1 →₀ ℕ) → M := fun s ↦ if hall : ∀ n, g s ∈ f '' (W n : Set M) then 0
     else by
       push Not at hall
       exact if hk0 : Nat.find hall = 0 then (hf_surj (g s)).choose

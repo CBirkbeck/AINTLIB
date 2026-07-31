@@ -4452,8 +4452,7 @@ theorem laurentCover_isEmbedding_presheaf
   have hprod_ind :
       Topology.IsInducing
         (Prod.map
-          (τ_plus :
-            presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
+          (τ_plus : presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
           (τ_minus :
             presheafValue (laurentMinusDatum D₀ f) → LaurentCover.B₂_gen (D₀.canonicalMap f))) :=
     Topology.IsInducing.prodMap hτ_plus_inducing hτ_minus_inducing
@@ -4461,8 +4460,7 @@ theorem laurentCover_isEmbedding_presheaf
   -- `epsilonHom_gen` extensionally, by `htau_plus` and `htau_minus`.
   have hcomp_eq :
       (Prod.map
-          (τ_plus :
-            presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
+          (τ_plus : presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
           (τ_minus :
             presheafValue (laurentMinusDatum D₀ f) →
               LaurentCover.B₂_gen (D₀.canonicalMap f))) ∘ pair =
@@ -4489,8 +4487,7 @@ theorem laurentCover_isEmbedding_presheaf
   have hprod_cont :
       Continuous
         (Prod.map
-          (τ_plus :
-            presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
+          (τ_plus : presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
           (τ_minus :
             presheafValue (laurentMinusDatum D₀ f) → LaurentCover.B₂_gen (D₀.canonicalMap f))) :=
     hτ_plus_inducing.continuous.prodMap hτ_minus_inducing.continuous

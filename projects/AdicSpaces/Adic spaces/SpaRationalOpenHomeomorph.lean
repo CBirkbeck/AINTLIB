@@ -128,6 +128,15 @@ theorem exists_uniform_bound_insert [IsRingOfIntegralElements (B⁺ : Subring B)
   · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp ht'
     exact Or.inr ⟨i, hi, hvle⟩
 
+/-- A finite product of elements outside the support of `w` is outside the support: the
+support is a prime ideal, so a product in it forces some factor in it. -/
+theorem not_vle_zero_prod {ι : Type v} (w : Spv B) (fam : Finset ι) (G : ι → B)
+    (hG : ∀ i ∈ fam, ¬ w.vle (G i) 0) : ¬ w.vle (∏ i ∈ fam, G i) 0 := by
+  rw [show ∀ x, w.vle x 0 ↔ x ∈ w.supp from fun x => (mem_supp_iff w x).symm]
+  intro hc
+  obtain ⟨i, hi, hGi⟩ := (Ideal.IsPrime.prod_mem_iff).mp hc
+  exact hG i hi ((mem_supp_iff w _).mp hGi)
+
 /-- **The rational-basis trick** (Wedhorn Remark 7.30-adjacent): a Spa-point in a
 finite intersection of basic opens lies in an indexed rational set with
 *spanning* parameters contained in that intersection. The numerators are
@@ -148,11 +157,7 @@ theorem exists_spanning_presentation_of_mem_basicOpens [DecidableEq B]
   set g : B := ∏ i ∈ fam, G i with hg_def
   -- `v(g) ≠ 0` at `w` (the support is prime)
   have hGw : ∀ i ∈ fam, ¬ w.vle (G i) 0 := fun i hi => (hmem i hi).2
-  have hgw : ¬ w.vle g 0 := by
-    rw [show ∀ x, w.vle x 0 ↔ x ∈ w.supp from fun x => (mem_supp_iff w x).symm]
-    intro hc
-    obtain ⟨i, hi, hGi⟩ := (Ideal.IsPrime.prod_mem_iff).mp hc
-    exact hGw i hi ((mem_supp_iff w _).mp hGi)
+  have hgw : ¬ w.vle g 0 := not_vle_zero_prod w fam G hGw
   -- pick `k` with `w(ϖ^k) ≤ w(g)` (continuity)
   obtain ⟨k, hk⟩ := exists_pow_vle_of_isContinuous hw.1 hϖ hgw
   refine ⟨fun o => o.elim (ϖ ^ k) (fun i => (∏ j ∈ fam.erase i, G j) * F i), g, ?_, ?_, ?_⟩

@@ -545,6 +545,27 @@ theorem biUnion_antidiagonal_eq (N : ℕ) :
   · rintro ⟨-, hlt⟩
     exact ⟨q.1 + q.2, hlt, rfl⟩
 
+/-- **Cauchy-product regrouping**: summing the antidiagonals below `N` is the same as summing
+over the part of the square `range N ×ˢ range N` where `q.1 + q.2 < N`. -/
+theorem sum_antidiagonal_mul_pow_eq_filter
+    {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    (A A' : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) (N : ℕ) :
+    (∑ l ∈ Finset.range N, (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
+      = ∑ q ∈ (Finset.range N ×ˢ Finset.range N).filter (fun q : ℕ × ℕ => q.1 + q.2 < N),
+          A q.1 * A' q.2 * b ^ (q.1 + q.2) := by
+  classical
+  rw [← biUnion_antidiagonal_eq, Finset.sum_biUnion]
+  · refine Finset.sum_congr rfl fun l _ => ?_
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun q hq => ?_
+    have hql : q.1 + q.2 = l := Finset.mem_antidiagonal.mp hq
+    rw [hql]
+  · intro x hx y hy hxy
+    simp only [Finset.disjoint_left, Finset.mem_antidiagonal]
+    intro q hq hq'
+    exact hxy (hq.symm.trans hq')
+
 /-- **The Cauchy-product estimate**: the product of two partial sums differs from the
 partial sum of the Cauchy product by a term of interval norm at most `ε·M`, provided the
 two coefficient families are bounded by `M` and are `≤ ε` beyond `N₀`, and `N ≥ 2N₀`.
@@ -576,20 +597,8 @@ theorem wI_partial_cauchy_diff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
     rw [pow_add]
     ring
   have hcauchy : (∑ l ∈ Finset.range N, (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
-      = ∑ q ∈ (Finset.range N ×ˢ Finset.range N).filter (fun q : ℕ × ℕ => q.1 + q.2 < N), g q := by
-    rw [← biUnion_antidiagonal_eq]
-    rw [Finset.sum_biUnion]
-    · refine Finset.sum_congr rfl fun l _ => ?_
-      rw [Finset.sum_mul]
-      refine Finset.sum_congr rfl fun q hq => ?_
-      have hql : q.1 + q.2 = l := Finset.mem_antidiagonal.mp hq
-      rw [hg]
-      simp only
-      rw [hql]
-    · intro x hx y hy hxy
-      simp only [Finset.disjoint_left, Finset.mem_antidiagonal]
-      intro q hq hq'
-      exact hxy (hq.symm.trans hq')
+      = ∑ q ∈ (Finset.range N ×ˢ Finset.range N).filter (fun q : ℕ × ℕ => q.1 + q.2 < N), g q :=
+    sum_antidiagonal_mul_pow_eq_filter p F b A A' N
   have hsub : (Finset.range N ×ˢ Finset.range N).filter
       (fun q : ℕ × ℕ => q.1 + q.2 < N) ⊆ Finset.range N ×ˢ Finset.range N :=
     Finset.filter_subset _ _

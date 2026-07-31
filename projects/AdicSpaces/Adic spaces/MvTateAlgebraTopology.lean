@@ -1060,6 +1060,18 @@ private theorem truncMv_coeff_outside (m : ℕ) (g : ↥(restrictedMvPowerSeries
   intro hbox
   exact absurd (hbox i) (by omega)
 
+/-- Every exponent occurring in a finite set of multi-indices is strictly below
+`(sup over the set of the sup over coordinates) + 1`. -/
+theorem coeff_lt_sup_sup_succ {m : ℕ} {S : Set (Fin m →₀ ℕ)} (hS : S.Finite)
+    (l : Fin m →₀ ℕ) (hl : l ∈ S) (i : Fin m) :
+    l i < (hS.toFinset.sup fun l' => Finset.univ.sup fun j => l' j) + 1 := by
+  have h1 : l i ≤ Finset.univ.sup (fun j => l j) :=
+    Finset.le_sup (f := fun j => l j) (Finset.mem_univ i)
+  have h2 : Finset.univ.sup (fun j => l j) ≤
+      hS.toFinset.sup (fun l' => Finset.univ.sup (fun j => l' j)) :=
+    Finset.le_sup (f := fun l' => Finset.univ.sup (fun j => l' j)) (hS.mem_toFinset.mpr hl)
+  omega
+
 /-- **Polynomials (box-finite-support elements) are dense in `A⟨X₁,…,Xₘ⟩`** for the canonical
 multivariate Tate topology. Generalizes `tateAlgebra₂_polynomials_dense_canonical` from `Fin 2`
 to `Fin m`; the density half of Wedhorn Example 6.38 ("`A[M]` is dense in `Â⟨T/s⟩`",
@@ -1083,14 +1095,8 @@ theorem mvTateAlgebra_polynomials_dense [IsTateRing A] (m : ℕ) :
       (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A)} with hS_def
   have hS_fin : S.Finite := hfin
   let N := (hS_fin.toFinset.sup (fun l => Finset.univ.sup (fun i => l i))) + 1
-  have hbad_lt : ∀ l ∈ S, ∀ i, l i < N := by
-    intro l hl i
-    have h1 : l i ≤ Finset.univ.sup (fun j => l j) :=
-      Finset.le_sup (f := fun j => l j) (Finset.mem_univ i)
-    have h2 : Finset.univ.sup (fun j => l j) ≤
-        hS_fin.toFinset.sup (fun l' => Finset.univ.sup (fun j => l' j)) :=
-      Finset.le_sup (f := fun l' => Finset.univ.sup (fun j => l' j)) (hS_fin.mem_toFinset.mpr hl)
-    omega
+  have hbad_lt : ∀ l ∈ S, ∀ i, l i < N :=
+    fun l hl i => coeff_lt_sup_sup_succ hS_fin l hl i
   refine ⟨truncMv m g N, hn ?_, ⟨N, fun l hl => truncMv_coeff_outside m g N l hl⟩⟩
   have hdiff_pair : g - truncMv m g N ∈ mvPairSubring m P := by
     intro l

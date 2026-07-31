@@ -3975,3 +3975,65 @@ construction anonymous — worse than doing nothing.
 Deferred deliberately, not skipped: it is a design change to `Presheaf.lean`, the most
 foundational file in the project (every gate after touching it is a full rebuild), so it wants
 to be its own change with its own gate rather than being bundled into a decompose batch.
+
+## 212 → 209: three more extractions
+
+* `coeff_lt_sup_sup_succ` ← `mvTateAlgebra_polynomials_dense` — a `Finset.sup` fact with no
+  ambient context at all.
+* `not_vle_zero_prod` ← `exists_spanning_presentation_of_mem_basicOpens` — "a finite product of
+  elements outside a Spa-point's support stays outside", true because the support is prime.
+* `sum_antidiagonal_mul_pow_eq_filter` ← `wI_partial_cauchy_diff` — the **Cauchy-product
+  regrouping** (antidiagonals below `N` = the `q.1+q.2 < N` part of the square). Purely about
+  index sets and ring operations: no valuation, no `wI`, no `ε`/`M`. Sits next to
+  `biUnion_antidiagonal_eq`, which it consumes. 15 lines → 3.
+
+All three modules green.
+
+### Diminishing returns are now visible, and worth stating
+
+The two next-cheapest proofs (`restrictedModule_map_surjective`,
+`laurentCover_isEmbedding_presheaf`) each sit at **need 2 with zero mechanical savings left** —
+every join and `rwa` is used up. Closing them means either a disproportionate extraction (a
+14-line block to save 2) or hunting two specific lines by hand.
+
+Checked whether one more general transform would help: `:= by / intro x / exact e` →
+`:= fun x => e`. Across all 207 in-scope proofs it appears **5 times, worth 6 lines total**, and
+clears nothing. Not worth building. Recording the measurement so it is not re-investigated.
+
+That is the shape of the rest of task 2: the general-purpose passes are exhausted, and the
+remaining ~207 are individual mathematical decompositions, each needing its own reading, its own
+helper design, and its own build.
+
+### Prepared: `exists_valuation_extension` (need 5, saves 7) — and when NOT to make a top-level lemma
+
+The proof does the same "at exponent 0" computation three times: `v_ext_fun a = v_r ⟨a, _⟩`
+whenever `a` is already in `A₀`, each time via `rw [v_ext_at a 0 _]` + `simp only [pow_zero, …]`
++ `Subtype.ext rfl`. Two of the three (`h_map_zero`, `h_map_one`) are mirror twins differing
+only in `0`/`1`, `zero_mem`/`one_mem`, `map_zero`/`map_one`.
+
+**The fix is a local `have`, not a top-level lemma** — a deliberate departure from the pattern
+used everywhere else in this phase. `v_ext_fun` is a local `let`, so a standalone lemma would
+have to re-thread `P`, `v_r`, `v_s`, `hs_A₀` and the well-definedness hypothesis just to restate
+something that is only ever used inside this one proof. That is the arity trap again: it would
+satisfy the metric while making the file worse. One named `have h_at0`, used three times, gets
+the same line reduction and leaves the fact ("the extension restricts to `v_r` on `A₀`") stated
+once and named.
+
+Rule of thumb this crystallises: **extract to a top-level lemma when the sub-result is about the
+theorem's PARAMETERS; keep it a local `have` when it is about the proof's own local
+constructions.** The dep metric already measures exactly this distinction — derived locals are
+what makes a helper unwieldy — so the two decisions are the same measurement read at different
+thresholds.
+
+### Staged, awaiting the gate
+
+* `lemma745.py` — `h_at0` in `exists_valuation_extension` (need 5, saves 7). Local `have`, per
+  the rule above, because `v_ext_fun` is a local `let`.
+* `spvai.py` — `one_lt_inv_of_not_mem_cGamma` + `cGammaUnits_subset_convexGenerated` out of
+  `restrictIdealSingle_cofinal_of_not_mem` (need 14, saves 16). These ARE top-level lemmas:
+  both are stated purely in the theorem's own parameters (`w`, `g`, `hg`, `hmem`), the second
+  taking the first as its `hy` argument. `A`/`Γ₀` are implicit section variables and auto-bind.
+
+`spvai.py` lifts the two proof bodies **verbatim** out of the file rather than retyping them, so
+the only thing that can be wrong is the signature — which is the part I can reason about
+statically. Retyping a body from a screenshot is how transcription errors get in.
