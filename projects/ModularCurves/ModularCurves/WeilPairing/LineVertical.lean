@@ -8,6 +8,7 @@ import ModularCurves.ForMathlib.CrossProductKernel
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+import ModularCurves.LevelStructure.CartierDivisor
 
 /-!
 # The line and the vertical as rank-one kernels ([GAP-A-4])
@@ -687,6 +688,29 @@ theorem cokernel_divisorTwistHom_bijective_restrict (U V : C.Opens)
     change Subsingleton Γ(M, U ⊓ V)
     infer_instance
   exact TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton F hUV
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- On a chart where both section kernels are principal, the pair divisor's ideal is
+the principal span of the product of the generators. -/
+theorem sectionsDivisor_pair_ideal_span {S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (P Q : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (rP rQ : Γ(C, U.1))
+    (hP : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQ : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ}) :
+    (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal.ideal U =
+      Ideal.span {rP * rQ} := by
+  rw [ModularCurves.RelEffCartierDiv.sectionsDivisor_ideal π hsm ![P, Q]]
+  rw [show (∏ i, Scheme.Hom.ker ((![P, Q]) i).1) =
+      Scheme.Hom.ker P.1 * Scheme.Hom.ker Q.1 from by
+    rw [Fin.prod_univ_two]
+    rfl]
+  rw [show (Scheme.Hom.ker P.1 * Scheme.Hom.ker Q.1).ideal U =
+      (Scheme.Hom.ker P.1).ideal U * (Scheme.Hom.ker Q.1).ideal U from by
+    rw [Scheme.IdealSheafData.ideal_mul]
+    rfl]
+  rw [hP, hQ, Ideal.span_singleton_mul_span_singleton]
 
 end LineAssembly
 
