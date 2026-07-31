@@ -1090,6 +1090,55 @@ theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair
   -- the ring-level split
   sorry
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- A morphism of sheaf modules vanishing locally on every section is zero
+(separatedness gluing). -/
+theorem hom_eq_zero_of_locally_zero {Z : Scheme.{u}} {M N : Z.Modules}
+    (f : M ⟶ N)
+    (h : ∀ (Uo : Z.Opens) (x : Γ(M, Uo)) (z : ↥Z), z ∈ Uo →
+      ∃ W : Z.Opens, z ∈ W ∧ ∃ hWU : W ≤ Uo,
+        N.presheaf.map (homOfLE hWU).op (f.app Uo x) = 0) : f = 0 := by
+  apply SheafOfModules.hom_ext
+  ext Uo x
+  classical
+  by_cases hne : Nonempty { z : ↥Z // z ∈ Uo.unop }
+  · -- glue the local vanishings over the pointwise cover
+    let W : { z : ↥Z // z ∈ Uo.unop } → Z.Opens :=
+      fun z => (h Uo.unop x z.1 z.2).choose
+    have hmem : ∀ z, z.1 ∈ W z := fun z => (h Uo.unop x z.1 z.2).choose_spec.1
+    have hle : ∀ z, W z ≤ Uo.unop :=
+      fun z => (h Uo.unop x z.1 z.2).choose_spec.2.choose
+    have hzero : ∀ z, N.presheaf.map (homOfLE (hle z)).op
+        (f.app Uo.unop x) = 0 :=
+      fun z => (h Uo.unop x z.1 z.2).choose_spec.2.choose_spec
+    have hcover : Uo.unop ≤ iSup W := by
+      intro z hz
+      exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨z, hz⟩, hmem ⟨z, hz⟩⟩
+    have hglue := TopCat.Sheaf.eq_of_locally_eq'
+      ((SheafOfModules.toSheaf Z.ringCatSheaf).obj N) W Uo.unop
+      (fun z => homOfLE (hle z)) hcover
+      (f.app Uo.unop x) 0
+      (fun z => by
+        rw [map_zero]
+        exact hzero z)
+    calc (f.val.app Uo) x = f.app Uo.unop x := rfl
+      _ = 0 := hglue
+      _ = _ := rfl
+  · -- the open is empty: sections are subsingleton by the empty gluing
+    have hUo : Uo.unop ≤ iSup (fun z : { z : ↥Z // z ∈ Uo.unop } => (⊥ : Z.Opens)) := by
+      intro z hz
+      exact absurd ⟨⟨z, hz⟩⟩ hne
+    have hglue := TopCat.Sheaf.eq_of_locally_eq'
+      ((SheafOfModules.toSheaf Z.ringCatSheaf).obj N)
+      (fun _ : { z : ↥Z // z ∈ Uo.unop } => (⊥ : Z.Opens)) Uo.unop
+      (fun z => homOfLE bot_le) hUo
+      (f.app Uo.unop x) 0
+      (fun z => absurd ⟨z⟩ hne)
+    calc (f.val.app Uo) x = f.app Uo.unop x := rfl
+      _ = 0 := hglue
+      _ = _ := rfl
+
 end LineAssembly
 
 end Twist
