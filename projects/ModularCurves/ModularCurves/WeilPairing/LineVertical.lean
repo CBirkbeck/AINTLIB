@@ -1328,7 +1328,88 @@ theorem nonempty_baseSections_cokernel_unitEndo_equiv {Y S : Scheme.{u}}
     Nonempty ((Scheme.Modules.baseSections π'
         (Limits.cokernel (ModularCurves.unitEndomorphismOfTopSection a)))
       ≃ₗ[Γ(S, (⊤ : S.Opens))] (Γ(Y, (⊤ : Y.Opens)) ⧸ Ideal.span {a})) := by
-  sorry
+  classical
+  haveI hQCu : (unitObj Y).IsQuasicoherent :=
+    isInvertible_unit.isQuasicoherent
+  haveI hQCc : (Limits.cokernel
+      (ModularCurves.unitEndomorphismOfTopSection a)).IsQuasicoherent :=
+    isQuasicoherent_cokernel _
+  haveI hH1 : Subsingleton (CategoryTheory.Sheaf.H (unitObj Y).sheaf 1) :=
+    affine_subsingleton_H (F := unitObj Y) 0
+  have hsurj := Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
+    π' (ModularCurves.unitEndomorphismOfTopSection a)
+  have hexact := Scheme.Modules.baseSectionsMap_exact_cokernel
+    π' (ModularCurves.unitEndomorphismOfTopSection a)
+  have hker := LinearMap.exact_iff.mp hexact
+  -- the mk-map from unit base sections to the target quotient, Γ(S)-linear via halg
+  let ψ : Scheme.Modules.baseSections π' (unitObj Y) →ₗ[Γ(S, (⊤ : S.Opens))]
+      (Γ(Y, (⊤ : Y.Opens)) ⧸ Ideal.span {a}) :=
+    { toFun := fun s => Ideal.Quotient.mk _ (s : Γ(Y, (⊤ : Y.Opens)))
+      map_add' := fun s t => by
+        show Ideal.Quotient.mk _ ((s + t : Γ(Y, (⊤ : Y.Opens)))) = _
+        rw [map_add]
+        rfl
+      map_smul' := fun r s => by
+        show Ideal.Quotient.mk _
+          ((Scheme.Hom.appTop π').hom r * (s : Γ(Y, (⊤ : Y.Opens)))) = _
+        rw [← halg r]
+        show Ideal.Quotient.mk _
+          (algebraMap Γ(S, (⊤ : S.Opens)) Γ(Y, (⊤ : Y.Opens)) r *
+            (s : Γ(Y, (⊤ : Y.Opens)))) = _
+        rw [map_mul]
+        rfl }
+  have hψsurj : Function.Surjective ψ := by
+    intro q
+    obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective q
+    exact ⟨y, rfl⟩
+  -- the kernel of the mk-map is the range of the endomorphism on base sections
+  have hkerψ : LinearMap.range (Scheme.Modules.baseSectionsMap π'
+      (ModularCurves.unitEndomorphismOfTopSection a)).hom = LinearMap.ker ψ := by
+    ext s
+    constructor
+    · rintro ⟨t, rfl⟩
+      show Ideal.Quotient.mk _ _ = 0
+      rw [Ideal.Quotient.eq_zero_iff_mem]
+      have hval := ModularCurves.unitEndomorphismOfTopSection_app_apply a
+        (⊤ : Y.Opens) (t : Γ(Y, (⊤ : Y.Opens)))
+      have hida : Y.presheaf.map
+          (homOfLE (le_top : (⊤ : Y.Opens) ≤ ⊤)).op a = a := by
+        rw [show (homOfLE (le_top : (⊤ : Y.Opens) ≤ ⊤)).op = 𝟙 _ from rfl,
+          CategoryTheory.Functor.map_id]
+        rfl
+      rw [hida] at hval
+      let t' : Γ(Y, (⊤ : Y.Opens)) := t
+      let v : Γ(Y, (⊤ : Y.Opens)) :=
+        ((ModularCurves.unitEndomorphismOfTopSection a).val.app
+          (Opposite.op (⊤ : Y.Opens))) t'
+      show v ∈ Ideal.span {a}
+      rw [show v = t' * a from hval]
+      exact Ideal.mul_mem_left _ _ (Ideal.mem_span_singleton_self a)
+    · intro hs
+      have hs0 : Ideal.Quotient.mk (Ideal.span {a})
+          (s : Γ(Y, (⊤ : Y.Opens))) = 0 := hs
+      rw [Ideal.Quotient.eq_zero_iff_mem] at hs0
+      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hs0
+      refine ⟨(c : Γ(Y, (⊤ : Y.Opens))), ?_⟩
+      have hval := ModularCurves.unitEndomorphismOfTopSection_app_apply a
+        (⊤ : Y.Opens) (c : Γ(Y, (⊤ : Y.Opens)))
+      have hida : Y.presheaf.map
+          (homOfLE (le_top : (⊤ : Y.Opens) ≤ ⊤)).op a = a := by
+        rw [show (homOfLE (le_top : (⊤ : Y.Opens) ≤ ⊤)).op = 𝟙 _ from rfl,
+          CategoryTheory.Functor.map_id]
+        rfl
+      rw [hida] at hval
+      let w : Γ(Y, (⊤ : Y.Opens)) :=
+        ((ModularCurves.unitEndomorphismOfTopSection a).val.app
+          (Opposite.op (⊤ : Y.Opens))) (c : Γ(Y, (⊤ : Y.Opens)))
+      show w = (s : Γ(Y, (⊤ : Y.Opens)))
+      rw [show w = (c : Γ(Y, (⊤ : Y.Opens))) * a from hval]
+      exact hc
+  -- assemble: coker sections ≃ unit sections ⧸ ker(π-map) ≃ ⧸range ≃ target
+  refine ⟨(((LinearMap.quotKerEquivOfSurjective _ hsurj).symm.trans
+    (Submodule.quotEquivOfEq _ _ hker)).trans
+    (Submodule.quotEquivOfEq _ _ hkerψ)).trans
+    (ψ.quotKerEquivOfSurjective hψsurj)⟩
 
 end LineAssembly
 
