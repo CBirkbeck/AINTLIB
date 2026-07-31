@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.IdealModule
+import ModularCurves.EllipticCurve.PoleSheaf
 
 /-!
 # The line and the vertical as rank-one kernels ([GAP-A-4])
@@ -238,6 +239,70 @@ private theorem smul_injective_of_restrict_triv {W : C.Opens}
     simp
   rw [heq] at inner
   exact inner g' hg'
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The presheaf action of a locally principal nonzerodivisor ideal on an invertible
+module is locally injective**: on a common refinement of the principal cover and the
+trivializing cover, the componentwise action is injective
+(`idealActionPre_app_injective_of_span` + `smul_injective_of_restrict_triv`), and
+injectivity of the restriction is exactly the equalizer-sieve condition. -/
+theorem isLocallyInjective_idealActionPre
+    (h : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L) :
+    Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+      ((PresheafOfModules.toPresheaf _).map (idealActionPre J L)) := by
+  obtain ⟨ι, Ut, hUt, htriv⟩ := hL
+  constructor
+  intro U x y hxy
+  rw [Opens.mem_grothendieckTopology]
+  intro c hcU
+  obtain ⟨V, hcV, g, hspan, hnzd⟩ := h c
+  have hcT : c ∈ iSup Ut := by rw [hUt]; trivial
+  obtain ⟨i, hci⟩ := TopologicalSpace.Opens.mem_iSup.mp hcT
+  have hopen : c ∈ U.unop ⊓ (V.1 ⊓ Ut i) := ⟨hcU, hcV, hci⟩
+  obtain ⟨_, ⟨W, hWaff, rfl⟩, hcW, hsub⟩ :=
+    C.isBasis_affineOpens.exists_subset_of_mem_open hopen
+      (U.unop ⊓ (V.1 ⊓ Ut i)).2
+  have hWU : W ≤ U.unop := fun a ha => (hsub ha).1
+  have hWV : W ≤ V.1 := fun a ha => (hsub ha).2.1
+  have hWT : W ≤ Ut i := fun a ha => (hsub ha).2.2
+  refine ⟨W, homOfLE hWU, ?_, hcW⟩
+  -- the descended generator on `W`
+  have hspanW : J.ideal ⟨W, hWaff⟩ =
+      Ideal.span {(C.presheaf.map (homOfLE hWV).op).hom g} := by
+    rw [← Scheme.IdealSheafData.map_ideal' (I := J)
+      (U := ⟨W, hWaff⟩) (V := V) ((homOfLE hWV).op), hspan,
+      Ideal.map_span, Set.image_singleton]
+  have hnzdW : (C.presheaf.map (homOfLE hWV).op).hom g ∈
+      nonZeroDivisors Γ(C, W) := by
+    have h1 := ModularCurves.affinePullbackSection_mem_nonZeroDivisors
+      (𝟙 C) ⟨W, hWaff⟩ V (by simpa using hWV) hnzd
+    rw [ModularCurves.affinePullbackSection_eq_appLE] at h1
+    have h2 : (Scheme.Hom.appLE (𝟙 C) V.1 W (by simpa using hWV)).hom g =
+        (C.presheaf.map (homOfLE hWV).op).hom g := by
+      simp [Scheme.Hom.appLE, Scheme.Hom.id_app]
+    rwa [h2] at h1
+  -- injectivity of the component at `W`
+  obtain ⟨eT⟩ := htriv i
+  have hLinj := smul_injective_of_restrict_triv L
+    (restrictIsoOfPullbackIso L W (restrictTrivialization hWT eT))
+    ((C.presheaf.map (homOfLE hWV).op).hom g) hnzdW
+  have hinj := idealActionPre_app_injective_of_span J L ⟨W, hWaff⟩
+    ((C.presheaf.map (homOfLE hWV).op).hom g) hspanW hnzdW hLinj
+  have hinj' : Function.Injective
+      (((PresheafOfModules.toPresheaf _).map (idealActionPre J L)).app
+        (Opposite.op W)) := hinj
+  -- the equalizer condition: restrictions agree because the action values do
+  refine hinj' ?_
+  have hnx := NatTrans.naturality_apply
+    ((PresheafOfModules.toPresheaf _).map (idealActionPre J L))
+    (homOfLE hWU).op x
+  have hny := NatTrans.naturality_apply
+    ((PresheafOfModules.toPresheaf _).map (idealActionPre J L))
+    (homOfLE hWU).op y
+  rw [hnx, hny, hxy]
 
 end Twist
 
