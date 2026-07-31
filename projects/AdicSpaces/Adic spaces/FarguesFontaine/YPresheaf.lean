@@ -81,7 +81,7 @@ theorem intervalTrace_dyadic_eq_rationalOpen (s j₁ j₂ : ℕ)
   have hYeq : Y p F ϖ' = Y p F ϖ := Y_eq_of_teichPi_pow p F ϖ hpk hteich
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 j₁ 1 j₂ one_pos hj₁ one_pos hj₂ v
-  rw [show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [show 1 + 1 - 1 = 1 by omega] at hiff
   rw [hiff, hYeq]
   have hq1 : (0 : ℚ) < 1 / ((j₁ : ℚ) / ((p : ℚ) ^ s)) := by
     have : (0 : ℚ) < (j₁ : ℚ) := by exact_mod_cast hj₁
@@ -137,7 +137,7 @@ theorem isOpen_intervalTrace_dyadic (s j₁ j₂ : ℕ)
     = {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
       (x : Spv (Ainf p F)) ∈ rationalOpen
         (chartT p F (PseudoUniformizer.frobRoot p F ϖ s) 1 (j₁ + j₂ - 1))
-        (chartS p F (PseudoUniformizer.frobRoot p F ϖ s) 1 j₂)} from by
+        (chartS p F (PseudoUniformizer.frobRoot p F ϖ s) 1 j₂)} by
     rw [← intervalTrace_dyadic_eq_rationalOpen p F ϖ s j₁ j₂ hj₁ hj₂]]
   exact isOpen_rationalOpen_trace (chartT_nonempty p F _ 1 (j₁ + j₂ - 1)) _
 
@@ -394,7 +394,7 @@ private theorem gaussVal_vle_teichPi_pow_p_pow_iff {q r : ℚ} (hq : 0 < q) (hr 
         ^ r.num.toNat = vpiQ p F ϖ ((r.num.toNat : ℕ) : ℚ) from
       (vpiQ_natCast p F ϖ r.num.toNat).symm,
     vpiQ_pow p F ϖ q r.den, vpiQ_le_vpiQ_iff p F ϖ, hcast]
-  rw [show (q * (r.den : ℚ) ≤ (r.num : ℚ)) ↔ q ≤ r from by
+  rw [show (q * (r.den : ℚ) ≤ (r.num : ℚ)) ↔ q ≤ r by
     rw [← le_div_iff₀ hden, Rat.num_div_den]]
 
 /-- **Gauss points detect the interval**: the Gauss point at radius `vpiQ q`
@@ -439,7 +439,7 @@ theorem gaussPoint_mem_intervalTrace_iff {q q₁ q₂ : ℚ}
           ^ q₂.num.toNat = vpiQ p F ϖ ((q₂.num.toNat : ℕ) : ℚ) from
         (vpiQ_natCast p F ϖ q₂.num.toNat).symm,
       vpiQ_pow p F ϖ q q₂.den, vpiQ_le_vpiQ_iff p F ϖ, hcast₂]
-    rw [show ((q₂.num : ℚ) ≤ q * (q₂.den : ℚ)) ↔ q₂ ≤ q from by
+    rw [show ((q₂.num : ℚ) ≤ q * (q₂.den : ℚ)) ↔ q₂ ≤ q by
       rw [← div_le_iff₀ hden₂, Rat.num_div_den]]
   constructor
   · rintro ⟨-, hge, hle⟩

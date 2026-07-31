@@ -477,10 +477,10 @@ theorem locIdeal_artinRees_ideal
   refine ⟨k₀, fun n hn ↦ ?_⟩
   have h := hk n hn
   rwa [show (locIdeal P T s) ^ n • (⊤ : Submodule _ _) =
-        ((locIdeal P T s) ^ n : Ideal _) from by
+        ((locIdeal P T s) ^ n : Ideal _) by
           rw [Ideal.smul_eq_mul, Ideal.mul_top],
        show (locIdeal P T s) ^ k₀ • (⊤ : Submodule _ _) =
-        ((locIdeal P T s) ^ k₀ : Ideal _) from by
+        ((locIdeal P T s) ^ k₀ : Ideal _) by
           rw [Ideal.smul_eq_mul, Ideal.mul_top],
        Ideal.smul_eq_mul] at h
 
@@ -1175,10 +1175,10 @@ theorem Jfull_artinRees [IsNoetherianRing A]
   refine ⟨k₀, fun n hn ↦ ?_⟩
   have h := hk n hn
   rwa [show (Jfull P T s) ^ n • (⊤ : Submodule _ _) =
-        ((Jfull P T s) ^ n : Ideal _) from by
+        ((Jfull P T s) ^ n : Ideal _) by
           rw [Ideal.smul_eq_mul, Ideal.mul_top],
        show (Jfull P T s) ^ k₀ • (⊤ : Submodule _ _) =
-        ((Jfull P T s) ^ k₀ : Ideal _) from by
+        ((Jfull P T s) ^ k₀ : Ideal _) by
           rw [Ideal.smul_eq_mul, Ideal.mul_top],
        Ideal.smul_eq_mul] at h
 
@@ -1299,7 +1299,7 @@ theorem locNhd_invS_mem_of_hopen
   · rintro d ⟨b, hb, rfl⟩
     change divByS 1 s * algebraMap A _ ↑b ∈ _
     rw [show divByS 1 s * algebraMap A (Localization.Away s) ↑b =
-        divByS (↑b) s from by
+        divByS (↑b) s by
       unfold divByS
       rw [← IsLocalization.mk'_one (M := Submonoid.powers s)
             (S := Localization.Away s) (↑b : A),

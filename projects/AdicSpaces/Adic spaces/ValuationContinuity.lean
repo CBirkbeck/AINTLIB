@@ -61,7 +61,7 @@ theorem isContinuous_of_ideal_pow_lt
       rintro _ ⟨y, hy, rfl⟩
       exact hn y hy
     rw [show { a : A | v a < γ } =
-      (v.ltAddSubgroup (Units.mk0 γ hγ) : Set A) from by ext; simp [ltAddSubgroup]]
+      (v.ltAddSubgroup (Units.mk0 γ hγ) : Set A) by ext; simp [ltAddSubgroup]]
     exact AddSubgroup.isOpen_of_mem_nhds _
       (Filter.mem_of_superset
         ((P.pow_image_isOpen n).mem_nhds (Set.mem_image_of_mem _ (P.I ^ n).zero_mem))
@@ -537,7 +537,7 @@ noncomputable def restrictToConvex
     · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
         rw [huxy_eq]; intro hmem
         have hle_ux : Units.mk0 (v x) hx * Units.mk0 (v y) hy ≤ Units.mk0 (v x) hx :=
-          Units.val_le_val.mp (show (v x) * (v y) ≤ v x from by
+          Units.val_le_val.mp (show (v x) * (v y) ≤ v x by
             calc v x * v y ≤ v x * 1 := mul_le_mul_right (hle y) (v x)
               _ = v x := mul_one _)
         exact not_mem_of_le' hmx (unit_le_one' x hx) hle_ux hmem
@@ -647,7 +647,7 @@ noncomputable def restrictToConvexBounded
       have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
         rw [huxy_eq]; intro hmem
         have hle_ux : Units.mk0 (v x) hx * Units.mk0 (v y) hy ≤ Units.mk0 (v x) hx :=
-          Units.val_le_val.mp (show (v x) * (v y) ≤ v x from by
+          Units.val_le_val.mp (show (v x) * (v y) ≤ v x by
             calc v x * v y ≤ v x * 1 := mul_le_mul_right hvy_lt.le (v x)
               _ = v x := mul_one _)
         have hvx_le_one : Units.mk0 (v x) hx ≤ 1 := Units.val_le_val.mp hvx_lt.le

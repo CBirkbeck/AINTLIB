@@ -628,7 +628,7 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
     exact UniformSpace.Completion.continuous_extension.comp
       (AbstractCompletion.uniformContinuous_compare pkg
         (@UniformSpace.Completion.cPkg _ _)).continuous
-  rw [show (↑(RingHom.ker π) : Set _) = π ⁻¹' {0} from by
+  rw [show (↑(RingHom.ker π) : Set _) = π ⁻¹' {0} by
     ext x; exact ⟨id, id⟩]
   exact isClosed_singleton.preimage hπ_cont
 

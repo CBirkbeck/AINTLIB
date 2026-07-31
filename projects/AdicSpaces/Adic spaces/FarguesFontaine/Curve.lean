@@ -383,7 +383,7 @@ private theorem windowU_zero_trace_eq :
   have hKLE : KLE p F ϖ (cFF p * (p : ℚ) ^ (0 : ℤ)) (v : Spv (Ainf p F)) ↔
       (v : Spv (Ainf p F)).vle ((p : Ainf p F) ^ (cFF p).num.toNat)
         (teichPi p F ϖ ^ (cFF p).den) := by
-    rw [show cFF p * (p : ℚ) ^ (0 : ℤ) = cFF p from by rw [zpow_zero, mul_one], KLE]
+    rw [show cFF p * (p : ℚ) ^ (0 : ℤ) = cFF p by rw [zpow_zero, mul_one], KLE]
   constructor
   · rintro ⟨hY, hge, hle⟩
     exact ⟨⟨hKGE.mp hge, fun h0 => v_p_ne_zero hY h0⟩,
@@ -415,11 +415,11 @@ private theorem windowV_zero_trace_eq :
   have hKGE : KGE p F ϖ (cFF p * (p : ℚ) ^ (0 : ℤ)) (v : Spv (Ainf p F)) ↔
       (v : Spv (Ainf p F)).vle (teichPi p F ϖ ^ (cFF p).den)
         ((p : Ainf p F) ^ (cFF p).num.toNat) := by
-    rw [show cFF p * (p : ℚ) ^ (0 : ℤ) = cFF p from by rw [zpow_zero, mul_one], KGE]
+    rw [show cFF p * (p : ℚ) ^ (0 : ℤ) = cFF p by rw [zpow_zero, mul_one], KGE]
   have hKLE : KLE p F ϖ ((p : ℚ) ^ ((0 : ℤ) + 1)) (v : Spv (Ainf p F)) ↔
       (v : Spv (Ainf p F)).vle ((p : Ainf p F) ^ ((p : ℚ)).num.toNat)
         (teichPi p F ϖ ^ ((p : ℚ)).den) := by
-    rw [show ((p : ℚ) ^ ((0 : ℤ) + 1)) = (p : ℚ) from by rw [zero_add, zpow_one], KLE]
+    rw [show ((p : ℚ) ^ ((0 : ℤ) + 1)) = (p : ℚ) by rw [zero_add, zpow_one], KLE]
   constructor
   · rintro ⟨hY, hge, hle⟩
     exact ⟨⟨hKGE.mp hge, fun h0 => not_vle_pow_p_zero p F ϖ hY _ h0⟩,

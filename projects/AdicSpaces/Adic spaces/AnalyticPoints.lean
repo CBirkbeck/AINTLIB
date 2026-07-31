@@ -118,9 +118,9 @@ theorem I_sup_prime_ne_top (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
   have h_unit : IsUnit p := by
     have : IsUnit (1 - i) := Ideal.isUnit_of_sub_one_mem_jacobson_bot _ (by
       change (1 - i) - 1 ∈ (⊥ : Ideal P.A₀).jacobson
-      rw [show (1 : ↥P.A₀) - i - 1 = -i from by ring]
+      rw [show (1 : ↥P.A₀) - i - 1 = -i by ring]
       exact neg_mem (IsAdicComplete.le_jacobson_bot (I := P.I) hi))
-    rwa [show (1 : ↥P.A₀) - i = p from by linear_combination -hip] at this
+    rwa [show (1 : ↥P.A₀) - i = p by linear_combination -hip] at this
   exact Ideal.IsPrime.ne_top ‹_› (Ideal.eq_top_of_isUnit_mem 𝔭₀ hp h_unit)
 
 end PairOfDefinition

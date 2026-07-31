@@ -179,7 +179,7 @@ private theorem mul_st_ideal_shift (P : PairOfDefinition A) (s t : A) :
   -- hC : ∀ x ∈ Im(I^C), s * t * x ∈ A₀.
   refine ⟨C, fun k b hb ↦ ?_⟩
   -- b ∈ I^(k+C) ⊆ I^C * I^k. Use Ideal.mul_le and span_induction.
-  rw [show k + C = C + k from by omega, pow_add] at hb
+  rw [show k + C = C + k by omega, pow_add] at hb
   -- b ∈ I^C * I^k. Decompose via Ideal.mul_le / the ideal product.
   -- The result s * t * val(b) ∈ val '' I^k follows because:
   -- for generators c * a with c ∈ I^C, a ∈ I^k:
@@ -192,7 +192,7 @@ private theorem mul_st_ideal_shift (P : PairOfDefinition A) (s t : A) :
   refine Submodule.mul_induction_on hb (fun c hc a ha ↦ ?_) (fun x y hx hy ↦ ?_)
   · -- Product case: c ∈ I^C, a ∈ I^k.
     have hca : (c * a : P.A₀).val = c.val * a.val := rfl
-    rw [hca, show s * t * (c.val * a.val) = (s * t * c.val) * a.val from by ring]
+    rw [hca, show s * t * (c.val * a.val) = (s * t * c.val) * a.val by ring]
     have hstc : s * t * c.val ∈ (P.A₀ : Set A) :=
       hC ⟨c, hc, rfl⟩
     exact ⟨⟨s * t * c.val, hstc⟩ * a, Ideal.mul_mem_left _ _ ha, rfl⟩
@@ -235,7 +235,7 @@ private theorem scaledCoeff_succ_tX_mul (f t : A)
     f ^ (n + 1) * TateAlgebra.coeff (n + 1) (algebraMap A _ t * TateAlgebra.X * g) =
       f * t * (f ^ n * TateAlgebra.coeff n g) := by
   rw [show algebraMap A _ t * TateAlgebra.X * g =
-    algebraMap A _ t * (TateAlgebra.X * g) from by ring,
+    algebraMap A _ t * (TateAlgebra.X * g) by ring,
     TateAlgebra.coeff_algebraMap_mul, TateAlgebra.coeff_succ_X_mul, pow_succ]
   ring
 
@@ -243,7 +243,7 @@ private theorem scaledCoeff_succ_tX_mul (f t : A)
 private theorem scaledCoeff_zero_tX_mul (f t : A) (g : ↥(TateAlgebra A)) :
     f ^ 0 * TateAlgebra.coeff 0 (algebraMap A _ t * TateAlgebra.X * g) = 0 := by
   rw [show algebraMap A _ t * TateAlgebra.X * g =
-    algebraMap A _ t * (TateAlgebra.X * g) from by ring,
+    algebraMap A _ t * (TateAlgebra.X * g) by ring,
     TateAlgebra.coeff_algebraMap_mul, TateAlgebra.coeff_zero_X_mul, mul_zero, mul_zero]
 
 /-- The self-preserving T-topology neighborhood `G` used in the continuity proof:
@@ -997,14 +997,14 @@ with `s 0 < N` and set the rest to zero. The result is restricted (polynomial). 
 private noncomputable def truncTate (g : ↥(TateAlgebra A)) (N : ℕ) :
     ↥(TateAlgebra A) :=
   ⟨fun s ↦ if s 0 < N then g.val s else 0,
-   isRestricted_of_eventually_zero _ N (fun s hs ↦ by simp [show ¬(s 0 < N) from by omega])⟩
+   isRestricted_of_eventually_zero _ N (fun s hs ↦ by simp [show ¬(s 0 < N) by omega])⟩
 
 private theorem truncTate_val (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ) :
     (truncTate g N).val s = if s 0 < N then g.val s else 0 := rfl
 
 private theorem truncTate_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : N ≤ s 0) : (truncTate g N).val s = 0 := by
-  simp [truncTate_val, show ¬(s 0 < N) from by omega]
+  simp [truncTate_val, show ¬(s 0 < N) by omega]
 
 private theorem truncTate_coeff_low (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : s 0 < N) : (truncTate g N).val s = g.val s := by
@@ -1147,7 +1147,7 @@ private theorem polynomial_quotient_in_range (s : A) (g : ↥(TateAlgebra A))
     -- By IH, mk(g - gk) is in the range.
     have hg'_range := ih (g - gk) hg'_vanish
     -- mk(g) = mk(g - gk) + mk(gk), both in range.
-    rw [show g = (g - gk) + gk from by ring, map_add]
+    rw [show g = (g - gk) + gk by ring, map_add]
     obtain ⟨x, hx⟩ := hg'_range
     obtain ⟨y, hy⟩ := hgk_range
     exact ⟨x + y, by rw [map_add, hx, hy]⟩
@@ -1510,7 +1510,7 @@ private noncomputable def truncTateC (g : ↥(TateAlgebra A)) (N : ℕ) :
     ↥(TateAlgebra A) :=
   ⟨fun s ↦ if s 0 < N then g.val s else 0,
    isRestricted_of_eventually_zero _ N
-    (fun s hs ↦ by simp [show ¬(s 0 < N) from by omega])⟩
+    (fun s hs ↦ by simp [show ¬(s 0 < N) by omega])⟩
 
 private theorem truncTateC_val (g : ↥(TateAlgebra A)) (N : ℕ)
     (s : Fin 1 →₀ ℕ) :
@@ -1519,7 +1519,7 @@ private theorem truncTateC_val (g : ↥(TateAlgebra A)) (N : ℕ)
 private theorem truncTateC_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ)
     (s : Fin 1 →₀ ℕ) (hs : N ≤ s 0) :
     (truncTateC g N).val s = 0 := by
-  simp [truncTateC_val, show ¬(s 0 < N) from by omega]
+  simp [truncTateC_val, show ¬(s 0 < N) by omega]
 
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the canonical (natural Tate) topology.
@@ -1586,7 +1586,7 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
       hdiff_pair hdiff_coeff
   -- truncTateC g N - g = -(g - truncTateC g N), use neg_mem.
   change truncTateC g N - g ∈ tateAlgNhd P n
-  rw [show truncTateC g N - g = -(g - truncTateC g N) from by ring]; exact neg_mem hg_diff_mem
+  rw [show truncTateC g N - g = -(g - truncTateC g N) by ring]; exact neg_mem hg_diff_mem
 
 /-- The localization `A[1/s]` maps densely into `A⟨X⟩/(1-sX)` for the canonical
 quotient topology (Wedhorn Example 6.38, canonical topology version).
@@ -1860,7 +1860,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
   -- π is topologically nilpotent in A.
   let P' := (IsTateRing.principalPair A).toPairOfDefinition
   have hπ := P'.isTopologicallyNilpotent_of_mem
-    (show (IsTateRing.principalPair A).π ∈ P'.I from by
+    (show (IsTateRing.principalPair A).π ∈ P'.I by
       rw [(IsTateRing.principalPair A).I_eq_span]; exact Ideal.mem_span_singleton_self _)
   -- mk(algebraMap(π^n)) → 0 in canonical quotient.
   have hmk_pi_tendsto : Filter.Tendsto

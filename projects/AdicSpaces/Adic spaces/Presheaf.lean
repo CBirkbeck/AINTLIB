@@ -1962,7 +1962,7 @@ theorem locTopology_eq_bot_of_discrete {A : Type*} [CommRing A] [TopologicalSpac
       {0} := Set.eq_singleton_iff_unique_mem.mpr ⟨zero_mem_locNhd D.P D.T D.s M, hNhd⟩
   apply eq_bot_of_singletons_open
   intro x
-  rw [show ({x} : Set (Localization.Away D.s)) = (x + ·) '' {0} from by
+  rw [show ({x} : Set (Localization.Away D.s)) = (x + ·) '' {0} by
     simp only [Set.image_singleton, add_zero]]
   exact (isOpenMap_add_left x) _ (hNhd_eq ▸ hopen_nhd)
 
@@ -2324,7 +2324,7 @@ theorem exists_continuous_valuation_of_valuationSubring_of_span_eq
       have hsn_eq : (⟨s ^ n, hsn_A₀⟩ : P.A₀) = t₀ ^ n := Subtype.ext rfl
       have hv₀_lt : v₀_A₀ ⟨s ^ n, hsn_A₀⟩ < v₀_A₀ ⟨s ^ n * x, hn⟩ := by
         change V.valuation (ι (s ^ n)) < V.valuation (ι (s ^ n * x))
-        rw [show ι (s ^ n * x) = ι s ^ n * ι x from by rw [map_mul, map_pow],
+        rw [show ι (s ^ n * x) = ι s ^ n * ι x by rw [map_mul, map_pow],
             show ι (s ^ n) = ι s ^ n from map_pow ι s n, map_mul, map_pow]
         exact lt_mul_of_one_lt_right
           (pow_pos (zero_lt_iff.mpr (ha₀_val_eq ▸ hg_ne0)) n)

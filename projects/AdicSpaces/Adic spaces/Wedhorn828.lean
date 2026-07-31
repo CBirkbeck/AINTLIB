@@ -315,7 +315,7 @@ private theorem fSubX_saturated_faithful (f : A) (I : Ideal A) (h : ↥(TateAlge
       exact noeth_mem_ideal_of_mul_shift f I (fun k ↦ TateAlgebra.coeff (n + 1 + k) h)
         (by simp only [Nat.add_zero]; exact hf_succ)
         (fun k ↦ by
-          rw [show n + 1 + (k + 1) = (n + 1 + k) + 1 from by omega]
+          rw [show n + 1 + (k + 1) = (n + 1 + k) + 1 by omega]
           exact hstep (n + 1 + k))
   exact mem_idealMap_of_forall_coeff_mem I h hall
 
@@ -1182,7 +1182,7 @@ theorem mvEvalHomBounded_continuous [IsTateRing R] {n : ℕ}
     rw [← hbeq]; exact hk ⟨bb, hbI, rfl⟩
   apply hVR
   rw [show mvEvalTerm g b h v =
-      (∏ i, b i ^ (v i)) * g (MvPowerSeries.coeff v h.val) from by
+      (∏ i, b i ^ (v i)) * g (MvPowerSeries.coeff v h.val) by
     rw [mvEvalTerm]; ring]
   exact Set.mul_mem_mul ⟨v, rfl⟩ hcoeffV
 
@@ -1332,7 +1332,7 @@ private theorem invS_mem_range [IsTateRing A] [IsNoetherianRing A] (D : Rational
   -- `invS = canonicalMap (↑ub⁻¹) · (canonicalMap (↑b) · invS)`.
   have hfinal : invS D = D.canonicalMap (↑ub⁻¹ : A) * D.coeRingHom (divByS (↑b : A) D.s) := by
     rw [hcoe, ← mul_assoc, ← map_mul]
-    rw [show (↑ub⁻¹ : A) * (↑b : A) = 1 from by
+    rw [show (↑ub⁻¹ : A) * (↑b : A) = 1 by
       rw [hub]; exact Units.inv_mul_eq_one.mpr (by rw [IsUnit.unit_spec])]
     rw [map_one, one_mul]
   rw [hfinal]
@@ -1363,7 +1363,7 @@ private theorem coeRingHom_mem_range [IsTateRing A] [IsNoetherianRing A]
           Localization.mk_mul, Localization.mk_eq_mk_iff, Localization.r_iff_exists]
         exact ⟨1, by simp [mul_comm]⟩
       rw [← key, mul_assoc,
-        show (D.canonicalMap D.s) ^ k * (invS D) ^ k = 1 from by
+        show (D.canonicalMap D.s) ^ k * (invS D) ^ k = 1 by
           rw [← mul_pow, canonicalMap_s_mul_invS, one_pow],
         mul_one]
     rw [hformula]
@@ -1465,7 +1465,7 @@ theorem example638_evalHom_continuous (D : RationalLocData A) :
   apply hVR
   rw [show mvEvalTerm D.canonicalMap (example638_genTuple D) h v =
       (∏ i, example638_genTuple D i ^ (v i)) *
-        D.canonicalMap (MvPowerSeries.coeff v h.val) from by
+        D.canonicalMap (MvPowerSeries.coeff v h.val) by
     rw [mvEvalTerm]; ring]
   exact Set.mul_mem_mul ⟨v, rfl⟩ hcoeffV
 
@@ -2140,7 +2140,7 @@ private lemma presheafValue_mvRestricted_iU_denseRange
       rw [show (∑ v ∈ box, MvPowerSeries.monomial v (g.val v) :
             MvPowerSeries (Fin m) (presheafValue D)) =
           MvPolynomial.coeToMvPowerSeries.ringHom
-            (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) from by
+            (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) by
         rw [map_sum]
         refine Finset.sum_congr rfl (fun v _ ↦ ?_)
         rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.coe_monomial]]
@@ -2515,7 +2515,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
   apply hVgV
   -- expand `fU p = ∑_{v ∈ supp p} ψγ(coeff_v p) · ∏ⱼ (fU Xⱼ)^(vⱼ)`.
   rw [show fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
-      ∏ j, fU (MvPolynomial.X j) ^ (v j) from by
+      ∏ j, fU (MvPolynomial.X j) ^ (v j) by
     have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j ↦ fU (MvPolynomial.X j)) p := by
       have hvar : (fun j ↦ fU (MvPolynomial.X j)) =
           (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)

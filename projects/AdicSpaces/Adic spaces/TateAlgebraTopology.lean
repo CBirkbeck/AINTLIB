@@ -1131,7 +1131,7 @@ theorem tateAlgebraTopology'_completeSpace [IsTateRing A] [T2Space A]
       have h1 := hN m hm k hk
       simp only [Set.mem_preimage] at h1
       -- h1 : u k - u m ∈ tateAlgNhd P n (since preimage is p.2 - p.1 and pair is (u m, u k))
-      rw [show u m - u k = -(u k - u m) from by ring]
+      rw [show u m - u k = -(u k - u m) by ring]
       exact neg_mem h1⟩
   -- Step 3: For each l, the coefficient sequence is Cauchy in (A, uA).
   -- Since uA is a letI, CauchySeq will use it automatically.
@@ -1389,7 +1389,7 @@ theorem tateAlgebra_algebraMap_continuous [IsTateRing A] :
     -- algebraMap (b : A) ∈ tateAlgNhd P n.
     -- Since b ∈ P.I^n, pairConstantHom P b ∈ (pairIdeal P)^n (by map_pow + mem_map).
     refine ⟨pairConstantHom P ⟨b, b.property⟩, ?_, ?_⟩
-    · rw [show (pairIdeal P) ^ n = Ideal.map (pairConstantHom P) (P.I ^ n) from by
+    · rw [show (pairIdeal P) ^ n = Ideal.map (pairConstantHom P) (P.I ^ n) by
         simp only [pairIdeal, ← Ideal.map_pow]]
       exact Ideal.mem_map_of_mem _ hb
     · apply Subtype.ext; rfl
@@ -2436,7 +2436,7 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
     exact ⟨N, fun m hm k hk => by
       have h1 := hN m hm k hk
       simp only [Set.mem_preimage] at h1
-      rw [show u m - u k = -(u k - u m) from by ring]
+      rw [show u m - u k = -(u k - u m) by ring]
       exact neg_mem h1⟩
   have hcoeff_cauchy : ∀ l : Fin 2 →₀ ℕ,
       CauchySeq (fun n => MvPowerSeries.coeff l (u n).val) := by
@@ -2600,7 +2600,7 @@ theorem tateAlgebra₂_algebraMap_continuous [IsTateRing A] :
       algebraMap A ↥(TateAlgebra₂ A) a ∈ tateAlgNhd₂ P n
     rw [map_add, add_sub_cancel_right]
     refine ⟨pairConstantHom₂ P ⟨b, b.property⟩, ?_, ?_⟩
-    · rw [show (pairIdeal₂ P) ^ n = Ideal.map (pairConstantHom₂ P) (P.I ^ n) from by
+    · rw [show (pairIdeal₂ P) ^ n = Ideal.map (pairConstantHom₂ P) (P.I ^ n) by
         simp only [pairIdeal₂, ← Ideal.map_pow]]
       exact Ideal.mem_map_of_mem _ hb
     · apply Subtype.ext; rfl
@@ -3103,7 +3103,7 @@ theorem tateAlgebra₂_polynomials_dense_canonical [IsTateRing A] :
       (IsTateRing.principalPair A).π_isUnit
       hdiff_pair hdiff_coeff
   change truncTateC₂ g N - g ∈ tateAlgNhd₂ P n
-  rw [show truncTateC₂ g N - g = -(g - truncTateC₂ g N) from by ring]
+  rw [show truncTateC₂ g N - g = -(g - truncTateC₂ g N) by ring]
   exact neg_mem hg_diff_mem
 
 /-! #### Polynomial decomposition of box-supported restricted series

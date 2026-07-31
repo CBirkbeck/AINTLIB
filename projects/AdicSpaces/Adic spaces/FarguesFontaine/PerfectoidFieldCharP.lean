@@ -215,7 +215,7 @@ private theorem exists_forall_sub_mem_of_adicPrecision [UniformSpace F]
   refine ⟨N, fun m n hm hn ↦ ?_⟩
   rcases le_total m n with h | h
   · exact hGW (key hm h)
-  · rw [show (f m : F) - (f n : F) = -((f n : F) - (f m : F)) from by ring]
+  · rw [show (f m : F) - (f n : F) = -((f n : F) - (f m : F)) by ring]
     exact hGW (neg_mem (key hn h))
 
 /-- `O_F` is `ϖ`-adically complete.

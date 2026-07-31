@@ -440,7 +440,7 @@ theorem isAdicComplete_Iinf (ϖ : PseudoUniformizer F) :
       (sub_mem_jointIdeal_of_coeff_sub_mem p F ϖ hn.ne' (fun j hj => ?_))
     have h3 := hℓ j (M - j - 1)
     rw [SModEq.sub_mem, Ideal.smul_eq_mul, Ideal.mul_top, Ideal.span_singleton_pow,
-      show M - j - 1 + j + 1 = M from by omega] at h3
+      show M - j - 1 + j + 1 = M by omega] at h3
     have h4 : (WittVector.mk p ℓ).coeff j = ℓ j := congrFun (WittVector.coeff_mk p ℓ) j
     rw [h4]
     exact Ideal.span_singleton_le_span_singleton.mpr (pow_dvd_pow _ (by omega)) h3

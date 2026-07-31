@@ -245,7 +245,7 @@ instance instPerfectRingF : PerfectRing F p := by
       rw [mul_assoc, ← pow_add]
       have hcancel : k + (p - 1) * k = p * k := by
         calc k + (p - 1) * k = (1 + (p - 1)) * k := by ring
-          _ = p * k := by rw [show 1 + (p - 1) = p from by omega]
+          _ = p * k := by rw [show 1 + (p - 1) = p by omega]
       rw [hcancel]
     rw [hsplit]
     exact isPowerBounded_mul hk (hϖpow _)
@@ -601,7 +601,7 @@ private theorem exists_fold_teichmuller_headsF {ρ : NNReal} (hρ0 : 0 < ρ) (h�
       conv_lhs => rw [show WittVector.teichmuller p h + (WittVector.teichmuller p c
         + (p : WittVector p F) * P.sum)
         = (WittVector.teichmuller p h + WittVector.teichmuller p c)
-          + (p : WittVector p F) * P.sum from by ring, hG']
+          + (p : WittVector p F) * P.sum by ring, hG']
       ring
     · refine le_trans (mul_le_mul_of_nonneg_left ?_ zero_le) hmax
       exact valuation_teichCoeffF_teichmuller_add_le p F h c 0
@@ -770,8 +770,8 @@ theorem gaussValueF_teichmuller_sub_le_of_le_scaled {ρ : NNReal} (hρ0 : 0 < ρ
       show ((powerBoundedSubring.toSubring F).subtype) bhat = ((bhat : OF F) : F) from rfl,
       hahat', hbhat', mul_sub, ← map_mul, ← map_mul]
     have hϖpm : (ϖF ^ m) ≠ 0 := pow_ne_zero m hϖne
-    rw [show (ϖF ^ m)⁻¹ * (a * ϖF ^ m) = a from by field_simp,
-      show (ϖF ^ m)⁻¹ * (b * ϖF ^ m) = b from by field_simp]
+    rw [show (ϖF ^ m)⁻¹ * (a * ϖF ^ m) = a by field_simp,
+      show (ϖF ^ m)⁻¹ * (b * ϖF ^ m) = b by field_simp]
   rw [hsplit, gaussValueF_teichmuller_mul, gaussValueF_map]
   have hvinv : perfectoidValuation p F ((ϖF ^ m)⁻¹) = (c⁻¹) ^ m := by
     rw [map_inv₀, map_pow, inv_pow]
@@ -901,8 +901,8 @@ theorem bddAbove_gaussTermF_teichmuller_sub {ρ : NNReal} (hρ1 : ρ < 1)
       show ((powerBoundedSubring.toSubring F).subtype) bhat = ((bhat : OF F) : F) from rfl,
       hahat', hbhat', mul_sub, ← map_mul, ← map_mul]
     have hϖpm : (ϖF ^ m) ≠ 0 := pow_ne_zero m hϖne
-    rw [show (ϖF ^ m)⁻¹ * (a * ϖF ^ m) = a from by field_simp,
-      show (ϖF ^ m)⁻¹ * (b * ϖF ^ m) = b from by field_simp]
+    rw [show (ϖF ^ m)⁻¹ * (a * ϖF ^ m) = a by field_simp,
+      show (ϖF ^ m)⁻¹ * (b * ϖF ^ m) = b by field_simp]
   refine ⟨(c⁻¹) ^ m, ?_⟩
   rintro z ⟨n, rfl⟩
   rw [hsplit, gaussTermF_teichmuller_mul, gaussTermF_map]
@@ -992,7 +992,7 @@ theorem exists_delta_teichCoeffF_sub (ϖ : PseudoUniformizer F) (n : ℕ) {ρ : 
         rw [teichCoeffF, teichCoeffF]
         simp only [pow_zero]
         have := RingHom.map_neg WittVector.constantCoeff (x - y)
-        rw [show (-(x - y)) = y - x from by ring] at this
+        rw [show (-(x - y)) = y - x by ring] at this
         exact this
       rw [h00, hneg0, Valuation.map_neg]
       have hterm : perfectoidValuation p F (teichCoeffF p F (x - y) 0)

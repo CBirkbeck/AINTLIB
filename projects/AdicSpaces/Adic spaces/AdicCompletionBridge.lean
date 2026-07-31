@@ -132,7 +132,7 @@ omit [UniformSpace R] [IsUniformAddGroup R] [IsTopologicalRing R] in
 private theorem adicCompletionSet_isClosed : IsClosed (adicCompletionSet I) := by
   rw [show adicCompletionSet I =
       ⋂ (p : ℕ × ℕ) (_ : p.1 ≤ p.2),
-        {g | (AdicCompletion.transitionMap I R ‹p.1 ≤ p.2›) (g p.2) = g p.1} from by
+        {g | (AdicCompletion.transitionMap I R ‹p.1 ≤ p.2›) (g p.2) = g p.1} by
     ext g; simp only [adicCompletionSet, Set.mem_setOf_eq, Set.mem_iInter]
     exact ⟨fun h p hp => h hp, fun h m n hmn => h ⟨m, n⟩ hmn⟩]
   exact isClosed_iInter fun ⟨m, n⟩ => isClosed_iInter fun hmn =>

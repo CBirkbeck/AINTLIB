@@ -2546,7 +2546,7 @@ private theorem unitCover_overlapEval_gen2 [IsTateRing A] [IsNoetherianRing A]
         (Localization.Away (unitCover_overlapDatum_B D₀ f).s) (D₀.canonicalMap f) =
       algebraMap (presheafValue D₀)
         (Localization.Away (unitCover_overlapDatum_B D₀ f).s)
-        ((unitCover_overlapDatum_B D₀ f).s) from by
+        ((unitCover_overlapDatum_B D₀ f).s) by
       rw [unitCover_overlapDatum_s D₀ f]]
     rw [h1, map_one]
   rw [hmul, map_one, sub_self]
@@ -2949,7 +2949,7 @@ private theorem unitCover_relPlus_forward_witness
         DB.canonicalMap (D₀.canonicalMap f) := by
       rw [show divByS (D₀.canonicalMap f) DB.s =
         algebraMap (presheafValue D₀) (Localization.Away DB.s)
-          (D₀.canonicalMap f) from by
+          (D₀.canonicalMap f) by
         erw [divByS_eq_algebraMap]]
       rfl
     have e1 : DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
@@ -3111,11 +3111,11 @@ private theorem unitCover_relPlus_canonicalMap_f_eq
       DI.canonicalMap (D₀.s * f) := by
     rw [show DI.canonicalMap DI.s * DI.coeRingHom (divByS (D₀.s * f) DI.s) =
       DI.coeRingHom (algebraMap A (Localization.Away DI.s) DI.s *
-        divByS (D₀.s * f) DI.s) from by rw [map_mul]; rfl]
+        divByS (D₀.s * f) DI.s) by rw [map_mul]; rfl]
     rw [algebraMap_s_mul_divByS]
     rfl
   rw [h1, map_mul]
-  rw [show DI.canonicalMap DI.s = DI.canonicalMap D₀.s from by
+  rw [show DI.canonicalMap DI.s = DI.canonicalMap D₀.s by
     rw [show (DI.s : A) = D₀.s * 1 from rfl, mul_one]]
 
 /-- `D₀.s * f` is a generator of the intersection datum (piece 7d′). -/
@@ -3158,7 +3158,7 @@ private theorem unitCover_relPlus_backwardLocHom_continuous
         DI.coeRingHom (divByS (D₀.s * f) DI.s) := by
       rw [show divByS (D₀.canonicalMap f) DB.s =
         algebraMap (presheafValue D₀) (Localization.Away DB.s)
-          (D₀.canonicalMap f) from by
+          (D₀.canonicalMap f) by
         erw [divByS_eq_algebraMap]]
       rw [hψ, unitCover_relPlus_backwardLocHom_algebraMap,
         restrictionMapHom_canonicalMap]
@@ -3562,7 +3562,7 @@ private theorem unitCover_relMinus_forward_witness
     rw [show DB.canonicalMap (D₀.canonicalMap f) *
         DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s) =
       DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.canonicalMap f) * divByS (1 : presheafValue D₀) DB.s) from by
+        (D₀.canonicalMap f) * divByS (1 : presheafValue D₀) DB.s) by
       rw [map_mul]; rfl]
     erw [algebraMap_s_mul_divByS DB (1 : presheafValue D₀)]
     rw [map_one, map_one]
@@ -3608,7 +3608,7 @@ private theorem unitCover_relMinus_forward_witness
     rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
         (D₀.coeRingHom (divByS p D₀.s)) * divByS (1 : presheafValue D₀) DB.s) =
       DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-        DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s) from by rw [map_mul]; rfl]
+        DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s) by rw [map_mul]; rfl]
     rw [hs_eq]
     rw [map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap)]
     rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
@@ -3780,13 +3780,13 @@ private theorem unitCover_relMinus_inv_f_eq
       DI.canonicalMap (D₀.s * 1) := by
     rw [show DI.canonicalMap DI.s * DI.coeRingHom (divByS (D₀.s * 1) DI.s) =
       DI.coeRingHom (algebraMap A (Localization.Away DI.s) DI.s *
-        divByS (D₀.s * 1) DI.s) from by rw [map_mul]; rfl]
+        divByS (D₀.s * 1) DI.s) by rw [map_mul]; rfl]
     rw [algebraMap_s_mul_divByS]
     rfl
   calc DI.canonicalMap D₀.s * (DI.canonicalMap f *
         DI.coeRingHom (divByS (D₀.s * 1) DI.s)) =
       DI.canonicalMap DI.s * DI.coeRingHom (divByS (D₀.s * 1) DI.s) := by
-        rw [show DI.canonicalMap DI.s = DI.canonicalMap D₀.s * DI.canonicalMap f from by
+        rw [show DI.canonicalMap DI.s = DI.canonicalMap D₀.s * DI.canonicalMap f by
           rw [show (DI.s : A) = D₀.s * f from rfl, map_mul]]
         ring
     _ = DI.canonicalMap (D₀.s * 1) := h1
@@ -4291,7 +4291,7 @@ private theorem unitCover_relOverlap_forward_witness
     rw [show algebraMap A (Localization.Away D₀.s) D₀.s *
       (divByS p' D₀.s * algebraMap A (Localization.Away D₀.s) q') =
       (algebraMap A (Localization.Away D₀.s) D₀.s * divByS p' D₀.s) *
-        algebraMap A (Localization.Away D₀.s) q' from by ring]
+        algebraMap A (Localization.Away D₀.s) q' by ring]
     rw [algebraMap_s_mul_divByS, ← map_mul]
   -- the B-side element identities
   have heq_s : ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
@@ -4310,7 +4310,7 @@ private theorem unitCover_relOverlap_forward_witness
     rw [show OD.canonicalMap (D₀.canonicalMap f) *
         OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s) =
       OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s)
-        (D₀.canonicalMap f) * divByS (1 : presheafValue D₀) OD.s) from by
+        (D₀.canonicalMap f) * divByS (1 : presheafValue D₀) OD.s) by
       rw [map_mul]; rfl]
     rw [h8, map_one, map_one]
   have haMbb : OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
@@ -4321,7 +4321,7 @@ private theorem unitCover_relOverlap_forward_witness
     rw [show OD.canonicalMap (D₀.canonicalMap f) *
         OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
       OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s)
-        (D₀.canonicalMap f) * divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) from by
+        (D₀.canonicalMap f) * divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) by
       rw [map_mul]; rfl]
     rw [h9, map_mul, map_mul]
     rfl
@@ -4334,7 +4334,7 @@ private theorem unitCover_relOverlap_forward_witness
     intro p hp
     rcases Finset.mem_insert.mp hp with rfl | hp'
     · refine ⟨D₀.coeRingHom (divByS (D₀.s * 1) D₀.s), ?_, Or.inl rfl⟩
-      rw [show divByS (D₀.s * 1) D₀.s = divByS D₀.s D₀.s from by rw [mul_one]]
+      rw [show divByS (D₀.s * 1) D₀.s = divByS D₀.s D₀.s by rw [mul_one]]
       exact hA₀ D₀.s (Finset.mem_insert_self _ _)
     · have hp'' : p ∈ ((insert D₀.s D₀.T).product
           (insert (1 : A) ({f} : Finset A))).image (fun r : A × A => r.1 * r.2) := hp'
@@ -4407,7 +4407,7 @@ private theorem unitCover_relOverlap_forward_witness
       OD.canonicalMap (D₀.canonicalMap D₀.s) * OD.canonicalMap (D₀.canonicalMap D₀.s) *
         OD.canonicalMap (D₀.canonicalMap f) := by
     rw [hF_alg]
-    rw [show D₀.canonicalMap DII.s = D₀.canonicalMap ((D₀.s * 1) * (D₀.s * f)) from by
+    rw [show D₀.canonicalMap DII.s = D₀.canonicalMap ((D₀.s * 1) * (D₀.s * f)) by
       rw [hs_eq]]
     rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap),
       map_one, mul_one]
@@ -4429,7 +4429,7 @@ private theorem unitCover_relOverlap_forward_witness
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q *
         divByS (1 : presheafValue D₀) OD.s) =
       OD.canonicalMap c_p * OD.canonicalMap c_q *
-        OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s) from by
+        OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s) by
       rw [map_mul, map_mul]; rfl]
     rw [show OD.canonicalMap (D₀.canonicalMap D₀.s) * OD.canonicalMap (D₀.canonicalMap D₀.s) *
         OD.canonicalMap (D₀.canonicalMap f) *
@@ -4438,7 +4438,7 @@ private theorem unitCover_relOverlap_forward_witness
       OD.canonicalMap (D₀.canonicalMap D₀.s) * OD.canonicalMap c_p *
         (OD.canonicalMap (D₀.canonicalMap D₀.s) * OD.canonicalMap c_q) *
         (OD.canonicalMap (D₀.canonicalMap f) *
-          OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s)) from by ring]
+          OD.coeRingHom (divByS (1 : presheafValue D₀) OD.s)) by ring]
     rw [hinvO, mul_one]
   · -- K = 1 (q-side `b`): witness `aM c_p · aM c_q`
     refine ⟨algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
@@ -4450,7 +4450,7 @@ private theorem unitCover_relOverlap_forward_witness
     rw [hLHS 0, hRHS, hk_p, hk_q]
     rw [show OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q) =
-      OD.canonicalMap c_p * OD.canonicalMap c_q from by rw [map_mul]; rfl]
+      OD.canonicalMap c_p * OD.canonicalMap c_q by rw [map_mul]; rfl]
     rw [map_mul (OD.canonicalMap)]
     ring
   · -- K = 1 (p-side `b`): witness `aM c_p · aM c_q`
@@ -4463,7 +4463,7 @@ private theorem unitCover_relOverlap_forward_witness
     rw [hLHS 0, hRHS, hk_p, hk_q]
     rw [show OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q) =
-      OD.canonicalMap c_p * OD.canonicalMap c_q from by rw [map_mul]; rfl]
+      OD.canonicalMap c_p * OD.canonicalMap c_q by rw [map_mul]; rfl]
     rw [map_mul (OD.canonicalMap)]
     ring
   · -- K = 2: witness `aM c_p · aM c_q · (b²/b)`
@@ -4481,7 +4481,7 @@ private theorem unitCover_relOverlap_forward_witness
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q *
         divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
       OD.canonicalMap c_p * OD.canonicalMap c_q *
-        OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) from by
+        OD.coeRingHom (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) by
       rw [map_mul, map_mul]; rfl]
     rw [haMbb, map_mul (OD.canonicalMap), map_mul (OD.canonicalMap)]
     ring
@@ -4709,14 +4709,14 @@ private theorem unitCover_relOverlap_gen_identities
     intro t
     rw [show DII.canonicalMap DII.s * DII.coeRingHom (divByS t DII.s) =
       DII.coeRingHom (algebraMap A (Localization.Away DII.s) DII.s *
-        divByS t DII.s) from by rw [map_mul]; rfl]
+        divByS t DII.s) by rw [map_mul]; rfl]
     rw [algebraMap_s_mul_divByS]
     rfl
   -- split `canMap DII.s` (closed equation; safe against the divByS type-index)
   have hsplit_s : DII.canonicalMap DII.s =
       DII.canonicalMap (D₀.s * 1) * DII.canonicalMap (D₀.s * f) := by
     rw [show DII.canonicalMap DII.s =
-      DII.canonicalMap ((D₀.s * 1) * (D₀.s * f)) from by
+      DII.canonicalMap ((D₀.s * 1) * (D₀.s * f)) by
       rw [show (DII.s : A) = (D₀.s * 1) * (D₀.s * f) from rfl]]
     rw [map_mul]
   have u_f : IsUnit (DII.canonicalMap f) := by
@@ -5912,7 +5912,7 @@ private theorem unitCover_sq_plus_dense
         rw [unitCover_relPlus_backward_coe, unitCover_relPlus_backwardLocHom_algebraMap]
         rw [show LaurentTateAlgebra.posIncl (algebraMap (presheafValue D₀)
             ↥(TateAlgebra (presheafValue D₀)) c) =
-          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c from by
+          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c by
           ext1; apply MvPowerSeries.ext; intro e
           change LaurentTateAlgebra.varInclFun 0 (algebraMap (presheafValue D₀)
             (MvPowerSeries (Fin 1) (presheafValue D₀)) c) e =
@@ -5960,7 +5960,7 @@ private theorem unitCover_sq_plus_dense
         rw [show LaurentTateAlgebra.posIncl (⟨MvPowerSeries.X (0 : Fin 1),
             MvPowerSeries.X_isRestricted 0⟩ : ↥(TateAlgebra (presheafValue D₀))) =
           (⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩ :
-            ↥(TateAlgebra₂ (presheafValue D₀))) from by
+            ↥(TateAlgebra₂ (presheafValue D₀))) by
           ext1; apply MvPowerSeries.ext; intro e
           change LaurentTateAlgebra.varInclFun (0 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
             MvPowerSeries.coeff e (MvPowerSeries.X (0 : Fin 2))
@@ -5978,7 +5978,7 @@ private theorem unitCover_sq_plus_dense
               ↥(TateAlgebra₂ (presheafValue D₀))) =
           (unitCover_overlapDatum_B D₀ f).coeRingHom
             (divByS (D₀.canonicalMap f * D₀.canonicalMap f)
-              ((unitCover_overlapDatum_B D₀ f).s)) from by
+              ((unitCover_overlapDatum_B D₀ f).s)) by
           refine Eq.trans (mvEvalHomBounded_X _ _ _ _ (0 : Fin 2)) ?_
           rfl]
         have heq_s : ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
@@ -6012,7 +6012,7 @@ private theorem unitCover_sq_plus_dense
                 (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
                 (D₀.canonicalMap f) *
               divByS (D₀.canonicalMap f * D₀.canonicalMap f)
-                ((unitCover_overlapDatum_B D₀ f).s)) from by rw [map_mul]; rfl]
+                ((unitCover_overlapDatum_B D₀ f).s)) by rw [map_mul]; rfl]
           rw [h9, map_mul, map_mul]
           rfl
         rw [haMbb]
@@ -6179,7 +6179,7 @@ private theorem unitCover_sq_minus_dense
         rw [unitCover_relMinus_backward_coe, unitCover_relMinus_backwardLocHom_algebraMap]
         rw [show LaurentTateAlgebra.negIncl (algebraMap (presheafValue D₀)
             ↥(TateAlgebra (presheafValue D₀)) c) =
-          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c from by
+          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c by
           ext1; apply MvPowerSeries.ext; intro e
           change LaurentTateAlgebra.varInclFun 1 (algebraMap (presheafValue D₀)
             (MvPowerSeries (Fin 1) (presheafValue D₀)) c) e =
@@ -6261,7 +6261,7 @@ private theorem unitCover_sq_minus_dense
           rw [show (coUnitDatum (presheafValue_concretePair D₀)
               (D₀.canonicalMap f)).canonicalMap (D₀.canonicalMap f) *
             invS (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)) =
-            1 from by
+            1 by
             rw [show (D₀.canonicalMap f) = ((coUnitDatum (presheafValue_concretePair D₀)
               (D₀.canonicalMap f)).s : presheafValue D₀) from rfl]
             exact canonicalMap_s_mul_invS _]
@@ -6270,7 +6270,7 @@ private theorem unitCover_sq_minus_dense
         -- RHS·: backward(canMap_O b · overlapEval(negIncl X)) = backward(canMap_O b · coe(1/s_O)) = 1
         rw [show LaurentTateAlgebra.negIncl (TateAlgebra.X (A := presheafValue D₀)) =
           (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
-            ↥(TateAlgebra₂ (presheafValue D₀))) from by
+            ↥(TateAlgebra₂ (presheafValue D₀))) by
           ext1; apply MvPowerSeries.ext; intro e
           change LaurentTateAlgebra.varInclFun (1 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
             MvPowerSeries.coeff e (MvPowerSeries.X (1 : Fin 2))
@@ -6287,7 +6287,7 @@ private theorem unitCover_sq_minus_dense
             (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
               ↥(TateAlgebra₂ (presheafValue D₀))) =
           (unitCover_overlapDatum_B D₀ f).coeRingHom
-            (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) from by
+            (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) by
           refine Eq.trans (mvEvalHomBounded_X _ _ _ _ (1 : Fin 2)) ?_
           rfl]
         have hf_resO : (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
@@ -6314,7 +6314,7 @@ private theorem unitCover_sq_minus_dense
         rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) *
             (unitCover_overlapDatum_B D₀ f).coeRingHom
               (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) =
-          (1 : presheafValue (unitCover_overlapDatum_B D₀ f)) from by
+          (1 : presheafValue (unitCover_overlapDatum_B D₀ f)) by
           have h8 := algebraMap_s_mul_divByS (unitCover_overlapDatum_B D₀ f)
             (1 : presheafValue D₀)
           rw [haM_s] at h8
@@ -6326,7 +6326,7 @@ private theorem unitCover_sq_minus_dense
                 (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
                 (D₀.canonicalMap f) *
               divByS (1 : presheafValue D₀)
-                ((unitCover_overlapDatum_B D₀ f).s)) from by rw [map_mul]; rfl]
+                ((unitCover_overlapDatum_B D₀ f).s)) by rw [map_mul]; rfl]
           rw [h8, map_one, map_one]]
         rw [map_one]
     exact RingHom.congr_fun hcomp q
@@ -8655,7 +8655,7 @@ private theorem genPiece_relOverlap_forward_witness
     rw [show EII.canonicalMap (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) *
         EII.coeRingHom (divByS u EII.s) =
       EII.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away EII.s)
-        (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) * divByS u EII.s) from by
+        (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) * divByS u EII.s) by
       rw [map_mul EII.coeRingHom]; rfl]
     rw [show algebraMap (presheafValue D₀) (Localization.Away EII.s)
         (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) =
@@ -8706,7 +8706,7 @@ private theorem genPiece_relOverlap_forward_witness
       (D₀.coeRingHom (divByS p' D₀.s)) *
       divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) =
     EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
-      EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) from by
+      EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) by
     rw [map_mul]; rfl]
   rw [show ((DII.s : A)) = (D₀.s * t₁) * t₂ from rfl]
   rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap),
@@ -8996,13 +8996,13 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
         rw [show DII.canonicalMap DII.s *
           DII.coeRingHom (divByS ((D₀.s * q') * q) DII.s) =
           DII.coeRingHom (algebraMap A (Localization.Away DII.s) DII.s *
-            divByS ((D₀.s * q') * q) DII.s) from by rw [map_mul]; rfl]
+            divByS ((D₀.s * q') * q) DII.s) by rw [map_mul]; rfl]
         rw [algebraMap_s_mul_divByS]
         rfl
       have hsplit_s : DII.canonicalMap DII.s = DII.canonicalMap D₀.s *
           DII.canonicalMap t₁ * DII.canonicalMap t₂ := by
         rw [show DII.canonicalMap DII.s =
-          DII.canonicalMap ((D₀.s * t₁) * t₂) from by
+          DII.canonicalMap ((D₀.s * t₁) * t₂) by
           rw [show ((DII.s : A)) = (D₀.s * t₁) * t₂ from rfl]]
         rw [map_mul, map_mul]
       have hu_s' : IsUnit (DII.canonicalMap D₀.s) := by
@@ -9976,7 +9976,7 @@ theorem genRestrictedCover_gluing
     rw [show rationalOpen (imagePieceDatum D₀ T (tof Et) hspan).T
         (imagePieceDatum D₀ T (tof Et) hspan).s =
       rationalOpen (imagePieceDatum D₀ T t hspan).T
-        (imagePieceDatum D₀ T t hspan).s from by
+        (imagePieceDatum D₀ T t hspan).s by
       show rationalOpen (T.image D₀.canonicalMap) (D₀.canonicalMap (tof Et)) =
         rationalOpen (T.image D₀.canonicalMap) (D₀.canonicalMap t)
       rw [hTT], Set.inter_self] at h
@@ -10069,7 +10069,7 @@ private theorem ratio_pairwise_comparable_on_leaf [DecidableEq A]
   have hspec : (↑(h_units g hg).unit : A) = g := (h_units g hg).unit_spec
   have hinv : ((↑(h_units g hg).unit⁻¹ : A) * g) = 1 := by
     rw [show ((↑(h_units g hg).unit⁻¹ : A) * g) =
-      ((↑(h_units g hg).unit⁻¹ : A) * ↑(h_units g hg).unit) from by rw [hspec]]
+      ((↑(h_units g hg).unit⁻¹ : A) * ↑(h_units g hg).unit) by rw [hspec]]
     exact (h_units g hg).unit.inv_mul
   rcases laurentProdLeaves_sign_dichotomy ratios C.base hV''
     (f * ↑((h_units g hg).unit⁻¹)) hmem with h | h
@@ -10192,7 +10192,7 @@ theorem ratio_laurent_unitGen_bundle [DecidableEq A]
       have hspec : (↑(h_units g hg).unit : A) = g := (h_units g hg).unit_spec
       have hinv : ((↑(h_units g hg).unit⁻¹ : A) * g) = 1 := by
         rw [show ((↑(h_units g hg).unit⁻¹ : A) * g) =
-          ((↑(h_units g hg).unit⁻¹ : A) * ↑(h_units g hg).unit) from by
+          ((↑(h_units g hg).unit⁻¹ : A) * ↑(h_units g hg).unit) by
             rw [hspec]]
         exact (h_units g hg).unit.inv_mul
       rcases laurentProdLeaves_sign_dichotomy ratios C.base hV''
@@ -10246,12 +10246,12 @@ theorem ratio_laurent_unitGen_bundle [DecidableEq A]
     have hspec : (↑(h_units ↑t hu).unit : A) = ↑t := (h_units ↑t hu).unit_spec
     have hinv_l : ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑t) = 1 := by
       rw [show ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑t) =
-        ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑(h_units ↑t hu).unit) from by
+        ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑(h_units ↑t hu).unit) by
           rw [hspec]]
       exact (h_units ↑t hu).unit.inv_mul
     have hinv_r : ((↑t : A) * ↑((h_units ↑t hu).unit⁻¹)) = 1 := by
       rw [show ((↑t : A) * ↑((h_units ↑t hu).unit⁻¹)) =
-        ((↑(h_units ↑t hu).unit : A) * ↑((h_units ↑t hu).unit⁻¹)) from by
+        ((↑(h_units ↑t hu).unit : A) * ↑((h_units ↑t hu).unit⁻¹)) by
           rw [hspec]]
       exact (h_units ↑t hu).unit.mul_inv
     -- v's bounds on D give the preferred signs for the t-ratios.

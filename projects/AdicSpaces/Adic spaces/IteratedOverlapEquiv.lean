@@ -343,8 +343,8 @@ private theorem iteratedOverlap_forwardLocHom_to_B_genPB_s
         (Finset.mem_insert_self _ _)))) ?_
     rw [hs_B_eq]; exact divByS_mem_locSubring _ _ _ h1_mem_T_B
   · -- `a = D₀.s, b = f`: trivial (`divByS (D₀.s · f) (D₀.s · f) = 1`).
-    rw [show D₀.s * b = D₀.s * f from by rw [hb_f],
-        show divByS (D₀.s * f) (laurentOverlapDatum D₀ f).s = 1 from by
+    rw [show D₀.s * b = D₀.s * f by rw [hb_f],
+        show divByS (D₀.s * f) (laurentOverlapDatum D₀ f).s = 1 by
           unfold divByS; exact IsLocalization.mk'_self _ _, map_one]
     exact (locSubring _ _ _).one_mem
 
@@ -381,20 +381,20 @@ private theorem iteratedOverlap_forwardLocHom_to_B_genPB_f
   simp only [Finset.mem_insert, Finset.mem_singleton] at hb
   rcases hb with hb_s | hb_f
   · -- `a = f, b = D₀.s`: trivial (`divByS (f · D₀.s) (D₀.s · f) = 1`).
-    rw [show f * b = f * D₀.s from by rw [hb_s],
-        show divByS (f * D₀.s) (laurentOverlapDatum D₀ f).s = 1 from by
+    rw [show f * b = f * D₀.s by rw [hb_s],
+        show divByS (f * D₀.s) (laurentOverlapDatum D₀ f).s = 1 by
           rw [show f * D₀.s = D₀.s * f from mul_comm _ _]
           unfold divByS; exact IsLocalization.mk'_self _ _, map_one]
     exact (locSubring _ _ _).one_mem
   · -- `a = f, b = f`: NEW case. forward = `algebraMap(canMap f) * algebraMap(invS D₀)`.
-    rw [show f * b = f * f from by rw [hb_f],
+    rw [show f * b = f * f by rw [hb_f],
         show divByS (f * f) (laurentOverlapDatum D₀ f).s = divByS (f * f) (D₀.s * f) from rfl,
         forward_divByS_ff_eq P D₀ f hLocLift_B hforward_alg hu_s_tgt]
     refine (locSubring _ _ _).mul_mem ?_ (algebraMap_mem_locSubring _ _ _ ?_)
     · -- `algebraMap_B (canMap f) = divByS (b · b) b ∈ locSubring`.
       rw [show algebraMap (presheafValue D₀) _ (D₀.canonicalMap f) =
             divByS (D₀.canonicalMap f * D₀.canonicalMap f)
-              (iteratedOverlapDatum_B P D₀ f hLocLift_B).s from by
+              (iteratedOverlapDatum_B P D₀ f hLocLift_B).s by
           rw [hs_B_eq]; unfold divByS
           rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.canonicalMap f))
                 (S := Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap f)]
@@ -447,7 +447,7 @@ private theorem iteratedOverlap_forwardLocHom_to_B_genPB_T
     refine (locSubring _ _ _).mul_mem (algebraMap_mem_locSubring _ _ _ hcan_a) ?_
     rw [hs_B_eq]; exact divByS_mem_locSubring _ _ _ h1_mem_T_B
   · -- `a ∈ D₀.T, b = f`: forward = `algebraMap(coeRingHom(divByS a D₀.s))`.
-    rw [show a * b = a * f from by rw [hb_f],
+    rw [show a * b = a * f by rw [hb_f],
         show divByS (a * f) (laurentOverlapDatum D₀ f).s =
           divByS (a * f) (D₀.s * f) from rfl,
         forward_divByS_mul_f_eq P D₀ f hLocLift_B hforward_alg hu_s_tgt a]

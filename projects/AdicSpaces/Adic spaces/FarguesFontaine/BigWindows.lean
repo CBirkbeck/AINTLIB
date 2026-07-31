@@ -165,7 +165,7 @@ theorem bigWindow_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 p 1
     one_pos one_pos hppos one_pos v
-  rw [show 1 + p - 1 = p from by omega, show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [show 1 + p - 1 = p by omega, show 1 + 1 - 1 = 1 by omega] at hiff
   rw [hiff, hYeq]
   have hq1 : (0 : ℚ) < (p : ℚ) ^ (n : ℤ) := zpow_pos hp0 _
   have hq2 : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + 1) := zpow_pos hp0 _
@@ -183,7 +183,7 @@ theorem bigWindow_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
       exact hgev
     · refine (vle_pow_iff hpk _ _).mp ?_
       simp only [pow_one]
-      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) by
         rw [pow_succ]
         ring]
       exact hlev
@@ -197,7 +197,7 @@ theorem bigWindow_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
       exact h
     · refine (KLE_iff hY hq2 one_pos hab2).mpr ?_
       have h := (vle_pow_iff (v := v) hpk _ _).mpr hle
-      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) by
         rw [pow_succ]
         ring] at h
       rw [pow_one]
@@ -224,7 +224,7 @@ theorem bigWindow_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 p 1
     one_pos one_pos hppos one_pos v
-  rw [show 1 + p - 1 = p from by omega, show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [show 1 + p - 1 = p by omega, show 1 + 1 - 1 = 1 by omega] at hiff
   rw [hiff, hYeq]
   have hq1 : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ)) := zpow_pos hp0 _
   have hq2 : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ) + 1) := zpow_pos hp0 _
@@ -233,7 +233,7 @@ theorem bigWindow_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
     push_cast
     rw [one_div]
   have hab2 : (p : ℚ) ^ (-(m : ℤ) + 1) = ((p : ℕ) : ℚ) / ((p ^ m : ℕ) : ℚ) := by
-    rw [show -(m : ℤ) + 1 = 1 - (m : ℤ) from by ring, zpow_sub₀ hp0.ne',
+    rw [show -(m : ℤ) + 1 = 1 - (m : ℤ) by ring, zpow_sub₀ hp0.ne',
       zpow_one, zpow_natCast]
     push_cast
     ring
@@ -295,7 +295,7 @@ theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' p 1 p 1
     hppos one_pos hppos one_pos v
-  rw [show p + p - 1 = 2 * p - 1 from by omega, show 1 + 1 - 1 = 1 from by omega]
+  rw [show p + p - 1 = 2 * p - 1 by omega, show 1 + 1 - 1 = 1 by omega]
     at hiff
   rw [hiff, hYeq]
   have hq : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + 1) := zpow_pos hp0 _
@@ -308,13 +308,13 @@ theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
     refine ⟨hY, ?_, ?_⟩
     · refine (vle_pow_iff hpk _ _).mp ?_
       simp only [pow_one]
-      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) by
         rw [pow_succ]
         ring]
       exact hgev
     · refine (vle_pow_iff hpk _ _).mp ?_
       simp only [pow_one]
-      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) by
         rw [pow_succ]
         ring]
       exact hlev
@@ -323,14 +323,14 @@ theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
     refine ⟨hY, ?_, ?_⟩
     · refine (KGE_iff hY hq one_pos hab).mpr ?_
       have h := (vle_pow_iff (v := v) hpk _ _).mpr hge
-      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) by
         rw [pow_succ]
         ring] at h
       rw [pow_one]
       exact h
     · refine (KLE_iff hY hq one_pos hab).mpr ?_
       have h := (vle_pow_iff (v := v) hpk _ _).mpr hle
-      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) by
         rw [pow_succ]
         ring] at h
       rw [pow_one]
@@ -358,12 +358,12 @@ theorem bigWindow_inter_succ_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' p 1 p 1
     hppos one_pos hppos one_pos v
-  rw [show p + p - 1 = 2 * p - 1 from by omega, show 1 + 1 - 1 = 1 from by omega]
+  rw [show p + p - 1 = 2 * p - 1 by omega, show 1 + 1 - 1 = 1 by omega]
     at hiff
   rw [hiff, hYeq]
   have hq : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ) + 1) := zpow_pos hp0 _
   have hab : (p : ℚ) ^ (-(m : ℤ) + 1) = ((p : ℕ) : ℚ) / ((p ^ m : ℕ) : ℚ) := by
-    rw [show -(m : ℤ) + 1 = 1 - (m : ℤ) from by ring, zpow_sub₀ hp0.ne',
+    rw [show -(m : ℤ) + 1 = 1 - (m : ℤ) by ring, zpow_sub₀ hp0.ne',
       zpow_one, zpow_natCast]
     push_cast
     ring

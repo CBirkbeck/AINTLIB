@@ -1094,7 +1094,7 @@ theorem isUnit_algebraMap_f_in_quotient [DiscreteTopology A] (f : A) :
     rw [← map_sub]
     exact Ideal.Quotient.eq_zero_iff_mem.mpr (by
       rw [show algebraMap A ↥(TateAlgebra A) f * X - 1 =
-        -(1 - algebraMap A ↥(TateAlgebra A) f * X) from by ring]
+        -(1 - algebraMap A ↥(TateAlgebra A) f * X) by ring]
       exact neg_mem (Ideal.subset_span rfl))
   exact this
 
@@ -1154,7 +1154,7 @@ theorem locToQuotientOneSubfX_comp_quotientOneSubfXToLoc [DiscreteTopology A] (f
       rw [← map_sub]
       exact Ideal.Quotient.eq_zero_iff_mem.mpr (by
         rw [show algebraMap A ↥(TateAlgebra A) f * X - 1 =
-          -(1 - algebraMap A ↥(TateAlgebra A) f * X) from by ring]
+          -(1 - algebraMap A ↥(TateAlgebra A) f * X) by ring]
         exact neg_mem (Ideal.subset_span rfl))
     have hunit : IsUnit ((Ideal.Quotient.mk I) (algebraMap A _ f)) := by
       rw [isUnit_iff_exists_inv]
@@ -1501,7 +1501,7 @@ noncomputable def restrictedModuleA_equiv :
     rw [show (a • f).val s = a * f.val s from rfl]
     rw [show
       (a • (⟨f.val, _⟩ : ↥(TateAlgebra A))).val s =
-        a * f.val s from by
+        a * f.val s by
       rw [show
         (a • (⟨f.val, _⟩ : ↥(TateAlgebra A))).val s =
           MvPowerSeries.coeff s
@@ -1604,7 +1604,7 @@ theorem muMap_surjective
         (restrictedModule_fin_equiv n h x : ↥(TateAlgebra A)).val s •
           p (Pi.single x 1), _⟩ : ↥(restrictedModule A M))).val s =
         ∑ x : Fin n, (restrictedModule_fin_equiv n h x : ↥(TateAlgebra A)).val s •
-          p (Pi.single x 1) from by
+          p (Pi.single x 1) by
       simp only [AddSubmonoidClass.coe_finsetSum]
       exact Fintype.sum_apply s _]
     rfl
@@ -1671,7 +1671,7 @@ private theorem muMap_free_injective (m : ℕ) :
     simp only [hcomp]
     -- Now: ∑ᵢ (Pi.single i 1) ⊗ (x i • f) = x ⊗ f.
     rw [show (∑ i : Fin m, (Pi.single i (1 : A) : Fin m → A) ⊗ₜ[A] (x i • f)) =
-        (∑ i : Fin m, (x i • Pi.single i (1 : A) : Fin m → A)) ⊗ₜ[A] f from by
+        (∑ i : Fin m, (x i • Pi.single i (1 : A) : Fin m → A)) ⊗ₜ[A] f by
       rw [TensorProduct.sum_tmul]
       exact Finset.sum_congr rfl fun i _ ↦ by
         rw [TensorProduct.smul_tmul, TensorProduct.tmul_smul]]
@@ -2040,7 +2040,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       exact h_eq_zero
     have h_smul_top : (fun i ↦ lift₀ i) ∈
         (P.I ^ (m + k₀) • ⊤ : Submodule P.A₀ (Fin l → P.A₀)) := by
-      rw [show (fun i ↦ lift₀ i) = ∑ i, lift₀ i • Pi.single i 1 from by
+      rw [show (fun i ↦ lift₀ i) = ∑ i, lift₀ i • Pi.single i 1 by
         ext j; simp [Finset.sum_apply, Pi.single_apply]]
       exact Submodule.sum_mem _ (fun i _ ↦
         Submodule.smul_mem_smul (hlift₀_mem i) Submodule.mem_top)
@@ -2048,7 +2048,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         (P.I ^ (m + k₀) • ⊤ ⊓ K₀ : Submodule P.A₀ (Fin l → P.A₀)) :=
       Submodule.mem_inf.mpr ⟨h_smul_top, h_ker⟩
     rw [hAR (m + k₀) (by omega : k₀ ≤ m + k₀),
-      show m + k₀ - k₀ = m from by omega] at h_in_inf
+      show m + k₀ - k₀ = m by omega] at h_in_inf
     -- h_in_inf : lift₀ ∈ I^m • (I^{k₀} • ⊤ ⊓ K₀) in (Fin l → A₀)
     -- Since I^{k₀} • ⊤ ⊓ K₀ ≤ K₀, lift₀ ∈ I^m • K₀.
     -- In the submodule K₀, this means ⟨lift₀, h_ker⟩ ∈ I^m • ⊤ as a K₀-element.
@@ -2406,7 +2406,7 @@ theorem Module.Flat.quotient_of_flat_of_saturated
     suffices h : ∑ i, f i • (g * c i) = ∑ i, f i • x' i by
       rw [h, sub_self]
     rw [← hw, show w * g = g * w from mul_comm w g,
-      show g * w = g * (∑ i, c i * (algebraMap R S ∘ f) i) from by rw [hc]]
+      show g * w = g * (∑ i, c i * (algebraMap R S ∘ f) i) by rw [hc]]
     rw [Finset.mul_sum]
     congr 1; ext i
     rw [Algebra.smul_def, Function.comp_apply]; ring
@@ -2543,7 +2543,7 @@ theorem forall_coeff_mem_of_mem_ideal_map (I : Ideal A) (g : ↥(TateAlgebra A))
   · -- Addition
     intro g₁ g₂ _ _ ih₁ ih₂ n
     change coeff n (g₁ + g₂) ∈ I
-    rw [show coeff n (g₁ + g₂) = coeff n g₁ + coeff n g₂ from by
+    rw [show coeff n (g₁ + g₂) = coeff n g₁ + coeff n g₂ by
       simp only [coeff, map_add, Subring.coe_add]]
     exact I.add_mem (ih₁ n) (ih₂ n)
   · -- Scalar multiplication: coeff n (r * g'') ∈ I when all coeff of g'' are in I.
@@ -2667,7 +2667,7 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
           rw [Ideal.smul_top_eq_map (P.I ^ ((qn - 1) + k₁))]
           exact Ideal.mem_map_of_mem _ hy_mem
         rw [hAR ((qn - 1) + k₁) (by omega),
-          show (qn - 1) + k₁ - k₁ = qn - 1 from by omega] at hy_inter
+          show (qn - 1) + k₁ - k₁ = qn - 1 by omega] at hy_inter
         have hy_smul : y ∈ (P.I ^ (qn - 1) • I₀.restrictScalars P.A₀ :
             Submodule P.A₀ P.A₀) :=
           Submodule.smul_mono le_rfl inf_le_right hy_inter
@@ -2686,7 +2686,7 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
             obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp hv_sp
             have hv_eq : v = ∑ j : Fin numG, (cf j : P.A₀) * (g₀ j : I₀).val := by
               have h' := congr_arg (fun (x : I₀) ↦ x.val) (show (⟨v, hv⟩ : I₀) =
-                ∑ j, cf j • g₀ j from by
+                ∑ j, cf j • g₀ j by
                   rw [← hcf, Finsupp.sum, Finset.sum_subset (Finset.subset_univ _)]
                   intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul])
               simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower, smul_eq_mul] at h'
@@ -2796,7 +2796,7 @@ theorem fSubX_saturated
       exact noeth_mem_ideal_of_mul_shift f I (fun k ↦ coeff (n + 1 + k) h)
         (by simp only [Nat.add_zero]; exact hf_succ)
         (fun k ↦ by
-          rw [show n + 1 + (k + 1) = (n + 1 + k) + 1 from by omega]
+          rw [show n + 1 + (k + 1) = (n + 1 + k) + 1 by omega]
           exact hstep (n + 1 + k))
   -- Step 5: Conclude h ∈ Ideal.map I.
   exact mem_ideal_map_of_forall_coeff_mem I P h hall

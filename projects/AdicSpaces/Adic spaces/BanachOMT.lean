@@ -293,7 +293,7 @@ theorem _sub_sub_lemma_D_1_cauchy_builder
     apply hsum_lemma k n
     intro j
     have h := hstep (n + 1 + (j : ℕ))
-    rw [show n + 1 + ((j : ℕ) + 1) = n + 1 + (j : ℕ) + 1 from by omega]
+    rw [show n + 1 + ((j : ℕ) + 1) = n + 1 + (j : ℕ) + 1 by omega]
     exact h
   -- basis is a HasBasis for nhds 0.
   have hbasis_basis : (nhds (0 : G)).HasBasis (fun _ : ℕ => True) basis :=

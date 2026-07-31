@@ -934,7 +934,7 @@ private theorem nilpotentUnit_principalData {C : Type*} [CommRing C] [Topologica
     (isTopologicallyNilpotent_pow hu_nil hK_pos)
   set N := N₀ + 1
   have hN_mem : (⟨(u : C) ^ K, hu_K⟩ : P.A₀) ^ N ∈ P.I := by
-    rw [show N = 1 + N₀ from by omega, pow_add, pow_one]
+    rw [show N = 1 + N₀ by omega, pow_add, pow_one]
     exact Ideal.mul_mem_left _ _ hN₀
   have hu_K_unit : ((u ^ K : Cˣ) : C) ∈ P.A₀ := by
     rwa [Units.val_pow_eq_pow_val]

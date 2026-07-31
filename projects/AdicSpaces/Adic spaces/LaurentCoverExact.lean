@@ -704,7 +704,7 @@ private theorem coeff_posIncl (g : ↥(TateAlgebra A)) (i j : ℕ) :
   have h1 : idx i j 0 = i := idx_apply_zero i j
   rw [h1]
   have h2 : (idx i j = Finsupp.single 0 i) ↔ j = 0 := by
-    rw [show Finsupp.single (0 : Fin 2) i = Finsupp.single 0 (idx i j 0) from by rw [h1]]
+    rw [show Finsupp.single (0 : Fin 2) i = Finsupp.single 0 (idx i j 0) by rw [h1]]
     exact idx_eq_single_zero_iff i j
   simp only [h2]
 
@@ -717,7 +717,7 @@ private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
   have h1 : idx i j 1 = j := idx_apply_one i j
   rw [h1]
   have h2 : (idx i j = Finsupp.single 1 j) ↔ i = 0 := by
-    rw [show Finsupp.single (1 : Fin 2) j = Finsupp.single 1 (idx i j 1) from by rw [h1]]
+    rw [show Finsupp.single (1 : Fin 2) j = Finsupp.single 1 (idx i j 1) by rw [h1]]
     exact idx_eq_single_one_iff i j
   simp only [h2]
 
@@ -901,11 +901,11 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     intro i j k; induction k with
     | zero => simp
     | succ k ih =>
-      rw [show i + (k + 1) = (i + k) + 1 from by omega,
-          show j + (k + 1) = (j + k) + 1 from by omega]
+      rw [show i + (k + 1) = (i + k) + 1 by omega,
+          show j + (k + 1) = (j + k) + 1 by omega]
       rw [hdiag _ _ (by omega) (by omega)]
-      simp only [show (i + k + 1) - 1 = i + k from by omega,
-                  show (j + k + 1) - 1 = j + k from by omega]
+      simp only [show (i + k + 1) - 1 = i + k by omega,
+                  show (j + k + 1) - 1 = j + k by omega]
       exact ih
   -- Step 3: c is restricted (coefficients tend to 0)
   have hc_restr : Filter.Tendsto
@@ -1507,7 +1507,7 @@ theorem lambdaMap_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space A] 
       ((posIncl g).val + (negIncl h).val - p.val)
   -- Rewrite LHS using coeff_XY_sub_one_mul
   rw [show c.val * (TateAlgebra₂.XY_sub_one (A := A)).val =
-    (MvPowerSeries.X 0 * MvPowerSeries.X 1 - 1) * c.val from by rw [mul_comm]; rfl,
+    (MvPowerSeries.X 0 * MvPowerSeries.X 1 - 1) * c.val by rw [mul_comm]; rfl,
     coeff_XY_sub_one_mul]
   -- Unfold RHS
   simp only [map_sub, map_add, coeff_posIncl, coeff_negIncl]
@@ -1783,11 +1783,11 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
   · -- mk g = mk (algebraMap a) in B₁
     symm; apply Ideal.Quotient.eq.mpr
     -- Need: algebraMap(a) - g ∈ (f - X). Since algebraMap(a) = g - g', this is -g' ∈ (f-X).
-    rw [ha1, show g - (g - g') = g' from by ring]
+    rw [ha1, show g - (g - g') = g' by ring]
     exact hg'_mem
   · -- mk h = mk (algebraMap a) in B₂
     symm; apply Ideal.Quotient.eq.mpr
-    rw [ha2, show h - (h - h') = h' from by ring]
+    rw [ha2, show h - (h - h') = h' by ring]
     exact hh'_mem
 
 /-- **Row 3 full exactness (general case).**

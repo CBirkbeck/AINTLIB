@@ -2069,7 +2069,7 @@ theorem one_mem_closure_coeRingHom_image
     refine hdense.induction_on (p := fun b => ∀ s ∈ S, b * s ∈ closure S) b ?_ ?_
     · -- closedness of `{b | ∀ s ∈ S, b * s ∈ closure S}`.
       rw [show {b | ∀ s ∈ S, b * s ∈ closure S} =
-        ⋂ s ∈ S, (fun b => b * s) ⁻¹' closure S from by ext b; simp]
+        ⋂ s ∈ S, (fun b => b * s) ⁻¹' closure S by ext b; simp]
       refine isClosed_biInter fun s _ => ?_
       exact isClosed_closure.preimage (continuous_id.mul continuous_const)
     · intro a s hs

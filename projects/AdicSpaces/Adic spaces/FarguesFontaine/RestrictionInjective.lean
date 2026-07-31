@@ -60,9 +60,9 @@ theorem rpow_mid_interpolate (hρ₁0 : 0 < ρ₁) (hρ₂0 : 0 < ρ₂) (θ' θ
   rw [NNReal.mul_rpow, NNReal.mul_rpow, ← NNReal.rpow_mul, ← NNReal.rpow_mul,
     ← NNReal.rpow_mul, ← NNReal.rpow_mul, mul_mul_mul_comm,
     ← NNReal.rpow_add (ne_of_gt hρ₁0), ← NNReal.rpow_add (ne_of_gt hρ₂0),
-    show θ' * c + θ'' * (1 - c) = c * θ' + (1 - c) * θ'' from by ring,
+    show θ' * c + θ'' * (1 - c) = c * θ' + (1 - c) * θ'' by ring,
     show (1 - θ') * c + (1 - θ'') * (1 - c)
-      = 1 - (c * θ' + (1 - c) * θ'') from by ring]
+      = 1 - (c * θ' + (1 - c) * θ'') by ring]
 
 /-- **Three circles for the intermediate values of `B^I`** (Kedlaya Cor 4.5 upgraded
 to the completed setting): the `resI`-value at the combined weight is bounded by the

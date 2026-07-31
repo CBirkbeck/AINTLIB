@@ -597,7 +597,7 @@ theorem presheafValueRingEquivHuber_comp_apply
           (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s)
           ((e₁.trans e₂).toRingHom a))
       = ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').canonicalMap
-          ((e₁.trans e₂).toRingHom a) from by
+          ((e₁.trans e₂).toRingHom a) by
       rw [restrictionMapAlg, IsLocalization.Away.lift_eq]]
     rfl
   exact congr_fun (congrArg DFunLike.coe halg) l
@@ -760,7 +760,7 @@ theorem presheafValueRingEquivHuber_refl_apply
     rw [locMapOfHom_algebraMap]
     rw [show restrictionMapAlg D (D.mapHuber (RingEquiv.refl A) hc hc') hle
         (algebraMap A (Localization.Away D.s) a)
-      = (D.mapHuber (RingEquiv.refl A) hc hc').canonicalMap a from by
+      = (D.mapHuber (RingEquiv.refl A) hc hc').canonicalMap a by
       rw [restrictionMapAlg, IsLocalization.Away.lift_eq]]
     rfl
   exact congr_fun (congrArg DFunLike.coe halg) l

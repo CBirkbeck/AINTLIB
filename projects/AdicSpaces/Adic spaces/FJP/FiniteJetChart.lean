@@ -309,7 +309,7 @@ noncomputable def kwToTate :
           (Finsupp.single () (v 0)) := by
         rw [Finsupp.embDomain_single]
         refine Finsupp.ext fun i => ?_
-        rw [show i = (0 : Fin 1) from by omega, Finsupp.single_apply,
+        rw [show i = (0 : Fin 1) by omega, Finsupp.single_apply,
           if_pos (Subsingleton.elim _ _)]
       have hemb := MvPowerSeries.coeff_embDomain_rename (R := K)
         unitFinOne.toEmbedding f.1 (Finsupp.single () (v 0))
@@ -319,7 +319,7 @@ noncomputable def kwToTate :
     have hinj : Function.Injective (fun v : Fin 1 →₀ ℕ => v 0) := by
       intro v w h
       refine Finsupp.ext fun i => ?_
-      rw [show i = (0 : Fin 1) from by omega]
+      rw [show i = (0 : Fin 1) by omega]
       exact h
     exact hf'.comp hinj.tendsto_cofinite⟩
   map_one' := Subtype.ext (map_one (MvPowerSeries.renameEquiv (R := K) unitFinOne))
@@ -372,7 +372,7 @@ theorem Wa_pow_mul_yQ (n : ℕ) : Wa F ^ n * yQ F n = Qa F * Qa F := by
     (constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((Qa F : JetA F) : JetC F) *
       ((Qa F : JetA F) : JetC F)) = ((Qa F : JetA F) : JetC F) * ((Qa F : JetA F) : JetC F)
   rw [Wa_val_eq, ← map_pow, ← mul_assoc, ← mul_assoc, ← map_mul,
-    show (Wu (R := K)).val ^ n * ((Wu (R := K))⁻¹).val ^ n = 1 from by
+    show (Wu (R := K)).val ^ n * ((Wu (R := K))⁻¹).val ^ n = 1 by
       rw [← mul_pow]
       rw [show (Wu (R := K)).val * ((Wu (R := K))⁻¹).val = 1 from (Wu (R := K)).val_inv]
       rw [one_pow],
@@ -392,7 +392,7 @@ theorem norm_yQ_le (n : ℕ) : ‖yQ F n‖ ≤ ‖Qa F‖ * ‖Qa F‖ := by
     · induction n with
       | zero =>
           rw [pow_zero]
-          rw [show ((-(0 : ℕ) : ℤ)) = 0 from by norm_num]
+          rw [show ((-(0 : ℕ) : ℤ)) = 0 by norm_num]
           exact single_zero_one.symm
       | succ k ih =>
           rw [pow_succ, ih, single_mul_single, one_mul]
@@ -549,7 +549,7 @@ theorem Wa_pow_mul_yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) =
     (constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((y : JetA F) : JetC F)) =
     ((y : JetA F) : JetC F)
   rw [Wa_val_eq, ← map_pow, ← mul_assoc, ← map_mul,
-    show (Wu (R := K)).val ^ n * ((Wu (R := K))⁻¹).val ^ n = 1 from by
+    show (Wu (R := K)).val ^ n * ((Wu (R := K))⁻¹).val ^ n = 1 by
       rw [← mul_pow]
       rw [show (Wu (R := K)).val * ((Wu (R := K))⁻¹).val = 1 from (Wu (R := K)).val_inv]
       rw [one_pow],
@@ -568,7 +568,7 @@ theorem norm_yGen_le (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
     · induction n with
       | zero =>
           rw [pow_zero]
-          rw [show ((-(0 : ℕ) : ℤ)) = 0 from by norm_num]
+          rw [show ((-(0 : ℕ) : ℤ)) = 0 by norm_num]
           exact single_zero_one.symm
       | succ k ih =>
           rw [pow_succ, ih, single_mul_single, one_mul]
@@ -739,7 +739,7 @@ theorem jet_decomposition (a : JetA F) :
         ((Qa F : JetA F) : JetC F) * constHomC F (qCoeff F 1 ((a : JetA F) : JetC F)))) = 0
     rw [sub_eq_add_neg, qCoeff_add, qCoeff_neg, qCoeff_add, qCoeff_constHomC,
       if_pos rfl, qCoeff_zero_mul]
-    rw [show qCoeff F 0 (((Qa F : JetA F) : JetC F)) = 0 from by
+    rw [show qCoeff F 0 (((Qa F : JetA F) : JetC F)) = 0 by
       show qCoeff F 0 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 0
       rw [qCoeff_sectionD]; norm_num]
     ring
@@ -748,10 +748,10 @@ theorem jet_decomposition (a : JetA F) :
         ((Qa F : JetA F) : JetC F) * constHomC F (qCoeff F 1 ((a : JetA F) : JetC F)))) = 0
     rw [sub_eq_add_neg, qCoeff_add, qCoeff_neg, qCoeff_add, qCoeff_constHomC,
       if_neg one_ne_zero, qCoeff_one_mul]
-    rw [show qCoeff F 0 (((Qa F : JetA F) : JetC F)) = 0 from by
+    rw [show qCoeff F 0 (((Qa F : JetA F) : JetC F)) = 0 by
       show qCoeff F 0 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 0
       rw [qCoeff_sectionD]; norm_num]
-    rw [show qCoeff F 1 (((Qa F : JetA F) : JetC F)) = 1 from by
+    rw [show qCoeff F 1 (((Qa F : JetA F) : JetC F)) = 1 by
       show qCoeff F 1 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 1
       rw [qCoeff_sectionD]; norm_num]
     rw [qCoeff_constHomC]
@@ -912,7 +912,7 @@ theorem coeff_kwToTate (f : PowerSeries.Restricted K (1 : ℝ)) (n : ℕ) :
       (Finsupp.single () n) := by
     rw [Finsupp.embDomain_single]
     refine Finsupp.ext fun i => ?_
-    rw [show i = (0 : Fin 1) from by omega, TateAlgebra.toIndex,
+    rw [show i = (0 : Fin 1) by omega, TateAlgebra.toIndex,
       Finsupp.single_apply, Finsupp.single_apply,
       if_pos (Subsingleton.elim _ _), if_pos (Subsingleton.elim _ _)]
   have hemb := MvPowerSeries.coeff_embDomain_rename (R := K)
@@ -994,7 +994,7 @@ theorem chartEval_continuous : Continuous (chartEval F) := by
     hball (by rwa [Metric.mem_ball, dist_zero_right])
   change TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F) (kwToTate F f) n ∈ W
   rw [show TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F) (kwToTate F f) n =
-      gChart F ^ n * chartConst F (PowerSeries.coeff n f.1) from by
+      gChart F ^ n * chartConst F (PowerSeries.coeff n f.1) by
     rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate]
     exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨n, rfl⟩ hVmem)
@@ -1196,7 +1196,7 @@ noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
       show (x * y).snd = x.fst • y.snd + MulOpposite.op y.fst • x.snd from
         TrivSqZeroExt.snd_mul x y]
     rw [show x.fst • y.snd + MulOpposite.op y.fst • x.snd =
-      x.fst * y.snd + y.fst * x.snd from by
+      x.fst * y.snd + y.fst * x.snd by
         rw [smul_eq_mul, op_smul_eq_mul]
         ring]
     rw [map_mul, map_add, map_mul, map_mul]
@@ -1470,7 +1470,7 @@ theorem chartFwd_chartRev (x : JetB F) : chartFwd F (chartRev F x) = x := by
     chartEval F x.snd * (chartDatum F).canonicalMap (Qa F)) = x
   rw [RingHom.map_add (chartFwd F), RingHom.map_mul (chartFwd F),
     chartFwd_chartEval, chartFwd_chartEval, hQ, TrivSqZeroExt.inl_mul_inr,
-    show (x.snd • (1 : PowerSeries.Restricted K (1 : ℝ))) = x.snd from by
+    show (x.snd • (1 : PowerSeries.Restricted K (1 : ℝ))) = x.snd by
       rw [smul_eq_mul, mul_one],
     TrivSqZeroExt.inl_fst_add_inr_snd_eq]
 

@@ -160,10 +160,10 @@ theorem isOpen_bigWindow_trace (n : ℤ) (hp : 1 < p) :
       = {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
         (x : Spv (Ainf p F)) ∈ rationalOpen
           (chartT p F (PseudoUniformizer.frobRoot p F ϖ n) p 1)
-          (chartS p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1)} from by
+          (chartS p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1)} by
       rw [← h]]
     exact isOpen_rationalOpen_trace (chartT_nonempty p F _ p 1) _
-  · rw [show (Int.negSucc m) = -((m + 1 : ℕ) : ℤ) from by
+  · rw [show (Int.negSucc m) = -((m + 1 : ℕ) : ℤ) by
       rw [Int.negSucc_eq]
       push_cast
       ring]
@@ -175,7 +175,7 @@ theorem isOpen_bigWindow_trace (n : ℤ) (hp : 1 < p) :
           (chartT p F (PseudoUniformizer.pPow F ϖ (p ^ (m + 1))
             (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) (m + 1))) p 1)
           (chartS p F (PseudoUniformizer.pPow F ϖ (p ^ (m + 1))
-            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) (m + 1))) 1 1)} from by
+            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) (m + 1))) 1 1)} by
       rw [← h]]
     exact isOpen_rationalOpen_trace (chartT_nonempty p F _ p 1) _
 
@@ -187,7 +187,7 @@ theorem isOpen_Y_trace (hp : 1 < p) :
   rw [show {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
       (x : Spv (Ainf p F)) ∈ Y p F ϖ}
     = ⋃ n : ℤ, {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
-      (x : Spv (Ainf p F)) ∈ bigWindow p F ϖ n} from by
+      (x : Spv (Ainf p F)) ∈ bigWindow p F ϖ n} by
     ext x
     simp only [Set.mem_setOf_eq, Set.mem_iUnion]
     rw [show (Y p F ϖ) = ⋃ n : ℤ, bigWindow p F ϖ n from
@@ -247,12 +247,12 @@ theorem bigWindow_inter_succ_eq_rationalOpen_left (n : ℕ) (hp : 1 < p) :
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 1 1
     one_pos one_pos one_pos one_pos v
-  rw [show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [show 1 + 1 - 1 = 1 by omega] at hiff
   rw [hiff, hYeq]
   have hq : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + 1) := zpow_pos hp0 _
   have hab : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
     push_cast
-    rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
+    rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) by push_cast; ring, zpow_natCast]
     ring
   constructor
   · rintro ⟨hY, hge, hle⟩

@@ -266,7 +266,7 @@ theorem smul_mem_Y (g : Multiplicative ℤ) {v : Spv (Ainf p F)} (hv : v ∈ Y p
     have hbpow : b ^ p ^ (-j).toNat = PseudoUniformizer.toOF F ϖ ^ p ^ j.toNat := by
       rw [hb, ← frobeniusEquiv_pow_apply p F ((-j).toNat), ← RingAut.mul_apply,
         ← zpow_natCast (_root_.frobeniusEquiv (OF F) p) ((-j).toNat), ← zpow_add,
-        show ((-j).toNat : ℤ) + j = (j.toNat : ℤ) from by omega,
+        show ((-j).toNat : ℤ) + j = (j.toNat : ℤ) by omega,
         zpow_natCast, frobeniusEquiv_pow_apply]
     have hmem : teichPi p F ϖ ^ p ^ j.toNat ∈ v.supp := by
       have h1 : WittVector.teichmuller p b ^ p ^ (-j).toNat ∈ v.supp :=
@@ -343,7 +343,7 @@ theorem KLE_iff {v : Spv (Ainf p F)} (_hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < 
     omega
   rw [KLE, hbridge, hbridge, map_pow, map_pow, map_pow, map_pow]
   exact pow_le_pow_iff_cross
-    (show b * q.num.toNat = q.den * a from by rw [mul_comm b, mul_comm q.den]; exact hcross.symm)
+    (show b * q.num.toNat = q.den * a by rw [mul_comm b, mul_comm q.den]; exact hcross.symm)
     ha hnum
 
 /-- Totality: at every positive rational `q`, either `κ(v) ≥ q` or `κ(v) ≤ q`
@@ -546,7 +546,7 @@ theorem Y_eq_iUnion_windows :
       rwa [one_mul, ← pow_succ'] at hstep
     have hKLE_M : KLE p F ϖ ((m₁ + 1 : ℕ) : ℚ) v := by
       rw [KLE_iff hv (by positivity) one_pos
-        (show ((m₁ + 1 : ℕ) : ℚ) = ((m₁ + 1 : ℕ) : ℚ) / ((1 : ℕ) : ℚ) from by norm_num),
+        (show ((m₁ + 1 : ℕ) : ℚ) = ((m₁ + 1 : ℕ) : ℚ) / ((1 : ℕ) : ℚ) by norm_num),
         pow_one]
       exact hMle
     obtain ⟨m₂, hm₂⟩ := exists_pow_teichPi_vlt hv (v_p_ne_zero hv)
@@ -567,7 +567,7 @@ theorem Y_eq_iUnion_windows :
         _ = (p : ℚ) ^ N := by push_cast; ring
     have hpNle : (p : ℚ) ^ (-(N : ℤ)) ≤ ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) := by
       rw [zpow_neg, zpow_natCast]
-      rw [show ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) = (((m₂ + 1 : ℕ) : ℚ))⁻¹ from by
+      rw [show ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) = (((m₂ + 1 : ℕ) : ℚ))⁻¹ by
         norm_num [one_div]]
       refine inv_anti₀ (by positivity) ?_
       calc ((m₂ + 1 : ℕ) : ℚ) ≤ ((p ^ (m₂ + 1) : ℕ) : ℚ) := by
@@ -624,7 +624,7 @@ private theorem teichmuller_frobeniusEquiv_zpow_pow (j : ℤ) (x : OF F) :
       = x ^ p ^ j.toNat := by
     rw [← frobeniusEquiv_pow_apply p F ((-j).toNat), ← RingAut.mul_apply,
       ← zpow_natCast (_root_.frobeniusEquiv (OF F) p) ((-j).toNat), ← zpow_add,
-      show ((-j).toNat : ℤ) + j = (j.toNat : ℤ) from by omega, zpow_natCast,
+      show ((-j).toNat : ℤ) + j = (j.toNat : ℤ) by omega, zpow_natCast,
       frobeniusEquiv_pow_apply]
   rw [← map_pow, h1, map_pow]
 
@@ -649,8 +649,8 @@ private theorem zpow_eq_natCast_div (n : ℤ) :
     ((p : ℚ)) ^ n = ((p ^ n.toNat : ℕ) : ℚ) / ((p ^ (-n).toNat : ℕ) : ℚ) := by
   obtain ⟨m, rfl | rfl⟩ := Int.eq_nat_or_neg n
   · simp [zpow_natCast]
-  · rw [show ((-(m : ℤ)).toNat) = 0 from by omega,
-      show ((-(-(m : ℤ))).toNat) = m from by omega]
+  · rw [show ((-(m : ℤ)).toNat) = 0 by omega,
+      show ((-(-(m : ℤ))).toNat) = m by omega]
     push_cast
     rw [zpow_neg, zpow_natCast]
     simp
@@ -683,7 +683,7 @@ private theorem vle_theta_iff_ge {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' :
   · intro h
     have h1 : w.vle (Tθ ^ (β * p ^ (-k).toNat)) ((p : Ainf p F) ^ (α * p ^ (-k).toNat)) :=
       (vle_pow_iff_cross p F (x := Tθ) (y := (p : Ainf p F))
-        (show α * (β * p ^ (-k).toNat) = (α * p ^ (-k).toNat) * β from by ring)
+        (show α * (β * p ^ (-k).toNat) = (α * p ^ (-k).toNat) * β by ring)
         hβ (Nat.mul_ne_zero hβ hPne)).mpr h
     rw [hcoll] at h1
     exact (vle_pow_iff_cross p F (x := teichPi p F ϖ) (y := (p : Ainf p F))
@@ -695,7 +695,7 @@ private theorem vle_theta_iff_ge {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' :
         hcross hβ' (Nat.mul_ne_zero (pow_pos hp0 _).ne' hβ)).mpr h
     rw [← hcoll] at h1
     exact (vle_pow_iff_cross p F (x := Tθ) (y := (p : Ainf p F))
-      (show α * (β * p ^ (-k).toNat) = (α * p ^ (-k).toNat) * β from by ring)
+      (show α * (β * p ^ (-k).toNat) = (α * p ^ (-k).toNat) * β by ring)
       hβ (Nat.mul_ne_zero hβ hPne)).mp h1
 
 /-- Core `KLE`-shape transport, mirror of `vle_theta_iff_ge`. -/
@@ -720,7 +720,7 @@ private theorem vle_theta_iff_le {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' :
   · intro h
     have h1 : w.vle ((p : Ainf p F) ^ (α * p ^ (-k).toNat)) (Tθ ^ (β * p ^ (-k).toNat)) :=
       (vle_pow_iff_cross p F (x := (p : Ainf p F)) (y := Tθ)
-        (show β * (α * p ^ (-k).toNat) = (β * p ^ (-k).toNat) * α from by ring)
+        (show β * (α * p ^ (-k).toNat) = (β * p ^ (-k).toNat) * α by ring)
         hα (Nat.mul_ne_zero hα hPne)).mpr h
     rw [hcoll] at h1
     refine (vle_pow_iff_cross p F (x := (p : Ainf p F)) (y := teichPi p F ϖ)
@@ -736,7 +736,7 @@ private theorem vle_theta_iff_le {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' :
       exact hcross.symm
     rw [← hcoll] at h1
     exact (vle_pow_iff_cross p F (x := (p : Ainf p F)) (y := Tθ)
-      (show β * (α * p ^ (-k).toNat) = (β * p ^ (-k).toNat) * α from by ring)
+      (show β * (α * p ^ (-k).toNat) = (β * p ^ (-k).toNat) * α by ring)
       hα (Nat.mul_ne_zero hα hPne)).mp h1
 
 private theorem KGE_smul_iff {w : Spv (Ainf p F)} (hw : w ∈ Y p F ϖ) (k n : ℤ) :

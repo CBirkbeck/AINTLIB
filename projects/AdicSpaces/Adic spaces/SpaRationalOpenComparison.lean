@@ -163,7 +163,7 @@ theorem extension_vle_one_on_locPlusSubring (D : RationalLocData A)
         intro hc; apply hv_s; rw [← hw_comap, comap_vle, map_zero]; exact hc
       refine w.vle_mul_cancel hsne ?_
       rw [one_mul, show divByS (t : A) D.s * algebraMap A (Localization.Away D.s) D.s
-          = algebraMap A (Localization.Away D.s) (t : A) from by
+          = algebraMap A (Localization.Away D.s) (t : A) by
         rw [divByS]; exact IsLocalization.mk'_spec _ _ _]
       exact hts
   have hsub : D.locPlusSubring ≤

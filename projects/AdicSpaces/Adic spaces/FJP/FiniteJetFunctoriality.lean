@@ -539,7 +539,7 @@ theorem IA_le_ker_bridgeEval : IA F e.m D.s e.f ≤ RingHom.ker (bridgeEval D e)
   rw [show D.canonicalMap D.s = D.coeRingHom (algebraMap (JetA F)
       (Localization.Away D.s) D.s) from rfl, ← RingHom.map_mul D.coeRingHom,
     show algebraMap (JetA F) (Localization.Away D.s) D.s * divByS (e.f i) D.s =
-      algebraMap (JetA F) (Localization.Away D.s) (e.f i) from by
+      algebraMap (JetA F) (Localization.Away D.s) (e.f i) by
     rw [mul_comm, divByS, IsLocalization.mk'_spec]]
   rfl
 
@@ -620,7 +620,7 @@ theorem bridgeEval_continuous : Continuous (bridgeEval D e) := by
   change mvEvalTerm D.canonicalMap (bridgeGen D e) (bridgeToRestricted e.m p) v ∈ W
   rw [show mvEvalTerm D.canonicalMap (bridgeGen D e) (bridgeToRestricted e.m p) v =
       (∏ i, bridgeGen D e i ^ (v i)) *
-        D.canonicalMap (MvPowerSeries.coeff v p.1) from by
+        D.canonicalMap (MvPowerSeries.coeff v p.1) by
     rw [mvEvalTerm]; exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
 
@@ -1333,7 +1333,7 @@ theorem IB_le_ker_bridgeEvalB (hD : D.IsRational) :
     ← RingHom.map_mul (pushDatumB D hD).coeRingHom,
     show algebraMap (JetB F) (Localization.Away (pushDatumB D hD).s) (pushDatumB D hD).s *
       divByS (jB F (e.f i)) (pushDatumB D hD).s =
-      algebraMap (JetB F) (Localization.Away (pushDatumB D hD).s) (jB F (e.f i)) from by
+      algebraMap (JetB F) (Localization.Away (pushDatumB D hD).s) (jB F (e.f i)) by
     rw [mul_comm, divByS, IsLocalization.mk'_spec]]
   rfl
 
@@ -1400,7 +1400,7 @@ theorem bridgeEvalB_continuous (hD : D.IsRational) :
   rw [show mvEvalTerm (pushDatumB D hD).canonicalMap (bridgeGenB D e hD)
       (bridgeToRestrictedB e.m p) v =
       (∏ i, bridgeGenB D e hD i ^ (v i)) *
-        (pushDatumB D hD).canonicalMap (MvPowerSeries.coeff v p.1) from by
+        (pushDatumB D hD).canonicalMap (MvPowerSeries.coeff v p.1) by
     rw [mvEvalTerm]; exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
 
@@ -1536,7 +1536,7 @@ theorem IC_le_ker_bridgeEvalC (hD : D.IsRational) :
     ← RingHom.map_mul (pushDatumC D hD).coeRingHom,
     show algebraMap (JetC F) (Localization.Away (pushDatumC D hD).s) (pushDatumC D hD).s *
       divByS (iotaC F (e.f i)) (pushDatumC D hD).s =
-      algebraMap (JetC F) (Localization.Away (pushDatumC D hD).s) (iotaC F (e.f i)) from by
+      algebraMap (JetC F) (Localization.Away (pushDatumC D hD).s) (iotaC F (e.f i)) by
     rw [mul_comm, divByS, IsLocalization.mk'_spec]]
   rfl
 
@@ -1603,7 +1603,7 @@ theorem bridgeEvalC_continuous (hD : D.IsRational) :
   rw [show mvEvalTerm (pushDatumC D hD).canonicalMap (bridgeGenC D e hD)
       (bridgeToRestrictedC e.m p) v =
       (∏ i, bridgeGenC D e hD i ^ (v i)) *
-        (pushDatumC D hD).canonicalMap (MvPowerSeries.coeff v p.1) from by
+        (pushDatumC D hD).canonicalMap (MvPowerSeries.coeff v p.1) by
     rw [mvEvalTerm]; exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
 
@@ -1764,7 +1764,7 @@ private theorem locRhoB_bridgeFwdB_comp_coeRingHom (hD : D.IsRational) :
       (Localization.Away (pushDatumB D hD).s) b) =
       (pushDatumB D hD).canonicalMap b from rfl,
     show bridgeFwdB D e hD ((pushDatumB D hD).canonicalMap b) =
-      bridgeBaseB D e b from by
+      bridgeBaseB D e b by
       rw [show (pushDatumB D hD).canonicalMap b =
         (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
           (Localization.Away (pushDatumB D hD).s) b) from rfl,
@@ -1773,7 +1773,7 @@ private theorem locRhoB_bridgeFwdB_comp_coeRingHom (hD : D.IsRational) :
       (pushDatumD D hD).canonicalMap (rhoB F b) from
       presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
     show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoB F b)) =
-      bridgeBaseD D e (rhoB F b) from by
+      bridgeBaseD D e (rhoB F b) by
       rw [show (pushDatumD D hD).canonicalMap (rhoB F b) =
         (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
           (Localization.Away (pushDatumD D hD).s) (rhoB F b)) from rfl,
@@ -1827,7 +1827,7 @@ private theorem locRhoC_bridgeFwdC_comp_coeRingHom (hD : D.IsRational) :
       (Localization.Away (pushDatumC D hD).s) b) =
       (pushDatumC D hD).canonicalMap b from rfl,
     show bridgeFwdC D e hD ((pushDatumC D hD).canonicalMap b) =
-      bridgeBaseC D e b from by
+      bridgeBaseC D e b by
       rw [show (pushDatumC D hD).canonicalMap b =
         (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
           (Localization.Away (pushDatumC D hD).s) b) from rfl,
@@ -1836,7 +1836,7 @@ private theorem locRhoC_bridgeFwdC_comp_coeRingHom (hD : D.IsRational) :
       (pushDatumD D hD).canonicalMap (rhoC F b) from
       presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
     show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoC F b)) =
-      bridgeBaseD D e (rhoC F b) from by
+      bridgeBaseD D e (rhoC F b) by
       rw [show (pushDatumD D hD).canonicalMap (rhoC F b) =
         (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
           (Localization.Away (pushDatumD D hD).s) (rhoC F b)) from rfl,

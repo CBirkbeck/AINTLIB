@@ -46,7 +46,7 @@ theorem continuous_frobPow (k : ℤ) : Continuous (frobPow p F k) := by
 
 theorem frobPow_symm (k : ℤ) : (frobPow p F k).symm = frobPow p F (-k) := by
   show ((frob p F ^ k : RingAut (Ainf p F)) : Ainf p F ≃+* Ainf p F).symm = _
-  rw [show (frobPow p F (-k)) = ((frob p F ^ k)⁻¹ : RingAut (Ainf p F)) from by
+  rw [show (frobPow p F (-k)) = ((frob p F ^ k)⁻¹ : RingAut (Ainf p F)) by
     rw [← zpow_neg]
     rfl]
   rfl
@@ -83,7 +83,7 @@ theorem comap_frobPow_eq_smul (k : ℤ) (v : Spv (Ainf p F)) :
   rw [frobPow_toRingHom_eq]
   congr 1
   rw [show ((Multiplicative.ofAdd (-k))⁻¹ : Multiplicative ℤ)
-    = Multiplicative.ofAdd k from by
+    = Multiplicative.ofAdd k by
       rw [← ofAdd_neg, neg_neg]]
 
 /-- The comap of a Frobenius power preserves `Spa` (extracted so the

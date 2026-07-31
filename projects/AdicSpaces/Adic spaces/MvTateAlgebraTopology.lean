@@ -740,7 +740,7 @@ theorem mvTate_completeSpace [IsTateRing A] [T2Space A] (n : ℕ)
     exact ⟨N, fun m hm i hi => by
       have h1 := hN m hm i hi
       simp only [Set.mem_preimage] at h1
-      rw [show u m - u i = -(u i - u m) from by ring]
+      rw [show u m - u i = -(u i - u m) by ring]
       exact neg_mem h1⟩
   -- Step 3: For each l, the coefficient sequence is Cauchy in (A, uA).
   have hcoeff_cauchy : ∀ l : Fin n →₀ ℕ,
@@ -933,7 +933,7 @@ theorem mvTateAlgebra_algebraMap_continuous [IsTateRing A] (n : ℕ) :
       algebraMap A ↥(restrictedMvPowerSeriesSubring n A) a ∈ mvTateAlgNhd n P k
     rw [map_add, add_sub_cancel_right]
     refine ⟨mvPairConstantHom n P b, ?_, ?_⟩
-    · rw [show (mvPairIdeal n P) ^ k = Ideal.map (mvPairConstantHom n P) (P.I ^ k) from by
+    · rw [show (mvPairIdeal n P) ^ k = Ideal.map (mvPairConstantHom n P) (P.I ^ k) by
         simp only [mvPairIdeal, ← Ideal.map_pow]]
       exact Ideal.mem_map_of_mem _ hb
     · apply Subtype.ext; rfl
@@ -1126,7 +1126,7 @@ theorem mvTateAlgebra_polynomials_dense [IsTateRing A] (m : ℕ) :
       (IsTateRing.principalPair A).π_isUnit
       hdiff_pair hdiff_coeff
   change truncMv m g N - g ∈ mvTateAlgNhd m P n
-  rw [show truncMv m g N - g = -(g - truncMv m g N) from by ring]
+  rw [show truncMv m g N - g = -(g - truncMv m g N) by ring]
   exact neg_mem hg_diff_mem
 
 /-- **The variable `Xⱼ` is power-bounded in `A⟨X₁,…,Xₘ⟩`** (the canonical Tate topology).

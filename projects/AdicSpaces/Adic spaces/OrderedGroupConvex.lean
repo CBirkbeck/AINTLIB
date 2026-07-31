@@ -186,7 +186,7 @@ private theorem quotient_le_total' (H : ConvexSubgroup Γ) (a b : Γ) :
     rcases lt_or_gt_of_ne hne with h | h
     · exact .inl (.inl h.le)
     · exact .inr (.inl (le_of_lt (by
-        rw [show a⁻¹ * b = (b⁻¹ * a)⁻¹ from by simp [mul_inv_rev, inv_inv]]
+        rw [show a⁻¹ * b = (b⁻¹ * a)⁻¹ by simp [mul_inv_rev, inv_inv]]
         exact inv_lt_one_of_one_lt h)))
 
 /-- The quotient `Γ ⧸ H.toSubgroup` by a convex subgroup `H` carries a linear order:
@@ -218,14 +218,14 @@ noncomputable instance quotientLinearOrder (H : ConvexSubgroup Γ) :
     rcases hxy with hxy | hxy
     · rcases hyx with hyx | hyx
       · have h1 : 1 ≤ b⁻¹ * a := by
-          rw [show b⁻¹ * a = (a⁻¹ * b)⁻¹ from by simp [mul_inv_rev, inv_inv]]
+          rw [show b⁻¹ * a = (a⁻¹ * b)⁻¹ by simp [mul_inv_rev, inv_inv]]
           exact one_le_inv_of_le_one hyx
         have : a⁻¹ * b = 1 := by
-          rw [show a⁻¹ * b = (b⁻¹ * a)⁻¹ from by simp [mul_inv_rev, inv_inv]]
+          rw [show a⁻¹ * b = (b⁻¹ * a)⁻¹ by simp [mul_inv_rev, inv_inv]]
           exact inv_eq_one.mpr (le_antisymm hxy h1)
         rw [this]; exact H.toSubgroup.one_mem
       · exact hyx
-    · rw [show a⁻¹ * b = (b⁻¹ * a)⁻¹ from by simp [mul_inv_rev, inv_inv]]
+    · rw [show a⁻¹ * b = (b⁻¹ * a)⁻¹ by simp [mul_inv_rev, inv_inv]]
       exact H.toSubgroup.inv_mem hxy
   le_total x y := by
     induction x using Quotient.inductionOn with | _ a =>

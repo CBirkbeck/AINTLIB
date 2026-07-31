@@ -82,7 +82,7 @@ theorem teichCoeffF_p_pow_mul (x : WittVector p F) (k j : ℕ) :
   | succ m ih =>
     have hsplit : (p : WittVector p F) ^ (m + 1) * x
         = (p : WittVector p F) ^ m * ((p : WittVector p F) * x) := by ring
-    rw [hsplit, show j + (m + 1) = (j + 1) + m from by omega,
+    rw [hsplit, show j + (m + 1) = (j + 1) + m by omega,
       ih ((p : WittVector p F) * x) (j + 1), teichCoeffF_p_mul]
 
 /-- Below the shift, iterated `p`-multiples have vanishing coordinates. -/

@@ -1449,7 +1449,7 @@ noncomputable def toAdic : ↥(unitBall (P E m)) →+*
     show ‖F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G)‖ ≤ _
     rw [show F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G) =
       F.1 * (G.1 - polyBall (trnc t ht0 n G)) +
-        (F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G) from by ring]
+        (F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G) by ring]
     refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
     · calc ‖F.1 * (G.1 - polyBall (trnc t ht0 n G))‖
           ≤ ‖F.1‖ * ‖G.1 - polyBall (trnc t ht0 n G)‖ := norm_mul_le _ _
@@ -1480,7 +1480,7 @@ noncomputable def toAdic : ↥(unitBall (P E m)) →+*
     rw [map_add]
     show ‖F.1 + G.1 - (polyBall (trnc t ht0 n F) + polyBall (trnc t ht0 n G))‖ ≤ _
     rw [show F.1 + G.1 - (polyBall (trnc t ht0 n F) + polyBall (trnc t ht0 n G)) =
-      (F.1 - polyBall (trnc t ht0 n F)) + (G.1 - polyBall (trnc t ht0 n G)) from by ring]
+      (F.1 - polyBall (trnc t ht0 n F)) + (G.1 - polyBall (trnc t ht0 n G)) by ring]
     exact (IsUltrametricDist.norm_add_le_max _ _).trans
       (max_le (norm_sub_polyBall_trnc_le t ht0 n F) (norm_sub_polyBall_trnc_le t ht0 n G)))
 
@@ -1814,7 +1814,7 @@ theorem syzygy_graph_restricted (hE₀ : IsNoetherianRing (unitBall E))
         d2_sum Finset.univ r y (fun j p => polyToP (w j p)) i
     _ = ∑ j, y j * polyToP ((d2 ρ (w j)) i) := Finset.sum_congr rfl fun j _ => by
         rw [show d2 r (fun p => polyToP (E := E) (m := m) (w j p)) i =
-          polyToP ((d2 ρ (w j)) i) from by
+          polyToP ((d2 ρ (w j)) i) by
             rw [← hrfun]
             exact (d2_map polyToP ρ (w j) i).symm]
     _ = ∑ j, y j * polyToP (a i j) := Finset.sum_congr rfl fun j _ => by

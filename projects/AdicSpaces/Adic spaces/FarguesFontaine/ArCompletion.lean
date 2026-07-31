@@ -668,7 +668,7 @@ theorem eventually_wAloc_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       push Not at hcon
       have h2 : Valued.v x = Valued.v ((x - z) + z) := by rw [sub_add_cancel]
       have h3 : Valued.v (x - z) = Valued.v (z - x) := by
-        rw [show x - z = -(z - x) from by ring, Valuation.map_neg]
+        rw [show x - z = -(z - x) by ring, Valuation.map_neg]
       have h4 : Valued.v x ≤ max (Valued.v (x - z)) (Valued.v z) :=
         h2.le.trans (Valuation.map_add _ _ _)
       rw [h3] at h4
@@ -1584,7 +1584,7 @@ private theorem gaussValueF_sub_teich_prefix_le {ρ : NNReal} (hρ0 : 0 < ρ) (h
     rw [hPuW, hPbW, ← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun i _ => ?_
     ring
-  rw [show w - PbW = (w - PuW) + (PuW - PbW) from by ring]
+  rw [show w - PbW = (w - PuW) + (PuW - PbW) by ring]
   refine le_trans (gaussValueF_add_le p F hρ0 hρ1 hBt
     (by rw [hdistrib]; exact hsum.1)) ?_
   refine max_le ?_ (by rw [hdistrib]; exact hsum.2)
@@ -1596,7 +1596,7 @@ private theorem gaussValueF_sub_teich_prefix_le {ρ : NNReal} (hρ0 : 0 < ρ) (h
 private theorem valued_sub_le_of_chain {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {a s t z : hatK p F hρ0 hρ1} {ε : NNReal} (h1 : Valued.v (a - s) ≤ ε)
     (h2 : Valued.v (s - t) ≤ ε) (h3 : Valued.v (t - z) ≤ ε) : Valued.v (a - z) ≤ ε := by
-  rw [show a - z = (a - s) + ((s - t) + (t - z)) from by ring]
+  rw [show a - z = (a - s) + ((s - t) + (t - z)) by ring]
   exact le_trans (Valuation.map_add _ _ _)
     (max_le h1 (le_trans (Valuation.map_add _ _ _) (max_le h2 h3)))
 
@@ -1673,14 +1673,14 @@ private theorem tailValueF_alocToWittF_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : 
       ← valued_AlocToHatK p F ϖ hρ0 hρ1 (u - u₀), map_sub,
       show AlocToHatK p F ϖ hρ0 hρ1 u - AlocToHatK p F ϖ hρ0 hρ1 u₀
         = (AlocToHatK p F ϖ hρ0 hρ1 u - x)
-          - (AlocToHatK p F ϖ hρ0 hρ1 u₀ - x) from by ring]
+          - (AlocToHatK p F ϖ hρ0 hρ1 u₀ - x) by ring]
     exact le_trans (Valuation.map_sub _ _ _) (max_le hux hu₀)
   have hBdiff : BddAbove (Set.range (gaussTermF p F ρ
       (alocToWittF p F ϖ u - alocToWittF p F ϖ u₀))) := by
     rw [← map_sub]
     exact bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 (u - u₀)
   conv_lhs => rw [show alocToWittF p F ϖ u = alocToWittF p F ϖ u₀
-    + (alocToWittF p F ϖ u - alocToWittF p F ϖ u₀) from by ring]
+    + (alocToWittF p F ϖ u - alocToWittF p F ϖ u₀) by ring]
   exact le_trans (tailValueF_add_le_gaussValueF p F hρ0 hρ1 hB₀ hBdiff N)
     (max_le (max_le htail₀ hhead₀) hval)
 
@@ -1716,7 +1716,7 @@ private theorem exists_holder_modulus_on_range {ρ : NNReal} (hρ0 : 0 < ρ) (h�
   have hbcap := le_trans
     (Finset.le_sup (f := fun i => perfectoidValuation p F (b i)) hi) hm
   refine hδ _ _ ?_ hbcap (le_trans (hclose i hi) (min_le_left δ 1))
-  rw [show teichCoeffF p F w i = (teichCoeffF p F w i - b i) + b i from by ring]
+  rw [show teichCoeffF p F w i = (teichCoeffF p F w i - b i) + b i by ring]
   exact le_trans (Valuation.map_add _ _ _)
     (max_le (le_trans (hclose i hi) (le_trans (min_le_right δ 1) hcap1)) hbcap)
 

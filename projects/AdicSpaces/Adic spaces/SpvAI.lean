@@ -380,12 +380,12 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one [TopologicalSpace A]
         wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t := by
       change wv (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩)) = _
       rw [show (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩) : A) =
-          P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) from by
+          P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) by
         simp]
       rw [map_mul, map_mul, map_pow]
       -- wv(c) * (wv(c)^n_0 * wv(t)) = wv(c)^(n_0+1) * wv(t).
       rw [show wv (P.A₀.subtype c) ^ (n_0 + 1) = wv (P.A₀.subtype c) * wv (P.A₀.subtype c) ^ n_0
-        from by rw [pow_succ']]
+        by rw [pow_succ']]
       rw [mul_assoc]
     rw [hb_eq] at hb_lt_one
     -- v(c)^(n_0+1) * v(t) < 1 → v(c)^(n_0+1) < v(t)⁻¹.
@@ -451,10 +451,10 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_principal [TopologicalSpace A]
         wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t := by
       change wv (P.A₀.subtype (π * ⟨(P.A₀.subtype π) ^ n_0 * t, hn_0⟩)) = _
       rw [show (P.A₀.subtype (π * ⟨(P.A₀.subtype π) ^ n_0 * t, hn_0⟩) : A) =
-          P.A₀.subtype π * ((P.A₀.subtype π) ^ n_0 * t) from by simp]
+          P.A₀.subtype π * ((P.A₀.subtype π) ^ n_0 * t) by simp]
       rw [map_mul, map_mul, map_pow]
       rw [show wv (P.A₀.subtype π) ^ (n_0 + 1)
-          = wv (P.A₀.subtype π) * wv (P.A₀.subtype π) ^ n_0 from by rw [pow_succ']]
+          = wv (P.A₀.subtype π) * wv (P.A₀.subtype π) ^ n_0 by rw [pow_succ']]
       rw [mul_assoc]
     rw [hb_eq] at hb_lt_one
     have h_pow_lt_inv : wv (P.A₀.subtype π) ^ (n_0 + 1) < (wv t)⁻¹ := by
@@ -679,12 +679,12 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO [TopologicalSpace A]
         wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t := by
       change wv (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩)) = _
       rw [show (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩) : A) =
-          P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) from by
+          P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) by
         simp]
       rw [map_mul, map_mul, map_pow]
       -- wv(c) * (wv(c)^n_0 * wv(t)) = wv(c)^(n_0+1) * wv(t).
       rw [show wv (P.A₀.subtype c) ^ (n_0 + 1) = wv (P.A₀.subtype c) * wv (P.A₀.subtype c) ^ n_0
-        from by rw [pow_succ']]
+        by rw [pow_succ']]
       rw [mul_assoc]
     rw [hb_eq] at hb_lt_one
     -- v(c)^(n_0+1) * v(t) < 1 → v(c)^(n_0+1) < v(t)⁻¹.

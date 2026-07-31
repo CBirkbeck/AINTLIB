@@ -182,7 +182,7 @@ theorem exists_wLoc_split {τ : NNReal} (hτ0 : 0 < τ) (hτ1 : τ < 1)
             (WittVector.tail k x * ↑y + WittVector.init k x * ↑y) (y * y) from
       (IsLocalization.mk'_add _ _ _ _).symm]
     rw [show WittVector.tail k x * ↑y + WittVector.init k x * ↑y
-        = x * ↑y from by
+        = x * ↑y by
       rw [← add_mul, add_comm, WittVector.init_add_tail],
       IsLocalization.mk'_cancel]
   · intro σ hσ0 hσ1 hστ
@@ -497,7 +497,7 @@ theorem exists_blocApprox_pair (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 <
           - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
               (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁
           = -(BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁ - (g₁ : _ × _)) from by
+              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁ - (g₁ : _ × _)) by
         ring, wI_neg]
       exact hb₁
     · rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
@@ -529,7 +529,7 @@ theorem exists_blocApprox_pair (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 <
           - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
               (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂
           = -(BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂ - (g₂ : _ × _)) from by
+              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂ - (g₂ : _ × _)) by
         ring, wI_neg]
       exact hb₂
     · rw [wI_neg, wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
@@ -953,7 +953,7 @@ theorem isPowerBounded_iff_wI_le_one
         rw [show ((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
             : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
           = ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ^ n
-            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) from by
+            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) by
           push_cast
           rfl, hyval]
         rfl
@@ -986,7 +986,7 @@ theorem isPowerBounded_iff_wI_le_one
         rw [show ((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
             : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
           = ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ^ n
-            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) from by
+            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) by
           push_cast
           rfl, hyval]
         rfl

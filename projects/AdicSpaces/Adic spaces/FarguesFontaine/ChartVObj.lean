@@ -214,7 +214,7 @@ theorem exists_ball_approx (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
     rw [show ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
         - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hh
       = -(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hh
-        - ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) from by ring,
+        - ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) by ring,
       wI_neg]
     exact hwb
   have hh1 : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
@@ -222,7 +222,7 @@ theorem exists_ball_approx (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
     rw [show BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hh
         = -((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : _ × _))
           - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hh)
-          + (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : _ × _)) from by ring]
+          + (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : _ × _)) by ring]
     refine le_trans (wI_add_le p F _ _) (max_le ?_ hzb)
     rw [wI_neg]
     exact le_trans hdiff (min_le_right _ _)
@@ -327,7 +327,7 @@ theorem exists_eq_toOF_pow_mul (j : ℕ) (c : OF F)
         = (c : F) from rfl,
       show ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
           ((PseudoUniformizer.toOF F ϖ : OF F) ^ j))
-        = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j from by
+        = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j by
         push_cast
         rfl,
       map_pow]
@@ -426,7 +426,7 @@ private theorem chartGen_pow_eq_chartFracP_pow_mul {a b d : ℕ} (hab : b ≤ a)
         * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'')) := by
       rw [show AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
           = AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * b)
-            * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b)) from by
+            * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b)) by
         rw [← pow_add, ← hda]]
       ring
     _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
@@ -454,7 +454,7 @@ theorem p_div_teich_pow_a_mem_chartSubring (a b d : ℕ) (hab : b ≤ a)
           ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) := by
   have hc' : perfectoidValuation p F (((c' ^ a : OF F)) : F)
       ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (d * (a - b)) := by
-    rw [show (((c' ^ a : OF F)) : F) = ((c' : F)) ^ a from by push_cast; rfl, map_pow]
+    rw [show (((c' ^ a : OF F)) : F) = ((c' : F)) ^ a by push_cast; rfl, map_pow]
     exact hc
   obtain ⟨c'', hc''⟩ := exists_eq_toOF_pow_mul p F ϖ (d * (a - b)) (c' ^ a) hc'
   rw [chartGen_pow_eq_chartFracP_pow_mul p F ϖ hab hc'']
@@ -495,7 +495,7 @@ private theorem mk_monomial_eq_chartFracP_pow_mul {a k i : ℕ} (c : OF F)
         rw [map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))]
         rw [show ((p : Ainf p F) ^ i)
             = (p : Ainf p F) ^ (k * a) * (p : Ainf p F) ^ (i - (k * a + k))
-              * (p : Ainf p F) ^ k from by
+              * (p : Ainf p F) ^ k by
           conv_lhs => rw [hsplit]
           rw [pow_add, pow_add]]
         rw [map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
@@ -601,7 +601,7 @@ private theorem mk_monomial_eq_teich_mul_pInv_pow {k i : ℕ} (hik : i ≤ k) {c
                 ((p : Ainf p F)) ^ (k - i))
             * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
               * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k)
-          from by ring, pInv_pow_mul_p_pow p F ϖ (k - i), mul_one]
+          by ring, pInv_pow_mul_p_pow p F ϖ (k - i), mul_one]
         ring
     _ = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
         * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
@@ -613,7 +613,7 @@ private theorem mk_monomial_eq_teich_mul_pInv_pow {k i : ℕ} (hik : i ≤ k) {c
         rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
             ((p : Ainf p F)) ^ (k - i)
             * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
-          = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ k from by
+          = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ k by
           rw [← pow_add]
           congr 1
           omega]
@@ -646,7 +646,7 @@ theorem mk_monomial_mem_of_le (a k i : ℕ) (hik : i ≤ k) (c : OF F)
           * perfectoidValuation p F (c' : F) := by
       rw [hc'eq]
       rw [show (((PseudoUniformizer.toOF F ϖ : OF F) ^ k * c' : OF F) : F)
-          = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k * (c' : F) from by
+          = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k * (c' : F) by
         push_cast; rfl]
       rw [Valuation.map_mul, map_pow]
     have h2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
@@ -655,7 +655,7 @@ theorem mk_monomial_mem_of_le (a k i : ℕ) (hik : i ≤ k) (c : OF F)
           ^ k * perfectoidValuation p F
             ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (k - i) := by
       rw [← hval, ← pow_add]
-      rw [show k + (k - i) = 2 * k - i from by omega]
+      rw [show k + (k - i) = 2 * k - i by omega]
       exact hc
     exact le_of_mul_le_mul_left h2 (pow_pos hπpos k)
   rw [mk_monomial_eq_teich_mul_pInv_pow p F ϖ hik hc'eq]
@@ -680,7 +680,7 @@ theorem mk_monomial_pow_a_eq (a k d : ℕ) (hd : d ≤ k * a) (c : OF F)
   have hc' : perfectoidValuation p F (((c ^ a : OF F)) : F)
       ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
         ^ (k * a - d) := by
-    rw [show (((c ^ a : OF F)) : F) = ((c : F)) ^ a from by push_cast; rfl,
+    rw [show (((c ^ a : OF F)) : F) = ((c : F)) ^ a by push_cast; rfl,
       map_pow]
     exact hc
   obtain ⟨c'', hc''⟩ := exists_eq_toOF_pow_mul p F ϖ (k * a - d) (c ^ a) hc'
@@ -718,7 +718,7 @@ theorem mk_monomial_pow_a_eq (a k d : ℕ) (hd : d ≤ k * a) (c : OF F)
             map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
             map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
             map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
-          rw [show (k + d) * a = a * d + k * a from by
+          rw [show (k + d) * a = a * d + k * a by
             rw [add_mul]
             rw [show d * a = a * d from mul_comm d a]
             omega, pow_add]
@@ -744,7 +744,7 @@ theorem mk_monomial_pow_a_eq (a k d : ℕ) (hd : d ≤ k * a) (c : OF F)
           rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
               (teichPi p F ϖ) ^ (k * a)
             = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (k * a - d)
-              * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ d from by
+              * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ d by
             rw [← pow_add]
             congr 1
             omega]
@@ -979,7 +979,7 @@ theorem monomial_symm_blocToBI_mem_completedPlusSubring (a : ℕ) (ha : 0 < a)
     rw [show (perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
         * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k
       = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
-        * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (2 * k - i) from by
+        * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (2 * k - i) by
       rw [← sq, ← pow_mul, ← pow_add]
       congr 1
       omega] at hc1
@@ -993,21 +993,21 @@ theorem monomial_symm_blocToBI_mem_completedPlusSubring (a : ℕ) (ha : 0 < a)
         have hstep := pow_le_pow_left' hc2 a
         rw [show (ρ₂ ^ i * perfectoidValuation p F (c : F)) ^ a
             = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
-              * perfectoidValuation p F (c : F) ^ a from by
+              * perfectoidValuation p F (c : F) ^ a by
           rw [mul_pow, ← pow_mul, mul_comm i a, pow_mul, hexact2, pow_one]]
           at hstep
         rw [show ((ρ₂ * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) ^ a
             = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
               * perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
-                ^ (k * a - (i - k)) from by
+                ^ (k * a - (i - k)) by
           rw [← pow_mul, mul_pow,
-            show ρ₂ ^ (k * a) = (ρ₂ ^ a) ^ k from by
+            show ρ₂ ^ (k * a) = (ρ₂ ^ a) ^ k by
               rw [← pow_mul, mul_comm a k],
             hexact2, pow_one, ← pow_add, ← pow_add]
           congr 1
           omega] at hstep
         exact le_of_mul_le_mul_left hstep (pow_pos hπ0 i)
-      rw [show i = k + (i - k) from by omega]
+      rw [show i = k + (i - k) by omega]
       obtain ⟨c'', hc''⟩ := mk_monomial_pow_a_eq p F ϖ a k (i - k) hd c hca
       refine symm_blocToBI_mem_completedPlusSubring_of_pow_mem p F ϖ a 1 ha
         one_pos ha hexact1 hexact2 ha ?_
@@ -1132,7 +1132,7 @@ theorem valued_BlocToHatK_sub_of_add {ρ : NNReal} (hρ0 : 0 < ρ)
   rw [hf, map_add]
   rw [show BlocToHatK p F ϖ hρ0 hρ1 g
       - (BlocToHatK p F ϖ hρ0 hρ1 g + BlocToHatK p F ϖ hρ0 hρ1 t)
-    = -(BlocToHatK p F ϖ hρ0 hρ1 t) from by ring]
+    = -(BlocToHatK p F ϖ hρ0 hρ1 t) by ring]
   rw [Valuation.map_neg]
   exact valued_BlocToHatK p F ϖ t
 

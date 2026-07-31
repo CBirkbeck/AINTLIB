@@ -453,7 +453,7 @@ theorem comap_limitEvalHom_pointValue {V : Opens ↥(Spa A A⁺)}
     rw [show comap (limitEvalHom l)
         (comap (restrictionMapHom l.D E hEl) (pointValue E hvE'))
       = comap ((restrictionMapHom l.D E hEl).comp (limitEvalHom l))
-          (pointValue E hvE') from by rw [comap_comp]; rfl]
+          (pointValue E hvE') by rw [comap_comp]; rfl]
     rw [restrictionMapHom_comp_limitEvalHom l
       ⟨E, hErat, (hEsub.trans Set.inter_subset_left).trans i.subset⟩ hEl]
   rw [key i hvi hEi, ← key j hj hEj]
@@ -470,7 +470,7 @@ theorem comap_limitRestrict_openValue {V W : Opens ↥(Spa A A⁺)} (h : W ≤ V
   rw [h1]
   rw [show comap (limitRestrict h) (comap (limitEvalHom k) (pointValue k.D hk))
       = comap ((limitEvalHom k).comp (limitRestrict h)) (pointValue k.D hk)
-    from by rw [comap_comp]; rfl]
+    by rw [comap_comp]; rfl]
   rw [show (limitEvalHom k).comp (limitRestrict h)
       = limitEvalHom (k.mono h) from RingHom.ext fun x => rfl]
   exact comap_limitEvalHom_pointValue (h hvW) (k.mono h) hk
@@ -1004,16 +1004,16 @@ theorem rationalShrink_holds : RationalShrink A := by
   set c : presheafValue D := ((u⁻¹ : _ˣ) : presheafValue D) ^ k * b with hcdef
   have h1c : (pointValue D hv).vle 1 c := by
     have h1 := (pointValue D hv).mul_vle_mul_left hk (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-    rw [show ((u : presheafValue D) ^ k * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 from by
+    rw [show ((u : presheafValue D) ^ k * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 by
         rw [← mul_pow, Units.mul_inv, one_pow],
-      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
         rw [hcdef]; ring] at h1
     exact h1
   have hc0 : ¬ (pointValue D hv).vle c 0 := by
     intro hcon
     refine hnz ?_
     have h2 := (pointValue D hv).mul_vle_mul_left hcon ((u : presheafValue D) ^ k)
-    rw [zero_mul, show c * (u : presheafValue D) ^ k = b from by
+    rw [zero_mul, show c * (u : presheafValue D) ^ k = b by
       rw [hcdef, mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow, mul_one]] at h2
     exact h2
   obtain ⟨W, hWopen, hvW, hcapture⟩ := exists_A_level_open_presentation D
@@ -1058,7 +1058,7 @@ theorem rationalShrink_holds : RationalShrink A := by
     exact hcon
   have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
     (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
     rw [hcdef]; ring] at h3
   exact h3
 

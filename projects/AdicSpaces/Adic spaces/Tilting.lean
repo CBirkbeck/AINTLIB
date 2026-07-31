@@ -150,7 +150,7 @@ theorem p_not_isUnit_in_powerBounded [Nontrivial A] :
   have hϖp_nil : IsTopologicallyNilpotent ((ϖ.val : A) ^ p) := by
     change Filter.Tendsto (((ϖ.val : A) ^ p) ^ ·) Filter.atTop (nhds 0)
     have hϖ := ϖ.property  -- ϖ topologically nilpotent
-    rw [show (fun n ↦ ((ϖ.val : A) ^ p) ^ n) = (fun n ↦ (ϖ.val : A) ^ (p * n)) from by
+    rw [show (fun n ↦ ((ϖ.val : A) ^ p) ^ n) = (fun n ↦ (ϖ.val : A) ^ (p * n)) by
       ext n; rw [← pow_mul]]
     exact hϖ.comp (Filter.tendsto_atTop_atTop.mpr fun n ↦
       ⟨n, fun m hm ↦ le_trans hm (Nat.le_mul_of_pos_left m (Nat.Prime.pos (Fact.out)))⟩)
@@ -175,7 +175,7 @@ theorem p_not_isUnit_in_powerBounded [Nontrivial A] :
   haveI := IsPerfectoidRing.t0 (p := p) (A := A)
   have h01 : Inseparable (0 : A) 1 :=
     tendsto_nhds_unique_inseparable
-      (show Filter.Tendsto (fun _ : ℕ ↦ (1 : A)) Filter.atTop (nhds 0) from by
+      (show Filter.Tendsto (fun _ : ℕ ↦ (1 : A)) Filter.atTop (nhds 0) by
         have : Filter.Tendsto ((1 : A) ^ ·) Filter.atTop (nhds 0) := h1_nil
         simp [one_pow] at this)
       tendsto_const_nhds
@@ -536,7 +536,7 @@ theorem tilt_isDomain : IsDomain (PerfectoidRing.tilt p K) := by
   -- rank-1 valuation, and the power-bounded subring is its valuation ring.
   -- This is Wedhorn Proposition 6.1 / Heuer Lemma 1.1.5.
   suffices h : ∃ (v : Valuation K NNReal),
-      v.Integers ↥(powerBoundedSubring.toSubring K) from by
+      v.Integers ↥(powerBoundedSubring.toSubring K) by
     obtain ⟨v, hv⟩ := h
     -- Step 2: Apply Mathlib's PreTilt.isDomain using the valuation.
     exact PreTilt.isDomain K v ↥(powerBoundedSubring.toSubring K) hv p

@@ -53,9 +53,9 @@ theorem rationalShrink_tate : RationalShrink A := by
     have h1 := (pointValue D hv).mul_vle_mul_left hk
       (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
     rw [show ((u : presheafValue D) ^ k
-          * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 from by
+          * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 by
         rw [← mul_pow, Units.mul_inv, one_pow],
-      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
         rw [hcdef]; ring] at h1
     exact h1
   have hc0 : ¬ (pointValue D hv).vle c 0 := by
@@ -63,7 +63,7 @@ theorem rationalShrink_tate : RationalShrink A := by
     refine hnz ?_
     have h2 := (pointValue D hv).mul_vle_mul_left hcon
       ((u : presheafValue D) ^ k)
-    rw [zero_mul, show c * (u : presheafValue D) ^ k = b from by
+    rw [zero_mul, show c * (u : presheafValue D) ^ k = b by
       rw [hcdef, mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow,
         mul_one]] at h2
     exact h2
@@ -116,7 +116,7 @@ theorem rationalShrink_tate : RationalShrink A := by
     exact hcon
   have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
     (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
     rw [hcdef]; ring] at h3
   exact h3
 

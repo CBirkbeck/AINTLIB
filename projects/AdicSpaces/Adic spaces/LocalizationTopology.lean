@@ -165,7 +165,7 @@ private theorem locNhd_invS_mem (P : PairOfDefinition A) (T : Finset A) (s : A)
     ?_ ?_ ?_ ?_ hd
   · rintro d ⟨b, hb, rfl⟩
     change divByS 1 s * algebraMap A _ ↑b ∈ _
-    rw [show divByS 1 s * algebraMap A (Localization.Away s) ↑b = divByS (↑b) s from by
+    rw [show divByS 1 s * algebraMap A (Localization.Away s) ↑b = divByS (↑b) s by
       unfold divByS
       rw [← IsLocalization.mk'_one (M := Submonoid.powers s) (S := Localization.Away s)
         (↑b : A), ← IsLocalization.mk'_mul, one_mul, mul_one]]
@@ -456,7 +456,7 @@ theorem locTopology_continuous_lift {B : Type*} [CommRing B] [TopologicalSpace B
               algebraMap A (Localization.Away s) (b : A) =
             ((p.coeff i : Localization.Away s) *
               algebraMap A (Localization.Away s) (b : A)) *
-              (divByS t s) ^ i from by ring, map_mul, map_pow, mul_comm]
+              (divByS t s) ^ i by ring, map_mul, map_pow, mul_comm]
       exact hzV (Set.mul_mem_mul ⟨i, rfl⟩
         (hWV (hm _ (p.coeff i).property b hb)))
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen

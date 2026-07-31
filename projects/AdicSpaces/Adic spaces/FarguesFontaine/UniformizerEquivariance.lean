@@ -51,7 +51,7 @@ theorem isLocalization_twist_Bloc {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 
       refine isUnit_of_mul_isUnit_left
         (y := algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ' ^ (k - 1))) ?_
       rw [← map_mul, ← pow_succ']
-      rw [show k - 1 + 1 = k from by omega, h]
+      rw [show k - 1 + 1 = k by omega, h]
       exact isUnit_teichPi_image p F ϖ
     have hunit : IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ)
         ((p : Ainf p F) * teichPi p F ϖ')) := by
@@ -500,7 +500,7 @@ theorem vpiQ_natCast (n : ℕ) :
     vpiQ p F ϖ (n : ℚ)
       = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ n := by
   rw [vpiQ]
-  rw [show (((n : ℚ) : ℝ)) = (n : ℝ) from by push_cast; rfl]
+  rw [show (((n : ℚ) : ℝ)) = (n : ℝ) by push_cast; rfl]
   exact NNReal.rpow_natCast _ n
 
 /-- `vpiQ 1` is the base radius `|ϖ|`. -/
@@ -522,7 +522,7 @@ theorem perfectoidValuation_frobRoot_rpow (s : ℕ) :
     have := Nat.Prime.pos (Fact.out : Nat.Prime p)
     positivity
   rw [← h, ← NNReal.rpow_natCast _ (p ^ s), ← NNReal.rpow_mul]
-  rw [show ((p ^ s : ℕ) : ℝ) = (p : ℝ) ^ s from by push_cast; ring,
+  rw [show ((p ^ s : ℕ) : ℝ) = (p : ℝ) ^ s by push_cast; ring,
     mul_inv_cancel₀ hps, NNReal.rpow_one]
 
 /-- **The twist bridge for rational radii (root side)**:
@@ -556,7 +556,7 @@ theorem theta_mem_unit {q₁ q₂ r : ℚ} (hlt : q₂ < q₁) (hr₁ : q₂ ≤
     (0 : ℝ) ≤ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ)
       ∧ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ) ≤ 1 := by
   have heq : (q₂ - r) / (q₂ - q₁) = (r - q₂) / (q₁ - q₂) := by
-    rw [show q₂ - r = -(r - q₂) from by ring, show q₂ - q₁ = -(q₁ - q₂) from by
+    rw [show q₂ - r = -(r - q₂) by ring, show q₂ - q₁ = -(q₁ - q₂) by
       ring, neg_div_neg_eq]
   have h1 : (0 : ℚ) ≤ (q₂ - r) / (q₂ - q₁) := by
     rw [heq]

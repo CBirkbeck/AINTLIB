@@ -500,7 +500,7 @@ theorem tendsto_convF {ρ : NNReal} {a b : ℕ → F}
     _ = (ρ ^ i₀ * perfectoidValuation p F (a i₀))
         * (ρ ^ (n - i₀) * perfectoidValuation p F (b (n - i₀))) := by
         rw [Valuation.map_mul,
-          show ρ ^ n = ρ ^ i₀ * ρ ^ (n - i₀) from by
+          show ρ ^ n = ρ ^ i₀ * ρ ^ (n - i₀) by
             rw [← pow_add, Nat.add_sub_cancel' hi₀n]]
         ring
     _ ≤ (Finset.range (n + 1)).sup (fun i =>
@@ -844,7 +844,7 @@ private theorem pow_mul_sup_convolution_le {ρ : NNReal} {a b : ℕ → F} {A B 
         = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
           * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
           rw [Valuation.map_mul,
-            show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+            show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) by
               rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
           ring
       _ ≤ A * B := mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
@@ -1060,7 +1060,7 @@ private theorem valued_sub_le_of_chain₄ {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : 
     {a s t u z : hatK p F hρ0 hρ1} {ε : NNReal} (h1 : Valued.v (a - s) ≤ ε)
     (h2 : Valued.v (s - t) ≤ ε) (h3 : Valued.v (t - u) ≤ ε) (h4 : Valued.v (u - z) ≤ ε) :
     Valued.v (a - z) ≤ ε := by
-  rw [show a - z = (a - s) + ((s - t) + ((t - u) + (u - z))) from by ring]
+  rw [show a - z = (a - s) + ((s - t) + ((t - u) + (u - z))) by ring]
   exact le_trans (Valuation.map_add _ _ _) (max_le h1
     (le_trans (Valuation.map_add _ _ _) (max_le h2
       (le_trans (Valuation.map_add _ _ _) (max_le h3 h4)))))
@@ -1145,7 +1145,7 @@ theorem gaussTerm_convF_le {ρ : NNReal} (a b : ℕ → F) {A B : NNReal}
       = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
         * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
         rw [Valuation.map_mul,
-          show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+          show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) by
             rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
         ring
     _ ≤ A * B := mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
@@ -1236,7 +1236,7 @@ private theorem valued_sum_antidiagonal_lt {ρ : NNReal} (_hρ0 : 0 < ρ) {c : N
         = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
           * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
           rw [Valuation.map_mul,
-            show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+            show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) by
               rw [← pow_add, Nat.add_sub_cancel' (hSn k₀ hk₀mem)]]
           ring
       _ < c := hlt k₀ hk₀mem
@@ -1281,9 +1281,9 @@ private theorem gaussTerm_convF_attain {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ 
               (Finset.mem_range.mp (Finset.mem_of_mem_erase hk))
             omega))
   rw [show convF F a b (m + l) = a m * b l + ∑ k ∈ (Finset.range (m + l + 1)).erase m,
-      a k * b (m + l - k) from by
+      a k * b (m + l - k) by
     rw [convF, ← Finset.add_sum_erase _ _ (Finset.mem_range.mpr (by omega : m < m + l + 1)),
-      show m + l - m = l from by omega]]
+      show m + l - m = l by omega]]
   rw [Valuation.map_add_eq_of_lt_left _ (lt_of_mul_lt_mul_left
     (by rw [hlead]; exact hrest) zero_le)]
   exact hlead
@@ -1591,7 +1591,7 @@ private theorem sub_convF_divStep_eq (a b : ℕ → F) (m n : ℕ) (hmn : m ≤ 
           (a (k + m) / b m) * b (n - k)) := by
   rw [convF, ← Finset.add_sum_erase _ _
       (Finset.mem_range.mpr (by omega : n - m < n + 1)),
-    show n - m + m = n from by omega, show n - (n - m) = m from by omega,
+    show n - m + m = n by omega, show n - (n - m) = m by omega,
     div_mul_cancel₀ _ hbm]
   ring
 
@@ -1612,8 +1612,8 @@ private theorem gaussTerm_divStep_mul_valued_eq {ρ : NNReal} {hρ0 : 0 < ρ} {h
         * (ρ ^ (n - k₀) * perfectoidValuation p F
           (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀))) := by
   rw [Valuation.map_mul, map_div₀, hxattain]
-  rw [show ρ ^ (k₀ + m) = ρ ^ k₀ * ρ ^ m from by rw [pow_add]]
-  rw [show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+  rw [show ρ ^ (k₀ + m) = ρ ^ k₀ * ρ ^ m by rw [pow_add]]
+  rw [show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) by
     rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
   rw [div_eq_mul_inv]
   have hcancel2 : perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
@@ -1765,7 +1765,7 @@ private theorem valued_sub_divStep_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} 
     le_trans hP1 (le_trans
       (mul_le_mul_of_nonneg_left (max_le le_rfl hvΦc) zero_le) hρvyc)
   rw [show (y - z * x) - PhiHatK p F ϖ hρ0 hρ1 w
-      = ((y - Φc) - PhiHatK p F ϖ hρ0 hρ1 w) + (Φc - z * x) from by ring]
+      = ((y - Φc) - PhiHatK p F ϖ hρ0 hρ1 w) + (Φc - z * x) by ring]
   refine le_trans (Valuation.map_add _ _ _) (max_le hP1c ?_)
   rw [Valuation.map_sub_swap]
   exact hEc

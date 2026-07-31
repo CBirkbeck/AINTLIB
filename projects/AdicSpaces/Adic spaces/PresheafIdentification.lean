@@ -230,7 +230,7 @@ theorem evalInvF_kernel_eq_oneSubfX (f : A) :
       simp only [RingHom.comp_apply, RingHom.id_apply] at this
       exact this
     rw [show TateAlgebra.quotientOneSubfXToLoc f ((Ideal.Quotient.mk _) x) =
-        TateAlgebra.evalInvFHom f x from by
+        TateAlgebra.evalInvFHom f x by
       simp only [TateAlgebra.quotientOneSubfXToLoc, Ideal.Quotient.lift_mk]] at hmk
     rw [hx, map_zero] at hmk
     exact Ideal.Quotient.eq_zero_iff_mem.mp hmk.symm
@@ -549,7 +549,7 @@ theorem coeff_of_oneSubfX_eq_aXn (f a : A) (n : ℕ)
         rw [h_step n, hlt n (by omega), mul_zero,
           zero_add, if_pos rfl]
     | succ k ih =>
-      rw [show n + (k + 1) = n + k + 1 from by omega,
+      rw [show n + (k + 1) = n + k + 1 by omega,
         h_step (n + k), ih, if_neg (by omega), add_zero,
         pow_succ]; ring
 

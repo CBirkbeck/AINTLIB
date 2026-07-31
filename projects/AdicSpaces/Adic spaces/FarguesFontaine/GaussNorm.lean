@@ -486,7 +486,7 @@ private theorem exists_fold_teichmuller_heads {ρ : NNReal} (hρ1 : ρ ≤ 1) (s
     · rw [List.map_cons, List.sum_cons, hsum, List.sum_cons]
       conv_lhs => rw [show WittVector.teichmuller p h + (WittVector.teichmuller p c
         + (p : Ainf p F) * P.sum) = (WittVector.teichmuller p h + WittVector.teichmuller p c)
-        + (p : Ainf p F) * P.sum from by ring, hG']
+        + (p : Ainf p F) * P.sum by ring, hG']
       ring
     · refine le_trans (mul_le_mul_of_nonneg_left ?_ zero_le) hmax
       exact valuation_teichCoeff_teichmuller_add_le p F h c 0

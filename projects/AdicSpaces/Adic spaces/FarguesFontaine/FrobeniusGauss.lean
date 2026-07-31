@@ -246,7 +246,7 @@ theorem isUnit_frobSymm_p_teichPi_image (y : Submonoid.powers
     (y := algebraMap (Ainf p F) (Bloc p F ϖ)
       ((frob p F).symm (teichPi p F ϖ)) ^ (p - 1)) ?_
   rw [← pow_succ']
-  rw [show p - 1 + 1 = p from by
+  rw [show p - 1 + 1 = p by
     have := Nat.Prime.pos (Fact.out : Nat.Prime p)
     omega]
   have hpow : (frob p F).symm (teichPi p F ϖ) ^ p = teichPi p F ϖ := by

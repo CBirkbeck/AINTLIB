@@ -208,7 +208,7 @@ theorem extendToLocalization_mul_pow_lt
       show ((p.coeff i : Localization.Away s) * (divByS t s) ^ i) *
             algebraMap A (Localization.Away s) (b : A) =
           ((p.coeff i : Localization.Away s) *
-            algebraMap A (Localization.Away s) (b : A)) * (divByS t s) ^ i from by ring,
+            algebraMap A (Localization.Away s) (b : A)) * (divByS t s) ^ i by ring,
       map_mul, map_pow]
     have h_coeff : ν_loc ((p.coeff i : Localization.Away s) *
         algebraMap A (Localization.Away s) (b : A)) < γ :=

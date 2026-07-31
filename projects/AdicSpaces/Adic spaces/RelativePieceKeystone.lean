@@ -76,7 +76,7 @@ theorem canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS
     (D : RationalLocData A) (p : A) :
     D.canonicalMap p = D.canonicalMap D.s * D.coeRingHom (divByS p D.s) := by
   rw [show D.canonicalMap D.s * D.coeRingHom (divByS p D.s) =
-    D.coeRingHom (algebraMap A (Localization.Away D.s) D.s * divByS p D.s) from by
+    D.coeRingHom (algebraMap A (Localization.Away D.s) D.s * divByS p D.s) by
       rw [map_mul]; rfl]
   rw [algebraMap_s_mul_divByS]
   rfl
@@ -161,13 +161,13 @@ theorem genPiece_hopen (P : PairOfDefinition A) (T : Finset A) (t : A)
       rw [show algebraMap A (Localization.Away t) t *
           (algebraMap A (Localization.Away t) ((↑b : A) * c t') * divByS t' t) =
         algebraMap A (Localization.Away t) ((↑b : A) * c t') *
-          (algebraMap A (Localization.Away t) t * divByS t' t) from by ring]
+          (algebraMap A (Localization.Away t) t * divByS t' t) by ring]
       rw [h2, ← map_mul]
     rw [Finset.sum_congr rfl hterm, ← map_sum]
     congr 1
     calc (↑b : A) = (↑b : A) * 1 := (mul_one _).symm
       _ = (↑b : A) * ∑ t' ∈ T, c t' * t' := by
-          rw [show ∑ t' ∈ T, c t' * t' = (1 : A) from by
+          rw [show ∑ t' ∈ T, c t' * t' = (1 : A) by
             simpa only [smul_eq_mul] using hc]
       _ = ∑ t' ∈ T, (↑b : A) * c t' * t' := by rw [Finset.mul_sum]; ring_nf
   rw [hkey]
@@ -404,7 +404,7 @@ theorem genPiece_rel_forward_witness
   rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
       (D₀.coeRingHom (divByS p D₀.s)) * divByS (D₀.canonicalMap q) DB.s) =
     DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-      DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) from by rw [map_mul]; rfl]
+      DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) by rw [map_mul]; rfl]
   rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s : A) =
     D₀.s * t from rfl]
   rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap),
@@ -550,11 +550,11 @@ theorem genPiece_rel_canonicalMap_q_eq
     intro c
     rw [show DI.canonicalMap DI.s * DI.coeRingHom (divByS c DI.s) =
       DI.coeRingHom (algebraMap A (Localization.Away DI.s) DI.s *
-        divByS c DI.s) from by rw [map_mul]; rfl]
+        divByS c DI.s) by rw [map_mul]; rfl]
     rw [algebraMap_s_mul_divByS]
     rfl
   have hsplit : DI.canonicalMap DI.s = DI.canonicalMap D₀.s * DI.canonicalMap t := by
-    rw [show DI.canonicalMap DI.s = DI.canonicalMap (D₀.s * t) from by
+    rw [show DI.canonicalMap DI.s = DI.canonicalMap (D₀.s * t) by
       rw [show (DI.s : A) = D₀.s * t from rfl]]
     rw [map_mul]
   have hu_s : IsUnit (DI.canonicalMap D₀.s) := by

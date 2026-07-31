@@ -1035,7 +1035,7 @@ theorem exists_twist (zb c : OF F)
     have hval : perfectoidValuation p F (c : F) = perfectoidValuation p F (zb : F) ^ j
           * perfectoidValuation p F (c' : F) := by
       rw [hc']
-      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) by
         push_cast; rfl]
       rw [Valuation.map_mul, map_pow]
     have hnext' : ¬ (perfectoidValuation p F (c : F)
@@ -1051,7 +1051,7 @@ theorem exists_twist (zb c : OF F)
     rw [show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
         = (c : F) from rfl,
       show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ j))
-        = ((zb : OF F) : F) ^ j from by push_cast; rfl,
+        = ((zb : OF F) : F) ^ j by push_cast; rfl,
       map_pow]
     exact hPj
 
@@ -1079,7 +1079,7 @@ theorem exists_twist_deep (zb c : OF F) (m : ℕ) (hm : 0 < m)
         = perfectoidValuation p F (zb : F) ^ j
           * perfectoidValuation p F (c' : F) := by
       rw [hc']
-      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) by
         push_cast; rfl]
       rw [Valuation.map_mul, map_pow]
     rw [hval, pow_succ]
@@ -1117,7 +1117,7 @@ theorem gaussValue_p_pow_mul_teichmuller {ρ : NNReal} (hρ1 : ρ ≤ 1)
   | succ n ih =>
     rw [show (p : Ainf p F) ^ (n + 1) * WittVector.teichmuller p c
         = (p : Ainf p F) * ((p : Ainf p F) ^ n
-          * WittVector.teichmuller p c) from by ring,
+          * WittVector.teichmuller p c) by ring,
       gaussValue_p_mul p F hρ1, ih, pow_succ]
     ring
 
@@ -1195,7 +1195,7 @@ theorem exists_monomial_twist_data (zb : OF F) (m : ℕ) (hm : 0 < m)
         = perfectoidValuation p F (zb : F) ^ j
           * perfectoidValuation p F (c' : F) := by
       rw [hc']
-      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) by
         push_cast; rfl]
       rw [Valuation.map_mul, map_pow]
     rw [hval, h0, mul_zero] at hc0
@@ -1228,7 +1228,7 @@ theorem exists_monomial_twist_div (zb : OF F) (m : ℕ) (hm : 0 < m)
         = (c : F) from rfl,
       show ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
           (zb ^ ((k - i) / m)))
-        = ((zb : OF F) : F) ^ ((k - i) / m) from by push_cast; rfl,
+        = ((zb : OF F) : F) ^ ((k - i) / m) by push_cast; rfl,
       map_pow]
     exact hdvd
 
@@ -1257,7 +1257,7 @@ theorem perfectoidValuation_twist_factor (zb c c' : OF F) (j : ℕ)
       = perfectoidValuation p F (zb : F) ^ j
         * perfectoidValuation p F (c' : F) := by
   rw [hfact]
-  rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+  rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) by
     push_cast; rfl]
   rw [Valuation.map_mul, map_pow]
 
@@ -1298,7 +1298,7 @@ theorem twisted_formula_le {ρ₁ σ₁ ρ₂ V vc vc' : NNReal}
     rw [show σ₁ ^ m * ((ρ₁ ^ m)⁻¹) * (σ₁ ^ (i + m * j) * vc'
           * (((σ₁ * V) ^ k)⁻¹))
         = vc' * (σ₁ ^ (i + m * j + m)
-          * ((ρ₁ ^ m * (σ₁ * V) ^ k)⁻¹)) from by
+          * ((ρ₁ ^ m * (σ₁ * V) ^ k)⁻¹)) by
       rw [pow_add (σ₁) (i + m * j) m, mul_inv]
       ring]
     refine mul_le_mul_right ?_ vc'
@@ -1433,7 +1433,7 @@ theorem monomial_dvd_of_wLoc_le_one {σ₁ : NNReal}
         = σ₁ ^ i * (σ₁ ^ (k - i)
           * perfectoidValuation p F
               ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k) := by
-      rw [mul_pow, show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) from by
+      rw [mul_pow, show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) by
         rw [← pow_add]
         congr 1
         omega]
@@ -1807,7 +1807,7 @@ theorem exists_evalBI_approx_bloc
             (sPow p F ϖ k))
       = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
           (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) from by
+            ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) by
       rw [← map_sub (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
       congr 1
       rw [hsplit]
@@ -2376,8 +2376,8 @@ private theorem telescope_down_bound_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : 
       _ = (∑ j ∈ Finset.range (M + 1), g ^ j * Y (m + 1 + j))
           + g ^ (M + 1) * X (m + (M + 1)) := by
           rw [Finset.sum_range_succ]
-          rw [show m + 1 + M = m + M + 1 from by omega,
-            show m + (M + 1) = m + M + 1 from by omega]
+          rw [show m + 1 + M = m + M + 1 by omega,
+            show m + (M + 1) = m + M + 1 by omega]
           ring
 
 /-- **The downward telescope bound** (Kedlaya's `t ≥ t₀` branch): under the
@@ -2454,14 +2454,14 @@ theorem telescope_up_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     rw [if_neg (by omega), zero_sub] at h0
     rw [hcancel (X 0)]
     refine mul_le_mul_of_nonneg_left ?_ zero_le
-    rw [show g * X 0 = -(Y 0) from by rw [h0]; ring, Valuation.map_neg]
+    rw [show g * X 0 = -(Y 0) by rw [h0]; ring, Valuation.map_neg]
     exact le_ciSup hbdd 0
   | succ n ih =>
     have h1 := hrec (n + 1)
     rw [if_pos (Nat.succ_le_succ (Nat.zero_le _)), Nat.add_sub_cancel] at h1
     rw [hcancel (X (n + 1))]
     refine mul_le_mul_of_nonneg_left ?_ zero_le
-    rw [show g * X (n + 1) = X n - Y (n + 1) from by rw [h1]; ring]
+    rw [show g * X (n + 1) = X n - Y (n + 1) by rw [h1]; ring]
     refine le_trans (Valuation.map_sub _ _ _) (max_le ?_ ?_)
     · refine le_trans ih ?_
       calc (Valued.v g)⁻¹ * (⨆ n, Valued.v (Y n))
@@ -2758,14 +2758,14 @@ theorem kerSol_rec_generic {A : Type*} [CommRing A] (g V : A)
   by_cases hn : 1 ≤ n
   · rw [if_pos hn, Finset.sum_range_succ]
     have h3 : (V * g) ^ n = 1 := by
-      rw [show V * g = 1 from by rw [mul_comm]; exact hinv, one_pow]
+      rw [show V * g = 1 by rw [mul_comm]; exact hinv, one_pow]
     calc -(V ^ n * ∑ i ∈ Finset.range n, y i * g ^ i)
           - g * -(V ^ (n + 1)
             * ((∑ i ∈ Finset.range n, y i * g ^ i) + y n * g ^ n))
         = (g * V) * (V ^ n
             * ((∑ i ∈ Finset.range n, y i * g ^ i) + y n * g ^ n))
           - V ^ n * ∑ i ∈ Finset.range n, y i * g ^ i := by
-          rw [show V ^ (n + 1) = V * V ^ n from by rw [pow_succ]; ring]
+          rw [show V ^ (n + 1) = V * V ^ n by rw [pow_succ]; ring]
           ring
       _ = V ^ n * ((∑ i ∈ Finset.range n, y i * g ^ i) + y n * g ^ n)
           - V ^ n * ∑ i ∈ Finset.range n, y i * g ^ i := by
@@ -4605,7 +4605,7 @@ theorem twisted_formula_le₂ {ρ₁ σ₂ ρ₂ V vc vc' : NNReal}
       hρσ hke
   · rw [hfold, mul_comm (ρ₂ ^ e) vc', mul_assoc]
     rw [show ρ₂ ^ m * ((σ₂ ^ m)⁻¹) * (σ₂ ^ e * vc' * (((σ₂ * V) ^ k)⁻¹))
-        = vc' * (ρ₂ ^ m * σ₂ ^ e * ((σ₂ ^ m * (σ₂ * V) ^ k)⁻¹)) from by
+        = vc' * (ρ₂ ^ m * σ₂ ^ e * ((σ₂ ^ m * (σ₂ * V) ^ k)⁻¹)) by
       rw [mul_inv]
       ring]
     refine mul_le_mul_right ?_ vc'
@@ -4814,7 +4814,7 @@ theorem exists_evalBI_approx_bloc₂
             (sPow p F ϖ k))
       = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
           (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) from by
+            ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) by
       rw [← map_sub (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)]
       congr 1
       rw [hsplit]
@@ -5771,10 +5771,10 @@ theorem exists_balanced_pow_twist (zb : OF F) (m : ℕ)
       ≤ perfectoidValuation p F
         ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ (k - i)))
     rw [show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (c ^ m))
-        = ((c : OF F) : F) ^ m from by push_cast; rfl,
+        = ((c : OF F) : F) ^ m by push_cast; rfl,
       show ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
           (zb ^ (k - i)))
-        = ((zb : OF F) : F) ^ (k - i) from by push_cast; rfl,
+        = ((zb : OF F) : F) ^ (k - i) by push_cast; rfl,
       map_pow, map_pow]
     exact hdvd
 
@@ -5801,7 +5801,7 @@ theorem valuation_coeff_of_wLoc_eq_one {σ₁ : NNReal} (hσ₁0 : 0 < σ₁)
   have h4 : σ₁ ^ i * perfectoidValuation p F (c : F)
       = σ₁ ^ i * (σ₁ ^ (k - i) * V ^ k) := by
     rw [h2, mul_pow]
-    rw [show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) from by
+    rw [show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) by
       rw [← pow_add]
       congr 1
       omega]
@@ -5955,7 +5955,7 @@ theorem valuation_coeff_of_wLoc_le_one {σ₁ : NNReal} (hσ₁0 : 0 < σ₁)
       ≤ σ₁ ^ i * (σ₁ ^ (k - i) * V ^ k) := by
     refine le_trans h2 (le_of_eq ?_)
     rw [mul_pow]
-    rw [show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) from by
+    rw [show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) by
       rw [← pow_add]
       congr 1
       omega]
@@ -6241,7 +6241,7 @@ theorem wLoc_mk'_monomial_mono_of_le {ρ σ : NNReal} (hρ0 : 0 < ρ)
         = τ ^ (i - k) * (perfectoidValuation p F (c : F) * ((V ^ k)⁻¹)) := by
     intro τ hτ0
     rw [mul_pow, mul_inv]
-    rw [show τ ^ i = τ ^ (i - k) * τ ^ k from by
+    rw [show τ ^ i = τ ^ (i - k) * τ ^ k by
       rw [← pow_add]
       congr 1
       omega]
@@ -6470,7 +6470,7 @@ theorem isIntegral_monomial_of_le_one
         (IsLocalization.mk' (Bloc p F ϖ)
           ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
           (sPow p F ϖ k) ^ m) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
-      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) from by
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) by
     rw [map_pow]]
   rfl
 

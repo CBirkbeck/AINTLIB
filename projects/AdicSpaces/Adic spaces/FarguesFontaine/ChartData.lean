@@ -164,7 +164,7 @@ theorem Iinf_pow_le_span_chartMonomials (N : ℕ) :
       refine ⟨i + 1, by simp; omega, ?_⟩
       show (p : Ainf p F) ^ (i + 1) * teichPi p F ϖ ^ (N + 1 - (i + 1))
         = (p : Ainf p F) * ((p : Ainf p F) ^ i * teichPi p F ϖ ^ (N - i))
-      rw [show N + 1 - (i + 1) = N - i from by omega, pow_succ]
+      rw [show N + 1 - (i + 1) = N - i by omega, pow_succ]
       ring
     · -- g = [ϖ]
       rw [Set.mem_singleton_iff.mp hg]
@@ -173,7 +173,7 @@ theorem Iinf_pow_le_span_chartMonomials (N : ℕ) :
       refine ⟨i, by simp; omega, ?_⟩
       show (p : Ainf p F) ^ i * teichPi p F ϖ ^ (N + 1 - i)
         = teichPi p F ϖ * ((p : Ainf p F) ^ i * teichPi p F ϖ ^ (N - i))
-      rw [show N + 1 - i = (N - i) + 1 from by omega, pow_succ]
+      rw [show N + 1 - i = (N - i) + 1 by omega, pow_succ]
       ring
 
 /-- Every degree-`(a+b+2)` monomial divided by `s = p[ϖ]^b` lies in the ring of
@@ -801,15 +801,15 @@ private theorem gaussValue_p_pow_mul_teichPi_pow {ρ : NNReal} (hρ1 : ρ < 1) (
       = ρ ^ i * perfectoidValuation p F
           ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ m := by
   rw [show (p : Ainf p F) ^ i * teichPi p F ϖ ^ m
-      = (p : Ainf p F) ^ i * (teichPi p F ϖ ^ m * 1) from by ring,
+      = (p : Ainf p F) ^ i * (teichPi p F ϖ ^ m * 1) by ring,
     gaussValue_p_pow_mul p F hρ1.le i, mul_one]
   congr 1
   rw [show teichPi p F ϖ ^ m
       = WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ) ^ m)
-      from by rw [map_pow]; rfl,
+      by rw [map_pow]; rfl,
     gaussValue_teichmuller p F hρ1.le]
   rw [show (((PseudoUniformizer.toOF F ϖ) ^ m : OF F) : F)
-      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ m from by
+      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ m by
     push_cast; rfl, map_pow]
 
 /-- **Elements of `I_inf^n` have Gauss value at most `max(ρ, |ϖ|)^n`** (each
@@ -1271,7 +1271,7 @@ theorem teich_shift_low (k m : ℕ) (hm : m ≤ k) (c c' : OF F)
         * ((p : Ainf p F) ^ m * teichPi p F ϖ ^ k))
       = WittVector.teichmuller p c * (p : Ainf p F) ^ m := by
   rw [hc, show PseudoUniformizer.toOF F ϖ ^ (2 * k - m)
-      = PseudoUniformizer.toOF F ϖ ^ (k - m) * PseudoUniformizer.toOF F ϖ ^ k from by
+      = PseudoUniformizer.toOF F ϖ ^ (k - m) * PseudoUniformizer.toOF F ϖ ^ k by
         rw [← pow_add]; congr 1; omega,
     map_mul (WittVector.teichmuller p), map_mul (WittVector.teichmuller p),
     teichPi_pow, teichPi_pow]
@@ -1298,9 +1298,9 @@ theorem chart_term_low_eq (k m : ℕ) (hm : m ≤ k) (c c' : OF F)
   rw [mul_assoc, ← map_mul,
     show WittVector.teichmuller p c' * ((p : Ainf p F) * teichPi p F ϖ) ^ k
         = (p : Ainf p F) ^ (k - m) * (WittVector.teichmuller p c'
-            * ((p : Ainf p F) ^ m * teichPi p F ϖ ^ k)) from by
+            * ((p : Ainf p F) ^ m * teichPi p F ϖ ^ k)) by
       rw [mul_pow, show (p : Ainf p F) ^ k
-          = (p : Ainf p F) ^ (k - m) * (p : Ainf p F) ^ m from by
+          = (p : Ainf p F) ^ (k - m) * (p : Ainf p F) ^ m by
         rw [← pow_add]; congr 1; omega]
       ring,
     map_mul, ← mul_assoc, chartFracPi_pow_mul_p_pow, ← map_mul,
@@ -1331,7 +1331,7 @@ theorem high_arg_split (b k t j : ℕ) (c c' : OF F)
 theorem high_arg_final (a k t j : ℕ) (c : OF F) :
     (p : Ainf p F) ^ (a * t) * (WittVector.teichmuller p c * (p : Ainf p F) ^ (k + j))
       = WittVector.teichmuller p c * (p : Ainf p F) ^ (k + a * t + j) := by
-  rw [show k + a * t + j = a * t + (k + j) from by omega, pow_add]
+  rw [show k + a * t + j = a * t + (k + j) by omega, pow_add]
   ring
 
 /-- **The high-term identity**: for `c·ϖ^{bt} = c'·ϖ^k`, the subring element
@@ -1354,7 +1354,7 @@ theorem tail_arg_split (b k : ℕ) (hb : 0 < b) (z : Ainf p F) :
     teichPi p F ϖ ^ (b * k - k) * z * ((p : Ainf p F) * teichPi p F ϖ) ^ k
       = teichPi p F ϖ ^ (b * k) * ((p : Ainf p F) ^ k * z) := by
   rw [mul_pow, show teichPi p F ϖ ^ (b * k)
-      = teichPi p F ϖ ^ (b * k - k) * teichPi p F ϖ ^ k from by
+      = teichPi p F ϖ ^ (b * k - k) * teichPi p F ϖ ^ k by
     rw [← pow_add]; congr 1
     have := Nat.le_mul_of_pos_left k hb
     omega]

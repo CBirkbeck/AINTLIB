@@ -69,9 +69,9 @@ theorem rationalShrink_Y
     have h1 := (pointValue D hv).mul_vle_mul_left hk
       (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
     rw [show ((u : presheafValue D) ^ k
-          * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 from by
+          * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 by
         rw [← mul_pow, Units.mul_inv, one_pow],
-      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
         rw [hcdef]; ring] at h1
     exact h1
   have hc0 : ¬ (pointValue D hv).vle c 0 := by
@@ -79,7 +79,7 @@ theorem rationalShrink_Y
     refine hnz ?_
     have h2 := (pointValue D hv).mul_vle_mul_left hcon
       ((u : presheafValue D) ^ k)
-    rw [zero_mul, show c * (u : presheafValue D) ^ k = b from by
+    rw [zero_mul, show c * (u : presheafValue D) ^ k = b by
       rw [hcdef, mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow,
         mul_one]] at h2
     exact h2
@@ -133,7 +133,7 @@ theorem rationalShrink_Y
     exact hcon
   have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
     (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
+  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
     rw [hcdef]; ring] at h3
   exact h3
 
@@ -595,8 +595,8 @@ theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (_hp : 1 < p) :
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 (p ^ (k + 1)) 1
     one_pos one_pos (pow_pos hppos _) one_pos v
-  rw [show 1 + p ^ (k + 1) - 1 = p ^ (k + 1) from by omega,
-    show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [show 1 + p ^ (k + 1) - 1 = p ^ (k + 1) by omega,
+    show 1 + 1 - 1 = 1 by omega] at hiff
   rw [runWindow, Set.mem_setOf_eq, hiff, hYeq]
   have hq1 : (0 : ℚ) < (p : ℚ) ^ (n : ℤ) := zpow_pos hp0 _
   have hq2 : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + k + 1) := zpow_pos hp0 _
@@ -654,8 +654,8 @@ theorem runWindow_eq_rationalOpen_neg (m k : ℕ) (_hp : 1 < p) :
   ext v
   have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 (p ^ (k + 1)) 1
     one_pos one_pos (pow_pos hppos _) one_pos v
-  rw [show 1 + p ^ (k + 1) - 1 = p ^ (k + 1) from by omega,
-    show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [show 1 + p ^ (k + 1) - 1 = p ^ (k + 1) by omega,
+    show 1 + 1 - 1 = 1 by omega] at hiff
   rw [runWindow, Set.mem_setOf_eq, hiff, hYeq]
   have hq1 : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ)) := zpow_pos hp0 _
   have hq2 : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ) + k + 1) := zpow_pos hp0 _
@@ -665,7 +665,7 @@ theorem runWindow_eq_rationalOpen_neg (m k : ℕ) (_hp : 1 < p) :
     rw [one_div]
   have hab2 : (p : ℚ) ^ (-(m : ℤ) + k + 1)
       = ((p ^ (k + 1) : ℕ) : ℚ) / ((p ^ m : ℕ) : ℚ) := by
-    rw [show -(m : ℤ) + k + 1 = ((k + 1 : ℕ) : ℤ) - ((m : ℕ) : ℤ) from by
+    rw [show -(m : ℤ) + k + 1 = ((k + 1 : ℕ) : ℤ) - ((m : ℕ) : ℤ) by
         push_cast
         ring,
       zpow_sub₀ hp0.ne', zpow_natCast, zpow_natCast]

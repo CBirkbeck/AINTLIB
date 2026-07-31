@@ -1206,12 +1206,12 @@ theorem comap_ringStalkMap_spaCompHom_stalkValue [DecidableEq A]
     rw [show (ringStalkMap (spaCompHom D₀ u hu) w).hom'
           ((spaRingPresheaf A).germ U (shadow D₀ w) hwU f)
         = (spaRingPresheaf (presheafValue D₀)).germ (shadowPre D₀ u hu W) w hwW
-            (ambComp D₀ u hu W (limitRestrict hWU f)) from by
+            (ambComp D₀ u hu W (limitRestrict hWU f)) by
         rw [← hnatf]; exact congrArg _ hresf.symm,
       show (ringStalkMap (spaCompHom D₀ u hu) w).hom'
           ((spaRingPresheaf A).germ U (shadow D₀ w) hwU g)
         = (spaRingPresheaf (presheafValue D₀)).germ (shadowPre D₀ u hu W) w hwW
-            (ambComp D₀ u hu W (limitRestrict hWU g)) from by
+            (ambComp D₀ u hu W (limitRestrict hWU g)) by
         rw [← hnatg]; exact congrArg _ hresg.symm]
     exact hgerm
   · intro hab
@@ -1242,7 +1242,7 @@ theorem comap_ringStalkMap_spaCompHom_stalkValue [DecidableEq A]
         ambComp_naturality D₀ u hu hWU g
       rw [← h2]
       show (openValue (shadowPre D₀ u hu W)
-          (show w ∈ shadowPre D₀ u hu W from by rw [hpre]; exact hwW')).vle
+          (show w ∈ shadowPre D₀ u hu W by rw [hpre]; exact hwW')).vle
         (ambComp D₀ u hu W (limitRestrict hWU f))
         (ambComp D₀ u hu W (limitRestrict hWU g))
       rw [hAf, hAg]

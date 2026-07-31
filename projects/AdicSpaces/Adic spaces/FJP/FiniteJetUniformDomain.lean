@@ -575,10 +575,10 @@ theorem qCoeff_q2elt (ℓ : L F) (n : ℕ) :
 
 theorem q2elt_mem_jetSupport (ℓ : L F) : q2elt F ℓ ∈ jetSupport F := by
   constructor
-  · rw [show qCoeff F 0 (q2elt F ℓ) = 0 from by
+  · rw [show qCoeff F 0 (q2elt F ℓ) = 0 by
       rw [qCoeff_q2elt, if_neg (by norm_num)]]
     exact zero_mem _
-  · rw [show qCoeff F 1 (q2elt F ℓ) = 0 from by
+  · rw [show qCoeff F 1 (q2elt F ℓ) = 0 by
       rw [qCoeff_q2elt, if_neg (by norm_num)]]
     exact zero_mem _
 

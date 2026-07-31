@@ -449,7 +449,7 @@ theorem wLoc_teichPowOverP {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (zb : O
       = (perfectoidValuation p F (zb : F)) ^ n / ρ := by
   rw [teichPowOverP, Valuation.map_mul, wLoc_algebraMap, wLoc_p_inv,
     ← map_pow (WittVector.teichmuller p), gaussValue_teichmuller p F hρ1.le]
-  rw [show ((zb ^ n : OF F) : F) = (zb : F) ^ n from by push_cast; rfl, map_pow]
+  rw [show ((zb ^ n : OF F) : F) = (zb : F) ^ n by push_cast; rfl, map_pow]
   exact (div_eq_mul_inv _ _).symm
 
 /-- The interval norm of `[z̄ⁿ]/p` is `|z̄|ⁿ/ρ₁` (the smaller radius dominates). -/
@@ -1641,7 +1641,7 @@ theorem BIProd_mem_evalRange (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
     rw [show algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)
         * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * (vp * vt)
         = (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) * vp)
-          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt) from by ring,
+          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt) by ring,
       hvpmul, hvtmul, mul_one, one_pow]
   obtain ⟨⟨a, y⟩, hxy⟩ := IsLocalization.surj
     (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x
@@ -1978,7 +1978,7 @@ theorem exists_evalAr_lift_bloc (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
     rw [show algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)
         * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * (vp * vt)
         = (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) * vp)
-          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt) from by ring,
+          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt) by ring,
       hvpmul, hvtmul, mul_one, one_pow]
   obtain ⟨⟨a, y⟩, hxy⟩ := IsLocalization.surj
     (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x

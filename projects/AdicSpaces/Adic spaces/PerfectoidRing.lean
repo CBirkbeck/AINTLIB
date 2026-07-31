@@ -362,7 +362,7 @@ private theorem cauchySeq_partialSum_of_term_eventually_mem_nhds
     have heq := Finset.sum_range_add_sum_Ico (fun j ↦ t n j) h
     have hS_diff : S n N₁ - S n N₂ = ∑ j ∈ Finset.Ico N₂ N₁, t n j := by
       simp only [hS]; rw [← heq]; ring
-    rw [show S n N₂ - S n N₁ = -(S n N₁ - S n N₂) from by ring, hS_diff]
+    rw [show S n N₂ - S n N₁ = -(S n N₁ - S n N₂) by ring, hS_diff]
     exact hKW (neg_mem (hsub N₂ N₁ hN₂ h))
   · -- S n N₂ - S n N₁ = Σ Ico N₁ N₂
     have heq := Finset.sum_range_add_sum_Ico (fun j ↦ t n j) h
@@ -383,7 +383,7 @@ private theorem p_pow_mul_partialSum_eq_sub {p : ℕ}
     rw [Finset.sum_range_succ, mul_add, ih]
     have h2 : (p : A) ^ n * ((p : A) ^ N * b (n + N)) = (p : A) ^ (n + N) * b (n + N) := by
       rw [pow_add]; ring
-    rw [h2, ← hab (n + N), show n + (N + 1) = n + N + 1 from by omega]; ring
+    rw [h2, ← hab (n + N), show n + (N + 1) = n + N + 1 by omega]; ring
 
 /-- **Passing the telescoping identity to the limit.** Fix `c, x : A`. If the partial sums
 `s N` converge to `ls`, the tails `r N` converge to `lr`, and `c · s N = x - r N` for all `N`,
@@ -456,7 +456,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     exact ⟨N, fun m n hm hn ↦ by
       rcases le_total m n with hmn | hmn
       · exact hJW (hN m n hm hmn)
-      · rw [show (f m : A) - (f n : A) = -((f n : A) - (f m : A)) from by ring]
+      · rw [show (f m : A) - (f n : A) = -((f n : A) - (f m : A)) by ring]
         exact hJW (neg_mem (hN n m hn hmn))⟩
   -- The coerced sequence is Cauchy in A.
   have hCauchy : CauchySeq (fun n ↦ (f n : A)) :=

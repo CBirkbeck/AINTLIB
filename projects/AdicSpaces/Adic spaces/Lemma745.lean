@@ -74,7 +74,7 @@ omit [IsTopologicalRing A] in
 This follows because `s ^ (n + k) * a = s ^ k * (s ^ n * a)` and `A₀` is a subring. -/
 theorem pow_mul_mem_A₀_of_le (P : PairOfDefinition A) {s : A} (hs : s ∈ P.A₀) {a : A}
     {n : ℕ} (hn : s ^ n * a ∈ P.A₀) (k : ℕ) : s ^ (n + k) * a ∈ P.A₀ := by
-  rw [show n + k = k + n from by omega, pow_add, mul_assoc]
+  rw [show n + k = k + n by omega, pow_add, mul_assoc]
   exact P.A₀.mul_mem (P.A₀.pow_mem hs k) hn
 
 /-! ### Helper (b)-(c): Extended valuation construction
@@ -149,7 +149,7 @@ theorem isContinuous_of_restriction_isContinuous (P : PairOfDefinition A) {Γ₀
   by_cases hγ : γ = 0
   · subst hγ; simp only [not_lt_zero, Set.setOf_false, isOpen_empty]
   rw [show { a : A | v a < γ } =
-    (v.ltAddSubgroup (Units.mk0 γ hγ) : Set A) from by ext; simp only [Set.mem_setOf_eq,
+    (v.ltAddSubgroup (Units.mk0 γ hγ) : Set A) by ext; simp only [Set.mem_setOf_eq,
       Valuation.ltAddSubgroup, Units.val_mk0, AddSubgroup.coe_set_mk, AddSubmonoid.coe_set_mk,
       AddSubsemigroup.coe_set_mk]]
   apply AddSubgroup.isOpen_of_mem_nhds
@@ -252,7 +252,7 @@ theorem vExtFun_step (P : PairOfDefinition A) {Γ₀ : Type*}
       P.pow_mul_mem_A₀_of_le hs_A₀ hk j⟩ : P.A₀) =
       ⟨s, hs_A₀⟩ ^ j * ⟨s ^ k * a, hk⟩ :=
     Subtype.ext (show s ^ (k + j) * a = s ^ j * (s ^ k * a)
-      from by rw [show k + j = j + k from by omega,
+      by rw [show k + j = j + k by omega,
         pow_add, mul_assoc])
   have hval : v_r ⟨s ^ (k + j) * a,
       P.pow_mul_mem_A₀_of_le hs_A₀ hk j⟩ =
@@ -278,7 +278,7 @@ theorem vExtFun_well_defined (P : PairOfDefinition A) {Γ₀ : Type*}
     vExtFun_step P v_r v_s hs_A₀ hv_s hv_r_s_ne m n hm]
   exact congrArg₂ (· * ·)
     (congrArg v_r (Subtype.ext (show s ^ (n + m) * a =
-      s ^ (m + n) * a from by rw [Nat.add_comm])))
+      s ^ (m + n) * a by rw [Nat.add_comm])))
     (show v_s⁻¹ ^ (n + m) = v_s⁻¹ ^ (m + n) from
       by rw [Nat.add_comm])
 
@@ -294,7 +294,7 @@ theorem vExtFun_map_mul (P : PairOfDefinition A) {Γ₀ : Type*}
   have hfact : (⟨s ^ (nx + ny) * (x * y), hprod_mem⟩ :
       P.A₀) = ⟨s ^ nx * x, hnx⟩ * ⟨s ^ ny * y, hny⟩ :=
     Subtype.ext (show s ^ (nx + ny) * (x * y) =
-      (s ^ nx * x) * (s ^ ny * y) from by ring)
+      (s ^ nx * x) * (s ^ ny * y) by ring)
   rw [hfact, map_mul, pow_add]
   exact mul_mul_mul_comm _ _ _ _
 
@@ -361,7 +361,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
     set nx := Nat.find (h_pow_mul x); set ny := Nat.find (h_pow_mul y)
     have hnx := Nat.find_spec (h_pow_mul x); have hny := Nat.find_spec (h_pow_mul y)
     have hprod_mem : s ^ (nx + ny) * (x * y) ∈ P.A₀ := by
-      rw [show s ^ (nx + ny) * (x * y) = (s ^ nx * x) * (s ^ ny * y) from by ring]
+      rw [show s ^ (nx + ny) * (x * y) = (s ^ nx * x) * (s ^ ny * y) by ring]
       exact P.A₀.mul_mem hnx hny
     rw [v_ext_at (x * y) (nx + ny) hprod_mem, v_ext_at x nx hnx, v_ext_at y ny hny]
     exact vExtFun_map_mul P v_r v_s hnx hny hprod_mem
@@ -371,7 +371,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
     have hnx := Nat.find_spec (h_pow_mul x); have hny := Nat.find_spec (h_pow_mul y)
     have hNx : s ^ (nx + ny) * x ∈ P.A₀ := P.pow_mul_mem_A₀_of_le hs_A₀ hnx ny
     have hNy : s ^ (nx + ny) * y ∈ P.A₀ := by
-      rw [show nx + ny = ny + nx from by omega]
+      rw [show nx + ny = ny + nx by omega]
       exact P.pow_mul_mem_A₀_of_le hs_A₀ hny nx
     have hNxy : s ^ (nx + ny) * (x + y) ∈ P.A₀ := by
       rw [show s ^ (nx + ny) * (x + y) = s ^ (nx + ny) * x + s ^ (nx + ny) * y from mul_add _ _ _]

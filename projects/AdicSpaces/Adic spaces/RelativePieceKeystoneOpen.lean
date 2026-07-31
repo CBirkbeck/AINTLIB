@@ -348,7 +348,7 @@ theorem genPiece_rel_forward_witness
   rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
       (D₀.coeRingHom (divByS p D₀.s)) * divByS (D₀.canonicalMap q) DB.s) =
     DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-      DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) from by rw [map_mul]; rfl]
+      DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) by rw [map_mul]; rfl]
   rw [show ((D₀.interSamePair (genPieceDatumOpen D₀.P T t M hle) rfl).s : A) =
     D₀.s * t from rfl]
   rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap),
@@ -522,11 +522,11 @@ theorem genPiece_rel_canonicalMap_q_eq
     intro c
     rw [show DI.canonicalMap DI.s * DI.coeRingHom (divByS c DI.s) =
       DI.coeRingHom (algebraMap A (Localization.Away DI.s) DI.s *
-        divByS c DI.s) from by rw [map_mul]; rfl]
+        divByS c DI.s) by rw [map_mul]; rfl]
     rw [algebraMap_s_mul_divByS]
     rfl
   have hsplit : DI.canonicalMap DI.s = DI.canonicalMap D₀.s * DI.canonicalMap t := by
-    rw [show DI.canonicalMap DI.s = DI.canonicalMap (D₀.s * t) from by
+    rw [show DI.canonicalMap DI.s = DI.canonicalMap (D₀.s * t) by
       rw [show (DI.s : A) = D₀.s * t from rfl]]
     rw [map_mul]
   have hu_s : IsUnit (DI.canonicalMap D₀.s) := by

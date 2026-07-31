@@ -375,10 +375,10 @@ theorem exists_disjoint_translates (y : ↥(yTop p F ϖ)) :
     Set.smul_mem_smul_set h1
   rw [show (Multiplicative.ofAdd k) •
       ((Multiplicative.ofAdd (-k)) • (z.1.1 : Spv (Ainf p F)))
-      = (z.1.1 : Spv (Ainf p F)) from by
+      = (z.1.1 : Spv (Ainf p F)) by
     rw [smul_smul]
     rw [show (Multiplicative.ofAdd k * Multiplicative.ofAdd (-k))
-        = (1 : Multiplicative ℤ) from by
+        = (1 : Multiplicative ℤ) by
       rw [← ofAdd_add]
       simp]
     rw [one_smul]] at h2
@@ -937,7 +937,7 @@ theorem pieces_cover_frobOpens_sat (W : Opens ↥(yTop p F ϖ))
   obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy
   refine ⟨k - 1, ⟨y, ?_, rfl⟩⟩
   show y ∈ ((Opens.map (yFrobTop p F ϖ (1 + (k - 1)))).obj W : Set _)
-  rw [show (1 : ℤ) + (k - 1) = k from by omega]
+  rw [show (1 : ℤ) + (k - 1) = k by omega]
   exact hk
 
 /-- **The per-piece invariance computation**: on each shifted piece, the
@@ -1261,7 +1261,7 @@ theorem frobOpens_inv_collapse (a : ℤ)
     (U : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
     frobOpens p F (-a) (frobOpens p F a U) = U := by
   rw [← frobOpens_add p F (-a) a U]
-  rw [show (-a) + a = 0 from by omega]
+  rw [show (-a) + a = 0 by omega]
   exact frobOpens_zero p F U
 
 /-- The zero-sum transport collapse (index-generalized). -/
@@ -1281,7 +1281,7 @@ theorem limitFrobHom_leftInv (a : ℤ)
       = limitRestrict (le_of_eq (frobOpens_inv_collapse p F a U)) s := by
   rw [limitFrobHom_double p F (-a) a U s]
   have hUc : frobOpens p F ((-a) + a) U = U := by
-    rw [show (-a) + a = 0 from by omega]
+    rw [show (-a) + a = 0 by omega]
     exact frobOpens_zero p F U
   rw [limitFrobHom_eq_zero_of p F ((-a) + a) (by omega) U s hUc]
   exact congr_fun (congrArg DFunLike.coe (limitRestrict_comp

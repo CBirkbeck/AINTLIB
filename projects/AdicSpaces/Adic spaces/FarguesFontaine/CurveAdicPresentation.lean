@@ -328,7 +328,7 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
       : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
       z.2.2, (ySpaPoint p F ϖ z.1).2⟩
       : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
-    (show h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩ ∈ RT from by
+    (show h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩ ∈ RT by
       have h1 : (⟨((ySpaPoint p F ϖ z.1
           : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
           z.2.2, (ySpaPoint p F ϖ z.1).2⟩

@@ -449,7 +449,7 @@ theorem away_saturation_prefix_via_algebraMap_match
     -- Now: algebraMap α * (divByS 1 s₀)^k =
     --   algebraMap ((α' : A) + (α - α')) * (divByS 1 s₀)^k
     congr 1
-    rw [show ((α' : A) + (α - α') : A) = α from by ring]
+    rw [show ((α' : A) + (α - α') : A) = α by ring]
 
 /-! ## Public witness-existence half-step (T107)
 
@@ -579,7 +579,7 @@ theorem algebraMap_image_mem_Jfull_pow_of_awayLift_image_in_locNhd
           algebraMap A (Localization.Away s) s ^ (N * k) := by
     rw [mul_assoc, ← mul_pow,
         show (divByS 1 s) * algebraMap A (Localization.Away s) s = 1
-          from by rw [mul_comm, algebraMap_mul_divByS_one_eq_one],
+          by rw [mul_comm, algebraMap_mul_divByS_one_eq_one],
         one_pow, mul_one]
   rw [h_unit_cancel]
   exact Ideal.mul_mem_right _ _ h_in_Jfull
@@ -722,7 +722,7 @@ theorem locSubring_exists_denominator_clearance
       rw [pow_add, map_mul, ← mul_assoc, h₁, ← map_mul]
     have h2' : z * algebraMap A (Localization.Away s) (s ^ (E₁ + E₂)) =
         algebraMap A (Localization.Away s) ((β₂ : A) * s ^ E₁) := by
-      rw [show E₁ + E₂ = E₂ + E₁ from by omega, pow_add, map_mul, ← mul_assoc, h₂, ← map_mul]
+      rw [show E₁ + E₂ = E₂ + E₁ by omega, pow_add, map_mul, ← mul_assoc, h₂, ← map_mul]
     change (y + z) * algebraMap A (Localization.Away s) (s ^ (E₁ + E₂)) =
         algebraMap A (Localization.Away s) ((β₁ : A) * s ^ E₂ + (β₂ : A) * s ^ E₁)
     rw [add_mul, h1', h2', ← map_add]

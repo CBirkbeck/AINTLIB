@@ -332,7 +332,7 @@ private theorem cechDiff_involution_add_lt {F : AbPresheaf X}
   have : (-1 : ℤ) ^ (j : ℕ) =
       (-1 : ℤ) ^ ((j : ℕ) - 1) * (-1) := by
     conv_lhs =>
-      rw [show (j : ℕ) = (j : ℕ) - 1 + 1 from by omega, pow_succ]
+      rw [show (j : ℕ) = (j : ℕ) - 1 + 1 by omega, pow_succ]
   rw [this]
   ring_nf
   exact zero_smul _ _

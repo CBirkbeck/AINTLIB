@@ -304,7 +304,7 @@ theorem perfectoidValuation_pow_toOF (j n : ℕ) :
       = perfectoidValuation p F
         ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) := by
   rw [show (((PseudoUniformizer.toOF F ϖ) ^ j : OF F) : F)
-      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j from by push_cast; rfl,
+      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j by push_cast; rfl,
     Valuation.map_pow, ← pow_mul]
 
 /-- **Power-boundedness of the Tate variable at the AD-9 left endpoint.** -/

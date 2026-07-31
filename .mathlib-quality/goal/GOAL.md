@@ -5442,3 +5442,34 @@ Fuzzy matching narrows the search; it does not replace reading.
 `check_formalisation.py` runs **library → manifest** and is structurally incapable of catching
 this: it starts from declarations that exist. This defect runs the other way — something outside
 the library claims a declaration that is not there. Two directions, two checkers.
+
+## Task 3: 28 dead `private` declarations, verified safe to delete
+
+`private` in Lean 4 is module-scoped, so a private declaration never referenced inside its own
+file is unreachable. Scanning all 718 private declarations: **31 are referenced at most once**
+(i.e. only at their own declaration site).
+
+Two ways that scan can lie, both checked and both ruled out:
+
+* **attribute use** — an `@[simp]` lemma is used without ever being named. **0 of the 31 carry
+  any attribute.**
+* **dot notation** — `Foo.bar` invoked as `x.bar` is invisible to a name-anchored regex.
+  Re-running with a leading-dot-permitting pattern removes **3**, leaving 28.
+
+The third way, and the one that burned an earlier dead-code batch in this campaign: tactics that
+consume the environment without naming anything. That batch claimed −45 lines and delivered −11
+because `rwa`/`simpa`/`trivial` were silently closing goals with bindings I had deleted. The
+top-level analogue is `aesop` / `solve_by_elim` / `exact?` / `apply?`, which search the
+environment and can find a private lemma by type alone.
+
+**There are zero occurrences of any of them in the entire library** (262 files). `omega`,
+`decide`, `tauto` and `simp_all` do appear, but they are decision procedures or simp-set users,
+and none of the 28 is tagged `@[simp]` — so none can be reached implicitly.
+
+The 28, by file: `WedhornCechAcyclicity` 8, `Wedhorn828` 4, `StructureSheaf` 3, `TateAlgebra` 2,
+`TateAlgebraTopology` 2, `LaurentCoverExact` 2, and one each in `CompletionLocalization`,
+`Cor832`, `MvTateAlgebraTopology`, `Presheaf`, `PresheafTateStructure`, `SpaCompactNoHArch`,
+`StandardCover`.
+
+Not yet applied — the gate is mid-run on the `show … from by` batch, and editing a file while a
+gate is running is the hazard recorded above. Queued as the next batch.

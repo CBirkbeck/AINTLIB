@@ -172,7 +172,7 @@ noncomputable def laurentMinusDatum (D₀ : RationalLocData A) (f : A) :
   hopen := by
     obtain ⟨N₀, hN₀⟩ := D₀.hopen
     refine ⟨2 * N₀, fun b hb => ?_⟩
-    rw [show 2 * N₀ = N₀ + N₀ from by omega, pow_add] at hb
+    rw [show 2 * N₀ = N₀ + N₀ by omega, pow_add] at hb
     refine Submodule.mul_induction_on hb ?_ ?_
     · intro c hc d hd
       rw [show (c * d : D₀.P.A₀).val = c.val * d.val from rfl,
@@ -222,10 +222,10 @@ theorem laurentCover_covers (D₀ : RationalLocData A) (f : A)
   · right
     open scoped Pointwise in
     rw [show rationalOpen (laurentMinusDatum D₀ f).T (laurentMinusDatum D₀ f).s =
-      rationalOpen (insert D₀.s D₀.T) D₀.s ∩ rationalOpen {D₀.s, f} f from by
+      rationalOpen (insert D₀.s D₀.T) D₀.s ∩ rationalOpen {D₀.s, f} f by
         simp only [laurentMinusDatum]
         rw [show Finset.image (fun p => p.1 * p.2) (Finset.product (insert D₀.s D₀.T) {D₀.s, f})
-          = insert D₀.s D₀.T * ({D₀.s, f} : Finset A) from by simp [Finset.mul_def]]
+          = insert D₀.s D₀.T * ({D₀.s, f} : Finset A) by simp [Finset.mul_def]]
         rw [← rationalOpen_inter (insert D₀.s D₀.T) {D₀.s, f} D₀.s f
           (Finset.mem_insert_self _ _) (Finset.mem_insert_of_mem (Finset.mem_singleton_self _))]]
     rw [rationalOpen_insert_s]
@@ -638,7 +638,7 @@ noncomputable def ratioPlusDatum (D₀ : RationalLocData A) (f g g_inv : A)
       have hg' : g ^ 2 * g_inv = g := by
         rw [pow_two, mul_assoc, hg, mul_one]
       ring_nf
-      rw [show D₀.s * g ^ 2 * g_inv = D₀.s * (g ^ 2 * g_inv) from by ring, hg']
+      rw [show D₀.s * g ^ 2 * g_inv = D₀.s * (g ^ 2 * g_inv) by ring, hg']
     rw [h_identity]
     refine (locSubring _ _ _).mul_mem
       (algebraMap_mem_locSubring _ _ _ hg_inv)

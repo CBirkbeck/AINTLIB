@@ -882,7 +882,7 @@ private lemma _adicCompletion_mk_of_first_zero_in_I_smul_top
   rcases (g i).2 with ⟨a, ha, ha_eq⟩
   rw [show (g i : AdicCompletion I R) = AdicCompletion.of I R a from ha_eq.symm]
   change c i • AdicCompletion.of I R a ∈ (I • ⊤ : Submodule R (AdicCompletion I R))
-  rw [show c i • AdicCompletion.of I R a = a • c i from by
+  rw [show c i • AdicCompletion.of I R a = a • c i by
     change c i * AdicCompletion.of I R a = AdicCompletion.of I R a * c i
     ring]
   exact Submodule.smul_mem_smul ha Submodule.mem_top
