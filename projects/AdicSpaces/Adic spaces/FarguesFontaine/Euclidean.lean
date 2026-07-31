@@ -922,6 +922,43 @@ theorem antidiagonal_pairwiseDisjoint (s : Set ℕ) :
   exact hmn (by rw [← Finset.mem_antidiagonal.mp hqm,
     ← Finset.mem_antidiagonal.mp hqn])
 
+/-- The "triangle" `⋃_{n < N} antidiagonal n` sits inside the box `range N ×ˢ range N`:
+each pair on an antidiagonal below `N` has both coordinates below `N`. -/
+theorem biUnion_antidiagonal_subset_box (N : ℕ) :
+    (Finset.range N).biUnion (fun n => Finset.antidiagonal n)
+      ⊆ Finset.range N ×ˢ Finset.range N := by
+  intro q hq
+  rw [Finset.mem_biUnion] at hq
+  obtain ⟨n, hn, hqn⟩ := hq
+  have hq' : q.1 + q.2 = n := Finset.mem_antidiagonal.mp hqn
+  have hnN : n < N := Finset.mem_range.mp hn
+  rw [Finset.mem_product]
+  exact ⟨Finset.mem_range.mpr (lt_of_le_of_lt (le_trans (Nat.le_add_right _ _) hq'.le) hnN),
+    Finset.mem_range.mpr (lt_of_le_of_lt (le_trans (Nat.le_add_left _ _) hq'.le) hnN)⟩
+
+/-- The product of two truncated Witt sums, as a single sum over the box
+`range N ×ˢ range N`. -/
+private theorem prod_truncated_witt_sum_eq_box (N : ℕ) (a b : ℕ → F) :
+    (∑ i ∈ Finset.range N,
+        WittVector.teichmuller p (a i) * (p : WittVector p F) ^ i)
+      * (∑ j ∈ Finset.range N,
+        WittVector.teichmuller p (b j) * (p : WittVector p F) ^ j)
+      = ∑ q ∈ Finset.range N ×ˢ Finset.range N, (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2) := by
+  have hnested : (∑ q ∈ Finset.range N ×ˢ Finset.range N,
+      (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2))
+      = ∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
+        (p : WittVector p F) ^ (i + j)
+          * WittVector.teichmuller p (a i * b j) :=
+    Finset.sum_product' (Finset.range N) (Finset.range N)
+      (fun i j => (p : WittVector p F) ^ (i + j)
+        * WittVector.teichmuller p (a i * b j))
+  rw [hnested, Finset.sum_mul_sum]
+  refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+  rw [map_mul, pow_add]
+  ring
+
 /-- **The prefix-product tail** (sol step 2, identity (10)): a prefix product
 differs from the convolution partial only in antidiagonal terms of total index at
 least `N`, so any uniform tail bound controls the difference. -/
@@ -940,24 +977,7 @@ theorem gaussValueF_prefix_mul_sub_convPartial_le {ρ : NNReal} (hρ0 : 0 < ρ)
   set TRI : Finset (ℕ × ℕ) := (Finset.range N).biUnion
     (fun n => Finset.antidiagonal n) with hTRI
   have hdisj := antidiagonal_pairwiseDisjoint (↑(Finset.range N) : Set ℕ)
-  have hprod : (∑ i ∈ Finset.range N,
-        WittVector.teichmuller p (a i) * (p : WittVector p F) ^ i)
-      * (∑ j ∈ Finset.range N,
-        WittVector.teichmuller p (b j) * (p : WittVector p F) ^ j)
-      = ∑ q ∈ box, (p : WittVector p F) ^ (q.1 + q.2)
-        * WittVector.teichmuller p (a q.1 * b q.2) := by
-    have hnested : (∑ q ∈ box, (p : WittVector p F) ^ (q.1 + q.2)
-        * WittVector.teichmuller p (a q.1 * b q.2))
-        = ∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
-          (p : WittVector p F) ^ (i + j)
-            * WittVector.teichmuller p (a i * b j) :=
-      Finset.sum_product' (Finset.range N) (Finset.range N)
-        (fun i j => (p : WittVector p F) ^ (i + j)
-          * WittVector.teichmuller p (a i * b j))
-    rw [hnested, Finset.sum_mul_sum]
-    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
-    rw [map_mul, pow_add]
-    ring
+  have hprod := prod_truncated_witt_sum_eq_box p F N a b
   have hanti : ∀ n : ℕ, (∑ q ∈ Finset.antidiagonal n,
       WittVector.teichmuller p (a q.1 * b q.2))
       = ∑ k ∈ Finset.range (n + 1), WittVector.teichmuller p (a k * b (n - k)) :=
@@ -971,18 +991,7 @@ theorem gaussValueF_prefix_mul_sub_convPartial_le {ρ : NNReal} (hρ0 : 0 < ρ)
     rw [← hanti n, Finset.mul_sum]
     refine Finset.sum_congr rfl fun q hq => ?_
     rw [Finset.mem_antidiagonal.mp hq]
-  have hsub : TRI ⊆ box := by
-    intro q hq
-    rw [hTRI, Finset.mem_biUnion] at hq
-    obtain ⟨n, hn, hqn⟩ := hq
-    have hq' : q.1 + q.2 = n := Finset.mem_antidiagonal.mp hqn
-    have hnN : n < N := Finset.mem_range.mp hn
-    rw [hbox, Finset.mem_product]
-    constructor
-    · exact Finset.mem_range.mpr (lt_of_le_of_lt
-        (le_trans (Nat.le_add_right _ _) hq'.le) hnN)
-    · exact Finset.mem_range.mpr (lt_of_le_of_lt
-        (le_trans (Nat.le_add_left _ _) hq'.le) hnN)
+  have hsub : TRI ⊆ box := biUnion_antidiagonal_subset_box N
   have hdiff : (∑ q ∈ box, (p : WittVector p F) ^ (q.1 + q.2)
         * WittVector.teichmuller p (a q.1 * b q.2))
       - (∑ q ∈ TRI, (p : WittVector p F) ^ (q.1 + q.2)

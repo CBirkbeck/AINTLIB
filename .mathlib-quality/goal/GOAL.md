@@ -4635,3 +4635,22 @@ once it moves. The earlier verbatim lifts (`hglue`, `hBz`/`hCz`) were safe preci
 those blocks were the FIRST `have` in their proofs, so nothing local existed yet.
 
 Net: ~9 lines of duplication removed, no proof cleared (the Euclidean proof needs 25 more).
+
+## 197 → 196: `gaussValueF_prefix_mul_sub_convPartial_le` (75 → 50)
+
+Two general `Finset` facts lifted out of the estimate, both axiom-clean:
+* `prod_truncated_witt_sum_eq_box` — the product of two truncated Witt sums as one sum over the
+  box `range N ×ˢ range N` (18 → 1).
+* `biUnion_antidiagonal_subset_box` — the "triangle" `⋃_{n<N} antidiagonal n` sits inside that
+  box (12 → 1). Public, like `antidiagonal_pairwiseDisjoint`: `Presentation` has the matching
+  antidiagonal/box machinery downstream and can use it.
+
+**The corrected second attempt succeeded where the verbatim lift failed, and the reason is
+generalisable: rewriting a block for its new context can make it SHORTER than lifting it.**
+`hsub`'s original body spends three lines on `rw [hTRI]` / `rw [hbox]` — unfolding the `set`
+equations. Stated directly about the explicit sets, those steps do not exist. Likewise `hprod`
+carried a `box` reference that only made sense inside the enclosing proof.
+  → So the rule from the failed attempt ("a verbatim lift is only safe when the block mentions
+    nothing the enclosing proof introduced") has a constructive converse: **when a block DOES
+    mention `set`-bound locals, do not lift it verbatim — restate it about their definitions, and
+    the unfolding steps fall away.**
