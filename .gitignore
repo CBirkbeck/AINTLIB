@@ -15,3 +15,7 @@ blueprint/print/
 references/*.pdf
 references/*.txt
 *.log
+
+# Python bytecode from the project scripts (formalisation manifest tooling)
+__pycache__/
+*.pyc
