@@ -29971,3 +29971,38 @@ Sub-tickets:
   `_of_isLocallySurjective_fac`), identify L(pbPre P) ≅ pbMod(idealModule J) via
   naturality of `SheafOfModules.sheafificationCompPullback` + IsIso(L_X unit)
   (counit-triangle), then [A7-2].
+
+## [GAP-A-7] DONE 2026-07-31 — both IdealModulePullback sorries discharged, axiom-verified
+
+All of `comap_ideal_eq_span_appLE`, `sheafificationW_idealPullHom`,
+`nonempty_pullback_idealModule`, `nonempty_pullback_idealModule_ker_sectionBaseChange`,
+and the new engine `isIso_of_isLocallySurjective_of_isInvertible` at
+propext/Classical.choice/Quot.sound. Root build green (9605 jobs).
+
+Route as replanned (surjectivity-only, injectivity never chased through the opaque
+left-adjoint pullback):
+- [A7-1] comap-span = 2-liner reuse (ideal_comap_affineOpens_span +
+  affinePullbackSection_eq_appLE).
+- [A7-2] NEW Picard/SurjectiveInvertible.lean: loc-surj map of invertible modules is
+  iso (unit-endo multiplier on a basis of unit-opens — no gluing; restrict-transport;
+  common-refinement conjugation via restrictIsoOfPullbackIso ∘ restrictTrivialization).
+- [A7-3] loc-surj of idealPullHom: adjunction-triangle eval ψ(η g)=f♯g is rfl-grade
+  after homEquiv_unit + congrArg-app; per-chart span-decomposition through
+  ker_subschemeι_app (▸-transport, NOT rw — dependent motive) + b'-smul with the
+  scalar let-cast to the ring-carrier.
+- [A7-4] assembly: unit-W via left_triangle_components + IsIso.of_isIso_fac_right;
+  naturality-square transport with Functor.id_map-normalized hnat; second-factor
+  extraction done BY HAND (superset_covering + h1.imageSieve_mem + witness-shift ⟨η.app t, ht⟩)
+  — TC could not bridge sheafToPresheaf-vs-.obj clothing on the composite;
+  domain-invertibility via pullbackIsoSheafifyPresheafPullback.symm + IsInvertible.pullback,
+  codomain via sheafifyValIso.
+
+LEAN-OPS lessons: (1) ascriptions are NO-OPS on defeq carriers — binop% unifies at
+reducible and fails across ModuleCat.of/RingCat spellings; type products via
+pre-elaborated statements (let-cast scalars, term-mode trans-chains). (2) haveI with a
+goal-display-copied statement re-keys an instance across clothing. (3) When TC still
+misses, destructure the class (field + superset_covering + witness-shift) instead.
+
+NEXT per board: [GAP-A-4] line ℓ and vertical v as rank-one kernels (⟦REV⟧-hardened:
+twisted restriction target, cohomology-and-base-change surjectivity, locally-split
+kernel invertible + BC-compatible).

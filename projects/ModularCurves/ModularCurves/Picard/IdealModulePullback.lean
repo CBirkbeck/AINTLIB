@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.DivisorClass
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.Picard.SurjectiveInvertible
 
 /-!
 # Pullback compatibility of ideal modules (naturality layer for (2.16))
@@ -174,17 +175,181 @@ noncomputable def idealPullHom :
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
-/-- **[NAT-3]** The transposed comparison is inverted by sheafification: on charts where
-both ideals are principal with nonzerodivisor generators, both sides trivialize
-compatibly (the affine base-change kernel computation,
-`Algebra.TensorProduct.quotientTensorEquiv`). -/
+/-- **[A7-3 evaluation]** The adjunction-triangle value of the transposed comparison at
+a unit image: `ψ (η g) = f♯ g`. The only computable values of a map out of the abstract
+left-adjoint pullback are those on unit images, and they are exactly the pushed
+sections. -/
+theorem idealPullHom_app_unit (V : X.Opens) (g : Γ(X, V))
+    (hg : g ∈ idealSections J (Opposite.op V)) :
+    (idealPullHom f J).app (Opposite.op (f ⁻¹ᵁ V))
+        (((PresheafOfModules.pullbackPushforwardAdjunction.{u}
+          f.toRingCatSheafHom.hom).unit.app (idealPresheaf J)).app
+            (Opposite.op V) ⟨g, hg⟩) =
+      ⟨f.app V g, app_mem_idealSections_comap f J (Opposite.op V) hg⟩ := by
+  have htri := ((PresheafOfModules.pullbackPushforwardAdjunction.{u}
+    f.toRingCatSheafHom.hom).homEquiv (idealPresheaf J)
+      (idealPresheaf (J.comap f))).apply_symm_apply (idealPushHom f J)
+  rw [Adjunction.homEquiv_unit] at htri
+  have hval := congrArg (fun (m : idealPresheaf J ⟶
+      (PresheafOfModules.pushforward.{u} f.toRingCatSheafHom.hom).obj
+        (idealPresheaf (J.comap f))) =>
+    (ConcreteCategory.hom (m.app (Opposite.op V))) ⟨g, hg⟩) htri
+  exact hval
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[A7-3]** The transposed comparison is locally surjective: near any point, the
+comap ideal is the span of the pulled-back generator (`comap_ideal_eq_span_appLE`), and
+that generator is the value of the comparison at a unit image
+(`idealPullHom_app_unit`), so every section is a scalar multiple of a value. -/
+theorem isLocallySurjective_idealPullHom
+    (h : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(X, V.1),
+      J.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(X, V.1)) :
+    Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X')
+      ((PresheafOfModules.toPresheaf _).map (idealPullHom f J)) := by
+  constructor
+  intro V₀ s
+  rw [Opens.mem_grothendieckTopology]
+  intro x' hx'
+  obtain ⟨V, hcV, g, hspan, hnzd⟩ := h (f.base x')
+  have hopen : x' ∈ f ⁻¹ᵁ V.1 ⊓ V₀ := ⟨hcV, hx'⟩
+  obtain ⟨_, ⟨V's, hV'aff, rfl⟩, hxV', hsub⟩ :=
+    X'.isBasis_affineOpens.exists_subset_of_mem_open hopen (f ⁻¹ᵁ V.1 ⊓ V₀).2
+  have hVle1 : V's ≤ f ⁻¹ᵁ V.1 := fun a ha => (hsub ha).1
+  have hVle0 : V's ≤ V₀ := fun a ha => (hsub ha).2
+  have hspan' := comap_ideal_eq_span_appLE f J hspan ⟨V's, hV'aff⟩ hVle1
+  -- the restriction of `s` to the chart, and its span decomposition
+  let sV' := ((PresheafOfModules.toPresheaf _).obj
+    (idealPresheaf (J.comap f))).map (homOfLE hVle0).op s
+  let sv : idealSections (J.comap f) (Opposite.op V's) := sV'
+  have hsmem : sv.1 ∈ (J.comap f).ideal ⟨V's, hV'aff⟩ :=
+    ((J.comap f).ker_subschemeι_app ⟨V's, hV'aff⟩) ▸ sv.2
+  rw [hspan'] at hsmem
+  obtain ⟨b, hb⟩ := Ideal.mem_span_singleton'.mp hsmem
+  have hgmem : g ∈ idealSections J (Opposite.op V.1) := by
+    rw [show idealSections J (Opposite.op V.1) = J.ideal V from
+      J.ker_subschemeι_app V, hspan]
+    exact Ideal.mem_span_singleton_self g
+  -- the unit image, restricted to the chart
+  let η := (PresheafOfModules.pullbackPushforwardAdjunction.{u}
+    f.toRingCatSheafHom.hom).unit.app (idealPresheaf J)
+  let τ₀ : ((PresheafOfModules.pullback.{u} f.toRingCatSheafHom.hom).obj
+      (idealPresheaf J)).obj (Opposite.op (f ⁻¹ᵁ V.1)) :=
+    η.app (Opposite.op V.1) ⟨g, hgmem⟩
+  let τ₁ := ((PresheafOfModules.pullback.{u} f.toRingCatSheafHom.hom).obj
+    (idealPresheaf J)).map (homOfLE hVle1).op τ₀
+  let b' : ((X'.ringCatSheaf.obj).obj (Opposite.op V's)) := b
+  refine ⟨V's, homOfLE hVle0, ⟨b' • τ₁, ?_⟩, hxV'⟩
+  -- evaluate: linearity, naturality, the unit evaluation, and the span identity
+  have hlin := ((idealPullHom f J).app (Opposite.op V's)).hom.map_smul b' τ₁
+  have hnat := PresheafOfModules.naturality_apply (idealPullHom f J)
+    (homOfLE hVle1).op τ₀
+  have heval := idealPullHom_app_unit f J V.1 g hgmem
+  show (idealPullHom f J).app (Opposite.op V's) (b' • τ₁) = sV'
+  rw [hlin]
+  have hτ₁ : (idealPullHom f J).app (Opposite.op V's) τ₁ =
+      (idealPresheaf (J.comap f)).map (homOfLE hVle1).op
+        ((idealPullHom f J).app (Opposite.op (f ⁻¹ᵁ V.1)) τ₀) := hnat
+  rw [hτ₁]
+  have heval' : (idealPullHom f J).app (Opposite.op (f ⁻¹ᵁ V.1)) τ₀ =
+      ⟨f.app V.1 g, app_mem_idealSections_comap f J (Opposite.op V.1) hgmem⟩ :=
+    heval
+  rw [heval']
+  refine Subtype.ext ?_
+  show b * (X'.presheaf.map (homOfLE hVle1).op) ((f.app V.1) g) = sv.1
+  rw [← hb]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[NAT-3]** The transposed comparison is inverted by sheafification: it is locally
+surjective (`isLocallySurjective_idealPullHom`), its sheafification is a map of
+invertible modules (the pullback of the ideal line and the comap ideal line), and a
+locally surjective map of invertible modules is an isomorphism
+(`isIso_of_isLocallySurjective_of_isInvertible`) — injectivity is never chased through
+the opaque left-adjoint pullback. -/
 theorem sheafificationW_idealPullHom
     (h : ∀ c : ↥X, ∃ V : X.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(X, V.1),
       J.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(X, V.1))
     (h' : ∀ c : ↥X', ∃ V : X'.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(X', V.1),
       (J.comap f).ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(X', V.1)) :
     PresheafOfModules.sheafificationW (𝟙 X'.ringCatSheaf.obj) (idealPullHom f J) := by
-  sorry
+  classical
+  rw [PresheafOfModules.sheafificationW_iff]
+  -- the unit of the sheafification adjunction on the codomain is in W, hence locally
+  -- surjective; compose with the local surjectivity of the comparison itself
+  have hWunit : PresheafOfModules.sheafificationW (𝟙 X'.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X'.ringCatSheaf.obj)).unit.app (idealPresheaf (J.comap f))) := by
+    rw [PresheafOfModules.sheafificationW_iff]
+    have htri := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 X'.ringCatSheaf.obj)).left_triangle_components (idealPresheaf (J.comap f))
+    haveI : IsIso ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X'.ringCatSheaf.obj)).counit.app
+          ((PresheafOfModules.sheafification (𝟙 X'.ringCatSheaf.obj)).obj
+            (idealPresheaf (J.comap f)))) := inferInstance
+    exact IsIso.of_isIso_fac_right htri
+  obtain ⟨-, hunitSurj⟩ :=
+    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ _).mp hWunit
+  haveI := hunitSurj
+  haveI hψ := isLocallySurjective_idealPullHom f J h
+  -- naturality of the unit: ψ ≫ η_Q = η_PB ≫ RA(L ψ); local surjectivity of the
+  -- left side gives local surjectivity of the second factor
+  have hnat := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 X'.ringCatSheaf.obj)).unit.naturality (idealPullHom f J)
+  rw [Functor.id_map] at hnat
+  haveI h1 : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X')
+      ((PresheafOfModules.toPresheaf
+        ((sheafToPresheaf (Opens.grothendieckTopology ↥X') RingCat).obj
+          X'.ringCatSheaf)).map (idealPullHom f J) ≫
+        (PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥X') RingCat).obj
+            X'.ringCatSheaf)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 X'.ringCatSheaf.obj)).unit.app (idealPresheaf (J.comap f)))) := by
+    haveI hψ' : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X')
+        ((PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥X') RingCat).obj
+            X'.ringCatSheaf)).map (idealPullHom f J)) := hψ
+    haveI hu' : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X')
+        ((PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥X') RingCat).obj
+            X'.ringCatSheaf)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 X'.ringCatSheaf.obj)).unit.app (idealPresheaf (J.comap f)))) :=
+      hunitSurj
+    infer_instance
+  rw [← Functor.map_comp, hnat, Functor.map_comp] at h1
+  -- extract the second factor's local surjectivity by hand: every image-sieve of the
+  -- composite refines the image-sieve of the second factor (shift the witness)
+  have hLsurj : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X')
+      ((PresheafOfModules.toPresheaf _).map
+        (((PresheafOfModules.sheafification (𝟙 X'.ringCatSheaf.obj)).map
+          (idealPullHom f J)).val)) := by
+    constructor
+    intro U s
+    refine (Opens.grothendieckTopology ↥X').superset_covering ?_
+      (h1.imageSieve_mem s)
+    intro Y i hi
+    obtain ⟨t, ht⟩ := hi
+    exact ⟨((PresheafOfModules.toPresheaf _).map
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X'.ringCatSheaf.obj)).unit.app
+          ((PresheafOfModules.pullback.{u} f.toRingCatSheafHom.hom).obj
+            (idealPresheaf J)))).app _ t, ht⟩
+  -- both sides of the sheafified comparison are invertible modules
+  have hInvDom : IsInvertible ((PresheafOfModules.sheafification
+      (𝟙 X'.ringCatSheaf.obj)).obj ((PresheafOfModules.pullback.{u}
+      f.toRingCatSheafHom.hom).obj (idealPresheaf J))) := by
+    refine IsInvertible.of_iso ((isInvertible_idealModule J h).pullback f) ?_
+    exact (pullbackIsoSheafifyPresheafPullback f (idealModule J)).symm
+  have hInvCod : IsInvertible ((PresheafOfModules.sheafification
+      (𝟙 X'.ringCatSheaf.obj)).obj (idealPresheaf (J.comap f))) := by
+    refine IsInvertible.of_iso (isInvertible_idealModule (J.comap f) h') ?_
+    exact sheafifyValIso (idealModule (J.comap f))
+  exact isIso_of_isLocallySurjective_of_isInvertible
+    ((PresheafOfModules.sheafification (𝟙 X'.ringCatSheaf.obj)).map
+      (idealPullHom f J)) hInvDom hInvCod hLsurj
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
