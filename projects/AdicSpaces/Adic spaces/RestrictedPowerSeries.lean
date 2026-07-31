@@ -138,7 +138,6 @@ def restrictedMvPowerSeriesSubring (k : ℕ) (A : Type*) [CommRing A] [Topologic
         intro b _
         exact (continuous_mul_const _).continuousAt.preimage_mem_nhds
           (by simpa using V.isOpen.mem_nhds V.zero_mem)
-    have hTW : T ⊆ (W : Set A) := fun x hx => hx.1.1
     have hT_left : ∀ a ∈ hSf.toFinset, ∀ y ∈ T,
         MvPowerSeries.coeff a f * y ∈ (V : Set A) := by
       intro a ha y hy

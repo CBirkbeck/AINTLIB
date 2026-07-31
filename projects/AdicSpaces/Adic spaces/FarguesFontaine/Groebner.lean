@@ -1659,8 +1659,6 @@ private theorem approx_generation_key {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ <
     · by_cases hgg : g' = g
       · subst hgg
         rw [Function.update_self]
-        have hcoe : ((b g' + m : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-            = ((b g' : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) + ((m : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := rfl
         refine le_trans (mul_le_mul_of_nonneg_right
           (gaussNormRPS_add_le p F ϖ (b g').2 m.2) zero_le) ?_
         rw [mul_comm, nnreal_mul_max, mul_comm _ (gaussNormRPS p F ϖ hρ0 hρ1

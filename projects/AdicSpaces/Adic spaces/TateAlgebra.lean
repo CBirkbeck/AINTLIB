@@ -2417,8 +2417,6 @@ theorem Module.Flat.quotient_of_flat_of_saturated
   -- Step 7: Project to Q.
   -- x̄ᵢ = π(x'ᵢ) = π(x''ᵢ + g * cᵢ) = π(x''ᵢ) since π(g) = 0.
   -- x''ᵢ = ∑ⱼ aᵢⱼ • yⱼ, so π(x''ᵢ) = ∑ⱼ aᵢⱼ • π(yⱼ).
-  have hπg : π g = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr
-    (Ideal.subset_span (Set.mem_singleton g))
   refine ⟨k, a, fun j ↦ π (y j), fun i ↦ ?_, hsyz⟩
   -- x i = π(x'' i)
   have hxi_eq : x i = π (x'' i) := by

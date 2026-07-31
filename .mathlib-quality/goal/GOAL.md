@@ -4588,3 +4588,28 @@ This is a `/cleanup` (task 3) win of ~45 lines rather than a task-2 one: the lar
 proof affected has 10 dead lines against a deficit of 66, and none clears on dead code alone.
 The build remains the final adjudicator — the heuristic cannot see `simp [*]`-style usage, so
 any deletion that breaks gets restored individually.
+
+## Dead-code batch: −45 claimed, **−11 actually correct**
+
+**The filter was substantially wrong and I nearly shipped it.** Of 15 applied deletions, **10
+were shadowed** and had to be reverted; the honest result is 11 lines across 5 files
+(`Groebner` `hcoe`, `IteratedOverlapEquiv` `hu_Dsf`, `RestrictedPowerSeries` `hTW`,
+`SpvAITopology` `h_vd_ne`, `TateAlgebra` `hπg`).
+
+**Root cause: `rwa` is `rw` then ASSUMPTION, and `simpa` is `simp` then assumption.** Both
+consume the local context implicitly, exactly like a bare `assumption` — which my filter did
+list. I had introduced `rwa` as a technique earlier in this campaign and still failed to
+recognise it as a context consumer. `trivial` was missing too.
+
+Shadowed by: `rwa` ×6 (`hyx`, `hcoords`, `hu_s_src`, `hu_f_src`, `hu_f_tgt`, `hΨcont`),
+`simpa` ×3 (`hlambda`, `hg_ne`, `hg_lt`), `trivial` ×1 (`h_restrc`), plus the three in
+TopologyComparison the gate caught (`hG_nhds`, `hW_nhds`, `hmk_pi_tendsto`).
+
+**The gate would NOT have found these efficiently.** It failed at the first file
+(TopologyComparison) and stopped, so 10 further breakages were still hiding behind it — each
+needing its own full gate cycle to surface. What found them in one step was re-deriving the
+safety check against `git show HEAD:<file>` for every applied deletion. **After a batch edit
+driven by a heuristic, re-run the heuristic against the ORIGINAL content of everything the batch
+touched, rather than letting the build discover failures serially.**
+
+Task 2 count unchanged at 197 either way — dead code was never a task-2 lever.

@@ -839,8 +839,6 @@ private theorem iteratedOverlap_backwardToCompletion_generators_powerBounded
         -- Their product is `mk' (D₀.s · f) ⟨D₀.s · f, _⟩ = 1`.
         have hsrc : divByS D₀.s (D₀.s * f) *
             algebraMap A (Localization.Away (D₀.s * f)) f = 1 := by
-          have hu_Dsf : IsUnit (algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f)) :=
-            IsLocalization.Away.algebraMap_isUnit _
           -- algebraMap f * algebraMap D₀.s = algebraMap (D₀.s · f); inverse = divByS 1.
           have hsf_inv : algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f) *
               divByS (1 : A) (D₀.s * f) = 1 := by

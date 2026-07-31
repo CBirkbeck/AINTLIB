@@ -279,10 +279,6 @@ theorem SpvAI.exists_rationalSubset_microbial [DecidableEq A]
     rw [h_eq] at h_vg0d_ge_one
     exact absurd h_vg0d_ge_one (by simp)
   -- v(d) ≠ 0 from v(g_0 * d) ≠ 0.
-  have h_vd_ne : wv d ≠ 0 := by
-    intro h_eq
-    apply h_vg0d_ne
-    rw [map_mul, h_eq, mul_zero]
   -- Build T' := g.image (·*d) ∪ {1}, s' := g_0 * d.
   refine ⟨g.image (· * d) ∪ {1}, g_0 * d, ?_, ?_, ?_⟩
   · -- 1 ∈ T'.
