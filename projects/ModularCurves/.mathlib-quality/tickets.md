@@ -30379,3 +30379,16 @@ FORWARD) — then the pushforward-action is concrete (apps = action at image-ope
 rfl-grade) and its conjugation by the presheaf-level trivializations evaluates at
 1 ⊗ 1 elementwise. Classification (unit_endo_eq_ofTopSection) then closes the endo.
 The span-identification only needs span-up-to-unit.
+
+### [A4-e2 3b-iii] square STATEMENT-LOCKED 2026-07-31 (one sorry, well-typed)
+`restrict_divisorTwistHom_forward_square (U)`: sheafifyY(pf(unitX at I⊗L)) ≫
+valIso(F-tensor).hom ≫ F.map(divisorTwistHom) = sheafifyY(pf(idealActionPre)) ≫
+valIso(F-L).hom — ALL-FORWARD (no W-inversion). Proof-plan (banked earlier):
+sheafify-Y-hom-ext against the Y-unit (sheafificationHomEquiv-injectivity), then
+elementwise on pf-sections: LHS collapses by X-unit-naturality + X-triangle
+(divisorTwistHom_eq), RHS by Y-unit-naturality; both sides = unitY-image of m•l.
+Downstream assembly (next): d' from the square's two valIso-conjugates; coker-chain
+(PreservesCokernel.iso + cokernel.mapIso on the square, W-piece is iso so coker
+transports); classification (unit_endo_eq_ofTopSection) + span-up-to-unit;
+Γ-of-coker via leaf-2 + baseSectionsRestrictIsoOfBijective; feed quotientSpanMulEquivProd
+(3a) with per-section evaluation equivs (SuccessorSections mechanism at P and Q).

@@ -790,6 +790,26 @@ theorem unit_endo_eq_ofTopSection {Z : Scheme.{u}}
     _ = _ := (ModularCurves.unitEndomorphismOfTopSection_app_apply
         (cW (⊤ : Z.Opens)) U.unop 1).symm
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[3b-iii] The forward conjugation square** (statement-locked; proof by
+adjunction triangles + unit naturality on both sides): restricting the divisor twist
+along an open immersion agrees with the sheafified pushforward of the presheaf action,
+through the sheafification-value isos and the inverted restricted unit. -/
+theorem restrict_divisorTwistHom_forward_square (U : C.Opens) :
+    (PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj)).map
+        ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val))) ≫
+      (sheafifyValIso ((restrictFunctor U.ι).obj
+        (tensorObj (idealModule J) L))).hom ≫
+      (restrictFunctor U.ι).map (divisorTwistHom J L) =
+    (PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj)).map
+        ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+          (idealActionPre J L)) ≫
+      (sheafifyValIso ((restrictFunctor U.ι).obj L)).hom := by
+  sorry
+
 end LineAssembly
 
 end Twist
