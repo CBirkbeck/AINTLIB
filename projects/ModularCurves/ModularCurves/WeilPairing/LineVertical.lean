@@ -1268,6 +1268,49 @@ theorem cokernelTwistDesc_π {J₁ J₂ : C.IdealSheafData}
       Limits.cokernel.π (divisorTwistHom J₂ L) :=
   Limits.cokernel.π_desc _ _ _
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Off the image of a closed immersion, `1` lies in the kernel ideal's sections:
+the kernel subscheme's preimage of such an open is empty, so its section ring is a
+subsingleton. -/
+theorem one_mem_idealSections_ker_of_preimage_eq_bot {S : Scheme.{u}}
+    (z : S ⟶ C) [IsClosedImmersion z] [QuasiCompact z]
+    (W : C.Opens) (hW : z ⁻¹ᵁ W = ⊥) :
+    (1 : Γ(C, W)) ∈ idealSections (Scheme.Hom.ker z) (Opposite.op W) := by
+  refine RingHom.mem_ker.mpr ?_
+  have hrange : Set.range ((Scheme.Hom.ker z).subschemeι.base) ⊆
+      Set.range z.base := by
+    have h1 := Scheme.IdealSheafData.range_subschemeι (I := Scheme.Hom.ker z)
+    have h2 := Scheme.Hom.support_ker z
+    intro c hc
+    have hc2 : c ∈ closure (Set.range z.base) := h2 ▸ (h1 ▸ hc)
+    rwa [z.isClosedEmbedding.isClosed_range.closure_eq] at hc2
+  haveI hempty : IsEmpty
+      ((Scheme.Hom.ker z).subschemeι ⁻¹ᵁ W : Set _) := by
+    constructor
+    rintro ⟨c, hc⟩
+    obtain ⟨s, hs⟩ := hrange ⟨c, rfl⟩
+    have hsW : z.base s ∈ W := by
+      rw [hs]
+      exact hc
+    have : s ∈ z ⁻¹ᵁ W := hsW
+    rw [hW] at this
+    exact this
+  haveI hsub : Subsingleton
+      Γ((Scheme.Hom.ker z).subscheme, (Scheme.Hom.ker z).subschemeι ⁻¹ᵁ W) := by
+    haveI : IsEmpty
+        ↥(((Scheme.Hom.ker z).subschemeι ⁻¹ᵁ W : (Scheme.Hom.ker z).subscheme.Opens).toScheme) := by
+      refine ⟨fun x => ?_⟩
+      exact hempty.elim' ⟨x.1, x.2⟩
+    have e := ((Scheme.Hom.ker z).subschemeι ⁻¹ᵁ W :
+      (Scheme.Hom.ker z).subscheme.Opens).topIso
+    exact Function.Surjective.subsingleton
+      (fun y => ⟨e.inv.hom y, by
+        change (e.inv ≫ e.hom).hom y = y
+        rw [e.inv_hom_id]
+        rfl⟩)
+  exact Subsingleton.elim _ _
+
 end LineAssembly
 
 end Twist
