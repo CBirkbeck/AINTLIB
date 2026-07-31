@@ -5048,3 +5048,52 @@ Two possible fixes, in order of preference:
 
 Not attempted yet: (1) touches a definition, so it is an owner call and needs its own verified
 batch rather than being folded into a cleanup commit.
+
+## Where the campaign stands, and the ranked next targets
+
+**Task 1: COMPLETE** (re-verified). The only `set_option` directives in scope are three
+`maxSynthPendingDepth 1` — reductions, kept by instruction. The two raises left are in
+`Vendored/`, skipped by instruction. Five further grep hits are prose recording raises removed.
+
+**Task 2: 486 → 185** (183 in scope, 2 sorry-bearing). `WedhornCechAcyclicity.lean` holds 29 of
+them and **2291 of the remaining deficit lines** — more than half.
+
+**Task 3:** digest scan found 10 groups of byte-identical duplicate statements; 4 `genPieceDatum`
+copies deleted; `pow_le_pow_right_of_le_one'` deduped at all four hand-rolled sites (0 remain);
+`closure_induction₂` deduped across `Bounded`/`HuberRings` (0 remain).
+
+### Ranked next targets — measured, not guessed
+
+`gap = need − (joins + (biggest single `have` − 1))`. A negative gap means joins plus one
+dominant-`have` extraction is arithmetically sufficient. What that column does **not** capture is
+the cost of the extraction, which is the number of **derived locals** the block uses (theorem
+parameters are free as helper arguments; derived locals are not, and `set`/`let`-bound ones
+cannot be lifted verbatim at all — they must be restated about their definitions).
+
+| gap | need | joins | have | proof | derived locals |
+|---|---|---|---|---|---|
+| −18 | 8 | 1 | 26 | `NoetherianTateModules.isClosed_ideal_of_noetherian` | **5** (3 set/let-bound) |
+| −20 | 21 | 5 | 37 | `ArCompletion.tendsto_teichCoeffAr` | 9 (3 set/let) |
+| −20 | 22 | 6 | 37 | `ArCompletion.tendsto_gaussTerm_teichCoeffAr` | — likely mirror of the above |
+| −22 | 26 | 18 | 31 | `CurveObject.ringStalkMap_piYHom_injective` | 12 (0 set/let) |
+| −25 | 18 | 4 | 40 | `WedhornExtendValuationCo…extendToLocalization_isContinuous_locTop` | not yet profiled |
+| −30 | 4 | 0 | 35 | `ChartVObj.p_div_teich_pow_a_mem_chartSubring` | not yet profiled |
+
+`isClosed_ideal_of_noetherian` is the best next single target: smallest deficit that a
+dominant-`have` lift clears, and only 5 derived locals. The two `ArCompletion` entries should be
+diffed against each other **first** — same file, near-identical need/have profile, so they are a
+probable mirror pair, and a shared core would clear both (the pattern that paid off three times
+this campaign).
+
+`CurveObject.ringStalkMap_piYHom_injective` has 18 joins and **no** `set`/`let`-bound
+dependencies, so its 31-line `have` is a rare candidate for a *verbatim* lift — but 12 derived
+locals is a 12-argument helper, which is over the threshold that has produced readable results.
+
+### Deliberately not done (owner calls, each with reasoning recorded above)
+
+* `JetC._proof_1` — the anonymous auxiliary embedded in the type of everything mentioning
+  `JetA F`, found by the comparator run. Fixing it means naming a proof inside a *definition*.
+* `genPiece_relative_overlap_square₁/₂`, `unitCover_sq_plus/minus_dense`,
+  `FaithfulLocLift`/`HuberLocLift` `mem_plus_of_forall_spa_vle_one` — all look like mirror pairs
+  and are not: differences run throughout, or the two files have no common ancestor.
+* `IsSheafyOn` relocation; `hpiece₁/₂` (needs a proof-level "which component" parameter).
