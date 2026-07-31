@@ -30565,3 +30565,23 @@ two evaluation equivs — check whether the interface can take v₀ ITSELF as th
 generator with nzd-of-v₀ from mono!! — mult-v₀-mono ⟺ v₀-nzd-on-sections: the CORE's
 Mono-slot IS the nzd; the span-identification may be DEFERRABLE entirely to [A4-c1]);
 (c) e2-wiring instantiations; (d) A-rows + unimodularity; (e) wrappers.
+
+### ★★★ [A4-e2] E2 PROVEN END-TO-END, AXIOM-VERIFIED 2026-07-31
+`nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair` (the rank-two coordinates,
+chart-native slots) + `nonempty_baseSections_cokernel_unitEndo_equiv` (the Γ-core) both
+at propext/Classical.choice/Quot.sound.
+
+★★ CRITICAL SESSION LESSON (add to global bank): tactic blocks inside STRUCTURE-FIELD
+literals (map_add'/map_smul' := by ...) can FAIL SILENTLY — failed shows/rws inside
+them produce SYNTHETIC SORRIES with only linter-warnings ("tactic does nothing",
+"never executed") and NO errors; the build exits 0. Detection: (1) NEVER filter
+"declaration uses 'sorry'" from build logs; (2) #print axioms every milestone decl;
+(3) the linter-warnings "does nothing/never executed" inside structure fields are a
+five-alarm signal. Fix-pattern: term-mode fields (map_add := map_add-of-mk) and the
+baseSections_smul value-lemma for baseSections-smul unfolds (NOT restrictScalars-rfl
+— that layer is not tactic-rfl-reducible through forgetToPresheafModuleCat).
+
+GAP-A-4 remaining: (b/c) consumer-side instantiations of the e2-slots at D/kerP/kerQ
+(eI via idealModuleRestrictTrivOfSpan + product-span; htriv via one_mem_...ker +
+products; hMono via the mono chain; hv/eP/eQ from the chart computations tied to
+[A4-c1] unimodularity); (d) A-rows; (e) wrappers. The HEAVY machinery is DONE.
