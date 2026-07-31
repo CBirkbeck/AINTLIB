@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2] rank-2 divisor-restriction coordinates — recon the succ-coker rank-1 iso construction (PoleSheafSuccessorBasis/Sections) + sectionsDivisor product structure; design the 2-section filtration splitting
+FOCUS: [GAP-A-4/A4-e2 decide] read GAP-A-5a/b/c consumer shapes (Z(l) zero-scheme machinery, RelEffCartierDiv residual API) to fix the (a)/(b) presentation; then implement e2 via the chosen route (leaning skyscraper-mirror (ii))

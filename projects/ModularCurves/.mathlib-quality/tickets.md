@@ -30260,3 +30260,22 @@ skyscraper two-cover argument at supp D = range P ∪ range Q with the 2-step
 ker-P-filtration (uniform in P=Q). DECIDE by checking what GAP-A-5's div-identities
 consume; the (a)-presentation feeds nonempty_pullback_idealModule (GAP-A-7 transport)
 directly, which GAP-A-5b's universal-pair argument needs — leaning (ii).
+
+### [A4-e2] DECISION 2026-07-31: presentation (a) CONFIRMED — skyscraper-mirror route (ii)
+GAP-A-5/6 consumers checked: the divisor arithmetic is RelEffCartierDiv
+(IdealSheafData) and GAP-A-6 closes through
+`exists_invertible_tensor_idealModule_add_of_discrepancy_trivial` (Picard-(a) world);
+GAP-A-7's transport is (a)-native. Stay in (a) throughout. [A4-e2]-implementation
+leaves:
+1. support-vanishing: `(cokernel (divisorTwistHom J L)).restrict V ≅ 0` when
+   `J.ideal`-trivial on V (restrictFunctor preserves cokernels — left adjoint;
+   the restricted inclusion is then iso, so the restricted twist is iso, cokernel 0).
+2. bijective-restrict two-cover at U ⊇ supp D (mirror
+   `sectionPoleSheafSuccCoker_bijective_restrict_of_neighborhood` with
+   V := (range P ∪ range Q)ᶜ).
+3. the on-U rank-2 identification via the ker-P filtration of coker (2-step; sub and
+   quotient are P-/Q-skyscraper-twists, each rank-1 by the SuccessorSections pattern
+   instantiated at the section P resp. Q; H⁰-splitting from the sub's vanishing H¹ на
+   affine-QC — or directly the two-cover H⁰-computation).
+Then A := evaluation rows against e2, [A4-c1] unimodularity, and the named
+lineSection/verticalSection wrappers close GAP-A-4.
