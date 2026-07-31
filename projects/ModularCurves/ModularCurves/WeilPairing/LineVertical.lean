@@ -304,6 +304,119 @@ theorem isLocallyInjective_idealActionPre
     (homOfLE hWU).op y
   rw [hnx, hny, hxy]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Second-factor extraction of local injectivity, parametrized so the instance keys
+unify at application position (across presheaf-clothing) instead of by typeclass
+search. -/
+private theorem isLocallyInjective_of_comp_fields
+    {F₁ F₂ F₃ : (TopologicalSpace.Opens ↥C)ᵒᵖ ⥤ AddCommGrpCat.{u}}
+    (f₁ : F₁ ⟶ F₂) (f₂ : F₂ ⟶ F₃)
+    (hcomp : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C) (f₁ ≫ f₂))
+    (hsurj : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥C) f₁) :
+    Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C) f₂ := by
+  haveI := hcomp
+  haveI := hsurj
+  exact Presheaf.isLocallyInjective_of_isLocallyInjective_of_isLocallySurjective
+    (Opens.grothendieckTopology ↥C) f₁ f₂
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The divisor twist map is the sheafification of the presheaf action followed by
+the counit (the `ev` idiom's identity). -/
+theorem divisorTwistHom_eq :
+    divisorTwistHom J L =
+      (PresheafOfModules.sheafification
+        (CategoryStruct.id C.ringCatSheaf.obj)).map (idealActionPre J L) ≫
+        (sheafifyValIso L).hom := by
+  have hCounit := (PresheafOfModules.sheafificationAdjunction
+    (CategoryStruct.id C.ringCatSheaf.obj)).homEquiv_counit
+    (X := (idealModule J).val ⊗ L.val) (Y := L) (g := idealActionPre J L)
+  exact hCounit
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The divisor twist map of a locally principal nonzerodivisor ideal into an
+invertible module is a monomorphism.** Its presheaf action is locally injective, the
+sheafification unit transports local injectivity to the sheafified map, and locally
+injective maps of sheaves are monomorphisms. -/
+theorem mono_divisorTwistHom
+    (h : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L) :
+    Mono (divisorTwistHom J L) := by
+  classical
+  haveI hφ := isLocallyInjective_idealActionPre J L h hL
+  -- the sheafification units at source and target are in W, hence locally bijective
+  have hWunitP : PresheafOfModules.sheafificationW (𝟙 C.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)) := by
+    rw [PresheafOfModules.sheafificationW_iff]
+    have htri := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 C.ringCatSheaf.obj)).left_triangle_components ((idealModule J).val ⊗ L.val)
+    haveI : IsIso ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).counit.app
+          ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).obj
+            ((idealModule J).val ⊗ L.val))) := inferInstance
+    exact IsIso.of_isIso_fac_right htri
+  have hWunitL : PresheafOfModules.sheafificationW (𝟙 C.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app L.val) := by
+    rw [PresheafOfModules.sheafificationW_iff]
+    have htri := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 C.ringCatSheaf.obj)).left_triangle_components L.val
+    haveI : IsIso ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).counit.app
+          ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).obj
+            L.val)) := inferInstance
+    exact IsIso.of_isIso_fac_right htri
+  obtain ⟨-, hPsurj⟩ :=
+    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ _).mp hWunitP
+  obtain ⟨hLinj2, -⟩ :=
+    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ _).mp hWunitL
+  -- naturality of the unit
+  have hnat := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 C.ringCatSheaf.obj)).unit.naturality (idealActionPre J L)
+  rw [Functor.id_map] at hnat
+  -- local injectivity of the composite, with goal-copied clothing
+  haveI h1 : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+      ((PresheafOfModules.toPresheaf
+        ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+          C.ringCatSheaf)).map (idealActionPre J L) ≫
+        (PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+            C.ringCatSheaf)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app L.val)) := by
+    haveI hφ' : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+        ((PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+            C.ringCatSheaf)).map (idealActionPre J L)) := hφ
+    haveI hu' : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+        ((PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+            C.ringCatSheaf)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app L.val)) := hLinj2
+    infer_instance
+  rw [← Functor.map_comp, hnat, Functor.map_comp] at h1
+  haveI := h1
+  have h4 := isLocallyInjective_of_comp_fields _ _ h1 hPsurj
+  -- the sheafified map is a mono: locally injective sheaf maps are monos, and the
+  -- Ab-sheaf functor reflects monos
+  haveI h5 : Sheaf.IsLocallyInjective
+      ((SheafOfModules.toSheaf _).map
+        ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).map
+          (idealActionPre J L))) := h4
+  haveI h6 : Mono ((SheafOfModules.toSheaf _).map
+      ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).map
+        (idealActionPre J L))) := Sheaf.mono_of_isLocallyInjective _
+  haveI h7 : Mono ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).map
+      (idealActionPre J L)) :=
+    (SheafOfModules.toSheaf _).mono_of_mono_map h6
+  rw [divisorTwistHom_eq]
+  exact mono_comp _ _
+
 end Twist
 
 end AlgebraicGeometry.Scheme.Modules

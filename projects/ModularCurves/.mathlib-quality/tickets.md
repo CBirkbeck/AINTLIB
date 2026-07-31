@@ -30126,3 +30126,22 @@ presheaf-mono criterion instead; probably a wash. Then [A4-c] H¹-leaf per decom
   (mathlib Modules/Sheaf.lean:361 — morphism-level smul-compat, rfl-based), (iii) the
   trivialization's ⊤-app module-iso to Γ(W-sch,⊤)-mult; nzd along RingEquivs via
   `MulEquivClass.map_nonZeroDivisors` (pattern at PoleSheaf:981).
+
+### [A4-b-mono] DONE 2026-07-31 — Mono (divisorTwistHom) PROVEN, axiom-verified
+Full chain landed in WeilPairing/LineVertical.lean: idealSectionsGenEquiv →
+idealActionPre_app_injective_of_span → smul_injective_of_restrict_triv →
+isLocallyInjective_idealActionPre → (unit-W ×2 + naturality + extraction) →
+Sheaf.mono_of_isLocallyInjective + toSheaf.mono_of_mono_map → divisorTwistHom_eq →
+mono_divisorTwistHom (h-principality + L-invertible).
+
+★★ NEW STANDARD TRICK — parametrized-extraction beats TC clothing-mismatch:
+`isLocallyInjective_of_comp_fields (f₁ f₂ : _) (hcomp) (hsurj) : ...f₂` — take the
+composite/factor instances as ARGUMENTS with f₁ f₂ PARAMETRIZED; unification happens at
+application position (default transparency, crosses sheafToPresheaf-vs-.obj clothing)
+instead of TC-key matching. h1-post-rw and hPsurj pass straight in. This retroactively
+simplifies A7-4's hand witness-shift (cleanup note for [CLEANUP-21]).
+
+NEXT: [A4-c] the H¹-vanishing of the twist (the real math — investigate whether the
+landed pole-sheaf ordered-Cech H¹ machinery admits a twisted variant, else the
+fibrewise-RR + cohomology-and-base-change route) ∥ [A4-d] lineSection statement
+skeleton over the b3-basis.
