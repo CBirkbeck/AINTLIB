@@ -3549,3 +3549,102 @@ instance head `IsTateRing (presheafValue ?D)` is narrow with its premise on `A`,
 
 Expected: 2 over-50 proofs cleared outright, three more dropping 17/18/20 → 6/6/9, and the
 largest single block of duplication in the project removed.
+
+### EXECUTED: preamble removal in WedhornCechAcyclicity.lean (−508 lines)
+
+`attribute [local instance]` on the three Prop-class facts, then every `haveI` preamble block
+deleted: **337 blocks, 508 lines removed, 13 added.** Measured effect: task 2 220 → 218, and
+that file 35 → 33 over-50 proofs with its cheapest deficits dropping 9/11/17 → 3/4/7 (the
+first two now clear on joins alone, checked).
+
+More than the ~250 lines estimated, because the preamble also appears at data other than `D₀`.
+
+Deliberately left alone, and worth knowing:
+  * `@CompleteSpace (presheafValue _) (…rightUniformSpace…)` and `HasLocLiftPowerBounded` —
+    the former is at a non-canonical uniformity (see the plan above).
+  * 4 × `haveI hTateB' : …` — the prime is not matched by `\w+`, so they survived. They are now
+    redundant rather than wrong, so they are left for a later pass rather than hand-patched.
+  * 2 × `haveI` appearing INSIDE a signature binder (`(hB : haveI hTateB : … := …)`). These are
+    hypothesis *types*, not proof steps, and must not be touched. The line-start anchor in the
+    deletion regex is what protected them — a naive `s/haveI.*//` would have corrupted two
+    signatures silently.
+
+**GOTCHA (one build): a `/-- … -/` docstring cannot precede an `attribute` command.**
+`unexpected token 'attribute'; expected 'lemma'`. Docstrings attach to declarations only;
+commands like `attribute`/`open`/`set_option` need a plain `/- … -/` block comment. The error
+text names `lemma`, which points at the *comment*, not at the attribute line itself.
+
+Two proofs cleared immediately afterwards on joins alone (218 → 216):
+`imageGenCover_isOXAcyclic_of_units` and `genRestrictedCover_separation`.
+
+**`genRestrictedCover_separation` had been explicitly REJECTED earlier in this campaign** —
+recorded as "16-line instance preamble → helper would be ~51 lines, not worth extracting". That
+rejection was correct at the time and is now obsolete: the 16-line preamble *was* the duplicated
+block, and once it is gone the proof clears on four joins. Worth generalising: **a rejection
+recorded against a proof is a rejection of a technique in a context, not a permanent verdict.**
+When a structural change lands, re-run the cheap techniques over everything previously refused.
+(Same thing happened to `wLoc_le_of_interior_bound`, refused twice before joins+rwa cleared it.)
+
+## STATUS after the preamble batch
+
+* **Task 1: COMPLETE.** Zero heartbeat raises in scope. Only the three `maxSynthPendingDepth 1`
+  reductions (keep, per the owner) and `Vendored/` (skipped) remain.
+* **Task 2: 486 baseline → 216** (214 in scope). WedhornCechAcyclicity 35 → 31 over-50 proofs
+  and −508 lines.
+* **Task 3:** the preamble removal was itself a large `/cleanup` win (the biggest single block of
+  duplication in the project). The earlier finding stands otherwise: no other mechanically-safe
+  class remains (`unusedSectionVars` 549, `overlappingInstances` ~350, and 25 binder
+  false-positives are all ruled out with evidence recorded above).
+
+Next cheapest targets, by deficit remaining AFTER joins+rwa are applied (so this is the real
+extraction work needed, not the raw deficit):
+`jB` 1, `isBounded_closure_finset_of_isPowerBounded` 1, `PairOfDefinition.adjoin` 2,
+`restrictedModule_map_surjective` 2, `gaussValueF_teichmuller_sub_le_of_le_scaled` 2,
+`genPiece_relOverlap_forward_backward` 2, then `ideal_row_surjective` 4.
+Designed and name-checked already: `d1AddHom` for `exists_d1_lift` (gap 6, extracting the
+12-line `set F := {…}` structure literal saves 11).
+
+### Follow-up: the other two preambles ARE registrable (my earlier caution was overstated)
+
+Re-running the body-scoped scan after the −508 change shows two blocks still repeated in
+WedhornCechAcyclicity: `@CompleteSpace (presheafValue D₀) (…rightUniformSpace…)` (**39 copies**,
+~117 lines) and `HasLocLiftPowerBounded (presheafValue D₀)` (**13 copies**, ~26 lines).
+
+I had excluded the `CompleteSpace` one on the grounds that a non-canonical uniformity must not
+become an instance. Checking the actual declaration rather than reasoning from its shape:
+`presheafValue_completeSpace_rightUniformSpace`'s proof is `rw [IsUniformAddGroup.rightUniformSpace_eq]`
+— the right uniformity **equals** the canonical one, and `CompleteSpace` is a `Prop` class
+(mathlib Cauchy.lean:370), so there is no diamond and no competition: a goal at the canonical
+instance is served by the existing `Presheaf.lean:329` instance, a goal at `rightUniformSpace`
+by this one. `HasLocLiftPowerBounded` is `Prop` too (Presheaf.lean:1582), and its hypotheses are
+demonstrably available at every current use site — that is what the deleted `haveI`s were.
+  → Lesson repeated for the third time this session: **check the declaration, not its shape.**
+    "Non-canonical uniformity" was a property of the *statement's spelling*, not of the maths.
+
+Queued as the next change (after the current gate + commit): add both to the
+`attribute [local instance]` list and delete their blocks — ~140 further lines.
+
+### The pattern generalises: theorems used as manual instances, project-wide
+
+Scanning every `haveI`/`letI` whose value is a bare application of a named lemma (i.e. "this
+should have been an instance") across the whole tree:
+
+| uses | files | lemma | verdict |
+|---:|---:|---|---|
+| 62 | 8 | `presheafValue_isTateRing_concrete` | **candidate** — a theorem |
+| 45 | 7 | `presheafValue_isTateRing` | **candidate** |
+| 37 | 9 | `hasLocLiftPowerBounded_faithful` | **candidate** (already queued for one file) |
+| 19 | 3 | `presheafValue_isTateRing_faithful` | done locally in WedhornCechAcyclicity |
+| 153 | 10 | `hNoeth_B` | NOT a candidate — a hypothesis binder, not a lemma |
+| 123 | 21 | `v.toValuativeRel` | NOT a candidate — derived from a local `v` |
+| 64/57/52 | | `D.isTopologicalRing`, `D.isUniformAddGroup`, `D.uniformSpace` | structure projections of a local `D`; would need `instance` wrappers taking `D`, a bigger design call |
+
+So roughly **150+ further `haveI` lines** across 8-9 files are the same defect as the
+WedhornCechAcyclicity preamble. The counts are inflated for the non-candidates, which is why the
+verdict column matters — a raw frequency list would have sent me at `hNoeth_B` (153 uses), which
+is just a hypothesis name and cannot be an instance at all.
+
+Approach: keep doing it per-file with `attribute [local instance]`, which is reviewable and
+cannot alter global resolution for other projects in the workspace. Promoting these to real
+`instance`s at their definition sites is the better end state but is a statement-level change
+(`/generalise` territory, owner call), so it is NOT being done unilaterally here.
