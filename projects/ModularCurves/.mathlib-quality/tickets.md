@@ -30291,3 +30291,23 @@ lineSection/verticalSection wrappers close GAP-A-4.
 - leaf 3 REMAINS: on-U rank-2 identification (ker-P filtration; the SuccessorSections
   pattern per section) → e2 : baseSections(coker) ≃ₗ Γ(S,⊤)² for
   D = sectionsDivisor ![P,Q]. Then A-rows, [A4-c1] unimodularity, named wrappers.
+
+### [A4-e2 leaf 3] DESIGN 2026-07-31 — chart-algebra route (B) over abelian filtration (A)
+On a common chart U (⊇ both section images, both kers principal r_P r_Q, L-trivial),
+leaf-2 concentrates baseSections(coker) into the U-model; the rank-2 identification is
+RING THEORY: the uniform SES 0 → A/(r_Q) --·r_P--> A/(r_P r_Q) --π--> A/(r_P) → 0
+(exact by r_P-nzd; valid for P = Q too) with both ends ≅ R by the two evaluations ⟹
+A/(r_P r_Q) ≅ R² (explicit split: u := lift of φ_P⁻¹ 1; ψ(a,b) := a·u + r_P·lift(φ_Q⁻¹ b);
+bijectivity by the SES). Sub-leaves:
+- **[3a]** `quotientMulEquivProd`-style ring lemma (fresh ForMathlib file, no AG):
+  CommRing A, R-algebra?? (module-level suffices: R-module maps), rP rQ nzd,
+  eP : A ⧸ span{rP} ≃ₗ[R] R, eQ : A ⧸ span{rQ} ≃ₗ[R] R ⟹
+  A ⧸ span{rP*rQ} ≃ₗ[R] (Fin 2 → R). Prove the three-term exactness by hand
+  (mult-rP-injectivity from nzd) and build ψ explicitly.
+- **[3b]** chart-plumbing: Γ(U-opens, coker(twist)) = the A/(rPrQ)-model — needs
+  QC-instances for tensorObj/cokernel + affine Γ-exactness (mirror
+  sectionPoleSheafSuccCoker_restrictIsoIdealCoker's construction pattern rather than
+  generic machinery if friction), then baseSections-assembly через leaf-2 +
+  baseSectionsRestrictIsoOfBijective + the (3a)-equiv transported along P-eval models
+  (the codex per-section evaluation isos at P and Q instantiate
+  the SuccessorSections mechanism at sections OTHER than z — they are z-generic ✓).
