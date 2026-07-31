@@ -5791,3 +5791,27 @@ simulator instead of refining the ranking.** Two heuristics failed here (`len ×
 "occurrences on wrap-pressured lines") for the same reason — both were proxies for a structural
 condition (does the line rejoin its parent under the guards?) that is directly computable. The
 simulator is ~20 lines and settles the whole question in one pass.
+
+## 180 → 179: the simulator's "1 over" target, finished by hand
+
+The simulator ranked `iteratedOverlap_forwardHom_comp_backwardHom` (need 9) top, predicting it
+would land **1 line over** after abbreviation + joins. That is exactly what happened, and the
+last line came from one `;` merge (`apply RingHom.ext; intro x`).
+
+What the abbreviation actually bought is worth recording, because it contradicts the two failed
+heuristics and confirms the simulator:
+
+* `iteratedOverlapDatum_B P D₀ f hLocLift_B` (40 chars) × 16 occurrences;
+* raw line count went **59 → 60** — the `set` costs one and collapses nothing directly;
+* but **joins went 4 → 9**. Three `letI` blocks of the form
+  `letI : UniformSpace\n    (Localization.Away ((iteratedOverlapDatum_B …).s)) :=\n  (… ).uniformSpace`
+  became short enough to rejoin into single lines.
+
+So the entire value was *indirect* — enabling joins, not removing characters. A ranking on
+"characters saved" scores this identically to the two cases that failed; only simulating the
+post-substitution `joinable` pass distinguishes them. The simulator predicted −4 net and
+delivered −4 net.
+
+→ **The simulator is now the tool for this technique, and its negative answer stands**: this was
+  the only proof in the tree it flagged as within reach, and it is done. Everything else it
+  ranked lands 5+ over, so abbreviation is genuinely exhausted.

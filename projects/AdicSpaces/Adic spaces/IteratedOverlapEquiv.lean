@@ -1253,10 +1253,10 @@ theorem iteratedOverlap_forwardHom_comp_backwardHom
     (iteratedOverlap_forwardHom P D₀ f hLocLift_B).comp
         (iteratedOverlap_backwardHom P D₀ f hLocLift_B hsub) =
       RingHom.id _ := by
+  set J := iteratedOverlapDatum_B P D₀ f hLocLift_B with hJ
   haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
   haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
-  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
-      (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
+  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f) (Localization.Away (J.s)) :=
     iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
   letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
@@ -1267,38 +1267,30 @@ theorem iteratedOverlap_forwardHom_comp_backwardHom
     (laurentOverlapDatum D₀ f).isUniformAddGroup
   letI : IsTopologicalRing (Localization.Away ((laurentOverlapDatum D₀ f).s)) :=
     (laurentOverlapDatum D₀ f).isTopologicalRing
-  letI : UniformSpace
-      (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
-    (iteratedOverlapDatum_B P D₀ f hLocLift_B).uniformSpace
-  letI : IsUniformAddGroup
-      (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
-    (iteratedOverlapDatum_B P D₀ f hLocLift_B).isUniformAddGroup
-  letI : IsTopologicalRing
-      (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
-    (iteratedOverlapDatum_B P D₀ f hLocLift_B).isTopologicalRing
-  apply RingHom.ext
-  intro x
+  letI : UniformSpace (Localization.Away (J.s)) :=
+    J.uniformSpace
+  letI : IsUniformAddGroup (Localization.Away (J.s)) :=
+    J.isUniformAddGroup
+  letI : IsTopologicalRing (Localization.Away (J.s)) :=
+    J.isTopologicalRing
+  apply RingHom.ext; intro x
   change iteratedOverlap_forwardHom P D₀ f hLocLift_B
     (iteratedOverlap_backwardHom P D₀ f hLocLift_B hsub x) = x
-  refine @UniformSpace.Completion.ext'
-    (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) _ _ _ _ _ _
+  refine @UniformSpace.Completion.ext' (Localization.Away (J.s)) _ _ _ _ _ _
     ((UniformSpace.Completion.continuous_extension).comp
       UniformSpace.Completion.continuous_extension)
     continuous_id ?_ x
   intro y
   change iteratedOverlap_forwardHom P D₀ f hLocLift_B
-      (iteratedOverlap_backwardHom P D₀ f hLocLift_B hsub
-        ((iteratedOverlapDatum_B P D₀ f hLocLift_B).coeRingHom y)) =
-    (iteratedOverlapDatum_B P D₀ f hLocLift_B).coeRingHom y
+      (iteratedOverlap_backwardHom P D₀ f hLocLift_B hsub (J.coeRingHom y)) =
+    J.coeRingHom y
   rw [iteratedOverlap_backwardHom_coeRingHom]
   -- Reduce to y = algebraMap b for b : presheafValue D₀.
-  let lhsHom : Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s) →+*
-      presheafValue (iteratedOverlapDatum_B P D₀ f hLocLift_B) :=
+  let lhsHom : Localization.Away (J.s) →+* presheafValue J :=
     (iteratedOverlap_forwardHom P D₀ f hLocLift_B).comp
       (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub)
-  let rhsHom : Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s) →+*
-      presheafValue (iteratedOverlapDatum_B P D₀ f hLocLift_B) :=
-    (iteratedOverlapDatum_B P D₀ f hLocLift_B).coeRingHom
+  let rhsHom : Localization.Away (J.s) →+* presheafValue J :=
+    J.coeRingHom
   suffices h : lhsHom = rhsHom by
     have hcong := congr_fun (congrArg DFunLike.coe h) y
     change lhsHom y = rhsHom y
@@ -1308,8 +1300,7 @@ theorem iteratedOverlap_forwardHom_comp_backwardHom
   change iteratedOverlap_forwardHom P D₀ f hLocLift_B
       (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
         (algebraMap (presheafValue D₀) _ b)) =
-    (iteratedOverlapDatum_B P D₀ f hLocLift_B).coeRingHom
-      (algebraMap (presheafValue D₀) _ b)
+    J.coeRingHom (algebraMap (presheafValue D₀) _ b)
   rw [iteratedOverlap_backwardToCompletion_algebraMap]
   -- Goal: forwardHom (restrictionMapHom b) = (iteratedOverlapDatum_B).canonicalMap b.
   exact congr_fun (congrArg DFunLike.coe
