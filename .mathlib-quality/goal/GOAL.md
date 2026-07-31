@@ -4305,3 +4305,54 @@ Final shape of what was one 127-line proof:
 | `choiceFamily_rationalRefinementCompatible` | <50 |
 
 **203 in total (201 in scope), from 486 at baseline.**
+
+## Both glue proofs decomposed, and the duplication is now REALLY shared (203 → 202)
+
+`exists_limitSections_glue_on` (133 → 50) split the same way as its SheafyPair twin:
+`exists_glue_at_rational_on` + joins + collapsing `have hglue := …; choose … using hglue` into a
+single `choose … using …`.
+
+**The 85%-duplication headline is now partly resolved for real, not just restructured.** The
+`hfcompat` step is *identical* in both proofs, and RestrictedLimitSheaf imports SheafyPair — so
+`choiceFamily_rationalRefinementCompatible` was made public and the 15-line copy in
+RestrictedLimitSheaf deleted in favour of a call. One lemma now serves both sides of the import
+edge.
+
+Two obstacles, both worth recording:
+* **`[IsTateRing A]`.** The lemma inherited it from SheafyPair's section, but the relative
+  version is deliberately **Tate-free** (that is the entire point of `IsSheafyOn`), so the call
+  failed with `failed to synthesize IsTateRing A`. `omit [IsTateRing A] in` fixes it — the proof
+  never used it, it was only inherited. The file already omits this variable on ~6 other lemmas,
+  so this is the established idiom there, not a workaround.
+* **`omit` cannot follow a docstring** — `unexpected token 'omit'; expected 'lemma'`. Same shape
+  as the earlier `attribute`-after-docstring error: these commands attach *before* the
+  docstring, not between it and the declaration.
+
+What remains of the original duplication is the parts that genuinely differ — the `_huber`
+refinement lemma, the `hOn.gluing`/`hOn.separationSub` interface, and `interCoveringV` vs
+`interCovering`. Those still need the file relocation (owner call, costed above), but the
+*shared* part is now shared.
+
+Net for one 127- and one 133-line proof: five declarations, all under 50, one of them serving
+both files.
+
+### Assessed and DEFERRED: the `unitCover_sq_plus/minus_dense` pair (need 140 / 179)
+
+The two largest proofs left (200 and 238 code lines) are a **mirror pair**: 52% identical, with
+the differences being `unitDatum` ↔ `coUnitDatum` and `posIncl` ↔ `negIncl` running throughout,
+not confined to a prefix.
+
+Each has a zero-dep `have hfun` block — but of **164 and 205 lines**. Extracting them clears
+neither proof: the helpers would themselves be far over the bar, exactly the trap the glue split
+hit (204 → 205) but much worse, since there is no second round that gets a 164-line helper under
+50 in one step.
+
+The right change is to abstract over the datum and the inclusion so one lemma serves both sides
+— genuinely worthwhile (≈100 duplicated lines) but a real design job on the largest proofs in
+the file, and it needs the mirror structure understood first. Deferred deliberately, not skipped.
+
+### Staged: `restrictedModule_map_surjective` (need 2, saves 4)
+
+`nhds_zero_hasBasis_openAddSubgroup` — "in a nonarchimedean additive group the open subgroups
+form a basis of neighbourhoods of `0`" — built inline purely so `.exists_antitone_subbasis`
+could be applied to it. Zero derived deps, nothing to do with restricted modules.

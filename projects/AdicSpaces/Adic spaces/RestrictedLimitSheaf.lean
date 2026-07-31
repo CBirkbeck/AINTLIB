@@ -223,6 +223,75 @@ theorem interCoveringV_isRational (E' : RationalLocData A) (hE' : E'.IsRational)
   obtain ⟨E, hFeq⟩ := (mem_interCoveringPiecesV E' hE' C hC).mp hF
   exact hFeq ▸ RationalLocData.interValid_isRational _ _ _ _
 
+/-- **The per-rational-datum gluing step, relative version**: for every valid rational `D₀`
+inside `V` (hence inside the trace set `S`), a section over `D₀` restricting, on every rational
+refinement piece contained in some `U i`, to the given family. Extracted from
+`exists_limitSections_glue_on`, where it was the opening 75-line `have`. -/
+private theorem exists_glue_at_rational_on {S : Set (Spv A)} (hOn : IsSheafyOn S)
+    (hcomp : ∀ D : RationalLocData A, D.IsRational → IsCompact (spaOpen D))
+    {V : Opens ↥(Spa A A⁺)} (hVS : (V : Set ↥(Spa A A⁺)) ⊆ Subtype.val ⁻¹' S)
+    {ι : Type*} {U : ι → Opens ↥(Spa A A⁺)}
+    (hcov : (V : Set ↥(Spa A A⁺)) ⊆ ⋃ i, (U i : Set ↥(Spa A A⁺)))
+    (s : ∀ i, ↥(limitSections (U i)))
+    (hs : ∀ i j, limitRestrict (inf_le_left (a := U i) (b := U j)) (s i) =
+                 limitRestrict (inf_le_right (a := U i) (b := U j)) (s j)) :
+    ∀ (D₀ : RationalLocData A), D₀.IsRational →
+      spaOpen D₀ ⊆ (V : Set ↥(Spa A A⁺)) →
+      ∃ z : presheafValue D₀,
+        ∀ (E : RationalLocData A) (hErat : E.IsRational)
+          (hED : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) (i : ι)
+          (hEUi : spaOpen E ⊆ (U i : Set ↥(Spa A A⁺))),
+          restrictionMap D₀ E hED z = (s i).1 ⟨E, hErat, hEUi⟩ := by
+  intro D₀ hD₀ hD₀V
+  have hD₀S : rationalOpen D₀.T D₀.s ⊆ S := RationalLocData.rationalOpen_subset_of_trace hD₀V hVS
+  obtain ⟨t, ht⟩ := exists_finite_rational_refinement_huber D₀ hD₀ (hcomp D₀ hD₀)
+    (fun i => (U i : Set ↥(Spa A A⁺))) (fun i => (U i).2) (hD₀V.trans hcov)
+  set C := refinementCovering D₀ t ht with hCdef
+  have hCrat : C.IsRational := refinementCovering_isRational D₀ hD₀ t ht
+  have hexE : ∀ E : ↥C.covers, E.1.IsRational ∧ ∃ i : ι, spaOpen E.1 ⊆ (U i : Set ↥(Spa A A⁺)) := by
+    rintro ⟨E, hE⟩
+    obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp (show E ∈ t.image (fun q => q.1.1) from hE)
+    exact ⟨q.2.1, q.1.2, q.2.2.trans Set.inter_subset_right⟩
+  set f : ∀ E : ↥C.covers, presheafValue E.1 := fun E =>
+    (s (hexE E).2.choose).1 ⟨E.1, (hexE E).1, (hexE E).2.choose_spec⟩ with hfdef
+  have hfcompat : C.RationalRefinementCompatible f :=
+    choiceFamily_rationalRefinementCompatible s hs C hexE
+  obtain ⟨z, hz⟩ := hOn.gluing C hCrat hD₀S f (hfcompat.allData_huber hCrat)
+  refine ⟨z, ?_⟩
+  intro E hErat hED i hEUi
+  have hEbase : rationalOpen E.T E.s ⊆ rationalOpen C.base.T C.base.s := hED
+  set CE := interCoveringV E hErat C hCrat hEbase with hCEdef
+  have hCErat : CE.IsRational := interCoveringV_isRational E hErat C hCrat hEbase
+  have hES : rationalOpen E.T E.s ⊆ S := hED.trans hD₀S
+  refine hOn.separationSub CE hCErat hES ?_
+  funext q
+  obtain ⟨E₀, hFeq⟩ := (mem_interCoveringPiecesV E hErat C hCrat).mp q.2
+  have hFrat : q.1.IsRational := hCErat.piece q.2
+  have hFE : rationalOpen q.1.T q.1.s ⊆ rationalOpen E.T E.s := CE.hsubset q.1 q.2
+  have hFE₀ : rationalOpen q.1.T q.1.s ⊆ rationalOpen E₀.1.T E₀.1.s :=
+    hFeq ▸ RationalLocData.interValid_subset_right _ _ _ _
+  have hFU_i : spaOpen q.1 ⊆ (U i : Set ↥(Spa A A⁺)) :=
+    (spaOpen_subset_of_rationalOpen_subset hFE).trans hEUi
+  have hi₀ := (hexE E₀).2.choose_spec
+  have hFU_i₀ : spaOpen q.1 ⊆ (U (hexE E₀).2.choose : Set ↥(Spa A A⁺)) :=
+    (spaOpen_subset_of_rationalOpen_subset hFE₀).trans hi₀
+  have hcompL := congr_fun (restrictionMap_comp D₀ E₀.1 q.1 (C.hsubset E₀.1 E₀.2) hFE₀) z
+  simp only [Function.comp_apply] at hcompL
+  have hcompR := congr_fun (restrictionMap_comp D₀ E q.1 hED hFE) z
+  simp only [Function.comp_apply] at hcompR
+  show restrictionMap E q.1 hFE (restrictionMap D₀ E hED z) =
+    restrictionMap E q.1 hFE ((s i).1 ⟨E, hErat, hEUi⟩)
+  calc restrictionMap E q.1 hFE (restrictionMap D₀ E hED z)
+      = restrictionMap D₀ q.1 (hFE.trans hED) z := hcompR
+    _ = restrictionMap E₀.1 q.1 hFE₀ (restrictionMap D₀ E₀.1 (C.hsubset E₀.1 E₀.2) z) := hcompL.symm
+    _ = restrictionMap E₀.1 q.1 hFE₀ (f E₀) := by rw [hz E₀]
+    _ = (s (hexE E₀).2.choose).1 ⟨q.1, hFrat, hFU_i₀⟩ :=
+        (s _).2 ⟨E₀.1, (hexE E₀).1, hi₀⟩ ⟨q.1, hFrat, hFU_i₀⟩ hFE₀
+    _ = (s i).1 ⟨q.1, hFrat, hFU_i⟩ :=
+        limitFamily_eval_eq s hs q.1 hFrat _ _ hFU_i₀ hFU_i
+    _ = restrictionMap E q.1 hFE ((s i).1 ⟨E, hErat, hEUi⟩) :=
+        ((s i).2 ⟨E, hErat, hEUi⟩ ⟨q.1, hFrat, hFU_i⟩ hFE).symm
+
 /-- **Gluing of the all-open presheaf on arbitrary covers, `S`-relative**
 (the Tate-free `exists_limitSections_glue` at `IsSheafyOn`). -/
 theorem exists_limitSections_glue_on {S : Set (Spv A)} (hOn : IsSheafyOn S)
@@ -235,108 +304,29 @@ theorem exists_limitSections_glue_on {S : Set (Spv A)} (hOn : IsSheafyOn S)
                  limitRestrict (inf_le_right (a := U i) (b := U j)) (s j)) :
     ∃ x : ↥(limitSections V), ∀ i, limitRestrict (hle i) x = s i := by
   classical
-  have hglue : ∀ (D₀ : RationalLocData A), D₀.IsRational →
-      spaOpen D₀ ⊆ (V : Set ↥(Spa A A⁺)) →
-      ∃ z : presheafValue D₀,
-        ∀ (E : RationalLocData A) (hErat : E.IsRational)
-          (hED : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s) (i : ι)
-          (hEUi : spaOpen E ⊆ (U i : Set ↥(Spa A A⁺))),
-          restrictionMap D₀ E hED z = (s i).1 ⟨E, hErat, hEUi⟩ := by
-    intro D₀ hD₀ hD₀V
-    have hD₀S : rationalOpen D₀.T D₀.s ⊆ S :=
-      RationalLocData.rationalOpen_subset_of_trace hD₀V hVS
-    obtain ⟨t, ht⟩ := exists_finite_rational_refinement_huber D₀ hD₀
-      (hcomp D₀ hD₀)
-      (fun i => (U i : Set ↥(Spa A A⁺))) (fun i => (U i).2) (hD₀V.trans hcov)
-    set C := refinementCovering D₀ t ht with hCdef
-    have hCrat : C.IsRational := refinementCovering_isRational D₀ hD₀ t ht
-    have hexE : ∀ E : ↥C.covers,
-        E.1.IsRational ∧ ∃ i : ι, spaOpen E.1 ⊆ (U i : Set ↥(Spa A A⁺)) := by
-      rintro ⟨E, hE⟩
-      obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp
-        (show E ∈ t.image (fun q => q.1.1) from hE)
-      exact ⟨q.2.1, q.1.2, q.2.2.trans Set.inter_subset_right⟩
-    set f : ∀ E : ↥C.covers, presheafValue E.1 := fun E =>
-      (s (hexE E).2.choose).1 ⟨E.1, (hexE E).1, (hexE E).2.choose_spec⟩ with hfdef
-    have hfcompat : C.RationalRefinementCompatible f := by
-      intro E₁ E₂ F hFrat h₁ h₂
-      have hFU₁ : spaOpen F ⊆ (U (hexE E₁).2.choose : Set ↥(Spa A A⁺)) :=
-        (spaOpen_subset_of_rationalOpen_subset h₁).trans (hexE E₁).2.choose_spec
-      have hFU₂ : spaOpen F ⊆ (U (hexE E₂).2.choose : Set ↥(Spa A A⁺)) :=
-        (spaOpen_subset_of_rationalOpen_subset h₂).trans (hexE E₂).2.choose_spec
-      calc restrictionMap E₁.1 F h₁ (f E₁)
-          = (s (hexE E₁).2.choose).1 ⟨F, hFrat, hFU₁⟩ :=
-            (s (hexE E₁).2.choose).2 ⟨E₁.1, (hexE E₁).1, (hexE E₁).2.choose_spec⟩
-              ⟨F, hFrat, hFU₁⟩ h₁
-        _ = (s (hexE E₂).2.choose).1 ⟨F, hFrat, hFU₂⟩ :=
-            limitFamily_eval_eq s hs F hFrat _ _ hFU₁ hFU₂
-        _ = restrictionMap E₂.1 F h₂ (f E₂) :=
-            ((s (hexE E₂).2.choose).2 ⟨E₂.1, (hexE E₂).1, (hexE E₂).2.choose_spec⟩
-              ⟨F, hFrat, hFU₂⟩ h₂).symm
-    obtain ⟨z, hz⟩ := hOn.gluing C hCrat hD₀S f (hfcompat.allData_huber hCrat)
-    refine ⟨z, ?_⟩
-    intro E hErat hED i hEUi
-    have hEbase : rationalOpen E.T E.s ⊆ rationalOpen C.base.T C.base.s := hED
-    set CE := interCoveringV E hErat C hCrat hEbase with hCEdef
-    have hCErat : CE.IsRational := interCoveringV_isRational E hErat C hCrat hEbase
-    have hES : rationalOpen E.T E.s ⊆ S := hED.trans hD₀S
-    refine hOn.separationSub CE hCErat hES ?_
-    funext q
-    obtain ⟨E₀, hFeq⟩ := (mem_interCoveringPiecesV E hErat C hCrat).mp q.2
-    have hFrat : q.1.IsRational := hCErat.piece q.2
-    have hFE : rationalOpen q.1.T q.1.s ⊆ rationalOpen E.T E.s := CE.hsubset q.1 q.2
-    have hFE₀ : rationalOpen q.1.T q.1.s ⊆ rationalOpen E₀.1.T E₀.1.s :=
-      hFeq ▸ RationalLocData.interValid_subset_right _ _ _ _
-    have hFU_i : spaOpen q.1 ⊆ (U i : Set ↥(Spa A A⁺)) :=
-      (spaOpen_subset_of_rationalOpen_subset hFE).trans hEUi
-    have hi₀ := (hexE E₀).2.choose_spec
-    have hFU_i₀ : spaOpen q.1 ⊆ (U (hexE E₀).2.choose : Set ↥(Spa A A⁺)) :=
-      (spaOpen_subset_of_rationalOpen_subset hFE₀).trans hi₀
-    have hcompL := congr_fun (restrictionMap_comp D₀ E₀.1 q.1
-      (C.hsubset E₀.1 E₀.2) hFE₀) z
-    simp only [Function.comp_apply] at hcompL
-    have hcompR := congr_fun (restrictionMap_comp D₀ E q.1 hED hFE) z
-    simp only [Function.comp_apply] at hcompR
-    show restrictionMap E q.1 hFE (restrictionMap D₀ E hED z) =
-      restrictionMap E q.1 hFE ((s i).1 ⟨E, hErat, hEUi⟩)
-    calc restrictionMap E q.1 hFE (restrictionMap D₀ E hED z)
-        = restrictionMap D₀ q.1 (hFE.trans hED) z := hcompR
-      _ = restrictionMap E₀.1 q.1 hFE₀
-            (restrictionMap D₀ E₀.1 (C.hsubset E₀.1 E₀.2) z) := hcompL.symm
-      _ = restrictionMap E₀.1 q.1 hFE₀ (f E₀) := by rw [hz E₀]
-      _ = (s (hexE E₀).2.choose).1 ⟨q.1, hFrat, hFU_i₀⟩ :=
-          (s _).2 ⟨E₀.1, (hexE E₀).1, hi₀⟩ ⟨q.1, hFrat, hFU_i₀⟩ hFE₀
-      _ = (s i).1 ⟨q.1, hFrat, hFU_i⟩ :=
-          limitFamily_eval_eq s hs q.1 hFrat _ _ hFU_i₀ hFU_i
-      _ = restrictionMap E q.1 hFE ((s i).1 ⟨E, hErat, hEUi⟩) :=
-          ((s i).2 ⟨E, hErat, hEUi⟩ ⟨q.1, hFrat, hFU_i⟩ hFE).symm
-  choose z hzchar using hglue
+  choose z hzchar using exists_glue_at_rational_on hOn hcomp hVS hcov s hs
   refine ⟨⟨fun D => z D.D D.isRational D.subset, ?_⟩, ?_⟩
   · intro D D' hD'D
     obtain ⟨t', ht'⟩ := exists_finite_rational_refinement_huber D'.D D'.isRational
       (hcomp D'.D D'.isRational)
       (fun i => (U i : Set ↥(Spa A A⁺))) (fun i => (U i).2) (D'.subset.trans hcov)
     set C' := refinementCovering D'.D t' ht' with hC'def
-    have hC'rat : C'.IsRational :=
-      refinementCovering_isRational D'.D D'.isRational t' ht'
+    have hC'rat : C'.IsRational := refinementCovering_isRational D'.D D'.isRational t' ht'
     refine hOn.separationSub C' hC'rat
       (RationalLocData.rationalOpen_subset_of_trace D'.subset hVS) ?_
     funext ⟨E', hE'⟩
-    obtain ⟨q', hq't, rfl⟩ := Finset.mem_image.mp
-      (show E' ∈ t'.image (fun q => q.1.1) from hE')
+    obtain ⟨q', hq't, rfl⟩ := Finset.mem_image.mp (show E' ∈ t'.image (fun q => q.1.1) from hE')
     have hE'rat : q'.1.1.IsRational := q'.2.1
     have hE'D' : rationalOpen q'.1.1.T q'.1.1.s ⊆ rationalOpen D'.D.T D'.D.s :=
       spaOpen_subset_iff.mp (q'.2.2.trans Set.inter_subset_left)
-    have hE'U : spaOpen q'.1.1 ⊆ (U q'.1.2 : Set ↥(Spa A A⁺)) :=
-      q'.2.2.trans Set.inter_subset_right
+    have hE'U : spaOpen q'.1.1 ⊆ (U q'.1.2 : Set ↥(Spa A A⁺)) := q'.2.2.trans Set.inter_subset_right
     have hcomp' := congr_fun (restrictionMap_comp D.D D'.D q'.1.1 hD'D hE'D')
       (z D.D D.isRational D.subset)
     simp only [Function.comp_apply] at hcomp'
     show restrictionMap D'.D q'.1.1 hE'D'
         (restrictionMap D.D D'.D hD'D (z D.D D.isRational D.subset)) =
       restrictionMap D'.D q'.1.1 hE'D' (z D'.D D'.isRational D'.subset)
-    rw [hcomp', hzchar D.D D.isRational D.subset q'.1.1 hE'rat (hE'D'.trans hD'D)
-        q'.1.2 hE'U,
+    rw [hcomp', hzchar D.D D.isRational D.subset q'.1.1 hE'rat (hE'D'.trans hD'D) q'.1.2 hE'U,
       hzchar D'.D D'.isRational D'.subset q'.1.1 hE'rat hE'D' q'.1.2 hE'U]
   · intro i
     refine Subtype.ext (funext fun F => ?_)
@@ -346,19 +336,15 @@ theorem exists_limitSections_glue_on {S : Set (Spv A)} (hOn : IsSheafyOn S)
       (fun j => (U j : Set ↥(Spa A A⁺))) (fun j => (U j).2)
       ((F.subset.trans (hle i)).trans hcov)
     set CF := refinementCovering F.D tF htF with hCFdef
-    have hCFrat : CF.IsRational :=
-      refinementCovering_isRational F.D F.isRational tF htF
+    have hCFrat : CF.IsRational := refinementCovering_isRational F.D F.isRational tF htF
     refine hOn.separationSub CF hCFrat
-      (RationalLocData.rationalOpen_subset_of_trace
-        (F.subset.trans (hle i)) hVS) ?_
+      (RationalLocData.rationalOpen_subset_of_trace (F.subset.trans (hle i)) hVS) ?_
     funext ⟨E, hE⟩
-    obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp
-      (show E ∈ tF.image (fun q => q.1.1) from hE)
+    obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp (show E ∈ tF.image (fun q => q.1.1) from hE)
     have hErat : q.1.1.IsRational := q.2.1
     have hEF : rationalOpen q.1.1.T q.1.1.s ⊆ rationalOpen F.D.T F.D.s :=
       spaOpen_subset_iff.mp (q.2.2.trans Set.inter_subset_left)
-    have hEU : spaOpen q.1.1 ⊆ (U q.1.2 : Set ↥(Spa A A⁺)) :=
-      q.2.2.trans Set.inter_subset_right
+    have hEU : spaOpen q.1.1 ⊆ (U q.1.2 : Set ↥(Spa A A⁺)) := q.2.2.trans Set.inter_subset_right
     have hEUi : spaOpen q.1.1 ⊆ (U i : Set ↥(Spa A A⁺)) :=
       (spaOpen_subset_of_rationalOpen_subset hEF).trans (Set.Subset.trans F.subset
         (by exact fun v hv => hv))

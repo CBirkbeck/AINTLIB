@@ -250,11 +250,13 @@ theorem limitFamily_eval_eq {ι : Type*} {U : ι → Opens ↥(Spa A A⁺)}
     exact Set.subset_inter hEi hEj
   exact congr_fun (congrArg Subtype.val (hs i j)) ⟨E, hErat, hEinf⟩
 
+omit [IsTateRing A] in
 /-- **The chosen family is compatible.** For each refinement piece `E` we pick some index `i`
 with `E ⊆ U i` and take `s i` there; the result is a compatible family because, by
 `limitFamily_eval_eq`, the value on a common refinement does not depend on which index was
-chosen. Extracted from `exists_glue_at_rational`. -/
-private theorem choiceFamily_rationalRefinementCompatible
+chosen. Extracted from `exists_glue_at_rational`; public because `RestrictedLimitSheaf` uses it
+too (its relative gluing proof needs exactly the same fact). -/
+theorem choiceFamily_rationalRefinementCompatible
     {ι : Type*} {U : ι → Opens ↥(Spa A A⁺)}
     (s : ∀ i, ↥(limitSections (U i)))
     (hs : ∀ i j, limitRestrict (inf_le_left (a := U i) (b := U j)) (s i) =
