@@ -452,8 +452,9 @@ omit [TopologicalSpace A] in
 /-- The additive closure of `B * {aⁿ}` is closed under multiplication: a product of two
 generators collapses into a single one,
 `(b₁ * a ^ k₁) * (b₂ * a ^ k₂) = (b₁ * b₂) * a ^ (k₁ + k₂)`.
-This is what lets that additive subgroup be upgraded to a subring. -/
-private theorem mul_mem_addClosure_mul_range_pow (B : Subring A) (a : A) {x y : A}
+This is what lets that additive subgroup be upgraded to a subring. Public because
+`HuberRings.PairOfDefinition.isBounded_adjoin` ran the same twenty-line induction inline. -/
+theorem mul_mem_addClosure_mul_range_pow (B : Subring A) (a : A) {x y : A}
     (hx : x ∈ AddSubgroup.closure ((B : Set A) * Set.range (a ^ · : ℕ → A)))
     (hy : y ∈ AddSubgroup.closure ((B : Set A) * Set.range (a ^ · : ℕ → A))) :
     x * y ∈ AddSubgroup.closure ((B : Set A) * Set.range (a ^ · : ℕ → A)) := by

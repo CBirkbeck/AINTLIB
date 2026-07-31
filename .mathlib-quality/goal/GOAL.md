@@ -4938,3 +4938,113 @@ intermediate open*. Stated that way it takes the chosen pieces as two plain argu
 new context makes the helper shorter than the block it replaces).
 
 Both `chooseC` and `gVj` are `let`-bound, so a verbatim lift was never available here.
+
+## Extracting a helper makes its clones findable
+
+`HuberRings.PairOfDefinition.isBounded_adjoin` contained the *same twenty-line induction* I had
+just extracted from `Bounded.isBounded_closure_finset_of_isPowerBounded` as
+`mul_mem_addClosure_mul_range_pow` — the `AddSubgroup.closure_induction₂` argument that products
+of `B * {aⁿ}` generators collapse. Differences: `B_old` vs `B`, one redundant pair of
+parentheses, and where the `| add_left …` cases wrap. `HuberRings` imports `Bounded`, so the
+direction was already right; the helper only had to stop being `private`.
+
+20 lines → 5, which clears `isBounded_adjoin` (need 14) on its own.
+
+The general point is about *sequencing*, not about this lemma. While the argument was inlined in
+both files it was **nameless in both**, so no name-based scan could pair them, and the
+repeated-block scan only finds blocks that survive normalisation intact (these differed in three
+places). The moment it acquired a name in one file, the other copy became a one-grep find.
+
+→ **After extracting any helper, grep the tree for its distinctive proof step.** Here
+  `closure_induction₂` + `Set.mem_mul.mp` was enough. Extraction is not just a decomposition
+  move; it converts an invisible duplicate into a visible one.
+
+This is the third variant of the same underlying defect recorded in this campaign: a lemma with
+no home gets inlined at each site. Previously the copies were of a lemma that *existed* in a
+later file; here the lemma existed nowhere until now.
+
+### A caution on similarity scores
+
+My first comparison of the two blocks reported **33%** and I nearly dropped the lead. That was
+measuring the HuberRings block against the Bounded helper's *docstring and signature* — the
+wrong 24 lines. Compared body-to-body from the `closure_induction₂` line the two are the same
+argument. → When a similarity score contradicts a structural hunch, check what was actually
+compared before believing either.
+
+## Side deliverable: comparator certification (corrected)
+
+I initially claimed comparator could not run on this machine because `landrun` is Linux-only.
+**That was wrong, and it was an assertion rather than a check.** The repo already contained a
+working recipe — `chebotarev-density/scripts/certify.sh` — which states the macOS path
+explicitly: use comparator's own `scripts/fake-landrun.sh`; the sandbox exists to contain an
+*adversarial* `Solution.lean`, which is not the situation when the solution is this
+repository's own code. Both binaries build natively:
+
+* `/tmp/comparator` — toolchain `v4.33.0-rc1`, identical to this project; sole dependency is
+  `lean4export`, no mathlib, so the build is small
+* `/tmp/lean4export` at `af5aa64` (the rev comparator pins), reporting lean githash
+  `62eed1db…` — the same compiler this project uses
+
+Reading the two existing setups also exposed a real design error in my first attempt, which
+matters more than the platform point:
+
+**The challenge must import only the definition layer.** My first `Challenge.lean` imported
+`FJP.FiniteJetMain` — *the module that proves the theorems*. That inflates the trusted side to
+include the very proofs being judged. The existing `chebotarev-density` challenge says it
+"imports only the definition layer … NOT `Main` … so the statements here are independent
+restatements".
+
+Rewritten to import only `FJP.FiniteJetRings`, and verified mechanically that this is a real
+separation: that module's transitive import closure (99 modules) contains **none** of
+`FiniteJetMain`, `FiniteJetSheafTransfer`, `FiniteJetChart`, `FiniteJetUniformDomain`. It still
+suffices to *state* the theorems because `FiniteJetRings` carries all the needed instances for
+`JetA F` — including four global `IsRingOfIntegralElements` instances, which was the one point
+in doubt.
+
+`Solution.lean` was deleted: as in both existing setups, `solution_module` is an ordinary
+library module (`«Adic spaces».FJP.FiniteJetMain`) and `theorem_names` are the library's own
+names, so there is no restatement on the solution side at all.
+
+→ **Check the repo for prior art before designing tooling.** Two working comparator setups
+  already existed here; reading them corrected both the platform claim and the trust boundary.
+
+### The comparator run works, and it found a real defect: an anonymous `_proof_1` inside a type
+
+`scripts/certify.sh` runs end to end on macOS (comparator + lean4export built natively,
+`fake-landrun.sh` shim). It exports, compares, and reports:
+
+    Challenge and solution theorem statement do not match: 'FiniteJet.finiteJet_isSheafy'
+
+That is not a tooling failure — the two statements really are different terms. Finding it took
+one wrong turn worth recording: under `pp.explicit` the two types are **byte-identical**
+(6529 chars each), same `levelParams`, both `thmInfo`. The difference is invisible because
+`pp.proofs` defaults to false and prints proof arguments as `⋯`. With `pp.proofs true` the
+types are 44233 vs 42127 chars, and the first divergence is:
+
+    solution : @NormedDivisionRing.to_normOneClass (LaurentSeries F) (NormedField.to… …)
+    challenge: @FiniteJet.JetC._proof_1 F inst
+
+Definitionally equal; **syntactically different**. Comparator compares
+`ConstantVal` (`name`, `levelParams`, `type`) with `!=`, i.e. structurally — correctly, since
+that is the whole point of pinning a statement.
+
+→ **When two elaborated types "look identical", check `pp.proofs true` before concluding
+  anything.** `pp.explicit` alone is not enough; it hides exactly the subterms most likely to
+  be environment-sensitive.
+
+The underlying defect is in the library, not the challenge: `JetC`'s definition generates an
+**anonymous auxiliary** `FiniteJet.JetC._proof_1`, and that constant ends up embedded in the
+*type* of anything mentioning `JetA F`. Whether the elaborator emits the auxiliary or its
+expansion depends on the ambient environment, so the type of `finiteJet_isSheafy` is not stable
+across import sets. That is a genuine fragility — any downstream statement about `JetA` inherits
+it — and it is invisible to every check this campaign has run so far, because `#print axioms`,
+the build and the manifest digests all see one environment at a time.
+
+Two possible fixes, in order of preference:
+1. give the proof a real name in `FiniteJetRings` so the term is a stable named constant rather
+   than an elaboration-order-dependent `_proof_1`;
+2. failing that, have the challenge import enough to reproduce the solution's elaboration —
+   which costs the "independent restatement" property and is therefore strictly worse.
+
+Not attempted yet: (1) touches a definition, so it is an owner call and needs its own verified
+batch rather than being folded into a cleanup commit.

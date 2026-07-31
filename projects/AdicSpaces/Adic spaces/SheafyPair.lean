@@ -474,11 +474,9 @@ theorem comap_limitRestrictProd_le_comap_eval
           (𝓝 ((x : ∀ j : RationalIndex V, presheafValue j.D) D)) := by
   classical
   set C := refinementCovering D.D t ht
-  have hexE : ∀ E : ↥C.covers,
-      E.1.IsRational ∧ ∃ i : ι, spaOpen E.1 ⊆ (U i : Set ↥(Spa A A⁺)) := by
+  have hexE : ∀ E : ↥C.covers, E.1.IsRational ∧ ∃ i : ι, spaOpen E.1 ⊆ (U i : Set ↥(Spa A A⁺)) := by
     rintro ⟨E, hE⟩
-    obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp
-      (show E ∈ t.image (fun q => q.1.1) from hE)
+    obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp (show E ∈ t.image (fun q => q.1.1) from hE)
     exact ⟨q.2.1, q.1.2, q.2.2.trans Set.inter_subset_right⟩
   -- the extraction map from the cover product to the refinement product
   set Φ : (∀ i, ↥(limitSections (U i))) → (∀ E : ↥C.covers, presheafValue E.1) :=
@@ -495,8 +493,7 @@ theorem comap_limitRestrictProd_le_comap_eval
         ((y : ∀ j : RationalIndex V, presheafValue j.D) D) := by
     intro y
     funext E
-    have hED : rationalOpen E.1.T E.1.s ⊆ rationalOpen D.D.T D.D.s :=
-      C.hsubset E.1 E.2
+    have hED : rationalOpen E.1.T E.1.s ⊆ rationalOpen D.D.T D.D.s := C.hsubset E.1 E.2
     have hEV : spaOpen E.1 ⊆ (V : Set ↥(Spa A A⁺)) :=
       (hexE E).2.choose_spec.trans (hle (hexE E).2.choose)
     show (y : ∀ j : RationalIndex V, presheafValue j.D) ⟨E.1, (hexE E).1, hEV⟩ =

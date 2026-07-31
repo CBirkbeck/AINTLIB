@@ -669,29 +669,14 @@ theorem PairOfDefinition.isBounded_adjoin (P : PairOfDefinition A) (T : Finset A
     -- mul is handled by distributing products of sums into sums of products.
     -- We construct an intermediate subring to use Subring.closure_le.
     -- Define the subring structure on C = AddSubgroup.closure(B_old * range(a^·)).
-    set BM := (B_old : Set A) * Set.range (a ^ · : ℕ → A)
+    set BM := (B_old : Set A) * Set.range (a ^ · : ℕ → A) with hBM
     -- C is closed under multiplication: products of generators collapse.
     -- Use closure_induction₂ to handle both arguments simultaneously.
     have hC_mul : ∀ x ∈ AddSubgroup.closure BM, ∀ y ∈ AddSubgroup.closure BM,
         x * y ∈ AddSubgroup.closure BM := by
-      intro x hx y hy
-      induction hx, hy using AddSubgroup.closure_induction₂ with
-      | mem u v hu hv =>
-        obtain ⟨b₁, hb₁, _, ⟨k₁, rfl⟩, rfl⟩ := Set.mem_mul.mp hu
-        obtain ⟨b₂, hb₂, _, ⟨k₂, rfl⟩, rfl⟩ := Set.mem_mul.mp hv
-        apply AddSubgroup.subset_closure
-        rw [show b₁ * a ^ k₁ * (b₂ * a ^ k₂) = (b₁ * b₂) * a ^ (k₁ + k₂) by ring]
-        exact Set.mul_mem_mul (B_old.mul_mem hb₁ hb₂) ⟨k₁ + k₂, rfl⟩
-      | zero_left _ _ => simp
-      | zero_right _ _ => simp
-      | add_left _ _ _ _ _ _ ih₁ ih₂ =>
-        rw [add_mul]; exact (AddSubgroup.closure BM).add_mem ih₁ ih₂
-      | add_right _ _ _ _ _ _ ih₁ ih₂ =>
-        rw [mul_add]; exact (AddSubgroup.closure BM).add_mem ih₁ ih₂
-      | neg_left _ _ _ _ ih₁ =>
-        rw [neg_mul]; exact (AddSubgroup.closure BM).neg_mem ih₁
-      | neg_right _ _ _ _ ih₁ =>
-        rw [mul_neg]; exact (AddSubgroup.closure BM).neg_mem ih₁
+      rw [hBM]
+      exact fun _ hx _ hy ↦
+        TopologicalRing.mul_mem_addClosure_mul_range_pow B_old a hx hy
     -- Build a Subring from C
     -- Helper: membership in BM via x = b * a^k
     have mem_BM (b : A) (hb : b ∈ B_old) (k : ℕ) : b * a ^ k ∈ BM :=
