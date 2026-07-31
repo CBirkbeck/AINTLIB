@@ -30537,3 +30537,18 @@ mapIso); (2) apply the CORE at a := v₀; (3) span v₀ = span (chart generator)
 hypothesis-slot or via the b3-coordinate computation; (4) instantiate at J := D
 (product-span 3b-i) for the rank-2 via 3a, and at J := kerP/kerQ for the per-section
 evaluations. All pieces exist; the wiring is bounded.
+
+### [A4-e2 wiring 3] DONE 2026-07-31 — conjugation trio landed
+twistChartTensorTriv + twistChartMultiplier + cokernelRestrictTwistUnitEndoIso all
+green (restrictFunctorIsoPullback.app direction: restrict → pb; factor-legs symm'd).
+THE FULL Γ-PIPELINE now exists for any J with chart-trivializations:
+baseSections π (coker (divisorTwistHom J L))
+  ≅ [leaf-2 concentration + baseSectionsRestrictIsoOfBijective]
+  ≅ [baseSectionsMapIso ∘ PreservesCokernel.iso]  coker (F.map twist)-baseSections
+  ≅ [cokernelRestrictTwistUnitEndoIso]            coker (unitEndo v₀)-baseSections
+  ≅ [per-section CORE]                            Γ(chart) ⧸ span (v₀)
+REMAINING for GAP-A-4: (a) Mono (unitEndo v₀)-slot discharge (transport
+mono_divisorTwistHom through the conjugation — mono-of-iso-conj) + algebra-compat
+instantiation; (b) span v₀ = span (rP·rQ resp rP) identification-or-slot; (c) 3a-feed
+at D + per-section instantiations at kerP/kerQ ⟹ e2 + evaluation-equivs; (d) A-rows +
+[A4-c1] unimodularity; (e) named wrappers lineSection/verticalSection. Then GAP-A-5a.
