@@ -54,7 +54,7 @@ theorem isBounded_of_forall_norm_le {L : Type*} [NormedCommRing L] {C : ℝ}
     _ = ε := mul_div_cancel₀ _ (ne_of_gt hC'pos)
 
 /-- Bounded sets push forward along continuous open ring homomorphisms. -/
-theorem TopologicalRing.IsBounded.image_of_isOpenMap {A B : Type*}
+theorem isBounded_image_of_isOpenMap {A B : Type*}
     [CommRing A] [TopologicalSpace A] [CommRing B] [TopologicalSpace B]
     (φ : A →+* B) (hcont : Continuous φ) (hopen : IsOpenMap φ)
     {S : Set A} (hS : TopologicalRing.IsBounded S) :
@@ -75,7 +75,7 @@ theorem TopologicalRing.IsBounded.image_of_isOpenMap {A B : Type*}
 
 /-- Power-bounded elements push forward along continuous open ring
 homomorphisms. -/
-theorem TopologicalRing.IsPowerBounded.image_of_isOpenMap {A B : Type*}
+theorem isPowerBounded_image_of_isOpenMap {A B : Type*}
     [CommRing A] [TopologicalSpace A] [CommRing B] [TopologicalSpace B]
     (φ : A →+* B) (hcont : Continuous φ) (hopen : IsOpenMap φ)
     {x : A} (hx : TopologicalRing.IsPowerBounded x) :
@@ -90,7 +90,7 @@ theorem TopologicalRing.IsPowerBounded.image_of_isOpenMap {A B : Type*}
       exact ⟨n, (map_pow φ x n).symm⟩
   show TopologicalRing.IsBounded (Set.range ((φ x) ^ · : ℕ → B))
   rw [hrange]
-  exact TopologicalRing.IsBounded.image_of_isOpenMap φ hcont hopen hx
+  exact isBounded_image_of_isOpenMap φ hcont hopen hx
 
 section KappaBridge
 

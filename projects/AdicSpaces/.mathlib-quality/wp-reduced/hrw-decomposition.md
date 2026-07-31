@@ -849,3 +849,42 @@ Bricks (ii) `continuous_mkKappaP` and (iii) `isBounded_range_bPoint_pow` are
 proven and axiom-clean; they are no longer on the critical path but give the
 sharp statement that the evaluation point lies in the closed unit ball
 (power-bounded in a normed FIELD ⟺ ‖b‖ ≤ 1) if an evaluation is ever wanted.
+
+## L1 CLOSED (2026-07-31): the completed-local comparison is discharged
+
+`qHead_completedLocal_comparison'` (WP/GraphCompletedLocal.lean) is PROVEN, and
+`headLocsReduced''` + the rewired `weightedParity_chainReduced_unconditional`
+now route through it.  The chain, exactly as planned:
+
+    completedLocal head 𝔭  ≅[localizationEquiv.symm]  AdicCompletion 𝔭 head
+      ≅[adicCompletionEquivOfFlatOfLevelOne]  AdicCompletion (𝔭·Q) Q
+      =[map_comap_headToQ_eq]                 AdicCompletion 𝔮 Q
+      ≅[localizationEquiv]                    completedLocal Q 𝔮
+
+Inputs: (β) `levelOne_bijective_headToQ` — BETA plus the free injectivity;
+(α) `flat_headToQ` — Wedhorn 8.30 transported to the head's graph model
+(WP/GraphFlat.lean): the restriction is flat, the completion model identifies
+the global sections with the head (`completeRingEquivCompletionModel`, so it is
+flat over the head by a rank-one linear equivalence), the tower gives flatness
+of the rational-subset sections over the head (`Module.Flat.trans`), and the
+graph bridge `headLocEquiv` is head-linear by the W16 law
+`headLocEquiv ∘ canonicalMap = headToQ` (new: `headLocEquiv_canonicalMap`), so
+`Module.Flat.of_linearEquiv` lands it on `QHead`.
+
+AXIOM STATE: `flat_headToQ` and everything downstream carry `sorryAx` through
+the CENTRAL `prop_8_30_flat_clean` (another producer's noeth-A0 WIP) — the
+8.30-conditionality designed in from the start.  The *conditional* endpoint
+`weightedParity_chainReduced` already carried a central `sorryAx` as well, so
+the WP side no longer contributes any sorry of its own to thm 6.2(3).
+
+The old sorried `qHead_completedLocal_comparison` (HeadReduced:413) is now
+unused by the main track; it stays parked (it sits upstream of the BETA files,
+so it cannot be filled in place without an import cycle).
+
+GOTCHA (cost a full-file cascade): naming a lemma `TopologicalRing.Foo` INSIDE
+`namespace WeightedParity` creates `WeightedParity.TopologicalRing`, which then
+shadows the root `TopologicalRing` for every downstream `open TopologicalRing`
+— Main.lean lost `IsUniform`/`powerBoundedSubring` as unknown identifiers.
+Never introduce a sub-namespace colliding with an opened root namespace; the
+two bricks are now `isBounded_image_of_isOpenMap` /
+`isPowerBounded_image_of_isOpenMap`.

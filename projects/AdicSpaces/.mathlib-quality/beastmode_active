@@ -1,1 +1,1 @@
-FOCUS: L1 assembly — levelOne_bijective_headToQ + map_comap_headToQ_eq LANDED. Next: Module.Flat (WPHead) (QHead) transport from prop_8_30_flat_clean_proof (via completeRingEquivCompletionModel + headLocEquiv), then the completedLocal chain closing qHead_completedLocal_comparison.
+FOCUS: L1 CLOSED + rewired into Main. Remaining WP sorries: 3 PARKED general-prime statements + the old unused qHead_completedLocal_comparison. Next: full-branch sorry audit and record update.

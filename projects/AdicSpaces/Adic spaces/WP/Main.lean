@@ -9,6 +9,7 @@ import «Adic spaces».WP.Chart
 import «Adic spaces».WP.Reduced
 import «Adic spaces».WP.HeadReduced
 import «Adic spaces».WP.HeadReducedMaximal
+import «Adic spaces».WP.GraphCompletedLocal
 
 /-!
 # The rationally stably reduced example — headline endpoints ([WP] thm 6.2)
@@ -93,13 +94,16 @@ theorem weightedParity_chainReduced (hred : HeadLocsReduced K idWeight)
   chainReduced_WPA hred ϖ hK₀ n
 
 variable {K} in
-/-- [WP] thm 6.2 (3), unconditional form (HRW-6 assembly; currently inherits the
-open L1/L3 head-leaf sorries transitively — the conditional form above is the
-fully verified statement until those land). -/
+/-- [WP] thm 6.2 (3), unconditional form (HRW-6 assembly).  The head leaves are
+discharged through the maximal-ideal route: the completed locals of the head at
+maximals are reduced, and the graph model has the same completed locals
+(`qHead_completedLocal_comparison'`, which uses Wedhorn 8.30 flatness — the one
+remaining central input). -/
 theorem weightedParity_chainReduced_unconditional (ϖ : Uniformizer K)
     (hK₀ : IsNoetherianRing (FiniteJet.unitBall K)) (n : ℕ) :
     ChainReduced (WPAid K) n :=
-  chainReduced_WPA (headLocsReduced' idWeight ϖ hK₀) ϖ hK₀ n
+  haveI := ϖ.isDiscreteValuationRing hK₀
+  chainReduced_WPA (headLocsReduced'' (w := idWeight) ϖ hK₀) ϖ hK₀ n
 
 variable {K} in
 /-- [WP] thm 6.2 (4): the chart `ℬ = 𝒜⟨W/ϖ⟩` is an integral domain. -/
