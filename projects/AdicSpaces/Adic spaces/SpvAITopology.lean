@@ -716,6 +716,34 @@ theorem restrictIdealSingle_isMicrobial_of_mem (w : Valuation A Γ₀) (g : A) (
     rw [hrsa, WithZero.coe_le_coe, ← Subtype.coe_le_coe]
     exact hhi
 
+/-- If `v(g)⁻¹` is not a characteristic generator then it is `> 1`. -/
+private theorem one_lt_inv_of_not_mem_cGamma (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hmem : (Units.mk0 (w g) hg)⁻¹ ∉ Valuation.cGamma w) :
+    (1 : Γ₀ˣ) < (Units.mk0 (w g) hg)⁻¹ := by
+  by_contra hle; rw [not_lt] at hle
+  apply hmem
+  have hge1 : (1 : Γ₀ˣ) ≤ Units.mk0 (w g) hg := inv_le_one'.mp hle
+  have hwg : (1 : Γ₀) ≤ w g := Units.val_le_val.mpr hge1
+  exact inv_mem (Valuation.mem_cGamma_iff.mpr
+    ⟨g, hwg, hg, (inv_le_one'.mpr hge1).trans hge1, le_refl _⟩)
+
+/-- Every characteristic generator lies below `v(g)⁻¹`, so `cΓ_w` sits inside the convex
+subgroup it generates. -/
+private theorem cGammaUnits_subset_convexGenerated (w : Valuation A Γ₀) (g : A) (hg : w g ≠ 0)
+    (hmem : (Units.mk0 (w g) hg)⁻¹ ∉ Valuation.cGamma w)
+    (hy : (1 : Γ₀ˣ) < (Units.mk0 (w g) hg)⁻¹) :
+    Valuation.cGammaUnits w ⊆ (ConvexSubgroup.convexGenerated hy : Set Γ₀ˣ) := by
+  rintro u ⟨b, hb, hvb, hlo, hhi⟩
+  have hby : Units.mk0 (w b) hvb < (Units.mk0 (w g) hg)⁻¹ := by
+    by_contra hge; rw [not_lt] at hge
+    apply hmem
+    have hbmem : Units.mk0 (w b) hvb ∈ Valuation.cGamma w :=
+      Valuation.mem_cGamma_iff.mpr ⟨b, hb, hvb,
+        (inv_le_one'.mpr (Units.val_le_val.mp hb)).trans (Units.val_le_val.mp hb), le_refl _⟩
+    exact (Valuation.cGamma w).convex (one_mem _) hbmem hy.le hge
+  exact ConvexSubgroup.mem_convexGenerated_of_between
+    (le_trans (inv_le_inv_iff.mpr hby.le) hlo) (le_trans hhi hby.le)
+
 /-- **COFINAL CASE (Wedhorn Def 7.3, `v((g)) ∩ cΓ_v = ∅` branch + Lemma 7.2 + Lemma 7.1).**
 If `v(g)⁻¹ ∉ cΓ_v`, then `v(g)⁻¹ > 1` and `cGammaSingle = convexGenerated (v(g)⁻¹)`
 (`cGammaSingle_eq_convexGenerated_of_subset`, the characteristic generators being `< v(g)⁻¹` by
@@ -729,24 +757,8 @@ theorem restrictIdealSingle_cofinal_of_not_mem (w : Valuation A Γ₀) (g : A) (
   obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton.mp ha
   -- `v(g)⁻¹ ∉ cΓ_v` and `> 1`; the characteristic generators are below it, so
   -- `cGammaSingle = convexGenerated (v(g)⁻¹)`.
-  have hy : (1 : Γ₀ˣ) < (Units.mk0 (w g) hg)⁻¹ := by
-    by_contra hle; rw [not_lt] at hle
-    apply hmem
-    have hge1 : (1 : Γ₀ˣ) ≤ Units.mk0 (w g) hg := inv_le_one'.mp hle
-    have hwg : (1 : Γ₀) ≤ w g := Units.val_le_val.mpr hge1
-    exact inv_mem (Valuation.mem_cGamma_iff.mpr
-      ⟨g, hwg, hg, (inv_le_one'.mpr hge1).trans hge1, le_refl _⟩)
-  have hsub : Valuation.cGammaUnits w ⊆ (ConvexSubgroup.convexGenerated hy : Set Γ₀ˣ) := by
-    rintro u ⟨b, hb, hvb, hlo, hhi⟩
-    have hby : Units.mk0 (w b) hvb < (Units.mk0 (w g) hg)⁻¹ := by
-      by_contra hge; rw [not_lt] at hge
-      apply hmem
-      have hbmem : Units.mk0 (w b) hvb ∈ Valuation.cGamma w :=
-        Valuation.mem_cGamma_iff.mpr ⟨b, hb, hvb,
-          (inv_le_one'.mpr (Units.val_le_val.mp hb)).trans (Units.val_le_val.mp hb), le_refl _⟩
-      exact (Valuation.cGamma w).convex (one_mem _) hbmem hy.le hge
-    exact ConvexSubgroup.mem_convexGenerated_of_between
-      (le_trans (inv_le_inv_iff.mpr hby.le) hlo) (le_trans hhi hby.le)
+  have hy := one_lt_inv_of_not_mem_cGamma w g hg hmem
+  have hsub := cGammaUnits_subset_convexGenerated w g hg hmem hy
   have hCS : Valuation.cGammaSingle w g hg = ConvexSubgroup.convexGenerated hy :=
     Valuation.cGammaSingle_eq_convexGenerated_of_subset hg hy hsub
   -- The generator `mk0(w g)` is cofinal for `convexGenerated hy` (`y⁻¹ = mk0 w g`).

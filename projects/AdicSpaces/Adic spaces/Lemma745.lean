@@ -345,16 +345,17 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
       v_ext_fun a = v_r ⟨s ^ m * a, hm⟩ * v_s⁻¹ ^ m :=
     fun a m hm ↦ vExtFun_well_defined P v_r v_s hs_A₀ v_s_def
       hv_r_s_ne _ m (Nat.find_spec (h_pow_mul a)) hm
-  have h_map_zero : v_ext_fun 0 = 0 := by
-    rw [v_ext_at 0 0 (by simp [P.A₀.zero_mem])]
+  -- on `A₀` the extension is just `v_r`; used for `0`, for `1`, and for the
+  -- restriction property below
+  have h_at0 : ∀ (a : A) (ha : a ∈ P.A₀), v_ext_fun a = v_r ⟨a, ha⟩ := fun a ha => by
+    rw [v_ext_at a 0 (by simpa using ha)]
     simp only [pow_zero, one_mul, mul_one]
-    have : (⟨(0 : A), P.A₀.zero_mem⟩ : P.A₀) = 0 := Subtype.ext rfl
-    rw [this, map_zero]
+  have h_map_zero : v_ext_fun 0 = 0 := by
+    rw [h_at0 0 P.A₀.zero_mem, show (⟨(0 : A), P.A₀.zero_mem⟩ : P.A₀) = 0 from Subtype.ext rfl]
+    exact map_zero _
   have h_map_one : v_ext_fun 1 = 1 := by
-    rw [v_ext_at 1 0 (by simp [P.A₀.one_mem])]
-    simp only [pow_zero, mul_one]
-    have : (⟨(1 : A), P.A₀.one_mem⟩ : P.A₀) = 1 := Subtype.ext rfl
-    rw [this, map_one]
+    rw [h_at0 1 P.A₀.one_mem, show (⟨(1 : A), P.A₀.one_mem⟩ : P.A₀) = 1 from Subtype.ext rfl]
+    exact map_one _
   have h_map_mul : ∀ x y : A, v_ext_fun (x * y) = v_ext_fun x * v_ext_fun y := by
     intro x y
     set nx := Nat.find (h_pow_mul x); set ny := Nat.find (h_pow_mul y)
@@ -384,11 +385,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
       map_mul' := h_map_mul
       map_add_le_max' := h_map_add_le_max }
   refine ⟨v_ext, fun a ↦ ?_, fun a n hn ↦ ?_⟩
-  · change v_ext_fun (P.A₀.subtype a) = v_r a
-    have hmem : s ^ 0 * (P.A₀.subtype a) ∈ P.A₀ := by
-      simp only [pow_zero, one_mul]; exact Subtype.coe_prop a
-    rw [v_ext_at (P.A₀.subtype a) 0 hmem]
-    simp only [pow_zero, one_mul, mul_one]
+  · change v_ext_fun (P.A₀.subtype a) = v_r a; rw [h_at0 (P.A₀.subtype a) (Subtype.coe_prop a)]
     exact congrArg v_r (Subtype.ext rfl)
   · exact v_ext_at a n hn
 

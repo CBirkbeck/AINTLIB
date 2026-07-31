@@ -4037,3 +4037,80 @@ thresholds.
 `spvai.py` lifts the two proof bodies **verbatim** out of the file rather than retyping them, so
 the only thing that can be wrong is the signature — which is the part I can reason about
 statically. Retyping a body from a screenshot is how transcription errors get in.
+
+## 209 → 208, and two estimation errors worth recording
+
+`restrictIdealSingle_cofinal_of_not_mem` **CLEARED** (64 → 50) via
+`one_lt_inv_of_not_mem_cGamma` + `cGammaUnits_subset_convexGenerated`, both stated purely in the
+theorem's parameters. Bodies lifted verbatim, only the signatures authored.
+
+`exists_valuation_extension` did **not** clear, and I mis-estimated it twice:
+
+1. **"`h_at0` saves 7"** — wrong, it saved 2 (55 → 53). The shared `have` costs its own 5 lines,
+   which the "sum of per-site savings" arithmetic ignored. Correct formula:
+   `saving = sites × per_site − helper_cost`, and with 3 sites × ~2-3 lines against a 5-line
+   helper the margin is thin. **Every earlier extraction estimate in this campaign used the same
+   naive arithmetic**; they happened to be safe because the extracted blocks were large relative
+   to their helper, but the formula was still wrong.
+
+2. **`hfind` made the proof LONGER** (53 → 54). I saw
+   `have hnx := Nat.find_spec (h_pow_mul x); have hny := Nat.find_spec (h_pow_mul y)` repeated
+   in two branches and factored it — but the duplication is *within a line*, and both sites still
+   occupy exactly one line after the change, so the new `have` was pure cost. Reverted.
+   → **Line-count duplication is not the same as textual duplication.** A repeated *fragment* on
+   an already-shared line is free to leave alone; only repeated *lines* are worth lifting.
+
+Net for this proof: 55 → 52 (need 2), from the `h_at0` dedup plus dropping its `intro`. Left at
+52 rather than forcing it — the remaining 2 lines have no honest cut, and padding the metric by
+inlining something readable would be the wrong trade.
+
+Both cleared in the end: **209 → 207**. `exists_valuation_extension` took four attempts
+(55 → 53 → 54 → 52 → 51 → 50), which is itself the lesson: on a proof whose deficit is small,
+the estimate is worth less than the measurement, so re-measure after **every** edit rather than
+after a planned batch of them.
+
+Two more small findings from that sequence:
+* Generalising `h_map_zero`/`h_map_one` into `h_at0` made the `simp only` strong enough to close
+  the goal outright, so the trailing `exact congrArg v_r (Subtype.ext rfl)` became
+  "No goals to be solved". A generalised helper can need a SHORTER proof than the special cases
+  it replaces — worth trying to delete the last tactic after any such merge.
+* `rw [h_at0 _ (Subtype.coe_prop a)]` failed with "Did not find an occurrence of the pattern":
+  the `_` is not inferable there (nothing constrains it before the rewrite). The explicit
+  `h_at0 (P.A₀.subtype a) (…)` works, and still fits on one joined line at 95 chars.
+
+## HEADLINE FINDING: `exists_limitSections_glue` is duplicated across two files (85%)
+
+| | file | code lines | need |
+|---|---|---:|---:|
+| `exists_limitSections_glue` | SheafyPair.lean | 127 | 66 |
+| `exists_limitSections_glue_on` | RestrictedLimitSheaf.lean | 133 | 69 |
+
+**108 of 127 body lines are identical** (LCS, comments stripped) — runs of 26, 25, 16, 9 and 8
+consecutive lines. The `_on` version is simply the relativised form: it threads
+`hOn : IsSheafyOn S` + `hVS` where the other uses the `[IsSheafy A]` instance. Same conclusion,
+same other hypotheses.
+
+These are the two largest single items left in task 2, and together the largest duplication
+still in the tree.
+
+**The obvious fix does not work, and the reason matters.** One would derive the special case
+from the general one — but `RestrictedLimitSheaf` **imports** `SheafyPair`, so the general `_on`
+version is *downstream* of the special one, and `IsSheafyOn` itself is defined even further out
+(`FarguesFontaine/YStalks.lean:434`). This is the recorded "general lemma lives in a later file,
+so the earlier file inlines its own copy" pattern, at file scale rather than lemma scale. Note
+the extra `hcomp` hypothesis is NOT the obstacle: `isCompact_spaOpen` exists
+(`RationalBasis.lean:40`) and SheafyPair already uses it at L74.
+
+Two routes, both real changes rather than tidying:
+1. **Move `IsSheafyOn` earlier** (out of the FarguesFontaine subtree, above SheafyPair), then
+   `exists_limitSections_glue` becomes a one-line application at `S = univ`. Mathematically the
+   right shape — the general statement should not sit downstream of its own special case — but
+   it moves a structure across a subtree boundary.
+2. **Factor the shared core into SheafyPair**, parameterised over the differing input, and have
+   both call it. Non-invasive (RestrictedLimitSheaf already imports SheafyPair) and needs no
+   file moves, but leaves the general/special inversion in place.
+
+Route 2 is what I intend, since it is reversible and does not touch the FarguesFontaine
+boundary; route 1 is the better end state and is an owner call. Either way this needs both
+proofs read in full to fix the interface — it is not a scripted edit, and it is queued as the
+next substantial piece of work.
