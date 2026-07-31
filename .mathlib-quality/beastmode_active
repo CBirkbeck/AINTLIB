@@ -1,1 +1,1 @@
-FOCUS: [WP prong — GAP-A-4] read board recipe + Picard/DivisorClass + fibre RR inputs; state the rank-one kernel lemmas
+FOCUS: [GAP-A-4/A4-a] idealModuleInclusion + Mono — write WeilPairing/LineVertical.lean skeleton

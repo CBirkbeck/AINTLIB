@@ -30043,3 +30043,23 @@ Sub-tickets (new file `WeilPairing/LineVertical.lean` unless noted):
 - **[A4-e]** vertical v: same shape one degree down (L := 𝒪(2[0]), D := [R], deg 1).
 
 Order: a → b → (c-investigate ∥ d-statement-skeleton) → c → d → e.
+
+### [A4-a] DONE 2026-07-31 — WeilPairing/LineVertical.lean created
+`idealModuleInclusion J : idealModule J ⟶ unitObj C` (componentwise Subtype.val,
+rfl-grade linearity/naturality) + `Mono` instance (cancellation via ext + congrArg-app
+at `op U` + Subtype.ext). Builds green.
+
+### [A4-b] DESIGN NOTE (next): two candidate routes for the twist map
+`divisorTwistHom : tensorObj (idealModule J) L ⟶ L`
+(i) PREFERRED — presheaf-action transpose: componentwise bilinear action
+    `I(U) ⊗[Γ(U)] L(U) → L(U), m ⊗ l ↦ m.1 • l` (TensorProduct.lift), assemble the
+    presheaf map `(idealModule J).val ⊗ L.val ⟶ L.val`, then transpose through the
+    sheafification adjunction (tensorObj := sheafify of val-⊗; target already a sheaf
+    via sheafifyValIso). Definitionally controlled; no ⊗-unit choice needed.
+(ii) abstract: letI Modules.monoidalCategory; whiskerRight (idealModuleInclusion) L
+    ≫ (chosen unitObj ≅ 𝟙_)-whisker ≫ λ_ L — pollutes with a Nonempty-choice; avoid.
+Mono-ness (needed by the BaseCechZero workhorses): `mono_whiskerRight_of_isInvertible`
+OR route-(i)-specific: mono ⟸ app-injectivity on a trivializing basis (L locally free
+rank 1: on trivializing opens the map is m⊗l ↦ m·l with l-coordinate iso — injective by
+nzd of the ideal generator... NEEDS J locally-principal-nzd hypotheses — fine, the
+consumers have them). Decide after (i)'s map lands.
