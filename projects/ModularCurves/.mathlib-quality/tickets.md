@@ -30403,3 +30403,18 @@ comment): elementwise value-chase — homEquiv-injective + homEquiv_unit (these 
 then PresheafOfModules-ext + per-section: unitY-naturality-APPLY,
 divisorTwistHom_app_unit for the X-side, Y-triangle valuewise. All application-position
 (clothing-immune per this session's discipline). Everything else in the file GREEN.
+
+### [A4-e2 3b-iii] SQUARE PROVEN 2026-07-31 — LineVertical.lean fully sorry-free again
+`restrict_divisorTwistHom_forward_square` closed by the ELEMENTWISE route: homEquiv-
+injective + homEquiv_unit + simp only [Functor.id_obj] + ext, generic helpers hYnat
+(unit-naturality valuewise) and right-triangle congr-homs (hLtri/hRtri), then the two
+cores as **pure Eq.trans chains of congrArgs** — ★ NEW STANDARD TRICK: when even
+display-identical terms fail rw (invisible implicit/instance args across defeq
+clothings), Eq.trans's middle-slot UNIFIES at default transparency and crosses them;
+build the whole chase as ((congrArg f h1).trans (congrArg g h2)).trans h3 with a
+final exact against a show. P-slots of helper-applications must be 𝟭.obj-clothed to
+match homEquiv_unit's output. divisorTwistHom_app_unit closes the twist-value.
+NEXT: the coker-transport (cokernel.mapIso on the square after packaging the two
+outer maps as isos — the W-piece is iso (sheafificationW) and valIso is iso, so
+coker(F.map twist) ≅ coker(sheafifyY(pf action)); then Γ-of-coker at the chart +
+idealGenHom-triv conjugation + quotientSpanMulEquivProd feed).

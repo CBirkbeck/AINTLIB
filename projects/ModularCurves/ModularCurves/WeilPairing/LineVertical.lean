@@ -824,12 +824,149 @@ theorem restrict_divisorTwistHom_forward_square (U : C.Opens) :
         ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
           (idealActionPre J L)) ≫
       (sheafifyValIso ((restrictFunctor U.ι).obj L)).hom := by
-  -- PROOF PLAN (elementwise; the morphism-level route drowns in
-  -- restrictScalars-𝟙 clothing): homEquiv-injective + homEquiv_unit, then
-  -- PresheafOfModules hom-ext and a value-chase: unitY-naturality-apply moves the
-  -- section across, the X-triangle evaluates via divisorTwistHom_app_unit, and the
-  -- Y-triangle collapses valIso against the unit valuewise.
-  sorry
+  -- elementwise: the morphism-level route drowns in restrictScalars-𝟙 clothing
+  apply ((PresheafOfModules.sheafificationAdjunction
+    (𝟙 U.toScheme.ringCatSheaf.obj)).homEquiv _ _).injective
+  rw [Adjunction.homEquiv_unit, Adjunction.homEquiv_unit]
+  simp only [Functor.id_obj]
+  -- generic elementwise helpers: unit-naturality and the right triangle, valuewise
+  have hYnat : ∀ {P Q : _root_.PresheafOfModules
+      (U.toScheme.ringCatSheaf.obj)} (g : P ⟶ Q)
+      (W : (TopologicalSpace.Opens ↥U.toScheme)ᵒᵖ) (p : ToType (P.obj W)),
+      ((PresheafOfModules.sheafification
+          (𝟙 U.toScheme.ringCatSheaf.obj)).map g).val.app W
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app P).app W p) =
+      ((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app Q).app W (g.app W p) := by
+    intro P Q g W p
+    have h := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 U.toScheme.ringCatSheaf.obj)).unit.naturality g
+    have hval := congrArg (fun (m : P ⟶
+        (PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj) ⋙
+          SheafOfModules.forget _ ⋙ PresheafOfModules.restrictScalars
+            (𝟙 U.toScheme.ringCatSheaf.obj)).obj Q) =>
+      (ModuleCat.Hom.hom (m.app W)) p) h
+    exact hval.symm
+  have hYtri : ∀ (M : U.toScheme.Modules)
+      (W : (TopologicalSpace.Opens ↥U.toScheme)ᵒᵖ) (y : ToType (M.val.obj W)),
+      (sheafifyValIso M).hom.val.app W
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app M.val).app W y) = y := by
+    intro M W y
+    have h := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 U.toScheme.ringCatSheaf.obj)).right_triangle_components M
+    have hval := congrArg (fun (m : M.val ⟶ M.val) =>
+      (ModuleCat.Hom.hom (m.app W)) y) h
+    exact hval
+  ext W' x
+  -- both sides reduce to the pushforward action value at x
+  have hL1 := hYnat (P := (PresheafOfModules.pushforward (restrictRingHom U.ι)).obj
+      ((𝟭 (_root_.PresheafOfModules C.ringCatSheaf.obj)).obj
+        ((idealModule J).val ⊗ L.val)))
+    ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val))) W' x
+  have hR1 := hYnat (P := (PresheafOfModules.pushforward (restrictRingHom U.ι)).obj
+      ((𝟭 (_root_.PresheafOfModules C.ringCatSheaf.obj)).obj
+        ((idealModule J).val ⊗ L.val)))
+    ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+      (idealActionPre J L)) W' x
+  have hLtri := congrArg (fun (m : ((restrictFunctor U.ι).obj
+      (tensorObj (idealModule J) L)).val ⟶ ((restrictFunctor U.ι).obj
+      (tensorObj (idealModule J) L)).val) =>
+    (ModuleCat.Hom.hom (m.app W'))
+      (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+        ((PresheafOfModules.sheafificationAdjunction
+          (𝟙 C.ringCatSheaf.obj)).unit.app
+            ((idealModule J).val ⊗ L.val))).app W' x))
+    ((PresheafOfModules.sheafificationAdjunction
+      (𝟙 U.toScheme.ringCatSheaf.obj)).right_triangle_components
+        ((restrictFunctor U.ι).obj (tensorObj (idealModule J) L)))
+  have hRtri := congrArg (fun (m : ((restrictFunctor U.ι).obj L).val ⟶
+      ((restrictFunctor U.ι).obj L).val) =>
+    (ModuleCat.Hom.hom (m.app W'))
+      (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+        (idealActionPre J L)).app W' x))
+    ((PresheafOfModules.sheafificationAdjunction
+      (𝟙 U.toScheme.ringCatSheaf.obj)).right_triangle_components
+        ((restrictFunctor U.ι).obj L))
+  have hcoreL : ((PresheafOfModules.sheafification
+      (𝟙 U.toScheme.ringCatSheaf.obj)).map
+        ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val))) ≫
+      (sheafifyValIso ((restrictFunctor U.ι).obj
+        (tensorObj (idealModule J) L))).hom ≫
+      (restrictFunctor U.ι).map (divisorTwistHom J L)).val.app W'
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app _).app W' x) =
+      ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+        (idealActionPre J L)).app W' x := by
+    show ((restrictFunctor U.ι).map (divisorTwistHom J L)).val.app W'
+      ((sheafifyValIso ((restrictFunctor U.ι).obj
+        (tensorObj (idealModule J) L))).hom.val.app W'
+        (((PresheafOfModules.sheafification
+          (𝟙 U.toScheme.ringCatSheaf.obj)).map
+            ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+              ((PresheafOfModules.sheafificationAdjunction
+                (𝟙 C.ringCatSheaf.obj)).unit.app
+                  ((idealModule J).val ⊗ L.val)))).val.app W'
+          (((PresheafOfModules.sheafificationAdjunction
+            (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app _).app W' x))) = _
+    have h2 : (sheafifyValIso ((restrictFunctor U.ι).obj
+        (tensorObj (idealModule J) L))).hom.val.app W'
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app
+            ((PresheafOfModules.pushforward (restrictRingHom U.ι)).obj
+              ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj) ⋙
+                SheafOfModules.forget C.ringCatSheaf ⋙
+                PresheafOfModules.restrictScalars
+                  (𝟙 C.ringCatSheaf.obj)).obj
+                ((idealModule J).val ⊗ L.val)))).app W'
+          (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+            ((PresheafOfModules.sheafificationAdjunction
+              (𝟙 C.ringCatSheaf.obj)).unit.app
+                ((idealModule J).val ⊗ L.val))).app W' x)) =
+        (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app
+              ((idealModule J).val ⊗ L.val))).app W' x) := hLtri
+    exact ((congrArg (fun t => ((restrictFunctor U.ι).map
+        (divisorTwistHom J L)).val.app W'
+          ((sheafifyValIso ((restrictFunctor U.ι).obj
+            (tensorObj (idealModule J) L))).hom.val.app W' t)) hL1).trans
+      (congrArg (fun t => ((restrictFunctor U.ι).map
+        (divisorTwistHom J L)).val.app W' t) h2)).trans
+      (divisorTwistHom_app_unit J L (Opposite.op (U.ι ''ᵁ W'.unop)) x)
+  have hcoreR : ((PresheafOfModules.sheafification
+      (𝟙 U.toScheme.ringCatSheaf.obj)).map
+        ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+          (idealActionPre J L)) ≫
+      (sheafifyValIso ((restrictFunctor U.ι).obj L)).hom).val.app W'
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app _).app W' x) =
+      ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+        (idealActionPre J L)).app W' x := by
+    show (sheafifyValIso ((restrictFunctor U.ι).obj L)).hom.val.app W'
+      (((PresheafOfModules.sheafification
+        (𝟙 U.toScheme.ringCatSheaf.obj)).map
+          ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+            (idealActionPre J L))).val.app W'
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app _).app W' x)) = _
+    have h3 : (sheafifyValIso ((restrictFunctor U.ι).obj L)).hom.val.app W'
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 U.toScheme.ringCatSheaf.obj)).unit.app
+            ((PresheafOfModules.pushforward (restrictRingHom U.ι)).obj
+              L.val)).app W'
+          (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+            (idealActionPre J L)).app W' x)) =
+        (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+          (idealActionPre J L)).app W' x) := hRtri
+    exact (congrArg (fun t => (sheafifyValIso
+      ((restrictFunctor U.ι).obj L)).hom.val.app W' t) hR1).trans h3
+  exact hcoreL.trans hcoreR.symm
 
 end LineAssembly
 
