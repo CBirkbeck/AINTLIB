@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4 remainder c] wire the e2-interface sorry using the full pipeline (concentration i1-i4 + cokernelRestrictTwistUnitEndoIso + per-section CORE at v0 + 3a with the D-chart data); check the span-deferability insight first (v0 as its own generator).
+FOCUS: [A4-hv] span{twistChartMultiplier} = span{g-transport} — leaves i (Mono unitEndo of nzd) / ii (locally-zero composite) / iii (c ∈ span g) / iv (g ∈ span c)

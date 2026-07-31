@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4] consumers — instantiate e2 slots at D=sectionsDivisor ![P,Q] (eI/htriv/hMono/hv/eP/eQ), then A-rows + wrappers
+FOCUS: [A4-hv] span{twistChartMultiplier} = span{g-transport} — leaves i (Mono unitEndo of nzd) / ii (locally-zero composite) / iii (c ∈ span g) / iv (g ∈ span c)

@@ -1607,6 +1607,328 @@ theorem mono_unitEndo_twistChartMultiplier (J : C.IdealSheafData)
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[A4-hv i]** On an affine scheme, the unit endomorphism of a nonzerodivisor
+global section is a monomorphism: on the basic-open basis the endomorphism is
+multiplication by the localized section, which remains a nonzerodivisor. -/
+theorem mono_unitEndomorphismOfTopSection_of_nzd {Z : Scheme.{u}} [IsAffine Z]
+    (g : Γ(Z, (⊤ : Z.Opens))) (hnzd : g ∈ nonZeroDivisors Γ(Z, (⊤ : Z.Opens))) :
+    Mono (ModularCurves.unitEndomorphismOfTopSection g) := by
+  have hloc : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥Z)
+      ((PresheafOfModules.toPresheaf _).map
+        (ModularCurves.unitEndomorphismOfTopSection g).val) := by
+    constructor
+    intro V x y hxy
+    rw [Opens.mem_grothendieckTopology]
+    intro c hcV
+    obtain ⟨t, htle, hct⟩ := (isAffineOpen_top Z).exists_basicOpen_le
+      (V := V.unop) ⟨c, hcV⟩ trivial
+    refine ⟨Z.basicOpen t, homOfLE htle, ?_, hct⟩
+    letI := (isAffineOpen_top Z).isLocalization_basicOpen t
+    have hgt : Z.presheaf.map (homOfLE (Z.basicOpen_le t)).op g
+        ∈ nonZeroDivisors Γ(Z, Z.basicOpen t) :=
+      IsLocalization.map_nonZeroDivisors_le (Submonoid.powers t)
+        Γ(Z, Z.basicOpen t) ⟨g, hnzd, rfl⟩
+    let x' : Γ(Z, V.unop) := x
+    let y' : Γ(Z, V.unop) := y
+    have hxy' : (x' * Z.presheaf.map
+          (homOfLE (le_top : V.unop ≤ (⊤ : Z.Opens))).op g) =
+        (y' * Z.presheaf.map
+          (homOfLE (le_top : V.unop ≤ (⊤ : Z.Opens))).op g) := hxy
+    have hres := congrArg (Z.presheaf.map (homOfLE htle).op).hom hxy'
+    have hcollapse : (Z.presheaf.map (homOfLE htle).op).hom
+        (Z.presheaf.map (homOfLE (le_top : V.unop ≤ (⊤ : Z.Opens))).op g) =
+        Z.presheaf.map (homOfLE (Z.basicOpen_le t)).op g := by
+      show (Z.presheaf.map (homOfLE (le_top : V.unop ≤ (⊤ : Z.Opens))).op ≫
+        Z.presheaf.map (homOfLE htle).op).hom g = _
+      rw [← Functor.map_comp]
+      rfl
+    rw [map_mul, map_mul, hcollapse] at hres
+    have hxyres := (mul_cancel_right_mem_nonZeroDivisors hgt).mp hres
+    show (Z.presheaf.map (homOfLE htle).op).hom x' =
+      (Z.presheaf.map (homOfLE htle).op).hom y'
+    exact hxyres
+  haveI h7 : Sheaf.IsLocallyInjective
+      ((SheafOfModules.toSheaf _).map
+        (ModularCurves.unitEndomorphismOfTopSection g)) := hloc
+  haveI h8 : Mono ((SheafOfModules.toSheaf _).map
+      (ModularCurves.unitEndomorphismOfTopSection g)) :=
+    Sheaf.mono_of_isLocallyInjective _
+  exact (SheafOfModules.toSheaf _).mono_of_mono_map h8
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The sheafification unit of the twist's presheaf tensor is locally surjective
+(the `W`-extraction of the adjunction triangle, as in the pullback development). -/
+theorem isLocallySurjective_tensor_sheafification_unit :
+    Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥C)
+      ((PresheafOfModules.toPresheaf _).map
+        ((PresheafOfModules.sheafificationAdjunction
+          (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val))) := by
+  have hWunit : PresheafOfModules.sheafificationW (𝟙 C.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)) := by
+    rw [PresheafOfModules.sheafificationW_iff]
+    have htri := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 C.ringCatSheaf.obj)).left_triangle_components
+        ((idealModule J).val ⊗ L.val)
+    haveI : IsIso ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).counit.app
+          ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).obj
+            ((idealModule J).val ⊗ L.val))) := inferInstance
+    exact IsIso.of_isIso_fac_right htri
+  obtain ⟨-, hunitSurj⟩ :=
+    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ _).mp hWunit
+  exact hunitSurj
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- On a principal chart, every presheaf-action value is a generator multiple. -/
+private theorem exists_idealActionPre_app_eq_smul (V : C.affineOpens)
+    (gV : Γ(C, V.1)) (hspanV : J.ideal V = Ideal.span {gV})
+    (t : ToType (((idealModule J).val ⊗ L.val).obj (Opposite.op V.1))) :
+    ∃ y : Γ(L, V.1), (idealActionPre J L).app (Opposite.op V.1) t = gV • y := by
+  induction t using TensorProduct.induction_on with
+  | zero => exact ⟨0, by rw [map_zero, smul_zero]⟩
+  | add a b ha hb =>
+    obtain ⟨y1, h1⟩ := ha
+    obtain ⟨y2, h2⟩ := hb
+    exact ⟨y1 + y2, by rw [map_add, h1, h2, smul_add]⟩
+  | tmul m l =>
+    have hm : (m.1 : Γ(C, V.1)) ∈ Ideal.span {gV} := by
+      rw [← hspanV, ← show idealSections J (Opposite.op V.1) = J.ideal V from
+        J.ker_subschemeι_app V]
+      exact m.2
+    obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hm
+    refine ⟨a • l, ?_⟩
+    erw [idealActionPre_app_tmul]
+    show (m.1 : Γ(C, V.1)) • l = gV • a • l
+    rw [← ha, smul_smul, mul_comm a gV, ← smul_smul]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[A4-hv ii]** Through a chart trivialization of the ambient module, the
+restricted twist followed by the cokernel projection of the transported generator's
+unit endomorphism vanishes: sections of the sheafified tensor are locally unit
+images over basic affines of the chart, the action value there is a generator
+multiple, and the transported generator's endomorphism range dies in its cokernel. -/
+theorem restrict_divisorTwistHom_comp_cokernelπ_transport_eq_zero
+    (U : C.affineOpens) (g : Γ(C, U.1))
+    (hspan : J.ideal U = Ideal.span {g})
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme) :
+    (restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom ≫
+      Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)) = 0 := by
+  classical
+  refine hom_eq_zero_of_locally_zero _ ?_
+  intro Uo x z hzUo
+  haveI := isLocallySurjective_tensor_sheafification_unit (J := J) (L := L)
+  let xC : Γ(tensorObj (idealModule J) L, U.1.ι ''ᵁ Uo) := x
+  have hmem := Presheaf.imageSieve_mem (Opens.grothendieckTopology ↥C)
+    ((PresheafOfModules.toPresheaf _).map
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val))) xC
+  rw [Opens.mem_grothendieckTopology] at hmem
+  obtain ⟨W₂, i₂, ⟨t₂, ht₂⟩, hzW₂⟩ := hmem (U.1.ι.base z) ⟨z, hzUo, rfl⟩
+  have hW₂U : W₂ ≤ U.1 := le_trans (leOfHom i₂) (U.1.ι_image_le Uo)
+  obtain ⟨b, hble, hzb⟩ := U.2.exists_basicOpen_le (V := W₂)
+    ⟨U.1.ι.base z, hzW₂⟩ (hW₂U hzW₂)
+  -- the answer open and its image bookkeeping
+  refine ⟨U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo,
+    ⟨show U.1.ι.base z ∈ C.basicOpen b from hzb, hzUo⟩, inf_le_right, ?_⟩
+  have hWbU : C.basicOpen b ≤ U.1 := hble.trans hW₂U
+  have hle5 : U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ C.basicOpen b := by
+    refine le_trans ((U.1.ι.opensFunctor.map (homOfLE inf_le_left)).le) ?_
+    rw [Scheme.Hom.image_preimage_eq_opensRange_inf]
+    exact inf_le_right
+  have hle6 : U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ W₂ := hle5.trans hble
+  have hleUo : U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ U.1.ι ''ᵁ Uo :=
+    (U.1.ι.opensFunctor.map (homOfLE inf_le_right)).le
+  -- restrict the unit witness to the image of the answer open
+  have htWtb : (((PresheafOfModules.toPresheaf _).obj
+      ((idealModule J).val ⊗ L.val)).map (homOfLE hle6).op) t₂ =
+      (((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map (homOfLE hle5).op)
+      ((((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map (homOfLE hble).op) t₂) := by
+    rw [show (((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map (homOfLE hle5).op)
+        ((((PresheafOfModules.toPresheaf _).obj
+          ((idealModule J).val ⊗ L.val)).map (homOfLE hble).op) t₂) =
+      (((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map
+        ((homOfLE hble).op ≫ (homOfLE hle5).op)) t₂ from by
+      rw [Functor.map_comp]
+      rfl]
+    rfl
+  have hres6 : (((PresheafOfModules.toPresheaf _).map
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val))).app
+      (Opposite.op (U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo))))
+      ((((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map (homOfLE hle6).op) t₂) =
+      (((PresheafOfModules.toPresheaf _).obj
+        ((SheafOfModules.forget _ ⋙ PresheafOfModules.restrictScalars
+          (𝟙 C.ringCatSheaf.obj)).obj (tensorObj (idealModule J) L))).map
+        (homOfLE hleUo).op) xC := by
+    have h1 := NatTrans.naturality_apply
+      ((PresheafOfModules.toPresheaf _).map
+        ((PresheafOfModules.sheafificationAdjunction
+          (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)))
+      (homOfLE hle6).op t₂
+    refine h1.trans ?_
+    rw [ht₂, ← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    rfl
+  -- the action value at the basic affine is a generator multiple
+  have hspanWb : J.ideal (C.affineBasicOpen b) = Ideal.span
+      {(C.presheaf.map (homOfLE (C.basicOpen_le b)).op).hom g} := by
+    rw [← J.map_ideal_basicOpen U b, hspan, Ideal.map_span, Set.image_singleton]
+  obtain ⟨y₀, hy₀⟩ := exists_idealActionPre_app_eq_smul (J := J) (L := L)
+    (C.affineBasicOpen b)
+    ((C.presheaf.map (homOfLE (C.basicOpen_le b)).op).hom g) hspanWb
+    ((((PresheafOfModules.toPresheaf _).obj
+      ((idealModule J).val ⊗ L.val)).map (homOfLE hble).op) t₂)
+  let y₀' : Γ(L, C.basicOpen b) := y₀
+  have hy₀' : (idealActionPre J L).app (Opposite.op (C.basicOpen b))
+      ((((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map (homOfLE hble).op) t₂) =
+      (C.presheaf.map (homOfLE (C.basicOpen_le b)).op).hom g • y₀' := hy₀
+  -- hoist the action value from the basic affine to the answer image open
+  have hDnat := PresheafOfModules.naturality_apply (idealActionPre J L)
+    (homOfLE hle5).op
+    ((((PresheafOfModules.toPresheaf _).obj
+      ((idealModule J).val ⊗ L.val)).map (homOfLE hble).op) t₂)
+  have hDchain : (idealActionPre J L).app
+      (Opposite.op (U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)))
+      ((((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map (homOfLE hle6).op) t₂) =
+      L.presheaf.map (homOfLE hle5).op
+        ((C.presheaf.map (homOfLE (C.basicOpen_le b)).op).hom g • y₀') := by
+    refine (congrArg ((idealActionPre J L).app
+      (Opposite.op (U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)))) htWtb).trans ?_
+    refine hDnat.trans ?_
+    exact congrArg (L.presheaf.map (homOfLE hle5).op) hy₀'
+  -- the twist value on the answer open through the unit witness
+  have htwistval : ((restrictFunctor U.1.ι).map (divisorTwistHom J L)).app
+      (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)
+      (((restrictFunctor U.1.ι).obj (tensorObj (idealModule J) L)).presheaf.map
+        (homOfLE (inf_le_right : U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo ≤ Uo)).op x) =
+      (idealActionPre J L).app
+        (Opposite.op (U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)))
+        ((((PresheafOfModules.toPresheaf _).obj
+          ((idealModule J).val ⊗ L.val)).map (homOfLE hle6).op) t₂) := by
+    have h2 := divisorTwistHom_app_unit (J := J) (L := L)
+      (Opposite.op (U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)))
+      ((((PresheafOfModules.toPresheaf _).obj
+        ((idealModule J).val ⊗ L.val)).map (homOfLE hle6).op) t₂)
+    refine Eq.trans ?_ h2
+    exact congrArg ((divisorTwistHom J L).val.app
+      (Opposite.op (U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)))) hres6.symm
+  -- scalar-section split of the hoisted value
+  have hval2 : L.presheaf.map (homOfLE hle5).op
+      ((C.presheaf.map (homOfLE (C.basicOpen_le b)).op).hom g • y₀') =
+      (C.presheaf.map (homOfLE ((hle5.trans (C.basicOpen_le b)) :
+        U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ U.1)).op).hom g •
+        L.presheaf.map (homOfLE hle5).op y₀' := by
+    rw [Scheme.Modules.map_smul]
+    congr 1
+    rw [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    rfl
+  -- transport coherence: the chart-top generator restricts to the single-arrow form
+  have hcoh : (U.1.toScheme).presheaf.map
+      (homOfLE (le_top : U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo ≤ ⊤)).op
+      ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g) =
+      (C.presheaf.map (homOfLE ((hle5.trans (C.basicOpen_le b)) :
+        U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ U.1)).op).hom g := by
+    rw [Scheme.Opens.ι_appLE]
+    rw [show (U.1.toScheme).presheaf.map
+        (homOfLE (le_top : U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo ≤ ⊤)).op =
+      C.presheaf.map (U.1.ι.opensFunctor.map
+        (homOfLE (le_top : U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo ≤ ⊤))).op from rfl]
+    rw [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    congr 1
+  -- the endomorphism range dies in its cokernel, sectionwise
+  have hEkill : ∀ s : Γ(unitObj U.1.toScheme, U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo),
+      (Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))).app
+        (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)
+        ((ModularCurves.unitEndomorphismOfTopSection
+          ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)).app
+          (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) s) = 0 := by
+    intro s
+    exact congrArg (fun (φ : unitObj U.1.toScheme ⟶ Limits.cokernel
+        (ModularCurves.unitEndomorphismOfTopSection
+          ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))) =>
+      φ.app (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) s)
+      (Limits.cokernel.condition (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)))
+  -- the transported scalar as a chart section, and the smul-clothing bridge
+  let rU : Γ(U.1.toScheme, U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) :=
+    (C.presheaf.map (homOfLE ((hle5.trans (C.basicOpen_le b)) :
+      U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ U.1)).op).hom g
+  let yW : Γ((restrictFunctor U.1.ι).obj L, U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) :=
+    L.presheaf.map (homOfLE hle5).op y₀'
+  have hbridge : ((C.presheaf.map (homOfLE ((hle5.trans (C.basicOpen_le b)) :
+      U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ U.1)).op).hom g •
+      L.presheaf.map (homOfLE hle5).op y₀' :
+        Γ(L, U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo))) = rU • yW := by
+    have hIso : (U.1.ι.appIso (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)).inv.hom rU =
+        ((C.presheaf.map (homOfLE ((hle5.trans (C.basicOpen_le b)) :
+          U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ U.1)).op).hom g :
+            Γ(C, U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo))) := by
+      rw [Scheme.Opens.ι_appIso]
+      rfl
+    calc ((C.presheaf.map (homOfLE ((hle5.trans (C.basicOpen_le b)) :
+        U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) ≤ U.1)).op).hom g •
+        L.presheaf.map (homOfLE hle5).op y₀' :
+          Γ(L, U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)))
+        = (U.1.ι.appIso (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)).inv.hom rU •
+            (L.presheaf.map (homOfLE hle5).op y₀' :
+              Γ(L, U.1.ι ''ᵁ (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo))) := by
+          rw [hIso]
+      _ = rU • yW := rfl
+  -- the scalar action on a unit section is the endomorphism value
+  have hEform : ∀ s : Γ(unitObj U.1.toScheme, U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo),
+      rU • s =
+      (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)).app
+        (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) s := by
+    intro s
+    let s' : Γ(U.1.toScheme, U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo) := s
+    show rU * s' = s' * (U.1.toScheme).presheaf.map
+        (homOfLE (le_top : U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo ≤ ⊤)).op
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)
+    rw [hcoh]
+    exact mul_comm rU s'
+  -- assemble
+  have hnatf := NatTrans.naturality_apply
+    (Scheme.Modules.Hom.mapPresheaf
+      ((restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom ≫
+        Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+          ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))))
+    (homOfLE (inf_le_right : U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo ≤ Uo)).op x
+  refine Eq.trans hnatf.symm ?_
+  have hsplit : ((restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom ≫
+      Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))).app
+      (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)
+      (((restrictFunctor U.1.ι).obj (tensorObj (idealModule J) L)).presheaf.map
+        (homOfLE (inf_le_right : U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo ≤ Uo)).op x) =
+    (Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))).app
+      (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)
+      (eL.hom.app (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)
+        (((restrictFunctor U.1.ι).map (divisorTwistHom J L)).app
+          (U.1.ι ⁻¹ᵁ C.basicOpen b ⊓ Uo)
+          (((restrictFunctor U.1.ι).obj (tensorObj (idealModule J) L)).presheaf.map
+            (homOfLE inf_le_right).op x))) := rfl
+  refine hsplit.trans ?_
+  rw [htwistval, hDchain, hval2, hbridge]
+  rw [Hom.app_smul]
+  rw [hEform]
+  exact hEkill _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[e2] The rank-two coordinates of the divisor restriction.** Chart-native form:
 given trivializations of the ideal module and the ambient module on a concentrating
 chart, a span identification of the conjugated multiplier as a product of two
