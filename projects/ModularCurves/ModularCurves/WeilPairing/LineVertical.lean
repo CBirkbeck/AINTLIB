@@ -561,6 +561,98 @@ theorem ker_baseSectionsMap_cokernel_eq_span_perp
     rw [e1.symm_apply_apply, map_zero] at h3
     exact h3
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Adjunction-triangle evaluation for the divisor twist: on unit images, the twist is
+the presheaf action. -/
+theorem divisorTwistHom_app_unit (U : (TopologicalSpace.Opens ↥C)ᵒᵖ)
+    (x : ToType ((((idealModule J).val ⊗ L.val :
+      _root_.PresheafOfModules
+        (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).obj U)) :
+    (divisorTwistHom J L).val.app U
+        (((PresheafOfModules.sheafificationAdjunction
+          (CategoryStruct.id C.ringCatSheaf.obj)).unit.app
+            ((idealModule J).val ⊗ L.val)).app U x) =
+      (idealActionPre J L).app U x := by
+  have htri := ((PresheafOfModules.sheafificationAdjunction
+    (CategoryStruct.id C.ringCatSheaf.obj)).homEquiv
+      ((idealModule J).val ⊗ L.val) L).apply_symm_apply (idealActionPre J L)
+  rw [Adjunction.homEquiv_unit] at htri
+  have hval := congrArg (fun (m : ((idealModule J).val ⊗ L.val :
+      _root_.PresheafOfModules
+        (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶
+      (SheafOfModules.forget _ ⋙ PresheafOfModules.restrictScalars
+        (𝟙 C.ringCatSheaf.obj)).obj L) =>
+    (ConcreteCategory.hom (m.app U)) x) htri
+  exact hval
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Support vanishing**: off the divisor, the restriction cokernel of the twist is
+zero — where the ideal contains `1`, the twist is an epimorphism because every section
+is the action value of `1 ⊗ₜ` itself. -/
+theorem isZero_restrict_cokernel_divisorTwistHom (V : C.Opens)
+    (htriv : ∀ (W : C.Opens), W ≤ V →
+      (1 : Γ(C, W)) ∈ idealSections J (Opposite.op W)) :
+    Limits.IsZero ((restrictFunctor V.ι).obj
+      (Limits.cokernel (divisorTwistHom J L))) := by
+  haveI hsurj : Presheaf.IsLocallySurjective
+      (Opens.grothendieckTopology ↥V.toScheme)
+      ((PresheafOfModules.toPresheaf _).map
+        ((restrictFunctor V.ι).map (divisorTwistHom J L)).val) := by
+    constructor
+    intro W' s
+    rw [Opens.mem_grothendieckTopology]
+    intro x hx
+    have hWle : V.ι ''ᵁ W' ≤ V := V.ι_image_le W'
+    let s' : (L.val.obj (Opposite.op (V.ι ''ᵁ W'))) := s
+    refine ⟨W', 𝟙 W', ?_, hx⟩
+    refine ⟨((PresheafOfModules.sheafificationAdjunction
+      (CategoryStruct.id C.ringCatSheaf.obj)).unit.app
+        ((idealModule J).val ⊗ L.val)).app (Opposite.op (V.ι ''ᵁ W'))
+        ((⟨(1 : Γ(C, V.ι ''ᵁ W')), htriv _ hWle⟩ :
+          idealSections J (Opposite.op (V.ι ''ᵁ W'))) ⊗ₜ[
+            (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+              (Opposite.op (V.ι ''ᵁ W'))] s'), ?_⟩
+    have heval := divisorTwistHom_app_unit J L (Opposite.op (V.ι ''ᵁ W'))
+      ((⟨(1 : Γ(C, V.ι ''ᵁ W')), htriv _ hWle⟩ :
+        idealSections J (Opposite.op (V.ι ''ᵁ W'))) ⊗ₜ[
+          (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+            (Opposite.op (V.ι ''ᵁ W'))] s')
+    have hact := idealActionPre_app_tmul J L (Opposite.op (V.ι ''ᵁ W'))
+      (⟨(1 : Γ(C, V.ι ''ᵁ W')), htriv _ hWle⟩ :
+        idealSections J (Opposite.op (V.ι ''ᵁ W'))) s'
+    have hone : (idealActionPre J L).app (Opposite.op (V.ι ''ᵁ W'))
+        ((⟨(1 : Γ(C, V.ι ''ᵁ W')), htriv _ hWle⟩ :
+          idealSections J (Opposite.op (V.ι ''ᵁ W'))) ⊗ₜ[
+            (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+              (Opposite.op (V.ι ''ᵁ W'))] s') = s' := by
+      rw [hact]
+      exact one_smul _ s'
+    show ((restrictFunctor V.ι).map (divisorTwistHom J L)).val.app
+        (Opposite.op W') _ = _
+    have hfin := heval.trans hone
+    calc ((restrictFunctor V.ι).map (divisorTwistHom J L)).val.app
+          (Opposite.op W') _
+        = (divisorTwistHom J L).val.app (Opposite.op (V.ι ''ᵁ W')) _ := rfl
+      _ = s' := hfin
+      _ = _ := by
+          rw [show (((PresheafOfModules.toPresheaf _).obj
+            ((restrictFunctor V.ι).obj L).val).map (𝟙 W').op) s = s from by
+              rw [op_id, CategoryTheory.Functor.map_id]
+              rfl]
+  haveI hepi2 : Epi ((SheafOfModules.toSheaf _).map
+      ((restrictFunctor V.ι).map (divisorTwistHom J L))) := by
+    haveI : Sheaf.IsLocallySurjective ((SheafOfModules.toSheaf _).map
+        ((restrictFunctor V.ι).map (divisorTwistHom J L))) := hsurj
+    exact Sheaf.epi_of_isLocallySurjective _
+  haveI hepi : Epi ((restrictFunctor V.ι).map (divisorTwistHom J L)) :=
+    (SheafOfModules.toSheaf _).epi_of_epi_map hepi2
+  have hz := Limits.isZero_cokernel_of_epi
+    ((restrictFunctor V.ι).map (divisorTwistHom J L))
+  exact hz.of_iso (Limits.PreservesCokernel.iso (restrictFunctor V.ι)
+    (divisorTwistHom J L))
+
 end LineAssembly
 
 end Twist

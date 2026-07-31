@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 decide] read GAP-A-5a/b/c consumer shapes (Z(l) zero-scheme machinery, RelEffCartierDiv residual API) to fix the (a)/(b) presentation; then implement e2 via the chosen route (leaning skyscraper-mirror (ii))
+FOCUS: [GAP-A-4/A4-e2 leaf 1] support-vanishing — coker(divisorTwistHom).restrict V is zero when J trivial on V; restrictFunctor-preserves-colimits + restricted-inclusion-iso; write in LineVertical.lean
