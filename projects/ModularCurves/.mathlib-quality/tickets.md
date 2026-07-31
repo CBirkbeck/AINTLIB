@@ -30429,3 +30429,27 @@ idealGenHom-triv conjugation + quotientSpanMulEquivProd feed).
 (vii) evaluation equivs at P and Q (SuccessorSections mechanism per-section) and the
     quotientSpanMulEquivProd (3a) feed ⟹ e2. Then A-rows + [A4-c1] unimodularity +
     named lineSection/verticalSection wrappers close GAP-A-4.
+
+### [A4-e2 step vi] DESIGN 2026-07-31 — Y-level mirror of leaves 1+2
+Kpre := presheaf-cokernel of (pushforward (restrictRingHom U.ι)).map (idealActionPre J L)
+on the U-chart scheme Y := U.toScheme (AFFINE). Sections of Kpre at W' are the
+POINTWISE cokernels coker(action at U.ι ''ᵁ W') — computable. Plan:
+(vi-a) pointwise vanishing: for W' with image missing the divisor (1 ∈ idealSections at
+  the image, via the descended htriv), the action is surjective at W' so Kpre.obj W' = 0
+  — gives IsZero of Kpre-restrictions to away-opens (presheaf-level, elementwise).
+(vi-b) sheafify-Y-Kpre concentration: two-cover bijective-restrict at Y (mirror leaf 2
+  with the Y-topology; the V-side subsingletons from (vi-a) + sheafify-of-zero-restrict
+  — for the sheafified object use the W-machinery: restriction-of-sheafification along
+  the away-open immersion inverts the restricted unit, so IsZero transports).
+(vi-c) on the D-preimage side the pointwise coker at the FULL chart-top is
+  L(U)/(image) ≅ A/(rPrQ) via the chart trivializations (idealModuleRestrictTrivOfSpan
+  ⊗ L-triv elementwise: the action's image = (rPrQ)·L(U) under the trivialization —
+  ONE elementwise computation with idealActionPre_app_tmul + genEquiv-surjectivity).
+(vi-d) assemble Γ-⊤ of sheafify-Kpre ≅ A/(rPrQ) (concentration + the (vi-c) model +
+  unit-app bijectivity on the concentration chart — the unit of sheafification is a
+  Γ-iso where the presheaf is already "concentrated separated"... verify via the
+  two-cover argument's third bullet as in SuccessorHOne).
+Then (vii): P/Q-evaluation equivs + quotientSpanMulEquivProd = e2; A-rows; [A4-c1];
+wrappers. NOTE: (vi-d)'s unit-Γ-iso step is the subtlest — if friction, reroute via
+(b)-presentation comparison ONLY for the Γ-computation (idealModuleCokerIsoPushforwardUnit
++ projection formula at the chart), keeping (a) for everything GAP-A-5-facing.
