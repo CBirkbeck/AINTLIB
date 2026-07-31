@@ -30214,3 +30214,24 @@ NEXT [A4-d2]: the b3-coordinate bridge — express
 ker (baseSectionsMap π (cokernel.π (divisorTwistHom D.ideal 𝒪(3[0])))) in b3-coordinates
 as the joint kernel of two Γ(S,⊤)-dot-products (the evaluation rows at the rank-2
 target basis), so the line is literally b3⁻¹(rows ⨯₃). Then [A4-c1] unimodularity.
+
+### [A4-d3] ASSEMBLY DONE 2026-07-31 — ker_baseSectionsMap_cokernel_eq_span_crossProduct
+PROVEN (WeilPairing/LineVertical.lean, axiom-clean): for ANY f : M ⟶ N over π with a
+rank-3 basis b3 of baseSections N, coordinates e2 of baseSections (cokernel f), the
+evaluation matrix A, and unimodular A0 ⨯₃ A1: ker (baseSectionsMap (cokernel.π f)) =
+span {b3.equivFun.symm (A0 ⨯₃ A1)}. LEAN-OPS: `map_smul` inside the Modules namespace
+resolves to the PRESHEAF map-smul — qualify `_root_.map_smul`; dotProduct unfolds by
+`show ... from rfl`; fin_cases leaves `(fun i ↦ i) ⟨0,_⟩`-artifacts — close bullets by
+simp, not rw-patterns.
+
+GAP-A-4 remaining leaves (architecture LOCKED):
+- **[A4-e2]** rank-2 coordinates: baseSections (cokernel (divisorTwistHom D.ideal L))
+  ≃ₗ Γ(S,⊤)² for D = sectionsDivisor π ![P,Q] — via the two-section filtration /
+  product-of-kers (sectionsDivisor_ideal) + the landed succ-coker rank-1 iso pattern
+  (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator). The remaining
+  geometry-input #1.
+- **[A4-c1/huni]** unimodularity of the evaluation-rows cross product (Zariski-local
+  on S; chord-tangent nondegeneracy). Geometry-input #2.
+- **[A4-e]** vertical: rank-1 analogue (2×2 matrix, kernel = det-complement — needs a
+  Fin-2 Cramer variant or the same file's 2-case; cheaper).
+- Then [GAP-A-5a/b/c] consume ℓ, v per board.

@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.IdealModule
+import ModularCurves.ForMathlib.CrossProductKernel
+import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.EllipticCurve.PoleSheaf
 
 /-!
@@ -416,6 +418,91 @@ theorem mono_divisorTwistHom
     (SheafOfModules.toSheaf _).mono_of_mono_map h6
   rw [divisorTwistHom_eq]
   exact mono_comp _ _
+
+section LineAssembly
+
+open Matrix
+
+variable {S : Scheme.{u}} {π : C ⟶ S}
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[A4-d3] The kernel of the restriction to a degree-two divisor is spanned by the
+Cramer line.** Hypothesis-slotted assembly: given a rank-3 basis `b3` of the ambient
+base sections, coordinates `e2` for the base sections of the restriction cokernel, and
+unimodularity of the cross product of the two evaluation rows, the kernel of the
+restriction on base sections is free of rank one, spanned by the `b3`-vector of the
+cross product — the chord-and-tangent line. -/
+theorem ker_baseSectionsMap_cokernel_eq_span_crossProduct
+    {M N : C.Modules} (f : M ⟶ N)
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π N))
+    (e2 : Scheme.Modules.baseSections π (Limits.cokernel f) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      (Fin 2 → Γ(S, (⊤ : S.Opens))))
+    (A : Fin 2 → Fin 3 → Γ(S, (⊤ : S.Opens)))
+    (hA : ∀ i j, A i j =
+      e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) (b3 j)) i)
+    (huni : Ideal.span (Set.range ((A 0) ⨯₃ (A 1))) = ⊤) :
+    LinearMap.ker
+        ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens))
+        {b3.equivFun.symm ((A 0) ⨯₃ (A 1))} := by
+  have hcoord : ∀ x : Scheme.Modules.baseSections π N, ∀ i : Fin 2,
+      e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) x) i =
+        (A i) ⬝ᵥ (b3.equivFun x) := by
+    intro x i
+    conv_lhs => rw [← b3.sum_equivFun x]
+    rw [map_sum, map_sum]
+    rw [show (∑ j, e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+        (b3.equivFun x j • b3 j))) i =
+      ∑ j, (b3.equivFun x j) *
+        e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) (b3 j)) i from by
+      rw [Finset.sum_apply]
+      refine Finset.sum_congr rfl fun j _ => ?_
+      rw [_root_.map_smul, _root_.map_smul]
+      rfl]
+    rw [show (A i) ⬝ᵥ (b3.equivFun x) = ∑ j, A i j * b3.equivFun x j from rfl]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [hA i j, mul_comm]
+  ext x
+  constructor
+  · intro hx
+    have hx0 : ∀ i : Fin 2, (A i) ⬝ᵥ (b3.equivFun x) = 0 := by
+      intro i
+      rw [← hcoord x i]
+      have : (Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) x = 0 := hx
+      rw [this, map_zero]
+      rfl
+    have hmem := ModularCurves.mem_span_crossProduct_of_dotProduct_eq_zero
+      (A 0) (A 1) (b3.equivFun x) huni (hx0 0) (hx0 1)
+    obtain ⟨r, hr⟩ := Submodule.mem_span_singleton.mp hmem
+    refine Submodule.mem_span_singleton.mpr ⟨r, ?_⟩
+    have := congrArg (b3.equivFun.symm) hr
+    rw [_root_.map_smul] at this
+    simpa using this
+  · intro hx
+    obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.mp hx
+    have hker : ∀ i : Fin 2,
+        e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+          (r • b3.equivFun.symm ((A 0) ⨯₃ (A 1)))) i = 0 := by
+      intro i
+      rw [hcoord]
+      rw [_root_.map_smul]
+      rw [show b3.equivFun (b3.equivFun.symm ((A 0) ⨯₃ (A 1))) =
+        (A 0) ⨯₃ (A 1) from b3.equivFun.apply_symm_apply _]
+      rw [dotProduct_smul]
+      fin_cases i
+      · simp [dot_self_cross]
+      · simp [dot_cross_self]
+    have h2 : e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+        (r • b3.equivFun.symm ((A 0) ⨯₃ (A 1)))) = 0 := by
+      funext i
+      exact hker i
+    have h3 := congrArg e2.symm h2
+    rw [e2.symm_apply_apply, map_zero] at h3
+    exact h3
+
+end LineAssembly
 
 end Twist
 
