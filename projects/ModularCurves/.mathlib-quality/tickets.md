@@ -30311,3 +30311,15 @@ bijectivity by the SES). Sub-leaves:
   baseSectionsRestrictIsoOfBijective + the (3a)-equiv transported along P-eval models
   (the codex per-section evaluation isos at P and Q instantiate
   the SuccessorSections mechanism at sections OTHER than z — they are z-generic ✓).
+
+### [A4-e2 leaf 3a] DONE 2026-07-31 — ForMathlib/QuotientProductRankTwo.lean
+`quotientSpanMulEquivProd : A ⧸ (rP·rQ) ≃ₗ[R] (Fin 2 → R)` from rP-nzd + the two
+evaluation equivs — via the uniform SES (mulQuotHom by rP; quotProjHom; injectivity
+by nzd-cancel; exactness both ways) split by σ := (eP ·) • mk u, with the residual
+inverse φ := (ofInjective ι).symm ∘ codRestrict (id − σπ). Valid for rP = rQ (tangent).
+LEAN-OPS: obtain-in-def hits Exists.casesOn-into-Type — use .choose/.choose_spec lets;
+Submodule.mapQ-mk needs mapQ_apply (not rfl); LinearEquiv.ofLinear inside .trans needs
+a full type ascription to pin the RingHomInvPair metas; identities as named haves
+(refine-holes break the instance synthesis).
+REMAINS [3b]: chart-plumbing Γ(U-model) = A/(rPrQ) + baseSections-assembly through
+leaf-2, THEN e2 done; then A-rows + [A4-c1] unimodularity + named wrappers.
