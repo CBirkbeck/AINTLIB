@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4 remainder a] Mono (unitEndo (twistChartMultiplier ...)) from Mono (F.map twist) via the mapIso-square conjugation (mono-iff-across-isos) — small lemma; then (b) span-slot + (c) instantiations per board.
+FOCUS: [GAP-A-4 remainder a cont] extract isLocallyInjective_divisorTwistHom (h)(hL) from the mono_divisorTwistHom body (steps thru h4-cast + divisorTwistHom_eq transfer + valIso-iso-composition); then Mono(unitEndo multiplier) via the conjugation square; then (b) span-slot + (c) instantiations per board.

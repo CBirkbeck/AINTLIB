@@ -1545,6 +1545,109 @@ theorem mono_restrictFunctor_map_of_isLocallyInjective {Z : Scheme.{u}}
       ((restrictFunctor W.ι).map f)) := Sheaf.mono_of_isLocallyInjective _
   exact (SheafOfModules.toSheaf _).mono_of_mono_map h8
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The divisor twist's underlying presheaf map is locally injective (the loc-inj
+core of `mono_divisorTwistHom`, exposed for restriction). -/
+theorem isLocallyInjective_divisorTwistHom
+    (h : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L) :
+    Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+      ((PresheafOfModules.toPresheaf _).map (divisorTwistHom J L).val) := by
+  classical
+  haveI hφ := isLocallyInjective_idealActionPre J L h hL
+  -- the sheafification units at source and target are in W, hence locally bijective
+  have hWunitP : PresheafOfModules.sheafificationW (𝟙 C.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)) := by
+    rw [PresheafOfModules.sheafificationW_iff]
+    have htri := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 C.ringCatSheaf.obj)).left_triangle_components ((idealModule J).val ⊗ L.val)
+    haveI : IsIso ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).counit.app
+          ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).obj
+            ((idealModule J).val ⊗ L.val))) := inferInstance
+    exact IsIso.of_isIso_fac_right htri
+  have hWunitL : PresheafOfModules.sheafificationW (𝟙 C.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app L.val) := by
+    rw [PresheafOfModules.sheafificationW_iff]
+    have htri := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 C.ringCatSheaf.obj)).left_triangle_components L.val
+    haveI : IsIso ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).counit.app
+          ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).obj
+            L.val)) := inferInstance
+    exact IsIso.of_isIso_fac_right htri
+  obtain ⟨-, hPsurj⟩ :=
+    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ _).mp hWunitP
+  obtain ⟨hLinj2, -⟩ :=
+    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ _).mp hWunitL
+  -- naturality of the unit
+  have hnat := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 C.ringCatSheaf.obj)).unit.naturality (idealActionPre J L)
+  rw [Functor.id_map] at hnat
+  -- local injectivity of the composite, with goal-copied clothing
+  haveI h1 : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+      ((PresheafOfModules.toPresheaf
+        ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+          C.ringCatSheaf)).map (idealActionPre J L) ≫
+        (PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+            C.ringCatSheaf)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app L.val)) := by
+    haveI hφ' : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+        ((PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+            C.ringCatSheaf)).map (idealActionPre J L)) := hφ
+    haveI hu' : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+        ((PresheafOfModules.toPresheaf
+          ((sheafToPresheaf (Opens.grothendieckTopology ↥C) RingCat).obj
+            C.ringCatSheaf)).map
+          ((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app L.val)) := hLinj2
+    infer_instance
+  rw [← Functor.map_comp, hnat, Functor.map_comp] at h1
+  haveI := h1
+  have h4 := isLocallyInjective_of_comp_fields _ _ h1 hPsurj
+  haveI h5' : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥C)
+      ((PresheafOfModules.toPresheaf _).map
+        (((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).map
+          (idealActionPre J L)).val)) := h4
+  haveI hIv : IsIso (sheafifyValIso L).hom.val :=
+    inferInstanceAs (IsIso ((SheafOfModules.forget _).map (sheafifyValIso L).hom))
+  haveI hI : IsIso ((PresheafOfModules.toPresheaf _).map
+      (sheafifyValIso L).hom.val) := inferInstance
+  have hval : (divisorTwistHom J L).val =
+      ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).map
+        (idealActionPre J L)).val ≫ (sheafifyValIso L).hom.val := by
+    rw [divisorTwistHom_eq]
+    rfl
+  rw [hval, Functor.map_comp]
+  infer_instance
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The chart multiplier's endomorphism inherits the twist's monomorphy through the
+conjugation. -/
+theorem mono_unitEndo_twistChartMultiplier (J : C.IdealSheafData)
+    (L : C.Modules) (U : C.Opens)
+    (eI : (restrictFunctor U.ι).obj (idealModule J) ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme)
+    [Mono ((restrictFunctor U.ι).map (divisorTwistHom J L))] :
+    Mono (ModularCurves.unitEndomorphismOfTopSection
+      (twistChartMultiplier J L U eI eL)) := by
+  have hd := unit_endo_eq_ofTopSection
+    ((twistChartTensorTriv J L U eI eL).inv ≫
+      (restrictFunctor U.ι).map (divisorTwistHom J L) ≫ eL.hom)
+  rw [show ModularCurves.unitEndomorphismOfTopSection
+      (twistChartMultiplier J L U eI eL) =
+    (twistChartTensorTriv J L U eI eL).inv ≫
+      (restrictFunctor U.ι).map (divisorTwistHom J L) ≫ eL.hom from hd.symm]
+  infer_instance
+
 end LineAssembly
 
 end Twist
