@@ -5473,3 +5473,43 @@ The 28, by file: `WedhornCechAcyclicity` 8, `Wedhorn828` 4, `StructureSheaf` 3, 
 
 Not yet applied — the gate is mid-run on the `show … from by` batch, and editing a file while a
 gate is running is the hazard recorded above. Queued as the next batch.
+
+## Dead-private deletion: reverted. The reference analysis was right, the SPAN heuristic was not
+
+Applied the 28-declaration deletion (593 lines, 13 files); the gate went red in `TateAlgebra`
+and `CompletionLocalization`. Stashed, tree clean and green again.
+
+**The reference analysis held up.** Checking the two `TateAlgebra` victims against the original
+file: `mvps_eq_const_add_X_mul_shift` and `tate_mem_span_range` each occur exactly once, at
+their own declaration site. They really are dead. The zero-`aesop`/`solve_by_elim` check also
+held.
+
+**What broke is deciding where a declaration *starts*.** These files write `omit` blocks with
+`in` on its own line:
+
+```
+omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    in
+/-- … -/
+private theorem ker_algLift_denom_clear
+```
+
+`block_start` walks up over attached lines testing `s.endswith(' in')`. The stripped line **is**
+`in`, so that test fails, the walk stops at the docstring, and the `omit` survives — now
+attaching to whichever declaration follows, which does reference those variables. Hence
+`cannot omit referenced section variable`. A second variant left an `end <Section>` unmatched.
+
+→ **Deleting a declaration is not deleting its lines — it is deleting its *attached block*, and
+  that block's extent is a parsing problem, not a regex problem.** The modifiers that bind to a
+  declaration (`omit … in`, `set_option … in`, `include … in`, attributes, docstring) can wrap
+  across lines in ways a suffix test does not see.
+
+This is the fourth defect in this campaign's tooling, and unlike the first three it did **not**
+fail silently — the build caught it, which is exactly what the gate is for. Worth contrasting:
+the three ranking bugs all produced plausible numbers that no build could contradict, and each
+cost a wasted batch; this one cost one gate cycle and nothing else.
+
+The finding stands and is worth redoing: **28 dead private declarations, 593 lines**, listed
+above. Redo it with the attached-block extent computed by scanning *forward* from a known-safe
+anchor (the previous declaration's end) rather than backward by suffix matching, and re-verify
+that each deletion's span contains no `section`/`end`/`namespace` line.
