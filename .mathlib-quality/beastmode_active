@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-b-mono] Mono (divisorTwistHom) — first grep PreservesFiniteLimits for PresheafOfModules.sheafification; then mono_of_locally_injective_app + trivialization conjugation per board note
+FOCUS: [GAP-A-4/A4-b-mono step 2] write smul_injective_of_restrict_triv in LineVertical.lean per board transport plan (eqToHom-top bridge + smul_restrictAppIso + MulEquiv-nzd), then isLocallyInjective_idealActionPre assembly

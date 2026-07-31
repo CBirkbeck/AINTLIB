@@ -141,9 +141,7 @@ componentwise action of the ideal module is injective. -/
 private theorem idealActionPre_app_injective_of_span
     (V : C.affineOpens) (g : Γ(C, V.1))
     (hspan : J.ideal V = Ideal.span {g}) (hnzd : g ∈ nonZeroDivisors Γ(C, V.1))
-    (hLinj : Function.Injective (fun l : L.val.obj (Opposite.op V.1) =>
-      (show ((C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V.1))
-        from g) • l)) :
+    (hLinj : Function.Injective ((L.smul (U := V.1) g).hom)) :
     Function.Injective ((idealActionPre J L).app (Opposite.op V.1)) := by
   have hsurj : Function.Surjective
       (LinearMap.rTensor (L.val.obj (Opposite.op V.1))
@@ -174,9 +172,72 @@ private theorem idealActionPre_app_injective_of_span
   obtain ⟨x', rfl⟩ := hsurj x
   obtain ⟨y', rfl⟩ := hsurj y
   have h2 := (key x').symm.trans (hxy.trans (key y'))
-  have h3 := hLinj h2
+  have h2' : (L.smul (U := V.1) g).hom ((TensorProduct.lid _ _) x') =
+      (L.smul (U := V.1) g).hom ((TensorProduct.lid _ _) y') := h2
+  have h3 := hLinj h2'
   have h4 := (TensorProduct.lid _ _).injective h3
   rw [h4]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Scalar multiplication by a nonzerodivisor is injective on the sections of a
+module trivialized on the open: `smul_restrictAppIso_inv` identifies it with the
+restricted module's scalar action, which the trivialization conjugates to
+multiplication on the structure sheaf of the open subscheme. -/
+private theorem smul_injective_of_restrict_triv {W : C.Opens}
+    (e : L.restrict W.ι ≅ unitObj W.toScheme)
+    (g' : Γ(C, W)) (hg' : g' ∈ nonZeroDivisors Γ(C, W)) :
+    Function.Injective ((L.smul (U := W) g').hom) := by
+  have inner : ∀ g'' ∈ nonZeroDivisors Γ(C, W.ι ''ᵁ (⊤ : W.toScheme.Opens)),
+      Function.Injective
+        ((L.smul (U := W.ι ''ᵁ (⊤ : W.toScheme.Opens)) g'').hom) := by
+    intro g'' hg''
+    -- the module smul IS the restricted module's smul at the transported scalar:
+    -- restrict-scalars acts through the appIso, and inv ∘ hom cancels
+    have hEnd : (L.restrict W.ι).smul
+        ((W.ι.appIso (⊤ : W.toScheme.Opens)).hom.hom g'') =
+        L.smul (U := W.ι ''ᵁ (⊤ : W.toScheme.Opens))
+          ((W.ι.appIso (⊤ : W.toScheme.Opens)).inv.hom
+            ((W.ι.appIso (⊤ : W.toScheme.Opens)).hom.hom g'')) := rfl
+    have hcanc : (W.ι.appIso (⊤ : W.toScheme.Opens)).inv.hom
+        ((W.ι.appIso (⊤ : W.toScheme.Opens)).hom.hom g'') = g'' := by
+      have := ConcreteCategory.congr_hom
+        (W.ι.appIso (⊤ : W.toScheme.Opens)).hom_inv_id g''
+      exact this
+    rw [hcanc] at hEnd
+    rw [← hEnd]
+    -- conjugate the restricted smul through the trivialization's global component
+    set r₀ := (W.ι.appIso (⊤ : W.toScheme.Opens)).hom.hom g'' with hr₀def
+    have hr₀ : r₀ ∈ nonZeroDivisors Γ(W.toScheme, (⊤ : W.toScheme.Opens)) := by
+      rw [hr₀def, ← MulEquivClass.map_nonZeroDivisors
+        (W.ι.appIso (⊤ : W.toScheme.Opens)).commRingCatIsoToRingEquiv]
+      exact ⟨g'', hg'', rfl⟩
+    intro x y hxy
+    have hΦiso : IsIso (e.hom.app (⊤ : W.toScheme.Opens)) :=
+      Hom.isIso_iff_isIso_app.mp inferInstance _
+    have hΦbij := (ConcreteCategory.isIso_iff_bijective
+      (e.hom.app (⊤ : W.toScheme.Opens))).mp hΦiso
+    let x' : Γ(L.restrict W.ι, (⊤ : W.toScheme.Opens)) := x
+    let y' : Γ(L.restrict W.ι, (⊤ : W.toScheme.Opens)) := y
+    have hxy2 : e.hom.app (⊤ : W.toScheme.Opens) (r₀ • x') =
+        e.hom.app (⊤ : W.toScheme.Opens) (r₀ • y') := by
+      have h1 : r₀ • x' = ((L.restrict W.ι).smul r₀).hom x' := rfl
+      have h2 : r₀ • y' = ((L.restrict W.ι).smul r₀).hom y' := rfl
+      rw [h1, h2]
+      exact congrArg (fun t => e.hom.app (⊤ : W.toScheme.Opens) t) hxy
+    rw [Hom.app_smul, Hom.app_smul] at hxy2
+    let u : Γ(W.toScheme, (⊤ : W.toScheme.Opens)) :=
+      e.hom.app (⊤ : W.toScheme.Opens) x'
+    let v : Γ(W.toScheme, (⊤ : W.toScheme.Opens)) :=
+      e.hom.app (⊤ : W.toScheme.Opens) y'
+    have hmul : r₀ * u = r₀ * v := hxy2
+    have hcancel : u = v := (mul_cancel_left_mem_nonZeroDivisors hr₀).mp hmul
+    have hfin : x' = y' := hΦbij.injective hcancel
+    exact hfin
+  have heq : W.ι ''ᵁ (⊤ : W.toScheme.Opens) = W := by
+    simp
+  rw [heq] at inner
+  exact inner g' hg'
 
 end Twist
 
