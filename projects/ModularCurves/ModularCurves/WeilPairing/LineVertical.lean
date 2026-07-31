@@ -1929,6 +1929,272 @@ theorem restrict_divisorTwistHom_comp_cokernelπ_transport_eq_zero
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[A4-hv iii]** The chart multiplier lies in the span of the transported
+generator: the zero-composite and baseSections-exactness over the identity
+exhibit it as a multiple of the generator. -/
+private theorem twistChartMultiplier_mem_span
+    (U : C.affineOpens) (g : Γ(C, U.1))
+    (hspan : J.ideal U = Ideal.span {g})
+    (hnzd : g ∈ nonZeroDivisors Γ(C, U.1))
+    (eI : (restrictFunctor U.1.ι).obj (idealModule J) ≅ unitObj U.1.toScheme)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme) :
+    twistChartMultiplier J L U.1 eI eL ∈
+      Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g} := by
+  classical
+  haveI : IsAffine U.1.toScheme := U.2
+  have hg' : (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g ∈
+      nonZeroDivisors Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) := by
+    rw [← MulEquivClass.map_nonZeroDivisors
+      (asIso (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge)).commRingCatIsoToRingEquiv]
+    exact ⟨g, hnzd, rfl⟩
+  haveI hMonoE : Mono (ModularCurves.unitEndomorphismOfTopSection
+      ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)) :=
+    mono_unitEndomorphismOfTopSection_of_nzd _ hg'
+  have hz := restrict_divisorTwistHom_comp_cokernelπ_transport_eq_zero
+    (J := J) (L := L) U g hspan eL
+  have h0 : (twistChartTensorTriv J L U.1 eI eL).inv ≫
+      ((restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom ≫
+        Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+          ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))) = 0 := by
+    rw [hz]
+    exact Limits.comp_zero
+  have hval := congrArg (fun (φ : unitObj U.1.toScheme ⟶ Limits.cokernel
+      (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))) =>
+    φ.val.app (Opposite.op (⊤ : U.1.toScheme.Opens))
+      (1 : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))) h0
+  have hexact := Scheme.Modules.baseSectionsMap_exact_cokernel
+    (𝟙 U.1.toScheme) (ModularCurves.unitEndomorphismOfTopSection
+      ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g))
+  have hker := LinearMap.exact_iff.mp hexact
+  let cB : Scheme.Modules.baseSections (𝟙 U.1.toScheme)
+      (unitObj U.1.toScheme) := twistChartMultiplier J L U.1 eI eL
+  have hczero : (Scheme.Modules.baseSectionsMap (𝟙 U.1.toScheme)
+      (Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)))).hom cB = 0 :=
+    hval
+  have hmem : cB ∈ LinearMap.ker (Scheme.Modules.baseSectionsMap (𝟙 U.1.toScheme)
+      (Limits.cokernel.π (ModularCurves.unitEndomorphismOfTopSection
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g)))).hom := hczero
+  rw [hker] at hmem
+  obtain ⟨y, hy⟩ := hmem
+  let y' : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) := y
+  have hyval : (y' * (U.1.toScheme).presheaf.map (homOfLE (le_top :
+      (⊤ : U.1.toScheme.Opens) ≤ ⊤)).op ((U.1.ι.appLE U.1 ⊤
+        U.1.ι_preimage_self.ge).hom g) : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) =
+      twistChartMultiplier J L U.1 eI eL := hy
+  have hrestop : (U.1.toScheme).presheaf.map (homOfLE (le_top :
+      (⊤ : U.1.toScheme.Opens) ≤ ⊤)).op ((U.1.ι.appLE U.1 ⊤
+        U.1.ι_preimage_self.ge).hom g) = (U.1.ι.appLE U.1 ⊤
+        U.1.ι_preimage_self.ge).hom g := by
+    rw [show (homOfLE (le_top : (⊤ : U.1.toScheme.Opens) ≤ ⊤)) =
+      𝟙 (⊤ : U.1.toScheme.Opens) from rfl]
+    rw [op_id, CategoryTheory.Functor.map_id]
+    rfl
+  rw [hrestop] at hyval
+  exact Ideal.mem_span_singleton'.mpr ⟨y', hyval⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[A4-hv iv]** The transported generator lies in the span of the chart
+multiplier: evaluating the conjugation square on the unit image of
+`g ⊗ eL.inv 1` writes the generator as a section multiple of the multiplier. -/
+private theorem gen_mem_span_twistChartMultiplier
+    (U : C.affineOpens) (g : Γ(C, U.1))
+    (hspan : J.ideal U = Ideal.span {g})
+    (eI : (restrictFunctor U.1.ι).obj (idealModule J) ≅ unitObj U.1.toScheme)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme) :
+    (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g ∈
+      Ideal.span {twistChartMultiplier J L U.1 eI eL} := by
+  classical
+  -- the generator as an ideal-module section over the image of the top open
+  have hgmem : g ∈ idealSections J (Opposite.op U.1) := by
+    rw [show idealSections J (Opposite.op U.1) = J.ideal U from
+      J.ker_subschemeι_app U, hspan]
+    exact Ideal.mem_span_singleton_self g
+  let gsec := (idealModule J).val.map
+    (homOfLE (U.1.ι_image_le (⊤ : U.1.toScheme.Opens))).op
+    (⟨g, hgmem⟩ : idealSections J (Opposite.op U.1))
+  -- the trivializing section of the ambient module
+  let l₀ : Γ((restrictFunctor U.1.ι).obj L, (⊤ : U.1.toScheme.Opens)) :=
+    eL.inv.app (⊤ : U.1.toScheme.Opens)
+      (1 : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+  let l₀C : (L.val.obj (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))) := l₀
+  -- the unit image of the tensor and its action value
+  have heval := divisorTwistHom_app_unit J L
+    (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+    (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+      (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C)
+  -- the conjugation square
+  have hsq : (restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom =
+      (twistChartTensorTriv J L U.1 eI eL).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          (twistChartMultiplier J L U.1 eI eL) := by
+    have hd := unit_endo_eq_ofTopSection
+      ((twistChartTensorTriv J L U.1 eI eL).inv ≫
+        (restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom)
+    calc (restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom
+        = (twistChartTensorTriv J L U.1 eI eL).hom ≫
+          ((twistChartTensorTriv J L U.1 eI eL).inv ≫
+            (restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫ eL.hom) :=
+          (Iso.hom_inv_id_assoc _ _).symm
+      _ = _ := by rw [hd]; rfl
+  -- evaluate the square on the unit image
+  have hsqval := congrArg (fun (φ : (restrictFunctor U.1.ι).obj
+      (tensorObj (idealModule J) L) ⟶ unitObj U.1.toScheme) =>
+    φ.val.app (Opposite.op (⊤ : U.1.toScheme.Opens))
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)).app
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+        (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C))) hsq
+  -- the action value is the restricted-generator multiple of the section
+  have htm : (idealActionPre J L).app
+      (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+      (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C) =
+      ((C.presheaf.map (homOfLE
+        (U.1.ι_image_le (⊤ : U.1.toScheme.Opens))).op).hom g • l₀C :
+          (L.val.obj (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))))) := by
+    erw [idealActionPre_app_tmul]
+    rfl
+  -- smul-clothing bridge at the top open
+  let rT : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+    (C.presheaf.map (homOfLE
+      (U.1.ι_image_le (⊤ : U.1.toScheme.Opens))).op).hom g
+  have hIsoT : (U.1.ι.appIso (⊤ : U.1.toScheme.Opens)).inv.hom rT =
+      ((C.presheaf.map (homOfLE
+        (U.1.ι_image_le (⊤ : U.1.toScheme.Opens))).op).hom g :
+          Γ(C, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))) := by
+    rw [Scheme.Opens.ι_appIso]
+    rfl
+  have hbridgeT : ((C.presheaf.map (homOfLE
+      (U.1.ι_image_le (⊤ : U.1.toScheme.Opens))).op).hom g • l₀C :
+        (L.val.obj (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))))) =
+      rT • l₀ := by
+    calc ((C.presheaf.map (homOfLE
+        (U.1.ι_image_le (⊤ : U.1.toScheme.Opens))).op).hom g • l₀C :
+          (L.val.obj (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))))
+        = (U.1.ι.appIso (⊤ : U.1.toScheme.Opens)).inv.hom rT •
+            (l₀C : (L.val.obj (Opposite.op
+              (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))))) := by
+          rw [hIsoT]
+      _ = rT • l₀ := rfl
+  -- the trivializing section maps to one
+  have hinvhom : eL.hom.app (⊤ : U.1.toScheme.Opens) l₀ =
+      (1 : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) := by
+    have h := congrArg (fun (φ : unitObj U.1.toScheme ⟶ unitObj U.1.toScheme) =>
+      Scheme.Modules.Hom.app φ (⊤ : U.1.toScheme.Opens)
+        (1 : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))) (Iso.inv_hom_id eL)
+    exact h
+  -- top-restriction collapse for the multiplier
+  have hrestopc : (U.1.toScheme).presheaf.map (homOfLE (le_top :
+      (⊤ : U.1.toScheme.Opens) ≤ ⊤)).op (twistChartMultiplier J L U.1 eI eL) =
+      twistChartMultiplier J L U.1 eI eL := by
+    rw [show (homOfLE (le_top : (⊤ : U.1.toScheme.Opens) ≤ ⊤)) =
+      𝟙 (⊤ : U.1.toScheme.Opens) from rfl]
+    rw [op_id, CategoryTheory.Functor.map_id]
+    rfl
+  -- the transported generator is the single-arrow restriction
+  have hg'eq : (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g = rT := by
+    rw [Scheme.Opens.ι_appLE]
+    rfl
+  -- evaluate the left side of the square down to the generator
+  have hLHS : ((restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫
+      eL.hom).val.app (Opposite.op (⊤ : U.1.toScheme.Opens)) (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)).app
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+        (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C)) =
+      (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g := by
+    calc ((restrictFunctor U.1.ι).map (divisorTwistHom J L) ≫
+        eL.hom).val.app (Opposite.op (⊤ : U.1.toScheme.Opens)) (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)).app
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+        (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C))
+        = eL.hom.app (⊤ : U.1.toScheme.Opens)
+            ((divisorTwistHom J L).val.app
+              (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))) (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)).app
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+        (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C))) := rfl
+      _ = eL.hom.app (⊤ : U.1.toScheme.Opens)
+            ((idealActionPre J L).app
+              (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+              (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+                (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C)) := by
+          rw [heval]
+      _ = eL.hom.app (⊤ : U.1.toScheme.Opens)
+            (((C.presheaf.map (homOfLE
+              (U.1.ι_image_le (⊤ : U.1.toScheme.Opens))).op).hom g • l₀C :
+                (L.val.obj (Opposite.op
+                  (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))))) := by
+          rw [htm]
+      _ = eL.hom.app (⊤ : U.1.toScheme.Opens) (rT • l₀) := by
+          rw [hbridgeT]
+      _ = rT • eL.hom.app (⊤ : U.1.toScheme.Opens) l₀ :=
+          Scheme.Modules.Hom.app_smul eL.hom rT l₀
+      _ = rT • (1 : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) := by
+          rw [hinvhom]
+      _ = rT := by
+          show rT * 1 = rT
+          exact mul_one rT
+      _ = (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g := hg'eq.symm
+  -- evaluate the right side of the square to the multiplier multiple
+  let w : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+    (twistChartTensorTriv J L U.1 eI eL).hom.val.app
+      (Opposite.op (⊤ : U.1.toScheme.Opens)) (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)).app
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+        (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C))
+  have hRHS : ((twistChartTensorTriv J L U.1 eI eL).hom ≫
+      ModularCurves.unitEndomorphismOfTopSection
+        (twistChartMultiplier J L U.1 eI eL)).val.app
+      (Opposite.op (⊤ : U.1.toScheme.Opens)) (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)).app
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+        (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C)) =
+      w * twistChartMultiplier J L U.1 eI eL := by
+    show (ModularCurves.unitEndomorphismOfTopSection
+        (twistChartMultiplier J L U.1 eI eL)).val.app
+        (Opposite.op (⊤ : U.1.toScheme.Opens))
+        ((twistChartTensorTriv J L U.1 eI eL).hom.val.app
+          (Opposite.op (⊤ : U.1.toScheme.Opens)) (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val)).app
+        (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+        (gsec ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+          (Opposite.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))] l₀C))) = _
+    rw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
+    rw [hrestopc]
+  refine Ideal.mem_span_singleton'.mpr ⟨w, ?_⟩
+  exact (hRHS.symm.trans hsqval.symm).trans hLHS
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[A4-hv] The chart multiplier's span is the transported generator's span** —
+for ANY pair of chart trivializations. Feeds the `hv` slot of the rank-two
+interface without ever computing the multiplier through the opaque tensor
+trivialization. -/
+theorem span_twistChartMultiplier_eq
+    (U : C.affineOpens) (g : Γ(C, U.1))
+    (hspan : J.ideal U = Ideal.span {g})
+    (hnzd : g ∈ nonZeroDivisors Γ(C, U.1))
+    (eI : (restrictFunctor U.1.ι).obj (idealModule J) ≅ unitObj U.1.toScheme)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme) :
+    Ideal.span {twistChartMultiplier J L U.1 eI eL} =
+      Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g} := by
+  refine le_antisymm ?_ ?_
+  · rw [Ideal.span_singleton_le_iff_mem]
+    exact twistChartMultiplier_mem_span J L U g hspan hnzd eI eL
+  · rw [Ideal.span_singleton_le_iff_mem]
+    exact gen_mem_span_twistChartMultiplier J L U g hspan eI eL
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[e2] The rank-two coordinates of the divisor restriction.** Chart-native form:
 given trivializations of the ideal module and the ambient module on a concentrating
 chart, a span identification of the conjugated multiplier as a product of two

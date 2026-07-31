@@ -1,1 +1,1 @@
-FOCUS: [A4-hv] span{twistChartMultiplier} = span{g-transport} — leaves i (Mono unitEndo of nzd) / ii (locally-zero composite) / iii (c ∈ span g) / iv (g ∈ span c)
+FOCUS: [A4-hv iii+iv] span_twistChartMultiplier_eq — c ∈ span g (exactness at 𝟙 + zero-composite) and g ∈ span c (range through the conjugation square)
