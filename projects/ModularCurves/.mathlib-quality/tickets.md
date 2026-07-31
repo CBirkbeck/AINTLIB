@@ -30203,3 +30203,14 @@ New sub-leaves:
   hsurj-as-minor-unimodularity ([A4-c1] merges INTO d1's hypothesis!).
 [A4-c1] restated: the evaluation matrix's minor-ideal is ⊤ Zariski-locally on S (unit
 minor case split; KM chord-tangent). The H¹-form is bypassed entirely for the line.
+
+### [A4-d1] DONE 2026-07-31 — ForMathlib/CrossProductKernel.lean (the Cramer engine)
+`mem_span_singleton_of_crossProduct_eq_zero` (unimodular c + c ⨯₃ u = 0 ⟹ u ∈ span{c};
+Cramer coordinates, minor relations by fin_cases battery),
+`mem_span_crossProduct_of_dotProduct_eq_zero` (BAC-CAB `cross_cross_eq_smul_sub_smul`
++ the two annihilations ⟹ kernel ⊆ span{v ⨯₃ w}),
+`span_crossProduct_le_ker` (dot_self_cross/dot_cross_self). All green, pure algebra.
+NEXT [A4-d2]: the b3-coordinate bridge — express
+ker (baseSectionsMap π (cokernel.π (divisorTwistHom D.ideal 𝒪(3[0])))) in b3-coordinates
+as the joint kernel of two Γ(S,⊤)-dot-products (the evaluation rows at the rank-2
+target basis), so the line is literally b3⁻¹(rows ⨯₃). Then [A4-c1] unimodularity.
