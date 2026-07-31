@@ -29902,3 +29902,34 @@ W-family already has this shape over U'.2.isoSpec; the lift must relate
 Uimg.2.isoSpec with U'.2.isoSpec via Spec (appIso) — one more square:
 Uimg.isoSpec ≫ Spec.map (appIso-inv?) = (img≅U'-scheme iso) ≫ U'.isoSpec — hunt
 `IsAffineOpen.isoSpec`-naturality (`isoSpec_hom`, `IsAffineOpen.isoSpec_ι`…) at fill.
+
+## [FLW-6] DONE 2026-07-31 — THE FLW CAMPAIGN IS COMPLETE
+
+Both handover-final theorems proven and axiom-verified (propext / Classical.choice /
+Quot.sound only), root `lake build ModularCurves` green (9605 jobs):
+
+- `ModularCurves.FibrewiseElliptic.locallyWeierstrass`
+  (EllipticCurve/FibrewiseLocallyWeierstrass.lean) — fibrewise elliptic + IsProper +
+  SmoothOfRelativeDimension 1 + section ⟹ LocallyWeierstrass.
+- `ModularCurves.locallyWeierstrass_iff_abstractConditions` — the iff with
+  RouteA converses.
+
+Final leaf `lw_point_of_baseChange_affineOpen` (chart-lift): both fields closed.
+Field 1 (π-compat): ψ-chain snd-collapse via terminal-form plain rewrites
+(reassoc_of% ONLY when a trailing factor exists; congrHom-inv via lift_snd;
+set-var mismatches closed by `rfl`, never `rw [hU]` — dependent-motive).
+Field 2 (zero-section): hβzero via generic eqToHom-zero-transport (`rintro rfl`)
++ projModelZero_baseChange with `letI ... .toAlgebra` + `exact this` (ofHom-defeq);
+hlift via nested pullback.hom_ext (3 components: E / W / U'), each collapsed by the
+hoisted hψ₂/hψ₃/hψ₄ fst/snd-compat haves + hbridge'
+(:= inverted isoSpec_appIso_bridge, proved by cancel_mono (eIm.hom ≫ isoSpec.hom)).
+
+Lesson bank additions: (1) terminal-occurrence rewrites take the PLAIN lemma —
+reassoc_of% patterns end in `≫ ?h` and never match a composite-final occurrence;
+(2) `pullback.congrHom_inv` + `pullback.lift_snd/fst` + `Category.comp_id` is the
+full congrHom-projection kit (no map_snd lemma exists — map is an abbrev of lift);
+(3) `𝟙 X = 𝟙 Y` residuals from set-var folding close by `rfl`.
+
+Next per board: WP prong — GAP-A-7 (Picard/IdealModulePullback 2 sorries) →
+GAP-A-4 → 5a/5b/5c → 6 → WP-κ → WP-C2 → WP-PIN → WP-REG → WP-BC → Y(ρ̄) clean.
+Then [CLEANUP-22] EllipticCurve/PoleSheaf* + FibrewiseLocallyWeierstrass.

@@ -130,6 +130,38 @@ private theorem lw_point_of_baseChange_affineOpen
     simp
   have hofHom : CommRingCat.ofHom (W.1.ι.appIso U'.1).hom.hom =
       (W.1.ι.appIso U'.1).hom := rfl
+  have hψ₂snd : ψ₂.inv ≫ pullback.snd π (U'.1.ι ≫ W.1.ι) =
+      pullback.snd π (eIm.hom ≫ U.1.ι) := by
+    rw [hψ₂]
+    simp only [pullback.congrHom_inv]
+    rw [pullback.lift_snd, Category.comp_id]
+  have hψ₃snd : ψ₃.inv ≫ pullback.snd π (eIm.hom ≫ U.1.ι) =
+      pullback.snd (pullback.snd π U.1.ι) eIm.hom := by
+    rw [hψ₃, Iso.symm_inv]
+    exact pullbackLeftPullbackSndIso_hom_snd π U.1.ι eIm.hom
+  have hψ₂fst : ψ₂.inv ≫ pullback.fst π (U'.1.ι ≫ W.1.ι) =
+      pullback.fst π (eIm.hom ≫ U.1.ι) := by
+    rw [hψ₂]
+    simp only [pullback.congrHom_inv]
+    rw [pullback.lift_fst, Category.comp_id]
+  have hψ₃fst : ψ₃.inv ≫ pullback.fst π (eIm.hom ≫ U.1.ι) =
+      pullback.fst (pullback.snd π U.1.ι) eIm.hom ≫ pullback.fst π U.1.ι := by
+    rw [hψ₃, Iso.symm_inv]
+    exact pullbackLeftPullbackSndIso_hom_fst π U.1.ι eIm.hom
+  have hψ₄fst : ψ₄.inv ≫ pullback.fst (pullback.snd π U.1.ι) eIm.hom = 𝟙 _ := by
+    rw [hψ₄]
+    exact IsIso.inv_hom_id _
+  have hbridge' : U.2.isoSpec.inv ≫ eIm.inv =
+      Spec.map (W.1.ι.appIso U'.1).inv ≫ U'.2.isoSpec.inv := by
+    rw [← cancel_mono (eIm.hom ≫ U.2.isoSpec.hom)]
+    have hR : (Spec.map (W.1.ι.appIso U'.1).inv ≫ U'.2.isoSpec.inv) ≫
+        eIm.hom ≫ U.2.isoSpec.hom = 𝟙 _ := by
+      rw [← hbridge, Category.assoc, Iso.inv_hom_id_assoc, ← Spec.map_comp,
+        Iso.hom_inv_id, Spec.map_id]
+    rw [hR]
+    simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id,
+      Category.comp_id]
+    rfl
   refine ⟨ψ₄.symm ≪≫ ψ₃.symm ≪≫ ψ₂.symm ≪≫ ψ₁.symm ≪≫ e₁ ≪≫ asIso β, ?_, ?_⟩
   · -- π-compatibility: chase the second projection down the iso chain
     simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
@@ -139,21 +171,72 @@ private theorem lw_point_of_baseChange_affineOpen
       exact hβsq.w
     rw [hβw, reassoc_of% heπ, hbridge]
     rw [hψ₁, reassoc_of% (pullbackLeftPullbackSndIso_inv_snd_snd π W.1.ι U'.1.ι)]
-    have hψ₂snd : ψ₂.inv ≫ pullback.snd π (U'.1.ι ≫ W.1.ι) =
-        pullback.snd π (eIm.hom ≫ U.1.ι) := by
-      rw [hψ₂]
-      simp only [pullback.congrHom_inv]
-      rw [pullback.lift_snd, Category.comp_id]
     rw [reassoc_of% hψ₂snd]
-    have hψ₃snd : ψ₃.inv ≫ pullback.snd π (eIm.hom ≫ U.1.ι) =
-        pullback.snd (pullback.snd π U.1.ι) eIm.hom := by
-      rw [hψ₃, Iso.symm_inv]
-      exact pullbackLeftPullbackSndIso_hom_snd π U.1.ι eIm.hom
     rw [reassoc_of% hψ₃snd, reassoc_of% hψ₄snd]
     simp only [Iso.inv_hom_id_assoc]
     rfl
   · -- zero-section compatibility
-    sorry
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+    -- the zero section transports along the base-change square
+    have hβzero : projModelZero Wc ≫ β =
+        Spec.map (W.1.ι.appIso U'.1).hom ≫
+          projModelZero (Wc.map (W.1.ι.appIso U'.1).inv.hom) := by
+      have htrans : ∀ {R : Type u} [inst : CommRing R]
+          (W₁ W₂ : WeierstrassCurve R) (h : W₁ = W₂),
+          projModelZero W₁ ≫ eqToHom (congrArg projModel h) = projModelZero W₂ := by
+        rintro R _ W₁ W₂ rfl
+        simp
+      rw [hβdef, projModelBaseChangeOf, ← Category.assoc,
+        htrans _ _ hmap.symm]
+      letI : Algebra ↑Γ(S, U.1) ↑Γ(W.1.toScheme, U'.1) :=
+        (W.1.ι.appIso U'.1).hom.hom.toAlgebra
+      have halg : algebraMap ↑Γ(S, U.1) ↑Γ(W.1.toScheme, U'.1) =
+          (W.1.ι.appIso U'.1).hom.hom := rfl
+      have := projModelZero_baseChange
+        (R := ↑Γ(S, U.1)) (R' := ↑Γ(W.1.toScheme, U'.1))
+        (Wc.map (W.1.ι.appIso U'.1).inv.hom)
+      rw [halg] at this
+      exact this
+    -- the section lift transports along the pullback chain
+    have hlift : U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) ≫
+          ψ₄.inv ≫ ψ₃.inv ≫ ψ₂.inv ≫ ψ₁.inv =
+        Spec.map (W.1.ι.appIso U'.1).inv ≫ U'.2.isoSpec.inv ≫
+          pullback.lift (U'.1.ι ≫ sectionBaseChange z hz W.1.ι) (𝟙 _)
+            (by rw [Category.assoc, sectionBaseChange_snd, Category.comp_id,
+              Category.id_comp]) := by
+      apply pullback.hom_ext
+      · apply pullback.hom_ext
+        · -- component into the total space `E`
+          simp only [Category.assoc, hψ₁]
+          rw [pullbackLeftPullbackSndIso_inv_fst π W.1.ι U'.1.ι,
+            hψ₂fst, hψ₃fst, reassoc_of% hψ₄fst]
+          rw [pullback.lift_fst, pullback.lift_fst_assoc]
+          simp only [Category.assoc]
+          rw [sectionBaseChange_fst z hz W.1.ι]
+          rw [show U.2.isoSpec.inv ≫ U.1.ι ≫ z =
+              (U.2.isoSpec.inv ≫ eIm.inv) ≫ (eIm.hom ≫ U.1.ι) ≫ z from by
+            simp only [Category.assoc, Iso.inv_hom_id_assoc]]
+          rw [hbridge', ← hι]
+          simp only [Category.assoc]
+        · -- component into the intermediate base `W`
+          simp only [Category.assoc, hψ₁]
+          rw [pullbackLeftPullbackSndIso_inv_fst_snd π W.1.ι U'.1.ι,
+            reassoc_of% hψ₂snd, reassoc_of% hψ₃snd, reassoc_of% hψ₄snd,
+            pullback.lift_snd_assoc, Category.id_comp,
+            pullback.lift_fst_assoc]
+          simp only [Category.assoc]
+          rw [sectionBaseChange_snd z hz W.1.ι, Category.comp_id]
+          rw [reassoc_of% hbridge']
+      · -- component into `U'`
+        simp only [Category.assoc, hψ₁]
+        rw [pullbackLeftPullbackSndIso_inv_snd_snd π W.1.ι U'.1.ι,
+          hψ₂snd, hψ₃snd, hψ₄snd,
+          pullback.lift_snd_assoc, Category.id_comp, pullback.lift_snd,
+          Category.comp_id]
+        exact hbridge'
+    rw [reassoc_of% hlift, reassoc_of% hez, hβzero,
+      ← Spec.map_comp_assoc, Iso.hom_inv_id, Spec.map_id, Category.id_comp]
 
 /-- **(FLW-6, affine case)** A smooth proper fibrewise elliptic family over an affine
 base is locally Weierstrass. -/
