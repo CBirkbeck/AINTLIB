@@ -5687,3 +5687,28 @@ the wrong declaration.
   is a coin toss. The fix is to find the declaration first and search forward from it.
   → And: **assert the shape of what you matched before writing.** Two cheap invariants (expected
     length, expected last line) turned a silent wrong-declaration edit into a clean failure.
+
+## 181 → 180: `imgFamily_agreement`, via an abbreviation that *created* the joins
+
+Need was 20 against 16 available joins — 4 short, with no extractable block. The lever was not
+extraction but **shortening lines so that joins become possible**.
+
+`E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂` — 38 characters — appeared **10 times**. One
+`set I := … with hI` collapsed all of them, which:
+
+* turned both three-line `hIsub₁`/`hIsub₂` statements into one line each (−4);
+* brought the proof from 75 to 67 code lines, i.e. need 20 → 17.
+
+Note the joins went *down* (16 → 15) — shortening lines removes some wrap points even as it
+removes more total lines. Net still strongly positive, but it means "joins available" cannot be
+added to "lines saved by abbreviating" as if they were independent. Re-measure after the
+abbreviation, never before.
+
+The last two lines came from two bare `X` argument lines that the join tool will not touch,
+because it only joins a *deeper-indented continuation* and these sit at equal indent as sibling
+arguments of the same application. Merging a bare argument onto the argument above it is safe
+and is a case the tool structurally cannot see.
+
+→ **When a proof is short on lines with no block worth extracting, look for a long repeated
+  term before concluding it is stuck.** The abbreviation is worth doing on readability grounds
+  anyway; the line count is a side effect.

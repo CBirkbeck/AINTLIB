@@ -889,75 +889,55 @@ theorem imgFamily_agreement
   -- the certified A-side intersection
   obtain ⟨M₁, hM₁⟩ := exists_pow_le_of_isRational E₁ (hC.piece h₁)
   obtain ⟨M₂', hM₂⟩ := exists_pow_le_of_isRational_pair E₁.P E₂ (hC.piece h₂)
-  have hIrat : (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂).IsRational :=
-    RationalLocData.isRational_of_pow_le (M₁ + M₂')
-      (E₁.interDatumOpen_pow_le E₂ M₁ M₂' hM₁ hM₂)
-  have hIsub₁ : rationalOpen (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂).T
-      (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂).s
-      ⊆ rationalOpen E₁.T E₁.s := by
+  set I := E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂ with hI
+  have hIrat : I.IsRational :=
+    RationalLocData.isRational_of_pow_le (M₁ + M₂') (E₁.interDatumOpen_pow_le E₂ M₁ M₂' hM₁ hM₂)
+  have hIsub₁ : rationalOpen I.T I.s ⊆ rationalOpen E₁.T E₁.s := by
     rw [RationalLocData.interDatumOpen_rationalOpen]
     exact Set.inter_subset_left
-  have hIsub₂ : rationalOpen (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂).T
-      (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂).s
-      ⊆ rationalOpen E₂.T E₂.s := by
+  have hIsub₂ : rationalOpen I.T I.s ⊆ rationalOpen E₂.T E₂.s := by
     rw [RationalLocData.interDatumOpen_rationalOpen]
     exact Set.inter_subset_right
-  have hA := hf ⟨E₁, h₁⟩ ⟨E₂, h₂⟩ (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂)
-    hIsub₁ hIsub₂
+  have hA := hf ⟨E₁, h₁⟩ ⟨E₂, h₂⟩ I hIsub₁ hIsub₂
   -- transport through the keystone squares
   have hsq₁ := keystone_restriction_squareO D₀
     (hcertAll E₁ (hC.piece h₁)) (hcertAll _ hIrat) hIsub₁ (f ⟨E₁, h₁⟩)
   have hsq₂ := keystone_restriction_squareO D₀
     (hcertAll E₂ (hC.piece h₂)) (hcertAll _ hIrat) hIsub₂ (f ⟨E₂, h₂⟩)
   have hBI : restrictionMap _ _
-      (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁))
-        (hcertAll _ hIrat) hIsub₁)
+      (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁)) (hcertAll _ hIrat) hIsub₁)
       (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))
       = restrictionMap _ _
-      (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂))
-        (hcertAll _ hIrat) hIsub₂)
+      (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂)) (hcertAll _ hIrat) hIsub₂)
       (keystoneHomO D₀ (hcertAll E₂ (hC.piece h₂)) (f ⟨E₂, h₂⟩)) := by
     rw [← hsq₁, ← hsq₂, hA]
   -- X refines the image intersection
   have hXI : rationalOpen X.T X.s
-      ⊆ rationalOpen (imgDatumO D₀ (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂)
-          (hcertAll _ hIrat)).T
-        (imgDatumO D₀ (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂)
-          (hcertAll _ hIrat)).s := by
+      ⊆ rationalOpen (imgDatumO D₀ I (hcertAll _ hIrat)).T
+        (imgDatumO D₀ I (hcertAll _ hIrat)).s := by
     rw [imgDatumO_interDatumOpen_rationalOpen D₀ hM₁ hM₂
       (hcertAll E₁ (hC.piece h₁)) (hcertAll E₂ (hC.piece h₂))
       (hcertAll _ hIrat)]
     exact Set.subset_inter hX₁ hX₂
   -- collapse both sides through the intersection
-  have hc₁ := congr_fun (restrictionMap_comp
-    (imgDatumO D₀ E₁ (hcertAll E₁ (hC.piece h₁)))
-    (imgDatumO D₀ (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂) (hcertAll _ hIrat))
-    X
-    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁))
-      (hcertAll _ hIrat) hIsub₁) hXI)
+  have hc₁ := congr_fun (restrictionMap_comp (imgDatumO D₀ E₁ (hcertAll E₁ (hC.piece h₁)))
+    (imgDatumO D₀ I (hcertAll _ hIrat)) X
+    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁)) (hcertAll _ hIrat) hIsub₁) hXI)
     (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))
-  have hc₂ := congr_fun (restrictionMap_comp
-    (imgDatumO D₀ E₂ (hcertAll E₂ (hC.piece h₂)))
-    (imgDatumO D₀ (E₁.interDatumOpen E₂ M₁ M₂' hM₁ hM₂) (hcertAll _ hIrat))
-    X
-    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂))
-      (hcertAll _ hIrat) hIsub₂) hXI)
+  have hc₂ := congr_fun (restrictionMap_comp (imgDatumO D₀ E₂ (hcertAll E₂ (hC.piece h₂)))
+    (imgDatumO D₀ I (hcertAll _ hIrat)) X
+    (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂)) (hcertAll _ hIrat) hIsub₂) hXI)
     (keystoneHomO D₀ (hcertAll E₂ (hC.piece h₂)) (f ⟨E₂, h₂⟩))
   simp only [Function.comp_apply] at hc₁ hc₂
-  calc restrictionMap _ X hX₁
-        (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))
+  calc restrictionMap _ X hX₁ (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))
       = restrictionMap _ X hXI (restrictionMap _ _
-          (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁))
-            (hcertAll _ hIrat) hIsub₁)
-          (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))) :=
-        hc₁.symm
+          (imgDatumO_rationalOpen_subset D₀ (hcertAll E₁ (hC.piece h₁)) (hcertAll _ hIrat) hIsub₁)
+          (keystoneHomO D₀ (hcertAll E₁ (hC.piece h₁)) (f ⟨E₁, h₁⟩))) := hc₁.symm
     _ = restrictionMap _ X hXI (restrictionMap _ _
-          (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂))
-            (hcertAll _ hIrat) hIsub₂)
+          (imgDatumO_rationalOpen_subset D₀ (hcertAll E₂ (hC.piece h₂)) (hcertAll _ hIrat) hIsub₂)
           (keystoneHomO D₀ (hcertAll E₂ (hC.piece h₂)) (f ⟨E₂, h₂⟩))) := by
         rw [hBI]
-    _ = restrictionMap _ X hX₂
-        (keystoneHomO D₀ (hcertAll E₂ (hC.piece h₂)) (f ⟨E₂, h₂⟩)) :=
+    _ = restrictionMap _ X hX₂ (keystoneHomO D₀ (hcertAll E₂ (hC.piece h₂)) (f ⟨E₂, h₂⟩)) :=
         hc₂
 
 end ImgAgreement
