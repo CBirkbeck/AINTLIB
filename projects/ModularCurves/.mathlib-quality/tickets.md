@@ -30616,3 +30616,27 @@ eP/eQ := Ideal.quotientKerAlgEquivOfRightInverse on σP := P.appLE-alghom.
 eP/eQ-builder → [A4-consumer] e2-at-sections-pair → [A4-line] lineSection wrapper
 (ker-span via crossProduct + surj-slot) → [A4-vert] rank-ONE sibling interface
 (same pipeline, eP-only tail) + verticalSection. THEN GAP-A-5a.
+
+### [A4-hv] DONE 2026-08-01 — span{twistChartMultiplier} = span{appLE-transport of g}
+All four leaves + combiner green, propext/choice/Quot.sound:
+- (i) mono_unitEndomorphismOfTopSection_of_nzd (affine; basic-open loc-inj; nzd localizes)
+- unit-loc-surj extraction for the tensor presheaf (left-triangle W + iff_isLocallyBijective)
+- exists_idealActionPre_app_eq_smul (action values are generator multiples; TensorProduct
+  induction; goal-side membership rewrite avoids the dependent-motive trap)
+- (ii) restrict_divisorTwistHom_comp_cokernelπ_transport_eq_zero — THE zero-composite:
+  hom_eq_zero_of_locally_zero + unit-witness + basic refinement + naturality hoists.
+- (iii) exactness at π=𝟙 turns the zero-composite into c = y·g'.
+- (iv) square-evaluation on unit(g ⊗ eL.inv 1) gives g' = w·c.
+★ LEAN-OPS lessons: (1) `set` abstraction BLOCKS rw/trans-unification through unit.app-args
+(P₀-vs-⊗ spellings) — use RAW spellings + congrArg-casts; the set-free rewrite compiled
+instantly. (2) restr-smul ≡rfl (appIso.inv r)-C-smul — bridge C-vs-chart smul clothing via
+hIso : appIso.inv-value = C-map-value (ι_appIso → Iso.refl → rfl) + a 2-step calc; direct
+rfl/with_unfolding_all FAILS (instance towers differ structurally). (3) mathlib's
+Scheme.Opens API is rfl-friendly: ι_appLE/ι_appIso/restrictAppIso=Iso.refl,
+toScheme_presheaf_map = C-map of opensFunctor arrows; proof-irrelevant homOfLE composites
+collapse by map_comp+rfl. (4) Scheme.Modules.Hom API (app_smul/comp_app/zero_app/map_smul)
+does the heavy lifting — prefer it over raw val.app forms.
+NEXT: [A4-support] one_mem_idealSections_of_disjoint_support (generalize the ker-version
+via range_subschemeι) + de-private CartierDivisor helpers (support_prod, exists_multiChart,
+KerPrincipal.retraction/.ker_app, basicOpen_span_nzd); [A4-eval] eP/eQ from σ-retractions
+(Ideal.quotientKerAlgEquivOfRightInverse); [A4-consumer] e2-at-sections-pair; [A4-line/vert].
