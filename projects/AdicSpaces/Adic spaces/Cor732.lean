@@ -264,6 +264,23 @@ Wedhorn's proof (p.63) constructs the neighborhood by:
    finite subcover, hence X ⊆ X_m for some m.
 4. Set I := T^m · A°° — a neighborhood of zero with the desired property. -/
 
+/-- **Powers of a topologically nilpotent element only get smaller**: for a Spa-point `x` and
+`t` topologically nilpotent, `t ^ n ≤ f` and `n ≤ k` give `t ^ k ≤ f`. (Membership of `Spa`
+forces `w t ≤ 1`, so raising the exponent can only decrease the value.) -/
+theorem vle_pow_of_le_of_vle_pow (x : ↥(Spa A A⁺)) (t f : A)
+    (ht : IsTopologicallyNilpotent t) {n k : ℕ} (hnk : n ≤ k)
+    (h : (x.1 : Spv A).vle (t ^ n) f) : (x.1 : Spv A).vle (t ^ k) f := by
+  letI : ValuativeRel A := x.1.toValuativeRel
+  have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
+  set w := ValuativeRel.valuation A
+  have h_t_le_one : w t ≤ 1 := by
+    rw [← map_one w]
+    exact le_of_not_ge fun hc => not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2
+      ht ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr hc)
+  refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
+    (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp h))
+  simpa only [map_pow] using pow_le_pow_of_le_one zero_le h_t_le_one hnk
+
 /-- **(T-B.1.a)** For QC `X ⊆ Spa A`, finite `T ⊆ A°°`, and `f ∈ A` nonvanishing
 on `X`, there exists `m : ℕ` such that for every `x ∈ X` and every `t ∈ T^m`,
 `v(t) ≤ v(f)`. (The open-cover step in Wedhorn 7.31.) -/
@@ -307,16 +324,7 @@ theorem exists_pow_dominated_finset
     have h_n_t := (h_choose ⟨t, htT⟩).choose_spec
     have h_n_le : (h_choose ⟨t, htT⟩).choose ≤ m_x :=
       Finset.le_sup (f := fun t => (h_choose t).choose) (Finset.mem_attach _ ⟨t, htT⟩)
-    letI : ValuativeRel A := x.1.toValuativeRel
-    have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
-    set w := ValuativeRel.valuation A
-    have h_t_le_one : w t ≤ 1 := by
-      rw [← map_one w]
-      exact le_of_not_ge fun h => not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2
-        (hT_topnilp t htT) ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
-      (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp h_n_t.1))
-    simpa only [map_pow] using pow_le_pow_of_le_one zero_le h_t_le_one h_n_le
+    exact vle_pow_of_le_of_vle_pow x t f (hT_topnilp t htT) h_n_le h_n_t.1
   -- Monotonicity in m on X (via w t ≤ 1 from Spa membership).
   have hU_mono : ∀ m m', m ≤ m' → U m ⊆ U m' := by
     intro m m' hmm' x hx_m
@@ -324,16 +332,7 @@ theorem exists_pow_dominated_finset
     intro t htT
     have ⟨hvtm, hvf⟩ := hx_m t htT
     refine ⟨?_, hvf⟩
-    letI : ValuativeRel A := x.1.toValuativeRel
-    have hcompat : (ValuativeRel.valuation A).Compatible := inferInstance
-    set w := ValuativeRel.valuation A
-    have h_t_le_one : w t ≤ 1 := by
-      rw [← map_one w]
-      exact le_of_not_ge fun h => not_vle_one_of_mem_spa_of_topologicallyNilpotent x.2
-        (hT_topnilp t htT) ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr h)
-    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr
-      (le_trans ?_ ((Valuation.Compatible.vle_iff_le (v := w) _ _).mp hvtm))
-    simpa only [map_pow] using pow_le_pow_of_le_one zero_le h_t_le_one hmm'
+    exact vle_pow_of_le_of_vle_pow x t f (hT_topnilp t htT) hmm' hvtm
   -- QC subcover.
   have hX_subset : X ⊆ ⋃ m, U m := fun x hx =>
     Set.mem_iUnion.mpr (h_per_x x hx)

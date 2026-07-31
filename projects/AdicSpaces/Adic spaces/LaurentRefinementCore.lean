@@ -4448,23 +4448,16 @@ theorem laurentCover_isEmbedding_presheaf
     fun x =>
       (restrictionMap D₀ (laurentPlusDatum D₀ f) hplus x,
        restrictionMap D₀ (laurentMinusDatum D₀ f) hminus x) with hpair_def
+  -- the product of the two τ-bridges, referred to four times below
+  set τprod := Prod.map
+    (τ_plus : presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
+    (τ_minus : presheafValue (laurentMinusDatum D₀ f) → LaurentCover.B₂_gen (D₀.canonicalMap f))
+    with hτprod
   -- The product map of the τ-bridges is inducing by `IsInducing.prodMap`.
-  have hprod_ind :
-      Topology.IsInducing
-        (Prod.map
-          (τ_plus : presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
-          (τ_minus :
-            presheafValue (laurentMinusDatum D₀ f) → LaurentCover.B₂_gen (D₀.canonicalMap f))) :=
+  have hprod_ind : Topology.IsInducing τprod :=
     Topology.IsInducing.prodMap hτ_plus_inducing hτ_minus_inducing
-  -- The composition `Prod.map τ_plus τ_minus ∘ pair` equals
-  -- `epsilonHom_gen` extensionally, by `htau_plus` and `htau_minus`.
-  have hcomp_eq :
-      (Prod.map
-          (τ_plus : presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
-          (τ_minus :
-            presheafValue (laurentMinusDatum D₀ f) →
-              LaurentCover.B₂_gen (D₀.canonicalMap f))) ∘ pair =
-        ⇑(LaurentCover.epsilonHom_gen (D₀.canonicalMap f)) := by
+  have hcomp_eq : τprod ∘ pair =
+      ⇑(LaurentCover.epsilonHom_gen (D₀.canonicalMap f)) := by
     funext x
     rw [hpair_def]
     change (τ_plus _, τ_minus _) = LaurentCover.epsilonHom_gen (D₀.canonicalMap f) x
@@ -4472,24 +4465,11 @@ theorem laurentCover_isEmbedding_presheaf
     · exact htau_plus x
     · exact htau_minus x
   -- Hence the composition is `IsInducing` (transported from `h_alg_inducing`).
-  have hcomp_ind :
-      Topology.IsInducing
-        ((Prod.map
-            (τ_plus :
-              presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
-            (τ_minus :
-              presheafValue (laurentMinusDatum D₀ f) →
-                LaurentCover.B₂_gen (D₀.canonicalMap f))) ∘ pair) := by
+  have hcomp_ind : Topology.IsInducing (τprod ∘ pair) := by
     rw [hcomp_eq]; exact h_alg_inducing
-  -- Cancel the outer `Prod.map (τ_plus, τ_minus)` (which is `IsInducing`)
-  -- to obtain `IsInducing pair`.
+  -- Cancel the outer product map (which is `IsInducing`) to get `IsInducing pair`.
   have hpair_cont' : Continuous pair := hpair_cont
-  have hprod_cont :
-      Continuous
-        (Prod.map
-          (τ_plus : presheafValue (laurentPlusDatum D₀ f) → LaurentCover.B₁_gen (D₀.canonicalMap f))
-          (τ_minus :
-            presheafValue (laurentMinusDatum D₀ f) → LaurentCover.B₂_gen (D₀.canonicalMap f))) :=
+  have hprod_cont : Continuous τprod :=
     hτ_plus_inducing.continuous.prodMap hτ_minus_inducing.continuous
   have hpair_ind : Topology.IsInducing pair :=
     Topology.IsInducing.of_comp hpair_cont' hprod_cont hcomp_ind

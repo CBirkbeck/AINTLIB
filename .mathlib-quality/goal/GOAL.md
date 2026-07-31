@@ -4114,3 +4114,150 @@ Route 2 is what I intend, since it is reversible and does not touch the FarguesF
 boundary; route 1 is the better end state and is an owner call. Either way this needs both
 proofs read in full to fix the interface — it is not a scripted edit, and it is queued as the
 next substantial piece of work.
+
+### The glue duplication: full diff analysis, and why route 2 is worse than it looked
+
+Diffed the two bodies hunk by hunk. The differences are systematic but run through the middle
+of the proof, on **three independent axes**, not one:
+
+1. `exists_finite_rational_refinement` ↔ `exists_finite_rational_refinement_huber … (hcomp …)` (3 sites)
+2. `IsSheafy.gluing`/`IsSheafy.separationSub` ↔ `hOn.gluing`/`hOn.separationSub …` (4 sites)
+3. **different intersection-covering constructions**: `interCovering` ↔ `interCoveringV`,
+   `mem_interCoveringPieces` ↔ `mem_interCoveringPiecesV`,
+   `interRational_subset_right` ↔ `interValid_subset_right`
+(plus one cosmetic rename, `hcomp` → `hcomp'`, forced because `hcomp` is a hypothesis name in
+the `_on` version.)
+
+Axis 3 is the one that matters: a shared core would have to abstract over the covering
+construction itself, not just over the sheafiness interface. That makes **route 2 (factor a
+common core into SheafyPair) considerably worse than it appeared** — three abstraction
+parameters threaded through a 120-line proof.
+
+**Route 1 is now clearly the better change**, because it needs no abstraction at all: the `_on`
+proof already handles the general case with `interCoveringV`, so deriving the special case from
+it just uses the general machinery. Feasibility check:
+* `exists_limitSections_glue` has exactly **one** real consumer — `SheafyPair.lean:552`, where it
+  fills the `glue` field of an instance.
+* But every ingredient the general proof needs lives DOWNSTREAM: `interCoveringV`
+  (RestrictedLimitSheaf:199), `exists_finite_rational_refinement_huber` (:88), `allData_huber`,
+  and `IsSheafyOn` itself (`FarguesFontaine/YStalks.lean:434`).
+
+So route 1 means relocating `IsSheafyOn` plus three helpers from the FarguesFontaine subtree and
+RestrictedLimitSheaf to a point above SheafyPair. That is a **project-layout change**, not a
+proof edit — it moves a structure across a subtree boundary and reorders the import graph.
+
+**NOT attempting it unilaterally.** Per the repo's own division of labour, restructuring is not
+a producer-side change, and this one would conflict badly with any concurrent work in either
+subtree. Recorded here as the top structural item with both routes costed; it wants an explicit
+owner decision on file layout. Everything needed to execute it once decided is in this entry.
+
+## Instance preambles: 1191 lines across 54 proofs — mostly IRREDUCIBLE
+
+54 of the remaining over-50 proofs carry ≥5 lines of `letI`/`haveI` instance preamble, **1191
+lines in total** (worst: `flat_polyToP` at 171, `idealOfDef_pow_isClosed_aux` at 60,
+`isSheafy_presheafChart` at 52). In 6 proofs the preamble alone exceeds the deficit.
+
+**NEGATIVE RESULT — these cannot be fixed the way the WedhornCechAcyclicity preamble was.**
+The facts involved are `RationalLocData.topology` / `.isTopologicalRing` / `.uniformSpace` /
+`.isTopologicalAddGroup` / `.isUniformAddGroup` (Presheaf.lean:275-297). Unlike the earlier
+case they are:
+* **data, not `Prop`** — `TopologicalSpace`/`UniformSpace` values, so a wrong choice is a real
+  diamond, not proof-irrelevant; and
+* **not instance-shaped**: the key is `Localization.Away D.s`, and the *type does not determine
+  `D`*. Instance search would have to invert the projection `.s`, which it cannot do.
+That is exactly why the author writes explicit `letI`s, and why the same proof binds the same
+instance twice under two spellings (`Localization.Away (D₀.canonicalMap f)` and
+`Localization.Away (iteratedMinusDatum_B P D₀ f).s` are the same type reached two ways —
+`letI topB := …` then `letI … := topB` forces them to agree). Registering these globally would
+be actively wrong. **Do not attempt it.**
+
+### What IS reclaimable: ~452 lines of preamble shared between sibling declarations
+
+Scanning for *identical* preambles on declarations in the same file:
+
+| file | groups | reclaimable |
+|---|---|---:|
+| WedhornCechAcyclicity | 10 | ~102 |
+| LaurentRefinementCore | 5 | ~93 |
+| LaurentOverlap | 3 | ~75 |
+| TopologyComparison / Wedhorn828 | 3 | ~51 |
+| FJP/FiniteJetFunctoriality | 4 | ~32 |
+| others | 15 | ~99 |
+
+The dominant shape is `X` / `X_coe` — a definition and its coercion lemma repeating the same
+block — and `X` / `X_coe` / `X_continuous` triples.
+
+Mechanism that would work here, unlike the global-instance one: convert the shared per-theorem
+binders (`P`, `D₀`, `f`) into section `variable`s and put the preamble in **section-scoped
+`local instance`s**. The key then is the rigid pattern `Localization.Away (laurentMinusDatum ?D₀ ?f).s`,
+which *does* unify against the concrete goals — the projection-inversion problem disappears
+because the datum's construction is syntactically present.
+
+Not attempted yet: it is a per-file restructuring (binders → section variables) across files as
+large as 4500 lines, and it is signature-preserving only if done exactly right. Lower risk than
+the glue relocation, higher risk than a per-proof extraction. Queued behind the per-proof work.
+
+## 207 → 205: two more, both from WITHIN-proof duplication
+
+* **`Cor732.exists_pow_dominated_finset`** (67 → 49) → `vle_pow_of_le_of_vle_pow`. The same
+  10-line argument ("membership of `Spa` forces `w t ≤ 1`, so raising the exponent only
+  decreases the value") appeared **twice** in the proof, differing in two arguments. Now a
+  reusable monotonicity lemma.
+* **`laurentCover_isEmbedding_presheaf`** (52 → 50) → a local `set τprod`. The 4-line ascribed
+  expression `Prod.map (τ_plus : …) (τ_minus : …)` appeared **four times**; naming it once
+  collapses all four and makes the four `have`s one line each.
+
+### New scan: blocks repeated 2+ times WITHIN a single proof
+
+The tree-wide dedup scan only reported blocks with 3+ copies, so a block appearing exactly
+twice inside one proof was invisible to it — which is exactly what `Cor732` was. Scanning
+per-proof: **50 of the remaining over-50 proofs contain such a block**, though in only one did
+it cover the deficit alone. Sizes are mostly 4-12 lines. So it is not a bulk lever, but it is
+the first thing to look for when reading any individual proof: the duplication is usually the
+proof's own repeated argument, not something shared with other files.
+
+Also worth noting from this pair: **the repeated thing need not be tactics.** In
+`laurentCover_isEmbedding_presheaf` it was a repeated *type ascription* inside four `have`
+statements. Naming it with `set` is the fix, and it improves readability independently of the
+line count.
+
+### Process note: an assertion prevented a bad write
+
+The first attempt at the `τprod` edit hand-reconstructed the four block texts and failed its
+`assert` on the first one (indentation mismatch). Because the write happens only after all
+substitutions, the file was left untouched rather than half-edited. Rewriting the patch to work
+from **line ranges located in the file** rather than from hand-typed strings then worked first
+time. For multi-site edits in indentation-sensitive Lean, locate-then-splice beats
+match-then-replace.
+
+### Staged: `wI_le_of_mem_locIdeal_pow` (need 25, saves ~37)
+
+`Bd` is a full `Ideal` structure literal — carrier plus `zero_mem'`, `add_mem'`, `smul_mem'` —
+built inside the proof by `set`. Split-def-from-packaging, the same shape as `d1AddHom`: as a
+named definition it is "the ideal of chart elements whose interval norm is bounded by `q ^ n`",
+a real object rather than an anonymous 38-line blob, and it gets its own elaboration budget.
+
+Everything it mentions is a parameter of the enclosing theorem plus the local `q`, so the helper
+takes those and the section variables auto-bind.
+
+Written to work from **line ranges located in the file**, not hand-typed strings — following the
+`τprod` lesson. The indentation of a 38-line structure literal is not something to retype, and
+the failure mode (a half-matched block) is silent.
+
+### Sibling-preamble reclaim: pilot assessed on LaurentOverlap (~48 lines in one group)
+
+The ×4 group (`TA_B_bivariate_to_outerQuotient_evalHom₂` + `_algebraMap` + `_X` + one more,
+L2946-2992+) repeats a 14-line block that **unpacks a hypothesis structure**:
+`letI := h.topOuter; haveI := h.ringOuter; haveI := h.addOuter; letI : UniformSpace … := …; …`
+where `h : BackwardEvalHypotheses b` bundles the instances.
+
+All four take the same `(b : B) (h : BackwardEvalHypotheses b)` binders, so the fix is a
+`section` with those as `variable`s plus ~8 `local instance`s derived from `h`. **Unlike the
+`RationalLocData` projections, this one WILL resolve**: the instance key is
+`TopologicalSpace (↥(TateAlgebra (LaurentCover.B₁_gen ?b)) ⧸ outerLaurentOverlapIdeal ?b)`,
+rigid in `?b`, and every goal has a concrete `b` — there is no projection to invert.
+
+56 preamble lines → ~8 section lines, so ~48 reclaimed in this group alone. Feasible and
+signature-preserving (section variables produce the same binders), but it restructures a region
+of a 3000-line file, so it wants its own change and gate. Queued behind the staged ChartData
+extraction.
