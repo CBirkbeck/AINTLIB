@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».WP.HeadReducedMaximal
 import «Adic spaces».WP.KappaResidue
 import «Adic spaces».FJP.SpectralExtension
+import Mathlib.Analysis.Normed.Module.FiniteDimension
 import «Adic spaces».WedhornBanachTheorem
 
 /-!
@@ -33,6 +34,24 @@ theorem isClosed_ideal_of_noetherian_normed {C : Type*} [NormedCommRing C]
   have hfg : (Submodule.topologicalClosure J).FG :=
     IsNoetherian.noetherian _
   exact Module.Finite.iff_fg.mpr hfg
+
+/-- A set of uniformly bounded norm is bounded. -/
+theorem isBounded_of_forall_norm_le {L : Type*} [NormedCommRing L] {C : ℝ}
+    {S : Set L} (hS : ∀ y ∈ S, ‖y‖ ≤ C) : TopologicalRing.IsBounded S := by
+  intro U hU
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  set C' : ℝ := max C 1 with hC'
+  have hC'pos : 0 < C' := lt_of_lt_of_le zero_lt_one (le_max_right _ _)
+  refine ⟨Metric.ball 0 (ε / C'), Metric.ball_mem_nhds 0 (by positivity), ?_⟩
+  rintro z ⟨y, hy, v, hv, rfl⟩
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right] at hv ⊢
+  calc ‖y * v‖ ≤ ‖y‖ * ‖v‖ := norm_mul_le y v
+    _ ≤ C' * ‖v‖ := mul_le_mul_of_nonneg_right
+        (le_trans (hS y hy) (le_max_left _ _)) (norm_nonneg v)
+    _ < C' * (ε / C') := by
+        exact mul_lt_mul_of_pos_left hv hC'pos
+    _ = ε := mul_div_cancel₀ _ (ne_of_gt hC'pos)
 
 /-- Bounded sets push forward along continuous open ring homomorphisms. -/
 theorem TopologicalRing.IsBounded.image_of_isOpenMap {A B : Type*}
@@ -138,5 +157,162 @@ theorem continuous_mkKappaP (ϖ : Uniformizer K)
   exact hbridge.comp hmk
 
 end KappaBridge
+
+section BPoint
+
+open ValuationSpectrum FiniteJet.SpectralExtension FiniteJet.GraphKoszul
+
+open scoped NormedField Valued
+
+variable {K : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
+  [CompleteSpace K]
+variable {w : ℕ → ℕ} {N : ℕ}
+
+/-- **The evaluation point** of a head datum at a maximal ideal of the head:
+the residue `bᵢ = t̄ᵢ / s̄` of the `i`-th graph coordinate. -/
+noncomputable def bPoint (DH : RationalLocData (WPHead K w N))
+    (𝔭 : Ideal (WPHead K w N)) [h𝔭 : 𝔭.IsMaximal] (i : Fin DH.T.card) :
+    KappaP w N 𝔭 :=
+  mkKappaP w N 𝔭 ((datumEnum DH i : ↥DH.T) : WPHead K w N) *
+    (mkKappaP w N 𝔭 DH.s)⁻¹
+
+theorem bPoint_mul_s (DH : RationalLocData (WPHead K w N))
+    (𝔭 : Ideal (WPHead K w N)) [h𝔭 : 𝔭.IsMaximal] (hs : DH.s ∉ 𝔭)
+    (i : Fin DH.T.card) :
+    bPoint DH 𝔭 i * mkKappaP w N 𝔭 DH.s =
+      mkKappaP w N 𝔭 ((datumEnum DH i : ↥DH.T) : WPHead K w N) := by
+  have hne : mkKappaP w N 𝔭 DH.s ≠ 0 := by
+    show (Ideal.Quotient.mk 𝔭 DH.s : WPHead K w N ⧸ 𝔭) ≠ 0
+    rw [Ne, Ideal.Quotient.eq_zero_iff_mem]
+    exact hs
+  rw [bPoint, mul_assoc, inv_mul_cancel₀ hne, mul_one]
+
+set_option maxHeartbeats 1600000 in
+/-- **BETA brick (iii)**: the evaluation point is power-bounded in the spectral
+residue field.  The graph variables are power-bounded in the graph model, hence
+in its residue field at `𝔮`; the residue field of the head at the contraction
+embeds there, and a continuous injection out of a finite-dimensional normed
+space is anti-Lipschitz, so the bound reflects. -/
+theorem isBounded_range_bPoint_pow (ϖ : Uniformizer K)
+    [hdvr : IsDiscreteValuationRing 𝒪[K]]
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (𝔮 : Ideal (QHead DH)) (h𝔮 : 𝔮.IsMaximal) (i : Fin DH.T.card) :
+    haveI h𝔭 : (𝔮.comap (headToQ DH)).IsMaximal :=
+      comap_headToQ_isMaximal w N ϖ hK₀ DH hDH 𝔮 h𝔮
+    haveI : FiniteDimensional K (KappaP w N (𝔮.comap (headToQ DH))) :=
+      module_finite_residue_head w N ϖ hK₀ (𝔮.comap (headToQ DH))
+    letI := extNormedField K (KappaP w N (𝔮.comap (headToQ DH)))
+    TopologicalRing.IsBounded
+      (Set.range (bPoint DH (𝔮.comap (headToQ DH)) i ^ · : ℕ → _)) := by
+  haveI h𝔭 : (𝔮.comap (headToQ DH)).IsMaximal :=
+    comap_headToQ_isMaximal w N ϖ hK₀ DH hDH 𝔮 h𝔮
+  haveI hfd : FiniteDimensional K (KappaP w N (𝔮.comap (headToQ DH))) :=
+    module_finite_residue_head w N ϖ hK₀ (𝔮.comap (headToQ DH))
+  letI nfκ : NormedField (KappaP w N (𝔮.comap (headToQ DH))) :=
+    extNormedField K (KappaP w N (𝔮.comap (headToQ DH)))
+  letI nsκ : NormedSpace K (KappaP w N (𝔮.comap (headToQ DH))) :=
+    extNormedSpace K (KappaP w N (𝔮.comap (headToQ DH)))
+  haveI hfd2 : FiniteDimensional K (KappaP w N (𝔮.comap (headToQ DH))) := hfd
+  haveI hprime : 𝔮.IsPrime := h𝔮.isPrime
+  haveI hnt : Nontrivial (QHead DH ⧸ 𝔮) := by
+    letI := Ideal.Quotient.field 𝔮
+    infer_instance
+  -- the head's residue map into the residue ring of the graph model at `𝔮`
+  set ρ : WPHead K w N →+* QHead DH ⧸ 𝔮 :=
+    (Ideal.Quotient.mk 𝔮).comp (headToQ DH) with hρdef
+  have hkill : ∀ a ∈ 𝔮.comap (headToQ DH), ρ a = 0 := by
+    intro a ha
+    show Ideal.Quotient.mk 𝔮 (headToQ DH a) = 0
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    exact ha
+  set ι : KappaP w N (𝔮.comap (headToQ DH)) →+* QHead DH ⧸ 𝔮 :=
+    Ideal.Quotient.lift _ ρ hkill with hιdef
+  have hιmk : ∀ a : WPHead K w N,
+      ι (mkKappaP w N (𝔮.comap (headToQ DH)) a) = ρ a := fun _ => rfl
+  have hinj : Function.Injective ι := ι.injective
+  -- the `K`-structures on the target
+  letI algL : Algebra K (QHead DH ⧸ 𝔮) :=
+    (ρ.comp (constHead K w N)).toAlgebra
+  have hnormconst : ∀ c : K, ‖ρ (constHead K w N c)‖ ≤ ‖c‖ := by
+    intro c
+    refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+    show ‖headToQ DH (constHead K w N c)‖ ≤ ‖c‖
+    refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+    show ‖(polyToP (MvPolynomial.C (constHead K w N c)) :
+      P (WPHead K w N) DH.T.card)‖ ≤ ‖c‖
+    have h1 := norm_tP_mul (E := WPHead K w N) (m := DH.T.card)
+      (constHead K w N c) (fun x => norm_wphead_mul _ x) 1
+    rw [mul_one, norm_one, mul_one, norm_constHead] at h1
+    exact le_of_eq h1
+  have hM : ∀ (c : K) (x : QHead DH ⧸ 𝔮),
+      ‖algebraMap K (QHead DH ⧸ 𝔮) c * x‖ ≤ ‖c‖ * ‖x‖ := fun c x =>
+    le_trans (norm_mul_le _ _)
+      (mul_le_mul_of_nonneg_right (hnormconst c) (norm_nonneg x))
+  have hfc : ∀ c : K,
+      ι (algebraMap K (KappaP w N (𝔮.comap (headToQ DH))) c) =
+        algebraMap K (QHead DH ⧸ 𝔮) c := fun _ => rfl
+  obtain ⟨C, hCpos, hbound⟩ :=
+    @exists_norm_le_mul_norm_map K _ _ _
+      (KappaP w N (𝔮.comap (headToQ DH))) _ _ hfd
+      (QHead DH ⧸ 𝔮) _ algL hM ι hfc hinj
+  -- the evaluation point maps to the graph variable
+  have hs : DH.s ∉ 𝔮.comap (headToQ DH) :=
+    s_notMem_comap_headToQ ϖ hK₀ DH hDH 𝔮 hprime
+  have h2 : ι (bPoint DH (𝔮.comap (headToQ DH)) i) * ρ DH.s =
+      ρ ((datumEnum DH i : ↥DH.T) : WPHead K w N) := by
+    rw [← hιmk, ← hιmk, ← map_mul, bPoint_mul_s DH _ hs i]
+  have hrel : ρ ((datumEnum DH i : ↥DH.T) : WPHead K w N) =
+      ρ DH.s * Ideal.Quotient.mk 𝔮 (qX DH i) := by
+    show Ideal.Quotient.mk 𝔮 (headToQ DH _) = _
+    rw [show headToQ DH ((datumEnum DH i : ↥DH.T) : WPHead K w N) =
+      headConst DH ((datumEnum DH i : ↥DH.T) : WPHead K w N) from rfl,
+      headConst_datumEnum DH i, map_mul]
+    rfl
+  have hρs : ρ DH.s ≠ 0 := by
+    rw [← hιmk]
+    refine fun hzero => ?_
+    have hmk : mkKappaP w N (𝔮.comap (headToQ DH)) DH.s = 0 :=
+      hinj (by rw [hzero, map_zero])
+    have hmk' : (Ideal.Quotient.mk (𝔮.comap (headToQ DH)) DH.s :
+        WPHead K w N ⧸ 𝔮.comap (headToQ DH)) = 0 := hmk
+    rw [Ideal.Quotient.eq_zero_iff_mem] at hmk'
+    exact hs hmk'
+  have hval : ι (bPoint DH (𝔮.comap (headToQ DH)) i) =
+      Ideal.Quotient.mk 𝔮 (qX DH i) :=
+    mul_right_cancel₀ hρs (by rw [h2, hrel, mul_comm])
+  have hnormι : ‖ι (bPoint DH (𝔮.comap (headToQ DH)) i)‖ ≤ 1 := by
+    rw [hval]
+    exact le_trans (Ideal.Quotient.norm_mk_le _ _) (norm_qX_le_one DH i)
+  have hone : ‖(1 : QHead DH ⧸ 𝔮)‖ ≤ 1 := by
+    have h1 : ‖(1 : QHead DH ⧸ 𝔮)‖ ≤ ‖(1 : QHead DH)‖ := by
+      have hx := Ideal.Quotient.norm_mk_le 𝔮 1
+      rwa [map_one] at hx
+    have h2 : ‖(1 : QHead DH)‖ ≤ ‖(1 : P (WPHead K w N) DH.T.card)‖ := by
+      have hx := Ideal.Quotient.norm_mk_le (headGraphIdeal DH) 1
+      rwa [map_one] at hx
+    calc ‖(1 : QHead DH ⧸ 𝔮)‖ ≤ ‖(1 : QHead DH)‖ := h1
+      _ ≤ ‖(1 : P (WPHead K w N) DH.T.card)‖ := h2
+      _ = 1 := norm_one
+  have hpow : ∀ n : ℕ, ‖ι (bPoint DH (𝔮.comap (headToQ DH)) i) ^ n‖ ≤ 1 := by
+    intro n
+    induction n with
+    | zero => rw [pow_zero]; exact hone
+    | succ k ih =>
+        rw [pow_succ]
+        refine le_trans (norm_mul_le _ _) ?_
+        calc ‖ι (bPoint DH (𝔮.comap (headToQ DH)) i) ^ k‖ *
+              ‖ι (bPoint DH (𝔮.comap (headToQ DH)) i)‖
+            ≤ 1 * 1 := mul_le_mul ih hnormι (norm_nonneg _) zero_le_one
+          _ = 1 := one_mul 1
+  refine isBounded_of_forall_norm_le (C := C) ?_
+  rintro y ⟨n, rfl⟩
+  calc ‖bPoint DH (𝔮.comap (headToQ DH)) i ^ n‖
+      ≤ C * ‖ι (bPoint DH (𝔮.comap (headToQ DH)) i ^ n)‖ := hbound _
+    _ = C * ‖ι (bPoint DH (𝔮.comap (headToQ DH)) i) ^ n‖ := by rw [map_pow]
+    _ ≤ C * 1 := mul_le_mul_of_nonneg_left (hpow n) (le_of_lt hCpos)
+    _ = C := mul_one _
+
+end BPoint
 
 end WeightedParity

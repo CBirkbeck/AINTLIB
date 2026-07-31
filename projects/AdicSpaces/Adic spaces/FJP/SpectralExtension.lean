@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Mathlib.Analysis.Normed.Unbundled.SpectralNorm
+import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import «Adic spaces».FJP.FiniteJetRings
 
@@ -88,6 +89,14 @@ theorem extCompleteSpace :
   haveI : ContinuousSMul K L := IsBoundedSMul.continuousSMul
   exact FiniteDimensional.complete K L
 
+/-- The spectral norm makes a finite extension a normed `K`-space. -/
+noncomputable def extNormedSpace :
+    letI := extNormedField K L
+    NormedSpace K L :=
+  letI := extNormedField K L
+  haveI : Algebra.IsAlgebraic K L := Algebra.IsAlgebraic.of_finite K L
+  spectralNorm.normedSpace K L
+
 /-- The spectral norm makes a finite extension a topological `K`-module. -/
 theorem extContinuousSMul :
     letI := extNormedField K L
@@ -98,6 +107,32 @@ theorem extContinuousSMul :
   haveI : IsBoundedSMul K L := IsBoundedSMul.of_norm_smul_le
     NormedSpace.norm_smul_le
   exact IsBoundedSMul.continuousSMul
+
+/-- **A continuous injection out of a finite spectral extension is bounded
+below**: if a finite extension `L/K` injects, compatibly with `K`, into a
+normed `K`-algebra `M` whose scalars are norm-nonincreasing, then the spectral
+norm of `L` is dominated by the norm of the image.  (Finite-dimensional normed
+spaces have a unique topology: `LinearMap.exists_antilipschitzWith`.) -/
+theorem exists_norm_le_mul_norm_map (M : Type*) [NormedCommRing M]
+    [Algebra K M] (hM : ∀ (c : K) (x : M), ‖algebraMap K M c * x‖ ≤ ‖c‖ * ‖x‖)
+    (f : L →+* M) (hf : ∀ c : K, f (algebraMap K L c) = algebraMap K M c)
+    (hinj : Function.Injective ⇑f) :
+    letI := extNormedField K L
+    ∃ C : ℝ, 0 < C ∧ ∀ x : L, ‖x‖ ≤ C * ‖f x‖ := by
+  letI := extNormedField K L
+  letI : NormedSpace K L := extNormedSpace K L
+  letI : NormedSpace K M :=
+    { norm_smul_le := fun c x => by rw [Algebra.smul_def]; exact hM c x }
+  haveI hfdL : FiniteDimensional K L := ‹FiniteDimensional K L›
+  set g : L →ₗ[K] M :=
+    { toFun := f
+      map_add' := map_add f
+      map_smul' := fun c x => by
+        simp only [RingHom.id_apply, Algebra.smul_def, map_mul, hf] } with hgdef
+  obtain ⟨C, hCpos, hanti⟩ :=
+    @LinearMap.exists_antilipschitzWith K _ L _ _ M _ _ _ hfdL g
+      (LinearMap.ker_eq_bot.mpr hinj)
+  exact ⟨C, hCpos, fun x => ZeroHomClass.bound_of_antilipschitz g hanti x⟩
 
 /-- The spectral norm extends the base norm. -/
 theorem ext_norm_algebraMap (c : K) :

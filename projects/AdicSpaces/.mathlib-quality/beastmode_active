@@ -1,1 +1,1 @@
-FOCUS: BETA brick (iii) — power-bounded b-points in kappa(q); just landed continuous_mkKappaP (brick ii) axiom-clean. Alias fix: KappaP needs the AddCommGroup-shaped Module instance + haveI IsUniformAddGroup/IsTopologicalAddGroup before fin-dim bridge.
+FOCUS: BETA brick (iv) — the bounded evaluation eps := mvEvalHomBounded (mkKappaP, continuous_mkKappaP) bPoint (isBounded_range_bPoint_pow) composed with a generic toTopRestricted; then the polynomial formula (MvPolynomial.ringHom_ext) and Phi/closed-kernel/density.
