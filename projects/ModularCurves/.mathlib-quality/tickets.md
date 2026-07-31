@@ -30552,3 +30552,16 @@ mono_divisorTwistHom through the conjugation — mono-of-iso-conj) + algebra-com
 instantiation; (b) span v₀ = span (rP·rQ resp rP) identification-or-slot; (c) 3a-feed
 at D + per-section instantiations at kerP/kerQ ⟹ e2 + evaluation-equivs; (d) A-rows +
 [A4-c1] unimodularity; (e) named wrappers lineSection/verticalSection. Then GAP-A-5a.
+
+### [GAP-A-4 remainder a] DONE 2026-07-31
+Mono-chain closed: mono_divisorTwistHom → isLocallyInjective_divisorTwistHom
+(exposed core) → mono_restrictFunctor_map_of_isLocallyInjective (+ the injective
+restriction twin) → mono_unitEndo_twistChartMultiplier. Probes confirmed NO
+restrict/toSheaf mono-preservation instances exist — the loc-inj pipeline is the way.
+NEXT: (b) span (twistChartMultiplier) = span (chart generator) — hypothesis-slot vs
+the eTL-1-value computation (prefer SLOT: the consumers' evaluation matrices are
+computed against the b3-basis anyway, and 3a only needs SOME nzd generator with the
+two evaluation equivs — check whether the interface can take v₀ ITSELF as the
+generator with nzd-of-v₀ from mono!! — mult-v₀-mono ⟺ v₀-nzd-on-sections: the CORE's
+Mono-slot IS the nzd; the span-identification may be DEFERRABLE entirely to [A4-c1]);
+(c) e2-wiring instantiations; (d) A-rows + unimodularity; (e) wrappers.
