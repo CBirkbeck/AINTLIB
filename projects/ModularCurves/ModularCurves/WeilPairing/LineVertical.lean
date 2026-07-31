@@ -712,6 +712,37 @@ theorem sectionsDivisor_pair_ideal_span {S : Scheme.{u}} {π : C ⟶ S} [IsSepar
     rfl]
   rw [hP, hQ, Ideal.span_singleton_mul_span_singleton]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The single-chart restriction trivialization of an ideal module with a principal
+nonzerodivisor generator (the `isInvertible_idealModule` tail, extracted): the
+generator morphism is an isomorphism onto the restricted ideal module. -/
+noncomputable def idealModuleRestrictTrivOfSpan {J : C.IdealSheafData}
+    (U : C.affineOpens) (g : Γ(C, U.1))
+    (hspan : J.ideal U = Ideal.span {g})
+    (hnzd : g ∈ nonZeroDivisors Γ(C, U.1)) :
+    (restrictFunctor U.1.ι).obj (idealModule J) ≅ unitObj U.1.toScheme := by
+  have hgmem : g ∈ idealSections J (Opposite.op U.1) := by
+    rw [show idealSections J (Opposite.op U.1) = J.ideal U from
+      J.ker_subschemeι_app U, hspan]
+    exact Ideal.mem_span_singleton_self g
+  haveI : IsIso (idealGenHom J U.1 g hgmem) := by
+    refine isIso_of_bijective_app_on_basis _
+      {W | ∃ (b : Γ(C, U.1)) (_ : C.basicOpen b ≤ U.1),
+        W = U.1.ι ⁻¹ᵁ C.basicOpen b} ?_ ?_
+    · intro x Uo hxUo
+      have hxV : U.1.ι.base x ∈ U.1 := x.2
+      obtain ⟨b, hble, hxb⟩ := U.2.exists_basicOpen_le
+        (V := U.1.ι ''ᵁ Uo) ⟨U.1.ι.base x, ⟨x, hxUo, rfl⟩⟩ hxV
+      refine ⟨U.1.ι ⁻¹ᵁ C.basicOpen b,
+        ⟨b, hble.trans (U.1.ι_image_le Uo), rfl⟩, hxb, ?_⟩
+      calc U.1.ι ⁻¹ᵁ C.basicOpen b
+          ≤ U.1.ι ⁻¹ᵁ (U.1.ι ''ᵁ Uo) := fun y hy => hble hy
+        _ = Uo := Scheme.Hom.preimage_image_eq _ Uo
+    · rintro W ⟨b, hb, rfl⟩
+      exact bijective_idealGenHom_app J U g hspan hnzd hgmem b hb
+  exact (asIso (idealGenHom J U.1 g hgmem)).symm
+
 end LineAssembly
 
 end Twist
