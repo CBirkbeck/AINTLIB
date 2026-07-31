@@ -502,6 +502,65 @@ theorem ker_baseSectionsMap_cokernel_eq_span_crossProduct
     rw [e2.symm_apply_apply, map_zero] at h3
     exact h3
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[A4-e] The vertical**: the rank-two analogue — the kernel of the restriction to
+a degree-one divisor is spanned by the perpendicular of the evaluation row. -/
+theorem ker_baseSectionsMap_cokernel_eq_span_perp
+    {M N : C.Modules} (f : M ⟶ N)
+    (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π N))
+    (e1 : Scheme.Modules.baseSections π (Limits.cokernel f) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      Γ(S, (⊤ : S.Opens)))
+    (a : Fin 2 → Γ(S, (⊤ : S.Opens)))
+    (ha : ∀ j, a j =
+      e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) (b2 j)))
+    (huni : Ideal.span (Set.range a) = ⊤) :
+    LinearMap.ker
+        ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens))
+        {b2.equivFun.symm ![-(a 1), a 0]} := by
+  have hcoord : ∀ x : Scheme.Modules.baseSections π N,
+      e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) x) =
+        a ⬝ᵥ (b2.equivFun x) := by
+    intro x
+    conv_lhs => rw [← b2.sum_equivFun x]
+    rw [map_sum, map_sum]
+    rw [show (a ⬝ᵥ (b2.equivFun x)) = ∑ j, a j * b2.equivFun x j from rfl]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [_root_.map_smul, _root_.map_smul, ha j]
+    show b2.equivFun x j • _ = _
+    rw [smul_eq_mul, mul_comm]
+  ext x
+  constructor
+  · intro hx
+    have hx0 : a ⬝ᵥ (b2.equivFun x) = 0 := by
+      rw [← hcoord x]
+      have hzero : (Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) x = 0 := hx
+      rw [hzero, map_zero]
+    have hmem := ModularCurves.mem_span_perp_of_dotProduct_eq_zero
+      a (b2.equivFun x) huni hx0
+    obtain ⟨r, hr⟩ := Submodule.mem_span_singleton.mp hmem
+    refine Submodule.mem_span_singleton.mpr ⟨r, ?_⟩
+    have := congrArg (b2.equivFun.symm) hr
+    rw [_root_.map_smul] at this
+    simpa using this
+  · intro hx
+    obtain ⟨r, rfl⟩ := Submodule.mem_span_singleton.mp hx
+    have hker : e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+        (r • b2.equivFun.symm ![-(a 1), a 0])) = 0 := by
+      rw [hcoord]
+      rw [_root_.map_smul]
+      rw [show b2.equivFun (b2.equivFun.symm ![-(a 1), a 0]) =
+        ![-(a 1), a 0] from b2.equivFun.apply_symm_apply _]
+      rw [dotProduct_smul]
+      rw [show a ⬝ᵥ ![-(a 1), a 0] = 0 from ModularCurves.dotProduct_perp a]
+      exact smul_zero r
+    have h3 := congrArg e1.symm hker
+    rw [e1.symm_apply_apply, map_zero] at h3
+    exact h3
+
 end LineAssembly
 
 end Twist

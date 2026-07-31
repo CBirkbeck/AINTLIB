@@ -92,4 +92,42 @@ theorem span_crossProduct_le_ker (v w : Fin 3 → R) (u : Fin 3 → R)
   · rw [dotProduct_smul, dot_self_cross, smul_zero]
   · rw [dotProduct_smul, dot_cross_self, smul_zero]
 
+/-- The two-dimensional Cramer analogue for the vertical: the kernel of a single
+unimodular row `a` is spanned by its perpendicular `![-(a 1), a 0]`. -/
+theorem mem_span_perp_of_dotProduct_eq_zero (a u : Fin 2 → R)
+    (ha : Ideal.span (Set.range a) = ⊤)
+    (h : a ⬝ᵥ u = 0) :
+    u ∈ Submodule.span R {![-(a 1), a 0]} := by
+  have h1 : (1 : R) ∈ Ideal.span (Set.range a) := by rw [ha]; trivial
+  obtain ⟨b, hb⟩ := (Submodule.mem_span_range_iff_exists_fun R).mp h1
+  have hb' : b 0 * a 0 + b 1 * a 1 = 1 := by
+    simpa [Fin.sum_univ_two, smul_eq_mul] using hb
+  have hdot : a 0 * u 0 + a 1 * u 1 = 0 := by
+    simpa [dotProduct, Fin.sum_univ_two] using h
+  refine Submodule.mem_span_singleton.mpr ⟨b 0 * u 1 - b 1 * u 0, ?_⟩
+  funext j
+  fin_cases j
+  · show (b 0 * u 1 - b 1 * u 0) * (-(a 1)) = u 0
+    have : (b 0 * u 1 - b 1 * u 0) * (-(a 1)) - u 0 =
+        (b 0 * (-(a 0 * u 0 + a 1 * u 1)) +
+          (b 0 * a 0 + b 1 * a 1 - 1) * u 0) := by ring
+    have hz : (b 0 * u 1 - b 1 * u 0) * (-(a 1)) - u 0 = 0 := by
+      rw [this, hdot, hb']
+      ring
+    exact sub_eq_zero.mp hz
+  · show (b 0 * u 1 - b 1 * u 0) * a 0 = u 1
+    have : (b 0 * u 1 - b 1 * u 0) * a 0 - u 1 =
+        (b 1 * (-(a 0 * u 0 + a 1 * u 1)) +
+          (b 0 * a 0 + b 1 * a 1 - 1) * u 1) := by ring
+    have hz : (b 0 * u 1 - b 1 * u 0) * a 0 - u 1 = 0 := by
+      rw [this, hdot, hb']
+      ring
+    exact sub_eq_zero.mp hz
+
+/-- The perpendicular is annihilated by the row. -/
+theorem dotProduct_perp (a : Fin 2 → R) :
+    a ⬝ᵥ ![-(a 1), a 0] = 0 := by
+  simp [dotProduct, Fin.sum_univ_two]
+  ring
+
 end ModularCurves

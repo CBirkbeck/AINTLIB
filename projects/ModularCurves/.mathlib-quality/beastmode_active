@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-d2] b3-coordinate bridge — express ker(baseSectionsMap of cokernel.pi of divisorTwistHom) as joint dot-product kernel in b3-coordinates; recon baseSections-coordinate API (sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator) first
+FOCUS: [GAP-A-4/A4-e2] rank-2 divisor-restriction coordinates — recon the succ-coker rank-1 iso construction (PoleSheafSuccessorBasis/Sections) + sectionsDivisor product structure; design the 2-section filtration splitting

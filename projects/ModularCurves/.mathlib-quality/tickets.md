@@ -30235,3 +30235,28 @@ GAP-A-4 remaining leaves (architecture LOCKED):
 - **[A4-e]** vertical: rank-1 analogue (2×2 matrix, kernel = det-complement — needs a
   Fin-2 Cramer variant or the same file's 2-case; cheaper).
 - Then [GAP-A-5a/b/c] consume ℓ, v per board.
+
+### [A4-e] vertical assembly DONE + [A4-e2] RECON 2026-07-31
+
+`ker_baseSectionsMap_cokernel_eq_span_perp` (rank-2 source, rank-1 target — the
+vertical) PROVEN, plus the Fin-2 Cramer `mem_span_perp_of_dotProduct_eq_zero` +
+`dotProduct_perp` in CrossProductKernel.lean. Both assemblies (line d3 + vertical e)
+now hypothesis-slotted on (basis, target-coordinates, unimodularity).
+
+[A4-e2]-recon (the target-coordinates leaf): TWO ideal-module presentations coexist:
+(a) `Scheme.Modules.idealModule J` (Picard, subtype-presheaf; my divisorTwistHom);
+(b) `ModularCurves.idealModule f := kernel (unitToPushforwardObjUnit f)` (PoleSheaf,
+abelian kernel of morphisms). Discoveries for (b):
+- `idealModuleToUnit f := kernel.ι ...` and **`idealModuleCokerIsoPushforwardUnit f :
+  cokernel (idealModuleToUnit f) ≅ pushforward f (unitObj)`** for ANY closed immersion
+  (PoleSheafQuasicoherent.lean:213) — the untwisted restriction-cokernel is already
+  the pushforward skyscraper.
+- The rank-1 succ-coker iso (SuccessorSections:115) = bijective-restrict-to-U
+  (two-cover, complement of the section) ≪≫ restrict-iso-to-pushforward-unit ≪≫
+  `baseSectionsRestrictPushforwardUnitIsoOfSection` (ForMathlib, SECTION-GENERIC).
+e2-design options: (i) redo the twist in presentation (b) at D.subschemeι +
+projection-formula-style pushforward⊗L; (ii) keep (a)-twist and mirror the
+skyscraper two-cover argument at supp D = range P ∪ range Q with the 2-step
+ker-P-filtration (uniform in P=Q). DECIDE by checking what GAP-A-5's div-identities
+consume; the (a)-presentation feeds nonempty_pullback_idealModule (GAP-A-7 transport)
+directly, which GAP-A-5b's universal-pair argument needs — leaning (ii).
