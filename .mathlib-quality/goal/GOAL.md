@@ -5147,3 +5147,47 @@ one verified change and one unreviewed one, with no way to attribute a failure.
 → **Either hold the patch, or — if an edit has already happened — check whether the running
   build has passed that module before trusting its verdict.** The check is one grep against the
   log's `Built` lines and settles it in a second.
+
+## Profiler bug: Greek-named locals were invisible, so the rankings undercounted
+
+The dependency profiler behind the ranked target list matched binders with
+`\s*(have|obtain|set|let)\s+([a-zA-Z_][\w'₀-₉]*)`. That character class excludes Greek letters,
+so **every local whose name starts with one was invisible**: `ν_loc`, `γu`, `Φ`, `ϖ`, `π`, `ρ`.
+In this codebase those are everywhere.
+
+Caught it on `extendToLocalization_isContinuous_locTopology_of_bounded`, where the profiler
+reported "no `set`/`let`-bound dependencies" for a block that uses `ν_loc` — `set`-bound three
+lines above it. The consequence is not cosmetic: "is anything in this block `set`/`let`-bound"
+is exactly the question that decides whether a **verbatim lift** is possible, and the answer was
+being reported optimistically.
+
+Fixed by matching `([^\s:={(\[]+)` — any run up to a delimiter — which also picks up `J₀`, `hm'`
+and every other previously-caught name.
+
+→ **A character class written for ASCII identifiers is a silent filter in a Lean codebase.**
+  It fails open (reports fewer dependencies, i.e. an easier-looking extraction), which is the
+  dangerous direction.
+
+### Corrected ranking — the best targets were ones I had deprioritised
+
+`deps` = derived locals the dominant `have` uses; `s/l` = how many are `set`/`let`-bound
+(non-zero means no verbatim lift).
+
+| gap | need | joins | have | deps | s/l | proof |
+|---|---|---|---|---|---|---|
+| −84 | 108 | 1 | **192** | **0** | 0 | `FaithfulLocLift.mem_plus_of_forall_spa_vle_one` |
+| −81 | 97 | 3 | **176** | **0** | 0 | `HuberLocLift.mem_plus_of_forall_spa_vle_one_huber` |
+| −89 | 56 | 2 | 144 | 4 | 0 | `LaurentCoverExact.ker_deltaMap_gen_le_range_epsilonHom_gen` |
+| −25 | 188 | 9 | 205 | **0** | 0 | `WedhornCechAcyclicity.unitCover_sq_minus_dense` |
+| −16 | 97 | 5 | 109 | 1 | 0 | `RestrictionInjective.resIHom_injective` |
+| −23 | 150 | 10 | 164 | 0 | 0 | `WedhornCechAcyclicity.unitCover_sq_plus_dense` |
+
+A **192-line dominant `have` with zero derived dependencies** is the ideal case, and it has a
+known explanation: such a block is the *first* thing in its proof, so no locals exist yet to
+depend on. That is exactly the shape of the successful `hglue` / `hBz` / `hCz` lifts earlier in
+this campaign.
+
+These are now the top targets, and they carry the largest deficits in the tree — including the
+two `unitCover_sq_*_dense` proofs previously costed-and-deferred as unsplittable mirror twins.
+Their *mirror* structure is still intractable, but that is a separate question from whether each
+one individually has a liftable dominant block, and the corrected profiler says both do.
