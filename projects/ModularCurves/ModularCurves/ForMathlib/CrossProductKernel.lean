@@ -124,6 +124,40 @@ theorem mem_span_perp_of_dotProduct_eq_zero (a u : Fin 2 → R)
       ring
     exact sub_eq_zero.mp hz
 
+/-- **Surjectivity makes the cross product unimodular** (Binet–Cauchy): if the two
+dot-product rows `v, w` jointly surject onto `R²`, then preimages `n₀, n₁` of the
+standard basis give `(v ⨯₃ w) ⬝ᵥ (n₀ ⨯₃ n₁) = det I₂ = 1`, so the coordinates of the
+cross product generate the unit ideal. This discharges the unimodularity hypothesis of
+`mem_span_crossProduct_of_dotProduct_eq_zero` from cohomological surjectivity alone —
+no evaluation-matrix minors are ever computed. -/
+theorem span_range_crossProduct_eq_top_of_surjective (v w : Fin 3 → R)
+    (hsurj : ∀ y : Fin 2 → R, ∃ u : Fin 3 → R, v ⬝ᵥ u = y 0 ∧ w ⬝ᵥ u = y 1) :
+    Ideal.span (Set.range (v ⨯₃ w)) = ⊤ := by
+  obtain ⟨n₀, hv₀, hw₀⟩ := hsurj ![1, 0]
+  obtain ⟨n₁, hv₁, hw₁⟩ := hsurj ![0, 1]
+  have hbc2 : (v ⨯₃ w) ⬝ᵥ (n₀ ⨯₃ n₁) = 1 := by
+    have h := cross_dot_cross v w n₀ n₁
+    rw [show v ⬝ᵥ n₀ = 1 from by simpa using hv₀,
+      show w ⬝ᵥ n₁ = 1 from by simpa using hw₁,
+      show v ⬝ᵥ n₁ = 0 from by simpa using hv₁,
+      show w ⬝ᵥ n₀ = 0 from by simpa using hw₀] at h
+    rw [h]
+    ring
+  rw [Ideal.eq_top_iff_one]
+  rw [show (1 : R) = (v ⨯₃ w) ⬝ᵥ (n₀ ⨯₃ n₁) from hbc2.symm]
+  rw [dotProduct]
+  exact Submodule.sum_mem _ fun i _ =>
+    Ideal.mul_mem_right _ _ (Ideal.subset_span ⟨i, rfl⟩)
+
+/-- The rank-one analogue: a surjective single row is unimodular. -/
+theorem span_range_eq_top_of_surjective (a : Fin 2 → R)
+    (hsurj : ∀ y : R, ∃ u : Fin 2 → R, a ⬝ᵥ u = y) :
+    Ideal.span (Set.range a) = ⊤ := by
+  obtain ⟨u, hu⟩ := hsurj 1
+  rw [Ideal.eq_top_iff_one, show (1 : R) = a ⬝ᵥ u from hu.symm, dotProduct]
+  exact Submodule.sum_mem _ fun i _ =>
+    Ideal.mul_mem_right _ _ (Ideal.subset_span ⟨i, rfl⟩)
+
 /-- The perpendicular is annihilated by the row. -/
 theorem dotProduct_perp (a : Fin 2 → R) :
     a ⬝ᵥ ![-(a 1), a 0] = 0 := by

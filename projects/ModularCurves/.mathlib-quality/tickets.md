@@ -30585,3 +30585,34 @@ GAP-A-4 remaining: (b/c) consumer-side instantiations of the e2-slots at D/kerP/
 (eI via idealModuleRestrictTrivOfSpan + product-span; htriv via one_mem_...ker +
 products; hMono via the mono chain; hv/eP/eQ from the chart computations tied to
 [A4-c1] unimodularity); (d) A-rows; (e) wrappers. The HEAVY machinery is DONE.
+
+## [GAP-A-4 consumer REPLAN 2026-07-31] — two structural discoveries kill the hard leaves
+**(1) UNIMODULARITY = SURJECTIVITY (Cauchy-Binet).** huni (span(range(A0 ⨯₃ A1)) = ⊤)
+follows from SURJECTIVITY of baseSectionsMap(coker.π) — which IS the H¹-workhorse
+`baseSectionsMap_cokernel_surjective_of_subsingleton_H_one` — via the Binet-Cauchy
+identity (v⨯w)⬝(n₀⨯n₁) = (v⬝n₀)(w⬝n₁)−(v⬝n₁)(w⬝n₀) applied to preimages n₀,n₁ of the
+std basis: 1 = det I₂ ∈ span(range cross). NO chord-tangent minors, NO row-values, NO
+per-entry evaluation computations anywhere in GAP-A-4. H¹-vanishing stays a SLOT
+(same discipline as GAP-A-3's hH1/hH2 — supplied later by the fibrewise machinery).
+**(2) hv WITHOUT VALUE-CHASING THE .some-OPAQUE tensorTriv.** span{c}=span{g'}
+(c := twistChartMultiplier, g' := chart-⊤ transport of the pair generator g=rP·rQ):
+- (≥) g' ∈ span c: pure ranges — eL-app-image(range(twist-restr-app-⊤)) =
+  range(E_c-app-⊤) = span c via the PROVEN square twist≫eL = tensorTriv≫E_c +
+  app-surjectivity of the iso; g'-multiples ⊆ eL(range) via divisorTwistHom_app_unit
+  (unit-image tmuls g⊗l).
+- (≤) c ∈ span g': the composite twist-restr ≫ eL ≫ coker.π(unitEndo g') is ZERO by
+  hom_eq_zero_of_locally_zero (sections locally unit-images; actionPre-values locally
+  in span(g|basic)=localized ideal via map_ideal_basicOpen; coker.π kills E-range).
+  Then baseSectionsMap_exact_cokernel at π := 𝟙 (U.toScheme) [Mono E_g'] turns
+  ker(coker.π-app-⊤) into range(E_g'-app-⊤) = span g' ∋ c. NO sheaf-gluing.
+**Toolkit found in CartierDivisor.lean (de-private as needed):** SectionsIdeal.
+exists_multiChart (:1042 all-kernels-principal-nzd charts), ideal_prod, support_prod
+(:1088), basicOpen_span_nzd (:1028 nzd localizes), quotient_prod/free_quotient
+(:1115/:1173 KM 1.1.2 — subsumes rank-2 quotient freeness via σ-retractions),
+piece_free (:1260 THE model: σW from appLE + KerPrincipal.retraction/.ker_app).
+eP/eQ := Ideal.quotientKerAlgEquivOfRightInverse on σP := P.appLE-alghom.
+**Execution order (each a commit):** [A4-uni] Binet-Cauchy → [A4-hv i-iv] →
+[A4-support] one_mem_idealSections_of_disjoint_support + de-privates → [A4-eval]
+eP/eQ-builder → [A4-consumer] e2-at-sections-pair → [A4-line] lineSection wrapper
+(ker-span via crossProduct + surj-slot) → [A4-vert] rank-ONE sibling interface
+(same pipeline, eP-only tail) + verticalSection. THEN GAP-A-5a.
