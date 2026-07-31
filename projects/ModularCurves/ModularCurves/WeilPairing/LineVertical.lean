@@ -1411,6 +1411,66 @@ theorem nonempty_baseSections_cokernel_unitEndo_equiv {Y S : Scheme.{u}}
     (Submodule.quotEquivOfEq _ _ hkerψ)).trans
     (ψ.quotKerEquivOfSurjective hψsurj)⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency.types false in
+/-- The chart trivialization of the restricted twisted tensor: restriction commutes
+with the sheafified tensor along the open immersion, both factors trivialize, and the
+unit absorbs. -/
+noncomputable def twistChartTensorTriv (J : C.IdealSheafData) (L : C.Modules)
+    (U : C.Opens)
+    (eI : (restrictFunctor U.ι).obj (idealModule J) ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme) :
+    (restrictFunctor U.ι).obj (tensorObj (idealModule J) L) ≅
+      unitObj U.toScheme :=
+  (restrictFunctorIsoPullback U.ι).app
+      (tensorObj (idealModule J) L) ≪≫
+    (nonempty_pullback_tensorObj_of_isOpenImmersion U.ι
+      (idealModule J) L).some ≪≫
+    tensorObjCongr
+      (((restrictFunctorIsoPullback U.ι).app (idealModule J)).symm ≪≫ eI)
+      (((restrictFunctorIsoPullback U.ι).app L).symm ≪≫ eL) ≪≫
+    (nonempty_tensorObj_unit_iso (unitObj U.toScheme)).some
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The conjugated multiplier of the restricted twist. -/
+noncomputable def twistChartMultiplier (J : C.IdealSheafData) (L : C.Modules)
+    (U : C.Opens)
+    (eI : (restrictFunctor U.ι).obj (idealModule J) ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme) :
+    Γ(U.toScheme, (⊤ : U.toScheme.Opens)) :=
+  ((twistChartTensorTriv J L U eI eL).inv ≫
+    (restrictFunctor U.ι).map (divisorTwistHom J L) ≫ eL.hom).val.app
+      (Opposite.op (⊤ : U.toScheme.Opens))
+      (1 : Γ(U.toScheme, (⊤ : U.toScheme.Opens)))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The restricted twist's cokernel is the multiplier's cokernel**: the tautological
+square through the trivializations, with the endo classified as multiplication. -/
+noncomputable def cokernelRestrictTwistUnitEndoIso (J : C.IdealSheafData)
+    (L : C.Modules) (U : C.Opens)
+    (eI : (restrictFunctor U.ι).obj (idealModule J) ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme) :
+    Limits.cokernel ((restrictFunctor U.ι).map (divisorTwistHom J L)) ≅
+      Limits.cokernel (ModularCurves.unitEndomorphismOfTopSection
+        (twistChartMultiplier J L U eI eL)) := by
+  refine Limits.cokernel.mapIso _ _
+    (twistChartTensorTriv J L U eI eL) eL ?_
+  have hd := unit_endo_eq_ofTopSection
+    ((twistChartTensorTriv J L U eI eL).inv ≫
+      (restrictFunctor U.ι).map (divisorTwistHom J L) ≫ eL.hom)
+  calc (restrictFunctor U.ι).map (divisorTwistHom J L) ≫ eL.hom
+      = (twistChartTensorTriv J L U eI eL).hom ≫
+        ((twistChartTensorTriv J L U eI eL).inv ≫
+          (restrictFunctor U.ι).map (divisorTwistHom J L) ≫ eL.hom) :=
+        (Iso.hom_inv_id_assoc _ _).symm
+    _ = (twistChartTensorTriv J L U eI eL).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          (twistChartMultiplier J L U eI eL) := by
+        rw [hd]
+        rfl
+
 end LineAssembly
 
 end Twist
