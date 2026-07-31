@@ -30279,3 +30279,15 @@ leaves:
    affine-QC — or directly the two-cover H⁰-computation).
 Then A := evaluation rows against e2, [A4-c1] unimodularity, and the named
 lineSection/verticalSection wrappers close GAP-A-4.
+
+### [A4-e2] leaves 1+2 DONE 2026-07-31
+- leaf 1 `isZero_restrict_cokernel_divisorTwistHom` (+ `divisorTwistHom_app_unit`
+  triangle-eval): 1-in-ideal ⟹ twist sectionwise-surjective via η-witness ⟹ epi ⟹
+  cokernel-restrict zero (toSheaf epi-reflect + PreservesCokernel.iso).
+- leaf 2 `cokernel_divisorTwistHom_bijective_restrict`: two-cover concentration via
+  TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton with leaf-1 vanishers
+  at V and U ⊓ V (needed import: EllipticCurve.PoleSheafQuasicoherent for
+  subsingleton_sections_of_isZero_restrict).
+- leaf 3 REMAINS: on-U rank-2 identification (ker-P filtration; the SuccessorSections
+  pattern per section) → e2 : baseSections(coker) ≃ₗ Γ(S,⊤)² for
+  D = sectionsDivisor ![P,Q]. Then A-rows, [A4-c1] unimodularity, named wrappers.

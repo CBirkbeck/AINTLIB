@@ -7,6 +7,7 @@ import ModularCurves.Picard.IdealModule
 import ModularCurves.ForMathlib.CrossProductKernel
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 
 /-!
 # The line and the vertical as rank-one kernels ([GAP-A-4])
@@ -652,6 +653,40 @@ theorem isZero_restrict_cokernel_divisorTwistHom (V : C.Opens)
     ((restrictFunctor V.ι).map (divisorTwistHom J L))
   exact hz.of_iso (Limits.PreservesCokernel.iso (restrictFunctor V.ι)
     (divisorTwistHom J L))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Concentration on a divisor neighborhood**: global sections of the twist cokernel
+restrict bijectively to any open whose complementary open misses the divisor. -/
+theorem cokernel_divisorTwistHom_bijective_restrict (U V : C.Opens)
+    (hUV : U ⊔ V = ⊤)
+    (htriv : ∀ (W : C.Opens), W ≤ V →
+      (1 : Γ(C, W)) ∈ idealSections J (Opposite.op W)) :
+    Function.Bijective fun s :
+        Γ(Limits.cokernel (divisorTwistHom J L), (⊤ : C.Opens)) ↦
+      (Limits.cokernel (divisorTwistHom J L)).presheaf.map
+        (homOfLE (le_top : U ≤ (⊤ : C.Opens))).op s := by
+  let M := Limits.cokernel (divisorTwistHom J L)
+  let F := (SheafOfModules.toSheaf C.ringCatSheaf).obj M
+  have hzeroV : Limits.IsZero ((restrictFunctor V.ι).obj M) :=
+    isZero_restrict_cokernel_divisorTwistHom J L V htriv
+  haveI hVsections : Subsingleton Γ(M, V) :=
+    Scheme.Modules.subsingleton_sections_of_isZero_restrict M V hzeroV
+  haveI hVsheaf : Subsingleton (ToType (F.1.obj (Opposite.op V))) := by
+    change Subsingleton Γ(M, V)
+    infer_instance
+  have htrivOverlap : ∀ (W : C.Opens), W ≤ U ⊓ V →
+      (1 : Γ(C, W)) ∈ idealSections J (Opposite.op W) :=
+    fun W hW => htriv W (le_trans hW inf_le_right)
+  have hzeroOverlap : Limits.IsZero ((restrictFunctor (U ⊓ V).ι).obj M) :=
+    isZero_restrict_cokernel_divisorTwistHom J L (U ⊓ V) htrivOverlap
+  haveI hoverlap : Subsingleton Γ(M, U ⊓ V) :=
+    Scheme.Modules.subsingleton_sections_of_isZero_restrict M (U ⊓ V)
+      hzeroOverlap
+  haveI hoverlapSheaf : Subsingleton (ToType (F.1.obj (Opposite.op (U ⊓ V)))) := by
+    change Subsingleton Γ(M, U ⊓ V)
+    infer_instance
+  exact TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton F hUV
 
 end LineAssembly
 

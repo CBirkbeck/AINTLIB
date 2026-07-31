@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 leaf 1] support-vanishing — coker(divisorTwistHom).restrict V is zero when J trivial on V; restrictFunctor-preserves-colimits + restricted-inclusion-iso; write in LineVertical.lean
+FOCUS: [GAP-A-4/A4-e2 leaf 2] two-cover bijective-restrict for coker(divisorTwistHom) at U covering the ideal cosupport — mirror sectionPoleSheafSuccCoker_bijective_restrict_of_neighborhood with leaf-1 as the V-side vanisher; recon TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton signature first
