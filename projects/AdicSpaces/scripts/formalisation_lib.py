@@ -374,6 +374,9 @@ def extract_all(project_root: Path) -> list[Decl]:
 #: "all of the adic spaces development" is covered rather than only the flagged parts.
 GROUPS: list[tuple[str, str, re.Pattern]] = [
     ("fjp", "The finite-jet pinching algebra ([FJP])", re.compile(r"(?:^|\.)FJP\.")),
+    ("scottish-book",
+     "The Nonarchimedean Scottish Book — Kedlaya's open-problem list, one module per problem",
+     re.compile(r"(?:^|\.)ScottishBook\.")),
     ("examples", "Worked examples and numbered results reduced to concrete rings",
      re.compile(r"(?:^|\.)(Example[A-Za-z0-9]*|Cor\d+|Lemma\d+|Prop\d+|Thm\d+)$")),
     ("adic-spaces", "Core adic-spaces development", re.compile(r".")),
@@ -385,3 +388,83 @@ def group_of(module: str) -> str:
         if rx.search(module):
             return key
     return "adic-spaces"
+
+
+# ---------------------------------------------------------------------------
+# The Nonarchimedean Scottish Book
+# ---------------------------------------------------------------------------
+
+#: `Adic spaces/ScottishBook/<stage>/ProblemNNN.lean`, where the stage records how far the
+#: formalisation has gone: `Described` = prose only, `Stated` = a Lean statement exists.
+SCOTTISH_DIR = "ScottishBook"
+
+_SB_NUM = re.compile(r"Problem0*(\d+)")
+_SB_FIELD = {
+    "proposer": re.compile(r"^\*\*Proposer:\*\*\s*(.+?)\s*$", re.M),
+    "date": re.compile(r"^\*\*Date:\*\*\s*(.+?)\s*$", re.M),
+}
+_SB_STATUS = re.compile(r"^##\s*Status\s*$(.*?)(?=^##\s|\Z)", re.M | re.S)
+
+
+def _sb_literature_status(body: str) -> tuple[str, str]:
+    """(verdict, verbatim first sentence) of the `## Status` section.
+
+    Verdict is the status **in the literature**, not in Lean — these are open problems, so a
+    `sorry` here is the honest state of mathematics rather than unfinished work, and the two
+    must not be conflated.
+    """
+    m = _SB_STATUS.search(body)
+    if not m:
+        return "unknown", ""
+    text = " ".join(l.strip() for l in m.group(1).strip().split("\n") if l.strip())
+    if not text:
+        return "unknown", ""
+    low = text.lower()
+    if low.startswith("resolved") or low.startswith("likely resolved"):
+        verdict = "resolved"
+    elif low.startswith("partially resolved"):
+        verdict = "partial"
+    elif low.startswith("open"):
+        verdict = "open"
+    else:
+        verdict = "unknown"
+    first = re.split(r"(?<=\.)\s", text)[0]
+    return verdict, first[:200]
+
+
+def scottish_book_problems(project_root: Path, decls: list[Decl] | None = None) -> list[dict]:
+    """One record per Scottish Book problem file, sorted by problem number."""
+    root = library_root(project_root) / SCOTTISH_DIR
+    if not root.is_dir():
+        return []
+    if decls is None:
+        decls = extract_all(project_root)
+    per_module: dict[str, list[Decl]] = {}
+    for d in decls:
+        per_module.setdefault(d.module, []).append(d)
+
+    out: list[dict] = []
+    for path in sorted(root.rglob("Problem*.lean")):
+        body = path.read_text(errors="replace")
+        mod = module_name(project_root, path)
+        ds = per_module.get(mod, [])
+        num = _SB_NUM.search(path.stem)
+        verdict, sentence = _sb_literature_status(body)
+        rec = {
+            "problem": int(num.group(1)) if num else 0,
+            "stage": path.parent.name.lower(),      # described | stated
+            "module": mod,
+            "literature_status": verdict,
+            "declarations": len(ds),
+            "with_sorry": sum(d.sorry for d in ds),
+            "proved": sum(not d.sorry for d in ds),
+        }
+        for k, rx in _SB_FIELD.items():
+            m = rx.search(body)
+            if m:
+                rec[k] = m.group(1)
+        if sentence:
+            rec["status_note"] = sentence
+        out.append(rec)
+    out.sort(key=lambda r: r["problem"])
+    return out

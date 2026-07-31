@@ -27,11 +27,11 @@ references:
     title: 'The Stacks Project'
 summary:
   modules: 260
-  declarations: 6989
-  public: 6274
-  documented: 6027
+  declarations: 6986
+  public: 6271
+  documented: 6028
   declarations_with_sorry: 130
-  results: 767
+  results: 768
   source_results: 173
 groups:
   - id: fjp
@@ -41,6 +41,13 @@ groups:
     results: 78
     source_results: 23
     with_sorry: 0
+  - id: scottish-book
+    description: 'The Nonarchimedean Scottish Book — Kedlaya''s open-problem list, one module per problem'
+    modules: 40
+    declarations: 67
+    results: 0
+    source_results: 0
+    with_sorry: 48
   - id: examples
     description: 'Worked examples and numbered results reduced to concrete rings'
     modules: 7
@@ -50,11 +57,420 @@ groups:
     with_sorry: 0
   - id: adic-spaces
     description: 'Core adic-spaces development'
-    modules: 241
-    declarations: 6084
-    results: 649
+    modules: 201
+    declarations: 6014
+    results: 650
     source_results: 153
-    with_sorry: 130
+    with_sorry: 82
+scottish_book:
+  description: 'The Nonarchimedean Scottish Book (Kedlaya''s problem list)'
+  problems: 40
+  stated: 36
+  described: 4
+  resolved_in_literature: 8
+  open_in_literature: 30
+  declarations: 67
+  proved_in_lean: 19
+  unproved_in_lean: 48
+  entries:
+    - problem: 1
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem001'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '17 December 2015'
+      status_note: Open.
+    - problem: 2
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem002'
+      literature_status: partial
+      declarations: 3
+      with_sorry: 3
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '17 December 2015'
+      status_note: 'Partially resolved (counterexample known; open for stably uniform).'
+    - problem: 3
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem003'
+      literature_status: resolved
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'David Hansen'
+      date: '17 December 2015'
+      status_note: 'RESOLVED: Yes.'
+    - problem: 4
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem004'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'David Hansen'
+      date: '18 December 2015'
+      status_note: Open.
+    - problem: 5
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem005'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'David Hansen'
+      date: '18 December 2015'
+      status_note: Open.
+    - problem: 6
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem006'
+      literature_status: open
+      declarations: 2
+      with_sorry: 1
+      proved: 1
+      proposer: 'David Hansen'
+      date: '18 December 2015'
+      status_note: Open.
+    - problem: 7
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem007'
+      literature_status: unknown
+      declarations: 6
+      with_sorry: 3
+      proved: 3
+      proposer: 'Kiran S. Kedlaya | **Date:** 18 December 2015'
+    - problem: 8
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem008'
+      literature_status: resolved
+      declarations: 2
+      with_sorry: 2
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '18 December 2015'
+      status_note: 'RESOLVED: Yes, both sheafiness and stable uniformity are independent of A+.'
+    - problem: 9
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem009'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '18 December 2015'
+      status_note: Open.
+    - problem: 10
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem010'
+      literature_status: resolved
+      declarations: 4
+      with_sorry: 2
+      proved: 2
+      proposer: 'Kiran Kedlaya'
+      date: '18 December 2015'
+      status_note: 'RESOLVED: No (counterexample by Kedlaya, 19 December 2016).'
+    - problem: 11
+      stage: described
+      module: '«Adic spaces».ScottishBook.Described.Problem011'
+      literature_status: open
+      declarations: 0
+      with_sorry: 0
+      proved: 0
+      proposer: 'Brian Conrad'
+      date: '18 December 2015'
+      status_note: Open.
+    - problem: 12
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem012'
+      literature_status: resolved
+      declarations: 10
+      with_sorry: 2
+      proved: 8
+      proposer: 'David Hansen'
+      date: '20 December 2015'
+      status_note: 'RESOLVED: Yes.'
+    - problem: 13
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem013'
+      literature_status: resolved
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'David Hansen'
+      date: '20 December 2015'
+      status_note: 'RESOLVED: No (Gabber counterexample).'
+    - problem: 14
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem014'
+      literature_status: open
+      declarations: 3
+      with_sorry: 3
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '26 December 2015'
+      status_note: Open.
+    - problem: 15
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem015'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '29 December 2015'
+      status_note: Open.
+    - problem: 16
+      stage: described
+      module: '«Adic spaces».ScottishBook.Described.Problem016'
+      literature_status: open
+      declarations: 0
+      with_sorry: 0
+      proved: 0
+      proposer: 'David Hansen'
+      date: '5 January 2016'
+      status_note: 'Open (partial results known).'
+    - problem: 17
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem017'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '11 January 2016'
+      status_note: 'Open in general (counterexample in strongly noetherian case).'
+    - problem: 18
+      stage: described
+      module: '«Adic spaces».ScottishBook.Described.Problem018'
+      literature_status: open
+      declarations: 0
+      with_sorry: 0
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '22 January 2016'
+      status_note: Open.
+    - problem: 19
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem019'
+      literature_status: resolved
+      declarations: 4
+      with_sorry: 2
+      proved: 2
+      proposer: 'Kiran Kedlaya'
+      date: '3 February 2016'
+      status_note: 'Likely RESOLVED (due to Gabber).'
+    - problem: 20
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem020'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '27 April 2016'
+      status_note: Open.
+    - problem: 21
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem021'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '28 April 2016'
+      status_note: Open.
+    - problem: 22
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem022'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '28 April 2016'
+      status_note: Open.
+    - problem: 23
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem023'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '28 April 2016'
+      status_note: Open.
+    - problem: 24
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem024'
+      literature_status: open
+      declarations: 2
+      with_sorry: 2
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '16 September 2016'
+      status_note: 'Open in general.'
+    - problem: 25
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem025'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '22 September 2016'
+      status_note: Open.
+    - problem: 26
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem026'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '2 January 2017'
+      status_note: Open.
+    - problem: 27
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem027'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '11 June 2017'
+      status_note: Open.
+    - problem: 28
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem028'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '11 October 2017'
+      status_note: Open.
+    - problem: 29
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem029'
+      literature_status: resolved
+      declarations: 3
+      with_sorry: 1
+      proved: 2
+      proposer: 'Alexander Zavyalov'
+      date: '6 June 2019'
+      status_note: 'RESOLVED: No (Gabber counterexample).'
+    - problem: 30
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem030'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Alexander Zavyalov'
+      date: '6 June 2019'
+      status_note: Open.
+    - problem: 31
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem031'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '29 November 2019'
+      status_note: Open.
+    - problem: 32
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem032'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '7 July 2020'
+      status_note: Open.
+    - problem: 33
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem033'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '7 July 2020'
+      status_note: Open.
+    - problem: 34
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem034'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '10 September 2020'
+      status_note: Open.
+    - problem: 35
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem035'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '29 October 2020'
+      status_note: Open.
+    - problem: 36
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem036'
+      literature_status: open
+      declarations: 2
+      with_sorry: 1
+      proved: 1
+      proposer: 'Kiran Kedlaya'
+      date: '5 February 2021'
+      status_note: Open.
+    - problem: 37
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem037'
+      literature_status: open
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '24 February 2021'
+      status_note: Open.
+    - problem: 38
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem038'
+      literature_status: resolved
+      declarations: 1
+      with_sorry: 1
+      proved: 0
+      proposer: Shahoseini
+      date: '24 February 2021'
+      status_note: 'RESOLVED: No.'
+    - problem: 39
+      stage: stated
+      module: '«Adic spaces».ScottishBook.Stated.Problem039'
+      literature_status: open
+      declarations: 2
+      with_sorry: 2
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '15 March 2021'
+      status_note: Open.
+    - problem: 40
+      stage: described
+      module: '«Adic spaces».ScottishBook.Described.Problem040'
+      literature_status: open
+      declarations: 0
+      with_sorry: 0
+      proved: 0
+      proposer: 'Kiran Kedlaya'
+      date: '26 April 2022'
+      status_note: Open.
 results:
   - decl: AdicCompletionBridge.map_surjective_of_surjective
     kind: theorem
@@ -2712,7 +3128,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».NonTateRationalOpenHomeomorph'
     file: 'projects/AdicSpaces/Adic spaces/NonTateRationalOpenHomeomorph.lean'
-    line: 229
+    line: 102
     status: proved
     digest: '7e27919f46a7'
     sources:
@@ -2725,7 +3141,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».NonTateRationalOpenHomeomorph'
     file: 'projects/AdicSpaces/Adic spaces/NonTateRationalOpenHomeomorph.lean'
-    line: 243
+    line: 116
     status: proved
     digest: '19a3c977b6a9'
     sources:
@@ -4470,7 +4886,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 78
+    line: 55
     status: proved
     digest: '5018148ede69'
     sources:
@@ -4483,7 +4899,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 117
+    line: 94
     status: proved
     digest: bbc136459fa8
     sources:
@@ -4495,7 +4911,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 786
+    line: 763
     status: proved
     digest: '934fff47a07f'
     sources:
@@ -4508,7 +4924,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 804
+    line: 781
     status: proved
     digest: '0e2fa50a9027'
     sources:
@@ -4521,7 +4937,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 844
+    line: 821
     status: proved
     digest: '13c3d28c2435'
     sources:
@@ -4539,7 +4955,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 876
+    line: 853
     status: proved
     digest: '5fd315f34d05'
     sources:
@@ -4552,7 +4968,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 923
+    line: 900
     status: proved
     digest: b94d5f590967
     sources:
@@ -4567,7 +4983,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 964
+    line: 941
     status: proved
     digest: eabd5120e4c4
     sources:
@@ -4580,7 +4996,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 987
+    line: 964
     status: proved
     digest: e357e7a7ed8a
     sources:
@@ -4593,7 +5009,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».RelativePieceKeystoneGen'
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    line: 1035
+    line: 1012
     status: proved
     digest: '07cdced4bb2f'
     sources:
@@ -4901,7 +5317,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».SheafyPair'
     file: 'projects/AdicSpaces/Adic spaces/SheafyPair.lean'
-    line: 462
+    line: 539
     status: proved
     digest: '10c60e4e4a44'
     sources:
@@ -4914,7 +5330,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».SheafyPair'
     file: 'projects/AdicSpaces/Adic spaces/SheafyPair.lean'
-    line: 545
+    line: 568
     status: proved
     digest: '11f96af0082c'
     sources:
@@ -5476,12 +5892,24 @@ results:
         at: '7.30'
         kind: Remark
     statement: 'The rational-basis trick (Wedhorn Remark 7.30-adjacent): a Spa-point in a finite intersection of basic opens lies in an indexed rational set with *spanning* parameters contained in that intersection.'
+  - decl: 'ValuationSpectrum.exists_A_level_open_presentation'''
+    kind: theorem
+    group: adic-spaces
+    module: '«Adic spaces».SpaRationalOpenHomeomorph'
+    file: 'projects/AdicSpaces/Adic spaces/SpaRationalOpenHomeomorph.lean'
+    line: 223
+    status: proved
+    digest: e4bb7e740bbc
+    sources:
+      - ref: wedhorn
+        at: '8.2(2)'
+    statement: 'The A-level open presentation, without a Tate hypothesis (Wedhorn 8.2(2)): the statement of exists_A_level_open_presentation with the topologically nilpotent unit of presheafValue D supplied as a hypothesis rather than produced from…'
   - decl: ValuationSpectrum.exists_A_level_open_presentation
     kind: theorem
     group: adic-spaces
     module: '«Adic spaces».SpaRationalOpenHomeomorph'
     file: 'projects/AdicSpaces/Adic spaces/SpaRationalOpenHomeomorph.lean'
-    line: 222
+    line: 356
     status: proved
     digest: '3c4c59cb9358'
     sources:
@@ -5493,7 +5921,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».SpaRationalOpenHomeomorph'
     file: 'projects/AdicSpaces/Adic spaces/SpaRationalOpenHomeomorph.lean'
-    line: 353
+    line: 372
     status: proved
     digest: '85c4ccbefd88'
     sources:
@@ -5505,7 +5933,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».SpaRationalOpenHomeomorph'
     file: 'projects/AdicSpaces/Adic spaces/SpaRationalOpenHomeomorph.lean'
-    line: 410
+    line: 429
     status: proved
     digest: '6e5270c08830'
     sources:
@@ -7879,7 +8307,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 2898
+    line: 2806
     status: proved
     digest: '253c622c7d13'
     sources:
@@ -7891,7 +8319,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 2959
+    line: 2867
     status: proved
     digest: '5815a1c6d4c3'
     sources:
@@ -7903,7 +8331,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 3450
+    line: 3358
     status: proved
     digest: '25c83c2ff96d'
     sources:
@@ -7916,7 +8344,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 5332
+    line: 5240
     status: proved
     digest: '349215398328'
     sources:
@@ -7929,7 +8357,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 5346
+    line: 5254
     status: proved
     digest: ffb271e40b3d
     sources:
@@ -7942,7 +8370,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 5433
+    line: 5341
     status: proved
     digest: '5e9464793020'
     sources:
@@ -7955,7 +8383,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 5624
+    line: 5532
     status: proved
     digest: '73d20998e5d2'
     sources:
@@ -7968,7 +8396,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 6538
+    line: 6446
     status: proved
     digest: '33d28dfb9327'
     sources:
@@ -7984,7 +8412,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 6764
+    line: 6672
     status: proved
     digest: a71b56410715
     sources:
@@ -7996,7 +8424,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 6824
+    line: 6732
     status: proved
     digest: '208e5629a963'
     sources:
@@ -8008,7 +8436,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 6904
+    line: 6812
     status: proved
     digest: f86e8f8c4cde
     sources:
@@ -8020,7 +8448,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 6960
+    line: 6868
     status: proved
     digest: '80c849729dd2'
     sources:
@@ -8032,7 +8460,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 7976
+    line: 7884
     status: proved
     digest: '072730d0b78f'
     sources:
@@ -8046,7 +8474,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8082
+    line: 7990
     status: proved
     digest: e36226f54f14
     sources:
@@ -8058,7 +8486,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8113
+    line: 8021
     status: proved
     digest: '09927a92e90e'
     sources:
@@ -8070,7 +8498,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8156
+    line: 8064
     status: proved
     digest: '98f6771be9c6'
     sources:
@@ -8082,7 +8510,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8202
+    line: 8110
     status: proved
     digest: c785c506abda
     sources:
@@ -8094,7 +8522,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8270
+    line: 8178
     status: proved
     digest: '8ffb4ce0e9c5'
     sources:
@@ -8106,7 +8534,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8302
+    line: 8210
     status: proved
     digest: '86dcf1fbf0a1'
     sources:
@@ -8119,7 +8547,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 8498
+    line: 8406
     status: proved
     digest: d711d2badc67
     sources:
@@ -8132,7 +8560,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 9417
+    line: 9325
     status: proved
     digest: a7aab2e314a8
     sources:
@@ -8145,7 +8573,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10109
+    line: 10017
     status: proved
     digest: f0274464cd22
     sources:
@@ -8158,7 +8586,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10184
+    line: 10092
     status: proved
     digest: '94c86d9c37ec'
     sources:
@@ -8170,7 +8598,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10244
+    line: 10152
     status: proved
     digest: '44056b226f26'
     sources:
@@ -8182,7 +8610,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10389
+    line: 10297
     status: proved
     digest: '264a564ae3bc'
     sources:
@@ -8194,7 +8622,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10548
+    line: 10456
     status: proved
     digest: '6d96083dc87b'
     sources:
@@ -8207,7 +8635,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 10592
+    line: 10500
     status: proved
     digest: d37e434ecd62
     sources:
@@ -8219,7 +8647,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11180
+    line: 11088
     status: proved
     digest: '8c4f71ce9d59'
     sources:
@@ -8232,7 +8660,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11452
+    line: 11360
     status: proved
     digest: '37b75052f4ed'
     sources:
@@ -8244,7 +8672,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11501
+    line: 11409
     status: proved
     digest: c904664be9ff
     sources:
@@ -8257,7 +8685,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11625
+    line: 11533
     status: proved
     digest: edf26da9b30d
     sources:
@@ -8271,7 +8699,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11663
+    line: 11571
     status: proved
     digest: a6a16be28080
     sources:
@@ -8286,7 +8714,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 11730
+    line: 11638
     status: proved
     digest: '1c8ea96c0ffd'
     sources:
@@ -8298,7 +8726,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12020
+    line: 11928
     status: sorry
     digest: '70bea334860b'
     sources:
@@ -8310,7 +8738,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12121
+    line: 12029
     status: proved
     digest: ba4dea17feec
     sources:
@@ -8325,7 +8753,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12226
+    line: 12134
     status: proved
     digest: d738db761e56
     sources:
@@ -8338,7 +8766,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12338
+    line: 12246
     status: proved
     digest: '232a30902dee'
     sources:
@@ -8351,7 +8779,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12385
+    line: 12293
     status: proved
     digest: f183fbfba1d9
     sources:
@@ -8364,7 +8792,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12436
+    line: 12344
     status: proved
     digest: '709a2ccdc60b'
     sources:
@@ -8376,7 +8804,7 @@ results:
     group: adic-spaces
     module: '«Adic spaces».WedhornCechAcyclicity'
     file: 'projects/AdicSpaces/Adic spaces/WedhornCechAcyclicity.lean'
-    line: 12554
+    line: 12462
     status: proved
     digest: c77a0fdb8f24
     sources:
@@ -11102,8 +11530,8 @@ modules:
   - name: '«Adic spaces».NonTateRationalOpenHomeomorph'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/NonTateRationalOpenHomeomorph.lean'
-    declarations: 4
-    public: 4
+    declarations: 3
+    public: 3
     with_sorry: 0
     results: 2
     sources:
@@ -11363,8 +11791,8 @@ modules:
   - name: '«Adic spaces».RelativePieceKeystoneGen'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/RelativePieceKeystoneGen.lean'
-    declarations: 40
-    public: 40
+    declarations: 36
+    public: 36
     with_sorry: 0
     results: 10
     sources:
@@ -11454,326 +11882,6 @@ modules:
     with_sorry: 0
     results: 0
     sources: []
-  - name: '«Adic spaces».ScottishBook.Described.Problem011'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem011.lean'
-    declarations: 0
-    public: 0
-    with_sorry: 0
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Described.Problem016'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem016.lean'
-    declarations: 0
-    public: 0
-    with_sorry: 0
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Described.Problem018'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem018.lean'
-    declarations: 0
-    public: 0
-    with_sorry: 0
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Described.Problem040'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem040.lean'
-    declarations: 0
-    public: 0
-    with_sorry: 0
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem001'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem001.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem002'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem002.lean'
-    declarations: 3
-    public: 3
-    with_sorry: 3
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem003'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem003.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem004'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem004.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem005'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem005.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem006'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem006.lean'
-    declarations: 2
-    public: 2
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem007'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem007.lean'
-    declarations: 6
-    public: 6
-    with_sorry: 3
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem008'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem008.lean'
-    declarations: 2
-    public: 2
-    with_sorry: 2
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem009'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem009.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem010'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem010.lean'
-    declarations: 4
-    public: 4
-    with_sorry: 2
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem012'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem012.lean'
-    declarations: 10
-    public: 10
-    with_sorry: 2
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem013'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem013.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem014'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem014.lean'
-    declarations: 3
-    public: 3
-    with_sorry: 3
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem015'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem015.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem017'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem017.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem019'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem019.lean'
-    declarations: 4
-    public: 4
-    with_sorry: 2
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem020'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem020.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem021'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem021.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem022'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem022.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem023'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem023.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem024'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem024.lean'
-    declarations: 2
-    public: 2
-    with_sorry: 2
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem025'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem025.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem026'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem026.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem027'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem027.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem028'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem028.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem029'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem029.lean'
-    declarations: 3
-    public: 2
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem030'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem030.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem031'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem031.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem032'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem032.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem033'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem033.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem034'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem034.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem035'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem035.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem036'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem036.lean'
-    declarations: 2
-    public: 2
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem037'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem037.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem038'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem038.lean'
-    declarations: 1
-    public: 1
-    with_sorry: 1
-    results: 0
-    sources: []
-  - name: '«Adic spaces».ScottishBook.Stated.Problem039'
-    group: adic-spaces
-    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem039.lean'
-    declarations: 2
-    public: 2
-    with_sorry: 2
-    results: 0
-    sources: []
   - name: '«Adic spaces».SeminormalRing'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/SeminormalRing.lean'
@@ -11815,8 +11923,8 @@ modules:
   - name: '«Adic spaces».SheafyPair'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/SheafyPair.lean'
-    declarations: 28
-    public: 27
+    declarations: 29
+    public: 28
     with_sorry: 0
     results: 3
     sources:
@@ -11906,10 +12014,10 @@ modules:
   - name: '«Adic spaces».SpaRationalOpenHomeomorph'
     group: adic-spaces
     file: 'projects/AdicSpaces/Adic spaces/SpaRationalOpenHomeomorph.lean'
-    declarations: 9
-    public: 9
+    declarations: 10
+    public: 10
     with_sorry: 0
-    results: 4
+    results: 5
     sources:
       - 'wedhorn:7.30'
       - 'wedhorn:8.2'
@@ -12617,3 +12725,323 @@ modules:
       - 'fjp:2.2'
       - 'fjp:2.3'
       - 'fjp:3.1'
+  - name: '«Adic spaces».ScottishBook.Described.Problem011'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem011.lean'
+    declarations: 0
+    public: 0
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Described.Problem016'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem016.lean'
+    declarations: 0
+    public: 0
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Described.Problem018'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem018.lean'
+    declarations: 0
+    public: 0
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Described.Problem040'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Described/Problem040.lean'
+    declarations: 0
+    public: 0
+    with_sorry: 0
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem001'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem001.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem002'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem002.lean'
+    declarations: 3
+    public: 3
+    with_sorry: 3
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem003'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem003.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem004'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem004.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem005'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem005.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem006'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem006.lean'
+    declarations: 2
+    public: 2
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem007'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem007.lean'
+    declarations: 6
+    public: 6
+    with_sorry: 3
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem008'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem008.lean'
+    declarations: 2
+    public: 2
+    with_sorry: 2
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem009'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem009.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem010'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem010.lean'
+    declarations: 4
+    public: 4
+    with_sorry: 2
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem012'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem012.lean'
+    declarations: 10
+    public: 10
+    with_sorry: 2
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem013'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem013.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem014'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem014.lean'
+    declarations: 3
+    public: 3
+    with_sorry: 3
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem015'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem015.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem017'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem017.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem019'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem019.lean'
+    declarations: 4
+    public: 4
+    with_sorry: 2
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem020'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem020.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem021'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem021.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem022'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem022.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem023'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem023.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem024'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem024.lean'
+    declarations: 2
+    public: 2
+    with_sorry: 2
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem025'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem025.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem026'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem026.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem027'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem027.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem028'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem028.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem029'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem029.lean'
+    declarations: 3
+    public: 2
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem030'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem030.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem031'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem031.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem032'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem032.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem033'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem033.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem034'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem034.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem035'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem035.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem036'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem036.lean'
+    declarations: 2
+    public: 2
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem037'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem037.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem038'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem038.lean'
+    declarations: 1
+    public: 1
+    with_sorry: 1
+    results: 0
+    sources: []
+  - name: '«Adic spaces».ScottishBook.Stated.Problem039'
+    group: scottish-book
+    file: 'projects/AdicSpaces/Adic spaces/ScottishBook/Stated/Problem039.lean'
+    declarations: 2
+    public: 2
+    with_sorry: 2
+    results: 0
+    sources: []

@@ -27,12 +27,30 @@ python3 scripts/check_formalisation.py     # verify it against the tree (fast, n
 
 ## What the manifest contains
 
-Two levels of granularity, because "what is formalised" means two different things:
+Three sections, because "what is formalised" means several different things here:
 
 * **`results:`** — statement level. One entry per declaration whose docstring cites a
   source (Wedhorn / `[FJP]` / Huber / Stacks). This is the informal↔formal correspondence.
 * **`modules:`** — the full inventory of every module in the library, so the manifest
   covers *all* of the adic-spaces development rather than only the cited parts.
+* **`scottish_book:`** — one entry per problem in the Nonarchimedean Scottish Book
+  (`Adic spaces/ScottishBook/`), with its proposer, date, stage and status.
+
+### The Scottish Book is scored differently, on purpose
+
+`ScottishBook/` is Kedlaya's **open-problem list**, so a `sorry` there is unsolved
+mathematics, not unfinished formalisation. Conflating the two would make the library look
+far less complete than it is (48 of the project's `sorry`s live there). So:
+
+* it is its own group, reported separately from the library totals;
+* `literature_status` (`open` / `partial` / `resolved`) is parsed from each file's
+  `## Status` section and tracks **the literature**, not Lean;
+* `stage` is how far formalisation has gone — `described` (prose only) or `stated` (a Lean
+  statement exists);
+* the checker never reports a Scottish Book `sorry` as a regression. It reports a problem
+  file that vanished (`SB-GONE`), a status or stage edited without regenerating
+  (`SB-STATUS` / `SB-STAGE`), a problem that newly acquired a proof (`SB-PROVED`), and a
+  new problem file (`SB-NEW`).
 
 Each result entry carries a `digest`: a hash of the declaration's **statement** (everything
 up to the top-level `:=`). That is what lets the checker distinguish a declaration that was

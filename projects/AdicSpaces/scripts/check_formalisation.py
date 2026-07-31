@@ -40,7 +40,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from formalisation_lib import citation_id, extract_all, group_of  # noqa: E402
+from formalisation_lib import (  # noqa: E402
+    citation_id,
+    extract_all,
+    group_of,
+    scottish_book_problems,
+)
 from mini_yaml import load  # noqa: E402
 
 ERROR, WARN, INFO = "error", "warning", "info"
@@ -126,6 +131,43 @@ def structural_check(manifest: dict, decls: list, only: str | None, rep: Report)
             continue
         if name not in listed_modules:
             rep.add(WARN, "MODULE-NEW", name, "module not in the manifest")
+
+
+def scottish_book_check(manifest: dict, decls: list, project_root: Path,
+                        rep: Report) -> None:
+    """Verify the Scottish Book section against the problem files.
+
+    A `sorry` in a Scottish Book problem is an OPEN PROBLEM, not unfinished formalisation, so
+    it is never reported as a regression. What is worth catching is drift in the other
+    direction: a problem file that disappeared, a literature status edited without
+    regenerating, or a problem that has newly acquired a proof.
+    """
+    listed = manifest.get("scottish_book") or {}
+    entries = {p["problem"]: p for p in (listed.get("entries") or [])}
+    if not entries:
+        return
+    actual = {p["problem"]: p for p in scottish_book_problems(project_root, decls)}
+
+    for num, want in sorted(entries.items()):
+        have = actual.get(num)
+        if have is None:
+            rep.add(ERROR, "SB-GONE", f"Problem{num:03d}",
+                    f"in the manifest ({want.get('module')}) but no problem file found")
+            continue
+        for field, kind in (("stage", "SB-STAGE"),
+                            ("literature_status", "SB-STATUS")):
+            if want.get(field) != have.get(field):
+                rep.add(WARN, kind, f"Problem{num:03d}",
+                        f"{field}: {want.get(field)} -> {have.get(field)}")
+        if want.get("proved", 0) != have.get("proved", 0):
+            level = WARN
+            rep.add(level, "SB-PROVED", f"Problem{num:03d}",
+                    f"declarations proved: {want.get('proved')} -> {have.get('proved')}")
+        if want.get("declarations", 0) != have.get("declarations", 0):
+            rep.add(WARN, "SB-COUNTS", f"Problem{num:03d}",
+                    f"declarations: {want.get('declarations')} -> {have.get('declarations')}")
+    for num in sorted(set(actual) - set(entries)):
+        rep.add(WARN, "SB-NEW", f"Problem{num:03d}", "problem file not in the manifest")
 
 
 def axiom_check(manifest: dict, decls: list, only: str | None, repo: Path,
@@ -229,6 +271,8 @@ def main() -> int:
 
     decls = extract_all(project_root)
     structural_check(manifest, decls, args.group, rep)
+    if not args.group or args.group == 'scottish-book':
+        scottish_book_check(manifest, decls, project_root, rep)
     if args.axioms:
         axiom_check(manifest, decls, args.group, repo_root, rep)
 

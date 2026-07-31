@@ -35,6 +35,7 @@ from formalisation_lib import (  # noqa: E402
     group_of,
     lean_files,
     module_name,
+    scottish_book_problems,
 )
 from mini_yaml import dump  # noqa: E402
 
@@ -151,6 +152,7 @@ def build(project_root: Path, repo_root: Path) -> dict:
             }
         )
 
+    problems = scottish_book_problems(project_root, decls)
     all_ids = {citation_id(s) for r in results for s in r["sources"]}
     # Deliberately no commit sha: it would change on every commit, so `regenerate and
     # diff` — the cheapest way to ask "has the manifest drifted?" — would never come back
@@ -180,6 +182,23 @@ def build(project_root: Path, repo_root: Path) -> dict:
             "source_results": len(all_ids),
         },
         "groups": groups,
+        # The Scottish Book is Kedlaya's OPEN-PROBLEM list, so `with_sorry` here counts
+        # unsolved mathematics, not unfinished formalisation. It is reported separately from
+        # the library totals for exactly that reason.
+        "scottish_book": {
+            "description": "The Nonarchimedean Scottish Book (Kedlaya's problem list)",
+            "problems": len(problems),
+            "stated": sum(1 for p in problems if p["stage"] == "stated"),
+            "described": sum(1 for p in problems if p["stage"] == "described"),
+            "resolved_in_literature": sum(1 for p in problems
+                                          if p["literature_status"] == "resolved"),
+            "open_in_literature": sum(1 for p in problems
+                                      if p["literature_status"] == "open"),
+            "declarations": sum(p["declarations"] for p in problems),
+            "proved_in_lean": sum(p["proved"] for p in problems),
+            "unproved_in_lean": sum(p["with_sorry"] for p in problems),
+            "entries": problems,
+        },
         "results": results,
         "modules": modules,
     }
@@ -221,6 +240,11 @@ def main() -> int:
             f"{s['results']} cited results covering {s['source_results']} source results, "
             f"{s['declarations_with_sorry']} declarations with sorry"
         )
+        sb = data["scottish_book"]
+        print(f"  scottish book: {sb['problems']} problems "
+              f"({sb['stated']} stated, {sb['described']} described), "
+              f"{sb['resolved_in_literature']} resolved in the literature, "
+              f"{sb['proved_in_lean']}/{sb['declarations']} declarations proved")
         for g in data["groups"]:
             print(
                 f"  - {g['id']:12s} {g['modules']:4d} modules {g['declarations']:5d} decls "
