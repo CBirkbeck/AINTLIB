@@ -1,1 +1,1 @@
-FOCUS: BETA PROVEN (headToQ_surjective_mod_map, axiom-clean). Next: level-one BIJECTIVITY (injectivity is free from comap) in the levelMap form, then 𝔭Q = 𝔮 (maximality), then the L1 chain into qHead_completedLocal_comparison with flatness threaded 8.30-conditionally.
+FOCUS: L1 assembly — levelOne_bijective_headToQ + map_comap_headToQ_eq LANDED. Next: Module.Flat (WPHead) (QHead) transport from prop_8_30_flat_clean_proof (via completeRingEquivCompletionModel + headLocEquiv), then the completedLocal chain closing qHead_completedLocal_comparison.
