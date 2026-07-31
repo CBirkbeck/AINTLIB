@@ -4494,3 +4494,50 @@ Not attempted: abstracting needs a "which component" parameter (the `.1`/`.2` pi
 proof-level choice, not data), and two 21-line near-mirror lemmas would clear the deficit but
 add little. Left for the same treatment as `unitCover_sq_plus/minus` if the vertex-mirror
 convention is ever revisited wholesale.
+
+## 199 → 198: `productRestrictionSub_injective_JetA` cleared (86 → 50)
+
+`presheafValueMapB_eq_zero_of_pieces` + `presheafValueMapC_eq_zero_of_pieces`, the two exact
+19/19 mirrors: "if every piece restriction of `z` vanishes, so does its vertex-pushed global
+section, by separatedness on the pushed covering". Bodies lifted verbatim; only the signatures
+authored. Two named mirrors rather than one seven-parameter abstraction, matching the file's
+existing `mapBD`/`mapCD`, `pushedFamilyB`/`pushedFamilyC` convention.
+
+`p_div_teich_pow_a_mem_chartSubring` also got `AlocToBloc_teichPiInv_pow_mul` (the `pow`-outside
+form of an existing lemma stated with the exponent inside the ring maps) and
+`teichmuller_pow_eq_teichPi_pow_mul`; 82 → 66, and 13 joins take it further.
+
+**GOTCHA (cost one failed run): a truncated name from my own ranking output.** The ranking
+prints `nm[-30:]`, so `p_div_teich_pow_a_mem_chartSubring` displayed as
+`v_teich_pow_a_mem_chartSubring`, and I reconstructed the anchor as
+`div_teich_pow_a_mem_chartSubring` — dropping the real `p_` prefix. The patch failed at the
+anchor lookup (before writing, so nothing was corrupted). **Names taken from truncated display
+output must be resolved against the file before use**; the ranking is for choosing targets, not
+for quoting identifiers. Same family as the `\bC\b` and single-axis-mirror errors: trusting a
+lossy view of the source instead of the source.
+
+### SECOND join-tool bug: `calc` steps are siblings, not continuations
+
+A join in `p_div_teich_pow_a_mem_chartSubring` merged two `calc` steps:
+
+```
+calc d * a = d * (b + (a - b)) := by rw [← h] _ = d * b + d * (a - b) := by ring
+```
+→ `unexpected token '_'; expected command`, plus two misleading "unsolved goals" upstream.
+
+**Exactly the same root cause as the structure-literal bug**, and it is the second instance:
+both guards are indentation-based, and a `calc` block is another place where indentation does
+not mean nesting — the `_ = rhs := proof` steps are *siblings* that happen to be indented under
+the `calc`. The continuation test fires and the leaf test passes, just as with `{ toFun := …` /
+`map_zero' := …`.
+
+Guard added: refuse when the right line starts with `_`. Safe-join count on that proof goes
+13 → 12, and it builds green.
+
+**Standing rule now explicit in the tool: any construct whose parts are indented siblings
+(structure literals, `calc` chains) must be excluded by NAME, because no indentation heuristic
+can distinguish them from continuations.** If a third such construct shows up, the tool needs a
+real parser rather than a third special case.
+
+`p_div_teich_pow_a_mem_chartSubring` sits at 54 (need 4) — extraction + 12 joins took it from
+82. Left there rather than forced; the remaining four lines have no honest cut.

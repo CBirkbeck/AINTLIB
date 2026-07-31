@@ -44,6 +44,58 @@ variable (F : Type*) [Field F]
 
 variable {F}
 
+/-- If every piece restriction of `z` vanishes then so does its B-pushed global section, by
+separatedness on the pushed covering. -/
+private theorem presheafValueMapB_eq_zero_of_pieces (C : RationalCoveringData (JetA F))
+    (hC : C.IsRational) (z : presheafValue C.base)
+    (hres : ∀ D : ↥C.covers, restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) z = 0) :
+    presheafValueMapB C.base hC.base z = 0 := by
+  haveI : IsSheafy (JetB F) := isSheafy_JetB F
+  refine IsSheafy.separationSub (A := JetB F) (pushCoveringB C hC)
+    (pushCoveringB_isRational hC) ?_
+  funext D'
+  obtain ⟨D₀, hD₀⟩ := D'
+  obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD₀
+  show restrictionMapHom (pushDatumB C.base hC.base) (pushDatumB d.1 (hC.piece d.2))
+    ((pushCoveringB C hC).hsubset _ hD₀) (presheafValueMapB C.base hC.base z) =
+    restrictionMapHom (pushDatumB C.base hC.base) (pushDatumB d.1 (hC.piece d.2))
+      ((pushCoveringB C hC).hsubset _ hD₀) 0
+  rw [RingHom.map_zero (restrictionMapHom (pushDatumB C.base hC.base)
+    (pushDatumB d.1 (hC.piece d.2)) ((pushCoveringB C hC).hsubset _ hD₀))]
+  show restrictionMap (pushDatumB C.base hC.base) (pushDatumB d.1 (hC.piece d.2))
+    ((pushCoveringB C hC).hsubset _ hD₀) (presheafValueMapB C.base hC.base z) = 0
+  rw [← presheafValueMapB_restriction C.base d.1 hC.base (hC.piece d.2)
+      (C.hsubset d.1 d.2) ((pushCoveringB C hC).hsubset _ hD₀) z,
+    show restrictionMap C.base d.1 (C.hsubset d.1 d.2) z =
+      restrictionMapHom C.base d.1 (C.hsubset d.1 d.2) z from rfl,
+    hres d, RingHom.map_zero (presheafValueMapB d.1 (hC.piece d.2))]
+
+/-- If every piece restriction of `z` vanishes then so does its C-pushed global section, by
+separatedness on the pushed covering. -/
+private theorem presheafValueMapC_eq_zero_of_pieces (C : RationalCoveringData (JetA F))
+    (hC : C.IsRational) (z : presheafValue C.base)
+    (hres : ∀ D : ↥C.covers, restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) z = 0) :
+    presheafValueMapC C.base hC.base z = 0 := by
+  haveI : IsSheafy (JetC F) := isSheafy_JetC F
+  refine IsSheafy.separationSub (A := JetC F) (pushCoveringC C hC)
+    (pushCoveringC_isRational hC) ?_
+  funext D'
+  obtain ⟨D₀, hD₀⟩ := D'
+  obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD₀
+  show restrictionMapHom (pushDatumC C.base hC.base) (pushDatumC d.1 (hC.piece d.2))
+    ((pushCoveringC C hC).hsubset _ hD₀) (presheafValueMapC C.base hC.base z) =
+    restrictionMapHom (pushDatumC C.base hC.base) (pushDatumC d.1 (hC.piece d.2))
+      ((pushCoveringC C hC).hsubset _ hD₀) 0
+  rw [RingHom.map_zero (restrictionMapHom (pushDatumC C.base hC.base)
+    (pushDatumC d.1 (hC.piece d.2)) ((pushCoveringC C hC).hsubset _ hD₀))]
+  show restrictionMap (pushDatumC C.base hC.base) (pushDatumC d.1 (hC.piece d.2))
+    ((pushCoveringC C hC).hsubset _ hD₀) (presheafValueMapC C.base hC.base z) = 0
+  rw [← presheafValueMapC_restriction C.base d.1 hC.base (hC.piece d.2)
+      (C.hsubset d.1 d.2) ((pushCoveringC C hC).hsubset _ hD₀) z,
+    show restrictionMap C.base d.1 (C.hsubset d.1 d.2) z =
+      restrictionMapHom C.base d.1 (C.hsubset d.1 d.2) z from rfl,
+    hres d, RingHom.map_zero (presheafValueMapC d.1 (hC.piece d.2))]
+
 /-- Injectivity (separation) for 𝓐: the localized Milnor rows are jointly injective on
 every rational piece ([FJP] Lemma 5.2: "It equals `J r_R`. Since `J` is itself an
 embedding …"; algebraic part). -/
@@ -70,45 +122,9 @@ theorem productRestrictionSub_injective_JetA (C : RationalCoveringData (JetA F))
       show restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) y =
         productRestrictionSub (JetA F) C y D from rfl, hDx, sub_self]
   -- the 𝓑-pushed global section vanishes (vertex separatedness on the pushed covering)
-  have hBz : presheafValueMapB C.base hC.base z = 0 := by
-    refine IsSheafy.separationSub (A := JetB F) (pushCoveringB C hC)
-      (pushCoveringB_isRational hC) ?_
-    funext D'
-    obtain ⟨D₀, hD₀⟩ := D'
-    obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD₀
-    show restrictionMapHom (pushDatumB C.base hC.base) (pushDatumB d.1 (hC.piece d.2))
-      ((pushCoveringB C hC).hsubset _ hD₀) (presheafValueMapB C.base hC.base z) =
-      restrictionMapHom (pushDatumB C.base hC.base) (pushDatumB d.1 (hC.piece d.2))
-        ((pushCoveringB C hC).hsubset _ hD₀) 0
-    rw [RingHom.map_zero (restrictionMapHom (pushDatumB C.base hC.base)
-      (pushDatumB d.1 (hC.piece d.2)) ((pushCoveringB C hC).hsubset _ hD₀))]
-    show restrictionMap (pushDatumB C.base hC.base) (pushDatumB d.1 (hC.piece d.2))
-      ((pushCoveringB C hC).hsubset _ hD₀) (presheafValueMapB C.base hC.base z) = 0
-    rw [← presheafValueMapB_restriction C.base d.1 hC.base (hC.piece d.2)
-        (C.hsubset d.1 d.2) ((pushCoveringB C hC).hsubset _ hD₀) z,
-      show restrictionMap C.base d.1 (C.hsubset d.1 d.2) z =
-        restrictionMapHom C.base d.1 (C.hsubset d.1 d.2) z from rfl,
-      hres d, RingHom.map_zero (presheafValueMapB d.1 (hC.piece d.2))]
+  have hBz := presheafValueMapB_eq_zero_of_pieces C hC z hres
   -- the 𝓒-pushed global section vanishes
-  have hCz : presheafValueMapC C.base hC.base z = 0 := by
-    refine IsSheafy.separationSub (A := JetC F) (pushCoveringC C hC)
-      (pushCoveringC_isRational hC) ?_
-    funext D'
-    obtain ⟨D₀, hD₀⟩ := D'
-    obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD₀
-    show restrictionMapHom (pushDatumC C.base hC.base) (pushDatumC d.1 (hC.piece d.2))
-      ((pushCoveringC C hC).hsubset _ hD₀) (presheafValueMapC C.base hC.base z) =
-      restrictionMapHom (pushDatumC C.base hC.base) (pushDatumC d.1 (hC.piece d.2))
-        ((pushCoveringC C hC).hsubset _ hD₀) 0
-    rw [RingHom.map_zero (restrictionMapHom (pushDatumC C.base hC.base)
-      (pushDatumC d.1 (hC.piece d.2)) ((pushCoveringC C hC).hsubset _ hD₀))]
-    show restrictionMap (pushDatumC C.base hC.base) (pushDatumC d.1 (hC.piece d.2))
-      ((pushCoveringC C hC).hsubset _ hD₀) (presheafValueMapC C.base hC.base z) = 0
-    rw [← presheafValueMapC_restriction C.base d.1 hC.base (hC.piece d.2)
-        (C.hsubset d.1 d.2) ((pushCoveringC C hC).hsubset _ hD₀) z,
-      show restrictionMap C.base d.1 (C.hsubset d.1 d.2) z =
-        restrictionMapHom C.base d.1 (C.hsubset d.1 d.2) z from rfl,
-      hres d, RingHom.map_zero (presheafValueMapC d.1 (hC.piece d.2))]
+  have hCz := presheafValueMapC_eq_zero_of_pieces C hC z hres
   -- through the base graph bridge: both localized-row images vanish
   have hbridge : graphBridgeA C.base hC.base e z = 0 := by
     have hpair := loc_pair_injective F e.m C.base.s e.f

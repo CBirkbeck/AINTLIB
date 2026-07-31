@@ -362,6 +362,29 @@ theorem teich_div_p_pow_mem_chartSubring (a b : ℕ) (j : ℕ) (c : OF F)
   · exact Set.mem_union_right _ (Set.mem_insert _ _)
   · exact Set.mem_union_left _ ⟨_, rfl⟩
 
+/-- The `pow`-outside form of `AlocToBloc_teichPiInv_mul`: the two Teichmüller atoms are
+mutually inverse in `Bloc`, with the exponent outside the ring maps. -/
+private theorem AlocToBloc_teichPiInv_pow_mul (k : ℕ) :
+    AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ k
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k = 1 := by
+  rw [← map_pow (AlocToBloc p F ϖ), ← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+  exact AlocToBloc_teichPiInv_mul p F ϖ k
+
+/-- Transport of the `OF F`-level factorisation `c' ^ a = ϖ ^ (d(a-b)) * c''` through the
+Teichmüller lift and `algebraMap`. -/
+private theorem teichmuller_pow_eq_teichPi_pow_mul {a b d : ℕ} {c' c'' : OF F}
+    (hc'' : c' ^ a = (PseudoUniformizer.toOF F ϖ : OF F) ^ (d * (a - b)) * c'') :
+    algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c') ^ a
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b))
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
+  rw [← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+    ← map_pow (WittVector.teichmuller p), hc'',
+    map_mul (WittVector.teichmuller p),
+    map_pow (WittVector.teichmuller p),
+    map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+    map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+  rfl
+
 /-- **(m3) Positive-monomial `a`-th-power membership**: for a fraction
 monomial `(p/[ϖ])^d·[c']` whose coordinate satisfies the right-endpoint bound
 `|c'|^a ≤ |ϖ|^{d(a−b)}`, the `a`-th power is `chartFracP^d·[c'']` and lies in
@@ -378,31 +401,13 @@ theorem p_div_teich_pow_a_mem_chartSubring (a b d : ℕ) (hab : b ≤ a)
         (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
           ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) := by
   have hc' : perfectoidValuation p F (((c' ^ a : OF F)) : F)
-      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
-        ^ (d * (a - b)) := by
-    rw [show (((c' ^ a : OF F)) : F) = ((c' : F)) ^ a from by push_cast; rfl,
-      map_pow]
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (d * (a - b)) := by
+    rw [show (((c' ^ a : OF F)) : F) = ((c' : F)) ^ a from by push_cast; rfl, map_pow]
     exact hc
   obtain ⟨c'', hc''⟩ := exists_eq_toOF_pow_mul p F ϖ (d * (a - b)) (c' ^ a) hc'
   -- atoms
-  have hIT : AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b))
-      * algebraMap (Ainf p F) (Bloc p F ϖ)
-        (teichPi p F ϖ) ^ (d * (a - b)) = 1 := by
-    rw [← map_pow (AlocToBloc p F ϖ),
-      ← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
-    exact AlocToBloc_teichPiInv_mul p F ϖ (d * (a - b))
-  have h1 : algebraMap (Ainf p F) (Bloc p F ϖ)
-        (WittVector.teichmuller p c') ^ a
-      = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b))
-        * algebraMap (Ainf p F) (Bloc p F ϖ)
-          (WittVector.teichmuller p c'') := by
-    rw [← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
-      ← map_pow (WittVector.teichmuller p), hc'',
-      map_mul (WittVector.teichmuller p),
-      map_pow (WittVector.teichmuller p),
-      map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
-      map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
-    rfl
+  have hIT := AlocToBloc_teichPiInv_pow_mul p F ϖ (d * (a - b))
+  have h1 := teichmuller_pow_eq_teichPi_pow_mul p F ϖ hc''
   have h2 : chartFracP p F ϖ a b
       = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a
         * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b := by
@@ -413,34 +418,27 @@ theorem p_div_teich_pow_a_mem_chartSubring (a b d : ℕ) (hab : b ≤ a)
       _ = d * b + d * (a - b) := by ring
   have hkey : (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
         * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ)
-          (WittVector.teichmuller p c')) ^ a
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')) ^ a
       = chartFracP p F ϖ a b ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ)
-          (WittVector.teichmuller p c'') := by
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
     calc (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
         * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ)
-          (WittVector.teichmuller p c')) ^ a
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')) ^ a
       = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
         * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
-        * algebraMap (Ainf p F) (Bloc p F ϖ)
-          (WittVector.teichmuller p c') ^ a := by
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c') ^ a := by
           rw [(show d * a = a * d from mul_comm d a), pow_mul, pow_mul]
           ring
       _ = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
         * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
         * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b))
-          * algebraMap (Ainf p F) (Bloc p F ϖ)
-            (WittVector.teichmuller p c'')) := by
+          * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'')) := by
         rw [h1]
       _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
         * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
         * ((AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b))
-          * algebraMap (Ainf p F) (Bloc p F ϖ)
-            (teichPi p F ϖ) ^ (d * (a - b)))
-          * algebraMap (Ainf p F) (Bloc p F ϖ)
-            (WittVector.teichmuller p c'')) := by
+          * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b)))
+          * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'')) := by
         rw [show AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
             = AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * b)
               * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b)) from by
@@ -448,16 +446,13 @@ theorem p_div_teich_pow_a_mem_chartSubring (a b d : ℕ) (hab : b ≤ a)
         ring
       _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
         * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ)
-          (WittVector.teichmuller p c'') := by
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
         rw [hIT, one_mul]
       _ = chartFracP p F ϖ a b ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ)
-          (WittVector.teichmuller p c'') := by
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
         rw [h2, mul_pow]
   rw [hkey]
-  refine mul_mem (pow_mem (Subring.subset_closure ?_) d)
-    (Subring.subset_closure ?_)
+  refine mul_mem (pow_mem (Subring.subset_closure ?_) d) (Subring.subset_closure ?_)
   · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
   · exact Set.mem_union_left _ ⟨_, rfl⟩
 
