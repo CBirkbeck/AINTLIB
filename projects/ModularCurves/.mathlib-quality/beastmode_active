@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 3b-iv] coker transport — package the square into cokernel.mapIso (W-piece iso via sheafificationW_pushforward_unit_tensor + valIso): coker(F.map twist) iso coker(sheafifyY(pf action)); then Gamma-of-coker at the chart + generator conjugation + 3a-feed = e2
+FOCUS: [GAP-A-4/A4-e2 step v] coker-sheafify commutation via PreservesCokernel.iso (sheafification preserves colimits instance) — then vi/vii per board

@@ -994,6 +994,21 @@ noncomputable def cokernelRestrictTwistIso (U : C.Opens) :
   rw [Iso.trans_hom, asIso_hom, Category.assoc]
   exact h.symm
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[3b-v]** Sheafification commutes with the action cokernel. -/
+noncomputable def cokernelSheafifyActionIso (U : C.Opens) :
+    Limits.cokernel
+        ((PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj)).map
+          ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+            (idealActionPre J L))) ≅
+      (PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj)).obj
+        (Limits.cokernel
+          ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+            (idealActionPre J L))) :=
+  (Limits.PreservesCokernel.iso
+    (PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj)) _).symm
+
 end LineAssembly
 
 end Twist
