@@ -5537,3 +5537,22 @@ The corrected run removes 598 lines, five more than the broken 593 — and those
 the orphaned `omit … in` blocks the first version left behind, which is what made it red.
 Verified before building: the diff removes **no** `section`/`end`/`namespace`/`variable`/`open`
 line, and the `omit` blocks now leave together with the declarations they modified.
+
+## 183 → 182: `PairOfDefinition.adjoin` cleared by five `;` merges
+
+Need 5, and the join tool found 3. The other two came from reading the proof: `intro n` +
+`apply AddSubgroup.isOpen_of_mem_nhds …` and `intro ⟨x, hx_mem⟩ hx` + `simp only [...] at hx`,
+both comfortably under 100 chars merged (74 and 62). No extraction needed.
+
+**Eighth occurrence of the transcription trap, and it bit again.** I copied the two anchor pairs
+out of my own annotated dump, whose format is `f'{n:5d}|{flag} {line}'` — two characters of
+prefix — so every copied line carried +2 indentation and the text match failed. The rule has
+been recorded since the third occurrence and I still walked into it.
+
+The fix that finally makes it structural: **locate by search, not by transcription.** The merge
+now matches on `line.strip() == upper and next.strip().startswith(lower)` and reconstructs the
+joined line from the file's own text, so the indentation never passes through me. That is worth
+more than another note to self — the note demonstrably does not work.
+
+Also guarded: the merge refuses any join whose result exceeds 100 characters, checked before
+writing rather than after. All five came out at 42–95.

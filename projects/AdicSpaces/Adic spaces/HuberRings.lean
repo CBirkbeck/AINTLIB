@@ -726,10 +726,8 @@ def PairOfDefinition.adjoin (P : PairOfDefinition A) (T : Finset A)
   A₀ := Subring.closure ((P.A₀ : Set A) ∪ ↑T)
   I := Ideal.map (Subring.inclusion (P.le_adjoin_A₀ T)) P.I
   isOpen := by
-    apply AddSubgroup.isOpen_of_mem_nhds
-      (Subring.closure ((P.A₀ : Set A) ∪ ↑T)).toAddSubgroup
-    exact Filter.mem_of_superset (P.isOpen.mem_nhds P.A₀.zero_mem)
-      (P.le_adjoin_A₀ T)
+    apply AddSubgroup.isOpen_of_mem_nhds (Subring.closure ((P.A₀ : Set A) ∪ ↑T)).toAddSubgroup
+    exact Filter.mem_of_superset (P.isOpen.mem_nhds P.A₀.zero_mem) (P.le_adjoin_A₀ T)
   fg := P.fg.map _
   isAdic := by
     set B₀ := Subring.closure ((P.A₀ : Set A) ∪ ↑T)
@@ -738,8 +736,7 @@ def PairOfDefinition.adjoin (P : PairOfDefinition A) (T : Finset A)
     rw [isAdic_iff]
     constructor
     · -- Part 1: Each I'^n is open in B₀ (subspace topology)
-      intro n
-      apply AddSubgroup.isOpen_of_mem_nhds (I' ^ n).toAddSubgroup
+      intro n; apply AddSubgroup.isOpen_of_mem_nhds (I' ^ n).toAddSubgroup
       rw [Submodule.coe_toAddSubgroup]
       -- I'^n ⊇ incl(I^n), and incl(I^n) maps to an open set in A
       have h_nhds : Subtype.val ⁻¹' (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀)) ∈
@@ -749,8 +746,7 @@ def PairOfDefinition.adjoin (P : PairOfDefinition A) (T : Finset A)
             (P.pow_image_isOpen n).mem_nhds ⟨0, (P.I ^ n).zero_mem, rfl⟩)
       apply Filter.mem_of_superset h_nhds
       -- Show val⁻¹'(val '' I^n) ⊆ I'^n
-      intro ⟨x, hx_mem⟩ hx
-      simp only [Set.mem_preimage] at hx
+      intro ⟨x, hx_mem⟩ hx; simp only [Set.mem_preimage] at hx
       obtain ⟨⟨y, hy_A₀⟩, hy_In, hval⟩ := hx
       -- x = y as elements of A, so incl(⟨y, hy_A₀⟩) corresponds to ⟨x, hx_mem⟩
       have heq : (⟨x, hx_mem⟩ : B₀) = incl ⟨y, hy_A₀⟩ := by
@@ -764,8 +760,7 @@ def PairOfDefinition.adjoin (P : PairOfDefinition A) (T : Finset A)
       rw [nhds_induced] at hs
       obtain ⟨U_A, hU_A, hU_sub⟩ := Filter.mem_comap.mp hs
       obtain ⟨G, hGU⟩ := NonarchimedeanRing.is_nonarchimedean U_A hU_A
-      obtain ⟨V, hV, hBV⟩ := P.isBounded_adjoin T hT (G : Set A)
-        (G.isOpen.mem_nhds G.zero_mem)
+      obtain ⟨V, hV, hBV⟩ := P.isBounded_adjoin T hT (G : Set A) (G.isOpen.mem_nhds G.zero_mem)
       obtain ⟨n, _, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp hV
       refine ⟨n, fun x hx_In => hU_sub (Set.mem_preimage.mpr (hGU ?_))⟩
       -- x ∈ I'^n = (Ideal.map incl P.I)^n = Ideal.map incl (P.I^n)
