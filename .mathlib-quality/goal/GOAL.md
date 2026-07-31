@@ -5763,3 +5763,31 @@ not measure any of that.
 Worth noting what this cost: two trials, **zero builds**, because both were re-measured before
 building. The procedure was sound even while the heuristic was wrong — which is the argument for
 keeping measure-before-build as a reflex rather than a rule to remember.
+
+## The simulator, built — and its answer is a negative worth having
+
+Replaced both failed rankings with an exact predictor: for each over-50 proof, take every
+parenthesised term occurring ≥3 times, apply the substitution **in memory**, re-run `joinable`
+over the modified body, and report the true net line delta `(code' − joins') − (code − joins)`.
+No build, no edit, no revert cycle.
+
+Swept over all 178 in-scope proofs. **Nothing clears.** The best case is
+`IteratedOverlapEquiv.iteratedOverlap_forwardHom…` (need 9, 4 joins, best term Δ = −4), which
+lands **1 line over**. After that: 5 over, 5 over, 5 over, 6 over…
+
+So the technique that cleared `imgFamily_agreement` is exhausted — it was the one proof in the
+tree where a repeated term was forcing enough wraps to matter. Confirming that cost one scan
+rather than the eight or so apply/measure/revert cycles the ranked list would have invited, and
+it is a much more useful result than another near-miss.
+
+→ **Every remaining target needs real extraction.** Joins, `;` merges and abbreviation are all
+  spent: the guarded join tool clears nothing alone, and the simulator says abbreviation clears
+  nothing either. The 118-target net-negative queue is now the only route, and each entry needs
+  its dependency set re-derived by reading the proof — the estimator columns have been wrong
+  three separate ways this session.
+
+Also worth recording as a method: **when a technique's ranking keeps mispredicting, build the
+simulator instead of refining the ranking.** Two heuristics failed here (`len × count`, then
+"occurrences on wrap-pressured lines") for the same reason — both were proxies for a structural
+condition (does the line rejoin its parent under the guards?) that is directly computable. The
+simulator is ~20 lines and settles the whole question in one pass.
