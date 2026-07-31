@@ -30006,3 +30006,40 @@ misses, destructure the class (field + superset_covering + witness-shift) instea
 NEXT per board: [GAP-A-4] line ℓ and vertical v as rank-one kernels (⟦REV⟧-hardened:
 twisted restriction target, cohomology-and-base-change surjectivity, locally-split
 kernel invertible + BC-compatible).
+
+## [GAP-A-4] DECOMPOSITION 2026-07-31 (beastmode recon; toolkit confirmed present)
+
+Toolkit located: `baseSections`/`baseSectionsMap` + the TWO cohomological workhorses
+`baseSectionsMap_cokernel_surjective_of_subsingleton_H_one` (LES surjectivity) and
+`baseSectionsMap_exact_cokernel` (H⁰-exactness at the cokernel) — both in
+ForMathlib/SchemeModuleBaseCechZero.lean, both take `[Mono f]`. GAP-A-3's deliverable
+shape: `Module.Basis (Fin 3) Γ(S,⊤) (baseSections π (sectionPoleSheafPower π z hz 3))`
+(PoleSheafRankTwoThree.lean:69, normalized-coordinate hypotheses). `sectionsDivisor`
++ `_ideal` + `_degree` at CartierDivisor.lean:1663ff.
+
+Sub-tickets (new file `WeilPairing/LineVertical.lean` unless noted):
+- **[A4-a]** `idealModuleInclusion J : idealModule J ⟶ unitObj C` (componentwise
+  Subtype.val; no such map exists in-tree — only the unit→restrict generator maps).
+  Mono via app-injectivity (subtype-val) + a presheaf→sheaf mono bridge.
+- **[A4-b]** the twist map `divisorTwistHom : tensorObj (idealModule D.ideal) L ⟶ L`
+  := whiskerRight (idealModuleInclusion) L ≫ (left/right unitor after tensorObjCongr
+  with unit) under `Modules.monoidalCategory`. Mono-ness: NEW lemma
+  `mono_whiskerRight_of_isInvertible` (tensoring with an invertible preserves monos —
+  conjugate through −⊗L⁻¹, associators, unitors; categorical, no elementwise work).
+- **[A4-c]** THE COHOMOLOGICAL LEAF: `Subsingleton (H (tensorObj (idealModule D.ideal)
+  L).sheaf 1)` for L := 𝒪(3[0]) (and 𝒪(2[0]) variant), D := [P]+[Q] (resp [R]).
+  ⟦REV⟧ route: fibrewise deg = 1 ⟹ fibre H¹ = 0 (fibre-file RR input — LOCATE) +
+  cohomology-and-base-change. INVESTIGATE FIRST: whether the landed pole-sheaf H¹
+  machinery (PoleSheafProjectiveBaseChangeHOne + ordered-Cech packages) admits a
+  twisted-by-ideal variant cheaply, or whether the fibrewise+Nakayama route must be
+  built. This is the real new math of the ticket.
+- **[A4-d]** `lineSection`: with [A4-a..c] + GAP-A-3's b3, the kernel
+  `ker (baseSectionsMap π (cokernel.π divisorTwistHom))` = range (baseSectionsMap π
+  divisorTwistHom) (exactness) is a rank-one direct summand of the free rank-3
+  baseSections (target free rank 2 from sectionsDivisor_degree = 2 — needs
+  `baseSections π (cokernel …)` locally free rank 2: pushforward of invertible along
+  the degree-2 finite-locally-free D — CHECK RelEffCartierDiv API for the
+  pushforward-rank lemma). Generator unique up to Γ(S,⊤)ˣ — the unit where N lives.
+- **[A4-e]** vertical v: same shape one degree down (L := 𝒪(2[0]), D := [R], deg 1).
+
+Order: a → b → (c-investigate ∥ d-statement-skeleton) → c → d → e.
