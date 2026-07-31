@@ -30512,3 +30512,15 @@ the L-twist conjugated by eL, or the direct pushforward-unit identification) —
 the PAIR (via the two descs) is the e2-map; injectivity/surjectivity from the 3a-split
 transported (or ker-count via concentration). Then A-rows, [A4-c1] unimodularity,
 wrappers ⟹ GAP-A-4 CLOSED.
+
+### [A4-e2] session-stretch ledger (end 2026-07-31, post keep-going ×2)
+PROVEN this stretch beyond the earlier ledger: hom_eq_zero_of_locally_zero;
+divisorTwistHom_comp_cokernelπ_eq_zero (unit-image tensor-induction);
+cokernelTwistDesc + π-compat; one_mem_idealSections_ker_of_preimage_eq_bot (the
+htriv-producer — instantiates leaf-1/2 at ANY section kernel and, via
+sectionsDivisor_pair_ideal_span-multiplication, at D). LineVertical.lean carries ONE
+sorry: the e2-interface wiring tail. NEXT (fresh stretch): per-section Γ ≅ Γ(S,⊤)
+for coker(twist-kerP) with eL — the (b)-bridge/SuccessorSections-mirror per the
+[desc-route] board section; then desc-pair + injectivity + 3a = e2; then A-rows,
+[A4-c1] unimodularity (evaluation-matrix minors via the b3-normalized coordinates —
+KM chord-tangent), named wrappers ⟹ GAP-A-4 CLOSED ⟹ [GAP-A-5a].
