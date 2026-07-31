@@ -1206,13 +1206,8 @@ private theorem mem_prime_of_rational_subset_open {A : Type*} [CommRing A]
     exact ⟨fun h ↦ Ideal.Quotient.eq_zero_iff_mem.mp
       ((IsFractionRing.injective (A ⧸ p) (FractionRing (A ⧸ p))).eq_iff.mp (by rwa [map_zero])),
       fun ha ↦ by rw [Ideal.Quotient.eq_zero_iff_mem.mpr ha, map_zero]⟩
-  have hw_one_or_zero : ∀ (a : A), w a = 0 ∨ w a = 1 := by
-    intro a
-    simp only [w, Valuation.comap_apply, φ, RingHom.comp_apply]
-    rcases eq_or_ne ((algebraMap (A ⧸ p) (FractionRing (A ⧸ p)))
-        ((Ideal.Quotient.mk p) a)) 0 with h | h
-    · left; rw [h]; simp
-    · right; exact Valuation.one_apply_of_ne_zero h
+  have hw_one_or_zero : ∀ (a : A), w a = 0 ∨ w a = 1 := fun a => by
+    simp only [w, Valuation.comap_apply, Valuation.one_apply_def]; split_ifs <;> simp
   have hv_spa : v ∈ Spa A A⁺ := by
     refine ⟨?_, ?_⟩
     · apply isContinuous_ofValuation_of; intro γ
@@ -1234,12 +1229,8 @@ private theorem mem_prime_of_rational_subset_open {A : Type*} [CommRing A]
       simp only [w, Valuation.comap_apply, map_one]; exact Valuation.one_apply_le_one _
   have hv_supp : v.supp = p := by
     rw [supp_ofValuation]; ext a; exact hw_mem_iff a
-  have hw_Ds : w D'.s = 1 := by
-    simp only [w, Valuation.comap_apply, φ, RingHom.comp_apply]
-    apply Valuation.one_apply_of_ne_zero
-    intro heq; apply hD's
-    exact Ideal.Quotient.eq_zero_iff_mem.mp
-      ((IsFractionRing.injective (A ⧸ p) (FractionRing (A ⧸ p))).eq_iff.mp (by rwa [map_zero]))
+  have hw_Ds : w D'.s = 1 :=
+    (hw_one_or_zero D'.s).resolve_left fun h => hD's ((hw_mem_iff D'.s).mp h)
   have hv_rat : v ∈ rationalOpen D'.T D'.s := by
     refine ⟨hv_spa, ?_, ?_⟩
     · intro t' _; change w t' ≤ w D'.s; rw [hw_Ds]

@@ -4404,3 +4404,93 @@ so one abstraction each should serve both blocks.
 `isClosed_chartData_completedPlusSubring` — the completed plus-subring of a chart datum is
 closed, because it is open and an open subgroup of a topological group is closed. A standing
 fact about the datum, not a step of this density argument; no such lemma existed.
+
+## 201 → 200: `chartPlus_le_completedPlusSubring_of_dense` (63 → 50)
+
+Two changes: `isClosed_chartData_completedPlusSubring` extracted (the completed plus-subring is
+closed, being open), and **two redundant `have hmax` blocks removed** — each spelled out the type
+of `hball n` in six lines only to bind it, in mirror-twin `.1`/`.2` branches. Using `hball n`
+directly at the single use site of each removed 12 lines.
+
+Three failed attempts on the way, all worth recording because two were self-inflicted repeats:
+
+1. **Removing the `haveI : IsRingOfIntegralElements …` line broke elaboration** 40 lines later.
+   It looked redundant once the helper carried its own copy — but the helper's copy is scoped to
+   the helper. Restored.
+2. **Inlining `hclosed` at its single use site also broke it.** `(isClosed_… a b).mem_of_tendsto`
+   fails where `have hclosed := …; hclosed.mem_of_tendsto` works: the binding gives elaboration a
+   fixed point to work from. **A `have` used exactly once is not automatically inlinable.**
+3. **The call site was missing the leading explicit section variables** (`p F ϖ`), so `a` was
+   being unified with `p` — surfacing as "argument `b` has type ℕ but is expected to have type
+   `Type ?u`" plus `failed to synthesize Fact (Nat.Prime a)`. This is the **5th occurrence** of
+   this exact gotcha, and I have a recorded rule for it ("copy a neighbouring call site's
+   argument shape") that I did not follow when writing the helper. The error never names the
+   missing argument — it always misreports as a type error on the *next* one.
+
+## 200 → 199: `mem_prime_of_rational_subset_open` (56 → 50), no extraction at all
+
+Two simplifications, both instances of the pattern that has become the reliable win — the proof
+restating something it already had, or that mathlib already has:
+
+1. **`hw_Ds` (6 → 2).** It proved `w D'.s = 1` by redoing the fraction-field injectivity argument
+   from scratch (`one_apply_of_ne_zero` + `IsFractionRing.injective` + `Quotient.eq_zero_iff_mem`)
+   — the very argument already inside `hw_mem_iff`, proved 30 lines earlier. It follows directly
+   from the two facts in scope: `w D'.s` is `0` or `1`, and is not `0` since `D'.s ∉ p`.
+2. **`hw_one_or_zero` (6 → 2) — a genuine best-API fix.** It hand-rolled "the trivial valuation
+   takes only the values 0 and 1" by case-splitting on whether the image in the fraction field is
+   zero. **mathlib has `Valuation.one_apply_def` (Valuation/Basic.lean:377)**: `(1 : Valuation _ _) x = if x = 0 then 0 else 1`.
+   With it the proof is `simp only [...]; split_ifs <;> simp`.
+
+Worth noting this proof needed **no extraction** — the earlier design note called for building a
+"trivial Spa-point attached to an open prime" construction lemma, which is still the right
+long-term shape for `Presheaf.lean`, but the deficit closed on redundancy alone. Cheaper, and it
+leaves that redesign available rather than half-done.
+
+**Pattern now confirmed across five proofs** (`hmax` in ChartVObj, `hfcompat` in the glue pair,
+`vle_pow_…` in Cor732, and both of the above): *look for the restatement before reaching for the
+extraction.* Extraction moves lines; removing a restatement removes them.
+
+### Staged: `productRestrictionSub_injective_JetA` (need 33 after joins, saves 36)
+
+`hBz` and `hCz` are 19 lines each and **19/19 identical under B↔C renaming** — exact mirrors.
+Each says: if every piece restriction of `z` vanishes, so does its vertex-pushed global section,
+by separatedness on the pushed covering.
+
+**Deliberately two mirror lemmas, not one abstraction.** Abstracting over the vertex needs the
+Jet type, its `IsSheafy` instance, `pushDatum`, `pushCovering`, `pushCovering_isRational`,
+`presheafValueMap` and `presheafValueMap_restriction` — seven parameters, two of them
+lemmas-as-hypotheses. The file already carries the vertex-mirror convention throughout
+(`mapBD`/`mapCD`, `pushedFamilyB`/`pushedFamilyC` from earlier this session), so two named
+mirrors match the surrounding code where a seven-parameter abstraction would not. This is the
+same judgement as the `unitCover_sq_plus/minus` deferral, resolved the other way because here
+the blocks are small enough to name individually.
+
+**Measurement gotcha, found and fixed while checking the mirror claim.** My first normalisation
+used `re.sub(r'\bC\b', 'X', l)` to fold `JetC`→`JetX` etc. — but that also rewrote the *covering
+variable* `C` (`C.base`, `pushCoveringB C hC`), manufacturing 14 fake differences and making the
+blocks look only 5/19 identical. Substituting on the identifier SUFFIX (`pushDatum`+`B`/`C`,
+`presheafValueMap`+`B`/`C`, …) rather than on a bare letter gives the true 19/19. A
+single-letter word-boundary regex is never safe in this codebase — `B`, `C`, `D`, `F`, `P` are
+all live variable names.
+
+### `hpiece₁`/`hpiece₂`: mirrors under a SIMULTANEOUS swap, not a single axis
+
+Analysed `wedhorn_lemma_834_pair_package_exists` (need 26 after 19 joins; two 21-line blocks).
+Getting the mirror axis right took three attempts, and the failures are the interesting part:
+
+* Normalising `₁↔₂` gave 10/21 — **wrong axis**. `Vj₁` and `Vj₂` both appear in *both* blocks
+  (the source datum is their intersection), so folding them manufactured differences.
+* Normalising `x↔y` alone also gave 10/21 — **still wrong**.
+* The real relation is a **paired swap**: `hpiece₁` targets the `Vj₁`-piece at `x`, `hpiece₂`
+  the `Vj₂`-piece at `y`, and the proofs close with `⟨hv.1.1, hv.2.1⟩` vs `⟨hv.1.2, hv.2.2⟩`.
+  The mirror is `(Vj₁, x, left) ↔ (Vj₂, y, right)` — three things swapping together.
+
+**Generalises the earlier `\bC\b` lesson.** It is not enough to substitute on the right *kind*
+of token; a mirror can be a simultaneous swap of several, and folding any one of them alone
+leaves the others as spurious differences. A single-axis diff that reports "about half
+identical" is the signature of a multi-axis mirror, not of two unrelated proofs.
+
+Not attempted: abstracting needs a "which component" parameter (the `.1`/`.2` pick is a
+proof-level choice, not data), and two 21-line near-mirror lemmas would clear the deficit but
+add little. Left for the same treatment as `unitCover_sq_plus/minus` if the vertex-mirror
+convention is ever revisited wholesale.

@@ -234,6 +234,19 @@ theorem exists_ball_approx (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
   · have h2 := le_trans (le_max_right _ _) hmax
     rwa [BIProd_snd, valued_BlocToHatK] at h2
 
+/-- The completed plus-subring of a chart datum is closed: it is open
+(`presheafValuePlus_isRingOfIntegralElements`), and an open subgroup of a topological group is
+closed. -/
+private theorem isClosed_chartData_completedPlusSubring (a b : ℕ) :
+    IsClosed ((chartData p F ϖ 1 b a b).completedPlusSubring
+      : Set (presheafValue (chartData p F ϖ 1 b a b))) := by
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+    isAffinoidRing_Ainf p F
+  exact AddSubgroup.isClosed_of_isOpen
+    (chartData p F ϖ 1 b a b).completedPlusSubring.toAddSubgroup
+    (RationalLocData.presheafValuePlus_isRingOfIntegralElements
+      (A := Ainf p F) (chartData p F ϖ 1 b a b)).isOpen
+
 /-- **The hard half of the plus reconciliation, reduced to the dense level**:
 given the dense-level integrality, the transported unit ball lies in the
 canonical plus subring. -/
@@ -251,35 +264,18 @@ theorem chartPlus_le_completedPlusSubring_of_dense (a b : ℕ) (ha : 0 < a)
           hexact1 hexact2).symm.toRingHom)
       ≤ (chartData p F ϖ 1 b a b).completedPlusSubring := by
   rintro _ ⟨z, hz, rfl⟩
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
-    isAffinoidRing_Ainf p F
-  have hclosed : IsClosed
-      ((chartData p F ϖ 1 b a b).completedPlusSubring
-        : Set (presheafValue (chartData p F ϖ 1 b a b))) := by
-    have hopen : IsOpen
-        ((chartData p F ϖ 1 b a b).completedPlusSubring
-          : Set (presheafValue (chartData p F ϖ 1 b a b))) :=
-      (RationalLocData.presheafValuePlus_isRingOfIntegralElements
-        (A := Ainf p F) (chartData p F ϖ 1 b a b)).isOpen
-    exact AddSubgroup.isClosed_of_isOpen
-      (chartData p F ϖ 1 b a b).completedPlusSubring.toAddSubgroup hopen
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
+  have hclosed := isClosed_chartData_completedPlusSubring p F ϖ a b
   choose hseq hball hw1 hw2 using exists_ball_approx p F ϖ
     (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) z hz
   -- convergence of the approximants to `z`
-  have htend : Filter.Tendsto
-      (fun n => blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n))
+  have htend : Filter.Tendsto (fun n => blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n))
       Filter.atTop (nhds z) := by
     refine tendsto_subtype_rng.mpr ?_
     refine tendsto_BIProd_of_valued_le p F ϖ (ε := fun n => (2 : NNReal)⁻¹ ^ n)
       ?_ ?_ glueSeq_eps_tendsto
     · intro n
-      have hmax : max
-          (Valued.v ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-            - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).1))
-          (Valued.v ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-            - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).2))
-          ≤ (2 : NNReal)⁻¹ ^ n := hball n
-      have h1 := le_trans (le_max_left _ _) hmax
+      have h1 := le_trans (le_max_left _ _) (hball n)
       rw [show ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
           - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).1)
         = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).1
@@ -287,13 +283,7 @@ theorem chartPlus_le_completedPlusSubring_of_dense (a b : ℕ) (ha : 0 < a)
         Valuation.map_sub_swap, BIProd_fst] at h1
       exact h1
     · intro n
-      have hmax : max
-          (Valued.v ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-            - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).1))
-          (Valued.v ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-            - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).2))
-          ≤ (2 : NNReal)⁻¹ ^ n := hball n
-      have h2 := le_trans (le_max_right _ _) hmax
+      have h2 := le_trans (le_max_right _ _) (hball n)
       rw [show ((((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
           - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (hseq n)).2)
         = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).2
