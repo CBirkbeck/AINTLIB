@@ -30145,3 +30145,35 @@ NEXT: [A4-c] the H¹-vanishing of the twist (the real math — investigate wheth
 landed pole-sheaf ordered-Cech H¹ machinery admits a twisted variant, else the
 fibrewise-RR + cohomology-and-base-change route) ∥ [A4-d] lineSection statement
 skeleton over the b3-basis.
+
+### [A4-c] INVESTIGATION VERDICT 2026-07-31 (mechanisms mapped)
+
+Landed H¹-machinery mechanism: `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover`
+(U-affine-QC side via `restrict_subsingleton_H_of_isAffineOpen`; V-side; overlap
+cocycle-splitting (iii)). Pole-power H¹s all route through it (SuccessorHOne for the
+skyscraper ladder; ProjectiveCech/BaseChangeHOne for the models; NeighborhoodHOne for
+the FLW basic-open shrink). The twist T := I_D ⊗ 𝒪(3[0]) does NOT reduce to it
+directly: LES gives H¹(T) = coker(H⁰(𝒪(3[0])) → H⁰(𝒪(3[0])|_D)) — a GLOBAL
+surjectivity, not overlap-splittable (the affine-local correction does not extend to
+the V-side; verified the failure shape). Two viable routes:
+
+- (R1, RECOMMENDED) **basis-evaluation, S-locally + glue**: over affine S with the
+  landed b3 = (1, x, y)-normalized basis, H⁰(𝒪(3[0])|_D) for D = [P]+[Q] is the
+  rank-2 evaluation target; surjectivity of the evaluation matrix
+  (rows (1, x(P), y(P)), (1, x(Q), y(Q))) holds Zariski-locally on S by a unit-minor
+  case split — x(P)−x(Q) unit OR the y-minor unit OR the tangent/vertical degenerate
+  cases via the Weierstrass relation (all cases uniform in the scheme-theoretic D:
+  P=Q uses the derivative row — KM 2.8's classical chord-tangent nondegeneracy).
+  The LINE then glues over S by rank-one-uniqueness + zero-normalization ([GAP-A-6]'s
+  discrepancy machinery — consistent with the boarded plan).
+- (R2) fibrewise H¹ = 0 (PoleSheafFibreHOne-style RR on fibres for the twisted deg-1
+  bundle) + cohomology-and-base-change: coh-BC is NOT in-tree in general form; the
+  FLW ordered-Čech replays don't transfer (z-anchored covers). R2 = mathlib-scale new
+  infrastructure. AVOID unless R1's degenerate-case algebra stalls.
+
+⟹ [A4-c] re-scoped: prove the surjectivity S-locally in evaluation form
+([A4-c1] the 2×3 evaluation matrix hits O² on a unit-minor cover of S, all P,Q-cases;
+[A4-c2] transport to `Subsingleton H¹(T)` per S-piece via the LES if the H¹-form is
+still wanted by consumers, else feed surjectivity directly into the
+baseSections-workhorses restricted to S-pieces). LineSection assembly [A4-d] then
+S-local + glue.

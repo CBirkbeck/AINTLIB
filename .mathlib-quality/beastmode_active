@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-b-mono step 2] isLocallyInjective_idealActionPre — glue charts: equalizerSieve via basis-refinement of h-cover x L-triv-cover; span-descent map_ideal-prime; nzd-descent affinePullbackSection(id); then steps 3-5 per board chain
+FOCUS: [GAP-A-4/A4-c investigate] twisted H1-vanishing — survey landed H1 machinery (PoleSheafProjectiveBaseChangeHOne mechanism, subsingleton_H_one producers, any cohomology-and-base-change) for twist-adaptability; decide route; board verdict
