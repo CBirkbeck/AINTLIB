@@ -30465,3 +30465,20 @@ genEquiv-span + eL-transport (u/v-recast discipline)] + [vi-d unit-Γ-step at th
 concentrated presheaf] + sectionsDivisor_pair_ideal_span (3b-i) + 3a
 (quotientSpanMulEquivProd rP rQ hPnzd eP eQ). All named pieces PROVEN and pushed;
 LineVertical.lean otherwise sorry-free; root 9605 green.
+
+### [A4-e2 wiring 2] TOOL-VERDICT 2026-07-31 — the Γ-wall and the (b)-bridge road
+Tools confirmed: `isQuasicoherent_cokernel` (SchemeModuleQuasicoherent:505),
+`restrict_subsingleton_H_of_isAffineOpen` (AcyclicAffineOpenCover/SheafCechCochains),
+kernel-QC, evaluation-preserves-limits. THE RESIDUAL WALL: every route to the
+Γ-⊤-model hits "sections of a sheafified object are abstract" (unit-Γ-step) — for
+the tensor-sections (range-⊆) or Kpre-sheafify (vi-d). The DESIGNED ESCAPE = the
+(b)-presentation bridge exactly where the succ-coker machinery already solved this:
+their Γ-computation went coker → idealModuleCokerIsoPushforwardUnit → pushforward-unit
+→ baseSectionsRestrictPushforwardUnitIsoOfSection. For the twist: build the bridge
+`coker (divisorTwistHom J L) ≅ tensorObj (coker (idealModuleToUnit D.subschemeι?))-L`
+OR directly mirror their per-section pipeline for coker(twist-P) with the L-twist
+carried through (the P-evaluation-map route: quotient maps coker(twist-D) →
+coker(twist-P) from the ideal-inclusion I_D ⊆ I_P — subtype-inclusion idiom — then
+per-section Γ ≅ R via the (b)-machinery, pair = the e2-coordinates; injectivity of
+the pair from the concentration + counting or from the SES-split as in 3a).
+This is the next stretch's focused build. All current work green+pushed thru f2c5805d4.
