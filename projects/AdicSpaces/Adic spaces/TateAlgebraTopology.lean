@@ -3185,6 +3185,57 @@ theorem Finsupp_fin2_decomp (l : Fin 2 →₀ ℕ) :
   fin_cases i <;> simp
 
 set_option linter.unusedSectionVars false in
+/-- The underlying power series of the double-sum decomposition is the corresponding sum of
+monomials. -/
+private theorem tateAlgebra₂_decomp_val_eq (g : ↥(TateAlgebra₂ A)) (N : ℕ) :
+    ((∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
+        algebraMap A ↥(TateAlgebra₂ A)
+          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
+            Finsupp.single (1 : Fin 2) j) g.val) *
+          TateAlgebra₂.X ^ i * TateAlgebra₂.Y ^ j : ↥(TateAlgebra₂ A)).val) =
+      ∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
+        MvPowerSeries.monomial (Finsupp.single (0 : Fin 2) i +
+          Finsupp.single (1 : Fin 2) j)
+          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
+            Finsupp.single (1 : Fin 2) j) g.val)
+    := by
+  change (Subring.subtype _) _ = _
+  rw [map_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [map_sum]
+  exact Finset.sum_congr rfl fun j _ => TateAlgebra₂_monomial_val _ i j
+
+/-- Evaluating that sum of monomials at `l` gives the corresponding sum of `if`-terms. -/
+private theorem tateAlgebra₂_decomp_sum_apply (g : ↥(TateAlgebra₂ A)) (N : ℕ)
+    (l : Fin 2 →₀ ℕ) :
+    (∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
+        MvPowerSeries.monomial (Finsupp.single (0 : Fin 2) i +
+          Finsupp.single (1 : Fin 2) j)
+          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
+            Finsupp.single (1 : Fin 2) j) g.val)) l =
+      ∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
+        (if l = Finsupp.single (0 : Fin 2) i + Finsupp.single (1 : Fin 2) j then
+          MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
+            Finsupp.single (1 : Fin 2) j) g.val
+        else 0)
+    := by
+  -- MvPowerSeries.coeff is a LinearMap; use `map_sum` + `coeff_apply` identity.
+  rw [(MvPowerSeries.coeff_apply (∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
+      MvPowerSeries.monomial (Finsupp.single (0 : Fin 2) i +
+        Finsupp.single (1 : Fin 2) j)
+        (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
+          Finsupp.single (1 : Fin 2) j) g.val)) l).symm, map_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [map_sum]
+  exact Finset.sum_congr rfl fun j _ => MvPowerSeries.coeff_monomial _ _ _
+
+/-- Reading off both coordinates from `l = single 0 i + single 1 j`. -/
+private theorem coord_of_eq_single_add {l : Fin 2 →₀ ℕ} {i j : ℕ}
+    (heq : l = Finsupp.single (0 : Fin 2) i + Finsupp.single (1 : Fin 2) j) :
+    l 0 = i ∧ l 1 = j :=
+  ⟨by simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 0) heq,
+   by simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 1) heq⟩
+
 /-- **Polynomial decomposition:** for `g : TateAlgebra₂ A` with coefficients
 vanishing outside the box `[0, N) × [0, N)`,
 `g = ∑_{(i, j) ∈ range N × range N} algebraMap A _ (coeff_{i,j} g) * X^i * Y^j`. -/
@@ -3199,44 +3250,12 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
   apply Subtype.ext
   funext l
   -- Establish: RHS.val = ∑_i ∑_j monomial (single 0 i + single 1 j) c_ij.
-  have hRHS_val_eq : ((∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
-        algebraMap A ↥(TateAlgebra₂ A)
-          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
-            Finsupp.single (1 : Fin 2) j) g.val) *
-          TateAlgebra₂.X ^ i * TateAlgebra₂.Y ^ j : ↥(TateAlgebra₂ A)).val) =
-      ∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
-        MvPowerSeries.monomial (Finsupp.single (0 : Fin 2) i +
-          Finsupp.single (1 : Fin 2) j)
-          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
-            Finsupp.single (1 : Fin 2) j) g.val) := by
-    change (Subring.subtype _) _ = _
-    rw [map_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [map_sum]
-    exact Finset.sum_congr rfl fun j _ => TateAlgebra₂_monomial_val _ i j
+  have hRHS_val_eq := tateAlgebra₂_decomp_val_eq g N
   rw [hRHS_val_eq]
   -- Compute the value at l via Finset.sum_apply' + coeff_monomial.
   -- (∑_i ∑_j monomial_ij c_ij) l = ∑_i ∑_j (monomial_ij c_ij) l
   -- = ∑_i ∑_j (if l = key_ij then c_ij else 0).
-  have hsum_val : (∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
-        MvPowerSeries.monomial (Finsupp.single (0 : Fin 2) i +
-          Finsupp.single (1 : Fin 2) j)
-          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
-            Finsupp.single (1 : Fin 2) j) g.val)) l =
-      ∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
-        (if l = Finsupp.single (0 : Fin 2) i + Finsupp.single (1 : Fin 2) j then
-          MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
-            Finsupp.single (1 : Fin 2) j) g.val
-        else 0) := by
-    -- MvPowerSeries.coeff is a LinearMap; use `map_sum` + `coeff_apply` identity.
-    rw [(MvPowerSeries.coeff_apply (∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
-        MvPowerSeries.monomial (Finsupp.single (0 : Fin 2) i +
-          Finsupp.single (1 : Fin 2) j)
-          (MvPowerSeries.coeff (Finsupp.single (0 : Fin 2) i +
-            Finsupp.single (1 : Fin 2) j) g.val)) l).symm, map_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [map_sum]
-    exact Finset.sum_congr rfl fun j _ => MvPowerSeries.coeff_monomial _ _ _
+  have hsum_val := tateAlgebra₂_decomp_sum_apply g N l
   rw [hsum_val]
   -- Split cases on whether l is in the box.
   by_cases hl : l 0 < N ∧ l 1 < N
@@ -3248,22 +3267,14 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
         rfl
       · intros j _ hj
         rw [if_neg]
-        intro heq
-        apply hj
-        have := congrArg (fun f : Fin 2 →₀ ℕ => f 1) heq
-        simp at this
-        exact this.symm
+        exact fun heq => hj (coord_of_eq_single_add heq).2.symm
       · intro h
         exfalso; exact h (Finset.mem_range.mpr h1)
     · intros i _ hi
       apply Finset.sum_eq_zero
       intros j _
       rw [if_neg]
-      intro heq
-      apply hi
-      have := congrArg (fun f : Fin 2 →₀ ℕ => f 0) heq
-      simp at this
-      exact this.symm
+      exact fun heq => hi (coord_of_eq_single_add heq).1.symm
     · intro h
       exfalso; exact h (Finset.mem_range.mpr h0)
   · push Not at hl
@@ -3276,10 +3287,7 @@ theorem tateAlgebra₂_polynomial_decomp (g : ↥(TateAlgebra₂ A)) (N : ℕ)
     intros j hj
     rw [if_neg]
     intro heq
-    have h_l_i : l 0 = i := by
-      simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 0) heq
-    have h_l_j : l 1 = j := by
-      simpa using congrArg (fun f : Fin 2 →₀ ℕ => f 1) heq
+    obtain ⟨h_l_i, h_l_j⟩ := coord_of_eq_single_add heq
     have h_i_lt : i < N := Finset.mem_range.mp hi
     have h_j_lt : j < N := Finset.mem_range.mp hj
     rw [h_l_i] at hl

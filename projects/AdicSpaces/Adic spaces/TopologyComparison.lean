@@ -1539,8 +1539,7 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
   obtain ⟨n, -, hn⟩ := (tateAlgBasis' (A := A)).hasBasis_nhds g |>.mem_iff.mp hO_nhds
   -- g is restricted: all but finitely many coefficients lie in image(I^n).
   have hfin : ∀ᶠ (l : Fin 1 →₀ ℕ) in Filter.cofinite,
-      MvPowerSeries.coeff l g.val ∈
-        (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A) :=
+      MvPowerSeries.coeff l g.val ∈ (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A) :=
     tateAlgebra_coeff_eventually_in_pow P g n
   set S : Set (Fin 1 →₀ ℕ) := {l |
     MvPowerSeries.coeff l g.val ∉
@@ -1550,6 +1549,16 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
   refine ⟨truncTateC g N, hn ?_, ⟨N, fun m hm ↦ truncTateC_coeff_high g N m hm⟩⟩
   -- Need: truncTateC g N - g ∈ tateAlgNhd P n (basis uses b - a ∈ ...).
   -- This equals -(g - truncTateC g N), so use neg_mem.
+  -- high coefficients are outside the bad set `S`, hence already good
+  have hhigh : ∀ l, ¬ (l 0 < N) → ∃ b : P.A₀, b ∈ P.I ^ n ∧ (b : A) = g.val l := by
+    intro l _
+    have hl_not_bad : l ∉ S := by
+      intro hl
+      have hl_fin : l ∈ hS_fin.toFinset := hS_fin.mem_toFinset.mpr hl
+      have : l 0 ≤ (hS_fin.toFinset.image (· 0)).sup id :=
+        Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 0) hl_fin)
+      omega
+    rwa [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
   have hdiff_pair : g - truncTateC g N ∈ pairSubring P := by
     intro l
     change (g.val l - (truncTateC g N).val l) ∈ (P.A₀ : Set A)
@@ -1557,14 +1566,7 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
     by_cases hlt : l 0 < N
     · rw [if_pos hlt, sub_self]; exact P.A₀.zero_mem
     · rw [if_neg hlt, sub_zero]
-      have hl_not_bad : l ∉ S := by
-        intro hl
-        have hl_fin : l ∈ hS_fin.toFinset := hS_fin.mem_toFinset.mpr hl
-        have : l 0 ≤ (hS_fin.toFinset.image (· 0)).sup id := by
-          exact Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 0) hl_fin)
-        omega
-      rw [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
-      obtain ⟨b, _, hb_eq⟩ := hl_not_bad
+      obtain ⟨b, _, hb_eq⟩ := hhigh l hlt
       rw [show g.val l = (b : A) from hb_eq.symm]; exact b.property
   have hdiff_coeff : ∀ l, ∃ b : P.A₀, b ∈ P.I ^ n ∧
       (b : A) = MvPowerSeries.coeff l (g - truncTateC g N).val := by
@@ -1573,29 +1575,18 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
     rw [truncTateC_val]
     by_cases hlt : l 0 < N
     · -- Coefficient agrees: difference is 0.
-      rw [if_pos hlt, sub_self]
-      exact ⟨0, (P.I ^ n).zero_mem, rfl⟩
+      rw [if_pos hlt, sub_self]; exact ⟨0, (P.I ^ n).zero_mem, rfl⟩
     · -- High coefficient: truncation is 0, difference is g.val l.
-      rw [if_neg hlt, sub_zero]
-      have hl_not_bad : l ∉ S := by
-        intro hl
-        have hl_fin : l ∈ hS_fin.toFinset := hS_fin.mem_toFinset.mpr hl
-        have : l 0 ≤ (hS_fin.toFinset.image (· 0)).sup id := by
-          exact Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 0) hl_fin)
-        omega
-      rw [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
-      exact hl_not_bad
+      rw [if_neg hlt, sub_zero]; exact hhigh l hlt
   -- g - truncTateC g N ∈ tateAlgNhd P n.
   have hg_diff_mem : g - truncTateC g N ∈ tateAlgNhd P n :=
-    tateAlgNhd_of_coeff_mem_principal P n
-      (IsTateRing.principalPair A).π
+    tateAlgNhd_of_coeff_mem_principal P n (IsTateRing.principalPair A).π
       (IsTateRing.principalPair A).I_eq_span
       (IsTateRing.principalPair A).π_isUnit
       hdiff_pair hdiff_coeff
   -- truncTateC g N - g = -(g - truncTateC g N), use neg_mem.
   change truncTateC g N - g ∈ tateAlgNhd P n
-  rw [show truncTateC g N - g = -(g - truncTateC g N) from by ring]
-  exact neg_mem hg_diff_mem
+  rw [show truncTateC g N - g = -(g - truncTateC g N) from by ring]; exact neg_mem hg_diff_mem
 
 /-- The localization `A[1/s]` maps densely into `A⟨X⟩/(1-sX)` for the canonical
 quotient topology (Wedhorn Example 6.38, canonical topology version).

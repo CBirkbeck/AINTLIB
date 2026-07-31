@@ -4654,3 +4654,22 @@ carried a `box` reference that only made sense inside the enclosing proof.
     nothing the enclosing proof introduced") has a constructive converse: **when a block DOES
     mention `set`-bound locals, do not lift it verbatim — restate it about their definitions, and
     the unfolding steps fall away.**
+
+## 196 → 195: `tateAlgebra₂_polynomial_decomp` (85 → ~43)
+
+* `tateAlgebra₂_decomp_val_eq` (15 → 1) and `tateAlgebra₂_decomp_sum_apply` (19 → 1) — clean
+  verbatim lifts; checked first that neither body touches a `set`-bound local, per the
+  precondition established by the Euclidean failure.
+* `coord_of_eq_single_add` — the incantation
+  `congrArg (fun f : Fin 2 →₀ ℕ => f k) heq` for reading a coordinate off
+  `l = single 0 i + single 1 j` appeared **four times** across three branches. One helper
+  returning both coordinates collapsed all four.
+
+**After the two big extractions the proof was still 4 over with ZERO joins available.** The way
+out was not more extraction but the repeated incantation. That is now the fifth proof where the
+redundant-restatement check closed the final gap after extraction had run out — it is reliably
+the *last* move as well as the first.
+
+Also: `#print axioms` needed the enclosing namespace (`TateAlgebra.`), which is not the file's
+name (`TateAlgebraTopology`) nor the section header (`TateAlgebra₂Topology`). Computing the
+namespace stack by walking `namespace`/`end` to the declaration beats guessing from the filename.
