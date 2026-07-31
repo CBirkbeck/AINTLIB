@@ -5556,3 +5556,30 @@ more than another note to self — the note demonstrably does not work.
 
 Also guarded: the merge refuses any join whose result exceeds 100 characters, checked before
 writing rather than after. All five came out at 42–95.
+
+### New gotcha: never `;`-merge into a tactic that takes `| …` alternatives
+
+Six `;` merges cleared `ideal_row_surjective` on paper (182 → 181) and the module build went
+red:
+
+```
+Alternative `insert` has not been provided
+unexpected identifier; expected command
+```
+
+The offender is `intro s` + `induction s using Finset.induction_on with`. Once `induction … with`
+becomes the tail of a `;` chain, the `| empty =>` / `| insert a s ha ih =>` alternatives that
+follow no longer attach to it, and the whole block reparses.
+
+→ **`;`-merging is safe only when the lower line is a self-contained tactic.** `induction`,
+  `cases`, `match` and `rcases … with` followed by `|` alternatives are not: their syntax
+  continues onto the lines below, so the merge silently changes what those lines belong to.
+  The join tool's existing guards (structure literals, `calc` steps) are the same class of
+  defect — constructs whose parts are indented siblings — and this is a third member of it.
+
+The other five merges were fine (78, 51, 55, 57, 68 chars). Reverted the whole change rather
+than keeping five and leaving the proof one line short of clearing: half-applied churn with no
+measurable gain is worse than nothing.
+
+`ideal_row_surjective` remains at need 6 with 5 safe merges available — it needs one more line
+from somewhere other than the `induction` seam.
