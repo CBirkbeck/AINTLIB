@@ -209,12 +209,30 @@ variable [h𝔭 : 𝔭.IsMaximal]
 
 noncomputable instance : Field (KappaP w N 𝔭) :=
   Ideal.Quotient.field 𝔭
-noncomputable instance : Algebra K (KappaP w N 𝔭) :=
-  ((Ideal.Quotient.mk 𝔭).comp (constHead K w N)).toAlgebra
-
 /-- The residue map onto the alias. -/
 noncomputable def mkKappaP : WPHead K w N →+* KappaP w N 𝔭 :=
   Ideal.Quotient.mk 𝔭
+
+/-- The constants of the head, viewed in the alias. -/
+noncomputable def constKappaP : K →+* KappaP w N 𝔭 :=
+  (mkKappaP w N 𝔭).comp (constHead K w N)
+
+noncomputable instance : Algebra K (KappaP w N 𝔭) :=
+  (constKappaP w N 𝔭).toAlgebra
+
+/-- The `K`-module structure of the residue field, in the shape the
+finite-dimensionality API expects (an `AddCommGroup`-derived scalar
+action).  Without it the `Module` search inside `FiniteDimensional K
+(KappaP w N 𝔭)` cannot reconcile the two routes through the alias's
+`Field` instance. -/
+noncomputable instance :
+    @Module K (KappaP w N 𝔭) _ (@AddCommGroup.toAddCommMonoid _ inferInstance) :=
+  Algebra.toModule
+
+@[simp]
+theorem algebraMap_kappaP (c : K) :
+    algebraMap K (KappaP w N 𝔭) c = mkKappaP w N 𝔭 (constHead K w N c) :=
+  rfl
 
 end KappaAlias
 

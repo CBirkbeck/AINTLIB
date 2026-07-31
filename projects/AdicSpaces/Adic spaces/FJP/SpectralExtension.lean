@@ -88,6 +88,17 @@ theorem extCompleteSpace :
   haveI : ContinuousSMul K L := IsBoundedSMul.continuousSMul
   exact FiniteDimensional.complete K L
 
+/-- The spectral norm makes a finite extension a topological `K`-module. -/
+theorem extContinuousSMul :
+    letI := extNormedField K L
+    ContinuousSMul K L := by
+  letI := extNormedField K L
+  haveI : Algebra.IsAlgebraic K L := Algebra.IsAlgebraic.of_finite K L
+  letI : NormedSpace K L := spectralNorm.normedSpace K L
+  haveI : IsBoundedSMul K L := IsBoundedSMul.of_norm_smul_le
+    NormedSpace.norm_smul_le
+  exact IsBoundedSMul.continuousSMul
+
 /-- The spectral norm extends the base norm. -/
 theorem ext_norm_algebraMap (c : K) :
     letI := extNormedField K L

@@ -1,1 +1,1 @@
-FOCUS: BETA brick (ii) part 2 — KappaP spectral alias + quotient-topology continuity bridge (t3_quotient_of_isClosed + LinearMap.continuous_of_finiteDimensional + continuousSMul_quotient); then brick (iii) power-bounded transfer; then (iv)-(viii)
+FOCUS: BETA brick (iii) — power-bounded b-points in kappa(q); just landed continuous_mkKappaP (brick ii) axiom-clean. Alias fix: KappaP needs the AddCommGroup-shaped Module instance + haveI IsUniformAddGroup/IsTopologicalAddGroup before fin-dim bridge.
