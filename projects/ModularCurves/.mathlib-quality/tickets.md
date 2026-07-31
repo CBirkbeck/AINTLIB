@@ -30091,3 +30091,21 @@ PresheafOfModules.sheafification — grep `PreservesFiniteLimits.*sheafification
 presheaf-level mono of idealActionPre — but the presheaf-level map is NOT objectwise
 injective in general (tensor torsion), so this route needs the LOCALLY-injective
 presheaf-mono criterion instead; probably a wash. Then [A4-c] H¹-leaf per decomposition.
+
+### [A4-b-mono] CHAIN REFINED 2026-07-31 (names verified in mathlib)
+`idealActionPre_app_tmul` (m⊗l ↦ m.1•l) is `rfl` — LANDED. Mono-chain (dual of A7-4):
+1. CHART LEAF `isLocallyInjective_idealActionPre` (h-principality + hL : IsInvertible L):
+   equalizerSieve via z := x−y; on common-refinement V (J-span-nzd ∧ L-restrict-triv):
+   act_V injective ⟸ precompose LinearEquiv.rTensor of μ_g : Γ(V) ≃ₗ I(V)
+   (a ↦ a•g — self-contained 20-liner from span+nzd, do NOT route through
+   idealGenHom) — composite on tmuls = g-smul ∘ lid; g-smul injective on L(V)
+   through the restrict-triv app-iso (rfl-grade sections) + nzd.
+2. unit-W loc-inj+loc-surj at BOTH presheaves (hWunit-derivation from A7-4, verbatim).
+3. `Presheaf.isLocallyInjective_of_isLocallyInjective_of_isLocallySurjective_fac`
+   (LocallySurjective.lean:209) on the unit-naturality square extracts loc-inj of
+   toPresheaf(RA-map (L-sheafify-map idealActionPre)) — fac-based, no TC-clothing risk
+   if stated with the h1-style goal-copied spelling (or hand witness-shift as in A7-4).
+4. `mono_of_isLocallyInjective` (Sites/EpiMono.lean) on the toSheaf-image + toSheaf
+   faithful reflects ⟹ Mono (sheafification.map (idealActionPre)).
+5. `divisorTwistHom_eq` (copy ev_eq_sheafification_map, Picard/Evaluation.lean:206) +
+   mono ≫ iso ⟹ `Mono (divisorTwistHom J L)`. DONE-CRITERION for [A4-b-mono].

@@ -91,6 +91,16 @@ noncomputable def divisorTwistHom : tensorObj (idealModule J) L ⟶ L :=
     (CategoryStruct.id C.ringCatSheaf.obj)).homEquiv
       ((idealModule J).val ⊗ L.val) L |>.symm (idealActionPre J L)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+@[simp]
+theorem idealActionPre_app_tmul (U : (TopologicalSpace.Opens ↥C)ᵒᵖ)
+    (m : idealSections J U) (l : L.val.obj U) :
+    (idealActionPre J L).app U
+        (m ⊗ₜ[(C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U] l) =
+      (show ((C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U) from m.1) • l :=
+  rfl
+
 end Twist
 
 end AlgebraicGeometry.Scheme.Modules

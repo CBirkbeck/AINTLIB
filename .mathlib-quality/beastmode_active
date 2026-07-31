@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-b] divisorTwistHom via presheaf-action transpose — recon tensorObj presheaf-level app API (PullbackTensorMonoidal/InvertibleSheaf), then build the bilinear lift
+FOCUS: [GAP-A-4/A4-b-mono] Mono (divisorTwistHom) — first grep PreservesFiniteLimits for PresheafOfModules.sheafification; then mono_of_locally_injective_app + trivialization conjugation per board note
