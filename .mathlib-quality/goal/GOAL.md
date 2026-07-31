@@ -4613,3 +4613,25 @@ driven by a heuristic, re-run the heuristic against the ORIGINAL content of ever
 touched, rather than letting the build discover failures serially.**
 
 Task 2 count unchanged at 197 either way — dead code was never a task-2 lever.
+
+## Cross-file dedup: `antidiagonal_pairwiseDisjoint`
+
+"Antidiagonals of distinct naturals are disjoint" was proved **inline in two files** — as `hdisj`
+in `Euclidean.gaussValueF_prefix_mul_sub_convPartial_le`, and as the `Finset.sum_biUnion` side
+condition inside `Presentation.sum_antidiagonal_mul_pow_eq_filter` (which I had extracted
+earlier this session, carrying the duplicate along without noticing).
+
+**Presentation imports Euclidean**, so the shared lemma goes in Euclidean — upstream — and is
+public for exactly that reason. Both sites now call it. Checked mathlib first: it has
+`PairwiseDisjoint` facts about antidiagonals of a *different* shape (`Antidiag/Pi.lean:166`), not
+this one.
+
+**A failed extraction alongside it, reverted.** `hprod` (the product of two truncated Witt sums
+as a sum over the box) looked like a clean 18-line lift, but its body references `box` — a local
+`set` in the enclosing proof — so the helper did not compile (`Unknown identifier box`, plus
+knock-on instance failures). **Lifting a body verbatim only works when the body mentions nothing
+the enclosing proof introduced**; `set`-bound names are invisible in a diff of the block but fatal
+once it moves. The earlier verbatim lifts (`hglue`, `hBz`/`hCz`) were safe precisely because
+those blocks were the FIRST `have` in their proofs, so nothing local existed yet.
+
+Net: ~9 lines of duplication removed, no proof cleared (the Euclidean proof needs 25 more).

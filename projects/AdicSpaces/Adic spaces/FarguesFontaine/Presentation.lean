@@ -561,10 +561,7 @@ theorem sum_antidiagonal_mul_pow_eq_filter
     refine Finset.sum_congr rfl fun q hq => ?_
     have hql : q.1 + q.2 = l := Finset.mem_antidiagonal.mp hq
     rw [hql]
-  · intro x hx y hy hxy
-    simp only [Finset.disjoint_left, Finset.mem_antidiagonal]
-    intro q hq hq'
-    exact hxy (hq.symm.trans hq')
+  · exact antidiagonal_pairwiseDisjoint (↑(Finset.range N) : Set ℕ)
 
 /-- **The Cauchy-product estimate**: the product of two partial sums differs from the
 partial sum of the Cauchy product by a term of interval norm at most `ε·M`, provided the

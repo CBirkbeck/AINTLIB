@@ -911,6 +911,17 @@ theorem gaussValueF_convPartial_sub_prefix_le {ρ : NNReal} (hρ0 : 0 < ρ)
   calc ρ ^ n * (ρ * Bn) = ρ * (ρ ^ n * Bn) := by ring
     _ ≤ ρ * (A * B) := mul_le_mul_of_nonneg_left hscaled zero_le
 
+/-- Antidiagonals of distinct naturals are disjoint: a pair in both `antidiagonal m` and
+`antidiagonal n` forces `m = n`. Used here and (via the import) by the Cauchy-product regrouping
+in `Presentation`. -/
+theorem antidiagonal_pairwiseDisjoint (s : Set ℕ) :
+    s.PairwiseDisjoint (fun n => (Finset.antidiagonal n : Finset (ℕ × ℕ))) := by
+  intro m _ n _ hmn
+  simp only [Function.onFun, Finset.disjoint_left]
+  intro q hqm hqn
+  exact hmn (by rw [← Finset.mem_antidiagonal.mp hqm,
+    ← Finset.mem_antidiagonal.mp hqn])
+
 /-- **The prefix-product tail** (sol step 2, identity (10)): a prefix product
 differs from the convolution partial only in antidiagonal terms of total index at
 least `N`, so any uniform tail bound controls the difference. -/
@@ -928,13 +939,7 @@ theorem gaussValueF_prefix_mul_sub_convPartial_le {ρ : NNReal} (hρ0 : 0 < ρ)
   set box : Finset (ℕ × ℕ) := Finset.range N ×ˢ Finset.range N with hbox
   set TRI : Finset (ℕ × ℕ) := (Finset.range N).biUnion
     (fun n => Finset.antidiagonal n) with hTRI
-  have hdisj : (↑(Finset.range N) : Set ℕ).PairwiseDisjoint
-      (fun n => (Finset.antidiagonal n : Finset (ℕ × ℕ))) := by
-    intro m _ n _ hmn
-    simp only [Function.onFun, Finset.disjoint_left]
-    intro q hqm hqn
-    exact hmn (by rw [← Finset.mem_antidiagonal.mp hqm,
-      ← Finset.mem_antidiagonal.mp hqn])
+  have hdisj := antidiagonal_pairwiseDisjoint (↑(Finset.range N) : Set ℕ)
   have hprod : (∑ i ∈ Finset.range N,
         WittVector.teichmuller p (a i) * (p : WittVector p F) ^ i)
       * (∑ j ∈ Finset.range N,
