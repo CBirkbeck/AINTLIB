@@ -131,6 +131,16 @@ private theorem eq_zero_of_mem_image_all
     exact hfc.congr (fun n ↦ by simp only [Function.comp_apply]; exact hm_eq n)
   exact tendsto_const_nhds_iff.mp this
 
+/-- In a nonarchimedean additive group the open subgroups form a basis of neighbourhoods
+of `0`. -/
+theorem nhds_zero_hasBasis_openAddSubgroup (M : Type*) [AddCommGroup M] [TopologicalSpace M]
+    [IsTopologicalAddGroup M] [NonarchimedeanAddGroup M] :
+    (nhds (0 : M)).HasBasis (fun _ : OpenAddSubgroup M ↦ True) (fun V ↦ (V : Set M)) :=
+  Filter.HasBasis.mk (fun U ↦ ⟨fun hU ↦
+    let ⟨V, hV⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
+    ⟨V, trivial, hV⟩, fun ⟨V, _, hV⟩ ↦
+      mem_nhds_iff.mpr ⟨(V : Set M), hV, V.isOpen, V.zero_mem⟩⟩)
+
 /-- **Surjection lifting for restricted modules.** If `f : M →ₗ[A] N` is surjective,
 continuous, and open, then the induced map `M⟨X⟩ → N⟨X⟩` is surjective.
 
@@ -158,11 +168,7 @@ theorem restrictedModule_map_surjective
     obtain ⟨h, hfh, hh⟩ := this
     exact ⟨⟨h, hh⟩, by apply Subtype.ext; funext s; exact hfh s⟩
   -- Step 1: Obtain an antitone basis of open additive subgroups of M.
-  obtain ⟨W, _, hW⟩ := (Filter.HasBasis.mk (fun U ↦ ⟨fun hU ↦
-    let ⟨V, hV⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
-    ⟨V, trivial, hV⟩, fun ⟨V, _, hV⟩ ↦ mem_nhds_iff.mpr ⟨(V : Set M), hV, V.isOpen, V.zero_mem⟩⟩) :
-    (nhds (0 : M)).HasBasis (fun _ : OpenAddSubgroup M ↦ True)
-      (fun V ↦ (V : Set M))).exists_antitone_subbasis
+  obtain ⟨W, _, hW⟩ := (nhds_zero_hasBasis_openAddSubgroup M).exists_antitone_subbasis
   -- Step 2: Sₙ = {s | g s ∉ f(Wₙ)} is finite for each n.
   have hS_fin : ∀ n, {s : Fin 1 →₀ ℕ | g s ∉ f '' (W n : Set M)}.Finite := by
     intro n

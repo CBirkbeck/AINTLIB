@@ -4356,3 +4356,51 @@ the file, and it needs the mirror structure understood first. Deferred deliberat
 `nhds_zero_hasBasis_openAddSubgroup` — "in a nonarchimedean additive group the open subgroups
 form a basis of neighbourhoods of `0`" — built inline purely so `.exists_antitone_subbasis`
 could be applied to it. Zero derived deps, nothing to do with restricted modules.
+
+## 202 → 201: `restrictedModule_map_surjective` → `nhds_zero_hasBasis_openAddSubgroup`
+
+"In a nonarchimedean additive group the open subgroups form a basis of neighbourhoods of `0`",
+built inline purely so `.exists_antitone_subbasis` could be applied to it. Zero derived deps and
+nothing to do with restricted modules.
+
+**GOTCHA (5th docstring-adjacency issue this campaign, and the first to actually corrupt a
+declaration): a multi-paragraph docstring contains blank lines.** My insertion anchor was "the
+last `/--` before the declaration, provided no blank line separates them" — which is exactly
+wrong for a docstring that has paragraphs. The blank line *inside* the docstring made the
+heuristic conclude the docstring was unattached, so the helper was spliced **between the
+docstring and its theorem**, orphaning it: `unexpected token '/--'; expected 'lemma'`.
+
+Correct rule: to insert before a declaration, scan backwards for the nearest line *starting*
+with `/--` and insert above that, with **no blank-line test at all** — a docstring ends at `-/`,
+and blank lines inside it mean nothing. The four earlier instances of this family were
+`attribute`/`omit` needing to precede a docstring; this one is the converse.
+
+### Widened search: 10 targets clear on ≤2 small low-dep extractions
+
+Narrowing to blocks of 5-45 lines with ≤2 derived deps, in proofs that are NOT preamble-heavy
+(<10 `letI`/`haveI` lines), and allowing two extractions rather than one:
+
+| need | mech | file | decl |
+|---:|---:|---|---|
+| 6 | 0 | Presheaf | `mem_prime_of_rational_subset_open` |
+| 9 | 4 | ChartVObj | `chartPlus_le_completedPlusSubring_of_dense` |
+| 14 | 18 | ChartVObj | `div_teich_pow_a_mem_chartSubring` |
+| 18 | 5 | ChartData | `exists_teichCoeff_factor_high` |
+| 21 | 10 | Euclidean | `prefix_mul_sub_convPartial_le` |
+| 26 | 3 | WedhornCechAcyclicity | `…normalized_rational_refinement_on` |
+| 26 | 19 | WedhornCechAcyclicity | `…lemma_834_pair_package_exists` |
+| 30 | 12 | TateAlgebra | `…subfX_comp_quotientOneSubfXToLoc` |
+| 31 | 4 | TateAlgebraTopology | `tateAlgebra₂_polynomial_decomp` |
+| 33 | 3 | FJP/FiniteJetSheafTransfer | `productRestrictionSub_injective_JetA` |
+
+The preamble filter matters: without it the ranking kept promoting proofs like
+`iteratedMinus_forwardToCompletion_continuous`, where the candidate block's *statement* depends
+on the `letI`-bound topologies, so extracting it just relocates the 32-line preamble into the
+helper. Two of the entries above are themselves mirror pairs (`hpiece₁`/`hpiece₂`, `hBz`/`hCz`),
+so one abstraction each should serve both blocks.
+
+### Staged: `chartPlus_le_completedPlusSubring_of_dense` (need 9, saves 9 + 4 joins margin)
+
+`isClosed_chartData_completedPlusSubring` — the completed plus-subring of a chart datum is
+closed, because it is open and an open subgroup of a topological group is closed. A standing
+fact about the datum, not a step of this density argument; no such lemma existed.
