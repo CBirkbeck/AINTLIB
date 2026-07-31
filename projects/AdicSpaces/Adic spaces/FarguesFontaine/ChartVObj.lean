@@ -385,6 +385,58 @@ private theorem teichmuller_pow_eq_teichPi_pow_mul {a b d : ℕ} {c' c'' : OF F}
     map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
   rfl
 
+/-- **The chart-generator identity.** Once `c' ^ a` factors as `ϖ ^ (d(a-b)) * c''` in `OF F`,
+the `a`-th power of the chart generator `p^d * (π⁻¹)^d * [c']` collapses to
+`chartFracP a b ^ d * [c'']`. Extracted from `p_div_teich_pow_a_mem_chartSubring`, where it was
+the whole algebraic content; what remains there is `Subring.closure` bookkeeping. -/
+private theorem chartGen_pow_eq_chartFracP_pow_mul {a b d : ℕ} (hab : b ≤ a) {c' c'' : OF F}
+    (hc'' : c' ^ a = (PseudoUniformizer.toOF F ϖ : OF F) ^ (d * (a - b)) * c'') :
+    (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')) ^ a
+      = chartFracP p F ϖ a b ^ d
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
+  have hIT := AlocToBloc_teichPiInv_pow_mul p F ϖ (d * (a - b))
+  have h1 := teichmuller_pow_eq_teichPi_pow_mul p F ϖ hc''
+  have h2 : chartFracP p F ϖ a b
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b := by
+    rw [chartFracP, map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+  have hda : d * a = d * b + d * (a - b) := by
+    have h : a = b + (a - b) := by omega
+    calc d * a = d * (b + (a - b)) := by rw [← h]
+      _ = d * b + d * (a - b) := by ring
+  calc (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
+      * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')) ^ a
+    = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
+      * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c') ^ a := by
+        rw [(show d * a = a * d from mul_comm d a), pow_mul, pow_mul]
+        ring
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
+      * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
+      * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b))
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'')) := by
+      rw [h1]
+    _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
+      * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
+      * ((AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b))
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b)))
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'')) := by
+      rw [show AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
+          = AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * b)
+            * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b)) from by
+        rw [← pow_add, ← hda]]
+      ring
+    _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
+      * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
+      rw [hIT, one_mul]
+    _ = chartFracP p F ϖ a b ^ d
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
+      rw [h2, mul_pow]
+
 /-- **(m3) Positive-monomial `a`-th-power membership**: for a fraction
 monomial `(p/[ϖ])^d·[c']` whose coordinate satisfies the right-endpoint bound
 `|c'|^a ≤ |ϖ|^{d(a−b)}`, the `a`-th power is `chartFracP^d·[c'']` and lies in
@@ -405,53 +457,7 @@ theorem p_div_teich_pow_a_mem_chartSubring (a b d : ℕ) (hab : b ≤ a)
     rw [show (((c' ^ a : OF F)) : F) = ((c' : F)) ^ a from by push_cast; rfl, map_pow]
     exact hc
   obtain ⟨c'', hc''⟩ := exists_eq_toOF_pow_mul p F ϖ (d * (a - b)) (c' ^ a) hc'
-  -- atoms
-  have hIT := AlocToBloc_teichPiInv_pow_mul p F ϖ (d * (a - b))
-  have h1 := teichmuller_pow_eq_teichPi_pow_mul p F ϖ hc''
-  have h2 : chartFracP p F ϖ a b
-      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a
-        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b := by
-    rw [chartFracP, map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
-  have hda : d * a = d * b + d * (a - b) := by
-    have h : a = b + (a - b) := by omega
-    calc d * a = d * (b + (a - b)) := by rw [← h]
-      _ = d * b + d * (a - b) := by ring
-  have hkey : (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
-        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')) ^ a
-      = chartFracP p F ϖ a b ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
-    calc (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ d
-        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')) ^ a
-      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
-        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
-        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c') ^ a := by
-          rw [(show d * a = a * d from mul_comm d a), pow_mul, pow_mul]
-          ring
-      _ = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (d * a)
-        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
-        * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b))
-          * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'')) := by
-        rw [h1]
-      _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
-        * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
-        * ((AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b))
-          * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ (d * (a - b)))
-          * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'')) := by
-        rw [show AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * a)
-            = AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * b)
-              * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ (d * (a - b)) from by
-          rw [← pow_add, ← hda]]
-        ring
-      _ = (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a) ^ d
-        * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ b) ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
-        rw [hIT, one_mul]
-      _ = chartFracP p F ϖ a b ^ d
-        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'') := by
-        rw [h2, mul_pow]
-  rw [hkey]
+  rw [chartGen_pow_eq_chartFracP_pow_mul p F ϖ hab hc'']
   refine mul_mem (pow_mem (Subring.subset_closure ?_) d) (Subring.subset_closure ?_)
   · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
   · exact Set.mem_union_left _ ⟨_, rfl⟩
