@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-a] idealModuleInclusion + Mono — write WeilPairing/LineVertical.lean skeleton
+FOCUS: [GAP-A-4/A4-b] divisorTwistHom via presheaf-action transpose — recon tensorObj presheaf-level app API (PullbackTensorMonoidal/InvertibleSheaf), then build the bilinear lift

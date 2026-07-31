@@ -20,7 +20,7 @@ This file starts with the ambient-module inclusion of an ideal module
 
 universe u
 
-open CategoryTheory AlgebraicGeometry Opposite
+open CategoryTheory AlgebraicGeometry Opposite MonoidalCategory
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -58,5 +58,39 @@ instance : Mono (idealModuleInclusion J) := by
   have hg : (idealModuleInclusion J).val.app (op U) (g.val.app (op U) m) =
       (idealModuleInclusion J).val.app (op U) (h.val.app (op U) m) := hval
   exact Subtype.ext hg
+
+section Twist
+
+variable (L : C.Modules)
+
+local instance (C : Scheme.{u}) :
+    ∀ U, IsMulCommutative (C.ringCatSheaf.obj.obj U) :=
+  fun U => by
+    change IsMulCommutative (C.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b => mul_comm a b
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The presheaf-level action of the ideal module on any module — the whiskered
+subtype inclusion followed by the left unitor. All naturality is the monoidal
+structure's. -/
+noncomputable def idealActionPre :
+    ((idealModule J).val ⊗ L.val :
+      _root_.PresheafOfModules (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶
+      L.val :=
+  MonoidalCategory.whiskerRight (idealModuleInclusion J).val L.val ≫
+    (λ_ L.val).hom
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The divisor twist map**: the sheafified action `I(J) ⊗ L ⟶ L`, the mono whose
+cokernel is the restriction of `L` to the subscheme of `J`. Transpose of
+`idealActionPre` through the sheafification adjunction (the `ev` idiom). -/
+noncomputable def divisorTwistHom : tensorObj (idealModule J) L ⟶ L :=
+  (PresheafOfModules.sheafificationAdjunction
+    (CategoryStruct.id C.ringCatSheaf.obj)).homEquiv
+      ((idealModule J).val ⊗ L.val) L |>.symm (idealActionPre J L)
+
+end Twist
 
 end AlgebraicGeometry.Scheme.Modules

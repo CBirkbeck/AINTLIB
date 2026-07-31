@@ -30063,3 +30063,31 @@ OR route-(i)-specific: mono ⟸ app-injectivity on a trivializing basis (L local
 rank 1: on trivializing opens the map is m⊗l ↦ m·l with l-coordinate iso — injective by
 nzd of the ideal generator... NEEDS J locally-principal-nzd hypotheses — fine, the
 consumers have them). Decide after (i)'s map lands.
+
+### [A4-b] map DONE 2026-07-31 — divisorTwistHom lands (mono still open)
+`idealActionPre J L := whiskerRight (idealModuleInclusion J).val L.val ≫ (λ_ L.val).hom`
+— the whiskered-inclusion route KILLED the whnf storms (elementwise tensor_ext
+naturality torched 200k heartbeats twice; ALL naturality now outsourced to the
+presheaf-monoidal structure; (unitObj C).val unified with 𝟙_ by rfl).
+`divisorTwistHom J L : tensorObj (idealModule J) L ⟶ L :=
+(sheafificationAdjunction _).homEquiv _ _ |>.symm (idealActionPre J L)` — the ev idiom.
+Both compile green in WeilPairing/LineVertical.lean.
+
+### [A4-b-mono] NEXT LEAF: `Mono (divisorTwistHom J L)` under h-principality + L invertible
+Design: (i) `mono_of_locally_injective_app` — a map of X.Modules is mono if its apps are
+injective on (opens of) a cover: sheaf-separatedness glues injectivity up (mirror of
+`isIso_of_isIso_restrict`'s happ-transport, InvertibleSheaf.lean:154). (ii) On a common
+refinement of the J-principal-nzd cover and the L-trivializing cover, conjugate
+divisorTwistHom by the trivializations: becomes mult-by-generator on 𝒪, injective by
+nzd. Tool for the divisorTwistHom-app values: derive
+`divisorTwistHom = sheafification.map (idealActionPre) ≫ (sheafifyValIso L).hom` by
+copying `ev_eq_sheafification_map` (Picard/Evaluation.lean:206ff) verbatim, then
+app-values via the sheafification-unit at tmuls (idealActionPre-app on m⊗l is
+DEFINITIONALLY m.1 • l through whiskerRight+λ_: whiskerRight-app = f.app ⊗ₘ id,
+λ_-app = TensorProduct.lid-ish — derive `idealActionPre_app_tmul` first, `rfl`-attempt).
+ALTERNATIVE cheaper (ASSESS FIRST): Mono (sheafification.map idealActionPre) via
+sheafification-preserves-finite-limits (if the instance exists for
+PresheafOfModules.sheafification — grep `PreservesFiniteLimits.*sheafification`) +
+presheaf-level mono of idealActionPre — but the presheaf-level map is NOT objectwise
+injective in general (tensor torsion), so this route needs the LOCALLY-injective
+presheaf-mono criterion instead; probably a wash. Then [A4-c] H¹-leaf per decomposition.
