@@ -387,19 +387,6 @@ theorem mvTateAlgNhd_of_coeff_mem_principal (n : ℕ) (P : PairOfDefinition A) (
     exact Ideal.pow_mem_pow hπ_in k
   exact ((mvPairIdeal n P) ^ k).mul_mem_right g_in_subring hπn_in
 
-omit [IsTopologicalRing A] in
-/-- Easy case of leftMul: when `x ∈ mvPairSubring n P`, multiplication by `x` preserves the
-basic neighborhoods. Generalizes `TateAlgebra.tateAlgNhd_leftMul_of_mem` from `Fin 1` to
-`Fin n`; Wedhorn Prop 6.21(2). -/
-private theorem mvTateAlgNhd_leftMul_of_mem (n : ℕ) (P : PairOfDefinition A)
-    {x : ↥(restrictedMvPowerSeriesSubring n A)} (hx : x ∈ mvPairSubring n P) (i : ℕ) :
-    (mvTateAlgNhd n P i : Set ↥(restrictedMvPowerSeriesSubring n A)) ⊆
-      (x * ·) ⁻¹' (mvTateAlgNhd n P i : Set ↥(restrictedMvPowerSeriesSubring n A)) := by
-  rintro _ ⟨y, hy, rfl⟩
-  refine ⟨⟨x, hx⟩ * y, ?_, ?_⟩
-  · exact ((mvPairIdeal n P) ^ i).mul_mem_left ⟨x, hx⟩ hy
-  · exact MulMemClass.coe_mul ..
-
 /-- The leftMul condition for a principal pair. Generalizes
 `TateAlgebra.tateAlgNhd_leftMul_of_principal` from `Fin 1` to `Fin n`; Wedhorn Prop 6.21(2). -/
 theorem mvTateAlgNhd_leftMul_of_principal [IsTateRing A] (n : ℕ) (P : PairOfDefinition A)

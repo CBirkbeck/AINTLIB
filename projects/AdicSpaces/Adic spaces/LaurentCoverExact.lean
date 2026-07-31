@@ -688,9 +688,6 @@ private theorem idx_eq_single_one_iff (i j : ℕ) :
   · intro hi
     subst hi; ext k; fin_cases k <;> simp [idx]
 
-private theorem idx_zero_zero : idx 0 0 = (0 : Fin 2 →₀ ℕ) := by
-  ext k; fin_cases k <;> simp [idx]
-
 /-- Every `Fin 2 →₀ ℕ` index equals `idx (e 0) (e 1)`. -/
 private theorem eq_idx (e : Fin 2 →₀ ℕ) : e = idx (e 0) (e 1) := by
   ext k; fin_cases k <;> simp [idx]
@@ -720,10 +717,6 @@ private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
     rw [show Finsupp.single (1 : Fin 2) j = Finsupp.single 1 (idx i j 1) by rw [h1]]
     exact idx_eq_single_one_iff i j
   simp only [h2]
-
-private theorem idx_11 :
-    Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 1 = idx 1 1 := by
-  ext k; fin_cases k <;> simp [idx]
 
 omit [TopologicalSpace A] [NonarchimedeanRing A] in
 /-- The LHS: coefficient of `(X₀ * X₁ - 1) * c` at index `idx i j`.

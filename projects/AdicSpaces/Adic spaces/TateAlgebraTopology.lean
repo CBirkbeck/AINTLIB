@@ -704,22 +704,6 @@ theorem tateAlgNhd_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
     exact Ideal.pow_mem_pow hπ_in n
   exact ((pairIdeal P) ^ n).mul_mem_right g_in_subring hπn_in
 
-omit [IsTopologicalRing A] in
-/-- **Easy case of leftMul:** when `x ∈ pairSubring P`, multiplication by `x`
-preserves the basic neighborhoods because they are images of ideals of
-`pairSubring P`, which are closed under multiplication by elements of
-`pairSubring P`. Take `j = i`. -/
-private theorem tateAlgNhd_leftMul_of_mem (P : PairOfDefinition A)
-    {x : ↥(TateAlgebra A)} (hx : x ∈ pairSubring P) (i : ℕ) :
-    (tateAlgNhd P i : Set ↥(TateAlgebra A)) ⊆
-      (x * ·) ⁻¹' (tateAlgNhd P i : Set ↥(TateAlgebra A)) := by
-  rintro _ ⟨y, hy, rfl⟩
-  -- `x · ↑y = ↑(⟨x, hx⟩ * y)` and `⟨x, hx⟩ * y ∈ (pairIdeal P)^i` because
-  -- ideals are closed under left multiplication by ring elements.
-  refine ⟨⟨x, hx⟩ * y, ?_, ?_⟩
-  · exact ((pairIdeal P) ^ i).mul_mem_left ⟨x, hx⟩ hy
-  · exact MulMemClass.coe_mul ..
-
 /-- **Sub-task F (assembly): the leftMul condition for a principal pair.**
 
 For a principal pair `P.I = (π : P.A₀)` with `π` a unit in `A`, the condition
@@ -2117,19 +2101,6 @@ theorem tateAlgNhd₂_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
     rw [map_pow]
     exact Ideal.pow_mem_pow hπ_in n
   exact ((pairIdeal₂ P) ^ n).mul_mem_right g_in_subring hπn_in
-
-omit [IsTopologicalRing A] in
-/-- **Bivariate easy case of leftMul:** when `x ∈ pairSubring₂ P`, multiplication
-by `x` preserves the basic bivariate neighborhoods. Bivariate analog of
-`tateAlgNhd_leftMul_of_mem`. -/
-private theorem tateAlgNhd₂_leftMul_of_mem (P : PairOfDefinition A)
-    {x : ↥(TateAlgebra₂ A)} (hx : x ∈ pairSubring₂ P) (i : ℕ) :
-    (tateAlgNhd₂ P i : Set ↥(TateAlgebra₂ A)) ⊆
-      (x * ·) ⁻¹' (tateAlgNhd₂ P i : Set ↥(TateAlgebra₂ A)) := by
-  rintro _ ⟨y, hy, rfl⟩
-  refine ⟨⟨x, hx⟩ * y, ?_, ?_⟩
-  · exact ((pairIdeal₂ P) ^ i).mul_mem_left ⟨x, hx⟩ hy
-  · exact MulMemClass.coe_mul ..
 
 /-! #### Phase 2 Sub-task F: bivariate leftMul assembly (principal case) -/
 

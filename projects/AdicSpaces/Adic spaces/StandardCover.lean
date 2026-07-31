@@ -1174,19 +1174,6 @@ private theorem exists_nullstellensatz_refinement_of_rationalOpen_empty
     change Ideal.span (({1} : Finset A) : Set A) = ⊤
     rw [Finset.coe_singleton, Ideal.span_singleton_one]
 
-/-- **Pathological edge case eliminated**: `C.covers = ∅` together with
-`[Nontrivial A]` and `hne : C.covers.Nonempty` gives an immediate
-contradiction. Retained as a private helper so the main dispatcher
-`exists_nullstellensatz_refinement` can use it uniformly. -/
-private theorem exists_nullstellensatz_refinement_of_empty_covers
-    [DecidableEq A] [Nontrivial A]
-    (C : RationalCoveringData A) (hne : C.covers.Nonempty) (hcov : C.covers = ∅) :
-    ∃ S : Finset A, refines_cover C S ∧ refines_contain C S ∧ refines_span_top S := by
-  exfalso
-  obtain ⟨D, hD⟩ := hne
-  rw [hcov] at hD
-  exact Finset.notMem_empty D hD
-
 /-- **The genuine Nullstellensatz obligation**: the *nonempty-rational-open*
 case of `exists_nullstellensatz_refinement`, with `C.covers` nonempty. This
 isolates the Zavyalov §2.3 + Wedhorn Prop 7.14/Lemma 7.44 construction from

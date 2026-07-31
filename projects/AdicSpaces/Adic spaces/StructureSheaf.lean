@@ -790,27 +790,6 @@ If the algebraic product restriction is injective on `Localization.Away C.base.s
 then the product restriction `presheafValue C.base → ∏ presheafValue D` is injective
 on the completion. Requires the `AdicCompletion` bridge (Wedhorn Thm 8.28, Stacks 00MA). -/
 
-/-- The combined restriction map from `presheafValue C.base` to the
-product of `presheafValue D` over covering pieces is continuous
-(each component is `restrictionMapHom`, which extends the algebraic
-restriction map by continuity). -/
-private theorem continuous_productRestriction (C : RationalCoveringData A) :
-    Continuous (fun z : presheafValue C.base ↦
-      fun (D : ↥C.covers) ↦ restrictionMap C.base D.1 (C.hsubset D.1 D.2) z) := by
-  apply continuous_pi
-  intro ⟨D, hD⟩
-  exact restrictionMapHom_continuous C.base D (C.hsubset D hD)
-
-/-- The combined restriction is a ring homomorphism, so its kernel is
-an additive subgroup. -/
-private theorem map_sub_productRestriction (C : RationalCoveringData A)
-    (x y : presheafValue C.base) (D : RationalLocData A)
-    (hD : D ∈ C.covers) :
-    restrictionMap C.base D (C.hsubset D hD) (x - y) =
-      restrictionMap C.base D (C.hsubset D hD) x -
-        restrictionMap C.base D (C.hsubset D hD) y :=
-  map_sub (restrictionMapHom C.base D (C.hsubset D hD)) x y
-
 /-! ### Old direct proof route (QUARANTINED)
 
 These theorems form the old direct proof of Theorem 8.28 via the Spa-point radical
@@ -833,33 +812,6 @@ transfer the product restriction to a ring hom `Q₀ → ∏ QD` between
 Tate algebra quotients. This ring hom is injective because it factors
 through the localization product map, which is injective by the
 covering condition (Spa-point radical argument). -/
-
-/-- If `s ∈ radical(ann(a))` and `s` is a unit in `A⟨X⟩/(1-sX)`,
-then `mk(algebraMap a) = 0` in the quotient. -/
-private theorem algebraMap_zero_of_radical_ann
-    [NonarchimedeanRing A] (s a : A)
-    (hs_rad : s ∈ (Ideal.span ({b : A | b * a = 0} : Set A)).radical) :
-    (Ideal.Quotient.mk (oneSubfXIdeal s)) (algebraMap A _ a) = 0 := by
-  rw [Ideal.mem_radical_iff] at hs_rad
-  obtain ⟨N, hN⟩ := hs_rad
-  have hs_ann : s ^ N * a = 0 := by
-    let ann_a : Ideal A :=
-      { carrier := {b : A | b * a = 0}
-        add_mem' := fun {x y} (hx : x * a = 0) (hy : y * a = 0) => by
-          change (x + y) * a = 0; rw [add_mul, hx, hy, add_zero]
-        zero_mem' := zero_mul a
-        smul_mem' := fun r {x} (hx : x * a = 0) => by
-          change r * x * a = 0; rw [mul_assoc, hx, mul_zero] }
-    have hspan : Ideal.span ({b : A | b * a = 0} : Set A) = ann_a :=
-      le_antisymm (Ideal.span_le.mpr (fun _ h ↦ h)) (fun _ h ↦ Ideal.subset_span h)
-    rw [hspan] at hN
-    exact hN
-  have hs_unit := isUnit_algebraMap_f_in_quotient_gen s
-  rw [RingHom.comp_apply] at hs_unit
-  have hmul : (Ideal.Quotient.mk (oneSubfXIdeal s)) (algebraMap A _ (s ^ N * a)) = 0 := by
-    rw [hs_ann, map_zero, map_zero]
-  rw [map_mul, map_pow] at hmul
-  exact (IsUnit.mul_right_eq_zero (IsUnit.pow N hs_unit)).mp hmul
 
 /-- If `z = C.base.canonicalMap a` and the product restriction kills `z`,
 then `e_base z = 0`.

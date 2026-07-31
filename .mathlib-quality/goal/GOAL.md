@@ -5513,3 +5513,27 @@ The finding stands and is worth redoing: **28 dead private declarations, 593 lin
 above. Redo it with the attached-block extent computed by scanning *forward* from a known-safe
 anchor (the previous declaration's end) rather than backward by suffix matching, and re-verify
 that each deletion's span contains no `section`/`end`/`namespace` line.
+
+### Redone soundly: 28 declarations, 598 lines, zero refusals
+
+The span is now computed **forward from an anchor**, where the anchor is the *later* of the
+previous declaration's end and the last structural command (`section` / `namespace` / `end` /
+`variable` / `open` / `import` / `universe`), plus any module docstring `/-! … -/`. Everything
+between anchor and declaration is the attached block, whatever shape its modifiers take — which
+is what the backward suffix test could not handle.
+
+Getting there took two wrong versions, both caught by the dry-run rather than the build:
+
+* anchoring on the **last structural line alone** swallowed every declaration since the enclosing
+  `section` — **6682 lines** instead of ~593, with `WedhornCechAcyclicity` alone at −4875;
+* adding the previous-declaration anchor but leaving the structural loop as `anchor = k + 1`
+  rather than `max(anchor, k + 1)` silently discarded it — identical 6682, which is exactly the
+  signature of a fix that did not take effect.
+
+→ **When a "fix" leaves the output bit-identical, the fix did not apply.** That is a stronger
+  signal than it looks and is worth checking before re-reasoning about the algorithm.
+
+The corrected run removes 598 lines, five more than the broken 593 — and those five are precisely
+the orphaned `omit … in` blocks the first version left behind, which is what made it red.
+Verified before building: the diff removes **no** `section`/`end`/`namespace`/`variable`/`open`
+line, and the `omit` blocks now leave together with the declarations they modified.

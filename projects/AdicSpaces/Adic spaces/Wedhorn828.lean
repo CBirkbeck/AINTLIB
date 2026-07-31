@@ -464,42 +464,6 @@ private theorem quotient_oneSubfXIdeal_completeSpace_faithful [IsStronglyNoether
   exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra A) _ τ haddgrp ‹_›
     (oneSubfXIdeal s).toAddSubgroup inferInstance hCS
 
-omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsNoetherianRing A] [CompatiblePlusSubring A] in
-/-- **Faithful: the fSubX quotient `A⟨X⟩/(b − X)` is T2** — the fSubX analogue of
-`quotient_oneSubfXIdeal_t2Space_faithful`, via the faithful general closed-ideal
-`tateAlgebra_isClosed_ideal_faithful` applied to `plusFSubXIdeal A b` (no `pairSubring`-noeth). -/
-private theorem quotient_plusFSubXIdeal_t2Space_faithful [IsStronglyNoetherian A]
-    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A)) (b : A) :
-    @T2Space (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b) (quotientPlusFSubXIdealTopology A b) := by
-  haveI : IsClosed ((plusFSubXIdeal A b).toAddSubgroup : Set ↥(TateAlgebra A)) :=
-    tateAlgebra_isClosed_ideal_faithful hA_complete (plusFSubXIdeal A b)
-  letI : TopologicalSpace (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b) :=
-    quotientPlusFSubXIdealTopology A b
-  haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b) :=
-    quotientPlusFSubXIdealTopology_isTopologicalAddGroup A b
-  infer_instance
-
-omit [PlusSubring A] [HasLocLiftPowerBounded A] [IsNoetherianRing A] [CompatiblePlusSubring A] in
-/-- **Faithful: the fSubX quotient `A⟨X⟩/(b − X)` is complete** under the canonical quotient
-topology — fSubX analogue of `quotient_oneSubfXIdeal_completeSpace_faithful`, via the faithful
-general closed-ideal `tateAlgebra_isClosed_ideal_faithful` (no `pairSubring`-noeth). -/
-private theorem quotient_plusFSubXIdeal_completeSpace_faithful [IsStronglyNoetherian A]
-    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A)) (b : A) :
-    @CompleteSpace (↥(TateAlgebra A) ⧸ plusFSubXIdeal A b)
-      (quotientPlusFSubXIdealUniformSpace A b) := by
-  letI τ : TopologicalSpace ↥(TateAlgebra A) := instTopologicalSpaceTateAlgebra
-  haveI _hring : IsTopologicalRing ↥(TateAlgebra A) := instIsTopologicalRingTateAlgebra
-  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra A) :=
-    IsTopologicalRing.to_topologicalAddGroup
-  haveI : FirstCountableTopology ↥(TateAlgebra A) := instFirstCountableTopologyTateAlgebra
-  haveI hCS : @CompleteSpace ↥(TateAlgebra A)
-      (IsTopologicalAddGroup.rightUniformSpace ↥(TateAlgebra A)) :=
-    tateAlgebraTopology'_completeSpace hA_complete
-  haveI : IsClosed ((plusFSubXIdeal A b).toAddSubgroup : Set ↥(TateAlgebra A)) :=
-    tateAlgebra_isClosed_ideal_faithful hA_complete (plusFSubXIdeal A b)
-  exact @QuotientAddGroup.completeSpace_right' ↥(TateAlgebra A) _ τ haddgrp ‹_›
-    (plusFSubXIdeal A b).toAddSubgroup inferInstance hCS
-
 omit [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] [CompatiblePlusSubring A] in
 /-- **Faithful forward completion map** `presheafValue D →+* A⟨X⟩/(1−sX)` — faithful (case-(b))
 replacement for `presheafValueToCanonicalQuotient`, which threads `hnoeth`. The localization
@@ -726,27 +690,6 @@ case is sorry-free (modulo the upstream Prop-6.17-forward `sorryAx`, see below).
 general rational subset is *not* `𝒪_X(X)[1/s]`; the `T`-conditions genuinely change the ring. The
 faithful general-`D` route is the **multivariate** Example 6.38 `presheafValue D ≃ A⟨X₁..Xₙ⟩/a`
 (with `Xᵢ ↦ tᵢ/s`, which ARE power-bounded), a quotient of the noetherian `A⟨X₁..Xₙ⟩` — repo gap. -/
-
-/-- **Faithful: the whole-space value `𝒪_X(X) = presheafValue (globalLocData P)` is noetherian.**
-Via `presheafValueCanonicalQuotientEquiv_faithful`: `globalLocData P` has `T = {1}`, `s = 1`, so the
-faithful Example 6.38 iso gives `presheafValue (globalLocData P) ≃+* A⟨X⟩/(1 − X)`, a quotient of
-the noetherian `A⟨X⟩` (`[IsStronglyNoetherian A]`). Honest case-(b) noetherianness for the whole
-space, with NO `pairSubring`/`A₀⟨X⟩` noetherianness and NO Bourbaki noeth-`A₀` completion. -/
-private theorem presheafValue_globalLocData_isNoetherianRing (P : PairOfDefinition A) :
-    IsNoetherianRing (presheafValue (globalLocData P)) := by
-  letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
-  haveI hAc : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
-  -- `invS (globalLocData P)` is power-bounded since `1 ∈ {1} = (globalLocData P).T`.
-  have hb : TopologicalRing.IsPowerBounded (invS (globalLocData P)) :=
-    isPowerBounded_invS_of_one_mem_T _ (Finset.mem_singleton_self 1)
-  -- Every `t ∈ (globalLocData P).T = {1}` is power-bounded.
-  have hT_pb : ∀ t ∈ (globalLocData P).T, TopologicalRing.IsPowerBounded t := by
-    intro t ht
-    rw [show (globalLocData P).T = {1} from rfl, Finset.mem_singleton] at ht
-    rw [ht]; exact TopologicalRing.isPowerBounded_one
-  -- Transport noetherianness across the faithful Example 6.38 equiv.
-  exact isNoetherianRing_of_ringEquiv _
-    (presheafValueCanonicalQuotientEquiv_faithful (globalLocData P) hb hAc hT_pb).symm
 
 end FaithfulExample638Base
 
@@ -1370,25 +1313,6 @@ private theorem coeRingHom_mem_range [IsTateRing A] [IsNoetherianRing A]
     exact (example638_evalHom D).range.mul_mem
       ⟨algebraMap A _ a, example638_evalHom_algebraMap D a⟩
       ((example638_evalHom D).range.pow_mem (invS_mem_range D) k)
-
-set_option linter.unusedSectionVars false in
-/-- **Density of the image (faithful):** `example638_evalHom D` has dense range.
-`presheafValue D = Completion (Localization.Away D.s)`, in which `range D.coeRingHom` is dense
-(`UniformSpace.Completion.denseRange_coe`); that dense subring is contained in
-`range (example638_evalHom D)` (`coeRingHom_mem_range`), so the larger set is dense too. This is
-Wedhorn's "`A[M]` dense in `Â⟨T/s⟩`" (Example 6.38). NO topology on `A⟨X₁..Xₙ⟩` is used. -/
-private theorem example638_evalHom_denseRange [IsTateRing A] [IsNoetherianRing A]
-    (D : RationalLocData A) : DenseRange (example638_evalHom D) := by
-  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
-    change DenseRange (UniformSpace.Completion.coeRingHom :
-      Localization.Away D.s → presheafValue D)
-    exact UniformSpace.Completion.denseRange_coe
-  -- `range coeRingHom ⊆ range example638_evalHom`, so the latter is dense too.
-  refine hdense.mono ?_
-  rintro _ ⟨y, rfl⟩
-  exact coeRingHom_mem_range D y
 
 /-! ### Example 6.38 — the completion-comparison isomorphism `presheafValue D ≃+* C ⧸ ker`
 

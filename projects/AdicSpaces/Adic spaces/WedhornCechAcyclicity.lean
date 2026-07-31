@@ -1739,36 +1739,6 @@ private noncomputable def datum_quotEquiv_taut
     (Ideal.quotEquivOfEq (datum_ker_eq_span_taut D h1))
 
 set_option linter.unusedSectionVars false in
-/-- The tautological quotient equivalence sends `canonicalMap x` to the constant class
-`mk (algebraMap x)`. -/
-private theorem datum_quotEquiv_taut_canonicalMap
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
-    (D : RationalLocData A) (h1 : (1 : A) ∈ D.T) (x : A) :
-    datum_quotEquiv_taut D h1 (D.canonicalMap x) =
-      Ideal.Quotient.mk _
-        (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x) := by
-  have hx : D.canonicalMap x =
-      example638_evalHom D
-        (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x) :=
-    (example638_evalHom_algebraMap _ x).symm
-  have h2 : (RingHom.quotientKerEquivOfSurjective
-      (example638_evalHom_surjective D)).symm
-        (example638_evalHom D
-          (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x)) =
-      Ideal.Quotient.mk (RingHom.ker (example638_evalHom D))
-        (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x) := by
-    rw [RingEquiv.symm_apply_eq]
-    rfl
-  show (Ideal.quotEquivOfEq (datum_ker_eq_span_taut D h1))
-      ((RingHom.quotientKerEquivOfSurjective
-        (example638_evalHom_surjective D)).symm (D.canonicalMap x)) = _
-  rw [hx, h2]
-  erw [Ideal.quotEquivOfEq_mk]
-
-set_option linter.unusedSectionVars false in
 /-- The two bivariate presentations of the annulus ring agree as ideals of `A⟨X,Y⟩`:
 `(b − X, 1 − bY) = (XY − 1, b − X)` (Wedhorn (8.2.1): `1 − bY ≡ 1 − XY (mod b − X)`). -/
 private theorem bivariateSpan_eq_laurentSup (b : A) :
@@ -2250,63 +2220,6 @@ private theorem tate_quotPresentation_symm_mk
   exact RingHom.quotientKerEquivOfSurjective_apply_mk _ z
 
 set_option linter.unusedSectionVars false in
-/-- The presentation equivalence sends `canonicalMap x` to the constant class
-`mk (algebraMap x)` (generic tracking; mirrors `datum_quotEquiv_taut_canonicalMap`). -/
-private theorem tate_quotPresentation_canonicalMap
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
-    (D : RationalLocData A) {m : ℕ}
-    (Φ : ↥(restrictedMvPowerSeriesSubring m A) →+* presheafValue D)
-    (hΦ_cont : @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' m) _ ⇑Φ)
-    (hΦ_alg : ∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x) =
-      D.canonicalMap x)
-    (gen : Fin m → A)
-    (hΦ_X : ∀ j : Fin m, Φ (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-        ↥(restrictedMvPowerSeriesSubring m A)) =
-      D.coeRingHom (divByS (gen j) D.s))
-    (aI : Ideal ↥(restrictedMvPowerSeriesSubring m A))
-    (haI_le : aI ≤ RingHom.ker Φ)
-    (haI_closed : @IsClosed _ (MvTateAlgebra.mvTateAlgebraTopology' m)
-      (aI : Set ↥(restrictedMvPowerSeriesSubring m A)))
-    (hUnit : IsUnit ((Ideal.Quotient.mk aI).comp
-      (algebraMap A ↥(restrictedMvPowerSeriesSubring m A)) D.s))
-    (hgen_mod : ∀ j : Fin m,
-      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) (gen j)) =
-        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) *
-          Ideal.Quotient.mk aI (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-            ↥(restrictedMvPowerSeriesSubring m A)))
-    (hT_mod : ∀ t ∈ D.T, ∃ w : ↥(restrictedMvPowerSeriesSubring m A),
-      w ∈ MvTateAlgebra.mvPairSubring m (IsTateRing.principalPair A).toPairOfDefinition ∧
-      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) t) =
-        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) *
-          Ideal.Quotient.mk aI w)
-    (x : A) :
-    tate_quotPresentation D Φ hΦ_cont hΦ_alg gen hΦ_X aI haI_le haI_closed hUnit
-        hgen_mod hT_mod (D.canonicalMap x) =
-      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x) := by
-  set e := tate_quotPresentation D Φ hΦ_cont hΦ_alg gen hΦ_X aI haI_le haI_closed hUnit
-    hgen_mod hT_mod with he
-  have hsymm : e.symm (Ideal.Quotient.mk aI
-      (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x)) = D.canonicalMap x := by
-    rw [he, tate_quotPresentation]
-    rw [RingEquiv.symm_trans_apply, RingEquiv.symm_symm]
-    rw [Ideal.quotEquivOfEq_symm]
-    erw [Ideal.quotEquivOfEq_mk]
-    erw [show (RingHom.quotientKerEquivOfSurjective _)
-        (Ideal.Quotient.mk (RingHom.ker Φ)
-          (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x)) =
-      Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x) from rfl]
-    exact hΦ_alg x
-  calc e (D.canonicalMap x)
-      = e (e.symm (Ideal.Quotient.mk aI
-          (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x))) := by rw [hsymm]
-    _ = Ideal.Quotient.mk aI
-          (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x) :=
-        e.apply_symm_apply _
-
-set_option linter.unusedSectionVars false in
 /-- Membership facts for the `interSamePair` of the unit/coUnit halves (the annulus
 datum: `T = {p·q : p ∈ {1,b}, q ∈ {b,1}} = {1, b, b²}`, `s = b`). Every element of `T`
 is `1`, `b`, or `b*b`. -/
@@ -2720,63 +2633,6 @@ private noncomputable def unitCover_overlapQuotEquiv
         hX_mem 0, ?_⟩
       rw [← hXzeta]
       exact (unitCover_overlapIdeal_rel D₀ f).2.2
-
-set_option linter.unusedSectionVars false in
-/-- The overlap presentation sends `canonicalMap x` to the constant class
-`mk (algebraMap x)` (instance of `tate_quotPresentation_canonicalMap`, by
-unification against the definition). -/
-private theorem unitCover_overlapQuotEquiv_canonicalMap
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺)]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
-    (D₀ : RationalLocData A) (f : A) (x : presheafValue D₀) :
-    unitCover_overlapQuotEquiv D₀ f
-        ((unitCover_overlapDatum_B D₀ f).canonicalMap x) =
-      Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)
-        (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) x) := by
-  classical
-  haveI hCompleteB :
-      (letI : UniformSpace (presheafValue D₀) :=
-        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
-       CompleteSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  set e := unitCover_overlapQuotEquiv D₀ f with he
-  have hsymm : e.symm (Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)
-      (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) x)) =
-      (unitCover_overlapDatum_B D₀ f).canonicalMap x := by
-    rw [he]
-    unfold unitCover_overlapQuotEquiv tate_quotPresentation
-    dsimp only
-    rw [RingEquiv.symm_trans_apply, RingEquiv.symm_symm, Ideal.quotEquivOfEq_symm]
-    erw [Ideal.quotEquivOfEq_mk]
-    erw [show (RingHom.quotientKerEquivOfSurjective _)
-        (Ideal.Quotient.mk (RingHom.ker (unitCover_overlapEval D₀ f))
-          (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) x)) =
-      unitCover_overlapEval D₀ f
-        (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) x) from rfl]
-    exact mvEvalHomBounded_algebraMap _ _ _ _ x
-  calc e ((unitCover_overlapDatum_B D₀ f).canonicalMap x)
-      = e (e.symm (Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)
-          (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) x))) := by
-        rw [hsymm]
-    _ = Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)
-          (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) x) :=
-        e.apply_symm_apply _
-
-set_option linter.unusedSectionVars false in
-/-- The Laurent step sends constant classes to constant classes:
-`mk_span (algebraMap x) ↦ mk_(b−ζ) (algebraMap_Laurent x)`. -/
-private theorem bivariateSpan_equiv_B₁₂gen_algebraMap (b x : A) :
-    bivariateSpan_equiv_B₁₂gen b
-        (Ideal.Quotient.mk _ (algebraMap A ↥(TateAlgebra₂ A) x)) =
-      Ideal.Quotient.mk (LaurentCover.laurentFSubZetaIdeal b)
-        (algebraMap A (LaurentTateAlgebra A) x) := by
-  -- v4.33: the (now explicit-`@`) `quotEquivOfEq` chain sends `mk` to `mk`; after unfolding
-  -- the def the goal is closed by `rfl` (the `trans_apply` rewrites are no longer needed).
-  rw [bivariateSpan_equiv_B₁₂gen]
-  rfl
 
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus forward base unit**: the image of the A-side plus-datum
@@ -5619,23 +5475,6 @@ private theorem unitCover_example638Plus_symm_continuous
   exact example638_evalHom_continuous _
 
 set_option linter.unusedSectionVars false in
-/-- S4: the minus bridge-component's inverse on `mk`-classes is the engine's backward
-hom (definitional: the `where`-structure's `invFun`). -/
-private theorem unitCover_example639Minus_symm_mk
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
-    (D₀ : RationalLocData A) (f : A)
-    (hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)))
-    (z : ↥(TateAlgebra (presheafValue D₀)) ⧸
-      Ideal.span {1 - algebraMap (presheafValue D₀)
-        ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) :
-    (unitCover_example639Minus D₀ f).symm z =
-      tateQuotientToPresheafHom (unitCover_minusDatum_B D₀ f) hb z :=
-  rfl
-
-set_option linter.unusedSectionVars false in
 /-- S5: the minus bridge-component's inverse is continuous. -/
 private theorem unitCover_example639Minus_symm_continuous
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
@@ -5745,38 +5584,6 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         rw [← hXzeta]
         exact (unitCover_overlapIdeal_rel D₀ f).2.2)
     z
-
-set_option linter.unusedSectionVars false in
-/-- S7: the overlap presentation's inverse is continuous (quotient universal property:
-`symm ∘ mk = overlapEval` is continuous). -/
-private theorem unitCover_overlapQuotEquiv_symm_continuous
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
-    (D₀ : RationalLocData A) (f : A) :
-    haveI : (letI : UniformSpace (presheafValue D₀) :=
-        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
-      CompleteSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    Continuous ⇑((unitCover_overlapQuotEquiv D₀ f).symm) := by
-  classical
-  haveI hCompleteB :
-      (letI : UniformSpace (presheafValue D₀) :=
-        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
-       CompleteSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  have hQM : Topology.IsQuotientMap (Ideal.Quotient.mk
-      (unitCover_overlapIdeal D₀ f)) :=
-    (QuotientRing.isOpenQuotientMap_mk _).isQuotientMap
-  rw [hQM.continuous_iff]
-  have hfun : ⇑((unitCover_overlapQuotEquiv D₀ f).symm) ∘
-      ⇑(Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)) =
-      ⇑(unitCover_overlapEval D₀ f) :=
-    funext fun z => unitCover_overlapQuotEquiv_symm_mk D₀ f z
-  rw [hfun]
-  exact mvEvalHomBounded_continuous _ _ _ _
 
 /-- v4.33 opaque annulus data: the `interSamePair … rfl` witnesses (whose stored `Eq.refl _`
 type is only defeq to the intended `.P = .P` at default transparency) are hidden behind
@@ -6978,31 +6785,6 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
         exact absurd h (by simpa using hplus t ht)
     obtain ⟨t, ht, _, hstrict⟩ := h_dom v hv.1
     exact hstrict (hall t ht)
-
-set_option linter.unusedSectionVars false in
-/-- `D.completedLocSubring` and `presheafValue_ringOfDef D` coincide as sets (both are
-closures of the same `locSubring`-image; local copy of the Cor832 private lemma). -/
-private theorem wca_completedLocSubring_eq_presheafValue_ringOfDef
-    [IsTateRing A] [IsNoetherianRing A]
-    (D : RationalLocData A) :
-    (D.completedLocSubring : Set (presheafValue D)) =
-    (presheafValue_ringOfDef D : Set (presheafValue D)) := by
-  unfold RationalLocData.completedLocSubring presheafValue_ringOfDef
-  have h_sub_eq : (Subring.map D.coeRingHom (locSubring D.P D.T D.s) :
-      Set (presheafValue D)) =
-    ((D.coeRingHom.comp (locSubring D.P D.T D.s).subtype).range :
-      Set (presheafValue D)) := by
-    ext y
-    -- v4.33: the goal after `ext` may already be in membership form (the `coe`-simp set
-    -- then makes no progress); `rintro` destructures either shape.
-    try simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image,
-      RingHom.comp_apply, Set.mem_range]
-    refine ⟨?_, ?_⟩
-    · rintro ⟨x, hx, rfl⟩; exact ⟨⟨x, hx⟩, rfl⟩
-    · rintro ⟨⟨x, hx⟩, rfl⟩; exact ⟨x, hx, rfl⟩
-  apply Set.eq_of_subset_of_subset
-  · exact closure_mono h_sub_eq.le
-  · exact closure_mono h_sub_eq.ge
 
 /-- **Step (b)**: the canonical image of `t` in `𝒪_X(V_j)` is a unit when
 `v(t) ≥ v(s)` holds on all of `V_j` (which is a rational subset). -/
@@ -8424,23 +8206,6 @@ theorem globalSections_equiv_apply
     (P : PairOfDefinition A) (a : A) :
     globalSections_equiv P a = (globalLocData P).canonicalMap a := rfl
 
-
-set_option linter.unusedSectionVars false in
-/-- The B-side image piece equals the `genPieceDatum`-at-`B` piece (the `hopen`-proofs
-differ but proofs are irrelevant). -/
-private theorem imagePieceDatum_eq_genPieceDatum
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
-    (D₀ : RationalLocData A) (T : Finset A)
-    (hspan : Ideal.span (T : Set A) = ⊤) (t : A) :
-    haveI : DecidableEq (presheafValue D₀) := Classical.decEq _
-    haveI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-    imagePieceDatum D₀ T t hspan =
-      genPieceDatum (presheafValue_concretePair D₀) (T.image D₀.canonicalMap)
-        (D₀.canonicalMap t) (imageGenCover_span D₀ T hspan) :=
-  rfl
 
 set_option linter.unusedSectionVars false in
 /-- **G3c-separation**: the separation half of the A-level restricted cover transports

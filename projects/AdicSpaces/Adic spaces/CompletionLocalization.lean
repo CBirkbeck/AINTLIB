@@ -622,23 +622,6 @@ theorem invS_isPowerBounded_of_one_mem_T (D : RationalLocData A)
 
 end InvSPowerBounded
 
-omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
-    in
-/-- Every kernel element of `algLift` times a high enough power of `algebraMap(D₀.s)` lands in
-`algebraMap(A) ∩ ker(algLift)`. -/
-private theorem ker_algLift_denom_clear
-    (D₀ D : RationalLocData A) (h : rationalOpen D.T D.s ⊆ rationalOpen D₀.T D₀.s)
-    (x : Localization.Away D₀.s) (hx : algLift D₀ D h x = 0) :
-    ∃ k : ℕ, ∃ a : A,
-      algebraMap A (Localization.Away D₀.s) a =
-        algebraMap A (Localization.Away D₀.s) (D₀.s ^ k) * x ∧
-      algLift D₀ D h (algebraMap A (Localization.Away D₀.s) a) = 0 := by
-  obtain ⟨k, a, hsurj⟩ := IsLocalization.Away.surj (S := Localization.Away D₀.s) D₀.s x
-  have heq : algebraMap A (Localization.Away D₀.s) a =
-      algebraMap A (Localization.Away D₀.s) (D₀.s ^ k) * x := by
-    rw [map_pow]; exact hsurj.symm.trans (mul_comm _ _)
-  exact ⟨k, a, heq, by rw [heq, map_mul, hx, mul_zero]⟩
-
 -- REMOVED 2026-04-16: `presheafValue_ker_from_locSubring_ker` (sorry'd) and
 -- `restrictionMapHom_eq_condition` (its only caller). Neither had external
 -- users. The T₂-density route these theorems implemented is superseded by the

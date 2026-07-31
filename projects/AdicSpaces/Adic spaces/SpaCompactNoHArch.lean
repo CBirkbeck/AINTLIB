@@ -306,27 +306,6 @@ private lemma isClosed_image_spa_ιSpv_bool_noHArch :
     IsClosed ((ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺)) := by
   sorry
 
-/-- **Closed Bool target set for `Spa A A⁺` in the no-`hArch` Tate case
-(L1.3.a, packaging).** A concrete closed subset of `A × A → Bool`
-into which `ιSpv_bool '' Spa A A⁺` exactly fits (relative to `range ιSpv_bool`).
-
-In the `hArch` case this would be `(⋂ a ∈ A⁺, {r | r(a,1) = true}) ∩
-{r | r(1, π) = false}` from `image_spa_ιSpv_bool_of_tate`; without `hArch`
-the description requires the Spv(A, I)-spectrality coordinate constraints
-(Wedhorn 7.5 + 7.12 + 7.30), all packaged into the genuine sub-lemma
-`isClosed_image_spa_ιSpv_bool_noHArch`.
-
-**Proof.** Trivial-witness trick: take `S` to be the image itself. Closedness
-comes from the named sub-lemma `isClosed_image_spa_ιSpv_bool_noHArch`, and
-`range ∩ image = image` since `image ⊆ range`. -/
-private lemma exists_closed_bool_target_noHArch :
-    ∃ S : Set (A × A → Bool), IsClosed S ∧
-      (ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺) =
-        Set.range (ιSpv_bool : Spv A → (A × A → Bool)) ∩ S :=
-  ⟨(ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺),
-    isClosed_image_spa_ιSpv_bool_noHArch,
-    (Set.inter_eq_right.mpr (Set.image_subset_range _ _)).symm⟩
-
 /-- **Sub-lemma (genuine content of L1.3.a).** In the no-`hArch` Tate case,
 `ιSpv_bool '' Spa A A⁺` is closed in the discrete Bool product
 `(A × A → Bool)`. Re-exports `isClosed_image_spa_ιSpv_bool_noHArch` under

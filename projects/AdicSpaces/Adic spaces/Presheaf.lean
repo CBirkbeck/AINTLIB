@@ -4117,35 +4117,6 @@ theorem mulArchimedean_of_rankOne_valueGroup
     MulArchimedean G :=
   MulArchimedean.comap (φ : G →* WithZero (Multiplicative ℝ)) hφ_mono
 
-/-- **Helper (constructive transfer).** *If the unit group `Γ₀ˣ` of a
-`LinearOrderedCommGroupWithZero Γ₀` is `MulArchimedean`, then so is `Γ₀`.*
-
-`MulArchimedean.arch` for `Γ₀` requires, given `x : Γ₀` and `y : Γ₀` with
-`1 < y`, an integer `n` with `x ≤ y ^ n`. If `x = 0` we use `n = 0`
-(since `0 ≤ 1 = y ^ 0`). Otherwise `x` and `y` lift to units `xu, yu : Γ₀ˣ`
-(`y ≠ 0` since `1 < y`), and we apply `MulArchimedean.arch` in `Γ₀ˣ`,
-then push the inequality back down via `Units.val_le_val`. No deep
-mathematical content — just a unit/zero case split. -/
-private theorem mulArchimedean_withZero_of_mulArchimedean_units
-    {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀] [MulArchimedean Γ₀ˣ] :
-    MulArchimedean Γ₀ := by
-  refine ⟨fun x y hy ↦ ?_⟩
-  have hy_ne : y ≠ 0 := by
-    intro h
-    rw [h] at hy
-    exact absurd hy (not_lt.mpr zero_le_one)
-  by_cases hx : x = 0
-  · exact ⟨0, by simp [hx]⟩
-  · set yu : Γ₀ˣ := Units.mk0 y hy_ne with hyu_eq
-    set xu : Γ₀ˣ := Units.mk0 x hx with hxu_eq
-    have hyu : 1 < yu := by
-      rw [← Units.val_lt_val]
-      simpa only [hyu_eq, Units.val_one, Units.val_mk0] using hy
-    obtain ⟨n, hn⟩ := MulArchimedean.arch xu hyu
-    refine ⟨n, ?_⟩
-    rw [← Units.val_le_val] at hn
-    simpa only [hxu_eq, hyu_eq, Units.val_pow_eq_pow_val, Units.val_mk0] using hn
-
 /-- **(Wedhorn 7.52(2), clean version — pass-4 audit)** *"Let `A` be a
 complete affinoid ring. An element `f ∈ A` is a unit if and only if
 `v(f) ≠ 0` for every `v ∈ Spa(A, A⁺)`."*

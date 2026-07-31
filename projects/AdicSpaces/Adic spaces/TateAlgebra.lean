@@ -439,13 +439,6 @@ private theorem mvps_coeff_eq (g : MvPowerSeries (Fin 1) A) (n : ℕ) :
     simp only [Finsupp.tsub_apply, Finsupp.add_apply, Finsupp.single_apply]
     omega
 
-omit [TopologicalSpace A] [NonarchimedeanRing A] in
-private theorem mvps_eq_const_add_X_mul_shift (g : MvPowerSeries (Fin 1) A) :
-    g = MvPowerSeries.C (g 0) + MvPowerSeries.X 0 * shiftFun g := by
-  ext s
-  rw [map_add, eq_toIndex s]
-  exact mvps_coeff_eq g (s 0)
-
 /-- Key identity: `f = const(f(0)) + X * shift(f)` as power series. -/
 theorem eq_const_add_X_mul_shift (f : ↥(TateAlgebra A)) :
     f = algebraMap A _ (evalZeroHom f) + X * shift f := by
@@ -1923,26 +1916,6 @@ private noncomputable def tateRelMap {l : ℕ}
   toFun r := ∑ i, f i * r i
   map_add' r s := by simp [mul_add, Finset.sum_add_distrib]
   map_smul' a r := by simp [smul_eq_mul, mul_left_comm, Finset.mul_sum]
-
-omit [TopologicalSpace A] [NonarchimedeanRing A] [IsTopologicalRing A]
-  [T2Space A] [IsNoetherianRing A] [IsTateRing A] in
-/-- Extraction of `Finsupp` coefficients to plain function coefficients
-in the span of a finite family. -/
-private lemma tate_mem_span_range {l : ℕ} {g : Fin l → A} {k : ℕ}
-    {s : Fin k → ↥(LinearMap.ker (tateRelMap g))}
-    {x : ↥(LinearMap.ker (tateRelMap (A := A) g))} :
-    x ∈ Submodule.span A (Set.range s) ↔
-      ∃ c : Fin k → A, x = ∑ j, c j • s j := by
-  constructor
-  · intro hx
-    obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp hx
-    refine ⟨cf, ?_⟩
-    rw [← hcf, Finsupp.sum,
-      Finset.sum_subset (s₂ := Finset.univ) (Finset.subset_univ _)]
-    intro j _ hj; rw [Finsupp.notMem_support_iff] at hj; simp [hj]
-  · intro ⟨c, hc⟩; rw [hc]
-    exact Submodule.sum_mem _
-      (fun j _ ↦ Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
