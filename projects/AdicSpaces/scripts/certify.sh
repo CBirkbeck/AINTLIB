@@ -32,10 +32,14 @@ fi
 
 cd "$REPO_ROOT"
 
-# The challenge is deliberately outside defaultTargets (it is full of `sorry`), so it must be
-# built by name. Build it BEFORE the solution: comparator's guarantee assumes the challenge's
-# oleans were not produced by a run that had already seen the solution.
+# Both modules are deliberately outside defaultTargets (the challenge is full of `sorry`), so
+# they must be built by name. Build the challenge FIRST: comparator's guarantee assumes the
+# challenge's oleans were not produced by a run that had already seen the solution.
+#
+# Comparator itself re-runs `lake build` on each module inside landrun (`safeLakeBuild`), which
+# is why `Solution.lean` is a small forwarding file rather than a library module: only the
+# untrusted submission belongs in the sandboxed build, not the whole project.
 lake build '«Adic spaces».Comparator.Challenge'
-lake build '«Adic spaces».FJP.FiniteJetMain'
+lake build '«Adic spaces».Comparator.Solution'
 
 exec lake env "$COMPARATOR_DIR/.lake/build/bin/comparator" "$CONFIG"

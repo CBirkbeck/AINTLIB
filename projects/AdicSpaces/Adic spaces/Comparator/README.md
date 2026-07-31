@@ -6,13 +6,26 @@ Kernel-level certification of the paper's headline theorem via
 | file | role |
 |---|---|
 | `Challenge.lean` | the five statements, each `:= sorry` |
+| `Solution.lean` | the same five, forwarded to the library's proofs |
 | `comparator-config.json` | `theorem_names` + `permitted_axioms` |
 | `../../scripts/certify.sh` | one-time setup instructions + the run |
 
-There is **no `Solution.lean`**: as in this repo's other two comparator setups
-(`flt-regular-bernoulli`, `chebotarev-density`), the solution module is an ordinary library
-module — here `«Adic spaces».FJP.FiniteJetMain` — and `theorem_names` are the library's own
-names. Nothing is restated on the solution side.
+### Why `Solution.lean` is a separate file and not the library module
+
+Comparator runs `safeLakeBuild solutionModule` — it rebuilds the solution **inside landrun**.
+That step is the whole point of the sandbox: it is where an adversarial solution would try to
+escape. Pointing `solution_module` at a library module therefore rebuilds the entire project
+inside the sandbox (3128 jobs here) and conflates "the untrusted submission" with "the project".
+All thirteen upstream tests use two dedicated files.
+
+The two shapes are forced by naming, and it is worth knowing which you are in:
+
+* **two files, neutral names** (this setup, and upstream's): the challenge declares
+  `fjp_1_3_*`, the solution declares the same names and forwards to `FiniteJet.finiteJet_*`.
+  The sandboxed build is one small file.
+* **one file, library names** (`chebotarev-density`'s): the challenge declares the library's own
+  names, so a solution file *cannot* redeclare them without clashing with the import that
+  provides them — hence `solution_module` must be the library module itself.
 
 ## What it buys over `#print axioms`
 
