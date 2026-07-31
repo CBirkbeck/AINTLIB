@@ -30348,3 +30348,16 @@ Use it with g := the D-chart generator (product of the two section generators;
 D.ideal-span on the chart from sectionsDivisor_ideal + per-section spans multiplied —
 `Ideal.span_singleton_mul_span_singleton`). The twist-conjugation square then pairs
 idealGenHom-triv ⊗ L-triv against unitEndomorphismOfTopSection.
+
+### [A4-e2 3b] classification landed 2026-07-31 — the square is now nearly free
+`unit_endo_eq_ofTopSection` PROVEN (every unit-endo = unitEndomorphismOfTopSection of
+its ⊤-value at 1; cW-let pattern + naturality + the app_apply closer; NOTE the
+hom_ext→ext lands directly at the 1-generator goal — no second ext needed).
+Consequently [3b-iii] reduces to: define d' := eTL.inv ≫ F.map (divisorTwistHom J L)
+≫ eL.hom conjugate-DEFINITIONALLY (square tautological for cokernel.mapIso), classify
+d' = unitEndo (its 1-value), and identify span(1-value) — for the 3a-feed a
+UNIT-MULTIPLE suffices (span-equality, not value-equality; mem_nonZeroDivisors_of_span
+transfers nzd). eTL := tensor-restrict chain (pullbackTensorMonoidal open-immersion
+pieces) ∘ (idealModuleRestrictTrivOfSpan ⊗-side) ∘ L-triv ∘ unitor; the 1-value
+computation goes through divisorTwistHom_app_unit at the η-image of (generator ⊗ 1).
+Remaining: assemble eTL, the 1-value/span computation, Γ-of-coker + 3a-feed, then e2.

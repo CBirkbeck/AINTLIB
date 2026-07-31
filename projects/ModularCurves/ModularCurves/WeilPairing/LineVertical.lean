@@ -9,6 +9,7 @@ import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.LevelStructure.CartierDivisor
+import ModularCurves.Picard.UnitPullback
 
 /-!
 # The line and the vertical as rank-one kernels ([GAP-A-4])
@@ -742,6 +743,52 @@ noncomputable def idealModuleRestrictTrivOfSpan {J : C.IdealSheafData}
     · rintro W ⟨b, hb, rfl⟩
       exact bijective_idealGenHom_app J U g hspan hnzd hgmem b hb
   exact (asIso (idealGenHom J U.1 g hgmem)).symm
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Classification of structure-sheaf endomorphisms**: every module endomorphism of
+the unit is multiplication by its value at the global `1`. -/
+theorem unit_endo_eq_ofTopSection {Z : Scheme.{u}}
+    (e : unitObj Z ⟶ unitObj Z) :
+    e = ModularCurves.unitEndomorphismOfTopSection
+      (e.val.app (Opposite.op (⊤ : Z.Opens)) (1 : Γ(Z, (⊤ : Z.Opens)))) := by
+  let cW : ∀ W : Z.Opens, Γ(Z, W) :=
+    fun W => e.val.app (Opposite.op W) (1 : Γ(Z, W))
+  have happ : ∀ (W : Z.Opens) (y : Γ(Z, W)),
+      e.val.app (Opposite.op W) y = y * cW W := by
+    intro W y
+    have hsmul := (e.val.app (Opposite.op W)).hom.map_smul y (1 : Γ(Z, W))
+    calc e.val.app (Opposite.op W) y
+        = e.val.app (Opposite.op W) ((y * 1 : Γ(Z, W))) := by rw [mul_one]
+      _ = y * cW W := hsmul
+  have hnat : ∀ W : Z.Opens, cW W =
+      Z.presheaf.map (homOfLE (le_top : W ≤ (⊤ : Z.Opens))).op
+        (cW (⊤ : Z.Opens)) := by
+    intro W
+    have h := PresheafOfModules.naturality_apply e.val
+      (homOfLE (le_top : W ≤ (⊤ : Z.Opens))).op (1 : Γ(Z, (⊤ : Z.Opens)))
+    have hone : ((unitObj Z).val.map
+        (homOfLE (le_top : W ≤ (⊤ : Z.Opens))).op)
+          (1 : Γ(Z, (⊤ : Z.Opens))) = (1 : Γ(Z, W)) := by
+      show ((Z.ringCatSheaf.obj).map
+        (homOfLE (le_top : W ≤ (⊤ : Z.Opens))).op).hom
+          (1 : Γ(Z, (⊤ : Z.Opens))) = (1 : Γ(Z, W))
+      exact map_one _
+    rw [hone] at h
+    calc cW W = ((unitObj Z).val.map
+        (homOfLE (le_top : W ≤ (⊤ : Z.Opens))).op) (cW (⊤ : Z.Opens)) := h
+      _ = Z.presheaf.map (homOfLE (le_top : W ≤ (⊤ : Z.Opens))).op
+          (cW (⊤ : Z.Opens)) := rfl
+  apply SheafOfModules.hom_ext
+  ext U
+  change e.val.app U (1 : Γ(Z, U.unop)) = _
+  calc e.val.app U (1 : Γ(Z, U.unop))
+      = (1 : Γ(Z, U.unop)) * cW U.unop := happ U.unop 1
+    _ = (1 : Γ(Z, U.unop)) * Z.presheaf.map
+          (homOfLE (le_top : U.unop ≤ (⊤ : Z.Opens))).op
+          (cW (⊤ : Z.Opens)) := by rw [hnat U.unop]
+    _ = _ := (ModularCurves.unitEndomorphismOfTopSection_app_apply
+        (cW (⊤ : Z.Opens)) U.unop 1).symm
 
 end LineAssembly
 
