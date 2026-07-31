@@ -968,6 +968,32 @@ theorem restrict_divisorTwistHom_forward_square (U : C.Opens) :
       ((restrictFunctor U.ι).obj L)).hom.val.app W' t) hR1).trans h3
   exact hcoreL.trans hcoreR.symm
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[3b-iv] Cokernel transport across the forward square**: the restricted twist's
+cokernel is the cokernel of the sheafified pushforward action. -/
+noncomputable def cokernelRestrictTwistIso (U : C.Opens) :
+    Limits.cokernel
+        ((PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj)).map
+          ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+            (idealActionPre J L))) ≅
+      Limits.cokernel ((restrictFunctor U.ι).map (divisorTwistHom J L)) := by
+  have hmem := sheafificationW_pushforward_unit_tensor U.ι (idealModule J) L
+  rw [PresheafOfModules.sheafificationW_iff] at hmem
+  haveI := hmem
+  refine Limits.cokernel.mapIso _ _
+    ((asIso ((PresheafOfModules.sheafification
+        (𝟙 U.toScheme.ringCatSheaf.obj)).map
+          ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+            ((PresheafOfModules.sheafificationAdjunction
+              (𝟙 C.ringCatSheaf.obj)).unit.app
+                ((idealModule J).val ⊗ L.val))))) ≪≫
+      sheafifyValIso ((restrictFunctor U.ι).obj (tensorObj (idealModule J) L)))
+    (sheafifyValIso ((restrictFunctor U.ι).obj L)) ?_
+  have h := restrict_divisorTwistHom_forward_square J L U
+  rw [Iso.trans_hom, asIso_hom, Category.assoc]
+  exact h.symm
+
 end LineAssembly
 
 end Twist

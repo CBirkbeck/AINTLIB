@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 3b-iii] elementwise square proof per in-file comment plan: homEquiv-injective + homEquiv_unit + PresheafOfModules-ext + value-chase (unitY-naturality-apply, divisorTwistHom_app_unit, Y-triangle valuewise). Then downstream assembly per board.
+FOCUS: [GAP-A-4/A4-e2 3b-iv] coker transport — package the square into cokernel.mapIso (W-piece iso via sheafificationW_pushforward_unit_tensor + valIso): coker(F.map twist) iso coker(sheafifyY(pf action)); then Gamma-of-coker at the chart + generator conjugation + 3a-feed = e2
