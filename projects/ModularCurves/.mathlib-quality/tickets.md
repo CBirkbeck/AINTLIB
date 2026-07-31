@@ -30524,3 +30524,16 @@ for coker(twist-kerP) with eL — the (b)-bridge/SuccessorSections-mirror per th
 [desc-route] board section; then desc-pair + injectivity + 3a = e2; then A-rows,
 [A4-c1] unimodularity (evaluation-matrix minors via the b3-normalized coordinates —
 KM chord-tangent), named wrappers ⟹ GAP-A-4 CLOSED ⟹ [GAP-A-5a].
+
+### [A4-e2 per-section CORE] DONE 2026-07-31
+`nonempty_baseSections_cokernel_unitEndo_equiv` : on affine Y over S,
+baseSections π' (coker (unitEndomorphismOfTopSection a)) ≃ₗ[Γ(S,⊤)] Γ(Y,⊤) ⧸ span{a}
+(Mono-endo + algebra-compat slots). THE Γ-WALL IS BROKEN at the reference-endo level:
+combined with the conjugation machinery (forward square at any J + unit-endo
+classification + eTL-trivializations) this computes baseSections of ANY twist-coker on
+a chart. REMAINING e2-wiring: (1) conjugate coker(F.map (twist J)) ≅ coker(unitEndo v₀)
+via the tautological d'-square (eTL from the open-immersion tensor machinery + trivs;
+mapIso); (2) apply the CORE at a := v₀; (3) span v₀ = span (chart generator) as a
+hypothesis-slot or via the b3-coordinate computation; (4) instantiate at J := D
+(product-span 3b-i) for the rank-2 via 3a, and at J := kerP/kerQ for the per-section
+evaluations. All pieces exist; the wiring is bounded.
