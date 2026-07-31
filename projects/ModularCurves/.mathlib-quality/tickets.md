@@ -30109,3 +30109,20 @@ presheaf-mono criterion instead; probably a wash. Then [A4-c] H¹-leaf per decom
    faithful reflects ⟹ Mono (sheafification.map (idealActionPre)).
 5. `divisorTwistHom_eq` (copy ev_eq_sheafification_map, Picard/Evaluation.lean:206) +
    mono ≫ iso ⟹ `Mono (divisorTwistHom J L)`. DONE-CRITERION for [A4-b-mono].
+
+### [A4-b-mono] descent-lemmas LOCATED (step-2 assembly plan, 2026-07-31)
+- SPAN-descent W ≤ V: mathlib `IdealSheafData.map_ideal'` (IdealSheaf/Basic.lean:233):
+  `(I.ideal V).map (presheaf.map h).hom = I.ideal U` ⟹
+  `rw [← map_ideal', hspan, Ideal.map_span, Set.image_singleton]`. NO comap needed.
+- NZD-descent: `affinePullbackSection_mem_nonZeroDivisors` (PoleSheaf:968, f flat) at
+  f := 𝟙 C + `affinePullbackSection_eq_appLE` + appLE-of-id ≡ presheaf.map (via
+  simp [Scheme.Hom.appLE] + Scheme.id_app).
+- IsLocallyInjective class-field: `equalizerSieve_mem {X : Cᵒᵖ} x y (h) : equalizerSieve
+  x y ∈ J X.unop`; pointwise via Opens.mem_grothendieckTopology; the W-arrow is
+  `homOfLE hWU` with condition = restrictions agree, discharged by chart-injectivity +
+  NatTrans.naturality_apply.
+- g-smul-injectivity leaf `smul_injective_of_restrict_triv`: transport across (i) the
+  eqToHom-bridge `W.ι ''ᵁ ⊤ = W` (simp), (ii) `smul_restrictAppIso_hom/inv`
+  (mathlib Modules/Sheaf.lean:361 — morphism-level smul-compat, rfl-based), (iii) the
+  trivialization's ⊤-app module-iso to Γ(W-sch,⊤)-mult; nzd along RingEquivs via
+  `MulEquivClass.map_nonZeroDivisors` (pattern at PoleSheaf:981).
