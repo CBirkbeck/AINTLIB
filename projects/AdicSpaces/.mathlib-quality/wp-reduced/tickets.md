@@ -1112,14 +1112,27 @@ propext/Classical.choice/Quot.sound) before marking done.
   (do NOT silently assume the contraction maximal; L3 is stated at primes for this
   reason).
 ### [HRW-3] L1.b/c — finite-level graph evaluation + inverse limits
-- Status: open | File: WP/HeadReduced.lean | Depends: HRW-2
+- Status: done at maximals (2026-07-31) | File: WP/GraphCompletedLocal.lean | Depends: HRW-2
+- **Done**: `qHead_completedLocal_comparison'` (WP/GraphCompletedLocal.lean) —
+  the comparison at a MAXIMAL `𝔮`, which is all the consumer needs (L2 runs over
+  maximals).  Route: flatness `flat_headToQ` (Wedhorn 8.30 transported, new
+  WP/GraphFlat.lean) + trivial special fibre `levelOne_bijective_headToQ`
+  (BETA, WP/GraphFibreBeta.lean + WP/GraphFibreL1.lean) through
+  `adicCompletionEquivOfFlatOfLevelOne`, then `map_comap_headToQ_eq` (𝔭Q = 𝔮)
+  and `AdicCompletion.localizationEquiv` at both ends.  The general-PRIME form
+  at HeadReduced:413 stays parked (unused; it sits upstream of the BETA files).
+  Carries the central `prop_8_30_flat_clean` sorry only.
 - Decls: `qHead_completedLocal_comparison`.
 - Sketch: mod 𝔮ⁿ the denominator s is a unit (s ∉ 𝔮 as s is a unit of QHead) and
   T_i = f_i/s is determined; surjectivity + kernel computation of the finite-level
   comparison; AdicCompletion functoriality along the tower.  Frontier flagged:
   finite-level commutative algebra, no mathlib precedent.
 ### [HRW-4] THE TATE LEAF (retitled 2026-07-30; was: L3.a Z-elimination)
-- Status: open | File: new (TateAlgebraCompletedLocal.lean, generic) | Depends: none
+- Status: done at maximals (2026-07-30/31) | File: FJP/TateReducedLocal.lean + WP/HeadReducedNotMem.lean | Depends: none
+- **Done**: block A (`isReduced_adicCompletion_localization_tate` + the
+  normalClosure corollary) and `head_completedLocal_reduced_of_isMaximal_of_wa_notMem`
+  — axiom-clean.  The all-primes statement (HeadReduced:426) stays PARKED per
+  the L3 adjudication (Rees's analytically-unramified theorem, not in mathlib).
 - REARCHITECTED TWICE — final plan = hrw-decomposition "THE TATE LEAF
   DECOMPOSED" (DVR integral-model route, NO Weierstrass, 11 leaves,
   ~500-850 LOC + downstream). PROGRESS 2026-07-30: leaf 7 DONE
@@ -1149,7 +1162,12 @@ propext/Classical.choice/Quot.sound) before marking done.
   opened: A_N[1/W] = K⟨W,U⟩[1/W] support identity; `tateAlgebra_completedLocal_
   reduced` leaf — check the 828b Nullstellensatz artifacts first).
 ### [HRW-5] The finite-embedding semilocal reduction (retitled 2026-07-30; was: L3.b)
-- Status: open | File: WP/HeadReduced.lean (+ helpers) | Depends: HRW-4 (final glue only)
+- Status: done at maximals (2026-07-30) | File: WP/HeadReducedMaximal.lean | Depends: HRW-4 (final glue only)
+- **Done**: `head_completedLocal_reduced_of_isMaximal_of_wa_mem` (block-A mirror
+  along `headToZeroHead`: levelwise-Pi cofinal reduction + fibre nilpotence +
+  `exists_artinRees_pullback`), and the case split
+  `head_completedLocal_reduced_of_isMaximal` — axiom-clean.  The all-primes
+  statement (HeadReduced:437) stays PARKED (Rees-gated, as for HRW-4).
 - REARCHITECTED: P ↪ Q := K⟨W,U⟩ finite (Y_i ↦ W^{w_i}U_i, Z_i ↦ U_i²;
   support-injective; U^ε-module-basis), semilocal completed decomposition
   Â ↪ ∏ (Q-locals)^ (AdicCompletion.map_exact +
