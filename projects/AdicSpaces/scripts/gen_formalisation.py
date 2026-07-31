@@ -152,11 +152,14 @@ def build(project_root: Path, repo_root: Path) -> dict:
         )
 
     all_ids = {citation_id(s) for r in results for s in r["sources"]}
+    # Deliberately no commit sha: it would change on every commit, so `regenerate and
+    # diff` — the cheapest way to ask "has the manifest drifted?" — would never come back
+    # empty, and a diff that is always dirty is a diff nobody reads. Provenance is the git
+    # history of this file. Branch/toolchain/mathlib move rarely enough to be worth keeping.
     meta = {
         "name": "AdicSpaces",
         "library": LIB_NAMESPACE,
         "branch": _git(repo_root, "rev-parse", "--abbrev-ref", "HEAD"),
-        "commit": _git(repo_root, "rev-parse", "--short", "HEAD"),
         **_toolchain(repo_root),
     }
 

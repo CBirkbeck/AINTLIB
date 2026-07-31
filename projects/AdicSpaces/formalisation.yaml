@@ -14,7 +14,6 @@ project:
   name: AdicSpaces
   library: '«Adic spaces»'
   branch: dev/adic-spaces
-  commit: a3794cf07
   toolchain: 'leanprover/lean4:v4.33.0-rc1'
   mathlib_rev: fd1d54bcac5c
 references:
