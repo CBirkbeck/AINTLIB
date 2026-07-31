@@ -1009,6 +1009,34 @@ noncomputable def cokernelSheafifyActionIso (U : C.Opens) :
   (Limits.PreservesCokernel.iso
     (PresheafOfModules.sheafification (𝟙 U.toScheme.ringCatSheaf.obj)) _).symm
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[vi-a] Pointwise surjectivity of the pushforward action off the divisor**: where
+`1` lies in the ideal's sections at the image open, the componentwise action is
+surjective (every `l` is `1 ⊗ₜ l`'s value). -/
+theorem pushforward_idealActionPre_app_surjective_of_one_mem (U : C.Opens)
+    (W' : (TopologicalSpace.Opens ↥U.toScheme)ᵒᵖ)
+    (h1 : (1 : Γ(C, U.ι ''ᵁ W'.unop)) ∈
+      idealSections J (Opposite.op (U.ι ''ᵁ W'.unop))) :
+    Function.Surjective
+      (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+        (idealActionPre J L)).app W') := by
+  intro l
+  refine ⟨(⟨(1 : Γ(C, U.ι ''ᵁ W'.unop)), h1⟩ :
+    idealSections J (Opposite.op (U.ι ''ᵁ W'.unop))) ⊗ₜ[
+      (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+        (Opposite.op (U.ι ''ᵁ W'.unop))]
+    (l : (L.val.obj (Opposite.op (U.ι ''ᵁ W'.unop)))), ?_⟩
+  have hact := idealActionPre_app_tmul J L (Opposite.op (U.ι ''ᵁ W'.unop))
+    (⟨(1 : Γ(C, U.ι ''ᵁ W'.unop)), h1⟩ :
+      idealSections J (Opposite.op (U.ι ''ᵁ W'.unop)))
+    (l : (L.val.obj (Opposite.op (U.ι ''ᵁ W'.unop))))
+  calc (((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
+        (idealActionPre J L)).app W') _
+      = (idealActionPre J L).app (Opposite.op (U.ι ''ᵁ W'.unop)) _ := rfl
+    _ = _ := hact
+    _ = l := one_smul _ _
+
 end LineAssembly
 
 end Twist
