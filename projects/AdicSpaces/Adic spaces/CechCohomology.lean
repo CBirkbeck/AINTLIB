@@ -378,6 +378,22 @@ private theorem cechDiff_involution_add_ge {F : AbPresheaf X}
     ⟨(j : ℕ), by have := k.isLt; omega⟩ hface_eq]
   exact sign_zsmul_cancel (j : ℕ) (k : ℕ) _
 
+/-- The `(j, k)` summand of the twice-applied Cech differential: the sign
+`(-1)^j * (-1)^k` times the double restriction of `f` to the `j`-then-`k` face. -/
+def cechDiffTerm (F : AbPresheaf X) (U : FiniteCover X ι) (q : ℕ) (f : CechCochain F U q)
+    (σ : Fin (q + 3) → ι) : Fin (q + 3) × Fin (q + 2) → F.obj (U.inter σ) := fun ⟨j, k⟩ =>
+  (-1 : ℤ) ^ (j : ℕ) • ((-1 : ℤ) ^ (k : ℕ) •
+    F.res (U.inter_face_subset j σ)
+      (F.res (U.inter_face_subset k (FiniteCover.face j σ))
+        (f (FiniteCover.face k (FiniteCover.face j σ)))))
+
+/-- The sign-cancelling involution on index pairs used to prove `d ∘ d = 0`: it pairs the
+`(j, k)` summand with the one carrying the opposite sign. Depends only on `q`. -/
+def cechFaceSwap (q : ℕ) : Fin (q + 3) × Fin (q + 2) → Fin (q + 3) × Fin (q + 2) :=
+  fun ⟨j, k⟩ =>
+    if _ : (k : ℕ) < (j : ℕ) then (⟨k.val, by omega⟩, ⟨j.val - 1, by omega⟩)
+    else (⟨k.val + 1, by omega⟩, ⟨j.val, by omega⟩)
+
 /-- `d^{q+1} ∘ d^q = 0` (Appendix A of Wedhorn). -/
 theorem cechDiff_comp_cechDiff (F : AbPresheaf X)
     (U : FiniteCover X ι) (q : ℕ) (f : CechCochain F U q) :
@@ -393,24 +409,12 @@ theorem cechDiff_comp_cechDiff (F : AbPresheaf X)
             (FiniteCover.face j σ)))) = 0
   simp_rw [F.res_sum, F.res_zsmul, Finset.smul_sum]
   rw [← Finset.sum_product' Finset.univ Finset.univ]
-  set T : Fin (q + 3) × Fin (q + 2) →
-      F.obj (U.inter σ) := fun ⟨j, k⟩ =>
-    (-1 : ℤ) ^ (j : ℕ) • ((-1 : ℤ) ^ (k : ℕ) •
-      F.res (U.inter_face_subset j σ)
-        (F.res (U.inter_face_subset k
-          (FiniteCover.face j σ))
-          (f (FiniteCover.face k
-            (FiniteCover.face j σ))))) with hT
-  let inv : Fin (q + 3) × Fin (q + 2) →
-      Fin (q + 3) × Fin (q + 2) := fun ⟨j, k⟩ =>
-    if _ : (k : ℕ) < (j : ℕ) then
-      (⟨k.val, by omega⟩, ⟨j.val - 1, by omega⟩)
-    else
-      (⟨k.val + 1, by omega⟩, ⟨j.val, by omega⟩)
+  set T := cechDiffTerm F U q f σ with hT
+  let inv := cechFaceSwap q
   change ∑ p ∈ Finset.univ ×ˢ Finset.univ, T p = 0
   apply Finset.sum_involution (fun p _ => inv p)
   · rintro ⟨j, k⟩ _
-    dsimp only [inv]
+    dsimp only [inv, cechFaceSwap]
     split_ifs with h
     · simp only [hT]
       exact cechDiff_involution_add_lt f j k h
@@ -418,23 +422,21 @@ theorem cechDiff_comp_cechDiff (F : AbPresheaf X)
       simp only [hT]
       exact cechDiff_involution_add_ge f j k h
   · rintro ⟨j, k⟩ _ _
-    dsimp only [inv]
+    dsimp only [inv, cechFaceSwap]
+    -- both branches close identically
     split_ifs with h
-    · intro heq
-      have h1 := congr_arg Prod.fst heq
-      simp only [Fin.ext_iff] at h1
-      omega
-    · intro heq
+    all_goals
+      intro heq
       have h1 := congr_arg Prod.fst heq
       simp only [Fin.ext_iff] at h1
       omega
   · rintro ⟨j, k⟩ _
-    dsimp only [inv]
+    dsimp only [inv, cechFaceSwap]
     split_ifs <;>
       exact Finset.mem_product.mpr
         ⟨Finset.mem_univ _, Finset.mem_univ _⟩
   · rintro ⟨j, k⟩ _
-    dsimp only [inv]
+    dsimp only [inv, cechFaceSwap]
     by_cases h1 : (k : ℕ) < (j : ℕ)
     · simp only [h1, dif_pos, Fin.val_mk]
       rw [dif_neg (by omega)]

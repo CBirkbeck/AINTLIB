@@ -155,13 +155,11 @@ theorem exists_spanning_presentation_of_mem_basicOpens [DecidableEq B]
     exact hGw i hi ((mem_supp_iff w _).mp hGi)
   -- pick `k` with `w(ϖ^k) ≤ w(g)` (continuity)
   obtain ⟨k, hk⟩ := exists_pow_vle_of_isContinuous hw.1 hϖ hgw
-  refine ⟨fun o => o.elim (ϖ ^ k) (fun i => (∏ j ∈ fam.erase i, G j) * F i), g,
-    ?_, ?_, ?_⟩
+  refine ⟨fun o => o.elim (ϖ ^ k) (fun i => (∏ j ∈ fam.erase i, G j) * F i), g, ?_, ?_, ?_⟩
   · -- spanning: `ϖ^k` is a unit in the parameter set
     refine Ideal.eq_top_of_isUnit_mem _ ?_ (hϖ_unit.pow k)
     refine Ideal.subset_span (Finset.mem_coe.mpr ?_)
-    exact Finset.mem_insert_of_mem
-      (Finset.mem_image.mpr ⟨none, Finset.mem_insert_self _ _, rfl⟩)
+    exact Finset.mem_insert_of_mem (Finset.mem_image.mpr ⟨none, Finset.mem_insert_self _ _, rfl⟩)
   · -- membership of `w`
     refine ⟨hw, fun o ho => ?_, hgw⟩
     match o with
@@ -174,8 +172,7 @@ theorem exists_spanning_presentation_of_mem_basicOpens [DecidableEq B]
           exact Option.some_injective _ hji ▸ hj
       show w.vle ((∏ j ∈ fam.erase i, G j) * F i) g
       have hmul := w.mul_vle_mul_left (hmem i hi).1 (∏ j ∈ fam.erase i, G j)
-      rw [show F i * ∏ j ∈ fam.erase i, G j =
-          (∏ j ∈ fam.erase i, G j) * F i from mul_comm _ _,
+      rw [show F i * ∏ j ∈ fam.erase i, G j = (∏ j ∈ fam.erase i, G j) * F i from mul_comm _ _,
         show G i * ∏ j ∈ fam.erase i, G j = g from Finset.mul_prod_erase fam G hi]
         at hmul
       exact hmul
@@ -187,24 +184,19 @@ theorem exists_spanning_presentation_of_mem_basicOpens [DecidableEq B]
       intro hc
       refine hg_ne ?_
       rw [← mem_supp_iff] at hc ⊢
-      rw [show g = (∏ j ∈ fam.erase i, G j) * G i from
-        (Finset.prod_erase_mul fam G hi).symm]
+      rw [show g = (∏ j ∈ fam.erase i, G j) * G i from (Finset.prod_erase_mul fam G hi).symm]
       exact Ideal.mul_mem_right _ _ hc
     have hGi_ne : ¬ v.vle (G i) 0 := by
       intro hc
       refine hg_ne ?_
       rw [← mem_supp_iff] at hc ⊢
-      rw [show g = (∏ j ∈ fam.erase i, G j) * G i from
-        (Finset.prod_erase_mul fam G hi).symm]
+      rw [show g = (∏ j ∈ fam.erase i, G j) * G i from (Finset.prod_erase_mul fam G hi).symm]
       exact Ideal.mul_mem_left _ _ hc
-    have hvle := hT (some i) (Finset.mem_insert_of_mem
-      (Finset.mem_image_of_mem some hi))
+    have hvle := hT (some i) (Finset.mem_insert_of_mem (Finset.mem_image_of_mem some hi))
     show v.vle (F i) (G i) ∧ ¬ v.vle (G i) 0
     refine ⟨?_, hGi_ne⟩
-    have : v.vle (F i * (∏ j ∈ fam.erase i, G j))
-        (G i * (∏ j ∈ fam.erase i, G j)) := by
-      rw [show F i * (∏ j ∈ fam.erase i, G j) =
-          (∏ j ∈ fam.erase i, G j) * F i from mul_comm _ _,
+    have : v.vle (F i * (∏ j ∈ fam.erase i, G j)) (G i * (∏ j ∈ fam.erase i, G j)) := by
+      rw [show F i * (∏ j ∈ fam.erase i, G j) = (∏ j ∈ fam.erase i, G j) * F i from mul_comm _ _,
         show G i * (∏ j ∈ fam.erase i, G j) = g from Finset.mul_prod_erase fam G hi]
       exact hvle
     exact v.vle_mul_cancel hGprod_ne this

@@ -1076,8 +1076,7 @@ theorem mvTateAlgebra_polynomials_dense [IsTateRing A] (m : ℕ) :
   have hO_nhds : O ∈ nhds g := hO.mem_nhds hgO
   obtain ⟨n, -, hn⟩ := (mvTateAlgBasis' (A := A) m).hasBasis_nhds g |>.mem_iff.mp hO_nhds
   have hfin : ∀ᶠ (l : Fin m →₀ ℕ) in Filter.cofinite,
-      MvPowerSeries.coeff l g.val ∈
-        (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A) :=
+      MvPowerSeries.coeff l g.val ∈ (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A) :=
     mvTateAlgebra_coeff_eventually_in_pow m P g n
   set S : Set (Fin m →₀ ℕ) := {l |
     MvPowerSeries.coeff l g.val ∉
@@ -1090,8 +1089,7 @@ theorem mvTateAlgebra_polynomials_dense [IsTateRing A] (m : ℕ) :
       Finset.le_sup (f := fun j => l j) (Finset.mem_univ i)
     have h2 : Finset.univ.sup (fun j => l j) ≤
         hS_fin.toFinset.sup (fun l' => Finset.univ.sup (fun j => l' j)) :=
-      Finset.le_sup (f := fun l' => Finset.univ.sup (fun j => l' j))
-        (hS_fin.mem_toFinset.mpr hl)
+      Finset.le_sup (f := fun l' => Finset.univ.sup (fun j => l' j)) (hS_fin.mem_toFinset.mpr hl)
     omega
   refine ⟨truncMv m g N, hn ?_, ⟨N, fun l hl => truncMv_coeff_outside m g N l hl⟩⟩
   have hdiff_pair : g - truncMv m g N ∈ mvPairSubring m P := by
@@ -1115,11 +1113,9 @@ theorem mvTateAlgebra_polynomials_dense [IsTateRing A] (m : ℕ) :
       exact ⟨0, (P.I ^ n).zero_mem, rfl⟩
     · rw [if_neg hlt, sub_zero]
       have hl_not_bad : l ∉ S := fun hl => hlt (hbad_lt l hl)
-      rw [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
-      exact hl_not_bad
+      rwa [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
   have hg_diff_mem : g - truncMv m g N ∈ mvTateAlgNhd m P n :=
-    mvTateAlgNhd_of_coeff_mem_principal m P n
-      (IsTateRing.principalPair A).π
+    mvTateAlgNhd_of_coeff_mem_principal m P n (IsTateRing.principalPair A).π
       (IsTateRing.principalPair A).I_eq_span
       (IsTateRing.principalPair A).π_isUnit
       hdiff_pair hdiff_coeff

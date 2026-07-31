@@ -996,18 +996,15 @@ Spa-point of the smaller value pulls back (plus functoriality) to a captured
 point, so `b` is nonvanishing there. -/
 theorem rationalShrink_holds : RationalShrink A := by
   intro D hD v' hv b hnz
-  haveI hTate : IsTateRing (presheafValue D) :=
-    presheafValue_isTateRing_concrete D
+  haveI hTate : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
   have hwspa := pointValue_mem_spa D hv
   have hwcont := pointValue_isContinuous D hv
   obtain ⟨u, hu⟩ := presheafValue_topNilUnit D
   obtain ⟨k, hk⟩ := exists_pow_vle_of_isContinuous hwcont hu hnz
   set c : presheafValue D := ((u⁻¹ : _ˣ) : presheafValue D) ^ k * b with hcdef
   have h1c : (pointValue D hv).vle 1 c := by
-    have h1 := (pointValue D hv).mul_vle_mul_left hk
-      (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-    rw [show ((u : presheafValue D) ^ k
-          * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 from by
+    have h1 := (pointValue D hv).mul_vle_mul_left hk (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
+    rw [show ((u : presheafValue D) ^ k * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 from by
         rw [← mul_pow, Units.mul_inv, one_pow],
       show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c from by
         rw [hcdef]; ring] at h1
@@ -1015,11 +1012,9 @@ theorem rationalShrink_holds : RationalShrink A := by
   have hc0 : ¬ (pointValue D hv).vle c 0 := by
     intro hcon
     refine hnz ?_
-    have h2 := (pointValue D hv).mul_vle_mul_left hcon
-      ((u : presheafValue D) ^ k)
+    have h2 := (pointValue D hv).mul_vle_mul_left hcon ((u : presheafValue D) ^ k)
     rw [zero_mul, show c * (u : presheafValue D) ^ k = b from by
-      rw [hcdef, mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow,
-        mul_one]] at h2
+      rw [hcdef, mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow, mul_one]] at h2
     exact h2
   obtain ⟨W, hWopen, hvW, hcapture⟩ := exists_A_level_open_presentation D
     hwspa (ι := Unit) (fam := {()}) (F := fun _ => (1 : presheafValue D))
@@ -1027,14 +1022,12 @@ theorem rationalShrink_holds : RationalShrink A := by
   rw [comap_pointValue D hv] at hvW
   obtain ⟨D', hD', hvD', hD'sub⟩ := exists_isRational_spaOpen_subset
     (V := Subtype.val ⁻¹' W ∩ spaOpen D)
-    (IsOpen.inter (hWopen.preimage continuous_subtype_val)
-      (isOpen_spaOpen D))
+    (IsOpen.inter (hWopen.preimage continuous_subtype_val) (isOpen_spaOpen D))
     (v := ⟨v', hv.2⟩) ⟨hvW, mem_spaOpen.mpr hv.1⟩
   have hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s :=
     spaOpen_subset_iff.mp (hD'sub.trans Set.inter_subset_right)
   refine ⟨D', hD', hsub, mem_spaOpen.mp hvD', ?_⟩
-  haveI hTate' : IsTateRing (presheafValue D') :=
-    presheafValue_isTateRing_concrete D'
+  haveI hTate' : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
   haveI : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
   haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
@@ -1042,18 +1035,15 @@ theorem rationalShrink_holds : RationalShrink A := by
   intro w'' hw'' hcon
   have hwPD := comap_restrictionMapHom_mem_spa D D' hsub hw''
   have hbase' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
-  have hbaseEq : comap D.canonicalMap
-      (comap (restrictionMapHom D D' hsub) w'')
+  have hbaseEq : comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
       = comap D'.canonicalMap w'' := by
     rw [show comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
         = comap ((restrictionMapHom D D' hsub).comp D.canonicalMap) w'' from
       by rw [comap_comp]; rfl]
-    have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap
-        = D'.canonicalMap :=
+    have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap = D'.canonicalMap :=
       RingHom.ext (restrictionMapHom_canonicalMap_generic D D' hsub)
     rw [hcomp]
-  have hW' : comap D.canonicalMap
-      (comap (restrictionMapHom D D' hsub) w'') ∈ W := by
+  have hW' : comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'') ∈ W := by
     rw [hbaseEq]
     exact (hD'sub (show (⟨comap D'.canonicalMap w'', hbase'.2⟩
       : ↥(Spa A A⁺)) ∈ spaOpen D' from hbase'.1)).1
@@ -1063,8 +1053,7 @@ theorem rationalShrink_holds : RationalShrink A := by
   refine hcap.2 ?_
   show (comap (restrictionMapHom D D' hsub) w'').vle c 0
   have hcb : (comap (restrictionMapHom D D' hsub) w'').vle b 0 := by
-    show w''.vle (restrictionMapHom D D' hsub b)
-      (restrictionMapHom D D' hsub 0)
+    show w''.vle (restrictionMapHom D D' hsub b) (restrictionMapHom D D' hsub 0)
     rw [map_zero]
     exact hcon
   have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb

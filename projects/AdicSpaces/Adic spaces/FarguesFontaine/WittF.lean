@@ -709,6 +709,17 @@ theorem gaussValueF_teichmuller_mul {ρ : NNReal} (w : F) (s : WittVector p F) :
   rw [gaussValueF, gaussValueF, NNReal.mul_iSup]
   exact iSup_congr fun n => gaussTermF_teichmuller_mul p F w s n
 
+/-- Scaling into the unit ball: if `|x| ≤ |w|⁻¹ ^ m` then `|x * w ^ m| ≤ 1`. -/
+theorem perfectoidValuation_mul_pow_le_one (x w : F) (m : ℕ)
+    (hw0 : 0 < perfectoidValuation p F w)
+    (hx : perfectoidValuation p F x ≤ (perfectoidValuation p F w)⁻¹ ^ m) :
+    perfectoidValuation p F (x * w ^ m) ≤ 1 := by
+  rw [Valuation.map_mul, map_pow]
+  calc perfectoidValuation p F x * perfectoidValuation p F w ^ m
+      ≤ ((perfectoidValuation p F w)⁻¹) ^ m * perfectoidValuation p F w ^ m :=
+        mul_le_mul_of_nonneg_right hx zero_le
+    _ = 1 := by rw [← mul_pow, inv_mul_cancel₀ hw0.ne', one_pow]
+
 /-- **Scaled Teichmüller-difference continuity**: for pairs with values at most
 `(vϖ)⁻ᵐ`, scale down by `ϖ^m` into `O_F`, apply the `O_F`-continuity, transport back. -/
 theorem gaussValueF_teichmuller_sub_le_of_le_scaled {ρ : NNReal} (hρ0 : 0 < ρ)
@@ -727,23 +738,15 @@ theorem gaussValueF_teichmuller_sub_le_of_le_scaled {ρ : NNReal} (hρ0 : 0 < ρ
   have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
   have hc1 : c ≤ 1 := perfectoidValuation_le_one p F _
   have hεc0 : 0 < ε * c ^ m := mul_pos hε0 (pow_pos hc0 m)
-  have hεc1 : ε * c ^ m ≤ 1 :=
-    mul_le_one₀ hε1 zero_le (pow_le_one₀ zero_le hc1)
+  have hεc1 : ε * c ^ m ≤ 1 := mul_le_one₀ hε1 zero_le (pow_le_one₀ zero_le hc1)
   obtain ⟨δT, hδT0, hδT⟩ := gaussValue_teichmuller_sub_le_of_le p F hρ0 hρ1
     (ε := ε * c ^ m) hεc0 hεc1
-  refine ⟨δT * (c⁻¹) ^ m, mul_pos hδT0 (pow_pos (inv_pos.mpr hc0) m),
-    fun a b ha hb hab => ?_⟩
+  refine ⟨δT * (c⁻¹) ^ m, mul_pos hδT0 (pow_pos (inv_pos.mpr hc0) m), fun a b ha hb hab => ?_⟩
   have hscale : ∀ x : F, perfectoidValuation p F x ≤ (c⁻¹) ^ m →
-      perfectoidValuation p F (x * ϖF ^ m) ≤ 1 := by
-    intro x hx
-    rw [Valuation.map_mul, map_pow]
-    calc perfectoidValuation p F x * c ^ m
-        ≤ (c⁻¹) ^ m * c ^ m := mul_le_mul_of_nonneg_right hx zero_le
-      _ = 1 := by rw [← mul_pow, inv_mul_cancel₀ hc0.ne', one_pow]
-  obtain ⟨ahat, hahat⟩ := (perfectoidValuation_integers p F).exists_of_le_one
-    (hscale a ha)
-  obtain ⟨bhat, hbhat⟩ := (perfectoidValuation_integers p F).exists_of_le_one
-    (hscale b hb)
+      perfectoidValuation p F (x * ϖF ^ m) ≤ 1 :=
+    fun x hx => perfectoidValuation_mul_pow_le_one p F x ϖF m hc0 hx
+  obtain ⟨ahat, hahat⟩ := (perfectoidValuation_integers p F).exists_of_le_one (hscale a ha)
+  obtain ⟨bhat, hbhat⟩ := (perfectoidValuation_integers p F).exists_of_le_one (hscale b hb)
   have hahat' : ((ahat : OF F) : F) = a * ϖF ^ m := hahat
   have hbhat' : ((bhat : OF F) : F) = b * ϖF ^ m := hbhat
   have hdiff : perfectoidValuation p F ((ahat - bhat : OF F) : F) ≤ δT := by
@@ -777,8 +780,7 @@ theorem gaussValueF_teichmuller_sub_le_of_le_scaled {ρ : NNReal} (hρ0 : 0 < ρ
         (WittVector.teichmuller p ahat - WittVector.teichmuller p bhat))
       ≤ (c⁻¹) ^ m * (ε * c ^ m) := mul_le_mul_of_nonneg_left hOF zero_le
     _ = ε := by
-        rw [mul_comm ε (c ^ m), ← mul_assoc, ← mul_pow, inv_mul_cancel₀ hc0.ne',
-          one_pow, one_mul]
+        rw [mul_comm ε (c ^ m), ← mul_assoc, ← mul_pow, inv_mul_cancel₀ hc0.ne', one_pow, one_mul]
 
 /-- Coordinates shift under multiplication by `p` (F-version). -/
 theorem teichCoeffF_p_mul (x : WittVector p F) (n : ℕ) :

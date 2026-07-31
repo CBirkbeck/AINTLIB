@@ -1845,6 +1845,23 @@ theorem isClosed_graphIdeal [IsNoetherianRing (P E m)]
   haveI : IsUniformAddGroup (P E m) := SeminormedAddCommGroup.to_isUniformAddGroup
   exact Wedhorn.isClosed_ideal_of_noetherian pod _
 
+/-- The Koszul differential `d1 r` packaged as an additive map into `Fin 1 → P E m`, which is
+the shape `exists_lift_norm_le_of_closed_range` consumes. Split out of `exists_d1_lift`, where
+it was an anonymous 12-line structure literal inside the proof. -/
+noncomputable def d1AddHom (r : Fin m → P E m) : (Fin m → P E m) →+ (Fin 1 → P E m) where
+  toFun u := fun _ => d1 r u
+  map_zero' := funext fun _ => by
+    show d1 r 0 = 0
+    unfold d1
+    exact Finset.sum_eq_zero fun i _ => zero_mul _
+  map_add' u v := funext fun _ => by
+    show d1 r (u + v) = d1 r u + d1 r v
+    unfold d1
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun i _ => by
+      show (u i + v i) * r i = _
+      ring
+
 /-- Strictness of `d₁` with an explicit constant ([FJP] (4.7): "an element `x ∈ I_E` has a
 representative `u ∈ P_E^m` with `d_{1,E}(u) = x`, `‖u‖ ≤ h_E ‖x‖`"; from closedness + the
 Banach open mapping theorem with constants). -/
@@ -1863,19 +1880,7 @@ theorem exists_d1_lift [IsNoetherianRing (P E m)]
   have htPs : ∀ G : P E m, ‖tP * G‖ = ‖tP‖ * ‖G‖ := fun G => by
     rw [htP, norm_tP t hscale]
     exact norm_tP_mul t hscale G
-  set F : (Fin m → P E m) →+ (Fin 1 → P E m) :=
-    { toFun := fun u => fun _ => d1 r u
-      map_zero' := funext fun _ => by
-        show d1 r 0 = 0
-        unfold d1
-        exact Finset.sum_eq_zero fun i _ => zero_mul _
-      map_add' := fun u v => funext fun _ => by
-        show d1 r (u + v) = d1 r u + d1 r v
-        unfold d1
-        rw [← Finset.sum_add_distrib]
-        exact Finset.sum_congr rfl fun i _ => by
-          show (u i + v i) * r i = _
-          ring } with hF
+  set F := d1AddHom r with hF
   have hrange : Set.range F = {y : Fin 1 → P E m | y 0 ∈ Ideal.span (Set.range r)} := by
     ext y
     constructor

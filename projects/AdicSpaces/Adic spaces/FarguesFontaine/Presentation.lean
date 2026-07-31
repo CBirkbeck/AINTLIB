@@ -567,8 +567,7 @@ theorem wI_partial_cauchy_diff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
   classical
   set g : ℕ × ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
     fun q => A q.1 * A' q.2 * b ^ (q.1 + q.2) with hg
-  have hprod : (∑ i ∈ Finset.range N, A i * b ^ i)
-      * (∑ j ∈ Finset.range N, A' j * b ^ j)
+  have hprod : (∑ i ∈ Finset.range N, A i * b ^ i) * (∑ j ∈ Finset.range N, A' j * b ^ j)
       = ∑ q ∈ Finset.range N ×ˢ Finset.range N, g q := by
     rw [Finset.sum_product, Finset.sum_mul_sum]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
@@ -576,10 +575,8 @@ theorem wI_partial_cauchy_diff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
     simp only
     rw [pow_add]
     ring
-  have hcauchy : (∑ l ∈ Finset.range N,
-        (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
-      = ∑ q ∈ (Finset.range N ×ˢ Finset.range N).filter
-          (fun q : ℕ × ℕ => q.1 + q.2 < N), g q := by
+  have hcauchy : (∑ l ∈ Finset.range N, (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
+      = ∑ q ∈ (Finset.range N ×ˢ Finset.range N).filter (fun q : ℕ × ℕ => q.1 + q.2 < N), g q := by
     rw [← biUnion_antidiagonal_eq]
     rw [Finset.sum_biUnion]
     · refine Finset.sum_congr rfl fun l _ => ?_
@@ -615,8 +612,7 @@ theorem wI_partial_cauchy_diff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
     rw [hg]
     simp only
     refine le_trans (wI_mul_le p F _ _) ?_
-    calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A q.1 * A' q.2)
-          * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (b ^ (q.1 + q.2))
+    calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A q.1 * A' q.2) * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (b ^ (q.1 + q.2))
         ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A q.1 * A' q.2) * 1 := by
           refine mul_le_mul_of_nonneg_left ?_ zero_le
           rw [wI_pow p F]

@@ -3866,3 +3866,112 @@ Two further corrections to the dep metric, found while reading `cechDiff_comp_ce
 So the working rule is: **count derived locals, not arity.** The refusals recorded above
 (`chartPlus…` at 8, `restrictedModule_map_surjective` at 7) stand — those are derived locals,
 not parameters — but the threshold should be applied to that narrower count from here on.
+
+### GOTCHA (process): backticks inside a double-quoted commit message are command substitution
+
+`git commit -m "... `foo` ..."` in zsh runs `foo` and splices its output — two code snippets were
+silently deleted from a commit message (and zsh printed `command not found: haveI`, which is easy
+to mistake for noise since the commit and push both still succeeded). Write commit messages to a
+file with the Write tool and use `git commit -F <file>`. Fixed here by amending with
+`--force-with-lease`, which aborts rather than clobbering if anyone else has pushed.
+
+## Per-proof decomposition phase started — 215 → 212
+
+Three proofs cleared by genuine extraction (not line-shuffling):
+
+* **`exists_d1_lift`** → `d1AddHom`: the 12-line anonymous `AddMonoidHom` structure literal that
+  was `set` inside the proof becomes a named definition. Split-def-from-packaging.
+* **`cechDiff_comp_cechDiff`** → `cechDiffTerm` + `cechFaceSwap`, plus a duplicate-branch merge.
+  `cechFaceSwap` (the sign-cancelling involution on index pairs) **depends only on `q`** — a
+  standalone combinatorial map that had been buried inside a proof. It is axiom-clean without
+  even `Classical.choice`.
+* **`gaussValueF_teichmuller_sub_le_of_le_scaled`** → `perfectoidValuation_mul_pow_le_one`
+  (`|x| ≤ |w|⁻¹^m → |x·wᵐ| ≤ 1`), a reusable scaling fact.
+
+Two build-cost lessons from the `cechDiff` extraction:
+  * **Do not hand-write instance binders for an extracted helper — let the section variables
+    auto-bind.** I guessed `{X} [TopologicalSpace X] {ι} [Fintype ι] [DecidableEq ι]`; the file
+    has no `DecidableEq ι` in scope, so the helper could not be applied at its only call site.
+    Auto-binding takes exactly the context the surrounding theorem has, by construction.
+  * **Extracting a `let`-bound function breaks the tactics that unfolded it.** `dsimp only [inv]`
+    unfolded the local `let`; once `inv := cechFaceSwap q`, it stops at the constant and
+    `split_ifs` reports "no if-then-else conditions to split". Fix: `dsimp only [inv, cechFaceSwap]`
+    at all four sites. Worth expecting whenever a `set`/`let` body moves into a definition.
+
+Joins also applied to eight further queue entries (they do not clear alone, but reduce the
+extraction each still needs).
+
+### BUG in the join tool, and the guard that was missing
+
+A join in `Lemma745.lean` merged two fields of a structure literal:
+
+```
+  let v_ext : Valuation A Γ₀ :=
+    { toFun := v_ext_fun          }  <- these two got joined
+      map_zero' := h_map_zero     }
+```
+producing `{ toFun := v_ext_fun map_zero' := h_map_zero` and
+`Fields missing: map_zero', map_one', map_mul', map_add_le_max'`.
+
+**Why the existing leaf guard did not catch it.** In a structure literal the fields are
+SIBLINGS at equal indent, while the `{` line is indented *less* than them. So:
+  * the continuation test (`right` deeper than `left`) fires — wrongly, they are not
+    continuation and head;
+  * the leaf test passes — the next field is at *equal*, not greater, indent.
+Both heuristics are about *indentation*, and a structure literal is the case where indentation
+does not mean nesting. This is the second time this exact block shape has produced a misleading
+"Fields missing" error from a join.
+
+Guard added: refuse when the left line has an unclosed `{`, or when the right line is a field
+assignment (`^[\w']+\s*:=`) and the left already carries one. On `exists_valuation_extension`
+that takes the safe-join count 6 → 5, and the file builds green.
+
+Cheap detection rule for the future: a join that produces `Fields missing` or `unexpected token
+':='` is almost always this, not a real proof error.
+
+### Prepared and queued (scripts in scratchpad, to run after the current gate + commit)
+
+* `mvtate.py` — `coeff_lt_sup_sup_succ` out of `mvTateAlgebra_polynomials_dense` (need 5, saves
+  7). Purely combinatorial (`Finset.sup` over a finite set of multi-indices); mentions nothing
+  from the surrounding proof, so it lifts with no ambient context.
+* `spanpres.py` — `not_vle_zero_prod` out of `exists_spanning_presentation_of_mem_basicOpens`
+  (need 4, saves 4). "A finite product of elements outside the support of a Spa-point stays
+  outside", true because the support is prime. Needs neither `hw` nor the rational-set
+  machinery.
+
+Both follow the rule learned from `cechDiffTerm`: **let the section variables auto-bind** rather
+than hand-writing instance binders.
+
+Not yet attempted, with reasons:
+* `laurentCover_isEmbedding_presheaf` (need 5) — the candidate `hcomp_eq` has a ~8-line
+  STATEMENT mentioning `τ_plus`/`τ_minus`/`pair`, so the helper would be mostly signature and
+  would need ~7 arguments. Its dep score is low only because those are theorem parameters. It is
+  a legitimate "the bridges commute with restriction" lemma but wants care, not a scripted edit.
+* `mem_prime_of_rational_subset_open` (need 6) — the three candidate `have`s (`hw_mem_iff`,
+  `hw_one_or_zero`, `hv_spa`) are all about the trivial valuation attached to a prime, built
+  from local `let`s (`φ`, `w`). The right move is one lemma constructing that valuation with its
+  three properties, not three ad-hoc extractions — a bigger, better change.
+* `rationalShrink_holds` (need 15) — only one usable block, saving 7. Genuinely short.
+
+### Design note: `mem_prime_of_rational_subset_open` wants a construction, not an extraction
+
+Reading the whole proof confirms the earlier suspicion. It builds, inline, the **trivial
+Spa-point attached to an open prime ideal** `p`:
+
+```
+φ : A →+* FractionRing (A ⧸ p)          -- quotient then fraction field
+w := (1 : Valuation _ _).comap φ         -- the trivial valuation pulled back
+v := ofValuation w
+```
+and then proves four things about it: `w a = 0 ↔ a ∈ p`, `w a = 0 ∨ w a = 1`,
+`v ∈ Spa A A⁺` (the continuity half is the real work — it shows `{a | w a < γ} = p`, which is
+where `hp_open` is consumed), and `v.supp = p`.
+
+That is a named object with an API, not a `have` to lift out. The right change is one lemma
+producing `∃ v, v ∈ Spa A A⁺ ∧ v.supp = p ∧ …`, which would serve any "separate a prime by a
+Spa-point" argument. Three ad-hoc extractions would hit the line target while leaving the
+construction anonymous — worse than doing nothing.
+
+Deferred deliberately, not skipped: it is a design change to `Presheaf.lean`, the most
+foundational file in the project (every gate after touching it is a full rebuild), so it wants
+to be its own change with its own gate rather than being bundled into a decompose batch.

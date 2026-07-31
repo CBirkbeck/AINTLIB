@@ -337,11 +337,9 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
       (∀ (a : A) (n : ℕ) (hn : s ^ n * a ∈ P.A₀),
         v_ext a = v_r ⟨s ^ n * a, hn⟩ * (v_r ⟨s, hs_A₀⟩)⁻¹ ^ n) := by
   classical
-  have h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ :=
-    P.exists_pow_mul_mem_A₀ hs_nil
+  have h_pow_mul : ∀ a : A, ∃ n : ℕ, s ^ n * a ∈ P.A₀ := P.exists_pow_mul_mem_A₀ hs_nil
   set v_s := v_r ⟨s, hs_A₀⟩ with v_s_def
-  let v_ext_fun : A → Γ₀ := fun a ↦
-    let n := Nat.find (h_pow_mul a)
+  let v_ext_fun : A → Γ₀ := fun a ↦ let n := Nat.find (h_pow_mul a)
     v_r ⟨s ^ n * a, Nat.find_spec (h_pow_mul a)⟩ * v_s⁻¹ ^ n
   have v_ext_at : ∀ (a : A) (m : ℕ) (hm : s ^ m * a ∈ P.A₀),
       v_ext_fun a = v_r ⟨s ^ m * a, hm⟩ * v_s⁻¹ ^ m :=
@@ -357,8 +355,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
     simp only [pow_zero, mul_one]
     have : (⟨(1 : A), P.A₀.one_mem⟩ : P.A₀) = 1 := Subtype.ext rfl
     rw [this, map_one]
-  have h_map_mul : ∀ x y : A,
-      v_ext_fun (x * y) = v_ext_fun x * v_ext_fun y := by
+  have h_map_mul : ∀ x y : A, v_ext_fun (x * y) = v_ext_fun x * v_ext_fun y := by
     intro x y
     set nx := Nat.find (h_pow_mul x); set ny := Nat.find (h_pow_mul y)
     have hnx := Nat.find_spec (h_pow_mul x); have hny := Nat.find_spec (h_pow_mul y)
@@ -367,8 +364,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
       exact P.A₀.mul_mem hnx hny
     rw [v_ext_at (x * y) (nx + ny) hprod_mem, v_ext_at x nx hnx, v_ext_at y ny hny]
     exact vExtFun_map_mul P v_r v_s hnx hny hprod_mem
-  have h_map_add_le_max : ∀ x y : A,
-      v_ext_fun (x + y) ≤ max (v_ext_fun x) (v_ext_fun y) := by
+  have h_map_add_le_max : ∀ x y : A, v_ext_fun (x + y) ≤ max (v_ext_fun x) (v_ext_fun y) := by
     intro x y
     set nx := Nat.find (h_pow_mul x); set ny := Nat.find (h_pow_mul y)
     have hnx := Nat.find_spec (h_pow_mul x); have hny := Nat.find_spec (h_pow_mul y)
@@ -377,8 +373,7 @@ theorem exists_valuation_extension (P : PairOfDefinition A) {Γ₀ : Type*}
       rw [show nx + ny = ny + nx from by omega]
       exact P.pow_mul_mem_A₀_of_le hs_A₀ hny nx
     have hNxy : s ^ (nx + ny) * (x + y) ∈ P.A₀ := by
-      rw [show s ^ (nx + ny) * (x + y) = s ^ (nx + ny) * x + s ^ (nx + ny) * y from
-        mul_add _ _ _]
+      rw [show s ^ (nx + ny) * (x + y) = s ^ (nx + ny) * x + s ^ (nx + ny) * y from mul_add _ _ _]
       exact P.A₀.add_mem hNx hNy
     rw [v_ext_at (x + y) (nx + ny) hNxy, v_ext_at x (nx + ny) hNx, v_ext_at y (nx + ny) hNy]
     exact vExtFun_map_add_le_max P v_r v_s hNx hNy hNxy
