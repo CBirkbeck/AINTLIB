@@ -1070,6 +1070,23 @@ theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair
           ((ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal)
           L))) ≃ₗ[Γ(S, (⊤ : S.Opens))]
       (Fin 2 → Γ(S, (⊤ : S.Opens)))) := by
+  classical
+  set D : C.IdealSheafData :=
+    (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal with hD
+  -- concentration of the cokernel onto the chart (leaf 2)
+  have hbij := cokernel_divisorTwistHom_bijective_restrict D L U.1 V hUV htriv
+  -- the base-sections chain to the sheafified pushforward-action cokernel
+  let i1 := Scheme.Modules.baseSectionsRestrictIsoOfBijective π
+    (Limits.cokernel (divisorTwistHom D L)) U.1 hbij
+  let i2 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+    (Limits.PreservesCokernel.iso (restrictFunctor U.1.ι)
+      (divisorTwistHom D L))
+  let i3 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+    (cokernelRestrictTwistIso D L U.1).symm
+  let i4 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+    (cokernelSheafifyActionIso D L U.1)
+  -- remaining: the concentrated Γ-model of the sheafified pointwise cokernel and
+  -- the ring-level split
   sorry
 
 end LineAssembly
