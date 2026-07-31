@@ -1471,6 +1471,80 @@ noncomputable def cokernelRestrictTwistUnitEndoIso (J : C.IdealSheafData)
         rw [hd]
         rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Local injectivity restricts along an open immersion of opens (the injective twin
+of `isLocallySurjective_restrictFunctor_map`). -/
+theorem isLocallyInjective_restrictFunctor_map {Z : Scheme.{u}}
+    {A B : Z.Modules} (g : A ⟶ B)
+    (hs : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥Z)
+      ((PresheafOfModules.toPresheaf _).map g.val))
+    (W : Z.Opens) :
+    Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥W.toScheme)
+      ((PresheafOfModules.toPresheaf _).map ((restrictFunctor W.ι).map g).val) := by
+  constructor
+  intro V x y hxy
+  rw [Opens.mem_grothendieckTopology]
+  intro c hcV
+  have hxy' : ((PresheafOfModules.toPresheaf _).map g.val).app
+      (Opposite.op (W.ι ''ᵁ V.unop)) x =
+      ((PresheafOfModules.toPresheaf _).map g.val).app
+        (Opposite.op (W.ι ''ᵁ V.unop)) y := hxy
+  have hmem := hs.equalizerSieve_mem x y hxy'
+  rw [Opens.mem_grothendieckTopology] at hmem
+  obtain ⟨V₂, i, hEq, hcV₂⟩ := hmem (W.ι.base c) ⟨c, hcV, rfl⟩
+  refine ⟨W.ι ⁻¹ᵁ V₂ ⊓ V.unop, homOfLE inf_le_right, ?_,
+    ⟨show W.ι.base c ∈ V₂ from hcV₂, hcV⟩⟩
+  have hle : W.ι ''ᵁ (W.ι ⁻¹ᵁ V₂ ⊓ V.unop) ≤ V₂ := by
+    refine le_trans ((W.ι.opensFunctor.map (homOfLE inf_le_left)).le) ?_
+    rw [Scheme.Hom.image_preimage_eq_opensRange_inf]
+    exact inf_le_right
+  have hres := congrArg (fun (q : ToType ((((PresheafOfModules.toPresheaf _).obj
+      A.val)).obj (Opposite.op V₂))) =>
+    (((PresheafOfModules.toPresheaf _).obj A.val).map (homOfLE hle).op) q) hEq
+  have hside : ∀ q : ToType ((((PresheafOfModules.toPresheaf _).obj
+      ((restrictFunctor W.ι).obj A).val)).obj V),
+      (((PresheafOfModules.toPresheaf _).obj
+        ((restrictFunctor W.ι).obj A).val).map (homOfLE inf_le_right).op) q =
+      (((PresheafOfModules.toPresheaf _).obj A.val).map (homOfLE hle).op)
+        ((((PresheafOfModules.toPresheaf _).obj A.val).map i.op) q) := by
+    intro q
+    rw [show (((PresheafOfModules.toPresheaf _).obj A.val).map
+        (homOfLE hle).op)
+        ((((PresheafOfModules.toPresheaf _).obj A.val).map i.op) q) =
+      (((PresheafOfModules.toPresheaf _).obj A.val).map
+        (i.op ≫ (homOfLE hle).op)) q from by
+      rw [Functor.map_comp]
+      rfl]
+    rfl
+  calc (((PresheafOfModules.toPresheaf _).obj
+      ((restrictFunctor W.ι).obj A).val).map (homOfLE inf_le_right).op) x
+      = (((PresheafOfModules.toPresheaf _).obj A.val).map (homOfLE hle).op)
+          ((((PresheafOfModules.toPresheaf _).obj A.val).map i.op) x) :=
+        hside x
+    _ = (((PresheafOfModules.toPresheaf _).obj A.val).map (homOfLE hle).op)
+          ((((PresheafOfModules.toPresheaf _).obj A.val).map i.op) y) := hres
+    _ = (((PresheafOfModules.toPresheaf _).obj
+          ((restrictFunctor W.ι).obj A).val).map (homOfLE inf_le_right).op) y :=
+        (hside y).symm
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- A restricted sheaf-module map is a monomorphism when the original map's underlying
+presheaf map is locally injective: restrict the local injectivity and run the
+mono pipeline on the open subscheme. -/
+theorem mono_restrictFunctor_map_of_isLocallyInjective {Z : Scheme.{u}}
+    {A B : Z.Modules} (f : A ⟶ B)
+    (hs : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥Z)
+      ((PresheafOfModules.toPresheaf _).map f.val))
+    (W : Z.Opens) : Mono ((restrictFunctor W.ι).map f) := by
+  have h6 := isLocallyInjective_restrictFunctor_map f hs W
+  haveI h7 : Sheaf.IsLocallyInjective
+      ((SheafOfModules.toSheaf _).map ((restrictFunctor W.ι).map f)) := h6
+  haveI h8 : Mono ((SheafOfModules.toSheaf _).map
+      ((restrictFunctor W.ι).map f)) := Sheaf.mono_of_isLocallyInjective _
+  exact (SheafOfModules.toSheaf _).mono_of_mono_map h8
+
 end LineAssembly
 
 end Twist
