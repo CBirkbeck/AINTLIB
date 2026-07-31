@@ -30361,3 +30361,21 @@ transfers nzd). eTL := tensor-restrict chain (pullbackTensorMonoidal open-immers
 pieces) ∘ (idealModuleRestrictTrivOfSpan ⊗-side) ∘ L-triv ∘ unitor; the 1-value
 computation goes through divisorTwistHom_app_unit at the η-image of (generator ⊗ 1).
 Remaining: assemble eTL, the 1-value/span computation, Γ-of-coker + 3a-feed, then e2.
+
+### [A4-e2 3b-iii] eTL design notes 2026-07-31 (W-inversion trap + forward-square fix)
+eTL-chain: F.obj(tensorObj I L) ≅ sheafifyY(F-val) [sheafifyValIso.symm] ≅
+sheafifyY(pushforward (I.val ⊗ L.val)) [(asIso W-restricted-unit).symm — from
+`sheafificationW_pushforward_unit_tensor` (PullbackTensorMonoidal:~300)] ≅
+sheafifyY(pf I.val ⊗ pf L.val) [pushforwardTensorIso.symm mapped] = tensorObj (F.obj I)
+(F.obj L) [refl] ≅ tensorObj unit unit [tensorObjCongr trivs] ≅ unit
+[nonempty_tensorObj_unit_iso.some].
+TRAP: evaluating the CONJUGATE d' := eTL.inv ≫ F.map(twist) ≫ eL.hom at 1 requires
+inverting the W-piece elementwise — no formula. FIX (forward square): compare
+F.map (divisorTwistHom) against sheafifyY(pushforward (idealActionPre J L)) FIRST —
+one naturality square through divisorTwistHom_eq (F.map(sheafifyX(action) ≫ counit))
++ the restrict-vs-pushforward sheafification naturality (the hmem-family is a natural
+transformation; its naturality at idealActionPre is the needed square, all maps
+FORWARD) — then the pushforward-action is concrete (apps = action at image-opens,
+rfl-grade) and its conjugation by the presheaf-level trivializations evaluates at
+1 ⊗ 1 elementwise. Classification (unit_endo_eq_ofTopSection) then closes the endo.
+The span-identification only needs span-up-to-unit.

@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 3b-iii] the conjugation square: F.map(divisorTwistHom J L) against unitEndomorphismOfTopSection through (idealModuleRestrictTrivOfSpan x L-triv + tensor-restrict chain per nonempty_pullback_tensorObj_of_isOpenImmersion pieces); then (iv) Data-subtype + coker-iso; upstream green through 3b-ii
+FOCUS: [GAP-A-4/A4-e2 3b-iii cont] assemble eTL (tensor-restrict chain on the chart) + d-prime 1-value/span computation; then Gamma-of-coker + quotientSpanMulEquivProd feed = e2. Upstream green+pushed thru unit_endo_eq_ofTopSection
