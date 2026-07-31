@@ -370,61 +370,9 @@ theorem isEmbedding_limitRestrictProd_on {S : Set (Spv A)} (hOn : IsSheafyOn S)
     obtain ⟨t, ht⟩ := exists_finite_rational_refinement_huber D.D D.isRational
       (hcomp D.D D.isRational)
       (fun i => (U i : Set ↥(Spa A A⁺))) (fun i => (U i).2) (D.subset.trans hcov)
-    set C := refinementCovering D.D t ht with hCdef
-    have hCrat : C.IsRational := refinementCovering_isRational D.D D.isRational t ht
-    have hexE : ∀ E : ↥C.covers,
-        E.1.IsRational ∧ ∃ i : ι, spaOpen E.1 ⊆ (U i : Set ↥(Spa A A⁺)) := by
-      rintro ⟨E, hE⟩
-      obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp
-        (show E ∈ t.image (fun q => q.1.1) from hE)
-      exact ⟨q.2.1, q.1.2, q.2.2.trans Set.inter_subset_right⟩
-    set Φ : (∀ i, ↥(limitSections (U i))) → (∀ E : ↥C.covers, presheafValue E.1) :=
-      fun y E => (y (hexE E).2.choose : ∀ j : RationalIndex (U (hexE E).2.choose),
-        presheafValue j.D) ⟨E.1, (hexE E).1, (hexE E).2.choose_spec⟩ with hΦdef
-    have hΦcont : Continuous Φ := by
-      refine continuous_pi fun E => ?_
-      exact ((continuous_apply _).comp continuous_subtype_val).comp
-        (continuous_apply (hexE E).2.choose)
-    have hfactor : ∀ y : ↥(limitSections V),
-        Φ (limitRestrictProd hle y) = productRestrictionSub A C
-          ((y : ∀ j : RationalIndex V, presheafValue j.D) D) := by
-      intro y
-      funext E
-      have hED : rationalOpen E.1.T E.1.s ⊆ rationalOpen D.D.T D.D.s :=
-        C.hsubset E.1 E.2
-      have hEV : spaOpen E.1 ⊆ (V : Set ↥(Spa A A⁺)) :=
-        (hexE E).2.choose_spec.trans (hle (hexE E).2.choose)
-      show (y : ∀ j : RationalIndex V, presheafValue j.D) ⟨E.1, (hexE E).1, hEV⟩ =
-        restrictionMap D.D E.1 hED ((y : ∀ j : RationalIndex V, presheafValue j.D) D)
-      exact (y.2 D ⟨E.1, (hexE E).1, hEV⟩ hED).symm
-    have hemb := (hOn.embedding C hCrat
-        (RationalLocData.rationalOpen_subset_of_trace D.subset hVS)
-      ).isInducing.nhds_eq_comap
-      ((x : ∀ j : RationalIndex V, presheafValue j.D) D)
-    calc Filter.comap (limitRestrictProd hle) (𝓝 (limitRestrictProd hle x))
-        ≤ Filter.comap (limitRestrictProd hle)
-            (Filter.comap Φ (𝓝 (Φ (limitRestrictProd hle x)))) :=
-          Filter.comap_mono ((hΦcont.tendsto _).le_comap)
-      _ = Filter.comap (fun y : ↥(limitSections V) =>
-            productRestrictionSub A C
-              ((y : ∀ j : RationalIndex V, presheafValue j.D) D))
-            (𝓝 (productRestrictionSub A C
-              ((x : ∀ j : RationalIndex V, presheafValue j.D) D))) := by
-          rw [Filter.comap_comap]
-          congr 1
-          · exact funext hfactor
-          · rw [hfactor x]
-      _ = Filter.comap (fun y : ↥(limitSections V) =>
-            (y : ∀ j : RationalIndex V, presheafValue j.D) D)
-            (Filter.comap (productRestrictionSub A C)
-              (𝓝 (productRestrictionSub A C
-                ((x : ∀ j : RationalIndex V, presheafValue j.D) D)))) := by
-          rw [Filter.comap_comap]
-          rfl
-      _ = Filter.comap (fun y : ↥(limitSections V) =>
-            (y : ∀ j : RationalIndex V, presheafValue j.D) D)
-            (𝓝 ((x : ∀ j : RationalIndex V, presheafValue j.D) D)) := by
-          rw [← hemb]
+    exact comap_limitRestrictProd_le_comap_eval hle x D ht
+      (hOn.embedding _ (refinementCovering_isRational D.D D.isRational t ht)
+        (RationalLocData.rationalOpen_subset_of_trace D.subset hVS))
   · intro x y hxy
     exact limitRestrict_injective_on hOn hcomp hVS hle hcov
       fun i => congr_fun hxy i

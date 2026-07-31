@@ -333,26 +333,17 @@ private lemma le_of_isContinuous_of_denseRange_of_le {Γv Γw : Type*}
     simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at ha
     obtain ⟨ha_v, ha_w⟩ := ha
     have hvy : v y ≠ 0 := fun h0 ↦ hvx (le_antisymm (h0 ▸ hxy) zero_le)
-    by_cases hwy : w y = 0
-    · have hmemb : y ∈ {z : S | w z < w x} := hwxy
-      have hN_b : {z | v z = v y} ∩ {z : S | w z < w x} ∈ nhds y :=
-        Filter.inter_mem (hv.setOf_value_eq_mem_nhds hvy) ((hw (w x)).mem_nhds hmemb)
-      obtain ⟨b, hb⟩ := hex y _ hN_b
-      simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hb
-      obtain ⟨hb_v, hb_w⟩ := hb
-      have hvab : v (φ a) ≤ v (φ b) := by rw [ha_v, hb_v]; exact hxy
-      have hwab : w (φ a) ≤ w (φ b) := (h a b).mp hvab
-      rw [ha_w] at hwab
-      exact absurd hwab (not_le.mpr hb_w)
-    · have hN_b : {z | v z = v y} ∩ {z | w z = w y} ∈ nhds y :=
-        Filter.inter_mem (hv.setOf_value_eq_mem_nhds hvy) (hw.setOf_value_eq_mem_nhds hwy)
-      obtain ⟨b, hb⟩ := hex y _ hN_b
-      simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hb
-      obtain ⟨hb_v, hb_w⟩ := hb
-      have hvab : v (φ a) ≤ v (φ b) := by rw [ha_v, hb_v]; exact hxy
-      have hwab : w (φ a) ≤ w (φ b) := (h a b).mp hvab
-      rw [ha_w, hb_w] at hwab
-      exact absurd hwab (not_le.mpr hwxy)
+    -- `{z | w z < w x}` is a neighbourhood of `y` whether or not `w y` vanishes: `hwxy` is
+    -- the top-level `by_contra` hypothesis, so no case split on `w y = 0` is needed.
+    have hN_b : {z | v z = v y} ∩ {z : S | w z < w x} ∈ nhds y :=
+      Filter.inter_mem (hv.setOf_value_eq_mem_nhds hvy) ((hw (w x)).mem_nhds hwxy)
+    obtain ⟨b, hb⟩ := hex y _ hN_b
+    simp only [Set.mem_inter_iff, Set.mem_setOf_eq] at hb
+    obtain ⟨hb_v, hb_w⟩ := hb
+    have hvab : v (φ a) ≤ v (φ b) := by rw [ha_v, hb_v]; exact hxy
+    have hwab : w (φ a) ≤ w (φ b) := (h a b).mp hvab
+    rw [ha_w] at hwab
+    exact absurd hwab (not_le.mpr hb_w)
 
 /-- **Continuous valuations are determined by a dense subring** (the injectivity content of
 Wedhorn Proposition 7.48 = Huber [Hu2] Prop. 3.9). If `φ : R →+* S` has dense image and two

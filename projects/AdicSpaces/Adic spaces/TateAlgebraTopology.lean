@@ -3072,34 +3072,13 @@ theorem tateAlgebra₂_polynomials_dense_canonical [IsTateRing A] :
   refine ⟨truncTateC₂ g N, hn ?_,
     ⟨N, fun m hm => truncTateC₂_coeff_outside g N m hm⟩⟩
   -- Need: truncTateC₂ g N - g ∈ tateAlgNhd₂ P n; equals -(g - truncTateC₂ g N).
-  have hdiff_pair : g - truncTateC₂ g N ∈ pairSubring₂ P := by
-    intro l
-    change (g.val l - (truncTateC₂ g N).val l) ∈ (P.A₀ : Set A)
-    rw [truncTateC₂_val]
-    by_cases hlt : l 0 < N ∧ l 1 < N
-    · rw [if_pos hlt, sub_self]; exact P.A₀.zero_mem
-    · rw [if_neg hlt, sub_zero]
-      have hl_not_bad : l ∉ S := by
-        intro hl
-        have hl_fin : l ∈ hS_fin.toFinset := hS_fin.mem_toFinset.mpr hl
-        have h0 : l 0 ≤ (hS_fin.toFinset.image (· 0)).sup id :=
-          Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 0) hl_fin)
-        have h1 : l 1 ≤ (hS_fin.toFinset.image (· 1)).sup id :=
-          Finset.le_sup (f := id) (Finset.mem_image_of_mem (· 1) hl_fin)
-        push Not at hlt
-        have hge := hlt (by omega : l 0 < N)
-        omega
-      rw [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
-      obtain ⟨b, _, hb_eq⟩ := hl_not_bad
-      rw [show g.val l = (b : A) from hb_eq.symm]; exact b.property
   have hdiff_coeff : ∀ l, ∃ b : P.A₀, b ∈ P.I ^ n ∧
       (b : A) = MvPowerSeries.coeff l (g - truncTateC₂ g N).val := by
     intro l
     change ∃ b : P.A₀, b ∈ P.I ^ n ∧ (b : A) = g.val l - (truncTateC₂ g N).val l
     rw [truncTateC₂_val]
     by_cases hlt : l 0 < N ∧ l 1 < N
-    · rw [if_pos hlt, sub_self]
-      exact ⟨0, (P.I ^ n).zero_mem, rfl⟩
+    · rw [if_pos hlt, sub_self]; exact ⟨0, (P.I ^ n).zero_mem, rfl⟩
     · rw [if_neg hlt, sub_zero]
       have hl_not_bad : l ∉ S := by
         intro hl
@@ -3111,8 +3090,12 @@ theorem tateAlgebra₂_polynomials_dense_canonical [IsTateRing A] :
         push Not at hlt
         have hge := hlt (by omega : l 0 < N)
         omega
-      rw [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
-      exact hl_not_bad
+      rwa [hS_def, Set.mem_setOf_eq, not_not] at hl_not_bad
+  -- `P.I ^ n` is an ideal of `P.A₀`, so `hdiff_coeff` already puts every
+  -- coefficient in `P.A₀`.
+  have hdiff_pair : g - truncTateC₂ g N ∈ pairSubring₂ P := by
+    intro l; obtain ⟨b, _, hb⟩ := hdiff_coeff l
+    exact hb ▸ b.property
   have hg_diff_mem : g - truncTateC₂ g N ∈ tateAlgNhd₂ P n :=
     tateAlgNhd₂_of_coeff_mem_principal P n
       (IsTateRing.principalPair A).π

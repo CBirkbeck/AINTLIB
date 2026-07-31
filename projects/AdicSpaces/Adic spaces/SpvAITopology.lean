@@ -403,11 +403,8 @@ theorem SpvAI.exists_rationalSubset_cofinality [DecidableEq A]
           exact Finset.le_sup (f := fun ⟨s', hs'⟩ ↦ k_s s' hs') (Finset.mem_attach _ ⟨s, hs⟩)
         have h_vs_le_one : wv s ≤ 1 := (h_cofinal s hs).le_one
         -- (wv s)^K ≤ (wv s)^{k_s s hs} (since wv s ≤ 1, larger exp = smaller).
-        have h_pow_mono : wv s ^ K ≤ wv s ^ (k_s s hs) := by
-          obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_le (Nat.le_of_lt h_K_ge)
-          rw [hj, pow_add]
-          conv_rhs => rw [← mul_one (wv s ^ (k_s s hs))]
-          exact mul_le_mul_right (Left.pow_le_one_of_le h_vs_le_one _) _
+        have h_pow_mono : wv s ^ K ≤ wv s ^ (k_s s hs) :=
+          pow_le_pow_right_of_le_one' h_vs_le_one (Nat.le_of_lt h_K_ge)
         exact lt_of_le_of_lt h_pow_mono (hk_s s hs) |>.le
   · -- SpvAI.rationalSubset I T' g_0 ⊆ W.
     intro w hw

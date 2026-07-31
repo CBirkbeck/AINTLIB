@@ -138,13 +138,7 @@ lemma exists_uniform_pow_vle_on_compact
         rw [map_one]
         exact h_not.le
       -- For `x ≤ 1` and `N ≤ M`, we have `x^M ≤ x^N`.
-      -- Proof: x^M = x^N · x^(M-N) ≤ x^N · 1 = x^N (since x^(M-N) ≤ 1).
-      obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hNM
-      rw [pow_add]
-      calc (ValuativeRel.valuation A) π ^ N * (ValuativeRel.valuation A) π ^ k
-          ≤ (ValuativeRel.valuation A) π ^ N * 1 :=
-            mul_le_mul_right (Left.pow_le_one_of_le hπ_le_one k) _
-        _ = (ValuativeRel.valuation A) π ^ N := mul_one _
+      exact pow_le_pow_right_of_le_one' hπ_le_one hNM
     -- Now translate to vle.
     -- hwN_le : w.1.vle (π^N) a, i.e., v(π^N) ≤ v(a).
     -- We have v(π^M) ≤ v(π^N) ≤ v(a), so v(π^M) ≤ v(a).

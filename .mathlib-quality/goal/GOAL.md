@@ -4673,3 +4673,268 @@ the *last* move as well as the first.
 Also: `#print axioms` needed the enclosing namespace (`TateAlgebra.`), which is not the file's
 name (`TateAlgebraTopology`) nor the section header (`TateAlgebra₂Topology`). Computing the
 namespace stack by walking `namespace`/`end` to the declaration beats guessing from the filename.
+
+## 194 → 191: three proofs cleared by removing work that never needed doing
+
+None of these three needed a new helper. In each the excess length was a step the proof
+did not have to take at all.
+
+* `Valuation.le_of_isContinuous_of_denseRange_of_le` (56 → 47). The proof ended in
+  `by_cases hwy : w y = 0` whose two branches shared five verbatim lines. The duplication was
+  the symptom; the defect is that **`hwy` is never used by either branch**. The only real
+  difference was the second component of a neighbourhood of `y`:
+  `{z | w z < w x}` in one branch, `{z | w z = w y}` in the other — and the *strict* set is a
+  neighbourhood of `y` in both, because `hwxy : w y < w x` comes from the top-level `by_contra`
+  and holds regardless of whether `w y` vanishes. So the first branch's argument already proved
+  the second. 21 lines → 9.
+  → **When two branches of a `by_cases` share a long block, check whether the case hypothesis is
+    used at all before extracting the block.** Extracting here would have needed five derived
+    locals (`hex`, `a`, `ha_v`, `ha_w`, `hxy`) as helper arguments — a lot of machinery to
+    preserve a case split that should not exist.
+
+* `ValuationSpectrum.pow_gen_prod_lt` (62 → 50) — mathlib already had the step (below).
+
+* `TopologicalRing.isBounded_closure_finset_of_isPowerBounded` (56 → 40) via
+  `mul_mem_addClosure_mul_range_pow`: the additive closure of `B * {aⁿ}` is closed under
+  multiplication because a product of generators collapses,
+  `(b₁ aᵏ¹)(b₂ aᵏ²) = (b₁b₂) a^(k₁+k₂)`. 20 lines → 4. The block referenced the `set`-bound
+  `BM`, which per the Euclidean rule cannot be lifted verbatim; here `rw [hBM]` at the single
+  call site unfolds it, so the helper is stated about the definition and the call site pays one
+  line for the fold.
+
+## Task 3 (best mathlib API): `pow_le_pow_right_of_le_one'` hand-rolled 4×
+
+`Mathlib/Algebra/Order/Monoid/Unbundled/Pow.lean` has
+`pow_le_pow_right_of_le_one' (ha : a ≤ 1) (h : n ≤ m) : a ^ m ≤ a ^ n`.
+Four proofs across three files derived it inline by the identical four-step ritual:
+
+```
+obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le h
+rw [hk, pow_add]
+conv_rhs => rw [← mul_one (a ^ n)]
+exact mul_le_mul_right (Left.pow_le_one_of_le ha k) _
+```
+
+Replaced at SpvAI ×2, SpvAITopology, SpaCompactNoHArch (−19 lines). The requirement is only
+`MulLeftMono`, which the `mul_le_mul_right` in the hand-rolled version was already using.
+→ **How it was found: grep the mathlib lemma the proof DOES cite (`Left.pow_le_one_of_le`) and
+  read its neighbours.** Six hits, four of them this shape. The inner step being correct is what
+  hides the fact that mathlib also packages the outer argument; searching for the *outer*
+  statement would not have turned it up, because the proof never names it.
+
+### Recurring transcription defect (7th occurrence — now a hard rule)
+
+Twice in this batch a patch failed because I copied the block to be replaced **out of my own
+annotated listing** rather than the raw file. My survey scripts print `f'{k+1:5d}|{flag} {line}'`,
+which prepends two characters, so every copied line carried +2 spaces of indentation. In Lean that
+is not a whitespace nit — it reparents the block, and the error surfaces far away
+(`unexpected token 'have'; expected command`, ~10 lines later) rather than at the bad indent.
+→ **Never transcribe code from tool output that adds a prefix.** Anchor edits on line indices, or
+  re-read the raw lines. The pattern-match failure (`FAIL: block not found`) is the *lucky* case;
+  the dangerous one is when the mis-indented block still parses.
+
+## Process fix: the build guard must be scoped to THIS worktree
+
+I spent a long stretch believing the gate was still running when I could not tell. The check
+was `ps -eo pid,command | grep -c "[b]in/lake build"`, which counts lake builds **anywhere on
+the machine** — and this machine runs several AINTLIB worktrees at once
+(`aintlib-modular-curves`, `aintlib-adic-fjp`, `TauCeti`, …). Five processes were reported;
+exactly one was mine.
+
+Those other builds have their own `.lake`, so they neither clobber this worktree nor block it
+— the one-build-at-a-time rule is about *this* worktree only. Counting them turns a free
+build slot into an apparently busy one and stalls the whole loop.
+
+`scratchpad/buildguard.sh` resolves each candidate's cwd via
+`lsof -a -d cwd -p <pid>` and counts only those under this worktree. The authoritative
+signal remains the backgrounded command's own completion notification; the guard is for
+deciding whether it is safe to *start* one.
+
+→ **Rule: never count processes by name alone on a shared machine. Resolve the cwd.**
+  (This is the third distinct way the naive `pgrep`/`grep` guard has misfired: it has matched
+  the shell running it, the editor's `lake serve`, and now sibling worktrees.)
+
+## Deliverable outside the three tasks: `formalisation.yaml` + comparator
+
+Built on request (`projects/AdicSpaces/formalisation.yaml`, `projects/AdicSpaces/scripts/`).
+Generated manifest of what the project has formalised — 767 cited results covering 173
+numbered source statements, plus the full 260-module / 6989-declaration inventory — and
+`check_formalisation.py`, which re-derives the same facts from source and reports drift
+(`RESTATED` / `MISSING` / `REGRESSED` as errors). Verified it fails on a mutated manifest
+rather than always passing. Groups: `fjp` (0 sorry), `examples` (0 sorry), `adic-spaces`.
+
+Two extractor bugs found there are worth knowing for any future source-scanning script in
+this repo:
+* **Docstring prose at column 0 parses as code.** Lines like `theorem is unsound outside …`,
+  `lemma so the chain assembly …`, `structure presheaf is a sheaf …` are docstring
+  continuations, and produced nine phantom declarations. Track block-comment depth (Lean's
+  nest, so count, don't toggle).
+* Signatures must not be split on the first `:=` — already recorded, re-confirmed.
+
+## Batch prepared and dry-run verified (194 → 189, ~330 duplicated lines)
+
+Five over-50 proofs cleared, all by the same realisation: the proof already existed elsewhere.
+
+| proof | before → after | how |
+|---|---|---|
+| `SpaRationalOpenHomeomorph.exists_A_level_open_presentation` | 112 → 2 | it *is* `exists_A_level_open_presentation'` applied to `presheafValue_topNilUnit D` |
+| `WedhornCechAcyclicity.tate_ker_le_of_backward` | 101 → 8 | `tate_backward_exists` is its own 93% prefix, packaged |
+| `RestrictedLimitSheaf.isEmbedding_limitRestrictProd_on` | 66 → 14 | shared inducing core |
+| `SheafyPair.isEmbedding_limitRestrictProd` | 65 → 15 | shared inducing core |
+| `TateAlgebraTopology.tateAlgebra₂_polynomials_dense_canonical` | 69 → 50 | `hdiff_pair` follows from `hdiff_coeff` |
+
+Two of these were found by a **global mirror-pair scan**: normalise away the `_on` suffix,
+`₁/₂` indices and `plus/minus/left/right`, then compare every pair of remaining over-50 proofs
+by line-sequence similarity. 24 pairs scored ≥62%. Reading them raw is essential — the
+normalisation that *finds* candidates also lies about them:
+
+* `genPiece_relative_overlap_square₁/₂` scored 86%, but the raw diff is 125 of 153 lines: the
+  normaliser had collapsed the very `t₁`/`t₂` distinction that makes them two theorems. Real
+  difference: one leg uses `interSamePair_subset_left`, the other an inline rewrite and
+  `subset_right`. **Not** duplicates.
+* `tate_ker_le_of_backward` / `tate_backward_exists` scored 97% and the raw diff is 6 lines,
+  all in the last 7%. Identical hypothesis lists, different conclusions. The docstring on the
+  second even says "same hypotheses and body" — recorded as a duplicate and left as one.
+
+### The direction problem, and the fix
+
+Both big wins had the general statement sitting **downstream** of the special case
+(`NonTate → SpaRationalOpenHomeomorph`, and `tate_backward_exists` 140 lines below its
+corollary). A special case cannot call a lemma it precedes. So:
+
+* `exists_A_level_open_presentation'` **moves upstream** — it has no Tate dependency, so
+  `SpaRationalOpenHomeomorph` is where it belonged; visibility only widens, and it was the
+  first declaration in its old file so nothing local preceded it.
+* `tate_ker_le_of_backward` **moves down** past the lemma it now calls — chosen because
+  moving the rewritten 7-line declaration is a far smaller edit than lifting a 140-line one.
+
+→ **When two proofs are near-identical, check the import/declaration order before designing
+  the dedup: it decides which one becomes the corollary, and moving the short side is
+  usually cheaper than moving the general side.**
+
+### Dry-running patches on copies caught two bugs the build would have
+
+Copied the six target files to a scratch dir and ran all four patch scripts there first. It
+found (a) a 109-char signature line, and (b) `have hemb := hemb.isInducing …` — my rewrite had
+left the binder shadowing the new hypothesis, so the `hnhds` referenced later was never bound.
+Both would have cost a full ~2h gate cycle each to discover. The dry run also confirmed every
+file's long-line count is unchanged, which is the cheapest proxy for "no new lint".
+
+## Task 3: exact duplicate statements across the library (digest scan)
+
+Using the `formalisation.yaml` signature digests, all 6989 declarations group by statement in
+one pass: **10 groups, 21 declarations, with byte-identical statements**. Import direction
+decides which are actionable:
+
+| duplicate | direction | verdict |
+|---|---|---|
+| `genPieceDatum` + `genPieceDatum_P/T/s` | `…KeystoneGen` imports `…Keystone`; Gen re-declares them under `ValuationSpectrum.GenKeystone` | **actionable** — delete the 4 downstream copies |
+| `oneSubfXIdeal` | `PresheafIdentification` imports `TateAlgebraTopology` | **actionable** — delete the downstream copy, repoint |
+| `IsSheafOfTopologicalRings` | `StructurePresheafBundled` imports `HomSheafPredicate` | actionable, but it is a `def … : Prop`; repointing changes what consumers refer to |
+| `isUnit_s_in_presheafValue` | neither imports the other | no possible home — needs a common ancestor |
+| `Ainf` | neither imports the other | same |
+| `toTopCat` (3×) | — | not yet checked |
+
+The two "neither imports the other" cases are the structural shape already recorded: a dedup
+there is a *file-placement* decision, not a proof edit.
+
+## Applied: 194 → 187 (measured), ~350 duplicated lines removed
+
+The five prepared patches went in together, plus the earlier five-module batch. Re-measured
+with `scope_code.py`: **187 over-50 proofs (2 sorry-bearing, 185 in scope)**.
+`WedhornCechAcyclicity.lean` drops 30 → 29.
+
+### Why the two batches were combined into one gate
+
+The full gate for the five-module batch reached 160/260 modules with zero errors after ~3h —
+not because anything was wrong, but because this machine was running **nine** lake builds
+across sibling worktrees and mine was CPU-starved. Letting it finish would have verified work
+that the next batch immediately invalidates: the prepared patches touch
+`SpaRationalOpenHomeomorph`, `WedhornCechAcyclicity`, `SheafyPair` and `TateAlgebraTopology`,
+all foundational. So the gate was stopped and one combined gate run instead.
+
+Stopping costs nothing: `.lake` keeps every olean already built, so a restarted build resumes
+from where it stopped rather than from scratch. What it does cost is *isolation* — a red
+combined gate has ten changes to bisect instead of five. That is bought back by building the
+touched modules by name first, which catches everything except downstream breakage.
+
+→ **Under heavy contention, prefer one combined gate over two sequential ones, but only after
+  a by-name module build of every touched module.** The module build is the part that
+  localises a failure; the gate only adds downstream coverage.
+
+### Gotcha: rcases `-` CLEARS the binder; use `_` when later components depend on it
+
+`tate_ker_le_of_backward` needs only the second conjunct out of
+
+    ∃ (β) (ψ'), Continuous β ∧ (β ∘ Φ = mk aI) ∧ … ∧ …
+
+so I wrote `obtain ⟨-, -, -, hext, -, -⟩ :=`. That fails with **`Unknown identifier hext`** at
+the use site and **`unsolved goals`** at the `obtain` — which reads like the destructuring
+pattern has the wrong arity, and sent me looking at the shape of the existential. It does not.
+
+`-` in an rcases pattern does not mean "ignore", it means **clear**. `β` and `ψ'` are
+dependencies of all four conjuncts, so clearing them makes the remaining components ill-typed
+and `hext` never gets introduced. `_` introduces an inaccessible name and keeps the binder.
+
+→ **Discard with `_`, not `-`, whenever an earlier component is a witness the later ones
+  mention.** `-` is only safe on genuinely independent components. The error message points at
+  the consumer, never at the `-` that caused it.
+
+Worth noting how cheaply this was localised: the by-name module build of all twelve touched
+modules put 3122/3136 jobs through and reported errors in exactly one file, so four of the
+five patches were confirmed green in the same run that found the bug. That is the argument
+for building touched modules by name before the gate — the gate would have reported the same
+two errors after far longer, with no evidence about the other four patches.
+
+## Next target analysed: `wedhorn_lemma_834_propA3_part1_gluing` (349 lines, need 299)
+
+The largest single proof left, and the largest remaining deficit in the tree.
+`WedhornCechAcyclicity.lean` as a whole holds 29 proofs and **2291 lines of deficit** — more
+than half the campaign's remainder.
+
+Three `have` blocks hold 244 of the 349 lines. Scored by *derived locals used* (the metric
+that matters — theorem parameters are free as helper arguments, derived locals are not):
+
+| block | lines | derived locals | theorem params |
+|---|---|---|---|
+| `h_gVj_compat` | 32 | **2** (`chooseC`, `gVj`) | 6 |
+| `h_yV_compat` | 139 | 5 (+ `h_gVj_compat`) | 16 |
+| `h_mixed` | 73 | **9** | 8 |
+
+So the extraction order is forced: `h_gVj_compat` first (cheapest, and `h_yV_compat` consumes
+it, so lifting it first shrinks the next one's dependency set too). `h_mixed` is the expensive
+one and should be attempted last, if at all.
+
+Arithmetic is tight: all three extractions save ~241 lines against a deficit of 299, so the 55
+available joins are load-bearing rather than optional. This is not a one-pass job.
+
+`chooseC`, `gVj`, `yV`, `yVj` are `set`/`let`-bound, so per the Euclidean rule none of these
+can be lifted verbatim — each must be restated about the definitions, which (as there) tends
+to make the helper shorter than the block it replaces.
+
+### Checked and rejected: the `unitCover_*` / `genPiece_*` families are NOT duplicates
+
+The naming strongly suggests the specific-vs-general pattern that paid off twice this session
+(`exists_A_level_open_presentation`, `tate_ker_le_of_backward`). It does not hold here:
+`unitCover_relOverlap_forward_witness` vs `genPiece_relOverlap_forward_witness` share **14%**
+of their lines, and the `backwardLocHom_continuous` pair shares **9%**. The `unitCover_*`
+versions take `(f : A)` — a one-element cover — where `genPiece_*` take `(T : Finset A)`;
+they are genuinely different constructions, not a special case of one another.
+→ A shared name prefix is a hypothesis, not evidence. One diff settles it in a second, and
+  doing that first avoids designing a dedup that cannot exist.
+
+### `h_gVj_compat` design (32 lines → ~6): state it about the composition law
+
+The block proves that `gVj`'s two restrictions agree, where
+`gVj Vj D' = restrictionMap (chooseC Vj D').1.1 D'.1 (chooseC Vj D').2 (f (chooseC Vj D').1)`.
+Its whole body is `restrictionMap_comp` applied on each side (via two `show`/`rw [show … from
+congrFun …]` blocks, 22 of the 32 lines) to collapse the double restriction into a single one,
+after which `h_compat` closes it verbatim.
+
+So the mathematical content is not about `chooseC` or `gVj` at all — it is: *a family
+compatible on a covering stays compatible after restricting each member through an
+intermediate open*. Stated that way it takes the chosen pieces as two plain arguments and the
+`set`-bound locals disappear, which is the Euclidean-rule converse again (restating for the
+new context makes the helper shorter than the block it replaces).
+
+Both `chooseC` and `gVj` are `let`-bound, so a verbatim lift was never available here.

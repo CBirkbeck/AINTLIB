@@ -215,12 +215,15 @@ section PresheafValue
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
-/-- **The A-level open presentation** (Wedhorn 8.2(2), steps 1–4 of the file
-docstring): every finite intersection of basic opens of `Spv (presheafValue D)`
-around a Spa-point contains, relatively to `Spa`, the `comap`-preimage of a
-finite intersection of basic opens of `Spv A`. -/
-theorem exists_A_level_open_presentation [IsTateRing A]
+/-- **The A-level open presentation, without a Tate hypothesis** (Wedhorn 8.2(2)): the
+statement of `exists_A_level_open_presentation` with the topologically nilpotent unit of
+`presheafValue D` supplied as a hypothesis rather than produced from `[IsTateRing A]`. The
+Tate version is the special case `u := presheafValue_topNilUnit D`; this general form is what
+`NonTateRationalOpenHomeomorph`, `SpaVIso`, `SpaVObj` and `FarguesFontaine.YStalks` use. -/
+theorem exists_A_level_open_presentation'
     [IsRingOfIntegralElements (A⁺ : Subring A)] (D : RationalLocData A)
+    (u : (presheafValue D)ˣ)
+    (hu : IsTopologicallyNilpotent ((u : (presheafValue D)ˣ) : presheafValue D))
     {w : Spv (presheafValue D)}
     (hw : w ∈ Spa (presheafValue D) (presheafValue D)⁺)
     {ι : Type v} [DecidableEq ι] {fam : Finset ι} {F G : ι → presheafValue D}
@@ -231,8 +234,6 @@ theorem exists_A_level_open_presentation [IsTateRing A]
         comap D.canonicalMap w' ∈ W →
         ∀ i ∈ fam, w' ∈ basicOpen (F i) (G i) := by
   classical
-  -- the topologically nilpotent unit of the completion
-  obtain ⟨u, hu⟩ := presheafValue_topNilUnit D
   have hϖ_unit : IsUnit ((u : (presheafValue D)ˣ) : presheafValue D) := u.isUnit
   -- Step 1: spanning presentation inside the intersection
   obtain ⟨f, g, hspan, hw_mem, hsubset⟩ :=
@@ -347,6 +348,24 @@ theorem exists_A_level_open_presentation [IsTateRing A]
     have hfinal := hsubset hmem'
     simp only [Set.mem_iInter] at hfinal
     exact hfinal
+
+/-- **The A-level open presentation** (Wedhorn 8.2(2), steps 1–4 of the file
+docstring): every finite intersection of basic opens of `Spv (presheafValue D)`
+around a Spa-point contains, relatively to `Spa`, the `comap`-preimage of a
+finite intersection of basic opens of `Spv A`. -/
+theorem exists_A_level_open_presentation [IsTateRing A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)] (D : RationalLocData A)
+    {w : Spv (presheafValue D)}
+    (hw : w ∈ Spa (presheafValue D) (presheafValue D)⁺)
+    {ι : Type v} [DecidableEq ι] {fam : Finset ι} {F G : ι → presheafValue D}
+    (hmem : ∀ i ∈ fam, w ∈ basicOpen (F i) (G i)) :
+    ∃ W : Set (Spv A), IsOpen W ∧ comap D.canonicalMap w ∈ W ∧
+      ∀ w' : Spv (presheafValue D),
+        w' ∈ Spa (presheafValue D) (presheafValue D)⁺ →
+        comap D.canonicalMap w' ∈ W →
+        ∀ i ∈ fam, w' ∈ basicOpen (F i) (G i) := by
+  obtain ⟨u, hu⟩ := presheafValue_topNilUnit D
+  exact exists_A_level_open_presentation' D u hu hw hmem
 
 /-- **Openness of the Wedhorn 8.2 comparison map**: the forward map of
 `spaPresheafValueEquivRationalOpen` is an open map. -/

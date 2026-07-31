@@ -215,11 +215,8 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
           h_v_c_le_one c_star
         have h_pow_mono :
             v (P.A₀.subtype (↑c_star : P.A₀)) ^ count ≤
-            v (P.A₀.subtype (↑c_star : P.A₀)) ^ N_star := by
-          obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le h_count_ge_N
-          rw [hk, pow_add]
-          conv_rhs => rw [← mul_one (v (P.A₀.subtype (↑c_star : P.A₀)) ^ N_star)]
-          exact mul_le_mul_right (Left.pow_le_one_of_le h_v_c_le_one_star k) _
+            v (P.A₀.subtype (↑c_star : P.A₀)) ^ N_star :=
+          pow_le_pow_right_of_le_one' h_v_c_le_one_star h_count_ge_N
         calc v (P.A₀.subtype (↑c_star : P.A₀)) ^ count
             ≤ v (P.A₀.subtype (↑c_star : P.A₀)) ^ N_star := h_pow_mono
           _ < γ := hN_c (↑c_star : P.A₀) c_star.2
@@ -525,8 +522,7 @@ private theorem pow_gen_prod_lt {R Γ₀ : Type*} [CommRing R]
     refine ⟨(S.card + 1) * N_max, fun f => ?_⟩
     rw [map_prod]
     haveI : Nonempty ↥S := hS.coe_sort
-    have h_card_le : Fintype.card ↥S * N_max ≤
-        Fintype.card (Fin ((S.card + 1) * N_max)) := by
+    have h_card_le : Fintype.card ↥S * N_max ≤ Fintype.card (Fin ((S.card + 1) * N_max)) := by
       simp only [Fintype.card_fin, Fintype.card_coe]
       calc S.card * N_max ≤ S.card * N_max + N_max := Nat.le_add_right _ _
         _ = (S.card + 1) * N_max := by ring
@@ -534,38 +530,27 @@ private theorem pow_gen_prod_lt {R Γ₀ : Type*} [CommRing R]
       Fintype.exists_le_card_fiber_of_mul_le_card (f := f) (n := N_max) h_card_le
     rw [show (∏ i, v (↑(f i) : R)) =
         ∏ c : ↥S, ∏ _i ∈ Finset.univ.filter (fun i => f i = c), v (↑c : R) by
-      rw [Finset.prod_fiberwise' (s := Finset.univ) (g := f)
-        (f := fun c : ↥S => v (↑c : R))]]
-    have h_inner : ∀ c : ↥S,
-        (∏ _i ∈ Finset.univ.filter (fun i => f i = c), v (↑c : R)) =
-        v (↑c : R) ^ (Finset.univ.filter
-          (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card :=
+      rw [Finset.prod_fiberwise' (s := Finset.univ) (g := f) (f := fun c : ↥S => v (↑c : R))]]
+    have h_inner : ∀ c : ↥S, (∏ _i ∈ Finset.univ.filter (fun i => f i = c), v (↑c : R)) =
+        v (↑c : R) ^ (Finset.univ.filter (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card :=
       fun c => Finset.prod_const _
     rw [Finset.prod_congr rfl fun c _ => h_inner c,
       ← Finset.prod_erase_mul (Finset.univ : Finset ↥S) _ (Finset.mem_univ c_star)]
     have h_v_le_one : ∀ c : ↥S, v (↑c : R) ≤ 1 := fun c => h_le_one ↑c c.2
     have h_others : (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star, v (↑c : R) ^
-        (Finset.univ.filter
-          (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card) ≤ 1 :=
+        (Finset.univ.filter (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card) ≤ 1 :=
       Finset.prod_le_one' fun c _ => Left.pow_le_one_of_le (h_v_le_one c) _
     have h_star_lt : v (↑c_star : R) ^ (Finset.univ.filter
         (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card < γ := by
-      set count := (Finset.univ.filter
-        (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card
       have h_N_max_ge : N_c (↑c_star : R) c_star.2 + 1 ≤ N_max := by
         rw [hN_max_def]
         apply Nat.add_le_add_right
         exact Finset.le_sup (f := id) (Finset.mem_image.mpr
           ⟨⟨(↑c_star : R), c_star.2⟩, Finset.mem_attach _ _, rfl⟩)
-      have h_count_ge : N_c (↑c_star : R) c_star.2 ≤ count :=
-        le_trans (Nat.le_succ _) (le_trans h_N_max_ge hc_count)
-      calc v (↑c_star : R) ^ count
-          ≤ v (↑c_star : R) ^ N_c (↑c_star : R) c_star.2 := by
-            obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le h_count_ge
-            rw [hk, pow_add]
-            conv_rhs => rw [← mul_one (v (↑c_star : R) ^ N_c (↑c_star : R) c_star.2)]
-            exact mul_le_mul_right (Left.pow_le_one_of_le (h_v_le_one c_star) k) _
-        _ < γ := hN_c (↑c_star : R) c_star.2
+      exact lt_of_le_of_lt
+        (pow_le_pow_right_of_le_one' (h_v_le_one c_star)
+          (le_trans (Nat.le_succ _) (le_trans h_N_max_ge hc_count)))
+        (hN_c (↑c_star : R) c_star.2)
     calc (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star, v (↑c : R) ^
             (Finset.univ.filter
               (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card) *

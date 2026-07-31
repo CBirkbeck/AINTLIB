@@ -48,29 +48,6 @@ theorem span_image_canonicalMap_eq_top
   rw [← Ideal.map_span D₀.canonicalMap, hspan]
   exact Ideal.map_top _
 
-omit [PlusSubring A] [IsHuberRing A] in
-/-- **The A-side gen-set piece** `R(T/t)` (Wedhorn p. 83's `U_t := R(T/t)` cover form),
-with the `hopen`-condition supplied by `genPiece_hopen` (span + absorption).
-(`A⁺`-free: the datum and its openness use only the pair of definition.) -/
-noncomputable def genPieceDatum (P : PairOfDefinition A) (T : Finset A) (t : A)
-    (hspan : Ideal.span (T : Set A) = ⊤) : RationalLocData A :=
-  { P := P
-    T := T
-    s := t
-    hopen := genPiece_hopen P T t hspan }
-
-omit [PlusSubring A] [IsHuberRing A] in
-@[simp] theorem genPieceDatum_P (P : PairOfDefinition A) (T : Finset A) (t : A)
-    (hspan : Ideal.span (T : Set A) = ⊤) : (genPieceDatum P T t hspan).P = P := rfl
-
-omit [PlusSubring A] [IsHuberRing A] in
-@[simp] theorem genPieceDatum_T (P : PairOfDefinition A) (T : Finset A) (t : A)
-    (hspan : Ideal.span (T : Set A) = ⊤) : (genPieceDatum P T t hspan).T = T := rfl
-
-omit [PlusSubring A] [IsHuberRing A] in
-@[simp] theorem genPieceDatum_s (P : PairOfDefinition A) (T : Finset A) (t : A)
-    (hspan : Ideal.span (T : Set A) = ⊤) : (genPieceDatum P T t hspan).s = t := rfl
-
 /-- **The B-side image piece** `R(canMap T / canMap t)` over `B = presheafValue D₀`
 (Wedhorn Remark 8.4 / Prop 8.2(1) vocabulary: the rational subset of `Spa 𝒪_X(D₀)`
 corresponding to `D₀ ∩ R(T/t)`). The `hopen`-condition is `genPiece_hopen` at `B`

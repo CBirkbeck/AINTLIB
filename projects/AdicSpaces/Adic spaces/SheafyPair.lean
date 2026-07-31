@@ -453,6 +453,83 @@ theorem nhds_limitSections {V : Opens ↥(Spa A A⁺)} (x : ↥(limitSections V)
   simp only [Filter.comap_comap]
   rfl
 
+omit [IsTateRing A] in
+/-- **The inducing step of the arbitrary-cover embedding**, isolated from the two ingredients
+that differ between the absolute (`IsSheafy`) and the `S`-relative (`IsSheafyOn`) settings: a
+finite rational refinement `t` of `D` subordinate to the cover, and the embedding property of
+the finite covering that refinement generates. The extraction map from the cover product to
+the refinement product, its continuity, the compatibility factorisation and the `comap`
+calculation are common to both, so they live here and each setting supplies only its own two
+ingredients. Public because `RestrictedLimitSheaf` uses it. -/
+theorem comap_limitRestrictProd_le_comap_eval
+    {V : Opens ↥(Spa A A⁺)} {ι : Type*} {U : ι → Opens ↥(Spa A A⁺)}
+    (hle : ∀ i, U i ≤ V) (x : ↥(limitSections V)) (D : RationalIndex V)
+    {t : Finset (RefinementIndex D.D (fun i => (U i : Set ↥(Spa A A⁺))))}
+    (ht : spaOpen D.D ⊆ ⋃ q ∈ t,
+      spaOpen (q : RefinementIndex D.D (fun i => (U i : Set ↥(Spa A A⁺)))).1.1)
+    (hemb : Topology.IsEmbedding (productRestrictionSub A (refinementCovering D.D t ht))) :
+    Filter.comap (limitRestrictProd hle) (𝓝 (limitRestrictProd hle x))
+      ≤ Filter.comap (fun y : ↥(limitSections V) =>
+          (y : ∀ j : RationalIndex V, presheafValue j.D) D)
+          (𝓝 ((x : ∀ j : RationalIndex V, presheafValue j.D) D)) := by
+  classical
+  set C := refinementCovering D.D t ht
+  have hexE : ∀ E : ↥C.covers,
+      E.1.IsRational ∧ ∃ i : ι, spaOpen E.1 ⊆ (U i : Set ↥(Spa A A⁺)) := by
+    rintro ⟨E, hE⟩
+    obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp
+      (show E ∈ t.image (fun q => q.1.1) from hE)
+    exact ⟨q.2.1, q.1.2, q.2.2.trans Set.inter_subset_right⟩
+  -- the extraction map from the cover product to the refinement product
+  set Φ : (∀ i, ↥(limitSections (U i))) → (∀ E : ↥C.covers, presheafValue E.1) :=
+    fun y E => (y (hexE E).2.choose : ∀ j : RationalIndex (U (hexE E).2.choose),
+      presheafValue j.D) ⟨E.1, (hexE E).1, (hexE E).2.choose_spec⟩ with hΦdef
+  have hΦcont : Continuous Φ := by
+    refine continuous_pi fun E => ?_
+    exact ((continuous_apply _).comp continuous_subtype_val).comp
+      (continuous_apply (hexE E).2.choose)
+  -- the extraction of the restricted family is the finite product restriction of
+  -- the evaluation (compatibility of the section)
+  have hfactor : ∀ y : ↥(limitSections V),
+      Φ (limitRestrictProd hle y) = productRestrictionSub A C
+        ((y : ∀ j : RationalIndex V, presheafValue j.D) D) := by
+    intro y
+    funext E
+    have hED : rationalOpen E.1.T E.1.s ⊆ rationalOpen D.D.T D.D.s :=
+      C.hsubset E.1 E.2
+    have hEV : spaOpen E.1 ⊆ (V : Set ↥(Spa A A⁺)) :=
+      (hexE E).2.choose_spec.trans (hle (hexE E).2.choose)
+    show (y : ∀ j : RationalIndex V, presheafValue j.D) ⟨E.1, (hexE E).1, hEV⟩ =
+      restrictionMap D.D E.1 hED ((y : ∀ j : RationalIndex V, presheafValue j.D) D)
+    exact (y.2 D ⟨E.1, (hexE E).1, hEV⟩ hED).symm
+  -- the finite `IsSheafy` embedding recovers the evaluation
+  have hnhds := hemb.isInducing.nhds_eq_comap
+    ((x : ∀ j : RationalIndex V, presheafValue j.D) D)
+  calc Filter.comap (limitRestrictProd hle) (𝓝 (limitRestrictProd hle x))
+      ≤ Filter.comap (limitRestrictProd hle)
+          (Filter.comap Φ (𝓝 (Φ (limitRestrictProd hle x)))) :=
+        Filter.comap_mono ((hΦcont.tendsto _).le_comap)
+    _ = Filter.comap (fun y : ↥(limitSections V) =>
+          productRestrictionSub A C
+            ((y : ∀ j : RationalIndex V, presheafValue j.D) D))
+          (𝓝 (productRestrictionSub A C
+            ((x : ∀ j : RationalIndex V, presheafValue j.D) D))) := by
+        rw [Filter.comap_comap]
+        congr 1
+        · exact funext hfactor
+        · rw [hfactor x]
+    _ = Filter.comap (fun y : ↥(limitSections V) =>
+          (y : ∀ j : RationalIndex V, presheafValue j.D) D)
+          (Filter.comap (productRestrictionSub A C)
+            (𝓝 (productRestrictionSub A C
+              ((x : ∀ j : RationalIndex V, presheafValue j.D) D)))) := by
+        rw [Filter.comap_comap]
+        rfl
+    _ = Filter.comap (fun y : ↥(limitSections V) =>
+          (y : ∀ j : RationalIndex V, presheafValue j.D) D)
+          (𝓝 ((x : ∀ j : RationalIndex V, presheafValue j.D) D)) := by
+        rw [← hnhds]
+
 /-- **The arbitrary-cover topological embedding** (Wedhorn Remark 8.20's second
 condition, for the genuine all-open presheaf): for every open cover of `V`, the
 restriction `𝒪_X(V) → ∏ᵢ 𝒪_X(Uᵢ)` is a topological embedding. Inducing: each rational
@@ -473,63 +550,9 @@ theorem isEmbedding_limitRestrictProd [IsSheafy A]
     refine le_iInf fun D => ?_
     obtain ⟨t, ht⟩ := exists_finite_rational_refinement D.D D.isRational
       (fun i => (U i : Set ↥(Spa A A⁺))) (fun i => (U i).2) (D.subset.trans hcov)
-    set C := refinementCovering D.D t ht with hCdef
-    have hCrat : C.IsRational := refinementCovering_isRational D.D D.isRational t ht
-    have hexE : ∀ E : ↥C.covers,
-        E.1.IsRational ∧ ∃ i : ι, spaOpen E.1 ⊆ (U i : Set ↥(Spa A A⁺)) := by
-      rintro ⟨E, hE⟩
-      obtain ⟨q, hqt, rfl⟩ := Finset.mem_image.mp
-        (show E ∈ t.image (fun q => q.1.1) from hE)
-      exact ⟨q.2.1, q.1.2, q.2.2.trans Set.inter_subset_right⟩
-    -- the extraction map from the cover product to the refinement product
-    set Φ : (∀ i, ↥(limitSections (U i))) → (∀ E : ↥C.covers, presheafValue E.1) :=
-      fun y E => (y (hexE E).2.choose : ∀ j : RationalIndex (U (hexE E).2.choose),
-        presheafValue j.D) ⟨E.1, (hexE E).1, (hexE E).2.choose_spec⟩ with hΦdef
-    have hΦcont : Continuous Φ := by
-      refine continuous_pi fun E => ?_
-      exact ((continuous_apply _).comp continuous_subtype_val).comp
-        (continuous_apply (hexE E).2.choose)
-    -- the extraction of the restricted family is the finite product restriction of
-    -- the evaluation (compatibility of the section)
-    have hfactor : ∀ y : ↥(limitSections V),
-        Φ (limitRestrictProd hle y) = productRestrictionSub A C
-          ((y : ∀ j : RationalIndex V, presheafValue j.D) D) := by
-      intro y
-      funext E
-      have hED : rationalOpen E.1.T E.1.s ⊆ rationalOpen D.D.T D.D.s :=
-        C.hsubset E.1 E.2
-      have hEV : spaOpen E.1 ⊆ (V : Set ↥(Spa A A⁺)) :=
-        (hexE E).2.choose_spec.trans (hle (hexE E).2.choose)
-      show (y : ∀ j : RationalIndex V, presheafValue j.D) ⟨E.1, (hexE E).1, hEV⟩ =
-        restrictionMap D.D E.1 hED ((y : ∀ j : RationalIndex V, presheafValue j.D) D)
-      exact (y.2 D ⟨E.1, (hexE E).1, hEV⟩ hED).symm
-    -- the finite `IsSheafy` embedding recovers the evaluation
-    have hemb := (IsSheafy.embedding (A := A) C hCrat).isInducing.nhds_eq_comap
-      ((x : ∀ j : RationalIndex V, presheafValue j.D) D)
-    calc Filter.comap (limitRestrictProd hle) (𝓝 (limitRestrictProd hle x))
-        ≤ Filter.comap (limitRestrictProd hle)
-            (Filter.comap Φ (𝓝 (Φ (limitRestrictProd hle x)))) :=
-          Filter.comap_mono ((hΦcont.tendsto _).le_comap)
-      _ = Filter.comap (fun y : ↥(limitSections V) =>
-            productRestrictionSub A C
-              ((y : ∀ j : RationalIndex V, presheafValue j.D) D))
-            (𝓝 (productRestrictionSub A C
-              ((x : ∀ j : RationalIndex V, presheafValue j.D) D))) := by
-          rw [Filter.comap_comap]
-          congr 1
-          · exact funext hfactor
-          · rw [hfactor x]
-      _ = Filter.comap (fun y : ↥(limitSections V) =>
-            (y : ∀ j : RationalIndex V, presheafValue j.D) D)
-            (Filter.comap (productRestrictionSub A C)
-              (𝓝 (productRestrictionSub A C
-                ((x : ∀ j : RationalIndex V, presheafValue j.D) D)))) := by
-          rw [Filter.comap_comap]
-          rfl
-      _ = Filter.comap (fun y : ↥(limitSections V) =>
-            (y : ∀ j : RationalIndex V, presheafValue j.D) D)
-            (𝓝 ((x : ∀ j : RationalIndex V, presheafValue j.D) D)) := by
-          rw [← hemb]
+    exact comap_limitRestrictProd_le_comap_eval hle x D ht
+      (IsSheafy.embedding (A := A) _
+        (refinementCovering_isRational D.D D.isRational t ht))
   · -- injectivity = separation
     intro x y hxy
     exact limitRestrict_injective hle hcov fun i => congr_fun hxy i
