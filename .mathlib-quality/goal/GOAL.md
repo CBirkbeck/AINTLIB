@@ -5191,3 +5191,130 @@ These are now the top targets, and they carry the largest deficits in the tree �
 two `unitCover_sq_*_dense` proofs previously costed-and-deferred as unsplittable mirror twins.
 Their *mirror* structure is still intractable, but that is a separate question from whether each
 one individually has a liftable dominant block, and the corrected profiler says both do.
+
+## Metric correction: extraction is count-neutral when the block is itself over 50
+
+Lifted the Huber [Hu2] 3.3(i) construction out of `mem_plus_of_forall_spa_vle_one` (192 lines
+→ 2) and its Tate-free twin `..._huber` (176 → 2). Both theorems cleared. **The over-50 count
+did not move**: 183 before, 183 after.
+
+The reason is obvious in hindsight and was missing from my ranking: the extracted blocks are
+153 and 142 code lines, so each *becomes* a new over-50 proof. Relocating a body does not
+shrink it.
+
+My `gap = need − (joins + biggest-have − 1)` column measured only whether extraction clears the
+**parent**. It silently assumed the helper lands under the bar. The honest metric is:
+
+    net = −1 (parent cleared) + (1 if have_size − 1 > 50 else 0)
+
+which is **0** for every one of the six "best" targets in the corrected ranking — they were
+ranked top precisely *because* their dominant blocks are huge (144–205 lines), and that is
+exactly what makes them count-neutral. The ranking was optimising the wrong quantity.
+
+→ **For task 2 the useful shape is a dominant `have` big enough to clear its parent but ≤ 51
+  lines itself.** A 190-line block needs genuine decomposition into several pieces, not
+  relocation — which is what `/decompose-proof` means and what the earlier wins
+  (`isClosed_ideal_of_noetherian` 26→2, `ChartVObj` 45→1, `hC_mul` 20→5) actually did: in each
+  the lifted block landed comfortably under the bar.
+
+The two extractions are still worth keeping, on their own merits rather than as count progress:
+a 190-line anonymous `obtain` block now has a name and a docstring (`exists_spa_point_not_vle_one`,
+Huber [Hu2] 3.3(i)), each file's over-length lines roughly halved (46→14 and 41→13) purely from
+the dedent, and the two constructions are now independently attackable — which is the necessary
+first step before either can be decomposed further.
+
+### Corrected ranking: 118 net-negative targets
+
+Re-ranked under `net = −1 + (1 if have_size − 1 > 50 else 0)`, i.e. only counting extractions
+whose lifted block lands **under the bar itself**. Greedy: take the largest non-overlapping
+blocks of 4–51 lines until `joins + Σ(size − 1) ≥ need`.
+
+**118 of the 181 in-scope proofs qualify.** That is the real work queue, and it is much larger
+than the old ranking suggested — the old one surfaced only the handful with giant blocks, which
+are exactly the ones that do not help.
+
+Top of the queue (`#blk` = blocks needed, `deps` = max derived locals of any block taken):
+
+| #blk | deps | need | joins | sizes | proof |
+|---|---|---|---|---|---|
+| 1 | **0** | 11 | 1 | [25] | `EmbeddingTopo.productRestrictionSub_isInducing` |
+| 1 | **0** | 19 | 7 | [25] | `Presentation.exists_evalAr_lift_aloc` |
+| 1 | **0** | 24 | 8 | [24] | `LaurentRefinementCore.iteratedMinus_forwardToCompletion…` |
+| 1 | **0** | 40 | 7 | [35] | `RelativePieceKeystone.relativePiece_equiv_restrict_square` |
+| 1 | 1 | 5 | 3 | [5] | `HuberRings.adjoin` |
+| 1 | 1 | 17 | 11 | [22] | `Groebner.ideal_eq_span_groebner` |
+| 1 | 1 | 20 | 15 | [9] | `RelativeDescentHuber.imgFamily_agreement` |
+| 1 | 1 | 27 | 2 | [38] | `Groebner.exists_rps_series_limit` |
+
+A single block, zero derived dependencies, and the block already under 51 lines is the ideal
+case: a verbatim lift that clears the parent and adds nothing back.
+
+→ **The ranking metric is now the deliverable, more than any individual extraction.** Two
+  successive versions of it pointed at the wrong targets — first because Greek-named locals were
+  invisible, then because it scored parent-clearing without checking whether the helper lands
+  under the bar. Both failure modes flattered the estimate.
+
+### Third instance of the same bug: `deps` in the 118-target ranking is also undercounted
+
+The `deps` column of the net-negative ranking counted binders with
+`BIND = (have|obtain|set|let)\s+([^\s:={(\[]+)` only. That matches `obtain h := …` but **not**
+`obtain ⟨a, b, c⟩ := …`, whose names live inside the anonymous constructor. Caught immediately on
+the top-ranked target: `EmbeddingTopo.…_isInducing_via_tree_no_disj`'s 25-line `hsf_eq` block was
+reported as `deps: 0`, but it uses `h_split_f`, bound by
+`obtain ⟨h_split_f, h_split_L, h_split_R⟩ :=` fourteen lines above.
+
+An earlier version of this profiler *did* have the `⟨…⟩` loop; the rewrite for the net-negative
+ranking dropped it.
+
+That is three separate defects in the same estimator, all in the same direction:
+
+1. Greek-named locals invisible → fewer deps reported;
+2. parent-clearing scored without checking the helper lands under the bar → extraction looks
+   net-negative when it is net-zero;
+3. `obtain ⟨…⟩` names invisible → fewer deps reported.
+
+Every one flattered the estimate, and each was caught only by reading the actual proof the
+ranking pointed at rather than trusting the number.
+
+→ **Treat this estimator's output as a candidate list, never as a cost.** Open the proof and
+  read the block before committing to an extraction; the numbers are for ordering the queue, not
+  for deciding the work. The three defects cost roughly one wasted batch between them — the
+  Huber 3.3(i) pair, which cleared two parents and created two new over-50 helpers for no net
+  movement.
+
+The `#blk` and `sizes` columns are unaffected (they come from line counting, not identifier
+matching), so the 118-target list is still the right queue — only its `deps` column needs
+re-deriving before each extraction.
+
+## Task 3: tree-wide style audit (262 files, Vendored excluded)
+
+| item | count | verdict |
+|---|---|---|
+| `letI` | 3232 | **not mechanical** — most are load-bearing in binder position (`[letI : UniformSpace A := …; CompleteSpace A]`); a blanket rewrite breaks the build |
+| `haveI` | 1272 | same caveat; needs per-site judgement |
+| `show … from by` | 201 | safe mechanical `→ show … by`; not yet applied |
+| `λ` | 22 | **all 22 are prose** — nothing to do |
+| lines > 100 chars | 541 across 39 files | concentrated: WedhornCechAcyclicity 107, RelativePieceKeystone 96, Groebner 71 |
+| `$` (vs `<|`) | 0 | clean |
+| `push_neg` | 0 | already migrated to `push Not` |
+
+### The `λ` count is a trap, and the answer is zero
+
+All 22 occurrences are **mathematical notation in prose**: Kedlaya's Gauss norms `λ_r` / `λ_t`
+/ `λ_I` (`ArCompletion`, `Euclidean`, `GaussNorm`, `IntervalRing`, `RobbaLoc`, `WittF`), the
+cocycle map `λ : S → S ⊗_R S` (`StructureSheaf`), the difference map `λ` of the Laurent
+exactness argument (`LaurentCoverExact`), and Wedhorn's `λ` (`Wedhorn828`,
+`WedhornCechAcyclicity`).
+
+There are **no** `λ`-as-lambda occurrences. The mathlib style rule "`λ` → `fun`" therefore has
+nothing to act on here, and a `replace_all` would have silently corrupted a dozen docstrings and
+several theorem statements' prose.
+
+→ **Never run the `λ` → `fun` replacement blind in a mathematics library.** Classify each hit by
+  block-comment depth first. (This is the second project where this exact trap appeared; the
+  first was Chebotarev, where `λ` was the Carmichael function.)
+
+`letI`/`haveI` deserve the same caution for a different reason: the `/cleanup` rule treats them
+as always-a-defect, but that rule assumes tactic position. In this library thousands sit inside
+*instance binders*, where `letI` is the only way to write the dependent `UniformSpace`/
+`CompleteSpace` pair, and removing it is not a style fix but a type error.

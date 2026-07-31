@@ -333,6 +333,193 @@ nonvanishing unit `π`). Both are replaced: `presheafValue_isHuberRing_huber` an
 the characteristic restriction `restrictIdeal · ⊥` (Huber's own `v = u|cΓ_u`). -/
 
 set_option linter.unusedSectionVars false in
+/-- **Huber [Hu2] 3.3(i)**: an element of `presheafValue D'` outside the ring of integral
+elements admits a Spa point valuing it above `1`.
+
+The Tate-free form. This is the whole content of `mem_plus_of_forall_spa_vle_one_huber`, which is that statement's
+contrapositive plus one line. Extracted so the construction has a name of its own. -/
+private theorem exists_spa_point_not_vle_one_huber
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    (D' : RationalLocData A) (x : presheafValue D') (hxnot : x ∉ (presheafValue D')⁺) :
+    ∃ w : Spv (presheafValue D'),
+      w ∈ Spa (presheafValue D') (presheafValue D')⁺ ∧ ¬ w.vle x 1 := by
+  -- HU-a (huber2.txt:635-637): `x ∉ B⁺` ⟹ `x` is NOT integral over `B⁺` (contrapositive of
+  -- `B⁺` integrally closed). This is what makes `x⁻¹` a non-unit of `B⁺[x⁻¹]`, opening Huber's
+  -- localization argument. (v4.33: the subtype algebra is no longer instance-automatic —
+  -- registered before first use.)
+  letI : Algebra ↥(presheafValue D')⁺ (presheafValue D') := (presheafValue D')⁺.subtype.toAlgebra
+  have hx_not_integral : ¬ IsIntegral ((presheafValue D')⁺) x := fun hint =>
+    hxnot (IsRingOfIntegralElements.isIntegrallyClosed (B := (presheafValue D')⁺) x hint)
+  -- HU-b: `x⁻¹` is a non-unit of `B⁺[x⁻¹] := adjoin B⁺ {x⁻¹} ⊆ B_x := Localization.Away x`.
+  have hnonunit := not_isUnit_invSelf_of_not_isIntegral (Bx := Localization.Away x) x hx_not_integral
+  -- HU-b': a maximal ideal `𝔪` of `B⁺[x⁻¹]` containing `x⁻¹` (proper since `x⁻¹` is a non-unit).
+  obtain ⟨𝔪, h𝔪max, h𝔪ge⟩ := Ideal.exists_le_maximal _ (Ideal.span_singleton_ne_top hnonunit)
+  have hxinv𝔪 : (⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ :
+      Algebra.adjoin ↥(presheafValue D')⁺ {(IsLocalization.Away.invSelf x : Localization.Away x)})
+      ∈ 𝔪 := h𝔪ge (Ideal.mem_span_singleton_self _)
+  -- HU-c (huber2.txt:644-646): a minimal prime `q ⊆ 𝔪`; the dominating valuation `s` of
+  -- `R := B⁺[x⁻¹]` with `supp s = q`, `s ≤ 1` on `R` (so on `B⁺` and at `x⁻¹`), `s < 1` on `𝔪`
+  -- (so `s(x⁻¹) < 1`, since `x⁻¹ ∈ 𝔪`).
+  haveI : 𝔪.IsPrime := h𝔪max.isPrime
+  obtain ⟨q, hq_min, hq_le⟩ := Ideal.exists_minimalPrimes_le (J := 𝔪) bot_le
+  obtain ⟨Γs, _, s, hs_supp, hs_le, hs_lt⟩ :=
+    exists_dominating_valuation_of_minimalPrime_le hq_min hq_le
+  -- HU-d (huber2.txt:646-648): a prime `q'` of `B_x` lying over `q = supp s` (Stacks 00FK, minimal
+  -- prime under the injective inclusion `R := B⁺[x⁻¹] ↪ B_x`); extend `s` to a valuation `t` of
+  -- `B_x` (`exists_valuation_extension_of_prime_over`); set `v := comap (B → B_x) (ofValuation t)`.
+  set Radj := Algebra.adjoin ↑(presheafValue D')⁺ {(IsLocalization.Away.invSelf x : Localization.Away x)}
+    with hRadj
+  letI : Algebra ↑Radj (Localization.Away x) := Radj.val.toRingHom.toAlgebra
+  have hinj : Function.Injective (algebraMap ↑Radj (Localization.Away x)) := Subtype.val_injective
+  obtain ⟨q', hq'prime, hq'eq⟩ :=
+    Ideal.exists_comap_eq_of_mem_minimalPrimes_of_injective hinj q hq_min
+  haveI := hq'prime
+  obtain ⟨Γt, _, t, ht_equiv⟩ := exists_valuation_extension_of_prime_over s q'
+    (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸ q'))
+  -- ▸ Pre-extracted facts about the comap valuation `W a := t(algebraMap a)` (Huber's properties
+  --   (b)(c)(d)), for the restricted-witness continuity wiring (T-SPVAI-4).
+  have hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
+      t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1 := by
+    intro f hf
+    have hg_mem : algebraMap (presheafValue D') (Localization.Away x) f ∈ Radj := by
+      rw [hRadj]
+      exact (Algebra.adjoin (↥(presheafValue D')⁺)
+        {(IsLocalization.Away.invSelf x : Localization.Away x)}).algebraMap_mem ⟨f, hf⟩
+    have hkey := (ht_equiv
+      (⟨algebraMap (presheafValue D') (Localization.Away x) f, hg_mem⟩ : ↥Radj) 1).mp
+      (by rw [map_one]; exact hs_le _)
+    rw [Valuation.comap_apply, Valuation.comap_apply, map_one, map_one] at hkey
+    exact hkey
+  have ht_inv : t (IsLocalization.Away.invSelf x) < 1 := by
+    rw [← not_le]
+    intro hge
+    have h2 : s (1 : ↑Radj) ≤
+        s ⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ := by
+      refine (ht_equiv 1 _).mpr ?_
+      simp only [Valuation.comap_apply, map_one]
+      exact hge
+    rw [map_one] at h2
+    exact absurd h2 (not_le.mpr (hs_lt _ hxinv𝔪))
+  -- Huber's continuity argument (c): `v < 1` on topologically nilpotent elements.
+  have hW_lt_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
+      t (algebraMap (presheafValue D') (Localization.Away x) a) < 1 := by
+    intro a ha
+    obtain ⟨n, hn, hn1⟩ : ∃ n : ℕ, a ^ n * x ∈ (presheafValue D')⁺ ∧ 1 ≤ n := by
+      have htend : Filter.Tendsto (fun n : ℕ => a ^ n * x) Filter.atTop (nhds 0) := by
+        simpa using ha.mul_const x
+      have hopen : IsOpen ((presheafValue D')⁺ : Set (presheafValue D')) :=
+        IsRingOfIntegralElements.isOpen
+      have hev := (htend.eventually (hopen.mem_nhds (Subring.zero_mem _))).and
+        (Filter.eventually_ge_atTop 1)
+      exact hev.exists
+    have halg : algebraMap (presheafValue D') (Localization.Away x) (a ^ n) =
+        algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x) *
+          IsLocalization.Away.invSelf x := by
+      rw [map_mul, mul_assoc, IsLocalization.Away.mul_invSelf, mul_one]
+    have ht2 : t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n)) < 1 := by
+      rw [halg, map_mul]
+      calc t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x)) *
+            t (IsLocalization.Away.invSelf x)
+          ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr; exact hW_le _ hn
+        _ = t (IsLocalization.Away.invSelf x) := one_mul _
+        _ < 1 := ht_inv
+    rw [map_pow, map_pow] at ht2
+    by_contra hge
+    rw [not_lt] at hge
+    exact absurd ht2 (not_lt.mpr (one_le_pow₀ hge))
+  have hW_x : 1 < t (algebraMap (presheafValue D') (Localization.Away x) x) := by
+    by_contra hle
+    rw [not_lt] at hle
+    have hprod : t (algebraMap (presheafValue D') (Localization.Away x) x) *
+        t (IsLocalization.Away.invSelf x) = 1 := by
+      rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+    have hlt : t (algebraMap (presheafValue D') (Localization.Away x) x) *
+        t (IsLocalization.Away.invSelf x) < 1 := by
+      calc t (algebraMap (presheafValue D') (Localization.Away x) x) *
+            t (IsLocalization.Away.invSelf x)
+          ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr
+        _ = t (IsLocalization.Away.invSelf x) := one_mul _
+        _ < 1 := ht_inv
+    rw [hprod] at hlt; exact lt_irrefl 1 hlt
+  -- ▸ General-Huber witness (Huber [Hu2] 3.3(i): `v = u|cΓ_u`): restrict
+  --   `W := t.comap algB` by its characteristic subgroup, encoded as
+  --   `restrictIdealSingle W 1` (`(W 1)⁻¹ = 1 ∈ cΓ_W`). No topologically nilpotent
+  --   unit is involved — this is the non-Tate replacement for the principal-pair
+  --   `restrictIdealSingle g` witness.
+  set algB := algebraMap (presheafValue D') (Localization.Away x) with halgB_def
+  have hW1 : (t.comap algB) 1 ≠ 0 := by
+    rw [Valuation.comap_apply, map_one, map_one]
+    exact one_ne_zero
+  set rs := (t.comap algB).restrictIdealSingle 1 hW1 with hrs_def
+  -- Bridge: `(ofValuation rs).vle a b ↔ rs a ≤ rs b`.
+  have hbr : ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation rs).vle a b ↔ rs a ≤ rs b := by
+    intro a b
+    letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
+    haveI : rs.Compatible := Valuation.Compatible.ofValuation rs
+    exact Valuation.Compatible.vle_iff_le (v := rs) a b
+  -- `W a = t(algB a)` definitionally, so the `hW_*` facts are facts about `W = t.comap algB`.
+  refine ⟨ValuationSpectrum.ofValuation rs, ?_, ?_⟩
+  · -- HU-e(1): `w' ∈ Spa(B, B⁺)` = `w'.IsContinuous ∧ ∀ f ∈ B⁺, w'.vle f 1` (`mem_spa_iff`).
+    rw [mem_spa_iff]
+    refine ⟨?_, ?_⟩
+    · -- **Continuity of `w' = ofValuation rs`** (Huber [Hu2] Thm 3.1 reverse, general
+      -- f-adic form): the A°°-engine `Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO` at
+      -- the concrete pair `presheafValue_concretePair D'` (Tate-free since T901), with
+      --   • `h_in` (Huber (d)): the characteristic restriction is microbial, hence in
+      --     `Spv(A, I)` for every `I` (`ofValuation_restrictIdealSingle_one_isInSpvAI`);
+      --   • `h_le_AOO` (Huber (c), `≤`-form): `hW_lt_AOO` + `restrictIdealSingle_le_one`;
+      --   • `h_lt_one` (ideal-of-definition decay): ideal elements are topologically
+      --     nilpotent, so `hW_lt_AOO` + `restrictIdealSingle_lt_one`.
+      have h_in : Spv.IsInSpvAI (ValuationSpectrum.ofValuation rs)
+          (Ideal.map (presheafValue_concretePair D').A₀.subtype
+            (presheafValue_concretePair D').I) :=
+        ofValuation_restrictIdealSingle_one_isInSpvAI (t.comap algB) hW1 _
+      letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
+      haveI hrsC : rs.Compatible := Valuation.Compatible.ofValuation rs
+      have hequiv : (ValuativeRel.valuation (presheafValue D')).IsEquiv rs := fun a b =>
+        (Valuation.Compatible.vle_iff_le
+            (v := ValuativeRel.valuation (presheafValue D')) a b).symm.trans
+          (Valuation.Compatible.vle_iff_le (v := rs) a b)
+      have hlt : ∀ p q : presheafValue D',
+          ((ValuativeRel.valuation (presheafValue D')) p <
+              (ValuativeRel.valuation (presheafValue D')) q
+            ↔ rs p < rs q) := fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
+      have h_le_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
+          (ValuativeRel.valuation (presheafValue D')) a ≤ 1 := by
+        intro a ha
+        have hrs_le : rs a ≤ 1 :=
+          restrictIdealSingle_le_one hW1 (le_of_lt (hW_lt_AOO a ha))
+        have hkey := (hequiv a 1).mpr (by rw [map_one]; exact hrs_le)
+        rwa [map_one] at hkey
+      have h_lt_one : ∀ a ∈ (presheafValue_concretePair D').I,
+          (ValuativeRel.valuation (presheafValue D'))
+            ((presheafValue_concretePair D').A₀.subtype a) < 1 := by
+        intro a ha
+        have hnilp : IsTopologicallyNilpotent
+            ((presheafValue_concretePair D').A₀.subtype a) :=
+          (presheafValue_concretePair D').isTopologicallyNilpotent_of_mem ha
+        have hrs_lt : rs ((presheafValue_concretePair D').A₀.subtype a) < 1 :=
+          restrictIdealSingle_lt_one hW1 (hW_lt_AOO _ hnilp)
+        have hkey := (hlt ((presheafValue_concretePair D').A₀.subtype a) 1).mpr
+          (by rw [map_one]; exact hrs_lt)
+        rwa [map_one] at hkey
+      exact Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO (presheafValue_concretePair D')
+        (ValuationSpectrum.ofValuation rs) h_in h_le_AOO h_lt_one
+    · -- `w' ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺` ⟹ `W f = t(algB f) ≤ 1` (`hW_le`),
+      -- lifted to `rs` by `restrictIdealSingle_le_one`, then to `w'.vle` by `hbr`.
+      intro f hf
+      rw [hbr, map_one]
+      exact restrictIdealSingle_le_one hW1 (hW_le f hf)
+  · -- HU-e(2): `¬ w'.vle x 1`, i.e. `w'(x) > 1`: `1 < W x = t(algB x)` (`hW_x`, the Huber
+    -- witness `s(x⁻¹) < 1` + `x⁻¹·x = 1`), lifted to `rs` by `restrictIdealSingle_one_lt`,
+    -- then to `w'.vle` by `hbr`.
+    intro hvle
+    rw [hbr, map_one] at hvle
+    exact absurd hvle (not_le.mpr (restrictIdealSingle_one_lt hW1 hW_x))
+
+set_option linter.unusedSectionVars false in
 /-- **Huber [Hu2] Lemma 3.3(i), substantive direction — general complete Huber base**
 (huber2.txt:633-658; hypothesis-free in the source: NO Tate, NO noetherian, NO domain).
 If `x ∈ presheafValue D'` has `w(x) ≤ 1` at every Spa point `w`, then `x ∈ B⁺`.
@@ -348,182 +535,7 @@ theorem mem_plus_of_forall_spa_vle_one_huber
       w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
     x ∈ (presheafValue D')⁺ := by
   by_contra hxnot
-  obtain ⟨w, hw_spa, hw⟩ :
-      ∃ w : Spv (presheafValue D'),
-        w ∈ Spa (presheafValue D') (presheafValue D')⁺ ∧ ¬ w.vle x 1 := by
-    -- HU-a (huber2.txt:635-637): `x ∉ B⁺` ⟹ `x` is NOT integral over `B⁺` (contrapositive of
-    -- `B⁺` integrally closed). This is what makes `x⁻¹` a non-unit of `B⁺[x⁻¹]`, opening Huber's
-    -- localization argument. (v4.33: the subtype algebra is no longer instance-automatic —
-    -- registered before first use.)
-    letI : Algebra ↥(presheafValue D')⁺ (presheafValue D') := (presheafValue D')⁺.subtype.toAlgebra
-    have hx_not_integral : ¬ IsIntegral ((presheafValue D')⁺) x := fun hint =>
-      hxnot (IsRingOfIntegralElements.isIntegrallyClosed (B := (presheafValue D')⁺) x hint)
-    -- HU-b: `x⁻¹` is a non-unit of `B⁺[x⁻¹] := adjoin B⁺ {x⁻¹} ⊆ B_x := Localization.Away x`.
-    have hnonunit := not_isUnit_invSelf_of_not_isIntegral (Bx := Localization.Away x) x hx_not_integral
-    -- HU-b': a maximal ideal `𝔪` of `B⁺[x⁻¹]` containing `x⁻¹` (proper since `x⁻¹` is a non-unit).
-    obtain ⟨𝔪, h𝔪max, h𝔪ge⟩ := Ideal.exists_le_maximal _ (Ideal.span_singleton_ne_top hnonunit)
-    have hxinv𝔪 : (⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ :
-        Algebra.adjoin ↥(presheafValue D')⁺ {(IsLocalization.Away.invSelf x : Localization.Away x)})
-        ∈ 𝔪 := h𝔪ge (Ideal.mem_span_singleton_self _)
-    -- HU-c (huber2.txt:644-646): a minimal prime `q ⊆ 𝔪`; the dominating valuation `s` of
-    -- `R := B⁺[x⁻¹]` with `supp s = q`, `s ≤ 1` on `R` (so on `B⁺` and at `x⁻¹`), `s < 1` on `𝔪`
-    -- (so `s(x⁻¹) < 1`, since `x⁻¹ ∈ 𝔪`).
-    haveI : 𝔪.IsPrime := h𝔪max.isPrime
-    obtain ⟨q, hq_min, hq_le⟩ := Ideal.exists_minimalPrimes_le (J := 𝔪) bot_le
-    obtain ⟨Γs, _, s, hs_supp, hs_le, hs_lt⟩ :=
-      exists_dominating_valuation_of_minimalPrime_le hq_min hq_le
-    -- HU-d (huber2.txt:646-648): a prime `q'` of `B_x` lying over `q = supp s` (Stacks 00FK, minimal
-    -- prime under the injective inclusion `R := B⁺[x⁻¹] ↪ B_x`); extend `s` to a valuation `t` of
-    -- `B_x` (`exists_valuation_extension_of_prime_over`); set `v := comap (B → B_x) (ofValuation t)`.
-    set Radj := Algebra.adjoin ↑(presheafValue D')⁺ {(IsLocalization.Away.invSelf x : Localization.Away x)}
-      with hRadj
-    letI : Algebra ↑Radj (Localization.Away x) := Radj.val.toRingHom.toAlgebra
-    have hinj : Function.Injective (algebraMap ↑Radj (Localization.Away x)) := Subtype.val_injective
-    obtain ⟨q', hq'prime, hq'eq⟩ :=
-      Ideal.exists_comap_eq_of_mem_minimalPrimes_of_injective hinj q hq_min
-    haveI := hq'prime
-    obtain ⟨Γt, _, t, ht_equiv⟩ := exists_valuation_extension_of_prime_over s q'
-      (hq'eq.trans hs_supp.symm) (FractionRing (↑Radj ⧸ s.supp)) (FractionRing (Localization.Away x ⧸ q'))
-    -- ▸ Pre-extracted facts about the comap valuation `W a := t(algebraMap a)` (Huber's properties
-    --   (b)(c)(d)), for the restricted-witness continuity wiring (T-SPVAI-4).
-    have hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
-        t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1 := by
-      intro f hf
-      have hg_mem : algebraMap (presheafValue D') (Localization.Away x) f ∈ Radj := by
-        rw [hRadj]
-        exact (Algebra.adjoin (↥(presheafValue D')⁺)
-          {(IsLocalization.Away.invSelf x : Localization.Away x)}).algebraMap_mem ⟨f, hf⟩
-      have hkey := (ht_equiv
-        (⟨algebraMap (presheafValue D') (Localization.Away x) f, hg_mem⟩ : ↥Radj) 1).mp
-        (by rw [map_one]; exact hs_le _)
-      rw [Valuation.comap_apply, Valuation.comap_apply, map_one, map_one] at hkey
-      exact hkey
-    have ht_inv : t (IsLocalization.Away.invSelf x) < 1 := by
-      rw [← not_le]
-      intro hge
-      have h2 : s (1 : ↑Radj) ≤
-          s ⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ := by
-        refine (ht_equiv 1 _).mpr ?_
-        simp only [Valuation.comap_apply, map_one]
-        exact hge
-      rw [map_one] at h2
-      exact absurd h2 (not_le.mpr (hs_lt _ hxinv𝔪))
-    -- Huber's continuity argument (c): `v < 1` on topologically nilpotent elements.
-    have hW_lt_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
-        t (algebraMap (presheafValue D') (Localization.Away x) a) < 1 := by
-      intro a ha
-      obtain ⟨n, hn, hn1⟩ : ∃ n : ℕ, a ^ n * x ∈ (presheafValue D')⁺ ∧ 1 ≤ n := by
-        have htend : Filter.Tendsto (fun n : ℕ => a ^ n * x) Filter.atTop (nhds 0) := by
-          simpa using ha.mul_const x
-        have hopen : IsOpen ((presheafValue D')⁺ : Set (presheafValue D')) :=
-          IsRingOfIntegralElements.isOpen
-        have hev := (htend.eventually (hopen.mem_nhds (Subring.zero_mem _))).and
-          (Filter.eventually_ge_atTop 1)
-        exact hev.exists
-      have halg : algebraMap (presheafValue D') (Localization.Away x) (a ^ n) =
-          algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x) *
-            IsLocalization.Away.invSelf x := by
-        rw [map_mul, mul_assoc, IsLocalization.Away.mul_invSelf, mul_one]
-      have ht2 : t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n)) < 1 := by
-        rw [halg, map_mul]
-        calc t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x)) *
-              t (IsLocalization.Away.invSelf x)
-            ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr; exact hW_le _ hn
-          _ = t (IsLocalization.Away.invSelf x) := one_mul _
-          _ < 1 := ht_inv
-      rw [map_pow, map_pow] at ht2
-      by_contra hge
-      rw [not_lt] at hge
-      exact absurd ht2 (not_lt.mpr (one_le_pow₀ hge))
-    have hW_x : 1 < t (algebraMap (presheafValue D') (Localization.Away x) x) := by
-      by_contra hle
-      rw [not_lt] at hle
-      have hprod : t (algebraMap (presheafValue D') (Localization.Away x) x) *
-          t (IsLocalization.Away.invSelf x) = 1 := by
-        rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
-      have hlt : t (algebraMap (presheafValue D') (Localization.Away x) x) *
-          t (IsLocalization.Away.invSelf x) < 1 := by
-        calc t (algebraMap (presheafValue D') (Localization.Away x) x) *
-              t (IsLocalization.Away.invSelf x)
-            ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr
-          _ = t (IsLocalization.Away.invSelf x) := one_mul _
-          _ < 1 := ht_inv
-      rw [hprod] at hlt; exact lt_irrefl 1 hlt
-    -- ▸ General-Huber witness (Huber [Hu2] 3.3(i): `v = u|cΓ_u`): restrict
-    --   `W := t.comap algB` by its characteristic subgroup, encoded as
-    --   `restrictIdealSingle W 1` (`(W 1)⁻¹ = 1 ∈ cΓ_W`). No topologically nilpotent
-    --   unit is involved — this is the non-Tate replacement for the principal-pair
-    --   `restrictIdealSingle g` witness.
-    set algB := algebraMap (presheafValue D') (Localization.Away x) with halgB_def
-    have hW1 : (t.comap algB) 1 ≠ 0 := by
-      rw [Valuation.comap_apply, map_one, map_one]
-      exact one_ne_zero
-    set rs := (t.comap algB).restrictIdealSingle 1 hW1 with hrs_def
-    -- Bridge: `(ofValuation rs).vle a b ↔ rs a ≤ rs b`.
-    have hbr : ∀ a b : presheafValue D', (ValuationSpectrum.ofValuation rs).vle a b ↔ rs a ≤ rs b := by
-      intro a b
-      letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
-      haveI : rs.Compatible := Valuation.Compatible.ofValuation rs
-      exact Valuation.Compatible.vle_iff_le (v := rs) a b
-    -- `W a = t(algB a)` definitionally, so the `hW_*` facts are facts about `W = t.comap algB`.
-    refine ⟨ValuationSpectrum.ofValuation rs, ?_, ?_⟩
-    · -- HU-e(1): `w' ∈ Spa(B, B⁺)` = `w'.IsContinuous ∧ ∀ f ∈ B⁺, w'.vle f 1` (`mem_spa_iff`).
-      rw [mem_spa_iff]
-      refine ⟨?_, ?_⟩
-      · -- **Continuity of `w' = ofValuation rs`** (Huber [Hu2] Thm 3.1 reverse, general
-        -- f-adic form): the A°°-engine `Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO` at
-        -- the concrete pair `presheafValue_concretePair D'` (Tate-free since T901), with
-        --   • `h_in` (Huber (d)): the characteristic restriction is microbial, hence in
-        --     `Spv(A, I)` for every `I` (`ofValuation_restrictIdealSingle_one_isInSpvAI`);
-        --   • `h_le_AOO` (Huber (c), `≤`-form): `hW_lt_AOO` + `restrictIdealSingle_le_one`;
-        --   • `h_lt_one` (ideal-of-definition decay): ideal elements are topologically
-        --     nilpotent, so `hW_lt_AOO` + `restrictIdealSingle_lt_one`.
-        have h_in : Spv.IsInSpvAI (ValuationSpectrum.ofValuation rs)
-            (Ideal.map (presheafValue_concretePair D').A₀.subtype
-              (presheafValue_concretePair D').I) :=
-          ofValuation_restrictIdealSingle_one_isInSpvAI (t.comap algB) hW1 _
-        letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
-        haveI hrsC : rs.Compatible := Valuation.Compatible.ofValuation rs
-        have hequiv : (ValuativeRel.valuation (presheafValue D')).IsEquiv rs := fun a b =>
-          (Valuation.Compatible.vle_iff_le
-              (v := ValuativeRel.valuation (presheafValue D')) a b).symm.trans
-            (Valuation.Compatible.vle_iff_le (v := rs) a b)
-        have hlt : ∀ p q : presheafValue D',
-            ((ValuativeRel.valuation (presheafValue D')) p <
-                (ValuativeRel.valuation (presheafValue D')) q
-              ↔ rs p < rs q) := fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
-        have h_le_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
-            (ValuativeRel.valuation (presheafValue D')) a ≤ 1 := by
-          intro a ha
-          have hrs_le : rs a ≤ 1 :=
-            restrictIdealSingle_le_one hW1 (le_of_lt (hW_lt_AOO a ha))
-          have hkey := (hequiv a 1).mpr (by rw [map_one]; exact hrs_le)
-          rwa [map_one] at hkey
-        have h_lt_one : ∀ a ∈ (presheafValue_concretePair D').I,
-            (ValuativeRel.valuation (presheafValue D'))
-              ((presheafValue_concretePair D').A₀.subtype a) < 1 := by
-          intro a ha
-          have hnilp : IsTopologicallyNilpotent
-              ((presheafValue_concretePair D').A₀.subtype a) :=
-            (presheafValue_concretePair D').isTopologicallyNilpotent_of_mem ha
-          have hrs_lt : rs ((presheafValue_concretePair D').A₀.subtype a) < 1 :=
-            restrictIdealSingle_lt_one hW1 (hW_lt_AOO _ hnilp)
-          have hkey := (hlt ((presheafValue_concretePair D').A₀.subtype a) 1).mpr
-            (by rw [map_one]; exact hrs_lt)
-          rwa [map_one] at hkey
-        exact Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO (presheafValue_concretePair D')
-          (ValuationSpectrum.ofValuation rs) h_in h_le_AOO h_lt_one
-      · -- `w' ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺` ⟹ `W f = t(algB f) ≤ 1` (`hW_le`),
-        -- lifted to `rs` by `restrictIdealSingle_le_one`, then to `w'.vle` by `hbr`.
-        intro f hf
-        rw [hbr, map_one]
-        exact restrictIdealSingle_le_one hW1 (hW_le f hf)
-    · -- HU-e(2): `¬ w'.vle x 1`, i.e. `w'(x) > 1`: `1 < W x = t(algB x)` (`hW_x`, the Huber
-      -- witness `s(x⁻¹) < 1` + `x⁻¹·x = 1`), lifted to `rs` by `restrictIdealSingle_one_lt`,
-      -- then to `w'.vle` by `hbr`.
-      intro hvle
-      rw [hbr, map_one] at hvle
-      exact absurd hvle (not_le.mpr (restrictIdealSingle_one_lt hW1 hW_x))
+  obtain ⟨w, hw_spa, hw⟩ := exists_spa_point_not_vle_one_huber D' x hxnot
   exact hw (hx w hw_spa)
 
 set_option linter.unusedSectionVars false in
