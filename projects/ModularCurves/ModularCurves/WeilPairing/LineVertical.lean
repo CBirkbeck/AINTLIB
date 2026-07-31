@@ -792,6 +792,22 @@ theorem unit_endo_eq_ofTopSection {Z : Scheme.{u}}
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The adjunction triangle for the divisor twist, morphism-level: the unit followed
+by the underlying of the twist is the presheaf action. -/
+theorem divisorTwistHom_unit_comp :
+    (PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J).val ⊗ L.val) ≫
+      (SheafOfModules.forget _ ⋙ PresheafOfModules.restrictScalars
+        (𝟙 C.ringCatSheaf.obj)).map (divisorTwistHom J L) =
+    idealActionPre J L := by
+  have htri := ((PresheafOfModules.sheafificationAdjunction
+    (𝟙 C.ringCatSheaf.obj)).homEquiv
+      ((idealModule J).val ⊗ L.val) L).apply_symm_apply (idealActionPre J L)
+  rw [Adjunction.homEquiv_unit] at htri
+  exact htri
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[3b-iii] The forward conjugation square** (statement-locked; proof by
 adjunction triangles + unit naturality on both sides): restricting the divisor twist
 along an open immersion agrees with the sheafified pushforward of the presheaf action,
@@ -808,6 +824,11 @@ theorem restrict_divisorTwistHom_forward_square (U : C.Opens) :
         ((PresheafOfModules.pushforward (restrictRingHom U.ι)).map
           (idealActionPre J L)) ≫
       (sheafifyValIso ((restrictFunctor U.ι).obj L)).hom := by
+  -- PROOF PLAN (elementwise; the morphism-level route drowns in
+  -- restrictScalars-𝟙 clothing): homEquiv-injective + homEquiv_unit, then
+  -- PresheafOfModules hom-ext and a value-chase: unitY-naturality-apply moves the
+  -- section across, the X-triangle evaluates via divisorTwistHom_app_unit, and the
+  -- Y-triangle collapses valIso against the unit valuewise.
   sorry
 
 end LineAssembly

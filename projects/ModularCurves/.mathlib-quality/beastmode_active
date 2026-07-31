@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 3b-iii cont] assemble eTL (tensor-restrict chain on the chart) + d-prime 1-value/span computation; then Gamma-of-coker + quotientSpanMulEquivProd feed = e2. Upstream green+pushed thru unit_endo_eq_ofTopSection
+FOCUS: [GAP-A-4/A4-e2 3b-iii] PROVE restrict_divisorTwistHom_forward_square — sheafifyY-hom-ext vs Y-unit then elementwise triangles per board plan; then downstream assembly per [A4-e2 3b-iii] board section. All else green+pushed thru f38abfbba+

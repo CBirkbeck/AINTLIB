@@ -30392,3 +30392,14 @@ Downstream assembly (next): d' from the square's two valIso-conjugates; coker-ch
 transports); classification (unit_endo_eq_ofTopSection) + span-up-to-unit;
 Γ-of-coker via leaf-2 + baseSectionsRestrictIsoOfBijective; feed quotientSpanMulEquivProd
 (3a) with per-section evaluation equivs (SuccessorSections mechanism at P and Q).
+
+### [A4-e2 3b-iii] STATUS 2026-07-31: unit_comp PROVEN; square pivoted to elementwise
+`divisorTwistHom_unit_comp` (morphism-level X-triangle) PROVEN. The square's
+morphism-level proof drowned in restrictScalars-𝟙 clothing (three rounds: hnat-𝟭.obj
+type-annotations block rw → simp-set normalization aligns hnats but NOT the
+right-triangle components — their unit-argument crosses forget-Y(restrict-obj) vs
+pf(RS-X(...)) clothing where even exact-defeq fails). PIVOT (banked in the sorry's
+comment): elementwise value-chase — homEquiv-injective + homEquiv_unit (these WORK),
+then PresheafOfModules-ext + per-section: unitY-naturality-APPLY,
+divisorTwistHom_app_unit for the X-side, Y-triangle valuewise. All application-position
+(clothing-immune per this session's discipline). Everything else in the file GREEN.
