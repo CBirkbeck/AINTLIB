@@ -421,6 +421,45 @@ private theorem isClosed_ideal_of_adicComplete_noetherian
   rw [hkrull, Submodule.mem_bot] at hmem
   exact hmem
 
+/-- **Closure transfers to the ring of definition.** If `a ∈ P.A₀` lies in the closure of an
+ideal `J` of `A`, then `a` lies in the closure of `J.comap P.A₀.subtype` in `↥P.A₀`.
+
+The two neighbourhood bases correspond: `a + Subtype.val '' (I ^ n)` is a basic `A`-neighbourhood
+of `a`, and its points that lie in `J` are exactly the points of `J₀` in the basic
+`A₀`-neighbourhood `a₀ + I ^ n`. Extracted from `Wedhorn.isClosed_ideal_of_noetherian`, where it
+was the dominant `have`. -/
+private theorem mem_closure_comap_subtype_of_mem_closure
+    {A : Type*} [CommRing A] [UniformSpace A] [IsUniformAddGroup A] [IsTopologicalRing A]
+    (P : PairOfDefinition A) (J : Ideal A) {a : A} (ha_A₀ : a ∈ P.A₀)
+    (ha_cl : a ∈ closure (J : Set A)) :
+    (⟨a, ha_A₀⟩ : ↥P.A₀) ∈
+      closure ((J.comap P.A₀.subtype : Ideal ↥P.A₀) : Set ↥P.A₀) := by
+  rw [mem_closure_iff_nhds_basis (P.isAdic.hasBasis_nhds (⟨a, ha_A₀⟩ : ↥P.A₀))]
+  intro n _
+  -- Need: a point of `J₀` inside the basic neighbourhood `a₀ + I ^ n`.
+  -- Build the corresponding neighborhood in A and extract a point of J.
+  have hnhd_A : ((fun y ↦ a + y) '' (Subtype.val ''
+      ((P.I ^ n : Ideal P.A₀) : Set P.A₀))) ∈ nhds a := by
+    have : (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A) ∈ nhds (0 : A) :=
+      P.hasBasis_nhds_zero.mem_of_mem (i := n) trivial
+    rw [← map_add_left_nhds_zero a]
+    exact Filter.image_mem_map this
+  rw [mem_closure_iff_nhds] at ha_cl
+  obtain ⟨j, hj_in_nhd, hj_in_J⟩ := ha_cl _ hnhd_A
+  obtain ⟨b, ⟨b₀, hb₀_mem, rfl⟩, hj_eq⟩ := hj_in_nhd
+  -- hj_eq : a + (b₀ : A) = j;  hb₀_mem : b₀ ∈ (P.I ^ n : Ideal P.A₀)
+  -- hj_in_J : j ∈ J.
+  -- j = a + b₀ ∈ A₀, so (⟨j, _⟩ : P.A₀) is well-defined.
+  have hj_A₀ : j ∈ P.A₀ := by rw [← hj_eq]; exact P.A₀.add_mem ha_A₀ b₀.2
+  refine ⟨⟨j, hj_A₀⟩, ?_, ?_⟩
+  · -- ⟨j, hj_A₀⟩ ∈ (J.comap P.A₀.subtype): just j ∈ J
+    change j ∈ J; exact hj_in_J
+  · -- ⟨j, hj_A₀⟩ ∈ (fun y ↦ (⟨a, ha_A₀⟩ : ↥P.A₀) + y) '' ↑(P.I^n)
+    refine ⟨b₀, hb₀_mem, ?_⟩
+    apply Subtype.ext
+    change a + (b₀ : A) = j
+    exact hj_eq
+
 /-- **Wedhorn Proposition 6.17 (ideal form):** Every ideal in a complete Tate
 ring `A` with a noetherian ring of definition `P.A₀` is closed.
 
@@ -493,32 +532,8 @@ theorem Wedhorn.isClosed_ideal_of_noetherian
   have ha_cl : a ∈ closure (J : Set A) := by rw [← Ideal.coe_closure]; exact ha_cl'
   -- 5c. Show ⟨a, ha_A₀⟩ is in closure of J₀ in ↥P.A₀.
   set a₀ : ↥P.A₀ := ⟨a, ha_A₀⟩ with ha₀_def
-  have ha₀_cl : a₀ ∈ closure (J₀ : Set ↥P.A₀) := by
-    rw [mem_closure_iff_nhds_basis (P.isAdic.hasBasis_nhds a₀)]
-    intro n _
-    -- Need: ∃ y ∈ J₀, y ∈ (fun z ↦ a₀ + z) '' (P.I^n : Ideal P.A₀).
-    -- Build the corresponding neighborhood in A and extract a point of J.
-    have hnhd_A : ((fun y ↦ a + y) '' (Subtype.val ''
-        ((P.I ^ n : Ideal P.A₀) : Set P.A₀))) ∈ nhds a := by
-      have : (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A) ∈ nhds (0 : A) :=
-        P.hasBasis_nhds_zero.mem_of_mem (i := n) trivial
-      rw [← map_add_left_nhds_zero a]
-      exact Filter.image_mem_map this
-    rw [mem_closure_iff_nhds] at ha_cl
-    obtain ⟨j, hj_in_nhd, hj_in_J⟩ := ha_cl _ hnhd_A
-    obtain ⟨b, ⟨b₀, hb₀_mem, rfl⟩, hj_eq⟩ := hj_in_nhd
-    -- hj_eq : a + (b₀ : A) = j;  hb₀_mem : b₀ ∈ (P.I ^ n : Ideal P.A₀)
-    -- hj_in_J : j ∈ J.
-    -- j = a + b₀ ∈ A₀, so (⟨j, _⟩ : P.A₀) is well-defined.
-    have hj_A₀ : j ∈ P.A₀ := by rw [← hj_eq]; exact P.A₀.add_mem ha_A₀ b₀.2
-    refine ⟨⟨j, hj_A₀⟩, ?_, ?_⟩
-    · -- ⟨j, hj_A₀⟩ ∈ J₀: just j ∈ J
-      change j ∈ J; exact hj_in_J
-    · -- ⟨j, hj_A₀⟩ ∈ (fun y ↦ a₀ + y) '' ↑(P.I^n)
-      refine ⟨b₀, hb₀_mem, ?_⟩
-      apply Subtype.ext
-      change a + (b₀ : A) = j
-      exact hj_eq
+  have ha₀_cl : a₀ ∈ closure (J₀ : Set ↥P.A₀) :=
+    mem_closure_comap_subtype_of_mem_closure P J ha_A₀ ha_cl
   -- 5d. a₀ ∈ J₀ by hJ₀_closed.
   have ha₀_in_J₀ : a₀ ∈ J₀ := by
     have h : a₀ ∈ (J₀ : Set ↥P.A₀) := hJ₀_closed.closure_eq ▸ ha₀_cl

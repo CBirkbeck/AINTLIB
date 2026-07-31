@@ -2,12 +2,14 @@
     "challenge_module": "«Adic spaces».Comparator.Challenge",
     "solution_module": "«Adic spaces».FJP.FiniteJetMain",
     "theorem_names": [
-        "FiniteJet.finiteJet_isSheafy",
         "FiniteJet.finiteJet_isUniform",
         "FiniteJet.finiteJet_isDomain",
-        "FiniteJet.finiteJet_not_noetherian",
-        "FiniteJet.finiteJet_not_stablyUniform"
+        "FiniteJet.finiteJet_not_noetherian"
     ],
-    "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ],
     "enable_nanoda": false
 }

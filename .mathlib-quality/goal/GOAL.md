@@ -5097,3 +5097,53 @@ locals is a 12-argument helper, which is over the threshold that has produced re
   `FaithfulLocLift`/`HuberLocLift` `mem_plus_of_forall_spa_vle_one` — all look like mirror pairs
   and are not: differences run throughout, or the two files have no common ancestor.
 * `IsSheafyOn` relocation; `hpiece₁/₂` (needs a proof-level "which component" parameter).
+
+## Comparator test FINISHED: 3 of 5 certified, 2 blocked by a library defect
+
+`./projects/AdicSpaces/scripts/certify.sh` → **`Your solution is okay!`**, exit 0.
+
+Certified — statement pinned against `Challenge.lean`, kernel-accepted, axioms within
+`propext / Quot.sound / Classical.choice`: `finiteJet_isUniform`, `finiteJet_isDomain`,
+`finiteJet_not_noetherian`.
+
+Not certifiable: `finiteJet_isSheafy`, `finiteJet_not_stablyUniform`.
+
+### The blocker, measured rather than guessed
+
+I first assumed the mismatch was import-driven and would be fixed by giving the challenge the
+right imports. **It is not.** Elaborating the identical source text under five different import
+sets — definition layer only, `+ExampleLaurentSeries`, `+RestrictedLaurent`, `+FiniteJetChart`,
+`+FiniteJetSheafTransfer` — gives 42127–42188 chars every time, against a stored type of 44233.
+Including the solution module's *own* imports: 42188. So
+
+  **the stored type of `finiteJet_isSheafy` cannot be reproduced by re-elaborating its own
+  source text, in any environment tried, including its own.**
+
+The divergent subterm is the `NormOneClass` instance inside `JetC`'s definition: stored as
+`@NormedDivisionRing.to_normOneClass …`, freshly elaborated as `@FiniteJet.JetC._proof_1 F inst`.
+`NormOneClass` is `Prop`-valued, so the two are proof-irrelevant equal — which is exactly why
+nothing else in this campaign can see the difference.
+
+→ **Consequence for the manifest tooling:** `formalisation.yaml`'s digests hash the *source
+  text* of a statement. Two declarations with identical source can have different elaborated
+  types, so a green digest check does not imply statement stability. That is a real limit of the
+  checker I built, and it is now documented rather than assumed away.
+
+Fix is an owner call: give `NormOneClass (L F)` a canonical named instance in `FiniteJetRings` so
+`JetC` stops emitting an anonymous `_proof_1` into the type of everything mentioning `JetA F`.
+Deliberately not folded into a cleanup commit — it changes a definition.
+
+### Discipline note: do not edit a file while a gate is running
+
+I edited `FarguesFontaine/ChartVObj.lean` while gate9 was mid-run — the exact hazard I had
+identified earlier and then avoided by holding patches in the scratchpad. It happened to be
+harmless: the gate had already compiled that module (verified by grepping its `Built` line),
+so gate9's verdict still cleanly covers the `NoetherianTateModules` change it was started for,
+and the `ChartVObj` edit simply falls outside it and needs its own build.
+
+Had lake reached that module *after* the edit, the gate would have been testing a mixture of
+one verified change and one unreviewed one, with no way to attribute a failure.
+
+→ **Either hold the patch, or — if an edit has already happened — check whether the running
+  build has passed that module before trusting its verdict.** The check is one grep against the
+  log's `Built` lines and settles it in a second.

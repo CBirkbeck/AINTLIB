@@ -45,33 +45,59 @@ real `landrun` for sandboxing; on macOS comparator's own `scripts/fake-landrun.s
 — no sandbox, which is acceptable here because the "solution" is this repository's own code
 rather than an adversarial submission.
 
-## Current status: statements do not match (a real defect, not a tooling problem)
+## Status: 3 of 5 certified; 2 blocked by an instability in the library
 
-The run completes and reports:
+```
+$ ./projects/AdicSpaces/scripts/certify.sh
+...
+Running Lean default kernel on solution.
+Lean default kernel accepts the solution
+Your solution is okay!        # exit 0
+```
+
+**Certified** — statement pinned against `Challenge.lean`, kernel-accepted, axioms within
+`propext / Quot.sound / Classical.choice`:
+
+| | |
+|---|---|
+| `FiniteJet.finiteJet_isUniform` | [FJP] Thm 1.3 (uniform) |
+| `FiniteJet.finiteJet_isDomain` | [FJP] Thm 1.3 (domain) |
+| `FiniteJet.finiteJet_not_noetherian` | [FJP] Thm 1.3 (nonnoetherian) |
+
+**Not certifiable yet** — `finiteJet_isSheafy` and `finiteJet_not_stablyUniform`. Both route
+through the `IsSheafy` / `IsStablyUniform` instance stack, which contains an anonymous
+auxiliary. Comparator reports:
 
 ```
 Challenge and solution theorem statement do not match: 'FiniteJet.finiteJet_isSheafy'
 ```
 
-Under `pp.explicit` the two types are byte-identical (6529 chars), with the same `levelParams`,
-both `thmInfo`. The difference only appears under **`pp.proofs true`** (44233 vs 42127 chars):
+That is correct behaviour, and the defect is in the library. Under `pp.explicit` the two types
+are byte-identical (6529 chars), same `levelParams`, both `thmInfo`; the difference only shows
+under **`pp.proofs true`** (44233 vs 42127 chars):
 
 ```
-solution : @NormedDivisionRing.to_normOneClass (LaurentSeries F) (NormedField.to… …)
-challenge: @FiniteJet.JetC._proof_1 F inst
+stored   : @NormedDivisionRing.to_normOneClass (LaurentSeries F) (NormedField.to… …)
+elaborated: @FiniteJet.JetC._proof_1 F inst
 ```
 
-Definitionally equal, syntactically different. Comparator compares `ConstantVal` structurally,
-which is exactly what pinning a statement means, so it is right to reject this.
+`NormOneClass` is a `Prop`-valued class, so these are proof-irrelevant equal but syntactically
+distinct, and comparator compares `ConstantVal` structurally — which is exactly what pinning a
+statement means.
 
-The cause is in the library: `JetC` is an `abbrev` whose elaboration generates an **anonymous
-auxiliary** `FiniteJet.JetC._proof_1`, and that constant is embedded in the *type* of anything
-mentioning `JetA F`. Whether the elaborator emits the auxiliary or its expansion depends on the
-ambient environment, so the type is not stable across import sets.
+**The mismatch is not import-driven.** Measured: re-elaborating the identical source text with
+the solution module's *own* imports still yields 42188 chars against the stored 44233. Importing
+the definition layer, `ExampleLaurentSeries`, `RestrictedLaurent`, `FiniteJetChart` or
+`FiniteJetSheafTransfer` all give ~42127–42188 — none reproduces the stored term. So **the
+stored type of `finiteJet_isSheafy` cannot be reproduced by re-elaborating its own source.**
+No arrangement of the challenge can fix that; adding imports only trades away the trust boundary
+without helping.
 
-That fragility is invisible to `#print axioms`, to `lake build`, and to the
-`formalisation.yaml` digests, because each of those sees one environment at a time.
+**Fix (owner call):** give the `NormOneClass (L F)` instance a canonical named form in
+`FiniteJetRings`, so `JetC`'s elaboration stops emitting an anonymous `_proof_1` into the type of
+everything mentioning `JetA F`. That is a change to a definition, so it belongs in its own
+verified batch rather than a cleanup commit.
 
-**Preferred fix:** give that proof a real name in `FiniteJetRings` so the term is a stable named
-constant. That changes a definition, so it is an owner call and needs its own verified batch —
-deliberately not folded into a cleanup commit.
+This fragility is invisible to `#print axioms`, to `lake build`, and to the
+`formalisation.yaml` digests, because each of those sees a single environment at a time. It took
+comparator to surface it.
