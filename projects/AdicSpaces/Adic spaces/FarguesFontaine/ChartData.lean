@@ -1410,6 +1410,32 @@ theorem exists_teichCoeff_factor_low (b k m : ℕ) (hm : m ≤ k)
     le_of_mul_le_mul_left hterm (pow_pos hπ0 m)
   exact le_trans hcancel (pow_le_pow_of_le_one zero_le hπ1.le (by omega))
 
+/-- Pure arithmetic behind the high-coefficient factorisation: writing `i = a·(i/a) + i%a`
+and bounding the remainder by `a`. -/
+private theorem key_arith {a b i k : ℕ} (ha : 0 < a) :
+    k * a + b * i ≤ a * b + a * k + b * (i / a) * a := by
+  have hmod := Nat.div_add_mod i a
+  have hlt : i % a < a := Nat.mod_lt i ha
+  calc k * a + b * i = k * a + b * (a * (i / a) + i % a) := by rw [hmod]
+    _ = k * a + (b * (i / a) * a + b * (i % a)) := by ring
+    _ ≤ k * a + (b * (i / a) * a + b * a) :=
+        Nat.add_le_add_left (Nat.add_le_add_left
+          (Nat.mul_le_mul_left b (le_of_lt hlt)) _) _
+    _ = a * b + a * k + b * (i / a) * a := by ring
+
+include hρ₂1 in
+/-- If `ρ₂ ^ a = |ϖ| ^ b` with `0 < a` and `ρ₂ < 1`, then `|ϖ| < 1`. -/
+private theorem perfectoidValuation_lt_one_of_exact {a b : ℕ} (ha : 0 < a)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) < 1 := by
+  have h1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b < 1 := by
+    rw [← hexact2]
+    exact pow_lt_one₀ zero_le hρ₂1 ha.ne'
+  by_contra hcon
+  rw [not_lt] at hcon
+  exact absurd (one_le_pow₀ hcon) (not_le.mpr h1)
+
 /-- **Existence of the high-term factor**: at the exact right endpoint
 `ρ₂^a = |ϖ|^b`, the `m > k` Teichmüller coordinates satisfy
 `a_m·ϖ^{bt} ∈ ϖ^k·O_F` for `t = (m-k)/a`. -/
@@ -1424,35 +1450,20 @@ theorem exists_teichCoeff_factor_high (a b k m : ℕ) (ha : 0 < a) (hm : k < m)
     ∃ c' : OF F, teichCoeff p F A m
         * PseudoUniformizer.toOF F ϖ ^ (b * ((m - k) / a))
       = c' * PseudoUniformizer.toOF F ϖ ^ k := by
-  set vπ : NNReal :=
-    perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hvπ
+  set vπ : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hvπ
   have hπ0 : 0 < vπ := by
     have hπne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
       fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
     rw [hvπ, pos_iff_ne_zero, Ne, Valuation.zero_iff]
     exact hπne
-  have hπ1 : vπ < 1 := by
-    have hb : 0 < b := by
-      rcases Nat.eq_zero_or_pos b with hb0 | hb0
-      · exfalso
-        have h1 : ρ₂ ^ a < 1 := pow_lt_one₀ zero_le hρ₂1 ha.ne'
-        rw [hexact2, hb0, pow_zero] at h1
-        exact absurd h1 (lt_irrefl 1)
-      · exact hb0
-    have h1 : vπ ^ b < 1 := by
-      rw [hvπ, ← hexact2]
-      exact pow_lt_one₀ zero_le hρ₂1 ha.ne'
-    by_contra hcon
-    rw [not_lt] at hcon
-    exact absurd (one_le_pow₀ hcon) (not_le.mpr h1)
+  have hπ1 : vπ < 1 := perfectoidValuation_lt_one_of_exact p F ϖ (hρ₂1 := hρ₂1) ha hexact2
   set i : ℕ := m - k with hidef
   have hik : m = k + i := by omega
   set t : ℕ := i / a with htdef
   have hterm := gaussTerm_le_of_wI_le p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
     (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) k A hx hwI hρ₂0 hρ₂1 (Or.inr rfl) m
   rw [gaussTerm, ← hvπ] at hterm
-  set X : NNReal := perfectoidValuation p F ((teichCoeff p F A m : OF F) : F)
-    with hXdef
+  set X : NNReal := perfectoidValuation p F ((teichCoeff p F A m : OF F) : F) with hXdef
   have h2 : ρ₂ ^ i * X ≤ vπ ^ (b + k) := by
     refine le_of_mul_le_mul_left ?_ (pow_pos hρ₂0 k)
     calc ρ₂ ^ k * (ρ₂ ^ i * X) = ρ₂ ^ m * X := by rw [hik, pow_add]; ring
@@ -1465,15 +1476,7 @@ theorem exists_teichCoeff_factor_high (a b k m : ℕ) (ha : 0 < a) (hm : k < m)
       _ = (ρ₂ ^ i * X) ^ a := by rw [mul_pow, ← pow_mul, ← pow_mul]; ring_nf
       _ ≤ (vπ ^ (b + k)) ^ a := h3
       _ = vπ ^ (a * b + a * k) := by rw [← pow_mul]; congr 1; ring
-  have key : k * a + b * i ≤ a * b + a * k + b * t * a := by
-    have hmod := Nat.div_add_mod i a
-    have hlt : i % a < a := Nat.mod_lt i ha
-    calc k * a + b * i = k * a + b * (a * (i / a) + i % a) := by rw [hmod]
-      _ = k * a + (b * t * a + b * (i % a)) := by rw [← htdef]; ring
-      _ ≤ k * a + (b * t * a + b * a) := by
-          exact Nat.add_le_add_left (Nat.add_le_add_left
-            (Nat.mul_le_mul_left b (le_of_lt hlt)) _) _
-      _ = a * b + a * k + b * t * a := by ring
+  have key : k * a + b * i ≤ a * b + a * k + b * t * a := key_arith ha
   have h6 : X ^ a * vπ ^ (b * t * a) ≤ (vπ ^ k) ^ a := by
     refine le_of_mul_le_mul_right ?_ (pow_pos hπ0 (b * i))
     calc X ^ a * vπ ^ (b * t * a) * vπ ^ (b * i)

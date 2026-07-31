@@ -4541,3 +4541,50 @@ real parser rather than a third special case.
 
 `p_div_teich_pow_a_mem_chartSubring` sits at 54 (need 4) — extraction + 12 joins took it from
 82. Left there rather than forced; the remaining four lines have no honest cut.
+
+## 198 → 197: `exists_teichCoeff_factor_high` (73 → 50)
+
+Three changes, biggest first:
+
+1. **`have hb : 0 < b` was DEAD CODE** — seven lines proving a fact referenced exactly once, at
+   its own binding. Found by counting occurrences of every binding before choosing what to
+   extract (now routine, after the `hpk`/`hteich` near-miss). Free 7 lines.
+2. `key_arith` — pure ℕ arithmetic (`i = a·(i/a) + i%a`, remainder bounded by `a`). No ambient
+   context at all, so it binds no section variables.
+3. `perfectoidValuation_lt_one_of_exact` — `ρ₂^a = |ϖ|^b` with `ρ₂ < 1` gives `|ϖ| < 1`.
+
+**NEW GOTCHA (cost two builds): a section hypothesis used only in the BODY needs `include`.**
+`perfectoidValuation_lt_one_of_exact` uses `hρ₂1`, an implicit section variable, only in its
+proof — its statement mentions `ρ₂` but not `hρ₂1`. Lean does not auto-include a section
+hypothesis the signature never mentions: `Unknown identifier hρ₂1`. Adding `include hρ₂1 in`
+fixes that but then breaks the CALL SITE with `don't know how to synthesize implicit argument`,
+because `include` makes it a real argument that cannot be inferred from `hexact2`. Fix: pass it
+by name, `(hρ₂1 := hρ₂1)` — the idiom this file already uses at neighbouring call sites.
+  → Two-part rule: **`include` for body-only section hypotheses, and expect it to change every
+    call site.** Like `omit`/`attribute`, `include` must also precede the docstring.
+
+Minor: splitting that call over two lines "to be safe" pushed the proof back to 51. It fits on
+one line at 90 chars. Formatting choices land directly on the metric — re-measure after each.
+
+### Systematic scan: unused `have` bindings across the remaining proofs
+
+Generalising the `hb` find. A named `have` whose identifier occurs exactly once in the proof
+body (its own binding) is dead. Across the 195 in-scope proofs: **26 proofs, 81 dead lines.**
+
+**But "occurs once" is not the same as "unused", and the difference matters.** `omega`,
+`linarith`, `nlinarith`, `positivity`, `assumption`, `aesop`, `tauto`, `simp_all`, `field_simp`,
+`gcongr` all consume the *whole local context* without naming anything — a `have` that no later
+line mentions can still be exactly what one of them closes the goal with. Splitting on whether
+such a tactic appears after the binding:
+
+* **45 lines safe** to delete (no context-consuming tactic follows)
+* **36 lines shadowed** — must be left alone regardless of the occurrence count
+
+Had I acted on the raw 81, roughly half the deletions would have been silent breakages, and
+`omega`-style failures are reported at the *closing tactic*, not at the deleted `have` — so the
+error would have pointed somewhere unrelated.
+
+This is a `/cleanup` (task 3) win of ~45 lines rather than a task-2 one: the largest single
+proof affected has 10 dead lines against a deficit of 66, and none clears on dead code alone.
+The build remains the final adjudicator — the heuristic cannot see `simp [*]`-style usage, so
+any deletion that breaks gets restored individually.
