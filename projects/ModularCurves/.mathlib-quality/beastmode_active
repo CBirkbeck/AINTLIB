@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 leaf 3] on-U rank-2 identification — design the ker-P filtration of coker(divisorTwistHom (kerP*kerQ) L) on a chart; recon: does a two-step SES with succ-coker-style rank-1 pieces assemble in (a)-presentation, or is the U-chart algebra (free L, principal kerP kerQ) more direct?
+FOCUS: [GAP-A-4/A4-e2 leaf 3b] chart plumbing — Gamma(U, coker(divisorTwistHom)) = A/(rPrQ)-model; recon sectionPoleSheafSuccCoker_restrictIsoIdealCoker construction (PoleSheafQuasicoherent:600s) for the transfer pattern; then baseSections-assembly via leaf-2 into e2

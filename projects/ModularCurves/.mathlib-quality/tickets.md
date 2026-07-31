@@ -30323,3 +30323,17 @@ a full type ascription to pin the RingHomInvPair metas; identities as named have
 (refine-holes break the instance synthesis).
 REMAINS [3b]: chart-plumbing Γ(U-model) = A/(rPrQ) + baseSections-assembly through
 leaf-2, THEN e2 done; then A-rows + [A4-c1] unimodularity + named wrappers.
+
+### [A4-e2 leaf 3b] PATTERN LOCATED 2026-07-31
+The conjugation template is `sectionPoleSheafSuccCoker_restrictIsoIdealCokerData`
+(PoleSheafQuasicoherent:513): build the square F.map(map) ≫ triv = triv ≫ reference-map
+(their reference: `unitEndomorphismOfTopSection r` / idealModuleToUnit-coker), then
+cokernel-functoriality gives the restrict-coker iso + π-compat as a Subtype-Data. For
+the twist: conjugate F.map (divisorTwistHom D.ideal L) through (idealModule-D-triv by
+generator rPrQ) ⊗ (L-triv) to `unitEndomorphismOfTopSection (rPrQ-section)`; the
+⊗-restrict comparison needs either the restrict-of-sheafified-tensor plumbing
+(PullbackTensorMonoidal restricted) or divisorTwistHom_eq + restrict-of-sheafification.
+Then Γ(U-sch, coker(unitEndo r)) = A/(r)-model (their `d`-machinery + two-cover), fed
+into quotientSpanMulEquivProd (leaf 3a) with the P- and Q-evaluation equivs
+(succ-coker-⊤-iso mechanism instantiated at sections P and Q — z-generic ✓).
+This is the next work item; everything upstream of it is proven and pushed.
