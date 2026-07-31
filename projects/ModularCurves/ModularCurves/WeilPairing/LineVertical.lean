@@ -1311,6 +1311,25 @@ theorem one_mem_idealSections_ker_of_preimage_eq_bot {S : Scheme.{u}}
         rfl⟩)
   exact Subsingleton.elim _ _
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[per-section Γ core, statement-locked]** On an affine total space, the base
+sections of the cokernel of multiplication by a global function are the quotient by
+its span: the workhorse H⁰-exactness and H¹-vanishing of the affine structure sheaf,
+with the range identified elementwise through `unitEndomorphismOfTopSection_app_apply`.
+-/
+theorem nonempty_baseSections_cokernel_unitEndo_equiv {Y S : Scheme.{u}}
+    (π' : Y ⟶ S) [IsAffine Y] (a : Γ(Y, (⊤ : Y.Opens)))
+    [Mono (ModularCurves.unitEndomorphismOfTopSection a)]
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(Y, (⊤ : Y.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(Y, (⊤ : Y.Opens)) r =
+        (Scheme.Hom.appTop π').hom r) :
+    Nonempty ((Scheme.Modules.baseSections π'
+        (Limits.cokernel (ModularCurves.unitEndomorphismOfTopSection a)))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] (Γ(Y, (⊤ : Y.Opens)) ⧸ Ideal.span {a})) := by
+  sorry
+
 end LineAssembly
 
 end Twist
