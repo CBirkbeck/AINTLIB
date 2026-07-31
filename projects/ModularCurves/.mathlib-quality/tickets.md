@@ -29933,3 +29933,41 @@ full congrHom-projection kit (no map_snd lemma exists — map is an abbrev of li
 Next per board: WP prong — GAP-A-7 (Picard/IdealModulePullback 2 sorries) →
 GAP-A-4 → 5a/5b/5c → 6 → WP-κ → WP-C2 → WP-PIN → WP-REG → WP-BC → Y(ρ̄) clean.
 Then [CLEANUP-22] EllipticCurve/PoleSheaf* + FibrewiseLocallyWeierstrass.
+
+## [GAP-A-7] REPLAN 2026-07-31 (beastmode, per replan-and-continue): NAT-3 route SWITCHED
+
+The v10.168 chart-conjugation route for `sheafificationW_idealPullHom` is superseded — the
+codebase has since landed the exact tools for a leaner **surjectivity-only** route
+(the opaque-domain injectivity half is never analyzed):
+
+**Mathematical shape**: W(ψ) ⟺ IsIso(Lψ). Lψ is a map of *invertible* modules
+(domain ≅ pullback of `idealModule J` — invertible by `h` + `IsInvertible.pullback`;
+codomain = `idealModule (J.comap f)` — invertible by `h'`), and a locally-surjective map
+of invertible 𝒪-modules is automatically an isomorphism (surjective endo of a line = mult
+by a unit). Injectivity is free, never chased through the opaque left-adjoint pullback.
+
+Sub-tickets:
+- **[A7-1]** `comap_ideal_eq_span_appLE` := `ModularCurves.ideal_comap_affineOpens_span`
+  (PoleSheaf.lean:1147, PROVEN) + `affinePullbackSection_eq_appLE` (:945). Import
+  EllipticCurve.PoleSheaf (cycle-free: nothing imports IdealModulePullback). 2-liner.
+- **[A7-2]** NEW `Picard/SurjectiveInvertible.lean`:
+  `isIso_of_isLocallySurjective_of_isInvertible {A B : X.Modules} (g : A ⟶ B)`
+  (hA hB invertible, toPresheaf g.val locally surjective) : IsIso g.
+  Innards: (i) unit-endo leaf — loc-surj endo of `unitObj` is iso via
+  `isIso_of_bijective_app_on_basis` on the basis {W | the 𝟙-multiplier restricts to a
+  unit} (no gluing needed!); (ii) common-refinement cover Uᵢ ⊓ Vⱼ (iSup-distrib);
+  (iii) per-chart conjugation by `restrictIsoOfPullbackIso ∘ restrictTrivialization`
+  (restrict-apps are rfl-grade: `restrictAppIso = Iso.refl`), assembled by
+  `isIso_of_isIso_restrict`; (iv) loc-surj transport: elementwise across
+  `restrictFunctor` (pushforward-along-opensFunctor, sections literally = image-open
+  sections) + mathlib's `isLocallySurjective_comp/_of_iso/_fac` kit.
+- **[A7-3]** elementwise loc-surj of ψ := `idealPullHom f J`: adjunction-triangle
+  evaluation ψ.app(η-image of g) = f♯g (rfl-grade: ψ := homEquiv.symm(idealPushHom),
+  push-apps are precomposition), then any section of the comap-ideal over a refined
+  chart is b·(f♯g|) = ψ(b·pbP-restriction of the η-image) by [A7-1] + O-linearity;
+  sieve-assembly exactly as the hsurj block of `sheafificationW_of_bijective_on_basis`.
+- **[A7-4]** assembly of `sheafificationW_idealPullHom`: transport loc-surj through
+  sheafification (unit-naturality + `isLocallySurjective_toSheafify` +
+  `_of_isLocallySurjective_fac`), identify L(pbPre P) ≅ pbMod(idealModule J) via
+  naturality of `SheafOfModules.sheafificationCompPullback` + IsIso(L_X unit)
+  (counit-triangle), then [A7-2].

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.DivisorClass
+import ModularCurves.EllipticCurve.PoleSheaf
 
 /-!
 # Pullback compatibility of ideal modules (naturality layer for (2.16))
@@ -158,7 +159,8 @@ the pulled-back generator (the affine base-change kernel computation: `Spec` of
 theorem comap_ideal_eq_span_appLE {V : X.affineOpens} {g : Γ(X, V.1)}
     (hspan : J.ideal V = Ideal.span {g}) (V' : X'.affineOpens) (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
     (J.comap f).ideal V' = Ideal.span {f.appLE V.1 V'.1 hV' g} := by
-  sorry
+  rw [ModularCurves.ideal_comap_affineOpens_span J f V' V hV' g hspan,
+    ModularCurves.affinePullbackSection_eq_appLE]
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
