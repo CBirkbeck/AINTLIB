@@ -30177,3 +30177,29 @@ the V-side; verified the failure shape). Two viable routes:
 still wanted by consumers, else feed surjectivity directly into the
 baseSections-workhorses restricted to S-pieces). LineSection assembly [A4-d] then
 S-local + glue.
+
+### [A4-d] STRUCTURAL COLLAPSE 2026-07-31 — the line IS the Cramer minors-vector
+
+Key simplification: with b3 = (1, x, y) and the target rank-2, the kernel-of-restriction
+computation is the classical chord equation: for a 2×3 matrix A over ANY commutative
+ring whose 2×2 minors generate the unit ideal (⟺ A surjective on free modules), the
+kernel of A : R³ → R² is FREE rank one, spanned by the signed-minors vector
+(m₂₃, −m₁₃, m₁₂) — Cramer/Plücker, no localization, no splitting theory. The line's
+coefficients ARE the minors of the evaluation matrix ((1,x(P),y(P)),(1,x(Q),y(Q))) —
+literally the chord through P and Q. Degenerate cases stay uniform because the
+scheme-theoretic evaluation at the Cartier divisor D handles P=Q as the tangent row.
+
+New sub-leaves:
+- **[A4-d1]** `ker_mulVecLin_span_minors` (pure matrix algebra, ForMathlib-grade):
+  A : Matrix (Fin 2) (Fin 3) R, (hA : Ideal.span {minors} = ⊤) ⟹
+  LinearMap.ker A.mulVecLin = Submodule.span R {minorsVec A} (+ the minorsVec is
+  unimodular hence a free generator). Check mathlib for cross-product/Plücker pieces
+  (Matrix.cramer, `crossProduct` for 3-vectors! — ker of 2×3 = cross product of the
+  two rows — `Matrix.crossProduct` API may give dot_cross etc.).
+- **[A4-d2]** the evaluation matrix: b3-coordinates of the composite
+  baseSectionsMap π (cokernel.π (divisorTwistHom D.ideal L)) against a rank-2 basis of
+  the target (hypothesis-slot; produced later from D-degree-2 pushforward freeness).
+- **[A4-d3]** lineSection := ⟨minors-vector in b3-coordinates⟩; ker-span statement with
+  hsurj-as-minor-unimodularity ([A4-c1] merges INTO d1's hypothesis!).
+[A4-c1] restated: the evaluation matrix's minor-ideal is ⊤ Zariski-locally on S (unit
+minor case split; KM chord-tangent). The H¹-form is bypassed entirely for the line.

@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-c investigate] twisted H1-vanishing — survey landed H1 machinery (PoleSheafProjectiveBaseChangeHOne mechanism, subsingleton_H_one producers, any cohomology-and-base-change) for twist-adaptability; decide route; board verdict
+FOCUS: [GAP-A-4/A4-d skeleton] state lineSection/verticalSection deliverables S-locally (ker of baseSectionsMap of cokernel.pi of divisorTwistHom; rank-one via b3 + exactness); sorry-bodied skeleton in LineVertical.lean, then A4-c1 evaluation-matrix leaf
