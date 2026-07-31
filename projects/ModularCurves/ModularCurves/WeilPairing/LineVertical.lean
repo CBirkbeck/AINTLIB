@@ -1139,6 +1139,117 @@ theorem hom_eq_zero_of_locally_zero {Z : Scheme.{u}} {M N : Z.Modules}
       _ = 0 := hglue
       _ = _ := rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[desc-route ii] The twist of a smaller ideal dies in the larger twist's
+cokernel**: locally every section is a unit image, on unit images the composite is the
+presheaf action, and the action value casts along `idealSections_mono` into the larger
+twist's image. -/
+theorem divisorTwistHom_comp_cokernelπ_eq_zero {J₁ J₂ : C.IdealSheafData}
+    (h12 : J₁ ≤ J₂) (L : C.Modules) :
+    divisorTwistHom J₁ L ≫ Limits.cokernel.π (divisorTwistHom J₂ L) = 0 := by
+  apply hom_eq_zero_of_locally_zero
+  intro Uo x z hz
+  -- the unit of the sheafification is locally surjective
+  have hWunit : PresheafOfModules.sheafificationW (𝟙 C.ringCatSheaf.obj)
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app ((idealModule J₁).val ⊗ L.val)) := by
+    rw [PresheafOfModules.sheafificationW_iff]
+    have htri := (PresheafOfModules.sheafificationAdjunction
+      (𝟙 C.ringCatSheaf.obj)).left_triangle_components
+        ((idealModule J₁).val ⊗ L.val)
+    haveI : IsIso ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).counit.app
+          ((PresheafOfModules.sheafification (𝟙 C.ringCatSheaf.obj)).obj
+            ((idealModule J₁).val ⊗ L.val))) := inferInstance
+    exact IsIso.of_isIso_fac_right htri
+  obtain ⟨-, hsurj⟩ :=
+    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ _).mp hWunit
+  have hmem := hsurj.imageSieve_mem
+    (x : ToType (((PresheafOfModules.toPresheaf _).obj
+      (tensorObj (idealModule J₁) L).val).obj (Opposite.op Uo)))
+  rw [Opens.mem_grothendieckTopology] at hmem
+  obtain ⟨W, i, ⟨t, ht⟩, hzW⟩ := hmem z hz
+  refine ⟨W, hzW, i.le, ?_⟩
+  -- transport the section along the restriction and evaluate on the unit image
+  have hnat := NatTrans.naturality_apply
+    ((PresheafOfModules.toPresheaf _).map
+      ((divisorTwistHom J₁ L ≫
+        Limits.cokernel.π (divisorTwistHom J₂ L)).val))
+    (homOfLE i.le).op x
+  have hbridge : (((PresheafOfModules.toPresheaf _).obj
+      (tensorObj (idealModule J₁) L).val).map (homOfLE i.le).op) x =
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app
+          ((idealModule J₁).val ⊗ L.val)).app (Opposite.op W) t) := by
+    exact ht.symm
+  calc (Limits.cokernel (divisorTwistHom J₂ L)).presheaf.map
+        (homOfLE i.le).op
+        ((divisorTwistHom J₁ L ≫
+          Limits.cokernel.π (divisorTwistHom J₂ L)).app Uo x)
+      = ((divisorTwistHom J₁ L ≫
+          Limits.cokernel.π (divisorTwistHom J₂ L)).val.app (Opposite.op W))
+          (((PresheafOfModules.toPresheaf _).obj
+            (tensorObj (idealModule J₁) L).val).map (homOfLE i.le).op x) :=
+        hnat.symm
+    _ = ((divisorTwistHom J₁ L ≫
+          Limits.cokernel.π (divisorTwistHom J₂ L)).val.app (Opposite.op W))
+          (((PresheafOfModules.sheafificationAdjunction
+            (𝟙 C.ringCatSheaf.obj)).unit.app
+              ((idealModule J₁).val ⊗ L.val)).app (Opposite.op W) t) := by
+        rw [hbridge]
+    _ = 0 := by
+        -- on unit images the composite is π ∘ action; induct on the tensor
+        have hval : ∀ (s : TensorProduct
+            ((C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op W))
+            (idealSections J₁ (Opposite.op W))
+            (L.val.obj (Opposite.op W))),
+            ((Limits.cokernel.π (divisorTwistHom J₂ L)).val.app
+              (Opposite.op W)) ((idealActionPre J₁ L).app (Opposite.op W) s) =
+              0 := by
+          intro s
+          induction s with
+          | zero => rw [map_zero, map_zero]
+          | add a b ha hb => rw [map_add, map_add, ha, hb, add_zero]
+          | tmul m l =>
+              have hcast := idealActionPre_app_tmul J₁ L (Opposite.op W) m l
+              rw [hcast]
+              have hcast2 := (idealActionPre_app_tmul J₂ L (Opposite.op W)
+                (⟨m.1, idealSections_mono h12 (Opposite.op W) m.2⟩ :
+                  idealSections J₂ (Opposite.op W)) l).symm
+              rw [show (show ((C.sheaf.obj ⋙ forget₂ CommRingCat
+                  RingCat).obj (Opposite.op W)) from m.1) • l =
+                  (show ((C.sheaf.obj ⋙ forget₂ CommRingCat
+                    RingCat).obj (Opposite.op W)) from
+                    ((⟨m.1, idealSections_mono h12 (Opposite.op W) m.2⟩ :
+                      idealSections J₂ (Opposite.op W))).1) • l from rfl]
+              rw [hcast2]
+              have happ_unit := divisorTwistHom_app_unit J₂ L (Opposite.op W)
+                ((⟨m.1, idealSections_mono h12 (Opposite.op W) m.2⟩ :
+                  idealSections J₂ (Opposite.op W)) ⊗ₜ[
+                    (C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+                      (Opposite.op W)] l)
+              rw [← happ_unit]
+              show ((divisorTwistHom J₂ L ≫
+                Limits.cokernel.π (divisorTwistHom J₂ L)).val.app
+                  (Opposite.op W)) _ = 0
+              rw [Limits.cokernel.condition]
+              rfl
+        have hcomp : ((divisorTwistHom J₁ L ≫
+            Limits.cokernel.π (divisorTwistHom J₂ L)).val.app (Opposite.op W))
+            (((PresheafOfModules.sheafificationAdjunction
+              (𝟙 C.ringCatSheaf.obj)).unit.app
+                ((idealModule J₁).val ⊗ L.val)).app (Opposite.op W) t) =
+            ((Limits.cokernel.π (divisorTwistHom J₂ L)).val.app
+              (Opposite.op W))
+              ((divisorTwistHom J₁ L).val.app (Opposite.op W)
+                (((PresheafOfModules.sheafificationAdjunction
+                  (𝟙 C.ringCatSheaf.obj)).unit.app
+                    ((idealModule J₁).val ⊗ L.val)).app (Opposite.op W) t)) :=
+          rfl
+        rw [hcomp, divisorTwistHom_app_unit J₁ L (Opposite.op W) t]
+        exact hval t
+
 end LineAssembly
 
 end Twist
