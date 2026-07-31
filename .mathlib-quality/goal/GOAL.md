@@ -5712,3 +5712,29 @@ and is a case the tool structurally cannot see.
 → **When a proof is short on lines with no block worth extracting, look for a long repeated
   term before concluding it is stuck.** The abbreviation is worth doing on readability grounds
   anyway; the line count is a side effect.
+
+### The abbreviation heuristic, corrected: characters saved do not predict lines saved
+
+Generalising the `imgFamily_agreement` win, I scanned every over-50 proof for a long
+parenthesised term repeated ≥4 times, ranked by `len × count`. Top hit:
+`iteratedOverlap_forwardHom_comp_restrictionMapHom`, with
+`iteratedOverlapDatum_B P D₀ f hLocLift_B` (40 chars) appearing **19 times** — 760 characters,
+nearly twice the winning case.
+
+Applied the same `set J := … with hJ`. Result: **72 → 73 code lines.** The abbreviation *added*
+a line.
+
+The reason is that the metric is wrong. Shortening a term only removes a *line* when its
+occurrences sit on **wrapped** lines that can then rejoin. Here the longest line in the proof is
+81 characters — nothing was wrapped on account of that term, so 760 characters of saving
+converted to zero lines, and the `set` itself cost one.
+
+In `imgFamily_agreement` the same term was forcing three-line `have` statements to wrap; that,
+not the character count, is what made it pay.
+
+→ **Rank abbreviation candidates by "occurrences on lines that are near or over the wrap
+  width", not by `len × count`.** A term repeated 19 times on short lines is worth nothing to
+  this metric; a term repeated 4 times on 95-character lines may be worth 8.
+
+Reverted. Cost: one measurement, no build — the re-measure caught it before any build was spent,
+which is the habit that has been paying all session.
