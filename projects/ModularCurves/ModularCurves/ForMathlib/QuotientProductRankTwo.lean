@@ -208,4 +208,20 @@ noncomputable def quotientSpanMulEquivProd (rP rQ : A)
         ((A ⧸ Ideal.span {rP}) × (A ⧸ Ideal.span {rQ})))).trans
     ((eP.prodCongr eQ).trans (LinearEquiv.finTwoArrow R R).symm)
 
+/-- **The evaluation equivalence**: an algebra retraction with principal kernel
+identifies the quotient by the generator with the base ring. -/
+noncomputable def evaluationQuotEquiv {R A : Type*} [CommRing R] [CommRing A]
+    [Algebra R A] (σ : A →ₐ[R] R) (r : A)
+    (hker : RingHom.ker σ = Ideal.span {r}) :
+    (A ⧸ Ideal.span {r}) ≃ₗ[R] R :=
+  ((Ideal.quotientEquivAlgOfEq R hker.symm).trans
+    (Ideal.quotientKerAlgEquivOfRightInverse
+      (f := σ) (g := algebraMap R A) (fun x => σ.commutes x))).toLinearEquiv
+
+@[simp]
+theorem evaluationQuotEquiv_mk {R A : Type*} [CommRing R] [CommRing A]
+    [Algebra R A] (σ : A →ₐ[R] R) (r : A)
+    (hker : RingHom.ker σ = Ideal.span {r}) (a : A) :
+    evaluationQuotEquiv σ r hker (Ideal.Quotient.mk _ a) = σ a := rfl
+
 end ModularCurves
