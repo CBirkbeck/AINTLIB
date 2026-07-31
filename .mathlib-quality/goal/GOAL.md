@@ -5318,3 +5318,127 @@ several theorem statements' prose.
 as always-a-defect, but that rule assumes tactic position. In this library thousands sit inside
 *instance binders*, where `letI` is the only way to write the dependent `UniformSpace`/
 `CompleteSpace` pair, and removing it is not a style fix but a type error.
+
+## Task 3 applied: `show … from by` → `show … by`, 361 sites in 66 files
+
+The one mechanical item the audit found that is genuinely safe here. `show T from e` is
+term-mode and `by tac` is a term, so `show T from by tac` and `show T by tac` are the same
+thing; mathlib style drops the redundant `from`.
+
+Done in two passes because 159 of the sites are **line-wrapped** — the `show` sits several lines
+above the `from by`, so a single-line regex catches only 202 of them and leaves the file
+inconsistent. Before touching the wrapped ones I checked what else `from` can belong to: Lean
+has exactly one other user, `suffices h : T from e`. Of the 159, **159 are `show`-rooted and 0
+are `suffices`-rooted**, so the rewrite is uniform.
+
+Both passes skip block-comment and line-comment content by tracking comment depth — the same
+guard the `λ` audit needed.
+
+Verification that mattered more than the build: diffing every changed line and asserting
+`deleted.replace(' from by', ' by') == added`. **354 changed lines, 0 mismatches.** That checks
+the edit did nothing except drop `from`, which a green build alone would not tell me (a build
+proves the result compiles, not that it is the edit I intended).
+
+### Docstring audit: 806 public declarations without one — but not 806 defects
+
+12% of the 6282 public declarations carry no docstring (735 theorems, 30 instances, 25 defs,
+10 lemmas, 6 abbrevs). Concentrated in `FJP.FiniteJetFunctoriality` (86), `FJP.RestrictedLaurent`
+(42), `FJP.FiniteJetRings` (38), `LaurentRefinementTree` (36).
+
+The raw number overstates the gap. The sample is dominated by routine API lemmas —
+`coe_map`, `spaHomeomorphOfRingEquiv_apply`, `AlmostMathematics.zero/add/neg/smul` — exactly the
+projection- and simp-lemma shapes mathlib itself leaves undocumented because the name already
+says everything. The `/cleanup` rule "public theorem with no docstring → write one" is aimed at
+*results*, not at `foo_apply`.
+
+Deliberately not attempted in bulk. Writing 806 docstrings is per-declaration mathematical
+judgement, and an auto-generated one that restates the signature in prose is worse than none: it
+looks like documentation while carrying no information, and it defeats the next audit that would
+otherwise have flagged the real gap.
+
+I then proposed isolating "cited results with no docstring" as the actionable subset, ran it,
+and got **0**. That number is worthless: citations are *parsed from* docstrings, so the set is
+empty **by construction**. A tautology dressed as a result — and it would have read as
+reassurance ("no headline result is undocumented") if I had not checked why it was zero.
+
+→ **When a filter returns exactly 0, check whether the predicate can be non-empty at all.**
+  Here two conditions came from the same source, so their conjunction could never fire.
+
+The real query cannot be built from docstrings, because the thing being measured is the
+docstring. It has to come from an independent signal of "this is a headline result" — being
+exported from the module root, being consumed across file boundaries, or appearing in the
+blueprint's `(lean := …)` references. The last is the most promising: `AdicSpacesBlueprint`
+names its nodes' Lean declarations explicitly, so "blueprint-referenced but undocumented" is a
+genuine, non-circular list.
+
+### The non-circular query, and what it found: blueprint drift
+
+Replacing the tautological filter with an independent signal — the blueprint's `(lean := …)`
+node references, which name their Lean declarations explicitly — gives a real result.
+
+`AdicSpacesBlueprint/Blueprint.lean` references **79 declarations**. Of those:
+
+* **76 exist and all 76 carry docstrings** — so the headline results really are documented, and
+  this time the zero means something, because the two conditions come from independent sources.
+* **3 do not exist in the library at all:**
+  * `ValuationSpectrum.IsRationalSubset.inter`
+  * `ValuationSpectrum.IsRationalSubset.isOpen`
+  * `ValuationSpectrum.structurePresheaf_typeLevel_isSheaf`
+
+`IsRationalSubset` itself is there (`RationalSubsets.lean:72`, with
+`IsRationalSubset.hasRationalPresentation`), so `.inter` / `.isOpen` were renamed or never
+landed; `structurePresheaf_typeLevel_isSheaf` has no trace anywhere.
+
+This is blueprint drift: the blueprint asserts a Lean correspondence that no longer holds, and
+Verso reads completion status from those references, so the published blueprint will be
+reporting on declarations that do not exist.
+
+Worth noting the shape: `formalisation.yaml`'s checker cannot catch this, because it starts from
+the *library* and asks what is missing from the manifest. This defect runs the other way —
+something outside the library claims a declaration that is not there. A second checker over the
+blueprint's `(lean := …)` references would close that direction, and is a small script.
+
+Not fixed here: deciding whether `.inter`/`.isOpen` were renamed (and to what) or dropped is a
+content question about the blueprint, not a cleanup edit.
+
+## All three blueprint references were RENAMES, and all three are fixed
+
+`scripts/check_blueprint.py` now verifies every `(lean := …)` reference in
+`AdicSpacesBlueprint/Blueprint.lean`. Result after the fixes: **80 references, all resolve, all
+documented, exit 0.**
+
+None of the three was a missing declaration. All three were stale namespaces or prefixes:
+
+| blueprint said | library has |
+|---|---|
+| `ValuationSpectrum.IsRationalSubset.inter` | `ValuationSpectrum.HasRationalPresentation.inter` |
+| `ValuationSpectrum.IsRationalSubset.isOpen` | `ValuationSpectrum.HasRationalPresentation.isOpen` |
+| `ValuationSpectrum.structurePresheaf_typeLevel_isSheaf` | `ValuationSpectrum.locallyFractionPresheaf_typeLevel_isSheaf` |
+
+Each was confirmed by reading the library docstring against the blueprint node's prose — they
+say the same thing ("The intersection of two rational subsets is rational", "A rational subset
+is open in `Spa(A, A⁺)`", "the underlying type-presheaf … is a sheaf of types"). The third node
+even names the target in its own prose: it describes "the *locally-a-fraction* predicate", which
+is exactly `locallyFractionPresheaf`.
+
+### The fallback that nearly hid one of them
+
+My first version resolved a fully-qualified miss by unique final-component match and treated it
+as **found**. That silently "resolved" `IsRationalSubset.isOpen` to
+`HasRationalPresentation.isOpen` — the right declaration, under the wrong namespace, which is
+precisely the defect. Verso resolves the *written* name, so the reference was broken and the
+checker said clean.
+
+→ **A fuzzy match must be reported as a distinct outcome, never folded into "found".** The
+  checker now has a `RENAMED` category and exits non-zero on it. That change is what turned a
+  1-defect report into the correct 3.
+
+The third was missed even by the final-component fallback, because the prefix changed too
+(`structurePresheaf_` → `locallyFractionPresheaf_`) — found only by reading the node's prose.
+Fuzzy matching narrows the search; it does not replace reading.
+
+### Why this needed a second checker
+
+`check_formalisation.py` runs **library → manifest** and is structurally incapable of catching
+this: it starts from declarations that exist. This defect runs the other way — something outside
+the library claims a declaration that is not there. Two directions, two checkers.

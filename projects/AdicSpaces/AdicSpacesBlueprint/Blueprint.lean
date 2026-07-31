@@ -427,7 +427,7 @@ is the basic open of $`\mathrm{Spa}` cut out by $`\texttt{rationalOpen}`
 arise this way. Following Wedhorn Definition 7.29.
 :::
 
-:::theorem "rational-subsets-inter" (lean := "ValuationSpectrum.IsRationalSubset.inter, ValuationSpectrum.rationalOpen_inter")
+:::theorem "rational-subsets-inter" (lean := "ValuationSpectrum.HasRationalPresentation.inter, ValuationSpectrum.rationalOpen_inter")
 The intersection of two rational subsets is again rational
 ({uses "rational-subsets"}[]): rational subsets form a basis of the topology of
 $`\mathrm{Spa}(A, A^{+})` closed under finite intersection. Following Wedhorn
@@ -442,7 +442,7 @@ numerator family of the product still generates an open ideal, so the intersecti
 again a rational subset. Following Wedhorn Remark 7.30(5).
 :::
 
-:::theorem "rational-subsets-open" (lean := "ValuationSpectrum.IsRationalSubset.isOpen, ValuationSpectrum.rationalOpen_isOpen")
+:::theorem "rational-subsets-open" (lean := "ValuationSpectrum.HasRationalPresentation.isOpen, ValuationSpectrum.rationalOpen_isOpen")
 Every rational subset is open in $`\mathrm{Spa}(A, A^{+})`
 ({uses "rational-subsets"}[]): it is a finite intersection of basic opens
 $`\{v(f_i) \le v(s) \ne 0\}`. Following Wedhorn Theorem 7.35(2).
@@ -589,12 +589,12 @@ $`\texttt{SpaTop}`, together with its continuous support map to $`\mathrm{Spec}(
 underlying space on which the structure (pre)sheaf lives. Following Wedhorn §8.1.
 :::
 
-:::theorem "structure-presheaf-typelevel-sheaf" (lean := "ValuationSpectrum.structurePresheaf_typeLevel_isSheaf")
+:::theorem "structure-presheaf-typelevel-sheaf" (lean := "ValuationSpectrum.locallyFractionPresheaf_typeLevel_isSheaf")
 The _type-level_ part of the structure-sheaf condition holds unconditionally: the
 underlying $`\texttt{subpresheafToTypes}` of the "locally-a-fraction" predicate on
 $`\mathrm{Spa}(A, A^{+})` is a sheaf of types
 ({uses "spa-topcat"}[], {uses "rational-subsets"}[]). In `Adic-Spaces`:
-$`\texttt{structurePresheaf\_typeLevel\_isSheaf}` — this is the sorry-free core extracted
+$`\texttt{locallyFractionPresheaf\_typeLevel\_isSheaf}` — this is the sorry-free core extracted
 from the (still in-progress) topological-ring sheaf statement. Following Wedhorn §8.1
 (Theorem 8.28(c)).
 :::
