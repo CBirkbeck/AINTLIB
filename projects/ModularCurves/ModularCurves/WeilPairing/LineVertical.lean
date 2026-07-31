@@ -1037,6 +1037,41 @@ theorem pushforward_idealActionPre_app_surjective_of_one_mem (U : C.Opens)
     _ = _ := hact
     _ = l := one_smul _ _
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[e2 INTERFACE, statement-locked]** The rank-two coordinates of the divisor
+restriction: over an affine base with a common chart containing both section images
+(both kernels principal by nonzerodivisors, the ambient module trivialized, and the
+chart concentrating the cokernel), the base sections of the twist cokernel are free of
+rank two. The proof assembles: leaf-2 concentration → restrict/cokernel/sheafify
+transports (3b-iv, 3b-v) → the chart-top pointwise model (vi-a/c) → the ring-level
+split (3a) with the two per-section evaluation equivalences. -/
+theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair
+    {S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (P Q : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (rP rQ : Γ(C, U.1))
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(C, U.1)]
+    (hPspan : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQspan : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
+    (hPnzd : rP ∈ nonZeroDivisors Γ(C, U.1))
+    (hQnzd : rQ ∈ nonZeroDivisors Γ(C, U.1))
+    (eL : L.restrict U.1.ι ≅ unitObj U.1.toScheme)
+    (V : C.Opens) (hUV : U.1 ⊔ V = ⊤)
+    (htriv : ∀ (W : C.Opens), W ≤ V → (1 : Γ(C, W)) ∈ idealSections
+      ((ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal)
+      (Opposite.op W))
+    (eP : (Γ(C, U.1) ⧸ Ideal.span {rP}) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      Γ(S, (⊤ : S.Opens)))
+    (eQ : (Γ(C, U.1) ⧸ Ideal.span {rQ}) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      Γ(S, (⊤ : S.Opens))) :
+    Nonempty ((Scheme.Modules.baseSections π (Limits.cokernel
+        (divisorTwistHom
+          ((ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal)
+          L))) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      (Fin 2 → Γ(S, (⊤ : S.Opens)))) := by
+  sorry
+
 end LineAssembly
 
 end Twist

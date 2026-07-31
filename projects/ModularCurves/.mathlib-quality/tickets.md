@@ -30453,3 +30453,15 @@ Then (vii): P/Q-evaluation equivs + quotientSpanMulEquivProd = e2; A-rows; [A4-c
 wrappers. NOTE: (vi-d)'s unit-Γ-iso step is the subtlest — if friction, reroute via
 (b)-presentation comparison ONLY for the Γ-computation (idealModuleCokerIsoPushforwardUnit
 + projection formula at the chart), keeping (a) for everything GAP-A-5-facing.
+
+### [A4-e2] INTERFACE LOCKED 2026-07-31 (end-of-stretch state)
+`nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair` statement-locked (general
+L; [Algebra Γ(S,⊤) Γ(C,U)]-binder for the quotient-module structures; eP/eQ/eL/htriv/
+concentration-slots) — ONE sorry = the wiring of the proven pieces:
+leaf-2 concentration + baseSectionsRestrictIsoOfBijective + PreservesCokernel-
+baseSections transport + cokernelRestrictTwistIso (3b-iv) + cokernelSheafifyActionIso
+(3b-v) + [vi-c chart-top model: range-identification via idealActionPre_app_tmul +
+genEquiv-span + eL-transport (u/v-recast discipline)] + [vi-d unit-Γ-step at the
+concentrated presheaf] + sectionsDivisor_pair_ideal_span (3b-i) + 3a
+(quotientSpanMulEquivProd rP rQ hPnzd eP eQ). All named pieces PROVEN and pushed;
+LineVertical.lean otherwise sorry-free; root 9605 green.
