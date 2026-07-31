@@ -5738,3 +5738,28 @@ not the character count, is what made it pay.
 
 Reverted. Cost: one measurement, no build — the re-measure caught it before any build was spent,
 which is the habit that has been paying all session.
+
+### Second abbreviation heuristic also fails. The fix is to simulate, not to rank.
+
+Corrected the ranking to "occurrences on wrap-pressured lines (≥78 chars)" and took the top hit:
+`Groebner.exists_rps_series_limit`, need 27, with `ArSub p F ϖ hρ0 hρ1` on **45** such lines
+(52 occurrences overall). Applied the same `set`.
+
+Result: 77 → 78 code lines, and joins 2 → 3. **Net zero** — one line spent on the `set`, one
+join bought. Still 25 over. Reverted.
+
+So both rankings are poor predictors, and for the same underlying reason: a long line only
+disappears if it *rejoins its parent*, which requires the combined length to fit under 100 **and**
+the join tool's structural guards to pass (deeper indent, not a calc step, not an alternatives
+block, no comment). Counting occurrences — whether by `len × count` or by "on long lines" — does
+not measure any of that.
+
+→ **Stop ranking and start simulating.** The exact predictor is computable and costs no build:
+  for each candidate term, apply the substitution *in memory*, re-run `joinable` over the body,
+  and report `new_joins − old_joins − 1` (the `−1` being the `set` line). That is a genuine
+  net-line delta rather than a proxy, and it can be swept over all 178 in-scope proofs in one
+  pass. Roughly twenty lines on top of the existing scan.
+
+Worth noting what this cost: two trials, **zero builds**, because both were re-measured before
+building. The procedure was sound even while the heuristic was wrong — which is the argument for
+keeping measure-before-build as a reflex rather than a rule to remember.
