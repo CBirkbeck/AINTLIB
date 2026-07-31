@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4 remainder a cont] extract isLocallyInjective_divisorTwistHom (h)(hL) from the mono_divisorTwistHom body (steps thru h4-cast + divisorTwistHom_eq transfer + valIso-iso-composition); then Mono(unitEndo multiplier) via the conjugation square; then (b) span-slot + (c) instantiations per board.
+FOCUS: [GAP-A-4 remainder c] wire the e2-interface sorry using the full pipeline (concentration i1-i4 + cokernelRestrictTwistUnitEndoIso + per-section CORE at v0 + 3a with the D-chart data); check the span-deferability insight first (v0 as its own generator).

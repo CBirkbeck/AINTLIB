@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Picard.IdealModule
 import ModularCurves.Picard.IdealModuleMono
 import ModularCurves.ForMathlib.CrossProductKernel
+import ModularCurves.ForMathlib.QuotientProductRankTwo
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
@@ -1038,57 +1039,6 @@ theorem pushforward_idealActionPre_app_surjective_of_one_mem (U : C.Opens)
     _ = _ := hact
     _ = l := one_smul _ _
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[e2 INTERFACE, statement-locked]** The rank-two coordinates of the divisor
-restriction: over an affine base with a common chart containing both section images
-(both kernels principal by nonzerodivisors, the ambient module trivialized, and the
-chart concentrating the cokernel), the base sections of the twist cokernel are free of
-rank two. The proof assembles: leaf-2 concentration → restrict/cokernel/sheafify
-transports (3b-iv, 3b-v) → the chart-top pointwise model (vi-a/c) → the ring-level
-split (3a) with the two per-section evaluation equivalences. -/
-theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair
-    {S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
-    (hsm : SmoothOfRelativeDimension 1 π)
-    (P Q : { w : S ⟶ C // w ≫ π = 𝟙 S })
-    (U : C.affineOpens) (rP rQ : Γ(C, U.1))
-    [Algebra Γ(S, (⊤ : S.Opens)) Γ(C, U.1)]
-    (hPspan : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
-    (hQspan : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
-    (hPnzd : rP ∈ nonZeroDivisors Γ(C, U.1))
-    (hQnzd : rQ ∈ nonZeroDivisors Γ(C, U.1))
-    (eL : L.restrict U.1.ι ≅ unitObj U.1.toScheme)
-    (V : C.Opens) (hUV : U.1 ⊔ V = ⊤)
-    (htriv : ∀ (W : C.Opens), W ≤ V → (1 : Γ(C, W)) ∈ idealSections
-      ((ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal)
-      (Opposite.op W))
-    (eP : (Γ(C, U.1) ⧸ Ideal.span {rP}) ≃ₗ[Γ(S, (⊤ : S.Opens))]
-      Γ(S, (⊤ : S.Opens)))
-    (eQ : (Γ(C, U.1) ⧸ Ideal.span {rQ}) ≃ₗ[Γ(S, (⊤ : S.Opens))]
-      Γ(S, (⊤ : S.Opens))) :
-    Nonempty ((Scheme.Modules.baseSections π (Limits.cokernel
-        (divisorTwistHom
-          ((ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal)
-          L))) ≃ₗ[Γ(S, (⊤ : S.Opens))]
-      (Fin 2 → Γ(S, (⊤ : S.Opens)))) := by
-  classical
-  set D : C.IdealSheafData :=
-    (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal with hD
-  -- concentration of the cokernel onto the chart (leaf 2)
-  have hbij := cokernel_divisorTwistHom_bijective_restrict D L U.1 V hUV htriv
-  -- the base-sections chain to the sheafified pushforward-action cokernel
-  let i1 := Scheme.Modules.baseSectionsRestrictIsoOfBijective π
-    (Limits.cokernel (divisorTwistHom D L)) U.1 hbij
-  let i2 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
-    (Limits.PreservesCokernel.iso (restrictFunctor U.1.ι)
-      (divisorTwistHom D L))
-  let i3 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
-    (cokernelRestrictTwistIso D L U.1).symm
-  let i4 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
-    (cokernelSheafifyActionIso D L U.1)
-  -- remaining: the concentrated Γ-model of the sheafified pointwise cokernel and
-  -- the ring-level split
-  sorry
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
@@ -1346,18 +1296,24 @@ theorem nonempty_baseSections_cokernel_unitEndo_equiv {Y S : Scheme.{u}}
       (Γ(Y, (⊤ : Y.Opens)) ⧸ Ideal.span {a}) :=
     { toFun := fun s => Ideal.Quotient.mk _ (s : Γ(Y, (⊤ : Y.Opens)))
       map_add' := fun s t => by
-        show Ideal.Quotient.mk _ ((s + t : Γ(Y, (⊤ : Y.Opens)))) = _
-        rw [map_add]
-        rfl
+        exact map_add (Ideal.Quotient.mk (Ideal.span {a})) _ _
       map_smul' := fun r s => by
-        show Ideal.Quotient.mk _
-          ((Scheme.Hom.appTop π').hom r * (s : Γ(Y, (⊤ : Y.Opens)))) = _
-        rw [← halg r]
-        show Ideal.Quotient.mk _
-          (algebraMap Γ(S, (⊤ : S.Opens)) Γ(Y, (⊤ : Y.Opens)) r *
-            (s : Γ(Y, (⊤ : Y.Opens)))) = _
-        rw [map_mul]
-        rfl }
+        let s' : Γ(Y, (⊤ : Y.Opens)) := s
+        have h2 : (r • (Ideal.Quotient.mk (Ideal.span {a}) s')) =
+            Ideal.Quotient.mk (Ideal.span {a})
+              (algebraMap Γ(S, (⊤ : S.Opens)) Γ(Y, (⊤ : Y.Opens)) r * s') := by
+          rw [Algebra.smul_def]
+          rfl
+        have h3 : ((r • s : Scheme.Modules.baseSections π' (unitObj Y)) :
+            Γ(Y, (⊤ : Y.Opens))) =
+            algebraMap Γ(S, (⊤ : S.Opens)) Γ(Y, (⊤ : Y.Opens)) r * s' := by
+          rw [halg r]
+          have hbase := Scheme.Modules.baseSections_smul π' (unitObj Y) r
+            (s : Γ(unitObj Y, (⊤ : Y.Opens)))
+          exact hbase
+        rw [RingHom.id_apply]
+        exact (congrArg (Ideal.Quotient.mk (Ideal.span {a})) h3).trans
+          h2.symm }
   have hψsurj : Function.Surjective ψ := by
     intro q
     obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective q
@@ -1406,10 +1362,11 @@ theorem nonempty_baseSections_cokernel_unitEndo_equiv {Y S : Scheme.{u}}
       rw [show w = (c : Γ(Y, (⊤ : Y.Opens))) * a from hval]
       exact hc
   -- assemble: coker sections ≃ unit sections ⧸ ker(π-map) ≃ ⧸range ≃ target
-  refine ⟨(((LinearMap.quotKerEquivOfSurjective _ hsurj).symm.trans
-    (Submodule.quotEquivOfEq _ _ hker)).trans
-    (Submodule.quotEquivOfEq _ _ hkerψ)).trans
-    (ψ.quotKerEquivOfSurjective hψsurj)⟩
+  have c1 := (LinearMap.quotKerEquivOfSurjective _ hsurj).symm
+  have c2 := Submodule.quotEquivOfEq _ _ hker
+  have c3 := Submodule.quotEquivOfEq _ _ hkerψ
+  have c4 := ψ.quotKerEquivOfSurjective hψsurj
+  exact ⟨((c1.trans c2).trans c3).trans c4⟩
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency.types false in
@@ -1647,6 +1604,68 @@ theorem mono_unitEndo_twistChartMultiplier (J : C.IdealSheafData)
     (twistChartTensorTriv J L U eI eL).inv ≫
       (restrictFunctor U.ι).map (divisorTwistHom J L) ≫ eL.hom from hd.symm]
   infer_instance
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[e2] The rank-two coordinates of the divisor restriction.** Chart-native form:
+given trivializations of the ideal module and the ambient module on a concentrating
+chart, a span identification of the conjugated multiplier as a product of two
+generators, the first of them a nonzerodivisor, and evaluation equivalences for the
+two factors, the base sections of the twist cokernel are free of rank two. -/
+theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair
+    {S : Scheme.{u}} {π : C ⟶ S} (J : C.IdealSheafData) (L : C.Modules)
+    (U : C.affineOpens)
+    (eI : (restrictFunctor U.1.ι).obj (idealModule J) ≅ unitObj U.1.toScheme)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    (V : C.Opens) (hUV : U.1 ⊔ V = ⊤)
+    (htriv : ∀ (W : C.Opens), W ≤ V →
+      (1 : Γ(C, W)) ∈ idealSections J (Opposite.op W))
+    (hMono : Mono ((restrictFunctor U.1.ι).map (divisorTwistHom J L)))
+    (rP' rQ' : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+    (hv : Ideal.span {twistChartMultiplier J L U.1 eI eL} =
+      Ideal.span {rP' * rQ'})
+    (hrP' : rP' ∈ nonZeroDivisors Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens))
+        Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    (eP : (Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸ Ideal.span {rP'})
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens)))
+    (eQ : (Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸ Ideal.span {rQ'})
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens))) :
+    Nonempty ((Scheme.Modules.baseSections π
+        (Limits.cokernel (divisorTwistHom J L)))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] (Fin 2 → Γ(S, (⊤ : S.Opens)))) := by
+  classical
+  haveI hMono' := hMono
+  haveI : IsAffine U.1.toScheme := U.2
+  haveI hMonoEndo : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (twistChartMultiplier J L U.1 eI eL)) :=
+    mono_unitEndo_twistChartMultiplier J L U.1 eI eL
+  -- concentration and transport to the multiplier cokernel
+  have hbij := cokernel_divisorTwistHom_bijective_restrict J L U.1 V hUV htriv
+  let i1 := Scheme.Modules.baseSectionsRestrictIsoOfBijective π
+    (Limits.cokernel (divisorTwistHom J L)) U.1 hbij
+  let i2 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+    (Limits.PreservesCokernel.iso (restrictFunctor U.1.ι)
+      (divisorTwistHom J L))
+  let i3 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+    (cokernelRestrictTwistUnitEndoIso J L U.1 eI eL)
+  -- the multiplier cokernel's base sections are the quotient (the CORE)
+  obtain ⟨eCore⟩ := nonempty_baseSections_cokernel_unitEndo_equiv
+    (U.1.ι ≫ π) (twistChartMultiplier J L U.1 eI eL) halg
+  -- span identification and the ring-level split
+  let eA : (Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸
+      Ideal.span {twistChartMultiplier J L U.1 eI eL}) ≃ₗ[
+        Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+      (Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸
+        Ideal.span {rP' * rQ'}) :=
+    Submodule.quotEquivOfEq _ _ hv
+  let eSpan := eA.restrictScalars Γ(S, (⊤ : S.Opens))
+  let e3a := ModularCurves.quotientSpanMulEquivProd rP' rQ' hrP' eP eQ
+  exact ⟨(((i1 ≪≫ i2 ≪≫ i3).toLinearEquiv).trans eCore).trans
+    (eSpan.trans e3a)⟩
 
 end LineAssembly
 
