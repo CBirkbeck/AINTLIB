@@ -146,6 +146,7 @@ non-canonical `IsTopologicalAddGroup.rightUniformSpace`, so it must stay an expl
 `haveI` at each use rather than compete with the canonical `UniformSpace` instance. -/
 attribute [local instance] presheafValue_isTateRing_faithful
   presheafValue_isNoetherianRing_faithful presheafValue_isStronglyNoetherian_faithful
+  presheafValue_completeSpace_rightUniformSpace hasLocLiftPowerBounded_faithful
 
 
 /-- The Laurent 2-element rational cover of `D₀` at `f ∈ A`. Equivalent to
@@ -2734,11 +2735,6 @@ private noncomputable def unitCover_overlapQuotEquiv
     presheafValue (unitCover_overlapDatum_B D₀ f) ≃+*
       (↥(TateAlgebra₂ (presheafValue D₀)) ⧸ unitCover_overlapIdeal D₀ f) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -2763,11 +2759,6 @@ private noncomputable def unitCover_overlapQuotEquiv
       (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
         ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
   haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   refine tate_quotPresentation (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
     (mvEvalHomBounded_continuous _ _ _ _)
@@ -2837,11 +2828,6 @@ private theorem unitCover_overlapQuotEquiv_canonicalMap
       Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)
         (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) x) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5381,11 +5367,6 @@ private noncomputable def unitCover_example638Plus
     presheafValue (unitCover_plusDatum_B D₀ f) ≃+*
       LaurentCover.B₁_gen (D₀.canonicalMap f) := by
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5404,11 +5385,6 @@ private theorem unitCover_example638Plus_canonicalMap
     unitCover_example638Plus D₀ f ((unitCover_plusDatum_B D₀ f).canonicalMap x) =
       (LaurentCover.epsilonHom_gen (D₀.canonicalMap f) x).1 := by
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5682,11 +5658,6 @@ private theorem unitCover_example638Plus_symm_mk
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) (z : ↥(TateAlgebra (presheafValue D₀))) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -5697,11 +5668,6 @@ private theorem unitCover_example638Plus_symm_mk
       example638_evalHom (unitDatum (presheafValue_concretePair D₀)
         (D₀.canonicalMap f)) z := by
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5719,22 +5685,12 @@ private theorem unitCover_example638Plus_symm_continuous
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
       presheafValue_completeSpace_rightUniformSpace D₀
     Continuous ⇑((unitCover_example638Plus D₀ f).symm) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5796,11 +5752,6 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A)
     (z : ↥(TateAlgebra₂ (presheafValue D₀))) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -5809,11 +5760,6 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         (Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f) z) =
       unitCover_overlapEval D₀ f z := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5838,11 +5784,6 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
       (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
         ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
   haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   exact tate_quotPresentation_symm_mk (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
     (mvEvalHomBounded_continuous _ _ _ _)
@@ -5906,22 +5847,12 @@ private theorem unitCover_overlapQuotEquiv_symm_continuous
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
       presheafValue_completeSpace_rightUniformSpace D₀
     Continuous ⇑((unitCover_overlapQuotEquiv D₀ f).symm) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -5982,11 +5913,6 @@ private theorem unitCover_sq_plus_dense
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -6003,11 +5929,6 @@ private theorem unitCover_sq_plus_dense
     unitCover_relOverlap_backward D₀ f
       (unitCover_overlapEval D₀ f (LaurentTateAlgebra.posIncl z)) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -6215,11 +6136,6 @@ private theorem unitCover_posLift_bridgePlus
             (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
           (RationalLocData.interSamePair_subset_left _ _ _) g₁) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -6264,11 +6180,6 @@ private theorem unitCover_sq_minus_dense
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (f : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
       CompleteSpace (presheafValue D₀)) :=
@@ -6285,11 +6196,6 @@ private theorem unitCover_sq_minus_dense
     unitCover_relOverlap_backward D₀ f
       (unitCover_overlapEval D₀ f (LaurentTateAlgebra.negIncl z)) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -6537,11 +6443,6 @@ private theorem unitCover_negLift_bridgeMinus
             (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
           (RationalLocData.interSamePair_subset_right _ _ _) g₂) := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -8374,11 +8275,6 @@ noncomputable def imageGenCover
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
     RationalCoveringData (presheafValue D₀) :=
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair D₀)
@@ -8411,11 +8307,6 @@ theorem imageGenCover_isRational
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
     (imageGenCover D₀ T hspan).IsRational := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   constructor
@@ -8440,11 +8331,6 @@ theorem imageGenCover_isGeneratedBy
     (hspan : Ideal.span (T : Set A) = ⊤) :
     haveI : DecidableEq (presheafValue D₀) := Classical.decEq _
     (imageGenCover D₀ T hspan).IsGeneratedBy (T.image D₀.canonicalMap) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   constructor
@@ -8641,11 +8527,6 @@ private theorem imagePieceDatum_eq_genPieceDatum
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : DecidableEq (presheafValue D₀) := Classical.decEq _
     haveI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
     imagePieceDatum D₀ T t hspan =
@@ -8664,10 +8545,6 @@ theorem genRestrictedCover_separation
       CompleteSpace A] [DecidableEq A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
     ∀ (_hBsep : ∀ (y : presheafValue (imageGenCover D₀ T hspan).base),
       (∀ (E : RationalLocData (presheafValue D₀)) (hE : E ∈ (imageGenCover D₀ T hspan).covers),
         restrictionMap (imageGenCover D₀ T hspan).base E
@@ -8678,10 +8555,6 @@ theorem genRestrictedCover_separation
         (RationalLocData.interSamePair_subset_left _ _ _) x = 0),
     x = 0 := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -8733,21 +8606,11 @@ private theorem genPiece_relOverlap_baseHom_isUnit
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     IsUnit (((algebraMap (presheafValue D₀) (Localization.Away
         ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s)).comp D₀.canonicalMap)
       (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   have hs : ((((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s : A)) = (D₀.s * t₁) * t₂ := rfl
   rw [RingHom.comp_apply, hs, map_mul, map_mul, map_mul, map_mul]
@@ -8833,11 +8696,6 @@ private theorem genPiece_relOverlap_forward_witness
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (w : A) (hw : w ∈ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).T) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     ∃ y : Localization.Away (((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s),
       y ∈ locSubring ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -8851,11 +8709,6 @@ private theorem genPiece_relOverlap_forward_witness
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom y := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   classical
   set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
@@ -8984,20 +8837,11 @@ private theorem genPiece_relOverlap_forwardCompletion_continuous
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
     @Continuous _ _ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).topology _
       ((((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom).comp
         (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂)) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   classical
   set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
@@ -9036,11 +8880,6 @@ private noncomputable def genPiece_relOverlap_forward
     presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) →+* presheafValue ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -9065,20 +8904,10 @@ private theorem genPiece_relOverlap_forward_coe
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (y : Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_forward D₀ T hspan t₁ t₂ (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom y) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂ y) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -9102,22 +8931,12 @@ private theorem genPiece_relOverlap_backward_baseHom_isUnit
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     IsUnit ((restrictionMapHom D₀ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)
         ((RationalLocData.interSamePair_subset_left _ _ _).trans
           (RationalLocData.interSamePair_subset_left _ _ _)))
       (((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s)) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   have hu : IsUnit (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) := isUnit_s_in_presheafValue _
@@ -9182,19 +9001,9 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     @Continuous _ _ ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).topology _
       (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   classical
   set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
@@ -9324,11 +9133,6 @@ private noncomputable def genPiece_relOverlap_backward
     presheafValue ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl) →+* presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).uniformSpace
@@ -9352,19 +9156,9 @@ private theorem genPiece_relOverlap_backward_coe
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (y : Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_backward D₀ T hspan t₁ t₂ (((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).coeRingHom y) =
       genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂ y := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s) := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).uniformSpace
@@ -9387,20 +9181,10 @@ private theorem genPiece_relOverlap_locRoundtrip1
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂).comp
         (genPiece_relOverlap_forwardLocHom D₀ T hspan t₁ t₂) =
       ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   refine IsLocalization.ringHom_ext (Submonoid.powers (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) ?_
   ext a
@@ -9420,18 +9204,8 @@ private theorem genPiece_relOverlap_backward_forward
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (x : presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_backward D₀ T hspan t₁ t₂
       (genPiece_relOverlap_forward D₀ T hspan t₁ t₂ x) = x := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s) := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -9478,11 +9252,6 @@ private theorem genPiece_relOverlap_forward_restriction
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (x : presheafValue D₀) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_forward D₀ T hspan t₁ t₂
         (restrictionMapHom D₀ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)
@@ -9490,11 +9259,6 @@ private theorem genPiece_relOverlap_forward_restriction
             (RationalLocData.interSamePair_subset_left _ _ _)) x) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).canonicalMap x := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
   letI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
@@ -9599,18 +9363,8 @@ private theorem genPiece_relOverlap_forward_backward
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (y : presheafValue ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl)) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     genPiece_relOverlap_forward D₀ T hspan t₁ t₂
       (genPiece_relOverlap_backward D₀ T hspan t₁ t₂ y) = y := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   have hloc : (genPiece_relOverlap_forward D₀ T hspan t₁ t₂).comp
       (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) =
       ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9667,11 +9421,6 @@ private noncomputable def genPiece_relative_overlap_equiv
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     presheafValue ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
         (genPieceDatum D₀.P T t₂ hspan) rfl) ≃+*
       presheafValue ((imagePieceDatum D₀ T t₁ hspan).interSamePair
@@ -9692,11 +9441,6 @@ private theorem genPiece_relative_overlap_square₁
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (g : presheafValue (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂
         (restrictionMap (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
           ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
@@ -9707,11 +9451,6 @@ private theorem genPiece_relative_overlap_square₁
           (imagePieceDatum D₀ T t₂ hspan) rfl)
         (RationalLocData.interSamePair_subset_left _ _ _)
         (genPiece_relative_equiv D₀ T t₁ hspan g) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away
       (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s) :=
     (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).uniformSpace
@@ -9758,11 +9497,6 @@ private theorem genPiece_relative_overlap_square₁
     ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).isUniformAddGroup
   haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   revert g
   suffices h : ∀ g, (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
       (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl)
@@ -9881,11 +9615,6 @@ private theorem genPiece_relative_overlap_square₂
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
     (g : presheafValue (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂
         (restrictionMap (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
           ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
@@ -9901,11 +9630,6 @@ private theorem genPiece_relative_overlap_square₂
           (imagePieceDatum D₀ T t₂ hspan) rfl)
         (RationalLocData.interSamePair_subset_right _ _ _)
         (genPiece_relative_equiv D₀ T t₂ hspan g) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   letI : UniformSpace (Localization.Away
       (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) :=
     (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).uniformSpace
@@ -9952,11 +9676,6 @@ private theorem genPiece_relative_overlap_square₂
     ((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).isUniformAddGroup
   haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   revert g
   suffices h : ∀ g, (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
       (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
@@ -10098,11 +9817,6 @@ private theorem genPiece_family_pair_compat
         rationalOpen (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).T
           (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s),
       restrictionMap _ D₃ h₃₁ g₁ = restrictionMap _ D₃ h₃₂ g₂) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     restrictionMap (imagePieceDatum D₀ T t₁ hspan)
         ((imagePieceDatum D₀ T t₁ hspan).interSamePair
           (imagePieceDatum D₀ T t₂ hspan) rfl)
@@ -10113,11 +9827,6 @@ private theorem genPiece_family_pair_compat
           (imagePieceDatum D₀ T t₂ hspan) rfl)
         (RationalLocData.interSamePair_subset_right _ _ _)
         (genPiece_relative_equiv D₀ T t₂ hspan g₂) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   rw [← genPiece_relative_overlap_square₁ D₀ T hspan t₁ t₂ g₁,
     ← genPiece_relative_overlap_square₂ D₀ T hspan t₁ t₂ g₂]
   congr 1
@@ -10158,11 +9867,6 @@ theorem genRestrictedCover_gluing
       CompleteSpace A] [DecidableEq A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     ∀ (_hBglue : ∀ (g : ∀ (E : ↥(imageGenCover D₀ T hspan).covers),
         presheafValue E.1),
       (∀ (E₁ E₂ : ↥(imageGenCover D₀ T hspan).covers)
@@ -10187,11 +9891,6 @@ theorem genRestrictedCover_gluing
     ∃ x : presheafValue D₀, ∀ t (ht : t ∈ T),
       restrictionMap D₀ (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)
         (RationalLocData.interSamePair_subset_left _ _ _) x = f t ht := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI hCompleteB :
       (letI : UniformSpace (presheafValue D₀) :=
         IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
@@ -10416,18 +10115,8 @@ theorem genRestrictedCover_isOXAcyclic_of_B
     (hspan : Ideal.span (T : Set A) = ⊤)
     (hB : haveI hTateB : IsTateRing (presheafValue D₀) :=
         presheafValue_isTateRing_faithful D₀
-      haveI : @CompleteSpace (presheafValue D₀)
-          (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-        presheafValue_completeSpace_rightUniformSpace D₀
-      haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-        hasLocLiftPowerBounded_faithful
       (imageGenCover D₀ T hspan).IsOXAcyclic) :
     (genRestrictedCover D₀ T hspan).IsOXAcyclic := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   constructor
   · intro x hx
     refine genRestrictedCover_separation D₀ T hspan hB.separation x ?_
@@ -10863,11 +10552,6 @@ noncomputable def imageCover [DecidableEq A]
       CompleteSpace A]
     (C : RationalCoveringData A) (hC : C.IsRational) :
     RationalCoveringData (presheafValue C.base) :=
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
-  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
   { base := globalLocData (presheafValue_concretePair C.base)
@@ -11013,22 +10697,11 @@ theorem imageGenCover_isOXAcyclic_of_units
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (hne : T.Nonempty)
     (h_units : ∀ t ∈ T, IsUnit (D₀.canonicalMap t)) :
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
     (imageGenCover D₀ T hspan).IsOXAcyclic := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
   haveI : T2Space (presheafValue D₀) := inferInstance
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
   -- the image set consists of RING units of B
   have h_units_B : ∀ u ∈ T.image D₀.canonicalMap, IsUnit u := by
     intro u hu
@@ -11153,18 +10826,10 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
       exact Subsingleton.elim _ _
   case pos =>
     -- the B-instance suite (as in `imageGenCover_isOXAcyclic_of_units`)
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-      hasLocLiftPowerBounded_faithful
     haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
     haveI : T2Space (presheafValue D₀) := inferInstance
     letI : DecidableEq (presheafValue D₀) := Classical.decEq _
     letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
     have hTn : T.Nonempty := ⟨hTne.choose, _hsub hTne.choose_spec⟩
     -- σ₋-emptiness transported to B: a Spa-B-point dominated by a σ₋-index
     -- would comap into the empty A-trace.
@@ -12325,18 +11990,10 @@ theorem genRestrictedCover_isOXAcyclic_of_spanTop [DecidableEq A]
     (hspan : Ideal.span (T : Set A) = ⊤) :
     (genRestrictedCover D₀ T hspan).IsOXAcyclic := by
   classical
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) :=
-    hasLocLiftPowerBounded_faithful
   haveI : NonarchimedeanRing (presheafValue D₀) := inferInstance
   haveI : T2Space (presheafValue D₀) := inferInstance
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
   -- Wedhorn Lemma 8.34 INSTANTIATED at B := 𝒪_X(D₀), applied to the image
   -- cover (the faithful "recursive" step of p. 84 — no circularity: 8.34 is
   -- a closed ∀-rings theorem).
@@ -12421,24 +12078,11 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (C : RationalCoveringData A) (hC : C.IsRational) :
-    haveI : @CompleteSpace (presheafValue C.base)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-      presheafValue_completeSpace_rightUniformSpace C.base
-    haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-      hasLocLiftPowerBounded_faithful
     (imageCover C hC).IsOXAcyclic := by
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
-  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-    hasLocLiftPowerBounded_faithful
   haveI : NonarchimedeanRing (presheafValue C.base) := inferInstance
   haveI : T2Space (presheafValue C.base) := inferInstance
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
   haveI : IsAdicComplete (presheafValue_concretePair C.base).I
       (presheafValue_concretePair C.base).A₀ := presheafValue_isAdicComplete C.base
   -- B-level instances (`IsHuberRing/T2Space/NonarchimedeanRing/CompleteSpace` +
@@ -12487,11 +12131,6 @@ private theorem imageCover_keystone_compat [DecidableEq A]
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
       restrictionMap D₁.1 D₃ h₃₁ (f D₁) =
         restrictionMap D₂.1 D₃ h₃₂ (f D₂)) :
-    haveI : @CompleteSpace (presheafValue C.base)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-      presheafValue_completeSpace_rightUniformSpace C.base
-    haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-      hasLocLiftPowerBounded_faithful
     ∀ (D₁ D₂ : ↥C.covers) (G : RationalLocData (presheafValue C.base))
       (h₁ : rationalOpen G.T G.s ⊆
         rationalOpen (imagePieceDatum C.base D₁.1.T D₁.1.s
@@ -12509,11 +12148,6 @@ private theorem imageCover_keystone_compat [DecidableEq A]
           ((hC.piece D₂.2).span_eq_top)) G h₂
         (relativePiece_equiv C.base D₂.1 (C.hsubset D₂.1 D₂.2)
           ((hC.piece D₂.2).span_eq_top) (f D₂)) := by
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
-  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   intro D₁ D₂ G h₁ h₂
   -- the normalised A-side intersection D₁₂ at the base pair (Wedhorn 7.31(2)):
@@ -12604,25 +12238,12 @@ theorem imageCover_gluing_transport [DecidableEq A]
         restrictionMap D₂.1 D₃ h₃₂ (f D₂))
     (hCB : haveI hTateB : IsTateRing (presheafValue C.base) :=
         presheafValue_isTateRing_faithful C.base
-      haveI : @CompleteSpace (presheafValue C.base)
-          (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-        presheafValue_completeSpace_rightUniformSpace C.base
-      haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-        hasLocLiftPowerBounded_faithful
       (imageCover C hC).IsOXAcyclic) :
     ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
       restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
   classical
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
-  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
   have hkc := imageCover_keystone_compat C hC f hcompat
   -- choose a presenting C-piece for each image piece
   have hmem : ∀ E : ↥(imageCover C hC).covers, ∃ D : ↥C.covers,
@@ -12722,18 +12343,9 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
     (C : RationalCoveringData A) (hC : C.IsRational) :
     C.IsOXAcyclic := by
   classical
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
-  haveI : HasLocLiftPowerBounded (presheafValue C.base) :=
-    hasLocLiftPowerBounded_faithful
   letI : DecidableEq (presheafValue C.base) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue C.base)) := Classical.decEq _
-  haveI : @CompleteSpace (presheafValue C.base)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) :=
-    presheafValue_completeSpace_rightUniformSpace C.base
   -- Faithful LL shadow (RPK pattern): everything below synthesizes the PROVEN package.
-  haveI : HasLocLiftPowerBounded (presheafValue C.base) := hasLocLiftPowerBounded_faithful
   have hCB := imageCover_isOXAcyclic C hC
   constructor
   · -- SEPARATION: transport through `globalSections_equiv` at `B` + the

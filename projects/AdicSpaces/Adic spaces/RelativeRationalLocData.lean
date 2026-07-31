@@ -58,6 +58,11 @@ build a rational locale data over `presheafValue E` carrying:
 
 The `hopen` condition is the key piece: openness in the relative locSubring. -/
 
+/- These are `theorem`s upstream, so every proof below introduced them by hand.
+Registered *locally* so the blast radius stays in this file. Occurrences inside a
+declaration's SIGNATURE are part of its statement and are deliberately left. -/
+attribute [local instance] presheafValue_isTateRing_concrete
+
 /-- **Residual obstruction (Wedhorn Lemma 2.13, non-LaurentNormalized case).**
 
 The single algebraic claim isolating the obstruction for
@@ -97,7 +102,6 @@ private theorem relativeRationalLocData_divByS_one_mem_locSubring
       presheafValue_concretePair E
     divByS (1 : presheafValue E) (E.canonicalMap D.s) ∈
       locSubring P_at_E (D.T.image E.canonicalMap) (E.canonicalMap D.s) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   sorry
 
@@ -190,7 +194,6 @@ private theorem relativeRationalLocData_hopen_proof
     ∃ N : ℕ, ∀ b : P_at_E.A₀, b ∈ P_at_E.I ^ N →
       divByS (b : presheafValue E) (E.canonicalMap D.s) ∈
         locSubring P_at_E (D.T.image E.canonicalMap) (E.canonicalMap D.s) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   -- See the theorem docstring for the full obstruction analysis.
   --
@@ -342,7 +345,6 @@ theorem relativeRationalLocData_hopen_proof_of_laurentNormalized
     ∃ N : ℕ, ∀ b : P_at_E.A₀, b ∈ P_at_E.I ^ N →
       divByS (b : presheafValue E) (E.canonicalMap D.s) ∈
         locSubring P_at_E (D.T.image E.canonicalMap) (E.canonicalMap D.s) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI P_at_E : PairOfDefinition (presheafValue E) :=
     presheafValue_concretePair E
@@ -432,7 +434,6 @@ private noncomputable def relativeLaurentNormalized_baseHom
     (D : RationalLocData A) [LaurentNormalized D]
     (hsub : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s) :
     A →+* presheafValue (relativeRationalLocData_laurentNormalized E D hsub) :=
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   (relativeRationalLocData_laurentNormalized E D hsub).canonicalMap.comp E.canonicalMap
 
 /-- D.s is a unit under the base hom: A → presheafValue E → presheafValue D_at_E. -/
@@ -442,7 +443,6 @@ private theorem relativeLaurentNormalized_Ds_isUnit
     (D : RationalLocData A) [LaurentNormalized D]
     (hsub : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s) :
     IsUnit (relativeLaurentNormalized_baseHom E D hsub D.s) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   -- Unfold: baseHom D.s = D_at_E.canonicalMap (E.canonicalMap D.s)
   --                    = D_at_E.canonicalMap D_at_E.s
   -- which is a unit by `isUnit_s_in_presheafValue D_at_E`.
@@ -547,7 +547,6 @@ private theorem relativeLaurentNormalized_Ds_isUnit_in_Loc
     letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
     IsUnit ((algebraMap (presheafValue E)
       (Localization.Away (E.canonicalMap D.s))).comp E.canonicalMap D.s) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   change IsUnit (algebraMap (presheafValue E) _ (E.canonicalMap D.s))
   exact IsLocalization.Away.algebraMap_isUnit _
 
@@ -560,7 +559,6 @@ noncomputable def relativeLaurentNormalized_forwardInnerLocHom
     (hsub : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s) :
     letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
     Localization.Away D.s →+* Localization.Away (E.canonicalMap D.s) :=
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   IsLocalization.Away.lift (S := Localization.Away D.s) (R := A) D.s
     (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub)
 
@@ -576,7 +574,6 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_algebraMap
         (algebraMap A (Localization.Away D.s) a) =
       algebraMap (presheafValue E) (Localization.Away (E.canonicalMap D.s))
         (E.canonicalMap a) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   exact IsLocalization.Away.lift_eq D.s
     (relativeLaurentNormalized_Ds_isUnit_in_Loc E D hsub) a
 
@@ -592,7 +589,6 @@ theorem relativeLaurentNormalized_forwardLocHom_factor
     relativeLaurentNormalized_forwardLocHom E D hsub =
       (relativeRationalLocData_laurentNormalized E D hsub).coeRingHom.comp
         (relativeLaurentNormalized_forwardInnerLocHom E D hsub) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   -- Both sides agree on `algebraMap A _` by uniqueness of IsLocalization.Away.lift.
   apply IsLocalization.ringHom_ext (Submonoid.powers D.s)
   ext a
@@ -638,7 +634,6 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_divByS
     letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
     relativeLaurentNormalized_forwardInnerLocHom E D hsub (divByS t D.s) =
       divByS (E.canonicalMap t) (E.canonicalMap D.s) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   -- Unfold divByS to mk' form, then use lift_mk'_spec.
   change relativeLaurentNormalized_forwardInnerLocHom E D hsub
       (IsLocalization.mk' (Localization.Away D.s) t
@@ -684,7 +679,6 @@ theorem relativeLaurentNormalized_forwardInnerLocHom_continuous
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     @Continuous _ _ D.topology (relativeRationalLocData_laurentNormalized E D hsub).topology
       (relativeLaurentNormalized_forwardInnerLocHom E D hsub) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -747,7 +741,6 @@ noncomputable def relativeLaurentNormalized_forwardToCompletion
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     Localization.Away D.s →+*
       presheafValue (relativeRationalLocData_laurentNormalized E D hsub) :=
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   (relativeRationalLocData_laurentNormalized E D hsub).coeRingHom.comp
     (relativeLaurentNormalized_forwardInnerLocHom E D hsub)
@@ -760,7 +753,6 @@ theorem relativeLaurentNormalized_forwardToCompletion_continuous
     (hsub : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s) :
     @Continuous _ _ D.topology _
       (relativeLaurentNormalized_forwardToCompletion E D hsub) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -807,7 +799,6 @@ noncomputable def relativeLaurentNormalized_forwardHom
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     presheafValue D →+*
       presheafValue (relativeRationalLocData_laurentNormalized E D hsub) :=
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
@@ -835,7 +826,6 @@ theorem relativeLaurentNormalized_backwardLocHom_divByS
     relativeLaurentNormalized_backwardLocHom E D hsub
       (divByS (E.canonicalMap t) (E.canonicalMap D.s)) =
       D.coeRingHom (divByS t D.s) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   -- Unfold divByS in source.
   change relativeLaurentNormalized_backwardLocHom E D hsub
       (IsLocalization.mk' (Localization.Away (E.canonicalMap D.s))
@@ -876,7 +866,6 @@ theorem relativeLaurentNormalized_backwardLocHom_continuous
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     @Continuous _ _ (relativeRationalLocData_laurentNormalized E D hsub).topology
       _ (relativeLaurentNormalized_backwardLocHom E D hsub) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -943,7 +932,6 @@ noncomputable def relativeLaurentNormalized_backwardHom
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     presheafValue (relativeRationalLocData_laurentNormalized E D hsub) →+*
       presheafValue D :=
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -985,7 +973,6 @@ theorem relativeLaurentNormalized_backwardHom_coeRingHom
       relativeRationalLocData_laurentNormalized E D hsub
     relativeLaurentNormalized_backwardHom E D hsub (D_at_E_data.coeRingHom b) =
       relativeLaurentNormalized_backwardLocHom E D hsub b := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -1037,7 +1024,6 @@ theorem relativeLaurentNormalized_backwardHom_comp_forwardHom
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     (relativeLaurentNormalized_backwardHom E D hsub).comp
       (relativeLaurentNormalized_forwardHom E D hsub) = RingHom.id _ := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -1095,7 +1081,6 @@ theorem relativeLaurentNormalized_forwardHom_canonicalMap
       relativeRationalLocData_laurentNormalized E D hsub
     relativeLaurentNormalized_forwardHom E D hsub (D.canonicalMap a) =
       D_at_E_data.canonicalMap (E.canonicalMap a) := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -1127,7 +1112,6 @@ theorem relativeLaurentNormalized_forwardHom_restrictionMapHom
       relativeRationalLocData_laurentNormalized E D hsub
     relativeLaurentNormalized_forwardHom E D hsub
       (restrictionMapHom E D hsub b) = D_at_E_data.canonicalMap b := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -1185,7 +1169,6 @@ theorem relativeLaurentNormalized_forwardHom_comp_backwardHom
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     (relativeLaurentNormalized_forwardHom E D hsub).comp
       (relativeLaurentNormalized_backwardHom E D hsub) = RingHom.id _ := by
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   letI D_at_E_data : RationalLocData (presheafValue E) :=
     relativeRationalLocData_laurentNormalized E D hsub
@@ -1260,7 +1243,6 @@ noncomputable def relativeLaurentNormalized_equiv
     letI : DecidableEq (presheafValue E) := Classical.decEq _
     presheafValue D ≃+*
       presheafValue (relativeRationalLocData_laurentNormalized E D hsub) :=
-  letI : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   { toFun := relativeLaurentNormalized_forwardHom E D hsub
     invFun := relativeLaurentNormalized_backwardHom E D hsub

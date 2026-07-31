@@ -42,6 +42,15 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 /-! ## The gen-piece data and the G1 relative-piece stack -/
 
 set_option linter.unusedSectionVars false in
+/- These are `theorem`s upstream, so every proof below introduced them by hand.
+Registered *locally* so the blast radius stays in this file. Occurrences inside a
+declaration's SIGNATURE are part of its statement and are deliberately left. -/
+attribute [local instance] presheafValue_isTateRing_faithful
+  presheafValue_isTateRing_concrete
+  presheafValue_isNoetherianRing_faithful
+  presheafValue_isStronglyNoetherian_faithful
+  hasLocLiftPowerBounded_faithful
+
 /-- `s · (t/s) = t` in the localization. (Relocated with the G1 stack from
 `WedhornCechAcyclicity.lean`, 2026-06-11.) -/
 theorem algebraMap_s_mul_divByS (D : RationalLocData A) (t : A) :
@@ -212,12 +221,6 @@ noncomputable def imagePieceDatum
     (D₀ : RationalLocData A) (T : Finset A) (t : A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
     RationalLocData (presheafValue D₀) :=
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
-  haveI : IsStronglyNoetherian (presheafValue D₀) :=
-    presheafValue_isStronglyNoetherian_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
   { P := presheafValue_concretePair D₀
@@ -336,9 +339,6 @@ theorem genPiece_rel_forward_witness
         (divByS w ((D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).s)) =
       (imagePieceDatum D₀ T t hspan).coeRingHom y := by
   classical
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
   set DI := D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl with hDI
   set DB := imagePieceDatum D₀ T t hspan with hDB
   set F := (DB.coeRingHom).comp (genPiece_rel_forwardLocHom D₀ T t hspan) with hF
@@ -426,9 +426,6 @@ theorem genPiece_rel_forwardCompletion_continuous
     @Continuous _ _ (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl).topology _
       (((imagePieceDatum D₀ T t hspan).coeRingHom).comp (genPiece_rel_forwardLocHom D₀ T t hspan)) := by
   classical
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
   set DI := (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl) with hDI
   set DB := (imagePieceDatum D₀ T t hspan) with hDB
   set F := (DB.coeRingHom).comp (genPiece_rel_forwardLocHom D₀ T t hspan) with hF
@@ -587,8 +584,6 @@ theorem genPiece_rel_backwardLocHom_continuous
     @Continuous _ _ (imagePieceDatum D₀ T t hspan).topology _
       (genPiece_rel_backwardLocHom D₀ T t hspan) := by
   classical
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI hNoethB : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
   set DI := (D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl) with hDI
   set DB := (imagePieceDatum D₀ T t hspan) with hDB
   change @Continuous _ _ (locTopology DB.P DB.T DB.s DB.hopen) _
@@ -845,9 +840,6 @@ theorem genPiece_rel_forward_backward
     (hspan : Ideal.span (T : Set A) = ⊤)
     (y : presheafValue (imagePieceDatum D₀ T t hspan)) :
     genPiece_rel_forward D₀ T t hspan (genPiece_rel_backward D₀ T t hspan y) = y := by
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI hNoethB : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
   have hloc : (genPiece_rel_forward D₀ T t hspan).comp
       (genPiece_rel_backwardLocHom D₀ T t hspan) =
       (imagePieceDatum D₀ T t hspan).coeRingHom := by
@@ -1014,14 +1006,11 @@ theorem imagePieceDatum_mem_rationalOpen_iff
     (D₀ E : RationalLocData A) (hspanE : Ideal.span (E.T : Set A) = ⊤)
     (w : Spv (presheafValue D₀)) :
     haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
     haveI : DecidableEq (presheafValue D₀) := Classical.decEq _
     (w ∈ rationalOpen (imagePieceDatum D₀ E.T E.s hspanE).T
         (imagePieceDatum D₀ E.T E.s hspanE).s ↔
       w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ ∧
         comap D₀.canonicalMap w ∈ rationalOpen E.T E.s) := by
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   have hT : (imagePieceDatum D₀ E.T E.s hspanE).T = E.T.image D₀.canonicalMap := rfl
   have hs : (imagePieceDatum D₀ E.T E.s hspanE).s = D₀.canonicalMap E.s := rfl
@@ -1057,13 +1046,10 @@ theorem imagePieceDatum_rationalOpen_mono
     (hspanE' : Ideal.span (E'.T : Set A) = ⊤)
     (h : rationalOpen E'.T E'.s ⊆ rationalOpen E.T E.s) :
     haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
     rationalOpen (imagePieceDatum D₀ E'.T E'.s hspanE').T
         (imagePieceDatum D₀ E'.T E'.s hspanE').s ⊆
       rationalOpen (imagePieceDatum D₀ E.T E.s hspanE).T
         (imagePieceDatum D₀ E.T E.s hspanE).s := by
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   intro w hw
   rw [imagePieceDatum_mem_rationalOpen_iff] at hw ⊢
   exact ⟨hw.1, h hw.2⟩
@@ -1082,15 +1068,12 @@ theorem imagePieceDatum_rationalOpen_inter
     (h₃ : rationalOpen E₃.T E₃.s =
       rationalOpen E₁.T E₁.s ∩ rationalOpen E₂.T E₂.s) :
     haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
     rationalOpen (imagePieceDatum D₀ E₃.T E₃.s hspanE₃).T
         (imagePieceDatum D₀ E₃.T E₃.s hspanE₃).s =
       rationalOpen (imagePieceDatum D₀ E₁.T E₁.s hspanE₁).T
           (imagePieceDatum D₀ E₁.T E₁.s hspanE₁).s ∩
         rationalOpen (imagePieceDatum D₀ E₂.T E₂.s hspanE₂).T
           (imagePieceDatum D₀ E₂.T E₂.s hspanE₂).s := by
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   ext w
   rw [Set.mem_inter_iff, imagePieceDatum_mem_rationalOpen_iff,
     imagePieceDatum_mem_rationalOpen_iff, imagePieceDatum_mem_rationalOpen_iff, h₃]
@@ -1130,30 +1113,18 @@ theorem relativePiece_equiv_restrict_square
     (hspanE' : Ideal.span (E'.T : Set A) = ⊤)
     (y : presheafValue E) :
     haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-    haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
-    haveI : IsNoetherianRing (presheafValue D₀) :=
-      presheafValue_isNoetherianRing_faithful D₀
     haveI : @CompleteSpace (presheafValue D₀)
         (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
       presheafValue_completeSpace_rightUniformSpace D₀
-    haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
     relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) hspanE'
         (restrictionMap E E' hE'_sub y) =
       restrictionMap (imagePieceDatum D₀ E.T E.s hspanE)
         (imagePieceDatum D₀ E'.T E'.s hspanE')
         (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)
         (relativePiece_equiv D₀ E hE_sub hspanE y) := by
-  haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-  haveI : IsNoetherianRing (presheafValue D₀) :=
-    presheafValue_isNoetherianRing_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   haveI : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
-  haveI : IsStronglyNoetherian (presheafValue D₀) :=
-    presheafValue_isStronglyNoetherian_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
   have hloc :
@@ -1351,11 +1322,6 @@ theorem prop_8_30_basic_laurent_step_flat
   -- `RationalLocData.presheafValuePlusSubring` (ambient `A` carries `[PlusSubring A]`); `[IsHuberRing
   -- B]` follows from `IsTateRing B`.  NO `[CompatiblePlusSubring B]` (which is false-in-general for a
   -- completion — `RationalLocData.P` is an arbitrary pair), NO noeth-`A₀`, NO `[IsDomain]`.
-  letI hTateE : IsTateRing (presheafValue E) := presheafValue_isTateRing_concrete E
-  haveI : IsNoetherianRing (presheafValue E) := presheafValue_isNoetherianRing_faithful E
-  haveI : IsStronglyNoetherian (presheafValue E) :=
-    presheafValue_isStronglyNoetherian_faithful E
-  haveI : IsHuberRing (presheafValue E) := hTateE.toIsHuberRing
   letI : DecidableEq (presheafValue E) := Classical.decEq _
   -- The relative Wedhorn-2.13 locale `Xbar` (`X̄`) of `D'` over `B`.
   set Xbar : RationalLocData (presheafValue E) :=
@@ -1490,8 +1456,6 @@ theorem remark755_dominating_unit_over_presheafValue
           rationalOpen (imagePieceDatum D E.T E.s hspanE).T (imagePieceDatum D E.T E.s hspanE).s →
         (y.1.vle (u : presheafValue D) (imagePieceDatum D E.T E.s hspanE).s ∧
          ¬ y.1.vle (imagePieceDatum D E.T E.s hspanE).s (u : presheafValue D)) := by
-  haveI hTate : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
-  haveI : IsHuberRing (presheafValue D) := hTate.toIsHuberRing
   set W := imagePieceDatum D E.T E.s hspanE with hW
   have hW_rat : W.IsRational := by
     rw [hW]
@@ -1516,7 +1480,6 @@ theorem imagePieceDatum_denomGen_rationalOpen_eq [DecidableEq A] (D₀ : Rationa
     (hs_unit : IsUnit (D₀.canonicalMap s)) :
     rationalOpen (imagePieceDatum D₀ {f, s} s hspan).T (imagePieceDatum D₀ {f, s} s hspan).s =
       rationalOpen ({D₀.canonicalMap f * Ring.inverse (D₀.canonicalMap s)} : Finset (presheafValue D₀)) 1 := by
-  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   have hT : (imagePieceDatum D₀ {f, s} s hspan).T = ({f, s} : Finset A).image D₀.canonicalMap := rfl
   have hSs : (imagePieceDatum D₀ {f, s} s hspan).s = D₀.canonicalMap s := rfl
@@ -1569,7 +1532,6 @@ theorem imagePieceDatum_domUnit_rationalOpen_eq [DecidableEq A] (D₀ : Rational
         (imagePieceDatum D₀ {g, u} s hspan).s =
       rationalOpen ({D₀.canonicalMap g * Ring.inverse (D₀.canonicalMap s)} :
         Finset (presheafValue D₀)) 1 := by
-  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   have hT : (imagePieceDatum D₀ {g, u} s hspan).T =
       ({g, u} : Finset A).image D₀.canonicalMap := rfl
@@ -1621,10 +1583,6 @@ theorem flat_imagePieceDatum_denomGen [DecidableEq A] (D₀ : RationalLocData A)
     @Module.Flat (presheafValue D₀) (presheafValue (imagePieceDatum D₀ {f, s} s hspan)) _ _
       (RingHom.toModule (imagePieceDatum D₀ {f, s} s hspan).canonicalMap) := by
   classical
-  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
-  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
-  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   haveI hCompleteB : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
@@ -1634,7 +1592,6 @@ theorem flat_imagePieceDatum_denomGen [DecidableEq A] (D₀ : RationalLocData A)
   -- route (7.51(2) + [Hu2] 3.3); the internal `restrictionMapHom W U`/`restrictionMap_bijective`
   -- over `presheafValue D₀` (in `e` below) then route through it. The conclusion is about
   -- `W.canonicalMap` (instance-independent), so this is diamond-free.
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   set g : presheafValue D₀ := D₀.canonicalMap f * Ring.inverse (D₀.canonicalMap s) with hg
   set W := imagePieceDatum D₀ {f, s} s hspan with hW
   set U : RationalLocData (presheafValue D₀) :=
@@ -1720,17 +1677,12 @@ theorem flat_imagePieceDatum_domUnit [DecidableEq A] (D₀ : RationalLocData A) 
     @Module.Flat (presheafValue D₀) (presheafValue (imagePieceDatum D₀ {g, u} s hspan)) _ _
       (RingHom.toModule (imagePieceDatum D₀ {g, u} s hspan).canonicalMap) := by
   classical
-  letI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_concrete D₀
-  haveI : IsNoetherianRing (presheafValue D₀) := presheafValue_isNoetherianRing_faithful D₀
-  haveI : IsStronglyNoetherian (presheafValue D₀) := presheafValue_isStronglyNoetherian_faithful D₀
-  haveI : IsHuberRing (presheafValue D₀) := hTateB.toIsHuberRing
   letI : DecidableEq (presheafValue D₀) := Classical.decEq _
   haveI hCompleteB : @CompleteSpace (presheafValue D₀)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
     presheafValue_completeSpace_rightUniformSpace D₀
   -- FAITHFUL re-wiring (see `flat_imagePieceDatum_denomGen`): route the internal
   -- `restrictionMapHom`-over-`presheafValue D₀` through the source-justified faithful `HasLocLift`.
-  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   set gg : presheafValue D₀ := D₀.canonicalMap g * Ring.inverse (D₀.canonicalMap s) with hgg
   set W := imagePieceDatum D₀ {g, u} s hspan with hW
   set U : RationalLocData (presheafValue D₀) :=
@@ -1810,10 +1762,6 @@ theorem flat_presheafValue_coUnitDatum_at_base (D : RationalLocData A) (f : pres
     @Module.Flat (presheafValue D)
       (presheafValue (coUnitDatum (presheafValue_concretePair D) f)) _ _
       (RingHom.toModule (coUnitDatum (presheafValue_concretePair D) f).canonicalMap) := by
-  letI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
-  haveI : IsNoetherianRing (presheafValue D) := presheafValue_isNoetherianRing_faithful D
-  haveI : IsStronglyNoetherian (presheafValue D) := presheafValue_isStronglyNoetherian_faithful D
-  haveI : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
   haveI hCompleteB : @CompleteSpace (presheafValue D)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) :=
     presheafValue_completeSpace_rightUniformSpace D
@@ -2141,10 +2089,6 @@ theorem prop_8_30_imagePiece_assembled
     @Module.Flat (presheafValue D) (presheafValue (imagePieceDatum D E.T E.s hspanE)) _ _
       ((imagePieceDatum D E.T E.s hspanE).canonicalMap).toModule := by
   classical
-  haveI hTateB : IsTateRing (presheafValue D) := presheafValue_isTateRing_concrete D
-  haveI : IsNoetherianRing (presheafValue D) := presheafValue_isNoetherianRing_faithful D
-  haveI : IsStronglyNoetherian (presheafValue D) := presheafValue_isStronglyNoetherian_faithful D
-  haveI : IsHuberRing (presheafValue D) := hTateB.toIsHuberRing
   haveI hCompleteB : @CompleteSpace (presheafValue D)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) :=
     presheafValue_completeSpace_rightUniformSpace D
@@ -2301,11 +2245,8 @@ theorem prop_8_30_flat_of_faithful_base
   -- None of this uses any `PairOfDefinition` / noeth-`A₀`.
   haveI := hTate
   haveI := hNoeth
-  haveI : IsHuberRing (presheafValue D) := hTate.toIsHuberRing
   haveI : NonarchimedeanRing (presheafValue D) := inferInstance
   haveI : T2Space (presheafValue D) := inferInstance
-  haveI : IsStronglyNoetherian (presheafValue D) :=
-    presheafValue_isStronglyNoetherian_faithful D
   -- Steps 2–4 (Remark 7.55 + relative Example 6.38 over `B` + Lemma 8.31): the single genuine
   -- residual, isolated faithfully (NO noeth-`A₀`). See `prop_8_30_relative_laurent_flat`.
   exact prop_8_30_relative_laurent_flat D D' h hD hD'
@@ -2390,7 +2331,6 @@ theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCoveringData A) :
   intro m hm
   haveI : m.IsPrime := hm.isPrime
   -- `presheafValue C.base` is a Tate ring (noeth-A₀-free faithful pair).
-  haveI : IsTateRing (presheafValue C.base) := presheafValue_isTateRing_faithful C.base
   -- A maximal (hence proper) ideal of a Tate ring is non-open.
   have hm_notOpen : ¬IsOpen (m : Set (presheafValue C.base)) :=
     tate_proper_ideal_not_open hm.ne_top

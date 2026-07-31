@@ -33,6 +33,11 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A]
   [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
 
+/- These are `theorem`s upstream, so every proof below introduced them by hand.
+Registered *locally* so the blast radius stays in this file. Occurrences inside a
+declaration's SIGNATURE are part of its statement and are deliberately left. -/
+attribute [local instance] hasLocLiftPowerBounded_faithful
+
 /-- **Pair-level sheafiness makes the public structure presheaf a sheaf of
 topological rings** (Wedhorn Remark 8.20, generic form): the projective-limit
 presheaf of `Spa (A, Aplus)` satisfies `Hom_cont(T, −)`-unique-gluing for every
@@ -41,11 +46,9 @@ theorem isSheafyFor_structurePresheaf_isSheafOfTopologicalRings
     (Aplus : RingOfIntegralElements A) (h : IsSheafyFor A Aplus) :
     letI := Aplus.toPlusSubring
     haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
     TopCat.Presheaf.IsSheafOfTopologicalRings (structurePresheaf A) := by
   letI := Aplus.toPlusSubring
   haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   exact (structurePresheaf_isSheafOfTopologicalRings_iff A).mpr h
 
 /-- **Pair-level sheafiness makes the public structure presheaf a categorical
@@ -54,11 +57,9 @@ theorem isSheafyFor_structurePresheaf_isSheaf
     (Aplus : RingOfIntegralElements A) (h : IsSheafyFor A Aplus) :
     letI := Aplus.toPlusSubring
     haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
     (structurePresheaf A).IsSheaf := by
   letI := Aplus.toPlusSubring
   haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   exact structurePresheaf_isSheaf A h
 
 end PairLevel
@@ -77,8 +78,6 @@ theorem isSheafyTateRing_structurePresheaf_isSheafOfTopologicalRings
     letI := Bplus.toPlusSubring
     haveI : IsRingOfIntegralElements
       ((CompletionModel A P)⁺ : Subring (CompletionModel A P)) := Bplus.2
-    haveI : HasLocLiftPowerBounded (CompletionModel A P) :=
-      hasLocLiftPowerBounded_faithful
     TopCat.Presheaf.IsSheafOfTopologicalRings
       (structurePresheaf (CompletionModel A P)) :=
   isSheafyFor_structurePresheaf_isSheafOfTopologicalRings Bplus (h P Bplus)
@@ -91,8 +90,6 @@ theorem isSheafyTateRing_structurePresheaf_isSheaf
     letI := Bplus.toPlusSubring
     haveI : IsRingOfIntegralElements
       ((CompletionModel A P)⁺ : Subring (CompletionModel A P)) := Bplus.2
-    haveI : HasLocLiftPowerBounded (CompletionModel A P) :=
-      hasLocLiftPowerBounded_faithful
     (structurePresheaf (CompletionModel A P)).IsSheaf :=
   isSheafyFor_structurePresheaf_isSheaf Bplus (h P Bplus)
 
@@ -104,8 +101,6 @@ theorem isSheafyTateRing_isLimitSheaf (h : IsSheafyTateRing A) (P : PairOfDefini
     letI := Bplus.toPlusSubring
     haveI : IsRingOfIntegralElements
       ((CompletionModel A P)⁺ : Subring (CompletionModel A P)) := Bplus.2
-    haveI : HasLocLiftPowerBounded (CompletionModel A P) :=
-      hasLocLiftPowerBounded_faithful
     IsLimitSheaf (CompletionModel A P) :=
   h P Bplus
 

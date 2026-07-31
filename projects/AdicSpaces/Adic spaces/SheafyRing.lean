@@ -86,6 +86,11 @@ variable (A : Type u) [CommRing A] [TopologicalSpace A]
 
 /-! ### Pair-level sheafiness for an explicit valid choice -/
 
+/- These are `theorem`s upstream, so every proof below introduced them by hand.
+Registered *locally* so the blast radius stays in this file. Occurrences inside a
+declaration's SIGNATURE are part of its statement and are deliberately left. -/
+attribute [local instance] hasLocLiftPowerBounded_faithful
+
 /-- **Pair-level sheafiness** (Wedhorn Definition 8.26 for one affinoid pair, in the
 genuine all-open vocabulary): the pair `(A, Aplus)` — with `Aplus` a **bundled ring of
 integral elements**, so invalid bare subrings cannot be supplied — is sheafy when the
@@ -100,7 +105,6 @@ so no `HasLocLiftPowerBounded` appears in this definition or anywhere downstream
 def IsSheafyFor (Aplus : RingOfIntegralElements A) : Prop :=
   letI := Aplus.toPlusSubring
   haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   IsLimitSheaf A
 
 /-- **The complete-ring specialization of Wedhorn Definition 8.26**: `A` is sheafy
@@ -128,7 +132,6 @@ theorem isSheafyFor_of_stronglyNoetherianTate [IsStronglyNoetherian A]
   letI := Aplus.toPlusSubring
   haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
   letI : IsNoetherianRing A := IsStronglyNoetherian.isNoetherianRing A
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   haveI : IsSheafy A := isSheafy_of_stronglyNoetherian_828b
   show IsLimitSheaf A
   exact isLimitSheaf_of_isSheafy
@@ -370,7 +373,6 @@ def StandardSheafCondition [IsTateRing A] [T2Space A]
   ∀ (S : StandardCoverData A) (B : Subring A) (hB : IsRingOfIntegralElements B),
     letI : PlusSubring A := ⟨B⟩
     haveI : IsRingOfIntegralElements (A⁺ : Subring A) := hB
-    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
     Topology.IsEmbedding (productRestrictionSub A S.toCovering) ∧
     ∀ (f : ∀ D : ↥S.toCovering.covers, presheafValue D.1),
       S.toCovering.AllDataCompatible f →
@@ -399,7 +401,6 @@ theorem standardSheafCondition_of_isSheafyComplete [IsTateRing A]
   intro S B hB
   letI : PlusSubring A := ⟨B⟩
   haveI : IsRingOfIntegralElements (A⁺ : Subring A) := hB
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   have hlimit : IsLimitSheaf A := h ⟨B, hB⟩
   haveI hSheafy : IsSheafy A := isSheafy_of_isLimitSheaf hlimit
   refine ⟨?_, ?_⟩

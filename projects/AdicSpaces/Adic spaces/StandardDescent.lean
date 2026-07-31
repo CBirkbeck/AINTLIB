@@ -70,6 +70,11 @@ namespace ValuationSpectrum
 
 /-! ### The factorization principle (elementary topology; WO2 task 4) -/
 
+/- These are `theorem`s upstream, so every proof below introduced them by hand.
+Registered *locally* so the blast radius stays in this file. Occurrences inside a
+declaration's SIGNATURE are part of its statement and are deliberately left. -/
+attribute [local instance] hasLocLiftPowerBounded_faithful
+
 /-- **Factorization principle for embeddings**: if `g ∘ f` is a topological
 embedding and `g` is continuous, then `f` is a topological embedding. (Elementary;
 proved from the filter characterization of induced topologies. Used for
@@ -117,11 +122,9 @@ theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
   -- ——— assertions at the GIVEN pair (derived before the target instance enters) ———
   have key : Topology.IsEmbedding (letI := Aplus.toPlusSubring;
         haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-        haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
         productRestrictionSub A (StandardCoverData.toCovering S)) ∧
       (letI := Aplus.toPlusSubring
        haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-       haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
        ∀ (f : ∀ D : ↥(StandardCoverData.toCovering S).covers, presheafValue D.1),
         (StandardCoverData.toCovering S).ExactIntersectionCompatible
           (StandardCoverData.toCovering_isRational S) f →
@@ -131,7 +134,6 @@ theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
               ((StandardCoverData.toCovering S).hsubset D.1 D.2) x = f D) := by
     letI := Aplus.toPlusSubring
     haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
     haveI hSheafy₁ : IsSheafy A := isSheafy_of_isLimitSheaf h
     refine ⟨IsSheafy.embedding _ (StandardCoverData.toCovering_isRational S),
       fun f hf => IsSheafy.gluing _ (StandardCoverData.toCovering_isRational S) f ?_⟩
@@ -140,7 +142,6 @@ theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
   -- ——— the assertions at the TARGET pair ———
   letI : PlusSubring A := ⟨B⟩
   haveI : IsRingOfIntegralElements (A⁺ : Subring A) := hB
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   refine ⟨?_, ?_⟩
   · -- embedding: the product restriction of the standard datum is the **same
     -- function** at both pairs (the instance and containment arguments are
@@ -252,7 +253,6 @@ theorem isSheafy_rationalCovering_of_covers_empty
         restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂)) →
       ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   have hbase_empty : rationalOpen C.base.T C.base.s = ∅ := by
     rw [Set.eq_empty_iff_forall_notMem]
     intro v hv
@@ -282,7 +282,6 @@ theorem isSheafy_of_standardSheafCondition_at
     (hstd : StandardSheafCondition A) (href : HasStandardRefinementsAt A) :
     haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
     IsSheafy A := by
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   classical
   constructor
   · -- ——— embedding ———
@@ -438,7 +437,6 @@ theorem isSheafyFor_of_standardSheafCondition (hstd : StandardSheafCondition A)
   classical
   letI := Bplus.toPlusSubring
   haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Bplus.2
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   letI iA : DecidableEq A := Classical.decEq A
   letI iR : DecidableEq (RationalLocData A) := Classical.decEq _
   haveI : IsSheafy A := isSheafy_of_standardSheafCondition_at hstd (href iA iR)

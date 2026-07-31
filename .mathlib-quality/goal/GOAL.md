@@ -3648,3 +3648,221 @@ Approach: keep doing it per-file with `attribute [local instance]`, which is rev
 cannot alter global resolution for other projects in the workspace. Promoting these to real
 `instance`s at their definition sites is the better end state but is a statement-level change
 (`/generalise` territory, owner call), so it is NOT being done unilaterally here.
+
+### Round 2 executed: −389 more lines (911 total from WedhornCechAcyclicity)
+
+`presheafValue_completeSpace_rightUniformSpace` + `hasLocLiftPowerBounded_faithful` added to the
+local-instance list; **157 further blocks, 389 lines** deleted. Task 2: 216 → 215.
+
+Round 2 removed MORE than round 1 per block (389/157 ≈ 2.5 lines vs 508/337 ≈ 1.5) because the
+`@CompleteSpace … (rightUniformSpace …)` block is three lines wide, not one.
+
+Running total for this file: **911 lines** removed, ~340 → ~180 `haveI`s.
+
+### Extending the fix to other files — two things that had to be checked first
+
+**1. `presheafValue_isTateRing` CANNOT be an instance, despite 42 manual uses across 4 files.**
+Its signature is `[IsTateRing A] [IsNoetherianRing A] (P : PairOfDefinition A) [IsNoetherianRing P.A₀] (D₀ …)`
+— `P` is **explicit and does not appear in the conclusion** `IsTateRing (presheafValue D₀)`, so as
+an instance `P` would be an unresolvable metavariable. Exactly the same failure shape as the
+`{z : ℤ}` implicit earlier: *an argument that only the hypotheses mention cannot be solved.*
+Only `presheafValue_isTateRing_concrete` (`[IsTateRing A] (D₀)`) qualifies. Frequency alone
+would have picked the wrong lemma.
+
+**2. Many occurrences are in SIGNATURES, where they are part of the statement.**
+`RelativeRationalLocData.lean` has 44 occurrences — **21 of them inside declaration signatures**
+(`… (D : RationalLocData A) : letI : IsTateRing (presheafValue E) := … ; …`). Deleting those
+would have silently changed 21 theorem statements. Per-file split, body vs signature:
+RelativeRationalLocData 23/21, RelativePieceKeystone 32/4, StandardDescent 7/3, SheafyEndpoints
+4/0, SheafyRing 4/0. `preamble_file.py` is therefore body-scoped via `body_span`, and reports
+the signature count it skipped so the number is visible rather than assumed.
+  → The WedhornCechAcyclicity script got away without body-scoping only because the signature
+    occurrences there were `(hB : haveI …`, which do not start the line. That was luck, not
+    design; this file's signature `letI`s *do* start the line.
+
+**GOTCHA (caught before it built): the attribute must go INSIDE the namespace.** Anchoring the
+insertion on the first `/--`/`/-!` put it directly after the imports — above the module
+docstring and, fatally, above `namespace ValuationSpectrum`, where the bare lemma name does not
+resolve. Fixed to anchor on the first real declaration and walk back over its own docstring.
+
+### Applied across five files (−96 body lines, 28 signature occurrences correctly preserved)
+
+| file | removed | signature occurrences left |
+|---|---:|---:|
+| RelativeRationalLocData | 23 | 21 |
+| RelativePieceKeystone | 52 | 4 |
+| SheafyEndpoints | 10 | 0 |
+| StandardDescent | 7 | 3 |
+| SheafyRing | 4 | 0 |
+
+Deliberately NOT touched: LaurentRefinementCore, LaurentOverlap, IteratedOverlapEquiv,
+RestrictionFlatness (~42 uses). They all go through `presheafValue_isTateRing`, which takes an
+explicit `P : PairOfDefinition A` absent from its conclusion and therefore cannot be an
+instance. Fixing those needs the `_concrete` variant to be substituted at each site — a real
+proof edit, not a registration, so it is left for the per-proof pass.
+
+Running total for this dedup thread: **1007 lines** removed (911 WedhornCechAcyclicity + 96).
+
+**MISTAKE (caught by the build): I did not repeat the occurrence check on the new files.**
+For WedhornCechAcyclicity I verified that `hTateB` had no surviving uses before deleting its
+binding. Applying the same script to RelativePieceKeystone, I skipped that step — and it *did*
+have surviving uses: 14 × `haveI : IsHuberRing … := hTateB.toIsHuberRing`, which broke with
+`Unknown identifier hTateB.toIsHuberRing` once the binding went.
+
+The fix was the same as before (those `IsHuberRing` lines are themselves redundant, since
+`IsTateRing extends IsHuberRing`, so they get deleted too — 17 more lines). But the lesson is
+about process, not the fix: **the per-file verification is part of the technique, not a one-off
+for the first file.** A script that encodes "delete these blocks" does NOT carry over the
+evidence that made deletion safe in the file it was written for. Re-run the occurrence count on
+every new target.
+
+Two secondary observations:
+  * The failure surfaced in SheafyRing / SheafyEndpoints / StandardDescent builds too, but every
+    error pointed at RelativePieceKeystone — a dependency. Those three files' own edits were
+    fine. Reading WHICH file the errors name, not which build reported them, avoided three
+    unnecessary reverts.
+  * 4 `haveI hTateB` bindings survive, all inside signatures, now unused. They are part of
+    statements so they stay; an unused named binding in a type is harmless.
+
+Ran the check retroactively on the other four files rather than waiting for a build to find a
+second instance: RelativeRationalLocData / StandardDescent / SheafyEndpoints / SheafyRing had
+**only anonymous** `haveI`/`letI` bindings removed, so no dangling-reference risk. A one-line
+diff-based check (`grep '^-\s*haveI\s+[A-Za-z_]'` then count surviving refs) makes this cheap
+enough to run on every file, and it should be part of the technique from here on.
+
+### Batch complete (pending gate): −502 lines across 6 files
+
+WedhornCechAcyclicity round 2 (−390) + RelativePieceKeystone (−78, incl. the 17 redundant
+`IsHuberRing` lines) + RelativeRationalLocData (−28) + SheafyEndpoints (−15) + StandardDescent
+(−12) + SheafyRing (−9). All six modules built individually green; `imagePieceDatum`
+axiom-clean; 28 signature occurrences deliberately preserved.
+
+**Running total for the whole instance-preamble thread: ~1400 lines removed.**
+
+Task-2 distribution now (213 in scope, median deficit 36):
+
+| deficit | count |
+|---|---|
+| 1-5 | 2 |
+| 6-15 | 36 |
+| 16-30 | 53 |
+| 31-60 | 58 |
+| 61+ | 64 |
+
+The dedup work is essentially exhausted as a *task-2* lever — it removed >1400 lines but only
+a handful of proofs crossed 50, because the duplication was spread thinly across many short
+proofs rather than concentrated in the long ones. It was, however, the single biggest `/cleanup`
+(task 3) win available. From here task 2 is per-proof decomposition and nothing else.
+
+## Task-2 worklist for the per-proof phase
+
+Ranked all 213 by "can joins + rwa + extracting the N largest top-level `have`s clear it".
+**96 of 213 clear with a bounded number of extractions**, and a large sub-block clear with
+exactly ONE. Head of the queue (need is AFTER joins+rwa are applied, so it is the real
+extraction requirement):
+
+| extractions | need | top `have` | decl |
+|---|---|---|---|
+| 1 | 2 | 8L | `CechCohomology.cechDiff_comp_cechDiff` |
+| 1 | 2 | 11L | `WittF.gaussValueF_teichmuller_sub_le_of_le_scaled` |
+| 1 | 2 | 24L | `RestrictedModule.restrictedModule_map_surjective` |
+| 1 | 4 | 15L | `Lemma745.exists_valuation_extension` |
+| 1 | 5 | 21L | `Presheaf.…archimedean_pair_of_topNilp_lt_one` |
+| 1 | 6 | 15L | `FJP.exists_d1_lift` (patch already written) |
+| 1 | 7 | 26L | `NoetherianTateModules.isClosed_ideal_of_noetherian` |
+| 1 | 9 | 34L | `ChartVObj.chartPlus_le_completedPlusSubring_of_dense` |
+
+**Caveat this ranking does NOT capture, and it is the one that decides feasibility:** it assumes
+an extracted `have` can be called back in one line, which is only true when its *local context*
+is small. A 30-line `have` depending on 15 local bindings needs a 15-argument helper and is a
+worse proof, not a better one — that is exactly why `wLoc_le_of_interior_bound` (15 deps) was
+refused for extraction earlier and eventually fell to joins+rwa instead. So the queue is
+ordered by extraction count, but each entry still gets the local-dependency check before being
+attempted, and entries that fail it get recorded as refusals with the dep count.
+
+### Local-dependency check on the queue head — all eight pass
+
+Deps = how many *locally bound* names the candidate `have` references (so, how many arguments
+the extracted helper would need). Measured with the Unicode-aware identifier regex
+`[^\W\d][\w'₀-₉]*` — the ASCII-only version had understated these before, tokenising `hρsyz` as
+`h` and matching bare `α`/`ϖ'` not at all, which promoted the hardest candidates.
+
+| decl | have | deps | verdict |
+|---|---:|---:|---|
+| `chartPlus_le_completedPlusSubring_of_dense` | 34L | **0** | GOOD |
+| `cechDiff_comp_cechDiff` | 8L | **0** | GOOD |
+| `exists_d1_lift` | 15L | 1 | GOOD |
+| `restrictedModule_map_surjective` | 24L | 2 | GOOD |
+| `gaussValueF_teichmuller_sub_le_of_le_scaled` | 11L | 4 | ok |
+| `mem_prime_of_rational_subset_open` | 19L | 4 | ok |
+| `isClosed_ideal_of_noetherian` | 26L | 5 | ok |
+| `exists_valuation_extension` | 15L | 6 | ok |
+
+No refusals in the head of the queue, so this phase is genuinely executable rather than a wall.
+`chartPlus_le_completedPlusSubring_of_dense` is the standout: a 34-line `have htend : Filter.Tendsto …`
+with **zero** local dependencies against a need of 9 — a free-standing convergence fact that
+should have been its own lemma from the start.
+
+### CORRECTION: the dep counts above were wrong — it only counted `have/obtain/let/set` binders
+
+The counter ignored every OTHER tactic that introduces local names: `choose`, `intro`, `rintro`,
+`rcases`, `cases`, `induction`. In `chartPlus_le_completedPlusSubring_of_dense` the candidate
+`have htend` visibly uses `hseq`, introduced by `choose hseq hball hw1 hw2 using …` at L266 —
+counted as a dep of zero. Corrected figures:
+
+| decl | have | deps (was) | verdict |
+|---|---:|---:|---|
+| `cechDiff_comp_cechDiff` | 8L | 0 (0) | GOOD |
+| `exists_d1_lift` | 15L | 1 (1) | GOOD |
+| `exists_valuation_extension` | 15L | 4 (6) | ok |
+| `mem_prime_of_rational_subset_open` | 19L | 4 (4) | ok |
+| `isClosed_ideal_of_noetherian` | 26L | 5 (5) | ok |
+| `gaussValueF_teichmuller_sub_le_of_le_scaled` | 11L | 6 (4) | ok |
+| `restrictedModule_map_surjective` | 24L | **7** (2) | **REFUSE** |
+| `chartPlus_le_completedPlusSubring_of_dense` | 34L | **8** (0) | **REFUSE** |
+
+So the entry I singled out as "the standout — a free-standing convergence fact with zero local
+dependencies" was the **worst** candidate in the list. A 34-line `have` needing an 8-argument
+helper is a worse proof than the block it replaces. Both refusals are recorded with their dep
+counts rather than silently dropped.
+
+The estimate is now conservative in the right direction: it can still *over*-count (a name
+bound and then shadowed, or bound in a sibling branch), but it no longer under-counts, and
+under-counting is the dangerous direction — it promotes exactly the proofs that will fight back.
+
+### Corrected worklist for the remaining 213
+
+Re-ranked with the fixed dep counter, and restricting extractions to `have` blocks with **≤4
+local deps** (helpers any bigger are a net loss — the `chartPlus` lesson):
+
+* **0** clear on joins+rwa alone (that seam really is exhausted)
+* **54** clear via extraction(s) of small-dep blocks — the executable queue
+* **159** do not, and need something harder: multi-level decomposition, restructuring the proof
+  so the sub-result has a small interface, or a genuinely new shared lemma
+
+Note the ranking picks the best *usable* block, not the biggest one — which is why
+`restrictedModule_map_surjective` and `chartPlus_le_completedPlusSubring_of_dense` are still in
+the queue despite their largest `have` being refused: each has a smaller, low-dep block that
+does the job.
+
+That 159 is the honest size of what is left, and it will not fall to tooling. Recording it as a
+number rather than discovering it proof-by-proof.
+
+### Refinement: `ext`/`funext` also bind, and not all deps are equal
+
+Two further corrections to the dep metric, found while reading `cechDiff_comp_cechDiff`:
+
+1. **`ext` and `funext` introduce names too** and were not in the binder list (`ext σ` binds
+   `σ`, which the candidate `set T` uses). Same class of bug as the missing `choose`.
+2. **More important: not every dep costs the same.** A dep that is a *theorem parameter*
+   (`F`, `U`, `q`, `f` here) is a perfectly good helper argument — it is the mathematical data
+   the sub-result is about. A dep that is a *derived local* (something the proof computed:
+   `hseq` from a `choose`, an intermediate `have`) is the expensive kind, because the helper
+   either has to take it as an opaque hypothesis or recompute it.
+   `cechDiff_comp_cechDiff`'s `set T` depends on 5 names, but *all five* are theorem parameters
+   plus the `ext` variable — so the natural helper `cechDiffTerm F U q f σ` is clean, and the
+   raw count of 5 would have wrongly demoted it.
+
+So the working rule is: **count derived locals, not arity.** The refusals recorded above
+(`chartPlus…` at 8, `restrictedModule_map_surjective` at 7) stand — those are derived locals,
+not parameters — but the threshold should be applied to that narrower count from here on.
