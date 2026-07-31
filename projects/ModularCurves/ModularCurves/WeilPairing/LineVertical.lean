@@ -1250,6 +1250,24 @@ theorem divisorTwistHom_comp_cokernelπ_eq_zero {J₁ J₂ : C.IdealSheafData}
         rw [hcomp, divisorTwistHom_app_unit J₁ L (Opposite.op W) t]
         exact hval t
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The per-section evaluation quotient**: the induced map from the smaller-ideal
+twist cokernel to the larger one, by the universal property. -/
+noncomputable def cokernelTwistDesc {J₁ J₂ : C.IdealSheafData}
+    (h12 : J₁ ≤ J₂) (L : C.Modules) :
+    Limits.cokernel (divisorTwistHom J₁ L) ⟶
+      Limits.cokernel (divisorTwistHom J₂ L) :=
+  Limits.cokernel.desc _ (Limits.cokernel.π (divisorTwistHom J₂ L))
+    (divisorTwistHom_comp_cokernelπ_eq_zero h12 L)
+
+@[reassoc (attr := simp)]
+theorem cokernelTwistDesc_π {J₁ J₂ : C.IdealSheafData}
+    (h12 : J₁ ≤ J₂) (L : C.Modules) :
+    Limits.cokernel.π (divisorTwistHom J₁ L) ≫ cokernelTwistDesc h12 L =
+      Limits.cokernel.π (divisorTwistHom J₂ L) :=
+  Limits.cokernel.π_desc _ _ _
+
 end LineAssembly
 
 end Twist

@@ -30500,3 +30500,15 @@ locally zero because it vanishes on unit-images (divisorTwistHom_app_unit +
 idealSections_mono casts the D-tensor to a P-tensor + cokernel.condition-elementwise)
 and the unit is locally surjective (hWunit-derivation, in-tree). All within proven
 pattern territory; no new structure-literals between ofPresheaf-machines.
+
+### [A4-e2 desc-route] steps i-iii DONE 2026-07-31
+`hom_eq_zero_of_locally_zero` + `divisorTwistHom_comp_cokernelπ_eq_zero` +
+`cokernelTwistDesc` (+ π-compat simp) all PROVEN. The per-section evaluation
+quotients coker(twist-D) ⟶ coker(twist-P), coker(twist-Q) exist with the universal
+property, NO idealModuleLE needed. REMAINING for e2 (next stretch): per-section
+Γ ≅ Γ(S,⊤) for coker(twist-P) with L trivialized on the chart — mirror the
+SuccessorSections pipeline ((b)-bridge: their restrictIsoIdealCoker Data-pattern with
+the L-twist conjugated by eL, or the direct pushforward-unit identification) — then
+the PAIR (via the two descs) is the e2-map; injectivity/surjectivity from the 3a-split
+transported (or ker-count via concentration). Then A-rows, [A4-c1] unimodularity,
+wrappers ⟹ GAP-A-4 CLOSED.
