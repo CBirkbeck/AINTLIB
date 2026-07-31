@@ -315,4 +315,122 @@ theorem isBounded_range_bPoint_pow (ϖ : Uniformizer K)
 
 end BPoint
 
+section QTate
+
+open ValuationSpectrum FiniteJet.GraphKoszul
+
+open scoped NormedField Valued
+
+variable {K : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
+  [CompleteSpace K]
+variable {w : ℕ → ℕ} {N : ℕ}
+
+/-- In a nontrivial graph model the unit has norm one: a lift of `1` of norm
+`< 1` would make `1` minus that lift — an element of the graph ideal — a unit. -/
+theorem norm_one_qHead (DH : RationalLocData (WPHead K w N))
+    [hnt : Nontrivial (QHead DH)] : ‖(1 : QHead DH)‖ = 1 := by
+  have hntq : Nontrivial
+      (P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH) := hnt
+  show ‖(1 : P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH)‖ = 1
+  set r : ℝ := ‖(1 : P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH)‖ with hr
+  have hle : r ≤ 1 := by
+    rw [hr]
+    calc ‖(1 : P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH)‖
+        = ‖Ideal.Quotient.mk (headGraphIdeal DH)
+            (1 : P (WPHead K w N) DH.T.card)‖ := by rw [map_one]
+      _ ≤ ‖(1 : P (WPHead K w N) DH.T.card)‖ := Ideal.Quotient.norm_mk_le _ _
+      _ = 1 := norm_one
+  refine le_antisymm hle ?_
+  by_contra hlt
+  push_neg at hlt
+  obtain ⟨a, ha, han⟩ :=
+    Ideal.Quotient.norm_mk_lt
+      (1 : P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH)
+      (by linarith : (0 : ℝ) < 1 - r)
+  have ha1 : ‖a‖ < 1 := by
+    have : r + (1 - r) = 1 := by ring
+    rw [← hr, this] at han
+    exact han
+  have hmem : (1 : P (WPHead K w N) DH.T.card) - a ∈ headGraphIdeal DH := by
+    rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_one, ha]
+    exact sub_self _
+  have hunit : IsUnit ((1 : P (WPHead K w N) DH.T.card) - a) :=
+    (Units.oneSub a ha1).isUnit
+  have htop : headGraphIdeal DH = ⊤ :=
+    Ideal.eq_top_of_isUnit_mem _ hmem hunit
+  have hzero : (1 : P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH) = 0 := by
+    rw [show (1 : P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH) =
+      Ideal.Quotient.mk (headGraphIdeal DH) 1 from (map_one _).symm,
+      Ideal.Quotient.eq_zero_iff_mem, htop]
+    trivial
+  exact one_ne_zero hzero
+
+/-- Multiplication by a nonzero constant scales the norm of the graph model:
+the constant is a unit upstairs, so it permutes the lifts of an element. -/
+theorem norm_headToQ_const_mul (DH : RationalLocData (WPHead K w N)) {c : K}
+    (hc : c ≠ 0) (x : QHead DH) :
+    ‖headToQ DH (constHead K w N c) * x‖ = ‖c‖ * ‖x‖ := by
+  have hcpos : 0 < ‖c‖ := norm_pos_iff.mpr hc
+  set tP : P (WPHead K w N) DH.T.card :=
+    polyToP (MvPolynomial.C (constHead K w N c)) with htP
+  set tP' : P (WPHead K w N) DH.T.card :=
+    polyToP (MvPolynomial.C (constHead K w N c⁻¹)) with htP'
+  have hscale : ∀ y : P (WPHead K w N) DH.T.card, ‖tP * y‖ = ‖c‖ * ‖y‖ := by
+    intro y
+    rw [htP, norm_tP_mul (constHead K w N c) (fun z => norm_wphead_mul _ z) y,
+      norm_constHead]
+  have hscale' : ∀ y : P (WPHead K w N) DH.T.card,
+      ‖tP' * y‖ = ‖c‖⁻¹ * ‖y‖ := by
+    intro y
+    rw [htP', norm_tP_mul (constHead K w N c⁻¹)
+      (fun z => norm_wphead_mul _ z) y, norm_constHead, norm_inv]
+  have hinv : tP' * tP = 1 := by
+    rw [htP, htP', ← map_mul, ← map_mul, ← map_mul, inv_mul_cancel₀ hc,
+      map_one, map_one, map_one]
+  set y : P (WPHead K w N) DH.T.card ⧸ headGraphIdeal DH := x with hy
+  show ‖Ideal.Quotient.mk (headGraphIdeal DH) tP * y‖ = ‖c‖ * ‖y‖
+  refine le_antisymm ?_ ?_
+  · refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨a, ha, han⟩ := Ideal.Quotient.norm_mk_lt y (div_pos hε hcpos)
+    have hlift : Ideal.Quotient.mk (headGraphIdeal DH) (tP * a) =
+        Ideal.Quotient.mk (headGraphIdeal DH) tP * y := by rw [map_mul, ha]
+    calc ‖Ideal.Quotient.mk (headGraphIdeal DH) tP * y‖
+        ≤ ‖tP * a‖ := by rw [← hlift]; exact Ideal.Quotient.norm_mk_le _ _
+      _ = ‖c‖ * ‖a‖ := hscale a
+      _ ≤ ‖c‖ * (‖y‖ + ε / ‖c‖) :=
+          mul_le_mul_of_nonneg_left han.le (norm_nonneg c)
+      _ = ‖c‖ * ‖y‖ + ε := by field_simp
+  · refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨z, hz, hzn⟩ := Ideal.Quotient.norm_mk_lt
+      (Ideal.Quotient.mk (headGraphIdeal DH) tP * y) hε
+    have hlift : Ideal.Quotient.mk (headGraphIdeal DH) (tP' * z) = y := by
+      rw [map_mul, hz, ← mul_assoc, ← map_mul, hinv, map_one, one_mul]
+    have hxle : ‖y‖ ≤ ‖c‖⁻¹ * ‖z‖ := by
+      rw [← hscale' z, ← hlift]
+      exact Ideal.Quotient.norm_mk_le _ _
+    calc ‖c‖ * ‖y‖ ≤ ‖c‖ * (‖c‖⁻¹ * ‖z‖) :=
+          mul_le_mul_of_nonneg_left hxle (norm_nonneg c)
+      _ = ‖z‖ := by field_simp
+      _ ≤ ‖Ideal.Quotient.mk (headGraphIdeal DH) tP * y‖ + ε := hzn.le
+
+/-- **The graph model is a Tate ring**: scaling by a constant pseudo-uniformizer
+is exact on the quotient norm. -/
+theorem isTateRing_qHead (DH : RationalLocData (WPHead K w N))
+    [hnt : Nontrivial (QHead DH)] : IsTateRing (QHead DH) := by
+  obtain ⟨c, hcu, hc1, hc0⟩ := exists_norm_window' K
+  have hcne : c ≠ 0 := by
+    intro h
+    rw [h, norm_zero] at hc0
+    exact lt_irrefl 0 hc0
+  haveI hnoc : NormOneClass (QHead DH) := ⟨norm_one_qHead DH⟩
+  have hnormt : ‖headToQ DH (constHead K w N c)‖ = ‖c‖ := by
+    have h := norm_headToQ_const_mul DH hcne (1 : QHead DH)
+    rwa [mul_one, norm_one, mul_one] at h
+  exact FiniteJet.isTateRing_of_scale (headToQ DH (constHead K w N c))
+    ((hcu.map (constHead K w N)).map (headToQ DH))
+    (by rw [hnormt]; exact hc1) (by rw [hnormt]; exact hc0)
+    (fun x => by rw [hnormt]; exact norm_headToQ_const_mul DH hcne x)
+
+end QTate
+
 end WeightedParity

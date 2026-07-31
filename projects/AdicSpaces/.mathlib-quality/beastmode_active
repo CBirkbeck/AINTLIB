@@ -1,1 +1,1 @@
-FOCUS: BETA brick (iv) — the bounded evaluation eps := mvEvalHomBounded (mkKappaP, continuous_mkKappaP) bPoint (isBounded_range_bPoint_pow) composed with a generic toTopRestricted; then the polynomial formula (MvPolynomial.ringHom_ext) and Phi/closed-kernel/density.
+FOCUS: BETA main theorem — level-one surjectivity of kappa(p) -> Q/pQ via (1) pQ closed [isTateRing_qHead + brick 1], (2) range j fin-dim closed [Submodule.closed_of_finiteDimensional], (3) dense polynomial images [ringHom_ext + tendsto_polyToP_truncTotal]. Tate package for QHead just landed.

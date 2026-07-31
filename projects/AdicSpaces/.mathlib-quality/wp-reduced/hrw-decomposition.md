@@ -807,3 +807,45 @@ quotient-top head⧸𝔭: T2 via t3_quotient_of_isClosed + brick-1 closedness;
 FiniteDimensional transported along the identity; ContinuousSMul K via
 continuousSMul_quotient needing ContinuousSMul K head — constants isometric).
 Same alias pattern for κ(𝔮) on the QHead side.
+
+## BETA ROUTE SIMPLIFIED (2026-07-31): no evaluation hom needed
+
+While implementing R1′ a much cheaper route appeared, and it is the one being
+built.  Surjectivity of `j : κ(𝔭) → Q/𝔭Q` follows from THREE facts, none of
+which needs the bounded evaluation ε, its continuity, or the canonical Tate
+topology:
+
+1. **Hausdorff target**: `𝔭Q` is closed in `Q` (brick 1 = Wedhorn 6.17 normed
+   form, whose inputs are `IsNoetherianRing (QHead)` ✓ and the NEW
+   `isTateRing_qHead`), so `Q/𝔭Q` is a normed ring.
+2. **`range j` is closed**: it is the image of the finite-dimensional
+   `κ(𝔭)` under a `K`-linear map, hence a finite-dimensional subspace of a
+   Hausdorff TVS (`Submodule.closed_of_finiteDimensional`).  This is where
+   `module_finite_residue_head` enters.
+3. **`range j` is dense**: polynomials are dense in `A⟨T⟩`
+   (`tendsto_polyToP_truncTotal`), the composite `A⟨T⟩ ↠ Q ↠ Q/𝔭Q` is
+   continuous and surjective (so images of a dense set are dense), and each
+   polynomial's image lies in `range j` by `MvPolynomial.ringHom_ext`: the two
+   ring homs agree on constants and send `Xᵢ` to `j(bᵢ)` — using only that
+   `s̄` is a UNIT in the field `κ(𝔭)` and the graph relation
+   `s̄·T̄ᵢ = t̄ᵢ` (`headConst_datumEnum`).
+
+Closed + dense ⟹ `range j = ⊤`.  Then `Q/𝔭Q ≅ κ(𝔭)` is a field, so `𝔭Q` is
+maximal, and `𝔭Q ⊆ 𝔮 ≠ Q` forces `𝔭Q = 𝔮` — the input the L1 chain wants.
+
+The adjudicated κ→κ[ε]/(ε²) counterexample does not apply: it refutes
+"split alone ⟹ onto", whereas here the density of the T-polynomials inside
+`range j` is what does the work.
+
+**New Tate package for the graph model** (`WP/GraphFibreBeta.lean`):
+`norm_one_qHead` (‖1‖ = 1 in a nontrivial quotient — a lift of norm < 1 would
+put a unit `1 − a` in the graph ideal), `norm_headToQ_const_mul`
+(‖c·x‖ = ‖c‖‖x‖ for constants: the constant is a unit upstairs, so it permutes
+lifts; two ε-approximation directions via `Ideal.Quotient.norm_mk_lt`), and
+`isTateRing_qHead` via `FiniteJet.isTateRing_of_scale`.  All in the UNFOLDED
+`P ⧸ headGraphIdeal` world (`set y := x`), per the QHead-alias discipline.
+
+Bricks (ii) `continuous_mkKappaP` and (iii) `isBounded_range_bPoint_pow` are
+proven and axiom-clean; they are no longer on the critical path but give the
+sharp statement that the evaluation point lies in the closed unit ball
+(power-bounded in a normed FIELD ⟺ ‖b‖ ≤ 1) if an evaluation is ever wanted.
