@@ -30337,3 +30337,14 @@ Then Γ(U-sch, coker(unitEndo r)) = A/(r)-model (their `d`-machinery + two-cover
 into quotientSpanMulEquivProd (leaf 3a) with the P- and Q-evaluation equivs
 (succ-coker-⊤-iso mechanism instantiated at sections P and Q — z-generic ✓).
 This is the next work item; everything upstream of it is proven and pushed.
+
+### [A4-e2 leaf 3b] trivialization-tool note
+`localIdealGeneratorIso` (PoleSheaf:773) is (b)-presentation (morphism-kernel idealModule).
+The (a)-side chart trivialization of `Scheme.Modules.idealModule J` is the
+`idealGenHom J U g hmem`-iso (Picard/IdealModule.lean; `bijective_idealGenHom_app` +
+`isIso_of_bijective_app_on_basis` as in the isInvertible_idealModule proof-tail, giving
+`pb U.ι (idealModule J) ≅ unitObj` via restrictFunctorIsoPullback ≪≫ (asIso idealGenHom).symm).
+Use it with g := the D-chart generator (product of the two section generators;
+D.ideal-span on the chart from sectionsDivisor_ideal + per-section spans multiplied —
+`Ideal.span_singleton_mul_span_singleton`). The twist-conjugation square then pairs
+idealGenHom-triv ⊗ L-triv against unitEndomorphismOfTopSection.

@@ -1,1 +1,1 @@
-FOCUS: [GAP-A-4/A4-e2 leaf 3b] chart plumbing — Gamma(U, coker(divisorTwistHom)) = A/(rPrQ)-model; recon sectionPoleSheafSuccCoker_restrictIsoIdealCoker construction (PoleSheafQuasicoherent:600s) for the transfer pattern; then baseSections-assembly via leaf-2 into e2
+FOCUS: [GAP-A-4/A4-e2 leaf 3b] twist-conjugation square on the chart — F.map(divisorTwistHom) vs unitEndomorphismOfTopSection(rPrQ) through idealModule-D-triv x L-triv; start from divisorTwistHom_eq + restrict-of-sheafification; build the Data-subtype then coker-iso
