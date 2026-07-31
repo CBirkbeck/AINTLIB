@@ -869,6 +869,55 @@ theorem wI_BIProd_algebraMap (x : Ainf p F) :
   rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK, wLoc_algebraMap,
     wLoc_algebraMap]
 
+/-- The ideal of elements of the chart `locSubring` whose interval norm is bounded by
+`q ^ n`. Extracted from `wI_le_of_mem_locIdeal_pow`, where it was an anonymous 38-line
+`Ideal` structure literal inside the proof. -/
+private def wIBoundedIdeal (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) (n : ℕ) (q : NNReal) :
+    Ideal ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+          (chartS p F ϖ 1 b)) :=
+  { carrier := {z | wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (blocEquivAwayChartS p F ϖ b hb
+        (↑z : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n}
+    zero_mem' := by
+      show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (blocEquivAwayChartS p F ϖ b hb
+          ((0 : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+            (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
+      rw [ZeroMemClass.coe_zero, map_zero, map_zero, wI_zero p F]
+      exact zero_le
+    add_mem' := by
+      intro x z hx hz
+      show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (blocEquivAwayChartS p F ϖ b hb
+          ((x + z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+            (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
+      rw [AddMemClass.coe_add, map_add, map_add]
+      exact le_trans (wI_add_le p F _ _) (max_le hx hz)
+    smul_mem' := by
+      intro c z hz
+      show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (blocEquivAwayChartS p F ϖ b hb
+          ((c • z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+            (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
+      have hcoe : ((c • z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+          (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b))
+          = (↑c : Localization.Away (chartS p F ϖ 1 b)) * ↑z := rfl
+      rw [hcoe, map_mul, map_mul]
+      have hcball : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (blocEquivAwayChartS p F ϖ b hb
+            (↑c : Localization.Away (chartS p F ϖ 1 b)))) ≤ 1 :=
+        map_locSubring_le_blocUnitBall p F ϖ a b hb hπ1 hπ2 hr1 hr2
+          ⟨c, c.2, rfl⟩
+      exact le_trans (wI_mul_le p F _ _)
+        (le_trans (mul_le_mul hcball hz zero_le zero_le)
+          (le_of_eq (one_mul _))) }
+
 /-- **The `J^n`-cofinality estimate**: elements of the `n`-th power of the ideal of
 definition of the chart localization transport into the `q^n`-ball of `B^I`, where
 `q = max(ρ₁, ρ₂, |ϖ|) < 1`. -/
@@ -887,44 +936,7 @@ theorem wI_le_of_mem_locIdeal_pow (a b : ℕ) (hb : 0 < b)
           ((PseudoUniformizer.toOF F ϖ : OF F) : F))) ^ n := by
   set q : NNReal := max (max ρ₁ ρ₂) (perfectoidValuation p F
     ((PseudoUniformizer.toOF F ϖ : OF F) : F)) with hqdef
-  set Bd : Ideal ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
-      (chartS p F ϖ 1 b)) :=
-    { carrier := {z | wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (blocEquivAwayChartS p F ϖ b hb
-          (↑z : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n}
-      zero_mem' := by
-        show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (blocEquivAwayChartS p F ϖ b hb
-            ((0 : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
-              (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
-        rw [ZeroMemClass.coe_zero, map_zero, map_zero, wI_zero p F]
-        exact zero_le
-      add_mem' := by
-        intro x z hx hz
-        show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (blocEquivAwayChartS p F ϖ b hb
-            ((x + z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
-              (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
-        rw [AddMemClass.coe_add, map_add, map_add]
-        exact le_trans (wI_add_le p F _ _) (max_le hx hz)
-      smul_mem' := by
-        intro c z hz
-        show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (blocEquivAwayChartS p F ϖ b hb
-            ((c • z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
-              (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
-        have hcoe : ((c • z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
-            (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b))
-            = (↑c : Localization.Away (chartS p F ϖ 1 b)) * ↑z := rfl
-        rw [hcoe, map_mul, map_mul]
-        have hcball : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-            (blocEquivAwayChartS p F ϖ b hb
-              (↑c : Localization.Away (chartS p F ϖ 1 b)))) ≤ 1 :=
-          map_locSubring_le_blocUnitBall p F ϖ a b hb hπ1 hπ2 hr1 hr2
-            ⟨c, c.2, rfl⟩
-        exact le_trans (wI_mul_le p F _ _)
-          (le_trans (mul_le_mul hcball hz zero_le zero_le)
-            (le_of_eq (one_mul _))) } with hBd
+  set Bd := wIBoundedIdeal p F ϖ a b hb hπ1 hπ2 hr1 hr2 n q with hBd
   suffices hle : locIdeal (podAinf p F ϖ) (chartT p F ϖ a b)
       (chartS p F ϖ 1 b) ^ n ≤ Bd from hle hy
   rw [locIdeal, ← Ideal.map_pow, Ideal.map, Ideal.span_le]

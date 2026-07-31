@@ -4261,3 +4261,47 @@ rigid in `?b`, and every goal has a concrete `b` — there is no projection to i
 signature-preserving (section variables produce the same binders), but it restructures a region
 of a 3000-line file, so it wants its own change and gate. Queued behind the staged ChartData
 extraction.
+
+## The SheafyPair glue: 127-line proof split, both halves under the bar (in progress)
+
+`exists_limitSections_glue` **CLEARED** (127 → 50) by extracting `exists_glue_at_rational` —
+the opening 79-line `have hglue`, the per-rational-datum gluing step. It had **zero derived
+local dependencies** (it is the first `have` in the body, so everything it mentions is a
+theorem parameter), which is what made a clean top-level lemma possible. Six joins finished it.
+
+**The metric went UP before it went down**, and that is worth recording honestly: immediately
+after the extraction the count was 204 → 205, because the new helper was itself 65 lines. One
+127-line proof had become a 56 and a 65. The extraction was still right — each half is now
+separately reducible, which the monolith was not — but "extract and the count falls" is not
+guaranteed, and a helper needs its own budget check.
+
+Current state: `exists_glue_at_rational` is at 59 (need 9) after its own six joins. Its
+remaining candidate is `hfcompat` (14 lines, 3 derived deps: `C`, `f`, `hexE`).
+
+Note this also means the earlier headline ("the two glue proofs are 85% duplicated") is now
+half-addressed on the SheafyPair side: the shared core is a NAMED lemma there. If the file
+relocation ever happens, `exists_limitSections_glue_on` can call it directly instead of carrying
+its own copy — the extraction makes that future change smaller, not larger.
+
+### The glue split finished: 127 lines → three declarations, all under the bar
+
+`exists_glue_at_rational` (59) cleared by extracting `choiceFamily_rationalRefinementCompatible`
+— "the family built by choosing, for each refinement piece, an index whose cover member contains
+it, is compatible", which is true because `limitFamily_eval_eq` makes the value independent of
+the chosen index.
+
+**Design choice worth recording:** the block had 3 derived deps (`C`, `f`, `hexE`), which is at
+the refusal threshold. Rather than thread all three, the helper is abstracted over the *choice
+data* (`C` and `hexE`) and re-derives `f` internally with a `set`, so the statement reads as a
+mathematical fact rather than a bundle of the caller's locals. The caller keeps its own `f` and
+gets the result with a type ascription, which is what makes the two `f`s line up definitionally.
+
+Final shape of what was one 127-line proof:
+
+| declaration | lines |
+|---|---:|
+| `exists_limitSections_glue` | 50 |
+| `exists_glue_at_rational` | <50 |
+| `choiceFamily_rationalRefinementCompatible` | <50 |
+
+**203 in total (201 in scope), from 486 at baseline.**
