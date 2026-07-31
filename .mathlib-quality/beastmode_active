@@ -1,1 +1,1 @@
-FOCUS: [A4-hv iii+iv] span_twistChartMultiplier_eq — c ∈ span g (exactness at 𝟙 + zero-composite) and g ∈ span c (range through the conjugation square)
+FOCUS: [A4-support] one_mem_idealSections_of_disjoint_support + de-private CartierDivisor helpers; then [A4-eval] eP/eQ sigma-retraction builder

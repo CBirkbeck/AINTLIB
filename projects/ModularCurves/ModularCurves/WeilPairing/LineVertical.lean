@@ -1220,6 +1220,36 @@ theorem cokernelTwistDesc_π {J₁ J₂ : C.IdealSheafData}
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **Support avoidance gives the unit section**: an ideal sheaf whose support is
+disjoint from an open contains `1` among its sections there. -/
+theorem one_mem_idealSections_of_disjoint_support (J' : C.IdealSheafData)
+    (W : C.Opens) (hW : Disjoint (J'.support : Set ↥C) (W : Set ↥C)) :
+    (1 : Γ(C, W)) ∈ idealSections J' (Opposite.op W) := by
+  refine RingHom.mem_ker.mpr ?_
+  haveI hempty : IsEmpty ↥(J'.subschemeι ⁻¹ᵁ W) := by
+    constructor
+    rintro ⟨c, hc⟩
+    have hcW : J'.subschemeι.base c ∈ W := hc
+    have hcs : J'.subschemeι.base c ∈ (J'.support : Set ↥C) := by
+      rw [← Scheme.IdealSheafData.range_subschemeι]
+      exact ⟨c, rfl⟩
+    exact Set.disjoint_left.mp hW hcs hcW
+  haveI hsub : Subsingleton
+      Γ(J'.subscheme, J'.subschemeι ⁻¹ᵁ W) := by
+    haveI : IsEmpty
+        ↥((J'.subschemeι ⁻¹ᵁ W : J'.subscheme.Opens).toScheme) := by
+      refine ⟨fun x => ?_⟩
+      exact hempty.elim' ⟨x.1, x.2⟩
+    have e := (J'.subschemeι ⁻¹ᵁ W : J'.subscheme.Opens).topIso
+    exact Function.Surjective.subsingleton
+      (fun y => ⟨e.inv.hom y, by
+        change (e.inv ≫ e.hom).hom y = y
+        rw [e.inv_hom_id]
+        rfl⟩)
+  exact Subsingleton.elim _ _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- Off the image of a closed immersion, `1` lies in the kernel ideal's sections:
 the kernel subscheme's preimage of such an open is empty, so its section ring is a
 subsingleton. -/
