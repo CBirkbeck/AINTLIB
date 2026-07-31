@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Picard.IdealModule
+import ModularCurves.Picard.IdealModuleMono
 import ModularCurves.ForMathlib.CrossProductKernel
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.EllipticCurve.PoleSheaf

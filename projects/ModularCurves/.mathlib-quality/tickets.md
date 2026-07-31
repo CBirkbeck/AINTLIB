@@ -30482,3 +30482,21 @@ coker(twist-P) from the ideal-inclusion I_D ⊆ I_P — subtype-inclusion idiom 
 per-section Γ ≅ R via the (b)-machinery, pair = the e2-coordinates; injectivity of
 the pair from the concentration + counting or from the SES-split as in 3a).
 This is the next stretch's focused build. All current work green+pushed thru f2c5805d4.
+
+### [A4-e2 wiring 2] KERNEL-WALL + PIVOT 2026-07-31
+`idealModuleLE` (hom between two idealModule-(a)-presheaf machines) is KERNEL-HOSTILE:
+(kernel) deterministic timeout in EVERY form tried — structure-literal (with/without
+the playbook transparency options), extracted componentwise hom, homMk over the
+Ab-level natTrans, term-rfl naturality, and in a minimal-import file. The obligation
+itself (naturality/structure between two ofPresheaf-machines) explodes at kernel
+transparency. `idealSections_mono` COMPILED (zero-chase via inclusion_subschemeι; now
+in Picard/IdealModuleMono.lean) — the mathematical content is retained.
+PIVOT for the per-section quotients: `cokernel.desc`-route — NO LE-map needed:
+coker(twist-D) → coker(twist-P) := cokernel.desc _ (cokernel.π (twist-P)) w, with
+w : divisorTwistHom D L ≫ cokernel.π (twist-P) = 0 proven by the established
+elementwise pipeline: (i) map-zero-of-locally-zero for sheaf-module maps
+(sections-eq-of-locally-eq/separatedness — new small lemma); (ii) the composite is
+locally zero because it vanishes on unit-images (divisorTwistHom_app_unit +
+idealSections_mono casts the D-tensor to a P-tensor + cokernel.condition-elementwise)
+and the unit is locally surjective (hWunit-derivation, in-tree). All within proven
+pattern territory; no new structure-literals between ofPresheaf-machines.
