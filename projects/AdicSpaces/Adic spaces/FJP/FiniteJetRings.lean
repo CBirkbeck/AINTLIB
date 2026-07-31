@@ -350,34 +350,29 @@ noncomputable def jB : JetA F →+* JetB F where
           ⟨qCoeff F 1 (a : JetC F), a.2.2⟩ * ⟨qCoeff F 0 (b : JetC F), b.2.1⟩ := by
         refine Subtype.ext ?_
         show qCoeff F 1 ((a * b : JetA F) : JetC F) = _
-        rw [show ((a * b : JetA F) : JetC F) = (a : JetC F) * (b : JetC F) from rfl,
-          qCoeff_one_mul]
+        rw [show ((a * b : JetA F) : JetC F) = (a : JetC F) * (b : JetC F) from rfl, qCoeff_one_mul]
         rfl
       exact (congrArg (nonnegEquiv (R := K)).symm hval).trans (by
         rw [map_add (nonnegEquiv (R := K)).symm, map_mul (nonnegEquiv (R := K)).symm,
           map_mul (nonnegEquiv (R := K)).symm]
         rfl)
   map_zero' := by
+    have hz : ∀ i, qCoeff F i ((0 : JetA F) : JetC F) = ((0 : nonnegSubring K) : L F) := by
+      intro i
+      rw [show ((0 : JetA F) : JetC F) = 0 from rfl, qCoeff_zero]
+      rfl
     refine TrivSqZeroExt.ext ?_ ?_
-    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
-        show qCoeff F 0 ((0 : JetA F) : JetC F) = ((0 : nonnegSubring K) : L F)
-        rw [show ((0 : JetA F) : JetC F) = 0 from rfl, qCoeff_zero]
-        rfl))).trans (map_zero _)
-    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
-        show qCoeff F 1 ((0 : JetA F) : JetC F) = ((0 : nonnegSubring K) : L F)
-        rw [show ((0 : JetA F) : JetC F) = 0 from rfl, qCoeff_zero]
-        rfl))).trans (map_zero _)
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (hz 0))).trans (map_zero _)
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (hz 1))).trans (map_zero _)
   map_add' a b := by
     refine TrivSqZeroExt.ext ?_ ?_
     · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
         show qCoeff F 0 ((a + b : JetA F) : JetC F) = _
-        rw [show ((a + b : JetA F) : JetC F) = (a : JetC F) + (b : JetC F) from rfl,
-          qCoeff_add]
+        rw [show ((a + b : JetA F) : JetC F) = (a : JetC F) + (b : JetC F) from rfl, qCoeff_add]
         rfl))).trans (map_add _ _ _)
     · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
         show qCoeff F 1 ((a + b : JetA F) : JetC F) = _
-        rw [show ((a + b : JetA F) : JetC F) = (a : JetC F) + (b : JetC F) from rfl,
-          qCoeff_add]
+        rw [show ((a + b : JetA F) : JetC F) = (a : JetC F) + (b : JetC F) from rfl, qCoeff_add]
         rfl))).trans (map_add _ _ _)
 
 theorem norm_nonnegEquiv_symm (x : nonnegSubring K) :

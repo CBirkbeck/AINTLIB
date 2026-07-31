@@ -5657,3 +5657,33 @@ than the diff.
   / explicit priorities). Once `JetA F` has a single canonical one, re-test — the `NormOneClass K`
   instance above is very likely needed alongside it, since it demonstrably removed one of the two
   divergences on its own.
+
+## 182 → 181: `jB` cleared (3 joins + collapsing a duplicated pair of bullets)
+
+`jB`'s `map_zero'` had two bullets identical except for `qCoeff F 0` vs `qCoeff F 1`:
+
+```
+· exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+    show qCoeff F i ((0 : JetA F) : JetC F) = ((0 : nonnegSubring K) : L F)
+    rw [show ((0 : JetA F) : JetC F) = 0 from rfl, qCoeff_zero]
+    rfl))).trans (map_zero _)
+```
+
+Lifting the shared step to `have hz : ∀ i, qCoeff F i ((0 : JetA F) : JetC F) = …` turns each
+bullet into one line: 10 lines → 8. With the 3 tool joins that is 5 against a need of 4.
+
+`qCoeff_zero` was already being applied identically at both indices, so the ∀-form is the
+statement the proof was using twice.
+
+### The scoping bug the assertion caught
+
+`next(k for k,l in enumerate(L) if l.strip() == "map_zero' := by")` found the **first**
+`map_zero'` in the file — line 153, belonging to a different declaration — not `jB`'s at 359. The
+`assert len(old) == 10 and old[-1].endswith('(map_zero _)')` fired instead of the edit landing in
+the wrong declaration.
+
+→ **Anchor a search inside the declaration you mean, not the file.** Field names like
+  `map_zero'` / `map_add'` / `toFun` repeat once per structure instance, so a file-wide `next()`
+  is a coin toss. The fix is to find the declaration first and search forward from it.
+  → And: **assert the shape of what you matched before writing.** Two cheap invariants (expected
+    length, expected last line) turned a silent wrong-declaration edit into a clean failure.
