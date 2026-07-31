@@ -101,6 +101,83 @@ theorem idealActionPre_app_tmul (U : (TopologicalSpace.Opens ↥C)ᵒᵖ)
       (show ((C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U) from m.1) • l :=
   rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The generator equivalence of a principal nonzerodivisor ideal's sections:
+`a ↦ a·g`. Self-contained from span + nzd. -/
+private noncomputable def idealSectionsGenEquiv (V : C.affineOpens) (g : Γ(C, V.1))
+    (hspan : J.ideal V = Ideal.span {g}) (hnzd : g ∈ nonZeroDivisors Γ(C, V.1)) :
+    Γ(C, V.1) ≃ₗ[Γ(C, V.1)] idealSections J (Opposite.op V.1) := by
+  have hIS : idealSections J (Opposite.op V.1) = J.ideal V :=
+    J.ker_subschemeι_app V
+  have hmem : ∀ a : Γ(C, V.1), a * g ∈ idealSections J (Opposite.op V.1) := by
+    intro a
+    have : a * g ∈ J.ideal V := by
+      rw [hspan]
+      exact Ideal.mul_mem_left _ a (Ideal.mem_span_singleton_self g)
+    rw [hIS]
+    exact this
+  refine LinearEquiv.ofBijective
+    { toFun := fun a => ⟨a * g, hmem a⟩
+      map_add' := fun a b => Subtype.ext (add_mul a b g)
+      map_smul' := fun r a => Subtype.ext (by
+        show (r * a) * g = r * (a * g)
+        rw [mul_assoc]) } ⟨?_, ?_⟩
+  · intro a b hab
+    have h1 : a * g = b * g := congrArg Subtype.val hab
+    exact (mul_cancel_right_mem_nonZeroDivisors hnzd).mp h1
+  · rintro ⟨m, hm⟩
+    have hm' : m ∈ Ideal.span {g} := by
+      rw [← hspan, ← hIS]
+      exact hm
+    obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hm'
+    exact ⟨a, Subtype.ext ha⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- On a chart where the ideal is a principal nonzerodivisor span and scalar
+multiplication by the generator acts injectively on the module's sections, the
+componentwise action of the ideal module is injective. -/
+private theorem idealActionPre_app_injective_of_span
+    (V : C.affineOpens) (g : Γ(C, V.1))
+    (hspan : J.ideal V = Ideal.span {g}) (hnzd : g ∈ nonZeroDivisors Γ(C, V.1))
+    (hLinj : Function.Injective (fun l : L.val.obj (Opposite.op V.1) =>
+      (show ((C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V.1))
+        from g) • l)) :
+    Function.Injective ((idealActionPre J L).app (Opposite.op V.1)) := by
+  have hsurj : Function.Surjective
+      (LinearMap.rTensor (L.val.obj (Opposite.op V.1))
+        (idealSectionsGenEquiv J V g hspan hnzd).toLinearMap) :=
+    LinearMap.rTensor_surjective _
+      (g := (idealSectionsGenEquiv J V g hspan hnzd).toLinearMap)
+      (idealSectionsGenEquiv J V g hspan hnzd).surjective
+  have key : ∀ w, (idealActionPre J L).app (Opposite.op V.1)
+      (LinearMap.rTensor (L.val.obj (Opposite.op V.1))
+        (idealSectionsGenEquiv J V g hspan hnzd).toLinearMap w) =
+      (show ((C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V.1))
+        from g) • (TensorProduct.lid _ _ w) := by
+    intro w
+    induction w with
+    | zero => simp
+    | add a b ha hb =>
+        rw [map_add, map_add, ha, hb, map_add, smul_add]
+    | tmul a l =>
+        rw [LinearMap.rTensor_tmul]
+        erw [idealActionPre_app_tmul]
+        erw [TensorProduct.lid_tmul]
+        show ((a * g : Γ(C, V.1)) :
+          ((C.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+            (Opposite.op V.1))) • l = _
+        rw [mul_comm]
+        exact mul_smul g a l
+  intro x y hxy
+  obtain ⟨x', rfl⟩ := hsurj x
+  obtain ⟨y', rfl⟩ := hsurj y
+  have h2 := (key x').symm.trans (hxy.trans (key y'))
+  have h3 := hLinj h2
+  have h4 := (TensorProduct.lid _ _).injective h3
+  rw [h4]
+
 end Twist
 
 end AlgebraicGeometry.Scheme.Modules
