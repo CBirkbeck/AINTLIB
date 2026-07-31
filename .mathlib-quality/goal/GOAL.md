@@ -5583,3 +5583,20 @@ measurable gain is worse than nothing.
 
 `ideal_row_surjective` remains at need 6 with 5 safe merges available — it needs one more line
 from somewhere other than the `induction` seam.
+
+### The guard is now in the tool, not only in this file
+
+`scratchpad/apply_joins.py` gained an ALTERNATIVES GUARD alongside its existing calc-step and
+structure-literal guards: it refuses to join onto a line matching
+`(induction|cases|rcases|obtain|match) … with$`, and refuses any join whose next non-blank line
+begins with `|`.
+
+Regression-checked across all 179 in-scope proofs: the tool still finds **1373** joins, and the
+new guard blocks **26** sites it would previously have offered — every one of which is an
+`induction … with` whose alternatives follow. So this was not a one-off; it would have recurred.
+
+Note also what the failed attempt revealed about the tool's scope: it only ever joins a
+*deeper-indented continuation*, never two sibling tactics at equal indentation. The five good
+`;` merges in that batch were a hand operation the tool does not perform, which is why they
+needed the manual length check. Worth knowing before reading a "joins available" count as
+"lines obtainable".
