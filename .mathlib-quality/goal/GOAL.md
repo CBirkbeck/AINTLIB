@@ -5600,3 +5600,26 @@ Note also what the failed attempt revealed about the tool's scope: it only ever 
 `;` merges in that batch were a hand operation the tool does not perform, which is why they
 needed the manual length check. Worth knowing before reading a "joins available" count as
 "lines obtainable".
+
+## Task 3: whitespace hygiene — 14 lines, 5 files
+
+Trailing whitespace on 14 lines (`SheafyPair` 7, `StandardDescent` 3,
+`RelativeStandardRefinement` 2, `Euclidean` 1, `RobbaPresentation` 1). No tabs anywhere, no
+file missing a final newline — so this was the only whitespace defect in the tree.
+
+Twelve of the fourteen are `omit […]` lines that wrap onto a continuation, i.e. a trailing space
+before the line break.
+
+Checked before stripping that none sits inside a string literal, where the whitespace would be
+semantic: all 14 lines have balanced quote counts.
+
+Verified after, and this is the part worth keeping: my first check paired the diff's `-` and `+`
+lines positionally and reported "6 changed lines where the change was NOT just whitespace" —
+alarming and **wrong**, because a unified diff groups all `-` lines then all `+` lines per hunk,
+so a flat positional pairing misaligns across hunks. The correct checks are
+`git diff -w --stat` (empty) and matching *adjacent* `-`/`+` pairs by regex (14 pairs, 0
+mismatched).
+
+→ **When verifying a mechanical edit, compare adjacent diff pairs, not two flat lists.** The
+  naive version produces false alarms, which is the failure direction that wastes time rather
+  than the one that ships bugs — but it is still a check that cannot be trusted.

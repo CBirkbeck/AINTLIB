@@ -232,7 +232,7 @@ theorem interCovering_isRational (E' : RationalLocData A) (hE' : E'.IsRational)
   obtain ⟨E, hFeq⟩ := (mem_interCoveringPieces E' hE' C hC).mp hF
   exact hFeq ▸ RationalLocData.interRational_isRational _ _ _ _
 
-omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A] 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- Agreement of the compatible family across cover members: for a valid rational `E`
 inside `U i` and `U j`, the two evaluations agree (evaluate the inf-compatibility at
@@ -433,14 +433,14 @@ def limitRestrictProd {V : Opens ↥(Spa A A⁺)} {ι : Type*} {U : ι → Opens
     (hle : ∀ i, U i ≤ V) (x : ↥(limitSections V)) : ∀ i, ↥(limitSections (U i)) :=
   fun i => limitRestrict (hle i) x
 
-omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A] 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 theorem limitRestrictProd_continuous {V : Opens ↥(Spa A A⁺)} {ι : Type*}
     {U : ι → Opens ↥(Spa A A⁺)} (hle : ∀ i, U i ≤ V) :
     Continuous (limitRestrictProd hle) :=
   continuous_pi fun i => limitRestrict_continuous (hle i)
 
-omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A] 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- The neighbourhood filter of the limit is the infimum of the comaps of the rational
 evaluations (the projective-limit topology, in filter form). -/
@@ -595,14 +595,14 @@ theorem isLimitSheaf_of_isSheafy [IsSheafy A] : IsLimitSheaf A :=
 /-! ### The converse (C5): the all-open sheaf condition restricts to the finite
 rational criterion -/
 
-omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- The cover-member inclusions of a rational covering, at the `Opens`-level. -/
 theorem spaOpens_le_of_covering (C : RationalCoveringData A) (E : ↥C.covers) :
     spaOpens E.1 ≤ spaOpens C.base :=
   spaOpen_subset_of_rationalOpen_subset (C.hsubset E.1 E.2)
 
-omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A] 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [HasLocLiftPowerBounded A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 theorem spaOpens_covering_subset (C : RationalCoveringData A) :
     ((spaOpens C.base : Opens ↥(Spa A A⁺)) : Set ↥(Spa A A⁺)) ⊆
@@ -611,7 +611,7 @@ theorem spaOpens_covering_subset (C : RationalCoveringData A) :
   obtain ⟨E, hEC, hvE⟩ := C.hcover v.1 hv
   exact Set.mem_iUnion.mpr ⟨⟨E, hEC⟩, hvE⟩
 
-omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A] 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- `𝒪_X(R(D₀))` carries the topology comap-ed from the limit along
 "restrict everywhere" (the rational comparison is a homeomorphism). -/
@@ -634,7 +634,7 @@ theorem nhds_eq_comap_limitOfValue {D₀ : RationalLocData A} (hD₀ : D₀.IsRa
 
 -- (`productRestrictionSub_continuous` is provided by `EmbeddingTopo.lean`; the same
 -- statement here is re-proved locally to keep this file's import cone small.)
-omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A] 
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 theorem productRestrictionSub_continuous' (C : RationalCoveringData A) :
     Continuous (productRestrictionSub A C) := by

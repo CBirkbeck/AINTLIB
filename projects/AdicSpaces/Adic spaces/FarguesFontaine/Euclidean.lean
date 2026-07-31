@@ -1116,7 +1116,7 @@ private theorem valued_mul_sub_PhiHatK_convF_le_of_ne_zero {ρ : NNReal} {hρ0 :
     (by rw [Valuation.map_sub_swap]; exact hN1) ?_ ?_ hN2
   · rw [← map_mul, ← map_sub, valued_AlocToHatK,
       ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub, map_mul]
-    exact gaussValueF_prefix_mul_sub_convPartial_le p F ϖ hρ0 hρ1 a b N 
+    exact gaussValueF_prefix_mul_sub_convPartial_le p F ϖ hρ0 hρ1 a b N
       fun i j hij => gaussTerm_mul_le_of_add_le p F hA hB hKa hKb
         (le_trans hNge hij)
   · rw [← map_sub, valued_AlocToHatK,

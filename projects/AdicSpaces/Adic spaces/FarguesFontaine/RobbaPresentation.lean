@@ -4878,7 +4878,7 @@ theorem exists_evalBI_approx_bloc₂
           (sPow p F ϖ k)) ≤ W :=
         le_trans (wLoc_mk'_monomial_le p F ϖ hσ₂0 hσ₂1 w k i) hw2
       exact mul_le_mul_right hm1 _
-  
+
 end AssemblyBot
 
 section CorrectionBot
