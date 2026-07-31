@@ -431,6 +431,218 @@ theorem isTateRing_qHead (DH : RationalLocData (WPHead K w N))
     (by rw [hnormt]; exact hc1) (by rw [hnormt]; exact hc0)
     (fun x => by rw [hnormt]; exact norm_headToQ_const_mul DH hcne x)
 
+/-- Residue maps of normed rings are continuous. -/
+theorem continuous_quotient_mk_normed {R : Type*} [SeminormedCommRing R]
+    (I : Ideal R) : Continuous (Ideal.Quotient.mk I) :=
+  AddMonoidHomClass.continuous_of_bound (Ideal.Quotient.mk I) 1 fun x => by
+    rw [one_mul]
+    exact Ideal.Quotient.norm_mk_le I x
+
 end QTate
+
+section BetaMain
+
+open ValuationSpectrum FiniteJet.SpectralExtension FiniteJet.GraphKoszul
+
+open scoped NormedField Valued
+
+variable {K : Type*} [NontriviallyNormedField K] [IsUltrametricDist K]
+  [CompleteSpace K]
+variable {w : ℕ → ℕ} {N : ℕ}
+
+set_option maxHeartbeats 1600000 in
+/-- **BETA**: the special fibre of the graph model at the contraction of a
+maximal ideal is trivial — the head surjects onto `Q/𝔭Q`.
+
+The residue field `κ(𝔭)` is finite over `K`, so its image in the (Hausdorff,
+because `𝔭Q` is closed) normed ring `Q/𝔭Q` is a finite-dimensional subspace,
+hence closed; and it contains the images of all polynomials, which are dense.
+The graph relation `s̄·T̄ᵢ = t̄ᵢ` with `s̄` invertible in `κ(𝔭)` is what puts the
+graph variables into that image. -/
+theorem headToQ_surjective_mod_map (ϖ : Uniformizer K)
+    [hdvr : IsDiscreteValuationRing 𝒪[K]]
+    (hK₀ : IsNoetherianRing (FiniteJet.unitBall K))
+    (DH : RationalLocData (WPHead K w N)) (hDH : DH.IsRational)
+    (𝔮 : Ideal (QHead DH)) (h𝔮 : 𝔮.IsMaximal) :
+    Function.Surjective
+      ((Ideal.Quotient.mk
+        (Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)))).comp (headToQ DH)) := by
+  classical
+  haveI h𝔭 : (𝔮.comap (headToQ DH)).IsMaximal :=
+    comap_headToQ_isMaximal w N ϖ hK₀ DH hDH 𝔮 h𝔮
+  haveI hfd : FiniteDimensional K (KappaP w N (𝔮.comap (headToQ DH))) :=
+    module_finite_residue_head w N ϖ hK₀ (𝔮.comap (headToQ DH))
+  haveI hnt : Nontrivial (QHead DH) :=
+    ⟨⟨1, 0, fun h => h𝔮.ne_top (Ideal.eq_top_iff_one 𝔮 |>.mpr (h ▸ 𝔮.zero_mem))⟩⟩
+  haveI hTate : IsTateRing (QHead DH) := isTateRing_qHead DH
+  haveI hNoeth : IsNoetherianRing (QHead DH) := isNoetherianRing_qHead ϖ hK₀ hDH
+  haveI hclosed : IsClosed
+      ((Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)) : Ideal (QHead DH)) :
+        Set (QHead DH)) :=
+    isClosed_ideal_of_noetherian_normed _
+  -- the residue field of the head maps into the special fibre
+  have hkill : ∀ a ∈ 𝔮.comap (headToQ DH),
+      (Ideal.Quotient.mk (Ideal.map (headToQ DH) (𝔮.comap (headToQ DH))))
+        (headToQ DH a) = 0 := by
+    intro a ha
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    exact Ideal.mem_map_of_mem _ ha
+  set j : KappaP w N (𝔮.comap (headToQ DH)) →+*
+      QHead DH ⧸ Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)) :=
+    Ideal.Quotient.lift _
+      ((Ideal.Quotient.mk _).comp (headToQ DH)) hkill with hjdef
+  have hjmk : ∀ a : WPHead K w N,
+      j (mkKappaP w N (𝔮.comap (headToQ DH)) a) =
+        Ideal.Quotient.mk _ (headToQ DH a) := fun _ => rfl
+  -- the `K`-structures on the special fibre
+  letI algF : Algebra K (QHead DH ⧸
+      Ideal.map (headToQ DH) (𝔮.comap (headToQ DH))) :=
+    (((Ideal.Quotient.mk _).comp (headToQ DH)).comp (constHead K w N)).toAlgebra
+  have hnormconst : ∀ c : K,
+      ‖algebraMap K (QHead DH ⧸ Ideal.map (headToQ DH)
+        (𝔮.comap (headToQ DH))) c‖ ≤ ‖c‖ := by
+    intro c
+    refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+    show ‖headToQ DH (constHead K w N c)‖ ≤ ‖c‖
+    refine le_trans (Ideal.Quotient.norm_mk_le _ _) ?_
+    show ‖(polyToP (MvPolynomial.C (constHead K w N c)) :
+      P (WPHead K w N) DH.T.card)‖ ≤ ‖c‖
+    have h1 := norm_tP_mul (E := WPHead K w N) (m := DH.T.card)
+      (constHead K w N c) (fun x => norm_wphead_mul _ x) 1
+    rw [mul_one, norm_one, mul_one, norm_constHead] at h1
+    exact le_of_eq h1
+  letI nsF : NormedSpace K (QHead DH ⧸
+      Ideal.map (headToQ DH) (𝔮.comap (headToQ DH))) :=
+    { norm_smul_le := fun c x => by
+        rw [Algebra.smul_def]
+        exact le_trans (norm_mul_le _ _)
+          (mul_le_mul_of_nonneg_right (hnormconst c) (norm_nonneg x)) }
+  haveI : IsBoundedSMul K (QHead DH ⧸
+      Ideal.map (headToQ DH) (𝔮.comap (headToQ DH))) :=
+    IsBoundedSMul.of_norm_smul_le NormedSpace.norm_smul_le
+  haveI : ContinuousSMul K (QHead DH ⧸
+      Ideal.map (headToQ DH) (𝔮.comap (headToQ DH))) :=
+    IsBoundedSMul.continuousSMul
+  -- the image of the residue field is a finite-dimensional, hence closed, subspace
+  letI nfκ : NormedField (KappaP w N (𝔮.comap (headToQ DH))) :=
+    extNormedField K (KappaP w N (𝔮.comap (headToQ DH)))
+  letI nsκ : NormedSpace K (KappaP w N (𝔮.comap (headToQ DH))) :=
+    extNormedSpace K (KappaP w N (𝔮.comap (headToQ DH)))
+  set jₗ : KappaP w N (𝔮.comap (headToQ DH)) →ₗ[K]
+      (QHead DH ⧸ Ideal.map (headToQ DH) (𝔮.comap (headToQ DH))) :=
+    { toFun := j
+      map_add' := map_add j
+      map_smul' := fun c x => by
+        show j (algebraMap K (KappaP w N (𝔮.comap (headToQ DH))) c * x) =
+          algebraMap K _ c * j x
+        rw [map_mul]
+        rfl } with hjₗdef
+  haveI hfdr : FiniteDimensional K ↥(LinearMap.range jₗ) := by
+    haveI : FiniteDimensional K (KappaP w N (𝔮.comap (headToQ DH))) := hfd
+    exact FiniteDimensional.of_surjective (jₗ.rangeRestrict)
+      (LinearMap.surjective_rangeRestrict jₗ)
+  have hrangeClosed : IsClosed ((LinearMap.range jₗ :
+      Submodule K (QHead DH ⧸ Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)))) :
+      Set (QHead DH ⧸ Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)))) :=
+    Submodule.closed_of_finiteDimensional _
+  -- the polynomial images are dense and land in that subspace
+  set π : P (WPHead K w N) DH.T.card →+*
+      (QHead DH ⧸ Ideal.map (headToQ DH) (𝔮.comap (headToQ DH))) :=
+    (Ideal.Quotient.mk _).comp (Ideal.Quotient.mk (headGraphIdeal DH))
+    with hπdef
+  have hπcont : Continuous π :=
+    (continuous_quotient_mk_normed _).comp (continuous_quotient_mk_normed _)
+  have hπsurj : Function.Surjective ⇑π := by
+    rw [hπdef]
+    show Function.Surjective (⇑(Ideal.Quotient.mk (Ideal.map (headToQ DH)
+        (𝔮.comap (headToQ DH)))) ∘
+      ⇑(Ideal.Quotient.mk (headGraphIdeal DH)))
+    exact Function.Surjective.comp Ideal.Quotient.mk_surjective
+      Ideal.Quotient.mk_surjective
+  have hpoly : ∀ p : MvPolynomial (Fin DH.T.card) (WPHead K w N),
+      π (polyToP p) ∈ LinearMap.range jₗ := by
+    have hs : DH.s ∉ 𝔮.comap (headToQ DH) :=
+      s_notMem_comap_headToQ ϖ hK₀ DH hDH 𝔮 h𝔮.isPrime
+    have hsne : mkKappaP w N (𝔮.comap (headToQ DH)) DH.s ≠ 0 := by
+      show (Ideal.Quotient.mk (𝔮.comap (headToQ DH)) DH.s :
+        WPHead K w N ⧸ 𝔮.comap (headToQ DH)) ≠ 0
+      rw [Ne, Ideal.Quotient.eq_zero_iff_mem]
+      exact hs
+    have hunit : IsUnit (j (mkKappaP w N (𝔮.comap (headToQ DH)) DH.s)) :=
+      (isUnit_iff_ne_zero.mpr hsne).map j
+    have hX : ∀ i : Fin DH.T.card,
+        π (polyToP (MvPolynomial.X i)) =
+          j (bPoint DH (𝔮.comap (headToQ DH)) i) := by
+      intro i
+      refine hunit.mul_left_cancel ?_
+      have h1 : j (mkKappaP w N (𝔮.comap (headToQ DH)) DH.s) *
+          π (polyToP (MvPolynomial.X i)) =
+          Ideal.Quotient.mk _ (headToQ DH DH.s * qX DH i) := by
+        rw [hjmk, map_mul]
+        rfl
+      have h2 : j (mkKappaP w N (𝔮.comap (headToQ DH)) DH.s) *
+          j (bPoint DH (𝔮.comap (headToQ DH)) i) =
+          Ideal.Quotient.mk _ (headToQ DH
+            ((datumEnum DH i : ↥DH.T) : WPHead K w N)) := by
+        rw [← map_mul, mul_comm,
+          bPoint_mul_s DH (𝔮.comap (headToQ DH)) hs i, hjmk]
+      rw [h1, h2, show headToQ DH DH.s * qX DH i =
+        headToQ DH ((datumEnum DH i : ↥DH.T) : WPHead K w N) from
+        (headConst_datumEnum DH i).symm]
+    intro p
+    have hext : π.comp (polyToP (E := WPHead K w N) (m := DH.T.card)) =
+        j.comp (MvPolynomial.eval₂Hom
+          (mkKappaP w N (𝔮.comap (headToQ DH)))
+          (fun i => bPoint DH (𝔮.comap (headToQ DH)) i)) := by
+      refine MvPolynomial.ringHom_ext (fun a => ?_) (fun i => ?_)
+      · rw [RingHom.comp_apply, RingHom.comp_apply, MvPolynomial.eval₂Hom_C,
+          hjmk]
+        rfl
+      · rw [RingHom.comp_apply, RingHom.comp_apply, MvPolynomial.eval₂Hom_X']
+        exact hX i
+    have hp : π (polyToP p) =
+        j (MvPolynomial.eval₂Hom (mkKappaP w N (𝔮.comap (headToQ DH)))
+          (fun i => bPoint DH (𝔮.comap (headToQ DH)) i) p) := by
+      have := congrArg
+        (fun f : MvPolynomial (Fin DH.T.card) (WPHead K w N) →+* _ => f p) hext
+      simpa only [RingHom.comp_apply] using this
+    exact ⟨_, hp.symm⟩
+
+  -- closed + dense
+  have hdense : Dense (⇑π '' Set.range (polyToP (E := WPHead K w N)
+      (m := DH.T.card))) := by
+    rw [dense_iff_closure_eq]
+    refine Set.eq_univ_of_univ_subset ?_
+    calc (Set.univ : Set (QHead DH ⧸ Ideal.map (headToQ DH)
+            (𝔮.comap (headToQ DH))))
+        = ⇑π '' Set.univ := (Set.image_univ_of_surjective hπsurj).symm
+      _ = ⇑π '' closure (Set.range (polyToP (E := WPHead K w N)
+            (m := DH.T.card))) := by rw [denseRange_polyToP.closure_eq]
+      _ ⊆ closure (⇑π '' Set.range (polyToP (E := WPHead K w N)
+            (m := DH.T.card))) := image_closure_subset_closure_image hπcont
+  have hsub : ⇑π '' Set.range (polyToP (E := WPHead K w N) (m := DH.T.card)) ⊆
+      ((LinearMap.range jₗ : Submodule K (QHead DH ⧸ Ideal.map (headToQ DH)
+        (𝔮.comap (headToQ DH)))) : Set (QHead DH ⧸ Ideal.map (headToQ DH)
+          (𝔮.comap (headToQ DH)))) := by
+    rintro y ⟨-, ⟨p, rfl⟩, rfl⟩
+    exact hpoly p
+  have htop : ((LinearMap.range jₗ : Submodule K (QHead DH ⧸
+      Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)))) :
+      Set (QHead DH ⧸ Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)))) =
+      Set.univ := by
+    refine Set.eq_univ_of_univ_subset ?_
+    rw [← hdense.closure_eq]
+    exact hrangeClosed.closure_subset_iff.mpr hsub
+  -- conclude
+  intro y
+  have hy : y ∈ ((LinearMap.range jₗ : Submodule K (QHead DH ⧸
+      Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)))) :
+      Set (QHead DH ⧸ Ideal.map (headToQ DH) (𝔮.comap (headToQ DH)))) :=
+    htop ▸ Set.mem_univ y
+  obtain ⟨u, hu⟩ := hy
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective u
+  exact ⟨a, by rw [← hu]; rfl⟩
+
+end BetaMain
 
 end WeightedParity

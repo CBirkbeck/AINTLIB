@@ -1,1 +1,1 @@
-FOCUS: BETA main theorem — level-one surjectivity of kappa(p) -> Q/pQ via (1) pQ closed [isTateRing_qHead + brick 1], (2) range j fin-dim closed [Submodule.closed_of_finiteDimensional], (3) dense polynomial images [ringHom_ext + tendsto_polyToP_truncTotal]. Tate package for QHead just landed.
+FOCUS: BETA PROVEN (headToQ_surjective_mod_map, axiom-clean). Next: level-one BIJECTIVITY (injectivity is free from comap) in the levelMap form, then 𝔭Q = 𝔮 (maximality), then the L1 chain into qHead_completedLocal_comparison with flatness threaded 8.30-conditionally.
