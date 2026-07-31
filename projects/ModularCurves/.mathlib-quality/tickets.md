@@ -30418,3 +30418,14 @@ NEXT: the coker-transport (cokernel.mapIso on the square after packaging the two
 outer maps as isos — the W-piece is iso (sheafificationW) and valIso is iso, so
 coker(F.map twist) ≅ coker(sheafifyY(pf action)); then Γ-of-coker at the chart +
 idealGenHom-triv conjugation + quotientSpanMulEquivProd feed).
+
+### [A4-e2 3b-iv] DONE — coker transport landed. REMAINING for e2:
+(v) sheafify-commutes-with-coker: coker(sheafifyY(pf action)) ≅ sheafifyY(presheaf-coker
+    of pf-action) [sheafification preserves colimits — instance registered; PreservesCokernel.iso].
+(vi) the presheaf-coker of the action on the chart: pointwise A(imgW')⊗L → L cokers;
+    with the D-generator triv (idealModuleRestrictTrivOfSpan + L-triv on the common
+    chart) this is the mult-(rPrQ)-coker presheaf; its sheafify-baseSections over the
+    concentration chart (leaf-2 + baseSectionsRestrictIsoOfBijective) = A/(rPrQ)-model.
+(vii) evaluation equivs at P and Q (SuccessorSections mechanism per-section) and the
+    quotientSpanMulEquivProd (3a) feed ⟹ e2. Then A-rows + [A4-c1] unimodularity +
+    named lineSection/verticalSection wrappers close GAP-A-4.
