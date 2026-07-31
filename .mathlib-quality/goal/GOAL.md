@@ -5623,3 +5623,37 @@ mismatched).
 → **When verifying a mechanical edit, compare adjacent diff pairs, not two flat lists.** The
   naive version produces false alarms, which is the failure direction that wastes time rather
   than the one that ships bugs — but it is still a check that cannot be trusted.
+
+## `JetC._proof_1`: tested the fix. It works, and reveals the real blocker underneath.
+
+Added a named `instance instNormOneClassK : NormOneClass K := NormedDivisionRing.to_normOneClass`
+beside `L` in `FiniteJetRings`, on the theory that `NormOneClass` being `Prop`-valued is why
+elaborating `abbrev JetC` abstracted the synthesised instance into an anonymous `JetC._proof_1`.
+
+**Module build green, and the theory was right**: the `_proof_1` divergence disappeared. The gap
+between the stored type of `finiteJet_isSheafy` and a fresh elaboration of the same source fell
+from **2045 characters to 61**.
+
+**But it does not fix the certification**, because a second, independent divergence sits
+underneath — two competing `NonarchimedeanRing` instances:
+
+| | |
+|---|---|
+| stored picks | `FJP/FiniteJetFunctoriality.lean:320` `instNonarchimedeanRingOfSeminormedUltra {R} [SeminormedCommRing R] [IsUltrametricDist R]` |
+| fresh picks | `ExampleUnitDisc.lean:260` `nonarchimedeanRing_ofUltrametric (S) [NormedRing S] [IsUltrametricDist S]` |
+
+Both apply to `JetA F`; which one instance search finds depends on the ambient environment. That
+is an instance-overlap problem in the library, not an artefact of how the challenge is written —
+and it is the same *kind* of defect as the `_proof_1` one, one layer down. 24 other `_proof_`
+constants also remain inside that type.
+
+**Reverted.** Adding the instance moved *both* types by ~7000 characters, i.e. it perturbs
+elaboration across a 260-module library, and it does not deliver the fix. Keeping a change with
+library-wide reach and no realised benefit is not a trade worth making; the finding is worth more
+than the diff.
+
+→ The actual work item is now precise and is a **design** question rather than a cleanup edit:
+  reconcile the two `NonarchimedeanRing` instances (drop one, or give them disjoint applicability
+  / explicit priorities). Once `JetA F` has a single canonical one, re-test — the `NormOneClass K`
+  instance above is very likely needed alongside it, since it demonstrably removed one of the two
+  divergences on its own.
