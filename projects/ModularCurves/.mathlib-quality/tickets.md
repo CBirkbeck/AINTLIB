@@ -30747,3 +30747,20 @@ H⁰(𝒪(3[0]))-side: Z(ℓ)-degree from the b3-freeness... or DIRECTLY: deg Z(
 the quotient-rank over charts: Γ(Zℓ')-piece ≅ coker(unimodular-row-matrix)-rank-1 —
 the B-side of the Binet-Cauchy surjectivity!! The A-rows' surjectivity ⟹ coker-of-the
 2x3 = rank-1-projective... TO DESIGN next round.)
+
+### [5a-iii-compat] ROUTE FIXED 2026-08-01: build the invertible-sections localization
+mathlib has NO affine-QCoh correspondence yet (Modules/ = Presheaf, Sheaf, Tilde only;
+Tilde's IsLocalizedModule.Away is for the Spec-model, unbridged). R2 (ofIdeals) circles
+back to the same content. ⟹ BUILD ForMathlib/InvertibleSectionsLocalization.lean:
+  theorem isLocalizedModule_presheaf_map_basicOpen (M : C.Modules) (hM : IsInvertible M)
+    (U : C.affineOpens) (f : Γ(C, U.1)) :
+    IsLocalizedModule (Submonoid.powers f) (M.presheaf.map (homOfLE (C.basicOpen_le f)).op).hom
+Proof: on the trivializing sub-basis of U the property is the structure sheaf's
+(IsAffineOpen.isLocalization_basicOpen through the app-iso of the trivialization);
+glue surjectivity (t^n-clearing over a finite trivializing basic-subcover of U +
+sheaf-amalgamation) and injectivity (separatedness + local t^n-kill) — the classical
+invertible⟹quasicoherent argument, self-contained, ~300 lines. THEN [5a-iii-compat]
+= Hom-localization of a rank-1 module (LinearMap through IsLocalizedModule.map/lift:
+functionals localize) + map_span bookkeeping. THEN [5a-iv] per the de-risked plan.
+NOTE the finiteness for t^n-clearing: U affine ⟹ quasi-compact ⟹ finite trivializing
+basic subcover ✓ (IsAffineOpen.isCompact + basis-refinement).
