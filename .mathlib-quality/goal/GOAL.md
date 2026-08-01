@@ -6471,3 +6471,87 @@ It is the restatement case predicted two entries ago. `S n₀` is *definitional*
 margin for a miscount. Left for a pass that can afford to verify it properly
 rather than forced now.
 
+
+## 163 → 162: five lemmas, not one — the helper's cost is its CONTEXT
+
+`sub_algebraMap_evalFHom_mem_ideal_fSubX` (77 lines) became
+
+    coeff_shift_eq                              6L
+    evalFHom_eq_coeff_zero_add                 10L
+    evalZeroHom_eq_coeff_zero                   1L
+    sub_algebraMap_evalFHom_key                 8L
+    sub_algebraMap_evalFHom_mem_of_vanishing   32L
+    parent                                     20L
+
+The obvious cut is `have hmain` (32 lines against a need of 27). It does not
+work: `hmain` uses the four `have`s above it, so as a helper it would take them
+as **hypotheses** — 25 lines of signature, helper 57, over budget. Promoting all
+five to top level instead lets `hmain` call the other four *by name* and need no
+hypotheses at all. The arithmetic only closes in the five-lemma shape.
+
+This is a *second*, distinct failure of the extract-the-big-block instinct. The
+one already recorded is "parent clears but the helper doesn't". This one is:
+**the helper's cost is not its body, it is the context it must re-import** — and
+the fix is to promote that context rather than pass it.
+
+### A ranking correction: `have`-bound and `obtain`-bound locals are not alike
+
+The worklist scored this target at 6 locals and put it third. Four of those
+(`coeff_shift`, `eval_decomp`, `eval_zero_eq`, `key_identity`) are `have`-bound
+with explicit ∀-types, and the other two (`k`, `q`) are merely *their* bound
+variables — not free locals at all.
+
+A `have`-bound local is nearly free to extract: its type is written down, so it
+can simply become a lemma. An `obtain`-bound local is the expensive kind,
+because its type exists nowhere and the extractor has to invent it. The ranking
+counts them alike, which is why this — the most tractable target on the board —
+sat third behind two `obtain`-heavy ones. **Weighting by binder kind, not binder
+count, is the next fix to `decompose-worklist`.**
+
+### The dropped quantifier
+
+My slice took `hmain`'s statement *continuation* lines but not the
+`have hmain : ∀ (n : ℕ) (q : …),` line itself — which I had replaced with the
+new signature — so the helper lost its binder. `induction n` then reported
+*major premise type is not an inductive type*, pointing at the tactic rather
+than at the missing quantifier.
+
+Assert-before-write would have caught it; I applied it to the body slices and
+not to the statement slice. The missing check: **a lifted statement fragment
+must not begin mid-binder.**
+
+
+### `decompose_rank.py`: cost by binder KIND, plus the two dimensions it kept losing
+
+Rewrote the worklist generator to weight locals by how they were bound:
+
+    have / set-bound   0   type or defining term is written down -> promote or carry
+    intro              1   type recoverable from the goal
+    induction/cases    2
+    obtain / rcases    3   type appears NOWHERE -> the extractor must invent it
+
+Building it reproduced this campaign's signature failure twice in five minutes,
+which is worth recording precisely because the fix each time was one line.
+
+**It dropped the preamble filter.** The reweighted ranking put an 84-line proof
+(`presheafValue_mvRestricted_isUnit_mk_s`) at the *top* with cost 0 — every
+local `have`/`set`-bound. Spot-checking the file before editing showed a
+~30-line `letI`/`haveI` preamble the helper would have to reproduce: a 70-line
+helper. I had fixed exactly this two entries ago and then wrote a new tool
+without it.
+
+**It counted carried lines as free.** With the preamble check restored, the new
+top was a 49-line block whose two `set` locals resolve at cost 0 — but resolving
+them means *carrying their defining lines into the helper*, making it 51. Cost
+and size are different currencies and I had conflated them.
+
+Both were caught by spot-checking the top candidate against the file rather than
+by a build. That is now the rule that actually works: **never edit from a
+ranking's top row without opening the file first.** Every estimator defect
+earlier in this campaign shipped because I acted on the ranking; the last three
+were caught because I did not.
+
+Current top after both fixes — `TateAlgebraTopology::tateAlgNhd_leftMul_of_principal`,
+cost 3, block 22 against a need of 18, parent → 47, helper ≈ 25. Comfortable on
+both sides, which is the property the previous two candidates lacked.
+

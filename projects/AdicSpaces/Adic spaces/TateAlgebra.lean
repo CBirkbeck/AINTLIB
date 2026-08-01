@@ -814,6 +814,75 @@ theorem ideal_fSubX_le_ker_evalFHom [DiscreteTopology A] (f : A) :
   simp only [Set.mem_singleton_iff] at hx
   simp only [SetLike.mem_coe, RingHom.mem_ker, hx, evalFHom_fSubX]
 
+/-- Coefficients of `shift q` are the shifted coefficients of `q`. -/
+private theorem coeff_shift_eq (q : ↥(TateAlgebra A)) (k : ℕ) :
+    coeff k (shift q) = coeff (k + 1) q := by
+  change MvPowerSeries.coeff (Finsupp.single 0 k) (shiftFun q.val) =
+    MvPowerSeries.coeff (Finsupp.single 0 (k + 1)) q.val
+  simp only [shiftFun, MvPowerSeries.coeff_apply, Finsupp.single_add]
+
+/-- `evalFHom` decomposes along `q = coeff 0 q + X * shift q`. -/
+private theorem evalFHom_eq_coeff_zero_add [DiscreteTopology A] (f : A)
+    (q : ↥(TateAlgebra A)) :
+    evalFHom f q = coeff 0 q + f * evalFHom f (shift q) := by
+  have hd := eq_const_add_X_mul_shift q
+  calc evalFHom f q
+      = evalFHom f (algebraMap A _ (evalZeroHom q) + X * shift q) := by rw [← hd]
+    _ = evalFHom f (algebraMap A _ (evalZeroHom q)) +
+        evalFHom f X * evalFHom f (shift q) := by rw [map_add, map_mul]
+    _ = coeff 0 q + f * evalFHom f (shift q) := by
+        rw [evalFHom_algebraMap, evalFHom_X]; rfl
+
+/-- `evalZeroHom` is the zeroth coefficient. -/
+private theorem evalZeroHom_eq_coeff_zero (q : ↥(TateAlgebra A)) :
+    evalZeroHom q = coeff 0 q := rfl
+
+/-- One step of the recursion: peel `X - algebraMap f` off `q - algebraMap (evalFHom f q)`. -/
+private theorem sub_algebraMap_evalFHom_key [DiscreteTopology A] (f : A)
+    (q : ↥(TateAlgebra A)) :
+    q - algebraMap A _ (evalFHom f q) =
+    X * (shift q - algebraMap A _ (evalFHom f (shift q))) +
+    (X - algebraMap A _ f) * algebraMap A _ (evalFHom f (shift q)) := by
+
+  rw [evalFHom_eq_coeff_zero_add f q]
+  nth_rw 1 [eq_const_add_X_mul_shift q]
+  rw [map_add, map_mul, evalZeroHom_eq_coeff_zero]; ring
+
+/-- The main induction: a `q` whose coefficients vanish above `n` lies in the ideal. -/
+private theorem sub_algebraMap_evalFHom_mem_of_vanishing [DiscreteTopology A] (f : A) :
+    ∀ (n : ℕ) (q : ↥(TateAlgebra A)),
+    (∀ k, n < k → coeff k q = 0) →
+    q - algebraMap A _ (evalFHom f q) ∈
+      Ideal.span {algebraMap A ↥(TateAlgebra A) f - X} := by
+  intro n; induction n with
+  | zero =>
+    intro q hq
+    have hshift_zero : shift q = 0 := by
+      apply ext; intro k
+      rw [coeff_shift_eq, hq (k + 1) (Nat.succ_pos k)]
+      simp only [coeff, map_zero, ZeroMemClass.coe_zero]
+    have hev : evalFHom f q = coeff 0 q := by
+      rw [evalFHom_eq_coeff_zero_add f, hshift_zero, map_zero, mul_zero, add_zero]
+    have hq0 : q = algebraMap A _ (coeff 0 q) := by
+      have := eq_const_add_X_mul_shift q
+      rw [hshift_zero, mul_zero, add_zero, evalZeroHom_eq_coeff_zero] at this
+      exact this
+    have h1 : algebraMap A _ (evalFHom f q) = q := by
+      rw [hev]; exact hq0.symm
+    rw [h1, sub_self]
+    exact Ideal.zero_mem _
+  | succ n ih =>
+    intro q hq
+    rw [sub_algebraMap_evalFHom_key f]
+    apply Ideal.add_mem
+    · apply Ideal.mul_mem_left
+      exact ih (shift q) (fun k hk ↦ by rw [coeff_shift_eq]; exact hq _ (by omega))
+    · apply Ideal.mul_mem_right
+      have hmem : (X : ↥(TateAlgebra A)) - algebraMap A ↥(TateAlgebra A) f =
+          -(algebraMap A ↥(TateAlgebra A) f - X) := by ring
+      rw [hmem]
+      exact neg_mem (Ideal.subset_span rfl)
+
 /-- The factor theorem for `TateAlgebra A` (discrete case): for every element `p`,
 `p - algebraMap(evalFHom f p) ∈ Ideal.span {algebraMap f - X}`.
 
@@ -823,63 +892,6 @@ theorem sub_algebraMap_evalFHom_mem_ideal_fSubX [DiscreteTopology A] (f : A)
     (p : ↥(TateAlgebra A)) :
     p - algebraMap A _ (evalFHom f p) ∈
       Ideal.span {algebraMap A ↥(TateAlgebra A) f - X} := by
-  have coeff_shift : ∀ (q : ↥(TateAlgebra A)) (k : ℕ),
-      coeff k (shift q) = coeff (k + 1) q := by
-    intro q k
-    change MvPowerSeries.coeff (Finsupp.single 0 k) (shiftFun q.val) =
-      MvPowerSeries.coeff (Finsupp.single 0 (k + 1)) q.val
-    simp only [shiftFun, MvPowerSeries.coeff_apply, Finsupp.single_add]
-  have eval_decomp : ∀ (q : ↥(TateAlgebra A)),
-      evalFHom f q = coeff 0 q + f * evalFHom f (shift q) := by
-    intro q
-    have hd := eq_const_add_X_mul_shift q
-    calc evalFHom f q
-        = evalFHom f (algebraMap A _ (evalZeroHom q) + X * shift q) := by rw [← hd]
-      _ = evalFHom f (algebraMap A _ (evalZeroHom q)) +
-          evalFHom f X * evalFHom f (shift q) := by rw [map_add, map_mul]
-      _ = coeff 0 q + f * evalFHom f (shift q) := by
-          rw [evalFHom_algebraMap, evalFHom_X]; rfl
-  have eval_zero_eq : ∀ (q : ↥(TateAlgebra A)), evalZeroHom q = coeff 0 q := fun _ ↦ rfl
-  have key_identity : ∀ (q : ↥(TateAlgebra A)),
-      q - algebraMap A _ (evalFHom f q) =
-      X * (shift q - algebraMap A _ (evalFHom f (shift q))) +
-      (X - algebraMap A _ f) * algebraMap A _ (evalFHom f (shift q)) := by
-    intro q
-    rw [eval_decomp q]
-    nth_rw 1 [eq_const_add_X_mul_shift q]
-    rw [map_add, map_mul, eval_zero_eq]; ring
-  have hmain : ∀ (n : ℕ) (q : ↥(TateAlgebra A)),
-      (∀ k, n < k → coeff k q = 0) →
-      q - algebraMap A _ (evalFHom f q) ∈
-        Ideal.span {algebraMap A ↥(TateAlgebra A) f - X} := by
-    intro n; induction n with
-    | zero =>
-      intro q hq
-      have hshift_zero : shift q = 0 := by
-        apply ext; intro k
-        rw [coeff_shift, hq (k + 1) (Nat.succ_pos k)]
-        simp only [coeff, map_zero, ZeroMemClass.coe_zero]
-      have hev : evalFHom f q = coeff 0 q := by
-        rw [eval_decomp, hshift_zero, map_zero, mul_zero, add_zero]
-      have hq0 : q = algebraMap A _ (coeff 0 q) := by
-        have := eq_const_add_X_mul_shift q
-        rw [hshift_zero, mul_zero, add_zero, eval_zero_eq] at this
-        exact this
-      have h1 : algebraMap A _ (evalFHom f q) = q := by
-        rw [hev]; exact hq0.symm
-      rw [h1, sub_self]
-      exact Ideal.zero_mem _
-    | succ n ih =>
-      intro q hq
-      rw [key_identity]
-      apply Ideal.add_mem
-      · apply Ideal.mul_mem_left
-        exact ih (shift q) (fun k hk ↦ by rw [coeff_shift]; exact hq _ (by omega))
-      · apply Ideal.mul_mem_right
-        have hmem : (X : ↥(TateAlgebra A)) - algebraMap A ↥(TateAlgebra A) f =
-            -(algebraMap A ↥(TateAlgebra A) f - X) := by ring
-        rw [hmem]
-        exact neg_mem (Ideal.subset_span rfl)
   have hfin : Set.Finite {s : Fin 1 →₀ ℕ | p.val s ≠ 0} :=
     (isRestricted_iff_finite_support p.val).mp p.prop
   by_cases hp : ∀ k, coeff k p = 0
@@ -891,7 +903,7 @@ theorem sub_algebraMap_evalFHom_mem_ideal_fSubX [DiscreteTopology A] (f : A)
       rw [Set.Finite.mem_toFinset]
       simp only [Set.mem_setOf_eq, coeff, toIndex] at hk ⊢
       exact hk
-    refine hmain (hfin.toFinset.sup' hne (fun s ↦ s 0)) p (fun k hk ↦ ?_)
+    refine sub_algebraMap_evalFHom_mem_of_vanishing f (hfin.toFinset.sup' hne (fun s ↦ s 0)) p (fun k hk ↦ ?_)
     by_contra hne2
     have hmem : toIndex k ∈ hfin.toFinset := by
       rw [Set.Finite.mem_toFinset]
