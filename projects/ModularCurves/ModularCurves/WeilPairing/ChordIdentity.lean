@@ -1174,31 +1174,6 @@ theorem vertical_exact_order {R A : Type u} [CommRing R] [CommRing A] [Algebra R
   rw [hc₁, hc₂, ← hu]
   ring
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[W1 (i2)] Coordinates over the base give a section of the model.** The tree's
-`chartSolutionsEquiv` and `chartHomEquiv` are stated for an arbitrary commutative
-`R`-algebra, not only for fields, so a solution of the dehomogenised equation over the
-base itself yields a point of `projModel W` over `Spec R` — that is, a section. This is
-the construction the `σ₃` condition needs for the chord's third intersection. -/
-noncomputable def sectionOfChartSolution {R : Type u} [CommRing R]
-    (W : WeierstrassCurve R) (i : Fin 3)
-    (v : { v : {j : Fin 3 // j ≠ i} → R //
-      MvPolynomial.aeval v
-        (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) = 0 }) :=
-  (chartHomEquiv W i R).symm ((chartSolutionsEquiv W i R).symm v)
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- The underlying `R`-point of `sectionOfChartSolution`. -/
-noncomputable def specPointOfChartSolution {R : Type u} [CommRing R]
-    (W : WeierstrassCurve R) (i : Fin 3)
-    (v : { v : {j : Fin 3 // j ≠ i} → R //
-      MvPolynomial.aeval v
-        (MvPolynomial.dehomogenizeAux R i W.toProjective.polynomial) = 0 }) :
-    SpecPoints (projModel W) (projModelπ W) R :=
-  (sectionOfChartSolution W i v).1
-
 end ModularCurves
 
 namespace ModularCurves

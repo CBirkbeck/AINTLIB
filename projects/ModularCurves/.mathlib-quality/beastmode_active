@@ -1,1 +1,1 @@
-FOCUS: [W1 (i2)] coordinates over the base + equation => a section of projModel (the missing construction); recon chartSolutionsEquiv at base level
+FOCUS: [W1 (i3)] build the third-point section from (addX, negAddY) and compare with the group-law -(P+Q) via section_eq_of_dictionary_eq
