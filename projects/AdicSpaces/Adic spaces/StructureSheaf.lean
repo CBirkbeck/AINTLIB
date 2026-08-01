@@ -679,6 +679,41 @@ using the covering condition on `Spa(A, A⁺)`. For discrete rings, proved via t
 valuations; for general Tate rings, requires Lemma 7.45 of Wedhorn. -/
 
 omit [IsHuberRing A] in
+/-- A valuation taking only the values `0` and `1`, whose zero-set is an open prime,
+is a Spa-point. Continuity is where openness is used: the sublevel set `{a | w a < γ}`
+is empty for `γ = 0`, everything for `γ > 1`, and exactly `p` in between; the
+plus-subring bound is immediate from `w ≤ 1`. -/
+private theorem spa_of_valuation_zero_or_one
+    (w : Valuation A (WithZero (Multiplicative ℤ))) (p : Ideal A)
+    (hp_open : IsOpen (p : Set A)) (hw_mem_iff : ∀ a : A, w a = 0 ↔ a ∈ p)
+    (hw_one_or_zero : ∀ a : A, w a = 0 ∨ w a = 1) :
+    ofValuation w ∈ Spa A A⁺ := by
+  have hw_le_one : ∀ a : A, w a ≤ 1 := fun a => by
+    rcases hw_one_or_zero a with h | h <;> simp [h]
+  refine ⟨?_, ?_⟩
+  · apply isContinuous_ofValuation_of; intro γ
+    by_cases hγ : γ = 0
+    · subst hγ; convert isOpen_empty
+      ext a; simp [not_lt_zero]
+    · by_cases h1 : (1 : WithZero (Multiplicative ℤ)) < γ
+      · convert isOpen_univ; ext a
+        simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true]
+        exact lt_of_le_of_lt (hw_le_one a) h1
+      · push Not at h1
+        suffices {a : A | w a < γ} = (p : Set A) by rw [this]; exact hp_open
+        ext a
+        simp only [Set.mem_setOf_eq]
+        constructor
+        · intro h
+          rcases hw_one_or_zero a with ha0 | ha1
+          · exact (hw_mem_iff a).mp ha0
+          · exact absurd (ha1 ▸ h |>.trans_le h1) (lt_irrefl _)
+        · intro ha
+          rw [(hw_mem_iff a).mpr ha]; exact zero_lt_iff.mpr hγ
+  · intro f _; change w f ≤ w 1
+    rw [map_one]; exact hw_le_one f
+
+omit [IsHuberRing A] in
 /-- For an open prime `p` with `s ∉ p`, the trivial valuation on `Frac(A/p)` pulled back
 to `A` lies in `rationalOpen T s`. Continuity follows from `p` being open. -/
 theorem exists_spa_point_in_rationalOpen_of_isOpen_prime
@@ -719,29 +754,8 @@ theorem exists_spa_point_in_rationalOpen_of_isOpen_prime
         ((Ideal.Quotient.mk p) a)) 0 with h | h
     · left; rw [h]; simp
     · right; exact Valuation.one_apply_of_ne_zero h
-  have hv_spa : v ∈ Spa A A⁺ := by
-    refine ⟨?_, ?_⟩
-    · apply isContinuous_ofValuation_of; intro γ
-      by_cases hγ : γ = 0
-      · subst hγ; convert isOpen_empty
-        ext a; simp [not_lt_zero]
-      · by_cases h1 : (1 : WithZero (Multiplicative ℤ)) < γ
-        · convert isOpen_univ; ext a
-          simp only [Set.mem_setOf_eq, Set.mem_univ, iff_true, w, Valuation.comap_apply]
-          exact lt_of_le_of_lt (Valuation.one_apply_le_one _) h1
-        · push Not at h1
-          suffices {a : A | w a < γ} = (p : Set A) by rw [this]; exact hp_open
-          ext a
-          simp only [Set.mem_setOf_eq]
-          constructor
-          · intro h
-            rcases hw_one_or_zero a with ha0 | ha1
-            · exact (hw_mem_iff a).mp ha0
-            · exact absurd (ha1 ▸ h |>.trans_le h1) (lt_irrefl _)
-          · intro ha
-            rw [(hw_mem_iff a).mpr ha]; exact zero_lt_iff.mpr hγ
-    · intro f _; change w f ≤ w 1
-      simp only [w, Valuation.comap_apply, map_one]; exact Valuation.one_apply_le_one _
+  have hv_spa : v ∈ Spa A A⁺ :=
+    spa_of_valuation_zero_or_one A w p hp_open hw_mem_iff hw_one_or_zero
   have hv_rat : v ∈ rationalOpen T s := by
     refine ⟨hv_spa, ?_, ?_⟩
     · intro t' _
