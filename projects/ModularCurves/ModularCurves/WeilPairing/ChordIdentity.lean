@@ -796,6 +796,29 @@ theorem chord_exact_order_in_chart {R A : Type u} [CommRing R] [CommRing A]
       c₂ _ hx₃ hy₃ hline₃ hquot
       (by rw [map_sub, hx₃, σ₃.commutes]; simp) htor₃
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 E1] The chart generator is the coordinate difference, up to a unit.** In a
+chart whose evaluation kernel is principal on `g` and where the coordinate difference
+also generates, the two differ by a unit — the compatibility that lets
+`chord_exact_order_in_chart` be applied with the section-provided generators. -/
+theorem exists_unit_generator_eq_sub_coord {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (σ : A →ₐ[R] R) (X : A) (x : R) (g : A)
+    (hx : σ X = x)
+    (hk : RingHom.ker (σ : A →+* R) = Ideal.span {g})
+    (hgen : Ideal.span {X - algebraMap R A x} = Ideal.span {g}) :
+    (∃ v : A, g = (X - algebraMap R A x) * v) ∧
+      (∃ w : A, X - algebraMap R A x = g * w) := by
+  have hmem₁ : g ∈ Ideal.span {X - algebraMap R A x} := by
+    rw [hgen]
+    exact Ideal.mem_span_singleton_self g
+  have hmem₂ : X - algebraMap R A x ∈ Ideal.span {g} := by
+    rw [← hgen]
+    exact Ideal.mem_span_singleton_self _
+  obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hmem₁
+  obtain ⟨b, hb⟩ := Ideal.mem_span_singleton'.mp hmem₂
+  exact ⟨⟨a, by rw [← ha, mul_comm]⟩, ⟨b, by rw [← hb, mul_comm]⟩⟩
+
 end ModularCurves
 
 namespace ModularCurves
