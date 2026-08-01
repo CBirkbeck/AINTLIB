@@ -32515,3 +32515,20 @@ LEAN-OPS: bare `idealModule` mis-resolves inside a `tensorObj` argument (it unif
 expected argument type with a hom type); write `Scheme.Modules.idealModule`. The transport
 lemma lives in `AlgebraicGeometry.Scheme.Modules`, so it needs the qualified name plus
 `import ModularCurves.Picard.IdealModulePullback`.
+
+## SESSION CLOSE 2026-08-01 — state and the single next step
+Root build green, 9619 jobs; every declaration added this session is axiom-clean
+([propext, Classical.choice, Quot.sound]); all work pushed to dev/modular-curves.
+
+The theorem-of-the-square prong is complete except for ONE step, and that step is
+geometry-plumbing with all its transports already proved:
+  **[W9b] run the chord/vertical prong with the base restricted to `U`.**
+  Inputs in hand: `EllObj.pullbackAlong` (Moduli/EllCategory.lean:99),
+  `nonempty_pullback_tensorObj_idealModule_pair` (W9a) to recognise the restricted
+  identity, `nonempty_tensorObj_dual_unitObj_of_iso` (W8) to turn `A ≅ B` into a
+  trivialization of `Δ`, then `nonempty_iso_pullback_section_of_units` (W4c) and
+  `exists_invertible_iso_tensorObj_pullback_of_descent` (W5b) close the Picard leaf.
+  Do NOT try to state W4c∘W5b as one theorem — see the [W6] entry (elaboration-infeasible).
+Downstream of the leaf: the DS4 construction of `weilPairing` (WeilPairing/Basic.lean:47),
+which discharges `weilPairing_torsionMapOfEllHom` (ModularCurve/YRho.lean:2489) — the live
+blocker of `yRho_representable`.
