@@ -1,1 +1,1 @@
-FOCUS: [W1 chart facts] supply the section coordinates and kernel generators in the away chart for the actual P,Q,R,Rm
+FOCUS: [W1 (i)] produce the three retractions for P, Q, -(P+Q) on a chart inside sectionAway and verify sigma3 reads the third point
