@@ -270,74 +270,53 @@ theorem mem_BIPlusIn_iff_isIntegral
       ↔ IsIntegral ↥(evalBallSubring p F ϖ φ hφ hbmem hb) z := by
   constructor
   · intro hz
-    have hz1 : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ 1 :=
-      (mem_BIPlusIn_iff p F ϖ).mp hz
-    have hKinv0 : (0 : NNReal) < ρ₁ ^ m * ((σ₁ ^ m)⁻¹) :=
-      mul_pos (pow_pos hρ₁0 m) (inv_pos.mpr (pow_pos hσ₁0 m))
     have hKinv1 : ρ₁ ^ m * ((σ₁ ^ m)⁻¹) ≤ 1 :=
-      le_trans (mul_le_mul_of_nonneg_right
-          (pow_le_pow_left₀ zero_le hρσ m) zero_le)
-        (le_of_eq (mul_inv_cancel₀ (pow_pos hσ₁0 m).ne'))
-    obtain ⟨x, hx⟩ := exists_BIProd_wI_le p F ϖ z.2 hKinv0
-    obtain ⟨⟨a, k⟩, hak⟩ := exists_mk'_sPow p F ϖ x
-    subst hak
+      mul_inv_le_one_of_le₀ (pow_le_pow_left₀ zero_le hρσ m) zero_le
+    obtain ⟨x, hx⟩ := exists_BIProd_wI_le p F ϖ z.2 (mul_pos (pow_pos hρ₁0 m) (inv_pos.mpr (pow_pos hσ₁0 m)))
+    obtain ⟨⟨a, k⟩, hak⟩ := exists_mk'_sPow p F ϖ x; subst hak
     have hxw : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
         (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
           (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))) ≤ 1 := by
       have hsplit := wI_add_le p F
-        (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-            (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+        (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
           - ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
             : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)))
-        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)) : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
       rw [sub_add_cancel] at hsplit
-      exact le_trans hsplit (max_le (le_trans hx hKinv1) hz1)
+      exact le_trans hsplit (max_le (le_trans hx hKinv1) ((mem_BIPlusIn_iff p F ϖ).mp hz))
     rw [wI_BIProd p F, valued_BlocToHatK, valued_BlocToHatK] at hxw
     have hint := isIntegral_blocToBI_of_wLoc_le_one p F ϖ φ hφ hφb
       hρσ hσρ zb m hm hgen hbmem hb hbg a k
       (le_trans (le_max_left _ _) hxw)
       (le_trans (le_max_right _ _) hxw)
     have hcoe : ((blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
-          : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
           : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
-        = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-            (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)) := rfl
+        = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)) := rfl
     have hdle : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
-        (((z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-            (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+        (((z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
           : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
           : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)))
         ≤ ρ₁ ^ m * ((σ₁ ^ m)⁻¹) := by
       rw [AddSubgroupClass.coe_sub, hcoe, show
-        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
-          - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-              (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
-        = -(BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-              (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+        ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)) : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+          - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
+        = -(BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))
             - ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
               : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)))
         from (neg_sub _ _).symm]
-      rw [wI_neg p F]
-      exact hx
+      rw [wI_neg p F]; exact hx
     obtain ⟨U, hUeq, hUnorm⟩ := exists_evalBI_eq_of_le_inv p F ϖ φ hφ hφb
       hρσ hσρ zb m hm hgen hbmem hb hbg
       (z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
         (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k))).2 hdle
     refine isIntegral_add_of_mem _
-      (blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)))
-      (z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)))
+      (blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)))
+      (z - blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) a (sPow p F ϖ k)))
       z (by ring) hint ⟨U, hUnorm, Subtype.ext hUeq⟩
   · intro h
     exact BIPlusIn_isIntegrallyClosed p F ϖ z
-      (isIntegral_of_subring_le
-        (evalBallSubring_le_BIPlusIn p F ϖ φ hφ hbmem hb) h)
+      (isIntegral_of_subring_le (evalBallSubring_le_BIPlusIn p F ϖ φ hφ hbmem hb) h)
 
 end Sandwich
 end FarguesFontaine

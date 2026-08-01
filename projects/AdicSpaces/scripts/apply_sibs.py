@@ -47,6 +47,8 @@ TERM_BY = re.compile(r":=\s*by\b|<\|\s*by\b|\bfrom\s+by\b")
 
 
 OPENER = ('by', 'do', '=>', '↦', 'from')
+# a line ending in one of these is mid-expression, so what follows continues it
+CONT = (':=', '(', '[', ',', '⟨', '+', '*', '-', '→', 'fun')
 
 
 def _eff_indent(line: str) -> int:
@@ -55,7 +57,7 @@ def _eff_indent(line: str) -> int:
     return ind + 2 if line.lstrip().startswith(('· ', '. ')) else ind
 
 
-def starts_a_tactic(prev: str, a: str) -> bool:
+def starts_a_tactic(prev: str, a: str, above=()) -> bool:
     """Is `a` the START of a tactic, or a CONTINUATION of `prev`'s expression?
 
     Equal indent between `a` and `c` is not enough: two argument-continuation
@@ -75,13 +77,36 @@ def starts_a_tactic(prev: str, a: str) -> bool:
         return True
     if prev.rstrip().endswith(OPENER):
         return True
-    return (len(a) - len(a.lstrip())) <= _eff_indent(prev)
+    if (len(a) - len(a.lstrip())) > _eff_indent(prev):
+        return False
+    # `prev` may ITSELF be a continuation at the same indent, in which case the
+    # one-line comparison above is fooled.  Walk back to the first line strictly
+    # LESS indented than `a`: that is the line `a` actually continues (or the
+    # tactic it belongs to).  If it does not end a complete tactic, `a` is an
+    # argument line, not a tactic.
+    #
+    #     have hint := f p F ϖ φ hφ            <- indent 4, opens an application
+    #       hρσ hσρ zb m hm a k                <- indent 6, continuation
+    #       (le_trans (le_max_left _ _) hxw)   <- indent 6, ALSO a continuation
+    #
+    # Merging the last two with `;` yields `unknown tactic`.  Cost: one build.
+    ai = len(a) - len(a.lstrip())
+    for line in reversed(above):
+        if not line.strip():
+            continue
+        if (len(line) - len(line.lstrip())) < ai:
+            # In Lean a line indented past the tactic column CONTINUES the line
+            # above unless that line opened a block (`by`, `do`, `=>`).  The
+            # trailing token cannot decide this: `f p F ϖ φ hφ hφb` looks
+            # complete but is a partial application continued below.
+            return line.rstrip().endswith(OPENER)
+    return True
 
 
-def mergeable(a: str, c: str, prev: str = '') -> bool:
+def mergeable(a: str, c: str, prev: str = '', above=()) -> bool:
     if not a.strip() or not c.strip():
         return False
-    if not starts_a_tactic(prev, a):
+    if not starts_a_tactic(prev, a, above):
         return False
     if '--' in a or '--' in c:
         return False
@@ -103,7 +128,7 @@ def main() -> int:
     b, e = body_span(lines, rec['line'] - 1)
     picks, k, last = [], b, -10
     while k < e - 1:
-        if k > last and mergeable(lines[k], lines[k + 1], lines[k - 1] if k else ''):
+        if k > last and mergeable(lines[k], lines[k + 1], lines[k - 1] if k else '', lines[max(0, k - 12):k]):
             picks.append(k)
             last = k + 1
             k += 2

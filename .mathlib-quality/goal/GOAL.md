@@ -7281,3 +7281,46 @@ i.e. the API wants both hypotheses for the *same* `ρ`, and I had written
 belongs. Reading the whole message named it immediately; a turn ago this class
 of signature error cost me four builds because I read only the first line.
 
+
+## 149 → 148: three techniques, no extraction — and a guard bug that nearly shipped
+
+`mem_BIPlusIn_iff_isIntegral` 70 → 49, with nothing extracted:
+
+    hKinv1 → mathlib `mul_inv_le_one_of_le₀`     frees 2
+    inline hz1  (single-use alias)               frees 4
+    inline hKinv0 (single-use)                   frees 2
+    11 joins + 2 sibs                            frees 13
+
+`hz1`'s body was `(mem_BIPlusIn_iff p F ϖ).mp hz` — a single term, i.e. the junk
+-def pattern where hoisting would be *wrong*. `hKinv1` hand-rolled
+`ρ₁ ≤ σ₁ → ρ₁^m * (σ₁^m)⁻¹ ≤ 1`, which mathlib already has. Block size would
+have pointed at extraction; the right moves were mathlib-first and inlining.
+
+### The sibling merger had a real bug
+
+It produced `unknown tactic` by joining two **argument-continuation** lines:
+
+    have hint := isIntegral_blocToBI_of_wLoc_le_one p F ϖ φ hφ hφb
+      hρσ hσρ zb m hm hgen hbmem hb hbg a k
+      (le_trans (le_max_left _ _) hxw); (le_trans (le_max_right _ _) hxw)
+
+`starts_a_tactic` exists to prevent exactly this. It failed because it compares
+only against the *immediately* preceding line — which is itself a continuation
+at the same indent, so the comparison passes.
+
+**Two ways this nearly went unnoticed.**
+
+`scope_code` reported the proof **CLEARED while the module was red**. The
+measurement counts lines and knows nothing about compilation, so a line-count
+success on broken code is indistinguishable from a real one. The only thing that
+caught it was building before believing the number.
+
+And my first fix *tested green but was wrong*: I keyed on trailing tokens, and
+`f p F ϖ φ hφ hφb` is a partial application that looks syntactically complete.
+The test I wrote alongside it caught that the continuation case still returned
+`True`.
+
+The correct rule is structural: **a line indented past the tactic column
+continues the line above unless that line opened a block** (`by`, `do`, `=>`).
+Verified on argument-continuation, sibling-tactic, and inside-a-`by`-block.
+
