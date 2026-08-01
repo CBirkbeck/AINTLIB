@@ -1,1 +1,1 @@
-FOCUS: [W3.8] instantiate nonempty_unitObj_iso_of_normalized_glue with the four proved inputs
+FOCUS: [W3.9] untwist — monoidalTensorObjIso transport + nonempty_eval_iso to get L ≅ f^*(z^*L)

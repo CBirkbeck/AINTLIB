@@ -604,4 +604,17 @@ theorem nonempty_unitObj_iso_tensorObj_of_frames
   · rw [tensorSection_one_one L D _ (eL i) (eD i)]
     exact bijective_smul_restrict_overTrivializationSection_one _ hW _
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.9] Untwisting.** A trivialization of `L ⊗ D` (monoidal) where `D` is the dual of
+an invertible `M` identifies `L` with `M`: transport to `tensorObj` along
+`monoidalTensorObjIso`, then cancel `D` against `nonempty_eval_iso`. -/
+theorem nonempty_iso_of_tensorObj_dual_trivial {X : Scheme.{u}} (L M : X.Modules)
+    (hM : IsInvertible M)
+    (h : Nonempty (unitObj X ≅ MonoidalCategory.tensorObj L (dualObj M))) :
+    Nonempty (L ≅ M) := by
+  have h' : Nonempty (Scheme.Modules.tensorObj L (dualObj M) ≅ unitObj X) :=
+    ⟨(monoidalTensorObjIso L (dualObj M)).symm ≪≫ h.some.symm⟩
+  exact nonempty_iso_of_tensorObj_unitObj h' (nonempty_eval_iso hM)
+
 end ModularCurves
