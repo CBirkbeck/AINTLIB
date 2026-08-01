@@ -30732,3 +30732,18 @@ does the heavy lifting and the basis-case is two rw's). ⟹ TRY (R2) FIRST next 
   R'' : S ⟶ C (graph; Stacks 0B8V-shape: deg-1 finite locally free Z→S has Z ≅ S).
 - Z(ℓ) = [P]+[Q]+[R''] product-decomposition ⟹ the 5a-v full-product factorization
   and the trivialization iso via isIso_twistSectionLift_of_isLocallySurjective.
+
+### [5a-iv] DE-RISK 2026-08-01: the graph lemma is IN MATHLIB
+`Scheme.Hom.isIso_iff_finrank_eq : IsIso f ↔ finrank f = 1` (Morphisms/FlatRank.lean:274,
+finite+flat+lfp context) — Stacks 0B8V done: once Z(ℓ') is RelEffCartierDiv with
+degree ≡ 1, R'' := (asIso (Z.subschemeι ≫ π)).inv ≫ Z.subschemeι is the residual
+SECTION (section-property: inv-≫-cancel). Remaining 5a-iv inputs: (1) [5a-iii-compat];
+(2) Z(ℓ')'s RelEffCartierDiv fields (finite/flat/lfp — via IsOfficialCartier-style
+per-chart principal-nzd + the KM-repackaging... CHECK CartierDivisor for an
+IsOfficialCartier → RelEffCartierDiv builder); (3) degree-1: additivity of degree
+along Z(ℓ) = D + Z(ℓ') (ideal-product ⟹ finrank-additive — the piece_free/free_quotient
+KM 1.1.2 machinery computes ranks of product-quotients: deg(Z(ℓ)) = 3 needs the
+H⁰(𝒪(3[0]))-side: Z(ℓ)-degree from the b3-freeness... or DIRECTLY: deg Z(ℓ') = 1 via
+the quotient-rank over charts: Γ(Zℓ')-piece ≅ coker(unimodular-row-matrix)-rank-1 —
+the B-side of the Binet-Cauchy surjectivity!! The A-rows' surjectivity ⟹ coker-of-the
+2x3 = rank-1-projective... TO DESIGN next round.)
