@@ -620,6 +620,15 @@ theorem algHom_second_quotient_eq_zero {R A : Type u} [CommRing R] [CommRing A]
   refine algHom_eq_zero_of_mul_eq_zero σ c₁ conj ?_ hnzd
   rw [hid, map_neg, map_mul, hf₂, zero_mul, neg_zero]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-ii] Exactness from a unit norm.** If the chord's norm quotient is a unit,
+so is the final cofactor of the exact-order factorisation — the criterion the rank-3
+coordinates supply through the adjugate. -/
+theorem isUnit_of_norm_unit {A : Type u} [CommRing A] (c₂ conj : A)
+    (hu : IsUnit (c₂ * conj)) : IsUnit c₂ :=
+  isUnit_of_mul_isUnit_left hu
+
 end ModularCurves
 
 namespace ModularCurves
