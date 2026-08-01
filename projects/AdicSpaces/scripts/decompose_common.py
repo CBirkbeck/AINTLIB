@@ -375,3 +375,57 @@ def explicit_binder_names(params):
             depth -= 1
         i += 1
     return names
+
+
+def parent_binders(lines, decl_index, names):
+    """Exact source text of the parent's binders for `names`, in signature order.
+
+    The one part of an extraction still typed by hand is the dependency list, and
+    it is where the errors are. Four of six consecutive build failures were here:
+
+      hDeq        declared `sum = iterated`; the producer gives `iterated = sum`
+      hnoeth      `RestrictedMvPowerSeries.restrictedMvPowerSeriesSubring 2 ↥P.A₀`
+                  -- wrong namespace AND wrong construction; it is
+                  `TateAlgebra.pairSubring₂ (IsTateRing.principalPair B).toPairOfDefinition`
+      hcont_forward  domain given as `↥(TateAlgebra₂ B)`; it is the QUOTIENT
+      hφb         omitted entirely (it is a section variable, needs `include`)
+
+    Every one of those types was sitting in the parent's signature, ten lines above
+    the block being lifted. Copy, do not reconstruct.
+
+    Returns a list of binder strings ready to pass as `lift_have`'s `params`;
+    unmatched names are reported so a typo does not silently drop a hypothesis.
+    """
+    by = next(k for k in range(decl_index, len(lines))
+              if lines[k].rstrip().endswith(":= by"))
+    sig, depth, cur = [], 0, []
+    for k in range(decl_index, by + 1):
+        for ch in lines[k]:
+            if ch in "([{":
+                if depth == 0:
+                    cur = [ch]
+                    depth += 1
+                    continue
+                depth += 1
+            elif ch in ")]}":
+                depth -= 1
+                if depth == 0:
+                    cur.append(ch)
+                    sig.append("".join(cur))
+                    cur = []
+                    continue
+            if depth:
+                cur.append(ch)
+        if depth:
+            cur.append(" ")
+    out, missing = [], []
+    for n in names:
+        hit = next((b for b in sig
+                    if re.match(rf"[\(\{{\[]\s*(?:[\w'ₐ-ₜ₀-₉]+\s+)*{re.escape(n)}\b", b)), None)
+        if hit is None:
+            missing.append(n)
+        else:
+            out.append(re.sub(r"\s+", " ", hit))
+    if missing:
+        raise KeyError(f"not binders of this declaration: {missing}")
+    return out
