@@ -1349,6 +1349,37 @@ theorem isLaurentProdCover_nil_iff [DecidableEq A] (C : RationalCoveringData A) 
     C.IsLaurentProdCover ([] : List A) ↔ C.covers = {C.base} := by
   rw [RationalCoveringData.IsLaurentProdCover, laurentProdLeaves_nil]
 
+omit [IsHuberRing A] [DecidableEq (RationalLocData A)] in
+/-- Intersecting a smaller datum with `RP` stays inside the bigger datum intersected
+with `RD`, when `RP` and `RD` cut out the same rational open. Shared by the `unitDatum`
+(plus) and `coUnitDatum` (minus) branches, which differ only in that datum. -/
+private theorem interSamePair_subset_of_subset [DecidableEq A] {D₀ P : RationalLocData A}
+    (hsub : rationalOpen P.T P.s ⊆ rationalOpen D₀.T D₀.s)
+    (RP RD : RationalLocData A) (hRP : RP.P = P.P) (hRD : RD.P = D₀.P)
+    (hR : rationalOpen RP.T RP.s = rationalOpen RD.T RD.s) :
+    rationalOpen (P.interSamePair RP hRP).T (P.interSamePair RP hRP).s ⊆
+      rationalOpen (D₀.interSamePair RD hRD).T (D₀.interSamePair RD hRD).s := by
+  rw [RationalLocData.interSamePair_rationalOpen _ _ hRP,
+    RationalLocData.interSamePair_rationalOpen _ _ hRD, hR]
+  exact Set.inter_subset_inter hsub (subset_refl _)
+
+/-- A leaf `Q` below `D₀ ⊓ RD` already satisfies `RD`'s condition, so intersecting `P`
+with `Q` is the same as intersecting `P ⊓ RP` with `Q` — the condition is
+base-independent. Shared by the plus and minus branches. -/
+private theorem inter_laurentProdLeaves_eq [DecidableEq A] (P D₀ : RationalLocData A)
+    (RP RD : RationalLocData A) (hRP : RP.P = P.P) (hRD : RD.P = D₀.P)
+    (hR : rationalOpen RP.T RP.s = rationalOpen RD.T RD.s)
+    (gs' : List A) (Q : RationalLocData A)
+    (hQ : Q ∈ laurentProdLeaves (D₀.interSamePair RD hRD) gs') :
+    rationalOpen P.T P.s ∩ rationalOpen Q.T Q.s =
+      rationalOpen (P.interSamePair RP hRP).T (P.interSamePair RP hRP).s
+        ∩ rationalOpen Q.T Q.s := by
+  have hQsub : rationalOpen Q.T Q.s ⊆ rationalOpen RD.T RD.s := by
+    refine (laurentProdLeaves_subset gs' _ hQ).trans ?_
+    rw [RationalLocData.interSamePair_rationalOpen _ _ hRD]; exact Set.inter_subset_right
+  rw [RationalLocData.interSamePair_rationalOpen _ _ hRP, hR, Set.inter_assoc,
+    Set.inter_eq_right.mpr hQsub]
+
 /-- **Restriction-commutation (Wedhorn 4233)** for the base-independent Laurent
 cover: for `P ⊆ D₀`, the rational subsets `{R(P) ∩ R(Q) : Q ∈ laurentProdLeaves D₀ fs}`
 and `{R(Q') : Q' ∈ laurentProdLeaves P fs}` coincide (both directions). This is
@@ -1380,48 +1411,20 @@ theorem laurentProdLeaves_restrict [DecidableEq A] (fs : List A) :
         rationalOpen (unitDatum D₀.P g).T (unitDatum D₀.P g).s := rfl
     have hR_counit : rationalOpen (coUnitDatum P.P g).T (coUnitDatum P.P g).s =
         rationalOpen (coUnitDatum D₀.P g).T (coUnitDatum D₀.P g).s := rfl
-    have hsub_plus : rationalOpen (P.interSamePair (unitDatum P.P g) rfl).T
-          (P.interSamePair (unitDatum P.P g) rfl).s ⊆
-        rationalOpen (D₀.interSamePair (unitDatum D₀.P g) rfl).T
-          (D₀.interSamePair (unitDatum D₀.P g) rfl).s := by
-      rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
-        RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hR_unit]
-      exact Set.inter_subset_inter hsub (subset_refl _)
-    have hsub_minus : rationalOpen (P.interSamePair (coUnitDatum P.P g) rfl).T
-          (P.interSamePair (coUnitDatum P.P g) rfl).s ⊆
-        rationalOpen (D₀.interSamePair (coUnitDatum D₀.P g) rfl).T
-          (D₀.interSamePair (coUnitDatum D₀.P g) rfl).s := by
-      rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
-        RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hR_counit]
-      exact Set.inter_subset_inter hsub (subset_refl _)
+    have hsub_plus := interSamePair_subset_of_subset hsub
+      (unitDatum P.P g) (unitDatum D₀.P g) rfl rfl hR_unit
+    have hsub_minus := interSamePair_subset_of_subset hsub
+      (coUnitDatum P.P g) (coUnitDatum D₀.P g) rfl rfl hR_counit
     obtain ⟨ihp_fwd, ihp_bwd⟩ := ih (D₀.interSamePair (unitDatum D₀.P g) rfl)
       (P.interSamePair (unitDatum P.P g) rfl) hsub_plus
     obtain ⟨ihm_fwd, ihm_bwd⟩ := ih (D₀.interSamePair (coUnitDatum D₀.P g) rfl)
       (P.interSamePair (coUnitDatum P.P g) rfl) hsub_minus
     -- key: a `D₀⁺`-leaf already satisfies `v(g)≤1`, so intersecting `P` with it
     -- equals intersecting `P⁺` with it (base-independence of the condition).
-    have key_plus : ∀ Q ∈ laurentProdLeaves (D₀.interSamePair (unitDatum D₀.P g) rfl) gs',
-        rationalOpen P.T P.s ∩ rationalOpen Q.T Q.s =
-        rationalOpen (P.interSamePair (unitDatum P.P g) rfl).T
-          (P.interSamePair (unitDatum P.P g) rfl).s ∩ rationalOpen Q.T Q.s := by
-      intro Q hQ
-      have hQsub : rationalOpen Q.T Q.s ⊆
-          rationalOpen (unitDatum D₀.P g).T (unitDatum D₀.P g).s := by
-        refine (laurentProdLeaves_subset gs' _ hQ).trans ?_
-        rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl)]; exact Set.inter_subset_right
-      rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hR_unit, Set.inter_assoc,
-        Set.inter_eq_right.mpr hQsub]
-    have key_minus : ∀ Q ∈ laurentProdLeaves (D₀.interSamePair (coUnitDatum D₀.P g) rfl) gs',
-        rationalOpen P.T P.s ∩ rationalOpen Q.T Q.s =
-        rationalOpen (P.interSamePair (coUnitDatum P.P g) rfl).T
-          (P.interSamePair (coUnitDatum P.P g) rfl).s ∩ rationalOpen Q.T Q.s := by
-      intro Q hQ
-      have hQsub : rationalOpen Q.T Q.s ⊆
-          rationalOpen (coUnitDatum D₀.P g).T (coUnitDatum D₀.P g).s := by
-        refine (laurentProdLeaves_subset gs' _ hQ).trans ?_
-        rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl)]; exact Set.inter_subset_right
-      rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hR_counit, Set.inter_assoc,
-        Set.inter_eq_right.mpr hQsub]
+    have key_plus := fun Q hQ => inter_laurentProdLeaves_eq P D₀
+      (unitDatum P.P g) (unitDatum D₀.P g) rfl rfl hR_unit gs' Q hQ
+    have key_minus := fun Q hQ => inter_laurentProdLeaves_eq P D₀
+      (coUnitDatum P.P g) (coUnitDatum D₀.P g) rfl rfl hR_counit gs' Q hQ
     refine ⟨fun Q hQ => ?_, fun Q' hQ' => ?_⟩
     · rw [laurentProdLeaves_cons, Finset.mem_union] at hQ
       rcases hQ with hQ | hQ
