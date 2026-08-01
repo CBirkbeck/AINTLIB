@@ -30984,3 +30984,18 @@ instances do not line up (the same clothing trap as the CORE's ψ).
       and is where `eq_one_of_pullback_eq_one` enters);
  (iv) `UniversallyOConnected p` for the family (project class — check where it is proven
       for elliptic families: grep UniversallyOConnected instances).
+
+### [W2-b/c] DONE 2026-08-01 — descent bricks complete
+exists_isUnit_smul_eq_of_generators, bijective_smul_restrict_of_restrictIso,
+generatorOfRestrictIso + bijective_smul_generatorOfRestrictIso, bijective_smul_congr_opens.
+★ LEAN-OPS: the recurring image-preimage transport is solved once and for all by
+`bijective_smul_congr_opens` (SUBST on the opens equality — both opens are universally
+quantified so `subst` applies, and `simpa` finishes). And the C-side-vs-subscheme-side
+smul mismatch is bridged by `conv_lhs => rw [← hIso]; rfl` where
+hIso : (V.ι.appIso ⊤).inv.hom r = r (by ι_appIso + rfl) — the appIso-inv trick again.
+NEXT [W2-d]: assemble into `nonempty_unitObj_iso_of_normalized_glue`. Shape:
+  hypotheses = a base cover U i, trivializations of L over `pullback.snd ⁻¹ᵁ U i`,
+  and the zero-normalization datum; conclusion = Nonempty (unitObj ≅ L).
+  The overlap units come from exists_isUnit_smul_eq_of_generators applied at
+  `⁻¹ᵁ U i ⊓ ⁻¹ᵁ U j` (both generators restrict there by
+  bijective_smul_restrict_of_restrictIso + the transport lemma).
