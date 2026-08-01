@@ -229,6 +229,18 @@ theorem projModelPointsEquiv_neg_mul_eq_negAddY {R : Type u} [CommRing R]
   rw [projModelPointsEquiv_neg_mul W K P Q, hP, hQ]
   exact neg_add_eq_some_negAddY (W.baseChange K) h₁ h₂ hxy
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 residue (ii), algebraic core] Exactness from a unit quotient.** If a chart
+element factors through three generators with a unit cofactor, the exact-order
+hypothesis of the trivialization criterion holds; conversely a non-unit cofactor is
+detected by a rank drop. This states the direction the chord computation supplies. -/
+theorem isUnit_of_eq_unit_mul {A : Type u} [CommRing A] (c g₁ g₂ g₃ w : A)
+    (hfac : c = w * (g₁ * (g₂ * g₃))) (hw : IsUnit w) :
+    ∃ u : Aˣ, c = (u : A) * (g₁ * (g₂ * g₃)) := by
+  obtain ⟨u, rfl⟩ := hw
+  exact ⟨u, hfac⟩
+
 end ModularCurves
 
 namespace ModularCurves
