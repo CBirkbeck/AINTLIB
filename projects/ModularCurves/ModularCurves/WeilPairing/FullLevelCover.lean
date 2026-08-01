@@ -62,4 +62,34 @@ theorem fullLevelSpaceStruct_surjective (N : ℕ) [NeZero N]
   rw [h1, ht, Scheme.Hom.comp_apply]
   exact X.base.fromSpecResidueField_apply y _
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-FPPF)** An étale morphism is flat — the first of the three fppf conditions the
+Weil-pairing descent asks of the cover. -/
+theorem flat_of_etale {A B : Scheme.{u}} (f : A ⟶ B) [Etale f] : Flat f :=
+  (Etale.iff_flat_and_formallyUnramified.mp ‹Etale f›).1
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-FPPF)** An étale morphism is locally of finite presentation. -/
+theorem locallyOfFinitePresentation_of_etale {A B : Scheme.{u}} (f : A ⟶ B) [Etale f] :
+    LocallyOfFinitePresentation f :=
+  (Etale.iff_flat_and_formallyUnramified.mp ‹Etale f›).2.2
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-FPPF)** The full-level space is an fppf cover of the base: flat, locally of
+finite presentation and surjective. These are exactly the three typeclass inputs of
+`EllipticCurve.weilPairingCharZero`, so this is the cover half of a
+`WeilPairingLocalData`. -/
+theorem fullLevelSpaceStruct_fppf (N : ℕ) [NeZero N]
+    (hinv : IsUnit ((N : ℕ) : R)) (X : EllObj R)
+    (hetale : Etale (YFull.fullLevelSpaceStruct X N)) :
+    Flat (YFull.fullLevelSpaceStruct X N) ∧
+      LocallyOfFinitePresentation (YFull.fullLevelSpaceStruct X N) ∧
+      AlgebraicGeometry.Surjective (YFull.fullLevelSpaceStruct X N) :=
+  haveI := hetale
+  ⟨flat_of_etale _, locallyOfFinitePresentation_of_etale _,
+    fullLevelSpaceStruct_surjective N hinv X⟩
+
 end ModularCurves
