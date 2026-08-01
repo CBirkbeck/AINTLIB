@@ -723,4 +723,63 @@ theorem appLE_z_mul_eq_one_of_units
   appLE_z_mul_pullback_inv_eq_one g hz (U₁ ⊓ U₂)
     (le_inf_preimage_preimage g hz U₁ U₂) a b c hc hb
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W4c — THE CALLER-FACING DESCENT CRITERION]** `L ≅ f^*(z^* L)` where every input is
+either a chart frame or an identity of sections: frames for `L` and for the twist factor,
+their comparison units `u` and `v`, the `z`-values `c` of `u`, and the single identity
+`v = f^*(c⁻¹)`. No `z`-computation is left to the caller, and no generator hypotheses
+remain anywhere in the criterion. -/
+theorem nonempty_iso_pullback_section_of_units
+    (hp : UniversallyOConnected p)
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    (L : (pullback p g).Modules) (hL : IsInvertible L)
+    {ι : Type u} (U : ι → T.Opens) (hU : iSup U = ⊤)
+    (eL : ∀ i, L.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (eD : ∀ i, (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+        (pullback.snd p g)).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))).restrict
+        (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (u v : ∀ i j, Γ(pullback p g,
+      pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j))
+    (hu : ∀ i j, L.presheaf.map
+        (Opens.infLELeft (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection L (pullback.snd p g ⁻¹ᵁ U i)
+          (Scheme.Modules.overTrivializationOfRestrictIso L _ (eL i)) 1) =
+      u i j • L.presheaf.map
+        (Opens.infLERight (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection L (pullback.snd p g ⁻¹ᵁ U j)
+          (Scheme.Modules.overTrivializationOfRestrictIso L _ (eL j)) 1))
+    (hv : ∀ i j, (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))).presheaf.map
+        (Opens.infLELeft (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection _ (pullback.snd p g ⁻¹ᵁ U i)
+          (Scheme.Modules.overTrivializationOfRestrictIso _ _ (eD i)) 1) =
+      v i j • (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))).presheaf.map
+        (Opens.infLERight (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection _ (pullback.snd p g ⁻¹ᵁ U j)
+          (Scheme.Modules.overTrivializationOfRestrictIso _ _ (eD j)) 1))
+    (c : ∀ i j, Γ(T, U i ⊓ U j)ˣ)
+    (hc : ∀ i j, (Scheme.Hom.appLE z
+        (pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j) (U i ⊓ U j)
+        (le_inf_preimage_preimage g hz (U i) (U j))).hom (u i j) =
+      (c i j : Γ(T, U i ⊓ U j)))
+    (hb : ∀ i j, v i j = (Scheme.Hom.appLE (pullback.snd p g) (U i ⊓ U j)
+      (pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j)
+      le_rfl).hom (↑(c i j)⁻¹ : Γ(T, U i ⊓ U j))) :
+    Nonempty (L ≅ (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)) :=
+  nonempty_iso_pullback_section_of_frames g hp hz L hL U hU eL eD u v hu hv
+    (fun i j => appLE_z_mul_eq_one_of_units g hz (U i) (U j) (u i j) (v i j)
+      (c i j) (hc i j) (hb i j))
+
 end ModularCurves

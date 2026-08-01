@@ -32396,3 +32396,33 @@ WHAT REMAINS on the critical path to the Weil pairing:
 3. Then the DS4 register `weilPairing` (`WeilPairing/Basic.lean:47`) can be *constructed*
    rather than registered, which discharges `weilPairing_torsionMapOfEllHom`
    (`ModularCurve/YRho.lean:2489`) — the live blocker of `yRho_representable`.
+
+### ★★★★★ [W4] DONE 2026-08-01 — `nonempty_iso_pullback_section_of_units` (CALLER-FACING)
+The descent criterion in its final form. `L ≅ f^*(z^* L)` for invertible `L`, from inputs
+that are **only** chart frames and identities of sections:
+* `eL i` — frames for `L` over `f ⁻¹ᵁ Uᵢ`;
+* `eD i` — frames for the twist factor, now *constructible*:
+  `dualPullbackSectionTrivialization` builds them from `eL i` (push along `z`, pull back
+  along `f`, dualize);
+* `u`, `v` — the two comparison units, with `hu`, `hv`;
+* `c i j` — the `z`-values of `u i j`, with `hc`, and the single identity
+  `hb : v i j = f^*((c i j)⁻¹)`.
+No `z`-computation and no generator hypothesis is left to the caller. Axiom-clean; root
+build 9619 jobs.
+
+Full chain, all proved this session:
+`tensorSection_comparison` → `tensorSection_restrict_comparison` (hu) ·
+`tensorSection_one_one` + `bijective_smul_overTrivializationSection_one` +
+`bijective_smul_restrict_overTrivializationSection_one` (hbij) ·
+`appLE_z_appLE_snd_eq_self` → `appLE_z_mul_pullback_inv_eq_one` →
+`appLE_z_mul_eq_one_of_units` (hnorm) ⟹ W3.8 `nonempty_unitObj_iso_tensorObj_of_frames`
+⟹ W3.9 `nonempty_iso_of_tensorObj_dual_trivial` ⟹ W3.10
+`nonempty_iso_pullback_section_of_frames` ⟹ W4c this.
+
+NEXT (the Δ instantiation): supply `hu`, `hv`, `hc`, `hb` for `Δ = 𝒪(D_{P+Q} + D_0 −
+D_P − D_Q)` on `E ×_S T`. `hu` is the chord/vertical prong (complete: see the
+`chord_identity_of_chart_sections` / `isUnit_chord_of_isUnit_prod` two-family cover);
+`hv`/`hb` come from `Picard/DualPullback/Iso.dualPullbackIsoOfIsInvertible` plus
+`dualPairing_frame_comparison`; `hc` is the definition of `c`. Then the Picard leaf
+`exists_invertible_tensor_idealModule_add` closes, and with it the DS4 construction of
+`weilPairing` and the `yRho_representable` blocker.
