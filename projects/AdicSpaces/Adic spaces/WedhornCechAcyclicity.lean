@@ -10681,6 +10681,39 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
         rwa [genPieceDatum_s] at h0
     exact genRestrictedCover_isOXAcyclic_of_B D₀ T hspan hC_full_acyclic
 
+/-- The product-piece open of a two-fold intersection lies inside both
+single-index piece opens. Proving the containment into the intersection
+once lets each flavour be a projection. -/
+private theorem genPiece_prod_subset_inter [DecidableEq A] (T : Finset A)
+    {D₁ D₂ : RationalLocData A} (hgen : Ideal.span ((T : Finset A) : Set A) = ⊤)
+    (hP : D₂.P = D₁.P)
+    (hspanW : Ideal.span ((T * T : Finset A) : Set A) = ⊤) :
+    ∀ x ∈ T, ∀ y ∈ T,
+    rationalOpen ((D₁.interSamePair D₂ hP).interSamePair
+        (genPieceDatum (D₁.interSamePair D₂ hP).P (T * T) (x * y)
+          hspanW) rfl).T
+      ((D₁.interSamePair D₂ hP).interSamePair
+        (genPieceDatum (D₁.interSamePair D₂ hP).P (T * T) (x * y)
+          hspanW) rfl).s ⊆
+    (rationalOpen (D₁.interSamePair (genPieceDatum D₁.P T x hgen) rfl).T
+        (D₁.interSamePair (genPieceDatum D₁.P T x hgen) rfl).s ∩
+      rationalOpen (D₂.interSamePair (genPieceDatum D₂.P T y hgen) rfl).T
+        (D₂.interSamePair (genPieceDatum D₂.P T y hgen) rfl).s) := by
+  intro x hx y hy
+  rw [RationalLocData.interSamePair_rationalOpen D₁
+      (genPieceDatum D₁.P T x hgen) rfl,
+    RationalLocData.interSamePair_rationalOpen D₂
+      (genPieceDatum D₂.P T y hgen) rfl,
+    RationalLocData.interSamePair_rationalOpen
+      (D₁.interSamePair D₂ hP)
+      (genPieceDatum (D₁.interSamePair D₂ hP).P (T * T) (x * y)
+        hspanW) rfl,
+    RationalLocData.interSamePair_rationalOpen D₁ D₂ hP,
+    genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s,
+    genPieceDatum_T, genPieceDatum_s,
+    ← rationalOpen_inter T T x y hx hy]
+  exact fun v hv => ⟨⟨hv.1.1, hv.2.1⟩, ⟨hv.1.2, hv.2.2⟩⟩
+
 /-- **Part (iv) pair-instances of the Prop A.3(1) standing hypothesis**
 (Wedhorn Prop A.3, p. 105, wedhorn.txt:5316-5318: "`U | V_{j₀…j_q}` is
 `F`-acyclic for all `(j₀,…,j_q) ∈ J^{q+1}`" — the `q = 1` instances; Wedhorn
@@ -10733,66 +10766,27 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
   classical
   -- Laurent pieces share the base pair of definition.
   have hVP₁ : Vj₁.1.P = V.base.P :=
-    laurentProdLeaves_pair _fs V.base
-      ((Finset.ext_iff.mp _hV_laurent Vj₁.1).mp Vj₁.2)
+    laurentProdLeaves_pair _fs V.base ((Finset.ext_iff.mp _hV_laurent Vj₁.1).mp Vj₁.2)
   have hVP₂ : Vj₂.1.P = V.base.P :=
-    laurentProdLeaves_pair _fs V.base
-      ((Finset.ext_iff.mp _hV_laurent Vj₂.1).mp Vj₂.2)
+    laurentProdLeaves_pair _fs V.base ((Finset.ext_iff.mp _hV_laurent Vj₂.1).mp Vj₂.2)
   have hP : Vj₂.1.P = Vj₁.1.P := hVP₂.trans hVP₁.symm
   -- the product generating set spans
   have hspanW : Ideal.span ((T * T : Finset A) : Set A) = ⊤ := by
     rw [Finset.coe_mul, ← Ideal.span_mul_span', hC_gen.1, Ideal.top_mul]
   -- the W'-piece-open ⊆ single-index piece-open computation, both flavours
-  have hpiece₁ : ∀ x ∈ T, ∀ y ∈ T,
-      rationalOpen ((Vj₁.1.interSamePair Vj₂.1 hP).interSamePair
-          (genPieceDatum (Vj₁.1.interSamePair Vj₂.1 hP).P (T * T) (x * y)
-            hspanW) rfl).T
-        ((Vj₁.1.interSamePair Vj₂.1 hP).interSamePair
-          (genPieceDatum (Vj₁.1.interSamePair Vj₂.1 hP).P (T * T) (x * y)
-            hspanW) rfl).s ⊆
-      rationalOpen (Vj₁.1.interSamePair
-          (genPieceDatum Vj₁.1.P T x hC_gen.1) rfl).T
-        (Vj₁.1.interSamePair (genPieceDatum Vj₁.1.P T x hC_gen.1) rfl).s := by
-    intro x hx y hy
-    rw [RationalLocData.interSamePair_rationalOpen Vj₁.1
-        (genPieceDatum Vj₁.1.P T x hC_gen.1) rfl,
-      RationalLocData.interSamePair_rationalOpen
-        (Vj₁.1.interSamePair Vj₂.1 hP)
-        (genPieceDatum (Vj₁.1.interSamePair Vj₂.1 hP).P (T * T) (x * y)
-          hspanW) rfl,
-      RationalLocData.interSamePair_rationalOpen Vj₁.1 Vj₂.1 hP,
-      genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s,
-      ← rationalOpen_inter T T x y hx hy]
-    exact fun v hv => ⟨hv.1.1, hv.2.1⟩
-  have hpiece₂ : ∀ x ∈ T, ∀ y ∈ T,
-      rationalOpen ((Vj₁.1.interSamePair Vj₂.1 hP).interSamePair
-          (genPieceDatum (Vj₁.1.interSamePair Vj₂.1 hP).P (T * T) (x * y)
-            hspanW) rfl).T
-        ((Vj₁.1.interSamePair Vj₂.1 hP).interSamePair
-          (genPieceDatum (Vj₁.1.interSamePair Vj₂.1 hP).P (T * T) (x * y)
-            hspanW) rfl).s ⊆
-      rationalOpen (Vj₂.1.interSamePair
-          (genPieceDatum Vj₂.1.P T y hC_gen.1) rfl).T
-        (Vj₂.1.interSamePair (genPieceDatum Vj₂.1.P T y hC_gen.1) rfl).s := by
-    intro x hx y hy
-    rw [RationalLocData.interSamePair_rationalOpen Vj₂.1
-        (genPieceDatum Vj₂.1.P T y hC_gen.1) rfl,
-      RationalLocData.interSamePair_rationalOpen
-        (Vj₁.1.interSamePair Vj₂.1 hP)
-        (genPieceDatum (Vj₁.1.interSamePair Vj₂.1 hP).P (T * T) (x * y)
-          hspanW) rfl,
-      RationalLocData.interSamePair_rationalOpen Vj₁.1 Vj₂.1 hP,
-      genPieceDatum_T, genPieceDatum_s, genPieceDatum_T, genPieceDatum_s,
-      ← rationalOpen_inter T T x y hx hy]
-    exact fun v hv => ⟨hv.1.2, hv.2.2⟩
+  -- Both flavours of the W'-piece-open computation share one rewrite chain and
+  -- differ only in which component of the intersection they keep, so prove the
+  -- containment into the intersection once and project.
+  have hpieces := genPiece_prod_subset_inter T hC_gen.1 hP hspanW
+  have hpiece₁ := fun x hx y hy => (hpieces x hx y hy).trans Set.inter_subset_left
+  have hpiece₂ := fun x hx y hy => (hpieces x hx y hy).trans Set.inter_subset_right
   refine ⟨Vj₁.1.interSamePair Vj₂.1 hP,
     genRestrictedCover (Vj₁.1.interSamePair Vj₂.1 hP) (T * T) hspanW,
     RationalLocData.interSamePair_rationalOpen Vj₁.1 Vj₂.1 hP, rfl, ?_, ?_, ?_⟩
   · -- acyclicity via the σ₊-dichotomy engine at the intersection: products
     -- of σ₊-units are units (restricted); otherwise some factor has empty
     -- trace and the product-trace is contained in it.
-    refine genRestrictedCover_isOXAcyclic_of_units_or_empty _ _ hspanW
-      (Tpos_at Vj₁ * Tpos_at Vj₂)
+    refine genRestrictedCover_isOXAcyclic_of_units_or_empty _ _ hspanW (Tpos_at Vj₁ * Tpos_at Vj₂)
       (Finset.mul_subset_mul (hTpos_sub Vj₁) (hTpos_sub Vj₂)) ?_ ?_
     · intro t ht
       obtain ⟨x, hx, y, hy, rfl⟩ := Finset.mem_mul.mp ht
@@ -10811,24 +10805,20 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
         exact htpos (Finset.mul_mem_mul h.1 h.2)
       rcases hxy with hxn | hyn
       · exact Set.eq_empty_of_subset_empty
-          ((hpiece₁ x hx y hy).trans
-            (le_of_eq (hTpos_empty Vj₁ x hx hxn)))
+          ((hpiece₁ x hx y hy).trans (le_of_eq (hTpos_empty Vj₁ x hx hxn)))
       · exact Set.eq_empty_of_subset_empty
-          ((hpiece₂ x hx y hy).trans
-            (le_of_eq (hTpos_empty Vj₂ y hy hyn)))
+          ((hpiece₂ x hx y hy).trans (le_of_eq (hTpos_empty Vj₂ y hy hyn)))
   · -- pieces lie inside single pieces of genRestrictedCover Vj₁ T.
     intro W' hW'
     obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hW'
     obtain ⟨x, hx, y, hy, rfl⟩ := Finset.mem_mul.mp ht
-    exact ⟨Vj₁.1.interSamePair
-      (genPieceDatum Vj₁.1.P T x hC_gen.1) rfl,
+    exact ⟨Vj₁.1.interSamePair (genPieceDatum Vj₁.1.P T x hC_gen.1) rfl,
       Finset.mem_image_of_mem _ hx, hpiece₁ x hx y hy⟩
   · -- pieces lie inside single pieces of genRestrictedCover Vj₂ T.
     intro W' hW'
     obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hW'
     obtain ⟨x, hx, y, hy, rfl⟩ := Finset.mem_mul.mp ht
-    exact ⟨Vj₂.1.interSamePair
-      (genPieceDatum Vj₂.1.P T y hC_gen.1) rfl,
+    exact ⟨Vj₂.1.interSamePair (genPieceDatum Vj₂.1.P T y hC_gen.1) rfl,
       Finset.mem_image_of_mem _ hy, hpiece₂ x hx y hy⟩
 
 /-- **Wedhorn Lemma 8.34** (p. 84). *Let `A` be a complete strongly

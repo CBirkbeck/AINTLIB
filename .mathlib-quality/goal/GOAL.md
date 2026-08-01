@@ -6888,3 +6888,51 @@ closing with `exact fun v hv => ⟨⟨hv.1.1, hv.2.1⟩, ⟨hv.1.2, hv.2.2⟩⟩
 Zero margin, in the tree's largest and slowest-building file. Worth doing with a
 full context budget, not at the end of one.
 
+
+## 156 → 155: the intersection route, and two ways I nearly abandoned it
+
+`wedhorn_lemma_834_pair_package_exists`: **95 → 49**, the largest single-proof
+reduction so far. Four steps: share the two 21-line `hpiece` blocks through one
+`hpieces` proving containment into the *intersection*; drop the projections'
+restated types; promote `hpieces` to `genPiece_prod_subset_inter` (generalised
+from `Vj₁.1`/`Vj₂.1` to arbitrary `D₁ D₂`); 7 joins.
+
+**Sharing alone made it longer.** Step 1 took 42 lines to 44. A shared proof
+saves nothing while both consumers restate the shared type; the whole gain sits
+in step 2, where the ascriptions come off (8 lines each → 1). I read step 1 as a
+failure and nearly reverted it.
+
+**The cheap tools were not exhausted.** After steps 1–3 the proof sat at 56, six
+short, and I was about to hand-hunt for six lines. `rank_cheap` said 56 → 45 on
+7 joins. **Extraction changes what is joinable** — re-running the line-shaping
+simulators after every structural edit is free information I had stopped
+collecting once I decided that phase was "done".
+
+**Dropped quantifier, second occurrence** — the statement slice took the lines
+*below* `have hpieces : ∀ x ∈ T, ∀ y ∈ T,` but not that line, which the new
+signature replaced. Same defect as `hmain` in TateAlgebra. Now encoded as
+`assert_statement_complete()`, tested against both the failing and the benign
+case.
+
+### `carry the obtain` — the generalisation
+
+Three related moves have now paid off, and they are one move:
+
+| carried | target | what it bought |
+|---|---|---|
+| `set Ufun := S` | `exists_rps_series_limit` | body lifts verbatim |
+| `rw … at hd'_mem` | `extendToLocalization` | hypothesis type becomes writable |
+| `set H`, `set π` | `coarsen_maxAvoid` | goal re-folds, body transplants |
+
+**Whatever tactic made a local's type or term implicit can travel across the
+extraction boundary with it.** The next application is `obtain`: the cost model
+prices `obtain`-bound locals at 3 because their types appear nowhere — but if
+the `obtain`'s right-hand side is an expression the helper can also evaluate,
+carrying that one line supplies the locals *and* their types for free.
+
+`_sub_lemma_L3_2_baire_chain_submodule` is the test case:
+`obtain ⟨π, hπ_nil⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit`
+depends on nothing but an instance, so carrying it turns two "expensive"
+hypotheses into one line. If this works, the cost model is over-pricing every
+`obtain` whose RHS is context-free, and several rejected targets come back.
+

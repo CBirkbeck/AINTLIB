@@ -119,3 +119,29 @@ def explicit_section_vars(path):
             out.append(line)
     return out
 
+
+
+def assert_statement_complete(first_line, sliced_stmt):
+    """A lifted statement fragment must not begin mid-binder.
+
+    When a `have NAME : <TYPE>` is promoted, the quantifier prefix usually lives
+    ON the `have` line, which is exactly the line replaced by the new signature.
+    Slicing "the lines below it" silently drops the binders, and the failure
+    surfaces as a tactic error inside the body -- `introN failed: no additional
+    binders`, or `induction: major premise is not an inductive type` -- naming
+    the tactic rather than the missing quantifier.
+
+    Two occurrences: hmain in TateAlgebra, hpieces in WedhornCechAcyclicity.
+    Both were written up as a lesson and neither was encoded, so here it is.
+
+    Pass the original `have` line and the statement lines you sliced.
+    """
+    import re
+    head = first_line.split(":", 1)[1] if ":" in first_line else ""
+    lost = [q for q in ("∀", "∃") if q in head and not any(q in s for s in sliced_stmt)]
+    if lost:
+        raise AssertionError(
+            f"statement slice dropped binder(s) {lost} that lived on the `have` "
+            f"line: {first_line.strip()[:80]!r}")
+    return True
+
