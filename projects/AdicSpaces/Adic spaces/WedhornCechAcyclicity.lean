@@ -11762,6 +11762,44 @@ private theorem restrictionMap_eqRec {B : Type*} [CommRing B] [TopologicalSpace 
   cases h; rfl
 
 set_option linter.unusedSectionVars false in
+/-- **The normalised `A`-side intersection of two pieces** (Wedhorn 7.31(2)):
+for two pieces of a Def-7.29 rational covering there is a rational datum
+presenting `open(D₁) ∩ open(D₂)` whose generating set still spans. Built by
+inserting `D₁`'s generators into the base and then `D₂`'s, which is why the
+intermediate `N₁` appears. Only the two properties escape — no consumer needs
+the construction itself. -/
+private theorem exists_inter_rationalLocData [DecidableEq A] [IsTateRing A]
+    (C : RationalCoveringData A) (hC : C.IsRational) (D₁ D₂ : ↥C.covers) :
+    ∃ D₁₂ : RationalLocData A,
+      rationalOpen D₁₂.T D₁₂.s =
+        rationalOpen D₁.1.T D₁.1.s ∩ rationalOpen D₂.1.T D₂.1.s ∧
+      Ideal.span ((D₁₂.T : Finset A) : Set A) = ⊤ := by
+  set gp₁ := genPieceDatum C.base.P D₁.1.T D₁.1.s ((hC.piece D₁.2).span_eq_top)
+    with hgp₁
+  set gp₂ := genPieceDatum C.base.P D₂.1.T D₂.1.s ((hC.piece D₂.2).span_eq_top)
+    with hgp₂
+  set N₁ := C.base.interSamePair gp₁ rfl with hN₁
+  set D₁₂ := N₁.interSamePair gp₂ rfl with hD₁₂
+  have hN₁_open : rationalOpen N₁.T N₁.s = rationalOpen D₁.1.T D₁.1.s := by
+    rw [hN₁, RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hgp₁, genPieceDatum_T,
+      genPieceDatum_s]
+    exact Set.inter_eq_right.mpr (C.hsubset D₁.1 D₁.2)
+  have hspanN₁ : Ideal.span ((N₁.T : Finset A) : Set A) = ⊤ := by
+    rw [hN₁]
+    refine C.base.interSamePair_span_eq_top' gp₁ rfl
+      (span_insert_eq_top_of_span_eq_top _ hC.base.span_eq_top) ?_
+    rw [hgp₁, genPieceDatum_T, genPieceDatum_s]
+    exact span_insert_eq_top_of_span_eq_top _ (hC.piece D₁.2).span_eq_top
+  refine ⟨D₁₂, ?_, ?_⟩
+  · rw [hD₁₂, RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hgp₂, genPieceDatum_T,
+      genPieceDatum_s, hN₁_open]
+  · rw [hD₁₂]
+    refine N₁.interSamePair_span_eq_top' gp₂ rfl
+      (span_insert_eq_top_of_span_eq_top _ hspanN₁) ?_
+    rw [hgp₂, genPieceDatum_T, genPieceDatum_s]
+    exact span_insert_eq_top_of_span_eq_top _ (hC.piece D₂.2).span_eq_top
+
+set_option linter.unusedSectionVars false in
 /-- **Keystone compatibility on overlaps** (Wedhorn Prop 8.16 + Prop 7.31(2)):
 for two pieces of a Def-7.29 rational covering and ANY `B`-side rational datum
 `G` inside both image pieces, the keystone images of a compatible family agree
@@ -11803,37 +11841,11 @@ private theorem imageCover_keystone_compat [DecidableEq A]
   intro D₁ D₂ G h₁ h₂
   -- the normalised A-side intersection D₁₂ at the base pair (Wedhorn 7.31(2)):
   -- open(N₁) = U ∩ open(D₁) = open(D₁); open(D₁₂) = open(D₁) ∩ open(D₂).
-  set gp₁ := genPieceDatum C.base.P D₁.1.T D₁.1.s ((hC.piece D₁.2).span_eq_top)
-    with hgp₁
-  set gp₂ := genPieceDatum C.base.P D₂.1.T D₂.1.s ((hC.piece D₂.2).span_eq_top)
-    with hgp₂
-  set N₁ := C.base.interSamePair gp₁ rfl with hN₁
-  set D₁₂ := N₁.interSamePair gp₂ rfl with hD₁₂
-  have hN₁_open : rationalOpen N₁.T N₁.s = rationalOpen D₁.1.T D₁.1.s := by
-    rw [hN₁, RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hgp₁, genPieceDatum_T,
-      genPieceDatum_s]
-    exact Set.inter_eq_right.mpr (C.hsubset D₁.1 D₁.2)
-  have hD₁₂_open : rationalOpen D₁₂.T D₁₂.s =
-      rationalOpen D₁.1.T D₁.1.s ∩ rationalOpen D₂.1.T D₂.1.s := by
-    rw [hD₁₂, RationalLocData.interSamePair_rationalOpen _ _ (by rfl), hgp₂, genPieceDatum_T,
-      genPieceDatum_s, hN₁_open]
+  obtain ⟨D₁₂, hD₁₂_open, hspanD₁₂⟩ := exists_inter_rationalLocData C hC D₁ D₂
   have hD₁₂_sub₁ : rationalOpen D₁₂.T D₁₂.s ⊆ rationalOpen D₁.1.T D₁.1.s := by
     rw [hD₁₂_open]; exact Set.inter_subset_left
   have hD₁₂_sub₂ : rationalOpen D₁₂.T D₁₂.s ⊆ rationalOpen D₂.1.T D₂.1.s := by
     rw [hD₁₂_open]; exact Set.inter_subset_right
-  -- D₁₂ spans (the kit: products of inserted spanning sets span).
-  have hspanN₁ : Ideal.span ((N₁.T : Finset A) : Set A) = ⊤ := by
-    rw [hN₁]
-    refine C.base.interSamePair_span_eq_top' gp₁ rfl
-      (span_insert_eq_top_of_span_eq_top _ hC.base.span_eq_top) ?_
-    rw [hgp₁, genPieceDatum_T, genPieceDatum_s]
-    exact span_insert_eq_top_of_span_eq_top _ (hC.piece D₁.2).span_eq_top
-  have hspanD₁₂ : Ideal.span ((D₁₂.T : Finset A) : Set A) = ⊤ := by
-    rw [hD₁₂]
-    refine N₁.interSamePair_span_eq_top' gp₂ rfl
-      (span_insert_eq_top_of_span_eq_top _ hspanN₁) ?_
-    rw [hgp₂, genPieceDatum_T, genPieceDatum_s]
-    exact span_insert_eq_top_of_span_eq_top _ (hC.piece D₂.2).span_eq_top
   -- the B-side: open(im D₁₂) = open(im D₁) ∩ open(im D₂) ⊇ open(G).
   have him_inter := imagePieceDatum_rationalOpen_inter C.base D₁.1 D₂.1 D₁₂
     ((hC.piece D₁.2).span_eq_top) ((hC.piece D₂.2).span_eq_top) hspanD₁₂ hD₁₂_open
