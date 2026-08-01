@@ -31081,3 +31081,30 @@ root build is green at 9615 jobs. The WP prong went from "GAP-A-4 in pieces" to:
   surjectivity ⟺ unimodularity → `exists_chord_of_unimodular`.
 The single remaining mathematical input is the chord–tangent identity, isolated behind
 `ChordDatum`, with a documented construction recipe (universal atlas + two-point space).
+
+### [W1-c] DONE 2026-08-01 — `exists_vertical_of_unimodular`
+Chord and vertical are both constructible from chart evaluation data (no cohomology).
+⟹ the ONLY remaining input to `ChordDatum` is the exact-order / chord–tangent identity.
+
+## [W1-d] DECOMPOSITION (the last mathematical leaf of the WP prong)
+Target: for the chord ℓ produced by `exists_chord_of_unimodular` (and the vertical v),
+on a trivializing chart cover, `chartMultiplier(ℓ) = unit · g_P·g_Q·g_{Rm}`.
+Leaves, in dependency order:
+ [W1-d1] the evaluation map at a section, as a ring map Γ(chart) → Γ(S,⊤) with kernel
+         the principal generator: ALREADY EXISTS —
+         `exists_algHom_ker_eq_span_of_section` (LineVerticalConsumers). ✓
+ [W1-d2] "ℓ vanishes at Rm ⟺ ev_{Rm}(ℓ-coefficient) = 0": the chart multiplier of ℓ
+         lies in ker(σ_{Rm}) = span{g_{Rm}} — pure algebra given [W1-d1] and the
+         divisibility statement; the missing content is the VANISHING itself.
+ [W1-d3] the chord–tangent vanishing: ev_{-(P+Q)}(ℓ) = 0. This is the universal
+         computation. Sub-leaves: (a) build the universal two-point space over
+         `WeierstrassAtlasRingU` (C ×_U C, reduced since smooth over a domain);
+         (b) transfer along classifying ring maps (GroupLawAxioms `*_of_map` idiom);
+         (c) the field/geometric-fibre case, from HasseWeil's Pic0 route
+         (`kappaDivisor_add_linEquiv`) or from mathlib's WeierstrassCurve.Affine
+         chord–tangent API.
+ [W1-d4] exactness of the order (the quotient multiplier is a unit): degree count —
+         deg(div ℓ) = 3 = deg([P]+[Q]+[Rm]), so no further vanishing; formalize via
+         the rank-3 coordinates (`nonempty_baseSections_cokernel_iteratedTwist₃_...`):
+         if the triple restriction of ℓ vanished to higher order the rank-3 evaluation
+         would drop, contradicting unimodularity of a 3×3 minor.
