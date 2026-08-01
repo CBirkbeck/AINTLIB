@@ -592,6 +592,34 @@ theorem chord_quotients_of_norm {A : Type u} [CommRing A]
   calc f₂ * (c₂ * conj - -f₃) = f₂ * (c₂ * conj) - f₂ * (-f₃) := by ring
     _ = 0 := by rw [h₂, sub_self]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-i2] The evaluation vanishings from the cancelled identities.** Applying an
+evaluation to `c · conj = −(∏ of factors vanishing at that point)` gives
+`σ(c) · σ(conj) = 0`; when `σ(conj)` is a nonzerodivisor of the base this forces
+`σ(c) = 0`. Off the `2`-torsion locus `σ(conj)` is `y − negY(x,y) ≠ 0`, which is where
+the classical case split enters. -/
+theorem algHom_eq_zero_of_mul_eq_zero {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (σ : A →ₐ[R] R) (c conj : A)
+    (hprod : σ (c * conj) = 0)
+    (hnzd : ∀ t : R, σ conj * t = 0 → t = 0) :
+    σ c = 0 := by
+  refine hnzd _ ?_
+  rw [mul_comm, ← map_mul]
+  exact hprod
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-i2] The second evaluation vanishes.** From `c₁ · conj = −(f₂ · f₃)` with
+`σ₂ f₂ = 0` and `σ₂ conj` a nonzerodivisor. -/
+theorem algHom_second_quotient_eq_zero {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (σ : A →ₐ[R] R) (c₁ conj f₂ f₃ : A)
+    (hid : c₁ * conj = -(f₂ * f₃)) (hf₂ : σ f₂ = 0)
+    (hnzd : ∀ t : R, σ conj * t = 0 → t = 0) :
+    σ c₁ = 0 := by
+  refine algHom_eq_zero_of_mul_eq_zero σ c₁ conj ?_ hnzd
+  rw [hid, map_neg, map_mul, hf₂, zero_mul, neg_zero]
+
 end ModularCurves
 
 namespace ModularCurves
