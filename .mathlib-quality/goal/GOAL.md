@@ -7872,3 +7872,65 @@ bound needs a reverse inequality — `/generalise`, not decompose.
 
     over-50 proofs   486 (baseline) → 129   (127 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: 129 → 128, plus a 36-line dedup that cleared no target
+
+    forwardLoc_div_eq generalised, 4 × hF_div deleted   118448fba   (no counter moved)
+    unitCover_relPlus_forward_witness  61 → 50           b073cbca7
+
+### Dedup first, clear second — and commit them separately
+
+`unitCover_relPlus_forward_witness` needed 25 lines and looked out of reach. Removing
+the duplicated `hF_div` took it 75 → 61; only then was the remaining 11 a single edit.
+The dedup commit moved NO counter (127 actionable before and after) and says so; the
+clearing commit is separate. Worth keeping that discipline — a dedup that reads as
+progress it did not make is worse than no note at all.
+
+`forwardLoc_div_eq` took `hF_alg` only to derive the `F`-level unit from a
+`canonicalMap`-level one; the body uses nothing but `hu.mul_left_cancel`. Taking the
+`F`-level unit directly is strictly more general and is the form four other proofs
+already had:
+
+    unitCover_relPlus 75→61, relMinus 90→81, relOverlap 227→218, genPiece_relOverlap 113→104
+
+### A fourth inflation pattern: the invisible `rfl`
+
+`canonicalMap` IS `coeRingHom.comp (algebraMap …)`, so
+`D.coeRingHom (algebraMap A _ x) = D.canonicalMap x` is `rfl`. The proof relied on it
+twice, once as a three-line `rw [show … from rfl]` and once as a five-line `have e1`
+that only packaged the same fact. Naming it (`coeRingHom_algebraMap`) collapsed eleven
+lines to two rewrites.
+
+**Distinct from the earlier three patterns**: the statement is trivial, the cost is
+writing the terms. No size ranking can find it — what shrinks is a `rw`, not a `have`.
+Tell: `show … from rfl` spanning more than one line.
+
+### Three more gotchas
+
+**Never hand-roll the insertion anchor.** Inserted a lemma directly above a
+`private theorem` that already had `set_option … in` + docstring, landing BETWEEN the
+modifier and its declaration → `unexpected token 'omit'; expected 'lemma'`. Third
+insertion-point failure this session, second on this rule. `insert_point` in
+`decompose_common.py` encodes it; USE IT.
+
+**A blanket replace cannot tell which declaration a hit belongs to.** `refine hF_div _ _ ?_`
+occurs in four proofs that do NOT share local names (`DI`/`DB`, `DII`/`OD`, `DII`/`EII`).
+Map every hit to its owner first — `owner(i) = last theorem/def starting before i` —
+then bound each edit to that span. A fourth copy was missed by the pattern anyway
+(different indentation), which is a second argument for enumerating owners.
+
+**A `rw` chain replacing a shape-pinning `have` needs explicit arguments.** Bare
+`map_mul` matched the wrong homomorphism and left the target unsplit; `map_mul DB.coeRingHom`
+fixed it. The deleted `have` had been doing disambiguation the bare rewrite does not inherit.
+
+### Not a cheap twin
+
+`unitCover_relMinus_forward_witness` (81) is NOT a mechanical copy of relPlus (70):
+111 changed lines, because `coUnitDatum` carries different generators and its branch
+computations genuinely differ. The `coeRingHom_algebraMap` rewrite applies, but that is
+~11 of the 31 it needs; it wants its own decomposition.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 128   (126 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
