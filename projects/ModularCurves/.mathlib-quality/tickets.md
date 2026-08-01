@@ -32466,3 +32466,28 @@ lesson is about *where* to chain them: at the call site, with `Δ` already intro
 the caller's own `let`/`set`, so the elaborator never has to unify twelve restated
 hypotheses against the big tensor-dual term. A convenience wrapper that restates them is
 strictly more expensive than the chain it replaces.
+
+### PLAN [W7] 2026-08-01 — route comparison for the leaf hypothesis, and why (a) wins
+Two routes to `Δ ≅ f^*(z^*Δ)`:
+* **(a) chart frames + descent** — what W3–W5 built. Works over an arbitrary base `T`.
+  Remaining input: chart trivializations of `Δ` over the preimages of a base cover.
+* **(b) universal pair + base change** — the leaf docstring's route. Tools exist
+  (`WeilPairing/TautologicalPair.lean`: `pairClassify`, `nonempty_pullback_iso_unitObj`,
+  `nonempty_pullback_triple/double_iso_unitObj`, `comap_ker_eq_ker_baseChange`,
+  `nonempty_pullback_sectionPoleSheafPower_iso`, plus
+  `Picard/IdealModulePullback.nonempty_pullback_idealModule_ker_sectionBaseChange`).
+
+**(b) does not avoid the descent.** If the universal identity were exact (`N = 𝟙`), its
+pullback would be exact over every base — contradicting the leaf docstring's
+`T = E × E` counterexample. So the universal identity itself carries an `N_univ`, and
+route (b) needs a descent over the universal base too, merely with reducedness as an
+extra tool. Route (a) already works over any base, so it is at least as strong and the
+plumbing is the same either way.
+
+**The single remaining input, stated precisely:** for each point of the base, a base-open
+`U` and a trivialization of `Δ|_{f ⁻¹ᵁ U}`. That is what the chord/vertical prong
+delivers on a chart carrying the away-chart data (the two-family cover of i10/i11), and
+`chordDatum_of_trivializations` → `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` is
+the assembled form. The work is to run that assembly with the base restricted to `U`
+rather than globally — geometry-plumbing against `EllObj.pullbackAlong`
+(`Moduli/EllCategory.lean:99`) and the ideal-module base-change transports above.
