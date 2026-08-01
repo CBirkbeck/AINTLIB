@@ -835,6 +835,36 @@ theorem eq_unit_mul_of_associates {A : Type u} [CommRing A]
   push_cast
   ring
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 E4] A `ChordDatum` from the two trivializations.** Once the chord and the
+vertical trivializations are in hand — which the closing links produce from the chart
+identities — the chord datum is immediate, and with it the theorem of the square. -/
+theorem chordDatum_of_trivializations {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (P Q R Rm : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (hprin : ∀ Z : { w : S ⟶ C // w ≫ π = 𝟙 S },
+      Z = P ∨ Z = Q ∨ Z = R ∨ Z = Rm →
+      ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+        (Scheme.Hom.ker Z.1).ideal V = Ideal.span {g} ∧
+          g ∈ nonZeroDivisors Γ(C, V.1))
+    (hchord : Nonempty (AlgebraicGeometry.Scheme.Modules.tensorObj
+      (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker P.1))
+      (AlgebraicGeometry.Scheme.Modules.tensorObj
+        (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker Q.1))
+        (AlgebraicGeometry.Scheme.Modules.tensorObj
+          (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker Rm.1))
+          (ModularCurves.sectionPoleSheafPower π z hz 3))) ≅
+      AlgebraicGeometry.Scheme.Modules.unitObj C))
+    (hvert : Nonempty (AlgebraicGeometry.Scheme.Modules.tensorObj
+      (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker R.1))
+      (AlgebraicGeometry.Scheme.Modules.tensorObj
+        (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker Rm.1))
+        (ModularCurves.sectionPoleSheafPower π z hz 2)) ≅
+      AlgebraicGeometry.Scheme.Modules.unitObj C)) :
+    AlgebraicGeometry.Scheme.Modules.ChordDatum z hz P Q R Rm :=
+  { principal := hprin, chord := hchord, vertical := hvert }
+
 end ModularCurves
 
 namespace ModularCurves
