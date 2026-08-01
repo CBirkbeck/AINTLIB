@@ -392,18 +392,8 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one [TopologicalSpace A]
     -- Multiply both sides by v(t)⁻¹ > 0 (v(t) ≠ 0).
     have h_pow_lt_inv : wv (P.A₀.subtype c) ^ (n_0 + 1) < (wv t)⁻¹ := by
       have h_vt_pos : 0 < wv t := zero_lt_iff.mpr h_vt_ne
-      have h_inv_pos : 0 < (wv t)⁻¹ := inv_pos.mpr h_vt_pos
-      -- x * y < 1, y > 0 → x < y⁻¹.
-      -- Rewrite: x = (x * y) * y⁻¹ < 1 * y⁻¹ = y⁻¹.
-      have h_x_eq : wv (P.A₀.subtype c) ^ (n_0 + 1) =
-          (wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t) * (wv t)⁻¹ := by
-        rw [mul_assoc, mul_inv_cancel₀ h_vt_ne, mul_one]
-      rw [h_x_eq]
-      calc (wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t) * (wv t)⁻¹
-          < 1 * (wv t)⁻¹ := by
-            rw [mul_comm _ ((wv t)⁻¹), mul_comm 1 ((wv t)⁻¹)]
-            exact (mul_lt_mul_iff_right₀ h_inv_pos).mpr hb_lt_one
-        _ = (wv t)⁻¹ := one_mul _
+      rw [← mul_one (wv t)⁻¹, lt_inv_mul_iff₀ h_vt_pos, mul_comm]
+      exact hb_lt_one
     -- v(c)^(n_0+1) < v(t)⁻¹ ≤ γ'.
     exact lt_of_lt_of_le h_pow_lt_inv h_vt_inv_le
 
@@ -459,16 +449,8 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_principal [TopologicalSpace A]
     rw [hb_eq] at hb_lt_one
     have h_pow_lt_inv : wv (P.A₀.subtype π) ^ (n_0 + 1) < (wv t)⁻¹ := by
       have h_vt_pos : 0 < wv t := zero_lt_iff.mpr h_vt_ne
-      have h_inv_pos : 0 < (wv t)⁻¹ := inv_pos.mpr h_vt_pos
-      have h_x_eq : wv (P.A₀.subtype π) ^ (n_0 + 1) =
-          (wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t) * (wv t)⁻¹ := by
-        rw [mul_assoc, mul_inv_cancel₀ h_vt_ne, mul_one]
-      rw [h_x_eq]
-      calc (wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t) * (wv t)⁻¹
-          < 1 * (wv t)⁻¹ := by
-            rw [mul_comm _ ((wv t)⁻¹), mul_comm 1 ((wv t)⁻¹)]
-            exact (mul_lt_mul_iff_right₀ h_inv_pos).mpr hb_lt_one
-        _ = (wv t)⁻¹ := one_mul _
+      rw [← mul_one (wv t)⁻¹, lt_inv_mul_iff₀ h_vt_pos, mul_comm]
+      exact hb_lt_one
     exact lt_of_lt_of_le h_pow_lt_inv h_vt_inv_le
 
 /-- **Wedhorn 7.11(1) forward / 7.10 forward direction.** For a continuous
@@ -691,18 +673,8 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO [TopologicalSpace A]
     -- Multiply both sides by v(t)⁻¹ > 0 (v(t) ≠ 0).
     have h_pow_lt_inv : wv (P.A₀.subtype c) ^ (n_0 + 1) < (wv t)⁻¹ := by
       have h_vt_pos : 0 < wv t := zero_lt_iff.mpr h_vt_ne
-      have h_inv_pos : 0 < (wv t)⁻¹ := inv_pos.mpr h_vt_pos
-      -- x * y < 1, y > 0 → x < y⁻¹.
-      -- Rewrite: x = (x * y) * y⁻¹ < 1 * y⁻¹ = y⁻¹.
-      have h_x_eq : wv (P.A₀.subtype c) ^ (n_0 + 1) =
-          (wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t) * (wv t)⁻¹ := by
-        rw [mul_assoc, mul_inv_cancel₀ h_vt_ne, mul_one]
-      rw [h_x_eq]
-      calc (wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t) * (wv t)⁻¹
-          < 1 * (wv t)⁻¹ := by
-            rw [mul_comm _ ((wv t)⁻¹), mul_comm 1 ((wv t)⁻¹)]
-            exact (mul_lt_mul_iff_right₀ h_inv_pos).mpr hb_lt_one
-        _ = (wv t)⁻¹ := one_mul _
+      rw [← mul_one (wv t)⁻¹, lt_inv_mul_iff₀ h_vt_pos, mul_comm]
+      exact hb_lt_one
     -- v(c)^(n_0+1) < v(t)⁻¹ ≤ γ'.
     exact lt_of_lt_of_le h_pow_lt_inv h_vt_inv_le
 
