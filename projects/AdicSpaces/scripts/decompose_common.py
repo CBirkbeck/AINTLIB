@@ -210,3 +210,46 @@ def insert_point(lines, decl_index):
         break
     return i
 
+
+
+def lift_have(lines, decl_start, decl_end, name, params, new_name=None):
+    """Lift `have <name> : <stmt> := by <body>` out as a standalone theorem.
+
+    Returns (call_line, helper_lines, i, j) where lines[i:j] is the block to
+    replace with `call_line`. Does NOT mutate `lines`.
+
+    Three things this gets right that hand-written versions kept getting wrong:
+
+    1. THE BODY STARTS AFTER THE LINE ENDING `:= by`, not after the `have` line.
+       A `have`'s statement wraps freely, and slicing at the `have` line silently
+       duplicates the continuation into the body (15 errors, TateAlgebraTopology).
+
+    2. THE PARAMETER BLOCK GETS ITS OWN LINES. Splicing multi-line `params` into
+       `have NAME :` in place concatenates the LAST param line with whatever
+       followed the `:` -- the start of the conclusion -- reliably producing a
+       ~110-column line. Hit three times (hhead_lem 109, hpert_lem 111) before
+       being fixed here rather than patched per site.
+
+    3. THE BODY IS DEDENTED BY THE `have`'s OWN INDENT, so a prelude the caller
+       prepends at column 2 lines up with it. Mixing a column-2 prelude with a
+       column-4 body makes Lean read the body as an argument to the prelude's
+       last term (`Function expected at ...`).
+
+    The caller still supplies `params`, because the dependency list is the one
+    part that cannot be derived from the source. Keeping the CONCLUSION verbatim
+    is what makes the body transplant unmodified -- change it only deliberately.
+    """
+    i = next(k for k in range(decl_start, decl_end)
+             if lines[k].lstrip().startswith("have " + name + " ")
+             or lines[k].lstrip().startswith("have " + name + ":"))
+    base = ind(lines[i])
+    j = i + 1
+    while j < decl_end and (not lines[j].strip() or ind(lines[j]) > base):
+        j += 1
+    by = next(k for k in range(i, j) if lines[k].rstrip().endswith(":= by"))
+    stmt = [l[base:] if len(l) > base else l for l in lines[i:by + 1]]
+    concl = stmt[0].split(":", 1)[1].lstrip()          # text after `have NAME :`
+    head = f"private theorem {new_name or (name + '_lem')} {params} :"
+    rest = ([("    " + concl)] if concl else []) + stmt[1:]
+    body = [l[base:] if len(l) > base else l for l in lines[by + 1:j]]
+    return (f"{' ' * base}have {name} := ", [head] + rest + body, i, j)
