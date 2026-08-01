@@ -192,9 +192,13 @@ theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
 
 /-- Tensoring with the unit is trivial: `M ⊗ 𝒪ₓ ≅ M` (presheaf unitor + the
 sheafification of a sheaf being itself; no GAP-1 content). -/
+noncomputable def tensorObjUnitIso (M : X.Modules) : tensorObj M (unitObj X) ≅ M :=
+  ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).mapIso (ρ_ M.val)).trans
+    (sheafifyValIso M)
+
+/-- The `Nonempty` wrapper of `tensorObjUnitIso`. -/
 theorem nonempty_tensorObj_unit_iso (M : X.Modules) : Nonempty (tensorObj M (unitObj X) ≅ M) :=
-  ⟨((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).mapIso (ρ_ M.val)).trans
-    (sheafifyValIso M)⟩
+  ⟨tensorObjUnitIso M⟩
 
 /-- Invertibility is stable under pullback: a trivializing cover of `X` pulls back to
 a trivializing cover of `Y` (GME p. 108: "If `g : T' → T` is an `S`-morphism, we have

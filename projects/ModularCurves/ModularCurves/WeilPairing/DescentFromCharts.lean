@@ -363,4 +363,22 @@ theorem nonempty_iso_pullback_section_of_chart_trivializations
     (hL.pullback z).pullback (pullback.snd p g)
   exact nonempty_iso_of_tensorObj_unitObj ⟨etriv.symm⟩ (nonempty_eval_iso hM)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.5] The tensor of two chart trivializations, as an explicit iso.** The definitional
+form of `nonempty_tensorObj_restrict_trivialization`. The cocycle computation needs *this*
+and not a choice: the generator it produces must be the tensor of the two generators, since
+an arbitrary choice would shift each chart's generator by a unit and destroy the
+normalization along the zero section. -/
+noncomputable def tensorObjRestrictTrivialization {X : Scheme.{u}} {M L : X.Modules}
+    (U : X.Opens)
+    (eM : (restrictFunctor U.ι).obj M ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme) :
+    (restrictFunctor U.ι).obj (tensorObj M L) ≅ unitObj U.toScheme :=
+  (restrictFunctorIsoPullback U.ι).app (tensorObj M L) ≪≫
+    pullbackTensorObjIsoOfIsOpenImmersion U.ι M L ≪≫
+      tensorObjCongr ((restrictFunctorIsoPullback U.ι).symm.app M ≪≫ eM)
+        ((restrictFunctorIsoPullback U.ι).symm.app L ≪≫ eL) ≪≫
+        AlgebraicGeometry.Scheme.Modules.tensorObjUnitIso (unitObj U.toScheme)
+
 end ModularCurves

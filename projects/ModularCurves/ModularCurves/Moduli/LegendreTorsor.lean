@@ -53,19 +53,39 @@ entry point so this file is decoupled from concurrent edits to `LevelThreeTorsor
   `legendreDelta_relRep_finiteEtale`), its finiteness/étaleness, and the equivariant
   package `legendreDeltaSignEquivariantData :
   EquivariantRelRepData (legendreDeltaSignAction R) X` over the `{±1}`-factor.
-* **The full-`G` target** `exists_legendreTorsorData` + `exists_legendreTorsorData_ulift`.
-* **Quarantined residuals** (T-E14-NAT is now GONE — see below):
-  `legendreDeltaGAction` ([T-E14-ACT']), `legendreDelta_surjective_of`,
-  `legendreDelta_torsor_of`.
+* **Quarantined residual**: `legendreDelta_surjective_of` (the genuine `{±1}` covering
+  half).
+
+## ⚠️ B2 REMOVAL (2026-08-01) — the full-`G` target is GONE, not deferred
+
+`legendreDeltaGAction`, `legendreDeltaGEquiv`, `legendreDelta_torsor_of`,
+`exists_legendreTorsorData` and `exists_legendreTorsorData_ulift` have been **deleted**.
+The first is FALSE as stated (discovery 2 below: the coupled `GL₂(𝔽₂)`-action needs a
+global `√(x(Q′) − x(P′))`, which does not exist over a base where that unit is a
+non-square — so it is not a functor automorphism), and the rest existed only to consume
+it. Two dead ends are ruled out and must not be retried: an `IsLegendreDatum.glSmul`
+stability lemma (false — the re-marked datum has abscissa difference ≠ 1) and dropping
+the `IsLegendreDatum` cut (then the `ω`-part is a `𝔾ₘ`-torsor, not finite, and `δ′` is
+not a `G`-torsor at all).
+
+**The engine does not need any of it.** Its `D(2)` leg
+(`ModuliProblem.representable_baseChange_two`, `Moduli/EngineWiring.lean`) runs on the
+**level-4** rigidifier — `naiveLevelFour_representable_by_affine` as KM axiom 1 and
+`exists_levelFourTorsorData_ulift` as axiom 2, over the genuinely global re-marking
+action `gammaFullNaiveGlAction R 4` — and `4` is invertible on `R[1/2]`, so it covers
+exactly the residue characteristics this file's Legendre rigidifier covered. Re-marking a
+full level-`N` structure needs no `ω` and no square root, so the obstruction never arises.
+What remains in this file is the genuine `{±1}` machinery, which `ModularCurve/RhoPoints`
+consumes.
 
 ## ⚠️ THREE STATEMENT-LAYER DISCOVERIES (T-E14 adjudication)
 
-1. **Universe wall** (identical to T-E15b discovery 1). `TorsorData` pins `G : Type u`,
-   but `GL₂(ℤ/2) × ℤˣ : Type 0`, so the chartered full-`G` target elaborates only at
-   `CommRingCat.{0}`. `exists_legendreTorsorData` is stated there; the `u`-generic
-   consumer form `exists_legendreTorsorData_ulift` `ULift`s the group. (The `{±1}`
-   package `legendreDeltaSignEquivariantData` uses `EquivariantRelRepData`'s widened
-   `{G : Type*}` and is stated at general `u`.)
+1. **Universe wall** (identical to T-E15b discovery 1, retained for the record).
+   `TorsorData` pins `G : Type u` but `GL₂(ℤ/2) × ℤˣ : Type 0`, so a full-`G` target
+   would elaborate only at `CommRingCat.{0}` and need a `ULift`ed group at general `u`.
+   Moot since the B2 removal above. The `{±1}` package
+   `legendreDeltaSignEquivariantData` uses `EquivariantRelRepData`'s widened
+   `{G : Type*}` and is stated at general `u`.
 
 2. **The coupled `G`-action does NOT restrict from the ambient product action**
    (the `φ_coupled` construction outcome). The correction block in `Bootstrap.lean`
@@ -88,8 +108,9 @@ entry point so this file is decoupled from concurrent edits to `LevelThreeTorsor
      (the `√λ` sqrt-cover of `SqrtCoverGlue`) — precisely why `δ` is a nontrivial
      torsor. Constructing it as a functor automorphism is the open datum-layer ticket
      **[T-E14-ACT']** (`abscissaDiff`/`basisUnitAt` + the `√`-extraction). It is
-     therefore QUARANTINED here as `legendreDeltaGAction`; the honest `{±1}`-factor is
-     exposed separately as `legendreDeltaSignAction`.
+     therefore **DELETED** (it was `legendreDeltaGAction`); the honest `{±1}`-factor is
+     exposed separately as `legendreDeltaSignAction`, and the engine's `D(2)` leg uses
+     the level-4 rigidifier instead.
 
 3. **The Legendre carrier is `∃`-form WITHOUT a natural family** ([T-E14-NAT], new
    vs. T-E15b). T-E15b's `levelThreeData` drew its classifying bijections from
@@ -261,28 +282,7 @@ noncomputable def legendreDeltaSignEquivariantData (hR : IsUnit (2 : R)) (X : El
     (legendreDeltaData R hR X) (legendreDeltaData_finite R hR X)
     (legendreDeltaData_etale R hR X)).some
 
-/-! ### The full engine action `G = GL₂(𝔽₂) × {±1}` and the quarantined residuals -/
-
-/-- **QUARANTINED [T-E14-ACT'] (the coupled `G`-action)** — KM 4.6.2's
-`G = GL₂(ℤ/2) × {±1}` acting on the coupled Legendre problem `δ`. The `{±1}`-factor is
-the GENUINE `legendreDeltaSignAction R`; the `GL₂(𝔽₂)`-factor is the open datum-layer
-ticket (module docstring, discovery 2): it re-marks `(P, Q)` AND re-scales `ω` by
-`√(x(Q') − x(P'))`, which is NOT the ambient `legendreBootstrapGAction` (that keeps `ω`
-fixed and fails to preserve `IsLegendreDatum`) and exists only over the `√λ` sqrt-cover.
-Building it as a functor automorphism awaits the `abscissaDiff`/`basisUnitAt` +
-`√`-extraction machinery. -/
-noncomputable def legendreDeltaGAction :
-    Matrix.GeneralLinearGroup (Fin 2) (ZMod 2) × ℤˣ →* Aut (legendreDeltaProblem R) :=
-  sorry
-
-/-- **The coupled `G`-equivariant datum** on the carrier (via the stable
-`exists_equivariant` transport, [GHB1]); gated on `legendreDeltaGAction` ([T-E14-ACT']).
-Its `σZ`/`over_base`/`equivariant`/finite/étale feed the torsor target. -/
-noncomputable def legendreDeltaGEquiv (hR : IsUnit (2 : R)) (X : EllObj R) :
-    ModuliProblem.EquivariantRelRepData (legendreDeltaGAction R) X :=
-  (ModuliProblem.RelRepData.exists_equivariant (legendreDeltaGAction R)
-    (legendreDeltaData R hR X) (legendreDeltaData_finite R hR X)
-    (legendreDeltaData_etale R hR X)).some
+/-! ### The quarantined residual (the genuine `{±1}` surjectivity) -/
 
 section Quarantine
 
@@ -323,74 +323,6 @@ theorem legendreDelta_surjective_of (hR : IsUnit (2 : R)) {G : Type*} [Group G] 
   rw [hrange] at hmem
   exact hmem
 
-/-- **QUARANTINED (geometric, TRUE)** — the torsor comparison
-`(γ, z) ↦ (γ·z, z) : ∐_G E.Z ≅ E.Z ×_S E.Z` is an isomorphism: fibrewise simple
-transitivity of `G` on Legendre data (`|G| = 12 = 6 × 2`, KM 4.6.2's heart). Route (as
-`levelThree_torsor`): the comparison is a finite étale morphism of `Z`-schemes reduced to
-constant fibre-rank `1` via `Scheme.Hom.isIso_iff_finrank_eq`. Stated for any equivariant
-datum; instantiated at the coupled `legendreDeltaGEquiv` and its `ULift`. -/
-theorem legendreDelta_torsor_of {G : Type u} [Group G] [Finite G]
-    {φ : G →* Aut (legendreDeltaProblem R)} {X : EllObj R}
-    (E : ModuliProblem.EquivariantRelRepData φ X) :
-    IsIso ((Sigma.desc fun γ : G =>
-      pullback.lift (E.σZ.hom γ) (𝟙 E.toRelRepData.Z)
-        (by rw [Category.id_comp]; exact E.over_base γ)) :
-      (∐ fun _ : G => E.toRelRepData.Z) ⟶
-        pullback E.toRelRepData.f E.toRelRepData.f) :=
-  sorry
-
 end Quarantine
-
-/-! ### The chartered targets -/
-
-/-- **T-E14 (the Legendre `TorsorData` package — KM 4.7 axiom 2 at
-`(N, G) = (2, GL₂(𝔽₂) × {±1})`)**: the coupled Legendre problem `δ` carries a finite
-étale `GL₂(ℤ/2) × {±1}`-torsor datum at every `X` with `2` invertible.
-
-⚠️ Stated at `CommRingCat.{0}` — the unique universe where the statement elaborates
-(discovery 1: `TorsorData` pins `G : Type u`, and `GL₂(ℤ/2) × ℤˣ : Type 0`).
-
-Assembly: the coupled equivariant datum `legendreDeltaGEquiv` (datum + `σZ`/`over_base`/
-`equivariant`/finite/étale via the `exists_equivariant` transport, [GHB1]) + the
-quarantined geometric residuals `legendreDelta_surjective_of`/`legendreDelta_torsor_of`,
-over the quarantined coupled action `legendreDeltaGAction` ([T-E14-ACT'], discovery 2).
-The GENUINE `{±1}`-sub-package is `legendreDeltaSignEquivariantData`. -/
-theorem exists_legendreTorsorData (R : CommRingCat.{0}) (hR : IsUnit (2 : R))
-    (X : EllObj R) :
-    Nonempty (ModuliProblem.TorsorData (legendreDeltaGAction R) X) :=
-  ⟨{ toRelRepData := (legendreDeltaGEquiv R hR X).toRelRepData
-     σZ := (legendreDeltaGEquiv R hR X).σZ
-     over_base := (legendreDeltaGEquiv R hR X).over_base
-     equivariant := (legendreDeltaGEquiv R hR X).equivariant
-     finite := (legendreDeltaGEquiv R hR X).finite
-     etale := (legendreDeltaGEquiv R hR X).etale
-     surjective := legendreDelta_surjective_of hR (legendreDeltaGEquiv R hR X)
-     torsor := legendreDelta_torsor_of (legendreDeltaGEquiv R hR X) }⟩
-
-/-- **T-E14, the `u`-generic consumer form**: at `CommRingCat.{u}`, over the `ULift`ed
-engine group `ULift (GL₂(ℤ/2) × {±1})` (via `MulEquiv.ulift`), sidestepping the
-`TorsorData` `G : Type u` universe wall (discovery 1). Built directly from the
-`exists_equivariant` transport of the `ULift`ed action (the `LevelThreeTorsor`
-`Sigma.map'`-reindex recipe is unnecessary under this transport). -/
-theorem exists_legendreTorsorData_ulift (R : CommRingCat.{u}) (hR : IsUnit (2 : R))
-    (X : EllObj R) :
-    Nonempty (ModuliProblem.TorsorData
-      ((legendreDeltaGAction R).comp
-        (MulEquiv.ulift
-          (α := Matrix.GeneralLinearGroup (Fin 2) (ZMod 2) × ℤˣ)).toMonoidHom) X) :=
-  let E := (ModuliProblem.RelRepData.exists_equivariant
-    ((legendreDeltaGAction R).comp
-      (MulEquiv.ulift
-        (α := Matrix.GeneralLinearGroup (Fin 2) (ZMod 2) × ℤˣ)).toMonoidHom)
-    (legendreDeltaData R hR X) (legendreDeltaData_finite R hR X)
-    (legendreDeltaData_etale R hR X)).some
-  ⟨{ toRelRepData := E.toRelRepData
-     σZ := E.σZ
-     over_base := E.over_base
-     equivariant := E.equivariant
-     finite := E.finite
-     etale := E.etale
-     surjective := legendreDelta_surjective_of hR E
-     torsor := legendreDelta_torsor_of E }⟩
 
 end ModularCurves

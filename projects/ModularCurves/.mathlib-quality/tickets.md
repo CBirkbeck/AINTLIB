@@ -32189,3 +32189,38 @@ the generators, the dual's generator is the dual generator, and the pullback's i
 pullback — after which the `z`-values cancel by `appLE_z_appLE_snd_eq_self`. That is the
 single remaining gap between this tree and the Picard leaf
 `exists_invertible_tensor_idealModule_add`.
+
+## ★★★★★ [B2-L4] 2026-08-01 — reviewer's Legendre→level-4 directive: AUDIT + REMOVAL
+
+**Finding: items 2–5 of the directive were already satisfied in the tree.** Verified by
+`#print axioms`, all `[propext, Classical.choice, Quot.sound]`:
+* item 2 (the ℰ₄-machine, "direct, not via the engine"):
+  `naiveLevelFour_representable_by_affine` — `Moduli/UniversalLevelFour.lean:3606`,
+  sorry-free, proved by hand from `universalE4_generation` (:534) +
+  `isE4Datum_of_bridges` (:1593) + `four_zsmul_universalE4P/Q_of_isUnit`, with
+  `bridgeA_holds`/`bridgeQ4_holds` discharged in-file. The whole 3615-line file is
+  sorry-free.
+* item 3 (level-3 torsor lemmas at N = 4): `exists_levelFourTorsorData_ulift` —
+  `Moduli/LevelFourTorsor.lean:658`, sorry-free.
+* item 4a (the D(2) mouth): `ModuliProblem.representable_baseChange_two`
+  (`Moduli/EngineWiring.lean:77`) **already** consumes the level-4 rigidifier over
+  `gammaFullNaiveGlAction R 4`; its docstring already records the B2 decision.
+* item 5 (census): engine + `gammaBot_representable` +
+  `gammaH_representable_of_orderOf` + `gammaFullNaive/-FullDrinfeld/-OneDrinfeld_rigid_and_representable`
+  all clean-triple. **The Legendre subtree was already outside every receipt cone.**
+
+**Item 4b (done here): the impossible object is DELETED, not repaired.**
+Removed from `Moduli/LegendreTorsor.lean`: `legendreDeltaGAction` (FALSE as stated),
+`legendreDeltaGEquiv`, `legendreDelta_torsor_of`, `exists_legendreTorsorData`,
+`exists_legendreTorsorData_ulift`. Confirmed beforehand that nothing outside the file
+referenced any of them (the single hit was a stale docstring in `EngineWiring.lean:18`,
+now pointing at `exists_levelFourTorsorData_ulift`). This removes 2 of the file's real
+sorries; the remaining "sorry" strings there are docstring prose.
+
+KEPT (genuine, and consumed by `ModularCurve/RhoPoints.lean`): `legendreDeltaNegAut`,
+`legendreDeltaSignAction`, `legendreDeltaData` + finite/étale, the `{±1}` package
+`legendreDeltaSignEquivariantData`, and `legendreDelta_surjective_of`.
+
+DO NOT RETRY (recorded in the module docstring): an `IsLegendreDatum.glSmul` stability
+lemma (false — the re-marked datum has abscissa difference ≠ 1), and dropping the
+`IsLegendreDatum` cut (the `ω`-part becomes a `𝔾ₘ`-torsor, not finite).
