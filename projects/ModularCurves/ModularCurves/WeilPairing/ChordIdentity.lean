@@ -404,6 +404,34 @@ theorem vieta_const_of_equations {R : Type u} [CommRing R] (W : WeierstrassCurve
     | linear_combination h₁ + x₁ * hC1
     | linear_combination -h₁ + x₁ * hC1
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (α), COMPLETE] The chord's norm factorisation from the two points alone.**
+For two points on the curve joined by a line of slope `ℓ`, with `x₁ − x₂` a
+nonzerodivisor, the chord times its conjugate is `−(X − x₁)(X − x₂)(X − x₃)` with
+`x₃ = addX x₁ x₂ ℓ`. Both Vieta hypotheses are discharged internally: the only inputs
+are the two Weierstrass equations, the line relation and non-tangency. -/
+theorem chord_mul_conj_eq_prod_of_equations {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (W : WeierstrassCurve R) (X Y : A) (ℓ x₁ x₂ y₁ y₂ : R)
+    (hEq : Y ^ 2 + algebraMap R A W.a₁ * X * Y + algebraMap R A W.a₃ * Y =
+      X ^ 3 + algebraMap R A W.a₂ * X ^ 2 + algebraMap R A W.a₄ * X +
+        algebraMap R A W.a₆)
+    (h₁ : y₁ ^ 2 + W.a₁ * x₁ * y₁ + W.a₃ * y₁ =
+      x₁ ^ 3 + W.a₂ * x₁ ^ 2 + W.a₄ * x₁ + W.a₆)
+    (h₂ : y₂ ^ 2 + W.a₁ * x₂ * y₂ + W.a₃ * y₂ =
+      x₂ ^ 3 + W.a₂ * x₂ ^ 2 + W.a₄ * x₂ + W.a₆)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hnzd : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0) :
+    (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) *
+        ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+          (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+      -((X - algebraMap R A x₁) * (X - algebraMap R A x₂) *
+        (X - algebraMap R A (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂))) :=
+  chord_mul_conj_eq_prod W X Y ℓ x₁ x₂ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂) y₁ y₂
+    hEq rfl
+    (vieta_of_equations W ℓ x₁ x₂ y₁ y₂ h₁ h₂ hline hnzd)
+    (vieta_const_of_equations W ℓ x₁ x₂ y₁ y₂ h₁ h₂ hline hnzd)
+
 end ModularCurves
 
 namespace ModularCurves
