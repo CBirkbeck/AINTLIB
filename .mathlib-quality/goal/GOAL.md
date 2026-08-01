@@ -7451,3 +7451,42 @@ precisely this reason, and I should apply the width check after any edit that
 moves text between lines — as I already do for `git diff -w` after whitespace
 edits.
 
+
+## Scoped and ready: `valued_resI_rpow_interpolate` (94 → 48)
+
+I rejected this target twice on the grounds that `hpad` needs a 23-line carry,
+giving a 69-line helper. Both rejections were wrong for the same reason the
+`toAdic` one was: **signature lines do not count against the 50-line body
+budget.** The carried locals should be *parameters*, not carried lines.
+
+The tail-check settles which ones can move. After `hpad` (lines 110–158, 49
+lines) the remaining 23 lines use only `v'`, `v''`, `hseq`. So
+`hθc0`, `hθc1`, `hlim'`, `hlim''`, `hlimc`, `hpt` are **exclusively `hpad`'s**
+and belong in its signature.
+
+    helper body   = hpad's body, 46 lines, nothing carried      ✓ under 50
+    parent        = 94 − 48 + 2 (the call)  = 48                ✓ under 50
+
+**All six hypothesis types are writable**, which is the part that needed
+checking:
+
+* `hpt` — written in place: `∀ x : Bloc p F ϖ, …`
+* `v'`, `v''` — `set`-bound to `Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)`
+* `hlim'`, `hlim''`, `hlimc` — `have h := tendsto_resI …`, so the type is that
+  lemma's conclusion, now looked up:
+
+      Filter.Tendsto (fun x => BlocToHatK p F ϖ hmid0 hmid1 x)
+        (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+        (nhds (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z))
+
+  instantiated at `hm'0 hm'1`, `hm''0 hm''1`, and `hmc0 hmc1` respectively.
+* `hθc0`, `hθc1` — one-liners proved by `nlinarith`; carry them (2 lines) rather
+  than parameterise, since their statements are shorter than their types.
+
+The general rule this establishes, which contradicts how I have been ranking all
+campaign: **a local whose type is writable belongs in the signature, not in a
+carry block.** Carrying is for locals whose type exists nowhere — `set` terms,
+`rw`-mutated hypotheses, `obtain` witnesses. I had been carrying everything
+because carrying is mechanical, and that inflated helper bodies past the budget
+on at least three targets I then rejected.
+
