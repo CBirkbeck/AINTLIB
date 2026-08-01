@@ -6188,3 +6188,82 @@ The symmetric `hAf`/`hAg` finiteness pair is a genuine duplicate but only worth
 does not bring the parent under 50 is churn, and that specific arithmetic error
 (scoring the parent without checking the helper) is already recorded twice in
 this file.
+
+## The binding constraint is PREAMBLE, not proof length — and the estimator lied three times finding that out
+
+Tried to build a worklist of bullet-seam extractions. The count of viable
+targets went **16 → 5 → 3 → 1** as three defects came out, and the final number
+is the honest one.
+
+### The three defects, in the order they surfaced
+
+**1. Assumed a 4-line preamble.** Ranked 16 targets by "bullet big enough to
+clear the parent", charging each helper a nominal 4 lines of context. Then I
+opened `spa_completion_of_spa_localization` and found its extractable bullet
+sits under a **23-line** `set`/`letI` block that any helper must reproduce:
+40 + 23 = 63, over budget. Viable count fell to 5.
+
+**2. Measured the preamble above the FIRST bullet, not above the CHOSEN one.**
+A helper for the largest bullet must reproduce every binding above *that*
+bullet. For `norm_restricted_mul` I had recorded a preamble of 2 when the real
+figure for its big bullet is ~30. Viable count fell to 3.
+
+**3. Treated bullets as partitioning the body.** Sizing each bullet as
+"distance to the next bullet" is only right if bullets tile the proof. They do
+not: `· simp` is a *one-line* bullet, and the 21 tactics after it are the
+mainline resuming at the same indent, not its contents. That inflated a 1-line
+bullet to 22. The correct extent is indentation-scoped — the bullet plus every
+strictly-more-indented line below it. **Viable count fell to 1.**
+
+All three are the same mistake: approximating structure with line arithmetic
+instead of parsing it. And all three failed in the flattering direction, which
+is now the fifth, sixth and seventh estimator defect of this campaign to do so.
+
+### What the corrected measurement says
+
+    VIABLE single-bullet cuts across all 165:   1
+    BLOCKED by preamble overhead:              58   (median preamble 26 lines)
+
+So the obstacle to decomposing this library is **not** that proofs are long. It
+is that each proof opens with ~26 lines of `set` / `letI` boilerplate that any
+extracted helper has to carry with it. A 30-line bullet under a 26-line
+preamble makes a 56-line helper — a decomposition that *adds* an over-50 entry.
+
+### The unlock, and why it is an owner call
+
+That boilerplate has one cause. `RationalLocData.uniformSpace` (and
+`.isTopologicalRing`, `.isUniformAddGroup`) are `@[reducible] def`s, not
+instances, and they *cannot* be instances as written: the head would be
+`UniformSpace (Localization.Away D.s)`, and Lean cannot recover `D` from
+`D.s` — a projection applied to a metavariable is not a valid instance pattern.
+Hence every proof re-installs them by hand:
+
+    letI : UniformSpace (Localization.Away D.s) := D.uniformSpace   ×286
+    letI : IsTopologicalRing (Localization.Away D.s) := …            ×286
+    letI : IsUniformAddGroup (Localization.Away D.s) := …            ×272
+
+**844 lines across 29 files.**
+
+The fix is to give the localization a name the elaborator can invert:
+
+    @[reducible] noncomputable def RationalLocData.locRing (D : RationalLocData A) :=
+      Localization.Away D.s
+
+Instances on `RationalLocData.locRing D` *are* valid — `D` is recoverable from
+the head — so all three become genuine instances, all 844 `letI` lines
+disappear, and the ~58 preamble-blocked decompositions become viable.
+
+I am not doing this unilaterally. It rewrites the type `Localization.Away D.s`
+in statements across 29 files, which is exactly the "never change a statement"
+line, and the mechanical fallout (defeq-but-not-syntactic mismatches at every
+consumer) is real. It is the single highest-leverage change available to this
+project and it belongs to the owner.
+
+### Consequence for the remaining task-2 work
+
+Without that refactor, the 165 remaining proofs mostly need **multi-cut**
+decomposition — several helpers each, with the shared preamble hoisted into a
+`section`/`variable` block per file so it is written once rather than per
+helper. That is the shape the `WedhornCechAcyclicity` plan already assumed
+(~28 usable lines per helper); this measurement confirms it generalises to the
+whole tree rather than being a quirk of that one file.

@@ -1,0 +1,4 @@
+VIABLE single-bullet cuts: 1
+
+help need  pre  blt code  target
+  23   18    2   21   68  IntervalRing.lean::mem_pIdeal_pow_iff
