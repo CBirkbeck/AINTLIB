@@ -5981,3 +5981,133 @@ Count after all four guards: **6** proofs clear on joins + sibs, down from the
 8 the unguarded simulator predicted and the 15 I claimed last session. The
 number fell each time the tool got more correct, which is the expected
 direction — the earlier figures were counting merges that do not compile.
+
+## 170 → 166: abbreviations compound, and I reverted my own green work
+
+Four proofs cleared, all by `set`, none by extraction.
+
+### The finding: one abbreviation is not the unit of measurement
+
+Single-round abbreviation ranking said **nothing** cleared — every candidate
+landed at 51–53, tantalisingly short. Re-scanning the *shortened* text and
+applying a second `set` changed that completely:
+
+    iteratedMinus_forwardToCompletion_continuous     74 → 51 (Q) → 43 (W)
+    iteratedMinus_forwardHom_comp_restrictionMapHom  69 → 53 (Q) → 47 (W)
+    iteratedOverlap_forwardHom_comp_restrictionMapHom 72 → 51 (Q) → 47 (W)
+    iteratedPlus_forwardHom_comp_restrictionMapHom   65 → 48 (DB)
+
+The reason is the same one that makes abbreviation worth anything at all: its
+value is **indirect** — it shortens lines until previously-unjoinable
+continuations rejoin. So round 1 does not merely remove characters, it changes
+*which other terms sit on wrap-pressured lines*. A candidate table computed
+against the original text structurally cannot know that. Identical blind spot
+to the join tool not seeing sibling merges, one level up.
+
+`rank_abbrev2.py` does the greedy multi-round version: apply best, re-scan,
+apply next, stop when the count stops falling.
+
+### Three failures, all caught
+
+**The third abbreviation was one too far.** On
+`iteratedMinus_forwardHom_comp_restrictionMapHom` the simulator wanted a third
+`set Z := iteratedMinus_forwardHom P D₀ f` for 44. It broke a downstream
+`change` — with the head symbol behind an fvar, the pattern no longer matches.
+Two abbreviations give 47, which clears, so I took the cheaper version rather
+than fight `change`. Worth remembering: `set` on the term a later `change`
+mentions is the risky one; `set` on a *datum* threaded through instance
+arguments is safe, which is why Q and W always worked.
+
+**Two junk candidates the generator produced.** `set W := change
+iteratedPlus_forwardHom P D₀ f` swallowed a leading TACTIC KEYWORD; `set Q :=
+ValuativeRel.valuation A with hw_def` swallowed a trailing `with` binder. Both
+now rejected, alongside the unbalanced-parens check added earlier
+(`Ideal (MvPolynomial (Fin m` — two opens, no closes). All three are the same
+defect: the regex returns a *substring*, the simulator only counts lines, so a
+fragment that is not an expression still scores as a saving. Line-count
+prediction correct; implied edit not Lean.
+
+### The one that cost real work: a targeted revert is not targeted
+
+After the `Z` failure I ran `git stash push -- LaurentRefinementCore.lean` to
+undo it. That reverts the file **to HEAD** — and HEAD did not contain the `DB`
+abbreviation I had built green earlier in the same session and had not yet
+committed. So undoing the bad edit silently undid a good one in the same file.
+
+The tell was purely numeric: I expected 166 and measured 167. Nothing else
+would have surfaced it — both files compiled, the diff looked plausible, and
+the lost work was a *reduction* whose absence looks exactly like "that target
+was never done". Re-measuring after every batch, and knowing what number to
+expect, is what made it visible.
+
+The rule that would have prevented it is already in the working rules —
+**commit after each green batch** — and I skipped it because the next edit was
+"in the same file anyway". That is precisely when it matters: a file-scoped
+revert has file-scoped blast radius, not edit-scoped.
+
+## The phase change: line-shaping is spent, extraction is the whole remaining job
+
+Profile of the 166 that remain:
+
+    51-60      3      <- the only band the mechanical levers can reach
+    61-80     49
+    81-120    71
+    121+      43
+
+Three. The joins / sibling-merge / abbreviation toolchain took the count from
+~180 to 166 and now has essentially nothing left to give. Recording that
+plainly, because the reflex that had me twice declare the cheap techniques
+exhausted when they were not now cuts the other way — reaching for those tools
+again out of habit would be motion, not progress.
+
+The worst eight run 200–349 lines and six of them are in
+`WedhornCechAcyclicity.lean`.
+
+### Scouted: `unitCover_sq_plus_dense` (200 lines) and `_minus_` (238)
+
+`rank_lifts.py` ranks both top with a **164- / 202-line `have` referencing zero
+proof-locals**, which looks like a free mechanical lift. It is not, and the
+reason is the trap already recorded in this file: *scoring a parent-clearing
+extraction without checking the helper lands under 50*.
+
+The structure is:
+
+    private theorem unitCover_sq_plus_dense … : ∀ z, LHS z = RHS z := by
+      classical; haveI hCompleteB …; 7 × letI instance blocks     -- ~22 lines
+      have hfun : (fun z => …) = (fun z => …) := by               -- 164 lines
+        refine Continuous.ext_on …
+        · … ; · …                                                 -- continuity legs
+        rintro _ ⟨q, rfl⟩
+        have hcomp : … := by                                      -- 139 lines
+          refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
+          · simp only […]                                         -- ~42  constants case
+          · simp only […]                                         -- ~82  variables case
+        exact RingHom.congr_fun hcomp q
+      intro z
+      exact congrFun hfun z
+
+Lifting `hfun` whole gives parent ≈ 15 (clears) and a helper ≈ 174 (a NEW
+over-50 entry). Net zero. Same for lifting `hcomp` alone: ≈ 149.
+
+The decomposition that actually pays follows **the author's own seams** — the
+two `·` bullets are precisely the two cases of `MvPolynomial.ringHom_ext`:
+
+  1. `…_constants_case`  ~42 lines + letI preamble
+  2. `…_variables_case`  ~82 lines + letI preamble  → still over 50, needs one
+     further cut inside it
+  3. `hcomp` collapses to `refine MvPolynomial.ringHom_ext …; exact A; exact B`
+  4. `hfun` ≈ 15 lines, parent ≈ 15 lines
+
+Two caveats that will decide whether this is 4 helpers or 6:
+
+* every helper needs the **7 letI instance blocks** replicated (≈ 22 lines of
+  preamble each), because the instances are what make the statements
+  elaborate. That preamble is pure overhead against the 50-line budget and is
+  why naive "lift the big block" arithmetic is wrong here — budget ≈ 28 usable
+  lines per helper, not 50.
+* the shared preamble is itself the strongest argument for a `variable`/section
+  refactor in this file rather than per-helper duplication. Worth measuring
+  before committing to a shape.
+
+`_minus_dense` (238 lines) is the same shape and should be done in the same
+pass so the preamble decision is made once.
