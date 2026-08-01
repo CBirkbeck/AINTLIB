@@ -8,17 +8,20 @@
 # follow any external schema. This file is the small, hand-written, standards-conformant
 # self-report intended for outside readers and tooling.
 #
-# FIELDS LEFT BLANK ARE NOT YET KNOWN — they are human-supplied (authorship, spend, review
-# status) and are deliberately empty rather than guessed.
+# FIELDS LEFT BLANK ARE NOT YET KNOWN — the remaining ones (source licenses, spend, wall
+# time, hardware, acknowledgements) are human-supplied and are deliberately empty rather
+# than guessed.
 
 version: "v0.3"
 
 project:
   name: "AINTLIB / AdicSpaces"
-  authors: []                      # [required] TODO: fill in — not inferable from the repo
-  license: ""                      # [required] TODO: Lean headers say "Apache 2.0 as described
-                                   # in the file LICENSE", but no LICENSE file exists in the
-                                   # repository. Add one, then set this to "Apache-2.0".
+  authors: ["Chris Birkbeck"]      # [required] from repo ownership + git history; ADD
+                                   # CO-AUTHORS if others contributed to this project.
+  license: "Apache-2.0"            # [required] matches the repository (LICENSE on `main`,
+                                   # commit 1c1c74664) and the Lean file headers. Note the
+                                   # `dev/adic-spaces` branch predates that commit and so does
+                                   # not itself carry the LICENSE file — housekeeping only.
 
 sources:
   - title: "Adic Spaces (lecture notes)"
@@ -91,7 +94,7 @@ status:
 automation:
   methods:
     - method: "LLM-assisted formalization with human direction"
-      models: []                   # TODO: fill in the models actually used
+      models: ["Claude Fable 5", "ChatGPT 5.6 Sol"]
       framework: "Claude Code"
       tool_setup: >-
         Lean 4 with mathlib; per-project dev branches in one Lake workspace; automated
