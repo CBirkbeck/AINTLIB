@@ -502,6 +502,28 @@ theorem eq_unit_mul_of_three_divisions_of_isUnit {A : Type u} [CommRing A]
   exact ⟨u, AlgebraicGeometry.Scheme.Modules.eq_unit_mul_of_three_divisions
     c gP gQ gR c₁ c₂ u hc₁ hc₂ hc₃⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 final] The chord's exact-order form from the chart facts.** Packaging the
+whole chord-side pipeline: the three evaluations kill the chord and its successive
+quotients, the last quotient is a unit, hence the chord is a unit multiple of the
+product of the three kernel generators — the hypothesis of the trivialization
+criterion. -/
+theorem chord_exact_order_of_chart_facts {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (c gP gQ gR : A) (σ₁ σ₂ σ₃ : A →ₐ[R] R)
+    (hk₁ : RingHom.ker (σ₁ : A →+* R) = Ideal.span {gP})
+    (hk₂ : RingHom.ker (σ₂ : A →+* R) = Ideal.span {gQ})
+    (hk₃ : RingHom.ker (σ₃ : A →+* R) = Ideal.span {gR})
+    (h₁ : σ₁ c = 0)
+    (hstep₂ : ∀ c₁ : A, c = gP * c₁ → σ₂ c₁ = 0)
+    (hstep₃ : ∀ c₁ c₂ : A, c = gP * c₁ → c₁ = gQ * c₂ → σ₃ c₂ = 0)
+    (hunit : ∀ c₁ c₂ c₃ : A, c = gP * c₁ → c₁ = gQ * c₂ → c₂ = gR * c₃ → IsUnit c₃) :
+    ∃ u : Aˣ, c = (u : A) * (gP * (gQ * gR)) := by
+  obtain ⟨c₁, c₂, c₃, hc₁, hc₂, hc₃⟩ :=
+    exists_three_divisions c gP gQ gR σ₁ σ₂ σ₃ hk₁ hk₂ hk₃ h₁ hstep₂ hstep₃
+  exact eq_unit_mul_of_three_divisions_of_isUnit c gP gQ gR c₁ c₂ c₃ hc₁ hc₂ hc₃
+    (hunit c₁ c₂ c₃ hc₁ hc₂ hc₃)
+
 end ModularCurves
 
 namespace ModularCurves
