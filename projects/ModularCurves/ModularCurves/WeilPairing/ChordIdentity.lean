@@ -278,6 +278,31 @@ theorem exists_three_algHom_ker_eq_span {C S : Scheme.{u}} {π : C ⟶ S} [IsSep
       Rm.1 Rm.2 U hRU rR hR halg
   exact ⟨σP, σQ, σR, hσP, hσQ, hσR⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (α)] The chord times its conjugate is a cubic in `X`.** In any algebra where
+`(X, Y)` satisfies the Weierstrass equation, the product of the chord
+`Y − ℓ(X − x₁) − y₁` with its conjugate (the same line subtracted from `negY`) is the
+`addPolynomial` cubic evaluated at `X` — the identity that produces the successive
+quotients of the exact-order factorisation. Pure algebra: it is the Weierstrass
+equation rearranged. -/
+theorem chord_mul_conj_eq_cubic {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (X Y : A) (ℓ x₁ y₁ : R)
+    (hEq : Y ^ 2 + algebraMap R A W.a₁ * X * Y + algebraMap R A W.a₃ * Y =
+      X ^ 3 + algebraMap R A W.a₂ * X ^ 2 + algebraMap R A W.a₄ * X +
+        algebraMap R A W.a₆) :
+    (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) *
+        ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+          (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+      -(X ^ 3 +
+        (algebraMap R A (-ℓ ^ 2 - W.a₁ * ℓ + W.a₂)) * X ^ 2 +
+        (algebraMap R A (2 * x₁ * ℓ ^ 2 + (W.a₁ * x₁ - 2 * y₁ - W.a₃) * ℓ +
+          (-W.a₁ * y₁ + W.a₄))) * X +
+        (algebraMap R A (-x₁ ^ 2 * ℓ ^ 2 + (2 * x₁ * y₁ + W.a₃ * x₁) * ℓ -
+          (y₁ ^ 2 + W.a₃ * y₁ - W.a₆)))) := by
+  simp only [map_add, map_sub, map_mul, map_neg, map_pow, map_ofNat]
+  linear_combination -hEq
+
 end ModularCurves
 
 namespace ModularCurves
