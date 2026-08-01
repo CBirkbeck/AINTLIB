@@ -31711,3 +31711,13 @@ WHAT IS STILL REQUIRED — instantiation only:
  (b) the degenerate configurations (tangency, 2-torsion, infinity) via addOnY/addOnZ;
  (c) run the same for the vertical (two-factor versions all exist).
 Root build 9617 jobs; audit sweeps clean.
+
+### ★★★ [W1 (a)] DONE 2026-08-01 — the chord identity in the coordinate ring
+`coord_equation` (repackaging the tree's `coordY_mul_coordY` — the from-scratch route
+hit a whnf timeout, and the lemma already existed) and
+`chord_exact_order_in_coordinateRing`: the chord identity now lives in
+`W.toAffine.CoordinateRing`, which is exactly the away-chart ring by
+`sectionAway_affineModelEval_bijective`.
+REMAINING: transport along that bijection to the actual chart sections, supply the
+retraction/generator data from the section machinery (`exists_three_algHom_ker_eq_span`,
+`eq_unit_mul_of_associates`), and run the closing links.
