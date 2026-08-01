@@ -432,6 +432,34 @@ theorem chord_mul_conj_eq_prod_of_equations {R A : Type u} [CommRing R] [CommRin
     (vieta_of_equations W ℓ x₁ x₂ y₁ y₂ h₁ h₂ hline hnzd)
     (vieta_const_of_equations W ℓ x₁ x₂ y₁ y₂ h₁ h₂ hline hnzd)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (1)] `X − x` lies in the kernel of the evaluation at that point.** Always
+true; the converse (that it *generates*) holds away from `2`-torsion and is the chart
+hypothesis. -/
+theorem sub_coord_mem_ker {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (σ : A →ₐ[R] R) (X : A) (x : R) (hx : σ X = x) :
+    (X - algebraMap R A x) ∈ RingHom.ker (σ : A →+* R) := by
+  show (σ : A →+* R) (X - algebraMap R A x) = 0
+  rw [map_sub]
+  show σ X - σ (algebraMap R A x) = 0
+  rw [hx, σ.commutes]
+  simp
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (1)] The generator divides `X − x`.** With the kernel principal on `g`, the
+coordinate difference is a multiple of the generator — the direction needed to turn the
+norm factorisation into the divisibility chain. -/
+theorem exists_mul_eq_sub_coord {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (σ : A →ₐ[R] R) (X : A) (x g : R) (hx : σ X = x)
+    {gA : A} (hker : RingHom.ker (σ : A →+* R) = Ideal.span {gA}) :
+    ∃ t : A, X - algebraMap R A x = gA * t := by
+  have hmem := sub_coord_mem_ker σ X x hx
+  rw [hker] at hmem
+  obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hmem
+  exact ⟨a, by rw [← ha, mul_comm]⟩
+
 end ModularCurves
 
 namespace ModularCurves
