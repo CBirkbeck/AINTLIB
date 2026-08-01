@@ -31257,3 +31257,15 @@ chord–tangent theorem:
      count (the chart is a rank-3 free module and the three evaluations are independent
      by the unimodularity already available).
 This is a far smaller remaining leaf than the "universal atlas campaign" first scoped.
+
+### [W1-d3.2d] partial 2026-08-01 — `ker_eq_of_mem_of_span_eq`
+Once the chord vanishes at the third point, the triple kernel = the pair kernel. What
+still has to be produced for the exact-order hypothesis is that the chart quotient
+`c_ℓ/(g_P g_Q g_{R⁻})` is a UNIT (not merely that the divisibility holds). Cleanest
+available route: the rank-3 coordinates (`nonempty_baseSections_cokernel_iteratedTwist₃_
+equiv_of_sections`) exhibit the triple restriction as a 3×3 system on the b3 basis; the
+chord spans its kernel (previous lemma), so the system has rank exactly 2, and the
+cofactor identity turns that into unimodularity of the quotient. To be done with the
+CrossProductKernel-style Cramer machinery (`mem_span_crossProduct_of_dotProduct_eq_zero`
+already handles the 2×3 case; the 3×3 case needs the adjugate identity
+`Matrix.mulVec_cramer`/`adjugate_mul` — check mathlib before building).
