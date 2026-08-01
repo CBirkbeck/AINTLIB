@@ -5815,3 +5815,37 @@ delivered −4 net.
 → **The simulator is now the tool for this technique, and its negative answer stands**: this was
   the only proof in the tree it flagged as within reach, and it is done. Everything else it
   ranked lands 5+ over, so abbreviation is genuinely exhausted.
+
+## Extraction is NOT the only route left: sibling `;` merges unlock 15 proofs
+
+I concluded twice that the cheap techniques were exhausted and every remaining proof needed
+extraction. That was wrong, and the reason is instructive: I was measuring reachability with the
+**join tool**, which by construction only joins a *deeper-indented continuation*. The other
+mechanical move — merging two adjacent tactics at **equal** indent with `; ` — is invisible to
+it, and it is what actually closed the last three proofs by hand.
+
+Counting both, with the same guards the join tool uses (no comments, no `·`/`|` bullets, no
+`calc` `_` steps, no `induction … with` alternatives, combined length ≤ 100, equal indent):
+
+**15 of the 177 in-scope proofs clear on joins + sibling merges alone.** Among them:
+
+| need | joins | sibs | proof |
+|---|---|---|---|
+| 8 | 1 | 13 | `Presheaf.valueGroup_archimedean_pair_of_topNilp…` |
+| 26 | 18 | 13 | `CurveObject.ringStalkMap_piYHom_injective` |
+| 26 | 12 | 18 | `YPresheaf.biResQ_chain_glue` |
+| 11 | 0 | 14 | `TateAlgebra.quotient_of_flat_of_saturated` |
+| 20 | 4 | 18 | `Euclidean.division_descent` |
+| 16 | 3 | 14 | `MvTateAlgebraTopology.mvTateAlgNhd_leftMul_of_principal` |
+
+A further six sit 1–3 short, reachable with one abbreviation or one small extraction on top.
+
+→ **When a capability estimate says "exhausted", check whether the estimate covers the moves you
+  have actually been making by hand.** Three of my recent clears used sibling merges; the
+  estimator that told me the technique was spent could not see a single one of them. That is the
+  fourth estimator defect this session and the same shape as the others — the tool measured a
+  proxy for the thing I cared about.
+
+Not yet applied: 15 proofs is a large batch and sibling merging is the move that produced the
+`induction … with` breakage, so it wants applying in two or three gated batches rather than one,
+with the module build run per file first.
