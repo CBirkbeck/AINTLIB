@@ -30789,3 +30789,20 @@ kernel-intersection (concentration two-cover) → [A5-A] the chord-tangent scala
 identity (universal pair) → [A5-B] exact order → [A5-C] assembly. The sorry'd
 sectionZeroIdeal stays as WIP scaffolding (unused; producer-WIP per repo rules) —
 DELETE it if [A5] closes without it.
+
+### [GAP-A-4 pole-sheaf wiring] DONE 2026-08-01
+`exists_ker_baseSectionsMap_cokernel_poleSheaf_pair` / `_single` — line + vertical
+stated directly for `sectionPoleSheafPower π z hz m`, axiom-clean. Slots consumed:
+IsInvertible (PoleSheaf.lean:7051) and the chart trivialization
+(PoleSheafQuasicoherent.lean:297, needs `z ⁻¹ᵁ U = ⊥` — the chart avoids the zero
+section). Slots REMAINING (both are pre-existing project leaves, not new debt):
+(1) b3/b2 bases — GAP-A-3's `sectionPoleSheafPower_{two,three}_baseSectionsBasisOf
+CartierGenerator` (themselves hH1-slotted, Zariski-local supply phase);
+(2) `Subsingleton (H (tensorObj (idealModule D) L) 1)` = the ORIGINAL [A4-c]
+cohomological leaf (twisted H¹). NOTE the twisted module is 𝒪(3[0] − D) with
+fibre degree 1 > 0, so fibrewise H¹ = 0 by Riemann–Roch; the route is the same
+fibrewise+base-change machinery already used for the untwisted pole sheaves
+(PoleSheafBaseCechHOne/FibreHOne) — a PORT, not new math, but it needs the
+twisted module to be quasicoherent (IsInvertible.tensorObj_isQuasicoherent ✓ exists)
+and its fibres identified with the base-changed twist (the pole-sheaf fibre-iso
+pattern `sectionPoleSheafPowerFiberIso`).
