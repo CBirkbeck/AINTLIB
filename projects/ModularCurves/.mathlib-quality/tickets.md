@@ -30999,3 +30999,17 @@ NEXT [W2-d]: assemble into `nonempty_unitObj_iso_of_normalized_glue`. Shape:
   The overlap units come from exists_isUnit_smul_eq_of_generators applied at
   `⁻¹ᵁ U i ⊓ ⁻¹ᵁ U j` (both generators restrict there by
   bijective_smul_restrict_of_restrictIso + the transport lemma).
+
+### ★★★ [W2-d] DESCENT ASSEMBLED 2026-08-01 (WeilPairing/DescentFromCharts.lean)
+`nonempty_unitObj_iso_of_chart_trivializations` (axiom-clean, root 9614): chart
+trivializations over preimages of a base cover + zero-normalized comparison units ⟹
+global triviality. The overlap units are CONSTRUCTED internally
+(exists_isUnit_smul_eq_of_generators + choose), so the caller supplies only:
+  (a) the trivializations, (b) the generating property (bijective_smul_generatorOfRestrictIso
+  + restriction), (c) the RIGIDIFICATION (z-value of each comparison unit = 1).
+WP PRONG STATUS: the only mathematical inputs left in the whole prong are
+  [W1] the chord/vertical chart-coefficient identities (universal-atlas campaign), and
+  [W2-e] the rigidification (c) — normalize each local generator along the zero section;
+        this is where N = 0^*Δ comes from (SelfAdjointN's docstring: the exact identity is
+        FALSE globally, so the normalization is only possible after twisting by N).
+Everything else is proven and axiom-clean.
