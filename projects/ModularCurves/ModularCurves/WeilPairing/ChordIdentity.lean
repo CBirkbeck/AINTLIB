@@ -515,4 +515,35 @@ theorem chord_eq_unit_mul_generators {R A : Type u} [CommRing R] [CommRing A]
     c g₁ g₂ g₃ c₁ c₂ u hc₁ hc₂ hc₃
 
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (a)+(b), assembled] The chord's chart factorisation from evaluation data.**
+Given the three retractions, the chord element's successive quotients, and a unit final
+cofactor, the chord is a unit multiple of the product of the three generators. This is
+the statement that `nonempty_iso_unitObj_of_exact_order₃` consumes, with every
+hypothesis now expressed in chart coordinates. -/
+theorem chord_chart_factorisation {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (X Y : A) (ℓ x₁ y₁ x₂ y₂ x₃ y₃ : R) (gP gQ gR : A)
+    (σ₁ σ₂ σ₃ : A →ₐ[R] R)
+    (hk₁ : RingHom.ker σ₁ = Ideal.span {gP})
+    (hk₂ : RingHom.ker σ₂ = Ideal.span {gQ})
+    (hk₃ : RingHom.ker σ₃ = Ideal.span {gR})
+    (h₁x : σ₁ X = x₁) (h₁y : σ₁ Y = y₁)
+    (h₂x : σ₂ X = x₂) (h₂y : σ₂ Y = y₂)
+    (h₃x : σ₃ X = x₃) (h₃y : σ₃ Y = y₃)
+    (hline₂ : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hline₃ : y₃ = ℓ * (x₃ - x₁) + y₁)
+    (c₁ : A)
+    (hc₁ : (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+      gP * c₁)
+    (h₂ : σ₂ c₁ = 0) (c₂ : A) (hc₂ : c₁ = gQ * c₂)
+    (h₃ : σ₃ c₂ = 0) (u : Aˣ) (hc₃ : c₂ = gR * (u : A)) :
+    (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+      (u : A) * (gP * (gQ * gR)) := by
+  obtain ⟨hv₁, hv₂, hv₃⟩ := chord_evaluations_vanish X Y ℓ x₁ y₁ x₂ y₂ x₃ y₃
+    σ₁ σ₂ σ₃ h₁x h₁y h₂x h₂y h₃x h₃y hline₂ hline₃
+  exact chord_eq_unit_mul_generators _ gP gQ gR σ₁ σ₂ σ₃ hk₁ hk₂ hk₃ hv₁
+    c₁ hc₁ h₂ c₂ hc₂ h₃ u hc₃
+
+
 end ModularCurves
