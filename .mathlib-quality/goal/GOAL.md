@@ -6111,3 +6111,80 @@ Two caveats that will decide whether this is 4 helpers or 6:
 
 `_minus_dense` (238 lines) is the same shape and should be done in the same
 pass so the preamble decision is made once.
+
+## 166 → 165: the first real extraction, and two ways generated code differs from written code
+
+`windowTraceHomeomorph` (57 code lines) split at **`Homeomorph`'s own structure** —
+an `Equiv` (the two maps plus `left_inv`/`right_inv`, 48 lines) and the two
+continuity legs (14). Both halves land under 50; the parent becomes
+
+    set h_n := spaChartHomeoWindow p F ϖ hp n with hhn
+    refine Homeomorph.mk (windowTraceEquiv p F ϖ hp n R G₂ hG₂eq) ?_ ?_
+    · -- continuity, forward   …
+    · -- continuity, backward  …
+
+This is the seam the *author* already used — the bullets were literally
+commented `-- left inverse` / `-- right inverse` / `-- continuity, forward` /
+`-- continuity, backward`. Following those beats inventing a cut.
+
+`@[reducible]` on the extracted equiv is load-bearing: the continuity goals are
+about the equiv's `toFun`/`invFun`, so the tactics need it to unfold to the
+original lambdas. Without it they see an opaque constant and the
+`Continuous.subtype_mk` chain fails.
+
+### The two failures, both from GENERATING the edit rather than writing it
+
+I built the split with a script that slices the declaration out of the file's
+own text — the standard defence against the transcription trap. It removed that
+class of error and introduced two others, both structural rather than textual.
+
+**1. The docstring reparented.** I inserted the new declaration *after* the
+existing `/-- **The window-trace homeomorphism** … -/`, so the file had two
+consecutive docstrings and Lean reported
+`unexpected token '/--'; expected 'lemma'`. Splitting a declaration is also a
+decision about where its *documentation* goes: the original doc describes the
+homeomorphism, so it must travel down to the homeomorphism, not stay stranded
+above the equiv carved out of it.
+
+**2. Indentation that was load-bearing and invisible.** The original read
+
+    refine Homeomorph.mk (Equiv.mk
+    (fun r => …)          <- column 2
+    (fun z => …)          <- column 2
+
+legal *only* because the unclosed `(Equiv.mk` paren made those continuations.
+Dropping the outer wrapper to `refine Equiv.mk` left the columns untouched and
+inverted their meaning — now they are sibling *tactics*, and Lean says
+`unexpected token 'fun'; expected '{' or tactic`. The bytes did not change; what
+encloses them did.
+
+That is the same lesson as today's `;`-merge guards, from the opposite
+direction. There I had to widen a two-line window to see that a line was a
+*continuation*; here I changed what a line continues *into* and had to re-indent
+to match. **Indentation carries no meaning in isolation — only relative to the
+enclosing syntax.** Any tool that moves a block across an enclosure boundary has
+to re-derive the indentation rather than preserve it.
+
+Both were caught by the single-module build in one round, which is the argument
+for `lake build '«Adic spaces».<Module>'` before the gate: the gate would have
+found the same two errors fifteen minutes later.
+
+### Scouting for the next cuts
+
+Ranked the remaining 165 by **top-level bullets at the body's base indent** —
+i.e. the author's own case split — rather than by size. That surfaces the
+proofs that are already decomposed in prose and merely need the pieces named:
+
+    5 bullets   58  norm_restricted_mul
+    5           79  exists_finite_normalized_ratio
+    4           89  groebner_reduce
+    4          132  cofinalValue_ideal_pow_lt
+    4          226  ideal_pullback_controlled
+
+Checked `norm_restricted_mul` first (needs 8): its five bullets are two
+throwaway `· simp` zero-cases plus a Gauss-norm argument with no 8-line seam.
+The symmetric `hAf`/`hAg` finiteness pair is a genuine duplicate but only worth
+4 lines. Left it rather than force a cut that would not clear it — a helper that
+does not bring the parent under 50 is churn, and that specific arithmetic error
+(scoring the parent without checking the helper) is already recorded twice in
+this file.

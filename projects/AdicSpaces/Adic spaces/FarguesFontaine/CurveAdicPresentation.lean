@@ -291,18 +291,15 @@ private theorem exists_finset_basicOpen_mem_subset {B : Type*} [CommRing B]
     exact Set.mem_iInter₂.mp hv e (hfam₀_fin.mem_toFinset.mpr he₀)
 
 
-/-- **The window-trace homeomorphism** — the second leg of the chart comparison. The
-chart homeomorphism `h_n = spaChartHomeoWindow` carries the rational open `R` on
-`Spa B_n` across to the neighbourhood that `G₂` cuts out on the `𝒴`-carrier; `hG₂eq`
-says exactly that `G₂` lifts the `h_n`-image of `R`'s trace. Both sides are subtypes of
-nested subtypes, so all four components are written out, but the content is only that
-`h_n` and `h_n.symm` are mutually inverse and continuous. -/
-private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
+/-- The underlying equivalence of `windowTraceHomeomorph`: the window chart
+homeomorphism transported to the trace of `R` on `Spa B_n`, as a bijection.
+Split out so each half stays readable; continuity is proved separately. -/
+@[reducible] private def windowTraceEquiv (hp : 1 < p) (n : ℤ)
     (R : Set (Spv (windowChartRing p F ϖ n))) (G₂ : Set (Spv (Ainf p F)))
     (hG₂eq : Subtype.val ⁻¹' G₂ = ⇑(spaChartHomeoWindow p F ϖ hp n) ''
       (Subtype.val ⁻¹' R : Set ↥(Spa (windowChartRing p F ϖ n)
         (ringPlus (windowChartRing p F ϖ n))))) :
-    ↥(R ∩ Spa (windowChartRing p F ϖ n) (windowChartRing p F ϖ n)⁺) ≃ₜ
+    ↥(R ∩ Spa (windowChartRing p F ϖ n) (windowChartRing p F ϖ n)⁺) ≃
       ↥({z : ↥(yTop p F ϖ) |
             ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
               : Spv (Ainf p F)) ∈ G₂}
@@ -313,29 +310,29 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
   set h_n := spaChartHomeoWindow p F ϖ hp n with hhn
   set RT : Set ↥(Spa Bn (ringPlus Bn)) := Subtype.val ⁻¹' R with hRT
   have hIM' : ⇑h_n '' RT = ⇑h_n.symm ⁻¹' RT := h_n.toEquiv.image_eq_preimage_symm RT
-  refine Homeomorph.mk (Equiv.mk
-  (fun r => ⟨⟨⟨((h_n ⟨(r : Spv Bn), r.2.2⟩
-      : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
-      (h_n ⟨(r : Spv Bn), r.2.2⟩).2.2⟩,
-      mem_Y_of_mem_bigWindow p F ϖ hp n (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩,
-    (Set.ext_iff.mp hG₂eq (h_n ⟨(r : Spv Bn), r.2.2⟩)).mpr
-      (Set.mem_image_of_mem _ (show (⟨(r : Spv Bn), r.2.2⟩
-        : ↥(Spa Bn (ringPlus Bn))) ∈ RT from r.2.1)),
-    (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩)
-  (fun z => ⟨((h_n.symm ⟨((ySpaPoint p F ϖ z.1
-      : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
-      z.2.2, (ySpaPoint p F ϖ z.1).2⟩
-      : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
-    (show h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩ ∈ RT by
-      have h1 : (⟨((ySpaPoint p F ϖ z.1
-          : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
-          z.2.2, (ySpaPoint p F ϖ z.1).2⟩
-          : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) ∈ ⇑h_n '' RT :=
-        (Set.ext_iff.mp hG₂eq _).mp z.2.1
-      rw [hIM'] at h1
-      exact h1),
-    (h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩).2⟩)
-    (fun r => ?_) (fun z => ?_)) ?_ ?_
+  refine Equiv.mk
+    (fun r => ⟨⟨⟨((h_n ⟨(r : Spv Bn), r.2.2⟩
+        : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+        (h_n ⟨(r : Spv Bn), r.2.2⟩).2.2⟩,
+        mem_Y_of_mem_bigWindow p F ϖ hp n (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩,
+      (Set.ext_iff.mp hG₂eq (h_n ⟨(r : Spv Bn), r.2.2⟩)).mpr
+        (Set.mem_image_of_mem _ (show (⟨(r : Spv Bn), r.2.2⟩
+          : ↥(Spa Bn (ringPlus Bn))) ∈ RT from r.2.1)),
+      (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩)
+    (fun z => ⟨((h_n.symm ⟨((ySpaPoint p F ϖ z.1
+        : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+        z.2.2, (ySpaPoint p F ϖ z.1).2⟩
+        : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
+      (show h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩ ∈ RT by
+        have h1 : (⟨((ySpaPoint p F ϖ z.1
+            : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+            z.2.2, (ySpaPoint p F ϖ z.1).2⟩
+            : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) ∈ ⇑h_n '' RT :=
+          (Set.ext_iff.mp hG₂eq _).mp z.2.1
+        rw [hIM'] at h1
+        exact h1),
+      (h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩).2⟩)
+      (fun r => ?_) (fun z => ?_)
   · -- left inverse
     refine Subtype.ext ?_
     have key : ∀ (m : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))),
@@ -357,6 +354,27 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
       (congrArg (fun m : ↥(bigWindow p F ϖ n
           ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) => (m : Spv (Ainf p F)))
         (h_n.apply_symm_apply mz))
+
+/-- **The window-trace homeomorphism** — the second leg of the chart comparison. The
+chart homeomorphism `h_n = spaChartHomeoWindow` carries the rational open `R` on
+`Spa B_n` across to the neighbourhood that `G₂` cuts out on the `𝒴`-carrier; `hG₂eq`
+says exactly that `G₂` lifts the `h_n`-image of `R`'s trace. Both sides are subtypes of
+nested subtypes, so all four components are written out, but the content is only that
+`h_n` and `h_n.symm` are mutually inverse and continuous. -/
+private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
+    (R : Set (Spv (windowChartRing p F ϖ n))) (G₂ : Set (Spv (Ainf p F)))
+    (hG₂eq : Subtype.val ⁻¹' G₂ = ⇑(spaChartHomeoWindow p F ϖ hp n) ''
+      (Subtype.val ⁻¹' R : Set ↥(Spa (windowChartRing p F ϖ n)
+        (ringPlus (windowChartRing p F ϖ n))))) :
+    ↥(R ∩ Spa (windowChartRing p F ϖ n) (windowChartRing p F ϖ n)⁺) ≃ₜ
+      ↥({z : ↥(yTop p F ϖ) |
+            ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+              : Spv (Ainf p F)) ∈ G₂}
+          ∩ {z : ↥(yTop p F ϖ) |
+            ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+              : Spv (Ainf p F)) ∈ bigWindow p F ϖ n}) := by
+  set h_n := spaChartHomeoWindow p F ϖ hp n with hhn
+  refine Homeomorph.mk (windowTraceEquiv p F ϖ hp n R G₂ hG₂eq) ?_ ?_
   · -- continuity, forward
     refine Continuous.subtype_mk (Continuous.subtype_mk (Continuous.subtype_mk ?_ _) _) _
     exact continuous_subtype_val.comp (h_n.continuous.comp
