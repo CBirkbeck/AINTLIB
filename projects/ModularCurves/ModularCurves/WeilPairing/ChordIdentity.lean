@@ -546,6 +546,28 @@ theorem exists_affineChart_le_of_multiChart {C S : Scheme.{u}} {π : C ⟶ S}
     ModularCurves.RelEffCartierDiv.SectionsIdeal.basicOpen_span_nzd hspan hnzd t
   exact ⟨_, h1, h2⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-i] Cancelling a nonzerodivisor factor from the norm factorisation.** From
+`chord · conj = −(X−x₁)(X−x₂)(X−x₃)` and `chord = (X−x₁)·c₁`, if `X−x₁` is a
+nonzerodivisor of the chart ring, the quotient satisfies
+`c₁ · conj = −(X−x₂)(X−x₃)`; iterating gives the deeper evaluation vanishings. -/
+theorem cancel_factor_of_norm {A : Type u} [CommRing A]
+    (chord conj f₁ f₂ f₃ c₁ : A)
+    (hnorm : chord * conj = -(f₁ * f₂ * f₃))
+    (hdiv : chord = f₁ * c₁)
+    (hnzd : ∀ t : A, f₁ * t = 0 → t = 0) :
+    c₁ * conj = -(f₂ * f₃) := by
+  rw [← sub_eq_zero]
+  refine hnzd _ ?_
+  have h : f₁ * (c₁ * conj) = f₁ * (-(f₂ * f₃)) := by
+    calc f₁ * (c₁ * conj) = chord * conj := by rw [hdiv]; ring
+      _ = -(f₁ * f₂ * f₃) := hnorm
+      _ = f₁ * (-(f₂ * f₃)) := by ring
+  have h2 : f₁ * (c₁ * conj) - f₁ * (-(f₂ * f₃)) = 0 := by rw [h, sub_self]
+  calc f₁ * (c₁ * conj - -(f₂ * f₃)) = f₁ * (c₁ * conj) - f₁ * (-(f₂ * f₃)) := by ring
+    _ = 0 := h2
+
 end ModularCurves
 
 namespace ModularCurves
