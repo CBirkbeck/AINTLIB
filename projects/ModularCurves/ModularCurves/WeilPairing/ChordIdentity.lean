@@ -199,6 +199,36 @@ theorem projModelPointsEquiv_neg_mul {R : Type u} [CommRing R]
     ⟨Limits.pullback.lift P.1 Q.1 (P.2.trans Q.2.symm) ≫ mulModelHom W, hsum⟩]
   rw [mulModelHom_specPoints W K P Q]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2c, steps 1+4 combined] The third point's coordinates at a field point.**
+For two `K`-points in the `Z`-chart with affine coordinates `(x₁, y₁)`, `(x₂, y₂)` in
+general position, the dictionary value of the scheme-level `-(P + Q)` is the affine
+point `(addX, negAddY)` — the chord's third intersection. -/
+theorem projModelPointsEquiv_neg_mul_eq_negAddY {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) [W.IsElliptic]
+    (K : Type u) [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    {x₁ x₂ y₁ y₂ : K}
+    (h₁ : (W.baseChange K).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (W.baseChange K).toAffine.Nonsingular x₂ y₂)
+    (hP : projModelPointsEquiv W K P = WeierstrassCurve.Affine.Point.some x₁ y₁ h₁)
+    (hQ : projModelPointsEquiv W K Q = WeierstrassCurve.Affine.Point.some x₂ y₂ h₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = (W.baseChange K).toAffine.negY x₂ y₂)) :
+    projModelPointsEquiv W K
+        ⟨(Limits.pullback.lift P.1 Q.1 (P.2.trans Q.2.symm) ≫ mulModelHom W) ≫
+            negModelHom W, by
+          rw [Category.assoc, negModelHom_π, Category.assoc, mulModelHom_π,
+            ← Category.assoc, Limits.pullback.lift_fst, P.2]⟩ =
+      WeierstrassCurve.Affine.Point.some
+        ((W.baseChange K).toAffine.addX x₁ x₂
+          ((W.baseChange K).toAffine.slope x₁ x₂ y₁ y₂))
+        ((W.baseChange K).toAffine.negAddY x₁ x₂ y₁
+          ((W.baseChange K).toAffine.slope x₁ x₂ y₁ y₂))
+        (WeierstrassCurve.Affine.nonsingular_negAdd h₁ h₂ hxy) := by
+  rw [projModelPointsEquiv_neg_mul W K P Q, hP, hQ]
+  exact neg_add_eq_some_negAddY (W.baseChange K) h₁ h₂ hxy
+
 end ModularCurves
 
 namespace ModularCurves
