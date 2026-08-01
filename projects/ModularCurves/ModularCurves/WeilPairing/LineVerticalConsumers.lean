@@ -777,6 +777,24 @@ noncomputable def unitHomOfTopSection {M : C.Modules} (m : Γ(M, (⊤ : C.Opens)
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The value of the section-hom at `1` over any open is the restriction of the
+section. -/
+theorem unitHomOfTopSection_app_one {M : C.Modules} (m : Γ(M, (⊤ : C.Opens)))
+    (V : C.Opens) :
+    (unitHomOfTopSection m).app V
+      (show Γ(unitObj C, V) from (1 : Γ(C, V))) =
+      M.presheaf.map (homOfLE (le_top : V ≤ (⊤ : C.Opens))).op m := by
+  show ((unitHomOfTopSection m).val.app (Opposite.op V))
+    (show Γ(unitObj C, V) from (1 : Γ(C, V))) = _
+  have hval := SheafOfModules.unitHomEquiv_apply_coe
+    (M := M) (unitHomOfTopSection m) (Opposite.op V)
+  refine hval.symm.trans ?_
+  show ((M.unitHomEquiv (unitHomOfTopSection m)).val (Opposite.op V)) = _
+  rw [unitHomOfTopSection, Equiv.apply_symm_apply]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 theorem unitHomOfTopSection_comp {M N : C.Modules} (m : Γ(M, (⊤ : C.Opens)))
     (p : M ⟶ N) :
     unitHomOfTopSection m ≫ p =

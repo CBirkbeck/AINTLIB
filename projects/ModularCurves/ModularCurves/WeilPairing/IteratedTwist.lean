@@ -599,6 +599,43 @@ theorem bijective_smul_generatorOfRestrictIso {M : C.Modules} (V : C.Opens)
   rw [hcast]
   exact hb'
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 residue (i)] The multiplier of a section is its chart coefficient.** For a
+normalized trivialization of the restricted unit (`eU.inv 1 = 1`), the chart multiplier
+of `unitHomOfTopSection ℓ` is the image of `ℓ` under the chart trivialization of `L` —
+i.e. exactly the coefficient that the pole-sheaf chart API computes. -/
+theorem chartMultiplier_unitHom_eq_coefficient {L : C.Modules} (U : C.Opens)
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (eU : (restrictFunctor U.ι).obj (unitObj C) ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme)
+    (hnorm : eU.inv.app (⊤ : U.toScheme.Opens)
+      (show Γ(unitObj U.toScheme, (⊤ : U.toScheme.Opens)) from
+        (1 : Γ(U.toScheme, (⊤ : U.toScheme.Opens)))) =
+      (show Γ((restrictFunctor U.ι).obj (unitObj C), (⊤ : U.toScheme.Opens)) from
+        (1 : Γ(C, U.ι ''ᵁ (⊤ : U.toScheme.Opens))))) :
+    chartMultiplier U (unitHomOfTopSection ℓ) eU eL =
+      eL.hom.app (⊤ : U.toScheme.Opens)
+        (L.presheaf.map (homOfLE (le_top :
+          U.ι ''ᵁ (⊤ : U.toScheme.Opens) ≤ (⊤ : C.Opens))).op ℓ) := by
+  show (eU.inv ≫ (restrictFunctor U.ι).map (unitHomOfTopSection ℓ) ≫
+    eL.hom).val.app (Opposite.op (⊤ : U.toScheme.Opens))
+      (1 : Γ(U.toScheme, (⊤ : U.toScheme.Opens))) = _
+  have hsplit : (eU.inv ≫ (restrictFunctor U.ι).map (unitHomOfTopSection ℓ) ≫
+      eL.hom).val.app (Opposite.op (⊤ : U.toScheme.Opens))
+      (1 : Γ(U.toScheme, (⊤ : U.toScheme.Opens))) =
+      eL.hom.app (⊤ : U.toScheme.Opens)
+        (((restrictFunctor U.ι).map (unitHomOfTopSection ℓ)).app
+          (⊤ : U.toScheme.Opens)
+          (eU.inv.app (⊤ : U.toScheme.Opens)
+            (show Γ(unitObj U.toScheme, (⊤ : U.toScheme.Opens)) from
+              (1 : Γ(U.toScheme, (⊤ : U.toScheme.Opens)))))) := rfl
+  rw [hsplit, hnorm]
+  congr 1
+  have hval := unitHomOfTopSection_app_one (M := L) ℓ
+    (U.ι ''ᵁ (⊤ : U.toScheme.Opens))
+  exact hval
+
 end GeneralMultiplier
 
 section IteratedTwist
