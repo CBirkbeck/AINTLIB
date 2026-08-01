@@ -257,3 +257,32 @@ theorem algHom_chord_eq_zero {R A : Type u} [CommRing R] [CommRing A] [Algebra R
   ring
 
 end ModularCurves
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+variable {C S : Scheme.{u}} {π : C ⟶ S}
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2d] The triple kernel is the pair kernel once the chord vanishes at the
+third point.** If `ℓ` generates the kernel of the restriction to the smaller divisor and
+also lies in the kernel of the restriction to the larger one, the two kernels agree —
+so the chord is a generator there too, and no further vanishing is possible without
+shrinking the kernel. -/
+theorem ker_eq_of_mem_of_span_eq {J₁ J₂ : C.IdealSheafData} (h12 : J₁ ≤ J₂)
+    (L : C.Modules) (ℓ : Scheme.Modules.baseSections π L)
+    (hspan : LinearMap.ker ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π (divisorTwistHom J₂ L))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {ℓ})
+    (hmem : ℓ ∈ LinearMap.ker ((Scheme.Modules.baseSectionsMap π
+      (Limits.cokernel.π (divisorTwistHom J₁ L))).hom)) :
+    LinearMap.ker ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π (divisorTwistHom J₁ L))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {ℓ} := by
+  refine le_antisymm ?_ ?_
+  · rw [← hspan]
+    exact ker_baseSectionsMap_cokernel_mono h12 L
+  · rw [Submodule.span_le, Set.singleton_subset_iff]
+    exact hmem
+
+end AlgebraicGeometry.Scheme.Modules

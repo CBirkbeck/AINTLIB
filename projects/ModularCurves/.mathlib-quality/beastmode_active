@@ -1,1 +1,1 @@
-FOCUS: [W1-d3.2] chord-tangent computation — begin with the affine-chart evaluation of the pole basis (PoleSheafAwayAffineModelEval) at a section
+FOCUS: [W1-d3.2c] dictionary bridge — the project group law -(P+Q) has affine coordinates (addX, negAddY); recon PointsDictionary/Dictionary.eq_toAffine
