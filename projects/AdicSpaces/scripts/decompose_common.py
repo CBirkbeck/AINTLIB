@@ -145,3 +145,35 @@ def assert_statement_complete(first_line, sliced_stmt):
             f"line: {first_line.strip()[:80]!r}")
     return True
 
+
+
+CONTEXT_FREE_RHS = re.compile(r":=\s*(‹[^›]+›\.[\w'.]+|[\w'.]+)\s*$")
+
+
+def obtain_is_carryable(line, bound=None):
+    """Can this `obtain` be CARRIED into a helper verbatim?
+
+    The cost model prices `obtain`-bound locals at 3 because their types appear
+    nowhere. That is only true when the destructuring depends on the proof
+    context. When the right-hand side names just an instance or a nullary
+    constant, carrying the single `obtain` line into the helper supplies the
+    locals AND their types -- exactly what carrying a `set` line does, and what
+    carrying a `rw ... at` does for a mutated hypothesis.
+
+    Verified on `le_chain_of_nhds_preimage_subset`, where carrying
+
+        obtain ⟨π, hπ_nil⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
+
+    turned two cost-3 locals into one line and made a rejected target viable.
+    """
+    m = CONTEXT_FREE_RHS.search(line) if re.match(r"\s*obtain\b", line) else None
+    if not m:
+        return False
+    # A bare identifier on the RHS may be a GLOBAL (carryable) or a local bound
+    # earlier in this proof (not carryable -- carrying the line would reference
+    # something the helper does not have). The line alone cannot distinguish
+    # them, so the caller must pass what is bound above.
+    head = m.group(1)
+    if head.startswith("‹"):
+        return True
+    return head.split(".")[0] not in (bound or ())

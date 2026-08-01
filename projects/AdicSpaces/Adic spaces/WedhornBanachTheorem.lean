@@ -722,6 +722,46 @@ supplies the absorbing structure that the AddGroup-level argument lacks; it
 is the variant the consumer (`wedhorn_6_17`) actually uses.
 -/
 
+/-- If a neighbourhood of `0` in `M_∞` lands inside `chain k₀`, then all of
+`M_∞` does: scale any element into the neighbourhood by a topologically
+nilpotent unit, then scale back. -/
+private theorem le_chain_of_nhds_preimage_subset {A : Type u} [CommRing A]
+    [TopologicalSpace A] [IsTopologicalRing A] [IsTateRing A]
+    {M : Type*} [AddCommGroup M] [Module A M] [UniformSpace M]
+    [IsUniformAddGroup M] [ContinuousSMul A M]
+    {chain : ℕ → Submodule A M} {M_inf : Submodule A M} {k₀ : ℕ}
+    {V₀ : Set ↥M_inf} (hV₀_nhds : V₀ ∈ nhds (0 : ↥M_inf))
+    (hV₀_sub : V₀ ⊆ (Subtype.val : ↥M_inf → M) ⁻¹' (chain k₀ : Set M)) :
+    M_inf ≤ chain k₀ := by
+  obtain ⟨π, hπ_nil⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
+  intro m hm
+  -- Lift m to ↥M_inf.
+  let m_lift : ↥M_inf := ⟨m, hm⟩
+  -- π^n • m_lift → 0 in ↥M_inf via ContinuousSMul + π^n → 0.
+  have h_pow_tend : Filter.Tendsto (fun n : ℕ => (π : A) ^ n) Filter.atTop (nhds 0) :=
+    hπ_nil
+  have h_smul_tend :
+      Filter.Tendsto (fun n : ℕ => (π : A) ^ n • m_lift) Filter.atTop (nhds 0) := by
+    have h0 : (0 : A) • m_lift = 0 := zero_smul A m_lift
+    exact h0 ▸ Filter.Tendsto.smul h_pow_tend tendsto_const_nhds
+  -- Eventually π^n • m_lift ∈ V₀.
+  obtain ⟨N, hN⟩ := (h_smul_tend.eventually hV₀_nhds).exists
+  -- π^N • m_lift ∈ V₀ ⊆ chain k₀ preimage.
+  have h_lift_in : ((π : A) ^ N • m_lift : ↥M_inf) ∈
+      (Subtype.val : ↥M_inf → M) ⁻¹' (chain k₀ : Set M) := hV₀_sub hN
+  -- Equivalently π^N • m ∈ chain k₀.
+  have h_pi_m_in : (π : A) ^ N • m ∈ chain k₀ := h_lift_in
+  -- m = (π^N)⁻¹ • (π^N • m), and chain k₀ is A-stable.
+  have hπN_val : ((π ^ N : Aˣ) : A) = (π : A) ^ N := by
+    push_cast; rfl
+  have hmem : (((π ^ N : Aˣ)⁻¹ : Aˣ) : A) • ((π : A) ^ N • m) ∈ chain k₀ :=
+    (chain k₀).smul_mem _ h_pi_m_in
+  have h_eq : m = (((π ^ N : Aˣ)⁻¹ : Aˣ) : A) • ((π : A) ^ N • m) := by
+    rw [← smul_assoc, smul_eq_mul, ← hπN_val, ← Units.val_mul]
+    simp
+  rw [h_eq]
+  exact hmem
+
 /-- **Sub-lemma L3.2-Submodule — Baire chain stationary for Submodules**.
 
 Variant of L3.2 for `Submodule A M` (not `AddSubgroup M`), needed for the
@@ -800,36 +840,8 @@ theorem _sub_lemma_L3_2_baire_chain_submodule
     exact continuous_smul.comp
       ((continuous_fst).prodMk (continuous_subtype_val.comp continuous_snd))⟩
   -- Get topologically nilpotent unit π from IsTateRing.
-  obtain ⟨π, hπ_nil⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
   -- Show M_inf ⊆ chain k₀ via absorption.
-  have h_inf_sub : M_inf ≤ chain k₀ := by
-    intro m hm
-    -- Lift m to ↥M_inf.
-    let m_lift : ↥M_inf := ⟨m, hm⟩
-    -- π^n • m_lift → 0 in ↥M_inf via ContinuousSMul + π^n → 0.
-    have h_pow_tend : Filter.Tendsto (fun n : ℕ => (π : A) ^ n) Filter.atTop (nhds 0) :=
-      hπ_nil
-    have h_smul_tend :
-        Filter.Tendsto (fun n : ℕ => (π : A) ^ n • m_lift) Filter.atTop (nhds 0) := by
-      have h0 : (0 : A) • m_lift = 0 := zero_smul A m_lift
-      exact h0 ▸ Filter.Tendsto.smul h_pow_tend tendsto_const_nhds
-    -- Eventually π^n • m_lift ∈ V₀.
-    obtain ⟨N, hN⟩ := (h_smul_tend.eventually hV₀_nhds).exists
-    -- π^N • m_lift ∈ V₀ ⊆ chain k₀ preimage.
-    have h_lift_in : ((π : A) ^ N • m_lift : ↥M_inf) ∈
-        (Subtype.val : ↥M_inf → M) ⁻¹' (chain k₀ : Set M) := hV₀_sub hN
-    -- Equivalently π^N • m ∈ chain k₀.
-    have h_pi_m_in : (π : A) ^ N • m ∈ chain k₀ := h_lift_in
-    -- m = (π^N)⁻¹ • (π^N • m), and chain k₀ is A-stable.
-    have hπN_val : ((π ^ N : Aˣ) : A) = (π : A) ^ N := by
-      push_cast; rfl
-    have hmem : (((π ^ N : Aˣ)⁻¹ : Aˣ) : A) • ((π : A) ^ N • m) ∈ chain k₀ :=
-      (chain k₀).smul_mem _ h_pi_m_in
-    have h_eq : m = (((π ^ N : Aˣ)⁻¹ : Aˣ) : A) • ((π : A) ^ N • m) := by
-      rw [← smul_assoc, smul_eq_mul, ← hπN_val, ← Units.val_mul]
-      simp
-    rw [h_eq]
-    exact hmem
+  have h_inf_sub := le_chain_of_nhds_preimage_subset hV₀_nhds hV₀_sub
   -- M_inf = chain k₀ (both directions: ⊆ from h_inf_sub, ⊇ from hk_le_inf).
   have h_inf_eq : M_inf = chain k₀ := le_antisymm h_inf_sub (hk_le_inf k₀)
   -- For n ≥ k₀: chain n ≤ M_inf = chain k₀, and chain k₀ ≤ chain n by monotone.
