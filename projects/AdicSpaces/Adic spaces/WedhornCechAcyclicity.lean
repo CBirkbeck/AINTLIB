@@ -1825,6 +1825,139 @@ private noncomputable def bivariateSpan_equiv_B₁₂gen (b : A) :
         (instIsTwoSided_laurentTateAlgebraIdeal _) (instIsTwoSided_laurentTateAlgebraIdeal _)
         (map_span_bSubX_eq_laurentFSubZeta b)))
 
+omit [DecidableEq (RationalLocData A)] in
+private theorem hψ_div_lem [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    (D : RationalLocData A) {m : ℕ}
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring m A))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x))
+    (hu : IsUnit (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s))) :
+    ∀ (c : A) (w : ↥(restrictedMvPowerSeriesSubring m A) ⧸ aI),
+    (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) * w) →
+    ψ (divByS c D.s) = w := by
+  intro c w hc
+  have h1 : ψ (algebraMap A (Localization.Away D.s) D.s) * ψ (divByS c D.s) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) := by
+    rw [← map_mul, algebraMap_s_mul_divByS, hψ_alg]
+  rw [hψ_alg] at h1
+  exact hu.mul_left_cancel (h1.trans hc)
+
+omit [DecidableEq (RationalLocData A)] in
+private theorem hψ_cont_lem [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D : RationalLocData A) {m : ℕ}
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring m A))
+    (haI_closed : @IsClosed _ (MvTateAlgebra.mvTateAlgebraTopology' m)
+      (aI : Set ↥(restrictedMvPowerSeriesSubring m A)))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x))
+    (hψ_div : ∀ (c : A) (w : ↥(restrictedMvPowerSeriesSubring m A) ⧸ aI),
+      (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) =
+        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) * w) →
+      ψ (divByS c D.s) = w)
+    (hT_mod : ∀ t ∈ D.T, ∃ w : ↥(restrictedMvPowerSeriesSubring m A),
+      w ∈ MvTateAlgebra.mvPairSubring m (IsTateRing.principalPair A).toPairOfDefinition ∧
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) t) =
+        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) *
+          Ideal.Quotient.mk aI w) :
+    @Continuous _ _ D.topology (mvQuotTopology m aI) ψ := by
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI) := mvQuotTopology m aI
+  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing m aI
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space m aI haI_closed
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean m aI
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring m A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' m
+  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring m A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
+  change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
+  refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
+  · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
+        (Ideal.Quotient.mk aI).comp
+          (algebraMap A ↥(restrictedMvPowerSeriesSubring m A)) := by
+      ext x; exact hψ_alg x
+    rw [heq]
+    exact continuous_quotient_mk'.comp
+      (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) m)
+  · intro t ht
+    obtain ⟨w, hw_mem, hw_mod⟩ := hT_mod t ht
+    rw [hψ_div t (Ideal.Quotient.mk aI w) hw_mod]
+    -- `w` is power-bounded in the source (pair subring), transported through `mk`
+    have hw_pb : @TopologicalRing.IsPowerBounded _ _ τC w := by
+      have hbd : @TopologicalRing.IsBounded _ _ τC
+          ((MvTateAlgebra.mvPairSubring m
+            (IsTateRing.principalPair A).toPairOfDefinition :
+              Subring ↥(restrictedMvPowerSeriesSubring m A)) :
+            Set ↥(restrictedMvPowerSeriesSubring m A)) :=
+        PairOfDefinition.isBounded_A₀ (MvTateAlgebra.mvTateAlgebra_pairOfDefinition m)
+      exact hbd.subset (by
+        rintro _ ⟨k, rfl⟩
+        exact (MvTateAlgebra.mvPairSubring m
+          (IsTateRing.principalPair A).toPairOfDefinition).pow_mem hw_mem k)
+    exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
+      continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC) hw_pb
+
+omit [DecidableEq (RationalLocData A)] in
+private theorem hext_lem [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D : RationalLocData A) {m : ℕ}
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring m A))
+    (haI_closed : @IsClosed _ (MvTateAlgebra.mvTateAlgebraTopology' m)
+      (aI : Set ↥(restrictedMvPowerSeriesSubring m A)))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x))
+    (hψ_div : ∀ (c : A) (w : ↥(restrictedMvPowerSeriesSubring m A) ⧸ aI),
+      (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) =
+        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) * w) →
+      ψ (divByS c D.s) = w)
+    (Φ : ↥(restrictedMvPowerSeriesSubring m A) →+* presheafValue D)
+    (hΦ_cont : @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' m) _ ⇑Φ)
+    (hΦ_alg : ∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x) = D.canonicalMap x)
+    (gen : Fin m → A)
+    (hΦ_X : ∀ j : Fin m, Φ (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        ↥(restrictedMvPowerSeriesSubring m A)) = D.coeRingHom (divByS (gen j) D.s))
+    (hgen_mod : ∀ j : Fin m,
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) (gen j)) =
+        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) *
+          Ideal.Quotient.mk aI (⟨MvPowerSeries.X j,
+        MvPowerSeries.X_isRestricted j⟩ : ↥(restrictedMvPowerSeriesSubring m A)))
+    (β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI))
+    (hβ_coe : ∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y)
+    (hβ_cont : @Continuous _ _ _ (mvQuotTopology m aI) ⇑β) :
+    (⇑β ∘ ⇑Φ :
+    ↥(restrictedMvPowerSeriesSubring m A) → _) = ⇑(Ideal.Quotient.mk aI) := by
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring m A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' m
+  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring m A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI) := mvQuotTopology m aI
+  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing m aI
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space m aI haI_closed
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean m aI
+  refine Continuous.ext_on
+    (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) m)
+    (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
+  rintro _ ⟨p, rfl⟩
+  have hcomp : ((β.comp Φ).comp
+      (MvTateAlgebra.mvPolynomialToTate (A := A) m)) =
+      (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) m) := by
+    refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+    · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
+      rw [hΦ_alg]
+      show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
+      rw [hβ_coe, hψ_alg]
+    · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
+      rw [hΦ_X j, hβ_coe, hψ_div (gen j) _ (hgen_mod j)]
+  exact RingHom.congr_fun hcomp p
+
 set_option linter.unusedSectionVars false in
 /-- **Backward-data export variant of `tate_ker_le_of_backward`** (same hypotheses and
 body): returns the backward extension `β` and the localization lift `ψ'` with the
@@ -1895,43 +2028,8 @@ private theorem tate_backward_exists
   have hu : IsUnit (Ideal.Quotient.mk aI
       (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s)) := hUnit
   -- DERIVED: `ψ(c/s) = mk w` whenever `c ≡ s·w (mod aI)` (cancel the unit)
-  have hψ_div : ∀ (c : A) (w : ↥(restrictedMvPowerSeriesSubring m A) ⧸ aI),
-      (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) =
-        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) * w) →
-      ψ (divByS c D.s) = w := by
-    intro c w hc
-    have h1 : ψ (algebraMap A (Localization.Away D.s) D.s) * ψ (divByS c D.s) =
-        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) := by
-      rw [← map_mul, algebraMap_s_mul_divByS, hψ_alg]
-    rw [hψ_alg] at h1
-    exact hu.mul_left_cancel (h1.trans hc)
-  have hψ_cont : @Continuous _ _ D.topology τQ ψ := by
-    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
-    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
-    · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
-          (Ideal.Quotient.mk aI).comp
-            (algebraMap A ↥(restrictedMvPowerSeriesSubring m A)) := by
-        ext x; exact hψ_alg x
-      rw [heq]
-      exact continuous_quotient_mk'.comp
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) m)
-    · intro t ht
-      obtain ⟨w, hw_mem, hw_mod⟩ := hT_mod t ht
-      rw [hψ_div t (Ideal.Quotient.mk aI w) hw_mod]
-      -- `w` is power-bounded in the source (pair subring), transported through `mk`
-      have hw_pb : @TopologicalRing.IsPowerBounded _ _ τC w := by
-        have hbd : @TopologicalRing.IsBounded _ _ τC
-            ((MvTateAlgebra.mvPairSubring m
-              (IsTateRing.principalPair A).toPairOfDefinition :
-                Subring ↥(restrictedMvPowerSeriesSubring m A)) :
-              Set ↥(restrictedMvPowerSeriesSubring m A)) :=
-          PairOfDefinition.isBounded_A₀ (MvTateAlgebra.mvTateAlgebra_pairOfDefinition m)
-        exact hbd.subset (by
-          rintro _ ⟨k, rfl⟩
-          exact (MvTateAlgebra.mvPairSubring m
-            (IsTateRing.principalPair A).toPairOfDefinition).pow_mem hw_mem k)
-      exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
-        continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC) hw_pb
+  have hψ_div := hψ_div_lem D aI ψ hψ_alg hu
+  have hψ_cont := hψ_cont_lem D aI haI_closed ψ hψ_alg hψ_div hT_mod
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
@@ -1947,23 +2045,8 @@ private theorem tate_backward_exists
         (mvQuot_isTopologicalRing m aI) ψ hψ_cont ‹_› ‹_› y
     · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
         D.uniformSpace _ uQ (⇑ψ) ‹_›
-  have hext : (⇑β ∘ ⇑Φ :
-      ↥(restrictedMvPowerSeriesSubring m A) → _) = ⇑(Ideal.Quotient.mk aI) := by
-    refine Continuous.ext_on
-      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) m)
-      (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
-    rintro _ ⟨p, rfl⟩
-    have hcomp : ((β.comp Φ).comp
-        (MvTateAlgebra.mvPolynomialToTate (A := A) m)) =
-        (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) m) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
-        rw [hΦ_alg]
-        show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
-        rw [hβ_coe, hψ_alg]
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
-        rw [hΦ_X j, hβ_coe, hψ_div (gen j) _ (hgen_mod j)]
-    exact RingHom.congr_fun hcomp p
+  have hext := hext_lem D aI haI_closed ψ hψ_alg hψ_div Φ hΦ_cont hΦ_alg
+    gen hΦ_X hgen_mod β hβ_coe hβ_cont
   exact ⟨β, ψ, hβ_cont, hext, hβ_coe, hψ_alg⟩
 
 set_option linter.unusedSectionVars false in
