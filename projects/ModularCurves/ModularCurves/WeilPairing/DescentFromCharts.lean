@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.PullbackTensorSection
 import ModularCurves.WeilPairing.IteratedTwist
+import ModularCurves.Picard.IdealModulePullback
 import ModularCurves.Picard.RigidDescent
 
 /-!
@@ -842,5 +843,37 @@ theorem nonempty_tensorObj_dual_unitObj_of_iso {X : Scheme.{u}} (A B : X.Modules
     toSkeleton_eq_toSkeleton_iff.mpr h, ← toSkeleton_tensorObj_eq,
     ← toSkeleton_unitObj]
   exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_eval_iso hB)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W9a] Base change of a tensor of two ideal modules.** The pullback of
+`I(D_{z₁}) ⊗ I(D_{z₂})` along a base change is the tensor of the base-changed section
+divisors' ideal modules. Composing `nonempty_pullback_tensorObj` with two copies of
+`nonempty_pullback_idealModule_ker_sectionBaseChange`; this is what lets the
+chord/vertical prong be run over a *restricted* base and its conclusion recognised as the
+restriction of the original. -/
+theorem nonempty_pullback_tensorObj_idealModule_pair {C S T' : Scheme.{u}} {π : C ⟶ S}
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (z₁ z₂ : S ⟶ C) (hz₁ : z₁ ≫ π = 𝟙 S) (hz₂ : z₂ ≫ π = 𝟙 S) (t : T' ⟶ S) :
+    Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+          (Limits.pullback.fst π t)).obj
+        (Scheme.Modules.tensorObj (Scheme.Modules.idealModule (Scheme.Hom.ker z₁))
+          (Scheme.Modules.idealModule (Scheme.Hom.ker z₂))) ≅
+      Scheme.Modules.tensorObj
+        (Scheme.Modules.idealModule (Scheme.Hom.ker
+          (Limits.pullback.lift (t ≫ z₁) (𝟙 T')
+            (by rw [Category.assoc, hz₁, Category.comp_id, Category.id_comp]) :
+            T' ⟶ Limits.pullback π t)))
+        (Scheme.Modules.idealModule (Scheme.Hom.ker
+          (Limits.pullback.lift (t ≫ z₂) (𝟙 T')
+            (by rw [Category.assoc, hz₂, Category.comp_id, Category.id_comp]) :
+            T' ⟶ Limits.pullback π t)))) := by
+  obtain ⟨e⟩ := nonempty_pullback_tensorObj (Limits.pullback.fst π t)
+    (Scheme.Modules.idealModule (Scheme.Hom.ker z₁)) (Scheme.Modules.idealModule (Scheme.Hom.ker z₂))
+  obtain ⟨e₁⟩ := Scheme.Modules.nonempty_pullback_idealModule_ker_sectionBaseChange
+    hsm z₁ hz₁ t
+  obtain ⟨e₂⟩ := Scheme.Modules.nonempty_pullback_idealModule_ker_sectionBaseChange
+    hsm z₂ hz₂ t
+  exact ⟨e ≪≫ tensorObjCongr e₁ e₂⟩
 
 end ModularCurves

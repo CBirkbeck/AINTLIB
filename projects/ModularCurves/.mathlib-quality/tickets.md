@@ -32503,3 +32503,15 @@ restricted to `U`**, obtaining `A|_{f⁻¹U} ≅ B|_{f⁻¹U}`, and feed W8 to g
 restriction machinery is `EllObj.pullbackAlong` plus the ideal-module base-change
 transports (`nonempty_pullback_idealModule_ker_sectionBaseChange`,
 `comap_ker_eq_ker_baseChange`).
+
+### ★★★★ [W9a] DONE 2026-08-01 — `nonempty_pullback_tensorObj_idealModule_pair`
+The pullback of `I(D_{z₁}) ⊗ I(D_{z₂})` along a base change is the tensor of the
+base-changed sections' ideal modules (`nonempty_pullback_tensorObj` + two copies of
+`nonempty_pullback_idealModule_ker_sectionBaseChange` + `tensorObjCongr`). This is the
+transport that lets the chord/vertical prong be run over a **restricted base** and its
+conclusion recognised as the restriction of the original identity — the last structural
+piece of the plumbing.
+LEAN-OPS: bare `idealModule` mis-resolves inside a `tensorObj` argument (it unified the
+expected argument type with a hom type); write `Scheme.Modules.idealModule`. The transport
+lemma lives in `AlgebraicGeometry.Scheme.Modules`, so it needs the qualified name plus
+`import ModularCurves.Picard.IdealModulePullback`.
