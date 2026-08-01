@@ -146,4 +146,18 @@ theorem appLE_z_rescaled_eq_one
     exact h2
   rw [map_mul, map_mul, hsec, hsec, hu]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.1] A section undoes its own pullback.** For `z` a section of `f`, the
+composite `z^* f^*` is the identity on modules of the base. This is the first brick of
+the un-normalized descent: it identifies the base bundle `N` that the rigidification
+contributes as `N = z^* L`. -/
+noncomputable def pullbackSectionIso {T' E' : Scheme.{u}} (f : E' ⟶ T') (z : T' ⟶ E')
+    (hz : z ≫ f = 𝟙 T') (N : T'.Modules) :
+    (AlgebraicGeometry.Scheme.Modules.pullback z).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback f).obj N) ≅ N :=
+  (AlgebraicGeometry.Scheme.Modules.pullbackComp z f).app N ≪≫
+    eqToIso (by rw [hz]) ≪≫
+      (AlgebraicGeometry.Scheme.Modules.pullbackId T').app N
+
 end ModularCurves

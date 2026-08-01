@@ -32018,3 +32018,23 @@ twist multiplier `exists_unit_chartMultiplier₃_eq`) → i12
 What remains is *instantiation for the specific model* (identify `Γ(C, D(conj))` with a
 Weierstrass chart via `sectionAway_top_affineModelEval_bijective`, read the σᵢ off the
 sections, and check `span {conj, g₁g₂g₃} = ⊤` from non-degeneracy) — no new algebra.
+
+### ★★★ [W3.1] DONE 2026-08-01 — `pullbackSectionIso`: `z^* f^* N ≅ N`
+First brick of the **un-normalized descent** (W3), the structural gap that stands between
+the completed chord/vertical toolkit and the Picard leaf
+`exists_invertible_tensor_idealModule_add` (`Picard/SelfAdjointN.lean:259`).
+
+WHY W3 IS THE GAP (established this session): `Picard/RigidDescent.lean` carries only
+`nonempty_unitObj_iso_of_normalized_glue`, which concludes `L ≅ 𝟙` — the *exact* case.
+The leaf's own docstring proves the exact case is FALSE in general (the Poincaré /
+biextension obstruction survives on charts). What is true, and what the leaf needs, is
+`L ≅ f^*(z^* L)`. So the descent must be run **un-normalized**, with the base bundle
+`N := z^* L` as the output rather than an assumption.
+Decomposition:
+* W3.1 `pullbackSectionIso` — `z^*(f^* N) ≅ N` for `z` a section of `f`  ✅ DONE
+  (mathlib's `Modules.pullbackComp` + `pullbackId`, glued by `eqToIso` on `z ≫ f = 𝟙`);
+* W3.2 — `f^* N` is trivial on the preimage of a chart trivializing `N`;
+* W3.3 — rescale the chart generators by base units so the comparison units are `1`
+  along `z` (the pieces exist: `bijective_smul_pullback_unit_smul`,
+  `appLE_z_rescaled_eq_one`);
+* W3.4 — feed `nonempty_unitObj_iso_of_normalized_glue` on `L ⊗ f^*N⁻¹` and untwist.
