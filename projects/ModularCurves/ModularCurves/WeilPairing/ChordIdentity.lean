@@ -719,6 +719,26 @@ theorem third_quotient_vanishes_of_not_two_torsion
       ← algHom_conj_eq W σ X Y ℓ x₁ y₁ x₃ y₃ hx hy]
     exact ht
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (2)] The last cofactor is a unit when the conjugate is.** From
+`c₂ · conj = −f₃` and `f₃ = g₃ · c₃`, if `conj` is a unit and `f₃ = −(c₂ · conj)` then
+`c₃` is a unit exactly when `c₂` is, and the chord's exact-order factorisation follows.
+Stated in the form the assembly uses: a unit conjugate makes `c₂` a unit multiple of
+`f₃`. -/
+theorem isUnit_cofactor_of_isUnit_conj {A : Type u} [CommRing A]
+    (c₂ conj f₃ : A) (hid : c₂ * conj = -f₃) (hu : IsUnit conj) :
+    ∃ v : Aˣ, f₃ = (v : A) * c₂ := by
+  obtain ⟨w, hw⟩ := hu
+  refine ⟨-w, ?_⟩
+  have h : f₃ = -(c₂ * conj) := by
+    rw [hid]; ring
+  calc f₃ = -(c₂ * conj) := h
+    _ = -(c₂ * (w : A)) := by rw [hw]
+    _ = ((-w : Aˣ) : A) * c₂ := by
+        show -(c₂ * (w : A)) = (-(w : A)) * c₂
+        ring
+
 end ModularCurves
 
 namespace ModularCurves
