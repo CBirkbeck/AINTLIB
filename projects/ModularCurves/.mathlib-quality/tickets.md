@@ -31673,3 +31673,20 @@ and both sides are identified: the left by `chartMultiplier_unitHom_eq_coefficie
 product). So the hypothesis reduces EXACTLY to `chord_exact_order_in_chart`'s conclusion.
 REMAINING: the final glue — instantiate at the pole sheaf and quotient by the two unit
 factors (a `Units` computation), then `ChordDatum`.
+
+## ★★★★★★★★★★★★★ [W1] THE CHORD SIDE IS CLOSED 2026-08-01
+`nonempty_iso_unitObj_of_two_unit_identities` (axiom-clean) is the closing link:
+   chord's chart coefficient = unit · (generator product)     [chord_exact_order_in_chart]
+   twist's chart multiplier  = unit · (generator product)     [exists_unit_chartMultiplier₃_eq]
+   ⟹  the triple twist is trivialized by the chord.
+Both inputs are proven. Together with `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`
+and the W2 descent toolkit, the only work left in the WP prong is INSTANTIATION at the
+pole sheaf plus the degenerate configurations:
+ * feed the actual chord (from `exists_chord_of_unimodular`) and the pole-sheaf chart
+   trivializations into the criterion — the chart ring is `R[X,Y]/(W)` by
+   `sectionAway_affineModelEval_bijective`, and `chartMultiplier_unitHom_eq_coefficient`
+   identifies the coefficient;
+ * cover tangency / `2`-torsion / infinity with the addOnY/addOnZ chart families;
+ * the same, two-factor, for the vertical;
+ * assemble `ChordDatum`, descend, close `exists_invertible_tensor_idealModule_add`.
+Root build 9617 jobs; all audits clean.
