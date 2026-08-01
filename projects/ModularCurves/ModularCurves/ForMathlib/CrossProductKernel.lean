@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.LinearAlgebra.CrossProduct
 import Mathlib.RingTheory.Ideal.Span
+import Mathlib.LinearAlgebra.Matrix.Adjugate
 
 /-!
 # The kernel of a rank-two system is spanned by the cross product
@@ -197,5 +198,36 @@ theorem dotProduct_perp (a : Fin 2 → R) :
     a ⬝ᵥ ![-(a 1), a 0] = 0 := by
   simp [dotProduct, Fin.sum_univ_two]
   ring
+
+section RankThree
+
+open Matrix
+
+/-- **A vector annihilated by a matrix with unit determinant is zero.** The adjugate
+identity turns `A *ᵥ u = 0` into `det A • u = 0`. -/
+theorem eq_zero_of_mulVec_eq_zero_of_isUnit_det {n : Type*} [Fintype n] [DecidableEq n]
+    (A : Matrix n n R) (hdet : IsUnit A.det) (u : n → R) (hu : A *ᵥ u = 0) : u = 0 := by
+  have h1 : (Matrix.adjugate A) *ᵥ (A *ᵥ u) = 0 := by rw [hu, Matrix.mulVec_zero]
+  rw [Matrix.mulVec_mulVec, Matrix.adjugate_mul, Matrix.smul_mulVec,
+    Matrix.one_mulVec] at h1
+  obtain ⟨d, hd⟩ := hdet
+  funext i
+  have h2 := congrFun h1 i
+  have h3 : A.det * u i = 0 := by
+    simpa [Pi.smul_apply, smul_eq_mul] using h2
+  have h4 : (↑d⁻¹ : R) * (A.det * u i) = 0 := by rw [h3, mul_zero]
+  rw [← mul_assoc, ← hd, Units.inv_mul, one_mul] at h4
+  exact h4
+
+/-- **The determinant of a system with a nonzero-kernel element is a zero divisor.**
+Contrapositive form of `eq_zero_of_mulVec_eq_zero_of_isUnit_det`: if some nonzero vector
+is annihilated, the determinant cannot be a unit — the rank-drop criterion feeding the
+exact-order argument. -/
+theorem not_isUnit_det_of_mulVec_eq_zero {n : Type*} [Fintype n] [DecidableEq n]
+    (A : Matrix n n R) (u : n → R) (hu : A *ᵥ u = 0) (hne : u ≠ 0) :
+    ¬ IsUnit A.det :=
+  fun hdet => hne (eq_zero_of_mulVec_eq_zero_of_isUnit_det A hdet u hu)
+
+end RankThree
 
 end ModularCurves
