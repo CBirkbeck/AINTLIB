@@ -31908,3 +31908,28 @@ therefore run in an away-chart, never in `W.toAffine.CoordinateRing` itself. The
 general-`A` statements (`chord_evaluations_vanish`, `chord_eq_unit_mul_generators`,
 i7's three) are already chart-ready; `chord_identity_of_sections` is the one that
 specialises and must be re-instantiated at a chart ring by the caller.
+
+### ★★★★★ [W1 i8] DONE 2026-08-01 — `chord_identity_of_chart_sections` (THE caller-facing form)
+The chord identity in an arbitrary away-chart `A` from **checkable** hypotheses only:
+* non-degeneracy: `d * (σ₂X − σ₁X) = 1`, `IsUnit (σ₁X − σ₂X)`, `htor₂`/`htor₃`;
+* the three **conjugate units** `IsUnit (Y + σᵢY + a₁X + a₃)` and the two-generator
+  kernel condition `hgenᵢ` — these replace the three kernel hypotheses via i7;
+* the geometric input `hslope`/`hline₃` — supplied by i6 from `addX`/`negAddY`;
+* the nzd conditions — supplied by `SectionsIdeal.basicOpen_span_nzd` (already proved);
+* `hunit` — the exact-order cofactor.
+DERIVED, no longer assumed: the two point equations (`coords_equation_of_relation`),
+the three kernel identities (i7), and the chord's vanishing at σ₁ (`algHom_chord_eq_zero`).
+
+**Hypothesis ledger for the chord prong is now closed.** Every hypothesis of the chord
+identity is either (a) a genuine non-degeneracy condition whose complement is the
+vertical case (`dictionary_add_eq_zero_of_vertical` + `vertical_exact_order`), or
+(b) discharged by a proved lemma in this tree. What remains is instantiation:
+build the chart `A = Γ(U,⊤)` for the away-open, read off `σᵢ` from the sections, and
+feed `chord_identity_of_chart_sections` → `chordDatum_of_trivializations` →
+`EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` → descent →
+`exists_invertible_tensor_idealModule_add`.
+
+LEAN-OPS: `s.replace(..., 1)` on `end ModularCurves` inserts at the FIRST such line —
+this file has an earlier one, so new blocks that call late declarations must be
+inserted at `rfind`, not `index`. Also `AlgHom.commutes` leaves `algebraMap R R`
+residues; add `Algebra.algebraMap_self, RingHom.id_apply` to the `simpa only` set.

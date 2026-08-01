@@ -1740,4 +1740,86 @@ theorem chord_identity_of_sections {R : Type u} [CommRing R]
     hd hx hf₁nzd hf₂nzd hk₁ hk₂ hk₃ hσ₁ rfl rfl hslope rfl hline₃ htor₂ htor₃ hunit
 
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i8a] A retraction's coordinates satisfy the equation.** Applying a retraction
+to the Weierstrass relation of the chart. -/
+theorem coords_equation_of_relation {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (a₁ a₂ a₃ a₄ a₆ : R) (X Y : A) (σ : A →ₐ[R] R)
+    (hEq : Y ^ 2 + algebraMap R A a₁ * X * Y + algebraMap R A a₃ * Y =
+      X ^ 3 + algebraMap R A a₂ * X ^ 2 + algebraMap R A a₄ * X + algebraMap R A a₆) :
+    (σ Y) ^ 2 + a₁ * σ X * σ Y + a₃ * σ Y =
+      (σ X) ^ 3 + a₂ * (σ X) ^ 2 + a₄ * σ X + a₆ := by
+  have h := congrArg σ hEq
+  simpa only [map_add, map_mul, map_pow, AlgHom.commutes, Algebra.algebraMap_self,
+    RingHom.id_apply] using h
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i8] THE CHORD IDENTITY IN A CHART, FROM CHECKABLE HYPOTHESES.** The
+caller-facing form: three retractions of an away-chart, the two non-degeneracy
+conditions (invertible `x`-difference, non-2-torsion), the *conjugate* units that make
+each maximal ideal principal (`ker_eq_span_sub_coordX_of_isUnit`), and the geometric
+input that the third section's coordinates are the group law's `addX`/`negAddY`. No
+kernel hypothesis, no point equations, no chord-vanishing hypothesis: all three are
+now derived. -/
+theorem chord_identity_of_chart_sections {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (W : WeierstrassCurve R) (X Y : A) (d : R)
+    (σ₁ σ₂ σ₃ : A →ₐ[R] R)
+    (hEq : Y ^ 2 + algebraMap R A W.a₁ * X * Y + algebraMap R A W.a₃ * Y =
+      X ^ 3 + algebraMap R A W.a₂ * X ^ 2 + algebraMap R A W.a₄ * X +
+        algebraMap R A W.a₆)
+    (hd : d * (σ₂ X - σ₁ X) = 1)
+    (hx : IsUnit (σ₁ X - σ₂ X))
+    (hf₁nzd : ∀ t : A, (X - algebraMap R A (σ₁ X)) * t = 0 → t = 0)
+    (hf₂nzd : ∀ t : A, (X - algebraMap R A (σ₂ X)) * t = 0 → t = 0)
+    (hconj₁ : IsUnit (Y + algebraMap R A (σ₁ Y) + algebraMap R A W.a₁ * X +
+      algebraMap R A W.a₃))
+    (hconj₂ : IsUnit (Y + algebraMap R A (σ₂ Y) + algebraMap R A W.a₁ * X +
+      algebraMap R A W.a₃))
+    (hconj₃ : IsUnit (Y + algebraMap R A (σ₃ Y) + algebraMap R A W.a₁ * X +
+      algebraMap R A W.a₃))
+    (hgen₁ : ∀ t : A, σ₁ t = 0 → ∃ a b : A,
+      t = (X - algebraMap R A (σ₁ X)) * a + (Y - algebraMap R A (σ₁ Y)) * b)
+    (hgen₂ : ∀ t : A, σ₂ t = 0 → ∃ a b : A,
+      t = (X - algebraMap R A (σ₂ X)) * a + (Y - algebraMap R A (σ₂ Y)) * b)
+    (hgen₃ : ∀ t : A, σ₃ t = 0 → ∃ a b : A,
+      t = (X - algebraMap R A (σ₃ X)) * a + (Y - algebraMap R A (σ₃ Y)) * b)
+    (hslope : σ₃ X = ((σ₂ Y - σ₁ Y) * d) ^ 2 + W.a₁ * ((σ₂ Y - σ₁ Y) * d) - W.a₂ -
+      σ₁ X - σ₂ X)
+    (hline₃ : σ₃ Y = ((σ₂ Y - σ₁ Y) * d) * (σ₃ X - σ₁ X) + σ₁ Y)
+    (htor₂ : IsUnit (2 * σ₂ Y + W.a₁ * σ₂ X + W.a₃))
+    (htor₃ : IsUnit (2 * σ₃ Y + W.a₁ * σ₃ X + W.a₃))
+    (hunit : ∀ c₁ c₂ c₃ : A,
+      (Y - (algebraMap R A ((σ₂ Y - σ₁ Y) * d) * (X - algebraMap R A (σ₁ X)) +
+        algebraMap R A (σ₁ Y))) = (X - algebraMap R A (σ₁ X)) * c₁ →
+        c₁ = (X - algebraMap R A (σ₂ X)) * c₂ →
+        c₂ = (X - algebraMap R A (σ₃ X)) * c₃ → IsUnit c₃) :
+    ∃ u : Aˣ,
+      (Y - (algebraMap R A ((σ₂ Y - σ₁ Y) * d) * (X - algebraMap R A (σ₁ X)) +
+        algebraMap R A (σ₁ Y))) =
+        (u : A) * ((X - algebraMap R A (σ₁ X)) *
+          ((X - algebraMap R A (σ₂ X)) * (X - algebraMap R A (σ₃ X)))) := by
+  have he₁ := coords_equation_of_relation W.a₁ W.a₂ W.a₃ W.a₄ W.a₆ X Y σ₁ hEq
+  have he₂ := coords_equation_of_relation W.a₁ W.a₂ W.a₃ W.a₄ W.a₆ X Y σ₂ hEq
+  have he₃ := coords_equation_of_relation W.a₁ W.a₂ W.a₃ W.a₄ W.a₆ X Y σ₃ hEq
+  have hk₁ := ker_eq_span_sub_coordX_of_isUnit W.a₁ W.a₂ W.a₃ W.a₄ W.a₆ X Y
+    (σ₁ X) (σ₁ Y) hEq he₁ hconj₁ σ₁ rfl hgen₁
+  have hk₂ := ker_eq_span_sub_coordX_of_isUnit W.a₁ W.a₂ W.a₃ W.a₄ W.a₆ X Y
+    (σ₂ X) (σ₂ Y) hEq he₂ hconj₂ σ₂ rfl hgen₂
+  have hk₃ := ker_eq_span_sub_coordX_of_isUnit W.a₁ W.a₂ W.a₃ W.a₄ W.a₆ X Y
+    (σ₃ X) (σ₃ Y) hEq he₃ hconj₃ σ₃ rfl hgen₃
+  have hσ₁ : σ₁ (Y - (algebraMap R A ((σ₂ Y - σ₁ Y) * d) *
+      (X - algebraMap R A (σ₁ X)) + algebraMap R A (σ₁ Y))) = 0 :=
+    algHom_chord_eq_zero σ₁ X Y ((σ₂ Y - σ₁ Y) * d) (σ₁ X) (σ₁ Y) (σ₁ X) (σ₁ Y)
+      rfl rfl (by ring)
+  rw [hslope] at hk₃ hline₃ htor₃ hunit ⊢
+  exact chord_exact_order_in_chart W X Y ((σ₂ Y - σ₁ Y) * d) (σ₁ X) (σ₁ Y)
+    (σ₂ X) (σ₂ Y) (σ₃ Y) σ₁ σ₂ σ₃ hEq he₁ he₂
+    (line_relation_of_slope (σ₁ X) (σ₁ Y) (σ₂ X) (σ₂ Y) d hd)
+    (nzd_of_isUnit_sub (σ₁ X) (σ₂ X) hx) hf₁nzd hf₂nzd hk₁ hk₂ hk₃ hσ₁ rfl rfl
+    hslope rfl hline₃
+    (nzd_of_isUnit_neg_two_torsion W (σ₂ X) (σ₂ Y) htor₂)
+    (nzd_of_isUnit_neg_two_torsion W _ (σ₃ Y) htor₃) hunit
+
 end ModularCurves
