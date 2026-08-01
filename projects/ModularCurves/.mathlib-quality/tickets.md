@@ -30916,3 +30916,23 @@ grep must be `grep -E "error|declaration uses"`, and every milestone gets an axi
 before commit. AVOIDANCE RULE: prefer ext-free proofs for hom equalities — compare both
 sides against the SAME normal form (here: `unitEndo x ≫ unitEndo c = unitEndo 0 ≫ unitEndo c`
 via the comp+zero_mul lemmas) and finish with congrArg + a trans-chain of value lemmas.
+
+## ★★★★★ [WP PRONG] STATE AT 2026-08-01 END OF STRETCH — ONE INPUT LEFT
+Everything below is PROVEN and axiom-clean (propext/choice/Quot.sound), root build 9613:
+  GAP-A-7 (ideal-module pullback) ✓
+  GAP-A-4 line+vertical, product-ideal AND tensor shapes, arities 1/2/3/m ✓
+  pole-sheaf instantiation (invertibility + chart trivialization) ✓
+  exact-order machinery (unit-multiplier ⟹ iso; mono ⟹ nzd multiplier) ✓
+  [CHORD-PKG] `nonempty_iso_unitObj_of_exact_order₃` : chart identity ⟹ triple
+    trivialization ✓
+  [GAP-A-5c] `nonempty_tensorObj_iso_of_chord_vertical(_poleSheaf)` : the two
+    trivializations ⟹ I(P)⊗I(Q) ≅ I(P+Q)⊗I(0) ✓
+**REMAINING INPUT (the whole prong now rests on it):** for the chord ℓ (and its
+vertical twin v), on a trivializing chart cover,
+    chartMultiplier(ℓ) = unit · g_P · g_Q · g_{R⁻}      (R⁻ := -(P+Q))
+i.e. the chord's chart coefficient factors as the product of the three point
+generators times a unit. Over the universal Weierstrass atlas this is the
+chord–tangent computation; transfer to arbitrary bases follows the project's own
+`GroupLawAxioms` `*_of_map`/`*_of_eq` idiom (`WeierstrassAtlasRingU`).
+That is the honest remaining cost — a GroupLawAxioms-scale campaign — and it is now
+completely isolated from all the sheaf-theoretic machinery.
