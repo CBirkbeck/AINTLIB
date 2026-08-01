@@ -24,7 +24,7 @@ the base bundle `N = 0^*Δ`).
 
 universe u
 
-open CategoryTheory AlgebraicGeometry Limits TopologicalSpace Opposite
+open CategoryTheory AlgebraicGeometry Limits TopologicalSpace Opposite MonoidalCategory
 open AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
@@ -464,5 +464,42 @@ theorem appLE_z_mul_pullback_inv_eq_one
       (pullback.snd p g ⁻¹ᵁ Wb) le_rfl).hom (↑c⁻¹ : Γ(T, Wb))) :
     (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ Wb) Wb e).hom (a * b) = 1 := by
   rw [map_mul, hc, hb, appLE_z_appLE_snd_eq_self g hz Wb e, Units.mul_inv]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.7] The tensor of two coefficient-one sections is the coefficient-one section of
+the tensor frame.** Coefficients multiply
+(`overTrivializationOfRestrictIso_tensorSection_coefficient`) and a section is determined
+by its coefficient (`overTrivializationSection_coefficient_self`), so `1 · 1 = 1` pins the
+pure tensor exactly — not merely up to a unit, which is what the descent needs: a unit
+ambiguity here would shift each chart's generator and destroy the normalization along the
+zero section. -/
+theorem tensorSection_one_one {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (eM : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (eN : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    tensorSection M N U
+        (overTrivializationSection M U
+          (Scheme.Modules.overTrivializationOfRestrictIso M U eM) 1)
+        (overTrivializationSection N U
+          (Scheme.Modules.overTrivializationOfRestrictIso N U eN) 1) =
+      overTrivializationSection (MonoidalCategory.tensorObj M N) U
+        (Scheme.Modules.overTrivializationOfRestrictIso
+          (MonoidalCategory.tensorObj M N) U
+          (restrictMonoidalTensorIso U.ι M N ≪≫
+            (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme)) 1 := by
+  set x := overTrivializationSection M U
+    (Scheme.Modules.overTrivializationOfRestrictIso M U eM) 1 with hx
+  set y := overTrivializationSection N U
+    (Scheme.Modules.overTrivializationOfRestrictIso N U eN) 1 with hy
+  set eT := Scheme.Modules.overTrivializationOfRestrictIso
+    (MonoidalCategory.tensorObj M N) U
+    (restrictMonoidalTensorIso U.ι M N ≪≫
+      (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme) with heT
+  have hcoeff := overTrivializationOfRestrictIso_tensorSection_coefficient M N U eM eN x y
+  simp only [hx, hy, overTrivializationSection_coefficient, mul_one] at hcoeff
+  have hself := overTrivializationSection_coefficient_self
+    (MonoidalCategory.tensorObj M N) U eT (tensorSection M N U x y)
+  rw [← hself, heT]
+  exact congrArg _ hcoeff
 
 end ModularCurves

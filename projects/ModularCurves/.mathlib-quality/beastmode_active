@@ -1,1 +1,1 @@
-FOCUS: [W3.6] assemble hnorm from tensorSection_comparison + dualPairing_frame_comparison + appLE_z_appLE_snd_eq_self
+FOCUS: [W3.7] instantiate nonempty_unitObj_iso_of_normalized_glue with tensorSection generators

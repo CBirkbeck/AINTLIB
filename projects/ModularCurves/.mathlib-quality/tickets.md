@@ -32307,3 +32307,23 @@ REMAINING for W3: one instantiation — feed
 `hu` from `tensorSection_restrict_comparison`, `hnorm` from
 `appLE_z_mul_pullback_inv_eq_one`, and `hbij` from the tensor trivialization. Every input
 is now a proved lemma; no new mathematics remains in the un-normalized descent.
+
+### ★★★★ [W3.7] DONE 2026-08-01 — `tensorSection_one_one`
+The tensor of two coefficient-one sections **is** the coefficient-one section of the
+tensor frame — exactly, not up to a unit. Coefficients multiply
+(`overTrivializationOfRestrictIso_tensorSection_coefficient`) and a section is determined
+by its coefficient (`overTrivializationSection_coefficient_self`), so `1·1 = 1` pins it.
+This matters: a unit ambiguity in the twisted generator would shift each chart's generator
+and destroy the normalization along the zero section, which is the whole point of the
+rigidification. It also supplies `hbij` for the twisted bundle, since the coefficient-one
+section of a frame is the generator.
+
+CAUGHT: the first attempt at the `hbij` route (`bijective_smul_overTrivializationSection_one`)
+took a **silent synthetic sorry** in a `have` block — `_root_.map_smul` does not fire on
+`ConcreteCategory.hom` components because the ring presentations
+(`X.ringCatSheaf` vs `Sheaf (Opens.grothendieckTopology X) RingCat`) differ up to defeq
+only. The standing `grep -E "error|declaration uses"` rule caught it; the route was then
+replaced by the coefficient argument above, which needs no `map_smul` at all.
+LEAN-OPS: `⊗ᵢ` needs `open MonoidalCategory` (added to this file's open list); and
+`rw [heT]` on a `set` variable fails inside a coefficient application — use
+`rw [← hself, heT]; exact congrArg _ hcoeff` instead.
