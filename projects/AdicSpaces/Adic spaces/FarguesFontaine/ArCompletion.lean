@@ -550,6 +550,78 @@ theorem exists_eventually_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         · rw [heq]
           exact le_max_left _ _
 
+/-- A non-negative real is dominated by some power of `c⁻¹` when `c < 1`. -/
+private theorem exists_le_inv_pow_of_lt_one {B c : NNReal} (hc0 : 0 < c)
+    (hclt : c < 1) :
+    ∃ M : ℕ, B ≤ (c⁻¹) ^ M := by
+  rcases eq_or_ne B 0 with rfl | hBne
+  · exact ⟨0, zero_le⟩
+  · obtain ⟨M, hM⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr
+      (pos_iff_ne_zero.mpr hBne)) hclt
+    refine ⟨M, ?_⟩
+    rw [inv_pow]
+    have h1 : B * c ^ M < 1 := by
+      have h2 := mul_lt_mul_of_pos_left hM (pos_iff_ne_zero.mpr hBne)
+      rwa [mul_inv_cancel₀ hBne] at h2
+    exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero M hc0.ne')).mpr h1)
+
+/-- The coordinate filter is Cauchy: coefficients of nearby `Aloc` elements
+agree to high order. The bulk of `tendsto_teichCoeffAr`. -/
+private theorem cauchy_map_coords {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    [CompleteSpace F] [T0Space F] [IsUniformAddGroup F]
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (n : ℕ)
+    (hne : (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x)).NeBot) :
+    Cauchy (Filter.map (fun u => teichCoeffF p F (alocToWittF p F ϖ u) n)
+      (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x))) := by
+  set L := Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x) with hL
+  set coords : Aloc p F ϖ → F := fun u => teichCoeffF p F (alocToWittF p F ϖ u) n
+    with hcoords
+  -- value scale
+  obtain ⟨B, hB⟩ := exists_eventually_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) hx
+  set c : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+    with hc
+  have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+    fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  have hclt : c < 1 := perfectoidValuation_toOF_lt_one p F ϖ
+  obtain ⟨M, hM⟩ := exists_le_inv_pow_of_lt_one hc0 hclt
+  refine ⟨hne.map _, ?_⟩
+  rw [Filter.prod_map_map_eq]
+  intro V hV
+  rw [uniformity_eq_comap_nhds_zero F] at hV
+  obtain ⟨W, hW, hWV⟩ := Filter.mem_comap.mp hV
+  have htop := IsPerfectoidRing.topologyEq (p := p) (A := F)
+  rw [htop] at hW
+  obtain ⟨m, hmW⟩ := exists_ball_subset_nhds p F ϖ hW
+  have hε0 : (0 : NNReal) < c ^ m := pow_pos hc0 m
+  have hε1 : c ^ m ≤ 1 := pow_le_one₀ zero_le hclt.le
+  obtain ⟨δ, hδ0, hδ⟩ := exists_delta_teichCoeffF_sub p F ϖ n hρ0 hρ1 M
+    (ε := c ^ m) hε0 hε1
+  have hpairs := eventually_pair_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) x
+    (ε := δ) hδ0
+  have hbounds : ∀ᶠ q in L ×ˢ L, wAloc p F ϖ hρ0 hρ1 q.1 ≤ B
+      ∧ wAloc p F ϖ hρ0 hρ1 q.2 ≤ B := by
+    exact Filter.Eventually.and (hB.prod_inl _) (hB.prod_inr _)
+  refine Filter.mem_of_superset ((hpairs.and hbounds).mono ?_) hWV
+  rintro ⟨u, u'⟩ ⟨hdiff, hbu, hbu'⟩
+  refine hmW ?_
+  have hkey := hδ (alocToWittF p F ϖ u') (alocToWittF p F ϖ u)
+    (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u')
+    (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u)
+    (by
+      rw [← map_sub]
+      exact bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 (u' - u))
+    (by
+      rw [gaussValueF_alocToWittF p F ϖ hρ0 hρ1 u']
+      exact hbu'.trans hM)
+    (by
+      rw [gaussValueF_alocToWittF p F ϖ hρ0 hρ1 u]
+      exact hbu.trans hM)
+    (by
+      rw [← map_sub, gaussValueF_alocToWittF p F ϖ hρ0 hρ1 (u' - u)]
+      exact hdiff)
+  exact hkey
+
 /-- **Coordinates converge along approximants** (the T903 step-4 capstone): for
 `x ∈ A^r`, the `n`-th Teichmüller coordinates of `Aloc`-approximants converge in `F`,
 to `teichCoeffAr x n`. -/
@@ -566,62 +638,8 @@ theorem tendsto_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   set coords : Aloc p F ϖ → F := fun u => teichCoeffF p F (alocToWittF p F ϖ u) n
     with hcoords
   -- value scale
-  obtain ⟨B, hB⟩ := exists_eventually_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) hx
-  set c : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
-    with hc
-  have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
-    fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
-  have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
-  have hclt : c < 1 := perfectoidValuation_toOF_lt_one p F ϖ
-  obtain ⟨M, hM⟩ : ∃ M : ℕ, B ≤ (c⁻¹) ^ M := by
-    rcases eq_or_ne B 0 with rfl | hBne
-    · exact ⟨0, zero_le⟩
-    · obtain ⟨M, hM⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr
-        (pos_iff_ne_zero.mpr hBne)) hclt
-      refine ⟨M, ?_⟩
-      rw [inv_pow]
-      have h1 : B * c ^ M < 1 := by
-        have h2 := mul_lt_mul_of_pos_left hM (pos_iff_ne_zero.mpr hBne)
-        rwa [mul_inv_cancel₀ hBne] at h2
-      exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero M hc0.ne')).mpr h1)
   -- Cauchy of the coordinate filter
-  have hcauchy : Cauchy (Filter.map coords L) := by
-    refine ⟨hne.map _, ?_⟩
-    rw [Filter.prod_map_map_eq]
-    intro V hV
-    rw [uniformity_eq_comap_nhds_zero F] at hV
-    obtain ⟨W, hW, hWV⟩ := Filter.mem_comap.mp hV
-    have htop := IsPerfectoidRing.topologyEq (p := p) (A := F)
-    rw [htop] at hW
-    obtain ⟨m, hmW⟩ := exists_ball_subset_nhds p F ϖ hW
-    have hε0 : (0 : NNReal) < c ^ m := pow_pos hc0 m
-    have hε1 : c ^ m ≤ 1 := pow_le_one₀ zero_le hclt.le
-    obtain ⟨δ, hδ0, hδ⟩ := exists_delta_teichCoeffF_sub p F ϖ n hρ0 hρ1 M
-      (ε := c ^ m) hε0 hε1
-    have hpairs := eventually_pair_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) x
-      (ε := δ) hδ0
-    have hbounds : ∀ᶠ q in L ×ˢ L, wAloc p F ϖ hρ0 hρ1 q.1 ≤ B
-        ∧ wAloc p F ϖ hρ0 hρ1 q.2 ≤ B := by
-      exact Filter.Eventually.and (hB.prod_inl _) (hB.prod_inr _)
-    refine Filter.mem_of_superset ((hpairs.and hbounds).mono ?_) hWV
-    rintro ⟨u, u'⟩ ⟨hdiff, hbu, hbu'⟩
-    refine hmW ?_
-    have hkey := hδ (alocToWittF p F ϖ u') (alocToWittF p F ϖ u)
-      (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u')
-      (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u)
-      (by
-        rw [← map_sub]
-        exact bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 (u' - u))
-      (by
-        rw [gaussValueF_alocToWittF p F ϖ hρ0 hρ1 u']
-        exact hbu'.trans hM)
-      (by
-        rw [gaussValueF_alocToWittF p F ϖ hρ0 hρ1 u]
-        exact hbu.trans hM)
-      (by
-        rw [← map_sub, gaussValueF_alocToWittF p F ϖ hρ0 hρ1 (u' - u)]
-        exact hdiff)
-    exact hkey
+  have hcauchy := cauchy_map_coords p F ϖ hx n hne
   -- conclude via completeness
   obtain ⟨y, hy⟩ := CompleteSpace.complete hcauchy
   have htop2 := IsPerfectoidRing.topologyEq (p := p) (A := F)
@@ -1511,17 +1529,7 @@ can be taken `≥ 1`. Used to cap a finite sup of coordinate values by a single 
 that one Hölder modulus works uniformly across the prefix. -/
 private theorem exists_le_inv_pow {c : NNReal} (hc0 : 0 < c) (hc1 : c < 1) (s : NNReal) :
     ∃ m : ℕ, s ≤ (c⁻¹) ^ m ∧ (1 : NNReal) ≤ (c⁻¹) ^ m := by
-  obtain ⟨m, hm⟩ : ∃ m : ℕ, s ≤ (c⁻¹) ^ m := by
-    rcases eq_or_ne s 0 with h0 | hne0
-    · exact ⟨0, by rw [h0]; exact zero_le⟩
-    · obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one
-        (inv_pos.mpr (pos_iff_ne_zero.mpr hne0)) hc1
-      refine ⟨m, ?_⟩
-      rw [inv_pow]
-      have h1 : s * c ^ m < 1 := by
-        have h2 := mul_lt_mul_of_pos_left hm (pos_iff_ne_zero.mpr hne0)
-        rwa [mul_inv_cancel₀ hne0] at h2
-      exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero m hc0.ne')).mpr h1)
+  obtain ⟨m, hm⟩ := exists_le_inv_pow_of_lt_one (B := s) hc0 hc1
   refine ⟨m, hm, ?_⟩
   rw [inv_pow]
   calc (1 : NNReal) = c ^ m * (c ^ m)⁻¹ :=

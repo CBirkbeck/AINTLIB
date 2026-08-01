@@ -6936,3 +6936,46 @@ depends on nothing but an instance, so carrying it turns two "expensive"
 hypotheses into one line. If this works, the cost model is over-pricing every
 `obtain` whose RHS is context-free, and several rejected targets come back.
 
+
+## 153 → 152: check what the TAIL uses before threading parameters
+
+`tendsto_teichCoeffAr` 71 → 17, via `exists_le_inv_pow_of_lt_one` (11L) and
+`cauchy_map_coords` (47L).
+
+**The technique that made it viable.** `hcauchy` reads as nine dependencies,
+four `obtain`-bound — cost 12, and the naive carry block is 28 lines giving a
+64-line helper. But grepping the lines *after* the block shows the rest of the
+proof touches only `coords`, `L`, `hcauchy`. So `B`/`c`/`M`/`hM`/`hc0`/`hclt`
+are **exclusively** that block's, and all 18 lines move *into* the helper rather
+than through its signature.
+
+Threading was never possible anyway — `hB`'s type comes from
+`exists_eventually_wAloc_le` and is written nowhere. **Grep the block's locals
+against the lines below it**: exclusive locals get carried, shared ones get
+threaded, and only the shared ones need writable types.
+
+Instance binders (`[CompleteSpace F]` …) go in the signature, which is free —
+the budget is on bodies.
+
+### The name collision was the duplicate announcing itself
+
+`exists_le_inv_pow` already existed in this file. Its *inner*
+`obtain ⟨m, hm⟩ : ∃ m, s ≤ (c⁻¹) ^ m` is the same 10-line proof I was
+extracting, modulo `s`/`B`. Both now call the shared lemma and the pre-existing
+one lost 10 lines. "Grep the name before adding it" is in my notes; skipping it
+cost one build and happened to pay for itself.
+
+### Where task 2 stands
+
+    51-60      2
+    61-80     40
+    81-120    67
+    121+      43
+
+and the rankers are down to **4** candidates. The remaining 148 need either
+multi-lemma decomposition (like `_omt_open_at_zero`, whose bulk is a single
+103-line `have` that must itself be split four ways) or parameter threading
+where the tail genuinely shares the locals — `ringStalkMap_piYHom_injective` is
+the latter: I tail-checked it and its `U`/`V₁`/`V₂`/`W₀`/`t₁`/`t₂` **are** used
+below, so the cost-21 score is correct rather than pessimistic.
+
