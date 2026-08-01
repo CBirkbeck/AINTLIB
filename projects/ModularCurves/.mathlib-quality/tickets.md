@@ -30963,3 +30963,24 @@ The board's [PLAN 2026-07-30] ordering (A-7 → A-4 → A-5a/b/c → A-6) is sup
 Note the counterexample discipline: the exact (N-free) identity is FALSE globally, so
 [W1] must stay LOCAL on the base and [W2] must supply N — the interfaces above already
 respect this (the local theorem's hypotheses are only satisfiable Zariski-locally).
+
+### [W2-a] DONE 2026-08-01 + [W2] REMAINING SHAPE
+`bijective_smul_restrictIso_inv_app` (axiom-clean): a restriction trivialization gives a
+generating section at every preimage open. LEAN-OPS NOTE: state such lemmas on the
+SUBSCHEME side (opens `U.ι ⁻¹ᵁ W`, scalars `Γ(U.toScheme, ·)`) with explicit
+`show Γ(unitObj U.toScheme, ·) from …` casts for the unit sections — the C-side
+statement needs an eqToHom transport along `U.ι ''ᵁ (U.ι ⁻¹ᵁ W) = W` and the HSMul
+instances do not line up (the same clothing trap as the CORE's ψ).
+[W2] still needs, to invoke `nonempty_unitObj_iso_of_normalized_glue`:
+ (i) the base-cover indexing: local trivializations indexed by a cover of the BASE S,
+     with the opens taken as `π ⁻¹ᵁ (U i)` (the lemma is stated for pullback.snd);
+ (ii) the overlap comparison units `u i j` and `hu` (two generating sections of an
+      invertible differ by a unit — needs a "ratio of two generators is a unit" lemma:
+      from bijectivity, s i = u • s j with u obtained by surjectivity, and u is a unit
+      by symmetry);
+ (iii) the ZERO-SECTION NORMALIZATION `hnorm` — rescale each local section by the
+      inverse of its value along z (needs: the value at z is a unit, i.e. the
+      trivialization is compatible with the zero section — this is the rigidification
+      and is where `eq_one_of_pullback_eq_one` enters);
+ (iv) `UniversallyOConnected p` for the family (project class — check where it is proven
+      for elliptic families: grep UniversallyOConnected instances).
