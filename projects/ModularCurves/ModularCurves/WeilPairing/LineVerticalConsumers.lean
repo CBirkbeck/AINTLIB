@@ -657,6 +657,65 @@ theorem ker_baseSectionsMap_cokernel_eq_span_perp_of_surjective
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-c] Surjectivity of the single-section restriction from unimodularity** — the
+rank-one sibling: a unimodular evaluation row gives a surjective restriction. -/
+theorem surjective_baseSectionsMap_cokernel_of_unimodular_row
+    {M N : C.Modules} (f : M ⟶ N)
+    (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π N))
+    (e1 : Scheme.Modules.baseSections π (Limits.cokernel f)
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens)))
+    (huni : Ideal.span (Set.range (fun j => e1 ((Scheme.Modules.baseSectionsMap π
+      (Limits.cokernel.π f)) (b2 j)))) = ⊤) :
+    Function.Surjective
+      ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) := by
+  classical
+  intro y
+  have h1 : (1 : Γ(S, (⊤ : S.Opens))) ∈ Ideal.span (Set.range
+      (fun j => e1 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) (b2 j)))) := by
+    rw [huni]; trivial
+  obtain ⟨a, ha⟩ := (Submodule.mem_span_range_iff_exists_fun
+    Γ(S, (⊤ : S.Opens))).mp h1
+  refine ⟨b2.equivFun.symm (fun j => e1 y * a j), ?_⟩
+  refine e1.injective ?_
+  have hsum : e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+      (b2.equivFun.symm (fun j => e1 y * a j))) =
+      ∑ j, (e1 y * a j) •
+        e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) (b2 j)) := by
+    calc e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+        (b2.equivFun.symm (fun j => e1 y * a j)))
+        = e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+            (∑ j, (e1 y * a j) • b2 j)) := by
+          congr 2
+          rw [← b2.sum_equivFun (b2.equivFun.symm (fun j => e1 y * a j))]
+          exact Finset.sum_congr rfl fun j _ => by
+            rw [b2.equivFun.apply_symm_apply]
+      _ = ∑ j, (e1 y * a j) •
+            e1 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b2 j)) := by
+          rw [map_sum, map_sum]
+          exact Finset.sum_congr rfl fun j _ => by
+            rw [_root_.map_smul, _root_.map_smul]
+  rw [hsum]
+  calc ∑ j, (e1 y * a j) •
+      e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) (b2 j))
+      = e1 y * ∑ j, a j *
+          e1 ((Scheme.Modules.baseSectionsMap π
+            (Limits.cokernel.π f)) (b2 j)) := by
+        rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl fun j _ => by
+          rw [smul_eq_mul, mul_assoc]
+    _ = e1 y * 1 := by
+        have hone : (∑ j, a j *
+            e1 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b2 j))) = 1 := by
+          simpa [smul_eq_mul] using ha
+        rw [hone]
+    _ = e1 y := mul_one _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GAP-A-4, the vertical]** For a single section on a principal chart, an
 invertible ambient with rank-two base sections, and vanishing `H¹` of the twisted
 tensor, the kernel of restriction to the section divisor is free of rank one,
