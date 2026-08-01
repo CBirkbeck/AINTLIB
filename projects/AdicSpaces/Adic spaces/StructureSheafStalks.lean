@@ -985,6 +985,53 @@ variable [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
 
 noncomputable local instance : DecidableEq A := Classical.decEq _
 
+omit [IsTateRing A] in
+/-- **Nonvanishing transports to the shrunken datum.** Every Spa-point of
+`presheafValue D'` pushes forward (along the restriction, then to the base) into
+the captured open `W`, where the scaled element `c` is nonvanishing; and `c` and
+`b` vanish together since they differ by a unit. So `b` cannot vanish at any
+Spa-point of `D'` — which by Wedhorn 7.52(2) is what makes it a unit there.
+
+`hcap0` is `exists_A_level_open_presentation`'s capture clause already specialised
+to the singleton family, which is all this argument consumes. -/
+private theorem not_vle_zero_of_shrink (D D' : RationalLocData A)
+    (hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) {W : Set (Spv A)}
+    (hD'sub : spaOpen D' ⊆ Subtype.val ⁻¹' W ∩ spaOpen D)
+    {b c : presheafValue D} {u : (presheafValue D)ˣ} {k : ℕ}
+    (hcdef : c = ((u⁻¹ : (presheafValue D)ˣ) : presheafValue D) ^ k * b)
+    (hcap0 : ∀ w' : Spv (presheafValue D),
+      w' ∈ Spa (presheafValue D) (presheafValue D)⁺ →
+      comap D.canonicalMap w' ∈ W → ¬ w'.vle c 0)
+    (w'' : Spv (presheafValue D'))
+    (hw'' : w'' ∈ Spa (presheafValue D') (presheafValue D')⁺) :
+    ¬ w''.vle (restrictionMapHom D D' hsub b) 0 := by
+  intro hcon
+  have hwPD := comap_restrictionMapHom_mem_spa D D' hsub hw''
+  have hbase' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
+  have hbaseEq : comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
+      = comap D'.canonicalMap w'' := by
+    rw [show comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
+        = comap ((restrictionMapHom D D' hsub).comp D.canonicalMap) w'' from
+      by rw [comap_comp]; rfl]
+    have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap = D'.canonicalMap :=
+      RingHom.ext (restrictionMapHom_canonicalMap_generic D D' hsub)
+    rw [hcomp]
+  have hW' : comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'') ∈ W := by
+    rw [hbaseEq]
+    exact (hD'sub (show (⟨comap D'.canonicalMap w'', hbase'.2⟩
+      : ↥(Spa A A⁺)) ∈ spaOpen D' from hbase'.1)).1
+  refine hcap0 (comap (restrictionMapHom D D' hsub) w'') hwPD hW' ?_
+  show (comap (restrictionMapHom D D' hsub) w'').vle c 0
+  have hcb : (comap (restrictionMapHom D D' hsub) w'').vle b 0 := by
+    show w''.vle (restrictionMapHom D D' hsub b) (restrictionMapHom D D' hsub 0)
+    rw [map_zero]
+    exact hcon
+  have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
+    (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
+  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
+    rw [hcdef]; ring] at h3
+  exact h3
+
 /-- **The rational shrink claim holds** (Wedhorn 8.14, the substantive step):
 an element `b` of a completed rational localization with nonzero point value
 becomes a unit on a smaller valid rational neighbourhood. The proof scales `b`
@@ -1032,35 +1079,8 @@ theorem rationalShrink_holds : RationalShrink A := by
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
   haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
-  intro w'' hw'' hcon
-  have hwPD := comap_restrictionMapHom_mem_spa D D' hsub hw''
-  have hbase' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
-  have hbaseEq : comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
-      = comap D'.canonicalMap w'' := by
-    rw [show comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
-        = comap ((restrictionMapHom D D' hsub).comp D.canonicalMap) w'' from
-      by rw [comap_comp]; rfl]
-    have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap = D'.canonicalMap :=
-      RingHom.ext (restrictionMapHom_canonicalMap_generic D D' hsub)
-    rw [hcomp]
-  have hW' : comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'') ∈ W := by
-    rw [hbaseEq]
-    exact (hD'sub (show (⟨comap D'.canonicalMap w'', hbase'.2⟩
-      : ↥(Spa A A⁺)) ∈ spaOpen D' from hbase'.1)).1
-  have hcap := hcapture (comap (restrictionMapHom D D' hsub) w'') hwPD hW'
-    () (Finset.mem_singleton_self ())
-  -- transport `vle (σ b) 0` to `vle c 0` at the pulled-back point
-  refine hcap.2 ?_
-  show (comap (restrictionMapHom D D' hsub) w'').vle c 0
-  have hcb : (comap (restrictionMapHom D D' hsub) w'').vle b 0 := by
-    show w''.vle (restrictionMapHom D D' hsub b) (restrictionMapHom D D' hsub 0)
-    rw [map_zero]
-    exact hcon
-  have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
-    (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
-    rw [hcdef]; ring] at h3
-  exact h3
+  exact fun w'' hw'' => not_vle_zero_of_shrink D D' hsub hD'sub hcdef
+    (fun w' hw' hW => (hcapture w' hw' hW () (Finset.mem_singleton_self ())).2) w'' hw''
 
 /-- **The stalk shrink claim holds.** -/
 theorem stalkShrink_holds (v : ↥(Spa A A⁺)) : StalkShrink v :=
