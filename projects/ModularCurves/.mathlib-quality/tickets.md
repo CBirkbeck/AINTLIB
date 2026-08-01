@@ -31737,3 +31737,16 @@ NEXT (final assembly, in order):
  4. feed `nonempty_iso_unitObj_of_two_unit_identities` (chord) and `…₂` (vertical);
  5. `chordDatum_of_trivializations` → `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`;
  6. descend (W2) and close `exists_invertible_tensor_idealModule_add`.
+
+### [W1 assembly 1–3] DONE 2026-08-01
+`chord_exact_order_transported` (chart identity via the away-chart isomorphism) and
+`chord_exact_order_with_generators` (restated against the section generators). Steps 1–3
+of the six-step assembly are now single lemma applications; steps 4–6 are the two closing
+links, the ChordDatum builder and the descent, all already proven.
+The genuinely remaining item is the SUPPLY of the hypotheses at the actual chart:
+ * the two points' equations and the line relation — from the sections' coordinates
+   (`exists_affine_point_of_section`) and the chord's definition;
+ * the non-degeneracies — non-tangency and non-`2`-torsion, i.e. the classical case
+   split, covered by the project's addOnY/addOnZ families in the degenerate cases;
+ * the generator associations — `exists_unit_generator_eq_sub_coord` plus the chart's
+   principality data.
