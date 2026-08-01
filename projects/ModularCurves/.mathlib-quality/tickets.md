@@ -32491,3 +32491,15 @@ delivers on a chart carrying the away-chart data (the two-family cover of i10/i1
 the assembled form. The work is to run that assembly with the base restricted to `U`
 rather than globally — geometry-plumbing against `EllObj.pullbackAlong`
 (`Moduli/EllCategory.lean:99`) and the ideal-module base-change transports above.
+
+### ★★★ [W8] DONE 2026-08-01 — `nonempty_tensorObj_dual_unitObj_of_iso`
+`A ≅ B` with `B` invertible gives `A ⊗ B^∨ ≅ 𝟙`. This is the shape-bridge between the two
+halves of the prong: the chord/vertical machinery concludes the theorem of the square in
+the form `A ≅ B`, while the descent wants the discrepancy `Δ = A ⊗ B^∨` to be *trivial*
+on a chart. Skeleton algebra against `nonempty_eval_iso`, three rewrites.
+
+So the last plumbing step is now exactly: **run the chord/vertical prong with the base
+restricted to `U`**, obtaining `A|_{f⁻¹U} ≅ B|_{f⁻¹U}`, and feed W8 to get `eL`. The
+restriction machinery is `EllObj.pullbackAlong` plus the ideal-module base-change
+transports (`nonempty_pullback_idealModule_ker_sectionBaseChange`,
+`comap_ker_eq_ker_baseChange`).

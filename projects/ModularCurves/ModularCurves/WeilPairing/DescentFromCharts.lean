@@ -829,4 +829,18 @@ theorem exists_invertible_iso_tensorObj_pullback_of_descent
     ((hA.tensorObj hB.dual).pullback z), ?_⟩
   exact nonempty_iso_tensorObj_of_dual_iso A B _ hB hdesc
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W8] From the theorem of the square to a trivialization of the discrepancy.** Where
+the chord/vertical prong applies it gives `A ≅ B`; the descent wants `Δ = A ⊗ B^∨` to be
+*trivial* there. Skeleton algebra converts one to the other. This is the shape-bridge
+between the two halves of the prong. -/
+theorem nonempty_tensorObj_dual_unitObj_of_iso {X : Scheme.{u}} (A B : X.Modules)
+    (hB : IsInvertible B) (h : Nonempty (A ≅ B)) :
+    Nonempty (Scheme.Modules.tensorObj A (dualObj B) ≅ unitObj X) := by
+  rw [← toSkeleton_eq_toSkeleton_iff, toSkeleton_tensorObj_eq, toSkeleton_unitObj,
+    toSkeleton_eq_toSkeleton_iff.mpr h, ← toSkeleton_tensorObj_eq,
+    ← toSkeleton_unitObj]
+  exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_eval_iso hB)
+
 end ModularCurves
