@@ -73,4 +73,18 @@ theorem isUnit_res_basicOpen (f : Γ(X, (⊤ : X.Opens))) :
     IsUnit (X.presheaf.map (homOfLE (X.basicOpen_le f)).op f) :=
   X.toRingedSpace.isUnit_res_basicOpen f
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[i11/i13] No common zero means the unit ideal.** Non-degeneracy is a statement
+about points — the conjugate and the generator product never vanish together, because
+that would put a reflected point on top of one of `P, Q, R`. This converts it into the
+`Ideal.span {f, g} = ⊤` hypothesis the cover lemma consumes. -/
+theorem span_pair_eq_top_of_no_common_maximal {A : Type u} [CommRing A] (f g : A)
+    (h : ∀ m : Ideal A, m.IsMaximal → ¬(f ∈ m ∧ g ∈ m)) :
+    Ideal.span ({f, g} : Set A) = ⊤ := by
+  by_contra hne
+  obtain ⟨m, hm, hle⟩ := Ideal.exists_le_maximal _ hne
+  exact h m hm ⟨hle (Ideal.subset_span (by simp)),
+    hle (Ideal.subset_span (by simp))⟩
+
 end ModularCurves
