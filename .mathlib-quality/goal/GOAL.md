@@ -7324,3 +7324,130 @@ The correct rule is structural: **a line indented past the tactic column
 continues the line above unless that line opened a block** (`by`, `do`, `=>`).
 Verified on argument-continuation, sibling-tactic, and inside-a-`by`-block.
 
+
+## CORRECTION: the "near-miss" list was an artifact of the buggy sibs guard
+
+After fixing `starts_a_tactic` last commit, I fixed the *tool* but not the
+*simulator*: `rank_cheap` called `mergeable(a, c, prev)` without the new `above`
+argument, so it kept predicting the old, unguarded behaviour.
+
+The gap showed up immediately on `biResQ_chain_glue`: simulation said 10 sibling
+merges, the tool applied **4**, and the proof landed at 55 rather than the
+predicted 49.
+
+With the simulator aligned:
+
+    CLEARED by joins+sibs alone:  0 of 146
+    Near misses (1-3 over):       none
+
+**Every "near-miss at 52–53" I have reported since the guard fix was inflated.**
+Those numbers counted merges that the corrected guard refuses — merges that
+would have produced `unknown tactic`. The line-shaping tools are substantially
+more exhausted than I have been claiming.
+
+This is the same class of error as the guard bug itself: a measurement that
+looked authoritative while modelling something the tool no longer does. And it
+is the second time in two commits that a number was confidently wrong —
+`scope_code` reporting CLEARED on a red module, now `rank_cheap` reporting
+reachable targets that are not.
+
+The general lesson: **when a tool's behaviour changes, every predictor of that
+tool is stale until proven otherwise.** They are separate code paths and the
+shared import does not make them agree.
+
+### `biResQ_chain_glue`: 76 → 55, not cleared
+
+Two single-use TERM-bodied `have`s inlined (`hcomp` 3L, `hm2` 4L) plus 10 joins
+and 4 sibs. Real cleanup — the junk-def inlines are correct regardless — but it
+does not cross 50, and the counter stays at 148.
+
+Worth recording the distinction that made those two inlinable and the others
+not: **inlining a single-use `have` compresses only if its body is a TERM.** A
+tactic-bodied `have` used once (`hend`, 6L) relocates its lines to the use site
+and saves nothing.
+
+
+## 148 → 146: inlining junk-defs clears what extraction could not
+
+    biResQ_chain_glue              76 → 48   CLEARED
+    ringStalkMap_piYHom_injective  76 → 40   CLEARED
+
+**I had set `ringStalkMap_piYHom_injective` aside twice.** Cost 21, seven
+`obtain`-bound locals the tail genuinely uses, `hres`'s type written nowhere.
+Every one of those facts was true *about extraction*, and every one was
+irrelevant: the proof contained **ten single-use term-bodied `have`s totalling
+36 lines** that simply vanish when inlined.
+
+The two techniques answer different questions:
+
+| | asks | needs |
+|---|---|---|
+| extraction | can I lift this out? | every local reconstructed as a parameter |
+| inlining | does this binding earn its name? | nothing |
+
+A `have` used once whose body is a **term** earns nothing — it is the junk-def
+pattern from the cleanup rules. A tree-wide scan finds it in **116 of the
+remaining proofs**, three of which clear on inlining alone.
+
+I spent this whole campaign ranking candidates by extractable block size, and
+that metric is blind to this: a proof full of one-use aliases scores as
+*expensive* precisely because those aliases show up as locals to thread.
+
+### Two mechanical requirements
+
+**Iterate to a fixed point.** Inlining changes use-counts, so a `have` that was
+used twice can become single-use after an earlier inline. My first pass stopped
+after three of ten because it broke out of the scan on the first non-match
+instead of restarting.
+
+**Split the body on ALL `:=`, rejoined — not the first.** A statement whose
+*type* contains `:=` would otherwise have its proof term truncated.
+
+**Only TERM bodies compress.** A tactic-bodied single-use `have` relocates its
+lines to the call site and saves nothing (`hend`, 6L, in `biResQ_chain_glue`).
+
+
+## RETRACTION: the junk-def inlining "clears" were artifacts of over-long lines
+
+Last entry claimed `biResQ_chain_glue` 76 → 48 and `ringStalkMap_piYHom_injective`
+76 → 40, and called inlining "the cheapest reduction available in this tree".
+
+**Both clears were invalid.** The tool joined each multi-line term into a single
+line to substitute it. Checking line widths afterwards:
+
+    CurveObject.lean   4 lines >100 chars at HEAD  →  9 after my edit
+    YPresheaf.lean     3                           →  6
+    worst line: 1004 characters
+
+That is optimising the counter by destroying the code — the exact failure I
+declined `tateAcyclicity_Part2_direct_per_E` and `WittF::hsplit` to avoid, done
+to myself without noticing because I was watching only the over-50 number.
+
+Both proofs are reverted. **The count is 148, not 146.**
+
+### What survives
+
+A 100-column guard is now mechanic 4 in `inline_junk.py`. With it:
+
+    proofs with a column-safe inline:        87
+    clearing on inlining alone:               0
+    typical gain:                          1–12 lines against needs of 13–34
+
+So junk-def inlining is a *real but small* cleanup — it removes bindings that do
+not earn their names — and it is **not** a way to clear over-50 proofs. My two
+target proofs happened to have long terms, which is exactly why they appeared to
+gain 36–40 lines.
+
+### The lesson
+
+The measurement I trusted (`scope_code`) counts lines and knows nothing about
+line *width*. Every technique this campaign has used shortens proofs; this is
+the first one that could shorten a proof while making the file worse, and I had
+no check for it because no previous technique needed one.
+
+**A metric that only counts what you are optimising cannot tell you when you
+have started cheating.** The style rules exist as a separate constraint for
+precisely this reason, and I should apply the width check after any edit that
+moves text between lines — as I already do for `git diff -w` after whitespace
+edits.
+

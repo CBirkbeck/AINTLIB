@@ -74,7 +74,8 @@ def simulate(path, line):
     sibs = 0
     k = end - 2
     while k >= bstart:
-        if AS_.mergeable(body[k], body[k + 1], body[k - 1] if k else ''):
+        if AS_.mergeable(body[k], body[k + 1], body[k - 1] if k else '',
+                         body[max(0, k - 12):k]):
             body[k] = body[k].rstrip() + "; " + body[k + 1].strip()
             del body[k + 1]
             end -= 1
