@@ -31648,3 +31648,15 @@ Remaining to close GAP-A-5/A-6 (engineering, with every mathematical input prove
  (E3) the degenerate configurations (tangency, `2`-torsion, infinity) via the project's
       addOnY/addOnZ chart families;
  (E4) descend with the W2 toolkit and close `exists_invertible_tensor_idealModule_add`.
+
+### [W1 E1] DONE 2026-08-01 — generator matching
+`exists_unit_generator_eq_sub_coord` + `eq_unit_mul_of_associates`: the chart's
+coordinate differences and the section-provided kernel generators are associates, and
+the exact-order factorisation is invariant under that change. So
+`chord_exact_order_in_chart` can be fed with either.
+NEXT (E2): assemble a `ChordDatum` — instantiate the chart data at
+`sectionPoleSheafPower π z hz 3` on a chart inside `sectionAway`, use
+`chartMultiplier_unitHom_eq_coefficient` to identify the chord's multiplier with its
+chart coefficient, apply `chord_exact_order_in_chart` (+ E1b) to get the exact-order
+hypothesis, then `nonempty_iso_unitObj_of_exact_order₃`; the same with two factors for
+the vertical.
