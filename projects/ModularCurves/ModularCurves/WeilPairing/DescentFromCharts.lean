@@ -672,4 +672,35 @@ theorem nonempty_iso_pullback_section_of_frames
     ((hL.pullback z).pullback (pullback.snd p g))
     (nonempty_unitObj_iso_tensorObj_of_frames g hp hz L _ U hU eL eD u v hu hv hnorm)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W4] The pulled-back trivialization at an equal open, definitionally.** The `subst`
+form of `nonempty_restrictPullbackTrivialization_of_eq`: W4 needs the iso itself, not its
+existence, because the frames feed a comparison-unit computation. -/
+noncomputable def restrictPullbackTrivializationOfEq {X Y : Scheme.{u}} (f : X ⟶ Y)
+    (N : Y.Modules) (U : Y.Opens) (V : X.Opens) (hV : V = f ⁻¹ᵁ U)
+    (e : (restrictFunctor U.ι).obj N ≅ unitObj U.toScheme) :
+    (restrictFunctor V.ι).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback f).obj N) ≅ unitObj V.toScheme := by
+  subst hV
+  exact restrictPullbackTrivialization f N U e
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W4] The frame for the twist factor.** From a frame for `L` over `f ⁻¹ᵁ U`: push it
+along `z` to a frame for `z^* L` over `U` (using `z ⁻¹ᵁ f ⁻¹ᵁ U = U`), pull it back along
+`f`, then dualize. This is the `eD` input of `nonempty_iso_pullback_section_of_frames`. -/
+noncomputable def dualPullbackSectionTrivialization {X T' : Scheme.{u}} (f : X ⟶ T')
+    (z : T' ⟶ X) (hz : z ≫ f = 𝟙 T') (L : X.Modules) (U : T'.Opens)
+    (e : (restrictFunctor (f ⁻¹ᵁ U).ι).obj L ≅ unitObj (f ⁻¹ᵁ U).toScheme) :
+    (restrictFunctor (f ⁻¹ᵁ U).ι).obj
+        (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback f).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))) ≅
+      unitObj (f ⁻¹ᵁ U).toScheme :=
+  dualRestrictIsoOfRestrictIso _ (f ⁻¹ᵁ U)
+    (restrictPullbackTrivialization f
+      ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L) U
+      (restrictPullbackTrivializationOfEq z L (f ⁻¹ᵁ U) U
+        (preimage_preimage_section f z hz U).symm e))
+
 end ModularCurves
