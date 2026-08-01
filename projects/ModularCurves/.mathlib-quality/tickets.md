@@ -31551,3 +31551,14 @@ the unit last quotient. Both are chart computations with all tools proven:
 Cramer/adjugate pair. Note the chart produced here is a BASIC open of a multi-chart, so
 its coordinate ring is a localization of the affine model's — where
 `sectionAway_affineModelEval_bijective` identifies the coordinates.
+
+### ★★★ [W1 F-i] DONE 2026-08-01 — the deeper vanishings are algebraic
+`cancel_factor_of_norm` + `chord_quotients_of_norm` (axiom-clean): cancelling the
+nonzerodivisor factors of the norm factorisation gives `c₁·conj = −(X−x₂)(X−x₃)` and
+`c₂·conj = −(X−x₃)`. Applying the evaluations: `σ₂(c₁)·σ₂(conj) = −σ₂((X−x₂)(X−x₃)) = 0`
+and `σ₃(c₂)·σ₃(conj) = −σ₃(X−x₃) = 0`, so the deeper vanishings follow whenever
+`σᵢ(conj)` is a nonzerodivisor of the base — which holds off the `2`-torsion locus
+(there `conj` is the "other" chord and does not vanish at the point).
+⟹ [W1] now needs only: the non-vanishing of `σᵢ(conj)` (equivalently, the 2-torsion
+case split) and the unit last quotient (F-ii, Cramer). Both are the classical degenerate
+-case analysis, and the project's addOnY/addOnZ chart families exist for exactly that.
