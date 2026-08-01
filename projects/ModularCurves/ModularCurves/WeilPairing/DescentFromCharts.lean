@@ -502,4 +502,32 @@ theorem tensorSection_one_one {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
   rw [← hself, heT]
   exact congrArg _ hcoeff
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.7] A coefficient-one frame section generates.** Scaling it is scaling `1` in the
+structure sheaf, so the map is bijective. With `tensorSection_one_one` this is the `hbij`
+input of the rigidified glue for the twisted bundle. -/
+theorem bijective_smul_overTrivializationSection_one {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens) (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    Function.Bijective
+      (fun r : Γ(X, U) => r • overTrivializationSection M U e (1 : Γ(X, U))) := by
+  have hkey : ∀ r : Γ(X, U), r • overTrivializationSection M U e (1 : Γ(X, U))
+      = overTrivializationSection M U e r := by
+    intro r
+    rw [overTrivializationSection_smul, mul_one]
+  have hsec : Function.Bijective
+      (fun r : Γ(X, U) => overTrivializationSection M U e r) := by
+    constructor
+    · intro a b h
+      replace h : overTrivializationSection M U e a =
+        overTrivializationSection M U e b := h
+      have ha := overTrivializationSection_coefficient M U e a
+      have hbb := overTrivializationSection_coefficient M U e b
+      rw [h] at ha
+      exact ha.symm.trans hbb
+    · intro y
+      exact ⟨e.hom.val.app (.op (Over.mk (𝟙 U))) y,
+        overTrivializationSection_coefficient_self M U e y⟩
+  simpa only [hkey] using hsec
+
 end ModularCurves

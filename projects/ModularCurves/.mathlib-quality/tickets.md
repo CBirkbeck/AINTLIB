@@ -32327,3 +32327,28 @@ replaced by the coefficient argument above, which needs no `map_smul` at all.
 LEAN-OPS: `⊗ᵢ` needs `open MonoidalCategory` (added to this file's open list); and
 `rw [heT]` on a `set` variable fails inside a coefficient application — use
 `rw [← hself, heT]; exact congrArg _ hcoeff` instead.
+
+### ★★★★ [W3.7b] DONE 2026-08-01 — `bijective_smul_overTrivializationSection_one`
+Scaling the coefficient-one section of a frame is bijective (it is scaling `1` in the
+structure sheaf). With `tensorSection_one_one` this discharges the `hbij` input of the
+rigidified glue for the twisted bundle.
+
+**All four inputs of the un-normalized descent are now proved lemmas**:
+| input | supplied by |
+|---|---|
+| generators | `tensorSection` of the two coefficient-one sections (`tensorSection_one_one` identifies it with the tensor frame's own coefficient-one section) |
+| `hu` | `tensorSection_restrict_comparison` |
+| `hnorm` | `appLE_z_mul_pullback_inv_eq_one` (`hb` from `Picard/DualPullback/Iso.dualPullbackIsoOfIsInvertible`) |
+| `hbij` | `bijective_smul_overTrivializationSection_one` |
+Only the instantiation of `nonempty_unitObj_iso_of_normalized_glue` with these remains,
+then `nonempty_iso_pullback_section_of_chart_trivializations` loses its `hnorm` hypothesis
+and W3 is unconditional.
+
+LEAN-OPS (three silent synthetic sorries in one sitting, all in the over-site layer, all
+caught by the `declaration uses` grep and none by an error):
+1. `_root_.map_smul` does not fire on `ConcreteCategory.hom` components here — the tree's
+   own `overTrivializationSection_smul` (`PoleSheaf.lean:3167`) does the job via
+   `.hom.map_smul`, which is the idiom to use.
+2. `show … at h` is not valid syntax; `replace h : … := h` is the beta-reducer.
+3. A `Function.Bijective (fun r => …)` goal keeps the beta-redex, so hypotheses obtained
+   from `intro a b h` must be `replace`d into reduced form before `rw` will match.
