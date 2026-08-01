@@ -562,8 +562,7 @@ theorem locToQuotientOneSubfX_gen_continuous (D : RationalLocData A)
   letI : TopologicalSpace (Localization.Away D.s) := D.topology
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
   letI : IsTopologicalAddGroup (Localization.Away D.s) := D.isTopologicalAddGroup
-  letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
-    quotientTTopology D.s
+  letI τQ : TopologicalSpace (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) := quotientTTopology D.s
   letI : IsTopologicalRing (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
     quotientTTopology_isTopologicalRing D.s
   haveI : IsTopologicalAddGroup (↥(TateAlgebra A) ⧸ oneSubfXIdeal D.s) :=
@@ -571,8 +570,7 @@ theorem locToQuotientOneSubfX_gen_continuous (D : RationalLocData A)
       (quotientTTopology D.s) (quotientTTopology_isTopologicalRing D.s)
   -- Step 1: Reduce to continuity at 0 using additive group structure.
   apply continuous_of_continuousAt_zero (locToQuotientOneSubfX_gen D.s)
-  rw [ContinuousAt, map_zero, Filter.tendsto_def]
-  intro S hS
+  rw [ContinuousAt, map_zero, Filter.tendsto_def]; intro S hS
   -- Step 2: Get a basis neighborhood from the localization topology.
   have hbasis := locBasis D.P D.T D.s D.hopen
   let hb := hbasis.toRingFilterBasis.toAddGroupFilterBasis
@@ -583,42 +581,30 @@ theorem locToQuotientOneSubfX_gen_continuous (D : RationalLocData A)
   obtain ⟨W, hWS⟩ := NonarchimedeanRing.is_nonarchimedean S hS
   -- Step 4: It suffices to show locToQuotientOneSubfX_gen maps some
   -- locNhd n into W.
-  suffices ∃ n, ∀ x ∈ locNhd D.P D.T D.s n,
-      locToQuotientOneSubfX_gen D.s x ∈ (W : Set _) by
-    obtain ⟨n, hn⟩ := this
-    apply Filter.mem_of_superset
-      (hb.nhds_zero_hasBasis.mem_iff.mpr
-        ⟨locNhd D.P D.T D.s n, ⟨n, rfl⟩, le_refl _⟩)
-    intro x hx
-    exact hWS (hn x hx)
+  suffices ∃ n, ∀ x ∈ locNhd D.P D.T D.s n, locToQuotientOneSubfX_gen D.s x ∈ (W : Set _) by
+    obtain ⟨n, hn⟩ := this; apply Filter.mem_of_superset
+      (hb.nhds_zero_hasBasis.mem_iff.mpr ⟨locNhd D.P D.T D.s n, ⟨n, rfl⟩, le_refl _⟩)
+    intro x hx; exact hWS (hn x hx)
   -- Step 5: Use locToQuotient_mul_small_constant_mem to find m such that
   -- for all r ∈ locSubring and b ∈ I^m, φ(subtype(r) * algebraMap(b)) ∈ W.
-  have hW_nhds : (W : Set _) ∈ @nhds _ τQ 0 :=
-    W.isOpen.mem_nhds (W.zero_mem)
-  obtain ⟨m, hm_helper⟩ :=
-    locToQuotient_mul_small_constant_mem D (W : Set _) hW_nhds
+  have hW_nhds : (W : Set _) ∈ @nhds _ τQ 0 := W.isOpen.mem_nhds (W.zero_mem)
+  obtain ⟨m, hm_helper⟩ := locToQuotient_mul_small_constant_mem D (W : Set _) hW_nhds
   -- Step 6: Show locNhd(m) maps into W.
   -- We use Submodule.span_induction with the STRENGTHENED predicate:
   -- P(d) = "for all r ∈ locSubring, φ(subtype(r * d)) ∈ W".
   -- This handles the scalar case because r * (s * d) = (r * s) * d.
   -- Then P(d) with r = 1 gives φ(subtype(d)) ∈ W.
-  refine ⟨m, ?_⟩
-  rintro x ⟨d, hd, rfl⟩
-  rw [locIdeal, ← Ideal.map_pow] at hd
-  suffices ∀ (r : locSubring D.P D.T D.s),
-      locToQuotientOneSubfX_gen D.s
-        ((locSubring D.P D.T D.s).subtype (r * d)) ∈ (W : Set _) by
+  refine ⟨m, ?_⟩; rintro x ⟨d, hd, rfl⟩
+  rw [locIdeal, ← Ideal.map_pow] at hd; suffices ∀ (r : locSubring D.P D.T D.s),
+      locToQuotientOneSubfX_gen D.s ((locSubring D.P D.T D.s).subtype (r * d)) ∈ (W : Set _) by
     simpa using this 1
-  intro r₀
-  revert r₀
+  intro r₀; revert r₀
   refine Submodule.span_induction (p := fun d _ ↦
       ∀ (r : locSubring D.P D.T D.s),
         locToQuotientOneSubfX_gen D.s
-          ((locSubring D.P D.T D.s).subtype (r * d)) ∈
-            (W : Set _)) ?_ ?_ ?_ ?_ hd
+          ((locSubring D.P D.T D.s).subtype (r * d)) ∈ (W : Set _)) ?_ ?_ ?_ ?_ hd
   · -- Generator: d = algebraMapD(b) for b ∈ I^m.
-    rintro d ⟨b, hb, rfl⟩ r
-    exact hm_helper r b hb
+    rintro d ⟨b, hb, rfl⟩ r; exact hm_helper r b hb
   · -- Zero
     intro r; simp [mul_zero, map_zero]
   · -- Addition: d₁ + d₂

@@ -315,11 +315,9 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
   have hIM' : ⇑h_n '' RT = ⇑h_n.symm ⁻¹' RT := h_n.toEquiv.image_eq_preimage_symm RT
   refine Homeomorph.mk (Equiv.mk
   (fun r => ⟨⟨⟨((h_n ⟨(r : Spv Bn), r.2.2⟩
-      : ↥(bigWindow p F ϖ n
-        ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+      : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
       (h_n ⟨(r : Spv Bn), r.2.2⟩).2.2⟩,
-      mem_Y_of_mem_bigWindow p F ϖ hp n
-        (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩,
+      mem_Y_of_mem_bigWindow p F ϖ hp n (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩,
     (Set.ext_iff.mp hG₂eq (h_n ⟨(r : Spv Bn), r.2.2⟩)).mpr
       (Set.mem_image_of_mem _ (show (⟨(r : Spv Bn), r.2.2⟩
         : ↥(Spa Bn (ringPlus Bn))) ∈ RT from r.2.1)),
@@ -332,8 +330,7 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
       have h1 : (⟨((ySpaPoint p F ϖ z.1
           : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
           z.2.2, (ySpaPoint p F ϖ z.1).2⟩
-          : ↥(bigWindow p F ϖ n
-            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) ∈ ⇑h_n '' RT :=
+          : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) ∈ ⇑h_n '' RT :=
         (Set.ext_iff.mp hG₂eq _).mp z.2.1
       rw [hIM'] at h1
       exact h1),
@@ -341,8 +338,7 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
     (fun r => ?_) (fun z => ?_)) ?_ ?_
   · -- left inverse
     refine Subtype.ext ?_
-    have key : ∀ (m : ↥(bigWindow p F ϖ n
-          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))),
+    have key : ∀ (m : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))),
         m = h_n ⟨(r : Spv Bn), r.2.2⟩ →
         ((h_n.symm m : ↥(Spa Bn (ringPlus Bn))) : Spv Bn) = (r : Spv Bn) := by
       intro m hm
@@ -350,14 +346,11 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
     exact key _ (Subtype.ext rfl)
   · -- right inverse
     refine Subtype.ext (Subtype.ext (Subtype.ext ?_))
-    set mz : ↥(bigWindow p F ϖ n
-        ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
-      ⟨((ySpaPoint p F ϖ z.1
-        : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+    set mz : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+      ⟨((ySpaPoint p F ϖ z.1 : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
         z.2.2, (ySpaPoint p F ϖ z.1).2⟩ with hmzdef
     have h1 : (⟨((h_n.symm mz : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
-        (h_n.symm mz).2⟩ : ↥(Spa Bn (ringPlus Bn))) = h_n.symm mz :=
-      Subtype.ext rfl
+        (h_n.symm mz).2⟩ : ↥(Spa Bn (ringPlus Bn))) = h_n.symm mz := Subtype.ext rfl
     exact (congrArg (fun w : ↥(Spa Bn (ringPlus Bn)) =>
         ((h_n w : ↥(bigWindow p F ϖ n
           ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F))) h1).trans
@@ -365,16 +358,14 @@ private def windowTraceHomeomorph (hp : 1 < p) (n : ℤ)
           ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) => (m : Spv (Ainf p F)))
         (h_n.apply_symm_apply mz))
   · -- continuity, forward
-    refine Continuous.subtype_mk (Continuous.subtype_mk
-      (Continuous.subtype_mk ?_ _) _) _
+    refine Continuous.subtype_mk (Continuous.subtype_mk (Continuous.subtype_mk ?_ _) _) _
     exact continuous_subtype_val.comp (h_n.continuous.comp
       (Continuous.subtype_mk continuous_subtype_val _))
   · -- continuity, backward
     refine Continuous.subtype_mk ?_ _
     refine continuous_subtype_val.comp (h_n.symm.continuous.comp ?_)
     refine Continuous.subtype_mk ?_ _
-    exact continuous_subtype_val.comp
-      (continuous_subtype_val.comp continuous_subtype_val)
+    exact continuous_subtype_val.comp (continuous_subtype_val.comp continuous_subtype_val)
 
 /-- **Rational opens over a window chart are a neighbourhood basis of `Spa B_n`.** Given
 a point `w₀` and an open `Q ⊆ Spv B_n` containing it, there is a rational localisation

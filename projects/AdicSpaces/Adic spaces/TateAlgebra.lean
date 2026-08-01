@@ -2335,32 +2335,24 @@ theorem Module.Flat.quotient_of_flat_of_saturated
     (hsat : ∀ (I : Ideal R) (s : S),
       g * s ∈ Ideal.map (algebraMap R S) I → s ∈ Ideal.map (algebraMap R S) I) :
     Module.Flat R (S ⧸ Ideal.span ({g} : Set S)) := by
-  set Q := S ⧸ Ideal.span ({g} : Set S)
-  set π := Ideal.Quotient.mk (Ideal.span ({g} : Set S))
-  apply Module.Flat.of_forall_isTrivialRelation
-  intro l f x hfx
+  set Q := S ⧸ Ideal.span ({g} : Set S); set π := Ideal.Quotient.mk (Ideal.span ({g} : Set S))
+  apply Module.Flat.of_forall_isTrivialRelation; intro l f x hfx
   -- Step 1: Lift x̄ᵢ from Q to S.
   choose x' hx' using fun i ↦ Ideal.Quotient.mk_surjective (x i)
   -- Step 2: ∑ fᵢ • x'ᵢ maps to 0 in Q, so it lies in Ideal.span {g}.
   have hπ_sum : π (∑ i, f i • x' i) = 0 := by
-    rw [map_sum]
-    convert hfx using 1
-    congr 1; ext i
-    change π (f i • x' i) = f i • x i
+    rw [map_sum]; convert hfx using 1
+    congr 1; ext i; change π (f i • x' i) = f i • x i
     rw [Algebra.smul_def, Algebra.smul_def, map_mul, ← RingHom.comp_apply,
       show (π : S →+* Q).comp (algebraMap R S) = algebraMap R Q from rfl, hx']
   have hsum_mem : ∑ i, f i • x' i ∈ Ideal.span ({g} : Set S) :=
     Ideal.Quotient.eq_zero_iff_mem.mp hπ_sum
   -- Extract: w * g = ∑ fᵢ • x'ᵢ for some w.
-  rw [Ideal.mem_span_singleton'] at hsum_mem
-  obtain ⟨w, hw⟩ := hsum_mem
+  rw [Ideal.mem_span_singleton'] at hsum_mem; obtain ⟨w, hw⟩ := hsum_mem
   -- Step 3: g * w ∈ Ideal.map (algebraMap R S) (Ideal.span (Set.range f)).
-  set J := Ideal.span (Set.range f)
-  have hgw_mem : g * w ∈ Ideal.map (algebraMap R S) J := by
-    rw [show g * w = w * g from mul_comm g w, hw]
-    apply Ideal.sum_mem
-    intro i _
-    rw [Algebra.smul_def]
+  set J := Ideal.span (Set.range f); have hgw_mem : g * w ∈ Ideal.map (algebraMap R S) J := by
+    rw [show g * w = w * g from mul_comm g w, hw]; apply Ideal.sum_mem
+    intro i _; rw [Algebra.smul_def]
     exact Ideal.mul_mem_right _ _
       (Ideal.mem_map_of_mem _ (Ideal.subset_span (Set.mem_range_self i)))
   -- Step 4: By saturation, w ∈ Ideal.map (algebraMap R S) J.
@@ -2368,20 +2360,17 @@ theorem Module.Flat.quotient_of_flat_of_saturated
   -- Decompose w: Ideal.map (algebraMap R S) J = Ideal.span (range (algebraMap R S ∘ f)).
   have hJ_map : Ideal.map (algebraMap R S) J = Ideal.span (Set.range (algebraMap R S ∘ f)) := by
     rw [Ideal.map_span]; congr 1; exact (Set.range_comp _ _).symm
-  rw [hJ_map] at hw_mem
-  rw [Ideal.mem_span_range_iff_exists_fun] at hw_mem
+  rw [hJ_map] at hw_mem; rw [Ideal.mem_span_range_iff_exists_fun] at hw_mem
   obtain ⟨c, hc⟩ := hw_mem
   -- So w = ∑ cᵢ * algebraMap(fᵢ).
   -- Step 5: Set x''ᵢ = x'ᵢ - g * cᵢ. Then ∑ fᵢ • x''ᵢ = 0 in S.
-  set x'' : Fin l → S := fun i ↦ x' i - g * c i
-  have hrel : ∑ i, f i • x'' i = 0 := by
+  set x'' : Fin l → S := fun i ↦ x' i - g * c i; have hrel : ∑ i, f i • x'' i = 0 := by
     simp only [x'', smul_sub, Finset.sum_sub_distrib]
     suffices h : ∑ i, f i • (g * c i) = ∑ i, f i • x' i by
       rw [h, sub_self]
     rw [← hw, show w * g = g * w from mul_comm w g,
       show g * w = g * (∑ i, c i * (algebraMap R S ∘ f) i) by rw [hc]]
-    rw [Finset.mul_sum]
-    congr 1; ext i
+    rw [Finset.mul_sum]; congr 1; ext i
     rw [Algebra.smul_def, Function.comp_apply]; ring
   -- Step 6: Apply flatness of S to get trivial relation witnesses.
   have hrel' : ∑ i : Fin l, f i • x'' i = (0 : S) := hrel

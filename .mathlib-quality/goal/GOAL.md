@@ -5849,3 +5849,33 @@ A further six sit 1–3 short, reachable with one abbreviation or one small extr
 Not yet applied: 15 proofs is a large batch and sibling merging is the move that produced the
 `induction … with` breakage, so it wants applying in two or three gated batches rather than one,
 with the module build run per file first.
+
+## 179 → 176: the sibling merge, made a tool
+
+`scratchpad/apply_sibs.py` now performs the equal-indent `; ` merge mechanically, with every
+guard that has bitten this session baked in: no merging onto
+`induction/cases/rcases/obtain/match … with` (its `| alt` blocks detach from a `;` chain), no
+bullets, no `calc` `_` steps, no comment-bearing lines, no line ending mid-expression
+(`:=`/`by`/`=>`/`(`/`[`/`,`/`⟨`), result length checked **before** writing, and no chaining
+within a pass.
+
+Validated on one proof before trusting it anywhere else — `TateAlgebra.quotient_of_flat_of_saturated`
+(need 11, joins 0, so a pure test of the new move): 11 merges, module build green. Then:
+
+| proof | joins | sibs | outcome |
+|---|---|---|---|
+| `quotient_of_flat_of_saturated` | 0 | 11 | cleared |
+| `ιSpvR_retractionSingle_eq` | 3 | 7 | cleared |
+| `locToQuotientOneSubfX_gen_continuous` | 7 | 7 | cleared |
+| `windowTraceHomeomorph` | 9 | 6 of 7 | joins applied, still 1 over |
+
+Two cheap catches worth distinguishing:
+
+* a target name did not resolve — bare `StopIteration` from the tool's `next()`. Worth a real
+  error message, but it failed loudly and changed nothing.
+* my first module build used `«Adic spaces».CurveAdicPresentation`, but the file lives under
+  `FarguesFontaine/`. That surfaces as **`no such file or directory (error code: 4294967294)`**,
+  which reads like a compile failure and is not one — it is lake refusing an unknown module
+  name. Recognising it at a glance saves a wrong diagnosis.
+
+Eleven of the fifteen sibling-merge targets remain.

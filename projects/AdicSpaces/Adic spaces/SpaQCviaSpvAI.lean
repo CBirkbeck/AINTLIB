@@ -331,8 +331,7 @@ theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hgI : g ∈ I)
   by_cases hg0 : v.vle g 0
   · rw [restrictIdealSingleSpv_of_zero hg0]
   · rw [restrictIdealSingleSpv_of_ne hg0]
-    letI : ValuativeRel A := v.toValuativeRel
-    set w := ValuativeRel.valuation A with hw_def
+    letI : ValuativeRel A := v.toValuativeRel; set w := ValuativeRel.valuation A with hw_def
     have hg : w g ≠ 0 := fun h0 => hg0 ((vle_zero_iff_canonical v g).mpr h0)
     set w' := w.restrictIdealSingle g
       (fun h0 => hg0 ((vle_zero_iff_canonical v g).mpr h0)) with hw'_def
@@ -341,28 +340,22 @@ theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hgI : g ∈ I)
     -- `w'(g) ≠ 0`: the generator's value-unit lies in its own window.
     have hg'_ne : w' g ≠ 0 := by
       have hg_mem : Units.mk0 (w g) hg ∈ Valuation.cGammaSingle w g hg := by
-        have := Valuation.invGen_mem_cGammaSingle w g hg
-        simpa using inv_mem this
+        have := Valuation.invGen_mem_cGammaSingle w g hg; simpa using inv_mem this
       rw [hw'_def, Valuation.restrictIdealSingle,
         Valuation.restrictToConvexBounded_apply_mem w _ _ hg hg_mem]
       exact WithZero.coe_ne_zero
     rw [Bool.eq_iff_iff, ιSpvR_eq_true_iff, ιSpvR_eq_true_iff]
     -- destructure the coordinate only AFTER the profile rewrites (v4.33 literal-leak)
-    obtain ⟨⟨T, s⟩, hTI⟩ := p
-    constructor
+    obtain ⟨⟨T, s⟩, hTI⟩ := p; constructor
     · rintro ⟨hT, hs⟩
       have hs_ne : w' s ≠ 0 := by
-        intro h0
-        exact hs ((hbr s 0).mpr (by rw [h0, map_zero]))
+        intro h0; exact hs ((hbr s 0).mpr (by rw [h0, map_zero]))
       constructor
       · intro t ht
-        have hle := (hbr t s).mp (hT t ht)
-        rw [hw'_def, Valuation.restrictIdealSingle] at hle hs_ne
-        rw [vle_iff_canonical]
-        exact (restrictToConvexBounded_le_reflect w _ _ hle hs_ne).1
+        have hle := (hbr t s).mp (hT t ht); rw [hw'_def, Valuation.restrictIdealSingle] at hle hs_ne
+        rw [vle_iff_canonical]; exact (restrictToConvexBounded_le_reflect w _ _ hle hs_ne).1
       · intro hcon
-        have h0 : w s = 0 := (vle_zero_iff_canonical v s).mp hcon
-        refine hs_ne ?_
+        have h0 : w s = 0 := (vle_zero_iff_canonical v s).mp hcon; refine hs_ne ?_
         rw [hw'_def, Valuation.restrictIdealSingle]
         exact Valuation.restrictToConvexBounded_apply_zero w _ _ h0
     · rintro ⟨hT, hs0⟩
@@ -378,18 +371,15 @@ theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hgI : g ∈ I)
             exact restrictToConvexBounded_le_of_le w _ _ hle
           rw [h0, le_zero_iff] at hle'
           exact (Valuation.mem_supp_iff w' t).mpr hle'
-        have hspan : Ideal.span (T : Set A) ≤ w'.supp :=
-          Ideal.span_le.mpr fun t ht => hTz t ht
-        have hg_rad : g ∈ (Ideal.span (T : Set A)).radical :=
-          hTI hgI
+        have hspan : Ideal.span (T : Set A) ≤ w'.supp := Ideal.span_le.mpr fun t ht => hTz t ht
+        have hg_rad : g ∈ (Ideal.span (T : Set A)).radical := hTI hgI
         obtain ⟨n, hn⟩ := hg_rad
         have hprime : (w'.supp).IsPrime := inferInstance
         have hg_supp : g ∈ w'.supp := hprime.mem_of_pow_mem n (hspan hn)
         exact hg'_ne ((Valuation.mem_supp_iff w' g).mp hg_supp)
       refine ⟨fun t ht => ?_, fun hcon => ?_⟩
       · rw [hbr, hw'_def, Valuation.restrictIdealSingle]
-        exact restrictToConvexBounded_le_of_le w _ _
-          ((vle_iff_canonical v t s).mp (hT t ht))
+        exact restrictToConvexBounded_le_of_le w _ _ ((vle_iff_canonical v t s).mp (hT t ht))
       · have h0 := (hbr s 0).mp hcon
         rw [map_zero, le_zero_iff] at h0
         exact hs'_ne h0
