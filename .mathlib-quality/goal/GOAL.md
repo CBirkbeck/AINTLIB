@@ -7490,3 +7490,43 @@ carry block.** Carrying is for locals whose type exists nowhere — `set` terms,
 because carrying is mechanical, and that inflated helper bodies past the budget
 on at least three targets I then rejected.
 
+
+## 148 → 147: `valued_resI_rpow_interpolate` 94 → 48, after two wrong rejections
+
+I rejected this target twice, computing "helper = carried locals + body = 69
+lines" both times. The arithmetic was right and the premise was wrong:
+**signature lines do not count against the 50-line body budget.**
+
+Six of `hpad`'s locals have writable types, so they belong in the *signature*:
+
+    hpt                 written in place
+    hlim', hlim'', hlimc  the conclusion of `tendsto_resI`, instantiated 3 ways
+    (v', v'', hne)      carried instead — their terms are shorter than their types
+
+Helper body 49, parent 48. Both clear.
+
+**The rule, which contradicts how I ranked targets for most of this campaign:**
+a local whose type is *writable* belongs in the signature; carrying is for
+locals whose type exists *nowhere* — `set` terms, `rw`-mutated hypotheses,
+`obtain` witnesses. I had been carrying everything because carrying is
+mechanical, and that inflated helper estimates past budget on at least three
+targets I then declared infeasible.
+
+### The width check was measuring bytes
+
+After the extraction, `awk 'length($0)>100'` reported 7 over-long lines against
+6 at HEAD, and I started to revert. **awk counts BYTES.** Lean source is
+Unicode-dense (`ρ ϖ ε ≤ ₀`), so a 96-character line measures 107 bytes. Measured
+in characters the count is **zero, before and after**.
+
+This gotcha is recorded in my own notes ("awk len>100 over-flags Unicode") and I
+used awk anyway. Worse, the guard I added to `inline_junk.py` last commit
+correctly uses Python `len` — so the tool and its verification disagreed, and
+the verification was the wrong one.
+
+`check_width.py` now measures characters and diffs against HEAD, so a real
+regression is distinguishable from an encoding artifact.
+
+Note this does **not** undo the previous retraction: that line was 1004 bytes,
+which is egregious under either measure.
+

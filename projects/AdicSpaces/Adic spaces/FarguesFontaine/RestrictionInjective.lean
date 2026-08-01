@@ -64,6 +64,85 @@ theorem rpow_mid_interpolate (hρ₁0 : 0 < ρ₁) (hρ₂0 : 0 < ρ₂) (θ' θ
     show (1 - θ') * c + (1 - θ'') * (1 - c)
       = 1 - (c * θ' + (1 - c) * θ'') by ring]
 
+/-- The ε-padded three-circles bound. Extracted from
+`valued_resI_rpow_interpolate`; the padding is removed by a limit there. -/
+private theorem valued_resI_le_max_pow {θ' θ'' c : ℝ} (hc0 : 0 < c) (hc1 : c < 1)
+    (hm'0 : 0 < ρ₁ ^ θ' * ρ₂ ^ (1 - θ')) (hm'1 : ρ₁ ^ θ' * ρ₂ ^ (1 - θ') < 1)
+    (hm''0 : 0 < ρ₁ ^ θ'' * ρ₂ ^ (1 - θ''))
+    (hm''1 : ρ₁ ^ θ'' * ρ₂ ^ (1 - θ'') < 1)
+    (hmc0 : 0 < ρ₁ ^ (c * θ' + (1 - c) * θ'')
+      * ρ₂ ^ (1 - (c * θ' + (1 - c) * θ'')))
+    (hmc1 : ρ₁ ^ (c * θ' + (1 - c) * θ'')
+      * ρ₂ ^ (1 - (c * θ' + (1 - c) * θ'')) < 1)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hpt : ∀ x : Bloc p F ϖ,
+      Valued.v (BlocToHatK p F ϖ hmc0 hmc1 x)
+        ≤ Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x) ^ c
+          * Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x) ^ (1 - c))
+    (hlim' : Filter.Tendsto (fun x => BlocToHatK p F ϖ hm'0 hm'1 x)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)))
+    (hlim'' : Filter.Tendsto (fun x => BlocToHatK p F ϖ hm''0 hm''1 x)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z)))
+    (hlimc : Filter.Tendsto (fun x => BlocToHatK p F ϖ hmc0 hmc1 x)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmc0 hmc1 z))) :
+    ∀ ε : NNReal, 0 < ε →
+      Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmc0 hmc1 z)
+        ≤ (max (Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)) ε) ^ c
+          * (max (Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z)) ε) ^ (1 - c) := by
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  set v' := Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) with hv'def
+  set v'' := Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) with hv''def
+  intro ε hε
+  have hC0 : 0 < (max v' ε) ^ c * (max v'' ε) ^ (1 - c) :=
+    mul_pos (NNReal.rpow_pos (lt_of_lt_of_le hε (le_max_right _ _)))
+      (NNReal.rpow_pos (lt_of_lt_of_le hε (le_max_right _ _)))
+  refine (isClosed_valued_ball p F hC0).mem_of_tendsto hlimc ?_
+  have hev' := hlim' (valued_ball_mem_nhds p F
+    (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) hε)
+  have hev'' := hlim'' (valued_ball_mem_nhds p F
+    (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) hε)
+  filter_upwards [hev', hev''] with x hx' hx''
+  have hb' : Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x) ≤ max v' ε := by
+    have hd : Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x
+        - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) ≤ ε := hx'
+    have hsplit : BlocToHatK p F ϖ hm'0 hm'1 x
+        = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z
+          + (BlocToHatK p F ϖ hm'0 hm'1 x
+            - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) := by ring
+    calc Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x)
+        = Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z
+          + (BlocToHatK p F ϖ hm'0 hm'1 x
+            - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)) := by rw [← hsplit]
+      _ ≤ max v' (Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x
+            - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)) :=
+          Valuation.map_add _ _ _
+      _ ≤ max v' ε := max_le_max le_rfl hd
+  have hb'' : Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x) ≤ max v'' ε := by
+    have hd : Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x
+        - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) ≤ ε := hx''
+    have hsplit : BlocToHatK p F ϖ hm''0 hm''1 x
+        = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z
+          + (BlocToHatK p F ϖ hm''0 hm''1 x
+            - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) := by ring
+    calc Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x)
+        = Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z
+          + (BlocToHatK p F ϖ hm''0 hm''1 x
+            - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z)) := by rw [← hsplit]
+      _ ≤ max v'' (Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x
+            - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z)) :=
+          Valuation.map_add _ _ _
+      _ ≤ max v'' ε := max_le_max le_rfl hd
+  calc Valued.v (BlocToHatK p F ϖ hmc0 hmc1 x)
+      ≤ Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x) ^ c
+        * Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x) ^ (1 - c) := hpt x
+    _ ≤ (max v' ε) ^ c * (max v'' ε) ^ (1 - c) :=
+        mul_le_mul (NNReal.rpow_le_rpow hb' hc0.le)
+          (NNReal.rpow_le_rpow hb'' (by linarith)) zero_le zero_le
+
 /-- **Three circles for the intermediate values of `B^I`** (Kedlaya Cor 4.5 upgraded
 to the completed setting): the `resI`-value at the combined weight is bounded by the
 interpolated product of the two `resI`-values. -/
@@ -107,55 +186,8 @@ theorem valued_resI_rpow_interpolate {θ' θ'' c : ℝ}
     rw [valued_BlocToHatK, valued_BlocToHatK, valued_BlocToHatK]
     exact h0
   -- the padded bound, one ε at a time
-  have hpad : ∀ ε : NNReal, 0 < ε →
-      Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmc0 hmc1 z)
-        ≤ (max v' ε) ^ c * (max v'' ε) ^ (1 - c) := by
-    intro ε hε
-    have hC0 : 0 < (max v' ε) ^ c * (max v'' ε) ^ (1 - c) :=
-      mul_pos (NNReal.rpow_pos (lt_of_lt_of_le hε (le_max_right _ _)))
-        (NNReal.rpow_pos (lt_of_lt_of_le hε (le_max_right _ _)))
-    refine (isClosed_valued_ball p F hC0).mem_of_tendsto hlimc ?_
-    have hev' := hlim' (valued_ball_mem_nhds p F
-      (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) hε)
-    have hev'' := hlim'' (valued_ball_mem_nhds p F
-      (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) hε)
-    filter_upwards [hev', hev''] with x hx' hx''
-    have hb' : Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x) ≤ max v' ε := by
-      have hd : Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x
-          - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) ≤ ε := hx'
-      have hsplit : BlocToHatK p F ϖ hm'0 hm'1 x
-          = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z
-            + (BlocToHatK p F ϖ hm'0 hm'1 x
-              - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z) := by ring
-      calc Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x)
-          = Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z
-            + (BlocToHatK p F ϖ hm'0 hm'1 x
-              - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)) := by rw [← hsplit]
-        _ ≤ max v' (Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x
-              - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm'0 hm'1 z)) :=
-            Valuation.map_add _ _ _
-        _ ≤ max v' ε := max_le_max le_rfl hd
-    have hb'' : Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x) ≤ max v'' ε := by
-      have hd : Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x
-          - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) ≤ ε := hx''
-      have hsplit : BlocToHatK p F ϖ hm''0 hm''1 x
-          = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z
-            + (BlocToHatK p F ϖ hm''0 hm''1 x
-              - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z) := by ring
-      calc Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x)
-          = Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z
-            + (BlocToHatK p F ϖ hm''0 hm''1 x
-              - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z)) := by rw [← hsplit]
-        _ ≤ max v'' (Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x
-              - resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm''0 hm''1 z)) :=
-            Valuation.map_add _ _ _
-        _ ≤ max v'' ε := max_le_max le_rfl hd
-    calc Valued.v (BlocToHatK p F ϖ hmc0 hmc1 x)
-        ≤ Valued.v (BlocToHatK p F ϖ hm'0 hm'1 x) ^ c
-          * Valued.v (BlocToHatK p F ϖ hm''0 hm''1 x) ^ (1 - c) := hpt x
-      _ ≤ (max v' ε) ^ c * (max v'' ε) ^ (1 - c) :=
-          mul_le_mul (NNReal.rpow_le_rpow hb' hc0.le)
-            (NNReal.rpow_le_rpow hb'' (by linarith)) zero_le zero_le
+  have hpad := valued_resI_le_max_pow p F ϖ hc0 hc1 hm'0 hm'1 hm''0 hm''1 hmc0 hmc1
+    hz hpt hlim' hlim'' hlimc
   -- let ε → 0 along the geometric sequence
   have hseq : Filter.Tendsto
       (fun m : ℕ => (max v' ((2⁻¹ : NNReal) ^ m)) ^ c
