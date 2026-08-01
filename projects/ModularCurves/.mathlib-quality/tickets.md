@@ -31331,3 +31331,31 @@ missing lemma is precisely the compatibility of the project's `mulModelHom`/`neg
 with the dictionary — the tree already has `mulModelHom_specPoints` and
 `negModelHom_specPoints` (referenced in PointsDictionary's docstring); the next session
 should locate them and chain.
+
+## ★★★★★★★★★ [W1-d3.2c] THE COMPLETE CHAIN — every link verified to exist 2026-08-01
+The last leaf of the WP prong is now a chain of EXISTING lemmas plus bookkeeping:
+
+  1. project group law on points ⟶ `mulModelHom` / `negModelHom`
+     (the group object is built from these: `GroupLawConstruction`, `GroupLawAxioms`);
+  2. `ModularCurves.mulModelHom_specPoints` (AdditionSpecPoints.lean:1776):
+       dictionary (sum of scheme points) = sum of affine points, ANY elliptic W/R, ANY field K;
+  3. `ModularCurves.negModelHom_specPoints` (GroupLawConstruction.lean:720):
+       dictionary (negation) = affine negation;
+  4. `ModularCurves.neg_add_eq_some_negAddY` (NEW, this session):
+       over a field, `-(P+Q) = some (addX, negAddY)`;
+  5. `ModularCurves.projModelPointsEquiv_some/_zero` (PointsDictionary:180/168):
+       reads coordinates back from the dictionary;
+  6. `ModularCurves.hom_ext_of_forall_algebra` / `section_ext_of_forall_specPoint`
+     (NEW, this session): upgrade the field-point identity to a section identity over a
+     REDUCED base (for the universal atlas power the reducedness is already discharged);
+  7. `ModularCurves.chord_vanishes_at_three_points` (NEW): the chord passes through
+     `(addX, negAddY)` by definition ⟹ the three evaluation vanishings;
+  8. `mul_dvd_of_evaluations_vanish` + `eq_unit_mul_of_three_divisions` (NEW) ⟹ the
+     exact-order hypothesis of `nonempty_iso_unitObj_of_exact_order₃`;
+  9. ⟹ a `ChordDatum`, ⟹ `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`
+     (the local theorem of the square), ⟹ the W2 descent toolkit,
+     ⟹ `exists_invertible_tensor_idealModule_add` (SelfAdjointN.lean:259).
+The only genuinely new mathematics still to write is the *unit* half of step 8 (that the
+final quotient is a unit) — the adjugate bricks
+(`not_isUnit_det_of_mulVec_eq_zero`, this session) are the intended tool — and the
+bookkeeping that glues steps 1–3 to the section-level statement.
