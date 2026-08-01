@@ -7249,3 +7249,35 @@ Note also that auto-binding includes only the variables actually *used*, in
 declaration order, so the call list is not the `variable` line: `ht1` is absent
 here and `hscale` (declared elsewhere) is present.
 
+
+## 150 → 149: a small clean extraction beats a large blocked one
+
+`ideal_eq_span_groebner`, 67 → 46. The obvious target was `hzero` — 22 lines,
+frees 21, clears outright. It is blocked: it depends on `hkey`, bound by
+`have hkey := gaussNorm_sub_combination_le …`, which has **no written type**.
+
+Instead I cut one level lower to `hgeo` (6 lines), whose only dependencies are
+`ε`, `hε1`, `y₀`. It frees 5 — not enough alone — but with 10 joins the proof
+reaches 46.
+
+**A small clean extraction plus line-shaping beats a large extraction with an
+unwritable hypothesis.** That is a different ranking from the one my tools use,
+which order candidates by block size: the biggest block is often the one whose
+context is hardest to reconstruct, precisely because it sits latest in the proof
+and has accumulated the most locals.
+
+Second consecutive win for "cut lower" — the first was `toAdic`, where the
+structure field's `funext`/`Subtype.ext` goal was unstateable but the norm
+estimate inside it was not.
+
+### Reading the full mismatch, applied
+
+One build failure, fixed in a single round. The error said
+
+    ArSub p F ϖ hρ0 hρ1   expected hρ1 : ρ0 < 1, got ρ1 < 1
+
+i.e. the API wants both hypotheses for the *same* `ρ`, and I had written
+`{ρ0 ρ1 : NNReal}` with `hρ0 : 0 < ρ0`, `hρ1 : ρ1 < 1` — two variables where one
+belongs. Reading the whole message named it immediately; a turn ago this class
+of signature error cost me four builds because I read only the first line.
+

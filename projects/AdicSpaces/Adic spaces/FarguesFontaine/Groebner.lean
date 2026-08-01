@@ -2234,6 +2234,19 @@ private theorem gaussNorm_sub_combination_le {ρ : NNReal} {hρ0 : 0 < ρ}
   refine le_trans (mul_le_mul_of_nonneg_right hUb zero_le) ?_
   rw [mul_assoc, inv_mul_cancel₀ (hgpos g).ne', mul_one]
 
+/-- `ε ^ l · ‖y₀‖` tends to zero when `ε < 1`. -/
+private theorem tendsto_pow_mul_gaussNormRPS {ρ : NNReal}
+    {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {k : ℕ} {ε : NNReal} (hε1 : ε < 1)
+    (y₀ : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
+    Filter.Tendsto (fun l => ε ^ l * gaussNormRPS p F ϖ hρ0 hρ1
+        (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+      Filter.atTop (nhds 0) := by
+  have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
+    (zero_le : (0 : NNReal) ≤ ε) hε1).mul_const
+    (gaussNormRPS p F ϖ hρ0 hρ1
+      (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+  rwa [zero_mul] at h1
+
 /-- **Kedlaya Lemma 3.9**: the Gröbner generators generate the ideal. -/
 theorem ideal_eq_span_groebner {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {ε : NNReal} {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))} {G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
@@ -2265,53 +2278,36 @@ theorem ideal_eq_span_groebner {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       rw [hy₀0]
       exact Ideal.zero_mem _
     have hBpos : 0 < gaussNormRPS p F ϖ hρ0 hρ1
-        (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
-      pos_iff_ne_zero.mpr hB0
+        (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := pos_iff_ne_zero.mpr hB0
     obtain ⟨Y, α, hY0, hYeq, hYnorm, hAnorm⟩ :=
-      exists_reduction_sequence p F ϖ hGH hG0 hGtail hGdeg hGdom hε0 hε1
-        hy₀H le_rfl
+      exists_reduction_sequence p F ϖ hGH hG0 hGtail hGdeg hGdom hε0 hε1 hy₀H le_rfl
     have hgpos : ∀ g : {g : GRing p F ϖ k hρ0 hρ1 // g ∈ G},
         0 < gaussNormRPS p F ϖ hρ0 hρ1
-          ((g : GRing p F ϖ k hρ0 hρ1)
-            : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := fun g =>
-      pos_iff_ne_zero.mpr (gaussNormRPS_ne_zero p F ϖ
-        (g : GRing p F ϖ k hρ0 hρ1).2 (hG0 g.1 g.2))
+          ((g : GRing p F ϖ k hρ0 hρ1) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := fun g =>
+      pos_iff_ne_zero.mpr (gaussNormRPS_ne_zero p F ϖ (g : GRing p F ϖ k hρ0 hρ1).2 (hG0 g.1 g.2))
     have hlim : ∀ g : {g : GRing p F ϖ k hρ0 hρ1 // g ∈ G},
         ∃ U : GRing p F ϖ k hρ0 hρ1, ∀ (n : ℕ) (b : NNReal), 0 < b →
           (∀ l, n ≤ l → ε ^ l * gaussNormRPS p F ϖ hρ0 hρ1
               (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
             * (gaussNormRPS p F ϖ hρ0 hρ1
-              ((g : GRing p F ϖ k hρ0 hρ1)
-                : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ ≤ b) →
+              ((g : GRing p F ϖ k hρ0 hρ1) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))⁻¹ ≤ b) →
           gaussNormRPS p F ϖ hρ0 hρ1
-            (((U - ∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1)
-              : GRing p F ϖ k hρ0 hρ1))
+            (((U - ∑ l ∈ Finset.range n, α l (g : GRing p F ϖ k hρ0 hρ1) : GRing p F ϖ k hρ0 hρ1))
               : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ b := fun g =>
-      exists_combination_limit p F ϖ hε1
-        (fun l => α l (g : GRing p F ϖ k hρ0 hρ1))
+      exists_combination_limit p F ϖ hε1 (fun l => α l (g : GRing p F ϖ k hρ0 hρ1))
         (g : GRing p F ϖ k hρ0 hρ1) (hgpos g)
         (fun l => hAnorm l (g : GRing p F ϖ k hρ0 hρ1) g.2)
     choose U hU using hlim
-    have hkey := gaussNorm_sub_combination_le p F ϖ hε0 hε1 hBpos hgpos
-      y₀ Y α hY0 hYeq hYnorm U hU
+    have hkey := gaussNorm_sub_combination_le p F ϖ hε0 hε1 hBpos hgpos y₀ Y α hY0 hYeq hYnorm U hU
     have hzero : (y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
         : GRing p F ϖ k hρ0 hρ1) = 0 := by
-      have hgeo : Filter.Tendsto (fun l => ε ^ l * gaussNormRPS p F ϖ hρ0 hρ1
-          (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
-          Filter.atTop (nhds 0) := by
-        have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
-          (zero_le : (0 : NNReal) ≤ ε) hε1).mul_const
-          (gaussNormRPS p F ϖ hρ0 hρ1
-            (y₀ : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
-        rwa [zero_mul] at h1
+      have hgeo := tendsto_pow_mul_gaussNormRPS p F ϖ hε1 y₀
       have hnorm0 : gaussNormRPS p F ϖ hρ0 hρ1
-          (((y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
-            : GRing p F ϖ k hρ0 hρ1))
+          (((y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1) : GRing p F ϖ k hρ0 hρ1))
             : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = 0 := by
         by_contra hne
         have hpos := pos_iff_ne_zero.mpr hne
-        obtain ⟨n, hn⟩ := Filter.eventually_atTop.mp
-          (hgeo.eventually_lt_const hpos)
+        obtain ⟨n, hn⟩ := Filter.eventually_atTop.mp (hgeo.eventually_lt_const hpos)
         exact absurd (lt_of_le_of_lt (hkey n) (hn n le_rfl)) (lt_irrefl _)
       exact Subtype.ext ((gaussNormRPS_eq_zero_iff p F ϖ
         (y₀ - ∑ g ∈ G.attach, U g * (g : GRing p F ϖ k hρ0 hρ1)
