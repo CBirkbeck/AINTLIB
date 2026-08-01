@@ -31117,3 +31117,22 @@ Leaves, in dependency order:
 (and the two-factor analogue for the vertical). Everything else in the prong is proven.
 REMAINING: [W1-d3] the chord–tangent vanishing σ_{-(P+Q)}(…) = 0 — the universal-atlas
 computation (two-point space + transfer + the field case).
+
+## ★★★★★★★ [WP PRONG] FULLY REDUCED 2026-08-01
+`ModularCurves.EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` (axiom-clean):
+for the project's `EllipticCurve S` and points P Q, a
+`ChordDatum E.zero E.zero_π P Q (P+Q) (-(P+Q))` yields
+   I(P) ⊗ I(Q) ≅ I(P+Q) ⊗ I(0),
+which is the local (chart-level) theorem of the square in the exact shape
+`Picard/SelfAdjointN.lean` consumes after descent.
+
+**THE ENTIRE REMAINING TASK OF THE PRONG** is to construct that `ChordDatum`, and by
+[W1-d2/d4] that means exhibiting, in one Weierstrass chart:
+  σ_P(c_ℓ) = 0 ; σ_Q(c_ℓ/g_P) = 0 ; σ_{-(P+Q)}(c_ℓ/(g_P g_Q)) = 0 ; last quotient a unit
+(plus the two-factor analogue for the vertical), where ℓ is produced by
+`exists_chord_of_unimodular` and v by `exists_vertical_of_unimodular`.
+The only non-mechanical ingredient is the third equation — the chord–tangent theorem —
+to be proved over the universal Weierstrass atlas and transferred (GroupLawAxioms idiom).
+
+Root build green at 9615 jobs throughout; every declaration listed in this session's
+entries audits to exactly propext / Classical.choice / Quot.sound.
