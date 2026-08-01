@@ -27,7 +27,7 @@ is the product of the multipliers (`chartMultiplier_comp`).
 
 universe u
 
-open CategoryTheory AlgebraicGeometry Opposite MonoidalCategory
+open CategoryTheory AlgebraicGeometry Opposite MonoidalCategory Matrix
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -743,6 +743,50 @@ theorem nonempty_baseSections_cokernel_iteratedTwist₃_equiv_of_sections
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
       Matrix.head_cons, Matrix.tail_cons]
     rw [mul_assoc]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The iterated line.** For a section pair on a principal chart and an invertible
+`L` with a rank-three basis of base sections, the kernel of the iterated restriction
+is free of rank one, spanned by the cross product of the evaluation rows — the
+tensor-shaped counterpart of `exists_ker_baseSectionsMap_cokernel_eq_span_of_sections`.
+The surjectivity input is where the cohomology enters. -/
+theorem exists_ker_baseSectionsMap_cokernel_iteratedTwist_eq_span_of_sections
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (P Q : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens)
+    (hPU : P.1 ⁻¹ᵁ U.1 = ⊤) (hQU : Q.1 ⁻¹ᵁ U.1 = ⊤)
+    (rP rQ : Γ(C, U.1))
+    (hP : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQ : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
+    (hnzdP : rP ∈ nonZeroDivisors Γ(C, U.1))
+    (hnzdQ : rQ ∈ nonZeroDivisors Γ(C, U.1))
+    (L : C.Modules) (hL : IsInvertible L)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    (hsurj : Function.Surjective
+      ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L))).hom))
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π L)) :
+    ∃ ℓ : Scheme.Modules.baseSections π L,
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {ℓ} := by
+  classical
+  obtain ⟨e2⟩ := nonempty_baseSections_cokernel_iteratedTwist_equiv_pair_of_sections
+    hsm P Q U hPU hQU rP rQ hP hQ hnzdP hnzdQ L hL eL halg
+  exact ⟨b3.equivFun.symm
+      ((fun j => e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L)))
+          (b3 j)) 0) ⨯₃
+       (fun j => e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L)))
+          (b3 j)) 1)),
+    ker_baseSectionsMap_cokernel_eq_span_crossProduct_of_surjective _ b3 e2 hsurj⟩
 
 end IteratedTwist
 
