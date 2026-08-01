@@ -147,3 +147,38 @@ theorem eq_unit_mul_of_two_divisions {A : Type*} [CommRing A]
   ring
 
 end AlgebraicGeometry.Scheme.Modules
+
+namespace ModularCurves
+
+open AlgebraicGeometry.Scheme.Modules
+
+variable {S : Scheme.{u}}
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1] The theorem of the square for an elliptic curve, from a chord datum.**
+Specialisation of `nonempty_tensorObj_iso_of_chordDatum` to the project's elliptic
+curves, with the third point taken to be `-(P + Q)` for the group law of `E`: a chord
+datum for `(P, Q, P + Q, -(P + Q))` gives `I(P) ⊗ I(Q) ≅ I(P+Q) ⊗ I(0)`.
+
+Constructing that chord datum — the chord through `P` and `Q` meets the curve again at
+`-(P+Q)`, to exact order — is the one remaining input of the Weil-pairing prong. -/
+theorem EllipticCurve.nonempty_tensorObj_iso_of_chordDatum
+    (E : EllipticCurve S) [IsSeparated E.π]
+    (P Q : E.Point (𝟙 S))
+    (h : ChordDatum (π := E.π) E.zero E.zero_π
+      ⟨P.1, by rw [P.2]⟩ ⟨Q.1, by rw [Q.2]⟩
+      ⟨(P + Q).1, by rw [(P + Q).2]⟩ ⟨(-(P + Q)).1, by rw [(-(P + Q)).2]⟩) :
+    Nonempty (tensorObj
+        (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker P.1))
+        (AlgebraicGeometry.Scheme.Modules.idealModule (Scheme.Hom.ker Q.1)) ≅
+      tensorObj
+        (AlgebraicGeometry.Scheme.Modules.idealModule
+          (Scheme.Hom.ker (P + Q).1))
+        (ModularCurves.sectionIdealModule E.π E.zero E.zero_π)) :=
+  AlgebraicGeometry.Scheme.Modules.nonempty_tensorObj_iso_of_chordDatum
+    E.smooth E.zero E.zero_π
+    ⟨P.1, by rw [P.2]⟩ ⟨Q.1, by rw [Q.2]⟩
+    ⟨(P + Q).1, by rw [(P + Q).2]⟩ ⟨(-(P + Q)).1, by rw [(-(P + Q)).2]⟩ h
+
+end ModularCurves
