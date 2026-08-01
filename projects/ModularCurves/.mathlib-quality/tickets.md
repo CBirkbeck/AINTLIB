@@ -31056,3 +31056,13 @@ Rm = -(P+Q) from the project's group law) is the whole remaining task.
    `-(P+Q)`. That is the shape to prove universally.
 NEXT SESSION should start at: build the universal two-point space and its reducedness,
 then the chord's coefficient computation in the away-chart.
+
+### [W1-a] DONE 2026-08-01 — surjectivity ⟺ unimodularity, both directions
+`surjective_of_span_range_crossProduct_eq_top` (CrossProductKernel) +
+`surjective_baseSectionsMap_cokernel_of_unimodular` (LineVerticalConsumers), axiom-clean.
+Consumers of the line/vertical may now supply EITHER
+  (i) H¹-vanishing of the twisted module (cohomological), OR
+  (ii) unimodularity of the 2×2 minors of the evaluation matrix (chart-level, Cramer),
+and each yields the other. For the chord campaign this matters: over a Weierstrass chart
+the minors are explicit (differences of coordinates of P and Q), so the chart route
+avoids the twisted-H¹ leaf entirely.
