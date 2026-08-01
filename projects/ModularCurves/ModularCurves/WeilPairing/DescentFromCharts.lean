@@ -530,4 +530,22 @@ theorem bijective_smul_overTrivializationSection_one {X : Scheme.{u}} (M : X.Mod
         overTrivializationSection_coefficient_self M U e y⟩
   simpa only [hkey] using hsec
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.7c] The coefficient-one section generates on every subopen.** Restricting it
+gives the coefficient-one section of the restricted frame
+(`overTrivializationSection_restrict`), so `bijective_smul_overTrivializationSection_one`
+applies there too. This is the `hbij` hypothesis of
+`nonempty_unitObj_iso_of_normalized_glue` in the exact form it is stated. -/
+theorem bijective_smul_restrict_overTrivializationSection_one {X : Scheme.{u}}
+    (M : X.Modules) {U W : X.Opens} (hW : W ≤ U)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    Function.Bijective (fun r : Γ(X, W) =>
+      r • M.presheaf.map (homOfLE hW).op
+        (overTrivializationSection M U e (1 : Γ(X, U)))) := by
+  have h := overTrivializationSection_restrict M hW e (1 : Γ(X, U))
+  rw [map_one] at h
+  rw [h]
+  exact bijective_smul_overTrivializationSection_one M W _
+
 end ModularCurves
