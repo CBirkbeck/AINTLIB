@@ -31387,3 +31387,27 @@ THE RESIDUE OF THE ENTIRE PRONG (two items):
  (ii) the UNIT half of the exact-order hypothesis (adjugate criterion).
 Both are mechanical relative to what is proven; no further conceptual input is needed.
 Root build 9617 jobs; audit sweeps clean throughout.
+
+## SESSION LEDGER 2026-08-01 (final) — WP prong
+Root build 9617 jobs green; every declaration below audits to
+propext / Classical.choice / Quot.sound (several to fewer).
+
+NEW FILES: WeilPairing/IteratedTwist.lean, LineVerticalAssembly.lean,
+DescentFromCharts.lean, ChordIdentity.lean, TautologicalPair.lean
+(all root-indexed in ModularCurves.lean).
+
+HEADLINE RESULTS: the line and the vertical as rank-one kernels (product-ideal AND
+tensor shapes; arities 1/2/3/m; pole-sheaf instantiated); the exact-order trivialization
+criterion; the theorem of the square from a chord datum, in the project's
+`EllipticCurve` language; the descent toolkit from chart trivializations; the
+tautological pair with transport of a chord datum along any base change;
+`chord_vanishes_at_three_points` (the chord–tangent vanishing is definitional in
+Weierstrass coordinates); the dictionary chain identifying the scheme-level `-(P+Q)`
+with `(addX, negAddY)` at every field point; and the Cramer/adjugate toolkit for the
+exactness half.
+
+WHAT IS LEFT (the whole of it): assemble the coordinate bookkeeping — express the
+chord's chart multiplier and the three evaluations in away-chart coordinates and apply
+`section_eq_of_dictionary_eq` + `eq_unit_mul_of_three_divisions` — to construct a
+`ChordDatum`; then `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` and the descent
+close `exists_invertible_tensor_idealModule_add` (SelfAdjointN.lean:259).
