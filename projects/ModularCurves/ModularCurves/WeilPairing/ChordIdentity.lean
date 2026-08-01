@@ -819,6 +819,22 @@ theorem exists_unit_generator_eq_sub_coord {R A : Type u} [CommRing R] [CommRing
   obtain ⟨b, hb⟩ := Ideal.mem_span_singleton'.mp hmem₂
   exact ⟨⟨a, by rw [← ha, mul_comm]⟩, ⟨b, by rw [← hb, mul_comm]⟩⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 E1b] The exact-order form is invariant under associate generators.** Replacing
+each generator by a unit multiple only changes the cofactor by a unit, so the
+factorisation proved with coordinate differences transfers to the generators the
+section machinery supplies. -/
+theorem eq_unit_mul_of_associates {A : Type u} [CommRing A]
+    (c f₁ f₂ f₃ g₁ g₂ g₃ : A) (u v₁ v₂ v₃ : Aˣ)
+    (hfac : c = (u : A) * (f₁ * (f₂ * f₃)))
+    (hg₁ : f₁ = (v₁ : A) * g₁) (hg₂ : f₂ = (v₂ : A) * g₂)
+    (hg₃ : f₃ = (v₃ : A) * g₃) :
+    c = ((u * v₁ * v₂ * v₃ : Aˣ) : A) * (g₁ * (g₂ * g₃)) := by
+  rw [hfac, hg₁, hg₂, hg₃]
+  push_cast
+  ring
+
 end ModularCurves
 
 namespace ModularCurves
