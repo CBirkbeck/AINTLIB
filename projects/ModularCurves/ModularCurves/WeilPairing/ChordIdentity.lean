@@ -487,6 +487,21 @@ theorem exists_three_divisions {R A : Type u} [CommRing R] [CommRing A] [Algebra
   obtain ⟨a₃, ha₃⟩ := Ideal.mem_span_singleton'.mp hm₃
   exact ⟨a₁, a₂, a₃, hc₁, hc₂, by rw [← ha₃, mul_comm]⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (2)+(3), assembled] From the three divisions to the exact-order form.**
+Given the successive quotients and a proof that the last one is a unit, the element is
+a unit multiple of the product of the three generators — the hypothesis of
+`nonempty_iso_unitObj_of_exact_order₃`. -/
+theorem eq_unit_mul_of_three_divisions_of_isUnit {A : Type u} [CommRing A]
+    (c gP gQ gR c₁ c₂ c₃ : A)
+    (hc₁ : c = gP * c₁) (hc₂ : c₁ = gQ * c₂) (hc₃ : c₂ = gR * c₃)
+    (hu : IsUnit c₃) :
+    ∃ u : Aˣ, c = (u : A) * (gP * (gQ * gR)) := by
+  obtain ⟨u, rfl⟩ := hu
+  exact ⟨u, AlgebraicGeometry.Scheme.Modules.eq_unit_mul_of_three_divisions
+    c gP gQ gR c₁ c₂ u hc₁ hc₂ hc₃⟩
+
 end ModularCurves
 
 namespace ModularCurves
