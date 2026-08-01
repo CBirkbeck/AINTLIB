@@ -31027,3 +31027,32 @@ content the theorem of the square supplies, not something the descent can produc
   [W1] the chord/vertical chart-coefficient identities (universal Weierstrass atlas), and
   [W1'] the coboundary/rigidification datum, which the same universal computation gives
         (the chord's z-value is computable in the chart).
+
+## ★★★★★★ [W1 INTERFACE] `ChordDatum` LANDED 2026-08-01 (WeilPairing/ChordIdentity.lean)
+The entire remaining geometric content of the WP prong is now ONE structure:
+  `ChordDatum z hz P Q R Rm` = (principal kernels) + (chord trivializes
+   I(P)⊗(I(Q)⊗(I(Rm)⊗𝒪(3[0])))) + (vertical trivializes I(R)⊗(I(Rm)⊗𝒪(2[0]))),
+and `nonempty_tensorObj_iso_of_chordDatum` derives I(P)⊗I(Q) ≅ I(R)⊗I(0) from it —
+PROVEN, axiom-clean, root build 9615 jobs. Constructing a ChordDatum (with R = P+Q,
+Rm = -(P+Q) from the project's group law) is the whole remaining task.
+
+**How to construct one** (all the tooling exists):
+ * the trivializations come from `nonempty_iso_unitObj_of_exact_order₃` / `₂`
+   (IteratedTwist.lean): supply a section ℓ (resp. v) of the pole sheaf with
+   (i) cokernel-vanishing at ⊤ and (ii) `chartMultiplier(ℓ) = unit · (product of the
+   generators)` on a trivializing cover;
+ * ℓ exists as the rank-one kernel generator
+   (`exists_ker_baseSectionsMap_cokernel_iteratedTwist_eq_span_of_sections`) once the
+   restriction is surjective on base sections (H¹ or fibrewise+Nakayama);
+ * the identity (ii) is the chord–tangent computation — the universal Weierstrass
+   atlas (`WeierstrassAtlasRingU`, AdditionBaseChange.lean:44) + a universal PAIR of
+   points (the two-point space is NOT yet in the tree — it must be built: `C ×_U C`
+   over the atlas, reduced since smooth over a domain) + transfer along classifying
+   ring maps (`GroupLawAxioms`'s `*_of_map`/`*_of_eq` idiom).
+ * the pole-sheaf coordinates x (order 2) and y (order 3) are ABSTRACT in this tree
+   (`PoleSheafUniformMonomialBasis`: supplied as normalized data, not polynomials) —
+   so the chord is `y − λx − μ` with λ, μ from the 2×3 evaluation matrix, and the
+   chord–tangent statement is that the third evaluation row is dependent exactly at
+   `-(P+Q)`. That is the shape to prove universally.
+NEXT SESSION should start at: build the universal two-point space and its reducedness,
+then the chord's coefficient computation in the away-chart.
