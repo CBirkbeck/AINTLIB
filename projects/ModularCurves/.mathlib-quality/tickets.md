@@ -31721,3 +31721,19 @@ hit a whnf timeout, and the lemma already existed) and
 REMAINING: transport along that bijection to the actual chart sections, supply the
 retraction/generator data from the section machinery (`exists_three_algHom_ker_eq_span`,
 `eq_unit_mul_of_associates`), and run the closing links.
+
+### [W1 a2] DONE 2026-08-01 — `eq_unit_mul_map`
+The exact-order factorisation transports along a ring isomorphism, so the
+coordinate-ring chord identity moves to the away chart. Together with
+`chord_exact_order_in_coordinateRing` this gives the chord's factorisation IN THE CHART
+RING, which is what `chartMultiplier_unitHom_eq_coefficient` and the closing links
+consume.
+NEXT (final assembly, in order):
+ 1. instantiate `sectionAway_affineModelEval_bijective` for the chosen chart to get φ
+    and its bijectivity;
+ 2. transport the coordinate-ring chord identity with `eq_unit_mul_map`;
+ 3. match the transported generators with the section-provided ones
+    (`eq_unit_mul_of_associates` + `exists_unit_generator_eq_sub_coord`);
+ 4. feed `nonempty_iso_unitObj_of_two_unit_identities` (chord) and `…₂` (vertical);
+ 5. `chordDatum_of_trivializations` → `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`;
+ 6. descend (W2) and close `exists_invertible_tensor_idealModule_add`.
