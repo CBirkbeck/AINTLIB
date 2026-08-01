@@ -361,6 +361,81 @@ theorem chartMultiplier_unitHomOfTopSection_eq {M L : C.Modules} (f : M ⟶ L) [
   rw [← chartMultiplier_comp U (monoSectionLift f ℓ hℓ) f eU eM eL,
     monoSectionLift_comp]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- A monomorphic multiplication has a nonzerodivisor multiplier. -/
+theorem mem_nonZeroDivisors_of_mono_unitEndo {Z : Scheme.{u}}
+    (c : Γ(Z, (⊤ : Z.Opens)))
+    [Mono (ModularCurves.unitEndomorphismOfTopSection c)] :
+    c ∈ nonZeroDivisors Γ(Z, (⊤ : Z.Opens)) := by
+  have hkill : ∀ x : Γ(Z, (⊤ : Z.Opens)), x * c = 0 → x = 0 := by
+    intro x hx
+    have hzero : ModularCurves.unitEndomorphismOfTopSection x ≫
+        ModularCurves.unitEndomorphismOfTopSection c =
+        (0 : unitObj Z ⟶ unitObj Z) ≫
+          ModularCurves.unitEndomorphismOfTopSection c := by
+      rw [ModularCurves.unitEndomorphismOfTopSection_comp, hx, Limits.zero_comp]
+      have hzeroEndo : ModularCurves.unitEndomorphismOfTopSection
+          (0 : Γ(Z, (⊤ : Z.Opens))) = (0 : unitObj Z ⟶ unitObj Z) := by
+        refine Scheme.Modules.hom_ext _ _ fun Uo => ?_
+        ext y
+        show (y : Γ(Z, Uo)) * Z.presheaf.map
+          (homOfLE (le_top : Uo ≤ (⊤ : Z.Opens))).op 0 = 0
+        rw [map_zero, mul_zero]
+      exact hzeroEndo
+    have hx0 : ModularCurves.unitEndomorphismOfTopSection x =
+        (0 : unitObj Z ⟶ unitObj Z) := (cancel_mono _).mp hzero
+    have hval := congrArg (fun (φ : unitObj Z ⟶ unitObj Z) =>
+      φ.val.app (Opposite.op (⊤ : Z.Opens)) (1 : Γ(Z, (⊤ : Z.Opens)))) hx0
+    have hlhs : (ModularCurves.unitEndomorphismOfTopSection x).val.app
+        (Opposite.op (⊤ : Z.Opens)) (1 : Γ(Z, (⊤ : Z.Opens))) = x := by
+      rw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
+      rw [show Z.presheaf.map (homOfLE (le_top : (⊤ : Z.Opens) ≤ ⊤)).op x = x from by
+        rw [show (homOfLE (le_top : (⊤ : Z.Opens) ≤ ⊤)) = 𝟙 (⊤ : Z.Opens) from rfl,
+          op_id, CategoryTheory.Functor.map_id]
+        rfl]
+      exact one_mul x
+    rw [hlhs] at hval
+    exact hval
+  rw [mem_nonZeroDivisors_iff]
+  exact ⟨fun x hx => hkill x (by rw [mul_comm]; exact hx), hkill⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The exact-order trivialization.** If, on each chart of a trivializing cover, the
+section's multiplier is a unit multiple of the map's multiplier, then the lift is an
+isomorphism: the twisted module is trivial. -/
+theorem isIso_monoSectionLift_of_multiplier_eq_unit_mul
+    {M L : C.Modules} (f : M ⟶ L) [Mono f]
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π f).app (⊤ : C.Opens) ℓ = 0)
+    {ι : Type u} (W : ι → C.Opens) (hW : iSup W = ⊤)
+    (eM : ∀ i, (restrictFunctor (W i).ι).obj M ≅ unitObj (W i).toScheme)
+    (eL : ∀ i, (restrictFunctor (W i).ι).obj L ≅ unitObj (W i).toScheme)
+    (eU : ∀ i, (restrictFunctor (W i).ι).obj (unitObj C) ≅ unitObj (W i).toScheme)
+    (hmono : ∀ i, Mono ((restrictFunctor (W i).ι).map f))
+    (u : ∀ i, Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))ˣ)
+    (hexact : ∀ i, chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i) =
+      (u i : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) *
+        chartMultiplier (W i) f (eM i) (eL i)) :
+    IsIso (monoSectionLift f ℓ hℓ) := by
+  refine isIso_of_chartMultiplier_isUnit _ W hW eU eM fun i => ?_
+  haveI := hmono i
+  haveI hMonoEndo : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (chartMultiplier (W i) f (eM i) (eL i))) :=
+    mono_unitEndo_chartMultiplier (W i) f (eM i) (eL i)
+  have hnzd := mem_nonZeroDivisors_of_mono_unitEndo
+    (chartMultiplier (W i) f (eM i) (eL i))
+  have hfac := chartMultiplier_unitHomOfTopSection_eq f ℓ hℓ (W i) (eU i) (eM i) (eL i)
+  have heq : chartMultiplier (W i) (monoSectionLift f ℓ hℓ) (eU i) (eM i) *
+      chartMultiplier (W i) f (eM i) (eL i) =
+      (u i : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) *
+        chartMultiplier (W i) f (eM i) (eL i) := by
+    rw [← hfac, hexact i]
+  have hcancel := (mul_cancel_right_mem_nonZeroDivisors hnzd).mp heq
+  rw [hcancel]
+  exact (u i).isUnit
+
 end GeneralMultiplier
 
 section IteratedTwist
