@@ -1,1 +1,1 @@
-FOCUS: [W2-e] rigidification — rescale a chart generator by the inverse of its zero-section value (needs: z-value is a unit); then the comparison units are 1
+FOCUS: [W1 recon] the universal Weierstrass atlas transfer idiom — locate the atlas ring, the chart sections of the pole sheaf, and how AdditionSpecPoints computes the third point; scope the chord-coefficient identity
