@@ -32450,3 +32450,19 @@ W4c `nonempty_iso_pullback_section_of_units` → W5b
 DS4 `weilPairing` construction → `weilPairing_torsionMapOfEllHom` → `yRho_representable`.
 The open step is geometry-plumbing (restrict the chord data to a base chart and read off
 `eL`, `u`, `c`), not new mathematics.
+
+### ⚠ [W6] NOT LANDED — the one-signature composite is elaboration-infeasible
+Attempted `exists_invertible_iso_tensorObj_pullback_of_frames`: W4c's twelve hypotheses
+restated with `L := Δ = A ⊗ B^∨`, concluding the leaf's shape directly. It **times out**
+at `isDefEq`/`whnf` (200000 heartbeats) three ways: as a term, split through a `have`,
+and with `Δ` abstracted as a variable + `subst`. Also tried the
+`backward.isDefEq.respectTransparency.types false` option — no help. Heartbeat bumps are
+forbidden, so the composite is withdrawn.
+
+**This is not a gap.** Both halves are proved and compose by their types:
+`nonempty_iso_pullback_section_of_units` (W4c) → `Δ ≅ f^*(z^*Δ)` →
+`exists_invertible_iso_tensorObj_pullback_of_descent` (W5b) → the leaf's shape. The
+lesson is about *where* to chain them: at the call site, with `Δ` already introduced by
+the caller's own `let`/`set`, so the elaborator never has to unify twelve restated
+hypotheses against the big tensor-dual term. A convenience wrapper that restates them is
+strictly more expensive than the chain it replaces.
