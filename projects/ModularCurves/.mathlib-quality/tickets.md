@@ -32167,3 +32167,25 @@ of a tensor is the product, of a dual is the inverse, of a pullback is the pullb
 comparison unit. Then `nonempty_unitObj_iso_of_normalized_glue` closes it and gives
 `L ≅ f^*(z^* L)` — the relative theorem of the square's "differs by `f^*`" statement, i.e.
 the Picard leaf `exists_invertible_tensor_idealModule_add`.
+
+### ★★★★★ [W3] DONE 2026-08-01 — `nonempty_iso_pullback_section_of_chart_trivializations`
+**The un-normalized descent is assembled.** A module on the total space trivial over the
+preimages of a base cover is `f^*(z^* L)` — the "differs by `f^*`" form the relative
+theorem of the square needs, and the correct replacement for the exact-triviality
+conclusion (which the leaf's docstring shows is false in general: the Poincaré /
+biextension obstruction survives on charts).
+
+Proof shape: twist by `(f^* z^* L)^∨` (chart-trivial by steps 1–3), run the existing
+rigidified glue on the twist, then cancel the dual with `nonempty_eval_iso` +
+`nonempty_iso_of_tensorObj_unitObj`. Invertibility of the twist factor comes from
+`IsInvertible.pullback` applied twice.
+
+**One named input remains**: `hnorm`, the cocycle cancellation — the comparison units of
+`L ⊗ (f^*z^*L)^∨` have `z`-value `1`. Everything else in the statement is dischargeable
+from lemmas already proved (`nonempty_trivialization_twisted` for `etw`,
+`bijective_smul_generatorOfRestrictIso` for `hgen`). Discharging `hnorm` needs the
+section-level tensor calculus: the generator of a tensor trivialization is the tensor of
+the generators, the dual's generator is the dual generator, and the pullback's is the
+pullback — after which the `z`-values cancel by `appLE_z_appLE_snd_eq_self`. That is the
+single remaining gap between this tree and the Picard leaf
+`exists_invertible_tensor_idealModule_add`.

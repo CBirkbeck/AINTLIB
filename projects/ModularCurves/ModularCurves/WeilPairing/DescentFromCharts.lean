@@ -296,4 +296,71 @@ theorem nonempty_trivialization_twisted {X T' : Scheme.{u}}
   exact nonempty_tensorObj_restrict_trivialization (f ⁻¹ᵁ U) e
     (dualRestrictIsoOfRestrictIso _ (f ⁻¹ᵁ U) eFN)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3 — THE UN-NORMALIZED DESCENT]** A module on the total space that is trivial over
+the preimage of each member of a base cover is the pullback of a bundle on the base,
+namely of `N = z^* L`. This is the "differs by `f^*`" statement the relative theorem of
+the square needs — the exact-triviality conclusion of
+`nonempty_unitObj_iso_of_chart_trivializations` is false in general (the
+Poincaré/biextension obstruction survives on charts), and this is its correct form.
+
+The proof twists by `(f^* z^* L)^∨`, whose chart trivializations are supplied by
+`nonempty_trivialization_twisted`, applies the rigidified glue to the twist, and cancels
+the dual with `nonempty_eval_iso` + `nonempty_iso_of_tensorObj_unitObj`.
+
+The normalization hypothesis is stated *for the twisted bundle*: it says the comparison
+units of `L ⊗ (f^*z^*L)^∨` have `z`-value `1`. That is the cocycle cancellation — the one
+input still to be discharged, and the only place the rigidification enters. -/
+theorem nonempty_iso_pullback_section_of_chart_trivializations
+    (hp : UniversallyOConnected p)
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    (L : (pullback p g).Modules) {ι : Type u} (U : ι → T.Opens) (hU : iSup U = ⊤)
+    (hL : IsInvertible L)
+    (e : ∀ i, (restrictFunctor (pullback.snd p g ⁻¹ᵁ U i).ι).obj L ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (etw : ∀ i, (restrictFunctor (pullback.snd p g ⁻¹ᵁ U i).ι).obj
+        (tensorObj L (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)))) ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (hnorm : ∀ i j, ∀ u : Γ(pullback p g,
+        pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j),
+      ((tensorObj L (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)))).presheaf.map
+          (Opens.infLELeft (pullback.snd p g ⁻¹ᵁ U i)
+            (pullback.snd p g ⁻¹ᵁ U j)).op
+          (generatorOfRestrictIso (pullback.snd p g ⁻¹ᵁ U i) (etw i))
+        = u • (tensorObj L (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+            (pullback.snd p g)).obj
+              ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)))).presheaf.map
+          (Opens.infLERight (pullback.snd p g ⁻¹ᵁ U i)
+            (pullback.snd p g ⁻¹ᵁ U j)).op
+          (generatorOfRestrictIso (pullback.snd p g ⁻¹ᵁ U j) (etw j))) →
+      (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j)
+        (U i ⊓ U j) (le_inf_preimage_preimage g hz (U i) (U j))).hom u = 1)
+    (hgen : ∀ (i : ι) (W : (pullback p g).Opens)
+      (hW : W ≤ pullback.snd p g ⁻¹ᵁ U i),
+      Function.Bijective fun r : Γ(pullback p g, W) =>
+        r • (tensorObj L (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+            (pullback.snd p g)).obj
+              ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)))).presheaf.map
+          (homOfLE hW).op (generatorOfRestrictIso (pullback.snd p g ⁻¹ᵁ U i) (etw i))) :
+    Nonempty (L ≅ (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)) := by
+  classical
+  -- the twist is trivial
+  obtain ⟨etriv⟩ := nonempty_unitObj_iso_of_chart_trivializations g hp hz
+    (tensorObj L (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+      (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))))
+    U hU etw hnorm hgen
+  -- and the twist factor pairs with `f^* N` to the unit
+  have hM : IsInvertible ((AlgebraicGeometry.Scheme.Modules.pullback
+      (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)) :=
+    (hL.pullback z).pullback (pullback.snd p g)
+  exact nonempty_iso_of_tensorObj_unitObj ⟨etriv.symm⟩ (nonempty_eval_iso hM)
+
 end ModularCurves
