@@ -206,4 +206,5 @@ import ModularCurves.WeilPairing.GaloisFieldPairing
 import ModularCurves.WeilPairing.GlobalFibreChart
 import ModularCurves.WeilPairing.LineVertical
 import ModularCurves.WeilPairing.IteratedTwist
+import ModularCurves.WeilPairing.LineVerticalAssembly
 import ModularCurves.WeilPairing.LineVerticalConsumers
