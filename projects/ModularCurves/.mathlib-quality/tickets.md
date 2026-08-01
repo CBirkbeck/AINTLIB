@@ -32126,3 +32126,29 @@ LEAN-OPS: `Opens.coe_iInf` unfolds to `interior (⋂ …)`, so preimage does **n
 with `⨅` definitionally and no `simp only`/`rfl` route works. Finiteness has to be used:
 `Finset.induction_on` with `iInf_insert`, where each step is `f ⁻¹ᵁ (A ⊓ B) = f⁻¹A ⊓ f⁻¹B`
 by `rfl`.
+
+### ⚠ PLAN CORRECTION [W3.4] — the gluing engine is NOT needed; take `N := z^* L`
+While scoping the `α : affineIntersectionFunctor f (f⁻¹U) ⟶ affineIntersectionFunctor (𝟙 T) U`
+comparison (components `appLE z`, three-case naturality, private `finiteIntersectionSections`
+to work around), the obvious simplification surfaced: **the base bundle does not have to be
+glued from a cocycle at all.** `N := z^* L` is already a module on `T`, and it is invertible
+by the existing `IsInvertible.pullback`. The whole `AffineIntersectionUnitCocycle` /
+`gluedModule` route (W3.4.c as previously planned) is unnecessary.
+
+REVISED W3.4:
+* `N := (Modules.pullback z).obj L`; invertible via `IsInvertible.pullback`.
+* Chart trivializations of `N` on `Uᵢ`: apply W3.2 `restrictPullbackTrivialization` with
+  `f := z`, using `z ⁻¹ᵁ (f ⁻¹ᵁ Uᵢ) = Uᵢ` (from `z ≫ f = 𝟙`).
+* Chart trivializations of `f^* N` on `f ⁻¹ᵁ Uᵢ`: W3.2 again, now with `f`.
+* Twisted bundle `L' := tensorObj L (f^* N)^∨`, trivial on each chart by W3.3 (+ the dual's
+  trivialization, `Picard/Dual.lean`).
+* Its comparison units are `uᵢⱼ · (f^*z^*uᵢⱼ)⁻¹`, whose `z`-value is `1` by
+  `appLE_z_appLE_snd_eq_self` — so `nonempty_unitObj_iso_of_normalized_glue` applies and
+  gives `L' ≅ 𝟙`, i.e. `L ≅ f^* N`.
+* Remaining bookkeeping, three chart-calculus lemmas: comparison unit of a **tensor** is the
+  product, of a **dual** is the inverse, of a **pullback** is the pullback.
+
+`mapAlong` and the `SectionAffineIntersection` bricks stay — they are correct and reusable
+(and `mapAlong` is the right tool if the gluing route is ever needed) — but they are no
+longer on the critical path. The two `finiteIntersectionOpen` lemmas remain useful for any
+preimage-cover argument.
