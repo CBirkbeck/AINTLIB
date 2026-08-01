@@ -6395,3 +6395,40 @@ a helper cannot take `S` abstractly, it has to restate the preimage directly.
 That is the concrete shape of "restatement, not lift", and it is invisible to
 any line-counting metric.
 
+
+## 164 → 163: the local-count worklist pays off, and the indent bug recurs
+
+`exists_rps_series_limit` — top of the new worklist at 2 locals — split as
+predicted. `have hres` (38 lines) became `isRestricted_of_coeff_limit`; parent
+77 → 41, helper 50.
+
+**The ranking earned its place.** `hres` touches exactly `Ufun`, `hS`, `hC0`
+(counted before editing, not taken on faith). `Ufun` is `set Ufun := S`, so
+moving that single line *into* the helper let the entire 37-line body lift
+verbatim — no renaming, no restatement. That is precisely what the local-count
+column measures and what every line-count ranking before it missed.
+
+**Statement derived, not written.** `hcoeff` reads `∀ K, ∃ S, P S K`, so
+post-`choose` `hS` is `∀ K, P (S K) K`. Took `hcoeff`'s own four lines, dropped
+`∃ S,`, substituted `(S : hatK …)` → `(S K : hatK …)`, dropped the trailing
+`:= by`, asserting each edit landed. Second extraction running on this
+principle: **a helper's statement almost always already exists in the file**,
+either in the lemma the proof rewrites with or in the `have` that produced the
+local.
+
+### The indentation bug is now 2-for-2 and belongs in the tool
+
+Body came out at indent 4 — its depth inside the original `have` — while
+`set Ufun` sat at 2, so the block was not a tactic sequence. This is the same
+failure as `refine Equiv.mk` in `windowTraceHomeomorph`: **a block moved across
+an enclosure boundary keeps its old columns and they now mean something else.**
+Preserving indentation is the bug; it has to be re-derived from the new parent.
+
+Two extractions, two instances, so it goes in the script as a dedent-to-parent
+step rather than in a note — the distinction the last commit drew between
+mechanism changes (which stop recurrence) and notes (which do not).
+
+The docstring-anchor fix from the previous commit *did* hold: no reparenting.
+That is the first of these defects to be fixed by mechanism and then verified
+not to recur.
+

@@ -1828,6 +1828,57 @@ theorem coe_RPS_sub {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (a b : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
     ((a - b : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = (a : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) - (b : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := rfl
 
+/-- The coefficientwise limit of a null-convergent series of restricted power series
+is itself restricted. Extracted from `exists_rps_series_limit`, whose remaining job
+is the partial-sum bound. -/
+private theorem isRestricted_of_coeff_limit {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {u : ℕ → ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))} {C : ℕ → NNReal}
+    (hC0 : Filter.Tendsto C Filter.atTop (nhds 0))
+    (S : (Fin k →₀ ℕ) → ↥(ArSub p F ϖ hρ0 hρ1))
+    (hS : ∀ K : Fin k →₀ ℕ, ∀ (n : ℕ) (b : NNReal), 0 < b →
+        (∀ l, n ≤ l → C l ≤ b) →
+        Valued.v ((S K : hatK p F hρ0 hρ1) - ∑ l ∈ Finset.range n,
+          ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) ≤ b) :
+    MvPowerSeries.IsRestricted (S : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
+  set Ufun : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1) := S with hUfun
+  rw [isRestricted_iff_valued]
+  intro t ht
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp (hC0.eventually_lt_const ht)
+  have hsub : {K : Fin k →₀ ℕ | t < Valued.v ((MvPowerSeries.coeff K
+        Ufun : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)}
+      ⊆ ⋃ l ∈ Finset.range N, {K : Fin k →₀ ℕ | t < Valued.v
+        ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)} := by
+    intro K hK
+    rw [Set.mem_setOf_eq] at hK
+    have hSK : ((MvPowerSeries.coeff K Ufun : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        = ((S K : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := rfl
+    rw [hSK] at hK
+    have htail := hS K N t ht (fun l hl => (hN l hl).le)
+    have hbig : t < Valued.v (∑ l ∈ Finset.range N,
+        ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) := by
+      by_contra hcon
+      push Not at hcon
+      have hsplit : ((S K : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+          = (((S K : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) - ∑ l ∈ Finset.range N,
+              ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1))
+            + ∑ l ∈ Finset.range N,
+              ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) :=
+        (sub_add_cancel _ _).symm
+      rw [hsplit] at hK
+      exact absurd (le_trans (Valuation.map_add _ _ _) (max_le htail hcon))
+        (not_le.mpr hK)
+    have hex : ∃ l ∈ Finset.range N, t < Valued.v
+        ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
+      by_contra hcon
+      push Not at hcon
+      exact absurd (Valuation.map_sum_le
+        (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal) hcon) (not_le.mpr hbig)
+    obtain ⟨l, hlN, hl⟩ := hex
+    exact Set.mem_biUnion hlN hl
+  refine Set.Finite.subset (Set.Finite.biUnion (Finset.range N).finite_toSet
+    fun l _ => ?_) hsub
+  exact (isRestricted_iff_valued p F ϖ ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))).mp (u l).2 t ht
+
 /-- **Ultrametric series converge in the Tate algebra** (the analytic input to
 Kedlaya Lemma 3.9): coefficientwise limits of a norm-vanishing series exist, are
 restricted, and satisfy the tail estimates. -/
@@ -1867,44 +1918,8 @@ theorem exists_rps_series_limit {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       AddSubmonoidClass.coe_finsetSum _ _]
   -- restrictedness of the limit
   set Ufun : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1) := S with hUfun
-  have hres : MvPowerSeries.IsRestricted Ufun := by
-    rw [isRestricted_iff_valued]
-    intro t ht
-    obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp (hC0.eventually_lt_const ht)
-    have hsub : {K : Fin k →₀ ℕ | t < Valued.v ((MvPowerSeries.coeff K
-          Ufun : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)}
-        ⊆ ⋃ l ∈ Finset.range N, {K : Fin k →₀ ℕ | t < Valued.v
-          ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)} := by
-      intro K hK
-      rw [Set.mem_setOf_eq] at hK
-      have hSK : ((MvPowerSeries.coeff K Ufun : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
-          = ((S K : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := rfl
-      rw [hSK] at hK
-      have htail := hS K N t ht (fun l hl => (hN l hl).le)
-      have hbig : t < Valued.v (∑ l ∈ Finset.range N,
-          ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) := by
-        by_contra hcon
-        push Not at hcon
-        have hsplit : ((S K : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
-            = (((S K : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) - ∑ l ∈ Finset.range N,
-                ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1))
-              + ∑ l ∈ Finset.range N,
-                ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) :=
-          (sub_add_cancel _ _).symm
-        rw [hsplit] at hK
-        exact absurd (le_trans (Valuation.map_add _ _ _) (max_le htail hcon))
-          (not_le.mpr hK)
-      have hex : ∃ l ∈ Finset.range N, t < Valued.v
-          ((MvPowerSeries.coeff K ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
-        by_contra hcon
-        push Not at hcon
-        exact absurd (Valuation.map_sum_le
-          (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal) hcon) (not_le.mpr hbig)
-      obtain ⟨l, hlN, hl⟩ := hex
-      exact Set.mem_biUnion hlN hl
-    refine Set.Finite.subset (Set.Finite.biUnion (Finset.range N).finite_toSet
-      fun l _ => ?_) hsub
-    exact (isRestricted_iff_valued p F ϖ ((u l : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))).mp (u l).2 t ht
+  have hres : MvPowerSeries.IsRestricted Ufun :=
+    isRestricted_of_coeff_limit p F ϖ hC0 S hS
   refine ⟨⟨Ufun, hres⟩, fun n b hb0 hb => ?_⟩
   refine ciSup_le fun K => ?_
   have hcoe : ((MvPowerSeries.coeff K (((⟨Ufun, hres⟩ : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
