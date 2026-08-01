@@ -280,6 +280,51 @@ private theorem vle_image_le_one_of_isIntegral_of_subring
   exact (Valuation.mem_integer_iff _ _).mp
     ((Valuation.integer.integers v).mem_of_integral hφc_int)
 
+/-- **The completed plus-subring lands in the valuation integer.** Abstracted over
+the two ring homs, so the argument does not depend on how the extension is built:
+`φ` is the map to the residue-field completion and `ψ` any continuous extension of
+it along `D.coeRingHom`. `(presheafValue D)⁺` is the integral closure of
+`completedPlusSubringBase`, which is a topological closure, so the bound transfers
+by closure-minimality (`Valued.v ≤ 1` is closed) and then along integrality. -/
+private theorem vle_one_of_mem_completedPlusSubring (D : RationalLocData A)
+    {w : Spv (Localization.Away D.s)}
+    [TopologicalSpace (Localization.Away D.s)] [IsTopologicalRing (Localization.Away D.s)]
+    [TopologicalSpace (ValuationSpectrum.valueGroup (Localization.Away D.s) w)]
+    [OrderClosedTopology (ValuationSpectrum.valueGroup (Localization.Away D.s) w)]
+    (hw_loc : ∀ d ∈ (D.locPlusSubring : Set (Localization.Away D.s)), w.vle d 1)
+    (hVcont : Continuous (Valued.v :
+      (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w).Completion →
+        ValuationSpectrum.valueGroup (Localization.Away D.s) w))
+    (φ : Localization.Away D.s →+*
+      (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w).Completion)
+    (ψ : presheafValue D →+*
+      (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w).Completion)
+    (hφ_coe : ∀ a, φ a = ((scResHom D w a :
+        WithVal (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w)) :
+      (ValuationSpectrum.residueFieldValuation (Localization.Away D.s) w).Completion))
+    (hψ_cont : Continuous ψ) (hψφ : ∀ c, ψ (D.coeRingHom c) = φ c)
+    {f : presheafValue D} (hf : f ∈ (presheafValue D)⁺) :
+    Valued.v (ψ f) ≤ 1 := by
+  have hφ_le : ∀ d ∈ (D.locPlusSubring : Set (Localization.Away D.s)),
+      Valued.v (φ d) ≤ 1 := by
+    intro d hd
+    rw [hφ_coe, Valued.valuedCompletion_apply, scResHom_val D w d]
+    exact canonicalValuation_le_one_of_vle w (hw_loc d hd)
+  have hbase_le : D.completedPlusSubringBase ≤ ((Valued.v).integer).comap ψ := by
+    rw [RationalLocData.completedPlusSubringBase]
+    refine Subring.topologicalClosure_minimal
+      ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring.map
+        D.coeRingHom) ?_
+      ((isClosed_le hVcont continuous_const).preimage hψ_cont)
+    rintro _ ⟨c, hc, rfl⟩
+    show ψ (D.coeRingHom c) ∈ (Valued.v).integer
+    rw [Valuation.mem_integer_iff, hψφ]
+    exact vle_image_le_one_of_isIntegral_of_subring Valued.v φ D.locPlusSubring hφ_le
+      ((mem_integralClosure_iff _ _).mp (Subalgebra.mem_toSubring.mp hc))
+  exact vle_image_le_one_of_isIntegral_of_subring Valued.v ψ D.completedPlusSubringBase
+    (fun d hd => (Valuation.mem_integer_iff _ _).mp (Subring.mem_comap.mp (hbase_le hd)))
+    ((mem_integralClosure_iff _ _).mp (Subalgebra.mem_toSubring.mp hf))
+
 /-- **Completion step (Wedhorn Lemma 8.2, completion half).** A Spa-point `w`
 of the rational localization `Localization.Away D.s` extends to a Spa-point `w'`
 of its completion `presheafValue D`, pulling back along `D.coeRingHom`.
@@ -328,39 +373,11 @@ theorem spa_completion_of_spa_localization
         (isContinuous_ofValuation_of _ (fun γ =>
           hVcont.isOpen_preimage _ WithZeroTopology.isOpen_Iio))
     · intro f hf
-      -- `f ∈ (presheafValue D)⁺ = integralClosure(completedPlusSubringBase)` (refactor): `f` is
-      -- integral over `completedPlusSubringBase`, which maps into the valuation integer (the
-      -- closure-minimality argument, unchanged); `vle_image_le_one_of_isIntegral_of_subring` lifts
-      -- the `≤ 1` bound from the base to `f`.
-      have hf_int : IsIntegral ↥(D.completedPlusSubringBase) f :=
-        (mem_integralClosure_iff _ _).mp (Subalgebra.mem_toSubring.mp hf)
-      have hbase_le : D.completedPlusSubringBase ≤ ((Valued.v).integer).comap φhat := by
-        rw [RationalLocData.completedPlusSubringBase]
-        refine Subring.topologicalClosure_minimal
-          ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring.map
-            D.coeRingHom) ?_
-          ((isClosed_le hVcont continuous_const).preimage
-            UniformSpace.Completion.continuous_extension)
-        rintro _ ⟨c, hc, rfl⟩
-        show φhat (D.coeRingHom c) ∈ (Valued.v).integer
-        rw [Valuation.mem_integer_iff]
-        have hφc : φhat (D.coeRingHom c) = φ c := by
-          rw [hφhat_def]; exact UniformSpace.Completion.extensionHom_coe φ hφ c
-        erw [hφc]
-        -- `c` is integral over `locPlusSubring`; the valuation integer is integrally closed and `φ`
-        -- carries `locPlusSubring` into it (the Spa bound `hw_loc`), so `Valued.v (φ c) ≤ 1`.
-        refine vle_image_le_one_of_isIntegral_of_subring Valued.v φ D.locPlusSubring ?_
-          ((mem_integralClosure_iff _ _).mp (Subalgebra.mem_toSubring.mp hc))
-        intro d hd
-        show Valued.v ((scResHom D w d : WithVal val) : val.Completion) ≤ 1
-        rw [Valued.valuedCompletion_apply, scResHom_val D w d]
-        exact canonicalValuation_le_one_of_vle w (hw_loc d hd)
-      have hf_le : Valued.v (φhat f) ≤ 1 :=
-        vle_image_le_one_of_isIntegral_of_subring Valued.v φhat D.completedPlusSubringBase
-          (fun d hd => (Valuation.mem_integer_iff _ _).mp (Subring.mem_comap.mp (hbase_le hd)))
-          hf_int
       rw [hw'_def]
-      exact vle_one_comap_ofValuation Valued.v φhat hf_le
+      exact vle_one_comap_ofValuation Valued.v φhat
+        (vle_one_of_mem_completedPlusSubring D hw_loc hVcont φ φhat (fun _ => rfl)
+          UniformSpace.Completion.continuous_extension
+          (fun c => by rw [hφhat_def]; exact UniformSpace.Completion.extensionHom_coe φ hφ c) hf)
   · have hval_φ : ∀ a, Valued.v (φ a) =
         ValuationSpectrum.canonicalValuation (Localization.Away D.s) w a := by
       intro a
