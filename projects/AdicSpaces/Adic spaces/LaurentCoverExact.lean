@@ -829,6 +829,170 @@ theorem lambdaMap_comp_iotaHom (a : A) : lambdaMap (iotaHom a) = 0 := by
     mkHom (negIncl (algebraMap A ↥(TateAlgebra A) a))
   rw [posIncl_algebraMap, negIncl_algebraMap]
 
+private theorem hg_higher_zero_lem [T1Space A] (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hc_restr : Filter.Tendsto (fun s => MvPowerSeries.coeff s c.val)
+      Filter.cofinite (nhds 0))
+    (hdiag_iter : ∀ i j k, MvPowerSeries.coeff (idx (i + k) (j + k)) c.val =
+      MvPowerSeries.coeff (idx i j) c.val)
+    (hboundary_x : ∀ n, 0 < n → MvPowerSeries.coeff (idx n 0) c.val =
+      -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val)) : ∀ n, 0 < n →
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val = 0 := by
+  intro n hn
+  -- c(n, 0) = -coeff_n g, and c(n+k, k) = c(n, 0) for all k
+  have hconst : ∀ k, MvPowerSeries.coeff (idx (n + k) k) c.val =
+      MvPowerSeries.coeff (idx n 0) c.val := fun k => by
+    simpa only [Nat.zero_add] using hdiag_iter n 0 k
+  -- The injection ℕ → Fin 2 →₀ ℕ sending k ↦ idx (n + k) k
+  have hinj : Function.Injective (fun k => idx (n + k) k) := by
+    intro a b hab
+    have := Finsupp.ext_iff.mp hab 1
+    simp [idx] at this; omega
+  -- By restricted + T1, the constant value must be 0
+  have h0 := eq_zero_of_restricted_const (fun s => MvPowerSeries.coeff s c.val)
+    hc_restr (fun k => idx (n + k) k) hinj hconst
+  rw [hboundary_x n hn] at h0
+  -- h0 : -(coeff_n g) = 0
+  exact neg_eq_zero.mp h0
+
+private theorem hh_higher_zero_lem [T1Space A] (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hc_restr : Filter.Tendsto (fun s => MvPowerSeries.coeff s c.val)
+      Filter.cofinite (nhds 0))
+    (hdiag_iter : ∀ i j k, MvPowerSeries.coeff (idx (i + k) (j + k)) c.val =
+      MvPowerSeries.coeff (idx i j) c.val)
+    (hboundary_y : ∀ m, 0 < m → MvPowerSeries.coeff (idx 0 m) c.val =
+      MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val) : ∀ m, 0 < m →
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val = 0 := by
+  intro m hm
+  have hconst : ∀ k, MvPowerSeries.coeff (idx k (m + k)) c.val =
+      MvPowerSeries.coeff (idx 0 m) c.val := fun k => by
+    simpa only [Nat.zero_add] using hdiag_iter 0 m k
+  have hinj : Function.Injective (fun k => idx k (m + k)) := by
+    intro a b hab
+    have := Finsupp.ext_iff.mp hab 0
+    simp [idx] at this; omega
+  have h0 := eq_zero_of_restricted_const (fun s => MvPowerSeries.coeff s c.val)
+    hc_restr (fun k => idx k (m + k)) hinj hconst
+  rw [hboundary_y m hm] at h0
+  exact h0
+
+private theorem hdiag_lem (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hcoeff_eq : ∀ i j,
+      (if 0 < i ∧ 0 < j then MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val else 0) -
+        MvPowerSeries.coeff (idx i j) c.val =
+      MvPowerSeries.coeff (idx i j) (posIncl g).val -
+        MvPowerSeries.coeff (idx i j) (negIncl h).val) : ∀ i j, 0 < i → 0 < j →
+    MvPowerSeries.coeff (idx i j) c.val =
+    MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val := by
+  intro i j hi hj
+  have h1 := hcoeff_eq i j
+  rw [if_pos ⟨hi, hj⟩] at h1
+  -- RHS: posIncl g at (i,j) with i ≥ 1, j ≥ 1 is 0; negIncl h at (i,j) with i ≥ 1 is 0
+  rw [coeff_posIncl, if_neg (by omega : ¬(j = 0))] at h1
+  rw [coeff_negIncl, if_neg (by omega : ¬(i = 0))] at h1
+  -- h1 : c(i-1,j-1) - c(i,j) = 0 - 0
+  simp only [sub_zero] at h1
+  -- h1 : c(i-1,j-1) - c(i,j) = 0
+  exact eq_of_sub_eq_zero h1 |>.symm
+
+private theorem hboundary_x_lem (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hcoeff_eq : ∀ i j,
+      (if 0 < i ∧ 0 < j then MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val else 0) -
+        MvPowerSeries.coeff (idx i j) c.val =
+      MvPowerSeries.coeff (idx i j) (posIncl g).val -
+        MvPowerSeries.coeff (idx i j) (negIncl h).val) : ∀ n, 0 < n →
+    MvPowerSeries.coeff (idx n 0) c.val =
+    -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val) := by
+  intro n hn
+  have h1 := hcoeff_eq n 0
+  rw [if_neg (by omega : ¬(0 < n ∧ 0 < 0))] at h1
+  rw [coeff_posIncl, if_pos rfl, coeff_negIncl, if_neg (by omega : ¬(n = 0))] at h1
+  -- h1 : 0 - c(n,0) = coeff_n g - 0
+  simp only [zero_sub, sub_zero] at h1
+  -- h1 : -c(n,0) = coeff_n g, so c(n,0) = -coeff_n g
+  rw [← h1, neg_neg]
+
+private theorem hboundary_y_lem (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hcoeff_eq : ∀ i j,
+      (if 0 < i ∧ 0 < j then MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val else 0) -
+        MvPowerSeries.coeff (idx i j) c.val =
+      MvPowerSeries.coeff (idx i j) (posIncl g).val -
+        MvPowerSeries.coeff (idx i j) (negIncl h).val) : ∀ m, 0 < m →
+    MvPowerSeries.coeff (idx 0 m) c.val =
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val := by
+  intro m hm
+  have h1 := hcoeff_eq 0 m
+  rw [if_neg (by omega : ¬(0 < 0 ∧ 0 < m))] at h1
+  rw [coeff_posIncl, if_neg (by omega : ¬(m = 0)), coeff_negIncl, if_pos rfl] at h1
+  -- h1 : 0 - c(0,m) = 0 - coeff_m h
+  simp only [zero_sub] at h1
+  -- h1 : -c(0,m) = -coeff_m h
+  exact neg_injective h1
+
+private theorem hboundary_00_lem (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hcoeff_eq : ∀ i j,
+      (if 0 < i ∧ 0 < j then MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val else 0) -
+        MvPowerSeries.coeff (idx i j) c.val =
+      MvPowerSeries.coeff (idx i j) (posIncl g).val -
+        MvPowerSeries.coeff (idx i j) (negIncl h).val) :
+    MvPowerSeries.coeff (idx 0 0) c.val =
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val -
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val := by
+  have h1 := hcoeff_eq 0 0
+  rw [if_neg (by omega : ¬(0 < 0 ∧ 0 < 0))] at h1
+  rw [coeff_posIncl, if_pos rfl, coeff_negIncl, if_pos rfl] at h1
+  -- h1 : 0 - c(0,0) = coeff_0 g - coeff_0 h
+  simp only [zero_sub] at h1
+  -- h1 : -c(0,0) = coeff_0 g - coeff_0 h; want c(0,0) = coeff_0 h - coeff_0 g
+  linear_combination -h1
+
+private theorem hdiag_iter_lem (c : ↥(TateAlgebra₂ A))
+    (hdiag : ∀ i j, 0 < i → 0 < j → MvPowerSeries.coeff (idx i j) c.val =
+      MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val) : ∀ i j k,
+    MvPowerSeries.coeff (idx (i + k) (j + k)) c.val =
+    MvPowerSeries.coeff (idx i j) c.val := by
+  intro i j k; induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [show i + (k + 1) = (i + k) + 1 by omega,
+        show j + (k + 1) = (j + k) + 1 by omega]
+    rw [hdiag _ _ (by omega) (by omega)]
+    simp only [show (i + k + 1) - 1 = i + k by omega,
+                show (j + k + 1) - 1 = j + k by omega]
+    exact ih
+
+private theorem hc00_zero_lem [T1Space A] (c : ↥(TateAlgebra₂ A))
+    (hc_restr : Filter.Tendsto (fun s => MvPowerSeries.coeff s c.val)
+      Filter.cofinite (nhds 0))
+    (hdiag_iter : ∀ i j k, MvPowerSeries.coeff (idx (i + k) (j + k)) c.val =
+      MvPowerSeries.coeff (idx i j) c.val) : MvPowerSeries.coeff (idx 0 0) c.val = 0 := by
+  have hconst : ∀ k, MvPowerSeries.coeff (idx k k) c.val =
+      MvPowerSeries.coeff (idx 0 0) c.val := fun k => by
+    simpa only [Nat.zero_add] using hdiag_iter 0 0 k
+  have hinj : Function.Injective (fun k => idx k k) := by
+    intro a b hab
+    have := Finsupp.ext_iff.mp hab 0
+    simp [idx] at this; omega
+  exact eq_zero_of_restricted_const (fun s => MvPowerSeries.coeff s c.val)
+    hc_restr (fun k => idx k k) hinj hconst
+
+private theorem hcoeff_eq_lem (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hc_ps : (MvPowerSeries.X (0 : Fin 2) * MvPowerSeries.X (1 : Fin 2) - 1) * c.val =
+      (posIncl g).val - (negIncl h).val) : ∀ i j,
+    (if 0 < i ∧ 0 < j then MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val else 0) -
+      MvPowerSeries.coeff (idx i j) c.val =
+    MvPowerSeries.coeff (idx i j) (posIncl g).val -
+      MvPowerSeries.coeff (idx i j) (negIncl h).val := by
+  intro i j
+  have h1 := congr_arg (MvPowerSeries.coeff (idx i j)) hc_ps
+  rw [coeff_XY_sub_one_mul] at h1
+  rwa [map_sub] at h1
+
+private theorem hc_ps_lem (c : ↥(TateAlgebra₂ A)) (g h : ↥(TateAlgebra A))
+    (hc : c * TateAlgebra₂.XY_sub_one = posIncl g - negIncl h) : (MvPowerSeries.X (0 : Fin 2) *
+    MvPowerSeries.X (1 : Fin 2) - 1) * c.val =
+    (posIncl g).val - (negIncl h).val := by
+  have := congr_arg Subtype.val hc; rw [mul_comm] at this; exact this
+
 /-- **Kernel exactness (Row 2): `ker(lambda) <= im(iota)`.**
 
 If `posEmbHom(g) = negEmbHom(h)` in the Laurent algebra, then `g` and `h`
@@ -858,135 +1022,32 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hmem
   -- hc: c * XY_sub_one = posIncl g - negIncl h
   -- Translate to MvPowerSeries level with (XY - 1) on the left
-  have hc_ps : (MvPowerSeries.X (0 : Fin 2) *
-      MvPowerSeries.X (1 : Fin 2) - 1) * c.val =
-      (posIncl g).val - (negIncl h).val := by
-    have := congr_arg Subtype.val hc; rw [mul_comm] at this; exact this
+  have hc_ps := hc_ps_lem c g h hc
   -- Step 1: Extract the coefficient equation at every (i, j)
   -- From hc_ps, for each (i,j): (XY-1)*c at (i,j) = (posIncl g - negIncl h) at (i,j)
-  have hcoeff_eq : ∀ i j,
-      (if 0 < i ∧ 0 < j then MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val else 0) -
-        MvPowerSeries.coeff (idx i j) c.val =
-      MvPowerSeries.coeff (idx i j) (posIncl g).val -
-        MvPowerSeries.coeff (idx i j) (negIncl h).val := by
-    intro i j
-    have h1 := congr_arg (MvPowerSeries.coeff (idx i j)) hc_ps
-    rw [coeff_XY_sub_one_mul] at h1
-    rwa [map_sub] at h1
+  have hcoeff_eq := hcoeff_eq_lem c g h hc_ps
   -- Step 2: Diagonal recurrence: for i ≥ 1, j ≥ 1, c(i,j) = c(i-1,j-1)
-  have hdiag : ∀ i j, 0 < i → 0 < j →
-      MvPowerSeries.coeff (idx i j) c.val =
-      MvPowerSeries.coeff (idx (i - 1) (j - 1)) c.val := by
-    intro i j hi hj
-    have h1 := hcoeff_eq i j
-    rw [if_pos ⟨hi, hj⟩] at h1
-    -- RHS: posIncl g at (i,j) with i ≥ 1, j ≥ 1 is 0; negIncl h at (i,j) with i ≥ 1 is 0
-    rw [coeff_posIncl, if_neg (by omega : ¬(j = 0))] at h1
-    rw [coeff_negIncl, if_neg (by omega : ¬(i = 0))] at h1
-    -- h1 : c(i-1,j-1) - c(i,j) = 0 - 0
-    simp only [sub_zero] at h1
-    -- h1 : c(i-1,j-1) - c(i,j) = 0
-    exact eq_of_sub_eq_zero h1 |>.symm
+  have hdiag := hdiag_lem c g h hcoeff_eq
   -- Step 2b: Iterated diagonal: c(i+k, j+k) = c(i, j) for all k
-  have hdiag_iter : ∀ i j k,
-      MvPowerSeries.coeff (idx (i + k) (j + k)) c.val =
-      MvPowerSeries.coeff (idx i j) c.val := by
-    intro i j k; induction k with
-    | zero => simp
-    | succ k ih =>
-      rw [show i + (k + 1) = (i + k) + 1 by omega,
-          show j + (k + 1) = (j + k) + 1 by omega]
-      rw [hdiag _ _ (by omega) (by omega)]
-      simp only [show (i + k + 1) - 1 = i + k by omega,
-                  show (j + k + 1) - 1 = j + k by omega]
-      exact ih
+  have hdiag_iter := hdiag_iter_lem c hdiag
   -- Step 3: c is restricted (coefficients tend to 0)
   have hc_restr : Filter.Tendsto
       (fun s => MvPowerSeries.coeff s c.val) Filter.cofinite (nhds 0) := c.prop
   -- Step 4: Along diagonal n+k, k (for n ≥ 1): c(n+k,k) = c(n,0) = -coeff_n g
   -- First: boundary equation at (n, 0) for n ≥ 1: -c(n,0) = coeff_n g
-  have hboundary_x : ∀ n, 0 < n →
-      MvPowerSeries.coeff (idx n 0) c.val =
-      -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val) := by
-    intro n hn
-    have h1 := hcoeff_eq n 0
-    rw [if_neg (by omega : ¬(0 < n ∧ 0 < 0))] at h1
-    rw [coeff_posIncl, if_pos rfl, coeff_negIncl, if_neg (by omega : ¬(n = 0))] at h1
-    -- h1 : 0 - c(n,0) = coeff_n g - 0
-    simp only [zero_sub, sub_zero] at h1
-    -- h1 : -c(n,0) = coeff_n g, so c(n,0) = -coeff_n g
-    rw [← h1, neg_neg]
+  have hboundary_x := hboundary_x_lem c g h hcoeff_eq
   -- Boundary equation at (0, m) for m ≥ 1: -c(0,m) = -coeff_m h, i.e. c(0,m) = coeff_m h
-  have hboundary_y : ∀ m, 0 < m →
-      MvPowerSeries.coeff (idx 0 m) c.val =
-      MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val := by
-    intro m hm
-    have h1 := hcoeff_eq 0 m
-    rw [if_neg (by omega : ¬(0 < 0 ∧ 0 < m))] at h1
-    rw [coeff_posIncl, if_neg (by omega : ¬(m = 0)), coeff_negIncl, if_pos rfl] at h1
-    -- h1 : 0 - c(0,m) = 0 - coeff_m h
-    simp only [zero_sub] at h1
-    -- h1 : -c(0,m) = -coeff_m h
-    exact neg_injective h1
+  have hboundary_y := hboundary_y_lem c g h hcoeff_eq
   -- Boundary at (0, 0): -c(0,0) = coeff_0 g - coeff_0 h
-  have hboundary_00 :
-      MvPowerSeries.coeff (idx 0 0) c.val =
-      MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val -
-      MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val := by
-    have h1 := hcoeff_eq 0 0
-    rw [if_neg (by omega : ¬(0 < 0 ∧ 0 < 0))] at h1
-    rw [coeff_posIncl, if_pos rfl, coeff_negIncl, if_pos rfl] at h1
-    -- h1 : 0 - c(0,0) = coeff_0 g - coeff_0 h
-    simp only [zero_sub] at h1
-    -- h1 : -c(0,0) = coeff_0 g - coeff_0 h; want c(0,0) = coeff_0 h - coeff_0 g
-    linear_combination -h1
+  have hboundary_00 := hboundary_00_lem c g h hcoeff_eq
   -- Step 5: For n ≥ 1, the diagonal c(n+k, k) = c(n, 0) for all k.
   -- This is constant, and by restricted condition in T1 space, must be 0.
   -- Therefore coeff_n g = 0 for all n ≥ 1.
-  have hg_higher_zero : ∀ n, 0 < n →
-      MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val = 0 := by
-    intro n hn
-    -- c(n, 0) = -coeff_n g, and c(n+k, k) = c(n, 0) for all k
-    have hconst : ∀ k, MvPowerSeries.coeff (idx (n + k) k) c.val =
-        MvPowerSeries.coeff (idx n 0) c.val := fun k => by
-      simpa only [Nat.zero_add] using hdiag_iter n 0 k
-    -- The injection ℕ → Fin 2 →₀ ℕ sending k ↦ idx (n + k) k
-    have hinj : Function.Injective (fun k => idx (n + k) k) := by
-      intro a b hab
-      have := Finsupp.ext_iff.mp hab 1
-      simp [idx] at this; omega
-    -- By restricted + T1, the constant value must be 0
-    have h0 := eq_zero_of_restricted_const (fun s => MvPowerSeries.coeff s c.val)
-      hc_restr (fun k => idx (n + k) k) hinj hconst
-    rw [hboundary_x n hn] at h0
-    -- h0 : -(coeff_n g) = 0
-    exact neg_eq_zero.mp h0
+  have hg_higher_zero := hg_higher_zero_lem c g h hc_restr hdiag_iter hboundary_x
   -- Step 6: Similarly, coeff_m h = 0 for all m ≥ 1.
-  have hh_higher_zero : ∀ m, 0 < m →
-      MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val = 0 := by
-    intro m hm
-    have hconst : ∀ k, MvPowerSeries.coeff (idx k (m + k)) c.val =
-        MvPowerSeries.coeff (idx 0 m) c.val := fun k => by
-      simpa only [Nat.zero_add] using hdiag_iter 0 m k
-    have hinj : Function.Injective (fun k => idx k (m + k)) := by
-      intro a b hab
-      have := Finsupp.ext_iff.mp hab 0
-      simp [idx] at this; omega
-    have h0 := eq_zero_of_restricted_const (fun s => MvPowerSeries.coeff s c.val)
-      hc_restr (fun k => idx k (m + k)) hinj hconst
-    rw [hboundary_y m hm] at h0
-    exact h0
+  have hh_higher_zero := hh_higher_zero_lem c g h hc_restr hdiag_iter hboundary_y
   -- Step 7: c(0,0) = 0, which gives coeff_0 g = coeff_0 h.
-  have hc00_zero : MvPowerSeries.coeff (idx 0 0) c.val = 0 := by
-    have hconst : ∀ k, MvPowerSeries.coeff (idx k k) c.val =
-        MvPowerSeries.coeff (idx 0 0) c.val := fun k => by
-      simpa only [Nat.zero_add] using hdiag_iter 0 0 k
-    have hinj : Function.Injective (fun k => idx k k) := by
-      intro a b hab
-      have := Finsupp.ext_iff.mp hab 0
-      simp [idx] at this; omega
-    exact eq_zero_of_restricted_const (fun s => MvPowerSeries.coeff s c.val)
-      hc_restr (fun k => idx k k) hinj hconst
+  have hc00_zero := hc00_zero_lem c hc_restr hdiag_iter
   have hg0_eq_h0 :
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val =
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val := by
