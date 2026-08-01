@@ -31066,3 +31066,18 @@ Consumers of the line/vertical may now supply EITHER
 and each yields the other. For the chord campaign this matters: over a Weierstrass chart
 the minors are explicit (differences of coordinates of P and Q), so the chart route
 avoids the twisted-H¹ leaf entirely.
+
+### [W1-b] DONE 2026-08-01 — `exists_chord_of_unimodular`
+The chord is produced from unimodular evaluation data alone. Remaining for a full
+`ChordDatum`: (α) the chord's exact-order chart identity at the THIRD point
+(chartMultiplier ℓ = unit·g_P g_Q g_{Rm}) and (β) the same for the vertical. Both are
+the chord–tangent computation. The rest of the prong is proven.
+
+**STATE OF THE SESSION (2026-08-01).** Everything landed today is axiom-clean and the
+root build is green at 9615 jobs. The WP prong went from "GAP-A-4 in pieces" to:
+  A-4 complete (all shapes/arities, pole-instantiated) → exact-order machinery →
+  CHORD-PKG/VERT-PKG → A-5c assembly → the LOCAL theorem of the square →
+  descent toolkit (W2 complete as a toolkit) → `ChordDatum` interface (W1) →
+  surjectivity ⟺ unimodularity → `exists_chord_of_unimodular`.
+The single remaining mathematical input is the chord–tangent identity, isolated behind
+`ChordDatum`, with a documented construction recipe (universal atlas + two-point space).
