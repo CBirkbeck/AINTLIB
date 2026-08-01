@@ -275,6 +275,92 @@ theorem cokernel_bijective_restrict_of_isZero (f : M ⟶ L) (Uo V : C.Opens)
     infer_instance
   exact TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton F hUV
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Multiplication by a unit is an isomorphism of the structure sheaf. -/
+theorem isIso_unitEndomorphismOfTopSection_of_isUnit {Z : Scheme.{u}}
+    {c : Γ(Z, (⊤ : Z.Opens))} (hc : IsUnit c) :
+    IsIso (ModularCurves.unitEndomorphismOfTopSection c) := by
+  obtain ⟨u, rfl⟩ := hc
+  exact (ModularCurves.unitAutomorphismOfTopUnit u).isIso_hom
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The unit-multiplier iso criterion.** A map of modules that is trivialized on a
+cover and whose chart multipliers are units there is an isomorphism. This is how a
+section vanishing to *exactly* the divisor order trivializes the twist. -/
+theorem isIso_of_chartMultiplier_isUnit {M L : C.Modules} (f : M ⟶ L)
+    {ι : Type u} (W : ι → C.Opens) (hW : iSup W = ⊤)
+    (eM : ∀ i, (restrictFunctor (W i).ι).obj M ≅ unitObj (W i).toScheme)
+    (eL : ∀ i, (restrictFunctor (W i).ι).obj L ≅ unitObj (W i).toScheme)
+    (hunit : ∀ i, IsUnit (chartMultiplier (W i) f (eM i) (eL i))) :
+    IsIso f := by
+  refine isIso_of_isIso_restrict f W hW fun i => ?_
+  haveI : IsIso (ModularCurves.unitEndomorphismOfTopSection
+      (chartMultiplier (W i) f (eM i) (eL i))) :=
+    isIso_unitEndomorphismOfTopSection_of_isUnit (hunit i)
+  have hconj : (restrictFunctor (W i).ι).map f =
+      (eM i).hom ≫ ModularCurves.unitEndomorphismOfTopSection
+        (chartMultiplier (W i) f (eM i) (eL i)) ≫ (eL i).inv := by
+    rw [← conj_eq_unitEndo_chartMultiplier]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
+  rw [hconj]
+  infer_instance
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The general section lift**: a global section of `L` killed by the cokernel of a
+monomorphism `f : M ⟶ L` factors through `f`. -/
+noncomputable def monoSectionLift {M L : C.Modules} (f : M ⟶ L) [Mono f]
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π f).app (⊤ : C.Opens) ℓ = 0) :
+    unitObj C ⟶ M :=
+  CategoryTheory.Abelian.monoLift f (unitHomOfTopSection ℓ)
+    (by rw [unitHomOfTopSection_comp, hℓ, unitHomOfTopSection_zero])
+
+@[reassoc (attr := simp)]
+theorem monoSectionLift_comp {M L : C.Modules} (f : M ⟶ L) [Mono f]
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π f).app (⊤ : C.Opens) ℓ = 0) :
+    monoSectionLift f ℓ hℓ ≫ f = unitHomOfTopSection ℓ :=
+  CategoryTheory.Abelian.monoLift_comp _ _ _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The exact-order criterion.** The lift of a section through a monomorphism is an
+isomorphism as soon as, on a trivializing cover, the section's own multiplier is the
+multiplier of `f` times a unit — "the section vanishes to exactly the order of `f`".
+The multiplier identity is the multiplicativity of chart multipliers along the
+factorization `lift ≫ f = ℓ`. -/
+theorem isIso_monoSectionLift_of_chartMultiplier_isUnit
+    {M L : C.Modules} (f : M ⟶ L) [Mono f]
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π f).app (⊤ : C.Opens) ℓ = 0)
+    {ι : Type u} (W : ι → C.Opens) (hW : iSup W = ⊤)
+    (eM : ∀ i, (restrictFunctor (W i).ι).obj M ≅ unitObj (W i).toScheme)
+    (eL : ∀ i, (restrictFunctor (W i).ι).obj L ≅ unitObj (W i).toScheme)
+    (eU : ∀ i, (restrictFunctor (W i).ι).obj (unitObj C) ≅ unitObj (W i).toScheme)
+    (hunit : ∀ i, IsUnit (chartMultiplier (W i) (monoSectionLift f ℓ hℓ)
+      (eU i) (eM i))) :
+    IsIso (monoSectionLift f ℓ hℓ) :=
+  isIso_of_chartMultiplier_isUnit _ W hW eU eM hunit
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The section's chart multiplier factors as (lift multiplier) · (twist multiplier):
+the arithmetic behind the exact-order criterion. -/
+theorem chartMultiplier_unitHomOfTopSection_eq {M L : C.Modules} (f : M ⟶ L) [Mono f]
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π f).app (⊤ : C.Opens) ℓ = 0) (U : C.Opens)
+    (eU : (restrictFunctor U.ι).obj (unitObj C) ≅ unitObj U.toScheme)
+    (eM : (restrictFunctor U.ι).obj M ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme) :
+    chartMultiplier U (unitHomOfTopSection ℓ) eU eL =
+      chartMultiplier U (monoSectionLift f ℓ hℓ) eU eM *
+        chartMultiplier U f eM eL := by
+  rw [← chartMultiplier_comp U (monoSectionLift f ℓ hℓ) f eU eM eL,
+    monoSectionLift_comp]
+
 end GeneralMultiplier
 
 section IteratedTwist
