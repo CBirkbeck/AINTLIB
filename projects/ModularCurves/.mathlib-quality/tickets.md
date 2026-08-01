@@ -32083,3 +32083,14 @@ a one-lemma step:
 * W3.4.e — descend the affine-stage reduction back to arbitrary `T`.
 This is the honest remaining structural work for the Picard leaf. Nothing in it is new
 mathematics; all five steps are wiring against APIs that exist.
+
+### ★★★ [W3.4.a] DONE 2026-08-01 — `unit_cocycle_of_generator_relations`
+The cocycle identity, isolated as the module algebra it is: three sections related
+pairwise by scalars over a freely-generating third force `a * b = c`.
+LEAN-OPS (why it is stated this way): the first attempt carried the geometric
+restrictions inside the lemma and had to push `•` through `L.presheaf.map`. That does
+not go through syntactically — `PresheafOfModules.map_smul` produces
+`X.ringCatSheaf.val.map r • …` while the surrounding statements are phrased with
+`X.presheaf.map r • …`; the two are defeq but simp will not match them, so the rewrite
+silently fails to fire. Isolating the algebra removes the problem entirely and leaves
+the restriction bookkeeping where it belongs (W3.4.c, the wiring step).

@@ -210,4 +210,22 @@ theorem nonempty_tensorObj_restrict_trivialization {X : Scheme.{u}} {M L : X.Mod
     ((restrictFunctorIsoPullback U.ι).symm.app L ≪≫ eL) ≪≫ ?_
   exact (nonempty_tensorObj_unit_iso (unitObj U.toScheme)).some
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.4.a] The comparison units satisfy the cocycle identity.** Stated as the module
+algebra it is: three sections of an invertible module over a common refinement, related
+pairwise by scalars, with the third generating freely. The geometric restriction
+bookkeeping is the caller's; the content is that `a * b = c` is forced.
+
+This is what makes the `z`-values of the comparison units a Čech cocycle on the base,
+hence what the gluing engine needs in order to produce the base bundle `N`. -/
+theorem unit_cocycle_of_generator_relations {A M : Type*} [CommRing A] [AddCommGroup M]
+    [Module A M] {t₁ t₂ t₃ : M} {a b c : A}
+    (e12 : t₁ = a • t₂) (e23 : t₂ = b • t₃) (e13 : t₁ = c • t₃)
+    (hinj : Function.Injective (fun r : A => r • t₃)) :
+    a * b = c := by
+  apply hinj
+  show (a * b) • t₃ = c • t₃
+  rw [mul_smul, ← e23, ← e12, e13]
+
 end ModularCurves
