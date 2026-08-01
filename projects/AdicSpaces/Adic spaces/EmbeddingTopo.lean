@@ -2176,6 +2176,42 @@ theorem iInf_subtype_finset_union_eq_inf_of_dependent
 -- Bumped from default 200000 to 1500000: tree-inducing recursive proof
 -- exercises deep typeclass synthesis through Laurent splits + Pi-product
 -- topological structure, which inflates per-node tactic heartbeat usage.
+/-- An inducing Laurent split at `f` presents the topology on `presheafValue D₀`
+as the meet of the two topologies induced by restriction to the plus and minus
+halves. This is the `⨅ q ∈ {plus, minus}` of the split, written as a binary `⊓`:
+the case-split on `q ∈ {plus, minus}` is what the two `le_antisymm` legs do, and
+it is valid whether or not `plus = minus`. -/
+private theorem laurentSplit_topology_eq_inf (D₀ : RationalLocData A) (f : A)
+    (h_split_f :
+      Topology.IsInducing (productRestrictionSub A (laurentCovering D₀ f))) :
+    instTopologicalSpacePresheafValue D₀ =
+      TopologicalSpace.induced (fun x : presheafValue D₀ =>
+        restrictionMap D₀ (laurentPlusDatum D₀ f) (laurentPlus_subset D₀ f) x)
+        (instTopologicalSpacePresheafValue _) ⊓
+      TopologicalSpace.induced (fun x : presheafValue D₀ =>
+        restrictionMap D₀ (laurentMinusDatum D₀ f) (laurentMinus_subset D₀ f) x)
+        (instTopologicalSpacePresheafValue _) := by
+  classical
+  rw [isInducing_to_subtype_pi_iff_iInf_induced] at h_split_f
+  change instTopologicalSpacePresheafValue (laurentCovering D₀ f).base = _
+  rw [h_split_f, iInf_subtype]
+  change (⨅ i, ⨅ (h : i ∈ ({laurentPlusDatum D₀ f, laurentMinusDatum D₀ f} : Finset _)),
+    TopologicalSpace.induced (fun x : presheafValue D₀ =>
+      restrictionMap D₀ i ((laurentCovering D₀ f).hsubset i h) x)
+      inferInstance) = _
+  refine le_antisymm ?_ ?_
+  · refine le_inf ?_ ?_
+    · refine iInf_le_of_le (laurentPlusDatum D₀ f) (iInf_le_of_le ?_ le_rfl)
+      simp
+    · refine iInf_le_of_le (laurentMinusDatum D₀ f) (iInf_le_of_le ?_ le_rfl)
+      simp
+  · refine le_iInf fun i => le_iInf fun hi => ?_
+    rcases Finset.mem_insert.mp hi with rfl | hi
+    · exact inf_le_left
+    · rw [Finset.mem_singleton] at hi
+      subst hi
+      exact inf_le_right
+
 /-- **Tree inducing (no-disjointness version)**: given a Laurent tree `t`
 with `allSplitsInducing D₀` (every Laurent split inside `t` gives an
 inducing 2-cover at its base), the diagonal `productRestrictionSub` for
@@ -2209,33 +2245,8 @@ theorem productRestrictionSub_isInducing_via_tree_no_disj
       LaurentTree.allSplitsInducing_node f L R D₀ |>.mp h_split
     have ihL_full := ihL (laurentPlusDatum D₀ f) h_split_L
     have ihR_full := ihR (laurentMinusDatum D₀ f) h_split_R
-    rw [isInducing_to_subtype_pi_iff_iInf_induced] at ihL_full ihR_full h_split_f ⊢
-    -- Decompose `h_split_f` into `⊓` of induced via plus / minus.
-    have hsf_eq : instTopologicalSpacePresheafValue D₀ =
-      TopologicalSpace.induced (fun x : presheafValue D₀ =>
-        restrictionMap D₀ (laurentPlusDatum D₀ f) (laurentPlus_subset D₀ f) x)
-        (instTopologicalSpacePresheafValue _) ⊓
-      TopologicalSpace.induced (fun x : presheafValue D₀ =>
-        restrictionMap D₀ (laurentMinusDatum D₀ f) (laurentMinus_subset D₀ f) x)
-        (instTopologicalSpacePresheafValue _) := by
-      change instTopologicalSpacePresheafValue (laurentCovering D₀ f).base = _
-      rw [h_split_f, iInf_subtype]
-      change (⨅ i, ⨅ (h : i ∈ ({laurentPlusDatum D₀ f, laurentMinusDatum D₀ f} : Finset _)),
-        TopologicalSpace.induced (fun x : presheafValue D₀ =>
-          restrictionMap D₀ i ((laurentCovering D₀ f).hsubset i h) x)
-          inferInstance) = _
-      refine le_antisymm ?_ ?_
-      · refine le_inf ?_ ?_
-        · refine iInf_le_of_le (laurentPlusDatum D₀ f) (iInf_le_of_le ?_ le_rfl)
-          simp
-        · refine iInf_le_of_le (laurentMinusDatum D₀ f) (iInf_le_of_le ?_ le_rfl)
-          simp
-      · refine le_iInf fun i => le_iInf fun hi => ?_
-        rcases Finset.mem_insert.mp hi with rfl | hi
-        · exact inf_le_left
-        · rw [Finset.mem_singleton] at hi
-          subst hi
-          exact inf_le_right
+    rw [isInducing_to_subtype_pi_iff_iInf_induced] at ihL_full ihR_full ⊢
+    have hsf_eq := laurentSplit_topology_eq_inf D₀ f h_split_f
     have hL_pulled := induced_restrictionMap_eq_iInf_of_inner_topology_iInf
       D₀ (laurentPlusDatum D₀ f) (laurentPlus_subset D₀ f)
       (L.toCovering (laurentPlusDatum D₀ f)).covers
