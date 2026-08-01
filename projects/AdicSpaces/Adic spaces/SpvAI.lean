@@ -323,6 +323,26 @@ theorem Spv.isContinuous_of_cofinal_disjunct [TopologicalSpace A]
   exact Valuation.isContinuous_of_ideal_pow_lt P (ValuativeRel.valuation A)
     (fun γ hγ ↦ cofinalValue_ideal_pow_lt P h_le_one h_cofinal γ hγ)
 
+/-- `v (c · (c^n · t)) = v c ^ (n+1) * v t` for the `A₀`-element witnessed by
+`hn`. Shared by the three `isInSpvAI` continuity arguments. -/
+private theorem valuation_subtype_mul_pow_mul [TopologicalSpace A] [ValuativeRel A]
+    [IsTopologicalRing A] (P : PairOfDefinition A) (c : P.A₀)
+    (n_0 : ℕ) (t : A) (hn_0 : (P.A₀.subtype c) ^ n_0 * t ∈ P.A₀) :
+    ValuativeRel.valuation A
+        (P.A₀.subtype (c * ⟨(P.A₀.subtype c) ^ n_0 * t, hn_0⟩)) =
+      ValuativeRel.valuation A (P.A₀.subtype c) ^ (n_0 + 1) *
+        ValuativeRel.valuation A t := by
+  set wv := ValuativeRel.valuation A with hwv_def
+  change wv (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩)) = _
+  rw [show (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩) : A) =
+      P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) by
+    simp]
+  rw [map_mul, map_mul, map_pow]
+  -- wv(c) * (wv(c)^n_0 * wv(t)) = wv(c)^(n_0+1) * wv(t).
+  rw [show wv (P.A₀.subtype c) ^ (n_0 + 1) = wv (P.A₀.subtype c) * wv (P.A₀.subtype c) ^ n_0
+    by rw [pow_succ']]
+  rw [mul_assoc]
+
 /-- **Wedhorn 7.10 reverse direction (project form).** Full proof using
 both disjuncts of `Spv.IsInSpvAI`.
 
@@ -377,16 +397,8 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one [TopologicalSpace A]
     have hb_lt_one : wv (P.A₀.subtype b) < 1 := h_lt_one b hb_mem_I
     -- v(b) = v(c)^(n_0+1) * v(t).
     have hb_eq : wv (P.A₀.subtype b) =
-        wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t := by
-      change wv (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩)) = _
-      rw [show (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩) : A) =
-          P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) by
-        simp]
-      rw [map_mul, map_mul, map_pow]
-      -- wv(c) * (wv(c)^n_0 * wv(t)) = wv(c)^(n_0+1) * wv(t).
-      rw [show wv (P.A₀.subtype c) ^ (n_0 + 1) = wv (P.A₀.subtype c) * wv (P.A₀.subtype c) ^ n_0
-        by rw [pow_succ']]
-      rw [mul_assoc]
+        wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t :=
+      valuation_subtype_mul_pow_mul P c n_0 t hn_0
     rw [hb_eq] at hb_lt_one
     -- v(c)^(n_0+1) * v(t) < 1 → v(c)^(n_0+1) < v(t)⁻¹.
     -- Multiply both sides by v(t)⁻¹ > 0 (v(t) ≠ 0).
@@ -438,14 +450,8 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_principal [TopologicalSpace A]
       rw [hπ]; exact Ideal.mul_mem_right _ _ (Ideal.mem_span_singleton_self π)
     have hb_lt_one : wv (P.A₀.subtype b) < 1 := h_lt_one b hb_mem_I
     have hb_eq : wv (P.A₀.subtype b) =
-        wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t := by
-      change wv (P.A₀.subtype (π * ⟨(P.A₀.subtype π) ^ n_0 * t, hn_0⟩)) = _
-      rw [show (P.A₀.subtype (π * ⟨(P.A₀.subtype π) ^ n_0 * t, hn_0⟩) : A) =
-          P.A₀.subtype π * ((P.A₀.subtype π) ^ n_0 * t) by simp]
-      rw [map_mul, map_mul, map_pow]
-      rw [show wv (P.A₀.subtype π) ^ (n_0 + 1)
-          = wv (P.A₀.subtype π) * wv (P.A₀.subtype π) ^ n_0 by rw [pow_succ']]
-      rw [mul_assoc]
+        wv (P.A₀.subtype π) ^ (n_0 + 1) * wv t :=
+      valuation_subtype_mul_pow_mul P π n_0 t hn_0
     rw [hb_eq] at hb_lt_one
     have h_pow_lt_inv : wv (P.A₀.subtype π) ^ (n_0 + 1) < (wv t)⁻¹ := by
       have h_vt_pos : 0 < wv t := zero_lt_iff.mpr h_vt_ne
@@ -658,16 +664,8 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO [TopologicalSpace A]
     have hb_lt_one : wv (P.A₀.subtype b) < 1 := h_lt_one b hb_mem_I
     -- v(b) = v(c)^(n_0+1) * v(t).
     have hb_eq : wv (P.A₀.subtype b) =
-        wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t := by
-      change wv (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩)) = _
-      rw [show (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩) : A) =
-          P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) by
-        simp]
-      rw [map_mul, map_mul, map_pow]
-      -- wv(c) * (wv(c)^n_0 * wv(t)) = wv(c)^(n_0+1) * wv(t).
-      rw [show wv (P.A₀.subtype c) ^ (n_0 + 1) = wv (P.A₀.subtype c) * wv (P.A₀.subtype c) ^ n_0
-        by rw [pow_succ']]
-      rw [mul_assoc]
+        wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t :=
+      valuation_subtype_mul_pow_mul P c n_0 t hn_0
     rw [hb_eq] at hb_lt_one
     -- v(c)^(n_0+1) * v(t) < 1 → v(c)^(n_0+1) < v(t)⁻¹.
     -- Multiply both sides by v(t)⁻¹ > 0 (v(t) ≠ 0).

@@ -7140,3 +7140,34 @@ Scouted. `wv` is `set wv := ValuativeRel.valuation A` — a global, so it carrie
 that element directly. Needs `hn_0`'s type from
 `PairOfDefinition.exists_pow_mul_mem_A₀`, which is the one piece not yet read.
 
+
+## `hb_eq` ×3: instances a hoisted lemma cannot inherit
+
+`SpvAI.lean`, three copies of a 10-line `have` → `valuation_subtype_mul_pow_mul`.
+Inventory 204 clusters, 1283 → **1275 redundant lines**.
+
+Two repair rounds, both missing instance binders, and the second is the useful
+one:
+
+    failed to synthesize TopologicalSpace A    -- PairOfDefinition A needs it
+    failed to synthesize ValuativeRel A        -- ValuativeRel.valuation A needs it
+
+The first is routine. The second is not: **there is no `variable [ValuativeRel A]`
+anywhere in the file.** The consuming theorems obtain it from
+
+    letI : ValuativeRel A := v.toValuativeRel
+
+— a local instance *manufactured from the valuation `v` inside each proof*. A
+hoisted lemma cannot inherit that from the file; it has to take `[ValuativeRel A]`
+as a binder so each call site supplies its own.
+
+`explicit_section_vars` cannot catch this, because the instance is not a section
+variable at all. The general form: **a hoisted lemma needs every instance its
+statement mentions, and some of those are conjured locally rather than
+declared.** There is no cheap pre-check; reading the error and adding the binder
+is the route.
+
+The three sites pass `c`, `π`, `c` — the element name varies, so the script
+extracted it per site rather than assuming uniformity. That is the same
+alpha-variation that made `dup_haves` report two copies instead of three.
+
