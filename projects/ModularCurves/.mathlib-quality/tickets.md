@@ -31157,3 +31157,14 @@ CONCRETE PLAN for [W1-d3]:
   d3.4 feed the result into `ChordDatum` and hence
        `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`.
 Everything downstream of d3.4 is already proven and axiom-clean.
+
+### [W1-d3.0] DONE 2026-08-01 — the tautological pair (WeilPairing/TautologicalPair.lean)
+`pairBase π = C ×_S C`, `pairCurve π`, `tautPoint₁/₂`, `pairClassify` + compatibilities.
+Every pair of sections is the pullback of the tautological pair along `pairClassify`.
+NEXT [W1-d3.1]: the base-change statement — a `ChordDatum` for the tautological pair
+pulls back to a `ChordDatum` for an arbitrary pair. Needs: base-change of the twist
+cokernels and of the trivializations (`sectionPoleSheafPowerBaseChangeIso` exists,
+PoleSheaf.lean:1876; `Scheme.Modules.pullback` is monoidal via
+ForMathlib/PullbackTensorMonoidal; `nonempty_pullback_idealModule` (GAP-A-7) transports
+ideal modules ✓ ALREADY PROVEN). So d3.1 is a transport assembly with all pieces present.
+Then [W1-d3.2] is the single computation over the universal atlas.
