@@ -6750,3 +6750,51 @@ failures; they were one concern re-implemented per tool, and the sixth
 (`promote_rank` shipping without Vendored-skip *or* preamble) is what made the
 pattern undeniable.
 
+
+## 158 → 157, and a 1429-line dedup opportunity my own extraction exposed
+
+`locToQuotientOneSubfX_comp_quotientOneSubfXToLoc`: parent 92 → 26, green first
+build. Four moves, only two of them decomposition:
+
+| move | what |
+|---|---|
+| dedup | `coeff_shift` (6L), `eval_zero_eq` (1L) — *exact re-proofs* of two top-level lemmas in the same file |
+| inline | `loc_alg` (4L) — a pure alias, body is one existing call |
+| promote | `loc_inv` (26L) → `locToQuotientOneSubfX_invSelf` |
+| promote | `hmain` (31L) → `locToQuotientOneSubfX_evalInvFHom_of_vanishing` |
+
+### Promotion makes duplication findable
+
+Two commits ago I promoted `coeff_shift`/`eval_zero_eq` out of a *different*
+proof in this same file. This proof, 300 lines down, had private copies of both.
+Before that promotion the duplication was undetectable: two anonymous `have`s in
+two proofs, no name to collide on. **Promotion converts an invisible duplicate
+into a visible one** — which matches the recorded lesson that the killer dedup
+pattern is a lemma a later proof re-proves inline, invisible to name-based scans.
+
+So I scanned the tree for identical `have` blocks:
+
+    213 clusters, 1429 redundant lines
+      within one file: 153     across files: 60
+
+**A correction on my own first number.** I initially reported 234 clusters /
+1554 lines from a comparator that hashed only the *body*, which counts two
+`have`s with the same tactic script but different statements as duplicates.
+Hashing type-plus-body gives 213 / 1429. The ~9% gap is small, but the
+body-only comparator is wrong in principle and would have produced bad merges.
+(I also first printed "239 redundant lines" because the accumulator sat inside a
+`[:12]` display slice — caught because 239 was implausible against 234
+clusters.)
+
+Within-file duplicates are the tractable half: no import-closure reasoning, and
+the two copies share a context. Top one is `hmax`, 22 lines, twice in
+`WedhornCechAcyclicity.lean` (9878 and 9973) in adjacent theorems — promotable
+to one lemma taking `units` and the comparability hypothesis `hcmp`.
+
+### A filter the promote ranking still lacks
+
+`loc_alg` was a **junk def**: a `have` whose body is a single existing call.
+Inlining beats promoting, and the ranking cannot tell because it only measures
+size. A `have` whose body is one term should be an INLINE candidate, never a
+promote candidate.
+

@@ -1128,6 +1128,70 @@ theorem quotientOneSubfXToLoc_comp_locToQuotientOneSubfX [DiscreteTopology A] (f
   rw [locToQuotientOneSubfX_algebraMap]
   simp only [quotientOneSubfXToLoc, Ideal.Quotient.lift_mk, evalInvFHom_algebraMap]
 
+/-- `locToQuotientOneSubfX` sends the inverse of `f` to the class of `X`. -/
+private theorem locToQuotientOneSubfX_invSelf [DiscreteTopology A] (f : A) :
+    locToQuotientOneSubfX f
+      (IsLocalization.Away.invSelf (S := Localization.Away f) f) =
+      (Ideal.Quotient.mk _) X := by
+  set I := Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * X} with hI_def
+  have hfX : (Ideal.Quotient.mk I)
+      (algebraMap A (↥(TateAlgebra A)) f * X) = 1 := by
+    rw [← sub_eq_zero]
+    change (Ideal.Quotient.mk I) (algebraMap A _ f * X) -
+      (Ideal.Quotient.mk I) 1 = 0
+    rw [← map_sub]
+    exact Ideal.Quotient.eq_zero_iff_mem.mpr (by
+      rw [show algebraMap A ↥(TateAlgebra A) f * X - 1 =
+        -(1 - algebraMap A ↥(TateAlgebra A) f * X) by ring]
+      exact neg_mem (Ideal.subset_span rfl))
+  have hunit : IsUnit ((Ideal.Quotient.mk I) (algebraMap A _ f)) := by
+    rw [isUnit_iff_exists_inv]
+    exact ⟨(Ideal.Quotient.mk I) X, by rw [← map_mul]; exact hfX⟩
+  have h1 : (Ideal.Quotient.mk I) (algebraMap A (↥(TateAlgebra A)) f) *
+      locToQuotientOneSubfX f
+        (IsLocalization.Away.invSelf (S := Localization.Away f) f) = 1 := by
+    rw [← locToQuotientOneSubfX_algebraMap f, ← map_mul,
+      IsLocalization.Away.mul_invSelf, map_one]
+  have h2 : (Ideal.Quotient.mk I) (algebraMap A (↥(TateAlgebra A)) f) *
+      (Ideal.Quotient.mk I) X = 1 := by
+    rw [← map_mul]; exact hfX
+  exact hunit.mul_left_cancel (h1.trans h2.symm)
+
+/-- The comparison map agrees with the quotient map on every `q` whose
+coefficients vanish above `n`. The induction inside
+`locToQuotientOneSubfX_comp_quotientOneSubfXToLoc`. -/
+private theorem locToQuotientOneSubfX_evalInvFHom_of_vanishing
+    [DiscreteTopology A] (f : A) :
+    ∀ (n : ℕ) (q : ↥(TateAlgebra A)), (∀ k, n < k → coeff k q = 0) →
+      locToQuotientOneSubfX f (evalInvFHom f q) = (Ideal.Quotient.mk _) q := by
+  intro n; induction n with
+  | zero =>
+    intro q hq
+    have hshift_zero : shift q = 0 := by
+      apply ext; intro k
+      rw [coeff_shift_eq, hq (k + 1) (Nat.succ_pos k)]
+      simp only [coeff, map_zero, ZeroMemClass.coe_zero]
+    have hq0 : q = algebraMap A _ (evalZeroHom q) := by
+      have := eq_const_add_X_mul_shift q
+      rw [hshift_zero, mul_zero, add_zero] at this
+      exact this
+    rw [hq0, evalInvFHom_algebraMap, locToQuotientOneSubfX_algebraMap f]
+  | succ n ih =>
+    intro q hq
+    have hdecomp := eq_const_add_X_mul_shift q
+    conv_rhs => rw [hdecomp]
+    rw [map_add, map_mul]
+    have hev : evalInvFHom f q =
+        evalInvFHom f (algebraMap A _ (evalZeroHom q)) +
+        evalInvFHom f X * evalInvFHom f (shift q) := by
+      conv_lhs => rw [hdecomp]
+      rw [map_add, map_mul]
+    rw [hev, map_add, map_mul, evalInvFHom_algebraMap, locToQuotientOneSubfX_algebraMap f,
+      evalInvFHom_X, locToQuotientOneSubfX_invSelf f]
+    congr 1
+    congr 1
+    exact ih (shift q) (fun k hk ↦ by rw [coeff_shift_eq]; exact hq _ (by omega))
+
 /-- Every element `p` of `TateAlgebra A` satisfies
 `p - algebraMap(evalInvFHom f p) ∈ Ideal.span {1 - fX}` in the appropriate sense:
 `mk(p) = locToQuotientOneSubfX(evalInvFHom f p)`.
@@ -1143,74 +1207,7 @@ theorem locToQuotientOneSubfX_comp_quotientOneSubfXToLoc [DiscreteTopology A] (f
   ext p
   simp only [RingHom.comp_apply, RingHom.id_apply, quotientOneSubfXToLoc
     ]
-  have loc_alg : ∀ (a : A),
-      locToQuotientOneSubfX f (algebraMap A _ a) =
-        (Ideal.Quotient.mk _) (algebraMap A _ a) :=
-    locToQuotientOneSubfX_algebraMap f
-  have loc_inv : locToQuotientOneSubfX f
-      (IsLocalization.Away.invSelf (S := Localization.Away f) f) =
-      (Ideal.Quotient.mk _) X := by
-    set I := Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * X} with hI_def
-    have hfX : (Ideal.Quotient.mk I)
-        (algebraMap A (↥(TateAlgebra A)) f * X) = 1 := by
-      rw [← sub_eq_zero]
-      change (Ideal.Quotient.mk I) (algebraMap A _ f * X) -
-        (Ideal.Quotient.mk I) 1 = 0
-      rw [← map_sub]
-      exact Ideal.Quotient.eq_zero_iff_mem.mpr (by
-        rw [show algebraMap A ↥(TateAlgebra A) f * X - 1 =
-          -(1 - algebraMap A ↥(TateAlgebra A) f * X) by ring]
-        exact neg_mem (Ideal.subset_span rfl))
-    have hunit : IsUnit ((Ideal.Quotient.mk I) (algebraMap A _ f)) := by
-      rw [isUnit_iff_exists_inv]
-      exact ⟨(Ideal.Quotient.mk I) X, by rw [← map_mul]; exact hfX⟩
-    have h1 : (Ideal.Quotient.mk I) (algebraMap A (↥(TateAlgebra A)) f) *
-        locToQuotientOneSubfX f
-          (IsLocalization.Away.invSelf (S := Localization.Away f) f) = 1 := by
-      rw [← loc_alg, ← map_mul,
-        IsLocalization.Away.mul_invSelf, map_one]
-    have h2 : (Ideal.Quotient.mk I) (algebraMap A (↥(TateAlgebra A)) f) *
-        (Ideal.Quotient.mk I) X = 1 := by
-      rw [← map_mul]; exact hfX
-    exact hunit.mul_left_cancel (h1.trans h2.symm)
-  have coeff_shift : ∀ (q : ↥(TateAlgebra A)) (k : ℕ),
-      coeff k (shift q) = coeff (k + 1) q := by
-    intro q k
-    change MvPowerSeries.coeff (Finsupp.single 0 k) (shiftFun q.val) =
-      MvPowerSeries.coeff (Finsupp.single 0 (k + 1)) q.val
-    simp only [shiftFun, MvPowerSeries.coeff_apply, Finsupp.single_add]
-  have eval_zero_eq : ∀ (q : ↥(TateAlgebra A)), evalZeroHom q = coeff 0 q := fun _ ↦ rfl
-  have hmain : ∀ (n : ℕ) (q : ↥(TateAlgebra A)),
-      (∀ k, n < k → coeff k q = 0) →
-      locToQuotientOneSubfX f (evalInvFHom f q) =
-        (Ideal.Quotient.mk _) q := by
-    intro n; induction n with
-    | zero =>
-      intro q hq
-      have hshift_zero : shift q = 0 := by
-        apply ext; intro k
-        rw [coeff_shift, hq (k + 1) (Nat.succ_pos k)]
-        simp only [coeff, map_zero, ZeroMemClass.coe_zero]
-      have hq0 : q = algebraMap A _ (evalZeroHom q) := by
-        have := eq_const_add_X_mul_shift q
-        rw [hshift_zero, mul_zero, add_zero] at this
-        exact this
-      rw [hq0, evalInvFHom_algebraMap, loc_alg]
-    | succ n ih =>
-      intro q hq
-      have hdecomp := eq_const_add_X_mul_shift q
-      conv_rhs => rw [hdecomp]
-      rw [map_add, map_mul]
-      have hev : evalInvFHom f q =
-          evalInvFHom f (algebraMap A _ (evalZeroHom q)) +
-          evalInvFHom f X * evalInvFHom f (shift q) := by
-        conv_lhs => rw [hdecomp]
-        rw [map_add, map_mul]
-      rw [hev, map_add, map_mul, evalInvFHom_algebraMap, loc_alg,
-        evalInvFHom_X, loc_inv]
-      congr 1
-      congr 1
-      exact ih (shift q) (fun k hk ↦ by rw [coeff_shift]; exact hq _ (by omega))
+  have hmain := locToQuotientOneSubfX_evalInvFHom_of_vanishing f
   have hfin : Set.Finite {s : Fin 1 →₀ ℕ | p.val s ≠ 0} :=
     (isRestricted_iff_finite_support p.val).mp p.prop
   by_cases hp : ∀ k, coeff k p = 0
