@@ -31540,3 +31540,14 @@ which is verbatim the hypothesis of `nonempty_iso_unitObj_of_exact_order₃`, an
         locally; the degenerate configurations are the addOnY/addOnZ families.
 Everything downstream (ChordDatum → theorem of the square → descent →
 `exists_invertible_tensor_idealModule_add`) is proven and axiom-clean.
+
+### [W1 F-iii] DONE 2026-08-01 — `exists_affineChart_le_of_multiChart`
+Charts inside a prescribed open (take it to be `sectionAway z hz`) on which all the
+sections of a finite family have principal nonzerodivisor kernels. Positioning solved.
+REMAINING: (F-i) the two deeper evaluation vanishings for the actual chord, and (F-ii)
+the unit last quotient. Both are chart computations with all tools proven:
+`chord_mul_conj_eq_prod_of_equations` (the norm factorisation),
+`exists_mul_eq_sub_coord` (generators divide the coordinate differences), and the
+Cramer/adjugate pair. Note the chart produced here is a BASIC open of a multi-chart, so
+its coordinate ring is a localization of the affine model's — where
+`sectionAway_affineModelEval_bijective` identifies the coordinates.
