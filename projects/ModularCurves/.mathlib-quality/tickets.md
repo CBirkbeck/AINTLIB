@@ -31359,3 +31359,14 @@ The only genuinely new mathematics still to write is the *unit* half of step 8 (
 final quotient is a unit) — the adjugate bricks
 (`not_isUnit_det_of_mulVec_eq_zero`, this session) are the intended tool — and the
 bookkeeping that glues steps 1–3 to the section-level statement.
+
+### ★★★★ [W1-d3.2c] STEPS 1–5 PROVEN 2026-08-01
+`projModelPointsEquiv_neg_mul` and `projModelPointsEquiv_neg_mul_eq_negAddY`
+(axiom-clean): at every field point the scheme-level `-(P+Q)` equals the chord's third
+intersection `(addX, negAddY)`. Remaining in the leaf:
+ * step 6 — upgrade to a SECTION identity over a reduced base
+   (`section_ext_of_forall_specPoint` / `hom_ext_of_forall_algebra`, both landed:
+   the work is supplying, for a given base and pair, the two sides' field-point values
+   in the `Dictionary` form, i.e. chart-coordinate bookkeeping);
+ * step 8's unit half — the adjugate criterion `not_isUnit_det_of_mulVec_eq_zero`.
+Everything else in the WP prong is proven and axiom-clean; root build 9617 jobs.
