@@ -7530,3 +7530,40 @@ regression is distinguishable from an encoding artifact.
 Note this does **not** undo the previous retraction: that line was 1004 bytes,
 which is egregious under either measure.
 
+
+## Re-test under the corrected rule: `ringStalkMap_piYHom_injective` IS viable
+
+I rejected this target twice, most recently writing that its seven
+`obtain`-bound locals have types that "appear nowhere". **That was wrong.** Both
+sources spell their existentials out:
+
+    exists_germ_eq : ∃ (U : Opens X) (m : x ∈ U) (s : …), F.germ _ x m s = t
+    germ_eq        : ∃ (W : Opens X) (_m : x ∈ W) (iU : W ⟶ U) (iV : W ⟶ V),
+                       F.map iU.op s = F.map iV.op t
+
+So every type is writable, and under the corrected rule they belong in the
+signature, where they cost nothing against the body budget.
+
+    hz body   30 lines                       ✓
+    parent    76 − 31 + 3 (the call) = 48    ✓
+
+Dependencies, counted inside `hz`: `V₁ V₂ U W₀ t₁ t₂ hres hU₁ hU₂ hWU hle₁
+hle₂` — twelve explicit, plus `iU iV` implicit because `hres`'s type mentions
+them. Fourteen parameters over dependent `Opens`/morphism types.
+
+**Not executed.** The signature is intricate enough that writing it at this
+depth of context risks a half-applied edit in a file that is not a leaf. It is
+recorded as *verified viable with a known parameter list*, not as blocked.
+
+### The pattern in these three wrong rejections
+
+`valued_resI_rpow_interpolate`, `toAdic`, and now this one were all rejected
+because I computed the helper as *carried locals + body*. Carrying is the
+mechanical move, so it became the default, and the default silently converted
+"writable type" into "another line of body". Two of the three are now cleared;
+the third is scoped.
+
+Any verdict in this file of the form "helper would be N lines, too big" that
+predates the signature/carry distinction is suspect and should be re-derived
+before being trusted.
+
