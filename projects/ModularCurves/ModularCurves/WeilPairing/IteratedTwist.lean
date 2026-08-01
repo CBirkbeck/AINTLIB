@@ -1494,6 +1494,58 @@ theorem nonempty_iso_unitObj_of_two_unit_identities₂
   exact nonempty_iso_unitObj_of_exact_order₂ J₁ J₂ L h₁ h₂ hL ℓ hℓ W hW
     eM eL eU w hw
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i12] The per-chart dichotomy criterion.** The two chart families of the chord
+cover satisfy *different* identities: on `D(conj)` both multipliers are unit multiples
+of the same generator product, while near the reflected points both multipliers are
+outright units. Either alternative suffices — the second is the first with `p = 1` —
+so the criterion accepts a disjunction chart by chart. -/
+theorem nonempty_iso_unitObj_of_chart_dichotomy
+    (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (h₁ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₁.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₂ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₂.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₃ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₃.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L)
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π (iteratedTwistHom₃ J₁ J₂ J₃ L)).app (⊤ : C.Opens) ℓ = 0)
+    {ι : Type u} (W : ι → C.Opens) (hW : iSup W = ⊤)
+    (eM : ∀ i, (restrictFunctor (W i).ι).obj (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L))) ≅
+        unitObj (W i).toScheme)
+    (eL : ∀ i, (restrictFunctor (W i).ι).obj L ≅ unitObj (W i).toScheme)
+    (eU : ∀ i, (restrictFunctor (W i).ι).obj (unitObj C) ≅ unitObj (W i).toScheme)
+    (hdich : ∀ i,
+      (∃ (p : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens)))
+        (uc um : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))ˣ),
+        chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i) =
+          (uc : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) * p ∧
+        chartMultiplier (W i) (iteratedTwistHom₃ J₁ J₂ J₃ L) (eM i) (eL i) =
+          (um : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) * p) ∨
+      (IsUnit (chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i)) ∧
+        IsUnit (chartMultiplier (W i) (iteratedTwistHom₃ J₁ J₂ J₃ L) (eM i) (eL i)))) :
+    Nonempty (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)) ≅ unitObj C) := by
+  classical
+  have hall : ∀ i, ∃ (p : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens)))
+      (uc um : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))ˣ),
+      chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i) =
+        (uc : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) * p ∧
+      chartMultiplier (W i) (iteratedTwistHom₃ J₁ J₂ J₃ L) (eM i) (eL i) =
+        (um : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) * p := by
+    intro i
+    rcases hdich i with h | ⟨hu, hv⟩
+    · exact h
+    · obtain ⟨uc, huc⟩ := hu
+      obtain ⟨um, hum⟩ := hv
+      exact ⟨1, uc, um, by rw [mul_one, huc], by rw [mul_one, hum]⟩
+  choose p uc um hchord hmult using hall
+  exact nonempty_iso_unitObj_of_two_unit_identities J₁ J₂ J₃ L h₁ h₂ h₃ hL ℓ hℓ
+    W hW eM eL eU p uc um hchord hmult
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules

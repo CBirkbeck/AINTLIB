@@ -31996,3 +31996,25 @@ Non-degeneracy enters exactly once, as `Ideal.span {conj, g₁g₂g₃} = ⊤`.
 LEAN-OPS: `rw [← hcov]` where `hcov : ⨆ … = (⊤ : X.Opens)` fails with "motive is not
 type correct" because `Γ(X, U)` depends on the open being rewritten; use
 `le_antisymm le_top (le_trans (le_of_eq hcov.symm) …)` instead.
+
+### ★★★★ [W1 i12] DONE 2026-08-01 — `nonempty_iso_unitObj_of_chart_dichotomy`
+The trivialization criterion now accepts the cover's *two different* chart identities as
+a disjunction, chart by chart: either both multipliers are unit multiples of a common
+`p` (family 1, `D(conj)`), or both are outright units (family 2, near the reflected
+points — which is the `p = 1` case). This is the exact interface the two families of
+i9/i10 produce, and it removes the last shape-mismatch between the chord algebra and
+the sheaf-level criterion.
+
+**Chord prong status: every link from the Weierstrass equation to
+`Nonempty (I(P) ⊗ (I(Q) ⊗ (I(Rm) ⊗ pole³)) ≅ 𝟙)` now exists and is proved.**
+The chain is
+`chord_mul_conj_eq_prod_of_equations` → {i9 `chord_eq_unit_mul_prod_of_conj_isUnit`
+| i10 `isUnit_chord_of_isUnit_prod`} → (transport `eq_unit_mul_map`, generators
+`chord_exact_order_with_generators`, coefficient `chartMultiplier_unitHom_eq_coefficient`,
+twist multiplier `exists_unit_chartMultiplier₃_eq`) → i12
+`nonempty_iso_unitObj_of_chart_dichotomy` → `chordDatum_of_trivializations` →
+`EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` → descent
+(`nonempty_unitObj_iso_of_chart_trivializations`) → `exists_invertible_tensor_idealModule_add`.
+What remains is *instantiation for the specific model* (identify `Γ(C, D(conj))` with a
+Weierstrass chart via `sectionAway_top_affineModelEval_bijective`, read the σᵢ off the
+sections, and check `span {conj, g₁g₂g₃} = ⊤` from non-degeneracy) — no new algebra.
