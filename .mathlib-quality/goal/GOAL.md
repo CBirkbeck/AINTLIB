@@ -6307,3 +6307,53 @@ Every one that stopped was a *mechanism* change. The one that recurred was a
 note. Writing the lesson down is how it gets remembered, not how it gets
 prevented.
 
+
+## CORRECTION: the tree is NOT preamble-bound — 125 of 162 are clean
+
+The previous entry concluded that "the binding constraint on decomposition is
+preamble, not proof length", from the measurement *58 of 63 blocked by preamble
+overhead*. That measurement is real but I generalised it wrongly.
+
+Those 63 are only the proofs with **≥2 top-level bullets** — a small and
+unrepresentative slice. Measuring `letI`/`haveI` block extent across *all*
+remaining targets gives:
+
+    PREAMBLE-HEAVY (≥8 boilerplate lines):   37
+    CLEAN (<8):                             125
+    boilerplate inside over-50 proofs:      992 lines
+
+and, decisively, the largest targets are the **clean** ones:
+
+     349L  boil=0   WedhornCechAcyclicity  wedhorn_lemma_834_propA3_part1_gluing
+     254L  boil=0   TateAlgebra            tateAlgebra_flat
+     227L  boil=0   WedhornCechAcyclicity  unitCover_relOverlap_forward_witness
+     179L  boil=0   AdicMorphismsCore      exists_pairOfDefinition_le_subring
+     167L  boil=0   Presheaf               exists_continuous_valuation_of_valuation
+
+So ordinary decomposition is the right tool for most of the remaining work, and
+the `locRing` refactor — still the correct fix for the 844 `letI` lines and
+still an owner call — is **not** a prerequisite for task 2. It unblocks 37
+targets, not 162. I over-claimed its leverage.
+
+The recurring error underneath this is worth naming, because it is the same one
+that made the bullet estimator wrong three times in a row: **I measured a
+convenient subpopulation and reported the conclusion as if it held for the
+population.** The bullet-bearing proofs were convenient because the tool already
+enumerated them.
+
+### What actually gates the remaining cuts
+
+Not preamble — *provenance of the locals*. A `have` lifts verbatim only when its
+statement and proof reference nothing introduced inside the proof. Checked the
+three clean single-`have` candidates:
+
+    _omt_almost_open              have h_image_eq   V, S, n₀ all from `obtain`
+    mem_chartSubring_of_wI_le     have key          8 proof-locals
+    coarsen_maxAvoid_isContinuous have hArch        —
+
+`obtain`-bound locals have no written-down type, so each becomes a hypothesis
+the helper must state explicitly. That is a genuine extraction, not a lift, and
+it is where the remaining effort goes. `rank_lifts.py` already reports this
+column (`locals: [...]`); the right worklist is **clean ∧ few locals**, which
+neither of my last two rankings used.
+
