@@ -31411,3 +31411,16 @@ chord's chart multiplier and the three evaluations in away-chart coordinates and
 `section_eq_of_dictionary_eq` + `eq_unit_mul_of_three_divisions` — to construct a
 `ChordDatum`; then `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` and the descent
 close `exists_invertible_tensor_idealModule_add` (SelfAdjointN.lean:259).
+
+### [W1 residue (i)] bridge landed 2026-08-01 — `chartMultiplier_unitHom_eq_coefficient`
+The exact-order criterion's `chartMultiplier (unitHomOfTopSection ℓ)` is literally the
+chart COEFFICIENT of `ℓ` (given `eU.inv 1 = 1`), so the hypothesis of
+`nonempty_iso_unitObj_of_exact_order₃` can be verified with the project's pole-sheaf
+chart-coefficient API (`overTrivializationCoefficient`, PoleSheaf.lean:3268, and
+`sectionAway_affineModelEval_bijective`, which identifies the away-chart ring with the
+affine Weierstrass coordinate ring). Also landed: `unitHomOfTopSection_app_one`.
+⟹ The remaining work is now entirely inside the away-chart: write the chord as
+`Y − ℓ(X − x_P) − y_P` there, use `algHom_chord_eq_zero` at the three sections, divide
+by the generators (`mul_dvd_of_evaluations_vanish`), and produce the unit cofactor
+(Cramer/adjugate). Then `ChordDatum` and the theorem of the square follow by the proven
+chain.
