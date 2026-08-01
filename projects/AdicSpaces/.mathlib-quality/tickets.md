@@ -4796,7 +4796,9 @@ nose, so every estimate is exact with constant 1). Generality: minimal, match us
   `rationalOpen` nonempty, `presheafValue D` nontrivial, `(f * ·)` injective + continuous
   + `IsStrictMap` + closed range, and `D.canonicalMap f = 0`
   (predicate `ScottishBook.IsProblem28Witness`).
-- **Witness**: `𝓐 = FiniteJet.JetA ℚ`, `f = Q²` (`scottishWitness`), `D = chartDatum`.
+- **Witness**: `𝓐 = FiniteJet.JetA F` for an ARBITRARY field `F` (statement is
+  universe-polymorphic and takes `F` as a parameter — no hypothesis on `F`),
+  `f = Q²` (`scottishWitness`), `D = chartDatum`.
 - **Inputs**: `canonicalMap_Qa_sq` (the [FJP] (3.3) collapse, already proved) and
   `norm_JetA_mul` + `‖Q‖ = 1` ⟹ `(Q² * ·)` is an isometry ⟹ injective / strict /
   closed range, with no open-mapping theorem.
@@ -4811,8 +4813,8 @@ nose, so every estimate is exact with constant 1). Generality: minimal, match us
 - **Status**: done (2026-08-01) — `ScottishBook.problem24_completed_false` /
   `exists_rationalLoc_not_flat`, axiom-clean.
   | **File**: FJP/FiniteJetScottishBook.lean, ScottishBook/Stated/Problem024.lean
-- **Statement**: ¬ ∀ Tate pair + rational datum `D`, `Module.Flat A (presheafValue D)`
-  (module structure `RingHom.toModule D.canonicalMap`).
+- **Statement**: for every field `F` (any universe), ¬ ∀ Tate pair + rational datum `D`,
+  `Module.Flat A (presheafValue D)` (module structure `RingHom.toModule D.canonicalMap`).
 - **Proof**: `Q²` is a nonzerodivisor of `𝓐` but `ρ(Q²) = 0` and `𝓐⟨W/ϖ⟩ ≅ 𝓑 ≠ 0`;
   flatness would give `IsSMulRegular` for `Q²`
   (`Module.Flat.isSMulRegular_of_nonZeroDivisors`). So SB28's witness ⟹ SB24 negative.
@@ -4826,3 +4828,21 @@ nose, so every estimate is exact with constant 1). Generality: minimal, match us
 - **Content**: `ev00 : 𝓐 →+* K`, `f₀(W) + Qf₁(W) + Q²h ↦ f₀(0)` (= constant coefficient
   of the disc component of the 𝓑-jet); `ev00Val` its pulled-back rank-one valuation;
   `innerPoint = ofValuation ev00Val ∈ Spa(𝓐, 𝓐°)` with `|W| = 0 ≤ |ϖ| ≠ 0`.
+
+### [SB-BASE] Base-field generality of the SB24/SB28 witnesses
+- **Status**: partial (2026-08-01). The Scottish Book statements are now parameterized by
+  an arbitrary `(F : Type u) [Field F]` with NO further hypothesis, so they hold over
+  every `K = F((t))`, in every universe. No fixed field is baked in.
+- **Remaining restriction**: the FJP construction hardcodes `K = LaurentSeries F`
+  (`local notation "K" => LaurentSeries F` in the five FJP files), i.e. EQUAL
+  characteristic. Mixed characteristic (`ℚ_p`) is NOT covered, although the theorem in
+  [FJP] is stated for any complete discretely valued nonarchimedean field.
+- **Cost of lifting**: the layer below is already abstract — `RestrictedLaurent R` is
+  stated over `[NormedCommRing R] [IsUltrametricDist R] [CompleteSpace R] [NormOneClass R]`
+  — and 59 of ~70 concrete references are just `LaurentSeriesExample.t`, i.e. the
+  pseudouniformizer, which becomes an abstract `ϖ` with `0 < ‖ϖ‖ < 1`. The genuine work
+  is five call sites: `FiniteJetRings.lean:533` (`valuation_t`, trivial) and
+  `FiniteJetNoetherianVertices.lean:368-393` (`Psi`, `psiR`, `psi_coeff_v_le`,
+  `exists_psi_eq`) — the noetherian-unit-ball argument, which uses the concrete
+  power-series model of `k°` and would need redoing over an abstract complete DVR.
+  Discreteness stays a genuine hypothesis; only its implementation is concrete.

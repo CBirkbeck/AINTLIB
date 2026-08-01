@@ -21,9 +21,9 @@ complete uniform *nonnoetherian* Tate domain, not a perfectoid ring.
 
 ## The witness
 
-Take `𝓐` the finite-jet ("pinching") algebra over a complete discretely valued
-nonarchimedean field, with `𝓐⁺ = 𝓐°`, the element `f = Q²`, and the rational subset
-`U = R(W/ϖ) = {x : |W(x)| ≤ |ϖ(x)| ≠ 0}`. Then:
+Take `𝓐` the finite-jet ("pinching") algebra over the complete discretely valued field
+`K = F((t))`, for an arbitrary field `F`, with `𝓐⁺ = 𝓐°`, the element `f = Q²`, and the
+rational subset `U = R(W/ϖ) = {x : |W(x)| ≤ |ϖ(x)| ≠ 0}`. Then:
 
 * the restricted Gauss norm on `𝓐` is multiplicative and `‖Q²‖ = 1`, so
   `‖Q²a − Q²b‖ = ‖a − b‖` — multiplication by `Q²` is an **isometry**, hence injective,
@@ -95,17 +95,21 @@ theorem finiteJet_isProblem28Witness (F : Type u) [Field F] :
 `f` is a strict inclusion — injective, open onto its image, with closed image `fA` — yet
 `f` restricts to `0` on a nonempty rational subspace of `Spa(A, A⁺)` with nonzero chart.*
 
-Witness: the [FJP] finite-jet algebra over the Laurent series field `ℚ((t))`, with
-`f = Q²` and the rational datum `(W; ϖ)`. Any complete discretely valued nonarchimedean
-field would do; the existential is discharged at one fixed choice.
+Stated over an arbitrary base: for **every** field `F` (in every universe) the [FJP]
+finite-jet algebra over the Laurent series field `K = F((t))` is a witness, with `f = Q²`
+and the rational datum `(W; ϖ)`. No hypothesis on `F` — any characteristic, any
+cardinality. The equal-characteristic shape `K = F((t))` of the base is the one genuine
+restriction, and it is inherited from the finite-jet construction itself
+(`FJP/FiniteJetRings.lean`), not from this statement; mixed characteristic (e.g. `ℚ_p`)
+would need that construction redone over an abstract complete DVR.
 
 The perfectoid case of the problem is **not** settled by this example. -/
-theorem problem28 :
-    ∃ (A : Type) (_ : CommRing A) (_ : TopologicalSpace A)
+theorem problem28 (F : Type u) [Field F] :
+    ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
       (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A) (f : A)
       (D : RationalLocData A),
       IsProblem28Witness f D :=
-  ⟨FiniteJet.JetA ℚ, inferInstance, inferInstance, inferInstance, inferInstance,
-    inferInstance, _, _, finiteJet_isProblem28Witness ℚ⟩
+  ⟨FiniteJet.JetA F, inferInstance, inferInstance, inferInstance, inferInstance,
+    inferInstance, _, _, finiteJet_isProblem28Witness F⟩
 
 end ScottishBook
