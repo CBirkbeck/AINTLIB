@@ -30710,3 +30710,25 @@ V-trivialization e. Then iv: Z(ℓ') via IsOfficialCartier + finite-flat-deg-1 �
 section (Stacks 0B8V-shape); fibrewise nonvanishing-to-degree-1 from the b3-coordinate
 unimodularity. SKELETON-FIRST: land the def + spec with sorry'd compat so iv can
 proceed against the interface (producer WIP-sorries per repo rules).
+
+### [5a-iii-compat] ANALYSIS 2026-08-01 (the ONE sorry in LineVerticalConsumers.lean:742)
+`map_ideal_basicOpen` for sectionEvalIdeal. Both inclusions = Hom-localization for the
+invertible M's affine sections (rank-one-projective content-ideal compat). Routes:
+(R1) M-sections-localization: IsQuasicoherent (mathlib presentation-based class,
+Quasicoherent.lean:251) ⟹ M(basicOpen f) ≅ localization of M(U); then f.p.-Hom-
+localization (M(U) rank-1 projective). RECON NEEDED: does mathlib's IsQuasicoherent
+expose a sections-isLocalization API on basic opens (Tilde.lean?), or only the
+presentation? (R2) redefine sectionZeroIdeal := ofIdeals (sectionEvalIdeal m) —
+compat FREE; then the VALUE-lemma at trivializing affines via gci.choice-style
+argument (ofIdeals-ideal = eval-ideal ⟸ eval-family is ≤-closed under the sSup —
+still needs the eval-family to BE a sheaf-family on the trivializing basis, i.e. the
+same compat but only at TRIVIALIZING pairs (W, g) where both sides principalize via
+sectionEvalIdeal_eq_span_of_equiv + map-span — LIKELY THE CHEAPEST: the value-spec
+does the heavy lifting and the basis-case is two rw's). ⟹ TRY (R2) FIRST next round.
+### [5a-iv] STATEMENT-PLAN (next after compat)
+- sectionZeroIdeal(ℓ'-of-twistSectionLift)-IsOfficialCartier + RelEffCartierDiv-fields
+  (finite/flat/lfp over S) — fibrewise degree 1 from b3-coordinate unimodularity.
+- degree-1 finite-flat closed subscheme with structure map iso ⟹ the RESIDUAL SECTION
+  R'' : S ⟶ C (graph; Stacks 0B8V-shape: deg-1 finite locally free Z→S has Z ≅ S).
+- Z(ℓ) = [P]+[Q]+[R''] product-decomposition ⟹ the 5a-v full-product factorization
+  and the trivialization iso via isIso_twistSectionLift_of_isLocallySurjective.
