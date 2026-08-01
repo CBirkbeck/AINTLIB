@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.WeilPairing.ChordIdentity
 import ModularCurves.ForMathlib.PullbackTensorGeneral
 import ModularCurves.Picard.IdealModulePullback
+import ModularCurves.EllipticCurve.PointsDictionary
 
 /-!
 # The tautological pair of points (W1-d3.0)
@@ -272,5 +273,21 @@ theorem nonempty_pullback_sectionPoleSheafPower_iso {C S T : Scheme.{u}} {π : C
         (ModularCurves.sectionBaseChange z hz t)
         (ModularCurves.sectionBaseChange_snd z hz t) n) :=
   ⟨ModularCurves.sectionPoleSheafPowerBaseChangeIso hsm z hz t n⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2c] Extensionality for sections.** Two sections of a separated family over
+a reduced base agreeing at every field-valued point of the base are equal. This is the
+section-level form of `hom_ext_of_forall_specPoint`, and it is the engine for
+identifying the project's group-law point `-(P + Q)` with the chord's third
+intersection: both are sections, and over a reduced base it is enough to compare them
+at field points, where the dictionary and mathlib's chord–tangent formulas apply. -/
+theorem section_ext_of_forall_specPoint {T : Scheme.{u}} [IsReduced T]
+    {D : Scheme.{u}} [D.IsSeparated] {q : D ⟶ T}
+    {P Q : { w : T ⟶ D // w ≫ q = 𝟙 T }}
+    (h : ∀ (K : Type u) [Field K] (p : Spec (CommRingCat.of K) ⟶ T),
+      p ≫ P.1 = p ≫ Q.1) :
+    P = Q :=
+  Subtype.ext (hom_ext_of_forall_specPoint h)
 
 end ModularCurves
