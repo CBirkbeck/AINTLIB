@@ -181,4 +181,41 @@ theorem EllipticCurve.nonempty_tensorObj_iso_of_chordDatum
     ⟨P.1, by rw [P.2]⟩ ⟨Q.1, by rw [Q.2]⟩
     ⟨(P + Q).1, by rw [(P + Q).2]⟩ ⟨(-(P + Q)).1, by rw [(-(P + Q)).2]⟩ h
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2a] The affine coordinates of a section.** Evaluating the chart
+coordinates `X, Y` at a section — through the section's evaluation retraction — gives a
+point of the Weierstrass curve over the base: the equation is preserved because the
+retraction is a ring map over the base and `W.map` is the same curve. -/
+theorem equation_of_algHom {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (σ : A →ₐ[R] R) (X Y : A)
+    (h : (W.map (algebraMap R A)).toAffine.Equation X Y) :
+    W.toAffine.Equation (σ X) (σ Y) := by
+  have hmap := WeierstrassCurve.Affine.Equation.map (f := (σ : A →+* R)) h
+  have hcomp : (W.map (algebraMap R A)).toAffine.map (σ : A →+* R) = W.toAffine := by
+    show ((W.map (algebraMap R A)).map (σ : A →+* R)).toAffine = W.toAffine
+    congr 1
+    rw [WeierstrassCurve.map_map]
+    have hid : (σ : A →+* R).comp (algebraMap R A) = RingHom.id R := by
+      ext r
+      exact σ.commutes r
+    rw [hid, WeierstrassCurve.map_id]
+  rwa [hcomp] at hmap
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2a] The evaluation of a chart element at a section, as a point.** Combines
+the section's evaluation retraction with the affine coordinates: the pair
+`(σ X, σ Y)` satisfies the Weierstrass equation and `σ` kills exactly the chart
+functions vanishing at the section. -/
+theorem exists_affine_point_of_section {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (W : WeierstrassCurve R) (X Y : A)
+    (hXY : (W.map (algebraMap R A)).toAffine.Equation X Y)
+    (σ : A →ₐ[R] R) (g : A) (hker : RingHom.ker σ = Ideal.span {g}) :
+    ∃ xP yP : R, W.toAffine.Equation xP yP ∧ σ X = xP ∧ σ Y = yP ∧
+      ∀ c : A, (σ c = 0 ↔ c ∈ Ideal.span {g}) :=
+  ⟨σ X, σ Y, equation_of_algHom W σ X Y hXY, rfl, rfl, fun c => by
+    rw [← hker]
+    exact Iff.rfl⟩
+
 end ModularCurves
