@@ -456,4 +456,26 @@ theorem chord_evaluations_vanish {R A : Type u} [CommRing R] [CommRing A] [Algeb
   · exact algHom_chord_eq_zero σ₃ X Y ℓ x₁ y₁ x₃ y₃ h₃x h₃y hline₃
 
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 away-chart, assembled] The exact-order factorisation of the chord.** Three
+evaluation retractions with principal kernels killing the chord give successive
+divisions by the three generators; a unit final cofactor then puts the chord in the
+form `unit · (g₁ · (g₂ · g₃))` — exactly the hypothesis of
+`nonempty_iso_unitObj_of_exact_order₃`. -/
+theorem chord_eq_unit_mul_generators {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (c g₁ g₂ g₃ : A)
+    (σ₁ σ₂ σ₃ : A →ₐ[R] R)
+    (hk₁ : RingHom.ker σ₁ = Ideal.span {g₁})
+    (hk₂ : RingHom.ker σ₂ = Ideal.span {g₂})
+    (hk₃ : RingHom.ker σ₃ = Ideal.span {g₃})
+    (h₁ : σ₁ c = 0)
+    (c₁ : A) (hc₁ : c = g₁ * c₁) (h₂ : σ₂ c₁ = 0)
+    (c₂ : A) (hc₂ : c₁ = g₂ * c₂) (h₃ : σ₃ c₂ = 0)
+    (u : Aˣ) (hc₃ : c₂ = g₃ * (u : A)) :
+    c = (u : A) * (g₁ * (g₂ * g₃)) :=
+  AlgebraicGeometry.Scheme.Modules.eq_unit_mul_of_three_divisions
+    c g₁ g₂ g₃ c₁ c₂ u hc₁ hc₂ hc₃
+
+
 end ModularCurves
