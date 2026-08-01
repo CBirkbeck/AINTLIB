@@ -647,6 +647,28 @@ theorem algHom_conj_eq {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
   rw [WeierstrassCurve.Affine.negY, σ.commutes]
   simp only [Algebra.algebraMap_self, RingHom.id_apply]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-ii] The conjugate at the base point is `y − negY`.** Its invertibility is
+the non-`2`-torsion condition at that point. -/
+theorem conj_at_base_point {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    (ℓ x₁ y₁ : R) :
+    W.toAffine.negY x₁ y₁ - (ℓ * (x₁ - x₁) + y₁) =
+      -(2 * y₁ + W.a₁ * x₁ + W.a₃) := by
+  rw [WeierstrassCurve.Affine.negY]
+  ring
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-ii] The conjugate at a point of the chord is `y − negY` there.** For a point
+on the line, the conjugate's value is `negY x y − y`, i.e. `−(2y + a₁x + a₃)`. -/
+theorem conj_at_line_point {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    (ℓ x₁ y₁ x y : R) (hline : y = ℓ * (x - x₁) + y₁) :
+    W.toAffine.negY x y - (ℓ * (x - x₁) + y₁) =
+      -(2 * y + W.a₁ * x + W.a₃) := by
+  rw [WeierstrassCurve.Affine.negY, ← hline]
+  ring
+
 end ModularCurves
 
 namespace ModularCurves
