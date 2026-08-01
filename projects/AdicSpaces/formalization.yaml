@@ -8,9 +8,13 @@
 # follow any external schema. This file is the small, hand-written, standards-conformant
 # self-report intended for outside readers and tooling.
 #
-# FIELDS LEFT BLANK ARE NOT YET KNOWN — the remaining ones (source licenses, spend, wall
-# time, hardware, acknowledgements) are human-supplied and are deliberately empty rather
-# than guessed.
+# FIELDS LEFT BLANK ARE NOT YET KNOWN — the remaining ones (the [FJP] source licence, spend,
+# wall time, hardware, prompting notes, acknowledgements) are human-supplied and are
+# deliberately empty rather than guessed.
+#
+# `sources[].license` is the licence of the SOURCE MATERIAL being formalized — the paper or
+# notes whose statements were transcribed — not the licence of this Lean code, which is
+# `project.license` above.
 
 version: "v0.3"
 
@@ -28,23 +32,25 @@ sources:
     authors: ["Torsten Wedhorn"]
     id: "wedhorn-adic-spaces"
     type: "lecture-notes"
-    license: ""
+    license: "arXiv nonexclusive-distrib/1.0"   # arXiv:1910.05934
     author_contacted: "no"
     prior_work: "None known in Lean at this scope."
 
   - title: "[FJP] — the finite-jet pinching algebra: a uniform sheafy Tate ring that is not stably uniform"
-    authors: []                    # TODO: fill in from the source paper
+    authors: ["Chris Birkbeck"]    # ADD CO-AUTHORS if the paper has any
     id: "fjp"
     type: "preprint"
-    license: ""
-    author_contacted: "no"
+    license: ""                    # TODO: the source paper's own terms — author's call
+                                   # (e.g. "arXiv nonexclusive-distrib/1.0", "CC-BY-4.0",
+                                   # or "unpublished; all rights reserved")
+    author_contacted: "n/a — the source author is an author of this formalization"
     prior_work: "None known."
 
   - title: "The Nonarchimedean Scottish Book"
     authors: ["Kiran S. Kedlaya (editor)"]
     id: "nonarchimedean-scottish-book"
     type: "problem-list"
-    license: ""
+    license: "none stated"         # the wiki carries no explicit copyright/licence notice
     author_contacted: "no"
     prior_work: "None known in Lean."
     # https://scripts.mit.edu/~kedlaya/wiki/index.php?title=The_Nonarchimedean_Scottish_Book
