@@ -47,9 +47,10 @@ namespace FiniteJet
 
 open RestrictedLaurent ValuationSpectrum
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F]
 
-local notation "K" => LaurentSeries F
+local notation "K" => F
 
 noncomputable section
 
@@ -63,7 +64,7 @@ exactly this regime. -/
 /-- **The witness ring is as good as it can be** ([FJP] Theorem 1.3): `𝓐` is a Tate ring,
 sheafy, uniform, a domain, and **not** noetherian — precisely the regime that Problems 24
 and 28 leave open. -/
-theorem finiteJet_witnessRing_quality :
+theorem finiteJet_witnessRing_quality [IsFJPNoetherianBase F] :
     IsTateRing (JetA F) ∧
     ValuationSpectrum.IsSheafy (JetA F) ∧
     TopologicalRing.IsUniform (JetA F) ∧
@@ -218,12 +219,12 @@ theorem ev00_Wa : ev00 F (Wa F) = 0 := by
   norm_num
 
 /-- The origin does not kill the pseudouniformizer. -/
-theorem ev00_tA : ev00 F (tA F) = LaurentSeriesExample.t F := by
+theorem ev00_tA : ev00 F (tA F) = ϖ F := by
   show PowerSeries.constantCoeff ((jB F (tA F)).fst).1 = _
   rw [jB_tA]
-  show PowerSeries.constantCoeff ((constHomPS F (LaurentSeriesExample.t F)).1 :
+  show PowerSeries.constantCoeff ((constHomPS F (ϖ F)).1 :
     PowerSeries K) = _
-  show PowerSeries.constantCoeff (PowerSeries.C (LaurentSeriesExample.t F)) = _
+  show PowerSeries.constantCoeff (PowerSeries.C (ϖ F)) = _
   rw [PowerSeries.constantCoeff_C]
 
 /-- The rank-one valuation of `𝓐` at the origin of the disc: `a ↦ |ev₀₀ a|`. -/

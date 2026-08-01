@@ -22,16 +22,17 @@ namespace FiniteJet
 
 open RestrictedLaurent TopologicalRing
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F]
 
-local notation "K" => LaurentSeries F
+local notation "K" => F
 
 /-! ### Norm multiplicativity and the domain property ([FJP] Prop 2.3) -/
 
 /-- The Gauss norm on `L = K⟨W,W⁻¹⟩` is multiplicative (specialisation of
 `RestrictedLaurent.norm_mul_eq` to the discretely valued `K`). -/
 theorem norm_L_mul (f g : L F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
-  RestrictedLaurent.norm_mul_eq (norm_K_discrete F) f g
+  RestrictedLaurent.norm_mul_eq f g
 
 theorem norm_L_eq_zero {f : L F} (hf : ‖f‖ = 0) : f = 0 :=
   norm_eq_zero.mp hf
@@ -400,8 +401,8 @@ theorem not_isUniform_JetB : ¬ TopologicalRing.IsUniform (JetB F) := by
     rw [this]
     exact hm
   -- the square-zero element with huge norm
-  set w : K := (LaurentSeriesExample.t F) ^ (m + 1)
-  have hw : w ≠ 0 := pow_ne_zero _ (LaurentSeriesExample.t_ne_zero F)
+  set w : K := (ϖ F) ^ (m + 1)
+  have hw : w ≠ 0 := pow_ne_zero _ (ϖ_ne_zero F)
   set z : JetB F := TrivSqZeroExt.inr (constHomPS F w⁻¹)
   have hzpb : TopologicalRing.IsPowerBounded z := by
     rw [isPowerBounded_JetB_iff]
@@ -415,15 +416,15 @@ theorem not_isUniform_JetB : ¬ TopologicalRing.IsUniform (JetB F) := by
     rw [show z = TrivSqZeroExt.inr (constHomPS F w⁻¹) from rfl, JetNorm.norm_eps_smul]
     exact norm_restrictedC _
   rw [norm_tB, hznorm] at hmem
-  have hwnorm : ‖w⁻¹‖ = ‖LaurentSeriesExample.t F‖ ^ (-(m + 1) : ℤ) := by
-    rw [norm_inv, show w = (LaurentSeriesExample.t F) ^ (m + 1) from rfl, norm_pow,
+  have hwnorm : ‖w⁻¹‖ = ‖ϖ F‖ ^ (-(m + 1) : ℤ) := by
+    rw [norm_inv, show w = (ϖ F) ^ (m + 1) from rfl, norm_pow,
       ← zpow_natCast, ← zpow_neg]
     congr 1
   rw [hwnorm] at hmem
-  have ht01 : 0 < ‖LaurentSeriesExample.t F‖ := norm_t_pos F
-  have hcalc : (1 : ℝ) ≤ ‖LaurentSeriesExample.t F‖ ^ m *
-      ‖LaurentSeriesExample.t F‖ ^ (-(m + 1) : ℤ) := by
-    rw [← zpow_natCast (‖LaurentSeriesExample.t F‖) m, ← zpow_add₀ (ne_of_gt ht01)]
+  have ht01 : 0 < ‖ϖ F‖ := norm_t_pos F
+  have hcalc : (1 : ℝ) ≤ ‖ϖ F‖ ^ m *
+      ‖ϖ F‖ ^ (-(m + 1) : ℤ) := by
+    rw [← zpow_natCast (‖ϖ F‖) m, ← zpow_add₀ (ne_of_gt ht01)]
     have hexp : (m : ℤ) + (-(m + 1) : ℤ) = -1 := by omega
     rw [hexp]
     rw [zpow_neg, zpow_one]

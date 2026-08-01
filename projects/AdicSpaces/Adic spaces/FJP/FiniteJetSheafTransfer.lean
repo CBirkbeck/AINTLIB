@@ -38,7 +38,8 @@ open RestrictedLaurent ValuationSpectrum StrictLoc
 
 open scoped Classical
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F] [IsFJPNoetherianBase F]
 
 /-! ### Ingredients of the gluing transfer -/
 

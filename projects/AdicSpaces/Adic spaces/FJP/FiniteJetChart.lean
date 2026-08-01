@@ -28,9 +28,10 @@ namespace FiniteJet
 
 open RestrictedLaurent ValuationSpectrum
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F]
 
-local notation "K" => LaurentSeries F
+local notation "K" => F
 
 noncomputable section
 
@@ -106,7 +107,7 @@ noncomputable def rescaleRestricted {R : Type*} [NormedCommRing R] [IsUltrametri
 
 /-- The componentwise `ϖ`-twist of 𝓑 (`X ↦ ϖX` on both jet components). -/
 noncomputable def twistB : JetB F →+* JetB F :=
-  JetNorm.mapHom (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le)
+  JetNorm.mapHom (rescaleRestricted (ϖ F) (norm_t_lt_one F).le)
 
 /-- The twisted base map `θ = twist ∘ jB` implementing Prop 3.1's `W ↦ ϖX`. -/
 noncomputable def thetaChart : JetA F →+* JetB F :=
@@ -129,13 +130,13 @@ theorem jB_tA : jB F (tA F) = tB F := by
   · refine ofRestricted_injective (R := K) ?_
     show ofRestricted ((nonnegEquiv (R := K)).symm
       ⟨qCoeff F 0 ((tA F : JetA F) : JetC F), (tA F).2.1⟩) =
-      ofRestricted (constHomPS F (LaurentSeriesExample.t F))
+      ofRestricted (constHomPS F (ϖ F))
     rw [ofRestricted_nonnegEquiv_symm]
-    show qCoeff F 0 (constHomC F (RestrictedLaurent.C (LaurentSeriesExample.t F))) =
-      ofRestricted (constHomPS F (LaurentSeriesExample.t F))
+    show qCoeff F 0 (constHomC F (RestrictedLaurent.C (ϖ F))) =
+      ofRestricted (constHomPS F (ϖ F))
     rw [qCoeff_constHomC, if_pos rfl]
-    show RestrictedLaurent.C (LaurentSeriesExample.t F) =
-      ofRestricted (PowerSeries.Restricted.C (1 : ℝ) (LaurentSeriesExample.t F))
+    show RestrictedLaurent.C (ϖ F) =
+      ofRestricted (PowerSeries.Restricted.C (1 : ℝ) (ϖ F))
     rw [ofRestricted_C]
     rfl
   · refine ofRestricted_injective (R := K) ?_
@@ -143,7 +144,7 @@ theorem jB_tA : jB F (tA F) = tB F := by
       ⟨qCoeff F 1 ((tA F : JetA F) : JetC F), (tA F).2.2⟩) =
       ofRestricted (0 : PowerSeries.Restricted K (1 : ℝ))
     rw [ofRestricted_nonnegEquiv_symm, map_zero]
-    show qCoeff F 1 (constHomC F (RestrictedLaurent.C (LaurentSeriesExample.t F))) = 0
+    show qCoeff F 1 (constHomC F (RestrictedLaurent.C (ϖ F))) = 0
     rw [qCoeff_constHomC, if_neg one_ne_zero]
 
 /-- The twist fixes the pseudouniformizer: `θ(ϖ_𝓐) = ϖ_𝓑`. -/
@@ -151,11 +152,11 @@ theorem thetaChart_tA : thetaChart F (tA F) = tB F := by
   show twistB F (jB F (tA F)) = tB F
   rw [jB_tA]
   refine TrivSqZeroExt.ext ?_ ?_
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
-      (constHomPS F (LaurentSeriesExample.t F)) =
-      constHomPS F (LaurentSeriesExample.t F)
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le
+      (constHomPS F (ϖ F)) =
+      constHomPS F (ϖ F)
     exact rescaleRestricted_const F _ _ _
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
 
 /-- The rescaling twist is norm-nonincreasing (Gauss-sup, coefficientwise bound). -/
@@ -194,8 +195,8 @@ theorem continuous_thetaChart : Continuous (thetaChart F) := by
     rescaleRestricted _ _ (jB F x).snd⟩ : JetB F)‖ ≤ ‖jB F x‖
   calc ‖(⟨rescaleRestricted _ _ (jB F x).fst,
         rescaleRestricted _ _ (jB F x).snd⟩ : JetB F)‖
-      = max ‖rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
-          (jB F x).fst‖ ‖rescaleRestricted (LaurentSeriesExample.t F)
+      = max ‖rescaleRestricted (ϖ F) (norm_t_lt_one F).le
+          (jB F x).fst‖ ‖rescaleRestricted (ϖ F)
           (norm_t_lt_one F).le (jB F x).snd‖ := JetNorm.norm_def _
     _ ≤ max ‖(jB F x).fst‖ ‖(jB F x).snd‖ :=
         max_le_max (norm_rescaleRestricted_le _ _ _) (norm_rescaleRestricted_le _ _ _)
@@ -240,21 +241,21 @@ theorem coeff_jB_Wa_fst (n : ℕ) :
 `W`-jet by the pseudouniformizer. -/
 theorem thetaChart_Wa : thetaChart F (Wa F) = tB F * jB F (Wa F) := by
   refine TrivSqZeroExt.ext ?_ ?_
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le
       (jB F (Wa F)).fst = (tB F * jB F (Wa F)).fst
     rw [TrivSqZeroExt.fst_mul]
     refine Subtype.ext ?_
     refine PowerSeries.ext fun n => ?_
-    show PowerSeries.coeff n (PowerSeries.rescale (LaurentSeriesExample.t F)
+    show PowerSeries.coeff n (PowerSeries.rescale (ϖ F)
       ((jB F (Wa F)).fst).1) = PowerSeries.coeff n
-        ((PowerSeries.C (LaurentSeriesExample.t F) : PowerSeries K) *
+        ((PowerSeries.C (ϖ F) : PowerSeries K) *
           ((jB F (Wa F)).fst).1)
     rw [PowerSeries.coeff_rescale, PowerSeries.coeff_C_mul, coeff_jB_Wa_fst]
     by_cases hn : n = 1
     · subst hn
       rw [if_pos rfl, pow_one]
     · rw [if_neg hn, mul_zero, mul_zero]
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le
       (jB F (Wa F)).snd = (tB F * jB F (Wa F)).snd
     rw [jB_Wa_snd, map_zero, TrivSqZeroExt.snd_mul]
     rw [jB_Wa_snd]
@@ -1108,13 +1109,13 @@ theorem rho_Wa_split :
 /-- The rescaling scales the disc variable by `ϖ` (fst-component of `thetaChart_Wa`,
 standalone form). -/
 theorem rescale_jBWa_fst :
-    rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
-      ((jB F (Wa F)).fst) = constHomPS F (LaurentSeriesExample.t F) * (jB F (Wa F)).fst := by
+    rescaleRestricted (ϖ F) (norm_t_lt_one F).le
+      ((jB F (Wa F)).fst) = constHomPS F (ϖ F) * (jB F (Wa F)).fst := by
   refine Subtype.ext ?_
   refine PowerSeries.ext fun n => ?_
-  show PowerSeries.coeff n (PowerSeries.rescale (LaurentSeriesExample.t F)
+  show PowerSeries.coeff n (PowerSeries.rescale (ϖ F)
     ((jB F (Wa F)).fst).1) = PowerSeries.coeff n
-      ((PowerSeries.C (LaurentSeriesExample.t F) : PowerSeries K) *
+      ((PowerSeries.C (ϖ F) : PowerSeries K) *
         ((jB F (Wa F)).fst).1)
   rw [PowerSeries.coeff_rescale, PowerSeries.coeff_C_mul, coeff_jB_Wa_fst]
   by_cases hn : n = 1
@@ -1139,16 +1140,16 @@ theorem polyKW_C (r : K) : polyKW F (Polynomial.C r) = constHomPS F r := by
 series recovers the canonical image of the constant lift ([FJP] Prop 3.1's
 `ψ ∘ φ`-coherence on the disc component). -/
 theorem evalRescale_eq (f : PowerSeries.Restricted K (1 : ℝ)) :
-    chartEval F (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le f) =
+    chartEval F (rescaleRestricted (ϖ F) (norm_t_lt_one F).le f) =
     (chartDatum F).canonicalMap (constKW F f) := by
   haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
   have hrescont : Continuous
-      (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le) :=
+      (rescaleRestricted (ϖ F) (norm_t_lt_one F).le) :=
     AddMonoidHomClass.continuous_of_bound _ 1 fun g => by
       rw [one_mul]
       exact norm_rescaleRestricted_le _ _ g
   have hpoly : ((chartEval F).comp
-      ((rescaleRestricted (LaurentSeriesExample.t F)
+      ((rescaleRestricted (ϖ F)
         (norm_t_lt_one F).le).comp (polyKW F))) =
       ((chartDatum F).canonicalMap.comp ((constKW F).comp (polyKW F))) := by
     refine Polynomial.ringHom_ext (fun r => ?_) ?_
@@ -1158,11 +1159,11 @@ theorem evalRescale_eq (f : PowerSeries.Restricted K (1 : ℝ)) :
     · simp only [RingHom.comp_apply]
       rw [polyKW_X, rescale_jBWa_fst, map_mul, chartEval_const, chartEval_jBWa_fst,
         constKW_X]
-      show chartConst F (LaurentSeriesExample.t F) * gChart F =
+      show chartConst F (ϖ F) * gChart F =
         (chartDatum F).canonicalMap (Wa F)
       rw [rho_Wa_split]
       rfl
-  have h_eq : (fun g => chartEval F (rescaleRestricted (LaurentSeriesExample.t F)
+  have h_eq : (fun g => chartEval F (rescaleRestricted (ϖ F)
       (norm_t_lt_one F).le g)) =
       fun g => (chartDatum F).canonicalMap (constKW F g) :=
     (polyKW_denseRange F).equalizer
@@ -1241,13 +1242,13 @@ theorem jB_constNN (b : L F) (hb : b ∈ nonnegSubring K) :
 /-- `θ` on constant lifts is the rescaled disc constant. -/
 theorem theta_constNN (b : L F) (hb : b ∈ nonnegSubring K) :
     thetaChart F (constNN F b hb) = TrivSqZeroExt.inl
-      (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+      (rescaleRestricted (ϖ F) (norm_t_lt_one F).le
         ((nonnegEquiv (R := K)).symm ⟨b, hb⟩)) := by
   show twistB F (jB F (constNN F b hb)) = _
   rw [jB_constNN]
   refine TrivSqZeroExt.ext ?_ ?_
   · rfl
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
 
 /-- `constKW` inverts the nonnegative-shadow equivalence. -/
@@ -1287,9 +1288,9 @@ theorem theta_Qa : thetaChart F (Qa F) = TrivSqZeroExt.inr 1 := by
       norm_num
   rw [hjBQ]
   refine TrivSqZeroExt.ext ?_ ?_
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 1 = 1
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le 1 = 1
     exact map_one _
 
 /-- **Roundtrip step 4**: `chartRev ∘ θ = ρ` ([FJP] Prop 3.1's coherence on 𝓐). -/
@@ -1409,12 +1410,12 @@ theorem jB_constKW (g : PowerSeries.Restricted K (1 : ℝ)) :
 /-- `θ` on disc constant lifts is the rescaled disc-only jet. -/
 theorem theta_constKW (g : PowerSeries.Restricted K (1 : ℝ)) :
     thetaChart F (constKW F g) = TrivSqZeroExt.inl
-      (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le g) := by
+      (rescaleRestricted (ϖ F) (norm_t_lt_one F).le g) := by
   show twistB F (jB F (constKW F g)) = _
   rw [jB_constKW]
   refine TrivSqZeroExt.ext ?_ ?_
   · rfl
-  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+  · show rescaleRestricted (ϖ F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
 
 /-- **Roundtrip II, disc component**: `chartFwd ∘ chartEval = inl` (polynomial density:

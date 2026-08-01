@@ -21,10 +21,16 @@ One conclusion per declaration (project statement-splitting rule). Strong sheafi
 
 namespace FiniteJet
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F]
+
+/-! The uniform/domain/nonnoetherian conclusions hold over **any** complete ultrametric
+base with a pseudouniformizer. Sheafiness additionally needs the noetherian input
+(`IsFJPNoetherianBase`), so it carries that binder explicitly. -/
 
 /-- **[FJP] Theorem 1.3 (sheafy)**: `(𝓐, 𝓐°)` is sheafy. -/
-theorem finiteJet_isSheafy : ValuationSpectrum.IsSheafy (JetA F) :=
+theorem finiteJet_isSheafy [IsFJPNoetherianBase F] :
+    ValuationSpectrum.IsSheafy (JetA F) :=
   isSheafy_JetA F
 
 /-- **[FJP] Theorem 1.3 (uniform)**: 𝓐 is uniform. -/

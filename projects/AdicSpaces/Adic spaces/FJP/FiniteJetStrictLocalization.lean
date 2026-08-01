@@ -36,7 +36,8 @@ open RestrictedLaurent GraphKoszul
 
 namespace StrictLoc
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F] [IsFJPNoetherianBase F]
 
 /-- `P_𝓐 = 𝓐⟨T₁,…,T_m⟩` and its three companions. -/
 abbrev PA (m : ℕ) : Type _ := GraphKoszul.P (JetA F) m
@@ -291,8 +292,8 @@ theorem isNoetherianRing_PD : IsNoetherianRing (PD F m) := by
 /-- The vertex Tate-extension unit balls are noetherian. -/
 theorem isNoetherianRing_unitBall_PB : IsNoetherianRing (unitBall (PB F m)) :=
   isNoetherianRing_unitBall_restricted_dualNumber
-    (PowerSeries.Restricted (LaurentSeries F) (1 : ℝ)) m
-    (isNoetherianRing_unitBall_restricted_univariate (LaurentSeries F) m
+    (PowerSeries.Restricted (F) (1 : ℝ)) m
+    (isNoetherianRing_unitBall_restricted_univariate (F) m
       (isNoetherianRing_unitBall_gaussK F (m + 1)))
 
 theorem isNoetherianRing_unitBall_PC : IsNoetherianRing (unitBall (PC F m)) :=

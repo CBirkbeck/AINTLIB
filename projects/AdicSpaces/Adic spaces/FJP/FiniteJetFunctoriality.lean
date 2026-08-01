@@ -46,9 +46,9 @@ namespace FiniteJet
 
 open RestrictedLaurent ValuationSpectrum StrictLoc
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F]
 
-local notation "K" => LaurentSeries F
 
 noncomputable section
 
@@ -416,6 +416,13 @@ theorem bridgeLocHom_continuous (hD : D.IsRational) :
     obtain ⟨i, rfl⟩ := e.hf t ht
     rw [bridgeLocHom_divByS]
     exact isPowerBounded_of_norm_le_one (norm_bridgeX_le_one D e i)
+
+/-! From here on the **strict-localization** machinery of [FJP] §4 is used, which needs the
+noetherian input on the base (`IsFJPNoetherianBase`). Everything above — in particular the
+pair of definition `podA`, which the chart datum is built from — needs only `IsFJPBase`, so
+it stays available over an arbitrary complete ultrametric base. -/
+
+variable [IsFJPNoetherianBase F]
 
 /-- Forward: `𝒪_𝓐(D) → 𝓐_α` (completion extension of the localization lift;
 the target is complete Hausdorff since `I_𝓐` is closed, [FJP] (4.21)). -/
@@ -1877,6 +1884,9 @@ theorem locRhoC_bridgeFwdC (hD : D.IsRational) :
 
 end GraphBridgeInfra
 
+-- the remaining bridges also use the strict-localization machinery
+variable [IsFJPNoetherianBase F]
+
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
 quotient "is therefore canonically the underlying Tate algebra of Huber's rational
 localization `E_α`"; by Lemma 4.3 the ideal is closed so no further completion is needed).
@@ -2123,7 +2133,7 @@ theorem mem_rationalOpen_pushDatumC_iff (D : RationalLocData (JetA F))
     v ∈ rationalOpen (pushDatumC D hD).T (pushDatumC D hD).s ↔
       ValuationSpectrum.comap (iotaC F) v ∈ rationalOpen D.T D.s := by
   have hcomap : ValuationSpectrum.comap (iotaC F) v ∈ Spa (JetA F) (ringPlus (JetA F)) :=
-    comap_mem_spa (continuous_iotaC) (fun x hx =>
+    comap_mem_spa (continuous_iotaC) (fun x (hx : x ∈ (JetA F)⁺) =>
       plus_le_comap_of_norm_le (iotaC F) (fun a => le_of_eq (norm_iotaC F a)) hx) hv
   constructor
   · rintro ⟨-, hvle, hs0⟩
@@ -2152,7 +2162,7 @@ theorem mem_rationalOpen_pushDatumB_iff (D : RationalLocData (JetA F))
     v ∈ rationalOpen (pushDatumB D hD).T (pushDatumB D hD).s ↔
       ValuationSpectrum.comap (jB F) v ∈ rationalOpen D.T D.s := by
   have hcomap : ValuationSpectrum.comap (jB F) v ∈ Spa (JetA F) (ringPlus (JetA F)) :=
-    comap_mem_spa (continuous_jB) (fun x hx =>
+    comap_mem_spa (continuous_jB) (fun x (hx : x ∈ (JetA F)⁺) =>
       plus_le_comap_of_norm_le (jB F) (norm_jB_le F) hx) hv
   constructor
   · rintro ⟨-, hvle, hs0⟩

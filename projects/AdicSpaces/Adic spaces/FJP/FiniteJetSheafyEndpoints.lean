@@ -47,7 +47,8 @@ open ValuationSpectrum
 
 universe u
 
-variable (F : Type u) [Field F]
+variable (F : Type u) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F] [IsFJPNoetherianBase F]
 
 /-- The canonical valid pair of the pinching algebra: its maximal plus ring,
 bundled. -/

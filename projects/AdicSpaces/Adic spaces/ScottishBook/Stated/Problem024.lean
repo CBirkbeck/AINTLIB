@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».Presheaf
 import «Adic spaces».HuberRings
 import «Adic spaces».FJP.FiniteJetScottishBook
+import «Adic spaces».FJP.FJPBaseLaurent
 import Mathlib.RingTheory.Flat.Basic
 import Mathlib.RingTheory.Flat.Localization
 
@@ -82,28 +83,38 @@ pair is always flat* — not even for a **complete uniform sheafy** Tate domain 
 only missing hypothesis being strong noetherianity, which is exactly what Huber's positive
 result uses).
 
-The counterexample is the [FJP] finite-jet algebra over the Laurent series field
-`K = F((t))`, at its chart datum `(W; ϖ)` — for **every** field `F`, in every universe,
-with no hypothesis on `F`. See `finiteJet_not_flat_canonicalMap` and the discussion in
-`Problem028.lean`. -/
-theorem problem24_completed_false (F : Type u) [Field F] :
+The counterexample is the [FJP] finite-jet algebra at its chart datum `(W; ϖ)`, over
+**any** complete ultrametric nonarchimedean field `K` carrying a pseudouniformizer
+(`FiniteJet.IsFJPBase`) — no discreteness needed, so `ℚ_p`, `ℂ_p` and `F((t))` all qualify.
+See `finiteJet_not_flat_canonicalMap` and the discussion in `Problem028.lean`. -/
+theorem problem24_completed_false (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
+      [FiniteJet.IsFJPBase K] :
     ¬ ∀ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
         (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A)
         (D : RationalLocData A),
         @Module.Flat A (presheafValue D) _ _ (RingHom.toModule D.canonicalMap) := by
   intro h
-  exact FiniteJet.finiteJet_not_flat_canonicalMap F
-    (h (FiniteJet.JetA F) inferInstance inferInstance inferInstance inferInstance
-      inferInstance (FiniteJet.chartDatum F))
+  exact FiniteJet.finiteJet_not_flat_canonicalMap K
+    (h (FiniteJet.JetA K) inferInstance inferInstance inferInstance inferInstance
+      inferInstance (FiniteJet.chartDatum K))
 
 /-- The same statement in existential form: there is a Tate pair and a rational datum
 whose completed rational localization is not flat. -/
-theorem exists_rationalLoc_not_flat (F : Type u) [Field F] :
+theorem exists_rationalLoc_not_flat (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
+      [FiniteJet.IsFJPBase K] :
     ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
       (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A)
       (D : RationalLocData A),
       ¬ @Module.Flat A (presheafValue D) _ _ (RingHom.toModule D.canonicalMap) :=
-  ⟨FiniteJet.JetA F, inferInstance, inferInstance, inferInstance, inferInstance,
-    inferInstance, FiniteJet.chartDatum F, FiniteJet.finiteJet_not_flat_canonicalMap F⟩
+  ⟨FiniteJet.JetA K, inferInstance, inferInstance, inferInstance, inferInstance,
+    inferInstance, FiniteJet.chartDatum K, FiniteJet.finiteJet_not_flat_canonicalMap K⟩
+
+/-- The classical [FJP] base `K = F((t))` is an instance. -/
+theorem exists_rationalLoc_not_flat_laurentSeries (F : Type u) [Field F] :
+    ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
+      (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A)
+      (D : RationalLocData A),
+      ¬ @Module.Flat A (presheafValue D) _ _ (RingHom.toModule D.canonicalMap) :=
+  exists_rationalLoc_not_flat (LaurentSeries F)
 
 end ScottishBook

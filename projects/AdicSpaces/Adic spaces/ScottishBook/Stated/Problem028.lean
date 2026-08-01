@@ -1,6 +1,7 @@
 import «Adic spaces».Presheaf
 import «Adic spaces».HuberRings
 import «Adic spaces».FJP.FiniteJetScottishBook
+import «Adic spaces».FJP.FJPBaseLaurent
 
 /-!
 # Nonarchimedean Scottish Book — Problem 28
@@ -85,9 +86,10 @@ def IsProblem28Witness {A : Type u} [CommRing A] [TopologicalSpace A]
 
 /-- **The finite-jet algebra is a Problem-28 witness** (with `f = Q²` and the chart datum
 `(W; ϖ)`) — the concrete form of `problem28` below. -/
-theorem finiteJet_isProblem28Witness (F : Type u) [Field F] :
-    IsProblem28Witness (FiniteJet.scottishWitness F) (FiniteJet.chartDatum F) :=
-  FiniteJet.finiteJet_problem28 F
+theorem finiteJet_isProblem28Witness (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
+    [FiniteJet.IsFJPBase K] :
+    IsProblem28Witness (FiniteJet.scottishWitness K) (FiniteJet.chartDatum K) :=
+  FiniteJet.finiteJet_problem28 K
 
 /-- **Scottish Book Problem 28 — affirmative answer (Tate case).**
 
@@ -104,12 +106,22 @@ restriction, and it is inherited from the finite-jet construction itself
 would need that construction redone over an abstract complete DVR.
 
 The perfectoid case of the problem is **not** settled by this example. -/
-theorem problem28 (F : Type u) [Field F] :
+theorem problem28 (K : Type u) [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
+    [FiniteJet.IsFJPBase K] :
     ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
       (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A) (f : A)
       (D : RationalLocData A),
       IsProblem28Witness f D :=
-  ⟨FiniteJet.JetA F, inferInstance, inferInstance, inferInstance, inferInstance,
-    inferInstance, _, _, finiteJet_isProblem28Witness F⟩
+  ⟨FiniteJet.JetA K, inferInstance, inferInstance, inferInstance, inferInstance,
+    inferInstance, _, _, finiteJet_isProblem28Witness K⟩
+
+/-- The classical [FJP] base is an instance: `K = F((t))` for any field `F`. Recorded so the
+abstract statement above is visibly non-vacuous. -/
+theorem problem28_laurentSeries (F : Type u) [Field F] :
+    ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A)
+      (_ : PlusSubring A) (_ : IsHuberRing A) (_ : IsTateRing A) (f : A)
+      (D : RationalLocData A),
+      IsProblem28Witness f D :=
+  problem28 (LaurentSeries F)
 
 end ScottishBook

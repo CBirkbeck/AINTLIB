@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.RestrictedLaurent
+import «Adic spaces».FJP.FJPBase
 import «Adic spaces».JetDualNumberNorm
 import «Adic spaces».ExampleUnitDisc
 
@@ -39,33 +40,14 @@ namespace FiniteJet
 
 open RestrictedLaurent
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
 
-local notation "K" => LaurentSeries F
+local notation "K" => F
 
 /-! ### The four rings -/
 
 /-- `L = K⟨W,W⁻¹⟩`, the radius-one Laurent algebra over `K` ([FJP] (1.4)). -/
 abbrev L : Type _ := RestrictedLaurent K
-
-/-- The discrete value group of `K`: every nonzero norm is an integer power of `2`
-(the `RankOne` normalisation of `ExampleUnitDisc.lean`). -/
-theorem norm_K_discrete : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n := by
-  intro x hx
-  have hvx : Valued.v.restrict x ≠ 0 := by
-    rw [ne_eq, Valuation.restrict_eq_zero_iff]
-    exact fun h => hx ((Valuation.zero_iff _).mp h)
-  have hne : (MonoidWithZeroHom.ValueGroup₀.embedding (Valued.v.restrict x) :
-      WithZero (Multiplicative ℤ)) ≠ 0 :=
-    fun h => hvx (MonoidWithZeroHom.ValueGroup₀.embedding_strictMono.injective
-      (h.trans (map_zero _).symm))
-  refine ⟨Multiplicative.toAdd (WithZero.unzero hne), ?_⟩
-  rw [Valued.toNormedField.norm_def]
-  show ((WithZeroMulInt.toNNReal (by norm_num : (2 : ℝ≥0) ≠ 0))
-    ((MonoidWithZeroHom.ValueGroup₀.embedding) (Valued.v.restrict x)) : ℝ) = _
-  rw [WithZeroMulInt.toNNReal_neg_apply _ hne]
-  push_cast
-  norm_num
 
 /-- `𝓒 = L⟨Q⟩` ([FJP] (1.4)). -/
 abbrev JetC : Type _ := PowerSeries.Restricted (L F) (1 : ℝ)
@@ -526,16 +508,14 @@ noncomputable def constA : K →+* JetA F :=
 
 theorem norm_constA (a : K) : ‖constA F a‖ = ‖a‖ := norm_constC F a
 
-/-- The pseudouniformizer `ϖ` of each jet ring: the image of `t ∈ K`. -/
-noncomputable def tA : JetA F := constA F (LaurentSeriesExample.t F)
+variable [IsFJPBase F]
 
-theorem norm_t_lt_one : ‖LaurentSeriesExample.t F‖ < 1 := by
-  rw [Valued.toNormedField.norm_lt_one_iff, LaurentSeriesExample.valuation_t,
-    ← WithZero.exp_zero, WithZero.exp_lt_exp]
-  omega
+/-- The pseudouniformizer `ϖ` of each jet ring: the image of `ϖ ∈ K`. -/
+noncomputable def tA : JetA F := constA F (ϖ F)
 
-theorem norm_t_pos : 0 < ‖LaurentSeriesExample.t F‖ :=
-  norm_pos_iff.mpr (LaurentSeriesExample.t_ne_zero F)
+theorem norm_t_lt_one : ‖ϖ F‖ < 1 := norm_ϖ_lt_one F
+
+theorem norm_t_pos : 0 < ‖ϖ F‖ := norm_ϖ_pos F
 
 theorem norm_tA_lt_one : ‖tA F‖ < 1 := by
   rw [tA, norm_constA]
@@ -545,9 +525,7 @@ theorem norm_tA_pos : 0 < ‖tA F‖ := by
   rw [tA, norm_constA]
   exact norm_t_pos F
 
-theorem isUnit_tA : IsUnit (tA F) := by
-  refine IsUnit.map (constA F) ?_
-  exact (LaurentSeriesExample.t_ne_zero F).isUnit
+theorem isUnit_tA : IsUnit (tA F) := IsUnit.map (constA F) (isUnit_ϖ F)
 
 /-! ### Huber instance stacks (pattern of `ExampleUnitDisc.lean`)
 
@@ -710,73 +688,73 @@ instance : NormOneClass (JetA F) :=
     show ‖((1 : JetA F) : JetC F)‖ = 1
     rw [show ((1 : JetA F) : JetC F) = 1 from rfl, norm_one]⟩
 
-theorem norm_tA : ‖tA F‖ = ‖LaurentSeriesExample.t F‖ := norm_constA F _
+theorem norm_tA : ‖tA F‖ = ‖ϖ F‖ := norm_constA F _
 
 /-- Scaling by `tA` in `𝓐` (restriction of the `𝒞`-statement). -/
 theorem norm_tA_mul (x : JetA F) : ‖tA F * x‖ = ‖tA F‖ * ‖x‖ := by
-  show ‖(constC F (LaurentSeriesExample.t F) * (x : JetC F) : JetC F)‖ = _
+  show ‖(constC F (ϖ F) * (x : JetC F) : JetC F)‖ = _
   rw [norm_constC_mul]
   congr 1
   exact (norm_tA F).symm
 
 /-- The pseudouniformizer of `𝓑`. -/
-noncomputable def tB : JetB F := TrivSqZeroExt.inl (constHomPS F (LaurentSeriesExample.t F))
+noncomputable def tB : JetB F := TrivSqZeroExt.inl (constHomPS F (ϖ F))
 
-theorem norm_tB : ‖tB F‖ = ‖LaurentSeriesExample.t F‖ := by
+theorem norm_tB : ‖tB F‖ = ‖ϖ F‖ := by
   rw [tB, JetNorm.norm_inl]
   exact norm_restrictedC _
 
 theorem isUnit_tB : IsUnit (tB F) := by
   refine IsUnit.map ((TrivSqZeroExt.inlHom _ _).comp (constHomPS F)) ?_
-  exact (LaurentSeriesExample.t_ne_zero F).isUnit
+  exact (isUnit_ϖ F)
 
 theorem norm_tB_mul (x : JetB F) : ‖tB F * x‖ = ‖tB F‖ * ‖x‖ := by
-  have hsnd : (tB F * x).snd = constHomPS F (LaurentSeriesExample.t F) * x.snd := by
+  have hsnd : (tB F * x).snd = constHomPS F (ϖ F) * x.snd := by
     rw [TrivSqZeroExt.snd_mul, smul_eq_mul, op_smul_eq_mul]
     show _ + (tB F).snd * x.fst = _
     rw [show (tB F).snd = 0 from rfl, zero_mul, add_zero]
     rfl
-  have hfst : (tB F * x).fst = constHomPS F (LaurentSeriesExample.t F) * x.fst := rfl
+  have hfst : (tB F * x).fst = constHomPS F (ϖ F) * x.fst := rfl
   rw [norm_tB, JetNorm.norm_def, JetNorm.norm_def, hfst, hsnd]
   show max ‖PowerSeries.Restricted.C (1 : ℝ) _ * x.fst‖
     ‖PowerSeries.Restricted.C (1 : ℝ) _ * x.snd‖ = _
   rw [norm_restrictedC_mul, norm_restrictedC_mul,
-    mul_max_of_nonneg _ _ (norm_nonneg (LaurentSeriesExample.t F))]
+    mul_max_of_nonneg _ _ (norm_nonneg (ϖ F))]
 
 /-- The pseudouniformizer of `𝓓`. -/
 noncomputable def tD : JetD F := TrivSqZeroExt.inl (RestrictedLaurent.C
-  (LaurentSeriesExample.t F))
+  (ϖ F))
 
-theorem norm_tD : ‖tD F‖ = ‖LaurentSeriesExample.t F‖ := by
+theorem norm_tD : ‖tD F‖ = ‖ϖ F‖ := by
   rw [tD, JetNorm.norm_inl]
   show ‖single 0 _‖ = _
   rw [norm_single]
 
 theorem isUnit_tD : IsUnit (tD F) := by
   refine IsUnit.map ((TrivSqZeroExt.inlHom _ _).comp (RestrictedLaurent.C (R := K))) ?_
-  exact (LaurentSeriesExample.t_ne_zero F).isUnit
+  exact (isUnit_ϖ F)
 
 theorem norm_tD_mul (x : JetD F) : ‖tD F * x‖ = ‖tD F‖ * ‖x‖ := by
   have hsnd : (tD F * x).snd =
-      RestrictedLaurent.C (LaurentSeriesExample.t F) * x.snd := by
+      RestrictedLaurent.C (ϖ F) * x.snd := by
     rw [TrivSqZeroExt.snd_mul, smul_eq_mul, op_smul_eq_mul]
     show _ + (tD F).snd * x.fst = _
     rw [show (tD F).snd = 0 from rfl, zero_mul, add_zero]
     rfl
   have hfst : (tD F * x).fst =
-      RestrictedLaurent.C (LaurentSeriesExample.t F) * x.fst := rfl
+      RestrictedLaurent.C (ϖ F) * x.fst := rfl
   rw [norm_tD, JetNorm.norm_def, JetNorm.norm_def, hfst, hsnd]
   show max ‖RestrictedLaurent.C _ * x.fst‖ ‖RestrictedLaurent.C _ * x.snd‖ = _
   rw [norm_C_mul, norm_C_mul,
-    mul_max_of_nonneg _ _ (norm_nonneg (LaurentSeriesExample.t F))]
+    mul_max_of_nonneg _ _ (norm_nonneg (ϖ F))]
 
 /-- The pseudouniformizer of `𝒞`. -/
-noncomputable def tC : JetC F := constC F (LaurentSeriesExample.t F)
+noncomputable def tC : JetC F := constC F (ϖ F)
 
-theorem norm_tC : ‖tC F‖ = ‖LaurentSeriesExample.t F‖ := norm_constC F _
+theorem norm_tC : ‖tC F‖ = ‖ϖ F‖ := norm_constC F _
 
 theorem isUnit_tC : IsUnit (tC F) :=
-  IsUnit.map (constC F) (LaurentSeriesExample.t_ne_zero F).isUnit
+  IsUnit.map (constC F) (isUnit_ϖ F)
 
 theorem norm_tC_mul (x : JetC F) : ‖tC F * x‖ = ‖tC F‖ * ‖x‖ := by
   rw [tC, norm_constC_mul, norm_constC]

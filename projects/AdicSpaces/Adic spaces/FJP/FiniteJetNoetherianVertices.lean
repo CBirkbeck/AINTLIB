@@ -33,9 +33,9 @@ namespace FiniteJet
 
 open RestrictedLaurent
 
-variable (F : Type*) [Field F]
+variable (F : Type*) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
 
-local notation "K" => LaurentSeries F
+local notation "K" => F
 
 /-! ### Strong noetherianity of the four coefficient rings -/
 
@@ -151,6 +151,32 @@ noncomputable instance {R : Type*} [NormedCommRing R] [IsUltrametricDist R] [Nor
       _ ≤ _ := h
 
 end MapRestricted
+
+/-- **The extra input for the sheafiness half of [FJP]**: the unit ball of the Gauss algebra
+`K⟨T₁,…,T_k⟩` — equivalently `K°⟨T₁,…,T_k⟩` — is noetherian for every `k`.
+
+This is where **discreteness of the valuation genuinely enters**: for a dense value group
+`K°` is not even noetherian and the strict-localization machinery of [FJP] §4 collapses.
+It is a class field rather than a derived fact because the general statement (the `ϖ`-adic
+completion of a noetherian ring is noetherian, Stacks 00MA) is a mathlib gap — this repo's
+`AdicCompletion.isNoetherianRing` is `sorry`-backed. For `K = F((t))` it is discharged
+sorry-free by the elementary transpose argument of `ExampleLaurentSeries.lean`
+(`Psi`/`exists_psi_eq`); see `FJP/FJPBaseLaurent.lean`.
+
+Deliberately kept separate from `IsFJPBase`, so that everything not needing it — in
+particular the Scottish Book Problem 24 and 28 witnesses — stays available over an
+arbitrary complete ultrametric base. -/
+class IsFJPNoetherianBase (E : Type*) [NormedField E] [IsUltrametricDist E]
+    [CompleteSpace E] where
+  /-- The Gauss unit ball in `k` variables is noetherian. -/
+  isNoetherianRing_unitBall_gauss (k : ℕ) :
+    IsNoetherianRing (unitBall (MvPowerSeries.Restricted E (fun _ : Fin k => (1 : ℝ))))
+  /-- The base is strongly noetherian (used at the `𝓑`/`𝓒`/`𝓓` vertices). -/
+  [isStronglyNoetherian : IsStronglyNoetherian E]
+
+attribute [instance] IsFJPNoetherianBase.isStronglyNoetherian
+
+variable [IsFJPBase F] [IsFJPNoetherianBase F]
 
 /-- Restricted extensions of the Laurent ring are noetherian: `L⟨Z₁,…,Zₘ⟩` is a quotient of
 the noetherian `K⟨W,V,Z₁,…,Zₘ⟩` ([FJP] Prop 2.1; the presentation `L = k⟨W,V⟩/(WV−1)`).
@@ -356,42 +382,11 @@ theorem isNoetherianRing_unitBall_of_isometry (e : A ≃+* B) (he : ∀ x, ‖e 
 
 end BallTransfer
 
-/-- **The Gauss unit ball of `K⟨T₁,…,Tₖ⟩` is noetherian**: the integral restricted series
-are exactly the transpose images of the noetherian `(MvPolynomial (Fin k) F)⟦X⟧`
-([FJP] Lemma 4.2: noetherian rings of definition). -/
+/-- **The Gauss unit ball of `K⟨T₁,…,T_k⟩` is noetherian** ([FJP] Lemma 4.2: noetherian
+rings of definition) — now an assumption on the base rather than a theorem about `F((t))`. -/
 theorem isNoetherianRing_unitBall_gaussK (k : ℕ) :
-    IsNoetherianRing (unitBall (MvPowerSeries.Restricted K (fun _ : Fin k => (1 : ℝ)))) := by
-  classical
-  refine isNoetherianRing_of_surjective (PowerSeries (MvPolynomial (Fin k) F)) _
-    (RingHom.codRestrict
-      (((UnitDiscExample.restrictedGaussEquiv K k).symm.toRingHom).comp
-        (LaurentSeriesExample.psiR F k))
-      (unitBall _) (fun g => ?_)) ?_
-  · -- the transpose image is integral: every coefficient has valuation ≤ 1
-    show ‖(UnitDiscExample.restrictedGaussEquiv K k).symm (LaurentSeriesExample.psiR F k g)‖
-      ≤ 1
-    rw [MvRestricted.norm_eq]
-    show MvPowerSeries.gaussNorm _ _ (LaurentSeriesExample.Psi F k g) ≤ 1
-    rw [MvPowerSeries.gaussNorm]
-    refine Real.iSup_le (fun t => ?_) zero_le_one
-    rw [finsupp_prod_one, mul_one]
-    rw [Valued.toNormedField.norm_le_one_iff]
-    have hv := LaurentSeriesExample.psi_coeff_v_le F k g t 0
-      (fun m hm => absurd hm (Nat.not_lt_zero m))
-    rwa [show (-(0 : ℕ) : ℤ) = 0 by omega, WithZero.exp_zero] at hv
-  · -- surjectivity: integral restricted series are transpose images
-    rintro ⟨y, hy⟩
-    have hyres : MvPowerSeries.IsRestricted y.1 :=
-      (UnitDiscExample.isRestrictedGauss_one_iff K k y.1).mp y.2
-    have hyint : ∀ t, Valued.v (MvPowerSeries.coeff t y.1) ≤ 1 := fun t => by
-      rw [← Valued.toNormedField.norm_le_one_iff]
-      have h := MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ y) t
-      rw [finsupp_prod_one, mul_one] at h
-      refine h.trans ?_
-      rw [← MvRestricted.norm_eq]
-      exact hy
-    obtain ⟨g, hg⟩ := LaurentSeriesExample.exists_psi_eq F k y.1 hyres hyint
-    exact ⟨g, Subtype.ext (Subtype.ext hg)⟩
+    IsNoetherianRing (unitBall (MvPowerSeries.Restricted K (fun _ : Fin k => (1 : ℝ)))) :=
+  IsFJPNoetherianBase.isNoetherianRing_unitBall_gauss (E := F) k
 
 /-- `L° = 𝒪_K⟨W,W⁻¹⟩` is noetherian: the `evalHom`-image of the integral `K⟨W,V⟩`
 ([FJP] Lemma 4.2 for the annulus vertex). -/

@@ -4829,7 +4829,33 @@ nose, so every estimate is exact with constant 1). Generality: minimal, match us
   of the disc component of the 𝓑-jet); `ev00Val` its pulled-back rank-one valuation;
   `innerPoint = ofValuation ev00Val ∈ Spa(𝓐, 𝓐°)` with `|W| = 0 ≤ |ϖ| ≠ 0`.
 
-### [SB-BASE] Base-field generality of the SB24/SB28 witnesses
+### [SB-BASE] Base-field generality — DONE (2026-08-01)
+- **Status**: done. The FJP construction now runs over an ABSTRACT base. Two classes in
+  `FJP/FJPBase.lean` + `FJP/FiniteJetNoetherianVertices.lean`:
+  - `IsFJPBase K` : `[NormedField K] [IsUltrametricDist K] [CompleteSpace K]` + a
+    pseudouniformizer `ϖ ≠ 0`, `‖ϖ‖ < 1`. **No discreteness.** Enough for the ring theory,
+    the chart `𝓐⟨W/ϖ⟩ ≅ 𝓑`, the `Q²`-collapse, and hence Problems 24 and 28.
+  - `IsFJPNoetherianBase K` : additionally the Gauss unit ball `K°⟨T₁..T_k⟩` is noetherian.
+    Needed only for the strict-localization machinery ([FJP] §4) and sheafiness.
+- **Key enabler**: `RestrictedLaurent.norm_mul_eq` carried an unused discreteness
+  hypothesis (`_hd`, literally underscore-prefixed). Dropping it shows the Laurent Gauss
+  norm is multiplicative over ANY complete nonarchimedean field — that is why the
+  `IsFJPBase` half needs no discreteness at all.
+- **Instances**: `FJP/FJPBaseLaurent.lean` gives `IsFJPBase`+`IsFJPNoetherianBase` for
+  `LaurentSeries F` (the noetherian half by the sorry-free `Psi`/`exists_psi_eq` transpose
+  argument). `FJP/FJPBasePadic.lean` gives `IsFJPBase ℚ_[p]`.
+- **Payoff**: `ScottishBook.problem28` / `problem24_completed_false` /
+  `exists_rationalLoc_not_flat` now hold over any `IsFJPBase` — verified to instantiate at
+  `ℚ_[p]` (mixed characteristic), and `ℂ_p`-style dense-value-group bases also qualify.
+  `problem28_laurentSeries` / `exists_rationalLoc_not_flat_laurentSeries` keep the classical
+  `F((t))` form. All axiom-clean (propext/Classical.choice/Quot.sound).
+- **Still open**: `IsFJPNoetherianBase ℚ_[p]`, i.e. `ℤ_p⟨T₁..T_k⟩` noetherian. True, but
+  needs Stacks 00MA (adic completion of noetherian is noetherian) — a mathlib gap; the
+  repo's `AdicCompletion.isNoetherianRing` is sorry-backed and deliberately NOT used. Until
+  then SHEAFINESS of the FJP algebra remains equal-characteristic only.
+
+### [SB-BASE-OLD] (superseded scoping note, kept for the cost estimate)
+
 - **Status**: partial (2026-08-01). The Scottish Book statements are now parameterized by
   an arbitrary `(F : Type u) [Field F]` with NO further hypothesis, so they hold over
   every `K = F((t))`, in every universe. No fixed field is baked in.

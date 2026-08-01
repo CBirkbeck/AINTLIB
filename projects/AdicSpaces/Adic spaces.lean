@@ -130,7 +130,10 @@ import «Adic spaces».ExampleLaurentSeries
 import «Adic spaces».ExampleUnitDisc
 import «Adic spaces».FJP.FiniteJetMain
 import «Adic spaces».FJP.FiniteJetSheafyEndpoints
+import «Adic spaces».FJP.FJPBase
+import «Adic spaces».FJP.FJPBaseLaurent
 import «Adic spaces».FJP.FiniteJetScottishBook
+import «Adic spaces».FJP.FJPBasePadic
 import «Adic spaces».SpaRationalOpenComparison
 import «Adic spaces».SpaRationalOpenHomeomorph
 import «Adic spaces».NonTateRationalOpenHomeomorph
