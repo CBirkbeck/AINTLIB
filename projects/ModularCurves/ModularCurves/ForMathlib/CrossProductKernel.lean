@@ -228,6 +228,17 @@ theorem not_isUnit_det_of_mulVec_eq_zero {n : Type*} [Fintype n] [DecidableEq n]
     ¬ IsUnit A.det :=
   fun hdet => hne (eq_zero_of_mulVec_eq_zero_of_isUnit_det A hdet u hu)
 
+/-- **The unit half, in Cramer form.** If a `3 × 3` system has unit determinant then it
+is surjective — the companion of `eq_zero_of_mulVec_eq_zero_of_isUnit_det`, giving the
+exactness of the order from non-degeneracy of the evaluation matrix. -/
+theorem surjective_mulVec_of_isUnit_det {n : Type*} [Fintype n] [DecidableEq n]
+    (A : Matrix n n R) (hdet : IsUnit A.det) (b : n → R) :
+    ∃ u : n → R, A *ᵥ u = b := by
+  obtain ⟨d, hd⟩ := hdet
+  refine ⟨(↑d⁻¹ : R) • (Matrix.adjugate A *ᵥ b), ?_⟩
+  rw [Matrix.mulVec_smul, Matrix.mulVec_mulVec, Matrix.mul_adjugate]
+  rw [Matrix.smul_mulVec, Matrix.one_mulVec, smul_smul, ← hd, Units.inv_mul, one_smul]
+
 end RankThree
 
 end ModularCurves
