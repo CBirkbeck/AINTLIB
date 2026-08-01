@@ -805,6 +805,27 @@ theorem compactSpace_spa_noHArch [IsTopologicalRing A] (P : PairOfDefinition A)
     CompactSpace ↥(Spa A A⁺) :=
   isCompact_iff_compactSpace.mp (isCompact_spa_noHArch P hπ hA₀le I hIeq)
 
+/-- The `ιSpvPropR`-image of a rational open is cut out of the `ιSpvR`-image
+of `Spa` by the single coordinate `⟨(T, s), hTI⟩`. -/
+private theorem ιSpvPropR_image_rationalOpen [IsTopologicalRing A]
+    (I : Ideal A) (T : Finset A) (s : A)
+    (hTI : I ≤ (Ideal.span (T : Set A)).radical) :
+    (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) ''
+    (Subtype.val ⁻¹' rationalOpen T s) =
+    (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) ''
+      ((ιSpvR I '' (Spa A A⁺)) ∩
+        {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true}) := by
+  ext r
+  constructor
+  · rintro ⟨v, hv, rfl⟩
+    rw [Set.mem_preimage] at hv
+    obtain ⟨hvSpa, h1, h2⟩ := hv
+    exact ⟨ιSpvR I (v : Spv A), ⟨⟨(v : Spv A), v.2, rfl⟩,
+      (ιSpvR_eq_true_iff I _ _).mpr ⟨h1, h2⟩⟩, rfl⟩
+  · rintro ⟨y, ⟨⟨v, hvSpa, rfl⟩, hq⟩, rfl⟩
+    obtain ⟨h1, h2⟩ := (ιSpvR_eq_true_iff I _ _).mp hq
+    exact ⟨⟨v, hvSpa⟩, Set.mem_preimage.mpr ⟨hvSpa, h1, h2⟩, rfl⟩
+
 /-- **Rational subsets are quasi-compact** (Wedhorn 7.35(2)): the trace of
 `rationalOpen T s` on `Spa A A⁺` is compact whenever the datum satisfies the openness
 side condition. -/
@@ -822,21 +843,7 @@ theorem isCompact_subtype_rationalOpen [IsTopologicalRing A] (P : PairOfDefiniti
   have hEmb : Topology.IsEmbedding (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) :=
     ⟨isInducing_ιSpvPropR_spa P I hIeq', injective_ιSpvPropR_spa P I hIeq'⟩
   refine (hEmb.isCompact_iff (s := Subtype.val ⁻¹' rationalOpen T s)).mpr ?_
-  have h1 : (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) ''
-      (Subtype.val ⁻¹' rationalOpen T s) =
-      (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) ''
-        ((ιSpvR I '' (Spa A A⁺)) ∩
-          {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true}) := by
-    ext r
-    constructor
-    · rintro ⟨v, hv, rfl⟩
-      rw [Set.mem_preimage] at hv
-      obtain ⟨hvSpa, h1, h2⟩ := hv
-      exact ⟨ιSpvR I (v : Spv A), ⟨⟨(v : Spv A), v.2, rfl⟩,
-        (ιSpvR_eq_true_iff I _ _).mpr ⟨h1, h2⟩⟩, rfl⟩
-    · rintro ⟨y, ⟨⟨v, hvSpa, rfl⟩, hq⟩, rfl⟩
-      obtain ⟨h1, h2⟩ := (ιSpvR_eq_true_iff I _ _).mp hq
-      exact ⟨⟨v, hvSpa⟩, Set.mem_preimage.mpr ⟨hvSpa, h1, h2⟩, rfl⟩
+  have h1 := ιSpvPropR_image_rationalOpen I T s hTI
   rw [h1]
   refine IsCompact.image ?_ (continuous_toProp_rcoord I)
   refine (isCompact_image_ιSpvR_spa P hπ hA₀le I hIeq).inter_right ?_
@@ -1097,21 +1104,7 @@ theorem isCompact_subtype_rationalOpen₂ [IsTopologicalRing A] (P : PairOfDefin
   have hEmb : Topology.IsEmbedding (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) :=
     ⟨isInducing_ιSpvPropR_spa P I hIeq', injective_ιSpvPropR_spa P I hIeq'⟩
   refine (hEmb.isCompact_iff (s := Subtype.val ⁻¹' rationalOpen T s)).mpr ?_
-  have h1 : (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) ''
-      (Subtype.val ⁻¹' rationalOpen T s) =
-      (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) ''
-        ((ιSpvR I '' (Spa A A⁺)) ∩
-          {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true}) := by
-    ext r
-    constructor
-    · rintro ⟨v, hv, rfl⟩
-      rw [Set.mem_preimage] at hv
-      obtain ⟨hvSpa, h1, h2⟩ := hv
-      exact ⟨ιSpvR I (v : Spv A), ⟨⟨(v : Spv A), v.2, rfl⟩,
-        (ιSpvR_eq_true_iff I _ _).mpr ⟨h1, h2⟩⟩, rfl⟩
-    · rintro ⟨y, ⟨⟨v, hvSpa, rfl⟩, hq⟩, rfl⟩
-      obtain ⟨h1, h2⟩ := (ιSpvR_eq_true_iff I _ _).mp hq
-      exact ⟨⟨v, hvSpa⟩, Set.mem_preimage.mpr ⟨hvSpa, h1, h2⟩, rfl⟩
+  have h1 := ιSpvPropR_image_rationalOpen I T s hTI
   rw [h1]
   refine IsCompact.image ?_ (continuous_toProp_rcoord I)
   refine (isCompact_image_ιSpvR_spa₂ P hpair hA₀le I hIeq).inter_right ?_

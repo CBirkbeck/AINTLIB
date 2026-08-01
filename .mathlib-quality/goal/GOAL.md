@@ -7028,3 +7028,39 @@ Sharpening the earlier rule (from `hkey` in FiniteJetChart): **drop the
 ascription only when the helper's implicit arguments are determined by its
 explicit ones.** Two lines spent, still 16 → 2 per site.
 
+
+## Concurrency incident: a second session shared this worktree
+
+Gate 42 failed with `failed to synthesize Field (ULift (ZMod 2))` in
+`ScottishBook/Stated/Problem028.lean` — a file I had never touched, with no
+plausible connection to the dedup I was doing.
+
+`git status` explained it: the tree held work that was not mine —
+`FJP/FiniteJetScottishBook.lean` (untracked), and modifications to
+`Problem024.lean`, `Problem028.lean` and `Adic spaces.lean`. Another session was
+answering Scottish Book problems 24 and 28 with the FJP finite-jet algebra, and
+its `lake build` processes were live in this directory. `Problem028` had just
+gained an import of a module that did not exist when my gate started. It has
+since landed cleanly as `d5e626ccc`, and the tree is quiet again.
+
+**What held.** Every commit this campaign has staged with
+`git add -- <explicit paths>`, never `git add -A`. That is the habit from the
+recorded clobber incident, and it is why none of the other session's files ever
+entered my commits even while they sat modified in my tree.
+
+**What did not hold — my own rule.** While my gate was still running I ran
+`lake build '«Adic spaces».ScottishBook.Stated.Problem028'` to test whether the
+failure reproduced. That is the one-build-at-a-time rule, broken by me, and it
+made the "builds green in isolation" result untrustworthy: it ran against a tree
+two other builds were mutating. I only noticed when I checked for live pids
+*after* drawing a conclusion from it.
+
+The ordering matters and is worth being precise about: the gate had already
+reported its errors before my concurrent build started, so my violation did not
+cause them. But it did mean neither result could settle the question, and I had
+to wait for a quiet tree regardless.
+
+**The check that should have come first.** Before diagnosing a build failure in
+a file I did not edit, run `git status`. A foreign modification is a far cheaper
+explanation than an instance-resolution mystery, and it is one command.
+
