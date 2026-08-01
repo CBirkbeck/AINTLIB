@@ -303,6 +303,32 @@ theorem chord_mul_conj_eq_cubic {R A : Type u} [CommRing R] [CommRing A] [Algebr
   simp only [map_add, map_sub, map_mul, map_neg, map_pow, map_ofNat]
   linear_combination -hEq
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (α)] The cubic factors through the three `X`-coordinates.** When the three
+`x`-coordinates satisfy the Vieta relations of the chord (which the chord–tangent
+formulas provide: `x₃ = ℓ² + a₁ℓ − a₂ − x₁ − x₂`, and the two points lie on the line),
+the cubic of `chord_mul_conj_eq_cubic` is `-(X − x₁)(X − x₂)(X − x₃)`. -/
+theorem cubic_factors_of_vieta {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (X : A) (ℓ x₁ x₂ x₃ y₁ y₂ : R)
+    (hx₃ : x₃ = ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)
+    (hc₁ : 2 * x₁ * ℓ ^ 2 + (W.a₁ * x₁ - 2 * y₁ - W.a₃) * ℓ + (-W.a₁ * y₁ + W.a₄) =
+      x₁ * x₂ + x₁ * x₃ + x₂ * x₃)
+    (hc₀ : -x₁ ^ 2 * ℓ ^ 2 + (2 * x₁ * y₁ + W.a₃ * x₁) * ℓ -
+        (y₁ ^ 2 + W.a₃ * y₁ - W.a₆) = -(x₁ * x₂ * x₃)) :
+    -(X ^ 3 +
+      (algebraMap R A (-ℓ ^ 2 - W.a₁ * ℓ + W.a₂)) * X ^ 2 +
+      (algebraMap R A (2 * x₁ * ℓ ^ 2 + (W.a₁ * x₁ - 2 * y₁ - W.a₃) * ℓ +
+        (-W.a₁ * y₁ + W.a₄))) * X +
+      (algebraMap R A (-x₁ ^ 2 * ℓ ^ 2 + (2 * x₁ * y₁ + W.a₃ * x₁) * ℓ -
+        (y₁ ^ 2 + W.a₃ * y₁ - W.a₆)))) =
+    -((X - algebraMap R A x₁) * (X - algebraMap R A x₂) * (X - algebraMap R A x₃)) := by
+  have hsum : (-ℓ ^ 2 - W.a₁ * ℓ + W.a₂) = -(x₁ + x₂ + x₃) := by
+    rw [hx₃]; ring
+  rw [hsum, hc₁, hc₀]
+  simp only [map_add, map_sub, map_mul, map_neg]
+  ring
+
 end ModularCurves
 
 namespace ModularCurves
