@@ -30846,3 +30846,22 @@ i.e. the Fin 3 analogue of quotientSpanMulEquivProd: EITHER iterate the SES twic
 SectionsIdeal.free_quotient (KM 1.1.2, already de-privatized, m arbitrary!) which gives
 A/(∏ fᵢ) ≃ₗ (Fin m → R) directly from m retractions — USE free_quotient, it subsumes
 quotientSpanMulEquivProd for every arity); (iii) then [A5-A] chord-tangent.
+
+### ★★★★ [G9] TRIPLE-DIVISOR RANK-THREE COORDINATES DONE 2026-08-01
+`nonempty_baseSections_cokernel_iteratedTwist₃_equiv_of_sections` — axiom-clean.
+The full tower now exists on the TENSOR-SHAPED source, all from ker-principality:
+  rank 1 (single) / rank 2 (pair) / rank 3 (triple) / rank m (G8, free_quotient).
+STATE OF THE WP PRONG:
+- GAP-A-7 ✓, GAP-A-4 ✓ (both shapes, both arities, pole-sheaf-instantiated).
+- The chord-tangent input [A5-A] is the remaining MATH: with L := 𝒪(3[0]) and
+  R'' := -(P+Q) (project group law), the line ℓ (rank-one kernel generator for
+  [P]+[Q]) must lie in the rank-3 triple kernel. Reformulations available now:
+  (a) ker-monotonicity gives ⊆ one way only; (b) the triple e3 gives a 3×3
+  evaluation matrix A(P,Q,R''), and ℓ ∈ ker ⟺ A · (coords of ℓ) = 0;
+  (c) surjectivity of the triple restriction FAILS in general (rank 3 → rank 3 with
+  a kernel!), so [A4-c']-style surjectivity slots must NOT be assumed for the triple.
+- Route for [A5-A] per the project's own idiom: the universal Weierstrass atlas
+  transfer (`GroupLawAxioms.lean`'s `*_of_map`/`*_of_eq`/atlas pattern over
+  `WeierstrassAtlasRingU`) — prove the determinant identity there (reduced/integral
+  base), transfer along ring maps. That is a GroupLawAxioms-scale campaign
+  (~1000+ LOC) and is the honest remaining cost of GAP-A-5.
