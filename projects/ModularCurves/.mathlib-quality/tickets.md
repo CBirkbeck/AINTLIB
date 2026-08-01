@@ -32112,3 +32112,17 @@ idiom is a helper
 proved by `Units.ext` + `Units.coe_map` + `congrArg (fun ψ => ψ.hom u) (α.naturality φ)`,
 then three rewrites. NOTE: editing this file invalidates the whole Picard glue chain —
 the root build takes >10 min, unlike the ~2 min incremental builds elsewhere.
+
+### ★★★ [W3.4.c bricks] DONE 2026-08-01 — `Picard/SectionAffineIntersection.lean` (9619 jobs)
+* `finiteIntersectionOpen_preimage` — a finite intersection of preimages is the preimage
+  of the finite intersection;
+* `finiteIntersectionOpen_le_preimage_section` — over the base's finite intersection, a
+  section `z` lands in the preimage finite intersection (so `appLE z` is defined there).
+These give the *domains* of the comparison `α` whose components are `appLE z`; the
+functor-level `α` (with its four-case naturality) is the next step, and the public API
+it needs — `affineIntersectionFunctor_obj_nonempty/_empty` and
+`affineIntersectionFunctor_map_nonempty/_empty` — has been confirmed to exist.
+LEAN-OPS: `Opens.coe_iInf` unfolds to `interior (⋂ …)`, so preimage does **not** commute
+with `⨅` definitionally and no `simp only`/`rfl` route works. Finiteness has to be used:
+`Finset.induction_on` with `iInf_insert`, where each step is `f ⁻¹ᵁ (A ⊓ B) = f⁻¹A ⊓ f⁻¹B`
+by `rfl`.

@@ -198,6 +198,7 @@ import ModularCurves.Picard.InvertibleSheafProperCechResidueSpread
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.RigidDescent
+import ModularCurves.Picard.SectionAffineIntersection
 import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.Picard.UnitPullback
 import ModularCurves.WeilPairing.Basic
