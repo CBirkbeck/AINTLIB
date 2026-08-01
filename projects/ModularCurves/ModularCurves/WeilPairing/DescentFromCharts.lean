@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.EllipticCurve.PullbackTensorSection
 import ModularCurves.WeilPairing.IteratedTwist
 import ModularCurves.Picard.RigidDescent
 
@@ -380,5 +381,21 @@ noncomputable def tensorObjRestrictTrivialization {X : Scheme.{u}} {M L : X.Modu
       tensorObjCongr ((restrictFunctorIsoPullback U.ι).symm.app M ≪≫ eM)
         ((restrictFunctorIsoPullback U.ι).symm.app L ≪≫ eL) ≪≫
         AlgebraicGeometry.Scheme.Modules.tensorObjUnitIso (unitObj U.toScheme)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.5] Comparison units multiply under `tensorSection`.** If two module sections
+are related by scalars, so are their pure tensors — with the product scalar. Together
+with `tensorSection_restrict` (naturality) this is the whole cocycle computation for the
+twisted bundle: `u'ᵢⱼ = uᵢⱼ · vᵢⱼ`. -/
+theorem tensorSection_comparison {X : Scheme.{u}} (M N : X.Modules) (V : X.Opens)
+    (a b : Γ(X, V)) (x x' : Γ(M, V)) (y y' : Γ(N, V))
+    (hx : x = a • x') (hy : y = b • y') :
+    tensorSection M N V x y = (a * b) • tensorSection M N V x' y' := by
+  subst hx
+  subst hy
+  rw [tensorSection_smul_left, tensorSection_smul_right, ← mul_smul]
 
 end ModularCurves

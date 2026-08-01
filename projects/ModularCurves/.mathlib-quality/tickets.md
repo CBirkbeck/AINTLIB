@@ -32242,3 +32242,27 @@ carrier was never the cause. Bisected with `#print axioms`:
   - `yRho_geometricallyIrreducible` (:8744) — independent, the irreducibility leg.
 Other sorry-bearing files on this line: `YFullRoute` (6), `YOneAssembly` (4),
 `YOneTatePoint` (3), `IrreducibilityScoping` (1).
+
+### ★★★ [W3.5] 2026-08-01 — `tensorSection_comparison` + the route to `hnorm`
+`tensorSection M N V x y = (a*b) • tensorSection M N V x' y'` when `x = a • x'` and
+`y = b • y'`. With `tensorSection_restrict` (naturality, already in the tree) this **is**
+the cocycle computation for the twisted bundle: `u'ᵢⱼ = uᵢⱼ · vᵢⱼ`.
+
+DISCOVERY while scoping: the tensor-section calculus already exists and is rich —
+`tensorSection` (`EllipticCurve/PoleSheaf.lean:2082`), `tensorSection_smul`,
+`tensorSection_smul_left/_right` (`EllipticCurve/PullbackTensorSection.lean:860/899`),
+`tensorSection_restrict` (:2294), `tensorSection_map` (:5312). I started to redefine
+`tensorSection` and the compiler caught it (fifth near-duplicate this session — the tree
+is large enough that *grep the concept before writing the declaration* has to be reflex).
+
+KEY RESHAPE: `nonempty_unitObj_iso_of_normalized_glue` (`Picard/RigidDescent.lean:65`)
+takes the generating sections `s : ∀ i, Γ(L, …)` as **free data**, not as
+`generatorOfRestrictIso` outputs. So the twisted bundle's generators should be built as
+`tensorSection (sL i) (dual generator i)` — only that form makes the comparison units
+multiply. This bypasses the "generator of a tensor trivialization" computation entirely.
+
+REMAINING for `hnorm`, one brick: the **dual generator's comparison unit is the inverse**
+(`dᵢ = uᵢⱼ⁻¹ • dⱼ`). Route: characterize `dᵢ` by `ev(tensorSection sᵢ dᵢ) = 1`
+(`Picard/PicComparison.lean:539 exists_pairingElem_tmul_eq_one` + `nonempty_eval_iso`),
+then `ev(tensorSection sᵢ dⱼ) = uᵢⱼ` forces the inverse. After that: `u'ᵢⱼ = uᵢⱼ ·
+(f^*z^*uᵢⱼ)⁻¹`, whose `z`-value is `1` by `appLE_z_appLE_snd_eq_self`, and W3 closes.
