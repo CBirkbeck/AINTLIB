@@ -31291,3 +31291,14 @@ follows from [W1-d3.2b] + [d3.2d]'s unit half, and then
 `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` gives the local theorem of the
 square, the W2 toolkit descends it, and `exists_invertible_tensor_idealModule_add`
 (SelfAdjointN.lean:259 — the one Picard sorry) closes.
+
+### [W1-d3.2c] engine landed 2026-08-01 — `section_ext_of_forall_specPoint`
+Section-level extensionality over a reduced base. The remaining content of d3.2c is the
+FIELD-POINT comparison: for `p : Spec K ⟶ T`, the composite of `p` with the project's
+`-(P+Q)` equals the composite with the chord's third-intersection section. At field
+points both sides are computed by `Dictionary.eq_toAffine` (AdditionSpecPoints:654) and
+mathlib's `WeierstrassCurve.Affine.Point.add` / `addX` / `negAddY`; the project's group
+law is characterised over fields by `SpecPoint.addOnZ_family` / `addOnY_family`
+(AdditionSpecPoints:51/62). So d3.2c = "unfold both sides at a field point and match
+formulas", with a reducedness hypothesis on the base which for the universal atlas
+power is already discharged in the tree (PointsDictionary docstring: the 0e integrality).
