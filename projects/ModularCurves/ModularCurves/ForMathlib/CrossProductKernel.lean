@@ -149,6 +149,40 @@ theorem span_range_crossProduct_eq_top_of_surjective (v w : Fin 3 → R)
   exact Submodule.sum_mem _ fun i _ =>
     Ideal.mul_mem_right _ _ (Ideal.subset_span ⟨i, rfl⟩)
 
+/-- **The converse of `span_range_crossProduct_eq_top_of_surjective`**: a unimodular
+cross product makes the two-row system surjective. With `a ⬝ᵥ (v ⨯₃ w) = 1`, the vector
+`-y₀ • (a ⨯₃ w) - y₁ • (v ⨯₃ a)` has prescribed dot products. -/
+theorem surjective_of_span_range_crossProduct_eq_top (v w : Fin 3 → R)
+    (hc : Ideal.span (Set.range (v ⨯₃ w)) = ⊤) :
+    ∀ y : Fin 2 → R, ∃ u : Fin 3 → R, v ⬝ᵥ u = y 0 ∧ w ⬝ᵥ u = y 1 := by
+  intro y
+  have h1 : (1 : R) ∈ Ideal.span (Set.range (v ⨯₃ w)) := by rw [hc]; trivial
+  obtain ⟨a, ha⟩ := (Submodule.mem_span_range_iff_exists_fun R).mp h1
+  have hca : (v ⨯₃ w) ⬝ᵥ a = 1 := by
+    rw [dotProduct]
+    simpa [smul_eq_mul, mul_comm] using ha
+  refine ⟨-(y 0) • (a ⨯₃ w) - (y 1) • (v ⨯₃ a), ?_, ?_⟩
+  · have hv1 : v ⬝ᵥ (a ⨯₃ w) = -((v ⨯₃ w) ⬝ᵥ a) := by
+      simp only [cross_apply, dotProduct, Fin.sum_univ_three, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons]
+      ring
+    have hv2 : v ⬝ᵥ (v ⨯₃ a) = 0 := by
+      simp only [cross_apply, dotProduct, Fin.sum_univ_three, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons]
+      ring
+    rw [dotProduct_sub, dotProduct_smul, dotProduct_smul, hv1, hv2, hca]
+    simp [smul_eq_mul]
+  · have hw1 : w ⬝ᵥ (a ⨯₃ w) = 0 := by
+      simp only [cross_apply, dotProduct, Fin.sum_univ_three, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons]
+      ring
+    have hw2 : w ⬝ᵥ (v ⨯₃ a) = -((v ⨯₃ w) ⬝ᵥ a) := by
+      simp only [cross_apply, dotProduct, Fin.sum_univ_three, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons]
+      ring
+    rw [dotProduct_sub, dotProduct_smul, dotProduct_smul, hw1, hw2, hca]
+    simp [smul_eq_mul]
+
 /-- The rank-one analogue: a surjective single row is unimodular. -/
 theorem span_range_eq_top_of_surjective (a : Fin 2 → R)
     (hsurj : ∀ y : R, ∃ u : Fin 2 → R, a ⬝ᵥ u = y) :
