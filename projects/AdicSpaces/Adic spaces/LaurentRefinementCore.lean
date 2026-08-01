@@ -2926,6 +2926,47 @@ noncomputable def laurentMinusBridge
     (hcont_eval := hcont_eval_B hb)
 
 
+/-- The ring-hom form of plus-branch compatibility, on the localization rather than
+its completion. This is the whole content of
+`presheafValue_iteratedPlus_equiv_restrictionMap_canonicalMap`; that theorem is this
+equality transported across `Completion.ext'`, so the completion machinery (the
+uniform-structure `letI` block, the two continuity obligations) stays there and the
+algebra stays here. Proved by `IsLocalization.ringHom_ext` and unfolding both sides
+to `coeRingHom_B ∘ algebraMap_B`. -/
+theorem iteratedPlus_forwardHom_comp_restrictionMapHom_comp_coeRingHom
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
+    (D₀ : RationalLocData A)
+    [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
+    [LaurentNormalized D₀]
+    (f : A)
+    (hplus : rationalOpen (laurentPlusDatum D₀ f).T (laurentPlusDatum D₀ f).s ⊆
+      rationalOpen D₀.T D₀.s) :
+    (iteratedPlus_forwardHom P D₀ f).comp
+        ((restrictionMapHom D₀ (laurentPlusDatum D₀ f) hplus).comp D₀.coeRingHom) =
+      ((iteratedPlusDatum_B P D₀ f).canonicalMap).comp D₀.coeRingHom := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers D₀.s)
+  ext b
+  change iteratedPlus_forwardHom P D₀ f
+      (restrictionMapHom D₀ (laurentPlusDatum D₀ f) hplus
+        (D₀.coeRingHom (algebraMap A _ b))) =
+    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.coeRingHom (algebraMap A _ b))
+  -- `D₀.coeRingHom (algebraMap A _ b) = D₀.canonicalMap b` by def.
+  change iteratedPlus_forwardHom P D₀ f
+      (restrictionMapHom D₀ (laurentPlusDatum D₀ f) hplus (D₀.canonicalMap b)) =
+    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.canonicalMap b)
+  rw [restrictionMapHom_canonicalMap]
+  change iteratedPlus_forwardHom P D₀ f
+      ((laurentPlusDatum D₀ f).coeRingHom (algebraMap A _ b)) =
+    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.canonicalMap b)
+  rw [iteratedPlus_forwardHom_coeRingHom]
+  change (iteratedPlusDatum_B P D₀ f).coeRingHom
+      (iteratedPlus_forwardLocHom D₀ (algebraMap A _ b)) =
+    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.canonicalMap b)
+  rw [iteratedPlus_forwardLocHom_algebraMap]
+  -- Both sides are `coeRingHom_B ∘ algebraMap_B` at `D₀.canonicalMap b`.
+  rfl
+
 /-- **Compatibility of `presheafValue_iteratedPlus_equiv` with `canonicalMap`.**
 
 `presheafValue_iteratedPlus_equiv` identifies the two presheaf values in a way
@@ -3000,33 +3041,7 @@ theorem presheafValue_iteratedPlus_equiv_restrictionMap_canonicalMap
     have := congr_fun (congrArg DFunLike.coe h) a
     change lhsHom a = rhsHom a
     exact this
-  apply IsLocalization.ringHom_ext (Submonoid.powers D₀.s)
-  ext b
-  change lhsHom (algebraMap A _ b) = rhsHom (algebraMap A _ b)
-  change iteratedPlus_forwardHom P D₀ f
-      (restrictionMapHom D₀ (laurentPlusDatum D₀ f) hplus
-        (D₀.coeRingHom (algebraMap A _ b))) =
-    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.coeRingHom (algebraMap A _ b))
-  -- `D₀.coeRingHom (algebraMap A _ b) = D₀.canonicalMap b` by def.
-  change iteratedPlus_forwardHom P D₀ f
-      (restrictionMapHom D₀ (laurentPlusDatum D₀ f) hplus (D₀.canonicalMap b)) =
-    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.canonicalMap b)
-  rw [restrictionMapHom_canonicalMap]
-  -- Now: forwardHom ((laurentPlus).canonicalMap b)
-  -- = (iteratedPlusDatum_B).canonicalMap (D₀.canonicalMap b)
-  change iteratedPlus_forwardHom P D₀ f
-      ((laurentPlusDatum D₀ f).coeRingHom (algebraMap A _ b)) =
-    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.canonicalMap b)
-  rw [iteratedPlus_forwardHom_coeRingHom]
-  change (iteratedPlusDatum_B P D₀ f).coeRingHom
-      (iteratedPlus_forwardLocHom D₀ (algebraMap A _ b)) =
-    (iteratedPlusDatum_B P D₀ f).canonicalMap (D₀.canonicalMap b)
-  rw [iteratedPlus_forwardLocHom_algebraMap]
-  -- Goal: coeRingHom_B (algebraMap_B (D₀.canonicalMap b))
-  -- = (iteratedPlusDatum_B).canonicalMap (D₀.canonicalMap b)
-  -- Both are `(iteratedPlusDatum_B).coeRingHom.comp algebraMap B _` applied to
-  -- `D₀.canonicalMap b`, i.e., `(iteratedPlusDatum_B).canonicalMap (D₀.canonicalMap b)` by def.
-  rfl
+  exact iteratedPlus_forwardHom_comp_restrictionMapHom_comp_coeRingHom P D₀ f hplus
 
 /-- **Route B bridge (plus compatibility)**: the plus bridge intertwines
 `restrictionMap` and the first projection of `epsilonHom_gen`.
