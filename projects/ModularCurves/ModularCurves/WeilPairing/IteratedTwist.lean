@@ -472,6 +472,55 @@ theorem bijective_smul_restrictIso_inv_app {M : C.Modules} (U : C.Opens)
   rw [hfun]
   exact hbij
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W2-b] Two generating sections differ by a unit.** If `s` and `t` both generate
+`Γ(M, ·)` freely over an open and all its sub-opens, the comparison scalar is a unit.
+This supplies the overlap data of the rigidified descent. -/
+theorem exists_isUnit_smul_eq_of_generators {M : C.Modules} (V : C.Opens)
+    (s t : Γ(M, V))
+    (hs : Function.Bijective (fun r : Γ(C, V) => r • s))
+    (ht : Function.Bijective (fun r : Γ(C, V) => r • t)) :
+    ∃ u : Γ(C, V), IsUnit u ∧ s = u • t := by
+  obtain ⟨u, hu⟩ := ht.surjective s
+  obtain ⟨w, hw⟩ := hs.surjective t
+  refine ⟨u, ?_, hu.symm⟩
+  have hws : w • s = t := hw
+  have hut : u • t = s := hu
+  have hchain : (u * w) • s = (1 : Γ(C, V)) • s := by
+    rw [mul_smul, hws, hut, one_smul]
+  have huw : u * w = 1 := hs.injective hchain
+  exact isUnit_of_mul_isUnit_left (show IsUnit (u * w) from by
+    rw [huw]; exact isUnit_one)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The restriction of a generating section generates: bijectivity descends along the
+trivialization's naturality. -/
+theorem bijective_smul_restrict_of_restrictIso {M : C.Modules} (U : C.Opens)
+    (e : (restrictFunctor U.ι).obj M ≅ unitObj U.toScheme) (W W' : C.Opens)
+    (hWW' : U.ι ⁻¹ᵁ W' ≤ U.ι ⁻¹ᵁ W) :
+    Function.Bijective (fun r : Γ(U.toScheme, U.ι ⁻¹ᵁ W') =>
+      r • (((restrictFunctor U.ι).obj M).presheaf.map (homOfLE hWW').op
+        (e.inv.app (U.ι ⁻¹ᵁ W)
+          (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from
+            (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W)))))) := by
+  have hnat := (e.inv.val.naturality (homOfLE hWW').op)
+  have hval : ((restrictFunctor U.ι).obj M).presheaf.map (homOfLE hWW').op
+      (e.inv.app (U.ι ⁻¹ᵁ W)
+        (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from
+          (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W)))) =
+      e.inv.app (U.ι ⁻¹ᵁ W')
+        (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W') from
+          (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W'))) := by
+    have h := PresheafOfModules.naturality_apply e.inv.val (homOfLE hWW').op
+      (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from
+        (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W)))
+    refine h.symm.trans (congrArg (e.inv.app (U.ι ⁻¹ᵁ W')) ?_)
+    exact map_one ((U.toScheme).presheaf.map (homOfLE hWW').op).hom
+  rw [hval]
+  exact bijective_smul_restrictIso_inv_app U e W'
+
 end GeneralMultiplier
 
 section IteratedTwist
