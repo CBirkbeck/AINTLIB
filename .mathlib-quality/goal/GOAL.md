@@ -7707,3 +7707,53 @@ Open's five shared bodies are a different case — its versions run over
 `hspan`, so they are primed twins over different datum constructors rather than
 pure hypothesis-weakenings. Sharing those needs abstraction over the constructor,
 which the generic-datum helpers below actually achieve.
+
+## Batch: 143 → 136
+
+    spa_completion_of_spa_localization                 63 → 41   cfba38fbb
+    exists_spa_point_in_rationalOpen_of_isOpen_prime   64 → 43   e9a6117e3
+    Y_eq_iUnion_windows                                65 → 33   0ac31eadb
+    rationalShrink_holds                               65 → 38   d51426c31
+    genPiece_rel_forward_witness ×3 (one extraction)   72 → 44   b4ebe30de
+
+### The dominant technique is now: parameterise over the INTERFACE
+
+Five of these were carried by the same move, which is worth stating once. The
+block to lift is written in terms of something unwritable — a `set`-bound term, a
+`let`, a nested capture hypothesis, a datum constructor — and the reflex is to
+CARRY it, which drags the construction along and makes the extraction look
+expensive. In every case the block used that thing through a small number of
+FACTS and never unfolded it:
+
+    φhat  (SpaRationalOpenComparison)  used via: continuous, agrees with φ on im(coe)
+    w     (StructureSheaf)             used via: {0,1}-valued, zero-set = p
+    D₁₂   (WedhornCechAcyclicity)      used via: its open, its span
+    hcapture (StructureSheafStalks)    used via: one projection at one index
+    DB    (RelativePieceKeystone)      used via: its `.s` and `.T` fields
+
+Taking those facts as hypotheses beats carrying the definition every time, and it
+has two side benefits. It often SHORTENS the proof — with `w` opaque, both bullets
+stopped `simp only [w, …]`-ing through the definition and collapsed to one shared
+`hw_le_one`. And it is what makes a helper reusable across files: the Keystone
+helpers work for `Open`'s completely different constructors precisely because they
+name fields rather than a constructor.
+
+The tell that this applies: the block mentions the local only as an argument to
+lemmas, never inside `unfold`, `show … from rfl`, or `simp [thatLocal]`.
+
+### Two limits found
+
+**The abstraction ceiling is the supporting lemmas.** `forwardLoc_div_eq` over a
+free `{s : A}` made `algebraMap_s_mul_divByS` (stated for `D.s`, a projection)
+unmatchable. Parameterise over the datum, not the field.
+
+**`private` does not cross files.** Correct for a single-file helper, wrong when
+the point is reuse. It also changes the verification story: the
+"one `+private theorem` ⇒ module build suffices" shortcut only holds while the
+addition is private. Keystone's two new PUBLIC theorems meant building all six
+other consumers (all green) rather than asserting additions are safe.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 136
+    heartbeat raises 0 (task 1 complete, re-verified)
