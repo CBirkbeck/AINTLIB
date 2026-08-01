@@ -436,6 +436,42 @@ theorem isIso_monoSectionLift_of_multiplier_eq_unit_mul
   rw [hcancel]
   exact (u i).isUnit
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency.types false in
+/-- **A chart trivialization is a generating section.** The component of the inverse
+trivialization at the preimage of `W` sends `1` to a section whose multiples exhaust the
+sections there — the input shape of the descent machinery
+(`Picard/GlueTrivialization.lean`). -/
+theorem bijective_smul_restrictIso_inv_app {M : C.Modules} (U : C.Opens)
+    (e : (restrictFunctor U.ι).obj M ≅ unitObj U.toScheme) (W : C.Opens) :
+    Function.Bijective (fun r : Γ(U.toScheme, U.ι ⁻¹ᵁ W) =>
+      r • (e.inv.app (U.ι ⁻¹ᵁ W)
+        (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from
+          (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W))))) := by
+  have hiso : IsIso (e.inv.app (U.ι ⁻¹ᵁ W)) :=
+    Hom.isIso_iff_isIso_app.mp inferInstance _
+  have hbij := (ConcreteCategory.isIso_iff_bijective
+    (e.inv.app (U.ι ⁻¹ᵁ W))).mp hiso
+  have hfun : (fun r : Γ(U.toScheme, U.ι ⁻¹ᵁ W) =>
+      r • (e.inv.app (U.ι ⁻¹ᵁ W)
+        (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from
+          (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W))))) =
+      fun r : Γ(U.toScheme, U.ι ⁻¹ᵁ W) =>
+        e.inv.app (U.ι ⁻¹ᵁ W) (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from r) := by
+    funext r
+    have hsmul := Scheme.Modules.Hom.app_smul e.inv
+      (U := U.ι ⁻¹ᵁ W) r
+      (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W)))
+    have hone : (r • (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from
+        (1 : Γ(U.toScheme, U.ι ⁻¹ᵁ W)))) =
+        (show Γ(unitObj U.toScheme, U.ι ⁻¹ᵁ W) from r) := by
+      show r * 1 = r
+      exact mul_one r
+    rw [hone] at hsmul
+    exact hsmul.symm
+  rw [hfun]
+  exact hbij
+
 end GeneralMultiplier
 
 section IteratedTwist
