@@ -951,6 +951,60 @@ theorem eq_unit_mul_map {A B : Type u} [CommRing A] [CommRing B] (φ : A →+* B
   rw [hval, map_mul, map_mul, map_mul]
   rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 assembly steps 1–2] The chord identity in the away chart.** Composing the
+coordinate-ring identity with the away-chart isomorphism
+(`sectionAway_top_affineModelEval_bijective` supplies `φ` and its bijectivity): the
+chord, written in the chart's coordinates, is a unit multiple of the product of the
+three coordinate differences. -/
+theorem chord_exact_order_transported {R B : Type u} [CommRing R] [CommRing B]
+    (W : WeierstrassCurve R) (φ : W.toAffine.CoordinateRing →+* B)
+    (hφ : Function.Bijective φ)
+    (ℓ x₁ y₁ x₂ y₂ y₃ : R)
+    (σ₁ σ₂ σ₃ : W.toAffine.CoordinateRing →ₐ[R] R)
+    (h₁ : y₁ ^ 2 + W.a₁ * x₁ * y₁ + W.a₃ * y₁ =
+      x₁ ^ 3 + W.a₂ * x₁ ^ 2 + W.a₄ * x₁ + W.a₆)
+    (h₂ : y₂ ^ 2 + W.a₁ * x₂ * y₂ + W.a₃ * y₂ =
+      x₂ ^ 3 + W.a₂ * x₂ ^ 2 + W.a₄ * x₂ + W.a₆)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hnzdx : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0)
+    (hf₁nzd : ∀ t : W.toAffine.CoordinateRing,
+      (coordX W - algebraMap R _ x₁) * t = 0 → t = 0)
+    (hf₂nzd : ∀ t : W.toAffine.CoordinateRing,
+      (coordX W - algebraMap R _ x₂) * t = 0 → t = 0)
+    (hk₁ : RingHom.ker (σ₁ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ x₁})
+    (hk₂ : RingHom.ker (σ₂ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ x₂})
+    (hk₃ : RingHom.ker (σ₃ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)})
+    (hσ₁ : σ₁ (coordY W - (algebraMap R _ ℓ * (coordX W - algebraMap R _ x₁) +
+      algebraMap R _ y₁)) = 0)
+    (hx₂ : σ₂ (coordX W) = x₂) (hy₂ : σ₂ (coordY W) = y₂)
+    (hx₃ : σ₃ (coordX W) = ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)
+    (hy₃ : σ₃ (coordY W) = y₃)
+    (hline₃ : y₃ = ℓ * ((ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂) - x₁) + y₁)
+    (htor₂ : ∀ t : R, -(2 * y₂ + W.a₁ * x₂ + W.a₃) * t = 0 → t = 0)
+    (htor₃ : ∀ t : R,
+      -(2 * y₃ + W.a₁ * (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂) + W.a₃) * t = 0 → t = 0)
+    (hunit : ∀ c₁ c₂ c₃ : W.toAffine.CoordinateRing,
+      (coordY W - (algebraMap R _ ℓ * (coordX W - algebraMap R _ x₁) +
+        algebraMap R _ y₁)) = (coordX W - algebraMap R _ x₁) * c₁ →
+        c₁ = (coordX W - algebraMap R _ x₂) * c₂ →
+        c₂ = (coordX W - algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)) * c₃ →
+        IsUnit c₃) :
+    ∃ v : Bˣ,
+      φ (coordY W - (algebraMap R _ ℓ * (coordX W - algebraMap R _ x₁) +
+        algebraMap R _ y₁)) =
+        (v : B) * (φ (coordX W - algebraMap R _ x₁) *
+          (φ (coordX W - algebraMap R _ x₂) *
+            φ (coordX W - algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)))) := by
+  obtain ⟨u, hu⟩ := chord_exact_order_in_coordinateRing W ℓ x₁ y₁ x₂ y₂ y₃ σ₁ σ₂ σ₃
+    h₁ h₂ hline hnzdx hf₁nzd hf₂nzd hk₁ hk₂ hk₃ hσ₁ hx₂ hy₂ hx₃ hy₃ hline₃
+    htor₂ htor₃ hunit
+  exact eq_unit_mul_map φ hφ _ _ _ _ u hu
+
 end ModularCurves
 
 namespace ModularCurves
