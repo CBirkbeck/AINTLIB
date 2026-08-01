@@ -532,6 +532,49 @@ theorem KLE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
     _ = (ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den) ^ q.den := by
         rw [← pow_mul, mul_comm, pow_mul]
 
+omit [Fact (Nat.Prime p)] in
+/-- A rational `k` is below `p ^ N` whenever `k ≤ N`, via `k < p ^ k ≤ p ^ N`.
+Both bounds in `exists_KGE_KLE_adjacent` are this one fact. -/
+private theorem natCast_lt_p_pow {k N : ℕ} (hp1 : 1 < p) (hkN : k ≤ N) :
+    ((k : ℕ) : ℚ) < (p : ℚ) ^ N := by
+  calc ((k : ℕ) : ℚ) < ((p ^ k : ℕ) : ℚ) := by exact_mod_cast Nat.lt_pow_self hp1
+    _ ≤ ((p ^ N : ℕ) : ℚ) := by exact_mod_cast Nat.pow_le_pow_right (by omega) hkN
+    _ = (p : ℚ) ^ N := by push_cast; ring
+
+/-- For `v ∈ Y`, the set of exponents `n` with `KGE p^n v` is nonempty and bounded
+above, so it has a greatest element `n₀` — and past it the next power falls on the
+`KLE` side. This is the pigeonhole that lands every point of `Y` in some window:
+`n₀` is the window index, and which of `U` / `V` it lies in is then decided by a
+single `KGE_or_KLE` at the cutoff. -/
+private theorem exists_KGE_KLE_adjacent {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ)
+    {m₁ m₂ : ℕ} (hKLE_M : KLE p F ϖ ((m₁ + 1 : ℕ) : ℚ) v)
+    (hKGE_m : KGE p F ϖ (((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ)) v) :
+    ∃ n₀ : ℤ, KGE p F ϖ ((p : ℚ) ^ n₀) v ∧ KLE p F ϖ ((p : ℚ) ^ (n₀ + 1)) v := by
+  have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
+  have hpQ : (1 : ℚ) < p := by exact_mod_cast hp1
+  have hp0 : (0 : ℚ) < p := zero_lt_one.trans hpQ
+  set N : ℕ := max (m₁ + 2) (m₂ + 1) with hN
+  have hMltpN : ((m₁ + 1 : ℕ) : ℚ) < (p : ℚ) ^ (N : ℤ) := by
+    rw [zpow_natCast]; exact natCast_lt_p_pow p hp1 (by omega)
+  have hpNle : (p : ℚ) ^ (-(N : ℤ)) ≤ ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) := by
+    rw [zpow_neg, zpow_natCast, show ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ)
+      = (((m₂ + 1 : ℕ) : ℚ))⁻¹ by norm_num [one_div]]
+    exact inv_anti₀ (by positivity) (natCast_lt_p_pow p hp1 (by omega)).le
+  have hSne : KGE p F ϖ ((p : ℚ) ^ (-(N : ℤ))) v :=
+    KGE_mono p F ϖ hv (zpow_pos hp0 _) hpNle hKGE_m
+  have hSbdd : ∀ z : ℤ, KGE p F ϖ ((p : ℚ) ^ z) v → z ≤ (N : ℤ) := by
+    intro z hz
+    by_contra hzN
+    refine not_KGE_of_KLE_of_lt hv (by positivity) ?_ hKLE_M hz
+    calc ((m₁ + 1 : ℕ) : ℚ) < (p : ℚ) ^ (N : ℤ) := hMltpN
+      _ ≤ (p : ℚ) ^ z := by
+          refine zpow_le_zpow_right₀ hpQ.le (by omega)
+  obtain ⟨n₀, hn₀S, hn₀max⟩ := Int.exists_greatest_of_bdd
+    ⟨(N : ℤ), fun z hz => hSbdd z hz⟩ ⟨-(N : ℤ), hSne⟩
+  refine ⟨n₀, hn₀S, (KGE_or_KLE hv (zpow_pos hp0 _)).resolve_left (fun hge => ?_)⟩
+  have := hn₀max _ hge
+  omega
+
 theorem Y_eq_iUnion_windows :
     Y p F ϖ = (⋃ n : ℤ, windowU p F ϖ n) ∪ ⋃ n : ℤ, windowV p F ϖ n := by
   have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
@@ -557,39 +600,7 @@ theorem Y_eq_iUnion_windows :
     have hKGE_m : KGE p F ϖ (((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ)) v := by
       rw [KGE_iff hv (by positivity) (by omega) rfl, pow_one]
       exact hGle
-    set N : ℕ := max (m₁ + 2) (m₂ + 1) with hN
-    have hMltpN : ((m₁ + 1 : ℕ) : ℚ) < (p : ℚ) ^ (N : ℤ) := by
-      rw [zpow_natCast]
-      calc ((m₁ + 1 : ℕ) : ℚ) < ((p ^ (m₁ + 1) : ℕ) : ℚ) := by
-            exact_mod_cast Nat.lt_pow_self hp1
-        _ ≤ ((p ^ N : ℕ) : ℚ) := by
-            exact_mod_cast Nat.pow_le_pow_right (by omega) (by omega)
-        _ = (p : ℚ) ^ N := by push_cast; ring
-    have hpNle : (p : ℚ) ^ (-(N : ℤ)) ≤ ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) := by
-      rw [zpow_neg, zpow_natCast]
-      rw [show ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) = (((m₂ + 1 : ℕ) : ℚ))⁻¹ by
-        norm_num [one_div]]
-      refine inv_anti₀ (by positivity) ?_
-      calc ((m₂ + 1 : ℕ) : ℚ) ≤ ((p ^ (m₂ + 1) : ℕ) : ℚ) := by
-            exact_mod_cast (Nat.lt_pow_self hp1 (n := m₂ + 1)).le
-        _ ≤ ((p ^ N : ℕ) : ℚ) := by
-            exact_mod_cast Nat.pow_le_pow_right (by omega) (by omega)
-        _ = (p : ℚ) ^ N := by push_cast; ring
-    have hSne : KGE p F ϖ ((p : ℚ) ^ (-(N : ℤ))) v :=
-      KGE_mono p F ϖ hv (zpow_pos hp0 _) hpNle hKGE_m
-    have hSbdd : ∀ z : ℤ, KGE p F ϖ ((p : ℚ) ^ z) v → z ≤ (N : ℤ) := by
-      intro z hz
-      by_contra hzN
-      refine not_KGE_of_KLE_of_lt hv (by positivity) ?_ hKLE_M hz
-      calc ((m₁ + 1 : ℕ) : ℚ) < (p : ℚ) ^ (N : ℤ) := hMltpN
-        _ ≤ (p : ℚ) ^ z := by
-            refine zpow_le_zpow_right₀ hpQ.le (by omega)
-    obtain ⟨n₀, hn₀S, hn₀max⟩ := Int.exists_greatest_of_bdd
-      ⟨(N : ℤ), fun z hz => hSbdd z hz⟩ ⟨-(N : ℤ), hSne⟩
-    have hKLEn₀ : KLE p F ϖ ((p : ℚ) ^ (n₀ + 1)) v := by
-      refine (KGE_or_KLE hv (zpow_pos hp0 _)).resolve_left (fun hge => ?_)
-      have := hn₀max _ hge
-      omega
+    obtain ⟨n₀, hn₀S, hKLEn₀⟩ := exists_KGE_KLE_adjacent p F ϖ hv hKLE_M hKGE_m
     rcases KGE_or_KLE hv (mul_pos (zero_lt_one.trans (one_lt_cFF hp1)) (zpow_pos hp0 n₀))
       with hgeC | hleC
     · exact Or.inr (Set.mem_iUnion.mpr ⟨n₀, hv, hgeC, hKLEn₀⟩)
