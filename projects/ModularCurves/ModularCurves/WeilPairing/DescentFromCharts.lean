@@ -117,6 +117,25 @@ theorem bijective_smul_pullback_unit_smul
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.4 brick] A section reads back what was pulled back along it.** Restricting a
+base section to a chart preimage and then evaluating along `z` returns the section. This
+is the one computation the cocycle argument runs on, so it is stated on its own. -/
+theorem appLE_z_appLE_snd_eq_self
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    (Wb : T.Opens) (e : Wb ≤ z ⁻¹ᵁ (pullback.snd p g ⁻¹ᵁ Wb)) (w : Γ(T, Wb)) :
+    (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ Wb) Wb e).hom
+        ((Scheme.Hom.appLE (pullback.snd p g) Wb (pullback.snd p g ⁻¹ᵁ Wb)
+          le_rfl).hom w) = w := by
+  have h1 : (pullback.snd p g).app Wb =
+      (pullback.snd p g).appLE Wb (pullback.snd p g ⁻¹ᵁ Wb) le_rfl :=
+    (Scheme.Hom.appLE_eq_app _).symm
+  have h2 := congrArg (fun φ : Γ(T, Wb) ⟶ Γ(T, Wb) => φ.hom w)
+    (app_appLE_section g hz Wb e)
+  rw [h1] at h2
+  exact h2
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[W2-e] The rigidification cocycle.** If the comparison unit of two generators has
 `z`-value `c i · (c j)⁻¹` for base units `c`, then after rescaling by the pullbacks of
 `c⁻¹` the comparison unit has `z`-value `1` — the hypothesis the rigidified glue lemma
@@ -135,15 +154,8 @@ theorem appLE_z_rescaled_eq_one
   subst hV
   have hsec : ∀ w : Γ(T, Wb), (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ Wb) Wb e).hom
       ((Scheme.Hom.appLE (pullback.snd p g) Wb (pullback.snd p g ⁻¹ᵁ Wb)
-        le_rfl).hom w) = w := by
-    intro w
-    have h1 : (pullback.snd p g).app Wb =
-        (pullback.snd p g).appLE Wb (pullback.snd p g ⁻¹ᵁ Wb) le_rfl :=
-      (Scheme.Hom.appLE_eq_app _).symm
-    have h2 := congrArg (fun φ : Γ(T, Wb) ⟶ Γ(T, Wb) => φ.hom w)
-      (app_appLE_section g hz Wb e)
-    rw [h1] at h2
-    exact h2
+        le_rfl).hom w) = w :=
+    fun w => appLE_z_appLE_snd_eq_self g hz Wb e w
   rw [map_mul, map_mul, hsec, hsec, hu]
 
 set_option backward.defeqAttrib.useBackward true in

@@ -1,1 +1,1 @@
-FOCUS: [W3.3] rescale chart generators by base units so the comparison units are 1 along z
+FOCUS: [W3.4] cocycle: comparison units of L ⊗ f^*(z^*L)⁻¹ have z-value 1
