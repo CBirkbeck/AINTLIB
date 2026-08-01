@@ -291,18 +291,6 @@ theorem genPiece_rel_forward_witness
     intro a
     rw [hF, RingHom.comp_apply, genPiece_rel_forwardLocHom_algebraMap]
     rfl
-  have hu : IsUnit (F (algebraMap A (Localization.Away DI.s) DI.s)) := by
-    rw [hF_alg]
-    exact (genPiece_rel_baseHom_isUnit D₀ T t M hle).map DB.coeRingHom
-  have hF_div : ∀ (c : A) (z : presheafValue DB),
-      F (algebraMap A (Localization.Away DI.s) c) =
-        F (algebraMap A (Localization.Away DI.s) DI.s) * z →
-      F (divByS c DI.s) = z := by
-    intro c z hz
-    have h1 : F (algebraMap A (Localization.Away DI.s) DI.s) * F (divByS c DI.s) =
-        F (algebraMap A (Localization.Away DI.s) c) := by
-      rw [← map_mul, algebraMap_s_mul_divByS]
-    exact hu.mul_left_cancel (h1.trans hz)
   have hps : ∀ p : A, D₀.canonicalMap p =
       D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
     canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
@@ -315,26 +303,10 @@ theorem genPiece_rel_forward_witness
       DB.canonicalMap (D₀.canonicalMap t) *
         DB.coeRingHom (divByS (D₀.canonicalMap q) DB.s) := fun q =>
     canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS DB (D₀.canonicalMap q)
-  -- the witness membership for the `q`-factor
-  have hq_mem : ∀ q ∈ insert t T,
-      divByS (D₀.canonicalMap q) DB.s ∈ locSubring DB.P DB.T DB.s := by
-    intro q hq
-    rcases Finset.mem_insert.mp hq with rfl | hq'
-    · have h1 : divByS (D₀.canonicalMap q) DB.s = 1 := by
-        rw [show (DB.s : presheafValue D₀) = D₀.canonicalMap q from rfl]
-        unfold divByS
-        exact IsLocalization.mk'_self (M := Submonoid.powers (D₀.canonicalMap q))
-          (S := Localization.Away (D₀.canonicalMap q)) ⟨1, pow_one _⟩
-      rw [h1]
-      exact one_mem _
-    · refine divByS_mem_locSubring DB.P DB.T DB.s ?_
-      show D₀.canonicalMap q ∈ T.image D₀.canonicalMap
-      exact Finset.mem_image_of_mem _ hq'
   -- decompose `w = p · q`
   have hw' : w ∈ ((insert D₀.s D₀.T).product
       (insert t T)).image (fun r : A × A => r.1 * r.2) := hw
-  rw [Finset.mem_image] at hw'
-  obtain ⟨⟨p, q⟩, hpq, rfl⟩ := hw'
+  obtain ⟨⟨p, q⟩, hpq, rfl⟩ := Finset.mem_image.mp hw'
   have hp : p ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq).1
   have hq : q ∈ insert t T := (Finset.mem_product.mp hpq).2
   rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
@@ -342,8 +314,9 @@ theorem genPiece_rel_forward_witness
       (D₀.coeRingHom (divByS p D₀.s)) * divByS (D₀.canonicalMap q) DB.s,
     (locSubring DB.P DB.T DB.s).mul_mem
       (algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp))
-      (hq_mem q hq), ?_⟩
-  refine hF_div _ _ ?_
+      (divByS_canonicalMap_mem_locSubring D₀ DB T t rfl rfl q hq), ?_⟩
+  refine forwardLoc_div_eq DI F hF_alg
+    ((genPiece_rel_baseHom_isUnit D₀ T t M hle).map DB.coeRingHom) _ _ ?_
   rw [hF_alg, hF_alg]
   rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
       (D₀.coeRingHom (divByS p D₀.s)) * divByS (D₀.canonicalMap q) DB.s) =
@@ -352,10 +325,8 @@ theorem genPiece_rel_forward_witness
   rw [show ((D₀.interSamePair (genPieceDatumOpen D₀.P T t M hle) rfl).s : A) =
     D₀.s * t from rfl]
   rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap),
-    map_mul (DB.canonicalMap)]
-  rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
-    D₀.coeRingHom (divByS p D₀.s) from hps p]
-  rw [map_mul (DB.canonicalMap), hqt q]
+    map_mul (DB.canonicalMap), show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
+      D₀.coeRingHom (divByS p D₀.s) from hps p, map_mul (DB.canonicalMap), hqt q]
   ring
 
 set_option linter.unusedSectionVars false in
