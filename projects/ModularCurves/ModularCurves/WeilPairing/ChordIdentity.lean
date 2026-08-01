@@ -629,6 +629,24 @@ theorem isUnit_of_norm_unit {A : Type u} [CommRing A] (c₂ conj : A)
     (hu : IsUnit (c₂ * conj)) : IsUnit c₂ :=
   isUnit_of_mul_isUnit_left hu
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-ii] The conjugate evaluates to `negY − line`.** At a point of the curve, the
+conjugate factor of the chord evaluates to `negY x y − (ℓ(x − x₁) + y₁)`; the
+non-degeneracy needed for the cancellations is exactly the invertibility of this value,
+which fails precisely when the point is fixed by negation relative to the chord — the
+`2`-torsion case. -/
+theorem algHom_conj_eq {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (σ : A →ₐ[R] R) (X Y : A) (ℓ x₁ y₁ x y : R)
+    (hx : σ X = x) (hy : σ Y = y) :
+    σ ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+        (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+      W.toAffine.negY x y - (ℓ * (x - x₁) + y₁) := by
+  rw [map_sub, map_sub, map_sub, map_neg, map_add, map_mul, map_mul, map_sub,
+    σ.commutes, σ.commutes, σ.commutes, σ.commutes, hx, hy]
+  rw [WeierstrassCurve.Affine.negY, σ.commutes]
+  simp only [Algebra.algebraMap_self, RingHom.id_apply]
+
 end ModularCurves
 
 namespace ModularCurves
