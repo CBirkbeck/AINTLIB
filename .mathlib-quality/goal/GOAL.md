@@ -8096,3 +8096,57 @@ a phantom duplicate binder that did not exist.
 
     over-50 proofs   486 (baseline) → 120   (118 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: 120 → 119, plus two tooling fixes and one deferral
+
+    limitFrobHom_add        122 → 62   0d61c0c36   (PARTIAL — not cleared)
+    exists_dominating_unit_noHArch_finset_on  80 → 45   df70459f0
+    datum_ker_le_span_of_unit_mod  120 → 98  3e4167e2e (dedup, not cleared)
+
+### lift_have now derives the FULL call
+
+Two rounds of fixes, both closing recurring failures rather than working around them:
+
+  * `params` is a LIST of binder lines (a string glued groups into 155-column lines),
+    and the call is derived from it (`Φ` had landed in `ψ`'s argument slot).
+  * `explicit_section_prefix` prepends the section variables the helper will bind.
+    Two filters, both required: IN SCOPE — with the reversion rule, `variable {A}`
+    inside a nested namespace reverts to EXPLICIT when that namespace closes, which is
+    why a StructureSheaf declaration 500 lines below a visible `variable {A}` still
+    needs `A` positionally — and ACTUALLY USED, since Lean auto-includes only the
+    variables a declaration mentions (`p F ϖ` in scope, helper binds `p F`).
+    Also strips `[Fact (Nat.Prime p)]`, whose inner parens parsed as a binder.
+    Verified against six declarations whose prefixes are known from builds.
+    Seventh occurrence of this class; two shapes — explicit ⇒ prefix at the call,
+    unused ⇒ `omit` on the declaration.
+
+### THE DEPENDENCY LIST IS WHERE THE ERRORS ARE
+
+`lift_have` transcribes the CONCLUSION, so bodies transplant unmodified. The one part
+still typed by hand is the dependency types — and four of the last six build failures
+were there: a reversed equation (`hDeq : sum = iterated` vs `iterated = sum`), a wrong
+namespace (`RestrictedMvPowerSeries.restrictedMvPowerSeriesSubring` vs
+`TateAlgebra.pairSubring₂`), a wrong domain (`↥(TateAlgebra₂ B)` vs the QUOTIENT).
+
+**Rule: copy the binder's text out of the parent's signature. Never reconstruct it.**
+I stated this after `limitFrobHom_add` and then immediately violated it twice on the
+next target, with both correct types sitting ten lines above the block being lifted.
+
+### DEFERRED: example638Bivariate_backward_forward_eq_id (100)
+
+Reached 47 via `hagree` (33) + `hevalHom_cont` (18) + inlining `hRHS_cont`, but the
+lifted `hevalHom_cont` fails: its `change …; rw [Ideal.Quotient.lift_mk]` chain relies
+on `TateAlgebra.bivariateOverlapIdeal b` unfolding definitionally to its
+`Ideal.span {…}` form, which held in the parent's context and not in the lifted one
+(proof-term mismatch on `forwardHom._proof_6`). Work stashed, not discarded:
+`git stash list` → "deferred: example638Bivariate extraction (lift_mk defeq)".
+
+Same family as the `subst`-flagged deferrals: a block whose proof depends on the
+elaboration context it was written in, not just on its stated hypotheses. The
+`subst`/defeq flag in the ranking should be extended to catch `Ideal.Quotient.lift`
++ `change` chains.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 119   (117 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
