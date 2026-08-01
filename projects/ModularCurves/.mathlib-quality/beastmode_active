@@ -1,1 +1,1 @@
-FOCUS: [W1 (alpha)] the explicit division in the affine coordinate ring — addPolynomial factorisation giving c1, c2 and the unit cofactor
+FOCUS: [W1 (alpha)(i)] discharge the Vieta relations hc1/hc0 from the two point equations and the line relation (linear_combination)

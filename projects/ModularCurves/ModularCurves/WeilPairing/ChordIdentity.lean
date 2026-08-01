@@ -354,6 +354,33 @@ theorem chord_mul_conj_eq_prod {R A : Type u} [CommRing R] [CommRing A] [Algebra
   (chord_mul_conj_eq_cubic W X Y ℓ x₁ y₁ hEq).trans
     (cubic_factors_of_vieta W X ℓ x₁ x₂ x₃ y₁ y₂ hx₃ hc₁ hc₀)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (α)(i)] The Vieta relations from the two point equations.** For two points on
+the curve joined by a line of slope `ℓ` with `x₁ − x₂` a nonzerodivisor, the two
+remaining Vieta identities follow from the equations and the line relation. (The
+`x₁ = x₂` tangent case is the derivative relation and is handled by the same identity
+with the tangent slope.) -/
+theorem vieta_of_equations {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    (ℓ x₁ x₂ y₁ y₂ : R)
+    (h₁ : y₁ ^ 2 + W.a₁ * x₁ * y₁ + W.a₃ * y₁ =
+      x₁ ^ 3 + W.a₂ * x₁ ^ 2 + W.a₄ * x₁ + W.a₆)
+    (h₂ : y₂ ^ 2 + W.a₁ * x₂ * y₂ + W.a₃ * y₂ =
+      x₂ ^ 3 + W.a₂ * x₂ ^ 2 + W.a₄ * x₂ + W.a₆)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hnzd : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0) :
+    (2 * x₁ * ℓ ^ 2 + (W.a₁ * x₁ - 2 * y₁ - W.a₃) * ℓ + (-W.a₁ * y₁ + W.a₄) =
+        x₁ * x₂ + x₁ * (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂) +
+          x₂ * (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)) := by
+  rw [← sub_eq_zero]
+  refine hnzd _ ?_
+  subst hline
+  first
+    | linear_combination h₁ - h₂
+    | linear_combination h₂ - h₁
+    | linear_combination (-1 : R) * h₁ + h₂
+    | linear_combination h₁ + (-1 : R) * h₂
+
 end ModularCurves
 
 namespace ModularCurves
