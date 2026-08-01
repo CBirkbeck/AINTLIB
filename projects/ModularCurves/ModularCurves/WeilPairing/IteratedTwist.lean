@@ -949,6 +949,108 @@ theorem exists_ker_baseSectionsMap_cokernel_iteratedTwist_eq_span_of_sections
           (b3 j)) 1)),
     ker_baseSectionsMap_cokernel_eq_span_crossProduct_of_surjective _ b3 e2 hsurj⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Monomorphy of the triple iterated twist, from principal covers of the three
+ideals and invertibility of the ambient module. -/
+theorem mono_iteratedTwistHom₃ (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (h₁ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₁.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₂ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₂.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₃ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₃.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L) :
+    Mono (iteratedTwistHom₃ J₁ J₂ J₃ L) := by
+  haveI hL₃ : IsInvertible (tensorObj (idealModule J₃) L) :=
+    IsInvertible.tensorObj (isInvertible_idealModule (J := J₃) h₃) hL
+  haveI hL₂₃ : IsInvertible (tensorObj (idealModule J₂)
+      (tensorObj (idealModule J₃) L)) :=
+    IsInvertible.tensorObj (isInvertible_idealModule (J := J₂) h₂) hL₃
+  haveI m₃ : Mono (divisorTwistHom J₃ L) := mono_divisorTwistHom _ L h₃ hL
+  haveI m₂ : Mono (divisorTwistHom J₂ (tensorObj (idealModule J₃) L)) :=
+    mono_divisorTwistHom _ _ h₂ hL₃
+  haveI m₁ : Mono (divisorTwistHom J₁ (tensorObj (idealModule J₂)
+      (tensorObj (idealModule J₃) L))) :=
+    mono_divisorTwistHom _ _ h₁ hL₂₃
+  exact mono_comp _ _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Monomorphy of the restricted triple iterated twist on every open. -/
+theorem mono_restrict_iteratedTwistHom₃ (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (h₁ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₁.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₂ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₂.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₃ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₃.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L) (W : C.Opens) :
+    Mono ((restrictFunctor W.ι).map (iteratedTwistHom₃ J₁ J₂ J₃ L)) := by
+  haveI hL₃ : IsInvertible (tensorObj (idealModule J₃) L) :=
+    IsInvertible.tensorObj (isInvertible_idealModule (J := J₃) h₃) hL
+  haveI hL₂₃ : IsInvertible (tensorObj (idealModule J₂)
+      (tensorObj (idealModule J₃) L)) :=
+    IsInvertible.tensorObj (isInvertible_idealModule (J := J₂) h₂) hL₃
+  haveI m₃ : Mono ((restrictFunctor W.ι).map (divisorTwistHom J₃ L)) :=
+    mono_restrictFunctor_map_of_isLocallyInjective _
+      (isLocallyInjective_divisorTwistHom _ L h₃ hL) W
+  haveI m₂ : Mono ((restrictFunctor W.ι).map
+      (divisorTwistHom J₂ (tensorObj (idealModule J₃) L))) :=
+    mono_restrictFunctor_map_of_isLocallyInjective _
+      (isLocallyInjective_divisorTwistHom _ _ h₂ hL₃) W
+  haveI m₁ : Mono ((restrictFunctor W.ι).map (divisorTwistHom J₁
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)))) :=
+    mono_restrictFunctor_map_of_isLocallyInjective _
+      (isLocallyInjective_divisorTwistHom _ _ h₁ hL₂₃) W
+  rw [show (restrictFunctor W.ι).map (iteratedTwistHom₃ J₁ J₂ J₃ L) =
+    (restrictFunctor W.ι).map (divisorTwistHom J₁ (tensorObj (idealModule J₂)
+      (tensorObj (idealModule J₃) L))) ≫
+    ((restrictFunctor W.ι).map (divisorTwistHom J₂
+      (tensorObj (idealModule J₃) L)) ≫
+      (restrictFunctor W.ι).map (divisorTwistHom J₃ L)) from by
+    rw [← Functor.map_comp, ← Functor.map_comp]]
+  infer_instance
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[CHORD-PKG] The triple trivialization from the exact-order chart identity.**
+A global section of `L` that vanishes on `[J₁] + [J₂] + [J₃]` and whose chart
+multiplier is, on each chart of a trivializing cover, a unit multiple of the product
+of the three generators, trivializes the triple twist:
+`I(J₁) ⊗ (I(J₂) ⊗ (I(J₃) ⊗ L)) ≅ 𝒪`. This is the exact shape the theorem-of-the-square
+assembly consumes. -/
+theorem nonempty_iso_unitObj_of_exact_order₃
+    (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (h₁ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₁.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₂ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₂.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₃ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₃.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L)
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π (iteratedTwistHom₃ J₁ J₂ J₃ L)).app (⊤ : C.Opens) ℓ = 0)
+    {ι : Type u} (W : ι → C.Opens) (hW : iSup W = ⊤)
+    (eM : ∀ i, (restrictFunctor (W i).ι).obj (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L))) ≅
+        unitObj (W i).toScheme)
+    (eL : ∀ i, (restrictFunctor (W i).ι).obj L ≅ unitObj (W i).toScheme)
+    (eU : ∀ i, (restrictFunctor (W i).ι).obj (unitObj C) ≅ unitObj (W i).toScheme)
+    (u : ∀ i, Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))ˣ)
+    (hexact : ∀ i, chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i) =
+      (u i : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) *
+        chartMultiplier (W i) (iteratedTwistHom₃ J₁ J₂ J₃ L) (eM i) (eL i)) :
+    Nonempty (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)) ≅ unitObj C) := by
+  haveI hmono : Mono (iteratedTwistHom₃ J₁ J₂ J₃ L) :=
+    mono_iteratedTwistHom₃ J₁ J₂ J₃ L h₁ h₂ h₃ hL
+  haveI hiso : IsIso (monoSectionLift (iteratedTwistHom₃ J₁ J₂ J₃ L) ℓ hℓ) :=
+    isIso_monoSectionLift_of_multiplier_eq_unit_mul _ ℓ hℓ W hW eM eL eU
+      (fun i => mono_restrict_iteratedTwistHom₃ J₁ J₂ J₃ L h₁ h₂ h₃ hL (W i))
+      u hexact
+  exact ⟨(asIso (monoSectionLift (iteratedTwistHom₃ J₁ J₂ J₃ L) ℓ hℓ)).symm⟩
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules

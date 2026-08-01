@@ -1,1 +1,1 @@
-FOCUS: [CHORD-B] statement-level packaging — the chart-coefficient identity c_l = unit * g_P g_Q g_R as the single hypothesis feeding chord trivialization -> A5c
+FOCUS: [CHORD-PKG] package the chord/vertical trivializations: hypothesis = chart-coefficient identity; conclusion = the two Nonempty-isos feeding nonempty_tensorObj_iso_of_chord_vertical_poleSheaf
