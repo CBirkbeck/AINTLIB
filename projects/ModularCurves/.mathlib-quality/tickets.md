@@ -31108,3 +31108,12 @@ Leaves, in dependency order:
          the rank-3 coordinates (`nonempty_baseSections_cokernel_iteratedTwist₃_...`):
          if the triple restriction of ℓ vanished to higher order the rank-3 evaluation
          would drop, contradicting unimodularity of a 3×3 minor.
+
+### [W1-d2/d4] DONE 2026-08-01 — the chord input is now three scalar equations
+`mem_span_iff_algHom_eq_zero_of_section`, `mul_dvd_of_evaluations_vanish`,
+`eq_unit_mul_of_three_divisions`, `eq_unit_mul_of_two_divisions` (all axiom-clean).
+⟹ To build a `ChordDatum` it now suffices to exhibit, in ONE Weierstrass chart:
+  σ_P(c_ℓ) = 0, σ_Q(c_ℓ/g_P) = 0, σ_{Rm}(c_ℓ/(g_P g_Q)) = 0, and the last quotient a unit
+(and the two-factor analogue for the vertical). Everything else in the prong is proven.
+REMAINING: [W1-d3] the chord–tangent vanishing σ_{-(P+Q)}(…) = 0 — the universal-atlas
+computation (two-point space + transfer + the field case).
