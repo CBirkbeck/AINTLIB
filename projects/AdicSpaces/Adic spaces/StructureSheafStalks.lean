@@ -994,7 +994,7 @@ Spa-point of `D'` — which by Wedhorn 7.52(2) is what makes it a unit there.
 
 `hcap0` is `exists_A_level_open_presentation`'s capture clause already specialised
 to the singleton family, which is all this argument consumes. -/
-private theorem not_vle_zero_of_shrink (D D' : RationalLocData A)
+theorem not_vle_zero_of_shrink (D D' : RationalLocData A)
     (hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) {W : Set (Spv A)}
     (hD'sub : spaOpen D' ⊆ Subtype.val ⁻¹' W ∩ spaOpen D)
     {b c : presheafValue D} {u : (presheafValue D)ˣ} {k : ℕ}

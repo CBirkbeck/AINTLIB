@@ -86,39 +86,8 @@ theorem rationalShrink_tate : RationalShrink A := by
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
   haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
   rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
-  intro w'' hw'' hcon
-  have hwPD := comap_restrictionMapHom_mem_spa D D' hsub hw''
-  have hbase' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
-  have hbaseEq : comap D.canonicalMap
-      (comap (restrictionMapHom D D' hsub) w'')
-      = comap D'.canonicalMap w'' := by
-    rw [show comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
-        = comap ((restrictionMapHom D D' hsub).comp D.canonicalMap) w'' from
-      by rw [comap_comp]; rfl]
-    have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap
-        = D'.canonicalMap :=
-      RingHom.ext (restrictionMapHom_canonicalMap_generic D D' hsub)
-    rw [hcomp]
-  have hW' : comap D.canonicalMap
-      (comap (restrictionMapHom D D' hsub) w'') ∈ W := by
-    rw [hbaseEq]
-    exact (hD'sub (show (⟨comap D'.canonicalMap w'', hbase'.2⟩
-      : ↥(Spa A A⁺)) ∈ spaOpen D' from
-      hbase'.1)).1
-  have hcap := hcapture (comap (restrictionMapHom D D' hsub) w'') hwPD hW'
-    () (Finset.mem_singleton_self ())
-  refine hcap.2 ?_
-  show (comap (restrictionMapHom D D' hsub) w'').vle c 0
-  have hcb : (comap (restrictionMapHom D D' hsub) w'').vle b 0 := by
-    show w''.vle (restrictionMapHom D D' hsub b)
-      (restrictionMapHom D D' hsub 0)
-    rw [map_zero]
-    exact hcon
-  have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
-    (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
-    rw [hcdef]; ring] at h3
-  exact h3
+  exact fun w'' hw'' => not_vle_zero_of_shrink D D' hsub hD'sub hcdef
+    (fun w' hw' hW => (hcapture w' hw' hW () (Finset.mem_singleton_self ())).2) w'' hw''
 
 
 /-- The stalk shrink claim over a complete Tate ring. -/
