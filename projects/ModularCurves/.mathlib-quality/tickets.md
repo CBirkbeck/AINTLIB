@@ -31862,3 +31862,17 @@ field point its coordinates are `(addX, negAddY)`; the third point's section is
 `section_eq_of_dictionary_eq`. Every ingredient is proven — this is assembly.
 LESSON (third time this session): grep the tree for the CONCEPT before building; the
 "missing" construction existed in a file whose name I had not searched.
+
+## ★★★★★★★★★★★★★★★★★ [W1 i3] `dictionary_neg_add_eq_negAddY` — THE THIRD POINT IS IDENTIFIED (2026-08-01)
+For points of `modelEllipticCurve W` over a GENERAL ring base, at every field point the
+dictionary sends `-(P+Q)` to `some (addX, negAddY)` — the chord's third intersection.
+Proof: the tree's additive dictionary (`projModelPointsEquiv_point_add` /
+`modelPointAddEquiv`) plus the field formula `neg_add_eq_some_negAddY`.
+This is the chord–tangent theorem in the form the identity needs, and it is PROVEN.
+
+The section-level statement follows by `section_eq_of_dictionary_eq` (reduced base) with
+the other side built by `affineSectionSpecPoint` from `(addX, negAddY)`; both ingredients
+are proven. That gives the `σ₃` hypotheses of `chord_identity_of_sections`, and from
+there the closing links → ChordDatum → theorem of the square → descent →
+`exists_invertible_tensor_idealModule_add` are all proven.
+REMAINING: the non-degeneracy/invertibility conditions and the degenerate charts.
