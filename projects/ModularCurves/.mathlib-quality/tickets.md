@@ -31660,3 +31660,16 @@ NEXT (E2): assemble a `ChordDatum` — instantiate the chart data at
 chart coefficient, apply `chord_exact_order_in_chart` (+ E1b) to get the exact-order
 hypothesis, then `nonempty_iso_unitObj_of_exact_order₃`; the same with two factors for
 the vertical.
+
+### ★★★ [W1 E2] DONE 2026-08-01 — the multiplier is a unit times the generator product
+`exists_unit_chartMultiplier₃_eq` (axiom-clean) upgrades `span_iteratedChartMultiplier₃_eq`
+from spans to elements, via `exists_unit_mul_of_span_eq` (relocated to
+ForMathlib/CrossProductKernel to avoid an import cycle — ChordIdentity sits ABOVE
+IteratedTwist).
+⟹ the `hexact` hypothesis of `nonempty_iso_unitObj_of_exact_order₃` is now:
+   `chartMultiplier(ℓ) = unit · chartMultiplier(iteratedTwistHom₃)`,
+and both sides are identified: the left by `chartMultiplier_unitHom_eq_coefficient`
+(it is the chord's chart coefficient) and the right by this lemma (it is the generator
+product). So the hypothesis reduces EXACTLY to `chord_exact_order_in_chart`'s conclusion.
+REMAINING: the final glue — instantiate at the pole sheaf and quotient by the two unit
+factors (a `Units` computation), then `ChordDatum`.
