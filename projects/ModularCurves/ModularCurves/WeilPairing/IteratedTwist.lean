@@ -1304,6 +1304,42 @@ theorem exists_chord_of_unimodular
     hsm P Q U hPU hQU rP rQ hP hQ hnzdP hnzdQ L hL eL halg
     (surjective_baseSectionsMap_cokernel_of_unimodular _ b3 e2 huni) b3
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-c] The vertical exists from a unimodular evaluation row** — the rank-one
+counterpart of `exists_chord_of_unimodular`. -/
+theorem exists_vertical_of_unimodular
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (R : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (hRU : R.1 ⁻¹ᵁ U.1 = ⊤)
+    (rR : Γ(C, U.1))
+    (hR : (Scheme.Hom.ker R.1).ideal U = Ideal.span {rR})
+    (hnzdR : rR ∈ nonZeroDivisors Γ(C, U.1))
+    (L : C.Modules) (hL : IsInvertible L)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π L))
+    (e1 : Scheme.Modules.baseSections π (Limits.cokernel
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![R]).ideal L))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens)))
+    (huni : Ideal.span (Set.range (fun j => e1
+      ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![R]).ideal L))) (b2 j)))) = ⊤) :
+    ∃ v : Scheme.Modules.baseSections π L,
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![R]).ideal L))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {v} :=
+  exists_ker_baseSectionsMap_cokernel_eq_span_perp_of_section hsm R U hRU rR hR hnzdR
+    L hL eL halg
+    (surjective_baseSectionsMap_cokernel_of_unimodular_row _ b2 e1 huni) b2
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules
