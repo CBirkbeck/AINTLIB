@@ -32426,3 +32426,27 @@ D_P − D_Q)` on `E ×_S T`. `hu` is the chord/vertical prong (complete: see the
 `dualPairing_frame_comparison`; `hc` is the definition of `c`. Then the Picard leaf
 `exists_invertible_tensor_idealModule_add` closes, and with it the DS4 construction of
 `weilPairing` and the `yRho_representable` blocker.
+
+### ★★★★★ [W5] DONE 2026-08-01 — the Picard leaf reduced to the descent hypothesis
+* `nonempty_iso_tensorObj_of_dual_iso` (W5a) — `A ⊗ B^∨ ≅ M`, `B` invertible ⟹
+  `A ≅ B ⊗ M`. Skeleton algebra against `nonempty_eval_iso`; needs the symmetric
+  structure (`letI := Scheme.Modules.symmetricCategory X`) for commutativity.
+* `exists_invertible_iso_tensorObj_pullback_of_descent` (W5b) — if the discrepancy
+  `Δ = A ⊗ B^∨` satisfies `Δ ≅ f^*(z^* Δ)`, then
+  `∃ N, IsInvertible N ∧ A ≅ B ⊗ f^* N`, **with `N = z^* Δ` exhibited**. Invertibility of
+  `N` from `IsInvertible.tensorObj` + `IsInvertible.dual` + `IsInvertible.pullback`.
+
+**This is the exact conclusion of the Picard leaf** `exists_invertible_tensor_idealModule_add`
+(`Picard/SelfAdjointN.lean:259`), with `A := I(Q) ⊗ I(Q')` and
+`B := I(Q+Q') ⊗ I(0)`. So the leaf now reduces to a single hypothesis:
+`Δ ≅ f^*(z^* Δ)` — which is precisely what `nonempty_iso_pullback_section_of_units`
+(W4c) delivers from chart frames.
+
+END-TO-END STATUS of the theorem-of-the-square prong. Every link exists and is
+axiom-clean except one instantiation:
+`chord/vertical two-family cover` → chart frames of `Δ` → **[open: wire the frames]** →
+W4c `nonempty_iso_pullback_section_of_units` → W5b
+`exists_invertible_iso_tensorObj_pullback_of_descent` → the Picard leaf →
+DS4 `weilPairing` construction → `weilPairing_torsionMapOfEllHom` → `yRho_representable`.
+The open step is geometry-plumbing (restrict the chord data to a base chart and read off
+`eL`, `u`, `c`), not new mathematics.

@@ -806,4 +806,27 @@ theorem nonempty_iso_tensorObj_of_dual_iso {X : Scheme.{u}} (A B M : X.Modules)
     _ = toSkeleton B * toSkeleton A * toSkeleton (dualObj B) := by
         rw [← mul_assoc, mul_comm (toSkeleton A) (toSkeleton B)]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W5b — THE PICARD LEAF'S SHAPE, FROM THE DESCENT]** If the discrepancy
+`Δ = A ⊗ B^∨` of two invertible modules is the pullback of its own restriction along the
+zero section, then `A` and `B` differ by a bundle pulled back from the base — with the
+base bundle exhibited as `N = z^* Δ`. This is exactly the conclusion the relative theorem
+of the square needs (`Picard/SelfAdjointN.exists_invertible_tensor_idealModule_add`), and
+the hypothesis is what `nonempty_iso_pullback_section_of_units` supplies. -/
+theorem exists_invertible_iso_tensorObj_pullback_of_descent
+    {z : T ⟶ pullback p g} (A B : (pullback p g).Modules)
+    (hA : IsInvertible A) (hB : IsInvertible B)
+    (hdesc : Nonempty (Scheme.Modules.tensorObj A (dualObj B) ≅
+      (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback z).obj
+          (Scheme.Modules.tensorObj A (dualObj B))))) :
+    ∃ N : T.Modules, IsInvertible N ∧
+      Nonempty (A ≅ Scheme.Modules.tensorObj B
+        ((AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj N)) := by
+  refine ⟨(AlgebraicGeometry.Scheme.Modules.pullback z).obj
+      (Scheme.Modules.tensorObj A (dualObj B)),
+    ((hA.tensorObj hB.dual).pullback z), ?_⟩
+  exact nonempty_iso_tensorObj_of_dual_iso A B _ hB hdesc
+
 end ModularCurves
