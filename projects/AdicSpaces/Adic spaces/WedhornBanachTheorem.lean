@@ -99,6 +99,36 @@ theorem iUnion_preimage_smul_pow_eq_univ
     simpa using hT.smul_const m
   exact (htend.eventually hU).exists
 
+/-- Dilating the image of the `ϖ^n₀`-preimage of `V` recovers the image of `V`:
+the dilation is a bijection, so image and preimage cancel. -/
+private theorem image_smul_image_preimage_eq {A : Type u} [CommRing A]
+    [TopologicalSpace A] {M : Type*} [AddCommGroup M] [Module A M]
+    [TopologicalSpace M] [IsTopologicalAddGroup M] [ContinuousSMul A M]
+    {N : Type*} [AddCommGroup N] [Module A N] [TopologicalSpace N]
+    [IsTopologicalAddGroup N] [ContinuousSMul A N]
+    {ϖ : A} (hϖu : IsUnit ϖ) (n₀ : ℕ) (V : Set M) (f : M →ₗ[A] N) :
+    (((hϖu.pow n₀).isHomeomorph_smul).homeomorph : N ≃ₜ N) ''
+        (f '' {m : M | ϖ ^ n₀ • m ∈ V}) = f '' V := by
+  haveI : ContinuousConstSMul A M := inferInstance
+  haveI : ContinuousConstSMul A N := inferInstance
+  set S : ℕ → Set M := fun n => {m : M | ϖ ^ n • m ∈ V} with hS_def
+  let e : N ≃ₜ N := ((hϖu.pow n₀).isHomeomorph_smul).homeomorph
+  show e '' (f '' S n₀) = f '' V
+  -- e ∘ f = f ∘ (ϖ^n₀ • · on M); pushing through the image of S n₀.
+  rw [Set.image_image]
+  have h_pt : ∀ m : M, e (f m) = f (ϖ ^ n₀ • m) := by
+    intro m
+    change (ϖ ^ n₀) • f m = f (ϖ ^ n₀ • m)
+    rw [map_smul]
+  simp_rw [h_pt]
+  rw [← Set.image_image f (fun m => ϖ ^ n₀ • m)]
+  congr 1
+  -- (ϖ^n₀ • · on M) '' S n₀ = V, because S n₀ = preimage of V under that bijection.
+  have hbij : Function.Surjective (fun m : M => ϖ ^ n₀ • m) :=
+    ((hϖu.pow n₀).isHomeomorph_smul).surjective
+  have : S n₀ = (fun m : M => ϖ ^ n₀ • m) ⁻¹' V := rfl
+  rw [this, Set.image_preimage_eq V hbij]
+
 open scoped Pointwise in
 /-- **Almost-open half of the faithful Wedhorn 6.16**: a continuous surjective `A`-linear map
 between topological `A`-modules (with a topologically nilpotent unit `ϖ` and continuous scalar
@@ -120,15 +150,13 @@ theorem _omt_almost_open
   obtain ⟨V, hV_nhds, _hV_closed, hV_symm, hV_add⟩ :=
     AddMonoidHom._sub_sub_lemma_A_1_split_symmetric U hU
   -- `ContinuousConstSMul` instances follow from `ContinuousSMul`.
-  haveI : ContinuousConstSMul A M := inferInstance
-  haveI : ContinuousConstSMul A N := inferInstance
+  haveI : ContinuousConstSMul A M := inferInstance; haveI : ContinuousConstSMul A N := inferInstance
   -- Step 1: closure (f '' V) has nonempty interior.
   -- The dilation cover sets in M.
   set S : ℕ → Set M := fun n => {m : M | ϖ ^ n • m ∈ V} with hS_def
   -- Cover of N by ⋃ n, closure (f '' S n).
   have h_cover : ⋃ n, closure (f '' S n) = Set.univ := by
-    refine Set.eq_univ_of_forall fun y => ?_
-    obtain ⟨x, rfl⟩ := hsurj y
+    refine Set.eq_univ_of_forall fun y => ?_; obtain ⟨x, rfl⟩ := hsurj y
     have hx : x ∈ ⋃ n, S n := by
       rw [iUnion_preimage_smul_pow_eq_univ hϖ hV_nhds]; exact Set.mem_univ x
     obtain ⟨n, hn⟩ := Set.mem_iUnion.1 hx
@@ -140,27 +168,13 @@ theorem _omt_almost_open
   let e : N ≃ₜ N := ((hϖu.pow n₀).isHomeomorph_smul).homeomorph
   -- The dilation homeomorphism on M (the same scalar, as a self-map of M).
   -- Key identity: e '' (f '' S n₀) = f '' V.
-  have h_image_eq : e '' (f '' S n₀) = f '' V := by
-    -- e ∘ f = f ∘ (ϖ^n₀ • · on M); pushing through the image of S n₀.
-    rw [Set.image_image]
-    have h_pt : ∀ m : M, e (f m) = f (ϖ ^ n₀ • m) := by
-      intro m
-      change (ϖ ^ n₀) • f m = f (ϖ ^ n₀ • m)
-      rw [map_smul]
-    simp_rw [h_pt]
-    rw [← Set.image_image f (fun m => ϖ ^ n₀ • m)]
-    congr 1
-    -- (ϖ^n₀ • · on M) '' S n₀ = V, because S n₀ = preimage of V under that bijection.
-    have hbij : Function.Surjective (fun m : M => ϖ ^ n₀ • m) :=
-      ((hϖu.pow n₀).isHomeomorph_smul).surjective
-    have : S n₀ = (fun m : M => ϖ ^ n₀ • m) ⁻¹' V := rfl
-    rw [this, Set.image_preimage_eq V hbij]
+  have h_image_eq : e '' (f '' S n₀) = f '' V :=
+    image_smul_image_preimage_eq hϖu n₀ V f
   -- closure (f '' V) = e '' closure (f '' S n₀), which has nonempty interior.
   have h_closure_eq : closure (f '' V) = e '' closure (f '' S n₀) := by
     rw [Homeomorph.image_closure, h_image_eq]
   have h_int_V : (interior (closure (f '' V))).Nonempty := by
-    rw [h_closure_eq, ← Homeomorph.image_interior]
-    exact hn₀.image e
+    rw [h_closure_eq, ← Homeomorph.image_interior]; exact hn₀.image e
   -- Step 2: conclude. Let W := closure (f '' V).
   set W : Set N := closure (f '' V) with hW_def
   -- W is symmetric: -W = W.
@@ -176,16 +190,13 @@ theorem _omt_almost_open
   -- interior (-W) = -(interior W) via the negation homeomorphism.
   have h_int_neg : interior (-W) = -interior W := by
     have h := (Homeomorph.neg N).image_interior W
-    rw [Homeomorph.coe_neg, Set.image_neg_eq_neg, Set.image_neg_eq_neg] at h
-    exact h.symm
+    rw [Homeomorph.coe_neg, Set.image_neg_eq_neg, Set.image_neg_eq_neg] at h; exact h.symm
   have hneg_w₀ : -w₀ ∈ interior W := by
-    have hmem : -w₀ ∈ -interior W := Set.neg_mem_neg.2 hw₀
-    rw [← h_int_neg, hW_symm] at hmem
+    have hmem : -w₀ ∈ -interior W := Set.neg_mem_neg.2 hw₀; rw [← h_int_neg, hW_symm] at hmem
     exact hmem
   have h0_int : (0 : N) ∈ interior (W + W) := by
     have h_sum : w₀ + (-w₀) ∈ interior W + interior W := Set.add_mem_add hw₀ hneg_w₀
-    rw [add_neg_cancel] at h_sum
-    exact AddMonoidHom._sub_sub_lemma_A_2_interior_add W W h_sum
+    rw [add_neg_cancel] at h_sum; exact AddMonoidHom._sub_sub_lemma_A_2_interior_add W W h_sum
   have hWW_nhds : W + W ∈ nhds (0 : N) := mem_interior_iff_mem_nhds.1 h0_int
   -- W + W ⊆ closure (f '' U).
   have hWW_sub : W + W ⊆ closure (f '' U) := by
@@ -193,11 +204,9 @@ theorem _omt_almost_open
     have h1 : W + W ⊆ closure (f '' V + f '' V) := by
       rw [hW_def]; exact vadd_set_closure_subset (f '' V) (f '' V)
     -- f '' V + f '' V = f '' (V + V).
-    have h2 : (f '' V + f '' V) = f '' (V + V) := (Set.image_add f).symm
-    rw [h2] at h1
+    have h2 : (f '' V + f '' V) = f '' (V + V) := (Set.image_add f).symm; rw [h2] at h1
     -- f '' (V + V) ⊆ f '' U ⊆ closure (f '' U).
-    refine h1.trans (closure_mono ?_)
-    exact (Set.image_mono hV_add)
+    refine h1.trans (closure_mono ?_); exact (Set.image_mono hV_add)
   exact Filter.mem_of_superset hWW_nhds hWW_sub
 
 open scoped Pointwise in
