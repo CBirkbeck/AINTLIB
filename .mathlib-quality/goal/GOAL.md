@@ -7934,3 +7934,88 @@ computations genuinely differ. The `coeRingHom_algebraMap` rewrite applies, but 
 
     over-50 proofs   486 (baseline) → 128   (126 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: 128 → 124 — the completeSpace family, and a corrected target ranking
+
+    extendToLocalization_mul_pow_lt      73 → 49   6f88b3b5f
+    tateAlgebraTopology'_completeSpace  124 → 49   da4ed9410
+    tateAlgebra₂Topology'_completeSpace 124 → 39   fb080da9b
+    mvTate_completeSpace                122 → 38   991d321ff
+
+`TateAlgebraTopology.lean` and `MvTateAlgebraTopology.lean` now have ZERO over-50 proofs.
+
+### TARGET SELECTION WAS BACKWARDS — score by block coverage, not by size
+
+I had been taking the smallest over-50 proofs first. That is the wrong order. Score
+each target by
+
+    slack = (sum of the top-3 blocks that are each ≤ 51 lines) − (code − 50)
+
+and the picture inverts: the 73–79 line proofs are DENSE (need 23–28, largest block
+5–13 ⇒ three or four fiddly micro-extractions each), while the 97–124 line ones are
+large enough to hold genuinely self-contained blocks. **Bigger is easier.** All three
+`completeSpace` proofs scored +15…+25 and came apart cleanly; the 73–79 band is what
+has been costing five tool-calls per target.
+
+### Extract the instance-escaping block FIRST
+
+Each `completeSpace` proof opens with an 8-line `letI`/`haveI` preamble (τ, uT, uA and
+their uniform-add-group instances). Extracted in source order, every helper needs its
+own copy — the cost that made me defer `presheafValue_mvRestricted_isUnit_mk_s`. But
+`hu_basis`'s CONCLUSION mentions no uniformity:
+
+    ∀ n, ∃ N, ∀ m ≥ N, ∀ k ≥ N, u m - u k ∈ tateAlgNhd P n
+
+so lifting it first confines the preamble to one helper and lets the other three take
+the basis fact as an ordinary hypothesis and stay instance-free.
+
+### The recipe converged: 5 rounds → 2 → 1
+
+Same argument at `Fin 1`, `Fin 2`, general `σ`. Corrections folded into the extraction
+script as they were found:
+
+  * body starts after the line ending `:= by`, NEVER after the `have` (statements wrap);
+  * hardcode the principal pair in the basis helper, reintroduce `P` as a body-local
+    `let` — `tateAlgBasis'`/`tateAlgBasis'₂`/`mvTateAlgBasis'` are all stated at the
+    principal pair, so an abstract `P` does not unify;
+  * `simp only [.., f]` → `rw [hf]` once `f` is a parameter;
+  * `insert_point` for declaration inserts AND `omit … in` prepends.
+
+### Two rules that cost builds this batch
+
+**Abstracting a `let`-bound local into a parameter breaks every tactic that unfolds it
+BY NAME** — `simp only [.., f]`, `unfold f`, `show … from rfl`. Route through the
+characterising equation (`rw [hf]`). Third variant of this theme, after
+`algebraMap_s_mul_divByS` and the `P`/`tateAlgBasis'` mismatch.
+
+**A patch correct for one target must be conditioned per target.** Having learned that
+promoting a leading `∀ l` orphans its `intro l`, I made the filter unconditional and
+broke `coeffMv_sub_limit_mem_pow`, which keeps `∀ l` in its CONCLUSION (14 errors).
+Rule: drop `intro l` exactly when the conclusion LOSES its `∀ l`. Same class as the
+`tateAlgNhd P n` replace that rewrote comments and the `forwardLoc_div_eq DI F hu`
+replace that hit proofs using `DII`.
+
+**Build after each scripted extraction, not after a batch.** The first `completeSpace`
+extraction was built and green; stacking three more before building produced 15
+mechanical errors and three extra rounds.
+
+### Fifth insertion-point failure — blind spot named
+
+I had been using `insert_point` when INSERTING a declaration but hand-coding the
+position when PREPENDING a modifier (`L[d] = "omit … in\n" + L[d]`). Same boundary,
+same function. The prepend always lands below the docstring → `unexpected token 'omit'`.
+Three inserts, two prepends, one mistake.
+
+### TASK-3 FINDING: the completeSpace family is triplicated
+
+These were three PARALLEL decompositions, not a dedup. `TateAlgebra A`,
+`TateAlgebra₂ A` and `restrictedMvPowerSeriesSubring n A` are distinct definitions with
+distinct bases (`tateAlgNhd`, `tateAlgNhd₂`, `mvTateAlgNhd`), so **twelve helpers now
+exist where four generic ones would do**. Unifying needs a common abstraction over the
+restricted-subring definitions — a real refactor. Filed next to the
+Keystone/Gen/Open finding (~695 lines) and the Wedhorn828 instance-preamble finding.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 124   (122 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
