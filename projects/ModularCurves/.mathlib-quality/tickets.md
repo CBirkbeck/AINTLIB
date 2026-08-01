@@ -31199,3 +31199,14 @@ LESSON: when a "missing lemma" blocks a route, grep the ForMathlib tree by CONCE
 ⟹ [W1-d3.1] is now: assemble ChordDatum-transport = (pullback of each trivialization)
 ∘ (pullback of the ideal modules, GAP-A-7) ∘ (pole-sheaf base-change iso). All three
 pieces exist; the assembly is bookkeeping.
+
+### [W1-d3.1] DONE 2026-08-01 — ChordDatum transports along any base change
+`nonempty_pullback_triple_iso_unitObj` + `nonempty_pullback_double_iso_unitObj`
+(TautologicalPair.lean, axiom-clean, root 9617). Together with `pairClassify` and the
+tautological points this reduces the chord identity to ONE instance: the tautological
+pair over `C ×_S C`.
+REMAINING (unchanged, and now the whole of it): [W1-d3.2] the chord–tangent computation
+for the tautological pair over the universal Weierstrass atlas — plus the small
+bookkeeping that comap-of-ker along `pairClassify` is the kernel of the classified
+section (`RelEffCartierDiv.ker_sectionBaseChange` shape) and the pole-sheaf base-change
+iso (`sectionPoleSheafPowerBaseChangeIso`).
