@@ -1252,6 +1252,30 @@ theorem dictionary_eq_of_third_point_coords {R : Type u} [CommRing R]
   intro hA
   rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 degenerate case] The vertical configuration.** When the two points share an
+`x`-coordinate and the second is the negative of the first, their sum is zero — so the
+chord configuration degenerates to the vertical, whose identity is
+`vertical_exact_order`. At field points this is mathlib's `add_of_Y_eq`, transported
+through the dictionary. -/
+theorem dictionary_add_eq_zero_of_vertical {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) [W.IsElliptic]
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap R K))))
+    {x₁ x₂ y₁ y₂ : K}
+    (h₁ : (W.baseChange K).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (W.baseChange K).toAffine.Nonsingular x₂ y₂)
+    (hP : projModelPointsEquiv W K ⟨P.1, P.2⟩ =
+      WeierstrassCurve.Affine.Point.some x₁ y₁ h₁)
+    (hQ : projModelPointsEquiv W K ⟨Q.1, Q.2⟩ =
+      WeierstrassCurve.Affine.Point.some x₂ y₂ h₂)
+    (hx : x₁ = x₂) (hy : y₁ = (W.baseChange K).toAffine.negY x₂ y₂) :
+    projModelPointsEquiv W K ⟨(P + Q).1, (P + Q).2⟩ = 0 := by
+  rw [projModelPointsEquiv_point_add W P Q, hP, hQ]
+  exact WeierstrassCurve.Affine.Point.add_of_Y_eq hx hy
+
 end ModularCurves
 
 namespace ModularCurves

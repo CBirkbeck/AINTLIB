@@ -1,1 +1,1 @@
-FOCUS: [W1 i4] section-level third point: affineSectionSpecPoint of (addX,negAddY) vs -(P+Q) via section_eq_of_dictionary_eq
+FOCUS: [W1 i5] the section identity over a reduced base (combine i4 with section_eq_of_dictionary_eq)
