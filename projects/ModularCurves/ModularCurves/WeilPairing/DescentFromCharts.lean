@@ -398,6 +398,10 @@ theorem tensorSection_comparison {X : Scheme.{u}} (M N : X.Modules) (V : X.Opens
   subst hy
   rw [tensorSection_smul_left, tensorSection_smul_right, ← mul_smul]
 
+noncomputable local instance descentModulesMonoidal (X : Scheme.{u}) :
+    MonoidalCategory X.Modules :=
+  Scheme.Modules.monoidalCategory X
+
 local instance mulCommutativeRingCatSheaf (X : Scheme.{u}) :
     ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
   fun U => by
@@ -424,5 +428,24 @@ theorem dualPairing_frame_comparison {X : Scheme.{u}} (M : X.Modules) (U : X.Ope
   rw [tensorSection_smul_right, _root_.map_smul, hs, tensorSection_smul_left,
     _root_.map_smul, dualPairing_overTrivializationSection_one M U f,
     smul_eq_mul, smul_eq_mul, mul_one, mul_comm v u, huv]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.6] The twisted bundle's comparison relation.** On an overlap, the pure-tensor
+section's comparison unit is the product of the two factors' comparison units. This is
+the `hu` hypothesis of `nonempty_unitObj_iso_of_normalized_glue` for the twisted bundle,
+assembled from `tensorSection_restrict` (naturality) and `tensorSection_comparison`
+(bilinearity). -/
+theorem tensorSection_restrict_comparison {X : Scheme.{u}} (M N : X.Modules)
+    {V₁ V₂ W : X.Opens} (h₁ : W ≤ V₁) (h₂ : W ≤ V₂) (a b : Γ(X, W))
+    (x₁ : Γ(M, V₁)) (x₂ : Γ(M, V₂)) (y₁ : Γ(N, V₁)) (y₂ : Γ(N, V₂))
+    (hx : M.val.map (homOfLE h₁).op x₁ = a • M.val.map (homOfLE h₂).op x₂)
+    (hy : N.val.map (homOfLE h₁).op y₁ = b • N.val.map (homOfLE h₂).op y₂) :
+    (MonoidalCategory.tensorObj M N).val.map (homOfLE h₁).op
+        (tensorSection M N V₁ x₁ y₁) =
+      (a * b) • (MonoidalCategory.tensorObj M N).val.map (homOfLE h₂).op
+        (tensorSection M N V₂ x₂ y₂) := by
+  rw [tensorSection_restrict M N h₁ x₁ y₁, tensorSection_restrict M N h₂ x₂ y₂]
+  exact tensorSection_comparison M N W a b _ _ _ _ hx hy
 
 end ModularCurves
