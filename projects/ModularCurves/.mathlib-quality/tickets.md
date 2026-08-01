@@ -30865,3 +30865,25 @@ STATE OF THE WP PRONG:
   `WeierstrassAtlasRingU`) — prove the determinant identity there (reduced/integral
   base), transfer along ring maps. That is a GroupLawAxioms-scale campaign
   (~1000+ LOC) and is the honest remaining cost of GAP-A-5.
+
+### ★★★★★ [GAP-A-5c] ASSEMBLY PROVEN 2026-08-01 (WeilPairing/LineVerticalAssembly.lean)
+`nonempty_tensorObj_iso_of_chord_vertical` (axiom-clean): chord-trivialization +
+vertical-trivialization + pole ladder + pole/ideal duality ⟹ I(P)⊗I(Q) ≅ I(P+Q)⊗I(0).
+Pure skeleton group-algebra (toSkeleton_tensorObj_eq + isUnit_toSkeleton cancellation).
+⟹ **THE WP PRONG IS NOW STRUCTURALLY COMPLETE END-TO-END** except for ONE input:
+the CHORD/VERTICAL TRIVIALIZATIONS themselves, i.e.
+  (A) ℓ's triple lift I(P)⊗(I(Q)⊗(I(R⁻)⊗𝒪(3[0]))) ⟶ 𝒪 is an ISO, and the vertical twin.
+Everything else on the path is proven and axiom-clean:
+  GAP-A-7 ✓ | GAP-A-4 (all shapes/arities, pole-instantiated) ✓ | 5a-i lift ✓ |
+  5a-v iso-engine ✓ | 5c assembly ✓ | Picard/skeleton bookkeeping ✓ (pre-existing).
+Inputs still needed for (A), in dependency order:
+ 1. pole ladder + duality isos as EXPLICIT lemmas: `sectionPoleSheafPower (n+1) =
+    tensorObj (power n) (sectionPoleSheaf)` is DEFEQ by the recursion (PoleSheaf:1869);
+    duality `tensorObj (sectionPoleSheaf) (sectionIdealModule) ≅ unitObj` = the
+    ev/dualObj pairing for invertibles (Picard/Evaluation.lean:201 `ev`, Dual.lean:943)
+    — CHECK for `ev` being an iso on invertibles; if absent it is a short SurjectiveInvertible
+    application (locally the pairing is (a,b) ↦ ab on 𝒪 ⟹ locally surjective ⟹ iso).
+ 2. the chord-tangent identity (A) — the GroupLawAxioms-scale universal-atlas campaign.
+NEXT ACTIONS: (1) the pole/ideal duality iso; (2) the "lift is iso" criterion in terms of
+local unit-coefficients (generalize twistSectionLift/isIso_twistSectionLift to a general
+mono, then give a chart criterion); (3) then (A).
