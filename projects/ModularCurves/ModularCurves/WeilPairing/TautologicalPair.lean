@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.ChordIdentity
+import ModularCurves.ForMathlib.PullbackTensorGeneral
 
 /-!
 # The tautological pair of points (W1-d3.0)
@@ -97,5 +98,40 @@ theorem pairClassify_π {T : Scheme.{u}} (g : T ⟶ S)
     pairClassify π g P Q ≫ pairBaseπ π = g := by
   rw [show pairBaseπ π = pullback.fst π π ≫ π from rfl, ← Category.assoc,
     pairClassify_fst, P.2]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.1] Pullback of a tensor of two modules** for an arbitrary morphism of
+schemes — the transport step of the tautological-pair argument. -/
+theorem nonempty_pullback_tensorObj {X Y : Scheme.{u}} (f : Y ⟶ X)
+    (M N : X.Modules) :
+    Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback f).obj
+        (AlgebraicGeometry.Scheme.Modules.tensorObj M N) ≅
+      AlgebraicGeometry.Scheme.Modules.tensorObj
+        ((AlgebraicGeometry.Scheme.Modules.pullback f).obj M)
+        ((AlgebraicGeometry.Scheme.Modules.pullback f).obj N)) := by
+  letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory X
+  letI := AlgebraicGeometry.Scheme.Modules.monoidalCategory Y
+  letI : (AlgebraicGeometry.Scheme.Modules.pullback f).Monoidal :=
+    (AlgebraicGeometry.Scheme.Modules.nonempty_pullback_monoidal f).some
+  obtain ⟨eM⟩ := AlgebraicGeometry.Scheme.Modules.nonempty_tensorObj_iso_tensor M N
+  obtain ⟨eY⟩ := AlgebraicGeometry.Scheme.Modules.nonempty_tensorObj_iso_tensor
+    ((AlgebraicGeometry.Scheme.Modules.pullback f).obj M)
+    ((AlgebraicGeometry.Scheme.Modules.pullback f).obj N)
+  exact ⟨(AlgebraicGeometry.Scheme.Modules.pullback f).mapIso eM ≪≫
+    (Functor.Monoidal.μIso (AlgebraicGeometry.Scheme.Modules.pullback f) M N).symm ≪≫
+    eY.symm⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.1] Pullback of a trivialization.** A module trivial upstairs is trivial
+after pullback — with the unit transported by `pullbackUnitIso`. -/
+theorem nonempty_pullback_iso_unitObj {X Y : Scheme.{u}} (f : Y ⟶ X)
+    {M : X.Modules}
+    (h : Nonempty (M ≅ AlgebraicGeometry.Scheme.Modules.unitObj X)) :
+    Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback f).obj M ≅
+      AlgebraicGeometry.Scheme.Modules.unitObj Y) :=
+  ⟨(AlgebraicGeometry.Scheme.Modules.pullback f).mapIso h.some ≪≫
+    AlgebraicGeometry.Scheme.Modules.pullbackUnitIso f⟩
 
 end ModularCurves
