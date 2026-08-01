@@ -1214,6 +1214,44 @@ theorem dictionary_neg_add_eq_negAddY {R : Type u} [CommRing R]
   rw [hneg, hadd]
   exact neg_add_eq_some_negAddY (W.baseChange K) h₁ h₂ hxy
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i4] The third point as a section, identified at field points.** The section
+built from base-level coordinates `(p, q)` (`affineSectionSpecPoint`) and the group-law
+section `-(P + Q)` have the SAME dictionary value at a field point, provided the base
+coordinates evaluate to the chord's third intersection there. Feeding this to
+`section_eq_of_dictionary_eq` (reduced base) upgrades it to an equality of sections. -/
+theorem dictionary_eq_of_third_point_coords {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) [W.IsElliptic] (p q : R)
+    (hpq : W.toAffine.Equation p q)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap R K))))
+    {x₁ x₂ y₁ y₂ : K}
+    (h₁ : (W.baseChange K).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (W.baseChange K).toAffine.Nonsingular x₂ y₂)
+    (hP : projModelPointsEquiv W K ⟨P.1, P.2⟩ =
+      WeierstrassCurve.Affine.Point.some x₁ y₁ h₁)
+    (hQ : projModelPointsEquiv W K ⟨Q.1, Q.2⟩ =
+      WeierstrassCurve.Affine.Point.some x₂ y₂ h₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = (W.baseChange K).toAffine.negY x₂ y₂))
+    (hns : (W.baseChange K).toAffine.Nonsingular
+      (algebraMap R K p) (algebraMap R K q))
+    (hp : algebraMap R K p = (W.baseChange K).toAffine.addX x₁ x₂
+      ((W.baseChange K).toAffine.slope x₁ x₂ y₁ y₂))
+    (hq : algebraMap R K q = (W.baseChange K).toAffine.negAddY x₁ x₂ y₁
+      ((W.baseChange K).toAffine.slope x₁ x₂ y₁ y₂)) :
+    projModelPointsEquiv W K (affineSectionSpecPoint W K p q hpq) =
+      projModelPointsEquiv W K ⟨(-(P + Q)).1, (-(P + Q)).2⟩ := by
+  have hleft := projModelPointsEquiv_affineSectionSpecPoint W p q hpq hns
+  have hright := dictionary_neg_add_eq_negAddY W P Q h₁ h₂ hP hQ hxy
+  rw [hleft, hright]
+  generalize_proofs hA
+  revert hA
+  rw [← hp, ← hq]
+  intro hA
+  rfl
+
 end ModularCurves
 
 namespace ModularCurves

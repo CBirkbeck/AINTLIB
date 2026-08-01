@@ -1,1 +1,1 @@
-FOCUS: [W1 i3] assemble sigma3: -(P+Q) has coordinates (addX, negAddY) at field points via modelPointAddEquiv + neg_add_eq_some_negAddY
+FOCUS: [W1 i4] section-level third point: affineSectionSpecPoint of (addX,negAddY) vs -(P+Q) via section_eq_of_dictionary_eq
