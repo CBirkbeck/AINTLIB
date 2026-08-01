@@ -32152,3 +32152,18 @@ REVISED W3.4:
 (and `mapAlong` is the right tool if the gluing route is ever needed) — but they are no
 longer on the critical path. The two `finiteIntersectionOpen` lemmas remain useful for any
 preimage-cover argument.
+
+### ★★★★ [W3.4 revised, steps 1–3] DONE 2026-08-01 — the twisted bundle is chart-trivial
+* `nonempty_trivialization_pullback_section` — charts of `N := z^* L` are the base charts;
+* `nonempty_trivialization_pullback_section_pullback` — hence charts of `f^* N`;
+* `nonempty_trivialization_twisted` — hence `L ⊗ (f^* N)^∨` is trivial on exactly the
+  charts where `L` is (`dualRestrictIsoOfRestrictIso` + W3.3).
+Also `preimage_preimage_section` (`z ⁻¹ᵁ f ⁻¹ᵁ V = V`) and
+`nonempty_restrictPullbackTrivialization_of_eq` (the `subst`-on-the-open transport).
+
+REMAINING for W3.4: the **cocycle cancellation** — the comparison units of
+`L ⊗ (f^* N)^∨` have `z`-value `1`. Needs three chart-calculus facts: the comparison unit
+of a tensor is the product, of a dual is the inverse, of a pullback is the pullback of the
+comparison unit. Then `nonempty_unitObj_iso_of_normalized_glue` closes it and gives
+`L ≅ f^*(z^* L)` — the relative theorem of the square's "differs by `f^*`" statement, i.e.
+the Picard leaf `exists_invertible_tensor_idealModule_add`.

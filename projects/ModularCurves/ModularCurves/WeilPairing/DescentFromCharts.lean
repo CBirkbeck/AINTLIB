@@ -264,4 +264,36 @@ theorem nonempty_trivialization_pullback_section {X T' : Scheme.{u}} (f : X ⟶ 
   nonempty_restrictPullbackTrivialization_of_eq z L (f ⁻¹ᵁ U) U
     (preimage_preimage_section f z hz U).symm e
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.4 revised, step 2] Chart trivializations of `f^*(z^* L)`.** Composing the two
+pullback transports: the twist factor is trivial on exactly the charts `L` is. -/
+theorem nonempty_trivialization_pullback_section_pullback {X T' : Scheme.{u}}
+    (f : X ⟶ T') (z : T' ⟶ X) (hz : z ≫ f = 𝟙 T') (L : X.Modules) (U : T'.Opens)
+    (e : (restrictFunctor (f ⁻¹ᵁ U).ι).obj L ≅ unitObj (f ⁻¹ᵁ U).toScheme) :
+    Nonempty ((restrictFunctor (f ⁻¹ᵁ U).ι).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback f).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)) ≅
+      unitObj (f ⁻¹ᵁ U).toScheme) := by
+  obtain ⟨eN⟩ := nonempty_trivialization_pullback_section f z hz L U e
+  exact ⟨restrictPullbackTrivialization f _ U eN⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.4 revised, step 3] The twisted bundle is trivial on every chart.** With
+`N := z^* L`, the twist `L ⊗ (f^* N)^∨` is trivial on exactly the charts where `L` is:
+the dual of a trivialized module is trivialized (`dualRestrictIsoOfRestrictIso`) and the
+tensor of two trivializations is one (W3.3). Its comparison units are the ones whose
+`z`-values cancel — which is what makes the rigidified glue lemma apply. -/
+theorem nonempty_trivialization_twisted {X T' : Scheme.{u}}
+    (f : X ⟶ T') (z : T' ⟶ X) (hz : z ≫ f = 𝟙 T') (L : X.Modules) (U : T'.Opens)
+    (e : (restrictFunctor (f ⁻¹ᵁ U).ι).obj L ≅ unitObj (f ⁻¹ᵁ U).toScheme) :
+    Nonempty ((restrictFunctor (f ⁻¹ᵁ U).ι).obj
+        (tensorObj L (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback f).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)))) ≅
+      unitObj (f ⁻¹ᵁ U).toScheme) := by
+  obtain ⟨eFN⟩ := nonempty_trivialization_pullback_section_pullback f z hz L U e
+  exact nonempty_tensorObj_restrict_trivialization (f ⁻¹ᵁ U) e
+    (dualRestrictIsoOfRestrictIso _ (f ⁻¹ᵁ U) eFN)
+
 end ModularCurves
