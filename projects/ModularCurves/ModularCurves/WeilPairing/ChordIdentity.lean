@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.LineVerticalAssembly
 import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.AdditionSpecPoints
 
 /-!
 # The chord identity (W1) — statement and downstream wiring
@@ -172,6 +173,31 @@ theorem neg_add_eq_some_negAddY {F : Type u} [Field F] [DecidableEq F]
         ((Affine.nonsingular_negAdd h₁ h₂ hxy)) := by
   rw [Affine.Point.add_some hxy, Affine.Point.neg_some]
   simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY_negY]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2c, step 1] The dictionary reads the negative of a sum.** Combining the
+project's addition and negation compatibilities with the field-case formula: for two
+`K`-points of the projective model, the dictionary sends the scheme-level `-(P + Q)` to
+the affine point `-(P_aff + Q_aff)`. This is the field-point statement that the
+extensionality principle upgrades to a section identity. -/
+theorem projModelPointsEquiv_neg_mul {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) [W.IsElliptic]
+    (K : Type u) [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K) :
+    projModelPointsEquiv W K
+        ⟨(Limits.pullback.lift P.1 Q.1 (P.2.trans Q.2.symm) ≫ mulModelHom W) ≫
+            negModelHom W, by
+          rw [Category.assoc, negModelHom_π, Category.assoc, mulModelHom_π,
+            ← Category.assoc, Limits.pullback.lift_fst, P.2]⟩ =
+      -(projModelPointsEquiv W K P + projModelPointsEquiv W K Q) := by
+  have hsum : ((Limits.pullback.lift P.1 Q.1 (P.2.trans Q.2.symm) ≫ mulModelHom W) ≫
+      projModelπ W) = Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
+    rw [Category.assoc, mulModelHom_π, ← Category.assoc,
+      Limits.pullback.lift_fst, P.2]
+  rw [negModelHom_specPoints W K
+    ⟨Limits.pullback.lift P.1 Q.1 (P.2.trans Q.2.symm) ≫ mulModelHom W, hsum⟩]
+  rw [mulModelHom_specPoints W K P Q]
 
 end ModularCurves
 

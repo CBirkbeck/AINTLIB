@@ -1,1 +1,1 @@
-FOCUS: [W1-d3.2c scheme case] compare the project group-law section -(P+Q) with the (addX,negAddY) section via section_ext_of_forall_specPoint + Dictionary.eq_toAffine
+FOCUS: [W1-d3.2c step 1] connect the project Point group law to mulModelHom/negModelHom at the section level (then chain steps 2-9)
