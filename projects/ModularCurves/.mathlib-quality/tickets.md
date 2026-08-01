@@ -31888,3 +31888,23 @@ working idiom is `generalize_proofs h; revert h; rw [← hcoord…]; intro h; rf
 `σ₃` hypothesis of `chord_identity_of_sections`. Every mathematical ingredient of the
 Weil-pairing prong is now proven; what is left is the non-degeneracy bookkeeping and the
 degenerate charts.
+
+### ★★★★★ [W1 i7] DONE 2026-08-01 — the principal-kernel hypothesis is now PROVED
+`ker_eq_span_sub_coordX_of_isUnit`: in any algebra carrying the Weierstrass relation,
+the kernel of an evaluation retraction is `span {x - x₀}` — the *two* obvious
+generators collapse to one — provided the conjugate factor `y + y₀ + a₁x + a₃` is a
+unit. That factor evaluates to `2y₀ + a₁x₀ + a₃` at the point, i.e. the condition is
+exactly **non-2-torsion**, and it is what the away-chart inverts.
+Chain: `sub_mul_conj_eq_of_equation` (difference of the two Weierstrass equations is
+divisible by `x - x₀`, with the explicit cofactor `x² + xx₀ + x₀² + a₂(x+x₀) + a₄ - a₁y₀`)
+⟹ `sub_coordY_mem_span_of_isUnit` ⟹ the kernel identity.
+**This closes `hk₁`/`hk₂`/`hk₃` of `chord_identity_of_sections`** — previously three
+free-standing hypotheses, now derivable in any chart.
+MATH NOTE (why the unit is needed, and why the FULL coordinate ring will not do):
+`A/(x - x₀)` has rank 2 — it contains both `(x₀,y₀)` and its reflection
+`(x₀, -y₀-a₁x₀-a₃)`. The kernel is principal only after the reflection is removed,
+which is precisely inverting the conjugate factor. Every chord/vertical consumer must
+therefore run in an away-chart, never in `W.toAffine.CoordinateRing` itself. The
+general-`A` statements (`chord_evaluations_vanish`, `chord_eq_unit_mul_generators`,
+i7's three) are already chart-ready; `chord_identity_of_sections` is the one that
+specialises and must be re-instantiated at a chart ring by the caller.
