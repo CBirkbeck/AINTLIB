@@ -7210,3 +7210,42 @@ whose locals are threaded through the enclosing proof — high parameter counts,
 low line savings. The 60 cross-file clusters are untouched and need an
 import-closure check before any of them can move.
 
+
+## 151 → 150: cut lower when the field's own goal is unstateable
+
+`toAdic` (a `RingHom` structure instance) was deferred earlier because its
+`map_mul'` field is `Subtype.ext (funext fun n => by …)` — a goal awkward to
+state as a standalone lemma. The fix was to cut **lower**: the tail after
+`refine mk_trnc_eq … ?_` is a plain norm estimate,
+
+    ‖F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G)‖ ≤ ‖t‖ ^ n
+
+which states cleanly. Extracted as `norm_mul_sub_polyBall_trnc_mul_le`; the
+field's 24 lines became 8, parent 60 → 44.
+
+**When a structure field's goal is unstateable, look for a sub-goal that is.**
+The awkwardness was in the `Subtype.ext ∘ funext` wrapper, not in the
+mathematics underneath it.
+
+### Four builds to get one call site right
+
+    t ht0             → expected IsUnit t
+    t htu ht1 ht0     → expected 0 < ‖t‖
+    t htu ht0         → expected ∀ x, ‖t*x‖ = ‖t‖*‖x‖
+    t htu ht0 hscale  → green
+
+Every one of those errors named exactly what it wanted, and I read only the
+first line of each. The fourth is what revealed `hscale` existed at all — a
+section variable I had not seen, because `explicit_section_vars` reported the
+`(t) (htu) (ht1) (ht0)` line and I stopped reading there.
+
+Two compounding failures: trusting a partial tool output as complete, and
+skimming diagnostics that contained the answer.
+
+**The method for auto-bound section variables is to read the FULL mismatch.**
+Lean states the expected type of the next positional argument, which identifies
+it unambiguously — faster than any pre-check, and available from build one.
+Note also that auto-binding includes only the variables actually *used*, in
+declaration order, so the call list is not the `variable` line: `ht1` is absent
+here and `hscale` (declared elsewhere) is present.
+

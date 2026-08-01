@@ -1418,6 +1418,28 @@ include htu hscale
 -- v4.33: the `⟨trnc …, ⋯⟩`-literals and `⟨t, ht1.le⟩`-witnesses throughout this layer
 -- type only at default transparency; restore pre-v4.33 defeq behaviour for the
 -- `kabstract`-heavy proof (established bump-repair pattern).
+/-- The product of truncations approximates the product to order `n`: the
+ultrametric bound on `F·G - polyBall (trnc F) · polyBall (trnc G)`. -/
+private theorem norm_mul_sub_polyBall_trnc_mul_le
+    (F G : ↥(unitBall (P E m))) (n : ℕ) :
+    ‖F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G)‖
+      ≤ ‖t‖ ^ n := by
+  rw [show F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G) =
+    F.1 * (G.1 - polyBall (trnc t ht0 n G)) +
+      (F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G) by ring]
+  refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
+  · calc ‖F.1 * (G.1 - polyBall (trnc t ht0 n G))‖
+        ≤ ‖F.1‖ * ‖G.1 - polyBall (trnc t ht0 n G)‖ := norm_mul_le _ _
+      _ ≤ 1 * ‖t‖ ^ n := mul_le_mul F.2 (norm_sub_polyBall_trnc_le t ht0 n G)
+          (norm_nonneg _) zero_le_one
+      _ = ‖t‖ ^ n := one_mul _
+  · calc ‖(F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G)‖
+        ≤ ‖F.1 - polyBall (trnc t ht0 n F)‖ * ‖polyBall (trnc t ht0 n G)‖ :=
+          norm_mul_le _ _
+      _ ≤ ‖t‖ ^ n * 1 := mul_le_mul (norm_sub_polyBall_trnc_le t ht0 n F)
+          (norm_polyBall_le_one _) (norm_nonneg _) (pow_nonneg (norm_nonneg t) n)
+      _ = ‖t‖ ^ n := mul_one _
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The truncation-classes ring homomorphism into the adic completion. -/
 noncomputable def toAdic : ↥(unitBall (P E m)) →+*
@@ -1446,22 +1468,7 @@ noncomputable def toAdic : ↥(unitBall (P E m)) →+*
       Ideal (MvPolynomial (Fin m) ↥(unitBall E))))]
     refine mk_trnc_eq t htu ht1 ht0 hscale n (F * G) (trnc t ht0 n F * trnc t ht0 n G) ?_
     rw [map_mul]
-    show ‖F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G)‖ ≤ _
-    rw [show F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G) =
-      F.1 * (G.1 - polyBall (trnc t ht0 n G)) +
-        (F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G) by ring]
-    refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
-    · calc ‖F.1 * (G.1 - polyBall (trnc t ht0 n G))‖
-          ≤ ‖F.1‖ * ‖G.1 - polyBall (trnc t ht0 n G)‖ := norm_mul_le _ _
-        _ ≤ 1 * ‖t‖ ^ n := mul_le_mul F.2 (norm_sub_polyBall_trnc_le t ht0 n G)
-            (norm_nonneg _) zero_le_one
-        _ = ‖t‖ ^ n := one_mul _
-    · calc ‖(F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G)‖
-          ≤ ‖F.1 - polyBall (trnc t ht0 n F)‖ * ‖polyBall (trnc t ht0 n G)‖ :=
-            norm_mul_le _ _
-        _ ≤ ‖t‖ ^ n * 1 := mul_le_mul (norm_sub_polyBall_trnc_le t ht0 n F)
-            (norm_polyBall_le_one _) (norm_nonneg _) (pow_nonneg (norm_nonneg t) n)
-        _ = ‖t‖ ^ n := mul_one _)
+    exact norm_mul_sub_polyBall_trnc_mul_le t htu ht0 hscale F G n)
   map_zero' := Subtype.ext (funext fun n => by
     show Ideal.Quotient.mk _ (trnc t ht0 n 0) = 0
     rw [← map_zero (Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
