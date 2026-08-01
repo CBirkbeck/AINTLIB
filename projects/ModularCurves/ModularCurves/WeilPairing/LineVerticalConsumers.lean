@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.LineVertical
+import ModularCurves.Picard.SurjectiveInvertible
+import ModularCurves.ForMathlib.PullbackTensorMonoidal
 
 /-!
 # Consumer wiring for the line and vertical (GAP-A-4)
@@ -672,5 +674,21 @@ theorem twistSectionLift_comp {J : C.IdealSheafData} {L : C.Modules}
     (hℓ : (Limits.cokernel.π (divisorTwistHom J L)).app (⊤ : C.Opens) ℓ = 0) :
     twistSectionLift ℓ hℓ ≫ divisorTwistHom J L = unitHomOfTopSection ℓ :=
   CategoryTheory.Abelian.monoLift_comp _ _ _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[5a-v engine] A locally surjective twist-section lift is an isomorphism** —
+"a section of an invertible module vanishing on the divisor to exact order
+trivializes the twist": injectivity is free from invertibility. -/
+theorem isIso_twistSectionLift_of_isLocallySurjective
+    {J : C.IdealSheafData} {L : C.Modules}
+    (ℓ : Γ(L, (⊤ : C.Opens))) [Mono (divisorTwistHom J L)]
+    (hℓ : (Limits.cokernel.π (divisorTwistHom J L)).app (⊤ : C.Opens) ℓ = 0)
+    (hJ : IsInvertible (idealModule J)) (hL : IsInvertible L)
+    (hs : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥C)
+      ((PresheafOfModules.toPresheaf _).map (twistSectionLift ℓ hℓ).val)) :
+    IsIso (twistSectionLift ℓ hℓ) :=
+  isIso_of_isLocallySurjective_of_isInvertible _ isInvertible_unit
+    (hJ.tensorObj hL) hs
 
 end AlgebraicGeometry.Scheme.Modules
