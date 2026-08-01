@@ -30905,3 +30905,14 @@ chartMultiplier_unitHomOfTopSection_eq. All axiom-clean, root build 9613 jobs.
 (the chord's coefficient factors as the product of the three point-generators times a
 unit), to be done over the universal atlas and transferred (GroupLawAxioms idiom).
 This is the cleanest possible reduction of the chord–tangent input.
+
+### ★★ SILENT-SORRY RECURRENCE 2026-08-01 (second occurrence, caught in minutes)
+Same failure mode as the [A4-e2] CORE bug: an `ext`-based sub-proof inside a `have`
+(proving `unitEndomorphismOfTopSection 0 = 0`) elaborated to a SYNTHETIC SORRY with only
+"tactic does nothing"/"never executed" warnings — build exit 0, no error.
+DETECTION THAT WORKED: `#print axioms` on every milestone declaration (the iteration-loop
+grep was `grep -E "error"` — which MISSES it). ⟹ STANDING RULE UPGRADE: the iteration
+grep must be `grep -E "error|declaration uses"`, and every milestone gets an axiom audit
+before commit. AVOIDANCE RULE: prefer ext-free proofs for hom equalities — compare both
+sides against the SAME normal form (here: `unitEndo x ≫ unitEndo c = unitEndo 0 ≫ unitEndo c`
+via the comp+zero_mul lemmas) and finish with congrArg + a trans-chain of value lemmas.
