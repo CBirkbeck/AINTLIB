@@ -119,4 +119,61 @@ theorem nonempty_tensorObj_iso_of_chord_vertical
   rw [toSkeleton_tensorObj_eq, toSkeleton_tensorObj_eq, ← ha, ← hb, ← hrp, ← hz]
   exact hcancel
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The pole/ideal duality**: the degree-one pole sheaf inverts the ideal module of
+the zero section. -/
+theorem nonempty_tensorObj_sectionPoleSheaf_iso
+    {S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
+    Nonempty (tensorObj (ModularCurves.sectionPoleSheaf π z hz)
+      (ModularCurves.sectionIdealModule π z hz) ≅ unitObj C) := by
+  obtain ⟨e⟩ := nonempty_eval_iso
+    (ModularCurves.sectionIdealModule_isInvertible hsm z hz)
+  obtain ⟨ec⟩ := nonempty_tensorObj_comm
+    (ModularCurves.sectionPoleSheaf π z hz)
+    (ModularCurves.sectionIdealModule π z hz)
+  exact ⟨ec ≪≫ e⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The pole ladder**: one more pole order is one more tensor factor. -/
+theorem nonempty_sectionPoleSheafPower_succ_iso
+    {S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    Nonempty (ModularCurves.sectionPoleSheafPower π z hz (n + 1) ≅
+      tensorObj (ModularCurves.sectionPoleSheafPower π z hz n)
+        (ModularCurves.sectionPoleSheaf π z hz)) := by
+  letI := Modules.monoidalCategory C
+  exact ⟨(nonempty_tensorObj_iso_tensor
+    (ModularCurves.sectionPoleSheafPower π z hz n)
+    (ModularCurves.sectionPoleSheaf π z hz)).some.symm⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GAP-A-5c at the pole sheaves]** The theorem of the square from the chord and
+the vertical, with the pole-sheaf inputs discharged. -/
+theorem nonempty_tensorObj_iso_of_chord_vertical_poleSheaf
+    {S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    {A B Rp Rm : C.Modules}
+    (hA : IsInvertible A) (hB : IsInvertible B) (hRp : IsInvertible Rp)
+    (hRm : IsInvertible Rm)
+    (hchord : Nonempty (tensorObj A (tensorObj B (tensorObj Rm
+      (ModularCurves.sectionPoleSheafPower π z hz 3))) ≅ unitObj C))
+    (hvert : Nonempty (tensorObj Rp (tensorObj Rm
+      (ModularCurves.sectionPoleSheafPower π z hz 2)) ≅ unitObj C)) :
+    Nonempty (tensorObj A B ≅
+      tensorObj Rp (ModularCurves.sectionIdealModule π z hz)) := by
+  refine nonempty_tensorObj_iso_of_chord_vertical hA hB hRp hRm
+    (ModularCurves.sectionIdealModule_isInvertible hsm z hz)
+    (ModularCurves.sectionPoleSheaf_isInvertible hsm z hz)
+    (ModularCurves.sectionPoleSheafPower_isInvertible hsm z hz 2)
+    (ModularCurves.sectionPoleSheafPower_isInvertible hsm z hz 3)
+    hchord hvert
+    (nonempty_sectionPoleSheafPower_succ_iso z hz 2)
+    (nonempty_tensorObj_sectionPoleSheaf_iso hsm z hz)
+
 end AlgebraicGeometry.Scheme.Modules
