@@ -1,1 +1,1 @@
-FOCUS: [W2-d] assemble the descent: local trivializations over preimages of a base cover + zero-normalization => Nonempty (unitObj ≅ L) via nonempty_unitObj_iso_of_normalized_glue
+FOCUS: [W2-e] rigidification — rescale a chart generator by the inverse of its zero-section value (needs: z-value is a unit); then the comparison units are 1

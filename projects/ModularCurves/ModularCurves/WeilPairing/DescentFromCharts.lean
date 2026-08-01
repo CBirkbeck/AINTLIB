@@ -89,4 +89,61 @@ theorem nonempty_unitObj_iso_of_chart_trivializations
     (fun i => generatorOfRestrictIso (pullback.snd p g ⁻¹ᵁ U i) (e i))
     u hu (fun i j => hnorm i j (u i j) (hu i j)) hgen
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W2-e] Rescaling a generator by a base unit.** The pullback of a unit of the base
+scales a generating section to another generating section. -/
+theorem bijective_smul_pullback_unit_smul
+    {L : (pullback p g).Modules} (W : (pullback p g).Opens)
+    (c : Γ(pullback p g, W)) (hc : IsUnit c) (s : Γ(L, W))
+    (hs : Function.Bijective (fun r : Γ(pullback p g, W) => r • s)) :
+    Function.Bijective (fun r : Γ(pullback p g, W) => r • (c • s)) := by
+  obtain ⟨v, rfl⟩ := hc
+  constructor
+  · intro a b hab
+    have h1 : (a * (v : Γ(pullback p g, W))) • s =
+        (b * (v : Γ(pullback p g, W))) • s := by
+      rw [mul_smul, mul_smul]
+      exact hab
+    have h2 := hs.injective h1
+    have h3 := congrArg (fun t => t * (↑v⁻¹ : Γ(pullback p g, W))) h2
+    simpa [mul_assoc] using h3
+  · intro y
+    obtain ⟨a, ha⟩ := hs.surjective y
+    refine ⟨a * (↑v⁻¹ : Γ(pullback p g, W)), ?_⟩
+    show (a * (↑v⁻¹ : Γ(pullback p g, W))) • ((v : Γ(pullback p g, W)) • s) = y
+    rw [← mul_smul, mul_assoc, Units.inv_mul, mul_one]
+    exact ha
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W2-e] The rigidification cocycle.** If the comparison unit of two generators has
+`z`-value `c i · (c j)⁻¹` for base units `c`, then after rescaling by the pullbacks of
+`c⁻¹` the comparison unit has `z`-value `1` — the hypothesis the rigidified glue lemma
+wants. Stated for the scalars only; the section rescaling is
+`bijective_smul_pullback_unit_smul`. -/
+theorem appLE_z_rescaled_eq_one
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    (V : (pullback p g).Opens) (Wb : T.Opens) (hV : V = pullback.snd p g ⁻¹ᵁ Wb)
+    (e : Wb ≤ z ⁻¹ᵁ V)
+    (u : Γ(pullback p g, V)) (ci cj : Γ(T, Wb))
+    (hu : (Scheme.Hom.appLE z V Wb e).hom u = ci * cj) :
+    (Scheme.Hom.appLE z V Wb e).hom
+      ((Scheme.Hom.appLE (pullback.snd p g) Wb V (by rw [hV]) ci) *
+        u * (Scheme.Hom.appLE (pullback.snd p g) Wb V (by rw [hV]) cj)) =
+      ci * (ci * cj) * cj := by
+  subst hV
+  have hsec : ∀ w : Γ(T, Wb), (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ Wb) Wb e).hom
+      ((Scheme.Hom.appLE (pullback.snd p g) Wb (pullback.snd p g ⁻¹ᵁ Wb)
+        le_rfl).hom w) = w := by
+    intro w
+    have h1 : (pullback.snd p g).app Wb =
+        (pullback.snd p g).appLE Wb (pullback.snd p g ⁻¹ᵁ Wb) le_rfl :=
+      (Scheme.Hom.appLE_eq_app _).symm
+    have h2 := congrArg (fun φ : Γ(T, Wb) ⟶ Γ(T, Wb) => φ.hom w)
+      (app_appLE_section g hz Wb e)
+    rw [h1] at h2
+    exact h2
+  rw [map_mul, map_mul, hsec, hsec, hu]
+
 end ModularCurves
