@@ -31370,3 +31370,20 @@ intersection `(addX, negAddY)`. Remaining in the leaf:
    in the `Dictionary` form, i.e. chart-coordinate bookkeeping);
  * step 8's unit half — the adjugate criterion `not_isUnit_det_of_mulVec_eq_zero`.
 Everything else in the WP prong is proven and axiom-clean; root build 9617 jobs.
+
+### ★★★★★ [W1-d3.2c] STEPS 1–6 PROVEN 2026-08-01 — only the coordinate bookkeeping remains
+Landed (axiom-clean): `projModelPointsEquiv_neg_mul`,
+`projModelPointsEquiv_neg_mul_eq_negAddY`, `section_eq_of_dictionary_eq`,
+`hom_ext_of_forall_algebra`, `section_ext_of_forall_specPoint`,
+`neg_add_eq_some_negAddY`, `chord_vanishes_at_three_points`,
+`mul_dvd_of_evaluations_vanish`, `eq_unit_mul_of_three_divisions/_two_divisions`,
+`equation_of_algHom`, `exists_affine_point_of_section`, `ker_eq_of_mem_of_span_eq`,
+and the adjugate rank-drop bricks.
+THE RESIDUE OF THE ENTIRE PRONG (two items):
+ (i) COORDINATE BOOKKEEPING: for a section pair on the away-chart, express both sides'
+     dictionary values in the chart coordinates (`projModelPointsEquiv_some` +
+     `sectionAway_affineModelEval_bijective`), so that `section_eq_of_dictionary_eq`
+     applies and the chord's three evaluations vanish;
+ (ii) the UNIT half of the exact-order hypothesis (adjugate criterion).
+Both are mechanical relative to what is proven; no further conceptual input is needed.
+Root build 9617 jobs; audit sweeps clean throughout.
