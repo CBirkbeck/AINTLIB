@@ -31,6 +31,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from apply_joins import body_span  # noqa: E402
+from decompose_common import in_scope, boilerplate, call_cost, fits  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1] / "Adic spaces"
 ID = re.compile(r"[^\W\d][\w'ₐ-ₜ₀-₉]*", re.UNICODE)
@@ -139,7 +140,7 @@ def analyse(rec):
 def main():
     rows = []
     for r in json.load(open('/tmp/over50_code.json')):
-        if r['sorry']:
+        if not in_scope(r):
             continue
         got = analyse(r)
         if got:

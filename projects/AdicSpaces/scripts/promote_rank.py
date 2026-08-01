@@ -25,6 +25,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from apply_joins import body_span  # noqa: E402
+from decompose_common import ID, NOISE, ind, in_scope, boilerplate, fits  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1] / "Adic spaces"
 ID = re.compile(r"[^\W\d][\w'ₐ-ₜ₀-₉]*", re.UNICODE)
@@ -99,7 +100,7 @@ def analyse(rec):
         if used & bound_costly:
             continue                      # needs a reconstructed hypothesis
         size = sum(1 for x in body[i:j] if x.strip())
-        if size + boil > 50:
+        if not fits(size, boil):
             continue
         promoted += 1
         freed += size - 1
@@ -116,7 +117,7 @@ def main():
     for r in json.load(open('/tmp/over50_code.json')):
         # Vendored/ is third-party and explicitly out of scope for this campaign.
         # It appeared at rank 5 on the first run of this tool.
-        if r['sorry'] or r['file'].startswith('Vendored/'):
+        if not in_scope(r):
             continue
         got = analyse(r)
         if got:

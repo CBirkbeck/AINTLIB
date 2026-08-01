@@ -1366,6 +1366,74 @@ section HeightOneGenerization
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 
+/-- The class of `g₀` in `Γ ⧸ maxAvoid` is non-trivial. -/
+private theorem maxAvoid_quotientMk_ne_one {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+    {g₀ : Γ} (hg₀_lt : g₀ < 1) :
+    QuotientGroup.mk' (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup g₀ ≠ 1 := fun h1 ↦
+  ConvexSubgroup.not_mem_maxAvoid hg₀_lt.ne ((QuotientGroup.eq_one_iff g₀).mp h1)
+
+/-- The class of `g₀` in `Γ ⧸ maxAvoid` is `< 1`. -/
+private theorem maxAvoid_quotientMk_lt_one {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+    {g₀ : Γ} (hg₀_lt : g₀ < 1) :
+    QuotientGroup.mk' (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup g₀ < 1 :=
+  lt_of_le_of_ne ((ConvexSubgroup.maxAvoid hg₀_lt.ne).quotientMk_le_one hg₀_lt.le)
+    (maxAvoid_quotientMk_ne_one hg₀_lt)
+
+/-- Cofinality of the powers of `g₀` descends to `Γ ⧸ maxAvoid`. -/
+private theorem maxAvoid_quotient_cofinal {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+    {g₀ : Γ} (hg₀_lt : g₀ < 1)
+    (hcof : ∀ γ : Γ, ∃ n : ℕ, g₀ ^ n ≤ γ) :
+    ∀ d : Γ ⧸ (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup,
+      ∃ n : ℕ, QuotientGroup.mk' (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup g₀ ^ n ≤ d := by
+  set H := ConvexSubgroup.maxAvoid hg₀_lt.ne with hH_def
+  set π := QuotientGroup.mk' H.toSubgroup with hπ_def
+
+  intro d
+  obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective H.toSubgroup d
+  obtain ⟨n, hn⟩ := hcof x
+  exact ⟨n, by rw [← map_pow]; exact H.quotientMk_monotone hn⟩
+
+/-- `Γ ⧸ maxAvoid` is `MulArchimedean`: every convex subgroup of it is trivial. -/
+private theorem maxAvoid_quotient_mulArchimedean {Γ : Type*} [CommGroup Γ] [LinearOrder Γ] [IsOrderedMonoid Γ]
+    {g₀ : Γ} (hg₀_lt : g₀ < 1)
+    (hcof : ∀ γ : Γ, ∃ n : ℕ, g₀ ^ n ≤ γ) :
+    MulArchimedean (Γ ⧸ (ConvexSubgroup.maxAvoid hg₀_lt.ne).toSubgroup) := by
+  set H := ConvexSubgroup.maxAvoid hg₀_lt.ne with hH_def
+  set π := QuotientGroup.mk' H.toSubgroup with hπ_def
+  have hcof_bar := maxAvoid_quotient_cofinal hg₀_lt hcof
+
+  rw [ConvexSubgroup.mulArchimedean_iff_convex_trivial]
+  intro K
+  by_cases hK : K = ⊥
+  · exact Or.inl hK
+  refine Or.inr ?_
+  have hπ_mono : Monotone π := H.quotientMk_monotone
+  -- The pullback of `K` strictly contains `H`, hence contains `g₀` by maximality.
+  have hg₀K : π g₀ ∈ K := by
+    by_contra hg₀_not
+    have hK'_le : K.comap (π : Γ →* _) hπ_mono ≤ H :=
+      ConvexSubgroup.le_maxAvoid_of_not_mem
+        (fun hmem ↦ hg₀_not (ConvexSubgroup.mem_comap.mp hmem))
+    apply hK
+    ext d
+    simp only [ConvexSubgroup.mem_bot]
+    constructor
+    · intro hd
+      obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective H.toSubgroup d
+      have hx_K' : x ∈ K.comap (π : Γ →* _) hπ_mono := ConvexSubgroup.mem_comap.mpr hd
+      exact (QuotientGroup.eq_one_iff x).mpr (SetLike.le_def.mp hK'_le hx_K')
+    · rintro rfl
+      exact K.one_mem
+  -- Sandwich: every element of the quotient lies between powers of `π g₀`.
+  ext d
+  simp only [ConvexSubgroup.mem_top, iff_true]
+  obtain ⟨n, hn⟩ := hcof_bar d
+  obtain ⟨m, hm⟩ := hcof_bar d⁻¹
+  have hd_le : d ≤ (π g₀ ^ m)⁻¹ := by
+    rw [← inv_inv d]
+    exact inv_le_inv' hm
+  exact K.convex (K.pow_mem hg₀K n) (K.inv_mem (K.pow_mem hg₀K m)) hn hd_le
+
 /-- **Wedhorn Rem 7.38/7.40(5)+4.12 (generization core).** If `v` is continuous and
 `g₀ < 1` is cofinal in the value group (`∀ γ, ∃ n, g₀ ^ n ≤ γ`), then the coarsening of
 `v` by `maxAvoid g₀` is continuous and its value group `Γ ⧸ maxAvoid g₀` is
@@ -1380,49 +1448,9 @@ theorem Valuation.coarsen_maxAvoid_isContinuous_mulArchimedean
   set H := ConvexSubgroup.maxAvoid hg₀_lt.ne with hH_def
   set π := QuotientGroup.mk' H.toSubgroup with hπ_def
   -- The class of `g₀` is `< 1` in the quotient.
-  have hg₀_bar_ne : π g₀ ≠ 1 := fun h1 ↦
-    ConvexSubgroup.not_mem_maxAvoid hg₀_lt.ne ((QuotientGroup.eq_one_iff g₀).mp h1)
-  have hg₀_bar_lt : π g₀ < 1 :=
-    lt_of_le_of_ne (H.quotientMk_le_one hg₀_lt.le) hg₀_bar_ne
-  -- Cofinality descends to the quotient.
-  have hcof_bar : ∀ d : Γ ⧸ H.toSubgroup, ∃ n : ℕ, π g₀ ^ n ≤ d := by
-    intro d
-    obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective H.toSubgroup d
-    obtain ⟨n, hn⟩ := hcof x
-    exact ⟨n, by rw [← map_pow]; exact H.quotientMk_monotone hn⟩
-  -- `MulArchimedean` of the quotient: every convex subgroup is trivial.
-  have hArch : MulArchimedean (Γ ⧸ H.toSubgroup) := by
-    rw [ConvexSubgroup.mulArchimedean_iff_convex_trivial]
-    intro K
-    by_cases hK : K = ⊥
-    · exact Or.inl hK
-    refine Or.inr ?_
-    have hπ_mono : Monotone π := H.quotientMk_monotone
-    -- The pullback of `K` strictly contains `H`, hence contains `g₀` by maximality.
-    have hg₀K : π g₀ ∈ K := by
-      by_contra hg₀_not
-      have hK'_le : K.comap (π : Γ →* _) hπ_mono ≤ H :=
-        ConvexSubgroup.le_maxAvoid_of_not_mem
-          (fun hmem ↦ hg₀_not (ConvexSubgroup.mem_comap.mp hmem))
-      apply hK
-      ext d
-      simp only [ConvexSubgroup.mem_bot]
-      constructor
-      · intro hd
-        obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective H.toSubgroup d
-        have hx_K' : x ∈ K.comap (π : Γ →* _) hπ_mono := ConvexSubgroup.mem_comap.mpr hd
-        exact (QuotientGroup.eq_one_iff x).mpr (SetLike.le_def.mp hK'_le hx_K')
-      · rintro rfl
-        exact K.one_mem
-    -- Sandwich: every element of the quotient lies between powers of `π g₀`.
-    ext d
-    simp only [ConvexSubgroup.mem_top, iff_true]
-    obtain ⟨n, hn⟩ := hcof_bar d
-    obtain ⟨m, hm⟩ := hcof_bar d⁻¹
-    have hd_le : d ≤ (π g₀ ^ m)⁻¹ := by
-      rw [← inv_inv d]
-      exact inv_le_inv' hm
-    exact K.convex (K.pow_mem hg₀K n) (K.inv_mem (K.pow_mem hg₀K m)) hn hd_le
+  have hg₀_bar_lt := maxAvoid_quotientMk_lt_one hg₀_lt
+  have hcof_bar := maxAvoid_quotient_cofinal hg₀_lt hcof
+  have hArch := maxAvoid_quotient_mulArchimedean hg₀_lt hcof
   refine ⟨?_, hArch⟩
   -- Continuity of the coarsening: additive translates of `v`-sublevels.
   intro δ

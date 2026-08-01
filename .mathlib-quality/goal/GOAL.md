@@ -6707,3 +6707,46 @@ invisible until the output is read against the actual files. The mitigation is
 not vigilance, it is that the filters belong in a shared module rather than
 being re-typed per tool; that refactor is the obvious next step and is not done.
 
+
+## 159 → 158: promote-cluster works, and the `set`-carry makes bodies transplant verbatim
+
+First use of `promote_rank.py`'s pattern, green on the first build. Four
+top-level `have`s became four lemmas in dependency order:
+
+    maxAvoid_quotientMk_ne_one          2L
+    maxAvoid_quotientMk_lt_one          3L   calls the first
+    maxAvoid_quotient_cofinal           8L
+    maxAvoid_quotient_mulArchimedean   34L   calls the third
+    parent                             41L   (was 81)
+
+**Why the cluster is cheap.** `H` and `π` are `set`-bound abbreviations. Each
+tactic-mode lemma states its goal with those terms *expanded*, then re-folds
+them by carrying the two `set` lines into its own body:
+
+    set H := ConvexSubgroup.maxAvoid hg₀_lt.ne with hH_def
+    set π := QuotientGroup.mk' H.toSubgroup with hπ_def
+
+`set` folds occurrences in the goal, so after those two lines the goal reads
+exactly as it did inside the original proof and the body transplants verbatim —
+no renaming at all. **Two lines of carry buys a fully mechanical body move.**
+Term-mode lemmas cannot carry a `set`, so the two small ones had `H`/`π`
+expanded by hand; at 2 and 3 lines that was trivial.
+
+This is the third distinct use of the carry idea — `set Ufun` in
+`exists_rps_series_limit`, the `rw … at` in `extendToLocalization`, now `set H`
+here. The unifying statement: **whatever tactic made a local's type or term
+implicit can travel across the extraction boundary with it.**
+
+### The shared-filter refactor
+
+`decompose_common.py` now holds the filters every ranking must apply —
+Vendored-skip, boilerplate extent, block extent, call cost, carried lines, and
+the fact that the budget is on *bodies* not declarations. Both rankers import it
+and both produce identical output to before (3 and 7 candidates), so it is
+behaviour-preserving.
+
+Its docstring lists the six instances that motivated it. They were not vigilance
+failures; they were one concern re-implemented per tool, and the sixth
+(`promote_rank` shipping without Vendored-skip *or* preamble) is what made the
+pattern undeniable.
+
