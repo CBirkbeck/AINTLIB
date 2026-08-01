@@ -703,4 +703,24 @@ noncomputable def dualPullbackSectionTrivialization {X T' : Scheme.{u}} (f : X �
       (restrictPullbackTrivializationOfEq z L (f ⁻¹ᵁ U) U
         (preimage_preimage_section f z hz U).symm e))
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W4b] `hnorm` in caller-facing form.** The normalization the descent needs, derived
+from a purely multiplicative statement: the twist factor's comparison unit is the pullback
+of the inverse of the `z`-value of `L`'s. The overlap identification
+`f ⁻¹ᵁ (Uᵢ ⊓ Uⱼ) = f ⁻¹ᵁ Uᵢ ⊓ f ⁻¹ᵁ Uⱼ` is definitional, so no transport is needed. -/
+theorem appLE_z_mul_eq_one_of_units
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T) (U₁ U₂ : T.Opens)
+    (a b : Γ(pullback p g, pullback.snd p g ⁻¹ᵁ U₁ ⊓ pullback.snd p g ⁻¹ᵁ U₂))
+    (c : Γ(T, U₁ ⊓ U₂)ˣ)
+    (hc : (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ U₁ ⊓ pullback.snd p g ⁻¹ᵁ U₂)
+        (U₁ ⊓ U₂) (le_inf_preimage_preimage g hz U₁ U₂)).hom a = (c : Γ(T, U₁ ⊓ U₂)))
+    (hb : b = (Scheme.Hom.appLE (pullback.snd p g) (U₁ ⊓ U₂)
+      (pullback.snd p g ⁻¹ᵁ U₁ ⊓ pullback.snd p g ⁻¹ᵁ U₂)
+      le_rfl).hom (↑c⁻¹ : Γ(T, U₁ ⊓ U₂))) :
+    (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ U₁ ⊓ pullback.snd p g ⁻¹ᵁ U₂)
+      (U₁ ⊓ U₂) (le_inf_preimage_preimage g hz U₁ U₂)).hom (a * b) = 1 :=
+  appLE_z_mul_pullback_inv_eq_one g hz (U₁ ⊓ U₂)
+    (le_inf_preimage_preimage g hz U₁ U₂) a b c hc hb
+
 end ModularCurves
