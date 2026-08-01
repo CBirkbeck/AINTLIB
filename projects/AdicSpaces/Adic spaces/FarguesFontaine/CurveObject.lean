@@ -1422,6 +1422,53 @@ theorem curveRingPresheaf_map_apply {V' V : Opens (Curve p F ϖ)}
         ((curveSpace p F ϖ).ringPresheaf.map (homOfLE h).op)) t
       = frobFixedRestrict p F ϖ h t := rfl
 
+/-- Two germ-equal sections have equal Frobenius-fixed restrictions on the
+wandering open. The core of `ringStalkMap_piYHom_injective`. -/
+private theorem frobFixedRestrict_eq_of_germ_eq (y : ↥(yTop p F ϖ))
+    {V₁ V₂ : Opens (Curve p F ϖ)}
+    (t₁ : ((curveSpace p F ϖ).ringPresheaf).obj (Opposite.op V₁))
+    (t₂ : ((curveSpace p F ϖ).ringPresheaf).obj (Opposite.op V₂))
+    {U W₀ : Opens ↥(yTop p F ϖ)}
+    {iU : U ⟶ curvePreimage p F ϖ V₁} {iV : U ⟶ curvePreimage p F ϖ V₂}
+    (hres : ((yPresheafedSpace p F ϖ).ringPresheaf).map iU.op
+        (piComponent p F ϖ V₁ t₁)
+      = ((yPresheafedSpace p F ϖ).ringPresheaf).map iV.op
+        (piComponent p F ϖ V₂ t₂))
+    (hU₁ : U ≤ curvePreimage p F ϖ V₁) (hU₂ : U ≤ curvePreimage p F ϖ V₂)
+    (hWU : U ⊓ W₀ ≤ U)
+    (hle₁ : xImage p F ϖ (U ⊓ W₀) ≤ V₁)
+    (hle₂ : xImage p F ϖ (U ⊓ W₀) ≤ V₂) :
+    frobFixedRestrict p F ϖ hle₁ t₁ = frobFixedRestrict p F ϖ hle₂ t₂ := by
+  refine invariant_sections_eq_of_zero_piece p F ϖ (U ⊓ W₀) _ _ ?_
+  have hUres : limitRestrict
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₁))) t₁.1
+      = limitRestrict
+        (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₂))) t₂.1 :=
+    (yRingPresheaf_map_apply p F ϖ hU₁
+        (piComponent p F ϖ V₁ t₁)).symm.trans
+      (hres.trans (yRingPresheaf_map_apply p F ϖ hU₂
+        (piComponent p F ϖ V₂ t₂)))
+  have hZU : (Opens.map (yFrobTop p F ϖ 0)).obj (U ⊓ W₀) ≤ U :=
+    le_trans (le_of_eq (map_yFrobTop_zero p F ϖ (U ⊓ W₀))) hWU
+  have hstep := congrArg (limitRestrict
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))) hUres
+  have hcol₁ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₁))))) t₁.1
+  have hcol₂ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₂))))) t₂.1
+  have hexp₁ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE
+      (translate_le_curvePreimage_xImage p F ϖ (U ⊓ W₀) 0))))
+    (yFunctor_curvePreimage_mono p F ϖ hle₁))) t₁.1
+  have hexp₂ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE
+      (translate_le_curvePreimage_xImage p F ϖ (U ⊓ W₀) 0))))
+    (yFunctor_curvePreimage_mono p F ϖ hle₂))) t₂.1
+  exact hexp₁.trans ((hcol₁.symm.trans (hstep.trans hcol₂)).trans
+    hexp₂.symm)
+
 /-- **Injectivity of the projection stalk map** (D-iv-3(γ iii)): an
 invariant germ is determined by its underlying `𝒴`-germ. -/
 theorem ringStalkMap_piYHom_injective (y : ↥(yTop p F ϖ)) :
@@ -1454,37 +1501,8 @@ theorem ringStalkMap_piYHom_injective (y : ↥(yTop p F ϖ)) :
     xImage_le p F ϖ (U ⊓ W₀) V₂ (le_trans hWU hU₂)
   have hmem : yTopToCurve p F ϖ y ∈ xImage p F ϖ (U ⊓ W₀) := ⟨y, hyW, rfl⟩
   -- the two invariant restrictions agree: separation over the translates
-  have hz : frobFixedRestrict p F ϖ hle₁ t₁
-      = frobFixedRestrict p F ϖ hle₂ t₂ := by
-    refine invariant_sections_eq_of_zero_piece p F ϖ (U ⊓ W₀) _ _ ?_
-    have hUres : limitRestrict
-        (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₁))) t₁.1
-        = limitRestrict
-          (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₂))) t₂.1 :=
-      (yRingPresheaf_map_apply p F ϖ hU₁
-          (piComponent p F ϖ V₁ t₁)).symm.trans
-        (hres.trans (yRingPresheaf_map_apply p F ϖ hU₂
-          (piComponent p F ϖ V₂ t₂)))
-    have hZU : (Opens.map (yFrobTop p F ϖ 0)).obj (U ⊓ W₀) ≤ U :=
-      le_trans (le_of_eq (map_yFrobTop_zero p F ϖ (U ⊓ W₀))) hWU
-    have hstep := congrArg (limitRestrict
-      (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))) hUres
-    have hcol₁ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
-      (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))
-      (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₁))))) t₁.1
-    have hcol₂ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
-      (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))
-      (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₂))))) t₂.1
-    have hexp₁ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
-      (leOfHom ((yFunctor p F ϖ).map (homOfLE
-        (translate_le_curvePreimage_xImage p F ϖ (U ⊓ W₀) 0))))
-      (yFunctor_curvePreimage_mono p F ϖ hle₁))) t₁.1
-    have hexp₂ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
-      (leOfHom ((yFunctor p F ϖ).map (homOfLE
-        (translate_le_curvePreimage_xImage p F ϖ (U ⊓ W₀) 0))))
-      (yFunctor_curvePreimage_mono p F ϖ hle₂))) t₂.1
-    exact hexp₁.trans ((hcol₁.symm.trans (hstep.trans hcol₂)).trans
-      hexp₂.symm)
+  have hz := frobFixedRestrict_eq_of_germ_eq p F ϖ y t₁ t₂ hres hU₁ hU₂ hWU
+    hle₁ hle₂
   -- both germs collapse to the common germ at the saturation image
   have hg₁ : ((curveSpace p F ϖ).ringPresheaf.germ V₁
       (yTopToCurve p F ϖ y) h₁) t₁
