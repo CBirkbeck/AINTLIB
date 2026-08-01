@@ -31844,3 +31844,21 @@ from the chord's third coordinates `(addX, negAddY)` (they satisfy the equation 
 `chord_vanishes_at_three_points` + the curve equation), then compare it with the
 group-law `-(P+Q)` by `section_eq_of_dictionary_eq` using the proven field-point
 identity `projModelPointsEquiv_neg_mul_eq_negAddY`.
+
+## ★★★★★★ [W1 (i3)] MAJOR FIND 2026-08-01 — `AffineSectionSpecPoints.lean` already has the bridge
+The file `EllipticCurve/AffineSectionSpecPoints.lean` contains, for ANY commutative
+`R`-algebra `K`:
+ * `affineSectionSpecPoint W K p q h` (:52) — affine coordinates satisfying the equation
+   give a `K`-point of `projModel W` (my `sectionOfChartSolution` duplicated this and has
+   been REMOVED);
+ * `affineSectionSpecPoint_coord`, `projModelPointsEquiv_affineSectionSpecPoint` (:160/:173)
+   — its coordinates read back as `(p, q)` and the dictionary sends it to `some p q`;
+ * **`projModelPointsEquiv_point_add` (:197)** — the dictionary is ADDITIVE over a general
+   ring base at field points, and `modelPointAddEquiv` packages it as an `≃+`.
+⟹ the `σ₃` identification is now: `Rm := -(P+Q)` in `(modelEllipticCurve W).Point`;
+apply `modelPointAddEquiv` (additive!) and `neg_add_eq_some_negAddY` to see that at every
+field point its coordinates are `(addX, negAddY)`; the third point's section is
+`affineSectionSpecPoint` of those coordinates; conclude equality of sections with
+`section_eq_of_dictionary_eq`. Every ingredient is proven — this is assembly.
+LESSON (third time this session): grep the tree for the CONCEPT before building; the
+"missing" construction existed in a file whose name I had not searched.
