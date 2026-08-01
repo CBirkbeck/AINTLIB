@@ -31474,3 +31474,23 @@ nonzerodivisor or in the tangent case with the derivative relation);
 criterion wants (the conjugate is a unit multiple of the "other" chord on the chart, so
 the chord itself divides the product of the generators);
 (iii) chart positioning / 2-torsion case split (the project's addOnZ/addOnY families).
+
+## ★★★★★★★ [W1 (α)] COMPLETE 2026-08-01 — the chord's divisor, algebraically
+`chord_mul_conj_eq_prod_of_equations` (axiom-clean): over ANY commutative ring, for two
+points of `W` joined by a line of slope `ℓ` with `x₁ − x₂` a nonzerodivisor,
+   chord · conjugate = −(X − x₁)(X − x₂)(X − x₃),   x₃ = addX x₁ x₂ ℓ,
+with both Vieta relations discharged from the point equations and the line relation
+(`vieta_of_equations`, `vieta_const_of_equations`).
+This is the algebraic heart of the chord–tangent input, and it is now PROVEN.
+
+REMAINING for a `ChordDatum` (all bookkeeping, no new mathematics):
+ (1) identify the linear factors `X − xᵢ` with the kernel generators `gᵢ` of the three
+     evaluation retractions on the chart (true away from `2`-torsion, where `X − x` does
+     generate; the `2`-torsion configurations are covered by the project's addOnY/addOnZ
+     chart families);
+ (2) conclude the divisibility chain for the chord itself: from
+     `chord · conj = −∏(X − xᵢ)` and `conj` being a unit multiple of the "reflected"
+     chord, the chord divides `∏ gᵢ` with unit cofactor — this is exactly
+     `chord_chart_factorisation`'s input;
+ (3) chart positioning hypotheses (three sections in one affine chart inside
+     `sectionAway`) and the base-change/descent wiring, all of which is proven.
