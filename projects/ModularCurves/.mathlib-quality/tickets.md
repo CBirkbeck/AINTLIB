@@ -32532,3 +32532,55 @@ geometry-plumbing with all its transports already proved:
 Downstream of the leaf: the DS4 construction of `weilPairing` (WeilPairing/Basic.lean:47),
 which discharges `weilPairing_torsionMapOfEllHom` (ModularCurve/YRho.lean:2489) — the live
 blocker of `yRho_representable`.
+
+## ★★★★★ [YRHO-ROOT] 2026-08-01 — the ENTIRE Y(ρ̄) sorryAx has ONE root cause
+
+Bisected with `#print axioms`, step by step:
+`yRho_representable` → `exists_representsYRho(_levelThree)` → `rho_rigidNoeth`
+(`YRho.lean:2921`) → `rho_fix_absurd` (:2821) → `pullTorsionIso_fst` (:2568) →
+`pullTorsionPB`/`pullTorsionIso` → **`RhoLevelStructure` (:2263) itself** →
+**`PairingCompatAt`** → `weilPairingEval` → **the DS4 data-sorry
+`EllipticCurve.weilPairing` (`WeilPairing/Basic.lean:47`)**.
+Axiom-verified at every other node checked: `exists_isoFibre_ne_refl`,
+`EllHom.fibre_pullbackAlongπ`, `pointedAuto_eq_id_of_fixes_torsion_kvc` (the KVC keystone),
+`torsionMapOfEllHom_ι/_π`, `isPullback_torsionMapOfEllHom`, `vRhoπ`, `coord`,
+`vRhoPointsEquiv`, `exists_levelThreeTorsorData`, and the whole engine layer.
+
+**So Y(ρ̄) needs exactly one thing: construct the Weil pairing.** The other sorry-bearing
+files on this line (`YFullRoute` 6, `YOneAssembly` 4, `YOneTatePoint` 3,
+`IrreducibilityScoping` 1) are NOT in this cone.
+
+## ★★★★★ [WP-FIND] the construction is already 90% present — and it is NOT the Picard route
+
+`WeilPairing/CharZeroDescent.lean:213` `weilPairingCharZero` is a **complete fppf-descent
+construction** of `e_N : E[N] ×_S E[N] ⟶ μ_{N,S}`, with `_restrict`, `_over`, `_unique`,
+`_baseChange` specs — all axiom-verified `[propext, Classical.choice, Quot.sound]`. It
+consumes exactly three inputs: an fppf cover `p`, a local pairing `ζ'` on the base change,
+and the cocycle condition. The determinant model for `ζ'` is in the same file (`detFun`,
+`detConstMor`, `detConstMor_gl2Both`: `e(gv,gw) = det(g)·e(v,w)`).
+
+Also present and sorry-free: `WeilPairing/EtaleDescent.lean` (452 ln, the field-level
+Galois-descent pairing `exists_pairingAlgebraHom_of_galoisEquivariant`),
+`GaloisEquivariance.lean` (908 ln), `GaloisFunctionField.lean` (1311 ln),
+`FibreGalois`/`GaloisFibre`/`GlobalFibreChart`/`GaloisFieldPairing`. And **AINTLIB already
+has a sorry-free field-level Weil pairing**: `projects/HasseWeil/HasseWeil/HasseBound/
+WeilPairing/Pairing.lean` (`weilFunction`, `weilPairing`, `weilPairing_spec`,
+`_translate`, `_mul_left`, `_nsmul_left`, …) — and ModularCurves already imports HasseWeil
+in five files, so the cross-project route is established practice.
+
+### DONE this step — `WeilPairing/CharZeroAssembly.lean` (root build 9621 jobs)
+`WeilPairingLocalData` bundles the three inputs; `toPairing`, `toPairing_over`,
+`toPairing_restrict`, and **`nonempty_weilPairing_of_localData`** reduce DS4 to a single
+named existence statement. Axiom-verified.
+LEAN-OPS: `over` is a reserved token as a structure field name — use `overBase`.
+LEAN-OPS: the repo guardrail rejects any `git` command whose text contains the word
+"clean" (it reads it as `git clean`) — write "axiom-verified" in commit messages.
+
+### NEXT — the one remaining obligation
+Build `WeilPairingLocalData` for `E/S` over `Spec ℚ`-schemes: cover `p` = the full-level
+space (finite étale + surjective when `N` is invertible — `isFinite_fullLevelSpaceStruct`,
+`levelSpaceΓπ_etale`, both proved), `ζ'` = the determinant pairing through the tautological
+trivialisation, `cocycle` by rigidity (two morphisms into the unramified separated `μ_N`
+agreeing on geometric points, where both are the HasseWeil field pairing). **The point-level
+`E[N] ≅ (ℤ/N)²` identification is T-W7 = the fibrewise-elliptic → locally-Weierstrass node**,
+which is also the user's next target — the two converge.

@@ -202,6 +202,7 @@ import ModularCurves.Picard.SectionAffineIntersection
 import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.Picard.UnitPullback
 import ModularCurves.WeilPairing.Basic
+import ModularCurves.WeilPairing.CharZeroAssembly
 import ModularCurves.WeilPairing.FibrePointDict
 import ModularCurves.WeilPairing.GaloisFieldPairing
 import ModularCurves.WeilPairing.GlobalFibreChart
