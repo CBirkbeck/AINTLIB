@@ -2717,6 +2717,13 @@ private theorem unitCover_relPlus_forwardLocHom_algebraMap
 --     and discharge `unitCover_relativePlus`; `_restrictionMap`-tracking follows from
 --     (7)'s base-hom being literally the restriction.
 
+omit [PlusSubring A] [IsHuberRing A] [DecidableEq (RationalLocData A)] in
+/-- `coeRingHom ∘ algebraMap = canonicalMap`, by definition of `canonicalMap`. Named
+because the `rfl` is invisible at the call sites, where both sides are three-line
+terms and writing the `show … from rfl` costs more than the rewrite it performs. -/
+theorem coeRingHom_algebraMap (D : RationalLocData A) (x : A) :
+    D.coeRingHom (algebraMap A (Localization.Away D.s) x) = D.canonicalMap x := rfl
+
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus per-generator witnesses (piece 4)**: every `t ∈ T_inter` has a
 `locSubring`-witness `y` over the B-datum with `F (divByS t s_inter) = coeRingHom_B y`.
@@ -2776,10 +2783,7 @@ private theorem unitCover_relPlus_forward_witness
       algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp), ?_⟩
     refine forwardLoc_div_eq DI F hu _ _ ?_
     rw [hF_alg, hF_alg]
-    rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
-      (D₀.coeRingHom (divByS p D₀.s))) =
-      DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) from rfl]
-    rw [← map_mul, hq1, mul_one]
+    rw [coeRingHom_algebraMap, ← map_mul, hq1, mul_one]
     exact congrArg _ (hps p)
   · -- `q = f`: witness `algebraMap (coeRingHom (p/s)) · divByS b 1`
     rw [Finset.mem_singleton.mp hqf]
@@ -2792,17 +2796,8 @@ private theorem unitCover_relPlus_forward_witness
     rw [hF_alg, hF_alg, map_mul]
     have hb1 : DB.coeRingHom (divByS (D₀.canonicalMap f) DB.s) =
         DB.canonicalMap (D₀.canonicalMap f) := by
-      rw [show divByS (D₀.canonicalMap f) DB.s =
-        algebraMap (presheafValue D₀) (Localization.Away DB.s)
-          (D₀.canonicalMap f) by
-        erw [divByS_eq_algebraMap]]
-      rfl
-    have e1 : DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.coeRingHom (divByS p D₀.s)) * divByS (D₀.canonicalMap f) DB.s) =
-        DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-          DB.canonicalMap (D₀.canonicalMap f) := by
-      rw [map_mul, hb1]; rfl
-    rw [e1, hps p, map_mul, map_mul]
+      erw [divByS_eq_algebraMap]; rfl
+    rw [map_mul DB.coeRingHom, coeRingHom_algebraMap, hb1, hps p, map_mul, map_mul]
     ring
 
 set_option linter.unusedSectionVars false in
