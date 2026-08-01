@@ -31690,3 +31690,24 @@ pole sheaf plus the degenerate configurations:
  * the same, two-factor, for the vertical;
  * assemble `ChordDatum`, descend, close `exists_invertible_tensor_idealModule_add`.
 Root build 9617 jobs; all audits clean.
+
+## ★★★★★★★★★★★★★★ [WP PRONG] THE FULL PATH IS NOW A CHAIN OF PROVEN LEMMAS (2026-08-01)
+End to end, every link below is proven and axiom-clean:
+
+  chart identities (Weierstrass algebra)
+    → chord_exact_order_in_chart              [the chord identity, all steps derived]
+    → exists_unit_chartMultiplier₃_eq         [the twist's multiplier]
+    → nonempty_iso_unitObj_of_two_unit_identities(₂)   [trivialization criterion]
+    → chordDatum_of_trivializations           [ChordDatum]
+    → EllipticCurve.nonempty_tensorObj_iso_of_chordDatum  [local theorem of the square]
+    → DescentFromCharts (W2 toolkit)          [global form with N]
+    → exists_invertible_tensor_idealModule_add (SelfAdjointN.lean:259, the last Picard sorry)
+
+WHAT IS STILL REQUIRED — instantiation only:
+ (a) supply the actual pole-sheaf chart data (chart ring `R[X,Y]/(W)` via
+     `sectionAway_affineModelEval_bijective`; coefficient via
+     `chartMultiplier_unitHom_eq_coefficient`; generators via
+     `exists_algHom_ker_eq_span_of_section` matched by `eq_unit_mul_of_associates`);
+ (b) the degenerate configurations (tangency, 2-torsion, infinity) via addOnY/addOnZ;
+ (c) run the same for the vertical (two-factor versions all exist).
+Root build 9617 jobs; audit sweeps clean.
