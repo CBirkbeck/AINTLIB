@@ -31750,3 +31750,16 @@ The genuinely remaining item is the SUPPLY of the hypotheses at the actual chart
    split, covered by the project's addOnY/addOnZ families in the degenerate cases;
  * the generator associations — `exists_unit_generator_eq_sub_coord` plus the chart's
    principality data.
+
+### ★★★★ [W1 supply] DONE 2026-08-01 — the chord identity's hypotheses are now invertibility statements
+`line_relation_of_slope`, `nzd_of_isUnit_sub`, `nzd_of_isUnit_neg_two_torsion`.
+So the chord identity in the away chart needs exactly:
+   • the two points' Weierstrass equations (from `exists_affine_point_of_section`);
+   • `IsUnit (x₁ − x₂)`  — the non-tangency condition;
+   • `IsUnit (2yᵢ + a₁xᵢ + a₃)` at the second and third points — non-`2`-torsion;
+   • the generators being associate to the coordinate differences;
+   • the unit final cofactor.
+All of these are conditions on the CHART, verifiable in the concrete Weierstrass model,
+and the degenerate cases are the classical ones the project's addOnY/addOnZ families
+were built to handle. Every implication from there to
+`exists_invertible_tensor_idealModule_add` is proven and axiom-clean.
