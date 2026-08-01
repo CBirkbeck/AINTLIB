@@ -1822,4 +1822,40 @@ theorem chord_identity_of_chart_sections {R A : Type u} [CommRing R] [CommRing A
     (nzd_of_isUnit_neg_two_torsion W (σ₂ X) (σ₂ Y) htor₂)
     (nzd_of_isUnit_neg_two_torsion W _ (σ₃ Y) htor₃) hunit
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i9] THE CHORD IDENTITY WITHOUT A COFACTOR HYPOTHESIS.** The norm
+factorisation `chord · conj = -(g₁g₂g₃)` already holds from the two point equations
+alone (`chord_mul_conj_eq_prod_of_equations`); if the chart makes the conjugate
+invertible — equivalently, no intersection point is `2`-torsion there — the chord *is*
+a unit multiple of the three generators, with the unit exhibited as `-conj⁻¹`.
+This is the short route to the exact-order conclusion: it needs no kernel hypotheses,
+no non-zero-divisor hypotheses in `A`, and no unit cofactor `hunit`. -/
+theorem chord_eq_unit_mul_prod_of_conj_isUnit {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (W : WeierstrassCurve R) (X Y : A) (ℓ x₁ x₂ y₁ y₂ : R)
+    (hEq : Y ^ 2 + algebraMap R A W.a₁ * X * Y + algebraMap R A W.a₃ * Y =
+      X ^ 3 + algebraMap R A W.a₂ * X ^ 2 + algebraMap R A W.a₄ * X +
+        algebraMap R A W.a₆)
+    (h₁ : y₁ ^ 2 + W.a₁ * x₁ * y₁ + W.a₃ * y₁ =
+      x₁ ^ 3 + W.a₂ * x₁ ^ 2 + W.a₄ * x₁ + W.a₆)
+    (h₂ : y₂ ^ 2 + W.a₁ * x₂ * y₂ + W.a₃ * y₂ =
+      x₂ ^ 3 + W.a₂ * x₂ ^ 2 + W.a₄ * x₂ + W.a₆)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hnzd : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0)
+    (hconj : IsUnit ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+      (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁))) :
+    ∃ u : Aˣ,
+      (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+        (u : A) * ((X - algebraMap R A x₁) * (X - algebraMap R A x₂) *
+          (X - algebraMap R A (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂))) := by
+  obtain ⟨v, hv⟩ := hconj
+  refine ⟨-v⁻¹, ?_⟩
+  have hprod := chord_mul_conj_eq_prod_of_equations W X Y ℓ x₁ x₂ y₁ y₂ hEq h₁ h₂
+    hline hnzd
+  rw [← hv] at hprod
+  have h := congrArg (fun t : A => t * (↑v⁻¹ : A)) hprod
+  simp only [mul_assoc, Units.mul_inv, mul_one] at h
+  rw [h, Units.val_neg]
+  ring
+
 end ModularCurves

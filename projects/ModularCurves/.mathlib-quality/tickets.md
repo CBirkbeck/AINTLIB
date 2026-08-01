@@ -31933,3 +31933,23 @@ LEAN-OPS: `s.replace(..., 1)` on `end ModularCurves` inserts at the FIRST such l
 this file has an earlier one, so new blocks that call late declarations must be
 inserted at `rfind`, not `index`. Also `AlgHom.commutes` leaves `algebraMap R R`
 residues; add `Algebra.algebraMap_self, RingHom.id_apply` to the `simpa only` set.
+
+### ★★★★★ [W1 i9] DONE 2026-08-01 — `chord_eq_unit_mul_prod_of_conj_isUnit` (THE SHORT ROUTE)
+From the already-proved norm factorisation `chord · conj = -(g₁g₂g₃)`
+(`chord_mul_conj_eq_prod_of_equations`, itself from the two point equations + the line
+relation + non-tangency, with both Vieta relations discharged internally), a single
+hypothesis — **the conjugate is a unit in the chart** — gives
+`chord = (-conj⁻¹) · (g₁ · g₂ · g₃)` outright.
+**This supersedes the division-chain route for the chord**: no `hunit`, no kernel
+identities, no non-zero-divisor hypotheses in `A`. The remaining hypotheses are the two
+point equations (free from `coords_equation_of_relation`), the line relation (free from
+`line_relation_of_slope`), non-tangency `x₁ - x₂` nzd (free from `IsUnit` via
+`nzd_of_isUnit_sub`), and `IsUnit conj` — which is exactly what an away-chart provides.
+
+NEAR-MISS (caught by the compiler, not by me): I began re-deriving the norm identity
+from scratch as "i9" and hit `has already been declared`. `chord_mul_conj_eq_prod`,
+`vieta_of_equations`, `vieta_const_of_equations` and
+`chord_mul_conj_eq_prod_of_equations` were proved earlier in this same file. **Grep the
+target FILE's own declaration list before adding to it** — the file is now ~1800 lines
+and its own contents have passed out of working memory. This is the fourth
+near-duplicate this session and the first that got as far as a compile.
