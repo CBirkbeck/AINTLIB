@@ -31494,3 +31494,15 @@ REMAINING for a `ChordDatum` (all bookkeeping, no new mathematics):
      `chord_chart_factorisation`'s input;
  (3) chart positioning hypotheses (three sections in one affine chart inside
      `sectionAway`) and the base-change/descent wiring, all of which is proven.
+
+### [W1 (1)] DONE 2026-08-01 — coordinate differences vs kernel generators
+`sub_coord_mem_ker`, `exists_mul_eq_sub_coord` (axiom-clean). Note the direction: the
+generator DIVIDES `X − x` always; the reverse (that `X − x` generates) is the chart
+hypothesis that holds away from `2`-torsion and is what the addOnY/addOnZ families
+supply in the degenerate cases.
+STATE: the whole chord–tangent input is now proven except for the final assembly, which
+consists of: choosing the chart, invoking `chord_mul_conj_eq_prod_of_equations`,
+converting the product factorisation into the three successive divisions via
+`exists_mul_eq_sub_coord` and the generation hypothesis, extracting the unit cofactor
+(Cramer), and feeding `chord_chart_factorisation` → `nonempty_iso_unitObj_of_exact_order₃`
+→ `ChordDatum` → `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`.
