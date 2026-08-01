@@ -228,4 +228,40 @@ theorem unit_cocycle_of_generator_relations {A M : Type*} [CommRing A] [AddCommG
   show (a * b) • t₃ = c • t₃
   rw [mul_smul, ← e23, ← e12, e13]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.4] A section's preimage of a preimage.** -/
+theorem preimage_preimage_section {X T' : Scheme.{u}} (f : X ⟶ T') (z : T' ⟶ X)
+    (hz : z ≫ f = 𝟙 T') (V : T'.Opens) : z ⁻¹ᵁ (f ⁻¹ᵁ V) = V := by
+  have h : z ⁻¹ᵁ (f ⁻¹ᵁ V) = (z ≫ f) ⁻¹ᵁ V := rfl
+  rw [h, hz]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.4] The pulled-back trivialization, at a chart presented as an equal open.**
+`subst` on the open avoids the motive problems that rewriting inside `restrictFunctor`
+and `unitObj` would create. -/
+theorem nonempty_restrictPullbackTrivialization_of_eq {X Y : Scheme.{u}} (f : X ⟶ Y)
+    (N : Y.Modules) (U : Y.Opens) (V : X.Opens) (hV : V = f ⁻¹ᵁ U)
+    (e : (restrictFunctor U.ι).obj N ≅ unitObj U.toScheme) :
+    Nonempty ((restrictFunctor V.ι).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback f).obj N) ≅ unitObj V.toScheme) := by
+  subst hV
+  exact ⟨restrictPullbackTrivialization f N U e⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.4] Chart trivializations of `N := z^* L`.** A trivialization of `L` over the
+preimage chart `f ⁻¹ᵁ U` gives one of `z^* L` over `U` itself, because `z` is a section
+of `f`. This is the first step of the revised descent: the base bundle is `z^* L`, and
+its charts are the base charts. -/
+theorem nonempty_trivialization_pullback_section {X T' : Scheme.{u}} (f : X ⟶ T')
+    (z : T' ⟶ X) (hz : z ≫ f = 𝟙 T') (L : X.Modules) (U : T'.Opens)
+    (e : (restrictFunctor (f ⁻¹ᵁ U).ι).obj L ≅ unitObj (f ⁻¹ᵁ U).toScheme) :
+    Nonempty ((restrictFunctor U.ι).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L) ≅ unitObj U.toScheme) :=
+  nonempty_restrictPullbackTrivialization_of_eq z L (f ⁻¹ᵁ U) U
+    (preimage_preimage_section f z hz U).symm e
+
 end ModularCurves
