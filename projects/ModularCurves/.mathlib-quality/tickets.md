@@ -31269,3 +31269,25 @@ cofactor identity turns that into unimodularity of the quotient. To be done with
 CrossProductKernel-style Cramer machinery (`mem_span_crossProduct_of_dotProduct_eq_zero`
 already handles the 2×3 case; the 3×3 case needs the adjugate identity
 `Matrix.mulVec_cramer`/`adjugate_mul` — check mathlib before building).
+
+## ★★★★★★★★ SESSION CLOSE-OUT 2026-08-01 — WP PRONG STATE
+Root build green at 9617 jobs; audit sweep of the headline declarations: 0 sorryAx.
+PROVEN THIS SESSION (all axiom-clean): GAP-A-4 complete in both shapes and all arities,
+pole-sheaf instantiated; the exact-order machinery; CHORD-PKG/VERT-PKG; the GAP-A-5c
+assembly and the LOCAL theorem of the square; the descent toolkit (W2) end to end; the
+`ChordDatum` interface and its elliptic-curve specialisation; surjectivity ⟺
+unimodularity in both directions; the chord and the vertical from unimodular evaluation
+data; the tautological pair and the transport of a ChordDatum along ANY base change;
+the affine-coordinate API for sections; `chord_vanishes_at_three_points` (the
+chord–tangent vanishing is DEFINITIONAL in mathlib's coordinates); the kernel-collapse
+lemma; and the adjugate rank-drop bricks.
+
+THE SINGLE REMAINING LEAF: **[W1-d3.2c] the dictionary bridge** — that the project's
+group-law point `-(P + Q)` has affine coordinates `(addX x_P x_Q ℓ, negAddY x_P x_Q y_P ℓ)`
+in the away-chart. Route: the project's own extensionality principle over the reduced
+universal atlas (`PointsDictionary.lean`, `Dictionary.eq_toAffine` at field points,
+`GroupLawAxioms`'s `*_atlas → *_of_map → *_of_eq → *` cascade). With it, a `ChordDatum`
+follows from [W1-d3.2b] + [d3.2d]'s unit half, and then
+`EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` gives the local theorem of the
+square, the W2 toolkit descends it, and `exists_invertible_tensor_idealModule_add`
+(SelfAdjointN.lean:259 — the one Picard sorry) closes.
