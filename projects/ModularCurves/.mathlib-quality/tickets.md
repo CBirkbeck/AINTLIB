@@ -30829,3 +30829,20 @@ cokernel is the restriction to [P]+[Q]. Requires generalizing the pipeline from
 - [G5] concentration for a composite (right-exactness: coker of a composite vanishes on
   an open where each factor's does).
 This also makes the machinery reusable for any number of factors (the triple divisor).
+
+### ★★★ [G1-G7] ITERATED-TWIST PIPELINE DONE 2026-08-01 (WeilPairing/IteratedTwist.lean)
+All axiom-clean. chartMultiplier (general map of invertibles) + conj_eq_unitEndo +
+chartMultiplier_comp (MULTIPLIER OF A COMPOSITE = PRODUCT) + cokernelRestrictUnitEndoIso +
+mono transport + general rank-2/rank-1 coordinate interfaces (concentration + span as
+hypotheses) + isZero_restrict_cokernel_comp + cokernel_bijective_restrict_of_isZero +
+span_iteratedChartMultiplier_eq + the section-pair consumer on I(P) ⊗ (I(Q) ⊗ L).
+CONSEQUENCE: the whole line/vertical apparatus is now available in BOTH shapes —
+product-ideal (LineVerticalConsumers) and tensor (IteratedTwist) — and the tensor shape
+is what `Picard/DivisorClass.lean` + `exists_invertible_tensor_idealModule_add` consume.
+NEXT: (i) the iterated LINE (cross-product kernel span) is immediate — the cross-product
+theorem is already stated for a general f; (ii) triple-divisor version (three factors,
+same composite calculus, multiplier = g₁g₂g₃ — needs a rank-THREE split of the quotient,
+i.e. the Fin 3 analogue of quotientSpanMulEquivProd: EITHER iterate the SES twice OR use
+SectionsIdeal.free_quotient (KM 1.1.2, already de-privatized, m arbitrary!) which gives
+A/(∏ fᵢ) ≃ₗ (Fin m → R) directly from m retractions — USE free_quotient, it subsumes
+quotientSpanMulEquivProd for every arity); (iii) then [A5-A] chord-tangent.
