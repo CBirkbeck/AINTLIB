@@ -782,4 +782,28 @@ theorem nonempty_iso_pullback_section_of_units
     (fun i j => appLE_z_mul_eq_one_of_units g hz (U i) (U j) (u i j) (v i j)
       (c i j) (hc i j) (hb i j))
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W5a] Moving a dual across.** If `A ⊗ B^∨ ≅ M` with `B` invertible, then
+`A ≅ B ⊗ M`. Skeleton algebra: `[B]·[B^∨] = 1` by `nonempty_eval_iso`, so
+`[A] = [B]·[M]`. This is the step that turns the descent's conclusion
+`Δ ≅ f^*(z^*Δ)` into the Picard leaf's shape. -/
+theorem nonempty_iso_tensorObj_of_dual_iso {X : Scheme.{u}} (A B M : X.Modules)
+    (hB : IsInvertible B)
+    (h : Nonempty (Scheme.Modules.tensorObj A (dualObj B) ≅ M)) :
+    Nonempty (A ≅ Scheme.Modules.tensorObj B M) := by
+  rw [← toSkeleton_eq_toSkeleton_iff]
+  have hM : toSkeleton M = toSkeleton A * toSkeleton (dualObj B) := by
+    rw [← toSkeleton_tensorObj_eq]
+    exact (toSkeleton_eq_toSkeleton_iff.mpr h).symm
+  have hev : toSkeleton B * toSkeleton (dualObj B) = 1 := by
+    rw [← toSkeleton_tensorObj_eq, ← toSkeleton_unitObj]
+    exact toSkeleton_eq_toSkeleton_iff.mpr (nonempty_eval_iso hB)
+  letI := Scheme.Modules.symmetricCategory X
+  rw [toSkeleton_tensorObj_eq, hM, ← mul_assoc]
+  calc toSkeleton A = toSkeleton A * 1 := (mul_one _).symm
+    _ = toSkeleton A * (toSkeleton B * toSkeleton (dualObj B)) := by rw [hev]
+    _ = toSkeleton B * toSkeleton A * toSkeleton (dualObj B) := by
+        rw [← mul_assoc, mul_comm (toSkeleton A) (toSkeleton B)]
+
 end ModularCurves
