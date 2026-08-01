@@ -349,19 +349,15 @@ unit and `F s * F (c/s) = F c`. Stated for an arbitrary such `F` so the `Gen` an
 theorem forwardLoc_div_eq {D₀ : RationalLocData A}
     {DB : RationalLocData (presheafValue D₀)} (DI : RationalLocData A)
     (F : Localization.Away DI.s →+* presheafValue DB)
-    (hF_alg : ∀ a : A, F (algebraMap A (Localization.Away DI.s) a)
-      = DB.canonicalMap (D₀.canonicalMap a))
-    (hu : IsUnit (DB.canonicalMap (D₀.canonicalMap DI.s)))
+    (hu : IsUnit (F (algebraMap A (Localization.Away DI.s) DI.s)))
     (c : A) (z : presheafValue DB)
     (hz : F (algebraMap A (Localization.Away DI.s) c)
       = F (algebraMap A (Localization.Away DI.s) DI.s) * z) :
     F (divByS c DI.s) = z := by
-  have hu' : IsUnit (F (algebraMap A (Localization.Away DI.s) DI.s)) := by
-    rw [hF_alg]; exact hu
   have h1 : F (algebraMap A (Localization.Away DI.s) DI.s) * F (divByS c DI.s) =
       F (algebraMap A (Localization.Away DI.s) c) := by
     rw [← map_mul, algebraMap_s_mul_divByS]
-  exact hu'.mul_left_cancel (h1.trans hz)
+  exact hu.mul_left_cancel (h1.trans hz)
 
 set_option linter.unusedSectionVars false in
 /-- **General relative piece, per-generator witnesses (G1-4)**: every
@@ -416,8 +412,9 @@ theorem genPiece_rel_forward_witness
     (locSubring DB.P DB.T DB.s).mul_mem
       (algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp))
       (divByS_canonicalMap_mem_locSubring D₀ DB T t rfl rfl q hq), ?_⟩
-  refine forwardLoc_div_eq DI F hF_alg
-    ((genPiece_rel_baseHom_isUnit D₀ T t hspan).map DB.coeRingHom) _ _ ?_
+  refine forwardLoc_div_eq DI F
+    (by rw [hF_alg]; exact (genPiece_rel_baseHom_isUnit D₀ T t hspan).map DB.coeRingHom)
+    _ _ ?_
   rw [hF_alg, hF_alg]
   rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
       (D₀.coeRingHom (divByS p D₀.s)) * divByS (D₀.canonicalMap q) DB.s) =

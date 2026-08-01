@@ -315,8 +315,9 @@ theorem genPiece_rel_forward_witness
     (locSubring DB.P DB.T DB.s).mul_mem
       (algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp))
       (divByS_canonicalMap_mem_locSubring D₀ DB T t rfl rfl q hq), ?_⟩
-  refine forwardLoc_div_eq DI F hF_alg
-    ((genPiece_rel_baseHom_isUnit D₀ T t M hle).map DB.coeRingHom) _ _ ?_
+  refine forwardLoc_div_eq DI F
+    (by rw [hF_alg]; exact (genPiece_rel_baseHom_isUnit D₀ T t M hle).map DB.coeRingHom)
+    _ _ ?_
   rw [hF_alg, hF_alg]
   rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
       (D₀.coeRingHom (divByS p D₀.s)) * divByS (D₀.canonicalMap q) DB.s) =

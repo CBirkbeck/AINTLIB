@@ -2751,25 +2751,12 @@ private theorem unitCover_relPlus_forward_witness
     rw [hF, RingHom.comp_apply, unitCover_relPlus_forwardLocHom_algebraMap]
     rfl
   have hu : IsUnit (F (algebraMap A (Localization.Away DI.s) DI.s)) := by
-    rw [hF_alg]
-    have hs : DI.s = D₀.s * 1 := rfl
-    rw [hs, mul_one]
-    exact ((isUnit_s_in_presheafValue D₀).map DB.canonicalMap)
-  have hF_div : ∀ (c : A) (w : presheafValue DB),
-      F (algebraMap A (Localization.Away DI.s) c) =
-        F (algebraMap A (Localization.Away DI.s) DI.s) * w →
-      F (divByS c DI.s) = w := by
-    intro c w hw
-    have h1 : F (algebraMap A (Localization.Away DI.s) DI.s) * F (divByS c DI.s) =
-        F (algebraMap A (Localization.Away DI.s) c) := by
-      rw [← map_mul, algebraMap_s_mul_divByS]
-    exact hu.mul_left_cancel (h1.trans hw)
+    rw [hF_alg, show DI.s = D₀.s * 1 from rfl, mul_one]
+    exact (isUnit_s_in_presheafValue D₀).map DB.canonicalMap
   -- the universal `p/s`-relation in `B`: `canMap p = canMap DI.s · coeRingHom (p/s)`
   have hps : ∀ p : A, D₀.canonicalMap p =
-      D₀.canonicalMap DI.s * D₀.coeRingHom (divByS p D₀.s) := by
-    intro p
-    have hs : DI.s = D₀.s * 1 := rfl
-    rw [hs, mul_one]
+      D₀.canonicalMap DI.s * D₀.coeRingHom (divByS p D₀.s) := fun p => by
+    rw [show DI.s = D₀.s * 1 from rfl, mul_one]
     exact canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀ p
   -- the `p/s`-elements lie in the B-pair's `A₀`
   have hA₀ : ∀ p ∈ insert D₀.s D₀.T,
@@ -2778,8 +2765,7 @@ private theorem unitCover_relPlus_forward_witness
   -- decompose `t = p · q`
   have ht' : t ∈ ((insert D₀.s D₀.T).product
       (insert (1 : A) ({f} : Finset A))).image (fun p : A × A => p.1 * p.2) := ht
-  rw [Finset.mem_image] at ht'
-  obtain ⟨⟨p, q⟩, hpq, rfl⟩ := ht'
+  obtain ⟨⟨p, q⟩, hpq, rfl⟩ := Finset.mem_image.mp ht'
   have hp : p ∈ insert D₀.s D₀.T := (Finset.mem_product.mp hpq).1
   have hq : q ∈ insert (1 : A) ({f} : Finset A) := (Finset.mem_product.mp hpq).2
   rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
@@ -2788,7 +2774,7 @@ private theorem unitCover_relPlus_forward_witness
     refine ⟨algebraMap (presheafValue D₀) (Localization.Away DB.s)
       (D₀.coeRingHom (divByS p D₀.s)),
       algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DI F hu _ _ ?_
     rw [hF_alg, hF_alg]
     rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
       (D₀.coeRingHom (divByS p D₀.s))) =
@@ -2802,7 +2788,7 @@ private theorem unitCover_relPlus_forward_witness
       (locSubring DB.P DB.T DB.s).mul_mem
         (algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp))
         (divByS_mem_locSubring DB.P DB.T DB.s (Finset.mem_singleton_self _)), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DI F hu _ _ ?_
     rw [hF_alg, hF_alg, map_mul]
     have hb1 : DB.coeRingHom (divByS (D₀.canonicalMap f) DB.s) =
         DB.canonicalMap (D₀.canonicalMap f) := by
@@ -3402,15 +3388,6 @@ private theorem unitCover_relMinus_forward_witness
   have hu : IsUnit (F (algebraMap A (Localization.Away DI.s) DI.s)) := by
     rw [hF_alg]
     exact (unitCover_relMinus_baseHom_isUnit D₀ f).map DB.coeRingHom
-  have hF_div : ∀ (c : A) (w : presheafValue DB),
-      F (algebraMap A (Localization.Away DI.s) c) =
-        F (algebraMap A (Localization.Away DI.s) DI.s) * w →
-      F (divByS c DI.s) = w := by
-    intro c w hw
-    have h1 : F (algebraMap A (Localization.Away DI.s) DI.s) * F (divByS c DI.s) =
-        F (algebraMap A (Localization.Away DI.s) c) := by
-      rw [← map_mul, algebraMap_s_mul_divByS]
-    exact hu.mul_left_cancel (h1.trans hw)
   -- the universal `p/s`-relation in `B`
   have hps : ∀ p : A, D₀.canonicalMap p =
       D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
@@ -3443,7 +3420,7 @@ private theorem unitCover_relMinus_forward_witness
     refine ⟨algebraMap (presheafValue D₀) (Localization.Away DB.s)
         (D₀.coeRingHom (divByS p D₀.s)),
       algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DI F hu _ _ ?_
     rw [hF_alg, hF_alg, hqf]
     rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
         (D₀.coeRingHom (divByS p D₀.s))) =
@@ -3462,7 +3439,7 @@ private theorem unitCover_relMinus_forward_witness
       (locSubring DB.P DB.T DB.s).mul_mem
         (algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp))
         (divByS_mem_locSubring DB.P DB.T DB.s (Finset.mem_singleton_self _)), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DI F hu _ _ ?_
     rw [hF_alg, hF_alg]
     rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
         (D₀.coeRingHom (divByS p D₀.s)) * divByS (1 : presheafValue D₀) DB.s) =
@@ -4125,15 +4102,6 @@ private theorem unitCover_relOverlap_forward_witness
   have hu : IsUnit (F (algebraMap A (Localization.Away DII.s) DII.s)) := by
     rw [hF_alg]
     exact (unitCover_relOverlap_baseHom_isUnit D₀ f).map OD.coeRingHom
-  have hF_div : ∀ (c : A) (w : presheafValue OD),
-      F (algebraMap A (Localization.Away DII.s) c) =
-        F (algebraMap A (Localization.Away DII.s) DII.s) * w →
-      F (divByS c DII.s) = w := by
-    intro c w hw
-    have h1 : F (algebraMap A (Localization.Away DII.s) DII.s) * F (divByS c DII.s) =
-        F (algebraMap A (Localization.Away DII.s) c) := by
-      rw [← map_mul, algebraMap_s_mul_divByS]
-    exact hu.mul_left_cancel (h1.trans hw)
   have hps : ∀ p : A, D₀.canonicalMap p =
       D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
     canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
@@ -4282,7 +4250,7 @@ private theorem unitCover_relOverlap_forward_witness
           (algebraMap_mem_locSubring OD.P OD.T OD.s hc_p)
           (algebraMap_mem_locSubring OD.P OD.T OD.s hc_q))
         (divByS_mem_locSubring OD.P OD.T OD.s (unitCoUnit_inter_one_mem _ _)), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DII F hu _ _ ?_
     rw [hLHS 0, hRHS, hk_p, hk_q]
     rw [show OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q *
@@ -4305,7 +4273,7 @@ private theorem unitCover_relOverlap_forward_witness
       (locSubring OD.P OD.T OD.s).mul_mem
         (algebraMap_mem_locSubring OD.P OD.T OD.s hc_p)
         (algebraMap_mem_locSubring OD.P OD.T OD.s hc_q), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DII F hu _ _ ?_
     rw [hLHS 0, hRHS, hk_p, hk_q]
     rw [show OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q) =
@@ -4318,7 +4286,7 @@ private theorem unitCover_relOverlap_forward_witness
       (locSubring OD.P OD.T OD.s).mul_mem
         (algebraMap_mem_locSubring OD.P OD.T OD.s hc_p)
         (algebraMap_mem_locSubring OD.P OD.T OD.s hc_q), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DII F hu _ _ ?_
     rw [hLHS 0, hRHS, hk_p, hk_q]
     rw [show OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q) =
@@ -4334,7 +4302,7 @@ private theorem unitCover_relOverlap_forward_witness
           (algebraMap_mem_locSubring OD.P OD.T OD.s hc_p)
           (algebraMap_mem_locSubring OD.P OD.T OD.s hc_q))
         (divByS_mem_locSubring OD.P OD.T OD.s (unitCoUnit_inter_bb_mem _ _)), ?_⟩
-    refine hF_div _ _ ?_
+    refine forwardLoc_div_eq DII F hu _ _ ?_
     rw [hLHS 0, hRHS, hk_p, hk_q]
     rw [show OD.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away OD.s) c_p *
         algebraMap (presheafValue D₀) (Localization.Away OD.s) c_q *
@@ -8400,15 +8368,6 @@ private theorem genPiece_relOverlap_forward_witness
   have hu : IsUnit (F (algebraMap A (Localization.Away DII.s) DII.s)) := by
     rw [hF_alg]
     exact (genPiece_relOverlap_baseHom_isUnit D₀ T hspan t₁ t₂).map EII.coeRingHom
-  have hF_div : ∀ (c : A) (z : presheafValue EII),
-      F (algebraMap A (Localization.Away DII.s) c) =
-        F (algebraMap A (Localization.Away DII.s) DII.s) * z →
-      F (divByS c DII.s) = z := by
-    intro c z hz
-    have h1 : F (algebraMap A (Localization.Away DII.s) DII.s) * F (divByS c DII.s) =
-        F (algebraMap A (Localization.Away DII.s) c) := by
-      rw [← map_mul, algebraMap_s_mul_divByS]
-    exact hu.mul_left_cancel (h1.trans hz)
   have hps : ∀ p : A, D₀.canonicalMap p =
       D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s) :=
     canonicalMap_eq_canonicalMap_s_mul_coeRingHom_divByS D₀
@@ -8468,7 +8427,7 @@ private theorem genPiece_relOverlap_forward_witness
     (locSubring EII.P EII.T EII.s).mul_mem
       (algebraMap_mem_locSubring EII.P EII.T EII.s (hA₀ p' hp'))
       (divByS_mem_locSubring EII.P EII.T EII.s hgen_mem), ?_⟩
-  refine hF_div _ _ ?_
+  refine forwardLoc_div_eq DII F hu _ _ ?_
   rw [hF_alg, hF_alg]
   rw [show EII.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away EII.s)
       (D₀.coeRingHom (divByS p' D₀.s)) *
