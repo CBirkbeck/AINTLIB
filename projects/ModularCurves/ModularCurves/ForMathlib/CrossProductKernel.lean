@@ -270,4 +270,18 @@ theorem exists_unit_mul_of_span_eq {A : Type*} [CommRing A] (a b : A)
   show a = c * b
   rw [← hc, mul_comm]
 
+/-- **Two unit multiples of the same element differ by a unit.** The final glue of the
+exact-order argument: the chord's coefficient and the twist's multiplier are both unit
+multiples of the generator product, hence unit multiples of each other. -/
+theorem exists_unit_mul_of_both_unit_mul {A : Type*} [CommRing A] (a b p : A)
+    (u v : Aˣ) (ha : a = (u : A) * p) (hb : b = (v : A) * p) :
+    ∃ w : Aˣ, a = (w : A) * b := by
+  refine ⟨u * v⁻¹, ?_⟩
+  rw [ha, hb]
+  show (u : A) * p = ((u * v⁻¹ : Aˣ) : A) * ((v : A) * p)
+  push_cast
+  rw [mul_assoc, ← mul_assoc (↑v⁻¹ : A) (v : A) p]
+  rw [show (↑v⁻¹ : A) * (v : A) = 1 from v.inv_mul]
+  rw [one_mul]
+
 end ModularCurves
