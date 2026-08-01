@@ -1502,6 +1502,54 @@ theorem exists_teichCoeff_factor_high (a b k m : ℕ) (ha : 0 < a) (hm : k < m)
     _ ≤ vπ ^ k := h7
 
 
+/-- Each low-order Teichmüller term of `A` is, after clearing the `(p·[π])^k`
+denominator, a product of chart generators. The `m < k + a * k` half of
+`mem_chartSubring_of_wI_le`. -/
+private theorem exists_chart_term_of_lt (a b : ℕ) (ha : 0 < a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    {x : Bloc p F ϖ}
+    (hwI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (A : Ainf p F) (k : ℕ)
+    (hx : x * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) A) :
+    ∀ m, m < k + a * k → ∃ y, y ∈ Subring.closure
+      (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+        ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) ∧
+      y * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+        = algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p (teichCoeff p F A m) * (p : Ainf p F) ^ m) := by
+  set S : Subring (Bloc p F ϖ) := Subring.closure
+    (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+      ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) with hSdef
+  have hmemAm : ∀ y : Ainf p F, algebraMap (Ainf p F) (Bloc p F ϖ) y ∈ S :=
+    fun y => Subring.subset_closure (Or.inl ⟨y, rfl⟩)
+  have hmemU : chartFracPi p F ϖ ∈ S :=
+    Subring.subset_closure (Or.inr (Set.mem_insert _ _))
+  have hmemV : chartFracP p F ϖ a b ∈ S :=
+    Subring.subset_closure (Or.inr (Set.mem_insert_of_mem _ rfl))
+  intro m hmN
+  by_cases hmk : m ≤ k
+  · obtain ⟨c', hc'⟩ := exists_teichCoeff_factor_low p F ϖ
+      (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+      b k m hmk hexact1 A hx hwI
+    exact ⟨chartFracPi p F ϖ ^ (k - m)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'),
+      mul_mem (pow_mem hmemU _) (hmemAm _),
+      chart_term_low_eq p F ϖ k m hmk _ c' hc'⟩
+  · push Not at hmk
+    obtain ⟨c', hc'⟩ := exists_teichCoeff_factor_high p F ϖ
+      (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+      a b k m ha hmk hexact2 A hx hwI
+    have hexp : k + a * ((m - k) / a) + (m - k) % a = m := by
+      have := Nat.div_add_mod (m - k) a
+      omega
+    have h := chart_term_high_eq p F ϖ a b k ((m - k) / a) ((m - k) % a) _ c' hc'
+    rw [hexp] at h
+    exact ⟨_, mul_mem (pow_mem hmemV _) (hmemAm _), h⟩
+
 /-- **The reverse inclusion at the exact chart interval (Kedlaya's plus-ring
 arithmetic on the dense layer)**: at the exact endpoints `ρ₁ = |ϖ|`,
 `ρ₂^a = |ϖ|^b`, every element of `Bloc` in the `|ϖ|^b`-ball lies in the subring
@@ -1535,29 +1583,7 @@ theorem mem_chartSubring_of_wI_le (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
     exact hs
   set N : ℕ := k + a * k with hNdef
   obtain ⟨z, hzA⟩ := exists_eq_sum_teichCoeff_add p F A N
-  have key : ∀ m, m < N → ∃ y, y ∈ S ∧
-      y * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
-        = algebraMap (Ainf p F) (Bloc p F ϖ)
-            (WittVector.teichmuller p (teichCoeff p F A m) * (p : Ainf p F) ^ m) := by
-    intro m hmN
-    by_cases hmk : m ≤ k
-    · obtain ⟨c', hc'⟩ := exists_teichCoeff_factor_low p F ϖ
-        (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
-        b k m hmk hexact1 A hx hwI
-      exact ⟨chartFracPi p F ϖ ^ (k - m)
-          * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'),
-        mul_mem (pow_mem hmemU _) (hmemAm _),
-        chart_term_low_eq p F ϖ k m hmk _ c' hc'⟩
-    · push Not at hmk
-      obtain ⟨c', hc'⟩ := exists_teichCoeff_factor_high p F ϖ
-        (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
-        a b k m ha hmk hexact2 A hx hwI
-      have hexp : k + a * ((m - k) / a) + (m - k) % a = m := by
-        have := Nat.div_add_mod (m - k) a
-        omega
-      have h := chart_term_high_eq p F ϖ a b k ((m - k) / a) ((m - k) % a) _ c' hc'
-      rw [hexp] at h
-      exact ⟨_, mul_mem (pow_mem hmemV _) (hmemAm _), h⟩
+  have key := exists_chart_term_of_lt p F ϖ a b ha hexact1 hexact2 hwI A k hx
   choose! y hyS hyEq using key
   have htail := chart_tail_eq p F ϖ a b k hb z
   have htotal : ((∑ m ∈ Finset.range N, y m)

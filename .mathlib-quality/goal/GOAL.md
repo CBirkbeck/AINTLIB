@@ -6595,3 +6595,45 @@ Folding that in beats rediscovering it per target — this is the fourth distinc
 dimension that ranking has had to learn (binder kind, preamble, carried lines,
 now call cost).
 
+
+## 161 → 160: the three-part extraction recipe holds; explicit section variables bite
+
+`mem_chartSubring_of_wI_le`'s `have key` (23 lines) became
+`exists_chart_term_of_lt`. Parent 67 → 44, helper 47.
+
+The division of labour from the previous extraction held exactly:
+
+| part | how | lines |
+|---|---|---|
+| signature | **hand-written** — judgement about delimiters | 13 |
+| carried | lifted verbatim (`set S`, `hmemAm`/`hmemU`/`hmemV`) | 9 |
+| body | lifted verbatim, dedented 4 → 2 by the tool | 19 |
+
+The carried block is why `set`/`have`-bound locals score 0: reproducing them is
+nine lines of copy, no thought. `N` was simply inlined as `k + a * k` rather
+than carried, which is cheaper still.
+
+### Explicit section variables are part of the call
+
+Build failed because this file opens with
+
+    variable (p : ℕ) [Fact (Nat.Prime p)]
+    variable (F : Type u) [Field F] …
+    variable (ϖ : PseudoUniformizer F)
+
+— **parenthesised, i.e. explicit** — so `p F ϖ` are auto-included as the
+helper's first explicit arguments, and my call omitted them.
+
+Generalising: a helper's argument list is not just the locals it needs, it is
+*(explicit section variables in scope) ++ (promoted locals)*. The section prefix
+never appears in the proof body, so nothing in the lifted text hints at it.
+Every earlier extraction this campaign happened to live in a file whose section
+variables are implicit (`{ρ₁ ρ₂}`, `{hρ₁0 …}`), which is why this is the first
+time it surfaced.
+
+The symptoms named nothing useful — *failed to synthesize instance* at the call,
+plus *unsolved goals* pointing at the theorem's own `:= by` twenty lines
+earlier. The cheap check is to grep the file's `variable` lines for
+parenthesised binders before writing the call, and it belongs in the extraction
+recipe next to "script the verbatim, write the judgement".
+
