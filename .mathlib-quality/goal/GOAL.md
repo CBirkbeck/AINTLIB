@@ -6357,3 +6357,41 @@ it is where the remaining effort goes. `rank_lifts.py` already reports this
 column (`locals: [...]`); the right worklist is **clean ∧ few locals**, which
 neither of my last two rankings used.
 
+
+## The worklist that actually gates decomposition: `decompose-worklist.txt`
+
+Built the ranking my last two entries said was needed and neither produced —
+**clean (<4 `letI`/`haveI`) ∧ one `have` big enough to clear the parent, ranked
+by proof-local count** — and committed it as
+`.mathlib-quality/goal/decompose-worklist.txt` so it survives context.
+
+Why local count and not size: each proof-local the extracted `have` touches must
+become an explicit hypothesis on the helper, and `obtain`-bound locals have **no
+written-down type anywhere**, so the extractor has to invent the statement. Zero
+locals is a verbatim lift; anything else is a restatement, and the cost scales
+with the count, not with the line total.
+
+    2 locals   77L  Groebner::exists_rps_series_limit           [K, Ufun]
+    4          64L  WedhornBanachTheorem::_omt_almost_open       [S, V, e, n₀]
+    5          68L  WedhornExtendValuationContinuity::…          [d', hd'_mem, hm', γ, ν_loc]
+    6          77L  TateAlgebra::sub_algebraMap_evalFHom_…       …
+    …
+   12          76L  CurveObject::ringStalkMap_piYHom_injective   …
+
+Two ranking defects fixed while building it, both inflating rather than
+flattering, so they mis-ordered the list without risking a bad edit:
+
+* `refine` and `use` were in the binder list. Neither has a `:`, so the
+  head-split kept the **whole line** and every section variable appearing in it
+  was counted as a proof-local. `exists_rps_series_limit` read as 5 locals
+  (`F`, `K`, `Ufun`, `p`, `ϖ`) when the true figure is 2 — `p`, `F`, `ϖ` are
+  section variables, free in any helper.
+* `rfl`, `this`, `_`, `Set`, `Type` were being counted as locals.
+
+Checked the top two by hand before trusting the ordering, which is what surfaced
+both. `_omt_almost_open`'s `S`, `V`, `n₀` are genuinely `obtain`/`set`-bound, and
+its `S n₀ = (fun m => ϖ^n₀ • m) ⁻¹' V := rfl` step is *definitional on `S`* — so
+a helper cannot take `S` abstractly, it has to restate the preimage directly.
+That is the concrete shape of "restatement, not lift", and it is invisible to
+any line-counting metric.
+

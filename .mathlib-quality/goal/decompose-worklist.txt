@@ -1,0 +1,28 @@
+# decompose worklist -- CLEAN proofs (<4 letI/haveI) with one `have` big
+# enough to clear the parent, ranked by PROOF-LOCAL COUNT.
+#
+# locals are what gates a lift: each must become an explicit helper
+# hypothesis, and `obtain`-bound ones have no written-down type at all.
+# 0 locals = verbatim lift. Anything else is a genuine restatement.
+#
+# 9 candidates
+
+loc  blk need code  target :: have
+  2   38   27   77  FarguesFontaine/Groebner.lean::exists_rps_series_limit :: have hres
+                      locals: ['K', 'Ufun']
+  4   15   14   64  WedhornBanachTheorem.lean::_omt_almost_open :: have h_image_eq
+                      locals: ['S', 'V', 'e', 'n₀']
+  5   40   18   68  WedhornExtendValuationContinuity.lean::extendToLocalization_isContinuous_locTopology_of_bounded :: have key
+                      locals: ["d'", "hd'_mem", "hm'", 'γ', 'ν_loc']
+  6   32   27   77  TateAlgebra.lean::sub_algebraMap_evalFHom_mem_ideal_fSubX :: have hmain
+                      locals: ['coeff_shift', 'eval_decomp', 'eval_zero_eq', 'k', 'key_identity', 'q']
+  7   32   31   81  ValuationContinuity.lean::coarsen_maxAvoid_isContinuous_mulArchimedean :: have hArch
+                      locals: ['H', 'd', 'hcof_bar', 'hn', 'n', 'x', 'π']
+  7   49   44   94  FarguesFontaine/RestrictionInjective.lean::valued_resI_rpow_interpolate :: have hpad
+                      locals: ["hlim'", "hlim''", 'hlimc', 'hpt', "v'", "v''", 'x']
+  8   23   17   67  FarguesFontaine/ChartData.lean::mem_chartSubring_of_wI_le :: have key
+                      locals: ['A', 'N', 'S', 'hmemAm', 'hmemU', 'hmemV', 'hx', 'k']
+  9   22   18   68  TateAlgebraTopology.lean::tateAlgNhd_leftMul_of_principal :: have hterm
+                      locals: ['S', 'hS_finite', 'hj_ge_i', 'hj_ge_m', 'hm_spec', 'hy_coeff', 'j', 'm_fn', 'y']
+ 12   31   26   76  FarguesFontaine/CurveObject.lean::ringStalkMap_piYHom_injective :: have hz
+                      locals: ['U', 'V₁', 'V₂', 'W₀', 'hU₁', 'hU₂', 'hWU', 'hle₁', 'hle₂', 'hres', 't₁', 't₂']
