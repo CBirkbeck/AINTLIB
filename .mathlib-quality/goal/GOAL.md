@@ -6432,3 +6432,42 @@ The docstring-anchor fix from the previous commit *did* hold: no reparenting.
 That is the first of these defects to be fixed by mechanism and then verified
 not to recur.
 
+
+## The decompose toolchain is now in the repo, not the scratchpad
+
+`projects/AdicSpaces/scripts/` gains the seven tools this campaign produced.
+They lived in a session scratchpad until now, which meant every context boundary
+risked re-deriving them — and re-derivation is exactly how the estimator defects
+kept reappearing in new clothes.
+
+    scope_code.py     the canonical measure (code lines, block comments excluded)
+    apply_joins.py    line-rejoining, with the structure-literal/calc/alt guards
+    apply_sibs.py     equal-indent `;` merges, four guards (alt-blocks, optional
+                      tacticSeq, term-level `by`, continuation lines)
+    rank_cheap.py     simulates joins-then-sibs; imports the real predicates
+                      rather than re-implementing them
+    rank_abbrev.py    single `set` abbreviation, balance + tactic-keyword filters
+    rank_abbrev2.py   greedy multi-round — abbreviations compound
+    extract_have.py   lift a `have` into a private helper
+
+`extract_have.py` is new and has all three recurring extraction defects designed
+out rather than documented:
+
+* **re-derives indentation** from the new parent instead of preserving it
+  (the `refine Equiv.mk` and `set Ufun` failures, two extractions apart);
+* **anchors on the docstring**, not the declaration, so a helper can never land
+  between a doc and the decl it documents;
+* **asserts the match** before writing.
+
+Dry-run verified on `_omt_almost_open`: body correctly dedented 4 → 2, insert
+point computed at line 103 for a theorem at 108 — i.e. above the docstring.
+
+### `_omt_almost_open` deliberately not taken
+
+It is the restatement case predicted two entries ago. `S n₀` is *definitional*
+(`have : S n₀ = (fun m => ϖ ^ n₀ • m) ⁻¹' V := rfl`), so a helper cannot take
+`S` abstractly — the statement has to spell out the set literal and re-fold with
+`show`. That is workable, but the parent then lands at **exactly 50**, with no
+margin for a miscount. Left for a pass that can afford to verify it properly
+rather than forced now.
+
