@@ -1482,6 +1482,26 @@ each consumer discharges them concretely on the spot (CLAUDE.md sub-lemma patter
 section Example638ExplicitKernel
 
 
+omit [DecidableEq (RationalLocData A)] in
+private theorem hψ_div_lem [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    (D : RationalLocData A) {m : ℕ}
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring m A))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x))
+    (hu : IsUnit (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s))) :
+    ∀ (c : A) (w : ↥(restrictedMvPowerSeriesSubring m A) ⧸ aI),
+    (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) * w) →
+    ψ (divByS c D.s) = w := by
+  intro c w hc
+  have h1 : ψ (algebraMap A (Localization.Away D.s) D.s) * ψ (divByS c D.s) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) := by
+    rw [← map_mul, algebraMap_s_mul_divByS, hψ_alg]
+  rw [hψ_alg] at h1
+  exact hu.mul_left_cancel (h1.trans hc)
+
 set_option linter.unusedSectionVars false in
 /-- **General `ker ≤ aI` for the Example-6.38 evaluation** (the parametric form of the
 completion comparison; see the section TODO). Inputs: `aI` closed, the denominator a
@@ -1534,30 +1554,8 @@ private theorem datum_ker_le_span_of_unit_mod
   -- DERIVED: `ψ(tᵢ/s) = mk Xᵢ` (cancel the unit `mk (algebraMap s)` using `hgen`)
   have hψ_div : ∀ i : Fin D.T.card, ψ (divByS ((D.T.equivFin.symm i : D.T) : A) D.s) =
       Ideal.Quotient.mk aI (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
-        ↥(restrictedMvPowerSeriesSubring D.T.card A)) := by
-    intro i
-    have hsmul : algebraMap A (Localization.Away D.s) D.s *
-        divByS ((D.T.equivFin.symm i : D.T) : A) D.s =
-        algebraMap A (Localization.Away D.s) ((D.T.equivFin.symm i : D.T) : A) := by
-      unfold divByS
-      rw [show algebraMap A (Localization.Away D.s) D.s =
-        IsLocalization.mk' (Localization.Away D.s) D.s
-          (1 : Submonoid.powers D.s) from (IsLocalization.mk'_one _ _).symm,
-        ← IsLocalization.mk'_mul]
-      rw [show algebraMap A (Localization.Away D.s) ((D.T.equivFin.symm i : D.T) : A) =
-        IsLocalization.mk' (Localization.Away D.s) ((D.T.equivFin.symm i : D.T) : A)
-          (1 : Submonoid.powers D.s) from (IsLocalization.mk'_one _ _).symm]
-      apply IsLocalization.mk'_eq_of_eq
-      simp []
-    have h1 : ψ (algebraMap A (Localization.Away D.s) D.s) *
-        ψ (divByS ((D.T.equivFin.symm i : D.T) : A) D.s) =
-        Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
-          ((D.T.equivFin.symm i : D.T) : A)) := by
-      rw [← map_mul, hsmul, hψ_alg]
-    rw [hψ_alg] at h1
-    have hu : IsUnit (Ideal.Quotient.mk aI
-        (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) D.s)) := hUnit
-    exact hu.mul_left_cancel (h1.trans (hgen i))
+        ↥(restrictedMvPowerSeriesSubring D.T.card A)) := fun i =>
+    hψ_div_lem D aI ψ hψ_alg hUnit _ _ (hgen i)
   -- `ψ` is continuous for the localization topology
   have hψ_cont : @Continuous _ _ D.topology τQ ψ := by
     change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
@@ -1824,26 +1822,6 @@ private noncomputable def bivariateSpan_equiv_B₁₂gen (b : A) :
       (@Ideal.quotEquivOfEq _ _ _ _
         (instIsTwoSided_laurentTateAlgebraIdeal _) (instIsTwoSided_laurentTateAlgebraIdeal _)
         (map_span_bSubX_eq_laurentFSubZeta b)))
-
-omit [DecidableEq (RationalLocData A)] in
-private theorem hψ_div_lem [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    (D : RationalLocData A) {m : ℕ}
-    (aI : Ideal ↥(restrictedMvPowerSeriesSubring m A))
-    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring m A) ⧸ aI))
-    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
-      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) x))
-    (hu : IsUnit (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s))) :
-    ∀ (c : A) (w : ↥(restrictedMvPowerSeriesSubring m A) ⧸ aI),
-    (Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) =
-      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) D.s) * w) →
-    ψ (divByS c D.s) = w := by
-  intro c w hc
-  have h1 : ψ (algebraMap A (Localization.Away D.s) D.s) * ψ (divByS c D.s) =
-      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring m A) c) := by
-    rw [← map_mul, algebraMap_s_mul_divByS, hψ_alg]
-  rw [hψ_alg] at h1
-  exact hu.mul_left_cancel (h1.trans hc)
 
 omit [DecidableEq (RationalLocData A)] in
 private theorem hψ_cont_lem [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
