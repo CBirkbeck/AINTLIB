@@ -31424,3 +31424,18 @@ affine Weierstrass coordinate ring). Also landed: `unitHomOfTopSection_app_one`.
 by the generators (`mul_dvd_of_evaluations_vanish`), and produce the unit cofactor
 (Cramer/adjugate). Then `ChordDatum` and the theorem of the square follow by the proven
 chain.
+
+### [W1 away-chart] assembled 2026-08-01 — `chord_evaluations_vanish` + `chord_eq_unit_mul_generators`
+The exact-order hypothesis of `nonempty_iso_unitObj_of_exact_order₃` is now reachable
+from purely chart-level data:
+   three evaluation retractions with principal kernels + the two line relations
+   + a unit final cofactor  ⟹  `c_ℓ = unit · (g_P · (g_Q · g_{R⁻}))`.
+The chord's own coefficient is identified with `chartMultiplier` by
+`chartMultiplier_unitHom_eq_coefficient`. So the ONLY inputs still to be produced in the
+away-chart are:
+  (a) the retractions σ_P, σ_Q, σ_{R⁻} with their principal kernels — available from
+      `exists_algHom_ker_eq_span_of_section` once each section lands in the chart;
+  (b) the two line relations — the coordinates of `R⁻ = -(P+Q)` satisfy them by
+      `chord_vanishes_at_three_points` + the dictionary chain (steps 1–6, proven);
+  (c) the unit cofactor — Cramer/adjugate (`surjective_mulVec_of_isUnit_det`,
+      `not_isUnit_det_of_mulVec_eq_zero`).
