@@ -31186,3 +31186,16 @@ shape `Picard/DivisorClass.lean`'s `picClass_mul_eq_of_nonempty_tensor_iso` and
 critical path in the first place.)
 NOTE for the future: the general monoidal pullback would ALSO unblock a module-level
 transport and is independently useful — but it is not required for the prong.
+
+### [W1-d3.1] CORRECTION-OF-THE-CORRECTION 2026-08-01 — the general monoidal pullback EXISTS
+`Modules.nonempty_pullback_monoidal (f : Y ⟶ X)` is in
+`ForMathlib/PullbackTensorGeneral.lean:1557` (it is what makes `Scheme.Pic.map` a
+MonoidHom, :1598). My earlier note that only the open-immersion case existed was based on
+grepping `PullbackTensorMonoidal.lean` alone — WRONG; the general case is in the
+`…General` file. ⟹ MODULE-level transport is available and now landed:
+`nonempty_pullback_tensorObj` + `nonempty_pullback_iso_unitObj` (TautologicalPair.lean).
+LESSON: when a "missing lemma" blocks a route, grep the ForMathlib tree by CONCEPT
+(`monoidal`, `Pic.map`) and not only the file whose name matches the topic.
+⟹ [W1-d3.1] is now: assemble ChordDatum-transport = (pullback of each trivialization)
+∘ (pullback of the ideal modules, GAP-A-7) ∘ (pole-sheaf base-change iso). All three
+pieces exist; the assembly is bookkeeping.
