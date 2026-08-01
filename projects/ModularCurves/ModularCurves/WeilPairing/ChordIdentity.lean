@@ -835,35 +835,6 @@ theorem eq_unit_mul_of_associates {A : Type u} [CommRing A]
   push_cast
   ring
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[W1 E2] Equal principal spans give associates, for a nonzerodivisor.** The bridge
-from the span-level identification of the chart multiplier
-(`span_iteratedChartMultiplier₃_eq`) to the unit-level hypothesis of the trivialization
-criterion. -/
-theorem exists_unit_mul_of_span_eq {A : Type u} [CommRing A] (a b : A)
-    (hspan : Ideal.span {a} = Ideal.span {b})
-    (hnzd : ∀ t : A, a * t = 0 → t = 0) :
-    ∃ u : Aˣ, a = (u : A) * b := by
-  have hab : a ∈ Ideal.span {b} := by
-    rw [← hspan]; exact Ideal.mem_span_singleton_self a
-  have hba : b ∈ Ideal.span {a} := by
-    rw [hspan]; exact Ideal.mem_span_singleton_self b
-  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hab
-  obtain ⟨d, hd⟩ := Ideal.mem_span_singleton'.mp hba
-  have hcd : a * (1 - c * d) = 0 := by
-    have h : c * (d * a) = a := by rw [hd, hc]
-    calc a * (1 - c * d) = a - c * (d * a) := by ring
-      _ = a - a := by rw [h]
-      _ = 0 := sub_self a
-  have hone : (1 : A) - c * d = 0 := hnzd _ hcd
-  have hcd1 : c * d = 1 := by
-    have := sub_eq_zero.mp hone
-    exact this.symm
-  refine ⟨⟨c, d, hcd1, by rw [mul_comm]; exact hcd1⟩, ?_⟩
-  show a = c * b
-  rw [← hc, mul_comm]
-
 end ModularCurves
 
 namespace ModularCurves

@@ -1377,6 +1377,46 @@ theorem exists_vertical_of_unimodular
     L hL eL halg
     (surjective_baseSectionsMap_cokernel_of_unimodular_row _ b2 e1 huni) b2
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 E2] The triple twist's multiplier is a unit multiple of the generator
+product.** Upgrading `span_iteratedChartMultiplier₃_eq` from spans to elements, using
+that the multiplier is a nonzerodivisor (which monomorphy of the restricted twist
+provides). -/
+theorem exists_unit_chartMultiplier₃_eq (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (U : C.affineOpens) (g₁ g₂ g₃ : Γ(C, U.1))
+    (hspan₁ : J₁.ideal U = Ideal.span {g₁})
+    (hnzd₁ : g₁ ∈ nonZeroDivisors Γ(C, U.1))
+    (hspan₂ : J₂.ideal U = Ideal.span {g₂})
+    (hnzd₂ : g₂ ∈ nonZeroDivisors Γ(C, U.1))
+    (hspan₃ : J₃.ideal U = Ideal.span {g₃})
+    (hnzd₃ : g₃ ∈ nonZeroDivisors Γ(C, U.1))
+    (eI₁ : (restrictFunctor U.1.ι).obj (idealModule J₁) ≅ unitObj U.1.toScheme)
+    (eI₂ : (restrictFunctor U.1.ι).obj (idealModule J₂) ≅ unitObj U.1.toScheme)
+    (eI₃ : (restrictFunctor U.1.ι).obj (idealModule J₃) ≅ unitObj U.1.toScheme)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Mono ((restrictFunctor U.1.ι).map (iteratedTwistHom₃ J₁ J₂ J₃ L))] :
+    ∃ u : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))ˣ,
+      chartMultiplier U.1 (iteratedTwistHom₃ J₁ J₂ J₃ L)
+          (iteratedChartTriv₃ J₁ J₂ J₃ L U.1 eI₁ eI₂ eI₃ eL) eL =
+        (u : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) *
+          ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₁ *
+            ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₂ *
+              (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₃)) := by
+  haveI : IsAffine U.1.toScheme := U.2
+  haveI hMonoEndo : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (chartMultiplier U.1 (iteratedTwistHom₃ J₁ J₂ J₃ L)
+        (iteratedChartTriv₃ J₁ J₂ J₃ L U.1 eI₁ eI₂ eI₃ eL) eL)) :=
+    mono_unitEndo_chartMultiplier U.1 _ _ eL
+  have hnzd := mem_nonZeroDivisors_of_mono_unitEndo
+    (chartMultiplier U.1 (iteratedTwistHom₃ J₁ J₂ J₃ L)
+      (iteratedChartTriv₃ J₁ J₂ J₃ L U.1 eI₁ eI₂ eI₃ eL) eL)
+  refine ModularCurves.exists_unit_mul_of_span_eq _ _ ?_ ?_
+  · exact span_iteratedChartMultiplier₃_eq J₁ J₂ J₃ L U g₁ g₂ g₃
+      hspan₁ hnzd₁ hspan₂ hnzd₂ hspan₃ hnzd₃ eI₁ eI₂ eI₃ eL
+  · intro t ht
+    exact (mem_nonZeroDivisors_iff.mp hnzd).1 t ht
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules
