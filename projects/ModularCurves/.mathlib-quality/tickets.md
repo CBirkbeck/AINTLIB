@@ -32224,3 +32224,21 @@ KEPT (genuine, and consumed by `ModularCurve/RhoPoints.lean`): `legendreDeltaNeg
 DO NOT RETRY (recorded in the module docstring): an `IsLegendreDatum.glSmul` stability
 lemma (false — the re-marked datum has abscissa difference ≠ 1), and dropping the
 `IsLegendreDatum` cut (the `ω`-part becomes a `𝔾ₘ`-torsor, not finite).
+
+### [B2-L4 follow-up] Where the Y(ρ̄) `sorryAx` actually lives (bisection, 2026-08-01)
+Removing the Legendre subtree does **not** clean `yRho_representable` — and the Legendre
+carrier was never the cause. Bisected with `#print axioms`:
+* `exists_levelThreeTorsorData` — CLEAN;
+  `ModuliProblem.exists_representableBy_isAffine_baseChange_three` — CLEAN;
+  `exists_representableBy_isAffine_of_isIso` — CLEAN. **The engine layer is clean.**
+* `rhoProblem_affineOverEll` (`ModularCurve/RhoSections.lean:7506`) and
+  `rho_rigidNoeth` (`ModularCurve/YRho.lean:2921`) — both carry `sorryAx`. These are the
+  ρ-problem's *own* engine hypotheses.
+* Their leaves, in `ModularCurve/YRho.lean`:
+  - **`weilPairing_torsionMapOfEllHom` (:2489)** — naturality of the Weil pairing under an
+    `EllHom`. This is the live blocker, and it is exactly what the WeilPairing/Picard
+    thread (theorem of the square → `exists_invertible_tensor_idealModule_add` → WP chain)
+    is being built to supply.
+  - `yRho_geometricallyIrreducible` (:8744) — independent, the irreducibility leg.
+Other sorry-bearing files on this line: `YFullRoute` (6), `YOneAssembly` (4),
+`YOneTatePoint` (3), `IrreducibilityScoping` (1).
