@@ -524,6 +524,28 @@ theorem chord_exact_order_of_chart_facts {R A : Type u} [CommRing R] [CommRing A
   exact eq_unit_mul_of_three_divisions_of_isUnit c gP gQ gR c₁ c₂ c₃ hc₁ hc₂ hc₃
     (hunit c₁ c₂ c₃ hc₁ hc₂ hc₃)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-iii] A chart inside a given open with principal kernels.** Shrinking a
+multi-section chart to a basic open inside a prescribed open keeps every section's
+kernel principal on a nonzerodivisor — the positioning step that puts the three
+sections and the away-condition on one chart. -/
+theorem exists_affineChart_le_of_multiChart {C S : Scheme.{u}} {π : C ⟶ S}
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (V : C.Opens) (c : ↥C) (hcV : c ∈ V) :
+    ∃ W : C.affineOpens, c ∈ W.1 ∧ W.1 ≤ V ∧ ∀ i : Fin n, ∃ f : Γ(C, W.1),
+      (Scheme.Hom.ker (P i).1).ideal W = Ideal.span {f} ∧
+        f ∈ nonZeroDivisors Γ(C, W.1) := by
+  classical
+  obtain ⟨U, hcU, hU⟩ :=
+    ModularCurves.RelEffCartierDiv.SectionsIdeal.exists_multiChart π hsm P c
+  obtain ⟨t, htle, hct⟩ := U.2.exists_basicOpen_le (V := U.1 ⊓ V) ⟨c, hcU, hcV⟩ hcU
+  refine ⟨C.affineBasicOpen t, hct, le_trans htle inf_le_right, fun i => ?_⟩
+  obtain ⟨f, hspan, hnzd⟩ := hU i
+  obtain ⟨h1, h2⟩ :=
+    ModularCurves.RelEffCartierDiv.SectionsIdeal.basicOpen_span_nzd hspan hnzd t
+  exact ⟨_, h1, h2⟩
+
 end ModularCurves
 
 namespace ModularCurves
