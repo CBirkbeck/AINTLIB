@@ -243,4 +243,34 @@ theorem nonempty_pullback_double_iso_unitObj {X Y : Scheme.{u}} (f : Y ⟶ X)
   refine (AlgebraicGeometry.Scheme.Modules.tensorObjCongr (Iso.refl _) t₂.symm) ≪≫ ?_
   exact t₁.symm ≪≫ hpb
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.1c] The kernel-ideal side of the transport.** For a section `z` of `π` and
+a base change `t`, the kernel ideal of the base-changed section is the comap of the
+kernel ideal — the bookkeeping that turns the abstract transport lemmas into a
+statement about the *classified* sections. -/
+theorem comap_ker_eq_ker_baseChange {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) :
+    (Scheme.Hom.ker z).comap (Limits.pullback.fst π t) =
+      Scheme.Hom.ker (Limits.pullback.lift (t ≫ z) (𝟙 T)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) :
+        T ⟶ Limits.pullback π t) :=
+  (ModularCurves.RelEffCartierDiv.ker_sectionBaseChange z hz t).symm
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.1c] The pole-sheaf side of the transport.** The pullback of the
+pole-sheaf power along a base change is the pole-sheaf power of the base-changed
+family, so the ambient module of the chord datum transports too. -/
+theorem nonempty_pullback_sectionPoleSheafPower_iso {C S T : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) (n : ℕ) :
+    Nonempty ((AlgebraicGeometry.Scheme.Modules.pullback
+        (Limits.pullback.fst π t)).obj
+        (ModularCurves.sectionPoleSheafPower π z hz n) ≅
+      ModularCurves.sectionPoleSheafPower (Limits.pullback.snd π t)
+        (ModularCurves.sectionBaseChange z hz t)
+        (ModularCurves.sectionBaseChange_snd z hz t) n) :=
+  ⟨ModularCurves.sectionPoleSheafPowerBaseChangeIso hsm z hz t n⟩
+
 end ModularCurves
