@@ -286,7 +286,7 @@ open EllipticCurve
 structure. The generation clause over an extension `k'` holds because pulling points
 back is an injection (`pull_injective`) between `N`-torsion groups of the same finite
 cardinality `N²`, hence onto. -/
-private theorem exists_isNaiveFullLevel_of_isAlgClosed (k : Type u) [Field k]
+theorem exists_isNaiveFullLevel_of_isAlgClosed (k : Type u) [Field k]
     [IsAlgClosed k] (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
     (hk : (N : k) ≠ 0) : ∃ P Q : E.Section, E.IsNaiveFullLevel N P Q := by
   obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two N k (𝟙 _) hk
