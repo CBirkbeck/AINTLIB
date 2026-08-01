@@ -30936,3 +30936,30 @@ chord–tangent computation; transfer to arbitrary bases follows the project's o
 `GroupLawAxioms` `*_of_map`/`*_of_eq` idiom (`WeierstrassAtlasRingU`).
 That is the honest remaining cost — a GroupLawAxioms-scale campaign — and it is now
 completely isolated from all the sheaf-theoretic machinery.
+
+## ★★★★★★ [PLAN UPDATE 2026-08-01] the WP prong, restated after this stretch
+The board's [PLAN 2026-07-30] ordering (A-7 → A-4 → A-5a/b/c → A-6) is superseded by:
+
+  DONE (all axiom-clean, root 9613 jobs):
+    A-7 ✓ ; A-4 ✓ (line+vertical; product & tensor shapes; arities 1/2/3/m;
+    pole-sheaf instantiated) ; exact-order machinery ✓ ; CHORD-PKG/VERT-PKG ✓ ;
+    A-5c assembly ✓ ; **`nonempty_tensorObj_iso_of_exact_order_chart_identities`** =
+    the Zariski-LOCAL theorem of the square, complete modulo two chart identities.
+
+  REMAINING, in order:
+  [W1] **the chord/vertical chart identities** (the only mathematics left in the local
+       statement): on a Weierstrass chart, chartMultiplier(ℓ) = unit · g_P g_Q g_{R⁻}
+       and chartMultiplier(v) = unit · g_R g_{R⁻}, with R⁻ = -(P+Q) from the project's
+       group law. Route: universal Weierstrass atlas (`WeierstrassAtlasRingU`) +
+       the `GroupLawAxioms` `*_of_map`/`*_of_eq` transfer idiom. Scale: GroupLawAxioms-like.
+  [W2] **the descent** (was GAP-A-6): from the local statement to the global one with
+       N = 0^*Δ, via `nonempty_unitObj_iso_of_normalized_glue` (RigidDescent.lean:65).
+       Needs: local trivializations ⟹ generating sections over preimages of a base
+       cover, overlap units, and the zero-section normalization (rescale each local
+       section by its value at z, which must be a unit — that is the rigidification).
+  [W3] then `exists_invertible_tensor_idealModule_add` (SelfAdjointN.lean:259, the one
+       Picard sorry) and the rest of the pairing chain (WP-κ → WP-C2 → … → Y(ρ̄)).
+
+Note the counterexample discipline: the exact (N-free) identity is FALSE globally, so
+[W1] must stay LOCAL on the base and [W2] must supply N — the interfaces above already
+respect this (the local theorem's hypotheses are only satisfiable Zariski-locally).
