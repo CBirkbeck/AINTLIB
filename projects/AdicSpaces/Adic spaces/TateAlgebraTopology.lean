@@ -2417,6 +2417,135 @@ noncomputable def instT2SpaceTateAlgebra₂ [IsTateRing A] [T2Space A] :
   simp at hb_eq
   exact hl hb_eq.symm
 
+/-- `Fin 2` analogue of `coeff_sub_limit_mem_pow`. -/
+private theorem coeff₂_sub_limit_mem_pow (P : PairOfDefinition A)
+    (u : ℕ → ↥(TateAlgebra₂ A)) (c : (Fin 2 →₀ ℕ) → A)
+    (hc : ∀ l, Filter.Tendsto (fun n => MvPowerSeries.coeff l (u n).val)
+      Filter.atTop (nhds (c l)))
+    (f : ↥(TateAlgebra₂ A)) (hf : ∀ l, MvPowerSeries.coeff l f.val = c l)
+    (k N n : ℕ) (hn : N ≤ n)
+    (hN : ∀ m ≥ N, ∀ m' ≥ N, u m - u m' ∈ tateAlgNhd₂ P k) :
+    ∀ l : Fin 2 →₀ ℕ,
+      ∃ b : ↥P.A₀, b ∈ P.I ^ k ∧ (b : A) = MvPowerSeries.coeff l (u n - f).val := by
+  intro l
+  have hcoeff_val : MvPowerSeries.coeff l (u n - f).val =
+      MvPowerSeries.coeff l (u n).val - c l := by
+    change MvPowerSeries.coeff l ((u n).val - f.val) =
+      MvPowerSeries.coeff l (u n).val - c l
+    rw [map_sub]
+    rw [hf]
+  have htend : Tendsto (fun m => MvPowerSeries.coeff l (u n).val -
+      MvPowerSeries.coeff l (u m).val)
+      atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) :=
+    tendsto_const_nhds.sub (hc l)
+  have hev : ∀ᶠ m in atTop,
+      MvPowerSeries.coeff l (u n).val - MvPowerSeries.coeff l (u m).val ∈
+        (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
+    rw [Filter.eventually_atTop]
+    refine ⟨N, fun m hm => ?_⟩
+    obtain ⟨b, hb_mem, hb_eq⟩ := tateAlgNhd₂_coeff_mem P k (hN n hn m hm) l
+    exact ⟨b, hb_mem, by rw [hb_eq]; simp [map_sub]⟩
+  have hlim_mem := (pow_image_isClosed P k).mem_of_tendsto htend hev
+  rw [← hcoeff_val] at hlim_mem
+  obtain ⟨b, hb_mem, hb_eq⟩ := hlim_mem
+  exact ⟨b, hb_mem, hb_eq⟩
+
+/-- `Fin 2` analogue of `isRestricted_limit_of_cauchy`. -/
+private theorem isRestricted₂_limit_of_cauchy (P : PairOfDefinition A)
+    (u : ℕ → ↥(TateAlgebra₂ A))
+    (hu_basis : ∀ n : ℕ, ∃ N : ℕ, ∀ m ≥ N, ∀ k ≥ N, u m - u k ∈ tateAlgNhd₂ P n)
+    (c : (Fin 2 →₀ ℕ) → A)
+    (hc : ∀ l, Filter.Tendsto (fun n => MvPowerSeries.coeff l (u n).val)
+      Filter.atTop (nhds (c l))) :
+    MvPowerSeries.IsRestricted (fun l => c l : MvPowerSeries (Fin 2) A) := by
+  change Tendsto c cofinite (nhds 0)
+  rw [tendsto_nhds]
+  intro U hU h0U
+  rw [Filter.mem_cofinite]
+  obtain ⟨n, _, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp (hU.mem_nhds h0U)
+  obtain ⟨N, hN⟩ := hu_basis n
+  have hfin : ∀ᶠ l in cofinite,
+      MvPowerSeries.coeff l (u N).val ∈
+        (Subtype.val '' ((P.I ^ n : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) :=
+    tateAlgebra₂_coeff_eventually_in_pow P (u N) n
+  set S : Set (Fin 2 →₀ ℕ) := {l |
+    MvPowerSeries.coeff l (u N).val ∉
+      (Subtype.val '' ((P.I ^ n : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A)}
+  have hS_fin : S.Finite := hfin
+  suffices hsub : {l | c l ∉ U} ⊆ S from hS_fin.subset hsub
+  intro l hl
+  simp only [Set.mem_setOf_eq] at hl ⊢
+  intro h_in
+  apply hl; apply hn
+  apply (pow_image_isClosed P n).mem_of_tendsto (hc l)
+  rw [Filter.eventually_atTop]
+  refine ⟨N, fun k hk => ?_⟩
+  obtain ⟨b_diff, hb_diff_mem, hb_diff_eq⟩ := tateAlgNhd₂_coeff_mem P n (hN k hk N le_rfl) l
+  obtain ⟨b_N, hb_N_mem, hb_N_eq⟩ := h_in
+  refine ⟨b_N + b_diff, (P.I ^ n).add_mem hb_N_mem hb_diff_mem, ?_⟩
+  push_cast
+  rw [hb_N_eq, hb_diff_eq]
+  simp [map_sub]
+
+/-- `Fin 2` analogue of `coeff_cauchySeq_of_basis`. -/
+private theorem coeff₂_cauchySeq_of_basis (P : PairOfDefinition A)
+    (u : ℕ → ↥(TateAlgebra₂ A))
+    (hu_basis : ∀ n : ℕ, ∃ N : ℕ, ∀ m ≥ N, ∀ k ≥ N, u m - u k ∈ tateAlgNhd₂ P n)
+    (l : Fin 2 →₀ ℕ) :
+    @CauchySeq A ℕ (IsTopologicalAddGroup.rightUniformSpace A) _
+      (fun n => MvPowerSeries.coeff l (u n).val) := by
+  letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
+  haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
+  rw [cauchySeq_iff]
+  intro V hV
+  rw [uniformity_eq_comap_nhds_zero'] at hV
+  obtain ⟨W, hW, hWV⟩ := Filter.mem_comap.mp hV
+  obtain ⟨n, _, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp hW
+  obtain ⟨N, hN⟩ := hu_basis n
+  refine ⟨N, fun m hm k hk => ?_⟩
+  have hdiff := hN m hm k hk
+  obtain ⟨b, hb_mem, hb_eq⟩ := tateAlgNhd₂_coeff_mem P n hdiff l
+  apply hWV
+  simp only [Set.mem_preimage]
+  apply hn
+  refine ⟨-b, (P.I ^ n).neg_mem hb_mem, ?_⟩
+  simp only [Subring.coe_neg, hb_eq]
+  change -MvPowerSeries.coeff l (u m - u k).val =
+    MvPowerSeries.coeff l (u k).val + -MvPowerSeries.coeff l (u m).val
+  rw [show (u m - u k).val = (u m).val - (u k).val from rfl, map_sub, neg_sub,
+    sub_eq_add_neg]
+
+omit [IsTopologicalRing A] in
+/-- `Fin 2` analogue of `tateAlgNhd_of_cauchySeq`: the Cauchy condition restated
+against the `tateAlgNhd₂` basis, so the coefficientwise lemmas stay instance-free. -/
+private theorem tateAlgNhd₂_of_cauchySeq [IsTateRing A] [T2Space A]
+    (u : ℕ → ↥(TateAlgebra₂ A))
+    (hu : @CauchySeq _ ℕ (@IsTopologicalAddGroup.rightUniformSpace _ _
+      tateAlgebra₂Topology' (@IsTopologicalRing.to_topologicalAddGroup _ _
+        tateAlgebra₂Topology' tateAlgebra₂Topology'_isTopologicalRing)) _ u) :
+    ∀ n : ℕ, ∃ N : ℕ, ∀ m ≥ N, ∀ k ≥ N,
+      u m - u k ∈ tateAlgNhd₂ (IsTateRing.principalPair A).toPairOfDefinition n := by
+  let P := (IsTateRing.principalPair A).toPairOfDefinition
+  letI τ : TopologicalSpace ↥(TateAlgebra₂ A) := tateAlgebra₂Topology'
+  haveI hring : IsTopologicalRing ↥(TateAlgebra₂ A) :=
+    tateAlgebra₂Topology'_isTopologicalRing
+  haveI haddgrp : IsTopologicalAddGroup ↥(TateAlgebra₂ A) :=
+    IsTopologicalRing.to_topologicalAddGroup
+  letI uT : UniformSpace ↥(TateAlgebra₂ A) := IsTopologicalAddGroup.rightUniformSpace _
+  intro n
+  have hmem : (fun p : ↥(TateAlgebra₂ A) × ↥(TateAlgebra₂ A) => p.2 - p.1) ⁻¹'
+      (tateAlgNhd₂ P n : Set _) ∈ @uniformity _ uT := by
+    rw [@uniformity_eq_comap_nhds_zero' _ _ _ haddgrp]
+    exact Filter.mem_comap.mpr ⟨(tateAlgNhd₂ P n : Set _),
+      tateAlgBasis'₂.hasBasis_nhds_zero.mem_of_mem (i := n) trivial,
+      fun p hp => by simpa only [Set.mem_preimage, sub_eq_add_neg] using hp⟩
+  obtain ⟨N, hN⟩ := cauchySeq_iff.mp hu _ hmem
+  exact ⟨N, fun m hm k hk => by
+    have h1 := hN m hm k hk
+    simp only [Set.mem_preimage] at h1
+    rw [show u m - u k = -(u k - u m) by ring]
+    exact neg_mem h1⟩
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Bivariate CompleteSpace**: `TateAlgebra₂ A` is complete under the canonical
 bivariate Tate topology. Bivariate analog of `tateAlgebraTopology'_completeSpace`.
@@ -2451,75 +2580,13 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
   intro u hu
   letI uA : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A
   haveI : @IsUniformAddGroup A uA _ := isUniformAddGroup_of_addCommGroup
-  have hu_basis : ∀ n : ℕ, ∃ N : ℕ, ∀ m ≥ N, ∀ k ≥ N,
-      u m - u k ∈ tateAlgNhd₂ P n := by
-    intro n
-    have hmem : (fun p : ↥(TateAlgebra₂ A) × ↥(TateAlgebra₂ A) => p.2 - p.1) ⁻¹'
-        (tateAlgNhd₂ P n : Set _) ∈ @uniformity _ uT := by
-      rw [@uniformity_eq_comap_nhds_zero' _ _ _ haddgrp]
-      exact Filter.mem_comap.mpr ⟨(tateAlgNhd₂ P n : Set _),
-        tateAlgBasis'₂.hasBasis_nhds_zero.mem_of_mem (i := n) trivial,
-        fun p hp => by simpa only [Set.mem_preimage, sub_eq_add_neg] using hp⟩
-    obtain ⟨N, hN⟩ := cauchySeq_iff.mp hu _ hmem
-    exact ⟨N, fun m hm k hk => by
-      have h1 := hN m hm k hk
-      simp only [Set.mem_preimage] at h1
-      rw [show u m - u k = -(u k - u m) by ring]
-      exact neg_mem h1⟩
-  have hcoeff_cauchy : ∀ l : Fin 2 →₀ ℕ,
-      CauchySeq (fun n => MvPowerSeries.coeff l (u n).val) := by
-    intro l
-    rw [cauchySeq_iff]
-    intro V hV
-    rw [uniformity_eq_comap_nhds_zero'] at hV
-    obtain ⟨W, hW, hWV⟩ := Filter.mem_comap.mp hV
-    obtain ⟨n, _, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp hW
-    obtain ⟨N, hN⟩ := hu_basis n
-    refine ⟨N, fun m hm k hk => ?_⟩
-    have hdiff := hN m hm k hk
-    obtain ⟨b, hb_mem, hb_eq⟩ := tateAlgNhd₂_coeff_mem P n hdiff l
-    apply hWV
-    simp only [Set.mem_preimage]
-    apply hn
-    refine ⟨-b, (P.I ^ n).neg_mem hb_mem, ?_⟩
-    simp only [Subring.coe_neg, hb_eq]
-    change -MvPowerSeries.coeff l (u m - u k).val =
-      MvPowerSeries.coeff l (u k).val + -MvPowerSeries.coeff l (u m).val
-    rw [show (u m - u k).val = (u m).val - (u k).val from rfl, map_sub, neg_sub,
-      sub_eq_add_neg]
+  have hu_basis := tateAlgNhd₂_of_cauchySeq u hu
+  have hcoeff_cauchy := coeff₂_cauchySeq_of_basis P u hu_basis
   have hcoeff_conv : ∀ l : Fin 2 →₀ ℕ, ∃ a : A,
       Tendsto (fun n => MvPowerSeries.coeff l (u n).val) atTop (nhds a) :=
     fun l => cauchySeq_tendsto_of_complete (hcoeff_cauchy l)
   choose c hc using hcoeff_conv
-  have hc_restricted : MvPowerSeries.IsRestricted (fun l => c l : MvPowerSeries (Fin 2) A) := by
-    change Tendsto c cofinite (nhds 0)
-    rw [tendsto_nhds]
-    intro U hU h0U
-    rw [Filter.mem_cofinite]
-    obtain ⟨n, _, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp (hU.mem_nhds h0U)
-    obtain ⟨N, hN⟩ := hu_basis n
-    have hfin : ∀ᶠ l in cofinite,
-        MvPowerSeries.coeff l (u N).val ∈
-          (Subtype.val '' ((P.I ^ n : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) :=
-      tateAlgebra₂_coeff_eventually_in_pow P (u N) n
-    set S : Set (Fin 2 →₀ ℕ) := {l |
-      MvPowerSeries.coeff l (u N).val ∉
-        (Subtype.val '' ((P.I ^ n : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A)}
-    have hS_fin : S.Finite := hfin
-    suffices hsub : {l | c l ∉ U} ⊆ S from hS_fin.subset hsub
-    intro l hl
-    simp only [Set.mem_setOf_eq] at hl ⊢
-    intro h_in
-    apply hl; apply hn
-    apply (pow_image_isClosed P n).mem_of_tendsto (hc l)
-    rw [Filter.eventually_atTop]
-    refine ⟨N, fun k hk => ?_⟩
-    obtain ⟨b_diff, hb_diff_mem, hb_diff_eq⟩ := tateAlgNhd₂_coeff_mem P n (hN k hk N le_rfl) l
-    obtain ⟨b_N, hb_N_mem, hb_N_eq⟩ := h_in
-    refine ⟨b_N + b_diff, (P.I ^ n).add_mem hb_N_mem hb_diff_mem, ?_⟩
-    push_cast
-    rw [hb_N_eq, hb_diff_eq]
-    simp [map_sub]
+  have hc_restricted := isRestricted₂_limit_of_cauchy P u hu_basis c hc
   let f : ↥(TateAlgebra₂ A) := ⟨fun l => c l, hc_restricted⟩
   refine ⟨f, ?_⟩
   rw [(tateAlgBasis'₂.hasBasis_nhds f).tendsto_right_iff]
@@ -2528,30 +2595,7 @@ theorem tateAlgebra₂Topology'_completeSpace [IsTateRing A] [T2Space A]
   obtain ⟨N, hN⟩ := hu_basis k
   refine ⟨N, fun n hn => ?_⟩
   change u n - f ∈ tateAlgNhd₂ P k
-  have hcoeff_diff : ∀ l : Fin 2 →₀ ℕ,
-      ∃ b : ↥P.A₀, b ∈ P.I ^ k ∧ (b : A) = MvPowerSeries.coeff l (u n - f).val := by
-    intro l
-    have hcoeff_val : MvPowerSeries.coeff l (u n - f).val =
-        MvPowerSeries.coeff l (u n).val - c l := by
-      change MvPowerSeries.coeff l ((u n).val - f.val) =
-        MvPowerSeries.coeff l (u n).val - c l
-      rw [map_sub]
-      simp only [MvPowerSeries.coeff_apply, f]
-    have htend : Tendsto (fun m => MvPowerSeries.coeff l (u n).val -
-        MvPowerSeries.coeff l (u m).val)
-        atTop (nhds (MvPowerSeries.coeff l (u n).val - c l)) :=
-      tendsto_const_nhds.sub (hc l)
-    have hev : ∀ᶠ m in atTop,
-        MvPowerSeries.coeff l (u n).val - MvPowerSeries.coeff l (u m).val ∈
-          (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
-      rw [Filter.eventually_atTop]
-      refine ⟨N, fun m hm => ?_⟩
-      obtain ⟨b, hb_mem, hb_eq⟩ := tateAlgNhd₂_coeff_mem P k (hN n hn m hm) l
-      exact ⟨b, hb_mem, by rw [hb_eq]; simp [map_sub]⟩
-    have hlim_mem := (pow_image_isClosed P k).mem_of_tendsto htend hev
-    rw [← hcoeff_val] at hlim_mem
-    obtain ⟨b, hb_mem, hb_eq⟩ := hlim_mem
-    exact ⟨b, hb_mem, hb_eq⟩
+  have hcoeff_diff := coeff₂_sub_limit_mem_pow P u c hc f (fun _ => rfl) k N n hn hN
   have hpair : (u n - f) ∈ pairSubring₂ P := by
     intro s
     obtain ⟨b, _, hb_eq⟩ := hcoeff_diff s
