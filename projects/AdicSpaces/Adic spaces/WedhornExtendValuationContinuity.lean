@@ -133,6 +133,45 @@ theorem extendToLocalization_le_one_of_locSubring
     rw [map_mul]
     exact mul_le_one' ha hb
 
+/-- With no generators adjoined, `locSubring` is just the image of `P.A₀`. -/
+private theorem locSubring_empty (P : PairOfDefinition A) (s : A) :
+    locSubring P ∅ s = P.A₀.map (algebraMap A (Localization.Away s)) := by
+  unfold locSubring
+  simp only [Set.range_eq_empty, Set.union_empty]
+  rw [← Subring.coe_map]; exact Subring.closure_eq _
+
+/-- Adjoining one more generator `t` keeps you inside the algebra generated over the
+smaller `locSubring` by `t/s`. This is the step that lets the induction in
+`extendToLocalization_mul_pow_lt` peel generators one at a time: everything in
+`locSubring P (insert t U') s` is a polynomial in `t/s` with coefficients in
+`locSubring P U' s`. -/
+private theorem mem_adjoin_of_mem_locSubring_insert [DecidableEq A]
+    (P : PairOfDefinition A)
+    (U' : Finset A) (t s : A) {x : Localization.Away s}
+    (hx : x ∈ locSubring P (insert t U') s) :
+    x ∈ Algebra.adjoin ↥(locSubring P U' s)
+      ({divByS t s} : Set (Localization.Away s)) := by
+  classical
+  have hinsert_le : locSubring P (insert t U') s ≤
+      Subring.closure ((locSubring P U' s : Set _) ∪ {divByS t s}) := by
+    unfold locSubring
+    apply Subring.closure_le.mpr
+    rintro y (⟨a₀, ha₀, rfl⟩ | ⟨⟨t', ht'⟩, rfl⟩)
+    · exact Subring.subset_closure (Or.inl (Subring.subset_closure (Or.inl ⟨a₀, ha₀, rfl⟩)))
+    · simp only [Finset.mem_insert] at ht'
+      rcases ht' with rfl | ht'U
+      · exact Subring.subset_closure (Or.inr rfl)
+      · exact Subring.subset_closure (Or.inl (Subring.subset_closure (Or.inr
+          ⟨⟨t', ht'U⟩, rfl⟩)))
+  have h_le : Subring.closure
+      ((locSubring P U' s : Set (Localization.Away s)) ∪ {divByS t s}) ≤
+        (Algebra.adjoin ↥(locSubring P U' s) ({divByS t s} : Set _)).toSubring := by
+    rw [Subring.closure_le]
+    rintro w (hw | rfl)
+    · exact Subalgebra.algebraMap_mem _ (⟨w, hw⟩ : ↥(locSubring P U' s))
+    · exact Algebra.subset_adjoin rfl
+  exact h_le (hinsert_le hx)
+
 /-- **(Wedhorn §8.1 absorption — valuation version)** For `x ∈ locSubring P T s`
 and `b ∈ P.Iᵐ`, the extended valuation satisfies `ν_loc(x · algebraMap b) < γ`,
 **given only** `ν(Iᵐ) < γ` (the `A`-continuity bound) and `ν(tᵢ) ≤ ν(s)` — with **no
@@ -168,38 +207,14 @@ theorem extendToLocalization_mul_pow_lt
   induction U using Finset.induction with
   | empty =>
     intro _ x hx b hb
-    have hempty : locSubring P ∅ s = P.A₀.map (algebraMap A (Localization.Away s)) := by
-      unfold locSubring
-      simp only [Set.range_eq_empty, Set.union_empty]
-      rw [← Subring.coe_map]; exact Subring.closure_eq _
-    rw [hempty] at hx
+    rw [locSubring_empty] at hx
     obtain ⟨a₀, ha₀, rfl⟩ := hx
     rw [← map_mul, hν_loc, Valuation.extendToLocalization_apply_map_apply]
     exact hm ⟨a₀ * (b : A), P.A₀.mul_mem ha₀ b.property⟩
       (Ideal.mul_mem_left _ ⟨a₀, ha₀⟩ hb)
   | insert t U' ht ih =>
     intro hdivU x hx b hb
-    have hinsert_le : locSubring P (insert t U') s ≤
-        Subring.closure ((locSubring P U' s : Set _) ∪ {divByS t s}) := by
-      unfold locSubring
-      apply Subring.closure_le.mpr
-      rintro y (⟨a₀, ha₀, rfl⟩ | ⟨⟨t', ht'⟩, rfl⟩)
-      · exact Subring.subset_closure (Or.inl (Subring.subset_closure (Or.inl ⟨a₀, ha₀, rfl⟩)))
-      · simp only [Finset.mem_insert] at ht'
-        rcases ht' with rfl | ht'U
-        · exact Subring.subset_closure (Or.inr rfl)
-        · exact Subring.subset_closure (Or.inl (Subring.subset_closure (Or.inr
-            ⟨⟨t', ht'U⟩, rfl⟩)))
-    have hx_in_adj : x ∈ Algebra.adjoin ↥(locSubring P U' s)
-        ({divByS t s} : Set (Localization.Away s)) := by
-      have h_le : Subring.closure
-          ((locSubring P U' s : Set (Localization.Away s)) ∪ {divByS t s}) ≤
-            (Algebra.adjoin ↥(locSubring P U' s) ({divByS t s} : Set _)).toSubring := by
-        rw [Subring.closure_le]
-        rintro w (hw | rfl)
-        · exact Subalgebra.algebraMap_mem _ (⟨w, hw⟩ : ↥(locSubring P U' s))
-        · exact Algebra.subset_adjoin rfl
-      exact h_le (hinsert_le hx)
+    have hx_in_adj := mem_adjoin_of_mem_locSubring_insert P U' t s hx
     rw [Algebra.adjoin_singleton_eq_range_aeval, AlgHom.mem_range] at hx_in_adj
     obtain ⟨p, hp⟩ := hx_in_adj
     rw [← hp, Polynomial.aeval_eq_sum_range, Finset.sum_mul]
