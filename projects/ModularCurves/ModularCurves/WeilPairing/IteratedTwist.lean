@@ -1417,6 +1417,48 @@ theorem exists_unit_chartMultiplier₃_eq (J₁ J₂ J₃ : C.IdealSheafData) (L
   · intro t ht
     exact (mem_nonZeroDivisors_iff.mp hnzd).1 t ht
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 E2b] The trivialization criterion from the two chart identities.** If the
+chord's chart coefficient and the triple twist's multiplier are both unit multiples of
+the product of the three transported generators, the twist is trivialized by the chord.
+This is the last link: `chord_exact_order_in_chart` supplies the first identity,
+`exists_unit_chartMultiplier₃_eq` the second. -/
+theorem nonempty_iso_unitObj_of_two_unit_identities
+    (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (h₁ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₁.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₂ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₂.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₃ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₃.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L)
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π (iteratedTwistHom₃ J₁ J₂ J₃ L)).app (⊤ : C.Opens) ℓ = 0)
+    {ι : Type u} (W : ι → C.Opens) (hW : iSup W = ⊤)
+    (eM : ∀ i, (restrictFunctor (W i).ι).obj (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L))) ≅
+        unitObj (W i).toScheme)
+    (eL : ∀ i, (restrictFunctor (W i).ι).obj L ≅ unitObj (W i).toScheme)
+    (eU : ∀ i, (restrictFunctor (W i).ι).obj (unitObj C) ≅ unitObj (W i).toScheme)
+    (p : ∀ i, Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens)))
+    (uc : ∀ i, Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))ˣ)
+    (um : ∀ i, Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))ˣ)
+    (hchord : ∀ i, chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i) =
+      (uc i : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) * p i)
+    (hmult : ∀ i, chartMultiplier (W i) (iteratedTwistHom₃ J₁ J₂ J₃ L) (eM i) (eL i) =
+      (um i : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) * p i) :
+    Nonempty (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)) ≅ unitObj C) := by
+  classical
+  choose w hw using fun i =>
+    ModularCurves.exists_unit_mul_of_both_unit_mul
+      (chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i))
+      (chartMultiplier (W i) (iteratedTwistHom₃ J₁ J₂ J₃ L) (eM i) (eL i))
+      (p i) (uc i) (um i) (hchord i) (hmult i)
+  exact nonempty_iso_unitObj_of_exact_order₃ J₁ J₂ J₃ L h₁ h₂ h₃ hL ℓ hℓ W hW
+    eM eL eU w hw
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules
