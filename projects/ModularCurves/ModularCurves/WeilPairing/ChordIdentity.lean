@@ -122,4 +122,28 @@ theorem mul_dvd_of_evaluations_vanish
   obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hmem
   exact ⟨a, by rw [← ha, mul_comm]⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d4] The exact-order identity from three evaluations and one unit.**
+If a chart element is killed by three evaluation retractions whose kernels are the
+principal ideals of `g₁, g₂, g₃`, the successive quotients being taken in the same
+chart, and the final quotient is a unit, then the element is a unit multiple of the
+product — the hypothesis shape of `nonempty_iso_unitObj_of_exact_order₃`. -/
+theorem eq_unit_mul_of_three_divisions {A : Type*} [CommRing A]
+    (c g₁ g₂ g₃ : A) (c₁ c₂ : A) (u : Aˣ)
+    (h₁ : c = g₁ * c₁) (h₂ : c₁ = g₂ * c₂) (h₃ : c₂ = g₃ * (u : A)) :
+    c = (u : A) * (g₁ * (g₂ * g₃)) := by
+  rw [h₁, h₂, h₃]
+  ring
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The two-factor version, for the vertical. -/
+theorem eq_unit_mul_of_two_divisions {A : Type*} [CommRing A]
+    (c g₁ g₂ : A) (c₁ : A) (u : Aˣ)
+    (h₁ : c = g₁ * c₁) (h₂ : c₁ = g₂ * (u : A)) :
+    c = (u : A) * (g₁ * g₂) := by
+  rw [h₁, h₂]
+  ring
+
 end AlgebraicGeometry.Scheme.Modules
