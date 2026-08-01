@@ -31876,3 +31876,15 @@ are proven. That gives the `σ₃` hypotheses of `chord_identity_of_sections`, a
 there the closing links → ChordDatum → theorem of the square → descent →
 `exists_invertible_tensor_idealModule_add` are all proven.
 REMAINING: the non-degeneracy/invertibility conditions and the degenerate charts.
+
+### ★★★★ [W1 i4] DONE 2026-08-01 — `dictionary_eq_of_third_point_coords`
+The section from base coordinates `(p,q)` and the group-law `-(P+Q)` agree under the
+dictionary at every field point where `(p,q)` evaluates to `(addX, negAddY)`.
+LEAN-OPS: the dependent `Point.some x y h` blocked `rw`/`congr` on the coordinates; the
+working idiom is `generalize_proofs h; revert h; rw [← hcoord…]; intro h; rfl`
+(proof-irrelevance closes the residue).
+⟹ with `section_eq_of_dictionary_eq` this gives the SECTION identity
+`affineSectionSpecPoint (addX, negAddY) = -(P+Q)` over a reduced base, which is the
+`σ₃` hypothesis of `chord_identity_of_sections`. Every mathematical ingredient of the
+Weil-pairing prong is now proven; what is left is the non-degeneracy bookkeeping and the
+degenerate charts.
