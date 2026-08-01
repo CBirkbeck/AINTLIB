@@ -1005,6 +1005,21 @@ theorem chord_exact_order_transported {R B : Type u} [CommRing R] [CommRing B]
     htor₂ htor₃ hunit
   exact eq_unit_mul_map φ hφ _ _ _ _ u hu
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 assembly 3] Matching the transported factors with the section generators.**
+The chart identity is stated with the images of the coordinate differences; the
+criterion wants the generators the section machinery supplies. When each pair is
+associate, the factorisation transfers with a new unit. -/
+theorem chord_exact_order_with_generators {B : Type u} [CommRing B]
+    (c f₁ f₂ f₃ g₁ g₂ g₃ : B) (v : Bˣ) (w₁ w₂ w₃ : Bˣ)
+    (hfac : c = (v : B) * (f₁ * (f₂ * f₃)))
+    (hg₁ : f₁ = (w₁ : B) * g₁) (hg₂ : f₂ = (w₂ : B) * g₂)
+    (hg₃ : f₃ = (w₃ : B) * g₃) :
+    ∃ u : Bˣ, c = (u : B) * (g₁ * (g₂ * g₃)) :=
+  ⟨v * w₁ * w₂ * w₃,
+    eq_unit_mul_of_associates c f₁ f₂ f₃ g₁ g₂ g₃ v w₁ w₂ w₃ hfac hg₁ hg₂ hg₃⟩
+
 end ModularCurves
 
 namespace ModularCurves
