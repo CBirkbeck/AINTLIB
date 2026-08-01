@@ -78,6 +78,28 @@ theorem exists_norm_psCoeff_eq (f : PowerSeries.Restricted R (1 : ℝ)) (hf : f 
     · exact ((not_le.mp hm).le.trans hnS)
   · exact norm_pos_iff.mp (lt_of_lt_of_le hpos hnS)
 
+/-- The Gauss norm of a nonzero radius-one restricted series is attained at a
+*least* index, strictly below which no coefficient reaches it. This minimal
+achiever is what drives multiplicativity: in a product, the pair `(i, j)` of
+minimal achievers is the only antidiagonal pair whose term is not strictly
+dominated. -/
+private theorem exists_min_norm_psCoeff_eq (f : PowerSeries.Restricted R (1 : ℝ))
+    (hf : f ≠ 0) :
+    ∃ i : ℕ, ‖PowerSeries.coeff i f.1‖ = ‖f‖ ∧ 0 < ‖f‖ ∧
+      ∀ m < i, ‖PowerSeries.coeff m f.1‖ < ‖f‖ := by
+  obtain ⟨n, hn_eq, hn_ne⟩ := exists_norm_psCoeff_eq f hf
+  have hpos : 0 < ‖f‖ := hn_eq ▸ norm_pos_iff.mpr hn_ne
+  have hA : {n : ℕ | ‖PowerSeries.coeff n f.1‖ = ‖f‖}.Finite :=
+    (finite_setOf_le_norm_psCoeff f hpos).subset fun n hn => by
+      rw [Set.mem_setOf_eq] at hn ⊢; rw [hn]
+  obtain ⟨i, hiA, himin⟩ := Set.exists_min_image _ (fun n : ℕ => n) hA ⟨n, hn_eq.symm⟩
+  rw [Set.mem_setOf_eq] at hiA
+  refine ⟨i, hiA, hpos, fun m hm => ?_⟩
+  rcases lt_or_eq_of_le (norm_psCoeff_le f m) with h | h
+  · exact h
+  · have := himin m h
+    omega
+
 /-- Multiplicativity of the radius-one Gauss norm over a base with multiplicative,
 zero-faithful norm (the minimal-achiever argument through the vendored
 `PowerSeries.gaussNorm_mul_eq_mul`). -/
@@ -89,19 +111,8 @@ theorem norm_restricted_mul (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖
   · simp
   rcases eq_or_ne g 0 with rfl | hg
   · simp
-  obtain ⟨nf, hnf_eq, hnf_ne⟩ := exists_norm_psCoeff_eq f hf
-  obtain ⟨ng, hng_eq, hng_ne⟩ := exists_norm_psCoeff_eq g hg
-  have hposf : 0 < ‖f‖ := hnf_eq ▸ norm_pos_iff.mpr hnf_ne
-  have hposg : 0 < ‖g‖ := hng_eq ▸ norm_pos_iff.mpr hng_ne
-  have hAf : {n : ℕ | ‖PowerSeries.coeff n f.1‖ = ‖f‖}.Finite :=
-    (finite_setOf_le_norm_psCoeff f hposf).subset fun n hn => by
-      rw [Set.mem_setOf_eq] at hn ⊢; rw [hn]
-  have hAg : {n : ℕ | ‖PowerSeries.coeff n g.1‖ = ‖g‖}.Finite :=
-    (finite_setOf_le_norm_psCoeff g hposg).subset fun n hn => by
-      rw [Set.mem_setOf_eq] at hn ⊢; rw [hn]
-  obtain ⟨i, hiA, himin⟩ := Set.exists_min_image _ (fun n : ℕ => n) hAf ⟨nf, hnf_eq.symm⟩
-  obtain ⟨j, hjA, hjmin⟩ := Set.exists_min_image _ (fun n : ℕ => n) hAg ⟨ng, hng_eq.symm⟩
-  rw [Set.mem_setOf_eq] at hiA hjA
+  obtain ⟨i, hiA, hposf, himin⟩ := exists_min_norm_psCoeff_eq f hf
+  obtain ⟨j, hjA, hposg, hjmin⟩ := exists_min_norm_psCoeff_eq g hg
   rw [Restricted.norm_eq (R := R) 1 (f * g), Restricted.norm_eq (R := R) 1 f,
     Restricted.norm_eq (R := R) 1 g,
     show (f * g : PowerSeries.Restricted R (1 : ℝ)).1 = f.1 * g.1 from rfl]
@@ -124,24 +135,15 @@ theorem norm_restricted_mul (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖
     rcases lt_or_gt_of_ne (show p.1 ≠ i from fun h => hpne (by
       refine Prod.ext h ?_
       omega)) with hlt | hgt
-    · have hf1 : ‖PowerSeries.coeff p.1 f.1‖ < ‖f‖ := by
-        rcases lt_or_eq_of_le (norm_psCoeff_le f p.1) with h | h
-        · exact h
-        · have := himin p.1 h
-          omega
-      calc ‖PowerSeries.coeff p.1 f.1‖ * ‖PowerSeries.coeff p.2 g.1‖
+    · calc ‖PowerSeries.coeff p.1 f.1‖ * ‖PowerSeries.coeff p.2 g.1‖
           ≤ ‖PowerSeries.coeff p.1 f.1‖ * ‖g‖ :=
             mul_le_mul_of_nonneg_left (norm_psCoeff_le g p.2) (norm_nonneg _)
-        _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_right hf1 hposg
-    · have hg1 : ‖PowerSeries.coeff p.2 g.1‖ < ‖g‖ := by
-        rcases lt_or_eq_of_le (norm_psCoeff_le g p.2) with h | h
-        · exact h
-        · have := hjmin p.2 h
-          omega
+        _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_right (himin p.1 hlt) hposg
+    · have hp2 : p.2 < j := by omega
       calc ‖PowerSeries.coeff p.1 f.1‖ * ‖PowerSeries.coeff p.2 g.1‖
           ≤ ‖f‖ * ‖PowerSeries.coeff p.2 g.1‖ :=
             mul_le_mul_of_nonneg_right (norm_psCoeff_le f p.1) (norm_nonneg _)
-        _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_left hg1 hposf
+        _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_left (hjmin p.2 hp2) hposf
 
 end GenericMult
 
