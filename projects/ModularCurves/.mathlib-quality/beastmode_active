@@ -1,1 +1,1 @@
-FOCUS: [G5] concentration for a composite of twists (isZero-restrict via right-exactness) + [G6] iterated-twist span = product of generators (chartMultiplier_comp + span_twistChartMultiplier_eq)
+FOCUS: [G6] iterated-twist instantiation — span of the composite multiplier = product of the two generator spans (chartMultiplier_comp + span_twistChartMultiplier_eq at each factor)
