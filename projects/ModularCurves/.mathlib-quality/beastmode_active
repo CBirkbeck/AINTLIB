@@ -1,1 +1,1 @@
-FOCUS: [W1 (i)] produce the three retractions for P, Q, -(P+Q) on a chart inside sectionAway and verify sigma3 reads the third point
+FOCUS: [W1 (i2)] coordinates over the base + equation => a section of projModel (the missing construction); recon chartSolutionsEquiv at base level
