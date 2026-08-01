@@ -669,6 +669,31 @@ theorem conj_at_line_point {R : Type u} [CommRing R] (W : WeierstrassCurve R)
   rw [WeierstrassCurve.Affine.negY, ← hline]
   ring
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-ii, assembled] The second evaluation vanishes off `2`-torsion.** For the
+chord through two points of the curve, the second quotient is killed by the second
+point's evaluation whenever that point is not `2`-torsion (`2y₂ + a₁x₂ + a₃` a
+nonzerodivisor). -/
+theorem second_quotient_vanishes_of_not_two_torsion
+    {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (σ : A →ₐ[R] R) (X Y : A) (ℓ x₁ y₁ x₂ y₂ : R)
+    (c₁ f₂ f₃ : A)
+    (hx : σ X = x₂) (hy : σ Y = y₂)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hid : c₁ * ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+        (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+      -(f₂ * f₃))
+    (hf₂ : σ f₂ = 0)
+    (hnzd : ∀ t : R, -(2 * y₂ + W.a₁ * x₂ + W.a₃) * t = 0 → t = 0) :
+    σ c₁ = 0 := by
+  refine algHom_second_quotient_eq_zero σ c₁ _ f₂ f₃ hid hf₂ ?_
+  intro t ht
+  refine hnzd t ?_
+  rw [← conj_at_line_point W ℓ x₁ y₁ x₂ y₂ hline,
+    ← algHom_conj_eq W σ X Y ℓ x₁ y₁ x₂ y₂ hx hy]
+  exact ht
+
 end ModularCurves
 
 namespace ModularCurves
