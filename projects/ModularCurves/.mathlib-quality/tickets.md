@@ -30661,3 +30661,39 @@ instantiate L := sectionPoleSheafPower π z hz 3 (resp 2) with b3/b2 from
 PoleSheafRankTwoThree, eL from the pole-sheaf chart trivializations, halg at the
 Weierstrass chart, H¹ from the fibrewise machinery (supplier side, later Zariski-
 local phase as in GAP-A-3). NEXT per board: [GAP-A-5a].
+
+## [GAP-A-5a] DECOMPOSITION 2026-08-01 (post-A4 recon; iso-theoretic reframing)
+TRUE TARGET (GAP-A-6-consumed): `exists_invertible_tensor_idealModule_add`
+(SelfAdjointN.lean:259, THE one Picard sorry): I(kerQ)⊗I(kerQ') ≅ I(ker(Q+Q'))⊗I(ker0)⊗π*N.
+Route stays line/vertical (board [PLAN]); universal-pair enters ONLY at 5b.
+**REFRAME: never build "Z(ℓ) as a divisor object"; work iso-theoretically.**
+The divisor-section correspondence in twist-language: ℓ ∈ ker(baseSectionsMap(coker.π
+(divisorTwistHom J L))) means ℓ-mult ≫ coker.π = 0, so ℓ-mult FACTORS through the twist:
+- **[5a-i]** `twistSectionLift`: ℓ' : unitObj C ⟶ tensorObj (idealModule J) L with
+  ℓ' ≫ divisorTwistHom J L = ℓ-mult (unitHomEquiv-form of ℓ). Pure abelian-cat:
+  coker-vanishing + Mono ⟹ image-factorization (kernel-of-cokernel = image at a mono).
+  CHEAP — do first.
+- **[5a-ii]** `isInvertible_tensorObj`: tensor of invertibles is invertible (common-
+  refinement covers + tensorObjCongr + unit-absorb; mirrors SurjectiveInvertible's
+  two-cover choreography). Gives M := I_D ⊗ 𝒪(3[0]) invertible. (CHECK first whether
+  already in Picard/*.lean.)
+- **[5a-iii]** the RESIDUAL SECTION ℓ' : 𝒪 → M vanishes nowhere-to-degree-1: the
+  degree bookkeeping (deg Z(ℓ') = deg Z(ℓ) − 2 = 1) needs the zero-divisor-of-section
+  machinery ONLY for ℓ' — build `sectionZeroIdeal (m : baseSections-form of 𝒪→M)` as
+  IdealSheafData via per-affine trivialization-coefficient ideals (choice-free VALUE:
+  image of the pairing L∨(U)→Γ(U); or span of coordinates in any trivialization —
+  well-defined up to unit). Needs: span-independence lemma + basicOpen-compat
+  (map_ideal_basicOpen field). THE substantial new piece.
+- **[5a-iv]** Z(ℓ')-IsOfficialCartier + finite-flat-lfp over S (degree-1 via the
+  b3-coordinates: ℓ' generically-unit ⟸ ℓ ∉ I_D·(next filtration step) ⟸ ℓ is a
+  KER-GENERATOR (unimodular cross!) — expect the Binet-Cauchy unimodularity to
+  discharge the fibrewise-nonvanishing directly: unimodular coordinates ⟹ ℓ'
+  fibrewise nonzero ⟹ Z(ℓ') finite flat deg 1 = section image (Stacks 0B8V-shape:
+  degree-1 finite-flat closed subscheme over S with a section = graph). Then
+  **R'' := the induced section S → C** (the residual point). This is where
+  KM 1.2.x lives.
+- **[5a-v]** OUTPUT-form for 5c: Nonempty (tensorObj (idealModule (ker P · ker Q ·
+  ker R'')) L ≅ unitObj C) — ℓ-mult as the trivialization (iso ⟸ isLocallySurjective
+  via the SurjectiveInvertible engine + the factorization being through the FULL
+  product ideal once 5b identifies Z(ℓ) = [P]+[Q]+[R'']).
+ORDER: i → ii → iii-design-then-iv (the real math) → v. 5b separately (universal pair).
