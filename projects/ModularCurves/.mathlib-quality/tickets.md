@@ -30887,3 +30887,21 @@ Inputs still needed for (A), in dependency order:
 NEXT ACTIONS: (1) the pole/ideal duality iso; (2) the "lift is iso" criterion in terms of
 local unit-coefficients (generalize twistSectionLift/isIso_twistSectionLift to a general
 mono, then give a chart criterion); (3) then (A).
+
+### ★★★ [EXACT-ORDER MACHINERY] DONE 2026-08-01
+isIso_unitEndomorphismOfTopSection_of_isUnit + isIso_of_chartMultiplier_isUnit +
+monoSectionLift (general mono) + isIso_monoSectionLift_of_chartMultiplier_isUnit +
+chartMultiplier_unitHomOfTopSection_eq. All axiom-clean, root build 9613 jobs.
+**The chord trivialization is now reduced to a CHART-COEFFICIENT statement:**
+  writing c_ℓ for the chart multiplier of ℓ (i.e. its coordinate in the chart
+  trivialization of 𝒪(3[0])) and g_P g_Q g_R for the product of the three kernel
+  generators, the two facts needed are
+    (A) ℓ ∈ ker(triple restriction)  [equivalently: g_P g_Q g_R ∣ c_ℓ], and
+    (B) c_ℓ = unit · g_P g_Q g_R     [the exact-order statement],
+  and (B) ⟹ (A). So a SINGLE chart-level identity discharges both.
+  With `chartMultiplier_unitHomOfTopSection_eq` the lift's multiplier is c_ℓ/(g_P g_Q g_R),
+  so (B) says precisely that this quotient is a unit.
+⟹ The whole WP prong now rests on ONE explicit Weierstrass-chart computation
+(the chord's coefficient factors as the product of the three point-generators times a
+unit), to be done over the universal atlas and transferred (GroupLawAxioms idiom).
+This is the cleanest possible reduction of the chord–tangent input.
