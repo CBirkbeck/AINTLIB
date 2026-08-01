@@ -7804,3 +7804,71 @@ avoid diamonds against other topologies on the same carrier), so the fix is not
 local `attribute [local instance]` block per section, or one setup lemma that takes
 the installed instances and returns everything downstream needs. Task-3 work; sized
 and recorded here rather than forced now.
+
+## Batch: 133 → 129
+
+    isRestricted_column_limits    82 → 37   4323b367e
+    laurentProdLeaves_restrict    73 → 45   7a7ee324b
+    imageCover_gluing_transport   74 → 48   f8da1da54
+    rationalShrink_tate           79 → 48   f7fc974c0   (pure dedup, no new lemma)
+
+### Three ways a block is longer than its argument
+
+Every target in this batch was inflated by something other than reasoning, and
+naming the inflation is what made the cut cheap:
+
+**1. Repeated type ascriptions.** `isRestricted_column_limits` spent ~37 of 46 lines
+on one five-level coercion written a dozen times. Naming the two operands `a` and `b`
+left a six-line ultrametric contrapositive and a three-line pigeonhole — two general
+`wI` facts that were unreadable at those types. The call site shrank further because
+`have h := lemma …` INFERS the giant types instead of restating them.
+
+**2. A statement the consumer already demands.** `imageCover_gluing_transport`'s
+`hcompat'` spent 5 of 10 lines writing a ∀-statement that `hCB.gluing` requires
+anyway; passing `fun E₁ E₂ D₃ h₃₁ h₃₂ => …` needs no statement at all. Likewise
+`hopen_eq` was 11 lines of statement over a one-tactic proof, replaced by one
+`congrArg`. **Size-based rankings are blind to both**: they score by block size, and
+here the block's size IS the redundancy.
+
+**3. A symmetric twin.** `laurentProdLeaves_restrict` had four blocks in two
+plus/minus pairs (`unitDatum`/`coUnitDatum`); two datum-parameterised lemmas replaced
+all four. The plus/minus split of a Laurent cover is a reliable place to look.
+
+### `private` blocks reuse — default to public for proof STEPS
+
+Third occurrence (RelativePieceKeystone's two datum helpers, now
+`not_vle_zero_of_shrink`). These proofs come in families — `A`-level vs
+`presheafValue`-level, Tate vs Huber, plus vs minus — and a helper capturing a real
+step in one member usually applies to the others. Reserve `private` for helpers that
+name something only the one proof cares about.
+
+### Two Lean gotchas
+
+**An implicit occurring only in a `rfl`-provable equation is under-determined.**
+`hRD : RD.P = D₀.P` with `rfl` lets Lean solve `?D₀ := RD`; it typechecks and is
+wrong, failing several arguments later at an innocent hypothesis. Make such arguments
+explicit. (Distinct from a missing section-variable prefix, which fails AT the call.)
+
+**A structure projection through a `noncomputable def` is not a free defeq.**
+`imageCover` sets `base := globalLocData …`, but the projection only reduces after
+delta-unfolding, which happens in `exact` / `:=`-against-a-stated-type position and
+NOT in argument position. Keep the general helper; state the `have` explicitly and
+close it with the helper.
+
+### Process
+
+`scope_code` needs no build, so measuring at source level between edits caught a
+53-then-51 shortfall in seconds and cost one wrong build instead of three. Do this
+before every WedhornCech-scale build.
+
+### Declined, recorded
+
+`exists_evalBI_pow_norm_exact` (75) / `exists_evalBI_pow_mem_image_of_le` (77):
+twins, ~55% identical over 116 lines, but the 53 differing lines are `= 1` vs `≤ 1`
+threaded throughout (calc chains reverse direction). Deriving the exact case from the
+bound needs a reverse inequality — `/generalise`, not decompose.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 129   (127 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
