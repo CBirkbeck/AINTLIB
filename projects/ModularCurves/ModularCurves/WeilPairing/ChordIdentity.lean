@@ -241,6 +241,43 @@ theorem isUnit_of_eq_unit_mul {A : Type u} [CommRing A] (c g₁ g₂ g₃ w : A)
   obtain ⟨u, rfl⟩ := hw
   exact ⟨u, hfac⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (a)] The three chart retractions.** Three sections landing in a common affine
+chart, each with principal kernel there, give three algebra retractions of the chart
+whose kernels are the principal ideals of the transported generators — the data the
+exact-order factorisation consumes. -/
+theorem exists_three_algHom_ker_eq_span {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (P Q Rm : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens)
+    (hPU : P.1 ⁻¹ᵁ U.1 = ⊤) (hQU : Q.1 ⁻¹ᵁ U.1 = ⊤) (hRU : Rm.1 ⁻¹ᵁ U.1 = ⊤)
+    (rP rQ rR : Γ(C, U.1))
+    (hP : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQ : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
+    (hR : (Scheme.Hom.ker Rm.1).ideal U = Ideal.span {rR})
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r) :
+    ∃ σP σQ σR : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) →ₐ[Γ(S, (⊤ : S.Opens))]
+        Γ(S, (⊤ : S.Opens)),
+      RingHom.ker σP =
+          Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP} ∧
+        RingHom.ker σQ =
+          Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rQ} ∧
+        RingHom.ker σR =
+          Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rR} := by
+  obtain ⟨σP, hσP⟩ :=
+    AlgebraicGeometry.Scheme.Modules.exists_algHom_ker_eq_span_of_section
+      P.1 P.2 U hPU rP hP halg
+  obtain ⟨σQ, hσQ⟩ :=
+    AlgebraicGeometry.Scheme.Modules.exists_algHom_ker_eq_span_of_section
+      Q.1 Q.2 U hQU rQ hQ halg
+  obtain ⟨σR, hσR⟩ :=
+    AlgebraicGeometry.Scheme.Modules.exists_algHom_ker_eq_span_of_section
+      Rm.1 Rm.2 U hRU rR hR halg
+  exact ⟨σP, σQ, σR, hσP, hσQ, hσR⟩
+
 end ModularCurves
 
 namespace ModularCurves

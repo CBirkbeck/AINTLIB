@@ -1,1 +1,1 @@
-FOCUS: [W1 away-chart] write the chord in away-chart coordinates and verify the three evaluations (algHom_chord_eq_zero) + divide out the generators
+FOCUS: [W1 (a)] chart retractions for the three sections in the away-chart (exists_algHom_ker_eq_span_of_section at sectionAway) -> then (b),(c)
