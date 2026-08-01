@@ -30697,3 +30697,16 @@ The divisor-section correspondence in twist-language: ℓ ∈ ker(baseSectionsMa
   via the SurjectiveInvertible engine + the factorization being through the FULL
   product ideal once 5b identifies Z(ℓ) = [P]+[Q]+[R'']).
 ORDER: i → ii → iii-design-then-iv (the real math) → v. 5b separately (universal pair).
+
+### [5a] STATUS 2026-08-01: i DONE (twistSectionLift), ii pre-existing
+(IsInvertible.tensorObj), v-ENGINE DONE (isIso_twistSectionLift_of_isLocallySurjective).
+REMAINING = iii (sectionZeroIdeal) + iv (residual section) — THE mountain. Design
+decision for iii: EVALUATION-IDEAL family I(V) := span (range fun φ : M(V) →ₗ[Γ(V)] Γ(V)
+=> φ (m|V)) — choice-free, no trivialization in the DEFINITION; the map_ideal_basicOpen
+compat proven through the IsInvertible trivializing cover + ideal local-global
+(localizations at a span-⊤ family determine the ideal); VALUE-lemma spec:
+sectionZeroIdeal_ideal_of_triv : ideal V = span {e.hom.app(m|V)-coefficient} at any
+V-trivialization e. Then iv: Z(ℓ') via IsOfficialCartier + finite-flat-deg-1 ⟹ graph
+section (Stacks 0B8V-shape); fibrewise nonvanishing-to-degree-1 from the b3-coordinate
+unimodularity. SKELETON-FIRST: land the def + spec with sorry'd compat so iv can
+proceed against the interface (producer WIP-sorries per repo rules).
