@@ -1,1 +1,1 @@
-FOCUS: [A5-mono] ker-monotonicity of divisor-restriction on base sections via cokernelTwistDesc; then [A5-ev] evaluation functional
+FOCUS: [A4-c] twisted H1 leaf — port the fibrewise+base-change H1 machinery to tensorObj (idealModule D) (poleSheafPower m); recon PoleSheafBaseCechHOne inputs

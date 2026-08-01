@@ -359,8 +359,10 @@ theorem exists_ker_baseSectionsMap_cokernel_eq_span_of_sections
     (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
       algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
         (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
-    [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
-      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal) L).sheaf 1)]
+    (hsurj : Function.Surjective
+      ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![P, Q]).ideal L))).hom))
     (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
       (Scheme.Modules.baseSections π L)) :
     ∃ ℓ : Scheme.Modules.baseSections π L,
@@ -385,10 +387,6 @@ theorem exists_ker_baseSectionsMap_cokernel_eq_span_of_sections
   haveI hMonoT : Mono (divisorTwistHom
       (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal L) :=
     mono_divisorTwistHom _ L hcover hL
-  -- surjectivity of the restriction on base sections from the H¹ slot
-  have hsurj := Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
-    π (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
-      π ![P, Q]).ideal L)
   -- the rank-two coordinates
   obtain ⟨e2⟩ := nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair_of_sections
     hsm P Q U hPU hQU rP rQ hP hQ hnzdP hnzdQ L hL eL halg
@@ -583,8 +581,10 @@ theorem exists_ker_baseSectionsMap_cokernel_eq_span_perp_of_section
     (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
       algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
         (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
-    [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
-      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal) L).sheaf 1)]
+    (hsurj : Function.Surjective
+      ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![R]).ideal L))).hom))
     (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
       (Scheme.Modules.baseSections π L)) :
     ∃ v : Scheme.Modules.baseSections π L,
@@ -605,9 +605,6 @@ theorem exists_ker_baseSectionsMap_cokernel_eq_span_perp_of_section
   haveI hMonoT : Mono (divisorTwistHom
       (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal L) :=
     mono_divisorTwistHom _ L hcover hL
-  have hsurj := Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
-    π (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
-      π ![R]).ideal L)
   obtain ⟨e1⟩ := nonempty_baseSections_cokernel_divisorTwistHom_equiv_single_of_section
     hsm R U hRU rR hR hnzdR L hL eL halg
   exact ⟨b2.equivFun.symm
@@ -798,6 +795,8 @@ theorem exists_ker_baseSectionsMap_cokernel_poleSheaf_pair
     [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
       (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal)
         (ModularCurves.sectionPoleSheafPower π z hz m)).sheaf 1)]
+    [Mono (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+      π ![P, Q]).ideal (ModularCurves.sectionPoleSheafPower π z hz m))]
     (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
       (Scheme.Modules.baseSections π (ModularCurves.sectionPoleSheafPower π z hz m))) :
     ∃ ℓ : Scheme.Modules.baseSections π
@@ -812,7 +811,9 @@ theorem exists_ker_baseSectionsMap_cokernel_poleSheaf_pair
     (ModularCurves.sectionPoleSheafPower_isInvertible hsm z hz m)
     (ModularCurves.sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
       z hz U.1 hzU m)
-    halg b3
+    halg
+    (Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one π _)
+    b3
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
@@ -833,6 +834,8 @@ theorem exists_ker_baseSectionsMap_cokernel_poleSheaf_single
     [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
       (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal)
         (ModularCurves.sectionPoleSheafPower π z hz m)).sheaf 1)]
+    [Mono (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+      π ![R]).ideal (ModularCurves.sectionPoleSheafPower π z hz m))]
     (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
       (Scheme.Modules.baseSections π (ModularCurves.sectionPoleSheafPower π z hz m))) :
     ∃ v : Scheme.Modules.baseSections π
@@ -847,6 +850,8 @@ theorem exists_ker_baseSectionsMap_cokernel_poleSheaf_single
     (ModularCurves.sectionPoleSheafPower_isInvertible hsm z hz m)
     (ModularCurves.sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
       z hz U.1 hzU m)
-    halg b2
+    halg
+    (Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one π _)
+    b2
 
 end AlgebraicGeometry.Scheme.Modules
