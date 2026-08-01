@@ -31506,3 +31506,16 @@ converting the product factorisation into the three successive divisions via
 `exists_mul_eq_sub_coord` and the generation hypothesis, extracting the unit cofactor
 (Cramer), and feeding `chord_chart_factorisation` → `nonempty_iso_unitObj_of_exact_order₃`
 → `ChordDatum` → `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`.
+
+### [W1 (2)] DONE 2026-08-01 — `exists_three_divisions` + `eq_unit_mul_of_three_divisions_of_isUnit`
+The chord-side chain is complete as an algebraic pipeline:
+  Weierstrass equations + line relation + non-tangency
+    ⟹ chord · conj = −∏(X − xᵢ)                    (chord_mul_conj_eq_prod_of_equations)
+    ⟹ successive divisions by the kernel generators (exists_three_divisions,
+       exists_mul_eq_sub_coord)
+    ⟹ exact-order form `c = u · (gP · (gQ · gR))`  (eq_unit_mul_of_three_divisions_of_isUnit)
+    ⟹ `nonempty_iso_unitObj_of_exact_order₃`        ⟹ ChordDatum ⟹ theorem of the square.
+The remaining inputs are the CHART FACTS: that the three evaluations kill the successive
+quotients (from the dictionary chain, proven at field points and upgradable by
+`section_eq_of_dictionary_eq`), that the last quotient is a unit (Cramer/adjugate), and
+the positioning of the three sections in one affine chart inside `sectionAway`.
