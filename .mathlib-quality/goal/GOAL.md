@@ -7171,3 +7171,42 @@ The three sites pass `c`, `π`, `c` — the element name varies, so the script
 extracted it per site rather than assuming uniformity. That is the same
 alpha-variation that made `dup_haves` report two copies instead of three.
 
+
+## Declined: `hX_mem` — an instance wall, and two hoists declined on structure
+
+`WedhornCechAcyclicity::hX_mem` (11L ×2) looked like the cleanest remaining
+cluster: its only dependency is `D₀`. It is not clean. The statement mentions
+
+    (IsTateRing.principalPair (presheafValue D₀)).toPairOfDefinition
+
+and `IsTateRing (presheafValue D₀)` resolves inside the consumers' proofs but
+**not** in a top-level lemma carrying the same binders (`[IsTateRing A]`
+`[IsNoetherianRing A]`). The instance that would supply it,
+`presheafValue.instIsTateRing`, is declared in `RelativeDescent.lean`, which
+this file does not import directly.
+
+Three builds spent without pinning down the difference, so the target is
+reverted and the tree confirmed green. Recording it as *blocked on instance
+availability*, not as an available quick win — the next attempt should start by
+establishing where `IsTateRing (presheafValue _)` comes from in this file's
+import closure, rather than by hoisting and reading errors.
+
+### Two hoists declined on structural grounds
+
+| target | why |
+|---|---|
+| `WittF::hsplit` 11L ×2 | nine threaded parameters to save two net lines |
+| `Presentation::hx` 13L ×2 | seven parameters, incl. `hsplit` threaded through |
+
+A hoisted lemma whose signature is longer than the duplication it removes is not
+an improvement. This is the same judgement as the six-micro-lemma split declined
+earlier, and it is worth stating as a rule: **dedup is only a win when the shared
+statement is smaller than the sharing machinery.**
+
+### What the remaining inventory actually looks like
+
+The high-yield same-file clusters are done. What is left is 11–13 line blocks
+whose locals are threaded through the enclosing proof — high parameter counts,
+low line savings. The 60 cross-file clusters are untouched and need an
+import-closure check before any of them can move.
+
