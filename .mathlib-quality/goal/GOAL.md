@@ -7064,3 +7064,41 @@ to wait for a quiet tree regardless.
 a file I did not edit, run `git status`. A foreign modification is a far cheaper
 explanation than an instance-resolution mystery, and it is one command.
 
+
+## Dedup batch: `hnull` + `hexp`, and dedup moving the task-2 counter
+
+    hnull ×2, 11L   FJP/FiniteJetChart          → tendsto_canonicalMap_tA_pow
+    hexp  ×2, 12L   UniformizerEquivariance     → p_teichPi_pow_mul
+
+Inventory 207 → **205 clusters, 1294 redundant lines**. And task 2 went
+**152 → 151**: removing `hnull`'s 11 lines pushed `canonicalMap_Qa_sq` under the
+threshold. Dedup keeps feeding decomposition without being aimed at it.
+
+### `hexp` was a within-proof duplicate across structure fields
+
+Both copies live in the *same* theorem, `isLocalization_twist_Bloc`, which is a
+structure instance with `map_units` / `surj` / `exists_of_eq` fields. My first
+instinct was to lift the `have` to a shared position earlier in the proof — but
+`surj` and `exists_of_eq` each bind their own `m` via a separate `obtain`, so
+there is no shared position. **Structure-instance fields are independent proofs
+that merely share a `where` block**; duplication across them needs a top-level
+lemma exactly as duplication across separate theorems does.
+
+### Deliberately skipped: `RobbaPresentation::hUnorm`
+
+13 lines ×2, but the file carries dozens of `variable` groups across many
+sections — `φ`, `hφ`, `hφb` redeclared with differing `hσ`/`hρ` combinations.
+Hoisting without first mapping which section the target sits in risks silently
+binding the wrong `φ`. Left for a pass that can afford that mapping; noted here
+so it is not re-picked as a quick win.
+
+### Two process slips this stretch
+
+I bundled a measurement into the same command as the gate, against my own rule
+that the gate runs as a separate command. The gate was then killed, and the
+measurement output died with it.
+
+Earlier, I ran a second `lake build` while a gate was live (recorded above).
+Both are the same failure of discipline around builds: treating the gate as
+something to multiplex around rather than as an exclusive operation.
+

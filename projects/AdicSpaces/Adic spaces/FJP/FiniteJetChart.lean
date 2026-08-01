@@ -425,6 +425,22 @@ private theorem canonicalMap_Wa_eq_mul_divByS :
     algebraMap (JetA F) (Localization.Away (chartDatum F).s) (Wa F)
   rw [divByS, IsLocalization.mk'_spec]
 
+/-- Powers of `ρ (tA F)` tend to zero: `tA` is topologically nilpotent and
+`canonicalMap` is continuous. -/
+private theorem tendsto_canonicalMap_tA_pow :
+    Filter.Tendsto (fun n : ℕ => (chartDatum F).canonicalMap (tA F) ^ n)
+      Filter.atTop (nhds (0 : presheafValue (chartDatum F))) := by
+  set ρ := (chartDatum F).canonicalMap with hρ
+  have htend : Filter.Tendsto (fun n : ℕ => tA F ^ n) Filter.atTop
+      (nhds (0 : JetA F)) := by
+    rw [tendsto_zero_iff_norm_tendsto_zero]
+    simp only [norm_JetA_pow]
+    exact tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg _) (norm_tA_lt_one F)
+  have hcont := (canonicalMap_continuous (chartDatum F)).continuousAt (x := (0 : JetA F))
+  have := hcont.tendsto.comp htend
+  rw [hρ]
+  simpa only [Function.comp_def, map_pow, map_zero] using this
+
 /-- **The (3.3) collapse**: `ρ(Q)² = 0` in the chart — the constant `ρ(Q²)` is a limit
 of the null products `ρ(ϖ)ⁿ · (gⁿ · ρ(W⁻ⁿQ²))` ([FJP] Prop 3.1 proof). -/
 theorem canonicalMap_Qa_sq :
@@ -507,17 +523,7 @@ theorem canonicalMap_Qa_sq :
     rintro _ ⟨n, rfl⟩
     exact ⟨g ^ n, ⟨n, rfl⟩, ρ (yQ F n), ⟨n, rfl⟩, rfl⟩
   -- the scalar powers are null
-  have hnull : Filter.Tendsto (fun n : ℕ => ρ (tA F) ^ n) Filter.atTop
-      (nhds (0 : presheafValue (chartDatum F))) := by
-    have htend : Filter.Tendsto (fun n : ℕ => tA F ^ n) Filter.atTop
-        (nhds (0 : JetA F)) := by
-      rw [tendsto_zero_iff_norm_tendsto_zero]
-      simp only [norm_JetA_pow]
-      exact tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg _) (norm_tA_lt_one F)
-    have hcont := (canonicalMap_continuous (chartDatum F)).continuousAt (x := (0 : JetA F))
-    have := hcont.tendsto.comp htend
-    rw [hρ]
-    simpa only [Function.comp_def, map_pow, map_zero] using this
+  have hnull := tendsto_canonicalMap_tA_pow F
   -- absorption: the constant `ρ(Q²)` lies in every neighbourhood of `0`
   have hmem0 : ∀ U ∈ nhds (0 : presheafValue (chartDatum F)), ρ (Qa F * Qa F) ∈ U := by
     intro U hU
@@ -670,17 +676,7 @@ theorem canonicalMap_eq_zero_of_qSq (y : JetA F)
     refine (hbddG.mul hbddY).subset ?_
     rintro _ ⟨n, rfl⟩
     exact ⟨g ^ n, ⟨n, rfl⟩, ρ (yGen F y hy0 hy1 n), ⟨n, rfl⟩, rfl⟩
-  have hnull : Filter.Tendsto (fun n : ℕ => ρ (tA F) ^ n) Filter.atTop
-      (nhds (0 : presheafValue (chartDatum F))) := by
-    have htend : Filter.Tendsto (fun n : ℕ => tA F ^ n) Filter.atTop
-        (nhds (0 : JetA F)) := by
-      rw [tendsto_zero_iff_norm_tendsto_zero]
-      simp only [norm_JetA_pow]
-      exact tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg _) (norm_tA_lt_one F)
-    have hcont := (canonicalMap_continuous (chartDatum F)).continuousAt (x := (0 : JetA F))
-    have := hcont.tendsto.comp htend
-    rw [hρ]
-    simpa only [Function.comp_def, map_pow, map_zero] using this
+  have hnull := tendsto_canonicalMap_tA_pow F
   have hmem0 : ∀ U ∈ nhds (0 : presheafValue (chartDatum F)), ρ y ∈ U := by
     intro U hU
     obtain ⟨V, hV, hVU⟩ := hbdd U hU

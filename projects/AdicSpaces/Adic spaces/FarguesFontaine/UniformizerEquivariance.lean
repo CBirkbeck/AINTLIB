@@ -39,6 +39,23 @@ variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
 variable (ϖ : PseudoUniformizer F)
 variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
 
+/-- Splitting `(p·[ϖ'])^(k·m)` when `[ϖ']^k = [ϖ]`: the Teichmüller part
+collapses to `[ϖ]^m` and the surplus is a power of `p`. -/
+private theorem p_teichPi_pow_mul (ϖ' : PseudoUniformizer F) (k m : ℕ) (hk : 0 < k)
+    (h : teichPi p F ϖ' ^ k = teichPi p F ϖ) :
+    ((p : Ainf p F) * teichPi p F ϖ') ^ (k * m)
+      = ((p : Ainf p F) * teichPi p F ϖ) ^ m * (p : Ainf p F) ^ (k * m - m) := by
+    have hteich' : teichPi p F ϖ' ^ (k * m) = teichPi p F ϖ ^ m := by
+      rw [pow_mul, h]
+    have hpsplit : (p : Ainf p F) ^ (k * m)
+        = (p : Ainf p F) ^ m * (p : Ainf p F) ^ (k * m - m) := by
+      rw [← pow_add]
+      congr 1
+      have : m ≤ k * m := Nat.le_mul_of_pos_left m hk
+      omega
+    rw [mul_pow, mul_pow, hteich', hpsplit]
+    ring
+
 /-- **`Bloc` is uniformizer-invariant**: if `[ϖ']^k = [ϖ]` then `Bloc-in-ϖ` is
 also the localization away from `p·[ϖ']`. -/
 theorem isLocalization_twist_Bloc {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
@@ -71,18 +88,7 @@ theorem isLocalization_twist_Bloc {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 
     show z * algebraMap (Ainf p F) (Bloc p F ϖ)
         (((p : Ainf p F) * teichPi p F ϖ') ^ (k * m))
       = algebraMap (Ainf p F) (Bloc p F ϖ) (a * (p : Ainf p F) ^ (k * m - m))
-    have hexp : ((p : Ainf p F) * teichPi p F ϖ') ^ (k * m)
-        = ((p : Ainf p F) * teichPi p F ϖ) ^ m * (p : Ainf p F) ^ (k * m - m) := by
-      have hteich' : teichPi p F ϖ' ^ (k * m) = teichPi p F ϖ ^ m := by
-        rw [pow_mul, h]
-      have hpsplit : (p : Ainf p F) ^ (k * m)
-          = (p : Ainf p F) ^ m * (p : Ainf p F) ^ (k * m - m) := by
-        rw [← pow_add]
-        congr 1
-        have : m ≤ k * m := Nat.le_mul_of_pos_left m hk
-        omega
-      rw [mul_pow, mul_pow, hteich', hpsplit]
-      ring
+    have hexp := p_teichPi_pow_mul p F ϖ ϖ' k m hk h
     rw [hexp, map_mul, ← mul_assoc,
       show ((p : Ainf p F) * teichPi p F ϖ) ^ m = (y : Ainf p F) from hm, hz,
       ← map_mul]
@@ -94,18 +100,7 @@ theorem isLocalization_twist_Bloc {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 
     refine ⟨⟨((p : Ainf p F) * teichPi p F ϖ') ^ (k * m), k * m, rfl⟩, ?_⟩
     show ((p : Ainf p F) * teichPi p F ϖ') ^ (k * m) * x
       = ((p : Ainf p F) * teichPi p F ϖ') ^ (k * m) * y
-    have hexp : ((p : Ainf p F) * teichPi p F ϖ') ^ (k * m)
-        = ((p : Ainf p F) * teichPi p F ϖ) ^ m * (p : Ainf p F) ^ (k * m - m) := by
-      have hteich' : teichPi p F ϖ' ^ (k * m) = teichPi p F ϖ ^ m := by
-        rw [pow_mul, h]
-      have hpsplit : (p : Ainf p F) ^ (k * m)
-          = (p : Ainf p F) ^ m * (p : Ainf p F) ^ (k * m - m) := by
-        rw [← pow_add]
-        congr 1
-        have : m ≤ k * m := Nat.le_mul_of_pos_left m hk
-        omega
-      rw [mul_pow, mul_pow, hteich', hpsplit]
-      ring
+    have hexp := p_teichPi_pow_mul p F ϖ ϖ' k m hk h
     rw [hexp]
     have hc' : ((p : Ainf p F) * teichPi p F ϖ) ^ m * x
         = ((p : Ainf p F) * teichPi p F ϖ) ^ m * y := by
