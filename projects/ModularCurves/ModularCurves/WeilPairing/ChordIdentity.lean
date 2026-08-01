@@ -694,6 +694,31 @@ theorem second_quotient_vanishes_of_not_two_torsion
     ← algHom_conj_eq W σ X Y ℓ x₁ y₁ x₂ y₂ hx hy]
   exact ht
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (1)] The third evaluation vanishes off `2`-torsion.** Same shape as the second:
+from `c₂ · conj = −f₃` with `σ f₃ = 0` and the third point not `2`-torsion. -/
+theorem third_quotient_vanishes_of_not_two_torsion
+    {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (σ : A →ₐ[R] R) (X Y : A) (ℓ x₁ y₁ x₃ y₃ : R)
+    (c₂ f₃ : A)
+    (hx : σ X = x₃) (hy : σ Y = y₃)
+    (hline : y₃ = ℓ * (x₃ - x₁) + y₁)
+    (hid : c₂ * ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+        (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) = -f₃)
+    (hf₃ : σ f₃ = 0)
+    (hnzd : ∀ t : R, -(2 * y₃ + W.a₁ * x₃ + W.a₃) * t = 0 → t = 0) :
+    σ c₂ = 0 := by
+  refine algHom_eq_zero_of_mul_eq_zero σ c₂
+    ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+      (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) ?_ ?_
+  · rw [hid, map_neg, hf₃, neg_zero]
+  · intro t ht
+    refine hnzd t ?_
+    rw [← conj_at_line_point W ℓ x₁ y₁ x₃ y₃ hline,
+      ← algHom_conj_eq W σ X Y ℓ x₁ y₁ x₃ y₃ hx hy]
+    exact ht
+
 end ModularCurves
 
 namespace ModularCurves
