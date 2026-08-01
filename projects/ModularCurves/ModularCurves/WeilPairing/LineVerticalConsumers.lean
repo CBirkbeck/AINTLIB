@@ -399,4 +399,222 @@ theorem exists_ker_baseSectionsMap_cokernel_eq_span_of_sections
           π ![P, Q]).ideal L))) (b3 j)) 1)),
     ker_baseSectionsMap_cokernel_eq_span_crossProduct_of_surjective _ b3 e2 hsurj⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- On a chart where the section's kernel is principal, the single-section
+divisor's ideal is that principal span. -/
+theorem sectionsDivisor_single_ideal_span [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (R : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (rR : Γ(C, U.1))
+    (hR : (Scheme.Hom.ker R.1).ideal U = Ideal.span {rR}) :
+    (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal.ideal U =
+      Ideal.span {rR} := by
+  rw [ModularCurves.RelEffCartierDiv.sectionsDivisor_ideal π hsm ![R]]
+  rw [show (∏ i, Scheme.Hom.ker ((![R]) i).1) = Scheme.Hom.ker R.1 from by
+    rw [Fin.prod_univ_one]
+    rfl]
+  exact hR
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GAP-A-4, rank-one coordinate at a single section]** The base sections of the
+single-section divisor twist cokernel are free of rank one. -/
+theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_single_of_section
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (R : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (hRU : R.1 ⁻¹ᵁ U.1 = ⊤)
+    (rR : Γ(C, U.1))
+    (hR : (Scheme.Hom.ker R.1).ideal U = Ideal.span {rR})
+    (hnzdR : rR ∈ nonZeroDivisors Γ(C, U.1))
+    (L : C.Modules) (hL : IsInvertible L)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r) :
+    Nonempty ((Scheme.Modules.baseSections π
+        (Limits.cokernel (divisorTwistHom
+          (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal L)))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens))) := by
+  classical
+  haveI hclR : IsClosedImmersion R.1 :=
+    ModularCurves.RelEffCartierDiv.SectionsIdeal.isClosedImmersion R.2
+  have hspanU : (ModularCurves.RelEffCartierDiv.sectionsDivisor
+      π ![R]).ideal.ideal U = Ideal.span {rR} :=
+    sectionsDivisor_single_ideal_span hsm R U rR hR
+  let eI : (restrictFunctor U.1.ι).obj (idealModule
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal) ≅
+      unitObj U.1.toScheme :=
+    idealModuleRestrictTrivOfSpan U rR hspanU hnzdR
+  have hcover : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal.ideal V =
+        Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1) := by
+    intro c
+    obtain ⟨V, hcV, hV⟩ :=
+      ModularCurves.RelEffCartierDiv.SectionsIdeal.exists_multiChart
+        π hsm ![R] c
+    obtain ⟨f₀, hf₀, hf₀nzd⟩ := hV 0
+    exact ⟨V, hcV, f₀, sectionsDivisor_single_ideal_span hsm R V f₀ hf₀, hf₀nzd⟩
+  haveI hMono : Mono ((restrictFunctor U.1.ι).map (divisorTwistHom
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal L)) :=
+    mono_restrictFunctor_map_of_isLocallyInjective _
+      (isLocallyInjective_divisorTwistHom _ L hcover hL) U.1
+  have hranges : ∀ s, R.1.base s ∈ U.1 := fun s => by
+    have : s ∈ R.1 ⁻¹ᵁ U.1 := by rw [hRU]; trivial
+    exact this
+  let V : C.Opens := ⟨(Set.range R.1.base)ᶜ,
+    R.1.isClosedEmbedding.isClosed_range.isOpen_compl⟩
+  have hUV : U.1 ⊔ V = ⊤ := by
+    refine le_antisymm le_top ?_
+    intro c _
+    by_cases hc : c ∈ Set.range R.1.base
+    · obtain ⟨s, rfl⟩ := hc
+      exact Or.inl (hranges s)
+    · exact Or.inr hc
+  have hsupp : ((ModularCurves.RelEffCartierDiv.sectionsDivisor
+      π ![R]).ideal.support : Set ↥C) = Set.range R.1.base := by
+    rw [ModularCurves.RelEffCartierDiv.sectionsDivisor_ideal π hsm ![R]]
+    rw [ModularCurves.RelEffCartierDiv.SectionsIdeal.support_prod π ![R]]
+    ext c
+    simp only [Set.mem_iUnion]
+    constructor
+    · rintro ⟨i, hi⟩
+      fin_cases i
+      exact hi
+    · intro hc
+      exact ⟨0, hc⟩
+  have htriv : ∀ (W : C.Opens), W ≤ V →
+      (1 : Γ(C, W)) ∈ idealSections
+        (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal
+        (Opposite.op W) := by
+    intro W hWV
+    refine one_mem_idealSections_of_disjoint_support _ W ?_
+    rw [hsupp]
+    refine Set.disjoint_left.mpr fun c hc hcW => ?_
+    exact (hWV hcW) hc
+  have hv : Ideal.span {twistChartMultiplier
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal
+        L U.1 eI eL} =
+      Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rR} :=
+    span_twistChartMultiplier_eq _ L U rR hspanU hnzdR eI eL
+  obtain ⟨eP⟩ := nonempty_evaluation_quotEquiv_of_ker_span
+    R.1 R.2 U hRU rR hR halg
+  exact nonempty_baseSections_cokernel_divisorTwistHom_equiv_single
+    (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal L U
+    eI eL V hUV htriv hMono
+    ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rR)
+    hv halg eP
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The vertical kernel from surjectivity alone**: the rank-one analogue —
+the single evaluation row is unimodular by surjectivity, and the kernel is the
+span of its perpendicular. -/
+theorem ker_baseSectionsMap_cokernel_eq_span_perp_of_surjective
+    {M N : C.Modules} (f : M ⟶ N)
+    (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π N))
+    (e1 : Scheme.Modules.baseSections π (Limits.cokernel f)
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens)))
+    (hsurj : Function.Surjective
+      (Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) :
+    LinearMap.ker
+        ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens))
+        {b2.equivFun.symm
+          ![-(e1 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b2 1))),
+            e1 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b2 0))]} := by
+  classical
+  have hcoord : ∀ (s : Scheme.Modules.baseSections π N),
+      (fun j => e1 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) (b2 j))) ⬝ᵥ b2.equivFun s =
+      e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) s) := by
+    intro s
+    calc (fun j => e1 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) (b2 j))) ⬝ᵥ b2.equivFun s
+        = ∑ j, b2.equivFun s j •
+            e1 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b2 j)) := by
+          simp only [dotProduct, smul_eq_mul]
+          exact Finset.sum_congr rfl fun j _ => mul_comm _ _
+      _ = ∑ j, e1 ((Scheme.Modules.baseSectionsMap π
+            (Limits.cokernel.π f)) (b2.equivFun s j • b2 j)) := by
+          exact Finset.sum_congr rfl fun j _ => by
+            rw [_root_.map_smul, _root_.map_smul, smul_eq_mul]
+      _ = e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+            (∑ j, b2.equivFun s j • b2 j)) := by
+          rw [map_sum, map_sum]
+      _ = _ := by rw [b2.sum_equivFun]
+  refine ker_baseSectionsMap_cokernel_eq_span_perp f b2 e1
+    (fun j => e1 ((Scheme.Modules.baseSectionsMap π
+      (Limits.cokernel.π f)) (b2 j)))
+    (fun j => rfl) ?_
+  refine ModularCurves.span_range_eq_top_of_surjective _ ?_
+  intro y
+  obtain ⟨s, hs⟩ := hsurj (e1.symm y)
+  refine ⟨b2.equivFun s, ?_⟩
+  rw [hcoord s]
+  rw [show ((Scheme.Modules.baseSectionsMap π
+    (Limits.cokernel.π f)) s : Scheme.Modules.baseSections π
+      (Limits.cokernel f)) = e1.symm y from hs]
+  exact e1.apply_symm_apply y
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GAP-A-4, the vertical]** For a single section on a principal chart, an
+invertible ambient with rank-two base sections, and vanishing `H¹` of the twisted
+tensor, the kernel of restriction to the section divisor is free of rank one,
+spanned by the perpendicular of the evaluation row. -/
+theorem exists_ker_baseSectionsMap_cokernel_eq_span_perp_of_section
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (R : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (hRU : R.1 ⁻¹ᵁ U.1 = ⊤)
+    (rR : Γ(C, U.1))
+    (hR : (Scheme.Hom.ker R.1).ideal U = Ideal.span {rR})
+    (hnzdR : rR ∈ nonZeroDivisors Γ(C, U.1))
+    (L : C.Modules) (hL : IsInvertible L)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal) L).sheaf 1)]
+    (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π L)) :
+    ∃ v : Scheme.Modules.baseSections π L,
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![R]).ideal L))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {v} := by
+  classical
+  have hcover : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal.ideal V =
+        Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1) := by
+    intro c
+    obtain ⟨V, hcV, hV⟩ :=
+      ModularCurves.RelEffCartierDiv.SectionsIdeal.exists_multiChart
+        π hsm ![R] c
+    obtain ⟨f₀, hf₀, hf₀nzd⟩ := hV 0
+    exact ⟨V, hcV, f₀, sectionsDivisor_single_ideal_span hsm R V f₀ hf₀, hf₀nzd⟩
+  haveI hMonoT : Mono (divisorTwistHom
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal L) :=
+    mono_divisorTwistHom _ L hcover hL
+  have hsurj := Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
+    π (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+      π ![R]).ideal L)
+  obtain ⟨e1⟩ := nonempty_baseSections_cokernel_divisorTwistHom_equiv_single_of_section
+    hsm R U hRU rR hR hnzdR L hL eL halg
+  exact ⟨b2.equivFun.symm
+      ![-(e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+          (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+            π ![R]).ideal L))) (b2 1))),
+        e1 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+          (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+            π ![R]).ideal L))) (b2 0))],
+    ker_baseSectionsMap_cokernel_eq_span_perp_of_surjective _ b2 e1 hsurj⟩
+
 end AlgebraicGeometry.Scheme.Modules

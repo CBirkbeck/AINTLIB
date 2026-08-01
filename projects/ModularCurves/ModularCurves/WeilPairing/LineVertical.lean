@@ -2285,6 +2285,64 @@ theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair
   exact ⟨(((i1 ≪≫ i2 ≪≫ i3).toLinearEquiv).trans eCore).trans
     (eSpan.trans e3a)⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[e1] The rank-one coordinate of the divisor restriction** (the vertical's
+degree-one case): with a single-generator span identification of the conjugated
+multiplier and one evaluation equivalence, the base sections of the twist cokernel
+are free of rank one. -/
+theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_single
+    {S : Scheme.{u}} {π : C ⟶ S} (J : C.IdealSheafData) (L : C.Modules)
+    (U : C.affineOpens)
+    (eI : (restrictFunctor U.1.ι).obj (idealModule J) ≅ unitObj U.1.toScheme)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    (V : C.Opens) (hUV : U.1 ⊔ V = ⊤)
+    (htriv : ∀ (W : C.Opens), W ≤ V →
+      (1 : Γ(C, W)) ∈ idealSections J (Opposite.op W))
+    (hMono : Mono ((restrictFunctor U.1.ι).map (divisorTwistHom J L)))
+    (r' : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+    (hv : Ideal.span {twistChartMultiplier J L U.1 eI eL} =
+      Ideal.span {r'})
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens))
+        Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    (eP : (Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸ Ideal.span {r'})
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens))) :
+    Nonempty ((Scheme.Modules.baseSections π
+        (Limits.cokernel (divisorTwistHom J L)))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens))) := by
+  classical
+  haveI hMono' := hMono
+  haveI : IsAffine U.1.toScheme := U.2
+  haveI hMonoEndo : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (twistChartMultiplier J L U.1 eI eL)) :=
+    mono_unitEndo_twistChartMultiplier J L U.1 eI eL
+  -- concentration and transport to the multiplier cokernel
+  have hbij := cokernel_divisorTwistHom_bijective_restrict J L U.1 V hUV htriv
+  let i1 := Scheme.Modules.baseSectionsRestrictIsoOfBijective π
+    (Limits.cokernel (divisorTwistHom J L)) U.1 hbij
+  let i2 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+    (Limits.PreservesCokernel.iso (restrictFunctor U.1.ι)
+      (divisorTwistHom J L))
+  let i3 := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+    (cokernelRestrictTwistUnitEndoIso J L U.1 eI eL)
+  -- the multiplier cokernel's base sections are the quotient (the CORE)
+  obtain ⟨eCore⟩ := nonempty_baseSections_cokernel_unitEndo_equiv
+    (U.1.ι ≫ π) (twistChartMultiplier J L U.1 eI eL) halg
+  -- span identification and the evaluation
+  let eA : (Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸
+      Ideal.span {twistChartMultiplier J L U.1 eI eL}) ≃ₗ[
+        Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+      (Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸
+        Ideal.span {r'}) :=
+    Submodule.quotEquivOfEq _ _ hv
+  let eSpan := eA.restrictScalars Γ(S, (⊤ : S.Opens))
+  exact ⟨(((i1 ≪≫ i2 ≪≫ i3).toLinearEquiv).trans eCore).trans
+    (eSpan.trans eP)⟩
+
+
 end LineAssembly
 
 end Twist
