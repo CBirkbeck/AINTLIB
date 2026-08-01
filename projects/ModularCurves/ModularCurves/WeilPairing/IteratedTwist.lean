@@ -521,6 +521,84 @@ theorem bijective_smul_restrict_of_restrictIso {M : C.Modules} (U : C.Opens)
   rw [hval]
   exact bijective_smul_restrictIso_inv_app U e W'
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Transport of the generating property along an equality of opens. -/
+theorem bijective_smul_congr_opens {M : C.Modules} {A B : C.Opens} (hAB : A = B)
+    (mB : Γ(M, B))
+    (h : Function.Bijective (fun r : Γ(C, A) =>
+      r • M.presheaf.map (eqToHom hAB).op mB)) :
+    Function.Bijective (fun r : Γ(C, B) => r • mB) := by
+  subst hAB
+  simpa using h
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The image of the top open under an open immersion of opens. -/
+theorem image_top_eq (V : C.Opens) : V.ι ''ᵁ (⊤ : V.toScheme.Opens) = V := by
+  simp
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W2-c] The generating section of a chart trivialization, on the base scheme.**
+A trivialization of `M` over `V` produces a section over `V` all of whose restrictions
+generate — the exact input of `Picard/GlueTrivialization.lean`. -/
+noncomputable def generatorOfRestrictIso {M : C.Modules} (V : C.Opens)
+    (e : (restrictFunctor V.ι).obj M ≅ unitObj V.toScheme) : Γ(M, V) :=
+  M.presheaf.map (eqToHom (image_top_eq V).symm).op
+    (e.inv.app (⊤ : V.toScheme.Opens)
+      (show Γ(unitObj V.toScheme, (⊤ : V.toScheme.Opens)) from
+        (1 : Γ(V.toScheme, (⊤ : V.toScheme.Opens)))))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The generator of a trivialization generates over the whole open. -/
+theorem bijective_smul_generatorOfRestrictIso {M : C.Modules} (V : C.Opens)
+    (e : (restrictFunctor V.ι).obj M ≅ unitObj V.toScheme) :
+    Function.Bijective (fun r : Γ(C, V) => r • generatorOfRestrictIso V e) := by
+  refine bijective_smul_congr_opens (image_top_eq V) _ ?_
+  have hb := bijective_smul_restrictIso_inv_app V e V
+  have hpre : V.ι ⁻¹ᵁ V = (⊤ : V.toScheme.Opens) := V.ι_preimage_self
+  have hb' : Function.Bijective
+      (fun r : Γ(V.toScheme, (⊤ : V.toScheme.Opens)) =>
+        r • (e.inv.app (⊤ : V.toScheme.Opens)
+          (show Γ(unitObj V.toScheme, (⊤ : V.toScheme.Opens)) from
+            (1 : Γ(V.toScheme, (⊤ : V.toScheme.Opens)))))) := by
+    rw [← hpre]
+    exact hb
+  have hcast : (fun r : Γ(C, V.ι ''ᵁ (⊤ : V.toScheme.Opens)) =>
+      r • M.presheaf.map (eqToHom (image_top_eq V)).op
+        (generatorOfRestrictIso V e)) =
+      (fun r : Γ(V.toScheme, (⊤ : V.toScheme.Opens)) =>
+        r • (e.inv.app (⊤ : V.toScheme.Opens)
+          (show Γ(unitObj V.toScheme, (⊤ : V.toScheme.Opens)) from
+            (1 : Γ(V.toScheme, (⊤ : V.toScheme.Opens)))))) := by
+    have hsec : M.presheaf.map (eqToHom (image_top_eq V)).op
+        (generatorOfRestrictIso V e) =
+        e.inv.app (⊤ : V.toScheme.Opens)
+          (show Γ(unitObj V.toScheme, (⊤ : V.toScheme.Opens)) from
+            (1 : Γ(V.toScheme, (⊤ : V.toScheme.Opens)))) := by
+      show M.presheaf.map (eqToHom (image_top_eq V)).op
+          (M.presheaf.map (eqToHom (image_top_eq V).symm).op
+            (e.inv.app (⊤ : V.toScheme.Opens)
+              (show Γ(unitObj V.toScheme, (⊤ : V.toScheme.Opens)) from
+                (1 : Γ(V.toScheme, (⊤ : V.toScheme.Opens)))))) = _
+      rw [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+      rw [show ((eqToHom (image_top_eq V).symm).op ≫ (eqToHom (image_top_eq V)).op) =
+        𝟙 _ from by
+        rw [← op_comp, eqToHom_trans, eqToHom_refl, op_id]]
+      rw [CategoryTheory.Functor.map_id]
+      rfl
+    funext r
+    rw [hsec]
+    have hIso : (V.ι.appIso (⊤ : V.toScheme.Opens)).inv.hom r = r := by
+      rw [Scheme.Opens.ι_appIso]
+      rfl
+    conv_lhs => rw [← hIso]
+    rfl
+  rw [hcast]
+  exact hb'
+
 end GeneralMultiplier
 
 section IteratedTwist
