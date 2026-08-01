@@ -31593,3 +31593,20 @@ So all the non-degeneracy hypotheses of the cancellation chain are the standard
 `2`-torsion exclusions, stated in the tree's own terms. This closes the analysis of the
 remaining leaf: the general case needs the addOnY/addOnZ chart families (already in the
 tree) to cover the excluded configurations.
+
+## ★★★★★★★★★★ [W1] CHORD INPUT ESSENTIALLY COMPLETE 2026-08-01
+With `second_quotient_vanishes_of_not_two_torsion` the chord's three evaluation
+vanishings are proven from:
+   the two Weierstrass equations, the line relation, non-tangency (`x₁ − x₂` nzd), and
+   the non-`2`-torsion conditions (`2y + a₁x + a₃` nzd at the relevant points).
+Everything else in the prong is proven and axiom-clean. The remaining work is:
+ (1) the same assembly for the THIRD evaluation (identical shape, using
+     `chord_quotients_of_norm`'s `c₂ · conj = −f₃` and the third point's non-torsion
+     condition) — a copy of the just-proven lemma;
+ (2) the unit last quotient: from `c₂ · conj = −f₃` and `f₃ = g₃ · c₃` with `g₃` the
+     generator, the cofactor is a unit iff the conjugate's value is — same criterion;
+ (3) instantiating all of this at the actual chord in the away-chart and feeding
+     `ChordDatum`;
+ (4) the degenerate configurations (tangency, `2`-torsion, points at infinity) via the
+     project's addOnY/addOnZ chart families.
+Root build 9617 jobs; all audits clean.
