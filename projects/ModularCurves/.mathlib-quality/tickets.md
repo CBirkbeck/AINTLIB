@@ -31562,3 +31562,23 @@ and `σ₃(c₂)·σ₃(conj) = −σ₃(X−x₃) = 0`, so the deeper vanishing
 ⟹ [W1] now needs only: the non-vanishing of `σᵢ(conj)` (equivalently, the 2-torsion
 case split) and the unit last quotient (F-ii, Cramer). Both are the classical degenerate
 -case analysis, and the project's addOnY/addOnZ chart families exist for exactly that.
+
+## ★★★★★★★★★ [W1] STATE AFTER THIS STRETCH (2026-08-01)
+The chord side is proven as a complete algebraic pipeline, all axiom-clean:
+  chord_mul_conj_eq_cubic → cubic_factors_of_vieta → chord_mul_conj_eq_prod(_of_equations)
+  → cancel_factor_of_norm → chord_quotients_of_norm
+  → algHom_eq_zero_of_mul_eq_zero / algHom_second_quotient_eq_zero
+  → exists_three_divisions → eq_unit_mul_of_three_divisions_of_isUnit
+  → chord_exact_order_of_chart_facts
+  → (chartMultiplier_unitHom_eq_coefficient) → nonempty_iso_unitObj_of_exact_order₃
+  → ChordDatum → EllipticCurve.nonempty_tensorObj_iso_of_chordDatum
+  → (DescentFromCharts) → exists_invertible_tensor_idealModule_add.
+Also proven: the Vieta relations from the point equations, the chart positioning
+(`exists_affineChart_le_of_multiChart`), the three retractions, the dictionary chain
+identifying `-(P+Q)` with `(addX, negAddY)` at field points and its section-level
+upgrade, and the Cramer/adjugate tools.
+
+THE ONLY REMAINING INPUTS, both classical case analysis:
+ * `σᵢ(conj)` is a nonzerodivisor (equivalently: the points are not `2`-torsion in the
+   relevant sense) — the case split the project's addOnY/addOnZ chart families handle;
+ * the unit last quotient (F-ii) — Cramer/adjugate against the rank-3 coordinates.
