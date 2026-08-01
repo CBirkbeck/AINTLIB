@@ -718,60 +718,6 @@ theorem ker_baseSectionsMap_cokernel_mono {J₁ J₂ : C.IdealSheafData}
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
-/-- The evaluation ideal of a global section at an affine open: the ideal of the
-values of all linear functionals on the restricted sections. Choice-free — no
-trivialization appears in the definition. -/
-noncomputable def sectionEvalIdeal {M : C.Modules} (m : Γ(M, (⊤ : C.Opens)))
-    (V : C.affineOpens) : Ideal Γ(C, V.1) :=
-  Ideal.span (Set.range fun φ : Γ(M, V.1) →ₗ[Γ(C, V.1)] Γ(C, V.1) =>
-    φ (M.presheaf.map (homOfLE (le_top : V.1 ≤ (⊤ : C.Opens))).op m))
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **The evaluation ideal through a sections-level trivialization** is the
-principal span of the coefficient: rank-one functionals are multiples of the
-trivialization. -/
-theorem sectionEvalIdeal_eq_span_of_equiv {M : C.Modules}
-    (m : Γ(M, (⊤ : C.Opens))) (V : C.affineOpens)
-    (eV : Γ(M, V.1) ≃ₗ[Γ(C, V.1)] Γ(C, V.1)) :
-    sectionEvalIdeal m V = Ideal.span
-      {eV (M.presheaf.map (homOfLE (le_top : V.1 ≤ (⊤ : C.Opens))).op m)} := by
-  refine le_antisymm ?_ ?_
-  · rw [sectionEvalIdeal, Ideal.span_le]
-    rintro _ ⟨φ, rfl⟩
-    have hx : (M.presheaf.map (homOfLE (le_top : V.1 ≤ (⊤ : C.Opens))).op m) =
-        eV (M.presheaf.map (homOfLE (le_top : V.1 ≤ (⊤ : C.Opens))).op m) •
-          eV.symm 1 := by
-      rw [← _root_.map_smul, smul_eq_mul, mul_one, eV.symm_apply_apply]
-    refine Ideal.mem_span_singleton'.mpr ⟨φ (eV.symm 1), ?_⟩
-    calc φ (eV.symm 1) * eV (M.presheaf.map
-          (homOfLE (le_top : V.1 ≤ (⊤ : C.Opens))).op m)
-        = eV (M.presheaf.map (homOfLE
-            (le_top : V.1 ≤ (⊤ : C.Opens))).op m) • φ (eV.symm 1) := by
-          rw [smul_eq_mul, mul_comm]
-      _ = φ (eV (M.presheaf.map (homOfLE
-            (le_top : V.1 ≤ (⊤ : C.Opens))).op m) • eV.symm 1) := by
-          rw [_root_.map_smul]
-      _ = φ (M.presheaf.map (homOfLE (le_top : V.1 ≤ (⊤ : C.Opens))).op m) := by
-          rw [← hx]
-  · rw [Ideal.span_le]
-    rintro _ rfl
-    exact Ideal.subset_span ⟨(eV : Γ(M, V.1) →ₗ[Γ(C, V.1)] Γ(C, V.1)), rfl⟩
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- **[5a-iii] The zero ideal sheaf of a global section of an invertible module.**
-The basic-open compatibility is the WIP leaf [5a-iii-compat]: through the
-trivializing cover, both sides principalize on the coefficient and localization
-of ideals is determined on a cover. -/
-noncomputable def sectionZeroIdeal {M : C.Modules} (_hM : IsInvertible M)
-    (m : Γ(M, (⊤ : C.Opens))) : C.IdealSheafData where
-  ideal := sectionEvalIdeal m
-  map_ideal_basicOpen := by
-    sorry
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[GAP-A-4 at the pole sheaf, the line]** The kernel of restriction of
 `π_*𝒪(m[0])` to the pair divisor `[P] + [Q]` is free of rank one, on a chart
 containing both sections and avoiding the zero section. Only the rank-three basis
