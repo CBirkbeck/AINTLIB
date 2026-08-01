@@ -1,1 +1,1 @@
-FOCUS: [W2-b] ratio-of-generators is a unit (overlap comparison units for the descent)
+FOCUS: [W2-d] assemble the descent: local trivializations over preimages of a base cover + zero-normalization => Nonempty (unitObj ≅ L) via nonempty_unitObj_iso_of_normalized_glue
