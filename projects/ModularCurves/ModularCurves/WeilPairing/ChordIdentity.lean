@@ -390,4 +390,35 @@ theorem hom_ext_of_forall_algebra {R : Type u} [CommRing R] {Y : Scheme.{u}}
   obtain ⟨ψ, rfl⟩ := Spec.map_surjective p
   exact h K ψ.hom
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2c, step 6] Section identity from field-point identity, dictionary form.**
+Two sections of the projective model over a reduced affine base agree as soon as their
+dictionary values agree for every field-valued point. The dictionary is injective, so
+this is exactly the extensionality principle in the form the chord comparison produces
+(the previous lemmas compute both sides' dictionary values). -/
+theorem section_eq_of_dictionary_eq {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) [W.IsElliptic]
+    [IsReduced (Spec (CommRingCat.of R))]
+    [(projModel W).IsSeparated]
+    {f g : Spec (CommRingCat.of R) ⟶ projModel W}
+    (hf : f ≫ projModelπ W = 𝟙 _) (hg : g ≫ projModelπ W = 𝟙 _)
+    (h : ∀ (K : Type u) [Field K] (φ : R →+* K),
+      letI : Algebra R K := φ.toAlgebra
+      projModelPointsEquiv W K
+          ⟨Spec.map (CommRingCat.ofHom φ) ≫ f, by
+            rw [Category.assoc, hf, Category.comp_id]
+            rfl⟩ =
+        projModelPointsEquiv W K
+          ⟨Spec.map (CommRingCat.ofHom φ) ≫ g, by
+            rw [Category.assoc, hg, Category.comp_id]
+            rfl⟩) :
+    f = g := by
+  refine hom_ext_of_forall_algebra (fun K _ φ => ?_)
+  letI : Algebra R K := φ.toAlgebra
+  have hval := h K φ
+  have hinj := (projModelPointsEquiv W K).injective hval
+  exact congrArg Subtype.val hinj
+
+
 end ModularCurves
