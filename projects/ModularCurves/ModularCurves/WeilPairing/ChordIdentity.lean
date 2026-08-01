@@ -865,6 +865,24 @@ theorem chordDatum_of_trivializations {C S : Scheme.{u}} {π : C ⟶ S} [IsSepar
     AlgebraicGeometry.Scheme.Modules.ChordDatum z hz P Q R Rm :=
   { principal := hprin, chord := hchord, vertical := hvert }
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (a)] The coordinate ring's own coordinates satisfy the Weierstrass equation**
+in the form `chord_exact_order_in_chart` consumes. Repackaging of the tree's
+`coordY_mul_coordY` (PoleFiltration.lean:116). -/
+theorem coord_equation {R : Type u} [CommRing R] (W : WeierstrassCurve R) :
+    (coordY W) ^ 2 +
+        algebraMap R W.toAffine.CoordinateRing W.a₁ * (coordX W) * (coordY W) +
+        algebraMap R W.toAffine.CoordinateRing W.a₃ * (coordY W) =
+      (coordX W) ^ 3 +
+        algebraMap R W.toAffine.CoordinateRing W.a₂ * (coordX W) ^ 2 +
+        algebraMap R W.toAffine.CoordinateRing W.a₄ * (coordX W) +
+        algebraMap R W.toAffine.CoordinateRing W.a₆ := by
+  have h := coordY_mul_coordY W
+  have hsq : (coordY W) ^ 2 = coordY W * coordY W := sq (coordY W)
+  rw [hsq, h]
+  ring
+
 end ModularCurves
 
 namespace ModularCurves
