@@ -176,4 +176,48 @@ theorem nonempty_tensorObj_iso_of_chord_vertical_poleSheaf
     (nonempty_sectionPoleSheafPower_succ_iso z hz 2)
     (nonempty_tensorObj_sectionPoleSheaf_iso hsm z hz)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[WP PRONG, local form] The theorem of the square from two chart identities.**
+
+`ℓ` is the chord — a section of `π_*𝒪(3[0])` whose chart multiplier is a unit times
+`g_P · g_Q · g_{R⁻}` — and `v` the vertical — a section of `π_*𝒪(2[0])` whose chart
+multiplier is a unit times `g_R · g_{R⁻}`. Then the divisor products agree:
+`I(P) ⊗ I(Q) ≅ I(R) ⊗ I(0)`.
+
+Everything between the two chart identities and this conclusion is discharged: the
+lifts are isomorphisms by the exact-order criterion, and the Picard skeleton cancels
+the residual factor and the pole sheaves. Over a general base the two identities hold
+only Zariski-locally on the base — which is exactly why the descent step
+(`Picard/RigidDescent.lean`) contributes the base bundle `N`. -/
+theorem nonempty_tensorObj_iso_of_exact_order_chart_identities
+    {S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (JP JQ JR JRm : C.IdealSheafData)
+    (hJP : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JP.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hJQ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JQ.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hJR : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JR.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hJRm : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      JRm.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hchord : Nonempty (tensorObj (idealModule JP) (tensorObj (idealModule JQ)
+      (tensorObj (idealModule JRm)
+        (ModularCurves.sectionPoleSheafPower π z hz 3))) ≅ unitObj C))
+    (hvert : Nonempty (tensorObj (idealModule JR) (tensorObj (idealModule JRm)
+      (ModularCurves.sectionPoleSheafPower π z hz 2)) ≅ unitObj C)) :
+    Nonempty (tensorObj (idealModule JP) (idealModule JQ) ≅
+      tensorObj (idealModule JR) (ModularCurves.sectionIdealModule π z hz)) := by
+  have hchord' : Nonempty (tensorObj (idealModule JP) (tensorObj (idealModule JQ)
+      (tensorObj (idealModule JRm)
+        (ModularCurves.sectionPoleSheafPower π z hz 3))) ≅ unitObj C) := hchord
+  exact nonempty_tensorObj_iso_of_chord_vertical_poleSheaf hsm z hz
+    (isInvertible_idealModule (J := JP) hJP)
+    (isInvertible_idealModule (J := JQ) hJQ)
+    (isInvertible_idealModule (J := JR) hJR)
+    (isInvertible_idealModule (J := JRm) hJRm)
+    hchord' hvert
+
 end AlgebraicGeometry.Scheme.Modules
