@@ -1856,6 +1856,42 @@ theorem gaussNormRPS_teichMonomial (t : Aloc p F ϖ) (i l : ℕ) :
   rw [gaussNormRPS_monomial, valued_AlocToHatK, Valuation.map_mul, Valuation.map_pow,
     wAloc_teichPiInvAloc p F ϖ hρ₂0 hρ₂1]
 
+/-- The inductive step of the norm estimate. If `u = t + p·w` with `t`'s norm bounded
+by `u`'s at every pair of radii (the `exists_aloc_head_split` output), then `w` scaled
+by `ρ⁻¹ᵏ` stays under `u` scaled by `ρ⁻¹ᵏ⁺¹`. The `p` in the splitting is exactly what
+pays for the extra `ρ⁻¹`: `p·w = u - t` gives `ρ·w(w) ≤ w(u)`.
+
+Stated at a single radius `ρ`; the caller applies it at `ρ₁` and `ρ₂` and recombines
+with `max_le_max`. -/
+private theorem wAloc_mul_inv_pow_le_succ {u t w : Aloc p F ϖ}
+    (hsplit : u = t + (p : Aloc p F ϖ) * w)
+    (hbound : ∀ (ρ σ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hσ0 : 0 < σ) (hσ1 : σ < 1),
+      wAloc p F ϖ hρ0 hρ1 t ≤ wAloc p F ϖ hσ0 hσ1 u)
+    (k : ℕ) (ρ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
+    wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k
+      ≤ wAloc p F ϖ hρ0 hρ1 u * (ρ⁻¹) ^ (k + 1) := by
+  have hpw : ρ * wAloc p F ϖ hρ0 hρ1 w ≤ wAloc p F ϖ hρ0 hρ1 u := by
+    have h1 : wAloc p F ϖ hρ0 hρ1 ((p : Aloc p F ϖ) * w)
+        = ρ * wAloc p F ϖ hρ0 hρ1 w := by
+      have h2 := wAloc_p_pow_mul p F ϖ hρ0 hρ1 1 w
+      rwa [pow_one, pow_one] at h2
+    have h3 : (p : Aloc p F ϖ) * w = u - t := by rw [hsplit]; ring
+    rw [h3] at h1
+    rw [← h1]
+    calc wAloc p F ϖ hρ0 hρ1 (u - t)
+        ≤ max (wAloc p F ϖ hρ0 hρ1 u) (wAloc p F ϖ hρ0 hρ1 t) :=
+          Valuation.map_sub _ _ _
+      _ ≤ wAloc p F ϖ hρ0 hρ1 u :=
+          max_le le_rfl (hbound ρ ρ hρ0 hρ1 hρ0 hρ1)
+  have hcancel : ρ * ρ⁻¹ = 1 := mul_inv_cancel₀ hρ0.ne'
+  calc wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k
+      = (ρ * ρ⁻¹) * (wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k) := by
+        rw [hcancel, one_mul]
+    _ = (ρ * wAloc p F ϖ hρ0 hρ1 w) * ((ρ⁻¹) ^ k * ρ⁻¹) := by ring
+    _ = (ρ * wAloc p F ϖ hρ0 hρ1 w) * (ρ⁻¹) ^ (k + 1) := by rw [pow_succ]
+    _ ≤ wAloc p F ϖ hρ0 hρ1 u * (ρ⁻¹) ^ (k + 1) :=
+        mul_le_mul_of_nonneg_right hpw zero_le
+
 /-- **The norm-controlled lift on the dense layer** (Kedlaya's strictness estimate,
 AD-9 exact form): every `u·p⁻ᵏ` with `u ∈ Aloc` has an `evalAr`-preimage whose Gauss
 norm is at most its interval norm. -/
@@ -1919,32 +1955,9 @@ theorem exists_evalAr_lift_aloc (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
       · refine le_trans hg_norm ?_
         rw [wI_BIProd_aloc_pInv_pow p F ϖ k w,
           wI_BIProd_aloc_pInv_pow p F ϖ (k + 1) u]
-        have key : ∀ (ρ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1),
-            wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k
-              ≤ wAloc p F ϖ hρ0 hρ1 u * (ρ⁻¹) ^ (k + 1) := by
-          intro ρ hρ0 hρ1
-          have hpw : ρ * wAloc p F ϖ hρ0 hρ1 w ≤ wAloc p F ϖ hρ0 hρ1 u := by
-            have h1 : wAloc p F ϖ hρ0 hρ1 ((p : Aloc p F ϖ) * w)
-                = ρ * wAloc p F ϖ hρ0 hρ1 w := by
-              have h2 := wAloc_p_pow_mul p F ϖ hρ0 hρ1 1 w
-              rwa [pow_one, pow_one] at h2
-            have h3 : (p : Aloc p F ϖ) * w = u - t := by rw [hsplit]; ring
-            rw [h3] at h1
-            rw [← h1]
-            calc wAloc p F ϖ hρ0 hρ1 (u - t)
-                ≤ max (wAloc p F ϖ hρ0 hρ1 u) (wAloc p F ϖ hρ0 hρ1 t) :=
-                  Valuation.map_sub _ _ _
-              _ ≤ wAloc p F ϖ hρ0 hρ1 u :=
-                  max_le le_rfl (hbound ρ ρ hρ0 hρ1 hρ0 hρ1)
-          have hcancel : ρ * ρ⁻¹ = 1 := mul_inv_cancel₀ hρ0.ne'
-          calc wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k
-              = (ρ * ρ⁻¹) * (wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k) := by
-                rw [hcancel, one_mul]
-            _ = (ρ * wAloc p F ϖ hρ0 hρ1 w) * ((ρ⁻¹) ^ k * ρ⁻¹) := by ring
-            _ = (ρ * wAloc p F ϖ hρ0 hρ1 w) * (ρ⁻¹) ^ (k + 1) := by rw [pow_succ]
-            _ ≤ wAloc p F ϖ hρ0 hρ1 u * (ρ⁻¹) ^ (k + 1) :=
-                mul_le_mul_of_nonneg_right hpw zero_le
-        exact max_le_max (key ρ₁ hρ₁0 hρ₁1) (key ρ₂ hρ₂0 hρ₂1)
+        exact max_le_max
+          (wAloc_mul_inv_pow_le_succ p F ϖ hsplit hbound k ρ₁ hρ₁0 hρ₁1)
+          (wAloc_mul_inv_pow_le_succ p F ϖ hsplit hbound k ρ₂ hρ₂0 hρ₂1)
 
 /-- **The norm-controlled lift of every `Bloc` element** — Kedlaya's estimate
 (4.9.1) with constant `1` (the AD-9 exact case). -/
