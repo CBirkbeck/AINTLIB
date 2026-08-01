@@ -31610,3 +31610,20 @@ Everything else in the prong is proven and axiom-clean. The remaining work is:
  (4) the degenerate configurations (tangency, `2`-torsion, points at infinity) via the
      project's addOnY/addOnZ chart families.
 Root build 9617 jobs; all audits clean.
+
+## ★★★★★★★★★★★ [W1] THE CHORD–TANGENT INPUT IS ALGEBRAICALLY COMPLETE 2026-08-01
+Every algebraic ingredient is proven and axiom-clean:
+ * `chord_mul_conj_eq_prod_of_equations` — the divisor identity (Vieta discharged);
+ * `cancel_factor_of_norm`, `chord_quotients_of_norm` — the successive cancellations;
+ * `second_/third_quotient_vanishes_of_not_two_torsion` — all three evaluations vanish;
+ * `isUnit_cofactor_of_isUnit_conj` — the exactness (unit) half;
+ * `conj_at_base_point`, `conj_at_line_point`, `algHom_conj_eq` — the non-degeneracy
+   conditions identified as the standard non-`2`-torsion ones;
+ * `chord_exact_order_of_chart_facts` — the packaging into the trivialization criterion;
+ * `exists_affineChart_le_of_multiChart`, `exists_three_algHom_ker_eq_span` — the chart.
+WHAT IS LEFT IS INSTANTIATION, NOT MATHEMATICS: plug the actual pole-sheaf chart data
+(`sectionAway_affineModelEval_bijective` identifies the chart ring with `R[X,Y]/(W)`)
+into these lemmas to build a `ChordDatum`, and cover the degenerate configurations
+(tangency, `2`-torsion, infinity) with the project's addOnY/addOnZ chart families.
+Then: `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum` → descent →
+`exists_invertible_tensor_idealModule_add` (the last Picard sorry) → GAP-A-5/A-6 closed.
