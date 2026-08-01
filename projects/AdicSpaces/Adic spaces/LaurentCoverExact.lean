@@ -1165,6 +1165,25 @@ theorem posEmbHom_ideal_compat (x : ↥(TateAlgebra A))
   rintro y rfl
   exact posEmbHom_generator_mem f
 
+/-- The negative-embedding image of `X` is `ζ⁻¹` in the Laurent Tate algebra. -/
+private theorem negEmbHom_X_eq_zetaInv :
+    negEmbHom (TateAlgebra.X (A := A)) = LaurentTateAlgebra.zetaInv := by
+  change LaurentTateAlgebra.mkHom (negIncl TateAlgebra.X) =
+    LaurentTateAlgebra.mkHom TateAlgebra₂.Y
+  congr 1; ext1; apply MvPowerSeries.ext; intro e
+  simp only [negIncl, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
+  change varInclFun (1 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
+    (MvPowerSeries.coeff e) (MvPowerSeries.X (1 : Fin 2))
+  rw [varInclFun_apply]
+  by_cases he : e = Finsupp.single (1 : Fin 2) (e 1)
+  · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
+    by_cases h0 : e 1 = 1
+    · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
+    · rw [if_neg (by intro h; exact h0 (by simpa using Finsupp.ext_iff.mp h 0)),
+          if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
+  · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
+    intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
+
 /-- `negEmbHom` sends the generator `1 - fX` to an element of `(f - ζ)`.
 Key identity: `1 - f·ζ⁻¹ = -ζ⁻¹·(f - ζ)`. -/
 theorem negEmbHom_generator_mem :
@@ -1175,22 +1194,8 @@ theorem negEmbHom_generator_mem :
       algebraMap A (LaurentTateAlgebra A) f := by
     simp only [negEmbHom, RingHom.comp_apply, negIncl_algebraMap]; rfl
   -- negEmbHom(X) = zetaInv: negIncl maps univariate X₀ to bivariate X₁ (= Y)
-  have h2 : negEmbHom (TateAlgebra.X (A := A)) = LaurentTateAlgebra.zetaInv := by
-    change LaurentTateAlgebra.mkHom (negIncl TateAlgebra.X) =
-      LaurentTateAlgebra.mkHom TateAlgebra₂.Y
-    congr 1; ext1; apply MvPowerSeries.ext; intro e
-    simp only [negIncl, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
-    change varInclFun (1 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
-      (MvPowerSeries.coeff e) (MvPowerSeries.X (1 : Fin 2))
-    rw [varInclFun_apply]
-    by_cases he : e = Finsupp.single (1 : Fin 2) (e 1)
-    · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
-      by_cases h0 : e 1 = 1
-      · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
-      · rw [if_neg (by intro h; exact h0 (by simpa using Finsupp.ext_iff.mp h 0)),
-            if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
-    · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
-      intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
+  have h2 : negEmbHom (TateAlgebra.X (A := A)) =
+      LaurentTateAlgebra.zetaInv := negEmbHom_X_eq_zetaInv
   rw [h1, h2]
   have hkey : (1 : LaurentTateAlgebra A) -
       algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
@@ -1701,22 +1706,8 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
               if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
       · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
         intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
-    have hnegX : negEmbHom (TateAlgebra.X (A := A)) = LaurentTateAlgebra.zetaInv := by
-      change LaurentTateAlgebra.mkHom (negIncl TateAlgebra.X) =
-        LaurentTateAlgebra.mkHom TateAlgebra₂.Y
-      congr 1; ext1; apply MvPowerSeries.ext; intro e
-      simp only [negIncl, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
-      change varInclFun (1 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
-        (MvPowerSeries.coeff e) (MvPowerSeries.X (1 : Fin 2))
-      rw [varInclFun_apply]
-      by_cases he : e = Finsupp.single (1 : Fin 2) (e 1)
-      · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
-        by_cases h0 : e 1 = 1
-        · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
-        · rw [if_neg (by intro h; exact h0 (by simpa using Finsupp.ext_iff.mp h 0)),
-              if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
-      · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
-        intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
+    have hnegX : negEmbHom (TateAlgebra.X (A := A)) =
+        LaurentTateAlgebra.zetaInv := negEmbHom_X_eq_zetaInv
     have hposAlg : posEmbHom (algebraMap A ↥(TateAlgebra A) f) =
         algebraMap A (LaurentTateAlgebra A) f := by
       simp only [posEmbHom, RingHom.comp_apply, posIncl_algebraMap]; rfl

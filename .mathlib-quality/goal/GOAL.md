@@ -6979,3 +6979,52 @@ where the tail genuinely shares the locals — `ringStalkMap_piYHom_injective` i
 the latter: I tail-checked it and its `U`/`V₁`/`V₂`/`W₀`/`t₁`/`t₂` **are** used
 below, so the cost-21 score is correct rather than pessimistic.
 
+
+## Dedup batch: search mathlib BEFORE hoisting
+
+Three clusters retired; inventory 210 → **208 clusters, 1332 redundant lines**.
+
+| cluster | outcome |
+|---|---|
+| `h_lift_zero` ×2, 19L | hoisted → `locLift_sub_mul_pow_eq_zero` |
+| `h_pow_lt_inv` ×3, 14L | **replaced by mathlib** `lt_inv_mul_iff₀`, 34 → 6, no new decl |
+| `negEmbHom X = zetaInv` ×2, 16L | hoisted → `negEmbHom_X_eq_zetaInv` |
+
+**The middle one changes the workflow.** My reflex on a duplicate is to hoist it.
+For `h_pow_lt_inv` that would have been the worse outcome: the block hand-rolls
+*`x·y < 1` and `0 < y` ⟹ `x < y⁻¹`*, and mathlib's `lt_inv_mul_iff₀` is exactly
+that at `b := 1`. **A duplicated hand-rolled proof is evidence the author did not
+find the API** — hoisting preserves the miss in tidier form.
+
+So: search mathlib first, every time. The check is also useful in the negative —
+`negEmbHom X = zetaInv` is about this development's own definitions, so hoisting
+it is provably the right move rather than a default.
+
+### The inventory is a floor, not a count
+
+The scanner said `h_pow_lt_inv` had two copies. There are **three** — the third
+writes `π` where the others write `c`, and the comparator hashes exact text. So
+209 clusters / 1348 lines under-counts by an unknown margin: every alpha-variant
+is invisible to it.
+
+An `assert len(locs)==2` is what caught it, rather than the edit silently
+touching two of three sites.
+
+### An assert says something disagrees, not which side is wrong
+
+The follow-up assert claimed copy 460 "genuinely differs". It did not — my
+normaliser was not stripping comment lines, and one copy carries two explanatory
+comments the others lack. I diffed the two copies instead of believing the
+assert, and fixed the normaliser. Worth stating because the reflex on a failing
+assert is to trust it and abandon the target.
+
+### Ascribe the call when implicits are not determined by explicits
+
+`have h2 := negEmbHom_X_eq_zetaInv` failed with *typeclass instance problem is
+stuck*: `A` occurs in the statement only as `TateAlgebra.X (A := A)`, so a bare
+`have :=` gives nothing to solve it against. Restoring the ascription fixed it.
+
+Sharpening the earlier rule (from `hkey` in FiniteJetChart): **drop the
+ascription only when the helper's implicit arguments are determined by its
+explicit ones.** Two lines spent, still 16 → 2 per site.
+
