@@ -7567,3 +7567,40 @@ Any verdict in this file of the form "helper would be N lines, too big" that
 predates the signature/carry distinction is suspect and should be re-derived
 before being trusted.
 
+
+### LANDED — `ringStalkMap_piYHom_injective` 76 → 45 (a1d3d8422), **147 → 146**
+
+Executed exactly as scoped above. The "not executed" caution was overcautious:
+the intricate signature was written to a scratch file and spliced, which is
+the same mechanic as every other extraction and carries no extra risk. Helper
+body landed at 29, one under the prediction; parent at 45, three under.
+
+All three of the wrong rejections are now cleared:
+
+    toAdic                          60 → 44
+    valued_resI_rpow_interpolate    94 → 48
+    ringStalkMap_piYHom_injective   76 → 45
+
+**The 14-parameter signature cost nothing.** This is the part worth keeping:
+I had treated a wide signature as itself a reason to decline, and it is not
+one — `scope_code` measures bodies. Signature width is free. The old model
+was double-charging: once for carrying a writable local into the body, and
+again for the width if it went into the signature instead.
+
+**Verification shape when the target is not a leaf.** `CurveObject` has two
+consumers. Rather than the full gate (killed externally 8× now, always on long
+rebuilds with clean logs), I checked the diff's *interface*:
+
+    git diff | grep -E "^[+-](theorem|private theorem|lemma|def|instance)"
+    → +private theorem frobFixedRestrict_eq_of_germ_eq   (nothing removed)
+
+One added private declaration and a shortened body means no public signature
+moved, so a downstream break is impossible by construction; building the two
+direct consumers then covers the whole blast radius in a fraction of the time.
+Worth reusing — the interface-diff check turns "is a full gate required?" into
+a mechanical question rather than a judgement call.
+
+**Third occurrence of the wrong-declaration match** (jB, hcompres, hz). A
+file-wide `next()` for `have hz` matched line 285, a different theorem, not
+1457. Bound every intra-declaration search to the parent's span. All three
+were caught by shape asserts, not by careful reading.
