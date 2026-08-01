@@ -378,27 +378,30 @@ theorem Wa_pow_mul_yQ (n : ℕ) : Wa F ^ n * yQ F n = Qa F * Qa F := by
       rw [one_pow],
     map_one, one_mul]
 
+/-- The inverse of the Weierstrass unit has norm one in every power. -/
+private theorem norm_Wu_inv_pow (n : ℕ) : ‖((Wu (R := K))⁻¹).val ^ n‖ = 1 := by
+  rw [show ((Wu (R := K))⁻¹).val = single (-1) 1 from rfl]
+  rw [show (single (-1) (1 : K) : RestrictedLaurent K) ^ n =
+    single (-n : ℤ) 1 from ?_]
+  · rw [norm_single, norm_one]
+  · induction n with
+    | zero =>
+        rw [pow_zero]
+        rw [show ((-(0 : ℕ) : ℤ)) = 0 by norm_num]
+        exact single_zero_one.symm
+    | succ k ih =>
+        rw [pow_succ, ih, single_mul_single, one_mul]
+        congr 1
+        push_cast
+        ring
+
 /-- The collapse family is norm-bounded: `‖W⁻ⁿQ²‖ ≤ ‖Q‖²` (unit `W`-multiples are
 isometric in 𝓒). -/
 theorem norm_yQ_le (n : ℕ) : ‖yQ F n‖ ≤ ‖Qa F‖ * ‖Qa F‖ := by
   show ‖constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((Qa F : JetA F) : JetC F) *
     ((Qa F : JetA F) : JetC F)‖ ≤ _
   rw [norm_JetC_mul, norm_JetC_mul, norm_constHomC]
-  have hWinv : ‖((Wu (R := K))⁻¹).val ^ n‖ = 1 := by
-    rw [show ((Wu (R := K))⁻¹).val = single (-1) 1 from rfl]
-    rw [show (single (-1) (1 : K) : RestrictedLaurent K) ^ n =
-      single (-n : ℤ) 1 from ?_]
-    · rw [norm_single, norm_one]
-    · induction n with
-      | zero =>
-          rw [pow_zero]
-          rw [show ((-(0 : ℕ) : ℤ)) = 0 by norm_num]
-          exact single_zero_one.symm
-      | succ k ih =>
-          rw [pow_succ, ih, single_mul_single, one_mul]
-          congr 1
-          push_cast
-          ring
+  have hWinv := norm_Wu_inv_pow F n
   rw [hWinv, one_mul]
   exact le_refl _
 
@@ -560,21 +563,7 @@ theorem norm_yGen_le (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
     ‖yGen F y hy0 hy1 n‖ ≤ ‖y‖ := by
   show ‖constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((y : JetA F) : JetC F)‖ ≤ _
   rw [norm_JetC_mul, norm_constHomC]
-  have hWinv : ‖((Wu (R := K))⁻¹).val ^ n‖ = 1 := by
-    rw [show ((Wu (R := K))⁻¹).val = single (-1) 1 from rfl]
-    rw [show (single (-1) (1 : K) : RestrictedLaurent K) ^ n =
-      single (-n : ℤ) 1 from ?_]
-    · rw [norm_single, norm_one]
-    · induction n with
-      | zero =>
-          rw [pow_zero]
-          rw [show ((-(0 : ℕ) : ℤ)) = 0 by norm_num]
-          exact single_zero_one.symm
-      | succ k ih =>
-          rw [pow_succ, ih, single_mul_single, one_mul]
-          congr 1
-          push_cast
-          ring
+  have hWinv := norm_Wu_inv_pow F n
   rw [hWinv, one_mul]
   exact le_of_eq rfl
 

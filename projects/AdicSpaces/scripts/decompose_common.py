@@ -93,3 +93,29 @@ def fits(body_size, boil, carried=0):
     """The 50-line rule is on proof BODIES, not declarations — signature length
     does not count against a helper."""
     return body_size + boil + carried <= BUDGET
+
+
+# ---------------------------------------------------------------------------
+
+EXPLICIT_VAR = __import__('re').compile(r"^variable\s*[^\[]*\(")
+
+
+def explicit_section_vars(path):
+    """Explicit (parenthesised) `variable` binders in a file.
+
+    A hoisted helper's argument list is (explicit section variables in scope) ++
+    (promoted locals). The section prefix never appears in the proof body, so
+    nothing in the lifted text hints at it, and the resulting errors name
+    something else entirely -- `failed to synthesize instance` at the call, or
+    `Application type mismatch` on the first real argument.
+
+    Cost so far: three separate builds (ChartData's `p F ϖ`, FiniteJetChart's
+    `F` twice). The recipe already said to grep for this before writing a call;
+    saying it was not enough, so it is a function now.
+    """
+    out = []
+    for line in open(path).read().split("\n"):
+        if line.startswith("variable") and EXPLICIT_VAR.match(line):
+            out.append(line)
+    return out
+
