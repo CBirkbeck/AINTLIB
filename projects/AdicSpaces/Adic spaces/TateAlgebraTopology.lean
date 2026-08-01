@@ -704,6 +704,44 @@ theorem tateAlgNhd_of_coeff_mem_principal (P : PairOfDefinition A) (n : ℕ)
     exact Ideal.pow_mem_pow hπ_in n
   exact ((pairIdeal P) ^ n).mul_mem_right g_in_subring hπn_in
 
+/-- Every antidiagonal coefficient of `x * y` has a witness in `P.I ^ i`,
+given the bad-index set `S`, the per-index bounds `m_fn`, and a uniform `j`.
+Extracted from `tateAlgNhd_leftMul_of_principal`. -/
+private theorem exists_coeff_witness_of_uniform_bound [IsTateRing A]
+    (P : PairOfDefinition A) (x : ↥(TateAlgebra A)) (i j : ℕ) (hj_ge_i : i ≤ j)
+    (y : ↥(pairSubring P)) (S : Set (Fin 1 →₀ ℕ))
+    (hS_def : S = {l |
+      MvPowerSeries.coeff l x.val ∉
+        (Subtype.val '' ((P.I ^ i : Ideal P.A₀) : Set P.A₀) : Set A)})
+    (hS_finite : S.Finite) (m_fn : (Fin 1 →₀ ℕ) → ℕ)
+    (hm_spec : ∀ (l : Fin 1 →₀ ℕ), ∀ b : P.A₀, b ∈ P.I ^ (m_fn l) →
+      ∃ c : P.A₀, c ∈ P.I ^ i ∧ (c : A) = MvPowerSeries.coeff l x.val * (b : A))
+    (hj_ge_m : ∀ l ∈ hS_finite.toFinset, m_fn l ≤ j)
+    (hy_coeff : ∀ l, ∃ b : P.A₀, b ∈ P.I ^ j ∧
+      (b : A) = MvPowerSeries.coeff l ((pairSubring P).subtype y).val) :
+    ∀ p : (Fin 1 →₀ ℕ) × (Fin 1 →₀ ℕ),
+      ∃ c : P.A₀, c ∈ P.I ^ i ∧
+        (c : A) = MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val := by
+  intro p
+  -- Extract the y-coefficient witness (in P.I^j).
+  obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
+  by_cases hp : p.1 ∈ S
+  · -- Bad case: use Sub-task B via `hm_spec`.
+    have hb_lower : b_p ∈ P.I ^ (m_fn p.1) :=
+      Ideal.pow_le_pow_right (hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)) hb_p_mem
+    obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower
+    refine ⟨c, hc_mem, ?_⟩
+    rw [hc_eq, hb_p_eq]
+    rfl
+  · -- Good case: coeff p.1 x is already in image P.I^i.
+    rw [hS_def] at hp
+    simp only [Set.mem_setOf_eq, not_not] at hp
+    obtain ⟨a, ha_mem, ha_eq⟩ := hp
+    refine ⟨a * b_p, Ideal.mul_mem_left _ _ (Ideal.pow_le_pow_right hj_ge_i hb_p_mem), ?_⟩
+    push_cast
+    rw [ha_eq, hb_p_eq]
+    rfl
+
 /-- **Sub-task F (assembly): the leftMul condition for a principal pair.**
 
 For a principal pair `P.I = (π : P.A₀)` with `π` a unit in `A`, the condition
@@ -765,28 +803,8 @@ theorem tateAlgNhd_leftMul_of_principal [IsTateRing A] (P : PairOfDefinition A)
   -- For each antidiagonal pair p = (p.1, p.2), the product
   -- `(coeff p.1 x) * (coeff p.2 y)` is in image P.I^i, with a concrete
   -- P.A₀ witness `term_of p`. Define this witness first.
-  have hterm : ∀ p : (Fin 1 →₀ ℕ) × (Fin 1 →₀ ℕ),
-      ∃ c : P.A₀, c ∈ P.I ^ i ∧
-        (c : A) = MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val := by
-    intro p
-    -- Extract the y-coefficient witness (in P.I^j).
-    obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
-    by_cases hp : p.1 ∈ S
-    · -- Bad case: use Sub-task B via `hm_spec`.
-      have hb_lower : b_p ∈ P.I ^ (m_fn p.1) :=
-        Ideal.pow_le_pow_right (hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)) hb_p_mem
-      obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower
-      refine ⟨c, hc_mem, ?_⟩
-      rw [hc_eq, hb_p_eq]
-      rfl
-    · -- Good case: coeff p.1 x is already in image P.I^i.
-      rw [hS_def] at hp
-      simp only [Set.mem_setOf_eq, not_not] at hp
-      obtain ⟨a, ha_mem, ha_eq⟩ := hp
-      refine ⟨a * b_p, Ideal.mul_mem_left _ _ (Ideal.pow_le_pow_right hj_ge_i hb_p_mem), ?_⟩
-      push_cast
-      rw [ha_eq, hb_p_eq]
-      rfl
+  have hterm := exists_coeff_witness_of_uniform_bound P x i j hj_ge_i y S hS_def
+    hS_finite m_fn hm_spec hj_ge_m hy_coeff
   -- Assemble the sum witness for each coefficient of xy.
   have hxy_coeff : ∀ l, ∃ c : P.A₀, c ∈ P.I ^ i ∧
       (c : A) = MvPowerSeries.coeff l xy.val := by

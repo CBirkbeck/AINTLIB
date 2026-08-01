@@ -116,7 +116,13 @@ def analyse(rec):
                     while k3 < i and body[k3].strip() and ind(body[k3]) > bi:
                         carried += 1
                         k3 += 1
-        if size - 1 < need or size + boil + carried > 50:
+        # The extracted block is NOT replaced by one line. The call passes every
+        # promoted local, so it wraps: about a line per four arguments. Scoring
+        # it at 1 put `tateAlgNhd_leftMul_of_principal`'s parent at 47 when it
+        # measured 52. (Keeping an explicit type ascription costs ~3 more; the
+        # fix there was to drop it and let Lean infer.)
+        call = 1 + len(set(binders(body, i)) & used_pre) // 4
+        if size - call < need or size + boil + carried > 50:
             continue
         bnd = binders(body, i)
         used = set()

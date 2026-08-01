@@ -6555,3 +6555,43 @@ Current top after both fixes — `TateAlgebraTopology::tateAlgNhd_leftMul_of_pri
 cost 3, block 22 against a need of 18, parent → 47, helper ≈ 25. Comfortable on
 both sides, which is the property the previous two candidates lacked.
 
+
+## 162 → 161: script the verbatim, write the judgement
+
+`tateAlgNhd_leftMul_of_principal`'s `have hterm` (22 lines) became
+`exists_coeff_witness_of_uniform_bound`. Parent 68 → 49, helper 37. First target
+chosen by the cost-weighted ranking, and it scored correctly: nine of ten locals
+are `have`/`set`-bound, so each resolved by promotion (type lifted verbatim from
+its `have`) or by carrying its defining line.
+
+### Scripting the signature was the wrong tool
+
+I assembled the helper's signature from source fragments with string surgery and
+produced garbage — a doubled `}}`, two hypotheses terminated with `:=` instead
+of `)`, a missing `:` before the conclusion, and a duplicated `:= by`. Rewriting
+those 14 lines by hand was correct first time.
+
+The distinction I had not drawn: **lifting a body is mechanical; building a
+signature is judgement.** A body is verbatim text with a known dedent — exactly
+what a script should do, and what has worked for four extractions running. A
+signature requires deciding where each hypothesis's delimiters close, which
+fragment-splicing cannot know. Script the verbatim, write the judgement.
+
+This also explains why the same approach worked for `exists_rps_series_limit`:
+there the signature was *derived by three named substitutions* on one contiguous
+statement (`drop ∃ S,`, `S → S K`, `drop := by`), each individually asserted —
+not spliced from five separate fragments.
+
+### The call site is not one line
+
+I scored the parent at 47 assuming the extracted block is replaced by a single
+line. With an explicit type ascription and a wrapped twelve-argument call it was
+five lines, and the parent measured **52** — still over. Dropping the ascription
+(`have hterm := …`, letting Lean infer) gave 2 lines and a parent of 49.
+
+`decompose_rank`'s `need` is therefore optimistic by the length of the call:
+roughly one line per four arguments, plus one if a type ascription is kept.
+Folding that in beats rediscovering it per target — this is the fourth distinct
+dimension that ranking has had to learn (binder kind, preamble, carried lines,
+now call cost).
+
