@@ -7663,3 +7663,47 @@ on long rebuilds with clean logs.
 Width is checked in **characters** (`check_width.py`), always against the HEAD
 count rather than an absolute — WedhornCech legitimately carries 107 over-100
 lines and an absolute check would read as a regression every time.
+
+## TASK-3 FINDING: the Keystone / KeystoneGen / KeystoneOpen triplication (~695 lines)
+
+Found while triaging three same-named 72-line targets in the over-50 list. Measured
+by hashing declaration bodies (everything after `:= by`) across the three files:
+
+    RelativePieceKeystone.lean       82 decls   (the Tate-base original)
+    RelativePieceKeystoneGen.lean    36 decls   24 bodies BYTE-IDENTICAL to Keystone, 603 lines
+    RelativePieceKeystoneOpen.lean   38 decls    5 bodies BYTE-IDENTICAL to Keystone,  92 lines
+
+This is by a wide margin the largest duplication in the tree — the whole standing
+dup inventory is ~1275 lines across 204 clusters, and this is 695 lines in two files.
+
+**It is deliberate and documented**, which is why no name-based scan caught it.
+`RelativePieceKeystoneGen.lean`'s own module docstring says:
+
+> the base-level `[IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]`
+> hypotheses are used for exactly one purpose: to supply `IsTateRing`,
+> `IsNoetherianRing` and `IsStronglyNoetherian` for the value ring `B := 𝒪_X(D₀)`
+> through the `_faithful` suppliers. … Statements and proofs are the Tate-base
+> originals with the hypothesis block moved.
+
+So Gen's statements are strictly MORE GENERAL than Keystone's (hypotheses on `B`
+rather than on `A`), and Keystone's follow from Gen's by the `_faithful` suppliers
+— `presheafValue_isTateRing_concrete`, `presheafValue_isNoetherianRing_of_*`,
+`presheafValue_isStronglyNoetherian_faithful`.
+
+**The direction of the fix is forced, and it is not the cheap one.** Gen imports
+Keystone, so the general proofs cannot stay where they are and be reused; they must
+move UP into Keystone.lean, with Keystone's A-level theorems becoming wrappers that
+`haveI` the three suppliers, and Gen's 24 becoming one-line wrappers. Seven modules
+import Keystone (including WedhornCechAcyclicity), so every iteration pays a large
+rebuild — which argues for doing all 24 in one pass rather than incrementally.
+
+**Not started.** This is task-3 work and the tasks are ordered; recording it here so
+it is not re-derived. The task-2 angle is handled separately (below): decompose the
+shared proof ONCE with helpers stated over a generic datum, so all three files reuse
+them rather than each growing its own copy of the decomposition.
+
+Open's five shared bodies are a different case — its versions run over
+`genPieceDatumOpen`/`imagePieceDatumOpen` with an `(M, hle)` pair in place of
+`hspan`, so they are primed twins over different datum constructors rather than
+pure hypothesis-weakenings. Sharing those needs abstraction over the constructor,
+which the generic-datum helpers below actually achieve.
