@@ -617,4 +617,60 @@ theorem exists_ker_baseSectionsMap_cokernel_eq_span_perp_of_section
             π ![R]).ideal L))) (b2 0))],
     ker_baseSectionsMap_cokernel_eq_span_perp_of_surjective _ b2 e1 hsurj⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The morphism from the unit determined by a global section of a module. -/
+noncomputable def unitHomOfTopSection {M : C.Modules} (m : Γ(M, (⊤ : C.Opens))) :
+    unitObj C ⟶ M :=
+  M.unitHomEquiv.symm (ModularCurves.moduleSectionsOfTop M m)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+theorem unitHomOfTopSection_comp {M N : C.Modules} (m : Γ(M, (⊤ : C.Opens)))
+    (p : M ⟶ N) :
+    unitHomOfTopSection m ≫ p =
+      unitHomOfTopSection (p.app (⊤ : C.Opens) m) := by
+  rw [unitHomOfTopSection, unitHomOfTopSection,
+    SheafOfModules.unitHomEquiv_symm_comp]
+  congr 1
+  apply Subtype.ext
+  funext X
+  show p.val.app X (M.val.map (homOfLE (le_top : X.unop ≤ (⊤ : C.Opens))).op m) =
+    N.val.map (homOfLE (le_top : X.unop ≤ (⊤ : C.Opens))).op
+      (p.val.app (Opposite.op (⊤ : C.Opens)) m)
+  exact (PresheafOfModules.naturality_apply p.val
+    (homOfLE (le_top : X.unop ≤ (⊤ : C.Opens))).op m)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+theorem unitHomOfTopSection_zero {M : C.Modules} :
+    unitHomOfTopSection (0 : Γ(M, (⊤ : C.Opens))) = 0 := by
+  apply M.unitHomEquiv.injective
+  rw [unitHomOfTopSection, Equiv.apply_symm_apply]
+  apply Subtype.ext
+  funext X
+  show M.val.map (homOfLE (le_top : X.unop ≤ (⊤ : C.Opens))).op 0 =
+    (0 : unitObj C ⟶ M).val.app X (1 : Γ(C, X.unop))
+  rw [map_zero]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[5a-i] The twist-section lift**: a global section of `L` killed by the twist
+cokernel factors through the divisor twist — "a section vanishing on the divisor is
+a section of the twisted module". -/
+noncomputable def twistSectionLift {J : C.IdealSheafData} {L : C.Modules}
+    (ℓ : Γ(L, (⊤ : C.Opens))) [Mono (divisorTwistHom J L)]
+    (hℓ : (Limits.cokernel.π (divisorTwistHom J L)).app (⊤ : C.Opens) ℓ = 0) :
+    unitObj C ⟶ tensorObj (idealModule J) L :=
+  CategoryTheory.Abelian.monoLift (divisorTwistHom J L) (unitHomOfTopSection ℓ)
+    (by rw [unitHomOfTopSection_comp, hℓ, unitHomOfTopSection_zero])
+
+@[reassoc (attr := simp)]
+theorem twistSectionLift_comp {J : C.IdealSheafData} {L : C.Modules}
+    (ℓ : Γ(L, (⊤ : C.Opens))) [Mono (divisorTwistHom J L)]
+    (hℓ : (Limits.cokernel.π (divisorTwistHom J L)).app (⊤ : C.Opens) ℓ = 0) :
+    twistSectionLift ℓ hℓ ≫ divisorTwistHom J L = unitHomOfTopSection ℓ :=
+  CategoryTheory.Abelian.monoLift_comp _ _ _
+
 end AlgebraicGeometry.Scheme.Modules
