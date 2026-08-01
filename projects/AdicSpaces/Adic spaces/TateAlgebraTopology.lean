@@ -2116,24 +2116,20 @@ theorem tateAlgNhd₂_leftMul_of_principal [IsTateRing A] (P : PairOfDefinition 
       (x * ·) ⁻¹' (tateAlgNhd₂ P i : Set ↥(TateAlgebra₂ A)) := by
   classical
   have hS : ∀ᶠ (l : Fin 2 →₀ ℕ) in Filter.cofinite,
-      MvPowerSeries.coeff l x.val ∈
-        (Subtype.val '' ((P.I ^ i : Ideal P.A₀) : Set P.A₀) : Set A) :=
+      MvPowerSeries.coeff l x.val ∈ (Subtype.val '' ((P.I ^ i : Ideal P.A₀) : Set P.A₀) : Set A) :=
     tateAlgebra₂_coeff_eventually_in_pow P x i
   set S : Set (Fin 2 →₀ ℕ) := {l |
     MvPowerSeries.coeff l x.val ∉
       (Subtype.val '' ((P.I ^ i : Ideal P.A₀) : Set P.A₀) : Set A)} with hS_def
-  have hS_finite : S.Finite := hS
-  let m_fn : (Fin 2 →₀ ℕ) → ℕ := fun (l : Fin 2 →₀ ℕ) =>
+  have hS_finite : S.Finite := hS; let m_fn : (Fin 2 →₀ ℕ) → ℕ := fun (l : Fin 2 →₀ ℕ) =>
     (exists_mul_pow_subset_pow P (MvPowerSeries.coeff l x.val) i).choose
   have hm_spec : ∀ (l : Fin 2 →₀ ℕ), ∀ b : P.A₀, b ∈ P.I ^ (m_fn l) →
       ∃ c : P.A₀, c ∈ P.I ^ i ∧ (c : A) = MvPowerSeries.coeff l x.val * (b : A) :=
     fun l => (exists_mul_pow_subset_pow P (MvPowerSeries.coeff l x.val) i).choose_spec
-  let j : ℕ := max i (hS_finite.toFinset.sup m_fn)
-  have hj_ge_i : i ≤ j := le_max_left _ _
+  let j : ℕ := max i (hS_finite.toFinset.sup m_fn); have hj_ge_i : i ≤ j := le_max_left _ _
   have hj_ge_m : ∀ l ∈ hS_finite.toFinset, m_fn l ≤ j := fun l hl =>
     le_max_of_le_right (Finset.le_sup hl)
-  refine ⟨j, ?_⟩
-  rintro _ ⟨y, hy, rfl⟩
+  refine ⟨j, ?_⟩; rintro _ ⟨y, hy, rfl⟩
   change (x * (pairSubring₂ P).subtype y) ∈ tateAlgNhd₂ P i
   have hy_coeff : ∀ l, ∃ b : P.A₀, b ∈ P.I ^ j ∧
       (b : A) = MvPowerSeries.coeff l ((pairSubring₂ P).subtype y).val :=
@@ -2142,42 +2138,31 @@ theorem tateAlgNhd₂_leftMul_of_principal [IsTateRing A] (P : PairOfDefinition 
   have hterm : ∀ p : (Fin 2 →₀ ℕ) × (Fin 2 →₀ ℕ),
       ∃ c : P.A₀, c ∈ P.I ^ i ∧
         (c : A) = MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val := by
-    intro p
-    obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
+    intro p; obtain ⟨b_p, hb_p_mem, hb_p_eq⟩ := hy_coeff p.2
     by_cases hp : p.1 ∈ S
     · have hb_lower : b_p ∈ P.I ^ (m_fn p.1) := by
         have hle : m_fn p.1 ≤ j := hj_ge_m p.1 (hS_finite.mem_toFinset.mpr hp)
         exact Ideal.pow_le_pow_right hle hb_p_mem
-      obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower
-      refine ⟨c, hc_mem, ?_⟩
-      rw [hc_eq, hb_p_eq]
-      rfl
+      obtain ⟨c, hc_mem, hc_eq⟩ := hm_spec p.1 b_p hb_lower; refine ⟨c, hc_mem, ?_⟩
+      rw [hc_eq, hb_p_eq]; rfl
     · rw [hS_def] at hp
-      simp only [Set.mem_setOf_eq, not_not] at hp
-      obtain ⟨a, ha_mem, ha_eq⟩ := hp
+      simp only [Set.mem_setOf_eq, not_not] at hp; obtain ⟨a, ha_mem, ha_eq⟩ := hp
       refine ⟨a * b_p, Ideal.mul_mem_left _ _ (Ideal.pow_le_pow_right hj_ge_i hb_p_mem), ?_⟩
-      push_cast
-      rw [ha_eq, hb_p_eq]
+      push_cast; rw [ha_eq, hb_p_eq]
       rfl
-  have hxy_coeff : ∀ l, ∃ c : P.A₀, c ∈ P.I ^ i ∧
-      (c : A) = MvPowerSeries.coeff l xy.val := by
-    intro l
-    have hcoeff : MvPowerSeries.coeff l xy.val =
+  have hxy_coeff : ∀ l, ∃ c : P.A₀, c ∈ P.I ^ i ∧ (c : A) = MvPowerSeries.coeff l xy.val := by
+    intro l; have hcoeff : MvPowerSeries.coeff l xy.val =
         ∑ p ∈ Finset.antidiagonal l,
           MvPowerSeries.coeff p.1 x.val * MvPowerSeries.coeff p.2 y.val.val := by
-      change MvPowerSeries.coeff l (x.val * y.val.val) = _
-      rw [MvPowerSeries.coeff_mul]
+      change MvPowerSeries.coeff l (x.val * y.val.val) = _; rw [MvPowerSeries.coeff_mul]
     refine ⟨∑ p ∈ Finset.antidiagonal l, (hterm p).choose, ?_, ?_⟩
     · exact (P.I ^ i).sum_mem fun p _ => (hterm p).choose_spec.1
     · rw [hcoeff]
-      push_cast
-      refine Finset.sum_congr rfl fun p _ => ?_
+      push_cast; refine Finset.sum_congr rfl fun p _ => ?_
       exact (hterm p).choose_spec.2
   have hxy_pair : xy ∈ pairSubring₂ P := by
-    intro l
-    obtain ⟨c, _, hc_eq⟩ := hxy_coeff l
-    rw [← hc_eq]
-    exact c.property
+    intro l; obtain ⟨c, _, hc_eq⟩ := hxy_coeff l
+    rw [← hc_eq]; exact c.property
   exact tateAlgNhd₂_of_coeff_mem_principal P i π hπ_gen hπ_unit hxy_pair hxy_coeff
 
 omit [IsTopologicalRing A] in

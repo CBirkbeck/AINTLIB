@@ -548,37 +548,27 @@ theorem range_map_subtype_le_map_pow_of_fg {R : Type*} [CommRing R] (I : Ideal R
     simpa using hmem
   set φ : (Fin r → R) →ₗ[R] R := ∑ i, w i • LinearMap.proj i with hφdef
   have hφrange : ∀ c, φ c ∈ (I ^ n • ⊤ : Submodule R R) := by
-    intro c
-    rw [← hw, hφdef]
+    intro c; rw [← hw, hφdef]
     simp only [LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
       LinearMap.proj_apply, smul_eq_mul]
-    refine Submodule.sum_mem _ fun i _ => ?_
-    rw [mul_comm]
+    refine Submodule.sum_mem _ fun i _ => ?_; rw [mul_comm]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
   have hφsingle : ∀ i, φ (Pi.single i 1) = w i := by
-    intro i
-    simp only [hφdef, LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
+    intro i; simp only [hφdef, LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
       LinearMap.proj_apply, smul_eq_mul, Pi.single_apply, mul_ite, mul_one, mul_zero]
-    rw [Finset.sum_ite_eq' Finset.univ i]
-    simp
+    rw [Finset.sum_ite_eq' Finset.univ i]; simp
   have hσsurj : Function.Surjective (LinearMap.codRestrict _ φ hφrange) := by
-    rintro ⟨y, hy⟩
-    rw [← hw] at hy
+    rintro ⟨y, hy⟩; rw [← hw] at hy
     have hsub : Submodule.span R (Set.range w) ≤ LinearMap.range φ := by
-      rw [Submodule.span_le]
-      rintro _ ⟨i, rfl⟩
+      rw [Submodule.span_le]; rintro _ ⟨i, rfl⟩
       exact ⟨Pi.single i 1, hφsingle i⟩
     obtain ⟨c, hc⟩ := hsub hy
     exact ⟨c, Subtype.ext (by rw [LinearMap.codRestrict_apply]; exact hc)⟩
   have hdecomp : ∀ η : AdicCompletion I (Fin r → R),
-      AdicCompletion.map I φ η
-        = ∑ i, w i • AdicCompletion.map I (LinearMap.proj i) η := by
-    intro η
-    obtain ⟨e, rfl⟩ := AdicCompletion.mk_surjective I _ η
-    simp only [AdicCompletion.map_mk, ← map_smul, ← map_sum]
-    congr 1
-    apply Subtype.ext
-    funext m
+      AdicCompletion.map I φ η = ∑ i, w i • AdicCompletion.map I (LinearMap.proj i) η := by
+    intro η; obtain ⟨e, rfl⟩ := AdicCompletion.mk_surjective I _ η
+    simp only [AdicCompletion.map_mk, ← map_smul, ← map_sum]; congr 1
+    apply Subtype.ext; funext m
     simp only [AdicCompletion.AdicCauchySequence.map_apply_coe, hφdef, LinearMap.coe_sum,
       Finset.sum_apply, LinearMap.smul_apply, LinearMap.proj_apply, smul_eq_mul]
     rw [show (∑ x, (AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e)) m
@@ -592,11 +582,9 @@ theorem range_map_subtype_le_map_pow_of_fg {R : Type*} [CommRing R] (I : Ideal R
         (fun x => (AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e))
         Finset.univ
   obtain ⟨xt, rfl⟩ := hz
-  obtain ⟨η, rfl⟩ :=
-    map_surjective_of_surjective I (LinearMap.codRestrict _ φ hφrange) hσsurj xt
+  obtain ⟨η, rfl⟩ := map_surjective_of_surjective I (LinearMap.codRestrict _ φ hφrange) hσsurj xt
   rw [AdicCompletion.map_comp_apply, LinearMap.subtype_comp_codRestrict, hdecomp η]
-  refine Ideal.sum_mem _ fun i _ => ?_
-  rw [Algebra.smul_def]
+  refine Ideal.sum_mem _ fun i _ => ?_; rw [Algebra.smul_def]
   exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ (hwmem i))
 
 set_option backward.isDefEq.respectTransparency false in

@@ -1899,29 +1899,22 @@ theorem division_descent {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         ∧ Valued.v (y - z * x) ≤ V
         ∧ (ε * V < Valued.v (y - z * x)
           → degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x) := by
-  intro K
-  induction K using Nat.strong_induction_on with
+  intro K; induction K using Nat.strong_induction_on with
   | _ K IH =>
-    intro y hy hvy hK
-    rcases lt_or_ge K (degAr p F ϖ hρ0 hρ1 x) with hKm | hKm
+    intro y hy hvy hK; rcases lt_or_ge K (degAr p F ϖ hρ0 hρ1 x) with hKm | hKm
     · -- base: the window is already inside the degree of x
       refine ⟨0, zero_mem _, ?_, ?_⟩
       · rw [zero_mul, sub_zero]
         exact hvy
       · rw [zero_mul, sub_zero]
-        intro hbig
-        have hy0 : y ≠ 0 := by
-          intro h0
-          rw [h0, Valuation.map_zero] at hbig
+        intro hbig; have hy0 : y ≠ 0 := by
+          intro h0; rw [h0, Valuation.map_zero] at hbig
           exact absurd hbig (not_lt_of_ge zero_le)
         have hub : ∀ n ∈ {n | Valued.v y = ρ ^ n * perfectoidValuation p F
             (teichCoeffAr p F ϖ hρ0 hρ1 y n)}, n ≤ K := by
-          intro n hn
-          by_contra hcon
-          push Not at hcon
-          have h1 := hK n hcon
-          rw [← hn] at h1
-          exact absurd (lt_of_lt_of_le hbig h1) (lt_irrefl _)
+          intro n hn; by_contra hcon
+          push Not at hcon; have h1 := hK n hcon
+          rw [← hn] at h1; exact absurd (lt_of_lt_of_le hbig h1) (lt_irrefl _)
         obtain ⟨n₀, hn₀, -⟩ := exists_valued_eq_teichCoeffAr p F ϖ hy hy0
         exact lt_of_le_of_lt (csSup_le ⟨n₀, hn₀⟩ hub) hKm
     · -- step: apply the descent and recurse on K - 1
@@ -1930,45 +1923,31 @@ theorem division_descent {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         · rw [zero_mul, sub_zero]
           exact hvy
         · rw [zero_mul, sub_zero]
-          intro hbig2
-          exact absurd (lt_of_le_of_lt hsmall hbig2) (lt_irrefl _)
+          intro hbig2; exact absurd (lt_of_le_of_lt hsmall hbig2) (lt_irrefl _)
       · have hstep := descent_step p F ϖ hx hy hx0 (ε := ε) (c := ε * V)
           (N := K) hρε hεx
           (mul_le_mul_of_nonneg_left hvy zero_le) hKm hK
         set y' := y - divStep p F ϖ hρ0 hρ1 x y * x with hy'
-        have hy'mem : y' ∈ ArSub p F ϖ hρ0 hρ1 :=
-          sub_mem hy (mul_mem (divStep_mem p F ϖ hx hy) hx)
-        have hvy' : Valued.v y' ≤ V :=
-          le_trans (valued_sub_divStep_mul_le p F ϖ hx hy hx0) hvy
+        have hy'mem : y' ∈ ArSub p F ϖ hρ0 hρ1 := sub_mem hy (mul_mem (divStep_mem p F ϖ hx hy) hx)
+        have hvy' : Valued.v y' ≤ V := le_trans (valued_sub_divStep_mul_le p F ϖ hx hy hx0) hvy
         rcases Nat.eq_zero_or_pos K with hK0 | hKpos
         · -- K = 0: every coordinate of y' is ε·V-small, so v(y') ≤ ε·V
-          refine ⟨divStep p F ϖ hρ0 hρ1 x y, divStep_mem p F ϖ hx hy, hvy', ?_⟩
-          intro hbig2
-          exfalso
-          have hval : Valued.v y' ≤ ε * V := by
-            rw [valued_eq_iSup_teichCoeffAr p F ϖ hy'mem]
-            refine ciSup_le fun n => ?_
-            refine hstep n ?_
-            omega
+          refine ⟨divStep p F ϖ hρ0 hρ1 x y, divStep_mem p F ϖ hx hy, hvy', ?_⟩; intro hbig2
+          exfalso; have hval : Valued.v y' ≤ ε * V := by
+            rw [valued_eq_iSup_teichCoeffAr p F ϖ hy'mem]; refine ciSup_le fun n => ?_
+            refine hstep n ?_; omega
           exact absurd (lt_of_le_of_lt hval hbig2) (lt_irrefl _)
         · have hK' : ∀ n, K - 1 < n → ρ ^ n * perfectoidValuation p F
               (teichCoeffAr p F ϖ hρ0 hρ1 y' n) ≤ ε * V := by
-            intro n hn
-            exact hstep n (by omega)
-          obtain ⟨z', hz'mem, hz'val, hz'deg⟩ :=
-            IH (K - 1) (by omega) y' hy'mem hvy' hK'
-          refine ⟨divStep p F ϖ hρ0 hρ1 x y + z',
-            add_mem (divStep_mem p F ϖ hx hy) hz'mem, ?_, ?_⟩
+            intro n hn; exact hstep n (by omega)
+          obtain ⟨z', hz'mem, hz'val, hz'deg⟩ := IH (K - 1) (by omega) y' hy'mem hvy' hK'
+          refine ⟨divStep p F ϖ hρ0 hρ1 x y + z', add_mem (divStep_mem p F ϖ hx hy) hz'mem, ?_, ?_⟩
           · have halg : y - (divStep p F ϖ hρ0 hρ1 x y + z') * x = y' - z' * x := by
-              rw [hy']
-              ring
-            rw [halg]
-            exact hz'val
+              rw [hy']; ring
+            rw [halg]; exact hz'val
           · have halg : y - (divStep p F ϖ hρ0 hρ1 x y + z') * x = y' - z' * x := by
-              rw [hy']
-              ring
-            rw [halg]
-            exact hz'deg
+              rw [hy']; ring
+            rw [halg]; exact hz'deg
 
 /-- **Kedlaya Lemma 2.8 (approximate division)**: for nonzero `x` there is
 `ε ∈ [ρ, 1)` such that every `y` admits a quotient `z` with remainder of value at

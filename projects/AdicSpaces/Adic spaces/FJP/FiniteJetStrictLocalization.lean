@@ -335,8 +335,7 @@ theorem ideal_row_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   · obtain ⟨u, hu, hun⟩ := hlift y hy
     have hsec : ∀ i, ∃ c : PC F m, extRhoC F m c = u i ∧ ‖c‖ = ‖u i‖ := fun i =>
       extRhoC_strict_surjective F m (u i)
-    choose cc hcc hccn using hsec
-    refine ⟨d1 (rC F m g f) cc, ?_, ?_, ?_⟩
+    choose cc hcc hccn using hsec; refine ⟨d1 (rC F m g f) cc, ?_, ?_, ?_⟩
     · show d1 (rC F m g f) cc ∈ Ideal.span (Set.range (rC F m g f))
       unfold d1
       exact Ideal.sum_mem _ fun i _ => Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨i, rfl⟩)
@@ -350,25 +349,20 @@ theorem ideal_row_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
         calc ‖cc i * rC F m g f i‖ ≤ ‖cc i‖ * ‖rC F m g f i‖ := norm_mul_le _ _
           _ = ‖u i‖ * ‖rC F m g f i‖ := by rw [hccn i]
           _ ≤ ‖u‖ * Cr := by
-              refine mul_le_mul (norm_le_pi_norm u i) ?_ (norm_nonneg _) (norm_nonneg u)
-              rw [hCr]
+              refine mul_le_mul (norm_le_pi_norm u i) ?_ (norm_nonneg _) (norm_nonneg u); rw [hCr]
               refine le_add_of_nonneg_of_le zero_le_one ?_
               exact Finset.single_le_sum (fun j _ => norm_nonneg _) (Finset.mem_univ i)
-      have hpartial : ∀ s : Finset (Fin m),
-          ‖∑ i ∈ s, cc i * rC F m g f i‖ ≤ ‖u‖ * Cr := by
-        intro s
-        induction s using Finset.induction_on with
+      have hpartial : ∀ s : Finset (Fin m), ‖∑ i ∈ s, cc i * rC F m g f i‖ ≤ ‖u‖ * Cr := by
+        intro s; induction s using Finset.induction_on with
         | empty =>
           rw [Finset.sum_empty, norm_zero]
           exact mul_nonneg (norm_nonneg u) (zero_le_one.trans hCr1)
         | insert a s ha ih =>
           rw [Finset.sum_insert ha]
           exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hterm a) ih)
-      show ‖d1 (rC F m g f) cc‖ ≤ h * Cr * ‖y‖
-      unfold d1
+      show ‖d1 (rC F m g f) cc‖ ≤ h * Cr * ‖y‖; unfold d1
       refine (hpartial Finset.univ).trans ?_
-      calc ‖u‖ * Cr ≤ h * ‖y‖ * Cr :=
-            mul_le_mul_of_nonneg_right hun (zero_le_one.trans hCr1)
+      calc ‖u‖ * Cr ≤ h * ‖y‖ * Cr := mul_le_mul_of_nonneg_right hun (zero_le_one.trans hCr1)
         _ = h * Cr * ‖y‖ := by ring
 
 /-- The controlled pullback ([FJP] (4.12)–(4.16)): a matching pair of graph-ideal elements

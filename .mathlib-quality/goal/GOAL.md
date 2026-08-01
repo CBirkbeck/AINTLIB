@@ -5879,3 +5879,105 @@ Two cheap catches worth distinguishing:
   name. Recognising it at a glance saves a wrong diagnosis.
 
 Eleven of the fifteen sibling-merge targets remain.
+
+## 176 → ~172: two more `;`-merge guards, one of them silent
+
+Re-derived the cheap-technique queue with a **corrected** estimator and got a
+smaller number than I had been carrying: **8** proofs clear on joins + sibling
+merges, not the 15 I reported last session.
+
+The 15 was wrong because I counted joins and sibs *independently on the original
+text and added them*. That double-counts: a join shortens a line, and a shorter
+line has fewer wrap points, so some sibs the raw count sees no longer exist once
+the joins land. This is the same relationship `imgFamily_agreement` taught —
+"joins available" and "lines saved" are not independent quantities — and I had
+written that lesson down and then violated it in the very next estimate.
+
+`rank_cheap.py` fixes it by **simulating**: apply joins in memory, then count
+sibs on the joined text. It also imports `joinable()` and `mergeable()` from the
+actual apply tools rather than re-implementing them, so the number it reports is
+by construction the number those tools will deliver. Every estimator defect this
+campaign has produced came from a re-implementation drifting from the tool; this
+removes the possibility rather than the instance.
+
+### Two new guards, from two build failures
+
+**`classical` (and `focus`, `next`, `case …`) may not be the LEFT of a merge.**
+mathlib's `classical` syntax ends in an *optional* trailing `tacticSeq`, so it
+parses fine alone and looks self-contained — but a `;` right after it lands
+where the parser is still reading that optional block:
+
+    classical; have hpfg : (…).FG := by
+    -- error: unexpected token ';'; expected '{' or tactic
+
+Same family as the existing `induction … with` guard: the left line's syntax has
+not actually ended, it just *looks* like it has. Two instances, and the second
+was masked because `lake build` stops at the first failing module — a partial
+build is not a clean bill of health for the modules after it.
+
+**A line containing a term-level `by` may not be the LEFT of a merge.** This one
+is worse because it fails *silently* rather than at the parser:
+
+    have hkle : (k : ℤ) ≤ n := by omega
+    have hdiff : (0 : ℤ) ≤ n - (k : ℤ) := by omega
+    -- merged:
+    have hkle : (k : ℤ) ≤ n := by omega; have hdiff : … := by omega
+
+A term-level `by` runs to the end of the line, so the appended tactic goes
+*inside* `hkle`'s proof instead of after it. `hdiff` is then never introduced at
+the outer level. The reported errors are `No goals to be solved` at the merge and
+`Unknown identifier hdiff` **two lines later, at the use site** — the same
+action-at-a-distance signature as the `rcases -`-vs-`_` bug: the error names the
+consumer, never the edit.
+
+The existing TAIL guard only caught lines ending in a *bare* `by`. The dangerous
+line is the far more common one where the by-block is complete on the same line,
+which TAIL reads as ending in `omega` and waves through.
+
+Regression scan over the already-committed sibling merges (fff0a47df): **zero
+instances** of either pattern, which is why that gate was green. Checked rather
+than assumed — the guards being absent when that batch ran is exactly the
+condition under which "it passed" and "it was safe" can come apart.
+
+### Third guard, and the one that explains the other two
+
+The second build round failed again, twice, with a symptom I had not seen:
+`unknown tactic`. Both were the tool merging two lines that are not tactics at
+all:
+
+    exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m …) _
+      (UnitDiscExample.restrictedGaussEquiv (JetD F) m).symm.toRingHom   <- left
+      (RingEquiv.surjective _)                                           <- right
+
+Both lines are *arguments of the `exact` above them*. They are equally indented,
+they contain no comment, neither ends mid-expression by the TAIL test — every
+guard passed, because every guard only ever looked at those two lines.
+
+That is the actual defect, and it subsumes the other two: **`mergeable(a, c)`
+was deciding a question that cannot be answered from `a` and `c` alone.**
+Whether `a` starts a tactic depends on the line *above* it. So the signature is
+now `mergeable(a, c, prev)`, with `starts_a_tactic(prev, a)` refusing when `a`
+is indented deeper than the content column of `prev` — unless `prev` ends in a
+block opener (`by`, `do`, `=>`), whose body is legitimately deeper. A `· tac`
+bullet counts its content column as indent + 2, so genuine sibling tactics
+inside a bullet still merge.
+
+Seen together, all three failures are the same mistake at different scopes:
+
+| symptom | what the guard could not see |
+|---|---|
+| `Alternative 'insert' has not been provided` | the `\| alt` lines BELOW `c` |
+| `unexpected token ';'` after `classical` | the optional tacticSeq the left line's syntax was still expecting |
+| `No goals` + unknown identifier at the use site | the `by` block earlier ON the left line |
+| `unknown tactic` | the expression `a` is continuing, ABOVE it |
+
+Every one is context outside the two-line window. I added the first guard by
+listing a forbidden keyword, which is why the next three arrived one build at a
+time: a keyword blacklist treats each failure as its own special case instead
+of as evidence the window is too small. Widening the window is what actually
+retired the class.
+
+Count after all four guards: **6** proofs clear on joins + sibs, down from the
+8 the unguarded simulator predicted and the 15 I claimed last session. The
+number fell each time the tool got more correct, which is the expected
+direction — the earlier figures were counting merges that do not compile.

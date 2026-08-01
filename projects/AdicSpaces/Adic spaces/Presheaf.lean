@@ -3821,12 +3821,9 @@ private theorem valueGroup_archimedean_pair_of_topNilp_lt_one
     {β : Γ₀} (hβ_pos : 0 < β) (hβ_lt_one : β < 1)
     {γ : Γ₀} (hγ_pos : 0 < γ) :
     ∃ n : ℤ, β ^ (n + 1) ≤ γ ∧ γ < β ^ n := by
-  have hβ_ne : β ≠ 0 := ne_of_gt hβ_pos
-  have hγ_ne : γ ≠ 0 := ne_of_gt hγ_pos
-  set βu : Γ₀ˣ := Units.mk0 β hβ_ne with hβu_def
-  set γu : Γ₀ˣ := Units.mk0 γ hγ_ne with hγu_def
-  have hβu_val : (βu : Γ₀) = β := Units.val_mk0 _
-  have hγu_val : (γu : Γ₀) = γ := Units.val_mk0 _
+  have hβ_ne : β ≠ 0 := ne_of_gt hβ_pos; have hγ_ne : γ ≠ 0 := ne_of_gt hγ_pos
+  set βu : Γ₀ˣ := Units.mk0 β hβ_ne with hβu_def; set γu : Γ₀ˣ := Units.mk0 γ hγ_ne with hγu_def
+  have hβu_val : (βu : Γ₀) = β := Units.val_mk0 _; have hγu_val : (γu : Γ₀) = γ := Units.val_mk0 _
   have hβu_lt_one : βu < 1 := by
     rw [← Units.val_lt_val]; simpa [hβu_val] using hβ_lt_one
   have hβu_inv_gt_one : (1 : Γ₀ˣ) < βu⁻¹ := Left.one_lt_inv_iff.mpr hβu_lt_one
@@ -3841,47 +3838,37 @@ private theorem valueGroup_archimedean_pair_of_topNilp_lt_one
     rw [zpow_neg, zpow_natCast, ← inv_pow]; exact hm
   -- `hk` ⇒ `βu^k ≤ γu`.
   have hk_zpow : βu ^ (k : ℤ) ≤ γu := by
-    have h1 : (βu⁻¹ ^ k)⁻¹ ≤ (γu⁻¹)⁻¹ := inv_le_inv_iff.mpr hk
-    rw [inv_inv, inv_pow, inv_inv] at h1
+    have h1 : (βu⁻¹ ^ k)⁻¹ ≤ (γu⁻¹)⁻¹ := inv_le_inv_iff.mpr hk; rw [inv_inv, inv_pow, inv_inv] at h1
     rw [zpow_natCast]; exact h1
   -- S nonempty: take `n := -(m+1)`.
   have hne : ∃ n : ℤ, γu < βu ^ n := by
-    refine ⟨-((m : ℤ) + 1), ?_⟩
-    have hrw : βu ^ (-((m : ℤ) + 1)) = βu ^ (-(m : ℤ)) * βu⁻¹ := by
+    refine ⟨-((m : ℤ) + 1), ?_⟩; have hrw : βu ^ (-((m : ℤ) + 1)) = βu ^ (-(m : ℤ)) * βu⁻¹ := by
       rw [show (-((m : ℤ) + 1) : ℤ) = -(m : ℤ) + (-1) by ring, zpow_add, zpow_neg_one]
-    rw [hrw]
-    calc γu ≤ βu ^ (-(m : ℤ)) := hm_zpow
+    rw [hrw]; calc γu ≤ βu ^ (-(m : ℤ)) := hm_zpow
       _ = βu ^ (-(m : ℤ)) * 1 := (mul_one _).symm
       _ < βu ^ (-(m : ℤ)) * βu⁻¹ := by gcongr
   -- S bounded above by k - 1.
   have hbd : ∃ b : ℤ, ∀ n : ℤ, γu < βu ^ n → n ≤ b := by
-    refine ⟨(k : ℤ) - 1, ?_⟩
-    intro n hn
-    by_contra hnb
-    push Not at hnb
+    refine ⟨(k : ℤ) - 1, ?_⟩; intro n hn
+    by_contra hnb; push Not at hnb
     have hkle : (k : ℤ) ≤ n := by omega
     have hdiff : (0 : ℤ) ≤ n - (k : ℤ) := by omega
     have hβu_pow_le_one : βu ^ (n - (k : ℤ)) ≤ 1 := by
-      obtain ⟨j, hj⟩ := Int.eq_ofNat_of_zero_le hdiff
-      rw [hj, zpow_natCast]
+      obtain ⟨j, hj⟩ := Int.eq_ofNat_of_zero_le hdiff; rw [hj, zpow_natCast]
       exact pow_le_one' hβu_lt_one.le j
     have hβu_pow_anti : βu ^ n ≤ βu ^ (k : ℤ) := by
       rw [show n = (k : ℤ) + (n - (k : ℤ)) by ring, zpow_add]
-      calc βu ^ (k : ℤ) * βu ^ (n - (k : ℤ))
-          ≤ βu ^ (k : ℤ) * 1 := by gcongr
+      calc βu ^ (k : ℤ) * βu ^ (n - (k : ℤ)) ≤ βu ^ (k : ℤ) * 1 := by gcongr
         _ = βu ^ (k : ℤ) := mul_one _
     have hcontra : βu ^ (k : ℤ) < βu ^ (k : ℤ) :=
       calc βu ^ (k : ℤ) ≤ γu := hk_zpow
         _ < βu ^ n := hn
         _ ≤ βu ^ (k : ℤ) := hβu_pow_anti
     exact lt_irrefl _ hcontra
-  obtain ⟨n, hn_lt, hn_max⟩ := Int.exists_greatest_of_bdd hbd hne
-  refine ⟨n, ?_, ?_⟩
+  obtain ⟨n, hn_lt, hn_max⟩ := Int.exists_greatest_of_bdd hbd hne; refine ⟨n, ?_, ?_⟩
   · by_contra hnp1
-    push Not at hnp1
-    have hlt : γu < βu ^ (n + 1) := (hcast_lt _).mpr hnp1
-    have hle : n + 1 ≤ n := hn_max _ hlt
-    omega
+    push Not at hnp1; have hlt : γu < βu ^ (n + 1) := (hcast_lt _).mpr hnp1
+    have hle : n + 1 ≤ n := hn_max _ hlt; omega
   · exact (hcast_lt n).mp hn_lt
 
 /-- **(Wedhorn 7.40(6), Step 3b — sub-lemma)** *Logarithmic embedding into
