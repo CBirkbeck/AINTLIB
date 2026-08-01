@@ -707,6 +707,100 @@ theorem mapHuber_frobPow_add (k l : ℤ) (D : RationalLocData (Ainf p F)) :
   exact RationalLocData.mapHuber_congr_e _ _ _ _
     (frobPow_trans_neg p F k l) D
 
+private theorem hle3_lem
+    (k l : ℤ)
+    (hct : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))))
+    (hct' : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))).symm)
+    (ED : RationalLocData (Ainf p F))
+    (hDeq : ED.mapHuber (frobPow p F (-(k + l)))
+      (continuous_frobPow p F (-(k + l)))
+      (continuous_frobPow_symm p F (-(k + l)))
+    = (ED.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+        (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
+        (continuous_frobPow p F (-l)) (continuous_frobPow_symm p F (-l))) :
+    rationalOpen
+    (ED.mapHuber (frobPow p F (-(k + l)))
+      (continuous_frobPow p F (-(k + l)))
+      (continuous_frobPow_symm p F (-(k + l)))).T
+    (ED.mapHuber (frobPow p F (-(k + l)))
+      (continuous_frobPow p F (-(k + l)))
+      (continuous_frobPow_symm p F (-(k + l)))).s
+    ⊆ rationalOpen
+      ((ED.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+        (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
+        (continuous_frobPow p F (-l))
+        (continuous_frobPow_symm p F (-l))).T
+      ((ED.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+        (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
+        (continuous_frobPow p F (-l))
+        (continuous_frobPow_symm p F (-l))).s := by
+  rw [hDeq]
+
+private theorem hle2_lem
+    (k l : ℤ)
+    (hct : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))))
+    (hct' : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))).symm)
+    (ED : RationalLocData (Ainf p F)) :
+    rationalOpen
+    (ED.mapHuber (frobPow p F (-(k + l)))
+      (continuous_frobPow p F (-(k + l)))
+      (continuous_frobPow_symm p F (-(k + l)))).T
+    (ED.mapHuber (frobPow p F (-(k + l)))
+      (continuous_frobPow p F (-(k + l)))
+      (continuous_frobPow_symm p F (-(k + l)))).s
+    ⊆ rationalOpen
+      (ED.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
+        hct hct').T
+      (ED.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
+        hct hct').s := by
+  rw [ValuationSpectrum.RationalLocData.mapHuber_congr_e
+    (continuous_frobPow p F (-(k + l)))
+    (continuous_frobPow_symm p F (-(k + l)))
+    hct hct'
+    (frobPow_trans_neg p F k l).symm ED]
+
+private theorem hle'_lem
+    (k l : ℤ)
+    (hct : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))))
+    (hct' : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))).symm)
+    (ED : RationalLocData (Ainf p F)) :
+    rationalOpen
+    (ED.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
+      hct hct').T
+    (ED.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
+      hct hct').s
+    ⊆ rationalOpen
+      ((ED.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+        (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
+        (continuous_frobPow p F (-l))
+        (continuous_frobPow_symm p F (-l))).T
+      ((ED.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+        (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
+        (continuous_frobPow p F (-l))
+        (continuous_frobPow_symm p F (-l))).s := by
+  rw [RationalLocData.mapHuber_comp]
+
+private theorem hle_lem
+    (k l : ℤ)
+    (hct : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))))
+    (hct' : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))).symm)
+    (ED : RationalLocData (Ainf p F)) :
+    rationalOpen
+    ((ED.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+      (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
+      (continuous_frobPow p F (-l))
+      (continuous_frobPow_symm p F (-l))).T
+    ((ED.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+      (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
+      (continuous_frobPow p F (-l))
+      (continuous_frobPow_symm p F (-l))).s
+    ⊆ rationalOpen
+      (ED.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
+        hct hct').T
+      (ED.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
+        hct hct').s := by
+  rw [RationalLocData.mapHuber_comp]
+
 /-- **Additivity of the limit transport** (componentwise through the value
 composite law). -/
 theorem limitFrobHom_add (k l : ℤ)
@@ -727,36 +821,8 @@ theorem limitFrobHom_add (k l : ℤ)
     ⟨E.D, E.isRational, E.subset.trans (by
       rw [← frobOpens_add p F k l W])⟩ with hElift
   have hDeq := mapHuber_frobPow_add p F k l E.D
-  have hle : rationalOpen
-      ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-        (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
-        (continuous_frobPow p F (-l))
-        (continuous_frobPow_symm p F (-l))).T
-      ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-        (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
-        (continuous_frobPow p F (-l))
-        (continuous_frobPow_symm p F (-l))).s
-      ⊆ rationalOpen
-        (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
-          hct hct').T
-        (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
-          hct hct').s := by
-    rw [RationalLocData.mapHuber_comp]
-  have hle' : rationalOpen
-      (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
-        hct hct').T
-      (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
-        hct hct').s
-      ⊆ rationalOpen
-        ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-          (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
-          (continuous_frobPow p F (-l))
-          (continuous_frobPow_symm p F (-l))).T
-        ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-          (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
-          (continuous_frobPow p F (-l))
-          (continuous_frobPow_symm p F (-l))).s := by
-    rw [RationalLocData.mapHuber_comp]
+  have hle := hle_lem p F k l hct hct' E.D
+  have hle' := hle'_lem p F k l hct hct' E.D
   have h1 := ValuationSpectrum.presheafValueRingEquivHuber_comp_symm_apply
     (frobPow p F (-k)) (continuous_frobPow p F (-k))
     (continuous_frobPow_symm p F (-k))
@@ -764,23 +830,7 @@ theorem limitFrobHom_add (k l : ℤ)
     (continuous_frobPow_symm p F (-l)) E.D hle hle'
     ((s : ∀ j : RationalIndex W, presheafValue j.D)
       (frobIndex p F l (frobIndex p F k Elift)))
-  have hle2 : rationalOpen
-      (E.D.mapHuber (frobPow p F (-(k + l)))
-        (continuous_frobPow p F (-(k + l)))
-        (continuous_frobPow_symm p F (-(k + l)))).T
-      (E.D.mapHuber (frobPow p F (-(k + l)))
-        (continuous_frobPow p F (-(k + l)))
-        (continuous_frobPow_symm p F (-(k + l)))).s
-      ⊆ rationalOpen
-        (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
-          hct hct').T
-        (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
-          hct hct').s := by
-    rw [ValuationSpectrum.RationalLocData.mapHuber_congr_e
-      (continuous_frobPow p F (-(k + l)))
-      (continuous_frobPow_symm p F (-(k + l)))
-      hct hct'
-      (frobPow_trans_neg p F k l).symm E.D]
+  have hle2 := hle2_lem p F k l hct hct' E.D
   have h2 := ValuationSpectrum.presheafValueRingEquivHuber_congr_e_symm
     hct hct'
     (continuous_frobPow p F (-(k + l)))
@@ -789,23 +839,7 @@ theorem limitFrobHom_add (k l : ℤ)
     (restrictionMap _ _ hle'
       ((s : ∀ j : RationalIndex W, presheafValue j.D)
         (frobIndex p F l (frobIndex p F k Elift))))
-  have hle3 : rationalOpen
-      (E.D.mapHuber (frobPow p F (-(k + l)))
-        (continuous_frobPow p F (-(k + l)))
-        (continuous_frobPow_symm p F (-(k + l)))).T
-      (E.D.mapHuber (frobPow p F (-(k + l)))
-        (continuous_frobPow p F (-(k + l)))
-        (continuous_frobPow_symm p F (-(k + l)))).s
-      ⊆ rationalOpen
-        ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-          (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
-          (continuous_frobPow p F (-l))
-          (continuous_frobPow_symm p F (-l))).T
-        ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-          (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
-          (continuous_frobPow p F (-l))
-          (continuous_frobPow_symm p F (-l))).s := by
-    rw [hDeq]
+  have hle3 := hle3_lem p F k l hct hct' E.D hDeq.symm
   have h3 := congr_fun (restrictionMap_comp
     ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
       (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
