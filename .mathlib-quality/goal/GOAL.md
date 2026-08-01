@@ -7757,3 +7757,50 @@ other consumers (all green) rather than asserting additions are safe.
 
     over-50 proofs   486 (baseline) → 136
     heartbeat raises 0 (task 1 complete, re-verified)
+
+## Batch: 136 → 133
+
+    presheafValue_iteratedPlus_equiv_restrictionMap_canonicalMap  67 → 41  b0caed144
+    exists_evalAr_lift_aloc                                       69 → 46  3fda3d442
+    tendsto_gaussTerm_teichCoeffAr                                72 → 34  6e2e74a7f
+
+### Target selection is now a ranking, not "smallest first"
+
+Scanning for proofs whose largest `have` block is big enough to clear them found 11
+candidates. **That test alone is wrong**: `unitCover_sq_minus_dense` (238) has a
+205-line `hfun`, and lifting it gives 33 + 205 — still one proof over 50, zero net
+progress. Requiring BOTH halves under 50 leaves three in the non-FJP actionable set,
+and all three came in green on the first build.
+
+The scan (one-off, not a new tool):
+
+    for each over-50, sorry-free, non-FJP proof:
+      find the largest `have <name> : <type>` block
+      keep it if  blk ≥ code-50  AND  blk-1 ≤ 50
+
+`decompose_rank.py` reports 0 candidates and its cost model is stale — it still
+prices `obtain`-bound locals as expensive because their types "appear nowhere",
+which the last several commits disproved (they are written in the existential being
+destructured). Not repaired; the scan above is the working version.
+
+A `have` with a written-out statement is the cheapest extraction there is: the
+helper's signature is a transcription, not a reconstruction.
+
+### DEFERRED (cost, not blocked): presheafValue_mvRestricted_isUnit_mk_s (84)
+
+Its `hkey` block is 40 lines and would clear the proof, but it sits under a 29-line
+`letI`/`haveI` preamble installing the mvTate topology / uniformity / completeness /
+nonarchimedean / T0 instances on BOTH the source and target restricted-power-series
+rings — and `hkey` needs them (summability, `map_tsum`, `mvEvalHomBounded`). A helper
+would have to repeat the preamble, landing around 69 lines: over 50, so it converts
+one failing proof into another.
+
+**The real finding is that the preamble is repeated.** `MvTateAlgebra.mvTateUniformSpace`
+is installed 6 times in `Wedhorn828.lean`, which carries 94 `MvTateAlgebra.mvTate`
+instance mentions in total — on the order of 150+ lines of identical instance
+boilerplate. These are `def`s rather than `instance`s (presumably deliberately, to
+avoid diamonds against other topologies on the same carrier), so the fix is not
+"tag them `@[instance]`" — that would change global resolution. Candidate fixes are a
+local `attribute [local instance]` block per section, or one setup lemma that takes
+the installed instances and returns everything downstream needs. Task-3 work; sized
+and recorded here rather than forced now.
