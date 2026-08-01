@@ -31302,3 +31302,18 @@ law is characterised over fields by `SpecPoint.addOnZ_family` / `addOnY_family`
 (AdditionSpecPoints:51/62). So d3.2c = "unfold both sides at a field point and match
 formulas", with a reducedness hypothesis on the base which for the universal atlas
 power is already discharged in the tree (PointsDictionary docstring: the 0e integrality).
+
+### ★★★ [W1-d3.2c FIELD CASE] DONE 2026-08-01 — `neg_add_eq_some_negAddY`
+Over a field, `-(P + Q) = some (addX, negAddY)` — literally the chord's third
+intersection point (`chord_vanishes_at_three_points` shows the chord passes through
+`(addX, negAddY)` by definition of `negAddY`). Proof: `Point.add_some` + `neg_some` +
+`negY_negY`. Axiom-clean.
+WHAT IS LEFT OF THE PRONG (precise): connect the project's scheme-level group law to
+this field statement, i.e. for a section pair over a reduced base, the section
+`-(P + Q)` (project group law) and the section with chart coordinates
+`(addX, negAddY)` agree — by `section_ext_of_forall_specPoint` this reduces to the
+field-point comparison, where one side is `Dictionary.eq_toAffine` +
+`projModelPointsEquiv` and the other is `neg_add_eq_some_negAddY`. Then
+`nonempty_iso_unitObj_of_exact_order₃`'s hypothesis follows from the three evaluation
+vanishings ([W1-d2/d4]) plus the unit half ([d3.2d], adjugate bricks landed), giving a
+`ChordDatum` and hence the local theorem of the square.
