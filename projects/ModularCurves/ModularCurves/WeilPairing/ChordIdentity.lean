@@ -75,4 +75,51 @@ theorem nonempty_tensorObj_iso_of_chordDatum [IsSeparated π]
     (h.principal Rm (Or.inr (Or.inr (Or.inr rfl))))
     h.chord h.vertical
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d2] Vanishing at a section, in chart coordinates.** A chart section lies in
+the kernel ideal of a section of `π` exactly when the corresponding evaluation
+retraction kills it; the kernel is the principal ideal of the transported generator.
+This is the algebraic form in which the chord–tangent condition will be checked. -/
+theorem mem_span_iff_algHom_eq_zero_of_section [IsSeparated π]
+    (Z : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (hZU : Z.1 ⁻¹ᵁ U.1 = ⊤)
+    (rZ : Γ(C, U.1)) (hZ : (Scheme.Hom.ker Z.1).ideal U = Ideal.span {rZ})
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r) :
+    ∃ σ : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) →ₐ[Γ(S, (⊤ : S.Opens))]
+        Γ(S, (⊤ : S.Opens)),
+      ∀ c : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)),
+        (c ∈ Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rZ} ↔
+          σ c = 0) := by
+  obtain ⟨σ, hσ⟩ := exists_algHom_ker_eq_span_of_section Z.1 Z.2 U hZU rZ hZ halg
+  refine ⟨σ, fun c => ?_⟩
+  constructor
+  · intro hc
+    rw [← hσ] at hc
+    exact hc
+  · intro hc
+    rw [← hσ]
+    exact hc
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d2] Divisibility by a product of three generators, in evaluation form.**
+The exact-order hypothesis of `nonempty_iso_unitObj_of_exact_order₃` asks for the chart
+multiplier to be a unit multiple of `g_P·g_Q·g_R`. In a chart where the three
+evaluations are available, the divisibility half of that statement is exactly the
+simultaneous vanishing of the three evaluations of the successive quotients — the form
+the chord–tangent computation produces. -/
+theorem mul_dvd_of_evaluations_vanish
+    {A B : Type*} [CommRing A] [CommRing B]
+    (σ : A →+* B) (g c : A) (hker : RingHom.ker σ = Ideal.span {g})
+    (hc : σ c = 0) : ∃ c' : A, c = g * c' := by
+  have hmem : c ∈ Ideal.span {g} := by
+    rw [← hker]
+    exact hc
+  obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hmem
+  exact ⟨a, by rw [← ha, mul_comm]⟩
+
 end AlgebraicGeometry.Scheme.Modules
