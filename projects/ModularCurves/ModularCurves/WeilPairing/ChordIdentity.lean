@@ -568,6 +568,30 @@ theorem cancel_factor_of_norm {A : Type u} [CommRing A]
   calc f₁ * (c₁ * conj - -(f₂ * f₃)) = f₁ * (c₁ * conj) - f₁ * (-(f₂ * f₃)) := by ring
     _ = 0 := h2
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 F-i, iterated] The chord's successive quotients from the norm factorisation.**
+Cancelling the three linear factors in turn expresses the chord's quotients explicitly;
+in particular the second quotient times the conjugate is `−(X − x₃)`, which is what
+makes the third evaluation vanish. -/
+theorem chord_quotients_of_norm {A : Type u} [CommRing A]
+    (chord conj f₁ f₂ f₃ c₁ c₂ : A)
+    (hnorm : chord * conj = -(f₁ * f₂ * f₃))
+    (hd₁ : chord = f₁ * c₁) (hd₂ : c₁ = f₂ * c₂)
+    (hnzd₁ : ∀ t : A, f₁ * t = 0 → t = 0)
+    (hnzd₂ : ∀ t : A, f₂ * t = 0 → t = 0) :
+    c₂ * conj = -f₃ := by
+  have h₁ : c₁ * conj = -(f₂ * f₃) :=
+    cancel_factor_of_norm chord conj f₁ f₂ f₃ c₁ hnorm hd₁ hnzd₁
+  have h₂ : f₂ * (c₂ * conj) = f₂ * (-f₃) := by
+    calc f₂ * (c₂ * conj) = c₁ * conj := by rw [hd₂]; ring
+      _ = -(f₂ * f₃) := h₁
+      _ = f₂ * (-f₃) := by ring
+  rw [← sub_eq_zero]
+  refine hnzd₂ _ ?_
+  calc f₂ * (c₂ * conj - -f₃) = f₂ * (c₂ * conj) - f₂ * (-f₃) := by ring
+    _ = 0 := by rw [h₂, sub_self]
+
 end ModularCurves
 
 namespace ModularCurves
