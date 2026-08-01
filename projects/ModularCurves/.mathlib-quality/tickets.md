@@ -31815,3 +31815,18 @@ THE PRONG'S REMAINING WORK, in full:
  (ii) the invertibility conditions — the classical non-degeneracy case split;
  (iii) the degenerate configurations via the project's addOnY/addOnZ families;
  (iv) run the closing links, build the ChordDatum, descend.
+
+### [W1 (i)] ANALYSIS 2026-08-01 — what the σ₃ condition actually needs
+`chord_identity_of_sections` requires `σ₃` to read the chord's third `x`-coordinate
+(the `addX` formula) and its `y` to lie on the line. For the actual `Rm = -(P+Q)` that
+is the dictionary chain, which is PROVEN at field points
+(`projModelPointsEquiv_neg_mul_eq_negAddY`). The section-level upgrade
+(`section_eq_of_dictionary_eq`) needs BOTH sides as sections of `projModel W`:
+ * one side is the group-law `-(P+Q)`;
+ * the other must be CONSTRUCTED from the coordinates `(addX, negAddY)` — i.e. "affine
+   coordinates satisfying the equation give a section of the projective model".
+   The tree's route for that is `chartSolutionsEquiv` (WeierstrassModel.lean:680) and
+   `chartHomEquiv` (:774), which are stated for K-points; the SECTION-level version
+   (over the base ring itself, not a field) is the missing construction.
+So the honest remaining leaf is: **coordinates over the base + equation ⟹ a section of
+`projModel W`**, then the dictionary comparison. Everything else in the prong is proven.
