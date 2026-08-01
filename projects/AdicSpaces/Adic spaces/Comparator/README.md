@@ -3,12 +3,35 @@
 Kernel-level certification of the paper's headline theorem via
 [`leanprover/comparator`](https://github.com/leanprover/comparator).
 
+There are now **two** certificates in this directory.
+
 | file | role |
 |---|---|
-| `Challenge.lean` | the five statements, each `:= sorry` |
+| `Challenge.lean` | [FJP] Thm 1.3: the five statements, each `:= sorry` |
 | `Solution.lean` | the same five, forwarded to the library's proofs |
-| `comparator-config.json` | `theorem_names` + `permitted_axioms` |
+| `comparator-config.json` | `theorem_names` + `permitted_axioms` for the above |
+| `ScottishBookChallenge.lean` | Scottish Book 24 + 28, each `:= sorry` |
+| `ScottishBookSolution.lean` | the same two, forwarded to the library's proofs |
+| `scottish-book-config.json` | `theorem_names` + `permitted_axioms` for the above |
 | `../../scripts/certify.sh` | one-time setup instructions + the run |
+
+`certify.sh` reads the challenge and solution module names out of the config, so:
+
+```sh
+bash projects/AdicSpaces/scripts/certify.sh                       # [FJP] Theorem 1.3
+CONFIG="projects/AdicSpaces/Adic spaces/Comparator/scottish-book-config.json" \
+  bash projects/AdicSpaces/scripts/certify.sh                     # Scottish Book 24 + 28
+```
+
+Both currently end in `Your solution is okay!`.
+
+### The Scottish Book certificate quantifies its data existentially
+
+`scottishWitness` (`= Q²`) and `chartDatum` (`= (W; ϖ)`) live in the *proving* layer, so
+naming them in the challenge would pull `FJP.FiniteJetChart` and `FJP.FiniteJetScottishBook`
+into the trusted side. The challenge therefore says "there **exist** an element and a rational
+datum with these properties" and the solution supplies them. That is also the faithful reading
+of Problem 28, which asks exactly whether such a pair exists.
 
 ### Why `Solution.lean` is a separate file and not the library module
 

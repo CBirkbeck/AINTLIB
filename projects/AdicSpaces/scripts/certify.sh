@@ -18,6 +18,10 @@
 # here: the "solution" is this repository's own code, not an adversarial submission).
 #
 # Run from the REPO ROOT (the lake workspace), not from projects/AdicSpaces.
+#
+# CONFIG selects which certificate to run; the challenge/solution modules are read from it:
+#   default  — Adic spaces/Comparator/comparator-config.json      ([FJP] Theorem 1.3)
+#   also     — Adic spaces/Comparator/scottish-book-config.json   (Scottish Book 24 + 28)
 
 set -euo pipefail
 
@@ -39,7 +43,9 @@ cd "$REPO_ROOT"
 # Comparator itself re-runs `lake build` on each module inside landrun (`safeLakeBuild`), which
 # is why `Solution.lean` is a small forwarding file rather than a library module: only the
 # untrusted submission belongs in the sandboxed build, not the whole project.
-lake build '«Adic spaces».Comparator.Challenge'
-lake build '«Adic spaces».Comparator.Solution'
+CHALLENGE_MOD="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['challenge_module'])" "$CONFIG")"
+SOLUTION_MOD="$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['solution_module'])" "$CONFIG")"
+lake build "$CHALLENGE_MOD"
+lake build "$SOLUTION_MOD"
 
 exec lake env "$COMPARATOR_DIR/.lake/build/bin/comparator" "$CONFIG"

@@ -18,10 +18,12 @@ open FiniteJet ValuationSpectrum TopologicalRing
 
 universe u
 
-variable (F : Type u) [Field F]
+variable (F : Type u) [NormedField F] [IsUltrametricDist F] [CompleteSpace F]
+  [IsFJPBase F]
 
 /-- **[FJP] Theorem 1.3 (sheafy)**. -/
-theorem fjp_1_3_isSheafy : IsSheafy (JetA F) := finiteJet_isSheafy F
+theorem fjp_1_3_isSheafy [IsFJPNoetherianBase F] : IsSheafy (JetA F) :=
+  finiteJet_isSheafy F
 
 /-- **[FJP] Theorem 1.3 (uniform)**. -/
 theorem fjp_1_3_isUniform : IsUniform (JetA F) := finiteJet_isUniform F
@@ -33,4 +35,5 @@ theorem fjp_1_3_isDomain : IsDomain (JetA F) := finiteJet_isDomain F
 theorem fjp_1_3_not_isNoetherianRing : ¬ IsNoetherianRing (JetA F) := finiteJet_not_noetherian F
 
 /-- **[FJP] Theorem 1.3 (not stably uniform)**. -/
-theorem fjp_1_3_not_isStablyUniform : ¬ IsStablyUniform (JetA F) := finiteJet_not_stablyUniform F
+theorem fjp_1_3_not_isStablyUniform [IsFJPNoetherianBase F] :
+    ¬ IsStablyUniform (JetA F) := finiteJet_not_stablyUniform F

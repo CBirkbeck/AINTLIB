@@ -1,0 +1,177 @@
+# formalization.yaml — self-report for the AdicSpaces project, in the schema of
+# https://github.com/mathlib-initiative/formalization.yaml (v0.3).
+#
+# NOTE ON THE TWO FILES. This is NOT the same artifact as the sibling
+# `formalisation.yaml` (British spelling, `schema: 1`). That one is a 465 KB GENERATED
+# inventory — 768 cited results, 260 modules, statement digests — consumed by
+# `scripts/check_formalisation.py` to detect drift. It is an internal manifest and does not
+# follow any external schema. This file is the small, hand-written, standards-conformant
+# self-report intended for outside readers and tooling.
+#
+# FIELDS LEFT BLANK ARE NOT YET KNOWN — they are human-supplied (authorship, spend, review
+# status) and are deliberately empty rather than guessed.
+
+version: "v0.3"
+
+project:
+  name: "AINTLIB / AdicSpaces"
+  authors: []                      # [required] TODO: fill in — not inferable from the repo
+  license: ""                      # [required] TODO: Lean headers say "Apache 2.0 as described
+                                   # in the file LICENSE", but no LICENSE file exists in the
+                                   # repository. Add one, then set this to "Apache-2.0".
+
+sources:
+  - title: "Adic Spaces (lecture notes)"
+    authors: ["Torsten Wedhorn"]
+    id: "wedhorn-adic-spaces"
+    type: "lecture-notes"
+    license: ""
+    author_contacted: "no"
+    prior_work: "None known in Lean at this scope."
+
+  - title: "[FJP] — the finite-jet pinching algebra: a uniform sheafy Tate ring that is not stably uniform"
+    authors: []                    # TODO: fill in from the source paper
+    id: "fjp"
+    type: "preprint"
+    license: ""
+    author_contacted: "no"
+    prior_work: "None known."
+
+  - title: "The Nonarchimedean Scottish Book"
+    authors: ["Kiran S. Kedlaya (editor)"]
+    id: "nonarchimedean-scottish-book"
+    type: "problem-list"
+    license: ""
+    author_contacted: "no"
+    prior_work: "None known in Lean."
+    # https://scripts.mit.edu/~kedlaya/wiki/index.php?title=The_Nonarchimedean_Scottish_Book
+
+status:
+  scope: >-
+    Huber/Tate rings, adic spectra, rational localizations and the structure presheaf
+    (Wedhorn); the [FJP] finite-jet pinching algebra and its chart; and formal statements of
+    the Nonarchimedean Scottish Book problem list, two of which are answered here. The
+    finite-jet development is stated over an ABSTRACT base — a complete ultrametric
+    nonarchimedean field with a pseudouniformizer (`FiniteJet.IsFJPBase`) — rather than only
+    over Laurent series, so it covers mixed characteristic.
+  sorry_count: 45                  # all in ScottishBook/Stated: the 38 problems that remain
+                                   # open or unformalized. FJP: 0. See sorry_count per result.
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+
+  main_results:
+    - declaration: "FiniteJet.finiteJet_isSheafy"
+      file: "Adic spaces/FJP/FiniteJetMain.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/comparator-config.json"
+      literature_dependencies: []
+
+    - declaration: "FiniteJet.finiteJet_not_stablyUniform"
+      file: "Adic spaces/FJP/FiniteJetMain.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/comparator-config.json"
+      literature_dependencies: []
+
+    - declaration: "ScottishBook.problem28"
+      file: "Adic spaces/ScottishBook/Stated/Problem028.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/scottish-book-config.json"
+      literature_dependencies: []
+
+    - declaration: "ScottishBook.problem24_completed_false"
+      file: "Adic spaces/ScottishBook/Stated/Problem024.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "Adic spaces/Comparator/scottish-book-config.json"
+      literature_dependencies: []
+
+automation:
+  methods:
+    - method: "LLM-assisted formalization with human direction"
+      models: []                   # TODO: fill in the models actually used
+      framework: "Claude Code"
+      tool_setup: >-
+        Lean 4 with mathlib; per-project dev branches in one Lake workspace; automated
+        cleanup lanes on `main`. See CLAUDE.md.
+      cost:
+        wall_time: ""
+        spend_usd: ""
+        hardware: ""
+      prompting_notes: ""
+  spend_usd: ""
+  notes: >-
+    Statement-level certification is available via leanprover/comparator; see
+    `scripts/certify.sh` and the two configs referenced above. Both certificates currently
+    pass (kernel accepts, axiom budget respected).
+
+fidelity:
+  divergences: >-
+    (1) SCOPE OF THE BASE. [FJP] states its theorem over a complete DISCRETELY VALUED
+    nonarchimedean field. The formalization is stated over the weaker `IsFJPBase` (complete
+    ultrametric field + pseudouniformizer, no discreteness) wherever that suffices, which is
+    everything except sheafiness. Discreteness is isolated in a second class,
+    `IsFJPNoetherianBase` (the Gauss unit ball is noetherian).
+
+    (2) SHEAFINESS IS EQUAL-CHARACTERISTIC ONLY. `IsFJPNoetherianBase` is discharged for
+    `K = F((t))` (`FJP/FJPBaseLaurent.lean`) by an elementary transpose argument. It is NOT
+    discharged for `ℚ_p`: that needs Stacks 00MA (the ϖ-adic completion of a noetherian ring
+    is noetherian), which is a mathlib gap — this repository's `AdicCompletion.isNoetherianRing`
+    is sorry-backed and is deliberately not used. So `FJP/FJPBasePadic.lean` provides only
+    `IsFJPBase ℚ_[p]`, and Scottish Book 24/28 hold there while sheafiness does not.
+
+    (3) PROBLEM 28 IS RESTATED. Kedlaya's wording ("f restricts to zero on some rational
+    subspace") is formalized with the structure-presheaf value `presheafValue D` and
+    `D.canonicalMap`, NOT with `algebraMap A (Localization.Away D.s)`. Over the algebraic
+    localization the statement is satisfiable only degenerately (nilpotent `s`, for which
+    `R(T/s)` is empty), and the [FJP] phenomenon is a separated-completion effect invisible
+    there. The formal statement additionally requires the rational subset to be nonempty and
+    its chart nonzero, closing that loophole.
+
+    (4) PROBLEM 28 IS ANSWERED IN THE TATE CASE ONLY. Kedlaya asks about "Tate/perfectoid";
+    the witness is a complete uniform nonnoetherian Tate domain, not a perfectoid ring, so
+    the perfectoid half remains open.
+
+    (5) PROBLEM 24, ALGEBRAIC FORM. `ScottishBook.problem24_algebraic` is a triviality (every
+    localization is flat) and is recorded only to make clear that the content of the problem
+    is entirely in the completed localization.
+
+review:
+  status: "unreviewed"             # [required]
+  reviewers: []
+  notes: >-
+    No external mathematical review. Machine-checked evidence only: full library build,
+    `#print axioms` on all main results, and passing comparator certificates.
+
+alignment:
+  namespace: "FiniteJet, ScottishBook"
+  statements:
+    - source: "fjp"
+      lean: "FiniteJet.finiteJet_isSheafy"
+      module: "«Adic spaces».FJP.FiniteJetMain"
+      status: "proved"
+      note: "[FJP] Theorem 1.3 (sheafy). Requires IsFJPNoetherianBase."
+    - source: "fjp"
+      lean: "FiniteJet.finiteJet_not_stablyUniform"
+      module: "«Adic spaces».FJP.FiniteJetMain"
+      status: "proved"
+      note: "[FJP] Theorem 1.3 / Corollary 3.2."
+    - source: "fjp"
+      lean: "FiniteJet.chartEquiv"
+      module: "«Adic spaces».FJP.FiniteJetChart"
+      status: "proved"
+      note: "[FJP] Proposition 3.1: 𝓐⟨W/ϖ⟩ ≅ K⟨X,Q⟩/(Q²)."
+    - source: "nonarchimedean-scottish-book"
+      lean: "ScottishBook.problem28"
+      module: "«Adic spaces».ScottishBook.Stated.Problem028"
+      status: "proved-restated"
+      note: "Problem 28, affirmative in the Tate case. See fidelity notes (3) and (4)."
+    - source: "nonarchimedean-scottish-book"
+      lean: "ScottishBook.problem24_completed_false"
+      module: "«Adic spaces».ScottishBook.Stated.Problem024"
+      status: "proved"
+      note: "Problem 24, answered negatively for the completed rational localization."
+
+acknowledgements: ""

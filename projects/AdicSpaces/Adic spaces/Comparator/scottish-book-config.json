@@ -1,0 +1,14 @@
+{
+    "challenge_module": "«Adic spaces».Comparator.ScottishBookChallenge",
+    "solution_module": "«Adic spaces».Comparator.ScottishBookSolution",
+    "theorem_names": [
+        "sb_28_strict_inclusion_dies_on_rational_subset",
+        "sb_24_rational_localization_not_flat"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ],
+    "enable_nanoda": false
+}
