@@ -826,6 +826,77 @@ private theorem gaussValue_shift_tail_le {ρ : NNReal} (hρ1 : ρ ≤ 1) {x X : 
   rw [heq]
   exact gaussTerm_le_gaussValue p F hρ1 x (n + i)
 
+private theorem hprefix_lem {ρ : NNReal} (hρ1 : ρ < 1) : ∀ (w : Ainf p F) (n : ℕ) (W : Ainf p F),
+    w = (∑ i ∈ Finset.range n,
+      WittVector.teichmuller p (teichCoeff p F w i) * (p : Ainf p F) ^ i)
+      + (p : Ainf p F) ^ n * W →
+    (∀ i < n, gaussTerm p F ρ w i < gaussValue p F ρ w) →
+    0 < gaussValue p F ρ w →
+    gaussValue p F ρ (w - (p : Ainf p F) ^ n * W) < gaussValue p F ρ w := by
+  intro w n W hweq hmin hwpos
+  have hsub : w - (p : Ainf p F) ^ n * W = ∑ i ∈ Finset.range n,
+      WittVector.teichmuller p (teichCoeff p F w i) * (p : Ainf p F) ^ i := by
+    conv_lhs => rw [hweq]
+    ring
+  rw [hsub]
+  have hB : (Finset.range n).sup (gaussTerm p F ρ w) < gaussValue p F ρ w := by
+    rw [Finset.sup_lt_iff (by simpa using hwpos)]
+    intro i hi
+    exact hmin i (Finset.mem_range.mp hi)
+  refine lt_of_le_of_lt ?_ hB
+  refine gaussValue_finset_sum_le p F hρ1.le _ _ _ fun i hi => ?_
+  rw [gaussValue_teichmuller_mul_p_pow p F hρ1.le]
+  have : ρ ^ i * perfectoidValuation p F ((teichCoeff p F w i : OF F) : F)
+      = gaussTerm p F ρ w i := rfl
+  rw [this]
+  exact Finset.le_sup hi
+
+private theorem hlead_lem {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (x y X Y : Ainf p F) (j k : ℕ) (x' y' : Ainf p F)
+    (hx'def : x' = (p : Ainf p F) ^ j * X)
+    (hy'def : y' = (p : Ainf p F) ^ k * Y)
+    (hXcoords : ∀ i, teichCoeff p F X i = teichCoeff p F x (j + i))
+    (hYcoords : ∀ i, teichCoeff p F Y i = teichCoeff p F y (k + i))
+    (hjspec : gaussValue p F ρ x = gaussTerm p F ρ x j)
+    (hkspec : gaussValue p F ρ y = gaussTerm p F ρ y k) : gaussTerm p F ρ (x' * y') (j + k)
+    = gaussValue p F ρ x * gaussValue p F ρ y := by
+  have hprod : x' * y' = (p : Ainf p F) ^ (j + k) * (X * Y) := by
+    rw [hx'def, hy'def, pow_add]
+    ring
+  have hcoord : teichCoeff p F (x' * y') (j + k) = teichCoeff p F (X * Y) 0 := by
+    rw [hprod]
+    have h0 := teichCoeff_p_pow_mul p F (X * Y) (j + k) 0
+    rwa [add_zero] at h0
+  have hmul0 : teichCoeff p F (X * Y) 0
+      = teichCoeff p F X 0 * teichCoeff p F Y 0 := by
+    rw [teichCoeff_zero_eq, teichCoeff_zero_eq, teichCoeff_zero_eq,
+      WittVector.mul_coeff_zero]
+  have hX0 : teichCoeff p F X 0 = teichCoeff p F x j := by
+    have h1 := hXcoords 0
+    rwa [add_zero] at h1
+  have hY0 : teichCoeff p F Y 0 = teichCoeff p F y k := by
+    have h1 := hYcoords 0
+    rwa [add_zero] at h1
+  rw [gaussTerm, hcoord, hmul0, hX0, hY0, hjspec, hkspec, gaussTerm, gaussTerm,
+    show ((teichCoeff p F x j * teichCoeff p F y k : OF F) : F)
+      = ((teichCoeff p F x j : OF F) : F) * ((teichCoeff p F y k : OF F) : F) from rfl,
+    Valuation.map_mul, pow_add]
+  ring
+
+private theorem hpert_lem {ρ : NNReal} (hρ1 : ρ < 1) (x y x' y' : Ainf p F)
+    (hxpos : 0 < gaussValue p F ρ x) (hypos : 0 < gaussValue p F ρ y)
+    (hy'le : gaussValue p F ρ y' ≤ gaussValue p F ρ y)
+    (hxpref : gaussValue p F ρ (x - x') < gaussValue p F ρ x)
+    (hypref : gaussValue p F ρ (y - y') < gaussValue p F ρ y) :
+    gaussValue p F ρ (x * (y - y') + (x - x') * y')
+    < gaussValue p F ρ x * gaussValue p F ρ y := by
+  refine lt_of_le_of_lt (gaussValue_add_le p F hρ1.le _ _) (max_lt ?_ ?_)
+  · refine lt_of_le_of_lt (gaussValue_mul_le p F hρ1 x (y - y')) ?_
+    exact mul_lt_mul_of_pos_left hypref hxpos
+  · refine lt_of_le_of_lt (gaussValue_mul_le p F hρ1 (x - x') y') ?_
+    refine lt_of_le_of_lt (mul_le_mul_of_nonneg_left hy'le zero_le) ?_
+    exact mul_lt_mul_of_pos_right hxpref hypos
+
 /-- **Multiplicativity** of the Gauss value ([Kedlaya-1004.0466, Lemma 4.1];
 [Kedlaya-noetherian-ff, Lemma 2.3(b)]): `w(x·y) = w(x)·w(y)` for `0 < ρ < 1`. -/
 theorem gaussValue_mul {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x y : Ainf p F) :
@@ -857,30 +928,8 @@ theorem gaussValue_mul {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x y : Ainf
   have hy'le : gaussValue p F ρ y' ≤ gaussValue p F ρ y :=
     gaussValue_shift_tail_le p F hρ1.le hYcoords
   -- the leading term of x'y' has value exactly w(x)·w(y)
-  have hlead : gaussTerm p F ρ (x' * y') (j + k)
-      = gaussValue p F ρ x * gaussValue p F ρ y := by
-    have hprod : x' * y' = (p : Ainf p F) ^ (j + k) * (X * Y) := by
-      rw [hx'def, hy'def, pow_add]
-      ring
-    have hcoord : teichCoeff p F (x' * y') (j + k) = teichCoeff p F (X * Y) 0 := by
-      rw [hprod]
-      have h0 := teichCoeff_p_pow_mul p F (X * Y) (j + k) 0
-      rwa [add_zero] at h0
-    have hmul0 : teichCoeff p F (X * Y) 0
-        = teichCoeff p F X 0 * teichCoeff p F Y 0 := by
-      rw [teichCoeff_zero_eq, teichCoeff_zero_eq, teichCoeff_zero_eq,
-        WittVector.mul_coeff_zero]
-    have hX0 : teichCoeff p F X 0 = teichCoeff p F x j := by
-      have h1 := hXcoords 0
-      rwa [add_zero] at h1
-    have hY0 : teichCoeff p F Y 0 = teichCoeff p F y k := by
-      have h1 := hYcoords 0
-      rwa [add_zero] at h1
-    rw [gaussTerm, hcoord, hmul0, hX0, hY0, hjspec, hkspec, gaussTerm, gaussTerm,
-      show ((teichCoeff p F x j * teichCoeff p F y k : OF F) : F)
-        = ((teichCoeff p F x j : OF F) : F) * ((teichCoeff p F y k : OF F) : F) from rfl,
-      Valuation.map_mul, pow_add]
-    ring
+  have hlead := hlead_lem p F hρ0 hρ1 x y X Y j k x' y' hx'def hy'def
+    hXcoords hYcoords hjspec hkspec
   have hlow : gaussValue p F ρ x * gaussValue p F ρ y ≤ gaussValue p F ρ (x' * y') := by
     rw [← hlead]
     exact gaussTerm_le_gaussValue p F hρ1.le _ _
@@ -891,43 +940,13 @@ theorem gaussValue_mul {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x y : Ainf
   have hcore : gaussValue p F ρ (x' * y') = gaussValue p F ρ x * gaussValue p F ρ y :=
     le_antisymm hupp hlow
   -- the prefixes are strictly smaller
-  have hprefix : ∀ (w : Ainf p F) (n : ℕ) (W : Ainf p F),
-      w = (∑ i ∈ Finset.range n,
-        WittVector.teichmuller p (teichCoeff p F w i) * (p : Ainf p F) ^ i)
-        + (p : Ainf p F) ^ n * W →
-      (∀ i < n, gaussTerm p F ρ w i < gaussValue p F ρ w) →
-      0 < gaussValue p F ρ w →
-      gaussValue p F ρ (w - (p : Ainf p F) ^ n * W) < gaussValue p F ρ w := by
-    intro w n W hweq hmin hwpos
-    have hsub : w - (p : Ainf p F) ^ n * W = ∑ i ∈ Finset.range n,
-        WittVector.teichmuller p (teichCoeff p F w i) * (p : Ainf p F) ^ i := by
-      conv_lhs => rw [hweq]
-      ring
-    rw [hsub]
-    have hB : (Finset.range n).sup (gaussTerm p F ρ w) < gaussValue p F ρ w := by
-      rw [Finset.sup_lt_iff (by simpa using hwpos)]
-      intro i hi
-      exact hmin i (Finset.mem_range.mp hi)
-    refine lt_of_le_of_lt ?_ hB
-    refine gaussValue_finset_sum_le p F hρ1.le _ _ _ fun i hi => ?_
-    rw [gaussValue_teichmuller_mul_p_pow p F hρ1.le]
-    have : ρ ^ i * perfectoidValuation p F ((teichCoeff p F w i : OF F) : F)
-        = gaussTerm p F ρ w i := rfl
-    rw [this]
-    exact Finset.le_sup hi
+  have hprefix := hprefix_lem p F hρ1
   have hxpref : gaussValue p F ρ (x - x') < gaussValue p F ρ x :=
     hprefix x j X hXeq hjmin hxpos
   have hypref : gaussValue p F ρ (y - y') < gaussValue p F ρ y :=
     hprefix y k Y hYeq hkmin hypos
   -- the perturbation is strictly below w(x)·w(y)
-  have hpert : gaussValue p F ρ (x * (y - y') + (x - x') * y')
-      < gaussValue p F ρ x * gaussValue p F ρ y := by
-    refine lt_of_le_of_lt (gaussValue_add_le p F hρ1.le _ _) (max_lt ?_ ?_)
-    · refine lt_of_le_of_lt (gaussValue_mul_le p F hρ1 x (y - y')) ?_
-      exact mul_lt_mul_of_pos_left hypref hxpos
-    · refine lt_of_le_of_lt (gaussValue_mul_le p F hρ1 (x - x') y') ?_
-      refine lt_of_le_of_lt (mul_le_mul_of_nonneg_left hy'le zero_le) ?_
-      exact mul_lt_mul_of_pos_right hxpref hypos
+  have hpert := hpert_lem p F hρ1 x y x' y' hxpos hypos hy'le hxpref hypref
   -- assemble via the isosceles principle
   have hdecomp : x * y = x' * y' + (x * (y - y') + (x - x') * y') := by
     ring
