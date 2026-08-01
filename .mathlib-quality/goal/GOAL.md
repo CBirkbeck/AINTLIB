@@ -8019,3 +8019,80 @@ Keystone/Gen/Open finding (~695 lines) and the Wedhorn828 instance-preamble find
 
     over-50 proofs   486 (baseline) → 124   (122 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: 124 → 120, and a corrected ranking
+
+    ker_lambdaMap_le_range_iotaHom     139 → 49   199319ce7
+    isIntegral_blocToBI_of_wLoc_le_one  96 → 47   55694c5c1
+    gaussValue_mul                      98 → 45   94b6ca4db
+    tate_backward_exists                97 → 46   42416bd10
+    datum_ker_le_span_of_unit_mod      120 → 98   3e4167e2e  (dedup, no target cleared)
+
+### THE RANKING WAS OVER-OPTIMISTIC — corrected
+
+The old scan counted NESTED blocks as independently extractable and ignored the
+call-line cost. `descent_step` scored slack 46 but its top-level blocks sum to exactly
+its 34-line need, netting 28 — never viable. Corrected metric:
+
+    net  = sum(top-level blocks, 4..51 lines) − #calls
+    slack = net − (code − 50)
+
+Best clean target is now slack ~22, not the 40+ the old scan claimed. This explains
+why recent targets each needed three or four extractions plus line-shaping rather than
+the one or two implied: I was reading inflated slack and discovering the shortfall at
+measure time (53, 51, 52…). Systematic, not per-target bad luck.
+
+The scan also flags `subst` in the body — a block after `subst` had its statement
+elaborated in a substituted context that a lifted signature will not reproduce. That is
+why `ker_deltaMap_gen_le_range_epsilonHom_gen` and `chartDensePlus_of_exact` are
+deferred rather than attempted.
+
+### PRESERVE THE CONCLUSION AND THE BODY IS INERT
+
+Ten extractions in `ker_lambdaMap_le_range_iotaHom` transplanted with zero body edits,
+because each helper's conclusion is byte-identical to the original `have`'s. Every
+body patch needed on earlier targets (dropping an `intro`, rewriting
+`simp only [.., f]`, re-indenting) traced back to my CHANGING the statement shape.
+Default: change the statement only when there is a reason to.
+
+### EXTRACT AT THE GENERAL STATEMENT
+
+`hψ_div_lem` was lifted from `tate_backward_exists` in its general ∀-form. A sibling
+120-line proof had its own 26-line copy with the existential already instantiated —
+same lemma, no shared text, invisible to every scan I run. Only reading the proofs
+finds it. Reuse cost 4 lines.
+
+### A HELPER'S HOME IS THE EARLIEST OF ITS CONSUMERS
+
+Within a file: `hψ_div_lem` sat at 1828 where extracted; its new consumer is at 1490.
+`Unknown identifier`. Moved it up. Across files, same rule — and it BLOCKS the next
+dedup: Wedhorn828 has three more sites of this family (hψ_div 3192, hψ_cont 3042/3208,
+hext 3100/3255) but Wedhorn828 is UPSTREAM of WedhornCechAcyclicity, so sharing needs
+the helpers moved into Wedhorn828 (rebuilds it + all downstream). Same shape as
+Keystone/Gen/Open. **Task-3 work, sized and recorded, not started.**
+
+### A lifted signature inherits NO instance context
+
+`tate_backward_exists` cost six build rounds discovering instances one at a time:
+τC/hringC → τQ → hringQ/hT2Q/hNAQ (forcing `haI_closed` into the parameters) →
+`CompleteSpace A` from the parent's `[letI …; CompleteSpace A]` bracket. Read the
+parent's ENTIRE preamble and signature brackets first and transcribe the set — which
+is what made the completeSpace family converge.
+
+Corrected sub-rule: spelling a `letI`'s value (e.g. `mvQuotTopology m aI`) frees the
+SIGNATURE, but the transplanted BODY still names `τQ`, so the binding is still needed.
+The instance-escaping heuristic only holds for blocks whose CONCLUSION is instance-free.
+
+### Tooling: lift_have (decompose_common.py)
+
+Written after the same three bugs recurred; then corrected again when it repeated two
+of them at the call site. Now takes `params` as a LIST of binder lines (a string glued
+groups into 155-column lines) and DERIVES the call from that list (writing it by hand
+put `Φ` in `ψ`'s slot). `explicit_binder_names` tracks paren depth so an inner
+`(aI : Set …)` type ascription is not read as a binder — misreading that made me report
+a phantom duplicate binder that did not exist.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 120   (118 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
