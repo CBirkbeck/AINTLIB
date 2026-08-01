@@ -32372,3 +32372,27 @@ step, not a hypothesis: instantiate this with `D := dualObj (f^* z^* L)`, get
 `L ≅ f^*(z^* L)`. The `v`-side input comes from
 `Picard/DualPullback/Iso.dualPullbackIsoOfIsInvertible` +
 `dualPairing_frame_comparison`, and `hnorm` is `appLE_z_mul_pullback_inv_eq_one`.
+
+### ★★★★★ [W3.10] DONE 2026-08-01 — `nonempty_iso_pullback_section_of_frames`
+**W3, the un-normalized descent, is complete as a chart-level criterion.**
+`L ≅ f^*(z^* L)` for invertible `L`, from: a base cover, restrict-frames for `L` and for
+`(f^* z^* L)^∨` over the preimages, their two comparison units, and the single
+normalization `z(uᵢⱼ · vᵢⱼ) = 1`. **No generator hypotheses, no `hbij`, no `etw`** — the
+earlier `nonempty_iso_pullback_section_of_chart_trivializations` carried three; this
+carries none. Axiom-clean; root build 9619 jobs.
+
+Chain: W3.8 `nonempty_unitObj_iso_tensorObj_of_frames` (the twisted glue) → W3.9
+`nonempty_iso_of_tensorObj_dual_trivial` (untwist through `monoidalTensorObjIso` +
+`nonempty_eval_iso`) → this. Invertibility of the twist factor is `IsInvertible.pullback`
+applied twice.
+
+WHAT REMAINS on the critical path to the Weil pairing:
+1. **Instantiate W3.10 for `Δ`** — the caller must produce `eD`, `hv` and `hnorm` for the
+   actual bundle. `eD` comes from W3.2/W3.3 + `dualRestrictIsoOfRestrictIso`;
+   `hv`/`hnorm` from `Picard/DualPullback/Iso.dualPullbackIsoOfIsInvertible` +
+   `dualPairing_frame_comparison` + `appLE_z_mul_pullback_inv_eq_one`.
+2. Feed that to the Picard leaf `exists_invertible_tensor_idealModule_add`
+   (`Picard/SelfAdjointN.lean:259`), whose chord/vertical prong is already complete.
+3. Then the DS4 register `weilPairing` (`WeilPairing/Basic.lean:47`) can be *constructed*
+   rather than registered, which discharges `weilPairing_torsionMapOfEllHom`
+   (`ModularCurve/YRho.lean:2489`) — the live blocker of `yRho_representable`.

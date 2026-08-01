@@ -617,4 +617,59 @@ theorem nonempty_iso_of_tensorObj_dual_trivial {X : Scheme.{u}} (L M : X.Modules
     ⟨(monoidalTensorObjIso L (dualObj M)).symm ≪≫ h.some.symm⟩
   exact nonempty_iso_of_tensorObj_unitObj h' (nonempty_eval_iso hM)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.10 — THE UN-NORMALIZED DESCENT, FROM CHART FRAMES]** An invertible module on the
+total space is the pullback of `z^* L` as soon as, on the preimage of a base cover, it and
+the dual of `f^*(z^* L)` carry frames whose comparison units cancel along `z`. This is the
+"differs by `f^*`" form of the relative theorem of the square, with **no** residual
+hypothesis about generators: `hu`, `hv` and `hnorm` are all statements about the two
+comparison units. -/
+theorem nonempty_iso_pullback_section_of_frames
+    (hp : UniversallyOConnected p)
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    (L : (pullback p g).Modules) (hL : IsInvertible L)
+    {ι : Type u} (U : ι → T.Opens) (hU : iSup U = ⊤)
+    (eL : ∀ i, L.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (eD : ∀ i, (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+        (pullback.snd p g)).obj
+          ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))).restrict
+        (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (u v : ∀ i j, Γ(pullback p g,
+      pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j))
+    (hu : ∀ i j, L.presheaf.map
+        (Opens.infLELeft (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection L (pullback.snd p g ⁻¹ᵁ U i)
+          (Scheme.Modules.overTrivializationOfRestrictIso L _ (eL i)) 1) =
+      u i j • L.presheaf.map
+        (Opens.infLERight (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection L (pullback.snd p g ⁻¹ᵁ U j)
+          (Scheme.Modules.overTrivializationOfRestrictIso L _ (eL j)) 1))
+    (hv : ∀ i j, (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))).presheaf.map
+        (Opens.infLELeft (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection _ (pullback.snd p g ⁻¹ᵁ U i)
+          (Scheme.Modules.overTrivializationOfRestrictIso _ _ (eD i)) 1) =
+      v i j • (dualObj ((AlgebraicGeometry.Scheme.Modules.pullback
+          (pullback.snd p g)).obj
+            ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L))).presheaf.map
+        (Opens.infLERight (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection _ (pullback.snd p g ⁻¹ᵁ U j)
+          (Scheme.Modules.overTrivializationOfRestrictIso _ _ (eD j)) 1))
+    (hnorm : ∀ i j, (Scheme.Hom.appLE z
+        (pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j) (U i ⊓ U j)
+        (le_inf_preimage_preimage g hz (U i) (U j))).hom (u i j * v i j) = 1) :
+    Nonempty (L ≅ (AlgebraicGeometry.Scheme.Modules.pullback (pullback.snd p g)).obj
+      ((AlgebraicGeometry.Scheme.Modules.pullback z).obj L)) :=
+  nonempty_iso_of_tensorObj_dual_trivial L _
+    ((hL.pullback z).pullback (pullback.snd p g))
+    (nonempty_unitObj_iso_tensorObj_of_frames g hp hz L _ U hU eL eD u v hu hv hnorm)
+
 end ModularCurves
