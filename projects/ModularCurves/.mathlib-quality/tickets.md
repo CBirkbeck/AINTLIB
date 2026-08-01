@@ -31210,3 +31210,33 @@ for the tautological pair over the universal Weierstrass atlas — plus the smal
 bookkeeping that comap-of-ker along `pairClassify` is the kernel of the classified
 section (`RelEffCartierDiv.ker_sectionBaseChange` shape) and the pole-sheaf base-change
 iso (`sectionPoleSheafPowerBaseChangeIso`).
+
+## [W1-d3.2] THE LAST LEAF — full decomposition 2026-08-01 (start here next session)
+Everything else in the WP prong is proved and axiom-clean (verified by an audit sweep of
+9 headline declarations: 0 sorryAx). What remains is the chord–tangent computation.
+
+TARGET (any one of these three equivalent forms — pick the cheapest to attack):
+ (F1) `ChordDatum E.zero E.zero_π P Q (P+Q) (-(P+Q))` for the tautological pair over
+      `pairBase π` (then transport by [W1-d3.1] to all pairs);
+ (F2) the three scalar equations of [W1-d2/d4] in ONE Weierstrass chart:
+      σ_P(c_ℓ) = 0, σ_Q(c_ℓ/g_P) = 0, σ_{-(P+Q)}(c_ℓ/(g_P g_Q)) = 0, last quotient a unit;
+ (F3) the determinant form: the 3×3 evaluation matrix of the b3-basis at
+      (P, Q, -(P+Q)) is singular, and drops rank by exactly one.
+
+AVAILABLE TOOLING (all proven):
+ * chord/vertical existence from unimodular evaluation data
+   (`exists_chord_of_unimodular`, `exists_vertical_of_unimodular`);
+ * rank 1/2/3/m coordinates of the restriction cokernels (tensor-shaped);
+ * evaluation retractions with principal kernels (`exists_algHom_ker_eq_span_of_section`);
+ * exact-order ⟹ trivialization (`nonempty_iso_unitObj_of_exact_order₂/₃`);
+ * ChordDatum ⟹ theorem of the square (`EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`);
+ * transport along any base change (`nonempty_pullback_{triple,double}_iso_unitObj`,
+   `comap_ker_eq_ker_baseChange`, `nonempty_pullback_sectionPoleSheafPower_iso`);
+ * the descent toolkit (W2) for going from the chart-local statement to the global one.
+
+ROUTE OF RECORD for (F2): the universal Weierstrass atlas `WeierstrassAtlasRingU`
+(AdditionBaseChange.lean:44) + `GroupLawAxioms`'s `*_atlas → *_of_map → *_of_eq → *`
+transfer cascade; the affine chart computation uses mathlib's
+`WeierstrassCurve.Affine` slope/negation API together with the project's
+`PoleSheafAwayAffineModelEval` (evaluation of pole sections in the affine model) and
+`AdditionSpecPoints` (the addition charts).
