@@ -6839,3 +6839,52 @@ file has not cost a repair round.
 
 Duplicate inventory: 210 → 209 clusters, 1377 → 1362 lines.
 
+
+## The promote well is dry: all four remaining candidates have a substantive obstacle
+
+Worked the promote-cluster list down to four, and each now needs design rather
+than a mechanical hoist. Recording the diagnosis per target so the next pass
+starts from it instead of re-deriving.
+
+**`valued_resI_rpow_interpolate`** (94L, need 44). `hpad` alone frees 48, but it
+depends on `hlim'`, `hlim''`, `hlimc` — each bound by `have X := tendsto_resI …`,
+i.e. **an alias with no written type**. Carrying them plus `hpt`, `v'`, `v''`
+costs 23 lines, putting the helper at 69. Viable only if the `hlim*` types are
+recovered from `tendsto_resI`'s own signature and passed as hypotheses.
+
+**`tateAcyclicity_Part2_direct_per_E`** (84L, need 34). Nine promotable `have`s
+totalling 37 frees, but the sizes are 7/1/3/6/4/2/4/2/17 — clearing it means
+promoting **six** of them, producing six top-level lemmas named `D_f_eq`,
+`D_sub_DE`, `D_E_mem` … Those names mean nothing outside their parent. This is
+the case where satisfying the 50-line rule mechanically makes the file *worse*,
+and I am not doing it to move a counter.
+
+**`limitFrobHom_add`** (122L, need 72). Eleven promotable `have`s, all ≤17 lines,
+named `h1`, `h2`, `h3`, `h4`, `hle`, `hle'`, `hct`, `hct'`. Clearing needs most of
+them, so it needs eleven invented names. Tractable but it is naming work, not
+extraction work.
+
+**`wedhorn_lemma_834_pair_package_exists`** (95L, need 45) — the interesting one.
+`hpiece₁` and `hpiece₂` are both exactly 21 lines and **17 of 21 lines are
+identical** after normalising `₁`/`₂`. The four differences are the `(Vjᵢ, elt)`
+pair and a final projection, `⟨hv.1.1, hv.2.1⟩` vs `⟨hv.1.2, hv.2.2⟩`.
+
+My first instinct — one lemma parameterised over the side, instantiated twice —
+does **not** work: `Vj₁.interSamePair Vj₂ hP` and `Vj₂.interSamePair Vj₁ hP` are
+different terms, and there is no `interSamePair_comm` in the tree (checked).
+Sharing that way means proving commutativity first.
+
+The route that does work, and needs no new math: both blocks run the *same*
+rewrite chain and then take different components of the same `hv`. So prove the
+containment **into the intersection** once —
+
+    … ⊆ rationalOpen (Vj₁ ⊓ genPiece Vj₁ x) ∩ rationalOpen (Vj₂ ⊓ genPiece Vj₂ y)
+
+closing with `exact fun v hv => ⟨⟨hv.1.1, hv.2.1⟩, ⟨hv.1.2, hv.2.2⟩⟩` — and let
+`hpiece₁`/`hpiece₂` be one-line projections of it. That frees 40; adding
+`hVP₁`/`hVP₂`/`hspanW` (5 more) lands the parent at exactly **50**, which clears
+(`scope_code` flags `code > 50`).
+
+Zero margin, in the tree's largest and slowest-building file. Worth doing with a
+full context budget, not at the end of one.
+
