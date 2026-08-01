@@ -1747,6 +1747,33 @@ private theorem away_eq_algebraMap_mul_invS_pow
     _ = algebraMap A (Localization.Away s) α *
         (divByS (1 : A) s) ^ k := by rw [hsec]
 
+/-- The `locLift` of a difference of two `algebraMap`-scaled powers vanishes when
+the two numerators already agree downstairs. -/
+private theorem locLift_sub_mul_pow_eq_zero [IsTateRing A] [IsNoetherianRing A]
+    [T2Space A] [NonarchimedeanRing A] (D₀ D : RationalLocData A)
+    (h : rationalOpen D.T D.s ⊆ rationalOpen D₀.T D₀.s)
+    (α : A) (α' : D₀.P.A₀) (k_a : ℕ)
+    (hα'_match : algebraMap A (Localization.Away D.s) α =
+      algebraMap A (Localization.Away D.s) ((α' : D₀.P.A₀) : A)) :
+    (locLift D₀ D h)
+        (algebraMap A (Localization.Away D₀.s) α * (divByS (1 : A) D₀.s) ^ k_a -
+          algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) *
+            (divByS (1 : A) D₀.s) ^ k_a) = 0 := by
+  have h_combine :
+      algebraMap A (Localization.Away D₀.s) α * (divByS (1 : A) D₀.s) ^ k_a -
+          algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) *
+            (divByS (1 : A) D₀.s) ^ k_a =
+        algebraMap A (Localization.Away D₀.s) (α - ((α' : D₀.P.A₀) : A)) *
+          (divByS (1 : A) D₀.s) ^ k_a := by
+    rw [map_sub]; ring
+  rw [h_combine, map_mul,
+      show (locLift D₀ D h)
+          (algebraMap A (Localization.Away D₀.s) (α - ((α' : D₀.P.A₀) : A))) =
+          algebraMap A (Localization.Away D.s) (α - ((α' : D₀.P.A₀) : A))
+        from IsLocalization.Away.lift_eq D₀.s
+          (isUnit_algebraMap_s_of_rational_subset D₀ D h) _,
+      map_sub, hα'_match, sub_self, zero_mul]
+
 /-- **Witness existence without Noetherian source pair**
 (T089 strictly-upstream no-Noeth witness; named sub-lemma with `sorry`
 body — the genuine Artin-Rees gap).
@@ -1830,25 +1857,7 @@ private theorem locLift_preimage_target_locNhd_saturation_no_noeth
   -- algebra: factor out `(divByS 1 D₀.s)^k_a`, evaluate `locLift` on
   -- the `algebraMap` factor via `IsLocalization.Away.lift_eq`, then
   -- use `hα'_match` to zero the algebraMap factor.
-  have h_lift_zero :
-      (locLift D₀ D h)
-          (algebraMap A (Localization.Away D₀.s) α * (divByS (1 : A) D₀.s) ^ k_a -
-            algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) *
-              (divByS (1 : A) D₀.s) ^ k_a) = 0 := by
-    have h_combine :
-        algebraMap A (Localization.Away D₀.s) α * (divByS (1 : A) D₀.s) ^ k_a -
-            algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) *
-              (divByS (1 : A) D₀.s) ^ k_a =
-          algebraMap A (Localization.Away D₀.s) (α - ((α' : D₀.P.A₀) : A)) *
-            (divByS (1 : A) D₀.s) ^ k_a := by
-      rw [map_sub]; ring
-    rw [h_combine, map_mul,
-        show (locLift D₀ D h)
-            (algebraMap A (Localization.Away D₀.s) (α - ((α' : D₀.P.A₀) : A))) =
-            algebraMap A (Localization.Away D.s) (α - ((α' : D₀.P.A₀) : A))
-          from IsLocalization.Away.lift_eq D₀.s
-            (isUnit_algebraMap_s_of_rational_subset D₀ D h) _,
-        map_sub, hα'_match, sub_self, zero_mul]
+  have h_lift_zero := locLift_sub_mul_pow_eq_zero D₀ D h α α' k_a hα'_match
   exact AddMonoidHom.mem_ker.mpr h_lift_zero
 
 /-- **Cross-localization preimage in `locNhd ⊔ ker` form, without Noetherian
@@ -2300,25 +2309,7 @@ private theorem locLift_preimage_target_locNhd_saturation
   -- algebra: factor out `(divByS 1 D₀.s)^k_a`, evaluate `locLift` on
   -- the `algebraMap` factor via `IsLocalization.Away.lift_eq`, then
   -- use `hα'_match` to zero the algebraMap factor.
-  have h_lift_zero :
-      (locLift D₀ D h)
-          (algebraMap A (Localization.Away D₀.s) α * (divByS (1 : A) D₀.s) ^ k_a -
-            algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) *
-              (divByS (1 : A) D₀.s) ^ k_a) = 0 := by
-    have h_combine :
-        algebraMap A (Localization.Away D₀.s) α * (divByS (1 : A) D₀.s) ^ k_a -
-            algebraMap A (Localization.Away D₀.s) ((α' : D₀.P.A₀) : A) *
-              (divByS (1 : A) D₀.s) ^ k_a =
-          algebraMap A (Localization.Away D₀.s) (α - ((α' : D₀.P.A₀) : A)) *
-            (divByS (1 : A) D₀.s) ^ k_a := by
-      rw [map_sub]; ring
-    rw [h_combine, map_mul,
-        show (locLift D₀ D h)
-            (algebraMap A (Localization.Away D₀.s) (α - ((α' : D₀.P.A₀) : A))) =
-            algebraMap A (Localization.Away D.s) (α - ((α' : D₀.P.A₀) : A))
-          from IsLocalization.Away.lift_eq D₀.s
-            (isUnit_algebraMap_s_of_rational_subset D₀ D h) _,
-        map_sub, hα'_match, sub_self, zero_mul]
+  have h_lift_zero := locLift_sub_mul_pow_eq_zero D₀ D h α α' k_a hα'_match
   exact AddMonoidHom.mem_ker.mpr h_lift_zero
 
 private theorem cross_localization_preimage_in_sup_ker

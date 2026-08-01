@@ -177,3 +177,36 @@ def obtain_is_carryable(line, bound=None):
     if head.startswith("‹"):
         return True
     return head.split(".")[0] not in (bound or ())
+
+
+def insert_point(lines, decl_index):
+    """Where to insert a helper so it lands ABOVE the declaration's header.
+
+    A declaration's header is docstring + attributes + `... in` modifiers, and
+    the docstring may contain BLANK LINES -- which is what broke three separate
+    hand-rolled anchors in this campaign (each walked up "while non-blank" and
+    halted inside the docstring, inserting the helper into the comment).
+
+    Robust rule: skip blanks; if the first non-blank line above closes a
+    docstring (`-/`), scan back to the line that opens it (`/--` or `/-!`);
+    then keep skipping attribute and `... in` modifier lines.
+    """
+    i = decl_index
+    while i > 0:
+        j = i - 1
+        while j > 0 and not lines[j].strip():
+            j -= 1
+        if j < 0:
+            break
+        prev = lines[j]
+        if prev.rstrip().endswith("-/"):
+            while j > 0 and not lines[j].lstrip().startswith(("/--", "/-!")):
+                j -= 1
+            i = j
+            continue
+        if prev.lstrip().startswith("@[") or prev.rstrip().endswith(" in"):
+            i = j
+            continue
+        break
+    return i
+
