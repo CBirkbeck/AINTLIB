@@ -11882,6 +11882,29 @@ private theorem imageCover_keystone_compat [DecidableEq A]
     hcompat D₁ D₂ D₁₂ hD₁₂_sub₁ hD₁₂_sub₂]
 
 set_option linter.unusedSectionVars false in
+/-- **A global section restricts to its own canonical images.** For `y` a section over
+the whole space, the canonical map of any rational datum `E` applied to `y`'s
+`globalSections_backward` is just `y` restricted to `E`. Immediate from
+`globalSections_canonicalMap_backward` plus `restrictionMapHom_canonicalMap`, but worth
+naming: at the call site `E` is a two-line `imagePieceDatum` term, and stating this
+inline forces that term to be written five more times. -/
+private theorem canonicalMap_globalSections_backward
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (P : PairOfDefinition A) (E : RationalLocData A)
+    (hsub : rationalOpen E.T E.s ⊆
+      rationalOpen (globalLocData P).T (globalLocData P).s)
+    (y : presheafValue (globalLocData P)) :
+    E.canonicalMap (globalSections_backward P y)
+      = restrictionMap (globalLocData P) E hsub y := by
+  conv_rhs => rw [show y = (globalLocData P).canonicalMap (globalSections_backward P y)
+    from (globalSections_canonicalMap_backward P y).symm]
+  exact (restrictionMapHom_canonicalMap (globalLocData P) E hsub
+    (globalSections_backward P y)).symm
+
+set_option linter.unusedSectionVars false in
 /-- **The R2 gluing transport** (Wedhorn Prop 8.2 + 8.16): a compatible family on
 a Def-7.29 rational covering `C` glues, given gluing for the `B`-side image cover.
 The `B`-side family is the keystone image of `f` (choices of presenting pieces for
@@ -11913,10 +11936,8 @@ theorem imageCover_gluing_transport [DecidableEq A]
   have hkc := imageCover_keystone_compat C hC f hcompat
   -- choose a presenting C-piece for each image piece
   have hmem : ∀ E : ↥(imageCover C hC).covers, ∃ D : ↥C.covers,
-      imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top) = E.1 := by
-    intro E
-    obtain ⟨D, -, hDE⟩ := Finset.mem_image.mp E.2
-    exact ⟨D, hDE⟩
+      imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top) = E.1 :=
+    fun E => (Finset.mem_image.mp E.2).imp fun _ hD => hD.2
   choose ψ hψ using hmem
   -- the B-side family (cast along the presentation equality)
   set f' : ∀ E : ↥(imageCover C hC).covers, presheafValue E.1 := fun E =>
@@ -11924,16 +11945,10 @@ theorem imageCover_gluing_transport [DecidableEq A]
       ((hC.piece (ψ E).2).span_eq_top) (f (ψ E))) with hf'
   -- B-side compatibility, from the keystone-compat helper (the casts commute
   -- past restriction via `restrictionMap_eqRec`)
-  have hcompat' : ∀ (E₁ E₂ : ↥(imageCover C hC).covers)
-      (D₃ : RationalLocData (presheafValue C.base))
-      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
-      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
-      restrictionMap E₁.1 D₃ h₃₁ (f' E₁) = restrictionMap E₂.1 D₃ h₃₂ (f' E₂) := by
-    intro E₁ E₂ D₃ h₃₁ h₃₂
-    refine ((restrictionMap_eqRec _ _ (hψ E₁) _ D₃ h₃₁).trans ?_).trans
+  obtain ⟨x', hx'⟩ := hCB.gluing f' fun E₁ E₂ D₃ h₃₁ h₃₂ =>
+    ((restrictionMap_eqRec _ _ (hψ E₁) _ D₃ h₃₁).trans
+      (hkc (ψ E₁) (ψ E₂) D₃ _ _)).trans
       (restrictionMap_eqRec _ _ (hψ E₂) _ D₃ h₃₂).symm
-    exact hkc (ψ E₁) (ψ E₂) D₃ _ _
-  obtain ⟨x', hx'⟩ := hCB.gluing f' hcompat'
   refine ⟨globalSections_backward (presheafValue_concretePair C.base) x', ?_⟩
   intro D
   -- keystone-injectivity reduction + the canonical-map trackings
@@ -11944,21 +11959,15 @@ theorem imageCover_gluing_transport [DecidableEq A]
   have hmemD : imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top) ∈
       (imageCover C hC).covers :=
     Finset.mem_image.mpr ⟨D, Finset.mem_attach _ _, rfl⟩
+  -- stated with `(imageCover C hC).base` (defeq to `globalLocData _`, but only after
+  -- unfolding the `noncomputable def`, which argument-position unification will not do)
   have htrack : (imagePieceDatum C.base D.1.T D.1.s
       ((hC.piece D.2).span_eq_top)).canonicalMap
         (globalSections_backward (presheafValue_concretePair C.base) x') =
       restrictionMap (imageCover C hC).base
         (imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
-        ((imageCover C hC).hsubset _ hmemD) x' := by
-    conv_rhs => rw [show x' =
-        (globalLocData (presheafValue_concretePair C.base)).canonicalMap
-          (globalSections_backward (presheafValue_concretePair C.base) x') from
-      (globalSections_canonicalMap_backward (presheafValue_concretePair C.base) x').symm]
-    exact (restrictionMapHom_canonicalMap
-      (globalLocData (presheafValue_concretePair C.base))
-      (imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
-      ((imageCover C hC).hsubset _ hmemD)
-      (globalSections_backward (presheafValue_concretePair C.base) x')).symm
+        ((imageCover C hC).hsubset _ hmemD) x' :=
+    canonicalMap_globalSections_backward (presheafValue_concretePair C.base) _ _ x'
   rw [htrack, hx' ⟨_, hmemD⟩]
   -- f' at the D-piece is the keystone of the CHOSEN presenting piece `ψ E`;
   -- compare with the keystone of `D` after restriction to the (equal) image
@@ -11966,17 +11975,8 @@ theorem imageCover_gluing_transport [DecidableEq A]
   simp only [hf']
   have hpres := hψ ⟨imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top),
     hmemD⟩
-  have hopen_eq : rationalOpen
-      (imagePieceDatum C.base
-        (ψ ⟨_, hmemD⟩).1.T (ψ ⟨_, hmemD⟩).1.s
-        ((hC.piece (ψ ⟨_, hmemD⟩).2).span_eq_top)).T
-      (imagePieceDatum C.base
-        (ψ ⟨_, hmemD⟩).1.T (ψ ⟨_, hmemD⟩).1.s
-        ((hC.piece (ψ ⟨_, hmemD⟩).2).span_eq_top)).s =
-      rationalOpen
-        (imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top)).T
-        (imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top)).s := by
-    rw [hpres]
+  have hopen_eq := congrArg
+    (fun E : RationalLocData (presheafValue C.base) => rationalOpen E.T E.s) hpres
   apply (wca_restrictionMap_bijective_of_rationalOpen_eq
     (imagePieceDatum C.base D.1.T D.1.s ((hC.piece D.2).span_eq_top))
     (imagePieceDatum C.base
