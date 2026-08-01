@@ -773,4 +773,80 @@ noncomputable def sectionZeroIdeal {M : C.Modules} (_hM : IsInvertible M)
   map_ideal_basicOpen := by
     sorry
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GAP-A-4 at the pole sheaf, the line]** The kernel of restriction of
+`π_*𝒪(m[0])` to the pair divisor `[P] + [Q]` is free of rank one, on a chart
+containing both sections and avoiding the zero section. Only the rank-three basis
+and the `H¹`-vanishing of the twisted module remain as inputs — the invertibility
+and the chart trivialization of the pole sheaf are supplied here. -/
+theorem exists_ker_baseSectionsMap_cokernel_poleSheaf_pair
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (m : ℕ)
+    (P Q : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (hzU : z ⁻¹ᵁ U.1 = ⊥)
+    (hPU : P.1 ⁻¹ᵁ U.1 = ⊤) (hQU : Q.1 ⁻¹ᵁ U.1 = ⊤)
+    (rP rQ : Γ(C, U.1))
+    (hP : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQ : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
+    (hnzdP : rP ∈ nonZeroDivisors Γ(C, U.1))
+    (hnzdQ : rQ ∈ nonZeroDivisors Γ(C, U.1))
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal)
+        (ModularCurves.sectionPoleSheafPower π z hz m)).sheaf 1)]
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (ModularCurves.sectionPoleSheafPower π z hz m))) :
+    ∃ ℓ : Scheme.Modules.baseSections π
+        (ModularCurves.sectionPoleSheafPower π z hz m),
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![P, Q]).ideal
+          (ModularCurves.sectionPoleSheafPower π z hz m)))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {ℓ} :=
+  exists_ker_baseSectionsMap_cokernel_eq_span_of_sections hsm P Q U hPU hQU
+    rP rQ hP hQ hnzdP hnzdQ _
+    (ModularCurves.sectionPoleSheafPower_isInvertible hsm z hz m)
+    (ModularCurves.sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+      z hz U.1 hzU m)
+    halg b3
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GAP-A-4 at the pole sheaf, the vertical]** The single-section analogue: the
+kernel of restriction of `π_*𝒪(m[0])` to `[R]` is free of rank one. -/
+theorem exists_ker_baseSectionsMap_cokernel_poleSheaf_single
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (m : ℕ)
+    (R : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens) (hzU : z ⁻¹ᵁ U.1 = ⊥) (hRU : R.1 ⁻¹ᵁ U.1 = ⊤)
+    (rR : Γ(C, U.1))
+    (hR : (Scheme.Hom.ker R.1).ideal U = Ideal.span {rR})
+    (hnzdR : rR ∈ nonZeroDivisors Γ(C, U.1))
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![R]).ideal)
+        (ModularCurves.sectionPoleSheafPower π z hz m)).sheaf 1)]
+    (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (ModularCurves.sectionPoleSheafPower π z hz m))) :
+    ∃ v : Scheme.Modules.baseSections π
+        (ModularCurves.sectionPoleSheafPower π z hz m),
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![R]).ideal
+          (ModularCurves.sectionPoleSheafPower π z hz m)))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {v} :=
+  exists_ker_baseSectionsMap_cokernel_eq_span_perp_of_section hsm R U hRU
+    rR hR hnzdR _
+    (ModularCurves.sectionPoleSheafPower_isInvertible hsm z hz m)
+    (ModularCurves.sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+      z hz U.1 hzU m)
+    halg b2
+
 end AlgebraicGeometry.Scheme.Modules
