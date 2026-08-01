@@ -31013,3 +31013,17 @@ WP PRONG STATUS: the only mathematical inputs left in the whole prong are
         this is where N = 0^*Δ comes from (SelfAdjointN's docstring: the exact identity is
         FALSE globally, so the normalization is only possible after twisting by N).
 Everything else is proven and axiom-clean.
+
+### [W2-e] DONE 2026-08-01 — rigidification bricks
+`bijective_smul_pullback_unit_smul` + `appLE_z_rescaled_eq_one` (uses the project's
+`app_appLE_section` retraction identity: z.appLE ∘ snd.appLE = id on base sections).
+[W2] IS NOW COMPLETE as a toolkit: trivializations ⟹ generators ⟹ comparison units ⟹
+(after rescaling by base units with the right z-values) normalized units ⟹ glue.
+The only genuinely missing datum is the EXISTENCE of the base units c i whose z-values
+match the cocycle — i.e. that the comparison units' z-values form a COBOUNDARY. That is
+precisely the statement "the discrepancy comes from the base", i.e. N = 0^*Δ; it is the
+content the theorem of the square supplies, not something the descent can produce.
+⟹ the honest remaining frontier of the WP prong is exactly:
+  [W1] the chord/vertical chart-coefficient identities (universal Weierstrass atlas), and
+  [W1'] the coboundary/rigidification datum, which the same universal computation gives
+        (the chord's z-value is computable in the chart).
