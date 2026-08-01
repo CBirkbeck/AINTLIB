@@ -6267,3 +6267,43 @@ decomposition — several helpers each, with the shared preamble hoisted into a
 helper. That is the shape the `WedhornCechAcyclicity` plan already assumed
 (~28 usable lines per helper); this measurement confirms it generalises to the
 whole tree rather than being a quirk of that one file.
+
+## 165 → 164: the one viable cut, and a defect repeated one commit after recording it
+
+`mem_pIdeal_pow_iff` split at its own `constructor`. The forward half became
+`valued_mul_pEltPlus_pow_le`; the bullet collapsed to
+`rintro ⟨b, rfl⟩; exact valued_mul_pEltPlus_pow_le p F ϖ n b`.
+Parent 68 → 49, helper 34.
+
+The helper's *statement* was composed from two lemmas already in the file rather
+than written by hand — `pIdeal_pow_eq_span` names the generator (`pEltPlus ^ n`)
+and `coe_mul_pEltPlus_pow` supplies the coercion spelling. Worth keeping as a
+habit: when a helper's statement is "the goal after `rintro`", the goal is
+almost always already spelled out in whatever lemma the proof rewrites with.
+
+### I repeated the docstring defect from the previous commit
+
+Inserted the helper between the parent's docstring and its declaration —
+`unexpected token '/--'; expected 'lemma'`. Identical failure, identical place,
+one commit after writing it into this file *and* into that commit message.
+
+The cause is mechanical rather than inattention: the insertion script anchors on
+the **declaration** line, and a declaration's documentation lives *above* it, so
+inserting at the anchor necessarily lands inside the doc/decl pair. The note was
+never going to prevent that. Changing the anchor does — the script now locates
+the docstring and inserts above it, which makes the error unrepresentable.
+
+That is exactly the split between the defects that stopped recurring this session
+and the ones that did not:
+
+| stopped | why |
+|---|---|
+| `;`-merge breakages | guards in `apply_sibs`, checked before writing |
+| wrong-declaration edits | assert the matched shape, locate by search |
+| unbalanced abbreviations | balance + tactic-keyword filter in the generator |
+| **docstring reparenting** | **anchor moved — as of this commit** |
+
+Every one that stopped was a *mechanism* change. The one that recurred was a
+note. Writing the lesson down is how it gets remembered, not how it gets
+prevented.
+

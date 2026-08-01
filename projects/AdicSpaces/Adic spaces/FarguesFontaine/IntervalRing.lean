@@ -1604,6 +1604,41 @@ theorem mul_pEltPlus_pow_eq {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁
     w * pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ n = y :=
   Subtype.ext (Subtype.ext (by rw [coe_mul_pEltPlus_pow p F ϖ n w]; exact h))
 
+/-- Multiplying a `BIPlusIn` element by `p ^ n` drops both coordinate valuations to
+`ρᵢ ^ n`. This is the forward half of `mem_pIdeal_pow_iff`, split out so each
+direction of the iff stays readable. -/
+private theorem valued_mul_pEltPlus_pow_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁}
+    {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (n : ℕ)
+    (b : ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    Valued.v (((b * pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ n :
+        ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+          (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ≤ ρ₁ ^ n
+      ∧ Valued.v (((b * pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ n :
+        ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+          (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 ≤ ρ₂ ^ n := by
+  have hb1 : Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ≤ 1 :=
+    le_trans (le_max_left _ _) ((mem_BIPlusIn_iff p F ϖ).mp b.2)
+  have hb2 : Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 ≤ 1 :=
+    le_trans (le_max_right _ _) ((mem_BIPlusIn_iff p F ϖ).mp b.2)
+  rw [coe_mul_pEltPlus_pow p F ϖ n b]
+  constructor
+  · show Valued.v (_ * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 ^ n) ≤ ρ₁ ^ n
+    rw [Valuation.map_mul, Valuation.map_pow, valued_pImage_fst]
+    calc Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 * ρ₁ ^ n
+        ≤ 1 * ρ₁ ^ n := mul_le_mul_of_nonneg_right hb1 zero_le
+      _ = ρ₁ ^ n := one_mul _
+  · show Valued.v (_ * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 ^ n) ≤ ρ₂ ^ n
+    rw [Valuation.map_mul, Valuation.map_pow, valued_pImage_snd]
+    calc Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 * ρ₂ ^ n
+        ≤ 1 * ρ₂ ^ n := mul_le_mul_of_nonneg_right hb2 zero_le
+      _ = ρ₂ ^ n := one_mul _
+
 /-- **The powers of the ideal of definition are exactly the balls**: `y ∈ (p)ⁿ` iff both
 coordinates of `y` have value at most `ρᵢⁿ`. This is the identification of the `p`-adic
 topology on `B^{I,+}` with its subspace topology. -/
@@ -1619,26 +1654,7 @@ theorem mem_pIdeal_pow_iff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1
   rw [pIdeal_pow_eq_span, Ideal.mem_span_singleton']
   constructor
   · rintro ⟨b, rfl⟩
-    have hb1 : Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
-        (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ≤ 1 :=
-      le_trans (le_max_left _ _) ((mem_BIPlusIn_iff p F ϖ).mp b.2)
-    have hb2 : Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
-        (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 ≤ 1 :=
-      le_trans (le_max_right _ _) ((mem_BIPlusIn_iff p F ϖ).mp b.2)
-    rw [coe_mul_pEltPlus_pow p F ϖ n b]
-    constructor
-    · show Valued.v (_ * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 ^ n) ≤ ρ₁ ^ n
-      rw [Valuation.map_mul, Valuation.map_pow, valued_pImage_fst]
-      calc Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
-              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 * ρ₁ ^ n
-          ≤ 1 * ρ₁ ^ n := mul_le_mul_of_nonneg_right hb1 zero_le
-        _ = ρ₁ ^ n := one_mul _
-    · show Valued.v (_ * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 ^ n) ≤ ρ₂ ^ n
-      rw [Valuation.map_mul, Valuation.map_pow, valued_pImage_snd]
-      calc Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
-              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 * ρ₂ ^ n
-          ≤ 1 * ρ₂ ^ n := mul_le_mul_of_nonneg_right hb2 zero_le
-        _ = ρ₂ ^ n := one_mul _
+    exact valued_mul_pEltPlus_pow_le p F ϖ n b
   · rintro ⟨h1, h2⟩
     have hmemS : (pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
         * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
