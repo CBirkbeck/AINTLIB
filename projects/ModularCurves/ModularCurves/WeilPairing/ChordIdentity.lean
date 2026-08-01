@@ -1442,4 +1442,30 @@ theorem chord_chart_factorisation {R A : Type u} [CommRing R] [CommRing A] [Alge
     c₁ hc₁ h₂ c₂ hc₂ h₃ u hc₃
 
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 chart facts] A section's coordinates satisfy the equation, in the ring form
+the chord identity uses.** Repackaging `equation_of_algHom` from
+`WeierstrassCurve.Affine.Equation` into the explicit polynomial identity. -/
+theorem section_coords_equation {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (X Y : A) (σ : A →ₐ[R] R)
+    (hXY : (W.map (algebraMap R A)).toAffine.Equation X Y) :
+    (σ Y) ^ 2 + W.a₁ * (σ X) * (σ Y) + W.a₃ * (σ Y) =
+      (σ X) ^ 3 + W.a₂ * (σ X) ^ 2 + W.a₄ * (σ X) + W.a₆ := by
+  have h := equation_of_algHom W σ X Y hXY
+  rw [WeierstrassCurve.Affine.equation_iff] at h
+  exact h
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 chart facts] The coordinate-ring coordinates satisfy the mapped equation.**
+The `hXY` input of `section_coords_equation`, for the coordinate ring itself. -/
+theorem coord_equation_affine {R : Type u} [CommRing R] (W : WeierstrassCurve R) :
+    (W.map (algebraMap R W.toAffine.CoordinateRing)).toAffine.Equation
+      (coordX W) (coordY W) := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  have h := coord_equation W
+  simpa using h
+
+
 end ModularCurves
