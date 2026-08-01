@@ -18,7 +18,7 @@ slot, exactly as in the rank ladder of `PoleSheafRankTwoThree`.
 
 universe u
 
-open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
+open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace Matrix
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -244,5 +244,159 @@ theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair_of_sections
     ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP)
     ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rQ)
     hv hg'nzdP halg eP eQ
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The line kernel from surjectivity alone.** When global sections surject onto
+the twist cokernel's sections (the `H¹` consequence), the evaluation rows are
+unimodular by Binet–Cauchy, and the kernel of the restriction on base sections is
+the free rank-one span of the cross product of the rows — no evaluation values are
+ever computed. -/
+theorem ker_baseSectionsMap_cokernel_eq_span_crossProduct_of_surjective
+    {M N : C.Modules} (f : M ⟶ N)
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π N))
+    (e2 : Scheme.Modules.baseSections π (Limits.cokernel f)
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] (Fin 2 → Γ(S, (⊤ : S.Opens))))
+    (hsurj : Function.Surjective
+      (Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) :
+    LinearMap.ker
+        ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens))
+        {b3.equivFun.symm
+          ((fun j => e2 ((Scheme.Modules.baseSectionsMap π
+            (Limits.cokernel.π f)) (b3 j)) 0) ⨯₃
+           (fun j => e2 ((Scheme.Modules.baseSectionsMap π
+            (Limits.cokernel.π f)) (b3 j)) 1))} := by
+  classical
+  -- the composite in coordinates
+  have hcoord : ∀ (s : Scheme.Modules.baseSections π N) (i : Fin 2),
+      (fun j => e2 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) (b3 j)) i) ⬝ᵥ b3.equivFun s =
+      e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) s) i := by
+    intro s i
+    calc (fun j => e2 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) (b3 j)) i) ⬝ᵥ b3.equivFun s
+        = ∑ j, b3.equivFun s j •
+            e2 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b3 j)) i := by
+          simp only [dotProduct, smul_eq_mul]
+          exact Finset.sum_congr rfl fun j _ => mul_comm _ _
+      _ = (∑ j, b3.equivFun s j •
+            e2 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b3 j))) i := by
+          rw [Finset.sum_apply]
+          exact Finset.sum_congr rfl fun j _ => rfl
+      _ = e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) s) i := by
+          have hsum : (∑ j, b3.equivFun s j •
+              e2 ((Scheme.Modules.baseSectionsMap π
+                (Limits.cokernel.π f)) (b3 j))) =
+              e2 ((Scheme.Modules.baseSectionsMap π
+                (Limits.cokernel.π f)) s) := by
+            calc ∑ j, b3.equivFun s j •
+                e2 ((Scheme.Modules.baseSectionsMap π
+                  (Limits.cokernel.π f)) (b3 j))
+                = ∑ j, e2 ((Scheme.Modules.baseSectionsMap π
+                    (Limits.cokernel.π f)) (b3.equivFun s j • b3 j)) := by
+                  exact Finset.sum_congr rfl fun j _ => by
+                    rw [_root_.map_smul, _root_.map_smul]
+              _ = e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+                    (∑ j, b3.equivFun s j • b3 j)) := by
+                  rw [map_sum, map_sum]
+              _ = _ := by rw [b3.sum_equivFun]
+          rw [hsum]
+  refine ker_baseSectionsMap_cokernel_eq_span_crossProduct f b3 e2
+    (fun i j => e2 ((Scheme.Modules.baseSectionsMap π
+      (Limits.cokernel.π f)) (b3 j)) i)
+    (fun i j => rfl) ?_
+  refine ModularCurves.span_range_crossProduct_eq_top_of_surjective _ _ ?_
+  intro y
+  obtain ⟨s, hs⟩ := hsurj (e2.symm ![y 0, y 1])
+  refine ⟨b3.equivFun s, ?_, ?_⟩
+  · rw [hcoord s 0]
+    have : e2 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) s) = ![y 0, y 1] := by
+      rw [show ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) s : Scheme.Modules.baseSections π
+          (Limits.cokernel f)) = e2.symm ![y 0, y 1] from hs]
+      exact e2.apply_symm_apply _
+    rw [this]
+    rfl
+  · rw [hcoord s 1]
+    have : e2 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) s) = ![y 0, y 1] := by
+      rw [show ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) s : Scheme.Modules.baseSections π
+          (Limits.cokernel f)) = e2.symm ![y 0, y 1] from hs]
+      exact e2.apply_symm_apply _
+    rw [this]
+    rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GAP-A-4, the line]** For a section pair on a chart with principal
+nonzerodivisor kernels, an invertible ambient module with a rank-three basis of
+base sections, and vanishing `H¹` of the twisted tensor, the kernel of restriction
+to the pair divisor is free of rank one: it is spanned by the cross product of the
+two evaluation rows, assembled through the basis. The generator is the module of
+the chord line; its unimodularity is Binet–Cauchy from cohomological surjectivity,
+never from evaluation minors. -/
+theorem exists_ker_baseSectionsMap_cokernel_eq_span_of_sections
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (P Q : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens)
+    (hPU : P.1 ⁻¹ᵁ U.1 = ⊤) (hQU : Q.1 ⁻¹ᵁ U.1 = ⊤)
+    (rP rQ : Γ(C, U.1))
+    (hP : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQ : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
+    (hnzdP : rP ∈ nonZeroDivisors Γ(C, U.1))
+    (hnzdQ : rQ ∈ nonZeroDivisors Γ(C, U.1))
+    (L : C.Modules) (hL : IsInvertible L)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    [Subsingleton (CategoryTheory.Sheaf.H (tensorObj (idealModule
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal) L).sheaf 1)]
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π L)) :
+    ∃ ℓ : Scheme.Modules.baseSections π L,
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![P, Q]).ideal L))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {ℓ} := by
+  classical
+  -- the principal cover and the global mono
+  have hcover : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal.ideal V =
+        Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1) := by
+    intro c
+    obtain ⟨V, hcV, hV⟩ :=
+      ModularCurves.RelEffCartierDiv.SectionsIdeal.exists_multiChart
+        π hsm ![P, Q] c
+    obtain ⟨f₀, hf₀, hf₀nzd⟩ := hV 0
+    obtain ⟨f₁, hf₁, hf₁nzd⟩ := hV 1
+    exact ⟨V, hcV, f₀ * f₁,
+      sectionsDivisor_pair_ideal_span hsm P Q V f₀ f₁ hf₀ hf₁,
+      mul_mem hf₀nzd hf₁nzd⟩
+  haveI hMonoT : Mono (divisorTwistHom
+      (ModularCurves.RelEffCartierDiv.sectionsDivisor π ![P, Q]).ideal L) :=
+    mono_divisorTwistHom _ L hcover hL
+  -- surjectivity of the restriction on base sections from the H¹ slot
+  have hsurj := Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
+    π (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+      π ![P, Q]).ideal L)
+  -- the rank-two coordinates
+  obtain ⟨e2⟩ := nonempty_baseSections_cokernel_divisorTwistHom_equiv_pair_of_sections
+    hsm P Q U hPU hQU rP rQ hP hQ hnzdP hnzdQ L hL eL halg
+  exact ⟨b3.equivFun.symm
+      ((fun j => e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![P, Q]).ideal L))) (b3 j)) 0) ⨯₃
+       (fun j => e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (divisorTwistHom (ModularCurves.RelEffCartierDiv.sectionsDivisor
+          π ![P, Q]).ideal L))) (b3 j)) 1)),
+    ker_baseSectionsMap_cokernel_eq_span_crossProduct_of_surjective _ b3 e2 hsurj⟩
 
 end AlgebraicGeometry.Scheme.Modules
