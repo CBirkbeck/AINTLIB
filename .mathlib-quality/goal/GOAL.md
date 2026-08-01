@@ -7604,3 +7604,62 @@ a mechanical question rather than a judgement call.
 file-wide `next()` for `have hz` matched line 285, a different theorem, not
 1457. Bound every intra-declaration search to the parent's span. All three
 were caught by shape asserts, not by careful reading.
+
+## Batch: 146 → 143, four extractions, all green on the first build
+
+    norm_restricted_mul                                58 → 38   91ffca7e8
+    productRestrictionSub_isInducing_via_tree_no_disj  61 → 37   6ac1bd56e
+    imageCover_keystone_compat                         62 → 37   c0aacd5ac
+
+(plus ringStalkMap_piYHom_injective 76 → 45, a1d3d8422, recorded above)
+
+**The size profile has changed and the technique had to change with it.** There
+are now ZERO proofs in 51–55 and one in 56–60; 86 of the remaining 143 are over
+90 lines, and the total excess is ~8.9k lines. The line-shaping tools (joins,
+sibling merges, guarded inlining) are finished as a *closing* move — nothing is
+within their reach any more. Every one of these four was carried by a single
+well-chosen extraction of 20–30 lines, and three of the four needed no shaping
+at all afterwards.
+
+### Three refinements to where the extraction boundary goes
+
+**1. Lift the conclusion the proof is reaching for, not the `have` that is
+sitting there.** `norm_restricted_mul` had `hAf`/`hAg` (finiteness of the
+norm-achieving set) as named `have`s, and lifting those saves 2 lines. The four
+sites — hAf, hAg, and the *inline* hf1/hg1 — are all really asking for one
+object, a minimal achiever with strictness below it. Stating that saved 20.
+The named intermediate step is a decoy; the shared conclusion is the lemma.
+
+**2. When a local's type is unwritable because a tactic mutated it, look at
+what it was BEFORE the mutation.** In the EmbeddingTopo node case, `h_split_f`
+had been rewritten by `rw [...] at ... h_split_f ⊢`, which classifies it as a
+carry (unwritable type). But the mutation was the parent's convenience, not the
+lemma's requirement: pre-rw it is the short, writable
+`IsInducing (productRestrictionSub A (laurentCovering D₀ f))`. The helper takes
+that and does the rewrite itself. **A carried `rw … at` is sometimes just a
+rewrite sitting on the wrong side of the boundary.**
+
+**3. The tail-check decides opacity, not just line ownership.** I had been using
+"grep the block's locals against the lines below" only to sort locals into
+carried vs threaded. In `imageCover_keystone_compat` it answered a bigger
+question: every downstream use of `D₁₂` goes through its two properties and
+never its definition, so the boundary can be an **existential** — and the three
+`set`s that exist only to build the witness (gp₁, gp₂, N₁) disappear from the
+parent entirely. When the witness escapes only through its properties, `∃` is
+the right shape and the scaffolding leaves with it.
+
+### Verification shape, now settled
+
+The interface diff decides whether a full gate is needed:
+
+    git diff -- <file> | grep -E "^[+-] *(theorem|private theorem|lemma|def|instance)"
+
+All four of these produce exactly one `+private theorem` and nothing removed —
+no public signature moved, so no downstream module can break, and the module
+build (plus direct consumers where they exist) is a complete check. This
+matters because the full gate has now been killed externally 8+ times, always
+on long rebuilds with clean logs.
+
+Width is checked in **characters** (`check_width.py`), always against the HEAD
+count rather than an absolute — WedhornCech legitimately carries 107 over-100
+lines and an absolute check would read as a regression every time.
