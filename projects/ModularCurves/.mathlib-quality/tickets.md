@@ -30806,3 +30806,26 @@ fibrewise+base-change machinery already used for the untwisted pole sheaves
 twisted module to be quasicoherent (IsInvertible.tensorObj_isQuasicoherent ✓ exists)
 and its fibres identified with the base-changed twist (the pole-sheaf fibre-iso
 pattern `sectionPoleSheafPowerFiberIso`).
+
+## ★★ [GAP-A-5 ASSEMBLY INSIGHT 2026-08-01] iterated twists kill ideal-multiplicativity
+The assembly needs `I(P)⊗I(Q)`-SHAPED isos (the target
+`exists_invertible_tensor_idealModule_add` is stated with separate tensor factors),
+while the line/vertical produce PRODUCT-IDEAL-shaped isos (`idealModule (kerP*kerQ*kerR)`).
+The bridge `idealModule (J₁J₂) ≅ idealModule J₁ ⊗ idealModule J₂` needs a hom BETWEEN
+TWO idealModule machines = the KERNEL WALL (idealModuleLE, abandoned; see the A4-b bank).
+**AVOID IT: run the pipeline on the ITERATED twist**
+  f := divisorTwistHom (ker P) (tensorObj (idealModule (ker Q)) L) ≫ divisorTwistHom (ker Q) L
+whose source IS `I_P ⊗ (I_Q ⊗ L)` — already in the target's tensor shape — and whose
+cokernel is the restriction to [P]+[Q]. Requires generalizing the pipeline from
+`divisorTwistHom J L` to a GENERAL MONO f : M ⟶ L between invertibles:
+- [G1] chartMultiplier f eM eL := (eM.inv ≫ restrict f ≫ eL.hom).app ⊤ 1
+- [G2] cokernelRestrictUnitEndoIso (verbatim copy of cokernelRestrictTwistUnitEndoIso
+  with eM in place of twistChartTensorTriv)
+- [G3] general e2/e1 (take the concentration bijectivity + the span identification as
+  HYPOTHESES; the twist case then instantiates them)
+- [G4] MULTIPLIER OF A COMPOSITE = PRODUCT OF MULTIPLIERS (proof: insert eL.hom ≫ eL.inv,
+  both factors are unit-endos, unitEndomorphismOfTopSection_comp) ⟹ the iterated twist's
+  span is span{g₁·g₂} — exactly the rank-2 split's input, with NO ideal-product identity.
+- [G5] concentration for a composite (right-exactness: coker of a composite vanishes on
+  an open where each factor's does).
+This also makes the machinery reusable for any number of factors (the triple divisor).
