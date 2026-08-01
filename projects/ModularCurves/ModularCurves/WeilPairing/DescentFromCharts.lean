@@ -181,4 +181,21 @@ noncomputable def restrictPullbackTrivialization {X Y : Scheme.{u}} (f : Y ⟶ X
             ((restrictFunctorIsoPullback U.ι).symm.app N ≪≫ e) ≪≫
             pullbackUnitIso (f ∣_ U)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.3] The tensor of two chart trivializations.** Trivializing both factors on a
+chart trivializes their tensor there. Phrased entirely in `tensorObj` (no monoidal
+instance in sight) — going through `⊗` makes the elaborator unify the whole monoidal
+structure and blows the whnf budget. -/
+theorem nonempty_tensorObj_restrict_trivialization {X : Scheme.{u}} {M L : X.Modules}
+    (U : X.Opens)
+    (eM : (restrictFunctor U.ι).obj M ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme) :
+    Nonempty ((restrictFunctor U.ι).obj (tensorObj M L) ≅ unitObj U.toScheme) := by
+  obtain ⟨e⟩ := nonempty_pullback_tensorObj_of_isOpenImmersion U.ι M L
+  refine ⟨(restrictFunctorIsoPullback U.ι).app (tensorObj M L) ≪≫ e ≪≫ ?_⟩
+  refine tensorObjCongr ((restrictFunctorIsoPullback U.ι).symm.app M ≪≫ eM)
+    ((restrictFunctorIsoPullback U.ι).symm.app L ≪≫ eL) ≪≫ ?_
+  exact (nonempty_tensorObj_unit_iso (unitObj U.toScheme)).some
+
 end ModularCurves

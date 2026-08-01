@@ -32038,3 +32038,25 @@ Decomposition:
   along `z` (the pieces exist: `bijective_smul_pullback_unit_smul`,
   `appLE_z_rescaled_eq_one`);
 * W3.4 — feed `nonempty_unitObj_iso_of_normalized_glue` on `L ⊗ f^*N⁻¹` and untwist.
+
+### ★★★ [W3.2 + W3.3] DONE 2026-08-01 — the twisting bricks of the un-normalized descent
+* W3.2 `restrictPullbackTrivialization` — a chart trivialization of `N` over `U` gives
+  one of `f^* N` over `f ⁻¹ᵁ U` (the content `IsInvertible.pullback` only used
+  internally, extracted as a reusable iso).
+* W3.3 `nonempty_tensorObj_restrict_trivialization` — trivializing both factors on a
+  chart trivializes their `tensorObj` there.
+
+LEAN-OPS (whnf, and the reason W3.3 is phrased the way it is): the natural route was
+`Picard/InvertibleSheafTensorQuasicoherent.tensorRestrictIso`, but its statement uses the
+monoidal `M ⊗ L` under a `local instance`, and asking the elaborator to see
+`Scheme.Modules.tensorObj M L` as `M ⊗ L` **blows the 200000-heartbeat whnf budget**
+(no bump allowed — user rule). Structural fix: stay in `tensorObj` language end to end,
+using the public `nonempty_pullback_tensorObj_of_isOpenImmersion` +
+`restrictFunctorIsoPullback` + `tensorObjCongr` + `nonempty_tensorObj_unit_iso`.
+The speculative de-privatization of `tensorRestrictIso` was reverted — it gained no
+consumer.
+
+REMAINING for W3: W3.4, the cocycle computation — the comparison units of
+`L ⊗ f^*(z^*L)⁻¹` have `z`-value `1`. Bricks in hand:
+`bijective_smul_pullback_unit_smul`, `appLE_z_rescaled_eq_one`, `pullbackSectionIso`,
+W3.2, W3.3, and `nonempty_unitObj_iso_of_normalized_glue` as the consumer.
