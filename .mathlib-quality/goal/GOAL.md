@@ -6798,3 +6798,44 @@ Inlining beats promoting, and the ranking cannot tell because it only measures
 size. A `have` whose body is one term should be an INLINE candidate, never a
 promote candidate.
 
+
+## 157 → 156: dedup feeding decomposition, and two reusable rules
+
+`FJP/FiniteJetChart.lean`, two edits, the first enabling the second:
+
+1. **dedup** `hWsplit` (15L ×2) → `canonicalMap_Wa_eq_mul_divByS`. Identical in
+   `canonicalMap_Qa_sq` (417) and `canonicalMap_eq_zero_of_qSq` (578); both
+   parents dropped 14 lines (112→98, 113→99). Neither cleared — but it is what
+   brought the second within reach of step 2.
+2. **promote** `hkey` (5L) and `hbddY` (49L) out of `canonicalMap_eq_zero_of_qSq`.
+   Parent 99 → 47; helpers 12 and 48.
+
+That ordering is worth noting: **dedup and decompose compound.** The duplicate
+scan is not a separate task-3 errand — retiring a duplicate shrinks every proof
+that carried a copy, which can drop one under the threshold or, as here, bring
+it inside a promotion's reach.
+
+### Rule: a hoist states the expanded goal and drops the unfold step
+
+`hWsplit`'s body opens `rw [hρ, hgdef]` — unfolding the two `set`-bound
+abbreviations before the real argument begins. A lemma stating the
+*already-expanded* goal does not need that line, so the body lifts from line 2.
+I asserted line 1 was exactly `rw [hρ, hgdef]` before dropping it, so a
+differently-shaped body would have halted the script rather than silently losing
+a proof step.
+
+### Rule: ascribe the call when later tactics rewrite with it
+
+The parent keeps `set ρ := … with hρ`, so its goal displays `ρ`, while the
+hoisted lemma's type says `(chartDatum F).canonicalMap`. Defeq, but **`rw`
+matches syntactically**. So `hkey`, which later `rw`s consume, keeps an
+ascription in terms of `ρ` and `g`; `hbddY`, only ever passed as an argument,
+stays bare at one line. Two lines spent deliberately against a parent that would
+otherwise have been 47-but-broken.
+
+The `explicit_section_vars` check from last commit was run *before* writing any
+call. Both edits were green on the first build — the first time a hoist in this
+file has not cost a repair round.
+
+Duplicate inventory: 210 → 209 clusters, 1377 → 1362 lines.
+
