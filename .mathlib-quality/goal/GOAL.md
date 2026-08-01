@@ -7102,3 +7102,41 @@ Earlier, I ran a second `lake build` while a gate was live (recorded above).
 Both are the same failure of discipline around builds: treating the gate as
 something to multiplex around rather than as an exclusive operation.
 
+
+## `hfactor`: the copy the scanner called "different" was the one worth generalising
+
+`SpaCompact.lean`, three copies of an 11-line `have`, 33 → 17 lines, one lemma
+serving **three** call sites. Inventory 205 → **204 clusters, 1283 lines**.
+
+The scanner listed only two, because the third writes `rationalOpen T s` where
+the others write `Spa A A⁺`. But the proof (`ext`, `simp only [Set.mem_image]`,
+two `rintro`/`exact` legs) **uses nothing about the set**. Generalising over
+`S : Set (Spv A)` covers all three.
+
+**The thing that made the third copy "different" was exactly the thing that
+should have been a parameter.** That is a sharper limitation than the
+alpha-variant one recorded earlier: exact-match hashing hides near-misses, and
+near-misses are often the *more* valuable clusters, because they force the
+generalisation the author skipped. A cluster of literally-identical blocks only
+ever yields a verbatim hoist; a cluster that differs in one argument yields a
+general lemma.
+
+Two asserts fired, both my normaliser rather than the code — first on the set
+difference (correct to flag, before I decided to generalise), then on `ext s` vs
+`ext p`, a bound-variable name. Inspected both instead of dropping the target.
+
+### Declined: `WittF::hsplit` (11L ×2)
+
+Hoisting needs nine threaded parameters — `a`, `b`, `ϖF`, `m`, `ahat`, `bhat`
+plus `hahat'`, `hbhat'`, `hϖne` — to save two net lines. A lemma with that
+signature is worse structure than the duplication it removes. Same judgement as
+the six-micro-lemma split declined earlier, and recorded rather than silently
+skipped so it is not re-picked.
+
+### Next: `SpvAI::hb_eq` (10L ×3)
+
+Scouted. `wv` is `set wv := ValuativeRel.valuation A` — a global, so it carries.
+`b` is `let`-bound to `c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩`, so the lemma states
+that element directly. Needs `hn_0`'s type from
+`PairOfDefinition.exists_pow_mul_mem_A₀`, which is the one piece not yet read.
+

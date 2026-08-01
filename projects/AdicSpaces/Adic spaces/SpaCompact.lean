@@ -112,6 +112,20 @@ lemma isClosed_image_spa_ιSpv_bool [DiscreteTopology A] :
   exact isClosed_range_ιSpv_bool.inter
     (isClosed_iInter fun a ↦ isClosed_iInter fun _ ↦ isClosed_coord_true (a, 1))
 
+/-- The `ιSpv`-image of ANY set of valuations factors through its `ιSpv_bool`
+image via `boolToProp`. The proof uses nothing about the set. -/
+private theorem ιSpv_image_eq_boolToProp_image (S : Set (Spv A)) :
+    (ιSpv : Spv A → (A × A → Prop)) '' S =
+      (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
+        ((ιSpv_bool : Spv A → (A × A → Bool)) '' S) := by
+  ext s
+  simp only [Set.mem_image]
+  refine ⟨?_, ?_⟩
+  · rintro ⟨v, hv, rfl⟩
+    exact ⟨ιSpv_bool v, ⟨v, hv, rfl⟩, (ιSpv_eq_boolToProp_comp_ιSpv_bool v).symm⟩
+  · rintro ⟨r, ⟨v, hv, rfl⟩, rfl⟩
+    exact ⟨v, hv, ιSpv_eq_boolToProp_comp_ιSpv_bool v⟩
+
 /-! ### Quasi-compactness of `Spa A A⁺` in `Spv A` -/
 
 /-- **T-NULL-0c (discrete case): `Spa(A, A⁺)` is quasi-compact in `Spv A`.**
@@ -132,17 +146,7 @@ theorem isCompact_spa [DiscreteTopology A] :
   -- Factor `ιSpv '' Spa` as the continuous image under `boolToProp_pi` of
   -- `ιSpv_bool '' Spa`. The latter is closed in the compact Bool product,
   -- hence compact; continuous image of compact is compact.
-  have hfactor :
-      (ιSpv : Spv A → (A × A → Prop)) '' (Spa A A⁺) =
-        (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
-          ((ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺)) := by
-    ext s
-    simp only [Set.mem_image]
-    refine ⟨?_, ?_⟩
-    · rintro ⟨v, hv, rfl⟩
-      exact ⟨ιSpv_bool v, ⟨v, hv, rfl⟩, (ιSpv_eq_boolToProp_comp_ιSpv_bool v).symm⟩
-    · rintro ⟨r, ⟨v, hv, rfl⟩, rfl⟩
-      exact ⟨v, hv, ιSpv_eq_boolToProp_comp_ιSpv_bool v⟩
+  have hfactor := ιSpv_image_eq_boolToProp_image (Spa A A⁺)
   rw [hfactor]
   exact isClosed_image_spa_ιSpv_bool.isCompact.image continuous_boolToProp_pi
 
@@ -183,17 +187,7 @@ theorem isCompact_spa_of_isClosed_image
       Set.range (ιSpv_bool : Spv A → (A × A → Bool)) ∩ S) :
     IsCompact ((Spa A A⁺) : Set (Spv A)) := by
   refine (ιSpv_isEmbedding.isCompact_iff (s := Spa A A⁺)).mpr ?_
-  have hfactor :
-      (ιSpv : Spv A → (A × A → Prop)) '' (Spa A A⁺) =
-        (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
-          ((ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺)) := by
-    ext s
-    simp only [Set.mem_image]
-    refine ⟨?_, ?_⟩
-    · rintro ⟨v, hv, rfl⟩
-      exact ⟨ιSpv_bool v, ⟨v, hv, rfl⟩, (ιSpv_eq_boolToProp_comp_ιSpv_bool v).symm⟩
-    · rintro ⟨r, ⟨v, hv, rfl⟩, rfl⟩
-      exact ⟨v, hv, ιSpv_eq_boolToProp_comp_ιSpv_bool v⟩
+  have hfactor := ιSpv_image_eq_boolToProp_image (Spa A A⁺)
   rw [hfactor, hEq]
   exact (isClosed_range_ιSpv_bool.inter hS).isCompact.image continuous_boolToProp_pi
 
@@ -273,17 +267,7 @@ theorem isCompact_rationalOpen_of_isClosed_image
     refine (isClosed_coord_true (s, s)).inter ?_
     exact isClosed_iInter fun t ↦ isClosed_iInter fun _ ↦ isClosed_coord_true (t, s)
   refine (ιSpv_isEmbedding.isCompact_iff (s := rationalOpen T s)).mpr ?_
-  have hfactor :
-      (ιSpv : Spv A → (A × A → Prop)) '' (rationalOpen T s) =
-        (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
-          ((ιSpv_bool : Spv A → (A × A → Bool)) '' (rationalOpen T s)) := by
-    ext p
-    simp only [Set.mem_image]
-    refine ⟨?_, ?_⟩
-    · rintro ⟨v, hv, rfl⟩
-      exact ⟨ιSpv_bool v, ⟨v, hv, rfl⟩, (ιSpv_eq_boolToProp_comp_ιSpv_bool v).symm⟩
-    · rintro ⟨r, ⟨v, hv, rfl⟩, rfl⟩
-      exact ⟨v, hv, ιSpv_eq_boolToProp_comp_ιSpv_bool v⟩
+  have hfactor := ιSpv_image_eq_boolToProp_image (rationalOpen T s)
   rw [hfactor]
   exact hBoolCompact.image continuous_boolToProp_pi
 
