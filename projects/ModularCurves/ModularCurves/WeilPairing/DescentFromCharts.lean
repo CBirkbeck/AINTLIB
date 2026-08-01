@@ -398,4 +398,31 @@ theorem tensorSection_comparison {X : Scheme.{u}} (M N : X.Modules) (V : X.Opens
   subst hy
   rw [tensorSection_smul_left, tensorSection_smul_right, ← mul_smul]
 
+local instance mulCommutativeRingCatSheaf (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U => by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b => mul_comm a b
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.5b] The dual frame's comparison unit is the inverse.** If two coefficient-one
+frames of `M` differ by a unit `u`, their dual frames differ by `u⁻¹` — *after pairing
+against the first frame*. Stated in the pairing form, which is what the cocycle argument
+consumes and which needs no nondegeneracy input: both sides pair to `1` against
+`x_e`. -/
+theorem dualPairing_frame_comparison {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e f : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (u : Γ(X, U)) (v : Γ(X, U)) (huv : u * v = 1)
+    (hs : overTrivializationSection M U e 1 = u • overTrivializationSection M U f 1) :
+    (dualPairing M).val.app (Opposite.op U)
+        (tensorSection M (Scheme.Modules.dualObj M) U
+          (overTrivializationSection M U e 1)
+          (v • overTrivializationSection (Scheme.Modules.dualObj M) U
+            (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U f) 1)) =
+      (show Γ(X, U) from 1) := by
+  rw [tensorSection_smul_right, _root_.map_smul, hs, tensorSection_smul_left,
+    _root_.map_smul, dualPairing_overTrivializationSection_one M U f,
+    smul_eq_mul, smul_eq_mul, mul_one, mul_comm v u, huv]
+
 end ModularCurves

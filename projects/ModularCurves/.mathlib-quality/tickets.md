@@ -32266,3 +32266,24 @@ REMAINING for `hnorm`, one brick: the **dual generator's comparison unit is the 
 (`Picard/PicComparison.lean:539 exists_pairingElem_tmul_eq_one` + `nonempty_eval_iso`),
 then `ev(tensorSection sᵢ dⱼ) = uᵢⱼ` forces the inverse. After that: `u'ᵢⱼ = uᵢⱼ ·
 (f^*z^*uᵢⱼ)⁻¹`, whose `z`-value is `1` by `appLE_z_appLE_snd_eq_self`, and W3 closes.
+
+### ★★★★ [W3.5b] DONE 2026-08-01 — `dualPairing_frame_comparison`
+The dual frame's comparison unit is the inverse, in the *pairing* form (which needs no
+nondegeneracy input): if two coefficient-one frames of `M` differ by `u`, then pairing the
+first against `v • (dual frame of the second)` gives `1` whenever `u * v = 1`.
+
+The proof is four rewrites, because the whole coefficient calculus was already in the tree
+and only needed to be found:
+* `dualPairing_overTrivializationSection_one` (`EllipticCurve/PoleSheaf.lean:6066`) — a
+  coefficient-one frame pairs to `1` against its coefficient-one dual frame;
+* `tensorSection_smul_left/_right` (`EllipticCurve/PullbackTensorSection.lean:860/899`);
+* `overTrivializationOfRestrictIso_tensorSection_coefficient` (:920) — coefficients
+  multiply under `tensorSection` (the tensor half of the same calculus).
+LEAN-OPS: `dualPairing` needs `∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U)` in scope —
+copy the `local instance` from `PoleSheaf.lean:6058`; and `map_smul` is ambiguous in this
+context (`Scheme.Modules.map_smul` shadows), so write `_root_.map_smul`.
+
+**W3's `hnorm` is now assembled from proved parts**: `u'ᵢⱼ = uᵢⱼ · vᵢⱼ`
+(`tensorSection_comparison`), the dual side contributes `(f^*z^*uᵢⱼ)⁻¹`
+(`dualPairing_frame_comparison`), and the `z`-value of the product is `1` by
+`appLE_z_appLE_snd_eq_self`. What is left is the assembly, not new mathematics.

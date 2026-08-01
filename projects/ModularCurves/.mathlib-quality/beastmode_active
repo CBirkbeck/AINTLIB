@@ -1,1 +1,1 @@
-FOCUS: [WP-CONSTRUCT chain] weilPairing (Basic.lean:47) is itself DS4 data-sorry; critical path = W3 hnorm -> Picard leaf -> pairing -> WP-NAT. Resume W3.5 tensor-section calculus
+FOCUS: [W3.5b] dual generator comparison unit is the inverse (via ev-pairing characterization)
