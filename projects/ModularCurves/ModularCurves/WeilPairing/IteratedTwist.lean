@@ -1051,6 +1051,54 @@ theorem nonempty_iso_unitObj_of_exact_order₃
       u hexact
   exact ⟨(asIso (monoSectionLift (iteratedTwistHom₃ J₁ J₂ J₃ L) ℓ hℓ)).symm⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[VERT-PKG] The two-factor trivialization from the exact-order chart identity** —
+the vertical's counterpart of `nonempty_iso_unitObj_of_exact_order₃`. -/
+theorem nonempty_iso_unitObj_of_exact_order₂
+    (J₁ J₂ : C.IdealSheafData) (L : C.Modules)
+    (h₁ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₁.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (h₂ : ∀ c : ↥C, ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+      J₂.ideal V = Ideal.span {g} ∧ g ∈ nonZeroDivisors Γ(C, V.1))
+    (hL : IsInvertible L)
+    (ℓ : Γ(L, (⊤ : C.Opens)))
+    (hℓ : (Limits.cokernel.π (iteratedTwistHom J₁ J₂ L)).app (⊤ : C.Opens) ℓ = 0)
+    {ι : Type u} (W : ι → C.Opens) (hW : iSup W = ⊤)
+    (eM : ∀ i, (restrictFunctor (W i).ι).obj (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) L)) ≅ unitObj (W i).toScheme)
+    (eL : ∀ i, (restrictFunctor (W i).ι).obj L ≅ unitObj (W i).toScheme)
+    (eU : ∀ i, (restrictFunctor (W i).ι).obj (unitObj C) ≅ unitObj (W i).toScheme)
+    (u : ∀ i, Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))ˣ)
+    (hexact : ∀ i, chartMultiplier (W i) (unitHomOfTopSection ℓ) (eU i) (eL i) =
+      (u i : Γ(((W i).toScheme), (⊤ : ((W i).toScheme).Opens))) *
+        chartMultiplier (W i) (iteratedTwistHom J₁ J₂ L) (eM i) (eL i)) :
+    Nonempty (tensorObj (idealModule J₁) (tensorObj (idealModule J₂) L) ≅
+      unitObj C) := by
+  haveI hL₂ : IsInvertible (tensorObj (idealModule J₂) L) :=
+    IsInvertible.tensorObj (isInvertible_idealModule (J := J₂) h₂) hL
+  haveI m₂ : Mono (divisorTwistHom J₂ L) := mono_divisorTwistHom _ L h₂ hL
+  haveI m₁ : Mono (divisorTwistHom J₁ (tensorObj (idealModule J₂) L)) :=
+    mono_divisorTwistHom _ _ h₁ hL₂
+  haveI hmono : Mono (iteratedTwistHom J₁ J₂ L) := mono_comp _ _
+  haveI hiso : IsIso (monoSectionLift (iteratedTwistHom J₁ J₂ L) ℓ hℓ) := by
+    refine isIso_monoSectionLift_of_multiplier_eq_unit_mul _ ℓ hℓ W hW eM eL eU
+      (fun i => ?_) u hexact
+    haveI mr₂ : Mono ((restrictFunctor (W i).ι).map (divisorTwistHom J₂ L)) :=
+      mono_restrictFunctor_map_of_isLocallyInjective _
+        (isLocallyInjective_divisorTwistHom _ L h₂ hL) (W i)
+    haveI mr₁ : Mono ((restrictFunctor (W i).ι).map
+        (divisorTwistHom J₁ (tensorObj (idealModule J₂) L))) :=
+      mono_restrictFunctor_map_of_isLocallyInjective _
+        (isLocallyInjective_divisorTwistHom _ _ h₁ hL₂) (W i)
+    rw [show (restrictFunctor (W i).ι).map (iteratedTwistHom J₁ J₂ L) =
+      (restrictFunctor (W i).ι).map
+        (divisorTwistHom J₁ (tensorObj (idealModule J₂) L)) ≫
+      (restrictFunctor (W i).ι).map (divisorTwistHom J₂ L) from
+      Functor.map_comp _ _ _]
+    infer_instance
+  exact ⟨(asIso (monoSectionLift (iteratedTwistHom J₁ J₂ L) ℓ hℓ)).symm⟩
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules

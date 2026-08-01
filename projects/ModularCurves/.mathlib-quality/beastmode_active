@@ -1,1 +1,1 @@
-FOCUS: [CHORD-PKG] package the chord/vertical trivializations: hypothesis = chart-coefficient identity; conclusion = the two Nonempty-isos feeding nonempty_tensorObj_iso_of_chord_vertical_poleSheaf
+FOCUS: [CHORD-UNIV] chord-tangent chart identity — recon the Weierstrass atlas transfer idiom (GroupLawAxioms *_of_map) and the explicit line/coefficient machinery in the affine charts
