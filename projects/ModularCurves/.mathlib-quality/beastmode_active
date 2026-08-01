@@ -1,1 +1,1 @@
-FOCUS: [W1 residue (i)] away-chart coordinate bookkeeping for the chord (dictionary values + chart multiplier), then assemble ChordDatum
+FOCUS: [W1 away-chart] write the chord in away-chart coordinates and verify the three evaluations (algHom_chord_eq_zero) + divide out the generators

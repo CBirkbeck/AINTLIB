@@ -341,8 +341,7 @@ set_option backward.isDefEq.respectTransparency false in
 sections `P` and `Q` is `Y − ℓ·(X − x_P) − y_P`; its evaluation at any section whose
 coordinates satisfy the line equation vanishes. -/
 theorem algHom_chord_eq_zero {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
-    (σ : A →ₐ[R] R) (X Y : A) (ℓ xP yP : R)
-    (hx : σ X = xP) (hy : σ Y = yP) (xZ yZ : R)
+    (σ : A →ₐ[R] R) (X Y : A) (ℓ xP yP : R) (xZ yZ : R)
     (hσX : σ X = xZ) (hσY : σ Y = yZ)
     (hline : yZ = ℓ * (xZ - xP) + yP) :
     σ (Y - (algebraMap R A ℓ * (X - algebraMap R A xP) + algebraMap R A yP)) = 0 := by
@@ -431,6 +430,30 @@ theorem section_eq_of_dictionary_eq {R : Type u} [CommRing R]
   have hval := h K φ
   have hinj := (projModelPointsEquiv W K).injective hval
   exact congrArg Subtype.val hinj
+
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 away-chart] The chord's three evaluations, packaged.** In a chart with
+coordinates `X, Y` over the base, given three sections whose evaluation retractions
+read off affine coordinates satisfying the line relation, the chord element
+`Y − ℓ(X − x₁) − y₁` is killed by all three retractions. Combined with
+`mul_dvd_of_evaluations_vanish` and `eq_unit_mul_of_three_divisions` this is the
+exact-order hypothesis, modulo the unit cofactor. -/
+theorem chord_evaluations_vanish {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (X Y : A) (ℓ x₁ y₁ x₂ y₂ x₃ y₃ : R)
+    (σ₁ σ₂ σ₃ : A →ₐ[R] R)
+    (h₁x : σ₁ X = x₁) (h₁y : σ₁ Y = y₁)
+    (h₂x : σ₂ X = x₂) (h₂y : σ₂ Y = y₂)
+    (h₃x : σ₃ X = x₃) (h₃y : σ₃ Y = y₃)
+    (hline₂ : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hline₃ : y₃ = ℓ * (x₃ - x₁) + y₁) :
+    σ₁ (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) = 0 ∧
+    σ₂ (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) = 0 ∧
+    σ₃ (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) = 0 := by
+  refine ⟨algHom_chord_eq_zero σ₁ X Y ℓ x₁ y₁ x₁ y₁ h₁x h₁y (by ring), ?_, ?_⟩
+  · exact algHom_chord_eq_zero σ₂ X Y ℓ x₁ y₁ x₂ y₂ h₂x h₂y hline₂
+  · exact algHom_chord_eq_zero σ₃ X Y ℓ x₁ y₁ x₃ y₃ h₃x h₃y hline₃
 
 
 end ModularCurves
