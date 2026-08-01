@@ -676,6 +676,30 @@ theorem coeff_partial_sum_BI
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) from
     AddSubmonoidClass.coe_finsetSum _ _]
 
+/-- Ultrametric contrapositive: if `t < wI a` and the tail `a - b` is at most `t`,
+then the head `b` must itself exceed `t` — otherwise `a = (a - b) + b` would be
+bounded by `t`. Stated for abstract `a`, `b`; at the call site both are large
+coefficient expressions, and naming them is what makes the argument legible. -/
+private theorem lt_wI_of_le_wI_sub {t : NNReal}
+    {a b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (ha : t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 a)
+    (htail : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (a - b) ≤ t) :
+    t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b := by
+  by_contra hcon
+  push Not at hcon
+  have hsplit : a = (a - b) + b := by ring
+  rw [hsplit] at ha
+  exact absurd (le_trans (wI_add_le p F _ _) (max_le htail hcon)) (not_le.mpr ha)
+
+/-- If a finite sum exceeds `t` in `wI`, some summand does. -/
+private theorem exists_lt_wI_of_lt_wI_sum {t : NNReal} {ι : Type*} {s : Finset ι}
+    {g : ι → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hsum : t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (∑ l ∈ s, g l)) :
+    ∃ l ∈ s, t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (g l) := by
+  by_contra hcon
+  push Not at hcon
+  exact absurd (wI_sum_le p F s g hcon) (not_le.mpr hsum)
+
 /-- **Restrictedness of columnwise limits**: if each coefficient column of a
 `wIRPS`-vanishing series of restricted series converges with the tail
 estimates, the limit series is restricted. -/
@@ -726,53 +750,8 @@ theorem isRestricted_column_limits
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := rfl
     rw [hSK] at hK
     have htail := hS K N t ht (fun l hl => (hN l hl).le)
-    have hbig : t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (∑ l ∈ Finset.range N,
-          ((MvPowerSeries.coeff K
-            ((u l : ↥(restrictedMvPowerSeriesSubring k
-              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-              : MvPowerSeries (Fin k)
-                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := by
-      by_contra hcon
-      push Not at hcon
-      have hsplit : ((S K : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-          = (((S K : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-            - ∑ l ∈ Finset.range N,
-              ((MvPowerSeries.coeff K
-                ((u l : ↥(restrictedMvPowerSeriesSubring k
-                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-                  : MvPowerSeries (Fin k)
-                    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-                : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-                : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
-            + ∑ l ∈ Finset.range N,
-              ((MvPowerSeries.coeff K
-                ((u l : ↥(restrictedMvPowerSeriesSubring k
-                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-                  : MvPowerSeries (Fin k)
-                    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-                : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-                : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
-        ring
-      rw [hsplit] at hK
-      exact absurd (le_trans (wI_add_le p F _ _) (max_le htail hcon))
-        (not_le.mpr hK)
-    have hex : ∃ l ∈ Finset.range N, t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        ((MvPowerSeries.coeff K
-          ((u l : ↥(restrictedMvPowerSeriesSubring k
-            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-            : MvPowerSeries (Fin k)
-              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
-      by_contra hcon
-      push Not at hcon
-      exact absurd (wI_sum_le p F _ _ hcon) (not_le.mpr hbig)
-    obtain ⟨l, hlN, hl⟩ := hex
+    have hbig := lt_wI_of_le_wI_sub p F hK htail
+    obtain ⟨l, hlN, hl⟩ := exists_lt_wI_of_lt_wI_sum p F hbig
     exact Set.mem_biUnion hlN hl
   refine Set.Finite.subset (Set.Finite.biUnion (Finset.range N).finite_toSet
     fun l _ => ?_) hsub
