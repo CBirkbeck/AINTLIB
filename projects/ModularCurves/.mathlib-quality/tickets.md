@@ -31953,3 +31953,31 @@ from scratch as "i9" and hit `has already been declared`. `chord_mul_conj_eq_pro
 target FILE's own declaration list before adding to it** — the file is now ~1800 lines
 and its own contents have passed out of working memory. This is the fourth
 near-duplicate this session and the first that got as far as a compile.
+
+### ★★★★★ [W1 i10] DONE 2026-08-01 — the TWO-FAMILY COVER (plan-level finding + its second family)
+**Finding that changes the assembly plan.** `IsUnit conj` cannot hold on the whole
+away-chart: `sectionAway z hz` has coordinate ring *equal* to the full Weierstrass
+coordinate ring (`sectionAway_top_affineModelEval_bijective`), and there `conj` vanishes
+on `div(conj) = [-P] + [-Q] + [-R] - 3[O]`. So i9 alone does not cover `C`, and neither
+does the old `chord_exact_order_transported` (whose `hk₁` in the *full* coordinate ring
+is unsatisfiable, by the rank-2 remark in i7 — that lemma is vacuous as stated and must
+not be used).
+
+**The fix — cover `C` by two chart families, both discharged by the same norm identity
+`chord · conj = -(g₁g₂g₃)`:**
+1. `D(conj)`: `chord = (-conj⁻¹) · (g₁g₂g₃)` — i9,
+   `chord_eq_unit_mul_prod_of_conj_isUnit`.
+2. charts where `g₁g₂g₃` is a unit — i.e. neighbourhoods of the reflected points, where
+   none of `P,Q,R` is present: the chord is then itself a **unit**
+   (`isUnit_chord_of_isUnit_prod`, i10), so the multiplier identity holds with `p := 1`.
+
+These two families cover `C` exactly when the reflected points are disjoint from
+`P, Q, R` — which is the non-degeneracy hypothesis we already carry. The divisor
+bookkeeping behind it: `div(chord) + div(conj) = div(g₁g₂g₃) = Σ([Pᵢ]+[-Pᵢ]) - 6[O]`
+and `div(conj) = Σ[-Pᵢ] - 3[O]`, so `div(chord) = [P]+[Q]+[R] - 3[O]` as required.
+
+REMAINING for the chord prong: build the two-family cover as an actual
+`W : ι → C.Opens` with `iSup W = ⊤`, and feed the two identities into
+`nonempty_iso_unitObj_of_two_unit_identities` (whose `p i`, `uc i`, `um i` slots are
+exactly what the two families supply, `um` from `exists_unit_chartMultiplier₃_eq`).
+No new algebra is needed — every algebraic input is proved.

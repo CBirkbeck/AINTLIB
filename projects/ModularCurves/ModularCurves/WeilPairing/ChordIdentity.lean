@@ -1858,4 +1858,36 @@ theorem chord_eq_unit_mul_prod_of_conj_isUnit {R A : Type u} [CommRing R] [CommR
   rw [h, Units.val_neg]
   ring
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i10] The chord is a unit where the three generators are.** The second chart
+family of the cover: near a point of `V(conj)` — i.e. near one of the *reflected*
+points `-P, -Q, -R` — none of `P, Q, R` is present, so all three generators are units
+there, and the norm identity forces the chord itself to be a unit. Together with i9
+(which covers `D(conj)`) this covers the whole curve, because non-degeneracy says the
+reflected points are disjoint from `P, Q, R`. -/
+theorem isUnit_chord_of_isUnit_prod {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (W : WeierstrassCurve R) (X Y : A) (ℓ x₁ x₂ y₁ y₂ : R)
+    (hEq : Y ^ 2 + algebraMap R A W.a₁ * X * Y + algebraMap R A W.a₃ * Y =
+      X ^ 3 + algebraMap R A W.a₂ * X ^ 2 + algebraMap R A W.a₄ * X +
+        algebraMap R A W.a₆)
+    (h₁ : y₁ ^ 2 + W.a₁ * x₁ * y₁ + W.a₃ * y₁ =
+      x₁ ^ 3 + W.a₂ * x₁ ^ 2 + W.a₄ * x₁ + W.a₆)
+    (h₂ : y₂ ^ 2 + W.a₁ * x₂ * y₂ + W.a₃ * y₂ =
+      x₂ ^ 3 + W.a₂ * x₂ ^ 2 + W.a₄ * x₂ + W.a₆)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hnzd : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0)
+    (hprod : IsUnit ((X - algebraMap R A x₁) * (X - algebraMap R A x₂) *
+      (X - algebraMap R A (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)))) :
+    IsUnit (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) := by
+  have hprod' := chord_mul_conj_eq_prod_of_equations W X Y ℓ x₁ x₂ y₁ y₂ hEq h₁ h₂
+    hline hnzd
+  have hu : IsUnit ((Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) +
+      algebraMap R A y₁)) *
+      ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+        (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁))) := by
+    rw [hprod']
+    exact hprod.neg
+  exact isUnit_of_mul_isUnit_left hu
+
 end ModularCurves
