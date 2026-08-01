@@ -32584,3 +32584,33 @@ trivialisation, `cocycle` by rigidity (two morphisms into the unramified separat
 agreeing on geometric points, where both are the HasseWeil field pairing). **The point-level
 `E[N] ≅ (ℤ/N)²` identification is T-W7 = the fibrewise-elliptic → locally-Weierstrass node**,
 which is also the user's next target — the two converge.
+
+### ★★★★ [WP-COVER + WP-FPPF] DONE 2026-08-01 — the cover half of `WeilPairingLocalData`
+* `fullLevelSpaceStruct_surjective` at **general `N`** (`WeilPairing/FullLevelCover.lean`) —
+  the `N = 3` / `N = 4` cases were `private` replays; this is the shared argument
+  (anchored geometric point → `exists_isNaiveFullLevel_of_isAlgClosed`, de-privatized and
+  already general-`N` → classify through `YFull.exists_pointsEquiv_family`).
+* `flat_of_etale`, `locallyOfFinitePresentation_of_etale` (from mathlib's
+  `Etale.iff_flat_and_formallyUnramified`), and `fullLevelSpaceStruct_fppf` bundling all
+  three. Root build 9622 jobs; axiom-verified.
+
+### OPEN DECISION — [WP-LOCAL], the local pairing `ζ'` and its cocycle
+Two routes, and they differ in what has to be built:
+
+**(A) determinant model on the full-level cover.** `ζ'` := `detConstMor` transported
+through the tautological trivialisation `E[N] ≅ (ℤ/N)²`. Needs the point-level
+identification (T-W7 = fibrewise-elliptic → locally-Weierstrass, the user's next target).
+**Risk to check first:** `detConstMor_gl2Both` says `e(gv,gw) = det(g)·e(v,w)`, so the naive
+det pairing is invariant only on `SL₂`; the full-level cover has `GL₂` monodromy. Either the
+cover must also trivialise `μ_N` (adjoin `ζ_N`), or `ζ'` must be built so the `det` twist
+lands on the `μ_N` side. This is a real design question and should be settled before code.
+
+**(B) rigidity from the field pairing.** `ζ'` := assembled from AINTLIB's sorry-free
+field-level pairing (`HasseWeil/HasseBound/WeilPairing/Pairing.lean`) fibrewise, with the
+cocycle discharged by rigidity: two morphisms into `μ_N` (unramified, separated over the
+base) agreeing on geometric points are equal. Uses `EtaleDescent.lean` +
+`GaloisEquivariance.lean` (both sorry-free) rather than T-W7. Avoids the `GL₂`/`SL₂` issue
+entirely, because it never picks a basis.
+
+(B) looks shorter and is independent of T-W7; (A) is the route the board's docstrings
+assume. Worth a decision before either is built.
