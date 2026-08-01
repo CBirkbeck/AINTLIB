@@ -31439,3 +31439,22 @@ away-chart are:
       `chord_vanishes_at_three_points` + the dictionary chain (steps 1–6, proven);
   (c) the unit cofactor — Cramer/adjugate (`surjective_mulVec_of_isUnit_det`,
       `not_isUnit_det_of_mulVec_eq_zero`).
+
+### ★★★★★★ [W1] CHART FACTORISATION ASSEMBLED 2026-08-01
+`chord_chart_factorisation` (axiom-clean): the chord's exact-order factorisation
+`Y − ℓ(X − x₁) − y₁ = u · (g_P · (g_Q · g_{R⁻}))` from purely chart-level data —
+three retractions with principal kernels, the two line relations, the successive
+quotients, and a unit cofactor. Together with
+`chartMultiplier_unitHom_eq_coefficient` this feeds
+`nonempty_iso_unitObj_of_exact_order₃` directly.
+
+WHAT REMAINS, concretely (nothing conceptual):
+ (α) produce the successive quotients `c₁, c₂` and the unit `u` for the actual chord in
+     the away-chart — i.e. carry out the division in the affine Weierstrass coordinate
+     ring (`sectionAway_affineModelEval_bijective` identifies it with `R[X,Y]/(W)`), where
+     `addPolynomial`-style factorisation gives them explicitly;
+ (β) the line relations for `R⁻` — supplied by the proven dictionary chain
+     (`projModelPointsEquiv_neg_mul_eq_negAddY` + `chord_vanishes_at_three_points`);
+ (γ) chart existence/positioning hypotheses (the three sections in one affine chart
+     inside `sectionAway`) — the degenerate configurations are exactly what the
+     project's addOnZ/addOnY chart families handle.
