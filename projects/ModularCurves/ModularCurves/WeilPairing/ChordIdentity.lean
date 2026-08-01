@@ -150,6 +150,31 @@ end AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
 
+open WeierstrassCurve
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2c, field case] The negative of a sum has the chord's third coordinates.**
+Over a field, mathlib's affine group law gives `P + Q = (addX, addY)` and negation flips
+`Y` by `negY`, so `-(P + Q)` is the point `(addX, negAddY)` — which is exactly the third
+intersection of the chord (`chord_vanishes_at_three_points`). This is the field-point
+input of the dictionary bridge. -/
+theorem neg_add_eq_some_negAddY {F : Type u} [Field F] [DecidableEq F]
+    (W : WeierstrassCurve F) {x₁ x₂ y₁ y₂ : F}
+    (h₁ : W.toAffine.Nonsingular x₁ y₁) (h₂ : W.toAffine.Nonsingular x₂ y₂)
+    (hxy : ¬(x₁ = x₂ ∧ y₁ = W.toAffine.negY x₂ y₂)) :
+    -(Affine.Point.some _ _ h₁ + Affine.Point.some _ _ h₂) =
+      Affine.Point.some
+        (W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂))
+        (W.toAffine.negAddY x₁ x₂ y₁ (W.toAffine.slope x₁ x₂ y₁ y₂))
+        ((Affine.nonsingular_negAdd h₁ h₂ hxy)) := by
+  rw [Affine.Point.add_some hxy, Affine.Point.neg_some]
+  simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY_negY]
+
+end ModularCurves
+
+namespace ModularCurves
+
 open AlgebraicGeometry.Scheme.Modules
 
 variable {S : Scheme.{u}}
@@ -286,3 +311,4 @@ theorem ker_eq_of_mem_of_span_eq {J₁ J₂ : C.IdealSheafData} (h12 : J₁ ≤ 
     exact hmem
 
 end AlgebraicGeometry.Scheme.Modules
+
