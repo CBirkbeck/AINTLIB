@@ -527,6 +527,80 @@ theorem nonempty_baseSections_cokernel_divisorTwistHom_equiv_single_of_section
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **Surjectivity of the base-section restriction from unimodularity of the evaluation
+rows.** The chart-level input replacing the cohomological one: if the cross product of
+the two evaluation rows is unimodular, the restriction is surjective. -/
+theorem surjective_baseSectionsMap_cokernel_of_unimodular
+    {M N : C.Modules} (f : M ⟶ N)
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π N))
+    (e2 : Scheme.Modules.baseSections π (Limits.cokernel f)
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] (Fin 2 → Γ(S, (⊤ : S.Opens))))
+    (huni : Ideal.span (Set.range
+      ((fun j => e2 ((Scheme.Modules.baseSectionsMap π
+          (Limits.cokernel.π f)) (b3 j)) 0) ⨯₃
+       (fun j => e2 ((Scheme.Modules.baseSectionsMap π
+          (Limits.cokernel.π f)) (b3 j)) 1))) = ⊤) :
+    Function.Surjective
+      ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)).hom) := by
+  classical
+  intro y
+  obtain ⟨u, hu0, hu1⟩ := ModularCurves.surjective_of_span_range_crossProduct_eq_top
+    _ _ huni ![e2 y 0, e2 y 1]
+  refine ⟨b3.equivFun.symm u, ?_⟩
+  refine e2.injective ?_
+  funext i
+  have hcoord : ∀ (s : Scheme.Modules.baseSections π N) (k : Fin 2),
+      (fun j => e2 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) (b3 j)) k) ⬝ᵥ b3.equivFun s =
+      e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) s) k := by
+    intro s k
+    calc (fun j => e2 ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π f)) (b3 j)) k) ⬝ᵥ b3.equivFun s
+        = ∑ j, b3.equivFun s j •
+            e2 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b3 j)) k := by
+          simp only [dotProduct, smul_eq_mul]
+          exact Finset.sum_congr rfl fun j _ => mul_comm _ _
+      _ = (∑ j, b3.equivFun s j •
+            e2 ((Scheme.Modules.baseSectionsMap π
+              (Limits.cokernel.π f)) (b3 j))) k := by
+          rw [Finset.sum_apply]
+          exact Finset.sum_congr rfl fun j _ => rfl
+      _ = e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f)) s) k := by
+          have hsum : (∑ j, b3.equivFun s j •
+              e2 ((Scheme.Modules.baseSectionsMap π
+                (Limits.cokernel.π f)) (b3 j))) =
+              e2 ((Scheme.Modules.baseSectionsMap π
+                (Limits.cokernel.π f)) s) := by
+            calc ∑ j, b3.equivFun s j •
+                e2 ((Scheme.Modules.baseSectionsMap π
+                  (Limits.cokernel.π f)) (b3 j))
+                = ∑ j, e2 ((Scheme.Modules.baseSectionsMap π
+                    (Limits.cokernel.π f)) (b3.equivFun s j • b3 j)) := by
+                  exact Finset.sum_congr rfl fun j _ => by
+                    rw [_root_.map_smul, _root_.map_smul]
+              _ = e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+                    (∑ j, b3.equivFun s j • b3 j)) := by
+                  rw [map_sum, map_sum]
+              _ = _ := by rw [b3.sum_equivFun]
+          rw [hsum]
+  have hu := hcoord (b3.equivFun.symm u)
+  rw [b3.equivFun.apply_symm_apply] at hu
+  have h0 : e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+      (b3.equivFun.symm u)) 0 = e2 y 0 := by
+    rw [← hu 0, hu0]
+    rfl
+  have h1 : e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π f))
+      (b3.equivFun.symm u)) 1 = e2 y 1 := by
+    rw [← hu 1, hu1]
+    rfl
+  fin_cases i
+  · exact h0
+  · exact h1
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The vertical kernel from surjectivity alone**: the rank-one analogue —
 the single evaluation row is unimodular by surjectivity, and the kernel is the
 span of its perpendicular. -/
