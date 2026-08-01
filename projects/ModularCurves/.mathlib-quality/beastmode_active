@@ -1,1 +1,1 @@
-FOCUS: [G1/G2/G4] general chart multiplier for a mono of invertibles + composite-multiplier product law (new file WeilPairing/IteratedTwist.lean)
+FOCUS: [G5] concentration for a composite of twists (isZero-restrict via right-exactness) + [G6] iterated-twist span = product of generators (chartMultiplier_comp + span_twistChartMultiplier_eq)

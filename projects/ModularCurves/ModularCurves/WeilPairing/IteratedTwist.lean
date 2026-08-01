@@ -227,6 +227,54 @@ theorem nonempty_baseSections_cokernel_equiv_single_of_mono
   let eSpan := eA.restrictScalars Γ(S, (⊤ : S.Opens))
   exact ⟨(((i1 ≪≫ i2 ≪≫ i3).toLinearEquiv).trans eCore).trans (eSpan.trans eP)⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[G5] Concentration for a composite**: if both factors' cokernels vanish on an
+open, so does the composite's — the composite is an epimorphism there, being a
+composite of epimorphisms. -/
+theorem isZero_restrict_cokernel_comp {N : C.Modules} (f : M ⟶ N) (g : N ⟶ L)
+    (V : C.Opens)
+    (hf : Limits.IsZero ((restrictFunctor V.ι).obj (Limits.cokernel f)))
+    (hg : Limits.IsZero ((restrictFunctor V.ι).obj (Limits.cokernel g))) :
+    Limits.IsZero ((restrictFunctor V.ι).obj (Limits.cokernel (f ≫ g))) := by
+  haveI hepif : Epi ((restrictFunctor V.ι).map f) :=
+    Preadditive.epi_of_isZero_cokernel _
+      (hf.of_iso (Limits.PreservesCokernel.iso (restrictFunctor V.ι) f).symm)
+  haveI hepig : Epi ((restrictFunctor V.ι).map g) :=
+    Preadditive.epi_of_isZero_cokernel _
+      (hg.of_iso (Limits.PreservesCokernel.iso (restrictFunctor V.ι) g).symm)
+  haveI : Epi ((restrictFunctor V.ι).map (f ≫ g)) := by
+    rw [Functor.map_comp]
+    infer_instance
+  have hz := Limits.isZero_cokernel_of_epi ((restrictFunctor V.ι).map (f ≫ g))
+  exact hz.of_iso (Limits.PreservesCokernel.iso (restrictFunctor V.ι) (f ≫ g))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Concentration of global sections from vanishing of the restricted cokernel on the
+complementary open (the general form of `cokernel_divisorTwistHom_bijective_restrict`). -/
+theorem cokernel_bijective_restrict_of_isZero (f : M ⟶ L) (Uo V : C.Opens)
+    (hUV : Uo ⊔ V = ⊤)
+    (hzero : ∀ W : C.Opens, W ≤ V →
+      Limits.IsZero ((restrictFunctor W.ι).obj (Limits.cokernel f))) :
+    Function.Bijective fun s : Γ(Limits.cokernel f, (⊤ : C.Opens)) ↦
+      (Limits.cokernel f).presheaf.map
+        (homOfLE (le_top : Uo ≤ (⊤ : C.Opens))).op s := by
+  let Mc := Limits.cokernel f
+  let F := (SheafOfModules.toSheaf C.ringCatSheaf).obj Mc
+  haveI hVsections : Subsingleton Γ(Mc, V) :=
+    Scheme.Modules.subsingleton_sections_of_isZero_restrict Mc V (hzero V le_rfl)
+  haveI hVsheaf : Subsingleton (ToType (F.1.obj (Opposite.op V))) := by
+    change Subsingleton Γ(Mc, V)
+    infer_instance
+  haveI hoverlap : Subsingleton Γ(Mc, Uo ⊓ V) :=
+    Scheme.Modules.subsingleton_sections_of_isZero_restrict Mc (Uo ⊓ V)
+      (hzero (Uo ⊓ V) inf_le_right)
+  haveI hoverlapSheaf : Subsingleton (ToType (F.1.obj (Opposite.op (Uo ⊓ V)))) := by
+    change Subsingleton Γ(Mc, Uo ⊓ V)
+    infer_instance
+  exact TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton F hUV
+
 end GeneralMultiplier
 
 end AlgebraicGeometry.Scheme.Modules
