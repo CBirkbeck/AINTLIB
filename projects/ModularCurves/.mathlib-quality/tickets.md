@@ -31317,3 +31317,17 @@ field-point comparison, where one side is `Dictionary.eq_toAffine` +
 `nonempty_iso_unitObj_of_exact_order₃`'s hypothesis follows from the three evaluation
 vanishings ([W1-d2/d4]) plus the unit half ([d3.2d], adjugate bricks landed), giving a
 `ChordDatum` and hence the local theorem of the square.
+
+### [W1-d3.2c] interfaces complete 2026-08-01
+`section_ext_of_forall_specPoint` (section-level) and `hom_ext_of_forall_algebra`
+(algebra-indexed, via `Spec.map_surjective`) — both axiom-clean. Together with
+`neg_add_eq_some_negAddY` (field case) and `projModelPointsEquiv_some/_zero` (the
+dictionary's value characterisation) every interface of the last leaf is in place.
+THE RESIDUE, stated exactly: for the universal (reduced) base, show that composing the
+project's section `-(P+Q)` with `Spec.map φ` gives, under `projModelPointsEquiv`, the
+affine point `-(P_φ + Q_φ)`; then `neg_add_eq_some_negAddY` rewrites it as
+`(addX, negAddY)`, and `chord_vanishes_at_three_points` finishes the vanishing. The
+missing lemma is precisely the compatibility of the project's `mulModelHom`/`negModelHom`
+with the dictionary — the tree already has `mulModelHom_specPoints` and
+`negModelHom_specPoints` (referenced in PointsDictionary's docstring); the next session
+should locate them and chain.
