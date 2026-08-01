@@ -74,6 +74,64 @@ variable (hφb : ∀ x : Bloc p F ϖ,
     : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
   = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
 
+/-- The `p^(N+1)`-tail of a `mk'` is `Kinv`-small at any radius `τ < 1` past the
+threshold `Nτ`. Shared by the two radii `σ₁` and `ρ₂`, whose tail estimates were
+identical modulo the radius. -/
+private theorem wLoc_tail_le_of_pow_lt {τ : NNReal} (hτ0 : 0 < τ) (hτ1 : τ < 1)
+    {Kinv : NNReal} {k Nτ : ℕ} (N : ℕ) (w' : Ainf p F)
+    (hNτ : τ ^ Nτ < Kinv * ((τ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)) (hleN : Nτ ≤ N) :
+    wLoc p F ϖ hτ0 hτ1 (IsLocalization.mk' (Bloc p F ϖ)
+      ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) ≤ Kinv := by
+  set V : NNReal := perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hV
+  have hV0 : 0 < V := vpi_pos p F ϖ
+  refine le_trans (wLoc_mk'_tail_le p F ϖ hτ0 hτ1 k N w') ?_
+  have hle : τ ^ (N + 1) ≤ τ ^ (Nτ + 1) :=
+    pow_le_pow_of_le_one zero_le hτ1.le (by omega)
+  have hlt : τ ^ (Nτ + 1) ≤ Kinv * ((τ * V) ^ k) :=
+    le_trans (pow_le_pow_of_le_one zero_le hτ1.le (Nat.le_succ Nτ)) hNτ.le
+  calc τ ^ (N + 1) * (((τ * V) ^ k)⁻¹)
+      ≤ Kinv * ((τ * V) ^ k) * (((τ * V) ^ k)⁻¹) :=
+        mul_le_mul_of_nonneg_right (le_trans hle hlt) zero_le
+    _ = Kinv := by
+        rw [mul_assoc, mul_inv_cancel₀
+          (pow_pos (mul_pos hτ0 hV0) k).ne', mul_one]
+
+include hφb in
+private theorem hhead_lem (hρσ : ρ₁ ≤ σ₁)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 (teichPowGen p F ϖ zb m))
+    (x : Ainf p F) (k N : ℕ)
+    (hw1 : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)) ≤ 1)
+    (hw2 : wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)) ≤ 1) :
+    ∀ i ∈ Finset.Iic N,
+    IsIntegral (↥(evalBallSubring p F ϖ φ hφ hbmem hb))
+      (blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k))) := by
+  intro i _
+  by_cases hik : i ≤ k
+  · exact isIntegral_monomial_of_le_one p F ϖ φ hφ hφb zb m hm hgen
+      hbmem hb hbg i k hik (teichCoeff p F x i)
+      (wLoc_mk'_monomial_le_one p F ϖ hσ₁0 hσ₁1 x k hw1 i)
+  · refine isIntegral_of_pow_mem _ _ 1 one_pos ?_
+    rw [pow_one]
+    refine blocToBI_mem_evalBallSubring_of_wI_le p F ϖ φ hφ hφb
+      hbmem hb _ ?_
+    rw [wI_blocToBI_eq p F ϖ]
+    refine max_le ?_ ?_
+    · refine le_trans (wLoc_mk'_monomial_mono_of_le p F ϖ hρ₁0 hρ₁1
+        hσ₁0 hσ₁1 hρσ i k (by omega) (teichCoeff p F x i)) ?_
+      exact wLoc_mk'_monomial_le_one p F ϖ hσ₁0 hσ₁1 x k hw1 i
+    · exact wLoc_mk'_monomial_le_one p F ϖ hρ₂0 hρ₂1 x k hw2 i
+
 set_option maxSynthPendingDepth 1 in
 include hφb in
 /-- **Every unit-ball `Bloc`-element is integral over the image ball**
@@ -114,34 +172,8 @@ theorem isIntegral_blocToBI_of_wLoc_le_one
     WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff x N
   have hsplit := mk'_sPow_split p F ϖ x k N w' hwd
   -- the tail is Kinv-small at both σ-radii
-  have htail1 : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
-      ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) ≤ Kinv := by
-    refine le_trans (wLoc_mk'_tail_le p F ϖ hσ₁0 hσ₁1 k N w') ?_
-    have hle : σ₁ ^ (N + 1) ≤ σ₁ ^ (N₁ + 1) :=
-      pow_le_pow_of_le_one zero_le hσ₁1.le (by omega)
-    have hlt : σ₁ ^ (N₁ + 1) ≤ Kinv * ((σ₁ * V) ^ k) :=
-      le_trans (pow_le_pow_of_le_one zero_le hσ₁1.le
-        (Nat.le_succ N₁)) hN₁.le
-    calc σ₁ ^ (N + 1) * (((σ₁ * V) ^ k)⁻¹)
-        ≤ Kinv * ((σ₁ * V) ^ k) * (((σ₁ * V) ^ k)⁻¹) :=
-          mul_le_mul_of_nonneg_right (le_trans hle hlt) zero_le
-      _ = Kinv := by
-          rw [mul_assoc, mul_inv_cancel₀
-            (pow_pos (mul_pos hσ₁0 hV0) k).ne', mul_one]
-  have htail2 : wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
-      ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) ≤ Kinv := by
-    refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₂0 hρ₂1 k N w') ?_
-    have hle : ρ₂ ^ (N + 1) ≤ ρ₂ ^ (N₂ + 1) :=
-      pow_le_pow_of_le_one zero_le hρ₂1.le (by omega)
-    have hlt : ρ₂ ^ (N₂ + 1) ≤ Kinv * ((ρ₂ * V) ^ k) :=
-      le_trans (pow_le_pow_of_le_one zero_le hρ₂1.le
-        (Nat.le_succ N₂)) hN₂.le
-    calc ρ₂ ^ (N + 1) * (((ρ₂ * V) ^ k)⁻¹)
-        ≤ Kinv * ((ρ₂ * V) ^ k) * (((ρ₂ * V) ^ k)⁻¹) :=
-          mul_le_mul_of_nonneg_right (le_trans hle hlt) zero_le
-      _ = Kinv := by
-          rw [mul_assoc, mul_inv_cancel₀
-            (pow_pos (mul_pos hρ₂0 hV0) k).ne', mul_one]
+  have htail1 := wLoc_tail_le_of_pow_lt p F ϖ hσ₁0 hσ₁1 N w' hN₁ (le_max_left _ _)
+  have htail2 := wLoc_tail_le_of_pow_lt p F ϖ hρ₂0 hρ₂1 N w' hN₂ (le_max_right _ _)
   -- the tail lies in the image ball
   have htailmem : blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
       (IsLocalization.mk' (Bloc p F ϖ)
@@ -156,28 +188,7 @@ theorem isIntegral_blocToBI_of_wLoc_le_one
         exact max_le htail1 htail2)
     exact ⟨U, hUnorm, Subtype.ext hUeq⟩
   -- per-head integrality
-  have hhead : ∀ i ∈ Finset.Iic N,
-      IsIntegral (↥(evalBallSubring p F ϖ φ hφ hbmem hb))
-        (blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ i
-              * WittVector.teichmuller p (teichCoeff p F x i))
-            (sPow p F ϖ k))) := by
-    intro i _
-    by_cases hik : i ≤ k
-    · exact isIntegral_monomial_of_le_one p F ϖ φ hφ hφb zb m hm hgen
-        hbmem hb hbg i k hik (teichCoeff p F x i)
-        (wLoc_mk'_monomial_le_one p F ϖ hσ₁0 hσ₁1 x k hw1 i)
-    · refine isIntegral_of_pow_mem _ _ 1 one_pos ?_
-      rw [pow_one]
-      refine blocToBI_mem_evalBallSubring_of_wI_le p F ϖ φ hφ hφb
-        hbmem hb _ ?_
-      rw [wI_blocToBI_eq p F ϖ]
-      refine max_le ?_ ?_
-      · refine le_trans (wLoc_mk'_monomial_mono_of_le p F ϖ hρ₁0 hρ₁1
-          hσ₁0 hσ₁1 hρσ i k (by omega) (teichCoeff p F x i)) ?_
-        exact wLoc_mk'_monomial_le_one p F ϖ hσ₁0 hσ₁1 x k hw1 i
-      · exact wLoc_mk'_monomial_le_one p F ϖ hρ₂0 hρ₂1 x k hw2 i
+  have hhead := hhead_lem p F ϖ φ hφ hφb hρσ zb m hm hgen hbmem hb hbg x k N hw1 hw2
   -- assemble through the split
   have himg : blocToBI p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
       (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k))
