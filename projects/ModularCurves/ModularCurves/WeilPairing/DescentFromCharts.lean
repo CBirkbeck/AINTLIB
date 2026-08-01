@@ -160,4 +160,25 @@ noncomputable def pullbackSectionIso {T' E' : Scheme.{u}} (f : E' ⟶ T') (z : T
     eqToIso (by rw [hz]) ≪≫
       (AlgebraicGeometry.Scheme.Modules.pullbackId T').app N
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.2] Pulling back a chart trivialization.** A trivialization of `N` over `U`
+gives one of `f^* N` over `f ⁻¹ᵁ U`. This is the trivialization-level content of
+`IsInvertible.pullback`, extracted as a usable iso so that the descent can twist by
+`f^* N` chart by chart. -/
+noncomputable def restrictPullbackTrivialization {X Y : Scheme.{u}} (f : Y ⟶ X)
+    (N : X.Modules) (U : X.Opens)
+    (e : (restrictFunctor U.ι).obj N ≅ unitObj U.toScheme) :
+    (restrictFunctor (f ⁻¹ᵁ U).ι).obj
+        ((AlgebraicGeometry.Scheme.Modules.pullback f).obj N) ≅
+      unitObj (f ⁻¹ᵁ U).toScheme :=
+  (restrictFunctorIsoPullback (f ⁻¹ᵁ U).ι).app _ ≪≫
+    (AlgebraicGeometry.Scheme.Modules.pullbackComp (f ⁻¹ᵁ U).ι f).app N ≪≫
+      (AlgebraicGeometry.Scheme.Modules.pullbackCongr
+        (morphismRestrict_ι f U).symm).app N ≪≫
+        (AlgebraicGeometry.Scheme.Modules.pullbackComp (f ∣_ U) U.ι).symm.app N ≪≫
+          (AlgebraicGeometry.Scheme.Modules.pullback (f ∣_ U)).mapIso
+            ((restrictFunctorIsoPullback U.ι).symm.app N ≪≫ e) ≪≫
+            pullbackUnitIso (f ∣_ U)
+
 end ModularCurves
