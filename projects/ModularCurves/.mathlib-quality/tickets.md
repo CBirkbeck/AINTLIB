@@ -32352,3 +32352,23 @@ caught by the `declaration uses` grep and none by an error):
 2. `show … at h` is not valid syntax; `replace h : … := h` is the beta-reducer.
 3. A `Function.Bijective (fun r => …)` goal keeps the beta-redex, so hypotheses obtained
    from `intro a b h` must be `replace`d into reduced form before `rw` will match.
+
+### ★★★★★ [W3.8] DONE 2026-08-01 — `nonempty_unitObj_iso_tensorObj_of_frames` (THE TWISTED GLUE)
+`Nonempty (𝟙 ≅ L ⊗ D)` from purely chart-level data: restrict-frames for the two factors,
+their comparison units `u`, `v`, and the single normalization `z(uᵢⱼ · vᵢⱼ) = 1`.
+No `hbij`, no `etw`, no generator hypotheses — every input of
+`nonempty_unitObj_iso_of_normalized_glue` is discharged internally:
+* generators := `tensorSection` of the two coefficient-one sections;
+* `hu` := `tensorSection_restrict_comparison`;
+* `hbij` := `tensorSection_one_one` (the pure tensor **is** the tensor frame's
+  coefficient-one section) + `bijective_smul_restrict_overTrivializationSection_one`.
+It compiled first try once those three were in place, and `Opens.infLELeft/Right`
+unified with `homOfLE` definitionally, so no bookkeeping was needed at the seam.
+
+**Status of W3 (un-normalized descent).** The remaining gap is now a single *bookkeeping*
+step, not a hypothesis: instantiate this with `D := dualObj (f^* z^* L)`, get
+`𝟙 ≅ L ⊗ D` (monoidal), transport along `monoidalTensorObjIso` to `tensorObj`, and feed
+`nonempty_iso_of_tensorObj_unitObj` together with `nonempty_eval_iso` to conclude
+`L ≅ f^*(z^* L)`. The `v`-side input comes from
+`Picard/DualPullback/Iso.dualPullbackIsoOfIsInvertible` +
+`dualPairing_frame_comparison`, and `hnorm` is `appLE_z_mul_pullback_inv_eq_one`.

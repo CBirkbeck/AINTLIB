@@ -548,4 +548,60 @@ theorem bijective_smul_restrict_overTrivializationSection_one {X : Scheme.{u}}
   rw [h]
   exact bijective_smul_overTrivializationSection_one M W _
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.8] THE TWISTED GLUE.** With coefficient-one generators built as pure tensors,
+the rigidified glue applies to `L ⊗ D` from purely chart-level data: the two factors'
+comparison units, and the single normalization `z(uᵢⱼ · vᵢⱼ) = 1`. Every input is a
+proved lemma — `tensorSection_restrict_comparison` for `hu`, `tensorSection_one_one` plus
+`bijective_smul_restrict_overTrivializationSection_one` for `hbij`. -/
+theorem nonempty_unitObj_iso_tensorObj_of_frames
+    (hp : UniversallyOConnected p)
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    (L D : (pullback p g).Modules)
+    {ι : Type u} (U : ι → T.Opens) (hU : iSup U = ⊤)
+    (eL : ∀ i, L.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (eD : ∀ i, D.restrict (pullback.snd p g ⁻¹ᵁ U i).ι ≅
+      unitObj ((pullback.snd p g ⁻¹ᵁ U i : (pullback p g).Opens)).toScheme)
+    (u v : ∀ i j, Γ(pullback p g,
+      pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j))
+    (hu : ∀ i j, L.presheaf.map
+        (Opens.infLELeft (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection L (pullback.snd p g ⁻¹ᵁ U i)
+          (Scheme.Modules.overTrivializationOfRestrictIso L _ (eL i)) 1) =
+      u i j • L.presheaf.map
+        (Opens.infLERight (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection L (pullback.snd p g ⁻¹ᵁ U j)
+          (Scheme.Modules.overTrivializationOfRestrictIso L _ (eL j)) 1))
+    (hv : ∀ i j, D.presheaf.map
+        (Opens.infLELeft (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection D (pullback.snd p g ⁻¹ᵁ U i)
+          (Scheme.Modules.overTrivializationOfRestrictIso D _ (eD i)) 1) =
+      v i j • D.presheaf.map
+        (Opens.infLERight (pullback.snd p g ⁻¹ᵁ U i)
+          (pullback.snd p g ⁻¹ᵁ U j)).op
+        (overTrivializationSection D (pullback.snd p g ⁻¹ᵁ U j)
+          (Scheme.Modules.overTrivializationOfRestrictIso D _ (eD j)) 1))
+    (hnorm : ∀ i j, (Scheme.Hom.appLE z
+        (pullback.snd p g ⁻¹ᵁ U i ⊓ pullback.snd p g ⁻¹ᵁ U j) (U i ⊓ U j)
+        (le_inf_preimage_preimage g hz (U i) (U j))).hom (u i j * v i j) = 1) :
+    Nonempty (unitObj (pullback p g) ≅ MonoidalCategory.tensorObj L D) := by
+  classical
+  refine nonempty_unitObj_iso_of_normalized_glue g hp hz
+    (MonoidalCategory.tensorObj L D) U hU
+    (fun i => tensorSection L D (pullback.snd p g ⁻¹ᵁ U i)
+      (overTrivializationSection L _
+        (Scheme.Modules.overTrivializationOfRestrictIso L _ (eL i)) 1)
+      (overTrivializationSection D _
+        (Scheme.Modules.overTrivializationOfRestrictIso D _ (eD i)) 1))
+    (fun i j => u i j * v i j) (fun i j => ?_) hnorm (fun i W hW => ?_)
+  · exact tensorSection_restrict_comparison L D _ _ (u i j) (v i j) _ _ _ _
+      (hu i j) (hv i j)
+  · rw [tensorSection_one_one L D _ (eL i) (eD i)]
+    exact bijective_smul_restrict_overTrivializationSection_one _ hW _
+
 end ModularCurves
