@@ -30764,3 +30764,28 @@ invertible⟹quasicoherent argument, self-contained, ~300 lines. THEN [5a-iii-co
 functionals localize) + map_span bookkeeping. THEN [5a-iv] per the de-risked plan.
 NOTE the finiteness for t^n-clearing: U affine ⟹ quasi-compact ⟹ finite trivializing
 basic subcover ✓ (IsAffineOpen.isCompact + basis-refinement).
+
+## ★ [GAP-A-5] REPLAN 2026-08-01 — DROP the residual-divisor construction (5a-iii/iv)
+Analysis: sectionZeroIdeal's map_ideal_basicOpen is EXACTLY "invertible ⟹ sections
+localize on basic opens" (mathlib has no QCoh↔module correspondence: Modules/ =
+Presheaf+Sheaf+Tilde only; Tilde's IsLocalizedModule.Away is Spec-model-only). Cost
+~500 LOC (trivializing-cover generator package + L1 pow-kill + L2 pow-extend + gluing
++ Hom-localization for the functional side). AND it is AVOIDABLE:
+**The third point is DEFINABLE — the project already has the group law on sections**
+(`exists_invertible_tensor_idealModule_add` is stated with `(Q + Q').1`). So set
+R'' := -(P+Q) and never construct a residual divisor. The line identity becomes:
+  (A) ℓ (the [P]+[Q]-kernel generator) also lies in ker(restriction to [P]+[Q]+[R'']);
+  (B) the triple lift is locally surjective (exact order) ⟹ iso ⟹ trivialization.
+(A) is 5b's chord-tangent content either way (universal pair + reduced base +
+HasseWeil.Pic0 field theorem fibrewise), so the residual construction was PURE
+OVERHEAD. Scalar reformulation of (A) for the universal-pair argument:
+ev_{R''}(ℓ) = 0 in Γ(S,⊤), where ev_R := (single-section rank-one equiv) ∘
+baseSectionsMap(coker.π) — an ELEMENT equation, ideal for reduced-base fibrewise
+arguments. CAVEAT: ker(J₁·J₂) = ker J₁ ∩ ker J₂ needs disjoint supports (fails for
+2[P]); the colliding case must go through the twist directly, not the intersection.
+NEW ORDER: [A5-mono] ker-monotonicity via cokernelTwistDesc (cheap, both routes) →
+[A5-ev] evaluation functional + kernel characterization → [A5-disj] disjoint-support
+kernel-intersection (concentration two-cover) → [A5-A] the chord-tangent scalar
+identity (universal pair) → [A5-B] exact order → [A5-C] assembly. The sorry'd
+sectionZeroIdeal stays as WIP scaffolding (unused; producer-WIP per repo rules) —
+DELETE it if [A5] closes without it.
