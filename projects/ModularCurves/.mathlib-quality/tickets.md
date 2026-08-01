@@ -31168,3 +31168,21 @@ PoleSheaf.lean:1876; `Scheme.Modules.pullback` is monoidal via
 ForMathlib/PullbackTensorMonoidal; `nonempty_pullback_idealModule` (GAP-A-7) transports
 ideal modules ✓ ALREADY PROVEN). So d3.1 is a transport assembly with all pieces present.
 Then [W1-d3.2] is the single computation over the universal atlas.
+
+### [W1-d3.1] ROUTE CORRECTED 2026-08-01 — transport at PICARD-CLASS level, not module level
+The module-level transport of a ChordDatum would need "pullback is monoidal" for a
+GENERAL morphism; the tree only has the open-immersion case
+(`nonempty_pullback_tensorObj_of_isOpenImmersion`, PullbackTensorMonoidal:331). But the
+FINAL statement is a Picard-class identity, and there the transport is free:
+ * `Scheme.Pic.map f` is a group hom, so it preserves the products;
+ * `nonempty_pullback_idealModule` (GAP-A-7 ✓) sends `I(J)` to `I(J.comap f)`;
+ * `nonempty_pullback_idealModule_ker_sectionBaseChange` (IdealModulePullback:387 ✓)
+   is exactly the section-kernel case, i.e. `I(ker z)` pulls back to `I(ker z_T)` —
+   built on `RelEffCartierDiv.ker_sectionBaseChange`.
+⟹ d3.1 = prove the class identity for the TAUTOLOGICAL pair over `pairBase`, then apply
+`Pic.map (pairClassify …)`. No monoidal-pullback lemma needed. (This is precisely the
+shape `Picard/DivisorClass.lean`'s `picClass_mul_eq_of_nonempty_tensor_iso` and
+`exists_pic_map_of_nonempty_tensor_pullback_iso` consume, and why GAP-A-7 was on the
+critical path in the first place.)
+NOTE for the future: the general monoidal pullback would ALSO unblock a module-level
+transport and is independently useful — but it is not required for the prong.
