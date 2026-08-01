@@ -522,6 +522,228 @@ theorem nonempty_baseSections_cokernel_iteratedTwist_equiv_pair_of_sections
     (iteratedChartTriv (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L U.1 eIP eIQ eL)
     eL hbij _ _ hv hg'nzdP halg eP eQ
 
+/-- The triple iterated twist: restriction to `[J₁] + [J₂] + [J₃]` on the
+tensor-shaped source. -/
+noncomputable abbrev iteratedTwistHom₃ (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules) :
+    tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)) ⟶ L :=
+  divisorTwistHom J₁ (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)) ≫
+    iteratedTwistHom J₂ J₃ L
+
+/-- The chart trivialization of the triple iterated twist's source. -/
+noncomputable abbrev iteratedChartTriv₃ (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (U : C.Opens)
+    (eI₁ : (restrictFunctor U.ι).obj (idealModule J₁) ≅ unitObj U.toScheme)
+    (eI₂ : (restrictFunctor U.ι).obj (idealModule J₂) ≅ unitObj U.toScheme)
+    (eI₃ : (restrictFunctor U.ι).obj (idealModule J₃) ≅ unitObj U.toScheme)
+    (eL : (restrictFunctor U.ι).obj L ≅ unitObj U.toScheme) :
+    (restrictFunctor U.ι).obj (tensorObj (idealModule J₁)
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L))) ≅
+        unitObj U.toScheme :=
+  twistChartTensorTriv J₁ (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L))
+    U eI₁ (iteratedChartTriv J₂ J₃ L U eI₂ eI₃ eL)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[G9] The triple iterated twist's multiplier spans the product of the three chart
+generators.** -/
+theorem span_iteratedChartMultiplier₃_eq (J₁ J₂ J₃ : C.IdealSheafData) (L : C.Modules)
+    (U : C.affineOpens) (g₁ g₂ g₃ : Γ(C, U.1))
+    (hspan₁ : J₁.ideal U = Ideal.span {g₁})
+    (hnzd₁ : g₁ ∈ nonZeroDivisors Γ(C, U.1))
+    (hspan₂ : J₂.ideal U = Ideal.span {g₂})
+    (hnzd₂ : g₂ ∈ nonZeroDivisors Γ(C, U.1))
+    (hspan₃ : J₃.ideal U = Ideal.span {g₃})
+    (hnzd₃ : g₃ ∈ nonZeroDivisors Γ(C, U.1))
+    (eI₁ : (restrictFunctor U.1.ι).obj (idealModule J₁) ≅ unitObj U.1.toScheme)
+    (eI₂ : (restrictFunctor U.1.ι).obj (idealModule J₂) ≅ unitObj U.1.toScheme)
+    (eI₃ : (restrictFunctor U.1.ι).obj (idealModule J₃) ≅ unitObj U.1.toScheme)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme) :
+    Ideal.span {chartMultiplier U.1 (iteratedTwistHom₃ J₁ J₂ J₃ L)
+        (iteratedChartTriv₃ J₁ J₂ J₃ L U.1 eI₁ eI₂ eI₃ eL) eL} =
+      Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₁ *
+        ((U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₂ *
+          (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g₃)} := by
+  rw [chartMultiplier_comp U.1
+    (divisorTwistHom J₁ (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)))
+    (iteratedTwistHom J₂ J₃ L)
+    (iteratedChartTriv₃ J₁ J₂ J₃ L U.1 eI₁ eI₂ eI₃ eL)
+    (iteratedChartTriv J₂ J₃ L U.1 eI₂ eI₃ eL) eL]
+  rw [← Ideal.span_singleton_mul_span_singleton,
+    ← Ideal.span_singleton_mul_span_singleton]
+  congr 1
+  · rw [← twistChartMultiplier_eq_chartMultiplier]
+    exact span_twistChartMultiplier_eq J₁
+      (tensorObj (idealModule J₂) (tensorObj (idealModule J₃) L)) U g₁
+      hspan₁ hnzd₁ eI₁ (iteratedChartTriv J₂ J₃ L U.1 eI₂ eI₃ eL)
+  · exact span_iteratedChartMultiplier_eq J₂ J₃ L U g₂ g₃ hspan₂ hnzd₂ hspan₃ hnzd₃
+      eI₂ eI₃ eL
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[G9] The rank-three coordinates of the triple iterated restriction.** For three
+sections on a common principal chart, the base sections of the triple restriction
+cokernel are free of rank three, on the tensor-shaped source
+`I(P) ⊗ (I(Q) ⊗ (I(R) ⊗ L))`. -/
+theorem nonempty_baseSections_cokernel_iteratedTwist₃_equiv_of_sections
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (P Q R : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens)
+    (hPU : P.1 ⁻¹ᵁ U.1 = ⊤) (hQU : Q.1 ⁻¹ᵁ U.1 = ⊤) (hRU : R.1 ⁻¹ᵁ U.1 = ⊤)
+    (rP rQ rR : Γ(C, U.1))
+    (hP : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQ : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
+    (hR : (Scheme.Hom.ker R.1).ideal U = Ideal.span {rR})
+    (hnzdP : rP ∈ nonZeroDivisors Γ(C, U.1))
+    (hnzdQ : rQ ∈ nonZeroDivisors Γ(C, U.1))
+    (hnzdR : rR ∈ nonZeroDivisors Γ(C, U.1))
+    (L : C.Modules) (hL : IsInvertible L)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r) :
+    Nonempty ((Scheme.Modules.baseSections π (Limits.cokernel
+        (iteratedTwistHom₃ (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1)
+          (Scheme.Hom.ker R.1) L)))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] (Fin 3 → Γ(S, (⊤ : S.Opens)))) := by
+  classical
+  haveI hclP : IsClosedImmersion P.1 :=
+    ModularCurves.RelEffCartierDiv.SectionsIdeal.isClosedImmersion P.2
+  haveI hclQ : IsClosedImmersion Q.1 :=
+    ModularCurves.RelEffCartierDiv.SectionsIdeal.isClosedImmersion Q.2
+  haveI hclR : IsClosedImmersion R.1 :=
+    ModularCurves.RelEffCartierDiv.SectionsIdeal.isClosedImmersion R.2
+  -- principal covers for each section (for invertibility and the mono chain)
+  have hcover : ∀ (Z : { w : S ⟶ C // w ≫ π = 𝟙 S }) (c : ↥C),
+      ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ g : Γ(C, V.1),
+        (Scheme.Hom.ker Z.1).ideal V = Ideal.span {g} ∧
+          g ∈ nonZeroDivisors Γ(C, V.1) := by
+    intro Z c
+    obtain ⟨V, hcV, hV⟩ :=
+      ModularCurves.RelEffCartierDiv.SectionsIdeal.exists_multiChart π hsm ![Z] c
+    obtain ⟨f₀, hf₀, hf₀nzd⟩ := hV 0
+    exact ⟨V, hcV, f₀, hf₀, hf₀nzd⟩
+  haveI hLR : IsInvertible (tensorObj (idealModule (Scheme.Hom.ker R.1)) L) :=
+    IsInvertible.tensorObj
+      (isInvertible_idealModule (J := Scheme.Hom.ker R.1) (hcover R)) hL
+  haveI hLQR : IsInvertible (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+      (tensorObj (idealModule (Scheme.Hom.ker R.1)) L)) :=
+    IsInvertible.tensorObj
+      (isInvertible_idealModule (J := Scheme.Hom.ker Q.1) (hcover Q)) hLR
+  let eIP := idealModuleRestrictTrivOfSpan U rP hP hnzdP
+  let eIQ := idealModuleRestrictTrivOfSpan U rQ hQ hnzdQ
+  let eIR := idealModuleRestrictTrivOfSpan U rR hR hnzdR
+  -- monos
+  haveI hMonoR : Mono ((restrictFunctor U.1.ι).map
+      (divisorTwistHom (Scheme.Hom.ker R.1) L)) :=
+    mono_restrictFunctor_map_of_isLocallyInjective _
+      (isLocallyInjective_divisorTwistHom _ L (hcover R) hL) U.1
+  haveI hMonoQ : Mono ((restrictFunctor U.1.ι).map
+      (divisorTwistHom (Scheme.Hom.ker Q.1)
+        (tensorObj (idealModule (Scheme.Hom.ker R.1)) L))) :=
+    mono_restrictFunctor_map_of_isLocallyInjective _
+      (isLocallyInjective_divisorTwistHom _ _ (hcover Q) hLR) U.1
+  haveI hMonoP : Mono ((restrictFunctor U.1.ι).map
+      (divisorTwistHom (Scheme.Hom.ker P.1)
+        (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+          (tensorObj (idealModule (Scheme.Hom.ker R.1)) L)))) :=
+    mono_restrictFunctor_map_of_isLocallyInjective _
+      (isLocallyInjective_divisorTwistHom _ _ (hcover P) hLQR) U.1
+  haveI hMono : Mono ((restrictFunctor U.1.ι).map
+      (iteratedTwistHom₃ (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1)
+        (Scheme.Hom.ker R.1) L)) := by
+    rw [show (restrictFunctor U.1.ι).map (iteratedTwistHom₃ (Scheme.Hom.ker P.1)
+        (Scheme.Hom.ker Q.1) (Scheme.Hom.ker R.1) L) =
+      (restrictFunctor U.1.ι).map (divisorTwistHom (Scheme.Hom.ker P.1)
+        (tensorObj (idealModule (Scheme.Hom.ker Q.1))
+          (tensorObj (idealModule (Scheme.Hom.ker R.1)) L))) ≫
+      ((restrictFunctor U.1.ι).map (divisorTwistHom (Scheme.Hom.ker Q.1)
+        (tensorObj (idealModule (Scheme.Hom.ker R.1)) L)) ≫
+        (restrictFunctor U.1.ι).map (divisorTwistHom (Scheme.Hom.ker R.1) L)) from by
+      rw [← Functor.map_comp, ← Functor.map_comp]]
+    infer_instance
+  -- concentration off the three section images
+  have hrange : ∀ (Z : { w : S ⟶ C // w ≫ π = 𝟙 S }),
+      Z.1 ⁻¹ᵁ U.1 = ⊤ → ∀ s, Z.1.base s ∈ U.1 := by
+    intro Z hZU s
+    have : s ∈ Z.1 ⁻¹ᵁ U.1 := by rw [hZU]; trivial
+    exact this
+  let V : C.Opens := ⟨(Set.range P.1.base ∪ Set.range Q.1.base ∪
+      Set.range R.1.base)ᶜ,
+    ((P.1.isClosedEmbedding.isClosed_range.union
+      Q.1.isClosedEmbedding.isClosed_range).union
+      R.1.isClosedEmbedding.isClosed_range).isOpen_compl⟩
+  have hUV : U.1 ⊔ V = ⊤ := by
+    refine le_antisymm le_top ?_
+    intro c _
+    by_cases hc : c ∈ Set.range P.1.base ∪ Set.range Q.1.base ∪ Set.range R.1.base
+    · rcases hc with (⟨s, rfl⟩ | ⟨s, rfl⟩) | ⟨s, rfl⟩
+      · exact Or.inl (hrange P hPU s)
+      · exact Or.inl (hrange Q hQU s)
+      · exact Or.inl (hrange R hRU s)
+    · exact Or.inr hc
+  have hzeroOf : ∀ (Z : { w : S ⟶ C // w ≫ π = 𝟙 S })
+      (_ : IsClosedImmersion Z.1) (N : C.Modules) (W : C.Opens),
+      (∀ c, c ∈ W → c ∉ Set.range Z.1.base) →
+      Limits.IsZero ((restrictFunctor W.ι).obj (Limits.cokernel
+        (divisorTwistHom (Scheme.Hom.ker Z.1) N))) := by
+    intro Z hZ N W hW
+    haveI := hZ
+    refine isZero_restrict_cokernel_divisorTwistHom _ _ W ?_
+    intro W' hW'
+    refine one_mem_idealSections_of_disjoint_support _ W' ?_
+    rw [Scheme.Hom.support_ker, Z.1.isClosedEmbedding.isClosed_range.closure_eq]
+    refine Set.disjoint_left.mpr fun c hc hcW => ?_
+    exact hW c (hW' hcW) hc
+  have hzero : ∀ W : C.Opens, W ≤ V →
+      Limits.IsZero ((restrictFunctor W.ι).obj (Limits.cokernel
+        (iteratedTwistHom₃ (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1)
+          (Scheme.Hom.ker R.1) L))) := by
+    intro W hWV
+    refine isZero_restrict_cokernel_comp _ _ W
+      (hzeroOf P hclP _ W fun c hc hcr => (hWV hc) (Or.inl (Or.inl hcr))) ?_
+    refine isZero_restrict_cokernel_comp _ _ W
+      (hzeroOf Q hclQ _ W fun c hc hcr => (hWV hc) (Or.inl (Or.inr hcr)))
+      (hzeroOf R hclR _ W fun c hc hcr => (hWV hc) (Or.inr hcr))
+  have hbij := cokernel_bijective_restrict_of_isZero _ U.1 V hUV hzero
+  -- the three retractions and the span of the composite multiplier
+  obtain ⟨σP, hσP⟩ := exists_algHom_ker_eq_span_of_section P.1 P.2 U hPU rP hP halg
+  obtain ⟨σQ, hσQ⟩ := exists_algHom_ker_eq_span_of_section Q.1 Q.2 U hQU rQ hQ halg
+  obtain ⟨σR, hσR⟩ := exists_algHom_ker_eq_span_of_section R.1 R.2 U hRU rR hR halg
+  have hnzdOf : ∀ g : Γ(C, U.1), g ∈ nonZeroDivisors Γ(C, U.1) →
+      (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom g ∈
+        nonZeroDivisors Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) := by
+    intro g hg
+    rw [← MulEquivClass.map_nonZeroDivisors
+      (asIso (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge)).commRingCatIsoToRingEquiv]
+    exact ⟨g, hg, rfl⟩
+  have hv := span_iteratedChartMultiplier₃_eq (Scheme.Hom.ker P.1)
+    (Scheme.Hom.ker Q.1) (Scheme.Hom.ker R.1) L U rP rQ rR
+    hP hnzdP hQ hnzdQ hR hnzdR eIP eIQ eIR eL
+  refine nonempty_baseSections_cokernel_equiv_pi_of_mono _ U
+    (iteratedChartTriv₃ (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1)
+      (Scheme.Hom.ker R.1) L U.1 eIP eIQ eIR eL) eL hbij halg 3
+    ![(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP,
+      (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rQ,
+      (U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rR]
+    ?_ ![σP, σQ, σR] ?_ ?_
+  · intro i
+    fin_cases i
+    · exact hnzdOf rP hnzdP
+    · exact hnzdOf rQ hnzdQ
+    · exact hnzdOf rR hnzdR
+  · intro i
+    fin_cases i
+    · exact hσP
+    · exact hσQ
+    · exact hσR
+  · rw [hv, Fin.prod_univ_three]
+    congr 1
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+      Matrix.head_cons, Matrix.tail_cons]
+    rw [mul_assoc]
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules
