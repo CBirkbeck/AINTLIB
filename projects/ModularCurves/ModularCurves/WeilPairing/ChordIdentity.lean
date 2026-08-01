@@ -1468,4 +1468,61 @@ theorem coord_equation_affine {R : Type u} [CommRing R] (W : WeierstrassCurve R)
   simpa using h
 
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 chart facts, assembled] The chord identity from section data only.** The two
+points' equations are supplied by their own evaluations (`section_coords_equation`),
+so the chord identity needs, beyond the retractions and generators, only the
+invertibility conditions. This is the form a caller with two sections in the chart
+uses. -/
+theorem chord_identity_of_sections {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) (d : R)
+    (σ₁ σ₂ σ₃ : W.toAffine.CoordinateRing →ₐ[R] R)
+    (hd : d * (σ₂ (coordX W) - σ₁ (coordX W)) = 1)
+    (hx : IsUnit (σ₁ (coordX W) - σ₂ (coordX W)))
+    (hf₁nzd : ∀ t : W.toAffine.CoordinateRing,
+      (coordX W - algebraMap R _ (σ₁ (coordX W))) * t = 0 → t = 0)
+    (hf₂nzd : ∀ t : W.toAffine.CoordinateRing,
+      (coordX W - algebraMap R _ (σ₂ (coordX W))) * t = 0 → t = 0)
+    (hk₁ : RingHom.ker (σ₁ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ (σ₁ (coordX W))})
+    (hk₂ : RingHom.ker (σ₂ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ (σ₂ (coordX W))})
+    (hk₃ : RingHom.ker (σ₃ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ (σ₃ (coordX W))})
+    (hslope : σ₃ (coordX W) =
+      ((σ₂ (coordY W) - σ₁ (coordY W)) * d) ^ 2 +
+        W.a₁ * ((σ₂ (coordY W) - σ₁ (coordY W)) * d) - W.a₂ -
+        σ₁ (coordX W) - σ₂ (coordX W))
+    (hσ₁ : σ₁ (coordY W -
+      (algebraMap R _ ((σ₂ (coordY W) - σ₁ (coordY W)) * d) *
+        (coordX W - algebraMap R _ (σ₁ (coordX W))) +
+        algebraMap R _ (σ₁ (coordY W)))) = 0)
+    (hline₃ : σ₃ (coordY W) = ((σ₂ (coordY W) - σ₁ (coordY W)) * d) *
+      (σ₃ (coordX W) - σ₁ (coordX W)) + σ₁ (coordY W))
+    (htor₂ : IsUnit (2 * σ₂ (coordY W) + W.a₁ * σ₂ (coordX W) + W.a₃))
+    (htor₃ : IsUnit (2 * σ₃ (coordY W) + W.a₁ * σ₃ (coordX W) + W.a₃))
+    (hunit : ∀ c₁ c₂ c₃ : W.toAffine.CoordinateRing,
+      (coordY W - (algebraMap R _ ((σ₂ (coordY W) - σ₁ (coordY W)) * d) *
+        (coordX W - algebraMap R _ (σ₁ (coordX W))) +
+        algebraMap R _ (σ₁ (coordY W)))) =
+          (coordX W - algebraMap R _ (σ₁ (coordX W))) * c₁ →
+        c₁ = (coordX W - algebraMap R _ (σ₂ (coordX W))) * c₂ →
+        c₂ = (coordX W - algebraMap R _ (σ₃ (coordX W))) * c₃ → IsUnit c₃) :
+    ∃ u : (W.toAffine.CoordinateRing)ˣ,
+      (coordY W - (algebraMap R _ ((σ₂ (coordY W) - σ₁ (coordY W)) * d) *
+        (coordX W - algebraMap R _ (σ₁ (coordX W))) +
+        algebraMap R _ (σ₁ (coordY W)))) =
+        (u : W.toAffine.CoordinateRing) *
+          ((coordX W - algebraMap R _ (σ₁ (coordX W))) *
+            ((coordX W - algebraMap R _ (σ₂ (coordX W))) *
+              (coordX W - algebraMap R _ (σ₃ (coordX W))))) := by
+  rw [hslope] at hk₃ hline₃ htor₃ hunit ⊢
+  exact chord_identity_of_isUnit_hypotheses W (σ₁ (coordX W)) (σ₁ (coordY W))
+    (σ₂ (coordX W)) (σ₂ (coordY W)) (σ₃ (coordY W)) d σ₁ σ₂ σ₃
+    (section_coords_equation W (coordX W) (coordY W) σ₁ (coord_equation_affine W))
+    (section_coords_equation W (coordX W) (coordY W) σ₂ (coord_equation_affine W))
+    hd hx hf₁nzd hf₂nzd hk₁ hk₂ hk₃ hσ₁ rfl rfl hslope rfl hline₃ htor₂ htor₃ hunit
+
+
 end ModularCurves
