@@ -329,6 +329,31 @@ theorem cubic_factors_of_vieta {R A : Type u} [CommRing R] [CommRing A] [Algebra
   simp only [map_add, map_sub, map_mul, map_neg]
   ring
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (α), assembled] The chord's norm factors through the three points.** Combining
+the Weierstrass-equation identity with the Vieta relations: in the coordinate ring, the
+chord times its conjugate is `-(X − x₁)(X − x₂)(X − x₃)`. Each factor `X − xᵢ` is (on a
+chart where the point is not `2`-torsion) the kernel generator of the corresponding
+evaluation, so this is the explicit form of the exact-order divisions. -/
+theorem chord_mul_conj_eq_prod {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (W : WeierstrassCurve R) (X Y : A) (ℓ x₁ x₂ x₃ y₁ y₂ : R)
+    (hEq : Y ^ 2 + algebraMap R A W.a₁ * X * Y + algebraMap R A W.a₃ * Y =
+      X ^ 3 + algebraMap R A W.a₂ * X ^ 2 + algebraMap R A W.a₄ * X +
+        algebraMap R A W.a₆)
+    (hx₃ : x₃ = ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)
+    (hc₁ : 2 * x₁ * ℓ ^ 2 + (W.a₁ * x₁ - 2 * y₁ - W.a₃) * ℓ + (-W.a₁ * y₁ + W.a₄) =
+      x₁ * x₂ + x₁ * x₃ + x₂ * x₃)
+    (hc₀ : -x₁ ^ 2 * ℓ ^ 2 + (2 * x₁ * y₁ + W.a₃ * x₁) * ℓ -
+        (y₁ ^ 2 + W.a₃ * y₁ - W.a₆) = -(x₁ * x₂ * x₃)) :
+    (Y - (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) *
+        ((-Y - algebraMap R A W.a₁ * X - algebraMap R A W.a₃) -
+          (algebraMap R A ℓ * (X - algebraMap R A x₁) + algebraMap R A y₁)) =
+      -((X - algebraMap R A x₁) * (X - algebraMap R A x₂) *
+        (X - algebraMap R A x₃)) :=
+  (chord_mul_conj_eq_cubic W X Y ℓ x₁ y₁ hEq).trans
+    (cubic_factors_of_vieta W X ℓ x₁ x₂ x₃ y₁ y₂ hx₃ hc₁ hc₀)
+
 end ModularCurves
 
 namespace ModularCurves
