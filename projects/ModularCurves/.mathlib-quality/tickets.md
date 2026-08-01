@@ -31582,3 +31582,14 @@ THE ONLY REMAINING INPUTS, both classical case analysis:
  * `σᵢ(conj)` is a nonzerodivisor (equivalently: the points are not `2`-torsion in the
    relevant sense) — the case split the project's addOnY/addOnZ chart families handle;
  * the unit last quotient (F-ii) — Cramer/adjugate against the rank-3 coordinates.
+
+### [W1 F-ii] `algHom_conj_eq` 2026-08-01
+The conjugate evaluates to `negY x y − (ℓ(x − x₁) + y₁)` at a point. Consequences:
+ * at `(x₁,y₁)` it is `negY x₁ y₁ − y₁ = −2y₁ − a₁x₁ − a₃` — a unit iff the point is not
+   `2`-torsion (this is `y ≠ negY x y`);
+ * at `(x₂,y₂)` it is `negY x₂ y₂ − y₂` likewise;
+ * at the third point it is `negY x₃ y₃ − y₃` where `y₃ = negAddY`.
+So all the non-degeneracy hypotheses of the cancellation chain are the standard
+`2`-torsion exclusions, stated in the tree's own terms. This closes the analysis of the
+remaining leaf: the general case needs the addOnY/addOnZ chart families (already in the
+tree) to cover the excluded configurations.
