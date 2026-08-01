@@ -218,4 +218,42 @@ theorem exists_affine_point_of_section {R A : Type u} [CommRing R] [CommRing A]
     rw [← hker]
     exact Iff.rfl⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2b] The chord passes through the third point — by construction.** For a
+Weierstrass curve over any commutative ring, the line `Y = ℓ·(X − x₁) + y₁` through
+`(x₁, y₁)` with slope `ℓ` passes through `(x₂, y₂)` exactly when the collinearity
+relation holds, and it *always* passes through `(addX x₁ x₂ ℓ, negAddY x₁ x₂ y₁ ℓ)` —
+the point mathlib defines as `-((x₁,y₁) + (x₂,y₂))`. The chord–tangent vanishing is
+therefore definitional in these coordinates; what remains for the prong is the bridge
+to the project's group law and the exactness of the order. -/
+theorem chord_vanishes_at_three_points {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) (x₁ x₂ y₁ y₂ ℓ : R)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁) :
+    (y₁ - (ℓ * (x₁ - x₁) + y₁) = 0) ∧
+    (y₂ - (ℓ * (x₂ - x₁) + y₁) = 0) ∧
+    (W.toAffine.negAddY x₁ x₂ y₁ ℓ -
+      (ℓ * (W.toAffine.addX x₁ x₂ ℓ - x₁) + y₁) = 0) := by
+  refine ⟨by ring, by rw [hline]; ring, ?_⟩
+  show W.toAffine.negAddY x₁ x₂ y₁ ℓ -
+    (ℓ * (W.toAffine.addX x₁ x₂ ℓ - x₁) + y₁) = 0
+  rw [WeierstrassCurve.Affine.negAddY]
+  ring
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2b] Chart form.** In a chart with coordinates `X, Y`, the chord through the
+sections `P` and `Q` is `Y − ℓ·(X − x_P) − y_P`; its evaluation at any section whose
+coordinates satisfy the line equation vanishes. -/
+theorem algHom_chord_eq_zero {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (σ : A →ₐ[R] R) (X Y : A) (ℓ xP yP : R)
+    (hx : σ X = xP) (hy : σ Y = yP) (xZ yZ : R)
+    (hσX : σ X = xZ) (hσY : σ Y = yZ)
+    (hline : yZ = ℓ * (xZ - xP) + yP) :
+    σ (Y - (algebraMap R A ℓ * (X - algebraMap R A xP) + algebraMap R A yP)) = 0 := by
+  rw [map_sub, map_add, map_mul, map_sub, σ.commutes, σ.commutes, σ.commutes,
+    hσX, hσY, hline]
+  simp only [Algebra.algebraMap_self, RingHom.id_apply]
+  ring
+
 end ModularCurves
