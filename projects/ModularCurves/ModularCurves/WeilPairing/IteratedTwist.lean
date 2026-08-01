@@ -343,6 +343,56 @@ theorem span_iteratedChartMultiplier_eq (J₁ J₂ : C.IdealSheafData) (L : C.Mo
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[G8] The rank-`m` coordinates for a general map of invertibles.** The chart
+multiplier is a product of `m` generators, each the kernel generator of an algebra
+retraction; the KM 1.1.2 filtration splits the quotient into `m` copies of the base. -/
+theorem nonempty_baseSections_cokernel_equiv_pi_of_mono
+    {M L : C.Modules} (f : M ⟶ L) (Ua : C.affineOpens)
+    (eM : (restrictFunctor Ua.1.ι).obj M ≅ unitObj Ua.1.toScheme)
+    (eL : (restrictFunctor Ua.1.ι).obj L ≅ unitObj Ua.1.toScheme)
+    (hbij : Function.Bijective
+      (((Scheme.Modules.toSheaf C).obj (Limits.cokernel f)).1.map
+        (homOfLE (le_top : Ua.1 ≤ (⊤ : C.Opens))).op))
+    [Mono ((restrictFunctor Ua.1.ι).map f)]
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens))
+        Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (Ua.1.ι ≫ π)).hom r)
+    (m : ℕ) (r : Fin m → Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens)))
+    (hnzd : ∀ i, r i ∈ nonZeroDivisors Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens)))
+    (σ : Fin m → (Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens)) →ₐ[Γ(S, (⊤ : S.Opens))]
+      Γ(S, (⊤ : S.Opens))))
+    (hker : ∀ i, RingHom.ker (σ i) = Ideal.span {r i})
+    (hv : Ideal.span {chartMultiplier Ua.1 f eM eL} = Ideal.span {∏ i, r i}) :
+    Nonempty ((Scheme.Modules.baseSections π (Limits.cokernel f))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] (Fin m → Γ(S, (⊤ : S.Opens)))) := by
+  classical
+  haveI : IsAffine Ua.1.toScheme := Ua.2
+  haveI hMonoEndo : Mono (ModularCurves.unitEndomorphismOfTopSection
+      (chartMultiplier Ua.1 f eM eL)) :=
+    mono_unitEndo_chartMultiplier Ua.1 f eM eL
+  let i1 := Scheme.Modules.baseSectionsRestrictIsoOfBijective π
+    (Limits.cokernel f) Ua.1 hbij
+  let i2 := Scheme.Modules.baseSectionsMapIso (Ua.1.ι ≫ π)
+    (Limits.PreservesCokernel.iso (restrictFunctor Ua.1.ι) f)
+  let i3 := Scheme.Modules.baseSectionsMapIso (Ua.1.ι ≫ π)
+    (cokernelRestrictUnitEndoIso Ua.1 f eM eL)
+  obtain ⟨eCore⟩ := nonempty_baseSections_cokernel_unitEndo_equiv
+    (Ua.1.ι ≫ π) (chartMultiplier Ua.1 f eM eL) halg
+  let eA : (Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens)) ⧸
+      Ideal.span {chartMultiplier Ua.1 f eM eL}) ≃ₗ[
+        Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens))]
+      (Γ(Ua.1.toScheme, (⊤ : Ua.1.toScheme.Opens)) ⧸ Ideal.span {∏ i, r i}) :=
+    Submodule.quotEquivOfEq _ _ hv
+  let eSpan := eA.restrictScalars Γ(S, (⊤ : S.Opens))
+  obtain ⟨eFree⟩ :=
+    ModularCurves.RelEffCartierDiv.SectionsIdeal.free_quotient m r hnzd σ hker
+  exact ⟨(((i1 ≪≫ i2 ≪≫ i3).toLinearEquiv).trans eCore).trans
+    (eSpan.trans eFree)⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[G7] The rank-two coordinates of the iterated restriction at a section pair.**
 Tensor-shaped source `I(P) ⊗ (I(Q) ⊗ L)`, so the output feeds the Picard assembly
 directly. All hypotheses are at the level of principal kernel ideals on a chart. -/

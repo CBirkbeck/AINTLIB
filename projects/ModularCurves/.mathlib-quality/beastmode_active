@@ -1,1 +1,1 @@
-FOCUS: [G6] iterated-twist instantiation — span of the composite multiplier = product of the two generator spans (chartMultiplier_comp + span_twistChartMultiplier_eq at each factor)
+FOCUS: [G8] arbitrary-arity iterated twist via SectionsIdeal.free_quotient (Fin m rank split) + the triple-divisor consumer

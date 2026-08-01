@@ -32,7 +32,7 @@ set_option backward.isDefEq.respectTransparency false in
 in an affine chart, with principal kernel ideal there, evaluates the chart-top
 quotient by the transported generator down to the base sections: the lifted
 section is an algebra retraction of the chart with that kernel. -/
-theorem nonempty_evaluation_quotEquiv_of_ker_span [IsSeparated π]
+theorem exists_algHom_ker_eq_span_of_section [IsSeparated π]
     (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
     (U : C.affineOpens) (hzU : z ⁻¹ᵁ U.1 = ⊤)
     (rP : Γ(C, U.1)) (hP : (Scheme.Hom.ker z).ideal U = Ideal.span {rP})
@@ -40,9 +40,10 @@ theorem nonempty_evaluation_quotEquiv_of_ker_span [IsSeparated π]
     (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
       algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
         (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r) :
-    Nonempty ((Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸
-        Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP})
-      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens))) := by
+    ∃ σ : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) →ₐ[Γ(S, (⊤ : S.Opens))]
+        Γ(S, (⊤ : S.Opens)),
+      RingHom.ker σ =
+        Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP} := by
   classical
   haveI : IsClosedImmersion z :=
     ModularCurves.RelEffCartierDiv.SectionsIdeal.isClosedImmersion hz
@@ -119,7 +120,25 @@ theorem nonempty_evaluation_quotEquiv_of_ker_span [IsSeparated π]
         Ideal.mem_span_singleton'.mpr ⟨a', rfl⟩
       rw [← hkerLE] at hmem
       exact RingHom.mem_ker.mp hmem
-  exact ⟨ModularCurves.evaluationQuotEquiv σ _ hkerσ⟩
+  exact ⟨σ, hkerσ⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The chart-top evaluation equivalence of a section** (the quotient form of
+`exists_algHom_ker_eq_span_of_section`). -/
+theorem nonempty_evaluation_quotEquiv_of_ker_span [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hzU : z ⁻¹ᵁ U.1 = ⊤)
+    (rP : Γ(C, U.1)) (hP : (Scheme.Hom.ker z).ideal U = Ideal.span {rP})
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r) :
+    Nonempty ((Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) ⧸
+        Ideal.span {(U.1.ι.appLE U.1 ⊤ U.1.ι_preimage_self.ge).hom rP})
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens))) := by
+  obtain ⟨σ, hσ⟩ := exists_algHom_ker_eq_span_of_section z hz U hzU rP hP halg
+  exact ⟨ModularCurves.evaluationQuotEquiv σ _ hσ⟩
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
