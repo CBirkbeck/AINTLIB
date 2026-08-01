@@ -693,6 +693,34 @@ theorem isIso_twistSectionLift_of_isLocallySurjective
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[A5-mono] Vanishing on a bigger divisor is a stronger condition.** If `J₁ ≤ J₂`
+as ideal sheaves (so the divisor of `J₁` dominates that of `J₂`), then base sections
+killed by the `J₁`-restriction are killed by the `J₂`-restriction. -/
+theorem ker_baseSectionsMap_cokernel_mono {J₁ J₂ : C.IdealSheafData}
+    (h12 : J₁ ≤ J₂) (L : C.Modules) :
+    LinearMap.ker ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π (divisorTwistHom J₁ L))).hom) ≤
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π (divisorTwistHom J₂ L))).hom) := by
+  intro x hx
+  have hfac : Scheme.Modules.baseSectionsMap π
+      (Limits.cokernel.π (divisorTwistHom J₂ L)) =
+      Scheme.Modules.baseSectionsMap π
+        (Limits.cokernel.π (divisorTwistHom J₁ L)) ≫
+      Scheme.Modules.baseSectionsMap π (cokernelTwistDesc h12 L) := by
+    rw [← Scheme.Modules.baseSectionsMap_comp, cokernelTwistDesc_π]
+  show (Scheme.Modules.baseSectionsMap π
+    (Limits.cokernel.π (divisorTwistHom J₂ L))).hom x = 0
+  rw [hfac]
+  show (Scheme.Modules.baseSectionsMap π (cokernelTwistDesc h12 L)).hom
+    ((Scheme.Modules.baseSectionsMap π
+      (Limits.cokernel.π (divisorTwistHom J₁ L))).hom x) = 0
+  rw [show (Scheme.Modules.baseSectionsMap π
+      (Limits.cokernel.π (divisorTwistHom J₁ L))).hom x = 0 from hx]
+  exact map_zero _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- The evaluation ideal of a global section at an affine open: the ideal of the
 values of all linear functionals on the restricted sections. Choice-free — no
 trivialization appears in the definition. -/

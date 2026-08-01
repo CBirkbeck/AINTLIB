@@ -36,6 +36,18 @@ noncomputable def baseSectionsMap
       (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop)).map f.val).app
         (op (⊤ : X.Opens)))
 
+/-- Global sections of a composite is the composite of global sections. -/
+@[reassoc]
+theorem baseSectionsMap_comp
+    {X S : Scheme.{u}} (π : X ⟶ S) {M N P : X.Modules} (f : M ⟶ N) (g : N ⟶ P) :
+    baseSectionsMap π (f ≫ g) = baseSectionsMap π f ≫ baseSectionsMap π g := by
+  show (ModuleCat.restrictScalars π.appTop.hom).map
+      (((PresheafOfModules.forgetToPresheafModuleCat
+        (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop)).map (f ≫ g).val).app
+          (op (⊤ : X.Opens))) = _
+  rw [show (f ≫ g).val = f.val ≫ g.val from rfl, Functor.map_comp]
+  rfl
+
 /-- If the source of a monomorphism has vanishing first cohomology, then
 global sections of its target surject onto global sections of its cokernel. -/
 theorem baseSectionsMap_cokernel_surjective_of_subsingleton_H_one

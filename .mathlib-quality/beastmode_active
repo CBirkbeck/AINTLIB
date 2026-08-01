@@ -1,1 +1,1 @@
-FOCUS: [5a-iii] sectionZeroIdeal skeleton — evaluation-ideal family def + value-spec lemmas (compat sorry-WIP)
+FOCUS: [A5-mono] ker-monotonicity of divisor-restriction on base sections via cokernelTwistDesc; then [A5-ev] evaluation functional
