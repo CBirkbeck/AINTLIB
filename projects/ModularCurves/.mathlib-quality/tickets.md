@@ -31240,3 +31240,20 @@ transfer cascade; the affine chart computation uses mathlib's
 `WeierstrassCurve.Affine` slope/negation API together with the project's
 `PoleSheafAwayAffineModelEval` (evaluation of pole sections in the affine model) and
 `AdditionSpecPoints` (the addition charts).
+
+### ★★★ [W1-d3.2b] DONE 2026-08-01 — the chord–tangent vanishing is DEFINITIONAL
+`chord_vanishes_at_three_points` (any commutative ring!): the line through `(x₁,y₁)` of
+slope `ℓ` passes through `(x₂,y₂)` iff collinearity, and passes through
+`(addX x₁ x₂ ℓ, negAddY x₁ x₂ y₁ ℓ)` UNCONDITIONALLY — because mathlib DEFINES
+`negAddY := ℓ * (addX − x₁) + y₁`, i.e. the third point is defined as the line's value.
+Plus `algHom_chord_eq_zero` (the chart/evaluation form).
+⟹ **[W1-d3.2] now needs only two things**, neither of which is the classical
+chord–tangent theorem:
+  [d3.2c] THE DICTIONARY BRIDGE: the project's `-(P + Q)` (Bosma–Lenstra group law on
+     `Point`) has affine coordinates `(addX, negAddY)` in the away-chart. The project has
+     `PointsDictionary.lean` / `Dictionary.eq_toAffine` (AdditionSpecPoints.lean:654) and
+     the `addOnZ`/`addOnY` chart factorizations for exactly this comparison.
+  [d3.2d] EXACTNESS: the quotient `c_ℓ /(g_P g_Q g_{R⁻})` is a unit — a degree/rank
+     count (the chart is a rank-3 free module and the three evaluations are independent
+     by the unimodularity already available).
+This is a far smaller remaining leaf than the "universal atlas campaign" first scoped.
