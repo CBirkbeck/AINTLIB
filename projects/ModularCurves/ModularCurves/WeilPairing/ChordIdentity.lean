@@ -883,6 +883,57 @@ theorem coord_equation {R : Type u} [CommRing R] (W : WeierstrassCurve R) :
   rw [hsq, h]
   ring
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (a)] The chord identity in the coordinate ring.** Specialisation of
+`chord_exact_order_in_chart` to `A = W.toAffine.CoordinateRing` with its own
+coordinates: the curve equation is automatic (`coord_equation`), so the inputs are
+exactly the two points, the line relation, the non-degeneracies and the generators. -/
+theorem chord_exact_order_in_coordinateRing {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) (ℓ x₁ y₁ x₂ y₂ y₃ : R)
+    (σ₁ σ₂ σ₃ : W.toAffine.CoordinateRing →ₐ[R] R)
+    (h₁ : y₁ ^ 2 + W.a₁ * x₁ * y₁ + W.a₃ * y₁ =
+      x₁ ^ 3 + W.a₂ * x₁ ^ 2 + W.a₄ * x₁ + W.a₆)
+    (h₂ : y₂ ^ 2 + W.a₁ * x₂ * y₂ + W.a₃ * y₂ =
+      x₂ ^ 3 + W.a₂ * x₂ ^ 2 + W.a₄ * x₂ + W.a₆)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hnzdx : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0)
+    (hf₁nzd : ∀ t : W.toAffine.CoordinateRing,
+      (coordX W - algebraMap R _ x₁) * t = 0 → t = 0)
+    (hf₂nzd : ∀ t : W.toAffine.CoordinateRing,
+      (coordX W - algebraMap R _ x₂) * t = 0 → t = 0)
+    (hk₁ : RingHom.ker (σ₁ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ x₁})
+    (hk₂ : RingHom.ker (σ₂ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W - algebraMap R _ x₂})
+    (hk₃ : RingHom.ker (σ₃ : W.toAffine.CoordinateRing →+* R) =
+      Ideal.span {coordX W -
+        algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)})
+    (hσ₁ : σ₁ (coordY W - (algebraMap R _ ℓ * (coordX W - algebraMap R _ x₁) +
+      algebraMap R _ y₁)) = 0)
+    (hx₂ : σ₂ (coordX W) = x₂) (hy₂ : σ₂ (coordY W) = y₂)
+    (hx₃ : σ₃ (coordX W) = ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)
+    (hy₃ : σ₃ (coordY W) = y₃)
+    (hline₃ : y₃ = ℓ * ((ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂) - x₁) + y₁)
+    (htor₂ : ∀ t : R, -(2 * y₂ + W.a₁ * x₂ + W.a₃) * t = 0 → t = 0)
+    (htor₃ : ∀ t : R,
+      -(2 * y₃ + W.a₁ * (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂) + W.a₃) * t = 0 → t = 0)
+    (hunit : ∀ c₁ c₂ c₃ : W.toAffine.CoordinateRing,
+      (coordY W - (algebraMap R _ ℓ * (coordX W - algebraMap R _ x₁) +
+        algebraMap R _ y₁)) = (coordX W - algebraMap R _ x₁) * c₁ →
+        c₁ = (coordX W - algebraMap R _ x₂) * c₂ →
+        c₂ = (coordX W - algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)) * c₃ →
+        IsUnit c₃) :
+    ∃ u : (W.toAffine.CoordinateRing)ˣ,
+      (coordY W - (algebraMap R _ ℓ * (coordX W - algebraMap R _ x₁) +
+        algebraMap R _ y₁)) =
+        (u : W.toAffine.CoordinateRing) * ((coordX W - algebraMap R _ x₁) *
+          ((coordX W - algebraMap R _ x₂) *
+            (coordX W - algebraMap R _ (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)))) :=
+  chord_exact_order_in_chart W (coordX W) (coordY W) ℓ x₁ y₁ x₂ y₂ y₃ σ₁ σ₂ σ₃
+    (coord_equation W) h₁ h₂ hline hnzdx hf₁nzd hf₂nzd hk₁ hk₂ hk₃ hσ₁
+    hx₂ hy₂ hx₃ hy₃ hline₃ htor₂ htor₃ hunit
+
 end ModularCurves
 
 namespace ModularCurves
