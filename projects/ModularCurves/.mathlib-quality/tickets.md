@@ -32287,3 +32287,23 @@ context (`Scheme.Modules.map_smul` shadows), so write `_root_.map_smul`.
 (`tensorSection_comparison`), the dual side contributes `(f^*z^*uᵢⱼ)⁻¹`
 (`dualPairing_frame_comparison`), and the `z`-value of the product is `1` by
 `appLE_z_appLE_snd_eq_self`. What is left is the assembly, not new mathematics.
+
+### ★★★ [W3.6] DONE 2026-08-01 — `tensorSection_restrict_comparison` + `appLE_z_mul_pullback_inv_eq_one`
+The two halves of `hnorm`:
+* the twisted bundle's comparison unit on an overlap is `a * b`, the product of the
+  factors' (`tensorSection_restrict_comparison`);
+* if the twist factor `b` is the pullback of the inverse of the `z`-value of `a`, then
+  `z`-value of `a * b` is `1` (`appLE_z_mul_pullback_inv_eq_one`, via
+  `appLE_z_appLE_snd_eq_self`).
+
+FOUND while scoping (do not rebuild): `Picard/DualPullback/Iso.lean:253`
+`dualPullbackIsoOfIsInvertible : (pullback f).obj (dualObj M) ≅ dualObj ((pullback f).obj M)`
+for invertible `M` — the whole `Picard/DualPullback/` directory (21 files) is the
+pullback-commutes-with-dual development. That is what identifies the twist factor's
+comparison unit as `(f^* z^* uᵢⱼ)⁻¹` and so supplies `hb` above.
+
+REMAINING for W3: one instantiation — feed
+`nonempty_unitObj_iso_of_normalized_glue` with `s i := tensorSection (sL i) (dual frame i)`,
+`hu` from `tensorSection_restrict_comparison`, `hnorm` from
+`appLE_z_mul_pullback_inv_eq_one`, and `hbij` from the tensor trivialization. Every input
+is now a proved lemma; no new mathematics remains in the un-normalized descent.

@@ -448,4 +448,21 @@ theorem tensorSection_restrict_comparison {X : Scheme.{u}} (M N : X.Modules)
   rw [tensorSection_restrict M N h₁ x₁ y₁, tensorSection_restrict M N h₂ x₂ y₂]
   exact tensorSection_comparison M N W a b _ _ _ _ hx hy
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W3.6] The cocycle cancellation, numerically.** If the twist factor is the pullback
+of the inverse of the `z`-value of the comparison unit, then the product's `z`-value is
+`1` — the `hnorm` hypothesis of `nonempty_unitObj_iso_of_normalized_glue`. This is the
+final step of the un-normalized descent: everything above it produces exactly this shape,
+and `appLE_z_appLE_snd_eq_self` is what makes the two `z`-values cancel. -/
+theorem appLE_z_mul_pullback_inv_eq_one
+    {z : T ⟶ pullback p g} (hz : z ≫ pullback.snd p g = 𝟙 T)
+    (Wb : T.Opens) (e : Wb ≤ z ⁻¹ᵁ (pullback.snd p g ⁻¹ᵁ Wb))
+    (a b : Γ(pullback p g, pullback.snd p g ⁻¹ᵁ Wb)) (c : Γ(T, Wb)ˣ)
+    (hc : (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ Wb) Wb e).hom a = (c : Γ(T, Wb)))
+    (hb : b = (Scheme.Hom.appLE (pullback.snd p g) Wb
+      (pullback.snd p g ⁻¹ᵁ Wb) le_rfl).hom (↑c⁻¹ : Γ(T, Wb))) :
+    (Scheme.Hom.appLE z (pullback.snd p g ⁻¹ᵁ Wb) Wb e).hom (a * b) = 1 := by
+  rw [map_mul, hc, hb, appLE_z_appLE_snd_eq_self g hz Wb e, Units.mul_inv]
+
 end ModularCurves
