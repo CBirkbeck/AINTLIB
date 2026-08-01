@@ -30640,3 +30640,24 @@ NEXT: [A4-support] one_mem_idealSections_of_disjoint_support (generalize the ker
 via range_subschemeι) + de-private CartierDivisor helpers (support_prod, exists_multiChart,
 KerPrincipal.retraction/.ker_app, basicOpen_span_nzd); [A4-eval] eP/eQ from σ-retractions
 (Ideal.quotientKerAlgEquivOfRightInverse); [A4-consumer] e2-at-sections-pair; [A4-line/vert].
+
+### ★★★★ [GAP-A-4] CORE DELIVERABLES DONE 2026-08-01 — LINE + VERTICAL PROVEN
+WeilPairing/LineVerticalConsumers.lean (all propext/Classical.choice/Quot.sound):
+- `exists_ker_baseSectionsMap_cokernel_eq_span_of_sections` — THE LINE: for P,Q on a
+  principal-nzd chart, L invertible w/ b3 + H¹-slot: ker(baseSections restriction to
+  [P]+[Q]) = span{b3.equivFun.symm (A₀ ⨯₃ A₁)} — free rank one.
+- `exists_ker_baseSectionsMap_cokernel_eq_span_perp_of_section` — THE VERTICAL:
+  single R, b2: ker = span{b2.equivFun.symm ![-(a 1), a 0]}.
+- infrastructure: nonempty_..._equiv_pair_of_sections (rank-2 e2 at sections),
+  nonempty_..._equiv_single(_of_section) (rank-1 e1), evaluation equivs from lifted-
+  section retractions, ker/cross/perp-of-surjective coordinate lemmas,
+  sectionsDivisor_single_ideal_span.
+ARCHITECTURAL WINS BANKED: (1) unimodularity = surjectivity via Binet-Cauchy (no
+minors, no row values — the H¹-workhorse is the whole unimodularity input);
+(2) hv-span computed structurally (zero-composite + exactness-at-𝟙 + square-eval)
+without touching the opaque tensorTriv; (3) H¹ stays a SLOT (GAP-A-3 discipline).
+REMAINING for full GAP-A-4 CLOSURE (consumers of the slots — the GAP-A-5 wiring):
+instantiate L := sectionPoleSheafPower π z hz 3 (resp 2) with b3/b2 from
+PoleSheafRankTwoThree, eL from the pole-sheaf chart trivializations, halg at the
+Weierstrass chart, H¹ from the fibrewise machinery (supplier side, later Zariski-
+local phase as in GAP-A-3). NEXT per board: [GAP-A-5a].
