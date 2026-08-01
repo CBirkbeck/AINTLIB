@@ -32094,3 +32094,21 @@ not go through syntactically — `PresheafOfModules.map_smul` produces
 `X.presheaf.map r • …`; the two are defeq but simp will not match them, so the rewrite
 silently fails to fire. Isolating the algebra removes the problem entirely and leaves
 the restriction bookkeeping where it belongs (W3.4.c, the wiring step).
+
+### ★★★★ [W3.4.c brick] `AffineIntersectionUnitCocycle.mapAlong` (pending root build)
+Transport a unit cocycle along a natural transformation of affine-intersection algebra
+functors. This is the step that turns the total space's comparison-unit cocycle into the
+**base's** cocycle (via the `z`-value map), which is what the gluing engine consumes to
+produce `N`.
+Also found while scoping: the effectivity API is richer than assumed —
+`affineIntersectionUnitCocycle π U e` builds the cocycle **directly from a trivializing
+cover**, and `affineIntersectionOriginalGluedModuleIso` identifies the pullback of the
+module to the glued model with the glued module of that cocycle. So W3.4.c does not have
+to hand-build a cocycle: it maps the existing one along `z`.
+LEAN-OPS: the three cocycle terms are `Units.map` of functor images; `← Units.map_comp`
+does not fire because the goal has them in *applied* form, not `.comp` form. The working
+idiom is a helper
+`Units.map (G.map φ) (Units.map (α.app X) u) = Units.map (α.app Y) (Units.map (F.map φ) u)`
+proved by `Units.ext` + `Units.coe_map` + `congrArg (fun ψ => ψ.hom u) (α.naturality φ)`,
+then three rewrites. NOTE: editing this file invalidates the whole Picard glue chain —
+the root build takes >10 min, unlike the ~2 min incremental builds elsewhere.
