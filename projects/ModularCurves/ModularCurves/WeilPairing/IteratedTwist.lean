@@ -1262,6 +1262,48 @@ theorem nonempty_iso_unitObj_of_exact_order₂
     infer_instance
   exact ⟨(asIso (monoSectionLift (iteratedTwistHom J₁ J₂ L) ℓ hℓ)).symm⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-b] The chord exists from unimodular evaluation data.** With the rank-two
+coordinates of the pair restriction and a rank-three basis upstairs, unimodularity of
+the evaluation rows' cross product produces a section of `L` spanning the kernel of the
+restriction to `[P] + [Q]` — the chord, with no cohomological input. -/
+theorem exists_chord_of_unimodular
+    [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+    (P Q : { w : S ⟶ C // w ≫ π = 𝟙 S })
+    (U : C.affineOpens)
+    (hPU : P.1 ⁻¹ᵁ U.1 = ⊤) (hQU : Q.1 ⁻¹ᵁ U.1 = ⊤)
+    (rP rQ : Γ(C, U.1))
+    (hP : (Scheme.Hom.ker P.1).ideal U = Ideal.span {rP})
+    (hQ : (Scheme.Hom.ker Q.1).ideal U = Ideal.span {rQ})
+    (hnzdP : rP ∈ nonZeroDivisors Γ(C, U.1))
+    (hnzdQ : rQ ∈ nonZeroDivisors Γ(C, U.1))
+    (L : C.Modules) (hL : IsInvertible L)
+    (eL : (restrictFunctor U.1.ι).obj L ≅ unitObj U.1.toScheme)
+    [Algebra Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))]
+    (halg : ∀ r : Γ(S, (⊤ : S.Opens)),
+      algebraMap Γ(S, (⊤ : S.Opens)) Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) r =
+        (Scheme.Hom.appTop (U.1.ι ≫ π)).hom r)
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π L))
+    (e2 : Scheme.Modules.baseSections π (Limits.cokernel
+        (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L))
+      ≃ₗ[Γ(S, (⊤ : S.Opens))] (Fin 2 → Γ(S, (⊤ : S.Opens))))
+    (huni : Ideal.span (Set.range
+      ((fun j => e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+          (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L)))
+            (b3 j)) 0) ⨯₃
+       (fun j => e2 ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+          (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L)))
+            (b3 j)) 1))) = ⊤) :
+    ∃ ℓ : Scheme.Modules.baseSections π L,
+      LinearMap.ker ((Scheme.Modules.baseSectionsMap π (Limits.cokernel.π
+        (iteratedTwistHom (Scheme.Hom.ker P.1) (Scheme.Hom.ker Q.1) L))).hom) =
+      Submodule.span Γ(S, (⊤ : S.Opens)) {ℓ} :=
+  exists_ker_baseSectionsMap_cokernel_iteratedTwist_eq_span_of_sections
+    hsm P Q U hPU hQU rP rQ hP hQ hnzdP hnzdQ L hL eL halg
+    (surjective_baseSectionsMap_cokernel_of_unimodular _ b3 e2 huni) b3
+
 end IteratedTwist
 
 end AlgebraicGeometry.Scheme.Modules
