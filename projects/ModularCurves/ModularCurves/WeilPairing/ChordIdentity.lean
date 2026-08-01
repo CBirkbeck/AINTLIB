@@ -1276,6 +1276,35 @@ theorem dictionary_add_eq_zero_of_vertical {R : Type u} [CommRing R]
   rw [projModelPointsEquiv_point_add W P Q, hP, hQ]
   exact WeierstrassCurve.Affine.Point.add_of_Y_eq hx hy
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i6] `hslope` from the geometric third point.** The algebraic hypothesis
+`chord_identity_of_sections` wants is exactly mathlib's `addX`, unfolded. -/
+theorem chord_hslope_of_addX {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    (σ₁ σ₂ σ₃ : W.toAffine.CoordinateRing →ₐ[R] R) (d : R)
+    (hX : σ₃ (coordX W) = W.toAffine.addX (σ₁ (coordX W)) (σ₂ (coordX W))
+      ((σ₂ (coordY W) - σ₁ (coordY W)) * d)) :
+    σ₃ (coordX W) =
+      ((σ₂ (coordY W) - σ₁ (coordY W)) * d) ^ 2 +
+        W.a₁ * ((σ₂ (coordY W) - σ₁ (coordY W)) * d) - W.a₂ -
+        σ₁ (coordX W) - σ₂ (coordX W) := by
+  rw [hX, WeierstrassCurve.Affine.addX]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 i6] `hline₃` from the geometric third point.** `negAddY` is *by definition*
+the value of the chord's line at `addX`, so the third point lies on the line for free —
+this is the algebraic form of "the third intersection point is on the chord". -/
+theorem chord_hline₃_of_negAddY {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    (σ₁ σ₂ σ₃ : W.toAffine.CoordinateRing →ₐ[R] R) (d : R)
+    (hX : σ₃ (coordX W) = W.toAffine.addX (σ₁ (coordX W)) (σ₂ (coordX W))
+      ((σ₂ (coordY W) - σ₁ (coordY W)) * d))
+    (hY : σ₃ (coordY W) = W.toAffine.negAddY (σ₁ (coordX W)) (σ₂ (coordX W))
+      (σ₁ (coordY W)) ((σ₂ (coordY W) - σ₁ (coordY W)) * d)) :
+    σ₃ (coordY W) = ((σ₂ (coordY W) - σ₁ (coordY W)) * d) *
+      (σ₃ (coordX W) - σ₁ (coordX W)) + σ₁ (coordY W) := by
+  rw [hY, hX, WeierstrassCurve.Affine.negAddY]
+
 end ModularCurves
 
 namespace ModularCurves
