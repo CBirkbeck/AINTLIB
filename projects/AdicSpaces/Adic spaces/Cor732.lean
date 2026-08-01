@@ -434,6 +434,65 @@ theorem exists_dominating_unit_noHArch
   -- Step 3: π is dominated by s on Y by hI.
   exact ⟨π, fun y hy => hI π hπ_mem y hy⟩
 
+omit [IsTopologicalRing A] in
+private theorem hUN_lem
+    (Y : Set ↥(Spa A A⁺)) (U : ℕ → Set ↥(Spa A A⁺)) (F : Finset ℕ)
+    (hF : Y ⊆ ⋃ n ∈ F, U n)
+    (hmono : ∀ (m n : ℕ), m ≤ n → U m ⊆ U n) :
+    ∀ x ∈ Y, x ∈ U (F.sup id) := by
+  intro x hx0
+  have hx := hF hx0
+  simp only [Set.mem_iUnion] at hx
+  obtain ⟨n, hnF, hxn⟩ := hx
+  exact hmono n (F.sup id) (Finset.le_sup (f := id) hnF) hxn
+
+omit [IsTopologicalRing A] in
+private theorem hmono_lem
+    [IsTateRing A] (u : Aˣ)
+    (hu_tn : IsTopologicallyNilpotent ((u : Aˣ) : A))
+    (T : Finset A)
+    (U : ℕ → Set ↥(Spa A A⁺))
+    (hU_def : U = fun n => ⋃ t ∈ T, Subtype.val ⁻¹' basicOpen ((u : A) ^ n) t) :
+    ∀ (m n : ℕ), m ≤ n → U m ⊆ U n := by
+  intro m n hmn x hx
+  simp only [hU_def, Set.mem_iUnion, Set.mem_preimage] at hx ⊢
+  obtain ⟨t, htT, hx1, hx0⟩ := hx
+  refine ⟨t, htT, ?_, hx0⟩
+  refine x.1.vle_trans ?_ hx1
+  letI : ValuativeRel A := x.1.toValuativeRel
+  set w := ValuativeRel.valuation A with hw_def
+  have hu_le_one : w ((u : A)) ≤ 1 := valuation_pi_le_one_on_spa x.2 hu_tn
+  refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
+  rw [map_pow, map_pow]
+  exact pow_le_pow_right_of_le_one' hu_le_one hmn
+
+omit [IsTopologicalRing A] in
+private theorem hU_cover_lem
+    (Y : Set ↥(Spa A A⁺)) (T : Finset A) (u : Aˣ)
+    (hu_tn : IsTopologicallyNilpotent ((u : Aˣ) : A))
+    (hT : ∀ y ∈ Y, ∃ t ∈ T, ¬ (y.1 : Spv A).vle t 0)
+    (U : ℕ → Set ↥(Spa A A⁺))
+    (hU_def : U = fun n => ⋃ t ∈ T, Subtype.val ⁻¹' basicOpen ((u : A) ^ n) t) :
+    Y ⊆ ⋃ n, U n := by
+  subst hU_def
+  rintro ⟨v, hvSpa⟩ hy
+  obtain ⟨t, htT, ht0⟩ := hT ⟨v, hvSpa⟩ hy
+  letI : ValuativeRel A := v.toValuativeRel
+  set w := ValuativeRel.valuation A with hw_def
+  have hwt_ne : w t ≠ 0 := by
+    intro h0
+    refine ht0 ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_)
+    rw [h0, map_zero]
+  have hcont : v.IsContinuous := hvSpa.1
+  have h_open : IsOpen {a : A | w a < w t} := hcont (w t)
+  have h0_mem : (0 : A) ∈ {a : A | w a < w t} := by
+    simp only [Set.mem_setOf_eq, map_zero]
+    exact zero_lt_iff.mpr hwt_ne
+  obtain ⟨n, hn⟩ := (hu_tn.eventually (h_open.mem_nhds h0_mem)).exists
+  refine Set.mem_iUnion.mpr ⟨n, Set.mem_biUnion htT ?_⟩
+  exact ⟨(Valuation.Compatible.vle_iff_le (v := w) _ _).mpr hn.le, ht0⟩
+
+omit [IsTopologicalRing A] in
 /-- **Wedhorn Cor 7.32 (no hArch), compact-subset Finset form.** For a compact
 subset `Y ⊆ Spa (A, A⁺)` and a finite family `T` with no common zero on `Y`,
 there exists a unit `s ∈ Aˣ` strictly dominated by some `t ∈ T` at every point of
@@ -453,45 +512,13 @@ theorem exists_dominating_unit_noHArch_finset_on
     isOpen_biUnion fun t _ =>
       (isOpen_basicOpen _ t).preimage continuous_subtype_val
   -- Pointwise: continuity of `v` + topological nilpotence of `u` put `v` in some `U n`.
-  have hU_cover : Y ⊆ ⋃ n, U n := by
-    rintro ⟨v, hvSpa⟩ hy
-    obtain ⟨t, htT, ht0⟩ := hT ⟨v, hvSpa⟩ hy
-    letI : ValuativeRel A := v.toValuativeRel
-    set w := ValuativeRel.valuation A with hw_def
-    have hwt_ne : w t ≠ 0 := by
-      intro h0
-      refine ht0 ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_)
-      rw [h0, map_zero]
-    have hcont : v.IsContinuous := hvSpa.1
-    have h_open : IsOpen {a : A | w a < w t} := hcont (w t)
-    have h0_mem : (0 : A) ∈ {a : A | w a < w t} := by
-      simp only [Set.mem_setOf_eq, map_zero]
-      exact zero_lt_iff.mpr hwt_ne
-    obtain ⟨n, hn⟩ := (hu_tn.eventually (h_open.mem_nhds h0_mem)).exists
-    refine Set.mem_iUnion.mpr ⟨n, Set.mem_biUnion htT ?_⟩
-    exact ⟨(Valuation.Compatible.vle_iff_le (v := w) _ _).mpr hn.le, ht0⟩
+  have hU_cover := hU_cover_lem Y T u hu_tn hT U hU_def
   -- The exhaustion is monotone (`v(u) ≤ 1` on `Spa`).
-  have hmono : ∀ (m n : ℕ), m ≤ n → U m ⊆ U n := by
-    intro m n hmn x hx
-    simp only [hU_def, Set.mem_iUnion, Set.mem_preimage] at hx ⊢
-    obtain ⟨t, htT, hx1, hx0⟩ := hx
-    refine ⟨t, htT, ?_, hx0⟩
-    refine x.1.vle_trans ?_ hx1
-    letI : ValuativeRel A := x.1.toValuativeRel
-    set w := ValuativeRel.valuation A with hw_def
-    have hu_le_one : w ((u : A)) ≤ 1 := valuation_pi_le_one_on_spa x.2 hu_tn
-    refine (Valuation.Compatible.vle_iff_le (v := w) _ _).mpr ?_
-    rw [map_pow, map_pow]
-    exact pow_le_pow_right_of_le_one' hu_le_one hmn
+  have hmono := hmono_lem u hu_tn T U hU_def
   -- Compactness extracts a single level `N`.
   obtain ⟨F, hF⟩ := hY.elim_finite_subcover U hU_open hU_cover
   set N : ℕ := F.sup id with hN_def
-  have hUN : ∀ x ∈ Y, x ∈ U N := by
-    intro x hx0
-    have hx := hF hx0
-    simp only [Set.mem_iUnion] at hx
-    obtain ⟨n, hnF, hxn⟩ := hx
-    exact hmono n N (Finset.le_sup (f := id) hnF) hxn
+  have hUN := hUN_lem Y U F hF hmono
   -- Conclude with `s := u^(N+1)`.
   refine ⟨u ^ (N + 1), fun y hy => ?_⟩
   obtain ⟨v, hvSpa⟩ := y
