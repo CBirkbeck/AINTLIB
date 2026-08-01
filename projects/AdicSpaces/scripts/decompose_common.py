@@ -235,10 +235,28 @@ def lift_have(lines, decl_start, decl_end, name, params, new_name=None):
        column-4 body makes Lean read the body as an argument to the prelude's
        last term (`Function expected at ...`).
 
+    `params` is a LIST OF BINDER LINES, e.g.
+
+        ["(D : RationalLocData A) {m : ℕ}",
+         "(aI : Ideal ↥(restrictedMvPowerSeriesSubring m A))"]
+
+    not one concatenated string. Taking a string invited exactly the bug this
+    function exists to prevent: two groups joined without a separator produced a
+    155-column line (three such, up to 189, in tate_backward_exists). Each entry
+    is emitted on its own line at 4-space indent.
+
+    The CALL LINE is derived from the same list -- binder names are read back out
+    of `params`, so the argument order cannot drift from the signature. Writing
+    the call by hand is how `Φ` ended up in `ψ`'s position on that same target.
+    Instance binders `[...]` and implicit `{...}` are skipped; explicit `(x y : T)`
+    contributes `x y`.
+
     The caller still supplies `params`, because the dependency list is the one
     part that cannot be derived from the source. Keeping the CONCLUSION verbatim
     is what makes the body transplant unmodified -- change it only deliberately.
     """
+    if isinstance(params, str):
+        raise TypeError("params must be a list of binder lines, not a string")
     i = next(k for k in range(decl_start, decl_end)
              if lines[k].lstrip().startswith("have " + name + " ")
              or lines[k].lstrip().startswith("have " + name + ":"))
@@ -249,7 +267,45 @@ def lift_have(lines, decl_start, decl_end, name, params, new_name=None):
     by = next(k for k in range(i, j) if lines[k].rstrip().endswith(":= by"))
     stmt = [l[base:] if len(l) > base else l for l in lines[i:by + 1]]
     concl = stmt[0].split(":", 1)[1].lstrip()          # text after `have NAME :`
-    head = f"private theorem {new_name or (name + '_lem')} {params} :"
+    head = [f"private theorem {new_name or (name + '_lem')}"]
+    head += ["    " + p.strip() for p in params]
+    head[-1] += " :"
     rest = ([("    " + concl)] if concl else []) + stmt[1:]
     body = [l[base:] if len(l) > base else l for l in lines[by + 1:j]]
-    return (f"{' ' * base}have {name} := ", [head] + rest + body, i, j)
+    args = " ".join(explicit_binder_names(params))
+    call = f"{' ' * base}have {name} := {new_name or (name + '_lem')} {args}".rstrip()
+    return (call, head + rest + body, i, j)
+
+
+def explicit_binder_names(params):
+    """Names bound by `(x y : T)` groups, in order; `[...]`/`{...}` are skipped.
+
+    Only depth-0 parentheses start a binder group -- `(aI : Set ...)` occurring
+    inside another binder's TYPE is not one. Reading such an inner ascription as a
+    binder is what made me report a phantom duplicate `aI` in tate_backward_exists.
+    """
+    text = " ".join(params)
+    names, depth, i = [], 0, 0
+    while i < len(text):
+        c = text[i]
+        if c in "([{":
+            if c == "(" and depth == 0:
+                close, d = i, 0
+                for k in range(i, len(text)):
+                    if text[k] in "([{":
+                        d += 1
+                    elif text[k] in ")]}":
+                        d -= 1
+                        if d == 0:
+                            close = k
+                            break
+                group = text[i + 1:close]
+                if ":" in group:
+                    names += group.split(":", 1)[0].split()
+                i = close + 1
+                continue
+            depth += 1
+        elif c in ")]}":
+            depth -= 1
+        i += 1
+    return names
