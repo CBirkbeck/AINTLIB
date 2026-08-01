@@ -6637,3 +6637,73 @@ earlier. The cheap check is to grep the file's `variable` lines for
 parenthesised binders before writing the call, and it belongs in the extraction
 recipe next to "script the verbatim, write the judgement".
 
+
+## 160 → 159: when the hypothesis has been rewritten, carry the rewrite
+
+`extendToLocalization_isContinuous_locTopology_of_bounded`'s `have key`
+(40 lines) became `extendToLocalization_smul_mem_pow_lt`. Parent 68 → 29,
+helper body 42. Green on the first build.
+
+### The obstacle, and the move that dissolves it
+
+`key` consumes `hd'_mem`, which is `obtain`-bound *and then mutated in place*:
+
+    obtain ⟨d', hd'_mem, rfl⟩ := hd
+    rw [locIdeal, ← Ideal.map_pow, ← Ideal.span_eq (P.I^m), Ideal.map_span] at hd'_mem
+
+so the hypothesis type a helper would need is the **post-rewrite** one, which
+appears nowhere in the file. Reconstructing it by hand is precisely what the
+cost model scores as expensive.
+
+Moving the `rw` *into* the helper dissolves the problem. The hypothesis reverts
+to its pre-rewrite form, and that form is recoverable — from `locNhd`'s
+definition,
+
+    locNhd P T s n = ((locIdeal P T s) ^ n).toAddSubgroup.map (locSubring …).subtype…
+
+`obtain` on `d ∈ locNhd P T s m` yields `hd'_mem : d' ∈ (locIdeal P T s) ^ m`,
+which is what the helper takes. The parent sheds the `rw` line too, so it is
+strictly cheaper than extracting around it.
+
+**General form: when a candidate `have` depends on a hypothesis mutated by a
+preceding `rw`/`simp … at`, extract the mutation as well.** The tactic that made
+the type unwritable is the same one you can carry across the boundary — the same
+move as carrying a `set` line, applied to a rewrite.
+
+### A measurement point I had been sloppy about
+
+The 50-line rule is on proof **bodies**, not declarations — signature length
+does not count against a helper. This helper's declaration is 55 lines and its
+body is 42, and only the 42 matters. That is what made the target viable at all;
+scoring it by declaration length would have rejected it.
+
+
+### `promote_rank.py` — the next phase's tool, and its two immediate bugs
+
+The single-`have` well is nearly dry: 3 candidates out of 159. The
+generalisation is the shape that actually worked on
+`sub_algebraMap_evalFHom_mem_ideal_fSubX` — **promote a cluster of top-level
+`have`s to lemmas in dependency order**, so each calls the previous by name and
+adds no hypotheses. That found **7** further candidates.
+
+Two bugs on its first run, both caught by reading the output rather than by a
+build, and both ones this campaign has already made:
+
+* **It listed `Vendored/`** at rank 5. That directory is third-party and
+  explicitly out of scope in the standing instructions. A new tool inherits none
+  of the old tool's filters.
+* **It ignored instance preamble** — the third time that has happened. Here it
+  is worse than in `decompose_rank`: preamble *multiplies* under promotion,
+  because every promoted lemma needs its own copy. A 30-line `letI` block times
+  four promotions is 120 lines of duplication. That is what put
+  `presheafValue_mvRestricted_isUnit_mk_s` (84 lines, ~30 of preamble) at the
+  top, the same target the single-`have` ranking had already rejected for the
+  same reason.
+
+The pattern is stable enough to name: **every new ranking tool starts by
+re-acquiring the previous one's filters.** Vendored-skip, preamble, carried
+lines, call cost — none of them transfer automatically, and each one is
+invisible until the output is read against the actual files. The mitigation is
+not vigilance, it is that the filters belong in a shared module rather than
+being re-typed per tool; that refactor is the obvious next step and is not done.
+

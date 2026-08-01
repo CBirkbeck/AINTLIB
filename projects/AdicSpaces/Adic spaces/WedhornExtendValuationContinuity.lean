@@ -225,6 +225,67 @@ theorem extendToLocalization_mul_pow_lt
             * algebraMap A (Localization.Away s) (b : A)) := mul_one _
       _ < γ := h_coeff
 
+/-- Absorption (Wedhorn §8.1): a `locSubring`-multiple of any element of
+`(locIdeal)^m` has extended valuation `< γ`, given `ν < γ` on `P.I ^ m`. No
+`ν ≤ 1` on `A₀` is needed. The span-induction half of
+`extendToLocalization_isContinuous_locTopology_of_bounded`. -/
+private theorem extendToLocalization_smul_mem_pow_lt
+    (P : PairOfDefinition A) (T : Finset A) (s : A)
+    (hopen : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
+      divByS (↑b : A) s ∈ locSubring P T s)
+    {Γ : Type*} [LinearOrderedCommGroupWithZero Γ]
+    (ν : Valuation A Γ) (hν_T : ∀ t ∈ T, ν t ≤ ν s)
+    (hS : Submonoid.powers s ≤ ν.supp.primeCompl)
+    {γ : Γ} (hγ : γ ≠ 0) {m : ℕ}
+    (hm' : ∀ b : ↥P.A₀, b ∈ P.I ^ m → ν (b : A) < γ)
+    (d' : ↥(locSubring P T s)) (hd'_mem : d' ∈ (locIdeal P T s) ^ m) :
+    ∀ r : ↥(locSubring P T s),
+      ν.extendToLocalization hS (Localization.Away s)
+          ((r : Localization.Away s)
+            * ((d' : locSubring P T s) : Localization.Away s)) < γ := by
+  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
+  haveI : IsTopologicalRing (Localization.Away s) :=
+    (locBasis P T s hopen).toRingFilterBasis.isTopologicalRing
+  set ν_loc := ν.extendToLocalization hS (Localization.Away s) with hν_loc
+  rw [locIdeal, ← Ideal.map_pow, ← Ideal.span_eq (P.I^m), Ideal.map_span] at hd'_mem
+  refine Submodule.span_induction (p := fun x _ ↦ ∀ r : ↥(locSubring P T s),
+    ν_loc ((r : Localization.Away s)
+      * ((x : locSubring P T s) : Localization.Away s)) < γ)
+    ?_ ?_ ?_ ?_ hd'_mem
+  · -- Generator case: x = algebraMapD b (b ∈ P.Iᵐ) — exactly the absorption lemma.
+    rintro x ⟨b, hb, rfl⟩ r
+    exact extendToLocalization_mul_pow_lt P T s ν hν_T hS hγ hm'
+      (r : Localization.Away s) r.property b hb
+  · -- Zero case.
+    intro r
+    simp only [ZeroMemClass.coe_zero, mul_zero, map_zero]
+    exact zero_lt_iff.mpr hγ
+  · -- Sum case.
+    intro x y _ _ hx hy r
+    have h_add : (r : Localization.Away s)
+          * ((x + y : locSubring P T s) : Localization.Away s) =
+        (r : Localization.Away s) * ((x : locSubring P T s) : Localization.Away s)
+        + (r : Localization.Away s) * ((y : locSubring P T s) : Localization.Away s) := by
+      rw [show ((x + y : locSubring P T s) : Localization.Away s) =
+        ((x : locSubring P T s) : Localization.Away s) +
+        ((y : locSubring P T s) : Localization.Away s) from rfl]; ring
+    rw [h_add]
+    exact lt_of_le_of_lt (ν_loc.map_add _ _) (max_lt (hx r) (hy r))
+  · -- Smul case: reassociate `r · (c • x) = (r · c) · x`, apply IH at `r · c`.
+    intro c x _ hx r
+    have h_smul : (r : Localization.Away s)
+          * ((c • x : locSubring P T s) : Localization.Away s) =
+        ((r * c : locSubring P T s) : Localization.Away s)
+          * ((x : locSubring P T s) : Localization.Away s) := by
+      rw [show ((c • x : locSubring P T s) : Localization.Away s) =
+          ((c : locSubring P T s) : Localization.Away s) *
+          ((x : locSubring P T s) : Localization.Away s) from rfl,
+        show ((r * c : locSubring P T s) : Localization.Away s) =
+          (r : Localization.Away s) * ((c : locSubring P T s) : Localization.Away s) from rfl]
+      ring
+    rw [h_smul]
+    exact hx (r * c)
+
 /-- **Strengthened continuity of `extendToLocalization` under
 `locTopology`** (the natural Wedhorn-callsite version).
 
@@ -296,53 +357,14 @@ theorem extendToLocalization_isContinuous_locTopology_of_bounded
   obtain ⟨d', hd'_mem, rfl⟩ := hd
   -- Goal: subtype.val d' ∈ ↑(ν_loc.ltAddSubgroup γu).
   change ν_loc ((d' : locSubring P T s) : Localization.Away s) < γ
-  rw [locIdeal, ← Ideal.map_pow, ← Ideal.span_eq (P.I^m), Ideal.map_span] at hd'_mem
   -- Wedhorn §8.1 absorption: any `locSubring`-multiple of an `algebraMap(Iᵐ)` generator has
   -- its `A₀`-coefficients swallowed by `Iᵐ`, so NO `ν ≤ 1` on `A₀` is needed. We prove the
   -- smul-stable strengthening `∀ r, ν_loc(↑r · ↑d') < γ` by span-induction (generator case =
   -- `extendToLocalization_mul_pow_lt`, smul case reassociates `r · (c • x) = (r·c) • x`), then
   -- specialise `r = 1`.
   have hm' : ∀ b : ↥P.A₀, b ∈ P.I ^ m → ν (b : A) < γ := fun b hb ↦ hm ⟨b, hb, rfl⟩
-  have key : ∀ r : ↥(locSubring P T s),
-      ν_loc ((r : Localization.Away s)
-        * ((d' : locSubring P T s) : Localization.Away s)) < γ := by
-    refine Submodule.span_induction (p := fun x _ ↦ ∀ r : ↥(locSubring P T s),
-      ν_loc ((r : Localization.Away s)
-        * ((x : locSubring P T s) : Localization.Away s)) < γ)
-      ?_ ?_ ?_ ?_ hd'_mem
-    · -- Generator case: x = algebraMapD b (b ∈ P.Iᵐ) — exactly the absorption lemma.
-      rintro x ⟨b, hb, rfl⟩ r
-      exact extendToLocalization_mul_pow_lt P T s ν hν_T hS hγ hm'
-        (r : Localization.Away s) r.property b hb
-    · -- Zero case.
-      intro r
-      simp only [ZeroMemClass.coe_zero, mul_zero, map_zero]
-      exact zero_lt_iff.mpr hγ
-    · -- Sum case.
-      intro x y _ _ hx hy r
-      have h_add : (r : Localization.Away s)
-            * ((x + y : locSubring P T s) : Localization.Away s) =
-          (r : Localization.Away s) * ((x : locSubring P T s) : Localization.Away s)
-          + (r : Localization.Away s) * ((y : locSubring P T s) : Localization.Away s) := by
-        rw [show ((x + y : locSubring P T s) : Localization.Away s) =
-          ((x : locSubring P T s) : Localization.Away s) +
-          ((y : locSubring P T s) : Localization.Away s) from rfl]; ring
-      rw [h_add]
-      exact lt_of_le_of_lt (ν_loc.map_add _ _) (max_lt (hx r) (hy r))
-    · -- Smul case: reassociate `r · (c • x) = (r · c) · x`, apply IH at `r · c`.
-      intro c x _ hx r
-      have h_smul : (r : Localization.Away s)
-            * ((c • x : locSubring P T s) : Localization.Away s) =
-          ((r * c : locSubring P T s) : Localization.Away s)
-            * ((x : locSubring P T s) : Localization.Away s) := by
-        rw [show ((c • x : locSubring P T s) : Localization.Away s) =
-            ((c : locSubring P T s) : Localization.Away s) *
-            ((x : locSubring P T s) : Localization.Away s) from rfl,
-          show ((r * c : locSubring P T s) : Localization.Away s) =
-            (r : Localization.Away s) * ((c : locSubring P T s) : Localization.Away s) from rfl]
-        ring
-      rw [h_smul]
-      exact hx (r * c)
+  have key := extendToLocalization_smul_mem_pow_lt P T s hopen ν hν_T hS hγ hm'
+    d' hd'_mem
   have hfinal := key 1
   simpa using hfinal
 
