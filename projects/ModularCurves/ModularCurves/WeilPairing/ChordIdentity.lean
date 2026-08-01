@@ -934,6 +934,23 @@ theorem chord_exact_order_in_coordinateRing {R : Type u} [CommRing R]
     (coord_equation W) h₁ h₂ hline hnzdx hf₁nzd hf₂nzd hk₁ hk₂ hk₃ hσ₁
     hx₂ hy₂ hx₃ hy₃ hline₃ htor₂ htor₃ hunit
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (a2)] Transporting the exact-order factorisation along a ring isomorphism.**
+The away chart is isomorphic to the coordinate ring
+(`sectionAway_affineModelEval_bijective`), and the factorisation transports: images of
+units are units and the equation is a ring identity. -/
+theorem eq_unit_mul_map {A B : Type u} [CommRing A] [CommRing B] (φ : A →+* B)
+    (hφ : Function.Bijective φ) (c g₁ g₂ g₃ : A) (u : Aˣ)
+    (hfac : c = (u : A) * (g₁ * (g₂ * g₃))) :
+    ∃ v : Bˣ, φ c = (v : B) * (φ g₁ * (φ g₂ * φ g₃)) := by
+  classical
+  let e : A ≃+* B := RingEquiv.ofBijective φ hφ
+  refine ⟨Units.map (e : A →* B) u, ?_⟩
+  have hval : φ c = φ ((u : A) * (g₁ * (g₂ * g₃))) := by rw [hfac]
+  rw [hval, map_mul, map_mul, map_mul]
+  rfl
+
 end ModularCurves
 
 namespace ModularCurves
