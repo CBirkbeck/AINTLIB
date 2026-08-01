@@ -1020,6 +1020,44 @@ theorem chord_exact_order_with_generators {B : Type u} [CommRing B]
   ⟨v * w₁ * w₂ * w₃,
     eq_unit_mul_of_associates c f₁ f₂ f₃ g₁ g₂ g₃ v w₁ w₂ w₃ hfac hg₁ hg₂ hg₃⟩
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 supply] The chord's slope and the line relation.** For two points with
+`x₁ − x₂` invertible, the slope `(y₂ − y₁)/(x₂ − x₁)` satisfies the line relation
+that the chord identity requires. -/
+theorem line_relation_of_slope {R : Type u} [CommRing R] (x₁ y₁ x₂ y₂ : R)
+    (d : R) (hd : d * (x₂ - x₁) = 1) :
+    y₂ = ((y₂ - y₁) * d) * (x₂ - x₁) + y₁ := by
+  have h : ((y₂ - y₁) * d) * (x₂ - x₁) = (y₂ - y₁) * (d * (x₂ - x₁)) := by ring
+  rw [h, hd, mul_one]
+  ring
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 supply] Non-tangency from invertibility of the coordinate difference.** -/
+theorem nzd_of_isUnit_sub {R : Type u} [CommRing R] (x₁ x₂ : R)
+    (h : IsUnit (x₁ - x₂)) : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0 := by
+  intro t ht
+  obtain ⟨w, hw⟩ := h
+  have h2 : (↑w⁻¹ : R) * ((x₁ - x₂) * t) = 0 := by rw [ht, mul_zero]
+  rwa [← mul_assoc, ← hw, Units.inv_mul, one_mul] at h2
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 supply] Non-`2`-torsion in the form the cancellation chain uses.** -/
+theorem nzd_of_isUnit_neg_two_torsion {R : Type u} [CommRing R]
+    (W : WeierstrassCurve R) (x y : R)
+    (h : IsUnit (2 * y + W.a₁ * x + W.a₃)) :
+    ∀ t : R, -(2 * y + W.a₁ * x + W.a₃) * t = 0 → t = 0 := by
+  intro t ht
+  obtain ⟨w, hw⟩ := h
+  have h2 : (2 * y + W.a₁ * x + W.a₃) * t = 0 := by
+    have hneg : -((2 * y + W.a₁ * x + W.a₃) * t) = 0 := by
+      rw [← neg_mul]; exact ht
+    exact neg_eq_zero.mp hneg
+  have h3 : (↑w⁻¹ : R) * ((2 * y + W.a₁ * x + W.a₃) * t) = 0 := by rw [h2, mul_zero]
+  rwa [← mul_assoc, ← hw, Units.inv_mul, one_mul] at h3
+
 end ModularCurves
 
 namespace ModularCurves
