@@ -31519,3 +31519,24 @@ The remaining inputs are the CHART FACTS: that the three evaluations kill the su
 quotients (from the dictionary chain, proven at field points and upgradable by
 `section_eq_of_dictionary_eq`), that the last quotient is a unit (Cramer/adjugate), and
 the positioning of the three sections in one affine chart inside `sectionAway`.
+
+## ★★★★★★★★ [W1] CHORD SIDE COMPLETE 2026-08-01
+`chord_exact_order_of_chart_facts` (axiom-clean) closes the chord-side pipeline:
+   (three evaluations kill c and its successive quotients) + (unit last quotient)
+     ⟹  c = u · (gP · (gQ · gR))
+which is verbatim the hypothesis of `nonempty_iso_unitObj_of_exact_order₃`, and via
+`chartMultiplier_unitHom_eq_coefficient` it applies to the chord's chart multiplier.
+
+**REMAINING FOR THE WHOLE PRONG — three chart facts, nothing else:**
+ (F-i)  σ_P(c_ℓ) = 0, σ_Q(c₁) = 0, σ_{R⁻}(c₂) = 0 for the actual chord in the away-chart.
+        Available inputs: `chord_evaluations_vanish` gives the first evaluation directly;
+        the deeper two follow from `chord_mul_conj_eq_prod_of_equations` (the norm
+        factorisation) plus `exists_mul_eq_sub_coord`, once the generators are the
+        coordinate differences (non-2-torsion chart).
+ (F-ii) the last quotient is a unit — Cramer/adjugate
+        (`surjective_mulVec_of_isUnit_det`, `not_isUnit_det_of_mulVec_eq_zero`).
+ (F-iii) chart positioning: the three sections in one affine chart inside `sectionAway`,
+        with principal kernels — `SectionsIdeal.exists_multiChart` gives such charts
+        locally; the degenerate configurations are the addOnY/addOnZ families.
+Everything downstream (ChordDatum → theorem of the square → descent →
+`exists_invertible_tensor_idealModule_add`) is proven and axiom-clean.
