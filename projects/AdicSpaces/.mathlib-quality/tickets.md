@@ -4786,3 +4786,43 @@ nose, so every estimate is exact with constant 1). Generality: minimal, match us
   rescalings.
 
 ### [PLAN-GATE-1] — CLOSED 2026-07-26 by this decomposition (see decomposition-laneB.md).
+
+## Nonarchimedean Scottish Book — answers from the FJP example
+
+### [SB28] Problem 28 (Kedlaya, 11 Oct 2017): strict inclusion killed by a rational localization
+- **Status**: done (2026-08-01) — `ScottishBook.problem28`, axiom-clean.
+  | **File**: FJP/FiniteJetScottishBook.lean, ScottishBook/Stated/Problem028.lean
+- **Statement**: ∃ Tate pair `(A, A⁺)`, `f : A`, rational datum `D` with `D.IsRational`,
+  `rationalOpen` nonempty, `presheafValue D` nontrivial, `(f * ·)` injective + continuous
+  + `IsStrictMap` + closed range, and `D.canonicalMap f = 0`
+  (predicate `ScottishBook.IsProblem28Witness`).
+- **Witness**: `𝓐 = FiniteJet.JetA ℚ`, `f = Q²` (`scottishWitness`), `D = chartDatum`.
+- **Inputs**: `canonicalMap_Qa_sq` (the [FJP] (3.3) collapse, already proved) and
+  `norm_JetA_mul` + `‖Q‖ = 1` ⟹ `(Q² * ·)` is an isometry ⟹ injective / strict /
+  closed range, with no open-mapping theorem.
+- **Note**: the OLD statement of `problem28` used `algebraMap A (Localization.Away D.s)`,
+  which is NOT Problem 28 — `D.s = ϖ` is a unit, so the algebraic localization is `A`
+  itself and `Q² ≠ 0` there; the vanishing is a *separated completion* phenomenon. That
+  old form was also degenerately satisfiable (nilpotent `s` ⟹ zero ring). Replaced by
+  `D.canonicalMap`, plus nonemptiness/nontriviality to close the empty-chart loophole.
+- **Open**: the perfectoid half of Problem 28 — `𝓐` is not perfectoid.
+
+### [SB24] Problem 24 (Kedlaya, 16 Sep 2016): flatness of rational localizations — FALSE
+- **Status**: done (2026-08-01) — `ScottishBook.problem24_completed_false` /
+  `exists_rationalLoc_not_flat`, axiom-clean.
+  | **File**: FJP/FiniteJetScottishBook.lean, ScottishBook/Stated/Problem024.lean
+- **Statement**: ¬ ∀ Tate pair + rational datum `D`, `Module.Flat A (presheafValue D)`
+  (module structure `RingHom.toModule D.canonicalMap`).
+- **Proof**: `Q²` is a nonzerodivisor of `𝓐` but `ρ(Q²) = 0` and `𝓐⟨W/ϖ⟩ ≅ 𝓑 ≠ 0`;
+  flatness would give `IsSMulRegular` for `Q²`
+  (`Module.Flat.isSMulRegular_of_nonZeroDivisors`). So SB28's witness ⟹ SB24 negative.
+- **Scope**: `𝓐` is complete uniform **sheafy** Tate domain, only non-noetherian
+  (`finiteJet_witnessRing_quality`) — exactly the regime Huber's positive result leaves
+  open. The *algebraic* form (`problem24_algebraic`) is a triviality (localizations are
+  always flat) and was proved outright, replacing its `sorry`.
+
+### [SB-NONEMPTY] The chart point `x₀₀`
+- **Status**: done (2026-08-01) — `chart_rationalOpen_nonempty`, axiom-clean.
+- **Content**: `ev00 : 𝓐 →+* K`, `f₀(W) + Qf₁(W) + Q²h ↦ f₀(0)` (= constant coefficient
+  of the disc component of the 𝓑-jet); `ev00Val` its pulled-back rank-one valuation;
+  `innerPoint = ofValuation ev00Val ∈ Spa(𝓐, 𝓐°)` with `|W| = 0 ≤ |ϖ| ≠ 0`.
