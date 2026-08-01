@@ -31981,3 +31981,18 @@ REMAINING for the chord prong: build the two-family cover as an actual
 `nonempty_iso_unitObj_of_two_unit_identities` (whose `p i`, `uc i`, `um i` slots are
 exactly what the two families supply, `um` from `exists_unit_chartMultiplier₃_eq`).
 No new algebra is needed — every algebraic input is proved.
+
+### ★★★★ [W1 i11] DONE 2026-08-01 — the two-family cover, in the shape the criteria consume
+New file `WeilPairing/ChartCover.lean` (root-indexed; build 9618 jobs):
+* `sup_basicOpen_eq_top_of_span_pair` — two sections generating the unit ideal have
+  basic opens covering the scheme (via mathlib's `iSup_basicOpen_of_span_eq_top`);
+* `pairCover` + `iSup_pairCover_eq_top` — the same as a `ULift (Fin 2)`-indexed family
+  with `iSup = ⊤`, which is literally the `W`/`hW` pair that
+  `nonempty_iso_unitObj_of_two_unit_identities` wants;
+* `isUnit_res_basicOpen` — a section restricts to a unit on its own basic open
+  (mathlib's ringed-space lemma in `Scheme` spelling), which is what makes family 1
+  satisfy i9's `IsUnit conj` and family 2 satisfy i10's `IsUnit (g₁g₂g₃)`.
+Non-degeneracy enters exactly once, as `Ideal.span {conj, g₁g₂g₃} = ⊤`.
+LEAN-OPS: `rw [← hcov]` where `hcov : ⨆ … = (⊤ : X.Opens)` fails with "motive is not
+type correct" because `Γ(X, U)` depends on the open being rewritten; use
+`le_antisymm le_top (le_trans (le_of_eq hcov.symm) …)` instead.
