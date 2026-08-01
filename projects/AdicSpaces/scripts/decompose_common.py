@@ -120,6 +120,67 @@ def explicit_section_vars(path):
     return out
 
 
+def explicit_section_prefix(lines, decl_index, used_text):
+    """Ordered EXPLICIT section variables that a helper at `decl_index` will bind.
+
+    Two filters, both necessary:
+
+      * IN SCOPE -- tracked below, with the reversion rule.
+      * ACTUALLY USED -- Lean auto-includes only the section variables a
+        declaration mentions. `CurveObject` has `(p) (F) (ϖ)` all in scope, but a
+        helper whose statement says only `frobPow p F …` binds `p F` and NOT `ϖ`,
+        so the call is `lem p F …`. Pass the helper's full text as `used_text`.
+
+    A lifted helper's argument list is this prefix ++ the promoted locals, so a
+    derived call that starts at the locals puts the first local where the first
+    section variable belongs. Symptom: `Application type mismatch` naming an
+    argument you did think about (`k : ℤ` where `p : ℕ` was expected), never the
+    prefix you forgot.
+
+    Two scoping rules this tracks, both learned by paying for them:
+
+      * `variable {A}` REVERTS when its namespace/section closes. StructureSheaf
+        declares `(A : Type u)` at namespace level, `{A}` inside `namespace
+        StructureSheaf`, and `end StructureSheaf` restores A to EXPLICIT -- so a
+        declaration 500 lines later needs `A` passed positionally even though a
+        `variable {A}` is plainly visible above it.
+      * a later `variable (A)` re-explicits a previously-implicit name.
+
+    Seven builds across this campaign, in two shapes: an explicit variable needs
+    prefixing at the call, an unused one needs `omit` on the declaration.
+    """
+    scopes = [[]]          # stack of (name, explicit) lists, one frame per open scope
+    for i in range(decl_index):
+        s = lines[i].strip()
+        if s.startswith(("namespace ", "section")):
+            scopes.append([])
+        elif s.startswith("end") and len(scopes) > 1:
+            scopes.pop()
+        elif s.startswith("variable"):
+            # strip instance binders: `[Fact (Nat.Prime p)]` is not a name binder,
+            # and its inner parens otherwise parse as one (yielding `Nat.Prime`).
+            stripped = re.sub(r"\[[^\]]*\]", " ", lines[i])
+            for m in re.finditer(r"([({])([^:()}{]*?)(?::|\})", stripped):
+                names = [n for n in m.group(2).split() if ID.fullmatch(n)]
+                if not names:
+                    continue
+                scopes[-1].append((names, m.group(1) == "("))
+            # `variable (A)` / `variable {A}` re-declare visibility with no type
+            for m in re.finditer(r"([({])\s*([^:()}{]+?)\s*[)}]", stripped):
+                names = [n for n in m.group(2).split() if ID.fullmatch(n)]
+                if names:
+                    scopes[-1].append((names, m.group(1) == "("))
+    seen, order = {}, []
+    for frame in scopes:
+        for names, explicit in frame:
+            for n in names:
+                seen[n] = explicit
+                if n not in order:
+                    order.append(n)
+    return [n for n in order
+            if seen.get(n) and re.search(rf"(?<![\w']){re.escape(n)}(?![\w'])", used_text)]
+
+
 
 def assert_statement_complete(first_line, sliced_stmt):
     """A lifted statement fragment must not begin mid-binder.
@@ -272,9 +333,14 @@ def lift_have(lines, decl_start, decl_end, name, params, new_name=None):
     head[-1] += " :"
     rest = ([("    " + concl)] if concl else []) + stmt[1:]
     body = [l[base:] if len(l) > base else l for l in lines[by + 1:j]]
-    args = " ".join(explicit_binder_names(params))
+    helper = head + rest + body
+    # The call is (explicit section vars the helper will bind) ++ (supplied binders).
+    # Omitting the first half puts the first local where a section variable belongs
+    # and reports `Application type mismatch` on an argument you did think about.
+    prefix = explicit_section_prefix(lines, decl_start, "\n".join(helper))
+    args = " ".join(prefix + explicit_binder_names(params))
     call = f"{' ' * base}have {name} := {new_name or (name + '_lem')} {args}".rstrip()
-    return (call, head + rest + body, i, j)
+    return (call, helper, i, j)
 
 
 def explicit_binder_names(params):
