@@ -32060,3 +32060,26 @@ REMAINING for W3: W3.4, the cocycle computation — the comparison units of
 `L ⊗ f^*(z^*L)⁻¹` have `z`-value `1`. Bricks in hand:
 `bijective_smul_pullback_unit_smul`, `appLE_z_rescaled_eq_one`, `pullbackSectionIso`,
 W3.2, W3.3, and `nonempty_unitObj_iso_of_normalized_glue` as the consumer.
+
+### PLAN [W3.4] — the un-normalized descent, decomposed against the *actual* glue API
+Scanned the tree's gluing machinery. `AffineIntersectionUnitCocycle`
+(`Picard/AffineIntersectionUnitCocycleFiniteStage.lean:22`) + `gluedModule` +
+`gluedModule_isInvertible` (`Picard/InvertibleSheafGlueEffectivity.lean:5035`) is the
+effectivity engine, but it is stated for an **affine-intersection algebra functor over a
+base ring `A`** with `Finset J`-indexed glue data — i.e. it wants an affine base and a
+finite-stage cover, not an arbitrary `T`. So W3.4 is a wiring job with a reduction, not
+a one-lemma step:
+* W3.4.a — the comparison units satisfy the triple-overlap cocycle identity. Algebra:
+  `sᵢ = uᵢⱼ · sⱼ`, `sⱼ = uⱼₖ · sₖ`, `sᵢ = uᵢₖ · sₖ` and injectivity of `r ↦ r • sₖ`
+  (which `hgen` already gives) force `uᵢⱼ · uⱼₖ = uᵢₖ`. Only the restriction bookkeeping
+  is work.
+* W3.4.b — their `z`-values form a cocycle on the base (`appLE_z_appLE_snd_eq_self` +
+  multiplicativity of `appLE`).
+* W3.4.c — package that as an `AffineIntersectionUnitCocycle` over an affine stage of
+  `T`, and glue: `N := c.gluedModule`, invertible by `gluedModule_isInvertible`.
+* W3.4.d — twist: `L ⊗ f^*N⁻¹` has trivializations (W3.2 + W3.3) whose comparison units
+  have `z`-value `1` (W3.4.b by construction), so
+  `nonempty_unitObj_iso_of_normalized_glue` gives `L ⊗ f^*N⁻¹ ≅ 𝟙`, i.e. `L ≅ f^*N`.
+* W3.4.e — descend the affine-stage reduction back to arbitrary `T`.
+This is the honest remaining structural work for the Picard leaf. Nothing in it is new
+mathematics; all five steps are wiring against APIs that exist.
