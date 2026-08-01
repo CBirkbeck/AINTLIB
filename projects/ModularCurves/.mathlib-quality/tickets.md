@@ -31136,3 +31136,24 @@ to be proved over the universal Weierstrass atlas and transferred (GroupLawAxiom
 
 Root build green at 9615 jobs throughout; every declaration listed in this session's
 entries audits to exactly propext / Classical.choice / Quot.sound.
+
+### [W1-d3] ROUTE FIXED 2026-08-01 — ride the project's own universal transfer
+mathlib has NO "smooth over a reduced base ⟹ reduced" (checked Morphisms/Smooth.lean and
+RingTheory/Smooth/*), so building the universal two-point space from scratch would first
+require that lemma. AVOID IT: `GroupLawAxioms.lean` already contains the multi-point
+universal transfer machinery — `BaseChangeOf.pairMap` / `tripleMap` (:684/:706) with
+`pairMap_fst/snd`, `tripleMap_fst/…`, and the `*_atlas` → `*_of_map` → `*_of_eq` → `*`
+cascade (mulOver_assoc etc.). The chord identity should be proved for the UNIVERSAL
+projective model `modelOver 𝕌` (over `WeierstrassAtlasRingU`, a domain — reducedness comes
+for free there, no smooth-descent needed) and transported along classifying ring maps by
+the same cascade.
+CONCRETE PLAN for [W1-d3]:
+  d3.1 state the chord identity for `projModel 𝕌` with the two universal points (the
+       pairMap source: `(modelOver 𝕌 ⊗ modelOver 𝕌).left = projModel ×_U projModel`);
+  d3.2 prove it there — over a domain, via the affine Weierstrass chart computation
+       (mathlib's `WeierstrassCurve.Affine` slope/addition API) + `PoleSheafAwayAffineModelEval`;
+  d3.3 transfer with the `*_of_map`/`*_of_eq` cascade (verbatim structure of
+       `mulOver_assoc_of_map` / `_of_eq` / final);
+  d3.4 feed the result into `ChordDatum` and hence
+       `EllipticCurve.nonempty_tensorObj_iso_of_chordDatum`.
+Everything downstream of d3.4 is already proven and axiom-clean.
