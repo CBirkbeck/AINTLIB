@@ -1,1 +1,1 @@
-FOCUS: [A4-c] twisted H1 leaf — port the fibrewise+base-change H1 machinery to tensorObj (idealModule D) (poleSheafPower m); recon PoleSheafBaseCechHOne inputs
+FOCUS: [G1/G2/G4] general chart multiplier for a mono of invertibles + composite-multiplier product law (new file WeilPairing/IteratedTwist.lean)
