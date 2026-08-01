@@ -31830,3 +31830,17 @@ is the dictionary chain, which is PROVEN at field points
    (over the base ring itself, not a field) is the missing construction.
 So the honest remaining leaf is: **coordinates over the base + equation ⟹ a section of
 `projModel W`**, then the dictionary comparison. Everything else in the prong is proven.
+
+### ★★★ [W1 (i2)] DONE 2026-08-01 + CORRECTION
+`sectionOfChartSolution` / `specPointOfChartSolution`: coordinates over the BASE
+satisfying the dehomogenised equation give a section of `projModel W`.
+CORRECTION to the previous entry: I recorded this construction as "missing"; in fact
+`chartSolutionsEquiv` (WeierstrassModel.lean:680) and `chartHomEquiv` (:774) are stated
+for an arbitrary commutative `R`-algebra `K`, not only for fields, so the base-level
+case is just `K := R`. (Same lesson as the monoidal-pullback episode: check the actual
+hypotheses before declaring a gap.)
+⟹ the `σ₃` input of `chord_identity_of_sections` can now be produced: build the section
+from the chord's third coordinates `(addX, negAddY)` (they satisfy the equation by
+`chord_vanishes_at_three_points` + the curve equation), then compare it with the
+group-law `-(P+Q)` by `section_eq_of_dictionary_eq` using the proven field-point
+identity `projModelPointsEquiv_neg_mul_eq_negAddY`.
