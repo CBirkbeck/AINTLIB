@@ -381,6 +381,29 @@ theorem vieta_of_equations {R : Type u} [CommRing R] (W : WeierstrassCurve R)
     | linear_combination (-1 : R) * h₁ + h₂
     | linear_combination h₁ + (-1 : R) * h₂
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 (α)(i)] The constant Vieta relation.** The companion of `vieta_of_equations`:
+the product of the three `x`-coordinates. Same derivation — substitute the line and
+cancel `x₁ − x₂`. -/
+theorem vieta_const_of_equations {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    (ℓ x₁ x₂ y₁ y₂ : R)
+    (h₁ : y₁ ^ 2 + W.a₁ * x₁ * y₁ + W.a₃ * y₁ =
+      x₁ ^ 3 + W.a₂ * x₁ ^ 2 + W.a₄ * x₁ + W.a₆)
+    (h₂ : y₂ ^ 2 + W.a₁ * x₂ * y₂ + W.a₃ * y₂ =
+      x₂ ^ 3 + W.a₂ * x₂ ^ 2 + W.a₄ * x₂ + W.a₆)
+    (hline : y₂ = ℓ * (x₂ - x₁) + y₁)
+    (hnzd : ∀ t : R, (x₁ - x₂) * t = 0 → t = 0) :
+    -x₁ ^ 2 * ℓ ^ 2 + (2 * x₁ * y₁ + W.a₃ * x₁) * ℓ -
+        (y₁ ^ 2 + W.a₃ * y₁ - W.a₆) =
+      -(x₁ * x₂ * (ℓ ^ 2 + W.a₁ * ℓ - W.a₂ - x₁ - x₂)) := by
+  have hC1 := vieta_of_equations W ℓ x₁ x₂ y₁ y₂ h₁ h₂ hline hnzd
+  first
+    | linear_combination h₁ - x₁ * hC1
+    | linear_combination -h₁ - x₁ * hC1
+    | linear_combination h₁ + x₁ * hC1
+    | linear_combination -h₁ + x₁ * hC1
+
 end ModularCurves
 
 namespace ModularCurves
