@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.LineVerticalAssembly
+import ModularCurves.EllipticCurve.PointsDictionary
 
 /-!
 # The chord identity (W1) — statement and downstream wiring
@@ -147,6 +148,7 @@ theorem eq_unit_mul_of_two_divisions {A : Type*} [CommRing A]
   ring
 
 end AlgebraicGeometry.Scheme.Modules
+
 
 namespace ModularCurves
 
@@ -312,3 +314,24 @@ theorem ker_eq_of_mem_of_span_eq {J₁ J₂ : C.IdealSheafData} (h12 : J₁ ≤ 
 
 end AlgebraicGeometry.Scheme.Modules
 
+namespace ModularCurves
+
+open AlgebraicGeometry
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1-d3.2c] The field-point comparison, algebra-indexed.** Every morphism
+`Spec K ⟶ Spec R` is `Spec` of a ring map, so an equality of morphisms that holds after
+composing with every ring map to every field holds after composing with every
+field-valued point — the form the extensionality principle consumes. -/
+theorem hom_ext_of_forall_algebra {R : Type u} [CommRing R] {Y : Scheme.{u}}
+    [IsReduced (Spec (CommRingCat.of R))] [Y.IsSeparated]
+    {f g : Spec (CommRingCat.of R) ⟶ Y}
+    (h : ∀ (K : Type u) [Field K] (φ : R →+* K),
+      Spec.map (CommRingCat.ofHom φ) ≫ f = Spec.map (CommRingCat.ofHom φ) ≫ g) :
+    f = g := by
+  refine hom_ext_of_forall_specPoint (fun K _ p => ?_)
+  obtain ⟨ψ, rfl⟩ := Spec.map_surjective p
+  exact h K ψ.hom
+
+end ModularCurves

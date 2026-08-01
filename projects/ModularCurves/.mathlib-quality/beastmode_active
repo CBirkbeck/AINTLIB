@@ -1,1 +1,1 @@
-FOCUS: [W1-d3.2c] field-point comparison: unfold the project group law (addOnZ_family/addOnY_family) and mathlib addX/negAddY at a Spec K point
+FOCUS: [W1-d3.2c scheme case] compare the project group-law section -(P+Q) with the (addX,negAddY) section via section_ext_of_forall_specPoint + Dictionary.eq_toAffine
