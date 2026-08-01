@@ -31458,3 +31458,19 @@ WHAT REMAINS, concretely (nothing conceptual):
  (γ) chart existence/positioning hypotheses (the three sections in one affine chart
      inside `sectionAway`) — the degenerate configurations are exactly what the
      project's addOnZ/addOnY chart families handle.
+
+### ★★★ [W1 (α)] NORM FACTORISATION LANDED 2026-08-01
+`chord_mul_conj_eq_cubic` + `cubic_factors_of_vieta` + `chord_mul_conj_eq_prod`
+(axiom-clean): in the affine coordinate ring, chord · conjugate = −(X−x₁)(X−x₂)(X−x₃).
+This exhibits the divisions of the exact-order factorisation explicitly, over ANY
+commutative ring, from the Weierstrass equation plus the Vieta relations (which the
+chord–tangent formulas supply: `hx₃` is literally `addX`, and `hc₁/hc₀` are the
+remaining two Vieta identities — to be discharged from the two points' equations and
+the line relation).
+NEXT: (i) discharge `hc₁`/`hc₀` from `Equation x₁ y₁`, `Equation x₂ y₂` and the line
+relation (a `linear_combination` computation, valid over any ring when `x₁ − x₂` is a
+nonzerodivisor or in the tangent case with the derivative relation);
+(ii) convert `chord · conj = −∏(X − xᵢ)` into the divisibility chain the exact-order
+criterion wants (the conjugate is a unit multiple of the "other" chord on the chart, so
+the chord itself divides the product of the generators);
+(iii) chart positioning / 2-torsion case split (the project's addOnZ/addOnY families).
