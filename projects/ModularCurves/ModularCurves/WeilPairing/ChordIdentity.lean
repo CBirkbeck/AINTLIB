@@ -1120,6 +1120,33 @@ theorem chord_identity_of_isUnit_hypotheses {R : Type u} [CommRing R]
     (nzd_of_isUnit_neg_two_torsion W x₂ y₂ htor₂)
     (nzd_of_isUnit_neg_two_torsion W _ y₃ htor₃) hunit
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 vertical] The vertical's norm factorisation.** The vertical line through a
+point `(x₀, y₀)` is `X − x₀`; its "conjugate" is trivial, and its divisor is
+`[R] + [−R]` — algebraically, `X − x₀` is already the product of the two evaluation
+generators up to a unit, since both points have the same `x`-coordinate. This is the
+two-factor analogue of the chord's norm identity, and it is immediate. -/
+theorem vertical_eq_generator {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    (X : A) (x₀ : R) :
+    X - algebraMap R A x₀ = (1 : Aˣ) * (X - algebraMap R A x₀) := by
+  rw [Units.val_one, one_mul]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[W1 vertical] The vertical vanishes at both points of its fibre.** Both `R` and
+`−R` have the same `x`-coordinate, so the vertical `X − x₀` is killed by both
+evaluations — the two-factor vanishing the vertical's trivialization needs. -/
+theorem vertical_evaluations_vanish {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (X : A) (x₀ : R) (σ₁ σ₂ : A →ₐ[R] R)
+    (h₁ : σ₁ X = x₀) (h₂ : σ₂ X = x₀) :
+    σ₁ (X - algebraMap R A x₀) = 0 ∧ σ₂ (X - algebraMap R A x₀) = 0 := by
+  constructor
+  · rw [map_sub, h₁, σ₁.commutes]
+    simp
+  · rw [map_sub, h₂, σ₂.commutes]
+    simp
+
 end ModularCurves
 
 namespace ModularCurves
