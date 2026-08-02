@@ -147,6 +147,25 @@ theorem constSchemeMap_mul_comp_rootSplitting (N : ℕ) [NeZero N]
   refine pow_eq_pow_of_nat_modEq ζ.2 ?_
   rw [ZMod.val_mul, Nat.mod_mod, mul_comm]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A4) THE DET TWIST.** Changing the trivialisation by `g ∈ GL₂(ℤ/N)` before taking
+the determinant model is the same as leaving the trivialisation alone and raising the root
+of unity to `det g`.
+
+This is the precise sense in which the determinant model *forces* a twist: the composite
+`det ∘ triv` followed by `ζ`-splitting is invariant under a change of trivialisation only
+if the root is simultaneously changed by `(det g)⁻¹`. It is the cocycle condition of the
+Weil-pairing descent, reduced to an identity of morphisms of constant schemes. -/
+theorem constSchemeMap_gl2Both_comp_detConstMor_rootSplitting (N : ℕ) [NeZero N]
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 })
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N)) :
+    constSchemeMap (S := S') (gl2Both N g) ≫ detConstMor N ≫ rootSplitting N ζ =
+      detConstMor N ≫ rootSplitting N ⟨(ζ : Γ(S', (⊤ : S'.Opens))) ^ g.det.val, by
+        rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ := by
+  rw [← Category.assoc, detConstMor_gl2Both, Category.assoc,
+    constSchemeMap_mul_comp_rootSplitting]
+
 end DetTwist
 
 end ModularCurves

@@ -32692,7 +32692,17 @@ the root is not circular.
 - **Generality**: as WP-A2.
 
 ### [WP-A4] Cocycle from a det-twisted root (THE HEART)
-- **Status**: open · **File**: `WeilPairing/RootSplitting.lean` · **Depends on**: WP-A3
+- **Status**: DONE 2026-08-02 — `constSchemeMap_gl2Both_comp_detConstMor_rootSplitting` in
+  `WeilPairing/RootSplitting.lean`, axiom-verified: changing the trivialisation by `g`
+  before the determinant model equals raising the root to `det g`. Two rewrites, given
+  `constSchemeMap_mul_comp_rootSplitting` (the algebraic core, with `rootPower_congr`).
+  This is the cocycle condition reduced to an identity of constant-scheme morphisms.
+
+TOOLING NOTE (2026-08-02): switched from the `edit → lake env lean → grep` loop to the
+Lean LSP (`lean_diagnostic_messages`, `lean_goal`, `lean_multi_attempt`). The old loop
+re-elaborated the whole file each iteration and showed only error text; the LSP answers in
+seconds and shows goal state. `lean_build` is needed once after adding an import, to
+refresh the LSP's oleans ("Imports are out of date"). · **File**: `WeilPairing/RootSplitting.lean` · **Depends on**: WP-A3
 - **Statement**: given, on the kernel pair of the cover, two trivialisations differing by
   a `GL₂(ZMod N)`-transition `g` and two roots with `ζ₁ = ζ₂ ^ (det g)`, the two pullbacks
   of `localDetPairing` agree.
