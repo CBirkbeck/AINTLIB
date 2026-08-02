@@ -10673,3 +10673,47 @@ The rules that repaid themselves, in the order they were learned:
    paid for itself one batch later, for free.
 6. **A build that dies with no `error:` in its log was killed, not failed.** This machine
    sits at ~9.9G/11.2G swap with other Lean projects resident.
+
+## Batch: approx_generation_key 107 → 40
+
+`FarguesFontaine/Groebner.lean`. Four lemmas, every one comfortably under the bar first
+measurement — the preamble budget finally applied *before* writing rather than after:
+
+    approxRedGoal_of_gaussNormRPS_le      bullet (1), the small case   13
+    frozen_coeff_diff_le_of_gaussNorm_le  `hfrozen'`                    5
+    update_gaussNormRPS_mul_le            sub-bullet A                 20
+    update_remainder_gaussNormRPS_le      sub-bullet B                 27
+    approx_generation_key                                              40
+
+### Choosing the target by dependency weight, not size
+
+The decisive measurement was not line count but how many *enclosing locals* each piece
+needs:
+
+    Presheaf:2231   three sub-bullets   15, 16, 10 locals   (5 of them `set`-bound)
+    Groebner:1586   four pieces          3,  6,  6,  6
+
+Presheaf's would each need a dozen explicit hypotheses plus `set … with` re-introduction;
+Groebner's take three to six, and its conclusion is the named `abbrev`
+`approxRedGoal p F ϖ hρ0 hρ1 G B c y`, so the statements are one line instead of eight.
+**Dependency weight is the right selector for what to attempt next**, and it is cheap to
+measure: for each candidate piece, grep its text for the names bound above it.
+
+### Three iterations, all signature guesses
+
+1. `hmg` — guessed `‖m‖ ≤ ‖y‖`; the real hypothesis bounds the **product**,
+   `‖m‖ · ‖g‖ ≤ ‖y‖`. The error names the expected type, so this is cheap to correct but
+   not cheap to avoid: `groebner_reduce`'s conclusion is a nine-way `∧`-chain and reading
+   the right conjunct out of it is the only way to get these right first time.
+2. **`p`, `F`, `ϖ` are explicit section variables here**, so every call site passes them —
+   the LaurentOverlap trap (`variable (B : Type*)`) in a different file. The
+   `grep -n "^variable" <file> | head -1` check catches the carrier but *not* this: the
+   explicit variables were declared on lines 41–53, far above the `{k : ℕ}` at 178.
+   Widen the check to *all* `^variable` lines above the target, not just the first.
+3. A heuristic line-wrap was avoided this time; the statements were hand-wrapped in the
+   template, and the three that still came out long were fixed by exact substitution.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 50   (47 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
