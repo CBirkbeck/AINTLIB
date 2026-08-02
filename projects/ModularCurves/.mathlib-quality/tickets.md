@@ -34076,3 +34076,24 @@ which is exactly `YFull.exists_representing_smooth_affine`
 (`ModularCurve/YFullRoute.lean:777`), `sorry` since T-E9.
 
 This framing needs no `EllHom` rigidity, no `levelSpaceΓ₁`, and no T-D6.
+
+## [WP-D2c-2] COMPLETE (2026-08-02) — axiom-verified
+
+`ModularCurve/YFullFromYOne.lean` (new):
+* `yFullCandidate N X₁ h := X₁.pullbackAlong (X₁.curve.fullLevelLocusπ N h)` — the universal
+  curve over a `Γ₁(N)`-object, pulled back to its full-level locus, with `_base` and
+  `_structMap` simp lemmas;
+* **`yFullCandidate_structMap_smooth`** — finite étale followed by smooth;
+* **`yFullCandidate_structMap_isAffineHom`** — finite followed by affine;
+* `yFullCandidate_smooth_affine` — the pair, in the shape
+  `smooth_affine_of_representableBy` consumes.
+
+As predicted this half needed no new mathematics. One implementation note: the mathlib
+instance `[IsAffineHom f] [IsAffineHom g] : IsAffineHom (f ≫ g)` **does not fire** here —
+`fullLevelLocusπ` is an `abbrev` that unfolds to `fullLevelLocusι ≫ torsionPairπ`, so the
+goal is a three-fold composite and instance search does not match. Worked around by applying
+`IsAffineOpen.preimage` twice directly, which is the instance's own proof inlined.
+
+**Next — [WP-D2c-3]**, the single remaining mathematical step: `yFullCandidate` represents
+`gammaFullNaiveProblem R N`. With it, `smooth_affine_of_representableBy` closes
+`YFull.exists_representing_smooth_affine`.

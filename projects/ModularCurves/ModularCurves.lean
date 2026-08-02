@@ -164,6 +164,7 @@ import ModularCurves.LevelStructure.Basic
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.Incidence
+import ModularCurves.ModularCurve.YFullFromYOne
 import ModularCurves.ModularCurve.YFullToYOne
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.ModularCurve.YOneAssembly
