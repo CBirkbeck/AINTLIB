@@ -34155,6 +34155,30 @@ Naturality then follows from `pullbackAlongMap` functoriality plus
 Stating D2c-3a generally is worth it: it is reusable for every level structure and keeps the
 `Γ(N)`-specific reasoning down to the collapse.
 
+## [WP-D2c-3a] **WITHDRAWN — it already existed** (2026-08-02)
+
+⚠ The entry below described a new file `Moduli/HomPullbackAlong.lean`. **That file was a
+duplicate and has been deleted.** `Moduli/QuotientProblem.lean` already contains the whole
+thing, with ~18 call sites across the project:
+
+| what I wrote | what already existed |
+|---|---|
+| `ofPullbackAlongData` | **`homToPullbackAlong`** (`QuotientProblem.lean`, just above 192) |
+| `ofPullbackAlongData_comp_pullbackAlongπ` | **`homToPullbackAlong_pullbackAlongπ`** |
+| `homPullbackAlongEquiv` (Σ-form) | **`EllObj.homPullbackAlongEquiv`** (`:192`, `Subtype (Prod)`-form) |
+
+**How the standing grep-first rule failed here, and the fix.** I *did* grep
+`⟶ X.pullbackAlong`, and the hit `QuotientProblem.lean:74` was in the output — but I read
+lines 65–110 and stopped, never reaching 192. The rule needs strengthening: when a grep
+points into a file, **check that file's full outline** (`grep -n '^theorem\|^noncomputable def'`)
+before writing anything in its subject area, not just the neighbourhood of the hit.
+
+Good news for WP-D2c-3b: the general lemma is already there and battle-tested. Use
+`EllObj.homPullbackAlongEquiv X g Y : (Y ⟶ X.pullbackAlong g) ≃ {p : (Y ⟶ X) × (Y.base ⟶ T) // p.2 ≫ g = p.1.baseHom}`
+directly, with `g := X₁.curve.fullLevelLocusπ N h`.
+
+<details><summary>original (withdrawn) entry</summary>
+
 ## [WP-D2c-3a] COMPLETE (2026-08-02) — axiom-verified
 
 `Moduli/HomPullbackAlong.lean` (new), the general `EllObj` lemma:
@@ -34175,7 +34199,9 @@ syntactically equal; and inside the structure the `rw`s must be replaced by term
 `.trans`/`▸` steps, because the `pullback.lift` carries a proof mentioning `b ≫ g` and `rw`
 cannot build the motive. Zero heartbeat bumps.
 
-**Next — [WP-D2c-3b]**: assemble. Specialise at `g := fullLevelLocusπ`; the `Σ`-description
-becomes "`Γ₁`-structure + refinement", and WP-D1a's `isNaiveGammaOne_of_isNaiveFullLevel`
-collapses it to just the full level structure, giving
-`yFullCandidate_representableBy` and closing the D-chain.
+</details>
+
+**Next — [WP-D2c-3b]**: assemble, using the **existing** `EllObj.homPullbackAlongEquiv`.
+Specialise at `g := fullLevelLocusπ`; the right-hand side becomes "`Γ₁`-structure +
+refinement", and WP-D1a's `isNaiveGammaOne_of_isNaiveFullLevel` collapses it to just the full
+level structure, giving `yFullCandidate_representableBy` and closing the D-chain.
