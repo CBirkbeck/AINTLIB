@@ -772,6 +772,92 @@ theorem mulArchimedean_valueGroupWithZero_ofValuation {Γ₀' : Type*}
 
 namespace PairOfDefinition
 
+omit [IsTopologicalRing A] in
+/-- A topologically nilpotent element has valuation `< 1` for a continuous valuation:
+some power lands in the open set `{v < 1}`, and `v i ≥ 1` would make every power `≥ 1`. -/
+private theorem valuation_lt_one_of_isTopologicallyNilpotent [ValuativeRel A]
+    (hv_cont : (ValuativeRel.valuation A).IsContinuous) {i : A}
+    (hi_nil : IsTopologicallyNilpotent i) : ValuativeRel.valuation A i < 1 := by
+  set v := ValuativeRel.valuation A
+  have hopen : IsOpen {a : A | v a < 1} := hv_cont 1
+  have h0mem : (0 : A) ∈ {a : A | v a < 1} := by simp
+  obtain ⟨n, hn⟩ := (hi_nil.eventually (hopen.mem_nhds h0mem)).exists
+  by_contra hge
+  rw [not_lt] at hge
+  refine absurd hn (not_lt.mpr ?_)
+  calc (1 : ValuativeRel.ValueGroupWithZero A) = 1 ^ n := (one_pow n).symm
+    _ ≤ (v i) ^ n := pow_le_pow_left' hge n
+    _ = v (i ^ n) := (map_pow v i n).symm
+
+omit [IsTopologicalRing A] in
+/-- Continuity transports along the `withZeroUnitsSplit` embedding of the value group:
+the `< ↑u` sublevel sets correspond exactly. -/
+private theorem isContinuous_map_withZeroUnitsSplit [ValuativeRel A]
+    (hv_cont : (ValuativeRel.valuation A).IsContinuous) :
+    ((ValuativeRel.valuation A).map (withZeroUnitsSplit (ValuativeRel.ValueGroupWithZero A))
+      (withZeroUnitsSplit_monotone _)).IsContinuous := by
+  set v := ValuativeRel.valuation A
+  set v' := v.map (withZeroUnitsSplit (ValuativeRel.ValueGroupWithZero A))
+    (withZeroUnitsSplit_monotone _)
+  have hv'_apply : ∀ a : A, v' a = withZeroUnitsSplit (ValuativeRel.ValueGroupWithZero A) (v a) :=
+    fun a ↦ Valuation.map_apply _ _ _ _
+  intro δ
+  rcases eq_or_ne δ 0 with rfl | hδ
+  · simp only [not_lt_zero]
+    exact isOpen_empty
+  obtain ⟨u, rfl⟩ := WithZero.ne_zero_iff_exists.mp hδ
+  have : {a : A | v' a < ↑u} = {a : A | v a < (u : ValuativeRel.ValueGroupWithZero A)} := by
+    ext a
+    rw [Set.mem_setOf_eq, Set.mem_setOf_eq, hv'_apply, withZeroUnitsSplit_lt_coe_iff]
+  rw [this]
+  exact hv_cont _
+
+omit [TopologicalSpace A] [IsTopologicalRing A] in
+/-- The support is unchanged by the `withZeroUnitsSplit` embedding: the embedding sends
+only `0` to `0`. Companion of `isContinuous_map_withZeroUnitsSplit`. -/
+private theorem supp_map_withZeroUnitsSplit [ValuativeRel A] :
+    ((ValuativeRel.valuation A).map (withZeroUnitsSplit (ValuativeRel.ValueGroupWithZero A))
+        (withZeroUnitsSplit_monotone _)).supp = (ValuativeRel.valuation A).supp := by
+  ext a
+  rw [Valuation.mem_supp_iff, Valuation.mem_supp_iff,
+    Valuation.map_apply, withZeroUnitsSplit_eq_zero_iff]
+
+/-- **Cofinality of a topologically nilpotent element's value**: every unit of the value
+group dominates some power of `v i`. Continuity puts `iⁿ·s` inside `{v < v a}` for the
+representation `γ = v a / v s`. -/
+private theorem exists_pow_le_of_topologicallyNilpotent [ValuativeRel A]
+    (hv_cont : (ValuativeRel.valuation A).IsContinuous) {i : A}
+    (hi_nil : IsTopologicallyNilpotent i)
+    (hvi_ne : ValuativeRel.valuation A i ≠ 0) (γ : (ValuativeRel.ValueGroupWithZero A)ˣ) :
+    ∃ n : ℕ, (Units.mk0 (ValuativeRel.valuation A i) hvi_ne) ^ n ≤ γ := by
+  set v := ValuativeRel.valuation A
+  obtain ⟨a, s, hval⟩ := ValuativeRel.exists_valuation_div_valuation_eq
+    (γ : ValuativeRel.ValueGroupWithZero A)
+  have hvs_ne : v (s : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero s
+  have hva_ne : v a ≠ 0 := by
+    intro h0
+    apply γ.ne_zero
+    rw [← hval, h0, zero_div]
+  -- continuity at `v a`: the sequence `i ^ n * s` enters `{v < v a}`.
+  have hopen : IsOpen {c : A | v c < v a} := hv_cont _
+  have h0mem : (0 : A) ∈ {c : A | v c < v a} := by
+    simp [zero_lt_iff.mpr hva_ne]
+  have htend : Filter.Tendsto (fun n : ℕ ↦ i ^ n * (s : A)) Filter.atTop (nhds 0) := by
+    simpa using hi_nil.mul_const (s : A)
+  obtain ⟨n, hn⟩ := (htend.eventually (hopen.mem_nhds h0mem)).exists
+  refine ⟨n, ?_⟩
+  rw [← Units.val_le_val]
+  have hval_le : (v i) ^ n * v (s : A) ≤ v a := by
+    have hlt : v (i ^ n * (s : A)) < v a := hn
+    rw [map_mul, map_pow] at hlt
+    exact le_of_lt hlt
+  calc (((Units.mk0 (v i) hvi_ne) ^ n : (ValuativeRel.ValueGroupWithZero A)ˣ)
+        : ValuativeRel.ValueGroupWithZero A)
+      = (v i) ^ n := by simp
+    _ ≤ v a / v (s : A) := (le_div_iff₀ (zero_lt_iff.mpr hvs_ne)).mpr hval_le
+    _ = (γ : ValuativeRel.ValueGroupWithZero A) := hval
+
+
 /-- **Wedhorn Lemma 7.45, height-one analytic form (assembled).** For a non-open prime
 `𝔭` of a complete Huber ring there is a continuous valuation `x` with `𝔭 ≤ supp x`,
 non-open support, and `MulArchimedean` canonical value group (Wedhorn's height-one
@@ -803,67 +889,22 @@ theorem exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime'
     intro h0
     exact hb_supp (hsupp_eq ▸ (Valuation.mem_supp_iff v i).mpr h0)
   -- `v i < 1` from continuity and topological nilpotence.
-  have hvi_lt : v i < 1 := by
-    have hopen : IsOpen {a : A | v a < 1} := hv_cont 1
-    have h0mem : (0 : A) ∈ {a : A | v a < 1} := by simp
-    obtain ⟨n, hn⟩ := (hi_nil.eventually (hopen.mem_nhds h0mem)).exists
-    by_contra hge
-    rw [not_lt] at hge
-    refine absurd hn (not_lt.mpr ?_)
-    calc (1 : ValuativeRel.ValueGroupWithZero A) = 1 ^ n := (one_pow n).symm
-      _ ≤ (v i) ^ n := pow_le_pow_left' hge n
-      _ = v (i ^ n) := (map_pow v i n).symm
+  have hvi_lt : v i < 1 :=
+    valuation_lt_one_of_isTopologicallyNilpotent hv_cont hi_nil
   -- Transport along `Γ₀ →*₀ WithZero Γ₀ˣ`.
   set φ := withZeroUnitsSplit (ValuativeRel.ValueGroupWithZero A) with hφ_def
   set v' : Valuation A (WithZero (ValuativeRel.ValueGroupWithZero A)ˣ) :=
     v.map φ (withZeroUnitsSplit_monotone _) with hv'_def
-  have hv'_apply : ∀ a : A, v' a = φ (v a) := fun a ↦ Valuation.map_apply _ _ _ _
-  have hv'_cont : v'.IsContinuous := by
-    intro δ
-    rcases eq_or_ne δ 0 with rfl | hδ
-    · simp only [not_lt_zero]
-      exact isOpen_empty
-    obtain ⟨u, rfl⟩ := WithZero.ne_zero_iff_exists.mp hδ
-    have : {a : A | v' a < ↑u} = {a : A | v a < (u : ValuativeRel.ValueGroupWithZero A)} := by
-      ext a
-      rw [Set.mem_setOf_eq, Set.mem_setOf_eq, hv'_apply, withZeroUnitsSplit_lt_coe_iff]
-    rw [this]
-    exact hv_cont _
-  have hv'_supp : v'.supp = v.supp := by
-    ext a
-    rw [Valuation.mem_supp_iff, Valuation.mem_supp_iff, hv'_apply,
-      withZeroUnitsSplit_eq_zero_iff]
+  have hv'_cont : v'.IsContinuous :=
+    isContinuous_map_withZeroUnitsSplit hv_cont
+  have hv'_supp : v'.supp = v.supp := supp_map_withZeroUnitsSplit
   -- The cofinal unit `g₀ := v i`.
   set g₀ : (ValuativeRel.ValueGroupWithZero A)ˣ := Units.mk0 (v i) hvi_ne with hg₀_def
   have hg₀_lt : g₀ < 1 := by
     rw [← Units.val_lt_val, hg₀_def]
     simpa using hvi_lt
-  have hcof : ∀ γ : (ValuativeRel.ValueGroupWithZero A)ˣ, ∃ n : ℕ, g₀ ^ n ≤ γ := by
-    intro γ
-    obtain ⟨a, s, hval⟩ := ValuativeRel.exists_valuation_div_valuation_eq
-      (γ : ValuativeRel.ValueGroupWithZero A)
-    have hvs_ne : v (s : A) ≠ 0 := ValuativeRel.valuation_posSubmonoid_ne_zero s
-    have hva_ne : v a ≠ 0 := by
-      intro h0
-      apply γ.ne_zero
-      rw [← hval, h0, zero_div]
-    -- continuity at `v a`: the sequence `i ^ n * s` enters `{v < v a}`.
-    have hopen : IsOpen {c : A | v c < v a} := hv_cont _
-    have h0mem : (0 : A) ∈ {c : A | v c < v a} := by
-      simp [zero_lt_iff.mpr hva_ne]
-    have htend : Filter.Tendsto (fun n : ℕ ↦ i ^ n * (s : A)) Filter.atTop (nhds 0) := by
-      simpa using hi_nil.mul_const (s : A)
-    obtain ⟨n, hn⟩ := (htend.eventually (hopen.mem_nhds h0mem)).exists
-    refine ⟨n, ?_⟩
-    rw [← Units.val_le_val]
-    have hval_le : (v i) ^ n * v (s : A) ≤ v a := by
-      have hlt : v (i ^ n * (s : A)) < v a := hn
-      rw [map_mul, map_pow] at hlt
-      exact le_of_lt hlt
-    calc ((g₀ ^ n : (ValuativeRel.ValueGroupWithZero A)ˣ) : ValuativeRel.ValueGroupWithZero A)
-        = (v i) ^ n := by simp [hg₀_def]
-      _ ≤ v a / v (s : A) := (le_div_iff₀ (zero_lt_iff.mpr hvs_ne)).mpr hval_le
-      _ = (γ : ValuativeRel.ValueGroupWithZero A) := hval
+  have hcof : ∀ γ : (ValuativeRel.ValueGroupWithZero A)ˣ, ∃ n : ℕ, g₀ ^ n ≤ γ :=
+    fun γ => exists_pow_le_of_topologicallyNilpotent hv_cont hi_nil hvi_ne γ
   -- Coarsen and package.
   obtain ⟨hw_cont, hw_arch⟩ :=
     v'.coarsen_maxAvoid_isContinuous_mulArchimedean hv'_cont hg₀_lt hcof
