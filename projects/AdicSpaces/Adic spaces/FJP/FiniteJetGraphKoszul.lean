@@ -267,6 +267,69 @@ section Polynomial
 
 variable {D : Type*} [CommRing D] {m : ℕ}
 
+/-- In an ordered pair `(i, j)` with `i < j`, the second index is never `0`. -/
+private lemma pairs_snd_ne_zero {n : ℕ} (p : Pairs (n + 1)) : p.1.2 ≠ 0 :=
+  Fin.pos_iff_ne_zero.mp (lt_of_le_of_lt (Fin.zero_le _) p.2)
+
+open MvPolynomial in
+/-- Pushing a coordinate syzygy through `finSuccEquiv`: the relation in `A[y]`, `y := X 0`. -/
+private lemma finSuccEquiv_syzygy_relation (u : Fin (m + 1) → MvPolynomial (Fin (m + 1)) D)
+    (h : d1 (fun i => (X i : MvPolynomial (Fin (m + 1)) D)) u = 0) :
+    MvPolynomial.finSuccEquiv D m (u 0) * Polynomial.X +
+      ∑ i : Fin m, MvPolynomial.finSuccEquiv D m (u i.succ) * Polynomial.C (X i) = 0 := by
+  have h0 := congrArg (MvPolynomial.finSuccEquiv D m) h
+  rw [map_zero] at h0
+  rw [← h0]
+  unfold d1
+  rw [map_sum, Fin.sum_univ_succ]
+  congr 1
+  · rw [map_mul, MvPolynomial.finSuccEquiv_X_zero]
+  · exact Finset.sum_congr rfl fun i _ => by
+      rw [map_mul, MvPolynomial.finSuccEquiv_X_succ]
+
+open MvPolynomial in
+/-- Reduction mod `y`: the constant coefficients of a relation in `A[y]` form a coordinate
+syzygy one variable down. -/
+private lemma coeff_zero_syzygy (U : Fin (m + 1) → Polynomial (MvPolynomial (Fin m) D))
+    (hrel : U 0 * Polynomial.X + ∑ i : Fin m, U i.succ * Polynomial.C (X i) = 0) :
+    d1 (fun i => (X i : MvPolynomial (Fin m) D)) (fun i => (U i.succ).coeff 0) = 0 := by
+  have hc := congrArg (fun p : Polynomial (MvPolynomial (Fin m) D) => p.coeff 0) hrel
+  simp only [Polynomial.coeff_add, Polynomial.coeff_zero, Polynomial.mul_coeff_zero,
+    Polynomial.coeff_X_zero, mul_zero, zero_add, Polynomial.finsetSum_coeff,
+    Polynomial.coeff_C_zero] at hc
+  unfold d1
+  exact hc
+
+open MvPolynomial in
+/-- Cancelling `y`: given the relation and the `divX` decomposition `Uᵢ₊₁ = y·Qᵢ + C(aᵢ)`
+with `a` itself a syzygy, the `y`-cofactor is Koszul-expressed by the `Qᵢ`. -/
+private lemma y_cofactor_eq (U : Fin (m + 1) → Polynomial (MvPolynomial (Fin m) D))
+    (Q : Fin m → Polynomial (MvPolynomial (Fin m) D)) (a : Fin m → MvPolynomial (Fin m) D)
+    (hrel : U 0 * Polynomial.X + ∑ i : Fin m, U i.succ * Polynomial.C (X i) = 0)
+    (hdecomp : ∀ i : Fin m, U i.succ = Polynomial.X * Q i + Polynomial.C (a i))
+    (hared : d1 (fun i => (X i : MvPolynomial (Fin m) D)) a = 0) :
+    U 0 = -∑ i : Fin m, Q i * Polynomial.C (X i) := by
+  have hXmul : Polynomial.X *
+      (U 0 + ∑ i : Fin m, Q i * Polynomial.C (X i)) = 0 := by
+    have hsplit : ∑ i : Fin m, U i.succ * Polynomial.C (X i) =
+        Polynomial.X * ∑ i : Fin m, Q i * Polynomial.C (X i) +
+          Polynomial.C (d1 (fun i => (X i : MvPolynomial (Fin m) D)) a) := by
+      unfold d1
+      rw [Finset.mul_sum, map_sum, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [hdecomp i, add_mul, map_mul, mul_assoc]
+    rw [mul_add, mul_comm Polynomial.X (U 0)]
+    have h2 := hrel
+    rw [hsplit, hared, map_zero, add_zero] at h2
+    exact h2
+  have hcancel : U 0 + ∑ i : Fin m, Q i * Polynomial.C (X i) = 0 := by
+    refine Polynomial.ext fun n => ?_
+    have hcn := congrArg (fun q : Polynomial (MvPolynomial (Fin m) D) =>
+      q.coeff (n + 1)) hXmul
+    simpa [Polynomial.coeff_X_mul] using hcn
+  exact eq_neg_of_add_eq_zero_left hcancel
+
+
 open MvPolynomial in
 /-- Coordinate-sequence syzygies over an arbitrary base are Koszul-generated (the elementary
 multidegree induction; [FJP]: "The coordinate sequence is regular over an arbitrary
@@ -281,59 +344,24 @@ theorem syzygy_coordinate (u : Fin m → MvPolynomial (Fin m) D)
     set e := MvPolynomial.finSuccEquiv D m with he
     set U : Fin (m + 1) → Polynomial (MvPolynomial (Fin m) D) := fun i => e (u i) with hUdef
     -- the relation in `A[y]`, `y := X 0`
-    have hrel : U 0 * Polynomial.X +
-        ∑ i : Fin m, U i.succ * Polynomial.C (X i) = 0 := by
-      have h0 := congrArg e h
-      rw [map_zero] at h0
-      rw [← h0]
-      unfold d1
-      rw [map_sum, Fin.sum_univ_succ]
-      congr 1
-      · rw [map_mul, MvPolynomial.finSuccEquiv_X_zero]
-      · exact Finset.sum_congr rfl fun i _ => by
-          rw [map_mul, MvPolynomial.finSuccEquiv_X_succ]
+    have hrel := finSuccEquiv_syzygy_relation u h
     -- reduction mod `y`: the constant coefficients form a coordinate syzygy over `Fin m`
     set a : Fin m → MvPolynomial (Fin m) D := fun i => (U i.succ).coeff 0 with hadef
-    have hared : d1 (fun i => (X i : MvPolynomial (Fin m) D)) a = 0 := by
-      have hc := congrArg (fun p : Polynomial (MvPolynomial (Fin m) D) => p.coeff 0) hrel
-      simp only [Polynomial.coeff_add, Polynomial.coeff_zero, Polynomial.mul_coeff_zero,
-        Polynomial.coeff_X_zero, mul_zero, zero_add, Polynomial.finsetSum_coeff,
-        Polynomial.coeff_C_zero] at hc
-      unfold d1
-      exact hc
+    have hared : d1 (fun i => (X i : MvPolynomial (Fin m) D)) a = 0 :=
+      coeff_zero_syzygy U hrel
     obtain ⟨w, hw⟩ := ih a hared
     -- the `divX` decomposition of the positive part
     set Q : Fin m → Polynomial (MvPolynomial (Fin m) D) := fun i => (U i.succ).divX with hQdef
     have hdecomp : ∀ i : Fin m, U i.succ = Polynomial.X * Q i + Polynomial.C (a i) :=
       fun i => (Polynomial.X_mul_divX_add (U i.succ)).symm
     -- cancel `y`: the top coefficient is Koszul-expressed
-    have hU0 : U 0 = -∑ i : Fin m, Q i * Polynomial.C (X i) := by
-      have hXmul : Polynomial.X *
-          (U 0 + ∑ i : Fin m, Q i * Polynomial.C (X i)) = 0 := by
-        have hsplit : ∑ i : Fin m, U i.succ * Polynomial.C (X i) =
-            Polynomial.X * ∑ i : Fin m, Q i * Polynomial.C (X i) +
-              Polynomial.C (d1 (fun i => (X i : MvPolynomial (Fin m) D)) a) := by
-          unfold d1
-          rw [Finset.mul_sum, map_sum, ← Finset.sum_add_distrib]
-          refine Finset.sum_congr rfl fun i _ => ?_
-          rw [hdecomp i, add_mul, map_mul, mul_assoc]
-        rw [mul_add, mul_comm Polynomial.X (U 0)]
-        have h2 := hrel
-        rw [hsplit, hared, map_zero, add_zero] at h2
-        exact h2
-      have hcancel : U 0 + ∑ i : Fin m, Q i * Polynomial.C (X i) = 0 := by
-        refine Polynomial.ext fun n => ?_
-        have hcn := congrArg (fun q : Polynomial (MvPolynomial (Fin m) D) =>
-          q.coeff (n + 1)) hXmul
-        simpa [Polynomial.coeff_X_mul] using hcn
-      exact eq_neg_of_add_eq_zero_left hcancel
+    have hU0 : U 0 = -∑ i : Fin m, Q i * Polynomial.C (X i) :=
+      y_cofactor_eq U Q a hrel hdecomp hared
     -- assemble the wedge
-    have hp2ne : ∀ p : Pairs (m + 1), p.1.2 ≠ 0 := fun p =>
-      Fin.pos_iff_ne_zero.mp (lt_of_le_of_lt (Fin.zero_le _) p.2)
     refine ⟨fun p =>
-      if h0 : p.1.1 = 0 then e.symm (Q (p.1.2.pred (hp2ne p)))
-      else e.symm (Polynomial.C (w ⟨(p.1.1.pred h0, p.1.2.pred (hp2ne p)),
-        (Fin.pred_lt_pred_iff (ha := h0) (hb := hp2ne p)).mpr p.2⟩)), ?_⟩
+      if h0 : p.1.1 = 0 then e.symm (Q (p.1.2.pred (pairs_snd_ne_zero p)))
+      else e.symm (Polynomial.C (w ⟨(p.1.1.pred h0, p.1.2.pred (pairs_snd_ne_zero p)),
+        (Fin.pred_lt_pred_iff (ha := h0) (hb := pairs_snd_ne_zero p)).mpr p.2⟩)), ?_⟩
     funext j
     refine Fin.cases ?_ ?_ j
     · -- component 0: `-∑ₖ v₀ₖ Xₖ = u 0` is exactly the `y`-cofactor identity `hU0`
@@ -354,8 +382,7 @@ theorem syzygy_coordinate (u : Fin m → MvPolynomial (Fin m) D)
       apply e.injective
       have hUj : e (u j.succ) = Polynomial.X * Q j +
           Polynomial.C (d2 (fun i => (X i : MvPolynomial (Fin m) D)) w j) := by
-        rw [hw]
-        exact hdecomp j
+        rw [hw]; exact hdecomp j
       rw [hUj]
       unfold d2
       have heX0 : e (X 0) = Polynomial.X := MvPolynomial.finSuccEquiv_X_zero
