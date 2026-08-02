@@ -9401,3 +9401,38 @@ which, one round per lemma. Zero new warnings and zero new over-width lines at t
 
     over-50 proofs   486 (baseline) → 72   (70 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: wI_le_one_of_isPowerBounded 93 → 29 — the cleanest symmetric twin yet
+
+`FarguesFontaine/SheafyBI.lean`. The proof ends in `rcases lt_max_iff.mp hlt with hbig | hbig`
+and the two branches are **35 lines each, identical modulo `.1`↔`.2`, `ρ₁`↔`ρ₂`,
+`le_max_left`↔`le_max_right`**. Seventy of the ninety-three lines were one argument written
+twice.
+
+The two coordinates cannot be unified into one lemma — `.1 : hatK p F hρ₁0 hρ₁1` and
+`.2 : hatK p F hρ₂0 hρ₂1` are *different types*, so a projection parameter would be
+dependent. But the branch splits cleanly into a part that is genuinely per-coordinate and a
+part that is not:
+
+    le_one_of_pow_mul_le_one   7L  pure NNReal: (∀ n, v^n·ρ^m ≤ 1) → v ≤ 1
+    valued_fst_pow_mul_pEltB   4L  the first-coordinate value of aⁿ·pᵐ
+    valued_snd_pow_mul_pEltB   4L  … and the second
+
+Only the last two are twins, and they are four lines each. Each branch is now three lines.
+**The right question for a symmetric twin is not "can I merge the branches" but "how much of
+the branch is actually asymmetric"** — here, twelve of the seventy lines.
+
+### Fifth wrong-altitude lemma
+
+The per-coordinate computation ended with a four-line `rw [show (pImage …).1 = BlocToHatK … from rfl,
+valued_BlocToHatK, wLoc_algebraMap, gaussValue_p …]` — which is exactly
+`IntervalRing.valued_pImage_fst`, an existing lemma in an imported file, re-derived inline in
+both branches. Using it directly shrinks each coordinate lemma to four lines.
+
+Result: 93 → 29, one *fewer* over-width line than HEAD, and `le_one_of_pow_mul_le_one`
+produces no `overlappingInstances` warning at all because it never mentions `F`.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 71   (69 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
