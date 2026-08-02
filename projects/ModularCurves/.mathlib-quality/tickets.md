@@ -34523,3 +34523,20 @@ So `hmatch` — the hypothesis `yFullCandidateHomEquiv` was stated against — i
   (`Moduli/LevelLocusNatural.lean`).
 
 **No mathematics remains — the last item is a naturality bookkeeping proof.**
+
+## [WP-D2c-3] the `homEquiv` field is BUILT (2026-08-03)
+
+`yFullCandidate_representableBy` now constructs its `homEquiv` outright:
+
+    homEquiv := yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne
+                  (fun Y u PQ => fibre_condition_iff …) Y
+
+with `hPsec` derived from `hP` by `pointToTorsion_torsionπ`, and the statement's
+per-geometric-point invertibility hypothesis replaced by the cleaner `hinvR : IsUnit (N : R)`
+(which is what `gammaFullToGammaOne` and hence `forgetAt` actually consume).
+
+**The single `sorry` in the whole D-chain is now the `homEquiv_comp` naturality field** —
+nothing else. Every factor of the chain is natural and the relevant squares are already
+proved; assembling them is the last task.
+
+Root green at 9638 jobs; every other file touched this session is sorry-free.

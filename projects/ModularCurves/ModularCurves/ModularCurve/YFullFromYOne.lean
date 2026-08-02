@@ -303,10 +303,18 @@ property).
 `T.base ⟶ B` over `v.baseHom`; combining with `toPullbackAlong v` produces
 `T ⟶ yFullCandidate N X₁ h`.
 
-*Round trips* are the two `Equiv` laws of `fullLevelLocusPointsEquiv` together with
-`toPullbackAlong_pullbackAlongπ`; *naturality* is
-`fullLevelLocusPointsEquiv`'s naturality (`Moduli/LevelLocusNatural.lean`) plus
-functoriality of `toPullbackAlong`.
+**STATUS (2026-08-03).** The `homEquiv` field is now *fully constructed and
+axiom-verified* — it is `yFullCandidateHomEquiv`, the chain
+
+    homPullbackAlongEquiv → subtypeProdEquivSigmaSubtype → completionFibreEquiv
+      → subtypeEquivRight (fibre_condition_iff) → sigmaHomForgetEquiv
+
+with every factor proved. The **only** remaining obligation is `homEquiv_comp`, the
+naturality field: `homEquiv (f ≫ g) = F.map f.op (homEquiv g)`. Each of the five factors is
+natural — `homPullbackAlongEquiv` by construction, the three `Equiv.sigma*`/`subtypeEquiv*`
+steps trivially, and `completionFibreEquiv` from `naiveGammaOneLocusPointsEquiv_natural` /
+`fullLevelLocusPointsEquiv_natural_*` (`Moduli/LevelLocusNatural.lean`) — so this is a
+composition of known squares, with no mathematical content left.
 
 Note `rOne` is a hypothesis: the candidate is built from a `Γ₁(N)`-representing object, and
 the backward direction is exactly where that representability is consumed. -/
@@ -316,9 +324,16 @@ theorem yFullCandidate_representableBy (N : ℕ) [NeZero N] (X₁ : EllObj R)
     (hP : P = X₁.curve.pointToTorsion (universalGammaOne R N rOne).1
       ((X₁.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 X₁.base) N _).mp
         (universalGammaOne R N rOne).2.1))
-    (hinv : ∀ (X : EllObj R) (k : Type u) [Field k] [IsAlgClosed k],
-      (Spec (CommRingCat.of k) ⟶ X.base) → (N : k) ≠ 0) :
+    (hinvR : IsUnit (N : R)) :
     Nonempty ((gammaFullNaiveProblem R N).RepresentableBy (yFullCandidate N X₁ h P)) := by
+  have hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base := by
+    rw [hP]
+    exact X₁.curve.pointToTorsion_torsionπ _ _
+  refine ⟨{
+    homEquiv := fun {Y} =>
+      yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne
+        (fun Y u PQ => fibre_condition_iff N hinvR X₁ P hPsec rOne hP Y u PQ) Y
+    homEquiv_comp := ?_ }⟩
   sorry
 
 /-- **(WP-D2c-4)** Given WP-D2c-3, every object representing the naive full level-`N`
