@@ -8739,3 +8739,45 @@ the `calc` cares which.
 
     over-50 proofs   486 (baseline) → 89   (87 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## DEFERRED (second attempt, diagnosis now firm): restrictToConvex / restrictToConvexBounded
+
+Two `def`s (79 and 96 code lines) whose `Valuation` fields carry the entire proof. Their
+`toFun`, `map_zero'` and `map_one'` are **byte-identical**; only `map_mul'` and
+`map_add_le_max'` differ, and those differ only in whether the hypothesis is
+`hle : ∀ r, v r ≤ 1` or `hH_ge : … → Units.mk0 (v a) ha ∈ H`. Splitting them would close two
+targets and remove ~29 duplicated lines, so it is worth stating exactly why it does not work.
+
+**Two approaches tried, both fail identically:**
+
+1. name the function, `unfold convexRestrictFun`, transplant each field body;
+2. name the function, transplant, and unfold *inside* each `simp only` set instead.
+
+Both reach the same wall in `map_mul'`:
+
+    simp only [hx, hy, hxy_ne, dif_neg, dif_pos hmx, dif_pos hmy, dif_pos hmxy, …]
+
+resolves the OUTER `dite (v x = 0)` but leaves `dif_pos hmx` unfired, so the following
+`rw [show some ⟨Units.mk0 (v x) hx, hmx⟩ = …]` reports "did not find an occurrence".
+
+**Why.** `dif_neg` discharges the outer `dite` and substitutes ITS OWN proof of
+`¬(v x = 0)` into the inner condition. In the structure field that proof is literally the
+`by_cases`-introduced `hx`, so `hmx : Units.mk0 (v x) hx ∈ H` matches. In a standalone lemma
+the elaboration path differs and the substituted proof is not syntactically `hx`, so
+`dif_pos hmx` no longer applies. The goal *terms* are the same; the *proof terms inside the
+dependent-if conditions* are not — and `simp only` with an explicit argument matches
+syntactically.
+
+**What would work** (not attempted, for effort reasons): make the dites non-dependent by
+extracting `Units.mk0 (v r) h` behind a `Classical.byCases` on `v r = 0` before the
+membership test, or restate the field bodies to avoid naming the dite's proof at all. Both
+rewrite the proofs rather than move them, which is `/cleanup` work, not decomposition.
+
+Four build rounds spent across two sessions; reverted to HEAD both times, module re-verified
+green. Recording the mechanism so a third attempt starts from it rather than from
+`unfold`.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 89   (87 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
