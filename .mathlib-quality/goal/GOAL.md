@@ -8403,3 +8403,58 @@ got it to 53).
 
     over-50 proofs   486 (baseline) → 104   (102 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: the twins, SpvAI, biResQ_chain_glue (104 → 100)
+
+### Full-library gate: GREEN
+
+`lake build '«Adic spaces»'` over all 3360 modules: **exit 0, zero errors**. 107 `sorry`
+declarations project-wide, all pre-existing producer WIP that this campaign never touches.
+First whole-library gate of the campaign; every target so far had only been built module-wise.
+
+### One extraction closed two targets
+
+`unitCover_overlapQuotEquiv` and `unitCover_overlapQuotEquiv_symm_mk` feed the SAME eight
+arguments to `tate_quotPresentation` and `tate_quotPresentation_symm_mk` — one in bullet
+form, one in term form, otherwise character-identical. Five shared lemmas took both from
+79 to 49, with the types read off `tate_quotPresentation`'s signature rather than invented.
+
+### An assertion stopped a blanket edit BEFORE the build
+
+I matched the five-line `haveI hCompleteB` preamble and asserted it occurred twice. It
+occurs **twelve** times in WedhornCechAcyclicity. Unscoped, the replace would have deleted
+it from ten unrelated proofs that still use it. Redone scoped to the two declarations' line
+ranges with a `count == 1` assertion per block.
+
+That count is a task-3 finding in its own right: ~60 lines of identical instance preamble in
+one file, next to the Wedhorn828 one.
+
+### THE `set` RULE, CONSOLIDATED — three failure modes now
+
+Naming a repeated term is:
+
+* **free for PROOFS** — proof irrelevance, nothing to unfold, later `rw`s still match
+  (`limitFrobHom_add`, `hsub` in `genPiece_relOverlap_forward_restriction`);
+* **cheap for small DATA** with a small statement (`DI`/`DII`/`EI`/`EII`, `D₁`/`D₁₂`/`Dt`);
+* **unaffordable** in two distinct ways:
+  - `set` on a proof whose STATEMENT is huge → `kabstract` across the whole statement,
+    `(deterministic) timeout at whnf` (`groebner_reduce`, 43-line `∃`);
+  - `set` on a large DATA term → `isDefEq` re-expands it against the goal,
+    `(deterministic) timeout at isDefEq` (`biResQ_chain_glue`, a six-line `RingHom`).
+
+And a separate trap: **`have` erases the body**, so a `have`-named data term is opaque and
+`hres f' = fm` will not match `(biResQ …) f' = fm`. Data needs `set`/`let`; if `set` is
+unaffordable, the term stays inline.
+
+### Targets that extract nothing
+
+`biResQ_chain_glue` went 76 → 50 with **no new declaration**: one hoisted `have` with an
+inferred type, one inlined single-use term, one `have h := …` replacing a three-line
+statement, and three reflows. Worth naming as a category — some proofs are long only because
+they restate, and the fix is arithmetic on lines, not decomposition.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 100   (98 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
+    full lake build  GREEN (exit 0, zero errors, 3360 modules)
