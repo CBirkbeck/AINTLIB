@@ -290,6 +290,54 @@ theorem isRational_chartData (u v a b : ℕ) :
   exact AddSubgroup.isOpen_of_mem_nhds _
     (Filter.mem_of_superset (hIopen.mem_nhds (zero_mem _)) hsub)
 
+/-- Cancel a nonzero right factor. Hand-rolled rather than via `mul_le_mul_iff_right₀`,
+whose `PosMulReflectLE` search on this value group blows the elaboration budget. -/
+private lemma le_of_mul_le_mul_right₀ {Γ : Type*} [LinearOrderedCommGroupWithZero Γ]
+    {x y c : Γ} (hc : c ≠ 0) (h : x * c ≤ y * c) : x ≤ y := by
+  have h2 := mul_le_mul_right h c⁻¹
+  rwa [mul_comm x c, mul_comm y c, ← mul_assoc, ← mul_assoc,
+    inv_mul_cancel₀ hc, one_mul, one_mul] at h2
+
+/-- Cancel a nonzero left factor. -/
+private lemma le_of_mul_le_mul_left₀ {Γ : Type*} [LinearOrderedCommGroupWithZero Γ]
+    {x y c : Γ} (hc : c ≠ 0) (h : c * x ≤ c * y) : x ≤ y :=
+  le_of_mul_le_mul_right₀ hc (by rwa [mul_comm x c, mul_comm y c])
+
+/-- `p·[ϖ]` is nonzero at `v` exactly when both factors are. The `ValuativeRel` instance is
+supplied EXPLICITLY — a `letI` in the statement leaves Lean nothing to synthesize from. -/
+private lemma not_vle_p_mul_teichPi_zero (v : Spv (Ainf p F))
+    (h1 : @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel (p : Ainf p F) ≠ 0)
+    (h2 : @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel (teichPi p F ϖ) ≠ 0) :
+    ¬ v.vle ((p : Ainf p F) * teichPi p F ϖ) 0 := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  rw [(ValuativeRel.valuation (Ainf p F)).vle_iff_le, map_mul, map_zero]
+  intro hle
+  rcases mul_eq_zero.mp (le_zero_iff.mp hle) with h | h
+  exacts [h1 h, h2 h]
+
+private lemma valuation_p_teichPi_ne_zero_of_not_vle (v : Spv (Ainf p F))
+    (hY2 : ¬ v.vle ((p : Ainf p F) * teichPi p F ϖ) 0) :
+    @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel (p : Ainf p F) ≠ 0
+      ∧ @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel (teichPi p F ϖ) ≠ 0 := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  exact ⟨fun h => hY2 (by rw [hbridge, map_mul, map_zero, h, zero_mul]),
+    fun h => hY2 (by rw [hbridge, map_mul, map_zero, h, mul_zero])⟩
+
+private lemma valuation_p_teichPi_ne_zero_of_chartS (v : Spv (Ainf p F)) {a₁ b₂ : ℕ}
+    (ha₁ : 0 < a₁) (hb₂ : 0 < b₂)
+    (hsval : @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel
+      (chartS p F ϖ a₁ b₂) ≠ 0) :
+    @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel (p : Ainf p F) ≠ 0
+      ∧ @ValuativeRel.valuation (Ainf p F) _ v.toValuativeRel (teichPi p F ϖ) ≠ 0 := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  rw [chartS, map_mul, map_pow, map_pow] at hsval
+  exact ⟨fun h => hsval (by rw [h, zero_pow ha₁.ne', zero_mul]),
+    fun h => hsval (by rw [h, zero_pow hb₂.ne', mul_zero])⟩
+
+
 /-- **The chart datum presents the two-sided window** (raw-exponent form): a
 valuation lies in `R({p^{a₁+a₂}, [ϖ]^{b₁+b₂}}/p^{a₁}[ϖ]^{b₂})` iff it lies in `𝒴`
 with `v([ϖ])^{b₁} ≤ v(p)^{a₁}` (κ ≥ a₁/b₁) and `v(p)^{a₂} ≤ v([ϖ])^{b₂}`
@@ -315,55 +363,24 @@ theorem mem_rationalOpen_chartData_iff (a₁ b₁ a₂ b₂ : ℕ)
         (chartS p F ϖ a₁ b₂) := hT _ (by rw [chartT]; simp)
     have h2 : v.vle (teichPi p F ϖ ^ ((b₁ + b₂ - 1) + 1))
         (chartS p F ϖ a₁ b₂) := hT _ (by rw [chartT]; simp)
-    rw [hexpa] at h1
-    rw [hexpb] at h2
+    rw [hexpa] at h1; rw [hexpb] at h2
     have hsval : w (chartS p F ϖ a₁ b₂) ≠ 0 := by
-      intro h0
-      refine hs ?_
-      rw [hbridge, map_zero, h0]
-    have hpϖ : w ((p : Ainf p F)) ≠ 0 ∧ w (teichPi p F ϖ) ≠ 0 := by
-      rw [chartS, map_mul, map_pow, map_pow] at hsval
-      constructor
-      · intro h
-        exact hsval (by rw [h, zero_pow ha₁.ne', zero_mul])
-      · intro h
-        exact hsval (by rw [h, zero_pow hb₂.ne', mul_zero])
-    have hY2 : ¬ v.vle ((p : Ainf p F) * teichPi p F ϖ) 0 := by
-      rw [hbridge, map_mul, map_zero]
-      intro hle
-      rcases mul_eq_zero.mp (le_zero_iff.mp hle) with h | h
-      · exact hpϖ.1 h
-      · exact hpϖ.2 h
+      intro h0; exact hs (by rw [hbridge, map_zero, h0])
+    have hpϖ := valuation_p_teichPi_ne_zero_of_chartS p F ϖ v ha₁ hb₂ hsval
+    have hY2 := not_vle_p_mul_teichPi_zero p F ϖ v hpϖ.1 hpϖ.2
     have hc1 : v.vle (teichPi p F ϖ ^ b₁) ((p : Ainf p F) ^ a₁) := by
       rw [hbridge, map_pow, map_pow]
       rw [hbridge, chartS, map_mul, map_pow, map_pow, map_pow] at h2
       rw [pow_add] at h2
-      have hcinv := mul_le_mul_right h2 ((w (teichPi p F ϖ) ^ b₂)⁻¹)
-      rwa [mul_comm (w (teichPi p F ϖ) ^ b₁) (w (teichPi p F ϖ) ^ b₂),
-        mul_comm (w ((p : Ainf p F)) ^ a₁) (w (teichPi p F ϖ) ^ b₂),
-        ← mul_assoc, ← mul_assoc, inv_mul_cancel₀ (pow_ne_zero _ hpϖ.2),
-        one_mul, one_mul] at hcinv
+      exact le_of_mul_le_mul_right₀ (pow_ne_zero _ hpϖ.2) h2
     have hc2 : v.vle ((p : Ainf p F) ^ a₂) (teichPi p F ϖ ^ b₂) := by
       rw [hbridge, map_pow, map_pow]
       rw [hbridge, chartS, map_mul, map_pow, map_pow, map_pow] at h1
       rw [pow_add] at h1
-      have h1' : w ((p : Ainf p F)) ^ a₁ * w ((p : Ainf p F)) ^ a₂
-          ≤ w ((p : Ainf p F)) ^ a₁ * w (teichPi p F ϖ) ^ b₂ := h1
-      have hcinv := mul_le_mul_left h1' ((w ((p : Ainf p F)) ^ a₁)⁻¹)
-      rwa [mul_comm (w ((p : Ainf p F)) ^ a₁) (w ((p : Ainf p F)) ^ a₂),
-        mul_comm (w ((p : Ainf p F)) ^ a₁) (w (teichPi p F ϖ) ^ b₂),
-        mul_assoc, mul_assoc, mul_inv_cancel₀ (pow_ne_zero _ hpϖ.1),
-        mul_one, mul_one] at hcinv
+      exact le_of_mul_le_mul_left₀ (pow_ne_zero _ hpϖ.1) h1
     exact ⟨⟨hspa, hY2⟩, hc1, hc2⟩
   · rintro ⟨⟨hspa, hY2⟩, hc1, hc2⟩
-    have hpϖ : w ((p : Ainf p F)) ≠ 0 ∧ w (teichPi p F ϖ) ≠ 0 := by
-      constructor
-      · intro h
-        refine hY2 ?_
-        rw [hbridge, map_mul, map_zero, h, zero_mul]
-      · intro h
-        refine hY2 ?_
-        rw [hbridge, map_mul, map_zero, h, mul_zero]
+    have hpϖ := valuation_p_teichPi_ne_zero_of_not_vle p F ϖ v hY2
     refine ⟨hspa, ?_, ?_⟩
     · intro t ht
       rw [chartT] at ht
