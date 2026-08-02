@@ -313,6 +313,46 @@ theorem stalkVle_congr {v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
   subst hb
   exact h
 
+/-- `ringStalkMap` of the ambient Frobenius on a germ representative, in the form the
+`stalkValue` comparison needs it: with the germ already identified as `a`. -/
+private lemma ringStalkMap_ambientFrob_hom_of_germ_eq (k : ℤ)
+    (x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    {U : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
+    {hxU : spaFrob p F k x ∈ U} {f : ↥(limitSections U)}
+    {a : ToType ((spaRingPresheaf (Ainf p F)).stalk (spaFrob p F k x))}
+    (hf : (spaRingPresheaf (Ainf p F)).germ U (spaFrob p F k x) hxU f = a) :
+    (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom a
+      = (yAmbientPresheafedSpace p F).ringPresheaf.germ
+          (frobOpens p F k U) x hxU (limitFrobHom p F k U f) := by
+  rw [← hf]
+  exact ringStalkMap_ambientFrob_germ p F k x U hxU f
+
+/-- Restricting a Frobenius-transported section twice equals transporting the restriction. -/
+private lemma limitRestrict_limitFrobHom_comm (k : ℤ)
+    {U W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
+    (hWU : W ≤ frobOpens p F k U)
+    (hle1 : frobOpens p F k (frobOpens p F (-k) W) ≤ W)
+    (hU'U : frobOpens p F (-k) W ≤ U) (f : ↥(limitSections U)) :
+    limitRestrict hle1 (limitRestrict hWU (limitFrobHom p F k U f))
+      = limitFrobHom p F k (frobOpens p F (-k) W) (limitRestrict hU'U f) := by
+  have hcomp := congr_fun (congrArg DFunLike.coe (limitRestrict_comp hle1 hWU))
+    (limitFrobHom p F k U f)
+  exact hcomp.trans (limitFrobHom_limitRestrict p F k hU'U f).symm
+
+/-- The germ of a Frobenius-transported restriction agrees with the transported germ. -/
+private lemma germ_limitFrobHom_limitRestrict (k : ℤ)
+    {U W' : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))} (hW'U : W' ≤ U)
+    (x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (hxF : spaFrob p F k x ∈ W') (hxU : spaFrob p F k x ∈ U)
+    (f : ↥(limitSections U)) :
+    (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k W') x hxF
+        (limitFrobHom p F k W' (limitRestrict hW'U f))
+      = (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k U) x hxU
+          (limitFrobHom p F k U f) := by
+  rw [limitFrobHom_limitRestrict p F k hW'U f]
+  exact germ_limitRestrict (frobOpens_mono p F k hW'U) hxF (limitFrobHom p F k U f)
+
+
 /-- **The ambient stalk-value equivariance** (D-iii-4b, the ambient core of
 `val_compat`): pulling the stalk valuation back along the Frobenius stalk
 transport gives the stalk valuation at the image point. -/
@@ -325,16 +365,8 @@ theorem comap_ringStalkMap_ambientFrob_stalkValue (k : ℤ)
   · -- forward: comap-vle ⇒ stalkVle at the image point
     intro hab
     obtain ⟨U, hxU, f, g, hf, hg⟩ := exists_common_rep (spaFrob p F k x) a b
-    have hMa : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom a
-        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
-            (frobOpens p F k U) x hxU (limitFrobHom p F k U f) := by
-      rw [← hf]
-      exact ringStalkMap_ambientFrob_germ p F k x U hxU f
-    have hMb : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom b
-        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
-            (frobOpens p F k U) x hxU (limitFrobHom p F k U g) := by
-      rw [← hg]
-      exact ringStalkMap_ambientFrob_germ p F k x U hxU g
+    have hMa := ringStalkMap_ambientFrob_hom_of_germ_eq p F k x hf
+    have hMb := ringStalkMap_ambientFrob_hom_of_germ_eq p F k x hg
     have hab' := stalkVle_congr p F hMa hMb hab
     obtain ⟨W, hxW, hWU, hvle⟩ := stalkVle_elim hab' hxU rfl rfl
     have hEq : frobOpens p F k (frobOpens p F (-k) W) = W :=
@@ -347,22 +379,8 @@ theorem comap_ringStalkMap_ambientFrob_stalkValue (k : ℤ)
     have hvle2 := (openValue_vle_restrict hle1 hxW'
       (limitRestrict hWU (limitFrobHom p F k U f))
       (limitRestrict hWU (limitFrobHom p F k U g))).mp hvle
-    have hcolf : limitRestrict hle1
-        (limitRestrict hWU (limitFrobHom p F k U f))
-        = limitFrobHom p F k (frobOpens p F (-k) W)
-            (limitRestrict hU'U f) := by
-      have hcomp := congr_fun (congrArg DFunLike.coe
-        (limitRestrict_comp hle1 hWU)) (limitFrobHom p F k U f)
-      refine (hcomp.trans ?_)
-      exact (limitFrobHom_limitRestrict p F k hU'U f).symm
-    have hcolg : limitRestrict hle1
-        (limitRestrict hWU (limitFrobHom p F k U g))
-        = limitFrobHom p F k (frobOpens p F (-k) W)
-            (limitRestrict hU'U g) := by
-      have hcomp := congr_fun (congrArg DFunLike.coe
-        (limitRestrict_comp hle1 hWU)) (limitFrobHom p F k U g)
-      refine (hcomp.trans ?_)
-      exact (limitFrobHom_limitRestrict p F k hU'U g).symm
+    have hcolf := limitRestrict_limitFrobHom_comm p F k hWU hle1 hU'U f
+    have hcolg := limitRestrict_limitFrobHom_comm p F k hWU hle1 hU'U g
     have hvle3 : (openValue (frobOpens p F k (frobOpens p F (-k) W))
         hxW').vle
         (limitFrobHom p F k (frobOpens p F (-k) W) (limitRestrict hU'U f))
@@ -383,30 +401,10 @@ theorem comap_ringStalkMap_ambientFrob_stalkValue (k : ℤ)
     have hcv := Eq.mpr (openValue_vle_frobTransport p F k W' hxF
       (limitRestrict hW'U f) (limitRestrict hW'U g)) hvle
     have hst := stalkVle_intro (v := x) hcv
-    have hMa : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom a
-        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
-            (frobOpens p F k U) x hxU (limitFrobHom p F k U f) := by
-      rw [← hf]
-      exact ringStalkMap_ambientFrob_germ p F k x U hxU f
-    have hMb : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom b
-        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
-            (frobOpens p F k U) x hxU (limitFrobHom p F k U g) := by
-      rw [← hg]
-      exact ringStalkMap_ambientFrob_germ p F k x U hxU g
-    have hgf : (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k W') x hxF
-        (limitFrobHom p F k W' (limitRestrict hW'U f))
-        = (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k U) x hxU
-            (limitFrobHom p F k U f) := by
-      rw [limitFrobHom_limitRestrict p F k hW'U f]
-      exact germ_limitRestrict (frobOpens_mono p F k hW'U) hxF
-        (limitFrobHom p F k U f)
-    have hgg : (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k W') x hxF
-        (limitFrobHom p F k W' (limitRestrict hW'U g))
-        = (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k U) x hxU
-            (limitFrobHom p F k U g) := by
-      rw [limitFrobHom_limitRestrict p F k hW'U g]
-      exact germ_limitRestrict (frobOpens_mono p F k hW'U) hxF
-        (limitFrobHom p F k U g)
+    have hMa := ringStalkMap_ambientFrob_hom_of_germ_eq p F k x hf
+    have hMb := ringStalkMap_ambientFrob_hom_of_germ_eq p F k x hg
+    have hgf := germ_limitFrobHom_limitRestrict p F k hW'U x hxF hxU f
+    have hgg := germ_limitFrobHom_limitRestrict p F k hW'U x hxF hxU g
     exact stalkVle_congr p F (hgf.trans hMa.symm) (hgg.trans hMb.symm) hst
 
 /-- **Germ naturality of the `𝒴`-Frobenius stalk transport** (the restricted
