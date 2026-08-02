@@ -112,4 +112,50 @@ theorem universalFullLevel_fst_eq (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
   rw [Category.id_comp] at h
   exact h
 
+/-! ### `Y(N)` over `Y₁(N)` classifies completions of the universal `P` (WP-D2b) -/
+
+/-- **(WP-D2b)** The defining property of `Y(N)` as a space over `Y₁(N)`: a morphism
+`u : T ⟶ Y(N)` lies over `f : T ⟶ Y₁(N)` exactly when the full level structure it
+classifies has, as its first member, the pullback along `f` of the universal
+`Γ₁(N)`-structure.
+
+Equivalently: `Y(N) ⟶ Y₁(N)` is the space of *completions* of the universal `P` to a naive
+full level structure. This is the identification WP-D2c transports finite-étaleness across. -/
+theorem yFullToYOne_comp_eq_iff (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
+    {X Y : EllObj R} (rFull : (gammaFullNaiveProblem R N).RepresentableBy X)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy Y)
+    {T : EllObj R} (u : T ⟶ X) (f : T ⟶ Y) :
+    u ≫ yFullToYOne R N hinv rFull rOne = f ↔
+      (rFull.homEquiv u).1.1 =
+        EllHom.pullSection R f (universalGammaOne R N rOne).1 := by
+  have hleft : (rOne.homEquiv (u ≫ yFullToYOne R N hinv rFull rOne)).1 =
+      (rFull.homEquiv u).1.1 := yFullToYOne_homEquiv R N hinv rFull rOne u
+  have hright : (rOne.homEquiv f).1 =
+      EllHom.pullSection R f (universalGammaOne R N rOne).1 := by
+    rw [homEquiv_eq_map_universalGammaOne R N rOne f]
+    rfl
+  constructor
+  · intro hu
+    rw [← hleft, hu, hright]
+  · intro hval
+    refine rOne.homEquiv.injective (Subtype.ext ?_)
+    rw [hleft, hright, hval]
+
+/-- **(WP-D2b)** The completions of the universal `Γ₁(N)`-structure over a fixed
+`f : T ⟶ Y₁(N)` are exactly the `T`-points of `Y(N)` over `f`. -/
+noncomputable def yFullToYOneFibreEquiv (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
+    {X Y : EllObj R} (rFull : (gammaFullNaiveProblem R N).RepresentableBy X)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy Y)
+    {T : EllObj R} (f : T ⟶ Y) :
+    { u : T ⟶ X // u ≫ yFullToYOne R N hinv rFull rOne = f } ≃
+      { PQ : (gammaFullNaiveProblem R N).obj (Opposite.op T) //
+        PQ.1.1 = EllHom.pullSection R f (universalGammaOne R N rOne).1 } :=
+  { toFun := fun u => ⟨rFull.homEquiv u.1,
+      (yFullToYOne_comp_eq_iff R N hinv rFull rOne u.1 f).mp u.2⟩
+    invFun := fun PQ => ⟨rFull.homEquiv.symm PQ.1,
+      (yFullToYOne_comp_eq_iff R N hinv rFull rOne _ f).mpr
+        (by rw [Equiv.apply_symm_apply]; exact PQ.2)⟩
+    left_inv := fun u => Subtype.ext (rFull.homEquiv.symm_apply_apply u.1)
+    right_inv := fun PQ => Subtype.ext (rFull.homEquiv.apply_symm_apply PQ.1) }
+
 end ModularCurves

@@ -33933,3 +33933,26 @@ structures on `T` whose first member is the pullback of the universal `P₁` alo
 direction is `universalFullLevel_fst_eq`, the other is the universal property of `rFull`.
 Then that functor is represented by the relative locus, which is finite étale
 (`fullLevelToNaiveGammaOne_etale`), giving `Etale (yFullToYOne …).baseHom` and hence WP-D2c.
+
+## [WP-D2b] COMPLETE (2026-08-02) — axiom-verified
+
+* **`yFullToYOne_comp_eq_iff`** — a morphism `u : T ⟶ Y(N)` lies over `f : T ⟶ Y₁(N)`
+  **iff** the full level structure it classifies has, as its first member, the pullback of
+  the universal `Γ₁(N)`-structure along `f`. Both directions come straight from
+  `yFullToYOne_homEquiv` + `homEquiv_eq_map_universalGammaOne`, with injectivity of
+  `rOne.homEquiv` for the converse.
+* **`yFullToYOneFibreEquiv`** — the packaged form: `T`-points of `Y(N)` over `f` are exactly
+  the completions of `f^*P₁` to a naive full level structure.
+
+So `Y(N) ⟶ Y₁(N)` *is* the space of completions of the universal `P`, which is the
+identification WP-D2c needs.
+
+### [WP-D2c] what is left
+Compare `yFullToYOneFibreEquiv`'s right-hand side with the relative locus. For the universal
+curve `E₁` over `Y₁(N)`, the completions of `P₁` form a subscheme of `E₁[N]` — the fibre of
+`fullLevelToNaiveGammaOne` over the section `P₁` — so the two functors agree and `Y(N)` is
+that fibre. `fullLevelToNaiveGammaOne_etale` + `_isFinite` then give
+`Etale (yFullToYOne …).baseHom` and `IsFinite` of it, after which:
+`Etale ⟹ Smooth` (instance) + `Smooth` composes + `yOneStructMap_smooth` gives
+`Smooth Y(N).structMap`, and `YFull.smooth_affine_of_representableBy` spreads it to every
+representing object — closing `YFull.exists_representing_smooth_affine`.
