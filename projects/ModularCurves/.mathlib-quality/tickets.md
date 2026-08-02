@@ -34379,3 +34379,31 @@ structure alone.
 
 This is the only place in the whole D-chain where WP-D1a's counting argument is consumed,
 and the only step still open.
+
+## [WP-D2c-3 step 4] COMPLETE (2026-08-03) — axiom-verified
+
+`ModularCurve/YFullFromYOne.lean`:
+* `forgetAt` — the forgetful map on structures over a fixed `Y`, as a plain function;
+* **`sigmaForgetEquiv`** — `Σ` over `Γ₁`-structures of the fibres of `forgetAt` is the full
+  level structures. This is `Equiv.sigmaFiberEquiv`, and it is *where WP-D1a is consumed*:
+  the map `forgetAt` exists only because a full level structure determines its `Γ₁`-part;
+* **`sigmaHomForgetEquiv`** — the same, reindexed along `rOne.homEquiv` so the `Σ` runs over
+  morphisms `Y ⟶ X₁`, which is the shape `homPullbackAlongEquiv` produces.
+
+**All four assembly steps now exist as standalone axiom-verified equivalences:**
+
+| step | lemma |
+|---|---|
+| 1. split off `u` | `EllObj.homPullbackAlongEquiv` (pre-existing) |
+| 2. lift ↦ level structure | `completionLocusClassifies` |
+| 3. transport to `Y` | `completionFibreEquiv` |
+| 4. collapse the `Σ` | `sigmaHomForgetEquiv` |
+
+### The only glue left
+Chaining 1→3 gives `Σ u, {PQ // (transport).symm PQ).1.1 = torsionMapSection (u.baseHom ≫ P)}`
+while 4 wants `Σ u, {PQ // forgetAt PQ = rOne.homEquiv u}`. So the remaining task is a single
+`Equiv.subtypeEquivRight`: show those two fibre conditions agree, given `hP` (that `P` is the
+universal `Γ₁`-structure). Unfolding both sides, each says *"the `Γ₁`-part of `PQ` is `u`'s
+pullback of the universal structure"* — one phrased via `torsionMapSection`, the other via
+`gammaFullToGammaOne` + `rOne`. Matching them is bookkeeping between `pointToTorsion` and
+`torsionMapSection`, both of which have their `_fst` computation lemmas.

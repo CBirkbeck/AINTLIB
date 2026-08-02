@@ -130,6 +130,42 @@ noncomputable def completionFibreEquiv (N : ℕ) [NeZero N] (X₁ : EllObj R)
       simp only [Equiv.symm_apply_apply]
       exact Iff.rfl))
 
+/-! ### The collapse (WP-D2c-3, step 4)
+
+The `Σ` over `u : Y ⟶ X₁` is redundant: the fibre condition pins `u`'s `Γ₁`-structure to be
+the `Γ₁`-part of the full level structure, and by WP-D1a that part is *determined* by the
+structure. Formally this is `Equiv.sigmaFiberEquiv` for the forgetful map. -/
+
+/-- The forgetful map on structures over a fixed `Y`, as a plain function — the fibre map
+whose `Σ` collapses. -/
+noncomputable def forgetAt (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)) (Y : EllObj R) :
+    (gammaFullNaiveProblem R N).obj (Opposite.op Y) →
+      (gammaOneNaiveProblem R N).obj (Opposite.op Y) :=
+  fun PQ => (gammaFullToGammaOne N hinv).app (Opposite.op Y) PQ
+
+/-- **(WP-D2c-3, step 4)** The collapse: summing the fibres of the forgetful map over all
+`Γ₁`-structures recovers the full level structures. This is where WP-D1a is consumed — the
+`Γ₁`-part is not extra data. -/
+noncomputable def sigmaForgetEquiv (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
+    (Y : EllObj R) :
+    (Σ y : (gammaOneNaiveProblem R N).obj (Opposite.op Y),
+        { PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y) //
+          forgetAt N hinv Y PQ = y }) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  Equiv.sigmaFiberEquiv (forgetAt N hinv Y)
+
+/-- **(WP-D2c-3, step 4)** Reindexed by `rOne`: the `Σ` over morphisms `Y ⟶ X₁` also
+collapses. -/
+noncomputable def sigmaHomForgetEquiv (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
+    {X₁ : EllObj R} (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁) (Y : EllObj R) :
+    (Σ u : Y ⟶ X₁, { PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y) //
+        forgetAt N hinv Y PQ = rOne.homEquiv u }) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  (Equiv.sigmaCongrLeft' (rOne.homEquiv (X := Y))).trans
+    ((Equiv.sigmaCongrRight fun _ =>
+      Equiv.subtypeEquivRight fun _ => by rw [Equiv.apply_symm_apply]).trans
+      (sigmaForgetEquiv N hinv Y))
+
 /-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
 
 The single remaining step of the D-chain. Stated here so the interface is fixed and
