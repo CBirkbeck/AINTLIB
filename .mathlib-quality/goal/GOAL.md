@@ -8536,3 +8536,53 @@ obviously a net win, and not attempted.
 
     over-50 proofs   486 (baseline) → 98   (96 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: kerSol, the refinement, and a self-paying extraction (98 → 95)
+
+    kerSol_decay_of_one_lt                        79 → 49
+    exists_finite_normalized_rational_refinement  79 → 49
+    valued_sub_sub_PhiHatK_le                     81 → 48
+
+### An extraction paid for the NEXT target in the same file
+
+`valued_sub_sub_PhiHatK_le` went 81 → 48 and **every line removed was a re-proof of
+something that already had a name**:
+
+* its `hde` — fifteen lines building `ρᵏ·|eₖ| → 0` via `nnreal_mul_max` and a squeeze — IS
+  `tendsto_gaussTerm_sub`, a lemma in the same file that `digit_sub_le` calls in one line;
+* its `M ≠ 0` branch — twenty lines ending in a `ring`-proved `z = (z - S N₀) + S N₀` — IS
+  `valued_le_of_tendsto_of_forall_le`, extracted from `digit_sub_le` two commits earlier.
+
+The two proofs share a forty-line preamble almost character for character, and each had
+written out the pieces the other called by name.
+
+> **After extracting a lemma, grep the file for its statement shape.** The name-based dedup
+> scan cannot see an inlined copy, and the repeated-block scan sees it only if the copy is
+> textually close — these two differed in indentation and in which hypothesis they threaded.
+
+The remaining ~40 shared lines are a task-3 dedup finding: one `private` lemma taking `x`,
+`y` and their `ArSub` memberships would serve both. Not done here — it changes both proofs'
+shapes, not just their length.
+
+### The general statement is short because the OBJECTS are short
+
+`kerSol_decay_of_one_lt`'s three extractions mention no Robba ring, valuation or series:
+`lt_one_of_mul_eq_one_of_one_lt`, `tendsto_const_mul_pow_succ`, `mul_pow_mul_pow_succ_le`
+are 9, 3 and 4 lines. Inline they were 12, 10 and 8, stated throughout in terms of
+`Valued.v V` and `Valued.v g` — which is exactly why they read as part of the decay argument
+instead of as the `ℝ≥0` arithmetic they are. Third instance of this shape after
+`norm_sub_le_max` and `valued_le_of_tendsto_of_forall_le`.
+
+### List bookkeeping is the same anonymous-block shape
+
+`exists_finite_normalized_rational_refinement_on` builds its witness as a `List.flatten` of
+per-piece maps, then unpacks membership from scratch in three of five bullets (7 lines each)
+and builds it from scratch in the other two (5 lines each). Naming the list and the two
+directions (`hmemLP` / `hLPmem`) turned 31 lines into five two-line bullets. Plus one lift,
+`exists_finite_subcover_of_normalized`, stated over an abstract slot-assignment so the
+`choose`-bound `q D hD` threads in as an argument.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 95   (93 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
