@@ -32848,3 +32848,46 @@ right shape for that match is a judgement call worth making deliberately rather 
 guessing.
 Then WP-A7.1 (universal moduli ring is a domain — with the `IsReduced` fallback A7.1′),
 A7.3, A7.4, A7.5, then WP-A8.
+
+### [WP-A5.3] Field-base pairing — RE-PLANNED after reading the interface (2026-08-02)
+Reading `exists_pairingAlgebraHom_of_galoisEquivariant` changed the target. It does **not**
+want a `Y(N) ⟶ μ_N` root map: fed a Galois-equivariant pairing on geometric points it
+returns **the field-base Weil pairing itself**, as a morphism
+`E[N] ×_{Spec k} E[N] ⟶ μ_N`. So the field case of route A is one composition away, and
+A5.3 as originally worded (a root morphism) was the wrong shape.
+
+What is already present and sorry-free:
+* `torsionAlgebraFibreEquiv` + `torsionAlgebraFibreEquiv_comp_algEquiv`
+  (`WeilPairing/GaloisFibre.lean:73/105`) — the torsion fibre dictionary **with** Galois
+  equivariance (algebra-side `f ↦ σ ∘ f` ↔ precomposition with `Spec σ`);
+* `muNAlgebraFibreEquiv` + `muNAlgebraFibreEquiv_comp_algEquiv` (:162/187) — same on the
+  `μ_N` side (`f ↦ σ ∘ f` ↔ `σ` applied to the root);
+* `fibreWeilPairing` + bilinearity / alternation / nondegeneracy
+  (`WeilPairing/FibrePointDict.lean`) — the pairing on **scheme** points at a geometric
+  fibre, computed through a chart;
+* `fieldWeilPairing_galois'` (`GaloisFieldPairing.lean:60`) — Galois equivariance at the
+  affine-Weierstrass level, hypothesis-free form;
+* `galoisPointEquiv` (`GaloisFunctionField.lean:580`) — the σ-action on affine points.
+
+#### [WP-A5.3a = M1b-3] Galois equivariance of `fibreWeilPairing`
+- **Status**: open · **File**: `WeilPairing/FibrePointDict.lean`
+- **Statement**: for `σ : K ≃ₐ[Γ(S,V.1)] K`,
+  `fibreWeilPairing Pr K N hN (σ • P) (σ • Q) _ _ = σ (fibreWeilPairing Pr K N hN P Q _ _)`,
+  where `σ • P` is precomposition with `Spec σ` on scheme points.
+- **Proof sketch**: (1) the chart dictionary commutes with the action —
+  `chartAffinePointEquiv Pr K (σ • P) = galoisPointEquiv _ σ (chartAffinePointEquiv Pr K P)`
+  (this is the one genuinely new lemma; `chartAffinePointEquiv` is
+  `chartPointsEquiv ≫ modelPointAddEquiv`, so it splits into one commutation per factor);
+  (2) rewrite and apply `fieldWeilPairing_galois'`.
+- **Sub-leaves**: `chartPointsEquiv_specMap_comp` and `modelPointAddEquiv_map` — neither
+  exists yet; both are "the dictionary is natural in the base ring map", provable from the
+  respective defs.
+
+#### [WP-A5.3b = M1c] The descent call
+- **Status**: blocked (A5.3a) · **File**: new, `WeilPairing/FieldBasePairing.lean`
+- **Statement**: for `k` perfect with `N` invertible, there is
+  `w : muNAlgebra k N hk ⟶ torsionPairAlgebra k E N hk` inducing `fibreWeilPairing` on
+  geometric points — i.e. the field-base Weil pairing as a scheme morphism.
+- **Proof sketch**: set `p` := `fibreWeilPairing` transported through
+  `torsionAlgebraFibreEquiv` (twice) and `muNAlgebraFibreEquiv`; `hp` is A5.3a combined with
+  the two `_comp_algEquiv` lemmas; apply `exists_pairingAlgebraHom_of_galoisEquivariant`.
