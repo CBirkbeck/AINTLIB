@@ -32676,7 +32676,15 @@ the root is not circular.
 - **Generality**: matches `fieldWeilPairing`.
 
 ### [WP-A3] The root attached to a basis, and its GL₂ law
-- **Status**: open · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: WP-A2
+- **Status**: DONE 2026-08-02 — `fieldWeilPairing_gl2_zmod` in
+  `WeilPairing/FieldPairingDet.lean`: for `g : Matrix (Fin 2) (Fin 2) (ZMod N)`,
+  `e(g₀₀P + g₀₁Q, g₁₀P + g₁₁Q) = e(P,Q)^{(det g).val}`. Axiom-verified.
+  Supporting: `pow_eq_pow_of_nat_modEq` (exponents of an `N`-th root matter only mod `N`),
+  `pow_val_add`, `pow_val_mul` (`ZMod N`-indexed powers are additive/multiplicative).
+  DESIGN NOTE: the planned `tautRoot` def was dropped — it would have been a bare rename of
+  `fieldWeilPairing`. The content is the law, not the alias.
+  LEAN-OPS: `ZMod.val` arithmetic does not go through `simp`; route everything through the
+  two `pow_val_*` helpers instead of manipulating `%` directly. · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: WP-A2
 - **Statement**: `tautRoot W N hN P Q hP hQ : {u : F // u ^ N = 1} := fieldWeilPairing …`,
   together with `tautRoot_gl2`: re-marking `(P,Q)` by `g ∈ GL₂(ZMod N)` raises the root to
   `det g`. Single-conclusion: the def and the law are separate declarations.

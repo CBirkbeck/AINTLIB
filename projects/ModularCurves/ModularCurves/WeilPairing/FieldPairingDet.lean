@@ -102,4 +102,64 @@ theorem fieldWeilPairing_gl2 (N : ℕ) (hN : (N : F) ≠ 0)
   simp only [fieldWeilPairing_val]
   exact weilPairing_gl2 W (N : ℤ) hz P Q hP hQ a b c d h₁ h₂
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- For an `N`-th root of unity the exponent only matters modulo `N`. -/
+theorem pow_eq_pow_of_nat_modEq {M : Type*} [Monoid M] {u : M} {N : ℕ} (hu : u ^ N = 1)
+    {m n : ℕ} (h : m % N = n % N) : u ^ m = u ^ n := by
+  conv_lhs => rw [← Nat.div_add_mod m N]
+  conv_rhs => rw [← Nat.div_add_mod n N]
+  rw [pow_add, pow_add, pow_mul, pow_mul, hu, one_pow, one_pow, one_mul, one_mul, h]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Powers of an `N`-th root of unity indexed by `ZMod N` are additive. -/
+theorem pow_val_add {M : Type*} [Monoid M] {u : M} {N : ℕ} [NeZero N] (hu : u ^ N = 1)
+    (x y : ZMod N) : u ^ x.val * u ^ y.val = u ^ (x + y).val := by
+  rw [← pow_add]
+  refine pow_eq_pow_of_nat_modEq hu ?_
+  rw [ZMod.val_add, Nat.mod_mod]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Powers of an `N`-th root of unity indexed by `ZMod N` are multiplicative in the
+exponent. -/
+theorem pow_val_mul {M : Type*} [Monoid M] {u : M} {N : ℕ} [NeZero N] (hu : u ^ N = 1)
+    (x y : ZMod N) : u ^ (x * y).val = u ^ (x.val * y.val) := by
+  refine pow_eq_pow_of_nat_modEq hu ?_
+  rw [ZMod.val_mul, Nat.mod_mod]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A3)** The determinant law with a `GL₂(ℤ/N)` matrix: re-marking `(P, Q)` by `g`
+raises the pairing to `det g`. This is the exact form the descent's cocycle consumes — the
+root of unity attached to a trivialisation must transform by `(det g)⁻¹`, so this law is
+what makes the det twist a *theorem* rather than an assumption. -/
+theorem fieldWeilPairing_gl2_zmod (N : ℕ) [NeZero N] (hN : (N : F) ≠ 0)
+    (P Q : W.toAffine.Point) (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (g : Matrix (Fin 2) (Fin 2) (ZMod N))
+    (h₁ : (N : ℤ) • ((g 0 0).val • P + (g 0 1).val • Q) = 0)
+    (h₂ : (N : ℤ) • ((g 1 0).val • P + (g 1 1).val • Q) = 0) :
+    (fieldWeilPairing W N hN ((g 0 0).val • P + (g 0 1).val • Q)
+        ((g 1 0).val • P + (g 1 1).val • Q) h₁ h₂ : F) =
+      (fieldWeilPairing W N hN P Q hP hQ : F) ^
+        (g 0 0 * g 1 1 - g 0 1 * g 1 0).val := by
+  set e : F := (fieldWeilPairing W N hN P Q hP hQ : F) with he
+  have heN : e ^ N = 1 := (fieldWeilPairing W N hN P Q hP hQ).2
+  have hne : e ≠ 0 := by
+    intro h0
+    rw [h0, zero_pow (NeZero.ne N)] at heN
+    exact zero_ne_one heN
+  have hmain := fieldWeilPairing_gl2 W N hN P Q hP hQ
+    (g 0 0).val (g 0 1).val (g 1 0).val (g 1 1).val h₁ h₂
+  refine mul_right_cancel₀ (pow_ne_zero ((g 0 1).val * (g 1 0).val) hne) ?_
+  rw [hmain]
+  calc e ^ ((g 0 0).val * (g 1 1).val)
+      = e ^ (g 0 0 * g 1 1).val := (pow_val_mul heN _ _).symm
+    _ = e ^ ((g 0 0 * g 1 1 - g 0 1 * g 1 0) + g 0 1 * g 1 0).val := by ring_nf
+    _ = e ^ (g 0 0 * g 1 1 - g 0 1 * g 1 0).val * e ^ (g 0 1 * g 1 0).val :=
+        (pow_val_add heN _ _).symm
+    _ = e ^ (g 0 0 * g 1 1 - g 0 1 * g 1 0).val * e ^ ((g 0 1).val * (g 1 0).val) := by
+        rw [pow_val_mul heN]
+
 end ModularCurves
