@@ -9209,3 +9209,35 @@ the lemma it is the corollary of.
     over-50 proofs   486 (baseline) → 74   (72 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete, re-verified this session)
     full lake build  gate running on the Presheaf.lean change
+
+## Task-3 backlog: three missing-API gaps found while decomposing
+
+Recording these as they surface, because each is a *repeated inline proof* rather than a
+duplicated named lemma, so only a block-level scan finds them.
+
+**1. `restrictionMap_comp` has no pointwise form — 93 sites, 20 files.** Fixed at the root
+this session (`restrictionMap_restrictionMap` in `Presheaf.lean`); 89 call sites remain to
+be golfed. The idiom is `congrFun (restrictionMap_comp …) y` followed, very often, by
+`simp only [Function.comp_def]` to clean up what `congrFun` left behind — so each site is
+two lines that should be zero.
+
+**2. Forward membership in an image-defined `covers` — 46 sites, 6 files.** Every cover
+constructor (`interProd`, `interProdOn`, `restrictTo`) defines `covers` as a
+`Finset.image` over an `attach`ed product, and every consumer proving *membership* writes
+
+    rw [RationalCoveringData.<ctor>_covers, Finset.mem_image]
+    exact ⟨⟨(X, Y), Finset.mem_product.mpr ⟨hX, hY⟩⟩, Finset.mem_attach _ _, rfl⟩
+
+by hand — 20 times in `FJP/FiniteJetSheafTransfer`, 18 in `WedhornCechAcyclicity`. The
+*reverse* direction is already named (`exists_of_mem_interProdOn`); the forward one never
+was. `isOXAcyclic_interProd` alone inlines it three times, and `interProdOn_isGeneratedBy`
+once more.
+
+**3. The `Spv` vle toolkit was unreachable from upstream — fixed, 51 sites remain.** See the
+hoist batch above; 21 raw `Valuation.Compatible.vle_iff_le` uses remain in `SpvAITopology`
+and 30 in `Cor732.lean`, all now able to use the hoisted API.
+
+Common shape: **a lemma stated at the wrong altitude** (function-level instead of pointwise,
+reverse direction only, or in a file below its earliest consumer) forces every consumer to
+re-derive it anonymously. The anonymous copies are invisible to name-based dedup, which is
+why they survived to a line-count campaign.
