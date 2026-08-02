@@ -10492,3 +10492,42 @@ so the habit transfers wrongly.
 
     over-50 proofs   486 (baseline) → 53   (50 actionable, 3 Vendored, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Next target, fully scoped: unitCover_relOverlap_backwardLocHom_continuous 91 → ~9
+
+`WedhornCechAcyclicity.lean:4814`. Same shape as the LaurentOverlap batch — a
+`locTopology_continuous_lift` with two bullets — and **easier**, because the target ring is
+`presheafValue DII`, which carries a real global `TopologicalSpace` instance. No topology
+binders, no passed-in concrete-topology facts.
+
+Four lemmas; sizes measured against the live file:
+
+    L1  ..._backwardLocHom_algebraMap_s   `hres_b`, 4839-4846               8
+    L2  ..._backwardLocHom_divByS_eq      `hψ_div` + `hu_f` + `hu_b`, 4847-4868  22
+    L3  ..._comp_algebraMap_continuous    bullet (1), 4830-4836             7
+    L4  ..._isPowerBounded_of_mem_T       bullet (2) after L1/L2           48
+
+    parent = 7 (setup) + 1 + 1 = ~9
+
+The three cases inside bullet (2) all go through `hψ_div` and `hres_b`, which is why those
+two come out first; after they do, bullet (2) is 48 and clears the bar as a single lemma.
+
+**The one wrinkle**: `DII` and `OD` are `set`-bound in the parent —
+
+    set DII := (D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl with hDII
+    set OD := unitCover_overlapDatum_B D₀ f with hOD
+
+so each lemma must spell the expressions out in its statement and re-introduce them with
+the same `set … with` as its first lines. `set` folds the occurrences, so the bodies
+transfer verbatim — the `r_top` handling in the SpvAITopology batch, and for the same
+reason: line 4849's `show (DII.s : A) = (D₀.s * 1) * (D₀.s * f) from rfl` needs `DII`
+delta-transparent, which an opaque parameter would not be.
+
+Prefix to reproduce on every piece: `set_option linter.unusedSectionVars false in`.
+Carrier variable: this file uses `{A : Type*}` (implicit) — unlike `LaurentOverlap`, so
+call sites do **not** pass it.
+
+Its sibling `genPiece_relOverlap_backwardLocHom_continuous` (112, bullets [8, 95]) has the
+same structure and should follow immediately after; the two are **not** textual twins
+(normalised diff 201 lines), so each needs its own lemmas, but the plan transfers.
