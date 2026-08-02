@@ -33199,3 +33199,33 @@ smoothness. Re-sketch before working it.
 `WP-C1` (unblocked, general, useful regardless of how the root is obtained) → `WP-B1`/`B2`/
 `B3`/`B4` (the root) → `WP-C2` → `WP-C3…C8` → `WP-B5`/`A8` (assembly) → DS4 closed →
 `weilPairing_torsionMapOfEllHom` → `rho_rigidNoeth` → `yRho_representable`.
+
+## [WP-C1] DONE (2026-08-02) — `WeilPairing/DescentFaithful.lean`, axiom-verified
+
+Six declarations, all `propext / Classical.choice / Quot.sound`:
+
+* `injective_stalkMap_of_flat` — stalk maps of a flat morphism are injective (flat local
+  hom of local rings ⟹ faithfully flat ⟹ injective);
+* `injective_app_of_flat_of_surjective` — `Γ(Y, U) ⟶ Γ(X, f⁻¹U)` injective for `f` flat +
+  surjective, at **any** open `U`;
+* `injective_appTop_of_flat_of_surjective`, `eq_of_appTop_eq_of_flat_of_surjective` — the
+  global-sections form and its implication form;
+* `injective_appTop_pullback_of_flat_of_surjective`, `eq_of_pullback_appTop_eq` — the
+  base-changed form `Γ(T, ⊤) ↪ Γ(T ×_S S', ⊤)`, which is what the DS4 specification proofs
+  actually call (every `weilPairingEval` identity lives in `Γ(T, ⊤)` for a varying `T`).
+
+Notes for whoever works C2–C8:
+* **No quasi-compactness is needed** — this is the germwise argument, not Amitsur. The
+  Amitsur equalizer in `ForMathlib/FaithfullyFlatEqualizer.lean` is for the *surjectivity*
+  half, which the descent construction needs but the specifications do not.
+* `Surjective (pullback.fst g p)` resolves by instance search from `Surjective p`
+  (`Mathlib/AlgebraicGeometry/PullbackCarrier.lean:436`); `Flat` likewise
+  (`Morphisms/Flat.lean:85`). No hypothesis plumbing required in the specs.
+* **Gotcha**: `TopCat.Presheaf.section_ext` presents the goal with `Y.sheaf.presheaf.germ`
+  while `Scheme.Hom.germ_stalkMap_apply` is stated with `Y.presheaf.germ`. These are
+  definitionally but not syntactically equal, so `rw`/`simp only` cannot see the pattern —
+  apply `germ_stalkMap_apply` as a **term** (`.trans`/`congrArg`), which elaborates up to
+  defeq. Same family as the `X.presheaf` vs `X.ringCatSheaf.val` mismatch already recorded.
+
+Mathlib's `epi_of_flat_of_surjective` proves the same stalkwise injectivity en route to an
+epi statement; that does not give injectivity on sections, since `Γ` is not faithful.
