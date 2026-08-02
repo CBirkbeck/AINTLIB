@@ -33575,3 +33575,32 @@ route is `fullLevelLocusπ_isFinite` + `fullLevelLocusπ_etale`.
 Then **WP-D2**: `Smooth (yFullToYOne ≫ Y₁(N).structMap)` by `Etale ≫ Smooth`, and
 `smooth_affine_of_representableBy` transports it to every representing object — closing
 `YFull.exists_representing_smooth_affine`, which has been `sorry` since T-E9.
+
+### WP-D1c étaleness — the cheap route, found 2026-08-02
+
+Mathlib has **`AlgebraicGeometry.Etale.of_comp`** (`Morphisms/Etale.lean:130`):
+`(g : Y ⟶ Z) [Etale (f ≫ g)] [LocallyOfFiniteType g] : Etale f`, backed by
+`MorphismProperty.HasOfPostcompProperty @Etale @Etale`. So étaleness of a *forgetful* map
+between two level schemes over the same base is free:
+
+    δ_full(E) ──forget──▶ δ_one(E) ──▶ S
+
+`δ_full(E) ⟶ S` is étale (`fullLevelLocusπ_etale`, `GroupScheme/TorsionCombination.lean:220`)
+and `δ_one(E) ⟶ S` is finite étale hence locally of finite type, so the forgetful map is
+**étale with no work at all**. Finiteness comes the same way from
+`fullLevelLocusπ_isFinite` plus `IsFinite`'s own cancellation.
+
+So WP-D1c splits again:
+* **[WP-D1c-rel]** — *easy.* The relative forgetful map `δ_full(E) ⟶ δ_one(E)` is finite
+  étale, by `Etale.of_comp` as above. Needs the `Γ₁` analogue of `fullLevelLocus` to exist;
+  if it does not, it is the same clopen-locus construction one generator down.
+* **[WP-D1c-coarse]** — *the real work.* Transport from the relative level schemes to the
+  coarse representing objects, i.e. show `yFullToYOne` is the map induced by the relative
+  forgetful maps. This is engine business (`Moduli/EngineWiring.lean`,
+  `AffineOverEll.relativelyRepresentable`).
+
+Given WP-D1c, **WP-D2 is mechanical**: `Etale ⟹ Smooth` is an instance
+(`Morphisms/Etale.lean:114`) and `Smooth` is stable under composition
+(`Morphisms/Smooth.lean:105`), so `Smooth X.structMap` follows from `yOneStructMap_smooth`,
+and `smooth_affine_of_representableBy` spreads it to every representing object — closing
+`YFull.exists_representing_smooth_affine`.
