@@ -8946,3 +8946,88 @@ that it is the right one.
     over-50 proofs   486 (baseline) → 84   (82 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
     full lake build  GREEN (exit 0, zero errors)
+
+## Batch: comap_ringStalkMap_spaCompHom_stalkValue (84 → 83)
+
+87 → 44. The same *shape* as the `ambientFrob` twin closed in the previous batch (an iff
+whose two bullets each push germs through a comparison morphism), but the shared-run scan
+reported `longest shared run 0` between them, so it needed its own extractions rather than
+reuse. That reading was right: same shape, different content.
+
+    ringStalkMap_spaCompHom_germ_restrict  2L   private, SpaVIso
+    openValue_vle_of_eq                    2L   StructureSheafStalks, next to
+                                                openValue_vle_restrict
+
+### `openValue_vle_of_eq` — why a two-line lemma was a nine-line `have` inline
+
+The proof needed to move a `vle` across `hpre : shadowPre D₀ u hu W = W'`. It cannot `rw`:
+the membership and containment proofs *depend on the open*, so rewriting the open leaves a
+motive that is not type correct. Nor can it `subst`: `W` was introduced by
+`set W := shadowImage D₀ u hu W'`, so `W'` occurs in `W`'s body and substituting it is
+circular. The author's workaround was the standard one —
+
+    have key : ∀ Z, Z = W' → ∀ hwZ hZU, (openValue Z hwZ).vle … := by
+      intro Z hZ hwZ hZU; subst hZ; exact hvle
+    exact key (shadowPre D₀ u hu W) hpre _ _
+
+— a nine-line ∀-generalisation whose only purpose is to make both sides of the equality
+bound variables so `subst` applies. **That is a lemma, not a `have`.** Stated at top level
+the two opens are already bound variables, `subst` fires on the first line, and proof
+irrelevance disposes of the four now-duplicated proof arguments. This is a general shape:
+an inline `have key : ∀ Z, Z = <closed term> → …` is always an extraction request.
+
+### Two more `have`s that were already lemmas
+
+`hresf`/`hresg` were five-line `have`s whose bodies were `TopCat.Presheaf.germ_res_apply`
+— but the project already has `germ_limitRestrict`, which IS that statement in the
+`limitRestrict` spelling the proof uses. Ten lines became one `rwa`. Worth remembering: a
+`have` whose statement you had to write out because the mathlib lemma is in a *different
+spelling* is usually a sign the project has already bridged that spelling.
+
+### Warning discipline in a file that is already warning-saturated
+
+Both files carry a project-wide `overlappingInstances` warning on **every** declaration
+(known blocker, out of scope for this campaign) plus `unusedSectionVars` on most. So the
+zero-new-warnings bar cannot mean "zero new warning lines" — adding any declaration adds
+one. What it does mean: no new *kind*, and no avoidable one. Writing `[DecidableEq A]`
+explicitly on the new helper, mirroring its neighbours, cost an extra `unusedSectionVars`
+(the section already supplies it, so the explicit copy shadows the used one and the
+included one is then unused). Dropping it removed that warning. Net: +2 lines, both the
+unavoidable per-declaration `overlappingInstances`.
+
+## Batch: the exists_evalBI_pow twins (83 → 81)
+
+75 → 44 and 77 → 46, one extraction. `RobbaPresentation.lean`.
+
+**This pair had been deferred once**, on a scan reading of "shared tail only ~15 lines".
+That was measuring the wrong thing. `rank_shared` compares *contiguous runs of normalised
+lines*, and the two proofs' shared content is not contiguous in that sense: they build the
+same witness and compute the same norm, then diverge into `= 1` versus `≤ 1` conclusions
+that interleave different tactics through the same rewrite chain. The run scan sees the
+interleaving, not the shape.
+
+    balancedMonomial        the witness (a def)
+    wIRPS_balancedMonomial  its interval Gauss norm, 20L
+
+The witness was written out **three times per proof**: once in the `refine`, and twice more
+inside a `rw [show <the witness coerced> = <the witness> from rfl]` whose entire purpose was
+to push `Subtype.val` through it. Naming the construction deletes all three copies *and*
+the coercion `show` — thirteen lines of the twenty-eight saved per proof were that one
+`rfl`. This is the `rank_anon_defs` shape, and it is the second time in this campaign that
+a `rw [show … from rfl]` block turned out to be pure evidence of an unnamed definition.
+
+**Gotcha:** `evalBI_monomial`'s LHS is the literal anonymous constructor `⟨_, hres⟩`, so it
+no longer matches once the witness is named. `simp only [balancedMonomial]` before the `rw`
+restores the match — one line, and cheaper than an `evalBI_balancedMonomial` companion,
+which would have required restating the whole `φ / hφ / b / hbmem / hb` context from a
+section that closed four thousand lines earlier.
+
+### Full-library gate: GREEN (both batches)
+
+`lake build '«Adic spaces»'`: exit 0, zero errors, run after each batch.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 81   (79 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+    full lake build  GREEN (exit 0, zero errors)
