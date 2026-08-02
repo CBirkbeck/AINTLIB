@@ -11150,6 +11150,39 @@ theorem spa_compactSpace_tate_noHArch
       (IsRingOfIntegralElements.isOpen (B := (A⁺ : Subring A)))
   exact compactSpace_spa_noHArch P hπ (fun x => hA₀le x.2) (Ideal.span {((π : A))}) rfl
 
+set_option linter.unusedSectionVars false in
+/-- Compactness of the preimage of a rational open gives a FINITE set of points whose
+normalized slots already cover it. -/
+private theorem exists_finite_subcover_of_normalized [DecidableEq A]
+    [IsTateRing A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D : RationalLocData A) (hD : D.IsRational)
+    (q : {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s} → Finset A × A)
+    (hqv : ∀ x, (x.1 : Spv A) ∈ rationalOpen (q x).1 (q x).2) :
+    ∃ ι : Finset {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s},
+      ∀ w : ↥(Spa A A⁺), (w : Spv A) ∈ rationalOpen D.T D.s →
+        ∃ x ∈ ι, (w : Spv A) ∈ rationalOpen (q x).1 (q x).2 := by
+  classical
+  have hcpt : IsCompact (Subtype.val ⁻¹' rationalOpen D.T D.s :
+      Set ↥(Spa A A⁺)) := isCompact_preimage_rationalOpen_noHArch
+    (IsRingOfIntegralElements.isOpen (B := (A⁺ : Subring A))) D hD
+  obtain ⟨ι, hι⟩ := hcpt.elim_finite_subcover
+    (fun x : {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s} =>
+      Subtype.val ⁻¹' rationalOpen (q x).1 (q x).2)
+    (fun x => rationalOpen_isOpen _ _)
+    (by
+      rintro w hw
+      simp only [Set.mem_iUnion, Set.mem_preimage]
+      exact ⟨⟨w, hw⟩, hqv ⟨w, hw⟩⟩)
+  refine ⟨ι, fun w hw => ?_⟩
+  have := hι hw
+  simp only [Set.mem_iUnion, Set.mem_preimage] at this
+  obtain ⟨x, hx, hmem⟩ := this
+  exact ⟨x, hx, hmem⟩
+
+
 /-- **Relative normalised refinement** (noetherian-free `_on` form of Step 1): from a
 rational family `𝒱` covering a subset `Y ⊆ Spa (A, A⁺)`, produce a finite normalised
 family `LP` (`1 ∈ Tᵢ`, `sᵢ ∈ Tᵢ`) whose pieces cover `Y` and each refine into some
@@ -11185,79 +11218,47 @@ theorem exists_finite_normalized_rational_refinement_on [DecidableEq A]
     exact ⟨(T', s'), hs', h1, hvm, hsub⟩
   choose q hq₂ hq₁ hqv hqsub using hpt
   -- per-D finite subcover of the compact preimage of D's rational open
-  -- (noeth-free: uses isCompact_preimage_rationalOpen_noHArch, not whole-space compactness)
   have hsubD : ∀ (D : RationalLocData A) (hD : D ∈ 𝒱),
-      ∃ ι : Finset {w : ↥(Spa A A⁺) //
-        (w : Spv A) ∈ rationalOpen D.T D.s},
+      ∃ ι : Finset {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s},
       ∀ w : ↥(Spa A A⁺), (w : Spv A) ∈ rationalOpen D.T D.s →
-        ∃ x ∈ ι, (w : Spv A) ∈ rationalOpen (q D hD x).1
-          (q D hD x).2 := by
-    intro D hD
-    have hcpt : IsCompact (Subtype.val ⁻¹' rationalOpen D.T D.s :
-        Set ↥(Spa A A⁺)) := isCompact_preimage_rationalOpen_noHArch
-      (IsRingOfIntegralElements.isOpen (B := (A⁺ : Subring A))) D (h𝒱 D hD)
-    obtain ⟨ι, hι⟩ := hcpt.elim_finite_subcover
-      (fun x : {w : ↥(Spa A A⁺) // (w : Spv A) ∈ rationalOpen D.T D.s} =>
-        Subtype.val ⁻¹' rationalOpen (q D hD x).1 (q D hD x).2)
-      (fun x => rationalOpen_isOpen _ _)
-      (by
-        rintro w hw
-        simp only [Set.mem_iUnion, Set.mem_preimage]
-        exact ⟨⟨w, hw⟩, hqv D hD ⟨w, hw⟩⟩)
-    refine ⟨ι, fun w hw => ?_⟩
-    have := hι hw
-    simp only [Set.mem_iUnion, Set.mem_preimage] at this
-    obtain ⟨x, hx, hmem⟩ := this
-    exact ⟨x, hx, hmem⟩
+        ∃ x ∈ ι, (w : Spv A) ∈ rationalOpen (q D hD x).1 (q D hD x).2 :=
+    fun D hD => exists_finite_subcover_of_normalized D (h𝒱 D hD) (q D hD) (hqv D hD)
   choose ι hι using hsubD
   -- assemble: the join of the per-D slot lists
-  refine ⟨(𝒱.toList.attach.map (fun D =>
+  set LP := (𝒱.toList.attach.map (fun D =>
     (ι D.1 (Finset.mem_toList.mp D.2)).toList.map
-      (q D.1 (Finset.mem_toList.mp D.2)))).flatten, ?_, ?_, ?_, ?_, ?_⟩
-  · intro p hp
-    rw [List.mem_flatten] at hp
+      (q D.1 (Finset.mem_toList.mp D.2)))).flatten with hLP
+  have hmemLP : ∀ D (hD : D ∈ 𝒱) x, x ∈ ι D hD → q D hD x ∈ LP := by
+    intro D hD x hx
+    rw [hLP, List.mem_flatten]
+    exact ⟨(ι D hD).toList.map (q D hD),
+      List.mem_map.mpr ⟨⟨D, Finset.mem_toList.mpr hD⟩, List.mem_attach _ _, rfl⟩,
+      List.mem_map.mpr ⟨x, Finset.mem_toList.mpr hx, rfl⟩⟩
+  have hLPmem : ∀ p ∈ LP, ∃ D, ∃ hD : D ∈ 𝒱, ∃ x, p = q D hD x := by
+    intro p hp
+    rw [hLP, List.mem_flatten] at hp
     obtain ⟨l, hl, hpl⟩ := hp
     rw [List.mem_map] at hl
     obtain ⟨D, -, rfl⟩ := hl
     rw [List.mem_map] at hpl
     obtain ⟨x, -, rfl⟩ := hpl
+    exact ⟨D.1, Finset.mem_toList.mp D.2, x, rfl⟩
+  refine ⟨LP, ?_, ?_, ?_, ?_, ?_⟩
+  · intro p hp; obtain ⟨D, hD, x, rfl⟩ := hLPmem p hp
     exact hq₂ _ _ _
-  · intro p hp
-    rw [List.mem_flatten] at hp
-    obtain ⟨l, hl, hpl⟩ := hp
-    rw [List.mem_map] at hl
-    obtain ⟨D, -, rfl⟩ := hl
-    rw [List.mem_map] at hpl
-    obtain ⟨x, -, rfl⟩ := hpl
+  · intro p hp; obtain ⟨D, hD, x, rfl⟩ := hLPmem p hp
     exact hq₁ _ _ _
   · -- cover of Y: route through the containing piece
     intro w hw
     obtain ⟨D, hD, hwD⟩ := hcov w hw
     obtain ⟨x, hx, hmem⟩ := hι D hD ⟨w, hYspa hw⟩ hwD
-    refine ⟨q D hD x, ?_, hmem⟩
-    rw [List.mem_flatten]
-    exact ⟨(ι D hD).toList.map (q D hD),
-      List.mem_map.mpr ⟨⟨D, Finset.mem_toList.mpr hD⟩,
-        List.mem_attach _ _, rfl⟩,
-      List.mem_map.mpr ⟨x, Finset.mem_toList.mpr hx, rfl⟩⟩
+    exact ⟨q D hD x, hmemLP D hD x hx, hmem⟩
   · -- D-relative refinement
     intro D hD w hwD hw
     obtain ⟨x, hx, hmem⟩ := hι D hD ⟨w, hw⟩ hwD
-    refine ⟨q D hD x, ?_, hmem, hqsub D hD x⟩
-    rw [List.mem_flatten]
-    exact ⟨(ι D hD).toList.map (q D hD),
-      List.mem_map.mpr ⟨⟨D, Finset.mem_toList.mpr hD⟩,
-        List.mem_attach _ _, rfl⟩,
-      List.mem_map.mpr ⟨x, Finset.mem_toList.mpr hx, rfl⟩⟩
-  · intro p hp
-    rw [List.mem_flatten] at hp
-    obtain ⟨l, hl, hpl⟩ := hp
-    rw [List.mem_map] at hl
-    obtain ⟨D, hD, rfl⟩ := hl
-    rw [List.mem_map] at hpl
-    obtain ⟨x, -, rfl⟩ := hpl
-    exact ⟨D.1, Finset.mem_toList.mp D.2, hqsub _ _ _⟩
-
+    exact ⟨q D hD x, hmemLP D hD x hx, hmem, hqsub D hD x⟩
+  · intro p hp; obtain ⟨D, hD, x, rfl⟩ := hLPmem p hp
+    exact ⟨D, hD, hqsub _ _ _⟩
 /-- **Step 1 (Wedhorn 7.54 / Huber [Hu3] 2.6 — analytic normalisation):** whole-space
 form, a thin wrapper over `exists_finite_normalized_rational_refinement_on` at `Y := Spa A A⁺`
 (the noetherian hypotheses are needed only to instantiate `Y = Spa` as a *set*, via the
