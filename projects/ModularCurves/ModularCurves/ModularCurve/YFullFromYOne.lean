@@ -219,6 +219,15 @@ noncomputable def yFullCandidateHomEquiv (N : ℕ) [NeZero N] (X₁ : EllObj R)
             (Equiv.subtypeEquivRight (hmatch Y u))).trans
         (sigmaHomForgetEquiv N hinv rOne Y)))
 
+/-- Pulling sections back along an isomorphism is injective. -/
+theorem pullSection_iso_injective {X Y : EllObj R} (e : X ≅ Y) :
+    Function.Injective (EllHom.pullSection R e.hom) := by
+  intro A B hab
+  have h := congrArg (EllHom.pullSection R e.inv) hab
+  rw [← EllHom.pullSection_comp, ← EllHom.pullSection_comp, e.inv_hom_id,
+    EllHom.pullSection_id, EllHom.pullSection_id] at h
+  exact h
+
 /-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
 
 The single remaining step of the D-chain. Stated here so the interface is fixed and
