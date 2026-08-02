@@ -964,6 +964,70 @@ theorem imagePieceDatum_rationalOpen_inter
     exact ⟨hspa, h₁, h₂⟩
 
 set_option linter.unusedSectionVars false in
+/-- The keystone restriction square at the LOCALIZATION level: both composites agree after
+precomposition with `E.coeRingHom`, because on the `algebraMap`-range both carry `a` to the
+image datum's `canonicalMap` of `D₀.canonicalMap a`. The square itself is this identity
+transported across the completion by density, which is all the parent still does. -/
+private theorem relativePiece_restrict_square_locLevel
+    [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺)]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ E E' : RationalLocData A)
+    [IsTateRing (presheafValue D₀)] [IsNoetherianRing (presheafValue D₀)]
+    [IsStronglyNoetherian (presheafValue D₀)]
+    (hE_sub : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s)
+    (hE'_sub : rationalOpen E'.T E'.s ⊆ rationalOpen E.T E.s)
+    (hspanE : Ideal.span (E.T : Set A) = ⊤)
+    (hspanE' : Ideal.span (E'.T : Set A) = ⊤) :
+      haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+    haveI : @CompleteSpace (presheafValue D₀)
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
+    ((relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) hspanE') :
+        presheafValue E' →+* presheafValue (imagePieceDatum D₀ E'.T E'.s hspanE')).comp
+      ((restrictionMapHom E E' hE'_sub).comp E.coeRingHom) =
+    ((restrictionMapHom (imagePieceDatum D₀ E.T E.s hspanE)
+        (imagePieceDatum D₀ E'.T E'.s hspanE')
+        (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)).comp
+      (((relativePiece_equiv D₀ E hE_sub hspanE) :
+        presheafValue E →+* presheafValue (imagePieceDatum D₀ E.T E.s hspanE)).comp
+        E.coeRingHom)) := by
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  haveI : @CompleteSpace (presheafValue D₀)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
+  haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
+  -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
+  -- the localization (determined on the `algebraMap`-range by the trackings)
+  refine IsLocalization.ringHom_ext (Submonoid.powers E.s) ?_
+  ext a
+  simp only [RingHom.comp_apply, RingEquiv.coe_toRingHom]
+  rw [show E.coeRingHom (algebraMap A (Localization.Away E.s) a) =
+    E.canonicalMap a from rfl]
+  rw [restrictionMapHom_canonicalMap E E' hE'_sub a]
+  rw [show (E'.canonicalMap a : presheafValue E') =
+      restrictionMapHom D₀ E' (hE'_sub.trans hE_sub) (D₀.canonicalMap a) from
+    (restrictionMapHom_canonicalMap D₀ E' (hE'_sub.trans hE_sub) a).symm]
+  rw [show (E.canonicalMap a : presheafValue E) =
+      restrictionMapHom D₀ E hE_sub (D₀.canonicalMap a) from
+    (restrictionMapHom_canonicalMap D₀ E hE_sub a).symm]
+  rw [show (relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) hspanE')
+        (restrictionMapHom D₀ E' (hE'_sub.trans hE_sub) (D₀.canonicalMap a)) =
+      (imagePieceDatum D₀ E'.T E'.s hspanE').canonicalMap (D₀.canonicalMap a) from
+    relativePiece_equiv_restrictionMap D₀ E' (hE'_sub.trans hE_sub) hspanE'
+      (D₀.canonicalMap a)]
+  rw [show (relativePiece_equiv D₀ E hE_sub hspanE)
+        (restrictionMapHom D₀ E hE_sub (D₀.canonicalMap a)) =
+      (imagePieceDatum D₀ E.T E.s hspanE).canonicalMap (D₀.canonicalMap a) from
+    relativePiece_equiv_restrictionMap D₀ E hE_sub hspanE (D₀.canonicalMap a)]
+  exact (restrictionMapHom_canonicalMap (imagePieceDatum D₀ E.T E.s hspanE)
+    (imagePieceDatum D₀ E'.T E'.s hspanE')
+    (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)
+    (D₀.canonicalMap a)).symm
+
 /-- **The keystone restriction square** (Wedhorn Prop 8.16 naturality for nested
 pieces, [Hu2] 1.4.4): for rational pieces `E' ⊆ E ⊆ D₀` the base-change
 isomorphisms intertwine the `A`-side and `B`-side restriction maps:
@@ -1013,41 +1077,7 @@ theorem relativePiece_equiv_restrict_square
   haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
-  have hloc :
-      ((relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) hspanE') :
-          presheafValue E' →+* presheafValue (imagePieceDatum D₀ E'.T E'.s hspanE')).comp
-        ((restrictionMapHom E E' hE'_sub).comp E.coeRingHom) =
-      ((restrictionMapHom (imagePieceDatum D₀ E.T E.s hspanE)
-          (imagePieceDatum D₀ E'.T E'.s hspanE')
-          (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)).comp
-        (((relativePiece_equiv D₀ E hE_sub hspanE) :
-          presheafValue E →+* presheafValue (imagePieceDatum D₀ E.T E.s hspanE)).comp
-          E.coeRingHom)) := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers E.s) ?_
-    ext a
-    simp only [RingHom.comp_apply, RingEquiv.coe_toRingHom]
-    rw [show E.coeRingHom (algebraMap A (Localization.Away E.s) a) =
-      E.canonicalMap a from rfl]
-    rw [restrictionMapHom_canonicalMap E E' hE'_sub a]
-    rw [show (E'.canonicalMap a : presheafValue E') =
-        restrictionMapHom D₀ E' (hE'_sub.trans hE_sub) (D₀.canonicalMap a) from
-      (restrictionMapHom_canonicalMap D₀ E' (hE'_sub.trans hE_sub) a).symm]
-    rw [show (E.canonicalMap a : presheafValue E) =
-        restrictionMapHom D₀ E hE_sub (D₀.canonicalMap a) from
-      (restrictionMapHom_canonicalMap D₀ E hE_sub a).symm]
-    rw [show (relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) hspanE')
-          (restrictionMapHom D₀ E' (hE'_sub.trans hE_sub) (D₀.canonicalMap a)) =
-        (imagePieceDatum D₀ E'.T E'.s hspanE').canonicalMap (D₀.canonicalMap a) from
-      relativePiece_equiv_restrictionMap D₀ E' (hE'_sub.trans hE_sub) hspanE'
-        (D₀.canonicalMap a)]
-    rw [show (relativePiece_equiv D₀ E hE_sub hspanE)
-          (restrictionMapHom D₀ E hE_sub (D₀.canonicalMap a)) =
-        (imagePieceDatum D₀ E.T E.s hspanE).canonicalMap (D₀.canonicalMap a) from
-      relativePiece_equiv_restrictionMap D₀ E hE_sub hspanE (D₀.canonicalMap a)]
-    exact (restrictionMapHom_canonicalMap (imagePieceDatum D₀ E.T E.s hspanE)
-      (imagePieceDatum D₀ E'.T E'.s hspanE')
-      (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)
-      (D₀.canonicalMap a)).symm
+  have hloc := relativePiece_restrict_square_locLevel D₀ E E' hE_sub hE'_sub hspanE hspanE'
   -- extend along the dense localization image by continuity (both composites are
   -- compositions of completion extensions) + T2
   letI : UniformSpace (Localization.Away E.s) := E.uniformSpace

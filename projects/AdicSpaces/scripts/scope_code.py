@@ -18,16 +18,33 @@ OPEN, CLOSE = '([{⟨', ')]}⟩'
 SORRY = re.compile(r'(?<![A-Za-z_])(sorry|admit)(?![A-Za-z_])')
 
 def sig_end(L, start, stop):
-    depth = 0
+    """Index of the line carrying the `:=` that starts the PROOF.
+
+    Bracket depth alone is not enough. A conclusion may itself contain term-mode
+    `haveI`/`letI` bindings, whose `:=` sits at depth 0:
+
+        theorem relativePiece_equiv_restrict_square … (y : presheafValue E) :
+            haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing… ← not it
+            …
+            relativePiece_equiv D₀ E' … = … := by                                    ← this one
+
+    Stopping at the first one charged nine lines of STATEMENT to the body and reported
+    three of these at 56/60/60 against their actual 47/50/50. So: when the declaration is
+    tactic-mode, the proof starts at the first line ending `:= by`; only a term-mode proof
+    falls back to the first depth-0 `:=`.
+    """
+    depth, first = 0, None
     for k in range(start, stop):
         s = re.sub(r'--.*', '', L[k]); i = 0
         while i < len(s):
             c = s[i]
             if c in OPEN: depth += 1
             elif c in CLOSE: depth -= 1
-            elif depth == 0 and s.startswith(':=', i): return k
+            elif depth == 0 and s.startswith(':=', i):
+                if s.rstrip().endswith(':= by'): return k
+                if first is None: first = k
             i += 1
-    return stop - 1
+    return first if first is not None else stop - 1
 
 rows = []
 for root, dirs, fs in os.walk('.'):
