@@ -33893,3 +33893,21 @@ where the two representability statements meet; it is the substantive step.
 
 Everything built this session (WP-D1a … D1c-coarse) feeds WP-D2c unchanged; only the bridge
 D2a/D2b is new, and it is representability bookkeeping, not new mathematics.
+
+### A pre-existing `Y(N) ⟶ Y₁(N)` — related to `yFullToYOne` but **not** the same map
+
+`Moduli/CoarseSpace.lean:301` already defines `piOneFineEll` (and `piOneFine`, its
+`baseHom`), described as *"KM 7.4.2(3)'s map `(P,Q) ↦ P` at the scheme level"*, built the
+same way as `yFullToYOne` — `homEquiv.symm` of a natural transformation applied to the
+tautological element. Checked for duplication (standing rule); they are **different maps**:
+
+* `piOneFineEll` targets `xOneFine`, which represents the **semi-Borel quotient problem**
+  `(semiBorelQPD …).prob` — the `Γ_H` construction with `H` semi-Borel;
+* `yFullToYOne` targets a representing object of **`gammaOneNaiveProblem`** itself.
+
+Neither has étaleness proved. Whoever works WP-D2 should decide deliberately between them:
+the naive route (this session's) keeps T-D6 out and connects directly to
+`gammaOneNaive_affineOverEll`; the quotient route connects to the engine's existing
+`gammaHAut`/`baseSchemeAction` compatibility lemmas
+(`gammaHAut_inv_comp_piOneFineEll`, `baseSchemeAction_comp_piOneFine`). They should
+ultimately agree, but proving that is its own ticket and is **not** needed for WP-D2.
