@@ -8781,3 +8781,42 @@ green. Recording the mechanism so a third attempt starts from it rather than fro
 
     over-50 proofs   486 (baseline) → 89   (87 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: exact_division (89 → 88), and the anon-defs recipe on a dependent construction
+
+`exact_division` 114 → 39. Found by `rank_anon_defs` (score 164 — "80 lines held by two
+anonymous constructions") and fixed by its recipe. The Euclidean descent was two anonymous
+`set`s, so every fact about it had to be proved inline:
+
+    descentStep           1L   keep `u` once its degree drops, else subtract hdiv's quotient
+    descentSeq            1L   the iterate starting at `y`
+    descentSeq_succ       1L   one unfolding step
+    descentSeq_valued_le  9L   the descent never increases the value
+    descentSeq_quot_mem  20L   every partial quotient `(y − seqₗ)/x` stays in `A_r`
+    descentSeq_geom      24L   with no degree drop, the values decay geometrically
+    isClosed_ArSub        4L   `A_r` is closed — it IS a closure, definitionally
+
+### The obstacle that makes this shape look impossible, and the way through
+
+`step` and `seq` both mention `(hdiv u.1 u.2).choose`, and `hdiv` arrives from an `obtain`
+INSIDE the proof. So the constructions are not definitions of `x` and `y` alone, which is
+why they were anonymous in the first place.
+
+> **Thread the obtained hypothesis itself as a parameter.** Its type is six lines here,
+> copied verbatim out of `approx_division`'s conclusion — never retyped.
+
+That is the general unblock for `rank_anon_defs` hits: the construction usually depends on
+something `obtain`ed, and the fix is to make that a binder rather than to give up.
+
+### Costs, both mechanical
+
+* the section variables `p F ϖ` needed adding at all 35 call sites — `explicit_section_prefix`'s
+  job, done by hand because the lemmas were hand-written;
+* the six-line `hdiv` binder ran into the following `{y : …}` binder on one line, producing
+  six 123–133-column lines. Splitting binder groups onto their own lines is not optional
+  when a binder's type is multi-line.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 88   (86 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
