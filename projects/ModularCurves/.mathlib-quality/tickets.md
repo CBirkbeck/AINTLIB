@@ -32973,3 +32973,29 @@ exactly the `ζ₃` that the det twist needs).
 build caught only via a name clash): before writing ANY declaration, run
 `grep -rn "<concept>" projects/ModularCurves/ModularCurves/{WeilPairing,Moduli,EllipticCurve}/`.
 The LSP cannot substitute for this — it only sees imported files.
+
+## SESSION CLOSE 2026-08-02 (route A, second stretch)
+
+Root build 9626 jobs; all axiom-verified and pushed.
+
+DONE this stretch: WP-A7.3 (`e3Zeta`, `e3Zeta_cyclotomic`, `e3Zeta_pow_three` — the
+explicit universal cube root, which retired A7.1 and A7.2 from the critical path) and
+WP-A7.4 (`e3ZetaAt` + its two relations — transport to an arbitrary base).
+
+### OPEN DECISION at WP-A7.5 — which `N`, and hence which shape
+Everything from A7.3 onward is **`N = 3`-specific**: `e3Zeta` is built from the `ℰ₃`
+normal form's `β, γ`. The det twist A7.5 and the assembly A8 can be done at `N = 3`
+directly, but the DS4 register and `Y(ρ̄)` want **general `N`**. Three options, and the
+choice changes what gets built:
+
+1. **Finish at `N = 3`, then redo at `N = 4`.** `UniversalLevelFour` has the same shape
+   (`e4B, e4U, e4V`, `isUnit_e4B`), so an `e4Zeta` is plausible — but `μ_4` needs `i`, and
+   whether the `ℰ₄` relations produce it is an open computation, not a translation.
+2. **Find the general-`N` root.** Requires a universal object at general `N`, which the
+   tree does not have (only 3 and 4 are built by hand).
+3. **Check what `Y(ρ̄)` actually needs.** `RhoLevelStructure` is stated at the `N` of the
+   Galois representation; if the pairing is only ever *used* at the `N` of `D`, a general-`N`
+   construction is unavoidable and options 1–2 are both dead ends for the headline target.
+
+Resolving this needs a look at how `PairingCompatAt` consumes `N` — worth doing before
+building A7.5, since A7.5's shape follows from the answer.
