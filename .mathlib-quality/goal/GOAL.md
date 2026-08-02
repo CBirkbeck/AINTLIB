@@ -9330,3 +9330,30 @@ the extraction compile while hiding exactly the signal that says the extraction 
 Next route for this proof, if resumed: keep the context *inside* the theorem and split by
 `n`-free / `n`-dependent seam instead, or give the pair `(g, hg)` a named structure so the
 signature carries one hypothesis rather than four.
+
+## Task-3 backlog: file size
+
+`/cleanup`'s A.5 check flags any file at or over 1000 lines for `/split-file`. Current state
+of the tree: **268 files, 184450 lines, 51 files (19%) over the threshold.**
+
+    12337  WedhornCechAcyclicity.lean
+     6502  FarguesFontaine/RobbaPresentation.lean
+     5944  GeometricReduction.lean
+     5443  LaurentRefinementCore.lean
+     4320  Presheaf.lean
+     3435  Wedhorn828.lean
+     3371  TateAlgebraTopology.lean
+     3370  LaurentOverlap.lean
+     3018  PresheafTateStructure.lean
+     2858  TateAlgebra.lean
+     … 41 more over 1000
+
+This is not only a style item, it is the **campaign's main throughput limit**. Every gate in
+this session has been dominated by two files: `RobbaPresentation` (6502 lines) alone takes
+8+ minutes to elaborate on an idle machine and hours under load, and `WedhornCechAcyclicity`
+(12337 lines) is comparable. A module-scoped edit-build cycle on the latter is 2–4 minutes,
+so a target needing three iterations costs ten minutes of pure waiting.
+
+Splitting the top two would cut the feedback loop for the 18 remaining targets in
+`WedhornCechAcyclicity` and make every future full gate substantially cheaper. Worth doing
+*before* the rest of task 3 rather than as part of it.
