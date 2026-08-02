@@ -810,6 +810,13 @@ theorem limitFrobHom_add (k l : ℤ)
       = limitRestrict (le_of_eq (frobOpens_add p F k l W))
           (limitFrobHom p F k (frobOpens p F l W)
             (limitFrobHom p F l W s)) := by
+  -- Name the six continuity proofs once; spelled out, they are most of this proof.
+  have hck := continuous_frobPow p F (-k)
+  have hck' := continuous_frobPow_symm p F (-k)
+  have hcl := continuous_frobPow p F (-l)
+  have hcl' := continuous_frobPow_symm p F (-l)
+  have hckl := continuous_frobPow p F (-(k + l))
+  have hckl' := continuous_frobPow_symm p F (-(k + l))
   have hct : Continuous ⇑((frobPow p F (-k)).trans (frobPow p F (-l))) :=
     (continuous_frobPow p F (-l)).comp (continuous_frobPow p F (-k))
   have hct' : Continuous
@@ -820,55 +827,30 @@ theorem limitFrobHom_add (k l : ℤ)
   set Elift : RationalIndex (frobOpens p F k (frobOpens p F l W)) :=
     ⟨E.D, E.isRational, E.subset.trans (by
       rw [← frobOpens_add p F k l W])⟩ with hElift
+  -- The single section value every step below transports.
+  set sv := (s : ∀ j : RationalIndex W, presheafValue j.D)
+    (frobIndex p F l (frobIndex p F k Elift))
   have hDeq := mapHuber_frobPow_add p F k l E.D
   have hle := hle_lem p F k l hct hct' E.D
   have hle' := hle'_lem p F k l hct hct' E.D
-  have h1 := ValuationSpectrum.presheafValueRingEquivHuber_comp_symm_apply
-    (frobPow p F (-k)) (continuous_frobPow p F (-k))
-    (continuous_frobPow_symm p F (-k))
-    (frobPow p F (-l)) (continuous_frobPow p F (-l))
-    (continuous_frobPow_symm p F (-l)) E.D hle hle'
-    ((s : ∀ j : RationalIndex W, presheafValue j.D)
-      (frobIndex p F l (frobIndex p F k Elift)))
   have hle2 := hle2_lem p F k l hct hct' E.D
-  have h2 := ValuationSpectrum.presheafValueRingEquivHuber_congr_e_symm
-    hct hct'
-    (continuous_frobPow p F (-(k + l)))
-    (continuous_frobPow_symm p F (-(k + l)))
-    (frobPow_trans_neg p F k l) E.D hle2
-    (restrictionMap _ _ hle'
-      ((s : ∀ j : RationalIndex W, presheafValue j.D)
-        (frobIndex p F l (frobIndex p F k Elift))))
   have hle3 := hle3_lem p F k l hct hct' E.D hDeq.symm
+  have h1 := ValuationSpectrum.presheafValueRingEquivHuber_comp_symm_apply
+    (frobPow p F (-k)) hck hck' (frobPow p F (-l)) hcl hcl' E.D hle hle' sv
+  have h2 := ValuationSpectrum.presheafValueRingEquivHuber_congr_e_symm
+    hct hct' hckl hckl' (frobPow_trans_neg p F k l) E.D hle2
+    (restrictionMap _ _ hle' sv)
   have h3 := congr_fun (restrictionMap_comp
-    ((E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-      (continuous_frobPow_symm p F (-k))).mapHuber (frobPow p F (-l))
-      (continuous_frobPow p F (-l)) (continuous_frobPow_symm p F (-l)))
-    (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l)))
-      ((continuous_frobPow p F (-l)).comp (continuous_frobPow p F (-k)))
-      ((continuous_frobPow_symm p F (-k)).comp
-        (continuous_frobPow_symm p F (-l))))
-    (E.D.mapHuber (frobPow p F (-(k + l)))
-      (continuous_frobPow p F (-(k + l)))
-      (continuous_frobPow_symm p F (-(k + l)))) hle' hle2)
-    ((s : ∀ j : RationalIndex W, presheafValue j.D)
-      (frobIndex p F l (frobIndex p F k Elift)))
+    ((E.D.mapHuber (frobPow p F (-k)) hck hck').mapHuber (frobPow p F (-l)) hcl hcl')
+    (E.D.mapHuber ((frobPow p F (-k)).trans (frobPow p F (-l))) hct hct')
+    (E.D.mapHuber (frobPow p F (-(k + l))) hckl hckl') hle' hle2) sv
   have h4 := s.2 (frobIndex p F l (frobIndex p F k Elift))
     (frobIndex p F (k + l) E) hle3
-  show (presheafValueRingEquivHuber (frobPow p F (-(k + l)))
-      (continuous_frobPow p F (-(k + l)))
-      (continuous_frobPow_symm p F (-(k + l))) E.D).symm
-      ((s : ∀ j : RationalIndex W, presheafValue j.D)
-        (frobIndex p F (k + l) E))
-    = (presheafValueRingEquivHuber (frobPow p F (-k))
-        (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
-        E.D).symm
-        ((presheafValueRingEquivHuber (frobPow p F (-l))
-          (continuous_frobPow p F (-l)) (continuous_frobPow_symm p F (-l))
-          (E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-            (continuous_frobPow_symm p F (-k)))).symm
-          ((s : ∀ j : RationalIndex W, presheafValue j.D)
-            (frobIndex p F l (frobIndex p F k Elift))))
+  show (presheafValueRingEquivHuber (frobPow p F (-(k + l))) hckl hckl' E.D).symm
+      ((s : ∀ j : RationalIndex W, presheafValue j.D) (frobIndex p F (k + l) E))
+    = (presheafValueRingEquivHuber (frobPow p F (-k)) hck hck' E.D).symm
+        ((presheafValueRingEquivHuber (frobPow p F (-l)) hcl hcl'
+          (E.D.mapHuber (frobPow p F (-k)) hck hck')).symm sv)
   rw [h1, h2]
   refine congrArg _ ?_
   exact (h3.trans h4).symm
