@@ -144,6 +144,7 @@ import ModularCurves.ForMathlib.TwoOpenHOne
 import ModularCurves.ForMathlib.UniquePointFactorsISup
 import ModularCurves.ForMathlib.WeierstrassInvariant
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
+import ModularCurves.GroupScheme.NaiveGammaOneLocus
 import ModularCurves.GroupScheme.CartierDivisorMapIso
 import ModularCurves.GroupScheme.ChartBridges
 import ModularCurves.GroupScheme.ChartPrecursorImmersion

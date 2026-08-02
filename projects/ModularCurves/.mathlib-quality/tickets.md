@@ -33658,3 +33658,42 @@ later. Note T-D6 is the "(1)⟺(3)" direction of KM 1.4.4, i.e. *geometric-point
 order ⟹ Drinfeld exact order*, and the file's own comment records that its statement was
 already hardened once (the `ℚ̄[ε]` counterexample of the 2026-07-06 adversarial pass forced
 the global killing clause), so the statement is trustworthy even though the proof is open.
+
+## [WP-D1c-rel] COMPLETE (2026-08-02) — axiom-verified, and it **avoids T-D6**
+
+`GroupScheme/NaiveGammaOneLocus.lean` (new) — the one-generator mirror of
+`GroupScheme/TorsionCombination.lean`.
+
+The key design decision: `gammaOneNaiveProblem` is stated with `IsNaiveGammaOne`, **not**
+with the Drinfeld `Section.HasExactOrder`. So the locus it needs is the *naive* one, and
+building that directly sidesteps `exists_exactOrderLocus` — hence sidesteps register box
+T-D6, which the Drinfeld route would have dragged in. **T-D6 is no longer a prerequisite of
+the D-chain.**
+
+Contents, all axiom-verified:
+* `torsionTaut`, `multiplePoint`, `multipleHom` (+ `_torsionπ`, `_torsionι`) — the
+  single-generator analogues of `combinationPoint` / `combinationHom`;
+* `naiveGammaOneSet` / `isClopen_naiveGammaOneSet` / `naiveGammaOneLocus` and its `ι`, `π` —
+  the clopen locus in `E[N]` where every proper multiple avoids the zero section;
+* `naiveGammaOneLocusπ_isFinite`, `naiveGammaOneLocusπ_etale`;
+* `combinationHom_fst` — the `(a, 0)`-combination *is* the `a`-th multiple of the first
+  coordinate. This is what makes the whole thing cheap: the full-level condition specialises
+  to the `Γ₁` condition, so **no counting argument is needed at the locus level** (WP-D1a's
+  counting is for the *moduli-problem* morphism, a statement about level structures);
+* `fullLevelToNaiveGammaOne` + `_ι`, `_π`, and the payoff
+  **`fullLevelToNaiveGammaOne_etale`** and `fullLevelToNaiveGammaOne_isFinite`, both by pure
+  cancellation (`Etale.of_comp` / `IsFinite.of_comp`) since both loci are finite étale
+  over `S`.
+
+Root build green at 9635 jobs.
+
+### The D-chain now stands at
+* WP-D1a ✅ · WP-D1b ✅ · WP-D1c construction ✅ · **WP-D1c-rel ✅**
+* **[WP-D1c-coarse]** — the one open step: identify `yFullToYOne` (the Yoneda-induced map on
+  *representing objects*) with the map induced by `fullLevelToNaiveGammaOne` (the map on
+  *relative loci*), so that finite-étaleness transfers. This is engine bookkeeping —
+  `AffineOverEll.relativelyRepresentable` (`Moduli/EllCategory.lean:209`),
+  `gammaFullNaive_affineOverEll` (`Moduli/GammaHClosure.lean:104`), and the corresponding
+  naive-`Γ₁` statement, which does **not** yet exist and is the concrete sub-task.
+* **[WP-D2]** — then mechanical: `Etale ⟹ Smooth` + `Smooth` composes +
+  `smooth_affine_of_representableBy` closes `YFull.exists_representing_smooth_affine`.
