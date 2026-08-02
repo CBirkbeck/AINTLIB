@@ -166,6 +166,7 @@ import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.ModularCurve.YOneAtlasClassify
 import ModularCurves.ModularCurve.YOneTatePoint
 import ModularCurves.ModularCurve.YRho
+import ModularCurves.Moduli.GammaFullToGammaOne
 import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.DrinfeldRegularity
 import ModularCurves.Moduli.EllCategory

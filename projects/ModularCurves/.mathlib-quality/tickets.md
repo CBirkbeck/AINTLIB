@@ -33529,3 +33529,21 @@ gammaOneNaiveProblem R N` of moduli problems. Both problems are concrete subtype
 sections (`Moduli/Representability.lean:622, 636`) with functoriality by `pullSection` on
 each side, already proved, so the naturality square should be `Subtype.ext` plus
 `EllHom.pullSection_*`. Then **[WP-D1c]**, finite étaleness of the induced `Y(N) ⟶ Y₁(N)`.
+
+## [WP-D1b] COMPLETE (2026-08-02) — axiom-verified
+
+`Moduli/GammaFullToGammaOne.lean` (new):
+* `natCast_ne_zero_of_geometricPoint` — `IsUnit (N : R)` ⟹ `(N : k) ≠ 0` at every geometric
+  point of every `Ell/R`-object, via `NIsInvertible.of_hom` + `nIsInvertible_spec_iff`;
+* **`gammaFullToGammaOne`** — the natural transformation
+  `gammaFullNaiveProblem R N ⟶ gammaOneNaiveProblem R N`, `(P, Q) ↦ P`. Well-definedness is
+  WP-D1a; naturality is `rfl` after `ext`, since both problems transport level structures by
+  `EllHom.pullSection`.
+
+Both axiom-verified. Note `ModuliProblem R` is `(EllObj R)ᵒᵖ ⥤ Type u`, so this is a
+`NatTrans` and the component needs the `↾` coercion into the `Type u` hom.
+
+**Next: [WP-D1c]** — the induced `Y(N) ⟶ Y₁(N)` on representing objects is finite étale.
+Then WP-D2 (`Etale ≫ Smooth` + `smooth_affine_of_representableBy`) closes
+`YFull.exists_representing_smooth_affine`, and WP-D3 gives normality ⟹ the universal root
+⟹ DS4.
