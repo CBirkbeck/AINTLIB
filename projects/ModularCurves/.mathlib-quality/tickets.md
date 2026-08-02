@@ -34321,3 +34321,36 @@ Only the `EllObj`-level assembly in `yFullCandidate_representableBy`: combine
   by that full level structure, so the pair collapses.
 
 No new mathematics: every input is proved and axiom-verified.
+
+### [WP-D2c-3, final assembly] fully scoped — every input exists (2026-08-03)
+
+The last step is plumbing between an `EllObj`-indexed equivalence and a scheme-indexed one.
+All four inputs are in place and axiom-verified:
+
+| input | where |
+|---|---|
+| `EllObj.homPullbackAlongEquiv X g Y : (Y ⟶ X.pullbackAlong g) ≃ {p : (Y ⟶ X) × (Y.base ⟶ T) // p.2 ≫ g = p.1.baseHom}` | `QuotientProblem.lean:192` (**pre-existing**) |
+| `completionLocusClassifies` | `NaiveGammaOneLevel.lean` (proved this session) |
+| `EllObj.isoPullbackAlong u : Y ≅ X.pullbackAlong u.baseHom` | `QuotientProblem.lean:279` (**pre-existing**) — this is the transport that moves level structures from `(X₁.pullbackAlong u.baseHom).curve` to `Y.curve` |
+| `isNaiveGammaOne_of_isNaiveFullLevel` (WP-D1a) + `gammaFullToGammaOne` (WP-D1b) | proved this session |
+
+Shape of the assembly, for `Y : EllObj R`:
+
+1. `homPullbackAlongEquiv` splits a morphism `Y ⟶ yFullCandidate` into `u : Y ⟶ X₁` plus a
+   lift `b` of `u.baseHom` through `completionLocusπ`.
+2. `completionLocusClassifies` at `g := u.baseHom` turns `b` into a full level structure on
+   `X₁.curve.baseChange u.baseHom = (X₁.pullbackAlong u.baseHom).curve`, with first member
+   `u.baseHom ≫ P`.
+3. `(gammaFullNaiveProblem R N).map (isoPullbackAlong u).hom.op` transports it to `Y.curve`.
+4. **The collapse**: `u` is not extra data. Its `Γ₁`-structure is `rOne.homEquiv u`, and step
+   2's condition says exactly that this equals the `Γ₁`-part of the full level structure,
+   which by WP-D1a is determined by it. So `u = rOne.homEquiv.symm (gammaFullToGammaOne …)`
+   and the `Σ` collapses to the full level structure alone.
+
+Step 4 is where WP-D1a and WP-D1b are consumed, and is the only step with mathematical
+content — the rest is transport. **No new mathematics remains in the D-chain.**
+
+Once assembled: `yFullCandidate_representableBy` loses its `sorry`,
+`exists_representing_smooth_affine_of_candidate` (already axiom-verified) fires, and
+`YFull.exists_representing_smooth_affine` — `sorry` since T-E9 — is closed. That in turn
+gives `Y(N)` smooth ⟹ regular ⟹ normal, which is the hypothesis the DS4 root needs.
