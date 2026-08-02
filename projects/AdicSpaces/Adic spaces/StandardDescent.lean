@@ -263,6 +263,136 @@ theorem isSheafy_rationalCovering_of_covers_empty
   exact ⟨Topology.IsEmbedding.of_subsingleton _,
     fun f _ => ⟨0, fun D => absurd D.2 (Finset.eq_empty_iff_forall_notMem.mp he D.1)⟩⟩
 
+/-- Each piece of the standard cover built from `S` sits inside a member of `C`: the piece
+is `stdPiece … f` for some `f ∈ S`, and `hsub` supplies a member containing that. -/
+private theorem exists_member_of_standard_piece
+    (C : RationalCoveringData A) (hC : C.IsRational) (S : Finset A)
+    (hS : Ideal.span (S : Set A) = ⊤)
+    (hsub : ∀ f ∈ S, ∃ E ∈ C.covers,
+      rationalOpen (stdPiece C.base hC.base S hS f).T
+        (stdPiece C.base hC.base S hS f).s ⊆ rationalOpen E.T E.s) :
+    ∀ P : ↥(StandardCoverData.ofSpanTop C.base hC.base S hS).toCovering.covers,
+      ∃ E ∈ C.covers, rationalOpen P.1.T P.1.s ⊆ rationalOpen E.T E.s := by
+  rintro ⟨P, hP⟩
+  obtain ⟨f, hfS, hfeq⟩ := mem_ofSpanTop_covers hP
+  obtain ⟨E, hEC, hEsub⟩ := hsub f hfS
+  exact ⟨E, hEC, hfeq ▸ hEsub⟩
+
+/-- The embedding half of `isSheafy_of_standardSheafCondition_at`, at a nonempty covering:
+the standard product restriction factors through the given one, so the latter is an
+embedding because the former is. -/
+private theorem isEmbedding_productRestrictionSub_of_standard
+    (hstd : StandardSheafCondition A) (href : HasStandardRefinementsAt A)
+    (C : RationalCoveringData A) (hC : C.IsRational) (hne : C.covers.Nonempty) :
+    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+    Topology.IsEmbedding (productRestrictionSub A C) := by
+  classical
+  obtain ⟨S, hS, hsub⟩ := href C hC hne
+  set Std := StandardCoverData.ofSpanTop C.base hC.base S hS with hStd
+  have hkey := hstd Std (A⁺ : Subring A) inferInstance
+  -- the refinement map: each standard piece into a member
+  have hr := exists_member_of_standard_piece C hC S hS hsub
+  choose r hrC hrsub using hr
+  -- factorization: the standard product restriction factors through the given one
+  have hfac : productRestrictionSub A Std.toCovering =
+      (fun y : ∀ E : ↥C.covers, presheafValue E.1 =>
+        fun P : ↥Std.toCovering.covers =>
+          restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ∘
+      (productRestrictionSub A C) := by
+    funext x P
+    exact (congr_fun (restrictionMap_comp C.base (r P) P.1
+      (C.hsubset (r P) (hrC P)) (hrsub P)) x).symm
+  have hΦcont : Continuous (fun y : ∀ E : ↥C.covers, presheafValue E.1 =>
+      fun P : ↥Std.toCovering.covers =>
+        restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) := by
+    refine continuous_pi fun P => ?_
+    exact (restrictionMapHom_continuous (r P) P.1 (hrsub P)).comp
+      (continuous_apply (⟨r P, hrC P⟩ : ↥C.covers))
+  refine IsEmbedding.of_comp_isEmbedding (g := fun y P =>
+    restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ?_
+    (productRestrictionSub_continuous'' C) hΦcont
+  rw [← hfac]
+  exact hkey.1
+
+/-- The per-member half of the gluing argument: a section `x` of the base whose restriction
+to each STANDARD piece is `g` restricts on each member `E` of `C` to `f E`. Checked by
+separation along the standard cover induced on `E`. -/
+private theorem restrictionMap_eq_of_standard_glue
+    (hstd : StandardSheafCondition A)
+    (C : RationalCoveringData A) (hC : C.IsRational) (S : Finset A)
+    (hS : Ideal.span (S : Set A) = ⊤)
+    (f : ∀ D : ↥C.covers, presheafValue D.1)
+    (hcompat : C.AllDataCompatible f)
+    (r : ↥(StandardCoverData.ofSpanTop C.base hC.base S hS).toCovering.covers
+      → RationalLocData A)
+    (hrC : ∀ P : ↥(StandardCoverData.ofSpanTop C.base hC.base S hS).toCovering.covers,
+      r P ∈ C.covers)
+    (hrsub : ∀ P : ↥(StandardCoverData.ofSpanTop C.base hC.base S hS).toCovering.covers,
+      rationalOpen P.1.T P.1.s ⊆ rationalOpen (r P).T (r P).s)
+    (x : presheafValue C.base)
+    (hx : ∀ P : ↥(StandardCoverData.ofSpanTop C.base hC.base S hS).toCovering.covers,
+      restrictionMap C.base P.1
+          ((StandardCoverData.ofSpanTop C.base hC.base S hS).toCovering.hsubset P.1 P.2) x
+        = restrictionMap (r P) P.1 (hrsub P) (f ⟨r P, hrC P⟩))
+    (E : RationalLocData A) (hEC : E ∈ C.covers) :
+    restrictionMap C.base E (C.hsubset E hEC) x = f ⟨E, hEC⟩ := by
+  classical
+  let Std := StandardCoverData.ofSpanTop C.base hC.base S hS
+  set g : ∀ P : ↥Std.toCovering.covers, presheafValue P.1 := fun P =>
+    restrictionMap (r P) P.1 (hrsub P) (f ⟨r P, hrC P⟩) with hgdef
+  -- identify on `E` by separation along the induced standard cover of `E`
+  set StdE := StandardCoverData.ofSpanTop E (hC.piece hEC) S hS with hStdE
+  have hkeyE := hstd StdE (A⁺ : Subring A) inferInstance
+  refine hkeyE.1.injective ?_
+  funext Q
+  obtain ⟨fq, hfqS, hfqeq⟩ := mem_ofSpanTop_covers Q.2
+  -- the `E`-piece sits inside the corresponding base-piece (at this pair)
+  have hQP : rationalOpen Q.1.T Q.1.s ⊆
+      rationalOpen (stdPiece C.base hC.base S hS fq).T
+        (stdPiece C.base hC.base S hS fq).s := by
+    rw [← hfqeq]
+    show rationalOpen (stdPiece E (hC.piece hEC) S hS fq).T
+        (stdPiece E (hC.piece hEC) S hS fq).s ⊆ _
+    rw [stdPiece, stdPiece, RationalLocData.interRational_rationalOpen,
+      RationalLocData.interRational_rationalOpen]
+    have hgen : rationalOpen (genPieceDatum E.P S fq hS).T
+        (genPieceDatum E.P S fq hS).s =
+        rationalOpen (genPieceDatum C.base.P S fq hS).T
+          (genPieceDatum C.base.P S fq hS).s := by
+      rw [genPieceDatum_T, genPieceDatum_T, genPieceDatum_s, genPieceDatum_s]
+    rw [hgen]
+    exact Set.inter_subset_inter_left _ (C.hsubset E hEC)
+  have hQE : rationalOpen Q.1.T Q.1.s ⊆ rationalOpen E.T E.s := StdE.toCovering.hsubset Q.1 Q.2
+  -- membership of the base-piece in the standard covering
+  have hPmem := stdPiece_mem_ofSpanTop C.base hC.base S hS hfqS
+  set P : ↥Std.toCovering.covers := ⟨stdPiece C.base hC.base S hS fq, hPmem⟩
+  -- left side: restrict `x` through the base piece
+  have hL : restrictionMap E Q.1 hQE
+      (restrictionMap C.base E (C.hsubset E hEC) x) =
+      restrictionMap P.1 Q.1 hQP (g P) := by
+    calc restrictionMap E Q.1 hQE (restrictionMap C.base E (C.hsubset E hEC) x)
+        = restrictionMap C.base Q.1 (hQE.trans (C.hsubset E hEC)) x :=
+          congr_fun (restrictionMap_comp C.base E Q.1 (C.hsubset E hEC) hQE) x
+      _ = restrictionMap P.1 Q.1 hQP
+          (restrictionMap C.base P.1 (Std.toCovering.hsubset P.1 P.2) x) :=
+          (congr_fun (restrictionMap_comp C.base P.1 Q.1
+            (Std.toCovering.hsubset P.1 P.2) hQP) x).symm
+      _ = restrictionMap P.1 Q.1 hQP (g P) :=
+          congrArg (restrictionMap P.1 Q.1 hQP) (hx P)
+  -- right side: the family agrees with the `E`-value on `Q`
+  have hR : restrictionMap P.1 Q.1 hQP (g P) =
+      restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) := by
+    calc restrictionMap P.1 Q.1 hQP (g P)
+        = restrictionMap (r P) Q.1 (hQP.trans (hrsub P)) (f ⟨r P, hrC P⟩) :=
+          congr_fun (restrictionMap_comp (r P) P.1 Q.1 (hrsub P) hQP)
+            (f ⟨r P, hrC P⟩)
+      _ = restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) :=
+          hcompat ⟨r P, hrC P⟩ ⟨E, hEC⟩ Q.1 (hQP.trans (hrsub P)) hQE
+  show restrictionMap E Q.1 _ (restrictionMap C.base E (C.hsubset E hEC) x) =
+    restrictionMap E Q.1 _ (f ⟨E, hEC⟩)
+  exact hL.trans hR
+
+
 /-- **The reduction** (the Čech-refinement argument assembling Kedlaya Lemma 1.6.8
 into the sheaf axioms; Wedhorn's Prop A.3-style transfer, algebraic and topological
 halves): given the `A⁺`-free standard condition and the descent input at this pair,
@@ -284,41 +414,10 @@ theorem isSheafy_of_standardSheafCondition_at
     IsSheafy A := by
   classical
   constructor
-  · -- ——— embedding ———
-    intro C hC
+  · intro C hC
     rcases C.covers.eq_empty_or_nonempty with he | hne
     · exact (isSheafy_rationalCovering_of_covers_empty C he).1
-    obtain ⟨S, hS, hsub⟩ := href C hC hne
-    set Std := StandardCoverData.ofSpanTop C.base hC.base S hS with hStd
-    have hkey := hstd Std (A⁺ : Subring A) inferInstance
-    -- the refinement map: each standard piece into a member
-    have hr : ∀ P : ↥Std.toCovering.covers, ∃ E ∈ C.covers,
-        rationalOpen P.1.T P.1.s ⊆ rationalOpen E.T E.s := by
-      rintro ⟨P, hP⟩
-      obtain ⟨f, hfS, hfeq⟩ := mem_ofSpanTop_covers hP
-      obtain ⟨E, hEC, hEsub⟩ := hsub f hfS
-      exact ⟨E, hEC, hfeq ▸ hEsub⟩
-    choose r hrC hrsub using hr
-    -- factorization: the standard product restriction factors through the given one
-    have hfac : productRestrictionSub A Std.toCovering =
-        (fun y : ∀ E : ↥C.covers, presheafValue E.1 =>
-          fun P : ↥Std.toCovering.covers =>
-            restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ∘
-        (productRestrictionSub A C) := by
-      funext x P
-      exact (congr_fun (restrictionMap_comp C.base (r P) P.1
-        (C.hsubset (r P) (hrC P)) (hrsub P)) x).symm
-    have hΦcont : Continuous (fun y : ∀ E : ↥C.covers, presheafValue E.1 =>
-        fun P : ↥Std.toCovering.covers =>
-          restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) := by
-      refine continuous_pi fun P => ?_
-      exact (restrictionMapHom_continuous (r P) P.1 (hrsub P)).comp
-        (continuous_apply (⟨r P, hrC P⟩ : ↥C.covers))
-    refine IsEmbedding.of_comp_isEmbedding (g := fun y P =>
-      restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ?_
-      (productRestrictionSub_continuous'' C) hΦcont
-    rw [← hfac]
-    exact hkey.1
+    exact isEmbedding_productRestrictionSub_of_standard hstd href C hC hne
   · -- ——— gluing ———
     intro C hC f hcompat
     rcases C.covers.eq_empty_or_nonempty with he | hne
@@ -326,12 +425,7 @@ theorem isSheafy_of_standardSheafCondition_at
     obtain ⟨S, hS, hsub⟩ := href C hC hne
     set Std := StandardCoverData.ofSpanTop C.base hC.base S hS with hStd
     have hkey := hstd Std (A⁺ : Subring A) inferInstance
-    have hr : ∀ P : ↥Std.toCovering.covers, ∃ E ∈ C.covers,
-        rationalOpen P.1.T P.1.s ⊆ rationalOpen E.T E.s := by
-      rintro ⟨P, hP⟩
-      obtain ⟨fₚ, hfS, hfeq⟩ := mem_ofSpanTop_covers hP
-      obtain ⟨E, hEC, hEsub⟩ := hsub fₚ hfS
-      exact ⟨E, hEC, hfeq ▸ hEsub⟩
+    have hr := exists_member_of_standard_piece C hC S hS hsub
     choose r hrC hrsub using hr
     -- the restricted family on the standard pieces
     set g : ∀ P : ↥Std.toCovering.covers, presheafValue P.1 := fun P =>
@@ -351,60 +445,7 @@ theorem isSheafy_of_standardSheafCondition_at
     obtain ⟨x, hx⟩ := hkey.2 g hgcompat
     refine ⟨x, ?_⟩
     rintro ⟨E, hEC⟩
-    -- identify on `E` by separation along the induced standard cover of `E`
-    set StdE := StandardCoverData.ofSpanTop E (hC.piece hEC) S hS with hStdE
-    have hkeyE := hstd StdE (A⁺ : Subring A) inferInstance
-    refine hkeyE.1.injective ?_
-    funext Q
-    obtain ⟨fq, hfqS, hfqeq⟩ := mem_ofSpanTop_covers Q.2
-    -- the `E`-piece sits inside the corresponding base-piece (at this pair)
-    have hQP : rationalOpen Q.1.T Q.1.s ⊆
-        rationalOpen (stdPiece C.base hC.base S hS fq).T
-          (stdPiece C.base hC.base S hS fq).s := by
-      rw [← hfqeq]
-      show rationalOpen (stdPiece E (hC.piece hEC) S hS fq).T
-          (stdPiece E (hC.piece hEC) S hS fq).s ⊆ _
-      rw [stdPiece, stdPiece, RationalLocData.interRational_rationalOpen,
-        RationalLocData.interRational_rationalOpen]
-      have hgen : rationalOpen (genPieceDatum E.P S fq hS).T
-          (genPieceDatum E.P S fq hS).s =
-          rationalOpen (genPieceDatum C.base.P S fq hS).T
-            (genPieceDatum C.base.P S fq hS).s := by
-        rw [genPieceDatum_T, genPieceDatum_T, genPieceDatum_s, genPieceDatum_s]
-      rw [hgen]
-      exact Set.inter_subset_inter_left _ (C.hsubset E hEC)
-    have hQE : rationalOpen Q.1.T Q.1.s ⊆ rationalOpen E.T E.s :=
-      StdE.toCovering.hsubset Q.1 Q.2
-    -- membership of the base-piece in the standard covering
-    have hPmem := stdPiece_mem_ofSpanTop C.base hC.base S hS hfqS
-    set P : ↥Std.toCovering.covers := ⟨stdPiece C.base hC.base S hS fq, hPmem⟩
-      with hPdef
-    -- left side: restrict `x` through the base piece
-    have hL : restrictionMap E Q.1 hQE
-        (restrictionMap C.base E (C.hsubset E hEC) x) =
-        restrictionMap P.1 Q.1 hQP (g P) := by
-      calc restrictionMap E Q.1 hQE (restrictionMap C.base E (C.hsubset E hEC) x)
-          = restrictionMap C.base Q.1 (hQE.trans (C.hsubset E hEC)) x :=
-            congr_fun (restrictionMap_comp C.base E Q.1 (C.hsubset E hEC) hQE) x
-        _ = restrictionMap P.1 Q.1 hQP
-            (restrictionMap C.base P.1 (Std.toCovering.hsubset P.1 P.2) x) :=
-            (congr_fun (restrictionMap_comp C.base P.1 Q.1
-              (Std.toCovering.hsubset P.1 P.2) hQP) x).symm
-        _ = restrictionMap P.1 Q.1 hQP (g P) :=
-            congrArg (restrictionMap P.1 Q.1 hQP) (hx P)
-    -- right side: the family agrees with the `E`-value on `Q`
-    have hR : restrictionMap P.1 Q.1 hQP (g P) =
-        restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) := by
-      calc restrictionMap P.1 Q.1 hQP (g P)
-          = restrictionMap (r P) Q.1 (hQP.trans (hrsub P)) (f ⟨r P, hrC P⟩) :=
-            congr_fun (restrictionMap_comp (r P) P.1 Q.1 (hrsub P) hQP)
-              (f ⟨r P, hrC P⟩)
-        _ = restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) :=
-            hcompat ⟨r P, hrC P⟩ ⟨E, hEC⟩ Q.1 (hQP.trans (hrsub P)) hQE
-    show restrictionMap E Q.1 _ (restrictionMap C.base E (C.hsubset E hEC) x) =
-      restrictionMap E Q.1 _ (f ⟨E, hEC⟩)
-    exact hL.trans hR
-
+    exact restrictionMap_eq_of_standard_glue hstd C hC S hS f hcompat r hrC hrsub x hx E hEC
 /-- **Empty-cover regression** (PHASE 1): the empty-cover branch is discharged
 unconditionally on the covering (only the ambient complete-Tate structure), with
 no descent input — the section ring is a subsingleton. -/
