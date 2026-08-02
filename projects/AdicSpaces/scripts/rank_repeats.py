@@ -102,21 +102,39 @@ def score(body):
     return (total // fill, picks)
 
 
+ROOT = pathlib.Path(__file__).resolve().parents[1] / 'Adic spaces'
+
+
 def main():
-    rows = [r for r in json.load(open('/tmp/over50.json'))
-            if r['file'].startswith('projects/AdicSpaces/')
-            and '/Vendored/' not in r['file']]
+    """Reads scope_code.py's output -- the CANONICAL task-2 measure.
+
+    Not `/tmp/scope.py`'s: that one splits the body at the first line containing `:=`,
+    so a `:=` inside a binder truncates the signature and the body absorbs it. It
+    reports 283 actionable against this campaign's 117, and it lives in a `/tmp` shared
+    with other sessions, which is how it came to be a different script than the one this
+    campaign started with. Run `scope_code.py` first; it writes the json read here.
+    """
+    src = pathlib.Path('/tmp/over50_code.json')
+    if not src.exists():
+        sys.exit('run projects/AdicSpaces/scripts/scope_code.py first')
+    rows = [r for r in json.load(open(src))
+            if not r['sorry'] and not r['file'].startswith('Vendored/')]
     out = []
     for r in rows:
-        L = pathlib.Path(r['file']).read_text().split('\n')
-        decl = L[r['line'] - 1:r['line'] - 1 + r['total']]
-        if any('sorry' in l for l in decl):
-            continue
-        by = next((k for k in range(len(decl))
-                   if decl[k].rstrip().endswith(':= by')), None)
+        path = ROOT / r['file']
+        L = path.read_text().split('\n')
+        e = r['line'] - 1 + 1
+        while e < len(L) and not re.match(
+                r'^\s*(?:@\[|/--|/-!|include |omit |(?:private |protected |noncomputable '
+                r'|scoped |partial |unsafe )*(?:theorem|lemma|def|abbrev|instance|structure'
+                r'|inductive|class|end|section|namespace|variable|open|universe|attribute'
+                r'|macro|notation|syntax|elab)\s)', L[e]):
+            e += 1
+        by = next((k for k in range(r['line'] - 1, e)
+                   if L[k].rstrip().endswith(':= by')), None)
         if by is None:
             continue
-        body = decl[by + 1:]
+        body = L[by + 1:e]
         n_code = len(code_lines(body))
         if n_code <= dc.BUDGET:
             continue
@@ -132,7 +150,7 @@ def main():
     print(f"{'slack':>5} {'saves':>5} {'code':>4} {'n':>2}  target :: top repeats")
     for slack, lines, n_code, picks, r in out[:20]:
         name = r['name'][:34]
-        loc = r['file'].split('Adic spaces/')[-1]
+        loc = r["file"]
         print(f"{slack:5d} {lines:5d} {n_code:4d} {len(picks):2d}  {loc}::{name}")
         for n, t in picks[:3]:
             print(f"{'':22}x{n:<3} {t[:82]}")
