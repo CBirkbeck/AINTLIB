@@ -2606,6 +2606,83 @@ private theorem unitCover_overlapIdeal_rel [IsTateRing A] [IsNoetherianRing A]
     exact Ideal.mul_mem_left _ _ hgen₁
 
 set_option linter.unusedSectionVars false in
+/-- Each variable `Xⱼ` of the bivariate Tate algebra lies in the pair subring. -/
+private lemma unitCover_X_mem
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (j : Fin 2) :
+    (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+      ↥(TateAlgebra₂ (presheafValue D₀))) ∈
+    MvTateAlgebra.mvPairSubring 2
+      (IsTateRing.principalPair (presheafValue D₀)).toPairOfDefinition := by
+  intro l
+  change MvPowerSeries.coeff l (MvPowerSeries.X j) ∈ _
+  rw [MvPowerSeries.coeff_X]
+  split
+  · exact Subring.one_mem _
+  · exact Subring.zero_mem _
+
+set_option linter.unusedSectionVars false in
+private lemma unitCover_X_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) :
+    (TateAlgebra₂.X : ↥(TateAlgebra₂ (presheafValue D₀))) =
+      (⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
+
+set_option linter.unusedSectionVars false in
+private lemma unitCover_Y_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) :
+    (TateAlgebra₂.Y : ↥(TateAlgebra₂ (presheafValue D₀))) =
+      (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
+        ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
+
+set_option linter.unusedSectionVars false in
+/-- The overlap ideal lies in the kernel of the bivariate evaluation. -/
+private lemma unitCover_overlapIdeal_le_ker
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    unitCover_overlapIdeal D₀ f ≤ RingHom.ker (unitCover_overlapEval D₀ f) := by
+  rw [unitCover_overlapIdeal, Ideal.span_le]
+  rintro x hx
+  rcases hx with rfl | hx'
+  · exact unitCover_overlapEval_gen1 D₀ f
+  · rw [Set.mem_singleton_iff] at hx'
+    subst hx'
+    exact unitCover_overlapEval_gen2 D₀ f
+
+set_option linter.unusedSectionVars false in
+/-- The overlap ideal is closed (completeness of `𝒪(D₀)` + the Tate topology). -/
+private lemma unitCover_overlapIdeal_isClosed
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    @IsClosed _ (MvTateAlgebra.mvTateAlgebraTopology' 2)
+      ((unitCover_overlapIdeal D₀ f : Ideal ↥(TateAlgebra₂ (presheafValue D₀))) :
+        Set ↥(TateAlgebra₂ (presheafValue D₀))) := by
+  haveI hCompleteB :
+      (letI : UniformSpace (presheafValue D₀) :=
+        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
+       CompleteSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  exact MvTateAlgebra.mvTate_isClosed_ideal 2 hCompleteB _
+
+
+set_option linter.unusedSectionVars false in
 /-- **The Example-6.38 half of the overlap bridge**: `O_X^B(annulus) ≃+*
 B⟨X,Y⟩/(b − X, 1 − bY)`, by `tate_quotPresentation` at the bivariate annulus
 evaluation, with every engine input discharged from the landed package
@@ -2620,29 +2697,7 @@ private noncomputable def unitCover_overlapQuotEquiv
     presheafValue (unitCover_overlapDatum_B D₀ f) ≃+*
       (↥(TateAlgebra₂ (presheafValue D₀)) ⧸ unitCover_overlapIdeal D₀ f) := by
   classical
-  haveI hCompleteB :
-      (letI : UniformSpace (presheafValue D₀) :=
-        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
-       CompleteSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  have hX_mem : ∀ j : Fin 2,
-      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-        ↥(TateAlgebra₂ (presheafValue D₀))) ∈
-      MvTateAlgebra.mvPairSubring 2
-        (IsTateRing.principalPair (presheafValue D₀)).toPairOfDefinition := by
-    intro j l
-    change MvPowerSeries.coeff l (MvPowerSeries.X j) ∈ _
-    rw [MvPowerSeries.coeff_X]
-    split
-    · exact Subring.one_mem _
-    · exact Subring.zero_mem _
-  have hXzeta : (TateAlgebra₂.X : ↥(TateAlgebra₂ (presheafValue D₀))) =
-      (⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩ :
-        ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
-  have hYeta : (TateAlgebra₂.Y : ↥(TateAlgebra₂ (presheafValue D₀))) =
-      (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
-        ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
   haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
   refine tate_quotPresentation (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
@@ -2654,19 +2709,12 @@ private noncomputable def unitCover_overlapQuotEquiv
     refine Eq.trans (mvEvalHomBounded_X _ _ _ _ j) ?_
     refine Fin.cases ?_ (fun j' => ?_) j
     · rfl
-    · have hj : j' = 0 := Subsingleton.elim j' 0
-      subst hj
+    · obtain rfl : j' = 0 := Subsingleton.elim j' 0
       rfl
   · -- haI_le
-    rw [unitCover_overlapIdeal, Ideal.span_le]
-    rintro x hx
-    rcases hx with rfl | hx'
-    · exact unitCover_overlapEval_gen1 D₀ f
-    · rw [Set.mem_singleton_iff] at hx'
-      subst hx'
-      exact unitCover_overlapEval_gen2 D₀ f
+    exact unitCover_overlapIdeal_le_ker D₀ f
   · -- haI_closed
-    exact MvTateAlgebra.mvTate_isClosed_ideal 2 hCompleteB _
+    exact unitCover_overlapIdeal_isClosed D₀ f
   · -- hUnit
     rw [isUnit_iff_exists_inv]
     refine ⟨Ideal.Quotient.mk _ TateAlgebra₂.Y, ?_⟩
@@ -2675,9 +2723,9 @@ private noncomputable def unitCover_overlapQuotEquiv
     exact h1.symm
   · -- hgen_mod
     refine Fin.cases ?_ (fun j' => ?_) j
-    · simpa only [Matrix.cons_val_zero, hXzeta] using (unitCover_overlapIdeal_rel D₀ f).2.2
-    · have hj : j' = 0 := Subsingleton.elim j' 0
-      subst hj
+    · simpa only [Matrix.cons_val_zero, unitCover_X_eq D₀] using
+        (unitCover_overlapIdeal_rel D₀ f).2.2
+    · obtain rfl : j' = 0 := Subsingleton.elim j' 0
       try simp only [Matrix.cons_val_succ, Matrix.cons_val_zero]
       rw [map_one]
       have h1 := (unitCover_overlapIdeal_rel D₀ f).1
@@ -2688,14 +2736,14 @@ private noncomputable def unitCover_overlapQuotEquiv
     rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
       (D₀.canonicalMap f) t ht with rfl | rfl | rfl
     · refine ⟨⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩,
-        hX_mem 1, ?_⟩
+        unitCover_X_mem D₀ 1, ?_⟩
       have h1 := (unitCover_overlapIdeal_rel D₀ f).1
-      rw [← hYeta]
+      rw [← unitCover_Y_eq D₀]
       exact h1
     · exact ⟨1, Subring.one_mem _, (unitCover_overlapIdeal_rel D₀ f).2.1⟩
     · refine ⟨⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩,
-        hX_mem 0, ?_⟩
-      rw [← hXzeta]
+        unitCover_X_mem D₀ 0, ?_⟩
+      rw [← unitCover_X_eq D₀]
       exact (unitCover_overlapIdeal_rel D₀ f).2.2
 
 set_option linter.unusedSectionVars false in
@@ -5534,29 +5582,7 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         (Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f) z) =
       unitCover_overlapEval D₀ f z := by
   classical
-  haveI hCompleteB :
-      (letI : UniformSpace (presheafValue D₀) :=
-        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
-       CompleteSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
   letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  have hX_mem : ∀ j : Fin 2,
-      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-        ↥(TateAlgebra₂ (presheafValue D₀))) ∈
-      MvTateAlgebra.mvPairSubring 2
-        (IsTateRing.principalPair (presheafValue D₀)).toPairOfDefinition := by
-    intro j l
-    change MvPowerSeries.coeff l (MvPowerSeries.X j) ∈ _
-    rw [MvPowerSeries.coeff_X]
-    split
-    · exact Subring.one_mem _
-    · exact Subring.zero_mem _
-  have hXzeta : (TateAlgebra₂.X : ↥(TateAlgebra₂ (presheafValue D₀))) =
-      (⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩ :
-        ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
-  have hYeta : (TateAlgebra₂.Y : ↥(TateAlgebra₂ (presheafValue D₀))) =
-      (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
-        ↥(TateAlgebra₂ (presheafValue D₀))) := rfl
   haveI hTateB' : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
   exact tate_quotPresentation_symm_mk (unitCover_overlapDatum_B D₀ f)
     (unitCover_overlapEval D₀ f)
@@ -5571,15 +5597,8 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         subst hj
         rfl)
     (unitCover_overlapIdeal D₀ f)
-    (by
-      rw [unitCover_overlapIdeal, Ideal.span_le]
-      rintro x hx
-      rcases hx with rfl | hx'
-      · exact unitCover_overlapEval_gen1 D₀ f
-      · rw [Set.mem_singleton_iff] at hx'
-        subst hx'
-        exact unitCover_overlapEval_gen2 D₀ f)
-    (MvTateAlgebra.mvTate_isClosed_ideal 2 hCompleteB _)
+    (unitCover_overlapIdeal_le_ker D₀ f)
+    (unitCover_overlapIdeal_isClosed D₀ f)
     (by
       rw [isUnit_iff_exists_inv]
       refine ⟨Ideal.Quotient.mk _ TateAlgebra₂.Y, ?_⟩
@@ -5588,7 +5607,7 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
       exact h1.symm)
     (fun j => by
       refine Fin.cases ?_ (fun j' => ?_) j
-      · simpa only [Matrix.cons_val_zero, hXzeta] using
+      · simpa only [Matrix.cons_val_zero, unitCover_X_eq D₀] using
           (unitCover_overlapIdeal_rel D₀ f).2.2
       · have hj : j' = 0 := Subsingleton.elim j' 0
         subst hj
@@ -5601,14 +5620,14 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
       rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
         (D₀.canonicalMap f) t ht with rfl | rfl | rfl
       · refine ⟨⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩,
-          hX_mem 1, ?_⟩
+          unitCover_X_mem D₀ 1, ?_⟩
         have h1 := (unitCover_overlapIdeal_rel D₀ f).1
-        rw [← hYeta]
+        rw [← unitCover_Y_eq D₀]
         exact h1
       · exact ⟨1, Subring.one_mem _, (unitCover_overlapIdeal_rel D₀ f).2.1⟩
       · refine ⟨⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩,
-          hX_mem 0, ?_⟩
-        rw [← hXzeta]
+          unitCover_X_mem D₀ 0, ?_⟩
+        rw [← unitCover_X_eq D₀]
         exact (unitCover_overlapIdeal_rel D₀ f).2.2)
     z
 
