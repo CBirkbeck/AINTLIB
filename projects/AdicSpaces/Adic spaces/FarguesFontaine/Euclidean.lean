@@ -601,6 +601,38 @@ private theorem tendsto_gaussTerm_sub {ρ : NNReal} {a b : ℕ → F}
         (Valuation.map_sub (perfectoidValuation p F) (a k) (b k)) zero_le)
         (nnreal_mul_max _ _ _).le
 
+/-- Ultrametric limit bound: if `S N → z` and every `Valued.v (S N) ≤ c`, then
+`Valued.v z ≤ c`. -/
+private lemma valued_le_of_tendsto_of_forall_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {z : hatK p F hρ0 hρ1} {S : ℕ → hatK p F hρ0 hρ1} {c : NNReal} (hc : 0 < c)
+    (hlim : Filter.Tendsto S Filter.atTop (nhds z))
+    (hb : ∀ N, Valued.v (S N) ≤ c) : Valued.v z ≤ c := by
+  obtain ⟨N₀, hN₀⟩ := (eventually_valued_sub_le_of_tendsto p F
+    (hρ0 := hρ0) (hρ1 := hρ1) hlim hc).exists
+  have h2 : z = (z - S N₀) + S N₀ := by ring
+  rw [h2]
+  refine le_trans (Valuation.map_add _ _ _) (max_le ?_ (hb N₀))
+  rw [Valuation.map_sub_swap]
+  exact hN₀
+
+/-- The degenerate case of `digit_sub_le`: both valuations vanish, so both elements do. -/
+private lemma digit_sub_le_of_max_eq_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hM0 : max (Valued.v x) (Valued.v y) = 0) (n : ℕ) :
+    ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+        - teichCoeffAr p F ϖ hρ0 hρ1 y n)
+      ≤ max (Valued.v (x - y)) (ρ * max (Valued.v x) (Valued.v y)) := by
+  have hvx : Valued.v x = 0 := le_antisymm (le_trans (le_max_left _ _) hM0.le) zero_le
+  have hvy : Valued.v y = 0 := le_antisymm (le_trans (le_max_right _ _) hM0.le) zero_le
+  have hx0 : x = 0 := (Valuation.zero_iff (Valued.v :
+    Valuation (hatK p F hρ0 hρ1) NNReal)).mp hvx
+  have hy0 : y = 0 := (Valuation.zero_iff (Valued.v :
+    Valuation (hatK p F hρ0 hρ1) NNReal)).mp hvy
+  have hgoal : teichCoeffAr p F ϖ hρ0 hρ1 x n - teichCoeffAr p F ϖ hρ0 hρ1 y n = 0 := by
+    rw [hx0, hy0, teichCoeffAr_zero, sub_zero]
+  rw [hgoal, Valuation.map_zero, mul_zero]
+  exact zero_le
+
+
 /-- **Digit comparison (DC⁺)**: coordinate differences on `A^r` are controlled by
 the value of the difference plus one `ρ`-damped term. The engine of Kedlaya's
 Remark 2.7 at a single radius. -/
@@ -613,45 +645,26 @@ theorem digit_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   set a : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 x with ha
   set b : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 y with hb
   set e : ℕ → F := fun k => a k - b k with he
-  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
-  rw [← ha] at hdx
-  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
-  rw [← hb] at hdy
+  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx; rw [← ha] at hdx
+  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy; rw [← hb] at hdy
   have hde : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (e k))
       Filter.atTop (nhds 0) := tendsto_gaussTerm_sub p F hdx hdy
   set M := max (Valued.v x) (Valued.v y) with hM
   have hΦe := valued_PhiHatK p F ϖ hρ0 hρ1 hde
-  have hrx : PhiHatK p F ϖ hρ0 hρ1 a = x := by
-    rw [ha]
-    exact PhiHatK_teichCoeffAr p F ϖ hx
-  have hry : PhiHatK p F ϖ hρ0 hρ1 b = y := by
-    rw [hb]
-    exact PhiHatK_teichCoeffAr p F ϖ hy
+  have hrx : PhiHatK p F ϖ hρ0 hρ1 a = x := by rw [ha]; exact PhiHatK_teichCoeffAr p F ϖ hx
+  have hry : PhiHatK p F ϖ hρ0 hρ1 b = y := by rw [hb]; exact PhiHatK_teichCoeffAr p F ϖ hy
   have hSx : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ a N)) Filter.atTop (nhds x) := by
-    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdx
-    rwa [hrx] at h1
+    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdx; rwa [hrx] at h1
   have hSy : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ b N)) Filter.atTop (nhds y) := by
-    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdy
-    rwa [hry] at h1
+    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdy; rwa [hry] at h1
   have hSe := tendsto_PhiHatK p F ϖ hρ0 hρ1 hde
   have hPNval : ∀ N : ℕ, Valued.v (AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ a N - prefixAloc p F ϖ b N - prefixAloc p F ϖ e N))
       ≤ ρ * M := fun N => valued_prefix_sub_sub_le p F ϖ hx hy N
   rcases eq_or_ne M 0 with hM0 | hM0
-  · have hvx : Valued.v x = 0 :=
-      le_antisymm (le_trans (le_max_left _ _) hM0.le) zero_le
-    have hvy : Valued.v y = 0 :=
-      le_antisymm (le_trans (le_max_right _ _) hM0.le) zero_le
-    have hx0 : x = 0 := (Valuation.zero_iff (Valued.v :
-      Valuation (hatK p F hρ0 hρ1) NNReal)).mp hvx
-    have hy0 : y = 0 := (Valuation.zero_iff (Valued.v :
-      Valuation (hatK p F hρ0 hρ1) NNReal)).mp hvy
-    have hgoal : a n - b n = 0 := by
-      rw [ha, hb, hx0, hy0, teichCoeffAr_zero, sub_zero]
-    rw [hgoal, Valuation.map_zero, mul_zero]
-    exact zero_le
+  · exact digit_sub_le_of_max_eq_zero p F ϖ hM0 n
   · have hρM : 0 < ρ * M := mul_pos hρ0 (pos_iff_ne_zero.mpr hM0)
     have hlim : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
         (prefixAloc p F ϖ a N - prefixAloc p F ϖ b N - prefixAloc p F ϖ e N))
@@ -659,20 +672,8 @@ theorem digit_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       have h1 := (hSx.sub hSy).sub hSe
       refine h1.congr fun N => ?_
       rw [map_sub, map_sub]
-    have hH : Valued.v ((x - y) - PhiHatK p F ϖ hρ0 hρ1 e) ≤ ρ * M := by
-      obtain ⟨N₀, hN₀⟩ := (eventually_valued_sub_le_of_tendsto p F
-        (hρ0 := hρ0) (hρ1 := hρ1) hlim hρM).exists
-      have h2 : (x - y) - PhiHatK p F ϖ hρ0 hρ1 e
-          = (((x - y) - PhiHatK p F ϖ hρ0 hρ1 e)
-              - AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N₀
-                - prefixAloc p F ϖ b N₀ - prefixAloc p F ϖ e N₀))
-            + AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N₀
-                - prefixAloc p F ϖ b N₀ - prefixAloc p F ϖ e N₀) := by
-        ring
-      rw [h2]
-      refine le_trans (Valuation.map_add _ _ _) (max_le ?_ (hPNval N₀))
-      rw [Valuation.map_sub_swap]
-      exact hN₀
+    have hH : Valued.v ((x - y) - PhiHatK p F ϖ hρ0 hρ1 e) ≤ ρ * M :=
+      valued_le_of_tendsto_of_forall_le p F hρM hlim hPNval
     have hΦval : Valued.v (PhiHatK p F ϖ hρ0 hρ1 e)
         ≤ max (Valued.v (x - y)) (ρ * M) := by
       have h3 : PhiHatK p F ϖ hρ0 hρ1 e
