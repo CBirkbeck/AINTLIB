@@ -9436,3 +9436,42 @@ produces no `overlappingInstances` warning at all because it never mentions `F`.
 
     over-50 proofs   486 (baseline) → 71   (69 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: ker_deltaMap_gen_le_range_epsilonHom_gen 92 → 31
+
+`LaurentCoverExact.lean`. Two extractions:
+
+    posEmbHom_X_eq_zeta             14L  posEmbHom X = ζ
+    exists_ideal_pair_lambdaMap_eq  43L  Row-1 surjectivity, the mathematical core
+
+**Sixth wrong-altitude lemma, and the most blatant.** `negEmbHom_X_eq_zetaInv` is a *named
+private lemma 500 lines above in the same file*. Its twin `posEmbHom X = ζ` was written out
+inline at its single use — fifteen lines differing only in `posIncl`/`negIncl`, `Fin 2`
+index `0`/`1`, and `TateAlgebra₂.X`/`.Y`. A missing twin of an existing lemma is the easiest
+kind of duplication to see once you look for it, and the hardest for a name-based scan,
+because the copy has no name to collide with.
+
+### `rfl` that was only cheap because of a prior `subst`
+
+The lift failed first with `(deterministic) timeout at whnf` at an inner `line:col` — one
+bad step, not cumulative. The step was
+
+    lambdaMap_surjective_with_zero_const rfl c_laurent
+
+whose first argument must prove `‹TopologicalSpace A› = UniformSpace.toTopologicalSpace`.
+In the parent that is a **syntactic identity**, because the proof opens with `subst htop`.
+Extracted standalone, the two sides are merely propositionally equal and `rfl` sends whnf
+into a 200k-heartbeat search. Carrying `htop` through the lemma's signature and passing
+`rfl` at the (post-`subst`) call site restores the original cost.
+
+**Rule:** a `rfl` inside a proof that has done `subst` is not portable. Check what the
+`subst` made syntactic before lifting anything downstream of it.
+
+Per the campaign rule the timeout was diagnosed, not raised: the `<decl>:0` vs `line:col`
+distinction told me immediately this was one step rather than the extraction itself being
+too expensive — the opposite of the `isOXAcyclic_interProd` case above.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 70   (68 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
