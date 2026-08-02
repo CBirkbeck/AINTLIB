@@ -9196,9 +9196,11 @@ plus a genuinely missing mathlib-style API lemma, added next to `restrictionMap_
     restrictionMap_restrictionMap   restriction composition, applied to a section
 
 `restrictionMap_comp` is stated as an equality of *functions*, so every consumer that wants
-it on an element writes `congrFun (restrictionMap_comp …) y` by hand — **at more than a
-dozen sites across ten files**. Naming the pointwise form turned four multi-line `have`
-blocks in this proof into rewrite-list entries. This is the `/overview` Step-7 shape (a
+it on an element writes `congrFun (restrictionMap_comp …) y` by hand. I counted after the
+fact: **93 sites across 20 files** (38 in `WedhornCechAcyclicity` alone, 7 in
+`GeometricReduction`, 6 each in `StandardDescent` and `RelativeDescentHuber`). Naming the
+pointwise form turned four multi-line `have` blocks in this proof into rewrite-list entries,
+and the other 89 sites are now a mechanical task-3 golf. This is the `/overview` Step-7 shape (a
 repeated three-line proof pattern is a missing lemma) and the fix belongs upstream, next to
 the lemma it is the corollary of.
 
