@@ -20,8 +20,9 @@ version: "v0.3"
 
 project:
   name: "AINTLIB / AdicSpaces"
-  authors: ["Chris Birkbeck"]      # [required] from repo ownership + git history; ADD
-                                   # CO-AUTHORS if others contributed to this project.
+  authors: ["Christopher Birkbeck"]  # [required] from repo ownership + git history; ADD
+                                   # CO-AUTHORS if others contributed to this formalization
+                                   # (distinct from the [FJP] paper's author list).
   license: "Apache-2.0"            # [required] matches the repository (LICENSE on `main`,
                                    # commit 1c1c74664) and the Lean file headers. Note the
                                    # `dev/adic-spaces` branch predates that commit and so does
@@ -36,15 +37,16 @@ sources:
     author_contacted: "no"
     prior_work: "None known in Lean at this scope."
 
-  - title: "[FJP] — the finite-jet pinching algebra: a uniform sheafy Tate ring that is not stably uniform"
-    authors: ["Chris Birkbeck"]    # ADD CO-AUTHORS if the paper has any
+  - title: "Uniform sheafy Tate domains that are not stably uniform"
+    authors: ["Christopher Birkbeck", "Alex Torzewski"]
     id: "fjp"
     type: "preprint"
-    license: ""                    # TODO: the source paper's own terms — author's call
-                                   # (e.g. "arXiv nonexclusive-distrib/1.0", "CC-BY-4.0",
-                                   # or "unpublished; all rights reserved")
-    author_contacted: "n/a — the source author is an author of this formalization"
-    prior_work: "None known."
+    license: "none stated"         # no licence appears on the paper page; the authors may
+                                   # wish to state one
+    author_contacted: "n/a — a source author is an author of this formalization"
+    prior_work: "None known. The paper's Theorem 1.1 is the result formalized here."
+    # https://cbirkbeck.github.io/uniform-sheafy-tate-domains/
+    # No arXiv identifier or DOI as of 2026-08-02.
 
   - title: "The Nonarchimedean Scottish Book"
     authors: ["Kiran S. Kedlaya (editor)"]
@@ -99,8 +101,19 @@ status:
 
 automation:
   methods:
-    - method: "LLM-assisted formalization with human direction"
-      models: ["Claude Fable 5", "ChatGPT 5.6 Sol"]
+    - method: "result discovery — the underlying mathematics"
+      models: ["ChatGPT 5.6 Sol"]
+      framework: ""
+      tool_setup: ""
+      cost:
+        wall_time: ""
+        spend_usd: ""
+        hardware: ""
+      prompting_notes: >-
+        Per the source paper's abstract, its two main results are due to ChatGPT 5.6 Sol.
+        This is provenance of the MATHEMATICS, not of the Lean code.
+    - method: "Lean formalization"
+      models: ["Claude Fable 5"]
       framework: "Claude Code"
       tool_setup: >-
         Lean 4 with mathlib; per-project dev branches in one Lake workspace; automated
@@ -109,7 +122,8 @@ automation:
         wall_time: ""
         spend_usd: ""
         hardware: ""
-      prompting_notes: ""
+      prompting_notes: >-
+        The source paper records that the Lean formalisation was carried out by Claude Code.
   spend_usd: ""
   notes: >-
     Statement-level certification is available via leanprover/comparator; see
