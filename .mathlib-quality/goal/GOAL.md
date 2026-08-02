@@ -9589,3 +9589,43 @@ proof in `ValuationContinuity` (195 rebuilds).
 Revised order: work the leaf files first, several targets per gate, and leave the deep
 foundational files (`Presheaf`, `ValuationContinuity`, `Lemma745`, `TateAlgebra`) to be
 batched together at the end so their rebuild is paid once.
+
+## Batch: resIHom_injective 147 → closed (RestrictionInjective now has no proof over 50)
+
+`FarguesFontaine/RestrictionInjective.lean`, a **zero-dependent file** — the first target
+picked by the new rebuild-cost ordering rather than by proof length. Four lifts:
+
+    valued_eq_zero_of_forall_le        6L   dominated by every ε ⇒ zero
+    valued_le_of_sub_le_of_le          5L   ultrametric split a = (a−b)+b
+    wLoc_le_of_resI_eq_zero           28L   every interior restriction of the approximant
+    valued_coords_le_of_resI_eq_zero  ~25L  both coordinates are ε-small
+
+The file lost twenty lines net while gaining four declarations.
+
+### Two twins, and how little of them was actually duplicated
+
+`hzero` and `hzero2` were eighteen lines **character-identical apart from which radius the
+`hatK` is over** — one lemma generic in `ρ` covers both. The two `constructor` bullets were
+26 lines each, differing only in `.1`/`.2`, `le_max_left`/`le_max_right`, `hend1`/`hend2`;
+after routing them through `valued_le_of_sub_le_of_le` they are **two lines each**. Fifty-two
+lines of "symmetric twin" contained about four lines of genuine asymmetry.
+
+### `BlocToHatK … x` vs `(BIProd … x).1`
+
+Routing the bullets through the shared split unified `b` as `(BIProd … x).1` rather than
+`BlocToHatK … x` — the two are *definitionally* equal, which is why the original's `hsplit1`
+could write either, but `rw [valued_BlocToHatK]` then finds no syntactic match. Fixed with
+the existing `BIProd_fst` / `BIProd_snd` rewrites. Same family as the earlier
+`restrictionMap_restrictionMap` motive failure: **defeq is enough for term application and
+never enough for `rw`.**
+
+### Three iterations, each caught before the build
+
+`verify_file.py` rejected two attempts on `over-width lines increased` — both times the
+offender was a generated statement line that the f-string had emitted unwrapped. The
+declaration diff stayed clean throughout (+4, none removed).
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 66   (64 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
