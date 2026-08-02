@@ -63,4 +63,53 @@ theorem nonempty_yFullToYOne (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit 
     Nonempty (X ⟶ yOneEllObj R N) :=
   (yOne_representableBy R N hN hinv).map (yFullToYOne R N hinv rFull)
 
+/-! ### The universal level structures (WP-D2a)
+
+A representing object carries a tautological level structure — the image of its identity
+under the representing equivalence — and every classified structure is its pullback. This is
+the input to WP-D2b, where `Y(N)` is identified with the relative locus of the universal
+curve over `Y₁(N)`. -/
+
+/-- **(WP-D2a)** The universal naive `Γ₁(N)`-structure on a representing object. -/
+noncomputable def universalGammaOne (N : ℕ) [NeZero N] {Y : EllObj R}
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy Y) :
+    { P : Y.curve.Section // Y.curve.IsNaiveGammaOne N P } :=
+  rOne.homEquiv (𝟙 Y)
+
+/-- **(WP-D2a)** Every classified naive `Γ₁(N)`-structure is the pullback of the universal
+one along its classifying morphism. -/
+theorem homEquiv_eq_map_universalGammaOne (N : ℕ) [NeZero N] {Y : EllObj R}
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy Y) {T : EllObj R} (f : T ⟶ Y) :
+    rOne.homEquiv f =
+      (gammaOneNaiveProblem R N).map f.op (universalGammaOne R N rOne) := by
+  rw [universalGammaOne, ← rOne.homEquiv_comp f (𝟙 Y), Category.comp_id]
+
+/-- **(WP-D2a)** The universal naive full level-`N` structure on a representing object. -/
+noncomputable def universalFullLevel (N : ℕ) [NeZero N] {X : EllObj R}
+    (rFull : (gammaFullNaiveProblem R N).RepresentableBy X) :
+    { PQ : X.curve.Section × X.curve.Section //
+      X.curve.IsNaiveFullLevel N PQ.1 PQ.2 } :=
+  rFull.homEquiv (𝟙 X)
+
+/-- **(WP-D2a)** Every classified naive full level-`N` structure is the pullback of the
+universal one. -/
+theorem homEquiv_eq_map_universalFullLevel (N : ℕ) [NeZero N] {X : EllObj R}
+    (rFull : (gammaFullNaiveProblem R N).RepresentableBy X) {T : EllObj R} (f : T ⟶ X) :
+    rFull.homEquiv f =
+      (gammaFullNaiveProblem R N).map f.op (universalFullLevel R N rFull) := by
+  rw [universalFullLevel, ← rFull.homEquiv_comp f (𝟙 X), Category.comp_id]
+
+/-- **(WP-D2a → D2b)** The universal full level structure's first member is the pullback of
+the universal `Γ₁(N)`-structure along `yFullToYOne`. This is the compatibility that lets
+`Y(N)` be recognised, over `Y₁(N)`, as the space of completions of the universal `P`. -/
+theorem universalFullLevel_fst_eq (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
+    {X Y : EllObj R} (rFull : (gammaFullNaiveProblem R N).RepresentableBy X)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy Y) :
+    ((gammaOneNaiveProblem R N).map (yFullToYOne R N hinv rFull rOne).op
+        (universalGammaOne R N rOne)).1 = (universalFullLevel R N rFull).1.1 := by
+  rw [← homEquiv_eq_map_universalGammaOne R N rOne (yFullToYOne R N hinv rFull rOne)]
+  have h := yFullToYOne_homEquiv R N hinv rFull rOne (𝟙 X)
+  rw [Category.id_comp] at h
+  exact h
+
 end ModularCurves

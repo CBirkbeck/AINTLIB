@@ -33911,3 +33911,25 @@ the naive route (this session's) keeps T-D6 out and connects directly to
 `gammaHAut`/`baseSchemeAction` compatibility lemmas
 (`gammaHAut_inv_comp_piOneFineEll`, `baseSchemeAction_comp_piOneFine`). They should
 ultimately agree, but proving that is its own ticket and is **not** needed for WP-D2.
+
+## [WP-D2a] COMPLETE (2026-08-02) — axiom-verified
+
+Added to `ModularCurve/YFullToYOne.lean`:
+* `universalGammaOne` / `universalFullLevel` — the tautological level structures on a
+  representing object (the image of the identity under the representing equivalence);
+* `homEquiv_eq_map_universalGammaOne` / `homEquiv_eq_map_universalFullLevel` — every
+  classified structure is the pullback of the universal one, from
+  `RepresentableBy.homEquiv_comp` at `g = 𝟙`;
+* **`universalFullLevel_fst_eq`** — the universal full level structure's *first member* is
+  the pullback of the universal `Γ₁(N)`-structure along `yFullToYOne`. This is precisely the
+  compatibility WP-D2b needs to recognise `Y(N)`, over `Y₁(N)`, as the space of completions
+  of the universal `P`.
+
+**Next — [WP-D2b]**, the substantive step. With `universalFullLevel_fst_eq` in hand, the
+task is: `Y(N)` together with `yFullToYOne` represents, over `Y₁(N)`, the functor
+`T ↦ {Q : completions of P₁|_T to a naive full level structure}`. Concretely, for
+`f : T ⟶ Y₁(N)`, classifying morphisms `T ⟶ Y(N)` over `f` correspond to naive full level
+structures on `T` whose first member is the pullback of the universal `P₁` along `f` — one
+direction is `universalFullLevel_fst_eq`, the other is the universal property of `rFull`.
+Then that functor is represented by the relative locus, which is finite étale
+(`fullLevelToNaiveGammaOne_etale`), giving `Etale (yFullToYOne …).baseHom` and hence WP-D2c.
