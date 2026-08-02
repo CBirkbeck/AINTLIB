@@ -482,6 +482,20 @@ theorem openValue_vle_restrict {V W : Opens ↥(Spa A A⁺)} (h : W ≤ V)
       ↔ (openValue W hvW).vle (limitRestrict h f) (limitRestrict h g) := by
   rw [← comap_limitRestrict_openValue h hvW, comap_vle]
 
+/-- The `vle`-relation of the point transports along an equality of opens.
+
+`rw` cannot do this substitution at the use site: the membership and containment
+proofs depend on the open, so rewriting it leaves a motive that is not type
+correct. Stated as a lemma, the equality is between two bound variables and
+`subst` discharges it. -/
+theorem openValue_vle_of_eq {V W W' : Opens ↥(Spa A A⁺)} (hWW' : W = W')
+    {v : ↥(Spa A A⁺)} (hvW : v ∈ W) (hvW' : v ∈ W') (hWV : W ≤ V) (hW'V : W' ≤ V)
+    (f g : ↥(limitSections V))
+    (h : (openValue W' hvW').vle (limitRestrict hW'V f) (limitRestrict hW'V g)) :
+    (openValue W hvW).vle (limitRestrict hWV f) (limitRestrict hWV g) := by
+  subst hWW'
+  exact h
+
 end OpenValue
 
 
