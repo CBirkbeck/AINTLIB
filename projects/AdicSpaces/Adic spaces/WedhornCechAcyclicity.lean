@@ -4809,6 +4809,167 @@ private theorem unitCover_relOverlap_gen_identities
     linear_combination h1
 
 set_option linter.unusedSectionVars false in
+/-- `coeRingHom (u/s)` is power-bounded whenever `u ∈ D.T`: its powers stay inside the
+image of the localization subring, which is bounded. -/
+private theorem coeRingHom_divByS_isPowerBounded (D : RationalLocData A) {u : A}
+    (hu : u ∈ D.T) :
+    TopologicalRing.IsPowerBounded (D.coeRingHom (divByS u D.s)) := by
+  refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded D).subset ?_
+  rintro _ ⟨k, rfl⟩
+  exact ⟨divByS u D.s ^ k,
+    pow_mem (divByS_mem_locSubring D.P D.T D.s hu) k, by rw [map_pow]⟩
+
+
+set_option linter.unusedSectionVars false in
+/-- The backward loc-hom sends the overlap denominator to `DII.canonicalMap f`: unfolding
+`s_O = 1 · canMap f` turns it into the restriction of the canonical map. -/
+private theorem unitCover_relOverlap_backwardLocHom_algebraMap_s
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    unitCover_relOverlap_backwardLocHom D₀ f (algebraMap (presheafValue D₀)
+          (Localization.Away (unitCover_overlapDatum_B D₀ f).s)
+          (unitCover_overlapDatum_B D₀ f).s)
+      = ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl).canonicalMap f := by
+  classical
+  set DII := (D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl with hDII
+  set OD := unitCover_overlapDatum_B D₀ f with hOD
+  rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f
+    ((unitCover_overlapDatum_B D₀ f).s)]
+  rw [show ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
+    (1 : presheafValue D₀) * D₀.canonicalMap f from rfl, one_mul]
+  exact restrictionMapHom_canonicalMap D₀ DII _ f
+
+set_option linter.unusedSectionVars false in
+/-- **Division through the backward loc-hom.** `s_O` maps to a unit — `DII.canonicalMap f`
+divides `DII.s = (D₀.s · 1)(D₀.s · f)` — so `ψ (c/s_O)` is pinned by `ψ (algMap c)`. -/
+private theorem unitCover_relOverlap_backwardLocHom_divByS_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    ∀ (c : presheafValue D₀)
+      (w : presheafValue ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl)),
+      unitCover_relOverlap_backwardLocHom D₀ f
+          (algebraMap (presheafValue D₀)
+            (Localization.Away (unitCover_overlapDatum_B D₀ f).s) c) =
+        unitCover_relOverlap_backwardLocHom D₀ f (algebraMap (presheafValue D₀)
+          (Localization.Away (unitCover_overlapDatum_B D₀ f).s)
+          (unitCover_overlapDatum_B D₀ f).s) * w →
+      unitCover_relOverlap_backwardLocHom D₀ f
+        (divByS c (unitCover_overlapDatum_B D₀ f).s) = w := by
+  classical
+  set DII := (D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl with hDII
+  set OD := unitCover_overlapDatum_B D₀ f with hOD
+  have hres_b := unitCover_relOverlap_backwardLocHom_algebraMap_s D₀ f
+  have hu_f : IsUnit (DII.canonicalMap f) := by
+    have hu_DII : IsUnit (DII.canonicalMap DII.s) := isUnit_s_in_presheafValue DII
+    rw [show (DII.s : A) = (D₀.s * 1) * (D₀.s * f) from rfl, map_mul, map_mul,
+      map_mul] at hu_DII
+    exact isUnit_of_mul_isUnit_right (isUnit_of_mul_isUnit_right hu_DII)
+  have hu_b : IsUnit (unitCover_relOverlap_backwardLocHom D₀ f
+      (algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s)) := by
+    rw [hres_b]; exact hu_f
+  intro c w hw
+  have h1 : unitCover_relOverlap_backwardLocHom D₀ f
+      (algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s) *
+      unitCover_relOverlap_backwardLocHom D₀ f (divByS c OD.s) =
+      unitCover_relOverlap_backwardLocHom D₀ f
+        (algebraMap (presheafValue D₀) (Localization.Away OD.s) c) := by
+    rw [← map_mul, algebraMap_s_mul_divByS]
+  exact hu_b.mul_left_cancel (h1.trans hw)
+
+set_option linter.unusedSectionVars false in
+/-- First hypothesis of `locTopology_continuous_lift`: on constants the backward loc-hom is
+the restriction map `D₀ → DII`, which is continuous. -/
+private theorem unitCover_relOverlap_backwardLocHom_comp_algebraMap_continuous
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    Continuous ((unitCover_relOverlap_backwardLocHom D₀ f).comp
+      (algebraMap (presheafValue D₀)
+        (Localization.Away (unitCover_overlapDatum_B D₀ f).s))) := by
+  classical
+  set DII := (D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl with hDII
+  set OD := unitCover_overlapDatum_B D₀ f with hOD
+  have heq : (unitCover_relOverlap_backwardLocHom D₀ f).comp
+      (algebraMap (presheafValue D₀) (Localization.Away OD.s)) =
+      restrictionMapHom D₀ DII ((RationalLocData.interSamePair_subset_left _ _ _).trans
+        (RationalLocData.interSamePair_subset_left _ _ _)) := by
+    ext x; exact unitCover_relOverlap_backwardLocHom_algebraMap D₀ f x
+  rw [heq]
+  exact restrictionMapHom_continuous D₀ DII _
+
+set_option linter.unusedSectionVars false in
+/-- Second hypothesis of `locTopology_continuous_lift`: each `t ∈ T = {1, b, b²}` has
+power-bounded image, with witnesses `(s·1)²/s_DII`, `1`, `(s·f)²/s_DII` in the
+localization subring. -/
+private theorem unitCover_relOverlap_backwardLocHom_isPowerBounded_of_mem_T
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    ∀ t ∈ (unitCover_overlapDatum_B D₀ f).T,
+      TopologicalRing.IsPowerBounded
+        (unitCover_relOverlap_backwardLocHom D₀ f
+          (divByS t (unitCover_overlapDatum_B D₀ f).s)) := by
+  classical
+  set DII := (D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) rfl with hDII
+  set OD := unitCover_overlapDatum_B D₀ f with hOD
+  have hres_b := unitCover_relOverlap_backwardLocHom_algebraMap_s D₀ f
+  have hψ_div := unitCover_relOverlap_backwardLocHom_divByS_eq D₀ f
+  intro t ht
+  obtain ⟨hgen1, hgen2⟩ := unitCover_relOverlap_gen_identities D₀ f
+  rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
+    (D₀.canonicalMap f) t ht with h1 | hb | hbb
+  · -- t = 1 : witness `(s·1)²/s_DII`
+    rw [h1]
+    have hwit : unitCover_relOverlap_backwardLocHom D₀ f
+        (divByS (1 : presheafValue D₀) OD.s) =
+        DII.coeRingHom (divByS ((D₀.s * 1) * (D₀.s * 1)) DII.s) := by
+      refine hψ_div _ _ ?_
+      rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f (1 : presheafValue D₀),
+        map_one, hres_b]
+      exact hgen1.symm
+    rw [hwit]
+    exact coeRingHom_divByS_isPowerBounded DII (unitCover_relOverlap_s1s1_mem D₀ f)
+  · -- t = b : witness `1`
+    rw [hb]
+    have hwit : unitCover_relOverlap_backwardLocHom D₀ f
+        (divByS (D₀.canonicalMap f) OD.s) = DII.coeRingHom 1 := by
+      refine hψ_div _ _ ?_
+      rw [map_one, mul_one]
+      rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f (D₀.canonicalMap f),
+        hres_b]
+      exact restrictionMapHom_canonicalMap D₀ DII _ f
+    rw [hwit, map_one]
+    exact TopologicalRing.isPowerBounded_one
+  · -- t = b·b : witness `(s·f)²/s_DII`
+    rw [hbb]
+    have hwit : unitCover_relOverlap_backwardLocHom D₀ f
+        (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
+        DII.coeRingHom (divByS ((D₀.s * f) * (D₀.s * f)) DII.s) := by
+      refine hψ_div _ _ ?_
+      rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f
+        (D₀.canonicalMap f * D₀.canonicalMap f), map_mul, hres_b,
+        restrictionMapHom_canonicalMap, hgen2]
+    rw [hwit]
+    exact coeRingHom_divByS_isPowerBounded DII (unitCover_relOverlap_sfsf_mem D₀ f)
+
+
+set_option linter.unusedSectionVars false in
 /-- **Relative-overlap backward continuity (O7e)**: the three annulus generators
 `{1, b, b²}` land on `((s·1)²/s_DII)`, `1`, `((s·f)²/s_DII)` respectively. -/
 private theorem unitCover_relOverlap_backwardLocHom_continuous
@@ -4827,91 +4988,8 @@ private theorem unitCover_relOverlap_backwardLocHom_continuous
     (unitCover_relOverlap_backwardLocHom D₀ f)
   refine locTopology_continuous_lift OD.P OD.T OD.s OD.hopen
     (unitCover_relOverlap_backwardLocHom D₀ f) ?_ ?_
-  · have heq : (unitCover_relOverlap_backwardLocHom D₀ f).comp
-        (algebraMap (presheafValue D₀) (Localization.Away OD.s)) =
-        restrictionMapHom D₀ DII ((RationalLocData.interSamePair_subset_left _ _ _).trans
-          (RationalLocData.interSamePair_subset_left _ _ _)) := by
-      ext x; exact unitCover_relOverlap_backwardLocHom_algebraMap D₀ f x
-    rw [heq]
-    exact restrictionMapHom_continuous D₀ DII _
-  · intro t ht
-    -- `ψ (aM s_O) = canMap_DII f`, a unit
-    have hres_b : unitCover_relOverlap_backwardLocHom D₀ f
-        (algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s) =
-        DII.canonicalMap f := by
-      rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f
-        ((unitCover_overlapDatum_B D₀ f).s)]
-      rw [show ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
-        (1 : presheafValue D₀) * D₀.canonicalMap f from rfl, one_mul]
-      exact restrictionMapHom_canonicalMap D₀ DII _ f
-    have hu_f : IsUnit (DII.canonicalMap f) := by
-      have hu_DII : IsUnit (DII.canonicalMap DII.s) := isUnit_s_in_presheafValue DII
-      rw [show (DII.s : A) = (D₀.s * 1) * (D₀.s * f) from rfl, map_mul, map_mul,
-        map_mul] at hu_DII
-      exact isUnit_of_mul_isUnit_right (isUnit_of_mul_isUnit_right hu_DII)
-    have hu_b : IsUnit (unitCover_relOverlap_backwardLocHom D₀ f
-        (algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s)) := by
-      rw [hres_b]; exact hu_f
-    have hψ_div : ∀ (c : presheafValue D₀) (w : presheafValue DII),
-        unitCover_relOverlap_backwardLocHom D₀ f
-          (algebraMap (presheafValue D₀) (Localization.Away OD.s) c) =
-          unitCover_relOverlap_backwardLocHom D₀ f
-            (algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s) * w →
-        unitCover_relOverlap_backwardLocHom D₀ f (divByS c OD.s) = w := by
-      intro c w hw
-      have h1 : unitCover_relOverlap_backwardLocHom D₀ f
-          (algebraMap (presheafValue D₀) (Localization.Away OD.s) OD.s) *
-          unitCover_relOverlap_backwardLocHom D₀ f (divByS c OD.s) =
-          unitCover_relOverlap_backwardLocHom D₀ f
-            (algebraMap (presheafValue D₀) (Localization.Away OD.s) c) := by
-        rw [← map_mul, algebraMap_s_mul_divByS]
-      exact hu_b.mul_left_cancel (h1.trans hw)
-    obtain ⟨hgen1, hgen2⟩ := unitCover_relOverlap_gen_identities D₀ f
-    have hbdd := CompletionLocalization.coeRingHom_image_locSubring_isBounded DII
-    rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
-      (D₀.canonicalMap f) t ht with h1 | hb | hbb
-    · -- t = 1 : witness `(s·1)²/s_DII`
-      rw [h1]
-      have hwit : unitCover_relOverlap_backwardLocHom D₀ f
-          (divByS (1 : presheafValue D₀) OD.s) =
-          DII.coeRingHom (divByS ((D₀.s * 1) * (D₀.s * 1)) DII.s) := by
-        refine hψ_div _ _ ?_
-        rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f (1 : presheafValue D₀),
-          map_one, hres_b]
-        exact hgen1.symm
-      rw [hwit]
-      refine hbdd.subset ?_
-      rintro _ ⟨k, rfl⟩
-      exact ⟨divByS ((D₀.s * 1) * (D₀.s * 1)) DII.s ^ k,
-        pow_mem (divByS_mem_locSubring DII.P DII.T DII.s
-          (unitCover_relOverlap_s1s1_mem D₀ f)) k, by rw [map_pow]⟩
-    · -- t = b : witness `1`
-      rw [hb]
-      have hwit : unitCover_relOverlap_backwardLocHom D₀ f
-          (divByS (D₀.canonicalMap f) OD.s) = DII.coeRingHom 1 := by
-        refine hψ_div _ _ ?_
-        rw [map_one, mul_one]
-        rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f (D₀.canonicalMap f),
-          hres_b]
-        exact restrictionMapHom_canonicalMap D₀ DII _ f
-      rw [hwit, map_one]
-      exact TopologicalRing.isPowerBounded_one
-    · -- t = b·b : witness `(s·f)²/s_DII`
-      rw [hbb]
-      have hwit : unitCover_relOverlap_backwardLocHom D₀ f
-          (divByS (D₀.canonicalMap f * D₀.canonicalMap f) OD.s) =
-          DII.coeRingHom (divByS ((D₀.s * f) * (D₀.s * f)) DII.s) := by
-        refine hψ_div _ _ ?_
-        rw [unitCover_relOverlap_backwardLocHom_algebraMap D₀ f
-          (D₀.canonicalMap f * D₀.canonicalMap f), map_mul, hres_b,
-          restrictionMapHom_canonicalMap, hgen2]
-      rw [hwit]
-      refine hbdd.subset ?_
-      rintro _ ⟨k, rfl⟩
-      exact ⟨divByS ((D₀.s * f) * (D₀.s * f)) DII.s ^ k,
-        pow_mem (divByS_mem_locSubring DII.P DII.T DII.s
-          (unitCover_relOverlap_sfsf_mem D₀ f)) k, by rw [map_pow]⟩
-
+  · exact unitCover_relOverlap_backwardLocHom_comp_algebraMap_continuous D₀ f
+  · exact unitCover_relOverlap_backwardLocHom_isPowerBounded_of_mem_T D₀ f
 /-- **Relative-overlap backward map (O7f)**. -/
 private noncomputable def unitCover_relOverlap_backward
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]

@@ -10531,3 +10531,49 @@ call sites do **not** pass it.
 Its sibling `genPiece_relOverlap_backwardLocHom_continuous` (112, bullets [8, 95]) has the
 same structure and should follow immediately after; the two are **not** textual twins
 (normalised diff 201 lines), so each needs its own lemmas, but the plan transfers.
+
+## Batch: unitCover_relOverlap_backwardLocHom_continuous 91 → 14
+
+`WedhornCechAcyclicity.lean`. The scoped plan held: four lemmas, and the target ring's
+global `TopologicalSpace` instance meant none of the topology-binder machinery was needed.
+
+    coeRingHom_divByS_isPowerBounded              generic, used twice          5
+    ..._backwardLocHom_algebraMap_s               `hres_b`                    17
+    ..._backwardLocHom_divByS_eq                  `hψ_div` + `hu_f` + `hu_b`  35
+    ..._comp_algebraMap_continuous                bullet (1)                  17
+    ..._isPowerBounded_of_mem_T                   bullet (2)                  50
+    unitCover_relOverlap_backwardLocHom_continuous                            14
+
+### The plan's estimates were low, and one lemma landed *over* the bar
+
+Estimated bullet (2) at 48; it came out at **59**, because each piece pays for its own
+`classical` + two `set`s + the `have`s that re-import L1/L2 — a fixed ~6-line preamble the
+estimate ignored. That is not a rounding error: **the scoreboard did not move**, because
+the parent dropped below 50 and the new lemma rose above it, netting zero.
+
+The fix was the fifth lemma, and it is the useful one:
+
+    coeRingHom_divByS_isPowerBounded (D : RationalLocData A) {u : A} (hu : u ∈ D.T) :
+        TopologicalRing.IsPowerBounded (D.coeRingHom (divByS u D.s))
+
+Two of bullet (2)'s three cases ended with the same five-line "powers stay in the bounded
+image of the localization subring" argument spelled out against different witnesses. It is
+generic in the datum, four lines, and dropping it in took bullet (2) 59 → 50 and made
+`hbdd` dead. An earlier batch created `laurentOverlap_coeRingHom_divByS_isPowerBounded` in
+`IteratedOverlapEquiv` — the same fact specialised to one datum; this generic form
+supersedes it and the specialisation should be repointed when the two files' import
+order allows.
+
+> **Add to the loop:** budget ~6 lines of preamble per extracted piece when estimating,
+> and re-measure *every* new lemma, not just the parent. A decomposition that moves a
+> proof from one side of the bar to the other has done nothing.
+
+Two indentation notes, both from this batch: the parent's bullet content sits at indent 4
+and belongs at 2 inside a lemma (dedent **2**, not 4 — dedenting to 0 produces
+`unexpected token 'have'; expected command`), and a `have foo : … := by` whose header is
+stripped needs its body dedented one level *further* than its siblings.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 52   (49 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
