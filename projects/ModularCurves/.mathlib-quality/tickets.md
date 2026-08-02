@@ -32999,3 +32999,104 @@ choice changes what gets built:
 
 Resolving this needs a look at how `PairingCompatAt` consumes `N` — worth doing before
 building A7.5, since A7.5's shape follows from the answer.
+
+# ══════════════════════════════════════════════════════════════════════════
+# /develop --continue — THE N QUESTION, RESOLVED FROM THE CODE (2026-08-02)
+# ══════════════════════════════════════════════════════════════════════════
+
+## (a) At which `N` does `Y(ρ̄)` consume the pairing? — **general `N`**, no reduction
+
+`PairingCompatAt` (`ModularCurve/YRho.lean:2204`) is stated at the `N` of
+`GaloisRepData N`, whose `ρ : GalQ →* GL₂(ZMod N)` fixes `N` arbitrarily. Its body calls
+`E.weilPairingEval x y hx hy` — the DS4 register — so **DS4 must be constructed at general
+`N`**; there is no reduction to a fixed level.
+
+Two refinements that matter for the plan:
+* The pairing is only ever *evaluated* at `ℚ̄`-points (`t : Spec (AlgebraicClosure ℚ) ⟶ T`),
+  with the value compared in `AlgebraicClosure ℚ`. But it is reached **through** the DS4
+  register's relative morphism, so a field-only construction does not discharge it.
+* `GaloisRepData.det_cyclo` requires `det ∘ ρ` to be the cyclotomic character. The det
+  twist is therefore *already present in the ρ-datum* — further evidence that the twist is
+  intrinsic, not an artifact of route A.
+
+## (b) Is there a universal object at general `N`? — **yes, with an affine base**
+
+`gammaFullNaive_rigid_and_representable` (`Moduli/GammaHClosure.lean:117`) gives
+`(gammaFullNaiveProblem R N).Representable` for `N ≥ 3` invertible, and
+`ModuliProblem.exists_representableBy_isAffine_baseChange_three`
+(`Moduli/EngineWiring.lean:124`) produces a representing `EllObj` with **`IsAffine` base**.
+Both are axiom-verified receipts, and both are proved through the level-3/level-4
+rigidifiers — never through the Weil pairing, so sourcing the root from this object is
+**non-circular**.
+
+What it does *not* give is an explicit ring presentation. So the `ℰ₃`-style trick — read
+`ζ = (3β+γ)/γ` off the normal form — has **no general-`N` analogue**. The `N = 3` work
+(`e3Zeta`, `e3ZetaAt`) is a worked special case and a sanity check, not a component of the
+general construction.
+
+## (c) Can the universal object be avoided? — **no, but it can be used more cheaply**
+
+The field-base pairing at general `N` (`exists_weilPairingHom_of_galoisFibreChart`) is only
+a statement over a field, and `PairingCompatAt`'s base `T` is an arbitrary `ℚ`-scheme, so
+it cannot discharge DS4 by itself. But it *can* supply the root at the generic points of
+the universal base, which is the cheap way to use (b).
+
+**Plan improvement found while resolving this:** the original A7.1 asked for the universal
+base to be an integral domain, which for `Y(N)` over `ℚ` needs irreducibility of the
+modular curve — a real theorem, absent from the tree. It is **not needed**. A noetherian
+normal ring is a finite product of normal domains; the field pairing supplies a root on
+each factor, and roots assemble across a finite product. So **normality + noetherian
+suffices, and connectedness is not required**.
+
+## Revised tickets (supersede A7.1/A7.3/A7.4 at general `N`)
+
+### [WP-B1] The universal object at general `N`, with affine base
+- **Status**: open · **File**: new, `WeilPairing/UniversalLevelN.lean` · **Depends on**: none
+- **Statement**: for `N ≥ 3` invertible in `ℚ`, an `EllObj (CommRingCat.of ℚ)` with
+  `IsAffine` base representing `gammaFullNaiveProblem (CommRingCat.of ℚ) N`.
+- **Proof sketch**: (1) `isIso_awayHomWire_of_isUnit` makes the `Away 3` base change an iso
+  over `ℚ` (the pattern of `rhoProblem_exists_representableBy_isAffine`,
+  `ModularCurve/RhoSmooth.lean:62`); (2) feed `gammaFullNaive_affineOverEll` and
+  `gammaFullNaive_rigidNoeth` to `exists_representableBy_isAffine_baseChange_three`;
+  (3) transport along the iso with `exists_representableBy_isAffine_of_isIso`.
+- **Lemmas**: all four cited above; each verified present and axiom-verified this session.
+- **Generality**: `N ≥ 3`, `N` invertible — exactly the engine's hypotheses.
+
+### [WP-B2] The universal base is normal and noetherian
+- **Status**: open · **File**: `WeilPairing/UniversalLevelN.lean` · **Depends on**: WP-B1
+- **Statement**: the coordinate ring of WP-B1's base is noetherian and integrally closed
+  in its total ring of fractions.
+- **Proof sketch**: the level space is finite étale over the base of the `j`-line-level
+  object (`levelSpaceΓπ_etale`, `isFinite_fullLevelSpaceStruct`), and étale over a regular
+  base is regular; regular ⟹ normal. Noetherian from finite type over `ℚ`.
+- **RISK — this is the crux ticket.** If the étale-over-regular step is not available in
+  mathlib at the needed generality, decompose further; do **not** substitute integrality.
+- **Generality**: as WP-B1.
+
+### [WP-B3] Roots of unity on a finite product of normal domains
+- **Status**: open · **File**: `WeilPairing/UniversalRootBase.lean` · **Depends on**: none
+- **Statement**: if `A` is noetherian normal and `x` is an `N`-th root of unity in its
+  total fraction ring, then `x ∈ A`. (Component-wise from `exists_algebraMap_eq_of_pow_eq_one`,
+  WP-A7.2, which is already proved for domains.)
+- **Proof sketch**: decompose `A` as a finite product of normal domains; apply A7.2 on each
+  factor; reassemble.
+- **Generality**: stated for `IsNoetherianRing` + normal, not for the moduli ring — a
+  general-purpose lemma, as A7.2 is.
+
+### [WP-B4] The universal root at general `N`
+- **Status**: blocked (B1, B2, B3) · **File**: `WeilPairing/UniversalLevelN.lean`
+- **Statement**: a root `ζ_N` in the universal base's coordinate ring with `ζ_N ^ N = 1`
+  whose value at each geometric point is the field pairing of the tautological pair.
+- **Proof sketch**: at each generic point apply `exists_weilPairingHom_of_galoisFibreChart`
+  to the tautological pair; the resulting root lies in the total fraction ring; WP-B3 puts
+  it in the ring.
+
+### [WP-B5] Transport, det twist, and DS4 — as previously planned, at general `N`
+- **Status**: blocked (B4) · Mirrors WP-A7.4 / A7.5 / A8 with `ζ_N` in place of `e3Zeta`.
+  The transport is again "apply the classifying ring hom"; the det twist is WP-A4, already
+  proved at general `N`; the assembly is `nonempty_weilPairing_of_localData`.
+
+### Status of the `N = 3` work
+`e3Zeta` / `e3ZetaAt` are **retained as a worked example and a cross-check** — when WP-B4
+lands, its value at `N = 3` must agree with `e3ZetaAt`, which is a cheap correctness test
+on the general construction. They are no longer on the critical path.
