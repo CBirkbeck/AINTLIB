@@ -33722,3 +33722,29 @@ is identified with the map induced by `fullLevelToNaiveGammaOne` — at which po
 
 Nothing in this needs new mathematics; it is a transcription with one genuine
 simplification (the single-generator case drops the `pullback.lift` plumbing throughout).
+
+### [WP-D1c-coarse] first mirror landed (2026-08-02) — axiom-verified
+
+`LevelStructure/NaiveGammaOneLevel.lean` (new):
+* `restrict_multiplePoint` — the multiple point restricts to the multiple of the restriction;
+* **`comp_multiple_mem_zeroSection_iff`** — the pulled-multiple zero test, the
+  single-generator mirror of `comp_combination_mem_zeroSection_iff`
+  (`CombinationLevel.lean:156`, 122 lines).
+
+Both axiom-verified. As predicted, the single-generator case is strictly simpler: the
+`pullback.lift` plumbing and the `torsionPair` detour both disappear, and it compiled first
+try. `comp_torsion_mem_zeroSection_iff` and `torsionMapSection` were reused verbatim — they
+were already single-generator.
+
+Note the original `forall_mem_fullLevelSet_iff_isNaiveFullLevel` carries
+`set_option maxHeartbeats 1600000` and `synthInstance.maxHeartbeats 160000`. **The mirror
+must not** — heartbeat bumps on proofs are forbidden in this project; the single-generator
+case should not need them, and if it does, the fix is structural (extract helpers), not a
+bump.
+
+**Next**: `forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne`, the mirror of
+`CombinationLevel.lean:278` (195 lines). Its full-level original uses
+`pair_generates_iff_combos_ne_zero` + `torsion_geometricFibre_rank_two`; the `Γ₁` version
+needs only "no proper multiple vanishes", which is the definition of `IsNaiveGammaOne`'s
+second clause, so the generation/counting machinery drops out entirely — this mirror should
+be **much** shorter than 195 lines.

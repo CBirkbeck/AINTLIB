@@ -158,6 +158,7 @@ import ModularCurves.GroupScheme.SubgroupQuotientGlue
 import ModularCurves.GroupScheme.SubgroupQuotientGlueData
 import ModularCurves.GroupScheme.SubgroupQuotientInterface
 import ModularCurves.GroupScheme.TranslationAction
+import ModularCurves.LevelStructure.NaiveGammaOneLevel
 import ModularCurves.LevelStructure.FullLevelGammaOne
 import ModularCurves.LevelStructure.Basic
 import ModularCurves.LevelStructure.CartierDivisor
