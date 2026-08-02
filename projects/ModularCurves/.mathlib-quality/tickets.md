@@ -33415,3 +33415,57 @@ root import was therefore **reverted to its 222 entries** rather than left broke
 orphans to `ModularCurves.lean` so coverage is permanent. Until then, any audit of this
 project must build the orphan list explicitly — the recipe is: enumerate `.lean` files,
 transitively close the root's imports, and pass the difference to `lake build`.
+
+# ══════════════════════════════════════════════════════════════════════════
+# TWO MAJOR FINDINGS (2026-08-02, late): T-W7 is DONE, and the DS4 blocker has a
+# tree-shaped route after all.
+# ══════════════════════════════════════════════════════════════════════════
+
+## 1. T-W7 (fibrewise-elliptic ⟹ locally Weierstrass) is COMPLETE and axiom-verified
+
+`FibrewiseElliptic.locallyWeierstrass` (`EllipticCurve/FibrewiseLocallyWeierstrass.lean:357`)
+— *a smooth proper fibrewise elliptic family is locally Weierstrass* — is **proved**, with
+`#print axioms` = `propext / Classical.choice / Quot.sound`. So is the affine case
+(`…_of_isAffine`, line 243). The file is sorry-free and error-free, as are the other
+T-W7-marked files (`WeierstrassAtlasBundle`, `ModelVariableChange`, `WeierstrassCover`).
+
+**It has zero consumers** — the theorem is finished but not yet wired to anything. That is
+the only remaining T-W7 action item, and it is a wiring task, not a proof.
+
+## 2. `exists_representing_smooth_affine` (the DS4 blocker) — a route that stays in the tree
+
+Earlier today the DS4 chain was recorded as blocked on normality of `Y(N)`, with the only
+apparent routes being (a) the sorry'd smoothness of `Y(N)`, or (b) Stacks 025P
+(étale ascent of normality), absent from mathlib. **Route (b) is not needed.**
+
+**`gammaOneNaive_representable` is AXIOM-VERIFIED** (`ModularCurve/YOneTatePoint.lean:1384`):
+for `N ≥ 4` invertible, `Γ₁(N)` is representable and *every* representing object is
+`Smooth` and `IsAffineHom` over `Spec R`. Its proof is not abstract — it exhibits one
+explicit object (`yOneEllObj`, the Tate-point construction), proves
+`yOneStructMap_smooth` directly, and transports by
+`YFull.smooth_affine_of_representableBy`, **which is generic in the moduli problem**
+(`ModularCurve/YFullRoute.lean:745`). So `Y(N)` smooth+affine needs only *one* explicit
+smooth representing object.
+
+### [WP-D1] The level-forgetting morphism `Γ(N) → Γ₁(N)` — does **not** exist in the tree
+- **Status**: open, and this is now the pivotal ticket
+- **Statement**: the forgetful map of moduli problems `(P, Q) ↦ P` induces a morphism
+  `Y(N) ⟶ Y₁(N)` of representing objects, and it is **finite étale**.
+- **Precedent in the tree's own idiom**: `naiveLevelThree_relativelyRepresentable_finiteEtale`
+  and `legendreDelta_relativelyRepresentable_finiteEtale` (`Moduli/Bootstrap.lean:122, 218`)
+  do exactly this shape for other level structures. Nothing like it exists for
+  `gammaFullNaive` over `gammaOneNaive` — grep for `gammaFullNaive.*gammaOneNaive` is empty.
+
+### [WP-D2] `Y(N)` is smooth and affine — closes `YFullRoute.lean:777`
+- **Depends on**: WP-D1 · **Proof**: `Etale ≫ Smooth = Smooth` on WP-D1's morphism composed
+  with `yOneStructMap_smooth`, then `smooth_affine_of_representableBy` (generic, proved).
+- **Range**: `Γ₁` needs `N ≥ 4`, `Γ(N)` needs `N ≥ 3`; `N = 3` is already covered explicitly
+  by the `ℰ₃` route, so together they cover all `N ≥ 3`.
+
+### [WP-D3] `Y(N)` normal ⟹ the universal root ⟹ DS4
+- Smooth over `ℚ` ⟹ regular ⟹ normal, which is exactly the hypothesis the spreading
+  argument needs (see the "bottom of the tree" entry above). Then WP-B4 (the root),
+  WP-C2 (the master evaluation formula) and the four surviving specs.
+
+**This converts the DS4 blocker from "build infrastructure mathlib does not have" into a
+concrete ticket in the tree's own idiom.** WP-D1 is the whole thing.
