@@ -33748,3 +33748,37 @@ bump.
 needs only "no proper multiple vanishes", which is the definition of `IsNaiveGammaOne`'s
 second clause, so the generation/counting machinery drops out entirely — this mirror should
 be **much** shorter than 195 lines.
+
+### [WP-D1c-coarse] both mirrors landed (2026-08-02) — axiom-verified, **no heartbeat bumps**
+
+`LevelStructure/NaiveGammaOneLevel.lean` is now complete at 224 lines, replacing ~320 lines
+of full-level original:
+
+* `restrict_multiplePoint`, `comp_multiple_mem_zeroSection_iff` — the pulled-multiple zero
+  test (mirror of the 122-line combination version);
+* `baseChangeEquiv_zsmul_eq_zero_iff` — torsion transport through the base-change dictionary;
+* **`forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne`** — the master iff (mirror of the
+  195-line `forall_mem_fullLevelSet_iff_isNaiveFullLevel`).
+
+The master iff came out far shorter than its original, exactly as predicted: `IsNaiveGammaOne`'s
+second clause *is* the locus condition read through the zero test, so
+`pair_generates_iff_combos_ne_zero`, the `N²`-count and the whole closure transport simply
+do not appear.
+
+Two implementation notes worth keeping:
+* **The file needs `backward.defeqAttrib.useBackward true` +
+  `backward.isDefEq.respectTransparency false`** at file level — `CombinationLevel.lean` has
+  the same pair at its lines 32–33. Without them `rw` cannot see through `(E.baseChange g).E`
+  to `pullback E.π g`, which the base-change dictionary needs. These are *transparency*
+  options, not heartbeat bumps.
+* The original needed `maxHeartbeats 1600000` and `synthInstance.maxHeartbeats 160000`; **the
+  mirror needs neither.** One instance blow-up did appear (`AddMonoidHomClass` for the
+  base-change `≃+`) and was fixed structurally, by extracting
+  `baseChangeEquiv_zsmul_eq_zero_iff` so the search happens once at fixed types — which is
+  the required fix in this project, not a bump.
+
+**Next**: `naiveGammaOneLocusPointsEquiv` (mirror of `fullLevelLocusPointsEquiv`,
+`CombinationLevel.lean:547`, using the already-proved `torsionPointsEquiv`), then
+`gammaOneNaive_relativelyRepresentable` / `_affineOverEll`, then the identification of
+`yFullToYOne` with the induced map — after which WP-D2 closes
+`YFull.exists_representing_smooth_affine`.

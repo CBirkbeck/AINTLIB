@@ -26,6 +26,12 @@ universe u
 
 open AlgebraicGeometry CategoryTheory Limits
 
+-- The same file-level transparency options `LevelStructure/CombinationLevel.lean` uses:
+-- without them `rw` cannot see through `(E.baseChange g).E` to `pullback E.π g`, which the
+-- base-change dictionary needs. (Transparency options, not heartbeat bumps.)
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 namespace ModularCurves
 
 namespace EllipticCurve
@@ -109,6 +115,109 @@ theorem comp_multiple_mem_zeroSection_iff (h : NIsInvertible S N)
           E.torsionπ N
       exact ((Category.assoc _ _ _).trans (by
         rw [E.torsionZero_torsionπ N, Category.comp_id])).symm
+
+/-- Transporting a torsion condition through the base-change dictionary. Extracted as its
+own lemma so that the `AddMonoidHomClass` instance search happens once, at fixed types —
+inline inside the master proof it blows the instance budget, and heartbeat bumps are not an
+option in this project. -/
+theorem baseChangeEquiv_zsmul_eq_zero_iff (τ : Spec (CommRingCat.of k) ⟶ T) (n : ℤ)
+    (x : (E.baseChange g).Point τ) :
+    n • x = 0 ↔ n • (Point.baseChangeEquiv E g τ x) = 0 := by
+  have hmap : ∀ y : (E.baseChange g).Point τ,
+      (Point.baseChangeEquiv E g τ) (n • y) = n • (Point.baseChangeEquiv E g τ) y :=
+    fun y => (Point.baseChangeEquiv E g τ).toAddMonoidHom.map_zsmul n y
+  have hz : (Point.baseChangeEquiv E g τ) 0 = 0 :=
+    (Point.baseChangeEquiv E g τ).map_zero
+  constructor
+  · intro h0
+    rw [← hmap, h0, hz]
+  · intro h0
+    refine (Point.baseChangeEquiv E g τ).injective ?_
+    rw [hmap, h0, hz]
+
+/-! ### The master identification: the naive `Γ₁(N)` set classifies naive `Γ₁(N)`-structures
+
+The mirror of `forall_mem_fullLevelSet_iff_isNaiveFullLevel` — and far shorter, because
+`IsNaiveGammaOne`'s second clause ("no proper multiple vanishes at any geometric point") is
+*literally* the locus condition read through `comp_multiple_mem_zeroSection_iff`. The
+full-level original has to convert a no-vanishing-combination statement into a *generation*
+statement, which is what costs it `pair_generates_iff_combos_ne_zero`, the `N²`-count and the
+closure transport; none of that appears here. -/
+
+/-- **The master iff.** For a `T`-point `a` of `E[N]` over `g` (with `N` invertible on `S`),
+`a` lands in the naive `Γ₁(N)` set at every point of `T` **iff** the attached section of
+`E ×_S T` is a naive `Γ₁(N)`-structure. -/
+theorem forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne (h : NIsInvertible S N)
+    (a : T ⟶ E.torsion N) (ha : a ≫ E.torsionπ N = g) :
+    (∀ t : ↥T, a.base t ∈ E.naiveGammaOneSet N)
+      ↔ (E.baseChange g).IsNaiveGammaOne N (E.torsionMapSection N g a ha) := by
+  classical
+  have hdict0 : ∀ {k : Type u} [Field k] (τ : Spec (CommRingCat.of k) ⟶ T)
+      (c : T ⟶ E.torsion N) (hc : c ≫ E.torsionπ N = g),
+      Point.baseChangeEquiv E g τ
+          (Point.pull (E.baseChange g) τ (E.torsionMapSection N g c hc))
+        = (⟨τ ≫ c ≫ E.torsionι N, by
+            rw [Category.assoc, Category.assoc, E.torsionι_π, hc]⟩ : E.Point (τ ≫ g)) := by
+    intro k _ τ c hc
+    refine Subtype.ext ?_
+    show (τ ≫ ((E.torsionMapSection N g c hc :
+        (E.baseChange g).Point (𝟙 T)) : T ⟶ (E.baseChange g).E)) ≫ pullback.fst E.π g
+      = τ ≫ c ≫ E.torsionι N
+    rw [Category.assoc, E.torsionMapSection_fst N g c hc]
+  have hdict : ∀ {k : Type u} [Field k] (τ : Spec (CommRingCat.of k) ⟶ T),
+      Point.baseChangeEquiv E g τ
+          (Point.pull (E.baseChange g) τ (E.torsionMapSection N g a ha))
+        = (⟨τ ≫ a ≫ E.torsionι N, by
+            rw [Category.assoc, Category.assoc, E.torsionι_π, ha]⟩ : E.Point (τ ≫ g)) :=
+    fun τ => hdict0 τ a ha
+  -- the zero test, transported through the base-change dictionary
+  have hzero : ∀ {k : Type u} [Field k] (τ : Spec (CommRingCat.of k) ⟶ T)
+      (pt : ↥(Spec (CommRingCat.of k))) (m : ℕ),
+      ((m : ℤ) • Point.pull (E.baseChange g) τ (E.torsionMapSection N g a ha) = 0
+        ↔ (τ ≫ a ≫ E.multipleHom N m).base pt ∈ Set.range (E.torsionZero N).base) := by
+    intro k _ τ pt m
+    rw [E.comp_multiple_mem_zeroSection_iff N h a ha τ pt m, ← hdict τ]
+    exact E.baseChangeEquiv_zsmul_eq_zero_iff τ (m : ℤ) _
+  -- composition of base maps, used in both directions
+  have hcomp : ∀ {k : Type u} [Field k] (τ : Spec (CommRingCat.of k) ⟶ T)
+      (pt : ↥(Spec (CommRingCat.of k))) (m : ℕ),
+      (τ ≫ a ≫ E.multipleHom N m).base pt
+        = (E.multipleHom N m).base (a.base (τ.base pt)) := by
+    intro k _ τ pt m
+    simp
+  constructor
+  · intro hset
+    refine ⟨E.torsionMapSection_killed N g a ha, fun k _ _ τ => ⟨?_, fun m hm0 hmN => ?_⟩⟩
+    · rw [← Point.pull_zsmul, E.torsionMapSection_killed N g a ha, Point.pull_zero]
+    · obtain ⟨pt⟩ : Nonempty ↥(Spec (CommRingCat.of k)) := inferInstance
+      intro h0
+      have hmem := (hzero τ pt m).mp h0
+      have hin := hset (τ.base pt)
+      rw [naiveGammaOneSet] at hin
+      exact Set.mem_iInter₂.mp hin m ⟨hm0, hmN⟩ (by rwa [hcomp τ pt m] at hmem)
+  · intro hnaive t
+    rw [naiveGammaOneSet]
+    refine Set.mem_iInter₂.mpr fun m hm => ?_
+    set τ : Spec (CommRingCat.of (AlgebraicClosure (T.residueField t))) ⟶ T :=
+      Spec.map (CommRingCat.ofHom (algebraMap (T.residueField t)
+        (AlgebraicClosure (T.residueField t)))) ≫
+        T.fromSpecResidueField t with hτ
+    obtain ⟨pt⟩ : Nonempty
+        ↥(Spec (CommRingCat.of (AlgebraicClosure (T.residueField t)))) := inferInstance
+    have hτpt : τ.base pt = t := by
+      have hmem2 : τ.base pt ∈ Set.range (T.fromSpecResidueField t).base := by
+        rw [hτ]
+        exact ⟨(Spec.map (CommRingCat.ofHom (algebraMap (T.residueField t)
+          (AlgebraicClosure (T.residueField t))))).base pt, rfl⟩
+      rwa [Scheme.range_fromSpecResidueField] at hmem2
+    rw [Set.mem_preimage, Set.mem_compl_iff]
+    intro hmem
+    have hmem' : (τ ≫ a ≫ E.multipleHom N m).base pt
+        ∈ Set.range (E.torsionZero N).base := by
+      rw [hcomp τ pt m, hτpt]
+      exact hmem
+    exact (hnaive.2 (AlgebraicClosure (T.residueField t)) τ).2 m hm.1 hm.2
+      ((hzero τ pt m).mpr hmem')
 
 end EllipticCurve
 
