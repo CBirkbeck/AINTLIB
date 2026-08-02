@@ -1099,20 +1099,8 @@ theorem constKW_X : constKW F ((jB F (Wa F)).fst) = Wa F := by
 /-- `ρ(W) = ρ(ϖ)·(W/ϖ)` (denominator clearing, standalone form). -/
 theorem rho_Wa_split :
     (chartDatum F).canonicalMap (Wa F) =
-      (chartDatum F).canonicalMap (tA F) * gChart F := by
-  show (chartDatum F).coeRingHom (algebraMap (JetA F)
-      (Localization.Away (chartDatum F).s) (Wa F)) =
-    (chartDatum F).coeRingHom (algebraMap (JetA F)
-      (Localization.Away (chartDatum F).s) (tA F)) *
-      (chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s)
-  rw [← RingHom.map_mul (chartDatum F).coeRingHom]
-  congr 1
-  rw [mul_comm]
-  symm
-  show divByS (Wa F) (chartDatum F).s *
-    algebraMap (JetA F) (Localization.Away (chartDatum F).s) (chartDatum F).s =
-    algebraMap (JetA F) (Localization.Away (chartDatum F).s) (Wa F)
-  rw [divByS, IsLocalization.mk'_spec]
+      (chartDatum F).canonicalMap (tA F) * gChart F :=
+  canonicalMap_Wa_eq_mul_divByS F
 
 /-- The rescaling scales the disc variable by `ϖ` (fst-component of `thetaChart_Wa`,
 standalone form). -/

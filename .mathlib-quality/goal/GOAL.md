@@ -10022,3 +10022,148 @@ compression touched, seen from the other end.
 That is a **structural** finding, not a list of edits: these families each want one
 `variable`-scoped section or one packaging lemma, and that is a design change per family.
 Recorded with counts; not actionable inside task 2.
+
+### Correction: `spa_topology_eq_generateFrom_huber` is NOT a deletable duplicate
+
+The table above lists it as fixed. It is not. Deleting the copy and repointing its one
+consumer to `RationalBasis.spa_topology_eq_generateFrom` fails to build:
+
+    RationalBasisHuber.lean:376:15: failed to synthesize instance of type class
+      IsTateRing A
+
+The two theorems have **byte-identical statements and byte-identical proofs**, but
+different *instance contexts*: `RationalBasis` carries `[IsTateRing A]` in its variable
+block, `RationalBasisHuber` carries `[IsHuberRing A]`. The copy exists because the base
+version is unavailable in the weaker setting. Reverted.
+
+This is the third occurrence of one pattern in this session, so it is now a rule:
+
+> **Byte-identical body ⇏ redundant.** Before deleting the copy, check the *instance
+> context* of both, not just the binders that are written out. Three cases here —
+> `mem_ideal_map_of_forall_coeff_mem` (Tate + PairOfDefinition vs neither),
+> `relativePiece_equiv_restrict_square` (hypotheses on `A` vs on `presheafValue D₀`), and
+> now `spa_topology_eq_generateFrom` (Tate vs Huber) — and in every one the *copy* is the
+> more general statement. The finding is always "generalise the original and delete the
+> copy", never "delete the copy". That is a statement change: coordinator work.
+
+The body-hash scan is still the right scan — it is the only one that finds these at all —
+but its output is a list of *generalisation candidates*, not a list of deletions. Only
+`canonicalMap_Wa_eq_mul_divByS` / `rho_Wa_split` (same file, same context) was a true
+duplicate, and that one stands.
+
+## Batch: isSheafy_of_isLimitSheaf 107 → 3, and the `omit` gotcha
+
+`SheafyPair.lean`. `IsSheafy` is a **two-field class** and the proof was `constructor`
+plus one bullet per field — so the bullets *are* the lemmas, and their statements can be
+read off `StructureSheaf.lean:376-387` rather than guessed. Three lemmas:
+
+    productRestrictionSub_injective_of_isLimitSheaf   the `hInj` block            25
+    isEmbedding_productRestrictionSub_of_isLimitSheaf the `embedding` field       45
+    exists_glue_of_isLimitSheaf                       the `gluing` field          33
+    isSheafy_of_isLimitSheaf                          ⟨…, …⟩                       3
+
+The embedding half was 72 on its own, so its `hInj` — a freestanding
+`Function.Injective (productRestrictionSub A C)` — came out too.
+
+### `omit … in` does not travel with the code, and that breaks the assembly
+
+The original theorem is prefixed
+
+    omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] in
+
+Lift a block out of it and the new lemma is **not** under that `omit`, so Lean
+auto-includes all three section instances into *its* signature. The assembly, which
+correctly still omits them, then cannot apply its own halves:
+
+    SheafyPair.lean:787:15: failed to synthesize instance of type class DecidableEq A
+    SheafyPair.lean:790:9:  failed to synthesize instance of type class IsTateRing A
+
+Two wrong turns before the right one. `classical` fixes `DecidableEq A` — and is wrong,
+because it supplies a *different* instance than the one the lemma's signature carries, and
+it does nothing for `IsTateRing A`. The fix is to **copy the `omit` prefix onto every
+extracted lemma**: the extracted proof is the same text, so it needs exactly the same
+instances, which is exactly what the `omit` records.
+
+> **Rule.** Before extracting from a theorem, look at the line *above* its docstring. An
+> `omit … in` there is part of the declaration and must be reproduced on each piece.
+> Symptom if you forget: the *parent* fails to synthesize an instance that the parent
+> never needed.
+
+This is the second member of a family with `insert_before_decl`'s docstring/`in`-line
+handling: **the lines above a declaration are part of it.** `insert_before_decl` already
+walks back over them when inserting; extraction has to carry them forward.
+
+### Also landed: two true duplicates from scan 3
+
+* `unitCover_overlapIdeal_T_mod` (WedhornCechAcyclicity) — the `hT_mod` argument to
+  `tate_quotPresentation`, written verbatim twice (lines 2845-2858 and 5730-5742) because
+  `tate_quotPresentation_symm_mk`'s *statement* mentions `tate_quotPresentation` applied to
+  all eleven arguments. Named once, used twice. `unitCover_overlapQuotEquiv_symm_mk`
+  53 → 41. (Needed `classical` + the `DecidableEq (RationalLocData …)` `letI` that both
+  call sites install — the extraction's own instance debt, same family as above.)
+* `rho_Wa_split := canonicalMap_Wa_eq_mul_divByS F` (FiniteJetChart) — same file, same
+  instance context, 700 lines apart, and `gChart F` *is* the right-hand factor by
+  definition. −12 lines.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 59   (56 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+
+### Precomputed: which remaining targets carry a modifier prefix
+
+The SheafyPair `omit` failure cost three attempts, so rather than meet it again one target
+at a time, here is the whole remaining list scanned for lines ending in ` in` above the
+declaration. **31 of the 56 carry one**, in four kinds — and each kind breaks an extraction
+differently:
+
+| kind | count | what happens if the extracted piece does not carry it |
+|---|---|---|
+| `omit [inst] in` | 9 | the piece auto-includes the instance; the **parent** then fails to synthesize it |
+| `set_option backward.isDefEq.respectTransparency false in` | 6 | the piece may fail to elaborate at all — this is a defeq escape hatch, the same wall as the `change`/`rw` case |
+| `set_option linter.unusedSectionVars false in` | 11 | the piece emits warnings the file's bar rejects |
+| `include h in` / `open … in` | 5 | `include hφb in` (both RobbaPresentation twins), `include hρ₁0 hρ₂0 in`, `open MvPolynomial in`, `open scoped Classical in` — the piece does not resolve |
+
+The ones to be most careful with, because the flag is about elaboration rather than
+hygiene: `TateAlgebra.lean:1946` and `:2548`, `PresheafTateStructure.lean:424`,
+`ValuationContinuity.lean:486` and `:587`, `LaurentOverlap.lean:1343`,
+`WedhornCechAcyclicity.lean:5796` and `:6063` — all
+`backward.isDefEq.respectTransparency false`.
+
+`ValuationContinuity` and `PresheafTateStructure` carry **two** prefix lines each; the
+extraction has to reproduce both, in order.
+
+> Added to the loop: after choosing a target, read the lines above its docstring *first*
+> and put them in the template before writing anything else.
+
+## Scoped: the `exists_evalBI_approx_bloc` twins — proved identical, deferred with a reason
+
+`FarguesFontaine/RobbaPresentation.lean:1703` and `:4708`, 122 and 123 code lines. Each is
+setup + `refine ⟨…, ?_, ?_⟩` with a "residual" bullet (58) and a "norm" bullet (40).
+
+**The two residual bullets are the same proof.** Normalising each twin's *target* radius
+pair to `(t₁, t₂)` — twin 1 targets `(σ₁, ρ₂)`, twin 2 targets `(ρ₁, σ₂)`, and both have
+source pair `(ρ₁, ρ₂)` — the diff is **zero lines**. (Protect the source-pair occurrences
+`hρ₁0 hρ₁1 hρ₂0 hρ₂1` before substituting, or the shared subterm is renamed on one side
+only and the diff shows a phantom mismatch; that is what made this look like a real
+difference on the first pass.)
+
+The bullet never sees which construction produced its data: `exists_monomial_lift_package`
+vs `…₂` and `teichPowGen` vs `teichPowGen₂` are consumed by the `choose` in the *setup*,
+and the bullet uses only `Jf`, `Ef`, `Cf`, `hfact`, `hsplit`. So one lemma generic in
+`(t₁, t₂)` serves both, and each twin then needs only its own norm bullet.
+
+    one shared residual lemma + two norm lemmas  →  both twins ≈ 24/25, −58 duplicated lines
+
+**Why it is queued rather than done.** The twins live in *different sections* with
+different `variable` blocks: `section Assembly` (1682) declares `{σ₁} {hσ₁0} {hσ₁1}` plus
+`φ`, `hφ`, `hφb` at the target pair `(σ₁, ρ₂)`, and the twin-2 section does the same at
+`(ρ₁, σ₂)`. A lemma serving both has to sit *outside both sections* and take ~20 binders
+explicitly — `φ`, `hφ`, `hφb`, both radius pairs with their four positivity/`< 1` proofs,
+`b`/`hbmem`/`hb`/`hbg`, `w`/`k`/`N`/`w'`/`hsplit`, `Jf`/`Ef`/`Cf`/`hfact`, `N₁`/`N₂`/
+`hN₁`/`hN₂`, `ε` — which is file restructuring, not a local extraction. Both twins also
+carry `include hφb in`, which the pieces must reproduce.
+
+RobbaPresentation is ~5000 lines and takes eight minutes to build alone, so each wrong
+guess on that signature is an eight-minute round trip. Scoped, evidenced, and handed over
+rather than started half-way.

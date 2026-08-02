@@ -2794,6 +2794,44 @@ private lemma unitCover_overlapIdeal_isClosed
 
 
 set_option linter.unusedSectionVars false in
+/-- **`hT_mod` for the annulus datum**: every `t` in the overlap datum's `T` is `s_O` times
+something in the pair subring — `t = 1` with `w = Y`, `t = b` with `w = 1`, `t = b²` with
+`w = X`.  This packages `unitCover_overlapIdeal_rel` in the shape `tate_quotPresentation`
+wants; both the equivalence and its `symm_mk` companion need exactly this. -/
+private theorem unitCover_overlapIdeal_T_mod
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    ∀ t ∈ (unitCover_overlapDatum_B D₀ f).T,
+      ∃ w : ↥(TateAlgebra₂ (presheafValue D₀)),
+        w ∈ MvTateAlgebra.mvPairSubring 2
+            (IsTateRing.principalPair (presheafValue D₀)).toPairOfDefinition ∧
+          Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)
+              (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) t) =
+            Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f)
+                (algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀))
+                  ((unitCover_overlapDatum_B D₀ f).s)) *
+              Ideal.Quotient.mk (unitCover_overlapIdeal D₀ f) w := by
+  classical
+  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+  intro t ht
+  rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
+    (D₀.canonicalMap f) t ht with rfl | rfl | rfl
+  · refine ⟨⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩,
+      unitCover_X_mem D₀ 1, ?_⟩
+    have h1 := (unitCover_overlapIdeal_rel D₀ f).1
+    rw [← unitCover_Y_eq D₀]
+    exact h1
+  · exact ⟨1, Subring.one_mem _, (unitCover_overlapIdeal_rel D₀ f).2.1⟩
+  · refine ⟨⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩,
+      unitCover_X_mem D₀ 0, ?_⟩
+    rw [← unitCover_X_eq D₀]
+    exact (unitCover_overlapIdeal_rel D₀ f).2.2
+
+
+set_option linter.unusedSectionVars false in
 /-- **The Example-6.38 half of the overlap bridge**: `O_X^B(annulus) ≃+*
 B⟨X,Y⟩/(b − X, 1 − bY)`, by `tate_quotPresentation` at the bivariate annulus
 evaluation, with every engine input discharged from the landed package
@@ -2843,19 +2881,7 @@ private noncomputable def unitCover_overlapQuotEquiv
       rw [map_one] at h1
       exact h1
   · -- hT_mod
-    intro t ht
-    rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
-      (D₀.canonicalMap f) t ht with rfl | rfl | rfl
-    · refine ⟨⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩,
-        unitCover_X_mem D₀ 1, ?_⟩
-      have h1 := (unitCover_overlapIdeal_rel D₀ f).1
-      rw [← unitCover_Y_eq D₀]
-      exact h1
-    · exact ⟨1, Subring.one_mem _, (unitCover_overlapIdeal_rel D₀ f).2.1⟩
-    · refine ⟨⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩,
-        unitCover_X_mem D₀ 0, ?_⟩
-      rw [← unitCover_X_eq D₀]
-      exact (unitCover_overlapIdeal_rel D₀ f).2.2
+    exact unitCover_overlapIdeal_T_mod D₀ f
 
 set_option linter.unusedSectionVars false in
 /-- **Relative-plus forward base unit**: the image of the A-side plus-datum
@@ -5727,19 +5753,7 @@ private theorem unitCover_overlapQuotEquiv_symm_mk
         have h1 := (unitCover_overlapIdeal_rel D₀ f).1
         rw [map_one] at h1
         exact h1)
-    (fun t ht => by
-      rcases unitCoUnit_inter_T_cases (presheafValue_concretePair D₀)
-        (D₀.canonicalMap f) t ht with rfl | rfl | rfl
-      · refine ⟨⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩,
-          unitCover_X_mem D₀ 1, ?_⟩
-        have h1 := (unitCover_overlapIdeal_rel D₀ f).1
-        rw [← unitCover_Y_eq D₀]
-        exact h1
-      · exact ⟨1, Subring.one_mem _, (unitCover_overlapIdeal_rel D₀ f).2.1⟩
-      · refine ⟨⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩,
-          unitCover_X_mem D₀ 0, ?_⟩
-        rw [← unitCover_X_eq D₀]
-        exact (unitCover_overlapIdeal_rel D₀ f).2.2)
+    (unitCover_overlapIdeal_T_mod D₀ f)
     z
 
 /-- v4.33 opaque annulus data: the `interSamePair … rfl` witnesses (whose stored `Eq.refl _`

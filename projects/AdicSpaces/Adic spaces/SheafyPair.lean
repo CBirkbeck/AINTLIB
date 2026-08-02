@@ -644,122 +644,151 @@ theorem productRestrictionSub_continuous' (C : RationalCoveringData A) :
   exact restrictionMapHom_continuous C.base E.1 (C.hsubset E.1 E.2)
 
 omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] in
+/-- **Separation from the limit-sheaf condition**: two sections that restrict equally to
+every piece of a rational cover agree, because their limit-transports agree on every
+rational open below each piece. -/
+private theorem productRestrictionSub_injective_of_isLimitSheaf (h : IsLimitSheaf A)
+    (C : RationalCoveringData A) (hC : C.IsRational) :
+    Function.Injective (productRestrictionSub A C) := by
+  intro g g' hgg'
+  have hlim : limitOfValue C.base g = limitOfValue C.base g' := by
+    refine h.injective (ι := ↥C.covers) (U := fun E : ↥C.covers => spaOpens E.1)
+      (spaOpens_le_of_covering C) (spaOpens_covering_subset C) (fun E => ?_)
+    refine Subtype.ext (funext fun F => ?_)
+    have hFE : rationalOpen F.D.T F.D.s ⊆ rationalOpen E.1.T E.1.s :=
+      spaOpen_subset_iff.mp F.subset
+    have h1 := congr_fun (restrictionMap_comp C.base E.1 F.D
+      (C.hsubset E.1 E.2) hFE) g
+    have h1' := congr_fun (restrictionMap_comp C.base E.1 F.D
+      (C.hsubset E.1 E.2) hFE) g'
+    simp only [Function.comp_apply] at h1 h1'
+    have h2 : restrictionMap C.base E.1 (C.hsubset E.1 E.2) g =
+        restrictionMap C.base E.1 (C.hsubset E.1 E.2) g' := congr_fun hgg' E
+    show restrictionMap C.base F.D _ g = restrictionMap C.base F.D _ g'
+    calc restrictionMap C.base F.D (hFE.trans (C.hsubset E.1 E.2)) g
+        = restrictionMap E.1 F.D hFE
+            (restrictionMap C.base E.1 (C.hsubset E.1 E.2) g) := h1.symm
+      _ = restrictionMap E.1 F.D hFE
+            (restrictionMap C.base E.1 (C.hsubset E.1 E.2) g') := by rw [h2]
+      _ = restrictionMap C.base F.D (hFE.trans (C.hsubset E.1 E.2)) g' := h1'
+  calc g = limitEval hC.base (limitOfValue C.base g) :=
+        ((limitEval hC.base).apply_symm_apply g).symm
+    _ = limitEval hC.base (limitOfValue C.base g') := congrArg _ hlim
+    _ = g' := (limitEval hC.base).apply_symm_apply g'
+
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] in
+/-- The `embedding` field of `IsSheafy`, from the limit-sheaf condition: the product
+restriction factors as `Ψ ∘ limitRestrictProd ∘ limitOfValue` with `Ψ` inducing, and
+`limitRestrictProd ∘ limitOfValue` is the limit sheaf's own embedding. -/
+private theorem isEmbedding_productRestrictionSub_of_isLimitSheaf (h : IsLimitSheaf A)
+    (C : RationalCoveringData A) (hC : C.IsRational) :
+    Topology.IsEmbedding (productRestrictionSub A C) := by
+  -- the evaluation of the limit-restrictions at the tautological indices
+  set Ψ : (∀ E : ↥C.covers, ↥(limitSections (spaOpens E.1))) →
+      (∀ E : ↥C.covers, presheafValue E.1) := fun y E =>
+    (y E : ∀ j : RationalIndex (spaOpens E.1), presheafValue j.D)
+      (RationalIndex.self E.1 (hC.piece E.2)) with hΨdef
+  have hΨcont : Continuous Ψ := by
+    refine continuous_pi fun E => ?_
+    exact ((continuous_apply _).comp continuous_subtype_val).comp (continuous_apply E)
+  -- the product restriction factors through the limit
+  have hfac : productRestrictionSub A C =
+      Ψ ∘ (limitRestrictProd (spaOpens_le_of_covering C)) ∘ (limitOfValue C.base) := by
+    funext g E
+    rfl
+  have hInj := productRestrictionSub_injective_of_isLimitSheaf h C hC
+  -- `Ψ` is a product of the rational-comparison homeomorphisms, hence inducing
+  have hΨind : Topology.IsInducing Ψ := by
+    have hΨmap : Ψ = Pi.map (fun E : ↥C.covers =>
+        (limitEval (hC.piece E.2) :
+          ↥(limitSections (spaOpens E.1)) → presheafValue E.1)) := rfl
+    rw [hΨmap]
+    exact Topology.IsInducing.piMap fun E =>
+      (Homeomorph.mk (limitEval (hC.piece E.2)).toEquiv
+        (limitEval_continuous (hC.piece E.2))
+        (limitEval_symm_continuous (hC.piece E.2))).isInducing
+  refine ⟨Topology.isInducing_iff_nhds.mpr fun g => ?_, hInj⟩
+  have hembL := (h.isEmbedding (ι := ↥C.covers) (U := fun E : ↥C.covers => spaOpens E.1)
+    (spaOpens_le_of_covering C)
+    (spaOpens_covering_subset C)).isInducing.nhds_eq_comap (limitOfValue C.base g)
+  refine Eq.symm ?_
+  calc Filter.comap (productRestrictionSub A C) (𝓝 (productRestrictionSub A C g))
+      = Filter.comap ((Ψ ∘ limitRestrictProd (spaOpens_le_of_covering C)) ∘
+          (limitOfValue C.base)) (𝓝 ((Ψ ∘ limitRestrictProd
+            (spaOpens_le_of_covering C)) (limitOfValue C.base g))) := by
+        rw [hfac]; rfl
+    _ = Filter.comap (limitOfValue C.base) (Filter.comap
+          (limitRestrictProd (spaOpens_le_of_covering C)) (Filter.comap Ψ
+            (𝓝 (Ψ (limitRestrictProd (spaOpens_le_of_covering C)
+              (limitOfValue C.base g)))))) := by
+        rw [Filter.comap_comap, Filter.comap_comap]
+        rfl
+    _ = Filter.comap (limitOfValue C.base) (Filter.comap
+          (limitRestrictProd (spaOpens_le_of_covering C))
+          (𝓝 (limitRestrictProd (spaOpens_le_of_covering C)
+            (limitOfValue C.base g)))) := by
+        rw [← hΨind.nhds_eq_comap]
+    _ = Filter.comap (limitOfValue C.base) (𝓝 (limitOfValue C.base g)) := by
+        rw [← hembL]
+    _ = 𝓝 g := (nhds_eq_comap_limitOfValue hC.base g).symm
+
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] in
+/-- The `gluing` field of `IsSheafy`, from the limit-sheaf condition: transport the
+compatible family to limit sections, glue there, and evaluate at the base. -/
+private theorem exists_glue_of_isLimitSheaf (h : IsLimitSheaf A)
+    (C : RationalCoveringData A) (hC : C.IsRational)
+    (f : ∀ D : ↥C.covers, presheafValue D.1)
+    (hcompat : ∀ (D₁ D₂ : ↥C.covers)
+       (D₃ : RationalLocData A)
+       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+       restrictionMap D₁.1 D₃ h₃₁ (f D₁) =
+         restrictionMap D₂.1 D₃ h₃₂ (f D₂)) :
+    ∃ x : presheafValue C.base, ∀ D : ↥C.covers,
+      restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
+  set s : ∀ E : ↥C.covers, ↥(limitSections (spaOpens E.1)) :=
+    fun E => limitOfValue E.1 (f E) with hsdef
+  have hs : ∀ E₁ E₂, limitRestrict (inf_le_left (a := spaOpens E₁.1)
+        (b := spaOpens E₂.1)) (s E₁) =
+      limitRestrict (inf_le_right (a := spaOpens E₁.1) (b := spaOpens E₂.1)) (s E₂) := by
+    intro E₁ E₂
+    refine Subtype.ext (funext fun F => ?_)
+    have hFsub : spaOpen F.D ⊆ spaOpen E₁.1 ∩ spaOpen E₂.1 := by
+      have := F.subset
+      rwa [Opens.coe_inf] at this
+    have hF₁ : rationalOpen F.D.T F.D.s ⊆ rationalOpen E₁.1.T E₁.1.s :=
+      spaOpen_subset_iff.mp (hFsub.trans Set.inter_subset_left)
+    have hF₂ : rationalOpen F.D.T F.D.s ⊆ rationalOpen E₂.1.T E₂.1.s :=
+      spaOpen_subset_iff.mp (hFsub.trans Set.inter_subset_right)
+    show restrictionMap E₁.1 F.D hF₁ (f E₁) = restrictionMap E₂.1 F.D hF₂ (f E₂)
+    exact hcompat E₁ E₂ F.D hF₁ hF₂
+  obtain ⟨x, hx⟩ := h.glue (ι := ↥C.covers) (U := fun E : ↥C.covers => spaOpens E.1)
+    (spaOpens_le_of_covering C) (spaOpens_covering_subset C) s hs
+  refine ⟨limitEval hC.base x, fun E => ?_⟩
+  have h1 : restrictionMap C.base E.1 (C.hsubset E.1 E.2) (limitEval hC.base x) =
+      (x : ∀ j : RationalIndex (spaOpens C.base), presheafValue j.D)
+        ⟨E.1, hC.piece E.2, spaOpen_subset_of_rationalOpen_subset
+          (C.hsubset E.1 E.2)⟩ :=
+    x.2 (RationalIndex.self C.base hC.base)
+      ⟨E.1, hC.piece E.2, spaOpen_subset_of_rationalOpen_subset (C.hsubset E.1 E.2)⟩
+      (C.hsubset E.1 E.2)
+  have h2 := congr_fun (congrArg Subtype.val (hx E))
+    (RationalIndex.self E.1 (hC.piece E.2))
+  have h3 : restrictionMap E.1 E.1
+      (RationalIndex.self E.1 (hC.piece E.2)).rationalOpen_subset (f E) = f E :=
+    congr_fun (restrictionMap_id E.1) (f E)
+  exact h1.trans (h2.trans h3)
+
+
+omit [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing A] in
 /-- **C5, converse direction**: if the genuine all-open structure presheaf is a sheaf
 of topological rings, the finite rational-cover criterion holds — the sheaf and
 embedding conditions restrict along the rational comparison `limitEval` to every
 finite rational covering. Together with `isLimitSheaf_of_isSheafy` this identifies the
 project's chosen-pair criterion `IsSheafy` with genuine pair-level sheafiness. -/
-theorem isSheafy_of_isLimitSheaf (h : IsLimitSheaf A) : IsSheafy A := by
-  constructor
-  · -- embedding on finite rational covers
-    intro C hC
-    -- the evaluation of the limit-restrictions at the tautological indices
-    set Ψ : (∀ E : ↥C.covers, ↥(limitSections (spaOpens E.1))) →
-        (∀ E : ↥C.covers, presheafValue E.1) := fun y E =>
-      (y E : ∀ j : RationalIndex (spaOpens E.1), presheafValue j.D)
-        (RationalIndex.self E.1 (hC.piece E.2)) with hΨdef
-    have hΨcont : Continuous Ψ := by
-      refine continuous_pi fun E => ?_
-      exact ((continuous_apply _).comp continuous_subtype_val).comp (continuous_apply E)
-    -- the product restriction factors through the limit
-    have hfac : productRestrictionSub A C =
-        Ψ ∘ (limitRestrictProd (spaOpens_le_of_covering C)) ∘ (limitOfValue C.base) := by
-      funext g E
-      rfl
-    have hInj : Function.Injective (productRestrictionSub A C) := by
-      intro g g' hgg'
-      have hlim : limitOfValue C.base g = limitOfValue C.base g' := by
-        refine h.injective (ι := ↥C.covers) (U := fun E : ↥C.covers => spaOpens E.1)
-          (spaOpens_le_of_covering C) (spaOpens_covering_subset C) (fun E => ?_)
-        refine Subtype.ext (funext fun F => ?_)
-        have hFE : rationalOpen F.D.T F.D.s ⊆ rationalOpen E.1.T E.1.s :=
-          spaOpen_subset_iff.mp F.subset
-        have h1 := congr_fun (restrictionMap_comp C.base E.1 F.D
-          (C.hsubset E.1 E.2) hFE) g
-        have h1' := congr_fun (restrictionMap_comp C.base E.1 F.D
-          (C.hsubset E.1 E.2) hFE) g'
-        simp only [Function.comp_apply] at h1 h1'
-        have h2 : restrictionMap C.base E.1 (C.hsubset E.1 E.2) g =
-            restrictionMap C.base E.1 (C.hsubset E.1 E.2) g' := congr_fun hgg' E
-        show restrictionMap C.base F.D _ g = restrictionMap C.base F.D _ g'
-        calc restrictionMap C.base F.D (hFE.trans (C.hsubset E.1 E.2)) g
-            = restrictionMap E.1 F.D hFE
-                (restrictionMap C.base E.1 (C.hsubset E.1 E.2) g) := h1.symm
-          _ = restrictionMap E.1 F.D hFE
-                (restrictionMap C.base E.1 (C.hsubset E.1 E.2) g') := by rw [h2]
-          _ = restrictionMap C.base F.D (hFE.trans (C.hsubset E.1 E.2)) g' := h1'
-      calc g = limitEval hC.base (limitOfValue C.base g) :=
-            ((limitEval hC.base).apply_symm_apply g).symm
-        _ = limitEval hC.base (limitOfValue C.base g') := congrArg _ hlim
-        _ = g' := (limitEval hC.base).apply_symm_apply g'
-    -- `Ψ` is a product of the rational-comparison homeomorphisms, hence inducing
-    have hΨind : Topology.IsInducing Ψ := by
-      have hΨmap : Ψ = Pi.map (fun E : ↥C.covers =>
-          (limitEval (hC.piece E.2) :
-            ↥(limitSections (spaOpens E.1)) → presheafValue E.1)) := rfl
-      rw [hΨmap]
-      exact Topology.IsInducing.piMap fun E =>
-        (Homeomorph.mk (limitEval (hC.piece E.2)).toEquiv
-          (limitEval_continuous (hC.piece E.2))
-          (limitEval_symm_continuous (hC.piece E.2))).isInducing
-    refine ⟨Topology.isInducing_iff_nhds.mpr fun g => ?_, hInj⟩
-    have hembL := (h.isEmbedding (ι := ↥C.covers) (U := fun E : ↥C.covers => spaOpens E.1)
-      (spaOpens_le_of_covering C)
-      (spaOpens_covering_subset C)).isInducing.nhds_eq_comap (limitOfValue C.base g)
-    refine Eq.symm ?_
-    calc Filter.comap (productRestrictionSub A C) (𝓝 (productRestrictionSub A C g))
-        = Filter.comap ((Ψ ∘ limitRestrictProd (spaOpens_le_of_covering C)) ∘
-            (limitOfValue C.base)) (𝓝 ((Ψ ∘ limitRestrictProd
-              (spaOpens_le_of_covering C)) (limitOfValue C.base g))) := by
-          rw [hfac]; rfl
-      _ = Filter.comap (limitOfValue C.base) (Filter.comap
-            (limitRestrictProd (spaOpens_le_of_covering C)) (Filter.comap Ψ
-              (𝓝 (Ψ (limitRestrictProd (spaOpens_le_of_covering C)
-                (limitOfValue C.base g)))))) := by
-          rw [Filter.comap_comap, Filter.comap_comap]
-          rfl
-      _ = Filter.comap (limitOfValue C.base) (Filter.comap
-            (limitRestrictProd (spaOpens_le_of_covering C))
-            (𝓝 (limitRestrictProd (spaOpens_le_of_covering C)
-              (limitOfValue C.base g)))) := by
-          rw [← hΨind.nhds_eq_comap]
-      _ = Filter.comap (limitOfValue C.base) (𝓝 (limitOfValue C.base g)) := by
-          rw [← hembL]
-      _ = 𝓝 g := (nhds_eq_comap_limitOfValue hC.base g).symm
-  · -- gluing on finite rational covers
-    intro C hC f hcompat
-    set s : ∀ E : ↥C.covers, ↥(limitSections (spaOpens E.1)) :=
-      fun E => limitOfValue E.1 (f E) with hsdef
-    have hs : ∀ E₁ E₂, limitRestrict (inf_le_left (a := spaOpens E₁.1)
-          (b := spaOpens E₂.1)) (s E₁) =
-        limitRestrict (inf_le_right (a := spaOpens E₁.1) (b := spaOpens E₂.1)) (s E₂) := by
-      intro E₁ E₂
-      refine Subtype.ext (funext fun F => ?_)
-      have hFsub : spaOpen F.D ⊆ spaOpen E₁.1 ∩ spaOpen E₂.1 := by
-        have := F.subset
-        rwa [Opens.coe_inf] at this
-      have hF₁ : rationalOpen F.D.T F.D.s ⊆ rationalOpen E₁.1.T E₁.1.s :=
-        spaOpen_subset_iff.mp (hFsub.trans Set.inter_subset_left)
-      have hF₂ : rationalOpen F.D.T F.D.s ⊆ rationalOpen E₂.1.T E₂.1.s :=
-        spaOpen_subset_iff.mp (hFsub.trans Set.inter_subset_right)
-      show restrictionMap E₁.1 F.D hF₁ (f E₁) = restrictionMap E₂.1 F.D hF₂ (f E₂)
-      exact hcompat E₁ E₂ F.D hF₁ hF₂
-    obtain ⟨x, hx⟩ := h.glue (ι := ↥C.covers) (U := fun E : ↥C.covers => spaOpens E.1)
-      (spaOpens_le_of_covering C) (spaOpens_covering_subset C) s hs
-    refine ⟨limitEval hC.base x, fun E => ?_⟩
-    have h1 : restrictionMap C.base E.1 (C.hsubset E.1 E.2) (limitEval hC.base x) =
-        (x : ∀ j : RationalIndex (spaOpens C.base), presheafValue j.D)
-          ⟨E.1, hC.piece E.2, spaOpen_subset_of_rationalOpen_subset
-            (C.hsubset E.1 E.2)⟩ :=
-      x.2 (RationalIndex.self C.base hC.base)
-        ⟨E.1, hC.piece E.2, spaOpen_subset_of_rationalOpen_subset (C.hsubset E.1 E.2)⟩
-        (C.hsubset E.1 E.2)
-    have h2 := congr_fun (congrArg Subtype.val (hx E))
-      (RationalIndex.self E.1 (hC.piece E.2))
-    have h3 : restrictionMap E.1 E.1
-        (RationalIndex.self E.1 (hC.piece E.2)).rationalOpen_subset (f E) = f E :=
-      congr_fun (restrictionMap_id E.1) (f E)
-    exact h1.trans (h2.trans h3)
+theorem isSheafy_of_isLimitSheaf (h : IsLimitSheaf A) : IsSheafy A where
+  embedding := isEmbedding_productRestrictionSub_of_isLimitSheaf h
+  gluing := exists_glue_of_isLimitSheaf h
 
 /-- **C5 (fixed-pair equivalence)**: the project's finite rational-cover criterion is
 *exactly* pair-level sheafiness — the genuine all-open projective-limit structure
