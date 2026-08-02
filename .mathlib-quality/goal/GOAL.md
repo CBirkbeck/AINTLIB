@@ -9550,3 +9550,42 @@ support one.
 
     over-50 proofs   486 (baseline) → 68   (66 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Scheduling: order targets by REBUILD COST, not by proof length
+
+The gate, not the analysis, is this campaign's bottleneck — 30–60 minutes a run, dominated by
+`RobbaPresentation` (6502 lines) and `WedhornCechAcyclicity` (12337). I had been picking
+targets by "closest to 50 lines", which is exactly the wrong key. Measuring the transitive
+dependent count of each remaining target's file:
+
+    rebuild  Robba?  targets  module
+          0       -        1  FarguesFontaine/RestrictionInjective.lean
+          1       -        1  IteratedOverlapEquiv.lean
+          1       -        2  FarguesFontaine/RobbaPresentation.lean
+          8       -        1  FarguesFontaine/CurveObject.lean
+         11       -        1  FJP/FiniteJetStrictLocalization.lean
+         13       -        3  FJP/FiniteJetGraphKoszul.lean
+         15       -        1  RelativeDescentHuber.lean
+         18     yes        1  FarguesFontaine/ChartVObj.lean
+         20     yes        2  FarguesFontaine/IntervalSplitting.lean
+         21       -        1  FJP/RestrictedLaurent.lean
+         …
+         72     yes       15  WedhornCechAcyclicity.lean
+         91     yes        6  Wedhorn828.lean
+        192     yes        1  Lemma745.lean
+        195     yes        2  ValuationContinuity.lean
+
+Two things fall out.
+
+**`RobbaPresentation` itself has ONE dependent.** The file that costs every gate 8–40 minutes
+is a near-leaf: editing it is almost free. It is expensive to *rebuild*, not to *depend on* —
+and it only gets rebuilt because something upstream of it changed. `Lemma745` (which I just
+edited) forces 192 module rebuilds, which is why this gate is slow.
+
+**Twenty-one of the remaining targets sit in files costing ≤51 rebuilds.** Batching those —
+several targets, one cheap gate — is worth far more than shaving lines off the closest-to-50
+proof in `ValuationContinuity` (195 rebuilds).
+
+Revised order: work the leaf files first, several targets per gate, and leave the deep
+foundational files (`Presheaf`, `ValuationContinuity`, `Lemma745`, `TateAlgebra`) to be
+batched together at the end so their rebuild is paid once.
