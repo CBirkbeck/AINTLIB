@@ -136,6 +136,57 @@ theorem pow_mul_gaussValue_init_le {σ τ : NNReal} (hτσ : τ ≤ σ) (_hσ1 :
     rw [hterm, mul_zero]
     exact zero_le
 
+/-- The two halves of the interval split obey the same estimate: if the numerator's Gauss
+value satisfies `τᵏ·|w|_σ ≤ σᵏ·|x|_τ`, then `mk' w y` is `wLoc`-dominated by `mk' x y`.
+Applied once with `w = tail k x` and once with `w = init k x`. -/
+private lemma wLoc_mk'_le_of_pow_mul_le {τ σ : NNReal} (hτ0 : 0 < τ) (hτ1 : τ < 1)
+    (hσ0 : 0 < σ) (hσ1 : σ < 1) (x w : Ainf p F)
+    (y : ↥(Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))) (k : ℕ)
+    (hy : (y : Ainf p F) = ((p : Ainf p F) * teichPi p F ϖ) ^ k)
+    (hbound : τ ^ k * gaussValue p F σ w ≤ σ ^ k * gaussValue p F τ x) :
+    wLoc p F ϖ hσ0 hσ1 (IsLocalization.mk' (Bloc p F ϖ) w y)
+      ≤ wLoc p F ϖ hτ0 hτ1 (IsLocalization.mk' (Bloc p F ϖ) x y) := by
+  have hgy : ∀ (ν : NNReal) (hν0 : 0 < ν) (hν1 : ν < 1),
+      gaussValue p F ν (y : Ainf p F)
+        = (ν * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
+    intro ν hν0 hν1
+    rw [hy, show gaussValue p F ν (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+        = gaussVal p F hν0 hν1 (((p : Ainf p F) * teichPi p F ϖ) ^ k) from
+      (gaussVal_apply p F hν0 hν1 _).symm, Valuation.map_pow, gaussVal_apply,
+      gaussValue_p_teichPi p F ϖ hν1]
+  have hgy_ne : ∀ (ν : NNReal) (hν0 : 0 < ν) (hν1 : ν < 1),
+      gaussValue p F ν (y : Ainf p F) ≠ 0 := by
+    intro ν hν0 hν1
+    rw [hy, show gaussValue p F ν (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+        = gaussVal p F hν0 hν1 (((p : Ainf p F) * teichPi p F ϖ) ^ k) from
+      (gaussVal_apply p F hν0 hν1 _).symm, Valuation.map_pow]
+    exact pow_ne_zero k (by
+      rw [gaussVal_apply]
+      exact gaussValue_p_teichPi_ne_zero p F ϖ hν0 hν1)
+  rw [wLoc_mk', wLoc_mk', hgy σ hσ0 hσ1, hgy τ hτ0 hτ1,
+    ← div_eq_mul_inv, ← div_eq_mul_inv,
+    div_le_div_iff₀ (pos_iff_ne_zero.mpr (by
+      rw [← hgy σ hσ0 hσ1]
+      exact hgy_ne σ hσ0 hσ1)) (pos_iff_ne_zero.mpr (by
+      rw [← hgy τ hτ0 hτ1]
+      exact hgy_ne τ hτ0 hτ1))]
+  rw [mul_pow, mul_pow]
+  calc gaussValue p F σ w
+        * (τ ^ k * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k)
+      = (τ ^ k * gaussValue p F σ w)
+          * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k := by ring
+    _ ≤ (σ ^ k * gaussValue p F τ x)
+          * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k :=
+        mul_le_mul_left hbound _
+    _ = gaussValue p F τ x
+          * (σ ^ k * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k) := by ring
+
+
 /-- **The Mittag-Leffler splitting of `Bloc`** at a threshold radius `τ`: every
 `z` splits as `z = zP + zM` where `zP` is `τ`-controlled at all smaller radii
 and `zM` at all larger radii. This is the analytic core of the interval-ring
@@ -154,25 +205,6 @@ theorem exists_wLoc_split {τ : NNReal} (hτ0 : 0 < τ) (hτ1 : τ < 1)
   have hzmk : z = IsLocalization.mk' (Bloc p F ϖ) x y :=
     IsLocalization.eq_mk'_iff_mul_eq.mpr hz
   have hy : (y : Ainf p F) = ((p : Ainf p F) * teichPi p F ϖ) ^ k := hk.symm
-  have hgy : ∀ (σ : NNReal) (hσ0 : 0 < σ) (hσ1 : σ < 1),
-      gaussValue p F σ (y : Ainf p F)
-        = (σ * perfectoidValuation p F
-            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
-    intro σ hσ0 hσ1
-    rw [hy, show gaussValue p F σ (((p : Ainf p F) * teichPi p F ϖ) ^ k)
-        = gaussVal p F hσ0 hσ1 (((p : Ainf p F) * teichPi p F ϖ) ^ k) from
-      (gaussVal_apply p F hσ0 hσ1 _).symm, Valuation.map_pow, gaussVal_apply,
-      gaussValue_p_teichPi p F ϖ hσ1]
-  have hgy_ne : ∀ (σ : NNReal) (hσ0 : 0 < σ) (hσ1 : σ < 1),
-      gaussValue p F σ (y : Ainf p F) ≠ 0 := by
-    intro σ hσ0 hσ1
-    rw [hy]
-    rw [show gaussValue p F σ (((p : Ainf p F) * teichPi p F ϖ) ^ k)
-        = gaussVal p F hσ0 hσ1 (((p : Ainf p F) * teichPi p F ϖ) ^ k) from
-      (gaussVal_apply p F hσ0 hσ1 _).symm, Valuation.map_pow]
-    exact pow_ne_zero k (by
-      rw [gaussVal_apply]
-      exact gaussValue_p_teichPi_ne_zero p F ϖ hσ0 hσ1)
   refine ⟨IsLocalization.mk' (Bloc p F ϖ) (WittVector.tail k x) y,
     IsLocalization.mk' (Bloc p F ϖ) (WittVector.init k x) y, ?_, ?_, ?_⟩
   · rw [hzmk]
@@ -186,52 +218,13 @@ theorem exists_wLoc_split {τ : NNReal} (hτ0 : 0 < τ) (hτ1 : τ < 1)
       rw [← add_mul, add_comm, WittVector.init_add_tail],
       IsLocalization.mk'_cancel]
   · intro σ hσ0 hσ1 hστ
-    rw [hzmk, wLoc_mk', wLoc_mk', hgy σ hσ0 hσ1, hgy τ hτ0 hτ1,
-      ← div_eq_mul_inv, ← div_eq_mul_inv,
-      div_le_div_iff₀ (pos_iff_ne_zero.mpr (by
-        rw [← hgy σ hσ0 hσ1]
-        exact hgy_ne σ hσ0 hσ1)) (pos_iff_ne_zero.mpr (by
-        rw [← hgy τ hτ0 hτ1]
-        exact hgy_ne τ hτ0 hτ1))]
-    rw [mul_pow, mul_pow]
-    calc gaussValue p F σ (WittVector.tail k x)
-          * (τ ^ k * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k)
-        = (τ ^ k * gaussValue p F σ (WittVector.tail k x))
-            * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k := by ring
-      _ ≤ (σ ^ k * gaussValue p F τ x)
-            * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k :=
-          mul_le_mul_left
-            (pow_mul_gaussValue_tail_le p F hστ hτ1.le x k) _
-      _ = gaussValue p F τ x
-            * (σ ^ k * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k) := by ring
+    rw [hzmk]
+    exact wLoc_mk'_le_of_pow_mul_le p F ϖ hτ0 hτ1 hσ0 hσ1 x (WittVector.tail k x) y k hy
+      (pow_mul_gaussValue_tail_le p F hστ hτ1.le x k)
   · intro σ hσ0 hσ1 hτσ
-    rw [hzmk, wLoc_mk', wLoc_mk', hgy σ hσ0 hσ1, hgy τ hτ0 hτ1,
-      ← div_eq_mul_inv, ← div_eq_mul_inv,
-      div_le_div_iff₀ (pos_iff_ne_zero.mpr (by
-        rw [← hgy σ hσ0 hσ1]
-        exact hgy_ne σ hσ0 hσ1)) (pos_iff_ne_zero.mpr (by
-        rw [← hgy τ hτ0 hτ1]
-        exact hgy_ne τ hτ0 hτ1))]
-    rw [mul_pow, mul_pow]
-    calc gaussValue p F σ (WittVector.init k x)
-          * (τ ^ k * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k)
-        = (τ ^ k * gaussValue p F σ (WittVector.init k x))
-            * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k := by ring
-      _ ≤ (σ ^ k * gaussValue p F τ x)
-            * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k :=
-          mul_le_mul_left
-            (pow_mul_gaussValue_init_le p F hτσ hσ1.le hτ1.le x k) _
-      _ = gaussValue p F τ x
-            * (σ ^ k * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k) := by ring
-
+    rw [hzmk]
+    exact wLoc_mk'_le_of_pow_mul_le p F ϖ hτ0 hτ1 hσ0 hσ1 x (WittVector.init k x) y k hy
+      (pow_mul_gaussValue_init_le p F hτσ hσ1.le hτ1.le x k)
 /-- **The left-endpoint projection** of the rational-exponent interval ring:
 the component in the completed field at radius `|ϖ|^{q₁}`. -/
 noncomputable def biFstQ (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) :
