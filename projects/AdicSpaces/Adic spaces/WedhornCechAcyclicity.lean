@@ -806,6 +806,19 @@ theorem RationalCoveringData.exists_of_mem_interProdOn (C₁ C₂ : RationalCove
     (Finset.mem_product.mp pq.2).2, rfl⟩
 
 omit [IsHuberRing A] in
+/-- Forward membership for `restrictTo`: `D ∩ Q` is a piece of `V|_D` for every piece
+`Q` of `V`. Companion of `mem_covers_interProd`. -/
+private theorem mem_covers_restrictTo (V : RationalCoveringData A)
+    (D : RationalLocData A)
+    (hD : rationalOpen D.T D.s ⊆ rationalOpen V.base.T V.base.s)
+    (hDP : D.P = V.base.P) (hVP : ∀ Q ∈ V.covers, Q.P = V.base.P)
+    {Q : RationalLocData A} (hQ : Q ∈ V.covers) :
+    D.interSamePair Q ((hVP Q hQ).trans hDP.symm) ∈
+      (V.restrictTo D hD hDP hVP).covers := by
+  rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
+  exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
+
+omit [IsHuberRing A] in
 /-- Forward membership for `interProd`: an intersection of a `Uf`-piece with a
 `V`-piece is a piece of the product cover. The reverse direction is already named
 (`exists_of_mem_interProdOn`); this one was inlined at every use. -/
@@ -1145,18 +1158,14 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
           intro v hv; exact ⟨hv.1.2, hv.2⟩
         have hmem₁ := mem_covers_interProd Uf V hbase hUfP hVP P₁.2 Q.2
         have hmem₂ := mem_covers_interProd Uf V hbase hUfP hVP P₂.2 Q.2
-        have hDmem₁ : (P₁.1.interSamePair Q.1 hQP₁) ∈
-            (V.restrictTo P₁.1 (by rw [hbase]; exact Uf.hsubset P₁.1 P₁.2)
-              (by rw [hbase]; exact hUfP P₁.1 P₁.2)
-              (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
-          rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
-          exact ⟨⟨Q.1, Q.2⟩, Finset.mem_attach _ _, rfl⟩
-        have hDmem₂ : (P₂.1.interSamePair Q.1 hQP₂) ∈
-            (V.restrictTo P₂.1 (by rw [hbase]; exact Uf.hsubset P₂.1 P₂.2)
-              (by rw [hbase]; exact hUfP P₂.1 P₂.2)
-              (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
-          rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
-          exact ⟨⟨Q.1, Q.2⟩, Finset.mem_attach _ _, rfl⟩
+        have hDmem₁ := mem_covers_restrictTo V P₁.1
+          (by rw [hbase]; exact Uf.hsubset P₁.1 P₁.2)
+          (by rw [hbase]; exact hUfP P₁.1 P₁.2)
+          (fun Q hQ => by rw [hbase]; exact hVP Q hQ) Q.2
+        have hDmem₂ := mem_covers_restrictTo V P₂.1
+          (by rw [hbase]; exact Uf.hsubset P₂.1 P₂.2)
+          (by rw [hbase]; exact hUfP P₂.1 P₂.2)
+          (fun Q hQ => by rw [hbase]; exact hVP Q hQ) Q.2
         have hg₁ := hg P₁ ⟨_, hDmem₁⟩
         have hg₂ := hg P₂ ⟨_, hDmem₂⟩
         simp only [RationalCoveringData.restrictTo_base] at hg₁ hg₂
@@ -1200,9 +1209,8 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
     obtain ⟨hP, hQ⟩ := Finset.mem_product.mp hPQ
     have hDmem : D₀ ∈ (V.restrictTo P (by rw [hbase]; exact Uf.hsubset P hP)
         (by rw [hbase]; exact hUfP P hP)
-        (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
-      rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
-      exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, hpq⟩
+        (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers :=
+      hpq ▸ mem_covers_restrictTo V P _ _ _ hQ
     have key := hg ⟨P, hP⟩ ⟨D₀, hDmem⟩
     simp only [RationalCoveringData.restrictTo_base] at key
     change restrictionMap Uf.base D₀
