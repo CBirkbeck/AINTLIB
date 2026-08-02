@@ -606,6 +606,37 @@ theorem norm_tsum_lt_of_forall_lt {F : ℤ → K}
     refine (IsUltrametricDist.norm_tsum_le_of_forall_le hbound).trans_lt ?_
     exact max_lt (h a₀) (by linarith)
 
+/-- Ultrametric: adding a strictly smaller element does not change the norm. -/
+private lemma norm_add_eq_of_norm_lt {X : Type*} [NormedAddCommGroup X]
+    [IsUltrametricDist X] {x y : X} (h : ‖y‖ < ‖x‖) : ‖x + y‖ = ‖x‖ := by
+  refine le_antisymm ((IsUltrametricDist.norm_add_le_max x y).trans
+    (max_le le_rfl h.le)) ?_
+  by_contra hcon
+  push Not at hcon
+  have hle : ‖x‖ ≤ max ‖x + y‖ ‖y‖ := by
+    have h1 : ‖x + y + -y‖ ≤ max ‖x + y‖ ‖-y‖ := IsUltrametricDist.norm_add_le_max _ _
+    rw [add_neg_cancel_right, norm_neg] at h1
+    exact h1
+  rcases max_cases ‖x + y‖ ‖y‖ with ⟨heq, -⟩ | ⟨heq, -⟩
+  · rw [heq] at hle; exact absurd (hle.trans_lt hcon) (lt_irrefl _)
+  · rw [heq] at hle; exact absurd (hle.trans_lt h) (lt_irrefl _)
+
+/-- The coefficients attaining the Gauss norm form a finite set. -/
+private lemma finite_setOf_norm_coeff_eq {f : RestrictedLaurent K} (hN : (0 : ℝ) < ‖f‖) :
+    {a : ℤ | ‖f.coeff a‖ = ‖f‖}.Finite :=
+  (f.finite_setOf_le_norm_coeff hN).subset fun a ha => by
+    rw [Set.mem_setOf_eq] at ha ⊢; rw [ha]
+
+/-- Below the least index attaining the Gauss norm, the coefficient is strictly submaximal. -/
+private lemma norm_coeff_lt_gaussNorm_of_min {f : RestrictedLaurent K} {a a₁ : ℤ}
+    (hmin : ∀ b ∈ {a : ℤ | ‖f.coeff a‖ = ‖f‖}, a₁ ≤ b) (hlt : a < a₁) :
+    ‖f.coeff a‖ < ‖f‖ := by
+  rcases lt_or_eq_of_le (norm_coeff_le_gaussNorm f a) with h | h
+  · exact h
+  · have := hmin a h
+    omega
+
+
 /-- Norm multiplicativity for restricted Laurent series over **any** complete nonarchimedean
 field ([FJP] Prop 2.3). [FJP] states this for a discretely valued base, but the
 minimal-achiever proof below never uses discreteness, so the hypothesis is dropped: this is
@@ -619,16 +650,10 @@ theorem norm_mul_eq (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g�
   -- attained norms and their minimal achievers
   obtain ⟨af, hafeq, hafne⟩ := exists_gaussNorm_eq f hf
   obtain ⟨ag, hageq, hagne⟩ := exists_gaussNorm_eq g hg
-  have hNf : (0 : ℝ) < ‖f‖ := by
-    rw [norm_def, hafeq]; exact norm_pos_iff.mpr hafne
-  have hNg : (0 : ℝ) < ‖g‖ := by
-    rw [norm_def, hageq]; exact norm_pos_iff.mpr hagne
-  have hAf : {a : ℤ | ‖f.coeff a‖ = ‖f‖}.Finite :=
-    (f.finite_setOf_le_norm_coeff hNf).subset fun a ha => by
-      rw [Set.mem_setOf_eq] at ha ⊢; rw [ha]
-  have hAg : {a : ℤ | ‖g.coeff a‖ = ‖g‖}.Finite :=
-    (g.finite_setOf_le_norm_coeff hNg).subset fun a ha => by
-      rw [Set.mem_setOf_eq] at ha ⊢; rw [ha]
+  have hNf : (0 : ℝ) < ‖f‖ := by rw [norm_def, hafeq]; exact norm_pos_iff.mpr hafne
+  have hNg : (0 : ℝ) < ‖g‖ := by rw [norm_def, hageq]; exact norm_pos_iff.mpr hagne
+  have hAf := finite_setOf_norm_coeff_eq hNf
+  have hAg := finite_setOf_norm_coeff_eq hNg
   obtain ⟨a₁, ha₁A, ha₁min⟩ := Set.exists_min_image _ (fun a : ℤ => a) hAf
     ⟨af, by rw [Set.mem_setOf_eq, ← hafeq, norm_def]⟩
   obtain ⟨b₁, hb₁A, hb₁min⟩ := Set.exists_min_image _ (fun a : ℤ => a) hAg
@@ -638,8 +663,7 @@ theorem norm_mul_eq (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g�
   have hkey : ‖(f * g).coeff (a₁ + b₁)‖ = ‖f‖ * ‖g‖ := by
     have hsplit := (summable_mul_coeff f g (a₁ + b₁)).tsum_eq_add_tsum_ite a₁
     rw [coeff_mul, hsplit, show a₁ + b₁ - a₁ = b₁ by ring]
-    have hmain : ‖f.coeff a₁ * g.coeff b₁‖ = ‖f‖ * ‖g‖ := by
-      rw [norm_mul, ha₁A, hb₁A]
+    have hmain : ‖f.coeff a₁ * g.coeff b₁‖ = ‖f‖ * ‖g‖ := by rw [norm_mul, ha₁A, hb₁A]
     -- all remaining terms are strictly smaller
     have hrest : ‖∑' a : ℤ, (if a = a₁ then 0 else f.coeff a * g.coeff (a₁ + b₁ - a))‖ <
         ‖f‖ * ‖g‖ := by
@@ -647,51 +671,27 @@ theorem norm_mul_eq (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g�
       · refine squeeze_zero (fun a => norm_nonneg _) (fun a => ?_)
           (tendsto_conv_term f g (a₁ + b₁))
         split
-        · simp only [norm_zero]
-          exact norm_nonneg _
+        · simp only [norm_zero]; exact norm_nonneg _
         · exact le_rfl
       · rcases eq_or_ne a a₁ with rfl | ha
         · rw [if_pos rfl, norm_zero]; positivity
         · rw [if_neg ha, norm_mul]
           rcases lt_or_gt_of_ne ha with hlt | hgt
           · -- `a < a₁`: the `f`-coefficient is strictly submaximal
-            have hfa : ‖f.coeff a‖ < ‖f‖ := by
-              rcases lt_or_eq_of_le (norm_coeff_le_gaussNorm f a) with h | h
-              · exact h
-              · have := ha₁min a h
-                omega
-            calc ‖f.coeff a‖ * ‖g.coeff (a₁ + b₁ - a)‖
-                ≤ ‖f.coeff a‖ * ‖g‖ :=
-                  mul_le_mul_of_nonneg_left (norm_coeff_le_gaussNorm g _) (norm_nonneg _)
-              _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_right hfa hNg
+            have hfa : ‖f.coeff a‖ < ‖f‖ :=
+              norm_coeff_lt_gaussNorm_of_min ha₁min (by omega)
+            exact lt_of_le_of_lt
+              (mul_le_mul_of_nonneg_left (norm_coeff_le_gaussNorm g _) (norm_nonneg _))
+              (mul_lt_mul_of_pos_right hfa hNg)
           · -- `a > a₁`: the `g`-coefficient is strictly submaximal
-            have hgb : ‖g.coeff (a₁ + b₁ - a)‖ < ‖g‖ := by
-              rcases lt_or_eq_of_le (norm_coeff_le_gaussNorm g (a₁ + b₁ - a)) with h | h
-              · exact h
-              · have := hb₁min _ h
-                omega
-            calc ‖f.coeff a‖ * ‖g.coeff (a₁ + b₁ - a)‖
-                ≤ ‖f‖ * ‖g.coeff (a₁ + b₁ - a)‖ :=
-                  mul_le_mul_of_nonneg_right (norm_coeff_le_gaussNorm f a) (norm_nonneg _)
-              _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_left hgb hNf
+            have hgb : ‖g.coeff (a₁ + b₁ - a)‖ < ‖g‖ :=
+              norm_coeff_lt_gaussNorm_of_min hb₁min (by omega)
+            exact lt_of_le_of_lt
+              (mul_le_mul_of_nonneg_right (norm_coeff_le_gaussNorm f a) (norm_nonneg _))
+              (mul_lt_mul_of_pos_left hgb hNf)
     -- ultrametric: adding a strictly smaller tail does not change the norm
-    set x := f.coeff a₁ * g.coeff b₁ with hxdef
-    set y := ∑' a : ℤ, (if a = a₁ then 0 else f.coeff a * g.coeff (a₁ + b₁ - a)) with hydef
-    have hyx : ‖y‖ < ‖x‖ := by rw [hmain]; exact hrest
     rw [← hmain]
-    refine le_antisymm ((IsUltrametricDist.norm_add_le_max x y).trans
-      (max_le le_rfl hyx.le)) ?_
-    by_contra hcon
-    push Not at hcon
-    have hle : ‖x‖ ≤ max ‖x + y‖ ‖y‖ := by
-      have h1 : ‖x + y + -y‖ ≤ max ‖x + y‖ ‖-y‖ := IsUltrametricDist.norm_add_le_max _ _
-      rw [add_neg_cancel_right, norm_neg] at h1
-      exact h1
-    rcases max_cases ‖x + y‖ ‖y‖ with ⟨heq, -⟩ | ⟨heq, -⟩
-    · rw [heq] at hle
-      exact absurd (hle.trans_lt hcon) (lt_irrefl _)
-    · rw [heq] at hle
-      exact absurd (hle.trans_lt hyx) (lt_irrefl _)
+    exact norm_add_eq_of_norm_lt (by rw [hmain]; exact hrest)
   refine le_antisymm (norm_mul_le f g) ?_
   rw [← hkey]
   exact norm_coeff_le_gaussNorm (f * g) (a₁ + b₁)
