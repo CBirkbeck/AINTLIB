@@ -33100,3 +33100,102 @@ suffices, and connectedness is not required**.
 `e3Zeta` / `e3ZetaAt` are **retained as a worked example and a cross-check** — when WP-B4
 lands, its value at `N = 3` must agree with `e3ZetaAt`, which is a cheap correctness test
 on the general construction. They are no longer on the critical path.
+
+# ══════════════════════════════════════════════════════════════════════════
+# /develop — THE DS4 API GAP, ENUMERATED (2026-08-02). READ BEFORE WP-B*.
+# ══════════════════════════════════════════════════════════════════════════
+
+## The gap the earlier plan hid
+
+Every plan up to WP-A8 wrote "discharge DS4" as **one** obligation. It is **ten**:
+`WeilPairing/Basic.lean` carries the def plus nine specification theorems, each its own
+`sorry`. Route A as planned produces exactly two of them — the def and `weilPairing_over`.
+The other eight were never ticketed. This is the API gap.
+
+Measured consumption (grep over `projects/ModularCurves/ModularCurves/`, uses outside
+`Basic.lean`):
+
+| DS4 item | uses | consumed by | on Y(ρ̄)'s path |
+|---|---|---|---|
+| `weilPairing` (def) | — | everything | ✔ |
+| `weilPairing_over` | 13 | RhoDescent, RhoPairingBridge, YRho, CharZero{Assembly,Descent} | ✔ |
+| `weilPairingEval_symplectic` | 11 | RhoPairingBridge, RhoSections, YRho | ✔ |
+| `weilPairingEval_restrict` | 6 | RhoSections, YRho | ✔ |
+| `weilPairingEval_zsmul_right` | 2 | RhoSections | ✔ |
+| `weilPairingEval_nondegenerate` | 2 | RhoSections | ✔ |
+| `weilPairingEval_add_left` | 1 | RhoSections | ✔ |
+| `weilPairingEval_add_right` | 1 | RhoSections | ✔ |
+| `weilPairingEval_self` | **0** | — | ✘ dead |
+| `weilPairingEval_mul` | **0** | — | ✘ dead |
+
+**Y(ρ̄) needs eight of the ten.** `_self` and `_mul` have no consumers and are not on the
+critical path (they stay as register entries; `_self` follows from `_symplectic` with
+`a,b,c,d = 1,0,1,0` if ever wanted).
+
+## Why this makes route A *more* clearly the right route, not less
+
+The eight specs are all statements about the same morphism, and route A defines that
+morphism as a descent of
+
+  `localDetPairing = triv.hom ≫ detConstMor N ≫ rootSplitting N ζ ≫ muNMapAlong p N`.
+
+On the cover the pairing is *literally* `ζ^(det of a ℤ/N-matrix)`. So each spec becomes an
+identity about `det` of `2×2` matrices over `ℤ/N`:
+
+* `_symplectic` — multiplicativity of `det` — this is `detConstMor_gl2Both`, **already
+  proved** (`WeilPairing/CharZeroDescent.lean`), and `constSchemeMap_gl2Both_comp_detConstMor_rootSplitting`
+  (WP-A4) is already its `rootSplitting` form;
+* `_add_left`, `_add_right`, `_zsmul_right` — additivity/homogeneity of `det` in one
+  column, the degenerate cases of the same law;
+* `_nondegenerate` — `det ≠ 0` in the invertible-`N` fibre;
+* `_restrict` — naturality of `constScheme`/`detConstMor`/`muNMapAlong` in the base, which
+  is formal.
+
+So the eight are cheap **given** two pieces of shared infrastructure, and expensive without
+them. Those two pieces are the real tickets:
+
+### [WP-C1] Sections inject along the trivialising cover  ← START HERE, unblocked
+- **Status**: open · **File**: new, `WeilPairing/DescentFaithful.lean` · **Depends on**: none
+- **Statement**: for `p : S' ⟶ S` flat + locally of finite presentation + surjective and
+  `T' := T ×_S S'`, the restriction `Γ(T, ⊤) ⟶ Γ(T', ⊤)` is injective.
+- **Why**: every `weilPairingEval` spec is an equation *in `Γ(T, ⊤)`*. This lemma is what
+  lets each be checked on the cover, where the pairing is the explicit `ζ^det` formula.
+- **Proof sketch**: reduce to affines; then it is the injective half of the Amitsur
+  equalizer, and the project already has the hard half —
+  `mem_range_algebraMap_iff_tmul_eq` (`ForMathlib/FaithfullyFlatEqualizer.lean:61`).
+  Injectivity itself is faithful flatness of `R ⟶ S` directly.
+- **Generality**: stated for an arbitrary fppf `p`, not for the level cover.
+
+### [WP-C2] The master evaluation formula
+- **Status**: blocked (WP-C1, WP-B4) · **File**: `WeilPairing/DescentFaithful.lean`
+- **Statement**: after restriction to the cover, `weilPairingEval x y` equals
+  `ζ ^ (det of the matrix of (x, y) in the trivialisation)`.
+- **Why**: this is the single lemma that converts all eight specs into `ℤ/N`-matrix
+  algebra. Without it each spec re-derives the descent by hand.
+- **Proof sketch**: unfold `weilPairingEval` (`muNPointsEquiv` of `pullback.lift … ≫
+  weilPairing`), rewrite the descended `weilPairing` by its defining cover identity, then
+  `rootSplitting_ι` / `rootPower` compute the value as `ζ^k`.
+
+### [WP-C3 … C8] The six computational specs
+- **Status**: blocked (WP-C2) · one ticket each, in this order (cheapest first):
+  `_restrict` (naturality only — does not even need C2's det form),
+  `_symplectic` (WP-A4 + C2), `_add_left`, `_add_right`, `_zsmul_right`
+  (column-degenerate cases of A4), `_nondegenerate` (det invertible in the fibre).
+- Each is expected to be short **given** C2; each gets its own ticket because each is a
+  separate `sorry` in the register and must be closed separately.
+
+## Correction to WP-B2's proof sketch (found while enumerating)
+
+WP-B2 proposed getting normality of the universal base from smoothness. **That route is
+blocked**: the smooth+affine statement `gammaFullNaive_representable`
+(`Moduli/Representability.lean:663`) and `YFull.exists_representing_smooth_affine`
+(`ModularCurve/YFullRoute.lean:777`) are **both `sorry`** — smoothness of `Y(N)` is itself
+open in the tree. WP-B2 must therefore route normality through the *explicit* level-3 ring
+(`E3ModuliRing`, a concrete quotient of a polynomial ring) plus étale ascent, not through
+smoothness. Re-sketch before working it.
+
+## Revised execution order
+
+`WP-C1` (unblocked, general, useful regardless of how the root is obtained) → `WP-B1`/`B2`/
+`B3`/`B4` (the root) → `WP-C2` → `WP-C3…C8` → `WP-B5`/`A8` (assembly) → DS4 closed →
+`weilPairing_torsionMapOfEllHom` → `rho_rigidNoeth` → `yRho_representable`.
