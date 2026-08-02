@@ -442,6 +442,63 @@ private theorem tendsto_canonicalMap_tA_pow :
   rw [hρ]
   simpa only [Function.comp_def, map_pow, map_zero] using this
 
+/-- The chart images `ρ(W⁻ⁿQ²)` form a bounded family: scale them into the unit
+ball by a fixed `ϖᵏ` — where `k` is chosen from `‖ϖ‖ < 1` against the constant
+`‖Q‖²` — and then unscale by the unit `ρ(ϖ)⁻¹`. -/
+private theorem isBounded_range_canonicalMap_yQ :
+    TopologicalRing.IsBounded
+      (Set.range fun n : ℕ => (chartDatum F).canonicalMap (yQ F n)) := by
+  classical
+  set ρ := (chartDatum F).canonicalMap with hρ
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) ≤ 1 := by
+    obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one
+      (show (0:ℝ) < 1 / (1 + ‖Qa F‖ * ‖Qa F‖) by positivity) (norm_tA_lt_one F)
+    refine ⟨k, ?_⟩
+    have h1 : ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) ≤
+        (1 / (1 + ‖Qa F‖ * ‖Qa F‖)) * (‖Qa F‖ * ‖Qa F‖) := by
+      refine mul_le_mul_of_nonneg_right hk.le (by positivity)
+    refine h1.trans ?_
+    rw [div_mul_eq_mul_div, one_mul, div_le_one (by positivity)]
+    linarith [mul_nonneg (norm_nonneg (Qa F)) (norm_nonneg (Qa F))]
+  have hunit : IsUnit (ρ (tA F)) := by
+    rw [hρ]
+    show IsUnit ((chartDatum F).coeRingHom (algebraMap (JetA F)
+      (Localization.Away (chartDatum F).s) (chartDatum F).s))
+    refine IsUnit.map _ ?_
+    exact IsLocalization.map_units (Localization.Away (chartDatum F).s)
+      ⟨(chartDatum F).s, Submonoid.mem_powers _⟩
+  obtain ⟨u, hu⟩ := hunit
+  -- the scaled family lies in the bounded `coeRingHom`-image of `locSubring`
+  have hball : TopologicalRing.IsBounded
+      (Set.range fun n : ℕ => ρ (tA F ^ k * yQ F n)) := by
+    refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+      (chartDatum F)).subset ?_
+    rintro _ ⟨n, rfl⟩
+    refine ⟨algebraMap (JetA F) (Localization.Away (chartDatum F).s)
+      (tA F ^ k * yQ F n), ?_, rfl⟩
+    refine algebraMap_mem_locSubring _ _ _ ?_
+    show tA F ^ k * yQ F n ∈ (podA F).A₀
+    show ‖tA F ^ k * yQ F n‖ ≤ 1
+    rw [norm_JetA_mul, norm_JetA_pow]
+    calc ‖tA F‖ ^ k * ‖yQ F n‖ ≤ ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) := by
+          refine mul_le_mul_of_nonneg_left (norm_yQ_le F n) (by positivity)
+      _ ≤ 1 := hk
+  -- unscale: `ρ(yQ n) = (u⁻¹)ᵏ · ρ(ϖᵏ yQ n)`
+  have hres : (Set.range fun n : ℕ => ρ (yQ F n)) ⊆
+      ({((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+        presheafValue (chartDatum F)) ^ k} : Set (presheafValue (chartDatum F))) *
+        Set.range fun n : ℕ => ρ (tA F ^ k * yQ F n) := by
+    rintro _ ⟨n, rfl⟩
+    refine ⟨((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+      presheafValue (chartDatum F)) ^ k, rfl, ρ (tA F ^ k * yQ F n), ⟨n, rfl⟩, ?_⟩
+    show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+      presheafValue (chartDatum F)) ^ k * ρ (tA F ^ k * yQ F n) = ρ (yQ F n)
+    rw [RingHom.map_mul ρ, map_pow ρ, ← hu, ← mul_assoc, ← mul_pow]
+    rw [show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+      presheafValue (chartDatum F)) * u = 1 from u.inv_mul]
+    rw [one_pow, one_mul]
+  exact ((TopologicalRing.isBounded_singleton _).mul hball).subset hres
+
 /-- **The (3.3) collapse**: `ρ(Q)² = 0` in the chart — the constant `ρ(Q²)` is a limit
 of the null products `ρ(ϖ)ⁿ · (gⁿ · ρ(W⁻ⁿQ²))` ([FJP] Prop 3.1 proof). -/
 theorem canonicalMap_Qa_sq :
@@ -458,56 +515,7 @@ theorem canonicalMap_Qa_sq :
     rw [← Wa_pow_mul_yQ F n, RingHom.map_mul ρ, map_pow ρ, hWsplit, mul_pow]
     ring
   -- the second factors form a bounded set
-  have hbddY : TopologicalRing.IsBounded (Set.range fun n : ℕ => ρ (yQ F n)) := by
-    -- scale into the unit ball by a fixed `ϖ^k`, then unscale by the unit `ρ(ϖ)⁻¹`
-    obtain ⟨k, hk⟩ : ∃ k : ℕ, ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) ≤ 1 := by
-      obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one
-        (show (0:ℝ) < 1 / (1 + ‖Qa F‖ * ‖Qa F‖) by positivity) (norm_tA_lt_one F)
-      refine ⟨k, ?_⟩
-      have h1 : ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) ≤
-          (1 / (1 + ‖Qa F‖ * ‖Qa F‖)) * (‖Qa F‖ * ‖Qa F‖) := by
-        refine mul_le_mul_of_nonneg_right hk.le (by positivity)
-      refine h1.trans ?_
-      rw [div_mul_eq_mul_div, one_mul, div_le_one (by positivity)]
-      linarith [mul_nonneg (norm_nonneg (Qa F)) (norm_nonneg (Qa F))]
-    have hunit : IsUnit (ρ (tA F)) := by
-      rw [hρ]
-      show IsUnit ((chartDatum F).coeRingHom (algebraMap (JetA F)
-        (Localization.Away (chartDatum F).s) (chartDatum F).s))
-      refine IsUnit.map _ ?_
-      exact IsLocalization.map_units (Localization.Away (chartDatum F).s)
-        ⟨(chartDatum F).s, Submonoid.mem_powers _⟩
-    obtain ⟨u, hu⟩ := hunit
-    -- the scaled family lies in the bounded `coeRingHom`-image of `locSubring`
-    have hball : TopologicalRing.IsBounded
-        (Set.range fun n : ℕ => ρ (tA F ^ k * yQ F n)) := by
-      refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
-        (chartDatum F)).subset ?_
-      rintro _ ⟨n, rfl⟩
-      refine ⟨algebraMap (JetA F) (Localization.Away (chartDatum F).s)
-        (tA F ^ k * yQ F n), ?_, rfl⟩
-      refine algebraMap_mem_locSubring _ _ _ ?_
-      show tA F ^ k * yQ F n ∈ (podA F).A₀
-      show ‖tA F ^ k * yQ F n‖ ≤ 1
-      rw [norm_JetA_mul, norm_JetA_pow]
-      calc ‖tA F‖ ^ k * ‖yQ F n‖ ≤ ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) := by
-            refine mul_le_mul_of_nonneg_left (norm_yQ_le F n) (by positivity)
-        _ ≤ 1 := hk
-    -- unscale: `ρ(yQ n) = (u⁻¹)ᵏ · ρ(ϖᵏ yQ n)`
-    have hres : (Set.range fun n : ℕ => ρ (yQ F n)) ⊆
-        ({((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
-          presheafValue (chartDatum F)) ^ k} : Set (presheafValue (chartDatum F))) *
-          Set.range fun n : ℕ => ρ (tA F ^ k * yQ F n) := by
-      rintro _ ⟨n, rfl⟩
-      refine ⟨((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
-        presheafValue (chartDatum F)) ^ k, rfl, ρ (tA F ^ k * yQ F n), ⟨n, rfl⟩, ?_⟩
-      show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
-        presheafValue (chartDatum F)) ^ k * ρ (tA F ^ k * yQ F n) = ρ (yQ F n)
-      rw [RingHom.map_mul ρ, map_pow ρ, ← hu, ← mul_assoc, ← mul_pow]
-      rw [show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
-        presheafValue (chartDatum F)) * u = 1 from u.inv_mul]
-      rw [one_pow, one_mul]
-    exact ((TopologicalRing.isBounded_singleton _).mul hball).subset hres
+  have hbddY := isBounded_range_canonicalMap_yQ F
   have hbddG : TopologicalRing.IsBounded
       (Set.range (g ^ · : ℕ → presheafValue (chartDatum F))) := by
     have hmem : divByS (Wa F) (chartDatum F).s ∈

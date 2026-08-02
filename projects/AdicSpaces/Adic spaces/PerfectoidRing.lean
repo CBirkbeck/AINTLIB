@@ -399,6 +399,61 @@ private theorem mul_lim_eq_sub_of_telescope
   rw [show (fun N ↦ c * s N) = fun N ↦ x - r N from funext htel] at hlhs
   exact tendsto_nhds_unique hlhs hrhs
 
+/-- One-sided smallness of the differences of a sequence upgrades to two-sided:
+the open additive subgroup inside the neighbourhood is closed under negation. -/
+private theorem sub_mem_nhds_symm (A : Type u) [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [NonarchimedeanRing A] {g : ℕ → A}
+    (h : ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → m ≤ n → g m - g n ∈ W) :
+    ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → N ≤ n → g m - g n ∈ W := by
+  intro W hW
+  obtain ⟨J, hJW⟩ := NonarchimedeanAddGroup.is_nonarchimedean W hW
+  obtain ⟨N, hN⟩ := h (J : Set A) (J.isOpen.mem_nhds J.zero_mem')
+  exact ⟨N, fun m n hm hn ↦ by
+    rcases le_total m n with hmn | hmn
+    · exact hJW (hN m n hm hmn)
+    · rw [show g m - g n = -(g n - g m) by ring]
+      exact hJW (neg_mem (hN n m hn hmn))⟩
+
+/-- **The telescoping limit**: if `f k - f (k+1) = p^k · d k` with every `d k`
+power-bounded and `f → L`, then `f n - L` is `p^n` times a power-bounded element —
+namely the limit of the partial sums `∑_{j<N} p^j · d (n+j)`. -/
+private theorem exists_powerBounded_telescope_limit {p : ℕ} (hp_pos : 0 < p)
+    (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsUniform A] [IsUniformAddGroup A]
+    [CompleteSpace A] [T2Space A] {ϖ c : A} (hϖ_tn : IsTopologicallyNilpotent ϖ)
+    (hϖ_pb : IsPowerBounded ϖ) (hc_pb : IsPowerBounded c)
+    (hpc : (p : A) = c * ϖ ^ p)
+    (htop : ‹UniformSpace A›.toTopologicalSpace = ‹TopologicalSpace A›)
+    {f d : ℕ → A} (hd_pb : ∀ k, IsPowerBounded (d k))
+    (hd_val : ∀ k, f k - f (k + 1) = (p : A) ^ k * d k) {L : A}
+    (hL : Filter.Tendsto f Filter.atTop (@nhds A ‹TopologicalSpace A› L)) (n : ℕ) :
+    ∃ s : A, IsPowerBounded s ∧ (p : A) ^ n * s = f n - L := by
+  let S : ℕ → ℕ → A := fun n N ↦ ∑ j ∈ Finset.range N, (p : A) ^ j * d (n + j)
+  have hS_pb : ∀ n N, IsPowerBounded (S n N) := by
+    intro n N
+    induction N with
+    | zero => simp only [S, Finset.sum_range_zero]; exact isPowerBounded_zero
+    | succ N ih =>
+      simp only [S, Finset.sum_range_succ]
+      exact isPowerBounded_add ih
+        (isPowerBounded_mul (isPowerBounded_p_pow A hϖ_pb hc_pb hpc N) (hd_pb (n + N)))
+  have hterm_small : ∀ W ∈ nhds (0 : A), ∃ M, ∀ n j, M ≤ j →
+      (p : A) ^ j * d (n + j) ∈ W := by
+    intro W hW
+    obtain ⟨M, hM⟩ := mul_p_pow_eventually_mem_nhds hp_pos A hϖ_tn hc_pb hpc hW
+    exact ⟨M, fun n j hj ↦ hM (d (n + j)) (hd_pb (n + j)) j hj⟩
+  obtain ⟨s, hs⟩ := cauchySeq_tendsto_of_complete
+    (cauchySeq_partialSum_of_term_eventually_mem_nhds A (S := S)
+      (t := fun n j ↦ (p : A) ^ j * d (n + j)) (hS := fun _ _ ↦ rfl) (htop := htop)
+      (hsmall := hterm_small) n)
+  have hs' : Filter.Tendsto (S n) Filter.atTop (@nhds A ‹TopologicalSpace A› s) := by
+    rw [htop] at hs; exact hs
+  refine ⟨s, isPowerBounded_of_tendsto_of_powerBounded (fun N ↦ hS_pb n N) hs', ?_⟩
+  exact mul_lim_eq_sub_of_telescope hs'
+    (hL.comp (Filter.tendsto_atTop_atTop_of_monotone
+      (fun _ _ h ↦ Nat.add_le_add_left h n) fun b ↦ ⟨b, Nat.le_add_left b n⟩))
+    (fun N ↦ p_pow_mul_partialSum_eq_sub hd_val n N)
+
 /-- **IsPrecomplete**: `p`-adic Cauchy sequences in `A°` converge.
 
 The proof proceeds in four steps:
@@ -446,23 +501,9 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   -- Step 3: Show CauchySeq and get limit.
   haveI : IsUniformAddGroup A := IsPerfectoidRing.uniformAddGroup (p := p) (A := A)
   have htop := IsPerfectoidRing.topologyEq (p := p) (A := A)
-  -- Symmetrize `hf_small`: an open ideal is closed under negation, so the one-sided estimate
-  -- extends to all `m, n ≥ N`.
-  have hf_sym : ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      (f m : A) - (f n : A) ∈ W := by
-    intro W hW
-    obtain ⟨J, hJW⟩ := NonarchimedeanAddGroup.is_nonarchimedean W hW
-    obtain ⟨N, hN⟩ := hf_small (J : Set A) (J.isOpen.mem_nhds J.zero_mem')
-    exact ⟨N, fun m n hm hn ↦ by
-      rcases le_total m n with hmn | hmn
-      · exact hJW (hN m n hm hmn)
-      · rw [show (f m : A) - (f n : A) = -((f n : A) - (f m : A)) by ring]
-        exact hJW (neg_mem (hN n m hn hmn))⟩
-  -- The coerced sequence is Cauchy in A.
-  have hCauchy : CauchySeq (fun n ↦ (f n : A)) :=
-    cauchySeq_of_sub_eventually_mem_nhds A htop hf_sym
-  -- Get limit from CompleteSpace
-  obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete hCauchy
+  -- Symmetrize `hf_small` (`sub_mem_nhds_symm`), get Cauchy, then the limit.
+  obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete
+    (cauchySeq_of_sub_eventually_mem_nhds A htop (sub_mem_nhds_symm A hf_small))
   -- Convert hL to use the given topology
   have hL' : Filter.Tendsto (fun n ↦ (f n : A)) Filter.atTop
       (@nhds A ‹TopologicalSpace A› L) := by rwa [htop] at hL
@@ -470,56 +511,14 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   have hL_pb : IsPowerBounded L :=
     isPowerBounded_of_tendsto_of_powerBounded (fun n ↦ (f n).property) hL'
   -- Step 5: Verify SModEq condition via telescoping series.
-  -- Extract differences d_k ∈ A° with f(k) - f(k+1) = p^k * d_k.
-  have hd_ex : ∀ k, ∃ d : PBSubring A, f k - f (k + 1) = (p : PBSubring A) ^ k * d :=
-    fun k ↦ hf_div k (k + 1) (Nat.le_succ k)
-  choose d hd using hd_ex
-  -- Define partial sums in A: S(n, N) = Σ_{j<N} p^j * d(n+j)
-  let S : ℕ → ℕ → A := fun n N ↦
-    ∑ j ∈ Finset.range N, (p : A) ^ j * (d (n + j) : A)
-  -- Telescoping identity p^n * S(n, N) = (f n : A) - (f(n+N) : A), from the coerced differences.
+  -- Extract differences d_k ∈ A° with f(k) - f(k+1) = p^k * d_k, then take the
+  -- limit of the partial sums Σ_{j<N} p^j * d(n+j) (`exists_powerBounded_telescope_limit`).
+  choose d hd using fun k ↦ hf_div k (k + 1) (Nat.le_succ k)
   have hd_val : ∀ k, (f k : A) - (f (k + 1) : A) = (p : A) ^ k * (d k : A) := by
     intro k; exact_mod_cast congr_arg (Subtype.val) (hd k)
-  have htelescope : ∀ n N, (p : A) ^ n * S n N = (f n : A) - (f (n + N) : A) :=
-    fun n N ↦ p_pow_mul_partialSum_eq_sub hd_val n N
-  -- Each partial sum S(n, N) is power-bounded.
-  have hS_pb : ∀ n N, IsPowerBounded (S n N) := by
-    intro n N; induction N with
-    | zero => simp only [S, Finset.sum_range_zero]; exact isPowerBounded_zero
-    | succ N ih =>
-      simp only [S, Finset.sum_range_succ]
-      exact isPowerBounded_add ih
-        (isPowerBounded_mul (isPowerBounded_p_pow A hϖ_pb hc_pb hpc N) (d (n + N)).property)
-  -- Each term `p^j * d(n+j)` is in any neighborhood of 0 for large `j` (smallness engine).
-  have hterm_small : ∀ W ∈ nhds (0 : A), ∃ M, ∀ n j, M ≤ j →
-      (p : A) ^ j * (d (n + j) : A) ∈ W := by
-    intro W hW
-    obtain ⟨M, hM⟩ :=
-      mul_p_pow_eventually_mem_nhds hp_pos A ϖ.isTopologicallyNilpotent hc_pb hpc hW
-    exact ⟨M, fun n j hj ↦ hM (d (n + j) : A) (d (n + j)).property j hj⟩
-  -- The partial sums S(n, ·) form a Cauchy sequence.
-  have hS_cauchy_unif : ∀ n, CauchySeq (S n) := by
-    haveI : IsUniformAddGroup A := IsPerfectoidRing.uniformAddGroup (p := p) (A := A)
-    exact fun n ↦ cauchySeq_partialSum_of_term_eventually_mem_nhds A
-      (S := S) (t := fun n j ↦ (p : A) ^ j * (d (n + j) : A))
-      (hS := fun _ _ ↦ rfl) (htop := htop) (hsmall := hterm_small) n
-  -- Get limits of S(n, ·) from CompleteSpace
-  have hS_lim : ∀ n, ∃ sn : A, Filter.Tendsto (S n) Filter.atTop
-      (@nhds A ‹UniformSpace A›.toTopologicalSpace sn) := by
-    intro n; exact cauchySeq_tendsto_of_complete (hS_cauchy_unif n)
-  choose sn hsn using hS_lim
-  -- Convert limits to given topology
-  have hsn' : ∀ n, Filter.Tendsto (S n) Filter.atTop (@nhds A ‹TopologicalSpace A› (sn n)) := by
-    intro n; rw [htop] at hsn; exact hsn n
-  -- Each sn is power-bounded (limit of PB sequence)
-  have hsn_pb : ∀ n, IsPowerBounded (sn n) := by
-    intro n; exact isPowerBounded_of_tendsto_of_powerBounded (fun N ↦ hS_pb n N) (hsn' n)
-  -- p^n * sn(n) = (f n : A) - L, by passing the telescoping identity to the limit.
-  have hpn_sn : ∀ n, (p : A) ^ n * sn n = (f n : A) - L := fun n ↦
-    mul_lim_eq_sub_of_telescope (hsn' n)
-      (hL'.comp (Filter.tendsto_atTop_atTop_of_monotone
-        (fun _ _ h ↦ Nat.add_le_add_left h n) fun b ↦ ⟨b, Nat.le_add_left b n⟩))
-      (htelescope n)
+  choose sn hsn_pb hpn_sn using fun n ↦ exists_powerBounded_telescope_limit hp_pos A
+    ϖ.isTopologicallyNilpotent hϖ_pb hc_pb hpc htop (fun k ↦ (d k).property) hd_val
+    hL' n
   -- Construct the limit in A° and verify SModEq
   refine ⟨⟨L, hL_pb⟩, fun n ↦ ?_⟩
   rw [SModEq.sub_mem]
