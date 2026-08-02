@@ -334,6 +334,77 @@ theorem propA3_part2_project_separation
   exact (restrictionMapHom C.base D' hsubD').map_zero ▸
     map_zero (restrictionMapHom D D' hD_contains_D')
 
+omit [DecidableEq (RationalLocData A)] in
+/-- The refinement family is compatible: each `g D'` is `f` restricted along the
+chosen refinement, so a double restriction on the `C'`-side is a double restriction
+on the `C`-side, where `h_compat` applies. -/
+private theorem propA3_part2_refined_compat
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    (C C' : RationalCoveringData A) (f : ∀ D : ↥C.covers, presheafValue D.1)
+    (h_compat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (ch : ∀ D' : ↥C'.covers, { D : ↥C.covers //
+      rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s })
+    (D'₁ D'₂ : ↥C'.covers) (D'₃ : RationalLocData A)
+    (h₃₁ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₁.1.T D'₁.1.s)
+    (h₃₂ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₂.1.T D'₂.1.s) :
+    restrictionMap D'₁.1 D'₃ h₃₁
+        (restrictionMap (ch D'₁).1.1 D'₁.1 (ch D'₁).2 (f (ch D'₁).1))
+      = restrictionMap D'₂.1 D'₃ h₃₂
+        (restrictionMap (ch D'₂).1.1 D'₂.1 (ch D'₂).2 (f (ch D'₂).1)) := by
+  rw [restrictionMap_restrictionMap (ch D'₁).1.1 D'₁.1 D'₃ (ch D'₁).2 h₃₁,
+    restrictionMap_restrictionMap (ch D'₂).1.1 D'₂.1 D'₃ (ch D'₂).2 h₃₂]
+  exact h_compat (ch D'₁).1 (ch D'₂).1 D'₃
+    (h₃₁.trans (ch D'₁).2) (h₃₂.trans (ch D'₂).2)
+
+/-- The glued section restricts correctly to a single refinement piece `E'`: factor
+`E'` through the `C'`-piece `Q` containing it, use the `C'`-gluing spec there, and
+land back on `h_compat`. -/
+private theorem propA3_part2_piece_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    (C C' : RationalCoveringData A) (h_same_base : C'.base = C.base)
+    (f : ∀ D : ↥C.covers, presheafValue D.1)
+    (h_compat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+      (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+      (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+      restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂))
+    (ch : ∀ D' : ↥C'.covers, { D : ↥C.covers //
+      rationalOpen D'.1.T D'.1.s ⊆ rationalOpen D.1.T D.1.s })
+    (x' : presheafValue C'.base) (x : presheafValue C.base)
+    (hx_cast :
+      (RationalCoveringData.presheafValueCast (C := C) (C' := C') h_same_base) x = x')
+    (hx' : ∀ D' : ↥C'.covers, restrictionMap C'.base D'.1 (C'.hsubset D'.1 D'.2) x'
+      = restrictionMap (ch D').1.1 D'.1 (ch D').2 (f (ch D').1))
+    (D : ↥C.covers) (E' : RationalLocData A)
+    (hsub_D : rationalOpen E'.T E'.s ⊆ rationalOpen D.1.T D.1.s)
+    (hpiece : ∃ Q ∈ C'.covers, rationalOpen E'.T E'.s ⊆ rationalOpen Q.T Q.s) :
+    restrictionMap D.1 E' hsub_D (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x)
+      = restrictionMap D.1 E' hsub_D (f D) := by
+  obtain ⟨Q, hQ, h_EQ⟩ := hpiece
+  have chained : rationalOpen E'.T E'.s ⊆ rationalOpen C.base.T C.base.s :=
+    hsub_D.trans (C.hsubset D.1 D.2)
+  have hsubC' : rationalOpen E'.T E'.s ⊆ rationalOpen C'.base.T C'.base.s := by
+    rw [h_same_base]; exact chained
+  have h_cast : restrictionMap C'.base E' hsubC' x' =
+      restrictionMap C.base E' chained x := by
+    have key := RationalCoveringData.presheafValueCast_restrictionMap
+      C.base C'.base h_same_base E' chained hsubC' x
+    rw [show
+      (@Eq.rec (RationalLocData A) C.base
+        (fun b _ => presheafValue C.base ≃+* presheafValue b)
+        (RingEquiv.refl _) C'.base h_same_base.symm x) =
+        ((RationalCoveringData.presheafValueCast (C := C) (C' := C') h_same_base) x)
+      from rfl, hx_cast] at key
+    exact key
+  rw [restrictionMap_restrictionMap C.base D.1 E' (C.hsubset D.1 D.2) hsub_D, ← h_cast,
+    ← restrictionMap_restrictionMap C'.base Q E' (C'.hsubset Q hQ) h_EQ, hx' ⟨Q, hQ⟩,
+    restrictionMap_restrictionMap (ch ⟨Q, hQ⟩).1.1 Q E' (ch ⟨Q, hQ⟩).2 h_EQ]
+  exact h_compat (ch ⟨Q, hQ⟩).1 D E' (h_EQ.trans (ch ⟨Q, hQ⟩).2) hsub_D
+
 /-- **Project Prop A.3(2) sub-lemma (gluing transfer)**: refinement
 + C'-gluing + double-restriction-acyclicity + C'-covers-each-D ⇒ C-gluing.
 
@@ -394,30 +465,9 @@ theorem propA3_part2_project_gluing
       (h₃₁ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₁.1.T D'₁.1.s)
       (h₃₂ : rationalOpen D'₃.T D'₃.s ⊆ rationalOpen D'₂.1.T D'₂.1.s),
       restrictionMap D'₁.1 D'₃ h₃₁ (_g D'₁) =
-        restrictionMap D'₂.1 D'₃ h₃₂ (_g D'₂) := by
-    intro D'₁ D'₂ D'₃ h₃₁ h₃₂
-    -- Unfold g D'₁ = restrictionMap (chooseC D'₁).1 D'₁ ... (f (chooseC D'₁))
-    show restrictionMap D'₁.1 D'₃ h₃₁
-          (restrictionMap (chooseC D'₁).1.1 D'₁.1 (chooseC D'₁).2 (f (chooseC D'₁).1))
-        = restrictionMap D'₂.1 D'₃ h₃₂
-          (restrictionMap (chooseC D'₂).1.1 D'₂.1 (chooseC D'₂).2 (f (chooseC D'₂).1))
-    -- Compose restrictions via restrictionMap_comp.
-    have h_lhs : restrictionMap D'₁.1 D'₃ h₃₁
-        (restrictionMap (chooseC D'₁).1.1 D'₁.1 (chooseC D'₁).2 (f (chooseC D'₁).1))
-        = restrictionMap (chooseC D'₁).1.1 D'₃
-          (h₃₁.trans (chooseC D'₁).2) (f (chooseC D'₁).1) := by
-      have := restrictionMap_comp (chooseC D'₁).1.1 D'₁.1 D'₃ (chooseC D'₁).2 h₃₁
-      exact congrFun this _
-    have h_rhs : restrictionMap D'₂.1 D'₃ h₃₂
-        (restrictionMap (chooseC D'₂).1.1 D'₂.1 (chooseC D'₂).2 (f (chooseC D'₂).1))
-        = restrictionMap (chooseC D'₂).1.1 D'₃
-          (h₃₂.trans (chooseC D'₂).2) (f (chooseC D'₂).1) := by
-      have := restrictionMap_comp (chooseC D'₂).1.1 D'₂.1 D'₃ (chooseC D'₂).2 h₃₂
-      exact congrFun this _
-    rw [h_lhs, h_rhs]
-    -- Now apply h_compat with the appropriate inclusions on the C-side.
-    exact h_compat (chooseC D'₁).1 (chooseC D'₂).1 D'₃
-      (h₃₁.trans (chooseC D'₁).2) (h₃₂.trans (chooseC D'₂).2)
+        restrictionMap D'₂.1 D'₃ h₃₂ (_g D'₂) :=
+    fun D'₁ D'₂ D'₃ h₃₁ h₃₂ =>
+      propA3_part2_refined_compat C C' f h_compat chooseC D'₁ D'₂ D'₃ h₃₁ h₃₂
   -- Step 5: apply _h_C'_acyclic.gluing to (_g, h_g_compat) to get x' on C'.
   obtain ⟨x', hx'⟩ := _h_C'_acyclic.gluing _g h_g_compat
   -- Step 6: cast x' from presheafValue C'.base to presheafValue C.base via
@@ -440,55 +490,9 @@ theorem propA3_part2_project_gluing
     (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x - f D)]
   show (restrictionMapHom D.1 E' hsub_D) _ = 0
   rw [map_sub, sub_eq_zero]
-  obtain ⟨Q, hQ, h_EQ⟩ := hE_pieces D E' hE'_in
-  have chained : rationalOpen E'.T E'.s ⊆ rationalOpen C.base.T C.base.s :=
-    hsub_D.trans (C.hsubset D.1 D.2)
-  have h_LHS_comp :
-      restrictionMap D.1 E' hsub_D
-        (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x)
-        = restrictionMap C.base E' chained x := by
-    have := restrictionMap_comp C.base D.1 E' (C.hsubset D.1 D.2) hsub_D
-    exact congrFun this _
-  show restrictionMap D.1 E' hsub_D
-      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x)
-      = restrictionMap D.1 E' hsub_D (f D)
-  rw [h_LHS_comp]
-  have hsubC' : rationalOpen E'.T E'.s ⊆ rationalOpen C'.base.T C'.base.s := by
-    rw [_h_same_base]; exact chained
-  have h_cast : restrictionMap C'.base E' hsubC' x' =
-      restrictionMap C.base E' chained x := by
-    have key := RationalCoveringData.presheafValueCast_restrictionMap
-      C.base C'.base _h_same_base E' chained hsubC' x
-    have h_cast_cancel :
-        (RationalCoveringData.presheafValueCast (C := C) (C' := C') _h_same_base) x
-          = x' := by
-      simp only [x, RingEquiv.apply_symm_apply]
-    rw [show
-      (@Eq.rec (RationalLocData A) C.base
-        (fun b _ => presheafValue C.base ≃+* presheafValue b)
-        (RingEquiv.refl _) C'.base _h_same_base.symm x) =
-        ((RationalCoveringData.presheafValueCast (C := C) (C' := C') _h_same_base) x)
-      from rfl, h_cast_cancel] at key
-    exact key
-  rw [← h_cast]
-  -- factor through the containing C'-piece Q and use the glued spec there.
-  have h_through_Q : restrictionMap C'.base E' hsubC' x' =
-      restrictionMap Q E' h_EQ
-        (restrictionMap C'.base Q (C'.hsubset Q hQ) x') :=
-    (congrFun (restrictionMap_comp C'.base Q E' (C'.hsubset Q hQ) h_EQ) x').symm
-  rw [h_through_Q, hx' ⟨Q, hQ⟩]
-  show restrictionMap Q E' h_EQ
-      (restrictionMap (chooseC ⟨Q, hQ⟩).1.1 Q (chooseC ⟨Q, hQ⟩).2
-        (f (chooseC ⟨Q, hQ⟩).1)) = restrictionMap D.1 E' hsub_D (f D)
-  rw [show restrictionMap Q E' h_EQ
-      (restrictionMap (chooseC ⟨Q, hQ⟩).1.1 Q (chooseC ⟨Q, hQ⟩).2
-        (f (chooseC ⟨Q, hQ⟩).1)) =
-      restrictionMap (chooseC ⟨Q, hQ⟩).1.1 E'
-        (h_EQ.trans (chooseC ⟨Q, hQ⟩).2) (f (chooseC ⟨Q, hQ⟩).1)
-    from congrFun (restrictionMap_comp (chooseC ⟨Q, hQ⟩).1.1 Q E'
-      (chooseC ⟨Q, hQ⟩).2 h_EQ) _]
-  exact h_compat (chooseC ⟨Q, hQ⟩).1 D E'
-    (h_EQ.trans (chooseC ⟨Q, hQ⟩).2) hsub_D
+  exact propA3_part2_piece_eq C C' _h_same_base f h_compat chooseC x' x
+    (by simp only [x, RingEquiv.apply_symm_apply]) hx' D E' hsub_D
+    (hE_pieces D E' hE'_in)
 
 /-- **Sub-lemma 2 of `every_rational_cover_is_OXAcyclic`** (Wedhorn Prop A.3(2)
 applied to project types): if `C'` refines `C` and `C'` is O_X-acyclic, and
@@ -1503,6 +1507,140 @@ private theorem hψ_div_lem [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoeth
   exact hu.mul_left_cancel (h1.trans hc)
 
 set_option linter.unusedSectionVars false in
+/-- The localization lift `ψ` is continuous for the localization topology: it is a
+restriction map on `algebraMap`, and each generator `tᵢ/s` goes to the bounded `Xᵢ`. -/
+private theorem datum_psi_continuous
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D : RationalLocData A)
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring D.T.card A))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x))
+    (hψ_div : ∀ i : Fin D.T.card, ψ (divByS ((D.T.equivFin.symm i : D.T) : A) D.s) =
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
+        ↥(restrictedMvPowerSeriesSubring D.T.card A))) :
+    @Continuous _ _ D.topology (mvQuotTopology D.T.card aI) ψ := by
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring D.T.card A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' D.T.card
+  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring D.T.card A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing D.T.card
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) :=
+    mvQuotTopology D.T.card aI
+  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing D.T.card aI
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean D.T.card aI
+  change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
+  refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
+  · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
+        (Ideal.Quotient.mk aI).comp
+          (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)) := by
+      ext x; exact hψ_alg x
+    rw [heq]
+    exact continuous_quotient_mk'.comp
+      (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) D.T.card)
+  · intro t ht
+    have hidx : t = ((D.T.equivFin.symm (D.T.equivFin ⟨t, ht⟩) : D.T) : A) := by
+      rw [Equiv.symm_apply_apply]
+    rw [hidx, hψ_div (D.T.equivFin ⟨t, ht⟩)]
+    exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
+      continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC)
+      (MvTateAlgebra.mvPowerSeries_X_isBounded (D.T.equivFin ⟨t, ht⟩))
+
+set_option linter.unusedSectionVars false in
+/-- The localization lift extends to the completion `presheafValue D`, determined on
+the image of `D.coeRingHom`. -/
+private theorem exists_completion_extension_of_psi
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D : RationalLocData A)
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring D.T.card A))
+    (haI_closed : @IsClosed _ (MvTateAlgebra.mvTateAlgebraTopology' D.T.card)
+      (aI : Set ↥(restrictedMvPowerSeriesSubring D.T.card A)))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI))
+    (hψ_cont : @Continuous _ _ D.topology (mvQuotTopology D.T.card aI) ψ) :
+    ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI),
+      (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
+        @Continuous _ _ _ (mvQuotTopology D.T.card aI) ⇑β := by
+  have hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) :=
+    mvQuotTopology D.T.card aI
+  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) :=
+    mvQuotUniformSpace D.T.card aI
+  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing D.T.card aI
+  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup D.T.card aI
+  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace D.T.card aI hA_complete
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space D.T.card aI haI_closed
+  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
+    (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) uQ _
+    (mvQuot_isUniformAddGroup D.T.card aI)
+    (mvQuot_isTopologicalRing D.T.card aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+  · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
+      _ _ (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) uQ _
+      (mvQuot_isUniformAddGroup D.T.card aI)
+      (mvQuot_isTopologicalRing D.T.card aI) ψ hψ_cont ‹_› ‹_› y
+  · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
+      D.uniformSpace _ uQ (⇑ψ) ‹_›
+
+set_option linter.unusedSectionVars false in
+/-- `β ∘ Φ` and the quotient map agree: both are continuous and they agree on the
+dense image of the polynomials, where `ringHom_ext` reduces to constants and the `Xⱼ`. -/
+private theorem comp_eq_quotient_mk_of_dense
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D : RationalLocData A)
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring D.T.card A))
+    (haI_closed : @IsClosed _ (MvTateAlgebra.mvTateAlgebraTopology' D.T.card)
+      (aI : Set ↥(restrictedMvPowerSeriesSubring D.T.card A)))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x))
+    (hψ_div : ∀ i : Fin D.T.card, ψ (divByS ((D.T.equivFin.symm i : D.T) : A) D.s) =
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
+        ↥(restrictedMvPowerSeriesSubring D.T.card A)))
+    (Φ : ↥(restrictedMvPowerSeriesSubring D.T.card A) →+* presheafValue D)
+    (hΦ_cont : @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' D.T.card) _ ⇑Φ)
+    (hΦ_alg : ∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x) =
+      D.canonicalMap x)
+    (hΦ_X : ∀ i : Fin D.T.card, Φ (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
+        ↥(restrictedMvPowerSeriesSubring D.T.card A)) =
+      D.coeRingHom (divByS ((D.T.equivFin.symm i : D.T) : A) D.s))
+    (β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI))
+    (hβ_coe : ∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y)
+    (hβ_cont : @Continuous _ _ _ (mvQuotTopology D.T.card aI) ⇑β) :
+    (⇑β ∘ ⇑Φ : ↥(restrictedMvPowerSeriesSubring D.T.card A) → _)
+      = ⇑(Ideal.Quotient.mk aI) := by
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring D.T.card A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' D.T.card
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) :=
+    mvQuotTopology D.T.card aI
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space D.T.card aI haI_closed
+  refine Continuous.ext_on
+    (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) D.T.card)
+    (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
+  rintro _ ⟨p, rfl⟩
+  have hcomp : ((β.comp Φ).comp
+      (MvTateAlgebra.mvPolynomialToTate (A := A) D.T.card)) =
+      (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) D.T.card) := by
+    refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+    · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
+      rw [hΦ_alg]
+      show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
+      rw [hβ_coe, hψ_alg]
+    · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
+      rw [hΦ_X j, hβ_coe, hψ_div j]
+  exact RingHom.congr_fun hcomp p
+
+set_option linter.unusedSectionVars false in
 /-- **General `ker ≤ aI` for the Example-6.38 evaluation** (the parametric form of the
 completion comparison; see the section TODO). Inputs: `aI` closed, the denominator a
 unit mod `aI`, and each generator relation `tᵢ ≡ s·Xᵢ (mod aI)`. The plus/minus/overlap
@@ -1526,21 +1664,6 @@ private theorem datum_ker_le_span_of_unit_mod
             ↥(restrictedMvPowerSeriesSubring D.T.card A))) :
     RingHom.ker (example638_evalHom D) ≤ aI := by
   classical
-  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring D.T.card A) :=
-    MvTateAlgebra.mvTateAlgebraTopology' D.T.card
-  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring D.T.card A) :=
-    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing D.T.card
-  have hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
-  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) :=
-    mvQuotTopology D.T.card aI
-  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) :=
-    mvQuotUniformSpace D.T.card aI
-  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing D.T.card aI
-  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup D.T.card aI
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace D.T.card aI hA_complete
-  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space D.T.card aI haI_closed
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
-  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean D.T.card aI
   -- the localization lift `ψ`
   set ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) :=
     IsLocalization.Away.lift (x := D.s)
@@ -1556,76 +1679,16 @@ private theorem datum_ker_le_span_of_unit_mod
       Ideal.Quotient.mk aI (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
         ↥(restrictedMvPowerSeriesSubring D.T.card A)) := fun i =>
     hψ_div_lem D aI ψ hψ_alg hUnit _ _ (hgen i)
-  -- `ψ` is continuous for the localization topology
-  have hψ_cont : @Continuous _ _ D.topology τQ ψ := by
-    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
-    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
-    · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
-          (Ideal.Quotient.mk aI).comp
-            (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)) := by
-        ext x; exact hψ_alg x
-      rw [heq]
-      exact continuous_quotient_mk'.comp
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) D.T.card)
-    · intro t ht
-      have hidx : t = ((D.T.equivFin.symm (D.T.equivFin ⟨t, ht⟩) : D.T) : A) := by
-        rw [Equiv.symm_apply_apply]
-      rw [hidx, hψ_div (D.T.equivFin ⟨t, ht⟩)]
-      exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
-        continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC)
-        (MvTateAlgebra.mvPowerSeries_X_isBounded (D.T.equivFin ⟨t, ht⟩))
-  -- opaquify the evaluation
-  obtain ⟨Φ, hΦ_cont, hΦ_alg, hΦ_X, hΦ_ker⟩ :
-      ∃ Φ : ↥(restrictedMvPowerSeriesSubring D.T.card A) →+* presheafValue D,
-        @Continuous _ _ τC _ ⇑Φ ∧
-        (∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A) x) =
-          D.canonicalMap x) ∧
-        (∀ i : Fin D.T.card, Φ (⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ :
-            ↥(restrictedMvPowerSeriesSubring D.T.card A)) =
-          D.coeRingHom (divByS ((D.T.equivFin.symm i : D.T) : A) D.s)) ∧
-        RingHom.ker (example638_evalHom D) = RingHom.ker Φ := by
-    refine ⟨example638_evalHom D, example638_evalHom_continuous D,
-      fun x => example638_evalHom_algebraMap D x, fun i => ?_, rfl⟩
-    rw [example638_evalHom_X D i]
-    rfl
-  -- extend to the completion, opaquely
-  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  obtain ⟨β, hβ_coe, hβ_cont⟩ :
-      ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI),
-        (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
-          @Continuous _ _ _ τQ ⇑β := by
-    refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
-      (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup D.T.card aI)
-      (mvQuot_isTopologicalRing D.T.card aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
-    · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
-        _ _ (↥(restrictedMvPowerSeriesSubring D.T.card A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup D.T.card aI)
-        (mvQuot_isTopologicalRing D.T.card aI) ψ hψ_cont ‹_› ‹_› y
-    · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
-        D.uniformSpace _ uQ (⇑ψ) ‹_›
-  -- `β ∘ Φ = mk` on the dense polynomials
-  have hext : (⇑β ∘ ⇑Φ :
-      ↥(restrictedMvPowerSeriesSubring D.T.card A) → _) = ⇑(Ideal.Quotient.mk aI) := by
-    refine Continuous.ext_on
-      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) D.T.card)
-      (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
-    rintro _ ⟨p, rfl⟩
-    have hcomp : ((β.comp Φ).comp
-        (MvTateAlgebra.mvPolynomialToTate (A := A) D.T.card)) =
-        (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) D.T.card) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
-        rw [hΦ_alg]
-        show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
-        rw [hβ_coe, hψ_alg]
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
-        rw [hΦ_X j, hβ_coe, hψ_div j]
-    exact RingHom.congr_fun hcomp p
-  -- conclude
-  rw [hΦ_ker]
+  -- extend `ψ` to the completion, then compare with the quotient map on the dense
+  -- polynomials; the evaluation enters only as an opaque `Φ`
+  obtain ⟨β, hβ_coe, hβ_cont⟩ := exists_completion_extension_of_psi D aI haI_closed ψ
+    (datum_psi_continuous D aI ψ hψ_alg hψ_div)
+  have hext := comp_eq_quotient_mk_of_dense D aI haI_closed ψ hψ_alg hψ_div
+    (example638_evalHom D) (example638_evalHom_continuous D)
+    (fun x => example638_evalHom_algebraMap D x)
+    (fun i => by rw [example638_evalHom_X D i]; rfl) β hβ_coe hβ_cont
   intro h hh
-  have hh2 : Φ h = 0 := hh
+  have hh2 : example638_evalHom D h = 0 := hh
   have hfun := congrFun hext h
   simp only [Function.comp_apply, hh2, map_zero] at hfun
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm

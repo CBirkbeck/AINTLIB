@@ -1857,6 +1857,17 @@ theorem restrictionMap_comp [HasLocLiftPowerBounded A] (D D' D'' : RationalLocDa
         (restrictionMapAlg_continuous D D'' (h₂.trans h₁)))]
   exact congr_fun (congrArg DFunLike.coe alg_comp_eq) a
 
+/-- Restriction maps compose, applied to a section. This is `restrictionMap_comp`
+read pointwise; consumers otherwise write `congrFun (restrictionMap_comp …) y` by
+hand, which they do at more than a dozen sites across the project. -/
+theorem restrictionMap_restrictionMap [HasLocLiftPowerBounded A]
+    (D D' D'' : RationalLocData A)
+    (h₁ : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (h₂ : rationalOpen D''.T D''.s ⊆ rationalOpen D'.T D'.s) (y : presheafValue D) :
+    restrictionMap D' D'' h₂ (restrictionMap D D' h₁ y) =
+      restrictionMap D D'' (h₂.trans h₁) y :=
+  congrFun (restrictionMap_comp D D' D'' h₁ h₂) y
+
 /-- The restriction map for the identity inclusion is the identity. -/
 theorem restrictionMap_id [HasLocLiftPowerBounded A] (D : RationalLocData A) :
     restrictionMap D D (le_refl _) = id := by
