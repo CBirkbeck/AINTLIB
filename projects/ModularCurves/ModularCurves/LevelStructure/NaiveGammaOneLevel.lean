@@ -274,6 +274,39 @@ noncomputable def naiveGammaOneLocusPointsEquiv (h : NIsInvertible S N) (g : T �
       right_inv := fun P => Subtype.ext
         (E.torsionMapSection_sectionTorsionMap N g P.1 P.2.1) }
 
+/-! ### Naturality of the classifying equivalence
+
+The mirror of `Moduli/LevelLocusNatural.lean`, halved: with one generator the `fst`/`snd`
+pairs of pinning and naturality lemmas each collapse to a single statement. -/
+
+/-- **(pinning)** The section produced by the locus dictionary is `w ≫ ι ≫ torsionι`, read
+through the base-change projection. -/
+theorem naiveGammaOneLocusPointsEquiv_comp_fst (h : NIsInvertible S N) (g : T ⟶ S)
+    (w : { h' : T ⟶ E.naiveGammaOneLocus N h // h' ≫ E.naiveGammaOneLocusπ N h = g }) :
+    ((E.naiveGammaOneLocusPointsEquiv N h g w).1 : T ⟶ (E.baseChange g).E) ≫
+        pullback.fst E.π g =
+      w.1 ≫ E.naiveGammaOneLocusι N h ≫ E.torsionι N := by
+  rw [show ((E.naiveGammaOneLocusPointsEquiv N h g w).1 : (E.baseChange g).Section) =
+      E.torsionMapSection N g (w.1 ≫ E.naiveGammaOneLocusι N h)
+        (by rw [Category.assoc]; exact w.2)
+      from rfl]
+  rw [E.torsionMapSection_fst N g _ _]
+  simp only [Category.assoc]
+
+/-- **Naturality in `T`.** -/
+theorem naiveGammaOneLocusPointsEquiv_natural (h : NIsInvertible S N)
+    {T' : Scheme.{u}} (g : T ⟶ S) (k : T' ⟶ T)
+    (w : { h' : T ⟶ E.naiveGammaOneLocus N h // h' ≫ E.naiveGammaOneLocusπ N h = g }) :
+    ((E.naiveGammaOneLocusPointsEquiv N h (k ≫ g)
+          ⟨k ≫ w.1, by rw [Category.assoc, w.2]⟩).1 :
+        T' ⟶ (E.baseChange (k ≫ g)).E) ≫ pullback.fst E.π (k ≫ g) =
+      k ≫ ((E.naiveGammaOneLocusPointsEquiv N h g w).1 : T ⟶ (E.baseChange g).E) ≫
+        pullback.fst E.π g := by
+  rw [E.naiveGammaOneLocusPointsEquiv_comp_fst N h (k ≫ g)
+      ⟨k ≫ w.1, by rw [Category.assoc, w.2]⟩,
+    E.naiveGammaOneLocusPointsEquiv_comp_fst N h g w]
+  simp only [Category.assoc]
+
 end EllipticCurve
 
 end ModularCurves
