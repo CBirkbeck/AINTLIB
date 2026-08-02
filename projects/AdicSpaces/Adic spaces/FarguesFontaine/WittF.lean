@@ -1646,55 +1646,36 @@ theorem bddAbove_gaussTermF_of_coords_shift {σ : NNReal} (hσ0 : 0 < σ)
     mul_assoc]
   exact mul_le_mul_of_nonneg_left h2 zero_le
 
-/-- **The moving-prefix tail estimate** (sol-consult (1)): the tail of a sum is
-controlled by the tails and the scaled head bound. -/
-theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
-    {x y : WittVector p F}
-    (hBx : BddAbove (Set.range (gaussTermF p F σ x)))
-    (hBy : BddAbove (Set.range (gaussTermF p F σ y))) (N : ℕ) :
-    tailValueF p F σ (x + y) N
-      ≤ max (max (tailValueF p F σ x N) (tailValueF p F σ y N))
-          (σ ^ N * (Finset.range N).sup (fun i => max
-            (perfectoidValuation p F (teichCoeffF p F x i))
-            (perfectoidValuation p F (teichCoeffF p F y i)))) := by
-  obtain ⟨X, hX, hXc⟩ := exists_iter_splitF p F x N
-  obtain ⟨Y, hY, hYc⟩ := exists_iter_splitF p F y N
-  set Px := ∑ i ∈ Finset.range N,
-    WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i with hPx
-  set Py := ∑ i ∈ Finset.range N,
-    WittVector.teichmuller p (teichCoeffF p F y i) * (p : WittVector p F) ^ i with hPy
-  set A := Px + Py with hA
-  obtain ⟨C, hC, hCc⟩ := exists_iter_splitF p F A N
-  obtain ⟨Z, hZ, hZc⟩ := exists_iter_splitF p F (x + y) N
-  set M : NNReal := (Finset.range N).sup (fun i => max
-    (perfectoidValuation p F (teichCoeffF p F x i))
-    (perfectoidValuation p F (teichCoeffF p F y i))) with hM
-  -- digits of A are bounded by M; so are C's
-  have hAdig : ∀ j, perfectoidValuation p F (teichCoeffF p F A j) ≤ M :=
-    fun j => valuation_teichCoeffF_prefix_add_le p F x y N j
-  have hCdig : ∀ k, perfectoidValuation p F (teichCoeffF p F C k) ≤ M := by
-    intro k
-    rw [hCc k]
-    exact hAdig (N + k)
-  have hBC : BddAbove (Set.range (gaussTermF p F σ C)) := by
-    refine ⟨M, ?_⟩
-    rintro s ⟨k, rfl⟩
-    rw [gaussTermF]
-    calc σ ^ k * perfectoidValuation p F (teichCoeffF p F C k)
-        ≤ 1 * M := mul_le_mul (pow_le_one₀ zero_le hσ1.le) (hCdig k) zero_le zero_le
-      _ = M := one_mul M
-  have hvC : gaussValueF p F σ C ≤ M := by
-    refine ciSup_le fun k => ?_
-    rw [gaussTermF]
-    calc σ ^ k * perfectoidValuation p F (teichCoeffF p F C k)
-        ≤ 1 * M := mul_le_mul (pow_le_one₀ zero_le hσ1.le) (hCdig k) zero_le zero_le
-      _ = M := one_mul M
-  -- boundedness of the tail witnesses
-  have hBX : BddAbove (Set.range (gaussTermF p F σ X)) :=
-    bddAbove_gaussTermF_of_coords_shift p F hσ0 hXc hBx
-  have hBY : BddAbove (Set.range (gaussTermF p F σ Y)) :=
-    bddAbove_gaussTermF_of_coords_shift p F hσ0 hYc hBy
-  -- the exact tail identity Z = C + X + Y
+/-- Termwise bound for the Gauss terms from a uniform bound on the digits: `σ ≤ 1`, so
+`σ^k · v(c_k) ≤ v(c_k) ≤ M`. Used both as a `BddAbove` witness and as a `ciSup` bound. -/
+private theorem gaussTermF_le_of_digits_le {σ : NNReal} (hσ1 : σ < 1)
+    {C : WittVector p F} {M : NNReal}
+    (hdig : ∀ k, perfectoidValuation p F (teichCoeffF p F C k) ≤ M) :
+    ∀ k, gaussTermF p F σ C k ≤ M := by
+  intro k
+  rw [gaussTermF]
+  calc σ ^ k * perfectoidValuation p F (teichCoeffF p F C k)
+      ≤ 1 * M := mul_le_mul (pow_le_one₀ zero_le hσ1.le) (hdig k) zero_le zero_le
+    _ = M := one_mul M
+
+/-- **The `N`-tail of a sum splits**: if `x`, `y`, their prefix sum `A` and `x + y` all
+split at level `N`, the tail of `x + y` is the sum of the three tails. Proved by
+cancelling `pⁿ`, which is a non-zero-divisor. -/
+private theorem wittSplit_add_eq {x y A C X Y Z : WittVector p F} {N : ℕ}
+    (hX : x = (∑ i ∈ Finset.range N, WittVector.teichmuller p (teichCoeffF p F x i)
+      * (p : WittVector p F) ^ i) + (p : WittVector p F) ^ N * X)
+    (hY : y = (∑ i ∈ Finset.range N, WittVector.teichmuller p (teichCoeffF p F y i)
+      * (p : WittVector p F) ^ i) + (p : WittVector p F) ^ N * Y)
+    (hC : A = (∑ i ∈ Finset.range N, WittVector.teichmuller p (teichCoeffF p F A i)
+      * (p : WittVector p F) ^ i) + (p : WittVector p F) ^ N * C)
+    (hZ : x + y = (∑ i ∈ Finset.range N, WittVector.teichmuller p
+      (teichCoeffF p F (x + y) i) * (p : WittVector p F) ^ i)
+      + (p : WittVector p F) ^ N * Z)
+    (hA : A = (∑ i ∈ Finset.range N, WittVector.teichmuller p (teichCoeffF p F x i)
+        * (p : WittVector p F) ^ i)
+      + ∑ i ∈ Finset.range N, WittVector.teichmuller p (teichCoeffF p F y i)
+        * (p : WittVector p F) ^ i) :
+    Z = C + X + Y := by
   have hcongr : ∀ i < N, teichCoeffF p F (x + y) i = teichCoeffF p F A i := by
     intro i hi
     refine teichCoeffF_eq_of_sub_eq_pow_mul p F hi (K := X + Y) ?_
@@ -1732,8 +1713,52 @@ theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
     have hpn : ((p : WittVector p F) ^ N) ≠ 0 :=
       pow_ne_zero N (coe_p_ne_zero_wittF p F)
     exact mul_left_cancel₀ hpn hmul
+  exact hZeq
+
+
+/-- **The moving-prefix tail estimate** (sol-consult (1)): the tail of a sum is
+controlled by the tails and the scaled head bound. -/
+theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+    {x y : WittVector p F}
+    (hBx : BddAbove (Set.range (gaussTermF p F σ x)))
+    (hBy : BddAbove (Set.range (gaussTermF p F σ y))) (N : ℕ) :
+    tailValueF p F σ (x + y) N
+      ≤ max (max (tailValueF p F σ x N) (tailValueF p F σ y N))
+          (σ ^ N * (Finset.range N).sup (fun i => max
+            (perfectoidValuation p F (teichCoeffF p F x i))
+            (perfectoidValuation p F (teichCoeffF p F y i)))) := by
+  obtain ⟨X, hX, hXc⟩ := exists_iter_splitF p F x N
+  obtain ⟨Y, hY, hYc⟩ := exists_iter_splitF p F y N
+  set Px := ∑ i ∈ Finset.range N,
+    WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i with hPx
+  set Py := ∑ i ∈ Finset.range N,
+    WittVector.teichmuller p (teichCoeffF p F y i) * (p : WittVector p F) ^ i with hPy
+  set A := Px + Py with hA
+  obtain ⟨C, hC, hCc⟩ := exists_iter_splitF p F A N
+  obtain ⟨Z, hZ, hZc⟩ := exists_iter_splitF p F (x + y) N
+  set M : NNReal := (Finset.range N).sup (fun i => max
+    (perfectoidValuation p F (teichCoeffF p F x i))
+    (perfectoidValuation p F (teichCoeffF p F y i))) with hM
+  -- digits of A are bounded by M; so are C's
+  have hAdig : ∀ j, perfectoidValuation p F (teichCoeffF p F A j) ≤ M :=
+    fun j => valuation_teichCoeffF_prefix_add_le p F x y N j
+  have hCdig : ∀ k, perfectoidValuation p F (teichCoeffF p F C k) ≤ M := by
+    intro k
+    rw [hCc k]
+    exact hAdig (N + k)
+  have hterm : ∀ k, gaussTermF p F σ C k ≤ M :=
+    gaussTermF_le_of_digits_le p F hσ1 hCdig
+  have hBC : BddAbove (Set.range (gaussTermF p F σ C)) :=
+    ⟨M, by rintro s ⟨k, rfl⟩; exact hterm k⟩
+  have hvC : gaussValueF p F σ C ≤ M := ciSup_le hterm
+  -- boundedness of the tail witnesses
+  have hBX : BddAbove (Set.range (gaussTermF p F σ X)) :=
+    bddAbove_gaussTermF_of_coords_shift p F hσ0 hXc hBx
+  have hBY : BddAbove (Set.range (gaussTermF p F σ Y)) :=
+    bddAbove_gaussTermF_of_coords_shift p F hσ0 hYc hBy
+  -- the exact tail identity Z = C + X + Y
+  have hZeq : Z = C + X + Y := wittSplit_add_eq p F hX hY hC hZ hA
   -- assemble
-  have hbridge := tailValueF_eq_of_coords p F (σ := σ) hZc
   have hBXY : BddAbove (Set.range (gaussTermF p F σ (X + Y))) :=
     bddAbove_gaussTermF_add p F hσ0 hσ1 hBX hBY
   have hvZ : gaussValueF p F σ Z
@@ -1741,9 +1766,7 @@ theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
     rw [hZeq, add_assoc]
     exact (gaussValueF_add_le p F hσ0 hσ1 hBC hBXY).trans
       (max_le_max le_rfl (gaussValueF_add_le p F hσ0 hσ1 hBX hBY))
-  rw [hbridge]
-  have hTx := tailValueF_eq_of_coords p F (σ := σ) hXc
-  have hTy := tailValueF_eq_of_coords p F (σ := σ) hYc
+  rw [tailValueF_eq_of_coords p F (σ := σ) hZc]
   calc σ ^ N * gaussValueF p F σ Z
       ≤ σ ^ N * max (gaussValueF p F σ C)
           (max (gaussValueF p F σ X) (gaussValueF p F σ Y)) :=
@@ -1754,7 +1777,8 @@ theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
     _ ≤ max (σ ^ N * M)
           (max (tailValueF p F σ x N) (tailValueF p F σ y N)) := by
         refine max_le_max (mul_le_mul_of_nonneg_left hvC zero_le) ?_
-        rw [← hTx, ← hTy]
+        rw [← tailValueF_eq_of_coords p F (σ := σ) hXc,
+          ← tailValueF_eq_of_coords p F (σ := σ) hYc]
     _ = max (max (tailValueF p F σ x N) (tailValueF p F σ y N)) (σ ^ N * M) :=
         max_comm _ _
 
