@@ -9864,3 +9864,161 @@ as the SheafyBI truncation. Replaced by a forward scan to the next declaration p
 
     over-50 proofs   486 (baseline) → 62   (59 actionable, 3 Vendored, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: isPowerBounded_iff_wI_le_one 134 → 2 — the proof was already imported
+
+`FarguesFontaine/IntervalSplitting.lean`. I had a five-lemma decomposition written and
+applied (backward direction, an ∃-lemma for the setup, the two coordinate branches, the
+forward assembly) when the build said:
+
+    `FarguesFontaine.wI_le_one_of_isPowerBounded` has already been declared
+
+`SheafyBI.lean:143` has exactly the forward direction, and `IntervalSplitting`
+**transitively imports `SheafyBI`** (115-module closure). The backward direction is there
+too, as `BIPlusIn_subset_powerBounded` composed with `mem_BIPlusIn_iff` (which is
+`Iff.rfl`). The whole 134-line proof was redundant:
+
+    theorem isPowerBounded_iff_wI_le_one (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        TopologicalRing.IsPowerBounded z ↔ wI … ((z : …)) ≤ 1 :=
+      ⟨wI_le_one_of_isPowerBounded p F ϖ,
+        fun hle => BIPlusIn_subset_powerBounded p F ϖ ((mem_BIPlusIn_iff p F ϖ).mpr hle)⟩
+
+−136 lines. The name collision is what surfaced it; nothing in the campaign's scans would
+have. **The lesson is procedural: before decomposing a proof, grep the tree for its
+statement's name-shape.** A name collision is a dedup signal — I had recorded that once
+before, and this is the first time it fired on a whole theorem rather than a helper.
+
+### The scan that generalises it
+
+Two mechanical scans over declaration names across all 268 files:
+
+*`X_iff_Y` alongside `X_of_Y` / `Y_of_X`.* Nine hits. Most are correct factoring — the
+`_of_` lemmas ARE the directions and the `iff` assembles them (`isSheafy_iff_isLimitSheaf`,
+`compactSpace_iff_subbasic_subcover`, `hasGluing_iff_section`). Two are duplicates, both
+across files:
+
+    isPowerBounded_iff_wI_le_one  IntervalSplitting:877  ← SheafyBI:143      (fixed, −136)
+    isRestricted_iff_wI           RobbaPresentation:71   ← Presentation:1174 (~13 lines,
+                                                            direct import; task-3)
+
+*The same theorem name declared in more than one file.* **63 cases.** The bulk is the
+`RelativePieceKeystone` / `…Gen` / `…Open` triple — **25+ shared names**, i.e. three
+parallel copies of one development, confirming what the `letI` batch found from the other
+end. The rest is a mixed bag (`coeff_sub`, `continuous_coeff`, `ext`, `coeff_tendsto_zero`
+in three files, `Comparator/Challenge` vs `Comparator/Solution` — the last is deliberate).
+
+Both scans are cheap and neither had been run. **They belong in task 3 before any further
+task-2 work on a file that has a sibling.**
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 61   (58 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+
+### The name-similarity scan, and one lead that is NOT a duplicate
+
+Extending the scan to token-overlap (≥3 shared name tokens with a theorem in a different
+file) over the 58 remaining targets gives seven leads. Six are the
+`RelativePieceKeystone` triple again, or `genPiece_rel_*` vs `genPiece_relOverlap_*` (plain
+vs overlap — genuinely different). One looked like a 158-line free win and is not:
+
+    TateAlgebra.lean:2548   theorem mem_ideal_map_of_forall_coeff_mem  (158 lines)
+    Wedhorn828.lean:214     private theorem mem_idealMap_of_forall_coeff_mem
+
+Same statement, two **independent** proofs, and the docstrings say so: TateAlgebra's runs
+Artin–Rees over a ring of definition and therefore carries `(P : PairOfDefinition A)
+[IsNoetherianRing P.A₀]`; Wedhorn828's is the faithful (Remark 8.29) route through
+`muMap` / `rTensor_mkQ` and needs **neither**. The import direction is
+`Wedhorn828 → TateAlgebra`, so the weaker-hypothesis proof sits *downstream* of the
+stronger-hypothesis one.
+
+This is not dedup, it is a **generalisation opportunity**: if the faithful route's
+ingredients can be relocated ahead of `TateAlgebra`, the Artin–Rees proof and its two
+extra hypotheses both disappear (−158 lines, and every consumer sheds a
+`PairOfDefinition`). That is a statement change — coordinator work, recorded not done.
+
+**The general rule this batch establishes:** two proofs of the same statement are not
+always a duplicate; check the hypotheses before deleting either. When the *downstream*
+copy is the weaker one, the finding is "generalise and move up", not "delete".
+
+## Next target, scoped but not executed: the `tate_quotPresentation` argument list
+
+`WedhornCechAcyclicity.lean`. `unitCover_overlapQuotEquiv` (a `def`, line 2802) calls
+`tate_quotPresentation` with eleven arguments, four of them inline `by` blocks. Its
+companion `unitCover_overlapQuotEquiv_symm_mk` (line 5681, **53 code lines — the cheapest
+remaining target**) calls `tate_quotPresentation_symm_mk`, whose statement *mentions*
+`tate_quotPresentation D Φ … hT_mod`, so it must re-supply **the same eleven arguments**.
+The four `by` blocks are therefore written out twice, ~45 lines each time.
+
+Verified verbatim-identical pair: the `hT_mod` block, lines 2845–2858 and 5730–5742.
+
+    ⟨X 1, unitCover_X_mem D₀ 1, …⟩ | ⟨1, Subring.one_mem _, …⟩ | ⟨X 0, unitCover_X_mem D₀ 0, …⟩
+
+all three cases dispatched by `unitCoUnit_inter_T_cases` and discharged from
+`unitCover_overlapIdeal_rel` — which is already a named lemma (line 2655) supplying exactly
+the three ideal-arithmetic facts. Only the *packaging* is duplicated.
+
+**The fix**: name the four arguments (`…_overlapEval_X`, `…_overlapIdeal_isUnit_s`,
+`…_overlapIdeal_gen_mod`, `…_overlapIdeal_T_mod`), placed just after
+`unitCover_overlapIdeal_rel`. Both call sites then become argument lists of names. Clears
+the 53-line target (→ ~20) and removes ~45 duplicated lines from the `def`.
+
+**Why it is not done here**: the four statements must be transcribed from
+`tate_quotPresentation`'s binders (lines 2365–2390) instantiated at
+`D := unitCover_overlapDatum_B D₀ f`, `m := 2`, `gen := ![b·b, 1]`,
+`aI := unitCover_overlapIdeal D₀ f`, and they mention
+`(IsTateRing.principalPair (presheafValue D₀)).toPairOfDefinition` — so each needs
+`[IsTateRing (presheafValue D₀)]` as a *binder* while both call sites supply it by `haveI`
+(`presheafValue_isTateRing_faithful D₀`). That is the campaign's standing rule and it does
+work, but on the project's largest file each wrong guess costs a full rebuild. Scoped and
+handed over rather than half-done.
+
+### Where task 2 stands
+
+The 58 remaining actionable proofs are the hard residue. Every one now needs **three to
+seven** new lemmas with heavy signatures, or a statement-level change. The cheap
+seams — one dominant `have`, a `∧`-split, a symmetric twin inside one proof — are gone;
+a scan for "clearable by lifting a single top-level block whose lemma would itself be
+under 50" returns exactly **one** target, the one scoped above.
+
+**What the next worker should do first is not task 2.** Run the two name scans from the
+batch above (`X_iff_Y` vs `X_of_Y`; same name in two files) to completion and act on them,
+because they find *whole proofs* that need not exist at all — one of them was 136 lines —
+and they cost minutes. Only then go back to lifting blocks.
+
+## Task 3 opened: the three dedup scans, run to completion
+
+GOAL.md's own advice from the previous batch was to run the name scans before more
+block-lifting. Doing that, plus the two body scans from the campaign's recorded method.
+
+### Scan 3 — byte-identical proof bodies (≥8 code lines), whole tree
+
+**14 pairs, 287 redundant lines.** Ranked, with the import direction that decides whether
+each is fixable in place:
+
+| lines | declarations | verdict |
+|---|---|---|
+| 31 | `spa_topology_eq_generateFrom` (RationalBasis:98) / `…_huber` (RationalBasisHuber:370) | **fixed** — identical statement *and* proof, importable, one consumer |
+| 13 | `canonicalMap_Wa_eq_mul_divByS` (FiniteJetChart:411) / `rho_Wa_split` (:1100) | **fixed** — same file; `gChart F` *is* the right-hand factor by definition |
+| 13 | `isBounded_OD` (ExampleUnitDisc:395) / `isBounded_unitBall` (FiniteJetRings:810) | recorded — `OD` and `unitBall` are both `{x ‖ ‖x‖ ≤ 1}`, but the files are in disjoint subtrees; needs `unitBall` moved up |
+| 10 | `principalPair_A₀_completeSpace_of_stronglyNoeth` (PrincipalPairAdicComplete:45) / `_aux_nonOpen_hSpa_…` (StructureSheaf:1159) | recorded — StructureSheaf does not import it; the `_aux_` prefix is the tell that someone copied because it was unreachable |
+| 217 | nine pairs, all `RelativePieceKeystone` vs `…Gen` | **not** a delete: `Gen` imports the base and *generalises* it (hypotheses move from `A` to `presheafValue D₀`). The fix is to move the general version up and derive the base — restructuring, coordinator |
+| 8 | `coeffSeq_GeltElt_mul_fst` / `_snd` (RobbaPresentation:2521/2552) | primed twins, mergeable; 8 lines, low value |
+
+The two fixed here are worth naming as a pattern: **a copy whose name gains a suffix
+(`_huber`) or is restated in other vocabulary (`rho_Wa_split` for
+`canonicalMap_Wa_eq_mul_divByS`) is invisible to a name scan and to a consumer scan.** Only
+the body hash finds it.
+
+### Scan 4 — repeated blocks *inside* proofs (8-line windows, ≥2 distinct declarations)
+
+**1254 windows.** This is not 1254 dedups: the dominant pattern is a `letI`/`haveI`
+instance preamble shared by every member of a lemma family —
+`unitCover_relPlus_*` (×6), `unitCover_relMinus_*` (×6), `genPiece_relOverlap_*` (×4),
+`example638Plus_*` / `overlap_plus_*` / `overlap_minus_*` (×3),
+`TA_B_bivariate_to_outerQuotient_*` (×4). Same family as the 17 proofs the `letI`
+compression touched, seen from the other end.
+
+That is a **structural** finding, not a list of edits: these families each want one
+`variable`-scoped section or one packaging lemma, and that is a design change per family.
+Recorded with counts; not actionable inside task 2.
