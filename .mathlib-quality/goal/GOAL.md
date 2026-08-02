@@ -8640,3 +8640,49 @@ in a file whose builds are slow. It is a task-3 job with the locations now writt
 
     over-50 proofs   486 (baseline) → 94   (92 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: norm_mul_eq → rationalShrink_Y (99 → 93)
+
+    norm_mul_eq                                   80 → 49
+    kerSol_decay_of_one_lt                        79 → 49
+    exists_finite_normalized_rational_refinement  79 → 49
+    valued_sub_sub_PhiHatK_le                     81 → 48
+    exists_spa_point_not_vle_one                  DELETED (−203 lines)
+    rationalShrink_Y                              83 → 49
+
+Full-library gate re-run at the end: **exit 0, zero errors, 3360 modules**.
+
+### The recurring find: the general statement is short because the OBJECTS are short
+
+Nine lemmas this batch, and the pattern behind almost all of them is the same. A block is
+long not because the argument is long but because every line names a big concrete object.
+Restated over abstract objects, the same argument is a third the size:
+
+    norm_add_eq_of_norm_lt                18 → 11   arbitrary ultrametric normed group
+    valued_le_of_tendsto_of_forall_le     14 →  7   arbitrary sequence and bound
+    lt_one_of_mul_eq_one_of_one_lt        12 →  9   plain `ℝ≥0`
+    tendsto_const_mul_pow_succ            10 →  3   plain `ℝ≥0`
+    mul_pow_mul_pow_succ_le                8 →  4   plain `ℝ≥0`
+    vle_one_and_not_vle_zero_of_pow_vle   19 → 12   arbitrary `w : Spv B`, `u : Bˣ`
+
+**Test for it:** read the block and ask which of its symbols the argument actually uses. If
+the answer is "two of the eight", the lemma over those two is the real statement.
+
+### Two mathlib gaps, same family
+
+`norm_sub_le_max` and `norm_add_eq_of_norm_lt`: mathlib has
+`IsUltrametricDist.norm_add_le_max` and neither the `sub` form nor the
+strict-domination equality. `Analysis/Normed/Field/Krasner.lean` and
+`NumberTheory/Padics/MahlerBasis.lean` both inline the `sub` case at the point of use. Both
+kept private here; both worth an upstream look.
+
+### `▸` vs `rw` on a `set`-bound equation
+
+`hcdef ▸ h` left an unsolved goal where `rw [hcdef]; exact h` works. `▸`'s direction is
+ambiguous when the equation's LHS is a `set`-bound local; the explicit `rw` is not.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 93   (91 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+    full lake build  GREEN (exit 0, zero errors, 3360 modules)
