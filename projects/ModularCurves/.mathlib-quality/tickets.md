@@ -34354,3 +34354,28 @@ Once assembled: `yFullCandidate_representableBy` loses its `sorry`,
 `exists_representing_smooth_affine_of_candidate` (already axiom-verified) fires, and
 `YFull.exists_representing_smooth_affine` — `sorry` since T-E9 — is closed. That in turn
 gives `Y(N)` smooth ⟹ regular ⟹ normal, which is the hypothesis the DS4 root needs.
+
+## [WP-D2c-3 steps 2–3] COMPLETE (2026-08-03) — axiom-verified
+
+`ModularCurve/YFullFromYOne.lean`:
+* `transportAlongIso` — the full-level problem transported along
+  `EllObj.isoPullbackAlong u : Y ≅ X₁.pullbackAlong u.baseHom`, as an `Equiv` (via
+  `Functor.mapIso` on a `Type`-valued functor);
+* **`completionFibreEquiv`** — for a fixed `u : Y ⟶ X₁`, the lifts of `u.baseHom` through
+  `completionLocusπ` correspond to the naive full level structures on `Y` whose first member
+  is the transported pullback of `P`.
+
+So the per-`u` fibre is now pinned. Both axiom-verified; the file's only `sorry` is still
+`yFullCandidate_representableBy`.
+
+### The single remaining step: the collapse (step 4)
+Assemble `homPullbackAlongEquiv` with `completionFibreEquiv` and show the `Σ` over `u` is
+redundant. Concretely: the condition in `completionFibreEquiv` says the level structure's
+first member is `u`'s pullback of `P`; since `P` is the universal `Γ₁`-structure (the
+hypothesis `hP` on `yFullCandidate_representableBy`), that says `rOne.homEquiv u` is the
+`Γ₁`-part of the level structure — which **WP-D1a** proves is determined by it. Hence
+`u = rOne.homEquiv.symm (gammaFullToGammaOne …)` and the pair collapses to the level
+structure alone.
+
+This is the only place in the whole D-chain where WP-D1a's counting argument is consumed,
+and the only step still open.

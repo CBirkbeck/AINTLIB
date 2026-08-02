@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.GroupScheme.NaiveGammaOneLocus
 import ModularCurves.ModularCurve.YFullToYOne
 import ModularCurves.Moduli.QuotientProblem
+import ModularCurves.LevelStructure.NaiveGammaOneLevel
 
 /-!
 # The candidate `Y(N)` built over `Y₁(N)` (WP-D2c)
@@ -98,6 +99,36 @@ theorem yFullCandidate_smooth_affine (N : ℕ) [NeZero N] (X₁ : EllObj R)
   haveI := ha
   ⟨yFullCandidate_structMap_smooth N X₁ h P hsm,
     yFullCandidate_structMap_isAffineHom N X₁ h P⟩
+
+/-! ### The per-`u` fibre (WP-D2c-3, step 2–3)
+
+For a fixed `u : Y ⟶ X₁`, the lifts of `u.baseHom` through `completionLocusπ` are the naive
+full level structures on `Y` whose first member is the pullback of `P`. This is
+`completionLocusClassifies` transported along `isoPullbackAlong u`. -/
+
+/-- Transport of the full-level problem along the canonical iso `Y ≅ X₁.pullbackAlong
+u.baseHom`. -/
+noncomputable def transportAlongIso (N : ℕ) [NeZero N] {X₁ Y : EllObj R} (u : Y ⟶ X₁) :
+    (gammaFullNaiveProblem R N).obj (Opposite.op (X₁.pullbackAlong u.baseHom)) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  ((gammaFullNaiveProblem R N).mapIso (EllObj.isoPullbackAlong u).op).toEquiv
+
+/-- **(WP-D2c-3, per-`u` fibre)** The lifts of `u.baseHom` through `completionLocusπ`
+correspond to the naive full level structures on `Y` whose first member is the transported
+pullback of `P`. -/
+noncomputable def completionFibreEquiv (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hP : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base) {Y : EllObj R} (u : Y ⟶ X₁) :
+    { b : Y.base ⟶ X₁.curve.completionLocus N h P //
+        b ≫ X₁.curve.completionLocusπ N h P = u.baseHom } ≃
+      { PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y) //
+          ((transportAlongIso N u).symm PQ).1.1 =
+            X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+              (by rw [Category.assoc, hP, Category.comp_id]) } :=
+  (X₁.curve.completionLocusClassifies N h P hP u.baseHom).trans
+    ((transportAlongIso N u).subtypeEquiv (fun PQ => by
+      simp only [Equiv.symm_apply_apply]
+      exact Iff.rfl))
 
 /-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
 
