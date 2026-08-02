@@ -9031,3 +9031,121 @@ section that closed four thousand lines earlier.
     over-50 proofs   486 (baseline) → 81   (79 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
     full lake build  GREEN (exit 0, zero errors)
+
+## Batch: groebner_step (78 → 38) and descent_step (84 → 49)
+
+Two proofs in the Fargues–Fontaine Gröbner/Euclidean pair, and they wanted opposite
+treatments.
+
+**`groebner_step` — the bullets were already the lemmas.** Its conclusion is a four-fold
+`∃ z, P₁ ∧ P₂ ∧ P₃ ∧ P₄`, and the proof discharged each conjunct in its own bullet. Two of
+those bullets were 28 and 14 lines and each states a self-contained fact:
+
+    valued_coeff_monomialMul_le_tail   the tail bound survives one reduction step
+    gaussNormRPS_sub_monomialMul_le    one reduction step does not increase ‖·‖
+
+Lifting them is mechanical — the bullet body becomes the lemma body unchanged — and each
+bullet becomes a one-line `exact`. **When a proof's top-level structure is one bullet per
+conjunct, the bullets are the lemmas.** This is the cheapest decomposition shape there is
+and the scans do not report it, because per-proof scoring cannot see that the *statement*
+is a conjunction.
+
+**`descent_step` — nothing lifted, because everything shared a setup.** Twenty distinct
+facts over a twenty-line construction (`z = divStep x y`, its coefficient sequence `zc`,
+the convolution, the difference series `w`). Every later block mentions a local, so
+`decompose_rank` scores it at zero. What worked was three conclusion-preserving lifts of
+*generic* content:
+
+    valued_PhiHatK_le                  Φ of a termwise-bounded sequence (used twice)
+    gaussTerm_le_of_sub_le             the ultrametric split a = (a − b) + b
+    gaussTerm_residue_sub_PhiHatK_le   the DC⁺ coordinate transfer
+
+plus folding six single-use `have`s into their use site. Two of those six are worth
+recording: `hΦccoords` and `hΦwcoords` were four- and three-line `have`s whose statements
+are `teichCoeffAr_PhiHatK` at a fixed argument — **a lemma the file already had**. Same
+lesson as `germ_limitRestrict` in the previous batch: a `have` you had to write out is
+often a lemma you already have, in a different spelling.
+
+I considered and rejected two bigger splits. Splitting at the `n`-free seam (everything
+before the coordinate index enters) leaves a 67-line half. Splitting `hvΦc` and `hvΦw`
+into separate lemmas duplicates the twenty-line setup between them. The honest full fix is
+to name `divStepSeq`/`residueSeq` and give the setup facts their own API — recorded here as
+task-3 work, not done.
+
+**Dead code found:** `gaussTerm_sub_convF_divStep_le` declared `hk₀ne` and `hk₀n` twice,
+verbatim, the second pair shadowing the first. Four dead lines, removed.
+
+**`omit` placement:** `omit [CharP F p] in` must precede the docstring, not sit between it
+and the declaration — the parser reads the docstring as attaching to the *next*
+declaration and then rejects `omit` where it expects `theorem`. Same rule as
+`open scoped … in`.
+
+## Batch: isPrecomplete_pIdeal (91 → 46) and canonicalMap_Qa_sq (88 → 42)
+
+`isPrecomplete_pIdeal`'s author had already lifted the analytic engines
+(`mul_p_pow_eventually_mem_nhds`, `cauchySeq_partialSum_of_term_eventually_mem_nhds`,
+`p_pow_mul_partialSum_eq_sub`, `mul_lim_eq_sub_of_telescope`), so what remained was glue —
+and glue is where the `∀ n` tax hides.
+
+    sub_mem_nhds_symm                    one-sided smallness → two-sided
+    exists_powerBounded_telescope_limit  the whole of Step 5, stated pointwise
+
+**The pointwise-versus-∀n observation is the transferable one.** Step 5 needed, for a
+single `n`, the limit of the partial sums `∑_{j<N} p^j·d(n+j)`. It was written as five
+`∀ n`-quantified `have`s and two `choose`s, because each intermediate fact was stated for
+all `n` and then instantiated. Stating the extracted lemma for one `n` and `choose`ing once
+at the call site turned fourteen lines into three. When a proof carries several `∀ n`
+`have`s that are each used at the same single `n`, the quantifier belongs on the lemma, not
+inside it.
+
+`canonicalMap_Qa_sq` needed one lift: `isBounded_range_canonicalMap_yQ`, the fifty-line
+`have hbddY` carrying the entire scaling argument. It mentions nothing local to the proof,
+so it moves unchanged — the plain conclusion-preserving lift, and the reason it had not
+been found earlier is that it sits *inside* a `have` whose statement is short, so the
+"long statement" heuristics miss it.
+
+## Batch: the Spv toolkit hoist — rationalSubset_inter 88 → 22
+
+The largest single reduction of the campaign, and none of it was decomposition.
+
+`SpvAI.rationalSubset_inter` hand-rolls, inline, six facts that **already exist in this
+repository**:
+
+    Spv.vle_mul_of_vle_of_vle      StandardRefinement.lean:45
+    Spv.not_vle_mul_zero           StandardRefinement.lean:60
+    Spv.not_vle_zero_left_of_mul   StandardRefinement.lean:68
+    Spv.not_vle_zero_right_of_mul  StandardRefinement.lean:73
+    Spv.vle_of_vle_mul_right       StandardRefinement.lean:79
+    vle_iff_canonical              SpaQCviaSpvAI.lean:171
+
+It cannot use them: **`SpvAITopology` is upstream of both files.** So it re-derives each one
+from `Valuation.Compatible.vle_iff_le` under a local `letI`, sixty-six lines of it. This is
+the third instance in this project of the same structural defect — a lemma declared in a
+file *later* than its earliest consumer, forcing the earlier file to inline an anonymous
+copy. Name-based dedup scans cannot see it, because the copy has no name.
+
+**The fix is to hoist, not to copy.** None of the six needs a topology on `A`; they need
+`Spv A` and `ValuativeRel A` together, which first happens in `ValuationSpectrumCompact`
+(it already defines `IsValuationChar.toValuativeRel`). Moving all nine declarations there —
+the three canonical-valuation bridges and the six-lemma multiplicative toolkit — makes them
+available to every consumer, and `rationalSubset_inter` becomes twenty-two lines that read
+as the mathematical argument: multiply the two comparisons, split the nonvanishing product,
+cancel the spare factor.
+
+### The instance cascade the hoist exposed
+
+Removing `[TopologicalSpace A]` from the moved lemmas' signatures made five theorems in
+`SpaQCviaSpvAI` report `unusedSectionVars` — they had been "using" the section's topology
+only by *applying a lemma that carried it*. Adding `omit [TopologicalSpace A] in` to one
+exposed the next, twice, before converging. That cascade is diagnostic, not noise: the
+whole block after `variable [TopologicalSpace A]` is topology-free, and the real fix is to
+move that `variable` line down to its first genuine use. Recorded for task 3; the five
+`omit`s are correct in the meantime and leave the file one warning *below* its baseline.
+
+Warning count across the four touched files: 39 → 34.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 76   (74 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+    full lake build  GREEN (exit 0, 3360 jobs, zero errors)
