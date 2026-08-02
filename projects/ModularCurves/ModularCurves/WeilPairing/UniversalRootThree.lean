@@ -31,6 +31,8 @@ the Weil pairing's determinant twist needs are the same phenomenon.
 
 universe u
 
+open AlgebraicGeometry CategoryTheory
+
 namespace ModularCurves
 
 variable (R : CommRingCat.{u})
@@ -84,5 +86,43 @@ set_option backward.isDefEq.respectTransparency false in
 theorem e3Zeta_pow_three : e3Zeta R ^ 3 = 1 := by
   have h := e3Zeta_cyclotomic R
   linear_combination (e3Zeta R - 1) * h
+
+/-! ## WP-A7.4 — transport to an arbitrary base -/
+
+section Transport
+
+variable {R} {X : EllObj R} (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+  (h3 : IsUnit (3 : Γ(X.base, (⊤ : X.base.Opens))))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A7.4)** The cube root of unity attached to a full level-3 structure on an
+arbitrary base: pull the universal `ζ` back along the classifying ring map.
+
+Non-circularity is the point here. The classifying map exists because `universalE3Obj`
+represents the naive full level-3 problem, and that representability
+(`naiveLevelThree_representable_by_affine`) is proved **by hand** from the `ℰ₃` normal
+form — never via the Weil pairing. So sourcing the pairing's root of unity from the
+universal object introduces no circular dependency. -/
+noncomputable def e3ZetaAt : Γ(X.base, (⊤ : X.base.Opens)) :=
+  e3ClassifyingRingHom X L hD h3 (e3Zeta R)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A7.4)** The transported root satisfies the cyclotomic relation. -/
+theorem e3ZetaAt_cyclotomic :
+    e3ZetaAt L hD h3 ^ 2 + e3ZetaAt L hD h3 + 1 = 0 := by
+  have h := congrArg (e3ClassifyingRingHom X L hD h3) (e3Zeta_cyclotomic R)
+  simpa only [map_add, map_pow, map_one, map_zero, e3ZetaAt] using h
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A7.4)** The transported root is a cube root of unity — the `N = 3` instance of
+the root datum that `WeilPairingLocalData` needs on the trivialising cover. -/
+theorem e3ZetaAt_pow_three : e3ZetaAt L hD h3 ^ 3 = 1 := by
+  have h := congrArg (e3ClassifyingRingHom X L hD h3) (e3Zeta_pow_three R)
+  simpa only [map_pow, map_one, e3ZetaAt] using h
+
+end Transport
 
 end ModularCurves

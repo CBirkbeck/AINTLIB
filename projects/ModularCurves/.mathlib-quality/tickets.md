@@ -32838,7 +32838,16 @@ unity in a fraction field is **integral** over the ring, hence lies in it.
   determined at the generic point and the base is integral.
 
 #### [WP-A7.4] Transport to an arbitrary base along the classifying map
-- **Status**: blocked (A7.3) · **File**: `WeilPairing/UniversalRootBase.lean`
+- **Status**: DONE at `N = 3` 2026-08-02 — `e3ZetaAt`, `e3ZetaAt_cyclotomic`,
+  `e3ZetaAt_pow_three` (`WeilPairing/UniversalRootThree.lean`), axiom-verified, root build
+  9626 jobs. The transport is just applying the classifying **ring hom**
+  `e3ClassifyingRingHom X L hD h3 : E3ModuliRing R →+* Γ(X.base, ⊤)` to `ζ`; the relations
+  come along because ring homs preserve them.
+  Non-circularity holds as planned: the classifying map exists because `universalE3Obj`
+  represents the naive full level-3 problem, proved by hand from the `ℰ₃` normal form and
+  never via the pairing.
+  LEAN-OPS: the `Γ(_, _)` notation needs `open AlgebraicGeometry` in the file — without it
+  the variable block fails with "unexpected token '('". · **File**: `WeilPairing/UniversalRootBase.lean`
 - **Statement**: for arbitrary `E/S` over a `ℚ`-scheme, the full-level cover
   `S' = Y(N)_{E/S}` carries a root `ζ ∈ Γ(S',⊤)` with `ζ ^ N = 1`, namely the pullback of
   `ζ_univ` along the classifying morphism `S' ⟶ Y(N)_univ`.
