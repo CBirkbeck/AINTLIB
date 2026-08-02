@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.CharZeroDescent
+import ModularCurves.WeilPairing.FieldPairingDet
 
 /-!
 # Splitting `μ_N` by a root of unity (route A, step 1)
@@ -116,5 +117,36 @@ theorem localDetPairing_over (N : ℕ) [NeZero N] {S' : Scheme.{u}} (p : S' ⟶ 
   exact pullback.condition.symm
 
 end LocalPairing
+
+section DetTwist
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Two root-powers agree as soon as the underlying ring elements do. -/
+theorem rootPower_congr (N : ℕ) [NeZero N]
+    (ζ η : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) (k l : ZMod N)
+    (h : (ζ : Γ(S', (⊤ : S'.Opens))) ^ k.val = (η : Γ(S', (⊤ : S'.Opens))) ^ l.val) :
+    rootPower N ζ k = rootPower N η l :=
+  congrArg (fun x => ((muNPointsEquiv S' N (𝟙 S')).symm x).1) (Subtype.ext h)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A4, the det twist)** Scaling the exponent by `m` before splitting is the same as
+splitting by the `m`-th power of the root. This is the algebraic heart of route A: it is
+what converts the determinant's action on the *model* into the inverse-determinant action
+on the *root*. -/
+theorem constSchemeMap_mul_comp_rootSplitting (N : ℕ) [NeZero N]
+    (ζ : { a : Γ(S', (⊤ : S'.Opens)) // a ^ N = 1 }) (m : ZMod N) :
+    constSchemeMap (S := S') (fun k : ZMod N => k * m) ≫ rootSplitting N ζ =
+      rootSplitting N ⟨(ζ : Γ(S', (⊤ : S'.Opens))) ^ m.val, by
+        rw [← pow_mul, mul_comm, pow_mul, ζ.2, one_pow]⟩ := by
+  refine Sigma.hom_ext _ _ fun k => ?_
+  rw [← Category.assoc, constSchemeMap_ι, rootSplitting_ι, rootSplitting_ι]
+  refine rootPower_congr N ζ _ (k * m) k ?_
+  rw [← pow_mul]
+  refine pow_eq_pow_of_nat_modEq ζ.2 ?_
+  rw [ZMod.val_mul, Nat.mod_mod, mul_comm]
+
+end DetTwist
 
 end ModularCurves
