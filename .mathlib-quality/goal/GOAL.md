@@ -8820,3 +8820,52 @@ something `obtain`ed, and the fix is to make that a binder rather than to give u
 
     over-50 proofs   486 (baseline) → 88   (86 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: _omt_open_at_zero, the largest decomposition of the campaign (88 → 87)
+
+**182 → 23.** The Banach open-mapping argument's "open at zero" step is now six named
+declarations instead of one block:
+
+    exists_closed_shrinking_basis       43L  Step 2: the closed symmetric doubling basis
+    sum_mem_of_mem_shrinking            15L  sums in such a basis
+    partial_sums_mem                    13L  telescoping: partial sums stay in `W 0`
+    tendsto_residual_zero               15L  the residuals `y − f (S k)` tend to `0`
+    closure_image_subset_image_of_micro 41L  Step 4: `closure (f '' W 1) ⊆ f '' W 0`
+    _omt_open_at_zero                   23L  the assembly
+
+Four of the six mention neither `f` nor almost-openness. Done in two commits so the first
+reduction (145 → 90) was banked before the second pass.
+
+### A TRANSPLANTED BODY RE-DERIVES WHAT IS NOW A PARAMETER
+
+Both failures in the second pass were this. `partial_sums_mem` takes `hS0 : S 0 = 0` as a
+hypothesis, but the moved body still opened with `have hS0 : S 0 = 0 := rfl` — true only
+because `S` was a `set`-bound `fun k => (D k).1`, and false for an abstract `S`. Likewise the
+body began `intro k` when the signature had already bound `k`.
+
+> **When abstracting a local into a parameter, delete the body's own derivation of it.** The
+> `rfl` that proved it was about the CONSTRUCTION, not about the abstract object.
+
+This is the `set`-becomes-parameter rule one step further on: there the defining equation had
+to be *passed*; here the passed equation must also be *removed* from the body.
+
+### Mechanical costs worth remembering
+
+* an extracted block is already at the parent's indentation — dedenting it puts it at column
+  0 inside a `by`;
+* `have h : … := by` can span several lines; dropping only the first leaves the rest
+  duplicated after the new signature;
+* `Set M + Set M` needs `open scoped Pointwise in` on each new declaration — the parent
+  inherited it from its own modifier.
+
+### A push error that was not one
+
+`git push` reported `cannot lock ref … is at fbe6a4d46 but expected a95ac301b`. The push had
+in fact landed; the compare-and-swap failed on a retry against the value it had just written.
+Verified with `git fetch` + `rev-parse`: local and remote agree. Worth knowing so a future
+session does not "fix" it by force-pushing.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 87   (85 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
