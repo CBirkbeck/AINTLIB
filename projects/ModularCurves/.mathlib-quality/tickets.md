@@ -33507,3 +33507,25 @@ So the forgetful map is **not** definitional — it needs: *if `P, Q` generate `
 
 This is the whole remaining path to DS4. Nothing in it needs mathlib infrastructure that
 does not exist, and every ingredient named above is sorry-free today.
+
+## [WP-D1a] COMPLETE (2026-08-02) — axiom-verified
+
+The mathematical content of the `Γ(N) → Γ₁(N)` forgetful map is done.
+
+* `ForMathlib/ClosurePairCard.lean` (new) — the group theory, for an arbitrary additive
+  abelian group: `exists_lt_smul_add_smul_of_mem_closure_pair`,
+  `ncard_torsion_le_of_closure_pair`, `smul_ne_zero_of_closure_pair_of_ncard`.
+* `LevelStructure/FullLevelGammaOne.lean` (new) — the geometry:
+  `ncard_torsion_geometricFibre` (the `Set.ncard` repackaging of the axiom-verified
+  `torsion_geometricFibre_rank_two`), then **`isNaiveGammaOne_of_isNaiveFullLevel`** and its
+  mirror `isNaiveGammaOne_snd_of_isNaiveFullLevel`.
+
+All six declarations depend only on `propext / Classical.choice / Quot.sound`. The
+invertibility is taken as the per-geometric-point hypothesis `(N : k) ≠ 0`, which is what
+`torsion_geometricFibre_rank_two` consumes; callers supply it from `NIsInvertible`.
+
+**Next: [WP-D1b]** — package this as a morphism `gammaFullNaiveProblem R N ⟶
+gammaOneNaiveProblem R N` of moduli problems. Both problems are concrete subtypes of
+sections (`Moduli/Representability.lean:622, 636`) with functoriality by `pullSection` on
+each side, already proved, so the naturality square should be `Subtype.ext` plus
+`EllHom.pullSection_*`. Then **[WP-D1c]**, finite étaleness of the induced `Y(N) ⟶ Y₁(N)`.
