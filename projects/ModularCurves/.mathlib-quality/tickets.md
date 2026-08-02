@@ -33469,3 +33469,41 @@ smooth representing object.
 
 **This converts the DS4 blocker from "build infrastructure mathlib does not have" into a
 concrete ticket in the tree's own idiom.** WP-D1 is the whole thing.
+
+### WP-D1 decomposed (2026-08-02) — the forgetful map is a counting argument
+
+Reading the two predicates (`LevelStructure/Basic.lean`):
+
+* `IsNaiveFullLevel N P Q` = `(N•P = 0 ∧ N•Q = 0)` ∧ at every geometric point, **every**
+  `N`-torsion point lies in `AddSubgroup.closure {P|ₜ, Q|ₜ}`;
+* `IsNaiveGammaOne N P` = `N•P = 0` ∧ at every geometric point, `N•P|ₜ = 0` and
+  `a•P|ₜ ≠ 0` for `0 < a < N` (exact order `N`).
+
+So the forgetful map is **not** definitional — it needs: *if `P, Q` generate `E[N](k̄)` then
+`P` has exact order `N`*. That is a counting argument: `|E[N](k̄)| = N²`, and if
+`ord(P) = d < N` then `|⟨P, Q⟩| ≤ d·N < N²`, contradiction.
+
+#### [WP-D1a] exact order from generation — the only real content
+- **Statement**: for `k̄` algebraically closed with `N` invertible, if every `N`-torsion
+  point of `E.Point t` lies in `closure {P, Q}`, then `∀ a, 0 < a < N → a • P ≠ 0`.
+- **Ingredients, both already sorry-free:**
+  - `HasseWeil.…NTorsion/TorsionGeneralN.torsion_genN_addEquiv` — `E[N](F) ≅ (ℤ/N)²` over an
+    algebraically closed field with `N` invertible;
+  - `WeilPairing/FibrePointDict.chartAffinePointEquiv` — the scheme-points ↔ affine-points
+    dictionary at a geometric fibre (that file is sorry-free by construction).
+- The cross-project import is the same one `FieldPairingDet.lean` already makes, so it costs
+  nothing new.
+
+#### [WP-D1b] the natural transformation and [WP-D1c] finite étaleness
+- **D1b**: with D1a, `⟨(P,Q), h⟩ ↦ ⟨P, …⟩` is a morphism `gammaFullNaiveProblem N ⟶
+  gammaOneNaiveProblem N` of moduli problems (functoriality is `pullSection` on both sides,
+  already proved).
+- **D1c**: the induced `Y(N) ⟶ Y₁(N)` is finite étale. Model it on
+  `naiveLevelThree_relativelyRepresentable_finiteEtale` (`Moduli/Bootstrap.lean:122`), whose
+  route is: the relative object is a clopen subscheme of `E[N] ×_S E[N]` cut out by
+  non-degeneracy, and `fullLevelLocusπ_isFinite` / `fullLevelLocusπ_etale` supply finiteness
+  and étaleness. The fibre of `Y(N) → Y₁(N)` is the choice of `Q` completing `P` to a basis
+  — again a clopen subscheme of `E[N]`, so the same machinery applies one level down.
+
+This is the whole remaining path to DS4. Nothing in it needs mathlib infrastructure that
+does not exist, and every ingredient named above is sorry-free today.
