@@ -34038,3 +34038,41 @@ morphism of **schemes** (`Moduli/EllCategory.lean:198`). Instantiating both at t
 object over `Y₁(N)` gives the comparison directly at the scheme level, with no `EllHom`
 rigidity needed anywhere. `yFullToYOneFibreEquiv` remains correct and useful as the
 *functorial* statement; it is simply not the right handle for a scheme-level property.
+
+### [WP-D2c] the real content, stated concretely (2026-08-02)
+
+Both earlier framings hit the same obstacle from different sides. The moduli problems live on
+`EllObj R`, so "points of `Y(N)`" always means **`EllObj`-morphisms**; the engine's
+`AffineOverEll` data is **scheme**-indexed but only *relative to a fixed `X`*. Neither is
+directly the other, and the false `WP-D2c-b1` was an attempt to force the translation.
+
+The way through is not to translate but to **build the representing object on the relative
+locus**, where both indexings are available by construction:
+
+#### [WP-D2c-1] the candidate object
+Let `X₁` represent `gammaOneNaiveProblem R N` (e.g. `yOneEllObj`, whose structMap is known
+smooth affine). Put `B := X₁.curve.fullLevelLocus N h` and let
+`X₀ : EllObj R` be `X₁.pullbackAlong (X₁.curve.fullLevelLocusπ N h)` — the universal curve
+pulled back to `B`.
+
+#### [WP-D2c-2] `X₀.structMap` is smooth and affine — *free*
+`X₀.base = B`, and `X₀.structMap = fullLevelLocusπ ≫ X₁.structMap`.
+`fullLevelLocusπ` is finite étale (`fullLevelLocusπ_isFinite`, `fullLevelLocusπ_etale`) and
+`X₁.structMap` is smooth affine (`yOneStructMap_smooth`, `yOne_isAffine`). `Etale ⟹ Smooth`
+is an instance and both `Smooth` and `IsAffineHom` compose. **No new mathematics.**
+
+#### [WP-D2c-3] `X₀` represents `gammaFullNaiveProblem R N` — the one real step
+An `EllObj`-morphism `T ⟶ X₀` is a morphism `T ⟶ X₁` (giving a `Γ₁`-structure on `T` by
+`rOne.homEquiv`, and identifying `T` with a pullback of `X₁`) together with a lift of its
+base map through `fullLevelLocusπ` — which by `fullLevelLocusPointsEquiv` is exactly a naive
+full level structure on that pullback extending the given `P`. Assembling gives
+`(T ⟶ X₀) ≃ (gammaFullNaiveProblem R N).obj (op T)`.
+`yFullToYOneFibreEquiv` (WP-D2b) is the functorial half of this and plugs straight in.
+
+#### [WP-D2c-4] conclude
+`YFull.smooth_affine_of_representableBy` is generic in the problem, so WP-D2c-2 + WP-D2c-3
+give `Smooth X.structMap ∧ IsAffineHom X.structMap` for **every** representing object —
+which is exactly `YFull.exists_representing_smooth_affine`
+(`ModularCurve/YFullRoute.lean:777`), `sorry` since T-E9.
+
+This framing needs no `EllHom` rigidity, no `levelSpaceΓ₁`, and no T-D6.
