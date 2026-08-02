@@ -164,6 +164,37 @@ theorem d2_sum {ι : Type*} (s : Finset ι) (r : Fin m → S) (c : ι → S)
       funext fun p => Finset.sum_insert ha
     rw [hfun, d2_add, d2_smul, ih, Finset.sum_insert ha]
 
+/-- Trichotomy split of a `Fin m`-indexed value around a fixed index. -/
+private lemma trichotomy_split (f : Fin m → S) (i j : Fin m) :
+    f j = (if j < i then f j else 0)
+      + ((if j = i then f j else 0) + (if i < j then f j else 0)) := by
+  rcases lt_trichotomy j i with h1 | rfl | h1
+  · rw [if_pos h1, if_neg (Fin.ne_of_lt h1), if_neg (asymm h1), add_zero, add_zero]
+  · simp
+  · rw [if_neg (asymm h1), if_neg (Fin.ne_of_gt h1), if_pos h1, zero_add, zero_add]
+
+/-- The `a < i` half of the `k = i` row of `d₂` on the `i`-th Koszul wedge. -/
+private lemma koszul_row_sum_lt (r u : Fin m → S) (i : Fin m) :
+    (∑ a, if h : a < i then
+        (if i = i then -u a else if a = i then u i else 0) * r a else 0) =
+      -∑ j, if j < i then u j * r j else 0 := by
+  rw [← Finset.sum_neg_distrib]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  by_cases hai : a < i
+  · rw [dif_pos hai, if_pos rfl, if_pos hai, neg_mul]
+  · rw [dif_neg hai, if_neg hai, neg_zero]
+
+/-- The `i < b` half of the same row. -/
+private lemma koszul_row_sum_gt (r u : Fin m → S) (i : Fin m) :
+    (∑ b, if h : i < b then
+        (if b = i then -u i else if i = i then u b else 0) * r b else 0) =
+      ∑ j, if i < j then u j * r j else 0 := by
+  refine Finset.sum_congr rfl fun b _ => ?_
+  by_cases hib : i < b
+  · rw [dif_pos hib, if_neg (Fin.ne_of_gt hib), if_pos rfl, if_pos hib]
+  · rw [dif_neg hib, if_neg hib]
+
+
 /-- The contractibility case: multiplying a syzygy by any one `rᵢ` lands it in the Koszul
 image, explicitly ([FJP] Lemma 4.2: "At a prime not containing every `rᵢ`, one generator is
 a unit and the localized Koszul complex is contractible"). -/
@@ -195,32 +226,11 @@ theorem d2_koszul_single (r : Fin m → S) (u : Fin m → S) (h : d1 r u = 0) (i
     rw [heq]
     have hsum := h
     unfold d1 at hsum
-    have hsplit : ∀ j : Fin m, u j * r j =
-        (if j < i then u j * r j else 0) + ((if j = i then u j * r j else 0) +
-          (if i < j then u j * r j else 0)) := fun j => by
-      rcases lt_trichotomy j i with h1 | rfl | h1
-      · rw [if_pos h1, if_neg (Fin.ne_of_lt h1), if_neg (asymm h1), add_zero, add_zero]
-      · simp
-      · rw [if_neg (asymm h1), if_neg (Fin.ne_of_gt h1), if_pos h1, zero_add, zero_add]
-    rw [Finset.sum_congr rfl fun j _ => hsplit j, Finset.sum_add_distrib,
+    rw [Finset.sum_congr rfl fun j _ => trichotomy_split (fun j => u j * r j) i j,
+      Finset.sum_add_distrib,
       Finset.sum_add_distrib, Finset.sum_ite_eq' Finset.univ i (fun j => u j * r j),
       if_pos (Finset.mem_univ i)] at hsum
-    have h1 : (∑ a, if h : a < i then
-        (if i = i then -u a else if a = i then u i else 0) * r a else 0) =
-        -∑ j, if j < i then u j * r j else 0 := by
-      rw [← Finset.sum_neg_distrib]
-      refine Finset.sum_congr rfl fun a _ => ?_
-      by_cases hai : a < i
-      · rw [dif_pos hai, if_pos rfl, if_pos hai, neg_mul]
-      · rw [dif_neg hai, if_neg hai, neg_zero]
-    have h2 : (∑ b, if h : i < b then
-        (if b = i then -u i else if i = i then u b else 0) * r b else 0) =
-        ∑ j, if i < j then u j * r j else 0 := by
-      refine Finset.sum_congr rfl fun b _ => ?_
-      by_cases hib : i < b
-      · rw [dif_pos hib, if_neg (Fin.ne_of_gt hib), if_pos rfl, if_pos hib]
-      · rw [dif_neg hib, if_neg hib]
-    rw [h1, h2, mul_comm (r i) (u i)]
+    rw [koszul_row_sum_lt r u i, koszul_row_sum_gt r u i, mul_comm (r i) (u i)]
     linear_combination -hsum
   · -- `i < k`: only the `(i,k)` wedge contributes, through the first sum
     have hs1 : (∑ a, if h : a < k then
