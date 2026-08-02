@@ -1204,9 +1204,7 @@ theorem relativePiece_equiv_restrict_square
       ≤ Ideal.span ((E'.T : Finset A) : Set A))
     (y : presheafValue E) :
       haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI := presheafValue_completeSpace_rightUniformSpace D₀
     haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
     relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) ME' hleE'
         (restrictionMap E E' hE'_sub y) =
@@ -1215,9 +1213,7 @@ theorem relativePiece_equiv_restrict_square
         (imagePieceDatum_rationalOpen_mono D₀ E E' ME hleE ME' hleE' hE'_sub)
         (relativePiece_equiv D₀ E hE_sub ME hleE y) := by
   haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI := presheafValue_completeSpace_rightUniformSpace D₀
   haveI : HasLocLiftPowerBounded (presheafValue D₀) := hasLocLiftPowerBounded_faithful
   haveI : IsHuberRing (presheafValue D₀) := IsTateRing.toIsHuberRing
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
@@ -1231,32 +1227,15 @@ theorem relativePiece_equiv_restrict_square
   letI : UniformSpace (Localization.Away E'.s) := E'.uniformSpace
   letI : IsTopologicalRing (Localization.Away E'.s) := E'.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away E'.s) := E'.isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).s) :=
-    (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).s) :=
-    (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).s) :=
-    (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).s) :=
-    (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).s) :=
-    (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).s) :=
-    (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away (imagePieceDatumOpen D₀ E.T E.s ME hleE).s) :=
-    (imagePieceDatumOpen D₀ E.T E.s ME hleE).uniformSpace
-  letI : IsTopologicalRing
-      (Localization.Away (imagePieceDatumOpen D₀ E.T E.s ME hleE).s) :=
-    (imagePieceDatumOpen D₀ E.T E.s ME hleE).isTopologicalRing
-  letI : IsUniformAddGroup
-      (Localization.Away (imagePieceDatumOpen D₀ E.T E.s ME hleE).s) :=
-    (imagePieceDatumOpen D₀ E.T E.s ME hleE).isUniformAddGroup
+  letI := (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).uniformSpace
+  letI := (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).isTopologicalRing
+  letI := (D₀.interSamePair (genPieceDatumOpen D₀.P E'.T E'.s ME' hleE') rfl).isUniformAddGroup
+  letI := (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).uniformSpace
+  letI := (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).isTopologicalRing
+  letI := (D₀.interSamePair (genPieceDatumOpen D₀.P E.T E.s ME hleE) rfl).isUniformAddGroup
+  letI := (imagePieceDatumOpen D₀ E.T E.s ME hleE).uniformSpace
+  letI := (imagePieceDatumOpen D₀ E.T E.s ME hleE).isTopologicalRing
+  letI := (imagePieceDatumOpen D₀ E.T E.s ME hleE).isUniformAddGroup
   refine @UniformSpace.Completion.ext' (Localization.Away E.s) E.uniformSpace
     (presheafValue (imagePieceDatumOpen D₀ E'.T E'.s ME' hleE')) _ _ _ _
     (UniformSpace.Completion.continuous_extension.comp

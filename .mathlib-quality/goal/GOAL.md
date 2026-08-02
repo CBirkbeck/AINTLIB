@@ -9732,3 +9732,71 @@ Also: `git checkout --` on a working file is blocked by the repo guardrail (righ
 
     over-50 proofs   486 (baseline) → 64   (62 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: exists_glue_of_imgCovering 130 → 42 — a lemma re-proved 40 lines below itself
+
+`RelativeDescentHuber.lean`, 15 rebuilds. The 130-line proof had two independent problems
+and one of them was not decomposition at all.
+
+`hfB` — the "transported family is all-data compatible" block, 66 lines — opens with
+`set h₁ …; set h₂ …` and then proves, for each side of the intersection, that a restriction
+of `imgFamily` collapses through the choice witness. That derivation is **already a theorem
+in the same file**, `imgFamily_restriction`, forty lines above. The block re-derives it
+twice, once per side, with `hv₁/hv₂`, `hI₁/hI₂`, `hc₁/hc₂` — three symmetric pairs whose
+bodies are the theorem's own proof transcribed. Two `rw`s replace all 62 lines.
+
+The tail was a genuine lift: `imgFamily_imgDatumO`, the value of the transported family at
+an image piece. Worth naming on its own — the witness `imgCoversO` picks for
+`imgDatumO D₀ D` need **not** be `D`, which is exactly why the proof has to detour through
+`imgFamily_agreement` rather than reducing.
+
+### Why the name-based dedup scans missed it
+
+`imgFamily_restriction` *is* named, and the duplication *is* inside a proof — so the
+exact-body hash sees nothing (the copy is three `have`s, not a declaration) and the
+name-grep sees nothing (the copy never mentions the name). Only reading the parent against
+its own file finds it. That is the same shape as the six wrong-altitude lemmas, one level
+up: not a lemma at the wrong altitude, but a lemma whose *consumer* did not know it existed.
+
+## Measurement: the scoreboard had drifted off the authoritative script
+
+`/tmp/scope.py` walks the whole repository from the cwd and splits body-from-signature at
+the first `:=`. Run from the repo root it counts DedekindResidue and ModularCurves too, and
+its raw-line measure counts documentation as proof length. The campaign's real measure is
+`scope_code.py` — code lines only (non-blank, not starting with `--`), bracket-depth
+signature split, scoped to `Adic spaces/`. Re-measured against it:
+
+    over-50 proofs (code lines)   68 total → 66 in scope (2 sorry-bearing)
+                                  63 of those non-Vendored = actionable
+
+The 64 on the previous scoreboard was close but not reproducible; every figure from here on
+is `scope_code.py`.
+
+## Batch: the three `relativePiece_equiv_restrict_square` twins, 56/60/60 → 35/39/39
+
+`RelativePieceKeystone`, `…Gen`, `…Open`. These proofs are *almost entirely* `letI`
+preamble — 17 to 22 of them each — and the long ones were written as three lines:
+
+    letI : IsUniformAddGroup (Localization.Away
+        (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).s) :=
+      (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).isUniformAddGroup
+
+The ascription restates the value's own type at length, and it does so by spelling the
+datum a **second time**. `letI := <value>` is one line and names the instance through the
+field it projects. −21 lines each, three proofs cleared, no term changed.
+
+Swept the same pattern across every remaining over-50 proof: **17 carry it, 162 lines
+total**, but these three are the only ones it clears on its own. Left the other 14 alone —
+compressing an ascription that changes no count is churn.
+
+### What the three files really are
+
+Same theorem name, same proof, three times, differing only in how the piece datum is
+certified (`span = ⊤` vs `Iᴹ ≤ span`, `imagePieceDatum` vs `imagePieceDatumOpen`). Unifying
+them means unifying those two `def`s — a statement change, so **task-3 / coordinator work,
+recorded not done**.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 63   (60 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)

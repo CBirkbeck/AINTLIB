@@ -1182,18 +1182,14 @@ theorem relativePiece_equiv_restrict_square
     (hspanE' : Ideal.span (E'.T : Set A) = ⊤)
     (y : presheafValue E) :
     haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
-    haveI : @CompleteSpace (presheafValue D₀)
-        (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-      presheafValue_completeSpace_rightUniformSpace D₀
+    haveI := presheafValue_completeSpace_rightUniformSpace D₀
     relativePiece_equiv D₀ E' (hE'_sub.trans hE_sub) hspanE'
         (restrictionMap E E' hE'_sub y) =
       restrictionMap (imagePieceDatum D₀ E.T E.s hspanE)
         (imagePieceDatum D₀ E'.T E'.s hspanE')
         (imagePieceDatum_rationalOpen_mono D₀ E E' hspanE hspanE' hE'_sub)
         (relativePiece_equiv D₀ E hE_sub hspanE y) := by
-  haveI : @CompleteSpace (presheafValue D₀)
-      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
+  haveI := presheafValue_completeSpace_rightUniformSpace D₀
   -- both composites, postcomposed with `E.coeRingHom`, agree as ring homs out of
   -- the localization (determined on the `algebraMap`-range by the trackings)
   have hloc := relativePiece_restrict_square_locLevel D₀ E E' hE_sub hE'_sub hspanE hspanE'
@@ -1205,32 +1201,15 @@ theorem relativePiece_equiv_restrict_square
   letI : UniformSpace (Localization.Away E'.s) := E'.uniformSpace
   letI : IsTopologicalRing (Localization.Away E'.s) := E'.isTopologicalRing
   letI : IsUniformAddGroup (Localization.Away E'.s) := E'.isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).uniformSpace
-  letI : IsTopologicalRing (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away
-      (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).s) :=
-    (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).isUniformAddGroup
-  letI : UniformSpace (Localization.Away (imagePieceDatum D₀ E.T E.s hspanE).s) :=
-    (imagePieceDatum D₀ E.T E.s hspanE).uniformSpace
-  letI : IsTopologicalRing
-      (Localization.Away (imagePieceDatum D₀ E.T E.s hspanE).s) :=
-    (imagePieceDatum D₀ E.T E.s hspanE).isTopologicalRing
-  letI : IsUniformAddGroup
-      (Localization.Away (imagePieceDatum D₀ E.T E.s hspanE).s) :=
-    (imagePieceDatum D₀ E.T E.s hspanE).isUniformAddGroup
+  letI := (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).uniformSpace
+  letI := (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).isTopologicalRing
+  letI := (D₀.interSamePair (genPieceDatum D₀.P E'.T E'.s hspanE') rfl).isUniformAddGroup
+  letI := (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).uniformSpace
+  letI := (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).isTopologicalRing
+  letI := (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).isUniformAddGroup
+  letI := (imagePieceDatum D₀ E.T E.s hspanE).uniformSpace
+  letI := (imagePieceDatum D₀ E.T E.s hspanE).isTopologicalRing
+  letI := (imagePieceDatum D₀ E.T E.s hspanE).isUniformAddGroup
   refine @UniformSpace.Completion.ext' (Localization.Away E.s) E.uniformSpace
     (presheafValue (imagePieceDatum D₀ E'.T E'.s hspanE')) _ _ _ _
     (UniformSpace.Completion.continuous_extension.comp
