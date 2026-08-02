@@ -9475,3 +9475,34 @@ too expensive — the opposite of the `isOXAcyclic_interProd` case above.
 
     over-50 proofs   486 (baseline) → 70   (68 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: isSheafOfTopologicalRings_iff_isLimitSheaf 96 → 44
+
+`StructurePresheafBundled.lean`. Two conclusion-preserving lifts:
+
+    isLimitSheaf_separation_of_sheaf        18L
+    isTopologicalRing_inducedLimitTopology  31L
+
+The second is the interesting one: **thirty lines sitting inside a sheaf-theoretic proof
+that depend on nothing from it**. `σring` shows the topology induced on `limitSections V`
+by the restriction maps is a ring topology — the inducing map is a ring homomorphism in each
+component, so `+`, `*` and `-` all factor through it. No sheaf hypothesis appears anywhere
+in the argument. Same shape as `gaussTerm_le_of_sub_le` and `le_one_of_pow_mul_le_one`
+earlier in the campaign: **the cheapest lifts are the sub-proofs whose hypotheses are a
+strict subset of the ambient ones**, and a block-length scan cannot see them because what
+makes them liftable is the *absence* of a dependency, not the presence of a pattern.
+
+Two mechanical notes from the lift, both about turning tactic-local binders into signature
+binders:
+
+* the body opened with `intro V ι U hle hcov x y hxy`, which must go once those are the
+  lemma's binders — `introN failed: there are no additional binders`;
+* `have hinj := isLimitSheaf_separation_of_sheaf hsheaf` cannot elaborate, because a bare
+  `have` gives the implicit `{V} {ι} {U}` nothing to unify against. Calling the lemma at each
+  of its three use sites is both shorter and well-typed. **A partially-applied lemma with
+  leading implicits does not survive being bound by `have`.**
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 69   (67 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
