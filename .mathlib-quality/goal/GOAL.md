@@ -8458,3 +8458,45 @@ they restate, and the fix is arithmetic on lines, not decomposition.
     over-50 proofs   486 (baseline) → 100   (98 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
     full lake build  GREEN (exit 0, zero errors, 3360 modules)
+
+## Batch: SpvAI, biResQ_chain_glue, digit_sub_le (100 → 99)
+
+    SpvAI.exists_rationalSubset_microbial   76 → 49   (two `vle` cancellation lemmas)
+    biResQ_chain_glue                       76 → 50   (no new declaration; see below)
+    digit_sub_le                            79 → 48   (ultrametric limit bound + degenerate case)
+
+### `valued_le_of_tendsto_of_forall_le` — the general statement was hiding in the bookkeeping
+
+Inline, this was fourteen lines whose bulk was a `ring`-proved `z = (z - S N₀) + S N₀`, with
+the six-line `AlocToHatK (prefixAloc a N₀ - …)` term written out twice. Stated over an
+abstract sequence — *a limit of things bounded by `c` is bounded by `c`* — it is seven lines
+and the concrete term never appears. Same lesson as `norm_sub_le_max`: when a block is long
+because its OBJECTS are long, the lemma over abstract objects is short.
+
+### Assertions stopped two more blanket edits, both before the build
+
+* the `haveI hCompleteB` preamble I asserted appeared twice appears **12×** in
+  WedhornCechAcyclicity;
+* the `have hdx := tendsto_gaussTerm_teichCoeffAr …` + `rw [← ha] at hdx` pair appears **5×**
+  in Euclidean.lean.
+
+Both patterns looked obviously local. The working guard is now fixed: **scope every textual
+edit to the declaration's line range and assert `count == 1` per block.**
+
+### DEFERRED: `restrictToConvex` (79) and `restrictToConvexBounded` (96)
+
+Both are `def`s whose `Valuation` fields carry the entire proof — the split-def-from-packaging
+shape, and the right fix is clear: name the underlying function, prove `map_one'`/`map_mul'`/
+`map_add_le_max'` about it, leave five one-line fields. Attempted and reverted: `unfold
+convexRestrictFun` does NOT reproduce the goal shape the structure field's elaborated body
+had, so the transplanted `simp only [hx, hy, hxy_ne, dif_neg, dif_pos hmx, …]` chains fire
+differently — the outer `dite`s resolve but `dif_pos hmx` does not, and the subsequent `rw`
+finds no `some ⟨…⟩`. Needs the function's defining equation stated as an explicit `rfl`
+lemma and `rw`n, rather than `unfold`. Reverted to HEAD, module re-verified green; the two
+targets stay on the list with the route written down.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 99   (97 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+    full lake build  GREEN (exit 0, zero errors, 3360 modules)
