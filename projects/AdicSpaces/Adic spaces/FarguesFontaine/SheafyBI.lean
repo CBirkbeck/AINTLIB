@@ -91,6 +91,53 @@ theorem isBounded_BIPlusIn :
         exact (mem_BIPlusIn_iff p F ϖ).mp hs
     _ = ε := one_mul ε
 
+/-- If `v ^ n * ρ ^ m ≤ 1` for every `n`, then `v ≤ 1`: otherwise some `v ^ n`
+exceeds `(ρ ^ m)⁻¹` and the product passes `1`. -/
+private theorem le_one_of_pow_mul_le_one {ρ : NNReal} (hρ0 : 0 < ρ) (m : ℕ)
+    {v : NNReal} (h : ∀ n : ℕ, v ^ n * ρ ^ m ≤ 1) : v ≤ 1 := by
+  by_contra hlt
+  rw [not_le] at hlt
+  obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt ((ρ ^ m)⁻¹ : NNReal) hlt
+  have hρm : (0 : NNReal) < ρ ^ m := pow_pos hρ0 m
+  refine absurd (h n) (not_le.mpr ?_)
+  calc (1 : NNReal) = (ρ ^ m)⁻¹ * ρ ^ m := (inv_mul_cancel₀ (ne_of_gt hρm)).symm
+    _ < v ^ n * ρ ^ m := mul_lt_mul_of_pos_right hn hρm
+
+/-- The first-coordinate value of `aⁿ·pᵐ` in `B^I`. -/
+private theorem valued_fst_pow_mul_pEltB
+    (a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (n m : ℕ) :
+    Valued.v (((a ^ n * pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+      = Valued.v ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ n
+        * ρ₁ ^ m := by
+  show Valued.v (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
+    * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).1) = _
+  rw [show (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
+      * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).1)
+      = ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ n
+        * ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1) ^ m from rfl,
+    Valuation.map_mul, Valuation.map_pow, Valuation.map_pow,
+    valued_pImage_fst p F ϖ]
+
+/-- The second-coordinate value of `aⁿ·pᵐ` in `B^I`. -/
+private theorem valued_snd_pow_mul_pEltB
+    (a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (n m : ℕ) :
+    Valued.v (((a ^ n * pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+      = Valued.v ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ n
+        * ρ₂ ^ m := by
+  show Valued.v (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
+    * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).2) = _
+  rw [show (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
+      * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).2)
+      = ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ n
+        * ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2) ^ m from rfl,
+    Valuation.map_mul, Valuation.map_pow, Valuation.map_pow,
+    valued_pImage_snd p F ϖ]
+
+
 /-- **Power-bounded elements of `B^I` lie in the unit ball** (Wedhorn Prop 5.30-style,
 via the power-multiplicativity of `wI` and the Tate element `p`). -/
 theorem wI_le_one_of_isPowerBounded {a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
@@ -121,77 +168,13 @@ theorem wI_le_one_of_isPowerBounded {a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂
   -- the coordinate where the value exceeds 1
   rcases lt_max_iff.mp hlt with hbig | hbig
   · -- first coordinate
-    obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt
-      ((ρ₁ ^ m)⁻¹ : NNReal) hbig
-    have hmem := hVsub ⟨a ^ n, ⟨n, rfl⟩, _, hqm, rfl⟩
-    have hval : Valued.v (((a ^ n * pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
-        = Valued.v ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ n
-          * ρ₁ ^ m := by
-      show Valued.v (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
-        * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).1) = _
-      rw [show (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
-          * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).1)
-        = ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ n
-          * ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1) ^ m from rfl,
-        Valuation.map_mul, Valuation.map_pow, Valuation.map_pow]
-      congr 1
-      rw [show (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1
-        = BlocToHatK p F ϖ hρ₁0 hρ₁1
-          (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) from rfl,
-        valued_BlocToHatK, wLoc_algebraMap, gaussValue_p p F hρ₁1.le]
-    have hle := hmem
-    have hle2 : Valued.v (((a ^ n * pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ 1 :=
-      le_trans (le_max_left _ _) hle
-    rw [hval] at hle2
-    have hρm : (0 : NNReal) < ρ₁ ^ m := pow_pos hρ₁0 m
-    have hgt : (1 : NNReal) < Valued.v
-        ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ n * ρ₁ ^ m := by
-      calc (1 : NNReal) = (ρ₁ ^ m)⁻¹ * ρ₁ ^ m :=
-            (inv_mul_cancel₀ (ne_of_gt hρm)).symm
-        _ < Valued.v ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ n
-            * ρ₁ ^ m := by
-            exact mul_lt_mul_of_pos_right hn hρm
-    exact absurd hle2 (not_le.mpr hgt)
+    refine absurd hbig (not_lt.mpr (le_one_of_pow_mul_le_one hρ₁0 m (fun n => ?_)))
+    rw [← valued_fst_pow_mul_pEltB p F ϖ a n m]
+    exact le_trans (le_max_left _ _) (hVsub ⟨a ^ n, ⟨n, rfl⟩, _, hqm, rfl⟩)
   · -- second coordinate
-    obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt
-      ((ρ₂ ^ m)⁻¹ : NNReal) hbig
-    have hmem := hVsub ⟨a ^ n, ⟨n, rfl⟩, _, hqm, rfl⟩
-    have hval : Valued.v (((a ^ n * pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
-        = Valued.v ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ n
-          * ρ₂ ^ m := by
-      show Valued.v (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
-        * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).2) = _
-      rw [show (((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ^ n
-          * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ m).2)
-        = ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ n
-          * ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2) ^ m from rfl,
-        Valuation.map_mul, Valuation.map_pow, Valuation.map_pow]
-      congr 1
-      rw [show (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2
-        = BlocToHatK p F ϖ hρ₂0 hρ₂1
-          (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) from rfl,
-        valued_BlocToHatK, wLoc_algebraMap, gaussValue_p p F hρ₂1.le]
-    have hle := hmem
-    have hle2 : Valued.v (((a ^ n * pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ≤ 1 :=
-      le_trans (le_max_right _ _) hle
-    rw [hval] at hle2
-    have hρm : (0 : NNReal) < ρ₂ ^ m := pow_pos hρ₂0 m
-    have hgt : (1 : NNReal) < Valued.v
-        ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ n * ρ₂ ^ m := by
-      calc (1 : NNReal) = (ρ₂ ^ m)⁻¹ * ρ₂ ^ m :=
-            (inv_mul_cancel₀ (ne_of_gt hρm)).symm
-        _ < Valued.v ((a : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ n
-            * ρ₂ ^ m := by
-            exact mul_lt_mul_of_pos_right hn hρm
-    exact absurd hle2 (not_le.mpr hgt)
+    refine absurd hbig (not_lt.mpr (le_one_of_pow_mul_le_one hρ₂0 m (fun n => ?_)))
+    rw [← valued_snd_pow_mul_pEltB p F ϖ a n m]
+    exact le_trans (le_max_right _ _) (hVsub ⟨a ^ n, ⟨n, rfl⟩, _, hqm, rfl⟩)
 
 /-- `B^{I,+}` consists of power-bounded elements. -/
 theorem BIPlusIn_subset_powerBounded :
