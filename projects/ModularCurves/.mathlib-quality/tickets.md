@@ -34120,3 +34120,37 @@ defining property — this is what transports level structures between `T.curve`
 ### D-chain status
 WP-D1a ✅ · D1b ✅ · D1c-construction ✅ · D1c-rel ✅ · D1c-coarse ✅ · D2a ✅ · D2b ✅ ·
 D2c-2 ✅ · **D2c-3 ← the one open step** · D2c-4 ✅ (conditional, axiom-verified)
+
+### [WP-D2c-3] the right abstraction — a general `EllObj` lemma (2026-08-02)
+
+Rather than build the representing equivalence by hand for `Γ(N)`, factor it through a
+statement about `EllObj R` alone:
+
+#### [WP-D2c-3a] morphisms into a `pullbackAlong`
+    (T ⟶ X.pullbackAlong g)  ≃  Σ (u : T ⟶ X), { b : T.base ⟶ B // b ≫ g = u.baseHom }
+
+* **→** `w ↦ (w ≫ X.pullbackAlongπ g, w.baseHom)`; the condition holds since
+  `(w ≫ pullbackAlongπ g).baseHom = w.baseHom ≫ g`.
+* **←** `(u, b) ↦ toPullbackAlong u ≫ X.pullbackAlongMap g b`, using
+  `b ≫ g = u.baseHom` to typecheck (`toPullbackAlong u : T ⟶ X.pullbackAlong u.baseHom`).
+* **Injectivity** — note this is *not* an instance of the rejected WP-D2c-b1. An `EllHom`
+  is determined by its `top` and `baseHom` (everything else is a `Prop`), and here `w.top`
+  is recovered from `u.top` and `w.baseHom` by `pullback.hom_ext`, because
+  `w.top ≫ pullback.fst = u.top`. The `[-1]` counterexample does not apply: changing `top`
+  changes `u`, which is part of the data being matched.
+
+#### [WP-D2c-3b] specialise
+Take `X := X₁`, `g := X₁.curve.fullLevelLocusπ N h`. The right-hand side becomes: a morphism
+`u : T ⟶ X₁` — i.e. by `rOne` a naive `Γ₁(N)`-structure on `T` — together with a lift of
+`u.baseHom` through `fullLevelLocusπ` — i.e. by `fullLevelLocusPointsEquiv` a naive full
+level structure on `X₁.pullbackAlong u.baseHom` refining it. WP-D1a's
+`isNaiveGammaOne_of_isNaiveFullLevel` says the pair is redundant: the full level structure
+already determines its `Γ₁`-part, so the `Σ` collapses to just the full level structure on
+`T`, which is `(gammaFullNaiveProblem R N).obj (op T)`.
+
+That collapse is the mathematical content, and it is exactly what WP-D1a was built for.
+Naturality then follows from `pullbackAlongMap` functoriality plus
+`Moduli/LevelLocusNatural.lean`.
+
+Stating D2c-3a generally is worth it: it is reusable for every level structure and keeps the
+`Γ(N)`-specific reasoning down to the collapse.
