@@ -34247,3 +34247,31 @@ coordinate is `P₁`"*. So take
 `Y₁(N)`"); WP-D2b is unchanged and is now the *characterising* property of `Z`; the new work
 is constructing `Z` and its finite-étaleness. WP-D1a/D1b remain exactly what supplies the
 split, i.e. why the fibre is nonempty and why the condition is the right one.
+
+## [WP-D2c-3-fix] the corrected construction is IN (2026-08-02) — axiom-verified
+
+`GroupScheme/NaiveGammaOneLocus.lean` gains the completion locus:
+* `fullLevelLocusFst` — the first-coordinate map `(P, Q) ↦ P` of the full-level locus;
+* **`fullLevelLocusFst_isFinite` / `_etale`** — closed/open immersion followed by a base
+  change of the finite étale `torsionπ`;
+* **`completionLocus` / `completionLocusπ`** — the fibre over a given torsion section, i.e.
+  the space of `Q` completing it;
+* **`completionLocusπ_isFinite` / `_etale`** — base changes of the above.
+
+`ModularCurve/YFullFromYOne.lean` is retargeted: `yFullCandidate N X₁ h P` is now
+`X₁.pullbackAlong (completionLocusπ N h P)`, and **WP-D2c-2 generalised verbatim** — the
+smooth and affine proofs only ever used "finite étale over `X₁.base`", so they went through
+with `completionLocusπ` in place of `fullLevelLocusπ` and no other change. That is the
+payoff of having stated them that way.
+
+`yFullCandidate_representableBy` now carries the compatibility hypothesis
+`P = pointToTorsion (universalGammaOne …)` — i.e. the section really is the universal
+`Γ₁`-structure — which is precisely what the `simul` correction showed was missing.
+`exists_representing_smooth_affine_of_candidate` is unchanged and still axiom-verified.
+
+**Remaining: the one `sorry`.** With the completion locus in hand the proof is:
+`homPullbackAlongEquiv` (the *existing* one, `QuotientProblem.lean:192`) describes
+`T`-points of `yFullCandidate` as pairs (`Γ₁`-structure, lift through `completionLocusπ`);
+`fullLevelLocusPointsEquiv` turns the lift into a full level structure whose first member is
+the pulled-back `P`; and WP-D2b's `yFullToYOne_comp_eq_iff` says that condition is exactly
+"the `Γ₁`-part agrees", so the pair is redundant and the `Σ` collapses — by WP-D1a.

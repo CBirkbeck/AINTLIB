@@ -231,6 +231,66 @@ theorem fullLevelToNaiveGammaOne_isFinite (h : NIsInvertible S N) :
     exact E.fullLevelLocusπ_isFinite N h
   exact IsFinite.of_comp _ (E.naiveGammaOneLocusπ N h)
 
+/-! ### The completion locus (WP-D2c-3-fix)
+
+`Y(N)` over `Y₁(N)` is not the whole full-level locus — that one carries an *unrelated*
+`Γ₁`-structure as well (see the board's `simulRepresentableBy` correction). It is the locus
+where the full level structure's **first coordinate is the given section**. Since the
+full-level locus sits inside `E[N] ×_S E[N]`, that is just a fibre of the first projection.
+-/
+
+/-- The first-coordinate map of the full-level locus, `(P, Q) ↦ P`. -/
+noncomputable abbrev fullLevelLocusFst (h : NIsInvertible S N) :
+    E.fullLevelLocus N h ⟶ E.torsion N :=
+  E.fullLevelLocusι N h ≫ pullback.fst (E.torsionπ N) (E.torsionπ N)
+
+/-- The first-coordinate map is finite: a closed immersion followed by a base change of the
+finite `torsionπ`. -/
+theorem fullLevelLocusFst_isFinite (h : NIsInvertible S N) :
+    IsFinite (E.fullLevelLocusFst N h) := by
+  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  haveI : IsFinite (pullback.fst (E.torsionπ N) (E.torsionπ N)) := inferInstance
+  haveI := E.fullLevelLocusι_isClosedImmersion N h
+  haveI : IsFinite (E.fullLevelLocusι N h) := inferInstance
+  exact MorphismProperty.comp_mem _ _ _ inferInstance inferInstance
+
+/-- The first-coordinate map is étale: an open immersion followed by a base change of the
+étale `torsionπ`. -/
+theorem fullLevelLocusFst_etale (h : NIsInvertible S N) :
+    Etale (E.fullLevelLocusFst N h) := by
+  haveI : Etale (E.torsionπ N) := E.torsionπ_etale N h
+  haveI : Etale (pullback.fst (E.torsionπ N) (E.torsionπ N)) := inferInstance
+  haveI : IsOpenImmersion (E.fullLevelLocusι N h) :=
+    inferInstanceAs (IsOpenImmersion (Scheme.Opens.ι _))
+  haveI : Etale (E.fullLevelLocusι N h) := inferInstance
+  exact inferInstanceAs (Etale (_ ≫ _))
+
+/-- **(WP-D2c-3-fix)** The *completion locus* of a torsion section `P`: the space of `Q`
+completing `P` to a naive full level structure. This — not the full-level locus — is what
+sits under `Y(N) ⟶ Y₁(N)`. -/
+noncomputable def completionLocus (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
+    Scheme.{u} :=
+  pullback (E.fullLevelLocusFst N h) P
+
+/-- The structure morphism of the completion locus. -/
+noncomputable def completionLocusπ (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
+    E.completionLocus N h P ⟶ S :=
+  pullback.snd (E.fullLevelLocusFst N h) P
+
+/-- **(WP-D2c-3-fix)** The completion locus is finite over the base — a base change of the
+finite `fullLevelLocusFst`. -/
+theorem completionLocusπ_isFinite (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
+    IsFinite (E.completionLocusπ N h P) := by
+  haveI : IsFinite (E.fullLevelLocusFst N h) := E.fullLevelLocusFst_isFinite N h
+  exact inferInstanceAs (IsFinite (pullback.snd _ _))
+
+/-- **(WP-D2c-3-fix)** The completion locus is étale over the base — a base change of the
+étale `fullLevelLocusFst`. This is what makes `Y(N) ⟶ Y₁(N)` finite étale. -/
+theorem completionLocusπ_etale (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
+    Etale (E.completionLocusπ N h P) := by
+  haveI : Etale (E.fullLevelLocusFst N h) := E.fullLevelLocusFst_etale N h
+  exact inferInstanceAs (Etale (pullback.snd _ _))
+
 end EllipticCurve
 
 end ModularCurves

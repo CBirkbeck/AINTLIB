@@ -41,28 +41,35 @@ namespace ModularCurves
 
 variable {R : CommRingCat.{u}}
 
-/-- **(WP-D2c-1)** The candidate representing object for the naive full level-`N` problem:
-the universal curve over a `Γ₁(N)`-object, pulled back to its full-level locus. -/
+/-- **(WP-D2c-1, corrected)** The candidate representing object for the naive full level-`N`
+problem: the universal curve over a `Γ₁(N)`-object, pulled back to the **completion locus**
+of the universal `Γ₁`-section.
+
+The earlier version used the whole full-level locus; that is wrong — by
+`ModuliProblem.simulRepresentableBy` it represents `Γ(N) × Γ₁(N)` with the two structures
+unrelated. Cutting down to the completions of the given section is exactly the missing
+compatibility. -/
 noncomputable def yFullCandidate (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N) : EllObj R :=
-  X₁.pullbackAlong (X₁.curve.fullLevelLocusπ N h)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N) : EllObj R :=
+  X₁.pullbackAlong (X₁.curve.completionLocusπ N h P)
 
 @[simp] theorem yFullCandidate_base (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N) :
-    (yFullCandidate N X₁ h).base = X₁.curve.fullLevelLocus N h := rfl
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N) :
+    (yFullCandidate N X₁ h P).base = X₁.curve.completionLocus N h P := rfl
 
 @[simp] theorem yFullCandidate_structMap (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N) :
-    (yFullCandidate N X₁ h).structMap =
-      X₁.curve.fullLevelLocusπ N h ≫ X₁.structMap := rfl
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N) :
+    (yFullCandidate N X₁ h P).structMap =
+      X₁.curve.completionLocusπ N h P ≫ X₁.structMap := rfl
 
 /-- **(WP-D2c-2)** The candidate's structure morphism is smooth: it is a finite étale
 morphism followed by a smooth one. -/
 theorem yFullCandidate_structMap_smooth (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N) (hsm : Smooth X₁.structMap) :
-    Smooth (yFullCandidate N X₁ h).structMap := by
-  haveI : Etale (X₁.curve.fullLevelLocusπ N h) := X₁.curve.fullLevelLocusπ_etale N h
-  haveI : Smooth (X₁.curve.fullLevelLocusπ N h) := inferInstance
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hsm : Smooth X₁.structMap) :
+    Smooth (yFullCandidate N X₁ h P).structMap := by
+  haveI : Etale (X₁.curve.completionLocusπ N h P) := X₁.curve.completionLocusπ_etale N h P
+  haveI : Smooth (X₁.curve.completionLocusπ N h P) := inferInstance
   haveI := hsm
   rw [yFullCandidate_structMap]
   exact MorphismProperty.comp_mem _ _ _ inferInstance hsm
@@ -70,25 +77,27 @@ theorem yFullCandidate_structMap_smooth (N : ℕ) [NeZero N] (X₁ : EllObj R)
 /-- **(WP-D2c-2)** The candidate's structure morphism is affine: it is a finite morphism
 followed by an affine one. -/
 theorem yFullCandidate_structMap_isAffineHom (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N) [IsAffineHom X₁.structMap] :
-    IsAffineHom (yFullCandidate N X₁ h).structMap := by
-  haveI : IsFinite (X₁.curve.fullLevelLocusπ N h) := X₁.curve.fullLevelLocusπ_isFinite N h
-  haveI hfa : IsAffineHom (X₁.curve.fullLevelLocusπ N h) := inferInstance
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    [IsAffineHom X₁.structMap] :
+    IsAffineHom (yFullCandidate N X₁ h P).structMap := by
+  haveI : IsFinite (X₁.curve.completionLocusπ N h P) :=
+    X₁.curve.completionLocusπ_isFinite N h P
+  haveI hfa : IsAffineHom (X₁.curve.completionLocusπ N h P) := inferInstance
   rw [yFullCandidate_structMap]
   -- the composition instance does not fire through the `abbrev`, so inline its proof
   refine ⟨fun U hU => ?_⟩
   haveI := hfa
-  exact (hU.preimage X₁.structMap).preimage (X₁.curve.fullLevelLocusπ N h)
+  exact (hU.preimage X₁.structMap).preimage (X₁.curve.completionLocusπ N h P)
 
 /-- **(WP-D2c-2)** Both at once — the shape `smooth_affine_of_representableBy` consumes. -/
 theorem yFullCandidate_smooth_affine (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N) (hsm : Smooth X₁.structMap)
-    (ha : IsAffineHom X₁.structMap) :
-    Smooth (yFullCandidate N X₁ h).structMap ∧
-      IsAffineHom (yFullCandidate N X₁ h).structMap :=
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hsm : Smooth X₁.structMap) (ha : IsAffineHom X₁.structMap) :
+    Smooth (yFullCandidate N X₁ h P).structMap ∧
+      IsAffineHom (yFullCandidate N X₁ h P).structMap :=
   haveI := ha
-  ⟨yFullCandidate_structMap_smooth N X₁ h hsm,
-    yFullCandidate_structMap_isAffineHom N X₁ h⟩
+  ⟨yFullCandidate_structMap_smooth N X₁ h P hsm,
+    yFullCandidate_structMap_isAffineHom N X₁ h P⟩
 
 /-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
 
@@ -120,24 +129,28 @@ functoriality of `toPullbackAlong`.
 Note `rOne` is a hypothesis: the candidate is built from a `Γ₁(N)`-representing object, and
 the backward direction is exactly where that representability is consumed. -/
 theorem yFullCandidate_representableBy (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
     (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hP : P = X₁.curve.pointToTorsion (universalGammaOne R N rOne).1
+      ((X₁.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 X₁.base) N _).mp
+        (universalGammaOne R N rOne).2.1))
     (hinv : ∀ (X : EllObj R) (k : Type u) [Field k] [IsAlgClosed k],
       (Spec (CommRingCat.of k) ⟶ X.base) → (N : k) ≠ 0) :
-    Nonempty ((gammaFullNaiveProblem R N).RepresentableBy (yFullCandidate N X₁ h)) := by
+    Nonempty ((gammaFullNaiveProblem R N).RepresentableBy (yFullCandidate N X₁ h P)) := by
   sorry
 
 /-- **(WP-D2c-4)** Given WP-D2c-3, every object representing the naive full level-`N`
 problem has smooth affine structure morphism — which is exactly
 `YFull.exists_representing_smooth_affine`. -/
 theorem exists_representing_smooth_affine_of_candidate (N : ℕ) [NeZero N] (X₁ : EllObj R)
-    (h : NIsInvertible X₁.base N)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
     (hsm : Smooth X₁.structMap) (ha : IsAffineHom X₁.structMap)
-    (hrep : Nonempty ((gammaFullNaiveProblem R N).RepresentableBy (yFullCandidate N X₁ h))) :
+    (hrep : Nonempty ((gammaFullNaiveProblem R N).RepresentableBy
+      (yFullCandidate N X₁ h P))) :
     ∃ X₀ : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X₀) ∧
       Smooth X₀.structMap ∧ IsAffineHom X₀.structMap :=
   haveI := ha
-  ⟨yFullCandidate N X₁ h, hrep, yFullCandidate_structMap_smooth N X₁ h hsm,
-    yFullCandidate_structMap_isAffineHom N X₁ h⟩
+  ⟨yFullCandidate N X₁ h P, hrep, yFullCandidate_structMap_smooth N X₁ h P hsm,
+    yFullCandidate_structMap_isAffineHom N X₁ h P⟩
 
 end ModularCurves
