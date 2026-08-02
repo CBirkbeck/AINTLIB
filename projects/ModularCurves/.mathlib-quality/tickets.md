@@ -32705,29 +32705,98 @@ the root is not circular.
 - **Generality**: any base scheme; the transition is a `GL₂(ZMod N)` element, i.e. the
   locally-constant case. (The fully general locally-constant transition is WP-A6.)
 
-### [WP-A5] The root as a section over the cover — **API GAP, field base first**
-- **Status**: open · **File**: new, `WeilPairing/TautRootSection.lean` · **Depends on**: WP-A3
-- **Statement**: over an algebraically closed / general field base, the assignment
-  "level structure ↦ `tautRoot` of its basis" is induced by a morphism
-  `Y(N) ⟶ μ_N` of finite étale schemes.
-- **Proof sketch**: the assignment is `Gal(k̄/k)`-equivariant (the field pairing commutes
-  with the Galois action — `GaloisEquivariance.lean`), so
-  `exists_finiteEtaleHom_of_galoisEquivariant` (`EtaleDescent.lean:309`) produces the
-  morphism.
-- **Honest status**: this is the API gap of route A. Over a **field** base it is
-  dischargeable as sketched. Over an **arbitrary** `ℚ`-scheme base — what the moduli
-  functor needs — it requires spreading out; that is ticket WP-A7 and is NOT yet planned
-  in detail, because the field case must be built first to see the right shape.
+### [WP-A5] The root as a section over the cover — FIELD BASE (fully planned)
+Split into three single-conclusion tickets. Nothing here is an API gap: the Galois
+equivariance is already proved and the descent engine already exists.
 
-### [WP-A6] Locally-constant transitions
-- **Status**: blocked (needs WP-A4) · **File**: `WeilPairing/RootSplitting.lean`
-- **Statement**: WP-A4 with the transition a morphism into the constant `GL₂(ZMod N)`
-  scheme rather than a single matrix.
-- **Note**: only needed if the cover's kernel pair is not connected; check before building.
+#### [WP-A5.1] Galois equivariance of the field pairing — **ALREADY PROVED**
+`weilPairing_galois_equivariant` (`WeilPairing/GaloisEquivariance.lean:890`), sorry-free,
+908-line development. No work; cite it.
 
-### [WP-A7] General base — spreading out the root section
-- **Status**: blocked (needs WP-A5) · **File**: TBD
-- **Note**: deliberately unplanned until WP-A5 lands. Do not start speculatively.
+#### [WP-A5.2] The level-structure-to-root map on `k̄`-points
+- **Status**: open · **File**: new, `WeilPairing/TautRootField.lean` · **Depends on**: WP-A3
+- **Statement**: for `k` a field of characteristic zero with `N` invertible, and `E/k`
+  elliptic, the map sending a naive full level-`N` structure `(P, Q)` on `E_{k̄}` to
+  `fieldWeilPairing … P Q : {u : k̄ // u ^ N = 1}` is `Gal(k̄/k)`-equivariant.
+- **Proof sketch**: (1) unfold the Galois action on level structures (it acts on the two
+  points); (2) apply `weilPairing_galois_equivariant` with `hW : W.map σ = W` supplied by
+  the curve being defined over `k`; (3) transport through `fieldWeilPairing_val`.
+- **Lemmas**: `weilPairing_galois_equivariant`, `fieldWeilPairing_val`.
+- **Generality**: char-0 field `k`; matches the `EtaleDescent` interface.
+
+#### [WP-A5.3] The root morphism over a field base
+- **Status**: blocked (WP-A5.2) · **File**: `WeilPairing/TautRootField.lean`
+- **Statement**: there is a morphism `Y(N)_{E/k} ⟶ μ_{N,k}` of finite étale `k`-schemes
+  whose `k̄`-points are the map of WP-A5.2.
+- **Proof sketch**: apply `exists_finiteEtaleHom_of_galoisEquivariant`
+  (`WeilPairing/EtaleDescent.lean:309`) to WP-A5.2. Finite étaleness of `Y(N)_{E/k}` is
+  `isFinite_fullLevelSpaceStruct` + `levelSpaceΓπ_etale`; of `μ_N`, standard.
+- **Lemmas**: `exists_finiteEtaleHom_of_galoisEquivariant`, `fullLevelSpaceStruct_fppf`.
+
+### [WP-A7] General base — fully planned, via the universal object and normality
+The previous board entry left this "deliberately unplanned". It is now planned. The
+argument avoids any spreading-out machinery by using two facts the tree already has: the
+universal object is an **affine, integral, integrally closed** base, and an `N`-th root of
+unity in a fraction field is **integral** over the ring, hence lies in it.
+
+#### [WP-A7.1] The universal moduli ring is an integral domain
+- **Status**: open · **File**: new, `WeilPairing/UniversalRootBase.lean`
+- **Statement**: `IsDomain (E4ModuliRing R)` for `R = ℤ[1/2]`-flavoured base (and the
+  `E3ModuliRing` analogue at `N = 3`).
+- **Proof sketch**: `E4ModuliRing R = Localization.Away (e4Delta R)` of
+  `MvPolynomial (Fin 3) R ⧸ span {e4CurveRel, e4OrderRel}`. (1) show the two relations
+  generate a prime ideal — `e4CurveRel` is the Weierstrass relation, monic in `X 2`, so the
+  quotient by it is a free module over `MvPolynomial (Fin 2) R` and a domain when `R` is;
+  `e4OrderRel` then cuts a further hypersurface, again monic in a remaining variable;
+  (2) localisation of a domain is a domain (`IsLocalization.isDomain_of_isDomain` /
+  `Localization.instIsDomain`).
+- **Lemmas**: `Ideal.Quotient.isDomain_iff_prime`, `MvPolynomial.isDomain`,
+  `Polynomial.Monic.irreducible…`, `IsLocalization.isDomain_localization`.
+- **Risk**: primality of the two-relation ideal is the real content; if it resists, the
+  fallback is WP-A7.1′ below, which needs only reducedness.
+- **WP-A7.1′ (fallback)**: `IsReduced` + irreducible spectrum suffices for the rigidity
+  half; normality is needed only for A7.2. If A7.1 resists, replace A7.2's "integrally
+  closed" by an explicit integrality-of-roots-of-unity argument on the concrete generators.
+
+#### [WP-A7.2] An `N`-th root of unity in the fraction field lies in the ring
+- **Status**: open · **File**: `WeilPairing/UniversalRootBase.lean` · **Depends on**: A7.1
+- **Statement**: for `A` an integrally closed domain and `x ∈ Frac A` with `x ^ N = 1`,
+  `x` is in the image of `A`.
+- **Proof sketch**: `x` is a root of the monic `X ^ N - 1 ∈ A[X]`, hence integral over `A`;
+  integrally closed gives `x ∈ A`.
+- **Lemmas**: `IsIntegrallyClosed.isIntegral_iff`, `Polynomial.monic_X_pow_sub_C`,
+  `isIntegral_of_root_monic` (verify exact names before use).
+- **Generality**: any `IsIntegrallyClosed` domain — state it there, not for the specific
+  moduli ring; this is a general-purpose lemma worth having.
+
+#### [WP-A7.3] The universal root
+- **Status**: blocked (A5.3, A7.1, A7.2) · **File**: `WeilPairing/UniversalRootBase.lean`
+- **Statement**: an element `ζ_univ ∈ E4ModuliRing R` with `ζ_univ ^ N = 1` whose image at
+  every geometric point is the field pairing of the tautological basis.
+- **Proof sketch**: (1) A5.3 over the fraction field gives the root there; (2) A7.2 pulls
+  it into the ring; (3) the geometric-point description transports because both sides are
+  determined at the generic point and the base is integral.
+
+#### [WP-A7.4] Transport to an arbitrary base along the classifying map
+- **Status**: blocked (A7.3) · **File**: `WeilPairing/UniversalRootBase.lean`
+- **Statement**: for arbitrary `E/S` over a `ℚ`-scheme, the full-level cover
+  `S' = Y(N)_{E/S}` carries a root `ζ ∈ Γ(S',⊤)` with `ζ ^ N = 1`, namely the pullback of
+  `ζ_univ` along the classifying morphism `S' ⟶ Y(N)_univ`.
+- **Proof sketch**: the classifying map exists because `S'` carries the tautological level
+  structure and `Y(N)_univ` represents the naive full level-`N` problem
+  (`naiveLevelFour_representable_by_affine` / `naiveLevelThree_representable_by_affine`,
+  both proved by hand this session and NOT via the pairing, so no circularity); pull back
+  `ζ_univ` and its `N`-th-root property along it.
+- **Non-circularity note**: this is the load-bearing point of route A. The universal object
+  is available independently of the Weil pairing, so using it to source the root is sound.
+
+#### [WP-A7.5] The det twist transports along base change
+- **Status**: blocked (A7.4) · **File**: `WeilPairing/UniversalRootBase.lean`
+- **Statement**: the pulled-back root satisfies the kernel-pair law
+  `pr₁^* ζ = (pr₂^* ζ) ^ (det g)`.
+- **Proof sketch**: the law holds for `ζ_univ` by WP-A3 at geometric points plus rigidity
+  (two morphisms into the unramified separated `μ_N` over an integral base agreeing at the
+  generic point are equal); pulling back preserves it.
 
 ### [WP-A8] Assemble `WeilPairingLocalData` and discharge DS4
 - **Status**: blocked (needs WP-A4, WP-A5/A7) · **File**: `WeilPairing/CharZeroAssembly.lean`
