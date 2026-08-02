@@ -452,6 +452,68 @@ theorem isClosed_spaProfileConditions (I : Ideal A) (g : A) :
     rw [h]
     exact IsClosed.preimage (continuous_apply _) (isClosed_discrete _)
 
+/-- A profile point satisfying the two Spa-profile conditions is continuous: the `oneOver`
+coordinate being `false` puts `w π` strictly below `1`, the `leOne` coordinates put `A₀`
+inside the unit ball, and `P.I = (π)` then makes every ideal generator strictly small. -/
+private lemma isContinuous_of_profile_conditions [IsTopologicalRing A]
+    (P : PairOfDefinition A) {π : P.A₀} (hπ : P.I = Ideal.span {π})
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span {((π : A))})
+    (w : Spv A) (hw_mem : w ∈ SpvAI A I)
+    (hone_w : ιSpvR I w (RCoord.oneOver I ((π : A))) = false)
+    (hplus_w : ∀ f ∈ (A⁺ : Subring A), ιSpvR I w (RCoord.leOne I f) = true) :
+    w.IsContinuous := by
+  letI : ValuativeRel A := w.toValuativeRel
+  set wv := ValuativeRel.valuation A with hwv_def
+  have h_le_one : ∀ a : P.A₀, wv ((a : A)) ≤ 1 := by
+    intro a
+    have hcoord := hplus_w (a : A) (hA₀le a)
+    rw [ιSpvR_eq_true_iff] at hcoord
+    have hle : w.vle ((a : A)) 1 :=
+      hcoord.1 (a : A) (by simp [RCoord.leOne])
+    have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
+    simpa using h2
+  have h_lt_pi : wv ((π : A)) < 1 := by
+    by_contra hge
+    push Not at hge
+    have hge' : wv 1 ≤ wv ((π : A)) := by
+      rw [map_one]
+      exact hge
+    have hne : wv ((π : A)) ≠ 0 := by
+      intro h0
+      rw [map_one, h0] at hge'
+      simp at hge'
+    have htrue : ιSpvR I w (RCoord.oneOver I ((π : A))) = true := by
+      rw [ιSpvR_eq_true_iff]
+      refine ⟨fun t ht => ?_, fun hcon => hne ((vle_zero_iff_canonical w _).mp hcon)⟩
+      simp only [RCoord.oneOver, Finset.mem_singleton] at ht
+      subst ht
+      exact (vle_iff_canonical w 1 ((π : A))).mpr hge'
+    rw [hone_w] at htrue
+    exact Bool.false_ne_true htrue
+  have h_lt_one : ∀ a ∈ P.I, wv ((P.A₀.subtype a)) < 1 := by
+    intro a ha
+    rw [hπ] at ha
+    obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
+    have hmul : wv ((P.A₀.subtype (c * π))) = wv ((c : A)) * wv ((π : A)) := by
+      rw [show (P.A₀.subtype (c * π) : A) = (c : A) * ((π : A)) from rfl, map_mul]
+    rw [hmul]
+    calc wv ((c : A)) * wv ((π : A)) ≤ 1 * wv ((π : A)) := by
+          gcongr
+          exact h_le_one c
+      _ = wv ((π : A)) := one_mul _
+      _ < 1 := h_lt_pi
+  have hmap : Ideal.map P.A₀.subtype P.I = I := by
+    rw [hπ, Ideal.map_span, Set.image_singleton, hIeq]
+    rfl
+  have h_in : Spv.IsInSpvAI w (Ideal.map P.A₀.subtype P.I) := by
+    rw [hmap]
+    exact hw_mem
+  have hcont : w.IsContinuous :=
+    Spv.isContinuous_of_isInSpvAI_of_lt_one P w h_in (fun a => h_le_one a) h_lt_one
+  exact Spv.isContinuous_of_isInSpvAI_of_lt_one P w h_in (fun a => h_le_one a) h_lt_one
+
+
 /-- **Wedhorn 7.10 + 7.35, profile form (principal Tate pair).** Let `P` be a pair of
 definition with `P.I = (π)` principal, `P.A₀ ≤ A⁺`, and `I = (↑π)` the generated ideal
 of `A`. The `Spa`-profile image equals the compact carrier intersected with the clopen
@@ -499,54 +561,8 @@ theorem image_ιSpvR_spa_eq [IsTopologicalRing A] (P : PairOfDefinition A) {π :
     have hplus_w : ∀ f ∈ (A⁺ : Subring A), ιSpvR I w (RCoord.leOne I f) = true := by
       intro f hf
       rw [hprofile]; exact hplus f hf
-    letI : ValuativeRel A := w.toValuativeRel
-    set wv := ValuativeRel.valuation A with hwv_def
-    have h_le_one : ∀ a : P.A₀, wv ((a : A)) ≤ 1 := by
-      intro a
-      have hcoord := hplus_w (a : A) (hA₀le a)
-      rw [ιSpvR_eq_true_iff] at hcoord
-      have hle : w.vle ((a : A)) 1 :=
-        hcoord.1 (a : A) (by simp [RCoord.leOne])
-      have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
-      simpa using h2
-    have h_lt_pi : wv ((π : A)) < 1 := by
-      by_contra hge
-      push Not at hge
-      have hge' : wv 1 ≤ wv ((π : A)) := by
-        rw [map_one]
-        exact hge
-      have hne : wv ((π : A)) ≠ 0 := by
-        intro h0
-        rw [map_one, h0] at hge'
-        simp at hge'
-      have htrue : ιSpvR I w (RCoord.oneOver I ((π : A))) = true := by
-        rw [ιSpvR_eq_true_iff]
-        refine ⟨fun t ht => ?_, fun hcon => hne ((vle_zero_iff_canonical w _).mp hcon)⟩
-        simp only [RCoord.oneOver, Finset.mem_singleton] at ht
-        subst ht
-        exact (vle_iff_canonical w 1 ((π : A))).mpr hge'
-      rw [hone_w] at htrue
-      exact Bool.false_ne_true htrue
-    have h_lt_one : ∀ a ∈ P.I, wv ((P.A₀.subtype a)) < 1 := by
-      intro a ha
-      rw [hπ] at ha
-      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
-      have hmul : wv ((P.A₀.subtype (c * π))) = wv ((c : A)) * wv ((π : A)) := by
-        rw [show (P.A₀.subtype (c * π) : A) = (c : A) * ((π : A)) from rfl, map_mul]
-      rw [hmul]
-      calc wv ((c : A)) * wv ((π : A)) ≤ 1 * wv ((π : A)) := by
-            gcongr
-            exact h_le_one c
-        _ = wv ((π : A)) := one_mul _
-        _ < 1 := h_lt_pi
-    have hmap : Ideal.map P.A₀.subtype P.I = I := by
-      rw [hπ, Ideal.map_span, Set.image_singleton, hIeq]
-      rfl
-    have h_in : Spv.IsInSpvAI w (Ideal.map P.A₀.subtype P.I) := by
-      rw [hmap]
-      exact hw_mem
     have hcont : w.IsContinuous :=
-      Spv.isContinuous_of_isInSpvAI_of_lt_one P w h_in (fun a => h_le_one a) h_lt_one
+      isContinuous_of_profile_conditions P hπ hA₀le I hIeq w hw_mem hone_w hplus_w
     have hbdd : ∀ f ∈ (A⁺ : Subring A), w.vle f 1 := by
       intro f hf
       have hcoord := hplus_w f hf
