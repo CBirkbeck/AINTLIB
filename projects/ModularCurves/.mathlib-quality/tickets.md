@@ -33819,3 +33819,38 @@ points-equivalence phrased with `E.baseChange g` into the `X.pullbackAlong g` fo
 `ModuliProblem.AffineOverEll` (`Moduli/EllCategory.lean:198`) demands. With that,
 `gammaOneNaive_affineOverEll` is the three-line mirror of `gammaFullNaive_affineOverEll`, and
 WP-D2 follows.
+
+## [WP-D1c-coarse] COMPLETE (2026-08-02) — axiom-verified, **no T-D6 dependency**
+
+`Moduli/GammaOneNaiveRelRep.lean` (new):
+* `naiveGammaOneLocusPointsEquiv_pullSection` — the locus dictionary commutes with the
+  base-change comparison (the `Γ₁`-analogue of `fullLevelLocusPointsEquiv_pullSection_fst`);
+* `nIsInvertible_base` — `IsUnit (N : R)` ⟹ `NIsInvertible X.base N`;
+* **`gammaOneNaive_affineOverEll`** and `gammaOneNaive_relativelyRepresentable`.
+
+Two things made the assembly short. `(X.pullbackAlong g).curve` is **definitionally**
+`X.curve.baseChange g` (`Moduli/EllCategory.lean:99`), so
+`naiveGammaOneLocusPointsEquiv` already has the target `AffineOverEll` demands — no
+transport lemma needed. And the naturality square reduces through `section_ext_comp_fst` to
+the carrier-level `naiveGammaOneLocusPointsEquiv_natural`.
+
+The file needs `backward.isDefEq.respectTransparency.types false`, exactly as
+`Moduli/LevelLocusNatural.lean:27` does, so `rw` can see through the
+`pullbackAlong`/`baseChange` coercion. Transparency option, not a heartbeat bump; the file
+has zero of those.
+
+Root build green at 9637 jobs.
+
+### The D-chain
+WP-D1a ✅ · WP-D1b ✅ · WP-D1c construction ✅ · WP-D1c-rel ✅ · **WP-D1c-coarse ✅**
+
+**Next — [WP-D2]**, and it is now mechanical:
+1. `Etale (yFullToYOne …)` — from `Etale.of_comp`, given that `Y(N)` and `Y₁(N)` are the
+   representing objects of two problems that are now *both* relatively representable by
+   finite étale loci;
+2. `Etale ⟹ Smooth` is an instance (`Morphisms/Etale.lean:114`) and `Smooth` composes
+   (`Morphisms/Smooth.lean:105`), so `Smooth X.structMap` follows from
+   `yOneStructMap_smooth`;
+3. `YFull.smooth_affine_of_representableBy` (generic in the problem) spreads it to every
+   representing object — closing `YFull.exists_representing_smooth_affine`
+   (`ModularCurve/YFullRoute.lean:777`), `sorry` since T-E9.
