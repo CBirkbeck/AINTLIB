@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.FieldTheory.IsAlgClosed.Basic
-import ModularCurves.EllipticCurve.Torsion
+import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.ForMathlib.RootOfUnityIntPow
 import ModularCurves.GroupScheme.MuN
 
 /-!
@@ -105,6 +106,82 @@ theorem weilPairingEval_self {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
     (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
     (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by sorry
 
+/-! ### Consequences of the register (proved, not registered)
+
+The four bilinearity/alternation entries above generate more of the pairing's algebra than
+the register admits. Everything in this section is **derived**: the torsion-closure lemmas
+the bilinearity docstrings already refer to as `point_add_killedBy`, the first-slot power
+law that mirrors the registered second-slot one, and — most importantly — the symplectic
+formula `weilPairingEval_symplectic`, which is the register's most-consumed entry
+(11 call sites in `RhoPairingBridge`, `RhoSections` and `YRho`) and needs no new input.
+-/
+
+/-- **(T-A6d closure)** The raw kill-by-`N` condition is closed under addition of points.
+This is the lemma the bilinearity specifications' docstrings call `point_add_killedBy`;
+it was referenced but never stated. -/
+theorem point_add_killedBy {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} {x y : E.Point g}
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (x + y).1 ≫ E.mulByHom N = g ≫ E.zero := by
+  have hx' := (E.smul_eq_zero_iff_comp_mulByHom g N x).mpr hx
+  have hy' := (E.smul_eq_zero_iff_comp_mulByHom g N y).mpr hy
+  exact (E.smul_eq_zero_iff_comp_mulByHom g N (x + y)).mp
+    (by rw [smul_add, hx', hy', add_zero])
+
+/-- **(T-A6d closure)** The raw kill-by-`N` condition is closed under integer scalars. -/
+theorem point_zsmul_killedBy {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} {x : E.Point g} (a : ℤ)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (a • x).1 ≫ E.mulByHom N = g ≫ E.zero := by
+  have hx' := (E.smul_eq_zero_iff_comp_mulByHom g N x).mpr hx
+  refine (E.smul_eq_zero_iff_comp_mulByHom g N (a • x)).mp ?_
+  rw [smul_comm, hx', smul_zero]
+
+/-- `weilPairingEval` depends only on the points: the kill-by-`N` witnesses are
+proof-irrelevant. -/
+theorem weilPairingEval_congr {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    {x x' y y' : E.Point g} (ex : x = x') (ey : y = y')
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hx' : x'.1 ≫ E.mulByHom N = g ≫ E.zero) (hy' : y'.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x y hx hy : Γ(T, ⊤)) = E.weilPairingEval x' y' hx' hy' := by
+  subst ex; subst ey; rfl
+
+/-- **Antisymmetry** `e_N(x,y) · e_N(y,x) = 1`, from alternation applied to `x + y` and
+bilinearity in both slots. Silverman III.8.1(c) derives antisymmetry from (a) and (b) in
+exactly this way. -/
+theorem weilPairingEval_antisymm {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x y : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x y hx hy : Γ(T, ⊤)) * E.weilPairingEval y x hy hx = 1 := by
+  have hxy := E.point_add_killedBy hx hy
+  have h := E.weilPairingEval_self (x + y) hxy
+  rw [E.weilPairingEval_add_left x y (x + y) hx hy hxy hxy,
+    E.weilPairingEval_add_right x x y hx hx hy hxy,
+    E.weilPairingEval_add_right y x y hy hx hy hxy,
+    E.weilPairingEval_self x hx, E.weilPairingEval_self y hy, one_mul, mul_one] at h
+  exact h
+
+/-- **The power law in the first slot** `e_N(a • x, y) = e_N(x, y)^(a mod N)` — the mirror
+of the registered `weilPairingEval_zsmul_right`, obtained from it by antisymmetry. -/
+theorem weilPairingEval_zsmul_left {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x y : E.Point g) (a : ℤ)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hax : (a • x).1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval (a • x) y hax hy : Γ(T, ⊤)) =
+      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat) := by
+  have hef : (E.weilPairingEval x y hx hy : Γ(T, ⊤)) *
+      E.weilPairingEval y x hy hx = 1 := E.weilPairingEval_antisymm x y hx hy
+  have h1 : (E.weilPairingEval (a • x) y hax hy : Γ(T, ⊤)) *
+      E.weilPairingEval y (a • x) hy hax = 1 :=
+    E.weilPairingEval_antisymm (a • x) y hax hy
+  have h2 : (E.weilPairingEval y (a • x) hy hax : Γ(T, ⊤)) =
+      (E.weilPairingEval y x hy hx : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat) :=
+    E.weilPairingEval_zsmul_right y x a hy hx hax
+  have hunit : IsUnit ((E.weilPairingEval y x hy hx : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat)) :=
+    (isUnit_of_pow_eq_one (E.weilPairingEval y x hy hx).2).pow _
+  refine (hunit.mul_left_inj).mp ?_
+  rw [pow_mul_pow_eq_one hef, ← h2]
+  exact h1
+
 /-- **(T-C3 = KM 2.8, fibrewise nondegeneracy — `N` invertible)** On a geometric point of
 `S` where `N` is invertible, the pairing is nondegenerate: a torsion point pairing
 trivially with everything is zero.
@@ -128,14 +205,46 @@ theorem weilPairingEval_nondegenerate {N : ℕ} [NeZero N]
 /-- **(T-C2a, base-change naturality — required pinning spec per expert review Q4:
 "compatible with arbitrary base change", since fibrewise agreement does not pin
 morphisms over non-reduced bases)** Restriction along `k : T' ⟶ T` commutes with the
-pairing: `e_N(x|_{T'}, y|_{T'}) = (e_N(x,y))|_{T'}` in `Γ(T', O)`. -/
+pairing: `e_N(x|_{T'}, y|_{T'}) = (e_N(x,y))|_{T'}` in `Γ(T', O)`.
+
+**PROVED (2026-08-02) — no longer a register entry.** This specification needs nothing
+about the pairing beyond `weilPairing_over`: restriction is naturality of the points
+dictionary (`muNPointsEquiv_natural`) composed with naturality of `pullback.lift`
+(`comp_pointToTorsion`). Whatever construction eventually fills the DS4 data-sorry, this
+law comes for free. -/
 theorem weilPairingEval_restrict {N : ℕ} [NeZero N] {T T' : Scheme.{u}} {g : T ⟶ S}
     (k : T' ⟶ T) (x y : E.Point g)
     (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
     (hx' : (Point.restrict E k x).1 ≫ E.mulByHom N = (k ≫ g) ≫ E.zero)
     (hy' : (Point.restrict E k y).1 ≫ E.mulByHom N = (k ≫ g) ≫ E.zero) :
     (E.weilPairingEval (Point.restrict E k x) (Point.restrict E k y) hx' hy' : Γ(T', ⊤))
-      = (Scheme.Γ.map k.op).hom (E.weilPairingEval x y hx hy : Γ(T, ⊤)) := by sorry
+      = (Scheme.Γ.map k.op).hom (E.weilPairingEval x y hx hy : Γ(T, ⊤)) := by
+  -- The pairing morphism itself never enters: restriction is naturality of the points
+  -- dictionary composed with naturality of `pullback.lift`, so this specification is a
+  -- formal consequence of `weilPairing_over` alone.
+  have hc : E.pointToTorsion x hx ≫ E.torsionπ N =
+      E.pointToTorsion y hy ≫ E.torsionπ N := by
+    rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]
+  have hc' : E.pointToTorsion (Point.restrict E k x) hx' ≫ E.torsionπ N =
+      E.pointToTorsion (Point.restrict E k y) hy' ≫ E.torsionπ N := by
+    rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]
+  have hlift : pullback.lift (E.pointToTorsion (Point.restrict E k x) hx')
+        (E.pointToTorsion (Point.restrict E k y) hy') hc' =
+      k ≫ pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) hc := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [pullback.lift_fst, Category.assoc, pullback.lift_fst,
+        E.pointToTorsion_restrict k x hx hx']
+    · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd,
+        E.pointToTorsion_restrict k y hy hy']
+  have hnat := muNPointsEquiv_natural S N g k
+    ⟨pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) hc ≫
+        E.weilPairing N, by
+      rw [Category.assoc, E.weilPairing_over N, ← Category.assoc,
+        pullback.lift_fst, E.pointToTorsion_torsionπ]⟩
+  rw [Scheme.Γ_map_op]
+  refine Eq.trans ?_ hnat
+  refine congrArg (fun v => ((muNPointsEquiv S N (k ≫ g) v : Γ(T', ⊤)))) (Subtype.ext ?_)
+  simp only [hlift, Category.assoc]
 
 /-- **(T-C2b, divisibility — expert review Q5: "compatibility with N ∣ M")** For
 points killed by `N`, the `N·M`-pairing is the `M`-th power of the `N`-pairing:
@@ -155,15 +264,54 @@ theorem weilPairingEval_mul {N M : ℕ} [NeZero N] [NeZero M] {T : Scheme.{u}}
 On a pair of torsion points, `e_N(aP + bQ, cP + dQ) = e_N(P,Q)^{ad − bc}` (exponent
 taken mod `N`). Together with Galois equivariance over fields (recorded in ticket
 `T-C4`) and `det ∘ ρ_E = χ_N`, this fixes the project's normalisation once and for
-all. -/
+all.
+
+**PROVED (2026-08-02) — no longer a register entry.** This was the register's
+most-consumed sorry (11 call sites) and it needs no new input: expand both slots by
+bilinearity, strip the four scalars by the two power laws, kill the diagonal terms by
+alternation, and cancel the off-diagonal one against `e(Q,P)` by antisymmetry. It is
+exactly Silverman III.8.1(a)+(b)+(c) ⟹ the determinant law, the same derivation as the
+field-level `weilPairing_gl2` in `WeilPairing/FieldPairingDet.lean`. -/
 theorem weilPairingEval_symplectic {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
     (P Q : E.Point g) (a b c d : ℤ)
     (hP : P.1 ≫ E.mulByHom N = g ≫ E.zero) (hQ : Q.1 ≫ E.mulByHom N = g ≫ E.zero)
     (h₁ : (a • P + b • Q).1 ≫ E.mulByHom N = g ≫ E.zero)
     (h₂ : (c • P + d • Q).1 ≫ E.mulByHom N = g ≫ E.zero) :
     (E.weilPairingEval (a • P + b • Q) (c • P + d • Q) h₁ h₂ : Γ(T, ⊤)) =
-      (E.weilPairingEval P Q hP hQ : Γ(T, ⊤)) ^ (((a * d - b * c) % (N : ℤ)).toNat) :=
-  by sorry
+      (E.weilPairingEval P Q hP hQ : Γ(T, ⊤)) ^ (((a * d - b * c) % (N : ℤ)).toNat) := by
+  have haP := E.point_zsmul_killedBy a hP
+  have hbQ := E.point_zsmul_killedBy b hQ
+  have hcP := E.point_zsmul_killedBy c hP
+  have hdQ := E.point_zsmul_killedBy d hQ
+  -- expand both slots
+  rw [E.weilPairingEval_add_left (a • P) (b • Q) (c • P + d • Q) haP hbQ h₂ h₁,
+    E.weilPairingEval_add_right (a • P) (c • P) (d • Q) haP hcP hdQ h₂,
+    E.weilPairingEval_add_right (b • Q) (c • P) (d • Q) hbQ hcP hdQ h₂]
+  -- strip the left scalars, then the right ones
+  rw [E.weilPairingEval_zsmul_left P (c • P) a hP hcP haP,
+    E.weilPairingEval_zsmul_left P (d • Q) a hP hdQ haP,
+    E.weilPairingEval_zsmul_left Q (c • P) b hQ hcP hbQ,
+    E.weilPairingEval_zsmul_left Q (d • Q) b hQ hdQ hbQ,
+    E.weilPairingEval_zsmul_right P P c hP hP hcP,
+    E.weilPairingEval_zsmul_right P Q d hP hQ hdQ,
+    E.weilPairingEval_zsmul_right Q P c hQ hP hcP,
+    E.weilPairingEval_zsmul_right Q Q d hQ hQ hdQ]
+  -- the diagonal terms are `1`
+  rw [E.weilPairingEval_self P hP, E.weilPairingEval_self Q hQ, one_pow, one_pow,
+    one_pow, one_pow, one_mul, mul_one]
+  -- collect the two surviving exponents
+  rw [pow_toNat_emod_mul (E.weilPairingEval P Q hP hQ).2,
+    pow_toNat_emod_mul (E.weilPairingEval Q P hQ hP).2]
+  -- cancel `e(Q,P)^{bc}` against `e(P,Q)^{bc}` using antisymmetry
+  have hanti : (E.weilPairingEval Q P hQ hP : Γ(T, ⊤)) *
+      E.weilPairingEval P Q hP hQ = 1 := by
+    rw [mul_comm]; exact E.weilPairingEval_antisymm P Q hP hQ
+  have hunit : IsUnit ((E.weilPairingEval P Q hP hQ : Γ(T, ⊤)) ^
+      ((b * c % (N : ℤ)).toNat)) :=
+    (isUnit_of_pow_eq_one (E.weilPairingEval P Q hP hQ).2).pow _
+  refine (hunit.mul_left_inj).mp ?_
+  rw [pow_toNat_emod_add (E.weilPairingEval P Q hP hQ).2, sub_add_cancel, mul_assoc,
+    pow_mul_pow_eq_one hanti, mul_one]
 
 end EllipticCurve
 

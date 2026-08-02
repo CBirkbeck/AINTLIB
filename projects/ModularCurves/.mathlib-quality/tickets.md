@@ -33229,3 +33229,52 @@ Notes for whoever works C2–C8:
 
 Mathlib's `epi_of_flat_of_surjective` proves the same stalkwise injectivity en route to an
 epi statement; that does not give injectivity on sections, since `Γ` is not faithful.
+
+## DS4 register: 10 sorries → 8 (2026-08-02). Two of Y(ρ̄)'s heaviest consumers closed.
+
+Both closed **without any new construction** — they were derivable from the register's own
+generators and were only ever sorries because nobody had done the algebra.
+
+### `weilPairingEval_restrict` (6 call sites) — PROVED
+Needs nothing beyond `weilPairing_over`. Restriction is naturality of the points dictionary
+(`muNPointsEquiv_natural`, `GroupScheme/MuN.lean:1383`) composed with naturality of
+`pullback.lift` (`comp_pointToTorsion`). Whatever eventually fills the DS4 data-sorry, this
+law comes for free.
+
+### `weilPairingEval_symplectic` (11 call sites — the most-consumed entry) — PROVED
+Silverman III.8.1 (a)+(b)+(c) ⟹ the determinant law, the same derivation as the field-level
+`weilPairing_gl2`. Expand both slots by bilinearity, strip the four scalars by the two power
+laws, kill the diagonals by alternation, cancel the off-diagonal against `e(Q,P)` by
+antisymmetry.
+
+### New supporting API (all axiom-verified, all previously missing)
+* `EllipticCurve/Torsion.lean` — `comp_pointToTorsion` **moved here** from
+  `GroupScheme/TorsionCombinationSpec.lean` (it had zero external users and belongs next to
+  `pointToTorsion`), plus its `Point.restrict` spelling `pointToTorsion_restrict`.
+* `ForMathlib/RootOfUnityIntPow.lean` (new) — integer exponents on a root of unity.
+  `pow_eq_pow_of_nat_modEq`, `pow_val_add`, `pow_val_mul` **moved here** from
+  `WeilPairing/FieldPairingDet.lean` so the register can share them without importing
+  HasseWeil; new: `toNat_emod_eq_val` (identifies the `ZMod N`-value spelling with the
+  `(m % N).toNat` spelling the register uses), `pow_toNat_emod_add`, `pow_toNat_emod_mul`,
+  `pow_toNat_emod_zero`, `pow_mul_pow_eq_one`, `isUnit_of_pow_eq_one`.
+* `WeilPairing/Basic.lean` — `point_add_killedBy` and `point_zsmul_killedBy` (the
+  torsion-closure lemmas the bilinearity docstrings **referenced but never stated**),
+  `weilPairingEval_congr`, `weilPairingEval_antisymm`, `weilPairingEval_zsmul_left`.
+
+### The register's true generating set is now
+`weilPairing` (def), `_over`, `_add_left`, `_add_right`, `_zsmul_right`, `_self`,
+`_nondegenerate` — plus `_mul`, which still has **zero consumers**. Note `_self` moved
+*onto* the critical path: it was unused before, and `_symplectic` now derives from it.
+
+### What this means for the plan
+The eight-spec problem is now a **six**-spec problem, and the six survivors are exactly the
+pairing's defining properties — none is derivable from the others, all need the
+construction. So the critical path is unchanged and unambiguous: produce the
+`WeilPairingLocalData`, i.e. the root (WP-B1…B4), and the rest follows. WP-C2 (the master
+evaluation formula) is still the lemma that converts the six into `ZMod N`-determinant
+algebra.
+
+### Dedup note for the cleaner
+`ModularCurve/YRho.lean:2982` has a `Scheme.{0}`-specialised `weilPairingEval_congr`. The
+universe-polymorphic one now lives in `WeilPairing/Basic.lean`; YRho's two call sites
+(3022, 3119) could delegate to it. Left alone here — YRho is 8000+ lines of live WIP.

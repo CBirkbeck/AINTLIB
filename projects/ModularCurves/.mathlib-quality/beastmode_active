@@ -1,1 +1,1 @@
-FOCUS: [WP-C1] DONE+axiom-verified. NEXT: WP-B2 re-sketch (normality via explicit E3ModuliRing, not smoothness)
+FOCUS: _symplectic + _restrict PROVED (DS4 10->8). Root build then commit.

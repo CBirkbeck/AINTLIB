@@ -58,18 +58,9 @@ noncomputable def torsionPairSectionsEquiv {T : Scheme.{u}} (g : T ⟶ S) :
 
 /-! ### Naturality of the combination morphisms -/
 
-/-- Composition with `pointToTorsion` is computed on the underlying `E`-points:
-`w ≫ pointToTorsion x hx` is `pointToTorsion` of the composite point. -/
-theorem comp_pointToTorsion {T T' : Scheme.{u}} {g : T ⟶ S} (w : T' ⟶ T)
-    (x : E.Point g) (hx : (x : T ⟶ E.E) ≫ E.mulByHom N = g ≫ E.zero) :
-    w ≫ E.pointToTorsion x hx = E.pointToTorsion
-      (⟨w ≫ (x : T ⟶ E.E), by rw [Category.assoc, x.2]⟩ : E.Point (w ≫ g))
-      (by rw [Category.assoc, hx, ← Category.assoc]) := by
-  apply pullback.hom_ext
-  · show w ≫ E.pointToTorsion x hx ≫ E.torsionι N = _ ≫ E.torsionι N
-    rw [E.pointToTorsion_torsionι, E.pointToTorsion_torsionι]
-  · show w ≫ E.pointToTorsion x hx ≫ E.torsionπ N = _ ≫ E.torsionπ N
-    rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]
+/- `comp_pointToTorsion` moved to its definitional home
+`EllipticCurve/Torsion.lean` (next to `pointToTorsion`), so that the DS4 register in
+`WeilPairing/Basic.lean` can use it without importing this file. -/
 
 /-! ### Points of the locus -/
 

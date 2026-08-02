@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
+import ModularCurves.ForMathlib.RootOfUnityIntPow
 import ModularCurves.WeilPairing.FieldPairing
 
 /-!
@@ -102,32 +103,9 @@ theorem fieldWeilPairing_gl2 (N : ℕ) (hN : (N : F) ≠ 0)
   simp only [fieldWeilPairing_val]
   exact weilPairing_gl2 W (N : ℤ) hz P Q hP hQ a b c d h₁ h₂
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- For an `N`-th root of unity the exponent only matters modulo `N`. -/
-theorem pow_eq_pow_of_nat_modEq {M : Type*} [Monoid M] {u : M} {N : ℕ} (hu : u ^ N = 1)
-    {m n : ℕ} (h : m % N = n % N) : u ^ m = u ^ n := by
-  conv_lhs => rw [← Nat.div_add_mod m N]
-  conv_rhs => rw [← Nat.div_add_mod n N]
-  rw [pow_add, pow_add, pow_mul, pow_mul, hu, one_pow, one_pow, one_mul, one_mul, h]
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- Powers of an `N`-th root of unity indexed by `ZMod N` are additive. -/
-theorem pow_val_add {M : Type*} [Monoid M] {u : M} {N : ℕ} [NeZero N] (hu : u ^ N = 1)
-    (x y : ZMod N) : u ^ x.val * u ^ y.val = u ^ (x + y).val := by
-  rw [← pow_add]
-  refine pow_eq_pow_of_nat_modEq hu ?_
-  rw [ZMod.val_add, Nat.mod_mod]
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-/-- Powers of an `N`-th root of unity indexed by `ZMod N` are multiplicative in the
-exponent. -/
-theorem pow_val_mul {M : Type*} [Monoid M] {u : M} {N : ℕ} [NeZero N] (hu : u ^ N = 1)
-    (x y : ZMod N) : u ^ (x * y).val = u ^ (x.val * y.val) := by
-  refine pow_eq_pow_of_nat_modEq hu ?_
-  rw [ZMod.val_mul, Nat.mod_mod]
+/- `pow_eq_pow_of_nat_modEq`, `pow_val_add` and `pow_val_mul` moved to
+`ForMathlib/RootOfUnityIntPow.lean`, so that the DS4 register in `WeilPairing/Basic.lean`
+can share them without importing this file (which pulls in HasseWeil). -/
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
