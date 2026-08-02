@@ -452,6 +452,42 @@ theorem isClosed_spaProfileConditions (I : Ideal A) (g : A) :
     rw [h]
     exact IsClosed.preimage (continuous_apply _) (isClosed_discrete _)
 
+/-- The `leOne` coordinates put `A₀` inside `w`'s unit ball. The instance is supplied
+EXPLICITLY (`@… w.toValuativeRel`) rather than by `letI` in the statement: synthesis has
+nothing to go on for a conclusion mentioning `w`'s own valuation. -/
+private lemma valuation_le_one_of_leOne (P : PairOfDefinition A) (I : Ideal A) (w : Spv A)
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (hplus_w : ∀ f ∈ (A⁺ : Subring A), ιSpvR I w (RCoord.leOne I f) = true) (a : P.A₀) :
+    @ValuativeRel.valuation A _ w.toValuativeRel (a : A) ≤ 1 := by
+  letI : ValuativeRel A := w.toValuativeRel
+  have hcoord := hplus_w (a : A) (hA₀le a)
+  rw [ιSpvR_eq_true_iff] at hcoord
+  have hle : w.vle ((a : A)) 1 := hcoord.1 (a : A) (by simp [RCoord.leOne])
+  have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
+  simpa using h2
+
+/-- A `false` `oneOver` coordinate is exactly a strict valuation bound. -/
+private lemma valuation_lt_one_of_oneOver_false (I : Ideal A) (w : Spv A) (g : A)
+    (hone_w : ιSpvR I w (RCoord.oneOver I g) = false) :
+    @ValuativeRel.valuation A _ w.toValuativeRel g < 1 := by
+  letI : ValuativeRel A := w.toValuativeRel
+  set wv := ValuativeRel.valuation A with hwv_def
+  by_contra hge
+  push Not at hge
+  have hge' : wv 1 ≤ wv g := by rw [map_one]; exact hge
+  have hne : wv g ≠ 0 := by
+    intro h0
+    rw [map_one, h0] at hge'
+    simp at hge'
+  have htrue : ιSpvR I w (RCoord.oneOver I g) = true := by
+    rw [ιSpvR_eq_true_iff]
+    refine ⟨fun t ht => ?_, fun hcon => hne ((vle_zero_iff_canonical w _).mp hcon)⟩
+    simp only [RCoord.oneOver, Finset.mem_singleton] at ht
+    subst ht
+    exact (vle_iff_canonical w 1 g).mpr hge'
+  rw [hone_w] at htrue
+  exact Bool.false_ne_true htrue
+
 /-- A profile point satisfying the two Spa-profile conditions is continuous: the `oneOver`
 coordinate being `false` puts `w π` strictly below `1`, the `leOne` coordinates put `A₀`
 inside the unit ball, and `P.I = (π)` then makes every ideal generator strictly small. -/
@@ -465,32 +501,8 @@ private lemma isContinuous_of_profile_conditions [IsTopologicalRing A]
     w.IsContinuous := by
   letI : ValuativeRel A := w.toValuativeRel
   set wv := ValuativeRel.valuation A with hwv_def
-  have h_le_one : ∀ a : P.A₀, wv ((a : A)) ≤ 1 := by
-    intro a
-    have hcoord := hplus_w (a : A) (hA₀le a)
-    rw [ιSpvR_eq_true_iff] at hcoord
-    have hle : w.vle ((a : A)) 1 :=
-      hcoord.1 (a : A) (by simp [RCoord.leOne])
-    have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
-    simpa using h2
-  have h_lt_pi : wv ((π : A)) < 1 := by
-    by_contra hge
-    push Not at hge
-    have hge' : wv 1 ≤ wv ((π : A)) := by
-      rw [map_one]
-      exact hge
-    have hne : wv ((π : A)) ≠ 0 := by
-      intro h0
-      rw [map_one, h0] at hge'
-      simp at hge'
-    have htrue : ιSpvR I w (RCoord.oneOver I ((π : A))) = true := by
-      rw [ιSpvR_eq_true_iff]
-      refine ⟨fun t ht => ?_, fun hcon => hne ((vle_zero_iff_canonical w _).mp hcon)⟩
-      simp only [RCoord.oneOver, Finset.mem_singleton] at ht
-      subst ht
-      exact (vle_iff_canonical w 1 ((π : A))).mpr hge'
-    rw [hone_w] at htrue
-    exact Bool.false_ne_true htrue
+  have h_le_one := valuation_le_one_of_leOne P I w hA₀le hplus_w
+  have h_lt_pi := valuation_lt_one_of_oneOver_false I w ((π : A)) hone_w
   have h_lt_one : ∀ a ∈ P.I, wv ((P.A₀.subtype a)) < 1 := by
     intro a ha
     rw [hπ] at ha
@@ -970,6 +982,57 @@ theorem isClosed_spaProfileConditions₂ (I : Ideal A) (g₁ g₂ : A) :
   exact (isClosed_spaProfileConditions I g₁).inter
     (IsClosed.preimage (continuous_apply _) (isClosed_discrete _))
 
+/-- The two-generator form of `isContinuous_of_profile_conditions`: `P.I = (g₁, g₂)` and
+both `oneOver` coordinates `false`. -/
+private lemma isContinuous_of_profile_conditions₂ [IsTopologicalRing A]
+    (P : PairOfDefinition A) {g₁ g₂ : P.A₀}
+    (hpair : P.I = Ideal.span ({g₁, g₂} : Set P.A₀))
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span ({(g₁ : A), (g₂ : A)} : Set A))
+    (w : Spv A) (hw_mem : w ∈ SpvAI A I)
+    (hone₁_w : ιSpvR I w (RCoord.oneOver I ((g₁ : A))) = false)
+    (hone₂_w : ιSpvR I w (RCoord.oneOver I ((g₂ : A))) = false)
+    (hplus_w : ∀ f ∈ (A⁺ : Subring A), ιSpvR I w (RCoord.leOne I f) = true) :
+    w.IsContinuous := by
+  letI : ValuativeRel A := w.toValuativeRel
+  set wv := ValuativeRel.valuation A with hwv_def
+  have h_le_one := valuation_le_one_of_leOne P I w hA₀le hplus_w
+  have h_lt_g₁ := valuation_lt_one_of_oneOver_false I w ((g₁ : A)) hone₁_w
+  have h_lt_g₂ := valuation_lt_one_of_oneOver_false I w ((g₂ : A)) hone₂_w
+  have h_lt_one : ∀ a ∈ P.I, wv ((P.A₀.subtype a)) < 1 := by
+    intro a ha
+    rw [hpair] at ha
+    obtain ⟨c₁, c₂, hc⟩ := Ideal.mem_span_pair.mp ha
+    have hval : wv ((P.A₀.subtype a)) ≤
+        max (wv ((c₁ : A)) * wv ((g₁ : A))) (wv ((c₂ : A)) * wv ((g₂ : A))) := by
+      calc wv ((P.A₀.subtype a))
+          = wv ((c₁ : A) * (g₁ : A) + (c₂ : A) * (g₂ : A)) := by
+            rw [← hc]
+            rfl
+        _ ≤ max (wv ((c₁ : A) * (g₁ : A))) (wv ((c₂ : A) * (g₂ : A))) :=
+            Valuation.map_add _ _ _
+        _ = max (wv ((c₁ : A)) * wv ((g₁ : A))) (wv ((c₂ : A)) * wv ((g₂ : A))) := by
+            rw [map_mul, map_mul]
+    refine lt_of_le_of_lt hval (max_lt ?_ ?_)
+    · calc wv ((c₁ : A)) * wv ((g₁ : A)) ≤ 1 * wv ((g₁ : A)) := by
+            gcongr
+            exact h_le_one c₁
+        _ = wv ((g₁ : A)) := one_mul _
+        _ < 1 := h_lt_g₁
+    · calc wv ((c₂ : A)) * wv ((g₂ : A)) ≤ 1 * wv ((g₂ : A)) := by
+            gcongr
+            exact h_le_one c₂
+        _ = wv ((g₂ : A)) := one_mul _
+        _ < 1 := h_lt_g₂
+  have hmap : Ideal.map P.A₀.subtype P.I = I := by
+    rw [hpair, Ideal.map_span, Set.image_insert_eq, Set.image_singleton, hIeq]
+    rfl
+  have h_in : Spv.IsInSpvAI w (Ideal.map P.A₀.subtype P.I) := by
+    rw [hmap]
+    exact hw_mem
+  exact Spv.isContinuous_of_isInSpvAI_of_lt_one P w h_in (fun a => h_le_one a) h_lt_one
+
+
 /-- Pair version of `image_ιSpvR_spa_eq` (Wedhorn 7.10 both ways, two generators):
 the `Spa`-profile image is cut out of the carrier by the two `v(gᵢ) < 1` cylinders and
 the `A⁺`-boundedness cylinders. -/
@@ -1021,70 +1084,8 @@ theorem image_ιSpvR_spa_eq₂ [IsTopologicalRing A] (P : PairOfDefinition A)
     have hplus_w : ∀ f ∈ (A⁺ : Subring A), ιSpvR I w (RCoord.leOne I f) = true := by
       intro f hf
       rw [hprofile]; exact hplus f hf
-    letI : ValuativeRel A := w.toValuativeRel
-    set wv := ValuativeRel.valuation A with hwv_def
-    have h_le_one : ∀ a : P.A₀, wv ((a : A)) ≤ 1 := by
-      intro a
-      have hcoord := hplus_w (a : A) (hA₀le a)
-      rw [ιSpvR_eq_true_iff] at hcoord
-      have hle : w.vle ((a : A)) 1 :=
-        hcoord.1 (a : A) (by simp [RCoord.leOne])
-      have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
-      simpa using h2
-    have h_lt_g : ∀ g : A, ιSpvR I w (RCoord.oneOver I g) = false → wv g < 1 := by
-      intro g hone_w
-      by_contra hge
-      push Not at hge
-      have hge' : wv 1 ≤ wv g := by
-        rw [map_one]
-        exact hge
-      have hne : wv g ≠ 0 := by
-        intro h0
-        rw [map_one, h0] at hge'
-        simp at hge'
-      have htrue : ιSpvR I w (RCoord.oneOver I g) = true := by
-        rw [ιSpvR_eq_true_iff]
-        refine ⟨fun t ht => ?_, fun hcon => hne ((vle_zero_iff_canonical w _).mp hcon)⟩
-        simp only [RCoord.oneOver, Finset.mem_singleton] at ht
-        subst ht
-        exact (vle_iff_canonical w 1 g).mpr hge'
-      rw [hone_w] at htrue
-      exact Bool.false_ne_true htrue
-    have h_lt_g₁ : wv ((g₁ : A)) < 1 := h_lt_g _ hone₁_w
-    have h_lt_g₂ : wv ((g₂ : A)) < 1 := h_lt_g _ hone₂_w
-    have h_lt_one : ∀ a ∈ P.I, wv ((P.A₀.subtype a)) < 1 := by
-      intro a ha
-      rw [hpair] at ha
-      obtain ⟨c₁, c₂, hc⟩ := Ideal.mem_span_pair.mp ha
-      have hval : wv ((P.A₀.subtype a)) ≤
-          max (wv ((c₁ : A)) * wv ((g₁ : A))) (wv ((c₂ : A)) * wv ((g₂ : A))) := by
-        calc wv ((P.A₀.subtype a))
-            = wv ((c₁ : A) * (g₁ : A) + (c₂ : A) * (g₂ : A)) := by
-              rw [← hc]
-              rfl
-          _ ≤ max (wv ((c₁ : A) * (g₁ : A))) (wv ((c₂ : A) * (g₂ : A))) :=
-              Valuation.map_add _ _ _
-          _ = max (wv ((c₁ : A)) * wv ((g₁ : A))) (wv ((c₂ : A)) * wv ((g₂ : A))) := by
-              rw [map_mul, map_mul]
-      refine lt_of_le_of_lt hval (max_lt ?_ ?_)
-      · calc wv ((c₁ : A)) * wv ((g₁ : A)) ≤ 1 * wv ((g₁ : A)) := by
-              gcongr
-              exact h_le_one c₁
-          _ = wv ((g₁ : A)) := one_mul _
-          _ < 1 := h_lt_g₁
-      · calc wv ((c₂ : A)) * wv ((g₂ : A)) ≤ 1 * wv ((g₂ : A)) := by
-              gcongr
-              exact h_le_one c₂
-          _ = wv ((g₂ : A)) := one_mul _
-          _ < 1 := h_lt_g₂
-    have hmap : Ideal.map P.A₀.subtype P.I = I := by
-      rw [hpair, Ideal.map_span, Set.image_insert_eq, Set.image_singleton, hIeq]
-      rfl
-    have h_in : Spv.IsInSpvAI w (Ideal.map P.A₀.subtype P.I) := by
-      rw [hmap]
-      exact hw_mem
     have hcont : w.IsContinuous :=
-      Spv.isContinuous_of_isInSpvAI_of_lt_one P w h_in (fun a => h_le_one a) h_lt_one
+      isContinuous_of_profile_conditions₂ P hpair hA₀le I hIeq w hw_mem hone₁_w hone₂_w hplus_w
     have hbdd : ∀ f ∈ (A⁺ : Subring A), w.vle f 1 := by
       intro f hf
       have hcoord := hplus_w f hf
