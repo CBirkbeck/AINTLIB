@@ -34275,3 +34275,24 @@ payoff of having stated them that way.
 `fullLevelLocusPointsEquiv` turns the lift into a full level structure whose first member is
 the pulled-back `P`; and WP-D2b's `yFullToYOne_comp_eq_iff` says that condition is exactly
 "the `Γ₁`-part agrees", so the pair is redundant and the `Σ` collapses — by WP-D1a.
+
+### completion-locus points (2026-08-02) — axiom-verified
+
+* **`completionLocusPointsEquiv`** — `T`-points of `completionLocus` over `g` are `T`-points
+  of the full-level locus whose first coordinate is `g ≫ P`. Just the universal property of
+  the defining pullback with the second leg pinned.
+* **`fullLevelLocusπ_of_fst`** — such a point automatically lies over `g`, provided `P` is a
+  *section* of `E[N]`. This is the side condition `fullLevelLocusPointsEquiv` needs, so the
+  two equivalences compose.
+
+Note: `completionLocus`/`completionLocusπ` had to become `abbrev`s (as `fullLevelLocus` and
+`fullLevelLocusπ` already are). As `def`s they are semireducible and `rw` cannot see through
+`completionLocus = pullback …`, which is the same class of failure recorded twice already in
+this chain.
+
+**The remaining `sorry` is now a composition.** For `T`-points over `g`:
+`{c // c ≫ completionLocusπ = g}`
+  `≃ {w // w ≫ fullLevelLocusFst = g ≫ P}`  (`completionLocusPointsEquiv`)
+  `→ ` full level structures on `X₁.pullbackAlong g` with first member `g^*P`
+      (`fullLevelLocusPointsEquiv`, applicable by `fullLevelLocusπ_of_fst`)
+and then `homPullbackAlongEquiv` + WP-D1a's collapse turns the `Γ₁`-datum into nothing new.

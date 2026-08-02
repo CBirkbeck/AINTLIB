@@ -268,12 +268,12 @@ theorem fullLevelLocusFst_etale (h : NIsInvertible S N) :
 /-- **(WP-D2c-3-fix)** The *completion locus* of a torsion section `P`: the space of `Q`
 completing `P` to a naive full level structure. This — not the full-level locus — is what
 sits under `Y(N) ⟶ Y₁(N)`. -/
-noncomputable def completionLocus (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
+noncomputable abbrev completionLocus (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
     Scheme.{u} :=
   pullback (E.fullLevelLocusFst N h) P
 
 /-- The structure morphism of the completion locus. -/
-noncomputable def completionLocusπ (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
+noncomputable abbrev completionLocusπ (h : NIsInvertible S N) (P : S ⟶ E.torsion N) :
     E.completionLocus N h P ⟶ S :=
   pullback.snd (E.fullLevelLocusFst N h) P
 
@@ -290,6 +290,37 @@ theorem completionLocusπ_etale (h : NIsInvertible S N) (P : S ⟶ E.torsion N) 
     Etale (E.completionLocusπ N h P) := by
   haveI : Etale (E.fullLevelLocusFst N h) := E.fullLevelLocusFst_etale N h
   exact inferInstanceAs (Etale (pullback.snd _ _))
+
+/-- **(WP-D2c-3)** The points of the completion locus: a `T`-point of `completionLocus`
+over `g` is a `T`-point of the full-level locus whose first coordinate is `g ≫ P`.
+
+This is just the universal property of the defining pullback, with the second leg pinned by
+`g`. -/
+noncomputable def completionLocusPointsEquiv (h : NIsInvertible S N)
+    (P : S ⟶ E.torsion N) {T : Scheme.{u}} (g : T ⟶ S) :
+    { c : T ⟶ E.completionLocus N h P // c ≫ E.completionLocusπ N h P = g } ≃
+      { w : T ⟶ E.fullLevelLocus N h // w ≫ E.fullLevelLocusFst N h = g ≫ P } where
+  toFun c := ⟨c.1 ≫ pullback.fst (E.fullLevelLocusFst N h) P, by
+    rw [Category.assoc, pullback.condition, ← Category.assoc]
+    exact congrArg (· ≫ P) c.2⟩
+  invFun w := ⟨pullback.lift w.1 g w.2, pullback.lift_snd _ _ _⟩
+  left_inv c := Subtype.ext (by
+    refine pullback.hom_ext (pullback.lift_fst _ _ _) ?_
+    rw [pullback.lift_snd]
+    exact c.2.symm)
+  right_inv w := Subtype.ext (pullback.lift_fst _ _ _)
+
+/-- A `T`-point of the full-level locus whose first coordinate is `g ≫ P`, for `P` a section
+of `E[N]`, lies over `g`. This is the side condition `fullLevelLocusPointsEquiv` needs. -/
+theorem fullLevelLocusπ_of_fst (h : NIsInvertible S N) (P : S ⟶ E.torsion N)
+    (hP : P ≫ E.torsionπ N = 𝟙 S) {T : Scheme.{u}} (g : T ⟶ S)
+    (w : T ⟶ E.fullLevelLocus N h) (hw : w ≫ E.fullLevelLocusFst N h = g ≫ P) :
+    w ≫ E.fullLevelLocusπ N h = g := by
+  have hfac : E.fullLevelLocusπ N h = E.fullLevelLocusFst N h ≫ E.torsionπ N := by
+    show E.fullLevelLocusι N h ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N =
+      E.fullLevelLocusι N h ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
+    rfl
+  rw [hfac, ← Category.assoc, hw, Category.assoc, hP, Category.comp_id]
 
 end EllipticCurve
 
