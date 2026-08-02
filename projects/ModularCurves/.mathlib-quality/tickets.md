@@ -32668,7 +32668,9 @@ the root is not circular.
   `ℤ`-indexed to match `weilPairing`'s index.
 
 ### [WP-A2] The determinant law in the `μ_N`-bundled packaging
-- **Status**: open · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: WP-A1
+- **Status**: DONE 2026-08-02 — `fieldWeilPairing_gl2` in `WeilPairing/FieldPairingDet.lean`,
+  axiom-verified. LEAN-OPS: `fieldWeil_intCast_ne_zero` is `private` to `FieldPairing.lean`;
+  inline it as `have hz : ((N : ℤ) : F) ≠ 0 := by simpa using hN`. · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: WP-A1
 - **Statement**: the same identity for `fieldWeilPairing` (ℕ-indexed, `{u // u^N = 1}`-valued).
 - **Proof sketch**: `Subtype.ext` then `fieldWeilPairing_val` and WP-A1.
 - **Generality**: matches `fieldWeilPairing`.

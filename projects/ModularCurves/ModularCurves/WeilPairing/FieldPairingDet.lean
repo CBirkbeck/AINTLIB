@@ -87,4 +87,19 @@ theorem weilPairing_gl2 (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
         ring
     _ = weilPairing W ℓ hℓ P Q hP hQ ^ (a * d) := by rw [hcollect, mul_one]
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A2)** The determinant law in the `μ_N`-bundled packaging: the same identity for
+`fieldWeilPairing`, which is the form the descent's root-of-unity datum uses. -/
+theorem fieldWeilPairing_gl2 (N : ℕ) (hN : (N : F) ≠ 0)
+    (P Q : W.toAffine.Point) (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (a b c d : ℕ)
+    (h₁ : (N : ℤ) • (a • P + b • Q) = 0) (h₂ : (N : ℤ) • (c • P + d • Q) = 0) :
+    (fieldWeilPairing W N hN (a • P + b • Q) (c • P + d • Q) h₁ h₂ : F) *
+        (fieldWeilPairing W N hN P Q hP hQ : F) ^ (b * c) =
+      (fieldWeilPairing W N hN P Q hP hQ : F) ^ (a * d) := by
+  have hz : ((N : ℤ) : F) ≠ 0 := by simpa using hN
+  simp only [fieldWeilPairing_val]
+  exact weilPairing_gl2 W (N : ℤ) hz P Q hP hQ a b c d h₁ h₂
+
 end ModularCurves
