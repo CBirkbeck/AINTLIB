@@ -687,6 +687,223 @@ private theorem f_sq_mem_laurentOverlap_T
   · change f ∈ ({D₀.s, f} : Finset A)
     exact Finset.mem_insert_of_mem (Finset.mem_singleton_self _)
 
+/-- In `Loc_A(D₀.s · f)` the image of `f` splits as `divByS (f²) (D₀.s · f)` times the
+image of `D₀.s`: both sides are `mk'` of the same pair after clearing denominators. -/
+private theorem algebraMap_eq_divByS_sq_mul_algebraMap_s (D₀ : RationalLocData A) (f : A) :
+    algebraMap A (Localization.Away (D₀.s * f)) f =
+      divByS (f * f) (D₀.s * f) * algebraMap A (Localization.Away (D₀.s * f)) D₀.s := by
+  unfold divByS
+  rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+        (S := Localization.Away (D₀.s * f)) D₀.s,
+      ← IsLocalization.mk'_mul,
+      ← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+        (S := Localization.Away (D₀.s * f)) f]
+  exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
+
+/-- `f` lies in the overlap datum's localization subring: by the splitting above it is a
+product of `divByS (f²) (D₀.s · f)` — legitimate because `f² ∈ (laurentOverlap).T` — and
+the image of `D₀.s`, which the normalisation puts in `A₀`. -/
+private theorem algebraMap_f_mem_locSubring_laurentOverlap
+    (D₀ : RationalLocData A) [LaurentNormalized D₀] (f : A) :
+    algebraMap A (Localization.Away (D₀.s * f)) f ∈
+      locSubring (laurentOverlapDatum D₀ f).P (laurentOverlapDatum D₀ f).T
+        (laurentOverlapDatum D₀ f).s := by
+  rw [algebraMap_eq_divByS_sq_mul_algebraMap_s D₀ f]
+  refine (locSubring _ _ _).mul_mem ?_ ?_
+  · exact divByS_mem_locSubring _ _ _ (f_sq_mem_laurentOverlap_T D₀ f)
+  · have hDs_A₀ : D₀.s ∈ D₀.P.A₀ := LaurentNormalized.insert_s_T_subset_A₀ D₀.s
+      (Finset.mem_insert_self _ _)
+    have hDs_A₀_overlap : D₀.s ∈ (laurentOverlapDatum D₀ f).P.A₀ := hDs_A₀
+    exact algebraMap_mem_locSubring _ _ _ hDs_A₀_overlap
+
+/-- The overlap datum's canonical map at `f` is power-bounded: it is `coeRingHom` of an
+element of the localization subring, whose image is a bounded subring. -/
+private theorem laurentOverlap_canonicalMap_isPowerBounded
+    (D₀ : RationalLocData A) [LaurentNormalized D₀] (f : A) :
+    TopologicalRing.IsPowerBounded ((laurentOverlapDatum D₀ f).canonicalMap f) := by
+  have hcoeF : (laurentOverlapDatum D₀ f).canonicalMap f =
+      (laurentOverlapDatum D₀ f).coeRingHom
+        (algebraMap A (Localization.Away (D₀.s * f)) f) := rfl
+  rw [hcoeF]
+  apply (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+    (laurentOverlapDatum D₀ f)).subset
+  rintro _ ⟨n, rfl⟩
+  exact ⟨_, (locSubring _ _ _).pow_mem
+    (algebraMap_f_mem_locSubring_laurentOverlap D₀ f) n, map_pow _ _ _⟩
+
+/-- The inverse direction: `divByS D₀.s (D₀.s · f)` is also in the localization subring
+(because `D₀.s ∈ (laurentOverlap).T`), hence power-bounded after `coeRingHom`. -/
+private theorem laurentOverlap_coeRingHom_divByS_isPowerBounded
+    (D₀ : RationalLocData A) [LaurentNormalized D₀] (f : A) :
+    TopologicalRing.IsPowerBounded
+      ((laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f))) := by
+  have hDsDivMem : divByS D₀.s (D₀.s * f) ∈
+      locSubring (laurentOverlapDatum D₀ f).P (laurentOverlapDatum D₀ f).T
+        (laurentOverlapDatum D₀ f).s :=
+    divByS_mem_locSubring _ _ _ (D₀s_mem_laurentOverlap_T D₀ f)
+  apply (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+    (laurentOverlapDatum D₀ f)).subset
+  rintro _ ⟨n, rfl⟩
+  exact ⟨_, (locSubring _ _ _).pow_mem hDsDivMem n, map_pow _ _ _⟩
+
+/-- **The two are inverse**: `divByS D₀.s (D₀.s · f) · f = 1` already in `Loc_A(D₀.s · f)`,
+because both sides are `mk'` of `D₀.s · f` over itself; apply `coeRingHom`. -/
+private theorem laurentOverlap_coeRingHom_divByS_mul_canonicalMap
+    (D₀ : RationalLocData A) (f : A) :
+    (laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f)) *
+      (laurentOverlapDatum D₀ f).canonicalMap f = 1 := by
+    -- `algebraMap f = mk' f 1`, `divByS D₀.s (D₀.s * f) = mk' D₀.s ⟨D₀.s * f, _⟩`.
+    -- Their product is `mk' (D₀.s · f) ⟨D₀.s · f, _⟩ = 1`.
+    have hsrc : divByS D₀.s (D₀.s * f) *
+        algebraMap A (Localization.Away (D₀.s * f)) f = 1 := by
+      -- algebraMap f * algebraMap D₀.s = algebraMap (D₀.s · f); inverse = divByS 1.
+      have hsf_inv : algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f) *
+          divByS (1 : A) (D₀.s * f) = 1 := by
+        unfold divByS
+        rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+              (S := Localization.Away (D₀.s * f)) (D₀.s * f),
+            ← IsLocalization.mk'_mul, mul_one, one_mul]
+        exact IsLocalization.mk'_self _ _
+      -- divByS D₀.s (D₀.s · f) = algebraMap D₀.s · divByS 1 (D₀.s · f).
+      have hDs_mul : algebraMap A (Localization.Away (D₀.s * f)) D₀.s *
+          divByS (1 : A) (D₀.s * f) = divByS D₀.s (D₀.s * f) := by
+        unfold divByS
+        rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+              (S := Localization.Away (D₀.s * f)) D₀.s,
+            ← IsLocalization.mk'_mul, one_mul, mul_one]
+      -- Goal: divByS D₀.s (D₀.s · f) · algebraMap f = 1.
+      rw [← hDs_mul, mul_assoc, mul_comm (divByS (1 : A) (D₀.s * f)) _,
+          ← mul_assoc, ← map_mul]
+      change algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f) *
+        divByS (1 : A) (D₀.s * f) = 1
+      exact hsf_inv
+    have h2 : (laurentOverlapDatum D₀ f).coeRingHom
+        (divByS D₀.s (D₀.s * f) *
+          algebraMap A (Localization.Away (D₀.s * f)) f) =
+        (laurentOverlapDatum D₀ f).coeRingHom 1 :=
+      congrArg _ hsrc
+    rw [show (laurentOverlapDatum D₀ f).coeRingHom
+        (divByS D₀.s (D₀.s * f) *
+          algebraMap A (Localization.Away (D₀.s * f)) f) =
+        (laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f)) *
+        (laurentOverlapDatum D₀ f).coeRingHom
+          (algebraMap A (Localization.Away (D₀.s * f)) f) from
+      map_mul _ _ _, map_one] at h2
+    exact h2
+
+
+/-- **The generator `t = 1`.** `divByS 1 s_B` is inverse to `algebraMap b`, so the
+backward map carries it to `coeRingHom (divByS D₀.s (D₀.s · f))` — power-bounded because
+`divByS D₀.s (D₀.s · f)` lies in the overlap datum's localization subring. -/
+private theorem iteratedOverlap_backward_divByS_one_isPowerBounded
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
+    (D₀ : RationalLocData A) [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
+    [LaurentNormalized D₀]
+    (f : A)
+    (hLocLift_B : letI : IsTateRing (presheafValue D₀) :=
+        presheafValue_isTateRing P D₀
+      HasLocLiftPowerBounded (presheafValue D₀))
+    (hsub : rationalOpen (laurentOverlapDatum D₀ f).T (laurentOverlapDatum D₀ f).s ⊆
+      rationalOpen D₀.T D₀.s) :
+    TopologicalRing.IsPowerBounded
+      (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
+        (divByS (1 : presheafValue D₀)
+          (iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
+  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+      (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
+    iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
+  set B := presheafValue D₀
+  set b := D₀.canonicalMap f
+  have hs_B_eq : (iteratedOverlapDatum_B P D₀ f hLocLift_B).s = b :=
+    iteratedOverlapDatum_B_s_eq P D₀ f hLocLift_B
+  have hbwd_algMap : ∀ z : B, iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
+      (algebraMap B (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) z) =
+      restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub z := fun z =>
+    iteratedOverlap_backwardToCompletion_algebraMap P D₀ f hLocLift_B hsub z
+  -- Show backward(divByS 1 s_B) = coeRingHom(divByS D₀.s (D₀.s·f)).
+  have hinv_target : divByS (1 : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s *
+      algebraMap B
+        (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) b = 1 := by
+    rw [hs_B_eq]; unfold divByS
+    rw [mul_comm, ← IsLocalization.mk'_one (M := Submonoid.powers b)
+          (S := Localization.Away b) b,
+        ← IsLocalization.mk'_mul, mul_one, one_mul]
+    exact IsLocalization.mk'_self _ _
+  have hbwd_inv : iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
+      (divByS (1 : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s) *
+      (laurentOverlapDatum D₀ f).canonicalMap f = 1 := by
+    -- Apply backward to `hinv_target`.
+    have := congrArg (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub) hinv_target
+    rw [map_mul, map_one, hbwd_algMap, restrictionMapHom_canonicalMap] at this
+    exact this
+  -- backward(divByS 1 s_B) = ((laurentOverlap).canMap f)⁻¹.
+  have hu_canF : IsUnit ((laurentOverlapDatum D₀ f).canonicalMap f) :=
+    canonicalMap_f_isUnit_in_laurentOverlap D₀ f
+  -- Apply mul_right_cancel: backward(divByS 1 s_B) = coeRingHom(divByS D₀.s (D₀.s·f)).
+  have hbwd_eq : iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
+      (divByS (1 : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s) =
+      (laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f)) := by
+    apply hu_canF.mul_right_cancel
+    rw [hbwd_inv, laurentOverlap_coeRingHom_divByS_mul_canonicalMap D₀ f]
+  rw [hbwd_eq]
+  exact laurentOverlap_coeRingHom_divByS_isPowerBounded D₀ f
+
+/-- **The generators `t = b · y` for `y ∈ {1, b}`.** Both collapse: `divByS b s_B = 1`
+and `divByS (b · b) s_B = algebraMap b`, whose backward image is `canonicalMap f`. -/
+private theorem iteratedOverlap_backward_divByS_canonicalMap_mul_isPowerBounded
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
+    (D₀ : RationalLocData A) [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
+    [LaurentNormalized D₀]
+    (f : A)
+    (hLocLift_B : letI : IsTateRing (presheafValue D₀) :=
+        presheafValue_isTateRing P D₀
+      HasLocLiftPowerBounded (presheafValue D₀))
+    (hsub : rationalOpen (laurentOverlapDatum D₀ f).T (laurentOverlapDatum D₀ f).s ⊆
+      rationalOpen D₀.T D₀.s)
+    (y : presheafValue D₀)
+    (hy : y ∈ ({1, D₀.canonicalMap f} : Finset (presheafValue D₀))) :
+    TopologicalRing.IsPowerBounded
+      (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
+        (divByS (D₀.canonicalMap f * y)
+          (iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) := by
+  haveI : IsTateRing (presheafValue D₀) := presheafValue_isTateRing P D₀
+  haveI : HasLocLiftPowerBounded (presheafValue D₀) := hLocLift_B
+  haveI hloc_tgt : IsLocalization.Away (D₀.canonicalMap f)
+      (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) :=
+    iteratedOverlap_isLocalization_target P D₀ f hLocLift_B
+  set B := presheafValue D₀
+  set b := D₀.canonicalMap f
+  have hs_B_eq : (iteratedOverlapDatum_B P D₀ f hLocLift_B).s = b :=
+    iteratedOverlapDatum_B_s_eq P D₀ f hLocLift_B
+  have hbwd_algMap : ∀ z : B, iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
+      (algebraMap B (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) z) =
+      restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub z := fun z =>
+    iteratedOverlap_backwardToCompletion_algebraMap P D₀ f hLocLift_B hsub z
+  rcases Finset.mem_insert.mp hy with hy_one | hy_b
+  · subst hy_one
+    -- `x = b, y = 1`: t = b · 1 = b. divByS b b = 1.
+    rw [show (b : B) * 1 = b from mul_one b]
+    have hdiv1 : divByS (b : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s = 1 := by
+      rw [hs_B_eq]; unfold divByS
+      exact IsLocalization.mk'_self _ _
+    rw [hdiv1, map_one]
+    exact TopologicalRing.isPowerBounded_one
+  · -- `x = b, y = b`: t = b · b = b². divByS (b · b) b = algebraMap_B b.
+    simp only [Finset.mem_singleton] at hy_b
+    subst hy_b
+    have halg_b_eq : divByS ((b : B) * b) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s =
+        algebraMap B (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) b := by
+      rw [hs_B_eq]; unfold divByS
+      rw [← IsLocalization.mk'_one (M := Submonoid.powers b)
+            (S := Localization.Away b) b]
+      apply IsLocalization.mk'_eq_of_eq
+      simp only [Submonoid.coe_one, one_mul]
+    rw [halg_b_eq, hbwd_algMap, restrictionMapHom_canonicalMap]
+    exact laurentOverlap_canonicalMap_isPowerBounded D₀ f
+
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Backward loc hom power-boundedness, overlap case.**
 
@@ -738,69 +955,8 @@ private theorem iteratedOverlap_backwardToCompletion_generators_powerBounded
   -- `hs_B_eq : (iteratedOverlapDatum_B).s = canonicalMap f = b`.
   have hs_B_eq : (iteratedOverlapDatum_B P D₀ f hLocLift_B).s = b :=
     iteratedOverlapDatum_B_s_eq P D₀ f hLocLift_B
-  -- `divByS t s_B` is computed via algebraic identities.
-  -- Key: the backward map sends `divByS t b` to `restrictionMap(t)` when `t ∈ A₀_B`.
-  -- For `t = 1`: divByS 1 b = (algebraMap b)⁻¹; backward = ((laurentOverlap).canMap f)⁻¹.
-  -- For `t = b`: divByS b b = algebraMap b; backward = (laurentOverlap).canMap f.
-  -- For `t = b · b`: divByS (b·b) b = algebraMap b; backward = (laurentOverlap).canMap f.
-  -- Useful: `algebraMap_A f = divByS (f²) (D₀.s · f) · algebraMap_A D₀.s` in Loc_A(D₀.s · f).
-  have halg_A_f : algebraMap A (Localization.Away (D₀.s * f)) f =
-      divByS (f * f) (D₀.s * f) * algebraMap A (Localization.Away (D₀.s * f)) D₀.s := by
-    unfold divByS
-    rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-          (S := Localization.Away (D₀.s * f)) D₀.s,
-        ← IsLocalization.mk'_mul,
-        ← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-          (S := Localization.Away (D₀.s * f)) f]
-    exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
-  -- Show `(laurentOverlap).canMap f ∈ coeRingHom '' locSubring(laurentOverlap)`,
-  -- and similarly for the inverse.
-  have hAlg_f_in_loc : algebraMap A (Localization.Away (D₀.s * f)) f ∈
-      locSubring (laurentOverlapDatum D₀ f).P (laurentOverlapDatum D₀ f).T
-        (laurentOverlapDatum D₀ f).s := by
-    rw [halg_A_f]
-    refine (locSubring _ _ _).mul_mem ?_ ?_
-    · -- divByS (f²) (D₀.s · f) — uses `f² ∈ (laurentOverlap).T`.
-      exact divByS_mem_locSubring _ _ _ (f_sq_mem_laurentOverlap_T D₀ f)
-    · -- algebraMap D₀.s — uses `D₀.s ∈ D₀.P.A₀ = (laurentOverlap).P.A₀`.
-      have hDs_A₀ : D₀.s ∈ D₀.P.A₀ := LaurentNormalized.insert_s_T_subset_A₀ D₀.s
-        (Finset.mem_insert_self _ _)
-      have hDs_A₀_overlap : D₀.s ∈ (laurentOverlapDatum D₀ f).P.A₀ := hDs_A₀
-      exact algebraMap_mem_locSubring _ _ _ hDs_A₀_overlap
-  have hCanF_pb : TopologicalRing.IsPowerBounded
-      ((laurentOverlapDatum D₀ f).canonicalMap f) := by
-    -- (laurentOverlap).canMap f = coeRingHom(algebraMap_A f); image lies in
-    -- coeRingHom '' locSubring, a bounded subring (closed under powers).
-    have hcoeF : (laurentOverlapDatum D₀ f).canonicalMap f =
-        (laurentOverlapDatum D₀ f).coeRingHom
-          (algebraMap A (Localization.Away (D₀.s * f)) f) := rfl
-    rw [hcoeF]
-    apply (CompletionLocalization.coeRingHom_image_locSubring_isBounded
-      (laurentOverlapDatum D₀ f)).subset
-    rintro _ ⟨n, rfl⟩
-    change ((laurentOverlapDatum D₀ f).coeRingHom
-      (algebraMap A (Localization.Away (D₀.s * f)) f)) ^ n ∈ _
-    rw [← map_pow]
-    exact ⟨_, (locSubring _ _ _).pow_mem hAlg_f_in_loc n, rfl⟩
-  -- Inverse: `((laurentOverlap).canMap f)⁻¹ = coeRingHom (divByS D₀.s (D₀.s · f))`.
-  have hDsDivMem : divByS D₀.s (D₀.s * f) ∈ locSubring
-      (laurentOverlapDatum D₀ f).P (laurentOverlapDatum D₀ f).T
-      (laurentOverlapDatum D₀ f).s :=
-    divByS_mem_locSubring _ _ _ (D₀s_mem_laurentOverlap_T D₀ f)
-  have hInvF_pb : TopologicalRing.IsPowerBounded
-      ((laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f))) := by
-    apply (CompletionLocalization.coeRingHom_image_locSubring_isBounded
-      (laurentOverlapDatum D₀ f)).subset
-    rintro _ ⟨n, rfl⟩
-    change ((laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f))) ^ n ∈ _
-    rw [← map_pow]
-    exact ⟨_, (locSubring _ _ _).pow_mem hDsDivMem n, rfl⟩
-  -- Useful: `backward(algebraMap_B b)` for `b : B`.
-  have hbwd_algMap : ∀ z : B, iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
-      (algebraMap B (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) z) =
-      restrictionMapHom D₀ (laurentOverlapDatum D₀ f) hsub z := fun z =>
-    iteratedOverlap_backwardToCompletion_algebraMap P D₀ f hLocLift_B hsub z
-  -- Split by `x ∈ {1, b}`.
+  -- Split by `x ∈ {1, b}`; each generator is one of the three lemmas above.
+
   rcases Finset.mem_insert.mp hx with hx_one | hx_b
   · subst hx_one
     -- `x = 1`.
@@ -813,73 +969,7 @@ private theorem iteratedOverlap_backwardToCompletion_generators_powerBounded
           (divByS (1 * 1) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s))
       have hone : (1 : B) * 1 = 1 := mul_one _
       rw [hone]
-      -- Show backward(divByS 1 s_B) = coeRingHom(divByS D₀.s (D₀.s·f)).
-      have hinv_target : divByS (1 : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s *
-          algebraMap B
-            (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) b = 1 := by
-        rw [hs_B_eq]; unfold divByS
-        rw [mul_comm, ← IsLocalization.mk'_one (M := Submonoid.powers b)
-              (S := Localization.Away b) b,
-            ← IsLocalization.mk'_mul, mul_one, one_mul]
-        exact IsLocalization.mk'_self _ _
-      have hbwd_inv : iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
-          (divByS (1 : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s) *
-          (laurentOverlapDatum D₀ f).canonicalMap f = 1 := by
-        -- Apply backward to `hinv_target`.
-        have := congrArg (iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub) hinv_target
-        rw [map_mul, map_one, hbwd_algMap, restrictionMapHom_canonicalMap] at this
-        exact this
-      -- backward(divByS 1 s_B) = ((laurentOverlap).canMap f)⁻¹.
-      have hu_canF : IsUnit ((laurentOverlapDatum D₀ f).canonicalMap f) :=
-        canonicalMap_f_isUnit_in_laurentOverlap D₀ f
-      -- Apply mul_right_cancel: backward(divByS 1 s_B) = coeRingHom(divByS D₀.s (D₀.s·f)).
-      have hinv_overlap : (laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f)) *
-          (laurentOverlapDatum D₀ f).canonicalMap f = 1 := by
-        -- `algebraMap f = mk' f 1`, `divByS D₀.s (D₀.s * f) = mk' D₀.s ⟨D₀.s * f, _⟩`.
-        -- Their product is `mk' (D₀.s · f) ⟨D₀.s · f, _⟩ = 1`.
-        have hsrc : divByS D₀.s (D₀.s * f) *
-            algebraMap A (Localization.Away (D₀.s * f)) f = 1 := by
-          -- algebraMap f * algebraMap D₀.s = algebraMap (D₀.s · f); inverse = divByS 1.
-          have hsf_inv : algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f) *
-              divByS (1 : A) (D₀.s * f) = 1 := by
-            unfold divByS
-            rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-                  (S := Localization.Away (D₀.s * f)) (D₀.s * f),
-                ← IsLocalization.mk'_mul, mul_one, one_mul]
-            exact IsLocalization.mk'_self _ _
-          -- divByS D₀.s (D₀.s · f) = algebraMap D₀.s · divByS 1 (D₀.s · f).
-          have hDs_mul : algebraMap A (Localization.Away (D₀.s * f)) D₀.s *
-              divByS (1 : A) (D₀.s * f) = divByS D₀.s (D₀.s * f) := by
-            unfold divByS
-            rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-                  (S := Localization.Away (D₀.s * f)) D₀.s,
-                ← IsLocalization.mk'_mul, one_mul, mul_one]
-          -- Goal: divByS D₀.s (D₀.s · f) · algebraMap f = 1.
-          rw [← hDs_mul, mul_assoc, mul_comm (divByS (1 : A) (D₀.s * f)) _,
-              ← mul_assoc, ← map_mul]
-          change algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f) *
-            divByS (1 : A) (D₀.s * f) = 1
-          exact hsf_inv
-        have h2 : (laurentOverlapDatum D₀ f).coeRingHom
-            (divByS D₀.s (D₀.s * f) *
-              algebraMap A (Localization.Away (D₀.s * f)) f) =
-            (laurentOverlapDatum D₀ f).coeRingHom 1 :=
-          congrArg _ hsrc
-        rw [show (laurentOverlapDatum D₀ f).coeRingHom
-            (divByS D₀.s (D₀.s * f) *
-              algebraMap A (Localization.Away (D₀.s * f)) f) =
-            (laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f)) *
-            (laurentOverlapDatum D₀ f).coeRingHom
-              (algebraMap A (Localization.Away (D₀.s * f)) f) from
-          map_mul _ _ _, map_one] at h2
-        exact h2
-      have hbwd_eq : iteratedOverlap_backwardToCompletion P D₀ f hLocLift_B hsub
-          (divByS (1 : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s) =
-          (laurentOverlapDatum D₀ f).coeRingHom (divByS D₀.s (D₀.s * f)) := by
-        apply hu_canF.mul_right_cancel
-        rw [hbwd_inv, hinv_overlap]
-      rw [hbwd_eq]
-      exact hInvF_pb
+      exact iteratedOverlap_backward_divByS_one_isPowerBounded P D₀ f hLocLift_B hsub
     · -- `x = 1, y = b`: t = 1 · b = b. divByS b b = 1. Trivial.
       rw [show (1 : B) * y = y from one_mul y]
       simp only [Finset.mem_singleton] at hy_b
@@ -892,27 +982,8 @@ private theorem iteratedOverlap_backwardToCompletion_generators_powerBounded
   · -- `x = b`.
     simp only [Finset.mem_singleton] at hx_b
     subst hx_b
-    rcases Finset.mem_insert.mp hy with hy_one | hy_b
-    · subst hy_one
-      -- `x = b, y = 1`: t = b · 1 = b. divByS b b = 1.
-      rw [show (b : B) * 1 = b from mul_one b]
-      have hdiv1 : divByS (b : B) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s = 1 := by
-        rw [hs_B_eq]; unfold divByS
-        exact IsLocalization.mk'_self _ _
-      rw [hdiv1, map_one]
-      exact TopologicalRing.isPowerBounded_one
-    · -- `x = b, y = b`: t = b · b = b². divByS (b · b) b = algebraMap_B b.
-      simp only [Finset.mem_singleton] at hy_b
-      subst hy_b
-      have halg_b_eq : divByS ((b : B) * b) (iteratedOverlapDatum_B P D₀ f hLocLift_B).s =
-          algebraMap B (Localization.Away ((iteratedOverlapDatum_B P D₀ f hLocLift_B).s)) b := by
-        rw [hs_B_eq]; unfold divByS
-        rw [← IsLocalization.mk'_one (M := Submonoid.powers b)
-              (S := Localization.Away b) b]
-        apply IsLocalization.mk'_eq_of_eq
-        simp only [Submonoid.coe_one, one_mul]
-      rw [halg_b_eq, hbwd_algMap, restrictionMapHom_canonicalMap]
-      exact hCanF_pb
+    exact iteratedOverlap_backward_divByS_canonicalMap_mul_isPowerBounded
+      P D₀ f hLocLift_B hsub y hy
 
 /-! ### Phase 5: backward loc hom continuity -/
 

@@ -9800,3 +9800,67 @@ recorded not done**.
 
     over-50 proofs   486 (baseline) → 63   (60 actionable, 3 Vendored, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: iteratedOverlap_..._generators_powerBounded 166 → 49, in seven pieces
+
+`IteratedOverlapEquiv.lean`. The proof enumerates the four generators of
+`(iteratedOverlapDatum_B).T` and shows each has power-bounded image. Two-thirds of it was
+not about that enumeration at all.
+
+**Five facts about `laurentOverlapDatum D₀ f` alone** were being proved inline, none of them
+mentioning `P`, `hLocLift_B`, `hsub`, or the generator under examination:
+
+    algebraMap_eq_divByS_sq_mul_algebraMap_s          f = divByS f² (D₀.s·f) · D₀.s
+    algebraMap_f_mem_locSubring_laurentOverlap        …so f is in the loc-subring
+    laurentOverlap_canonicalMap_isPowerBounded        canMap f is power-bounded
+    laurentOverlap_coeRingHom_divByS_isPowerBounded   …and so is its inverse
+    laurentOverlap_coeRingHom_divByS_mul_canonicalMap the two ARE inverse
+
+The last was buried four levels deep inside the `x = 1, y = 1` branch, 38 of that branch's
+90 lines. **Two branches** then lifted as generator lemmas (`t = 1`; `t = b · y`), and the
+`hbwd_algMap` helper — used only by those branches — died with them.
+
+### `change` then `rw` does not survive extraction
+
+`(laurentOverlapDatum D₀ f).s` is definitionally `D₀.s * f`, so
+
+    change ((laurentOverlapDatum D₀ f).coeRingHom
+      (algebraMap A (Localization.Away (D₀.s * f)) f)) ^ n ∈ _
+    rw [← map_pow]
+
+elaborates: `change` works up to defeq. Hoisted into a lemma the same two lines fail —
+
+    Tactic `rewrite` failed: Did not find an occurrence of the pattern ?f ?a ^ ?n
+    Note: The target expression is not type-correct under the `implicit` transparency level
+
+`change` had produced a term only type-correct at `default` transparency, and `rw`'s motive
+is checked at `implicit`. The fix is not a bigger `change` — it is to stop going through the
+goal at all:
+
+    rintro _ ⟨n, rfl⟩
+    exact ⟨_, (locSubring _ _ _).pow_mem hMem n, map_pow _ _ _⟩
+
+Two lines instead of four, and term-mode elaboration accepts the defeq. This is the third
+`defeq ≠ rw` incident of the campaign and the first where the *same text* compiled before
+extraction and not after — worth stating as a rule: **a `change`/`rw` pair is context-
+dependent in a way a term application is not; when a lift breaks one, replace it rather
+than repair it.**
+
+### Two script failures, both previously recorded, both caught before the build
+
+*Dropped parentheses, third occurrence.* `f"…coeRingHom {AWAY}"` with
+`AWAY = "algebraMap A (Localization.Away (D₀.s * f)) f"` produced
+`coeRingHom algebraMap A (Localization.Away (D₀.s * f)) f` — four arguments. Caught by
+`verify_file.py`'s over-width counter, not by anything semantic. **Any substitution landing
+in argument position needs its own parentheses in the template**, not at the call site.
+
+*The `\nend ` anchor.* The natural way to find "the end of the last branch" is
+`s.index("\nend ", i)` — and it is wrong, because between the theorem and its namespace's
+`end` sit eleven more declarations, all of which the slice would have deleted. Same family
+as the SheafyBI truncation. Replaced by a forward scan to the next declaration plus
+`assert 'theorem' not in s[i4:i5]`.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 62   (59 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
