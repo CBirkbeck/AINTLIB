@@ -107,7 +107,7 @@ automation:
       tool_setup: ""
       cost:
         wall_time: ""
-        spend_usd: ""
+        spend_usd: "1 month of a ChatGPT Pro subscription (flat-rate, not metered)"
         hardware: ""
       prompting_notes: >-
         Per the source paper's abstract, its two main results are due to ChatGPT 5.6 Sol.
@@ -120,12 +120,16 @@ automation:
         cleanup lanes on `main`. See CLAUDE.md.
       cost:
         wall_time: ""
-        spend_usd: ""
+        spend_usd: "4 months of a Claude Code Max 20x subscription (flat-rate, not metered)"
         hardware: ""
       prompting_notes: >-
         The source paper records that the Lean formalisation was carried out by Claude Code.
-  spend_usd: ""
+  spend_usd: "4 months Claude Code Max 20x + 1 month ChatGPT Pro"
   notes: >-
+    COST CAVEAT: both figures are flat-rate subscriptions, not per-token metering, and each
+    subscription covered all of the holder's work over that period rather than this project
+    alone. So the subscription cost is an UPPER BOUND on what is attributable here, not a
+    measurement of it, and no USD figure is quoted for that reason.
     Statement-level certification is available via leanprover/comparator; see
     `scripts/certify.sh` and the two configs referenced above. Both certificates currently
     pass (kernel accepts, axiom budget respected).
