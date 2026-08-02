@@ -8358,3 +8358,48 @@ here with a 3–21-line statement took `set` without complaint. Added to the rul
 Baseline caveat: 486 was measured with the `sig_end` bug fixed this batch, so it was
 somewhat overstated. The corrected measure moved the count 114 → 110 on its own, and
 exposed `ChartComparison::isSheafy_presheafChart` (reported 80) as never having been over 50.
+
+## Batch: lambdaMap_surjective + syzygy_coordinate (106 → 104), and a third ranking
+
+### `rank_anon_defs` — proofs that construct anonymously, then prove lemmas about it
+
+The third distinct shape, and neither existing ranking can see it:
+
+* `decompose_rank` scores liftable `have` blocks — every block in such a proof mentions a
+  local, so nothing lifts;
+* `rank_repeats` scores repeated subterms — the construction's formula appears **twice**
+  (the definition, then the `change` that restates it), under the 3-occurrence threshold.
+
+`lambdaMap_surjective` is the instance: it built `g`, `h` and a Bézout witness `c` as
+anonymous `set` subtype terms, then needed three `have … _val` lemmas whose entire proof was
+a `change` back to the formula written above. Named as `private noncomputable def`s with
+their coefficient lemmas beside them: **76 → 45**.
+
+The tell the script looks for: a `set`/`let` whose value is an anonymous constructor or a
+lambda, plus `have`s mentioning the bound name. Score = lines held hostage. It finds nine
+targets, four of them large — `_omt_open_at_zero` (145), `wedhorn_lemma_834_propA3_part1_gluing`
+(349), `exists_lift_norm_le_of_closed_range` (336), `genRestrictedCover_gluing` (192).
+
+**Three rankings now, three different tells.** Long because it lifts (`decompose_rank`),
+long because it repeats (`rank_repeats`), long because it constructs anonymously
+(`rank_anon_defs`). A target invisible to all three is long because it genuinely says a lot
+— like `syzygy_coordinate`, which needed its induction step's three stages named.
+
+### A two-line `have` used three times costs nothing as a lemma
+
+`pairs_snd_ne_zero` — "in an ordered pair `i < j`, `j ≠ 0`" — was a two-line `have` used
+three times inside one `refine`. Hoisted, it costs **zero** lines in the parent, and it was
+exactly the last three lines `syzygy_coordinate` needed to reach 50 (the three real lemmas
+got it to 53).
+
+### Slips, both caught by the build
+
+* A textual replace handled `(hp2ne p)` but not the named-argument form `(hb := hp2ne p)`.
+  Renaming needs to cover named-argument positions.
+* The generator-scoping typo `next(i for i in … if l0.… for l0 in [L[i]])` — **twice this
+  session in the same idiom**. Use a plain loop for line searches.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 104   (102 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
