@@ -33984,3 +33984,27 @@ lifting criterion here, so Finish A is likely shorter.
 
 Then WP-D2 concludes as recorded: `Etale ⟹ Smooth` + `Smooth` composes + `yOneStructMap_smooth`
 + `YFull.smooth_affine_of_representableBy` close `YFull.exists_representing_smooth_affine`.
+
+### [WP-D2c-bridge] the crux is an `EllHom`-rigidity statement, and it does **not** exist
+
+Searched (`EllHom.ext'`, `baseHom_injective`, any `theorem` mentioning `baseHom` in
+`Moduli/EllCategory.lean`): there is **no lemma saying an `EllHom` is determined by its
+`baseHom`**. That is exactly what the bridge needs, since `yFullToYOneFibreEquiv` indexes
+fibres by `EllObj`-morphisms while étaleness is about `baseHom`.
+
+#### [WP-D2c-b1] `EllHom` is determined by `baseHom`
+- **Statement**: for `φ ψ : EllHom X Y`, `φ.baseHom = ψ.baseHom → φ = ψ`.
+- **Why it is true**: `EllHom` bundles `top` with `isPullback` (the square is cartesian) and
+  `zero_w` (the zero sections match). Two `top`s over the same `baseHom`, both cartesian,
+  differ by an automorphism of `X.curve.E` over `X.base`; `zero_w` says both respect the
+  zero section, and **rigidity of elliptic curves** then forces that automorphism to be the
+  identity. The tree has `EllipticCurve/Rigidity.lean` for exactly this kind of argument.
+- **Consequence**: `u ↦ u.baseHom` is injective on `{u : T ⟶ X // u ≫ yFullToYOne = f}`;
+  surjectivity onto `{v // v ≫ (yFullToYOne).baseHom = f.baseHom}` comes from the cartesian
+  square, since a base map plus `T ≅ Y.pullbackAlong v` reconstructs the `EllHom`.
+
+With D2c-b1 the fibre description becomes a statement about scheme points, Finish A (Yoneda
+⟹ isomorphism over `Y₁(N).base` ⟹ transport `Etale`/`IsFinite`) applies, and WP-D2 closes.
+
+**This is the single remaining mathematical step in the D-chain.** Everything else —
+WP-D1a, D1b, D1c-construction, D1c-rel, D1c-coarse, D2a, D2b — is done and axiom-verified.
