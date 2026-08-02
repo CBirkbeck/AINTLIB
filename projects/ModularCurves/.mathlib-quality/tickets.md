@@ -33697,3 +33697,28 @@ Root build green at 9635 jobs.
   naive-`Γ₁` statement, which does **not** yet exist and is the concrete sub-task.
 * **[WP-D2]** — then mechanical: `Etale ⟹ Smooth` + `Smooth` composes +
   `smooth_affine_of_representableBy` closes `YFull.exists_representing_smooth_affine`.
+
+### [WP-D1c-coarse] scoped (2026-08-02) — a ~320-line mirror, with two pieces already free
+
+To transfer finite-étaleness from the relative loci to the representing objects, the naive
+`Γ₁` problem needs its own relative-representability statement, mirroring
+`fullLevelLocusPointsEquiv` (`LevelStructure/CombinationLevel.lean:547`). The chain to
+mirror, with sizes measured:
+
+| piece | full-level original | Γ₁ mirror |
+|---|---|---|
+| `comp_torsion_mem_zeroSection_iff` | `CombinationLevel.lean:57` | **already single-generator — reuse directly** |
+| `torsionMapSection` (+ `_fst`, `_killed`) | `:90` | **already single-generator — reuse directly** |
+| `comp_combination_mem_zeroSection_iff` | `:156`, 122 lines | `comp_multiple_mem_zeroSection_iff` — *easier*: no `pullback.lift`, one generator |
+| `forall_mem_fullLevelSet_iff_isNaiveFullLevel` | `:278`, 195 lines | `forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne` |
+| `fullLevelLocusSectionsEquiv` | `TorsionCombinationSpec.lean` | mirror via `torsionPointsEquiv`, which is already proved |
+| `fullLevelLocusPointsEquiv` | `:547` | `naiveGammaOneLocusPointsEquiv` |
+
+Then `gammaOneNaive_relativelyRepresentable` / `_affineOverEll` follow the shape of
+`gammaFullNaive_affineOverEll` (`Moduli/GammaHClosure.lean:104`), and finally `yFullToYOne`
+is identified with the map induced by `fullLevelToNaiveGammaOne` — at which point
+`fullLevelToNaiveGammaOne_etale` transfers and **WP-D2 closes
+`YFull.exists_representing_smooth_affine`**.
+
+Nothing in this needs new mathematics; it is a transcription with one genuine
+simplification (the single-generator case drops the `pullback.lift` plumbing throughout).
