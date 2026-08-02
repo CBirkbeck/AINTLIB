@@ -228,6 +228,59 @@ theorem pullSection_iso_injective {X Y : EllObj R} (e : X ≅ Y) :
     EllHom.pullSection_id, EllHom.pullSection_id] at h
   exact h
 
+@[simp] theorem transportAlongIso_symm_fst (N : ℕ) [NeZero N] {X₁ Y : EllObj R}
+    (u : Y ⟶ X₁) (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    ((transportAlongIso N u).symm PQ).1.1 =
+      EllHom.pullSection R (EllObj.isoPullbackAlong u).inv PQ.1.1 := rfl
+
+/-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member
+is the section attached to `u.baseHom ≫ P`" says exactly "the `Γ₁`-part of `PQ` is `u`'s
+structure".
+
+Both directions are the injectivity of `pullSection` along the iso: pulling back along
+`(isoPullbackAlong u).hom` cancels the `inv` on one side and, by
+`toPullbackAlong_pullbackAlongπ`, turns the tautological projection into `u` on the
+other. -/
+theorem fibre_condition_iff (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)) (X₁ : EllObj R)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hP : P = X₁.curve.pointToTorsion (universalGammaOne R N rOne).1
+      ((X₁.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 X₁.base) N _).mp
+        (universalGammaOne R N rOne).2.1))
+    (Y : EllObj R) (u : Y ⟶ X₁)
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    (((transportAlongIso N u).symm PQ).1.1 =
+        X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+          (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+      forgetAt N hinv Y PQ = rOne.homEquiv u := by
+  set e := EllObj.isoPullbackAlong u with he
+  -- the right-hand condition, unfolded
+  have hRHS : (forgetAt N hinv Y PQ = rOne.homEquiv u) ↔
+      PQ.1.1 = EllHom.pullSection R u (universalGammaOne R N rOne).1 := by
+    rw [homEquiv_eq_map_universalGammaOne R N rOne u]
+    exact ⟨fun hh => congrArg Subtype.val hh, fun hh => Subtype.ext hh⟩
+  -- the left-hand condition, with `hP` and the glue lemma
+  have hglue : X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+        (by rw [Category.assoc, hPsec, Category.comp_id]) =
+      EllHom.pullSection R (X₁.pullbackAlongπ u.baseHom)
+        (universalGammaOne R N rOne).1 := by
+    subst hP
+    exact torsionMapSection_comp_eq_pullSection N X₁ u.baseHom _ _ _
+  rw [transportAlongIso_symm_fst, hglue, hRHS]
+  constructor
+  · intro hh
+    have := congrArg (EllHom.pullSection R e.hom) hh
+    rwa [← EllHom.pullSection_comp, ← EllHom.pullSection_comp, e.hom_inv_id,
+      EllHom.pullSection_id, he, EllObj.isoPullbackAlong_hom,
+      EllObj.toPullbackAlong_pullbackAlongπ] at this
+  · intro hh
+    refine pullSection_iso_injective e ?_
+    rw [← EllHom.pullSection_comp, ← EllHom.pullSection_comp, e.hom_inv_id,
+      EllHom.pullSection_id, he, EllObj.isoPullbackAlong_hom,
+      EllObj.toPullbackAlong_pullbackAlongπ]
+    exact hh
+
 /-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
 
 The single remaining step of the D-chain. Stated here so the interface is fixed and

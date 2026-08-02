@@ -34497,3 +34497,29 @@ remaining bookkeeping.
    `Moduli/LevelLocusNatural.lean`), so this is composition of known naturality squares.
 
 Both are bookkeeping over proved inputs; **no mathematics remains**. Root green at 9638 jobs.
+
+## [WP-D2c-3 `hmatch`] DISCHARGED (2026-08-03) — axiom-verified
+
+* `transportAlongIso_symm_fst` — `((transportAlongIso u).symm PQ).1.1 =
+  pullSection (isoPullbackAlong u).inv PQ.1.1`, by `rfl`;
+* **`fibre_condition_iff`** — the two fibre conditions agree. Compiled first try. Both
+  directions are `pullSection_iso_injective`: pulling back along `(isoPullbackAlong u).hom`
+  cancels the `inv` on one side (`pullSection_comp` + `hom_inv_id` + `pullSection_id`) and,
+  by `isoPullbackAlong_hom` + `toPullbackAlong_pullbackAlongπ`, turns the tautological
+  projection into `u` on the other. `hP` and
+  `torsionMapSection_comp_eq_pullSection` supply the identification of `P`.
+
+So `hmatch` — the hypothesis `yFullCandidateHomEquiv` was stated against — is now a theorem.
+
+### The D-chain is down to ONE mechanical obligation
+`yFullCandidate_representableBy` needs only:
+* `homEquiv := yFullCandidateHomEquiv … (fibre_condition_iff …)` — every argument now
+  available;
+* `homEquiv_comp` — the naturality field. Composition of five squares, each already natural:
+  `homPullbackAlongEquiv` (functorial by construction),
+  `Equiv.subtypeProdEquivSigmaSubtype` and the two `Equiv.sigma*`/`subtypeEquiv*` steps
+  (trivially), and `completionFibreEquiv`, whose naturality comes from
+  `naiveGammaOneLocusPointsEquiv_natural` / `fullLevelLocusPointsEquiv_natural_*`
+  (`Moduli/LevelLocusNatural.lean`).
+
+**No mathematics remains — the last item is a naturality bookkeeping proof.**
