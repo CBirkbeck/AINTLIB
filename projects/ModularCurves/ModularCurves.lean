@@ -48,6 +48,7 @@ import ModularCurves.EllipticCurve.SectionRigidity
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassCover
 import ModularCurves.EllipticCurve.WeierstrassModel
+import ModularCurves.ForMathlib.ClosurePairCard
 import ModularCurves.ForMathlib.AcyclicAffineOpenCover
 import ModularCurves.ForMathlib.AffineOpenImmersionCover
 import ModularCurves.ForMathlib.AffineVanishing
