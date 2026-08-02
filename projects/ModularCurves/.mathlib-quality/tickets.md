@@ -33315,3 +33315,66 @@ WP-C3…C8 shrinks from six computational tickets to **four** (`_add_left`, `_ad
 which was the single most-consumed entry — is already discharged for whatever construction
 lands. The critical path is unchanged and now completely unambiguous: **the root**
 (WP-B1…B4) → `WeilPairingLocalData` → WP-C2 → the four → DS4 closed.
+
+# ══════════════════════════════════════════════════════════════════════════
+# THE BOTTOM OF THE Y(ρ̄) TREE — established 2026-08-02. Read before planning DS4.
+# ══════════════════════════════════════════════════════════════════════════
+
+## Leg 1 (`yRho_representable`) — proved modulo DS4, and DS4 bottoms out here
+
+`yRho_representable` is **proved** (`ModularCurve/RhoPoints.lean`, via the level-three
+rigidifier); its only `sorryAx` is DS4. With today's three derivations, DS4 is six
+statements, all requiring the construction. So the whole leg is one obligation.
+
+### Route A cannot bootstrap itself — a negative result worth recording
+
+Route A reduces "construct `e_N`" to "find a root of unity `ζ` on the trivialising cover
+transforming by `det`". Take the cover to be the frame bundle; then `S' ×_S S' ≅ S' × GL₂(ℤ/N)`
+and the cocycle condition (via WP-A4) reads `ζ(φ·g) = ζ(φ)^{det g}`. A `GL₂`-equivariant
+`μ_N`-valued function on the frame bundle transforming by `det` **is** a trivialisation of
+`∧²E[N] ≅ μ_N` — which is the Weil pairing itself. So route A is an *equivalent
+reformulation*, not a reduction, and needs an independent input. This is why every attempt
+to "just adjoin a primitive root" fails: a freely adjoined `ζ` does not satisfy the cocycle,
+and cutting down to where it does re-references the pairing.
+
+### The two independent inputs actually available
+1. **The field-level pairing** — `exists_weilPairingHom_of_field`
+   (`WeilPairing/GlobalFibreChart.lean:134`), over perfect fields, via the Galois category
+   of finite étale algebras. Real and available.
+2. **KM 2.8's relative divisor construction** — not in the tree.
+
+### Spreading (1) to a general base: exactly one gap, and it is mathlib-absent
+* Non-reduced bases are **free**: `E[N]` and `μ_N` are finite étale for `N` invertible, and
+  the étale site is a topological invariant, so it suffices to construct over `S_red`.
+* Over an integral base, a morphism of finite étale schemes is determined by its generic
+  fibre, and **extends iff the base is normal**.
+* Therefore the root exists on the universal base as soon as that base is **normal**.
+* **Both sources of normality are blocked:**
+  - via smoothness — `YFull.exists_representing_smooth_affine`
+    (`ModularCurve/YFullRoute.lean:777`) and `gammaFullNaive_representable`
+    (`Moduli/Representability.lean:663`) are **`sorry`**;
+  - via étale ascent — searched `Mathlib/RingTheory/{Etale,Unramified,Smooth}` and
+    `Mathlib/AlgebraicGeometry/Morphisms/`: there is **no normality or regularity ascent
+    along étale** in mathlib, and no `Morphisms/Normal.lean` or `Morphisms/Regular.lean` at
+    all. Stacks 025P would have to be built.
+
+**Verified special case.** At `N = 3` the base is explicit and manifestly normal: inverting
+`γ` in `R[β,γ]/(β³−(β+γ)³) = R[β,γ]/(−γ(3β²+3βγ+γ²))` and setting `u = β/γ` gives
+`3u²+3u+1 = 0`, i.e. `E3ModuliRing ℚ ≅ ℚ(ζ₃)[γ, γ⁻¹, …]` — a localization of a PID. This is
+exactly why `e3Zeta = (3β+γ)/γ = 3u+1` works, and it cross-checks `e3Zeta_cyclotomic`:
+`(3u+1)²+(3u+1)+1 = 3(3u²+3u+1) = 0`. No general-`N` analogue exists.
+
+## Leg 2 (`yRho_geometricallyIrreducible`, `YRho.lean:8740`) — paper-scale
+
+Irreducibility of the modular curve. Buzzard (p. 33): *"NB irreducibility is proved
+complex-analytically by uniformising the ℂ-points of the curve by the upper half plane"*;
+(p. 34) *"Proof: See 1980s"*. Needs either complex uniformisation of modular curves or the
+monodromy of `Y(N) → Y(1)` being all of `SL₂(ℤ/N)`. Neither is in mathlib or the tree.
+
+## Consequence for planning
+Y(ρ̄)'s two legs bottom out in two classical projects of comparable size:
+**(A) normality/smoothness of `Y(N)`** (blocking DS4, hence leg 1) and
+**(B) irreducibility of `Y(N)`** (leg 2). They are the same classical fact seen twice — the
+geometry of the modular curve — and neither has mathlib support. Any further planning for
+Y(ρ̄) should start from which of the two to build, not from more DS4 rearrangement: DS4 is
+now provably at its minimum and every derivable consequence has been derived.
