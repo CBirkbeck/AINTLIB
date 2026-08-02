@@ -32849,7 +32849,16 @@ guessing.
 Then WP-A7.1 (universal moduli ring is a domain — with the `IsReduced` fallback A7.1′),
 A7.3, A7.4, A7.5, then WP-A8.
 
-### [WP-A5.3] Field-base pairing — RE-PLANNED after reading the interface (2026-08-02)
+### [WP-A5.3] Field-base pairing — ALREADY COMPLETE (discovered 2026-08-02)
+
+★★★ **PROCESS FAILURE, seventh near-duplicate.** I wrote `chartAffinePointEquiv_of_coe_eq`
+from scratch; it already existed at `FibreGalois.lean:43`, and so did every other piece of
+A5.3. The LSP cannot catch this (it only sees imported files) — only a **directory-wide
+grep for the concept before writing any declaration** catches it. Standing rule from here:
+`grep -rn "<concept>" projects/ModularCurves/ModularCurves/{WeilPairing,Moduli}/` first,
+every time, no exceptions.
+
+### [WP-A5.3] original re-plan, retained for the record
 Reading `exists_pairingAlgebraHom_of_galoisEquivariant` changed the target. It does **not**
 want a `Y(N) ⟶ μ_N` root map: fed a Galois-equivariant pairing on geometric points it
 returns **the field-base Weil pairing itself**, as a morphism
@@ -32870,7 +32879,10 @@ What is already present and sorry-free:
 * `galoisPointEquiv` (`GaloisFunctionField.lean:580`) — the σ-action on affine points.
 
 #### [WP-A5.3a = M1b-3] Galois equivariance of `fibreWeilPairing`
-- **Status**: open · **File**: `WeilPairing/FibrePointDict.lean`
+- **Status**: ALREADY PROVED — `WeilPairing/FibreGalois.lean` (sorry-free) has the whole
+  chain: `chartAffinePointEquiv_of_coe_eq` (:43, node D — I re-derived it and the root
+  build rejected the clash), `GaloisFibreChart` + `.pairing` + `.pairing_galois` (:82/108/117),
+  `weilPairingFibreMap` + `weilPairingFibreMap_galoisEquivariant` (:184/195). · **File**: `WeilPairing/FibrePointDict.lean`
 - **Statement**: for `σ : K ≃ₐ[Γ(S,V.1)] K`,
   `fibreWeilPairing Pr K N hN (σ • P) (σ • Q) _ _ = σ (fibreWeilPairing Pr K N hN P Q _ _)`,
   where `σ • P` is precomposition with `Spec σ` on scheme points.
@@ -32884,7 +32896,11 @@ What is already present and sorry-free:
   respective defs.
 
 #### [WP-A5.3b = M1c] The descent call
-- **Status**: blocked (A5.3a) · **File**: new, `WeilPairing/FieldBasePairing.lean`
+- **Status**: ALREADY PROVED — `exists_weilPairingHom_of_galoisFibreChart`
+  (`WeilPairing/FibreGalois.lean:236`), axiom-verified: over a perfect field, given a
+  Galois-equivariant Weierstrass chart at the geometric point, the Weil pairing descends to
+  a morphism of finite étale `k`-algebras, i.e. to `E[N] ×_{Spec k} E[N] ⟶ μ_{N,Spec k}`.
+  **The field-base Weil pairing already exists in this tree.** · **File**: new, `WeilPairing/FieldBasePairing.lean`
 - **Statement**: for `k` perfect with `N` invertible, there is
   `w : muNAlgebra k N hk ⟶ torsionPairAlgebra k E N hk` inducing `fibreWeilPairing` on
   geometric points — i.e. the field-base Weil pairing as a scheme morphism.
