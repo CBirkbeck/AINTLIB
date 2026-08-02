@@ -34540,3 +34540,24 @@ nothing else. Every factor of the chain is natural and the relevant squares are 
 proved; assembling them is the last task.
 
 Root green at 9638 jobs; every other file touched this session is sorry-free.
+
+### `homEquiv_comp` — `cat_disch` does NOT discharge it (tried 2026-08-03)
+
+`RepresentableBy.homEquiv_comp` carries `:= by cat_disch` as a default, so omitting the field
+is worth one attempt. It fails: *"could not synthesize default value … aesop failed after
+exhaustive search"*. The field must be proved explicitly.
+
+**Route for the proof.** Apply `homEquiv.symm` to both sides, turning the goal into the
+`comp_homEquiv_symm` shape, then unfold the five factors in order. The naturality of each is
+available:
+
+| factor | naturality source |
+|---|---|
+| `EllObj.homPullbackAlongEquiv` | functorial by construction (`toFun v = (v ≫ π, v.baseHom)`, so precomposition is immediate) |
+| `Equiv.subtypeProdEquivSigmaSubtype` | pure `Equiv`, commutes with everything |
+| `completionFibreEquiv` | `completionLocusPointsEquiv` (pullback UP) + `fullLevelLocusPointsEquiv_natural_fst/_snd` (`Moduli/LevelLocusNatural.lean`) + `transportAlongIso` functoriality |
+| `Equiv.subtypeEquivRight (fibre_condition_iff)` | condition-only, no data movement |
+| `sigmaHomForgetEquiv` | `Equiv.sigmaFiberEquiv` + `rOne.homEquiv_comp` |
+
+The one with content is the third; note `Moduli/LevelLocusNatural.lean` was written for
+exactly this purpose and its two `_natural_*` lemmas are the inputs.
