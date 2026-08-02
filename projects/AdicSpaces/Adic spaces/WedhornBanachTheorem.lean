@@ -300,6 +300,132 @@ private theorem sum_mem_of_mem_shrinking {M : Type*} [AddCommGroup M] [Topologic
     exact hW_shrink _ (Set.add_mem_add h0 hrest)
 
 open scoped Pointwise in
+/-- Telescoping: partial sums whose increments satisfy `S (k+1) − S k ∈ W (k+1)` stay in `W 0`. -/
+private theorem partial_sums_mem {M : Type*} [AddCommGroup M] [TopologicalSpace M]
+    (W : ℕ → Set M) (hW_zero : ∀ n, (0 : M) ∈ W n)
+    (hW_shrink : ∀ n, W (n + 1) + W (n + 1) ⊆ W n)
+    (S : ℕ → M) (hS0 : S 0 = 0) (hS_incr : ∀ k, S (k + 1) - S k ∈ W (k + 1)) :
+    ∀ k, S k ∈ W 0 := by
+  have hsum_W := sum_mem_of_mem_shrinking W hW_zero hW_shrink
+  intro k
+  have hsum_eq : S k - S 0 =
+      ∑ i ∈ Finset.range k, (S (i + 1) - S i) :=
+    (Finset.sum_range_sub S k).symm
+  rw [hS0, sub_zero] at hsum_eq
+  rw [hsum_eq, ← Fin.sum_univ_eq_sum_range]
+  apply hsum_W k 0
+  intro j
+  have hji := hS_incr (j : ℕ)
+  have : (0 + 1 + (j : ℕ)) = (j : ℕ) + 1 := by ring
+  rw [this]
+  exact hji
+
+/-- The residuals `y − f (S k)` tend to `0`: each lies in `closure (f '' W (k+1))`, and the
+closed neighbourhoods of `0` are approached along the cofinal basis. -/
+private theorem tendsto_residual_zero
+    {A : Type u} [CommRing A] [TopologicalSpace A]
+    {M : Type*} [AddCommGroup M] [Module A M] [UniformSpace M] [IsUniformAddGroup M]
+    {N : Type*} [AddCommGroup N] [Module A N] [UniformSpace N] [IsUniformAddGroup N]
+    (f : M →ₗ[A] N) (hf : Continuous f) (W : ℕ → Set M)
+    (hW_cofinal : ∀ V ∈ nhds (0 : M), ∃ n, W n ⊆ V) (hW_anti : Antitone W)
+    (y : N) (S : ℕ → M)
+    (hS_inv : ∀ k, y - f (S k) ∈ closure (f '' W (k + 1))) :
+    Filter.Tendsto (fun k => y - f (S k)) Filter.atTop (nhds (0 : N)) := by
+  rw [(closed_nhds_basis (0 : N)).tendsto_right_iff]
+  rintro Z ⟨hZ_nhds, hZ_closed⟩
+  -- `f ⁻¹' Z` is a nbhd of `0` in `M`.
+  have hpre : f ⁻¹' Z ∈ nhds (0 : M) := by
+    have h0 : f (0 : M) = 0 := map_zero f
+    exact hf.continuousAt (h0 ▸ hZ_nhds)
+  obtain ⟨n, hn⟩ := hW_cofinal _ hpre
+  -- `closure (f '' W n) ⊆ Z`.
+  have hcl_sub : closure (f '' W n) ⊆ Z := by
+    refine hZ_closed.closure_subset_iff.mpr ?_
+    rintro _ ⟨m, hm, rfl⟩
+    exact hn hm
+  -- For `k ≥ n`, `y - f (S k) ∈ closure (f '' W (k+1)) ⊆ closure (f '' W n) ⊆ Z`.
+  filter_upwards [Filter.eventually_ge_atTop n] with k hk
+  have hkn : n ≤ k + 1 := by omega
+  have hsub : closure (f '' W (k + 1)) ⊆ closure (f '' W n) :=
+    closure_mono (Set.image_mono (hW_anti hkn))
+  exact hcl_sub (hsub (hS_inv k))
+
+open scoped Pointwise in
+/-- Step 4 of the open-mapping argument: the closure of `f '' W 1` is already inside
+`f '' W 0`. Iterating the micro-step builds a Cauchy sequence of partial sums whose limit
+lies in the closed set `W 0` and maps to `y`. -/
+private theorem closure_image_subset_image_of_micro
+    {A : Type u} [CommRing A] [TopologicalSpace A]
+    {M : Type*} [AddCommGroup M] [Module A M] [UniformSpace M] [IsUniformAddGroup M]
+      [CompleteSpace M] [(uniformity M).IsCountablyGenerated]
+    {N : Type*} [AddCommGroup N] [Module A N] [UniformSpace N] [IsUniformAddGroup N]
+      [T2Space N]
+    (f : M →ₗ[A] N) (hf : Continuous f) (W : ℕ → Set M)
+    (hW_nhds : ∀ n, W n ∈ nhds (0 : M)) (hW_closed : ∀ n, IsClosed (W n))
+    (hW_shrink : ∀ n, W (n + 1) + W (n + 1) ⊆ W n)
+    (hW_cofinal : ∀ V ∈ nhds (0 : M), ∃ n, W n ⊆ V)
+    (hW_zero : ∀ n, (0 : M) ∈ W n)
+    (h_micro : ∀ (z : N) (k : ℕ), z ∈ closure (f '' W (k + 1)) →
+      ∃ w ∈ W (k + 1), z - f w ∈ closure (f '' W (k + 2))) :
+    closure (f '' W 1) ⊆ f '' W 0 := by
+  intro y hy
+  -- Build partial sums `S k` with invariant `y - f (S k) ∈ closure (f '' W (k+1))`.
+  let D : (k : ℕ) → {s : M // y - f s ∈ closure (f '' W (k + 1))} := fun k =>
+    Nat.rec
+      (motive := fun k => {s : M // y - f s ∈ closure (f '' W (k + 1))})
+      ⟨0, by simpa using hy⟩
+      (fun k prev =>
+        ⟨prev.1 + (h_micro (y - f prev.1) k prev.2).choose, by
+          have hspec := (h_micro (y - f prev.1) k prev.2).choose_spec.2
+          simpa [map_add, sub_add_eq_sub_sub] using hspec⟩)
+      k
+  set S : ℕ → M := fun k => (D k).1 with hS_def
+  -- Invariant.
+  have hS_inv : ∀ k, y - f (S k) ∈ closure (f '' W (k + 1)) := fun k => (D k).2
+  -- Increment: `S (k+1) - S k ∈ W (k+1)`.
+  have hS_incr : ∀ k, S (k + 1) - S k ∈ W (k + 1) := fun k => by
+    have hSeq : S (k + 1) = S k + (h_micro (y - f (D k).1) k (D k).2).choose := rfl
+    rw [hSeq, add_sub_cancel_left]
+    exact (h_micro (y - f (D k).1) k (D k).2).choose_spec.1
+  -- `W` is decreasing (each `W (n+1) ⊆ W n`).
+  have hW_dec : ∀ n, W (n + 1) ⊆ W n := fun n x hx =>
+    hW_shrink n ⟨x, hx, 0, hW_zero (n + 1), add_zero x⟩
+  -- `S` is Cauchy (shrinking basis builder D.1).
+  have hcauchy : CauchySeq S :=
+    AddMonoidHom._sub_sub_lemma_D_1_cauchy_builder W hW_nhds hW_shrink hW_cofinal S
+      (fun n => hW_dec n (hS_incr n))
+  -- Limit `x` of `S`.
+  obtain ⟨x, hx_tend⟩ := cauchySeq_tendsto_of_complete hcauchy
+  -- Doubling sum lemma (mirrors the internal `hsum_lemma` of D.1): a sum of terms
+  -- `xs i ∈ W (n + 1 + i)` lands in `W n`.
+  have hsum_W := sum_mem_of_mem_shrinking W hW_zero hW_shrink
+  -- Each partial sum `S k` lies in `W 0` (telescoping with offset `0`).
+  have hS0 : S 0 = 0 := rfl
+  have hpartial := partial_sums_mem W hW_zero hW_shrink S hS0 hS_incr
+  -- `x ∈ W 0` (closed set containing the convergent sequence).
+  have hx_W0 : x ∈ W 0 :=
+    (hW_closed 0).mem_of_tendsto hx_tend (Filter.Eventually.of_forall hpartial)
+  -- `W` is antitone.
+  have hW_anti : Antitone W := antitone_nat_of_succ_le hW_dec
+  -- `f x = y`: show `f (S k) → y` (residuals shrink to `0`) and `f (S k) → f x`,
+  -- then use uniqueness of limits (`N` is T2).
+  have hf_Sx : Filter.Tendsto (fun k => f (S k)) Filter.atTop (nhds (f x)) :=
+    (hf.continuousAt (x := x)).tendsto.comp hx_tend
+  -- Residual `y - f (S k) → 0` via the closed-neighbourhood basis at `0`.
+  have htend0 := tendsto_residual_zero f hf W hW_cofinal hW_anti y S hS_inv
+  have hf_Sy : Filter.Tendsto (fun k => f (S k)) Filter.atTop (nhds y) := by
+    have heq : (fun k => f (S k)) = fun k => y - (y - f (S k)) := by
+      funext k; abel
+    have hlim : Filter.Tendsto (fun k => y - (y - f (S k))) Filter.atTop (nhds (y - 0)) :=
+      tendsto_const_nhds.sub htend0
+    rw [sub_zero] at hlim
+    rw [heq]
+    exact hlim
+  have hfx_eq : f x = y := tendsto_nhds_unique hf_Sx hf_Sy
+  -- Conclude `y = f x ∈ f '' W 0`.
+  exact ⟨x, hx_W0, hfx_eq⟩
+
+open scoped Pointwise in
 /-- **Completion-upgrade half of Wedhorn 6.16**: if `f` is continuous with `M` complete and
 `f` is "almost open" (`closure (f '' U) ∈ nhds 0` for every nbhd `U`), then `f` is open at `0`
 (`f '' U ∈ nhds 0`). Classical Banach iterated-approximation: build `xₖ ∈ Wₖ` with
@@ -339,93 +465,8 @@ theorem _omt_open_at_zero
     refine ⟨w, hw_mem, ?_⟩
     rw [hw_eq, ← hc_eq]
     simpa using hc_mem
-  have h_key : closure (f '' W 1) ⊆ f '' W 0 := by
-    intro y hy
-    -- Build partial sums `S k` with invariant `y - f (S k) ∈ closure (f '' W (k+1))`.
-    let D : (k : ℕ) → {s : M // y - f s ∈ closure (f '' W (k + 1))} := fun k =>
-      Nat.rec
-        (motive := fun k => {s : M // y - f s ∈ closure (f '' W (k + 1))})
-        ⟨0, by simpa using hy⟩
-        (fun k prev =>
-          ⟨prev.1 + (h_micro (y - f prev.1) k prev.2).choose, by
-            have hspec := (h_micro (y - f prev.1) k prev.2).choose_spec.2
-            simpa [map_add, sub_add_eq_sub_sub] using hspec⟩)
-        k
-    set S : ℕ → M := fun k => (D k).1 with hS_def
-    -- Invariant.
-    have hS_inv : ∀ k, y - f (S k) ∈ closure (f '' W (k + 1)) := fun k => (D k).2
-    -- Increment: `S (k+1) - S k ∈ W (k+1)`.
-    have hS_incr : ∀ k, S (k + 1) - S k ∈ W (k + 1) := fun k => by
-      have hSeq : S (k + 1) = S k + (h_micro (y - f (D k).1) k (D k).2).choose := rfl
-      rw [hSeq, add_sub_cancel_left]
-      exact (h_micro (y - f (D k).1) k (D k).2).choose_spec.1
-    -- `W` is decreasing (each `W (n+1) ⊆ W n`).
-    have hW_dec : ∀ n, W (n + 1) ⊆ W n := fun n x hx =>
-      hW_shrink n ⟨x, hx, 0, hW_zero (n + 1), add_zero x⟩
-    -- `S` is Cauchy (shrinking basis builder D.1).
-    have hcauchy : CauchySeq S :=
-      AddMonoidHom._sub_sub_lemma_D_1_cauchy_builder W hW_nhds hW_shrink hW_cofinal S
-        (fun n => hW_dec n (hS_incr n))
-    -- Limit `x` of `S`.
-    obtain ⟨x, hx_tend⟩ := cauchySeq_tendsto_of_complete hcauchy
-    -- Doubling sum lemma (mirrors the internal `hsum_lemma` of D.1): a sum of terms
-    -- `xs i ∈ W (n + 1 + i)` lands in `W n`.
-    have hsum_W := sum_mem_of_mem_shrinking W hW_zero hW_shrink
-    -- Each partial sum `S k` lies in `W 0` (telescoping with offset `0`).
-    have hpartial : ∀ k, S k ∈ W 0 := by
-      intro k
-      have hsum_eq : S k - S 0 =
-          ∑ i ∈ Finset.range k, (S (i + 1) - S i) :=
-        (Finset.sum_range_sub S k).symm
-      have hS0 : S 0 = 0 := rfl
-      rw [hS0, sub_zero] at hsum_eq
-      rw [hsum_eq, ← Fin.sum_univ_eq_sum_range]
-      apply hsum_W k 0
-      intro j
-      have hji := hS_incr (j : ℕ)
-      have : (0 + 1 + (j : ℕ)) = (j : ℕ) + 1 := by ring
-      rw [this]
-      exact hji
-    -- `x ∈ W 0` (closed set containing the convergent sequence).
-    have hx_W0 : x ∈ W 0 :=
-      (hW_closed 0).mem_of_tendsto hx_tend (Filter.Eventually.of_forall hpartial)
-    -- `W` is antitone.
-    have hW_anti : Antitone W := antitone_nat_of_succ_le hW_dec
-    -- `f x = y`: show `f (S k) → y` (residuals shrink to `0`) and `f (S k) → f x`,
-    -- then use uniqueness of limits (`N` is T2).
-    have hf_Sx : Filter.Tendsto (fun k => f (S k)) Filter.atTop (nhds (f x)) :=
-      (hf.continuousAt (x := x)).tendsto.comp hx_tend
-    -- Residual `y - f (S k) → 0` via the closed-neighbourhood basis at `0`.
-    have htend0 : Filter.Tendsto (fun k => y - f (S k)) Filter.atTop (nhds (0 : N)) := by
-      rw [(closed_nhds_basis (0 : N)).tendsto_right_iff]
-      rintro Z ⟨hZ_nhds, hZ_closed⟩
-      -- `f ⁻¹' Z` is a nbhd of `0` in `M`.
-      have hpre : f ⁻¹' Z ∈ nhds (0 : M) := by
-        have h0 : f (0 : M) = 0 := map_zero f
-        exact hf.continuousAt (h0 ▸ hZ_nhds)
-      obtain ⟨n, hn⟩ := hW_cofinal _ hpre
-      -- `closure (f '' W n) ⊆ Z`.
-      have hcl_sub : closure (f '' W n) ⊆ Z := by
-        refine hZ_closed.closure_subset_iff.mpr ?_
-        rintro _ ⟨m, hm, rfl⟩
-        exact hn hm
-      -- For `k ≥ n`, `y - f (S k) ∈ closure (f '' W (k+1)) ⊆ closure (f '' W n) ⊆ Z`.
-      filter_upwards [Filter.eventually_ge_atTop n] with k hk
-      have hkn : n ≤ k + 1 := by omega
-      have hsub : closure (f '' W (k + 1)) ⊆ closure (f '' W n) :=
-        closure_mono (Set.image_mono (hW_anti hkn))
-      exact hcl_sub (hsub (hS_inv k))
-    have hf_Sy : Filter.Tendsto (fun k => f (S k)) Filter.atTop (nhds y) := by
-      have heq : (fun k => f (S k)) = fun k => y - (y - f (S k)) := by
-        funext k; abel
-      have hlim : Filter.Tendsto (fun k => y - (y - f (S k))) Filter.atTop (nhds (y - 0)) :=
-        tendsto_const_nhds.sub htend0
-      rw [sub_zero] at hlim
-      rw [heq]
-      exact hlim
-    have hfx_eq : f x = y := tendsto_nhds_unique hf_Sx hf_Sy
-    -- Conclude `y = f x ∈ f '' W 0`.
-    exact ⟨x, hx_W0, hfx_eq⟩
+  have h_key := closure_image_subset_image_of_micro f hf W hW_nhds hW_closed
+    hW_shrink hW_cofinal hW_zero h_micro
   -- Conclude: `f '' U ⊇ f '' W 0 ⊇ closure (f '' W 1) ∈ nhds 0`.
   refine Filter.mem_of_superset (hclos 1) (h_key.trans (Set.image_mono hW0_subU))
 
