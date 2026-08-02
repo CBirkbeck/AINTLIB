@@ -32929,3 +32929,21 @@ What is already present and sorry-free:
 - **Proof sketch**: set `p` := `fibreWeilPairing` transported through
   `torsionAlgebraFibreEquiv` (twice) and `muNAlgebraFibreEquiv`; `hp` is A5.3a combined with
   the two `_comp_algEquiv` lemmas; apply `exists_pairingAlgebraHom_of_galoisEquivariant`.
+
+## SESSION CLOSE 2026-08-02 (route A) — where the remaining work actually is
+
+Root build 9625 jobs; everything added is axiom-verified and pushed.
+
+**Route A's algebra is complete** (WP-A1/A2/A3/A4, WP-A7.2). **The field case was already
+complete** in the tree before this session: `exists_weilPairingHom_of_galoisFibreChart`
+(`WeilPairing/FibreGalois.lean:236`) is the field-base Weil pairing as a scheme morphism.
+
+**So the entire remaining gap is the general base**, and it is A7.1 → A7.3 → A7.4 → A7.5 →
+A8, with A7.1's shape now pinned by a verified finding (the relation factors; the
+localisation excises the bad component; the surviving quadratic's discriminant `−3γ²` is
+exactly the `ζ₃` that the det twist needs).
+
+**Process rule now standing** (seven near-duplicates this session, five of which the root
+build caught only via a name clash): before writing ANY declaration, run
+`grep -rn "<concept>" projects/ModularCurves/ModularCurves/{WeilPairing,Moduli,EllipticCurve}/`.
+The LSP cannot substitute for this — it only sees imported files.
