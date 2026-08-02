@@ -10625,3 +10625,51 @@ Also: a blind line-wrapping pass that split lines at `(((` mangled two unrelated
 
     over-50 proofs   486 (baseline) → 51   (48 actionable, 3 Vendored, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Consolidation: where task 2 stands, and what the residue is made of
+
+    over-50 proofs   486 (baseline) → 51   (48 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+
+Re-ran the duplicate-body scan after this session's twelve batches: **21 identical bodies,
+334 redundant lines — and no new free wins.** Every hit is one of the two families already
+adjudicated: the `RelativePieceKeystone` / `…Gen` pairs and
+`spa_topology_eq_generateFrom` / `…_huber`. Both are *hypothesis-context* duplicates where
+the copy is the more general statement, so the fix is "generalise the original, delete the
+copy" — a statement change, coordinator work, not decomposition.
+
+**So the residue is uniform**: every one of the 48 needs three to five new lemmas with
+heavy signatures. There is no cheap tier left. Ranked by how much structure is already
+visible (`rest` = what survives after lifting all top-level bullets):
+
+| rest | total | bullets | target |
+|---|---|---|---|
+| 1 | 118 | [12, 105] | `WedhornCechAcyclicity:1082` `isOXAcyclic_interProd` — **deferred**, cumulative elaboration cost |
+| 2 | 179 | [177] | `AdicMorphismsCore:218` `exists_pairOfDefinition_le_subring` |
+| 8 | 167 | [26, 133] | `Presheaf:2231` `exists_continuous_valuation_of_…` — bullet (1) is a free 26-line lift |
+| 11 | 107 | [12, 84] | `Groebner:1586` `approx_generation_key` — 4 lemmas; heavy `obtain`-bound plumbing |
+| 21 | 132 | [92,2,6,11] | `SpvAI:108` `cofinalValue_ideal_pow_lt` |
+| 24/25 | 122/123 | [58, 40] | the `RobbaPresentation` twins — residual bullets **proved identical**; needs a cross-section restructure |
+
+`unitCover_relMinus_forward_witness` (81) was examined and its two branches are *not*
+twins (17 vs 28 lines, different witnesses) — no dedup there, a 3-lemma job.
+
+### What this session's twelve batches actually taught
+
+The rules that repaid themselves, in the order they were learned:
+
+1. **Check the lines above the docstring** — `omit`/`include`/`open`/`set_option … in` are
+   part of the declaration and must be reproduced on every piece. 31 of the targets carry
+   one.
+2. **A byte-identical body is not a duplicate** until the *instance contexts* match. Three
+   occurrences; in every one the copy was the more general statement.
+3. **Generalising the statement does not generalise the body.** Three occurrences, and the
+   third was after the rule was written down. Grep the extracted text for the concrete
+   names the generalisation replaced.
+4. **Budget ~6 lines of preamble per piece and re-measure every new lemma.** A
+   decomposition that moves a proof from one side of the bar to the other has done nothing
+   — that happened twice.
+5. **Prefer generic to specialised** when extracting. `coeRingHom_divByS_isPowerBounded`
+   paid for itself one batch later, for free.
+6. **A build that dies with no `error:` in its log was killed, not failed.** This machine
+   sits at ~9.9G/11.2G swap with other Lean projects resident.
