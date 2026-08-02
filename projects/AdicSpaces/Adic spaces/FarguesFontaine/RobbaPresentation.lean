@@ -5680,16 +5680,8 @@ theorem mk'_monomial_pow (i k m : ℕ) (c : OF F) :
       = IsLocalization.mk' (Bloc p F ϖ)
         ((p : Ainf p F) ^ (i * m) * WittVector.teichmuller p (c ^ m))
         (sPow p F ϖ (k * m)) := by
-  have hnum : ((p : Ainf p F) ^ i * WittVector.teichmuller p c) ^ m
-      = (p : Ainf p F) ^ (i * m) * WittVector.teichmuller p (c ^ m) := by
-    rw [mul_pow, ← pow_mul, ← map_pow (WittVector.teichmuller p (R := OF F))]
-  have hden : (sPow p F ϖ k) ^ m = sPow p F ϖ (k * m) := by
-    refine Subtype.ext ?_
-    show (((p : Ainf p F) * teichPi p F ϖ) ^ k) ^ m
-      = ((p : Ainf p F) * teichPi p F ϖ) ^ (k * m)
-    rw [← pow_mul]
-  rw [← hnum, ← hden]
-  exact (IsLocalization.mk'_pow _ _ m).symm
+  rw [mk'_sPow_pow p F ϖ ((p : Ainf p F) ^ i * WittVector.teichmuller p c) k m,
+    mul_pow, ← pow_mul, ← map_pow (WittVector.teichmuller p (R := OF F))]
 
 /-- **The radius-free value of `p`-balanced monomials**: when the `p`-power
 matches the denominator depth, the local valuation does not depend on the
