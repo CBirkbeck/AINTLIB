@@ -1504,40 +1504,20 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   set a : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 x with ha
   set b : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 y with hb
   set e : ℕ → F := fun k => a k - b k with he
-  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
-  rw [← ha] at hdx
-  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
-  rw [← hb] at hdy
+  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx; rw [← ha] at hdx
+  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy; rw [← hb] at hdy
+  -- this is `tendsto_gaussTerm_sub`, which `digit_sub_le` already uses
   have hde : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (e k))
-      Filter.atTop (nhds 0) := by
-    have hbound : ∀ k, ρ ^ k * perfectoidValuation p F (e k)
-        ≤ max (ρ ^ k * perfectoidValuation p F (a k))
-            (ρ ^ k * perfectoidValuation p F (b k)) := by
-      intro k
-      refine le_trans (mul_le_mul_of_nonneg_left
-        (Valuation.map_sub (perfectoidValuation p F) (a k) (b k)) zero_le) ?_
-      exact (nnreal_mul_max _ _ _).le
-    have hmax' : Filter.Tendsto (fun k => max
-        (ρ ^ k * perfectoidValuation p F (a k))
-        (ρ ^ k * perfectoidValuation p F (b k))) Filter.atTop (nhds 0) := by
-      simpa using hdx.max hdy
-    exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hmax'
-      (fun k => zero_le) hbound
+      Filter.atTop (nhds 0) := tendsto_gaussTerm_sub p F hdx hdy
   set M := max (Valued.v x) (Valued.v y) with hM
-  have hrx : PhiHatK p F ϖ hρ0 hρ1 a = x := by
-    rw [ha]
-    exact PhiHatK_teichCoeffAr p F ϖ hx
-  have hry : PhiHatK p F ϖ hρ0 hρ1 b = y := by
-    rw [hb]
-    exact PhiHatK_teichCoeffAr p F ϖ hy
+  have hrx : PhiHatK p F ϖ hρ0 hρ1 a = x := by rw [ha]; exact PhiHatK_teichCoeffAr p F ϖ hx
+  have hry : PhiHatK p F ϖ hρ0 hρ1 b = y := by rw [hb]; exact PhiHatK_teichCoeffAr p F ϖ hy
   have hSx : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ a N)) Filter.atTop (nhds x) := by
-    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdx
-    rwa [hrx] at h1
+    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdx; rwa [hrx] at h1
   have hSy : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ b N)) Filter.atTop (nhds y) := by
-    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdy
-    rwa [hry] at h1
+    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdy; rwa [hry] at h1
   have hSe := tendsto_PhiHatK p F ϖ hρ0 hρ1 hde
   have hPNval : ∀ N : ℕ, Valued.v (AlocToHatK p F ϖ hρ0 hρ1
       (prefixAloc p F ϖ a N - prefixAloc p F ϖ b N - prefixAloc p F ϖ e N))
@@ -1569,19 +1549,7 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       have h1 := (hSx.sub hSy).sub hSe
       refine h1.congr fun N => ?_
       rw [map_sub, map_sub]
-    obtain ⟨N₀, hN₀⟩ := (eventually_valued_sub_le_of_tendsto p F
-      (hρ0 := hρ0) (hρ1 := hρ1) hlim hρM).exists
-    have h2 : (x - y) - PhiHatK p F ϖ hρ0 hρ1 e
-        = (((x - y) - PhiHatK p F ϖ hρ0 hρ1 e)
-            - AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N₀
-              - prefixAloc p F ϖ b N₀ - prefixAloc p F ϖ e N₀))
-          + AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N₀
-              - prefixAloc p F ϖ b N₀ - prefixAloc p F ϖ e N₀) := by
-      ring
-    rw [h2]
-    refine le_trans (Valuation.map_add _ _ _) (max_le ?_ (hPNval N₀))
-    rw [Valuation.map_sub_swap]
-    exact hN₀
+    exact valued_le_of_tendsto_of_forall_le p F hρM hlim hPNval
 
 /-- **The divided convolution reproduces `aₙ` exactly at `k = n − m`.** The `k = n − m`
 term is `a n / b m · b m = a n`, so subtracting it from `a n` leaves only the erased sum,
