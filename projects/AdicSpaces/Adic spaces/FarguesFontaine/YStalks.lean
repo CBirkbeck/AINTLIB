@@ -37,6 +37,47 @@ noncomputable instance : HasLocLiftPowerBounded (Ainf p F) :=
   hasLocLiftPowerBounded_Ainf p F
     (IsTateRing.pseudoUniformizer (A := F))
 
+/-- Comap functoriality: `restrictionMapHom ∘ canonicalMap = canonicalMap`, so comapping a
+point of `𝒪(D')` to the base through either route agrees. -/
+private lemma comap_canonicalMap_comp_restrictionMapHom
+    (D D' : RationalLocData (Ainf p F))
+    (hsub : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (w'' : Spv (presheafValue D')) :
+    comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
+      = comap D'.canonicalMap w'' := by
+  rw [show comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
+      = comap ((restrictionMapHom D D' hsub).comp D.canonicalMap) w'' from
+    by rw [comap_comp]; rfl]
+  have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap = D'.canonicalMap :=
+    RingHom.ext (restrictionMapHom_canonicalMap_generic D D' hsub)
+  rw [hcomp]
+
+/-- Dividing by a unit power: from `w(uᵏ) ≤ w(b)` and `w(b) ≠ 0`, the twist `u⁻ᵏ·b` has
+`w ≥ 1` and is still nonzero. -/
+private lemma vle_one_and_not_vle_zero_of_pow_vle {B : Type*} [CommRing B]
+    (w : Spv B) (u : Bˣ) (k : ℕ) (b : B)
+    (hk : w.vle ((u : B) ^ k) b) (hnz : ¬ w.vle b 0) :
+    w.vle 1 (((u⁻¹ : Bˣ) : B) ^ k * b) ∧ ¬ w.vle (((u⁻¹ : Bˣ) : B) ^ k * b) 0 := by
+  constructor
+  · have h1 := w.mul_vle_mul_left hk (((u⁻¹ : Bˣ) : B) ^ k)
+    rw [show ((u : B) ^ k * ((u⁻¹ : Bˣ) : B) ^ k) = 1 by
+        rw [← mul_pow, Units.mul_inv, one_pow],
+      show b * ((u⁻¹ : Bˣ) : B) ^ k = ((u⁻¹ : Bˣ) : B) ^ k * b by ring] at h1
+    exact h1
+  · intro hcon
+    refine hnz ?_
+    have h2 := w.mul_vle_mul_left hcon ((u : B) ^ k)
+    rw [zero_mul, show ((u⁻¹ : Bˣ) : B) ^ k * b * (u : B) ^ k = b by
+      rw [mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow, mul_one]] at h2
+    exact h2
+
+/-- The same twist preserves "valued zero". -/
+private lemma vle_zero_mul_inv_pow {B : Type*} [CommRing B] (w : Spv B) (u : Bˣ) (k : ℕ)
+    {b : B} (hb : w.vle b 0) : w.vle (((u⁻¹ : Bˣ) : B) ^ k * b) 0 := by
+  have h3 := w.mul_vle_mul_left hb (((u⁻¹ : Bˣ) : B) ^ k)
+  rwa [zero_mul, show b * ((u⁻¹ : Bˣ) : B) ^ k = ((u⁻¹ : Bˣ) : B) ^ k * b by ring] at h3
+
+
 /-- **The rational shrink claim at `Y`-interior rationals** (the Wedhorn 8.14
 core over the non-Tate ambient `A_inf`): the concrete Tate structure of the
 completed localization comes from `𝒴`-interiority (`YB1`), everything else is
@@ -54,8 +95,7 @@ theorem rationalShrink_Y
       ∧ v' ∈ rationalOpen D'.T D'.s
       ∧ IsUnit (restrictionMapHom D D' h b) := by
   classical
-  haveI : IsRingOfIntegralElements
-      ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
   haveI : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
   haveI := completeSpace_right_Ainf p F ϖ
   haveI hTate : IsTateRing (presheafValue D) :=
@@ -65,24 +105,7 @@ theorem rationalShrink_Y
   obtain ⟨u, hu⟩ := hTate.exists_topologicallyNilpotent_unit
   obtain ⟨k, hk⟩ := exists_pow_vle_of_isContinuous hwcont hu hnz
   set c : presheafValue D := ((u⁻¹ : _ˣ) : presheafValue D) ^ k * b with hcdef
-  have h1c : (pointValue D hv).vle 1 c := by
-    have h1 := (pointValue D hv).mul_vle_mul_left hk
-      (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-    rw [show ((u : presheafValue D) ^ k
-          * ((u⁻¹ : _ˣ) : presheafValue D) ^ k) = 1 by
-        rw [← mul_pow, Units.mul_inv, one_pow],
-      show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
-        rw [hcdef]; ring] at h1
-    exact h1
-  have hc0 : ¬ (pointValue D hv).vle c 0 := by
-    intro hcon
-    refine hnz ?_
-    have h2 := (pointValue D hv).mul_vle_mul_left hcon
-      ((u : presheafValue D) ^ k)
-    rw [zero_mul, show c * (u : presheafValue D) ^ k = b by
-      rw [hcdef, mul_comm _ b, mul_assoc, ← mul_pow, Units.inv_mul, one_pow,
-        mul_one]] at h2
-    exact h2
+  obtain ⟨h1c, hc0⟩ := vle_one_and_not_vle_zero_of_pow_vle (pointValue D hv) u k b hk hnz
   obtain ⟨W, hWopen, hvW, hcapture⟩ := exists_A_level_open_presentation' D
     u hu hwspa (ι := Unit) (fam := {()})
     (F := fun _ => (1 : presheafValue D))
@@ -97,8 +120,7 @@ theorem rationalShrink_Y
     spaOpen_subset_iff.mp (hD'sub.trans Set.inter_subset_right)
   refine ⟨D', hD', hsub, hsub.trans hDY, mem_spaOpen.mp hvD', ?_⟩
   haveI hTate' : IsTateRing (presheafValue D') :=
-    isTateRing_presheafValue_of_rationalOpen_subset_Y p F ϖ D'
-      (hsub.trans hDY)
+    isTateRing_presheafValue_of_rationalOpen_subset_Y p F ϖ D' (hsub.trans hDY)
   haveI : IsHuberRing (presheafValue D') := presheafValue_isHuberRing_huber D'
   letI P_B : PairOfDefinition (presheafValue D') := presheafValue_concretePair D'
   haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete D'
@@ -106,16 +128,7 @@ theorem rationalShrink_Y
   intro w'' hw'' hcon
   have hwPD := comap_restrictionMapHom_mem_spa D D' hsub hw''
   have hbase' := comap_canonicalMap_mem_rationalOpen_inter_spa D' ⟨w'', hw''⟩
-  have hbaseEq : comap D.canonicalMap
-      (comap (restrictionMapHom D D' hsub) w'')
-      = comap D'.canonicalMap w'' := by
-    rw [show comap D.canonicalMap (comap (restrictionMapHom D D' hsub) w'')
-        = comap ((restrictionMapHom D D' hsub).comp D.canonicalMap) w'' from
-      by rw [comap_comp]; rfl]
-    have hcomp : (restrictionMapHom D D' hsub).comp D.canonicalMap
-        = D'.canonicalMap :=
-      RingHom.ext (restrictionMapHom_canonicalMap_generic D D' hsub)
-    rw [hcomp]
+  have hbaseEq := comap_canonicalMap_comp_restrictionMapHom p F D D' hsub w''
   have hW' : comap D.canonicalMap
       (comap (restrictionMapHom D D' hsub) w'') ∈ W := by
     rw [hbaseEq]
@@ -127,15 +140,9 @@ theorem rationalShrink_Y
   refine hcap.2 ?_
   show (comap (restrictionMapHom D D' hsub) w'').vle c 0
   have hcb : (comap (restrictionMapHom D D' hsub) w'').vle b 0 := by
-    show w''.vle (restrictionMapHom D D' hsub b)
-      (restrictionMapHom D D' hsub 0)
-    rw [map_zero]
-    exact hcon
-  have h3 := (comap (restrictionMapHom D D' hsub) w'').mul_vle_mul_left hcb
-    (((u⁻¹ : _ˣ) : presheafValue D) ^ k)
-  rw [zero_mul, show b * ((u⁻¹ : _ˣ) : presheafValue D) ^ k = c by
-    rw [hcdef]; ring] at h3
-  exact h3
+    show w''.vle (restrictionMapHom D D' hsub b) (restrictionMapHom D D' hsub 0)
+    rw [map_zero]; exact hcon
+  rw [hcdef]; exact vle_zero_mul_inv_pow _ u k hcb
 
 /-- The plus subring of `A_inf` is a ring of integral elements (instance
 form of `isAffinoidRing_Ainf`). -/
