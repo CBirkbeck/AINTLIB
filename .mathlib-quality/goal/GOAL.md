@@ -9664,3 +9664,39 @@ which is the block's own indent, readable off its first line.
 
     over-50 proofs   486 (baseline) → 65   (63 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: chartDensePlus_of_exact 97 → closed (ChartVObj has no proof over 50)
+
+`FarguesFontaine/ChartVObj.lean`, 18 rebuilds. Two lifts:
+
+    isClosed_completedPlusSubring        the closed target (an open subgroup is closed)
+    tendsto_blocToBI_teichmuller_heads   the convergence of the Teichmüller heads, with
+                                         the `hpair` identity folded in
+
+### An unanchored `.index()` nearly destroyed the file
+
+The seam anchor `haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=`
+occurs **three times** in this file, and `s.index(A)` found the first — 54,000 characters
+before the target. The slice `s[:ia] + …` would have deleted everything in between. The
+script errored out on a later `StopIteration` before writing, and `verify_file.py` confirmed
+`+0` lines, so nothing was lost.
+
+This is the third member of one family: the SheafyBI truncation (slice to end-of-string),
+the RobbaPresentation seam mis-find (`s.index(C)` before `ib`), and now this. **Every
+`.index()` in an edit script must be anchored at the declaration's own offset**, and the
+chain asserted monotone: `assert thm < ia < ib < ic < idd`. That assertion is what turns a
+silent 54k-character deletion into an immediate failure.
+
+### The `have`-with-leading-implicits failure, second occurrence
+
+`have htend := tendsto_blocToBI_teichmuller_heads p F ϖ x k w hsplit` cannot elaborate: the
+implicit radii `{ρ₁} {ρ₂} {hρ₁0} …` have nothing to unify against in a bare `have`. Named
+them explicitly, exactly as the surrounding code already does. Recorded once in the
+StructurePresheafBundled batch; this is the same failure, so it is a rule rather than an
+incident: **a partially-applied lemma with leading implicits does not survive `have`** —
+either name the implicits or call it at the use site.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 64   (62 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
