@@ -937,6 +937,123 @@ theorem bivariateLocToQuotient_atOverlap_algebraMap
   rw [IsLocalization.Away.lift_eq]
   rfl
 
+/-- The three `divByS` values of the overlap datum: `b/s = 1`, `b²/s = b`, and `1/s` is
+inverse to `b`. All three are `mk'` identities once `s` is rewritten to `b` — `rw [hs]`
+rather than `subst`, because `b` occurs inside `overlapDatum B P b`. -/
+private theorem overlap_divByS_values (P : PairOfDefinition B) [IsNoetherianRing P.A₀]
+    (b : B) [IsLocalization.Away b (Localization.Away (overlapDatum B P b).s)] :
+    divByS b (overlapDatum B P b).s = (1 : Localization.Away (overlapDatum B P b).s) ∧
+      divByS (b * b) (overlapDatum B P b).s =
+        algebraMap B (Localization.Away (overlapDatum B P b).s) b ∧
+      divByS 1 (overlapDatum B P b).s *
+        algebraMap B (Localization.Away (overlapDatum B P b).s) b = 1 := by
+  have hs : (overlapDatum B P b).s = b := overlapDatum_s B P b
+  refine ⟨?_, ?_, ?_⟩
+  · unfold divByS
+    rw [hs]
+    exact IsLocalization.mk'_self (M := Submonoid.powers b)
+      (S := Localization.Away b) (⟨1, pow_one b⟩ : b ∈ Submonoid.powers b)
+  · unfold divByS
+    rw [hs]
+    rw [← IsLocalization.mk'_one (M := Submonoid.powers b)
+        (S := Localization.Away b) b]
+    apply IsLocalization.mk'_eq_of_eq
+    simp only [Submonoid.coe_one, one_mul]
+  · unfold divByS
+    rw [hs]
+    rw [IsLocalization.mk'_spec]
+    exact map_one _
+
+/-- `Y` inverts `b` in `B⟨X,Y⟩/(b − X, 1 − bY)`: the difference is minus the second
+generator of the ideal. -/
+private theorem mk_Y_mul_mk_algebraMap_eq_one (b : B) :
+    Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b) TateAlgebra₂.Y *
+        Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
+          (algebraMap B ↥(TateAlgebra₂ B) b) = 1 := by
+  rw [← map_mul, ← map_one (Ideal.Quotient.mk _)]
+  refine Ideal.Quotient.eq.mpr ?_
+  have h_sign : TateAlgebra₂.Y * algebraMap B ↥(TateAlgebra₂ B) b - 1 =
+      -(1 - algebraMap B ↥(TateAlgebra₂ B) b * TateAlgebra₂.Y) := by ring
+  rw [h_sign]
+  unfold TateAlgebra.bivariateOverlapIdeal
+  exact neg_mem (Ideal.subset_span (Set.mem_insert_of_mem _ rfl))
+
+/-- First hypothesis of `locTopology_continuous_lift`: the composite with `algebraMap B` is
+the quotient map on constants, whose continuity is supplied by the caller (the topology here
+is a binder, so the concrete-topology lemma cannot be named inside). -/
+private theorem bivariateLocToQuotient_comp_algebraMap_continuous
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    [TopologicalSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b)]
+    (hmk : Continuous (fun a : B ↦
+      Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
+        (algebraMap B ↥(TateAlgebra₂ B) a))) :
+    Continuous ((bivariateLocToQuotient_atOverlap B P b).comp
+      (algebraMap B (Localization.Away (overlapDatum B P b).s))) := by
+  have heq : ∀ a : B,
+      ((bivariateLocToQuotient_atOverlap B P b).comp
+        (algebraMap B (Localization.Away (overlapDatum B P b).s))) a =
+      Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
+        (algebraMap B ↥(TateAlgebra₂ B) a) := by
+    intro a
+    simp only [RingHom.comp_apply]
+    exact bivariateLocToQuotient_atOverlap_algebraMap B P b a
+  rw [show ⇑((bivariateLocToQuotient_atOverlap B P b).comp
+      (algebraMap B (Localization.Away (overlapDatum B P b).s))) =
+      (fun a : B ↦ Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
+          (algebraMap B ↥(TateAlgebra₂ B) a)) from funext heq]
+  exact hmk
+
+/-- Second hypothesis of `locTopology_continuous_lift`: every `t ∈ T = {1, b, b²}` has
+power-bounded image — `mk Y`, `1`, `mk (algebraMap b)` respectively. -/
+private theorem bivariateLocToQuotient_isPowerBounded_of_mem_T
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    [TopologicalSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b)]
+    [IsTopologicalRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b)]
+    (h_inv : bivariateLocToQuotient_atOverlap B P b (divByS 1 (overlapDatum B P b).s) =
+      Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b) TateAlgebra₂.Y)
+    (h_loc_bb : divByS b (overlapDatum B P b).s = (1 : Localization.Away (overlapDatum B P b).s))
+    (h_loc_bsq : divByS (b * b) (overlapDatum B P b).s =
+      algebraMap B (Localization.Away (overlapDatum B P b).s) b)
+    (hY : TopologicalRing.IsPowerBounded
+      (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b) TateAlgebra₂.Y))
+    (hb : TopologicalRing.IsPowerBounded
+      (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
+        (algebraMap B ↥(TateAlgebra₂ B) b))) :
+    ∀ t ∈ (overlapDatum B P b).T,
+      TopologicalRing.IsPowerBounded
+        (bivariateLocToQuotient_atOverlap B P b (divByS t (overlapDatum B P b).s)) := by
+  intro t ht
+  classical
+  change t ∈ Finset.image (fun p : B × B ↦ p.1 * p.2)
+    (Finset.product (insert (1 : B) {b}) ({1, b} : Finset B)) at ht
+  obtain ⟨p, hp_mem, hp_eq⟩ := Finset.mem_image.mp ht
+  obtain ⟨h1, h2⟩ := Finset.mem_product.mp hp_mem
+  obtain ⟨p1, p2⟩ := p
+  -- `hp_eq : (fun p => p.1 * p.2) (p1, p2) = t` beta-reduces to `p1 * p2 = t`.
+  change p1 * p2 = t at hp_eq
+  subst hp_eq
+  change p1 ∈ insert (1 : B) {b} at h1
+  change p2 ∈ ({1, b} : Finset B) at h2
+  rw [Finset.mem_insert, Finset.mem_singleton] at h1
+  simp only [Finset.mem_insert, Finset.mem_singleton] at h2
+  /- Use `rw` instead of `rcases rfl` to avoid `subst` substituting the
+  outer parameter `b` instead of the local `p1`/`p2`. -/
+  rcases h1 with h1 | h1 <;> rcases h2 with h2 | h2 <;>
+    rw [h1, h2]
+  · -- (p1, p2) = (1, 1), t = 1, `divByS 1 (overlap).s ↦ mk Y`.
+    rw [show ((1 : B) * 1) = 1 from mul_one 1, h_inv]
+    exact hY
+  · -- (p1, p2) = (1, b), t = b, `divByS b (overlap).s ↦ 1`.
+    rw [show ((1 : B) * b) = b from one_mul b, h_loc_bb, map_one]
+    exact TopologicalRing.isPowerBounded_one
+  · -- (p1, p2) = (b, 1), t = b.
+    rw [show (b * (1 : B)) = b from mul_one b, h_loc_bb, map_one]
+    exact TopologicalRing.isPowerBounded_one
+  · -- (p1, p2) = (b, b), t = b*b.
+    rw [h_loc_bsq, bivariateLocToQuotient_atOverlap_algebraMap]
+    exact hb
+
+
 /-- The three distinct values of `bivariateLocToQuotient_atOverlap (divByS t (overlap).s)`
 for `t ∈ (overlapDatum B P b).T` (i.e., `{1, b, b²}`) are respectively
 `mk(Y)` (the inverse of `mk(algMap b)` in the quotient), `1`, and
@@ -961,49 +1078,14 @@ theorem bivariateLocToQuotient_continuous
     TateAlgebra.quotientBivariateOverlapIdealTopology_nonarchimedean b
   haveI : IsLocalization.Away b (Localization.Away (overlapDatum B P b).s) := by
     rw [overlapDatum_s B P b]; infer_instance
-  have hs : (overlapDatum B P b).s = b := overlapDatum_s B P b
-  /- Compute the three relevant `divByS` values (in the overlap source).
-  We use `rw [hs]` rather than `subst hs` because `b` appears in
-  `overlapDatum B P b` and cannot be substituted away. -/
-  have h_loc_bb : divByS b (overlapDatum B P b).s =
-      (1 : Localization.Away (overlapDatum B P b).s) := by
-    unfold divByS
-    rw [hs]
-    exact IsLocalization.mk'_self (M := Submonoid.powers b)
-      (S := Localization.Away b) (⟨1, pow_one b⟩ : b ∈ Submonoid.powers b)
-  have h_loc_bsq : divByS (b * b) (overlapDatum B P b).s =
-      algebraMap B (Localization.Away (overlapDatum B P b).s) b := by
-    unfold divByS
-    rw [hs]
-    rw [← IsLocalization.mk'_one (M := Submonoid.powers b)
-        (S := Localization.Away b) b]
-    apply IsLocalization.mk'_eq_of_eq
-    simp only [Submonoid.coe_one, one_mul]
-  have h_inv_algmap : divByS 1 (overlapDatum B P b).s *
-      algebraMap B (Localization.Away (overlapDatum B P b).s) b = 1 := by
-    unfold divByS
-    rw [hs]
-    rw [IsLocalization.mk'_spec]
-    exact map_one _
-  /- Reduce `bivariateLocToQuotient_atOverlap (divByS 1 (overlap).s)` to `mk Y`
-  via uniqueness of inverse in the quotient. -/
+  obtain ⟨h_loc_bb, h_loc_bsq, h_inv_algmap⟩ := overlap_divByS_values B P b
   have h_biv_inv :
       bivariateLocToQuotient_atOverlap B P b (divByS 1 (overlapDatum B P b).s) *
       Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
         (algebraMap B ↥(TateAlgebra₂ B) b) = 1 := by
     rw [← bivariateLocToQuotient_atOverlap_algebraMap B P b b,
         ← map_mul, h_inv_algmap, map_one]
-  have h_Y_inv : Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
-        TateAlgebra₂.Y *
-      Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
-        (algebraMap B ↥(TateAlgebra₂ B) b) = 1 := by
-    rw [← map_mul, ← map_one (Ideal.Quotient.mk _)]
-    refine Ideal.Quotient.eq.mpr ?_
-    have h_sign : TateAlgebra₂.Y * algebraMap B ↥(TateAlgebra₂ B) b - 1 =
-        -(1 - algebraMap B ↥(TateAlgebra₂ B) b * TateAlgebra₂.Y) := by ring
-    rw [h_sign]
-    unfold TateAlgebra.bivariateOverlapIdeal
-    exact neg_mem (Ideal.subset_span (Set.mem_insert_of_mem _ rfl))
+  have h_Y_inv := mk_Y_mul_mk_algebraMap_eq_one B b
   have h_inv :
       bivariateLocToQuotient_atOverlap B P b (divByS 1 (overlapDatum B P b).s) =
       Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b) TateAlgebra₂.Y :=
@@ -1012,55 +1094,11 @@ theorem bivariateLocToQuotient_continuous
   apply locTopology_continuous_lift (overlapDatum B P b).P (overlapDatum B P b).T
     (overlapDatum B P b).s (overlapDatum B P b).hopen
     (bivariateLocToQuotient_atOverlap B P b)
-  · -- (1) Composition with `algebraMap B` is continuous.
-    change @Continuous _ _ _ (TateAlgebra.quotientBivariateOverlapIdealTopology b)
-      ((bivariateLocToQuotient_atOverlap B P b).comp
-        (algebraMap B (Localization.Away (overlapDatum B P b).s)))
-    have heq : ∀ a : B,
-        ((bivariateLocToQuotient_atOverlap B P b).comp
-          (algebraMap B (Localization.Away (overlapDatum B P b).s))) a =
-        Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
-          (algebraMap B ↥(TateAlgebra₂ B) a) := by
-      intro a
-      simp only [RingHom.comp_apply]
-      exact bivariateLocToQuotient_atOverlap_algebraMap B P b a
-    rw [show ⇑((bivariateLocToQuotient_atOverlap B P b).comp
-        (algebraMap B (Localization.Away (overlapDatum B P b).s))) =
-        (fun a : B ↦ Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
-            (algebraMap B ↥(TateAlgebra₂ B) a)) from funext heq]
-    exact TateAlgebra.mk_algebraMap_continuous_bivariateOverlap b
-  · -- (2) Power-boundedness at each `t ∈ (overlapDatum).T`.
-    intro t ht
-    classical
-    change t ∈ Finset.image (fun p : B × B ↦ p.1 * p.2)
-      (Finset.product (insert (1 : B) {b}) ({1, b} : Finset B)) at ht
-    obtain ⟨p, hp_mem, hp_eq⟩ := Finset.mem_image.mp ht
-    obtain ⟨h1, h2⟩ := Finset.mem_product.mp hp_mem
-    obtain ⟨p1, p2⟩ := p
-    -- `hp_eq : (fun p => p.1 * p.2) (p1, p2) = t` beta-reduces to `p1 * p2 = t`.
-    change p1 * p2 = t at hp_eq
-    subst hp_eq
-    change p1 ∈ insert (1 : B) {b} at h1
-    change p2 ∈ ({1, b} : Finset B) at h2
-    rw [Finset.mem_insert, Finset.mem_singleton] at h1
-    simp only [Finset.mem_insert, Finset.mem_singleton] at h2
-    /- Use `rw` instead of `rcases rfl` to avoid `subst` substituting the
-    outer parameter `b` instead of the local `p1`/`p2`. -/
-    rcases h1 with h1 | h1 <;> rcases h2 with h2 | h2 <;>
-      rw [h1, h2]
-    · -- (p1, p2) = (1, 1), t = 1, `divByS 1 (overlap).s ↦ mk Y`.
-      rw [show ((1 : B) * 1) = 1 from mul_one 1, h_inv]
-      exact TateAlgebra.mk_Y_isPowerBounded_in_bivariateOverlap b
-    · -- (p1, p2) = (1, b), t = b, `divByS b (overlap).s ↦ 1`.
-      rw [show ((1 : B) * b) = b from one_mul b, h_loc_bb, map_one]
-      exact TopologicalRing.isPowerBounded_one
-    · -- (p1, p2) = (b, 1), t = b.
-      rw [show (b * (1 : B)) = b from mul_one b, h_loc_bb, map_one]
-      exact TopologicalRing.isPowerBounded_one
-    · -- (p1, p2) = (b, b), t = b*b.
-      rw [h_loc_bsq, bivariateLocToQuotient_atOverlap_algebraMap]
-      exact TateAlgebra.mk_algebraMap_b_isPowerBounded_in_bivariateOverlap b
-
+  · exact bivariateLocToQuotient_comp_algebraMap_continuous B P b
+      (TateAlgebra.mk_algebraMap_continuous_bivariateOverlap b)
+  · exact bivariateLocToQuotient_isPowerBounded_of_mem_T B P b h_inv h_loc_bb h_loc_bsq
+      (TateAlgebra.mk_Y_isPowerBounded_in_bivariateOverlap b)
+      (TateAlgebra.mk_algebraMap_b_isPowerBounded_in_bivariateOverlap b)
 /-! ### Step A backward: extension to completion
 
 Backward ring hom `presheafValue (overlapDatum B P b) →+*

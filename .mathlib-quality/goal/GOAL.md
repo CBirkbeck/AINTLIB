@@ -10411,3 +10411,84 @@ than a `set` local, the rewrite closes the goal outright and the `rfl` is "No go
 
     over-50 proofs   486 (baseline) → 54   (51 actionable, 3 Vendored, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Next target, fully scoped: bivariateLocToQuotient_continuous 112 → ~46
+
+`LaurentOverlap.lean:945`. Anchors dry-run verified; bodies extracted and measured
+(`h_Y_inv` 6, bullet (1) 15, bullet (2) 29). No modifier prefix above the declaration.
+
+**Two pieces need no topology at all** — pure algebra, lowest risk:
+
+* `overlap_divByS_values` — the three `divByS` computations bundled as a conjunction.
+  They currently sit as three `have`s sharing one `hs : (overlapDatum B P b).s = b`, so
+  bundling removes the shared setup too. Needs `[IsLocalization.Away b (Localization.Away
+  (overlapDatum B P b).s)]` as a binder (the parent installs it by `haveI`). −19.
+* `mk_Y_mul_mk_algebraMap_eq_one` — `Y · b = 1` in `B⟨X,Y⟩/(b − X, 1 − bY)`, because the
+  difference is minus the second generator. −9.
+
+**Two are the bullets of `locTopology_continuous_lift`**, whose side goals are
+`hf_alg : Continuous (f.comp (algebraMap …))` and
+`hpow : ∀ t ∈ T, IsPowerBounded (f (divByS t s))` (signature at
+`LocalizationTopology.lean:371`). Both mention the quotient's topology, which the parent
+installs by `letI`. Take it as a **binder** — and then, exactly as in the Wedhorn828 batch,
+the specific-topology facts no longer apply inside and must be passed in:
+
+    bullet (1)  + [TopologicalSpace (quotient)]
+                + (hmk : Continuous (fun a ↦ mk (algebraMap B _ a)))
+                  ← `TateAlgebra.mk_algebraMap_continuous_bivariateOverlap b` at the call site
+    bullet (2)  + [TopologicalSpace (quotient)] [IsTopologicalRing (quotient)]
+                + h_inv, h_loc_bb, h_loc_bsq
+                + (hY : IsPowerBounded (mk Y)) (hb : IsPowerBounded (mk (algebraMap B _ b)))
+                  ← `TateAlgebra.mk_Y_isPowerBounded_in_bivariateOverlap b` and
+                    `…mk_algebraMap_b_isPowerBounded_in_bivariateOverlap b`
+
+`TopologicalRing.isPowerBounded_one` in the middle two cases is generic and needs nothing.
+−13 and −25 after paying for the extra hypotheses.
+
+The alternative — pinning the topology with `@Continuous _ _ _ (quotientBivariate…) …` —
+is available for bullet (1) only, because the parent's own `change` writes that form out
+verbatim at line 1016. There is no written `@`-form for bullet (2)'s `IsPowerBounded`, and
+guessing one costs a LaurentOverlap build per attempt. Prefer the binder route for both.
+
+## Batch: bivariateLocToQuotient_continuous 112 → 32
+
+`LaurentOverlap.lean`. Four lemmas, exactly as scoped:
+
+    overlap_divByS_values                             the three `divByS` values   ~19
+    mk_Y_mul_mk_algebraMap_eq_one                     `Y · b = 1` mod the ideal   ~7
+    bivariateLocToQuotient_comp_algebraMap_continuous bullet (1)                  ~13
+    bivariateLocToQuotient_isPowerBounded_of_mem_T    bullet (2)                  ~28
+
+The binder route for the two bullets worked first try — the plan written down before
+starting is what made that possible. Taking `[TopologicalSpace (quotient)]` (and
+`[IsTopologicalRing (quotient)]` for bullet (2)) as binders means the concrete-topology
+facts cannot be named inside, so they are **passed in** and discharged at the call site:
+
+    (hmk : Continuous (fun a ↦ mk (algebraMap B _ a)))     ← mk_algebraMap_continuous_…
+    (hY  : IsPowerBounded (mk Y))                          ← mk_Y_isPowerBounded_…
+    (hb  : IsPowerBounded (mk (algebraMap B _ b)))         ← mk_algebraMap_b_isPowerBounded_…
+
+`TopologicalRing.isPowerBounded_one`, used in the middle two of bullet (2)'s four cases, is
+generic and needed nothing. Dropping bullet (1)'s leading `change` was also necessary: with
+the topology a binder, re-pinning the concrete one is exactly wrong.
+
+Bundling the `divByS` trio as a conjunction removed their shared
+`hs : (overlapDatum B P b).s = b` as well as the three statements — three `have`s sharing
+one setup line collapse better than three separate lemmas would.
+
+### The one thing that went wrong: an explicit section variable
+
+    @overlap_divByS_values P
+    argument P has type PairOfDefinition B but is expected to have type Type ?u
+
+`LaurentOverlap` declares `variable (B : Type*) …` — **explicit**, not implicit. Every call
+site needs `B` passed. Other files in this project make the carrier implicit (`{A : Type*}`),
+so the habit transfers wrongly.
+
+> Check whether the file's carrier variable is `(B : Type*)` or `{A : Type*}` *before*
+> writing call sites. One `grep -n "^variable" <file> | head -1` answers it.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 53   (50 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
