@@ -33854,3 +33854,42 @@ WP-D1a ✅ · WP-D1b ✅ · WP-D1c construction ✅ · WP-D1c-rel ✅ · **WP-D1
 3. `YFull.smooth_affine_of_representableBy` (generic in the problem) spreads it to every
    representing object — closing `YFull.exists_representing_smooth_affine`
    (`ModularCurve/YFullRoute.lean:777`), `sorry` since T-E9.
+
+### [WP-D2] CORRECTION (2026-08-02) — the cancellation route does **not** work at the coarse level
+
+Earlier entries said WP-D2 was "mechanical: `Etale.of_comp` then `Etale ⟹ Smooth`". That is
+right for the **relative** map (and is how `fullLevelToNaiveGammaOne_etale` was proved) but
+**wrong for the coarse one**, and the reason is worth writing down before someone burns a
+session on it:
+
+`Etale.of_comp` needs `Etale (f ≫ g)`. At the coarse level `f = yFullToYOne` and
+`g = Y₁(N).structMap`, so `f ≫ g = Y(N).structMap` — and that is *smooth of relative
+dimension 1*, **not étale**. The hypothesis is unavailable, and cannot be: `Y(N) → Spec R`
+is a curve, not a finite map. The cancellation argument only ever applies over a base where
+*both* legs are étale, which at the relative level (over `X.base`) they are, and at the
+coarse level (over `Spec R`) they are not.
+
+**The correct route** is the classical one: over `Y₁(N)` sits the universal pair `(E, P)`,
+and `Y(N)` is the scheme over `Y₁(N)` classifying the choices of `Q` completing `P` to a
+basis — i.e. `Y(N) ≅ Z` for the *relative* object `Z ⟶ Y₁(N)` attached to that universal
+curve, which is finite étale by `fullLevelToNaiveGammaOne_etale` applied to the universal
+`E`. So:
+
+#### [WP-D2a] the universal object over `Y₁(N)`
+Extract from `yOne_representableBy` the universal `(E₁, P₁)` over `Y₁(N)`: the image of
+`𝟙 (yOneEllObj R N)` under the representing equivalence.
+
+#### [WP-D2b] `Y(N)` is the relative full-level locus of the universal curve
+Show `Y(N)` represents, over `Y₁(N)`, the functor of `Q`'s completing `P₁` — hence is
+isomorphic over `Y₁(N)` to `E₁.fullLevelLocus N` cut by the fixed first coordinate. This is
+where the two representability statements meet; it is the substantive step.
+
+#### [WP-D2c] conclude
+`Etale (Y(N) ⟶ Y₁(N))` transports along that isomorphism from
+`fullLevelToNaiveGammaOne_etale`; then `Etale ⟹ Smooth` + `Smooth` composes gives
+`Smooth Y(N).structMap` from `yOneStructMap_smooth`, and
+`YFull.smooth_affine_of_representableBy` spreads it — closing
+`YFull.exists_representing_smooth_affine`.
+
+Everything built this session (WP-D1a … D1c-coarse) feeds WP-D2c unchanged; only the bridge
+D2a/D2b is new, and it is representability bookkeeping, not new mathematics.
