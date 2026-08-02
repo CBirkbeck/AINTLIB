@@ -10577,3 +10577,51 @@ stripped needs its body dedented one level *further* than its siblings.
 
     over-50 proofs   486 (baseline) → 52   (49 actionable, 3 Vendored, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: genPiece_relOverlap_backwardLocHom_continuous 112 → 49
+
+`WedhornCechAcyclicity.lean`. Sibling of the `unitCover` proof; five new declarations, two
+of them generic, and one **reuse** of the lemma the previous batch created:
+
+    exists_mem_insert_canonicalMap_eq       `hq₁` = `hq₂`, verbatim twins       7
+    canonicalMap_s_mul_coeRingHom_divByS    `hchase`, generic in the datum      7
+    genPiece_DII_canonicalMap_s_split       `hsplit_s` + `hu_s'`               28
+    ..._backwardLocHom_witness              `hwit`, minus the two above        49
+    ..._comp_algebraMap_continuous          bullet (1)                         20
+    coeRingHom_divByS_isPowerBounded        REUSED from the last batch          —
+
+The reuse is the first dividend from having made that one generic rather than specialising
+it: the tail of this bullet (2) was the same five-line argument and collapsed to one line
+for free.
+
+### Five build round trips, and three of them were my own recorded rules
+
+1. Estimated `hwit` at 46; it came out at **58**, so `genPiece_DII_canonicalMap_s_split`
+   had to come out too. Same preamble-budget miss as last batch, one batch later.
+2. **The generalisation leak, third occurrence.** Both generic lemmas got generalised
+   *statements* and verbatim bodies: `exists_mem_insert_canonicalMap_eq` still said `hu₁`,
+   `t₁`, `u₁`, `q'`; `canonicalMap_s_mul_coeRingHom_divByS` still said `DII` and
+   `((D₀.s * q') * q)`. GOAL.md already carries the rule — *grep the extracted text for the
+   concrete names the generalisation replaced* — and I did not run it.
+3. Instance binders: the generic lemma needed the whole `[IsTateRing A] …` block (it
+   mentions `imagePieceDatum`), then `DecidableEq (presheafValue D₀)` on top.
+4. And that `DecidableEq` binder was itself wrong. With it abstract,
+   `(imagePieceDatum D₀ T t hspan).T` and `T.image D₀.canonicalMap` stop being defeq —
+   `Finset.image` fixes an instance internally, and the parent's was `Classical.decEq`.
+   The fix was to **drop `insert` from the statement**: take
+   `hu : u = (…).s ∨ u ∈ (…).T` and let the call site pass `Finset.mem_insert.mp hu₁`.
+   With no `insert` in the statement there is no `DecidableEq` to get wrong, and a
+   `classical` in the body makes the internal instances agree.
+
+> **Rule.** A `Finset`-valued projection in a hypothesis drags a `DecidableEq` instance
+> with it. Prefer restating the hypothesis in a decidability-free form (`= _ ∨ ∈ _` for
+> `∈ insert _ _`) and converting at the call site — the conversion is one term, the
+> instance mismatch is a build.
+
+Also: a blind line-wrapping pass that split lines at `(((` mangled two unrelated lemmas.
+**Width fixes must be exact, asserted substitutions**, never a heuristic loop over lines.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 51   (48 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)

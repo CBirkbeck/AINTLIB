@@ -8851,7 +8851,8 @@ private theorem genPiece_relOverlap_backward_baseHom_isUnit
       (((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s)) := by
   have hu : IsUnit (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-      (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap
+          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s)) := isUnit_s_in_presheafValue _
   rw [show ((((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl).s : A)) = (D₀.s * t₁) * t₂ from rfl, map_mul, map_mul] at hu
@@ -8896,13 +8897,173 @@ private theorem genPiece_relOverlap_backwardLocHom_algebraMap
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) (x : presheafValue D₀) :
     genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
-        (algebraMap (presheafValue D₀) (Localization.Away (((imagePieceDatum D₀ T t₁ hspan).interSamePair
+        (algebraMap (presheafValue D₀) (Localization.Away
+            (((imagePieceDatum D₀ T t₁ hspan).interSamePair
       (imagePieceDatum D₀ T t₂ hspan) rfl).s)) x) =
       restrictionMapHom D₀ ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
       (genPieceDatum D₀.P T t₂ hspan) rfl)
         ((RationalLocData.interSamePair_subset_left _ _ _).trans
           (RationalLocData.interSamePair_subset_left _ _ _)) x := by
   rw [genPiece_relOverlap_backwardLocHom, IsLocalization.Away.lift_eq]
+
+set_option linter.unusedSectionVars false in
+/-- Every generator of `imagePieceDatum D₀ T t` — its denominator or one of its numerators
+— is the canonical image of an element of `insert t T`. -/
+private theorem exists_mem_insert_canonicalMap_eq [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t : A) {u : presheafValue D₀}
+    (hu : u = (imagePieceDatum D₀ T t hspan).s ∨
+      u ∈ (imagePieceDatum D₀ T t hspan).T) :
+    ∃ q ∈ insert t T, u = D₀.canonicalMap q := by
+  classical
+  rcases hu with rfl | h
+  · exact ⟨t, Finset.mem_insert_self _ _, rfl⟩
+  · have h' : u ∈ T.image D₀.canonicalMap := h
+    rw [Finset.mem_image] at h'
+    obtain ⟨q, hq, rfl⟩ := h'
+    exact ⟨q, Finset.mem_insert_of_mem hq, rfl⟩
+
+set_option linter.unusedSectionVars false in
+/-- `canMap s · coeRingHom (u/s) = canMap u`: the denominator cancels inside the
+localization before `coeRingHom` is applied. -/
+private theorem canonicalMap_s_mul_coeRingHom_divByS (D : RationalLocData A) (u : A) :
+    D.canonicalMap D.s * D.coeRingHom (divByS u D.s) = D.canonicalMap u := by
+  rw [show D.canonicalMap D.s * D.coeRingHom (divByS u D.s) =
+    D.coeRingHom (algebraMap A (Localization.Away D.s) D.s *
+      divByS u D.s) by rw [map_mul]; rfl]
+  rw [algebraMap_s_mul_divByS]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- The double-overlap denominator splits as `D₀.s · t₁ · t₂` in `DII`, so its first factor
+is a unit there. -/
+private theorem genPiece_DII_canonicalMap_s_split
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
+    (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).canonicalMap
+          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).s =
+        (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).canonicalMap D₀.s *
+          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).canonicalMap t₁ *
+          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).canonicalMap t₂ ∧
+      IsUnit ((((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).canonicalMap D₀.s) := by
+  classical
+  set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
+  have hsplit_s : DII.canonicalMap DII.s = DII.canonicalMap D₀.s *
+      DII.canonicalMap t₁ * DII.canonicalMap t₂ := by
+    rw [show DII.canonicalMap DII.s =
+      DII.canonicalMap ((D₀.s * t₁) * t₂) by
+      rw [show ((DII.s : A)) = (D₀.s * t₁) * t₂ from rfl]]
+    rw [map_mul, map_mul]
+  refine ⟨hsplit_s, ?_⟩
+  have h := isUnit_s_in_presheafValue DII
+  rw [hsplit_s] at h
+  exact isUnit_of_mul_isUnit_left (isUnit_of_mul_isUnit_left h)
+
+
+set_option linter.unusedSectionVars false in
+/-- The witness identity: the backward loc-hom carries `(canMap q' · canMap q)/s_EII` to
+`coeRingHom ((D₀.s·q')·q / s_DII)`. Cancel the unit `ψ (algMap s_EII)` and chase both sides
+through `DII`. -/
+private theorem genPiece_relOverlap_backwardLocHom_witness
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A)
+    (q' q : A)
+    (hu_s : IsUnit (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
+      (algebraMap (presheafValue D₀) (Localization.Away
+          (((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl)).s)
+        (((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl)).s))) :
+    genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
+        (divByS (D₀.canonicalMap q' * D₀.canonicalMap q)
+            (((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl)).s) =
+      (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).coeRingHom
+        (divByS ((D₀.s * q') * q)
+            (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl)).s) := by
+  classical
+  set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
+  set EII := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl) with hEII
+  refine hu_s.mul_left_cancel ?_
+  have h1 : genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
+      (algebraMap (presheafValue D₀) (Localization.Away EII.s) EII.s) *
+      genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
+        (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) =
+      genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
+        (algebraMap (presheafValue D₀) (Localization.Away EII.s)
+          (D₀.canonicalMap q' * D₀.canonicalMap q)) := by
+    rw [← map_mul, algebraMap_s_mul_divByS]
+  rw [h1, genPiece_relOverlap_backwardLocHom_algebraMap,
+    genPiece_relOverlap_backwardLocHom_algebraMap]
+  -- both sides through the `DII`-chase
+  have hchase := canonicalMap_s_mul_coeRingHom_divByS DII ((D₀.s * q') * q)
+  obtain ⟨hsplit_s, hu_s'⟩ := genPiece_DII_canonicalMap_s_split D₀ T hspan t₁ t₂
+  rw [map_mul (restrictionMapHom D₀ DII
+    ((RationalLocData.interSamePair_subset_left _ _ _).trans
+      (RationalLocData.interSamePair_subset_left _ _ _)))]
+  rw [show ((EII.s : presheafValue D₀)) =
+    D₀.canonicalMap t₁ * D₀.canonicalMap t₂ from rfl]
+  rw [map_mul (restrictionMapHom D₀ DII
+    ((RationalLocData.interSamePair_subset_left _ _ _).trans
+      (RationalLocData.interSamePair_subset_left _ _ _)))]
+  rw [restrictionMapHom_canonicalMap, restrictionMapHom_canonicalMap,
+    restrictionMapHom_canonicalMap, restrictionMapHom_canonicalMap]
+  refine hu_s'.mul_left_cancel ?_
+  rw [hsplit_s] at hchase
+  rw [map_mul (DII.canonicalMap), map_mul (DII.canonicalMap)] at hchase
+  linear_combination -hchase
+
+set_option linter.unusedSectionVars false in
+/-- First hypothesis of `locTopology_continuous_lift`: on constants the backward loc-hom is
+the restriction map `D₀ → DII`. -/
+private theorem genPiece_relOverlap_backwardLocHom_comp_algebraMap_continuous
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
+    Continuous ((genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂).comp
+      (algebraMap (presheafValue D₀) (Localization.Away
+          (((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl)).s))) := by
+  classical
+  set DII := ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl) with hDII
+  set EII := ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+      (imagePieceDatum D₀ T t₂ hspan) rfl) with hEII
+  have heq : (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂).comp
+      (algebraMap (presheafValue D₀) (Localization.Away EII.s)) =
+      restrictionMapHom D₀ DII
+        ((RationalLocData.interSamePair_subset_left _ _ _).trans
+          (RationalLocData.interSamePair_subset_left _ _ _)) := by
+    ext x; exact genPiece_relOverlap_backwardLocHom_algebraMap D₀ T hspan t₁ t₂ x
+  rw [heq]
+  exact restrictionMapHom_continuous D₀ DII _
+
 
 set_option linter.unusedSectionVars false in
 /-- G3b-7e: backward continuity (each `T_EII`-generator lands on the A-side
@@ -8926,14 +9087,7 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
     (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂)
   refine locTopology_continuous_lift EII.P EII.T EII.s EII.hopen
     (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂) ?_ ?_
-  · have heq : (genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂).comp
-        (algebraMap (presheafValue D₀) (Localization.Away EII.s)) =
-        restrictionMapHom D₀ DII
-          ((RationalLocData.interSamePair_subset_left _ _ _).trans
-            (RationalLocData.interSamePair_subset_left _ _ _)) := by
-      ext x; exact genPiece_relOverlap_backwardLocHom_algebraMap D₀ T hspan t₁ t₂ x
-    rw [heq]
-    exact restrictionMapHom_continuous D₀ DII _
+  · exact genPiece_relOverlap_backwardLocHom_comp_algebraMap_continuous D₀ T hspan t₁ t₂
   · intro u hu_mem
     -- destructure the `T_EII`-generator to `(canMap q′)·(canMap q)`
     have hu' : u ∈ ((insert (imagePieceDatum D₀ T t₁ hspan).s
@@ -8950,20 +9104,10 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
     rw [show (((u₁, u₂).1 : presheafValue D₀) * (u₁, u₂).2 :
       presheafValue D₀) = u₁ * u₂ from rfl]
     -- the layers are canonical images
-    have hq₁ : ∃ q' ∈ insert t₁ T, u₁ = D₀.canonicalMap q' := by
-      rcases Finset.mem_insert.mp hu₁ with rfl | h
-      · exact ⟨t₁, Finset.mem_insert_self _ _, rfl⟩
-      · have h' : u₁ ∈ T.image D₀.canonicalMap := h
-        rw [Finset.mem_image] at h'
-        obtain ⟨q', hq', rfl⟩ := h'
-        exact ⟨q', Finset.mem_insert_of_mem hq', rfl⟩
-    have hq₂ : ∃ q ∈ insert t₂ T, u₂ = D₀.canonicalMap q := by
-      rcases Finset.mem_insert.mp hu₂ with rfl | h
-      · exact ⟨t₂, Finset.mem_insert_self _ _, rfl⟩
-      · have h' : u₂ ∈ T.image D₀.canonicalMap := h
-        rw [Finset.mem_image] at h'
-        obtain ⟨q, hq, rfl⟩ := h'
-        exact ⟨q, Finset.mem_insert_of_mem hq, rfl⟩
+    have hq₁ := exists_mem_insert_canonicalMap_eq D₀ T hspan t₁
+      (Finset.mem_insert.mp hu₁)
+    have hq₂ := exists_mem_insert_canonicalMap_eq D₀ T hspan t₂
+      (Finset.mem_insert.mp hu₂)
     obtain ⟨q', hq', rfl⟩ := hq₁
     obtain ⟨q, hq, rfl⟩ := hq₂
     -- the A-side witness `W := (D₀.s·q′)·q`
@@ -8980,61 +9124,9 @@ private theorem genPiece_relOverlap_backwardLocHom_continuous
         (algebraMap (presheafValue D₀) (Localization.Away EII.s) EII.s)) := by
       rw [genPiece_relOverlap_backwardLocHom_algebraMap]
       exact genPiece_relOverlap_backward_baseHom_isUnit D₀ T hspan t₁ t₂
-    have hwit : genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
-        (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) =
-        DII.coeRingHom (divByS ((D₀.s * q') * q) DII.s) := by
-      refine hu_s.mul_left_cancel ?_
-      have h1 : genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
-          (algebraMap (presheafValue D₀) (Localization.Away EII.s) EII.s) *
-          genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
-            (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) =
-          genPiece_relOverlap_backwardLocHom D₀ T hspan t₁ t₂
-            (algebraMap (presheafValue D₀) (Localization.Away EII.s)
-              (D₀.canonicalMap q' * D₀.canonicalMap q)) := by
-        rw [← map_mul, algebraMap_s_mul_divByS]
-      rw [h1, genPiece_relOverlap_backwardLocHom_algebraMap,
-        genPiece_relOverlap_backwardLocHom_algebraMap]
-      -- both sides through the `DII`-chase
-      have hchase : DII.canonicalMap DII.s *
-          DII.coeRingHom (divByS ((D₀.s * q') * q) DII.s) =
-          DII.canonicalMap ((D₀.s * q') * q) := by
-        rw [show DII.canonicalMap DII.s *
-          DII.coeRingHom (divByS ((D₀.s * q') * q) DII.s) =
-          DII.coeRingHom (algebraMap A (Localization.Away DII.s) DII.s *
-            divByS ((D₀.s * q') * q) DII.s) by rw [map_mul]; rfl]
-        rw [algebraMap_s_mul_divByS]
-        rfl
-      have hsplit_s : DII.canonicalMap DII.s = DII.canonicalMap D₀.s *
-          DII.canonicalMap t₁ * DII.canonicalMap t₂ := by
-        rw [show DII.canonicalMap DII.s =
-          DII.canonicalMap ((D₀.s * t₁) * t₂) by
-          rw [show ((DII.s : A)) = (D₀.s * t₁) * t₂ from rfl]]
-        rw [map_mul, map_mul]
-      have hu_s' : IsUnit (DII.canonicalMap D₀.s) := by
-        have h := isUnit_s_in_presheafValue DII
-        rw [hsplit_s] at h
-        exact isUnit_of_mul_isUnit_left (isUnit_of_mul_isUnit_left h)
-      rw [map_mul (restrictionMapHom D₀ DII
-        ((RationalLocData.interSamePair_subset_left _ _ _).trans
-          (RationalLocData.interSamePair_subset_left _ _ _)))]
-      rw [show ((EII.s : presheafValue D₀)) =
-        D₀.canonicalMap t₁ * D₀.canonicalMap t₂ from rfl]
-      rw [map_mul (restrictionMapHom D₀ DII
-        ((RationalLocData.interSamePair_subset_left _ _ _).trans
-          (RationalLocData.interSamePair_subset_left _ _ _)))]
-      rw [restrictionMapHom_canonicalMap, restrictionMapHom_canonicalMap,
-        restrictionMapHom_canonicalMap, restrictionMapHom_canonicalMap]
-      refine hu_s'.mul_left_cancel ?_
-      rw [hsplit_s] at hchase
-      rw [map_mul (DII.canonicalMap), map_mul (DII.canonicalMap)] at hchase
-      linear_combination -hchase
+    have hwit := genPiece_relOverlap_backwardLocHom_witness D₀ T hspan t₁ t₂ q' q hu_s
     rw [hwit]
-    have hbdd := CompletionLocalization.coeRingHom_image_locSubring_isBounded DII
-    refine hbdd.subset ?_
-    rintro _ ⟨k, rfl⟩
-    exact ⟨divByS ((D₀.s * q') * q) DII.s ^ k,
-      pow_mem (divByS_mem_locSubring DII.P DII.T DII.s hW_mem) k, by rw [map_pow]⟩
-
+    exact coeRingHom_divByS_isPowerBounded DII hW_mem
 /-- G3b-7f: backward map. -/
 private noncomputable def genPiece_relOverlap_backward
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
