@@ -358,6 +358,24 @@ theorem pairMapBC_injective (D : RationalLocData (JetA F)) (hD : D.IsRational)
   rw [← sub_eq_zero]
   exact hz0
 
+/-- The `𝓑`-push of a datum's generators lands in the `𝓓`-push's, via the coherence square
+`rhoB ∘ jB = rhoC ∘ iotaC`. Used at both the base and the piece in the naturality steps. -/
+private theorem rhoB_mem_pushDatumD_T (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    ∀ t ∈ (pushDatumB D hD).T, rhoB F t ∈ (pushDatumD D hD).T := by
+  intro t ht
+  obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+  rw [square_commutes F t₀]
+  exact Finset.mem_image_of_mem _ ht₀
+
+/-- The `𝓒`-push of a datum's generators lands in the `𝓓`-push's — here `pushDatumD` is
+`rhoC ∘ iotaC` on the nose, so no square is needed. -/
+private theorem rhoC_mem_pushDatumD_T (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    ∀ t ∈ (pushDatumC D hD).T, rhoC F t ∈ (pushDatumD D hD).T := by
+  intro t ht
+  obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+  exact Finset.mem_image_of_mem _ ht₀
+
+
 /-- **𝓓-matching of the two pushed vertex gluings** ([FJP] Lemma 5.2, the middle step of the
 gluing half): the 𝓑- and 𝓒-glued sections agree after pushing to 𝓓.
 
@@ -391,83 +409,52 @@ private theorem mapBD_eq_mapCD_of_pushed_gluing
   funext D'
   obtain ⟨DD, hDD⟩ := D'
   obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hDD
-  show restrictionMapHom (pushDatumD C.base hC.base) (pushDatumD d.1 (hC.piece d.2))
-    ((pushCoveringD C hC).hsubset _ hDD) (mapBD C.base hC.base bB) =
-    restrictionMapHom (pushDatumD C.base hC.base) (pushDatumD d.1 (hC.piece d.2))
-      ((pushCoveringD C hC).hsubset _ hDD) (mapCD C.base hC.base bC)
-  have hpushB : rationalOpen (pushDatumB d.1 (hC.piece d.2)).T
-      (pushDatumB d.1 (hC.piece d.2)).s ⊆
-      rationalOpen (pushDatumB C.base hC.base).T (pushDatumB C.base hC.base).s :=
+  -- the six pushed data this proof is about
+  set DB := pushDatumB C.base hC.base
+  set DBd := pushDatumB d.1 (hC.piece d.2)
+  set DC := pushDatumC C.base hC.base
+  set DCd := pushDatumC d.1 (hC.piece d.2)
+  set DD₀ := pushDatumD C.base hC.base
+  set DDd := pushDatumD d.1 (hC.piece d.2)
+  show restrictionMapHom DD₀ DDd ((pushCoveringD C hC).hsubset _ hDD) (mapBD C.base hC.base bB)
+    = restrictionMapHom DD₀ DDd ((pushCoveringD C hC).hsubset _ hDD) (mapCD C.base hC.base bC)
+  have hpushB : rationalOpen DBd.T DBd.s ⊆ rationalOpen DB.T DB.s :=
     (pushCoveringB C hC).hsubset _
       (Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩)
-  have hpushC : rationalOpen (pushDatumC d.1 (hC.piece d.2)).T
-      (pushDatumC d.1 (hC.piece d.2)).s ⊆
-      rationalOpen (pushDatumC C.base hC.base).T (pushDatumC C.base hC.base).s :=
+  have hpushC : rationalOpen DCd.T DCd.s ⊆ rationalOpen DC.T DC.s :=
     (pushCoveringC C hC).hsubset _
       (Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩)
   -- restriction commutes with mapBD/mapCD (generic naturality at ρ)
-  have hnatB : restrictionMap (pushDatumD C.base hC.base)
-      (pushDatumD d.1 (hC.piece d.2)) ((pushCoveringD C hC).hsubset _ hDD)
+  have hnatB : restrictionMap DD₀ DDd ((pushCoveringD C hC).hsubset _ hDD)
       (mapBD C.base hC.base bB) =
-      mapBD d.1 (hC.piece d.2) (restrictionMap (pushDatumB C.base hC.base)
-        (pushDatumB d.1 (hC.piece d.2)) hpushB bB) :=
+      mapBD d.1 (hC.piece d.2) (restrictionMap DB DBd hpushB bB) :=
     (presheafValueMapOfHom_restriction (rhoB F) (continuous_rhoB)
-      (pushDatumB C.base hC.base) (pushDatumB d.1 (hC.piece d.2))
-      (pushDatumD C.base hC.base) (pushDatumD d.1 (hC.piece d.2))
-      ((square_commutes F C.base.s).symm)
-      (by
-        intro t ht
-        obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
-        rw [square_commutes F t₀]
-        exact Finset.mem_image_of_mem _ ht₀)
+      DB DBd DD₀ DDd ((square_commutes F C.base.s).symm)
+      (rhoB_mem_pushDatumD_T C.base hC.base)
       ((square_commutes F d.1.s).symm)
-      (by
-        intro t ht
-        obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
-        rw [square_commutes F t₀]
-        exact Finset.mem_image_of_mem _ ht₀)
+      (rhoB_mem_pushDatumD_T d.1 (hC.piece d.2))
       hpushB ((pushCoveringD C hC).hsubset _ hDD) bB).symm
-  have hnatC : restrictionMap (pushDatumD C.base hC.base)
-      (pushDatumD d.1 (hC.piece d.2)) ((pushCoveringD C hC).hsubset _ hDD)
+  have hnatC : restrictionMap DD₀ DDd ((pushCoveringD C hC).hsubset _ hDD)
       (mapCD C.base hC.base bC) =
-      mapCD d.1 (hC.piece d.2) (restrictionMap (pushDatumC C.base hC.base)
-        (pushDatumC d.1 (hC.piece d.2)) hpushC bC) :=
+      mapCD d.1 (hC.piece d.2) (restrictionMap DC DCd hpushC bC) :=
     (presheafValueMapOfHom_restriction (rhoC F) (continuous_rhoC)
-      (pushDatumC C.base hC.base) (pushDatumC d.1 (hC.piece d.2))
-      (pushDatumD C.base hC.base) (pushDatumD d.1 (hC.piece d.2))
+      DC DCd DD₀ DDd rfl
+      (rhoC_mem_pushDatumD_T C.base hC.base)
       rfl
-      (by
-        intro t ht
-        obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
-        exact Finset.mem_image_of_mem _ ht₀)
-      rfl
-      (by
-        intro t ht
-        obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
-        exact Finset.mem_image_of_mem _ ht₀)
+      (rhoC_mem_pushDatumD_T d.1 (hC.piece d.2))
       hpushC ((pushCoveringD C hC).hsubset _ hDD) bC).symm
-  show restrictionMap (pushDatumD C.base hC.base) (pushDatumD d.1 (hC.piece d.2))
-    ((pushCoveringD C hC).hsubset _ hDD) (mapBD C.base hC.base bB) =
-    restrictionMap (pushDatumD C.base hC.base) (pushDatumD d.1 (hC.piece d.2))
-      ((pushCoveringD C hC).hsubset _ hDD) (mapCD C.base hC.base bC)
+  show restrictionMap DD₀ DDd ((pushCoveringD C hC).hsubset _ hDD) (mapBD C.base hC.base bB)
+    = restrictionMap DD₀ DDd ((pushCoveringD C hC).hsubset _ hDD) (mapCD C.base hC.base bC)
   rw [hnatB, hnatC]
   -- restrictions of the glued sections are the pushed piece-values
-  have hbBd := hbB ⟨pushDatumB d.1 (hC.piece d.2),
-    Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-  have hbCd := hbC ⟨pushDatumC d.1 (hC.piece d.2),
-    Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
-  rw [show restrictionMap (pushDatumB C.base hC.base)
-      (pushDatumB d.1 (hC.piece d.2)) hpushB bB =
-      gB ⟨pushDatumB d.1 (hC.piece d.2),
-        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from hbBd,
-    show restrictionMap (pushDatumC C.base hC.base)
-      (pushDatumC d.1 (hC.piece d.2)) hpushC bC =
-      gC ⟨pushDatumC d.1 (hC.piece d.2),
-        Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from hbCd]
-  -- both sides are the 𝓓-pushes of chosen 𝓐-sections; identify via self-restriction
-  -- + pushed compatibility + the coherence square
+  have hbBd := hbB ⟨DBd, Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
+  have hbCd := hbC ⟨DCd, Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩
+  rw [show restrictionMap DB DBd hpushB bB =
+      gB ⟨DBd, Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from hbBd,
+    show restrictionMap DC DCd hpushC bC =
+      gC ⟨DCd, Finset.mem_image.mpr ⟨d, Finset.mem_attach _ _, rfl⟩⟩ from hbCd]
+  -- both sides are the 𝓓-pushes of chosen 𝓐-sections; finish with 𝓓-coherence
   rw [hgBd d, hgCd d]
-  -- finish with the 𝓓-coherence at the piece
   exact DFunLike.congr_fun (mapBD_mapB_eq_mapCD_mapC d.1 (hC.piece d.2)) (f d)
 
 -- `gluing_JetA` needed `set_option maxHeartbeats 1600000` until the decomposition below.
