@@ -8907,3 +8907,42 @@ still costs three lines instead of six.
 
     over-50 proofs   486 (baseline) → 85   (83 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: comap_ringStalkMap_ambientFrob_stalkValue (85 → 84)
+
+87 → 45 via three lemmas of two, three and two lines. Inline they were five, eight and
+seven — because each spelled out its own five-line statement, and the first was written out
+**four times** (once per element, in each of the two bullets of an iff).
+
+    ringStalkMap_ambientFrob_hom_of_germ_eq  2L
+    limitRestrict_limitFrobHom_comm          3L
+    germ_limitFrobHom_limitRestrict          2L
+
+Forty-two lines of that proof were statements of facts whose proofs total seven.
+
+### I broke the "copy, never reconstruct" rule again — three binders, two wrong
+
+    hWU   guessed `W ≤ U`;                    it is `W ≤ frobOpens p F k U`
+    hxU   guessed `x ∈ frobOpens p F k U`;    it is `spaFrob p F k x ∈ U`
+    hxF   the same mistake
+
+All three were readable off the `obtain` that produced them and off
+`ringStalkMap_ambientFrob_germ`'s signature. This is the rule first written down after
+`limitFrobHom_add` and the reason `parent_binders` exists — it just does not apply to
+hypotheses produced by an `obtain` inside the proof, which is exactly where these came from.
+
+**The membership pair is the instructive part.** `x ∈ frobOpens p F k U` and
+`spaFrob p F k x ∈ U` are DEFEQ, so the wrong spelling type-checks in the statement and
+fails only later, in a different lemma, where unification picks `U` instead of
+`frobOpens p F k U` for an implicit argument. A binder type that elaborates is not evidence
+that it is the right one.
+
+### Full-library gate: GREEN
+
+`lake build '«Adic spaces»'`: exit 0, zero errors.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 84   (82 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+    full lake build  GREEN (exit 0, zero errors)
