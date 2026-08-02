@@ -87,6 +87,35 @@ theorem isNaiveGammaOne_snd_of_isNaiveFullLevel {N : ℕ} [NeZero N] {P Q : E.Se
     · have := h.2 k t x hx
       rwa [Set.pair_comm (Point.pull E t P) (Point.pull E t Q)] at this
 
+/-! ## Bridge to the Drinfeld notion
+
+`Section.hasExactOrder_iff_geometric` (T-D6 = KM 1.4.4 (1)⟺(3)) has *exactly* the shape of
+`IsNaiveGammaOne`'s second component, so the naive and Drinfeld notions differ only by the
+global killing clause. That makes the level-forgetting map land in the exact-order locus
+(`exists_exactOrderLocus`), which is what WP-D1c-rel needs.
+
+**Dependency note.** The `mpr` direction of `hasExactOrder_iff_geometric` routes through
+`Section.hasExactOrder_of_geometric`, which is a `sorry` (register box T-D6,
+`LevelStructure/ExactOrder.lean:916`). So the two theorems below inherit `sorryAx` — they are
+correct reductions, not closures, and T-D6 is the single named obligation they expose. -/
+
+/-- The naive `Γ₁(N)`-condition is the Drinfeld one, given `N` invertible.
+Depends on register box T-D6 (`Section.hasExactOrder_of_geometric`). -/
+theorem hasExactOrder_of_isNaiveGammaOne {N : ℕ} [NeZero N] (hN : NIsInvertible S N)
+    {P : E.Section} (h : E.IsNaiveGammaOne N P) : P.HasExactOrder E N :=
+  (Section.hasExactOrder_iff_geometric E hN h.1).mpr h.2
+
+/-- **(WP-D1c-rel, step 1)** The first member of a naive full level-`N` structure has exact
+order `N` in the Drinfeld sense — the hypothesis `exists_exactOrderLocus`'s universal
+property consumes, so the level-forgetting map factors through the exact-order locus.
+Depends on register box T-D6. -/
+theorem hasExactOrder_fst_of_isNaiveFullLevel {N : ℕ} [NeZero N] (hN : NIsInvertible S N)
+    {P Q : E.Section}
+    (hinv : ∀ (k : Type u) [Field k] [IsAlgClosed k],
+      (Spec (CommRingCat.of k) ⟶ S) → (N : k) ≠ 0)
+    (h : E.IsNaiveFullLevel N P Q) : P.HasExactOrder E N :=
+  E.hasExactOrder_of_isNaiveGammaOne hN (E.isNaiveGammaOne_of_isNaiveFullLevel hinv h)
+
 end EllipticCurve
 
 end ModularCurves

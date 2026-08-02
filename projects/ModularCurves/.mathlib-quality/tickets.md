@@ -33633,3 +33633,28 @@ remains of the chain is only **WP-D1c-coarse** — identifying `yFullToYOne` wit
 induced by these relative forgetful maps, which is engine bookkeeping
 (`AffineOverEll.relativelyRepresentable`, `Moduli/EngineWiring.lean`) — and after that WP-D2
 is mechanical.
+
+### WP-D1c-rel step 1 landed — and it exposes register box T-D6
+
+Added to `LevelStructure/FullLevelGammaOne.lean`:
+* `hasExactOrder_of_isNaiveGammaOne` — the naive `Γ₁(N)`-condition *is* the Drinfeld one,
+  given `N` invertible. `Section.hasExactOrder_iff_geometric` (T-D6 = KM 1.4.4 (1)⟺(3)) has
+  literally the same shape as `IsNaiveGammaOne`'s second component, so this is one line.
+* `hasExactOrder_fst_of_isNaiveFullLevel` — composing with WP-D1a: the first member of a
+  naive full level structure has exact order `N` in the Drinfeld sense. This is precisely
+  the hypothesis `exists_exactOrderLocus`'s universal property consumes.
+
+**Both carry `sorryAx`, verified by `#print axioms`, and the docstrings say so.** The cause
+is the `mpr` direction of `hasExactOrder_iff_geometric`, which routes through
+`Section.hasExactOrder_of_geometric` — a `sorry`, register box **T-D6**
+(`LevelStructure/ExactOrder.lean:916`). WP-D1a itself remains axiom-verified; only the
+Drinfeld bridge is affected.
+
+**Revised dependency picture for the D-chain.** Closing
+`YFull.exists_representing_smooth_affine` via WP-D1/D2 now needs T-D6 as well. That is not a
+new obligation — T-D6 is an existing register box on the board — but it is a *second*
+prerequisite alongside WP-D1c-coarse, and it should be planned for rather than discovered
+later. Note T-D6 is the "(1)⟺(3)" direction of KM 1.4.4, i.e. *geometric-pointwise exact
+order ⟹ Drinfeld exact order*, and the file's own comment records that its statement was
+already hardened once (the `ℚ̄[ε]` counterexample of the 2026-07-06 adversarial pass forced
+the global killing clause), so the statement is trustworthy even though the proof is open.
