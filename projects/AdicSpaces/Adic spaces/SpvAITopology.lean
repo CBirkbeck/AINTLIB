@@ -238,6 +238,37 @@ theorem Spv.isInSpvAI_of_isMicrobial (I : Ideal A) {v : Spv A}
       Valuation.IsMicrobial (ValuativeRel.valuation A)) :
     Spv.IsInSpvAI v I := Or.inr h
 
+/-- Cancelling a factor from a `vle` comparison: if `w(i·d) ≤ w(g₀·d)` and `w(g₀·d) ≠ 0`
+(so `w d ≠ 0`), then `w i ≤ w g₀`. -/
+private lemma vle_of_vle_mul_right {w : Spv A} {i g₀ d : A}
+    (h_le : w.vle (i * d) (g₀ * d)) (h_ne : ¬ w.vle (g₀ * d) 0) : w.vle i g₀ := by
+  letI : ValuativeRel A := w.toValuativeRel
+  set ww := ValuativeRel.valuation A with hww_def
+  have h_wgd_ne : ww (g₀ * d) ≠ 0 := by
+    intro h_eq
+    apply h_ne
+    refine (Valuation.Compatible.vle_iff_le (v := ww) (g₀ * d) 0).mpr ?_
+    rw [h_eq, map_zero]
+  rw [map_mul, mul_ne_zero_iff] at h_wgd_ne
+  obtain ⟨h_wg0_ne, h_wd_ne⟩ := h_wgd_ne
+  have h_id_le_gd' :=
+    (Valuation.Compatible.vle_iff_le (v := ww) (i * d) (g₀ * d)).mp h_le
+  rw [map_mul, map_mul] at h_id_le_gd'
+  have h_wd_pos : 0 < ww d := zero_lt_iff.mpr h_wd_ne
+  refine (Valuation.Compatible.vle_iff_le (v := ww) i g₀).mpr ?_
+  exact (mul_le_mul_iff_left₀ h_wd_pos).mp h_id_le_gd'
+
+/-- `w g₀ = 0` forces `w (g₀ * d) = 0`. -/
+private lemma vle_mul_zero_of_vle_zero {w : Spv A} {g₀ : A} (d : A)
+    (h : w.vle g₀ 0) : w.vle (g₀ * d) 0 := by
+  letI : ValuativeRel A := w.toValuativeRel
+  set ww := ValuativeRel.valuation A
+  have h_wg0_zero := (Valuation.Compatible.vle_iff_le (v := ww) g₀ 0).mp h
+  rw [map_zero, le_zero_iff] at h_wg0_zero
+  refine (Valuation.Compatible.vle_iff_le (v := ww) (g₀ * d) 0).mpr ?_
+  rw [map_mul, h_wg0_zero, zero_mul, map_zero]
+
+
 /-- **Wedhorn 7.5(ii), microbial case.** Given `v` microbial in `SpvAI I`
 and a basic open W (`∀ i ∈ g, v.vle i g_0` and `¬ v.vle g_0 0`),
 there exists a rational subset of `SpvAI I` containing `v` and inside `W`.
@@ -309,41 +340,9 @@ theorem SpvAI.exists_rationalSubset_microbial [DecidableEq A]
   · -- SpvAI.rationalSubset I T' s' ⊆ W.
     intro w hw
     obtain ⟨hw_in, hw_T, hw_s⟩ := hw
-    refine ⟨?_, ?_⟩
-    · -- ∀ i ∈ g, w.vle i g_0.
-      intro i hi
-      -- w(i * d) ≤ w(g_0 * d). Divide both sides by w(d) (= w(g_0 * d) / w(g_0)).
-      have h_id_in : i * d ∈ g.image (· * d) ∪ {1} :=
-        Finset.mem_union_left _ (Finset.mem_image.mpr ⟨i, hi, rfl⟩)
-      have h_id_le_gd : w.vle (i * d) (g_0 * d) := hw_T (i * d) h_id_in
-      -- w(g_0 * d) ≠ 0 → w(g_0) ≠ 0 ∧ w(d) ≠ 0.
-      letI : ValuativeRel A := w.toValuativeRel
-      set ww := ValuativeRel.valuation A with hww_def
-      have h_wgd_ne : ww (g_0 * d) ≠ 0 := by
-        intro h_eq
-        apply hw_s
-        refine (Valuation.Compatible.vle_iff_le (v := ww) (g_0 * d) 0).mpr ?_
-        rw [h_eq, map_zero]
-      rw [map_mul, mul_ne_zero_iff] at h_wgd_ne
-      obtain ⟨h_wg0_ne, h_wd_ne⟩ := h_wgd_ne
-      -- Translate h_id_le_gd to ww.
-      have h_id_le_gd' :=
-        (Valuation.Compatible.vle_iff_le (v := ww) (i * d) (g_0 * d)).mp h_id_le_gd
-      rw [map_mul, map_mul] at h_id_le_gd'
-      -- ww(i) * ww(d) ≤ ww(g_0) * ww(d) → ww(i) ≤ ww(g_0).
-      have h_wd_pos : 0 < ww d := zero_lt_iff.mpr h_wd_ne
-      refine (Valuation.Compatible.vle_iff_le (v := ww) i g_0).mpr ?_
-      exact (mul_le_mul_iff_left₀ h_wd_pos).mp h_id_le_gd'
-    · -- ¬ w.vle g_0 0.
-      intro h_vle
-      apply hw_s
-      letI : ValuativeRel A := w.toValuativeRel
-      set ww := ValuativeRel.valuation A
-      have h_wg0_zero := (Valuation.Compatible.vle_iff_le (v := ww) g_0 0).mp h_vle
-      rw [map_zero, le_zero_iff] at h_wg0_zero
-      refine (Valuation.Compatible.vle_iff_le (v := ww) (g_0 * d) 0).mpr ?_
-      rw [map_mul, h_wg0_zero, zero_mul, map_zero]
-
+    refine ⟨fun i hi => vle_of_vle_mul_right (hw_T (i * d)
+      (Finset.mem_union_left _ (Finset.mem_image.mpr ⟨i, hi, rfl⟩))) hw_s,
+      fun h_vle => hw_s (vle_mul_zero_of_vle_zero d h_vle)⟩
 /-- **Wedhorn 7.5(ii), cofinality-disjunct case.** Given `v` satisfying the
 cofinality disjunct of `IsInSpvAI` (for each `s_i` in a finite generating set
 `S ⊆ I`, `CofinalValue v s_i`), and a basic open W
