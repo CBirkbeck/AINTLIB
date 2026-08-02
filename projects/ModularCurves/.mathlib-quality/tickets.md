@@ -33956,3 +33956,31 @@ that fibre. `fullLevelToNaiveGammaOne_etale` + `_isFinite` then give
 `Etale ⟹ Smooth` (instance) + `Smooth` composes + `yOneStructMap_smooth` gives
 `Smooth Y(N).structMap`, and `YFull.smooth_affine_of_representableBy` spreads it to every
 representing object — closing `YFull.exists_representing_smooth_affine`.
+
+### [WP-D2c] scoped (2026-08-02) — one bridge, then two possible finishes
+
+`yFullToYOneFibreEquiv` describes the fibres of `Y(N) ⟶ Y₁(N)` in terms of **`EllObj R`**
+morphisms `f : T ⟶ Y`. Étaleness is a property of the **scheme** morphism
+`(yFullToYOne …).baseHom`. So whichever finish is chosen, the same bridge is needed first:
+
+#### [WP-D2c-bridge] `EllObj`-points ↔ scheme-points
+An `EllObj R` morphism `T ⟶ Y` is a base map `g : T.base ⟶ Y.base` together with a cartesian
+square, i.e. an identification `T ≅ Y.pullbackAlong g` (`Moduli/EllCategory.lean:99, 107`).
+So fibres indexed by `EllObj`-morphisms over `f` become fibres indexed by scheme morphisms
+into `Y.base`, once one restricts to `T = Y.pullbackAlong g`. This is bookkeeping the engine
+already does elsewhere (`AffineOverEll`'s `eqv` is stated in exactly that form) — the task is
+to state it once, reusably.
+
+#### Finish A — via a scheme isomorphism (preferred)
+With the bridge, `Y(N)` and the relative locus of the universal curve represent the same
+functor of scheme-points over `Y₁(N).base`, so Yoneda gives an isomorphism over `Y₁(N).base`;
+`Etale`/`IsFinite` transport along it from `fullLevelToNaiveGammaOne_etale` / `_isFinite`.
+
+#### Finish B — via the lifting criterion
+`Etale` is the infinitesimal lifting criterion, itself a statement about `T`-points for
+square-zero thickenings, so the fibre description transfers it directly. Avoids constructing
+the isomorphism but still needs the bridge, and mathlib's `Etale` is not *definitionally* the
+lifting criterion here, so Finish A is likely shorter.
+
+Then WP-D2 concludes as recorded: `Etale ⟹ Smooth` + `Smooth` composes + `yOneStructMap_smooth`
++ `YFull.smooth_affine_of_representableBy` close `YFull.exists_representing_smooth_affine`.
