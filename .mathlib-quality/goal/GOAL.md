@@ -9149,3 +9149,61 @@ Warning count across the four touched files: 39 → 34.
     over-50 proofs   486 (baseline) → 76   (74 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
     full lake build  GREEN (exit 0, 3360 jobs, zero errors)
+
+## Batch: WedhornCechAcyclicity, first two targets (76 → 74)
+
+The file holds 18 of the remaining targets and 1788 of the excess lines — by far the
+largest cluster left. A pairwise shared-content scan over its eighteen over-50 proofs found
+exactly **one** pair sharing real bulk (`unitCover_sq_plus_dense` + `unitCover_sq_minus_dense`,
+104 lines across 7 blocks). Everything else is under twenty: the `unitCover_*` / `genPiece_*`
+families are structurally parallel but textually divergent — the same skeleton with different
+data threaded through — so a line-based scan cannot see them. They need interface
+parameterisation, not shared-run extraction.
+
+### `datum_ker_le_span_of_unit_mod` 98 → 25
+
+Three conclusion-preserving lifts, one per step of the argument:
+
+    datum_psi_continuous               24L  ψ is continuous for the loc topology
+    exists_completion_extension_of_psi 23L  ψ extends to the completion
+    comp_eq_quotient_mk_of_dense       20L  β ∘ Φ = mk, via density
+
+The interesting part is what came *free*. The parent opened with sixteen lines of
+`letI`/`haveI` instance plumbing (τC, τQ, uQ, hringC, hringQ, IsUniformAddGroup,
+CompleteSpace, T2, T0, NonarchimedeanRing). Once each step is a lemma, **each lemma declares
+only the instances its own step needs** and the parent declares none — sixteen lines to zero.
+That is a general property of instance-heavy proofs: the plumbing is proportional to the
+*union* of what all the steps need, and decomposition replaces the union by the parts.
+
+Two instances had to be added back to the extracted lemmas, and the errors said which:
+`mvQuot_isTopologicalRing` and `mvQuot_t2Space` both need `CompleteSpace A`, so two of the
+three lemmas need the `[letI : UniformSpace A := …; CompleteSpace A]` binder; and
+`locTopology_continuous_lift` needs `NonarchimedeanRing` on the *quotient*, which the parent
+had supplied as `hNAQ`.
+
+The 13-line "opaquify the evaluation" `obtain ⟨Φ, …⟩` block also disappeared: its only
+purpose was to make `example638_evalHom` opaque to the rest of the proof, and a lemma
+parameter is opaque for free. Pass `example638_evalHom D` and its four spec lemmas directly.
+
+### `propA3_part2_project_gluing` 98 → 35
+
+    propA3_part2_refined_compat   4L   the refined family is compatible
+    propA3_part2_piece_eq        20L   the glued section restricts correctly to one piece
+
+plus a genuinely missing mathlib-style API lemma, added next to `restrictionMap_comp` in
+`Presheaf.lean`:
+
+    restrictionMap_restrictionMap   restriction composition, applied to a section
+
+`restrictionMap_comp` is stated as an equality of *functions*, so every consumer that wants
+it on an element writes `congrFun (restrictionMap_comp …) y` by hand — **at more than a
+dozen sites across ten files**. Naming the pointwise form turned four multi-line `have`
+blocks in this proof into rewrite-list entries. This is the `/overview` Step-7 shape (a
+repeated three-line proof pattern is a missing lemma) and the fix belongs upstream, next to
+the lemma it is the corollary of.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 74   (72 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete, re-verified this session)
+    full lake build  gate running on the Presheaf.lean change
