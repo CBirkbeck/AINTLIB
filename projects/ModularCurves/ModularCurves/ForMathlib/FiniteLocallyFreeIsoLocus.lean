@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import ModularCurves.ForMathlib.EtaleIsoLocus
 
 /-!
 # The iso-locus of a finite locally free morphism (YFULL route γ, [YF-ISOLOC])
@@ -36,10 +37,9 @@ namespace AlgebraicGeometry
 variable {X S : Scheme.{u}} (ψ : X ⟶ S)
   [IsFinite ψ] [Flat ψ] [LocallyOfFinitePresentation ψ]
 
-/-- **[YF-ISOLOC], clopen half.** The rank-`n` locus of a finite locally free morphism
-is clopen (the rank is a locally constant function of the base point). -/
-theorem isClopen_finrank_eq (n : ℕ) : IsClopen {s : S | ψ.finrank s = n} :=
-  ψ.isLocallyConstant_finrank.isClopen_fiber n
+/- `isClopen_finrank_eq` is NOT restated here: the identical theorem (same namespace, same
+statement) already lives in `ForMathlib/EtaleIsoLocus.lean`. The duplication was invisible
+while both files were unreachable from the root import. -/
 
 /-- The rank-`n` locus of a finite locally free morphism, as an open subscheme of the
 base (it is in fact clopen — `isClopen_finrank_eq`). -/

@@ -33378,3 +33378,40 @@ Y(ρ̄)'s two legs bottom out in two classical projects of comparable size:
 geometry of the modular curve — and neither has mathlib support. Any further planning for
 Y(ρ̄) should start from which of the two to build, not from more DS4 rearrangement: DS4 is
 now provably at its minimum and every derivable consequence has been derived.
+
+# ══════════════════════════════════════════════════════════════════════════
+# COVERAGE FINDING (2026-08-02): 77 orphan modules, and they cannot simply be wired in
+# ══════════════════════════════════════════════════════════════════════════
+
+`ModularCurves.lean` imports 222 modules and reaches **756 of 833**. The other **77 are
+unreachable**, so `lake build ModularCurves` never compiles them and any `sorry`, error or
+duplicate in them is invisible to every routine check. (The earlier note recorded 66; it has
+grown.)
+
+All 77 **do** build: `lake build <the 77>` is green at 9395 jobs, zero errors, 91
+`declaration uses sorry` warnings.
+
+**But adding them to the root import breaks the build**, because unreachable modules have
+been free to reuse names. A scan of all 833 files finds **43 duplicate fully-qualified
+declaration names** (some are regex false positives; at least three are real and were hit
+in sequence by the build):
+
+| name | files |
+|---|---|
+| `MvPolynomial.instDecidableEq_modularCurves_6` | `EllipticCurve/ProjectiveSpaceTwistCechHOne`, `…CechHigher` — twin anonymous `local instance : DecidableEq σ`, auto-named identically |
+| `AlgebraicGeometry.isClopen_finrank_eq` | `ForMathlib/FiniteLocallyFreeIsoLocus`, `ForMathlib/EtaleIsoLocus` — **the same theorem proved twice** |
+| `ModularCurves.geomPt` | `WeilPairing/FibreGalois`, `ModularCurve/RhoSections` |
+
+**Fixed here** (both are the cardinal sin or its cause, so in a producer's lane):
+* named the two anonymous instances `decEqSigmaCechHOne` / `decEqSigmaCechHigher`;
+* deleted the duplicate `isClopen_finrank_eq` from `FiniteLocallyFreeIsoLocus`, which now
+  imports `ForMathlib/EtaleIsoLocus`.
+
+**Not fixed — this is fleet work.** `ModularCurves.geomPt` and the remaining candidates are
+a cross-file dedup sweep, explicitly the `lane:cleanup` job on `main`, not a producer's. The
+root import was therefore **reverted to its 222 entries** rather than left broken.
+
+**Recommended cleanup ticket for `main`:** resolve the duplicate-name set, then add all 77
+orphans to `ModularCurves.lean` so coverage is permanent. Until then, any audit of this
+project must build the orphan list explicitly — the recipe is: enumerate `.lean` files,
+transitively close the root's imports, and pass the difference to `lake build`.

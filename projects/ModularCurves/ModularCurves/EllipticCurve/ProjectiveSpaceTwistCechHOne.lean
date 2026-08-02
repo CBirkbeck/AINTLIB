@@ -31,7 +31,10 @@ variable {R : Type u} {σ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-local instance : DecidableEq σ := Classical.decEq σ
+-- Named explicitly: the anonymous form auto-generates
+-- `MvPolynomial.instDecidableEq_modularCurves_6`, which collides verbatim with the twin
+-- instance in `ProjectiveSpaceTwistCechHigher` once both files are imported together.
+local instance decEqSigmaCechHOne : DecidableEq σ := Classical.decEq σ
 
 /-- Every degree-one cocycle in the homogeneous Laurent presentation of the ordered Cech complex
 for a nonnegative projective twist is a boundary. -/
