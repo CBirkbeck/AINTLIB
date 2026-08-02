@@ -33782,3 +33782,40 @@ Two implementation notes worth keeping:
 `gammaOneNaive_relativelyRepresentable` / `_affineOverEll`, then the identification of
 `yFullToYOne` with the induced map — after which WP-D2 closes
 `YFull.exists_representing_smooth_affine`.
+
+### [WP-D1c-coarse] all four mirrors landed (2026-08-02) — 312 lines, zero heartbeat bumps
+
+`LevelStructure/NaiveGammaOneLevel.lean` now covers, for the naive `Γ₁(N)` locus, everything
+`CombinationLevel.lean` + `LevelLocusNatural.lean` cover for the full-level one (~500 lines
+of original):
+
+| | |
+|---|---|
+| `restrict_multiplePoint`, `comp_multiple_mem_zeroSection_iff` | the pulled-multiple zero test |
+| `baseChangeEquiv_zsmul_eq_zero_iff` | torsion transport through the base-change dictionary |
+| `forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne` | the master iff |
+| `naiveGammaOneLocusSectionsEquiv`, `naiveGammaOneLocusPointsEquiv` | the classifying equivalences |
+| `naiveGammaOneLocusPointsEquiv_comp_fst`, `_natural` | pinning + naturality in `T` |
+
+All axiom-verified. The originals need `maxHeartbeats`/`synthInstance.maxHeartbeats` in three
+places; the mirror needs **none** — the single instance blow-up was fixed structurally.
+
+### Two findings about the remaining bridge
+
+1. **`levelSpaceΓ₁` already exists** (`Moduli/LevelSpaces.lean:40`) — but it is built from
+   `exists_exactOrderLocus`, i.e. the **Drinfeld** locus, so anything routed through it
+   re-acquires the T-D6 dependency. Since `gammaOneNaiveProblem` is stated with the *naive*
+   notion, the correct relative object is the new `naiveGammaOneLocus`, and the assembly
+   should use it directly rather than `levelSpaceΓ₁`.
+2. **The full-level route bridges the two constructions**:
+   `exists_levelSpaceΓ_iso_fullLevelLocus` (`Moduli/LevelSpaceEtale.lean:873`) shows
+   `levelSpaceΓ ≅ fullLevelLocus`. The `Γ₁` analogue (`levelSpaceΓ₁ ≅ naiveGammaOneLocus`) is
+   **exactly T-D6** and so should be *avoided*, not proved.
+
+### What remains
+The `pullbackAlong` bridge: the analogue of `YFull.exists_pointsEquiv_naive` /
+`exists_pointsEquiv_family` (`ModularCurve/YFullRoute.lean:543, 573`), which converts a
+points-equivalence phrased with `E.baseChange g` into the `X.pullbackAlong g` form that
+`ModuliProblem.AffineOverEll` (`Moduli/EllCategory.lean:198`) demands. With that,
+`gammaOneNaive_affineOverEll` is the three-line mirror of `gammaFullNaive_affineOverEll`, and
+WP-D2 follows.
