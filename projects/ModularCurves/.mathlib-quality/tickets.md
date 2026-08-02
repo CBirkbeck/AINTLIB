@@ -32771,7 +32771,8 @@ unity in a fraction field is **integral** over the ring, hence lies in it.
   surviving relation `3β² + 3βγ + γ² = 0`, extracted from inside `universalE3_hcubic` as a
   public lemma. Axiom-verified, root build 9625 jobs.
 
-  **Remaining for A7.1:** primality of the surviving quadratic. Its discriminant in `β` is
+  **SUPERSEDED** by the explicit root in A7.3 — A7.1 is no longer needed. (Retained for
+  the record.) Remaining, were it wanted: primality of the surviving quadratic. Its discriminant in `β` is
   `9γ² − 12γ² = −3γ²`, so it is irreducible over `ℚ` and splits exactly over
   `ℚ(√−3) = ℚ(ζ₃)`. **That is the geometric reason the Weil-pairing root of unity lives on
   this base** — the det twist and the field of definition of `Y(3)`'s components are the
@@ -32813,7 +32814,23 @@ unity in a fraction field is **integral** over the ring, hence lies in it.
   moduli ring; this is a general-purpose lemma worth having.
 
 #### [WP-A7.3] The universal root
-- **Status**: blocked (A5.3, A7.1, A7.2) · **File**: `WeilPairing/UniversalRootBase.lean`
+- **Status**: DONE at `N = 3` 2026-08-02, and **it bypasses A7.1 and A7.2 entirely** —
+  `WeilPairing/UniversalRootThree.lean`, axiom-verified, root build 9626 jobs.
+
+  The root is **explicit**. After `γ` is inverted the surviving relation is
+  `3β² + 3βγ + γ² = 0` (`universalE3_quadratic_rel`); homogenising gives
+  `(3β + γ)² + (3β + γ)γ + γ² = 0`, so `ζ := (3β + γ)/γ` satisfies `ζ² + ζ + 1 = 0`
+  (`e3Zeta_cyclotomic`) and hence `ζ³ = 1` (`e3Zeta_pow_three`).
+
+  No domain hypothesis, no fraction field, no integrality argument, and **no division by
+  `2`** — which matters, since the base is `ℤ[1/3]` and the usual `ζ = (−1+√−3)/2` is not
+  available there. `A7.1` (universal ring is a domain) and `A7.2` (roots descend to an
+  integrally closed ring) are therefore **not on the critical path**; A7.2 stays as a
+  general-purpose lemma, A7.1 is dropped unless something else needs it.
+
+  This is the arithmetic shadow of the geometry: the surviving quadratic has discriminant
+  `−3γ²` in `β`, so the `ℰ₃` base is exactly where `ζ₃` becomes available — the field of
+  definition of `Y(3)`'s geometric components and the determinant twist are one phenomenon. · **File**: `WeilPairing/UniversalRootBase.lean`
 - **Statement**: an element `ζ_univ ∈ E4ModuliRing R` with `ζ_univ ^ N = 1` whose image at
   every geometric point is the field pairing of the tautological basis.
 - **Proof sketch**: (1) A5.3 over the fraction field gives the root there; (2) A7.2 pulls
