@@ -34407,3 +34407,34 @@ universal `Γ₁`-structure). Unfolding both sides, each says *"the `Γ₁`-part
 pullback of the universal structure"* — one phrased via `torsionMapSection`, the other via
 `gammaFullToGammaOne` + `rOne`. Matching them is bookkeeping between `pointToTorsion` and
 `torsionMapSection`, both of which have their `_fst` computation lemmas.
+
+### [WP-D2c-3 glue] the exact identity still needed (2026-08-03)
+
+Unfolding both fibre conditions:
+
+* **steps 1–3 give** `((transportAlongIso N u).symm PQ).1.1 =
+  torsionMapSection N u.baseHom (u.baseHom ≫ P) _`;
+* **step 4 wants** `forgetAt N hinv Y PQ = rOne.homEquiv u`, which by `Subtype.ext` and
+  `homEquiv_eq_map_universalGammaOne` is `PQ.1.1 = EllHom.pullSection R u (universalGammaOne R N rOne).1`
+  (using `gammaFullToGammaOne_app_val : (forgetAt … PQ).1 = PQ.1.1`).
+
+So the glue is one computation, given `hP : P = pointToTorsion (universalGammaOne R N rOne).1 _`:
+
+    torsionMapSection N u.baseHom (u.baseHom ≫ pointToTorsion Q hQ) _
+      = pullSection R (X₁.pullbackAlongπ u.baseHom) Q
+
+i.e. *"the section attached to the composite of a base map with a torsion section is the
+pullback of that section"* — plus transporting across `transportAlongIso`, where
+`isoPullbackAlong u` relates `pullSection u` to `pullSection (pullbackAlongπ u.baseHom)`
+composed with the iso.
+
+Both sides have `_fst` computation lemmas (`torsionMapSection_fst`,
+`pointToTorsion_torsionι`), and sections of a base-changed curve are determined by their
+`≫ pullback.fst` composite (`baseChange_section_ext`, proved this session). So the proof is:
+apply `baseChange_section_ext`, rewrite both sides by their `_fst` lemmas, and compare — the
+same three-line pattern used for `fullLevelLocusPointsEquiv_fst_eq`.
+
+### Session-final state of the D-chain
+Every file touched is sorry-free **except** `ModularCurve/YFullFromYOne.lean`, which has
+exactly **one** — `yFullCandidate_representableBy` — and `WeilPairing/Basic.lean`, whose
+7 are the DS4 register (down from 10). Root build green at 9638 jobs.
