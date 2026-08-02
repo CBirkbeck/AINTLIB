@@ -10366,3 +10366,48 @@ round trip on this file.
 
 This is the mirror image of the earlier `omit`/`include` family: there the *context* had to
 travel with the code; here the *substitution* has to.
+
+## Batch: presheafValue_mvRestricted_iU_denseRange 118 → 36, and four extraction taxes
+
+`Wedhorn828.lean`. Five new declarations, three of them **generic in the coefficient
+ring** — they mention neither `presheafValue D` nor the hom `iU`:
+
+    boxFinset / mem_boxFinset_iff       the finite index box, as a real definition
+    coe_algebraMap_mul_prod_X_pow       a monomial summand's underlying series
+    eq_sum_monomials_of_box             box-supported ⇒ sum of its monomials
+    algebraMap_mem_closure_range_iU     constants land in closure (range iU)
+
+`eq_sum_monomials_of_box` is the one worth reusing: its 33-line proof touches `term` and
+`box` **only** through `hterm_val` and `hmem_box`, so both abstract to parameters and the
+body transfers verbatim.
+
+This one cost four build round trips, each a distinct tax. All four are general:
+
+1. **A `def` built from `Finsupp.equivFunOnFinite` is noncomputable.** Extracting an
+   inline `let` into a top-level `def` exposes that; a `let` inside a proof never had to
+   say so. → `private noncomputable def boxFinset`.
+2. **Generalising the statement does not generalise the body** (recorded above): the
+   extracted bodies still said `presheafValue D` and `g.val v`.
+3. **The statement needs instances the parent installs by `letI` in the body.**
+   `∈ iU.range.topologicalClosure` needs a `TopologicalSpace` on the subring, and the
+   parent's `letI τT` comes *after* the statement. Taking `[TopologicalSpace …]` and
+   `[IsTopologicalRing …]` as binders fixes it — but then the *specific*-topology lemma
+   `mvTateAlgebra_algebraMap_continuous` no longer applies inside, so continuity has to be
+   passed **in** as `hcont` rather than derived. The call site derives it.
+4. **`omit` must be reproduced, and `[CompleteSpace A]` cannot be named.** The parent omits
+   `[CompatiblePlusSubring A]`; without the same `omit` the extracted lemma auto-includes
+   it and the parent cannot apply its own helper (the SheafyPair failure, exactly). And the
+   section declares completeness as
+   `[letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]`,
+   which `omit [CompleteSpace A]` does not match — `omit` can only name a binder as
+   written. For that one the file's own idiom is
+   `set_option linter.unusedSectionVars false in`.
+
+Also: `rw [hiU_C c]; rfl` became `rw [hiU_C c]` — with `R` an abstracted parameter rather
+than a `set` local, the rewrite closes the goal outright and the `rfl` is "No goals".
+**A trailing `rfl` is a symptom of the context it was written in, not of the lemma.**
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 54   (51 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)

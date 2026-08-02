@@ -1944,6 +1944,134 @@ theorem presheafValue_isNoetherianRing_faithful
     IsNoetherianRing (presheafValue D) :=
   presheafValue_isNoetherianRing_residual D
 
+/-- The finite index box `{l | ∀ i, l i < N}`, as the image of `Fin m → Fin N`. -/
+private noncomputable def boxFinset (m N : ℕ) : Finset (Fin m →₀ ℕ) :=
+  (Finset.univ : Finset (Fin m → Fin N)).image
+    (fun f ↦ Finsupp.equivFunOnFinite.symm (fun i ↦ (f i : ℕ)))
+
+private lemma mem_boxFinset_iff {m N : ℕ} (l : Fin m →₀ ℕ) :
+    l ∈ boxFinset m N ↔ ∀ i, l i < N := by
+  simp only [boxFinset, Finset.mem_image, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨f, rfl⟩ i
+    exact (f i).2
+  · intro hlt
+    exact ⟨fun i ↦ ⟨l i, hlt i⟩, by ext i; simp [Finsupp.equivFunOnFinite]⟩
+
+/-- The series underlying a monomial summand `algebraMap c · ∏ⱼ Xⱼ^(vⱼ)` is
+`monomial v c`. -/
+private lemma coe_algebraMap_mul_prod_X_pow {B : Type*} [CommRing B] [TopologicalSpace B]
+    [NonarchimedeanRing B] {m : ℕ} (v : Fin m →₀ ℕ) (c : B) :
+    ((algebraMap B ↥(restrictedMvPowerSeriesSubring m B) c *
+        ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+          ↥(restrictedMvPowerSeriesSubring m B)) ^ (v j)
+      : ↥(restrictedMvPowerSeriesSubring m B)) : MvPowerSeries (Fin m) B)
+      = MvPowerSeries.monomial v c := by
+  rw [Subring.coe_mul, MvPowerSeries.monomial_eq']
+  have hprod : (↑(∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        ↥(restrictedMvPowerSeriesSubring m B)) ^ (v j)) :
+        MvPowerSeries (Fin m) B) =
+      v.prod fun s e ↦ MvPowerSeries.X s ^ e := by
+    rw [SubmonoidClass.coe_finsetProd, Finsupp.prod_fintype]
+    · refine Finset.prod_congr rfl (fun j _ ↦ ?_)
+      rw [SubmonoidClass.coe_pow]
+    · intro j; rw [pow_zero]
+  have hC : (↑(algebraMap B ↥(restrictedMvPowerSeriesSubring m B) c) :
+        MvPowerSeries (Fin m) B) = MvPowerSeries.C c :=
+    MvPowerSeries.algebraMap_apply
+  rw [hC, hprod]
+
+/-- **A box-supported restricted series is the sum of its monomials over the box.** The
+summands enter only through their underlying series, so `term` is abstracted by
+`hterm_val` and the index set by `hmem_box`. -/
+private lemma eq_sum_monomials_of_box {B : Type*} [CommRing B] [TopologicalSpace B]
+    [NonarchimedeanRing B] {m N : ℕ} (g : ↥(restrictedMvPowerSeriesSubring m B))
+    (hN : ∀ l : Fin m →₀ ℕ, (∃ i, N ≤ l i) → g.val l = 0)
+    (box : Finset (Fin m →₀ ℕ))
+    (hmem_box : ∀ l : Fin m →₀ ℕ, l ∈ box ↔ ∀ i, l i < N)
+    (term : (Fin m →₀ ℕ) → ↥(restrictedMvPowerSeriesSubring m B))
+    (hterm_val : ∀ v, (term v).val = MvPowerSeries.monomial v (g.val v)) :
+    g = ∑ v ∈ box, term v := by
+  apply Subtype.ext
+  rw [AddSubmonoidClass.coe_finsetSum]
+  simp only [hterm_val]
+  -- `∑ v∈box, monomial v (g.val v) = ↑(∑ v∈box, MvPolynomial.monomial v (g.val v))`.
+  rw [show (∑ v ∈ box, MvPowerSeries.monomial v (g.val v) :
+        MvPowerSeries (Fin m) B) =
+      MvPolynomial.coeToMvPowerSeries.ringHom
+        (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun v _ ↦ ?_)
+    rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.coe_monomial]]
+  rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply]
+  ext w
+  rw [MvPolynomial.coeff_coe, show MvPowerSeries.coeff w g.val = g.val w from
+    MvPowerSeries.coeff_apply g.val w]
+  rw [show MvPolynomial.coeff w (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) =
+      ∑ v ∈ box, MvPolynomial.coeff w (MvPolynomial.monomial v (g.val v)) from
+    MvPolynomial.coeff_sum _ _ _]
+  by_cases hw : ∀ i, w i < N
+  · rw [Finset.sum_eq_single w]
+    · rw [MvPolynomial.coeff_monomial, if_pos rfl]
+    · intro v _ hvw
+      rw [MvPolynomial.coeff_monomial, if_neg hvw]
+    · intro hw_notin
+      exact absurd ((hmem_box w).mpr hw) hw_notin
+  · -- `w` outside the box: `g.val w = 0` and every monomial term vanishes at `w`.
+    push Not at hw
+    obtain ⟨i, hi⟩ := hw
+    rw [hN w ⟨i, hi⟩]
+    symm
+    refine Finset.sum_eq_zero (fun v hv ↦ ?_)
+    rw [MvPolynomial.coeff_monomial, if_neg]
+    intro hwv
+    exact absurd ((hmem_box v).mp hv i) (by rw [hwv]; omega)
+
+set_option linter.unusedSectionVars false in
+omit [CompatiblePlusSubring A] in
+/-- Constants land in the closure of `range iU`: `range coeRingHom` is dense in
+`presheafValue D`, `algebraMap _ T` is continuous, and it carries `coeRingHom c` to
+`iU (C c)`. -/
+private lemma algebraMap_mem_closure_range_iU (D : RationalLocData A) (m : ℕ)
+    [TopologicalSpace ↥(restrictedMvPowerSeriesSubring m (presheafValue D))]
+    [IsTopologicalRing ↥(restrictedMvPowerSeriesSubring m (presheafValue D))]
+    {iU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
+      ↥(restrictedMvPowerSeriesSubring m (presheafValue D))}
+    (hcont : Continuous (algebraMap (presheafValue D)
+      ↥(restrictedMvPowerSeriesSubring m (presheafValue D))))
+    (hiU_C : ∀ c : Localization.Away D.s, iU (MvPolynomial.C c) =
+      algebraMap (presheafValue D)
+        ↥(restrictedMvPowerSeriesSubring m (presheafValue D)) (D.coeRingHom c))
+    (hiU_le : iU.range ≤ iU.range.topologicalClosure) :
+    ∀ x : presheafValue D,
+      algebraMap (presheafValue D)
+          ↥(restrictedMvPowerSeriesSubring m (presheafValue D)) x
+        ∈ iU.range.topologicalClosure := by
+  set R : Subring ↥(restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+    iU.range.topologicalClosure with hR
+  -- the preimage subring is closed and contains `range coeRingHom`
+  have hclosed : IsClosed
+      ((algebraMap (presheafValue D)
+        ↥(restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹'
+          (R : Set _)) : Set (presheafValue D)) :=
+    (Subring.isClosed_topologicalClosure _).preimage hcont
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
+    letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+    letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+    change DenseRange (UniformSpace.Completion.coeRingHom :
+      Localization.Away D.s → presheafValue D)
+    exact UniformSpace.Completion.denseRange_coe
+  intro x
+  have hx_cl : x ∈ closure (Set.range (D.coeRingHom)) := hdense x
+  have hsub : Set.range (D.coeRingHom) ⊆
+      algebraMap (presheafValue D)
+        ↥(restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹' (R : Set _) := by
+    rintro _ ⟨c, rfl⟩
+    change algebraMap (presheafValue D)
+      ↥(restrictedMvPowerSeriesSubring m (presheafValue D)) (D.coeRingHom c) ∈ R
+    exact hiU_le ⟨MvPolynomial.C c, by rw [hiU_C c]⟩
+  exact hclosed.closure_subset_iff.mpr hsub hx_cl
+
 omit [CompatiblePlusSubring A] in
 /-- **Density of the dense subring** `U = (Localization.Away D.s)[Y₁..Yₘ] → B⟨Y⟩` (helper for
 `presheafValue_mvRestricted_surjection`). The polynomial evaluation hom `iU` (coefficients via
@@ -1975,34 +2103,10 @@ private lemma presheafValue_mvRestricted_iU_denseRange
   -- Step 1: every constant series `algebraMap _ T x` (x : presheafValue D) lies in `R`, because
   -- `range coeRingHom` is dense in `presheafValue D`, `algebraMap _ T` is continuous, and
   -- `algebraMap _ T (coeRingHom c) = iU (C c) ∈ R`.
-  have hconst : ∀ x : presheafValue D,
-      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) x ∈ R :=
-      by
-    have hcont : Continuous
-        (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))) :=
-      MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m
-    -- the preimage subring `R.comap (algebraMap _ T)` is closed and contains `range coeRingHom`.
-    have hclosed : IsClosed
-        ((algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹'
-          (R : Set _)) : Set (presheafValue D)) :=
-      (Subring.isClosed_topologicalClosure _).preimage hcont
-    have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
-      letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-      letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-      change DenseRange (UniformSpace.Completion.coeRingHom :
-        Localization.Away D.s → presheafValue D)
-      exact UniformSpace.Completion.denseRange_coe
-    intro x
-    -- `x ∈ closure(range coeRingHom)`; the preimage set is closed, contains `range coeRingHom`.
-    have hx_cl : x ∈ closure (Set.range (D.coeRingHom)) := hdense x
-    have hsub : Set.range (D.coeRingHom) ⊆
-        algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D)) ⁻¹'
-          (R : Set _) := by
-      rintro _ ⟨c, rfl⟩
-      change algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
-        (D.coeRingHom c) ∈ R
-      exact hiU_le ⟨MvPolynomial.C c, by rw [hiU_C c]; rfl⟩
-    exact hclosed.closure_subset_iff.mpr hsub hx_cl
+  have hcont : Continuous
+      (algebraMap (presheafValue D) ↥(restrictedMvPowerSeriesSubring m (presheafValue D))) :=
+    MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := presheafValue D) m
+  have hconst := algebraMap_mem_closure_range_iU D m hcont hiU_C hiU_le
   -- Step 2: each variable `⟨Xⱼ, _⟩` lies in `R` (`= iU (X j) ∈ range iU ≤ R`).
   have hX : ∀ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
       restrictedMvPowerSeriesSubring m (presheafValue D)) ∈ R :=
@@ -2014,18 +2118,9 @@ private lemma presheafValue_mvRestricted_iU_denseRange
       g ∈ R := by
     rintro g ⟨N, hN⟩
     -- the finite box index set `{l | ∀ i, l i < N}`.
-    set box : Finset (Fin m →₀ ℕ) :=
-      (Finset.univ : Finset (Fin m → Fin N)).image
-        (fun f ↦ Finsupp.equivFunOnFinite.symm (fun i ↦ (f i : ℕ))) with hbox_def
-    -- membership: `l ∈ box ↔ ∀ i, l i < N`.
-    have hmem_box : ∀ l : Fin m →₀ ℕ, l ∈ box ↔ ∀ i, l i < N := by
-      intro l
-      simp only [hbox_def, Finset.mem_image, Finset.mem_univ, true_and]
-      constructor
-      · rintro ⟨f, rfl⟩ i
-        exact (f i).2
-      · intro hlt
-        exact ⟨fun i ↦ ⟨l i, hlt i⟩, by ext i; simp [Finsupp.equivFunOnFinite]⟩
+    set box : Finset (Fin m →₀ ℕ) := boxFinset m N with hbox_def
+    have hmem_box : ∀ l : Fin m →₀ ℕ, l ∈ box ↔ ∀ i, l i < N :=
+      fun l => mem_boxFinset_iff l
     -- the monomial summand `term v = algebraMap _ T (g.val v) · ∏ⱼ ⟨Xⱼ,_⟩^(vⱼ) ∈ T`.
     set term : (Fin m →₀ ℕ) → restrictedMvPowerSeriesSubring m (presheafValue D) :=
       fun v ↦ algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
@@ -2033,64 +2128,15 @@ private lemma presheafValue_mvRestricted_iU_denseRange
         ∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
           restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j) with hterm_def
     -- `(term v).val = monomial v (g.val v)`.
-    have hterm_val : ∀ v, (term v).val = MvPowerSeries.monomial v (g.val v) := by
-      intro v
-      rw [hterm_def]
-      simp only
-      rw [Subring.coe_mul, MvPowerSeries.monomial_eq']
-      have hprod : (↑(∏ j : Fin m, (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
-            restrictedMvPowerSeriesSubring m (presheafValue D)) ^ (v j)) :
-            MvPowerSeries (Fin m) (presheafValue D)) =
-          v.prod fun s e ↦ MvPowerSeries.X s ^ e := by
-        rw [SubmonoidClass.coe_finsetProd, Finsupp.prod_fintype]
-        · refine Finset.prod_congr rfl (fun j _ ↦ ?_)
-          rw [SubmonoidClass.coe_pow]
-        · intro j; rw [pow_zero]
-      have hC : (↑(algebraMap (presheafValue D)
-            (restrictedMvPowerSeriesSubring m (presheafValue D)) (g.val v)) :
-            MvPowerSeries (Fin m) (presheafValue D)) = MvPowerSeries.C (g.val v) :=
-        MvPowerSeries.algebraMap_apply
-      rw [hC, hprod]
+    have hterm_val : ∀ v, (term v).val = MvPowerSeries.monomial v (g.val v) :=
+      fun v => coe_algebraMap_mul_prod_X_pow v (g.val v)
     -- each `term v ∈ R` (constant ∈ R, variables ∈ R, `R` a subring).
     have hterm_mem : ∀ v, term v ∈ R := fun v ↦
       R.mul_mem (hconst (g.val v)) (Subring.prod_mem _ (fun j _ ↦ R.pow_mem (hX j) (v j)))
     -- `g = ∑_{v ∈ box} term v` in the restricted subring (coefficient-wise check, going through
     -- the `MvPolynomial` coe ring hom so `map_sum` lands on a `RingHom`).
-    have hg_sum : g = ∑ v ∈ box, term v := by
-      apply Subtype.ext
-      rw [AddSubmonoidClass.coe_finsetSum]
-      simp only [hterm_val]
-      -- `∑ v∈box, monomial v (g.val v) = ↑(∑ v∈box, MvPolynomial.monomial v (g.val v))`.
-      rw [show (∑ v ∈ box, MvPowerSeries.monomial v (g.val v) :
-            MvPowerSeries (Fin m) (presheafValue D)) =
-          MvPolynomial.coeToMvPowerSeries.ringHom
-            (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) by
-        rw [map_sum]
-        refine Finset.sum_congr rfl (fun v _ ↦ ?_)
-        rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.coe_monomial]]
-      rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply]
-      ext w
-      rw [MvPolynomial.coeff_coe, show MvPowerSeries.coeff w g.val = g.val w from
-        MvPowerSeries.coeff_apply g.val w]
-      rw [show MvPolynomial.coeff w (∑ v ∈ box, MvPolynomial.monomial v (g.val v)) =
-          ∑ v ∈ box, MvPolynomial.coeff w (MvPolynomial.monomial v (g.val v)) from
-        MvPolynomial.coeff_sum _ _ _]
-      by_cases hw : ∀ i, w i < N
-      · rw [Finset.sum_eq_single w]
-        · rw [MvPolynomial.coeff_monomial, if_pos rfl]
-        · intro v _ hvw
-          rw [MvPolynomial.coeff_monomial, if_neg hvw]
-        · intro hw_notin
-          exact absurd ((hmem_box w).mpr hw) hw_notin
-      · -- `w` outside the box: `g.val w = 0` and every monomial term vanishes at `w`.
-        push Not at hw
-        obtain ⟨i, hi⟩ := hw
-        rw [hN w ⟨i, hi⟩]
-        symm
-        refine Finset.sum_eq_zero (fun v hv ↦ ?_)
-        rw [MvPolynomial.coeff_monomial, if_neg]
-        intro hwv
-        exact absurd ((hmem_box v).mp hv i) (by rw [hwv]; omega)
+    have hg_sum : g = ∑ v ∈ box, term v :=
+      eq_sum_monomials_of_box g hN box hmem_box term hterm_val
     rw [hg_sum]
     exact Subring.sum_mem _ (fun v _ ↦ hterm_mem v)
   -- Conclude: the dense box-polynomials are ⊆ `R = closure(range iU)`, so `closure(range iU)`
