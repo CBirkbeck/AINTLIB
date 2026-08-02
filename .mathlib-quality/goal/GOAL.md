@@ -9357,3 +9357,47 @@ so a target needing three iterations costs ten minutes of pure waiting.
 Splitting the top two would cut the feedback loop for the 18 remaining targets in
 `WedhornCechAcyclicity` and make every future full gate substantially cheaper. Worth doing
 *before* the rest of task 3 rather than as part of it.
+
+## Batch: mk_monomial_pow_a_eq 89 → 43 (ChartVObj), and the fourth wrong-altitude lemma
+
+`RobbaPresentation.mk'_monomial_pow` proves the mk'-power collapse
+`(mk' w s^k)^a = mk' (w^a) s^{k·a}`. But `RobbaPresentation` **imports** `ChartVObj`, so
+`ChartVObj` — which needs the same fact — carries a thirteen-line inline copy behind a
+`rw [show … from ?_]` whose only purpose is to defer it to a second bullet. Fourth instance
+of the same defect this session.
+
+Hoisted `sPow_pow` and `mk'_sPow_pow` to `ChartVObj`, next to `sPow` where they belong.
+`RobbaPresentation.mk'_monomial_pow` is now **2 lines** (was 10) and the `ChartVObj` copy is
+gone entirely. Then two calc-step proofs lifted:
+
+    numerator_pow_factor    14L  the a-th power of the numerator factors
+    chartFracP_pow_regroup  14L  regroup into chartFracP^d · [c''] · alg(s^{ka})
+
+### The insertion-point failure, eighth occurrence — now fixed in the tooling
+
+Inserting a helper block above a `theorem` line orphans anything bound to that declaration:
+a docstring, or an `omit … in` / `open … in` / `set_option … in` modifier. The file then
+fails to parse with *"unexpected token '/--'; expected 'lemma'"*. I have now hit this eight
+times and re-derived the walk-back each time.
+
+Added `insert_before_decl(lines, pred, block)` to `scripts/decompose_common.py`: it walks the
+prefix back over complete docstring blocks and over any line ending in ` in` or `]`, and
+inserts above all of it. Use it instead of anchoring on the declaration line.
+
+### Two more mechanical traps, both mine
+
+* **Dropped parentheses in a templated substitution.** Writing `map_mul @ALG@` where `@ALG@`
+  expands to `algebraMap (Ainf p F) (Bloc p F ϖ)` yields `map_mul algebraMap (Ainf p F) (Bloc p F ϖ)`
+  — *three arguments*, not one. The original had the parentheses because the term was already
+  in argument position. Template substitutions into argument position need their own parens.
+* **The generator-scoping typo, third occurrence.** `next(k for k in range(...) if l0.startswith(...) for l0 in [L[k]])`
+  raises `UnboundLocalError`. It is already in my notes; use a plain loop.
+
+`omit` needed on all four new lemmas — none of them touches `[IsTopologicalRing F]`,
+`[UniformSpace F]`, `[IsPerfectoidField p F]` or `[CharP F p]`. The linter names exactly
+which, one round per lemma. Zero new warnings and zero new over-width lines at the end.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 72   (70 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)

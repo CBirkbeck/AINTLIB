@@ -429,3 +429,30 @@ def parent_binders(lines, decl_index, names):
     if missing:
         raise KeyError(f"not binders of this declaration: {missing}")
     return out
+
+
+def insert_before_decl(lines, decl_line_pred, block):
+    """Insert `block` (a list of lines) above a declaration AND its whole prefix.
+
+    A Lean declaration may be preceded by a docstring and by modifiers that bind to the
+    next declaration (`omit … in`, `open … in`, `set_option … in`, `@[…]`). Inserting
+    between any of those and the `theorem` line orphans the modifier and the file no
+    longer parses -- "unexpected token '/--'; expected 'lemma'". This walks the prefix
+    back and inserts above all of it.
+
+    `decl_line_pred` is a predicate on a line identifying the declaration itself.
+    """
+    i = next(k for k, l in enumerate(lines) if decl_line_pred(l))
+    j = i
+    while j > 0:
+        prev = lines[j - 1].rstrip()
+        if prev.endswith('-/'):                      # a docstring block: walk to its start
+            k = j - 1
+            while k > 0 and not lines[k].lstrip().startswith(('/--', '/-!')):
+                k -= 1
+            j = k
+        elif prev.endswith(' in') or prev.endswith(']'):   # `… in` modifier or attribute
+            j -= 1
+        else:
+            break
+    return lines[:j] + block + lines[j:]
