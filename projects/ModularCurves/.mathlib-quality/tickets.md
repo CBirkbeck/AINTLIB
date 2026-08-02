@@ -34296,3 +34296,28 @@ this chain.
   `→ ` full level structures on `X₁.pullbackAlong g` with first member `g^*P`
       (`fullLevelLocusPointsEquiv`, applicable by `fullLevelLocusπ_of_fst`)
 and then `homPullbackAlongEquiv` + WP-D1a's collapse turns the `Γ₁`-datum into nothing new.
+
+## **`completionLocusClassifies` PROVED** (2026-08-02) — axiom-verified, the heart of WP-D2c-3
+
+`LevelStructure/NaiveGammaOneLevel.lean`:
+* `baseChange_section_ext` — the `EllipticCurve`-level form of `EllObj.section_ext_comp_fst`;
+* `torsionMapSection_injective` — via `torsionMapSection_fst` and the fact that `torsionι` is
+  a **mono** (`torsionι_isClosedImmersion`). Cleaner than the round-trip route, which got
+  stuck on dependent proof arguments;
+* `fullLevelLocusPointsEquiv_fst_eq` — the first member of the classified level structure is
+  the section attached to `w`'s first coordinate;
+* **`completionLocusClassifies`** — `T`-points of the completion locus over `g` are exactly
+  the naive full level structures on `E ×_S T` **whose first member is `g ≫ P`**.
+
+That is the corrected statement of what sits under `Y(N) ⟶ Y₁(N)`, and it is the piece the
+`simul` finding showed was missing. Sorry-free, axiom-verified, no heartbeat bumps.
+
+### What is left of the D-chain
+Only the `EllObj`-level assembly in `yFullCandidate_representableBy`: combine
+* `EllObj.homPullbackAlongEquiv` (**existing**, `QuotientProblem.lean:192`) — `T`-points of
+  `X₁.pullbackAlong (completionLocusπ …)` are pairs (`u : T ⟶ X₁`, lift of `u.baseHom`);
+* `completionLocusClassifies` — the lift is a full level structure refining `u.baseHom ≫ P`;
+* WP-D1a (`isNaiveGammaOne_of_isNaiveFullLevel`) + WP-D1b — the `Γ₁`-datum `u` is *determined*
+  by that full level structure, so the pair collapses.
+
+No new mathematics: every input is proved and axiom-verified.

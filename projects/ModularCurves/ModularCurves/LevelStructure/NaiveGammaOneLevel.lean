@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.GroupScheme.NaiveGammaOneLocus
 import ModularCurves.LevelStructure.CombinationLevel
+import ModularCurves.Moduli.LevelLocusNatural
 
 /-!
 # The naive `Γ₁(N)` locus classifies naive `Γ₁(N)`-structures (WP-D1c-coarse)
@@ -306,6 +307,82 @@ theorem naiveGammaOneLocusPointsEquiv_natural (h : NIsInvertible S N)
       ⟨k ≫ w.1, by rw [Category.assoc, w.2]⟩,
     E.naiveGammaOneLocusPointsEquiv_comp_fst N h g w]
   simp only [Category.assoc]
+
+/-! ### The completion locus classifies refinements (WP-D2c-3) -/
+
+/-- A section of a base-changed curve is determined by its composite with the projection.
+The `EllipticCurve`-level form of `EllObj.section_ext_comp_fst`. -/
+theorem baseChange_section_ext {T : Scheme.{u}} {g : T ⟶ S}
+    {P Q : (E.baseChange g).Section}
+    (hfst : (P.1 : T ⟶ pullback E.π g) ≫ pullback.fst E.π g =
+      (Q.1 : T ⟶ pullback E.π g) ≫ pullback.fst E.π g) : P = Q := by
+  refine Subtype.ext (pullback.hom_ext hfst ?_)
+  show (P.1 : T ⟶ (E.baseChange g).E) ≫ (E.baseChange g).π =
+    (Q.1 : T ⟶ (E.baseChange g).E) ≫ (E.baseChange g).π
+  rw [P.2, Q.2]
+
+/-- `torsionMapSection` is injective in the torsion map: the round trip
+`sectionTorsionMap_torsionMapSection` recovers it. -/
+theorem torsionMapSection_injective {T : Scheme.{u}} (g : T ⟶ S)
+    {a b : T ⟶ E.torsion N} (ha : a ≫ E.torsionπ N = g) (hb : b ≫ E.torsionπ N = g)
+    (hab : E.torsionMapSection N g a ha = E.torsionMapSection N g b hb) : a = b := by
+  haveI := E.torsionι_isClosedImmersion N
+  haveI : Mono (E.torsionι N) := inferInstance
+  have h1 := E.torsionMapSection_fst N g a ha
+  have h2 := E.torsionMapSection_fst N g b hb
+  rw [hab] at h1
+  exact ((cancel_mono (E.torsionι N)).mp (h2.symm.trans h1)).symm
+
+/-- **(WP-D2c-3, pinning)** The first member of the level structure classified by `w` is the
+section attached to `w`'s first coordinate. -/
+theorem fullLevelLocusPointsEquiv_fst_eq (h : NIsInvertible S N) {T : Scheme.{u}}
+    (g : T ⟶ S) (w : { h' : T ⟶ E.fullLevelLocus N h // h' ≫ E.fullLevelLocusπ N h = g })
+    (a : T ⟶ E.torsion N) (ha : a ≫ E.torsionπ N = g)
+    (hw : w.1 ≫ E.fullLevelLocusFst N h = a) :
+    (E.fullLevelLocusPointsEquiv N h g w).1.1 = E.torsionMapSection N g a ha := by
+  refine E.baseChange_section_ext ?_
+  rw [E.fullLevelLocusPointsEquiv_fst_comp_fst N h g w, E.torsionMapSection_fst N g a ha,
+    ← hw]
+  rfl
+
+/-- **(WP-D2c-3)** The completion locus classifies exactly the naive full level structures
+whose first member is the given section: `T`-points over `g` correspond to full level
+structures on `E ×_S T` refining `g ≫ P`.
+
+This is the corrected statement of what sits under `Y(N) ⟶ Y₁(N)` — the earlier version,
+using the whole full-level locus, classified an *unrelated* pair. -/
+noncomputable def completionLocusClassifies (h : NIsInvertible S N) (P : S ⟶ E.torsion N)
+    (hP : P ≫ E.torsionπ N = 𝟙 S) {T : Scheme.{u}} (g : T ⟶ S) :
+    { c : T ⟶ E.completionLocus N h P // c ≫ E.completionLocusπ N h P = g } ≃
+      { PQ : { PQ : (E.baseChange g).Section × (E.baseChange g).Section //
+            (E.baseChange g).IsNaiveFullLevel N PQ.1 PQ.2 } //
+          PQ.1.1 = E.torsionMapSection N g (g ≫ P)
+            (by rw [Category.assoc, hP, Category.comp_id]) } :=
+  (E.completionLocusPointsEquiv N h P g).trans
+    { toFun := fun w =>
+        ⟨E.fullLevelLocusPointsEquiv N h g
+            ⟨w.1, E.fullLevelLocusπ_of_fst N h P hP g w.1 w.2⟩,
+          E.fullLevelLocusPointsEquiv_fst_eq N h g _ (g ≫ P) _ w.2⟩
+      invFun := fun PQ =>
+        ⟨((E.fullLevelLocusPointsEquiv N h g).symm PQ.1).1, by
+          have hfst := E.fullLevelLocusPointsEquiv_fst_eq N h g
+            ((E.fullLevelLocusPointsEquiv N h g).symm PQ.1)
+            (((E.fullLevelLocusPointsEquiv N h g).symm PQ.1).1 ≫ E.fullLevelLocusFst N h)
+            (by
+              rw [Category.assoc]
+              exact ((E.fullLevelLocusPointsEquiv N h g).symm PQ.1).2) rfl
+          rw [Equiv.apply_symm_apply] at hfst
+          refine E.torsionMapSection_injective N g
+            (by
+              rw [Category.assoc]
+              exact ((E.fullLevelLocusPointsEquiv N h g).symm PQ.1).2)
+            (by rw [Category.assoc, hP, Category.comp_id]) ?_
+          rw [← hfst]
+          exact PQ.2⟩
+      left_inv := fun w => Subtype.ext (by
+        simp only [Equiv.symm_apply_apply])
+      right_inv := fun PQ => Subtype.ext (by
+        simp only [Subtype.coe_eta, Equiv.apply_symm_apply]) }
 
 end EllipticCurve
 
