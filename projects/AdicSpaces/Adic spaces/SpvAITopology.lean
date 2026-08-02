@@ -70,90 +70,25 @@ theorem SpvAI.rationalSubset_inter (I : Ideal A) [DecidableEq A]
     Finset.mem_image, Finset.mem_product]
   constructor
   · rintro ⟨⟨hv_in, hv_t₁, hv_s₁⟩, _, hv_t₂, hv_s₂⟩
-    refine ⟨hv_in, ?_, ?_⟩
-    · -- ∀ t ∈ T₁ × T₂ products, v(t₁·t₂) ≤ v(s₁·s₂).
-      intro x hx
-      obtain ⟨⟨t₁, t₂⟩, hp, h_eq⟩ := hx
-      obtain ⟨ht₁, ht₂⟩ := hp
-      subst h_eq
-      letI : ValuativeRel A := v.toValuativeRel
-      have hwv_t₁ := (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) t₁ s₁).mp
-        (hv_t₁ t₁ ht₁)
-      have hwv_t₂ := (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) t₂ s₂).mp
-        (hv_t₂ t₂ ht₂)
-      refine (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) _ _).mpr ?_
-      rw [map_mul, map_mul]
-      exact mul_le_mul' hwv_t₁ hwv_t₂
-    · -- ¬ v(s₁·s₂) ≤ 0 follows from each ≠ 0.
-      letI : ValuativeRel A := v.toValuativeRel
-      have h_s₁_ne : ValuativeRel.valuation A s₁ ≠ 0 := by
-        intro h_eq
-        apply hv_s₁
-        refine (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) _ _).mpr ?_
-        rw [h_eq, map_zero]
-      have h_s₂_ne : ValuativeRel.valuation A s₂ ≠ 0 := by
-        intro h_eq
-        apply hv_s₂
-        refine (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) _ _).mpr ?_
-        rw [h_eq, map_zero]
-      intro h_vle
-      have h_le := (Valuation.Compatible.vle_iff_le
-        (v := ValuativeRel.valuation A) (s₁ * s₂) 0).mp h_vle
-      rw [map_zero, le_zero_iff, map_mul, mul_eq_zero] at h_le
-      rcases h_le with h₁ | h₂
-      · exact h_s₁_ne h₁
-      · exact h_s₂_ne h₂
+    refine ⟨hv_in, ?_, Spv.not_vle_mul_zero hv_s₁ hv_s₂⟩
+    -- ∀ t ∈ T₁ × T₂ products, v(t₁·t₂) ≤ v(s₁·s₂).
+    rintro _ ⟨⟨t₁, t₂⟩, ⟨ht₁, ht₂⟩, rfl⟩
+    exact Spv.vle_mul_of_vle_of_vle (hv_t₁ t₁ ht₁) (hv_t₂ t₂ ht₂)
   · rintro ⟨hv_in, hv_T, hv_s_prod⟩
-    -- Decompose: from `v(s₁·s₂) ≠ 0`, get v(s₁) ≠ 0 and v(s₂) ≠ 0.
-    letI : ValuativeRel A := v.toValuativeRel
-    have h_s₁s₂_ne : ValuativeRel.valuation A (s₁ * s₂) ≠ 0 := by
-      intro h_eq
-      apply hv_s_prod
-      refine (Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) _ _).mpr ?_
-      rw [h_eq, map_zero]
-    rw [map_mul, mul_ne_zero_iff] at h_s₁s₂_ne
-    obtain ⟨h_s₁_ne, h_s₂_ne⟩ := h_s₁s₂_ne
-    have h_s₁_n_vle : ¬ v.vle s₁ 0 := by
-      intro h_vle
-      apply h_s₁_ne
-      have := (Valuation.Compatible.vle_iff_le
-        (v := ValuativeRel.valuation A) s₁ 0).mp h_vle
-      rw [map_zero, le_zero_iff] at this
-      exact this
-    have h_s₂_n_vle : ¬ v.vle s₂ 0 := by
-      intro h_vle
-      apply h_s₂_ne
-      have := (Valuation.Compatible.vle_iff_le
-        (v := ValuativeRel.valuation A) s₂ 0).mp h_vle
-      rw [map_zero, le_zero_iff] at this
-      exact this
-    refine ⟨⟨hv_in, ?_, h_s₁_n_vle⟩, hv_in, ?_, h_s₂_n_vle⟩
+    -- From `v(s₁·s₂) ≠ 0`, get v(s₁) ≠ 0 and v(s₂) ≠ 0, then cancel the spare factor.
+    have h_s₁ : ¬ v.vle s₁ 0 := Spv.not_vle_zero_left_of_mul hv_s_prod
+    have h_s₂ : ¬ v.vle s₂ 0 := Spv.not_vle_zero_right_of_mul hv_s_prod
+    refine ⟨⟨hv_in, ?_, h_s₁⟩, hv_in, ?_, h_s₂⟩
     · -- ∀ t₁ ∈ T₁, v(t₁) ≤ v(s₁). Use s₂ ∈ T₂: v(t₁·s₂) ≤ v(s₁·s₂), cancel v(s₂).
       intro t₁ ht₁
-      have ht_in : ∃ a : A × A, (a.1 ∈ T₁ ∧ a.2 ∈ T₂) ∧ a.1 * a.2 = t₁ * s₂ :=
-        ⟨(t₁, s₂), ⟨ht₁, hs₂_in⟩, rfl⟩
-      have h_prod : v.vle (t₁ * s₂) (s₁ * s₂) := hv_T (t₁ * s₂) ht_in
-      have h_le := (Valuation.Compatible.vle_iff_le
-        (v := ValuativeRel.valuation A) (t₁ * s₂) (s₁ * s₂)).mp h_prod
-      rw [map_mul, map_mul] at h_le
-      refine (Valuation.Compatible.vle_iff_le
-        (v := ValuativeRel.valuation A) t₁ s₁).mpr ?_
-      have h_s₂_pos : 0 < ValuativeRel.valuation A s₂ := zero_lt_iff.mpr h_s₂_ne
-      rw [mul_comm _ (ValuativeRel.valuation A s₂),
-        mul_comm _ (ValuativeRel.valuation A s₂)] at h_le
-      exact (mul_le_mul_iff_right₀ h_s₂_pos).mp h_le
-    · -- ∀ t₂ ∈ T₂, v(t₂) ≤ v(s₂). Symmetric using s₁ ∈ T₁.
+      exact Spv.vle_of_vle_mul_right
+        (hv_T (t₁ * s₂) ⟨(t₁, s₂), ⟨ht₁, hs₂_in⟩, rfl⟩) h_s₂
+    · -- ∀ t₂ ∈ T₂, v(t₂) ≤ v(s₂). Symmetric, cancelling v(s₁) on the left.
       intro t₂ ht₂
-      have ht_in : ∃ a : A × A, (a.1 ∈ T₁ ∧ a.2 ∈ T₂) ∧ a.1 * a.2 = s₁ * t₂ :=
-        ⟨(s₁, t₂), ⟨hs₁_in, ht₂⟩, rfl⟩
-      have h_prod : v.vle (s₁ * t₂) (s₁ * s₂) := hv_T (s₁ * t₂) ht_in
-      have h_le := (Valuation.Compatible.vle_iff_le
-        (v := ValuativeRel.valuation A) (s₁ * t₂) (s₁ * s₂)).mp h_prod
-      rw [map_mul, map_mul] at h_le
-      refine (Valuation.Compatible.vle_iff_le
-        (v := ValuativeRel.valuation A) t₂ s₂).mpr ?_
-      have h_s₁_pos : 0 < ValuativeRel.valuation A s₁ := zero_lt_iff.mpr h_s₁_ne
-      exact (mul_le_mul_iff_right₀ h_s₁_pos).mp h_le
+      have h_prod : v.vle (s₁ * t₂) (s₁ * s₂) :=
+        hv_T (s₁ * t₂) ⟨(s₁, t₂), ⟨hs₁_in, ht₂⟩, rfl⟩
+      rw [mul_comm s₁ t₂, mul_comm s₁ s₂] at h_prod
+      exact Spv.vle_of_vle_mul_right h_prod h_s₁
 
 /-- **`SpvAI.rationalSubset` is contained in `SpvAI`.** Trivial from
 the intersection definition. -/

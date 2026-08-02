@@ -167,29 +167,11 @@ theorem restrictToConvexBounded_le_reflect
 
 variable [TopologicalSpace A]
 
-/-- `vle`-bridge for `v` via its canonical valuation. -/
-theorem vle_iff_canonical (v : Spv A) (g h : A) :
-    v.vle g h ↔
-      (letI : ValuativeRel A := v.toValuativeRel
-       ValuativeRel.valuation A g ≤ ValuativeRel.valuation A h) := by
-  letI : ValuativeRel A := v.toValuativeRel
-  exact Valuation.Compatible.vle_iff_le (v := ValuativeRel.valuation A) g h
+-- `vle_iff_canonical`, `vle_zero_iff_canonical` and `vle_trans'` moved to
+-- `ValuationSpectrumCompact` — they need no topology, and this file is downstream of
+-- `SpvAITopology`, which was inlining copies of them for want of access.
 
-/-- `v(a) = 0` in canonical-valuation form. -/
-theorem vle_zero_iff_canonical (v : Spv A) (a : A) :
-    v.vle a 0 ↔
-      (letI : ValuativeRel A := v.toValuativeRel
-       ValuativeRel.valuation A a = 0) := by
-  letI : ValuativeRel A := v.toValuativeRel
-  rw [vle_iff_canonical]
-  simp
-
-/-- Transitivity of `vle` (through the canonical valuation). -/
-theorem vle_trans' {v : Spv A} {a b c : A} (h1 : v.vle a b) (h2 : v.vle b c) :
-    v.vle a c := by
-  rw [vle_iff_canonical] at h1 h2 ⊢
-  exact le_trans h1 h2
-
+omit [TopologicalSpace A] in
 /-- `v(I) = 0` puts `v` in `Spv(A, I)` (the cofinality disjunct holds vacuously on zero
 values). -/
 theorem isInSpvAI_of_forall_vle_zero {v : Spv A} {I : Ideal A}
@@ -279,12 +261,14 @@ noncomputable def restrictIdealSingleSpv (v : Spv A) (g : A) : Spv A :=
   if hg : (ValuativeRel.valuation A) g = 0 then v
   else ofValuation ((ValuativeRel.valuation A).restrictIdealSingle g hg)
 
+omit [TopologicalSpace A] in
 theorem restrictIdealSingleSpv_of_zero {v : Spv A} {g : A} (hg : v.vle g 0) :
     restrictIdealSingleSpv v g = v := by
   letI : ValuativeRel A := v.toValuativeRel
   have h0 : (ValuativeRel.valuation A) g = 0 := (vle_zero_iff_canonical v g).mp hg
   simp only [restrictIdealSingleSpv, dif_pos h0]
 
+omit [TopologicalSpace A] in
 theorem restrictIdealSingleSpv_of_ne {v : Spv A} {g : A} (hg : ¬ v.vle g 0) :
     restrictIdealSingleSpv v g =
       (letI : ValuativeRel A := v.toValuativeRel
@@ -295,6 +279,7 @@ theorem restrictIdealSingleSpv_of_ne {v : Spv A} {g : A} (hg : ¬ v.vle g 0) :
     fun h => hg ((vle_zero_iff_canonical v g).mpr h)
   simp only [restrictIdealSingleSpv, dif_neg h0]
 
+omit [TopologicalSpace A] in
 /-- The principal retraction lands in `Spv(A, (g))` — faithfully
 (`ofValuation_restrictIdealSingle_isInSpvAI`), no `cGammaIdeal` sorry. -/
 theorem restrictIdealSingleSpv_mem_SpvAI (v : Spv A) (g : A) :
@@ -322,6 +307,7 @@ theorem restrictIdealSingleSpv_eq_self_of_mem {v : Spv A} {g : A}
       (restrictToConvexBounded_isEquiv_of_univ _ _ _
         (cGammaSingle_univ_of_isInSpvAI _ hv))).trans (ofValuation_valuation v)
 
+omit [TopologicalSpace A] in
 /-- **Wedhorn 7.5(iii), principal profile form** (`wedhorn.txt:2862-2872`): for every
 side-condition coordinate `p` and every `v : Spv A`, the `p`-profile coordinate of `v`
 agrees with that of the principal retraction. -/

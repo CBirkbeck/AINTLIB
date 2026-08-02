@@ -38,51 +38,10 @@ namespace ValuationSpectrum
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 
-/-! ### `Spv`-level multiplicative toolkit -/
-
-/-- Multiplicativity of `vle`: `v(a) ≤ v(a')` and `v(b) ≤ v(b')` give
-`v(ab) ≤ v(a'b')`. -/
-theorem Spv.vle_mul_of_vle_of_vle {v : Spv A} {a a' b b' : A}
-    (ha : v.vle a a') (hb : v.vle b b') : v.vle (a * b) (a' * b') := by
-  rw [vle_iff_canonical] at ha hb ⊢
-  letI : ValuativeRel A := v.toValuativeRel
-  rw [map_mul, map_mul]
-  exact mul_le_mul' ha hb
-
-/-- A product with a zero factor has value zero. -/
-theorem Spv.vle_mul_zero_left {v : Spv A} {a : A} (b : A) (ha : v.vle a 0) :
-    v.vle (a * b) 0 := by
-  rw [vle_zero_iff_canonical] at ha ⊢
-  letI : ValuativeRel A := v.toValuativeRel
-  rw [map_mul, ha, zero_mul]
-
-/-- A product of nonvanishing values does not vanish. -/
-theorem Spv.not_vle_mul_zero {v : Spv A} {a b : A} (ha : ¬ v.vle a 0)
-    (hb : ¬ v.vle b 0) : ¬ v.vle (a * b) 0 := by
-  rw [vle_zero_iff_canonical] at ha hb ⊢
-  letI : ValuativeRel A := v.toValuativeRel
-  rw [map_mul]
-  exact mul_ne_zero ha hb
-
-/-- The left factor of a nonvanishing product does not vanish. -/
-theorem Spv.not_vle_zero_left_of_mul {v : Spv A} {a b : A}
-    (h : ¬ v.vle (a * b) 0) : ¬ v.vle a 0 :=
-  fun ha => h (Spv.vle_mul_zero_left b ha)
-
-/-- The right factor of a nonvanishing product does not vanish. -/
-theorem Spv.not_vle_zero_right_of_mul {v : Spv A} {a b : A}
-    (h : ¬ v.vle (a * b) 0) : ¬ v.vle b 0 :=
-  fun hb => h (mul_comm a b ▸ Spv.vle_mul_zero_left a hb)
-
-/-- **Cancellation** (the slot-comparison engine of Kedlaya Lemma 1.6.8):
-`v(ac) ≤ v(bc)` and `v(c) ≠ 0` give `v(a) ≤ v(b)`. -/
-theorem Spv.vle_of_vle_mul_right {v : Spv A} {a b c : A}
-    (h : v.vle (a * c) (b * c)) (hc : ¬ v.vle c 0) : v.vle a b := by
-  rw [vle_iff_canonical] at h ⊢
-  rw [vle_zero_iff_canonical] at hc
-  letI : ValuativeRel A := v.toValuativeRel
-  rw [map_mul, map_mul] at h
-  exact le_of_mul_le_mul_right h (lt_of_le_of_ne zero_le (Ne.symm hc))
+-- The `Spv`-level multiplicative toolkit (`Spv.vle_mul_of_vle_of_vle`,
+-- `Spv.not_vle_mul_zero`, `Spv.vle_of_vle_mul_right`, …) moved to
+-- `ValuationSpectrumCompact`: it needs no topology, and `SpvAITopology` — far upstream
+-- of this file — was inlining copies of it for want of access.
 
 /-! ### The maximum argument (Kedlaya 1.6.2) -/
 
