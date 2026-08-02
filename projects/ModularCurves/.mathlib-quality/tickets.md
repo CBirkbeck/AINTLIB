@@ -34008,3 +34008,33 @@ With D2c-b1 the fibre description becomes a statement about scheme points, Finis
 
 **This is the single remaining mathematical step in the D-chain.** Everything else —
 WP-D1a, D1b, D1c-construction, D1c-rel, D1c-coarse, D2a, D2b — is done and axiom-verified.
+
+### [WP-D2c-b1] **REJECTED — the statement is FALSE.** (2026-08-02)
+
+Before proving "an `EllHom` is determined by its `baseHom`", I looked for a counterexample.
+There is one, and it is immediate:
+
+Take `X = Y` and `baseHom = 𝟙 X.base`. Then `⟨𝟙, _, [-1], _, _⟩` is a valid `EllHom X X`,
+where `[-1]` is inversion on the curve:
+* `[-1] ≫ π = π ≫ 𝟙` — inversion is a morphism over the base ✔
+* the square is cartesian — both `[-1]` and `𝟙` are isomorphisms ✔
+* `zero_w` — inversion fixes the zero section ✔
+
+and it is **not** the identity `EllHom`. So `baseHom` does not determine `EllHom`; the
+`top`-component is only pinned up to `Aut(E, 0)`, which is nontrivial. Rigidity of elliptic
+curves says a zero-preserving morphism is a homomorphism — it does **not** say the only such
+automorphism is the identity.
+
+**Why the earlier reasoning went wrong**: I conflated rigidity of the *curve* with rigidity
+of the *moduli problem*. `gammaFullNaive_rigid` says automorphisms preserving a **level
+structure** are trivial; that is a statement about `(E, P, Q)`, not about `(E, 0)`.
+
+#### The corrected bridge
+Do not go through `EllObj`-morphisms at all. Both `gammaFullNaive_affineOverEll` and (as of
+today) `gammaOneNaive_affineOverEll` provide relative data whose `eqv` is **already
+scheme-indexed**:
+`{ h : T ⟶ Z // h ≫ f = g } ≃ P.obj (op (X.pullbackAlong g))`, for `g : T ⟶ X.base` a
+morphism of **schemes** (`Moduli/EllCategory.lean:198`). Instantiating both at the universal
+object over `Y₁(N)` gives the comparison directly at the scheme level, with no `EllHom`
+rigidity needed anywhere. `yFullToYOneFibreEquiv` remains correct and useful as the
+*functorial* statement; it is simply not the right handle for a scheme-level property.
