@@ -1,1 +1,1 @@
-FOCUS: _symplectic + _restrict PROVED (DS4 10->8). Root build then commit.
+FOCUS: DS4 at 7 sorries (_restrict,_symplectic,_zsmul_right derived). Root build + commit.

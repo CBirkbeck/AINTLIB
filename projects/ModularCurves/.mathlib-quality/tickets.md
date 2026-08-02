@@ -33278,3 +33278,40 @@ algebra.
 `ModularCurve/YRho.lean:2982` has a `Scheme.{0}`-specialised `weilPairingEval_congr`. The
 universe-polymorphic one now lives in `WeilPairing/Basic.lean`; YRho's two call sites
 (3022, 3119) could delegate to it. Left alone here — YRho is 8000+ lines of live WIP.
+
+## DS4 register: 10 → **7** sorries. It is now at its mathematical minimum.
+
+Third entry closed today: **`weilPairingEval_zsmul_right`** (2 call sites). Bilinearity in
+the second slot already forces it. The `mod N` in the statement turns out not to be an extra
+hypothesis but a *consequence*: `y` is `N`-torsion, so `a • y = (a % N) • y` outright, and
+`a % N ≥ 0`, which reduces the integer law to a natural-number induction. Supporting lemmas
+added: `point_zero_killedBy`, `weilPairingEval_zero_right` (`e(x,0) = e(x,0)²` and it is a
+unit), `weilPairingEval_nsmul_right`.
+
+### The register, final form
+
+| entry | status |
+|---|---|
+| `weilPairing` (def) | **sorry** — the construction |
+| `weilPairing_over` | **sorry** — the construction |
+| `weilPairingEval_add_left` | **sorry** — bilinearity, slot 1 |
+| `weilPairingEval_add_right` | **sorry** — bilinearity, slot 2 |
+| `weilPairingEval_self` | **sorry** — alternation |
+| `weilPairingEval_nondegenerate` | **sorry** — nondegeneracy |
+| `weilPairingEval_mul` | sorry, **zero consumers** — off the path |
+| `weilPairingEval_restrict` | ✅ derived (from `_over`) |
+| `weilPairingEval_symplectic` | ✅ derived (Silverman III.8.1 a+b+c) |
+| `weilPairingEval_zsmul_right` | ✅ derived (from `_add_right`) |
+
+The six live entries are exactly the pairing's defining properties — the pairing, that it
+lives over `S`, bilinearity in each slot, alternation, nondegeneracy. **None is derivable
+from the others**, so no further reduction of this kind is available: everything left needs
+the construction. Anything a future route proves about `weilPairing` now propagates to all
+ten entries through these three derivations.
+
+### Consequences for the plan
+WP-C3…C8 shrinks from six computational tickets to **four** (`_add_left`, `_add_right`,
+`_self`, `_nondegenerate`), and `_symplectic` — which WP-A4's det twist was aimed at, and
+which was the single most-consumed entry — is already discharged for whatever construction
+lands. The critical path is unchanged and now completely unambiguous: **the root**
+(WP-B1…B4) → `WeilPairingLocalData` → WP-C2 → the four → DS4 closed.

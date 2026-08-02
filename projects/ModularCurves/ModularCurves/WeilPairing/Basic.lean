@@ -66,56 +66,6 @@ noncomputable def weilPairingEval {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T �
       rw [Category.assoc, E.weilPairing_over N, ← Category.assoc,
         pullback.lift_fst, E.pointToTorsion_torsionπ]⟩
 
-/-- **(T-C2 = KM 2.8, bilinearity)** `e_N(x + x', y) = e_N(x, y) · e_N(x', y)` on
-`T`-points, where the addition is the registered group structure (DS2) and the raw
-kill-by-`N` hypotheses transport by `point_add_killedBy` (T-A6d).
-Source: KM 2.8.2; Silverman III.8.1(a). -/
-theorem weilPairingEval_add_left {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
-    (x x' y : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
-    (hx' : x'.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
-    (hxx' : (x + x').1 ≫ E.mulByHom N = g ≫ E.zero) :
-    (E.weilPairingEval (x + x') y hxx' hy : Γ(T, ⊤)) =
-      E.weilPairingEval x y hx hy * E.weilPairingEval x' y hx' hy := by sorry
-
-/-- **(T-C2-R = KM 2.8.2, bilinearity in the second slot)** The mirror of
-`weilPairingEval_add_left`: `e_N(x, y + y') = e_N(x, y) · e_N(x, y')` on
-`T`-points. Same source and status as the left law — the DS4 bilinearity
-covers both slots (KM 2.8.2; Silverman III.8.1(a)). -/
-theorem weilPairingEval_add_right {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
-    (x y y' : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
-    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) (hy' : y'.1 ≫ E.mulByHom N = g ≫ E.zero)
-    (hyy' : (y + y').1 ≫ E.mulByHom N = g ≫ E.zero) :
-    (E.weilPairingEval x (y + y') hx hyy' : Γ(T, ⊤)) =
-      E.weilPairingEval x y hx hy * E.weilPairingEval x y' hx hy' := by sorry
-
-/-- **(T-C2-R′ = KM 2.8.2, integer scalars in the second slot)** The power law
-`e_N(x, a • y) = e_N(x, y)^(a mod N)` (exponent taken as the canonical
-non-negative representative), the iterated form of the right bilinearity.
-Source: KM 2.8.2; Silverman III.8.1(a). -/
-theorem weilPairingEval_zsmul_right {N : ℕ} [NeZero N] {T : Scheme.{u}}
-    {g : T ⟶ S} (x y : E.Point g) (a : ℤ)
-    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
-    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
-    (hay : (a • y).1 ≫ E.mulByHom N = g ≫ E.zero) :
-    (E.weilPairingEval x (a • y) hx hay : Γ(T, ⊤)) =
-      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat) := by sorry
-
-/-- **(T-C2′ = KM 2.8, alternating)** `e_N(x, x) = 1`.
-Source: KM 2.8; Silverman III.8.1(b). -/
-theorem weilPairingEval_self {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
-    (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
-    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by sorry
-
-/-! ### Consequences of the register (proved, not registered)
-
-The four bilinearity/alternation entries above generate more of the pairing's algebra than
-the register admits. Everything in this section is **derived**: the torsion-closure lemmas
-the bilinearity docstrings already refer to as `point_add_killedBy`, the first-slot power
-law that mirrors the registered second-slot one, and — most importantly — the symplectic
-formula `weilPairingEval_symplectic`, which is the register's most-consumed entry
-(11 call sites in `RhoPairingBridge`, `RhoSections` and `YRho`) and needs no new input.
--/
-
 /-- **(T-A6d closure)** The raw kill-by-`N` condition is closed under addition of points.
 This is the lemma the bilinearity specifications' docstrings call `point_add_killedBy`;
 it was referenced but never stated. -/
@@ -143,6 +93,123 @@ theorem weilPairingEval_congr {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S
     (hx' : x'.1 ≫ E.mulByHom N = g ≫ E.zero) (hy' : y'.1 ≫ E.mulByHom N = g ≫ E.zero) :
     (E.weilPairingEval x y hx hy : Γ(T, ⊤)) = E.weilPairingEval x' y' hx' hy' := by
   subst ex; subst ey; rfl
+
+/-- The zero point is `N`-torsion. -/
+theorem point_zero_killedBy {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} :
+    ((0 : E.Point g)).1 ≫ E.mulByHom N = g ≫ E.zero :=
+  (E.smul_eq_zero_iff_comp_mulByHom g N 0).mp (smul_zero _)
+
+/-- **(T-C2 = KM 2.8, bilinearity)** `e_N(x + x', y) = e_N(x, y) · e_N(x', y)` on
+`T`-points, where the addition is the registered group structure (DS2) and the raw
+kill-by-`N` hypotheses transport by `point_add_killedBy` (T-A6d).
+Source: KM 2.8.2; Silverman III.8.1(a). -/
+theorem weilPairingEval_add_left {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x x' y : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hx' : x'.1 ≫ E.mulByHom N = g ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hxx' : (x + x').1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval (x + x') y hxx' hy : Γ(T, ⊤)) =
+      E.weilPairingEval x y hx hy * E.weilPairingEval x' y hx' hy := by sorry
+
+/-- **(T-C2-R = KM 2.8.2, bilinearity in the second slot)** The mirror of
+`weilPairingEval_add_left`: `e_N(x, y + y') = e_N(x, y) · e_N(x, y')` on
+`T`-points. Same source and status as the left law — the DS4 bilinearity
+covers both slots (KM 2.8.2; Silverman III.8.1(a)). -/
+theorem weilPairingEval_add_right {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x y y' : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) (hy' : y'.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hyy' : (y + y').1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x (y + y') hx hyy' : Γ(T, ⊤)) =
+      E.weilPairingEval x y hx hy * E.weilPairingEval x y' hx hy' := by sorry
+
+/-- Pairing with the zero point is trivial — from bilinearity in the second slot alone
+(`e(x,0) = e(x,0)²` and `e(x,0)` is a unit). -/
+theorem weilPairingEval_zero_right {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x (0 : E.Point g) hx E.point_zero_killedBy : Γ(T, ⊤)) = 1 := by
+  have h := E.weilPairingEval_add_right x (0 : E.Point g) (0 : E.Point g) hx
+    E.point_zero_killedBy E.point_zero_killedBy
+    (by rw [add_zero]; exact E.point_zero_killedBy)
+  rw [E.weilPairingEval_congr (x := x) (x' := x) (y := (0 : E.Point g) + 0)
+      (y' := (0 : E.Point g)) rfl (add_zero _) _ _ hx E.point_zero_killedBy] at h
+  have hunit : IsUnit (E.weilPairingEval x (0 : E.Point g) hx
+      E.point_zero_killedBy : Γ(T, ⊤)) :=
+    isUnit_of_pow_eq_one (E.weilPairingEval x (0 : E.Point g) hx E.point_zero_killedBy).2
+  refine (hunit.mul_left_inj).mp ?_
+  rw [one_mul]
+  exact h.symm
+
+/-- The power law in the second slot for natural-number scalars, by induction from
+bilinearity. -/
+theorem weilPairingEval_nsmul_right {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x y : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) (n : ℕ) :
+    (E.weilPairingEval x ((n : ℤ) • y) hx (E.point_zsmul_killedBy (n : ℤ) hy) :
+        Γ(T, ⊤)) =
+      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) ^ n := by
+  induction n with
+  | zero =>
+      rw [pow_zero]
+      refine Eq.trans ?_ (E.weilPairingEval_zero_right x hx)
+      exact E.weilPairingEval_congr rfl (by rw [Nat.cast_zero, zero_smul]) _ _ hx
+        E.point_zero_killedBy
+  | succ n ih =>
+      have hsplit : ((n + 1 : ℕ) : ℤ) • y = (n : ℤ) • y + y := by
+        push_cast
+        rw [add_smul, one_smul]
+      have hstep := E.weilPairingEval_add_right x ((n : ℤ) • y) y hx
+        (E.point_zsmul_killedBy (n : ℤ) hy) hy
+        (E.point_add_killedBy (E.point_zsmul_killedBy (n : ℤ) hy) hy)
+      calc (E.weilPairingEval x (((n + 1 : ℕ) : ℤ) • y) hx
+              (E.point_zsmul_killedBy _ hy) : Γ(T, ⊤))
+          = (E.weilPairingEval x ((n : ℤ) • y + y) hx
+              (E.point_add_killedBy (E.point_zsmul_killedBy (n : ℤ) hy) hy) : Γ(T, ⊤)) :=
+            E.weilPairingEval_congr rfl hsplit _ _ hx _
+        _ = _ := hstep
+        _ = (E.weilPairingEval x y hx hy : Γ(T, ⊤)) ^ (n + 1) := by
+            rw [ih, pow_succ]
+
+/-- **(T-C2-R′ = KM 2.8.2, integer scalars in the second slot)** The power law
+`e_N(x, a • y) = e_N(x, y)^(a mod N)` (exponent taken as the canonical
+non-negative representative), the iterated form of the right bilinearity.
+Source: KM 2.8.2; Silverman III.8.1(a).
+
+**PROVED (2026-08-02) — no longer a register entry.** Bilinearity in the second slot
+already forces it. The `mod N` in the statement is not an extra hypothesis but a
+consequence: `y` is `N`-torsion, so `a • y = (a % N) • y` outright, and `a % N` is
+non-negative, which reduces the integer law to the natural-number induction. -/
+theorem weilPairingEval_zsmul_right {N : ℕ} [NeZero N] {T : Scheme.{u}}
+    {g : T ⟶ S} (x y : E.Point g) (a : ℤ)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hay : (a • y).1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x (a • y) hx hay : Γ(T, ⊤)) =
+      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat) := by
+  have hNy : (N : ℤ) • y = 0 := (E.smul_eq_zero_iff_comp_mulByHom g N y).mpr hy
+  have hnn : (0 : ℤ) ≤ a % (N : ℤ) :=
+    Int.emod_nonneg a (Int.natCast_ne_zero.mpr (NeZero.ne N))
+  -- `y` is `N`-torsion, so only `a mod N` matters — and that is `≥ 0`
+  have hred : a • y = (((a % (N : ℤ)).toNat : ℕ) : ℤ) • y := by
+    rw [Int.toNat_of_nonneg hnn]
+    conv_lhs => rw [← Int.mul_ediv_add_emod a (N : ℤ)]
+    rw [add_smul, mul_smul, smul_comm, hNy, smul_zero, zero_add]
+  refine Eq.trans ?_ (E.weilPairingEval_nsmul_right x y hx hy ((a % (N : ℤ)).toNat))
+  exact E.weilPairingEval_congr rfl hred _ _ hx _
+
+/-- **(T-C2′ = KM 2.8, alternating)** `e_N(x, x) = 1`.
+Source: KM 2.8; Silverman III.8.1(b). -/
+theorem weilPairingEval_self {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x x hx hx : Γ(T, ⊤)) = 1 := by sorry
+
+/-! ### Consequences of the register (proved, not registered)
+
+The four bilinearity/alternation entries above generate more of the pairing's algebra than
+the register admits. Everything in this section is **derived**: the torsion-closure lemmas
+the bilinearity docstrings already refer to as `point_add_killedBy`, the first-slot power
+law that mirrors the registered second-slot one, and — most importantly — the symplectic
+formula `weilPairingEval_symplectic`, which is the register's most-consumed entry
+(11 call sites in `RhoPairingBridge`, `RhoSections` and `YRho`) and needs no new input.
+-/
 
 /-- **Antisymmetry** `e_N(x,y) · e_N(y,x) = 1`, from alternation applied to `x + y` and
 bilinearity in both slots. Silverman III.8.1(c) derives antisymmetry from (a) and (b) in
