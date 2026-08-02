@@ -48,6 +48,7 @@ import ModularCurves.EllipticCurve.SectionRigidity
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassCover
 import ModularCurves.EllipticCurve.WeierstrassModel
+import ModularCurves.ForMathlib.RepresentableByMap
 import ModularCurves.ForMathlib.ClosurePairCard
 import ModularCurves.ForMathlib.AcyclicAffineOpenCover
 import ModularCurves.ForMathlib.AffineOpenImmersionCover
@@ -161,6 +162,7 @@ import ModularCurves.LevelStructure.Basic
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.Incidence
+import ModularCurves.ModularCurve.YFullToYOne
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.ModularCurve.YOneAtlasClassify

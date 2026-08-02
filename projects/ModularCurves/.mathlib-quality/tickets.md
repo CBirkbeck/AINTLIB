@@ -33547,3 +33547,31 @@ Both axiom-verified. Note `ModuliProblem R` is `(EllObj R)ᵒᵖ ⥤ Type u`, so
 Then WP-D2 (`Etale ≫ Smooth` + `smooth_affine_of_representableBy`) closes
 `YFull.exists_representing_smooth_affine`, and WP-D3 gives normality ⟹ the universal root
 ⟹ DS4.
+
+## [WP-D1c, construction half] COMPLETE (2026-08-02) — axiom-verified
+
+The morphism `Y(N) ⟶ Y₁(N)` now exists.
+
+* `ForMathlib/RepresentableByMap.lean` (new) — mathlib has `RepresentableBy.ofIso` and
+  `RepresentableBy.uniqueUpToIso` but **not** the one-directional statement, so it is proved
+  here in general: `Functor.RepresentableBy.map` builds `YF ⟶ YG` from a natural
+  transformation `F ⟶ G` between representable functors, with the characterising property
+  `homEquiv_comp_map` (precomposing = applying `α`), plus `homEquiv_map` and `map_id`.
+* `ModularCurve/YFullToYOne.lean` (new) — `yFullToYOne`, its characterising property
+  `yFullToYOne_homEquiv` (composing forgets `Q`), and `nonempty_yFullToYOne` for the
+  Tate-point model whose smoothness is known.
+
+The representations are **arguments, not choices**, so the definition carries no hidden
+`Classical.choice` and applies to whichever representing objects a caller holds.
+
+### What is left of WP-D1c
+Exactly one statement: **`yFullToYOne` is finite étale.** Sketch: the fibre over a
+`Γ₁(N)`-structure `P` is the set of `Q` completing `P` to a basis of `E[N]` — a clopen
+subscheme of `E[N]`, cut out by the same non-degeneracy conditions that
+`fullLevelLocus` uses one level up. The model to copy is
+`naiveLevelThree_relativelyRepresentable_finiteEtale` (`Moduli/Bootstrap.lean:122`), whose
+route is `fullLevelLocusπ_isFinite` + `fullLevelLocusπ_etale`.
+
+Then **WP-D2**: `Smooth (yFullToYOne ≫ Y₁(N).structMap)` by `Etale ≫ Smooth`, and
+`smooth_affine_of_representableBy` transports it to every representing object — closing
+`YFull.exists_representing_smooth_affine`, which has been `sorry` since T-E9.
