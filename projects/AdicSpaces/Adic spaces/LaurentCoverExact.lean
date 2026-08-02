@@ -1477,6 +1477,45 @@ private theorem cRestr_of_restricted :
     · by_contra h1
       exact he (hVU (hbad_bound e (Or.inr (by omega))))
 
+
+/-- The positive-diagonal series `gₙ = ∑ₖ p_{n+k, k}`, as an element of `A⟨X⟩`. -/
+private noncomputable def gSeries : ↥(TateAlgebra A) :=
+  ⟨fun s => ∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val,
+    gRestr_of_restricted htop p⟩
+
+/-- The negative-diagonal series `h₀ = 0`, `hₘ = ∑ₖ p_{k, m+k}`. -/
+private noncomputable def hSeries : ↥(TateAlgebra A) :=
+  ⟨fun s => if s 0 = 0 then 0
+            else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val,
+    hRestr_of_restricted htop p⟩
+
+/-- The Bézout witness `c(i,j) = -(∑ₖ p_{i+1+k, j+1+k})` (negated diagonal tail sums). -/
+private noncomputable def cSeries : ↥(TateAlgebra₂ A) :=
+  ⟨fun e => -(∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val),
+    cRestr_of_restricted htop p⟩
+
+private lemma coeff_cSeries (a b : ℕ) :
+    MvPowerSeries.coeff (idx a b) (cSeries htop p).val =
+      -(∑' k, MvPowerSeries.coeff (idx (a + 1 + k) (b + 1 + k)) p.val) := by
+  change -(∑' k, MvPowerSeries.coeff (idx ((idx a b) 0 + 1 + k)
+    ((idx a b) 1 + 1 + k)) p.val) = _
+  simp only [idx_apply_zero, idx_apply_one]
+
+private lemma coeff_gSeries (n : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) (gSeries htop p).val =
+      ∑' k, MvPowerSeries.coeff (idx (n + k) k) p.val := by
+  change (fun s => ∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val)
+    (Finsupp.single (0 : Fin 1) n) = _
+  simp [Finsupp.single_eq_same]
+
+private lemma coeff_hSeries (m : ℕ) :
+    MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) (hSeries htop p).val =
+      if m = 0 then 0 else ∑' k, MvPowerSeries.coeff (idx k (m + k)) p.val := by
+  change (fun s => if s 0 = 0 then 0
+    else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val)
+    (Finsupp.single (0 : Fin 1) m) = _
+  simp [Finsupp.single_eq_same]
+
 end LambdaSurjectiveHelpers
 
 /-- **`lambdaMap` surjectivity** for complete nonarchimedean rings: every element
@@ -1507,107 +1546,51 @@ theorem lambdaMap_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space A] 
     (htop : ‹TopologicalSpace A› = UniformSpace.toTopologicalSpace) :
     Function.Surjective (lambdaMap (A := A)) := by
   intro ℓ
-  -- Step 1: Lift `ℓ` to a bivariate restricted series `p`.
+  -- Step 1: Lift `ℓ` to a bivariate restricted series `p`; `gSeries`/`hSeries` are its
+  -- positive/negative diagonal sums and `cSeries` the Bézout witness.
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective ℓ
-  -- Step 2: Assemble `g`, `h` from diagonal sums of `p` (restrictedness via helpers).
-  --   g_n = ∑_{k≥0} p_{n+k, k}    (positive diagonals);
-  --   h_0 = 0, h_m = ∑_{k≥0} p_{k, m+k}  (negative diagonals).
-  set g : ↥(TateAlgebra A) :=
-    ⟨fun s => ∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val,
-      gRestr_of_restricted htop p⟩
-  set h : ↥(TateAlgebra A) :=
-    ⟨fun s => if s 0 = 0 then 0
-              else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val,
-      hRestr_of_restricted htop p⟩
-  -- Step 3: Produce the preimage `(g, -h)` and reduce to an ideal membership.
-  refine ⟨(g, -h), ?_⟩
-  change posEmbHom g - negEmbHom (-h) = mkHom p
+  refine ⟨(gSeries htop p, -hSeries htop p), ?_⟩
+  change posEmbHom (gSeries htop p) - negEmbHom (-(hSeries htop p)) = mkHom p
   rw [map_neg, sub_neg_eq_add]
-  -- Reduce `posEmbHom g + negEmbHom h = mkHom p` to an ideal membership:
   -- posEmbHom = mkHom ∘ posIncl and negEmbHom = mkHom ∘ negIncl, so it suffices that
-  -- posIncl g + negIncl h - p ∈ laurentIdeal A = (XY - 1).
-  change mkHom (posIncl g) + mkHom (negIncl h) = mkHom p
+  -- posIncl g + negIncl h - p lies in `laurentIdeal A = (XY - 1)`.
+  change mkHom (posIncl (gSeries htop p)) + mkHom (negIncl (hSeries htop p)) = mkHom p
   rw [← map_add]
   apply Ideal.Quotient.eq.mpr
-  -- Goal: posIncl g + negIncl h - p ∈ laurentIdeal A = Ideal.span {XY_sub_one}
   rw [laurentIdeal, Ideal.mem_span_singleton']
-  -- Step 4: The witness c(i,j) = -(∑_k p_{i+1+k, j+1+k}) (negated diagonal tail sums);
-  -- its restrictedness and the head/tail tsum split `tsum_diag_head` come from the helpers.
-  let c : ↥(TateAlgebra₂ A) :=
-    ⟨fun e => -(∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val),
-      cRestr_of_restricted htop p⟩
-  -- The witness: c * XY_sub_one = posIncl g + negIncl h - p
-  -- Helper: c.val at idx a b = -(∑' k, p(a+1+k, b+1+k)).
-  have hc_val : ∀ a b, MvPowerSeries.coeff (idx a b) c.val =
-      -(∑' k, MvPowerSeries.coeff (idx (a + 1 + k) (b + 1 + k)) p.val) := by
-    intro a b; change -(∑' k, MvPowerSeries.coeff (idx ((idx a b) 0 + 1 + k)
-      ((idx a b) 1 + 1 + k)) p.val) = _
-    simp only [idx_apply_zero, idx_apply_one]
-  -- Helper: g.val at single 0 n = ∑' k, p(n+k, k).
-  have hg_val : ∀ n, MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val =
-      ∑' k, MvPowerSeries.coeff (idx (n + k) k) p.val := by
-    intro n; change (fun s => ∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val)
-      (Finsupp.single (0 : Fin 1) n) = _
-    simp [Finsupp.single_eq_same]
-  -- Helper: h.val at single 0 m = if m = 0 then 0 else ∑' k, p(k, m+k).
-  have hh_val : ∀ m, MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val =
-      if m = 0 then 0 else ∑' k, MvPowerSeries.coeff (idx k (m + k)) p.val := by
-    intro m; change (fun s => if s 0 = 0 then 0
-      else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val)
-      (Finsupp.single (0 : Fin 1) m) = _
-    simp [Finsupp.single_eq_same]
-  -- Now prove c * XY_sub_one = posIncl g + negIncl h - p coefficient by coefficient.
-  refine ⟨c, Subtype.ext (MvPowerSeries.ext (fun e => ?_))⟩
+  refine ⟨cSeries htop p, Subtype.ext (MvPowerSeries.ext (fun e => ?_))⟩
   rw [eq_idx e]
-  -- Unfold to MvPowerSeries level
   change MvPowerSeries.coeff (idx (e 0) (e 1))
-      (c.val * (TateAlgebra₂.XY_sub_one (A := A)).val) =
+      ((cSeries htop p).val * (TateAlgebra₂.XY_sub_one (A := A)).val) =
     MvPowerSeries.coeff (idx (e 0) (e 1))
-      ((posIncl g).val + (negIncl h).val - p.val)
-  -- Rewrite LHS using coeff_XY_sub_one_mul
-  rw [show c.val * (TateAlgebra₂.XY_sub_one (A := A)).val =
-    (MvPowerSeries.X 0 * MvPowerSeries.X 1 - 1) * c.val by rw [mul_comm]; rfl,
-    coeff_XY_sub_one_mul]
-  -- Unfold RHS
+      ((posIncl (gSeries htop p)).val + (negIncl (hSeries htop p)).val - p.val)
+  rw [show (cSeries htop p).val * (TateAlgebra₂.XY_sub_one (A := A)).val =
+    (MvPowerSeries.X 0 * MvPowerSeries.X 1 - 1) * (cSeries htop p).val by
+      rw [mul_comm]; rfl, coeff_XY_sub_one_mul]
   simp only [map_sub, map_add, coeff_posIncl, coeff_negIncl]
-  -- Case split
   by_cases hij : 0 < e 0 ∧ 0 < e 1
-  · -- e 0 ≥ 1, e 1 ≥ 1: posIncl = 0, negIncl = 0
-    rw [if_pos hij, hc_val, hc_val, if_neg (by omega : ¬(e 1 = 0)),
+  · -- `e 0 ≥ 1` and `e 1 ≥ 1`: both inclusions vanish
+    rw [if_pos hij, coeff_cSeries, coeff_cSeries, if_neg (by omega : ¬(e 1 = 0)),
       if_neg (by omega : ¬(e 0 = 0))]
-    -- LHS has ∑' k, p((e 0-1)+1+k, (e 1-1)+1+k). Since e 0 ≥ 1 and e 1 ≥ 1,
-    -- (e 0-1)+1 = e 0 and (e 1-1)+1 = e 1. Rewrite the tsum argument.
     have he0 : ∀ k, idx ((e 0 - 1) + 1 + k) ((e 1 - 1) + 1 + k) = idx (e 0 + k) (e 1 + k) := by
       intro k; apply Finsupp.ext; intro x; fin_cases x <;> simp [idx] <;> omega
     simp_rw [he0]
     rw [tsum_diag_head htop p]; ring
-  · -- e 0 = 0 or e 1 = 0
-    -- After if_neg hij: LHS = 0 - coeff c.val = 0 - (-(∑' k, p(e 0+1+k, e 1+1+k)))
-    rw [if_neg hij, hc_val]
-    -- RHS involves posIncl g and negIncl h.
+  · rw [if_neg hij, coeff_cSeries]
     by_cases h0 : e 1 = 0
-    · -- e 1 = 0
-      rw [if_pos h0, h0, hg_val, hh_val, if_pos rfl]
+    · rw [if_pos h0, h0, coeff_gSeries, coeff_hSeries, if_pos rfl]
       by_cases h1 : e 0 = 0
-      · -- e 0 = 0, e 1 = 0
-        rw [h1, if_pos rfl]
-        -- Goal: 0 - (-(∑' k, p(0+1+k, 0+1+k))) = (∑' k, p(0+k, k)) + 0 - p(0, 0)
-        -- tsum_diag_head 0 0 uses idx(0+k)(0+k), but hg_val uses idx(0+k)(k).
-        -- These differ syntactically, so normalize both.
+      · rw [h1, if_pos rfl]
         have hts := tsum_diag_head htop p 0 0
         simp only [Nat.zero_add] at hts ⊢
         rw [hts]; ring
-      · -- e 0 ≥ 1, e 1 = 0
-        rw [if_neg h1]
-        -- Goal: 0 - (-(∑' k, p(e 0+1+k, 0+1+k))) = (∑' k, p(e 0+k, k)) + 0 - p(e 0, 0)
+      · rw [if_neg h1]
         have hts := tsum_diag_head htop p (e 0) 0
         simp only [Nat.zero_add] at hts ⊢
         rw [hts]; ring
-    · -- e 1 ≥ 1, so e 0 = 0
-      have h1 : e 0 = 0 := by
+    · have h1 : e 0 = 0 := by
         by_contra hne; exact hij ⟨Nat.pos_of_ne_zero hne, Nat.pos_of_ne_zero h0⟩
-      rw [if_neg h0, if_pos h1, h1, hh_val, if_neg h0]
-      -- Goal: 0 - (-(∑' k, p(0+1+k, e 1+1+k))) = 0 + (∑' k, p(k, e 1+k)) - p(0, e 1)
+      rw [if_neg h0, if_pos h1, h1, coeff_hSeries, if_neg h0]
       have hts := tsum_diag_head htop p 0 (e 1)
       simp only [Nat.zero_add] at hts ⊢
       rw [hts]; ring
