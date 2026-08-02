@@ -397,6 +397,112 @@ theorem resI_eq_zero_of_interior {θ : ℝ} (hθ0 : 0 < θ) (hθ1 : θ < 1)
       le_antisymm hint zero_le
     exact transport _ _ hcomb hmc0 hmc1 hm0 hm1 ((Valuation.zero_iff _).mp hval0)
 
+/-- A value dominated by every positive `ε` is zero: otherwise it exceeds its own half. -/
+private theorem valued_eq_zero_of_forall_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {w : hatK p F hρ0 hρ1} (hw : ∀ ε : NNReal, 0 < ε → Valued.v w ≤ ε) :
+    Valued.v w = 0 := by
+  rcases eq_or_ne (Valued.v w) 0 with h | h
+  · exact h
+  · have hhalf : 0 < Valued.v w / 2 := by positivity
+    exact absurd (hw _ hhalf) (not_le.mpr (NNReal.half_lt_self h))
+
+/-- Ultrametric split: `a = (a - b) + b`, so `a` inherits a bound both summands satisfy. -/
+private theorem valued_le_of_sub_le_of_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {a b : hatK p F hρ0 hρ1} {ε : NNReal} (h1 : Valued.v (a - b) ≤ ε)
+    (h2 : Valued.v b ≤ ε) : Valued.v a ≤ ε := by
+  calc Valued.v a ≤ max (Valued.v (a - b)) (Valued.v b) := by
+        conv_lhs => rw [show a = (a - b) + b by ring]
+        exact Valuation.map_add _ _ _
+    _ ≤ ε := max_le h1 h2
+
+/-- Every interior restriction of the approximant `x` is `ε`-small: the difference
+`BIProd x - z` restricts to `BlocToHatK x` because `z`'s own restriction vanishes, and
+`wI` of that difference is `ε` by construction of `x`. -/
+private theorem wLoc_le_of_resI_eq_zero {θ : ℝ} (hθ0 : 0 < θ) (hθ1 : θ < 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (h1 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0)
+    {ε : NNReal} {x : Bloc p F ϖ}
+    (hx : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ ε)
+    (α : ℝ) (hα0 : 0 < α) (hα1 : α < 1)
+    (hm0 : 0 < ρ₁ ^ α * ρ₂ ^ (1 - α)) (hm1 : ρ₁ ^ α * ρ₂ ^ (1 - α) < 1) :
+    wLoc p F ϖ hm0 hm1 x ≤ ε := by
+  have hres0 := resI_eq_zero_of_interior p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 h1
+    hα0 hα1 hm0 hm1
+  have hmemsub : (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+      - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 :=
+    sub_mem (BIProd_mem_BISub p F ϖ x) z.2
+  have hsplit : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+      = (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        + (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by ring
+  have hadd := resI_add p F ϖ hα0.le hα1.le hm0 hm1 hmemsub z.2
+  have hres : BlocToHatK p F ϖ hm0 hm1 x
+      = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm0 hm1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+          - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := by
+    rw [← resI_BIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) hα0.le hα1.le hm0 hm1 x]
+    conv_lhs => rw [hsplit]
+    rw [hadd, hres0, add_zero]
+  rw [← valued_BlocToHatK, hres]
+  refine le_trans (valued_resI_le_wI p F ϖ hα0.le hα1.le hm0 hm1 hmemsub) ?_
+  have hswap : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+      - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = -((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) := by ring
+  rw [hswap, wI_neg]
+  exact hx
+
+
+/-- Both coordinates of a kernel element are dominated by every positive `ε`: approximate
+`z` by a `Bloc` element `x`, whose interior restrictions all vanish, and split. -/
+private theorem valued_coords_le_of_resI_eq_zero {θ : ℝ} (hθ0 : 0 < θ) (hθ1 : θ < 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (h1 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0)
+    (ε : NNReal) (hε : 0 < ε) :
+    Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ ε
+      ∧ Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ≤ ε := by
+  obtain ⟨x, hx⟩ := exists_BIProd_approx p F ϖ z.2 hε
+  have hxint : ∀ (α : ℝ), 0 < α → α < 1 →
+      ∀ (hm0 : 0 < ρ₁ ^ α * ρ₂ ^ (1 - α)) (hm1 : ρ₁ ^ α * ρ₂ ^ (1 - α) < 1),
+      wLoc p F ϖ hm0 hm1 x ≤ ε := fun α hα0 hα1 hm0 hm1 =>
+    wLoc_le_of_resI_eq_zero p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z h1 hx α hα0 hα1 hm0 hm1
+  have hend2 : wLoc p F ϖ hρ₂0 hρ₂1 x ≤ ε := by
+    refine wLoc_le_of_interior_bound p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₂0 hρ₂1
+      (fun m => (1 : ℝ) / (m + 2)) (fun m => by positivity)
+      (fun m => ?_) (tendsto_interior_radius_right hρ₁0 hρ₂0) x hxint
+    rw [div_lt_one (by positivity)]
+    have hm0 : (0:ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
+    linarith
+  have hend1 : wLoc p F ϖ hρ₁0 hρ₁1 x ≤ ε := by
+    refine wLoc_le_of_interior_bound p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₁0 hρ₁1
+      (fun m => 1 - (1 : ℝ) / (m + 2)) (fun m => ?_)
+      (fun m => ?_) (tendsto_interior_radius_left hρ₁0 hρ₂0) x hxint
+    · have hm0 : (0:ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
+      have hlt : (1 : ℝ) / (m + 2) < 1 := by
+        rw [div_lt_one (by positivity)]
+        linarith
+      linarith
+    · have hpos : (0:ℝ) < 1 / (m + 2) := by positivity
+      linarith
+  refine ⟨valued_le_of_sub_le_of_le p F (le_trans (le_max_left _ _) hx) ?_,
+    valued_le_of_sub_le_of_le p F (le_trans (le_max_right _ _) hx) ?_⟩
+  · rw [BIProd_fst, valued_BlocToHatK]; exact hend1
+  · rw [BIProd_snd, valued_BlocToHatK]; exact hend2
+
+
 /-- **Kedlaya Corollary 4.6**: the restriction homomorphism `B^I → B^{I'}` is
 injective when the target interval is interior. -/
 theorem resIHom_injective {θ η : ℝ} (hθ0 : 0 < θ) (hθ1 : θ < 1)
@@ -418,139 +524,13 @@ theorem resIHom_injective {θ η : ℝ} (hθ0 : 0 < θ) (hθ1 : θ < 1)
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 :=
     congrArg (fun w : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) =>
       ((w : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)).1)) hz0
-  have hkey : ∀ (ε : NNReal), 0 < ε →
-      Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ ε
-        ∧ Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ≤ ε := by
-    intro ε hε
-    obtain ⟨x, hx⟩ := exists_BIProd_approx p F ϖ z.2 hε
-    have hxint : ∀ (α : ℝ), 0 < α → α < 1 →
-        ∀ (hm0 : 0 < ρ₁ ^ α * ρ₂ ^ (1 - α)) (hm1 : ρ₁ ^ α * ρ₂ ^ (1 - α) < 1),
-        wLoc p F ϖ hm0 hm1 x ≤ ε := by
-      intro α hα0 hα1 hm0 hm1
-      have hres0 := resI_eq_zero_of_interior p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 h1
-        hα0 hα1 hm0 hm1
-      have hmemsub : (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
-          - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
-          ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 :=
-        sub_mem (BIProd_mem_BISub p F ϖ x) z.2
-      have hsplit : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
-          = (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
-            - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
-            + (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by ring
-      have hadd := resI_add p F ϖ hα0.le hα1.le hm0 hm1 hmemsub z.2
-      have hres : BlocToHatK p F ϖ hm0 hm1 x
-          = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hm0 hm1
-            (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
-              - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := by
-        rw [← resI_BIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
-          (hρ₂1 := hρ₂1) hα0.le hα1.le hm0 hm1 x]
-        conv_lhs => rw [hsplit]
-        rw [hadd, hres0, add_zero]
-      rw [← valued_BlocToHatK, hres]
-      refine le_trans (valued_resI_le_wI p F ϖ hα0.le hα1.le hm0 hm1 hmemsub) ?_
-      have hswap : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
-          - (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-          = -((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-            - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) := by ring
-      rw [hswap, wI_neg]
-      exact hx
-    have hend2 : wLoc p F ϖ hρ₂0 hρ₂1 x ≤ ε := by
-      refine wLoc_le_of_interior_bound p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₂0 hρ₂1
-        (fun m => (1 : ℝ) / (m + 2)) (fun m => by positivity)
-        (fun m => ?_) (tendsto_interior_radius_right hρ₁0 hρ₂0) x hxint
-      rw [div_lt_one (by positivity)]
-      have hm0 : (0:ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
-      linarith
-    have hend1 : wLoc p F ϖ hρ₁0 hρ₁1 x ≤ ε := by
-      refine wLoc_le_of_interior_bound p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₁0 hρ₁1
-        (fun m => 1 - (1 : ℝ) / (m + 2)) (fun m => ?_)
-        (fun m => ?_) (tendsto_interior_radius_left hρ₁0 hρ₂0) x hxint
-      · have hm0 : (0:ℝ) ≤ (m : ℝ) := Nat.cast_nonneg m
-        have hlt : (1 : ℝ) / (m + 2) < 1 := by
-          rw [div_lt_one (by positivity)]
-          linarith
-        linarith
-      · have hpos : (0:ℝ) < 1 / (m + 2) := by positivity
-        linarith
-    constructor
-    · have hsplit1 : ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
-          = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
-            - BlocToHatK p F ϖ hρ₁0 hρ₁1 x) + BlocToHatK p F ϖ hρ₁0 hρ₁1 x := by
-        ring
-      have hcomp : Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
-            - BlocToHatK p F ϖ hρ₁0 hρ₁1 x) ≤ ε := by
-        refine le_trans (le_max_left _ (Valued.v
-          (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
-            - BlocToHatK p F ϖ hρ₂0 hρ₂1 x))) ?_
-        exact hx
-      calc Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
-          ≤ max (Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
-              - BlocToHatK p F ϖ hρ₁0 hρ₁1 x))
-            (Valued.v (BlocToHatK p F ϖ hρ₁0 hρ₁1 x)) := by
-            conv_lhs => rw [hsplit1]
-            exact Valuation.map_add _ _ _
-        _ ≤ ε := by
-            refine max_le hcomp ?_
-            rw [valued_BlocToHatK]
-            exact hend1
-    · have hsplit2 : ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
-          = (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
-            - BlocToHatK p F ϖ hρ₂0 hρ₂1 x) + BlocToHatK p F ϖ hρ₂0 hρ₂1 x := by
-        ring
-      have hcomp : Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
-            - BlocToHatK p F ϖ hρ₂0 hρ₂1 x) ≤ ε := by
-        refine le_trans (le_max_right (Valued.v
-          (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
-            - BlocToHatK p F ϖ hρ₁0 hρ₁1 x)) _) ?_
-        exact hx
-      calc Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
-          ≤ max (Valued.v (((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
-              - BlocToHatK p F ϖ hρ₂0 hρ₂1 x))
-            (Valued.v (BlocToHatK p F ϖ hρ₂0 hρ₂1 x)) := by
-            conv_lhs => rw [hsplit2]
-            exact Valuation.map_add _ _ _
-        _ ≤ ε := by
-            refine max_le hcomp ?_
-            rw [valued_BlocToHatK]
-            exact hend2
-  have hzero : ∀ w : hatK p F hρ₁0 hρ₁1, (∀ ε : NNReal, 0 < ε → Valued.v w ≤ ε) →
-      Valued.v w = 0 := by
-    intro w hw
-    rcases eq_or_ne (Valued.v w) 0 with h | h
-    · exact h
-    · have hv0 : 0 < Valued.v w := pos_iff_ne_zero.mpr h
-      have hhalf : 0 < Valued.v w / 2 := by positivity
-      have := hw _ hhalf
-      exact absurd this (not_le.mpr (NNReal.half_lt_self h))
-  have hzero2 : ∀ w : hatK p F hρ₂0 hρ₂1, (∀ ε : NNReal, 0 < ε → Valued.v w ≤ ε) →
-      Valued.v w = 0 := by
-    intro w hw
-    rcases eq_or_ne (Valued.v w) 0 with h | h
-    · exact h
-    · have hv0 : 0 < Valued.v w := pos_iff_ne_zero.mpr h
-      have hhalf : 0 < Valued.v w / 2 := by positivity
-      have := hw _ hhalf
-      exact absurd this (not_le.mpr (NNReal.half_lt_self h))
+  have hkey := valued_coords_le_of_resI_eq_zero p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z h1
   have hfst : ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
       : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 = 0 :=
-    (Valuation.zero_iff _).mp (hzero _ fun ε hε => (hkey ε hε).1)
+    (Valuation.zero_iff _).mp (valued_eq_zero_of_forall_le p F fun ε hε => (hkey ε hε).1)
   have hsnd : ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
       : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 = 0 :=
-    (Valuation.zero_iff _).mp (hzero2 _ fun ε hε => (hkey ε hε).2)
+    (Valuation.zero_iff _).mp (valued_eq_zero_of_forall_le p F fun ε hε => (hkey ε hε).2)
   refine Subtype.ext ?_
   exact Prod.ext hfst hsnd
 
