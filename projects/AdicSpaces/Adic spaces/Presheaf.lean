@@ -2030,6 +2030,103 @@ theorem isIntegral_of_forall_valuation_le_one
   have : V.valuation (ι x) ≤ V.valuation (ι 1) := hw_x
   simpa only [map_one] using this
 
+/-- The ring hom `P.A₀ → integralClosure B K` induced by `algebraMap R K`: every element
+of `A₀` lies in `B`, hence is integral over it. -/
+private def pairAlgebraMapToIntegralClosure {R : Type u} [CommRing R] [TopologicalSpace R]
+    [IsTopologicalRing R] [IsDomain R] (P : PairOfDefinition R) {B : Subring R}
+    (hA₀B : (P.A₀ : Set R) ⊆ B) :
+    P.A₀ →+* (integralClosure B (FractionRing R)).toSubring where
+  toFun a := ⟨algebraMap R (FractionRing R) (P.A₀.subtype a),
+    (Subalgebra.algebraMap_mem (integralClosure B (FractionRing R))
+      ⟨P.A₀.subtype a, hA₀B a.property⟩ :
+      algebraMap R (FractionRing R) (P.A₀.subtype a) ∈
+        (integralClosure B (FractionRing R) : Set (FractionRing R)))⟩
+  map_one' := Subtype.ext (map_one _)
+  map_mul' a b := Subtype.ext (map_mul _ _ _)
+  map_zero' := Subtype.ext (map_zero _)
+  map_add' a b := Subtype.ext (map_add _ _ _)
+
+
+/-- The **conductor** of `z : K` into a subring `R₀`: the `s ∈ R₀` with `s · z ∈ R₀`. -/
+private def conductorIdeal {K : Type*} [Field K] (R₀ : Subring K) (z : K) : Ideal R₀ where
+  carrier := { s : R₀ | (s : K) * z ∈ R₀ }
+  add_mem' := fun {a b} ha hb ↦ by
+    change (↑(a + b) : K) * z ∈ R₀
+    rw [Subring.coe_add, add_mul]; exact R₀.add_mem ha hb
+  zero_mem' := by change (0 : K) * z ∈ R₀; rw [zero_mul]; exact R₀.zero_mem
+  smul_mem' := fun r s hs ↦ by
+    change (↑(r • s) : K) * z ∈ R₀
+    simp only [smul_eq_mul, Subring.coe_mul, mul_assoc]
+    exact R₀.mul_mem r.property hs
+
+/-- The conductor is proper exactly when `z` itself is outside `R₀`: `1` is in it iff
+`1 · z = z ∈ R₀`. -/
+private theorem conductorIdeal_ne_top {K : Type*} [Field K] (R₀ : Subring K) {z : K}
+    (hz : z ∉ R₀) : conductorIdeal R₀ z ≠ ⊤ := by
+  intro heq
+  have h1 : ((1 : R₀) : K) * z ∈ R₀ := (heq ▸ Submodule.mem_top : (1 : R₀) ∈ _)
+  simp only [Subring.coe_one, one_mul] at h1
+  exact hz h1
+
+/-- **`z` stays outside the localisation** as long as its whole conductor lies in `𝔪`:
+writing `z = a/s` with `s ∉ 𝔪` puts `s` in the conductor, hence in `𝔪`. -/
+private theorem notMem_ofPrime_of_conductor_le {K : Type*} [Field K] (R₀ : Subring K)
+    (𝔪 : Ideal R₀) [𝔪.IsPrime] {z : K} (hcond : conductorIdeal R₀ z ≤ 𝔪) :
+    z ∉ (LocalSubring.ofPrime R₀ 𝔪).toSubring := by
+  intro hmem
+  obtain ⟨⟨a, ⟨s, hs⟩⟩, heq⟩ := IsLocalization.surj 𝔪.primeCompl
+    (⟨z, hmem⟩ : (LocalSubring.ofPrime R₀ 𝔪).toSubring)
+  have h1 := congr_arg Subtype.val heq
+  simp only [Subring.coe_mul] at h1
+  have halg : ∀ y : R₀,
+      (↑((algebraMap R₀ (LocalSubring.ofPrime R₀ 𝔪).toSubring) y) : K) = (y : K) :=
+    fun _ ↦ rfl
+  rw [halg s, halg a] at h1
+  have hs_cond : s ∈ conductorIdeal R₀ z := show (s : K) * z ∈ R₀ by
+    rw [mul_comm, h1]; exact a.property
+  exact hs (hcond hs_cond)
+
+/-- **Localising preserves integral closedness in `K`.** Clear denominators to get
+`m • y` integral over `R₀`, so `m • y ∈ R₀` by closedness, then divide by the unit `m`. -/
+private theorem isIntegrallyClosedIn_ofPrime {K : Type*} [Field K] (R₀ : Subring K)
+    [IsIntegrallyClosedIn R₀ K] (𝔪 : Ideal R₀) [𝔪.IsPrime] :
+    IsIntegrallyClosedIn (LocalSubring.ofPrime R₀ 𝔪).toSubring K := by
+  set L := LocalSubring.ofPrime R₀ 𝔪 with hL
+  rw [Subring.isIntegrallyClosedIn_iff]
+  intro x hx
+  obtain ⟨⟨m, hm⟩, hmx⟩ :=
+    hx.exists_multiple_integral_of_isLocalization 𝔪.primeCompl x
+  have hmx_R₀ : m • x ∈ R₀ := Subring.isIntegrallyClosedIn_iff.mp inferInstance hmx
+  have hmx_L : m • x ∈ L.toSubring := LocalSubring.le_ofPrime R₀ 𝔪 hmx_R₀
+  have hu := IsLocalization.map_units L.toSubring (⟨m, hm⟩ : 𝔪.primeCompl)
+  have hsmul : m • x = algebraMap R₀ K m * x := by
+    rw [Algebra.smul_def]
+  have halg_coe : (↑(algebraMap R₀ L.toSubring m) : K) = algebraMap R₀ K m := rfl
+  set u_L := hu.unit
+  have hu_inv_mul : (↑(u_L⁻¹) : L.toSubring) * (algebraMap R₀ L.toSubring m) = 1 := by
+    exact_mod_cast u_L.inv_val
+  have hu_inv_mul_K : (↑(↑(u_L⁻¹) : L.toSubring) : K) *
+      (↑(algebraMap R₀ L.toSubring m) : K) = 1 := by
+    have := congr_arg (↑· : L.toSubring → K) hu_inv_mul
+    simpa [map_mul, map_one] using this
+  have hx_eq : x = (↑(↑(u_L⁻¹) : L.toSubring) : K) * (m • x) := by
+    rw [hsmul, ← halg_coe, ← mul_assoc, hu_inv_mul_K, one_mul]
+  rw [hx_eq]; exact L.toSubring.mul_mem (↑(u_L⁻¹) : L.toSubring).property hmx_L
+
+/-- **Multiplication by `x` contracts a power of the ideal of definition into any open
+subring**: `μ_x⁻¹(B)` is a neighbourhood of `0`, and the powers of `P.I` are a basis. -/
+private theorem exists_pow_ideal_mul_mem {R : Type u} [CommRing R] [TopologicalSpace R]
+    [IsTopologicalRing R] (P : PairOfDefinition R) {B : Subring R}
+    (hB_open : IsOpen (B : Set R)) (x : R) :
+    ∃ n : ℕ, ∀ a ∈ P.I ^ n, x * P.A₀.subtype a ∈ B := by
+  have hcont_mul : Continuous (x * · : R → R) := continuous_const_mul x
+  have h0_mem : (0 : R) ∈ (x * ·) ⁻¹' (B : Set R) := by
+    simp only [Set.mem_preimage, mul_zero]; exact B.zero_mem
+  obtain ⟨n, -, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp
+    ((hB_open.preimage hcont_mul).mem_nhds h0_mem)
+  exact ⟨n, fun a ha => hn ⟨a, ha, rfl⟩⟩
+
+
 /-- **Phase A of Wedhorn Lemma 7.18** (a refined Stacks 090P): if `x` misses the integral
 closure `R₀` of `B` in `K = Frac R`, some valuation subring `V ⊇ R₀` still misses `x` *and*
 is strictly less than `1` on the image of the ideal of definition `P.I`.
@@ -2057,50 +2154,21 @@ theorem exists_valuationSubring_of_notMem_integralClosure
   let R₀ := (integralClosure B K).toSubring
   -- Phase A: Refined Stacks 090P using LocalSubring domination.
   -- Map P.A₀ into R₀ via ι.
-  have hA₀_to_R₀ : ∀ (a : P.A₀), ι (P.A₀.subtype a) ∈ R₀ := fun a ↦
-    (Subalgebra.algebraMap_mem (integralClosure B K) ⟨P.A₀.subtype a, hA₀B a.property⟩ :
-      ι (P.A₀.subtype a) ∈ (integralClosure B K : Set K))
-  -- F3: Define image of P.I as an ideal of R₀.
-  -- Map P.I generators to R₀ and take the ideal they span.
-  let ι_R₀ : P.A₀ →+* R₀ :=
-    { toFun := fun a ↦ ⟨ι (P.A₀.subtype a), hA₀_to_R₀ a⟩
-      map_one' := Subtype.ext (map_one ι)
-      map_mul' := fun a b ↦ Subtype.ext (map_mul ι _ _)
-      map_zero' := Subtype.ext (map_zero ι)
-      map_add' := fun a b ↦ Subtype.ext (map_add ι _ _) }
+  -- F3: the image of `P.I` as an ideal of `R₀`, via the induced ring hom.
+  let ι_R₀ : P.A₀ →+* R₀ := pairAlgebraMapToIntegralClosure P hA₀B
   let I_img : Ideal R₀ := Ideal.map ι_R₀ P.I
   -- F3: Define conductor of ι x in R₀.
   -- S(x) = { s ∈ R₀ : (s : K) * (ι x) ∈ R₀ }
   -- This is proper because 1 · (ι x) = ι x ∉ R₀.
-  let S_x : Ideal R₀ :=
-    { carrier := { s : R₀ | (s : K) * ι x ∈ R₀ }
-      add_mem' := fun {a b} ha hb ↦ by
-        change (↑(a + b) : K) * ι x ∈ R₀
-        rw [Subring.coe_add, add_mul]; exact R₀.add_mem ha hb
-      zero_mem' := by change (0 : K) * ι x ∈ R₀; rw [zero_mul]; exact R₀.zero_mem
-      smul_mem' := fun r s hs ↦ by
-        change (↑(r • s) : K) * ι x ∈ R₀
-        simp only [smul_eq_mul, Subring.coe_mul, mul_assoc]
-        exact R₀.mul_mem r.property hs }
-  -- S_x is proper (since 1 · ι x = ι x ∉ R₀).
-  have hS_x_proper : S_x ≠ ⊤ := by
-    intro heq
-    have h1 : (1 : R₀) ∈ S_x := heq ▸ Submodule.mem_top
-    have : ((1 : R₀) : K) * ι x ∈ R₀ := h1
-    simp only [Subring.coe_one, one_mul] at this
-    exact hx_notin this
+  let S_x : Ideal R₀ := conductorIdeal R₀ (ι x)
+  have hS_x_proper : S_x ≠ ⊤ := conductorIdeal_ne_top R₀ hx_notin
   -- Key lemma: I_img^n ⊆ S_x for some n (from continuity of multiplication by x).
   -- Since B is open and multiplication by x is continuous, μ_x⁻¹(B) is a
   -- neighborhood of 0. By the pair of definition, ∃ n with I^n ⊆ μ_x⁻¹(B).
   -- Then x · I^n ⊆ B, so for any b ∈ I^n: ι_R₀(b) · ι(x) = ι(b · x) ∈ R₀.
   -- Since S_x is an ideal and the generators of I_img^n are in S_x, I_img^n ⊆ S_x.
   have hI_pow_le_Sx : ∃ n : ℕ, I_img ^ n ≤ S_x := by
-    -- Continuity of multiplication by x: μ_x⁻¹(B) is a nbhd of 0.
-    have hcont_mul : Continuous (x * · : R → R) := continuous_const_mul x
-    have h0_mem : (0 : R) ∈ (x * ·) ⁻¹' (B : Set R) := by
-      simp only [Set.mem_preimage, mul_zero]; exact B.zero_mem
-    obtain ⟨n, -, hn⟩ := P.hasBasis_nhds_zero.mem_iff.mp
-      ((hB_open.preimage hcont_mul).mem_nhds h0_mem)
+    obtain ⟨n, hn⟩ := exists_pow_ideal_mul_mem P hB_open x
     refine ⟨n, ?_⟩
     -- For a ∈ P.I^n: x * P.A₀.subtype a ∈ B, so ι_R₀ a · ι x ∈ R₀.
     have hgen : ∀ a ∈ P.I ^ n, ι_R₀ a ∈ S_x := by
@@ -2108,7 +2176,7 @@ theorem exists_valuationSubring_of_notMem_integralClosure
       change (ι_R₀ a : K) * ι x ∈ R₀
       change ι (P.A₀.subtype a) * ι x ∈ R₀
       rw [← map_mul]
-      have hmem : x * P.A₀.subtype a ∈ B := hn ⟨a, ha, rfl⟩
+      have hmem := hn a ha
       rw [mul_comm] at hmem
       exact Subalgebra.algebraMap_mem (integralClosure B K) ⟨P.A₀.subtype a * x, hmem⟩
     -- I_img^n = map ι_R₀ (P.I^n) by Ideal.map_pow. Each element maps into S_x.
@@ -2125,50 +2193,8 @@ theorem exists_valuationSubring_of_notMem_integralClosure
   let L := LocalSubring.ofPrime R₀ 𝔪
   -- ι x ∉ L.toSubring: if ι x = a/s with a ∈ R₀, s ∉ 𝔪, then
   -- s · ι x = a ∈ R₀, so s ∈ S_x ⊆ 𝔪, contradiction.
-  have hx_notL : ι x ∉ L.toSubring := by
-    intro hmem
-    obtain ⟨⟨a, ⟨s, hs⟩⟩, heq⟩ := IsLocalization.surj 𝔪.primeCompl (⟨ι x, hmem⟩ : L.toSubring)
-    have h1 := congr_arg Subtype.val heq
-    simp only [Subring.coe_mul] at h1
-    have halg : ∀ (y : R₀), (↑((algebraMap R₀ L.toSubring) y) : K) = (y : K) := fun _ ↦ rfl
-    rw [halg s, halg a] at h1
-    have hs_cond : s ∈ S_x := show (s : K) * ι x ∈ R₀ by
-      rw [mul_comm, h1]; exact a.property
-    exact hs (h𝔪_le hs_cond)
-  -- R₀ is integrally closed in K (it's the integral closure).
-  -- Localization preserves integrally closed (standard commutative algebra).
-  haveI : IsIntegrallyClosedIn L.toSubring K := by
-    -- Localization of R₀ (integrally closed in K) at 𝔪 is still IC in K.
-    rw [Subring.isIntegrallyClosedIn_iff]
-    intro x hx
-    -- Clear denominators: ∃ m ∈ 𝔪.primeCompl, m • x integral over R₀.
-    obtain ⟨⟨m, hm⟩, hmx⟩ :=
-      hx.exists_multiple_integral_of_isLocalization 𝔪.primeCompl x
-    -- Since R₀ is IC in K, m • x ∈ R₀.
-    have hmx_R₀ : m • x ∈ R₀ := Subring.isIntegrallyClosedIn_iff.mp inferInstance hmx
-    -- m • x ∈ R₀ ⊆ L.toSubring.
-    have hmx_L : m • x ∈ L.toSubring := LocalSubring.le_ofPrime R₀ 𝔪 hmx_R₀
-    -- algebraMap R₀ L.toSubring m is a unit (m ∉ 𝔪 → invertible in localization).
-    have hu := IsLocalization.map_units L.toSubring (⟨m, hm⟩ : 𝔪.primeCompl)
-    -- x = (algebraMap R₀ K m)⁻¹ * (m • x), both factors in L.toSubring.
-    -- The inverse of algebraMap m exists in L.toSubring since m maps to a unit.
-    -- x = (algebraMap m)⁻¹ * (m • x), both factors in L.toSubring.
-    -- The smul m • x unfolds to algebraMap R₀ K m * x in the field K.
-    have hsmul : m • x = algebraMap R₀ K m * x := by
-      rw [Algebra.smul_def]
-    -- Coercion compatibility: algebraMap R₀ L.toSubring m coerces to m in K.
-    have halg_coe : (↑(algebraMap R₀ L.toSubring m) : K) = algebraMap R₀ K m := rfl
-    -- Let u_inv be the inverse of the unit algebraMap R₀ L.toSubring m.
-    set u_L := hu.unit
-    have hu_inv_mul : (↑(u_L⁻¹) : L.toSubring) * (algebraMap R₀ L.toSubring m) = 1 := by
-      exact_mod_cast u_L.inv_val
-    have hu_inv_mul_K : (↑(↑(u_L⁻¹) : L.toSubring) : K) *
-        (↑(algebraMap R₀ L.toSubring m) : K) = 1 := by
-      have := congr_arg (↑· : L.toSubring → K) hu_inv_mul
-      simpa [map_mul, map_one] using this
-    have hx_eq : x = (↑(↑(u_L⁻¹) : L.toSubring) : K) * (m • x) := by
-      rw [hsmul, ← halg_coe, ← mul_assoc, hu_inv_mul_K, one_mul]
-    rw [hx_eq]; exact L.toSubring.mul_mem (↑(u_L⁻¹) : L.toSubring).property hmx_L
+  have hx_notL : ι x ∉ L.toSubring := notMem_ofPrime_of_conductor_le R₀ 𝔪 h𝔪_le
+  haveI : IsIntegrallyClosedIn L.toSubring K := isIntegrallyClosedIn_ofPrime R₀ 𝔪
   -- Apply Stacks 090P part 2.
   obtain ⟨V, hV_dom, hx_notV⟩ :=
     LocalSubring.exists_le_valuationSubring_of_isIntegrallyClosedIn hx_notL

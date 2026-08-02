@@ -1468,6 +1468,95 @@ theorem ιSpv_isClosedEmbedding :
   ⟨ιSpv_isEmbedding, isClosed_range_ιSpv⟩
 
 omit [CommRing A] in
+/-- **Every cylinder over a point of the basic open box meets an irreducible set.** Case
+analysis on whether `True`/`False` lie in `u p`: if both, `u p` is everything; if only
+`True`, the supremum `r_top p` holds and its witness is the required element of `S`; if
+neither, `r_top p` fails and *any* element of `S` works. -/
+private theorem exists_mem_inter_cylinder_of_isIrreducible
+    {S : Set (A × A → Prop)} (hirr : IsIrreducible S)
+    {I : Finset (A × A)} {u : A × A → Set Prop}
+    (hu : ∀ p ∈ I, IsOpen (u p) ∧ (∃ r ∈ S, r p) ∈ u p) :
+    ∀ p ∈ I, (S ∩ {r : A × A → Prop | r p ∈ u p}).Nonempty := by
+  classical
+  set r_top : A × A → Prop := fun p ↦ ∃ r ∈ S, r p with hr_top
+  intro p hp
+  have h_rtop_p : r_top p ∈ u p := (hu p hp).2
+  by_cases h_True : True ∈ u p
+  · by_cases h_False : False ∈ u p
+    · -- Both True and False ∈ u p: u p = univ, so any r ∈ S works.
+      obtain ⟨r, hr⟩ := hirr.nonempty
+      refine ⟨r, hr, ?_⟩
+      change r p ∈ u p
+      by_cases hrp : r p
+      · have heq : r p = True := propext (iff_true_intro hrp)
+        rw [heq]; exact h_True
+      · have heq : r p = False := propext (iff_false_intro hrp)
+        rw [heq]; exact h_False
+    · -- True ∈ u p, False ∉ u p: u p = {True}, so r_top p = True;
+      -- extract a witnessing r ∈ S with r p = True.
+      have h_rtop_T : r_top p := by
+        by_contra h_neg
+        have hrtopF : r_top p = False := propext (iff_false_intro h_neg)
+        rw [hrtopF] at h_rtop_p
+        exact h_False h_rtop_p
+      obtain ⟨r, hr, hrp⟩ := h_rtop_T
+      refine ⟨r, hr, ?_⟩
+      change r p ∈ u p
+      have heq : r p = True := propext (iff_true_intro hrp)
+      rw [heq]; exact h_True
+  · -- True ∉ u p: then u p ⊆ {False}, so r_top p = False, hence ∀ r ∈ S, ¬ r p.
+    have h_rtop_F : ¬ r_top p := by
+      intro hrp
+      apply h_True
+      have heq : r_top p = True := propext (iff_true_intro hrp)
+      rwa [heq] at h_rtop_p
+    obtain ⟨r, hr⟩ := hirr.nonempty
+    refine ⟨r, hr, ?_⟩
+    change r p ∈ u p
+    have hrp : ¬ r p := fun hrp' ↦ h_rtop_F ⟨r, hr, hrp'⟩
+    have hrpF : r p = False := propext (iff_false_intro hrp)
+    rw [hrpF]
+    have hrtopF : r_top p = False := propext (iff_false_intro h_rtop_F)
+    rwa [hrtopF] at h_rtop_p
+
+omit [CommRing A] in
+/-- **Every member of `S` specialises to the pointwise supremum**, hence lies in the
+closure of `{r_top}`. Pointwise this is the Sierpiński specialisation `q ⤳ p ↔ p → q`,
+and `r p → ∃ r ∈ S, r p` is immediate. Uses neither irreducibility nor closedness. -/
+private theorem subset_closure_singleton_exists_mem (S : Set (A × A → Prop)) :
+    S ⊆ closure ({fun p ↦ ∃ r ∈ S, r p} : Set (A × A → Prop)) := by
+  set r_top : A × A → Prop := fun p ↦ ∃ r ∈ S, r p with hr_top
+  intro r hr
+  rw [mem_closure_iff]
+  intro U hU hrU
+  refine ⟨r_top, ?_, Set.mem_singleton _⟩
+  refine Specializes.mem_open ?_ hU hrU
+  -- Show r_top ⤳ r via pointwise specialisation r_top p ⤳ r p
+  -- (i.e., r p → r_top p in Sierpinski Prop).
+  rw [specializes_pi]
+  intro p
+  rw [specializes_iff_mem_closure]
+  have hpq : r p → r_top p := fun hrp ↦ ⟨r, hr, hrp⟩
+  by_cases hq : r_top p
+  · -- r_top p = True; closure {True} = univ (dense_true).
+    have hqT : r_top p = True := propext (iff_true_intro hq)
+    rw [hqT]
+    exact dense_true _
+  · -- r_top p = False; closure {False} = {False}; conclude r p = False.
+    have hqF : r_top p = False := propext (iff_false_intro hq)
+    rw [hqF]
+    have h_false_closed : IsClosed ({False} : Set Prop) := by
+      have h_compl : ({False} : Set Prop) = ({True} : Set Prop)ᶜ := by
+        ext x; simp [Set.mem_singleton_iff, eq_iff_iff]
+      rw [h_compl, isClosed_compl_iff]
+      exact TopologicalSpace.GenerateOpen.basic _ (Set.mem_singleton _)
+    rw [h_false_closed.closure_eq]
+    have hp : ¬ r p := fun hrp ↦ hq (hpq hrp)
+    have hpF : r p = False := propext (iff_false_intro hp)
+    rw [hpF]; exact Set.mem_singleton _
+
+
+omit [CommRing A] in
 /-- **Sub-lemma (T-Spv.2.β-ii).** Arbitrary products of QuasiSober spaces are
 QuasiSober. In particular the Sierpinski cube `(A × A → Prop)` (a product of
 copies of `Prop` with the Sierpinski topology) is QuasiSober.
@@ -1497,46 +1586,7 @@ theorem prop_pi_quasiSober : QuasiSober (A × A → Prop) := by
     classical
     have hV_open : ∀ p ∈ I, IsOpen ({r : A × A → Prop | r p ∈ u p}) :=
       fun p hp ↦ (continuous_apply p).isOpen_preimage _ (hu p hp).1
-    have hV_meets : ∀ p ∈ I, (S ∩ {r : A × A → Prop | r p ∈ u p}).Nonempty := by
-      intro p hp
-      have h_rtop_p : r_top p ∈ u p := (hu p hp).2
-      by_cases h_True : True ∈ u p
-      · by_cases h_False : False ∈ u p
-        · -- Both True and False ∈ u p: u p = univ, so any r ∈ S works.
-          obtain ⟨r, hr⟩ := hirr.nonempty
-          refine ⟨r, hr, ?_⟩
-          change r p ∈ u p
-          by_cases hrp : r p
-          · have heq : r p = True := propext (iff_true_intro hrp)
-            rw [heq]; exact h_True
-          · have heq : r p = False := propext (iff_false_intro hrp)
-            rw [heq]; exact h_False
-        · -- True ∈ u p, False ∉ u p: u p = {True}, so r_top p = True;
-          -- extract a witnessing r ∈ S with r p = True.
-          have h_rtop_T : r_top p := by
-            by_contra h_neg
-            have hrtopF : r_top p = False := propext (iff_false_intro h_neg)
-            rw [hrtopF] at h_rtop_p
-            exact h_False h_rtop_p
-          obtain ⟨r, hr, hrp⟩ := h_rtop_T
-          refine ⟨r, hr, ?_⟩
-          change r p ∈ u p
-          have heq : r p = True := propext (iff_true_intro hrp)
-          rw [heq]; exact h_True
-      · -- True ∉ u p: then u p ⊆ {False}, so r_top p = False, hence ∀ r ∈ S, ¬ r p.
-        have h_rtop_F : ¬ r_top p := by
-          intro hrp
-          apply h_True
-          have heq : r_top p = True := propext (iff_true_intro hrp)
-          rwa [heq] at h_rtop_p
-        obtain ⟨r, hr⟩ := hirr.nonempty
-        refine ⟨r, hr, ?_⟩
-        change r p ∈ u p
-        have hrp : ¬ r p := fun hrp' ↦ h_rtop_F ⟨r, hr, hrp'⟩
-        have hrpF : r p = False := propext (iff_false_intro hrp)
-        rw [hrpF]
-        have hrtopF : r_top p = False := propext (iff_false_intro h_rtop_F)
-        rwa [hrtopF] at h_rtop_p
+    have hV_meets := exists_mem_inter_cylinder_of_isIrreducible hirr hu
     -- Apply irreducibility (`isIrreducible_iff_sInter`) on the cylinder Finset.
     have h_irr_iff := (isIrreducible_iff_sInter (X := A × A → Prop) (s := S)).mp hirr
     obtain ⟨r, hr_S, hr_inter⟩ := h_irr_iff
@@ -1559,36 +1609,7 @@ theorem prop_pi_quasiSober : QuasiSober (A × A → Prop) := by
         (I.image (fun p ↦ {r : A × A → Prop | r p ∈ u p}) : Finset _) :=
       Finset.mem_image.mpr ⟨p, hp, rfl⟩
     exact hmem _ (Finset.mem_coe.mpr hcyl_mem)
-  · -- S ⊆ closure {r_top}
-    intro r hr
-    rw [mem_closure_iff]
-    intro U hU hrU
-    refine ⟨r_top, ?_, Set.mem_singleton _⟩
-    refine Specializes.mem_open ?_ hU hrU
-    -- Show r_top ⤳ r via pointwise specialisation r_top p ⤳ r p
-    -- (i.e., r p → r_top p in Sierpinski Prop).
-    rw [specializes_pi]
-    intro p
-    rw [specializes_iff_mem_closure]
-    have hpq : r p → r_top p := fun hrp ↦ ⟨r, hr, hrp⟩
-    by_cases hq : r_top p
-    · -- r_top p = True; closure {True} = univ (dense_true).
-      have hqT : r_top p = True := propext (iff_true_intro hq)
-      rw [hqT]
-      exact dense_true _
-    · -- r_top p = False; closure {False} = {False}; conclude r p = False.
-      have hqF : r_top p = False := propext (iff_false_intro hq)
-      rw [hqF]
-      have h_false_closed : IsClosed ({False} : Set Prop) := by
-        have h_compl : ({False} : Set Prop) = ({True} : Set Prop)ᶜ := by
-          ext x; simp [Set.mem_singleton_iff, eq_iff_iff]
-        rw [h_compl, isClosed_compl_iff]
-        exact TopologicalSpace.GenerateOpen.basic _ (Set.mem_singleton _)
-      rw [h_false_closed.closure_eq]
-      have hp : ¬ r p := fun hrp ↦ hq (hpq hrp)
-      have hpF : r p = False := propext (iff_false_intro hp)
-      rw [hpF]; exact Set.mem_singleton _
-
+  · exact subset_closure_singleton_exists_mem S
 /-- **(T-Spv.2.β, Wedhorn 4.7 — Spv A is spectral)** Existing project
 infrastructure in `ValuationSpectrumCompact.lean` provides CompactSpace and
 T0Space via the bool-cube embedding. The QuasiSober piece is delegated to the

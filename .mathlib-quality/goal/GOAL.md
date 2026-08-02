@@ -10167,3 +10167,202 @@ carry `include hφb in`, which the pieces must reproduce.
 RobbaPresentation is ~5000 lines and takes eight minutes to build alone, so each wrong
 guess on that signature is an eight-minute round trip. Scoped, evidenced, and handed over
 rather than started half-way.
+
+## Batch: two ∧-splits — perturbation 103 → 36, quasi-sober 100 → 37
+
+Both are `constructor`/`antisymm` proofs where the bullets are the lemmas. Both landed
+first try, which is what the modifier-prefix precomputation was for.
+
+**`indexedRationalSet_perturb_eq`** (SpaParameterPerturbation, 103 → 36). 34 lines of
+shared valuation setup, then one bullet per direction:
+
+    indexedRationalSet_perturb_forward   22
+    indexedRationalSet_perturb_reverse   45
+
+The setup runs under `letI : ValuativeRel B := v.toValuativeRel`, so both lemmas take
+`[ValuativeRel B]` as a **binder** and the four facts the setup establishes (`hbridge`,
+`hzero`, `hϖ_succ_lt`, `hδ_le`) as explicit hypotheses. Passing them rather than
+re-deriving them is what keeps both bodies verbatim — re-deriving `hδ_le` alone would need
+`hv` and `vle_one_of_mem_spa` in each half.
+
+The asymmetry is worth recording because it is *why* the reverse half is twice as long:
+`hbound` bounds `v(ϖ^M)` against `g` and the `f i`, **not** against `g'`. So the forward
+direction gets `v(ϖ^M) ≤ v(g)` for free and the reverse has to re-derive `v(ϖ^M) ≤ v(g')`
+— by contradiction in the `g` case, through `v(f' i) = v(f i)` in the other. Not a
+symmetric twin; no shared lemma to find.
+
+**`prop_pi_quasiSober`** (SpvAITopology, 100 → 37). `Set.Subset.antisymm` gives two halves
+and the second — every member of `S` specialises to the pointwise supremum — uses
+**neither irreducibility nor closedness**, so it is a freestanding fact:
+
+    exists_mem_inter_cylinder_of_isIrreducible   the `hV_meets` case analysis   39
+    subset_closure_singleton_exists_mem          the `S ⊆ closure` half         26
+
+`r_top` is a `let` in the parent and the block both destructures and constructs it
+(`obtain ⟨r, hr, hrp⟩ := h_rtop_T` on one line, `⟨r, hr, hrp'⟩` as a witness on another),
+so each piece re-introduces it with `set … with` rather than taking it as an opaque
+parameter — an opaque `{r_top}` + `(hr_top : r_top = …)` would break both of those lines.
+
+`omit [CommRing A] in` sits **above the docstring** at line 1470, which is exactly why the
+prefix scan walks back over the docstring; both pieces carry it.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 57   (54 actionable, 3 Vendored, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+
+## Batch: WittF 126 → 39 and Presheaf 101 → 46 — two different kinds of long proof
+
+**`valuation_teichCoeffF_prefix_add_le`** (WittF) was long because it wrote its `x` and `y`
+cases out **twice**. Four lemmas, two of them dedups:
+
+    teichmuller_prefix_sum_eq_zero    2   was `hzx`+`h1` AND `hzy`+`h2`
+    exists_ofF_lift_div              11   was `hchx` AND `hchy`, verbatim twins
+    exists_maxAttaining_coeff        24   the whole choice of `c`, `hNpos` → `hcne`
+    teichmuller_prefix_sum_factor    15   the scaling factorisation
+
+**`exists_valuationSubring_of_notMem_integralClosure`** (Presheaf) was long for the
+opposite reason: **a definition it needed did not exist.** The conductor
+`{s ∈ R₀ | s·z ∈ R₀}` was built inline as an anonymous `Ideal` structure literal, with its
+properness proved just underneath — and because it had no name, the fact that uses it could
+not be stated. Naming it is what makes the rest extractable:
+
+    conductorIdeal / conductorIdeal_ne_top    def + 4
+    notMem_ofPrime_of_conductor_le            12   `z ∉ R₀_𝔪` when its conductor ⊆ 𝔪
+    isIntegrallyClosedIn_ofPrime              21   localising preserves closedness in K
+    exists_pow_ideal_mul_mem                   6   μ_x contracts a power of P.I into open B
+    pairAlgebraMapToIntegralClosure          def   the induced `P.A₀ →+* integralClosure B K`
+
+Four of those five say **nothing about the theorem they came from** —
+`isIntegrallyClosedIn_ofPrime` is general commutative algebra with no trace of
+`PairOfDefinition` or `FractionRing` in it. That is the *missing-API* pattern rather than
+the decomposition pattern, and it is worth separating in the ledger: a proof can be over
+the bar because it is doing several things, or because it is inlining a definition. The
+second kind gets shorter *and* leaves reusable lemmas behind.
+
+### Operational: a full gate was killed, not failed
+
+    GATE_EXIT=143      # 128+15 = SIGTERM
+
+Zero errors in its log and 6113 of 6188 jobs done, but it did not finish — so it is **not**
+a green gate and nothing was committed on it. Worth stating because the log looks clean:
+**check the exit code, not just the error count.** Earlier gates in this campaign completed
+6188 jobs, so this is machine load (four other Lean builds running), not a hard limit.
+
+### Scan 5 — remaining targets that inline a definition
+
+Generalising the Presheaf finding: scanned the 54 remaining targets for `let`/`set`
+bindings whose value is a structure literal or a multi-line definition. **17 of 54 build at
+least one definition inline.** Three build an actual structure literal — the exact shape
+that was 10 lines of the Presheaf proof:
+
+    336  FJP/FiniteJetGraphKoszul.lean:830   `ballGrp`   (an AddSubgroup literal)
+    254  TateAlgebra.lean:1946               `relMap₀`   (a hom literal)
+    125  FJP/FiniteJetGraphKoszul.lean:537   `φ`         (a hom literal)
+
+and the rest bind named objects that a reader has to reconstruct from the proof:
+`presheafValue_mvRestricted_surjection` alone builds five (`b`, `backward`, `fU`, `g`, `iU`).
+
+This is a **different defect from length** and the fix is different too: naming the object
+does not just shorten the proof, it makes the facts about that object *statable*, which is
+what unlocks the rest of the extraction. Worth working before the pure-length targets,
+because each one leaves reusable API behind.
+
+Two entries confirm the twin structure found earlier: `unitDatum_ker_le_span` (115) and
+`coUnitDatum_ker_le_span` (133) each inline `aI` and `ψ` — the shared localisation lift is
+precisely the ~100 duplicated lines between them.
+
+### Caveat on the `letI` ascription compression
+
+The sweep that cleared the three `relativePiece_equiv_restrict_square` twins drops the type
+ascription from `letI : T := e`. It is **not** always safe, and the sweep script as written
+does not know it:
+
+    letI : ValuationSpectrum.PlusSubring ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+      ⟨BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1⟩
+
+Here the value is an **anonymous constructor**, which has no type of its own — dropping the
+ascription leaves `⟨…⟩` with nothing to elaborate against. The keystone twins happened to
+have field-projection values (`E.uniformSpace`, `(…).isTopologicalRing`), which do.
+
+Rule: compress only when the value is a *term whose head determines its type* — an
+application or a projection. Skip `⟨…⟩`, `{ … }`, and bare `fun`. On
+`isSheafy_presheafChart` (63) this is the difference between a clean −13 and two broken
+`letI`s; two of its six multi-line `letI`s are anonymous constructors.
+
+### Negative result: `isSheafy_presheafChart` (63) does not decompose
+
+Worth recording so it is not re-attempted. The proof is: install the instance package on
+the `B^I` side, prove `IsSheafy` there, install the package on the chart side, transport
+along the ring equiv `e`. Two routes, both dead:
+
+*Compression.* Six multi-line `letI`s, but **two are anonymous constructors**
+(`⟨BIPlusIn …⟩`, `⟨(BIPlusIn …).map e.toRingHom⟩`) and cannot lose their ascription. Of the
+remaining four, two ascribe to `ValuationSpectrum.ringPlus …` while the lemma's own type is
+about `BIPlusIn …` — the ascription is doing real work, not restating. Safe savings are 6
+lines, giving 57; even compressing the risky pair only reaches 51.
+
+*Lifting the `B^I` half.* `IsSheafy ↥(BISub …)` is a class whose binders are exactly the
+`PlusSubring` / `CompleteSpace` / `IsRingOfIntegralElements` instances the `letI`s install.
+A lemma stating it must take them as binders, so the parent still has to install them
+before applying — the `letI` block cannot move. No saving.
+
+**The real fix is upstream**: the instance package for `BISub` wants to be actual
+`instance`s (or one bundled `IsAffinoidPair`-style structure) rather than four `letI`s
+repeated at each use site. That is a design change, and it is the same finding as the
+1191-line `letI`-preamble family from the earlier scan, seen on one concrete proof.
+Recorded, not done.
+
+### Two "failed" builds that were not failures — the machine is out of swap
+
+The killed gate (`GATE_EXIT=143`) and the WittF build that "failed with exit code 1" have
+the same cause, and neither was a real error. Both logs contain **zero** `error:` lines and
+both died on their last few jobs.
+
+    vm.swapusage: total = 11264M  used = 9903M  free = 1360M
+
+with four other Lean builds resident, the largest at 3.2 GB. The heaviest step of a module
+build is the final file's elaboration, which is exactly where both died. Re-running WittF
+with its 2931 cached jobs intact finished immediately and green (2933 jobs).
+
+Two things follow, both worth keeping:
+
+1. **A build that dies with no `error:` in the log did not fail — it was killed.** Check
+   `vm_stat` / `sysctl vm.swapusage` before believing it, and re-run: cached oleans make the
+   retry nearly free.
+2. The largest resident processes are **idle LSP workers** — `lean --worker` on
+   `FJP/FiniteJetMain.lean` and `StructureSheaf.lean`, 3.2 GB each, running for **two days**.
+   They belong to an editor session, not to this campaign, so they are left alone here; but
+   closing those editor tabs would return ~6 GB and roughly halve the gate time. Flagged for
+   the owner rather than acted on.
+
+All four of this batch's modules are green individually and axiom-clean:
+
+    SpaParameterPerturbation  103 → 36
+    SpvAITopology             100 → 37
+    WittF                     126 → 39
+    Presheaf                  101 → 46
+
+### New gotcha: generalising the statement does not generalise the body
+
+Extracting `coe_algebraMap_mul_prod_X_pow` from Wedhorn828, I wrote a signature generic in
+the coefficient ring — `{B : Type*} … (v : Fin m →₀ ℕ) (c : B)` — and transplanted the
+19-line body verbatim. The body still said
+
+    MvPowerSeries (Fin m) (presheafValue D)      -- the concrete ring
+    algebraMap … (g.val v)                       -- the concrete coefficient
+
+neither of which exists in the new lemma's context. The same slip was in
+`eq_sum_monomials_of_box` (one `presheafValue D` in an ascription).
+
+Nothing mechanical catches this: `verify_file.py` compares *declaration names*, and the
+names were all correct. Only reading the inserted text does — or the build, an eight-minute
+round trip on this file.
+
+> **Rule.** When an extraction *generalises* rather than merely relocates, the body needs
+> the same substitution as the statement. Grep the extracted text for the concrete names
+> the generalisation replaced (`presheafValue D`, `g`, `iU`, …) before building — every
+> occurrence must be gone or it is a leak.
+
+This is the mirror image of the earlier `omit`/`include` family: there the *context* had to
+travel with the code; here the *substitution* has to.

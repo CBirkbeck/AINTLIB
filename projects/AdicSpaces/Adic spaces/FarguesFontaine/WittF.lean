@@ -1472,6 +1472,103 @@ noncomputable def tailValueF (σ : NNReal) (x : WittVector p F) (N : ℕ) : NNRe
 noncomputable def headBoundF (σ : NNReal) (x : WittVector p F) (N : ℕ) : NNReal :=
   σ ^ N * (Finset.range N).sup (fun i => perfectoidValuation p F (teichCoeffF p F x i))
 
+/-- A prefix sum of Teichmüller lifts vanishes as soon as every coordinate does. -/
+private theorem teichmuller_prefix_sum_eq_zero (z : WittVector p F) (N : ℕ)
+    (hz : ∀ i ∈ Finset.range N, perfectoidValuation p F (teichCoeffF p F z i) = 0) :
+    (∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (teichCoeffF p F z i) * (p : WittVector p F) ^ i) = 0 :=
+  Finset.sum_eq_zero fun i hi => by
+    rw [(Valuation.zero_iff _).mp (hz i hi), WittVector.teichmuller_zero, zero_mul]
+
+/-- **A max-attaining coefficient.** When the sup of the two prefixes' coordinate
+valuations is nonzero the range is nonempty, and the coordinate attaining the sup — `x`'s
+or `y`'s, whichever is larger there — has valuation exactly the sup, hence is nonzero. -/
+private theorem exists_maxAttaining_coeff (x y : WittVector p F) {N : ℕ} {M : NNReal}
+    (hM : M = (Finset.range N).sup (fun i => max
+      (perfectoidValuation p F (teichCoeffF p F x i))
+      (perfectoidValuation p F (teichCoeffF p F y i))))
+    (hMne : M ≠ 0) :
+    ∃ c : F, perfectoidValuation p F c = M ∧ c ≠ 0 := by
+  have hNpos : 0 < N := by
+    by_contra hN0
+    push Not at hN0
+    interval_cases N
+    · rw [hM] at hMne
+      simp at hMne
+  obtain ⟨i₀, hi₀mem, hi₀⟩ := Finset.exists_mem_eq_sup (Finset.range N)
+    (Finset.nonempty_range_iff.mpr hNpos.ne') (fun i => max
+      (perfectoidValuation p F (teichCoeffF p F x i))
+      (perfectoidValuation p F (teichCoeffF p F y i)))
+  set c : F := if perfectoidValuation p F (teichCoeffF p F y i₀)
+      ≤ perfectoidValuation p F (teichCoeffF p F x i₀)
+    then teichCoeffF p F x i₀ else teichCoeffF p F y i₀ with hc
+  have hvc : perfectoidValuation p F c = M := by
+    rw [hc]
+    split_ifs with hif
+    · rw [hM, hi₀]
+      exact (max_eq_left hif).symm
+    · rw [hM, hi₀]
+      exact (max_eq_right (le_of_not_ge hif)).symm
+  refine ⟨c, hvc, ?_⟩
+  intro h0
+  rw [h0] at hvc
+  exact hMne (by simpa using hvc.symm)
+
+/-- Dividing a prefix coordinate by a max-attaining `c` lands in `O_F`: the quotient has
+valuation `≤ 1` because `c` realises the sup. -/
+private theorem exists_ofF_lift_div (z : WittVector p F) (N : ℕ) {M : NNReal} {c : F}
+    (hcne : c ≠ 0) (hvcne : perfectoidValuation p F c ≠ 0)
+    (hvc : perfectoidValuation p F c = M)
+    (hzle : ∀ i ∈ Finset.range N, perfectoidValuation p F (teichCoeffF p F z i) ≤ M) :
+    ∀ i : ℕ, ∃ a : OF F, ((a : OF F) : F)
+      = if i ∈ Finset.range N then teichCoeffF p F z i / c else 0 := by
+  intro i
+  by_cases hi : i ∈ Finset.range N
+  · rw [if_pos hi]
+    refine (perfectoidValuation_integers p F).exists_of_le_one ?_
+    have hdiv : perfectoidValuation p F (teichCoeffF p F z i / c) *
+        perfectoidValuation p F c = perfectoidValuation p F (teichCoeffF p F z i) := by
+      rw [← Valuation.map_mul, div_mul_cancel₀ _ hcne]
+    refine le_of_mul_le_mul_right ?_ (pos_iff_ne_zero.mpr hvcne)
+    rw [one_mul, hdiv, hvc]
+    exact hzle i hi
+  · exact ⟨0, by rw [if_neg hi]; simp⟩
+
+/-- **The scaling factorisation**: with every coordinate divided by `c` lifted to `O_F`,
+the pair of prefixes is `teichmuller c` times a Witt vector over `O_F`. -/
+private theorem teichmuller_prefix_sum_factor (x y : WittVector p F) (N : ℕ) {c : F}
+    (hcne : c ≠ 0) (xh yh : ℕ → OF F)
+    (hxh : ∀ i, ((xh i : OF F) : F)
+      = if i ∈ Finset.range N then teichCoeffF p F x i / c else 0)
+    (hyh : ∀ i, ((yh i : OF F) : F)
+      = if i ∈ Finset.range N then teichCoeffF p F y i / c else 0) :
+    (∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
+    + (∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (teichCoeffF p F y i) * (p : WittVector p F) ^ i)
+      = WittVector.teichmuller p c *
+        WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+          ((∑ i ∈ Finset.range N,
+            WittVector.teichmuller p (xh i) * (p : Ainf p F) ^ i)
+          + (∑ i ∈ Finset.range N,
+            WittVector.teichmuller p (yh i) * (p : Ainf p F) ^ i)) := by
+  rw [map_add, map_sum, map_sum, mul_add, Finset.mul_sum, Finset.mul_sum]
+  refine congrArg₂ (· + ·) (Finset.sum_congr rfl fun i hi => ?_)
+    (Finset.sum_congr rfl fun i hi => ?_)
+  · rw [map_mul, map_pow, map_natCast, WittVector.map_teichmuller, ← mul_assoc,
+      ← map_mul]
+    congr 2
+    rw [show ((powerBoundedSubring.toSubring F).subtype) (xh i)
+      = ((xh i : OF F) : F) from rfl, hxh i, if_pos hi, mul_comm,
+      div_mul_cancel₀ _ hcne]
+  · rw [map_mul, map_pow, map_natCast, WittVector.map_teichmuller, ← mul_assoc,
+      ← map_mul]
+    congr 2
+    rw [show ((powerBoundedSubring.toSubring F).subtype) (yh i)
+      = ((yh i : OF F) : F) from rfl, hyh i, if_pos hi, mul_comm,
+      div_mul_cancel₀ _ hcne]
+
+
 /-- **The prefix-pair digit bound**: all Teichmüller coordinates of a sum of two
 prefixes are bounded by the largest input coordinate (scaling: factor out a
 max-attaining coefficient, the rest comes from `W(O_F)`). -/
@@ -1499,116 +1596,29 @@ theorem valuation_teichCoeffF_prefix_add_le (x y : WittVector p F) (N : ℕ) (j 
       (perfectoidValuation p F (teichCoeffF p F y i))) hi)
   rcases eq_or_ne M 0 with hM0 | hMne
   · -- degenerate: all input coordinates vanish, both prefixes are zero
-    have hzx : ∀ i ∈ Finset.range N, teichCoeffF p F x i = 0 := by
-      intro i hi
-      have h := hxle i hi
-      rw [hM0, nonpos_iff_eq_zero] at h
-      exact (Valuation.zero_iff _).mp h
-    have hzy : ∀ i ∈ Finset.range N, teichCoeffF p F y i = 0 := by
-      intro i hi
-      have h := hyle i hi
-      rw [hM0, nonpos_iff_eq_zero] at h
-      exact (Valuation.zero_iff _).mp h
-    have hsum0 : (∑ i ∈ Finset.range N,
-        WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
-      + (∑ i ∈ Finset.range N,
-        WittVector.teichmuller p (teichCoeffF p F y i) * (p : WittVector p F) ^ i)
-        = 0 := by
-      have h1 : (∑ i ∈ Finset.range N,
-          WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
-          = 0 :=
-        Finset.sum_eq_zero fun i hi => by
-          rw [hzx i hi, WittVector.teichmuller_zero, zero_mul]
-      have h2 : (∑ i ∈ Finset.range N,
-          WittVector.teichmuller p (teichCoeffF p F y i) * (p : WittVector p F) ^ i)
-          = 0 :=
-        Finset.sum_eq_zero fun i hi => by
-          rw [hzy i hi, WittVector.teichmuller_zero, zero_mul]
-      rw [h1, h2, add_zero]
-    rw [hsum0, hM0]
+    have hz : ∀ z : WittVector p F,
+        (∀ i ∈ Finset.range N, perfectoidValuation p F (teichCoeffF p F z i) ≤ M) →
+        ∀ i ∈ Finset.range N, perfectoidValuation p F (teichCoeffF p F z i) = 0 :=
+      fun z hzle i hi => by
+        have h := hzle i hi
+        rw [hM0, nonpos_iff_eq_zero] at h
+        exact h
+    rw [teichmuller_prefix_sum_eq_zero p F x N (hz x hxle),
+      teichmuller_prefix_sum_eq_zero p F y N (hz y hyle), add_zero, hM0]
     simp [teichCoeffF]
   · -- pick a max-attaining coefficient c
-    have hNpos : 0 < N := by
-      by_contra hN0
-      push Not at hN0
-      interval_cases N
-      · rw [hM] at hMne
-        simp at hMne
-    obtain ⟨i₀, hi₀mem, hi₀⟩ := Finset.exists_mem_eq_sup (Finset.range N)
-      (Finset.nonempty_range_iff.mpr hNpos.ne') (fun i => max
-        (perfectoidValuation p F (teichCoeffF p F x i))
-        (perfectoidValuation p F (teichCoeffF p F y i)))
-    set c : F := if perfectoidValuation p F (teichCoeffF p F y i₀)
-        ≤ perfectoidValuation p F (teichCoeffF p F x i₀)
-      then teichCoeffF p F x i₀ else teichCoeffF p F y i₀ with hc
-    have hvc : perfectoidValuation p F c = M := by
-      rw [hc]
-      split_ifs with hif
-      · rw [hM, hi₀]
-        exact (max_eq_left hif).symm
-      · rw [hM, hi₀]
-        exact (max_eq_right (le_of_not_ge hif)).symm
-    have hcne : c ≠ 0 := by
-      intro h0
-      rw [h0] at hvc
-      exact hMne (by simpa using hvc.symm)
-    have hvcne : perfectoidValuation p F c ≠ 0 := by
-      rw [hvc]
-      exact hMne
+    obtain ⟨c, hvc, hcne⟩ := exists_maxAttaining_coeff p F x y hM hMne
+    have hvcne : perfectoidValuation p F c ≠ 0 := by rw [hvc]; exact hMne
     -- O_F-lifts of all scaled coordinates
-    have hchx : ∀ i : ℕ, ∃ a : OF F, ((a : OF F) : F)
-        = if i ∈ Finset.range N then teichCoeffF p F x i / c else 0 := by
-      intro i
-      by_cases hi : i ∈ Finset.range N
-      · rw [if_pos hi]
-        refine (perfectoidValuation_integers p F).exists_of_le_one ?_
-        have hdiv : perfectoidValuation p F (teichCoeffF p F x i / c) *
-            perfectoidValuation p F c = perfectoidValuation p F (teichCoeffF p F x i) := by
-          rw [← Valuation.map_mul, div_mul_cancel₀ _ hcne]
-        refine le_of_mul_le_mul_right ?_ (pos_iff_ne_zero.mpr hvcne)
-        rw [one_mul, hdiv, hvc]
-        exact hxle i hi
-      · exact ⟨0, by rw [if_neg hi]; simp⟩
-    have hchy : ∀ i : ℕ, ∃ a : OF F, ((a : OF F) : F)
-        = if i ∈ Finset.range N then teichCoeffF p F y i / c else 0 := by
-      intro i
-      by_cases hi : i ∈ Finset.range N
-      · rw [if_pos hi]
-        refine (perfectoidValuation_integers p F).exists_of_le_one ?_
-        have hdiv : perfectoidValuation p F (teichCoeffF p F y i / c) *
-            perfectoidValuation p F c = perfectoidValuation p F (teichCoeffF p F y i) := by
-          rw [← Valuation.map_mul, div_mul_cancel₀ _ hcne]
-        refine le_of_mul_le_mul_right ?_ (pos_iff_ne_zero.mpr hvcne)
-        rw [one_mul, hdiv, hvc]
-        exact hyle i hi
-      · exact ⟨0, by rw [if_neg hi]; simp⟩
+    have hchx := exists_ofF_lift_div p F x N hcne hvcne hvc hxle
+    have hchy := exists_ofF_lift_div p F y N hcne hvcne hvc hyle
     choose xh hxh using hchx
     choose yh hyh using hchy
     set S : Ainf p F := (∑ i ∈ Finset.range N,
       WittVector.teichmuller p (xh i) * (p : Ainf p F) ^ i)
       + (∑ i ∈ Finset.range N,
         WittVector.teichmuller p (yh i) * (p : Ainf p F) ^ i) with hS
-    have hfactor : (∑ i ∈ Finset.range N,
-        WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
-      + (∑ i ∈ Finset.range N,
-        WittVector.teichmuller p (teichCoeffF p F y i) * (p : WittVector p F) ^ i)
-        = WittVector.teichmuller p c *
-          WittVector.map ((powerBoundedSubring.toSubring F).subtype) S := by
-      rw [hS, map_add, map_sum, map_sum, mul_add, Finset.mul_sum, Finset.mul_sum]
-      refine congrArg₂ (· + ·) (Finset.sum_congr rfl fun i hi => ?_)
-        (Finset.sum_congr rfl fun i hi => ?_)
-      · rw [map_mul, map_pow, map_natCast, WittVector.map_teichmuller, ← mul_assoc,
-          ← map_mul]
-        congr 2
-        rw [show ((powerBoundedSubring.toSubring F).subtype) (xh i)
-          = ((xh i : OF F) : F) from rfl, hxh i, if_pos hi, mul_comm,
-          div_mul_cancel₀ _ hcne]
-      · rw [map_mul, map_pow, map_natCast, WittVector.map_teichmuller, ← mul_assoc,
-          ← map_mul]
-        congr 2
-        rw [show ((powerBoundedSubring.toSubring F).subtype) (yh i)
-          = ((yh i : OF F) : F) from rfl, hyh i, if_pos hi, mul_comm,
-          div_mul_cancel₀ _ hcne]
+    have hfactor := teichmuller_prefix_sum_factor p F x y N hcne xh yh hxh hyh
     rw [hfactor, teichCoeffF_teichmuller_mul, Valuation.map_mul, teichCoeffF_map, hvc]
     exact mul_le_of_le_one_right zero_le (perfectoidValuation_le_one p F _)
 

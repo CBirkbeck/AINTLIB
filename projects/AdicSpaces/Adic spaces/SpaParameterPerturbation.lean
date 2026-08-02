@@ -197,6 +197,124 @@ theorem indexedRationalSet_eq_rationalOpen {ι : Type v} [PlusSubring B]
   · rintro ⟨⟨hv, hT, hg⟩, -⟩
     exact ⟨hv, fun i hi => hT (f i) (Finset.mem_image_of_mem f hi), hg⟩
 
+/-- **Perturbation, forward**: at a point of `Spa B B⁺`, membership of the presented set
+for `(f, g)` gives membership for the perturbed `(f', g')`. The bound `M` forces
+`v(ϖ^(M+1)·b) < v(g)`, so `v(g') = v(g)` and every `v(f' i) ≤ v(g')` follows from
+`v(f i) ≤ v(g)` by the ultrametric inequality. -/
+private theorem indexedRationalSet_perturb_forward
+    {ι : Type v} [PlusSubring B] [ValuativeRel B]
+    {ϖ : B} {s : Finset ι} {f f' : ι → B} {g g' : B} {M : ℕ}
+    (v : Spv B) (hv : v ∈ Spa B B⁺)
+    (hbridge : ∀ x y : B, v.vle x y ↔ ValuativeRel.valuation B x ≤ ValuativeRel.valuation B y)
+    (hzero : ∀ x : B, v.vle x 0 ↔ ValuativeRel.valuation B x = 0)
+    (hϖ_succ_lt : ValuativeRel.valuation B (ϖ ^ (M + 1)) < ValuativeRel.valuation B (ϖ ^ M))
+    (hδ_le : ∀ b ∈ (B⁺ : Subring B),
+      ValuativeRel.valuation B (ϖ ^ (M + 1) * b) ≤ ValuativeRel.valuation B (ϖ ^ (M + 1)))
+    (hbound : ∀ v : Spv B, v ∈ Spa B B⁺ →
+      v.vle (ϖ ^ M) g ∨ ∃ i ∈ s, v.vle (ϖ ^ M) (f i))
+    (hδf : ∀ i ∈ s, ∃ b ∈ (B⁺ : Subring B), f' i = f i + ϖ ^ (M + 1) * b)
+    {bg : B} (hbg_mem : bg ∈ (B⁺ : Subring B))
+    (hbg : g' = g + ϖ ^ (M + 1) * bg) :
+    ((∀ i ∈ s, v.vle (f i) g) ∧ ¬ v.vle g 0) →
+      ((∀ i ∈ s, v.vle (f' i) g') ∧ ¬ v.vle g' 0) := by
+  set val := ValuativeRel.valuation B with hval
+  rintro ⟨hT, hg_ne⟩
+  rw [hzero] at hg_ne
+  -- `v(ϖ^M) ≤ v(g)`
+  have hMg : val (ϖ ^ M) ≤ val g := by
+    rcases hbound v hv with h | ⟨i, hi, h⟩
+    · rwa [hbridge] at h
+    · rw [hbridge] at h
+      exact h.trans ((hbridge _ _).mp (hT i hi))
+  have hδg_lt : val (ϖ ^ (M + 1) * bg) < val g :=
+    lt_of_le_of_lt (hδ_le bg hbg_mem) (lt_of_lt_of_le hϖ_succ_lt hMg)
+  -- `v(g') = v(g)`
+  have hg'_eq : val g' = val g := by
+    rw [hbg]
+    exact Valuation.map_add_eq_of_lt_left _ hδg_lt
+  refine ⟨fun i hi => ?_, ?_⟩
+  · obtain ⟨bf, hbf_mem, hbf⟩ := hδf i hi
+    have hδf_lt : val (ϖ ^ (M + 1) * bf) ≤ val g :=
+      le_trans (hδ_le bf hbf_mem) (le_trans hϖ_succ_lt.le hMg)
+    rw [hbridge, hbf, hg'_eq]
+    calc val (f i + ϖ ^ (M + 1) * bf) ≤
+          max (val (f i)) (val (ϖ ^ (M + 1) * bf)) := Valuation.map_add _ _ _
+      _ ≤ val g := max_le ((hbridge _ _).mp (hT i hi)) hδf_lt
+  · rw [hzero, hg'_eq]
+    exact hg_ne
+
+/-- **Perturbation, reverse**. Longer than the forward direction for one reason: `hbound`
+bounds `v(ϖ^M)` against `g` and the `f i`, not against `g'`, so `v(ϖ^M) ≤ v(g')` has to be
+re-derived — by contradiction in the `g` case, and through `v(f' i) = v(f i)` in the other. -/
+private theorem indexedRationalSet_perturb_reverse
+    {ι : Type v} [PlusSubring B] [ValuativeRel B]
+    {ϖ : B} {s : Finset ι} {f f' : ι → B} {g g' : B} {M : ℕ}
+    (v : Spv B) (hv : v ∈ Spa B B⁺)
+    (hbridge : ∀ x y : B, v.vle x y ↔ ValuativeRel.valuation B x ≤ ValuativeRel.valuation B y)
+    (hzero : ∀ x : B, v.vle x 0 ↔ ValuativeRel.valuation B x = 0)
+    (hϖ_succ_lt : ValuativeRel.valuation B (ϖ ^ (M + 1)) < ValuativeRel.valuation B (ϖ ^ M))
+    (hδ_le : ∀ b ∈ (B⁺ : Subring B),
+      ValuativeRel.valuation B (ϖ ^ (M + 1) * b) ≤ ValuativeRel.valuation B (ϖ ^ (M + 1)))
+    (hbound : ∀ v : Spv B, v ∈ Spa B B⁺ →
+      v.vle (ϖ ^ M) g ∨ ∃ i ∈ s, v.vle (ϖ ^ M) (f i))
+    (hδf : ∀ i ∈ s, ∃ b ∈ (B⁺ : Subring B), f' i = f i + ϖ ^ (M + 1) * b)
+    {bg : B} (hbg_mem : bg ∈ (B⁺ : Subring B))
+    (hbg : g' = g + ϖ ^ (M + 1) * bg) :
+    ((∀ i ∈ s, v.vle (f' i) g') ∧ ¬ v.vle g' 0) →
+      ((∀ i ∈ s, v.vle (f i) g) ∧ ¬ v.vle g 0) := by
+  set val := ValuativeRel.valuation B with hval
+  rintro ⟨hT', hg'_ne⟩
+  rw [hzero] at hg'_ne
+  -- first: `v(ϖ^M) ≤ v(g')`
+  have hMg' : val (ϖ ^ M) ≤ val g' := by
+    rcases hbound v hv with h | ⟨i, hi, h⟩
+    · -- `v(ϖ^M) ≤ v(g)`; if `v(g') < v(ϖ^M) ≤ v(g)` then `v(δg) = v(g)`… derive directly:
+      rw [hbridge] at h
+      by_contra hcon
+      rw [not_le] at hcon
+      -- then `v(g') < v(ϖ^M) ≤ v(g)`, and `v(δg) ≤ v(ϖ^(M+1)) < v(ϖ^M) ≤ v(g)`,
+      -- so `v(g') = v(g + δg) = v(g) ≥ v(ϖ^M)` — contradiction.
+      have hδlt : val (ϖ ^ (M + 1) * bg) < val g :=
+        lt_of_le_of_lt (hδ_le bg hbg_mem) (lt_of_lt_of_le hϖ_succ_lt h)
+      have : val g' = val g := by
+        rw [hbg]; exact Valuation.map_add_eq_of_lt_left _ hδlt
+      rw [this] at hcon
+      exact absurd h (not_le.mpr hcon)
+    · -- `v(ϖ^M) ≤ v(f i)`: then `v(f' i) = v(f i)`, and membership gives
+      -- `v(f' i) ≤ v(g')`.
+      rw [hbridge] at h
+      obtain ⟨bf, hbf_mem, hbf⟩ := hδf i hi
+      have hδlt : val (ϖ ^ (M + 1) * bf) < val (f i) :=
+        lt_of_le_of_lt (hδ_le bf hbf_mem) (lt_of_lt_of_le hϖ_succ_lt h)
+      have hf'_eq : val (f' i) = val (f i) := by
+        rw [hbf]; exact Valuation.map_add_eq_of_lt_left _ hδlt
+      have := (hbridge _ _).mp (hT' i hi)
+      rw [hf'_eq] at this
+      exact h.trans this
+  -- `v(δg) < v(g')`, so `v(g) = v(g')`
+  have hδg_lt : val (ϖ ^ (M + 1) * bg) < val g' :=
+    lt_of_le_of_lt (hδ_le bg hbg_mem) (lt_of_lt_of_le hϖ_succ_lt hMg')
+  have hg_eq : val g = val g' := by
+    have : g = g' + -(ϖ ^ (M + 1) * bg) := by rw [hbg]; ring
+    rw [this]
+    have hneg : val (-(ϖ ^ (M + 1) * bg)) < val g' := by rwa [Valuation.map_neg]
+    exact Valuation.map_add_eq_of_lt_left _ hneg
+  refine ⟨fun i hi => ?_, ?_⟩
+  · obtain ⟨bf, hbf_mem, hbf⟩ := hδf i hi
+    have hδf_lt : val (ϖ ^ (M + 1) * bf) ≤ val g' :=
+      le_trans (hδ_le bf hbf_mem) (le_trans hϖ_succ_lt.le hMg')
+    rw [hbridge, hg_eq]
+    have : f i = f' i + -(ϖ ^ (M + 1) * bf) := by rw [hbf]; ring
+    rw [this]
+    calc val (f' i + -(ϖ ^ (M + 1) * bf)) ≤
+          max (val (f' i)) (val (-(ϖ ^ (M + 1) * bf))) := Valuation.map_add _ _ _
+      _ ≤ val g' := by
+          rw [Valuation.map_neg]
+          exact max_le ((hbridge _ _).mp (hT' i hi)) hδf_lt
+  · rw [hzero, hg_eq]
+    exact hg'_ne
+
+
 /-- **The perturbation theorem** (Kedlaya Ex. 1.2.2(b) / the approximation step of
 Wedhorn 7.48): if `M` is a uniform spanning bound for the presentation
 `(f, g)` on `Spa B B⁺`, then perturbing every parameter by an element of
@@ -245,82 +363,9 @@ theorem indexedRationalSet_perturb_eq {ι : Type v} [PlusSubring B]
           mul_le_mul_of_nonneg_left hb1 zero_le
       _ = _ := mul_one _
   obtain ⟨bg, hbg_mem, hbg⟩ := hδg
-  constructor
-  · -- forward: membership for `(f, g)` gives membership for `(f', g')`
-    rintro ⟨hT, hg_ne⟩
-    rw [hzero] at hg_ne
-    -- `v(ϖ^M) ≤ v(g)`
-    have hMg : val (ϖ ^ M) ≤ val g := by
-      rcases hbound v hv with h | ⟨i, hi, h⟩
-      · rwa [hbridge] at h
-      · rw [hbridge] at h
-        exact h.trans ((hbridge _ _).mp (hT i hi))
-    have hδg_lt : val (ϖ ^ (M + 1) * bg) < val g :=
-      lt_of_le_of_lt (hδ_le bg hbg_mem) (lt_of_lt_of_le hϖ_succ_lt hMg)
-    -- `v(g') = v(g)`
-    have hg'_eq : val g' = val g := by
-      rw [hbg]
-      exact Valuation.map_add_eq_of_lt_left _ hδg_lt
-    refine ⟨fun i hi => ?_, ?_⟩
-    · obtain ⟨bf, hbf_mem, hbf⟩ := hδf i hi
-      have hδf_lt : val (ϖ ^ (M + 1) * bf) ≤ val g :=
-        le_trans (hδ_le bf hbf_mem) (le_trans hϖ_succ_lt.le hMg)
-      rw [hbridge, hbf, hg'_eq]
-      calc val (f i + ϖ ^ (M + 1) * bf) ≤
-            max (val (f i)) (val (ϖ ^ (M + 1) * bf)) := Valuation.map_add _ _ _
-        _ ≤ val g := max_le ((hbridge _ _).mp (hT i hi)) hδf_lt
-    · rw [hzero, hg'_eq]
-      exact hg_ne
-  · -- reverse: membership for `(f', g')` gives membership for `(f, g)`
-    rintro ⟨hT', hg'_ne⟩
-    rw [hzero] at hg'_ne
-    -- first: `v(ϖ^M) ≤ v(g')`
-    have hMg' : val (ϖ ^ M) ≤ val g' := by
-      rcases hbound v hv with h | ⟨i, hi, h⟩
-      · -- `v(ϖ^M) ≤ v(g)`; if `v(g') < v(ϖ^M) ≤ v(g)` then `v(δg) = v(g)`… derive directly:
-        rw [hbridge] at h
-        by_contra hcon
-        rw [not_le] at hcon
-        -- then `v(g') < v(ϖ^M) ≤ v(g)`, and `v(δg) ≤ v(ϖ^(M+1)) < v(ϖ^M) ≤ v(g)`,
-        -- so `v(g') = v(g + δg) = v(g) ≥ v(ϖ^M)` — contradiction.
-        have hδlt : val (ϖ ^ (M + 1) * bg) < val g :=
-          lt_of_le_of_lt (hδ_le bg hbg_mem) (lt_of_lt_of_le hϖ_succ_lt h)
-        have : val g' = val g := by
-          rw [hbg]; exact Valuation.map_add_eq_of_lt_left _ hδlt
-        rw [this] at hcon
-        exact absurd h (not_le.mpr hcon)
-      · -- `v(ϖ^M) ≤ v(f i)`: then `v(f' i) = v(f i)`, and membership gives
-        -- `v(f' i) ≤ v(g')`.
-        rw [hbridge] at h
-        obtain ⟨bf, hbf_mem, hbf⟩ := hδf i hi
-        have hδlt : val (ϖ ^ (M + 1) * bf) < val (f i) :=
-          lt_of_le_of_lt (hδ_le bf hbf_mem) (lt_of_lt_of_le hϖ_succ_lt h)
-        have hf'_eq : val (f' i) = val (f i) := by
-          rw [hbf]; exact Valuation.map_add_eq_of_lt_left _ hδlt
-        have := (hbridge _ _).mp (hT' i hi)
-        rw [hf'_eq] at this
-        exact h.trans this
-    -- `v(δg) < v(g')`, so `v(g) = v(g')`
-    have hδg_lt : val (ϖ ^ (M + 1) * bg) < val g' :=
-      lt_of_le_of_lt (hδ_le bg hbg_mem) (lt_of_lt_of_le hϖ_succ_lt hMg')
-    have hg_eq : val g = val g' := by
-      have : g = g' + -(ϖ ^ (M + 1) * bg) := by rw [hbg]; ring
-      rw [this]
-      have hneg : val (-(ϖ ^ (M + 1) * bg)) < val g' := by rwa [Valuation.map_neg]
-      exact Valuation.map_add_eq_of_lt_left _ hneg
-    refine ⟨fun i hi => ?_, ?_⟩
-    · obtain ⟨bf, hbf_mem, hbf⟩ := hδf i hi
-      have hδf_lt : val (ϖ ^ (M + 1) * bf) ≤ val g' :=
-        le_trans (hδ_le bf hbf_mem) (le_trans hϖ_succ_lt.le hMg')
-      rw [hbridge, hg_eq]
-      have : f i = f' i + -(ϖ ^ (M + 1) * bf) := by rw [hbf]; ring
-      rw [this]
-      calc val (f' i + -(ϖ ^ (M + 1) * bf)) ≤
-            max (val (f' i)) (val (-(ϖ ^ (M + 1) * bf))) := Valuation.map_add _ _ _
-        _ ≤ val g' := by
-            rw [Valuation.map_neg]
-            exact max_le ((hbridge _ _).mp (hT' i hi)) hδf_lt
-    · rw [hzero, hg_eq]
-      exact hg'_ne
+  exact ⟨indexedRationalSet_perturb_forward v hv
+      hbridge hzero hϖ_succ_lt hδ_le hbound hδf hbg_mem hbg,
+    indexedRationalSet_perturb_reverse v hv
+      hbridge hzero hϖ_succ_lt hδ_le hbound hδf hbg_mem hbg⟩
 
 end ValuationSpectrum
