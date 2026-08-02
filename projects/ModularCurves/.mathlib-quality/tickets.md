@@ -32724,7 +32724,14 @@ equivariance is already proved and the descent engine already exists.
 908-line development. No work; cite it.
 
 #### [WP-A5.2] The level-structure-to-root map on `k̄`-points
-- **Status**: open · **File**: new, `WeilPairing/TautRootField.lean` · **Depends on**: WP-A3
+- **Status**: ALREADY PROVED — `fieldWeilPairing_galois` and the hypothesis-free
+  `fieldWeilPairing_galois'` in `WeilPairing/GaloisFieldPairing.lean:40/60`, sorry-free, in
+  exactly the base-change form Galois descent wants (`W` over the subfield, `L` the
+  extension), with `zsmul_galoisPointEquiv_eq_zero` supplying the σ-side torsion
+  hypotheses. I wrote a duplicate and the **root build** caught it
+  ("environment already contains") — the LSP could not, because that file was not imported.
+  Sixth near-duplicate this session: grep the whole `WeilPairing/` directory for the
+  *concept*, not just the file you are editing. · **File**: new, `WeilPairing/TautRootField.lean` · **Depends on**: WP-A3
 - **Statement**: for `k` a field of characteristic zero with `N` invertible, and `E/k`
   elliptic, the map sending a naive full level-`N` structure `(P, Q)` on `E_{k̄}` to
   `fieldWeilPairing … P Q : {u : k̄ // u ^ N = 1}` is `Gal(k̄/k)`-equivariant.
