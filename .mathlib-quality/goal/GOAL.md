@@ -8288,3 +8288,73 @@ batch — find the level the content lives at, and the transport stops being pro
 
     over-50 proofs   486 (baseline) → 114   (112 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: Keystone trio → loc_norm_le (114 → 106)
+
+Six targets, and the seam is the same one every time now.
+
+    relativePiece_equiv_restrict_square ×3     90/94/94 → 47/50/50
+    presheafValueRingEquivHuber_comp_apply     104 → 47
+    mapBD_eq_mapCD_of_pushed_gluing             80 → 50
+    d2_koszul_single                            68 → 47
+    loc_norm_le                                 71 → 49
+
+### The recurring seam: the identity is at the LOCALIZATION level
+
+Four of the six split at the same place. A statement about `presheafValue` — a completion —
+is proved by checking a ring-hom identity on the image of `Loc D.s` and then transporting it
+by density. Named, that identity is the content and the parent is just the transport:
+
+    relativePiece_restrict_square_locLevel        (×3, one script)
+    locMapOfHom_comp_eq_restrictionMapAlg_comp
+    genPiece_relative_overlap_square₁_comp_coeRingHom   (previous batch)
+    restrictionMapHom_comp_coeRingHom                  (previous batch)
+
+**Where to cut: find the level the content lives at.** Everything above it is transport, and
+transport does not survive extraction — it is deleted by restatement.
+
+### `rfl` is not a substitute for the parent's named equation
+
+Writing the helper's statement with `rfl` in a `locMapOfHom … hs` slot fails: with no
+expected type written down, `rfl` unifies both sides to `D₁₂.s` and the statement is not the
+intended one. The parent's `have hs₂ : D₁₂.s = e₂.toRingHom D₁.s := rfl` works only because
+the type is spelled out. Same rule as `parent_binders`: **the equation the parent wrote down
+is part of the interface, not an incidental `rfl`.**
+
+### A repeated ANONYMOUS block has no name to dedup on
+
+`mapBD_eq_mapCD_of_pushed_gluing` carried the same five-line `by` block four times, in
+argument position inside `presheafValueMapOfHom_restriction` — once for the base and once
+for the piece, in each of two naturality steps. Named (`rhoB_mem_pushDatumD_T`,
+`rhoC_mem_pushDatumD_T`) they are 4 and 3 lines. A name-based dedup scan cannot see these;
+only the repeated-block scan can.
+
+### `norm_sub_le_max` is a mathlib gap
+
+Checked before writing: mathlib has `IsUltrametricDist.norm_add_le_max` and no `sub` form.
+`Analysis/Normed/Field/Krasner.lean` and `NumberTheory/Padics/MahlerBasis.lean` both inline
+`simpa [norm_neg, sub_eq_add_neg] using norm_add_le_max a (-b)`. Kept private; flagged
+mathlibable.
+
+### DEFERRED: `presheafValue_mvRestricted_isUnit_mk_s` (84) — blocked on task 3
+
+Its 29-line `letI` instance preamble is needed by every block in it, so any extraction
+carries a copy and lands over 50 by itself. The fix is file-level `local instance`s for the
+`restrictedMvPowerSeriesSubring` topology/uniformity/completeness — which is the Wedhorn828
+instance-preamble finding already filed (repeated 6×, ~150 lines), and a `/cleanup`-scale
+change with real diamond risk. Not decompose work. Same reason as the first deferral.
+
+### `set` safety, refined again
+
+Statement size is the predictor. `groebner_reduce` (43-line `∃`) timed out; every target
+here with a 3–21-line statement took `set` without complaint. Added to the rule in
+`rank_repeats`.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 106   (104 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
+
+Baseline caveat: 486 was measured with the `sig_end` bug fixed this batch, so it was
+somewhat overstated. The corrected measure moved the count 114 → 110 on its own, and
+exposed `ChartComparison::isSheafy_presheafChart` (reported 80) as never having been over 50.
