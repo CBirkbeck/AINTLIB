@@ -9506,3 +9506,47 @@ binders:
 
     over-50 proofs   486 (baseline) → 69   (67 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: exists_heightOne_analytic_cont_supp_ge_of_nonOpen_prime' 93 → closed
+
+`Lemma745.lean`. Four conclusion-preserving lifts:
+
+    valuation_lt_one_of_isTopologicallyNilpotent  10L
+    isContinuous_map_withZeroUnitsSplit           15L
+    supp_map_withZeroUnitsSplit                    3L
+    exists_pow_le_of_topologicallyNilpotent       25L  (the cofinality block)
+
+### `letI` in a proof vs an instance BINDER in a statement
+
+The proof opens `letI : ValuativeRel A := x₀.toValuativeRel` and then works with
+`ValuativeRel.valuation A`, so three of the four statements mention the value group and
+cannot be stated instance-free. The campaign rule ("a `letI` never belongs in a statement")
+does **not** mean such blocks cannot be lifted — it means the instance must appear as a
+*binder*: `private theorem … [ValuativeRel A] (hv_cont : (ValuativeRel.valuation A).IsContinuous)`.
+The call site's `letI` then supplies it silently. That distinction is what made this target
+tractable at all, and it is worth separating from the "never `letI` in a statement" rule it
+looks like it contradicts.
+
+### The dropped-parens template bug, second occurrence
+
+Substituting `ValuativeRel.ValueGroupWithZero A` into `withZeroUnitsSplit {VGZ}` produced
+`withZeroUnitsSplit ValuativeRel.ValueGroupWithZero A` — two arguments, not one. Identical
+to the `map_mul @ALG@` bug in the ChartVObj batch. **Any template substitution landing in
+argument position needs its own parentheses**, because the text being replaced was
+parenthesised in the original precisely for that reason.
+
+### `verify_file.py` earned its keep twice
+
+It refused the first attempt (`over-width lines increased`, 3 → 5) and the `&&` chain never
+reached the build — the two long lines were the un-parenthesised substitution above and one
+`calc` head. Catching a width regression before spending a build on it is the cheap half of
+what the checker is for; the expensive half is the declaration diff.
+
+Four `omit`s needed, all named by the linter one round at a time:
+`[IsTopologicalRing A]` on three lemmas and `[TopologicalSpace A]` additionally on the
+support one.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 68   (66 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
