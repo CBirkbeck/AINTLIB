@@ -32614,3 +32614,111 @@ entirely, because it never picks a basis.
 
 (B) looks shorter and is independent of T-W7; (A) is the route the board's docstrings
 assume. Worth a decision before either is built.
+
+# ══════════════════════════════════════════════════════════════════════════
+# /develop --continue — ROUTE A PROPERLY: the det twist (2026-08-02)
+# ══════════════════════════════════════════════════════════════════════════
+
+## The design decision, and why it is forced
+
+Route A builds `e_N` on a cover trivialising `E[N]` and descends. On the kernel pair two
+trivialisations differ by `g ∈ GL₂(ℤ/N)`; `detConstMor_gl2Both` gives
+`D(gv, gw) = det(g)·D(v, w)`, so a root-of-unity splitting `ζ^D` descends **iff** the root
+attached to a trivialisation transforms by the inverse determinant,
+`ζ(g ∘ φ) = ζ(φ)^{(det g)⁻¹}`.
+
+**The det twist is therefore irreducible content, not a bookkeeping nuisance.** Concretely:
+the full-level cover `Y(N)` is a `GL₂(ℤ/N)`-torsor over `S`, so `Y(N)/SL₂` is a
+`(ℤ/N)ˣ`-torsor; `μ_N^{prim}` is another; and a det-twisted root is exactly an
+**isomorphism of those two torsors**. That isomorphism *is* the Weil pairing's content, so
+no amount of trivialising can produce it — options (ii) "adjoin `ζ_N` and fix the
+determinant" and (iii) "basis-free into `⋀²E[N]`" both relocate it rather than remove it
+(and (ii) is circular: which component of `Y(N)` matches which `ζ_N` is decided by the
+pairing).
+
+**Decision: option (i).** The det twist enters as DATA, supplied non-circularly by the
+**field-level** Weil pairing — `ModularCurves.fieldWeilPairing`
+(`WeilPairing/FieldPairing.lean`), a sorry-free wrapper of AINTLIB's
+`HasseWeil.WeilPairing.weilPairing` (Silverman AEC III.8, divisor construction). That
+pairing is built from `weilFunction`, not from any trivialisation, so using it to supply
+the root is not circular.
+
+## Tickets
+
+### [WP-A1] The determinant law for the field pairing
+- **Status**: open · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: none
+- **Type**: theorem · **Parent**: none
+- **Statement**: for `F` algebraically closed, `W` elliptic over `F`, `N` invertible, and
+  `P Q : W.toAffine.Point` killed by `N`, and `a b c d : ℤ`,
+  `weilPairing W N _ (a•P + b•Q) (c•P + d•Q) _ _ = (weilPairing W N _ P Q _ _) ^ (a*d - b*c)`.
+- **Proof sketch**: (1) expand the left slot with `weilPairing_mul_left`; (2) expand each
+  right slot with `weilPairing_mul_right`; (3) `weilPairing_self` kills the `e(P,P)` and
+  `e(Q,Q)` terms; (4) `weilPairing_antisymm` turns `e(Q,P)` into `e(P,Q)⁻¹`; (5) collect
+  exponents with `zpow_add`/`zpow_mul`.
+- **Mathlib/project lemmas**: `HasseWeil.WeilPairing.weilPairing_mul_left` (Pairing.lean:276),
+  `_mul_right` (PairingProps.lean:109), `_self` (:255), `_antisymm` (:365),
+  `_nsmul_left` (Pairing.lean:312).
+- **Sources**: Silverman, *AEC* III.8.1 (bilinearity, alternation, antisymmetry).
+- **Generality**: over `[Field F] [IsAlgClosed F]` as the existing HasseWeil API requires;
+  `ℤ`-indexed to match `weilPairing`'s index.
+
+### [WP-A2] The determinant law in the `μ_N`-bundled packaging
+- **Status**: open · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: WP-A1
+- **Statement**: the same identity for `fieldWeilPairing` (ℕ-indexed, `{u // u^N = 1}`-valued).
+- **Proof sketch**: `Subtype.ext` then `fieldWeilPairing_val` and WP-A1.
+- **Generality**: matches `fieldWeilPairing`.
+
+### [WP-A3] The root attached to a basis, and its GL₂ law
+- **Status**: open · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: WP-A2
+- **Statement**: `tautRoot W N hN P Q hP hQ : {u : F // u ^ N = 1} := fieldWeilPairing …`,
+  together with `tautRoot_gl2`: re-marking `(P,Q)` by `g ∈ GL₂(ZMod N)` raises the root to
+  `det g`. Single-conclusion: the def and the law are separate declarations.
+- **Proof sketch**: definition is a rename; the law is WP-A2 with `a b c d` the entries of `g`.
+- **Generality**: as WP-A2.
+
+### [WP-A4] Cocycle from a det-twisted root (THE HEART)
+- **Status**: open · **File**: `WeilPairing/RootSplitting.lean` · **Depends on**: WP-A3
+- **Statement**: given, on the kernel pair of the cover, two trivialisations differing by
+  a `GL₂(ZMod N)`-transition `g` and two roots with `ζ₁ = ζ₂ ^ (det g)`, the two pullbacks
+  of `localDetPairing` agree.
+- **Proof sketch**: (1) rewrite both sides through `localDetPairing`; (2) push the
+  transition through with `detConstMor_gl2Both`; (3) the resulting exponent shift
+  `· * det g` is absorbed by `ζ₁ = ζ₂ ^ det g` via `rootSplitting`'s definition
+  (`rootPower` is `ζ^k.val`, so this is `pow_mul` after `ZMod.val` bookkeeping).
+- **Mathlib/project lemmas**: `detConstMor_gl2Both`, `constSchemeMap_comp`,
+  `rootSplitting_ι`, `rootPower`, `muNMapAlong_π`.
+- **Generality**: any base scheme; the transition is a `GL₂(ZMod N)` element, i.e. the
+  locally-constant case. (The fully general locally-constant transition is WP-A6.)
+
+### [WP-A5] The root as a section over the cover — **API GAP, field base first**
+- **Status**: open · **File**: new, `WeilPairing/TautRootSection.lean` · **Depends on**: WP-A3
+- **Statement**: over an algebraically closed / general field base, the assignment
+  "level structure ↦ `tautRoot` of its basis" is induced by a morphism
+  `Y(N) ⟶ μ_N` of finite étale schemes.
+- **Proof sketch**: the assignment is `Gal(k̄/k)`-equivariant (the field pairing commutes
+  with the Galois action — `GaloisEquivariance.lean`), so
+  `exists_finiteEtaleHom_of_galoisEquivariant` (`EtaleDescent.lean:309`) produces the
+  morphism.
+- **Honest status**: this is the API gap of route A. Over a **field** base it is
+  dischargeable as sketched. Over an **arbitrary** `ℚ`-scheme base — what the moduli
+  functor needs — it requires spreading out; that is ticket WP-A7 and is NOT yet planned
+  in detail, because the field case must be built first to see the right shape.
+
+### [WP-A6] Locally-constant transitions
+- **Status**: blocked (needs WP-A4) · **File**: `WeilPairing/RootSplitting.lean`
+- **Statement**: WP-A4 with the transition a morphism into the constant `GL₂(ZMod N)`
+  scheme rather than a single matrix.
+- **Note**: only needed if the cover's kernel pair is not connected; check before building.
+
+### [WP-A7] General base — spreading out the root section
+- **Status**: blocked (needs WP-A5) · **File**: TBD
+- **Note**: deliberately unplanned until WP-A5 lands. Do not start speculatively.
+
+### [WP-A8] Assemble `WeilPairingLocalData` and discharge DS4
+- **Status**: blocked (needs WP-A4, WP-A5/A7) · **File**: `WeilPairing/CharZeroAssembly.lean`
+- **Statement**: build a `WeilPairingLocalData` from the full-level cover
+  (`fullLevelSpaceStruct_fppf`), `localDetPairing` with the section from WP-A5/A7, and the
+  cocycle from WP-A4; conclude via `nonempty_weilPairing_of_localData`.
+
+## Dependency order for execution
+WP-A1 → WP-A2 → WP-A3 → {WP-A4, WP-A5} → WP-A8 (with WP-A6/A7 as needed).
