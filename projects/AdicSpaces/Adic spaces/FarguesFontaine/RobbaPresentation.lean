@@ -2857,6 +2857,35 @@ theorem kerSol_decay_of_le_one {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     _ = δ / 2 := by rw [hVg, one_pow, one_mul]
     _ < δ := NNReal.half_lt_self hδ.ne'
 
+/-- In `ℝ≥0`, a factor of `1` whose partner exceeds `1` is itself below `1`. -/
+private lemma lt_one_of_mul_eq_one_of_one_lt {a b : NNReal} (hab : a * b = 1) (hb : 1 < b) :
+    a < 1 := by
+  by_contra hcon
+  push Not at hcon
+  have h2 : (1 : NNReal) * 1 < a * b := by
+    calc (1 : NNReal) * 1 = 1 := one_mul 1
+      _ ≤ 1 * a := by rw [one_mul]; exact hcon
+      _ < b * a := mul_lt_mul_of_pos_right hb (lt_of_lt_of_le one_pos hcon)
+      _ = a * b := mul_comm _ _
+  rw [one_mul, hab] at h2
+  exact absurd h2 (lt_irrefl _)
+
+/-- `C·rⁿ⁺¹ → 0` when `r < 1`. -/
+private lemma tendsto_const_mul_pow_succ {r : NNReal} (hr : r < 1) (C : NNReal) :
+    Filter.Tendsto (fun n : ℕ => C * r ^ (n + 1)) Filter.atTop (nhds 0) := by
+  have h1 : Filter.Tendsto (fun n : ℕ => r ^ (n + 1)) Filter.atTop (nhds 0) :=
+    (tendsto_pow_atTop_nhds_zero_of_lt_one hr).comp (Filter.tendsto_add_atTop_nat 1)
+  simpa using h1.const_mul C
+
+/-- With `a·b = 1` and `a < 1`, the tail factor `bⁿ·aⁿ⁺¹` is at most `1`. -/
+private lemma mul_pow_mul_pow_succ_le {a b c : NNReal} (hab : a * b = 1) (ha1 : a < 1)
+    (n : ℕ) : c * (b ^ n * a ^ (n + 1)) ≤ c := by
+  calc c * (b ^ n * a ^ (n + 1)) = c * ((a * b) ^ n * a) := by rw [mul_pow]; ring
+    _ = c * a := by rw [hab, one_pow, one_mul]
+    _ ≤ c * 1 := mul_le_mul_of_nonneg_left ha1.le zero_le
+    _ = c := mul_one _
+
+
 /-- **Kernel-solution decay, expanding scale** (the bottom-radius
 component): with `1 < v(g)` the inverse powers contract and the solution
 values decay — no vanishing hypothesis needed. -/
@@ -2871,37 +2900,18 @@ theorem kerSol_decay_of_one_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   have hg0 : (0 : NNReal) < Valued.v g := lt_trans one_pos hg
   have hVg : Valued.v V * Valued.v g = 1 := by
     rw [← Valuation.map_mul, mul_comm V g, hinv, Valuation.map_one]
-  have hV1 : Valued.v V < 1 := by
-    by_contra hcon
-    push Not at hcon
-    have h2 : (1 : NNReal) * 1 < Valued.v V * Valued.v g := by
-      calc (1 : NNReal) * 1 = 1 := one_mul 1
-        _ ≤ 1 * Valued.v V := by rw [one_mul]; exact hcon
-        _ < Valued.v g * Valued.v V := by
-            exact mul_lt_mul_of_pos_right hg
-              (lt_of_lt_of_le one_pos hcon)
-        _ = Valued.v V * Valued.v g := mul_comm _ _
-    rw [one_mul, hVg] at h2
-    exact absurd h2 (lt_irrefl _)
+  have hV1 : Valued.v V < 1 := lt_one_of_mul_eq_one_of_one_lt hVg hg
   obtain ⟨B, hB⟩ := hybdd
   refine tendsto_order.mpr
     ⟨fun c hc => absurd hc (not_lt.mpr zero_le), fun δ hδ => ?_⟩
   have hδ2 : (0 : NNReal) < δ / 2 := half_pos hδ
-  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp
-    ((hy0.eventually_lt_const hδ2).mono fun i h => h.le)
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp ((hy0.eventually_lt_const hδ2).mono fun i h => h.le)
   -- the head constant dies under the inverse powers
   have hhead : Filter.Tendsto
       (fun n : ℕ => B * Valued.v g ^ N * Valued.v V ^ (n + 1))
-      Filter.atTop (nhds 0) := by
-    have h1 : Filter.Tendsto (fun n : ℕ => Valued.v V ^ (n + 1))
-        Filter.atTop (nhds 0) := by
-      have h2 := tendsto_pow_atTop_nhds_zero_of_lt_one hV1
-      have h3 := h2.comp (Filter.tendsto_add_atTop_nat 1)
-      exact h3
-    have h4 := h1.const_mul (B * Valued.v g ^ N)
-    simpa using h4
-  obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp
-    (hhead.eventually_lt_const hδ2)
+      Filter.atTop (nhds 0) :=
+    tendsto_const_mul_pow_succ hV1 (B * Valued.v g ^ N)
+  obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp (hhead.eventually_lt_const hδ2)
   rw [Filter.eventually_atTop]
   refine ⟨max N N₂, fun n hn => ?_⟩
   have hnN : N ≤ n := le_trans (le_max_left _ _) hn
@@ -2910,9 +2920,7 @@ theorem kerSol_decay_of_one_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   have hS : Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i)
       ≤ max (B * Valued.v g ^ N) ((δ / 2) * Valued.v g ^ n) := by
     refine Valuation.map_sum_le _ (fun i hi => ?_)
-    have hin : i ≤ n := by
-      have := Finset.mem_range.mp hi
-      omega
+    have hin : i ≤ n := by have := Finset.mem_range.mp hi; omega
     rw [Valuation.map_mul, Valuation.map_pow]
     by_cases hiN : i ≤ N
     · refine le_trans ?_ (le_max_left _ _)
@@ -2933,20 +2941,11 @@ theorem kerSol_decay_of_one_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         ((δ / 2) * (Valued.v g ^ n * Valued.v V ^ (n + 1))) := by
         rw [mul_max_of_nonneg _ _ (zero_le
           : (0:NNReal) ≤ Valued.v V ^ (n + 1))]
-        congr 1
-        · ring
-        · ring
+        congr 1 <;> ring
     _ ≤ max (δ / 2) (δ / 2) := by
         refine max_le_max ?_ ?_
         · exact (hN₂ n hnN₂).le
-        · calc (δ / 2) * (Valued.v g ^ n * Valued.v V ^ (n + 1))
-              = (δ / 2) * ((Valued.v V * Valued.v g) ^ n * Valued.v V) := by
-                rw [mul_pow]
-                ring
-            _ = (δ / 2) * Valued.v V := by rw [hVg, one_pow, one_mul]
-            _ ≤ (δ / 2) * 1 :=
-                mul_le_mul_of_nonneg_left hV1.le zero_le
-            _ = δ / 2 := mul_one _
+        · exact mul_pow_mul_pow_succ_le hVg hV1 n
     _ = δ / 2 := max_self _
     _ < δ := NNReal.half_lt_self hδ.ne'
 
