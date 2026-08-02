@@ -5714,6 +5714,51 @@ theorem wLoc_balanced {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
             ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e)⁻¹ := by
         rw [mul_inv_cancel₀ (pow_pos hρ0 e).ne', one_mul]
 
+/-- **The balanced monomial lift**: the degree-`n` monomial over `B^I` whose
+coefficient is the `p`-balanced fraction of depth `j`. This is the witness both
+`evalBI`-power lemmas below produce. -/
+def balancedMonomial (c' : OF F) (n j : ℕ) :
+    ↥(restrictedMvPowerSeriesSubring 1 ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+  ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) n)
+      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ j * WittVector.teichmuller p c')
+          (sPow p F ϖ j))),
+    isRestricted_monomial_BI p F ϖ _⟩
+
+/-- The interval Gauss norm of `balancedMonomial` is radius-free (`wLoc_balanced`
+on both components, which then agree): it is the coefficient's value measured
+against the uniformizer's. -/
+theorem wIRPS_balancedMonomial (c' : OF F) (n j : ℕ) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((balancedMonomial p F ϖ c' n j
+            : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = perfectoidValuation p F (c' : F)
+        * ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ j)⁻¹ := by
+  show wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) n)
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ j * WittVector.teichmuller p c')
+            (sPow p F ϖ j)))) = _
+  rw [wIRPS_monomial p F ϖ]
+  rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ j * WittVector.teichmuller p c')
+        (sPow p F ϖ j))
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ j * WittVector.teichmuller p c')
+        (sPow p F ϖ j)) from rfl]
+  rw [wI_BIProd p F]
+  rw [valued_BlocToHatK, valued_BlocToHatK]
+  rw [wLoc_balanced p F ϖ hρ₁0 hρ₁1, wLoc_balanced p F ϖ hρ₂0 hρ₂1, max_self]
+
 /-- **The balanced `m`-power twist** (T910-M M1a): the `m`-th power of a
 monomial fraction with divisibility-controlled coefficient factors through
 the generator with an exactly `p`-balanced remainder monomial. -/
@@ -5862,43 +5907,12 @@ theorem exists_evalBI_pow_norm_exact
             rw [hgen, ← pow_mul]
     exact (mul_left_cancel₀ (pow_pos hσ₁0 (m * (k - i))).ne' h3).symm
   -- the lift
-  refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
-      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-          (sPow p F ϖ (k * m)))),
-    isRestricted_monomial_BI p F ϖ _⟩, ?_, ?_⟩
+  refine ⟨balancedMonomial p F ϖ c' (k - i) (k * m), ?_, ?_⟩
   · -- the exact norm
-    rw [show ((⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
-        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-            (sPow p F ϖ (k * m)))),
-        isRestricted_monomial_BI p F ϖ _⟩ : ↥(restrictedMvPowerSeriesSubring 1
-          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-      = MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
-        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-            (sPow p F ϖ (k * m)))) from rfl]
-    rw [wIRPS_monomial p F ϖ]
-    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-          (sPow p F ϖ (k * m)))
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-          (sPow p F ϖ (k * m))) from rfl]
-    rw [wI_BIProd p F]
-    rw [valued_BlocToHatK, valued_BlocToHatK]
-    rw [wLoc_balanced p F ϖ hρ₁0 hρ₁1, wLoc_balanced p F ϖ hρ₂0 hρ₂1,
-      hc'val]
-    rw [mul_inv_cancel₀ (pow_pos hV0 (k * m)).ne', max_self]
+    rw [wIRPS_balancedMonomial p F ϖ c' (k - i) (k * m), ← hV, hc'val,
+      mul_inv_cancel₀ (pow_pos hV0 (k * m)).ne']
   · -- the evaluation identity
+    simp only [balancedMonomial]
     rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
     rw [hφb, hbg, ← map_pow (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1),
       ← map_mul (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
@@ -6013,45 +6027,14 @@ theorem exists_evalBI_pow_mem_image_of_le
             rw [mul_pow, ← pow_mul, ← pow_mul,
               Nat.mul_comm (k - i) m, Nat.mul_comm k m]
     exact le_of_mul_le_mul_left h3 (pow_pos hσ₁0 (m * (k - i)))
-  refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
-      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-          (sPow p F ϖ (k * m)))),
-    isRestricted_monomial_BI p F ϖ _⟩, ?_, ?_⟩
-  · rw [show ((⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
-        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-            (sPow p F ϖ (k * m)))),
-        isRestricted_monomial_BI p F ϖ _⟩ : ↥(restrictedMvPowerSeriesSubring 1
-          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
-        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-      = MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
-        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-            (sPow p F ϖ (k * m)))) from rfl]
-    rw [wIRPS_monomial p F ϖ]
-    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-          (sPow p F ϖ (k * m)))
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
-          (sPow p F ϖ (k * m))) from rfl]
-    rw [wI_BIProd p F]
-    rw [valued_BlocToHatK, valued_BlocToHatK]
-    rw [wLoc_balanced p F ϖ hρ₁0 hρ₁1, wLoc_balanced p F ϖ hρ₂0 hρ₂1]
-    rw [max_self]
+  refine ⟨balancedMonomial p F ϖ c' (k - i) (k * m), ?_, ?_⟩
+  · rw [wIRPS_balancedMonomial p F ϖ c' (k - i) (k * m), ← hV]
     calc perfectoidValuation p F (c' : F) * ((V ^ (k * m))⁻¹)
         ≤ V ^ (k * m) * ((V ^ (k * m))⁻¹) :=
           mul_le_mul_of_nonneg_right hc'val zero_le
       _ = 1 := mul_inv_cancel₀ (pow_pos hV0 (k * m)).ne'
-  · rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
+  · simp only [balancedMonomial]
+    rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
     rw [hφb, hbg, ← map_pow (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1),
       ← map_mul (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
     congr 1
