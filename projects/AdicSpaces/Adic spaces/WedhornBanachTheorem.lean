@@ -210,20 +210,16 @@ theorem _omt_almost_open
   exact Filter.mem_of_superset hWW_nhds hWW_sub
 
 open scoped Pointwise in
-/-- **Completion-upgrade half of Wedhorn 6.16**: if `f` is continuous with `M` complete and
-`f` is "almost open" (`closure (f '' U) ∈ nhds 0` for every nbhd `U`), then `f` is open at `0`
-(`f '' U ∈ nhds 0`). Classical Banach iterated-approximation: build `xₖ ∈ Wₖ` with
-`y - f(x₁+…+xₖ) → 0`, sum is Cauchy (shrinking basis), limit `x ∈ closure W₀ ⊆ U`, `f x = y`. -/
-theorem _omt_open_at_zero
-    {A : Type u} [CommRing A] [TopologicalSpace A]
-    {M : Type*} [AddCommGroup M] [Module A M] [UniformSpace M] [IsUniformAddGroup M]
-      [CompleteSpace M] [(uniformity M).IsCountablyGenerated]
-    {N : Type*} [AddCommGroup N] [Module A N] [UniformSpace N] [IsUniformAddGroup N]
-      [T2Space N]
-    (f : M →ₗ[A] N) (hf : Continuous f)
-    (h_almost : ∀ U ∈ nhds (0 : M), closure (f '' U) ∈ nhds (0 : N))
+/-- A countably-generated `nhds 0` admits a CLOSED, SYMMETRIC, doubling-shrinking basis
+inside any given neighbourhood: `W (n+1) + W (n+1) ⊆ W n`, `W 0 ⊆ U`, and every
+neighbourhood of `0` contains some `W n`. Step 2 of the open-mapping argument. -/
+private theorem exists_closed_shrinking_basis
+    {M : Type*} [AddCommGroup M] [UniformSpace M] [IsUniformAddGroup M]
+    [(uniformity M).IsCountablyGenerated]
     {U : Set M} (hU : U ∈ nhds (0 : M)) :
-    f '' U ∈ nhds (0 : N) := by
+    ∃ W : ℕ → Set M, (∀ n, W n ∈ nhds (0 : M)) ∧ (∀ n, IsClosed (W n))
+      ∧ (∀ n, W (n + 1) + W (n + 1) ⊆ W n) ∧ W 0 ⊆ U
+      ∧ (∀ V ∈ nhds (0 : M), ∃ n, W n ⊆ V) := by
   classical
   -- Step 1: countable antitone basis `B` of `nhds (0:M)`.
   obtain ⟨B, hB_basis, _hB_anti⟩ := (nhds (0 : M)).exists_antitone_basis
@@ -278,6 +274,49 @@ theorem _omt_open_at_zero
     intro V hV
     obtain ⟨n, _, hn⟩ := hB_basis.mem_iff.mp hV
     exact ⟨n, (hW_subB n).trans hn⟩
+  exact ⟨W, hW_nhds, hW_closed, hW_shrink, hW0_subU, hW_cofinal⟩
+
+open scoped Pointwise in
+/-- In a doubling-shrinking basis, a sum of terms `xs i ∈ W (n + 1 + i)` lands in `W n`. -/
+private theorem sum_mem_of_mem_shrinking {M : Type*} [AddCommGroup M] [TopologicalSpace M]
+    (W : ℕ → Set M) (hW_zero : ∀ n, (0 : M) ∈ W n)
+    (hW_shrink : ∀ n, W (n + 1) + W (n + 1) ⊆ W n) :
+    ∀ (k : ℕ) (n : ℕ) (xs : Fin k → M),
+      (∀ i : Fin k, xs i ∈ W (n + 1 + i)) → ∑ i, xs i ∈ W n := by
+  intro k
+  induction k with
+  | zero =>
+    intro n xs _
+    simp only [Finset.univ_eq_empty, Finset.sum_empty]; exact hW_zero _
+  | succ k ih =>
+    intro n xs hxs
+    rw [Fin.sum_univ_succ]
+    have h0 : xs 0 ∈ W (n + 1) := by simpa using hxs 0
+    have hrest : ∑ i, xs (Fin.succ i) ∈ W (n + 1) := by
+      apply ih (n + 1)
+      intro i
+      convert hxs (Fin.succ i) using 2
+      simp [Fin.val_succ]; ring
+    exact hW_shrink _ (Set.add_mem_add h0 hrest)
+
+open scoped Pointwise in
+/-- **Completion-upgrade half of Wedhorn 6.16**: if `f` is continuous with `M` complete and
+`f` is "almost open" (`closure (f '' U) ∈ nhds 0` for every nbhd `U`), then `f` is open at `0`
+(`f '' U ∈ nhds 0`). Classical Banach iterated-approximation: build `xₖ ∈ Wₖ` with
+`y - f(x₁+…+xₖ) → 0`, sum is Cauchy (shrinking basis), limit `x ∈ closure W₀ ⊆ U`, `f x = y`. -/
+theorem _omt_open_at_zero
+    {A : Type u} [CommRing A] [TopologicalSpace A]
+    {M : Type*} [AddCommGroup M] [Module A M] [UniformSpace M] [IsUniformAddGroup M]
+      [CompleteSpace M] [(uniformity M).IsCountablyGenerated]
+    {N : Type*} [AddCommGroup N] [Module A N] [UniformSpace N] [IsUniformAddGroup N]
+      [T2Space N]
+    (f : M →ₗ[A] N) (hf : Continuous f)
+    (h_almost : ∀ U ∈ nhds (0 : M), closure (f '' U) ∈ nhds (0 : N))
+    {U : Set M} (hU : U ∈ nhds (0 : M)) :
+    f '' U ∈ nhds (0 : N) := by
+  obtain ⟨W, hW_nhds, hW_closed, hW_shrink, hW0_subU, hW_cofinal⟩ :=
+    exists_closed_shrinking_basis hU
+  have hW_zero : ∀ n, (0 : M) ∈ W n := fun n => mem_of_mem_nhds (hW_nhds n)
   -- Step 3: closures of `f '' W n` are nbhds of `0` (almost-openness).
   have hclos : ∀ n, closure (f '' W n) ∈ nhds (0 : N) := fun n => h_almost (W n) (hW_nhds n)
   -- Step 4: the key claim — `closure (f '' W 1) ⊆ f '' W 0`.
@@ -331,23 +370,7 @@ theorem _omt_open_at_zero
     obtain ⟨x, hx_tend⟩ := cauchySeq_tendsto_of_complete hcauchy
     -- Doubling sum lemma (mirrors the internal `hsum_lemma` of D.1): a sum of terms
     -- `xs i ∈ W (n + 1 + i)` lands in `W n`.
-    have hsum_W : ∀ (k : ℕ) (n : ℕ) (xs : Fin k → M),
-        (∀ i : Fin k, xs i ∈ W (n + 1 + i)) → ∑ i, xs i ∈ W n := by
-      intro k
-      induction k with
-      | zero =>
-        intro n xs _
-        simp only [Finset.univ_eq_empty, Finset.sum_empty]; exact hW_zero _
-      | succ k ih =>
-        intro n xs hxs
-        rw [Fin.sum_univ_succ]
-        have h0 : xs 0 ∈ W (n + 1) := by simpa using hxs 0
-        have hrest : ∑ i, xs (Fin.succ i) ∈ W (n + 1) := by
-          apply ih (n + 1)
-          intro i
-          convert hxs (Fin.succ i) using 2
-          simp [Fin.val_succ]; ring
-        exact hW_shrink _ (Set.add_mem_add h0 hrest)
+    have hsum_W := sum_mem_of_mem_shrinking W hW_zero hW_shrink
     -- Each partial sum `S k` lies in `W 0` (telescoping with offset `0`).
     have hpartial : ∀ k, S k ∈ W 0 := by
       intro k
