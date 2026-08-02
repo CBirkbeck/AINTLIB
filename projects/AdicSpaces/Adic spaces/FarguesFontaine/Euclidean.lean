@@ -1983,6 +1983,142 @@ theorem tendsto_of_valued_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       Valuation (hatK p F hρ0 hρ1) NNReal)).mp hzero)
   rwa [hLy] at hL
 
+/-- One step of the Euclidean descent: keep `u` once its degree has dropped, otherwise
+subtract the approximate quotient supplied by `hdiv`. -/
+private noncomputable def descentStep {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) {ε : NNReal}
+    (hdiv : ∀ y : hatK p F hρ0 hρ1, y ∈ ArSub p F ϖ hρ0 hρ1
+      → ∃ z : hatK p F hρ0 hρ1, z ∈ ArSub p F ϖ hρ0 hρ1
+        ∧ Valued.v (y - z * x) ≤ Valued.v y
+        ∧ (ε * Valued.v y < Valued.v (y - z * x)
+          → degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x)) :
+    {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1}
+      → {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1} := fun u =>
+  if degAr p F ϖ hρ0 hρ1 u.1 < degAr p F ϖ hρ0 hρ1 x then u
+  else ⟨u.1 - (hdiv u.1 u.2).choose * x,
+    sub_mem u.2 (mul_mem (hdiv u.1 u.2).choose_spec.1 hx)⟩
+
+/-- The descent sequence starting at `y`. -/
+private noncomputable def descentSeq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) {ε : NNReal}
+    (hdiv : ∀ y : hatK p F hρ0 hρ1, y ∈ ArSub p F ϖ hρ0 hρ1
+      → ∃ z : hatK p F hρ0 hρ1, z ∈ ArSub p F ϖ hρ0 hρ1
+        ∧ Valued.v (y - z * x) ≤ Valued.v y
+        ∧ (ε * Valued.v y < Valued.v (y - z * x)
+          → degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x))
+    {y : hatK p F hρ0 hρ1} (hy : y ∈ ArSub p F ϖ hρ0 hρ1) :
+    ℕ → {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1} :=
+  fun l => (descentStep p F ϖ hx hdiv)^[l] ⟨y, hy⟩
+
+private lemma descentSeq_succ {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) {ε : NNReal}
+    (hdiv : ∀ y : hatK p F hρ0 hρ1, y ∈ ArSub p F ϖ hρ0 hρ1
+      → ∃ z : hatK p F hρ0 hρ1, z ∈ ArSub p F ϖ hρ0 hρ1
+        ∧ Valued.v (y - z * x) ≤ Valued.v y
+        ∧ (ε * Valued.v y < Valued.v (y - z * x)
+          → degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x))
+    {y : hatK p F hρ0 hρ1} (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (l : ℕ) :
+    descentSeq p F ϖ hx hdiv hy (l + 1) =
+      descentStep p F ϖ hx hdiv (descentSeq p F ϖ hx hdiv hy l) :=
+  Function.iterate_succ_apply' (descentStep p F ϖ hx hdiv) l ⟨y, hy⟩
+
+/-- The descent never increases the value. -/
+private lemma descentSeq_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) {ε : NNReal}
+    (hdiv : ∀ y : hatK p F hρ0 hρ1, y ∈ ArSub p F ϖ hρ0 hρ1
+      → ∃ z : hatK p F hρ0 hρ1, z ∈ ArSub p F ϖ hρ0 hρ1
+        ∧ Valued.v (y - z * x) ≤ Valued.v y
+        ∧ (ε * Valued.v y < Valued.v (y - z * x)
+          → degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x))
+    {y : hatK p F hρ0 hρ1} (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (l : ℕ) :
+    Valued.v (descentSeq p F ϖ hx hdiv hy l).1 ≤ Valued.v y := by
+  induction l with
+  | zero => exact le_rfl
+  | succ n ih =>
+    rw [descentSeq_succ, descentStep]
+    by_cases h : degAr p F ϖ hρ0 hρ1 (descentSeq p F ϖ hx hdiv hy n).1
+        < degAr p F ϖ hρ0 hρ1 x
+    · rw [if_pos h]; exact ih
+    · rw [if_neg h]
+      exact le_trans (hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose_spec.2.1 ih
+
+/-- Every partial quotient `(y − seq l)/x` stays in `A_r`. -/
+private lemma descentSeq_quot_mem {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) {ε : NNReal} (hx0 : x ≠ 0)
+    (hdiv : ∀ y : hatK p F hρ0 hρ1, y ∈ ArSub p F ϖ hρ0 hρ1
+      → ∃ z : hatK p F hρ0 hρ1, z ∈ ArSub p F ϖ hρ0 hρ1
+        ∧ Valued.v (y - z * x) ≤ Valued.v y
+        ∧ (ε * Valued.v y < Valued.v (y - z * x)
+          → degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x))
+    {y : hatK p F hρ0 hρ1} (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (l : ℕ) :
+    (y - (descentSeq p F ϖ hx hdiv hy l).1) / x ∈ ArSub p F ϖ hρ0 hρ1 := by
+  induction l with
+  | zero =>
+    have h0 : (y - (descentSeq p F ϖ hx hdiv hy 0).1) / x = 0 := by
+      rw [show (descentSeq p F ϖ hx hdiv hy 0).1 = y from rfl, sub_self, zero_div]
+    rw [h0]
+    exact zero_mem _
+  | succ n ih =>
+    rw [descentSeq_succ, descentStep]
+    by_cases h : degAr p F ϖ hρ0 hρ1 (descentSeq p F ϖ hx hdiv hy n).1
+        < degAr p F ϖ hρ0 hρ1 x
+    · rw [if_pos h]; exact ih
+    · rw [if_neg h]
+      have halg : (y - ((descentSeq p F ϖ hx hdiv hy n).1
+            - (hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose * x)) / x
+          = (y - (descentSeq p F ϖ hx hdiv hy n).1) / x
+            + (hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose := by
+        field_simp
+        ring
+      rw [halg]
+      exact add_mem ih (hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose_spec.1
+
+/-- If the degree never drops, the values decay geometrically. -/
+private lemma descentSeq_geom {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) {ε : NNReal}
+    (hdiv : ∀ y : hatK p F hρ0 hρ1, y ∈ ArSub p F ϖ hρ0 hρ1
+      → ∃ z : hatK p F hρ0 hρ1, z ∈ ArSub p F ϖ hρ0 hρ1
+        ∧ Valued.v (y - z * x) ≤ Valued.v y
+        ∧ (ε * Valued.v y < Valued.v (y - z * x)
+          → degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x))
+    {y : hatK p F hρ0 hρ1} (hy : y ∈ ArSub p F ϖ hρ0 hρ1)
+    (hdrop : ∀ l, degAr p F ϖ hρ0 hρ1 x
+      ≤ degAr p F ϖ hρ0 hρ1 (descentSeq p F ϖ hx hdiv hy l).1) (l : ℕ) :
+    Valued.v (descentSeq p F ϖ hx hdiv hy l).1 ≤ ε ^ l * Valued.v y := by
+  induction l with
+  | zero =>
+    rw [pow_zero, one_mul]
+    exact descentSeq_valued_le p F ϖ hx hdiv hy 0
+  | succ n ih =>
+    have hnodrop : ¬ degAr p F ϖ hρ0 hρ1
+        ((descentSeq p F ϖ hx hdiv hy n).1 - (hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose * x)
+        < degAr p F ϖ hρ0 hρ1 x := by
+      have h2 := hdrop (n + 1)
+      rw [descentSeq_succ, descentStep] at h2
+      rw [if_neg (not_lt.mpr (hdrop n))] at h2
+      exact not_lt.mpr h2
+    have hle2 : Valued.v ((descentSeq p F ϖ hx hdiv hy n).1
+          - (hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose * x)
+        ≤ ε * Valued.v (descentSeq p F ϖ hx hdiv hy n).1 := by
+      by_contra hcon
+      push Not at hcon
+      exact hnodrop ((hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose_spec.2.2 hcon)
+    rw [descentSeq_succ, descentStep, if_neg (not_lt.mpr (hdrop n))]
+    calc Valued.v ((descentSeq p F ϖ hx hdiv hy n).1
+          - (hdiv _ (descentSeq p F ϖ hx hdiv hy n).2).choose * x)
+        ≤ ε * Valued.v (descentSeq p F ϖ hx hdiv hy n).1 := hle2
+      _ ≤ ε * (ε ^ n * Valued.v y) := mul_le_mul_of_nonneg_left ih zero_le
+      _ = ε ^ (n + 1) * Valued.v y := by ring
+
+/-- `A_r` is closed: it is by definition the closure of the `A_loc` image. -/
+private lemma isClosed_ArSub {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
+    IsClosed (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1)) := by
+  have hcarrier : (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1))
+      = closure ((AlocToHatK p F ϖ hρ0 hρ1).range : Set (hatK p F hρ0 hρ1)) := rfl
+  rw [hcarrier]
+  exact isClosed_closure
+
+
 /-- **Kedlaya Proposition 2.9 (exact division)**: division on `A^r` by a nonzero
 element leaves a remainder that vanishes or has degree strictly below the divisor.
 The quotient sequence from Lemma 2.8 either drops the degree in finitely many
@@ -1995,86 +2131,16 @@ theorem exact_division {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       ∧ (y - z * x = 0
         ∨ degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x) := by
   obtain ⟨ε, hρε, hε1, hdiv⟩ := approx_division p F ϖ hx hx0
-  set step : {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1}
-      → {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1} := fun u =>
-    if degAr p F ϖ hρ0 hρ1 u.1 < degAr p F ϖ hρ0 hρ1 x then u
-    else ⟨u.1 - (hdiv u.1 u.2).choose * x,
-      sub_mem u.2 (mul_mem (hdiv u.1 u.2).choose_spec.1 hx)⟩ with hstep
-  set seq : ℕ → {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1} :=
-    fun l => step^[l] ⟨y, hy⟩ with hseq
-  have hsucc : ∀ l, seq (l + 1) = step (seq l) :=
-    fun l => Function.iterate_succ_apply' step l ⟨y, hy⟩
-  have hval : ∀ l, Valued.v (seq l).1 ≤ Valued.v y := by
-    intro l
-    induction l with
-    | zero => exact le_rfl
-    | succ n ih =>
-      rw [hsucc n]
-      simp only [hstep]
-      by_cases h : degAr p F ϖ hρ0 hρ1 (seq n).1 < degAr p F ϖ hρ0 hρ1 x
-      · rw [if_pos h]
-        exact ih
-      · rw [if_neg h]
-        exact le_trans (hdiv (seq n).1 (seq n).2).choose_spec.2.1 ih
-  have hZmem : ∀ l, (y - (seq l).1) / x ∈ ArSub p F ϖ hρ0 hρ1 := by
-    intro l
-    induction l with
-    | zero =>
-      have h0 : (y - (seq 0).1) / x = 0 := by
-        rw [show (seq 0).1 = y from rfl, sub_self, zero_div]
-      rw [h0]
-      exact zero_mem _
-    | succ n ih =>
-      rw [hsucc n]
-      simp only [hstep]
-      by_cases h : degAr p F ϖ hρ0 hρ1 (seq n).1 < degAr p F ϖ hρ0 hρ1 x
-      · rw [if_pos h]
-        exact ih
-      · rw [if_neg h]
-        have halg : (y - ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)) / x
-            = (y - (seq n).1) / x + (hdiv (seq n).1 (seq n).2).choose := by
-          field_simp
-          ring
-        rw [halg]
-        exact add_mem ih (hdiv (seq n).1 (seq n).2).choose_spec.1
+  set seq := descentSeq p F ϖ hx hdiv hy with hseq
   by_cases hdrop : ∃ l, degAr p F ϖ hρ0 hρ1 (seq l).1 < degAr p F ϖ hρ0 hρ1 x
   · obtain ⟨l, hl⟩ := hdrop
     have hid : y - (y - (seq l).1) / x * x = (seq l).1 := by
       rw [div_mul_cancel₀ _ hx0]
       ring
-    refine ⟨(y - (seq l).1) / x, hZmem l, ?_, Or.inr ?_⟩
-    · rw [hid]
-      exact hval l
-    · rw [hid]
-      exact hl
+    refine ⟨(y - (seq l).1) / x, descentSeq_quot_mem p F ϖ hx hx0 hdiv hy l, ?_, Or.inr ?_⟩
+    · rw [hid]; exact descentSeq_valued_le p F ϖ hx hdiv hy l
+    · rw [hid]; exact hl
   · push Not at hdrop
-    have hgeo : ∀ l, Valued.v (seq l).1 ≤ ε ^ l * Valued.v y := by
-      intro l
-      induction l with
-      | zero =>
-        rw [pow_zero, one_mul]
-        exact hval 0
-      | succ n ih =>
-        have hnodrop : ¬ degAr p F ϖ hρ0 hρ1
-            ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)
-            < degAr p F ϖ hρ0 hρ1 x := by
-          have h2 := hdrop (n + 1)
-          rw [hsucc n] at h2
-          simp only [hstep] at h2
-          rw [if_neg (not_lt.mpr (hdrop n))] at h2
-          exact not_lt.mpr h2
-        have hle2 : Valued.v ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)
-            ≤ ε * Valued.v (seq n).1 := by
-          by_contra hcon
-          push Not at hcon
-          exact hnodrop ((hdiv (seq n).1 (seq n).2).choose_spec.2.2 hcon)
-        rw [hsucc n]
-        simp only [hstep]
-        rw [if_neg (not_lt.mpr (hdrop n))]
-        calc Valued.v ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)
-            ≤ ε * Valued.v (seq n).1 := hle2
-          _ ≤ ε * (ε ^ n * Valued.v y) := mul_le_mul_of_nonneg_left ih zero_le
-          _ = ε ^ (n + 1) * Valued.v y := by ring
     set Z : ℕ → hatK p F hρ0 hρ1 := fun l => (y - (seq l).1) / x with hZdef
     have hZx : ∀ l, Valued.v (Z l * x - y) ≤ ε ^ l * Valued.v y := by
       intro l
@@ -2082,7 +2148,7 @@ theorem exact_division {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         rw [hZdef, div_mul_cancel₀ _ hx0]
         ring
       rw [h1, Valuation.map_neg]
-      exact hgeo l
+      exact descentSeq_geom p F ϖ hx hdiv hy hdrop l
     have hεgeo : Filter.Tendsto (fun l => ε ^ l * Valued.v y)
         Filter.atTop (nhds 0) := by
       have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
@@ -2096,19 +2162,13 @@ theorem exact_division {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         rw [mul_assoc, mul_inv_cancel₀ hx0, mul_one]
       rw [show y / x = y * x⁻¹ from div_eq_mul_inv y x]
       exact h1.congr h2
-    have hclosed : IsClosed (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1)) := by
-      have hcarrier : (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1))
-          = closure ((AlocToHatK p F ϖ hρ0 hρ1).range :
-            Set (hatK p F hρ0 hρ1)) := rfl
-      rw [hcarrier]
-      exact isClosed_closure
     have hyxmem : y / x ∈ ArSub p F ϖ hρ0 hρ1 :=
-      hclosed.mem_of_tendsto hZlim (Filter.Eventually.of_forall fun l => hZmem l)
+      (isClosed_ArSub p F ϖ).mem_of_tendsto hZlim
+        (Filter.Eventually.of_forall fun l => descentSeq_quot_mem p F ϖ hx hx0 hdiv hy l)
     refine ⟨y / x, hyxmem, ?_, Or.inl ?_⟩
     · rw [div_mul_cancel₀ _ hx0, sub_self, Valuation.map_zero]
       exact zero_le
     · rw [div_mul_cancel₀ _ hx0, sub_self]
-
 /-- **Kedlaya Corollary 2.10**: `A^r` is a principal ideal ring — every ideal is
 generated by an element of minimal degree, by exact division. -/
 theorem isPrincipalIdealRing_ArSub {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
