@@ -32757,7 +32757,29 @@ universal object is an **affine, integral, integrally closed** base, and an `N`-
 unity in a fraction field is **integral** over the ring, hence lies in it.
 
 #### [WP-A7.1] The universal moduli ring is an integral domain
-- **Status**: open · **File**: new, `WeilPairing/UniversalRootBase.lean`
+- **Status**: RE-PLANNED 2026-08-02 after a verified finding; first input landed.
+
+  **FINDING (checked in Lean):** `e3Rel = X₀³ − (X₀+X₁)³` **factors**:
+  `e3Rel = −X₁ · (3X₀² + 3X₀X₁ + X₁²)` (verified by `ring`). So `E3Quotient` is *not* a
+  domain and the ticket as originally written is false for the quotient. It is still true
+  for the **localisation**: `e3Delta` contains the factor `X 1` explicitly
+  (`UniversalLevelThree.lean:61`), so `γ` is inverted (`isUnit_e3Gamma`) and the `γ = 0`
+  component is excised. The tree already knew this — `universalE3_hcubic`'s docstring says
+  the `hcubic` identity "was *false* pre-B2 on the (now-excluded) `γ = 0` component".
+
+  **Landed:** `universalE3_quadratic_rel` (`Moduli/UniversalLevelThree.lean`) — the
+  surviving relation `3β² + 3βγ + γ² = 0`, extracted from inside `universalE3_hcubic` as a
+  public lemma. Axiom-verified, root build 9625 jobs.
+
+  **Remaining for A7.1:** primality of the surviving quadratic. Its discriminant in `β` is
+  `9γ² − 12γ² = −3γ²`, so it is irreducible over `ℚ` and splits exactly over
+  `ℚ(√−3) = ℚ(ζ₃)`. **That is the geometric reason the Weil-pairing root of unity lives on
+  this base** — the det twist and the field of definition of `Y(3)`'s components are the
+  same phenomenon. Route: `Polynomial.irreducible_iff_roots_eq_zero`-style on the quadratic
+  in `β` over `Frac ℤ[1/3][γ]`, then `Ideal.Quotient.isDomain_iff_prime`, then
+  `IsLocalization` preserves domains.
+  LEAN-OPS: a new docstring inserted between a `set_option … in` and its declaration is a
+  parse error — insert *above* the whole `set_option` block. · **File**: new, `WeilPairing/UniversalRootBase.lean`
 - **Statement**: `IsDomain (E4ModuliRing R)` for `R = ℤ[1/2]`-flavoured base (and the
   `E3ModuliRing` analogue at `N = 3`).
 - **Proof sketch**: `E4ModuliRing R = Localization.Away (e4Delta R)` of
