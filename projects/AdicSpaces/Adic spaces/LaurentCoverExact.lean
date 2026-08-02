@@ -1245,6 +1245,26 @@ private theorem negEmbHom_X_eq_zetaInv :
   · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
     intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
 
+/-- The positive-embedding image of `X` is `ζ` in the Laurent Tate algebra. The
+symmetric twin of `negEmbHom_X_eq_zetaInv`. -/
+private theorem posEmbHom_X_eq_zeta :
+    posEmbHom (TateAlgebra.X (A := A)) = LaurentTateAlgebra.zeta := by
+  change LaurentTateAlgebra.mkHom (posIncl TateAlgebra.X) =
+    LaurentTateAlgebra.mkHom TateAlgebra₂.X
+  congr 1; ext1; apply MvPowerSeries.ext; intro e
+  change varInclFun (0 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
+    MvPowerSeries.coeff e (MvPowerSeries.X (0 : Fin 2))
+  rw [varInclFun_apply]
+  by_cases he : e = Finsupp.single (0 : Fin 2) (e 0)
+  · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
+    by_cases h0 : e 0 = 1
+    · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
+    · rw [if_neg (by intro h; exact h0 (by simpa using Finsupp.ext_iff.mp h 0)),
+          if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
+  · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
+    intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
+
+
 /-- `negEmbHom` sends the generator `1 - fX` to an element of `(f - ζ)`.
 Key identity: `1 - f·ζ⁻¹ = -ζ⁻¹·(f - ζ)`. -/
 theorem negEmbHom_generator_mem :
@@ -1629,6 +1649,132 @@ theorem deltaMap_gen_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space 
   simp only [posLift, negLift]
   exact congrArg (quotLaurent f) hgh
 
+/-- **Row-1 surjectivity**: the Laurent relation `posEmbHom g - negEmbHom h = c·(f - ζ)`
+is already witnessed by a pair drawn from the two one-sided ideals. Extracted from
+`ker_deltaMap_gen_le_range_epsilonHom_gen`, whose remaining steps are bookkeeping. -/
+private theorem exists_ideal_pair_lambdaMap_eq
+    [UniformSpace A] [IsUniformAddGroup A] [T2Space A] [CompleteSpace A]
+    (htop : ‹TopologicalSpace A› = UniformSpace.toTopologicalSpace)
+    (g h : ↥(TateAlgebra A)) (c_laurent : LaurentTateAlgebra A)
+    (hc : c_laurent * (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)
+      = posEmbHom g - negEmbHom h) :
+    ∃ (g' : ↥(TateAlgebra A)),
+      g' ∈ Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X} ∧
+    ∃ (h' : ↥(TateAlgebra A)),
+      h' ∈ Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X} ∧
+    lambdaMap (g', h') = lambdaMap (g, h) := by
+  -- Use lambdaMap_surjective to decompose c_laurent = posEmbHom a - negEmbHom b.
+  -- Decompose c_laurent = posEmbHom a - negEmbHom b with b_0 = 0.
+  obtain ⟨a, b, hb0, hab⟩ := lambdaMap_surjective_with_zero_const htop c_laurent
+  -- hab : posEmbHom a - negEmbHom b = c_laurent, hb0 : TateAlgebra.coeff 0 b = 0
+  -- Since b_0 = 0, we can write b = X · b' for some b'.
+  -- negEmbHom(b) = negEmbHom(X · b') = zetaInv · negEmbHom(b')
+  -- So c_laurent = posEmbHom a - zetaInv · negEmbHom b'
+  -- (f-ζ) · c_laurent = (f-ζ)·posEmbHom a - (f-ζ)·zetaInv·negEmbHom b'
+  --   = posEmbHom((f-X)·a) + (1-f·zetaInv)·negEmbHom b'  [using (f-ζ)·zetaInv = -(1-f·zetaInv)]
+  --   = posEmbHom((f-X)·a) - negEmbHom((1-fX)·b')  [using negEmbHom(1-fX) = 1-f·zetaInv]
+  -- So g' = (f-X)·a and h' = (1-fX)·b' with b' to be defined from b.
+  -- Since b_0 = 0, b ∈ (X) in TateAlgebra A, so b = X · b' for some b'.
+  -- Then negEmbHom b = negEmbHom(X) · negEmbHom b' = zetaInv · negEmbHom b'.
+  -- Set g' = (f-X)·a ∈ (f-X) and h' = (1-fX)·b' ∈ (1-fX).
+  -- Verify: lambdaMap(g', h') = posEmbHom(g') - negEmbHom(h')
+  --   = (f-ζ)·posEmbHom(a) - (1-f·zetaInv)·negEmbHom(b')
+  --   = (f-ζ)·posEmbHom(a) + zetaInv·(f-ζ)·negEmbHom(b')    [since 1-f·zetaInv = -zetaInv·(f-ζ)]
+  --   = (f-ζ)·(posEmbHom(a) + zetaInv·negEmbHom(b'))
+  --   = (f-ζ)·(posEmbHom(a) - negEmbHom(b))
+  --                                       [since zetaInv·negEmb(b') = negEmb(b)]
+  --   = (f-ζ)·c_laurent = posEmbHom g - negEmbHom h = lambdaMap(g, h)  ✓
+  --
+  -- g' = (f-X)·a, h' = (1-fX)·b' where b' satisfies b = X·b'.
+  -- For the algebraic identity, we work entirely in the Laurent algebra.
+  -- We don't actually need b' explicitly! We just need to verify the identity.
+  -- lambdaMap((f-X)·a, (1-fX)·b') = (f-ζ)·c_laurent = lambdaMap(g, h).
+  -- But (1-fX)·b' requires knowing b'. Let's avoid this entirely.
+  --
+  -- SIMPLER APPROACH: take g' = g and h' = h and show g ∈ (f-X), h ∈ (1-fX).
+  -- This fails because g, h are NOT in those ideals in general.
+  --
+  -- Even simpler: the goal asks for g' IN the ideal and h' IN the ideal.
+  -- Take g' = (f-X)·a and h' = 0 + correction.
+  -- Actually, take g' = g - algebraMap(TateAlgebra.coeff 0 g) and argue...
+  -- No, this is getting nowhere.
+  --
+  -- The CORRECT proof:
+  -- From hc: c_laurent * (f - ζ) = posEmbHom g - negEmbHom h
+  -- From hab: posEmbHom a - negEmbHom b = c_laurent, with b_0 = 0
+  -- So: (posEmbHom a - negEmbHom b) * (f - ζ) = posEmbHom g - negEmbHom h
+  -- LHS = posEmbHom(a) * (f-ζ) - negEmbHom(b) * (f-ζ)
+  --   posEmbHom(a) * (f-ζ) = posEmbHom((f-X)·a) = posEmbHom((algebraMap f - X)·a)
+  --   negEmbHom(b) * (f-ζ): since b_0 = 0, b = ∑_{n≥1} b_n X^n. negEmbHom(b) = ∑ b_n zetaInv^n.
+  --   (f-ζ) * negEmbHom(b): this equals -(1-f·zetaInv)·ζ·negEmbHom(b)·ζ⁻¹... too complex.
+  --
+  -- Let me just define g' and h' algebraically and verify with sorry:
+  -- Since b_0 = 0, ∃ b', X · b' = b (X-divisibility in TateAlgebra).
+  have ⟨b', hb'⟩ : ∃ b' : ↥(TateAlgebra A), TateAlgebra.X * b' = b := by
+    refine ⟨TateAlgebra.shift b, ?_⟩
+    have h := TateAlgebra.eq_const_add_X_mul_shift b
+    have heval : TateAlgebra.evalZeroHom b = 0 := hb0
+    rw [heval, map_zero, zero_add] at h
+    exact h.symm
+  -- Set g' = (f-X)·a and h' = (1-fX)·b'
+  refine ⟨(algebraMap A _ f - TateAlgebra.X) * a,
+    Ideal.mul_mem_right _ _ (Ideal.subset_span rfl),
+    -((1 - algebraMap A _ f * TateAlgebra.X) * b'),
+    neg_mem (Ideal.mul_mem_right _ _ (Ideal.subset_span rfl)), ?_⟩
+  -- Verify: lambdaMap(g', h') = lambdaMap(g, h)
+  -- lambdaMap(g', h') = posEmbHom((f-X)·a) - negEmbHom((1-fX)·b')
+  change lambdaMap (((algebraMap A _ f - TateAlgebra.X) * a),
+    (-((1 - algebraMap A _ f * TateAlgebra.X) * b'))) = lambdaMap (g, h)
+  change posEmbHom ((algebraMap A _ f - TateAlgebra.X) * a) -
+    negEmbHom (-((1 - algebraMap A _ f * TateAlgebra.X) * b')) = posEmbHom g - negEmbHom h
+  -- Establish key facts about how posEmbHom and negEmbHom act on generators
+  have hposX := posEmbHom_X_eq_zeta (A := A)
+  have hnegX : negEmbHom (TateAlgebra.X (A := A)) =
+      LaurentTateAlgebra.zetaInv := negEmbHom_X_eq_zetaInv
+  have hposAlg : posEmbHom (algebraMap A ↥(TateAlgebra A) f) =
+      algebraMap A (LaurentTateAlgebra A) f := by
+    simp only [posEmbHom, RingHom.comp_apply, posIncl_algebraMap]; rfl
+  have hnegAlg : negEmbHom (algebraMap A ↥(TateAlgebra A) f) =
+      algebraMap A (LaurentTateAlgebra A) f := by
+    simp only [negEmbHom, RingHom.comp_apply, negIncl_algebraMap]; rfl
+  -- negEmbHom(X * b') = zetaInv * negEmbHom(b') = negEmbHom(b)
+  have hneg_b : LaurentTateAlgebra.zetaInv * negEmbHom b' = negEmbHom b := by
+    rw [← hnegX, ← map_mul, hb']
+  -- Rewrite directly to the factored form
+  -- LHS = posEmbHom((f-X)*a) - negEmbHom(-((1-fX)*b'))
+  --     = posEmbHom(f-X)*posEmbHom(a) + negEmbHom((1-fX)*b')   [map_mul, map_neg, sub_neg]
+  --     = (alg f - zeta) * posEmbHom(a) + negEmbHom(1-fX) * negEmbHom(b')
+  --     = (alg f - zeta) * posEmbHom(a) + (1 - alg f * zetaInv) * negEmbHom(b')
+  -- Now 1 - f*zetaInv = -zetaInv*(f - zeta), so:
+  --     = (alg f - zeta) * posEmbHom(a) - zetaInv*(f-zeta) * negEmbHom(b')
+  --     = (alg f - zeta) * (posEmbHom(a) - zetaInv * negEmbHom(b'))
+  --     = (alg f - zeta) * (posEmbHom(a) - negEmbHom(b))  [zetaInv*negEmb(b') = negEmb(b)]
+  --     = (alg f - zeta) * c_laurent = posEmbHom g - negEmbHom h  [hab, hc]
+  -- Expand posEmbHom((f-X)*a)
+  rw [map_mul, map_sub, hposAlg, hposX]
+  -- Expand negEmbHom(-((1-fX)*b'))
+  rw [map_neg, sub_neg_eq_add, map_mul, map_sub, map_one, map_mul, hnegAlg, hnegX]
+  -- Goal: (alg f - zeta) * posEmbHom a + (1 - alg f * zetaInv) * negEmbHom b'
+  --     = posEmbHom g - negEmbHom h
+  -- Use: 1 - f * zetaInv = -zetaInv * (f - zeta)
+  have hkey : (1 : LaurentTateAlgebra A) -
+      algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
+      -(LaurentTateAlgebra.zetaInv *
+        (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
+    rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
+      LaurentTateAlgebra.zetaInv_mul_zeta]; ring
+  rw [hkey]
+  -- Factor out (alg f - zeta) and use hneg_b, hab, hc
+  have : (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta) *
+      posEmbHom a + -(LaurentTateAlgebra.zetaInv *
+      (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) *
+      negEmbHom b' =
+      (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta) *
+      (posEmbHom a - LaurentTateAlgebra.zetaInv * negEmbHom b') := by ring
+  rw [this, hneg_b, hab, mul_comm]
+  exact hc
+
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Row 3 exactness: `ker(δ) ⊆ im(ε)` (general case, 3×3 diagram chase).**
 
@@ -1664,136 +1810,8 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
   -- i.e., posEmbHom g' - negEmbHom h' = posEmbHom g - negEmbHom h
   -- This uses: (f-ζ)·c in the Laurent algebra decomposes as
   --   posEmbHom((f-X)·a) - negEmbHom((1-fX)·b) for some a, b
-  have ⟨g', hg'_mem, h', hh'_mem, hrow1⟩ :
-      ∃ (g' : ↥(TateAlgebra A)),
-        g' ∈ Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X} ∧
-      ∃ (h' : ↥(TateAlgebra A)),
-        h' ∈ Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X} ∧
-      lambdaMap (g', h') = lambdaMap (g, h) := by
-    -- Use lambdaMap_surjective to decompose c_laurent = posEmbHom a - negEmbHom b.
-    -- Decompose c_laurent = posEmbHom a - negEmbHom b with b_0 = 0.
-    obtain ⟨a, b, hb0, hab⟩ := lambdaMap_surjective_with_zero_const rfl c_laurent
-    -- hab : posEmbHom a - negEmbHom b = c_laurent, hb0 : TateAlgebra.coeff 0 b = 0
-    -- Since b_0 = 0, we can write b = X · b' for some b'.
-    -- negEmbHom(b) = negEmbHom(X · b') = zetaInv · negEmbHom(b')
-    -- So c_laurent = posEmbHom a - zetaInv · negEmbHom b'
-    -- (f-ζ) · c_laurent = (f-ζ)·posEmbHom a - (f-ζ)·zetaInv·negEmbHom b'
-    --   = posEmbHom((f-X)·a) + (1-f·zetaInv)·negEmbHom b'  [using (f-ζ)·zetaInv = -(1-f·zetaInv)]
-    --   = posEmbHom((f-X)·a) - negEmbHom((1-fX)·b')  [using negEmbHom(1-fX) = 1-f·zetaInv]
-    -- So g' = (f-X)·a and h' = (1-fX)·b' with b' to be defined from b.
-    -- Since b_0 = 0, b ∈ (X) in TateAlgebra A, so b = X · b' for some b'.
-    -- Then negEmbHom b = negEmbHom(X) · negEmbHom b' = zetaInv · negEmbHom b'.
-    -- Set g' = (f-X)·a ∈ (f-X) and h' = (1-fX)·b' ∈ (1-fX).
-    -- Verify: lambdaMap(g', h') = posEmbHom(g') - negEmbHom(h')
-    --   = (f-ζ)·posEmbHom(a) - (1-f·zetaInv)·negEmbHom(b')
-    --   = (f-ζ)·posEmbHom(a) + zetaInv·(f-ζ)·negEmbHom(b')    [since 1-f·zetaInv = -zetaInv·(f-ζ)]
-    --   = (f-ζ)·(posEmbHom(a) + zetaInv·negEmbHom(b'))
-    --   = (f-ζ)·(posEmbHom(a) - negEmbHom(b))
-    --                                       [since zetaInv·negEmb(b') = negEmb(b)]
-    --   = (f-ζ)·c_laurent = posEmbHom g - negEmbHom h = lambdaMap(g, h)  ✓
-    --
-    -- g' = (f-X)·a, h' = (1-fX)·b' where b' satisfies b = X·b'.
-    -- For the algebraic identity, we work entirely in the Laurent algebra.
-    -- We don't actually need b' explicitly! We just need to verify the identity.
-    -- lambdaMap((f-X)·a, (1-fX)·b') = (f-ζ)·c_laurent = lambdaMap(g, h).
-    -- But (1-fX)·b' requires knowing b'. Let's avoid this entirely.
-    --
-    -- SIMPLER APPROACH: take g' = g and h' = h and show g ∈ (f-X), h ∈ (1-fX).
-    -- This fails because g, h are NOT in those ideals in general.
-    --
-    -- Even simpler: the goal asks for g' IN the ideal and h' IN the ideal.
-    -- Take g' = (f-X)·a and h' = 0 + correction.
-    -- Actually, take g' = g - algebraMap(TateAlgebra.coeff 0 g) and argue...
-    -- No, this is getting nowhere.
-    --
-    -- The CORRECT proof:
-    -- From hc: c_laurent * (f - ζ) = posEmbHom g - negEmbHom h
-    -- From hab: posEmbHom a - negEmbHom b = c_laurent, with b_0 = 0
-    -- So: (posEmbHom a - negEmbHom b) * (f - ζ) = posEmbHom g - negEmbHom h
-    -- LHS = posEmbHom(a) * (f-ζ) - negEmbHom(b) * (f-ζ)
-    --   posEmbHom(a) * (f-ζ) = posEmbHom((f-X)·a) = posEmbHom((algebraMap f - X)·a)
-    --   negEmbHom(b) * (f-ζ): since b_0 = 0, b = ∑_{n≥1} b_n X^n. negEmbHom(b) = ∑ b_n zetaInv^n.
-    --   (f-ζ) * negEmbHom(b): this equals -(1-f·zetaInv)·ζ·negEmbHom(b)·ζ⁻¹... too complex.
-    --
-    -- Let me just define g' and h' algebraically and verify with sorry:
-    -- Since b_0 = 0, ∃ b', X · b' = b (X-divisibility in TateAlgebra).
-    have ⟨b', hb'⟩ : ∃ b' : ↥(TateAlgebra A), TateAlgebra.X * b' = b := by
-      refine ⟨TateAlgebra.shift b, ?_⟩
-      have h := TateAlgebra.eq_const_add_X_mul_shift b
-      have heval : TateAlgebra.evalZeroHom b = 0 := hb0
-      rw [heval, map_zero, zero_add] at h
-      exact h.symm
-    -- Set g' = (f-X)·a and h' = (1-fX)·b'
-    refine ⟨(algebraMap A _ f - TateAlgebra.X) * a,
-      Ideal.mul_mem_right _ _ (Ideal.subset_span rfl),
-      -((1 - algebraMap A _ f * TateAlgebra.X) * b'),
-      neg_mem (Ideal.mul_mem_right _ _ (Ideal.subset_span rfl)), ?_⟩
-    -- Verify: lambdaMap(g', h') = lambdaMap(g, h)
-    -- lambdaMap(g', h') = posEmbHom((f-X)·a) - negEmbHom((1-fX)·b')
-    change lambdaMap (((algebraMap A _ f - TateAlgebra.X) * a),
-      (-((1 - algebraMap A _ f * TateAlgebra.X) * b'))) = lambdaMap (g, h)
-    change posEmbHom ((algebraMap A _ f - TateAlgebra.X) * a) -
-      negEmbHom (-((1 - algebraMap A _ f * TateAlgebra.X) * b')) = posEmbHom g - negEmbHom h
-    -- Establish key facts about how posEmbHom and negEmbHom act on generators
-    have hposX : posEmbHom (TateAlgebra.X (A := A)) = LaurentTateAlgebra.zeta := by
-      change LaurentTateAlgebra.mkHom (posIncl TateAlgebra.X) =
-        LaurentTateAlgebra.mkHom TateAlgebra₂.X
-      congr 1; ext1; apply MvPowerSeries.ext; intro e
-      change varInclFun (0 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
-        MvPowerSeries.coeff e (MvPowerSeries.X (0 : Fin 2))
-      rw [varInclFun_apply]
-      by_cases he : e = Finsupp.single (0 : Fin 2) (e 0)
-      · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
-        by_cases h0 : e 0 = 1
-        · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
-        · rw [if_neg (by intro h; exact h0 (by simpa using Finsupp.ext_iff.mp h 0)),
-              if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
-      · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
-        intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
-    have hnegX : negEmbHom (TateAlgebra.X (A := A)) =
-        LaurentTateAlgebra.zetaInv := negEmbHom_X_eq_zetaInv
-    have hposAlg : posEmbHom (algebraMap A ↥(TateAlgebra A) f) =
-        algebraMap A (LaurentTateAlgebra A) f := by
-      simp only [posEmbHom, RingHom.comp_apply, posIncl_algebraMap]; rfl
-    have hnegAlg : negEmbHom (algebraMap A ↥(TateAlgebra A) f) =
-        algebraMap A (LaurentTateAlgebra A) f := by
-      simp only [negEmbHom, RingHom.comp_apply, negIncl_algebraMap]; rfl
-    -- negEmbHom(X * b') = zetaInv * negEmbHom(b') = negEmbHom(b)
-    have hneg_b : LaurentTateAlgebra.zetaInv * negEmbHom b' = negEmbHom b := by
-      rw [← hnegX, ← map_mul, hb']
-    -- Rewrite directly to the factored form
-    -- LHS = posEmbHom((f-X)*a) - negEmbHom(-((1-fX)*b'))
-    --     = posEmbHom(f-X)*posEmbHom(a) + negEmbHom((1-fX)*b')   [map_mul, map_neg, sub_neg]
-    --     = (alg f - zeta) * posEmbHom(a) + negEmbHom(1-fX) * negEmbHom(b')
-    --     = (alg f - zeta) * posEmbHom(a) + (1 - alg f * zetaInv) * negEmbHom(b')
-    -- Now 1 - f*zetaInv = -zetaInv*(f - zeta), so:
-    --     = (alg f - zeta) * posEmbHom(a) - zetaInv*(f-zeta) * negEmbHom(b')
-    --     = (alg f - zeta) * (posEmbHom(a) - zetaInv * negEmbHom(b'))
-    --     = (alg f - zeta) * (posEmbHom(a) - negEmbHom(b))  [zetaInv*negEmb(b') = negEmb(b)]
-    --     = (alg f - zeta) * c_laurent = posEmbHom g - negEmbHom h  [hab, hc]
-    -- Expand posEmbHom((f-X)*a)
-    rw [map_mul, map_sub, hposAlg, hposX]
-    -- Expand negEmbHom(-((1-fX)*b'))
-    rw [map_neg, sub_neg_eq_add, map_mul, map_sub, map_one, map_mul, hnegAlg, hnegX]
-    -- Goal: (alg f - zeta) * posEmbHom a + (1 - alg f * zetaInv) * negEmbHom b'
-    --     = posEmbHom g - negEmbHom h
-    -- Use: 1 - f * zetaInv = -zetaInv * (f - zeta)
-    have hkey : (1 : LaurentTateAlgebra A) -
-        algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
-        -(LaurentTateAlgebra.zetaInv *
-          (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
-      rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
-        LaurentTateAlgebra.zetaInv_mul_zeta]; ring
-    rw [hkey]
-    -- Factor out (alg f - zeta) and use hneg_b, hab, hc
-    have : (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta) *
-        posEmbHom a + -(LaurentTateAlgebra.zetaInv *
-        (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) *
-        negEmbHom b' =
-        (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta) *
-        (posEmbHom a - LaurentTateAlgebra.zetaInv * negEmbHom b') := by ring
-    rw [this, hneg_b, hab, mul_comm]
-    exact hc
+  obtain ⟨g', hg'_mem, h', hh'_mem, hrow1⟩ :=
+    exists_ideal_pair_lambdaMap_eq f rfl g h c_laurent hc
   -- Step 5: λ(g - g', h - h') = 0 by linearity
   have hker : lambdaMap (g - g', h - h') = 0 := by
     change posEmbHom (g - g') - negEmbHom (h - h') = 0
