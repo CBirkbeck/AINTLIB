@@ -34154,3 +34154,28 @@ Naturality then follows from `pullbackAlongMap` functoriality plus
 
 Stating D2c-3a generally is worth it: it is reusable for every level structure and keeps the
 `Γ(N)`-specific reasoning down to the collapse.
+
+## [WP-D2c-3a] COMPLETE (2026-08-02) — axiom-verified
+
+`Moduli/HomPullbackAlong.lean` (new), the general `EllObj` lemma:
+* `comp_baseHom`, `comp_top` — simp lemmas for composition;
+* `hom_ext` — an `EllHom` is determined by `baseHom` **and** `top` (the rest are `Prop`s);
+* **`hom_pullbackAlong_ext`** — a morphism into a `pullbackAlong` is determined by its base
+  map together with its composite to `X`. This is the injectivity half, and the docstring
+  records why it is *not* an instance of the rejected WP-D2c-b1: `w.top` is recovered from
+  `u.top` by `pullback.hom_ext`, and the `[-1]` counterexample changes `u`, which is part of
+  the matched data;
+* **`ofPullbackAlongData`** — the backward map, built explicitly (no `eqToHom`, no transport)
+  so `baseHom` and `top` are definitionally what one expects, with
+  `ofPullbackAlongData_baseHom` (`rfl`) and `ofPullbackAlongData_comp_pullbackAlongπ`.
+
+Implementation notes: the file needs the two `backward.*` transparency options, since
+`(X.pullbackAlong g).curve.E` and `pullback X.curve.π g` are definitionally but not
+syntactically equal; and inside the structure the `rw`s must be replaced by term-mode
+`.trans`/`▸` steps, because the `pullback.lift` carries a proof mentioning `b ≫ g` and `rw`
+cannot build the motive. Zero heartbeat bumps.
+
+**Next — [WP-D2c-3b]**: assemble. Specialise at `g := fullLevelLocusπ`; the `Σ`-description
+becomes "`Γ₁`-structure + refinement", and WP-D1a's `isNaiveGammaOne_of_isNaiveFullLevel`
+collapses it to just the full level structure, giving
+`yFullCandidate_representableBy` and closing the D-chain.
