@@ -8150,3 +8150,76 @@ elaboration context it was written in, not just on its stated hypotheses. The
 
     over-50 proofs   486 (baseline) → 119   (117 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: fg_topologicalClosure_isClosed + limitFrobHom_add (119 → 117)
+
+### `parent_binders` — the dependency list is now copied, not retyped
+
+Added to `decompose_common.py`. Returns the exact binder source text for named
+hypotheses of a declaration, in signature order, and raises on a name that is not a
+binder so a typo cannot silently drop a hypothesis. This closes the gap named in the
+previous entry: `lift_have` transcribes the CONCLUSION, `explicit_section_prefix`
+supplies the section variables, and this supplies the dependencies. Nothing about an
+extraction is now typed from memory.
+
+Checked against the target that motivated it — it returns
+`TateAlgebra.pairSubring₂ (IsTateRing.principalPair B).toPairOfDefinition` and the
+quotient domain, i.e. exactly the two types I had reconstructed wrongly.
+
+### Restating a proof where it is intrinsic beats lifting blocks out of it
+
+`fg_topologicalClosure_isClosed` (128 → 36) had a block of coercion plumbing — `hrelM`,
+`hmem`, `((g v : ↥Nbar) : M)` — whose only job was to push a relation from `↥N̄` down to
+`M`, run Nakayama in `M ⧸ N`, and read the answer back. Lifting those blocks would have
+carried the plumbing into the helpers. Stating the content where it is actually
+intrinsic —
+
+    eq_top_of_dense_of_finite : a dense submodule of a module-finite complete
+                                Tate-module is ⊤   (Nakayama in `V ⧸ N'`)
+
+— makes the plumbing vanish rather than move. Two further pieces came out because they
+are separately meaningful, not to hit the line budget: a Tate ring has a neighbourhood
+of `0` of topologically nilpotent elements, and `a ↦ ∑ aᵢ • gᵢ` on a spanning family is
+open.
+
+**Add to the taxonomy: RE-SITING.** Before lifting blocks, ask which module/object the
+argument is really about. If the answer is not the one the statement is phrased over, a
+chunk of the proof is transport, and transport does not survive extraction — it is
+deleted by restatement.
+
+### Proofs made long by REPETITION rank last and should rank first
+
+`limitFrobHom_add` went 62 → 43 with no helper: the same six continuity proofs were
+spelled out at seventeen sites, and the transported section value at four. Naming them
+was the whole fix.
+
+The ranking scores candidates by extractable `have` blocks, so a proof with no big block
+scores as expensive — this one showed `cost 0 / need 12` and sat at the bottom of the
+list. **A proof inflated by repetition is the cheapest kind of target and the ranking
+cannot see it.** A repeated-subterm scan would find these; the ranking should carry one.
+
+Safe here because `Continuous` is a Prop: proof irrelevance keeps the `mapHuber` terms
+definitionally equal, so the downstream `rw` still matches. Mechanical for proof
+arguments, not for data arguments.
+
+### The `set`-vs-parameter rule, third costume
+
+Abstracting `π` into a parameter plus `hπ_apply : ∀ a, π a = ∑ i, a i • g i` is right,
+but `rw [hπ_apply] at ha_eq` then left the beta-redex `(fun z ↦ g v - z) w` in `ha_eq`,
+and `abel` stopped at `g v = w + (-1 • w + g v)`. The parent had stated the reduced form
+itself. **Rewriting WITH the defining equation leaves whatever the `let` was hiding;
+state the shape you want and discharge it.**
+
+### `/tmp/scope.py` IS NO LONGER THE CAMPAIGN'S SCRIPT
+
+It now reports 283 actionable against the tracker's 117. It is a repo-wide script that
+splits the body at the FIRST line containing `:=` — the inflation bug already on record.
+`/tmp` is shared between sessions and it has been overwritten by another worker.
+
+**Use `projects/AdicSpaces/scripts/scope_code.py`** — committed, adic-scoped, counts code
+lines, and agrees with this tracker. Every number in this file is that script's.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 117   (115 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
