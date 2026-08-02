@@ -9629,3 +9629,38 @@ declaration diff stayed clean throughout (+4, none removed).
 
     over-50 proofs   486 (baseline) → 66   (64 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: evalHom_exists_norm_le 96 → closed (RestrictedLaurent has no proof over 50)
+
+`FJP/RestrictedLaurent.lean`, 21 rebuilds. Four lifts, arrived at by splitting twice:
+
+    norm_evalHomSection_le                   the norm bound
+    negOfSeries_coeff_mul_Wu_pow             the i-th evaluation term
+    coeffHom_negOfSeries_coeff_mul_Wu_pow    its m-th coefficient
+    evalHom_evalHomSection                   the evaluation itself, 44L
+
+The first split (norm bound / evaluation) closed the parent but left
+`evalHom_evalHomSection` at 76 — **a lift is not done when the parent is under 50, it is
+done when every piece is.** Two further extractions from inside it finished the job. The
+measure catches this automatically because the new lemma re-enters the over-50 list, which
+is exactly what happened: the count sat at 66 through two green builds before moving.
+
+### The `set` preamble is the cost of this shape
+
+Each of the four lemmas re-`set`s `c0`, `G'`, `G''` — nine lines apiece — because all three
+are definitions of `h` that the bodies refer to by name. The alternative is promoting `G''`
+to a `private def` and restating the lemmas about it, which removes the repetition but
+changes every statement. Left as it is: the repetition is mechanical and local, and the
+statements read better in terms of the explicit construction.
+
+### Indentation, again
+
+The lifted `hterm` body sat at indent 4 (inside `have … := by` at indent 2), so it needed a
+dedent by 2; the lifted `hZeq` body in the WittF batch sat at indent 2 and needed **none**.
+The rule is not "dedent by 2" but *"re-indent to 2 from whatever level the block was at"* —
+which is the block's own indent, readable off its first line.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 65   (63 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
