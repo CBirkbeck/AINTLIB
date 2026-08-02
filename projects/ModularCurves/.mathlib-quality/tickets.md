@@ -32827,3 +32827,24 @@ unity in a fraction field is **integral** over the ring, hence lies in it.
 
 ## Dependency order for execution
 WP-A1 → WP-A2 → WP-A3 → {WP-A4, WP-A5} → WP-A8 (with WP-A6/A7 as needed).
+
+## SESSION CLOSE 2026-08-02 — route A status
+
+Root build green at 9625 jobs; every declaration added is axiom-verified; all pushed.
+
+DONE this session (route A): WP-A1 `weilPairing_gl2`, WP-A2 `fieldWeilPairing_gl2`,
+WP-A3 `fieldWeilPairing_gl2_zmod` (+ `pow_eq_pow_of_nat_modEq`, `pow_val_add`,
+`pow_val_mul`), **WP-A4 `constSchemeMap_gl2Both_comp_detConstMor_rootSplitting`** (the det
+twist itself, via `constSchemeMap_mul_comp_rootSplitting` and `rootPower_congr`),
+WP-A7.2 `exists_algebraMap_eq_of_pow_eq_one` (+ `pow_eq_one_of_algebraMap_eq`).
+WP-A5.1 and WP-A5.2 were found to be already proved (`GaloisEquivariance.lean:890`,
+`GaloisFieldPairing.lean:40/60`).
+
+NEXT: WP-A5.3 — apply `exists_finiteEtaleHom_of_galoisEquivariant` (`EtaleDescent.lean:309`)
+to `fieldWeilPairing_galois'` to get `Y(N)_{E/k} ⟶ μ_{N,k}`. Read that lemma's exact
+interface first: it is stated in the `CommAlgCat.FiniteEtale` / `torsionPairAlgebra`
+language, so the ticket's real content is matching the level-space side to it, and the
+right shape for that match is a judgement call worth making deliberately rather than
+guessing.
+Then WP-A7.1 (universal moduli ring is a domain — with the `IsReduced` fallback A7.1′),
+A7.3, A7.4, A7.5, then WP-A8.
