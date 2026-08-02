@@ -1,0 +1,90 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import HasseWeil.HasseBound.WeilPairing.PairingAdjoint
+import ModularCurves.WeilPairing.FieldPairing
+
+/-!
+# The determinant law of the field-level Weil pairing (WP-A1)
+
+Route A builds the relative Weil pairing by descending the determinant model along a
+trivialising cover, and the descent works only if the root of unity attached to a
+trivialisation transforms by the inverse determinant of the transition
+(`WeilPairing/RootSplitting.lean`, and the plan entry "route A properly"). The
+transformation law comes from the **field-level** pairing, which AINTLIB already has
+sorry-free (`HasseWeil.WeilPairing.weilPairing`, Silverman *AEC* III.8).
+
+This file proves that law: re-marking a pair `(P, Q)` of `ℓ`-torsion points by an integer
+matrix raises the pairing to the determinant. It is stated multiplicatively —
+`e(aP+bQ, cP+dQ) · e(P,Q)^{bc} = e(P,Q)^{ad}` — so that no inverses or `zpow` appear;
+the `ZMod`-exponent form used by the descent is derived from it downstream.
+
+Source: Silverman, *AEC* III.8.1 — (a) bilinearity, (b) alternation, (c) antisymmetry.
+-/
+
+universe u
+
+open WeierstrassCurve HasseWeil.WeilPairing
+
+namespace ModularCurves
+
+variable {F : Type u} [Field F] [DecidableEq F] [IsAlgClosed F]
+  (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(WP-A1)** The determinant law of the Weil pairing: re-marking `(P, Q)` by the integer
+matrix `!![a, b; c, d]` raises the pairing to `ad - bc`. Stated multiplicatively to avoid
+inverses: `e(aP+bQ, cP+dQ) · e(P,Q)^{bc} = e(P,Q)^{ad}`.
+
+This is the transformation law that forces the det twist in the descent construction of the
+relative pairing: a change of trivialisation by `g` multiplies the determinant model by
+`det g`, so the root of unity must change by `(det g)⁻¹`.
+
+Source: Silverman, *AEC* III.8.1 (a) bilinearity, (b) alternation, (c) antisymmetry. -/
+theorem weilPairing_gl2 (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
+    (P Q : W.toAffine.Point) (hP : ℓ • P = 0) (hQ : ℓ • Q = 0)
+    (a b c d : ℕ)
+    (h₁ : ℓ • (a • P + b • Q) = 0) (h₂ : ℓ • (c • P + d • Q) = 0) :
+    weilPairing W ℓ hℓ (a • P + b • Q) (c • P + d • Q) h₁ h₂ *
+        weilPairing W ℓ hℓ P Q hP hQ ^ (b * c) =
+      weilPairing W ℓ hℓ P Q hP hQ ^ (a * d) := by
+  -- torsion hypotheses for the pieces
+  have haP : ℓ • (a • P) = 0 := smul_nsmul_eq_zero W ℓ P hP a
+  have hbQ : ℓ • (b • Q) = 0 := smul_nsmul_eq_zero W ℓ Q hQ b
+  have hcP : ℓ • (c • P) = 0 := smul_nsmul_eq_zero W ℓ P hP c
+  have hdQ : ℓ • (d • Q) = 0 := smul_nsmul_eq_zero W ℓ Q hQ d
+  -- split the left slot, then each right slot
+  rw [weilPairing_mul_left W ℓ hℓ (a • P) (b • Q) (c • P + d • Q) haP hbQ h₂ h₁,
+    weilPairing_mul_right W ℓ hℓ (a • P) (c • P) (d • Q) haP hcP hdQ,
+    weilPairing_mul_right W ℓ hℓ (b • Q) (c • P) (d • Q) hbQ hcP hdQ]
+  -- evaluate the four terms
+  rw [weilPairing_nsmul_left W ℓ hℓ P (c • P) hP hcP a haP,
+    weilPairing_nsmul_left W ℓ hℓ P (d • Q) hP hdQ a haP,
+    weilPairing_nsmul_left W ℓ hℓ Q (c • P) hQ hcP b hbQ,
+    weilPairing_nsmul_left W ℓ hℓ Q (d • Q) hQ hdQ b hbQ,
+    weilPairing_nsmul_right W ℓ hℓ P P hP hP c hcP,
+    weilPairing_nsmul_right W ℓ hℓ P Q hP hQ d hdQ,
+    weilPairing_nsmul_right W ℓ hℓ Q P hQ hP c hcP,
+    weilPairing_nsmul_right W ℓ hℓ Q Q hQ hQ d hdQ]
+  -- the diagonal terms are `1`
+  rw [weilPairing_self W ℓ hℓ P hP, weilPairing_self W ℓ hℓ Q hQ]
+  -- and `e(Q,P) · e(P,Q) = 1`
+  have hanti := weilPairing_antisymm W ℓ hℓ Q P hQ hP
+  have hcollect : (weilPairing W ℓ hℓ Q P hQ hP * weilPairing W ℓ hℓ P Q hP hQ) ^ (b * c)
+      = 1 := by rw [hanti, one_pow]
+  rw [mul_pow] at hcollect
+  calc ((1 : F) ^ c) ^ a * (weilPairing W ℓ hℓ P Q hP hQ ^ d) ^ a *
+        ((weilPairing W ℓ hℓ Q P hQ hP ^ c) ^ b * ((1 : F) ^ d) ^ b) *
+        weilPairing W ℓ hℓ P Q hP hQ ^ (b * c)
+      = weilPairing W ℓ hℓ P Q hP hQ ^ (a * d) *
+        (weilPairing W ℓ hℓ Q P hQ hP ^ (b * c) *
+          weilPairing W ℓ hℓ P Q hP hQ ^ (b * c)) := by
+        rw [one_pow, one_pow, one_pow, one_pow, one_mul, mul_one, ← pow_mul, ← pow_mul,
+          mul_comm d a, mul_comm c b]
+        ring
+    _ = weilPairing W ℓ hℓ P Q hP hQ ^ (a * d) := by rw [hcollect, mul_one]
+
+end ModularCurves

@@ -203,6 +203,7 @@ import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.Picard.UnitPullback
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.CharZeroAssembly
+import ModularCurves.WeilPairing.FieldPairingDet
 import ModularCurves.WeilPairing.FullLevelCover
 import ModularCurves.WeilPairing.RootSplitting
 import ModularCurves.WeilPairing.FibrePointDict

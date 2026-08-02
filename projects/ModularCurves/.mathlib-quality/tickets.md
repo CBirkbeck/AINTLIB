@@ -32646,7 +32646,12 @@ the root is not circular.
 ## Tickets
 
 ### [WP-A1] The determinant law for the field pairing
-- **Status**: open · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: none
+- **Status**: DONE 2026-08-02 — `weilPairing_gl2` in `WeilPairing/FieldPairingDet.lean`,
+  axiom-verified, root build 9624 jobs. Stated multiplicatively
+  (`e(aP+bQ, cP+dQ) · e(P,Q)^{bc} = e(P,Q)^{ad}`) so no inverses or `zpow` appear.
+  LEAN-OPS: the four bilinearity terms must be stripped **left-first for all four, then
+  right-first for all four** — interleaving them makes the second rewrite's pattern
+  disappear (the first `nsmul_left` already rewrote the term the next one targeted). · **File**: `WeilPairing/FieldPairing.lean` · **Depends on**: none
 - **Type**: theorem · **Parent**: none
 - **Statement**: for `F` algebraically closed, `W` elliptic over `F`, `N` invertible, and
   `P Q : W.toAffine.Point` killed by `N`, and `a b c d : ℤ`,
