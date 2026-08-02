@@ -338,7 +338,7 @@ elements admits a Spa point valuing it above `1`.
 
 The Tate-free form. This is the whole content of `mem_plus_of_forall_spa_vle_one_huber`, which is that statement's
 contrapositive plus one line. Extracted so the construction has a name of its own. -/
-private theorem exists_spa_point_not_vle_one_huber
+theorem exists_spa_point_not_vle_one_huber
     [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
