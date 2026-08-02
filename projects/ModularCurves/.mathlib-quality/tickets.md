@@ -32759,7 +32759,11 @@ unity in a fraction field is **integral** over the ring, hence lies in it.
   closed" by an explicit integrality-of-roots-of-unity argument on the concrete generators.
 
 #### [WP-A7.2] An `N`-th root of unity in the fraction field lies in the ring
-- **Status**: open · **File**: `WeilPairing/UniversalRootBase.lean` · **Depends on**: A7.1
+- **Status**: DONE 2026-08-02 — `exists_algebraMap_eq_of_pow_eq_one` and
+  `pow_eq_one_of_algebraMap_eq` in `WeilPairing/UniversalRootBase.lean`, axiom-verified,
+  root build 9625 jobs. Stated for a general `IsIntegrallyClosed` domain, as planned.
+  LEAN-OPS: in this mathlib the class lives in
+  `Mathlib.RingTheory.IntegralClosure.IntegrallyClosed`, not `Mathlib.RingTheory.IntegrallyClosed`. · **File**: `WeilPairing/UniversalRootBase.lean` · **Depends on**: A7.1
 - **Statement**: for `A` an integrally closed domain and `x ∈ Frac A` with `x ^ N = 1`,
   `x` is in the image of `A`.
 - **Proof sketch**: `x` is a root of the monic `X ^ N - 1 ∈ A[X]`, hence integral over `A`;
