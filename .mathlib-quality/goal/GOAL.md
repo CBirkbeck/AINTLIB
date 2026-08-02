@@ -8586,3 +8586,57 @@ directions (`hmemLP` / `hLPmem`) turned 31 lines into five two-line bullets. Plu
 
     over-50 proofs   486 (baseline) → 95   (93 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## `rank_shared` — the fourth scan, and the largest duplication in the campaign
+
+The three earlier rankings all score ONE proof at a time, so a block that appears once per
+proof is invisible to each. `rank_shared` compares PAIRS of over-50 proofs on normalised
+lines (so re-indentation cannot hide a copy) and reports their longest common run.
+
+### Closed: `exists_spa_point_not_vle_one` deleted outright (−203 lines)
+
+`FaithfulLocLift::exists_spa_point_not_vle_one` (190-line body) and
+`HuberLocLift::exists_spa_point_not_vle_one_huber` (174) have the **same statement** — the
+Faithful copy just carries an extra `[IsTateRing A]` binder it never uses. FaithfulLocLift
+transitively imports HuberLocLift and each had exactly one consumer, so: delete the
+Tate-only copy, promote the general one from `private`, repoint the consumer. One target
+gone, 203 lines gone, no statement changed.
+
+**Cross-file duplication is the blind spot of every per-file scan**, and this was an
+83-line run in two different files.
+
+### Task-3 finding, precise: the Wedhorn828 `ker_le_span` pair
+
+`unitDatum_ker_le_span` (115) and `coUnitDatum_ker_le_span` (133) share **73 lines in seven
+runs**, at these exact locations:
+
+    A 3002–3008  B 3144–3150   7   source-ring instances (τC, hringC, …)
+    A 3010–3019  B 3151–3160  10   quotient instances (τQ, uQ, complete Hausdorff)
+    A 3030–3034  B 3186–3190   5   hψ_alg
+    A 3041–3052  B 3207–3218  12   hψ_cont
+    A 3068–3074  B 3226–3232   7   obtain ⟨Φ, hΦ_cont, hΦ_alg, hΦ_X, hΦ_ker⟩
+    A 3084–3098  B 3239–3253  15   localization instances
+    A 3100–3116  B 3255–3271  17   hext : β ∘ Φ = mk aI
+
+They differ only in the unit witness — `D.s = 1` trivially for `unitDatum`, versus `b`
+invertible mod `(1 − bη)` for `coUnitDatum`.
+
+This is the same `hψ_alg` / `hψ_cont` / `hext` family already extracted from
+`WedhornCechAcyclicity::tate_backward_exists`, and the note filed then still holds:
+Wedhorn828 is **upstream**, so the shared lemmas belong here and the downstream copies
+should call them. NOT done in task 2 because it closes only one of the two targets
+(115 − 73 = 42, but 133 − 73 = 60) for a refactor that cost six build rounds the first time,
+in a file whose builds are slow. It is a task-3 job with the locations now written down.
+
+### `rank_shared`'s remaining hits
+
+    29  restrictToConvexBounded + restrictToConvex          ValuationContinuity  (also deferred above)
+    25  exists_evalBI_pow_mem_image_of_le + _norm_exact     RobbaPresentation
+    18  exists_evalBI_approx_bloc₂ + exists_evalBI_approx_bloc  RobbaPresentation
+    13  image_ιSpvR_spa_eq₂ + image_ιSpvR_spa_eq            SpaQCviaSpvAI
+    11  unitCover_sq_minus_dense + unitCover_sq_plus_dense  WedhornCechAcyclicity
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 94   (92 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
