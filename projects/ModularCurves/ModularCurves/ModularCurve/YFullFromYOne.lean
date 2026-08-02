@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.GroupScheme.NaiveGammaOneLocus
 import ModularCurves.ModularCurve.YFullToYOne
+import ModularCurves.Moduli.QuotientProblem
 
 /-!
 # The candidate `Y(N)` built over `Y₁(N)` (WP-D2c)
@@ -87,6 +88,56 @@ theorem yFullCandidate_smooth_affine (N : ℕ) [NeZero N] (X₁ : EllObj R)
       IsAffineHom (yFullCandidate N X₁ h).structMap :=
   haveI := ha
   ⟨yFullCandidate_structMap_smooth N X₁ h hsm,
+    yFullCandidate_structMap_isAffineHom N X₁ h⟩
+
+/-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
+
+The single remaining step of the D-chain. Stated here so the interface is fixed and
+type-checked; the proof is the one piece still open.
+
+**Proof plan.** Write `B := X₁.curve.fullLevelLocus N h` and `π_B := fullLevelLocusπ`.
+
+*Forward.* Given `u : T ⟶ yFullCandidate N X₁ h`, its base map is `u.baseHom : T.base ⟶ B`,
+and `u ≫ X₁.pullbackAlongπ π_B : T ⟶ X₁` has base map `u.baseHom ≫ π_B`. Feeding
+`⟨u.baseHom, _⟩` to `fullLevelLocusPointsEquiv` yields a naive full level structure on
+`X₁.curve.baseChange (u.baseHom ≫ π_B) = (X₁.pullbackAlong (u.baseHom ≫ π_B)).curve`;
+transport it to `T.curve` along the isomorphism `toPullbackAlong` supplies
+(`Moduli/QuotientProblem.lean:73`, with `toPullbackAlong_pullbackAlongπ` as its defining
+property).
+
+*Backward.* Given a full level structure `(P, Q)` on `T`, its first member is a naive
+`Γ₁(N)`-structure by `isNaiveGammaOne_of_isNaiveFullLevel` (WP-D1a), so
+`v := rOne.homEquiv.symm ⟨P, _⟩ : T ⟶ X₁` classifies it. Transporting `(P, Q)` along
+`toPullbackAlong v` and applying `fullLevelLocusPointsEquiv.symm` gives a lift
+`T.base ⟶ B` over `v.baseHom`; combining with `toPullbackAlong v` produces
+`T ⟶ yFullCandidate N X₁ h`.
+
+*Round trips* are the two `Equiv` laws of `fullLevelLocusPointsEquiv` together with
+`toPullbackAlong_pullbackAlongπ`; *naturality* is
+`fullLevelLocusPointsEquiv`'s naturality (`Moduli/LevelLocusNatural.lean`) plus
+functoriality of `toPullbackAlong`.
+
+Note `rOne` is a hypothesis: the candidate is built from a `Γ₁(N)`-representing object, and
+the backward direction is exactly where that representability is consumed. -/
+theorem yFullCandidate_representableBy (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hinv : ∀ (X : EllObj R) (k : Type u) [Field k] [IsAlgClosed k],
+      (Spec (CommRingCat.of k) ⟶ X.base) → (N : k) ≠ 0) :
+    Nonempty ((gammaFullNaiveProblem R N).RepresentableBy (yFullCandidate N X₁ h)) := by
+  sorry
+
+/-- **(WP-D2c-4)** Given WP-D2c-3, every object representing the naive full level-`N`
+problem has smooth affine structure morphism — which is exactly
+`YFull.exists_representing_smooth_affine`. -/
+theorem exists_representing_smooth_affine_of_candidate (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N)
+    (hsm : Smooth X₁.structMap) (ha : IsAffineHom X₁.structMap)
+    (hrep : Nonempty ((gammaFullNaiveProblem R N).RepresentableBy (yFullCandidate N X₁ h))) :
+    ∃ X₀ : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X₀) ∧
+      Smooth X₀.structMap ∧ IsAffineHom X₀.structMap :=
+  haveI := ha
+  ⟨yFullCandidate N X₁ h, hrep, yFullCandidate_structMap_smooth N X₁ h hsm,
     yFullCandidate_structMap_isAffineHom N X₁ h⟩
 
 end ModularCurves

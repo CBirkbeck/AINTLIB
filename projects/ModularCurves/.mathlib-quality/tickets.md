@@ -34097,3 +34097,26 @@ goal is a three-fold composite and instance search does not match. Worked around
 **Next — [WP-D2c-3]**, the single remaining mathematical step: `yFullCandidate` represents
 `gammaFullNaiveProblem R N`. With it, `smooth_affine_of_representableBy` closes
 `YFull.exists_representing_smooth_affine`.
+
+## [WP-D2c-4] COMPLETE, [WP-D2c-3] stated with its proof plan (2026-08-02)
+
+`ModularCurve/YFullFromYOne.lean` now also contains:
+* **`yFullCandidate_representableBy`** — the statement that the candidate represents
+  `gammaFullNaiveProblem R N`. **One `sorry`**, deliberately: the interface is fixed and
+  type-checked so the remaining work has a precise target, and the full proof plan is in its
+  docstring (forward via `fullLevelLocusPointsEquiv` + `toPullbackAlong`; backward via
+  WP-D1a's `isNaiveGammaOne_of_isNaiveFullLevel` then `rOne.homEquiv.symm` then
+  `fullLevelLocusPointsEquiv.symm`; round trips from the two `Equiv` laws plus
+  `toPullbackAlong_pullbackAlongπ`; naturality from `Moduli/LevelLocusNatural.lean`).
+* **`exists_representing_smooth_affine_of_candidate`** — *axiom-verified*: given that
+  statement, the conclusion of `YFull.exists_representing_smooth_affine` follows. So the
+  whole D-chain is now reduced to a single named `sorry`.
+
+Key machinery located for the proof: `toPullbackAlong` (`Moduli/QuotientProblem.lean:73`),
+the canonical `Y ⟶ X.pullbackAlong u.baseHom` with `toPullbackAlong_pullbackAlongπ` as its
+defining property — this is what transports level structures between `T.curve` and
+`(X₁.pullbackAlong _).curve`.
+
+### D-chain status
+WP-D1a ✅ · D1b ✅ · D1c-construction ✅ · D1c-rel ✅ · D1c-coarse ✅ · D2a ✅ · D2b ✅ ·
+D2c-2 ✅ · **D2c-3 ← the one open step** · D2c-4 ✅ (conditional, axiom-verified)
