@@ -219,6 +219,61 @@ theorem forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne (h : NIsInvertible S N)
     exact (hnaive.2 (AlgebraicClosure (T.residueField t)) τ).2 m hm.1 hm.2
       ((hzero τ pt m).mpr hmem')
 
+/-! ### The classifying equivalences -/
+
+/-- `T`-points of the naive `Γ₁(N)` locus over `g` are `T`-points of `E[N]` over `g` whose
+image lies in the naive `Γ₁(N)` set. The mirror of `fullLevelLocusSectionsEquiv`, without the
+`torsionPair` detour. -/
+noncomputable def naiveGammaOneLocusSectionsEquiv (h : NIsInvertible S N) (g : T ⟶ S) :
+    { h' : T ⟶ E.naiveGammaOneLocus N h // h' ≫ E.naiveGammaOneLocusπ N h = g } ≃
+      { a : T ⟶ E.torsion N // a ≫ E.torsionπ N = g ∧
+        ∀ t : T, a.base t ∈ E.naiveGammaOneSet N } where
+  toFun h' := ⟨h'.1 ≫ E.naiveGammaOneLocusι N h,
+    by rw [Category.assoc]; exact h'.2,
+    fun t => by
+      have : (E.naiveGammaOneLocusι N h).base (h'.1.base t) ∈
+          Set.range (E.naiveGammaOneLocusι N h).base := Set.mem_range_self _
+      rw [Scheme.Opens.range_ι] at this
+      exact this⟩
+  invFun w := ⟨IsOpenImmersion.lift (E.naiveGammaOneLocusι N h) w.1
+      (by
+        rw [Scheme.Opens.range_ι]
+        rintro x ⟨t, rfl⟩
+        exact w.2.2 t),
+    by
+      rw [show E.naiveGammaOneLocusπ N h = E.naiveGammaOneLocusι N h ≫ E.torsionπ N
+        from rfl, ← Category.assoc, IsOpenImmersion.lift_fac]
+      exact w.2.1⟩
+  left_inv h' := Subtype.ext (by
+    haveI : Mono (E.naiveGammaOneLocusι N h) := IsOpenImmersion.mono _
+    exact (cancel_mono (E.naiveGammaOneLocusι N h)).mp (IsOpenImmersion.lift_fac _ _ _))
+  right_inv w := Subtype.ext (IsOpenImmersion.lift_fac _ _ _)
+
+/-- **(WP-D1c-coarse, the classifying equivalence)** `T`-points of the naive `Γ₁(N)` locus
+over `g` are exactly the naive `Γ₁(N)`-structures on `E ×_S T`.
+
+This is the relative-representability datum for `gammaOneNaiveProblem`, mirroring
+`fullLevelLocusPointsEquiv` — and with a single generator the `pullback.lift` round-trips of
+the original collapse to the two `sectionTorsionMap`/`torsionMapSection` identities. -/
+noncomputable def naiveGammaOneLocusPointsEquiv (h : NIsInvertible S N) (g : T ⟶ S) :
+    { h' : T ⟶ E.naiveGammaOneLocus N h // h' ≫ E.naiveGammaOneLocusπ N h = g } ≃
+      { P : (E.baseChange g).Section // (E.baseChange g).IsNaiveGammaOne N P } :=
+  (E.naiveGammaOneLocusSectionsEquiv N h g).trans
+    { toFun := fun w => ⟨E.torsionMapSection N g w.1 w.2.1,
+        (E.forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne N h w.1 w.2.1).mp w.2.2⟩
+      invFun := fun P => ⟨(E.sectionTorsionMap N g P.1 P.2.1).1,
+        (E.sectionTorsionMap N g P.1 P.2.1).2,
+        by
+          have hmi := (E.forall_mem_naiveGammaOneSet_iff_isNaiveGammaOne N h
+            (E.sectionTorsionMap N g P.1 P.2.1).1
+            (E.sectionTorsionMap N g P.1 P.2.1).2).mpr
+          rw [E.torsionMapSection_sectionTorsionMap N g P.1 P.2.1] at hmi
+          exact hmi P.2⟩
+      left_inv := fun w => Subtype.ext
+        (E.sectionTorsionMap_torsionMapSection N g w.1 w.2.1)
+      right_inv := fun P => Subtype.ext
+        (E.torsionMapSection_sectionTorsionMap N g P.1 P.2.1) }
+
 end EllipticCurve
 
 end ModularCurves
