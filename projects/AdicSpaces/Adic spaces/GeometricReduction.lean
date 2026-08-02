@@ -5686,6 +5686,54 @@ No τ compatibility is required because each step closes via
 `hC_compat` or `restrictionMap_comp`, both Prop-irrelevant on their
 subset-proof arguments. -/
 
+/-- For each refined V-cover piece, `refines_contain` picks a member of the original
+covering that contains it: the composite of the plus-piece containment with the chosen
+target. Step 1 of `tateAcyclicity_Part2_direct_per_E`. -/
+private theorem exists_target_cover_of_refines [HasLocLiftPowerBounded A] [DecidableEq A]
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
+    (hS_contain : refines_contain C S) :
+    ∃ DE : { D // D ∈ C.refinedVCovers S f₀ } → RationalLocData A,
+      (∀ D, DE D ∈ C.covers)
+        ∧ (∀ D, rationalOpen D.1.T D.1.s ⊆ rationalOpen (DE D).T (DE D).s) := by
+  classical
+  have D_f_exists : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
+      ∃ f, f ∈ S ∧
+        (laurentPlusDatum (C.plusDatum f) f₀ = D.1 ∨
+         laurentMinusDatum (C.plusDatum f) f₀ = D.1) := fun D => by
+    rcases (C.mem_refinedVCovers S f₀).mp D.2 with ⟨f, hf, hf_eq⟩ | ⟨f, hf, hf_eq⟩
+    · exact ⟨f, hf, Or.inl hf_eq⟩
+    · exact ⟨f, hf, Or.inr hf_eq⟩
+  let D_f : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, A := fun D =>
+    Classical.choose (D_f_exists D)
+  have D_f_mem_S : ∀ D, D_f D ∈ S := fun D => (Classical.choose_spec (D_f_exists D)).1
+  have D_f_eq : ∀ D, laurentPlusDatum (C.plusDatum (D_f D)) f₀ = D.1 ∨
+      laurentMinusDatum (C.plusDatum (D_f D)) f₀ = D.1 :=
+    fun D => (Classical.choose_spec (D_f_exists D)).2
+  -- D.1's rational open is contained in plus-piece-at-(D_f D).
+  have D_sub_plusPiece : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
+      rationalOpen D.1.T D.1.s ⊆
+        rationalOpen (C.plusDatum (D_f D)).T (C.plusDatum (D_f D)).s := fun D => by
+    rcases D_f_eq D with heq | heq
+    · rw [← heq]; exact laurentPlus_subset (C.plusDatum (D_f D)) f₀
+    · rw [← heq]; exact laurentMinus_subset (C.plusDatum (D_f D)) f₀
+  have D_sub_plusPiece_insert : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
+      rationalOpen D.1.T D.1.s ⊆
+        rationalOpen (insert (D_f D) C.base.T) C.base.s := fun D =>
+    (D_sub_plusPiece D).trans (C.rationalOpen_plusDatum_eq_insert (D_f D)).le
+  -- Classical.choose target E via refines_contain.
+  let D_E : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, RationalLocData A := fun D =>
+    Classical.choose (hS_contain (D_f D) (D_f_mem_S D))
+  have D_E_mem : ∀ D, D_E D ∈ C.covers := fun D =>
+    (Classical.choose_spec (hS_contain (D_f D) (D_f_mem_S D))).1
+  have D_E_sub : ∀ D,
+      rationalOpen (insert (D_f D) C.base.T) C.base.s ⊆
+        rationalOpen (D_E D).T (D_E D).s := fun D =>
+    (Classical.choose_spec (hS_contain (D_f D) (D_f_mem_S D))).2
+  -- Composite: D ⊆ D_E D.
+  have D_sub_DE : ∀ D, rationalOpen D.1.T D.1.s ⊆ rationalOpen (D_E D).T (D_E D).s :=
+    fun D => (D_sub_plusPiece_insert D).trans (D_E_sub D)
+  exact ⟨D_E, D_E_mem, D_sub_DE⟩
+
 /-- **`tateAcyclicity` Part 2 via direct per-E covering** — the Lane B
 closure consuming the canonical `refines_cover_per_E` predicate from
 `StandardCover.lean` (via `refines_by_standard_cover_per_E`) without any
@@ -5728,42 +5776,7 @@ theorem RationalCoveringData.tateAcyclicity_Part2_direct_per_E
   -- Step 1: Extract f per refined V-piece D via Classical.choose on
   -- `mem_refinedVCovers`, then pick target E_D via Classical.choose on
   -- `refines_contain` at f.
-  have D_f_exists : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
-      ∃ f, f ∈ S ∧
-        (laurentPlusDatum (C.plusDatum f) f₀ = D.1 ∨
-         laurentMinusDatum (C.plusDatum f) f₀ = D.1) := fun D => by
-    rcases (C.mem_refinedVCovers S f₀).mp D.2 with ⟨f, hf, hf_eq⟩ | ⟨f, hf, hf_eq⟩
-    · exact ⟨f, hf, Or.inl hf_eq⟩
-    · exact ⟨f, hf, Or.inr hf_eq⟩
-  let D_f : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, A := fun D =>
-    Classical.choose (D_f_exists D)
-  have D_f_mem_S : ∀ D, D_f D ∈ S := fun D => (Classical.choose_spec (D_f_exists D)).1
-  have D_f_eq : ∀ D, laurentPlusDatum (C.plusDatum (D_f D)) f₀ = D.1 ∨
-      laurentMinusDatum (C.plusDatum (D_f D)) f₀ = D.1 :=
-    fun D => (Classical.choose_spec (D_f_exists D)).2
-  -- D.1's rational open is contained in plus-piece-at-(D_f D).
-  have D_sub_plusPiece : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
-      rationalOpen D.1.T D.1.s ⊆
-        rationalOpen (C.plusDatum (D_f D)).T (C.plusDatum (D_f D)).s := fun D => by
-    rcases D_f_eq D with heq | heq
-    · rw [← heq]; exact laurentPlus_subset (C.plusDatum (D_f D)) f₀
-    · rw [← heq]; exact laurentMinus_subset (C.plusDatum (D_f D)) f₀
-  have D_sub_plusPiece_insert : ∀ D : { D // D ∈ C.refinedVCovers S f₀ },
-      rationalOpen D.1.T D.1.s ⊆
-        rationalOpen (insert (D_f D) C.base.T) C.base.s := fun D =>
-    (D_sub_plusPiece D).trans (C.rationalOpen_plusDatum_eq_insert (D_f D)).le
-  -- Classical.choose target E via refines_contain.
-  let D_E : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, RationalLocData A := fun D =>
-    Classical.choose (hS_contain (D_f D) (D_f_mem_S D))
-  have D_E_mem : ∀ D, D_E D ∈ C.covers := fun D =>
-    (Classical.choose_spec (hS_contain (D_f D) (D_f_mem_S D))).1
-  have D_E_sub : ∀ D,
-      rationalOpen (insert (D_f D) C.base.T) C.base.s ⊆
-        rationalOpen (D_E D).T (D_E D).s := fun D =>
-    (Classical.choose_spec (hS_contain (D_f D) (D_f_mem_S D))).2
-  -- Composite: D ⊆ D_E D.
-  have D_sub_DE : ∀ D, rationalOpen D.1.T D.1.s ⊆ rationalOpen (D_E D).T (D_E D).s :=
-    fun D => (D_sub_plusPiece_insert D).trans (D_E_sub D)
+  obtain ⟨D_E, D_E_mem, D_sub_DE⟩ := exists_target_cover_of_refines C S f₀ hS_contain
   -- Step 2: Build fV.
   let fV : ∀ D : { D // D ∈ C.refinedVCovers S f₀ }, presheafValue D.1 := fun D =>
     restrictionMap (D_E D) D.1 (D_sub_DE D) (fC ⟨D_E D, D_E_mem D⟩)
@@ -5777,12 +5790,9 @@ theorem RationalCoveringData.tateAcyclicity_Part2_direct_per_E
     -- Unfold fV D₁, fV D₂, use restrictionMap_comp to peel off, apply hC_compat.
     have hcomp1 := restrictionMap_comp (D_E D₁) D₁.1 D₃ (D_sub_DE D₁) h₃₁
     have hcomp2 := restrictionMap_comp (D_E D₂) D₂.1 D₃ (D_sub_DE D₂) h₃₂
-    have step1 : restrictionMap D₁.1 D₃ h₃₁ (fV D₁) =
-        restrictionMap (D_E D₁) D₃ (h₃₁.trans (D_sub_DE D₁)) (fC ⟨D_E D₁, D_E_mem D₁⟩) :=
-      congr_fun hcomp1 _
-    have step2 : restrictionMap D₂.1 D₃ h₃₂ (fV D₂) =
-        restrictionMap (D_E D₂) D₃ (h₃₂.trans (D_sub_DE D₂)) (fC ⟨D_E D₂, D_E_mem D₂⟩) :=
-      congr_fun hcomp2 _
+    have step1 := congr_fun hcomp1 (fC ⟨D_E D₁, D_E_mem D₁⟩)
+    have step2 := congr_fun hcomp2 (fC ⟨D_E D₂, D_E_mem D₂⟩)
+    simp only [Function.comp_apply] at step1 step2
     rw [step1, step2]
     exact hC_compat ⟨D_E D₁, D_E_mem D₁⟩ ⟨D_E D₂, D_E_mem D₂⟩ D₃ _ _
   -- Step 4: Apply hV_glue_refined to get x.
