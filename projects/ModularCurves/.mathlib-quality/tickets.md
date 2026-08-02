@@ -34205,3 +34205,45 @@ cannot build the motive. Zero heartbeat bumps.
 Specialise at `g := fullLevelLocusπ`; the right-hand side becomes "`Γ₁`-structure +
 refinement", and WP-D1a's `isNaiveGammaOne_of_isNaiveFullLevel` collapses it to just the full
 level structure, giving `yFullCandidate_representableBy` and closing the D-chain.
+
+### [WP-D2c-3] **CORRECTION — the candidate represents the *simultaneous* problem, not `Γ(N)`**
+
+Reading `Moduli/QuotientProblem.lean` in full (the lesson from the duplicate above) turned up
+`ModuliProblem.simul` (`:370`), `simulRepresentableBy` (`:433`) and `simul_representable`
+(`:506`) — KM 4.7 step (i), *"Because `δ` is representable and `𝒫` is relatively
+representable, the simultaneous problem `(𝒫, δ)` is representable, by
+`𝕸(𝒫, δ) = 𝒫_{E/𝕸(δ)}`"*. Instantiated at `Q := Γ₁(N)`, `P := Γ(N)`, `f := fullLevelLocusπ`
+its conclusion is literally
+
+    (Γ(N).simul Γ₁(N)).RepresentableBy (X₁.pullbackAlong fullLevelLocusπ)
+
+i.e. **`yFullCandidate` represents `Γ(N) × Γ₁(N)` with the two structures *unrelated***, not
+`Γ(N)`. Checked directly against `homPullbackAlongEquiv`: a `T`-point is a pair
+`(u : T ⟶ X₁, b)` with `b ≫ f = u.baseHom`, i.e. a `Γ₁`-structure **and** a full level
+structure, with no compatibility imposed. So `yFullCandidate_representableBy` as stated is
+**not provable**; `Γ(N)` is only a *retract* of the simul problem (split by
+`(𝟙, gammaFullToGammaOne)` — WP-D1b), and a retract of a representable functor need not be
+representable.
+
+#### The fix: cut down to the fibre over the universal `P₁`
+`Y(N)` is the locus in `yFullCandidate` where the two `Γ₁`-structures agree — and since the
+full-level locus sits inside `E₁[N] ×_{Y₁(N)} E₁[N]`, that condition is just *"the first
+coordinate is `P₁`"*. So take
+
+    Z := the fibre of  fullLevelLocus(X₁.curve) ⟶ E₁[N]  over the universal section P₁
+
+(the base change of the first-coordinate map along `P₁ : Y₁(N) ⟶ E₁[N]`), and
+`X₀ := X₁.pullbackAlong (Z ⟶ Y₁(N))`.
+
+* `fullLevelLocus ⟶ E₁[N]` is finite étale — the projection `E[N] ×_S E[N] ⟶ E[N]` is a base
+  change of `E[N] ⟶ S`, and restricting to the clopen `fullLevelLocus` preserves it;
+* hence `Z ⟶ Y₁(N)` is finite étale, being a base change of that along `P₁`;
+* hence `X₀.structMap` is smooth affine by the **already-proved** WP-D2c-2 argument, with `Z`
+  in place of `fullLevelLocus`;
+* and `X₀` represents `Γ(N)` because the fibre condition is exactly WP-D2b's
+  `yFullToYOne_comp_eq_iff`.
+
+**Net effect on the plan:** WP-D2c-2 generalises verbatim (it only used "finite étale over
+`Y₁(N)`"); WP-D2b is unchanged and is now the *characterising* property of `Z`; the new work
+is constructing `Z` and its finite-étaleness. WP-D1a/D1b remain exactly what supplies the
+split, i.e. why the fibre is nonempty and why the condition is the right one.
