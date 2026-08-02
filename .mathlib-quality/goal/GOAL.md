@@ -8500,3 +8500,39 @@ targets stay on the list with the route written down.
     over-50 proofs   486 (baseline) → 99   (97 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
     full lake build  GREEN (exit 0, zero errors, 3360 modules)
+
+## DEFERRED: mem_rationalOpen_chartData_iff (80) — the cleanup is SLOWER than the code
+
+Three independent attempts, all reverted, module re-verified green at HEAD each time.
+
+`hc1` and `hc2` are the same cancellation written twice: from `w(ϖ)^b₁ · w(ϖ)^b₂ ≤ w(p)^a₁ ·
+w(ϖ)^b₂` conclude `w(ϖ)^b₁ ≤ w(p)^a₁`, and the mirror. Each does it by hand in nine and
+eleven lines via `mul_le_mul_right`, `inv_mul_cancel₀` and four `mul_comm` reassociations.
+mathlib has exactly the lemma — `mul_le_mul_iff_right₀` / `mul_le_mul_iff_left₀` — and
+substituting it produces `(deterministic) timeout at whnf`.
+
+**The hand-rolled route was the point.** `mul_le_mul_iff_right₀` needs `PosMulReflectLE` /
+`MulPosReflectLE` on the valuation's codomain, and that instance search is what blows the
+budget; `mul_le_mul_right` + `inv_mul_cancel₀` never asks for it. This is the first target
+where the obvious dedup is measurably *worse* than what is written, and it is worth stating
+as a rule:
+
+> **A hand-rolled version of a mathlib lemma is not automatically a defect.** In
+> instance-heavy code it may be avoiding an instance search that the general lemma forces.
+> Check the build, not just the statement.
+
+Two further attempts also failed:
+* stating the helper lemmas with `letI : ValuativeRel (Ainf p F) := v.toValuativeRel` in the
+  STATEMENT — Lean fails to synthesize `ValuativeRel (Ainf p F)` for the conclusion, and the
+  surrounding declarations then time out;
+* even `have hsval : … := fun h0 => hs (by rw …)` in term form times out where the
+  four-line tactic version does not.
+
+The target stays at 80. A viable route would phrase the helpers purely in `v.vle` (no
+valuation, hence no instance threading), at the cost of conversion steps at each use — not
+obviously a net win, and not attempted.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 98   (96 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
