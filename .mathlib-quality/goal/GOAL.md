@@ -8686,3 +8686,56 @@ ambiguous when the equation's LHS is a `set`-bound local; the explicit `rw` is n
     over-50 proofs   486 (baseline) → 93   (91 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
     full lake build  GREEN (exit 0, zero errors, 3360 modules)
+
+## Batch: exists_wLoc_split → the ChartData undeferral (93 → 89)
+
+    exists_wLoc_split               83 → 26   (largest ratio of the campaign)
+    image_ιSpvR_spa_eq              85 → 39
+    image_ιSpvR_spa_eq₂            114 → 50
+    mem_rationalOpen_chartData_iff  80 → 49   ← previously deferred TWICE
+
+### THE INSTANCE-THREADING RULE, IN TWO PARTS
+
+This blocked `mem_rationalOpen_chartData_iff` through two separate deferrals. Both halves
+now have answers, and they are different answers:
+
+**1. If the CONCLUSION does not mention the valuation, thread nothing.**
+`isContinuous_of_profile_conditions` concludes `w.IsContinuous`. Forty-six lines of
+`wv`-flavoured argument sit behind it, and the `letI : ValuativeRel A := w.toValuativeRel`
+plus `set wv` stay entirely inside the proof.
+
+**2. If it does, supply the instance EXPLICITLY — never `letI` in the statement.**
+
+    @ValuativeRel.valuation A _ w.toValuativeRel g < 1
+
+A `letI` in a statement leaves Lean nothing to synthesize from: it reports "failed to
+synthesize instance ValuativeRel A" and the surrounding declarations then time out. That is
+precisely what the first ChartData attempt hit. The `@` form asks for no synthesis at all.
+
+### And a correction to the earlier ChartData note
+
+I recorded that its hand-rolled cancellation was deliberate — `mul_le_mul_iff_right₀` needs
+`PosMulReflectLE` on that value group and the search blows the budget — and concluded the
+target should stay as it was. That was half right. The correct move is neither mathlib's
+lemma nor two hand-rolled copies, but to **give the hand-rolled route a name**:
+
+    le_of_mul_le_mul_right₀  3L   over `LinearOrderedCommGroupWithZero`, no order classes
+    le_of_mul_le_mul_left₀   1L   the mirror, by `mul_comm`
+
+`hc1` and `hc2` are four lines each now instead of nine and eleven.
+
+> A hand-rolled version of a mathlib lemma is not automatically a defect — and when it is
+> there for a reason, generalise the hand-rolled route rather than keep writing it out.
+
+### `exists_wLoc_split`: take the ESTIMATE as a hypothesis, not the object
+
+83 → 26. Its last two bullets were 23-line twins differing only in `WittVector.tail k x`
+versus `init k x` and which of `pow_mul_gaussValue_tail_le` / `_init_le` supplied the bound.
+One lemma covers both because it takes the inequality as a hypothesis: `tail` and `init`
+differ only in which one they satisfy, and neither the `div_le_div_iff₀` normalisation nor
+the `calc` cares which.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 89   (87 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
