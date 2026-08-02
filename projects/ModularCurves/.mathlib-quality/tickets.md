@@ -33604,3 +33604,32 @@ Given WP-D1c, **WP-D2 is mechanical**: `Etale ⟹ Smooth` is an instance
 (`Morphisms/Smooth.lean:105`), so `Smooth X.structMap` follows from `yOneStructMap_smooth`,
 and `smooth_affine_of_representableBy` spreads it to every representing object — closing
 `YFull.exists_representing_smooth_affine`.
+
+### WP-D1c-rel fully scoped (2026-08-02) — every ingredient located
+
+The `Γ₁` relative level scheme **exists**: `exists_exactOrderLocus`
+(`LevelStructure/Incidence.lean:2512`, T-D17 = KM 1.6) produces an
+`(E.torsion N).IdealSheafData` whose subscheme is universal for *"the torsion point has
+exact order `N`"*. Call it `δ_one(E)`. So the diagram is
+
+    δ_full(E) = fullLevelLocus ──forget──▶ δ_one(E) = Z.subscheme ──▶ E[N] ──▶ S
+
+and the three steps are:
+
+1. **The forgetful map exists.** Apply `exists_exactOrderLocus`'s universal property to the
+   tautological first member of the full-level structure. Its hypothesis is
+   `Section.HasExactOrder`, whereas WP-D1a delivers `IsNaiveGammaOne`; the bridge is
+   `Section.hasExactOrder_iff_geometric` (`LevelStructure/ExactOrder.lean:927`), valid
+   exactly when `N` is invertible, which is already assumed.
+2. **`δ_one(E) ⟶ S` is finite and locally of finite type.** It is a closed subscheme of
+   `E[N]` (`Z.subschemeι`), and `E[N] ⟶ S` is finite étale, so the composite is finite;
+   `LocallyOfFiniteType` follows.
+3. **The forgetful map is étale.** `Etale.of_comp` with `g = δ_one(E) ⟶ S`: the composite
+   `δ_full(E) ⟶ S` is étale by `fullLevelLocusπ_etale`, and `g` is locally of finite type by
+   step 2. Finiteness of the forgetful map likewise from `fullLevelLocusπ_isFinite`.
+
+That is the whole relative statement, with no missing mathlib infrastructure. What then
+remains of the chain is only **WP-D1c-coarse** — identifying `yFullToYOne` with the map
+induced by these relative forgetful maps, which is engine bookkeeping
+(`AffineOverEll.relativelyRepresentable`, `Moduli/EngineWiring.lean`) — and after that WP-D2
+is mechanical.
