@@ -9241,3 +9241,51 @@ Common shape: **a lemma stated at the wrong altitude** (function-level instead o
 reverse direction only, or in a file below its earliest consumer) forces every consumer to
 re-derive it anonymously. The anonymous copies are invisible to name-based dedup, which is
 why they survived to a line-count campaign.
+
+## Batch: interProdOn_isGeneratedBy 85 → 48, isOXAcyclic_interProd 141 → 123
+
+Four extractions in `WedhornCechAcyclicity`, three of them API rather than decomposition:
+
+    mem_covers_interProd             2L   forward membership for `interProd`
+    mem_covers_interProdOn           6L   forward membership for `interProdOn`
+    insert_s_T_eq_of_generated       2L   `insert s T = units` for a generated cover
+    interProdOn_pieceMap_surjective 26L   the surjectivity bullet, lifted whole
+
+`interProdOn_isGeneratedBy` proves the four components of `IsGeneratedBy`'s bijection in
+four bullets; the surjectivity bullet was 27 of its 85 lines and lifts unchanged once the
+map's *membership component* is a named lemma rather than a `?_` filled by the first bullet.
+That is the enabling move: `refine ⟨fun p => ⟨…, ?_⟩, ⟨?_, ?_⟩, ?_⟩` makes the map's own
+definition depend on a later goal, so no other bullet can be stated about it. Supplying the
+membership term inline instead frees all three remaining bullets to become lemmas.
+
+### `rw` needs a type-correct motive; term application does not
+
+The `restrictionMap_restrictionMap` conversion is **not** unconditionally mechanical. Three
+of the seven sites in `isOXAcyclic_interProd` rejected
+
+    rw [restrictionMap_restrictionMap P₁.1 M E hMP₁ hEM]
+
+with *"Did not find an occurrence of the pattern"* — while the pattern is visibly in the
+goal. The real cause is in the note underneath: `g P₁ : presheafValue (V.restrictTo ↑P₁ …).base`,
+which is only **defeq** to `presheafValue ↑P₁`. Term-mode application unfolds that happily;
+`rw` builds a motive and type-checks it at `implicit` transparency, where it does not. So at
+those three sites the `have c := …; rw [c]` shape has to stay, and the win is only the
+dropped `simp only [Function.comp_def]` that `congrFun` had made necessary.
+
+**Rule:** converting `have c := congrFun (lemma …) y; simp only […] at c; rw [c]` into a
+direct `rw [lemma … y]` is safe only when the arguments' types are *syntactically* right,
+not merely defeq.
+
+### Machine state (blocking, not a defect)
+
+The full gate for this batch has been on one module (`RobbaPresentation`) for nearly five
+hours. It is not hung: load average is 38–67, free RAM is ~65 MB, swap is 9.9 GB of 11 GB
+used, and an orphaned `python3 -` (ppid 1, 12 days old) is holding 28.8 GB RSS. Several
+other sessions' Lean processes hold 2.4–2.9 GB each. Every module-scoped build in this batch
+was green before the gate started.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 73   (71 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
+    full lake build  last green at the Presheaf batch; this batch's gate is starved
