@@ -1656,6 +1656,50 @@ theorem xPresheaf_map_apply {V' V : Opens (Curve p F ϖ)} (h : V' ≤ V)
     ((curveSpace p F ϖ).presheaf.map (homOfLE h).op).1 t
       = frobFixedRestrict p F ϖ h t := rfl
 
+/-- The 𝒴-side family inherits the compatibility of the `X`-side family: both
+`curvePreimage` and `yFunctor` preserve `⊓`, so the two pullbacks agree. -/
+private theorem xPresheaf_glue_compat (T : Type u) [CommRing T] [TopologicalSpace T]
+    [IsTopologicalRing T] {ι : Type u} (U : ι → Opens ↥(curveSpace p F ϖ).carrier)
+    (f : ∀ i, {g : T →+* ((curveSpace p F ϖ).presheaf.obj
+      (Opposite.op (U i)) : Type _) // Continuous g})
+    (hcompat : ∀ i j : ι,
+      ((curveSpace p F ϖ).presheaf.map
+          (homOfLE (inf_le_left (a := U i) (b := U j))).op).1.comp (f i).1 =
+        ((curveSpace p F ϖ).presheaf.map
+          (homOfLE (inf_le_right (a := U i) (b := U j))).op).1.comp (f j).1) :
+    ∀ i j,
+      (limitRestrict (inf_le_left
+          (a := (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i)))
+          (b := (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U j))))).comp
+          ((piComponent p F ϖ (U i)).comp (f i).1)
+        = (limitRestrict (inf_le_right
+            (a := (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i)))
+            (b := (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U j))))).comp
+            ((piComponent p F ϖ (U j)).comp (f j).1) := by
+  set U' : ι → Opens ↥(SpaTop (Ainf p F)) :=
+    fun i => (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i)) with hU'def
+  intro i j
+  refine RingHom.ext fun t => ?_
+  have h0 := DFunLike.congr_fun (hcompat i j) t
+  have h0' := congrArg Subtype.val
+    ((xPresheaf_map_apply p F ϖ
+        (inf_le_left (a := U i) (b := U j)) ((f i).1 t)).symm.trans
+      (h0.trans (xPresheaf_map_apply p F ϖ
+        (inf_le_right (a := U i) (b := U j)) ((f j).1 t))))
+  have e1 := curvePreimage_inf p F ϖ (U i) (U j)
+  have e2 := yFunctor_inf p F ϖ (curvePreimage p F ϖ (U i))
+    (curvePreimage p F ϖ (U j))
+  have hpre : (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i ⊓ U j))
+      = U' i ⊓ U' j := by rw [e1, e2]
+  exact ValuationSpectrum.limitRestrict_cross_eq_of_opens_eq hpre
+    (yFunctor_curvePreimage_mono p F ϖ
+      (inf_le_left (a := U i) (b := U j)))
+    (yFunctor_curvePreimage_mono p F ϖ
+      (inf_le_right (a := U i) (b := U j)))
+    (inf_le_left (a := U' i) (b := U' j))
+    (inf_le_right (a := U' i) (b := U' j)) h0'
+
+
 /-- **The curve presheaf is a sheaf of topological rings** (D-iv-4, Wedhorn
 Remark 8.20 for the quotient): compatible continuous `T`-families of
 invariant sections glue uniquely — glue the underlying `𝒴`-sections over
@@ -1683,31 +1727,7 @@ theorem xPresheaf_isSheafOfTopologicalRings :
   have stabU : ∀ i, frobOpens p F 1 (U' i) = U' i :=
     fun i => frobOpens_yFunctor_curvePreimage p F ϖ 1 (U i)
   -- the underlying 𝒴-side family
-  have hcompat' : ∀ i j,
-      (limitRestrict (inf_le_left (a := U' i) (b := U' j))).comp
-          ((piComponent p F ϖ (U i)).comp (f i).1)
-        = (limitRestrict (inf_le_right (a := U' i) (b := U' j))).comp
-            ((piComponent p F ϖ (U j)).comp (f j).1) := by
-    intro i j
-    refine RingHom.ext fun t => ?_
-    have h0 := DFunLike.congr_fun (hcompat i j) t
-    have h0' := congrArg Subtype.val
-      ((xPresheaf_map_apply p F ϖ
-          (inf_le_left (a := U i) (b := U j)) ((f i).1 t)).symm.trans
-        (h0.trans (xPresheaf_map_apply p F ϖ
-          (inf_le_right (a := U i) (b := U j)) ((f j).1 t))))
-    have e1 := curvePreimage_inf p F ϖ (U i) (U j)
-    have e2 := yFunctor_inf p F ϖ (curvePreimage p F ϖ (U i))
-      (curvePreimage p F ϖ (U j))
-    have hpre : (yFunctor p F ϖ).obj (curvePreimage p F ϖ (U i ⊓ U j))
-        = U' i ⊓ U' j := by rw [e1, e2]
-    exact ValuationSpectrum.limitRestrict_cross_eq_of_opens_eq hpre
-      (yFunctor_curvePreimage_mono p F ϖ
-        (inf_le_left (a := U i) (b := U j)))
-      (yFunctor_curvePreimage_mono p F ϖ
-        (inf_le_right (a := U i) (b := U j)))
-      (inf_le_left (a := U' i) (b := U' j))
-      (inf_le_right (a := U' i) (b := U' j)) h0'
+  have hcompat' := xPresheaf_glue_compat p F ϖ T U f hcompat
   obtain ⟨g, hg, huniq⟩ := (isLimitSheafOn_Y p F ϖ).homGlue hVS hle hcov
     (fun i => (piComponent p F ϖ (U i)).comp (f i).1)
     (fun i => continuous_subtype_val.comp (f i).2) hcompat'
