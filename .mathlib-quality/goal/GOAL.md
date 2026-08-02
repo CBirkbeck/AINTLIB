@@ -9289,3 +9289,44 @@ was green before the gate started.
     over-50 proofs   486 (baseline) → 73   (71 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
     full lake build  last green at the Presheaf batch; this batch's gate is starved
+
+## `isOXAcyclic_interProd`: 141 → 118, and a decomposition that did NOT work
+
+Three passes brought it from 141 to 118 — the `mem_covers_interProd` /
+`mem_covers_restrictTo` forward-membership lemmas at five sites, and the
+`restrictionMap_restrictionMap` pointwise form at four. It is still open at 118, and the
+structural split that would close it **failed on elaboration cost**, which is worth
+recording because the failure mode is not one the campaign has hit before.
+
+The plan was sound: extract `hcanon` (the per-piece agreement on the canonical intersection
+`P₁ ∩ P₂`) and the `hgcoc` cocycle around it, using a **normalised interface** for the
+glued sections —
+
+    (g  : ∀ P : ↥Uf.covers, presheafValue P.1)
+    (hg : ∀ (P : ↥Uf.covers) (Q : ↥V.covers), restrictionMap P.1 (P.1 ∩ Q.1) _ (g P) = f ⟨_, _⟩)
+
+instead of the literal types (`presheafValue (V.restrictTo P.1 …).base`, and `hg` indexed by
+a `restrictTo`-piece). That interface is a real improvement: it deletes the `hDmem₁`/`hDmem₂`
+membership plumbing and the `simp only [restrictTo_base]` normalisation from the inner proof
+entirely, taking the inner lemma from ~60 lines to ~44.
+
+**But the extracted lemma does not elaborate**: `(deterministic) timeout at whnf` reported at
+`<decl>:0` — cumulative, not a single bad step. The statement carries four large hypotheses
+(`hV1`, `f`, `hf`, `hg`), each mentioning `Uf.interProd V hbase hUfP hVP` or a `restrictTo`
+of an `interSamePair`, and every `have` in the body re-checks against that context. Inside a
+tactic proof those same hypotheses are already-elaborated local constants; hoisting them into
+a signature makes them elaboration work at every step.
+
+**The lesson:** interface parameterisation is not free. Abstracting a proof's context into a
+lemma signature converts *local constants* into *types to be elaborated*, and when the
+context is this heavy the cumulative cost can exceed what the proof itself ever paid. When a
+lift reports `<decl>:0` rather than an inner `line:col`, the extraction itself is the cost —
+decomposing further inside the lemma will not help.
+
+Reverted the two structural lemmas; kept the API lemmas, which are cheap and used at five
+sites. Per the campaign rule, **no heartbeat raise was added** — the raise would have made
+the extraction compile while hiding exactly the signal that says the extraction is wrong.
+
+Next route for this proof, if resumed: keep the context *inside* the theorem and split by
+`n`-free / `n`-dependent seam instead, or give the pair `(g, hg)` a named structure so the
+signature carries one hypothesis rather than four.
