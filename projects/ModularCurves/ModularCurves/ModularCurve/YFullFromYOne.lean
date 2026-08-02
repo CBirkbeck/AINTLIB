@@ -192,6 +192,33 @@ noncomputable def sigmaHomForgetEquiv (N : ℕ) [NeZero N] (hinv : IsUnit (N : R
       Equiv.subtypeEquivRight fun _ => by rw [Equiv.apply_symm_apply]).trans
       (sigmaForgetEquiv N hinv Y))
 
+/-- **(WP-D2c-3, the chain)** The representing equivalence at a fixed `Y`, assembled from
+the four steps. The `Σ`-reindexing is `Equiv.subtypeProdEquivSigmaSubtype`; the fibre
+conditions are matched by `torsionMapSection_comp_eq_pullSection` together with
+`homEquiv_eq_map_universalGammaOne`. -/
+noncomputable def yFullCandidateHomEquiv (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (hinv : IsUnit (N : R)) (h : NIsInvertible X₁.base N)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hmatch : ∀ (Y : EllObj R) (u : Y ⟶ X₁)
+      (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)),
+      (((transportAlongIso N u).symm PQ).1.1 =
+          X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+            (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+        forgetAt N hinv Y PQ = rOne.homEquiv u)
+    (Y : EllObj R) :
+    (Y ⟶ yFullCandidate N X₁ h P) ≃
+      (gammaFullNaiveProblem R N).obj (Opposite.op Y) :=
+  (EllObj.homPullbackAlongEquiv X₁ (X₁.curve.completionLocusπ N h P) Y).trans
+    ((Equiv.subtypeProdEquivSigmaSubtype
+        (fun (u : Y ⟶ X₁) (b : Y.base ⟶ X₁.curve.completionLocus N h P) =>
+          b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
+      ((Equiv.sigmaCongrRight fun u =>
+          (completionFibreEquiv N X₁ h P hPsec u).trans
+            (Equiv.subtypeEquivRight (hmatch Y u))).trans
+        (sigmaHomForgetEquiv N hinv rOne Y)))
+
 /-! ### `yFullCandidate` represents the full-level problem (WP-D2c-3)
 
 The single remaining step of the D-chain. Stated here so the interface is fixed and

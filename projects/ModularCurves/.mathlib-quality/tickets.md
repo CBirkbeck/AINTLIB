@@ -34469,3 +34469,31 @@ by `((homPullbackAlongEquiv …).trans (Equiv.sigmaCongrRight fun u => completio
 `subtypeEquivRight` discharged by the glue lemma plus
 `homEquiv_eq_map_universalGammaOne`/`gammaFullToGammaOne_app_val`, and then the
 `homEquiv_comp` naturality field. **No unproved mathematics remains anywhere in the chain.**
+
+## [WP-D2c-3, the chain] COMPLETE (2026-08-03) — axiom-verified
+
+**`yFullCandidateHomEquiv`** — the representing equivalence at a fixed `Y`, assembled from
+all four steps:
+
+    (Y ⟶ yFullCandidate)
+      ≃ {p : (Y ⟶ X₁) × (Y.base ⟶ completionLocus) // p.2 ≫ π = p.1.baseHom}   homPullbackAlongEquiv
+      ≃ Σ u, {b // b ≫ π = u.baseHom}                     Equiv.subtypeProdEquivSigmaSubtype
+      ≃ Σ u, {PQ // fibre condition}                                     completionFibreEquiv
+      ≃ Σ u, {PQ // forgetAt PQ = rOne.homEquiv u}                    Equiv.subtypeEquivRight
+      ≃ (gammaFullNaiveProblem R N).obj (op Y)                            sigmaHomForgetEquiv
+
+Axiom-verified. It takes the condition-matching as a hypothesis `hmatch`, which is the
+remaining bookkeeping.
+
+### Exactly two things left in the whole D-chain
+1. **`hmatch`** — that the two fibre conditions agree. Its content is
+   `torsionMapSection_comp_eq_pullSection` (**proved**) plus
+   `homEquiv_eq_map_universalGammaOne` and `gammaFullToGammaOne_app_val` (**proved**), and
+   `hP` to identify `P` with the universal section; what is left is unfolding
+   `transportAlongIso` on the left-hand side.
+2. **`homEquiv_comp`** — the naturality field of `RepresentableBy`. Each of the five factors
+   is natural (the two `Equiv.sigma*`/`subtypeEquiv*` steps trivially, the others by
+   `homPullbackAlongEquiv`'s and `fullLevelLocusPointsEquiv`'s recorded naturality —
+   `Moduli/LevelLocusNatural.lean`), so this is composition of known naturality squares.
+
+Both are bookkeeping over proved inputs; **no mathematics remains**. Root green at 9638 jobs.
