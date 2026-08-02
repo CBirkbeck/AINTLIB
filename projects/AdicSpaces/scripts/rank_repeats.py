@@ -11,11 +11,19 @@ These are the cheapest targets in the campaign and the other ranking cannot see 
 This one finds them: balanced-parenthesis subterms occurring 3+ times in one proof
 body, scored by the characters naming them once would remove.
 
-Safety note carried from that target: substituting a name for an inlined term is
-mechanical when the term is a PROOF (`Continuous …`, `_ ≤ _`), because proof
-irrelevance keeps the surrounding terms definitionally equal and later `rw`s still
-match. For a DATA argument the substitution can change what unifies -- check before
-applying.
+TWO LIMITS, BOTH PAID FOR:
+
+  * Substituting a name for an inlined term is mechanical when the term is a PROOF
+    (`Continuous …`, `_ ≤ _`) -- proof irrelevance keeps surrounding terms defeq and
+    later `rw`s still match. For a DATA argument it can change what unifies.
+
+  * `set` IS NOT FREE ON A PROOF WITH A HUGE STATEMENT. `groebner_reduce` ranked top
+    here (slack 0: naming alone finishes it), and naming its two repeated coercions
+    with `set` produced a `(deterministic) timeout at whnf` on the DECLARATION -- its
+    conclusion is a 43-line nested `∃`, `set` `kabstract`s across all of it, and every
+    later unification then delta-expands the let. THIS SCRIPT CANNOT SEE THAT: it
+    scores the body, and the cost is in the signature. Treat a large signature as a
+    warning that the saving must come from extraction instead.
 """
 import json
 import pathlib

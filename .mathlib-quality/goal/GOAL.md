@@ -8223,3 +8223,68 @@ lines, and agrees with this tracker. Every number in this file is that script's.
 
     over-50 proofs   486 (baseline) → 117   (115 actionable, 2 sorry-blocked)
     heartbeat raises 0                      (task 1 complete)
+
+## Batch: WedhornCechAcyclicity ×2 + groebner_reduce (117 → 114)
+
+### `rank_repeats` — the targets the other ranking cannot see
+
+`decompose_rank` scores by liftable `have` blocks, so a proof that is long because it
+REPEATS itself scores as expensive — there is no block to lift. `limitFrobHom_add` sat at
+the bottom of it with `cost 0 / need 12` and then went 62 → 43 with no helper at all.
+`rank_repeats` finds these: balanced-paren subterms occurring 3+ times, scored by the code
+lines naming them removes, **iterating** — substituting the outer term is what makes the
+inner repeat visible, and scoring only the single best repeat reported negative slack for
+every target in the tree, i.e. "nothing is fixable this way", right after I had fixed one
+this way.
+
+It immediately produced the two biggest reductions of the campaign:
+
+    genPiece_relative_overlap_square₁                150 → 34
+    genPiece_relOverlap_forward_restriction           92 → 48
+
+Both in WedhornCechAcyclicity, both from the same cause: four rational-loc data written out
+thirty-odd times each, two lines per occurrence, which also made each `letI` three lines
+instead of one. Naming them took over-100-column lines in that file from 107 to 89 as a
+side effect — the giant repeated terms were what made those lines unsplittable.
+
+### `set` IS NOT FREE — new failure mode, cost two builds
+
+`groebner_reduce` ranked top (`↑y` ×15, `↑hgd.choose` ×12, slack 0). Naming them with `set`
+produced `(deterministic) timeout at whnf` **at the declaration's line:col** — cumulative,
+not one bad step. Its statement is a 43-line nested `∃`; `set` `kabstract`s the abstracted
+term across the whole of it and every later unification delta-expands the let.
+
+So the `limitFrobHom_add` rule needs a bound:
+
+> Naming a repeated term is free when the term is a PROOF (proof irrelevance — nothing to
+> unfold) and cheap when the goal is small. On a proof whose STATEMENT is huge, `set` pays
+> `kabstract` over the whole statement and carries a let-fvar into every later unification.
+
+`rank_repeats` structurally cannot see this: it scores the body, the cost is in the
+signature. Noted in the script itself. `groebner_reduce` got to 50 by extraction only, with
+the coercions left spelled out.
+
+### RE-SITING, continued
+
+`genPiece_relative_overlap_square₁` split at the seam where the mathematics changes level:
+the square commutes because both composites reduce to `forwardLocHom` on `algebraMap a`,
+which is a LOCALIZATION identity; the completion only transports it by density. The parent
+is now exactly the density argument. Same move as `eq_top_of_dense_of_finite` in the last
+batch — find the level the content lives at, and the transport stops being proof.
+
+### Task-3 findings added
+
+* `LaurentRefinementCore::iteratedPlus_forwardHom_comp_restrictionMapHom_comp_coeRingHom`
+  is `restrictionMapHom_comp_coeRingHom` (new, this batch) composed with
+  `iteratedPlus_forwardHom`. Not a duplicate — checked before writing — but a candidate to
+  restate over the general core.
+* `RobbaPresentation::coeff_sub_eq_BI` is `Groebner::coeff_sub_eq` for `BISub` instead of
+  `ArSub`. Exact twin modulo the subring; a `/generalise` job.
+* `WedhornCechAcyclicity` carries **305** `linter.overlappingInstances` warnings. The fix is
+  removing section-level instance brackets the whole file shares — a coordinator sweep, not
+  a decompose ticket. Not touched.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 114   (112 actionable, 2 sorry-blocked)
+    heartbeat raises 0                      (task 1 complete)
