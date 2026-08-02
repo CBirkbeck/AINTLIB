@@ -130,6 +130,32 @@ noncomputable def completionFibreEquiv (N : ℕ) [NeZero N] (X₁ : EllObj R)
       simp only [Equiv.symm_apply_apply]
       exact Iff.rfl))
 
+/-- **(WP-D2c-3, glue)** The section attached to "a base map composed with a torsion
+section" is the pullback of that section along the tautological projection.
+
+Both sides are sections of `X₁.curve.baseChange g`, so by `baseChange_section_ext` it is
+enough to compare their composites with `pullback.fst`: the left is
+`(g ≫ pointToTorsion Q) ≫ torsionι = g ≫ Q` by `pointToTorsion_torsionι`, and the right is
+`g ≫ Q` by the defining property of `pullSection`. -/
+theorem torsionMapSection_comp_eq_pullSection (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    {T : Scheme.{u}} (g : T ⟶ X₁.base) (Q : X₁.curve.Section)
+    (hQ : (Q : X₁.base ⟶ X₁.curve.E) ≫ X₁.curve.mulByHom N = 𝟙 X₁.base ≫ X₁.curve.zero)
+    (hg : (g ≫ X₁.curve.pointToTorsion Q hQ) ≫ X₁.curve.torsionπ N = g) :
+    X₁.curve.torsionMapSection N g (g ≫ X₁.curve.pointToTorsion Q hQ) hg =
+      EllHom.pullSection R (X₁.pullbackAlongπ g) Q := by
+  refine X₁.curve.baseChange_section_ext ?_
+  have hL : ((X₁.curve.torsionMapSection N g (g ≫ X₁.curve.pointToTorsion Q hQ) hg).1 :
+        T ⟶ pullback X₁.curve.π g) ≫ pullback.fst X₁.curve.π g =
+      g ≫ (Q : X₁.base ⟶ X₁.curve.E) := by
+    rw [X₁.curve.torsionMapSection_fst N g _ hg, Category.assoc,
+      X₁.curve.pointToTorsion_torsionι Q hQ]
+  have hR : ((EllHom.pullSection R (X₁.pullbackAlongπ g) Q).1 :
+        T ⟶ pullback X₁.curve.π g) ≫ pullback.fst X₁.curve.π g =
+      g ≫ (Q : X₁.base ⟶ X₁.curve.E) :=
+    (X₁.pullbackAlongπ g).isPullback.lift_fst _ _ _
+  rw [hL]
+  exact hR.symm
+
 /-! ### The collapse (WP-D2c-3, step 4)
 
 The `Σ` over `u : Y ⟶ X₁` is redundant: the fibre condition pins `u`'s `Γ₁`-structure to be

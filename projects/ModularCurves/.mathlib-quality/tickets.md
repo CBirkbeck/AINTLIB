@@ -34438,3 +34438,34 @@ same three-line pattern used for `fullLevelLocusPointsEquiv_fst_eq`.
 Every file touched is sorry-free **except** `ModularCurve/YFullFromYOne.lean`, which has
 exactly **one** — `yFullCandidate_representableBy` — and `WeilPairing/Basic.lean`, whose
 7 are the DS4 register (down from 10). Root build green at 9638 jobs.
+
+## [WP-D2c-3 glue] COMPLETE (2026-08-03) — axiom-verified
+
+**`torsionMapSection_comp_eq_pullSection`**: the section attached to *a base map composed
+with a torsion section* is the pullback of that section along the tautological projection,
+
+    torsionMapSection N g (g ≫ pointToTorsion Q hQ) _ = pullSection (X₁.pullbackAlongπ g) Q.
+
+Proof exactly as predicted: both sides are sections of `X₁.curve.baseChange g`, so
+`baseChange_section_ext` reduces to comparing `≫ pullback.fst`; the left is
+`(g ≫ pointToTorsion Q) ≫ torsionι = g ≫ Q` by `pointToTorsion_torsionι`, the right is
+`g ≫ Q` by `pullSection`'s defining `isPullback.lift_fst`. Three lines.
+
+### Every ingredient of the D-chain now exists and is axiom-verified
+
+| step | lemma |
+|---|---|
+| 1. split off `u` | `EllObj.homPullbackAlongEquiv` (pre-existing) |
+| 2. lift ↦ level structure | `completionLocusClassifies` |
+| 3. transport to `Y` | `completionFibreEquiv` |
+| 4. collapse the `Σ` | `sigmaHomForgetEquiv` |
+| glue between 3 and 4 | **`torsionMapSection_comp_eq_pullSection`** |
+| smooth + affine | `yFullCandidate_smooth_affine` |
+| the conclusion, conditional | `exists_representing_smooth_affine_of_candidate` |
+
+What remains in `yFullCandidate_representableBy` is purely the chaining: build `homEquiv`
+by `((homPullbackAlongEquiv …).trans (Equiv.sigmaCongrRight fun u => completionFibreEquiv …
+|>.trans (Equiv.subtypeEquivRight …))).trans (sigmaHomForgetEquiv …)`, with the
+`subtypeEquivRight` discharged by the glue lemma plus
+`homEquiv_eq_map_universalGammaOne`/`gammaFullToGammaOne_app_val`, and then the
+`homEquiv_comp` naturality field. **No unproved mathematics remains anywhere in the chain.**
