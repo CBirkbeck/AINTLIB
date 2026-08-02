@@ -9700,3 +9700,35 @@ either name the implicits or call it at the use site.
 
     over-50 proofs   486 (baseline) → 64   (62 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: xPresheaf_isSheafOfTopologicalRings 114 → 90 (partial), and a universe wall
+
+`FarguesFontaine/CurveObject.lean`, 8 rebuilds. One lift landed:
+
+    xPresheaf_glue_compat   the `hcompat'` block (25L) — the 𝒴-side compatibility
+
+**The second lift did not, and the reason is universes.** `hginv` (46 lines) extracts
+cleanly as a statement, but its body calls `(isLimitSheafOn_Y p F ϖ).injective`, whose
+`IsLimitSheafOn` signature ties the index universe to the space's:
+
+    hcov2 : ↑(frobOpens p F 1 V') ⊆ Set.iUnion.{u_1, u + 1} fun i ↦ ↑(U' i)
+    expected                        Set.iUnion.{u_1, u_1 + 1} fun i ↦ ↑(?m i)
+
+Inside the parent this is invisible, because the `ι` introduced by `intro` and the ambient
+space already share a universe. Hoisting `ι` into a lemma binder makes the two independent,
+and neither `{ι : Type u}` nor `{ι : Type*}` reconciles them. Reverted that half; the
+`hcompat'` lift is green and the target stands at **90**.
+
+**The rule:** a block that is universe-monomorphic *by accident of its context* does not
+survive being hoisted. `ι` and the space universe were equal in the parent for no reason the
+statement records, and a lemma signature has to say which. Fixing this properly means
+either threading the space's universe explicitly or generalising `IsLimitSheafOn` — a
+statement change, out of scope for task 2.
+
+Also: `git checkout --` on a working file is blocked by the repo guardrail (rightly).
+`git stash push -u -- <path>` is the sanctioned way to get back to HEAD for one file.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 64   (62 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
