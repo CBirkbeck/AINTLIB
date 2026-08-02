@@ -1181,6 +1181,79 @@ theorem tendsto_max_const_mul_pow (c₁ c₂ : NNReal) :
   have := h1.max h2
   simpa using this
 
+/-- The completed plus-subring of the chart datum is closed: it is an open additive
+subgroup, and open subgroups are closed. -/
+private theorem isClosed_completedPlusSubring (a : ℕ) :
+    IsClosed ((chartData p F ϖ 1 1 a 1).completedPlusSubring
+      : Set (presheafValue (chartData p F ϖ 1 1 a 1))) := by
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+    isAffinoidRing_Ainf p F
+  have hopen : IsOpen
+      ((chartData p F ϖ 1 1 a 1).completedPlusSubring
+        : Set (presheafValue (chartData p F ϖ 1 1 a 1))) :=
+    (RationalLocData.presheafValuePlus_isRingOfIntegralElements
+      (A := Ainf p F) (chartData p F ϖ 1 1 a 1)).isOpen
+  exact AddSubgroup.isClosed_of_isOpen
+    (chartData p F ϖ 1 1 a 1).completedPlusSubring.toAddSubgroup hopen
+
+/-- The Teichmüller heads converge to the element itself in `B^I`: at each radius the
+tail after `N` is a constant times `ρ^N`. -/
+private theorem tendsto_blocToBI_teichmuller_heads (x : Ainf p F) (k : ℕ)
+    (w : ℕ → Ainf p F)
+    (hsplit : ∀ N, IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)
+      = (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k))
+        + IsLocalization.mk' (Bloc p F ϖ) ((p : Ainf p F) ^ (N + 1) * w N)
+            (sPow p F ϖ k)) :
+    Filter.Tendsto
+      (fun N => blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k)))
+      Filter.atTop
+      (nhds (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)))) := by
+  have hpair : ((BlocToHatK p F ϖ hρ₁0 hρ₁1
+        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)),
+      BlocToHatK p F ϖ hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)) :=
+    Prod.ext (BIProd_fst p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 _).symm
+      (BIProd_snd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 _).symm
+  refine tendsto_subtype_rng.mpr ?_
+  show Filter.Tendsto
+    (fun N => BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i
+          * WittVector.teichmuller p (teichCoeff p F x i))
+        (sPow p F ϖ k)))
+    Filter.atTop
+    (nhds (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k))))
+  rw [← hpair]
+  refine tendsto_BIProd_of_valued_le p F ϖ
+    (ε := fun N => max
+      ((ρ₁ * (((ρ₁ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹)) * ρ₁ ^ N)
+      ((ρ₂ * (((ρ₂ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹)) * ρ₂ ^ N))
+    ?_ ?_
+    (tendsto_max_const_mul_pow (hρ₁1 := hρ₁1) (hρ₂1 := hρ₂1) _ _)
+  · intro N
+    rw [valued_BlocToHatK_sub_of_add p F ϖ hρ₁0 hρ₁1 _ _ _ (hsplit N)]
+    refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₁0 hρ₁1 k N (w N))
+      (le_trans (le_of_eq (by ring)) (le_max_left _ _))
+  · intro N
+    rw [valued_BlocToHatK_sub_of_add p F ϖ hρ₂0 hρ₂1 _ _ _ (hsplit N)]
+    refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₂0 hρ₂1 k N (w N))
+      (le_trans (le_of_eq (by ring)) (le_max_right _ _))
+
+
 /-- **The dense-level integrality theorem** (`b = 1`, Kedlaya Def 4.5):
 `ChartDensePlus` holds at the exact window — every `Bloc` element bounded in
 both window Gauss norms transports into the canonical plus subring, by the
@@ -1215,18 +1288,7 @@ theorem chartDensePlus_of_exact (a : ℕ) (ha : 0 < a)
             (sPow p F ϖ k) :=
     fun N => mk'_sPow_split p F ϖ x k N (w N) (hwspec N)
   -- the closed target
-  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
-    isAffinoidRing_Ainf p F
-  have hclosed : IsClosed
-      ((chartData p F ϖ 1 1 a 1).completedPlusSubring
-        : Set (presheafValue (chartData p F ϖ 1 1 a 1))) := by
-    have hopen : IsOpen
-        ((chartData p F ϖ 1 1 a 1).completedPlusSubring
-          : Set (presheafValue (chartData p F ϖ 1 1 a 1))) :=
-      (RationalLocData.presheafValuePlus_isRingOfIntegralElements
-        (A := Ainf p F) (chartData p F ϖ 1 1 a 1)).isOpen
-    exact AddSubgroup.isClosed_of_isOpen
-      (chartData p F ϖ 1 1 a 1).completedPlusSubring.toAddSubgroup hopen
+  have hclosed := isClosed_completedPlusSubring p F ϖ a
   -- memberships of the heads
   have hmem : ∀ N, (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
       (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a 1 ha one_pos ha
@@ -1245,53 +1307,8 @@ theorem chartDensePlus_of_exact (a : ℕ) (ha : 0 < a)
     exact sum_mem fun i _ =>
       monomial_symm_blocToBI_mem_completedPlusSubring p F ϖ a ha
         hexact1 hexact2 k i (teichCoeff p F x i) (hb1 i) (hb2 i)
-  -- the pair identity for the limit target
-  have hpair : ((BlocToHatK p F ϖ hρ₁0 hρ₁1
-        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)),
-      BlocToHatK p F ϖ hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)))
-      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)) :=
-    Prod.ext (BIProd_fst p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 _).symm
-      (BIProd_snd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 _).symm
-  -- convergence of the heads
-  have htend : Filter.Tendsto
-      (fun N => blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F x i))
-          (sPow p F ϖ k)))
-      Filter.atTop
-      (nhds (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)))) := by
-    refine tendsto_subtype_rng.mpr ?_
-    show Filter.Tendsto
-      (fun N => BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F x i))
-          (sPow p F ϖ k)))
-      Filter.atTop
-      (nhds (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k))))
-    rw [← hpair]
-    refine tendsto_BIProd_of_valued_le p F ϖ
-      (ε := fun N => max
-        ((ρ₁ * (((ρ₁ * perfectoidValuation p F
-            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹)) * ρ₁ ^ N)
-        ((ρ₂ * (((ρ₂ * perfectoidValuation p F
-            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹)) * ρ₂ ^ N))
-      ?_ ?_
-      (tendsto_max_const_mul_pow (hρ₁1 := hρ₁1) (hρ₂1 := hρ₂1) _ _)
-    · intro N
-      rw [valued_BlocToHatK_sub_of_add p F ϖ hρ₁0 hρ₁1 _ _ _ (hsplit N)]
-      refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₁0 hρ₁1 k N (w N))
-        (le_trans (le_of_eq (by ring)) (le_max_left _ _))
-    · intro N
-      rw [valued_BlocToHatK_sub_of_add p F ϖ hρ₂0 hρ₂1 _ _ _ (hsplit N)]
-      refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₂0 hρ₂1 k N (w N))
-        (le_trans (le_of_eq (by ring)) (le_max_right _ _))
+  have htend := tendsto_blocToBI_teichmuller_heads p F ϖ (hρ₁0 := hρ₁0)
+    (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) x k w hsplit
   have hlim := ((presheafChartRingEquivBISub_symm_continuous p F ϖ
     (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
     a 1 ha one_pos ha hexact1 hexact2).tendsto _).comp htend
