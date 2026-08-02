@@ -855,6 +855,38 @@ theorem locIotaC_lipschitz : LipschitzWith 1 (locIotaC F m g f) :=
       _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
       _ ≤ ‖Ideal.Quotient.mk (IA F m g f) p‖ + ε := hqn.le
 
+/-- Ultrametric `‖a - b‖ ≤ max ‖a‖ ‖b‖`. Mathlib has only the `add` form
+(`IsUltrametricDist.norm_add_le_max`); the `sub` case is inlined at each use there too. -/
+private lemma norm_sub_le_max {X : Type*} [NormedAddCommGroup X] [IsUltrametricDist X]
+    (a b : X) : ‖a - b‖ ≤ max ‖a‖ ‖b‖ := by
+  have h := IsUltrametricDist.norm_add_le_max a (-b)
+  rwa [← sub_eq_add_neg, norm_neg] at h
+
+private lemma lt_add_of_lt_max_left {a u v d : ℝ} (h : a < u + d) : a < max u v + d := by
+  linarith [le_max_left u v]
+
+private lemma lt_add_of_lt_max_right {a u v d : ℝ} (h : a < v + d) : a < max u v + d := by
+  linarith [le_max_right u v]
+
+/-- `(1 + C)·(ε / (2(1+C))) ≤ ε` — the slack the `le_of_forall_pos_le_add` step spends. -/
+private lemma one_add_mul_div_two_le {C ε : ℝ} (hC : 0 ≤ C) (hε : 0 < ε) :
+    (1 + C) * (ε / (2 * (1 + C))) ≤ ε := by
+  have h2 : (0 : ℝ) < 2 * (1 + C) := by linarith
+  calc (1 + C) * (ε / (2 * (1 + C))) = ε / 2 := by field_simp
+    _ ≤ ε := by linarith
+
+/-- The lifted element's norm bound: `‖p'‖ = max ‖pb‖ ‖pc + xc‖`, and the ultrametric
+inequality turns the three input bounds into the `(1 + C)` one. -/
+private lemma norm_max_le_one_add_mul (pb : PB F m) (pc xc : PC F m) {C M δ : ℝ}
+    (hC0 : 0 ≤ C) (hM0 : 0 ≤ M) (hδ0 : 0 < δ)
+    (hpbM : ‖pb‖ < M + δ) (hpcM : ‖pc‖ < M + δ) (hxcn : ‖xc‖ ≤ C * (M + δ)) :
+    max ‖pb‖ ‖pc + xc‖ ≤ (1 + C) * (M + δ) := by
+  refine max_le (by nlinarith [hpbM.le, hM0, hδ0.le, hC0]) ?_
+  refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
+  · nlinarith [hpcM.le, hM0, hδ0.le, hC0]
+  · nlinarith [hxcn, hM0, hδ0.le, hC0]
+
+
 /-- The quantitative Lemma 4.4 estimate: the quotient pullback norm is controlled by the
 component norms. -/
 theorem loc_norm_le (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) (x : locA F m g f) :
@@ -871,25 +903,15 @@ theorem loc_norm_le (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) (x : locA F
   have hδ0 : 0 < δ := by positivity
   obtain ⟨pb, hpb, hpbn⟩ := Ideal.Quotient.norm_mk_lt (locJB F m g f x) hδ0
   obtain ⟨pc, hpc, hpcn⟩ := Ideal.Quotient.norm_mk_lt (locIotaC F m g f x) hδ0
-  have hpbM : ‖pb‖ < M + δ := by
-    refine hpbn.trans_le ?_
-    have h := le_max_left ‖locJB F m g f x‖ ‖locIotaC F m g f x‖
-    linarith
-  have hpcM : ‖pc‖ < M + δ := by
-    refine hpcn.trans_le ?_
-    have h := le_max_right ‖locJB F m g f x‖ ‖locIotaC F m g f x‖
-    linarith
+  have hpbM : ‖pb‖ < M + δ := lt_add_of_lt_max_left hpbn
+  have hpcM : ‖pc‖ < M + δ := lt_add_of_lt_max_right hpcn
   -- the defect lies in the graph ideal at 𝓓
   have hdefect : extRhoB F m pb - extRhoC F m pc ∈ ID F m g f := by
     rw [← Ideal.Quotient.mk_eq_mk_iff_sub_mem, ← locRhoB_mk, ← locRhoC_mk, hpb, hpc]
     exact loc_square_commutes F m g f x
   obtain ⟨xc, hxcIC, hxcρ, hxcn⟩ := hrow _ hdefect
   have hdn : ‖extRhoB F m pb - extRhoC F m pc‖ < M + δ := by
-    have hsub : ‖extRhoB F m pb - extRhoC F m pc‖ ≤
-        max ‖extRhoB F m pb‖ ‖extRhoC F m pc‖ := by
-      have h := IsUltrametricDist.norm_add_le_max (extRhoB F m pb) (-(extRhoC F m pc))
-      rwa [← sub_eq_add_neg, norm_neg] at h
-    refine lt_of_le_of_lt hsub (max_lt ?_ ?_)
+    refine lt_of_le_of_lt (norm_sub_le_max _ _) (max_lt ?_ ?_)
     · exact lt_of_le_of_lt (norm_mapRestricted_le _ _ _ _) hpbM
     · exact lt_of_le_of_lt (norm_mapRestricted_le _ _ _ _) hpcM
   have hxcn' : ‖xc‖ ≤ C₁ * (M + δ) :=
@@ -903,33 +925,22 @@ theorem loc_norm_le (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) (x : locA F
     refine loc_pair_injective F m g f hspan ?_
     show (locJB F m g f _, locIotaC F m g f _) = (locJB F m g f x, locIotaC F m g f x)
     rw [Prod.mk.injEq]
-    constructor
-    · rw [locJB_mk, hp'b, hpb]
-    · rw [locIotaC_mk, hp'c, hpc'def, ← hpc]
-      rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, add_sub_cancel_left]
-      exact hxcIC
+    refine ⟨by rw [locJB_mk, hp'b, hpb], ?_⟩
+    rw [locIotaC_mk, hp'c, hpc'def, ← hpc]
+    rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, add_sub_cancel_left]
+    exact hxcIC
   have hnormp' : ‖p'‖ ≤ (1 + C₁) * (M + δ) := by
     have hmax := ext_max_norm_eq F m p'
-    rw [hp'b, hp'c] at hmax
+    rw [hp'b, hp'c, hpc'def] at hmax
     rw [← hmax]
-    refine max_le ?_ ?_
-    · nlinarith [hpbM.le, hM0, hδ0.le, hC₁0]
-    · show ‖pc'‖ ≤ _
-      rw [hpc'def]
-      refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
-      · nlinarith [hpcM.le, hM0, hδ0.le, hC₁0]
-      · nlinarith [hxcn', hM0, hδ0.le, hC₁0]
+    exact norm_max_le_one_add_mul F m pb pc xc hC₁0 hM0 hδ0 hpbM hpcM hxcn'
   calc ‖x‖ = ‖Ideal.Quotient.mk (IA F m g f) p'‖ := by rw [hmkp']
     _ ≤ ‖p'‖ := Ideal.Quotient.norm_mk_le _ p'
     _ ≤ (1 + C₁) * (M + δ) := hnormp'
     _ = (1 + C₁) * M + (1 + C₁) * δ := by ring
     _ ≤ (1 + C₁) * M + ε := by
         have hδval : (1 + C₁) * δ ≤ ε := by
-          have h2 : (0 : ℝ) < 2 * (1 + C₁) := by linarith
-          calc (1 + C₁) * δ = (1 + C₁) * (ε / (2 * (1 + C₁))) := by rw [hδdef]
-            _ = ε / 2 := by
-                field_simp
-            _ ≤ ε := by linarith
+          rw [hδdef]; exact one_add_mul_div_two_le hC₁0 hε
         linarith
 
 -- v4.33: instance search no longer sees the quotient-norm chain through the
