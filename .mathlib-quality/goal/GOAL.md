@@ -8869,3 +8869,41 @@ session does not "fix" it by force-pushing.
 
     over-50 proofs   486 (baseline) → 87   (85 actionable, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## Batch: tateAcyclicity_Part2 + isSheafy_of_standardSheafCondition_at (87 → 85)
+
+    RationalCoveringData.tateAcyclicity_Part2_direct_per_E   84 → 49
+    isSheafy_of_standardSheafCondition_at                   123 → 33
+
+### Two elaboration traps, both new, and they look identical in the error
+
+Lifting the gluing half of `isSheafy_of_standardSheafCondition_at` failed twice with
+`hrsub P : … (r✝ P) … but expected … (r P) …`. Same message, two unrelated causes:
+
+**1. `set` reintroduces reverted hypotheses with INACCESSIBLE names.** The lemma takes `r`,
+`hrC`, `hrsub`, `hx` as parameters whose types mention
+`StandardCoverData.ofSpanTop C.base hC.base S hS`. The transplanted body opened with
+`set Std := … with hStd`, which reverts every hypothesis mentioning that term, rewrites, and
+reintroduces them as `r✝`, `hrC✝`, … — so the body's `r` was no longer the parameter. Inside
+the original proof this was invisible, because `r` was `choose`n *after* the `set`.
+
+> **When a lifted body opens with `set x := e` and a PARAMETER's type mentions `e`, use
+> `let`.** `set` rewrites hypotheses; `let` only adds the definition.
+
+**2. Auto-bound implicits silently invent a second `r`.** `(hrC : ∀ P, r P ∈ C.covers)`
+leaves `P`'s type to inference; where it cannot be inferred, Lean auto-binds fresh implicits
+rather than failing. Annotate the binder's type.
+
+### `Function.comp_apply` is the price of an inferred type
+
+Dropping the explicit type from `have step1 := congr_fun hcomp1 (fC …)` leaves the LHS as
+`(f ∘ g) v` rather than `f (g v)`, so the following `rw` finds nothing — the ascription had
+been forcing the reduction. One `simp only [Function.comp_apply]` restores it and the pair
+still costs three lines instead of six.
+
+> Inferring a type is free only when nothing downstream matches on its syntactic shape.
+
+### Scoreboard
+
+    over-50 proofs   486 (baseline) → 85   (83 actionable, 2 sorry-blocked)
+    heartbeat raises 0                     (task 1 complete)
