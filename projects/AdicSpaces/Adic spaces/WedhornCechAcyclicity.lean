@@ -9675,6 +9675,99 @@ private theorem genPiece_relative_overlap_square₁
     exact RingHom.congr_fun
       (genPiece_relative_overlap_square₁_comp_coeRingHom D₀ T hspan t₁ t₂) y
 set_option linter.unusedSectionVars false in
+/-- Step of `genPiece_relative_overlap_square₂` (hcomp). -/
+private theorem genPiece_relOverlap_equiv_restriction_canonicalMap
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
+    ∀ a : A,
+        (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
+          (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
+            ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+              (genPieceDatum D₀.P T t₂ hspan) rfl)
+            (by
+            rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
+              RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
+              RationalLocData.interSamePair_rationalOpen _ _ (by rfl)]
+            intro v hv
+            exact ⟨hv.1.1, hv.2⟩)
+            ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a)) =
+        restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
+          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+            (imagePieceDatum D₀ T t₂ hspan) rfl)
+          (RationalLocData.interSamePair_subset_right _ _ _)
+          ((genPiece_relative_equiv D₀ T t₂ hspan)
+            ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a)) := by
+  intro a
+  rw [restrictionMapHom_canonicalMap]
+  rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a =
+    ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+      (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
+      (algebraMap A _ a) from rfl]
+  rw [show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
+      (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
+        (algebraMap A _ a)) =
+    genPiece_relOverlap_forward D₀ T hspan t₁ t₂
+      (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+        (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
+        (algebraMap A _ a)) from rfl]
+  rw [genPiece_relOverlap_forward_coe, genPiece_relOverlap_forwardLocHom_algebraMap]
+  rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a) =
+    ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
+      (algebraMap A _ a)) from rfl]
+  rw [show (genPiece_relative_equiv D₀ T t₂ hspan)
+      ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
+        (algebraMap A _ a)) =
+    genPiece_rel_forward D₀ T t₂ hspan
+      ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
+        (algebraMap A _ a)) from rfl]
+  rw [genPiece_rel_forward_coe, genPiece_rel_forwardLocHom_algebraMap]
+  rw [show (imagePieceDatum D₀ T t₂ hspan).coeRingHom
+      (algebraMap (presheafValue D₀) _ (D₀.canonicalMap a)) =
+    (imagePieceDatum D₀ T t₂ hspan).canonicalMap (D₀.canonicalMap a) from rfl]
+  rw [restrictionMapHom_canonicalMap]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- Step of `genPiece_relative_overlap_square₂` (hhom). -/
+private theorem genPiece_relOverlap_equiv_comp_restrictionMapHom
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A)
+    (hspan : Ideal.span (T : Set A) = ⊤) (t₁ t₂ : A) :
+    ((genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
+        (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
+          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
+            (genPieceDatum D₀.P T t₂ hspan) rfl)
+          (by
+            rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
+              RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
+              RationalLocData.interSamePair_rationalOpen _ _ (by rfl)]
+            intro v hv
+            exact ⟨hv.1.1, hv.2⟩))).comp
+        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom) =
+        ((restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
+          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
+            (imagePieceDatum D₀ T t₂ hspan) rfl)
+          (RationalLocData.interSamePair_subset_right _ _ _)).comp
+          (genPiece_relative_equiv D₀ T t₂ hspan).toRingHom).comp
+        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom) := by
+  refine IsLocalization.ringHom_ext
+    (Submonoid.powers (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) ?_
+  ext a
+  simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
+    RingEquiv.coe_toRingHom]
+  exact genPiece_relOverlap_equiv_restriction_canonicalMap D₀ T hspan t₁ t₂ a
+
+
+set_option linter.unusedSectionVars false in
 /-- **G3b square (right)**: the `t₂`-side square. The B-side restriction is from the
 `t₂`-piece into the SAME double piece (`interSamePair` of the pair in the `t₁,t₂`-order,
 via the right-inclusion). -/
@@ -9792,78 +9885,8 @@ private theorem genPiece_relative_overlap_square₂
         (RationalLocData.interSamePair_subset_right _ _ _)
         ((genPiece_relative_equiv D₀ T t₂ hspan)
           ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom y))
-    have hcomp : ∀ a : A,
-        (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-          (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-              (genPieceDatum D₀.P T t₂ hspan) rfl)
-            (by
-            rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
-              RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
-              RationalLocData.interSamePair_rationalOpen _ _ (by rfl)]
-            intro v hv
-            exact ⟨hv.1.1, hv.2⟩)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a)) =
-        restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
-          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-            (imagePieceDatum D₀ T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_right _ _ _)
-          ((genPiece_relative_equiv D₀ T t₂ hspan)
-            ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a)) := by
-      intro a
-      rw [restrictionMapHom_canonicalMap]
-      rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a =
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-          (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-          (algebraMap A _ a) from rfl]
-      rw [show (genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂)
-          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) =
-        genPiece_relOverlap_forward D₀ T hspan t₁ t₂
-          (((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) from rfl]
-      rw [genPiece_relOverlap_forward_coe, genPiece_relOverlap_forwardLocHom_algebraMap]
-      rw [show ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).canonicalMap a) =
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-          (algebraMap A _ a)) from rfl]
-      rw [show (genPiece_relative_equiv D₀ T t₂ hspan)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) =
-        genPiece_rel_forward D₀ T t₂ hspan
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom
-            (algebraMap A _ a)) from rfl]
-      rw [genPiece_rel_forward_coe, genPiece_rel_forwardLocHom_algebraMap]
-      rw [show (imagePieceDatum D₀ T t₂ hspan).coeRingHom
-          (algebraMap (presheafValue D₀) _ (D₀.canonicalMap a)) =
-        (imagePieceDatum D₀ T t₂ hspan).canonicalMap (D₀.canonicalMap a) from rfl]
-      rw [restrictionMapHom_canonicalMap]
-      rfl
-    have hhom : ((genPiece_relative_overlap_equiv D₀ T hspan t₁ t₂).toRingHom.comp
-        (restrictionMapHom (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl)
-          ((D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).interSamePair
-            (genPieceDatum D₀.P T t₂ hspan) rfl)
-          (by
-            rw [RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
-              RationalLocData.interSamePair_rationalOpen _ _ (by rfl),
-              RationalLocData.interSamePair_rationalOpen _ _ (by rfl)]
-            intro v hv
-            exact ⟨hv.1.1, hv.2⟩))).comp
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom) =
-        ((restrictionMapHom (imagePieceDatum D₀ T t₂ hspan)
-          ((imagePieceDatum D₀ T t₁ hspan).interSamePair
-            (imagePieceDatum D₀ T t₂ hspan) rfl)
-          (RationalLocData.interSamePair_subset_right _ _ _)).comp
-          (genPiece_relative_equiv D₀ T t₂ hspan).toRingHom).comp
-        ((D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).coeRingHom) := by
-      refine IsLocalization.ringHom_ext
-        (Submonoid.powers (D₀.interSamePair (genPieceDatum D₀.P T t₂ hspan) rfl).s) ?_
-      ext a
-      simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe,
-        RingEquiv.coe_toRingHom]
-      exact hcomp a
+    have hcomp := genPiece_relOverlap_equiv_restriction_canonicalMap D₀ T hspan t₁ t₂
+    have hhom := genPiece_relOverlap_equiv_comp_restrictionMapHom D₀ T hspan t₁ t₂
     exact RingHom.congr_fun hhom y
 
 set_option linter.unusedSectionVars false in

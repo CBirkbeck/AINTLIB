@@ -11979,3 +11979,33 @@ liftable steps (>=15 code lines, statement free of proof-locals): 8
 
 No target clears on these alone (best is `genPiece_relative_overlap_square₂`: 165 − 72 + 2 =
 95), but each is a certain, threading-free lift that produces a genuinely reusable lemma.
+
+### Batch: two threading-free lifts, and scan 7's own false positives
+
+`genPiece_relative_overlap_square₂` **165 → 95** by lifting `hcomp` (49) and `hhom` (23) —
+the two scan-7 candidates whose statements use only the parent's binders. Both lemmas land
+under 50; over-width unchanged.
+
+**One fix the build demanded:** `hhom`'s *body* references `hcomp`. Scan 7 checks
+*statements* — correctly, since that is what determines liftability — but a body may still
+reference proof-locals. When the local has itself just become a lemma, the fix is to repoint
+(`hcomp` → `genPiece_relOverlap_equiv_restriction_canonicalMap D₀ T hspan t₁ t₂`); when it
+has not, the lift is not viable.
+
+**Then four more lifts failed, and scan 7 turns out to have false positives of its own:**
+
+- `hcmp` (ratio_laurent_unitGen_bundle): its statement *does* name proof-locals — `V'.T`,
+  `V'.s` — and its body needs `ratios`. The scan missed `V'` because **it only records
+  bindings from `have`/`let`/`set`/`obtain`/`choose`, not from `intro`/`rintro`/`fun` or
+  pattern binders.**
+- `hclass₁`/`hclass₂` (unitCover_relOverlap_forward_witness): need `Insert A (Finset A)`,
+  i.e. `DecidableEq A`, which the parent gets from a `classical` in its *body* rather than
+  from its signature — so the binder block copied verbatim from the signature is not enough.
+
+> Scan 7 joins scan 6 as a **candidate generator, not a verdict**. Both are worth running;
+> neither may be committed without a per-module build.
+
+**A process error worth recording.** The `genPiece` lifts built green and I did not commit
+them before starting the next batch; when that batch broke I reverted the whole file and
+lost them, then had to redo the work. **Commit each green increment before beginning the
+next**, especially when successive batches touch the same file.
