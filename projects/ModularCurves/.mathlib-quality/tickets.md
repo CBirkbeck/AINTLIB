@@ -35758,3 +35758,19 @@ unlike `isDomain_localization_atPrime_of_isMaximal`.
 available), integrally closed on each factor (`WP-D3b`), and the decomposition into factors
 (`WP-D3a-DOM`). What remains is the root itself: `WP-D3c` step 2 (field-change naturality,
 now a uniqueness argument) and `WP-D3d` (ζ, primitivity, the det-cocycle).
+
+### [WP-D3d, C5 primitivity] dissolves in the componentwise ring picture
+
+ChatGPT's C5 required a separate argument that the extended `ζ` stays **primitive**, via the
+clopen primitive-root locus `μ_N^prim ⊆ μ_N` — and noted the tree has no such locus
+machinery (confirmed: grepped `GroupScheme/`, `WeilPairing/`).
+
+With WP-D3a-DOM in place that argument is unnecessary. On each factor `Aᵢ = A ⧸ pᵢ` — a
+**domain** — the root lives in `Aᵢ ↪ Frac Aᵢ`, and a ring embedding preserves and reflects the
+order of a unit (`map_pow` plus injectivity). So `ζ` has exact order `N` in `Aᵢ` iff it does at
+the generic point, which is exactly what nondegeneracy of the field pairing gives. Three lines
+at the use site, no locus.
+
+This is the second C-correction that the componentwise picture absorbs (C3's irreducibility
+worry was the first). What survives of the ChatGPT validation as genuinely open is **C3's
+field-change naturality** and **C6's convention check**.
