@@ -35487,3 +35487,36 @@ satisfy `ζ_a ^ det v = ζ_b ^ det w`. Since the two readings differ by the tran
 
 Everything else on the path is now proved: the record, the descent, the pairing, the
 over-`S` field, WP-A4, the fppf cover, the clopen reading and the glue.
+
+## [WP-D3c step 1] the field-level pairing is UNIQUE (2026-08-04) — axiom-verified
+
+`finiteEtaleHom_unique` (`WeilPairing/FieldPairingUnique.lean`, new, sorry-free):
+
+```
+(A B : CommAlgCat.FiniteEtale k) (w₁ w₂ : A ⟶ B)
+(h : ∀ x : B →ₐ[k] SeparableClosure k, x.comp w₁ = x.comp w₂) : w₁ = w₂
+```
+
+Faithfulness of the fibre functor of the Galois category of finite étale `k`-algebras — the
+exact dual of the **fullness** statement `exists_finiteEtaleHom_of_galoisEquivariant`
+(`WeilPairing/EtaleDescent.lean:309`) that *produced* the pairing. Four lines:
+`FintypeCat.hom_ext` on the two `F.map wᵢ.op`, then `Functor.map_injective`.
+
+**Why this matters.** `exists_weilPairingHom_of_field` is an *existence* statement whose
+characterisation clause quantifies over `f : torsionPairAlgebra →ₐ[k] AlgebraicClosure k`.
+With `finiteEtaleHom_unique` that clause now **pins the pairing uniquely**, which is the
+prerequisite for the field-change naturality ChatGPT flagged as the largest remaining gap
+(C3): naturality of a merely-existential object is not even statable.
+
+### [WP-D3c step 2] the naturality itself — next
+- **Statement**: for a `k`-algebra map (or isomorphism) `K → L` of perfect fields with `N`
+  invertible, the base change of `e_{N,K}` along it is `e_{N,L}`, after identifying the
+  base-changed curves.
+- **Proof of record (ChatGPT)**: base-change both candidates to an algebraic closure of `L`;
+  they induce the same Silverman pairing on geometric points, hence agree there; faithful
+  flatness gives equality over `L`. With step 1 in hand this is a uniqueness argument, not a
+  construction.
+- **Note**: `finiteEtaleHom_unique` is stated over `SeparableClosure k`, while
+  `exists_weilPairingHom_of_field`'s clause uses `AlgebraicClosure k`; over a **perfect**
+  field (which that theorem assumes) these agree, but the transport lemma between the two
+  fibre functors will be needed.
