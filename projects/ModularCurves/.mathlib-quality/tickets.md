@@ -34666,3 +34666,20 @@ it into exactly that: the lift produced for `PQ` over `u.baseHom`, precomposed w
 `completionLocusPointsEquiv` is the pullback universal property (so `pullback.lift`
 uniqueness), and `fullLevelLocusPointsEquiv_natural_fst/_snd`
 (`Moduli/LevelLocusNatural.lean`) is the base-naturality — the file was written for this.
+
+## [WP-D2c-3-H2] PROVED (2026-08-03) — axiom-verified
+
+**`completionLocusClassifies_natural_fst`** (`LevelStructure/NaiveGammaOneLevel.lean`) — the
+completion-locus classification is natural in the base, read on the `pullback.fst` composite.
+
+It closed with `exact hfst` — i.e. `completionLocusClassifies`'s value **is**
+`fullLevelLocusPointsEquiv` of the lift definitionally, and the lift for `k ≫ g` is
+definitionally `k ≫` the lift for `g` (because `completionLocusPointsEquiv` is the pullback
+universal property, whose `invFun` is `pullback.lift` — and `pullback.lift` of precomposed
+data *is* the precomposition). So the whole content reduces to
+`fullLevelLocusPointsEquiv_natural_fst`, which `Moduli/LevelLocusNatural.lean` already had.
+
+Both H1 and H2 are now proved. The single remaining step is wiring H2 into the `baseHom`
+component of `yFullCandidateHomEquiv_symm_natural` — applying
+`homToPullbackAlong_baseHom` (with the `set` pattern that made H1 a one-liner) to both sides
+and matching against H2.

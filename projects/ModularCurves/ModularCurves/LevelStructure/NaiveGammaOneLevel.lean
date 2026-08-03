@@ -384,6 +384,31 @@ noncomputable def completionLocusClassifies (h : NIsInvertible S N) (P : S ⟶ E
       right_inv := fun PQ => Subtype.ext (by
         simp only [Subtype.coe_eta, Equiv.apply_symm_apply]) }
 
+/-! ### Base-naturality of the completion-locus classification (WP-D2c-3-H2) -/
+
+/-- **(WP-D2c-3-H2)** The completion-locus classification is natural in the base, read on the
+`pullback.fst` composite — the same form as `fullLevelLocusPointsEquiv_natural_fst`, which is
+what it reduces to.
+
+`completionLocusPointsEquiv` is the pullback universal property, so precomposition with `k`
+commutes with it (`pullback.lift` uniqueness); the remaining content is the full-level
+equivalence's own base-naturality. -/
+theorem completionLocusClassifies_natural_fst (h : NIsInvertible S N)
+    (P : S ⟶ E.torsion N) (hP : P ≫ E.torsionπ N = 𝟙 S)
+    {T' : Scheme.{u}} (g : T ⟶ S) (k : T' ⟶ T)
+    (c : { c : T ⟶ E.completionLocus N h P // c ≫ E.completionLocusπ N h P = g }) :
+    (((E.completionLocusClassifies N h P hP (k ≫ g))
+          ⟨k ≫ c.1, by rw [Category.assoc, c.2]⟩).1.1.1.1 :
+        T' ⟶ pullback E.π (k ≫ g)) ≫ pullback.fst E.π (k ≫ g) =
+      k ≫ ((E.completionLocusClassifies N h P hP g c).1.1.1.1 :
+        T ⟶ pullback E.π g) ≫ pullback.fst E.π g := by
+  -- both sides are `fullLevelLocusPointsEquiv` of a lift; the lift for `k ≫ g` is `k ≫` the
+  -- lift for `g` by the pullback universal property, so this is the full-level naturality
+  have hfst := E.fullLevelLocusPointsEquiv_natural_fst N h g k
+    ⟨(E.completionLocusPointsEquiv N h P g c).1,
+      E.fullLevelLocusπ_of_fst N h P hP g _ (E.completionLocusPointsEquiv N h P g c).2⟩
+  exact hfst
+
 end EllipticCurve
 
 end ModularCurves
