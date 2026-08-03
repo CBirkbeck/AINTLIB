@@ -233,6 +233,39 @@ theorem pullSection_iso_injective {X Y : EllObj R} (e : X ≅ Y) :
     ((transportAlongIso N u).symm PQ).1.1 =
       EllHom.pullSection R (EllObj.isoPullbackAlong u).inv PQ.1.1 := rfl
 
+/-- **(WP-D2c-3, naturality — the `symm` form)** The inverse of the representing
+equivalence is natural: precomposing with `f` corresponds to pulling the level structure
+back along `f`.
+
+This is the tractable form of the naturality obligation. Comparing morphisms *into*
+`X₁.pullbackAlong (completionLocusπ …)` is easy — `EllObj.homPullbackAlongEquiv` is an
+`Equiv`, so two such morphisms agree as soon as their `(≫ pullbackAlongπ, baseHom)` pairs
+do, and both components are directly computable from `EllObj.homToPullbackAlong`'s
+computation lemmas together with `fullLevelLocusPointsEquiv`'s naturality
+(`Moduli/LevelLocusNatural.lean`). Comparing the level structures directly (the `toFun`
+form) instead forces `whnf` through all five composed equivalences and does not terminate —
+measured: `(deterministic) timeout at whnf` on the unfolded goal.
+
+Mirrors the `left_inv` argument of `ModuliProblem.simulRepresentableBy`
+(`Moduli/QuotientProblem.lean`), which is the same shape one level up. -/
+theorem yFullCandidateHomEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (hinvR : IsUnit (N : R)) (h : NIsInvertible X₁.base N)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hmatch : ∀ (Y : EllObj R) (u : Y ⟶ X₁)
+      (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)),
+      (((transportAlongIso N u).symm PQ).1.1 =
+          X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+            (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+        forgetAt N hinvR Y PQ = rOne.homEquiv u)
+    {X X' : EllObj R} (f : X ⟶ X')
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op X')) :
+    f ≫ (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ =
+      (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
+        ((gammaFullNaiveProblem R N).map f.op PQ) := by
+  sorry
+
 /-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member
 is the section attached to `u.baseHom ≫ P`" says exactly "the `Γ₁`-part of `PQ` is `u`'s
 structure".
@@ -333,8 +366,13 @@ theorem yFullCandidate_representableBy (N : ℕ) [NeZero N] (X₁ : EllObj R)
     homEquiv := fun {Y} =>
       yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne
         (fun Y u PQ => fibre_condition_iff N hinvR X₁ P hPsec rOne hP Y u PQ) Y
-    homEquiv_comp := ?_ }⟩
-  sorry
+    homEquiv_comp := fun {X X'} f g => by
+      have hsymm := yFullCandidateHomEquiv_symm_natural N X₁ hinvR h P hPsec rOne
+        (fun Y u PQ => fibre_condition_iff N hinvR X₁ P hPsec rOne hP Y u PQ) f
+        (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne
+          (fun Y u PQ => fibre_condition_iff N hinvR X₁ P hPsec rOne hP Y u PQ) X' g)
+      rw [Equiv.symm_apply_apply] at hsymm
+      rw [hsymm, Equiv.apply_symm_apply] }⟩
 
 /-- **(WP-D2c-4)** Given WP-D2c-3, every object representing the naive full level-`N`
 problem has smooth affine structure morphism — which is exactly

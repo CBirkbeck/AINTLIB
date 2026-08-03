@@ -34561,3 +34561,35 @@ available:
 
 The one with content is the third; note `Moduli/LevelLocusNatural.lean` was written for
 exactly this purpose and its two `_natural_*` lemmas are the inputs.
+
+## [WP-D2c-3] `yFullCandidate_representableBy` is PROVED (2026-08-03)
+
+The top-level theorem no longer carries a `sorry`. Its `homEquiv` is
+`yFullCandidateHomEquiv` (proved) and its `homEquiv_comp` is *derived* in three lines from a
+single named lemma:
+
+    yFullCandidateHomEquiv_symm_natural :
+      f ≫ (equiv X').symm PQ = (equiv X).symm (map f.op PQ)
+
+via `rw [hsymm, Equiv.apply_symm_apply]`.
+
+**Why the `symm` form.** Proving `homEquiv_comp` directly — comparing the two *level
+structures* — forces `whnf` through all five composed equivalences. Measured: `(deterministic)
+timeout at whnf, maximum number of heartbeats (200000)`. Heartbeat bumps are forbidden here,
+so the fix had to be structural. The `symm` form instead compares **morphisms into**
+`X₁.pullbackAlong (completionLocusπ …)`, and `EllObj.homPullbackAlongEquiv` is an `Equiv` —
+so two such morphisms agree as soon as their `(≫ pullbackAlongπ, baseHom)` pairs do, and both
+components are directly computable from `homToPullbackAlong`'s computation lemmas plus
+`fullLevelLocusPointsEquiv`'s naturality. This is exactly the shape of
+`simulRepresentableBy`'s `left_inv` argument one level up.
+
+### The one remaining `sorry` in the entire D-chain
+`yFullCandidateHomEquiv_symm_natural`. Route:
+`refine (EllObj.homPullbackAlongEquiv X₁ (completionLocusπ …) X).injective ?_`, then
+`Subtype.ext (Prod.ext ?_ ?_)`:
+* **second component (`baseHom`)** — `homToPullbackAlong_baseHom` on both sides reduces it to
+  `fullLevelLocusPointsEquiv`'s naturality in the base;
+* **first component (`≫ pullbackAlongπ`)** — `homToPullbackAlong_pullbackAlongπ` on both
+  sides reduces it to `rOne.homEquiv_comp`.
+
+Root green at 9638 jobs.
