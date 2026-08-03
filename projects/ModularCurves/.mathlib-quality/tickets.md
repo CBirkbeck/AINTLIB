@@ -35393,3 +35393,59 @@ itself is done too.
 `ModularCurves.lean`: its import `StandardSmoothMaximalDVR` is one of the 77 orphan modules,
 and adding orphans to the root is what the duplicate-name finding says breaks the build. It
 builds and is axiom-checked explicitly.
+
+## [WP-B5] the DS4 descent, fully surveyed (2026-08-04) — everything but the cocycle exists
+
+Read the whole `WeilPairing/` directory (26 files) before planning further. The descent half
+of route A is **built and axiom-verified**; the DS4 obligation is now literally one field of
+one record.
+
+| piece | where | status |
+|---|---|---|
+| `WeilPairingLocalData` (the record) | `CharZeroAssembly.lean:45` | ✅ |
+| `nonempty_weilPairing_of_localData` — *"DS4 def + `_over` follow from the record"* | `CharZeroAssembly.lean:114` | ✅ |
+| `weilPairingCharZero` + `_restrict` / `_over` / `_unique` / `_baseChange` | `CharZeroDescent.lean:213–275` | ✅ |
+| `localDetPairing = triv ≫ detConstMor ≫ rootSplitting ζ ≫ muNMapAlong` | `RootSplitting.lean:93` | ✅ |
+| `localDetPairing_over` (the record's `overBase` field) | `RootSplitting.lean:105` | ✅ |
+| **WP-A4** `constSchemeMap_gl2Both_comp_detConstMor_rootSplitting` — *"changing the trivialisation by `g` = raising ζ to `det g`"* | `RootSplitting.lean:160` | ✅ |
+| the fppf cover `fullLevelSpaceStruct_fppf` | `FullLevelCover.lean:85` | ✅ |
+| `constSchemePointsEquiv` — points of a constant scheme = locally constant functions | `GroupScheme/MuN.lean:393` | ✅ |
+| `constSchemeMapAlong`, `muNMapAlong_comp` | `GroupScheme/MuN.lean:541, 89` | ✅ |
+| **the `cocycle` field** | — | ✘ **the only gap** |
+
+Also: **the `N = 3` root already exists and has zero consumers.** `e3Zeta`
+(`WeilPairing/UniversalRootThree.lean:44`), `e3Zeta_pow_three`, and the transported
+`e3ZetaAt` / `e3ZetaAt_pow_three` for an arbitrary object with a level-3 datum are all
+proved and axiom-verified, and `grep` finds **no use of them outside their own file**. So at
+`N = 3` every ingredient of `WeilPairingLocalData` is present except the cocycle.
+
+### [WP-B5b] the cocycle, decomposed — the exact remaining shape
+- **Status**: open · **File**: new, `WeilPairing/DetCocycle.lean` · **Type**: theorem
+- **Setting**: `W := pullback (pullback.fst (E.torsionSqπ N) p) (pullback.fst (E.torsionSqπ N) p)`
+  with projections `a b : W ⟶ pullback (E.torsionSqπ N) p`. The cocycle is
+  `a ≫ localDetPairing E N p ζ triv = b ≫ localDetPairing E N p ζ triv`.
+- **The two obstacles, and how they resolve:**
+  1. `a` and `b` lie over **two different** `S'`-points (`a ≫ pullback.snd ≠ b ≫ pullback.snd`),
+     so the comparison of the pulled-back trivialisations is not a single global matrix — it
+     is a `LocallyConstant W (GL₂(ℤ/N))`. `constSchemePointsEquiv` is exactly the dictionary:
+     each of `a ≫ triv.hom` and `b ≫ triv.hom` is a
+     `LocallyConstant W ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))`.
+  2. Correspondingly the root relation `(a ≫ pullback.snd)^* ζ = ((b ≫ pullback.snd)^* ζ) ^ det γ`
+     has a **locally constant exponent**, which WP-A4 (stated for a *constant* `g`) cannot
+     absorb.
+- **Resolution**: `GL₂(ℤ/N)` is finite and `γ` is locally constant, so
+  `W = ⊔_{g ∈ GL₂(ℤ/N)} W_g` is a finite **clopen** decomposition. On each `W_g` the exponent
+  is the constant `det g` and WP-A4 applies verbatim. Glue by joint-epimorphy of a finite
+  clopen cover. This is the same `Sigma`/`constFiber` vocabulary `constSchemePointsEquiv`'s
+  own proof uses (`constFiber`, `constFiberCofanIsColimit`, `constIndex`), so the gluing
+  machinery is already in `GroupScheme/MuN.lean`.
+- **The mathematical input that remains after all of that** is precisely ChatGPT's **C3**:
+  that the *root itself* transforms by `det`, i.e. `ζ(φ·g) = ζ(φ)^{det g}`. Nothing in the
+  tree proves this for `e3Zeta` — there is no `GL₂(ℤ/3)`-action statement on `E3ModuliRing`
+  anywhere (grepped). That, and not the descent bookkeeping, is the remaining content.
+
+### Revised critical path to DS4
+`WP-B5b-glue` (clopen decomposition + WP-A4, mechanical) →
+**`WP-D3c` (the root transforms by `det`)** — the one genuinely new theorem →
+`WeilPairingLocalData` → `nonempty_weilPairing_of_localData` → DS4 def + `_over` →
+`WP-C2` → the four computational specs → `weilPairing_torsionMapOfEllHom` → `yRho_representable`.
