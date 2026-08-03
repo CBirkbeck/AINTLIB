@@ -3,7 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.WeilPairing.EtaleDescent
+import ModularCurves.WeilPairing.GlobalFibreChart
 
 /-!
 # The field-level Weil pairing is unique (WP-D3c, step 1)
@@ -24,7 +24,7 @@ the pairing in the first place.
 
 universe u
 
-open CategoryTheory
+open CategoryTheory AlgebraicGeometry
 
 namespace ModularCurves
 
@@ -111,5 +111,44 @@ and mathlib registers none of its own. `faithful_fiber_algebraicClosure` above s
 for perfect `k`, by transporting along `IsSepClosure.equiv` — which applies because
 `IsSepClosure.of_isAlgClosure_of_perfectField` (`FieldTheory/IsSepClosed.lean:252`) makes the
 algebraic closure a separable closure. -/
+
+/-! ### The field-level Weil pairing as a canonical object -/
+
+/-- **(WP-D3c step 1, the payoff)** The field-level Weil pairing, *named*: the morphism of
+finite étale `k`-algebras produced by `exists_weilPairingHom_of_field`.
+
+Naming it is only legitimate because of `fieldWeilPairingHom_unique` below — before the
+uniqueness pin this was a `choose` from a possibly-non-singleton set, and no naturality
+statement about it would have been meaningful. -/
+noncomputable def fieldWeilPairingHom (k : Type u) [Field k] [PerfectField k]
+    [DecidableEq (AlgebraicClosure k)] (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (N : ℕ) [NeZero N] (hk : (N : k) ≠ 0) :
+    muNAlgebra k N hk ⟶ EllipticCurve.torsionPairAlgebra k E N hk :=
+  (exists_weilPairingHom_of_field k E N hk).choose
+
+/-- **(WP-D3c step 1)** The defining property: the pairing's value at every geometric point is
+the Silverman pairing of that point's pair of torsion points. -/
+theorem fieldWeilPairingHom_spec (k : Type u) [Field k] [PerfectField k]
+    [DecidableEq (AlgebraicClosure k)] (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (N : ℕ) [NeZero N] (hk : (N : k) ≠ 0)
+    (f : (EllipticCurve.torsionPairAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k) :
+    f.comp (fieldWeilPairingHom k E N hk).hom.hom =
+      weilPairingFibreMap k N hk E (globalGaloisFibreChart k (AlgebraicClosure k) E)
+        (EllipticCurve.torsionPairAlgebraPointsEquiv k E N hk f) :=
+  (exists_weilPairingHom_of_field k E N hk).choose_spec f
+
+/-- **(WP-D3c step 1)** …and it is the **only** morphism with that property. This is what
+makes `fieldWeilPairingHom` canonical, hence a legitimate subject for naturality statements. -/
+theorem fieldWeilPairingHom_unique (k : Type u) [Field k] [PerfectField k]
+    [DecidableEq (AlgebraicClosure k)] (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (N : ℕ) [NeZero N] (hk : (N : k) ≠ 0)
+    (w : muNAlgebra k N hk ⟶ EllipticCurve.torsionPairAlgebra k E N hk)
+    (hw : ∀ f : (EllipticCurve.torsionPairAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k,
+      f.comp w.hom.hom =
+        weilPairingFibreMap k N hk E (globalGaloisFibreChart k (AlgebraicClosure k) E)
+          (EllipticCurve.torsionPairAlgebraPointsEquiv k E N hk f)) :
+    w = fieldWeilPairingHom k E N hk :=
+  finiteEtaleHom_unique_algClosure _ _ w (fieldWeilPairingHom k E N hk) fun f =>
+    (hw f).trans (fieldWeilPairingHom_spec k E N hk f).symm
 
 end ModularCurves

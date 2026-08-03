@@ -35586,3 +35586,30 @@ closure when `k` is perfect). `PerfectField k` is the hypothesis
 existential one. Field-change naturality (WP-D3c step 2, ChatGPT's C3) is henceforth a
 uniqueness argument: base-change both candidates to an algebraic closure of the target,
 observe they induce the same Silverman pairing on geometric points, and apply the pin.
+
+## [WP-D3c step 1, the payoff] the field pairing is now a NAMED canonical object (2026-08-04)
+
+`WeilPairing/FieldPairingUnique.lean` (sorry-free, six declarations, all axiom-verified):
+
+| name | content |
+|---|---|
+| `fiberIsoOfAlgEquiv` | equivalence of geometric points ⟹ natural iso of fibre functors |
+| `faithful_fiber_of_algEquiv` | faithfulness transports along it |
+| `faithful_fiber_algebraicClosure` | the instance at `AlgebraicClosure k`, perfect `k` |
+| `finiteEtaleHom_unique` | the pin at `SeparableClosure k` |
+| `finiteEtaleHom_unique_algClosure` | the pin at `AlgebraicClosure k` |
+| **`fieldWeilPairingHom`** + `_spec` + `_unique` | the field-level Weil pairing, *named*, with its defining property and its uniqueness |
+
+`exists_weilPairingHom_of_field` was an existence statement; `fieldWeilPairingHom` is the
+`choose`, `fieldWeilPairingHom_spec` is the characterisation, and `fieldWeilPairingHom_unique`
+says nothing else satisfies it. Naming the pairing was **not** legitimate before the pin —
+`choose` from a possibly-non-singleton set has no naturality.
+
+### Where this leaves WP-D3c step 2 (ChatGPT's C3, the largest remaining gap)
+
+Statable at last, and as a **uniqueness argument** rather than a construction: for a
+`k`-algebra map of perfect fields `K → L`, the base change of `fieldWeilPairingHom K …` also
+satisfies the characterisation clause over `L` (both sides induce the same Silverman pairing
+on `L̄`-points), so `fieldWeilPairingHom_unique` forces it to *be*
+`fieldWeilPairingHom L …`. The remaining work is the base-change bookkeeping on
+`torsionPairAlgebra`, `muNAlgebra` and `weilPairingFibreMap`, not new mathematics.
