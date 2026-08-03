@@ -382,6 +382,139 @@ theorem biResQ_split_injective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 <
       RingHom.comp_apply, RingHom.comp_apply, hR]
   exact Subtype.ext (Prod.ext hfst hsnd)
 
+/-- Every element of `BISub` is a limit of honest `Bloc` fractions, so it is `ε`-approximated by
+one in the `wI` norm. This is `BISub`'s defining closure property, packaged as the approximation
+statement its consumers actually want. -/
+private theorem exists_bloc_approx {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1)
+    (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1) (g : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    {ε : NNReal} (hε : 0 < ε) :
+    ∃ z : Bloc p F ϖ, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z
+        - (g : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ≤ ε := by
+  have hcl : (g : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      ∈ closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := g.2
+  obtain ⟨w, hwball, z, hz⟩ := mem_closure_iff_nhds.mp hcl _
+    (wI_ball_mem_nhds p F (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) _ hε)
+  rw [← hz] at hwball
+  exact ⟨z, hwball⟩
+
+
+/-- The left half of `exists_blocApprox_pair`: subtracting the `P`-part of the discrepancy keeps
+`z₁` an `ε`-approximation of `g₁`, the correction being `ε`-small at every radius below the
+split. -/
+private theorem blocApprox_left (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂)
+    {ε : NNReal} (hε : 0 < ε)
+    (z₁ z₂ dP dM : Bloc p F ϖ) (hd : z₁ - z₂ = dP + dM)
+    (hP : ∀ (σ : NNReal) (hσ0 : 0 < σ) (hσ1 : σ < 1), σ ≤ vpiQ p F ϖ r →
+      wLoc p F ϖ hσ0 hσ1 dP ≤ wLoc p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂))
+    (hM : ∀ (σ : NNReal) (hσ0 : 0 < σ) (hσ1 : σ < 1), vpiQ p F ϖ r ≤ σ →
+      wLoc p F ϖ hσ0 hσ1 dM ≤ wLoc p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂))
+    (hdisc : wLoc p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂) ≤ ε)
+    (hb₁ : wI p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r)
+      (vpiQ_lt_one p F ϖ hr)
+      (BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r)
+        (vpiQ_lt_one p F ϖ hr) z₁
+      - (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+          × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))) ≤ ε) :
+      wI p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r)
+        (vpiQ_lt_one p F ϖ hr)
+        ((g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+            × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+          - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - dP)) ≤ ε := by
+  have hsplit : (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+        × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+      - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+          (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - dP)
+      = ((g₁ : _ × _) - BIProd p F ϖ (vpiQ_pos p F ϖ q₁)
+          (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁)
+        + BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+            (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) dP := by
+    rw [map_sub]
+    ring
+  rw [hsplit]
+  refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
+  · rw [show (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+          × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+        - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+            (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁
+        = -(BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+            (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁ - (g₁ : _ × _)) by
+      ring, wI_neg]
+    exact hb₁
+  · rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
+    refine max_le ?_ ?_
+    · exact le_trans (hP _ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+        (vpiQ_antitone p F ϖ hrq₁)) hdisc
+    · exact le_trans (hP _ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+        le_rfl) hdisc
+
+
+/-- The right half: `z₁ - dP = z₂ + dM`, so adding the `M`-part keeps `z₂` an `ε`-approximation of
+`g₂` at every radius above the split. -/
+private theorem blocApprox_right (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂)
+    {ε : NNReal} (hε : 0 < ε)
+    (z₁ z₂ dP dM : Bloc p F ϖ) (hd : z₁ - z₂ = dP + dM)
+    (hP : ∀ (σ : NNReal) (hσ0 : 0 < σ) (hσ1 : σ < 1), σ ≤ vpiQ p F ϖ r →
+      wLoc p F ϖ hσ0 hσ1 dP ≤ wLoc p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂))
+    (hM : ∀ (σ : NNReal) (hσ0 : 0 < σ) (hσ1 : σ < 1), vpiQ p F ϖ r ≤ σ →
+      wLoc p F ϖ hσ0 hσ1 dM ≤ wLoc p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂))
+    (hdisc : wLoc p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂) ≤ ε)
+    (hb₂ : wI p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂)
+      (vpiQ_lt_one p F ϖ h₂)
+      (BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂)
+        (vpiQ_lt_one p F ϖ h₂) z₂
+      - (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+          × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))) ≤ ε) :
+      wI p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂)
+          (vpiQ_lt_one p F ϖ h₂)
+          ((g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+              × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+            - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+                (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (z₁ - dP)) ≤ ε := by
+  have hzM : z₁ - dP = z₂ + dM := by
+    have h' := hd
+    rw [sub_eq_iff_eq_add] at h'
+    rw [h']
+    ring
+  rw [hzM]
+  have hsplit : (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+        × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+      - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+          (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (z₂ + dM)
+      = ((g₂ : _ × _) - BIProd p F ϖ (vpiQ_pos p F ϖ r)
+          (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂)
+        + (- BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+            (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) dM) := by
+    rw [map_add]
+    ring
+  rw [hsplit]
+  refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
+  · rw [show (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+          × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+        - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+            (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂
+        = -(BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+            (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂ - (g₂ : _ × _)) by
+      ring, wI_neg]
+    exact hb₂
+  · rw [wI_neg, wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
+    refine max_le ?_ ?_
+    · exact le_trans (hM _ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+        le_rfl) hdisc
+    · exact le_trans (hM _ (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+        (vpiQ_antitone p F ϖ hq₂r)) hdisc
+
+
+
 /-- **The joint approximation step**: a matching pair of half-interval elements
 is jointly `ε`-approximated by a single `Bloc` element, via the Mittag-Leffler
 splitting of the discrepancy at the split radius. -/
@@ -404,38 +537,10 @@ theorem exists_blocApprox_pair (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 <
             - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
                 (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) h) ≤ ε := by
   -- approximate each half from the closure description of `BISub`
-  have hg₁cl : (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
-      × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
-      ∈ closure ((BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-        (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)).range
-          : Set ((hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
-            × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))) := g₁.2
-  have hg₂cl : (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
-      × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
-      ∈ closure ((BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-        (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)).range
-          : Set ((hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
-            × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))) := g₂.2
-  obtain ⟨w₁, hw₁ball, z₁, hz₁⟩ := mem_closure_iff_nhds.mp hg₁cl _
-    (wI_ball_mem_nhds p F (hρ₁0 := vpiQ_pos p F ϖ q₁)
-      (hρ₁1 := vpiQ_lt_one p F ϖ h₁) (hρ₂0 := vpiQ_pos p F ϖ r)
-      (hρ₂1 := vpiQ_lt_one p F ϖ hr) _ hε)
-  obtain ⟨w₂, hw₂ball, z₂, hz₂⟩ := mem_closure_iff_nhds.mp hg₂cl _
-    (wI_ball_mem_nhds p F (hρ₁0 := vpiQ_pos p F ϖ r)
-      (hρ₁1 := vpiQ_lt_one p F ϖ hr) (hρ₂0 := vpiQ_pos p F ϖ q₂)
-      (hρ₂1 := vpiQ_lt_one p F ϖ h₂) _ hε)
-  rw [← hz₁] at hw₁ball
-  rw [← hz₂] at hw₂ball
-  have hb₁ : wI p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-      (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-      (BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-        (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁ - (g₁ : _ × _)) ≤ ε :=
-    hw₁ball
-  have hb₂ : wI p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-      (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
-      (BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-        (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂ - (g₂ : _ × _)) ≤ ε :=
-    hw₂ball
+  obtain ⟨z₁, hb₁⟩ := exists_bloc_approx p F ϖ (vpiQ_pos p F ϖ q₁)
+    (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) g₁ hε
+  obtain ⟨z₂, hb₂⟩ := exists_bloc_approx p F ϖ (vpiQ_pos p F ϖ r)
+    (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) g₂ hε
   -- the discrepancy is small at the split radius
   have hmid₁ : Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
       (vpiQ_lt_one p F ϖ hr) z₁ - biSndQ p F ϖ q₁ r h₁ hr g₁) ≤ ε := by
@@ -473,65 +578,10 @@ theorem exists_blocApprox_pair (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 <
   obtain ⟨dP, dM, hd, hP, hM⟩ := exists_wLoc_split p F ϖ
     (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂)
   refine ⟨z₁ - dP, ?_, ?_⟩
-  · have hsplit : (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
-          × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
-        - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-            (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - dP)
-        = ((g₁ : _ × _) - BIProd p F ϖ (vpiQ_pos p F ϖ q₁)
-            (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁)
-          + BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) dP := by
-      rw [map_sub]
-      ring
-    rw [hsplit]
-    refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
-    · rw [show (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
-            × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
-          - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁
-          = -(BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁ - (g₁ : _ × _)) by
-        ring, wI_neg]
-      exact hb₁
-    · rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
-      refine max_le ?_ ?_
-      · exact le_trans (hP _ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
-          (vpiQ_antitone p F ϖ hrq₁)) hdisc
-      · exact le_trans (hP _ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-          le_rfl) hdisc
-  · have hzM : z₁ - dP = z₂ + dM := by
-      have h' := hd
-      rw [sub_eq_iff_eq_add] at h'
-      rw [h']
-      ring
-    rw [hzM]
-    have hsplit : (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
-          × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
-        - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-            (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (z₂ + dM)
-        = ((g₂ : _ × _) - BIProd p F ϖ (vpiQ_pos p F ϖ r)
-            (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂)
-          + (- BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) dM) := by
-      rw [map_add]
-      ring
-    rw [hsplit]
-    refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
-    · rw [show (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
-            × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
-          - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂
-          = -(BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂ - (g₂ : _ × _)) by
-        ring, wI_neg]
-      exact hb₂
-    · rw [wI_neg, wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
-      refine max_le ?_ ?_
-      · exact le_trans (hM _ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
-          le_rfl) hdisc
-      · exact le_trans (hM _ (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
-          (vpiQ_antitone p F ϖ hq₂r)) hdisc
-
+  · exact blocApprox_left p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch hε
+      z₁ z₂ dP dM hd hP hM hdisc hb₁
+  · exact blocApprox_right p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch hε
+      z₁ z₂ dP dM hd hP hM hdisc hb₂
 /-- Convergence in the completed field from termwise valuation bounds. -/
 theorem tendsto_hatK_of_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {u : ℕ → hatK p F hρ0 hρ1} {L : hatK p F hρ0 hρ1} {ε : ℕ → NNReal}

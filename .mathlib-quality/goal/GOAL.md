@@ -13085,3 +13085,39 @@ A build-monitoring note: this module takes ~10 minutes, past the foreground limi
 it is right, but the completion check must look for the `EXIT=` marker — the output file becomes
 non-empty as soon as the *Python* stage prints, so testing `[ -s file ]` reports "done" while the
 build is still running.
+
+### `exists_blocApprox_pair` 125 -> 44: `IntervalSplitting` is clear
+
+Three extractions, one of which is a genuine dedup rather than a move:
+
+| new lemma | lines | was |
+|---|---|---|
+| `exists_bloc_approx` | 14 | **two** copies of the same 16-line block |
+| `blocApprox_left` | 26 | the first bullet |
+| `blocApprox_right` | 33 | the second bullet |
+
+The setup did the same thing twice — take `g.2` (the closure property of `BISub`), feed it to
+`mem_closure_iff_nhds`, pull out a `Bloc` fraction `z`, and rewrite the ball membership into a
+`wI`-bound. Thirty-two lines for what is one statement applied at two radius pairs: *every element
+of `BISub` is `ε`-approximated by an honest `Bloc` fraction*. That statement is the closure
+property in the form its consumers actually want, and it collapsed the block to four lines.
+
+**The dedent bug in a third new guise, and it cost a full revert.** Extracting a `·` bullet, I
+anchored on the line *after* the bullet marker — so the lemma body silently lost its own first
+line (`have hsplit : (g₁ : (hatK …`) and began mid-expression at `× (hatK …)`. Lean reported
+`unexpected token '×'; expected command` pointing at the body, with a correct-looking signature
+directly above it.
+
+The rule that finally makes bullet extraction reliable, and which I have now got wrong three
+different ways:
+
+> A bullet's content **includes the bullet line itself**. Take `L[i:j]` with `i` the `·` line,
+> replace the leading `· ` with two spaces, then dedent once by the bullet's indent. Never
+> `L[i+1:j]` (drops the first line), never dedent-then-strip-then-reindent (leaves everything
+> after line one two columns deep), and never search forward for `theorem` to find the end (a
+> docstring or `open … in` sits above it — use the first non-empty line at column 0).
+
+Because two edits were already stacked on the file, the cheapest fix was `git stash push -u` on
+that one path, then re-running both edits from one corrected script. Worth remembering that
+reverting a single file mid-batch is cheap when the edits are scripted — it is only expensive if
+the earlier work was done by hand.
