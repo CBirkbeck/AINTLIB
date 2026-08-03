@@ -69,6 +69,164 @@ def MvPowerSeries.IsRestricted {k : ℕ} {A : Type*} [CommRing A] [TopologicalSp
     (f : MvPowerSeries (Fin k) A) : Prop :=
   Tendsto (fun s : Fin k →₀ ℕ => MvPowerSeries.coeff s f) cofinite (nhds 0)
 
+/-- `0` is restricted: its coefficients are constantly `0`. -/
+theorem MvPowerSeries.isRestricted_zero (k : ℕ) (A : Type*) [CommRing A] [TopologicalSpace A]
+    [NonarchimedeanRing A] :
+    MvPowerSeries.IsRestricted (0 : MvPowerSeries (Fin k) A) := by
+  change Tendsto _ cofinite (nhds 0)
+  simp only [map_zero]
+  exact tendsto_const_nhds
+
+/-- `1` is restricted: every coefficient but the `0`-th vanishes. -/
+theorem MvPowerSeries.isRestricted_one (k : ℕ) (A : Type*) [CommRing A] [TopologicalSpace A]
+    [NonarchimedeanRing A] :
+    MvPowerSeries.IsRestricted (1 : MvPowerSeries (Fin k) A) := by
+  change Tendsto _ cofinite (nhds 0)
+  apply tendsto_nhds.mpr
+  intro U hU h0U
+  rw [Filter.mem_cofinite]
+  apply (Set.finite_singleton (0 : Fin k →₀ ℕ)).subset
+  intro s hs
+  simp only [Set.mem_compl_iff, Set.mem_preimage] at hs
+  simp only [Set.mem_singleton_iff]
+  by_contra h
+  exact hs (by rw [MvPowerSeries.coeff_one, if_neg h]; exact h0U)
+
+/-- A sum of restricted series is restricted. -/
+theorem MvPowerSeries.IsRestricted.add {k : ℕ} {A : Type*} [CommRing A] [TopologicalSpace A]
+    [NonarchimedeanRing A] {f g : MvPowerSeries (Fin k) A}
+    (hf : f.IsRestricted) (hg : g.IsRestricted) : (f + g).IsRestricted := by
+  change Tendsto _ cofinite (nhds 0)
+  have : Tendsto (fun s => MvPowerSeries.coeff s f + MvPowerSeries.coeff s g)
+      cofinite (nhds 0) := by
+    rw [show (0 : A) = 0 + 0 from (add_zero 0).symm]
+    exact Filter.Tendsto.add hf hg
+  exact this.congr (fun s => by simp [map_add])
+
+/-- The negation of a restricted series is restricted. -/
+theorem MvPowerSeries.IsRestricted.neg {k : ℕ} {A : Type*} [CommRing A] [TopologicalSpace A]
+    [NonarchimedeanRing A] {f : MvPowerSeries (Fin k) A}
+    (hf : f.IsRestricted) : (-f).IsRestricted := by
+  change Tendsto _ cofinite (nhds 0)
+  have : Tendsto (fun s => -(MvPowerSeries.coeff s f)) cofinite (nhds 0) := by
+    rw [show (0 : A) = -0 from neg_zero.symm]
+    exact Filter.Tendsto.neg hf
+  exact this.congr (fun s => by simp [map_neg])
+
+/-- Restrictedness, restated: for every open additive subgroup `W`, all but finitely many
+coefficients lie in `W`. This is the form the convolution argument actually consumes. -/
+theorem MvPowerSeries.IsRestricted.finite_coeff_notMem {k : ℕ} {A : Type*} [CommRing A]
+    [TopologicalSpace A] {f : MvPowerSeries (Fin k) A} (hf : f.IsRestricted)
+    (W : OpenAddSubgroup A) : {s | MvPowerSeries.coeff s f ∉ (W : Set A)}.Finite := by
+  have := (tendsto_nhds.mp hf) _ W.isOpen (SetLike.mem_coe.mpr W.zero_mem)
+  rwa [Filter.mem_cofinite] at this
+
+/-- The neighbourhood of `0` used to control a coefficient convolution: inside the open
+subgroup `W`, and small enough that multiplying by any of finitely many fixed coefficients
+lands in `V`. Openness of `V` and `W` plus continuity of multiplication is all this needs. -/
+private theorem inter_preimage_mul_mem_nhds {A : Type*} [CommRing A] [TopologicalSpace A]
+    [NonarchimedeanRing A] {ι : Type*} (V W : OpenAddSubgroup A) (S₁ S₂ : Finset ι)
+    (c₁ c₂ : ι → A) :
+    ((W : Set A) ∩ (⋂ a ∈ S₁, (fun x => c₁ a * x) ⁻¹' (V : Set A))
+        ∩ (⋂ b ∈ S₂, (fun x => x * c₂ b) ⁻¹' (V : Set A))) ∈ nhds (0 : A) := by
+  refine Filter.inter_mem (Filter.inter_mem ?_ ?_) ?_
+  · exact W.isOpen.mem_nhds W.zero_mem
+  · apply (Filter.biInter_finset_mem _).mpr
+    intro a _
+    exact (continuous_const_mul _).continuousAt.preimage_mem_nhds
+      (by simpa using V.isOpen.mem_nhds V.zero_mem)
+  · apply (Filter.biInter_finset_mem _).mpr
+    intro b _
+    exact (continuous_mul_const _).continuousAt.preimage_mem_nhds
+      (by simpa using V.isOpen.mem_nhds V.zero_mem)
+
+/-- The "bad" indices contributed by one side of a coefficient convolution form a finite set:
+for each `a` in a finite `S`, only finitely many `n` have `c (n - a) ∉ T`, and `n ↦ n - a` is
+injective on `{n | a ≤ n}`. Both halves of `IsRestricted.mul`'s bad set have this shape, with
+the roles of the two series swapped. -/
+private theorem finite_shift_bad_set {k : ℕ} {A : Type*} [CommRing A] [TopologicalSpace A]
+    (S : Finset (Fin k →₀ ℕ)) (T : Set A) (c : (Fin k →₀ ℕ) → A)
+    (hcT : {s | c s ∉ T}.Finite) : {n | ∃ a ∈ S, a ≤ n ∧ c (n - a) ∉ T}.Finite := by
+  apply Set.Finite.subset (S.finite_toSet.biUnion (fun a _ => hcT.image (· + a)))
+  intro n ⟨a, ha, han, hng⟩
+  simp only [Set.mem_iUnion, Set.mem_image, Finset.mem_coe]
+  exact ⟨a, ha, n - a, hng, tsub_add_cancel_of_le han⟩
+
+/-- A product of restricted series is restricted. This is the only field of
+`restrictedMvPowerSeriesSubring` that needs `A` nonarchimedean: the coefficient convolution is
+a finite sum, and it is nonarchimedeanness that keeps such a sum inside an open subgroup. -/
+theorem MvPowerSeries.IsRestricted.mul {k : ℕ} {A : Type*} [CommRing A] [TopologicalSpace A]
+    [NonarchimedeanRing A] {f g : MvPowerSeries (Fin k) A}
+    (hf : f.IsRestricted) (hg : g.IsRestricted) : (f * g).IsRestricted := by
+  classical
+  change Tendsto _ cofinite (nhds 0)
+  rw [tendsto_nhds]
+  intro U hU h0U
+  rw [Filter.mem_cofinite]
+  obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U (hU.mem_nhds h0U)
+  obtain ⟨W, hWV⟩ := NonarchimedeanRing.mul_subset V
+  set Sf := {s | MvPowerSeries.coeff s f ∉ (W : Set A)}
+  set Sg := {s | MvPowerSeries.coeff s g ∉ (W : Set A)}
+  have hSf : Sf.Finite := hf.finite_coeff_notMem W
+  have hSg : Sg.Finite := hg.finite_coeff_notMem W
+  set T := (W : Set A) ∩
+    (⋂ a ∈ hSf.toFinset,
+      (fun x => MvPowerSeries.coeff a f * x) ⁻¹' (V : Set A)) ∩
+    (⋂ b ∈ hSg.toFinset,
+      (fun x => x * MvPowerSeries.coeff b g) ⁻¹' (V : Set A))
+  have hT_nhds : T ∈ nhds (0 : A) :=
+    inter_preimage_mul_mem_nhds V W hSf.toFinset hSg.toFinset
+      (fun a => MvPowerSeries.coeff a f) (fun b => MvPowerSeries.coeff b g)
+  have hT_left : ∀ a ∈ hSf.toFinset, ∀ y ∈ T,
+      MvPowerSeries.coeff a f * y ∈ (V : Set A) := by
+    intro a ha y hy
+    exact (Set.mem_iInter₂.mp hy.1.2 a ha : _)
+  have hT_right : ∀ b ∈ hSg.toFinset, ∀ x ∈ T,
+      x * MvPowerSeries.coeff b g ∈ (V : Set A) := by
+    intro b hb x hx
+    exact (Set.mem_iInter₂.mp hx.2 b hb : _)
+  have hgT : {s | MvPowerSeries.coeff s g ∉ T}.Finite :=
+    (Filter.mem_cofinite.mp (hg hT_nhds)).subset (fun s hs => hs)
+  have hfT : {s | MvPowerSeries.coeff s f ∉ T}.Finite :=
+    (Filter.mem_cofinite.mp (hf hT_nhds)).subset (fun s hs => hs)
+  set B := {n | ∃ a ∈ hSf.toFinset, a ≤ n ∧ MvPowerSeries.coeff (n - a) g ∉ T} ∪
+           {n | ∃ b ∈ hSg.toFinset, b ≤ n ∧ MvPowerSeries.coeff (n - b) f ∉ T}
+  have hB_finite : B.Finite :=
+    (finite_shift_bad_set _ _ _ hgT).union (finite_shift_bad_set _ _ _ hfT)
+  apply hB_finite.subset
+  intro n hn
+  simp only [Set.mem_compl_iff, Set.mem_preimage] at hn
+  by_contra hnB
+  apply hn; clear hn
+  simp only [B, Set.mem_union, Set.mem_setOf_eq, not_or, not_exists, not_and] at hnB
+  obtain ⟨hnB1, hnB2⟩ := hnB
+  apply hVU
+  rw [SetLike.mem_coe]
+  rw [show MvPowerSeries.coeff n (f * g) =
+    ∑ p ∈ Finset.antidiagonal n,
+      MvPowerSeries.coeff p.1 f * MvPowerSeries.coeff p.2 g
+    from MvPowerSeries.coeff_mul (n := n) (φ := f) (ψ := g)]
+  apply V.toAddSubgroup.sum_mem
+  intro ⟨a, b⟩ hab
+  rw [Finset.mem_antidiagonal] at hab
+  by_cases haS : a ∈ Sf
+  · have hab_le : a ≤ n := hab ▸ le_add_right le_rfl
+    have hb_eq : b = n - a := by rw [← hab]; exact (add_tsub_cancel_left a b).symm
+    have hgT_b : MvPowerSeries.coeff b g ∈ T := by
+      rw [hb_eq]; exact not_not.mp (hnB1 a (hSf.mem_toFinset.mpr haS) hab_le)
+    exact SetLike.mem_coe.mp (hT_left a (hSf.mem_toFinset.mpr haS) _ hgT_b)
+  · by_cases hbS : b ∈ Sg
+    · have hb_le : b ≤ n := hab ▸ le_add_left le_rfl
+      have ha_eq : a = n - b := by rw [← hab]; exact (add_tsub_cancel_right a b).symm
+      have hfT_a : MvPowerSeries.coeff a f ∈ T := by
+        rw [ha_eq]; exact not_not.mp (hnB2 b (hSg.mem_toFinset.mpr hbS) hb_le)
+      exact SetLike.mem_coe.mp (hT_right b (hSg.mem_toFinset.mpr hbS) _ hfT_a)
+    · have haW : MvPowerSeries.coeff a f ∈ (W : Set A) := by
+        simp only [Sf, Set.mem_setOf_eq, not_not] at haS; exact haS
+      have hbW : MvPowerSeries.coeff b g ∈ (W : Set A) := by
+        simp only [Sg, Set.mem_setOf_eq, not_not] at hbS; exact hbS
+      exact SetLike.mem_coe.mp (hWV ⟨_, haW, _, hbW, rfl⟩)
+
 /-- The set of restricted power series forms a subring of `MvPowerSeries (Fin k) A`.
 
 The closure under multiplication (convolution of tendsto-0 coefficient sequences)
@@ -78,126 +236,11 @@ open additive subgroup remain in the subgroup). This is the canonical definition
 def restrictedMvPowerSeriesSubring (k : ℕ) (A : Type*) [CommRing A] [TopologicalSpace A]
     [NonarchimedeanRing A] : Subring (MvPowerSeries (Fin k) A) where
   carrier := {f | MvPowerSeries.IsRestricted f}
-  zero_mem' := by
-    change Tendsto _ cofinite (nhds 0)
-    simp only [map_zero]
-    exact tendsto_const_nhds
-  one_mem' := by
-    change Tendsto _ cofinite (nhds 0)
-    apply tendsto_nhds.mpr
-    intro U hU h0U
-    rw [Filter.mem_cofinite]
-    apply (Set.finite_singleton (0 : Fin k →₀ ℕ)).subset
-    intro s hs
-    simp only [Set.mem_compl_iff, Set.mem_preimage] at hs
-    simp only [Set.mem_singleton_iff]
-    by_contra h
-    exact hs (by rw [MvPowerSeries.coeff_one, if_neg h]; exact h0U)
-  add_mem' {f g} hf hg := by
-    change Tendsto _ cofinite (nhds 0)
-    have : Tendsto (fun s => MvPowerSeries.coeff s f + MvPowerSeries.coeff s g)
-        cofinite (nhds 0) := by
-      rw [show (0 : A) = 0 + 0 from (add_zero 0).symm]
-      exact hf.add hg
-    exact this.congr (fun s => by simp [map_add])
-  neg_mem' {f} hf := by
-    change Tendsto _ cofinite (nhds 0)
-    have : Tendsto (fun s => -(MvPowerSeries.coeff s f)) cofinite (nhds 0) := by
-      rw [show (0 : A) = -0 from neg_zero.symm]
-      exact hf.neg
-    exact this.congr (fun s => by simp [map_neg])
-  mul_mem' {f g} hf hg := by
-    classical
-    change Tendsto _ cofinite (nhds 0)
-    rw [tendsto_nhds]
-    intro U hU h0U
-    rw [Filter.mem_cofinite]
-    obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U (hU.mem_nhds h0U)
-    obtain ⟨W, hWV⟩ := NonarchimedeanRing.mul_subset V
-    set Sf := {s | MvPowerSeries.coeff s f ∉ (W : Set A)}
-    set Sg := {s | MvPowerSeries.coeff s g ∉ (W : Set A)}
-    have hSf : Sf.Finite := by
-      have := (tendsto_nhds.mp hf) _ W.isOpen (SetLike.mem_coe.mpr W.zero_mem)
-      rwa [Filter.mem_cofinite] at this
-    have hSg : Sg.Finite := by
-      have := (tendsto_nhds.mp hg) _ W.isOpen (SetLike.mem_coe.mpr W.zero_mem)
-      rwa [Filter.mem_cofinite] at this
-    set T := (W : Set A) ∩
-      (⋂ a ∈ hSf.toFinset,
-        (fun x => MvPowerSeries.coeff a f * x) ⁻¹' (V : Set A)) ∩
-      (⋂ b ∈ hSg.toFinset,
-        (fun x => x * MvPowerSeries.coeff b g) ⁻¹' (V : Set A))
-    have hT_nhds : T ∈ nhds (0 : A) := by
-      refine Filter.inter_mem (Filter.inter_mem ?_ ?_) ?_
-      · exact W.isOpen.mem_nhds W.zero_mem
-      · apply (Filter.biInter_finset_mem _).mpr
-        intro a _
-        exact (continuous_const_mul _).continuousAt.preimage_mem_nhds
-          (by simpa using V.isOpen.mem_nhds V.zero_mem)
-      · apply (Filter.biInter_finset_mem _).mpr
-        intro b _
-        exact (continuous_mul_const _).continuousAt.preimage_mem_nhds
-          (by simpa using V.isOpen.mem_nhds V.zero_mem)
-    have hT_left : ∀ a ∈ hSf.toFinset, ∀ y ∈ T,
-        MvPowerSeries.coeff a f * y ∈ (V : Set A) := by
-      intro a ha y hy
-      exact (Set.mem_iInter₂.mp hy.1.2 a ha : _)
-    have hT_right : ∀ b ∈ hSg.toFinset, ∀ x ∈ T,
-        x * MvPowerSeries.coeff b g ∈ (V : Set A) := by
-      intro b hb x hx
-      exact (Set.mem_iInter₂.mp hx.2 b hb : _)
-    have hgT : {s | MvPowerSeries.coeff s g ∉ T}.Finite :=
-      (Filter.mem_cofinite.mp (hg hT_nhds)).subset (fun s hs => hs)
-    have hfT : {s | MvPowerSeries.coeff s f ∉ T}.Finite :=
-      (Filter.mem_cofinite.mp (hf hT_nhds)).subset (fun s hs => hs)
-    set B := {n | ∃ a ∈ hSf.toFinset, a ≤ n ∧ MvPowerSeries.coeff (n - a) g ∉ T} ∪
-             {n | ∃ b ∈ hSg.toFinset, b ≤ n ∧ MvPowerSeries.coeff (n - b) f ∉ T}
-    have hB_finite : B.Finite := by
-      apply Set.Finite.union
-      · apply Set.Finite.subset (hSf.toFinset.finite_toSet.biUnion (fun a _ =>
-            (hgT.image (· + a))))
-        intro n ⟨a, ha, han, hng⟩
-        simp only [Set.mem_iUnion, Set.mem_image, Finset.mem_coe]
-        exact ⟨a, ha, n - a, hng, tsub_add_cancel_of_le han⟩
-      · apply Set.Finite.subset (hSg.toFinset.finite_toSet.biUnion (fun b _ =>
-            (hfT.image (· + b))))
-        intro n ⟨b, hb, hbn, hnf⟩
-        simp only [Set.mem_iUnion, Set.mem_image, Finset.mem_coe]
-        exact ⟨b, hb, n - b, hnf, tsub_add_cancel_of_le hbn⟩
-    apply hB_finite.subset
-    intro n hn
-    simp only [Set.mem_compl_iff, Set.mem_preimage] at hn
-    by_contra hnB
-    apply hn; clear hn
-    simp only [B, Set.mem_union, Set.mem_setOf_eq, not_or, not_exists, not_and] at hnB
-    obtain ⟨hnB1, hnB2⟩ := hnB
-    apply hVU
-    rw [SetLike.mem_coe]
-    rw [show MvPowerSeries.coeff n (f * g) =
-      ∑ p ∈ Finset.antidiagonal n,
-        MvPowerSeries.coeff p.1 f * MvPowerSeries.coeff p.2 g
-      from MvPowerSeries.coeff_mul (n := n) (φ := f) (ψ := g)]
-    apply V.toAddSubgroup.sum_mem
-    intro ⟨a, b⟩ hab
-    rw [Finset.mem_antidiagonal] at hab
-    by_cases haS : a ∈ Sf
-    · have hab_le : a ≤ n := hab ▸ le_add_right le_rfl
-      have hb_eq : b = n - a := by rw [← hab]; exact (add_tsub_cancel_left a b).symm
-      have hgT_b : MvPowerSeries.coeff b g ∈ T := by
-        rw [hb_eq]; exact not_not.mp (hnB1 a (hSf.mem_toFinset.mpr haS) hab_le)
-      exact SetLike.mem_coe.mp (hT_left a (hSf.mem_toFinset.mpr haS) _ hgT_b)
-    · by_cases hbS : b ∈ Sg
-      · have hb_le : b ≤ n := hab ▸ le_add_left le_rfl
-        have ha_eq : a = n - b := by rw [← hab]; exact (add_tsub_cancel_right a b).symm
-        have hfT_a : MvPowerSeries.coeff a f ∈ T := by
-          rw [ha_eq]; exact not_not.mp (hnB2 b (hSg.mem_toFinset.mpr hbS) hb_le)
-        exact SetLike.mem_coe.mp (hT_right b (hSg.mem_toFinset.mpr hbS) _ hfT_a)
-      · have haW : MvPowerSeries.coeff a f ∈ (W : Set A) := by
-          simp only [Sf, Set.mem_setOf_eq, not_not] at haS; exact haS
-        have hbW : MvPowerSeries.coeff b g ∈ (W : Set A) := by
-          simp only [Sg, Set.mem_setOf_eq, not_not] at hbS; exact hbS
-        exact SetLike.mem_coe.mp (hWV ⟨_, haW, _, hbW, rfl⟩)
-
+  zero_mem' := MvPowerSeries.isRestricted_zero k A
+  one_mem' := MvPowerSeries.isRestricted_one k A
+  add_mem' := MvPowerSeries.IsRestricted.add
+  neg_mem' := MvPowerSeries.IsRestricted.neg
+  mul_mem' := MvPowerSeries.IsRestricted.mul
 /-! ### Algebra instance -/
 
 /-- Constant power series are restricted: the `algebraMap` image of any `a : A` has

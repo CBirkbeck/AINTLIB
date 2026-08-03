@@ -12688,3 +12688,54 @@ was to treat them as another twin family. Normalised structural diff says no: si
 and 0.14, ~20 shared lines out of ~100. They share a naming scheme and a shape, not a proof.
 Each needs individual decomposition. Cheap to check, and it would have been an expensive
 assumption.
+
+### `restrictedMvPowerSeriesSubring` 118 -> 6: split the Subring from its field proofs
+
+Every field of this `Subring` instance is a statement purely about `MvPowerSeries.IsRestricted`
+— no field named a proof-local — so this was the zero-risk end of the spectrum. Five bodies
+lifted out verbatim as `isRestricted_zero`, `isRestricted_one`, `IsRestricted.add`,
+`IsRestricted.neg`, `IsRestricted.mul`; the instance is now six field lines.
+
+Then `IsRestricted.mul` (90 on its own) came down to **68** via three further lifts, two of
+which were internal twin pairs rather than mere moves:
+
+| new lemma | replaced | kind |
+|---|---|---|
+| `IsRestricted.finite_coeff_notMem` | `hSf` and `hSg`, identical 3-line blocks | twin pair |
+| `finite_shift_bad_set` | `hB_finite`'s two bullets, identical up to swapping `f`/`g` | twin pair |
+| `inter_preimage_mul_mem_nhds` | the 11-line `hT_nhds` neighbourhood construction | move + generalise |
+
+`finite_coeff_notMem` is the one worth keeping in mind: "restricted" unfolds to a `Tendsto`,
+and what every consumer actually wants is *for each open subgroup `W`, all but finitely many
+coefficients lie in `W`*. That restatement was being re-derived inline.
+
+Two gotchas, both new:
+
+* **The insert landed between the def's docstring and the def.** I anchored on
+  `s.index('def restrictedMvPowerSeriesSubring')` instead of using
+  `decompose_common.insert_before_decl`, which exists precisely to walk back over docstrings.
+  Lean reports `unexpected token '/--'; expected 'lemma'`. Third time this session that
+  hand-rolling the backup has cost an iteration — use the helper.
+* **Extracting a lemma can capture its own name via dot notation.** Inside the field proof,
+  `hf.add hg` resolved to `Filter.Tendsto.add`, because `hf` was a `Tendsto`. Once the field
+  became `theorem MvPowerSeries.IsRestricted.add` with `hf : f.IsRestricted`, `hf.add`
+  resolved to *the lemma being defined*, and Lean reported a type mismatch against the
+  recursive call rather than anything about namespaces. Same for `.neg`. Fix: name
+  `Filter.Tendsto.add`/`.neg` explicitly.
+
+`mul` is still 68. Getting it under 50 needs the final antidiagonal argument lifted, which
+wants ~10 threaded hypotheses (`V`, `W`, `hWV`, `T`, `hT_left`, `hT_right`, `hnB1`, `hnB2` and
+the `Sf`/`Sg` `set`-locals). Attempted on paper and rejected: the adapter at the call site
+costs about as much as the lift saves.
+
+### The structure-instance seam is now exhausted
+
+All 36 remaining targets are `theorem`/`lemma` tactic proofs — the two `where`-instance defs
+(`restrictToConvex` pair, `restrictedMvPowerSeriesSubring`) were the only ones, and both are
+done. What is left is genuine proof surgery.
+
+A systematic scan for the *next* cheapest pattern — sibling bullets inside one proof that are
+near-identical after normalising identifiers — turns up exactly **one** further candidate
+across all 36: `laurentProdCoverOf_isOXAcyclic` (105), which contains two `unitDatum` /
+`coUnitDatum` twin pairs (~18 and ~8 lines) differing only in that name plus
+`unit_mem_unitCover` / `counit_mem_unitCover` and `Finset.mem_union_left` / `_right`.
