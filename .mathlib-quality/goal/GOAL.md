@@ -11545,3 +11545,35 @@ Also: `noncomputable ` is 14 characters, and adding it pushed three instance lin
 itself over 50, so they need a second-level split — one more round. The same section
 treatment now unblocks `idealOfDef_pow_isClosed_aux`, whose 74-line instance preamble is the
 identical problem.
+
+### `flat_polyToP` — next round, fully specified
+
+Extracted `exists_pow_mul_norm_le_one` — the `hex` step, **generalised**: it was stated for
+`MvPolynomial.coeff s z` though neither `s` nor `z` plays any role. It is just "some power
+of a norm-`< 1` scaling element carries any `a : E` into the unit ball", which is reusable
+API rather than a step of one proof.
+
+Remaining: `hloc1` (71) and `hloc2` (54). Both are `refine ⟨⟨?_, ?_, ?_⟩⟩` over
+`IsLocalization`, whose fields I looked up rather than guessed
+(`Mathlib/GroupTheory/MonoidLocalization/Basic.lean:114`):
+
+```lean
+structure Submonoid.IsLocalizationMap (S : Submonoid M) (f : M → N) where
+  map_units (y : S) : IsUnit (f y)
+  surj (z : N) : ∃ x : M × S, z * f x.2 = f x.1
+  exists_of_eq {x y} : f x = f y → ∃ c : S, c * x = c * y
+```
+
+(`IsLocalization` is an `abbrev` for `IsLocalization'`, which *extends*
+`M.IsLocalizationMap (algebraMap R S)` — hence the **double** anonymous constructor
+`⟨⟨_, _, _⟩⟩`.) So the three bullets' conclusions are those three fields with
+`f := algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E)`.
+
+**Blocker to clear first:** the `surj` statements mention `S₀`, which is a `set` inside the
+proof. Exactly the `gB` situation — it must become a def in the section. It cannot be a
+plain section-level def though: `S₀ = Submonoid.powers (MvPolynomial.C ⟨t, ht1.le⟩)` depends
+on `t` and `ht1`, and `PolyToPTower` sits *after* `end AdicBridge`, so those are no longer
+section variables. It needs explicit `(t : E) (ht : ‖t‖ ≤ 1)` arguments.
+
+Sizes after that: `hloc1` surj bullet 41, `hloc1` 20, `hloc2` surj bullet 33, `hloc2` 22,
+and `flat_polyToP` ≈ 23 — which clears it.

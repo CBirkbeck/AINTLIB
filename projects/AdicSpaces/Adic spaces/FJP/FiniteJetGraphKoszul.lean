@@ -1657,6 +1657,22 @@ noncomputable local instance : IsScalarTower (MvPolynomial (Fin m) ↥(unitBall 
     ↥(unitBall (P E m)) (P E m) :=
   IsScalarTower.of_algebraMap_eq (fun q => rfl)
 
+/-- Some power of a norm-`< 1` scaling element carries any element of `E` into the unit
+ball. Extracted from `flat_polyToP`, where it was stated for `MvPolynomial.coeff s z`
+though neither `s` nor `z` plays any role. -/
+private theorem exists_pow_mul_norm_le_one (t : E) (ht1 : ‖t‖ < 1)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (a : E) :
+    ∃ n : ℕ, ‖t ^ n * a‖ ≤ 1 := by
+  rcases eq_or_ne a 0 with h0 | h0
+  · exact ⟨0, by rw [h0, mul_zero, norm_zero]; exact zero_le_one⟩
+  · have hpos : 0 < ‖a‖ := norm_pos_iff.mpr h0
+    obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
+    refine ⟨n, ?_⟩
+    rw [norm_pow_mul_of_scale (E := E) hscale n]
+    calc ‖t‖ ^ n * ‖a‖
+        ≤ ‖a‖⁻¹ * ‖a‖ := mul_le_mul_of_nonneg_right hn.le (norm_nonneg _)
+      _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)
+
 /-- Step B of `flat_polyToP`: the unit ball of `P E m` is flat over `E₀[T]`, being its
 `I₀`-adic completion and `E₀[T]` noetherian. -/
 private theorem flat_unitBall_over_polyBall
@@ -1729,17 +1745,8 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
       rw [heq]
       exact (htu.map MvPolynomial.C).pow k
     · intro z
-      have hex : ∀ s : Fin m →₀ ℕ, ∃ n : ℕ, ‖t ^ n * MvPolynomial.coeff s z‖ ≤ 1 := fun s => by
-        rcases eq_or_ne (MvPolynomial.coeff s z) 0 with h0 | h0
-        · exact ⟨0, by rw [h0, mul_zero, norm_zero]; exact zero_le_one⟩
-        · have hpos : 0 < ‖MvPolynomial.coeff s z‖ := norm_pos_iff.mpr h0
-          obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
-          refine ⟨n, ?_⟩
-          rw [norm_pow_mul_of_scale (E := E) hscale n]
-          calc ‖t‖ ^ n * ‖MvPolynomial.coeff s z‖
-              ≤ ‖MvPolynomial.coeff s z‖⁻¹ * ‖MvPolynomial.coeff s z‖ :=
-                mul_le_mul_of_nonneg_right hn.le (norm_nonneg _)
-            _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)
+      have hex : ∀ s : Fin m →₀ ℕ, ∃ n : ℕ, ‖t ^ n * MvPolynomial.coeff s z‖ ≤ 1 :=
+        fun s => exists_pow_mul_norm_le_one t ht1 hscale (MvPolynomial.coeff s z)
       choose nf hnf using hex
       set N := z.support.sup nf with hN
       have hball : ∀ s : Fin m →₀ ℕ, ‖t ^ N * MvPolynomial.coeff s z‖ ≤ 1 := fun s => by
