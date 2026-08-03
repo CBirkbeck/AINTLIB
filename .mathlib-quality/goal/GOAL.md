@@ -13041,3 +13041,47 @@ Two more mechanical notes:
   `private theorem …` and the next declaration is preceded by `open Classical in` **and** a
   docstring. The reliable end-of-body marker is the first non-empty line back at column 0, not the
   next `theorem` keyword — the same lesson as `insert_before_decl`, from the other direction.
+
+### `exists_evalBI_approx_bloc` and `bloc₂` 122 + 123 -> 31 + 31: `RobbaPresentation` is clear
+
+Two targets in one file, cleared with the *same* three-way split applied twice. Six new lemmas,
+all under 50:
+
+| | `bloc` | `bloc₂` |
+|---|---|---|
+| each monomial evaluates to its `BIProd` fraction | `evalBI_monomial_eq_BIProd` (7) | `…₂` (7) |
+| the residual: head sum reproduces `w`'s first `max N₁ N₂` terms | `evalBI_residual_le` (38) | `…₂` (38) |
+| the norm: per-monomial `wIRPS` estimates | `wIRPS_monomialSum_le` (40) | `…₂` (39) |
+
+The two theorems are 0.66 similar after normalising subscripts — near-twins over different radius
+pairs (`σ₁,ρ₂` vs `ρ₁,σ₂`), with `bloc` carrying an extra `hWle` that `bloc₂` lacks. **I did not
+try to unify them.** At 0.66 the shared skeleton would need every radius and every
+`exists_monomial_lift_package` conjunct abstracted, and the two packages genuinely differ in which
+coordinate gets the `ρ₂ᵐ(σ₂ᵐ)⁻¹` factor. Applying the same *decomposition* twice is cheap and
+leaves both statements readable; unifying them would be a `/generalise` project.
+
+The second pass landed **green first try, all three extractions at once** — the interface was
+already known, so the only work was reading the `₂` package's conjunct order (`hbnd2K`/`hbnd1M`
+are swapped relative to `bloc`'s `hbnd1`/`hbnd2`, and the factor sits on the other coordinate).
+
+**Four things this file taught that the earlier ones did not:**
+
+1. **`include hφb in` is per-declaration.** The parent carries it; an extracted lemma that uses
+   `hφb` needs its own. Symptom is a bare `Unknown identifier hφb` inside the new lemma even
+   though the section variable is plainly in scope — and then a second, confusing error at the
+   *call site*, where the argument list is one short and `hφb` gets matched against `hρσ`.
+2. **Section variables come first in the call.** `p F ϖ φ hφ hφb` are auto-included explicit
+   binders, so the call is `wIRPS_monomialSum_le p F ϖ hρσ …`, not `… hρσ …`. Omitting them
+   produced `hρσ … expected to have type ℕ` — `hρσ` was being matched against `p : ℕ`.
+3. **Never slice a binder block by line number across two edits.** After inserting the first
+   lemma the theorem moved ~85 lines, and the second extraction's `L[1703:1717]` silently grabbed
+   the *first lemma's* binders — producing a signature that mixed the two and a parse error
+   pointing at neither. Re-locate the theorem by name and slice relative to it, every time.
+4. **`set N := max N₁ N₂ with hNdef` must be restored inside the extracted lemma.** The statement
+   spells `max N₁ N₂`; the body then folds it back to `N` so the copied tactics — which use
+   `le_max_left`/`le_max_right` against `N` — still typecheck.
+
+A build-monitoring note: this module takes ~10 minutes, past the foreground limit. Backgrounding
+it is right, but the completion check must look for the `EXIT=` marker — the output file becomes
+non-empty as soon as the *Python* stage prints, so testing `[ -s file ]` reports "done" while the
+build is still running.

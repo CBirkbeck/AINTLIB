@@ -1696,6 +1696,226 @@ variable (hφb : ∀ x : Bloc p F ϖ,
     : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
   = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
 
+/-- The norm half of `exists_evalBI_approx_bloc`: every monomial of the approximating polynomial
+has `wIRPS` bounded by its per-term estimate rescaled by `σ₁ᵐ · (ρ₁ᵐ)⁻¹`, so the sum is too. -/
+private theorem wIRPS_monomialSum_le
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m))
+    (w : Ainf p F) (k : ℕ) {W : NNReal} (hWle : W ≤ 1)
+    (hw1 : wLoc p F ϖ hσ₁0 hσ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    (hw2 : wLoc p F ϖ hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    {ε : NNReal} (hε : 0 < ε)
+    (N : ℕ) (Jf Ef : ℕ → ℕ) (Cf : ℕ → OF F)
+    (hbnd1 : ∀ i, wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k))
+      ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) * wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)))
+    (hbnd2 : ∀ i, wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k))
+      ≤ max
+        (wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k)))
+        (wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k)))) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (((∑ i ∈ Finset.Iic N,
+      ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+            (sPow p F ϖ k))),
+        isRestricted_monomial_BI p F ϖ _⟩ :
+      ↥(restrictedMvPowerSeriesSubring 1 ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) * W := by
+  refine wIRPS_finset_sum_le p F ϖ _ _ _ (fun i _ => ?_)
+  rw [wIRPS_monomial p F ϖ]
+  rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+        (sPow p F ϖ k))
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+          (sPow p F ϖ k)) from rfl]
+  rw [wI_BIProd p F ϖ, valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
+  have hK1 : (1 : NNReal) ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
+    calc (1 : NNReal) = ρ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
+        (mul_inv_cancel₀ (pow_pos hρ₁0 m).ne').symm
+      _ ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hρσ m) _
+  refine max_le ?_ ?_
+  · refine le_trans (hbnd1 i) ?_
+    have hm1 : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i
+          * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)) ≤ W :=
+      le_trans (wLoc_mk'_monomial_le p F ϖ hσ₁0 hσ₁1 w k i) hw1
+    exact mul_le_mul_right hm1 _
+  · refine le_trans (hbnd2 i) ?_
+    have hm1 : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i
+          * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)) ≤ W :=
+      le_trans (wLoc_mk'_monomial_le p F ϖ hσ₁0 hσ₁1 w k i) hw1
+    have hm2 : wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i
+          * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)) ≤ W :=
+      le_trans (wLoc_mk'_monomial_le p F ϖ hρ₂0 hρ₂1 w k i) hw2
+    refine le_trans (max_le hm1 hm2) ?_
+    exact le_mul_of_one_le_left zero_le hK1
+
+
+
+include hφb in
+/-- Each monomial of the approximating polynomial evaluates to the corresponding `BIProd`
+fraction: `evalBI` on a monomial is `φ` of its coefficient, and `hfact` identifies that
+coefficient with the `i`-th term of `w`. -/
+private theorem evalBI_monomial_eq_BIProd
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m))
+    (w : Ainf p F) (k : ℕ) {W : NNReal} (hWle : W ≤ 1)
+    (hw1 : wLoc p F ϖ hσ₁0 hσ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    (hw2 : wLoc p F ϖ hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    {ε : NNReal} (hε : 0 < ε)
+    (N : ℕ) (Jf Ef : ℕ → ℕ) (Cf : ℕ → OF F)
+    (hfact : ∀ i, IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)
+      = teichPowGen p F ϖ zb m ^ (Jf i) * IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k)) :
+    ∀ i ∈ Finset.Iic N,
+      evalBI p F ϖ φ hφ hbmem hb
+        ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
+          (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ (Ef i)
+                * WittVector.teichmuller p (Cf i))
+              (sPow p F ϖ k))),
+          isRestricted_monomial_BI p F ϖ _⟩
+        = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ i
+                * WittVector.teichmuller p (teichCoeff p F w i))
+              (sPow p F ϖ k)) := by
+    intro i _
+    rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
+    rw [hφb, hbg, ← map_pow (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1),
+      ← map_mul (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
+    congr 1
+    rw [mul_comm]
+    exact (hfact i).symm
+
+
+include hφb in
+/-- The residual half of `exists_evalBI_approx_bloc`: the head sum reproduces `w`'s first
+`max N₁ N₂` Teichmüller terms, so the difference is the tail, and the two coordinate norms of the
+tail are cut below `ε` by the defining choices of `N₁` and `N₂`. -/
+private theorem evalBI_residual_le
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m))
+    (w : Ainf p F) (k : ℕ) {W : NNReal} (hWle : W ≤ 1)
+    (hw1 : wLoc p F ϖ hσ₁0 hσ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    (hw2 : wLoc p F ϖ hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    {ε : NNReal} (hε : 0 < ε)
+    (N₁ N₂ : ℕ) (Jf Ef : ℕ → ℕ) (Cf : ℕ → OF F) (w' : Ainf p F)
+    (hsplit : IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)
+      = (∑ i ∈ Finset.Iic (max N₁ N₂), IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k))
+        + IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (max N₁ N₂ + 1) * w') (sPow p F ϖ k))
+    (hN₁ : σ₁ ^ N₁ < ε * ((σ₁ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k))
+    (hN₂ : ρ₂ ^ N₂ < ε * ((ρ₂ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k))
+    (hfact : ∀ i, IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)
+      = teichPowGen p F ϖ zb m ^ (Jf i) * IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k)) :
+    wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+        - evalBI p F ϖ φ hφ hbmem hb (∑ i ∈ Finset.Iic (max N₁ N₂),
+        ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
+          (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+              (sPow p F ϖ k))),
+          isRestricted_monomial_BI p F ϖ _⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))) ≤ ε := by
+  set N := max N₁ N₂ with hNdef
+  rw [evalBI_finset_sum p F ϖ φ hφ]
+  have hterm := evalBI_monomial_eq_BIProd p F ϖ φ hφ hφb hρσ hσρ zb m hm hgen hbmem hb
+    hbg w k hWle hw1 hw2 hε N Jf Ef Cf hfact
+  rw [Finset.sum_congr rfl hterm]
+  rw [← map_sum (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
+  rw [show BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+      - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k))
+    = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) by
+    rw [← map_sub (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
+    congr 1
+    rw [hsplit]
+    ring]
+  rw [wI_BIProd p F ϖ]
+  rw [valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
+  refine max_le ?_ ?_
+  · refine le_trans (wLoc_mk'_tail_le p F ϖ hσ₁0 hσ₁1 k N w') ?_
+    rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hσ₁0
+      (vpi_pos p F ϖ)) k)]
+    calc σ₁ ^ (N + 1)
+        ≤ σ₁ ^ N₁ := pow_le_pow_of_le_one zero_le hσ₁1.le
+          (le_trans (le_max_left _ _) (Nat.le_succ N))
+      _ ≤ ε * ((σ₁ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₁.le
+  · refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₂0 hρ₂1 k N w') ?_
+    rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hρ₂0
+      (vpi_pos p F ϖ)) k)]
+    calc ρ₂ ^ (N + 1)
+        ≤ ρ₂ ^ N₂ := pow_le_pow_of_le_one zero_le hρ₂1.le
+          (le_trans (le_max_right _ _) (Nat.le_succ N))
+      _ ≤ ε * ((ρ₂ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₂.le
+
+
 include hφb in
 /-- **The first approximation** (T910 case 1, the Kedlaya lift on the dense
 layer): a doubly-bounded fraction is approximated to any accuracy by the
@@ -1752,105 +1972,10 @@ theorem exists_evalBI_approx_bloc
           ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
           (sPow p F ϖ k))),
       isRestricted_monomial_BI p F ϖ _⟩, ?_, ?_⟩
-  · -- the residual
-    rw [evalBI_finset_sum p F ϖ φ hφ]
-    have hterm : ∀ i ∈ Finset.Iic N,
-        evalBI p F ϖ φ hφ hbmem hb
-          ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
-            (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-              (IsLocalization.mk' (Bloc p F ϖ)
-                ((p : Ainf p F) ^ (Ef i)
-                  * WittVector.teichmuller p (Cf i))
-                (sPow p F ϖ k))),
-            isRestricted_monomial_BI p F ϖ _⟩
-          = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-              (IsLocalization.mk' (Bloc p F ϖ)
-                ((p : Ainf p F) ^ i
-                  * WittVector.teichmuller p (teichCoeff p F w i))
-                (sPow p F ϖ k)) := by
-      intro i _
-      rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
-      rw [hφb, hbg, ← map_pow (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1),
-        ← map_mul (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
-      congr 1
-      rw [mul_comm]
-      exact (hfact i).symm
-    rw [Finset.sum_congr rfl hterm]
-    rw [← map_sum (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
-    rw [show BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
-        - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-          (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ i
-              * WittVector.teichmuller p (teichCoeff p F w i))
-            (sPow p F ϖ k))
-      = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) by
-      rw [← map_sub (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
-      congr 1
-      rw [hsplit]
-      ring]
-    rw [wI_BIProd p F ϖ]
-    rw [valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
-    refine max_le ?_ ?_
-    · refine le_trans (wLoc_mk'_tail_le p F ϖ hσ₁0 hσ₁1 k N w') ?_
-      rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hσ₁0
-        (vpi_pos p F ϖ)) k)]
-      calc σ₁ ^ (N + 1)
-          ≤ σ₁ ^ N₁ := pow_le_pow_of_le_one zero_le hσ₁1.le
-            (le_trans (le_max_left _ _) (Nat.le_succ N))
-        _ ≤ ε * ((σ₁ * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₁.le
-    · refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₂0 hρ₂1 k N w') ?_
-      rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hρ₂0
-        (vpi_pos p F ϖ)) k)]
-      calc ρ₂ ^ (N + 1)
-          ≤ ρ₂ ^ N₂ := pow_le_pow_of_le_one zero_le hρ₂1.le
-            (le_trans (le_max_right _ _) (Nat.le_succ N))
-        _ ≤ ε * ((ρ₂ * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₂.le
-  · -- the norm
-    refine wIRPS_finset_sum_le p F ϖ _ _ _ (fun i _ => ?_)
-    rw [wIRPS_monomial p F ϖ]
-    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
-          (sPow p F ϖ k))
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
-            (sPow p F ϖ k)) from rfl]
-    rw [wI_BIProd p F ϖ, valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
-    have hK1 : (1 : NNReal) ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
-      calc (1 : NNReal) = ρ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
-          (mul_inv_cancel₀ (pow_pos hρ₁0 m).ne').symm
-        _ ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
-          mul_le_mul_left (pow_le_pow_left' hρσ m) _
-    refine max_le ?_ ?_
-    · refine le_trans (hbnd1 i) ?_
-      have hm1 : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F w i))
-          (sPow p F ϖ k)) ≤ W :=
-        le_trans (wLoc_mk'_monomial_le p F ϖ hσ₁0 hσ₁1 w k i) hw1
-      exact mul_le_mul_right hm1 _
-    · refine le_trans (hbnd2 i) ?_
-      have hm1 : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F w i))
-          (sPow p F ϖ k)) ≤ W :=
-        le_trans (wLoc_mk'_monomial_le p F ϖ hσ₁0 hσ₁1 w k i) hw1
-      have hm2 : wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F w i))
-          (sPow p F ϖ k)) ≤ W :=
-        le_trans (wLoc_mk'_monomial_le p F ϖ hρ₂0 hρ₂1 w k i) hw2
-      refine le_trans (max_le hm1 hm2) ?_
-      exact le_mul_of_one_le_left zero_le hK1
-
+  · exact evalBI_residual_le p F ϖ φ hφ hφb hρσ hσρ zb m hm hgen hbmem hb hbg w k hWle
+      hw1 hw2 hε N₁ N₂ Jf Ef Cf w' hsplit hN₁ hN₂ hfact
+  · exact wIRPS_monomialSum_le p F ϖ hρσ hσρ zb m hm hgen hbmem hb hbg w k hWle hw1 hw2 hε
+      N Jf Ef Cf hbnd1 hbnd2
 end Assembly
 
 
@@ -4702,6 +4827,220 @@ variable (hφb : ∀ x : Bloc p F ϖ,
     : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
   = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x)
 
+/-- The norm half of `exists_evalBI_approx_bloc₂`. -/
+private theorem wIRPS_monomialSum_le₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m))
+    (w : Ainf p F) (k : ℕ) {W : NNReal}
+    (hw1 : wLoc p F ϖ hρ₁0 hρ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    (hw2 : wLoc p F ϖ hσ₂0 hσ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    {ε : NNReal} (hε : 0 < ε)
+    (N : ℕ) (Jf Ef : ℕ → ℕ) (Cf : ℕ → OF F)
+    (hbnd2K : ∀ i, wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k))
+      ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) * wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)))
+    (hbnd1M : ∀ i, wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k))
+      ≤ max
+        (wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k)))
+        (wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k)))) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (((∑ i ∈ Finset.Iic N,
+        ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
+          (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+              (sPow p F ϖ k))),
+          isRestricted_monomial_BI p F ϖ _⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) * W := by
+  refine wIRPS_finset_sum_le p F ϖ _ _ _ (fun i _ => ?_)
+  rw [wIRPS_monomial p F ϖ]
+  rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+        (sPow p F ϖ k))
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+          (sPow p F ϖ k)) from rfl]
+  rw [wI_BIProd p F ϖ, valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
+  have hK1 : (1 : NNReal) ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
+    calc (1 : NNReal) = σ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
+        (mul_inv_cancel₀ (pow_pos hσ₂0 m).ne').symm
+      _ ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hσρ m) _
+  refine max_le ?_ ?_
+  · refine le_trans (hbnd1M i) ?_
+    have hm1 : wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i
+          * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)) ≤ W :=
+      le_trans (wLoc_mk'_monomial_le p F ϖ hσ₂0 hσ₂1 w k i) hw2
+    have hm2 : wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i
+          * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)) ≤ W :=
+      le_trans (wLoc_mk'_monomial_le p F ϖ hρ₁0 hρ₁1 w k i) hw1
+    refine le_trans (max_le hm1 hm2) ?_
+    exact le_mul_of_one_le_left zero_le hK1
+  · refine le_trans (hbnd2K i) ?_
+    have hm1 : wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i
+          * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)) ≤ W :=
+      le_trans (wLoc_mk'_monomial_le p F ϖ hσ₂0 hσ₂1 w k i) hw2
+    exact mul_le_mul_right hm1 _
+
+
+include hφb in
+/-- Each monomial of the `bloc₂` approximating polynomial evaluates to its `BIProd` fraction. -/
+private theorem evalBI_monomial_eq_BIProd₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m))
+    (w : Ainf p F) (k : ℕ) {W : NNReal}
+    (hw1 : wLoc p F ϖ hρ₁0 hρ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    (hw2 : wLoc p F ϖ hσ₂0 hσ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    {ε : NNReal} (hε : 0 < ε)
+    (N : ℕ) (Jf Ef : ℕ → ℕ) (Cf : ℕ → OF F)
+    (hfact : ∀ i, IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)
+      = teichPowGen₂ p F ϖ zb m ^ (Jf i) * IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k)) :
+    ∀ i ∈ Finset.Iic N,
+      evalBI p F ϖ φ hφ hbmem hb
+        ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
+          (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ (Ef i)
+                * WittVector.teichmuller p (Cf i))
+              (sPow p F ϖ k))),
+          isRestricted_monomial_BI p F ϖ _⟩
+        = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+            (IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ i
+                * WittVector.teichmuller p (teichCoeff p F w i))
+              (sPow p F ϖ k)) := by
+    intro i _
+    rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
+    rw [hφb, hbg, ← map_pow (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1),
+      ← map_mul (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)]
+    congr 1
+    rw [mul_comm]
+    exact (hfact i).symm
+
+
+include hφb in
+/-- The residual half of `exists_evalBI_approx_bloc₂`. -/
+private theorem evalBI_residual_le₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m))
+    (w : Ainf p F) (k : ℕ) {W : NNReal}
+    (hw1 : wLoc p F ϖ hρ₁0 hρ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    (hw2 : wLoc p F ϖ hσ₂0 hσ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ W)
+    {ε : NNReal} (hε : 0 < ε)
+    (N₁ N₂ : ℕ) (Jf Ef : ℕ → ℕ) (Cf : ℕ → OF F) (w' : Ainf p F)
+    (hsplit : IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)
+      = (∑ i ∈ Finset.Iic (max N₁ N₂), IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k))
+        + IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (max N₁ N₂ + 1) * w') (sPow p F ϖ k))
+    (hN₁ : ρ₁ ^ N₁ < ε * ((ρ₁ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k))
+    (hN₂ : σ₂ ^ N₂ < ε * ((σ₂ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k))
+    (hfact : ∀ i, IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k)
+      = teichPowGen₂ p F ϖ zb m ^ (Jf i) * IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i)) (sPow p F ϖ k)) :
+    wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+          (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+        - evalBI p F ϖ φ hφ hbmem hb (∑ i ∈ Finset.Iic (max N₁ N₂),
+        ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
+          (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
+              (sPow p F ϖ k))),
+          isRestricted_monomial_BI p F ϖ _⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))) ≤ ε := by
+  set N := max N₁ N₂ with hNdef
+  rw [evalBI_finset_sum p F ϖ φ hφ]
+  have hterm := evalBI_monomial_eq_BIProd₂ p F ϖ φ hφ hφb hρσ hσρ zb m hm hgen hbmem hb
+    hbg w k hw1 hw2 hε N Jf Ef Cf hfact
+  rw [Finset.sum_congr rfl hterm]
+  rw [← map_sum (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)]
+  rw [show BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+      - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F w i))
+          (sPow p F ϖ k))
+    = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) by
+    rw [← map_sub (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)]
+    congr 1
+    rw [hsplit]
+    ring]
+  rw [wI_BIProd p F ϖ]
+  rw [valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
+  refine max_le ?_ ?_
+  · refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₁0 hρ₁1 k N w') ?_
+    rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hρ₁0
+      (vpi_pos p F ϖ)) k)]
+    calc ρ₁ ^ (N + 1)
+        ≤ ρ₁ ^ N₁ := pow_le_pow_of_le_one zero_le hρ₁1.le
+          (le_trans (le_max_left _ _) (Nat.le_succ N))
+      _ ≤ ε * ((ρ₁ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₁.le
+  · refine le_trans (wLoc_mk'_tail_le p F ϖ hσ₂0 hσ₂1 k N w') ?_
+    rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hσ₂0
+      (vpi_pos p F ϖ)) k)]
+    calc σ₂ ^ (N + 1)
+        ≤ σ₂ ^ N₂ := pow_le_pow_of_le_one zero_le hσ₂1.le
+          (le_trans (le_max_right _ _) (Nat.le_succ N))
+      _ ≤ ε * ((σ₂ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₂.le
+
+
 include hφb in
 /-- **The case-2 first approximation** (the mirrored Kedlaya lift on the
 dense layer). -/
@@ -4758,104 +5097,10 @@ theorem exists_evalBI_approx_bloc₂
           ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
           (sPow p F ϖ k))),
       isRestricted_monomial_BI p F ϖ _⟩, ?_, ?_⟩
-  · -- the residual
-    rw [evalBI_finset_sum p F ϖ φ hφ]
-    have hterm : ∀ i ∈ Finset.Iic N,
-        evalBI p F ϖ φ hφ hbmem hb
-          ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (Jf i))
-            (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-              (IsLocalization.mk' (Bloc p F ϖ)
-                ((p : Ainf p F) ^ (Ef i)
-                  * WittVector.teichmuller p (Cf i))
-                (sPow p F ϖ k))),
-            isRestricted_monomial_BI p F ϖ _⟩
-          = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-              (IsLocalization.mk' (Bloc p F ϖ)
-                ((p : Ainf p F) ^ i
-                  * WittVector.teichmuller p (teichCoeff p F w i))
-                (sPow p F ϖ k)) := by
-      intro i _
-      rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
-      rw [hφb, hbg, ← map_pow (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1),
-        ← map_mul (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)]
-      congr 1
-      rw [mul_comm]
-      exact (hfact i).symm
-    rw [Finset.sum_congr rfl hterm]
-    rw [← map_sum (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)]
-    rw [show BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-          (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
-        - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-          (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ i
-              * WittVector.teichmuller p (teichCoeff p F w i))
-            (sPow p F ϖ k))
-      = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (N + 1) * w') (sPow p F ϖ k)) by
-      rw [← map_sub (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)]
-      congr 1
-      rw [hsplit]
-      ring]
-    rw [wI_BIProd p F ϖ]
-    rw [valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
-    refine max_le ?_ ?_
-    · refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₁0 hρ₁1 k N w') ?_
-      rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hρ₁0
-        (vpi_pos p F ϖ)) k)]
-      calc ρ₁ ^ (N + 1)
-          ≤ ρ₁ ^ N₁ := pow_le_pow_of_le_one zero_le hρ₁1.le
-            (le_trans (le_max_left _ _) (Nat.le_succ N))
-        _ ≤ ε * ((ρ₁ * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₁.le
-    · refine le_trans (wLoc_mk'_tail_le p F ϖ hσ₂0 hσ₂1 k N w') ?_
-      rw [← div_eq_mul_inv, div_le_iff₀ (pow_pos (mul_pos hσ₂0
-        (vpi_pos p F ϖ)) k)]
-      calc σ₂ ^ (N + 1)
-          ≤ σ₂ ^ N₂ := pow_le_pow_of_le_one zero_le hσ₂1.le
-            (le_trans (le_max_right _ _) (Nat.le_succ N))
-        _ ≤ ε * ((σ₂ * perfectoidValuation p F
-              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) := hN₂.le
-  · -- the norm
-    refine wIRPS_finset_sum_le p F ϖ _ _ _ (fun i _ => ?_)
-    rw [wIRPS_monomial p F ϖ]
-    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-        (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
-          (sPow p F ϖ k))
-        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
-        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
-      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
-          (IsLocalization.mk' (Bloc p F ϖ)
-            ((p : Ainf p F) ^ (Ef i) * WittVector.teichmuller p (Cf i))
-            (sPow p F ϖ k)) from rfl]
-    rw [wI_BIProd p F ϖ, valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
-    have hK1 : (1 : NNReal) ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
-      calc (1 : NNReal) = σ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
-          (mul_inv_cancel₀ (pow_pos hσ₂0 m).ne').symm
-        _ ≤ ρ₂ ^ m * ((σ₂ ^ m)⁻¹) :=
-          mul_le_mul_left (pow_le_pow_left' hσρ m) _
-    refine max_le ?_ ?_
-    · refine le_trans (hbnd1M i) ?_
-      have hm1 : wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F w i))
-          (sPow p F ϖ k)) ≤ W :=
-        le_trans (wLoc_mk'_monomial_le p F ϖ hσ₂0 hσ₂1 w k i) hw2
-      have hm2 : wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F w i))
-          (sPow p F ϖ k)) ≤ W :=
-        le_trans (wLoc_mk'_monomial_le p F ϖ hρ₁0 hρ₁1 w k i) hw1
-      refine le_trans (max_le hm1 hm2) ?_
-      exact le_mul_of_one_le_left zero_le hK1
-    · refine le_trans (hbnd2K i) ?_
-      have hm1 : wLoc p F ϖ hσ₂0 hσ₂1 (IsLocalization.mk' (Bloc p F ϖ)
-          ((p : Ainf p F) ^ i
-            * WittVector.teichmuller p (teichCoeff p F w i))
-          (sPow p F ϖ k)) ≤ W :=
-        le_trans (wLoc_mk'_monomial_le p F ϖ hσ₂0 hσ₂1 w k i) hw2
-      exact mul_le_mul_right hm1 _
+  · exact evalBI_residual_le₂ p F ϖ φ hφ hφb hρσ hσρ zb m hm hgen hbmem hb hbg w k
+      hw1 hw2 hε N₁ N₂ Jf Ef Cf w' hsplit hN₁ hN₂ hfact
+  · exact wIRPS_monomialSum_le₂ p F ϖ hρσ hσρ zb m hm hgen hbmem hb hbg w k hw1 hw2 hε
+      N Jf Ef Cf hbnd2K hbnd1M
 
 end AssemblyBot
 
