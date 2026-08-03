@@ -11907,3 +11907,75 @@ it were lifted. Four targets are one-extraction-clears on paper; two of those
 (`isOXAcyclic_interProd`, `xPresheaf_isSheafOfTopologicalRings`) are the ones already
 deferred with diagnoses (cumulative elaboration cost; universe wall), and the other two hit
 the preamble trap above. Cross-check any candidate against both lists before starting.
+
+### Wedhorn828: the section lands; the `ι` promotion does not
+
+**Landed (green, gated):** `section MvRestrictedTate` over
+`(D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)`, carrying the five
+`restrictedMvPowerSeriesSubring m (presheafValue D)` instances as `local instance`s.
+`presheafValue_mvRestricted_isUnit_mk_s` **84 → 72**, and the section's binders replace the
+lemma's own `(D) [IsTateRing …] (m)` so the signature is unchanged.
+
+Verified safe before starting: no global `TopologicalSpace`/`UniformSpace` instance exists
+on these carriers (the only global one is `instAlgebra`), and `mvTateAlgebraTopology'` and
+friends are `@[reducible] def` — deliberately not instances. So the `local instance`s
+compete with nothing.
+
+**Did not land, after six iterations — and the reason is worth recording.** Promoting the
+`let ι` (the variable inclusion `A⟨X₁..Xₙ⟩ → A⟨X₁..Xₙ₊ₘ⟩`) to a section-level `def`, so that
+`hkey` could be lifted, fails because **`ι` is not hypothesis-free**:
+
+- `mvEvalHomBounded` requires `NonarchimedeanRing` on the target (fixable — added to the
+  section) **and `CompleteSpace`**, which is `MvTateAlgebra.mvTate_completeSpace (D.T.card + m)
+  hA_complete` — derived from a *theorem hypothesis*, not from `D` and `m`.
+- So `mvVarIncl` has to take `hA_complete` explicitly, and then every mention of it in the
+  lifted body does too;
+- and the body separately references `bι`/`hbι`, the two `let`/`have`s that `ι` was built
+  from, so those must be spelled out or promoted as well.
+
+> **A local is promotable to section scope only if it is closed in the section variables.**
+> A `let`/`set` whose *definition* consumes a theorem hypothesis is not — it can only become
+> a def with that hypothesis as an argument, which pushes the same threading problem into
+> every call site. Check what the local's definition depends on before planning the lift,
+> not after.
+
+`flat_polyToP`'s `ballDenoms` needed `(t) (ht : ‖t‖ ≤ 1)` for exactly this reason and was
+still worth it, because `t` and `ht1` were used at one call site. Here `hA_complete` threads
+through four.
+
+Remaining in this file: `surjection` (187), `fU_uniformContinuous` (169),
+`coUnitDatum_ker_le_span` (133), `unitDatum_ker_le_span` (115), `isUnit_mk_s` (72). The
+section now exists for the first two to use.
+
+### Scan 7: the selector that matches the actual blocker
+
+The residue's blocker is that a step's *statement* names a proof-local binding. So the
+useful selector is: **which steps have statements free of proof-locals?** Those lift with no
+threading, no section, no preamble. `scratchpad/liftable.py`.
+
+First run said 14. **Six were false positives**, and the bug is the recurring one: the binder
+regex required identifiers to *start* with `[A-Za-z_]`, so Greek-initial locals — `ι`, `ψγ`,
+`τQ`, `πc` — were never recorded as bound, and steps whose statements mention them looked
+clean. `hkey` was in that list, and I had just proved by hand that it is not liftable.
+
+```
+liftable steps (>=15 code lines, statement free of proof-locals): 8
+
+   49  hcomp            genPiece_relative_overlap_square₂   (165)  WedhornCechAcyclicity:9795
+   25  hcmp             ratio_laurent_unitGen_bundle         (91)  WedhornCechAcyclicity:10355
+   25  hclass₂          unitCover_relOverlap_forward_witness (218) WedhornCechAcyclicity:4422
+   24  hclass₁          unitCover_relOverlap_forward_witness (218) WedhornCechAcyclicity:4397
+   23  hiU_coeff        presheafValue_mvRestricted_fU_unif  (169)  Wedhorn828:2413
+   23  hhom             genPiece_relative_overlap_square₂   (165)  WedhornCechAcyclicity:9844
+   19  hiU_val          presheafValue_mvRestricted_fU_unif  (169)  Wedhorn828:2416
+   17  hC_full_acyclic  genRestrictedCover_isOXAcyclic_…    (213)  WedhornCechAcyclicity:11063
+```
+
+> **Third time this session a Unicode-unaware identifier regex has given a wrong answer**
+> (dead-binding use counts; the `have`-boundary class; now binder capture). In this codebase
+> identifiers routinely start with Greek and carry subscripts. The character classes are
+> `[A-Za-z_Ͱ-Ͽ]` to start and `[A-Za-z_0-9Ͱ-Ͽᵢ-ᵪ₀-ₜ¹²³']` to continue — anything less
+> silently under-reports, and under-reporting *bindings* over-reports liftability.
+
+No target clears on these alone (best is `genPiece_relative_overlap_square₂`: 165 − 72 + 2 =
+95), but each is a certain, threading-free lift that produces a genuinely reusable lemma.

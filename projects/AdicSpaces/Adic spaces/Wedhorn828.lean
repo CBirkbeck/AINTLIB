@@ -2147,6 +2147,32 @@ private lemma presheafValue_mvRestricted_iU_denseRange
   refine closure_minimal (fun g hg ↦ ?_) isClosed_closure
   exact hbox g hg
 
+section MvRestrictedTate
+
+variable (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+
+/-! The `A⟨X₁..Xₘ⟩`-over-`presheafValue D` topology/uniformity stack, hoisted out of the
+`presheafValue_mvRestricted_*` proofs that each re-installed it verbatim. Nothing global
+competes: `mvTateAlgebraTopology'` and friends are deliberately `@[reducible] def`, not
+instances. -/
+
+noncomputable local instance :
+    TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  MvTateAlgebra.mvTateAlgebraTopology' m
+
+local instance : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
+
+noncomputable local instance :
+    UniformSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  MvTateAlgebra.mvTateUniformSpace m
+
+local instance : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  MvTateAlgebra.mvTate_isUniformAddGroup m
+
+local instance : T2Space (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
+  MvTateAlgebra.mvTate_t2Space m
+
 omit [CompatiblePlusSubring A] in
 /-- **`mk(s)` is a unit in the quotient `γ = source ⧸ ker Ψ`** (helper for
 `presheafValue_mvRestricted_surjection`). Mirrors `example638_isUnit_mk_s`: the relation
@@ -2157,7 +2183,6 @@ the three characterizing facts `hΨ_cont`/`hΨ_alg`/`hΨ_genX` of the bounded ev
 `Ψ` is opaque; its evaluation behaviour enters only through the three facts, so the conclusion is
 topology-free and matches the caller's `RingHom.ker Ψ`. -/
 private lemma presheafValue_mvRestricted_isUnit_mk_s
-    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
     (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
     (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
       restrictedMvPowerSeriesSubring m (presheafValue D))
@@ -2172,18 +2197,6 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
         (example638_genTuple D i)) :
     IsUnit ((Ideal.Quotient.mk (RingHom.ker Ψ)).comp
       (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)) D.s) := by
-  haveI hT2B : T2Space (presheafValue D) := inferInstance
-  letI τT : TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
-    MvTateAlgebra.mvTateAlgebraTopology' m
-  haveI hringT : IsTopologicalRing (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
-    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing m
-  letI uT : UniformSpace (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
-    MvTateAlgebra.mvTateUniformSpace m
-  haveI : IsUniformAddGroup (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
-    MvTateAlgebra.mvTate_isUniformAddGroup m
-  haveI : T2Space (restrictedMvPowerSeriesSubring m (presheafValue D)) :=
-    MvTateAlgebra.mvTate_t2Space m
-  haveI : T0Space (restrictedMvPowerSeriesSubring m (presheafValue D)) := inferInstance
   -- Install the source-ring (`A⟨X₁..Xₙ₊ₘ⟩`) topology/uniform/complete/nonarch/T0 instances so that
   -- `mvEvalHomBounded` can build the variable-inclusion `ι`.
   letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
@@ -2271,6 +2284,8 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
   -- `algebraMap _ T (canonicalMap s) · algebraMap _ T (invS D) = 1`.
   rw [hΨ_alg D.s]
   rw [← map_mul, canonicalMap_s_mul_invS, map_one]
+
+end MvRestrictedTate
 
 omit [CompatiblePlusSubring A] in
 /-- **Uniform continuity of `fU : U → γ`** (helper for `presheafValue_mvRestricted_surjection`),
