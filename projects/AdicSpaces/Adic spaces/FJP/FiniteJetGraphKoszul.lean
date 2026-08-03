@@ -1619,6 +1619,81 @@ noncomputable def ballAdicEquiv : ↥(unitBall (P E m)) ≃+*
 
 end AdicBridge
 
+section PolyToPTower
+
+/-- `polyBall` corestricted to the unit ball of `P E m`: a polynomial with unit-ball
+coefficients has norm at most one. -/
+private noncomputable def polyBallCod :
+    MvPolynomial (Fin m) ↥(unitBall E) →+* ↥(unitBall (P E m)) :=
+  RingHom.codRestrict (polyBall (E := E) (m := m)) (unitBall (P E m))
+    (fun q => norm_polyBall_le_one q)
+
+/-! The `E₀[T] → E[T] → P E m` / `E₀[T] → (P E m)₀ → P E m` algebra tower. These are
+`local instance`s rather than in-proof `letI`s so that the steps of `flat_polyToP` can be
+stated as top-level lemmas at all — their statements do not typecheck without them. -/
+
+noncomputable local instance :
+    Algebra (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E) :=
+  (MvPolynomial.map (unitBall E).subtype).toAlgebra
+
+noncomputable local instance :
+    Algebra (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m)) :=
+  polyBallCod.toAlgebra
+
+noncomputable local instance : Algebra ↥(unitBall (P E m)) (P E m) :=
+  (unitBall (P E m)).subtype.toAlgebra
+
+noncomputable local instance : Algebra (MvPolynomial (Fin m) ↥(unitBall E)) (P E m) :=
+  (polyBall (E := E) (m := m)).toAlgebra
+
+noncomputable local instance : Algebra (MvPolynomial (Fin m) E) (P E m) :=
+  (polyToP (E := E) (m := m)).toAlgebra
+
+noncomputable local instance : IsScalarTower (MvPolynomial (Fin m) ↥(unitBall E))
+    (MvPolynomial (Fin m) E) (P E m) :=
+  IsScalarTower.of_algebraMap_eq (fun q => rfl)
+
+noncomputable local instance : IsScalarTower (MvPolynomial (Fin m) ↥(unitBall E))
+    ↥(unitBall (P E m)) (P E m) :=
+  IsScalarTower.of_algebraMap_eq (fun q => rfl)
+
+/-- Step B of `flat_polyToP`: the unit ball of `P E m` is flat over `E₀[T]`, being its
+`I₀`-adic completion and `E₀[T]` noetherian. -/
+private theorem flat_unitBall_over_polyBall
+    (hE₀ : IsNoetherianRing (unitBall E))
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
+    Module.Flat (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m)) := by
+  haveI : IsNoetherianRing ↥(unitBall E) := hE₀
+  haveI : IsNoetherianRing (MvPolynomial (Fin m) ↥(unitBall E)) := inferInstance
+  have hcompat : ∀ q : MvPolynomial (Fin m) ↥(unitBall E),
+      ballAdicEquiv t htu ht1 ht0 hscale (polyBallCod q) =
+        algebraMap (MvPolynomial (Fin m) ↥(unitBall E))
+          (AdicCompletion (I0 (E := E) (m := m) t ht1)
+            (MvPolynomial (Fin m) ↥(unitBall E))) q := fun q => by
+    refine Subtype.ext (funext fun n => ?_)
+    show Ideal.Quotient.mk _ (trnc t ht0 n (polyBallCod q)) = _
+    have hval : (algebraMap (MvPolynomial (Fin m) ↥(unitBall E))
+        (AdicCompletion (I0 (E := E) (m := m) t ht1)
+          (MvPolynomial (Fin m) ↥(unitBall E))) q).val n =
+        Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+          Ideal (MvPolynomial (Fin m) ↥(unitBall E))) q := rfl
+    rw [hval]
+    refine mk_trnc_eq t htu ht1 ht0 hscale n (polyBallCod q) q ?_
+    show ‖polyBall q - polyBall q‖ ≤ _
+    rw [sub_self, norm_zero]
+    exact pow_nonneg (norm_nonneg t) n
+  -- transport flatness along the algebra equivalence
+  let e : AdicCompletion (I0 (E := E) (m := m) t ht1)
+      (MvPolynomial (Fin m) ↥(unitBall E)) ≃ₐ[MvPolynomial (Fin m) ↥(unitBall E)]
+      ↥(unitBall (P E m)) :=
+    AlgEquiv.ofRingEquiv (f := (ballAdicEquiv t htu ht1 ht0 hscale).symm)
+      (fun q => by
+        rw [← hcompat q]
+        exact RingEquiv.symm_apply_apply _ _)
+  exact Module.Flat.of_linearEquiv e.symm.toLinearEquiv
+
+
 /-- The base change `E[T] → E⟨T⟩` is **flat** ([FJP] Lemma 4.2, proof: "Noetherian adic
 completion is flat [8, Lemma 10.97.2, Tag 00MB], and localization preserves flatness";
 via the (4.4) identification `P_E ≅ (E₀[T])^∧_ϖ[1/ϖ]` for the noetherian unit ball `E₀`).
@@ -1633,50 +1708,10 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
   letI : Algebra (MvPolynomial (Fin m) E) (P E m) := (polyToP (E := E) (m := m)).toAlgebra
   haveI hE₀' : IsNoetherianRing ↥(unitBall E) := hE₀
   haveI hR₀ : IsNoetherianRing (MvPolynomial (Fin m) ↥(unitBall E)) := inferInstance
-  -- the ball-valued polynomial hom and its ball corestriction
-  set gB : MvPolynomial (Fin m) ↥(unitBall E) →+* ↥(unitBall (P E m)) :=
-    RingHom.codRestrict (polyBall (E := E) (m := m)) (unitBall (P E m))
-      (fun q => norm_polyBall_le_one q) with hgB
-  letI : Algebra (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E) :=
-    (MvPolynomial.map (unitBall E).subtype).toAlgebra
-  letI : Algebra (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m)) := gB.toAlgebra
-  letI : Algebra ↥(unitBall (P E m)) (P E m) := (unitBall (P E m)).subtype.toAlgebra
-  letI : Algebra (MvPolynomial (Fin m) ↥(unitBall E)) (P E m) :=
-    (polyBall (E := E) (m := m)).toAlgebra
-  haveI hT1 : IsScalarTower (MvPolynomial (Fin m) ↥(unitBall E))
-      (MvPolynomial (Fin m) E) (P E m) :=
-    IsScalarTower.of_algebraMap_eq (fun q => rfl)
-  haveI hT2 : IsScalarTower (MvPolynomial (Fin m) ↥(unitBall E))
-      ↥(unitBall (P E m)) (P E m) :=
-    IsScalarTower.of_algebraMap_eq (fun q => rfl)
   -- Step B: the ball is flat over `R₀` (adic completion of a noetherian ring)
-  haveI hflatB : Module.Flat (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m)) := by
-    have hcompat : ∀ q : MvPolynomial (Fin m) ↥(unitBall E),
-        ballAdicEquiv t htu ht1 ht0 hscale (gB q) =
-          algebraMap (MvPolynomial (Fin m) ↥(unitBall E))
-            (AdicCompletion (I0 (E := E) (m := m) t ht1)
-              (MvPolynomial (Fin m) ↥(unitBall E))) q := fun q => by
-      refine Subtype.ext (funext fun n => ?_)
-      show Ideal.Quotient.mk _ (trnc t ht0 n (gB q)) = _
-      have hval : (algebraMap (MvPolynomial (Fin m) ↥(unitBall E))
-          (AdicCompletion (I0 (E := E) (m := m) t ht1)
-            (MvPolynomial (Fin m) ↥(unitBall E))) q).val n =
-          Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
-            Ideal (MvPolynomial (Fin m) ↥(unitBall E))) q := rfl
-      rw [hval]
-      refine mk_trnc_eq t htu ht1 ht0 hscale n (gB q) q ?_
-      show ‖polyBall q - polyBall q‖ ≤ _
-      rw [sub_self, norm_zero]
-      exact pow_nonneg (norm_nonneg t) n
-    -- transport flatness along the algebra equivalence
-    let e : AdicCompletion (I0 (E := E) (m := m) t ht1)
-        (MvPolynomial (Fin m) ↥(unitBall E)) ≃ₐ[MvPolynomial (Fin m) ↥(unitBall E)]
-        ↥(unitBall (P E m)) :=
-      AlgEquiv.ofRingEquiv (f := (ballAdicEquiv t htu ht1 ht0 hscale).symm)
-        (fun q => by
-          rw [← hcompat q]
-          exact RingEquiv.symm_apply_apply _ _)
-    exact Module.Flat.of_linearEquiv e.symm.toLinearEquiv
+  haveI hflatB : Module.Flat (MvPolynomial (Fin m) ↥(unitBall E))
+      ↥(unitBall (P E m)) :=
+    flat_unitBall_over_polyBall hE₀ t htu ht1 ht0 hscale
   -- Step C: localization instances
   set S₀ : Submonoid (MvPolynomial (Fin m) ↥(unitBall E)) :=
     Submonoid.powers (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E))) with hS₀
@@ -1757,8 +1792,8 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
     refine ⟨⟨?_, ?_, ?_⟩⟩
     · rintro ⟨y, ⟨w, hw, rfl⟩⟩
       obtain ⟨k, hk⟩ := hw
-      show IsUnit ((unitBall (P E m)).subtype (gB w))
-      have heq : (unitBall (P E m)).subtype (gB w) = polyBall (E := E) (m := m) w := rfl
+      show IsUnit ((unitBall (P E m)).subtype (polyBallCod w))
+      have heq : (unitBall (P E m)).subtype (polyBallCod w) = polyBall (E := E) (m := m) w := rfl
       rw [heq, ← hk, map_pow]
       have hCt : polyBall (E := E) (m := m)
           (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E))) = polyToP (MvPolynomial.C t) := by
@@ -1785,10 +1820,10 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
           norm_tP t hscale]
         exact hn
       refine ⟨(⟨polyToP (MvPolynomial.C t) ^ n * F, hmem⟩,
-        ⟨gB (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n),
+        ⟨polyBallCod (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n),
           ⟨MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n, ⟨n, rfl⟩, rfl⟩⟩), ?_⟩
-      show F * (unitBall (P E m)).subtype (gB _) = (unitBall (P E m)).subtype _
-      have hgBval : (unitBall (P E m)).subtype (gB (MvPolynomial.C
+      show F * (unitBall (P E m)).subtype (polyBallCod _) = (unitBall (P E m)).subtype _
+      have hgBval : (unitBall (P E m)).subtype (polyBallCod (MvPolynomial.C
           (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n)) = polyToP (MvPolynomial.C t) ^ n := by
         show polyBall (E := E) (m := m)
           (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n) = _
@@ -1815,6 +1850,8 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
     ((IsScalarTower.toAlgHom (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m))
       (P E m)).toLinearMap)
   exact Module.Flat.of_linearEquiv hBC.equiv.symm
+
+end PolyToPTower
 
 -- v4.33: the `MvPolynomial`-`CommSemiring` diamond (`AddMonoidAlgebra.commSemiring` vs
 -- `CommRing.toCommSemiring`) blocks the flat-lemma's instance unification at reducible

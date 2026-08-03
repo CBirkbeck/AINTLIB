@@ -11490,3 +11490,58 @@ form a natural pair — both are blocked on the same thing (instance preamble th
 a section, not in a proof), and doing the section refactor once teaches how to do the other.
 That is the highest-value remaining move, and it is no longer gated on an unreliable build:
 the LSP kill took the gate from "dies at 99% after 10+ minutes" to finishing normally.
+
+### Batch: the `section` + `local instance` refactor (`flat_polyToP`)
+
+This is the move that was deferred earlier on the grounds that a resolution-affecting change
+needs a trustworthy gate. With the LSP memory freed, gates finish normally, so it went ahead.
+
+`flat_polyToP` **181 → 142**, and — the actual point — a step of its proof is now a
+**top-level lemma**, which was impossible before.
+
+**Why it was impossible.** `hflatB`, `hloc1`, `hloc2` are named `haveI`s with written-down
+statements (ideal axis-2 shape), but those statements do not *typecheck* outside the proof:
+they mention `Algebra (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m))`, which only
+existed as an in-proof `letI` built from an in-proof `set gB`. So the fix is not to extract
+harder, it is to move the tower out of the proof:
+
+```lean
+section PolyToPTower
+private noncomputable def polyBallCod : … := RingHom.codRestrict polyBall …
+noncomputable local instance : Algebra … := polyBallCod.toAlgebra   -- ×5
+noncomputable local instance : IsScalarTower … := IsScalarTower.of_algebraMap_eq (fun q => rfl)
+…
+end PolyToPTower
+```
+
+Scoped to its own section between `end AdicBridge` and `syzygy_graph_restricted`, so nothing
+leaks. Then `flat_unitBall_over_polyBall` (27 lines) lifts out cleanly.
+
+**Three faults, each instructive.**
+
+1. *`local instance` needs `noncomputable`* here — all six are built from
+   `AddMonoidAlgebra.commSemiring` / `MvRestricted.isNormedCommRing`. Six errors, one word.
+2. *The tower's middle leg lives in the theorem's **statement***.
+   `IsScalarTower … (MvPolynomial (Fin m) E) (P E m)` cannot be stated at section level
+   without `Algebra (MvPolynomial (Fin m) E) (P E m)`, which `flat_polyToP` introduces via a
+   `letI` **in its own signature** — deliberately not a global instance. Adding the same
+   definition as a `local instance` fixes it and stays defeq to the statement's `letI`.
+3. *`end` must not land between a `set_option … in` and its declaration.* I inserted
+   `end PolyToPTower` after `set_option backward.isDefEq.respectTransparency false in`,
+   orphaning the `in`. Lean reports this as **"Unexpected name `PolyToPTower` after `end`:
+   The current section is unnamed"** — a message that points nowhere near the cause, and
+   whose cascade produced four further `end` mismatches at the bottom of the file. This is
+   exactly what `decompose_common.insert_before_decl` exists to prevent (it walks back over
+   docstrings and lines ending in ` in`); I hand-rolled the insertion with `rindex('/--')`
+   instead.
+
+> Lean's scope errors name the *symptom's* location, not the cause. An `end`/section error
+> that makes no sense means look upward for a dangling `… in`.
+
+Also: `noncomputable ` is 14 characters, and adding it pushed three instance lines past the
+100-**byte** limit. Reflowed; over-width back to 19, unchanged from baseline.
+
+**Remaining on this target:** `hloc1` (71) and `hloc2` (54) still need lifting, and each is
+itself over 50, so they need a second-level split — one more round. The same section
+treatment now unblocks `idealOfDef_pow_isClosed_aux`, whose 74-line instance preamble is the
+identical problem.
