@@ -12918,3 +12918,50 @@ Two real fixes, both outside the scope of a decompose edit:
 (2) is the better change and would likely unblock other extractions in this file, but it is a
 statement change to a bundled structure field — a `/generalise` job, not a `/decompose-proof`
 one. Recording it rather than doing it.
+
+### `exists_lift_norm_le_of_closed_range` 298 -> 45: the ultrametric open mapping theorem, decomposed
+
+The second-largest proof in the project, taken all the way down in seven rounds against a cheap
+module build. Nine new declarations, every one under 50 and every one a statement worth naming:
+
+| new declaration | lines | what it is |
+|---|---|---|
+| `closedBallAddSubgroup` | 10 | the closed ball about `0` *is* a subgroup, ultrametrically |
+| `exists_radius_and_delta_of_isClosed_range` | 46 | the **Baire step**: a ball-image closure with interior gives `R` and `δ` |
+| `exists_lift_approx_step` | 36 | **one approximation step**: rescaling by `t⁻ᵏ` reduces scale `k` to scale `0` |
+| `norm_le_of_hasSum_of_forall_norm_le` | 13 | ultrametric: a sum inherits a uniform bound on its terms |
+| `exists_lift_norm_le_of_approx_step` | 47 | **the geometric correction**: iterate, telescope, sum |
+| `exists_pow_inv_mul_mem_window` | 25 | the scaling window, upward (`δ ≤ c` fails) |
+| `exists_pow_mul_mem_window` | 26 | the scaling window, downward — the dual |
+| `exists_lift_norm_le_of_norm_lt` | 37 | the `‖y‖ < δ` half of the constant |
+| `exists_lift_norm_le_of_le_norm` | 38 | the `δ ≤ ‖y‖` half |
+
+What made this one tractable where `xPresheaf` was not: **every seam was a real mathematical
+step**, and the ambient facts it needed (`hequiv_pow`, `hpitpow`, …) were already thin aliases of
+general lemmas elsewhere in the file, so they passed as hypotheses at zero cost. Nothing had to
+be re-derived inside an extracted lemma.
+
+Two seams were only visible after an earlier extraction. The `by_cases hcase : ‖y‖ < δ` branches
+were 37 and 135 lines and looked hopeless as a pair; after pulling the *upward* window lemma out
+of the first branch, the second turned out to contain the **dual** window block — same `Nat.find`
+argument, `‖t‖ᵐ` instead of `‖t‖⁻ⁿ`. Extracting that companion dropped branch 2 from 135 to 38 and
+made both branches liftable. Generalising off `‖y‖` to an abstract `c` is what let the two window
+lemmas be stated cleanly.
+
+**Gotchas, one new and two repeats.**
+
+*New:* the two branches use **opposite** unit-inverse lemmas — branch 1 `IsUnit.mul_val_inv`
+(`t * t⁻¹ = 1`), branch 2 `IsUnit.val_inv_mul` (`t⁻¹ * t = 1`). Passing `tinv` abstractly with
+`htmul : t * tinv = 1` covers branch 1 directly and branch 2 via `mul_comm` (`A` is a
+`NormedCommRing`). My blanket text-substitution matched 2 occurrences in branch 1 and **0** in
+branch 2, which is exactly why the assert-the-count discipline matters — the mismatch surfaced as
+`Unknown identifier htinv` rather than as silently wrong code.
+
+*Repeat 1:* dedented a bullet body by 6 instead of 4. Symptom as recorded: `unsolved goals`
+immediately followed by `unexpected identifier; expected command`.
+
+*Repeat 2 (worse):* the fix for that — re-indent the lemma body by 2 — ran past the end of the
+lemma and indented **the next declaration's docstring**, because I searched forward for the line
+starting `theorem …` and the docstring sits above it. Same class of error as anchoring an insert
+on the `def` line instead of using `insert_before_decl`: a docstring is part of the declaration
+and any range that stops at the `theorem` keyword is one block short.
