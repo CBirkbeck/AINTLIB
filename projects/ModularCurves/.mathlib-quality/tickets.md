@@ -35697,3 +35697,28 @@ base is globally standard smooth with an explicit standard-smooth anchor, which 
 route does not give.
 
 **Remaining for the base**: only `IsDomain`, i.e. the componentwise decomposition (C3).
+
+### [WP-D3a-DOM] the base is a finite product of domains — the last base-side gap
+- **Status**: open · **File**: new, `ForMathlib/SmoothCurveComponents.lean` · **Depends on**: none
+- **Why**: `IsIntegrallyClosed` (and mathlib's `isIntegrallyClosed_ofLocalizationMaximal`,
+  `RingTheory/LocalProperties/IntegrallyClosed.lean`) both require `IsDomain`. `Y(N)` need not
+  be connected, and its connectedness is Leg 2 (irreducibility), which is out of scope.
+- **Statement**: for `A` Noetherian with `Localization.AtPrime m` a domain for every maximal
+  `m`, the minimal primes are finite and pairwise comaximal and `A ≅ ∏ A ⧸ pᵢ`.
+- **Inputs that exist:**
+  - `isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth`
+    (`ForMathlib/StandardSmoothMaximalDVR.lean:41`) already bundles `IsDomain
+    (Localization.AtPrime m)` for **every** maximal `m` over an arbitrary field — no
+    `IsAlgClosed` needed, unlike `isDomain_localization_atPrime_of_isMaximal`
+    (`ForMathlib/SmoothRegularLocal.lean:189`);
+  - `isReduced_ofLocalizationMaximal` (mathlib, `RingTheory/LocalProperties/Reduced.lean`) —
+    so `A` is reduced, hence `⋂ pᵢ = 0`;
+  - `MaximalSpectrum.toPiLocalization_injective` (mathlib,
+    `RingTheory/Spectrum/Maximal/Localization.lean`) — the embedding `A ↪ ∏_m A_m`, useful for
+    the comaximality bookkeeping.
+- **Proof sketch**: two distinct minimal primes inside a common maximal `m` would give two
+  minimal primes of the domain `A_m`; so the minimal primes are pairwise comaximal, and CRT
+  (`Ideal.quotientInfRingEquivPiQuotient`) plus reducedness gives the product decomposition.
+- **Then**: apply WP-D3b to each factor, and construct ζ factor by factor — which is exactly
+  the componentwise treatment ChatGPT's C3 prescribes, with the finite clopen decomposition
+  made explicit as a ring product.
