@@ -12009,3 +12009,31 @@ has not, the lift is not viable.
 them before starting the next batch; when that batch broke I reverted the whole file and
 lost them, then had to redo the work. **Commit each green increment before beginning the
 next**, especially when successive batches touch the same file.
+
+### Scan 7b, and the limit of scripted lifting
+
+Closed both known false-positive classes: **proof-local now means "bound by a tactic and not
+a parent binder"** (v1 filtered by case, so uppercase locals like `V'` were never recorded),
+and the scan reports body-locals and whether the parent uses `classical` alongside each
+candidate. That took the list from 8 → 5, with two clean on *both* axes.
+
+Attempting those two (`hiU_coeff`, `hψγval` in `fU_uniformContinuous`) still failed, on
+neither of the modelled grounds:
+
+- the generic call-site builder emits `lemma D m Ψ …` from the binder block, and its regex
+  `\(([name])\s*:` only matches **single-name** parens — `(t₁ t₂ : A)` groups and instance
+  binders are dropped, so the argument list is wrong;
+- and a bound `i` in the lifted statement lost its type (`?m.27` vs `Fin D.T.card`).
+
+Reverted; the file is green at HEAD.
+
+> **The generic lifter has reached its limit.** Statement-and-body liftability can be
+> screened mechanically, but the *call site* cannot: reconstructing an argument list from a
+> binder block requires handling multi-name groups, instance binders, implicit-vs-explicit,
+> and `letI`-in-binder syntax. Every remaining target has a different binder shape, so the
+> economical approach from here is per-target hand work using the scan only to choose the
+> target — not scripted batches.
+
+That is the same conclusion the earlier taxonomy reached from the other direction: the
+residue is uniform in *kind* (proof-local bindings in step statements) but each instance
+needs its own reading.
