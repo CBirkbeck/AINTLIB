@@ -12833,3 +12833,45 @@ Ranking every remaining target by its dominant block, as a share of body:
 The useful band is **40–65%**. Above ~80% the "block" is the entire proof and extracting it just
 renames the problem; below ~30% no single lift moves the number enough. Three targets sit in the
 band and are not otherwise blocked.
+
+### `IsRestricted.mul` 68 -> 42: `RestrictedPowerSeries` is clear
+
+The tail of `mul` — the antidiagonal argument — was 28 of its 68 lines. I had costed this lift
+earlier and rejected it, on the grounds that it needed ~12 threaded hypotheses including the four
+`set`-locals `Sf`, `Sg`, `T`, `B`. That estimate was wrong, and the reason is worth recording:
+
+**`Sf` and `Sg` never needed to be parameters at all.** The block case-splits on `a ∈ Sf`, but
+`Sf` is by definition `{s | coeff s f ∉ (W : Set A)}` — so phrasing the extracted lemma's split
+directly on `MvPowerSeries.coeff a f ∉ (W : Set A)` removes both sets from the interface, and
+with them `hSf`/`hSg` and every `hSf.mem_toFinset` conversion *inside* the lemma. Those
+conversions move to the call site, where they are one `fun … => …` each. The interface came out
+at seven arguments, not twelve, and the adapter cost four lines against twenty-six saved.
+
+The general lesson: when a `set`-local is a *predicate* rather than a value, do not thread it —
+inline its definition into the extracted statement. The threading cost I was estimating was the
+cost of preserving an abbreviation nobody outside the proof needs.
+
+`coeff_mul_mem_of_forall_mem` also reads better than what it replaced: *each term of the
+convolution lands in `V`, because if either factor is outside `W` the other is in `T`, and if
+both are inside `W` then `hWV` applies*. That trichotomy was previously buried under
+`Finset.mem_toFinset` plumbing.
+
+`RestrictedPowerSeries.lean` is now clear: the 118-line `Subring` instance is six field lines,
+and all eight extracted lemmas are under 50.
+
+**Actionable count: 36 -> 34** this stretch, with two files fully cleared.
+
+### Next: `xPresheaf_isSheafOfTopologicalRings` (90), and why the "universe wall" note is stale
+
+`have hginv` is 49 of its 90 lines, so one lift clears it (44 + 49). The target was recorded as
+blocked on a universe wall — `TopCat.Presheaf.IsSheafOfTopologicalRings` quantifies over
+`(T : Type u)` and `{ι : Type u}` at a *fixed* `u`, not `Type*`, so an extracted lemma has to
+match. But `CurveObject.lean:1661` already contains `xPresheaf_glue_compat`, a private helper
+extracted from this same proof, carrying exactly that binder block. The pattern demonstrably
+works; the block can be copied verbatim rather than reconstructed.
+
+The remaining design question is `hginv`'s five ambient facts (`hle`, `hVS`, `hcov`, `stabV`,
+`stabU`). They should be *parameters*, not re-derived inside the lemma: re-deriving costs 12
+lines and would push the new lemma to 61, while passing them keeps its body at the original 49
+and leaves the main proof at 49. The conclusion mentions `frobFixed p F ϖ (iSup U)`, so `V'`
+cannot be left abstract — it has to be spelled.
