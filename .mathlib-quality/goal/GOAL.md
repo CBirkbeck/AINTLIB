@@ -13535,3 +13535,51 @@ problem and was not: **`open Classical in` is the right fix only when the parent
 from the `classical` *tactic*. When the parent has a `DecidableEq` *binder*, the extracted lemma
 must take the same binder** — otherwise every hypothesis mentioning a `Finset` operation fails to
 match.
+
+### `isOXAcyclic_interProd` 118 -> 112: the Čech cocycle comparison is one general fact, twice
+
+`eL` and `eR` were the same six-line argument on the two sides of the cocycle. Both are instances
+of a fact about the presheaf that had no name:
+
+```lean
+theorem restrictionMap_eq_of_restrictionMap_eq (P M E X : RationalLocData A) … (y z) 
+    (hz : restrictionMap P X hXP y = z) :
+    restrictionMap M E hEM (restrictionMap P M hMP y) = restrictionMap X E hEX z
+```
+
+*Two routes from `P` down to `E` agree once you know how `y` restricts to the intermediate.* Both
+call sites are now one line. The count does not move (112 is still over 50), but the lemma is
+reusable and the duplication is gone.
+
+### The deep-outline scan over-counts — do not trust its block sizes
+
+Last round's lesson ("outline one level deeper") is right, but the *automated* version of it that I
+wrote is not. Scanning at indent `L` and treating "a step line at indent `L` through the next step
+line at indent `L`" as a block is wrong whenever a `have` at indent `L-2` has its body at indent
+`L`: the scanner then groups that body's steps *through to the end of the enclosing structure*, and
+reports a block far larger than any extractable unit.
+
+Concretely it claimed `locToQuotient_mul_small_constant_mem` (124) clears in 3 lifts with blocks
+`[34, 24, 23]`. Reading those spans shows they start mid-proof (`exact hC_fn …`, `rw [hscale]`) and
+run past the end of their own `have`. The real units there are `hlift` (33) and `hG_sub_W` (23) —
+the same numbers the top-level scan gave — so that target still needs ~10 lifts and will not clear.
+Same story for `presheafValue_mvRestricted_fU_uniformContinuous`, whose "22-line block at indent 4"
+straddles the end of `hnhds0` and the start of the main argument.
+
+**Deeper outlining has to be read, not trusted.** The `laurentProdCoverOf` win came from reading
+the branch, not from a scanner number.
+
+### The remaining path on `isOXAcyclic_interProd`, measured
+
+Nesting is `gluing bullet (99) ⊃ hgcoc (70) ⊃ hcanon (51)`. To clear:
+
+1. `hEP₁Q` / `hEP₂Q` (7 each) — nearly twins, differing only in which component of the intersection
+   is projected (`hv.1.1` vs `hv.1.2`), so they want two 3-line lemmas rather than one shared one.
+   That brings `hcanon` to ~45.
+2. lift `hcanon` (~45) → `hgcoc` ~26
+3. lift `hgcoc` (~26) → parent ~43 ✓
+
+The blocker on 2 and 3 is not size but the interface: `g` and `hg` come from
+`choose g hg using fun P => (hV0 P.1 P.2).gluing …`, so their types are the `gluing` field's
+signature instantiated at a restricted cover — several lines each to write out, and `f`/`hf` come
+from the enclosing `intro`. That is threadable but wants a dedicated pass.

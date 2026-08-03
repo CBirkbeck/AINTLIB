@@ -1073,6 +1073,23 @@ theorem restrictionMap_sub [HasLocLiftPowerBounded A] (D D' : RationalLocData A)
       restrictionMap D D' h a - restrictionMap D D' h b :=
   map_sub (restrictionMapHom D D' h) a b
 
+/-- Two routes from `P` down to `E` agree once you know how `y` restricts to the intermediate:
+if `y` restricts to `z` on `X`, then going `P → M → E` and `P → X → E` give the same section.
+Both legs of the Čech cocycle comparison in `isOXAcyclic_interProd` are this fact. -/
+theorem restrictionMap_eq_of_restrictionMap_eq [HasLocLiftPowerBounded A]
+    (P M E X : RationalLocData A)
+    (hMP : rationalOpen M.T M.s ⊆ rationalOpen P.T P.s)
+    (hEM : rationalOpen E.T E.s ⊆ rationalOpen M.T M.s)
+    (hXP : rationalOpen X.T X.s ⊆ rationalOpen P.T P.s)
+    (hEX : rationalOpen E.T E.s ⊆ rationalOpen X.T X.s)
+    (y : presheafValue P) (z : presheafValue X)
+    (hz : restrictionMap P X hXP y = z) :
+    restrictionMap M E hEM (restrictionMap P M hMP y) = restrictionMap X E hEX z := by
+  have c1 := restrictionMap_restrictionMap P M E hMP hEM y
+  have c2 := restrictionMap_restrictionMap P X E hXP hEX y
+  rw [c1, ← c2, hz]
+
+
 /-- **Explicit Wedhorn A.3(3) in degree 0** for `RationalCoveringData`/`IsOXAcyclic`:
 the product cover `Uf × V` is `O_X`-acyclic given `Uf` is and `V` restricted to
 the `Uf`-pieces (`hV0`) and `Uf`-pairwise-intersections (`hV1`) is acyclic. This
@@ -1179,17 +1196,11 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
           rw [← hQeq]; exact RationalLocData.interSamePair_subset_left _ _ _
         -- LHS = resMap (P₁∩Q) E (f ⟨P₁∩Q⟩); RHS = resMap (P₂∩Q) E (f ⟨P₂∩Q⟩); equal by `hf`.
         have eL : restrictionMap M E hEM (restrictionMap P₁.1 M hMP₁ (g P₁)) =
-            restrictionMap (P₁.1.interSamePair Q.1 hQP₁) E hEP₁Q (f ⟨_, hmem₁⟩) := by
-          have c1 := restrictionMap_restrictionMap P₁.1 M E hMP₁ hEM (g P₁)
-          have c2 := restrictionMap_restrictionMap P₁.1
-            (P₁.1.interSamePair Q.1 hQP₁) E hP₁Q hEP₁Q (g P₁)
-          rw [c1, ← c2, hg₁]
+            restrictionMap (P₁.1.interSamePair Q.1 hQP₁) E hEP₁Q (f ⟨_, hmem₁⟩) :=
+          restrictionMap_eq_of_restrictionMap_eq P₁.1 M E _ hMP₁ hEM hP₁Q hEP₁Q _ _ hg₁
         have eR : restrictionMap M E hEM (restrictionMap P₂.1 M hMP₂ (g P₂)) =
-            restrictionMap (P₂.1.interSamePair Q.1 hQP₂) E hEP₂Q (f ⟨_, hmem₂⟩) := by
-          have c1 := restrictionMap_restrictionMap P₂.1 M E hMP₂ hEM (g P₂)
-          have c2 := restrictionMap_restrictionMap P₂.1
-            (P₂.1.interSamePair Q.1 hQP₂) E hP₂Q hEP₂Q (g P₂)
-          rw [c1, ← c2, hg₂]
+            restrictionMap (P₂.1.interSamePair Q.1 hQP₂) E hEP₂Q (f ⟨_, hmem₂⟩) :=
+          restrictionMap_eq_of_restrictionMap_eq P₂.1 M E _ hMP₂ hEM hP₂Q hEP₂Q _ _ hg₂
         change restrictionMap M E hEM
           (restrictionMap P₁.1 M hMP₁ (g P₁) - restrictionMap P₂.1 M hMP₂ (g P₂)) = 0
         rw [restrictionMap_sub, eL, eR]
