@@ -12739,3 +12739,47 @@ near-identical after normalising identifiers — turns up exactly **one** furthe
 across all 36: `laurentProdCoverOf_isOXAcyclic` (105), which contains two `unitDatum` /
 `coUnitDatum` twin pairs (~18 and ~8 lines) differing only in that name plus
 `unit_mem_unitCover` / `counit_mem_unitCover` and `Finset.mem_union_left` / `_right`.
+
+### Task 3 groundwork: what is actually left, measured properly
+
+A read-only sweep of all 268 non-`Vendored` files for the mechanical `/cleanup` items:
+
+| item | count | verdict |
+|---|---|---|
+| `push_neg` (should be `push Not`) | 0 | already done |
+| `$` (should be `<|`) | 0 | already done |
+| `λ` (should be `fun`) | 3 | **all false positives** — every one is prose: the cocycle map "λ" in `StructureSheaf` and `LaurentCoverExact` docstrings. Not Lean lambdas. Left alone. |
+| module docstring missing | 2 | **fixed, now 0 across the project** |
+| over-width lines | 517 | see below — was being reported as 1608 |
+| `letI` / `haveI` | 4545 | see below — mostly NOT actionable |
+
+**Module docstrings are now complete.** `FarguesFontaine/CurveChartVIso.lean` got one summarising
+the chart `𝒱^pre`-isomorphism (written from the file's own declaration docstrings, not invented).
+`Basic.lean` was a `lake new` stub whose only content was `def hello := "world"` — unreferenced
+anywhere (checked), so removed; the module itself stays, because `ScottishBook/Described/Problem*`
+import it as an anchor.
+
+**The over-width count was wrong by a factor of three, and it was my tooling that was wrong.**
+`verify_file.py` measured `len(l.encode()) > 100` — UTF-8 bytes. mathlib's `longLine` linter
+tests `maxLineLength < (fm.toPosition line.stopPos).column`, and Lean's `Position.column` counts
+**codepoints**. In a file full of `↥ ⟨⟩ ₀ ⁻¹ ⧸ ∀ ε`, the two measures diverge badly: 1610 lines
+are over 100 bytes, but only **517** are over 100 characters. Fixed the script and left a comment
+on the check so it does not get "corrected" back. Had this gone unnoticed, a later pass would have
+rewrapped ~1100 lines that were never in violation — pure churn on top of a clean file.
+
+**`letI`/`haveI` is not the 4545-site mechanical sweep it looks like.** 443 of them sit inside
+instance *binders* (`[letI : UniformSpace A := …; CompleteSpace A]`) and another ~118 inside
+hypothesis binders — those are part of the **statement**, not the proof, and can never be
+rewritten. Of the rest, the dominant forms introduce *data* instances
+(`letI : ValuativeRel A := v.toValuativeRel`, `letI P_B : PairOfDefinition … := …`), where the
+`/cleanup` advice to prefer `have :` is actively wrong: `have` forgets the body and the
+definitional equalities go with it. The correct rewrite there is `let`, per site, checked
+individually. Recorded as a genuine but per-site task, not a sweep.
+
+### Task 1 re-verified: still zero raises
+
+Seven `maxHeartbeats`/`maxSynthPendingDepth` hits outside `Vendored/`, and every one is benign:
+four are comments recording that a raise *used to* be needed (`WedhornCechAcyclicity:10551`,
+`LaurentBaireSupport:19`, `FiniteJetUniformDomain:214`, `FiniteJetSheafTransfer:460`), and three
+are `set_option maxSynthPendingDepth 1 in` in `RobbaCorrespondence` — a *reduction*, explicitly
+to keep. Two more live in `Vendored/`, which is out of scope.

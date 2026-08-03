@@ -49,7 +49,11 @@ def main():
     added = [d for d in n if d not in o]
 
     def wide(t):
-        return sum(1 for l in t.split('\n') if len(l.encode()) > 100)
+        # CODEPOINTS, not UTF-8 bytes. mathlib's `longLine` linter tests
+        # `maxLineLength < (fm.toPosition line.stopPos).column`, and Lean's Position.column
+        # counts characters. Measuring in bytes reports 1610 over-wide lines in this project
+        # where the linter's own rule reports 517 -- the difference is entirely ↥ ⟨⟩ ₀ ⁻¹ etc.
+        return sum(1 for l in t.split('\n') if len(l) > 100)
 
     print(f'{rel}  ({ref} -> working tree)')
     print(f'  lines       {len(old_text.split(chr(10))):6d} -> {len(new_text.split(chr(10))):6d}'

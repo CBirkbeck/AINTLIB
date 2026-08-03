@@ -4,6 +4,34 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FarguesFontaine.CurveYSlice
 
+/-!
+# The chart `𝒱^pre`-isomorphism
+
+The last step of the Fargues–Fontaine capstone. For a rational datum `D'` over the `n`-th window
+chart ring, the affinoid `Spa(𝒪(D'))` is shown to be isomorphic — in Wedhorn's category `𝒱^pre`,
+so carrying the structure presheaf, the stalk local rings *and* the stalk valuations — to the
+slice of `𝒴` that `D'` cuts out.
+
+The work is in transporting the stalk data across the two comparisons: first from a window
+subobject to the ambient `𝒴`, then along the inclusion of a slice. Each direction needs the
+stalk map to be surjective and the stalk valuation to be the pullback of the ambient one.
+
+## Main definitions
+
+* `windowSubVPreHom`: the `𝒱^pre`-morphism from `Spa(𝒪(D'))` to the `𝒴`-slice, built from the
+  presheafed-space isomorphism together with its valuation-compatibility.
+* `windowSubVPreIso`: that morphism packaged as an isomorphism.
+
+## Main results
+
+* `isIso_windowSubVPreHom_toHom`: the underlying map is invertible — it *is* the presheafed-space
+  isomorphism, by `windowSubVPreHom_toHom`.
+* `nonempty_windowSubVPreIso`: the `hviso` hypothesis consumed by
+  `isAdicSpace_xVObj_of_windowVIso`.
+* `ringStalkMap_yAmbOfRestrict_surjective`, `ringStalkMap_ySliceIncl_surjective` and the
+  `stalkValue_eq_comap_*` lemmas: the stalk-level input to the comparison.
+-/
+
 open TopologicalRing ValuationSpectrum WittVector NNReal TopologicalSpace Topology
   Filter CategoryTheory Opposite Pointwise
 open scoped AlgebraicGeometry
