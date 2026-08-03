@@ -35569,3 +35569,20 @@ theorem for the carrier) works. The fix is a `show … ≃ … from` ascription 
 (`IsSepClosure.of_isAlgClosure_of_perfectField` + uniqueness of separable closures), giving
 the `AlgebraicClosure` form of the uniqueness pin; then step 2, the field-change naturality
 itself.
+
+## [WP-D3c step 1] COMPLETE (2026-08-04) — the field pairing is pinned at the geometric point
+
+`finiteEtaleHom_unique_algClosure` (axiom-verified): over a **perfect** field, a morphism of
+finite étale `k`-algebras is determined by the induced map on `→ₐ[k] AlgebraicClosure k` —
+which is exactly the quantifier in `exists_weilPairingHom_of_field`'s characterisation clause.
+
+The `AlgebraicClosure` `Faithful` instance is supplied by `faithful_fiber_algebraicClosure`,
+transporting the `SeparableClosure` one along `IsSepClosure.equiv` (available because
+`IsSepClosure.of_isAlgClosure_of_perfectField` makes the algebraic closure a separable
+closure when `k` is perfect). `PerfectField k` is the hypothesis
+`exists_weilPairingHom_of_field` already carries, so this costs nothing at the use site.
+
+**Consequence**: the field-level Weil pairing is now a *canonical* object, not merely an
+existential one. Field-change naturality (WP-D3c step 2, ChatGPT's C3) is henceforth a
+uniqueness argument: base-change both candidates to an algebraic closure of the target,
+observe they induce the same Silverman pairing on geometric points, and apply the pin.

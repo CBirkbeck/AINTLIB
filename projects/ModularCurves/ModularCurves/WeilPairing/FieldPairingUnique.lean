@@ -78,15 +78,38 @@ theorem faithful_fiber_of_algEquiv {k : Type u} [Field k] {Ω₁ Ω₂ : Type u}
       (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}).Faithful :=
   Functor.Faithful.of_iso (fiberIsoOfAlgEquiv e)
 
-/- The uniqueness statement read at `AlgebraicClosure k` — which is the geometric point
-`exists_weilPairingHom_of_field`'s characterisation clause actually quantifies over — does
-**not** follow by the same three lines: the `PreGaloisCategory.FiberFunctor` instance in
-`ForMathlib/FiniteEtaleFiberFunctor.lean:662` is registered at `SeparableClosure k` only, so
-`Faithful (CommAlgCat.FiniteEtale.fiber k (AlgebraicClosure k))` is not synthesised
-(measured). Over a perfect field the two closures agree —
-`IsSepClosure.of_isAlgClosure_of_perfectField` (`FieldTheory/IsSepClosed.lean:252`) plus
-uniqueness of separable closures gives `SeparableClosure k ≃ₐ[k] AlgebraicClosure k` — so the
-missing step is a natural isomorphism of the two fibre functors along that equivalence. See
-the board's [WP-D3c-CLOSURE]. -/
+/-- **(WP-D3c-CLOSURE)** For a perfect field the algebraic closure is *also* a separable
+closure (`IsSepClosure.of_isAlgClosure_of_perfectField`), so uniqueness of separable closures
+transports faithfulness of the fibre functor to the algebraic closure. -/
+instance faithful_fiber_algebraicClosure (k : Type u) [Field k] [PerfectField k] :
+    (CommAlgCat.FiniteEtale.fiber.{u} k (AlgebraicClosure k) :
+      (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}).Faithful :=
+  faithful_fiber_of_algEquiv
+    (IsSepClosure.equiv k (SeparableClosure k) (AlgebraicClosure k))
+
+/-- **(WP-D3c step 1, the form the pairing's characterisation uses)** Over a perfect field,
+the uniqueness pin read at the algebraic closure — which is the geometric point that
+`exists_weilPairingHom_of_field`'s characterisation clause quantifies over. -/
+theorem finiteEtaleHom_unique_algClosure {k : Type u} [Field k] [PerfectField k]
+    (A B : CommAlgCat.FiniteEtale.{u} k) (w₁ w₂ : A ⟶ B)
+    (h : ∀ x : (B : Type u) →ₐ[k] AlgebraicClosure k,
+      x.comp w₁.hom.hom = x.comp w₂.hom.hom) :
+    w₁ = w₂ := by
+  have hmap : (CommAlgCat.FiniteEtale.fiber k (AlgebraicClosure k) :
+      (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}).map w₁.op =
+      (CommAlgCat.FiniteEtale.fiber k (AlgebraicClosure k) :
+        (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}).map w₂.op :=
+    FintypeCat.hom_ext _ _ h
+  have := (CommAlgCat.FiniteEtale.fiber k (AlgebraicClosure k) :
+    (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}).map_injective hmap
+  exact Opposite.op_injective this
+
+/- Implementation note. `Faithful (CommAlgCat.FiniteEtale.fiber k (AlgebraicClosure k))` is
+**not** synthesised out of the box: the `PreGaloisCategory.FiberFunctor` instance
+(`ForMathlib/FiniteEtaleFiberFunctor.lean:662`) is registered at `SeparableClosure k` only,
+and mathlib registers none of its own. `faithful_fiber_algebraicClosure` above supplies it,
+for perfect `k`, by transporting along `IsSepClosure.equiv` — which applies because
+`IsSepClosure.of_isAlgClosure_of_perfectField` (`FieldTheory/IsSepClosed.lean:252`) makes the
+algebraic closure a separable closure. -/
 
 end ModularCurves
