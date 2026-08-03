@@ -1707,6 +1707,154 @@ theorem presheafValue_iteratedPlus_equiv_symm_isInducing
           presheafValue (laurentPlusDatum D₀ f)) :=
   (presheafValue_iteratedPlus_equiv_homeomorph P D₀ f).symm.isInducing
 
+/-- The `b = D₀.s` case: `(a·s)/(s·f)` is `a/f`, whose forward image is `canonicalMap a` times
+`1/canonicalMap f` — a product of a ring-of-definition element and a listed generator, so it lies
+in the target's `locSubring`. -/
+private theorem iteratedMinus_forward_mem_locSubring_of_eq_s
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
+    (D₀ : RationalLocData A)
+    [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
+    [LaurentNormalized D₀]
+    (f : A) (a b : A) (ha : a ∈ insert D₀.s D₀.T) (ha_A₀ : a ∈ D₀.P.A₀)
+    (hcan_a : D₀.canonicalMap a ∈ (iteratedMinusDatum_B P D₀ f).P.A₀)
+    (hu_s_tgt : IsUnit (algebraMap (presheafValue D₀)
+      (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap D₀.s)))
+    (hforward_alg : ∀ x : A, iteratedMinus_forwardLocHom D₀ f
+      (algebraMap A (Localization.Away (D₀.s * f)) x) =
+      algebraMap (presheafValue D₀) (Localization.Away (D₀.canonicalMap f))
+        (D₀.canonicalMap x))
+    (hb_s : b = D₀.s) :
+    iteratedMinus_forwardLocHom D₀ f (divByS (a * b) (D₀.s * f))
+      ∈ locSubring (iteratedMinusDatum_B P D₀ f).P (iteratedMinusDatum_B P D₀ f).T
+          (iteratedMinusDatum_B P D₀ f).s := by
+  set B := presheafValue D₀
+  -- Case `b = D₀.s`. Show `divByS (a * D₀.s) (D₀.s * f) ∈ algebraMap(A) * divByS 1 f` image.
+  subst hb_s
+  -- We have `divByS (a * D₀.s) (D₀.s * f) * algebraMap(f) = algebraMap a` in Loc_A(D₀.s*f).
+  -- By `IsLocalization.Away.lift`, forward of LHS = forward(algebraMap a) * (algebraMap f)⁻¹.
+  -- Let u = forward of divByS (a * D₀.s) (D₀.s * f).
+  -- Show u = algebraMap B (canonicalMap a) * divByS 1 (canonicalMap f).
+  have hrel : divByS (a * D₀.s) (D₀.s * f) *
+      algebraMap A (Localization.Away (D₀.s * f)) f =
+      algebraMap A (Localization.Away (D₀.s * f)) a := by
+    unfold divByS
+    rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+          (S := Localization.Away (D₀.s * f)) f,
+        ← IsLocalization.mk'_mul,
+        ← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+          (S := Localization.Away (D₀.s * f)) a]
+    exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
+  -- Apply forward map to hrel.
+  have hforward_rel : iteratedMinus_forwardLocHom D₀ f
+      (divByS (a * D₀.s) (D₀.s * f)) *
+      algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap f) =
+      algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap a) := by
+    have := congrArg (iteratedMinus_forwardLocHom D₀ f) hrel
+    rw [map_mul, hforward_alg, hforward_alg] at this; exact this
+  -- Multiply both sides by `divByS 1 (canonicalMap f)`, which is the inverse.
+  have hinv_f : algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap f) *
+      divByS (1 : B) (D₀.canonicalMap f) = 1 := by
+    unfold divByS
+    rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.canonicalMap f))
+          (S := Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap f),
+        ← IsLocalization.mk'_mul, mul_one, one_mul]
+    exact IsLocalization.mk'_self _ _
+  have hforward_eq : iteratedMinus_forwardLocHom D₀ f (divByS (a * D₀.s) (D₀.s * f)) =
+      algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap a) *
+        divByS (1 : B) (D₀.canonicalMap f) := by
+    have := congrArg (· * divByS (1 : B) (D₀.canonicalMap f)) hforward_rel
+    rwa [mul_assoc, hinv_f, mul_one] at this
+  rw [hforward_eq]
+  -- Membership: both factors in `locSubring (iteratedMinusDatum_B)`.
+  refine (locSubring _ _ _).mul_mem ?_ ?_
+  · exact algebraMap_mem_locSubring _ _ _ hcan_a
+  · exact divByS_mem_locSubring _ _ _ (Finset.mem_singleton_self 1)
+
+/-- The `b = f` case: `(a·f)/(s·f)` is `a/s`, whose forward image is `canonicalMap a` times the
+inverse of the unit `canonicalMap s`; being a unit multiple of a ring-of-definition element it
+again lies in the target's `locSubring`. -/
+private theorem iteratedMinus_forward_mem_locSubring_of_eq_f
+    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
+    (D₀ : RationalLocData A)
+    [IsNoetherianRing (locSubring D₀.P D₀.T D₀.s)]
+    [LaurentNormalized D₀]
+    (f : A) (a b : A) (ha : a ∈ insert D₀.s D₀.T) (ha_A₀ : a ∈ D₀.P.A₀)
+    (hcan_a : D₀.canonicalMap a ∈ (iteratedMinusDatum_B P D₀ f).P.A₀)
+    (hu_s_tgt : IsUnit (algebraMap (presheafValue D₀)
+      (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap D₀.s)))
+    (hforward_alg : ∀ x : A, iteratedMinus_forwardLocHom D₀ f
+      (algebraMap A (Localization.Away (D₀.s * f)) x) =
+      algebraMap (presheafValue D₀) (Localization.Away (D₀.canonicalMap f))
+        (D₀.canonicalMap x))
+    (hb_f : b = f) :
+    iteratedMinus_forwardLocHom D₀ f (divByS (a * b) (D₀.s * f))
+      ∈ locSubring (iteratedMinusDatum_B P D₀ f).P (iteratedMinusDatum_B P D₀ f).T
+          (iteratedMinusDatum_B P D₀ f).s := by
+  set B := presheafValue D₀
+  -- Case `b = f`. Use `hb_f : b = f` but keep `f` as the free variable by rewriting.
+  rw [hb_f]
+  -- Now goal is about `divByS (a * f) (D₀.s * f)`.
+  -- `divByS (a * f) (D₀.s * f) * algebraMap(D₀.s) = algebraMap(a)`.
+  have hrel : divByS (a * f) (D₀.s * f) *
+      algebraMap A (Localization.Away (D₀.s * f)) D₀.s =
+      algebraMap A (Localization.Away (D₀.s * f)) a := by
+    unfold divByS
+    rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+          (S := Localization.Away (D₀.s * f)) D₀.s,
+        ← IsLocalization.mk'_mul,
+        ← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
+          (S := Localization.Away (D₀.s * f)) a]
+    exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
+  have hforward_rel : iteratedMinus_forwardLocHom D₀ f
+      (divByS (a * f) (D₀.s * f)) *
+      algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap D₀.s) =
+      algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap a) := by
+    have := congrArg (iteratedMinus_forwardLocHom D₀ f) hrel
+    rw [map_mul, hforward_alg, hforward_alg] at this; exact this
+  -- Now: forward = algebraMap(canonicalMap a) * (algebraMap(canonicalMap D₀.s))⁻¹
+  --            = algebraMap(canonicalMap a * (canonicalMap D₀.s)⁻¹)
+  --            = algebraMap(coeRingHom(divByS a D₀.s)).
+  -- Get: canonicalMap D₀.s * coeRingHom(divByS a D₀.s) = canonicalMap a in B.
+  have hcoeB : D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS a D₀.s) =
+      D₀.canonicalMap a := by
+    change D₀.coeRingHom (algebraMap A _ D₀.s) * D₀.coeRingHom (divByS a D₀.s) =
+      D₀.coeRingHom (algebraMap A _ a)
+    rw [← map_mul]
+    congr 1
+    unfold divByS
+    rw [← IsLocalization.mk'_one (M := Submonoid.powers D₀.s)
+          (S := Localization.Away D₀.s) D₀.s,
+        ← IsLocalization.mk'_mul,
+        ← IsLocalization.mk'_one (M := Submonoid.powers D₀.s)
+          (S := Localization.Away D₀.s) a]
+    exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
+  -- From `hforward_rel`: forward * algebraMap(canonicalMap D₀.s) = algebraMap(canonicalMap a).
+  -- Apply `hu_s_tgt.mul_right_cancel` with target algebraMap(coeRingHom(divByS a D₀.s)).
+  have hforward_eq : iteratedMinus_forwardLocHom D₀ f (divByS (a * f) (D₀.s * f)) =
+      algebraMap B (Localization.Away (D₀.canonicalMap f))
+        (D₀.coeRingHom (divByS a D₀.s)) := by
+    apply hu_s_tgt.mul_right_cancel
+    rw [hforward_rel, ← hcoeB, map_mul]; ring
+  rw [hforward_eq]
+  -- `divByS a D₀.s ∈ locSubring D₀.P D₀.T D₀.s`.
+  have hdiv_mem_loc : divByS a D₀.s ∈ locSubring D₀.P D₀.T D₀.s := by
+    simp only [Finset.mem_insert] at ha
+    rcases ha with rfl | ha'
+    · -- `a = D₀.s`: `divByS D₀.s D₀.s = 1`.
+      have hself : divByS D₀.s D₀.s = 1 := by
+        unfold divByS; exact IsLocalization.mk'_self _ _
+      rw [hself]; exact (locSubring _ _ _).one_mem
+    · exact divByS_mem_locSubring _ _ _ ha'
+  -- `D₀.coeRingHom(divByS a D₀.s) ∈ presheafValue_ringOfDef D₀`.
+  have hcoe_mem : D₀.coeRingHom (divByS a D₀.s) ∈ presheafValue_ringOfDef D₀ := by
+    refine Subring.le_topologicalClosure _ ?_
+    exact ⟨⟨divByS a D₀.s, hdiv_mem_loc⟩, rfl⟩
+  exact algebraMap_mem_locSubring _ _ _ hcoe_mem
+
+
+
 theorem iteratedMinus_forwardLocHom_generators_powerBounded
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
@@ -1751,107 +1899,10 @@ theorem iteratedMinus_forwardLocHom_generators_powerBounded
   -- Split by `b`.
   simp only [Finset.mem_insert, Finset.mem_singleton] at hb
   rcases hb with hb_s | hb_f
-  · -- Case `b = D₀.s`. Show `divByS (a * D₀.s) (D₀.s * f) ∈ algebraMap(A) * divByS 1 f` image.
-    subst hb_s
-    -- We have `divByS (a * D₀.s) (D₀.s * f) * algebraMap(f) = algebraMap a` in Loc_A(D₀.s*f).
-    -- By `IsLocalization.Away.lift`, forward of LHS = forward(algebraMap a) * (algebraMap f)⁻¹.
-    -- Let u = forward of divByS (a * D₀.s) (D₀.s * f).
-    -- Show u = algebraMap B (canonicalMap a) * divByS 1 (canonicalMap f).
-    have hrel : divByS (a * D₀.s) (D₀.s * f) *
-        algebraMap A (Localization.Away (D₀.s * f)) f =
-        algebraMap A (Localization.Away (D₀.s * f)) a := by
-      unfold divByS
-      rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-            (S := Localization.Away (D₀.s * f)) f,
-          ← IsLocalization.mk'_mul,
-          ← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-            (S := Localization.Away (D₀.s * f)) a]
-      exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
-    -- Apply forward map to hrel.
-    have hforward_rel : iteratedMinus_forwardLocHom D₀ f
-        (divByS (a * D₀.s) (D₀.s * f)) *
-        algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap f) =
-        algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap a) := by
-      have := congrArg (iteratedMinus_forwardLocHom D₀ f) hrel
-      rw [map_mul, hforward_alg, hforward_alg] at this; exact this
-    -- Multiply both sides by `divByS 1 (canonicalMap f)`, which is the inverse.
-    have hinv_f : algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap f) *
-        divByS (1 : B) (D₀.canonicalMap f) = 1 := by
-      unfold divByS
-      rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.canonicalMap f))
-            (S := Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap f),
-          ← IsLocalization.mk'_mul, mul_one, one_mul]
-      exact IsLocalization.mk'_self _ _
-    have hforward_eq : iteratedMinus_forwardLocHom D₀ f (divByS (a * D₀.s) (D₀.s * f)) =
-        algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap a) *
-          divByS (1 : B) (D₀.canonicalMap f) := by
-      have := congrArg (· * divByS (1 : B) (D₀.canonicalMap f)) hforward_rel
-      rwa [mul_assoc, hinv_f, mul_one] at this
-    rw [hforward_eq]
-    -- Membership: both factors in `locSubring (iteratedMinusDatum_B)`.
-    refine (locSubring _ _ _).mul_mem ?_ ?_
-    · exact algebraMap_mem_locSubring _ _ _ hcan_a
-    · exact divByS_mem_locSubring _ _ _ (Finset.mem_singleton_self 1)
-  · -- Case `b = f`. Use `hb_f : b = f` but keep `f` as the free variable by rewriting.
-    rw [hb_f]
-    -- Now goal is about `divByS (a * f) (D₀.s * f)`.
-    -- `divByS (a * f) (D₀.s * f) * algebraMap(D₀.s) = algebraMap(a)`.
-    have hrel : divByS (a * f) (D₀.s * f) *
-        algebraMap A (Localization.Away (D₀.s * f)) D₀.s =
-        algebraMap A (Localization.Away (D₀.s * f)) a := by
-      unfold divByS
-      rw [← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-            (S := Localization.Away (D₀.s * f)) D₀.s,
-          ← IsLocalization.mk'_mul,
-          ← IsLocalization.mk'_one (M := Submonoid.powers (D₀.s * f))
-            (S := Localization.Away (D₀.s * f)) a]
-      exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
-    have hforward_rel : iteratedMinus_forwardLocHom D₀ f
-        (divByS (a * f) (D₀.s * f)) *
-        algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap D₀.s) =
-        algebraMap B (Localization.Away (D₀.canonicalMap f)) (D₀.canonicalMap a) := by
-      have := congrArg (iteratedMinus_forwardLocHom D₀ f) hrel
-      rw [map_mul, hforward_alg, hforward_alg] at this; exact this
-    -- Now: forward = algebraMap(canonicalMap a) * (algebraMap(canonicalMap D₀.s))⁻¹
-    --            = algebraMap(canonicalMap a * (canonicalMap D₀.s)⁻¹)
-    --            = algebraMap(coeRingHom(divByS a D₀.s)).
-    -- Get: canonicalMap D₀.s * coeRingHom(divByS a D₀.s) = canonicalMap a in B.
-    have hcoeB : D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS a D₀.s) =
-        D₀.canonicalMap a := by
-      change D₀.coeRingHom (algebraMap A _ D₀.s) * D₀.coeRingHom (divByS a D₀.s) =
-        D₀.coeRingHom (algebraMap A _ a)
-      rw [← map_mul]
-      congr 1
-      unfold divByS
-      rw [← IsLocalization.mk'_one (M := Submonoid.powers D₀.s)
-            (S := Localization.Away D₀.s) D₀.s,
-          ← IsLocalization.mk'_mul,
-          ← IsLocalization.mk'_one (M := Submonoid.powers D₀.s)
-            (S := Localization.Away D₀.s) a]
-      exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
-    -- From `hforward_rel`: forward * algebraMap(canonicalMap D₀.s) = algebraMap(canonicalMap a).
-    -- Apply `hu_s_tgt.mul_right_cancel` with target algebraMap(coeRingHom(divByS a D₀.s)).
-    have hforward_eq : iteratedMinus_forwardLocHom D₀ f (divByS (a * f) (D₀.s * f)) =
-        algebraMap B (Localization.Away (D₀.canonicalMap f))
-          (D₀.coeRingHom (divByS a D₀.s)) := by
-      apply hu_s_tgt.mul_right_cancel
-      rw [hforward_rel, ← hcoeB, map_mul]; ring
-    rw [hforward_eq]
-    -- `divByS a D₀.s ∈ locSubring D₀.P D₀.T D₀.s`.
-    have hdiv_mem_loc : divByS a D₀.s ∈ locSubring D₀.P D₀.T D₀.s := by
-      simp only [Finset.mem_insert] at ha
-      rcases ha with rfl | ha'
-      · -- `a = D₀.s`: `divByS D₀.s D₀.s = 1`.
-        have hself : divByS D₀.s D₀.s = 1 := by
-          unfold divByS; exact IsLocalization.mk'_self _ _
-        rw [hself]; exact (locSubring _ _ _).one_mem
-      · exact divByS_mem_locSubring _ _ _ ha'
-    -- `D₀.coeRingHom(divByS a D₀.s) ∈ presheafValue_ringOfDef D₀`.
-    have hcoe_mem : D₀.coeRingHom (divByS a D₀.s) ∈ presheafValue_ringOfDef D₀ := by
-      refine Subring.le_topologicalClosure _ ?_
-      exact ⟨⟨divByS a D₀.s, hdiv_mem_loc⟩, rfl⟩
-    exact algebraMap_mem_locSubring _ _ _ hcoe_mem
-
+  · exact iteratedMinus_forward_mem_locSubring_of_eq_s P D₀ f a b ha ha_A₀ hcan_a
+      hu_s_tgt hforward_alg hb_s
+  · exact iteratedMinus_forward_mem_locSubring_of_eq_f P D₀ f a b ha ha_A₀ hcan_a
+      hu_s_tgt hforward_alg hb_f
 set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the forward uncompleted hom to the completion
 (Wedhorn Prop 8.2 analogue, minus branch).

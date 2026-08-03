@@ -13217,3 +13217,33 @@ Two distinct shapes here, and they want different treatment. The `[108]`/`[109]`
 lifted *and then* decomposed inside, two rounds before the count moves. The `[26,25,24,20]` and
 `[20,14,13,9]` ones are **many-small-step** proofs where no single lift is decisive and only a
 sustained five-or-six-lift pass clears them.
+
+### `iteratedMinus_forwardLocHom_generators_powerBounded` 105 -> 10: `LaurentRefinementCore` is clear
+
+Green first try. The proof reduces power-boundedness to membership in the target's `locSubring`
+and then splits on which of the two Laurent denominators `b` is; the two cases carry 101 of the
+105 lines.
+
+| new lemma | code | case |
+|---|---|---|
+| `iteratedMinus_forward_mem_locSubring_of_eq_s` | 35 | `b = D₀.s`: `(a·s)/(s·f)` is `a/f` |
+| `iteratedMinus_forward_mem_locSubring_of_eq_f` | 50 | `b = f`: `(a·f)/(s·f)` is `a/s`, a unit multiple |
+
+**Measuring the branches in `code` rather than `raw` before committing to the plan is what made
+this a one-round job.** The second branch is 60 raw lines, which by the ≤50 bar looks like it
+would just become a new target — but 11 of those lines are comments, so it is 49 code lines, and
+50 with the `set B` line restored. Checking that first turned "this needs three rounds" into "this
+needs one". Worth doing whenever a candidate block is in the 50–70 raw range.
+
+Two other choices worth recording:
+
+* **Where to put the `apply`.** The parent does `apply isPowerBounded_of_mem_locSubring` before
+  branching, so the branch goals are *membership* statements, not `IsPowerBounded` ones. I kept
+  the `apply` in the parent and gave the lemmas the membership conclusion. The alternative —
+  concluding `IsPowerBounded` and moving the `apply` inside each branch — would have duplicated
+  the 14-line setup into both lemmas and pushed them to 55 and 74.
+* **`set B := presheafValue D₀` restored inside each lemma.** The hypotheses are stated with
+  `presheafValue D₀` spelled out; `set` then folds them to `B` in the local context, so the copied
+  bodies — which say `B` — work unchanged. This is the same manoeuvre as `set N := max N₁ N₂` in
+  `RobbaPresentation`, and it is the general answer to "the body uses a `set`-local that the
+  signature cannot mention".
