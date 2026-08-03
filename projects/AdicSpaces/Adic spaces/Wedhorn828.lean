@@ -2363,6 +2363,117 @@ private lemma presheafValue_mvRestricted_psiGamma_genX
 
 
 omit [CompatiblePlusSubring A] in
+/-- The localization lift `ψγ : Loc → γ` is continuous: on constants it is `mk ∘ algebraMap`,
+and each generator ratio `tᵢ/s` lands on `mk (X (castAdd m i))`, which is power-bounded. -/
+private lemma presheafValue_mvRestricted_psiGamma_continuous
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (ψγ : Localization.Away D.s →+*
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
+    (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
+        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (example638_genTuple D i))
+    (hψγ_alg : ψγ.comp (algebraMap A (Localization.Away D.s)) =
+      (Ideal.Quotient.mk (RingHom.ker Ψ)).comp
+        (algebraMap A (restrictedMvPowerSeriesSubring (D.T.card + m) A)))
+    (hψ_round' : (RingHom.kerLift Ψ).comp ψγ =
+      (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
+        D.coeRingHom) :
+    @Continuous _ _ D.topology (mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)) ψγ := by
+  letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
+  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
+  letI τQ : TopologicalSpace
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
+    mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)
+  haveI hringQ : @IsTopologicalRing _ τQ _ :=
+    mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ :=
+    mvQuot_nonarchimedean (D.T.card + m) (RingHom.ker Ψ)
+  change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψγ
+  refine locTopology_continuous_lift D.P D.T D.s D.hopen ψγ ?_ ?_
+  · -- (a) `ψγ ∘ algebraMap A = mk ∘ algebraMap A source` is continuous.
+    rw [hψγ_alg]
+    exact (continuous_quotient_mk'.comp
+      (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)))
+  · -- (b) `ψγ(tᵢ/s) = mk(X (castAdd i))` is power-bounded in `γ`.
+    intro t ht
+    set i := D.T.equivFin ⟨t, ht⟩ with hi
+    -- `ψγ(divByS t s) = mk(X (castAdd i))`, from injectivity of `ē = kerLift Ψ`.
+    have hψγval := presheafValue_mvRestricted_psiGamma_genX D m Ψ ψγ hΨ_genX hψ_round' i
+    have htval : t = (↑(D.T.equivFin.symm i) : A) := by rw [hi, Equiv.symm_apply_apply]
+    rw [htval, hψγval]
+    -- `X (castAdd i)` ∈ pair-subring of source ⟹ power-bounded ⟹ `mk` power-bounded.
+    have hXi_mem : (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+        restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
+        MvTateAlgebra.mvPairSubring (D.T.card + m)
+          (IsTateRing.principalPair A).toPairOfDefinition := by
+      intro l
+      change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.castAdd m i)) ∈ _
+      rw [MvPowerSeries.coeff_X]
+      split
+      · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
+      · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
+    have hXi_pb : @TopologicalRing.IsPowerBounded _ _ τS
+        (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+      (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring
+        hXi_mem
+    exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
+      (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
+      (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hXi_pb
+-- (ii) `iU p`'s coefficient at `v` is `coeRingHom (coeff_v p)` (`iU = coe ∘ map coeRingHom`).
+
+
+omit [CompatiblePlusSubring A] in
+/-- Each `fU (X j)` is power-bounded in `γ`: it is `mk` of a variable of the source, whose
+coefficients lie in `A₀`, and `mk` is a continuous open map. -/
+private lemma presheafValue_mvRestricted_fU_X_isPowerBounded
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (fU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
+    (hfU_X : ∀ j, fU (MvPolynomial.X j) =
+      Ideal.Quotient.mk (RingHom.ker Ψ)
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A))
+    (j : Fin m) :
+    @TopologicalRing.IsPowerBounded _ _ (mvQuotTopology (D.T.card + m) (RingHom.ker Ψ))
+      (fU (MvPolynomial.X j)) := by
+  letI τS : TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' (D.T.card + m)
+  haveI hringS : IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing (D.T.card + m)
+  letI τQ : TopologicalSpace
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ) :=
+    mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)
+  haveI hringQ : @IsTopologicalRing _ τQ _ :=
+    mvQuot_isTopologicalRing (D.T.card + m) (RingHom.ker Ψ)
+  rw [hfU_X j]
+  have hZ_mem : (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+      restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
+      MvTateAlgebra.mvPairSubring (D.T.card + m)
+        (IsTateRing.principalPair A).toPairOfDefinition := by
+    intro l
+    change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.natAdd D.T.card j)) ∈ _
+    rw [MvPowerSeries.coeff_X]
+    split
+    · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
+    · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
+  have hZ_pb : @TopologicalRing.IsPowerBounded _ _ τS
+      (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+        restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
+    (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring hZ_mem
+  exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
+    (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
+    (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hZ_pb
+
+
+omit [CompatiblePlusSubring A] in
 /-- **Uniform continuity of `fU : U → γ`** (helper for `presheafValue_mvRestricted_surjection`),
 where `U = (Localization.Away D.s)[Y]` carries the pullback uniformity along `iU` and
 `γ = source ⧸ ker Ψ`. Reduces (additive-group hom) to continuity at `0`; the localization lift `ψγ`
@@ -2436,61 +2547,10 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
   -- `P_T = principal pair of `presheafValue D``, `P_S = principal pair of `A``.
   set P_T := (IsTateRing.principalPair (presheafValue D)).toPairOfDefinition with hP_T
   -- (i) `ψγ : Loc → γ` is continuous (relative analogue of `example638_locToQuot_continuous`).
-  have hψγ_cont : @Continuous _ _ D.topology τQ ψγ := by
-    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψγ
-    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψγ ?_ ?_
-    · -- (a) `ψγ ∘ algebraMap A = mk ∘ algebraMap A source` is continuous.
-      rw [hψγ_alg]
-      exact (continuous_quotient_mk'.comp
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (D.T.card + m)))
-    · -- (b) `ψγ(tᵢ/s) = mk(X (castAdd i))` is power-bounded in `γ`.
-      intro t ht
-      set i := D.T.equivFin ⟨t, ht⟩ with hi
-      -- `ψγ(divByS t s) = mk(X (castAdd i))`, from injectivity of `ē = kerLift Ψ`.
-      have hψγval := presheafValue_mvRestricted_psiGamma_genX D m Ψ ψγ hΨ_genX hψ_round' i
-      have htval : t = (↑(D.T.equivFin.symm i) : A) := by rw [hi, Equiv.symm_apply_apply]
-      rw [htval, hψγval]
-      -- `X (castAdd i)` ∈ pair-subring of source ⟹ power-bounded ⟹ `mk` power-bounded.
-      have hXi_mem : (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-          restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
-          MvTateAlgebra.mvPairSubring (D.T.card + m)
-            (IsTateRing.principalPair A).toPairOfDefinition := by
-        intro l
-        change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.castAdd m i)) ∈ _
-        rw [MvPowerSeries.coeff_X]
-        split
-        · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
-        · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
-      have hXi_pb : @TopologicalRing.IsPowerBounded _ _ τS
-          (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-            restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-        (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring
-          hXi_mem
-      exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
-        (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
-        (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hXi_pb
-  -- (ii) `iU p`'s coefficient at `v` is `coeRingHom (coeff_v p)` (`iU = coe ∘ map coeRingHom`).
+  have hψγ_cont := presheafValue_mvRestricted_psiGamma_continuous D m Ψ ψγ
+    hΨ_genX hψγ_alg hψ_round'
   have hiU_coeff := presheafValue_mvRestricted_iU_coeff D m iU hiU_C hiU_X
-  have hfUX_pb : ∀ j : Fin m, @TopologicalRing.IsPowerBounded _ _ τQ (fU (MvPolynomial.X j)) := by
-    intro j
-    rw [hfU_X j]
-    have hZ_mem : (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
-        restrictedMvPowerSeriesSubring (D.T.card + m) A) ∈
-        MvTateAlgebra.mvPairSubring (D.T.card + m)
-          (IsTateRing.principalPair A).toPairOfDefinition := by
-      intro l
-      change MvPowerSeries.coeff l (MvPowerSeries.X (Fin.natAdd D.T.card j)) ∈ _
-      rw [MvPowerSeries.coeff_X]
-      split
-      · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.one_mem
-      · exact (IsTateRing.principalPair A).toPairOfDefinition.A₀.zero_mem
-    have hZ_pb : @TopologicalRing.IsPowerBounded _ _ τS
-        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
-          restrictedMvPowerSeriesSubring (D.T.card + m) A) :=
-      (MvTateAlgebra.mvTateAlgebra_pairOfDefinition (D.T.card + m)).mem_powerBoundedSubring hZ_mem
-    exact @isPowerBounded_map_of_isOpenMap _ _ _ τS _ τQ hringQ
-      (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
-      (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hZ_pb
+  have hfUX_pb := presheafValue_mvRestricted_fU_X_isPowerBounded D m Ψ fU hfU_X
   have hRbdd : @TopologicalRing.IsBounded _ _ τQ
       (Set.range (fun v : Fin m →₀ ℕ ↦ ∏ j, fU (MvPolynomial.X j) ^ (v j))) :=
     mvRangeProd_isBounded (fun j ↦ fU (MvPolynomial.X j)) hfUX_pb
