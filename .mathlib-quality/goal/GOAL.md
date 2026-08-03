@@ -12354,3 +12354,26 @@ dead anon code  target
 
 The three Wedhorn828 entries are the ones I have already lifted steps out of, so they are the
 likeliest to carry genuinely orphaned instances — the same situation as the twins.
+
+### Scan 8 tested: the named candidates were LIVE
+
+Deleted the six named "dead" instances in the two targets I had actually lifted steps out of
+(`fU_uniformContinuous`: `τS`, `hringS`, `hringQ`; `isUnit_mk_s`: `τS`, `hringS`, `uS`) and
+rebuilt. **All six were live** — ten errors, all `failed to synthesize instance of type class
+UniformSpace/TopologicalSpace ↥(restrictedMvPowerSeriesSubring (D.T.card + m) A)`. Reverted.
+
+So the caveat was right and the scan's named column is not just weak but, on this sample,
+**0 for 6**. Recorded as a negative result rather than quietly dropped.
+
+**Why the twins were different.** Their instances died because *two* things happened at once:
+the lifted lemmas installed their own copies **and** the parent's remaining body no longer
+touched those types at all — the twins had been reduced to `rw [hΦ_ker]; exact ker_le_of_ext …`.
+Here the parents still have 70–80 lines of body that use the same carriers, so the instances
+are still required.
+
+> **Dead instance preamble appears only when a target's body is nearly gone.** It is a
+> *consequence* of a target being almost cleared, not an independent source of savings. Do not
+> spend build cycles hunting it in targets that still have substantial bodies.
+
+Scan 8 is retired as a work-selector. Its one real use is as a final sweep on a target that
+has just dropped under 50 anyway.
