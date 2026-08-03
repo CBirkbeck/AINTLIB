@@ -13499,3 +13499,39 @@ Three builds, all on already-recorded gotchas rather than new ones:
 3. The one-line call site came out at 115 characters and had to be wrapped — worth checking after
    any lift with more than about ten arguments, since the one-line-call rule that makes the
    arithmetic work also pushes lines over the width limit.
+
+### `laurentProdCoverOf_isOXAcyclic` 105 -> 13: the first single-branch target cracked
+
+Recorded three rounds ago as one of the hard shapes — *"blocks `[105]`, the `cons` branch **is** the
+proof; lifting it merely renames the target"*. That was true of lifting the branch, but not of
+looking **inside** it. The branch has three independent pieces:
+
+| new lemma | code | what it is |
+|---|---|---|
+| `laurentProdCoverOf_cons_interProd_isOXAcyclic` | 41 | the product cover is acyclic — `unitCover` outright, the rest from the IH at each piece |
+| `laurentProdCoverOf_cons_congr_left` | 30 | every leaf of the `(f :: gs)`-cover is R-equal to a product piece |
+| `laurentProdCoverOf_cons_congr_right` | 19 | ...and conversely |
+
+So the rule for single-branch targets should be: **outline one level deeper before judging them.**
+A `[105]` profile means the top level has one block, not that the proof is indivisible; the block
+profile of the branch's *interior* is what decides. The same is worth re-checking for
+`isOXAcyclic_interProd` (`[105, 12]`) and `genRestrictedCover_isOXAcyclic_…` (`[184, 27]`).
+
+**Three builds, and two of the failures were new variants of old traps.**
+
+1. *A nested bullet impersonating the next top-level one.* I located the second bullet by its
+   leading tactic (`· rw [RationalCoveringData.interProd_covers…`) — but the **first** bullet
+   contains a sub-bullet starting with exactly that text. The end-marker matched the nested one,
+   truncating lemma 1's body mid-`refine`. Match top-level bullets by **indent**
+   (`l.startswith('    · ')`), never by leading tactic.
+2. *The first instance binder lives on the `theorem` line.* `theorem laurentProdCoverOf_isOXAcyclic
+   [DecidableEq A]` — slicing the binder block from `t0+1` silently dropped it. I patched around
+   the symptom with `open Classical in`, which *does* supply a `DecidableEq A`, but a **different**
+   one than the parent's binder, so `hVP` no longer typechecked at the call site. Two wrongs: the
+   real fix was to carry `[DecidableEq A]` through and drop the `open Classical`.
+
+That second one is worth stating sharply because it looked like the familiar `classical`-vs-statement
+problem and was not: **`open Classical in` is the right fix only when the parent gets decidability
+from the `classical` *tactic*. When the parent has a `DecidableEq` *binder*, the extracted lemma
+must take the same binder** — otherwise every hypothesis mentioning a `Finset` operation fails to
+match.

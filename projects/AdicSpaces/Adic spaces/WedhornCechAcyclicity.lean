@@ -6701,6 +6701,148 @@ theorem unitCover_isOXAcyclic
       apply (unitCover_bridgeMinus D₀ f).injective
       exact (unitCover_bridgeMinus_restrictionMap D₀ f a).trans ha₂
 
+/-- Backward leg of the `cons` step: every leaf of the `(f :: gs)`-cover is R-equal to a piece of
+the product cover, by `laurentProdLeaves_restrict` at whichever of the two unit halves it came
+from. -/
+private theorem laurentProdCoverOf_cons_congr_left [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) (gs : List A)
+    (hbase : (laurentProdCoverOf D₀ gs).base = (unitCover D₀ f).base)
+    (hUfP : ∀ P ∈ (unitCover D₀ f).covers, P.P = (unitCover D₀ f).base.P)
+    (hVP : ∀ Q ∈ (laurentProdCoverOf D₀ gs).covers, Q.P = (unitCover D₀ f).base.P)
+    (D : RationalLocData A) (hD : D ∈ (laurentProdCoverOf D₀ (f :: gs)).covers) :
+    ∃ D' ∈ ((unitCover D₀ f).interProd (laurentProdCoverOf D₀ gs) hbase hUfP hVP).covers,
+      rationalOpen D.T D.s = rationalOpen D'.T D'.s := by
+  rw [laurentProdCoverOf_covers, laurentProdLeaves_cons, Finset.mem_union] at hD
+  rcases hD with hD | hD
+  · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀
+      (D₀.interSamePair (unitDatum D₀.P f) rfl)
+      (RationalLocData.interSamePair_subset_left _ _ _)).2 D hD
+    -- v4.33: build the pair-equality proof by `Eq.trans` through `interSamePair_P`
+    -- (reducible-well-typed; a bare `laurentProdLeaves_pair` proof types only at
+    -- default transparency and makes the subsequent `rw` choke), then apply
+    -- `interSamePair_rationalOpen` forward.
+    refine ⟨(D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair Q
+      ((laurentProdLeaves_pair gs D₀ hQ).trans
+        (RationalLocData.interSamePair_P D₀ (unitDatum D₀.P f) rfl).symm), ?_, ?_⟩
+    · rw [RationalCoveringData.interProd_covers, Finset.mem_image]
+      exact ⟨⟨(D₀.interSamePair (unitDatum D₀.P f) rfl, Q),
+        Finset.mem_product.mpr ⟨unit_mem_unitCover D₀ f, hQ⟩⟩,
+        Finset.mem_attach _ _, rfl⟩
+    · exact hQeq.symm.trans (RationalLocData.interSamePair_rationalOpen
+        (D₀.interSamePair (unitDatum D₀.P f) rfl) Q
+        ((laurentProdLeaves_pair gs D₀ hQ).trans
+          (RationalLocData.interSamePair_P D₀ (unitDatum D₀.P f) rfl).symm)).symm
+  · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+      (RationalLocData.interSamePair_subset_left _ _ _)).2 D hD
+    refine ⟨(D₀.interSamePair (coUnitDatum D₀.P f) rfl).interSamePair Q
+      ((laurentProdLeaves_pair gs D₀ hQ).trans
+        (RationalLocData.interSamePair_P D₀ (coUnitDatum D₀.P f) rfl).symm), ?_, ?_⟩
+    · rw [RationalCoveringData.interProd_covers, Finset.mem_image]
+      exact ⟨⟨(D₀.interSamePair (coUnitDatum D₀.P f) rfl, Q),
+        Finset.mem_product.mpr ⟨counit_mem_unitCover D₀ f, hQ⟩⟩,
+        Finset.mem_attach _ _, rfl⟩
+    · exact hQeq.symm.trans (RationalLocData.interSamePair_rationalOpen
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) Q
+        ((laurentProdLeaves_pair gs D₀ hQ).trans
+          (RationalLocData.interSamePair_P D₀ (coUnitDatum D₀.P f) rfl).symm)).symm
+
+/-- Forward leg: every piece of the product cover is R-equal to a leaf of the `(f :: gs)`-cover. -/
+private theorem laurentProdCoverOf_cons_congr_right [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) (gs : List A)
+    (hbase : (laurentProdCoverOf D₀ gs).base = (unitCover D₀ f).base)
+    (hUfP : ∀ P ∈ (unitCover D₀ f).covers, P.P = (unitCover D₀ f).base.P)
+    (hVP : ∀ Q ∈ (laurentProdCoverOf D₀ gs).covers, Q.P = (unitCover D₀ f).base.P)
+    (D' : RationalLocData A)
+    (hD' : D' ∈ ((unitCover D₀ f).interProd (laurentProdCoverOf D₀ gs)
+      hbase hUfP hVP).covers) :
+    ∃ D ∈ (laurentProdCoverOf D₀ (f :: gs)).covers,
+      rationalOpen D.T D.s = rationalOpen D'.T D'.s := by
+  rw [RationalCoveringData.interProd_covers, Finset.mem_image] at hD'
+  obtain ⟨⟨⟨P, Q⟩, hPQ⟩, -, rfl⟩ := hD'
+  obtain ⟨hPmem, hQmem⟩ := Finset.mem_product.mp hPQ
+  rw [mem_unitCover_iff] at hPmem
+  rcases hPmem with rfl | rfl
+  · obtain ⟨D, hD, hDeq⟩ := (laurentProdLeaves_restrict gs D₀
+      (D₀.interSamePair (unitDatum D₀.P f) rfl)
+      (RationalLocData.interSamePair_subset_left _ _ _)).1 Q hQmem
+    refine ⟨D, ?_, ?_⟩
+    · rw [laurentProdCoverOf_covers, laurentProdLeaves_cons]
+      exact Finset.mem_union_left _ hD
+    · rw [RationalLocData.interSamePair_rationalOpen]; exact hDeq.symm
+  · obtain ⟨D, hD, hDeq⟩ := (laurentProdLeaves_restrict gs D₀
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+      (RationalLocData.interSamePair_subset_left _ _ _)).1 Q hQmem
+    refine ⟨D, ?_, ?_⟩
+    · rw [laurentProdCoverOf_covers, laurentProdLeaves_cons]
+      exact Finset.mem_union_right _ hD
+    · rw [RationalLocData.interSamePair_rationalOpen]; exact hDeq.symm
+
+
+/-- The product cover is acyclic: `unitCover` is acyclic outright, and each restriction of the
+`gs`-cover to a unit piece (or to an intersection of two) is acyclic by the induction hypothesis
+at that base, transported along `laurentProdLeaves_restrict`. -/
+private theorem laurentProdCoverOf_cons_interProd_isOXAcyclic [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) (gs : List A)
+    (hbase : (laurentProdCoverOf D₀ gs).base = (unitCover D₀ f).base)
+    (hUfP : ∀ P ∈ (unitCover D₀ f).covers, P.P = (unitCover D₀ f).base.P)
+    (hVP : ∀ Q ∈ (laurentProdCoverOf D₀ gs).covers, Q.P = (unitCover D₀ f).base.P)
+    (hD₀ : D₀.IsRational)
+    (ih : ∀ D₀ : RationalLocData A, D₀.IsRational →
+      (laurentProdCoverOf D₀ gs).IsOXAcyclic) :
+    ((unitCover D₀ f).interProd (laurentProdCoverOf D₀ gs) hbase hUfP hVP).IsOXAcyclic := by
+  refine isOXAcyclic_interProd (unitCover D₀ f) (laurentProdCoverOf D₀ gs)
+    hbase hUfP hVP (unitCover_isOXAcyclic D₀ f hD₀) (fun P hP => ?_)
+    (fun P P' hP hP' => ?_)
+  · -- hV0: V|_P acyclic, via congr from the IH at base P
+    have hPsub : rationalOpen P.T P.s ⊆ rationalOpen D₀.T D₀.s :=
+      (unitCover D₀ f).hsubset P hP
+    refine isOXAcyclic_congr _ (laurentProdCoverOf P gs) rfl (fun D hD => ?_)
+      (fun D' hD' => ?_) (ih P ((unitCover_isRational D₀ f hD₀).piece hP))
+    · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hD
+      obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
+      obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ P hPsub).1 Q hQ
+      exact ⟨Q', hQ', by rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq⟩
+    · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀ P hPsub).2 D' hD'
+      refine ⟨P.interSamePair Q ((laurentProdLeaves_pair gs D₀ hQ).trans
+        (hUfP P hP).symm), ?_, ?_⟩
+      · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
+        exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
+      · rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq
+  · -- hV1: V|_{P∩P'} acyclic, via congr from the IH at base P∩P'
+    set Pm := P.interSamePair P' (by rw [hUfP P' hP', hUfP P hP]) with hPm
+    have hPsub : rationalOpen Pm.T Pm.s ⊆ rationalOpen D₀.T D₀.s :=
+      (RationalLocData.interSamePair_subset_left P P' _).trans
+        ((unitCover D₀ f).hsubset P hP)
+    have hPm_rat : Pm.IsRational :=
+      RationalLocData.interSamePair_isRational P P' _
+        ((unitCover_isRational D₀ f hD₀).piece hP)
+        ((unitCover_isRational D₀ f hD₀).piece hP')
+    refine isOXAcyclic_congr _ (laurentProdCoverOf Pm gs) rfl (fun D hD => ?_)
+      (fun D' hD' => ?_) (ih Pm hPm_rat)
+    · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hD
+      obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
+      obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ Pm hPsub).1 Q hQ
+      exact ⟨Q', hQ', by rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq⟩
+    · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀ Pm hPsub).2 D' hD'
+      refine ⟨Pm.interSamePair Q ((laurentProdLeaves_pair gs D₀ hQ).trans
+        (hUfP P hP).symm), ?_, ?_⟩
+      · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
+        exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
+      · rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq
+
 /-- **Lemma 8.34(i) — the base-independent Laurent cover is `O_X`-acyclic** (the
 faithful Wedhorn A.3(3) induction). By induction on `fs`: the empty cover is the
 trivial cover `{D₀}`; the cons cover `R`-equals the product
@@ -6727,105 +6869,15 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
       rcases hP with rfl | rfl <;> rfl
     have hVP : ∀ Q ∈ (laurentProdCoverOf D₀ gs).covers, Q.P = (unitCover D₀ f).base.P :=
       fun Q hQ => laurentProdLeaves_pair gs D₀ hQ
-    have hinner : ((unitCover D₀ f).interProd (laurentProdCoverOf D₀ gs)
-        hbase hUfP hVP).IsOXAcyclic := by
-      refine isOXAcyclic_interProd (unitCover D₀ f) (laurentProdCoverOf D₀ gs)
-        hbase hUfP hVP (unitCover_isOXAcyclic D₀ f hD₀) (fun P hP => ?_)
-        (fun P P' hP hP' => ?_)
-      · -- hV0: V|_P acyclic, via congr from the IH at base P
-        have hPsub : rationalOpen P.T P.s ⊆ rationalOpen D₀.T D₀.s :=
-          (unitCover D₀ f).hsubset P hP
-        refine isOXAcyclic_congr _ (laurentProdCoverOf P gs) rfl (fun D hD => ?_)
-          (fun D' hD' => ?_) (ih P ((unitCover_isRational D₀ f hD₀).piece hP))
-        · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hD
-          obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
-          obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ P hPsub).1 Q hQ
-          exact ⟨Q', hQ', by rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq⟩
-        · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀ P hPsub).2 D' hD'
-          refine ⟨P.interSamePair Q ((laurentProdLeaves_pair gs D₀ hQ).trans
-            (hUfP P hP).symm), ?_, ?_⟩
-          · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
-            exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
-          · rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq
-      · -- hV1: V|_{P∩P'} acyclic, via congr from the IH at base P∩P'
-        set Pm := P.interSamePair P' (by rw [hUfP P' hP', hUfP P hP]) with hPm
-        have hPsub : rationalOpen Pm.T Pm.s ⊆ rationalOpen D₀.T D₀.s :=
-          (RationalLocData.interSamePair_subset_left P P' _).trans
-            ((unitCover D₀ f).hsubset P hP)
-        have hPm_rat : Pm.IsRational :=
-          RationalLocData.interSamePair_isRational P P' _
-            ((unitCover_isRational D₀ f hD₀).piece hP)
-            ((unitCover_isRational D₀ f hD₀).piece hP')
-        refine isOXAcyclic_congr _ (laurentProdCoverOf Pm gs) rfl (fun D hD => ?_)
-          (fun D' hD' => ?_) (ih Pm hPm_rat)
-        · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hD
-          obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
-          obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ Pm hPsub).1 Q hQ
-          exact ⟨Q', hQ', by rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq⟩
-        · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀ Pm hPsub).2 D' hD'
-          refine ⟨Pm.interSamePair Q ((laurentProdLeaves_pair gs D₀ hQ).trans
-            (hUfP P hP).symm), ?_, ?_⟩
-          · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
-            exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
-          · rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq
+    have hinner := laurentProdCoverOf_cons_interProd_isOXAcyclic D₀ f gs hbase hUfP
+      hVP hD₀ ih
     -- outer: the cons cover R-equals the product (the `unitCover` pieces ARE the
     -- `laurentProdLeaves_cons` recursion bases, so this is `laurentProdLeaves_restrict`).
     refine isOXAcyclic_congr (laurentProdCoverOf D₀ (f :: gs))
       ((unitCover D₀ f).interProd (laurentProdCoverOf D₀ gs) hbase hUfP hVP)
       rfl (fun D hD => ?_) (fun D' hD' => ?_) hinner
-    · rw [laurentProdCoverOf_covers, laurentProdLeaves_cons, Finset.mem_union] at hD
-      rcases hD with hD | hD
-      · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀
-          (D₀.interSamePair (unitDatum D₀.P f) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)).2 D hD
-        -- v4.33: build the pair-equality proof by `Eq.trans` through `interSamePair_P`
-        -- (reducible-well-typed; a bare `laurentProdLeaves_pair` proof types only at
-        -- default transparency and makes the subsequent `rw` choke), then apply
-        -- `interSamePair_rationalOpen` forward.
-        refine ⟨(D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair Q
-          ((laurentProdLeaves_pair gs D₀ hQ).trans
-            (RationalLocData.interSamePair_P D₀ (unitDatum D₀.P f) rfl).symm), ?_, ?_⟩
-        · rw [RationalCoveringData.interProd_covers, Finset.mem_image]
-          exact ⟨⟨(D₀.interSamePair (unitDatum D₀.P f) rfl, Q),
-            Finset.mem_product.mpr ⟨unit_mem_unitCover D₀ f, hQ⟩⟩,
-            Finset.mem_attach _ _, rfl⟩
-        · exact hQeq.symm.trans (RationalLocData.interSamePair_rationalOpen
-            (D₀.interSamePair (unitDatum D₀.P f) rfl) Q
-            ((laurentProdLeaves_pair gs D₀ hQ).trans
-              (RationalLocData.interSamePair_P D₀ (unitDatum D₀.P f) rfl).symm)).symm
-      · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀
-          (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)).2 D hD
-        refine ⟨(D₀.interSamePair (coUnitDatum D₀.P f) rfl).interSamePair Q
-          ((laurentProdLeaves_pair gs D₀ hQ).trans
-            (RationalLocData.interSamePair_P D₀ (coUnitDatum D₀.P f) rfl).symm), ?_, ?_⟩
-        · rw [RationalCoveringData.interProd_covers, Finset.mem_image]
-          exact ⟨⟨(D₀.interSamePair (coUnitDatum D₀.P f) rfl, Q),
-            Finset.mem_product.mpr ⟨counit_mem_unitCover D₀ f, hQ⟩⟩,
-            Finset.mem_attach _ _, rfl⟩
-        · exact hQeq.symm.trans (RationalLocData.interSamePair_rationalOpen
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) Q
-            ((laurentProdLeaves_pair gs D₀ hQ).trans
-              (RationalLocData.interSamePair_P D₀ (coUnitDatum D₀.P f) rfl).symm)).symm
-    · rw [RationalCoveringData.interProd_covers, Finset.mem_image] at hD'
-      obtain ⟨⟨⟨P, Q⟩, hPQ⟩, -, rfl⟩ := hD'
-      obtain ⟨hPmem, hQmem⟩ := Finset.mem_product.mp hPQ
-      rw [mem_unitCover_iff] at hPmem
-      rcases hPmem with rfl | rfl
-      · obtain ⟨D, hD, hDeq⟩ := (laurentProdLeaves_restrict gs D₀
-          (D₀.interSamePair (unitDatum D₀.P f) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)).1 Q hQmem
-        refine ⟨D, ?_, ?_⟩
-        · rw [laurentProdCoverOf_covers, laurentProdLeaves_cons]
-          exact Finset.mem_union_left _ hD
-        · rw [RationalLocData.interSamePair_rationalOpen]; exact hDeq.symm
-      · obtain ⟨D, hD, hDeq⟩ := (laurentProdLeaves_restrict gs D₀
-          (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
-          (RationalLocData.interSamePair_subset_left _ _ _)).1 Q hQmem
-        refine ⟨D, ?_, ?_⟩
-        · rw [laurentProdCoverOf_covers, laurentProdLeaves_cons]
-          exact Finset.mem_union_right _ hD
-        · rw [RationalLocData.interSamePair_rationalOpen]; exact hDeq.symm
+    · exact laurentProdCoverOf_cons_congr_left D₀ f gs hbase hUfP hVP D hD
+    · exact laurentProdCoverOf_cons_congr_right D₀ f gs hbase hUfP hVP D' hD'
 
 theorem wedhorn_lemma_834_part_i_laurent_acyclic [DecidableEq A]
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
