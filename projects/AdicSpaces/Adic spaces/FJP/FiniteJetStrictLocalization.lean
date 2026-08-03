@@ -361,6 +361,42 @@ theorem ideal_row_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
       calc ‖u‖ * Cr ≤ h * ‖y‖ * Cr := mul_le_mul_of_nonneg_right hun (zero_le_one.trans hCr1)
         _ = h * Cr * ‖y‖ := by ring
 
+/-- Norm bound for `d₂`: if every `v p` is bounded by `K` and `Cr = 1 + ∑ ‖r i‖`, then each
+component of `d₂ r v` is bounded by `K * Cr`. Ultrametric, so the difference of the two
+partial sums is bounded by their max. -/
+private theorem norm_d2_le {S : Type*} [NormedCommRing S] [IsUltrametricDist S] {m : ℕ}
+    (r : Fin m → S) (v : Pairs m → S) (K Cr : ℝ) (hK : 0 ≤ K)
+    (hCr : Cr = 1 + ∑ i, ‖r i‖) (hv : ∀ p, ‖v p‖ ≤ K) (i : Fin m) :
+    ‖d2 r v i‖ ≤ K * Cr := by
+  have hCr1 : 1 ≤ Cr := by
+    rw [hCr]; exact le_add_of_nonneg_right (Finset.sum_nonneg fun _ _ => norm_nonneg _)
+  have hKCr0 : 0 ≤ K * Cr := mul_nonneg hK (zero_le_one.trans hCr1)
+  have hterm : ∀ (p : Pairs m) (j : Fin m), ‖v p * r j‖ ≤ K * Cr := fun p j => by
+    calc ‖v p * r j‖ ≤ ‖v p‖ * ‖r j‖ := norm_mul_le _ _
+      _ ≤ K * Cr := by
+          refine mul_le_mul (hv p) ?_ (norm_nonneg _) hK
+          rw [hCr]
+          exact le_add_of_nonneg_of_le zero_le_one
+            (Finset.single_le_sum (fun k _ => norm_nonneg _) (Finset.mem_univ j))
+  show ‖d2 r v i‖ ≤ _
+  unfold d2
+  have h1 : ‖(∑ j, if h : j < i then v ⟨(j, i), h⟩ * r j else 0)‖ ≤ K * Cr := by
+    refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hKCr0 fun j _ => ?_
+    by_cases hji : j < i
+    · rw [dif_pos hji]; exact hterm _ _
+    · rw [dif_neg hji, norm_zero]; exact hKCr0
+  have h2 : ‖(∑ j, if h : i < j then v ⟨(i, j), h⟩ * r j else 0)‖ ≤ K * Cr := by
+    refine IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hKCr0 fun j _ => ?_
+    by_cases hji : i < j
+    · rw [dif_pos hji]; exact hterm _ _
+    · rw [dif_neg hji, norm_zero]; exact hKCr0
+  have hd := IsUltrametricDist.norm_add_le_max
+    (∑ j, if h : j < i then v ⟨(j, i), h⟩ * r j else 0)
+    (-(∑ j, if h : i < j then v ⟨(i, j), h⟩ * r j else 0))
+  rw [← sub_eq_add_neg, norm_neg] at hd
+  exact hd.trans (max_le h1 h2)
+
+
 /-- The controlled pullback ([FJP] (4.12)–(4.16)): a matching pair of graph-ideal elements
 comes from an element of `I_𝓐` with a uniformly bounded representative. This is where the
 `d₂`-syzygy correction (`exists_d2_lift` at the 𝓓-vertex) enters. -/
@@ -417,12 +453,6 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
   have hvn' : ‖v‖ ≤ hC * M :=
     hvn.trans (mul_le_mul_of_nonneg_left (le_max_right _ _) hC0)
   set w : Fin m → PD F m := fun i => extRhoB F m (u i) - extRhoC F m (v i) with hw
-  have hd1sub : ∀ {S : Type _} [inst : CommRing S] (r a b : Fin m → S),
-      d1 r (fun i => a i - b i) = d1 r a - d1 r b := by
-    intro S _ r a b
-    unfold d1
-    rw [← Finset.sum_sub_distrib]
-    exact Finset.sum_congr rfl fun i _ => by ring
   have hwd1 : d1 (rD F m g f) w = 0 := by
     have h1 : d1 (rD F m g f) (fun i => extRhoB F m (u i)) = extRhoB F m xb := by
       rw [← hu, d1_map (extRhoB F m)]
@@ -431,7 +461,7 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
     have h2 : d1 (rD F m g f) (fun i => extRhoC F m (v i)) = extRhoC F m xc := by
       rw [← hv, d1_map (extRhoC F m)]
       rfl
-    rw [hw, hd1sub, h1, h2, hcompat, sub_self]
+    rw [hw, d1_sub, h1, h2, hcompat, sub_self]
   obtain ⟨sD, hsD, hsDn⟩ := hliftD w hwd1
   have hwn : ‖w‖ ≤ (hB + hC) * M := by
     refine pi_norm_le_iff_of_nonneg (mul_nonneg (add_nonneg hB0 hC0) hM0) |>.mpr fun i => ?_
@@ -463,14 +493,8 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
     rw [hsCn p]
     exact (norm_le_pi_norm sD p).trans hsDn'
   set v' : Fin m → PC F m := fun i => v i + d2 (rC F m g f) sC i with hv'def
-  have hd1add : ∀ {S : Type _} [inst : CommRing S] (r a b : Fin m → S),
-      d1 r (fun i => a i + b i) = d1 r a + d1 r b := by
-    intro S _ r a b
-    unfold d1
-    rw [← Finset.sum_add_distrib]
-    exact Finset.sum_congr rfl fun i _ => by ring
   have hv'd1 : d1 (rC F m g f) v' = xc := by
-    rw [hv'def, hd1add, hv,
+    rw [hv'def, d1_add, hv,
       show d1 (rC F m g f) (fun i => d2 (rC F m g f) sC i) = 0 from d1_d2 _ sC, add_zero]
   have hv'compat : ∀ i, extRhoB F m (u i) = extRhoC F m (v' i) := fun i => by
     rw [hv'def]
@@ -505,44 +529,8 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
   · have hsum : ∀ (C0 : ℝ), 0 ≤ C0 → ∀ (T : Finset (Fin m)) (G : Fin m → PC F m),
         (∀ j ∈ T, ‖G j‖ ≤ C0) → ‖∑ j ∈ T, G j‖ ≤ C0 :=
       fun _ h _ _ hG => IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg h hG
-    have hd2bound : ∀ i, ‖d2 (rC F m g f) sC i‖ ≤ z * (hB + hC) * M * CrC := fun i => by
-      have hterm : ∀ (p : Pairs m) (j : Fin m), ‖sC p * rC F m g f j‖ ≤
-          z * (hB + hC) * M * CrC := fun p j => by
-        calc ‖sC p * rC F m g f j‖ ≤ ‖sC p‖ * ‖rC F m g f j‖ := norm_mul_le _ _
-          _ ≤ (z * (hB + hC) * M) * CrC := by
-              refine mul_le_mul (hsCn' p) ?_ (norm_nonneg _) hzM0
-              rw [hCrC]
-              exact le_add_of_nonneg_of_le zero_le_one
-                (Finset.single_le_sum (fun k _ => norm_nonneg _) (Finset.mem_univ j))
-      have hCrCM0 : 0 ≤ z * (hB + hC) * M * CrC :=
-        mul_nonneg hzM0 (zero_le_one.trans hCrC1)
-      show ‖d2 (rC F m g f) sC i‖ ≤ _
-      unfold d2
-      have h1 : ‖(∑ j, if h : j < i then sC ⟨(j, i), h⟩ * rC F m g f j else 0)‖ ≤
-          z * (hB + hC) * M * CrC := by
-        refine hsum _ hCrCM0 Finset.univ _ fun j _ => ?_
-        by_cases hji : j < i
-        · rw [dif_pos hji]
-          exact hterm _ _
-        · rw [dif_neg hji, norm_zero]
-          exact hCrCM0
-      have h2 : ‖(∑ j, if h : i < j then sC ⟨(i, j), h⟩ * rC F m g f j else 0)‖ ≤
-          z * (hB + hC) * M * CrC := by
-        refine hsum _ hCrCM0 Finset.univ _ fun j _ => ?_
-        by_cases hji : i < j
-        · rw [dif_pos hji]
-          exact hterm _ _
-        · rw [dif_neg hji, norm_zero]
-          exact hCrCM0
-      have hd : ‖(∑ j, if h : j < i then sC ⟨(j, i), h⟩ * rC F m g f j else 0) -
-          (∑ j, if h : i < j then sC ⟨(i, j), h⟩ * rC F m g f j else 0)‖ ≤
-          max ‖(∑ j, if h : j < i then sC ⟨(j, i), h⟩ * rC F m g f j else 0)‖
-            ‖(∑ j, if h : i < j then sC ⟨(i, j), h⟩ * rC F m g f j else 0)‖ := by
-        have h := IsUltrametricDist.norm_add_le_max
-          (∑ j, if h : j < i then sC ⟨(j, i), h⟩ * rC F m g f j else 0)
-          (-(∑ j, if h : i < j then sC ⟨(i, j), h⟩ * rC F m g f j else 0))
-        rwa [← sub_eq_add_neg, norm_neg] at h
-      exact hd.trans (max_le h1 h2)
+    have hd2bound : ∀ i, ‖d2 (rC F m g f) sC i‖ ≤ z * (hB + hC) * M * CrC :=
+      fun i => norm_d2_le _ _ _ _ hzM0 hCrC hsCn' i
     have hv'n : ‖v'‖ ≤ Bs * M := by
       refine pi_norm_le_iff_of_nonneg (mul_nonneg hBs0 hM0) |>.mpr fun i => ?_
       show ‖v i + d2 (rC F m g f) sC i‖ ≤ _

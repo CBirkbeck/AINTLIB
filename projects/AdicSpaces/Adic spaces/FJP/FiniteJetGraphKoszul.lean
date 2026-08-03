@@ -58,6 +58,20 @@ abbrev Pairs (m : ℕ) := {p : Fin m × Fin m // p.1 < p.2}
 /-- `d₁ u = ∑ᵢ uᵢ rᵢ` — the first graph–Koszul differential. -/
 def d1 (r : Fin m → S) (u : Fin m → S) : S := ∑ i, u i * r i
 
+/-- `d₁` is additive in its second argument. -/
+theorem d1_add (r a b : Fin m → S) :
+    d1 r (fun i => a i + b i) = d1 r a + d1 r b := by
+  unfold d1
+  rw [← Finset.sum_add_distrib]
+  exact Finset.sum_congr rfl fun i _ => by ring
+
+/-- `d₁` respects differences in its second argument. -/
+theorem d1_sub (r a b : Fin m → S) :
+    d1 r (fun i => a i - b i) = d1 r a - d1 r b := by
+  unfold d1
+  rw [← Finset.sum_sub_distrib]
+  exact Finset.sum_congr rfl fun i _ => by ring
+
 /-- `d₂` on ordered pairs, with the [FJP] p.10 sign convention
 `d₂(e_i ∧ e_j) = r_i e_j − r_j e_i` for `i < j`:
 `(d₂ v)_j = ∑_{i<j} v_{ij} r_i − ∑_{k>j} v_{jk} r_k`. -/

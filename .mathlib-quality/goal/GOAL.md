@@ -12588,3 +12588,24 @@ with `failed to synthesize IsUltrametricDist (iota -> A)` -- the pi type carries
 instance. Reverted, left as it is.
 
 Gate green in **2:21** (this file is outside `RobbaPresentation`'s closure).
+
+### `ideal_pullback_controlled` 226 -> 163: three general lemmas, none of them fragments
+
+Every lift this round produced a genuinely reusable statement rather than a piece of one
+proof:
+
+| lemma | was | note |
+|---|---|---|
+| `d1_add`, `d1_sub` | `hd1sub`/`hd1add`, 6 lines each | already written `forall {S} [CommRing S]` inside the proof -- general facts hiding in a `have`. Hoisted to `FiniteJetGraphKoszul` next to `d1`'s definition. |
+| `norm_d2_le` | `hd2bound`, 38 lines | *if every `v p` is bounded by `K` and `Cr = 1 + sum of norms, then each component of `d2 r v` is bounded by `K * Cr`*. Generalised off `PC F m` to any ultrametric normed comm ring. |
+
+`hd1sub`/`hd1add` are the clearest example of the pattern: the author had *already* written
+them in full generality (`forall {S : Type _} [CommRing S] ...`) and then left them inside a
+proof body. Nothing needed inventing -- only moving.
+
+`norm_d2_le` needed real generalisation: the original was stated for the concrete
+`PC F m` with the bound spelled as `z * (hB + hC) * M * CrC`, five proof-locals deep. Naming
+the bound `K` and the constant `Cr` makes it a statement about `d2` rather than about this
+proof.
+
+Gate green in **1:01**. Cumulative on this target: 226 -> 163.
