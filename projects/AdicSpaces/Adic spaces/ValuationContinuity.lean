@@ -480,6 +480,158 @@ theorem coarsenByUnits_lt_one_of_not_mem
 
 open Classical in
 set_option backward.isDefEq.respectTransparency false in
+/-- The function underlying **both** `restrictToConvex` and `restrictToConvexBounded`: keep a
+value whose unit part lies in `H`, send every other value to `0`. The two restrictions differ
+only in the hypothesis that bounds the discarded values, never in this function — which is why
+`restrictToConvex_unfold` and `restrictToConvexBounded_unfold` state the same `dite` chain. -/
+noncomputable def convexRestrictFun (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ)
+    (r : R) : WithZero H.toSubgroup :=
+  if h : v r = 0 then 0
+  else if hm : Units.mk0 (v r) h ∈ H then some ⟨Units.mk0 (v r) h, hm⟩
+  else 0
+
+open Classical in
+/-- Unfold `convexRestrictFun` to its underlying `dite` chain. Restating the chain here (rather
+than unfolding the definition in place) is what lets `rw [dif_neg …, dif_pos …]` match: the
+instances are then synthesised in the consumer's context. -/
+theorem convexRestrictFun_unfold (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) (r : R) :
+    convexRestrictFun v H r =
+      (if h : v r = 0 then (0 : WithZero H.toSubgroup)
+       else if hm : Units.mk0 (v r) h ∈ H
+            then (⟨Units.mk0 (v r) h, hm⟩ : H.toSubgroup)
+            else 0) :=
+  rfl
+
+open Classical in
+/-- `convexRestrictFun` kills the values `v` already kills. -/
+theorem convexRestrictFun_of_zero (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) {r : R}
+    (h : v r = 0) : convexRestrictFun v H r = 0 := by
+  rw [convexRestrictFun_unfold, dif_pos h]
+
+open Classical in
+/-- On a value whose unit part lies in `H`, `convexRestrictFun` records that unit. -/
+theorem convexRestrictFun_of_mem (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) {r : R}
+    (hr : v r ≠ 0) (hm : Units.mk0 (v r) hr ∈ H) :
+    convexRestrictFun v H r =
+      ((⟨Units.mk0 (v r) hr, hm⟩ : H.toSubgroup) : WithZero H.toSubgroup) := by
+  rw [convexRestrictFun_unfold, dif_neg hr, dif_pos hm]
+
+open Classical in
+/-- Values whose unit part misses `H` are discarded. -/
+theorem convexRestrictFun_of_not_mem (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) {r : R}
+    (hr : v r ≠ 0) (hm : Units.mk0 (v r) hr ∉ H) : convexRestrictFun v H r = 0 := by
+  rw [convexRestrictFun_unfold, dif_neg hr, dif_neg hm]
+
+open Classical in
+set_option backward.isDefEq.respectTransparency false in
+theorem convexRestrictFun_map_zero (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) :
+    convexRestrictFun v H 0 = 0 := by
+  simp [convexRestrictFun, map_zero]
+
+open Classical in
+set_option backward.isDefEq.respectTransparency false in
+theorem convexRestrictFun_map_one (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ) :
+    convexRestrictFun v H 1 = 1 := by
+  simp only [convexRestrictFun]
+  simp only [map_one]
+  have h1 : (1 : Γ₀) ≠ 0 := one_ne_zero
+  have hm : Units.mk0 (1 : Γ₀) h1 ∈ H := by
+    rw [show Units.mk0 (1 : Γ₀) h1 = 1 from Units.ext rfl]; exact one_mem H
+  simp only [h1, dite_false, dif_pos hm,
+    show (1 : WithZero H.toSubgroup) = ((1 : H.toSubgroup) : WithZero H.toSubgroup) from rfl]
+  congr 1; exact Subtype.ext (Units.ext rfl)
+
+open Classical in
+/-- Multiplicativity of `convexRestrictFun`, from the single fact both restrictions supply:
+a value whose unit part is outside `H` is at most `1`. -/
+theorem convexRestrictFun_map_mul (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ)
+    (hbnd : ∀ (r : R) (hr : v r ≠ 0), Units.mk0 (v r) hr ∉ H → v r ≤ 1) (x y : R) :
+    convexRestrictFun v H (x * y) = convexRestrictFun v H x * convexRestrictFun v H y := by
+  have not_mem_of_le' {u w : Γ₀ˣ} (hu : u ∉ H) (hu1 : u ≤ 1) (hw1 : w ≤ u) : w ∉ H :=
+    fun hw_mem ↦ hu (H.convex hw_mem (one_mem H) hw1 hu1)
+  by_cases hx : v x = 0
+  · have hxy : v (x * y) = 0 := by rw [map_mul, hx, zero_mul]
+    rw [convexRestrictFun_of_zero v H hxy, convexRestrictFun_of_zero v H hx, zero_mul]
+  by_cases hy : v y = 0
+  · have hxy : v (x * y) = 0 := by rw [map_mul, hy, mul_zero]
+    rw [convexRestrictFun_of_zero v H hxy, convexRestrictFun_of_zero v H hy, mul_zero]
+  have hxy_ne : v (x * y) ≠ 0 := by rw [map_mul]; exact mul_ne_zero hx hy
+  have huxy_eq : Units.mk0 (v (x * y)) hxy_ne =
+      Units.mk0 (v x) hx * Units.mk0 (v y) hy := Units.ext (map_mul v x y)
+  by_cases hmx : Units.mk0 (v x) hx ∈ H <;> by_cases hmy : Units.mk0 (v y) hy ∈ H
+  · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∈ H := huxy_eq ▸ mul_mem hmx hmy
+    rw [convexRestrictFun_of_mem v H hxy_ne hmxy, convexRestrictFun_of_mem v H hx hmx,
+      convexRestrictFun_of_mem v H hy hmy, ← WithZero.coe_mul]
+    congr 1
+    exact Subtype.ext huxy_eq
+  · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
+      rw [huxy_eq]; intro hmem
+      exact hmy (by have := mul_mem (inv_mem hmx) hmem; rwa [inv_mul_cancel_left] at this)
+    rw [convexRestrictFun_of_not_mem v H hxy_ne hmxy, convexRestrictFun_of_not_mem v H hy hmy,
+      mul_zero]
+  · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
+      rw [huxy_eq]; intro hmem
+      exact hmx (by have := mul_mem hmem (inv_mem hmy); rwa [mul_inv_cancel_right] at this)
+    rw [convexRestrictFun_of_not_mem v H hxy_ne hmxy, convexRestrictFun_of_not_mem v H hx hmx,
+      zero_mul]
+  · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
+      rw [huxy_eq]; intro hmem
+      have hle_ux : Units.mk0 (v x) hx * Units.mk0 (v y) hy ≤ Units.mk0 (v x) hx :=
+        Units.val_le_val.mp (show (v x) * (v y) ≤ v x by
+          calc v x * v y ≤ v x * 1 := mul_le_mul_right (hbnd y hy hmy) (v x)
+            _ = v x := mul_one _)
+      exact not_mem_of_le' hmx (Units.val_le_val.mp (hbnd x hx hmx)) hle_ux hmem
+    rw [convexRestrictFun_of_not_mem v H hxy_ne hmxy, convexRestrictFun_of_not_mem v H hx hmx,
+      zero_mul]
+
+open Classical in
+set_option backward.isDefEq.respectTransparency false in
+/-- The ultrametric inequality for `convexRestrictFun`, from the same bound as
+`convexRestrictFun_map_mul`. -/
+theorem convexRestrictFun_map_add_le_max (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ)
+    (hbnd : ∀ (r : R) (hr : v r ≠ 0), Units.mk0 (v r) hr ∉ H → v r ≤ 1) (x y : R) :
+    convexRestrictFun v H (x + y) ≤
+      max (convexRestrictFun v H x) (convexRestrictFun v H y) := by
+  set f : R → WithZero H.toSubgroup := fun r ↦
+    if h : v r = 0 then 0
+    else if hm : Units.mk0 (v r) h ∈ H then some ⟨Units.mk0 (v r) h, hm⟩
+    else 0
+  change f (x + y) ≤ max (f x) (f y)
+  by_cases hxy : v (x + y) = 0
+  · simp only [f, hxy, dif_pos]; exact bot_le
+  by_cases hmxy : Units.mk0 (v (x + y)) hxy ∈ H
+  · rcases le_total (v x) (v y) with hvxy | hvyx
+    · have hv_le : v (x + y) ≤ v y := (v.map_add x y).trans (max_eq_right hvxy).le
+      suffices h : f (x + y) ≤ f y from
+        h.trans (le_max_right _ _)
+      have hy : v y ≠ 0 := ne_of_gt (lt_of_lt_of_le (zero_lt_iff.mpr hxy) hv_le)
+      by_cases hmy : Units.mk0 (v y) hy ∈ H
+      · simp only [f, hxy, hy, dif_pos hmxy, dif_pos hmy]
+        exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr (Units.val_le_val.mp hv_le))
+      · exfalso; exact hmy (H.convex hmxy (one_mem H)
+          (Units.val_le_val.mp hv_le) (Units.val_le_val.mp (hbnd y hy hmy)))
+    · have hv_le : v (x + y) ≤ v x := (v.map_add x y).trans (max_eq_left hvyx).le
+      suffices h : f (x + y) ≤ f x from
+        h.trans (le_max_left _ _)
+      have hx' : v x ≠ 0 := ne_of_gt (lt_of_lt_of_le (zero_lt_iff.mpr hxy) hv_le)
+      by_cases hmx : Units.mk0 (v x) hx' ∈ H
+      · simp only [f, hxy, hx', dif_pos hmxy, dif_pos hmx]
+        exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr (Units.val_le_val.mp hv_le))
+      · exfalso; exact hmx (H.convex hmxy (one_mem H)
+          (Units.val_le_val.mp hv_le) (Units.val_le_val.mp (hbnd x hx' hmx)))
+  · simp only [f, dif_neg hxy, dif_neg hmxy]; exact bot_le
+
+/-- Contrapositive of `restrictToConvexBounded`'s hypothesis: a value whose unit part misses
+`H` cannot be `≥ 1`, so it is `≤ 1`. This is the bound `convexRestrictFun_map_mul` wants. -/
+theorem le_one_of_unit_not_mem (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ)
+    (hH_ge : ∀ a : R, ∀ ha : v a ≠ 0, 1 ≤ v a → Units.mk0 (v a) ha ∈ H)
+    (r : R) (hr : v r ≠ 0) (hnot : Units.mk0 (v r) hr ∉ H) : v r ≤ 1 := by
+  by_contra h_gt
+  push Not at h_gt
+  exact hnot (hH_ge r hr h_gt.le)
+
+open Classical in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Restriction of a valuation to a convex subgroup** (Wedhorn 7.1.2).
 The restricted valuation keeps values whose unit part is in `H` and zeros out the rest.
 Requires `∀ r, v r ≤ 1` for multiplicativity. -/
@@ -487,91 +639,11 @@ noncomputable def restrictToConvex
     (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ)
     (hle : ∀ r : R, v r ≤ 1) :
     Valuation R (WithZero H.toSubgroup) where
-  toFun r :=
-    if h : v r = 0 then 0
-    else if hm : Units.mk0 (v r) h ∈ H then some ⟨Units.mk0 (v r) h, hm⟩
-    else 0
-  map_zero' := by simp [map_zero]
-  map_one' := by
-    simp only [map_one]
-    have h1 : (1 : Γ₀) ≠ 0 := one_ne_zero
-    have hm : Units.mk0 (1 : Γ₀) h1 ∈ H := by
-      rw [show Units.mk0 (1 : Γ₀) h1 = 1 from Units.ext rfl]; exact one_mem H
-    simp only [h1, dite_false, dif_pos hm,
-      show (1 : WithZero H.toSubgroup) = ((1 : H.toSubgroup) : WithZero H.toSubgroup) from rfl]
-    congr 1; exact Subtype.ext (Units.ext rfl)
-  map_mul' x y := by
-    have not_mem_of_le' {u w : Γ₀ˣ} (hu : u ∉ H) (hu1 : u ≤ 1) (hw1 : w ≤ u) : w ∉ H :=
-      fun hw_mem ↦ hu (H.convex hw_mem (one_mem H) hw1 hu1)
-    have unit_le_one' : ∀ (r : R) (hr : v r ≠ 0), Units.mk0 (v r) hr ≤ 1 :=
-      fun r hr ↦ Units.val_le_val.mp (hle r)
-    by_cases hx : v x = 0
-    · have hxy : v (x * y) = 0 := by rw [map_mul, hx, zero_mul]
-      simp only [hxy, hx, dif_pos, zero_mul]
-    by_cases hy : v y = 0
-    · have hxy : v (x * y) = 0 := by rw [map_mul, hy, mul_zero]
-      simp only [hxy, hy, dif_pos, mul_zero]
-    have hxy_ne : v (x * y) ≠ 0 := by rw [map_mul]; exact mul_ne_zero hx hy
-    have huxy_eq : Units.mk0 (v (x * y)) hxy_ne =
-        Units.mk0 (v x) hx * Units.mk0 (v y) hy := Units.ext (map_mul v x y)
-    by_cases hmx : Units.mk0 (v x) hx ∈ H <;> by_cases hmy : Units.mk0 (v y) hy ∈ H
-    · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∈ H := huxy_eq ▸ mul_mem hmx hmy
-      simp only [hx, hy, hxy_ne, dif_neg, dif_pos hmx, dif_pos hmy, dif_pos hmxy, not_false_eq_true]
-      rw [show (some (⟨Units.mk0 (v x) hx, hmx⟩ : H.toSubgroup) : WithZero H.toSubgroup) =
-        (↑(⟨Units.mk0 (v x) hx, hmx⟩ : H.toSubgroup) : WithZero H.toSubgroup) from rfl,
-        show (some (⟨Units.mk0 (v y) hy, hmy⟩ : H.toSubgroup) : WithZero H.toSubgroup) =
-        (↑(⟨Units.mk0 (v y) hy, hmy⟩ : H.toSubgroup) : WithZero H.toSubgroup) from rfl,
-        ← WithZero.coe_mul]
-      congr 1
-      exact Subtype.ext huxy_eq
-    · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
-        rw [huxy_eq]; intro hmem
-        exact hmy (by have := mul_mem (inv_mem hmx) hmem; rwa [inv_mul_cancel_left] at this)
-      simp only [hx, hy, hxy_ne, dif_neg, dif_pos hmx, dif_neg hmy, dif_neg hmxy, not_false_eq_true,
-        mul_zero]
-    · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
-        rw [huxy_eq]; intro hmem
-        exact hmx (by have := mul_mem hmem (inv_mem hmy); rwa [mul_inv_cancel_right] at this)
-      simp only [hx, hy, hxy_ne, dif_neg, dif_neg hmx, dif_pos hmy, dif_neg hmxy, not_false_eq_true,
-        zero_mul]
-    · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
-        rw [huxy_eq]; intro hmem
-        have hle_ux : Units.mk0 (v x) hx * Units.mk0 (v y) hy ≤ Units.mk0 (v x) hx :=
-          Units.val_le_val.mp (show (v x) * (v y) ≤ v x by
-            calc v x * v y ≤ v x * 1 := mul_le_mul_right (hle y) (v x)
-              _ = v x := mul_one _)
-        exact not_mem_of_le' hmx (unit_le_one' x hx) hle_ux hmem
-      simp only [hx, hy, hxy_ne, dif_neg, dif_neg hmx, dif_neg hmy, dif_neg hmxy, not_false_eq_true,
-        mul_zero]
-  map_add_le_max' x y := by
-    set f : R → WithZero H.toSubgroup := fun r ↦
-      if h : v r = 0 then 0
-      else if hm : Units.mk0 (v r) h ∈ H then some ⟨Units.mk0 (v r) h, hm⟩
-      else 0
-    change f (x + y) ≤ max (f x) (f y)
-    by_cases hxy : v (x + y) = 0
-    · simp only [f, hxy, dif_pos]; exact bot_le
-    by_cases hmxy : Units.mk0 (v (x + y)) hxy ∈ H
-    · rcases le_total (v x) (v y) with hvxy | hvyx
-      · have hv_le : v (x + y) ≤ v y := (v.map_add x y).trans (max_eq_right hvxy).le
-        suffices h : f (x + y) ≤ f y from h.trans (le_max_right _ _)
-        have hy : v y ≠ 0 := ne_of_gt (lt_of_lt_of_le (zero_lt_iff.mpr hxy) hv_le)
-        by_cases hmy : Units.mk0 (v y) hy ∈ H
-        · simp only [f, hxy, hy, dif_pos hmxy, dif_pos hmy]
-          exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
-            (Units.val_le_val.mp hv_le))
-        · exfalso; exact hmy (H.convex hmxy (one_mem H)
-            (Units.val_le_val.mp hv_le) (Units.val_le_val.mp (hle y)))
-      · have hv_le : v (x + y) ≤ v x := (v.map_add x y).trans (max_eq_left hvyx).le
-        suffices h : f (x + y) ≤ f x from h.trans (le_max_left _ _)
-        have hx' : v x ≠ 0 := ne_of_gt (lt_of_lt_of_le (zero_lt_iff.mpr hxy) hv_le)
-        by_cases hmx : Units.mk0 (v x) hx' ∈ H
-        · simp only [f, hxy, hx', dif_pos hmxy, dif_pos hmx]
-          exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
-            (Units.val_le_val.mp hv_le))
-        · exfalso; exact hmx (H.convex hmxy (one_mem H)
-            (Units.val_le_val.mp hv_le) (Units.val_le_val.mp (hle x)))
-    · simp only [f, dif_neg hxy, dif_neg hmxy]; exact bot_le
+  toFun := convexRestrictFun v H
+  map_zero' := convexRestrictFun_map_zero v H
+  map_one' := convexRestrictFun_map_one v H
+  map_mul' := convexRestrictFun_map_mul v H fun r _ _ => hle r
+  map_add_le_max' := convexRestrictFun_map_add_le_max v H fun r _ _ => hle r
 
 open Classical in
 set_option backward.isDefEq.respectTransparency false in
@@ -588,110 +660,12 @@ noncomputable def restrictToConvexBounded
     (v : Valuation R Γ₀) (H : ConvexSubgroup Γ₀ˣ)
     (hH_ge : ∀ a : R, ∀ ha : v a ≠ 0, 1 ≤ v a → Units.mk0 (v a) ha ∈ H) :
     Valuation R (WithZero H.toSubgroup) where
-  toFun r :=
-    if h : v r = 0 then 0
-    else if hm : Units.mk0 (v r) h ∈ H then some ⟨Units.mk0 (v r) h, hm⟩
-    else 0
-  map_zero' := by simp [map_zero]
-  map_one' := by
-    simp only [map_one]
-    have h1 : (1 : Γ₀) ≠ 0 := one_ne_zero
-    have hm : Units.mk0 (1 : Γ₀) h1 ∈ H := by
-      rw [show Units.mk0 (1 : Γ₀) h1 = 1 from Units.ext rfl]; exact one_mem H
-    simp only [h1, dite_false, dif_pos hm,
-      show (1 : WithZero H.toSubgroup) = ((1 : H.toSubgroup) : WithZero H.toSubgroup) from rfl]
-    congr 1; exact Subtype.ext (Units.ext rfl)
-  map_mul' x y := by
-    -- Key: if u ∉ H then u < 1 (contrapositive of hH_ge).
-    have unit_lt_one_of_not_mem : ∀ (r : R) (hr : v r ≠ 0),
-        Units.mk0 (v r) hr ∉ H → v r < 1 := by
-      intro r hr hnot
-      by_contra h_ge_one
-      push Not at h_ge_one
-      exact hnot (hH_ge r hr h_ge_one)
-    have not_mem_of_le' {u w : Γ₀ˣ} (hu : u ∉ H) (hu1 : u ≤ 1) (hw1 : w ≤ u) : w ∉ H :=
-      fun hw_mem ↦ hu (H.convex hw_mem (one_mem H) hw1 hu1)
-    by_cases hx : v x = 0
-    · have hxy : v (x * y) = 0 := by rw [map_mul, hx, zero_mul]
-      simp only [hxy, hx, dif_pos, zero_mul]
-    by_cases hy : v y = 0
-    · have hxy : v (x * y) = 0 := by rw [map_mul, hy, mul_zero]
-      simp only [hxy, hy, dif_pos, mul_zero]
-    have hxy_ne : v (x * y) ≠ 0 := by rw [map_mul]; exact mul_ne_zero hx hy
-    have huxy_eq : Units.mk0 (v (x * y)) hxy_ne =
-        Units.mk0 (v x) hx * Units.mk0 (v y) hy := Units.ext (map_mul v x y)
-    by_cases hmx : Units.mk0 (v x) hx ∈ H <;> by_cases hmy : Units.mk0 (v y) hy ∈ H
-    · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∈ H := huxy_eq ▸ mul_mem hmx hmy
-      simp only [hx, hy, hxy_ne, dif_neg, dif_pos hmx, dif_pos hmy, dif_pos hmxy, not_false_eq_true]
-      rw [show (some (⟨Units.mk0 (v x) hx, hmx⟩ : H.toSubgroup) : WithZero H.toSubgroup) =
-        (↑(⟨Units.mk0 (v x) hx, hmx⟩ : H.toSubgroup) : WithZero H.toSubgroup) from rfl,
-        show (some (⟨Units.mk0 (v y) hy, hmy⟩ : H.toSubgroup) : WithZero H.toSubgroup) =
-        (↑(⟨Units.mk0 (v y) hy, hmy⟩ : H.toSubgroup) : WithZero H.toSubgroup) from rfl,
-        ← WithZero.coe_mul]
-      congr 1
-      exact Subtype.ext huxy_eq
-    · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
-        rw [huxy_eq]; intro hmem
-        exact hmy (by have := mul_mem (inv_mem hmx) hmem; rwa [inv_mul_cancel_left] at this)
-      simp only [hx, hy, hxy_ne, dif_neg, dif_pos hmx, dif_neg hmy, dif_neg hmxy, not_false_eq_true,
-        mul_zero]
-    · have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
-        rw [huxy_eq]; intro hmem
-        exact hmx (by have := mul_mem hmem (inv_mem hmy); rwa [mul_inv_cancel_right] at this)
-      simp only [hx, hy, hxy_ne, dif_neg, dif_neg hmx, dif_pos hmy, dif_neg hmxy, not_false_eq_true,
-        zero_mul]
-    · -- Both v(x), v(y) ∉ H. By hypothesis, both v(x), v(y) < 1, so v(x)*v(y) < 1 ≤ ...
-      -- and v(x)*v(y) ≤ v(x) since v(y) ≤ 1.
-      have hvy_lt : v y < 1 := unit_lt_one_of_not_mem y hy hmy
-      have hvx_lt : v x < 1 := unit_lt_one_of_not_mem x hx hmx
-      have hmxy : Units.mk0 (v (x * y)) hxy_ne ∉ H := by
-        rw [huxy_eq]; intro hmem
-        have hle_ux : Units.mk0 (v x) hx * Units.mk0 (v y) hy ≤ Units.mk0 (v x) hx :=
-          Units.val_le_val.mp (show (v x) * (v y) ≤ v x by
-            calc v x * v y ≤ v x * 1 := mul_le_mul_right hvy_lt.le (v x)
-              _ = v x := mul_one _)
-        have hvx_le_one : Units.mk0 (v x) hx ≤ 1 := Units.val_le_val.mp hvx_lt.le
-        exact not_mem_of_le' hmx hvx_le_one hle_ux hmem
-      simp only [hx, hy, hxy_ne, dif_neg, dif_neg hmx, dif_neg hmy, dif_neg hmxy, not_false_eq_true,
-        mul_zero]
-  map_add_le_max' x y := by
-    have unit_lt_one_of_not_mem : ∀ (r : R) (hr : v r ≠ 0),
-        Units.mk0 (v r) hr ∉ H → v r < 1 := by
-      intro r hr hnot
-      by_contra h_ge_one
-      push Not at h_ge_one
-      exact hnot (hH_ge r hr h_ge_one)
-    set f : R → WithZero H.toSubgroup := fun r ↦
-      if h : v r = 0 then 0
-      else if hm : Units.mk0 (v r) h ∈ H then some ⟨Units.mk0 (v r) h, hm⟩
-      else 0
-    change f (x + y) ≤ max (f x) (f y)
-    by_cases hxy : v (x + y) = 0
-    · simp only [f, hxy, dif_pos]; exact bot_le
-    by_cases hmxy : Units.mk0 (v (x + y)) hxy ∈ H
-    · rcases le_total (v x) (v y) with hvxy | hvyx
-      · have hv_le : v (x + y) ≤ v y := (v.map_add x y).trans (max_eq_right hvxy).le
-        suffices h : f (x + y) ≤ f y from h.trans (le_max_right _ _)
-        have hy : v y ≠ 0 := ne_of_gt (lt_of_lt_of_le (zero_lt_iff.mpr hxy) hv_le)
-        by_cases hmy : Units.mk0 (v y) hy ∈ H
-        · simp only [f, hxy, hy, dif_pos hmxy, dif_pos hmy]
-          exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
-            (Units.val_le_val.mp hv_le))
-        · -- v(y) ∉ H → v(y) < 1 → Units.mk0 (v y) hy ≤ 1
-          have hvy_lt : v y < 1 := unit_lt_one_of_not_mem y hy hmy
-          exfalso; exact hmy (H.convex hmxy (one_mem H)
-            (Units.val_le_val.mp hv_le) (Units.val_le_val.mp hvy_lt.le))
-      · have hv_le : v (x + y) ≤ v x := (v.map_add x y).trans (max_eq_left hvyx).le
-        suffices h : f (x + y) ≤ f x from h.trans (le_max_left _ _)
-        have hx' : v x ≠ 0 := ne_of_gt (lt_of_lt_of_le (zero_lt_iff.mpr hxy) hv_le)
-        by_cases hmx : Units.mk0 (v x) hx' ∈ H
-        · simp only [f, hxy, hx', dif_pos hmxy, dif_pos hmx]
-          exact WithZero.coe_le_coe.mpr (Subtype.mk_le_mk.mpr
-            (Units.val_le_val.mp hv_le))
-        · have hvx_lt : v x < 1 := unit_lt_one_of_not_mem x hx' hmx
-          exfalso; exact hmx (H.convex hmxy (one_mem H)
-            (Units.val_le_val.mp hv_le) (Units.val_le_val.mp hvx_lt.le))
-    · simp only [f, dif_neg hxy, dif_neg hmxy]; exact bot_le
+  toFun := convexRestrictFun v H
+  map_zero' := convexRestrictFun_map_zero v H
+  map_one' := convexRestrictFun_map_one v H
+  map_mul' := convexRestrictFun_map_mul v H (le_one_of_unit_not_mem v H hH_ge)
+  map_add_le_max' := convexRestrictFun_map_add_le_max v H (le_one_of_unit_not_mem v H hH_ge)
+
 
 /-! ### API for `restrictToConvex` -/
 

@@ -67,10 +67,13 @@ for root, dirs, fs in os.walk('.'):
                              'code': code, 'comment': raw - code,
                              'sorry': bool(SORRY.search(re.sub(r'--.*', '', '\n'.join(L[i:e]))))})
 rows.sort(key=lambda r: -r['code'])
-json.dump(rows, open('/tmp/over50_code.json', 'w'), indent=1)
-clean = [r for r in rows if not r['sorry']]
-print(f'proof bodies over 50 CODE lines: {len(rows)}  ({len(rows)-len(clean)} sorry-bearing, '
-      f'{len(clean)} in scope)')
+# ACTIONABLE = sorry-free and not third-party. `Vendored/` is out of scope by directive, and a
+# sorry-bearing body is the owning producer's WIP (CLAUDE.md) — never decompose either. The JSON
+# is the work queue, so it carries only these; `rows` stays for the summary counts below.
+clean = [r for r in rows if not r['sorry'] and not r['file'].startswith('Vendored/')]
+json.dump(clean, open('/tmp/over50_code.json', 'w'), indent=1)
+print(f'proof bodies over 50 CODE lines: {len(rows)}  ({len(rows)-len(clean)} excluded '
+      f'(sorry-bearing or Vendored/), {len(clean)} actionable)')
 both = [r for r in clean if r['raw'] <= 55]
 print(f'of those, RAW <= 55 as well (cheapest — a few lines move both metrics): {len(both)}\n')
 for r in sorted(both, key=lambda z: z['raw'])[:18]:

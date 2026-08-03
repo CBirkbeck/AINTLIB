@@ -361,6 +361,14 @@ theorem ideal_row_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
       calc ‖u‖ * Cr ≤ h * ‖y‖ * Cr := mul_le_mul_of_nonneg_right hun (zero_le_one.trans hCr1)
         _ = h * Cr * ‖y‖ := by ring
 
+/-- Ultrametric `‖a - b‖ ≤ max ‖a‖ ‖b‖`. Mathlib has only the `add` form
+(`IsUltrametricDist.norm_add_le_max`); the `sub` case is inlined at each use there too. -/
+private lemma norm_sub_le_max {X : Type*} [NormedAddCommGroup X] [IsUltrametricDist X]
+    (a b : X) : ‖a - b‖ ≤ max ‖a‖ ‖b‖ := by
+  have h := IsUltrametricDist.norm_add_le_max a (-b)
+  rwa [← sub_eq_add_neg, norm_neg] at h
+
+
 /-- Norm bound for `d₂`: if every `v p` is bounded by `K` and `Cr = 1 + ∑ ‖r i‖`, then each
 component of `d₂ r v` is bounded by `K * Cr`. Ultrametric, so the difference of the two
 partial sums is bounded by their max. -/
@@ -390,11 +398,7 @@ private theorem norm_d2_le {S : Type*} [NormedCommRing S] [IsUltrametricDist S] 
     by_cases hji : i < j
     · rw [dif_pos hji]; exact hterm _ _
     · rw [dif_neg hji, norm_zero]; exact hKCr0
-  have hd := IsUltrametricDist.norm_add_le_max
-    (∑ j, if h : j < i then v ⟨(j, i), h⟩ * r j else 0)
-    (-(∑ j, if h : i < j then v ⟨(i, j), h⟩ * r j else 0))
-  rw [← sub_eq_add_neg, norm_neg] at hd
-  exact hd.trans (max_le h1 h2)
+  exact (norm_sub_le_max _ _).trans (max_le h1 h2)
 
 
 /-- The controlled pullback ([FJP] (4.12)–(4.16)): a matching pair of graph-ideal elements
@@ -466,12 +470,7 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
   have hwn : ‖w‖ ≤ (hB + hC) * M := by
     refine pi_norm_le_iff_of_nonneg (mul_nonneg (add_nonneg hB0 hC0) hM0) |>.mpr fun i => ?_
     show ‖extRhoB F m (u i) - extRhoC F m (v i)‖ ≤ _
-    have hsub : ‖extRhoB F m (u i) - extRhoC F m (v i)‖ ≤
-        max ‖extRhoB F m (u i)‖ ‖extRhoC F m (v i)‖ := by
-      have h := IsUltrametricDist.norm_add_le_max (extRhoB F m (u i))
-        (-(extRhoC F m (v i)))
-      rwa [← sub_eq_add_neg, norm_neg] at h
-    refine hsub.trans (max_le ?_ ?_)
+    refine (norm_sub_le_max _ _).trans (max_le ?_ ?_)
     · calc ‖extRhoB F m (u i)‖ ≤ ‖u i‖ := norm_mapRestricted_le _ _ _ _
         _ ≤ ‖u‖ := norm_le_pi_norm u i
         _ ≤ hB * M := hun'
@@ -822,13 +821,6 @@ theorem locIotaC_lipschitz : LipschitzWith 1 (locIotaC F m g f) :=
         ≤ ‖extIotaC F m q‖ := Ideal.Quotient.norm_mk_le _ (extIotaC F m q)
       _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
       _ ≤ ‖Ideal.Quotient.mk (IA F m g f) p‖ + ε := hqn.le
-
-/-- Ultrametric `‖a - b‖ ≤ max ‖a‖ ‖b‖`. Mathlib has only the `add` form
-(`IsUltrametricDist.norm_add_le_max`); the `sub` case is inlined at each use there too. -/
-private lemma norm_sub_le_max {X : Type*} [NormedAddCommGroup X] [IsUltrametricDist X]
-    (a b : X) : ‖a - b‖ ≤ max ‖a‖ ‖b‖ := by
-  have h := IsUltrametricDist.norm_add_le_max a (-b)
-  rwa [← sub_eq_add_neg, norm_neg] at h
 
 private lemma lt_add_of_lt_max_left {a u v d : ℝ} (h : a < u + d) : a < max u v + d := by
   linarith [le_max_left u v]

@@ -12609,3 +12609,82 @@ the bound `K` and the constant `Cr` makes it a statement about `d2` rather than 
 proof.
 
 Gate green in **1:01**. Cumulative on this target: 226 -> 163.
+
+### The measure was over-counting: 43 "actionable" was really 36
+
+`scope_code.py` computed the actionable set correctly and then dumped the **unfiltered** rows
+to `/tmp/over50_code.json`. The queue I had been working from therefore included 2
+sorry-bearing proofs (`ofValuation_restrictIdeal_isInSpvAI`, `berkeley_6_2_8`) and 3
+`Vendored/` files — neither of which is ever mine to touch. Both exclusions were already
+written down; only the JSON dump skipped them.
+
+I found this by opening the two smallest remaining targets (66 lines each) and discovering a
+`sorry` in each. Fixed the dump to emit only the actionable set, so the tracker number is now
+the number of things I can actually do.
+
+`ofValuation_restrictIdeal_isInSpvAI` is worth flagging separately: its sorried `hdich` step
+carries a 20-line in-source B2 note arguing the statement is **false as encoded**
+(`cGammaIdeal` unconditionally adjoins ideal generators where Wedhorn Def 7.3 case-splits),
+with a counterexample. That is a producer decision, not cleanup.
+
+### `restrictToConvex` + `restrictToConvexBounded` 79 + 96 -> 6 + 6: a twin pair, not two proofs
+
+These two `Valuation` structure instances were **byte-identical** in `toFun`, `map_zero'` and
+`map_one'`, and differed in `map_mul'` / `map_add_le_max'` only in *how* they obtained one
+fact: a value whose unit part misses `H` is at most `1`. `restrictToConvex` reads it off its
+global `hle : ∀ r, v r ≤ 1`; `restrictToConvexBounded` gets it from the contrapositive of its
+`hH_ge`. Everything else — all ~175 lines — was duplicated.
+
+The tell was already in the file: `restrictToConvex_unfold` and `restrictToConvexBounded_unfold`
+both prove *the same* `dite` chain, both by `rfl`. Two defs with one underlying function.
+
+Collapsed to one function plus lemmas parameterised by that single interface hypothesis:
+
+    hbnd : ∀ (r : R) (hr : v r ≠ 0), Units.mk0 (v r) hr ∉ H → v r ≤ 1
+
+| new declaration | replaces |
+|---|---|
+| `convexRestrictFun` | the `toFun` field of both defs |
+| `convexRestrictFun_unfold` | — (the `rfl` restatement both `_apply_*` families needed) |
+| `convexRestrictFun_of_zero` / `_of_mem` / `_of_not_mem` | the dite surgery inlined in both `map_mul'` |
+| `convexRestrictFun_map_zero` / `_map_one` | two identical field proofs |
+| `convexRestrictFun_map_mul`, `convexRestrictFun_map_add_le_max` | the two 40-line and 28-line field proofs, twice over |
+| `le_one_of_unit_not_mem` | the `unit_lt_one_of_not_mem` block, inlined twice inside the bounded def |
+
+Both defs are now six field lines each. The file lost 26 lines *net* while gaining five new
+API lemmas and their docstrings.
+
+**The lesson that cost four iterations: `simp` does not preserve the dite's proof term.**
+Every branch of `map_mul'` ends by rewriting the inner `if hm : … ∈ H`. Moving the proof out
+of the structure field broke all of them, and the error was always the same shape —
+
+    Did not find an occurrence of the pattern  some ⟨Units.mk0 (v x) hx, hmx⟩
+    in the target                              if hm : Units.mk0 (v x) ⋯ ∈ H then …
+
+`⋯` is the point. Using `hx : ¬(v x = 0)` as a *simp rule* rewrites the condition to `False`
+and the dite's binder gets instantiated with a derived proof, not with `hx` — so the later
+`dif_pos hmx`, which mentions `hx` by name, no longer matches. `rw [dif_neg hx]` substitutes
+`hx` itself and keeps the match. Three failed dodges before that (hoisting the unfold to its
+own step, carrying over the def's `backward.isDefEq.respectTransparency` option, `split`) all
+missed this, because they all left the `simp only` in place.
+
+The fix was already in the file, forty lines below: `restrictToConvexBounded_apply_mem` proves
+exactly this goal shape with `rw [restrictToConvexBounded_unfold, dif_neg hr, dif_pos hm]`.
+Restating the chain in a `rfl` lemma — rather than unfolding the definition in place — lets the
+decidable instances be synthesised in the *consumer's* context, and then `rw` matches. Copying
+the working pattern from the same file beat four rounds of reasoning about why mine didn't work.
+
+Two secondary gotchas: `set_option … in` must come **above** a declaration's docstring, not
+between docstring and `theorem` (Lean reports `unexpected token 'set_option'; expected 'lemma'`
+pointing at the end of the docstring); and `lake build` must run from the repo root, not from
+the `Adic spaces` lib directory, which has no lakefile.
+
+### Checked and rejected: the `*_forward_witness` family is not a twin set
+
+`WedhornCechAcyclicity` holds 11 of the remaining targets, three of them named
+`unitCover_relMinus_forward_witness` (81), `genPiece_relOverlap_forward_witness` (104) and
+`unitCover_relOverlap_forward_witness` (218). After the `restrictToConvex` win the obvious move
+was to treat them as another twin family. Normalised structural diff says no: similarity 0.17
+and 0.14, ~20 shared lines out of ~100. They share a naming scheme and a shape, not a proof.
+Each needs individual decomposition. Cheap to check, and it would have been an expensive
+assumption.
