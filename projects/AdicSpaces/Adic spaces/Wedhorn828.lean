@@ -3135,6 +3135,49 @@ theorem coUnitDatum_span_le_ker
   rw [hmul, sub_self]
 
 omit [CompatiblePlusSubring A] in
+/-- Continuity of a localization lift `ψ : A[1/s] → A⟨ζ⟩ ⧸ aI` for the localization
+topology: on constants it is `mk ∘ algebraMap`, and on the single generator ratio it is
+`mk ζ`, which is power-bounded because `mk` is a continuous open map.
+
+Shared skeleton of `unitDatum_ker_le_span` and `coUnitDatum_ker_le_span`; the two differ
+only in how `hψ_gen` is discharged. -/
+private theorem psi_continuous_of_gen
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
+    [HasLocLiftPowerBounded A]
+    (D : RationalLocData A) (aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x))
+    (hψ_gen : ∀ t ∈ D.T, ψ (divByS t D.s) =
+      Ideal.Quotient.mk aI
+        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+          ↥(restrictedMvPowerSeriesSubring 1 A))) :
+    @Continuous _ _ D.topology (mvQuotTopology 1 aI) ψ := by
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' 1
+  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing 1
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotTopology 1 aI
+  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing 1 aI
+  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean 1 aI
+  change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) (mvQuotTopology 1 aI) ψ
+  refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
+  · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
+        (Ideal.Quotient.mk aI).comp
+          (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) := by
+      ext x; exact hψ_alg x
+    rw [heq]
+    exact continuous_quotient_mk'.comp
+      (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) 1)
+  · intro t ht
+    rw [hψ_gen t ht]
+    exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
+      continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC)
+      (MvTateAlgebra.mvPowerSeries_X_isBounded (0 : Fin 1))
+
+
+omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
 `A⟨ζ⟩ ⧸ (b − ζ)` is complete Hausdorff (the principal ideal is closed by Prop 6.17
@@ -3196,28 +3239,12 @@ theorem unitDatum_ker_le_span
     rw [Ideal.Quotient.eq]
     exact Ideal.subset_span (Set.mem_singleton _)
   -- `ψ` is continuous for the localization topology
-  have hψ_cont : @Continuous _ _ D.topology τQ ψ := by
-    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
-    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
-    · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
-          (Ideal.Quotient.mk aI).comp
-            (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) := by
-        ext x; exact hψ_alg x
-      rw [heq]
-      exact continuous_quotient_mk'.comp
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) 1)
-    · intro t ht
-      rw [show (D.T : Finset A) = {b} from rfl, Finset.mem_singleton] at ht
-      subst ht
-      have h1 : ψ (divByS t D.s) = Ideal.Quotient.mk aI
-          (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
-            ↥(restrictedMvPowerSeriesSubring 1 A)) := by
-        erw [divByS_eq_algebraMap, hψ_alg]
-        exact hmk_bX
-      rw [h1]
-      exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
-        continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC)
-        (MvTateAlgebra.mvPowerSeries_X_isBounded (0 : Fin 1))
+  have hψ_cont := psi_continuous_of_gen D aI ψ hψ_alg (by
+    intro t ht
+    rw [show (D.T : Finset A) = {b} from rfl, Finset.mem_singleton] at ht
+    subst ht
+    erw [divByS_eq_algebraMap, hψ_alg]
+    exact hmk_bX)
   -- Opaquify the evaluation as a `Fin 1`-typed hom `Φ`: the `D.T.card ≡ 1` defeq is
   -- paid ONCE here; every later composite is then cheaply `Fin 1`-typed (leaving the
   -- evaluation at the `D.T.card`-type makes each `RingHom.comp` unification re-pay
@@ -3362,23 +3389,11 @@ theorem coUnitDatum_ker_le_span
       isUnit_iff_exists_inv.mpr ⟨_, hmkX_mul⟩
     exact hu.mul_left_cancel (h1.trans hmkX_mul.symm)
   -- `ψ` is continuous for the localization topology
-  have hψ_cont : @Continuous _ _ D.topology τQ ψ := by
-    change @Continuous _ _ (locTopology D.P D.T D.s D.hopen) τQ ψ
-    refine locTopology_continuous_lift D.P D.T D.s D.hopen ψ ?_ ?_
-    · have heq : ψ.comp (algebraMap A (Localization.Away D.s)) =
-          (Ideal.Quotient.mk aI).comp
-            (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) := by
-        ext x; exact hψ_alg x
-      rw [heq]
-      exact continuous_quotient_mk'.comp
-        (MvTateAlgebra.mvTateAlgebra_algebraMap_continuous (A := A) 1)
-    · intro t ht
-      rw [show (D.T : Finset A) = {1} from rfl, Finset.mem_singleton] at ht
-      subst ht
-      rw [hψ_div]
-      exact isPowerBounded_map_of_isOpenMap (Ideal.Quotient.mk aI)
-        continuous_quotient_mk' (@QuotientRing.isOpenMap_coe _ τC _ aI hringC)
-        (MvTateAlgebra.mvPowerSeries_X_isBounded (0 : Fin 1))
+  have hψ_cont := psi_continuous_of_gen D aI ψ hψ_alg (by
+    intro t ht
+    rw [show (D.T : Finset A) = {1} from rfl, Finset.mem_singleton] at ht
+    subst ht
+    exact hψ_div)
   -- opaquify the evaluation (pay the `D.T.card ≡ 1` defeq once)
   obtain ⟨Φ, hΦ_cont, hΦ_alg, hΦ_X, hΦ_ker⟩ :
       ∃ Φ : ↥(restrictedMvPowerSeriesSubring 1 A) →+* presheafValue D,

@@ -12197,3 +12197,68 @@ the largest single dedup left.
 **Risk:** the shared skeleton must be stated with the datum abstract while each twin keeps
 its own `aI`; `hψ_cont`'s datum-specific step has to be isolated cleanly as `hpb` or the
 abstraction leaks. Two or three rounds.
+
+### Twin unification, step 1: the shared `ψ`-continuity lemma
+
+`psi_continuous_of_gen` — one lemma now serving **both** twins.
+`unitDatum_ker_le_span` 115 → 99, `coUnitDatum_ker_le_span` 133 → 121.
+
+Reading the two `hψ_cont` proofs side by side showed they are identical except for **one
+step**: deriving `ψ (divByS t D.s) = mk ζ` for the single generator. `unitDatum` gets it from
+`hmk_bX` after `divByS_eq_algebraMap`; `coUnitDatum` gets it directly from `hψ_div`. So that
+step becomes the hypothesis
+
+```lean
+    (hψ_gen : ∀ t ∈ D.T, ψ (divByS t D.s) =
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), …⟩))
+```
+
+and everything else — the `locTopology_continuous_lift` split, the constants bullet, and the
+`isPowerBounded_map_of_isOpenMap` finish — is shared. Each twin supplies `hψ_gen` inline in
+four lines.
+
+Note this is **interface parameterisation, not "spell the term"**: `ψ` is passed as an
+abstract `RingHom` with `hψ_alg`/`hψ_gen` characterising it, rather than spelling out
+`IsLocalization.Away.lift …`. That keeps the lemma usable for any lift with those two
+properties, and avoids threading `hUnit` through the statement.
+
+Two fixes, both now familiar: the quotient's `NonarchimedeanRing`/`IsTopologicalRing` had to
+be installed inside the lemma, and I duplicated `[T2Space A]`/`[NonarchimedeanRing A]` that
+the file's `variable` block already supplies — the linter caught it as
+"There are 2 `[T2Space A]` instances; one is sufficient."
+
+Remaining for the full unification: the `Φ`/`β`/`hext` skeleton (still ~60 shared lines
+across the two). That is the larger half and is unchanged in plan.
+
+### Twin unification, step 2 design: `ker_le_of_ext`
+
+Reading the "shared" tail closely shows it is *not* fully shared — three spots differ:
+
+| | `unitDatum` | `coUnitDatum` |
+|---|---|---|
+| `hΦ_X` value | `D.coeRingHom (algebraMap A _ b)` | `D.coeRingHom (divByS (1 : A) D.s)` |
+| the `erw` | `unitDatum_genTuple_eq` (+ `rfl`) | `coUnitDatum_genTuple_eq` |
+| final rewrite | `rw [hΦ_X, hβ_coe, hψ_alg, hmk_bX]` | `rw [hΦ_X, hβ_coe, hψ_div]` |
+
+All three are the same fact in disguise: **`Φ ζ` is `D.coeRingHom` of some `y`, and `ψ y = mk
+aI ζ`.** So they package into a single hypothesis and the rest unifies:
+
+```lean
+private theorem ker_le_of_ext [inst]
+    (D : RationalLocData A) (aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI))
+    (hψ_alg : …) (hψ_cont : @Continuous _ _ D.topology (mvQuotTopology 1 aI) ψ)
+    (Φ : ↥(restrictedMvPowerSeriesSubring 1 A) →+* presheafValue D)
+    (hΦ_cont : …) (hΦ_alg : …)
+    (hΦ_ker : RingHom.ker (example638_evalHom D) = RingHom.ker Φ)
+    (hΦζ : ∃ y, Φ ζ = D.coeRingHom y ∧ ψ y = Ideal.Quotient.mk aI ζ) :
+    RingHom.ker (example638_evalHom D) ≤ aI
+```
+
+Body = the three `letI`s + `obtain β` + `hext` + the tail ≈ **42 lines**, so the unified lemma
+itself lands *under* 50 — unlike the earlier estimate of ~90, because parameterising over `Φ`
+(rather than constructing it) leaves the datum-specific `obtain Φ` block in each twin.
+
+Expected: `unitDatum` 99 → ~59, `coUnitDatum` 121 → ~81, ~42 duplicated lines removed, and
+**no new over-50 target**. Neither twin clears yet; the remaining bulk in each is its own
+`obtain Φ` plus datum-specific witnesses.
