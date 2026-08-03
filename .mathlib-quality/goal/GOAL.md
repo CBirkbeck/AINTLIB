@@ -13247,3 +13247,53 @@ Two other choices worth recording:
   bodies — which say `B` — work unchanged. This is the same manoeuvre as `set N := max N₁ N₂` in
   `RobbaPresentation`, and it is the general answer to "the body uses a `set`-local that the
   signature cannot mention".
+
+### CORRECTION: the `xPresheaf` universe fix I recorded does not work
+
+An earlier entry proposed two fixes for the `xPresheaf_isSheafOfTopologicalRings` universe wall,
+the first being *"add `universe u` to `CurveObject.lean` and state the section variables over it,
+so the lemma can say `{ι : Type u}` and mean the space's `u`"*. **Tried it; it is wrong.**
+
+Declaring `universe u` and changing `variable (F : Type*)` to `variable (F : Type u)` produces
+**29 errors** across the file, of the form
+
+    Application type mismatch: ↥(frobFixed p F ϖ (unop V)) has type Type u
+    of sort `Type (u + 1)` but is expected to have type Type u_1
+
+The presheaf's **value** universe is independently auto-bound (`u_1`) and is *not* `F`'s universe.
+Naming `F`'s universe forces the two to coincide, which the file does not support: `curveSpace`'s
+presheaf takes values in its own universe, and dozens of sites depend on that freedom.
+
+So the cover index `ι` in `IsSheafOfTopologicalRings` lives in the **presheafed space's value
+universe**, which is auto-bound per declaration and has no name to borrow. Naming *it* would mean
+annotating `curveSpace`'s definition in another file — a much larger change than the note implied.
+
+That leaves only the second fix as viable: `IsLimitSheafOn.injective` is a **structure field**
+(`RestrictedLimitSheaf.lean:387`) declared `∀ {ι : Type u}` at the ambient `A`'s universe, and
+generalising it to `Type*` is a statement change to a structure field — a `/generalise` job.
+Reverted; target stays blocked, but for a now-precisely-understood reason.
+
+### Refined survey: block sizes must be counted in CODE lines
+
+The `LaurentRefinementCore` round showed that ranking blocks by *raw* lines over-states them —
+a 60-raw block was 49 code lines and cleared the bar. Re-running the survey with per-block code
+counts changes several verdicts, so the numbers below supersede the earlier table:
+
+| target | blocks (code) | note |
+|---|---|---|
+| `presheafValue_mvRestricted_isUnit_mk_s` (72) | 34, 12, 7 | one lift clears — blocked on `ι`-unfolding |
+| `xPresheaf_isSheafOfTopologicalRings` (90) | 46, 15, 4 | one lift clears — blocked above |
+| `exists_spa_point_not_vle_one_huber` (141) | 43, 26, 14, 12, 10 | **five lifts clear, all pieces ≤50** |
+| `exists_A_level_open_presentation'` (111) | 25, 18, 11, 9, 6, 5 | ~7 lifts |
+| `ker_restrictionMapHom_subset_closure_algLift` (95) | 7, 7, 7, 7 | no dominant block; a merge job, not a split job |
+| `unitCover_relOverlap_forward_witness` (217) | 26, 25, 24, 19 | ~6 lifts |
+| `laurentProdCoverOf_isOXAcyclic` (105) | 105 | single branch — lift then decompose inside |
+| `isOXAcyclic_interProd` (118) | 105, 12 | same |
+| `genRestrictedCover_isOXAcyclic_…` (213) | 184, 27 | same |
+
+`exists_spa_point_not_vle_one_huber` is the best-shaped target left — every block is already under
+50, so each lift is a valid lemma and five of them clear it. **What stops it being a one-round job
+is its setup**, not its blocks: `Radj`, `s`, `t`, `ht_equiv`, `hs_le` arrive through `obtain`s with
+anonymous universe/instance binders (`⟨Γs, _, s, …⟩`), plus two `letI : Algebra …` instances, so
+the shared parameter block for the extracted lemmas runs to about twelve binders including two
+anonymous instances. That is threadable but wants a dedicated pass rather than a batch.
