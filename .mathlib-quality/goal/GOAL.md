@@ -12965,3 +12965,43 @@ lemma and indented **the next declaration's docstring**, because I searched forw
 starting `theorem …` and the docstring sits above it. Same class of error as anchoring an insert
 on the `def` line instead of using `insert_before_decl`: a docstring is part of the declaration
 and any range that stops at the `theorem` keyword is one block short.
+
+### `ideal_pullback_controlled` 158 -> 146, and an honest assessment of its shape
+
+Two real improvements, then a stop.
+
+* **`have hsum` was dead code** — defined at line 528, referenced nowhere. It restates
+  `IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg`, which the proof then calls directly two
+  blocks later. Removed.
+* **`hfinal` became `norm_sum_mul_le`**, the same shape as the `norm_d2_le` extracted earlier:
+  *if every `‖a j‖ ≤ K` and `Cr = 1 + ∑ ‖r j‖`, then `‖∑_{j ∈ T} a j * r j‖ ≤ K * Cr`*. Twelve
+  lines of inline calc became a three-line application of a reusable statement.
+
+**Why I stopped there.** This proof is the tightly-coupled-constants shape, and it is genuinely
+the least tractable one on the board. It `set`s five interdependent reals (`CrC`, `CrA`, `Bs`,
+`M`, `z`) and derives eight arithmetic facts relating them, then every subsequent block consumes
+six to ten of those at once. Extracting the last bullet — the largest remaining piece at 34 lines
+— needs eighteen parameters. The pieces are not hiding a mathematical statement; they *are*
+constant bookkeeping, and the honest fix is to bundle the constants into a structure, which is a
+redesign of the statement rather than a `/decompose-proof` edit.
+
+### A dead-code sweep worth finishing (task 3)
+
+Finding `hsum` by accident prompted a project-wide scan: named `have`s never referenced later in
+their own proof. **60 candidates** across the non-`Vendored` files, in proofs that contain none of
+`omega`/`linarith`/`positivity`/`assumption`/`simp_all`/… — those tactics consume hypotheses *by
+type*, so any proof using one is excluded as unjudgeable (the scan that ignored this was wrong on
+5 of 17 the first time it was run).
+
+**One further caveat before acting on the list**, not yet encoded in the scan: a named `have`
+whose type is a *class* stays load-bearing even when never named, because instance resolution
+searches the whole local context. `have hcompat : SomeClass …` is exactly that shape and appears
+in the candidate list. So the list is a starting point for per-site checking, not a delete-list —
+each removal needs its own build.
+
+Sample of the 60: `AdicCompletionBridge:398 have hmkQ`, `SpvAITopology:501/570/605 have hh`,
+`PresheafTateStructure:1228 have hu_unit`, `TateAlgebra:1857 have hcomp`,
+`Presheaf:2010/2542 have hni_K`, `ValuationPrimeConvex:224/435 have hx_ne`,
+`TateAlgebraTopology:666/2144 have hpow`. The repeated names across sibling declarations
+(`hh` ×3, `hni_K` ×2, `hpow` ×2, `hx_ne` ×2) suggest copy-paste of a block whose conclusion was
+later obtained another way — which is the usual way a `have` goes dead.

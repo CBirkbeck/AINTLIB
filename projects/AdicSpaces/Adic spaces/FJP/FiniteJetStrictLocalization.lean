@@ -401,6 +401,26 @@ private theorem norm_d2_le {S : Type*} [NormedCommRing S] [IsUltrametricDist S] 
   exact (norm_sub_le_max _ _).trans (max_le h1 h2)
 
 
+/-- Ultrametric bound on a sum of products: if every `‖a j‖ ≤ K` and `Cr = 1 + ∑ ‖r j‖`, then
+every partial sum `∑_{j ∈ T} a j * r j` is bounded by `K * Cr`. Companion to `norm_d2_le`, and the
+same shape: name the bound `K` and the constant `Cr` and the statement is about `r`, not about the
+proof it came from. -/
+private theorem norm_sum_mul_le {S : Type*} [NormedCommRing S] [IsUltrametricDist S] {m : ℕ}
+    (a r : Fin m → S) (K Cr : ℝ) (hK : 0 ≤ K) (hCr : Cr = 1 + ∑ k, ‖r k‖)
+    (ha : ∀ j, ‖a j‖ ≤ K) (T : Finset (Fin m)) : ‖∑ j ∈ T, a j * r j‖ ≤ K * Cr := by
+  have hCr1 : 1 ≤ Cr := by
+    rw [hCr]; exact le_add_of_nonneg_right (Finset.sum_nonneg fun k _ => norm_nonneg _)
+  have hterm : ∀ b : Fin m, ‖a b * r b‖ ≤ K * Cr := fun b => by
+    calc ‖a b * r b‖ ≤ ‖a b‖ * ‖r b‖ := norm_mul_le _ _
+      _ ≤ K * Cr := by
+          refine mul_le_mul (ha b) ?_ (norm_nonneg _) hK
+          rw [hCr]
+          exact le_add_of_nonneg_of_le zero_le_one
+            (Finset.single_le_sum (fun k _ => norm_nonneg _) (Finset.mem_univ b))
+  exact IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg
+    (mul_nonneg hK (zero_le_one.trans hCr1)) fun b _ => hterm b
+
+
 /-- The controlled pullback ([FJP] (4.12)–(4.16)): a matching pair of graph-ideal elements
 comes from an element of `I_𝓐` with a uniformly bounded representative. This is where the
 `d₂`-syzygy correction (`exists_d2_lift` at the 𝓓-vertex) enters. -/
@@ -525,10 +545,7 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
       show (fun i => extIotaC F m (rA F m g f i)) = rC F m g f from rfl,
       show (fun i => extIotaC F m (a i)) = v' from funext fun i => (ha i).2]
     exact hv'd1
-  · have hsum : ∀ (C0 : ℝ), 0 ≤ C0 → ∀ (T : Finset (Fin m)) (G : Fin m → PC F m),
-        (∀ j ∈ T, ‖G j‖ ≤ C0) → ‖∑ j ∈ T, G j‖ ≤ C0 :=
-      fun _ h _ _ hG => IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg h hG
-    have hd2bound : ∀ i, ‖d2 (rC F m g f) sC i‖ ≤ z * (hB + hC) * M * CrC :=
+  · have hd2bound : ∀ i, ‖d2 (rC F m g f) sC i‖ ≤ z * (hB + hC) * M * CrC :=
       fun i => norm_d2_le _ _ _ _ hzM0 hCrC hsCn' i
     have hv'n : ‖v'‖ ≤ Bs * M := by
       refine pi_norm_le_iff_of_nonneg (mul_nonneg hBs0 hM0) |>.mpr fun i => ?_
@@ -549,18 +566,9 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
       · exact (norm_le_pi_norm u i).trans (hun'.trans
           (mul_le_mul_of_nonneg_right hBsB hM0))
       · exact (norm_le_pi_norm v' i).trans hv'n
-    have hfinal : ∀ (T : Finset (Fin m)), ‖∑ j ∈ T, a j * rA F m g f j‖ ≤ Bs * M * CrA := by
-      have hBMC0 : 0 ≤ Bs * M * CrA :=
-        mul_nonneg (mul_nonneg hBs0 hM0) (zero_le_one.trans hCrA1)
-      have hterm : ∀ b : Fin m, ‖a b * rA F m g f b‖ ≤ Bs * M * CrA := fun b => by
-        calc ‖a b * rA F m g f b‖ ≤ ‖a b‖ * ‖rA F m g f b‖ := norm_mul_le _ _
-          _ ≤ (Bs * M) * CrA := by
-              refine mul_le_mul ((norm_le_pi_norm a b).trans han) ?_ (norm_nonneg _)
-                (mul_nonneg hBs0 hM0)
-              rw [hCrA]
-              exact le_add_of_nonneg_of_le zero_le_one
-                (Finset.single_le_sum (fun k _ => norm_nonneg _) (Finset.mem_univ b))
-      exact fun T => IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hBMC0 fun b _ => hterm b
+    have hfinal : ∀ (T : Finset (Fin m)), ‖∑ j ∈ T, a j * rA F m g f j‖ ≤ Bs * M * CrA :=
+      norm_sum_mul_le a (rA F m g f) (Bs * M) CrA (mul_nonneg hBs0 hM0) hCrA
+        (fun j => (norm_le_pi_norm a j).trans han)
     show ‖d1 (rA F m g f) a‖ ≤ (1 + Bs * CrA) * M
     unfold d1
     refine (hfinal Finset.univ).trans ?_
