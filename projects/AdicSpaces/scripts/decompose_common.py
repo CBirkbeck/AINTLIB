@@ -56,6 +56,30 @@ def boilerplate(body, upto=None):
     return n
 
 
+def bullet_body(lines, i, j):
+    """Extract a `·` bullet's content as a standalone proof body.
+
+    The content INCLUDES the bullet's own line -- that line carries the first tactic. Swap the
+    `· ` marker for two spaces so the first tactic aligns with the rest, then dedent once by the
+    bullet's own indent.
+
+    Getting this wrong has cost three separate rebuilds, in three different ways:
+      * `lines[i+1:j]`                 drops the first tactic; Lean then reports a parse error
+                                       (`unexpected token`) pointing mid-expression in the body.
+      * dedent, strip marker, reindent leaves everything after line one two columns too deep;
+                                       symptom is `unsolved goals` then `unexpected identifier`.
+      * dedenting a block already at proof-body indent puts the body at column 0, which Lean
+                                       will not accept as a tactic block.
+
+    Note the end index `j` must come from a declaration-start scan, NOT from "first non-empty
+    line at column 0" -- when the body itself sits at column 0 that test matches its own first
+    line and yields an empty range.
+    """
+    indent = len(lines[i]) - len(lines[i].lstrip())
+    block = [' ' * indent + '  ' + lines[i].lstrip()[2:]] + list(lines[i + 1:j])
+    return [(l[indent:] if l.startswith(' ' * indent) else l) for l in block]
+
+
 def block_extent(body, start, base):
     """A block runs to the first line at indent <= base. Bullets and `have`s do
     NOT partition a proof: `· simp` is one line and the tactics after it are the

@@ -13162,3 +13162,58 @@ Four builds were spent on avoidable errors, all variations of things already in 
   `divByS_mem_locSubring … (Finset.mem_singleton_self _)` line. Scope every substitution to the
   target declaration's line range, not the whole file — the assert caught it, but only because the
   count was checked.
+
+### `ratio_laurent_unitGen_bundle` 90 -> 6: the two directions become two lemmas
+
+Green first try, one round. The proof establishes a two-sided refinement relation between the
+ratio Laurent cover and `C`, and its two bullets carry 88 of the 90 lines:
+
+| new lemma | lines | direction |
+|---|---|---|
+| `ratio_laurent_refines_leaf` | 38 | every leaf of the ratio cover sits inside some piece of `C` |
+| `ratio_laurent_cover_each` | 50 | every point of every piece lies in a leaf still inside that piece |
+
+Naming them was the whole decomposition: the parent is now the `set ratios` + `refine` skeleton
+and two `exact`s, and the two halves — *refines* and *cover-each* — are the statements the
+Prop A.3(2) bridge actually reasons about.
+
+`ratios` is a `set`-local closed in `units` and `h_units`, but both bullets use its **defining
+equation** `hratios` (to show membership of a particular product in the list), so it passes as a
+parameter *plus* its equation rather than being spelled. That is the middle option between the two
+extremes used elsewhere in this log — abstract-with-equation, when the body opens the definition
+only via a named hypothesis.
+
+**The bullet rule, applied deliberately for the first time, worked unmodified.** After getting it
+wrong three ways in previous rounds, encoding it as a helper —
+
+```python
+def bullet(L, i, j):
+    ind = len(L[i]) - len(L[i].lstrip())
+    blk = [' ' * ind + '  ' + L[i].lstrip()[2:]] + list(L[i+1:j])
+    return [(l[ind:] if l.startswith(' ' * ind) else l) for l in blk]
+```
+
+— produced both lemma bodies correctly on the first attempt. Worth keeping in
+`decompose_common.py` rather than re-deriving it per extraction.
+
+### `WedhornCechAcyclicity`: what is left, and why none of it is a one-round job
+
+Nine targets remain in this file. Their block profiles say each needs three or more rounds:
+
+| target | blocks | one lift leaves |
+|---|---|---|
+| `genPiece_relative_overlap_square₂` (94) | 22, 16 | 75 — blocks too small |
+| `genPiece_relOverlap_forward_witness` (103) | 19, 14, 9, 8 | 87 — many small steps |
+| `laurentProdCoverOf_isOXAcyclic` (105) | 108 | the `cons` branch **is** the proof |
+| `isOXAcyclic_interProd` (118) | 109, 13 | likewise — the gluing bullet is everything |
+| `wedhorn_lemma_834` (131) | 20, 14, 13, 9 | 114 |
+| `genRestrictedCover_gluing` (191) | 61, 16, 13, 12 | 133, and the 61 is itself over |
+| `genRestrictedCover_isOXAcyclic_…` (213) | 196, 29 | `case pos` is the proof |
+| `unitCover_relOverlap_forward_witness` (217) | 26, 25, 24, 20 | 134 — four even blocks, needs ~6 lifts |
+| `wedhorn_lemma_834_propA3_part1_gluing` (349) | 139, 73, 32, 15 | 213 |
+
+Two distinct shapes here, and they want different treatment. The `[108]`/`[109]`/`[196]` ones are
+**single-branch proofs** — extracting the branch just renames the target, so they need the branch
+lifted *and then* decomposed inside, two rounds before the count moves. The `[26,25,24,20]` and
+`[20,14,13,9]` ones are **many-small-step** proofs where no single lift is decisive and only a
+sustained five-or-six-lift pass clears them.

@@ -10367,6 +10367,130 @@ theorem ratio_laurent_refines_unitGen_cover [DecidableEq A]
   exact ⟨hv.1, fun g hg => hmmax g hg v hv,
     not_vle_zero_of_isUnit (h_units m hm) v⟩
 
+/-- The **refines** half of `ratio_laurent_unitGen_bundle`: every leaf of the ratio cover sits
+inside some piece of `C`. On a leaf the unit generators are totally ordered by `vle` (the
+σ-walk dichotomy), so the `vle`-maximal one names the containing piece. -/
+private theorem ratio_laurent_refines_leaf
+[DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCoveringData A) (units : Finset A) (hne : units.Nonempty)
+    (hC_gen : C.IsGeneratedBy units) (h_units : ∀ f ∈ units, IsUnit f)
+    (ratios : List A)
+    (hratios : ratios = (units.attach.toList.product units.attach.toList).map
+      (fun p => (p.1 : A) * ↑((h_units p.2 p.2.2).unit⁻¹))) :
+    ∀ V' ∈ (laurentProdCoverOf C.base ratios).covers, ∃ D ∈ C.covers,
+      rationalOpen V'.T V'.s ⊆ rationalOpen D.T D.s := by
+  -- refines: delegate to the proven σ-walk lemma's argument by re-running it
+  -- on the explicit cover (the proven lemma's witness IS this cover, but the
+  -- ∃ hides the identification; the dichotomy+max argument re-applies).
+  intro V' hV'
+  have hV'' : V' ∈ laurentProdLeaves C.base ratios := hV'
+  have hcmp : ∀ f ∈ units, ∀ g ∈ units,
+      (∀ v ∈ rationalOpen V'.T V'.s, v.vle f g) ∨
+      (∀ v ∈ rationalOpen V'.T V'.s, v.vle g f) := by
+    intro f hf g hg
+    have hmem : (f * ↑((h_units g hg).unit⁻¹) : A) ∈ ratios := by
+      rw [hratios]
+      exact List.mem_map.mpr ⟨(⟨f, hf⟩, ⟨g, hg⟩),
+        List.mem_product.mpr ⟨Finset.mem_toList.mpr (Finset.mem_attach _ _),
+          Finset.mem_toList.mpr (Finset.mem_attach _ _)⟩, rfl⟩
+    have hspec : (↑(h_units g hg).unit : A) = g := (h_units g hg).unit_spec
+    have hinv : ((↑(h_units g hg).unit⁻¹ : A) * g) = 1 := by
+      rw [show ((↑(h_units g hg).unit⁻¹ : A) * g) =
+        ((↑(h_units g hg).unit⁻¹ : A) * ↑(h_units g hg).unit) by
+          rw [hspec]]
+      exact (h_units g hg).unit.inv_mul
+    rcases laurentProdLeaves_sign_dichotomy ratios C.base hV''
+      (f * ↑((h_units g hg).unit⁻¹)) hmem with h | h
+    · left
+      intro v hv
+      have h2 := v.mul_vle_mul_left (h v hv) g
+      rwa [one_mul, mul_assoc, hinv, mul_one] at h2
+    · right
+      intro v hv
+      have h2 := v.mul_vle_mul_left (h v hv) g
+      rwa [one_mul, mul_assoc, hinv, mul_one] at h2
+  have hmax := exists_max_vle_of_pairwise_comparable units hcmp
+  obtain ⟨m, hm, hmmax⟩ := hmax units hne (Finset.Subset.refl units)
+  obtain ⟨-, φ, hφ_bij, hφ_eq⟩ := hC_gen
+  refine ⟨(φ ⟨m, hm⟩).1, (φ ⟨m, hm⟩).2, ?_⟩
+  intro v hv
+  rw [(hφ_eq ⟨m, hm⟩).1, (hφ_eq ⟨m, hm⟩).2]
+  exact ⟨hv.1, fun g hg => hmmax g hg v hv,
+    not_vle_zero_of_isUnit (h_units m hm) v⟩
+
+/-- The **cover-each** half: every point of every piece of `C` lies in a leaf of the ratio cover
+that is still contained in that piece. Choose the leaf by the sign-selecting σ-walk that keeps
+the piece's own denominator dominant. -/
+private theorem ratio_laurent_cover_each
+[DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (C : RationalCoveringData A) (units : Finset A) (hne : units.Nonempty)
+    (hC_gen : C.IsGeneratedBy units) (h_units : ∀ f ∈ units, IsUnit f)
+    (ratios : List A)
+    (hratios : ratios = (units.attach.toList.product units.attach.toList).map
+      (fun p => (p.1 : A) * ↑((h_units p.2 p.2.2).unit⁻¹))) :
+    ∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
+      ∃ V' ∈ (laurentProdCoverOf C.base ratios).covers, v ∈ rationalOpen V'.T V'.s ∧
+        rationalOpen V'.T V'.s ⊆ rationalOpen D.T D.s := by
+  -- cover-each: sign-selecting σ-walk keeping the piece's denominator
+  -- dominant.
+  intro D hD v hv
+  obtain ⟨-, φ, hφ_bij, hφ_eq⟩ := hC_gen
+  obtain ⟨t, ht⟩ := hφ_bij.2 ⟨D, hD⟩
+  have hval : (φ t).1 = D := congrArg Subtype.val ht
+  have hT : D.T = units := hval ▸ (hφ_eq t).1
+  have hs : D.s = ↑t := hval ▸ (hφ_eq t).2
+  have hu : (↑t : A) ∈ units := t.2
+  have hspec : (↑(h_units ↑t hu).unit : A) = ↑t := (h_units ↑t hu).unit_spec
+  have hinv_l : ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑t) = 1 := by
+    rw [show ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑t) =
+      ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑(h_units ↑t hu).unit) by
+        rw [hspec]]
+    exact (h_units ↑t hu).unit.inv_mul
+  have hinv_r : ((↑t : A) * ↑((h_units ↑t hu).unit⁻¹)) = 1 := by
+    rw [show ((↑t : A) * ↑((h_units ↑t hu).unit⁻¹)) =
+      ((↑(h_units ↑t hu).unit : A) * ↑((h_units ↑t hu).unit⁻¹)) by
+        rw [hspec]]
+    exact (h_units ↑t hu).unit.mul_inv
+  -- v's bounds on D give the preferred signs for the t-ratios.
+  have hv_base : v ∈ rationalOpen C.base.T C.base.s := C.hsubset D hD hv
+  have hvg : ∀ g ∈ units, v.vle g ↑t := by
+    intro g hg
+    have h0 := hv.2.1 g (by rw [hT]; exact hg)
+    rwa [hs] at h0
+  -- the preferred-sign condition at v
+  have hPv : ∀ f ∈ ratios,
+      (∃ g ∈ units, f = g * ↑((h_units ↑t hu).unit⁻¹)) → v.vle f 1 := by
+    rintro f hf ⟨g, hg, rfl⟩
+    have h2 := v.mul_vle_mul_left (hvg g hg) (↑((h_units ↑t hu).unit⁻¹) : A)
+    rwa [hinv_r] at h2
+  obtain ⟨V', hV'_leaf, hvV', hbound⟩ :=
+    laurentProdLeaves_cover_sign_select ratios
+      (fun r => ∃ g ∈ units, r = g * ↑((h_units ↑t hu).unit⁻¹))
+      C.base hv_base hPv
+  refine ⟨V', hV'_leaf, hvV', ?_⟩
+  intro w hw
+  rw [hT, hs]
+  refine ⟨hw.1, ?_, not_vle_zero_of_isUnit (h_units ↑t hu) w⟩
+  intro g hg
+  have hmem : (g * ↑((h_units ↑t hu).unit⁻¹) : A) ∈ ratios := by
+    rw [hratios]
+    exact List.mem_map.mpr ⟨(⟨g, hg⟩, ⟨↑t, hu⟩),
+      List.mem_product.mpr ⟨Finset.mem_toList.mpr (Finset.mem_attach _ _),
+        Finset.mem_toList.mpr (Finset.mem_attach _ _)⟩, rfl⟩
+  have h1 := hbound w hw _ hmem ⟨g, hg, rfl⟩
+  have h2 := w.mul_vle_mul_left h1 (↑t : A)
+  rwa [one_mul, mul_assoc, hinv_l, mul_one] at h2
+
+
+
 /-- **Wedhorn 8.34(iii), bundled faithful form (wedhorn.txt:4246-4249)**: for a
 rational cover generated by RING units, the `{fᵢfⱼ⁻¹}`-ratio Laurent cover both
 refines it AND covers each piece from inside (the sign-selecting σ-walk keeps
@@ -10401,94 +10525,8 @@ theorem ratio_laurent_unitGen_bundle [DecidableEq A]
     (fun p => (p.1 : A) * ↑((h_units p.2 p.2.2).unit⁻¹)) with hratios
   refine ⟨ratios, laurentProdCoverOf C.base ratios,
     laurentProdCoverOf_isLaurentProd _ _, rfl, ?_, ?_⟩
-  · -- refines: delegate to the proven σ-walk lemma's argument by re-running it
-    -- on the explicit cover (the proven lemma's witness IS this cover, but the
-    -- ∃ hides the identification; the dichotomy+max argument re-applies).
-    intro V' hV'
-    have hV'' : V' ∈ laurentProdLeaves C.base ratios := hV'
-    have hcmp : ∀ f ∈ units, ∀ g ∈ units,
-        (∀ v ∈ rationalOpen V'.T V'.s, v.vle f g) ∨
-        (∀ v ∈ rationalOpen V'.T V'.s, v.vle g f) := by
-      intro f hf g hg
-      have hmem : (f * ↑((h_units g hg).unit⁻¹) : A) ∈ ratios := by
-        rw [hratios]
-        exact List.mem_map.mpr ⟨(⟨f, hf⟩, ⟨g, hg⟩),
-          List.mem_product.mpr ⟨Finset.mem_toList.mpr (Finset.mem_attach _ _),
-            Finset.mem_toList.mpr (Finset.mem_attach _ _)⟩, rfl⟩
-      have hspec : (↑(h_units g hg).unit : A) = g := (h_units g hg).unit_spec
-      have hinv : ((↑(h_units g hg).unit⁻¹ : A) * g) = 1 := by
-        rw [show ((↑(h_units g hg).unit⁻¹ : A) * g) =
-          ((↑(h_units g hg).unit⁻¹ : A) * ↑(h_units g hg).unit) by
-            rw [hspec]]
-        exact (h_units g hg).unit.inv_mul
-      rcases laurentProdLeaves_sign_dichotomy ratios C.base hV''
-        (f * ↑((h_units g hg).unit⁻¹)) hmem with h | h
-      · left
-        intro v hv
-        have h2 := v.mul_vle_mul_left (h v hv) g
-        rwa [one_mul, mul_assoc, hinv, mul_one] at h2
-      · right
-        intro v hv
-        have h2 := v.mul_vle_mul_left (h v hv) g
-        rwa [one_mul, mul_assoc, hinv, mul_one] at h2
-    have hmax := exists_max_vle_of_pairwise_comparable units hcmp
-    obtain ⟨m, hm, hmmax⟩ := hmax units hne (Finset.Subset.refl units)
-    obtain ⟨-, φ, hφ_bij, hφ_eq⟩ := hC_gen
-    refine ⟨(φ ⟨m, hm⟩).1, (φ ⟨m, hm⟩).2, ?_⟩
-    intro v hv
-    rw [(hφ_eq ⟨m, hm⟩).1, (hφ_eq ⟨m, hm⟩).2]
-    exact ⟨hv.1, fun g hg => hmmax g hg v hv,
-      not_vle_zero_of_isUnit (h_units m hm) v⟩
-  · -- cover-each: sign-selecting σ-walk keeping the piece's denominator
-    -- dominant.
-    intro D hD v hv
-    obtain ⟨-, φ, hφ_bij, hφ_eq⟩ := hC_gen
-    obtain ⟨t, ht⟩ := hφ_bij.2 ⟨D, hD⟩
-    have hval : (φ t).1 = D := congrArg Subtype.val ht
-    have hT : D.T = units := hval ▸ (hφ_eq t).1
-    have hs : D.s = ↑t := hval ▸ (hφ_eq t).2
-    have hu : (↑t : A) ∈ units := t.2
-    have hspec : (↑(h_units ↑t hu).unit : A) = ↑t := (h_units ↑t hu).unit_spec
-    have hinv_l : ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑t) = 1 := by
-      rw [show ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑t) =
-        ((↑(h_units ↑t hu).unit⁻¹ : A) * ↑(h_units ↑t hu).unit) by
-          rw [hspec]]
-      exact (h_units ↑t hu).unit.inv_mul
-    have hinv_r : ((↑t : A) * ↑((h_units ↑t hu).unit⁻¹)) = 1 := by
-      rw [show ((↑t : A) * ↑((h_units ↑t hu).unit⁻¹)) =
-        ((↑(h_units ↑t hu).unit : A) * ↑((h_units ↑t hu).unit⁻¹)) by
-          rw [hspec]]
-      exact (h_units ↑t hu).unit.mul_inv
-    -- v's bounds on D give the preferred signs for the t-ratios.
-    have hv_base : v ∈ rationalOpen C.base.T C.base.s := C.hsubset D hD hv
-    have hvg : ∀ g ∈ units, v.vle g ↑t := by
-      intro g hg
-      have h0 := hv.2.1 g (by rw [hT]; exact hg)
-      rwa [hs] at h0
-    -- the preferred-sign condition at v
-    have hPv : ∀ f ∈ ratios,
-        (∃ g ∈ units, f = g * ↑((h_units ↑t hu).unit⁻¹)) → v.vle f 1 := by
-      rintro f hf ⟨g, hg, rfl⟩
-      have h2 := v.mul_vle_mul_left (hvg g hg) (↑((h_units ↑t hu).unit⁻¹) : A)
-      rwa [hinv_r] at h2
-    obtain ⟨V', hV'_leaf, hvV', hbound⟩ :=
-      laurentProdLeaves_cover_sign_select ratios
-        (fun r => ∃ g ∈ units, r = g * ↑((h_units ↑t hu).unit⁻¹))
-        C.base hv_base hPv
-    refine ⟨V', hV'_leaf, hvV', ?_⟩
-    intro w hw
-    rw [hT, hs]
-    refine ⟨hw.1, ?_, not_vle_zero_of_isUnit (h_units ↑t hu) w⟩
-    intro g hg
-    have hmem : (g * ↑((h_units ↑t hu).unit⁻¹) : A) ∈ ratios := by
-      rw [hratios]
-      exact List.mem_map.mpr ⟨(⟨g, hg⟩, ⟨↑t, hu⟩),
-        List.mem_product.mpr ⟨Finset.mem_toList.mpr (Finset.mem_attach _ _),
-          Finset.mem_toList.mpr (Finset.mem_attach _ _)⟩, rfl⟩
-    have h1 := hbound w hw _ hmem ⟨g, hg, rfl⟩
-    have h2 := w.mul_vle_mul_left h1 (↑t : A)
-    rwa [one_mul, mul_assoc, hinv_l, mul_one] at h2
-
+  · exact ratio_laurent_refines_leaf C units hne hC_gen h_units ratios hratios
+  · exact ratio_laurent_cover_each C units hne hC_gen h_units ratios hratios
 set_option linter.unusedSectionVars false in
 /-- **Wedhorn 8.34(i)-restriction, TRACE form (wedhorn.txt:4233-4235)**: *"If
 `U` is any rational subset of `X`, then `V|U` is the Laurent cover generated
