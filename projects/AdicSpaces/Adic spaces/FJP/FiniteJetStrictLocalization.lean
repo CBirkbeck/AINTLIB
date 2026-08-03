@@ -353,14 +353,9 @@ theorem ideal_row_surjective (_hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
               refine mul_le_mul (norm_le_pi_norm u i) ?_ (norm_nonneg _) (norm_nonneg u); rw [hCr]
               refine le_add_of_nonneg_of_le zero_le_one ?_
               exact Finset.single_le_sum (fun j _ => norm_nonneg _) (Finset.mem_univ i)
-      have hpartial : ∀ s : Finset (Fin m), ‖∑ i ∈ s, cc i * rC F m g f i‖ ≤ ‖u‖ * Cr := by
-        intro s; induction s using Finset.induction_on with
-        | empty =>
-          rw [Finset.sum_empty, norm_zero]
-          exact mul_nonneg (norm_nonneg u) (zero_le_one.trans hCr1)
-        | insert a s ha ih =>
-          rw [Finset.sum_insert ha]
-          exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hterm a) ih)
+      have hpartial : ∀ s : Finset (Fin m), ‖∑ i ∈ s, cc i * rC F m g f i‖ ≤ ‖u‖ * Cr :=
+        fun _ => IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg
+          (mul_nonneg (norm_nonneg u) (zero_le_one.trans hCr1)) fun i _ => hterm i
       show ‖d1 (rC F m g f) cc‖ ≤ h * Cr * ‖y‖; unfold d1
       refine (hpartial Finset.univ).trans ?_
       calc ‖u‖ * Cr ≤ h * ‖y‖ * Cr := mul_le_mul_of_nonneg_right hun (zero_le_one.trans hCr1)
@@ -508,17 +503,8 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
       show (fun i => extIotaC F m (a i)) = v' from funext fun i => (ha i).2]
     exact hv'd1
   · have hsum : ∀ (C0 : ℝ), 0 ≤ C0 → ∀ (T : Finset (Fin m)) (G : Fin m → PC F m),
-        (∀ j ∈ T, ‖G j‖ ≤ C0) → ‖∑ j ∈ T, G j‖ ≤ C0 := by
-      intro C0 hC00 T G hG
-      induction T using Finset.induction_on with
-      | empty =>
-        rw [Finset.sum_empty, norm_zero]
-        exact hC00
-      | insert b T hb ih =>
-        rw [Finset.sum_insert hb]
-        exact (IsUltrametricDist.norm_add_le_max _ _).trans
-          (max_le (hG b (Finset.mem_insert_self _ _))
-            (ih fun j hj => hG j (Finset.mem_insert_of_mem hj)))
+        (∀ j ∈ T, ‖G j‖ ≤ C0) → ‖∑ j ∈ T, G j‖ ≤ C0 :=
+      fun _ h _ _ hG => IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg h hG
     have hd2bound : ∀ i, ‖d2 (rC F m g f) sC i‖ ≤ z * (hB + hC) * M * CrC := fun i => by
       have hterm : ∀ (p : Pairs m) (j : Fin m), ‖sC p * rC F m g f j‖ ≤
           z * (hB + hC) * M * CrC := fun p j => by
@@ -579,14 +565,7 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
     have hfinal : ∀ (T : Finset (Fin m)), ‖∑ j ∈ T, a j * rA F m g f j‖ ≤ Bs * M * CrA := by
       have hBMC0 : 0 ≤ Bs * M * CrA :=
         mul_nonneg (mul_nonneg hBs0 hM0) (zero_le_one.trans hCrA1)
-      intro T
-      induction T using Finset.induction_on with
-      | empty =>
-        rw [Finset.sum_empty, norm_zero]
-        exact hBMC0
-      | insert b T hb ih =>
-        rw [Finset.sum_insert hb]
-        refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ih)
+      have hterm : ∀ b : Fin m, ‖a b * rA F m g f b‖ ≤ Bs * M * CrA := fun b => by
         calc ‖a b * rA F m g f b‖ ≤ ‖a b‖ * ‖rA F m g f b‖ := norm_mul_le _ _
           _ ≤ (Bs * M) * CrA := by
               refine mul_le_mul ((norm_le_pi_norm a b).trans han) ?_ (norm_nonneg _)
@@ -594,6 +573,7 @@ theorem ideal_pullback_controlled (hspan : Ideal.span ({g} ∪ Set.range f) = �
               rw [hCrA]
               exact le_add_of_nonneg_of_le zero_le_one
                 (Finset.single_le_sum (fun k _ => norm_nonneg _) (Finset.mem_univ b))
+      exact fun T => IsUltrametricDist.norm_sum_le_of_forall_le_of_nonneg hBMC0 fun b _ => hterm b
     show ‖d1 (rA F m g f) a‖ ≤ (1 + Bs * CrA) * M
     unfold d1
     refine (hfinal Finset.univ).trans ?_
