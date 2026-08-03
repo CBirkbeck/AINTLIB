@@ -34707,3 +34707,37 @@ earlier points in this chain. Use the term form
 
 Everything else in the D-chain is proved and axiom-verified. One `sorry` remains and both of
 its inputs (H1, H2) are theorems.
+
+### [WP-D2c-3] the exact remaining splice (2026-08-03, measured)
+
+Attempted the `pullback.hom_ext` split twice; reverted both times. Recording exactly what is
+needed so the next pass does not rediscover it.
+
+**Setup that works** (verified to elaborate): hoist the first component out of the
+`Prod.ext` split, so it is available to *both* branches:
+
+```lean
+  have hu : f ≫ (yFullCandidateHomEquiv … X').symm PQ ≫ X₁.pullbackAlongπ _ =
+      (yFullCandidateHomEquiv … X).symm ((gammaFullNaiveProblem R N).map f.op PQ) ≫
+        X₁.pullbackAlongπ _ := by
+    rw [yFullCandidateHomEquiv_symm_comp_pullbackAlongπ,
+      yFullCandidateHomEquiv_symm_comp_pullbackAlongπ]
+    rw [forgetAt_naturality N hinvR f PQ, rOne.comp_homEquiv_symm]
+```
+then `refine (homPullbackAlongEquiv …).injective ?_; refine Subtype.ext (Prod.ext ?_ ?_)`,
+first branch `exact hu`.
+
+**What blocked the second branch.** After `rw [hbX', hbX]` and `refine pullback.hom_ext ?_ ?_`
+the `snd` branch needs `f.baseHom ≫ pX'.1.1.baseHom = pX.1.1.baseHom`. Deriving it as
+`congrArg EllHom.baseHom hu` gives the *un-normalised* form —
+`(w ≫ pullbackAlongπ g).baseHom = w.baseHom ≫ g`, not `pX.1.1.baseHom`. The missing step is
+to rewrite `hu` by `homToPullbackAlong_pullbackAlongπ` on both sides *first* (so both sides
+become the bare `u`-components), and only then take `baseHom`. State that as its own
+`have hub : f.baseHom ≫ (pX' : _ × _).1.baseHom = (pX : _ × _).1.baseHom` before the
+`pullback.hom_ext`.
+
+**`fst` branch** is H2, `completionLocusClassifies_natural_fst` (proved) — modulo matching
+its `.1.1.1.1` projection against `pX'.1.2 ≫ pullback.fst`.
+
+Reminder: `rw [Category.assoc]` does not work anywhere in this goal (coercion defeats the
+motive); use `(Category.assoc _ _ _).trans (congrArg (fun m => f.baseHom ≫ m) pX'.2)`.

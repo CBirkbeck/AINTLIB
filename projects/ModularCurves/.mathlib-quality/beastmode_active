@@ -1,1 +1,1 @@
-FOCUS: [WP-D2c-3] H1+H2 both proved; wire H2 into the baseHom component
+FOCUS: [WP-D2c-3] pullback.hom_ext split of the final goal; snd branch via term-form assoc
