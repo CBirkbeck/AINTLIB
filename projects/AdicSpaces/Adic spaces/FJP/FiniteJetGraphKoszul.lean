@@ -896,6 +896,37 @@ theorem map_inv_unit_mul_of_equivariant {t : A} (htu : IsUnit t) (f : (ι → A)
     ((htu.unit⁻¹ : Aˣ) : A) * (t * f (fun i => ((htu.unit⁻¹ : Aˣ) : A) * u i) k)
   rw [← mul_assoc, IsUnit.val_inv_mul, one_mul]
 
+omit [CompleteSpace A] in
+/-- The scaled closed balls cover the range: every `y` in `range f` is `f v` for some `v`,
+and some power of `t` scales `v` into the ball of radius `(‖t‖ ^ N)⁻¹`. -/
+private theorem iUnion_preimage_closure_ball_eq_univ
+    {t : A} (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖) (f : (ι → A) →+ (κ → A)) :
+    (⋃ N : ℕ, (Subtype.val ⁻¹' closure (⇑f '' Metric.closedBall 0 ((‖t‖ ^ N)⁻¹)) :
+      Set ↥(f.range))) = Set.univ := by
+  refine Set.eq_univ_of_forall fun y => ?_
+  obtain ⟨v, hv⟩ := AddMonoidHom.mem_range.mp y.2
+  have hex : ∃ N : ℕ, ‖t‖ ^ N * ‖v‖ ≤ 1 := by
+    rcases eq_or_ne ‖v‖ 0 with h0 | h0
+    · exact ⟨0, by rw [h0, mul_zero]; exact zero_le_one⟩
+    · have hpos : 0 < ‖v‖ := lt_of_le_of_ne (norm_nonneg v) (Ne.symm h0)
+      obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
+      exact ⟨N, by
+        calc ‖t‖ ^ N * ‖v‖ ≤ ‖v‖⁻¹ * ‖v‖ :=
+              mul_le_mul_of_nonneg_right hN.le (norm_nonneg _)
+          _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)⟩
+  obtain ⟨N, hN⟩ := hex
+  have hvball : v ∈ Metric.closedBall (0 : ι → A) ((‖t‖ ^ N)⁻¹) := by
+    rw [Metric.mem_closedBall, dist_zero_right]
+    have hpow : (0 : ℝ) < ‖t‖ ^ N := pow_pos ht0 N
+    calc ‖v‖ = (‖t‖ ^ N)⁻¹ * (‖t‖ ^ N * ‖v‖) := by
+          rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
+      _ ≤ (‖t‖ ^ N)⁻¹ * 1 :=
+          mul_le_mul_of_nonneg_left hN (inv_nonneg.mpr hpow.le)
+      _ = (‖t‖ ^ N)⁻¹ := mul_one _
+  exact Set.mem_iUnion.mpr ⟨N, subset_closure ⟨v, hvball, hv⟩⟩
+-- Baire: some ball-image closure has interior
+
+
 /-- **Ultrametric Banach open mapping with constants** ([FJP] Lemma 4.2's strictness;
 Huber [4, Lemma 2.4(ii)]): a continuous `t`-equivariant additive map between finite tuple
 spaces over a complete ultrametric normed ring lifts elements of its closed range with a
@@ -918,29 +949,8 @@ theorem exists_lift_norm_le_of_closed_range
     Subtype.val ⁻¹' closure (⇑f '' Metric.closedBall 0 ((‖t‖ ^ N)⁻¹)) with hCN
   have hCNclosed : ∀ N, IsClosed (CN N) := fun N =>
     isClosed_closure.preimage continuous_subtype_val
-  have hCNcover : (⋃ N, CN N) = Set.univ := by
-    refine Set.eq_univ_of_forall fun y => ?_
-    obtain ⟨v, hv⟩ := AddMonoidHom.mem_range.mp y.2
-    have hex : ∃ N : ℕ, ‖t‖ ^ N * ‖v‖ ≤ 1 := by
-      rcases eq_or_ne ‖v‖ 0 with h0 | h0
-      · exact ⟨0, by rw [h0, mul_zero]; exact zero_le_one⟩
-      · have hpos : 0 < ‖v‖ := lt_of_le_of_ne (norm_nonneg v) (Ne.symm h0)
-        obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
-        exact ⟨N, by
-          calc ‖t‖ ^ N * ‖v‖ ≤ ‖v‖⁻¹ * ‖v‖ :=
-                mul_le_mul_of_nonneg_right hN.le (norm_nonneg _)
-            _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)⟩
-    obtain ⟨N, hN⟩ := hex
-    have hvball : v ∈ Metric.closedBall (0 : ι → A) ((‖t‖ ^ N)⁻¹) := by
-      rw [Metric.mem_closedBall, dist_zero_right]
-      have hpow : (0 : ℝ) < ‖t‖ ^ N := pow_pos ht0 N
-      calc ‖v‖ = (‖t‖ ^ N)⁻¹ * (‖t‖ ^ N * ‖v‖) := by
-            rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
-        _ ≤ (‖t‖ ^ N)⁻¹ * 1 :=
-            mul_le_mul_of_nonneg_left hN (inv_nonneg.mpr hpow.le)
-        _ = (‖t‖ ^ N)⁻¹ := mul_one _
-    exact Set.mem_iUnion.mpr ⟨N, subset_closure ⟨v, hvball, hv⟩⟩
-  -- Baire: some ball-image closure has interior
+  have hCNcover : (⋃ N, CN N) = Set.univ :=
+    iUnion_preimage_closure_ball_eq_univ ht1 ht0 f
   obtain ⟨N, hNne⟩ := nonempty_interior_of_iUnion_of_closed hCNclosed hCNcover
   obtain ⟨y₀, hy₀⟩ := hNne
   set R : ℝ := (‖t‖ ^ N)⁻¹ with hR

@@ -12534,3 +12534,28 @@ closure (141 modules), so changes there can affect it.
 > empty result from a graph query is not evidence of absence — a file with three visible
 > imports cannot have an empty closure, and that should have been read as a parser failure
 > immediately, not as an answer. Acting on it would have skipped genuine verification.
+
+### The iteration-cost map, confirmed: 78 seconds vs 9+ minutes
+
+Lifted `iUnion_preimage_closure_ball_eq_univ` (`hCNcover`, 23 lines) out of
+`exists_lift_norm_le_of_closed_range` — 318 → 298 — and gated it:
+
+```
+lake build «Adic spaces»  ...  1:18.34 total    GATE_EXIT=0, 0 errors
+```
+
+**78 seconds.** Wedhorn828 batches have been taking 9+ minutes and getting killed, because
+`FarguesFontaine.RobbaPresentation` (540 s, the slowest module in the project) is downstream
+of `Wedhorn828` and must rebuild. `FiniteJetGraphKoszul` is outside that closure, so
+`RobbaPresentation` stays cached.
+
+| | targets | gate cost |
+|---|---|---|
+| inside `RobbaPresentation`s closure (142 modules) | 35 | 9+ min, frequently killed |
+| outside | 3 | ~80 s |
+
+`hCNcover` was another scan-7b false positive — its statement names the `set`-bound `CN` —
+but `CN N` is a closed term in `f` and `t`, so fix #1 applied and it spelled out cleanly.
+
+**Sequencing consequence:** prefer the two `FJP` targets while other sessions load the
+machine; a Wedhorn828 batch costs roughly seven times the verification time per attempt.
