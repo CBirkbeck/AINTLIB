@@ -233,6 +233,37 @@ theorem pullSection_iso_injective {X Y : EllObj R} (e : X ≅ Y) :
     ((transportAlongIso N u).symm PQ).1.1 =
       EllHom.pullSection R (EllObj.isoPullbackAlong u).inv PQ.1.1 := rfl
 
+/-- **(WP-D2c-3-H1)** The first component of the `symm` composite: precomposing the inverse
+with the tautological projection recovers the `Γ₁`-classifying morphism.
+
+The outermost factor of the composite's `invFun` is `EllObj.homToPullbackAlong`, whose
+`_pullbackAlongπ` computation lemma gives the composite as the pair's first component; that
+component is `sigmaHomForgetEquiv`'s `invFun`, i.e. `rOne.homEquiv.symm` of the forgetful
+image (`Equiv.sigmaFiberEquiv_symm_apply_fst`). -/
+theorem yFullCandidateHomEquiv_symm_comp_pullbackAlongπ (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (hinvR : IsUnit (N : R)) (h : NIsInvertible X₁.base N)
+    (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    (rOne : (gammaOneNaiveProblem R N).RepresentableBy X₁)
+    (hmatch : ∀ (Y : EllObj R) (u : Y ⟶ X₁)
+      (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)),
+      (((transportAlongIso N u).symm PQ).1.1 =
+          X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+            (by rw [Category.assoc, hPsec, Category.comp_id])) ↔
+        forgetAt N hinvR Y PQ = rOne.homEquiv u)
+    (Y : EllObj R) (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch Y).symm PQ ≫
+        X₁.pullbackAlongπ (X₁.curve.completionLocusπ N h P) =
+      rOne.homEquiv.symm (forgetAt N hinvR Y PQ) := by
+  set p := (((Equiv.subtypeProdEquivSigmaSubtype
+      (fun (u : Y ⟶ X₁) (b : Y.base ⟶ X₁.curve.completionLocus N h P) =>
+        b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
+      ((Equiv.sigmaCongrRight fun u =>
+          (completionFibreEquiv N X₁ h P hPsec u).trans
+            (Equiv.subtypeEquivRight (hmatch Y u))).trans
+        (sigmaHomForgetEquiv N hinvR rOne Y))).symm PQ) with hp
+  exact EllObj.homToPullbackAlong_pullbackAlongπ p.1.1 p.1.2 p.2
+
 /-- **(WP-D2c-3, naturality — the `symm` form)** The inverse of the representing
 equivalence is natural: precomposing with `f` corresponds to pulling the level structure
 back along `f`.
@@ -264,6 +295,12 @@ theorem yFullCandidateHomEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj 
     f ≫ (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ =
       (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
         ((gammaFullNaiveProblem R N).map f.op PQ) := by
+  -- Reduction (verified to typecheck): comparing morphisms into the `pullbackAlong` is
+  -- comparing their `(≫ pullbackAlongπ, baseHom)` pairs.
+  --   · component 1 needs  [WP-D2c-3-H1]  `yFullCandidateHomEquiv_symm_comp_pullbackAlongπ`
+  --   · component 2 needs  [WP-D2c-3-H2]  `yFullCandidateHomEquiv_symm_baseHom`
+  -- Both are computation lemmas for the `.symm` of the five-fold composite; see the ticket
+  -- board entry [WP-D2c-3-H1/H2] for their statements and sketches.
   sorry
 
 /-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member

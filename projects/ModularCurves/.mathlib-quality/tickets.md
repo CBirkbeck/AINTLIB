@@ -34593,3 +34593,39 @@ components are directly computable from `homToPullbackAlong`'s computation lemma
   sides reduces it to `rOne.homEquiv_comp`.
 
 Root green at 9638 jobs.
+
+### [WP-D2c-3-H1] `yFullCandidateHomEquiv_symm_comp_pullbackAlongπ`
+- **Status**: open · **File**: `ModularCurve/YFullFromYOne.lean` · **Parent**: WP-D2c-3
+- **Type**: lemma
+- **Statement**: for `Y : EllObj R` and `PQ : (gammaFullNaiveProblem R N).obj (op Y)`,
+  `(yFullCandidateHomEquiv … Y).symm PQ ≫ X₁.pullbackAlongπ (completionLocusπ N h P)
+   = rOne.homEquiv.symm (forgetAt N hinvR Y PQ)`.
+- **Proof sketch**: unfold the composite's `invFun`; the outermost factor is
+  `EllObj.homToPullbackAlong`, and `homToPullbackAlong_pullbackAlongπ` gives the composite
+  with `pullbackAlongπ` as the first component of the pair, which by
+  `sigmaHomForgetEquiv`'s `invFun` (`Equiv.sigmaFiberEquiv.symm x = ⟨f x, x, rfl⟩`) is
+  `rOne.homEquiv.symm (forgetAt … PQ)`.
+- **Mathlib lemmas**: `Equiv.sigmaFiberEquiv_symm_apply_fst`, `Equiv.symm_apply_apply`.
+
+### [WP-D2c-3-H2] `yFullCandidateHomEquiv_symm_baseHom`
+- **Status**: open · **File**: `ModularCurve/YFullFromYOne.lean` · **Parent**: WP-D2c-3
+- **Type**: lemma
+- **Statement**: `((yFullCandidateHomEquiv … Y).symm PQ).baseHom` equals the underlying
+  morphism of `(completionLocusClassifies N h P hPsec u.baseHom).symm (transported PQ)`,
+  where `u := rOne.homEquiv.symm (forgetAt N hinvR Y PQ)`.
+- **Proof sketch**: `homToPullbackAlong_baseHom` gives the `baseHom` as the second component
+  of the pair, which is `completionLocusClassifies.symm` of the transported structure, by
+  `Equiv.subtypeEquivRight`'s and `Equiv.sigmaCongrRight`'s `symm` computations.
+- **Mathlib lemmas**: `Equiv.subtypeEquivRight_symm_apply`, `Equiv.sigmaCongrRight_symm`.
+
+### [WP-D2c-3] naturality, given H1 and H2
+With H1 and H2 the parent lemma is: rewrite both components, then the first equality is
+`rOne.homEquiv_comp` and the second is `fullLevelLocusPointsEquiv`'s base-naturality
+(`fullLevelLocusPointsEquiv_natural_fst/_snd`, `Moduli/LevelLocusNatural.lean`) transported
+through `completionLocusPointsEquiv` (pullback universal property, so `pullback.lift`
+uniqueness).
+
+**Measured constraint for whoever works this:** do NOT attempt the `toFun` form of
+naturality — comparing the level structures directly forces `whnf` through all five
+composed equivalences and hits a deterministic timeout at 200000 heartbeats. Heartbeat
+bumps are forbidden in this project; the `symm` form above is the structural fix.
