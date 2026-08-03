@@ -13369,3 +13369,44 @@ clear that *threading* is not enough: the instances must be the caller's, not fr
 Reverted that attempt and re-applied only the verified bullet extraction. Worth noting the revert
 was cheap because both edits were scripted: `git stash push -u` on the one path, then re-run the
 good script.
+
+### `exists_A_level_open_presentation'` 111 -> 45: `SpaRationalOpenHomeomorph` is clear
+
+Five lemmas, in two rounds:
+
+| new lemma | code | what it is |
+|---|---|---|
+| `exists_coset_approx` | 25 | density + openness of the integral subring: every element is in the localization's image modulo `uᴹ⁺¹ · integral` |
+| `indexedRationalSet_canonicalMap_eq` | 14 | clearing denominators does not move the indexed rational set — both sides differ by the same unit |
+| `canonicalMap_eq_unit_mul` | 4 | **one lemma replacing `hqparam` and `hparam`** |
+| `comap_mem_biInter_basicOpen` | 6 | the chosen point lies in the downstairs open |
+| `mem_basicOpen_of_comap_mem` | 10 | ...and conversely |
+
+**What unlocked this target was counting the call sites, not the blocks.** Its profile is
+`[25, 18, 11, 8, 5, 5, 4, 4]` — eight medium blocks, no dominant one. At the 2–3 line call sites I
+had been writing, eight lifts would net `111 - 80 + 24 = 55` and never clear. With **one-line**
+call sites the same eight lifts give `111 - 80 + 8 = 39`. Every previous survey of this target
+said "~7 lifts, does not clear"; that verdict was an artefact of my own call-site style.
+
+`hqparam` and `hparam` turned out to be the *same* four-line argument (`congrArg D.coeRingHom`,
+`rw [Algebra.smul_def, map_mul]`, `exact`) applied to the scalar and to each family member. One
+4-line lemma covers both, and both call sites became one line each.
+
+**Two new binder gotchas, both from the same root — a binder that mentions `D` must come after
+it.**
+
+* Writing `private theorem foo {w : Spv (presheafValue D)} … (D : RationalLocData A) …` auto-binds
+  a *second*, implicit `D` before the explicit one. The symptom is not a scope error but
+  `(deterministic) timeout at isDefEq` inside the proof, because Lean is trying to unify two
+  unrelated `D`s. Moving the binder after `(D : …)` fixed it with no other change — and note the
+  temptation here is exactly the forbidden one: the error message suggests raising
+  `maxHeartbeats`, which would have buried a binder-order bug under a timeout raise.
+* `{fam : Finset ι}` appeared in neither the statement nor the body of
+  `comap_mem_biInter_basicOpen`, so it was unsolvable at the call site
+  (`don't know how to synthesize implicit argument fam`). Copying the parent's binder block
+  wholesale is usually right, but an implicit that the extracted statement never mentions must be
+  dropped.
+
+Also: with `idx` abstract, `none ∈ idx` stops being definitional, so it becomes a hypothesis
+`hnone` that the caller discharges with `Finset.mem_insert_self _ _`. Same shape as `hDB_one` in
+the `WedhornCechAcyclicity` round — abstract the object, pass the field-facts the proof opens up.

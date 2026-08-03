@@ -215,6 +215,133 @@ section PresheafValue
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
+/-- Density of `D.coeRingHom` plus openness of the integral subring: every element of
+`presheafValue D` is, modulo `uᴹ⁺¹ · (something integral)`, in the image of the localization.
+This is the approximation step that lets an `A`-level presentation be found. -/
+private theorem exists_coset_approx [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (D : RationalLocData A) (u : (presheafValue D)ˣ) (M : ℕ) :
+    ∀ x : presheafValue D, ∃ l : Localization.Away D.s,
+    ∃ b ∈ ((presheafValue D)⁺ : Subring (presheafValue D)),
+      D.coeRingHom l = x + (u : presheafValue D) ^ (M + 1) * b := by
+  have hϖ_unit : IsUnit ((u : (presheafValue D)ˣ) : presheafValue D) := u.isUnit
+  have hdense : DenseRange (⇑(D.coeRingHom)) := fun y =>
+    @UniformSpace.Completion.denseRange_coe _ D.uniformSpace y
+  intro x
+  obtain ⟨u', hu'⟩ := (hϖ_unit.pow (M + 1)).exists_left_inv
+  have hplus : IsOpen (((presheafValue D)⁺ :
+      Subring (presheafValue D)) : Set (presheafValue D)) :=
+    (inferInstance : IsRingOfIntegralElements
+      ((presheafValue D)⁺ : Subring (presheafValue D))).isOpen
+  have hO_open : IsOpen ((fun y => u' * (y - x)) ⁻¹'
+      (((presheafValue D)⁺ : Subring (presheafValue D)) :
+        Set (presheafValue D))) :=
+    hplus.preimage (continuous_const.mul (continuous_id.sub continuous_const))
+  have hxO : x ∈ (fun y => u' * (y - x)) ⁻¹'
+      (((presheafValue D)⁺ : Subring (presheafValue D)) :
+        Set (presheafValue D)) := by
+    simp only [Set.mem_preimage, sub_self, mul_zero, SetLike.mem_coe]
+    exact Subring.zero_mem _
+  obtain ⟨l, hl⟩ := hdense.exists_mem_open hO_open ⟨x, hxO⟩
+  refine ⟨l, u' * (D.coeRingHom l - x), hl, ?_⟩
+  have hcalc : (u : presheafValue D) ^ (M + 1) * (u' * (D.coeRingHom l - x)) =
+      D.coeRingHom l - x := by
+    rw [← mul_assoc, mul_comm ((u : presheafValue D) ^ (M + 1)) u', hu', one_mul]
+  rw [hcalc]
+  ring
+
+/-- Replacing each `lf o` by its cleared-denominator representative `hA o`, and `lg` by `q`,
+does not change the indexed rational set: both differ from the originals by the same unit `U`,
+and `indexedRationalSet` is invariant under scaling by a unit. -/
+private theorem indexedRationalSet_canonicalMap_eq {ι : Type v} [DecidableEq ι]
+    (D : RationalLocData A) (idx : Finset (Option ι))
+    (hA : Option ι → A) (q : A)
+    (lf : Option ι → Localization.Away D.s) (lg : Localization.Away D.s)
+    (U : presheafValue D) (hU_unit : IsUnit U)
+    (hqparam : D.canonicalMap q = U * D.coeRingHom lg)
+    (hparam : ∀ o ∈ idx, D.canonicalMap (hA o) = U * D.coeRingHom (lf o)) :
+    indexedRationalSet (presheafValue D) idx
+    (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) =
+    indexedRationalSet (presheafValue D) idx
+      (fun o => D.coeRingHom (lf o)) (D.coeRingHom lg) := by
+  have hstep : indexedRationalSet (presheafValue D) idx
+      (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) =
+      indexedRationalSet (presheafValue D) idx
+        (fun o => U * D.coeRingHom (lf o)) (U * D.coeRingHom lg) := by
+    ext v
+    simp only [indexedRationalSet, Set.mem_setOf_eq]
+    refine and_congr_right fun hv => ?_
+    rw [hqparam]
+    constructor
+    · rintro ⟨hT, h0⟩
+      exact ⟨fun o ho => by rw [← hparam o ho]; exact hT o ho, h0⟩
+    · rintro ⟨hT, h0⟩
+      exact ⟨fun o ho => by rw [hparam o ho]; exact hT o ho, h0⟩
+  rw [hstep, indexedRationalSet_unit_mul_eq hU_unit]
+
+
+/-- Clearing a denominator: if `algebraMap y = b • l` upstairs, then downstairs
+`canonicalMap y` is `coeRingHom (algebraMap b)` times `coeRingHom l`. Used for both the
+scalar `q` and each family member `hA o`. -/
+private theorem canonicalMap_eq_unit_mul {D : RationalLocData A} (b : A) {y : A}
+    {l : Localization.Away D.s}
+    (h : algebraMap A (Localization.Away D.s) y = b • l) :
+    D.canonicalMap y
+      = D.coeRingHom (algebraMap A (Localization.Away D.s) b) * D.coeRingHom l := by
+  have hstep := congrArg D.coeRingHom h
+  rw [Algebra.smul_def, map_mul] at hstep
+  exact hstep
+
+/-- The chosen point lies in the downstairs open: `hchain` transports its membership of the
+upstairs rational set to the `hA`/`q` presentation, whose conditions are exactly the defining
+inequalities of the `basicOpen`s. -/
+private theorem comap_mem_biInter_basicOpen
+    {ι : Type v} [DecidableEq ι]
+    (D : RationalLocData A) (idx : Finset (Option ι)) (hA : Option ι → A) (q : A)
+    (f : Option ι → presheafValue D) (g : presheafValue D)
+    {w : Spv (presheafValue D)}
+    (hchain : indexedRationalSet (presheafValue D) idx f g =
+      indexedRationalSet (presheafValue D) idx
+        (fun o => D.canonicalMap (hA o)) (D.canonicalMap q))
+    (hw_mem : w ∈ indexedRationalSet (presheafValue D) idx f g) :
+    comap D.canonicalMap w ∈ ⋂ o ∈ idx, basicOpen (hA o) q := by
+  have hw_mem' : w ∈ indexedRationalSet (presheafValue D) idx
+      (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) := hchain ▸ hw_mem
+  obtain ⟨-, hT, h0⟩ := hw_mem'
+  simp only [Set.mem_iInter]
+  intro o ho
+  exact ⟨hT o ho, by rwa [comap_vle, map_zero]⟩
+
+/-- Conversely, any Spa point of `presheafValue D` whose comap lies in the downstairs open is
+in every `basicOpen (F i) (G i)`: rewrite back along `hchain` and apply `hsubset`. -/
+private theorem mem_basicOpen_of_comap_mem
+    {ι : Type v} [DecidableEq ι] {fam : Finset ι}
+    (D : RationalLocData A) (idx : Finset (Option ι)) (hA : Option ι → A) (q : A)
+    (f : Option ι → presheafValue D) (g : presheafValue D)
+    {F G : ι → presheafValue D}
+    (hchain : indexedRationalSet (presheafValue D) idx f g =
+      indexedRationalSet (presheafValue D) idx
+        (fun o => D.canonicalMap (hA o)) (D.canonicalMap q))
+    (hnone : (none : Option ι) ∈ idx)
+    (hsubset : indexedRationalSet (presheafValue D) idx f g ⊆
+      ⋂ i ∈ fam, basicOpen (F i) (G i)) :
+    ∀ w' : Spv (presheafValue D),
+      w' ∈ Spa (presheafValue D) (presheafValue D)⁺ →
+      comap D.canonicalMap w' ∈ (⋂ o ∈ idx, basicOpen (hA o) q) →
+      ∀ i ∈ fam, w' ∈ basicOpen (F i) (G i) := by
+  intro w' hw' hWmem
+  simp only [Set.mem_iInter] at hWmem
+  have hmem' : w' ∈ indexedRationalSet (presheafValue D) idx
+      (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) := by
+    refine ⟨hw', fun o ho => (hWmem o ho).1, ?_⟩
+    have := (hWmem none hnone).2
+    rwa [comap_vle, map_zero] at this
+  rw [← hchain] at hmem'
+  have hfinal := hsubset hmem'
+  simp only [Set.mem_iInter] at hfinal
+  exact hfinal
+
+
+
 /-- **The A-level open presentation, without a Tate hypothesis** (Wedhorn 8.2(2)): the
 statement of `exists_A_level_open_presentation` with the topologically nilpotent unit of
 `presheafValue D` supplied as a hypothesis rather than produced from `[IsTateRing A]`. The
@@ -244,31 +371,7 @@ theorem exists_A_level_open_presentation'
     exists_uniform_bound_insert hu (s := idx) (f := f) (g := g) hspan
   have hdense : DenseRange (⇑(D.coeRingHom)) := fun y =>
     @UniformSpace.Completion.denseRange_coe _ D.uniformSpace y
-  have hcoset : ∀ x : presheafValue D, ∃ l : Localization.Away D.s,
-      ∃ b ∈ ((presheafValue D)⁺ : Subring (presheafValue D)),
-        D.coeRingHom l = x + (u : presheafValue D) ^ (M + 1) * b := by
-    intro x
-    obtain ⟨u', hu'⟩ := (hϖ_unit.pow (M + 1)).exists_left_inv
-    have hplus : IsOpen (((presheafValue D)⁺ :
-        Subring (presheafValue D)) : Set (presheafValue D)) :=
-      (inferInstance : IsRingOfIntegralElements
-        ((presheafValue D)⁺ : Subring (presheafValue D))).isOpen
-    have hO_open : IsOpen ((fun y => u' * (y - x)) ⁻¹'
-        (((presheafValue D)⁺ : Subring (presheafValue D)) :
-          Set (presheafValue D))) :=
-      hplus.preimage (continuous_const.mul (continuous_id.sub continuous_const))
-    have hxO : x ∈ (fun y => u' * (y - x)) ⁻¹'
-        (((presheafValue D)⁺ : Subring (presheafValue D)) :
-          Set (presheafValue D)) := by
-      simp only [Set.mem_preimage, sub_self, mul_zero, SetLike.mem_coe]
-      exact Subring.zero_mem _
-    obtain ⟨l, hl⟩ := hdense.exists_mem_open hO_open ⟨x, hxO⟩
-    refine ⟨l, u' * (D.coeRingHom l - x), hl, ?_⟩
-    have hcalc : (u : presheafValue D) ^ (M + 1) * (u' * (D.coeRingHom l - x)) =
-        D.coeRingHom l - x := by
-      rw [← mul_assoc, mul_comm ((u : presheafValue D) ^ (M + 1)) u', hu', one_mul]
-    rw [hcalc]
-    ring
+  have hcoset := exists_coset_approx D u M
   choose lf bf hbf hlf using fun o => hcoset (f o)
   obtain ⟨lg, bg, hbg, hlg⟩ := hcoset g
   have hpert : indexedRationalSet (presheafValue D) idx f g =
@@ -296,33 +399,10 @@ theorem exists_A_level_open_presentation'
     D.coeRingHom (algebraMap A (Localization.Away D.s) (b : A)) with hU_def
   have hU_unit : IsUnit U :=
     (IsLocalization.map_units (Localization.Away D.s) b).map D.coeRingHom
-  have hqparam : D.canonicalMap q = U * D.coeRingHom lg := by
-    have hstep := congrArg D.coeRingHom hq
-    rw [Algebra.smul_def, map_mul] at hstep
-    exact hstep
-  have hparam : ∀ o ∈ idx, D.canonicalMap (hA o) = U * D.coeRingHom (lf o) := by
-    intro o ho
-    have hstep := congrArg D.coeRingHom (hhA o ho)
-    rw [Algebra.smul_def, map_mul] at hstep
-    exact hstep
-  have hset' : indexedRationalSet (presheafValue D) idx
-      (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) =
-      indexedRationalSet (presheafValue D) idx
-        (fun o => D.coeRingHom (lf o)) (D.coeRingHom lg) := by
-    have hstep : indexedRationalSet (presheafValue D) idx
-        (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) =
-        indexedRationalSet (presheafValue D) idx
-          (fun o => U * D.coeRingHom (lf o)) (U * D.coeRingHom lg) := by
-      ext v
-      simp only [indexedRationalSet, Set.mem_setOf_eq]
-      refine and_congr_right fun hv => ?_
-      rw [hqparam]
-      constructor
-      · rintro ⟨hT, h0⟩
-        exact ⟨fun o ho => by rw [← hparam o ho]; exact hT o ho, h0⟩
-      · rintro ⟨hT, h0⟩
-        exact ⟨fun o ho => by rw [hparam o ho]; exact hT o ho, h0⟩
-    rw [hstep, indexedRationalSet_unit_mul_eq hU_unit]
+  have hqparam : D.canonicalMap q = U * D.coeRingHom lg := canonicalMap_eq_unit_mul _ hq
+  have hparam : ∀ o ∈ idx, D.canonicalMap (hA o) = U * D.coeRingHom (lf o) := fun o ho =>
+    canonicalMap_eq_unit_mul _ (hhA o ho)
+  have hset' := indexedRationalSet_canonicalMap_eq D idx hA q lf lg U hU_unit hqparam hparam
   have hchain : indexedRationalSet (presheafValue D) idx f g =
       indexedRationalSet (presheafValue D) idx
         (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) :=
@@ -331,24 +411,9 @@ theorem exists_A_level_open_presentation'
   refine ⟨⋂ o ∈ idx, basicOpen (hA o) q, ?_, ?_, ?_⟩
   · exact isOpen_biInter_finset fun o _ =>
       TopologicalSpace.isOpen_generateFrom_of_mem ⟨hA o, q, rfl⟩
-  · have hw_mem' : w ∈ indexedRationalSet (presheafValue D) idx
-        (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) := hchain ▸ hw_mem
-    obtain ⟨-, hT, h0⟩ := hw_mem'
-    simp only [Set.mem_iInter]
-    intro o ho
-    exact ⟨hT o ho, by rwa [comap_vle, map_zero]⟩
-  · intro w' hw' hWmem
-    simp only [Set.mem_iInter] at hWmem
-    have hmem' : w' ∈ indexedRationalSet (presheafValue D) idx
-        (fun o => D.canonicalMap (hA o)) (D.canonicalMap q) := by
-      refine ⟨hw', fun o ho => (hWmem o ho).1, ?_⟩
-      have := (hWmem none (Finset.mem_insert_self _ _)).2
-      rwa [comap_vle, map_zero] at this
-    rw [← hchain] at hmem'
-    have hfinal := hsubset hmem'
-    simp only [Set.mem_iInter] at hfinal
-    exact hfinal
-
+  · exact comap_mem_biInter_basicOpen D idx hA q f g hchain hw_mem
+  · exact mem_basicOpen_of_comap_mem D idx hA q f g hchain
+      (Finset.mem_insert_self _ _) hsubset
 /-- **The A-level open presentation** (Wedhorn 8.2(2), steps 1–4 of the file
 docstring): every finite intersection of basic opens of `Spv (presheafValue D)`
 around a Spa-point contains, relatively to `Spa`, the `comap`-preimage of a
