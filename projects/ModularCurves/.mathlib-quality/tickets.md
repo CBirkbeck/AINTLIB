@@ -35449,3 +35449,41 @@ proved and axiom-verified, and `grep` finds **no use of them outside their own f
 **`WP-D3c` (the root transforms by `det`)** — the one genuinely new theorem →
 `WeilPairingLocalData` → `nonempty_weilPairing_of_localData` → DS4 def + `_over` →
 `WP-C2` → the four computational specs → `weilPairing_torsionMapOfEllHom` → `yRho_representable`.
+
+## [WP-B5b] the mechanical half is DONE (2026-08-04) — axiom-verified
+
+`WeilPairing/DetCocycle.lean` (new, sorry-free, `propext / Classical.choice / Quot.sound`):
+
+* **`comp_localDetPairing_restrict`** — on the clopen piece where the trivialisation reads
+  the constant value `v`, the local determinant pairing *is* `ζ ^ det v`. Three rewrites:
+  `constMap_factor_of_le`, `constSchemeMap_ι`, `rootSplitting_ι`.
+* **`jointReading`** — the `LocallyConstant W (A × A)` recording both trivialisation
+  readings at once (`IsLocallyConstant.prodMk` of the two `constSchemePointsEquiv` values).
+* **`comp_localDetPairing_eq_of_pieces`** — the glue: two morphisms into the cover induce
+  the same local pairing as soon as, on each piece of the joint decomposition, the two
+  *constant* readings `ζ ^ det v` and `ζ ^ det w` agree. `locConst_hom_ext` does the gluing.
+
+So the locally-constant comparison matrix is no longer an obstacle: on each piece the
+exponent is constant and WP-A4 applies verbatim.
+
+### Correction to the previous entry: the clopen API was already public
+
+The previous entry said the decomposition vocabulary was `private` in `GroupScheme/MuN.lean`
+and proposed de-privatising it. Wrong — **`locConstPiece`, `locConst_hom_ext`,
+`mem_locConstPiece` and `constMap_factor_of_le` are all public**, defined at
+`MuN.lean:452–470` as the deliberate "public face of the fiber decomposition"
+([T-EQ-3c-PIN-3]), sixty lines below the private internals I first read. A de-privatising
+edit was made, built, and **reverted**; the working tree is unchanged apart from the new
+file. Third time this session that reading further into a file changed the plan.
+
+### What is left of DS4's first two entries
+
+Exactly the hypothesis `h` of `comp_localDetPairing_eq_of_pieces`, i.e. **[WP-D3c]**: at a
+point where the first trivialisation reads `v` and the second reads `w`, the two `ζ`-values
+satisfy `ζ_a ^ det v = ζ_b ^ det w`. Since the two readings differ by the transition matrix
+`g` (`w = g · v`, so `det w = det g · det v`), this is precisely *"the root transforms by
+`det`"* — ChatGPT's C3, and the only genuinely new mathematics between here and
+`WeilPairingLocalData`.
+
+Everything else on the path is now proved: the record, the descent, the pairing, the
+over-`S` field, WP-A4, the fppf cover, the clopen reading and the glue.
