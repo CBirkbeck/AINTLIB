@@ -11343,3 +11343,82 @@ adic lean RSS: 33.1 GB -> 6.5 GB
 - Never verify a kill with a count derived from a constructed argument list. Check each pid.
 - `2>/dev/null` is already banned next to `lake`/`lean` by CLAUDE.md; the same reasoning
   applies to `kill`. Use `2>&1` and read what it says.
+
+### Batch: `unitCover_sq_plus_dense` 188 → off the list
+
+Two steps, four lemmas, parent body down to **2 lines**.
+
+**Step 1** — the `haMbb` chain. `heq_s`, `haM_s` and `hu_b` exist only to prove
+`coeRingHom (f*f / s) = canonicalMap f`, and the four together depend on nothing but `D₀`
+and `f`. Lifted as `unitCover_overlapDatum_coeRingHom_divByS_mul_self` (34 lines out).
+
+**Step 2** — `MvPolynomial.ringHom_ext` says *bullets are the lemmas*:
+
+```lean
+ringHom_ext (hC : ∀ r, f (C r) = g (C r)) (hX : ∀ i, f (X i) = g (X i)) : f = g
+```
+
+so the two bullets' conclusions are `hcomp`'s own statement with `C c` / `X i` applied —
+both composites lifted verbatim from the type ascription, nothing retyped. And once both
+bullets are lemmas, **`hcomp` stops being needed as a named step at all**: `ringHom_ext`
+infers `f` and `g` from them, so its 14-line statement disappears rather than being
+duplicated into a wrapper. `hfun` then leaves carrying the 23-line `letI` preamble, and the
+parent is `intro z; exact congrFun (unitCover_sq_plus_funext D₀ f) z`.
+
+Final: `_comp_C` 29, `_comp_X` 36, `_funext` 37, the datum lemma 31 — all under 50.
+
+**Faults, both from rules I had already written down.**
+
+1. *Dedent by (own indent − 2), never to column 0.* I dedented the bullet bodies by 8
+   (their own indent) instead of 6, and left `MID` at indent 4. Result: `unsolved goals`
+   immediately followed by `unexpected identifier; expected command` — the classic
+   signature of a body that has fallen out of its declaration. Reverted and re-ran rather
+   than patching the mangled file.
+2. *Over-width is measured in BYTES, not characters.* `verify_file.py` uses
+   `len(l.encode()) > 100`; my own check used `len(l) > 100` and found nothing, twice.
+   These lines are dense with 3-byte glyphs (`↥`, `₀`, `⟨`), so a 90-character line can be
+   104 bytes. The count rose because one 104-byte line from the RHS composite went from one
+   occurrence (in `hcomp`) to two (in the C and X statements). Split it at `→+*` as an
+   exact asserted substitution — 104 → 62 bytes, and the file's total went **166 → 165**,
+   better than baseline.
+
+> Duplicating a statement duplicates its over-width lines. When a decomposition copies a
+> composite into two lemma signatures, check width in bytes *before* building.
+
+Scoreboard: **486 → 46 actionable.**
+
+### Plan: `unitCover_sq_minus_dense` (226 lines) — an adaptation, not a re-run
+
+Read its actual structure rather than assuming it mirrors the plus twin. Same skeleton
+(preamble → `hfun` → `hcomp` → `ringHom_ext` bullets → `intro z`), but three real
+differences:
+
+1. **Two extra `have`s before `hcomp`**: `h1T : (1 : presheafValue D₀) ∈ (…minusDatum_B).T`
+   and `hb : IsPowerBounded (invS …)`. `hb` is used inside **both** bullets (lines 6269,
+   6300); `h1T` exists only to derive it. So `hb` becomes a **hypothesis** on the two bullet
+   lemmas, derived once in the wrapper — rather than re-deriving it in each.
+2. **Bullet sizes are reversed in difficulty**: C is 25 lines (fine as-is), X is 111.
+3. **X's tail proves a different fact from the plus twin's.** Plus proves
+   `coeRingHom (f*f / s) = canonicalMap f`; minus proves
+   `canonicalMap f * coeRingHom (divByS 1 s) = 1`. The `heq_s` / `haM_s` preludes are
+   byte-identical, but the conclusions are not — copying the plus plan here would have been
+   the RobbaPresentation mistake again.
+
+Bullet X's internals: `hu_f` (11), `hL` (36), `hf_resO` (10), `heq_s`+`haM_s` (10), and a
+17-line `rw [show … = 1 by …]`. Extracting `hL`, `hu_f` and the `= 1` block leaves X at
+~39.
+
+**Shared sub-fact spotted:** `heq_s`
+(`((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) = D₀.canonicalMap f`) now appears
+both inside the plus twin's extracted
+`unitCover_overlapDatum_coeRingHom_divByS_mul_self` and here. It is a clean two-line lemma
+about the datum; lifting it serves both and removes the last copy.
+
+**Axiom-checking `private` declarations.** They cannot be named from a scratch file — the
+`_private.«Adic spaces».<Module>.«0».<Namespace>.<name>` mangling did not resolve, and
+guessing at it is a waste of build cycles. The right check is the **public consumer**:
+`sorryAx` propagates, so if a public theorem downstream of the chain is clean, everything it
+uses is. Here `every_rational_cover_is_OXAcyclic` and `lemma_8_34_gluing` are
+`[propext, Classical.choice, Quot.sound]`, and the module emits **zero**
+`declaration uses 'sorry'` warnings. (The 7 grep hits for "sorry" in the file are all prose
+inside docstrings.) This supersedes the scratch-file recipe for private decls.
