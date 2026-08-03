@@ -35336,3 +35336,60 @@ ingredient is:
 
 **This replaces the plan's WP-D3a/WP-D3b as written.** The `Spec ℤ[1/N]`-base correction (C1)
 and the `Y(N²)` trick (C2) from the ChatGPT validation still stand and are unaffected.
+
+## [WP-D3b] DONE (2026-08-04) — and it was **eight lines**, because the tree already had it
+
+`isIntegrallyClosed_of_isStandardSmoothOfRelativeDimension_one`
+(`ForMathlib/StandardSmoothIntegrallyClosed.lean`, axiom-verified): a standard-smooth curve
+over a field which is a domain is integrally closed.
+
+The previous entry sized this as a ~200–500 line trace-dual contribution. That was wrong,
+and the grep-first rule is what caught it — **the two halves already existed**:
+
+* `isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth`
+  (`ForMathlib/StandardSmoothMaximalDVR.lean:41`, axiom-verified, written for BB-FLAT) — the
+  localization at a **maximal** ideal of a standard-smooth curve over a field is a DVR;
+* `IsIntegrallyClosed.of_localization_maximal` — **mathlib has this**, in
+  `RingTheory/DedekindDomain/Dvr.lean` (it is what `IsDedekindDomainDvr.isIntegrallyClosed`
+  uses). My earlier grep for it looked in `RingTheory/IntegralClosure/` and
+  `RingTheory/LocalProperties/` and missed it.
+
+So the route is *not* the finite-étale trace ascent [WP-D3b-ET] at all — that ticket is
+**withdrawn**. Integral closedness is local at maximal ideals, and the tree already knows the
+localizations are DVRs. The `ForMathlib/` directory has 445 files; the relevant ones were
+findable by name (`SmoothRegularLocal`, `RegularLocalDomain`, `PrincipalMaximalDVR`,
+`StandardSmoothMaximalDVR`, `StandardSmoothStalkDVR`) and none of them was in the plan.
+
+Also already present, and also missed by the first pass:
+**`exists_algebraMap_eq_of_pow_eq_one`** (`WeilPairing/UniversalRootBase.lean:30`,
+axiom-verified) — *"a root of unity in the fraction field of an integrally closed domain
+comes from the ring"*, written for WP-A7.2 for exactly this purpose. So the extension step
+itself is done too.
+
+### What Stage B still needs (revised, after the two finds)
+
+1. **[WP-D3a-DOM] the universal base is a domain.** `IsIntegrallyClosed` needs `IsDomain`, and
+   `Y(N)` need not be connected — that is Leg 2 (irreducibility) and stays out of scope. Per
+   the ChatGPT validation (C3) the fix is to work **componentwise**: a connected normal
+   locally-noetherian scheme is irreducible, and the components of a noetherian scheme are
+   finite and clopen. Building blocks are in the tree:
+   `isDomain_localization_atPrime_of_isMaximal` and `exists_isIrreducible_basicOpen_nbhd`
+   (`ForMathlib/SmoothRegularLocal.lean:189, 209`). Target: `A ≅ ∏ A/pᵢ` over the minimal
+   primes for a smooth affine curve over a field, then apply WP-D3b to each factor.
+2. **[WP-D3a-SS] the universal base is standard smooth of relative dimension 1 over the
+   field.** For the level-3 base this is `e3ModuliRing_isStandardSmoothOfRelativeDimension`
+   (axiom-verified). For `Y(N)` it is the `SmoothOfRelativeDimension 1` produced by
+   `smoothOfRelativeDimension_one_of_finite_etale_surjective_cover` in the Stage-A arms —
+   note that is the *scheme* property, and WP-D3b wants the *ring* property
+   `Algebra.IsStandardSmoothOfRelativeDimension 1`; `HasRingHomProperty` for
+   `SmoothOfRelativeDimension` is `Locally (IsStandardSmoothOfRelativeDimension n)`, so
+   this needs the affine-local unwrapping (`HasRingHomProperty.iff_of_isAffine`).
+3. **[WP-D3c]** field-change naturality of the field pairing (unchanged, still the largest
+   genuinely new item — ChatGPT's C3).
+4. **[WP-D3d]** ζ, primitivity, the det-cocycle (unchanged).
+5. **[WP-B5]** descend via `descend_hom_of_effectiveEpi` (unchanged).
+
+`ForMathlib/StandardSmoothIntegrallyClosed.lean` is deliberately **not** added to
+`ModularCurves.lean`: its import `StandardSmoothMaximalDVR` is one of the 77 orphan modules,
+and adding orphans to the root is what the duplicate-name finding says breaks the build. It
+builds and is axiom-checked explicitly.

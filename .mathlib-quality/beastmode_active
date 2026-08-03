@@ -1,1 +1,1 @@
-FOCUS: Stage A complete (T-E9 axiom-verified). Waiting on root build; next = WP-D3a (Y(N^2) over Z[1/N] regular=>normal, components integral)
+FOCUS: WP-D3a-DOM/SS — get IsDomain + Algebra.IsStandardSmoothOfRelativeDimension 1 for the universal base; WP-D3b (integrally closed) is DONE
