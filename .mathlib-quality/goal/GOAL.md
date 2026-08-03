@@ -11646,3 +11646,36 @@ and therefore depart with it.
 > The lesson is the same one that keeps recurring: the shape of a proof from a structural
 > scan (`letI` count, `anon` count) is a hypothesis, not a diagnosis. Reading the first
 > fifty lines settles it, and costs one tool call.
+
+### Batch: `syzygy_graph_polynomial` 125 → cleared
+
+Four declarations, and the first one is a naming fix rather than a decomposition.
+
+**`koszulReachable` — an anonymous `Ideal` structure literal given a name.** The proof
+opened with `set A : Ideal (MvPolynomial (Fin m) D) := { carrier := …, zero_mem' := …,
+add_mem' := …, smul_mem' := … }` — twelve lines of inline definition. It is "the ideal of
+Koszul-reachable multipliers of `u`", it is the subject of the whole proof, and it had no
+name. This is the *inline-definition* category from the earlier scan (17 of 54 targets
+inline a definition, three with structure literals); this was one of the three.
+
+Then `exists_pow_mem_koszulReachable` (hgA, 56), `one_mem_span_pow_union_graph` (h1J, 26),
+`d1_map_graph_eq_zero` (hsyz', 9). Parent 125 → under 50.
+
+**A count-neutral intermediate is a signal to keep going, not to stop.** After the first two
+extractions the scoreboard had not moved: `syzygy_graph_polynomial` left the list and
+`exists_pow_mem_koszulReachable` (58) joined it. Trading one over-50 body for another is not
+progress, and committing there would have banked a wash. Two more lifts finished it.
+
+**Dead `set` bindings.** Checking which locals were actually referenced after their own line
+found `A`, `hDg`, `hNmax`, `hMmax` all bound and never used — `set X := e with h` where
+neither `X` nor `h` is mentioned again. Removing the dead `set A` was one of the lines that
+brought the lemma under the bar.
+
+> Before hunting for something to extract, grep the locals: `set`/`have` bindings that are
+> never referenced again are free lines.
+
+The guard earned its keep again: `set A := koszulReachable g f u with hAdef` appeared
+**twice** (parent and new lemma), and only the lemma's copy was dead — an unanchored
+replace would have deleted the live one.
+
+Scoreboard: **486 → 43 actionable.**
