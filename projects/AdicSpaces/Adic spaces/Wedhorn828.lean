@@ -3259,6 +3259,49 @@ private theorem ker_le_of_ext
 
 
 omit [CompatiblePlusSubring A] in
+/-- Modulo any ideal containing `1 - b·ζ`, the classes of `b` and `ζ` are inverse. -/
+private theorem mk_mul_mkX_eq_one (b : A)
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A))
+    (hgen : (1 - algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b *
+      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 A))) ∈ aI) :
+    Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) *
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 A)) = 1 := by
+  rw [← map_mul, show (1 : ↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) =
+    Ideal.Quotient.mk aI 1 from (map_one _).symm, Ideal.Quotient.eq]
+  have hneg := aI.neg_mem hgen
+  rwa [neg_sub] at hneg
+
+omit [CompatiblePlusSubring A] in
+/-- A localization lift at `b` sends `1/b` to the class of `ζ`, given that `b` and `ζ` are
+inverse in the quotient: cancel the unit `mk b`. -/
+private theorem psi_divByS_one_eq_mkX (b : A)
+    (aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A))
+    (ψ : Localization.Away b →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away b) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x))
+    (hmul : Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) *
+      Ideal.Quotient.mk aI (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 A)) = 1) :
+    ψ (divByS (1 : A) b) = Ideal.Quotient.mk aI
+      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+        ↥(restrictedMvPowerSeriesSubring 1 A)) := by
+  have hloc : algebraMap A (Localization.Away b) b * divByS (1 : A) b = 1 := by
+    erw [show divByS (1 : A) b = IsLocalization.mk' (Localization.Away b) (1 : A)
+      (⟨b, Submonoid.mem_powers b⟩ : Submonoid.powers b) from rfl]
+    exact (IsLocalization.mk'_spec' (Localization.Away b) 1
+      ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
+  have h1 : ψ (algebraMap A (Localization.Away b) b) * ψ (divByS (1 : A) b) = 1 := by
+    rw [← map_mul, hloc, map_one]
+  rw [hψ_alg] at h1
+  have hu : IsUnit (Ideal.Quotient.mk aI
+      (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b)) :=
+    isUnit_iff_exists_inv.mpr ⟨_, hmul⟩
+  exact hu.mul_left_cancel (h1.trans hmul.symm)
+
+
+omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
 `A⟨ζ⟩ ⧸ (b − ζ)` is complete Hausdorff (the principal ideal is closed by Prop 6.17
@@ -3354,20 +3397,7 @@ theorem coUnitDatum_ker_le_span
   have haI_closed : IsClosed (aI : Set ↥(restrictedMvPowerSeriesSubring 1 A)) :=
     MvTateAlgebra.mvTate_isClosed_ideal 1 hA_complete aI
   -- `mk (algebraMap b) · mk η = 1` modulo `(1 − bη)`
-  have hmkX_mul : Ideal.Quotient.mk aI
-        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) *
-      Ideal.Quotient.mk aI
-        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
-          ↥(restrictedMvPowerSeriesSubring 1 A)) = 1 := by
-    rw [← map_mul, show (1 : ↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) =
-      Ideal.Quotient.mk aI 1 from (map_one _).symm, Ideal.Quotient.eq]
-    have hgen : (1 - algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b *
-        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
-          ↥(restrictedMvPowerSeriesSubring 1 A))) ∈ aI :=
-      Ideal.subset_span (Set.mem_singleton _)
-    have hneg := aI.neg_mem hgen
-    rwa [neg_sub] at hneg
-  -- the localization lift `ψ` (`D.s = b` is a unit mod `(1 − bη)`)
+  have hmkX_mul := mk_mul_mkX_eq_one b aI (Ideal.subset_span (Set.mem_singleton _))
   have hUnitb : IsUnit ((Ideal.Quotient.mk aI).comp
       (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) D.s) := by
     rw [isUnit_iff_exists_inv]
@@ -3384,22 +3414,7 @@ theorem coUnitDatum_ker_le_span
     rw [hψ, IsLocalization.Away.lift_eq]
     rfl
   -- `ψ (1/b) = mk η` (cancel the unit `mk (algebraMap b)`)
-  have hψ_div : ψ (divByS (1 : A) D.s) = Ideal.Quotient.mk aI
-      (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
-        ↥(restrictedMvPowerSeriesSubring 1 A)) := by
-    have hloc : algebraMap A (Localization.Away D.s) b * divByS (1 : A) D.s = 1 := by
-      erw [show divByS (1 : A) D.s = IsLocalization.mk' (Localization.Away b) (1 : A)
-        (⟨b, Submonoid.mem_powers b⟩ : Submonoid.powers b) from rfl]
-      exact (IsLocalization.mk'_spec' (Localization.Away b) 1
-        ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
-    have h1 : ψ (algebraMap A (Localization.Away D.s) b) * ψ (divByS (1 : A) D.s) = 1 := by
-      rw [← map_mul, hloc, map_one]
-    rw [hψ_alg] at h1
-    have hu : IsUnit (Ideal.Quotient.mk aI
-        (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b)) :=
-      isUnit_iff_exists_inv.mpr ⟨_, hmkX_mul⟩
-    exact hu.mul_left_cancel (h1.trans hmkX_mul.symm)
-  -- `ψ` is continuous for the localization topology
+  have hψ_div := psi_divByS_one_eq_mkX b aI ψ hψ_alg hmkX_mul
   have hψ_cont := psi_continuous_of_gen D aI ψ hψ_alg (by
     intro t ht
     rw [show (D.T : Finset A) = {1} from rfl, Finset.mem_singleton] at ht

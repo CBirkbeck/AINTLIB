@@ -12377,3 +12377,30 @@ are still required.
 
 Scan 8 is retired as a work-selector. Its one real use is as a final sweep on a target that
 has just dropped under 50 anyway.
+
+### `coUnitDatum_ker_le_span` CLEARED — the twin pair is finished
+
+Scoreboard **42 → 41**. Both twins are now under 50.
+
+Two more lifts, both clean because each fact is genuinely standalone:
+
+- `mk_mul_mkX_eq_one` — modulo any ideal containing `1 - b·ζ`, the classes of `b` and `ζ`
+  are inverse. Parameterised over `aI` with `hgen : (1 - b·ζ) ∈ aI`, so it is not tied to
+  the `coUnitDatum` span; the call site supplies `Ideal.subset_span (Set.mem_singleton _)`.
+- `psi_divByS_one_eq_mkX` — a localization lift at `b` sends `1/b` to the class of `ζ`.
+  Stated over `Localization.Away b` rather than `Localization.Away D.s`; those are defeq at
+  the call site, and stating it in `b` keeps the lemma free of the datum.
+
+**Full accounting for the pair:**
+
+| | start | end |
+|---|---|---|
+| `unitDatum_ker_le_span` | 115 | **< 50** |
+| `coUnitDatum_ker_le_span` | 133 | **< 50** |
+
+248 lines of near-duplicate proof → both cleared, via four shared lemmas
+(`psi_continuous_of_gen`, `ker_le_of_ext`, `mk_mul_mkX_eq_one`,
+`psi_divByS_one_eq_mkX`), all under 50 themselves. This was the largest single item in the
+residue and it is done.
+
+Over-width: one 117-byte line reflowed; back to 117 total.
