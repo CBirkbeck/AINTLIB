@@ -35774,3 +35774,35 @@ at the use site, no locus.
 This is the second C-correction that the componentwise picture absorbs (C3's irreducibility
 worry was the first). What survives of the ChatGPT validation as genuinely open is **C3's
 field-change naturality** and **C6's convention check**.
+
+### [WP-D3c step 2] REDUCED (2026-08-04): naturality is needed only along **isomorphisms**
+
+ChatGPT's C3 asked for naturality of the field pairing under "a field map or field
+isomorphism `K → L`". Tracing what the cocycle actually consumes shows only the isomorphism
+case is needed, which is a much smaller obligation.
+
+**Why.** The `GL₂(ℤ/N)`-action on the universal base `B` is over the coarse space: `g` sends
+a point `b` to `b·g` carrying the **same** elliptic curve with a re-marked basis. If `b` is
+the generic point of a component `C` and `b·g` of a component `D`, the action induces an
+**isomorphism** of function fields `K(D) ≅ K(C)` (it is an automorphism of `B`, not a general
+extension). So the comparison is
+
+`e_{N,K(C)}(gP, gQ) = e_{N,K(C)}(P,Q)^{det g}` — **at one and the same field** —
+
+after transporting `ζ_D` along that isomorphism. The within-one-field statement is
+`fieldWeilPairing_gl2_zmod` (`WeilPairing/FieldPairingDet.lean:116`, **proved**).
+
+**And the transport is a uniqueness argument, not a construction**, now that
+`fieldWeilPairingHom_unique` exists: the transported pairing satisfies the characterisation
+clause over `K(C)` because the Silverman pairing on geometric points transports manifestly, so
+it *is* the pairing over `K(C)`.
+
+**Template already in the tree**: `WeilPairing/GaloisEquivariance.lean` and
+`WeilPairing/FibreGalois.lean` do exactly this conjugation for the `Gal(k̄/k)`-action —
+`galoisCoordRingEquiv`, `functionFieldEquiv`, `weilPairingFibreMap_galoisEquivariant`
+(which is the `σ`-equivariance of the fibre map, proved). The field-change transport is the
+same construction with `σ : K(D) ≃ₐ K(C)` in place of a Galois automorphism of the closure.
+
+**Revised sizing**: no base-change API for `torsionAlgebra` / `muNAlgebra` across a general
+field *extension* is needed — only conjugation along an equivalence, for which
+`fiberIsoOfAlgEquiv` (this session) is already the fibre-functor half.
