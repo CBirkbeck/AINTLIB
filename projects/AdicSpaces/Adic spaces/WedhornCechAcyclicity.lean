@@ -8752,6 +8752,149 @@ private theorem genPiece_relOverlap_forwardLocHom_algebraMap
   rw [genPiece_relOverlap_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
+open Classical in
+/-- The merge identity: multiplying by the pair generator `t₁t₂` and then dividing by `EII.s`
+is the identity on `EII`'s canonical image, because `EII.s` *is* that product. -/
+private theorem genPiece_relOverlap_merge
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤)
+    (t₁ t₂ : A) (EII : RationalLocData (presheafValue D₀))
+    (hEII_s : EII.s = D₀.canonicalMap t₁ * D₀.canonicalMap t₂) :
+    ∀ u : presheafValue D₀,
+      EII.canonicalMap (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) *
+        EII.coeRingHom (divByS u EII.s) = EII.canonicalMap u := by
+  intro u
+  rw [show EII.canonicalMap (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) *
+      EII.coeRingHom (divByS u EII.s) =
+    EII.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away EII.s)
+      (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) * divByS u EII.s) by
+    rw [map_mul EII.coeRingHom]; rfl]
+  rw [show algebraMap (presheafValue D₀) (Localization.Away EII.s)
+      (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) =
+    algebraMap (presheafValue D₀) (Localization.Away EII.s) EII.s by rw [hEII_s]]
+  rw [algebraMap_s_mul_divByS]
+  rfl
+
+
+open Classical in
+/-- Every generator of the singly-intersected datum factors as a base generator times a
+`t₁`-generator: either it is the distinguished `s·t₁`, or it already came from the product. -/
+private theorem genPiece_relOverlap_p_decomp
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤)
+    (t₁ t₂ : A) (EII : RationalLocData (presheafValue D₀))
+    (p : A) (hp : p ∈ insert (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s
+      (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).T) :
+    ∃ p' ∈ insert D₀.s D₀.T, ∃ q' ∈ insert t₁ T, p = p' * q' := by
+  rcases Finset.mem_insert.mp hp with rfl | hp'
+  · exact ⟨D₀.s, Finset.mem_insert_self _ _, t₁, Finset.mem_insert_self _ _, rfl⟩
+  · have hp'' : p ∈ ((insert D₀.s D₀.T).product
+        (insert t₁ T)).image (fun r : A × A => r.1 * r.2) := hp'
+    rw [Finset.mem_image] at hp''
+    obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hp''
+    exact ⟨p', (Finset.mem_product.mp hpq').1, q', (Finset.mem_product.mp hpq').2, rfl⟩
+
+
+open Classical in
+/-- Membership of the generator pair in the doubly-intersected datum's generator set. -/
+private theorem genPiece_relOverlap_gen_mem
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤)
+    (t₁ t₂ : A) (EII : RationalLocData (presheafValue D₀))
+    (hEII_T : EII.T = ((insert (D₀.canonicalMap t₁) (T.image D₀.canonicalMap)).product
+      (insert (D₀.canonicalMap t₂) (T.image D₀.canonicalMap))).image
+        (fun r => r.1 * r.2))
+    (q' q : A) (hq' : q' ∈ insert t₁ T) (hq : q ∈ insert t₂ T) :
+    D₀.canonicalMap q' * D₀.canonicalMap q ∈ EII.T := by
+  rw [hEII_T]
+  refine Finset.mem_image.mpr ⟨(D₀.canonicalMap q', D₀.canonicalMap q),
+    Finset.mem_product.mpr ⟨?_, ?_⟩, rfl⟩
+  · rcases Finset.mem_insert.mp hq' with rfl | hq''
+    · exact Finset.mem_insert_self _ _
+    · exact Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ hq'')
+  · rcases Finset.mem_insert.mp hq with rfl | hq''
+    · exact Finset.mem_insert_self _ _
+    · exact Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ hq'')
+
+
+open Classical in
+/-- The witness and its defining equation for `genPiece_relOverlap_forward_witness`: the pair
+`(p'/s) · (q'q)⁻¹` lies in the target's `locSubring`, and pushing it through `F` reproduces the
+image of `p·q`, the merge identity absorbing the `t₁t₂` factor. -/
+private theorem genPiece_relOverlap_witness_eq
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (hspan : Ideal.span (T : Set A) = ⊤)
+    (t₁ t₂ : A) (EII : RationalLocData (presheafValue D₀))
+    (DII : RationalLocData A) (F : Localization.Away DII.s →+* presheafValue EII)
+    (hDII_s : (DII.s : A) = (D₀.s * t₁) * t₂)
+    (hF_alg : ∀ a : A, F (algebraMap A (Localization.Away DII.s) a) =
+      EII.canonicalMap (D₀.canonicalMap a))
+    (hu : IsUnit (F (algebraMap A (Localization.Away DII.s) DII.s)))
+    (hps : ∀ p : A, D₀.canonicalMap p =
+      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s))
+    (hA₀ : ∀ p ∈ insert D₀.s D₀.T, D₀.coeRingHom (divByS p D₀.s) ∈ EII.P.A₀)
+    (hmerge : ∀ u : presheafValue D₀,
+      EII.canonicalMap (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) *
+        EII.coeRingHom (divByS u EII.s) = EII.canonicalMap u)
+    (p' q' q : A) (hp' : p' ∈ insert D₀.s D₀.T)
+    (hgen_mem : D₀.canonicalMap q' * D₀.canonicalMap q ∈ EII.T) :
+    ∃ y : Localization.Away EII.s, y ∈ locSubring EII.P EII.T EII.s ∧
+      F (divByS (p' * q' * q) DII.s) = EII.coeRingHom y := by
+  refine ⟨algebraMap (presheafValue D₀) (Localization.Away EII.s)
+      (D₀.coeRingHom (divByS p' D₀.s)) *
+      divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s,
+    (locSubring EII.P EII.T EII.s).mul_mem
+      (algebraMap_mem_locSubring EII.P EII.T EII.s (hA₀ p' hp'))
+      (divByS_mem_locSubring EII.P EII.T EII.s hgen_mem), ?_⟩
+  refine forwardLoc_div_eq DII F hu _ _ ?_
+  rw [hF_alg, hF_alg]
+  rw [show EII.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away EII.s)
+      (D₀.coeRingHom (divByS p' D₀.s)) *
+      divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) =
+    EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
+      EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) by
+    rw [map_mul]; rfl]
+  rw [hDII_s]
+  rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap),
+    map_mul (D₀.canonicalMap)]
+  rw [show D₀.canonicalMap p' = D₀.canonicalMap D₀.s *
+    D₀.coeRingHom (divByS p' D₀.s) from hps p']
+  simp only [map_mul]
+  -- assemble: replace the merge-factor and close by `ring`
+  have hm := hmerge (D₀.canonicalMap q' * D₀.canonicalMap q)
+  rw [map_mul (EII.canonicalMap)] at hm
+  calc EII.canonicalMap (D₀.canonicalMap D₀.s) *
+        EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
+        EII.canonicalMap (D₀.canonicalMap q') *
+        EII.canonicalMap (D₀.canonicalMap q) =
+      EII.canonicalMap (D₀.canonicalMap D₀.s) *
+        EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
+        (EII.canonicalMap (D₀.canonicalMap q') *
+          EII.canonicalMap (D₀.canonicalMap q)) := by ring
+    _ = EII.canonicalMap (D₀.canonicalMap D₀.s) *
+        EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
+        (EII.canonicalMap (D₀.canonicalMap t₁) * EII.canonicalMap (D₀.canonicalMap t₂) *
+          EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s)) := by
+        rw [hm, map_mul (EII.canonicalMap)]
+    _ = EII.canonicalMap (D₀.canonicalMap D₀.s) * EII.canonicalMap (D₀.canonicalMap t₁) *
+        EII.canonicalMap (D₀.canonicalMap t₂) *
+        (EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
+          EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s)) := by
+        ring
+
+
 set_option linter.unusedSectionVars false in
 /-- G3b-4: the 3-layer per-generator witnesses for the double-intersection. -/
 private theorem genPiece_relOverlap_forward_witness
@@ -8798,20 +8941,7 @@ private theorem genPiece_relOverlap_forward_witness
       D₀.coeRingHom (divByS p D₀.s) ∈ (presheafValue_concretePair D₀).A₀ :=
     fun p hp => coeRingHom_divByS_mem_concretePair_A₀ D₀ (Finset.mem_insert.mp hp)
   -- the EII-merge identity
-  have hmerge : ∀ u : presheafValue D₀,
-      EII.canonicalMap (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) *
-        EII.coeRingHom (divByS u EII.s) = EII.canonicalMap u := by
-    intro u
-    rw [show EII.canonicalMap (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) *
-        EII.coeRingHom (divByS u EII.s) =
-      EII.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away EII.s)
-        (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) * divByS u EII.s) by
-      rw [map_mul EII.coeRingHom]; rfl]
-    rw [show algebraMap (presheafValue D₀) (Localization.Away EII.s)
-        (D₀.canonicalMap t₁ * D₀.canonicalMap t₂) =
-      algebraMap (presheafValue D₀) (Localization.Away EII.s) EII.s from rfl]
-    rw [algebraMap_s_mul_divByS]
-    rfl
+  have hmerge := genPiece_relOverlap_merge D₀ T hspan t₁ t₂ EII rfl
   -- destructure `w = p·q`, then `p = p′·q′`
   have hw' : w ∈ ((insert (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).s
       (D₀.interSamePair (genPieceDatum D₀.P T t₁ hspan) rfl).T).product
@@ -8824,67 +8954,13 @@ private theorem genPiece_relOverlap_forward_witness
   have hq : q ∈ insert t₂ T := (Finset.mem_product.mp hpq).2
   rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
   -- inline decomposition of `p`
-  have hp_decomp : ∃ p' ∈ insert D₀.s D₀.T, ∃ q' ∈ insert t₁ T, p = p' * q' := by
-    rcases Finset.mem_insert.mp hp with rfl | hp'
-    · exact ⟨D₀.s, Finset.mem_insert_self _ _, t₁, Finset.mem_insert_self _ _, rfl⟩
-    · have hp'' : p ∈ ((insert D₀.s D₀.T).product
-          (insert t₁ T)).image (fun r : A × A => r.1 * r.2) := hp'
-      rw [Finset.mem_image] at hp''
-      obtain ⟨⟨p', q'⟩, hpq', rfl⟩ := hp''
-      exact ⟨p', (Finset.mem_product.mp hpq').1, q', (Finset.mem_product.mp hpq').2, rfl⟩
+  have hp_decomp := genPiece_relOverlap_p_decomp D₀ T hspan t₁ t₂ EII p hp
   obtain ⟨p', hp', q', hq', rfl⟩ := hp_decomp
   -- the generator-pair membership in `T_EII`
-  have hgen_mem : D₀.canonicalMap q' * D₀.canonicalMap q ∈ EII.T := by
-    refine Finset.mem_image.mpr ⟨(D₀.canonicalMap q', D₀.canonicalMap q),
-      Finset.mem_product.mpr ⟨?_, ?_⟩, rfl⟩
-    · rcases Finset.mem_insert.mp hq' with rfl | hq''
-      · exact Finset.mem_insert_self _ _
-      · exact Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ hq'')
-    · rcases Finset.mem_insert.mp hq with rfl | hq''
-      · exact Finset.mem_insert_self _ _
-      · exact Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ hq'')
+  have hgen_mem := genPiece_relOverlap_gen_mem D₀ T hspan t₁ t₂ EII rfl q' q hq' hq
   -- witness and equation
-  refine ⟨algebraMap (presheafValue D₀) (Localization.Away EII.s)
-      (D₀.coeRingHom (divByS p' D₀.s)) *
-      divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s,
-    (locSubring EII.P EII.T EII.s).mul_mem
-      (algebraMap_mem_locSubring EII.P EII.T EII.s (hA₀ p' hp'))
-      (divByS_mem_locSubring EII.P EII.T EII.s hgen_mem), ?_⟩
-  refine forwardLoc_div_eq DII F hu _ _ ?_
-  rw [hF_alg, hF_alg]
-  rw [show EII.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away EII.s)
-      (D₀.coeRingHom (divByS p' D₀.s)) *
-      divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) =
-    EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
-      EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s) by
-    rw [map_mul]; rfl]
-  rw [show ((DII.s : A)) = (D₀.s * t₁) * t₂ from rfl]
-  rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap),
-    map_mul (D₀.canonicalMap)]
-  rw [show D₀.canonicalMap p' = D₀.canonicalMap D₀.s *
-    D₀.coeRingHom (divByS p' D₀.s) from hps p']
-  simp only [map_mul]
-  -- assemble: replace the merge-factor and close by `ring`
-  have hm := hmerge (D₀.canonicalMap q' * D₀.canonicalMap q)
-  rw [map_mul (EII.canonicalMap)] at hm
-  calc EII.canonicalMap (D₀.canonicalMap D₀.s) *
-        EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
-        EII.canonicalMap (D₀.canonicalMap q') *
-        EII.canonicalMap (D₀.canonicalMap q) =
-      EII.canonicalMap (D₀.canonicalMap D₀.s) *
-        EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
-        (EII.canonicalMap (D₀.canonicalMap q') *
-          EII.canonicalMap (D₀.canonicalMap q)) := by ring
-    _ = EII.canonicalMap (D₀.canonicalMap D₀.s) *
-        EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
-        (EII.canonicalMap (D₀.canonicalMap t₁) * EII.canonicalMap (D₀.canonicalMap t₂) *
-          EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s)) := by
-        rw [hm, map_mul (EII.canonicalMap)]
-    _ = EII.canonicalMap (D₀.canonicalMap D₀.s) * EII.canonicalMap (D₀.canonicalMap t₁) *
-        EII.canonicalMap (D₀.canonicalMap t₂) *
-        (EII.canonicalMap (D₀.coeRingHom (divByS p' D₀.s)) *
-          EII.coeRingHom (divByS (D₀.canonicalMap q' * D₀.canonicalMap q) EII.s)) := by
-        ring
+  exact genPiece_relOverlap_witness_eq D₀ T hspan t₁ t₂ EII DII F rfl hF_alg hu hps
+    hA₀ hmerge p' q' q hp' hgen_mem
 
 set_option linter.unusedSectionVars false in
 /-- G3b-5: forward continuity. -/

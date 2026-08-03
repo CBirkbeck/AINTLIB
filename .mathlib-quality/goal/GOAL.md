@@ -13463,3 +13463,39 @@ The remaining `~` entries are genuinely hard for structural reasons already reco
 proofs (`[105]`, `[108]`, `[184]`, `[130]`, `[133]`, `[107]`, `[103]`) where the one block *is* the
 proof, and `ker_restrictionMapHom_subset_closure_algLift` whose blocks are all ≤7 lines — a merge
 job rather than a split job.
+
+### `genPiece_relOverlap_forward_witness` 103 -> 40: four lifts in one script
+
+The first target cleared by a **planned multi-lift batch** rather than one lift at a time. Four
+lemmas, written in a single script and landed in three builds:
+
+| new lemma | code | what it is |
+|---|---|---|
+| `genPiece_relOverlap_merge` | 12 | `EII.s` *is* `t₁t₂`, so multiplying by that pair generator and dividing by `EII.s` is the identity |
+| `genPiece_relOverlap_p_decomp` | 8 | every generator of the singly-intersected datum factors as base × `t₁`-generator |
+| `genPiece_relOverlap_gen_mem` | 9 | the generator pair lands in the doubly-intersected generator set |
+| `genPiece_relOverlap_witness_eq` | 34 | the witness and its defining equation |
+
+Batching worked because the lifts are independent: three are self-contained `have`s and the fourth
+is the tail. Ordering them **highest line-index first** inside the script means each edit leaves
+the earlier indices valid, so all four could be computed against one snapshot of the file.
+
+**The `.s`-identity pattern.** Both `merge` and the tail contain a `show … from rfl` that holds
+only because `EII.s` is *definitionally* `D₀.canonicalMap t₁ * D₀.canonicalMap t₂` (and `DII.s` is
+`(D₀.s * t₁) * t₂`). With `EII`/`DII` abstract those `rfl`s die. Passing `hEII_s` / `hDII_s` and
+rewriting instead costs one binder each, and the caller discharges both with `rfl`. This is the
+third variant of the same manoeuvre — after `hDB_one` and `hnone` — and the general statement is:
+**abstract the object, then pass exactly those of its definitional identities that the proof's
+`rfl`s were silently using.**
+
+Three builds, all on already-recorded gotchas rather than new ones:
+
+1. `insert` on `Finset`s in the *statements* needs `DecidableEq`; the parent gets it from
+   `classical` in its body. Fixed with `open Classical in` on each new lemma — the fourth
+   occurrence of this exact failure (`SpvAI`, `unitCover_relMinus`, here ×2).
+2. The tail was already at proof-body indent, so dedenting put it at column 0 — `unsolved goals`
+   then `unexpected identifier; expected command`. `dc.bullet_body` handles bullets, but this
+   block is not a bullet; a plain `have`-tail needs **no** dedent at all.
+3. The one-line call site came out at 115 characters and had to be wrapped — worth checking after
+   any lift with more than about ten arguments, since the one-line-call rule that makes the
+   arithmetic work also pushes lines over the width limit.
