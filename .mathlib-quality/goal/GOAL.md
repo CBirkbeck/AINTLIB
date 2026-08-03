@@ -12875,3 +12875,46 @@ The remaining design question is `hginv`'s five ambient facts (`hle`, `hVS`, `hc
 lines and would push the new lemma to 61, while passing them keeps its body at the original 49
 and leaves the main proof at 49. The conclusion mentions `frobFixed p F ϖ (iSup U)`, so `V'`
 cannot be left abstract — it has to be spelled.
+
+### `xPresheaf_isSheafOfTopologicalRings`: the universe wall, diagnosed
+
+Attempted and reverted. The earlier note just said "universe wall"; here is what it actually is,
+so the next attempt does not have to rediscover it.
+
+Lifting `have hginv` (49 of 90 lines) is otherwise a clean, well-understood extraction — the five
+ambient facts pass as parameters, `V'` and `U'` get spelled because the conclusion mentions
+`frobFixed p F ϖ (iSup U)`, and `CurveObject.lean:1661` already contains `xPresheaf_glue_compat`,
+a helper extracted from this same proof, whose `(T : Type u) … {ι : Type u}` binder block can be
+copied verbatim. All of that works.
+
+What fails is one step inside the body:
+
+    refine (isLimitSheafOn_Y p F ϖ).injective hVS2 hle2 hcov2 (fun i => ?_)
+
+    Application type mismatch: hcov2 has type
+      … ⊆ Set.iUnion.{u_1, u_2 + 1} fun i ↦ ↑(U' i)
+    but is expected to have type
+      … ⊆ Set.iUnion.{u_1, u_1 + 1} fun i ↦ ↑(?m i)
+
+`IsLimitSheafOn.injective` requires the **cover index to live in the space's own universe**
+(`u_1`), not in an arbitrary one. Note the contrast: the standalone
+`RestrictedLimitSheaf.limitRestrict_injective_on` is `{ι : Type*}` and fully polymorphic — it is
+specifically the bundled `IsLimitSheafOn` field that is pinned.
+
+Inside `xPresheaf_isSheafOfTopologicalRings` this is satisfied for free, because `ι` arrives from
+`TopCat.Presheaf.IsSheafOfTopologicalRings`, which quantifies `{ι : Type u}` at the working
+universe. In an extracted lemma it cannot be expressed: `CurveObject.lean` declares no
+`universe`, so `F`'s universe has no name, and both `{ι : Type u}` (fresh auto-bound) and
+`{ι : Type _}` (also fresh) miss it — the two spellings produce the identical mismatch with
+`u_2` in place of `u_1`.
+
+Two real fixes, both outside the scope of a decompose edit:
+
+1. add `universe u` to `CurveObject.lean` and state the section variables over it, so the lemma
+   can say `{ι : Type u}` and mean the space's `u`; or
+2. generalise `IsLimitSheafOn.injective`'s index universe to `Type*`, matching the standalone
+   `limitRestrict_injective_on` it is presumably built from.
+
+(2) is the better change and would likely unblock other extractions in this file, but it is a
+statement change to a bundled structure field — a `/generalise` job, not a `/decompose-proof`
+one. Recording it rather than doing it.
