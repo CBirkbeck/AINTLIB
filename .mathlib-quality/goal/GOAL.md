@@ -13005,3 +13005,39 @@ Sample of the 60: `AdicCompletionBridge:398 have hmkQ`, `SpvAITopology:501/570/6
 `TateAlgebraTopology:666/2144 have hpow`. The repeated names across sibling declarations
 (`hh` ×3, `hni_K` ×2, `hpow` ×2, `hx_ne` ×2) suggest copy-paste of a block whose conclusion was
 later obtained another way — which is the usual way a `have` goes dead.
+
+### `cofinalValue_ideal_pow_lt` 131 -> 34: `SpvAI` is clear
+
+Chosen because `SpvAI.lean` has exactly **one** importer — the cheapest gate on the board — which
+is worth optimising for when a target needs several rounds. Three extractions, all under 50:
+
+| new lemma | lines | what it is |
+|---|---|---|
+| `pow_lt_of_sup_lt` | 20 | any exponent past `N_max` is already below `γ` |
+| `prod_lt_of_nonempty` | 44 | the **pigeonhole**: some `c⋆` occurs `≥ N_max` times |
+| `valuation_lt_of_mem_pow_span` | 34 | the generator case of the span-induction |
+
+The proof is a `Submodule.span_induction` whose zero/add/scale cases are three lines each and
+whose generator case was 98 — a pigeonhole argument over `n₀ = (|S|+1)·N_max` factors. Naming
+that argument is the whole decomposition; the parent is now just the induction skeleton.
+
+**`let`-bound constants become parameters, and every `change` that unfolded them must become a
+`rw`.** `N_max` and `n₀` were `let`s, so the proof used `change` four times to unfold them
+silently. As parameters with defining equations `hN_max`/`hn₀`, each of those `change`s fails with
+`'change' tactic failed, pattern … is not definitionally equal to target`. Three were caught by
+the pre-write asserts; the fourth only surfaced on the build. Worth checking for `change` up front
+whenever a `let` is being promoted to a parameter.
+
+Two more mechanical notes:
+
+* The statement mentions `S ^ n₀` on a `Finset`, which needs `DecidableEq`. Inside the original
+  theorem that came from the `classical` *tactic*, but a lemma's **statement** is elaborated
+  before any tactic runs — so the extracted lemma needs `open Classical in`. Symptom:
+  `failed to synthesize HPow (Finset ↥P.A₀) ℕ ?m`.
+* **The dedent bug bit twice more, in a new way.** Extracting a bullet needs a *single* dedent by
+  the bullet's own indent plus replacing the leading `· ` with spaces. I instead dedented, stripped
+  `· `, and re-indented — which leaves the first body line correct and everything after it two
+  columns too deep. Then the *fix* for that overshot its range, because I searched forward for
+  `private theorem …` and the next declaration is preceded by `open Classical in` **and** a
+  docstring. The reliable end-of-body marker is the first non-empty line back at column 0, not the
+  next `theorem` keyword — the same lesson as `insert_before_decl`, from the other direction.

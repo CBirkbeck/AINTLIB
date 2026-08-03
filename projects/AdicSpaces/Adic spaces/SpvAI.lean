@@ -93,6 +93,138 @@ def Spv.IsInSpvAI (v : Spv A) (I : Ideal A) : Prop :=
   (∀ a ∈ I, Valuation.CofinalValue (ValuativeRel.valuation A) a) ∨
   Valuation.IsMicrobial (ValuativeRel.valuation A)
 
+/-- Any power past `N_max` is already below `γ`: `N_max` dominates every `N_c`, so the exponent
+exceeds this generator's own `N_c`, and `v ≤ 1` on `A₀` makes the power antitone in the exponent. -/
+private theorem pow_lt_of_sup_lt {A : Type*} [CommRing A] [TopologicalSpace A]
+    {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀] {v : Valuation A Γ₀}
+    (P : PairOfDefinition A) (h_le_one : ∀ a : P.A₀, v (P.A₀.subtype a) ≤ 1)
+    {γ : Γ₀} (S : Finset P.A₀) (N_c : ∀ c ∈ S, ℕ)
+    (hN_c : ∀ (c : P.A₀) (hc : c ∈ S), v (P.A₀.subtype c) ^ N_c c hc < γ)
+    (N_max : ℕ) (hN_max : N_max = (S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc)).sup id + 1)
+    (c : ↥S) (count : ℕ) (hcount : N_max ≤ count) :
+    v (P.A₀.subtype (↑c : P.A₀)) ^ count < γ := by
+  set N_star := N_c (↑c : P.A₀) c.2 with hN_star
+  have h_N_max_ge : N_star + 1 ≤ N_max := by
+    rw [hN_max]
+    apply Nat.add_le_add_right
+    have h_mem_image : N_star ∈ S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc) := by
+      rw [Finset.mem_image]
+      refine ⟨⟨(↑c : P.A₀), c.2⟩, Finset.mem_attach _ _, rfl⟩
+    exact Finset.le_sup (f := id) h_mem_image
+  have h_count_ge_N : N_star ≤ count := by omega
+  exact (pow_le_pow_right_of_le_one' (h_le_one _) h_count_ge_N).trans_lt
+    (hN_c (↑c : P.A₀) c.2)
+
+
+/-- **Pigeonhole.** A product of `n₀ = (|S|+1)·N_max` generators drawn from a nonempty `S` has
+valuation `< γ`: some `c⋆` must occur at least `N_max` times, its block is `< γ` by
+`pow_lt_of_sup_lt`, and every other block is `≤ 1` since `v ≤ 1` on `A₀`. -/
+private theorem prod_lt_of_nonempty {A : Type*} [CommRing A] [TopologicalSpace A]
+    {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀] {v : Valuation A Γ₀}
+    (P : PairOfDefinition A) (h_le_one : ∀ a : P.A₀, v (P.A₀.subtype a) ≤ 1)
+    {γ : Γ₀} (S : Finset P.A₀) (N_c : ∀ c ∈ S, ℕ)
+    (hN_c : ∀ (c : P.A₀) (hc : c ∈ S), v (P.A₀.subtype c) ^ N_c c hc < γ)
+    (N_max n₀ : ℕ)
+    (hN_max : N_max = (S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc)).sup id + 1)
+    (hn₀ : n₀ = (S.card + 1) * N_max)
+    (hS_ne : S.Nonempty) (f : Fin n₀ → ↥S) :
+    (∏ i : Fin n₀, v (P.A₀.subtype (↑(f i) : P.A₀))) < γ := by
+  classical
+  haveI : Nonempty ↥S := hS_ne.coe_sort
+  have h_card_le : Fintype.card ↥S * N_max ≤ Fintype.card (Fin n₀) := by
+    simp only [Fintype.card_fin, Fintype.card_coe]
+    rw [hn₀]
+    calc S.card * N_max ≤ S.card * N_max + N_max := Nat.le_add_right _ _
+      _ = (S.card + 1) * N_max := by ring
+  obtain ⟨c_star, hc_count⟩ :=
+    Fintype.exists_le_card_fiber_of_mul_le_card (f := f) (n := N_max) h_card_le
+  -- Group by fiber.
+  rw [show (∏ i : Fin n₀, v (P.A₀.subtype (↑(f i) : P.A₀))) =
+      ∏ c : ↥S, ∏ i : Fin n₀ with f i = c,
+        v (P.A₀.subtype (↑c : P.A₀)) by
+    rw [Finset.prod_fiberwise' (s := Finset.univ) (g := f)
+      (f := fun c : ↥S ↦ v (P.A₀.subtype (↑c : P.A₀)))]]
+  have h_inner : ∀ c : ↥S, (∏ i ∈ Finset.univ.filter (fun i ↦ f i = c),
+      v (P.A₀.subtype (↑c : P.A₀))) =
+      v (P.A₀.subtype (↑c : P.A₀)) ^
+      (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card := by
+    intro c
+    rw [Finset.prod_const]
+  rw [Finset.prod_congr rfl fun c _ ↦ h_inner c]
+  rw [← Finset.prod_erase_mul (Finset.univ : Finset ↥S) _ (Finset.mem_univ c_star)]
+  -- Bound `others ≤ 1` and `c_star_factor < γ`.
+  have h_v_c_le_one : ∀ c : ↥S, v (P.A₀.subtype (↑c : P.A₀)) ≤ 1 := fun c ↦
+    h_le_one (↑c : P.A₀)
+  have h_others_le_one :
+      (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
+        v (P.A₀.subtype (↑c : P.A₀)) ^
+        (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card) ≤ 1 := by
+    refine Finset.prod_le_one' ?_
+    intro c _
+    exact Left.pow_le_one_of_le (h_v_c_le_one c) _
+  have h_c_star_lt : v (P.A₀.subtype (↑c_star : P.A₀)) ^
+      (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card < γ :=
+    pow_lt_of_sup_lt P h_le_one S N_c hN_c N_max hN_max c_star _ hc_count
+  calc (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
+          v (P.A₀.subtype (↑c : P.A₀)) ^
+          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card) *
+        v (P.A₀.subtype (↑c_star : P.A₀)) ^
+          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card
+      ≤ 1 * v (P.A₀.subtype (↑c_star : P.A₀)) ^
+          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card := by
+        exact mul_le_mul_left h_others_le_one _
+    _ = v (P.A₀.subtype (↑c_star : P.A₀)) ^
+          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card := one_mul _
+    _ < γ := h_c_star_lt
+
+
+open Classical in
+/-- **The generator case of `cofinalValue_ideal_pow_lt`.** A product of `n₀ = (|S|+1)·N_max`
+generators has valuation `< γ`: by pigeonhole some `c⋆ ∈ S` occurs at least `N_max > N_{c⋆}` times,
+so its block alone is already `< γ`, and every other block is `≤ 1` because `v ≤ 1` on `A₀`. -/
+private theorem valuation_lt_of_mem_pow_span {A : Type*} [CommRing A] [TopologicalSpace A]
+    {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀] {v : Valuation A Γ₀}
+    (P : PairOfDefinition A) (h_le_one : ∀ a : P.A₀, v (P.A₀.subtype a) ≤ 1)
+    {γ : Γ₀} (S : Finset P.A₀) (N_c : ∀ c ∈ S, ℕ)
+    (hN_c : ∀ (c : P.A₀) (hc : c ∈ S), v (P.A₀.subtype c) ^ N_c c hc < γ)
+    (N_max n₀ : ℕ)
+    (hN_max : N_max = (S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc)).sup id + 1)
+    (hn₀ : n₀ = (S.card + 1) * N_max)
+    (x : P.A₀) (hx : x ∈ ((S ^ n₀ : Finset P.A₀) : Set P.A₀)) :
+    v (P.A₀.subtype x) < γ := by
+  classical
+  -- x ∈ S^n₀ → ∃ f : Fin n₀ → ↥S with (List.ofFn fun i => ↑(f i)).prod = x.
+  rw [show ((S ^ n₀ : Finset P.A₀) : Set P.A₀) = ((S ^ n₀ : Finset P.A₀) : Set P.A₀)
+      from rfl] at hx
+  have hx_mem : x ∈ (S ^ n₀ : Finset P.A₀) := hx
+  rw [Finset.mem_pow] at hx_mem
+  obtain ⟨f, hf⟩ := hx_mem
+  -- Express v(P.A₀.subtype x) as ∏ via List.prod_ofFn + map_prod.
+  have hx_eq : (P.A₀.subtype x : A) =
+      ∏ i : Fin n₀, (P.A₀.subtype (↑(f i) : P.A₀) : A) := by
+    have h_map : (P.A₀.subtype : P.A₀ →+* A)
+        ((List.ofFn fun i ↦ (↑(f i) : P.A₀)).prod) =
+        ((List.ofFn fun i ↦ (↑(f i) : P.A₀)).map P.A₀.subtype).prod :=
+      map_list_prod P.A₀.subtype _
+    rw [← hf, h_map, List.map_ofFn, List.prod_ofFn]
+    rfl
+  rw [hx_eq, map_prod]
+  -- v(∏ i, P.A₀.subtype (↑(f i))) = ∏ i, v(P.A₀.subtype (↑(f i)))
+  -- Pigeonhole: some c ∈ S has count ≥ N_max.
+  by_cases hS_ne : S.Nonempty
+  · exact prod_lt_of_nonempty P h_le_one S N_c hN_c N_max n₀ hN_max hn₀ hS_ne f
+  · -- S empty: f vacuous, contradiction.
+    exfalso
+    rw [Finset.not_nonempty_iff_eq_empty] at hS_ne
+    have hn₀_pos : 0 < n₀ := by
+      rw [hn₀]
+      apply Nat.mul_pos
+      · exact Nat.succ_pos _
+      · rw [hN_max]
+        exact Nat.succ_pos _
+    exact (Finset.eq_empty_iff_forall_notMem.mp hS_ne) _ (f ⟨0, hn₀_pos⟩).2
+
+
 /-- **Per-`v` uniform decay on `I^n` from per-generator cofinality.**
 Given `v : Valuation A Γ₀` with `v ≤ 1` on `P.A₀` and `CofinalValue v c`
 for each generator `c` of `P.I`, conclude: for every `γ > 0`, there is
@@ -142,104 +274,8 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
     (M := P.A₀) (R := P.A₀)
     (s := ((S ^ n₀ : Finset P.A₀) : Set P.A₀))
     (p := fun x _ ↦ v (P.A₀.subtype x) < γ) ?_ ?_ ?_ ?_ ha'
-  · -- Generator case: x ∈ S^n₀ as Finset.
-    intro x hx
-    -- x ∈ S^n₀ → ∃ f : Fin n₀ → ↥S with (List.ofFn fun i => ↑(f i)).prod = x.
-    rw [show ((S ^ n₀ : Finset P.A₀) : Set P.A₀) = ((S ^ n₀ : Finset P.A₀) : Set P.A₀)
-        from rfl] at hx
-    have hx_mem : x ∈ (S ^ n₀ : Finset P.A₀) := hx
-    rw [Finset.mem_pow] at hx_mem
-    obtain ⟨f, hf⟩ := hx_mem
-    -- Express v(P.A₀.subtype x) as ∏ via List.prod_ofFn + map_prod.
-    have hx_eq : (P.A₀.subtype x : A) =
-        ∏ i : Fin n₀, (P.A₀.subtype (↑(f i) : P.A₀) : A) := by
-      have h_map : (P.A₀.subtype : P.A₀ →+* A)
-          ((List.ofFn fun i ↦ (↑(f i) : P.A₀)).prod) =
-          ((List.ofFn fun i ↦ (↑(f i) : P.A₀)).map P.A₀.subtype).prod :=
-        map_list_prod P.A₀.subtype _
-      rw [← hf, h_map, List.map_ofFn, List.prod_ofFn]
-      rfl
-    rw [hx_eq, map_prod]
-    -- v(∏ i, P.A₀.subtype (↑(f i))) = ∏ i, v(P.A₀.subtype (↑(f i)))
-    -- Pigeonhole: some c ∈ S has count ≥ N_max.
-    by_cases hS_ne : S.Nonempty
-    · haveI : Nonempty ↥S := hS_ne.coe_sort
-      have h_card_le : Fintype.card ↥S * N_max ≤ Fintype.card (Fin n₀) := by
-        simp only [Fintype.card_fin, Fintype.card_coe]
-        change S.card * N_max ≤ (S.card + 1) * N_max
-        calc S.card * N_max ≤ S.card * N_max + N_max := Nat.le_add_right _ _
-          _ = (S.card + 1) * N_max := by ring
-      obtain ⟨c_star, hc_count⟩ :=
-        Fintype.exists_le_card_fiber_of_mul_le_card (f := f) (n := N_max) h_card_le
-      -- Group by fiber.
-      rw [show (∏ i : Fin n₀, v (P.A₀.subtype (↑(f i) : P.A₀))) =
-          ∏ c : ↥S, ∏ i : Fin n₀ with f i = c,
-            v (P.A₀.subtype (↑c : P.A₀)) by
-        rw [Finset.prod_fiberwise' (s := Finset.univ) (g := f)
-          (f := fun c : ↥S ↦ v (P.A₀.subtype (↑c : P.A₀)))]]
-      have h_inner : ∀ c : ↥S, (∏ i ∈ Finset.univ.filter (fun i ↦ f i = c),
-          v (P.A₀.subtype (↑c : P.A₀))) =
-          v (P.A₀.subtype (↑c : P.A₀)) ^
-          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card := by
-        intro c
-        rw [Finset.prod_const]
-      rw [Finset.prod_congr rfl fun c _ ↦ h_inner c]
-      rw [← Finset.prod_erase_mul (Finset.univ : Finset ↥S) _ (Finset.mem_univ c_star)]
-      -- Bound `others ≤ 1` and `c_star_factor < γ`.
-      have h_v_c_le_one : ∀ c : ↥S, v (P.A₀.subtype (↑c : P.A₀)) ≤ 1 := fun c ↦
-        h_le_one (↑c : P.A₀)
-      have h_others_le_one :
-          (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
-            v (P.A₀.subtype (↑c : P.A₀)) ^
-            (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card) ≤ 1 := by
-        refine Finset.prod_le_one' ?_
-        intro c _
-        exact Left.pow_le_one_of_le (h_v_c_le_one c) _
-      have h_c_star_lt : v (P.A₀.subtype (↑c_star : P.A₀)) ^
-          (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card < γ := by
-        set count := (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card
-        set N_star := N_c (↑c_star : P.A₀) c_star.2
-        have h_N_max_ge : N_max ≥ N_star + 1 := by
-          change (S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc)).sup id + 1 ≥ N_star + 1
-          apply Nat.add_le_add_right
-          have h_mem_image : N_star ∈ S.attach.image (fun ⟨c, hc⟩ ↦ N_c c hc) := by
-            rw [Finset.mem_image]
-            refine ⟨⟨(↑c_star : P.A₀), c_star.2⟩, Finset.mem_attach _ _, rfl⟩
-          exact Finset.le_sup (f := id) h_mem_image
-        have h_count_ge_N : count ≥ N_star := by
-          calc count ≥ N_max := hc_count
-            _ ≥ N_star + 1 := h_N_max_ge
-            _ ≥ N_star := Nat.le_succ _
-        have h_v_c_le_one_star : v (P.A₀.subtype (↑c_star : P.A₀)) ≤ 1 :=
-          h_v_c_le_one c_star
-        have h_pow_mono :
-            v (P.A₀.subtype (↑c_star : P.A₀)) ^ count ≤
-            v (P.A₀.subtype (↑c_star : P.A₀)) ^ N_star :=
-          pow_le_pow_right_of_le_one' h_v_c_le_one_star h_count_ge_N
-        calc v (P.A₀.subtype (↑c_star : P.A₀)) ^ count
-            ≤ v (P.A₀.subtype (↑c_star : P.A₀)) ^ N_star := h_pow_mono
-          _ < γ := hN_c (↑c_star : P.A₀) c_star.2
-      calc (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star,
-              v (P.A₀.subtype (↑c : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c)).card) *
-            v (P.A₀.subtype (↑c_star : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card
-          ≤ 1 * v (P.A₀.subtype (↑c_star : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card := by
-            exact mul_le_mul_left h_others_le_one _
-        _ = v (P.A₀.subtype (↑c_star : P.A₀)) ^
-              (Finset.univ.filter (fun i : Fin n₀ ↦ f i = c_star)).card := one_mul _
-        _ < γ := h_c_star_lt
-    · -- S empty: f vacuous, contradiction.
-      exfalso
-      rw [Finset.not_nonempty_iff_eq_empty] at hS_ne
-      have hn₀_pos : 0 < n₀ := by
-        change 0 < (S.card + 1) * N_max
-        apply Nat.mul_pos
-        · exact Nat.succ_pos _
-        · change 0 < (S.attach.image _).sup id + 1
-          exact Nat.succ_pos _
-      exact (Finset.eq_empty_iff_forall_notMem.mp hS_ne) _ (f ⟨0, hn₀_pos⟩).2
+  · exact fun x hx =>
+      valuation_lt_of_mem_pow_span P h_le_one S N_c hN_c N_max n₀ rfl rfl x hx
   · -- Zero case: v(0) = 0 < γ.
     simp [map_zero]; exact hγ
   · -- Add case: v(x + y) ≤ max v(x) v(y) < γ.
