@@ -35105,3 +35105,113 @@ Rather than extending only the *value* `ζ` on the universal basis, extend the w
 morphism `E[N]²_K ⟶ μ_{N,K}` over each component: `E[N]²` is finite étale over a normal base
 hence componentwise normal, so WP-D3b applies directly and the determinant formula is never
 needed at the universal stage. Costs more Lean infrastructure; avoids C6 entirely.
+
+## [WP-D2c-3] REPLAN (2026-08-03) — the `toFun` form is the one whose inputs are proved
+
+Working the recorded splice surfaced a **dependent-transport blocker in the `symm` form**:
+goal (a) after `pullback.hom_ext` compares `fullLevelLocusPointsEquiv.symm` at base
+`pX'.1.1.baseHom` (precomposed with `f.baseHom`) against base `pX.1.1.baseHom`, and those
+two indices agree only **propositionally** (via `hub`). The level structures then live in
+types that match only after transporting along `hub` — exactly the cast-juggling that
+`moduliProblem_fppf_descent` needed a `transport_eqv` helper for.
+
+**The `toFun` form has no such transport**: the index there is
+`(f ≫ w ≫ π).baseHom = f.baseHom ≫ (w ≫ π).baseHom`, which is `rfl`. And its inputs are
+already proved: `fullLevelLocusPointsEquiv_pullSection_fst` / `_snd`
+(`Moduli/LevelLocusNatural.lean:150, 164`) are the forward-direction naturality, written for
+exactly this. The `whnf` timeout previously measured on the `toFun` form came from proving
+`homEquiv_comp` **inside the structure instance**; as a standalone lemma with an explicit
+`Subtype.ext (Prod.ext …)` skeleton the elaborator never unfolds the whole `Equiv` chain.
+
+Three sub-tickets, then the parent falls out in two lines.
+
+### [WP-D2c-3-H4] `yFullCandidateHomEquiv_apply`
+- **Status**: open · **File**: `ModularCurve/YFullFromYOne.lean` · **Parent**: WP-D2c-3
+- **Type**: lemma
+- **Statement**: for `w : Y ⟶ yFullCandidate N X₁ h P`,
+  `yFullCandidateHomEquiv … Y w =
+     transportAlongIso N (w ≫ X₁.pullbackAlongπ (completionLocusπ N h P))
+       ((X₁.curve.completionLocusClassifies N h P hPsec
+          (w ≫ X₁.pullbackAlongπ _).baseHom) ⟨w.baseHom, rfl⟩).1`
+- **Proof sketch**: `rfl`. The chain's `toFun` is `homPullbackAlongEquiv` (`w ↦ ⟨(w ≫ π,
+  w.baseHom), rfl⟩`), then `subtypeProdEquivSigmaSubtype` (repackaging), then
+  `sigmaCongrRight` of `completionFibreEquiv ∘ subtypeEquivRight` (data-preserving on the
+  second factor), then `sigmaHomForgetEquiv`, whose last factor is
+  `Equiv.sigmaFiberEquiv f` with `toFun x = x.2.1` — a projection. So the composite just
+  reads off the classified level structure.
+- **Generality**: matches the use site exactly (no extra hypotheses).
+
+### [WP-D2c-3-H5] `isoPullbackAlong_hom_comp_pullbackAlongMap`
+- **Status**: open · **File**: `ModularCurve/YFullFromYOne.lean` · **Parent**: WP-D2c-3
+- **Type**: lemma
+- **Statement**: for `u : Y ⟶ X₁` and `f : Y' ⟶ Y`,
+  `(EllObj.isoPullbackAlong (f ≫ u)).hom ≫ X₁.pullbackAlongMap u.baseHom f.baseHom =
+     f ≫ (EllObj.isoPullbackAlong u).hom`
+- **Proof sketch**: `EllHom.ext`; `baseHom` is `f.baseHom` on both sides
+  (`toPullbackAlong`'s `baseHom` is the identity of the source base); `top` by
+  `pullback.hom_ext` with `pullback.lift_fst` / `lift_snd` on both `toPullbackAlong` and
+  `pullbackAlongMap` (both are `pullback.lift`/`pullback.map`).
+- **Mathlib lemmas**: `Limits.pullback.lift_fst`, `Limits.pullback.lift_snd`,
+  `Limits.pullback.hom_ext`, `EllHom.ext`.
+- **Generality**: stated for arbitrary `EllObj R` morphisms — it is a base-change
+  comparison identity with no level-structure content.
+
+### [WP-D2c-3-H6] `yFullCandidateHomEquiv_natural`  (the `toFun` form)
+- **Status**: blocked (H4, H5) · **File**: `ModularCurve/YFullFromYOne.lean` · **Parent**: WP-D2c-3
+- **Type**: lemma
+- **Statement**: `yFullCandidateHomEquiv … X (f ≫ w) =
+    (gammaFullNaiveProblem R N).map f.op (yFullCandidateHomEquiv … X' w)`
+- **Proof sketch**: rewrite both sides by **H4**; the level index becomes
+  `f.baseHom ≫ (w ≫ π).baseHom` definitionally. Unfold `completionLocusClassifies` to its
+  `fullLevelLocusPointsEquiv` value, apply `fullLevelLocusPointsEquiv_pullSection_fst` and
+  `_snd` (proved) componentwise via `Subtype.ext (Prod.ext …)`, then the two
+  `transportAlongIso`s are related by **H5** through `EllHom.pullSection_comp`
+  (`Moduli/Representability.lean:169`).
+- **Mathlib/project lemmas**: `fullLevelLocusPointsEquiv_pullSection_fst/_snd`,
+  `EllHom.pullSection_comp`, `Subtype.ext`, `Prod.ext`.
+
+### [WP-D2c-3] parent, given H6
+`f ≫ (equiv X').symm PQ = (equiv X).symm (map f.op PQ)` follows by applying `equiv X` to
+both sides (`Equiv.apply_eq_iff_eq_symm_apply` / `Equiv.eq_symm_apply`): the left becomes
+H6 at `w := (equiv X').symm PQ`, and `Equiv.apply_symm_apply` finishes. Two lines. The
+stated theorem is unchanged (`theorem_statement_protected`).
+
+## [WP-D2c-3] DONE (2026-08-03) — axiom-verified. The D-chain has no sorries.
+
+`yFullCandidateHomEquiv_symm_natural` is proved; `yFullCandidate_representableBy` is
+`propext / Classical.choice / Quot.sound`. Four new lemmas, all axiom-verified:
+
+| lemma | file | content |
+|---|---|---|
+| `fullLevelLocusPointsEquiv_symm_natural` (H3) | `Moduli/LevelLocusNatural.lean` | the `symm` form of the two `_pullSection_*` lemmas; 6 lines, first try |
+| `isoPullbackAlong_hom_comp_pullbackAlongMap` (H5) | `ModularCurve/YFullFromYOne.lean` | the base-change comparison square |
+| `transportAlongIso_symm_natural` (H8) | same | H5 + functoriality |
+| `completionFibreEquiv_symm_natural` (H7) | same | H3 + H8 + `pullback.hom_ext` |
+
+### What actually unblocked it (three findings worth keeping)
+
+1. **The recorded splice could not work as written.** After `pullback.hom_ext` the `fst`
+   branch compares `fullLevelLocusPointsEquiv.symm` at base `pX'.1.1.baseHom` (precomposed
+   with `f.baseHom`) against base `pX.1.1.baseHom`; those indices agree only
+   **propositionally**, so the level structures live in types that match only after a
+   transport. H2 (`completionLocusClassifies_natural_fst`) is stated at `k ≫ g` and cannot
+   absorb that.
+   **Fix:** take the relation as a hypothesis. H7 has signature
+   `(u : Y ⟶ X₁) (f : Y' ⟶ Y) (u₂ : Y' ⟶ X₁) (hfu : f ≫ u = u₂)` and opens with `subst hfu`
+   — the transport is done once, where `u₂` is still a variable. At the use site the caller
+   supplies `hu' : f ≫ rOne.homEquiv.symm (forgetAt … X' PQ) = rOne.homEquiv.symm (forgetAt …
+   X (map f.op PQ))`, and everything else matches definitionally.
+2. **The `toFun` form is genuinely unavailable, and now we know why.** It is not a
+   heartbeat problem: `sigmaHomForgetEquiv` uses `Equiv.sigmaCongrLeft'`, whose **forward**
+   map transports the fibre predicate along `homEquiv.symm_apply_apply`. That cast sits on
+   the data, so `yFullCandidateHomEquiv … w = <the classified structure>` is **not** `rfl`
+   (measured: `rfl`, `Subtype.ext rfl`, `Prod.ext rfl rfl` all fail). `Equiv.sigmaCongrLeft'`
+   is *defined* as `(sigmaCongrLeft f.symm).symm`, so its **inverse** is cast-free — which
+   is exactly why H1 and H7 compute and the `toFun` route does not. The earlier `whnf`
+   timeout was this cast being chased, not sheer size. Record: **on this chain, always work
+   in the `symm` direction.**
+3. `H2` (`completionLocusClassifies_natural_fst`) turned out **not** to be needed — H7 goes
+   through `completionFibreEquiv` directly and gets the `fullLevelLocus` component from H3.
+   H2 stays in the tree as a proved lemma with no consumer.
+
+**Next:** WP-D2c-5 (`4 ≤ N` arm), WP-D2c-6 (`N = 3` arm), WP-D2c-7 (the splice).

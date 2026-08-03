@@ -276,6 +276,103 @@ theorem yFullCandidateHomEquiv_symm_comp_pullbackAlongπ (N : ℕ) [NeZero N] (X
         (sigmaHomForgetEquiv N hinvR rOne Y))).symm PQ) with hp
   exact EllObj.homToPullbackAlong_pullbackAlongπ p.1.1 p.1.2 p.2
 
+/-- **(WP-D2c-3-H5)** The base-change comparison square: comparing `Y'` into the chosen
+pullback over `u`'s base map, either directly along `f ≫ u` and then along the
+`pullbackAlongMap`, or through `f` first, gives the same morphism.
+
+Pure base-change bookkeeping — no level-structure content. Both sides have `baseHom`
+`f.baseHom`, and on `top` the two composites agree after `pullback.hom_ext` because
+`isoPullback.hom` computes against both projections. -/
+theorem isoPullbackAlong_hom_comp_pullbackAlongMap {X₁ Y Y' : EllObj R} (u : Y ⟶ X₁)
+    (f : Y' ⟶ Y) :
+    (EllObj.isoPullbackAlong (f ≫ u)).hom ≫ X₁.pullbackAlongMap u.baseHom f.baseHom =
+      f ≫ (EllObj.isoPullbackAlong u).hom := by
+  refine EllHom.ext ?_ ?_
+  · show 𝟙 Y'.base ≫ f.baseHom = f.baseHom ≫ 𝟙 Y.base
+    rw [Category.id_comp, Category.comp_id]
+  · show (f ≫ u).isPullback.isoPullback.hom ≫
+        pullback.map X₁.curve.π (f.baseHom ≫ u.baseHom) X₁.curve.π u.baseHom
+          (𝟙 _) f.baseHom (𝟙 _) (by simp) (by simp) =
+      f.top ≫ u.isPullback.isoPullback.hom
+  -- the four `isoPullback` computation rules, ascribed at the unfolded base maps so that
+  -- `rw` can see them (`(f ≫ u).baseHom` and `f.baseHom ≫ u.baseHom` are defeq, not syntactic)
+    have hfst' : (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback.hom ≫
+        pullback.fst X₁.curve.π (f.baseHom ≫ u.baseHom) = (f ≫ u : Y' ⟶ X₁).top :=
+      (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback_hom_fst
+    have hsnd' : (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback.hom ≫
+        pullback.snd X₁.curve.π (f.baseHom ≫ u.baseHom) = Y'.curve.π :=
+      (f ≫ u : Y' ⟶ X₁).isPullback.isoPullback_hom_snd
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullback.lift_fst, Category.comp_id, hfst', Category.assoc,
+        u.isPullback.isoPullback_hom_fst]
+      rfl
+    · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, hsnd', Category.assoc,
+        u.isPullback.isoPullback_hom_snd]
+      exact f.isPullback.w.symm
+
+/-- **(WP-D2c-3-H8)** Transporting a level structure along `isoPullbackAlong` is natural:
+the transport for `f ≫ u` of a pulled-back structure is the base change of the transport
+for `u`. Immediate from the comparison square `isoPullbackAlong_hom_comp_pullbackAlongMap`
+and functoriality of the moduli problem. -/
+theorem transportAlongIso_symm_natural (N : ℕ) [NeZero N] {X₁ Y Y' : EllObj R} (u : Y ⟶ X₁)
+    (f : Y' ⟶ Y) (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y)) :
+    (transportAlongIso N (f ≫ u)).symm ((gammaFullNaiveProblem R N).map f.op PQ) =
+      (gammaFullNaiveProblem R N).map (X₁.pullbackAlongMap u.baseHom f.baseHom).op
+        ((transportAlongIso N u).symm PQ) := by
+  have hsq : (EllObj.isoPullbackAlong (f ≫ u)).inv ≫ f =
+      X₁.pullbackAlongMap u.baseHom f.baseHom ≫ (EllObj.isoPullbackAlong u).inv := by
+    rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
+    exact (isoPullbackAlong_hom_comp_pullbackAlongMap u f).symm
+  show (gammaFullNaiveProblem R N).map (EllObj.isoPullbackAlong (f ≫ u)).inv.op
+      ((gammaFullNaiveProblem R N).map f.op PQ) =
+    (gammaFullNaiveProblem R N).map (X₁.pullbackAlongMap u.baseHom f.baseHom).op
+      ((gammaFullNaiveProblem R N).map (EllObj.isoPullbackAlong u).inv.op PQ)
+  rw [← Functor.map_comp_apply, ← Functor.map_comp_apply, ← op_comp, ← op_comp, hsq]
+
+/-- **(WP-D2c-3-H7)** The per-`u` fibre dictionary is natural in the base, in the `symm`
+direction: the lift attached to a pulled-back level structure is the pullback of the lift.
+
+The `u₂ = f ≫ u` hypothesis is taken as an argument rather than substituted at the use
+site: the caller only knows the two classifying morphisms agree *propositionally*, and
+`subst` here does the transport once, in a context where nothing else depends on it. -/
+theorem completionFibreEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj R)
+    (h : NIsInvertible X₁.base N) (P : X₁.base ⟶ X₁.curve.torsion N)
+    (hPsec : P ≫ X₁.curve.torsionπ N = 𝟙 X₁.base)
+    {Y Y' : EllObj R} (u : Y ⟶ X₁) (f : Y' ⟶ Y) (u₂ : Y' ⟶ X₁) (hfu : f ≫ u = u₂)
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op Y))
+    (hPQ : ((transportAlongIso N u).symm PQ).1.1 =
+      X₁.curve.torsionMapSection N u.baseHom (u.baseHom ≫ P)
+        (by rw [Category.assoc, hPsec, Category.comp_id]))
+    (hPQ₂ : ((transportAlongIso N u₂).symm ((gammaFullNaiveProblem R N).map f.op PQ)).1.1 =
+      X₁.curve.torsionMapSection N u₂.baseHom (u₂.baseHom ≫ P)
+        (by rw [Category.assoc, hPsec, Category.comp_id])) :
+    f.baseHom ≫ ((completionFibreEquiv N X₁ h P hPsec u).symm ⟨PQ, hPQ⟩).1 =
+      ((completionFibreEquiv N X₁ h P hPsec u₂).symm
+        ⟨(gammaFullNaiveProblem R N).map f.op PQ, hPQ₂⟩).1 := by
+  subst hfu
+  -- both lifts are `pullback.lift`s, so the two projections compute
+  have e1 : ((completionFibreEquiv N X₁ h P hPsec u).symm ⟨PQ, hPQ⟩).1 ≫
+      pullback.fst (X₁.curve.fullLevelLocusFst N h) P =
+      ((X₁.curve.fullLevelLocusPointsEquiv N h u.baseHom).symm
+        ((transportAlongIso N u).symm PQ)).1 := pullback.lift_fst _ _ _
+  have e2 : ((completionFibreEquiv N X₁ h P hPsec (f ≫ u)).symm
+        ⟨(gammaFullNaiveProblem R N).map f.op PQ, hPQ₂⟩).1 ≫
+      pullback.fst (X₁.curve.fullLevelLocusFst N h) P =
+      ((X₁.curve.fullLevelLocusPointsEquiv N h (f ≫ u).baseHom).symm
+        ((transportAlongIso N (f ≫ u)).symm
+          ((gammaFullNaiveProblem R N).map f.op PQ))).1 := pullback.lift_fst _ _ _
+  refine pullback.hom_ext ?_ ?_
+  · -- the `fullLevelLocus` component: H3 after rewriting the transported structure by H8
+    rw [Category.assoc, e1, e2, transportAlongIso_symm_natural N u f PQ]
+    exact (fullLevelLocusPointsEquiv_symm_natural X₁ N h u.baseHom f.baseHom
+      ((transportAlongIso N u).symm PQ)).symm
+  · -- the base component: both sides lie over `f.baseHom ≫ u.baseHom` by construction
+    rw [Category.assoc,
+      ((completionFibreEquiv N X₁ h P hPsec u).symm ⟨PQ, hPQ⟩).2,
+      ((completionFibreEquiv N X₁ h P hPsec (f ≫ u)).symm
+        ⟨(gammaFullNaiveProblem R N).map f.op PQ, hPQ₂⟩).2]
+    rfl
+
 /-- **(WP-D2c-3, naturality — the `symm` form)** The inverse of the representing
 equivalence is natural: precomposing with `f` corresponds to pulling the level structure
 back along `f`.
@@ -319,44 +416,19 @@ theorem yFullCandidateHomEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj 
     rw [yFullCandidateHomEquiv_symm_comp_pullbackAlongπ,
       yFullCandidateHomEquiv_symm_comp_pullbackAlongπ]
     rw [forgetAt_naturality N hinvR f PQ, rOne.comp_homEquiv_symm]
-  · -- second component: the `baseHom`s. `homPullbackAlongEquiv`'s `toFun` reads it off
-    -- directly, so this is the naturality of `completionLocusClassifies.symm` in the base.
-    show f.baseHom ≫
-        ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ).baseHom =
-      ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
-        ((gammaFullNaiveProblem R N).map f.op PQ)).baseHom
-    set pX' := (((Equiv.subtypeProdEquivSigmaSubtype
-        (fun (u : X' ⟶ X₁) (b : X'.base ⟶ X₁.curve.completionLocus N h P) =>
-          b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
-        ((Equiv.sigmaCongrRight fun u =>
-            (completionFibreEquiv N X₁ h P hPsec u).trans
-              (Equiv.subtypeEquivRight (hmatch X' u))).trans
-          (sigmaHomForgetEquiv N hinvR rOne X'))).symm PQ) with hpX'
-    set pX := (((Equiv.subtypeProdEquivSigmaSubtype
-        (fun (u : X ⟶ X₁) (b : X.base ⟶ X₁.curve.completionLocus N h P) =>
-          b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
-        ((Equiv.sigmaCongrRight fun u =>
-            (completionFibreEquiv N X₁ h P hPsec u).trans
-              (Equiv.subtypeEquivRight (hmatch X u))).trans
-          (sigmaHomForgetEquiv N hinvR rOne X))).symm
-        ((gammaFullNaiveProblem R N).map f.op PQ)) with hpX
-    have hbX' : ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ).baseHom
-        = pX'.1.2 := EllObj.homToPullbackAlong_baseHom pX'.1.1 pX'.1.2 pX'.2
-    have hbX : ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
-        ((gammaFullNaiveProblem R N).map f.op PQ)).baseHom
-        = pX.1.2 := EllObj.homToPullbackAlong_baseHom pX.1.1 pX.1.2 pX.2
-    rw [hbX', hbX]
-    -- Goal is now fully reduced: `f.baseHom ≫ pX'.1.2 = pX.1.2`, an equality of morphisms
-    -- into `completionLocus = pullback (fullLevelLocusFst) P`. Split it with
-    -- `pullback.hom_ext`:
-    --   · `≫ pullback.fst` (into `fullLevelLocus`) is H2,
-    --     `completionLocusClassifies_natural_fst`;
-    --   · `≫ pullback.snd` (`= completionLocusπ`) follows from `pX'.2` / `pX.2` and the
-    --     already-proved first component, which says the `u`-parts agree.
-    -- NB `rw [Category.assoc]` fails here on the `completionLocus`-vs-`pullback` coercion —
-    -- use the term form `(Category.assoc _ _ _).trans (congrArg _ pX'.2)`, as elsewhere in
-    -- this chain.
-    sorry
+  · -- second component: the `baseHom`s. `homPullbackAlongEquiv`'s `toFun` reads them off
+    -- directly, and the `symm` composite's base component is *definitionally*
+    -- `completionFibreEquiv.symm` at the classifying morphism, so this is exactly H7. The
+    -- two classifying morphisms are related only propositionally, which is why H7 takes
+    -- that relation as an argument and `subst`s it.
+    have hu' : f ≫ rOne.homEquiv.symm (forgetAt N hinvR X' PQ) =
+        rOne.homEquiv.symm
+          (forgetAt N hinvR X ((gammaFullNaiveProblem R N).map f.op PQ)) := by
+      rw [forgetAt_naturality N hinvR f PQ, rOne.comp_homEquiv_symm]
+    exact completionFibreEquiv_symm_natural N X₁ h P hPsec
+      (rOne.homEquiv.symm (forgetAt N hinvR X' PQ)) f
+      (rOne.homEquiv.symm (forgetAt N hinvR X ((gammaFullNaiveProblem R N).map f.op PQ)))
+      hu' PQ _ _
 
 /-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member
 is the section attached to `u.baseHom ≫ P`" says exactly "the `Γ₁`-part of `PQ` is `u`'s

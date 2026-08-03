@@ -173,6 +173,33 @@ theorem fullLevelLocusPointsEquiv_pullSection_snd (X : EllObj R) (N : ℕ) [NeZe
   rw [pullSection_pullbackAlongMap_comp_fst X g k]
   exact X.curve.fullLevelLocusPointsEquiv_natural_snd N h g k w
 
+/-- **(WP-D2c-3-H3)** The `symm` form of the two lemmas above: the locus point classifying
+a base-changed level structure is the base change of the locus point classifying the
+original.
+
+This is the direction the representability naturality actually consumes, and it is where
+the `symm` route is cast-free: `Equiv.sigmaCongrLeft'` (used forward in
+`sigmaHomForgetEquiv`) transports the fibre predicate along `homEquiv.symm_apply_apply`, so
+the *forward* composite is not definitional, whereas its inverse is. -/
+theorem fullLevelLocusPointsEquiv_symm_natural (X : EllObj R) (N : ℕ) [NeZero N]
+    (h : NIsInvertible X.base N) {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+    (L : (gammaFullNaiveProblem R N).obj (Opposite.op (X.pullbackAlong g))) :
+    ((X.curve.fullLevelLocusPointsEquiv N h (k ≫ g)).symm
+        ((gammaFullNaiveProblem R N).map (X.pullbackAlongMap g k).op L)).1 =
+      k ≫ ((X.curve.fullLevelLocusPointsEquiv N h g).symm L).1 := by
+  set w := (X.curve.fullLevelLocusPointsEquiv N h g).symm L with hw
+  have hL : X.curve.fullLevelLocusPointsEquiv N h g w = L := by
+    rw [hw, Equiv.apply_symm_apply]
+  have hkey : X.curve.fullLevelLocusPointsEquiv N h (k ≫ g)
+      ⟨k ≫ w.1, by rw [Category.assoc, w.2]⟩ =
+      (gammaFullNaiveProblem R N).map (X.pullbackAlongMap g k).op L := by
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · rw [← hL]
+      exact fullLevelLocusPointsEquiv_pullSection_fst X N h g k w
+    · rw [← hL]
+      exact fullLevelLocusPointsEquiv_pullSection_snd X N h g k w
+  rw [← hkey, Equiv.symm_apply_apply]
+
 end EllObj
 
 end ModularCurves
