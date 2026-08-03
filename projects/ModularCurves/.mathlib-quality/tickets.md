@@ -34683,3 +34683,27 @@ Both H1 and H2 are now proved. The single remaining step is wiring H2 into the `
 component of `yFullCandidateHomEquiv_symm_natural` — applying
 `homToPullbackAlong_baseHom` (with the `set` pattern that made H1 a one-liner) to both sides
 and matching against H2.
+
+## [WP-D2c-3] the last goal is fully reduced (2026-08-03)
+
+The `baseHom` component is now reduced *in the file* to
+
+    f.baseHom ≫ pX'.1.2 = pX.1.2
+
+where `pX'`/`pX` are the composite's inner values at `X'`/`X`, named with `set` (the pattern
+that made H1 a one-liner) and their `baseHom`s rewritten by
+`EllObj.homToPullbackAlong_baseHom`. This is an equality of morphisms into
+`completionLocus = pullback (fullLevelLocusFst) P`, so `pullback.hom_ext` splits it:
+
+* **`≫ pullback.fst`** (into `fullLevelLocus`) — this is **H2**,
+  `completionLocusClassifies_natural_fst` (proved).
+* **`≫ pullback.snd`** (`= completionLocusπ`) — from `pX'.2` / `pX.2` plus the already-proved
+  first component, which says the `u`-parts agree.
+
+**Recorded gotcha (hit and reverted):** `rw [Category.assoc]` fails on this goal — the
+`completionLocus`-vs-`pullback` coercion defeats the motive, the same failure mode as three
+earlier points in this chain. Use the term form
+`(Category.assoc _ _ _).trans (congrArg (fun m => f.baseHom ≫ m) pX'.2)`.
+
+Everything else in the D-chain is proved and axiom-verified. One `sorry` remains and both of
+its inputs (H1, H2) are theorems.

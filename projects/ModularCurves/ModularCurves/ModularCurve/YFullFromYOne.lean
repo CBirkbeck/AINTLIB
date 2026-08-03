@@ -325,6 +325,37 @@ theorem yFullCandidateHomEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj 
         ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ).baseHom =
       ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
         ((gammaFullNaiveProblem R N).map f.op PQ)).baseHom
+    set pX' := (((Equiv.subtypeProdEquivSigmaSubtype
+        (fun (u : X' ⟶ X₁) (b : X'.base ⟶ X₁.curve.completionLocus N h P) =>
+          b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
+        ((Equiv.sigmaCongrRight fun u =>
+            (completionFibreEquiv N X₁ h P hPsec u).trans
+              (Equiv.subtypeEquivRight (hmatch X' u))).trans
+          (sigmaHomForgetEquiv N hinvR rOne X'))).symm PQ) with hpX'
+    set pX := (((Equiv.subtypeProdEquivSigmaSubtype
+        (fun (u : X ⟶ X₁) (b : X.base ⟶ X₁.curve.completionLocus N h P) =>
+          b ≫ X₁.curve.completionLocusπ N h P = u.baseHom)).trans
+        ((Equiv.sigmaCongrRight fun u =>
+            (completionFibreEquiv N X₁ h P hPsec u).trans
+              (Equiv.subtypeEquivRight (hmatch X u))).trans
+          (sigmaHomForgetEquiv N hinvR rOne X))).symm
+        ((gammaFullNaiveProblem R N).map f.op PQ)) with hpX
+    have hbX' : ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ).baseHom
+        = pX'.1.2 := EllObj.homToPullbackAlong_baseHom pX'.1.1 pX'.1.2 pX'.2
+    have hbX : ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
+        ((gammaFullNaiveProblem R N).map f.op PQ)).baseHom
+        = pX.1.2 := EllObj.homToPullbackAlong_baseHom pX.1.1 pX.1.2 pX.2
+    rw [hbX', hbX]
+    -- Goal is now fully reduced: `f.baseHom ≫ pX'.1.2 = pX.1.2`, an equality of morphisms
+    -- into `completionLocus = pullback (fullLevelLocusFst) P`. Split it with
+    -- `pullback.hom_ext`:
+    --   · `≫ pullback.fst` (into `fullLevelLocus`) is H2,
+    --     `completionLocusClassifies_natural_fst`;
+    --   · `≫ pullback.snd` (`= completionLocusπ`) follows from `pX'.2` / `pX.2` and the
+    --     already-proved first component, which says the `u`-parts agree.
+    -- NB `rw [Category.assoc]` fails here on the `completionLocus`-vs-`pullback` coercion —
+    -- use the term form `(Category.assoc _ _ _).trans (congrArg _ pX'.2)`, as elsewhere in
+    -- this chain.
     sorry
 
 /-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member
