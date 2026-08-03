@@ -35668,3 +35668,32 @@ register; nothing else in its cone carries a `sorry`.
 * **The orphan sweep** — `lane:cleanup` work on `main`. (Note: the three modules added to the
   root this session pulled in `StandardSmoothMaximalDVR`'s chain with **no** duplicate-name
   clash, so the 77-orphan problem is not uniform — some chains wire in cleanly.)
+
+## [WP-D3a-SS] WITHDRAWN (2026-08-04) — global standard smoothness is already available
+
+The concern was that `IsIntegrallyClosed` (via WP-D3b) needs the **ring**-level
+`Algebra.IsStandardSmoothOfRelativeDimension 1 k A`, while the Stage-A arms produce the
+*scheme*-level `SmoothOfRelativeDimension 1`, whose ring-hom property is only
+`Locally (IsStandardSmoothOfRelativeDimension 1)` — standard smoothness is Zariski-local, so
+a smooth affine curve need not be globally standard smooth.
+
+No unwrapping lemma is needed, because the level-3-rigidified base sidesteps it:
+
+**`isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec`**
+(`ForMathlib/SmoothDescentScheme.lean:98`) — for `Z` affine and **étale** over `Spec R` with
+`R` standard smooth of relative dimension `n` over `k`, the *global* sections map of
+`Z ⟶ Spec k` is standard smooth of relative dimension `n`. Axiom-verified, and already used
+this way by `rhoLevelThree_total_isStandardSmooth` (`ModularCurve/RhoSmooth.lean:129`).
+
+So take the universal base to be `Y(N) ×_ℳ Y(3)`: it is affine and finite étale over
+`Spec (E3ModuliRing R)` (`gammaFullNaive_relRepData` at `universalE3Obj R`), and
+`E3ModuliRing R` is standard smooth of relative dimension 1 (`e3ModuliRing_isStandard-
+SmoothOfRelativeDimension`). Its coordinate ring is therefore **globally** standard smooth of
+relative dimension 1 over `R`, and WP-D3b applies directly.
+
+This also decides the C1/C2 question in the ChatGPT validation: use the **level-3-rigidified**
+base rather than `Y(N²)`. It needs `IsUnit (3 : R)` instead of `N² ≥ 4`, and in exchange the
+base is globally standard smooth with an explicit standard-smooth anchor, which the `Y(N²)`
+route does not give.
+
+**Remaining for the base**: only `IsDomain`, i.e. the componentwise decomposition (C3).
