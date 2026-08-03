@@ -169,6 +169,18 @@ noncomputable def forgetAt (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)) (Y : Ell
       (gammaOneNaiveProblem R N).obj (Opposite.op Y) :=
   fun PQ => (gammaFullToGammaOne N hinv).app (Opposite.op Y) PQ
 
+/-- `forgetAt` is natural — it is a component of the natural transformation
+`gammaFullToGammaOne`. Extracted as its own lemma so the unification happens at these simple
+types; used inside the big composite it times out `isDefEq`. -/
+theorem forgetAt_naturality (N : ℕ) [NeZero N] (hinvR : IsUnit (N : R))
+    {X X' : EllObj R} (f : X ⟶ X')
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op X')) :
+    forgetAt N hinvR X ((gammaFullNaiveProblem R N).map f.op PQ) =
+      (gammaOneNaiveProblem R N).map f.op (forgetAt N hinvR X' PQ) :=
+  -- both sides have underlying section `pullSection f PQ.1.1`, by `gammaFullToGammaOne_app_val`
+  -- (which is `rfl`) and the definition of each problem's `map`
+  Subtype.ext rfl
+
 /-- **(WP-D2c-3, step 4)** The collapse: summing the fibres of the forgetful map over all
 `Γ₁`-structures recovers the full level structures. This is where WP-D1a is consumed — the
 `Γ₁`-part is not extra data. -/
@@ -295,13 +307,19 @@ theorem yFullCandidateHomEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj 
     f ≫ (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ =
       (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
         ((gammaFullNaiveProblem R N).map f.op PQ) := by
-  -- Reduction (verified to typecheck): comparing morphisms into the `pullbackAlong` is
-  -- comparing their `(≫ pullbackAlongπ, baseHom)` pairs.
-  --   · component 1 needs  [WP-D2c-3-H1]  `yFullCandidateHomEquiv_symm_comp_pullbackAlongπ`
-  --   · component 2 needs  [WP-D2c-3-H2]  `yFullCandidateHomEquiv_symm_baseHom`
-  -- Both are computation lemmas for the `.symm` of the five-fold composite; see the ticket
-  -- board entry [WP-D2c-3-H1/H2] for their statements and sketches.
-  sorry
+  refine (EllObj.homPullbackAlongEquiv X₁ (X₁.curve.completionLocusπ N h P) X).injective ?_
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · -- first component: `≫ pullbackAlongπ`, discharged by H1 on both sides plus
+    -- `rOne.homEquiv_comp`
+    show f ≫ (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ ≫
+        X₁.pullbackAlongπ (X₁.curve.completionLocusπ N h P) =
+      (yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
+          ((gammaFullNaiveProblem R N).map f.op PQ) ≫
+        X₁.pullbackAlongπ (X₁.curve.completionLocusπ N h P)
+    rw [yFullCandidateHomEquiv_symm_comp_pullbackAlongπ,
+      yFullCandidateHomEquiv_symm_comp_pullbackAlongπ]
+    rw [forgetAt_naturality N hinvR f PQ, rOne.comp_homEquiv_symm]
+  · sorry
 
 /-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member
 is the section attached to `u.baseHom ≫ P`" says exactly "the `Γ₁`-part of `PQ` is `u`'s
