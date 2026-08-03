@@ -35520,3 +35520,25 @@ prerequisite for the field-change naturality ChatGPT flagged as the largest rema
   `exists_weilPairingHom_of_field`'s clause uses `AlgebraicClosure k`; over a **perfect**
   field (which that theorem assumes) these agree, but the transport lemma between the two
   fibre functors will be needed.
+
+### [WP-D3c-CLOSURE] the fibre functor at `AlgebraicClosure` vs `SeparableClosure` (measured)
+- **Status**: open · **File**: `WeilPairing/FieldPairingUnique.lean` · **Parent**: WP-D3c
+- **Measured**: `Faithful (CommAlgCat.FiniteEtale.fiber k (AlgebraicClosure k))` is **not**
+  synthesised. The `PreGaloisCategory.FiberFunctor` instance
+  (`ForMathlib/FiniteEtaleFiberFunctor.lean:662`) is registered at `SeparableClosure k` only,
+  and mathlib registers none of its own (`FiniteEtale.fiber` has no uses in mathlib outside
+  `RingTheory/Etale/Finite.lean`).
+- **Why it matters**: `finiteEtaleHom_unique` is therefore stated at `SeparableClosure k`,
+  while `exists_weilPairingHom_of_field`'s characterisation clause quantifies over
+  `→ₐ[k] AlgebraicClosure k`. Bridging them is needed before the uniqueness pin can be
+  applied to the pairing.
+- **Route**: for perfect `k`, `IsSepClosure.of_isAlgClosure_of_perfectField`
+  (`Mathlib/FieldTheory/IsSepClosed.lean:252`) makes `AlgebraicClosure k` a separable
+  closure; uniqueness of separable closures gives `e : SeparableClosure k ≃ₐ[k]
+  AlgebraicClosure k`; `CommAlgCat.FiniteEtale.fiberIsoBaseChangeFiber`
+  (`RingTheory/Etale/Finite.lean:134`) is the shape to transport along, giving a natural
+  isomorphism `fiber k (SeparableClosure k) ≅ fiber k (AlgebraicClosure k)` and hence the
+  `Faithful` instance.
+- **Generality**: state the transport for an arbitrary `k`-algebra equivalence of two fields,
+  not just these two — it is the same lemma the field-change naturality (WP-D3c step 2) will
+  need.

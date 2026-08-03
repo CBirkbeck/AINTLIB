@@ -46,4 +46,15 @@ theorem finiteEtaleHom_unique {k : Type u} [Field k]
     (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ ⥤ FintypeCat.{u}).map_injective hmap
   exact Opposite.op_injective this
 
+/- The same statement read at `AlgebraicClosure k` — which is the geometric point
+`exists_weilPairingHom_of_field`'s characterisation clause actually quantifies over — does
+**not** follow by the same three lines: the `PreGaloisCategory.FiberFunctor` instance in
+`ForMathlib/FiniteEtaleFiberFunctor.lean:662` is registered at `SeparableClosure k` only, so
+`Faithful (CommAlgCat.FiniteEtale.fiber k (AlgebraicClosure k))` is not synthesised
+(measured). Over a perfect field the two closures agree —
+`IsSepClosure.of_isAlgClosure_of_perfectField` (`FieldTheory/IsSepClosed.lean:252`) plus
+uniqueness of separable closures gives `SeparableClosure k ≃ₐ[k] AlgebraicClosure k` — so the
+missing step is a natural isomorphism of the two fibre functors along that equivalence. See
+the board's [WP-D3c-CLOSURE]. -/
+
 end ModularCurves
