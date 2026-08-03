@@ -12037,3 +12037,35 @@ Reverted; the file is green at HEAD.
 That is the same conclusion the earlier taxonomy reached from the other direction: the
 residue is uniform in *kind* (proof-local bindings in step statements) but each instance
 needs its own reading.
+
+### Hand-lifting works where scripted lifting failed
+
+`presheafValue_mvRestricted_fU_uniformContinuous` **169 → 132** via two lifts the generic
+script could not do:
+
+| lemma | was | lines |
+|---|---|---|
+| `presheafValue_mvRestricted_iU_coeff` | `hiU_coeff` | 25 |
+| `presheafValue_mvRestricted_psiGamma_genX` | `hψγval` | 16 |
+
+**Why the script failed and reading succeeded.** The script copied the parent's *entire*
+34-line binder block and machine-built the call from it. But `hiU_coeff` needs **five**
+things — `D`, `m`, `iU`, `hiU_C`, `hiU_X` — and `hψγval` needs six plus `i`. Reading each
+step tells you exactly which hypotheses it consumes; the binder block is an upper bound, not
+the answer. Copying it wholesale is what produced the malformed argument lists.
+
+> The verbatim-binder technique is right when the piece genuinely uses the parent's context
+> (RobbaPresentation, Groebner). When a step uses a *handful* of the parent's hypotheses, the
+> minimal signature is both correct and better documentation — `iU_coeff` now says exactly
+> what determines it: the values of `iU` on constants and variables.
+
+Also of note: `hψγval` needs `i`, which is itself a proof-local (`set i := D.T.equivFin ⟨t,
+ht⟩`). That is fine — a proof-local of *ground* type becomes a parameter. The blocker is only
+when the local appears in the statement as an opaque *definition* (`τQ`, `ι`, `S₀`), because
+then the statement cannot be written without it.
+
+**The `intro` fault recurred once** (`intro p v` left behind after `p`/`v` became binders) and
+was avoided on the second lift by checking first. Turning a `∀`-bound variable into a binder
+always means deleting the matching `intro`.
+
+Scoreboard: **486 → 43** (Wedhorn828 now 187 / 132 / 133 / 115 / 72).

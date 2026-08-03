@@ -2288,6 +2288,81 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
 end MvRestrictedTate
 
 omit [CompatiblePlusSubring A] in
+/-- Coefficients of `iU p` are the `coeRingHom`-images of `p`'s coefficients: `iU` is the
+polynomial map `MvPolynomial.map D.coeRingHom` followed by the coercion into power series,
+which is determined by its values on constants and variables. -/
+private lemma presheafValue_mvRestricted_iU_coeff
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (iU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (hiU_C : ∀ c : Localization.Away D.s, iU (MvPolynomial.C c) =
+      (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
+        D.coeRingHom c)
+    (hiU_X : ∀ j, iU (MvPolynomial.X j) =
+      (⟨MvPowerSeries.X j, MvPowerSeries.X_isRestricted j⟩ :
+        restrictedMvPowerSeriesSubring m (presheafValue D)))
+    (p : MvPolynomial (Fin m) (Localization.Away D.s)) (v : Fin m →₀ ℕ) :
+    MvPowerSeries.coeff v (iU p).val = D.coeRingHom (MvPolynomial.coeff v p) := by
+  -- `(iU p).val = ↑(MvPolynomial.map coeRingHom p)` (coe to power series), coeff-wise.
+  have hiU_val : ∀ p : MvPolynomial (Fin m) (Localization.Away D.s),
+      (iU p).val = (↑(MvPolynomial.map D.coeRingHom p) :
+        MvPowerSeries (Fin m) (presheafValue D)) := by
+    have hiU_eq : (restrictedMvPowerSeriesSubring m (presheafValue D)).subtype.comp iU =
+        (MvPolynomial.coeToMvPowerSeries.ringHom).comp (MvPolynomial.map D.coeRingHom) := by
+      refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun j ↦ ?_)
+      · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_C c]
+        change (algebraMap (presheafValue D) (MvPowerSeries (Fin m) (presheafValue D)))
+          (D.coeRingHom c) = _
+        rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_C,
+          MvPolynomial.coe_C, MvPowerSeries.algebraMap_apply, Algebra.algebraMap_self_apply]
+      · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_X j]
+        change (MvPowerSeries.X j : MvPowerSeries (Fin m) (presheafValue D)) = _
+        rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_X,
+          MvPolynomial.coe_X]
+    intro p
+    have hp := RingHom.congr_fun hiU_eq p
+    simpa only [RingHom.comp_apply, MvPolynomial.coeToMvPowerSeries.ringHom_apply,
+      Subring.coe_subtype] using hp
+  rw [hiU_val p, MvPolynomial.coeff_coe, MvPolynomial.coeff_map]
+-- (iii) each `fU (X j) = mk (Z_{n+j})` is power-bounded in `γ`, so the product-power range is.
+
+
+omit [CompatiblePlusSubring A] in
+/-- `ψγ` sends the generator ratio `tᵢ/s` to `mk (X (castAdd m i))`: both sides agree after
+the injective `RingHom.kerLift Ψ`, by `hψ_round'` on the left and `hΨ_genX` on the right. -/
+private lemma presheafValue_mvRestricted_psiGamma_genX
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (ψγ : Localization.Away D.s →+*
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
+    (hΨ_genX : ∀ i : Fin D.T.card, Ψ (⟨MvPowerSeries.X (Fin.castAdd m i),
+        MvPowerSeries.X_isRestricted _⟩ : restrictedMvPowerSeriesSubring (D.T.card + m) A) =
+      algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))
+        (example638_genTuple D i))
+    (hψ_round' : (RingHom.kerLift Ψ).comp ψγ =
+      (algebraMap (presheafValue D) (restrictedMvPowerSeriesSubring m (presheafValue D))).comp
+        D.coeRingHom)
+    (i : Fin D.T.card) :
+    ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s) =
+      Ideal.Quotient.mk (RingHom.ker Ψ)
+        (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A) := by
+  apply RingHom.kerLift_injective Ψ
+  rw [show RingHom.kerLift Ψ (ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s)) =
+      ((algebraMap (presheafValue D)
+          (restrictedMvPowerSeriesSubring m (presheafValue D))).comp D.coeRingHom)
+        (divByS (↑(D.T.equivFin.symm i) : A) D.s) from
+    RingHom.congr_fun hψ_round' (divByS (↑(D.T.equivFin.symm i) : A) D.s)]
+  rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ)
+      (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+        restrictedMvPowerSeriesSubring (D.T.card + m) A)) =
+      Ψ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
+        restrictedMvPowerSeriesSubring (D.T.card + m) A) from RingHom.kerLift_mk Ψ _]
+  rw [hΨ_genX i, RingHom.comp_apply, example638_genTuple]
+
+
+omit [CompatiblePlusSubring A] in
 /-- **Uniform continuity of `fU : U → γ`** (helper for `presheafValue_mvRestricted_surjection`),
 where `U = (Localization.Away D.s)[Y]` carries the pullback uniformity along `iU` and
 `γ = source ⧸ ker Ψ`. Reduces (additive-group hom) to continuity at `0`; the localization lift `ψγ`
@@ -2372,22 +2447,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
       intro t ht
       set i := D.T.equivFin ⟨t, ht⟩ with hi
       -- `ψγ(divByS t s) = mk(X (castAdd i))`, from injectivity of `ē = kerLift Ψ`.
-      have hψγval : ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s) =
-          Ideal.Quotient.mk (RingHom.ker Ψ)
-            (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-              restrictedMvPowerSeriesSubring (D.T.card + m) A) := by
-        apply RingHom.kerLift_injective Ψ
-        rw [show RingHom.kerLift Ψ (ψγ (divByS (↑(D.T.equivFin.symm i) : A) D.s)) =
-            ((algebraMap (presheafValue D)
-                (restrictedMvPowerSeriesSubring m (presheafValue D))).comp D.coeRingHom)
-              (divByS (↑(D.T.equivFin.symm i) : A) D.s) from
-          RingHom.congr_fun hψ_round' (divByS (↑(D.T.equivFin.symm i) : A) D.s)]
-        rw [show RingHom.kerLift Ψ (Ideal.Quotient.mk (RingHom.ker Ψ)
-            (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-              restrictedMvPowerSeriesSubring (D.T.card + m) A)) =
-            Ψ (⟨MvPowerSeries.X (Fin.castAdd m i), MvPowerSeries.X_isRestricted _⟩ :
-              restrictedMvPowerSeriesSubring (D.T.card + m) A) from RingHom.kerLift_mk Ψ _]
-        rw [hΨ_genX i, RingHom.comp_apply, example638_genTuple]
+      have hψγval := presheafValue_mvRestricted_psiGamma_genX D m Ψ ψγ hΨ_genX hψ_round' i
       have htval : t = (↑(D.T.equivFin.symm i) : A) := by rw [hi, Equiv.symm_apply_apply]
       rw [htval, hψγval]
       -- `X (castAdd i)` ∈ pair-subring of source ⟹ power-bounded ⟹ `mk` power-bounded.
@@ -2410,31 +2470,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
         (Ideal.Quotient.mk (RingHom.ker Ψ)) continuous_quotient_mk'
         (@QuotientRing.isOpenMap_coe _ τS _ (RingHom.ker Ψ) hringS) _ hXi_pb
   -- (ii) `iU p`'s coefficient at `v` is `coeRingHom (coeff_v p)` (`iU = coe ∘ map coeRingHom`).
-  have hiU_coeff : ∀ (p : MvPolynomial (Fin m) (Localization.Away D.s)) (v : Fin m →₀ ℕ),
-      MvPowerSeries.coeff v (iU p).val = D.coeRingHom (MvPolynomial.coeff v p) := by
-    -- `(iU p).val = ↑(MvPolynomial.map coeRingHom p)` (coe to power series), coeff-wise.
-    have hiU_val : ∀ p : MvPolynomial (Fin m) (Localization.Away D.s),
-        (iU p).val = (↑(MvPolynomial.map D.coeRingHom p) :
-          MvPowerSeries (Fin m) (presheafValue D)) := by
-      have hiU_eq : (restrictedMvPowerSeriesSubring m (presheafValue D)).subtype.comp iU =
-          (MvPolynomial.coeToMvPowerSeries.ringHom).comp (MvPolynomial.map D.coeRingHom) := by
-        refine MvPolynomial.ringHom_ext (fun c ↦ ?_) (fun j ↦ ?_)
-        · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_C c]
-          change (algebraMap (presheafValue D) (MvPowerSeries (Fin m) (presheafValue D)))
-            (D.coeRingHom c) = _
-          rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_C,
-            MvPolynomial.coe_C, MvPowerSeries.algebraMap_apply, Algebra.algebraMap_self_apply]
-        · rw [RingHom.comp_apply, RingHom.comp_apply, hiU_X j]
-          change (MvPowerSeries.X j : MvPowerSeries (Fin m) (presheafValue D)) = _
-          rw [MvPolynomial.coeToMvPowerSeries.ringHom_apply, MvPolynomial.map_X,
-            MvPolynomial.coe_X]
-      intro p
-      have hp := RingHom.congr_fun hiU_eq p
-      simpa only [RingHom.comp_apply, MvPolynomial.coeToMvPowerSeries.ringHom_apply,
-        Subring.coe_subtype] using hp
-    intro p v
-    rw [hiU_val p, MvPolynomial.coeff_coe, MvPolynomial.coeff_map]
-  -- (iii) each `fU (X j) = mk (Z_{n+j})` is power-bounded in `γ`, so the product-power range is.
+  have hiU_coeff := presheafValue_mvRestricted_iU_coeff D m iU hiU_C hiU_X
   have hfUX_pb : ∀ j : Fin m, @TopologicalRing.IsPowerBounded _ _ τQ (fU (MvPolynomial.X j)) := by
     intro j
     rw [hfU_X j]
