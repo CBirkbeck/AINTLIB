@@ -11422,3 +11422,71 @@ uses is. Here `every_rational_cover_is_OXAcyclic` and `lemma_8_34_gluing` are
 `[propext, Classical.choice, Quot.sound]`, and the module emits **zero**
 `declaration uses 'sorry'` warnings. (The 7 grep hits for "sorry" in the file are all prose
 inside docstrings.) This supersedes the scratch-file recipe for private decls.
+
+### Batch: `unitCover_sq_minus_dense` 226 → off the list
+
+Seven lemmas, parent body **2 lines**, in two stages.
+
+**Stage A** lifted four facts out of the 111-line X-bullet, all depending on nothing but
+`D₀` and `f`:
+
+| lemma | was | lines |
+|---|---|---|
+| `unitCover_annulus_canonicalMap_isUnit` | `hu_f` | 11 |
+| `unitCover_minus_restriction_backward_invS_one` | `hL` | 36 |
+| `unitCover_annulus_canonicalMap_eq_backward` | `hf_resO` | 10 |
+| `unitCover_overlapDatum_canonicalMap_mul_divByS_one` | `heq_s`+`haM_s`+the `= 1` block | 27 |
+
+226 → 118 on stage A alone.
+
+**Stage B** split the two `ringHom_ext` bullets and lifted `hfun`, exactly as for the plus
+twin — except `hb` (power-boundedness of `invS`) is used by **both** bullets, so it is a
+*hypothesis* on each bullet lemma and is derived once in the wrapper from `h1T`. Green
+first try.
+
+**The fault worth recording: removing a `have` is two edits, not one.** Stage A deleted the
+`have hu_f`/`hf_resO`/`hL` blocks but left their use sites (`refine hu_f.mul_left_cancel`,
+`rw [hf_resO, ← map_mul]`, `rw [hL]`), giving three rounds of `Unknown identifier`. Two
+distinct causes:
+
+- for `hu_f` and `hf_resO` I replaced the block with `""` and forgot the reference;
+- for `hL` the slice **ended before** `rw [hL]`, so my replacement was *inserted alongside*
+  the old line rather than replacing it — the build then had both.
+
+> When lifting a `have`, the slice must either cover its use site or the replacement must
+> repoint it. Grep the name after the edit and before the build: `hu_f`, `hL`, `hf_resO`
+> would each have shown a surviving occurrence in one second.
+
+Over-width 165 → 163 (both `unitCover` batches improved it). Scoreboard: **486 → 45.**
+
+### Survey of the remaining 45 — the residue really is uniform now
+
+Earlier I wrote "the residue is uniform" from axis 1 alone and then withdrew it when axis 2
+found two `anon = 0` targets and a triplicated fact. Having now surveyed the top of the
+list properly, the withdrawal was right but the conclusion returns in a sharper form: **the
+cheap tier is genuinely gone, and every remaining target needs multiple rounds.**
+
+Three surveyed in detail:
+
+**`wedhorn_lemma_834_propA3_part1_gluing`** (349 code / 454 raw, WedhornCechAcyclicity:7404)
+— three levels. `h_gVj_compat` (48, fits as-is), `h_yV_compat` (140), then a ~167-line
+separation argument. Each of the last two needs its own internal split before the parent
+moves.
+
+**`idealOfDef_pow_isClosed_aux`** (187, PresheafTateStructure:424) — best axis-2 shape of
+any remaining target (cov 208, `anon` 1), but **74 of its 213 lines are instance preamble**
+serving *all three* of its big `have`s. So the Example638 trick does not apply: no single
+piece takes the wall with it. Even extracting `hge` (19), `hle` (89) and `hπ_cont` (17)
+leaves the parent at ~84. This one needs the same `section` + `local instance` treatment as
+`flat_polyToP` — the preamble has to stop being inside the proof at all.
+
+**`tateAlgebra_flat`** (254, TateAlgebra:2045) — no `letI` wall, and its body is two
+enormous named `have`s (`hAR_ctrl`, `hdecomp_or_ctrl`) plus a 48-line setup chain. Ideal
+axis-2 shape; the pieces are simply large, so each needs a second-level split.
+
+**Consequence for sequencing.** Both `unitCover` targets took two stages each and that is
+now the expected shape, not the exception. `flat_polyToP` and `idealOfDef_pow_isClosed_aux`
+form a natural pair — both are blocked on the same thing (instance preamble that belongs in
+a section, not in a proof), and doing the section refactor once teaches how to do the other.
+That is the highest-value remaining move, and it is no longer gated on an unreliable build:
+the LSP kill took the gate from "dies at 99% after 10+ minutes" to finishing normally.

@@ -6090,6 +6090,134 @@ private theorem unitCover_sq_plus_funext
       (unitCover_sq_plus_comp_X D₀ f)) q
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- On the annulus `U₁∩U₂`, `canonicalMap f` is a unit: the denominator factors as
+`(D₀.s * 1) * (D₀.s * f)`, and a factor of a unit is a unit. -/
+private theorem unitCover_annulus_canonicalMap_isUnit
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    IsUnit ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f) := by
+  have hu : IsUnit ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap
+      ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s)) :=
+    isUnit_s_in_presheafValue _
+  rw [show ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s : A) =
+    (D₀.s * 1) * (D₀.s * f) from rfl, map_mul, map_mul, map_mul] at hu
+  exact isUnit_of_mul_isUnit_right (isUnit_of_mul_isUnit_right hu)
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- LHS of the minus `X`-case: restricting `backward (invS)` into the annulus and
+multiplying by `canonicalMap f` gives `1`. -/
+private theorem unitCover_minus_restriction_backward_invS_one
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f *
+            restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+              ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+                (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
+              (RationalLocData.interSamePair_subset_right _ _ _)
+            (unitCover_relMinus_backward D₀ f
+              (invS (coUnitDatum (presheafValue_concretePair D₀)
+                (D₀.canonicalMap f)))) = 1 := by
+  have hf_res : (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f =
+    restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+      ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+        (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
+      (RationalLocData.interSamePair_subset_right _ _ _)
+    (unitCover_relMinus_backward D₀ f
+      ((coUnitDatum (presheafValue_concretePair D₀)
+        (D₀.canonicalMap f)).canonicalMap (D₀.canonicalMap f))) := by
+    rw [show (coUnitDatum (presheafValue_concretePair D₀)
+        (D₀.canonicalMap f)).canonicalMap (D₀.canonicalMap f) =
+      (coUnitDatum (presheafValue_concretePair D₀)
+        (D₀.canonicalMap f)).coeRingHom (algebraMap (presheafValue D₀)
+          (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
+            (D₀.canonicalMap f)).s)) (D₀.canonicalMap f)) from rfl]
+    rw [unitCover_relMinus_backward_coe,
+      unitCover_relMinus_backwardLocHom_algebraMap,
+      restrictionMapHom_canonicalMap, restrictionMapHom_canonicalMap]
+  rw [hf_res, ← map_mul, ← map_mul]
+  rw [show (coUnitDatum (presheafValue_concretePair D₀)
+      (D₀.canonicalMap f)).canonicalMap (D₀.canonicalMap f) *
+    invS (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)) =
+    1 by
+    rw [show (D₀.canonicalMap f) = ((coUnitDatum (presheafValue_concretePair D₀)
+      (D₀.canonicalMap f)).s : presheafValue D₀) from rfl]
+    exact canonicalMap_s_mul_invS _]
+  rw [map_one, map_one]
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- `canonicalMap f` on the annulus is the overlap-backward image of `canonicalMap f`
+in the overlap datum. -/
+private theorem unitCover_annulus_canonicalMap_eq_backward
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f =
+          unitCover_relOverlap_backward D₀ f
+            ((unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f)) := by
+  rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) =
+    (unitCover_overlapDatum_B D₀ f).coeRingHom (algebraMap (presheafValue D₀)
+      (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
+      (D₀.canonicalMap f)) from rfl]
+  rw [unitCover_relOverlap_backward_coe,
+    unitCover_relOverlap_backwardLocHom_algebraMap, restrictionMapHom_canonicalMap]
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- In the overlap datum, `canonicalMap f * coeRingHom (1/s) = 1`: the denominator is
+`1 * f`, so this is the unit cancellation `algebraMap s * (1/s) = 1`. -/
+private theorem unitCover_overlapDatum_canonicalMap_mul_divByS_one
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) *
+            (unitCover_overlapDatum_B D₀ f).coeRingHom
+              (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) =
+          (1 : presheafValue (unitCover_overlapDatum_B D₀ f)) := by
+  have heq_s : ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
+      D₀.canonicalMap f := by
+    rw [show ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
+      (1 : presheafValue D₀) * D₀.canonicalMap f from rfl, one_mul]
+  have haM_s : algebraMap (presheafValue D₀)
+      (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
+        ((unitCover_overlapDatum_B D₀ f).s) =
+      algebraMap (presheafValue D₀)
+        (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
+        (D₀.canonicalMap f) := congrArg _ heq_s
+  have h8 := algebraMap_s_mul_divByS (unitCover_overlapDatum_B D₀ f)
+    (1 : presheafValue D₀)
+  rw [haM_s] at h8
+  rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) *
+      (unitCover_overlapDatum_B D₀ f).coeRingHom
+        (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) =
+    (unitCover_overlapDatum_B D₀ f).coeRingHom
+      (algebraMap (presheafValue D₀)
+        (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
+        (D₀.canonicalMap f) *
+      divByS (1 : presheafValue D₀)
+        ((unitCover_overlapDatum_B D₀ f).s)) by rw [map_mul]; rfl]
+  rw [h8, map_one, map_one]
+
+set_option linter.unusedSectionVars false in
 -- v4.33: the `hcomp` goal mixes `unitCover_plusDatum_B`-typed and `unitDatum …`-typed
 -- constants (defeq only after unfolding semireducible defs), so `kabstract`'s
 -- reducible-transparency re-check rejects every `rw`/`erw` on it; restore the
@@ -6171,6 +6299,179 @@ private theorem unitCover_posLift_bridgePlus
   rfl
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- `C`-case of the minus square: on constants both composites are restriction
+functoriality for `U₂ ⊇ U₁∩U₂`. -/
+private theorem unitCover_sq_minus_comp_C
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A)
+    (hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f))) (c : presheafValue D₀) :
+    (((restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+        ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+          (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
+        (RationalLocData.interSamePair_subset_right _ _ _)).comp
+        ((unitCover_relMinus_backward D₀ f).comp
+          ((RingEquiv.toRingHom (unitCover_example639Minus D₀ f).symm).comp
+            (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
+            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}))))).comp
+          (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1))
+        (MvPolynomial.C c) =
+      (        ((unitCover_relOverlap_backward D₀ f).comp
+          ((unitCover_overlapEval D₀ f).comp
+            (LaurentTateAlgebra.negIncl :
+              ↥(TateAlgebra (presheafValue D₀)) →+*
+                ↥(TateAlgebra₂ (presheafValue D₀))))).comp
+          (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1))
+        (MvPolynomial.C c) := by
+  simp only [RingHom.comp_apply]
+  rw [MvTateAlgebra.mvPolynomialToTate_C (A := presheafValue D₀) 1 c]
+  erw [tateQuotientToPresheafHom_algebraMap (unitCover_minusDatum_B D₀ f) hb]
+  rw [show (unitCover_minusDatum_B D₀ f).canonicalMap c =
+    (coUnitDatum (presheafValue_concretePair D₀)
+      (D₀.canonicalMap f)).coeRingHom (algebraMap (presheafValue D₀)
+        (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
+          (D₀.canonicalMap f)).s)) c) from rfl]
+  rw [unitCover_relMinus_backward_coe, unitCover_relMinus_backwardLocHom_algebraMap]
+  rw [show LaurentTateAlgebra.negIncl (algebraMap (presheafValue D₀)
+      ↥(TateAlgebra (presheafValue D₀)) c) =
+    algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c
+    from LaurentTateAlgebra.negIncl_algebraMap c]
+  erw [mvEvalHomBounded_algebraMap]
+  rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap c =
+    (unitCover_overlapDatum_B D₀ f).coeRingHom (algebraMap (presheafValue D₀)
+      (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) c) from rfl]
+  rw [unitCover_relOverlap_backward_coe,
+    unitCover_relOverlap_backwardLocHom_algebraMap]
+  exact congrFun (restrictionMap_comp D₀
+    (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+    ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+      (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
+    (RationalLocData.interSamePair_subset_left _ _ _)
+    (RationalLocData.interSamePair_subset_right _ _ _)) c
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- `X`-case of the minus square: both composites send the variable to the inverse of
+`canonicalMap f` on the annulus. -/
+private theorem unitCover_sq_minus_comp_X
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A)
+    (hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f))) (i : Fin 1) :
+    (((restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+        ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+          (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
+        (RationalLocData.interSamePair_subset_right _ _ _)).comp
+        ((unitCover_relMinus_backward D₀ f).comp
+          ((RingEquiv.toRingHom (unitCover_example639Minus D₀ f).symm).comp
+            (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
+            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}))))).comp
+          (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1))
+        (MvPolynomial.X i) =
+      (        ((unitCover_relOverlap_backward D₀ f).comp
+          ((unitCover_overlapEval D₀ f).comp
+            (LaurentTateAlgebra.negIncl :
+              ↥(TateAlgebra (presheafValue D₀)) →+*
+                ↥(TateAlgebra₂ (presheafValue D₀))))).comp
+          (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1))
+        (MvPolynomial.X i) := by
+  simp only [RingHom.comp_apply]
+  have hi : i = 0 := Subsingleton.elim i 0
+  subst hi
+  rw [MvTateAlgebra.mvPolynomialToTate_X (A := presheafValue D₀) 1 0]
+  rw [show (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+      ↥(TateAlgebra (presheafValue D₀))) =
+    TateAlgebra.X (A := presheafValue D₀) from rfl]
+  erw [tateQuotientToPresheafHom_X (coUnitDatum (presheafValue_concretePair D₀)
+    (D₀.canonicalMap f)) hb]
+  -- both sides are the inverse of `canMap_{U₁∩U₂} f`: cancel it
+  refine (unitCover_annulus_canonicalMap_isUnit D₀ f).mul_left_cancel ?_
+  -- LHS·: restriction(backward(invS · canMap_B b)) = restriction(backward 1) = 1
+  rw [unitCover_minus_restriction_backward_invS_one D₀ f]
+  -- RHS·: backward(canMap_O b · overlapEval(negIncl X)) = backward(canMap_O b · coe(1/s_O)) = 1
+  rw [show LaurentTateAlgebra.negIncl (TateAlgebra.X (A := presheafValue D₀)) =
+    (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
+      ↥(TateAlgebra₂ (presheafValue D₀)))
+    from LaurentTateAlgebra.negIncl_X]
+  rw [show (unitCover_overlapEval D₀ f)
+      (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
+        ↥(TateAlgebra₂ (presheafValue D₀))) =
+    (unitCover_overlapDatum_B D₀ f).coeRingHom
+      (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) by
+    refine Eq.trans (mvEvalHomBounded_X _ _ _ _ (1 : Fin 2)) ?_
+    rfl]
+  rw [unitCover_annulus_canonicalMap_eq_backward D₀ f, ← map_mul]
+  rw [unitCover_overlapDatum_canonicalMap_mul_divByS_one D₀ f]
+  rw [map_one]
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The two backward-composites agree as functions on `B⟨X⟩` (minus column). -/
+private theorem unitCover_sq_minus_funext
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A) :
+    (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
+      restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
+        ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
+          (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
+        (RationalLocData.interSamePair_subset_right _ _ _)
+      (unitCover_relMinus_backward D₀ f
+        ((unitCover_example639Minus D₀ f).symm
+          (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
+            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) z)))) =
+    (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
+      unitCover_relOverlap_backward D₀ f
+        (unitCover_overlapEval D₀ f (LaurentTateAlgebra.negIncl z))) := by
+  classical
+  haveI hCompleteB :
+      (letI : UniformSpace (presheafValue D₀) :=
+        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
+       CompleteSpace (presheafValue D₀)) :=
+    presheafValue_completeSpace_rightUniformSpace D₀
+  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
+  letI : UniformSpace (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
+      (D₀.canonicalMap f)).s)) :=
+    (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)).uniformSpace
+  letI : IsTopologicalRing (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
+      (D₀.canonicalMap f)).s)) :=
+    (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
+      (D₀.canonicalMap f)).s)) :=
+    (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)).isUniformAddGroup
+  letI : UniformSpace (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
+    (unitCover_overlapDatum_B D₀ f).uniformSpace
+  letI : IsTopologicalRing (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
+    (unitCover_overlapDatum_B D₀ f).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
+    (unitCover_overlapDatum_B D₀ f).isUniformAddGroup
+  refine Continuous.ext_on
+    (MvTateAlgebra.mvPolynomialToTate_denseRange (A := presheafValue D₀) 1) ?_ ?_ ?_
+  · refine (restrictionMapHom_continuous _ _ _).comp ?_
+    refine Continuous.comp ?_ ?_
+    · exact UniformSpace.Completion.continuous_extension
+    · exact (unitCover_example639Minus_symm_continuous D₀ f).comp continuous_quot_mk
+  · refine Continuous.comp ?_ ?_
+    · exact UniformSpace.Completion.continuous_extension
+    · exact (mvEvalHomBounded_continuous _ _ _ _).comp
+        (LaurentCover.negIncl_continuous (A := presheafValue D₀))
+  rintro _ ⟨q, rfl⟩
+  have h1T : (1 : presheafValue D₀) ∈ (unitCover_minusDatum_B D₀ f).T :=
+    Finset.mem_singleton_self 1
+  have hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)) :=
+    isPowerBounded_invS_of_one_mem_T _ h1T
+  exact RingHom.congr_fun
+    (MvPolynomial.ringHom_ext (unitCover_sq_minus_comp_C D₀ f hb)
+      (unitCover_sq_minus_comp_X D₀ f hb)) q
+
+set_option linter.unusedSectionVars false in
 -- v4.33: same mixed-vocabulary goal as `unitCover_sq_plus_dense` (see note there);
 -- restore pre-v4.33 defeq behaviour for this declaration.
 set_option backward.isDefEq.respectTransparency false in
@@ -6199,210 +6500,8 @@ private theorem unitCover_sq_minus_dense
             ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) z))) =
     unitCover_relOverlap_backward D₀ f
       (unitCover_overlapEval D₀ f (LaurentTateAlgebra.negIncl z)) := by
-  classical
-  haveI hCompleteB :
-      (letI : UniformSpace (presheafValue D₀) :=
-        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
-       CompleteSpace (presheafValue D₀)) :=
-    presheafValue_completeSpace_rightUniformSpace D₀
-  letI : DecidableEq (RationalLocData (presheafValue D₀)) := Classical.decEq _
-  letI : UniformSpace (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
-      (D₀.canonicalMap f)).s)) :=
-    (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
-      (D₀.canonicalMap f)).s)) :=
-    (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
-      (D₀.canonicalMap f)).s)) :=
-    (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)).isUniformAddGroup
-  letI : UniformSpace (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
-    (unitCover_overlapDatum_B D₀ f).uniformSpace
-  letI : IsTopologicalRing (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
-    (unitCover_overlapDatum_B D₀ f).isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) :=
-    (unitCover_overlapDatum_B D₀ f).isUniformAddGroup
-  have hfun : (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
-      restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
-        ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-          (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
-        (RationalLocData.interSamePair_subset_right _ _ _)
-      (unitCover_relMinus_backward D₀ f
-        ((unitCover_example639Minus D₀ f).symm
-          (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
-            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}) z)))) =
-    (fun z : ↥(TateAlgebra (presheafValue D₀)) =>
-      unitCover_relOverlap_backward D₀ f
-        (unitCover_overlapEval D₀ f (LaurentTateAlgebra.negIncl z))) := by
-    refine Continuous.ext_on
-      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := presheafValue D₀) 1) ?_ ?_ ?_
-    · refine (restrictionMapHom_continuous _ _ _).comp ?_
-      refine Continuous.comp ?_ ?_
-      · exact UniformSpace.Completion.continuous_extension
-      · exact (unitCover_example639Minus_symm_continuous D₀ f).comp continuous_quot_mk
-    · refine Continuous.comp ?_ ?_
-      · exact UniformSpace.Completion.continuous_extension
-      · exact (mvEvalHomBounded_continuous _ _ _ _).comp
-          (LaurentCover.negIncl_continuous (A := presheafValue D₀))
-    rintro _ ⟨q, rfl⟩
-    have h1T : (1 : presheafValue D₀) ∈ (unitCover_minusDatum_B D₀ f).T :=
-      Finset.mem_singleton_self 1
-    have hb : TopologicalRing.IsPowerBounded (invS (unitCover_minusDatum_B D₀ f)) :=
-      isPowerBounded_invS_of_one_mem_T _ h1T
-    have hcomp : ((restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
-        ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-          (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
-        (RationalLocData.interSamePair_subset_right _ _ _)).comp
-        ((unitCover_relMinus_backward D₀ f).comp
-          ((RingEquiv.toRingHom (unitCover_example639Minus D₀ f).symm).comp
-            (Ideal.Quotient.mk (Ideal.span {1 - algebraMap (presheafValue D₀)
-            ↥(TateAlgebra (presheafValue D₀)) (D₀.canonicalMap f) * TateAlgebra.X}))))).comp
-          (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1) =
-        ((unitCover_relOverlap_backward D₀ f).comp
-          ((unitCover_overlapEval D₀ f).comp
-            (LaurentTateAlgebra.negIncl :
-              ↥(TateAlgebra (presheafValue D₀)) →+*
-                ↥(TateAlgebra₂ (presheafValue D₀))))).comp
-          (MvTateAlgebra.mvPolynomialToTate (A := presheafValue D₀) 1) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun i => ?_)
-      · simp only [RingHom.comp_apply]
-        rw [MvTateAlgebra.mvPolynomialToTate_C (A := presheafValue D₀) 1 c]
-        erw [tateQuotientToPresheafHom_algebraMap (unitCover_minusDatum_B D₀ f) hb]
-        rw [show (unitCover_minusDatum_B D₀ f).canonicalMap c =
-          (coUnitDatum (presheafValue_concretePair D₀)
-            (D₀.canonicalMap f)).coeRingHom (algebraMap (presheafValue D₀)
-              (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
-                (D₀.canonicalMap f)).s)) c) from rfl]
-        rw [unitCover_relMinus_backward_coe, unitCover_relMinus_backwardLocHom_algebraMap]
-        rw [show LaurentTateAlgebra.negIncl (algebraMap (presheafValue D₀)
-            ↥(TateAlgebra (presheafValue D₀)) c) =
-          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c
-          from LaurentTateAlgebra.negIncl_algebraMap c]
-        erw [mvEvalHomBounded_algebraMap]
-        rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap c =
-          (unitCover_overlapDatum_B D₀ f).coeRingHom (algebraMap (presheafValue D₀)
-            (Localization.Away ((unitCover_overlapDatum_B D₀ f).s)) c) from rfl]
-        rw [unitCover_relOverlap_backward_coe,
-          unitCover_relOverlap_backwardLocHom_algebraMap]
-        exact congrFun (restrictionMap_comp D₀
-          (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
-          ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
-          (RationalLocData.interSamePair_subset_left _ _ _)
-          (RationalLocData.interSamePair_subset_right _ _ _)) c
-      · simp only [RingHom.comp_apply]
-        have hi : i = 0 := Subsingleton.elim i 0
-        subst hi
-        rw [MvTateAlgebra.mvPolynomialToTate_X (A := presheafValue D₀) 1 0]
-        rw [show (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
-            ↥(TateAlgebra (presheafValue D₀))) =
-          TateAlgebra.X (A := presheafValue D₀) from rfl]
-        erw [tateQuotientToPresheafHom_X (coUnitDatum (presheafValue_concretePair D₀)
-          (D₀.canonicalMap f)) hb]
-        -- both sides are the inverse of `canMap_{U₁∩U₂} f`: cancel it
-        have hu_f : IsUnit ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f) := by
-          have hu : IsUnit ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-              (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap
-              ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-                (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s)) :=
-            isUnit_s_in_presheafValue _
-          rw [show ((((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-              (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).s : A) =
-            (D₀.s * 1) * (D₀.s * f) from rfl, map_mul, map_mul, map_mul] at hu
-          exact isUnit_of_mul_isUnit_right (isUnit_of_mul_isUnit_right hu)
-        refine hu_f.mul_left_cancel ?_
-        -- LHS·: restriction(backward(invS · canMap_B b)) = restriction(backward 1) = 1
-        have hL : (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f *
-            restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
-              ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-                (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
-              (RationalLocData.interSamePair_subset_right _ _ _)
-            (unitCover_relMinus_backward D₀ f
-              (invS (coUnitDatum (presheafValue_concretePair D₀)
-                (D₀.canonicalMap f)))) = 1 := by
-          have hf_res : (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-              (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f =
-            restrictionMapHom (D₀.interSamePair (coUnitDatum D₀.P f) rfl)
-              ((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-                (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))
-              (RationalLocData.interSamePair_subset_right _ _ _)
-            (unitCover_relMinus_backward D₀ f
-              ((coUnitDatum (presheafValue_concretePair D₀)
-                (D₀.canonicalMap f)).canonicalMap (D₀.canonicalMap f))) := by
-            rw [show (coUnitDatum (presheafValue_concretePair D₀)
-                (D₀.canonicalMap f)).canonicalMap (D₀.canonicalMap f) =
-              (coUnitDatum (presheafValue_concretePair D₀)
-                (D₀.canonicalMap f)).coeRingHom (algebraMap (presheafValue D₀)
-                  (Localization.Away ((coUnitDatum (presheafValue_concretePair D₀)
-                    (D₀.canonicalMap f)).s)) (D₀.canonicalMap f)) from rfl]
-            rw [unitCover_relMinus_backward_coe,
-              unitCover_relMinus_backwardLocHom_algebraMap,
-              restrictionMapHom_canonicalMap, restrictionMapHom_canonicalMap]
-          rw [hf_res, ← map_mul, ← map_mul]
-          rw [show (coUnitDatum (presheafValue_concretePair D₀)
-              (D₀.canonicalMap f)).canonicalMap (D₀.canonicalMap f) *
-            invS (coUnitDatum (presheafValue_concretePair D₀) (D₀.canonicalMap f)) =
-            1 by
-            rw [show (D₀.canonicalMap f) = ((coUnitDatum (presheafValue_concretePair D₀)
-              (D₀.canonicalMap f)).s : presheafValue D₀) from rfl]
-            exact canonicalMap_s_mul_invS _]
-          rw [map_one, map_one]
-        rw [hL]
-        -- RHS·: backward(canMap_O b · overlapEval(negIncl X)) = backward(canMap_O b · coe(1/s_O)) = 1
-        rw [show LaurentTateAlgebra.negIncl (TateAlgebra.X (A := presheafValue D₀)) =
-          (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
-            ↥(TateAlgebra₂ (presheafValue D₀)))
-          from LaurentTateAlgebra.negIncl_X]
-        rw [show (unitCover_overlapEval D₀ f)
-            (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
-              ↥(TateAlgebra₂ (presheafValue D₀))) =
-          (unitCover_overlapDatum_B D₀ f).coeRingHom
-            (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) by
-          refine Eq.trans (mvEvalHomBounded_X _ _ _ _ (1 : Fin 2)) ?_
-          rfl]
-        have hf_resO : (((D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair
-            (D₀.interSamePair (coUnitDatum D₀.P f) rfl) (unitCover_annulus_pair_eq D₀ f))).canonicalMap f =
-          unitCover_relOverlap_backward D₀ f
-            ((unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f)) := by
-          rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) =
-            (unitCover_overlapDatum_B D₀ f).coeRingHom (algebraMap (presheafValue D₀)
-              (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
-              (D₀.canonicalMap f)) from rfl]
-          rw [unitCover_relOverlap_backward_coe,
-            unitCover_relOverlap_backwardLocHom_algebraMap, restrictionMapHom_canonicalMap]
-        rw [hf_resO, ← map_mul]
-        have heq_s : ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
-            D₀.canonicalMap f := by
-          rw [show ((unitCover_overlapDatum_B D₀ f).s : presheafValue D₀) =
-            (1 : presheafValue D₀) * D₀.canonicalMap f from rfl, one_mul]
-        have haM_s : algebraMap (presheafValue D₀)
-            (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
-              ((unitCover_overlapDatum_B D₀ f).s) =
-            algebraMap (presheafValue D₀)
-              (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
-              (D₀.canonicalMap f) := congrArg _ heq_s
-        rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) *
-            (unitCover_overlapDatum_B D₀ f).coeRingHom
-              (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) =
-          (1 : presheafValue (unitCover_overlapDatum_B D₀ f)) by
-          have h8 := algebraMap_s_mul_divByS (unitCover_overlapDatum_B D₀ f)
-            (1 : presheafValue D₀)
-          rw [haM_s] at h8
-          rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap (D₀.canonicalMap f) *
-              (unitCover_overlapDatum_B D₀ f).coeRingHom
-                (divByS (1 : presheafValue D₀) ((unitCover_overlapDatum_B D₀ f).s)) =
-            (unitCover_overlapDatum_B D₀ f).coeRingHom
-              (algebraMap (presheafValue D₀)
-                (Localization.Away ((unitCover_overlapDatum_B D₀ f).s))
-                (D₀.canonicalMap f) *
-              divByS (1 : presheafValue D₀)
-                ((unitCover_overlapDatum_B D₀ f).s)) by rw [map_mul]; rfl]
-          rw [h8, map_one, map_one]]
-        rw [map_one]
-    exact RingHom.congr_fun hcomp q
   intro z
-  exact congrFun hfun z
+  exact congrFun (unitCover_sq_minus_funext D₀ f) z
 
 /-- **Minus column square** (Wedhorn (8.2.1), commuting square `O_X(U₂) → O_X(U₁∩U₂)`
 over `B₂_gen b → B₁₂_gen b`): restricting a section of `U₂` into the overlap and
