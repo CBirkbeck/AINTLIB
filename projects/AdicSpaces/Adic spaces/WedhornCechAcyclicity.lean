@@ -5968,22 +5968,8 @@ private theorem unitCover_sq_plus_dense
         rw [unitCover_relPlus_backward_coe, unitCover_relPlus_backwardLocHom_algebraMap]
         rw [show LaurentTateAlgebra.posIncl (algebraMap (presheafValue D₀)
             ↥(TateAlgebra (presheafValue D₀)) c) =
-          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c by
-          ext1; apply MvPowerSeries.ext; intro e
-          change LaurentTateAlgebra.varInclFun 0 (algebraMap (presheafValue D₀)
-            (MvPowerSeries (Fin 1) (presheafValue D₀)) c) e =
-            (MvPowerSeries.coeff e) (algebraMap (presheafValue D₀)
-              (MvPowerSeries (Fin 2) (presheafValue D₀)) c)
-          rw [LaurentTateAlgebra.varInclFun_apply]
-          simp only [MvPowerSeries.algebraMap_apply, MvPowerSeries.coeff_C]
-          by_cases he : e = 0
-          · subst he; simp [Finsupp.single_zero (0 : Fin 2)]
-          · rw [if_neg he]
-            by_cases h1 : e = Finsupp.single (0 : Fin 2) (e 0)
-            · rw [if_pos h1]
-              exact if_neg (Finsupp.single_ne_zero.mpr
-                (fun h => he (by rw [h1, h, Finsupp.single_zero])))
-            · rw [if_neg h1]]
+          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c
+          from LaurentTateAlgebra.posIncl_algebraMap c]
         erw [mvEvalHomBounded_algebraMap]
         rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap c =
           (unitCover_overlapDatum_B D₀ f).coeRingHom (algebraMap (presheafValue D₀)
@@ -6016,19 +6002,8 @@ private theorem unitCover_sq_plus_dense
         rw [show LaurentTateAlgebra.posIncl (⟨MvPowerSeries.X (0 : Fin 1),
             MvPowerSeries.X_isRestricted 0⟩ : ↥(TateAlgebra (presheafValue D₀))) =
           (⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩ :
-            ↥(TateAlgebra₂ (presheafValue D₀))) by
-          ext1; apply MvPowerSeries.ext; intro e
-          change LaurentTateAlgebra.varInclFun (0 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
-            MvPowerSeries.coeff e (MvPowerSeries.X (0 : Fin 2))
-          rw [LaurentTateAlgebra.varInclFun_apply]
-          by_cases he : e = Finsupp.single (0 : Fin 2) (e 0)
-          · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
-            by_cases h0 : e 0 = 1
-            · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
-            · rw [if_neg (by intro h2; exact h0 (by simpa using Finsupp.ext_iff.mp h2 0)),
-                  if_neg (by intro h2; exact h0 (by rw [h2]; simp [Finsupp.single_eq_same]))]
-          · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
-            intro h2; exact he (by rw [h2]; simp [Finsupp.single_eq_same])]
+            ↥(TateAlgebra₂ (presheafValue D₀)))
+          from LaurentTateAlgebra.posIncl_X]
         rw [show (unitCover_overlapEval D₀ f)
             (⟨MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X_isRestricted 0⟩ :
               ↥(TateAlgebra₂ (presheafValue D₀))) =
@@ -6235,22 +6210,8 @@ private theorem unitCover_sq_minus_dense
         rw [unitCover_relMinus_backward_coe, unitCover_relMinus_backwardLocHom_algebraMap]
         rw [show LaurentTateAlgebra.negIncl (algebraMap (presheafValue D₀)
             ↥(TateAlgebra (presheafValue D₀)) c) =
-          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c by
-          ext1; apply MvPowerSeries.ext; intro e
-          change LaurentTateAlgebra.varInclFun 1 (algebraMap (presheafValue D₀)
-            (MvPowerSeries (Fin 1) (presheafValue D₀)) c) e =
-            (MvPowerSeries.coeff e) (algebraMap (presheafValue D₀)
-              (MvPowerSeries (Fin 2) (presheafValue D₀)) c)
-          rw [LaurentTateAlgebra.varInclFun_apply]
-          simp only [MvPowerSeries.algebraMap_apply, MvPowerSeries.coeff_C]
-          by_cases he : e = 0
-          · subst he; simp [Finsupp.single_zero (1 : Fin 2)]
-          · rw [if_neg he]
-            by_cases h1 : e = Finsupp.single (1 : Fin 2) (e 1)
-            · rw [if_pos h1]
-              exact if_neg (Finsupp.single_ne_zero.mpr
-                (fun h => he (by rw [h1, h, Finsupp.single_zero])))
-            · rw [if_neg h1]]
+          algebraMap (presheafValue D₀) ↥(TateAlgebra₂ (presheafValue D₀)) c
+          from LaurentTateAlgebra.negIncl_algebraMap c]
         erw [mvEvalHomBounded_algebraMap]
         rw [show (unitCover_overlapDatum_B D₀ f).canonicalMap c =
           (unitCover_overlapDatum_B D₀ f).coeRingHom (algebraMap (presheafValue D₀)
@@ -6326,19 +6287,8 @@ private theorem unitCover_sq_minus_dense
         -- RHS·: backward(canMap_O b · overlapEval(negIncl X)) = backward(canMap_O b · coe(1/s_O)) = 1
         rw [show LaurentTateAlgebra.negIncl (TateAlgebra.X (A := presheafValue D₀)) =
           (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
-            ↥(TateAlgebra₂ (presheafValue D₀))) by
-          ext1; apply MvPowerSeries.ext; intro e
-          change LaurentTateAlgebra.varInclFun (1 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
-            MvPowerSeries.coeff e (MvPowerSeries.X (1 : Fin 2))
-          rw [LaurentTateAlgebra.varInclFun_apply]
-          by_cases he : e = Finsupp.single (1 : Fin 2) (e 1)
-          · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
-            by_cases h0 : e 1 = 1
-            · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
-            · rw [if_neg (by intro h2; exact h0 (by simpa using Finsupp.ext_iff.mp h2 0)),
-                  if_neg (by intro h2; exact h0 (by rw [h2]; simp [Finsupp.single_eq_same]))]
-          · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
-            intro h2; exact he (by rw [h2]; simp [Finsupp.single_eq_same])]
+            ↥(TateAlgebra₂ (presheafValue D₀)))
+          from LaurentTateAlgebra.negIncl_X]
         rw [show (unitCover_overlapEval D₀ f)
             (⟨MvPowerSeries.X (1 : Fin 2), MvPowerSeries.X_isRestricted 1⟩ :
               ↥(TateAlgebra₂ (presheafValue D₀))) =

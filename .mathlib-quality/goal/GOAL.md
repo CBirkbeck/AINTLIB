@@ -11269,3 +11269,77 @@ Fix: hoist all four to `TateAlgebra.lean` beside `posIncl`/`negIncl`/`varInclFun
 (`posIncl_algebraMap`, `negIncl_algebraMap`, `posIncl_X`, `negIncl_X`). All eight sites
 collapse to a lemma name, and the two `unitCover` targets each shed ~36 lines before their
 own decomposition even starts.
+
+### Batch: the `posIncl`/`negIncl` hoist — 8 copies → 4 lemmas
+
+Landed the family described above. `TateAlgebra.lean` gains four public lemmas beside the
+definitions they describe (`posIncl_algebraMap`, `negIncl_algebraMap`, `posIncl_X`,
+`negIncl_X`); `LaurentCoverExact` loses its two private copies and has the two X-facts
+lifted out of `posEmbHom_X_eq_zeta` / `negEmbHom_X_eq_zetaInv` (13 lines each → 1);
+`WedhornCechAcyclicity`'s four `rw [show … by <16–18 lines>]` blocks become
+`rw [show … from <lemma>]`.
+
+**−40 lines net, and 8 copies of 4 facts become 4 declarations.** WedhornCechAcyclicity
+alone drops 50 lines. All three modules green; the four WedhornCech sites went in first
+try.
+
+Two things worth keeping:
+
+**Keep the author's `show`, replace only the `by`.** The goals there spell the element
+raw — `⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩` — while the hoisted
+lemma is stated with `TateAlgebra.X`. A bare `rw [posIncl_X]` cannot match that
+syntactically. But `TateAlgebra.X` is *definitionally* that anonymous constructor
+(`TateAlgebra.lean:108`), and `show … from e` typechecks up to defeq. So leaving the
+statement exactly as written and swapping `by <proof>` for `from <lemma>` works where a
+bare rewrite fails, and needs no `change` scaffolding.
+
+**The `omit` was wrong and the compiler said so precisely.** I copied
+`omit [TopologicalSpace A] [NonarchimedeanRing A] in` from the neighbouring
+`varInclFun_apply` and got `cannot omit referenced section variable` four times. The reason
+is a real distinction: `varInclFun_apply`'s statement is pure `MvPowerSeries`, whereas
+these lemmas mention `↥(TateAlgebra A)`, whose *definition* consumes the topology. The
+right neighbours to imitate were `posIncl`/`negIncl` themselves, which carry no `omit`.
+
+**Tooling note:** `verify_file.py` flagged `LaurentCoverExact` with "DECLARATIONS REMOVED —
+a decompose edit must never remove one". That rule is right for decomposition and wrong for
+dedup: the two names *moved*, and the same script reports them as ADDED on
+`TateAlgebra.lean`. The invariant to check for a hoist is repo-wide name preservation plus
+green consumers, not per-file.
+
+### Correction: the first LSP kill did not work
+
+Earlier I recorded "killed both subtrees (19 processes)" and reported 0 survivors. **That
+was wrong.** The processes were still running seven hours later — the elapsed times
+(1d14h, 2d16h) matched the same pids aged forward, not restarts.
+
+The verification was broken, not the diagnosis. I checked survivors with
+
+```sh
+ps -p $(echo $KILL | tr ' ' ',') -o pid=,etime= | wc -l
+```
+
+`$KILL` had a leading space, so the comma list was malformed, `ps` errored, printed
+nothing, and `wc -l` returned 0 — which I read as "none left". The "RSS about to be freed:
+0.0 GB" line was the same bug and should have been the tell: freeing 0.0 GB while claiming
+to kill 19 processes holding 2.3 GB each is not a plausible reading.
+
+The kill itself also failed. `kill -9 $STALE 2>/dev/null` on all 19 at once did nothing,
+while `kill -9 28524` on a single pid returned 0 and the process was gone in two seconds.
+I had suppressed the bulk command's stderr, so whatever it complained about was discarded.
+Both faults come from the same habit: **hiding the error channel and then trusting a
+derived count instead of the direct observation.**
+
+Redone properly — one `kill -9` per pid, filtered to `etime` containing `-` (≥ 1 day, so a
+running build's minutes-old jobs cannot be caught), then a per-pid `ps` check:
+
+```
+stale pids (elapsed >= 1 day): 16
+killed: 16   still alive: 0
+adic lean RSS: 33.1 GB -> 6.5 GB
+```
+
+**26.6 GB freed.** Two rules for this environment:
+
+- Never verify a kill with a count derived from a constructed argument list. Check each pid.
+- `2>/dev/null` is already banned next to `lake`/`lean` by CLAUDE.md; the same reasoning
+  applies to `kill`. Use `2>&1` and read what it says.

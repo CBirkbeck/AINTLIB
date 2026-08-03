@@ -348,6 +348,73 @@ noncomputable def negIncl : ↥(TateAlgebra A) →+* ↥(TateAlgebra₂ A) where
   map_zero' := by ext1; exact map_zero (varInclHom (1 : Fin 2))
   map_add' f g := by ext1; exact map_add (varInclHom (1 : Fin 2)) f.val g.val
 
+/-- `posIncl` fixes constants: it sends `algebraMap a` to `algebraMap a`. -/
+theorem posIncl_algebraMap (a : A) :
+    posIncl (algebraMap A ↥(TateAlgebra A) a) =
+      algebraMap A ↥(TateAlgebra₂ A) a := by
+  ext1; apply MvPowerSeries.ext; intro e
+  change varInclFun 0 (algebraMap A (MvPowerSeries (Fin 1) A) a) e =
+    (MvPowerSeries.coeff e) (algebraMap A (MvPowerSeries (Fin 2) A) a)
+  rw [varInclFun_apply]
+  simp only [MvPowerSeries.algebraMap_apply, MvPowerSeries.coeff_C]
+  by_cases he : e = 0
+  · subst he; simp [Finsupp.single_zero (0 : Fin 2)]
+  · rw [if_neg he]
+    by_cases h1 : e = Finsupp.single (0 : Fin 2) (e 0)
+    · rw [if_pos h1]
+      exact if_neg (Finsupp.single_ne_zero.mpr
+        (fun h => he (by rw [h1, h, Finsupp.single_zero])))
+    · rw [if_neg h1]
+
+/-- `negIncl` fixes constants: it sends `algebraMap a` to `algebraMap a`. -/
+theorem negIncl_algebraMap (a : A) :
+    negIncl (algebraMap A ↥(TateAlgebra A) a) =
+      algebraMap A ↥(TateAlgebra₂ A) a := by
+  ext1; apply MvPowerSeries.ext; intro e
+  change varInclFun 1 (algebraMap A (MvPowerSeries (Fin 1) A) a) e =
+    (MvPowerSeries.coeff e) (algebraMap A (MvPowerSeries (Fin 2) A) a)
+  rw [varInclFun_apply]
+  simp only [MvPowerSeries.algebraMap_apply, MvPowerSeries.coeff_C]
+  by_cases he : e = 0
+  · subst he; simp [Finsupp.single_zero (1 : Fin 2)]
+  · rw [if_neg he]
+    by_cases h1 : e = Finsupp.single (1 : Fin 2) (e 1)
+    · rw [if_pos h1]
+      exact if_neg (Finsupp.single_ne_zero.mpr
+        (fun h => he (by rw [h1, h, Finsupp.single_zero])))
+    · rw [if_neg h1]
+
+/-- `posIncl` sends the variable `X` to the first variable of `A⟨X, Y⟩`. -/
+theorem posIncl_X : posIncl (TateAlgebra.X (A := A)) = TateAlgebra₂.X := by
+  ext1; apply MvPowerSeries.ext; intro e
+  change varInclFun (0 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
+    MvPowerSeries.coeff e (MvPowerSeries.X (0 : Fin 2))
+  rw [varInclFun_apply]
+  by_cases he : e = Finsupp.single (0 : Fin 2) (e 0)
+  · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
+    by_cases h0 : e 0 = 1
+    · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
+    · rw [if_neg (by intro h; exact h0 (by simpa using Finsupp.ext_iff.mp h 0)),
+          if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
+  · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
+    intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
+
+/-- `negIncl` sends the variable `X` to the second variable `Y` of `A⟨X, Y⟩`. -/
+theorem negIncl_X : negIncl (TateAlgebra.X (A := A)) = TateAlgebra₂.Y := by
+  ext1; apply MvPowerSeries.ext; intro e
+  simp only [negIncl, RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
+  change varInclFun (1 : Fin 2) (MvPowerSeries.X (0 : Fin 1)) e =
+    (MvPowerSeries.coeff e) (MvPowerSeries.X (1 : Fin 2))
+  rw [varInclFun_apply]
+  by_cases he : e = Finsupp.single (1 : Fin 2) (e 1)
+  · rw [if_pos he, MvPowerSeries.coeff_X, MvPowerSeries.coeff_X]
+    by_cases h0 : e 1 = 1
+    · rw [if_pos (by rw [h0]), if_pos (by rw [he, h0])]
+    · rw [if_neg (by intro h; exact h0 (by simpa using Finsupp.ext_iff.mp h 0)),
+          if_neg (by intro h; exact h0 (by rw [h]; simp [Finsupp.single_eq_same]))]
+  · rw [if_neg he, MvPowerSeries.coeff_X, if_neg]
+    intro h; exact he (by rw [h]; simp [Finsupp.single_eq_same])
+
 /-- The positive embedding `A⟨X⟩ →+* A⟨ζ, ζ⁻¹⟩` sending `X ↦ ζ`.
 Embeds restricted power series in positive powers of `ζ`. -/
 noncomputable def posEmbHom : ↥(TateAlgebra A) →+* LaurentTateAlgebra A :=
