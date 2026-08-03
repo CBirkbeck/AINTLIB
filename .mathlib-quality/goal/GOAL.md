@@ -11679,3 +11679,40 @@ The guard earned its keep again: `set A := koszulReachable g f u with hAdef` app
 replace would have deleted the live one.
 
 Scoreboard: **486 → 43 actionable.**
+
+### `exists_lift_norm_le_of_closed_range` — 336 → 318, and an honest sizing
+
+The largest remaining target (ultrametric Banach open mapping, Baire category). Two moves
+this round, both genuine but small against its size.
+
+**Dead code.** Scanning every `have`/`set` binding in the declaration for later references
+found `htinvpow` and `htpow` bound and **never used anywhere** — 5 lines, removed, build
+still green. Worth keeping the scan: it is a dozen lines of Python and it found dead code
+in two consecutive targets now.
+
+> Regex caution: `(?![A-Za-z_0-9'])` does **not** exclude Unicode, so `hpitpow` matched
+> inside `hpitpowκ` and inflated its use count. The dead-code verdict was unaffected
+> (neither dead name is a substring of another), but the boundary needs
+> `Ͱ-Ͽ₀-₟` in the class.
+
+**Hoisted the `t⁻¹` scaling facts.** `norm_inv_unit_mul` (`‖t⁻¹ x‖ = ‖t‖⁻¹‖x‖`) and
+`map_inv_unit_mul_of_equivariant` (a `t`-equivariant map is `t⁻¹`-equivariant) are facts
+about `(A, t, f)`, not steps of a Baire argument, and the file already has exactly this
+shape of helper next door (`pi_norm_pow_mul_of_scale`, `map_pow_mul_of_equivariant`). The
+two absorb `hcancel`/`hcancel'`, which existed only to prove the second.
+
+**Why I did not extract `step` (40) and `key` (60).** Both are clean statements, but each
+needs ~11 threaded hypotheses (`hδkey`, `hequivinv_pow`, `hpitinvpow`, `hpitpowκ`,
+`hpitpow`, `hequiv_pow`, `δ`, `R`, …), and re-deriving them inside instead costs ~20 lines
+of preamble per piece — more than the 40 extracted. A lemma with an eleven-hypothesis
+signature satisfies the line metric while making the code harder to read than it was.
+
+> Not every over-50 body should be split where the metric wants it split. When extraction
+> requires threading a dozen locals, the honest options are a section/`variable` block, a
+> genuinely general statement, or leaving it and saying so.
+
+**Realistic sizing:** clearing this target needs ~270 more lines out, at 20–60 per round —
+five or more rounds, and the tractable part is the `step`/`key`/`hCNcover` cluster only if
+the `tinv`-derived facts (`hpit*`, `hequiv*_pow`) first become section-level data so they
+stop needing to be threaded. That is the same `section` + `variable` move that unblocked
+`flat_polyToP`, and it is the right next step here.

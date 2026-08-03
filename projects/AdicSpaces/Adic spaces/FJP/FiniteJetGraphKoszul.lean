@@ -871,6 +871,31 @@ theorem map_pow_mul_of_equivariant {c : A} (f : (ι → A) →+ (κ → A))
     show c * (c ^ n * f u k) = c ^ (n + 1) * f u k
     ring
 
+/-- The inverse of a norm-scaling unit scales by the inverse norm. -/
+theorem norm_inv_unit_mul {t : A} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : A, ‖t * x‖ = ‖t‖ * ‖x‖) (x : A) :
+    ‖((htu.unit⁻¹ : Aˣ) : A) * x‖ = ‖t‖⁻¹ * ‖x‖ := by
+  have h1 : ‖t * (((htu.unit⁻¹ : Aˣ) : A) * x)‖ = ‖t‖ * ‖((htu.unit⁻¹ : Aˣ) : A) * x‖ :=
+    hscale _
+  rw [← mul_assoc, IsUnit.mul_val_inv, one_mul] at h1
+  rw [eq_inv_mul_iff_mul_eq₀ (ne_of_gt ht0)]
+  exact h1.symm
+
+/-- A `t`-equivariant map is also `t⁻¹`-equivariant. -/
+theorem map_inv_unit_mul_of_equivariant {t : A} (htu : IsUnit t) (f : (ι → A) →+ (κ → A))
+    (hequiv : ∀ u, f (fun i => t * u i) = fun k => t * f u k) (u : ι → A) :
+    f (fun i => ((htu.unit⁻¹ : Aˣ) : A) * u i) =
+      fun k => ((htu.unit⁻¹ : Aˣ) : A) * f u k := by
+  have h1 := hequiv (fun i => ((htu.unit⁻¹ : Aˣ) : A) * u i)
+  have h2 : (fun i => t * (((htu.unit⁻¹ : Aˣ) : A) * u i)) = u :=
+    funext fun i => by rw [← mul_assoc, IsUnit.mul_val_inv, one_mul]
+  rw [h2] at h1
+  funext k
+  rw [h1]
+  show f (fun i => ((htu.unit⁻¹ : Aˣ) : A) * u i) k =
+    ((htu.unit⁻¹ : Aˣ) : A) * (t * f (fun i => ((htu.unit⁻¹ : Aˣ) : A) * u i) k)
+  rw [← mul_assoc, IsUnit.val_inv_mul, one_mul]
+
 /-- **Ultrametric Banach open mapping with constants** ([FJP] Lemma 4.2's strictness;
 Huber [4, Lemma 2.4(ii)]): a continuous `t`-equivariant additive map between finite tuple
 spaces over a complete ultrametric normed ring lifts elements of its closed range with a
@@ -960,23 +985,10 @@ theorem exists_lift_norm_le_of_closed_range
     exact hmem
   -- scaling helpers
   set tinv : A := ((htu.unit⁻¹ : Aˣ) : A) with htinv
-  have htinvscale : ∀ x : A, ‖tinv * x‖ = ‖t‖⁻¹ * ‖x‖ := fun x => by
-    have h1 : ‖t * (tinv * x)‖ = ‖t‖ * ‖tinv * x‖ := hscale _
-    rw [← mul_assoc, htinv, IsUnit.mul_val_inv, one_mul] at h1
-    rw [eq_inv_mul_iff_mul_eq₀ (ne_of_gt ht0)]
-    exact h1.symm
-  have hcancel : ∀ x : A, t * (tinv * x) = x := fun x => by
-    rw [← mul_assoc, htinv, IsUnit.mul_val_inv, one_mul]
-  have hcancel' : ∀ x : A, tinv * (t * x) = x := fun x => by
-    rw [← mul_assoc, htinv, IsUnit.val_inv_mul, one_mul]
-  have hequivinv : ∀ u, f (fun i => tinv * u i) = fun k => tinv * f u k := fun u => by
-    have h1 := hequiv (fun i => tinv * u i)
-    have h2 : (fun i => t * (tinv * u i)) = u := funext fun i => hcancel (u i)
-    rw [h2] at h1
-    funext k
-    rw [h1]
-    show f (fun i => tinv * u i) k = tinv * (t * f (fun i => tinv * u i) k)
-    rw [hcancel']
+  have htinvscale : ∀ x : A, ‖tinv * x‖ = ‖t‖⁻¹ * ‖x‖ :=
+    fun x => norm_inv_unit_mul htu ht0 hscale x
+  have hequivinv : ∀ u, f (fun i => tinv * u i) = fun k => tinv * f u k :=
+    map_inv_unit_mul_of_equivariant htu f hequiv
   have hequiv_pow : ∀ (n : ℕ) (u), f (fun i => t ^ n * u i) = fun k => t ^ n * f u k :=
     map_pow_mul_of_equivariant f hequiv
   have hequivinv_pow : ∀ (n : ℕ) (u), f (fun i => tinv ^ n * u i) =
@@ -988,11 +1000,6 @@ theorem exists_lift_norm_le_of_closed_range
   have htinvscale' : ∀ x : A, ‖tinv * x‖ = ‖tinv‖ * ‖x‖ := fun x => by
     rw [htinvnorm]
     exact htinvscale x
-  have htinvpow : ∀ (n : ℕ) (x : A), ‖tinv ^ n * x‖ = (‖t‖⁻¹) ^ n * ‖x‖ := fun n x => by
-    have h := norm_pow_mul_of_scale (E := A) htinvscale' n x
-    rwa [htinvnorm] at h
-  have htpow : ∀ (n : ℕ) (x : A), ‖t ^ n * x‖ = ‖t‖ ^ n * ‖x‖ := fun n x =>
-    norm_pow_mul_of_scale (E := A) hscale n x
   have hpitpow : ∀ (n : ℕ) (u : ι → A), ‖fun i => t ^ n * u i‖ = ‖t‖ ^ n * ‖u‖ :=
     fun n u => pi_norm_pow_mul_of_scale hscale n u
   have hpitinvpow : ∀ (n : ℕ) (u : κ → A), ‖fun k => tinv ^ n * u k‖ = (‖t‖⁻¹) ^ n * ‖u‖ :=
