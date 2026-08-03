@@ -2474,6 +2474,51 @@ private lemma presheafValue_mvRestricted_fU_X_isPowerBounded
 
 
 omit [CompatiblePlusSubring A] in
+/-- In the localization topology, the `0`-neighbourhood filter is the comap along
+`D.coeRingHom` of the `0`-neighbourhood filter of the completion. -/
+private lemma nhds_zero_eq_comap_coeRingHom (D : RationalLocData A) :
+    @nhds _ D.topology (0 : Localization.Away D.s) =
+      Filter.comap D.coeRingHom (@nhds _ _ (0 : presheafValue D)) := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  have hcoe_ind : @Topology.IsInducing _ _ D.topology _ (D.coeRingHom) :=
+    (UniformSpace.Completion.isUniformInducing_coe (Localization.Away D.s)).isInducing
+  have h := hcoe_ind.nhds_eq_comap (0 : Localization.Away D.s)
+  rw [h, map_zero]
+
+omit [CompatiblePlusSubring A] in
+/-- `fU` expands over the support of its argument: it is `eval₂ ψγ (fU ∘ X)`. -/
+private lemma fU_eq_sum_support
+    (D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)
+    (Ψ : restrictedMvPowerSeriesSubring (D.T.card + m) A →+*
+      restrictedMvPowerSeriesSubring m (presheafValue D))
+    (ψγ : Localization.Away D.s →+*
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
+    (fU : MvPolynomial (Fin m) (Localization.Away D.s) →+*
+      (restrictedMvPowerSeriesSubring (D.T.card + m) A ⧸ RingHom.ker Ψ))
+    (hfU_X : ∀ j, fU (MvPolynomial.X j) =
+      Ideal.Quotient.mk (RingHom.ker Ψ)
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A))
+    (hfU_eval : ⇑fU = MvPolynomial.eval₂ ψγ
+      (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)
+        (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+          restrictedMvPowerSeriesSubring (D.T.card + m) A)))
+    (p : MvPolynomial (Fin m) (Localization.Away D.s)) :
+    fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
+      ∏ j, fU (MvPolynomial.X j) ^ (v j) := by
+  have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j ↦ fU (MvPolynomial.X j)) p := by
+    have hvar : (fun j ↦ fU (MvPolynomial.X j)) =
+        (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)
+          (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
+            restrictedMvPowerSeriesSubring (D.T.card + m) A)) := funext hfU_X
+    rw [hvar]
+    change (fU p : _) = _
+    rw [hfU_eval]
+  rw [hfe, MvPolynomial.eval₂_eq']
+
+
+omit [CompatiblePlusSubring A] in
 /-- **Uniform continuity of `fU : U → γ`** (helper for `presheafValue_mvRestricted_surjection`),
 where `U = (Localization.Away D.s)[Y]` carries the pullback uniformity along `iU` and
 `γ = source ⧸ ker Ψ`. Reduces (additive-group hom) to continuity at `0`; the localization lift `ψγ`
@@ -2576,14 +2621,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
     (hψγ_cont.continuousAt (x := (0 : Localization.Away D.s))).preimage_mem_nhds
       (by rw [map_zero]; exact hV')
   -- `coeRingHom` is uniform-inducing (completion coe) ⟹ `Loc`-topology = comap of `presheafValue`.
-  have hcoe_ind : @Topology.IsInducing _ _ tLoc _ (D.coeRingHom) := by
-    letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-    letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-    exact (UniformSpace.Completion.isUniformInducing_coe (Localization.Away D.s)).isInducing
-  have hcoe_nhds : @nhds _ tLoc (0 : Localization.Away D.s) =
-      Filter.comap D.coeRingHom (@nhds _ _ (0 : presheafValue D)) := by
-    have := hcoe_ind.nhds_eq_comap (0 : Localization.Away D.s)
-    rw [this, map_zero]
+  have hcoe_nhds := nhds_zero_eq_comap_coeRingHom D
   rw [hcoe_nhds, Filter.mem_comap] at hψpre
   obtain ⟨O, hO, hO_sub⟩ := hψpre
   -- choose `k` with `image(P_T.I^k) ⊆ O` (basic `0`-nbhds of `presheafValue D`).
@@ -2595,17 +2633,7 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
   rw [Set.mem_preimage]
   apply hVgV
   -- expand `fU p = ∑_{v ∈ supp p} ψγ(coeff_v p) · ∏ⱼ (fU Xⱼ)^(vⱼ)`.
-  rw [show fU p = ∑ v ∈ p.support, ψγ (MvPolynomial.coeff v p) *
-      ∏ j, fU (MvPolynomial.X j) ^ (v j) by
-    have hfe : fU p = MvPolynomial.eval₂ ψγ (fun j ↦ fU (MvPolynomial.X j)) p := by
-      have hvar : (fun j ↦ fU (MvPolynomial.X j)) =
-          (fun j ↦ Ideal.Quotient.mk (RingHom.ker Ψ)
-            (⟨MvPowerSeries.X (Fin.natAdd D.T.card j), MvPowerSeries.X_isRestricted _⟩ :
-              restrictedMvPowerSeriesSubring (D.T.card + m) A)) := funext hfU_X
-      rw [hvar]
-      change (fU p : _) = _
-      rw [hfU_eval]
-    rw [hfe, MvPolynomial.eval₂_eq']]
+  rw [fU_eq_sum_support D m Ψ ψγ fU hfU_X hfU_eval p]
   -- each term lies in `Vg` (open subgroup), so the sum does.
   refine AddSubgroup.sum_mem _ (fun v hv ↦ ?_)
   -- `coeff_v(iU p) = coeRingHom(coeff_v p) ∈ image(P_T.I^k) ⊆ O`, so `coeff_v p ∈ ψγ⁻¹ V'`.

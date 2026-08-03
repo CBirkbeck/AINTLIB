@@ -12429,3 +12429,108 @@ six-iteration attempt earlier, and the cost/benefit has not changed.
 
 `isUnit_mk_s` stays at 72. The remaining Wedhorn828 targets are 187 (`surjection`) and 84
 (`fU_uniformContinuous`).
+
+### `fU_uniformContinuous` 84 → 67: two general facts out of the main argument
+
+Both lifts came from the *main tactic flow* rather than from named steps, which is where I had
+previously said this target was stuck:
+
+- **`nhds_zero_eq_comap_coeRingHom`** — the `0`-neighbourhood filter of the localization is
+  the comap along `D.coeRingHom` of the completion's. This was two `have`s (`hcoe_ind`,
+  `hcoe_nhds`) whose statements named the `letI`-bound `tLoc`; `tLoc := D.topology` is a
+  closed term, so fix #1 applies and the lemma states `@nhds _ D.topology …` directly. It is
+  a fact about any `RationalLocData`, reusable well beyond this proof.
+- **`fU_eq_sum_support`** — `fU p` expands over `p.support`. This was an anonymous
+  `rw [show … by …]` block, i.e. an unnamed lemma, and the only thing tying it to the proof
+  was that `p` came from an `intro`; universally quantifying `p` frees it entirely.
+
+> The main flow of a proof is not off-limits just because it has no named steps. An
+> `rw [show … by …]` is an unnamed lemma, and a `have` naming a `letI` is liftable whenever
+> that `letI` is a closed term.
+
+Wedhorn828 now: 187 / 72 / 67, from 187 / 169 / 133 / 115 / 84 at the start of work on the
+file — two targets cleared, twelve lemmas extracted.
+
+### Scan 9: `show … by …` blocks — unnamed lemmas, a source I had not searched
+
+`fU_eq_sum_support` came out of one of these, so I scanned the residue for them.
+
+```
+`show` blocks of 8+ code lines inside the remaining targets: 18
+
+  20 / 18 / 16 / 12 / 11 / 10   wedhorn_lemma_834_propA3_part1_gluing  (349)   = 87 lines
+  12 / 12 / 12 / 10             genRestrictedCover_gluing              (192)   = 46 lines
+  14 / 10                       exists_evalBI_approx_bloc              (122)   = 24 lines
+  14 / 10                       exists_evalBI_approx_bloc₂             (123)   = 24 lines
+  17                            genPiece_relative_overlap_square₂       (95)
+   8                            unitCover_relOverlap_forward_witness    (218)
+```
+
+**`wedhorn_lemma_834_propA3_part1_gluing` — the largest remaining target at 349 — carries 87
+lines in six unnamed `show` blocks.** That reframes it: I had surveyed it as "three levels,
+each needing its own split", but a quarter of it is lemmas that were simply never named.
+
+Caveat, same as scan 7: a `show` block's *statement* may mention proof-locals, in which case
+it is not liftable as-is. The scan lists candidates; each needs its statement read.
+
+Also of note: the two `exists_evalBI_approx_bloc` twins reappear here. That is the target
+that cost six failed attempts early in this session — but via a different route (their `have`
+bullets). The `show` blocks are a different and possibly easier seam.
+
+**Scan 9, first candidates read.** `genRestrictedCover_gluing`'s four `show` blocks are *not*
+liftable as-is: their statements name `E₁`/`E₂`/`E₃`, `h₃₁`/`h₃₂`, `hE₁₂`, `f`, `t`/`ht`,
+`Et`, `hPPim`, `hro_eq`, `g` — a dozen proof-locals between them.
+
+But they are **two twin pairs inside one proof**: 10070/10082 differ only in `E₁` vs `E₂`,
+and 10175/10188 only in `f t ht` vs `g Et`. Unifying each pair (parameterising over the
+piece) would save ~22 of the 46 lines. That is the symmetric-twin technique applied
+*within* a declaration rather than across two.
+
+Worth noting for the estimate: 192 − 22 = 170, so this alone does not approach clearing the
+target. Recorded as available work, not as a next step.
+
+### Gate killed again — different cause, and not mine to fix
+
+`gate26` was killed at 3337/3360 with zero errors. Memory check:
+
+```
+adic-spaces:  3 procs,  0.0 GB
+TauCeti:     14 procs,  7.1 GB
+FLT:         10 procs, 17.0 GB
+total lean RSS: 41.1 GB   (swap 9.85 of 11.26 GB)
+```
+
+**This is not the earlier situation.** Then it was 5-day-old stale LSP file-workers for
+*this* project, which were nobody's live work and which the owner authorised killing. Now it
+is **other sessions actively building FLT and TauCeti** — 24 GB of legitimate in-progress
+work. Leaving it alone and retrying; the gate simply takes longer under that load.
+
+Recording the distinction so the earlier "check `lake serve` worker age" rule is not
+misapplied: the diagnostic is *whose* processes and *how old*, not merely how much memory is
+in use. Stale workers for the project under work are cleanable; another session's running
+build is not.
+
+### Why the gate keeps dying at 3356/3360
+
+From the last gate that *did* complete:
+
+```
+⚠ [3356/3360] Built FarguesFontaine.CurveAdicPresentation   (6.1s)
+⚠ [3357/3360] Built FarguesFontaine.RobbaPresentation     (540s)   <-- nine minutes
+✔ [3358/3360] Built FarguesFontaine.RobbaCorrespondence     (15s)
+✔ [3359/3360] Built «Adic spaces»                            (4.3s)
+```
+
+`RobbaPresentation` alone takes **540 seconds**, and under the current load (24 GB of other
+sessions' FLT/TauCeti builds) it runs long enough to be killed. Every gate reaching
+"3356/3360, 0 errors" is a gate that got through everything except that one module and its
+two dependents.
+
+**It cannot be skipped:** `Wedhorn828` *is* in `RobbaPresentation`'s transitive import
+closure (141 modules), so changes there can affect it.
+
+> A caution on my own tooling: the first import-closure query returned "0 modules,
+> Wedhorn828 absent" because the parser's `break` fired on the file's copyright block. An
+> empty result from a graph query is not evidence of absence — a file with three visible
+> imports cannot have an empty closure, and that should have been read as a parser failure
+> immediately, not as an answer. Acting on it would have skipped genuine verification.
