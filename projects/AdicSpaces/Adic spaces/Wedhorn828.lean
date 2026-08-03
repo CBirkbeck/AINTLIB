@@ -3280,24 +3280,10 @@ theorem unitDatum_ker_le_span
   set aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A) :=
     Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X} with haI
   -- source instances
-  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
-    MvTateAlgebra.mvTateAlgebraTopology' 1
-  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A) :=
-    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing 1
   have hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
   have haI_closed : IsClosed (aI : Set ↥(restrictedMvPowerSeriesSubring 1 A)) :=
     MvTateAlgebra.mvTate_isClosed_ideal 1 hA_complete aI
   -- quotient instances (complete Hausdorff topological ring)
-  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
-    mvQuotTopology 1 aI
-  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
-    mvQuotUniformSpace 1 aI
-  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing 1 aI
-  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
-  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
-  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean 1 aI
   -- the localization lift `ψ` (the denominator `D.s = 1` is trivially a unit)
   have hUnit1 : IsUnit ((Ideal.Quotient.mk aI).comp
       (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A)) D.s) := by
@@ -3332,7 +3318,7 @@ theorem unitDatum_ker_le_span
   -- the structural defeq and blow up `whnf`).
   obtain ⟨Φ, hΦ_cont, hΦ_alg, hΦ_X, hΦ_ker⟩ :
       ∃ Φ : ↥(restrictedMvPowerSeriesSubring 1 A) →+* presheafValue D,
-        @Continuous _ _ τC _ ⇑Φ ∧
+        @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' 1) _ ⇑Φ ∧
         (∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
           D.canonicalMap x) ∧
         (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
@@ -3364,23 +3350,9 @@ theorem coUnitDatum_ker_le_span
   set D := coUnitDatum P b with hD
   set aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A) :=
     Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X} with haI
-  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
-    MvTateAlgebra.mvTateAlgebraTopology' 1
-  haveI hringC : IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A) :=
-    MvTateAlgebra.mvTateAlgebraTopology'_isTopologicalRing 1
   have hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A) := ‹_›
   have haI_closed : IsClosed (aI : Set ↥(restrictedMvPowerSeriesSubring 1 A)) :=
     MvTateAlgebra.mvTate_isClosed_ideal 1 hA_complete aI
-  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
-    mvQuotTopology 1 aI
-  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
-    mvQuotUniformSpace 1 aI
-  haveI hringQ : @IsTopologicalRing _ τQ _ := mvQuot_isTopologicalRing 1 aI
-  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
-  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
-  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
-  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
-  haveI hNAQ : @NonarchimedeanRing _ _ τQ := mvQuot_nonarchimedean 1 aI
   -- `mk (algebraMap b) · mk η = 1` modulo `(1 − bη)`
   have hmkX_mul : Ideal.Quotient.mk aI
         (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) b) *
@@ -3436,7 +3408,7 @@ theorem coUnitDatum_ker_le_span
   -- opaquify the evaluation (pay the `D.T.card ≡ 1` defeq once)
   obtain ⟨Φ, hΦ_cont, hΦ_alg, hΦ_X, hΦ_ker⟩ :
       ∃ Φ : ↥(restrictedMvPowerSeriesSubring 1 A) →+* presheafValue D,
-        @Continuous _ _ τC _ ⇑Φ ∧
+        @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' 1) _ ⇑Φ ∧
         (∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
           D.canonicalMap x) ∧
         (Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :

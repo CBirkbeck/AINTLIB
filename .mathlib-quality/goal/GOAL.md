@@ -12294,3 +12294,63 @@ in`, and the *downstream* `coUnitDatum_ker_eq_span` then failed to synthesize
 `end PolyToPTower`. `decompose_common.insert_before_decl` exists precisely to handle it.
 
 Over-width: one 102-byte line reflowed, back to 117.
+
+### `unitDatum_ker_le_span` CLEARED — 115 → under 50
+
+Scoreboard **43 → 42**. `coUnitDatum_ker_le_span` 133 → 70.
+
+The last step was not an extraction at all: **once the shared lemmas installed their own
+instances, the twins' 14-line instance blocks became dead.** Removing them:
+
+- the quotient block (`τQ`, `uQ`, `hringQ`, `IsUniformAddGroup`, `CompleteSpace`, `hT2Q`,
+  `T0Space`, `hNAQ` — 10 lines) was dead in **both** twins;
+- the source block (`τC`, `hringC` — 4 lines) was *nearly* dead: `τC` survived only in the
+  `obtain Φ` statement (`@Continuous _ _ τC _ ⇑Φ`), so spelling the term there
+  (`MvTateAlgebra.mvTateAlgebraTopology' 1`) retired both lines.
+
+> **Extraction leaves dead preamble behind.** Every instance a proof installed for a step
+> that has since been lifted is now unused, and nothing warns about it — `letI`/`haveI` are
+> instance-position, so the unused-variable linter is silent and my own dead-binding scan
+> deliberately skips them. After lifting, re-test the preamble by deleting it.
+
+A guard paid off again: the source-instance block occurs **three** times (both twins *and*
+`psi_continuous_of_gen`, which genuinely needs it), so a global replace would have broken the
+shared lemma. The `n == 2` assertion caught it, and the per-theorem anchored version was
+correct.
+
+Cumulative for this pair: **115 + 133 = 248 lines → 70 + (<50), plus three shared lemmas**
+(`psi_continuous_of_gen`, `ker_le_of_ext`) — the largest dedup of the session.
+
+### Scan 8: dead instance preamble — and why its "dead" column is weak
+
+Ran a scan for `letI`/`haveI` bindings left behind by earlier extractions:
+
+```
+named instance bindings never referenced again: 22
+anonymous letI/haveI (only deletion can test):  80
+```
+
+**The named column is a weak signal, and it is important to say so.** A `haveI hFoo : SomeClass
+X := …` is consumed by *typeclass resolution*, not by its name — so "never referenced again"
+does not imply dead. That is exactly why scan 6 deliberately excluded `haveI` from
+consideration. The 22 hits are candidates for testing, not findings; and the 80 anonymous
+ones cannot be screened at all, since they have no name to look for.
+
+**Deletion is the only test.** That is how the `ker_le_span` twins' 14 lines were confirmed
+dead — remove and rebuild — and it is why `τC` survived that removal while the other 13 did
+not.
+
+Prioritisation (targets whose preamble is worth testing by deletion, most instance-heavy
+first):
+
+```
+dead anon code  target
+   6    8  187  presheafValue_mvRestricted_surjection      Wedhorn828
+   3    5   72  presheafValue_mvRestricted_isUnit_mk_s     Wedhorn828
+   3    3   84  presheafValue_mvRestricted_fU_uniformCont  Wedhorn828
+   3    0  226  ideal_pullback_controlled                  FiniteJetStrictLocalization
+   0   23  187  idealOfDef_pow_isClosed_aux                PresheafTateStructure
+```
+
+The three Wedhorn828 entries are the ones I have already lifted steps out of, so they are the
+likeliest to carry genuinely orphaned instances — the same situation as the twins.
