@@ -12404,3 +12404,28 @@ Two more lifts, both clean because each fact is genuinely standalone:
 residue and it is done.
 
 Over-width: one 117-byte line reflowed; back to 117 total.
+
+### `isUnit_mk_s` — the `hkey` lift is blocked, definitively
+
+Re-examined rather than re-attempted. `hkey` (40 of the target's 72 lines) cannot be lifted:
+
+- its statement is `algebraMap … (example638_evalHom D h) = Ψ (ι h)`, so it needs `ι`;
+- `ι = mvEvalHomBounded … bι hbι`, and its body separately uses `bι` (4×) and `hbι` (1×),
+  so `ι` cannot be passed abstractly — the proof needs its definition;
+- promoting `ι` to a def requires `mvEvalHomBounded`'s instances, and among them
+  **`CompleteSpace ↥(restrictedMvPowerSeriesSubring (D.T.card + m) A)` comes from
+  `mvTate_completeSpace … hA_complete`** — a *theorem hypothesis*, not a section variable;
+- and `hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A)` is
+  completeness for a **specific uniformity**, which is precisely why it is a hypothesis and
+  not the ambient `[CompleteSpace A]` instance. So no section can supply it.
+
+Threading `hA_complete` through a `mvVarIncl` def is possible but pushes the argument into
+every call site and forces `bι`/`hbι` to be spelled or promoted too — that was the
+six-iteration attempt earlier, and the cost/benefit has not changed.
+
+> This is the sharpest instance of the residue's blocker: **a local whose definition consumes
+> a hypothesis about a non-canonical structure can never move to section scope.** Recorded so
+> it is not attempted a third time.
+
+`isUnit_mk_s` stays at 72. The remaining Wedhorn828 targets are 187 (`surjection`) and 84
+(`fU_uniformContinuous`).
