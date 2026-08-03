@@ -35542,3 +35542,30 @@ prerequisite for the field-change naturality ChatGPT flagged as the largest rema
 - **Generality**: state the transport for an arbitrary `k`-algebra equivalence of two fields,
   not just these two — it is the same lemma the field-change naturality (WP-D3c step 2) will
   need.
+
+## [WP-D3c-CLOSURE] DONE (2026-08-04) — the fibre-functor transport, axiom-verified
+
+`WeilPairing/FieldPairingUnique.lean` (sorry-free, three declarations):
+
+* **`fiberIsoOfAlgEquiv`** — a `k`-algebra equivalence `e : Ω₁ ≃ₐ[k] Ω₂` of geometric points
+  induces a natural isomorphism `fiber k Ω₁ ≅ fiber k Ω₂`: postcomposition with `e` is a
+  bijection on `A →ₐ[k] Ω`, natural in `A` (`NatIso.ofComponents`, naturality by `rfl`).
+* **`faithful_fiber_of_algEquiv`** — faithfulness transports along it
+  (`Functor.Faithful.of_iso`).
+* **`finiteEtaleHom_unique`** — the uniqueness pin at `SeparableClosure k`.
+
+Stated for an **arbitrary** equivalence of fields, deliberately: the field-change naturality
+of the pairing (WP-D3c step 2) needs exactly this transport, not just the
+separable-vs-algebraic-closure instance.
+
+**Gotcha recorded**: the fibre-functor values are `FintypeCat` carriers
+(`((fiber k Ω).obj A).obj`), which are *definitionally* `A →ₐ[k] Ω` but not syntactically —
+so neither `AlgHom.ext fun a => …` (function application fails) nor `ext` (no extensionality
+theorem for the carrier) works. The fix is a `show … ≃ … from` ascription on the underlying
+`Equiv`, after which both round-trips are the ordinary `AlgHom.ext`.
+
+**Remaining on the WP-D3c path**: instantiate the transport at
+`SeparableClosure k ≃ₐ[k] AlgebraicClosure k` for perfect `k`
+(`IsSepClosure.of_isAlgClosure_of_perfectField` + uniqueness of separable closures), giving
+the `AlgebraicClosure` form of the uniqueness pin; then step 2, the field-change naturality
+itself.
