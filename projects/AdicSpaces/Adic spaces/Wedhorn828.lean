@@ -3178,6 +3178,87 @@ private theorem psi_continuous_of_gen
 
 
 omit [CompatiblePlusSubring A] in
+/-- If a continuous localization lift `ψ` and a continuous `Φ` with the same kernel as
+`example638_evalHom D` agree at the variable (via `hΦζ`), then `ker (example638_evalHom D) ≤
+aI`: extend `ψ` to the completion as `β`, check `β ∘ Φ = mk aI` on the dense polynomials, and
+transport.
+
+Shared tail of `unitDatum_ker_le_span` and `coUnitDatum_ker_le_span`; the two differ only in
+the witness `hΦζ`. -/
+private theorem ker_le_of_ext
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
+    [HasLocLiftPowerBounded A]
+    (D : RationalLocData A) (aI : Ideal ↥(restrictedMvPowerSeriesSubring 1 A))
+    (haI_closed : IsClosed (aI : Set ↥(restrictedMvPowerSeriesSubring 1 A)))
+    (hA_complete : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A))
+    (ψ : Localization.Away D.s →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI))
+    (hψ_alg : ∀ x : A, ψ (algebraMap A (Localization.Away D.s) x) =
+      Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x))
+    (hψ_cont : @Continuous _ _ D.topology (mvQuotTopology 1 aI) ψ)
+    (Φ : ↥(restrictedMvPowerSeriesSubring 1 A) →+* presheafValue D)
+    (hΦ_cont : @Continuous _ _ (MvTateAlgebra.mvTateAlgebraTopology' 1) _ ⇑Φ)
+    (hΦ_alg : ∀ x : A, Φ (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) =
+      D.canonicalMap x)
+    (hΦζ : ∃ y : Localization.Away D.s,
+      Φ (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+          ↥(restrictedMvPowerSeriesSubring 1 A)) = D.coeRingHom y ∧
+      ψ y = Ideal.Quotient.mk aI
+        (⟨MvPowerSeries.X (0 : Fin 1), MvPowerSeries.X_isRestricted 0⟩ :
+          ↥(restrictedMvPowerSeriesSubring 1 A))) :
+    RingHom.ker Φ ≤ aI := by
+  obtain ⟨y, hy1, hy2⟩ := hΦζ
+  letI τC : TopologicalSpace ↥(restrictedMvPowerSeriesSubring 1 A) :=
+    MvTateAlgebra.mvTateAlgebraTopology' 1
+  letI τQ : TopologicalSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotTopology 1 aI
+  letI uQ : UniformSpace (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) :=
+    mvQuotUniformSpace 1 aI
+  haveI : @IsUniformAddGroup _ uQ _ := mvQuot_isUniformAddGroup 1 aI
+  haveI : @CompleteSpace _ uQ := mvQuot_completeSpace 1 aI hA_complete
+  haveI hT2Q : @T2Space _ τQ := mvQuot_t2Space 1 aI haI_closed
+  haveI : @T0Space _ τQ := @T1Space.t0Space _ τQ (@T2Space.t1Space _ τQ hT2Q)
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  obtain ⟨β, hβ_coe, hβ_cont⟩ :
+      ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI),
+        (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
+          @Continuous _ _ _ τQ ⇑β := by
+    refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
+      (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
+    · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
+        _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
+        (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
+    · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
+        D.uniformSpace _ uQ (⇑ψ) ‹_›
+  have hext : (⇑β ∘ ⇑Φ :
+      ↥(restrictedMvPowerSeriesSubring 1 A) → _) = ⇑(Ideal.Quotient.mk aI) := by
+    refine Continuous.ext_on
+      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) 1)
+      (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
+    rintro _ ⟨q, rfl⟩
+    have hcomp : ((β.comp Φ).comp
+        (MvTateAlgebra.mvPolynomialToTate (A := A) 1)) =
+        (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) 1) := by
+      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
+      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
+        rw [hΦ_alg]
+        show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
+        rw [hβ_coe, hψ_alg]
+      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
+        have hj : j = 0 := Subsingleton.elim j 0
+        subst hj
+        rw [hy1, hβ_coe, hy2]
+    exact RingHom.congr_fun hcomp q
+  intro h hh
+  have hh' : Φ h = 0 := hh
+  have hfun := congrFun hext h
+  rw [show (⇑β ∘ ⇑Φ) h = β (Φ h) from rfl, hh', map_zero] at hfun
+  exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
+
+
+omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
 `A⟨ζ⟩ ⧸ (b − ζ)` is complete Hausdorff (the principal ideal is closed by Prop 6.17
@@ -3262,51 +3343,9 @@ theorem unitDatum_ker_le_span
       fun x => example638_evalHom_algebraMap D x, ?_, rfl⟩
     erw [example638_evalHom_X D ((0 : Fin 1) : Fin D.T.card), unitDatum_genTuple_eq]
     rfl
-  -- extend to the completion, then make the extension OPAQUE (an existential
-  -- `obtain` yields a fresh `β` carrying only the two facts the rest needs —
-  -- unfolding the `extensionHom` term in every later unification blows up `whnf`)
-  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  obtain ⟨β, hβ_coe, hβ_cont⟩ :
-      ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI),
-        (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
-          @Continuous _ _ _ τQ ⇑β := by
-    refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
-      (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
-    · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
-        _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-        (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
-    · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
-        D.uniformSpace _ uQ (⇑ψ) ‹_›
-  -- `β ∘ Φ = mk` (continuous ring homs agreeing on the dense polynomials)
-  have hext : (⇑β ∘ ⇑Φ :
-      ↥(restrictedMvPowerSeriesSubring 1 A) → _) = ⇑(Ideal.Quotient.mk aI) := by
-    refine Continuous.ext_on
-      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) 1)
-      (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
-    rintro _ ⟨p, rfl⟩
-    have hcomp : ((β.comp Φ).comp
-        (MvTateAlgebra.mvPolynomialToTate (A := A) 1)) =
-        (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) 1) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
-        rw [hΦ_alg]
-        show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
-        rw [hβ_coe, hψ_alg]
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
-        have hj : j = 0 := Subsingleton.elim j 0
-        subst hj
-        rw [hΦ_X, hβ_coe, hψ_alg, hmk_bX]
-    exact RingHom.congr_fun hcomp p
-  -- conclude: `Φ h = 0 ⟹ mk h = 0 ⟹ h ∈ span`
   rw [hΦ_ker]
-  intro h hh
-  have hh' : Φ h = 0 := hh
-  have hfun := congrFun hext h
-  rw [show (⇑β ∘ ⇑Φ) h = β (Φ h) from rfl, hh', map_zero] at hfun
-  exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
+  exact ker_le_of_ext D aI haI_closed hA_complete ψ hψ_alg hψ_cont Φ hΦ_cont hΦ_alg
+    ⟨algebraMap A (Localization.Away D.s) b, hΦ_X, by rw [hψ_alg]; exact hmk_bX⟩
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
@@ -3407,50 +3446,9 @@ theorem coUnitDatum_ker_le_span
     refine ⟨example638_evalHom D, example638_evalHom_continuous D,
       fun x => example638_evalHom_algebraMap D x, ?_, rfl⟩
     erw [example638_evalHom_X D ((0 : Fin 1) : Fin D.T.card), coUnitDatum_genTuple_eq]
-  -- extend to the completion, opaquely
-  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
-  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
-  obtain ⟨β, hβ_coe, hβ_cont⟩ :
-      ∃ β : presheafValue D →+* (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI),
-        (∀ y : Localization.Away D.s, β (D.coeRingHom y) = ψ y) ∧
-          @Continuous _ _ _ τQ ⇑β := by
-    refine ⟨@UniformSpace.Completion.extensionHom (Localization.Away D.s) _ D.uniformSpace _ _
-      (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-      (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_›, fun y => ?_, ?_⟩
-    · exact @UniformSpace.Completion.extensionHom_coe (Localization.Away D.s) _ D.uniformSpace
-        _ _ (↥(restrictedMvPowerSeriesSubring 1 A) ⧸ aI) uQ _ (mvQuot_isUniformAddGroup 1 aI)
-        (mvQuot_isTopologicalRing 1 aI) ψ hψ_cont ‹_› ‹_› y
-    · exact @UniformSpace.Completion.continuous_extension (Localization.Away D.s)
-        D.uniformSpace _ uQ (⇑ψ) ‹_›
-  -- `β ∘ Φ = mk` on the dense polynomials
-  have hext : (⇑β ∘ ⇑Φ :
-      ↥(restrictedMvPowerSeriesSubring 1 A) → _) = ⇑(Ideal.Quotient.mk aI) := by
-    refine Continuous.ext_on
-      (MvTateAlgebra.mvPolynomialToTate_denseRange (A := A) 1)
-      (hβ_cont.comp hΦ_cont) continuous_quotient_mk' ?_
-    rintro _ ⟨p, rfl⟩
-    have hcomp : ((β.comp Φ).comp
-        (MvTateAlgebra.mvPolynomialToTate (A := A) 1)) =
-        (Ideal.Quotient.mk aI).comp (MvTateAlgebra.mvPolynomialToTate (A := A) 1) := by
-      refine MvPolynomial.ringHom_ext (fun c => ?_) (fun j => ?_)
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_C]
-        rw [hΦ_alg]
-        show β (D.coeRingHom (algebraMap A (Localization.Away D.s) c)) = _
-        rw [hβ_coe, hψ_alg]
-      · simp only [RingHom.comp_apply, MvTateAlgebra.mvPolynomialToTate_X]
-        have hj : j = 0 := Subsingleton.elim j 0
-        subst hj
-        rw [hΦ_X, hβ_coe, hψ_div]
-    exact RingHom.congr_fun hcomp p
-  -- conclude
   rw [hΦ_ker]
-  intro h hh
-  have hh2 : Φ h = 0 := hh
-  have hfun := congrFun hext h
-  rw [show (⇑β ∘ ⇑Φ) h = β (Φ h) from rfl, hh2, map_zero] at hfun
-  exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
-
+  exact ker_le_of_ext D aI haI_closed hA_complete ψ hψ_alg hψ_cont Φ hΦ_cont hΦ_alg
+    ⟨divByS (1 : A) D.s, hΦ_X, hψ_div⟩
 omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
   [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
   [CompatiblePlusSubring A]

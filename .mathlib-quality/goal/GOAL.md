@@ -12262,3 +12262,35 @@ itself lands *under* 50 — unlike the earlier estimate of ~90, because paramete
 Expected: `unitDatum` 99 → ~59, `coUnitDatum` 121 → ~81, ~42 duplicated lines removed, and
 **no new over-50 target**. Neither twin clears yet; the remaining bulk in each is its own
 `obtain Φ` plus datum-specific witnesses.
+
+### Twin unification, step 2: `ker_le_of_ext` — 92 duplicated lines gone
+
+`unitDatum_ker_le_span` **99 → 62**, `coUnitDatum_ker_le_span` **121 → 84**, and the shared
+tail (48 and 44 lines respectively) collapses to a three-line call each. `ker_le_of_ext`
+itself is **under 50**.
+
+**Two design faults, both instructive, both caught by the compiler:**
+
+1. *`D.T.card` is only definitionally `1` for these particular data.* My first version stated
+   `RingHom.ker (example638_evalHom D) = RingHom.ker Φ` as a hypothesis and
+   `RingHom.ker (example638_evalHom D) ≤ aI` as the conclusion — ill-typed for abstract `D`,
+   because `example638_evalHom D` lives over `restrictedMvPowerSeriesSubring D.T.card A`
+   while `Φ` lives over `…1 A`. The twins get away with it only because `unitDatum`/
+   `coUnitDatum` have singleton `T`. Fix: state the conclusion as `RingHom.ker Φ ≤ aI` and
+   let each twin do its own `rw [hΦ_ker]` first — the abstraction then never mentions
+   `example638_evalHom` at all.
+2. *`obtain` inside a `refine … (fun j => ?_)` hole* failed with `recursor Exists.casesOn can
+   only eliminate into Prop`. Destructuring `hΦζ` once at the top of the body fixes it.
+
+> When abstracting a proof over a parameter, check which *types* silently depended on the
+> concrete instantiation. `D.T.card ≡ 1` was invisible in the source and is the whole reason
+> the original could state the kernel equation the way it did.
+
+**A third fault, mine and mechanical:** my end-boundary used `rindex('/--')`, which lands
+*after* any `omit … in` / `set_option … in` attached to the next declaration — so the slice
+swallowed `omit [CompatiblePlusSubring A] in` and `set_option linter.unusedSectionVars false
+in`, and the *downstream* `coUnitDatum_ker_eq_span` then failed to synthesize
+`CompatiblePlusSubring A`. This is the same hand-rolled-backup mistake as the misplaced
+`end PolyToPTower`. `decompose_common.insert_before_decl` exists precisely to handle it.
+
+Over-width: one 102-byte line reflowed, back to 117.
