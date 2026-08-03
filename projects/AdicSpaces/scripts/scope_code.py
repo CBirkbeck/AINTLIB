@@ -12,7 +12,8 @@ count is also barely over, so a couple of removed lines move both metrics at onc
 import json, os, re, collections
 
 os.chdir("/Users/mcu22seu/Documents/GitHub/aintlib-adic-spaces/projects/AdicSpaces/Adic spaces")
-NEXT = re.compile(r'^\s*(?:@\[|/--|/-!|include |omit |(?:private |protected |noncomputable |scoped |partial |unsafe )*(?:theorem|lemma|def|abbrev|instance|structure|inductive|class|end|section|namespace|variable|open|universe|attribute|macro|notation|syntax|elab)\s)')
+NEXT = re.compile(r'^set_option .* in$|'
+                  r'^\s*(?:@\[|/--|/-!|include |omit |(?:private |protected |noncomputable |scoped |partial |unsafe )*(?:theorem|lemma|def|abbrev|instance|structure|inductive|class|end|section|namespace|variable|open|universe|attribute|macro|notation|syntax|elab)\s)')
 DECL = re.compile(r"^\s*(?:@\[[^\]]*\]\s*)?(?:private\s+|protected\s+|noncomputable\s+|scoped\s+|partial\s+|unsafe\s+)*(theorem|lemma|def|abbrev|instance|structure|inductive|class)\s+([^\s({\[:]+)")
 OPEN, CLOSE = '([{⟨', ')]}⟩'
 SORRY = re.compile(r'(?<![A-Za-z_])(sorry|admit)(?![A-Za-z_])')

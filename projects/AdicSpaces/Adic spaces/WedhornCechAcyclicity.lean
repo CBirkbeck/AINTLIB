@@ -3595,6 +3595,81 @@ private theorem unitCover_relMinus_forwardLocHom_algebraMap
   rw [unitCover_relMinus_forwardLocHom, IsLocalization.Away.lift_eq]
   rfl
 
+open Classical in
+/-- The two-case core of `unitCover_relMinus_forward_witness`: `t = p·q` with `q` either the
+generator `f` or `1`, and in each case the witness is the `p/s`-element of the `B`-pair's `A₀`,
+multiplied by `1/b` in the second. Stated over an abstract `DI`/`DB`/`F` so that the caller's
+`set`-locals pass straight in. -/
+private theorem unitCover_relMinus_forward_witness_cases
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (f : A)
+    (DI : RationalLocData A) (DB : RationalLocData (presheafValue D₀))
+    (F : Localization.Away DI.s →+* presheafValue DB)
+    (hF_alg : ∀ a : A, F (algebraMap A (Localization.Away DI.s) a) =
+      DB.canonicalMap (D₀.canonicalMap a))
+    (hu : IsUnit (F (algebraMap A (Localization.Away DI.s) DI.s)))
+    (hps : ∀ p : A, D₀.canonicalMap p =
+      D₀.canonicalMap D₀.s * D₀.coeRingHom (divByS p D₀.s))
+    (hinv : DB.canonicalMap (D₀.canonicalMap f) *
+      DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s) = 1)
+    (hA₀ : ∀ p ∈ insert D₀.s D₀.T, D₀.coeRingHom (divByS p D₀.s) ∈ DB.P.A₀)
+    (hDB_one : (1 : presheafValue D₀) ∈ DB.T)
+    (hs_eq : (DI.s : A) = D₀.s * f)
+    (p q : A) (hp : p ∈ insert D₀.s D₀.T) (hq : q ∈ insert f ({1} : Finset A)) :
+    ∃ y : Localization.Away DB.s,
+      y ∈ locSubring DB.P DB.T DB.s ∧
+      F (divByS (p * q) DI.s) = DB.coeRingHom y := by
+  rcases Finset.mem_insert.mp hq with hqf | hq1
+  · -- `q = f`: witness `algebraMap (coeRingHom (p/s))`
+    refine ⟨algebraMap (presheafValue D₀) (Localization.Away DB.s)
+        (D₀.coeRingHom (divByS p D₀.s)),
+      algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp), ?_⟩
+    refine forwardLoc_div_eq DI F hu _ _ ?_
+    rw [hF_alg, hF_alg, hqf]
+    rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
+        (D₀.coeRingHom (divByS p D₀.s))) =
+      DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) from rfl]
+    rw [hs_eq]
+    rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap),
+      map_mul (DB.canonicalMap)]
+    rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
+      D₀.coeRingHom (divByS p D₀.s) from hps p]
+    rw [map_mul (DB.canonicalMap)]
+    ring
+  · -- `q = 1`: witness `algebraMap (coeRingHom (p/s)) · (1/b)`
+    rw [Finset.mem_singleton.mp hq1, mul_one]
+    refine ⟨algebraMap (presheafValue D₀) (Localization.Away DB.s)
+        (D₀.coeRingHom (divByS p D₀.s)) * divByS (1 : presheafValue D₀) DB.s,
+      (locSubring DB.P DB.T DB.s).mul_mem
+        (algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp))
+        (divByS_mem_locSubring DB.P DB.T DB.s hDB_one), ?_⟩
+    refine forwardLoc_div_eq DI F hu _ _ ?_
+    rw [hF_alg, hF_alg]
+    rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
+        (D₀.coeRingHom (divByS p D₀.s)) * divByS (1 : presheafValue D₀) DB.s) =
+      DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
+        DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s) by rw [map_mul]; rfl]
+    rw [hs_eq]
+    rw [map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap)]
+    rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
+      D₀.coeRingHom (divByS p D₀.s) from hps p]
+    rw [map_mul (DB.canonicalMap)]
+    calc DB.canonicalMap (D₀.canonicalMap D₀.s) *
+          DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) =
+        DB.canonicalMap (D₀.canonicalMap D₀.s) *
+          DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
+          (DB.canonicalMap (D₀.canonicalMap f) *
+            DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s)) := by
+          rw [hinv, mul_one]
+      _ = DB.canonicalMap (D₀.canonicalMap D₀.s) * DB.canonicalMap (D₀.canonicalMap f) *
+          (DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
+            DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s)) := by ring
+
+
+
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus per-generator witnesses (M4)**: every `t ∈ T_inter` (a product `p·1`,
 `p ∈ insert D₀.s D₀.T`) has a `locSubring`-witness over the B-side minus datum:
@@ -3656,52 +3731,8 @@ private theorem unitCover_relMinus_forward_witness
   have hq : q ∈ insert f ({1} : Finset A) := (Finset.mem_product.mp hpq).2
   rw [show (((p, q).1 : A) * (p, q).2 : A) = p * q from rfl]
   have hs_eq : ((D₀.interSamePair (coUnitDatum D₀.P f) rfl).s : A) = D₀.s * f := rfl
-  rcases Finset.mem_insert.mp hq with hqf | hq1
-  · -- `q = f`: witness `algebraMap (coeRingHom (p/s))`
-    refine ⟨algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.coeRingHom (divByS p D₀.s)),
-      algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp), ?_⟩
-    refine forwardLoc_div_eq DI F hu _ _ ?_
-    rw [hF_alg, hF_alg, hqf]
-    rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.coeRingHom (divByS p D₀.s))) =
-      DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) from rfl]
-    rw [hs_eq]
-    rw [map_mul (D₀.canonicalMap), map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap),
-      map_mul (DB.canonicalMap)]
-    rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
-      D₀.coeRingHom (divByS p D₀.s) from hps p]
-    rw [map_mul (DB.canonicalMap)]
-    ring
-  · -- `q = 1`: witness `algebraMap (coeRingHom (p/s)) · (1/b)`
-    rw [Finset.mem_singleton.mp hq1, mul_one]
-    refine ⟨algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.coeRingHom (divByS p D₀.s)) * divByS (1 : presheafValue D₀) DB.s,
-      (locSubring DB.P DB.T DB.s).mul_mem
-        (algebraMap_mem_locSubring DB.P DB.T DB.s (hA₀ p hp))
-        (divByS_mem_locSubring DB.P DB.T DB.s (Finset.mem_singleton_self _)), ?_⟩
-    refine forwardLoc_div_eq DI F hu _ _ ?_
-    rw [hF_alg, hF_alg]
-    rw [show DB.coeRingHom (algebraMap (presheafValue D₀) (Localization.Away DB.s)
-        (D₀.coeRingHom (divByS p D₀.s)) * divByS (1 : presheafValue D₀) DB.s) =
-      DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-        DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s) by rw [map_mul]; rfl]
-    rw [hs_eq]
-    rw [map_mul (D₀.canonicalMap), map_mul (DB.canonicalMap)]
-    rw [show D₀.canonicalMap p = D₀.canonicalMap D₀.s *
-      D₀.coeRingHom (divByS p D₀.s) from hps p]
-    rw [map_mul (DB.canonicalMap)]
-    calc DB.canonicalMap (D₀.canonicalMap D₀.s) *
-          DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) =
-        DB.canonicalMap (D₀.canonicalMap D₀.s) *
-          DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-          (DB.canonicalMap (D₀.canonicalMap f) *
-            DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s)) := by
-          rw [hinv, mul_one]
-      _ = DB.canonicalMap (D₀.canonicalMap D₀.s) * DB.canonicalMap (D₀.canonicalMap f) *
-          (DB.canonicalMap (D₀.coeRingHom (divByS p D₀.s)) *
-            DB.coeRingHom (divByS (1 : presheafValue D₀) DB.s)) := by ring
-
+  exact unitCover_relMinus_forward_witness_cases D₀ f DI DB F hF_alg hu hps hinv hA₀
+    (Finset.mem_singleton_self _) hs_eq p q hp hq
 set_option linter.unusedSectionVars false in
 /-- **Relative-minus forward continuity (M5)**. -/
 private theorem unitCover_relMinus_forwardCompletion_continuous

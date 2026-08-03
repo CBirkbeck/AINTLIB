@@ -13121,3 +13121,44 @@ Because two edits were already stacked on the file, the cheapest fix was `git st
 that one path, then re-running both edits from one corrected script. Worth remembering that
 reverting a single file mid-batch is cheap when the edits are scripted — it is only expensive if
 the earlier work was done by hand.
+
+### `unitCover_relMinus_forward_witness` 81 -> 34: the first `WedhornCechAcyclicity` target
+
+One extraction: the `rcases` over `q ∈ insert f {1}` and both its branches become
+`unitCover_relMinus_forward_witness_cases` (46 lines). The parent keeps its 33-line setup and
+ends in a single `exact`.
+
+**The technique that made this one work: keep the parameter names identical to the caller's
+`set`-locals.** The proof `set`s `DI`, `DB`, `F` and then states six facts about them. By naming
+the new lemma's parameters `DI`, `DB`, `F` too, both the sliced hypothesis statements *and* the
+branch bodies transfer verbatim — no substitution anywhere. That is much safer than spelling the
+terms out, which is what I had assumed this extraction would require.
+
+**Getting the types without guessing.** `DI`, `DB` and `F` needed explicit types. Rather than
+infer them from usage I probed the compiled module with a scratch file — `lake env lean` on three
+`have h : _ := …` lines, reading the types off the resulting `unsolved goals` message. That cost
+seconds against a ~6-minute module build per wrong guess, and it settled
+`DB : RationalLocData (presheafValue D₀)` (not `RationalLocData A`, which is what I would have
+written). Worth doing whenever a lemma's binder types are non-obvious: **the error message is the
+type oracle**.
+
+**Where abstraction had to stop.** Two steps genuinely need `DB`'s *definition*, not just its
+fields: `hA₀` is stated against `(presheafValue_concretePair D₀).A₀` where the goal wants
+`DB.P.A₀`, and `divByS_mem_locSubring … (Finset.mem_singleton_self _)` needs `1 ∈ DB.T`. Both
+became hypotheses (`hA₀` retyped to `DB.P.A₀`, plus a new `hDB_one`), and the caller discharges
+them by defeq since its `DB` is the concrete one. That is the general shape: *abstract the object,
+but pass whichever of its field-facts the proof actually opens up*.
+
+Four builds were spent on avoidable errors, all variations of things already in this log:
+
+* `insert D₀.s D₀.T` needs `DecidableEq A`, which the parent gets from its `classical` **tactic** —
+  a lemma's *statement* elaborates first, so the extracted lemma needs `open Classical in`.
+  (Identical to the `S ^ n₀` case in `SpvAI`.)
+* I dedented a block that was **already** at proof-body indent, putting the body at column 0.
+* The fix for that then used "first non-empty line at column 0" as the body's end — but the body
+  itself was at column 0, so the range came out empty and silently did nothing. With the body at
+  column 0 the only reliable end-marker is *the next declaration start*.
+* A blanket `s.replace` hit **two** occurrences: a sibling proof in the same file contains the same
+  `divByS_mem_locSubring … (Finset.mem_singleton_self _)` line. Scope every substitution to the
+  target declaration's line range, not the whole file — the assert caught it, but only because the
+  count was checked.
