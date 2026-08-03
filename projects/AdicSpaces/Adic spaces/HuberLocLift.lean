@@ -402,6 +402,86 @@ private theorem huber_one_lt_t_x
 --   `restrictIdealSingle g` witness.
 
 
+/-- Huber (e)(1): the constructed point lies in `Spa(B, B⁺)`. Continuity comes from the `A°°`
+engine — Huber (d) puts the characteristic restriction in `Spv(A, I)`, and Huber (c) sends every
+topologically nilpotent element below `1` — and integrality is Huber (b). -/
+private theorem huber_ofValuation_mem_spa
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    {Γt : Type*} [LinearOrderedCommGroupWithZero Γt]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (t : Valuation (Localization.Away x) Γt)
+    (hW1 : (t.comap (algebraMap (presheafValue D') (Localization.Away x))) 1 ≠ 0)
+    (hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
+      t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1)
+    (hW_lt_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
+      t (algebraMap (presheafValue D') (Localization.Away x) a) < 1)
+    (hbr : ∀ a b : presheafValue D',
+      (ValuationSpectrum.ofValuation ((t.comap (algebraMap (presheafValue D')
+        (Localization.Away x))).restrictIdealSingle 1 hW1)).vle a b ↔
+      ((t.comap (algebraMap (presheafValue D')
+        (Localization.Away x))).restrictIdealSingle 1 hW1) a ≤
+      ((t.comap (algebraMap (presheafValue D')
+        (Localization.Away x))).restrictIdealSingle 1 hW1) b) :
+    ValuationSpectrum.ofValuation ((t.comap (algebraMap (presheafValue D')
+        (Localization.Away x))).restrictIdealSingle 1 hW1)
+      ∈ Spa (presheafValue D') (presheafValue D')⁺ := by
+  set algB := algebraMap (presheafValue D') (Localization.Away x) with halgB_def
+  set rs := (t.comap algB).restrictIdealSingle 1 hW1 with hrs_def
+  -- HU-e(1): `w' ∈ Spa(B, B⁺)` = `w'.IsContinuous ∧ ∀ f ∈ B⁺, w'.vle f 1` (`mem_spa_iff`).
+  rw [mem_spa_iff]
+  refine ⟨?_, ?_⟩
+  · -- **Continuity of `w' = ofValuation rs`** (Huber [Hu2] Thm 3.1 reverse, general
+    -- f-adic form): the A°°-engine `Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO` at
+    -- the concrete pair `presheafValue_concretePair D'` (Tate-free since T901), with
+    --   • `h_in` (Huber (d)): the characteristic restriction is microbial, hence in
+    --     `Spv(A, I)` for every `I` (`ofValuation_restrictIdealSingle_one_isInSpvAI`);
+    --   • `h_le_AOO` (Huber (c), `≤`-form): `hW_lt_AOO` + `restrictIdealSingle_le_one`;
+    --   • `h_lt_one` (ideal-of-definition decay): ideal elements are topologically
+    --     nilpotent, so `hW_lt_AOO` + `restrictIdealSingle_lt_one`.
+    have h_in : Spv.IsInSpvAI (ValuationSpectrum.ofValuation rs)
+        (Ideal.map (presheafValue_concretePair D').A₀.subtype
+          (presheafValue_concretePair D').I) :=
+      ofValuation_restrictIdealSingle_one_isInSpvAI (t.comap algB) hW1 _
+    letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
+    haveI hrsC : rs.Compatible := Valuation.Compatible.ofValuation rs
+    have hequiv : (ValuativeRel.valuation (presheafValue D')).IsEquiv rs := fun a b =>
+      (Valuation.Compatible.vle_iff_le
+          (v := ValuativeRel.valuation (presheafValue D')) a b).symm.trans
+        (Valuation.Compatible.vle_iff_le (v := rs) a b)
+    have hlt : ∀ p q : presheafValue D',
+        ((ValuativeRel.valuation (presheafValue D')) p <
+            (ValuativeRel.valuation (presheafValue D')) q
+          ↔ rs p < rs q) := fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
+    have h_le_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
+        (ValuativeRel.valuation (presheafValue D')) a ≤ 1 := by
+      intro a ha
+      have hrs_le : rs a ≤ 1 :=
+        restrictIdealSingle_le_one hW1 (le_of_lt (hW_lt_AOO a ha))
+      have hkey := (hequiv a 1).mpr (by rw [map_one]; exact hrs_le)
+      rwa [map_one] at hkey
+    have h_lt_one : ∀ a ∈ (presheafValue_concretePair D').I,
+        (ValuativeRel.valuation (presheafValue D'))
+          ((presheafValue_concretePair D').A₀.subtype a) < 1 := by
+      intro a ha
+      have hnilp : IsTopologicallyNilpotent
+          ((presheafValue_concretePair D').A₀.subtype a) :=
+        (presheafValue_concretePair D').isTopologicallyNilpotent_of_mem ha
+      have hrs_lt : rs ((presheafValue_concretePair D').A₀.subtype a) < 1 :=
+        restrictIdealSingle_lt_one hW1 (hW_lt_AOO _ hnilp)
+      have hkey := (hlt ((presheafValue_concretePair D').A₀.subtype a) 1).mpr
+        (by rw [map_one]; exact hrs_lt)
+      rwa [map_one] at hkey
+    exact Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO (presheafValue_concretePair D')
+      (ValuationSpectrum.ofValuation rs) h_in h_le_AOO h_lt_one
+  · -- `w' ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺` ⟹ `W f = t(algB f) ≤ 1` (`hW_le`),
+    -- lifted to `rs` by `restrictIdealSingle_le_one`, then to `w'.vle` by `hbr`.
+    intro f hf
+    rw [hbr, map_one]
+    exact restrictIdealSingle_le_one hW1 (hW_le f hf)
+
+
 set_option linter.unusedSectionVars false in
 /-- **Huber [Hu2] 3.3(i)**: an element of `presheafValue D'` outside the ring of integral
 elements admits a Spa point valuing it above `1`.
@@ -488,57 +568,7 @@ theorem exists_spa_point_not_vle_one_huber
     exact Valuation.Compatible.vle_iff_le (v := rs) a b
   -- `W a = t(algB a)` definitionally, so the `hW_*` facts are facts about `W = t.comap algB`.
   refine ⟨ValuationSpectrum.ofValuation rs, ?_, ?_⟩
-  · -- HU-e(1): `w' ∈ Spa(B, B⁺)` = `w'.IsContinuous ∧ ∀ f ∈ B⁺, w'.vle f 1` (`mem_spa_iff`).
-    rw [mem_spa_iff]
-    refine ⟨?_, ?_⟩
-    · -- **Continuity of `w' = ofValuation rs`** (Huber [Hu2] Thm 3.1 reverse, general
-      -- f-adic form): the A°°-engine `Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO` at
-      -- the concrete pair `presheafValue_concretePair D'` (Tate-free since T901), with
-      --   • `h_in` (Huber (d)): the characteristic restriction is microbial, hence in
-      --     `Spv(A, I)` for every `I` (`ofValuation_restrictIdealSingle_one_isInSpvAI`);
-      --   • `h_le_AOO` (Huber (c), `≤`-form): `hW_lt_AOO` + `restrictIdealSingle_le_one`;
-      --   • `h_lt_one` (ideal-of-definition decay): ideal elements are topologically
-      --     nilpotent, so `hW_lt_AOO` + `restrictIdealSingle_lt_one`.
-      have h_in : Spv.IsInSpvAI (ValuationSpectrum.ofValuation rs)
-          (Ideal.map (presheafValue_concretePair D').A₀.subtype
-            (presheafValue_concretePair D').I) :=
-        ofValuation_restrictIdealSingle_one_isInSpvAI (t.comap algB) hW1 _
-      letI : ValuativeRel (presheafValue D') := (ValuationSpectrum.ofValuation rs).toValuativeRel
-      haveI hrsC : rs.Compatible := Valuation.Compatible.ofValuation rs
-      have hequiv : (ValuativeRel.valuation (presheafValue D')).IsEquiv rs := fun a b =>
-        (Valuation.Compatible.vle_iff_le
-            (v := ValuativeRel.valuation (presheafValue D')) a b).symm.trans
-          (Valuation.Compatible.vle_iff_le (v := rs) a b)
-      have hlt : ∀ p q : presheafValue D',
-          ((ValuativeRel.valuation (presheafValue D')) p <
-              (ValuativeRel.valuation (presheafValue D')) q
-            ↔ rs p < rs q) := fun p q => le_iff_le_iff_lt_iff_lt.mp (hequiv q p)
-      have h_le_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
-          (ValuativeRel.valuation (presheafValue D')) a ≤ 1 := by
-        intro a ha
-        have hrs_le : rs a ≤ 1 :=
-          restrictIdealSingle_le_one hW1 (le_of_lt (hW_lt_AOO a ha))
-        have hkey := (hequiv a 1).mpr (by rw [map_one]; exact hrs_le)
-        rwa [map_one] at hkey
-      have h_lt_one : ∀ a ∈ (presheafValue_concretePair D').I,
-          (ValuativeRel.valuation (presheafValue D'))
-            ((presheafValue_concretePair D').A₀.subtype a) < 1 := by
-        intro a ha
-        have hnilp : IsTopologicallyNilpotent
-            ((presheafValue_concretePair D').A₀.subtype a) :=
-          (presheafValue_concretePair D').isTopologicallyNilpotent_of_mem ha
-        have hrs_lt : rs ((presheafValue_concretePair D').A₀.subtype a) < 1 :=
-          restrictIdealSingle_lt_one hW1 (hW_lt_AOO _ hnilp)
-        have hkey := (hlt ((presheafValue_concretePair D').A₀.subtype a) 1).mpr
-          (by rw [map_one]; exact hrs_lt)
-        rwa [map_one] at hkey
-      exact Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO (presheafValue_concretePair D')
-        (ValuationSpectrum.ofValuation rs) h_in h_le_AOO h_lt_one
-    · -- `w' ≤ 1` on `B⁺` (Huber property (b)): `f ∈ B⁺` ⟹ `W f = t(algB f) ≤ 1` (`hW_le`),
-      -- lifted to `rs` by `restrictIdealSingle_le_one`, then to `w'.vle` by `hbr`.
-      intro f hf
-      rw [hbr, map_one]
-      exact restrictIdealSingle_le_one hW1 (hW_le f hf)
+  · exact huber_ofValuation_mem_spa D' x t hW1 hW_le hW_lt_AOO hbr
   · -- HU-e(2): `¬ w'.vle x 1`, i.e. `w'(x) > 1`: `1 < W x = t(algB x)` (`hW_x`, the Huber
     -- witness `s(x⁻¹) < 1` + `x⁻¹·x = 1`), lifted to `rs` by `restrictIdealSingle_one_lt`,
     -- then to `w'.vle` by `hbr`.

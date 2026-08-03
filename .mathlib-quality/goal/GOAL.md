@@ -13329,3 +13329,43 @@ Two slicing bugs, both in boundary detection, both caught only by the build:
   them, so the `set` was swallowed into the extracted body and deleted from the parent, producing
   `Unknown identifier algB` forty lines later. The end-marker must be *the next line of any kind
   at the same level*, not the next `have`.
+
+### `exists_spa_point_not_vle_one_huber` 103 -> 61: Huber (e)(1) named
+
+`huber_ofValuation_mem_spa` (45 code) takes the 43-line first bullet — the proof that the
+constructed valuation is a point of `Spa(B, B⁺)`, via continuity from the `A°°` engine plus
+integrality. Cumulative on this target: **141 -> 61**.
+
+The interface choice that made it fit: `hW1` and `hbr` pass as *parameters* with `rs` spelled out
+in their types, while only `algB` and `rs` are re-`set` inside. Re-deriving all four locals
+(`algB`, `hW1`, `rs`, `hbr`) internally would have cost 10 lines and landed the body at 53.
+Signature length does not count toward the measure, so pushing verbosity into the binders and
+keeping the body short is the right trade every time.
+
+### Attempted and reverted: lifting `hW_le` / `ht_inv` (the last 22 lines)
+
+Those two are what stands between this target and clearing. Both reach into the deep construction,
+and I tried to thread it by spelling `Radj` (a closed term in `D'` and `x`) and abstracting the
+two algebra instances as binders. It fails on **instance defeq**:
+
+    Subalgebra.algebraMap_mem … ⟨f, hf⟩ has type
+      (algebraMap ↥(presheafValue D')⁺ (Localization.Away x)) ⟨f, hf⟩ ∈ …
+    but is expected to have type
+      (algebraMap (presheafValue D') (Localization.Away x)) f ∈ …
+
+The parent installs `letI : Algebra ↥(presheafValue D')⁺ (presheafValue D') :=
+(presheafValue D')⁺.subtype.toAlgebra` — a *specific* algebra structure. Declaring
+`[Algebra ↥(presheafValue D')⁺ (presheafValue D')]` in the extracted lemma introduces an
+*arbitrary* one, and the two `algebraMap`s are then not definitionally equal. The same mismatch
+made `ht_equiv`'s `s` print as `s✝` against the parameter `s`.
+
+**The rule: a `letI` that installs a specific structure cannot be abstracted to an instance
+binder.** It must either be reproduced verbatim inside the extracted lemma (the statement then
+needs `letI … in` on the declaration, since the statement mentions `Radj`), or the extraction has
+to stop short of the constructions that depend on it. This is the same class of obstacle as
+`isUnit_mk_s`'s `ι` — recorded there as "requires threading 4 explicit instances" — and it is now
+clear that *threading* is not enough: the instances must be the caller's, not fresh ones.
+
+Reverted that attempt and re-applied only the verified bullet extraction. Worth noting the revert
+was cheap because both edits were scripted: `git stash push -u` on the one path, then re-run the
+good script.
