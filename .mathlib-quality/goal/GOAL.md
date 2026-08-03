@@ -11577,3 +11577,72 @@ section variables. It needs explicit `(t : E) (ht : ‖t‖ ≤ 1)` arguments.
 
 Sizes after that: `hloc1` surj bullet 41, `hloc1` 20, `hloc2` surj bullet 33, `hloc2` 22,
 and `flat_polyToP` ≈ 23 — which clears it.
+
+### `flat_polyToP` CLEARED: 181 → under 50, six lemmas
+
+The section refactor paid off exactly as predicted. Sequence:
+
+| step | lemma | body |
+|---|---|---|
+| tower | `ballDenoms` (def), `polyBallCod` (def) | — |
+| B | `flat_unitBall_over_polyBall` | 27 |
+| general | `exists_pow_mul_norm_le_one` | 12 |
+| general | `pow_mul_norm_le_one_of_le` | 9 |
+| C.surj | `ballDenoms_surj` | 37 |
+| C | `ballDenoms_isLocalization` | 20 |
+| D.surj | `algebraMapSubmonoid_ballDenoms_surj` | 33 |
+| D | `algebraMapSubmonoid_ballDenoms_isLocalization` | 22 |
+
+181 → 142 → 133 → 127 → 59 → **off the list**. Over-width 19 → **18** (better than baseline).
+
+**Reading the structure beat guessing it, twice.** The `surj` bullets went in **first try**
+because I looked up `Submonoid.IsLocalizationMap`'s fields
+(`map_units` / `surj (z) : ∃ x : M × S, z * f x.2 = f x.1` / `exists_of_eq`) instead of
+reconstructing them from `refine ⟨⟨?_, ?_, ?_⟩⟩`. That is the exact failure that cost six
+attempts on RobbaPresentation. `exact` also matches up to defeq, so the coercion
+`(x.2 : …)` did not have to be spelled the way the goal spells it — a rewrite would have
+been far less forgiving.
+
+**Two generalisations, not just lifts.** `hex` and `hball` were both stated about
+`MvPolynomial.coeff s z`, and neither `s` nor `z` appears in either argument. They are
+really "some power of `t` scales any `a : E` into the unit ball" and "raising the exponent
+preserves a unit-ball bound". Extracting them *as stated* would have produced two lemmas
+nobody could reuse.
+
+**Three small faults, all mechanical.** `ballDenoms` needed `noncomputable`; the new lemmas
+needed `omit [CompleteSpace E] in`; and `ballDenoms_isLocalization` used `htu`, which I had
+left out of its signature — the same "copy the binder list from the theorem you are
+extracting from" rule as Example638. One new syntax fact:
+
+> `omit … in` goes **above** the docstring, not between it and the declaration. A docstring
+> cannot attach to `omit`, and the error says `unexpected token 'omit'; expected 'lemma'`.
+
+Scoreboard: **486 → 44 actionable.**
+
+### Correction: `idealOfDef_pow_isClosed_aux` does NOT need the section treatment
+
+I recorded it as "the identical problem" to `flat_polyToP` — blocked on instance preamble
+that belongs in a section. Having now read it rather than skimmed the shape, that is wrong
+in two ways:
+
+1. **Most of its preamble is facts, not instances.** `hadic_eq`, `hg_dense`, `hg_ui`,
+   `hcomplete`, `hg_cont`, `hJn_open`, `hrus_bot`, `hcs` are `have`s with written-down
+   statements about `D₀`. They extract as ordinary lemmas taking `D₀` — no `local instance`
+   needed. Only `letI := D₀.uniformSpace; …` (one line) and two `haveI`s are instances.
+2. **Its statements are already instance-independent.** Unlike `flat_polyToP`, this proof
+   writes `@IsUniformInducing _ _ (UniformSpace.comap …) (UniformSpace.comap …) g` —
+   uniform structures spelled *explicitly* in the statement rather than left to inference.
+   That is precisely what makes the pieces stateable outside the proof already.
+
+Also, my "74-line preamble" figure counted raw lines including a **15-line explanatory
+comment block** (lines 435–449). The measure counts code lines only, so the real preamble
+is ~54.
+
+So the plan here is ordinary extraction: `hge` (19), `hle` (89, needs its own split),
+`hπ_cont` (17), plus whichever preamble facts leave with them. The open question is the one
+the Example638 win turned on — which preamble items serve exactly one of the three steps,
+and therefore depart with it.
+
+> The lesson is the same one that keeps recurring: the shape of a proof from a structural
+> scan (`letI` count, `anon` count) is a hypothesis, not a diagnosis. Reading the first
+> fifty lines settles it, and costs one tool call.

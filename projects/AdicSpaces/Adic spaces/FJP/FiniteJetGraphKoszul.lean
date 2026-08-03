@@ -1657,6 +1657,26 @@ noncomputable local instance : IsScalarTower (MvPolynomial (Fin m) ↥(unitBall 
     ↥(unitBall (P E m)) (P E m) :=
   IsScalarTower.of_algebraMap_eq (fun q => rfl)
 
+/-- Denominators for the localization `E₀[T] → E[T]`: powers of the scaling element `t`,
+viewed in the unit ball. `t` and its norm bound are explicit arguments because this section
+sits after `end AdicBridge`, where they stop being section variables. -/
+private noncomputable def ballDenoms (t : E) (ht : ‖t‖ ≤ 1) :
+    Submonoid (MvPolynomial (Fin m) ↥(unitBall E)) :=
+  Submonoid.powers (MvPolynomial.C (⟨t, ht⟩ : ↥(unitBall E)))
+
+omit [CompleteSpace E] in
+/-- Raising the exponent preserves a unit-ball bound: if `‖t ^ k * a‖ ≤ 1` and `k ≤ N`, then
+`‖t ^ N * a‖ ≤ 1`, since `‖t‖ ≤ 1`. -/
+private theorem pow_mul_norm_le_one_of_le (t : E) (ht1 : ‖t‖ ≤ 1)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) {k N : ℕ} (hkN : k ≤ N) {a : E}
+    (h : ‖t ^ k * a‖ ≤ 1) : ‖t ^ N * a‖ ≤ 1 := by
+  rw [show N = (N - k) + k by omega, pow_add, mul_assoc,
+    norm_pow_mul_of_scale (E := E) hscale (N - k)]
+  calc ‖t‖ ^ (N - k) * ‖t ^ k * a‖
+      ≤ 1 * 1 := mul_le_mul (pow_le_one₀ (norm_nonneg t) ht1) h (norm_nonneg _) zero_le_one
+    _ = 1 := one_mul 1
+
+omit [CompleteSpace E] in
 /-- Some power of a norm-`< 1` scaling element carries any element of `E` into the unit
 ball. Extracted from `flat_polyToP`, where it was stated for `MvPolynomial.coeff s z`
 though neither `s` nor `z` plays any role. -/
@@ -1672,6 +1692,150 @@ private theorem exists_pow_mul_norm_le_one (t : E) (ht1 : ‖t‖ < 1)
     calc ‖t‖ ^ n * ‖a‖
         ≤ ‖a‖⁻¹ * ‖a‖ := mul_le_mul_of_nonneg_right hn.le (norm_nonneg _)
       _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)
+
+omit [CompleteSpace E] in
+/-- `surj` field of `IsLocalization (ballDenoms t ht1.le) (MvPolynomial (Fin m) E)`: clear
+denominators by multiplying through by a high enough power of `t`. -/
+private theorem ballDenoms_surj
+    (t : E) (ht1 : ‖t‖ < 1) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (z : MvPolynomial (Fin m) E) :
+    ∃ x : MvPolynomial (Fin m) ↥(unitBall E) × (ballDenoms (m := m) t ht1.le),
+      z * algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E)
+          (x.2 : MvPolynomial (Fin m) ↥(unitBall E)) =
+        algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E) x.1 := by
+  have hex : ∀ s : Fin m →₀ ℕ, ∃ n : ℕ, ‖t ^ n * MvPolynomial.coeff s z‖ ≤ 1 :=
+    fun s => exists_pow_mul_norm_le_one t ht1 hscale (MvPolynomial.coeff s z)
+  choose nf hnf using hex
+  set N := z.support.sup nf with hN
+  have hball : ∀ s : Fin m →₀ ℕ, ‖t ^ N * MvPolynomial.coeff s z‖ ≤ 1 := fun s => by
+    by_cases hs : s ∈ z.support
+    · exact pow_mul_norm_le_one_of_le t ht1.le hscale (Finset.le_sup hs) (hnf s)
+    · rw [MvPolynomial.notMem_support_iff.mp hs, mul_zero, norm_zero]
+      exact zero_le_one
+  refine ⟨(∑ s ∈ z.support, MvPolynomial.monomial s
+    (⟨t ^ N * MvPolynomial.coeff s z, hball s⟩ : ↥(unitBall E)),
+    ⟨MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ N, ⟨N, rfl⟩⟩), ?_⟩
+  show z * algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E)
+      (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ N) = _
+  have hCt : algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E)
+      (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ N) = MvPolynomial.C t ^ N := by
+    show MvPolynomial.map (unitBall E).subtype _ = _
+    rw [map_pow, MvPolynomial.map_C]
+    rfl
+  rw [hCt, mul_comm z (MvPolynomial.C t ^ N)]
+  refine MvPolynomial.ext _ _ fun s => ?_
+  rw [← map_pow, MvPolynomial.coeff_C_mul]
+  show _ = MvPolynomial.coeff s (MvPolynomial.map (unitBall E).subtype
+    (∑ s ∈ z.support, MvPolynomial.monomial s
+      (⟨t ^ N * MvPolynomial.coeff s z, hball s⟩ : ↥(unitBall E))))
+  rw [MvPolynomial.coeff_map, MvPolynomial.coeff_sum]
+  by_cases hs : s ∈ z.support
+  · rw [Finset.sum_eq_single s (fun b _ hb => by
+      rw [MvPolynomial.coeff_monomial, if_neg hb]) (fun hns => absurd hs hns),
+      MvPolynomial.coeff_monomial, if_pos rfl]
+    rfl
+  · rw [MvPolynomial.notMem_support_iff.mp hs, mul_zero,
+      Finset.sum_eq_zero fun b hb => by
+        rw [MvPolynomial.coeff_monomial,
+          if_neg (show ¬ b = s from fun hbs => hs (hbs ▸ hb))]]
+    rfl
+
+
+/-- `surj` field of `IsLocalization (algebraMapSubmonoid _ (ballDenoms t ht1.le)) (P E m)`:
+scale `F` by a power of `t` until it lies in the unit ball. -/
+private theorem algebraMapSubmonoid_ballDenoms_surj
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (F : P E m) :
+    ∃ x : ↥(unitBall (P E m)) ×
+        (Algebra.algebraMapSubmonoid ↥(unitBall (P E m)) (ballDenoms (m := m) t ht1.le)),
+      F * algebraMap ↥(unitBall (P E m)) (P E m) (x.2 : ↥(unitBall (P E m))) =
+        algebraMap ↥(unitBall (P E m)) (P E m) x.1 := by
+  have hex : ∃ n : ℕ, ‖t‖ ^ n * ‖F‖ ≤ 1 := by
+    rcases eq_or_ne ‖F‖ 0 with h0 | h0
+    · exact ⟨0, by rw [h0, mul_zero]; exact zero_le_one⟩
+    · have hpos : 0 < ‖F‖ := lt_of_le_of_ne (norm_nonneg F) (Ne.symm h0)
+      obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
+      exact ⟨n, by
+        calc ‖t‖ ^ n * ‖F‖ ≤ ‖F‖⁻¹ * ‖F‖ :=
+              mul_le_mul_of_nonneg_right hn.le (norm_nonneg _)
+          _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)⟩
+  obtain ⟨n, hn⟩ := hex
+  have hmem : ‖polyToP (MvPolynomial.C t) ^ n * F‖ ≤ 1 := by
+    rw [norm_pow_mul_of_scale (E := P E m)
+      (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G) n,
+      norm_tP t hscale]
+    exact hn
+  refine ⟨(⟨polyToP (MvPolynomial.C t) ^ n * F, hmem⟩,
+    ⟨polyBallCod (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n),
+      ⟨MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n, ⟨n, rfl⟩, rfl⟩⟩), ?_⟩
+  show F * (unitBall (P E m)).subtype (polyBallCod _) = (unitBall (P E m)).subtype _
+  have hgBval : (unitBall (P E m)).subtype (polyBallCod (MvPolynomial.C
+      (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n)) = polyToP (MvPolynomial.C t) ^ n := by
+    show polyBall (E := E) (m := m)
+      (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n) = _
+    rw [map_pow]
+    congr 1
+    show polyToP (MvPolynomial.map (unitBall E).subtype
+      (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)))) = _
+    rw [MvPolynomial.map_C]
+    rfl
+  rw [hgBval]
+  show F * polyToP (MvPolynomial.C t) ^ n = polyToP (MvPolynomial.C t) ^ n * F
+  ring
+
+
+/-- `E[T]` is the localization of `E₀[T]` at the powers of `t`. -/
+private theorem ballDenoms_isLocalization
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
+    IsLocalization (ballDenoms (m := m) t ht1.le) (MvPolynomial (Fin m) E) := by
+  refine ⟨⟨?_, ?_, ?_⟩⟩
+  · rintro ⟨y, hy⟩
+    obtain ⟨k, hk⟩ := hy
+    have heq : algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E) y =
+        MvPolynomial.C t ^ k := by
+      rw [← hk]
+      show MvPolynomial.map (unitBall E).subtype _ = _
+      rw [map_pow, MvPolynomial.map_C]
+      rfl
+    show IsUnit (algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E) y)
+    rw [heq]
+    exact (htu.map MvPolynomial.C).pow k
+  · exact ballDenoms_surj t ht1 hscale
+  · intro x y h
+    refine ⟨1, ?_⟩
+    have hinj : Function.Injective
+        (MvPolynomial.map (σ := Fin m) (unitBall E).subtype) :=
+      MvPolynomial.map_injective _ Subtype.val_injective
+    rw [hinj h]
+
+/-- `P E m` is the localization of its unit ball at the image of the powers of `t`. -/
+private theorem algebraMapSubmonoid_ballDenoms_isLocalization
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
+    IsLocalization
+        (Algebra.algebraMapSubmonoid ↥(unitBall (P E m)) (ballDenoms (m := m) t ht1.le))
+        (P E m) := by
+  refine ⟨⟨?_, ?_, ?_⟩⟩
+  · rintro ⟨y, ⟨w, hw, rfl⟩⟩
+    obtain ⟨k, hk⟩ := hw
+    show IsUnit ((unitBall (P E m)).subtype (polyBallCod w))
+    have heq : (unitBall (P E m)).subtype (polyBallCod w) = polyBall (E := E) (m := m) w := rfl
+    rw [heq, ← hk, map_pow]
+    have hCt : polyBall (E := E) (m := m)
+        (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E))) = polyToP (MvPolynomial.C t) := by
+      show polyToP (MvPolynomial.map (unitBall E).subtype
+        (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)))) = _
+      rw [MvPolynomial.map_C]
+      rfl
+    rw [hCt]
+    exact (isUnit_tP t htu).pow k
+  · exact algebraMapSubmonoid_ballDenoms_surj t htu ht1 ht0 hscale
+  · intro x y h
+    refine ⟨1, ?_⟩
+    have hinj : Function.Injective ((unitBall (P E m)).subtype) :=
+      Subtype.val_injective
+    rw [hinj h]
+
 
 /-- Step B of `flat_polyToP`: the unit ball of `P E m` is flat over `E₀[T]`, being its
 `I₀`-adic completion and `E₀[T]` noetherian. -/
@@ -1730,124 +1894,11 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
     flat_unitBall_over_polyBall hE₀ t htu ht1 ht0 hscale
   -- Step C: localization instances
   set S₀ : Submonoid (MvPolynomial (Fin m) ↥(unitBall E)) :=
-    Submonoid.powers (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E))) with hS₀
-  haveI hloc1 : IsLocalization S₀ (MvPolynomial (Fin m) E) := by
-    refine ⟨⟨?_, ?_, ?_⟩⟩
-    · rintro ⟨y, hy⟩
-      obtain ⟨k, hk⟩ := hy
-      have heq : algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E) y =
-          MvPolynomial.C t ^ k := by
-        rw [← hk]
-        show MvPolynomial.map (unitBall E).subtype _ = _
-        rw [map_pow, MvPolynomial.map_C]
-        rfl
-      show IsUnit (algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E) y)
-      rw [heq]
-      exact (htu.map MvPolynomial.C).pow k
-    · intro z
-      have hex : ∀ s : Fin m →₀ ℕ, ∃ n : ℕ, ‖t ^ n * MvPolynomial.coeff s z‖ ≤ 1 :=
-        fun s => exists_pow_mul_norm_le_one t ht1 hscale (MvPolynomial.coeff s z)
-      choose nf hnf using hex
-      set N := z.support.sup nf with hN
-      have hball : ∀ s : Fin m →₀ ℕ, ‖t ^ N * MvPolynomial.coeff s z‖ ≤ 1 := fun s => by
-        by_cases hs : s ∈ z.support
-        · have hle : nf s ≤ N := Finset.le_sup hs
-          rw [show N = (N - nf s) + nf s by omega, pow_add, mul_assoc,
-            norm_pow_mul_of_scale (E := E) hscale (N - nf s)]
-          calc ‖t‖ ^ (N - nf s) * ‖t ^ nf s * MvPolynomial.coeff s z‖
-              ≤ 1 * 1 := mul_le_mul (pow_le_one₀ (norm_nonneg t) ht1.le) (hnf s)
-                (norm_nonneg _) zero_le_one
-            _ = 1 := one_mul 1
-        · rw [MvPolynomial.notMem_support_iff.mp hs, mul_zero, norm_zero]
-          exact zero_le_one
-      refine ⟨(∑ s ∈ z.support, MvPolynomial.monomial s
-        (⟨t ^ N * MvPolynomial.coeff s z, hball s⟩ : ↥(unitBall E)),
-        ⟨MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ N, ⟨N, rfl⟩⟩), ?_⟩
-      show z * algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E)
-          (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ N) = _
-      have hCt : algebraMap (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E)
-          (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ N) = MvPolynomial.C t ^ N := by
-        show MvPolynomial.map (unitBall E).subtype _ = _
-        rw [map_pow, MvPolynomial.map_C]
-        rfl
-      rw [hCt, mul_comm z (MvPolynomial.C t ^ N)]
-      refine MvPolynomial.ext _ _ fun s => ?_
-      rw [← map_pow, MvPolynomial.coeff_C_mul]
-      show _ = MvPolynomial.coeff s (MvPolynomial.map (unitBall E).subtype
-        (∑ s ∈ z.support, MvPolynomial.monomial s
-          (⟨t ^ N * MvPolynomial.coeff s z, hball s⟩ : ↥(unitBall E))))
-      rw [MvPolynomial.coeff_map, MvPolynomial.coeff_sum]
-      by_cases hs : s ∈ z.support
-      · rw [Finset.sum_eq_single s (fun b _ hb => by
-          rw [MvPolynomial.coeff_monomial, if_neg hb]) (fun hns => absurd hs hns),
-          MvPolynomial.coeff_monomial, if_pos rfl]
-        rfl
-      · rw [MvPolynomial.notMem_support_iff.mp hs, mul_zero,
-          Finset.sum_eq_zero fun b hb => by
-            rw [MvPolynomial.coeff_monomial,
-              if_neg (show ¬ b = s from fun hbs => hs (hbs ▸ hb))]]
-        rfl
-    · intro x y h
-      refine ⟨1, ?_⟩
-      have hinj : Function.Injective
-          (MvPolynomial.map (σ := Fin m) (unitBall E).subtype) :=
-        MvPolynomial.map_injective _ Subtype.val_injective
-      rw [hinj h]
+    ballDenoms t ht1.le with hS₀
+  haveI hloc1 := ballDenoms_isLocalization (m := m) t htu ht1 hscale
   -- Step D: `P_E` is the localized module of the ball along `S₀`
-  haveI hloc2 : IsLocalization (Algebra.algebraMapSubmonoid ↥(unitBall (P E m)) S₀)
-      (P E m) := by
-    refine ⟨⟨?_, ?_, ?_⟩⟩
-    · rintro ⟨y, ⟨w, hw, rfl⟩⟩
-      obtain ⟨k, hk⟩ := hw
-      show IsUnit ((unitBall (P E m)).subtype (polyBallCod w))
-      have heq : (unitBall (P E m)).subtype (polyBallCod w) = polyBall (E := E) (m := m) w := rfl
-      rw [heq, ← hk, map_pow]
-      have hCt : polyBall (E := E) (m := m)
-          (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E))) = polyToP (MvPolynomial.C t) := by
-        show polyToP (MvPolynomial.map (unitBall E).subtype
-          (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)))) = _
-        rw [MvPolynomial.map_C]
-        rfl
-      rw [hCt]
-      exact (isUnit_tP t htu).pow k
-    · intro F
-      have hex : ∃ n : ℕ, ‖t‖ ^ n * ‖F‖ ≤ 1 := by
-        rcases eq_or_ne ‖F‖ 0 with h0 | h0
-        · exact ⟨0, by rw [h0, mul_zero]; exact zero_le_one⟩
-        · have hpos : 0 < ‖F‖ := lt_of_le_of_ne (norm_nonneg F) (Ne.symm h0)
-          obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
-          exact ⟨n, by
-            calc ‖t‖ ^ n * ‖F‖ ≤ ‖F‖⁻¹ * ‖F‖ :=
-                  mul_le_mul_of_nonneg_right hn.le (norm_nonneg _)
-              _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)⟩
-      obtain ⟨n, hn⟩ := hex
-      have hmem : ‖polyToP (MvPolynomial.C t) ^ n * F‖ ≤ 1 := by
-        rw [norm_pow_mul_of_scale (E := P E m)
-          (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G) n,
-          norm_tP t hscale]
-        exact hn
-      refine ⟨(⟨polyToP (MvPolynomial.C t) ^ n * F, hmem⟩,
-        ⟨polyBallCod (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n),
-          ⟨MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n, ⟨n, rfl⟩, rfl⟩⟩), ?_⟩
-      show F * (unitBall (P E m)).subtype (polyBallCod _) = (unitBall (P E m)).subtype _
-      have hgBval : (unitBall (P E m)).subtype (polyBallCod (MvPolynomial.C
-          (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n)) = polyToP (MvPolynomial.C t) ^ n := by
-        show polyBall (E := E) (m := m)
-          (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) ^ n) = _
-        rw [map_pow]
-        congr 1
-        show polyToP (MvPolynomial.map (unitBall E).subtype
-          (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)))) = _
-        rw [MvPolynomial.map_C]
-        rfl
-      rw [hgBval]
-      show F * polyToP (MvPolynomial.C t) ^ n = polyToP (MvPolynomial.C t) ^ n * F
-      ring
-    · intro x y h
-      refine ⟨1, ?_⟩
-      have hinj : Function.Injective ((unitBall (P E m)).subtype) :=
-        Subtype.val_injective
-      rw [hinj h]
+  haveI hloc2 := algebraMapSubmonoid_ballDenoms_isLocalization
+    (m := m) t htu ht1 ht0 hscale
   -- Step E: base change along the localization and transport of flatness
   haveI hlocmod : IsLocalizedModule S₀
       ((IsScalarTower.toAlgHom (MvPolynomial (Fin m) ↥(unitBall E)) ↥(unitBall (P E m))
