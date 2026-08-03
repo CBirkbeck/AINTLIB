@@ -13297,3 +13297,35 @@ is its setup**, not its blocks: `Radj`, `s`, `t`, `ht_equiv`, `hs_le` arrive thr
 anonymous universe/instance binders (`⟨Γs, _, s, …⟩`), plus two `letI : Algebra …` instances, so
 the shared parameter block for the extracted lemmas runs to about twelve binders including two
 anonymous instances. That is threadable but wants a dedicated pass rather than a batch.
+
+### `exists_spa_point_not_vle_one_huber` 141 -> 103: Huber's (c) and (d) named
+
+Two of the five blocks lifted. The count does not move (103 is still over 50), but these are the
+two that *could* be separated cheaply, and naming them is worth having on its own:
+
+| new lemma | code | Huber's property |
+|---|---|---|
+| `huber_t_lt_one_of_topologicallyNilpotent` | 24 | (c) `a` topologically nilpotent ⟹ `t (algebraMap a) < 1` |
+| `huber_one_lt_t_x` | 18 | (d) `1 < t (algebraMap x)` — what makes the Spa point fail `vle x 1` |
+
+**The dependency structure is what made these two separable and the others not.** A grep of which
+locals each block touches shows the deep construction — `Radj`, `s`, `ht_equiv`, `hs_le`, the two
+`letI : Algebra` instances — is confined to `hW_le` and `ht_inv`. Every *later* block depends only
+on those two derived facts plus `t` itself. So (c) and (d) need six binders, while lifting `hW_le`
+or `ht_inv` would need about twelve, several of them anonymous (`obtain ⟨Γs, _, s, …⟩`).
+
+Doing that grep before choosing what to lift is the transferable part: **rank blocks by how deep
+into the setup they reach, not just by size**. The 43-line first bullet is the biggest block here,
+but it needs `rs` and `algB` — `set`-locals defined *after* the point I was extracting from — so
+it is a later round's job, not this one's.
+
+Two slicing bugs, both in boundary detection, both caught only by the build:
+
+* The instance-binder block was sliced as a fixed `L[t0+1:t0+5]`, which swallowed the first *value*
+  binder line `(D' : RationalLocData A) …` and so duplicated `D'` and `x`. Fixed by scanning
+  forward to the first line starting `(` instead of counting lines. **Never slice a binder block
+  by a fixed count.**
+* `have hW_x`'s body was taken as everything up to `have hW1` — but `set algB := …` sits between
+  them, so the `set` was swallowed into the extracted body and deleted from the parent, producing
+  `Unknown identifier algB` forty lines later. The end-marker must be *the next line of any kind
+  at the same level*, not the next `have`.

@@ -332,6 +332,76 @@ nonvanishing unit `π`). Both are replaced: `presheafValue_isHuberRing_huber` an
 `A°°`-form general engine `isContinuous_of_isInSpvAI_of_lt_one_AOO` +
 the characteristic restriction `restrictIdeal · ⊥` (Huber's own `v = u|cΓ_u`). -/
 
+/-- Huber (c): a topologically nilpotent `a` has `t (algebraMap a) < 1`. Some power `aⁿ·x` is
+integral, so `t (aⁿ) = t (aⁿ·x) · t (x⁻¹) < 1`, and `t a < 1` follows since `n ≥ 1`. -/
+private theorem huber_t_lt_one_of_topologicallyNilpotent
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    {Γt : Type*} [LinearOrderedCommGroupWithZero Γt]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (t : Valuation (Localization.Away x) Γt)
+    (hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
+      t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1)
+    (ht_inv : t (IsLocalization.Away.invSelf x) < 1) :
+    ∀ a : presheafValue D', IsTopologicallyNilpotent a →
+    t (algebraMap (presheafValue D') (Localization.Away x) a) < 1 := by
+  intro a ha
+  obtain ⟨n, hn, hn1⟩ : ∃ n : ℕ, a ^ n * x ∈ (presheafValue D')⁺ ∧ 1 ≤ n := by
+    have htend : Filter.Tendsto (fun n : ℕ => a ^ n * x) Filter.atTop (nhds 0) := by
+      simpa using ha.mul_const x
+    have hopen : IsOpen ((presheafValue D')⁺ : Set (presheafValue D')) :=
+      IsRingOfIntegralElements.isOpen
+    have hev := (htend.eventually (hopen.mem_nhds (Subring.zero_mem _))).and
+      (Filter.eventually_ge_atTop 1)
+    exact hev.exists
+  have halg : algebraMap (presheafValue D') (Localization.Away x) (a ^ n) =
+      algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x) *
+        IsLocalization.Away.invSelf x := by
+    rw [map_mul, mul_assoc, IsLocalization.Away.mul_invSelf, mul_one]
+  have ht2 : t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n)) < 1 := by
+    rw [halg, map_mul]
+    calc t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x)) *
+          t (IsLocalization.Away.invSelf x)
+        ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr; exact hW_le _ hn
+      _ = t (IsLocalization.Away.invSelf x) := one_mul _
+      _ < 1 := ht_inv
+  rw [map_pow, map_pow] at ht2
+  by_contra hge
+  rw [not_lt] at hge
+  exact absurd ht2 (not_lt.mpr (one_le_pow₀ hge))
+
+/-- Huber (d): `t` exceeds `1` at `x`, which is what makes the resulting Spa point fail
+`vle x 1`. Immediate from `t (x⁻¹) < 1` together with `t x · t (x⁻¹) = 1`. -/
+private theorem huber_one_lt_t_x
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    {Γt : Type*} [LinearOrderedCommGroupWithZero Γt]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (t : Valuation (Localization.Away x) Γt)
+    (ht_inv : t (IsLocalization.Away.invSelf x) < 1) :
+    1 < t (algebraMap (presheafValue D') (Localization.Away x) x) := by
+  by_contra hle
+  rw [not_lt] at hle
+  have hprod : t (algebraMap (presheafValue D') (Localization.Away x) x) *
+      t (IsLocalization.Away.invSelf x) = 1 := by
+    rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+  have hlt : t (algebraMap (presheafValue D') (Localization.Away x) x) *
+      t (IsLocalization.Away.invSelf x) < 1 := by
+    calc t (algebraMap (presheafValue D') (Localization.Away x) x) *
+          t (IsLocalization.Away.invSelf x)
+        ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr
+      _ = t (IsLocalization.Away.invSelf x) := one_mul _
+      _ < 1 := ht_inv
+  rw [hprod] at hlt; exact lt_irrefl 1 hlt
+-- ▸ General-Huber witness (Huber [Hu2] 3.3(i): `v = u|cΓ_u`): restrict
+--   `W := t.comap algB` by its characteristic subgroup, encoded as
+--   `restrictIdealSingle W 1` (`(W 1)⁻¹ = 1 ∈ cΓ_W`). No topologically nilpotent
+--   unit is involved — this is the non-Tate replacement for the principal-pair
+--   `restrictIdealSingle g` witness.
+
+
 set_option linter.unusedSectionVars false in
 /-- **Huber [Hu2] 3.3(i)**: an element of `presheafValue D'` outside the ring of integral
 elements admits a Spa point valuing it above `1`.
@@ -403,51 +473,8 @@ theorem exists_spa_point_not_vle_one_huber
     rw [map_one] at h2
     exact absurd h2 (not_le.mpr (hs_lt _ hxinv𝔪))
   -- Huber's continuity argument (c): `v < 1` on topologically nilpotent elements.
-  have hW_lt_AOO : ∀ a : presheafValue D', IsTopologicallyNilpotent a →
-      t (algebraMap (presheafValue D') (Localization.Away x) a) < 1 := by
-    intro a ha
-    obtain ⟨n, hn, hn1⟩ : ∃ n : ℕ, a ^ n * x ∈ (presheafValue D')⁺ ∧ 1 ≤ n := by
-      have htend : Filter.Tendsto (fun n : ℕ => a ^ n * x) Filter.atTop (nhds 0) := by
-        simpa using ha.mul_const x
-      have hopen : IsOpen ((presheafValue D')⁺ : Set (presheafValue D')) :=
-        IsRingOfIntegralElements.isOpen
-      have hev := (htend.eventually (hopen.mem_nhds (Subring.zero_mem _))).and
-        (Filter.eventually_ge_atTop 1)
-      exact hev.exists
-    have halg : algebraMap (presheafValue D') (Localization.Away x) (a ^ n) =
-        algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x) *
-          IsLocalization.Away.invSelf x := by
-      rw [map_mul, mul_assoc, IsLocalization.Away.mul_invSelf, mul_one]
-    have ht2 : t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n)) < 1 := by
-      rw [halg, map_mul]
-      calc t (algebraMap (presheafValue D') (Localization.Away x) (a ^ n * x)) *
-            t (IsLocalization.Away.invSelf x)
-          ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr; exact hW_le _ hn
-        _ = t (IsLocalization.Away.invSelf x) := one_mul _
-        _ < 1 := ht_inv
-    rw [map_pow, map_pow] at ht2
-    by_contra hge
-    rw [not_lt] at hge
-    exact absurd ht2 (not_lt.mpr (one_le_pow₀ hge))
-  have hW_x : 1 < t (algebraMap (presheafValue D') (Localization.Away x) x) := by
-    by_contra hle
-    rw [not_lt] at hle
-    have hprod : t (algebraMap (presheafValue D') (Localization.Away x) x) *
-        t (IsLocalization.Away.invSelf x) = 1 := by
-      rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
-    have hlt : t (algebraMap (presheafValue D') (Localization.Away x) x) *
-        t (IsLocalization.Away.invSelf x) < 1 := by
-      calc t (algebraMap (presheafValue D') (Localization.Away x) x) *
-            t (IsLocalization.Away.invSelf x)
-          ≤ 1 * t (IsLocalization.Away.invSelf x) := by gcongr
-        _ = t (IsLocalization.Away.invSelf x) := one_mul _
-        _ < 1 := ht_inv
-    rw [hprod] at hlt; exact lt_irrefl 1 hlt
-  -- ▸ General-Huber witness (Huber [Hu2] 3.3(i): `v = u|cΓ_u`): restrict
-  --   `W := t.comap algB` by its characteristic subgroup, encoded as
-  --   `restrictIdealSingle W 1` (`(W 1)⁻¹ = 1 ∈ cΓ_W`). No topologically nilpotent
-  --   unit is involved — this is the non-Tate replacement for the principal-pair
-  --   `restrictIdealSingle g` witness.
+  have hW_lt_AOO := huber_t_lt_one_of_topologicallyNilpotent D' x t hW_le ht_inv
+  have hW_x := huber_one_lt_t_x D' x t ht_inv
   set algB := algebraMap (presheafValue D') (Localization.Away x) with halgB_def
   have hW1 : (t.comap algB) 1 ≠ 0 := by
     rw [Valuation.comap_apply, map_one, map_one]
