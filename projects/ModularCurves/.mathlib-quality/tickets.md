@@ -35215,3 +35215,124 @@ stated theorem is unchanged (`theorem_statement_protected`).
    H2 stays in the tree as a proved lemma with no consumer.
 
 **Next:** WP-D2c-5 (`4 ≤ N` arm), WP-D2c-6 (`N = 3` arm), WP-D2c-7 (the splice).
+
+## [WP-D2c-5/6/7] DONE (2026-08-03) — **T-E9 IS AXIOM-VERIFIED**
+
+`YFull.gammaFullNaive_representable_assembly` and `YFull.exists_representing_smooth_affine`
+now depend only on `propext / Classical.choice / Quot.sound`. For `3 ≤ N` invertible in `R`:
+`[Γ(N)]` is rigid and representable, and **every** representing object is smooth and affine
+over `Spec R`.
+
+New file `ModularCurve/YFullSmoothAffine.lean`:
+
+* **`exists_representing_smooth_affine_of_four_le`** (`4 ≤ N`) — five lines:
+  `yOne_representable_smooth_affine` gives `(X₁, rOne, hsm, ha)`; `nIsInvertible_base` gives
+  `h`; `exists_representing_smooth_affine_of_candidate` fed with
+  `yFullCandidate_representableBy`. The `hP` argument is discharged by `rfl` (the ticket's
+  `P` is *defined* by that expression), so no `set`/`subst` is needed.
+* **`exists_representing_smooth_affine_three`** (`N = 3`) — `universalE3Obj R` with
+  `hL`/`hArb` copied from `Moduli/Bootstrap.lean:87–107` (both general in `R`); `Smooth`
+  from `e3ModuliRing_isStandardSmoothOfRelativeDimension` via
+  `Algebra.instSmoothOfIsStandardSmooth` + `HasRingHomProperty.Spec_iff` +
+  `RingHom.smooth_algebraMap`; `IsAffineHom` by `infer_instance` on a `Spec.map`.
+* **`YFull.exists_representing_smooth_affine`** — `rcases eq_or_lt_of_le hN` on the two arms.
+* **`YFull.gammaFullNaive_representable_assembly`** — the T-E9 statement.
+
+### Two relocations (no statement changed; zero code consumers affected)
+
+Both theorems had to move **downstream**: their proofs consume
+`gammaOneNaive_representable` (`ModularCurve/YOneTatePoint.lean`) and the level-3 rigidifier,
+and both of those import `ModularCurve/YFullRoute.lean` through
+`YFull.smooth_affine_of_representableBy`. Proving them in place is a cycle.
+
+1. `ModularCurve/YFullRoute.lean` — `exists_representing_smooth_affine` (was `:= by sorry`)
+   and `gammaFullNaive_representable_assembly` removed, replaced by a pointer comment.
+   `smooth_affine_of_representableBy` and `smooth_of_etale_surjective` **stay** (upstream
+   consumers).
+2. `Moduli/Representability.lean:663` — the `sorry`'d duplicate `gammaFullNaive_representable`
+   removed, replaced by a pointer comment, exactly as `gammaOneNaive_representable` was
+   handled at line 651.
+
+### The third root also died
+
+`gammaFullNaive_representable_assembly` previously had **three** sorry-roots
+(`ModuliProblem.representable_iff`, `YFull.gammaFullNaive_rigid`,
+`exists_representing_smooth_affine`). The relocated version takes its `Rigid ∧ Representable`
+half from **`gammaFullNaive_rigid_and_representable`** (`Moduli/GammaHClosure.lean`,
+axiom-verified) rather than the older `gammaFullNaive_rigid` /
+`gammaFullNaive_representable_of_engine` pair, which is what carried the other two. All three
+are gone at once.
+
+**Stage A of the plan is complete.** Next: Stage B (`Y(N²)` over `ℤ[1/N]` normal ⟹ the
+universal root ζ ⟹ DS4), as corrected by the ChatGPT validation block.
+
+## [WP-D3] Stage B, refined (2026-08-04) — the normality obstacle is much better scoped than "Y(N) normal"
+
+Measured before planning further:
+
+* **mathlib has no normality of schemes at all.** `Mathlib/AlgebraicGeometry/Morphisms/` has
+  no `Normal.lean` and no `Regular.lean` (directory listed; 36 files, none of them).
+* **mathlib has no "regular ⟹ integrally closed".** Grepped
+  `Mathlib/RingTheory/Regular/` and `Mathlib/RingTheory/RegularLocalRing/` for
+  `IsIntegrallyClosed`: nothing. That direction is Auslander–Buchsbaum (regular local ⟹ UFD)
+  and is genuinely a mathlib-scale project.
+* **What mathlib *does* have**, and it is enough:
+  - `isIntegrallyClosed_of_isLocalization` — localizations of integrally closed domains;
+  - `instIsIntegrallyClosedPolynomialOfIsDomain` — `R[X]` when `R` is;
+  - the full trace-dual package: `FractionalIdeal.dual`, `mem_dual`,
+    `traceForm_dualSubmodule_adjoin` (`RingTheory/DedekindDomain/Different.lean`),
+    `IsIntegralClosure.range_le_span_dualBasis`
+    (`RingTheory/DedekindDomain/IntegralClosure.lean`).
+
+### Why normality cannot be dodged (checked, not assumed)
+
+The extension step needs `ζ ∈ K` with `ζ^N = 1` to lie in `A`. Roots of unity are integral
+over the prime ring, so this is exactly integral-closedness, and it genuinely fails without
+it: `A = ℤ[1/7][3ζ₃]` has `ζ₃ = (3ζ₃)/3 ∈ Frac A`, `ζ₃³ = 1`, `ζ₃ ∉ A`. So no weaker
+hypothesis on `A` will do.
+
+### The re-scoping: **finite étale ascent**, not smooth ascent
+
+`Y(N)` is not reachable as a localization of a polynomial ring, but it *is* reachable as a
+finite étale tower over one:
+
+1. `E3ModuliRing R = (R[β,γ]/(β³ − (β+γ)³))_{γ·∂}`. With `3` invertible and `γ` inverted, put
+   `u = β/γ`: the relation becomes `3u² + 3u + 1 = 0`, whose discriminant `−3` is a unit. So
+   **`E3ModuliRing R` is finite étale over `R[γ, γ⁻¹]`** — and `R[γ,γ⁻¹]` is integrally closed
+   whenever `R` is, by the two mathlib lemmas above.
+2. For general `N`, `gammaFullNaive_relRepData R N hinv (universalE3Obj R)` makes
+   `Y(N) ×_{ℳ} Y(3)` **finite étale over `Spec (E3ModuliRing R)`**, and
+   `ModuliProblem.prodUniqueUpToIso` identifies it with `Y(N)`'s own level-3 cover — the same
+   architecture `ModularCurve/RhoSmooth.lean` already uses for smoothness.
+
+So the whole tower sits finite étale over an integrally closed ring, and the single missing
+ingredient is:
+
+### [WP-D3b-ET] finite étale ascent of `IsIntegrallyClosed` — the one real gap
+- **Status**: open · **File**: new, `ForMathlib/EtaleIntegrallyClosed.lean` · **Depends on**: none
+- **Statement (target)**: `A` an integrally closed domain with fraction field `K`, `B` a
+  finite étale `A`-algebra which is a domain; then `B` is integrally closed.
+- **Proof of record**: `B ⊆ B ⊗_A K = L`, finite separable over `K`. For `b ∈ L` integral
+  over `A`: étaleness makes the trace form `B × B → A` perfect, so `B` equals its own
+  trace-dual; `Tr_{L/K}(b·B) ⊆ A` because `b·B` is integral, hence `b` lies in the dual of
+  `B`, which is `B`. Stacks 025P is the scheme-level statement; the ring-level trace argument
+  is the standard one and mathlib has the dual-module vocabulary (`FractionalIdeal.dual`,
+  `mem_dual`, `IsIntegralClosure.range_le_span_dualBasis`).
+- **Why this scope and not Stacks 033C (smooth ⟹ normal)**: the smooth version needs Serre's
+  R1+S2 criterion, which mathlib does not have either; the finite étale version needs only the
+  trace pairing, which it does.
+- **Sizing**: mathlib proves the Dedekind analogue (`IsIntegralClosure.isDedekindDomain`) in
+  ~200 lines using the same dual-basis lemma; expect comparable.
+
+### [WP-D3a'] `Y(N)`'s base is integrally closed — assembly, once WP-D3b-ET lands
+- **Depends on**: WP-D3b-ET
+- `R[γ,γ⁻¹]` integrally closed (mathlib) → `E3ModuliRing R` (D3b-ET, step 1) →
+  `Y(N) ×_ℳ Y(3)` (D3b-ET, step 2). Then the components of `Y(N)`'s own base follow because
+  the level-3 cover is finite étale **surjective**
+  (`exists_levelThreeTorsorData … .surjective`), and integral-closedness descends along a
+  faithfully flat finite map from an integrally closed ring
+  (`IsIntegrallyClosed.of_isIntegrallyClosed_of_isIntegrallyClosedIn` is the mathlib shape to
+  aim at).
+
+**This replaces the plan's WP-D3a/WP-D3b as written.** The `Spec ℤ[1/N]`-base correction (C1)
+and the `Y(N²)` trick (C2) from the ChatGPT validation still stand and are unaffected.

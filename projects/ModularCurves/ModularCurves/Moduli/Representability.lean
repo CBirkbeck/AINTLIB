@@ -652,20 +652,13 @@ noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R w
 `ModularCurve/YOneTatePoint.lean` (assembled from `gammaOneNaive_representable_assembly`),
 and this file only ever carried a `sorry`'d duplicate of it. -/
 
-/-- **(T-E9 = Loeffler Prop 3.8.2–3.8.3; KM 3.1/4.7/5.1)** For `N ≥ 3` and `N` invertible
-in `R`, the naive full-level problem `[Γ(N)]` is rigid and representable; the representing
-scheme `Y(N)` is smooth and affine over `Spec R`.
-(Rigidity: Loeffler Prop 3.8.3 covers `Ell/R[1/6]` only; for residue characteristics
-2 and 3 the source of record is the GME 2.6.4 Aut-computation ("`ε ∈ Aut(E,φ)`,
-`n ≥ 3` invertible ⟹ `ε = 1`", chain B9 in decomposition-gme2 — valid in all
-characteristics with `N` invertible); KM locator pending. Smooth+affine conjunct
-restored 2026-07-06 — it was in this docstring but missing from the statement.) -/
-theorem gammaFullNaive_representable (N : ℕ) [NeZero N] (hN : 3 ≤ N)
-    (hinv : IsUnit (N : R)) :
-    ((gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable) ∧
-      ∀ X : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X) →
-        (Smooth X.structMap ∧ IsAffineHom X.structMap) := by
-  sorry
+/- `gammaFullNaive_representable` (T-E9 = Loeffler Prop 3.8.2–3.8.3; KM 3.1/4.7/5.1) is NOT
+restated here either, for the same reason: the proved copy is
+`YFull.gammaFullNaive_representable_assembly` in `ModularCurve/YFullSmoothAffine.lean`
+(axiom-verified 2026-08-03), whose statement is byte-identical to the `sorry`'d duplicate
+this file used to carry. It cannot live here — its proof consumes
+`gammaOneNaive_representable` and the level-3 rigidifier, both far downstream of this
+file. -/
 
 end LevelModuli
 

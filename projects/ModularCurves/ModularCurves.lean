@@ -167,6 +167,7 @@ import ModularCurves.LevelStructure.Incidence
 import ModularCurves.ModularCurve.YFullFromYOne
 import ModularCurves.ModularCurve.YFullToYOne
 import ModularCurves.ModularCurve.YFullRoute
+import ModularCurves.ModularCurve.YFullSmoothAffine
 import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.ModularCurve.YOneAtlasClassify
 import ModularCurves.ModularCurve.YOneTatePoint
