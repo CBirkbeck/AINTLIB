@@ -701,11 +701,7 @@ theorem example638Plus_evalHom_continuous
   have heq : (example638Plus_evalHom B P b : ↥(TateAlgebra B) → _) =
       (example638Plus_forwardHom B P b ∘ Ideal.Quotient.mk (plusFSubXIdeal B b)) := by
     ext y
-    change example638Plus_evalHom B P b y =
-      example638Plus_forwardHom B P b (Ideal.Quotient.mk _ y)
-    change _ = Ideal.Quotient.lift _ (example638Plus_evalHom B P b) _
-      (Ideal.Quotient.mk _ y)
-    rw [Ideal.Quotient.lift_mk]
+    rfl
   rw [show (example638Plus_evalHom B P b : ↥(TateAlgebra B) → _) =
       example638Plus_forwardHom B P b ∘
         (Ideal.Quotient.mk (plusFSubXIdeal B b) : ↥(TateAlgebra B) → _)

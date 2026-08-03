@@ -1367,6 +1367,109 @@ Uses `tateAlgebra₂_polynomial_decomp` (polynomial finite-support decomposition
 (`algebraMap`, `X`, `Y`) via `_canonicalMap`, `quotient_algebraMap_b_eq_X_bivariate`,
 and `_backwardHom_invS` implies agreement through the monomial decomposition. -/
 
+/-- `example638Bivariate_backwardHom` is continuous (from the `presheafValue` canonical
+topology to `quotientBivariateOverlapIdealTopology` on the target) — it is a
+`UniformSpace.Completion.extension` of a continuous ring hom into a complete Hausdorff
+target, so continuous by `continuous_extension`. -/
+theorem example638Bivariate_backwardHom_continuous
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
+    (hnoeth : IsNoetherianRing
+      ↥(TateAlgebra.pairSubring₂ (IsTateRing.principalPair B).toPairOfDefinition)) :
+    @Continuous _ _
+      (inferInstance : TopologicalSpace (presheafValue (overlapDatum B P b)))
+      (TateAlgebra.quotientBivariateOverlapIdealTopology b)
+      (example638Bivariate_backwardHom B P b hA_complete hnoeth) := by
+  letI : TopologicalSpace ↥(TateAlgebra₂ B) := TateAlgebra.instTopologicalSpaceTateAlgebra₂
+  letI : TopologicalSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+    TateAlgebra.quotientBivariateOverlapIdealTopology b
+  haveI hT2Q : @T2Space _ (TateAlgebra.quotientBivariateOverlapIdealTopology b) :=
+    TateAlgebra.quotient_bivariateOverlapIdeal_t2Space hA_complete hnoeth b
+  letI : UniformSpace (Localization.Away (overlapDatum B P b).s) :=
+    (overlapDatum B P b).uniformSpace
+  letI : IsUniformAddGroup (Localization.Away (overlapDatum B P b).s) :=
+    (overlapDatum B P b).isUniformAddGroup
+  letI : IsTopologicalRing (Localization.Away (overlapDatum B P b).s) :=
+    (overlapDatum B P b).isTopologicalRing
+  letI : UniformSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+    TateAlgebra.quotientBivariateOverlapIdealUniformSpace b
+  letI : IsTopologicalAddGroup
+      (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+    TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b
+  letI : IsTopologicalRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+    TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalRing b
+  haveI : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+    TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
+  exact UniformSpace.Completion.continuous_extension
+
+/-- `example638Bivariate_evalHom` is continuous: it factors as the (continuous) forward
+hom after the quotient projection. -/
+theorem example638Bivariate_evalHom_continuous
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    (hcont_forward : @Continuous _ _
+      (TateAlgebra.quotientBivariateOverlapIdealTopology b)
+      (inferInstance : TopologicalSpace (presheafValue (overlapDatum B P b)))
+      (example638Bivariate_forwardHom B P b)) :
+    @Continuous _ _ TateAlgebra.instTopologicalSpaceTateAlgebra₂
+      (inferInstance : TopologicalSpace (presheafValue (overlapDatum B P b)))
+      (example638Bivariate_evalHom B P b) := by
+  letI : TopologicalSpace ↥(TateAlgebra₂ B) := TateAlgebra.instTopologicalSpaceTateAlgebra₂
+  letI : TopologicalSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
+    TateAlgebra.quotientBivariateOverlapIdealTopology b
+  have heq : (example638Bivariate_evalHom B P b : ↥(TateAlgebra₂ B) → _) =
+      (example638Bivariate_forwardHom B P b ∘
+        Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)) := by
+    ext y
+    rfl
+  rw [show (example638Bivariate_evalHom B P b : ↥(TateAlgebra₂ B) → _) =
+      example638Bivariate_forwardHom B P b ∘
+        (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b) :
+          ↥(TateAlgebra₂ B) → _)
+      from heq]
+  exact hcont_forward.comp continuous_quotient_mk'
+
+/-- `backward ∘ eval` agrees with the quotient projection on the bivariate polynomials:
+decompose into monomials and evaluate each `c · Xⁱ · Yʲ` through both maps. -/
+theorem example638Bivariate_agree_on_polynomials
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
+    (hnoeth : IsNoetherianRing
+      ↥(TateAlgebra.pairSubring₂ (IsTateRing.principalPair B).toPairOfDefinition)) :
+    @Set.EqOn _ _
+      ((example638Bivariate_backwardHom B P b hA_complete hnoeth) ∘
+        (example638Bivariate_evalHom B P b))
+      (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b))
+      {g | ∃ N : ℕ, ∀ n : Fin 2 →₀ ℕ, N ≤ n 0 ∨ N ≤ n 1 → g.val n = 0} := by
+  intro g ⟨N, hN⟩
+  have hg_eq := TateAlgebra.tateAlgebra₂_polynomial_decomp g N hN
+  have h_mono_agree : ∀ (i j : ℕ) (c : B),
+      (example638Bivariate_backwardHom B P b hA_complete hnoeth)
+        (example638Bivariate_evalHom B P b
+          (algebraMap B ↥(TateAlgebra₂ B) c * TateAlgebra₂.X ^ i *
+            TateAlgebra₂.Y ^ j)) =
+      Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
+        (algebraMap B ↥(TateAlgebra₂ B) c * TateAlgebra₂.X ^ i *
+          TateAlgebra₂.Y ^ j) := by
+    intros i j c
+    rw [map_mul, map_mul, map_pow, map_pow, map_mul, map_mul, map_pow, map_pow,
+        map_mul, map_mul, map_pow, map_pow]
+    rw [example638Bivariate_evalHom_algebraMap, example638Bivariate_evalHom_X,
+      example638Bivariate_evalHom_Y,
+      example638Bivariate_backwardHom_canonicalMap,
+      example638Bivariate_backwardHom_canonicalMap,
+      example638Bivariate_backwardHom_invS,
+      TateAlgebra.quotient_algebraMap_b_eq_X_bivariate]
+  simp only [Function.comp]
+  rw [hg_eq]
+  rw [map_sum, map_sum, map_sum]
+  apply Finset.sum_congr rfl
+  intros i _
+  rw [map_sum, map_sum, map_sum]
+  apply Finset.sum_congr rfl
+  intros j _
+  exact h_mono_agree i j _
+
+
 set_option backward.isDefEq.respectTransparency false in
 /-- `backward ∘ forward = id` on `TateAlgebra₂ B ⧸ bivariateOverlapIdeal b`.
 
@@ -1405,44 +1508,8 @@ theorem example638Bivariate_backward_forward_eq_id
     (Ideal.Quotient.lift _ (example638Bivariate_evalHom B P b) _
       (Ideal.Quotient.mk _ x)) = _
   rw [Ideal.Quotient.lift_mk]
-  letI : UniformSpace (Localization.Away (overlapDatum B P b).s) :=
-    (overlapDatum B P b).uniformSpace
-  letI : IsUniformAddGroup (Localization.Away (overlapDatum B P b).s) :=
-    (overlapDatum B P b).isUniformAddGroup
-  letI : IsTopologicalRing (Localization.Away (overlapDatum B P b).s) :=
-    (overlapDatum B P b).isTopologicalRing
-  letI : UniformSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
-    TateAlgebra.quotientBivariateOverlapIdealUniformSpace b
-  letI : IsTopologicalAddGroup
-      (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
-    TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalAddGroup b
-  letI : IsTopologicalRing (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
-    TateAlgebra.quotientBivariateOverlapIdealTopology_isTopologicalRing b
-  haveI : CompleteSpace (↥(TateAlgebra₂ B) ⧸ TateAlgebra.bivariateOverlapIdeal b) :=
-    TateAlgebra.quotient_bivariateOverlapIdeal_completeSpace hA_complete hnoeth b
-  have hbwd_cont : @Continuous _ _
-      (inferInstance : TopologicalSpace (presheafValue (overlapDatum B P b)))
-      (TateAlgebra.quotientBivariateOverlapIdealTopology b)
-      (example638Bivariate_backwardHom B P b hA_complete hnoeth) :=
-    UniformSpace.Completion.continuous_extension
-  have hevalHom_cont : @Continuous _ _ TateAlgebra.instTopologicalSpaceTateAlgebra₂
-      (inferInstance : TopologicalSpace (presheafValue (overlapDatum B P b)))
-      (example638Bivariate_evalHom B P b) := by
-    have heq : (example638Bivariate_evalHom B P b : ↥(TateAlgebra₂ B) → _) =
-        (example638Bivariate_forwardHom B P b ∘
-          Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)) := by
-      ext y
-      change example638Bivariate_evalHom B P b y =
-        example638Bivariate_forwardHom B P b (Ideal.Quotient.mk _ y)
-      change _ = Ideal.Quotient.lift _ (example638Bivariate_evalHom B P b) _
-        (Ideal.Quotient.mk _ y)
-      rw [Ideal.Quotient.lift_mk]
-    rw [show (example638Bivariate_evalHom B P b : ↥(TateAlgebra₂ B) → _) =
-        example638Bivariate_forwardHom B P b ∘
-          (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b) :
-            ↥(TateAlgebra₂ B) → _)
-        from heq]
-    exact hcont_forward.comp continuous_quotient_mk'
+  have hbwd_cont := example638Bivariate_backwardHom_continuous B P b hA_complete hnoeth
+  have hevalHom_cont := example638Bivariate_evalHom_continuous B P b hcont_forward
   have hLHS_cont : @Continuous _ _ TateAlgebra.instTopologicalSpaceTateAlgebra₂
       (TateAlgebra.quotientBivariateOverlapIdealTopology b)
       ((example638Bivariate_backwardHom B P b hA_complete hnoeth) ∘
@@ -1456,39 +1523,7 @@ theorem example638Bivariate_backward_forward_eq_id
       {g : ↥(TateAlgebra₂ B) |
         ∃ N : ℕ, ∀ n : Fin 2 →₀ ℕ, N ≤ n 0 ∨ N ≤ n 1 → g.val n = 0} :=
     TateAlgebra.tateAlgebra₂_polynomials_dense_canonical (A := B)
-  have hagree : @Set.EqOn _ _
-      ((example638Bivariate_backwardHom B P b hA_complete hnoeth) ∘
-        (example638Bivariate_evalHom B P b))
-      (Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b))
-      {g | ∃ N : ℕ, ∀ n : Fin 2 →₀ ℕ, N ≤ n 0 ∨ N ≤ n 1 → g.val n = 0} := by
-    intro g ⟨N, hN⟩
-    have hg_eq := TateAlgebra.tateAlgebra₂_polynomial_decomp g N hN
-    have h_mono_agree : ∀ (i j : ℕ) (c : B),
-        (example638Bivariate_backwardHom B P b hA_complete hnoeth)
-          (example638Bivariate_evalHom B P b
-            (algebraMap B ↥(TateAlgebra₂ B) c * TateAlgebra₂.X ^ i *
-              TateAlgebra₂.Y ^ j)) =
-        Ideal.Quotient.mk (TateAlgebra.bivariateOverlapIdeal b)
-          (algebraMap B ↥(TateAlgebra₂ B) c * TateAlgebra₂.X ^ i *
-            TateAlgebra₂.Y ^ j) := by
-      intros i j c
-      rw [map_mul, map_mul, map_pow, map_pow, map_mul, map_mul, map_pow, map_pow,
-          map_mul, map_mul, map_pow, map_pow]
-      rw [example638Bivariate_evalHom_algebraMap, example638Bivariate_evalHom_X,
-        example638Bivariate_evalHom_Y,
-        example638Bivariate_backwardHom_canonicalMap,
-        example638Bivariate_backwardHom_canonicalMap,
-        example638Bivariate_backwardHom_invS,
-        TateAlgebra.quotient_algebraMap_b_eq_X_bivariate]
-    simp only [Function.comp]
-    rw [hg_eq]
-    rw [map_sum, map_sum, map_sum]
-    apply Finset.sum_congr rfl
-    intros i _
-    rw [map_sum, map_sum, map_sum]
-    apply Finset.sum_congr rfl
-    intros j _
-    exact h_mono_agree i j _
+  have hagree := example638Bivariate_agree_on_polynomials B P b hA_complete hnoeth
   exact congr_fun (Continuous.ext_on hS_dense hLHS_cont hRHS_cont hagree) x
 
 /-! ### Step A full equiv: `example638Bivariate_equiv`

@@ -11197,3 +11197,75 @@ subtrees (19 processes) with the owner's authorisation.
 > If the gate starts dying at ~99% with zero errors, check `lake serve` worker age before
 > assuming contention from other builds. A days-old LSP holds more memory than an active
 > build does.
+
+### Batch: the bivariate twin — and a `change`/`rw` dance that was always `rfl`
+
+`example638Bivariate_backward_forward_eq_id` **100 → 32 code lines**, same three
+extractions as its Plus twin (`backwardHom_continuous` taking the 14-line uniform-structure
+wall with it, `evalHom_continuous`, `agree_on_polynomials`). Pre-checked this time: all
+three names free repo-wide, and no existing lemma concludes
+`Continuous … example638Bivariate_backwardHom` — so no repeat of the collision.
+
+One error, and it was the already-recorded **`change` + `rw` doesn't survive extraction**
+fault: `change` matches up to defeq, but `rw`'s pattern is syntactic, so after extraction
+the lift's argument was no longer *literally* `Ideal.Quotient.mk _ y`:
+
+```
+Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  (Ideal.Quotient.lift ?I ?f ?H) ((Ideal.Quotient.mk ?I) ?a)
+```
+
+The recorded fix is "replace with a term rather than repair the rewrite". Doing that here
+revealed something better: `example638Bivariate_forwardHom` **is**
+`Ideal.Quotient.lift _ evalHom _`, so `(forwardHom ∘ mk) y` reduces to `evalHom y` by
+computation. The whole thing is `rfl`:
+
+```lean
+    ext y
+    rfl
+```
+
+Six lines of `change` / `change` / `rw` → two. And since the Plus twin has the identical
+dance, the same simplification applies there — committed in the previous batch, now
+shortened by 4 lines too. Both rebuilt green.
+
+> Extraction is not only a duplicate detector; it is a **proof-necessity detector**. A
+> tactic block that only works in its original context is evidence the block is doing
+> setup, not mathematics. Ask what the statement reduces to before repairing the tactics.
+
+Scoreboard: **486 → 47 actionable.** LaurentOverlap 127 → 130 decls, Example638 −4 lines,
+nothing removed.
+
+## The `posIncl`/`negIncl` family — eight copies of four facts
+
+Surveying `unitCover_sq_plus_dense` (the next target) turned up something larger than the
+target. Its 139-line `hcomp` splits at `MvPolynomial.ringHom_ext` into a constants bullet
+(42 lines) and a variables bullet (83). Both bullets open with an
+`rw [show LaurentTateAlgebra.posIncl … = … by <16–18 lines>]` — an **anonymous lemma**
+about `posIncl`, inlined into a Čech-acyclicity proof.
+
+Grepping the proof body (`change varInclFun …`) rather than any name found four facts,
+each written out twice:
+
+| fact | named | inline |
+|---|---|---|
+| `posIncl (algebraMap a) = algebraMap a` | `LaurentCoverExact:787` **private**, 7 uses | `WedhornCech:5969` |
+| `negIncl (algebraMap a) = algebraMap a` | `LaurentCoverExact:804` **private** | `WedhornCech:6240` |
+| `posIncl X = …` | — | `LaurentCoverExact:1201,1255` + `WedhornCech:6016` |
+| `negIncl X = …` | — | `LaurentCoverExact:1236` + `WedhornCech:6331` |
+
+**Two structural causes, both from [[dedup-search-statement-shape-not-name]], stacked:**
+
+1. *No possible home.* `WedhornCechAcyclicity` and `LaurentCoverExact` do not import each
+   other in either direction, so neither can see the other's work. The fact has to move to
+   a common ancestor — `TateAlgebra.lean:335`, where `posIncl` is defined.
+2. *`private` blocks reuse.* Even where an import existed, `private theorem
+   posIncl_algebraMap` could not be named from outside. A private lemma is invisible to the
+   dedup scan **and** to the next author who needs it, so it gets re-proved. Worth stating
+   as a rule: **a `private` lemma proving a general fact about a public definition is a
+   latent duplicate.**
+
+Fix: hoist all four to `TateAlgebra.lean` beside `posIncl`/`negIncl`/`varInclFun`, public
+(`posIncl_algebraMap`, `negIncl_algebraMap`, `posIncl_X`, `negIncl_X`). All eight sites
+collapse to a lemma name, and the two `unitCover` targets each shed ~36 lines before their
+own decomposition even starts.
