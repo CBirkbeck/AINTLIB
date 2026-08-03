@@ -319,7 +319,13 @@ theorem yFullCandidateHomEquiv_symm_natural (N : ℕ) [NeZero N] (X₁ : EllObj 
     rw [yFullCandidateHomEquiv_symm_comp_pullbackAlongπ,
       yFullCandidateHomEquiv_symm_comp_pullbackAlongπ]
     rw [forgetAt_naturality N hinvR f PQ, rOne.comp_homEquiv_symm]
-  · sorry
+  · -- second component: the `baseHom`s. `homPullbackAlongEquiv`'s `toFun` reads it off
+    -- directly, so this is the naturality of `completionLocusClassifies.symm` in the base.
+    show f.baseHom ≫
+        ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X').symm PQ).baseHom =
+      ((yFullCandidateHomEquiv N X₁ hinvR h P hPsec rOne hmatch X).symm
+        ((gammaFullNaiveProblem R N).map f.op PQ)).baseHom
+    sorry
 
 /-- **(WP-D2c-3, `hmatch`)** The two fibre conditions agree: "the transported first member
 is the section attached to `u.baseHom ≫ P`" says exactly "the `Γ₁`-part of `PQ` is `u`'s

@@ -34629,3 +34629,40 @@ uniqueness).
 naturality — comparing the level structures directly forces `whnf` through all five
 composed equivalences and hits a deterministic timeout at 200000 heartbeats. Heartbeat
 bumps are forbidden in this project; the `symm` form above is the structural fix.
+
+## [WP-D2c-3] first component CLOSED; the remainder is one locus-level naturality (2026-08-03)
+
+Progress this pass:
+* **`yFullCandidate_representableBy` is PROVED** — `homEquiv_comp` derives in three lines
+  from `yFullCandidateHomEquiv_symm_natural`.
+* **[WP-D2c-3-H1] `yFullCandidateHomEquiv_symm_comp_pullbackAlongπ`** — proved,
+  axiom-verified. One line once the composite's inner value is named with `set`;
+  `homToPullbackAlong_pullbackAlongπ` applied with the subtype's own property, since
+  `sigmaHomForgetEquiv.symm` produces the `u`-component as `rOne.homEquiv.symm (forgetAt …)`
+  *definitionally*.
+* **`forgetAt_naturality`** — proved by `Subtype.ext rfl` (both sides have underlying section
+  `pullSection f PQ.1.1`).
+* **The first of the two components** of `symm_natural` is closed: H1 on both sides, then
+  `forgetAt_naturality` + `rOne.comp_homEquiv_symm`.
+* The second component is now reduced, in the file, to its clearest form:
+  `f.baseHom ≫ ((equiv X').symm PQ).baseHom = ((equiv X).symm (map f.op PQ)).baseHom`.
+
+### Three elaboration blowups, all fixed structurally (no heartbeat bumps)
+1. `homEquiv_comp` in `toFun` form → `whnf` timeout through five composed equivalences. Fix:
+   the `symm` form.
+2. `NatTrans.naturality_apply` on `gammaFullToGammaOne` inside the composite → `isDefEq`
+   timeout. Fix: extract `forgetAt_naturality` to simple types.
+3. That extraction *still* timed out through the `↾fun` coercion. Fix: `Subtype.ext rfl`.
+
+Also: naming the inner value with `set` is what makes H1 a one-liner — passing the property
+as `_` or `Subtype.property _` fails to unify, because the predicate is not determined by the
+goal. Same pattern will be needed for the remaining component.
+
+### [WP-D2c-3-H2] the one remaining obligation
+**Naturality of `completionLocusClassifies.symm` in the base.** Applying
+`homToPullbackAlong_baseHom` (with the `set` pattern) to both sides of the reduced goal turns
+it into exactly that: the lift produced for `PQ` over `u.baseHom`, precomposed with
+`f.baseHom`, equals the lift produced for `map f.op PQ` over `(f ≫ u).baseHom`. Inputs:
+`completionLocusPointsEquiv` is the pullback universal property (so `pullback.lift`
+uniqueness), and `fullLevelLocusPointsEquiv_natural_fst/_snd`
+(`Moduli/LevelLocusNatural.lean`) is the base-naturality — the file was written for this.
