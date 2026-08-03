@@ -34741,3 +34741,367 @@ its `.1.1.1.1` projection against `pX'.1.2 ≫ pullback.fst`.
 
 Reminder: `rw [Category.assoc]` does not work anywhere in this goal (coercion defeats the
 motive); use `(Category.assoc _ _ _).trans (congrArg (fun m => f.baseHom ≫ m) pX'.2)`.
+
+# ══════════════════════════════════════════════════════════════════════════
+# /develop --continue (2026-08-03) — R1 DEEP SCAN, MEASURED CONE, AND THE PLAN
+# ══════════════════════════════════════════════════════════════════════════
+
+## New tooling: the sorry-root bisector (`scripts/sorry-roots.lean`)
+
+`#print axioms T` says *that* `T` inherits `sorryAx`, never *from where*. The new script
+walks `T`'s value-level dependency cone and prints every declaration in it whose own body
+mentions `sorryAx` — the actual leaves. Every claim in this section is its output, not
+inference from the board.
+
+**Gotcha worth remembering:** in this Lean, `ConstantInfo.value?` carries an
+`allowOpaque := false` argument and returns `none` for **theorems**. A traversal written
+with `ci.value?` visits one node and reports `0 sorry-roots` — silently, no error. Match
+`.thmInfo v => v.value` explicitly. (Two earlier versions of the script reported clean
+cones for `yFullCandidate_representableBy`, which demonstrably has a sorry. Reading `.type`
+instead does not help; `Environment.header.moduleData` has the same hole.)
+
+## R1: the measured cone (2026-08-03)
+
+| target | sorry-roots | cone size |
+|---|---|---|
+| `gammaOneNaive_representable` | **0** ✅ | 70 479 |
+| `gammaFullNaive_rigid_and_representable` | **0** ✅ | 78 954 |
+| `gammaFullDrinfeld_rigid_and_representable` | **0** ✅ | 78 958 |
+| `naiveLevelThree_representable_by_affine` | **0** ✅ | — |
+| `e3ModuliRing_isStandardSmoothOfRelativeDimension` | **0** ✅ | — |
+| `exists_representing_smooth_affine_of_candidate` | **0** ✅ | — |
+| `yFullCandidate_representableBy` | 1 — `yFullCandidateHomEquiv_symm_natural` | 71 779 |
+| `YFull.exists_representing_smooth_affine` | 1 — itself | 55 563 |
+| `YFull.gammaFullNaive_representable_assembly` | 3 — `ModuliProblem.representable_iff`, `YFull.gammaFullNaive_rigid`, `exists_representing_smooth_affine` | 72 133 |
+| **`yRho_representable`** | **7 — all Weil-pairing** | 85 211 |
+| `yRho_geometricallyIrreducible` | 4 — itself + 3 Weil | 68 189 |
+
+### Three corrections to the board this forces
+
+1. **`yRho_representable`'s cone does NOT contain `YFull.exists_representing_smooth_affine`.**
+   Y(ρ̄) goes through `exists_representsYRho_levelThree`, whose rigidifier is
+   `naiveLevelThreeRepresentableBy` (axiom-verified). So the WP-D chain is on the path to
+   DS4 (it supplies the *normality* that the pairing construction needs), **not** a
+   dependency of `yRho_representable` itself. Closing the WP-D chain does not, by itself,
+   move `yRho_representable`.
+
+2. **The DS4 register has SEVEN live entries on Y(ρ̄)'s path, not six.** The "final form"
+   table above lists only `WeilPairing/Basic.lean`. The measured cone adds
+   **`weilPairing_torsionMapOfEllHom`** (`ModularCurve/YRho.lean:2482`) — the *curve*-direction
+   base-change spec (KM 2.8.4.2), a register entry in its own right and a genuine sorry.
+   `weilPairingEval_mul` is confirmed absent from the cone (dead, as recorded); the six
+   `Basic.lean` entries are confirmed present.
+
+   The seven: `weilPairing` (def), `weilPairing_over`, `weilPairingEval_add_left`,
+   `weilPairingEval_add_right`, `weilPairingEval_self`, `weilPairingEval_nondegenerate`,
+   `weilPairing_torsionMapOfEllHom`.
+
+   Note `weilPairingEval_self` IS in the cone despite the earlier consumption table saying
+   "0 uses" — grep counted direct textual uses; the cone counts reachability, and something
+   between `RhoSections` and `weilPairingEval_symplectic`'s derivation reaches it.
+
+3. **`gammaFullNaive_rigid_and_representable` is already axiom-verified**, so `Y(N)` rigid +
+   representable for `N ≥ 3` is DONE. `YFull.exists_representing_smooth_affine` is *only*
+   about the smooth-affine conjunct, which that theorem's docstring explicitly disclaims.
+   The WP-D chain is therefore not redundant with it.
+
+## The `N = 3` arm is small, and every ingredient is axiom-verified
+
+`exists_representing_smooth_affine` assumes `3 ≤ N`; the Γ₁-route can only reach `4 ≤ N`
+(`gammaOneNaive_representable` needs `hN : 4 ≤ N`). The `N = 3` arm needs no cover at all:
+
+* `universalE3Obj R` (`Moduli/UniversalLevelThree.lean:349`) has
+  `base = Spec (E3ModuliRing R)` and
+  `structMap = Spec.map (CommRingCat.ofHom (algebraMap R (E3ModuliRing R)))` — literally a
+  `Spec`-of-a-ring-map, so `IsAffineHom` is immediate;
+* it represents `gammaFullNaiveProblem R 3` — `naiveLevelThree_representable_by_affine`
+  (`Moduli/Bootstrap.lean:80`), **axiom-verified**, unconditional in `R` given
+  `IsUnit (3 : R)`;
+* `E3ModuliRing R` is `Algebra.IsStandardSmoothOfRelativeDimension 1` over `R`
+  (`Moduli/LevelThreeSmooth.lean:137`), **axiom-verified**.
+
+So the arm is: name the object, convert standard-smooth → `Smooth` on the `Spec` map (the
+conversion pattern is already in `ModularCurve/RhoSmooth.lean:144–151`), done.
+
+## Recorded alternative (do NOT need it, but it exists)
+
+`ModularCurve/RhoSmooth.lean` already implements, for `rhoProblem`, the *rigidifier* route to
+smoothness of a representing object: `ModuliProblem.prodUniqueUpToIso` +
+`isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec` +
+`smoothOfRelativeDimension_one_of_finite_etale_surjective_cover`. Substituting
+`gammaFullNaiveProblem R N` for `rhoProblem D` would give
+`exists_representing_smooth_affine` **without the WP-D chain**, at the cost of
+(a) `IsUnit (3 : R)` (or the Legendre arm plus a `D(2) ∪ D(3) = Spec R` glue — legitimate,
+since `3 - 2 = 1`), (b) `IsAffine X.base` for the Γ(N)-representing object, and
+(c) `IsNoetherianRing Γ(Spec R, ⊤)`. Neither (b) nor (c) is currently available at the
+generality `exists_representing_smooth_affine` is stated at. The WP-D chain is one scoped
+sorry from done, so it stays the route of record; this paragraph exists so the fallback is
+not rediscovered.
+
+## THE PLAN — tickets
+
+### Stage A — close the WP-D chain (`Y(N)` smooth affine). 3 tickets.
+
+#### [WP-D2c-3] `yFullCandidateHomEquiv_symm_natural` — THE one sorry
+- **Status**: open · **File**: `ModularCurve/YFullFromYOne.lean:359` · **Type**: lemma
+- **Statement**: already in the file (line 294). Do not restate.
+- **Both inputs are proved theorems**: `yFullCandidateHomEquiv_symm_comp_pullbackAlongπ`
+  (H1) and `completionLocusClassifies_natural_fst` (H2).
+- **Proof sketch** (measured; see "the exact remaining splice" above for the two reverted
+  attempts):
+  1. Hoist the first component *before* `Prod.ext`, as `hu`, so both branches can use it:
+     `rw [yFullCandidateHomEquiv_symm_comp_pullbackAlongπ, …, forgetAt_naturality,
+     rOne.comp_homEquiv_symm]`.
+  2. Rewrite `hu` by `EllObj.homToPullbackAlong_pullbackAlongπ` on **both** sides *first*,
+     then take `baseHom`, giving
+     `hub : f.baseHom ≫ (pX' : _ × _).1.baseHom = (pX : _ × _).1.baseHom`.
+     (Taking `congrArg EllHom.baseHom hu` *without* step 2 yields the un-normalised
+     `(w ≫ pullbackAlongπ g).baseHom = w.baseHom ≫ g` — this is what killed both earlier
+     attempts.)
+  3. `refine (homPullbackAlongEquiv …).injective ?_; refine Subtype.ext (Prod.ext ?_ ?_)`;
+     first branch `exact hu`.
+  4. Second branch: `rw [hbX', hbX]`, then `refine pullback.hom_ext ?_ ?_`.
+     `fst` = H2 (modulo matching its `.1.1.1.1` against `pX'.1.2 ≫ pullback.fst`);
+     `snd` = `pX'.2` / `pX.2` plus `hub`.
+- **Binding constraints**: `rw [Category.assoc]` does **not** work anywhere in this goal (the
+  `completionLocus`-vs-`pullback` coercion defeats the motive) — use the term form
+  `(Category.assoc _ _ _).trans (congrArg (fun m => f.baseHom ≫ m) pX'.2)`. Do **not**
+  attempt the `toFun` form of naturality: measured `whnf` timeout at 200000 heartbeats
+  through the five composed equivalences, and heartbeat bumps are forbidden in this project.
+- **Effect**: `yFullCandidate_representableBy` becomes axiom-verified.
+
+#### [WP-D2c-5] `exists_representing_smooth_affine`, the `4 ≤ N` arm
+- **Status**: blocked (WP-D2c-3) · **File**: `ModularCurve/YFullFromYOne.lean` (new theorem)
+- **Statement**: `∃ X₀ : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X₀)
+  ∧ Smooth X₀.structMap ∧ IsAffineHom X₀.structMap`, hypotheses `4 ≤ N`, `IsUnit (N : R)`.
+- **Proof sketch**: `obtain ⟨⟨⟨X₁, r₁⟩⟩, hgeom⟩ := gammaOneNaive_representable R N hN hinv`;
+  `obtain ⟨hs, ha⟩ := hgeom X₁ ⟨r₁⟩`; take `P := X₁.curve.pointToTorsion
+  (universalGammaOne R N r₁).1 …` (the `hP` shape is already the hypothesis of
+  `yFullCandidate_representableBy`); `h : NIsInvertible X₁.base N := nIsInvertible_base R N
+  hinv X₁` (`Moduli/GammaOneNaiveRelRep.lean:68`); then
+  `exists_representing_smooth_affine_of_candidate` (**axiom-verified**) fed with
+  `yFullCandidate_representableBy`.
+- **Mathlib/project lemmas**: `gammaOneNaive_representable`, `universalGammaOne`,
+  `nIsInvertible_base`, `exists_representing_smooth_affine_of_candidate`,
+  `yFullCandidate_representableBy` — all verified to exist at these signatures.
+
+#### [WP-D2c-6] `exists_representing_smooth_affine`, the `N = 3` arm
+- **Status**: open (unblocked — independent of WP-D2c-3) · **File**: new,
+  `ModularCurve/YFullLevelThree.lean`
+- **Statement**: same shape, hypotheses `IsUnit (3 : R)`, at `N = 3`.
+- **Proof sketch**: `X₀ := universalE3Obj R`. Representability from
+  `naiveLevelThree_representable_by_affine R hR` (or the named
+  `naiveLevelThreeRepresentableBy` with the `hL`/`hArb` instantiation copied from
+  `ModularCurve/RhoPoints.lean:276–291`, which is general in `R`). `Smooth` from
+  `e3ModuliRing_isStandardSmoothOfRelativeDimension R hR` via
+  `RingHom.isStandardSmoothOfRelativeDimension_algebraMap` and the `Spec`-map converter used
+  at `RhoSmooth.lean:144–151`. `IsAffineHom` from both ends being `Spec` of a ring.
+- **Note**: `IsUnit (3 : R)` follows from `IsUnit (N : R)` only when `3 ∣ N`; at `N = 3`
+  it is exactly `hinv`. `X.isUnit_three` is the existing coercion helper.
+
+#### [WP-D2c-7] splice the two arms into `YFullRoute.lean:783`
+- **Status**: blocked (WP-D2c-5, WP-D2c-6) · **File**: `ModularCurve/YFullRoute.lean`
+- **Proof sketch**: `rcases eq_or_lt_of_le hN` — `N = 3` → WP-D2c-6, `4 ≤ N` → WP-D2c-5.
+  Statement unchanged (`theorem_statement_protected`).
+- **Effect**: closes 1 of the 3 roots of `gammaFullNaive_representable_assembly`, and
+  supplies `Y(N)` smooth affine — the input Stage B needs.
+
+### Stage B — `Y(N)` normal ⟹ the universal root ζ ⟹ `weilPairing`
+
+This is the DS4 construction. Route (validated against an independent reviewer — see the
+validation block appended below): the independent input is the **field-level** pairing
+`exists_weilPairingHom_of_field` (`WeilPairing/GlobalFibreChart.lean:134`, axiom-verified) at
+the *function field* of `Y(N)`, which is what breaks route A's circularity.
+
+#### [WP-D3a] `Y(N)` normal, and its components integral
+- **Depends on**: WP-D2c-7 · **Content**: smooth over a field ⟹ regular ⟹ normal; `Y(N)`
+  noetherian ⟹ finitely many connected components; normal + connected + locally noetherian
+  ⟹ irreducible (normal local rings are domains ⟹ irreducible components are disjoint).
+  **Irreducibility of `Y(N)` is NOT needed** — that is Leg 2 and stays out of scope.
+
+#### [WP-D3b] sections of a finite étale scheme extend from the generic point of a normal
+  integral base
+- **Depends on**: none (pure algebraic geometry; ForMathlib)
+- **Content**: closure of the generic section is integral, finite and birational over the
+  base; finite + birational + normal target ⟹ iso (ring form: `A` a normal domain,
+  `A → B` finite injective with equal fraction fields ⟹ `A = B`, i.e.
+  `IsIntegrallyClosed`). Search mathlib first — `IsIntegrallyClosed`,
+  `IsIntegralClosure`, `Scheme.normalization`.
+
+#### [WP-D3c] the universal root ζ with the det-cocycle
+- **Depends on**: WP-D3a, WP-D3b · **Content**: `ζ := e_N(P,Q)` at each component's generic
+  point via `exists_weilPairingHom_of_field`, extended by WP-D3b; the cocycle
+  `ζ(φ·g) = ζ(φ)^{det g}` holds because ζ came from an honest pairing over the function
+  field, checked at the generic points of `Y(N) × GL₂(ℤ/N)` and propagated by WP-D3b.
+
+#### [WP-B5 / WP-A8] descend and discharge the def
+- **Depends on**: WP-D3c, WP-C1 (**done**) · **Content**: pull ζ back along the classifying
+  map of the full-level cover `S' → S` (finite étale surjective — `fullLevelLocusπ_isFinite`
+  / `_etale`), define the pairing on `S'` as `ζ^det`, descend. Gives `weilPairing` and
+  `weilPairing_over`.
+
+### Stage C — the specifications
+
+#### [WP-C2] the master evaluation formula
+- **Depends on**: WP-B5 · already ticketed above; unchanged.
+
+#### [WP-C3…C6] `_add_left`, `_add_right`, `_self`, `_nondegenerate`
+- **Depends on**: WP-C2 · one ticket each (each is a separate register `sorry`). Each becomes
+  an identity about `det` of a 2×2 matrix over `ℤ/N`, checked in `Γ(T, ⊤)` through WP-C1.
+
+#### [WP-C7] `weilPairing_torsionMapOfEllHom` — the seventh root (NEW TICKET)
+- **Depends on**: WP-B5 · **File**: `ModularCurve/YRho.lean:2482`
+- **Content**: the curve-direction base-change spec (KM 2.8.4.2). Once the pairing is a
+  *descent* of the explicit `ζ^det` formula it is no longer independent data: the formula is
+  natural in the curve because `constScheme`/`detConstMor`/`muNMapAlong` are. Same shape as
+  `_restrict` (already derived, `_over`-only).
+
+### Out of scope, explicitly
+
+* **Leg 2 — `yRho_geometricallyIrreducible`** (`ModularCurve/YRho.lean:8740`). Buzzard: *"NB
+  irreducibility is proved complex-analytically by uniformising the ℂ-points of the curve by
+  the upper half plane"*; *"Proof: See 1980s"*. Needs complex uniformisation or surjectivity
+  of the monodromy of `Y(N) → Y(1)` onto `SL₂(ℤ/N)`. Neither is in mathlib or the tree. NOT
+  ticketed. Stage B is designed so that DS4 does **not** need it.
+* **T-W7 wiring.** `FibrewiseElliptic.locallyWeierstrass`
+  (`EllipticCurve/FibrewiseLocallyWeierstrass.lean:357`) is proved and axiom-verified with
+  **zero consumers**. A wiring task, not a proof task. Deliberately left after Stage A/B —
+  wiring it changes no axiom profile.
+* **The 77 orphan modules / 43 duplicate names.** `lane:cleanup` work on `main`, not a
+  producer's; recorded above.
+
+## The one scope decision this plan surfaces (needs a call)
+
+`weilPairing` (`WeilPairing/Basic.lean:48`) is stated for an **arbitrary** base scheme
+`S : Scheme.{u}` and an **arbitrary** `N`, with **no invertibility hypothesis**. Stage B's
+route reaches only `N` invertible on `S` — when `N` is not invertible, `E[N]` is not étale and
+the entire finite-étale/normal-spreading argument evaporates. Full generality is Katz–Mazur
+2.8 (pick `f_Q` with divisor `N(Q) − N(0)`, then `g_Q` with `g_Q^N = f_Q ∘ [N]`, set
+`e_N(P,Q) = g_Q(X+P)/g_Q(X)`), which needs a relative-divisor / relative-Picard theory the
+tree does not have.
+
+Every actual consumer of the register is over `ℚ` (Y(ρ̄), RhoSections, RhoPairingBridge,
+CharZero*), where every non-zero `N` is invertible. **Recommendation: add
+`(h : NIsInvertible S N)` to `weilPairing` and to each spec**, and let the ℚ-side consumers
+supply it — mechanical, ≈35 call sites, and it is the honest scope. Held for a decision
+because it changes register statements.
+
+## ChatGPT (gpt-5.6-sol, effort max) adversarial validation of Stage B — 2026-08-03
+
+Verdict: **the route is non-circular and the core idea is right, but four steps as written
+are wrong or incomplete.** All four are repairable in the tame (`N` invertible) case. Each
+correction below has been checked against the actual code.
+
+### C1 (BASE — must change). `Y(N)_ℚ` is the wrong universal base
+`Y(N)_ℚ` classifies only ℚ-schemes, so it cannot serve arbitrary `S` with `N` invertible.
+Work over `B := Spec ℤ[1/N]` instead: `B` regular + `Y(N) → B` smooth ⟹ `Y(N)` regular ⟹
+normal, and every nonempty connected component **dominates** `B`'s generic point (its image
+is open, since the morphism is smooth, hence contains the generic point), so each component's
+function field has **characteristic zero** — which is exactly what
+`exists_weilPairingHom_of_field`'s `[PerfectField k]` needs. `exists_representing_smooth_affine`
+is stated for general `R` with `IsUnit (N : R)`, so instantiating at
+`R = ℤ[1/N] = Localization.Away (N : ℤ)` costs nothing; `gammaOneNaive_representable_zInv`
+(`YOneTatePoint.lean:1407`) is already that instantiation for `Γ₁`.
+
+### C2 (RANGE — a strictly better idea than the `N = 3` arm). The `N²` trick
+Build the root on **`Y(N²)`**, not `Y(N)`. For `N ≥ 2`, `N² ≥ 4`, so the Γ₁-route covers it
+with no special case at all. If `(A,B)` is the universal `N²`-basis then `(NA, NB)` is an
+`N`-basis; set `ζ := e_N(NA, NB)`; the acting group is `GL₂(ℤ/N²)`, and its action on
+`(NA,NB)` **factors through reduction to `GL₂(ℤ/N)`**, so the descent datum is unchanged.
+Consequence: **Stage B needs neither `N ≥ 3` nor the `N = 3` arm** — invertibility is the
+only hypothesis, and `N = 1` is the trivial pairing.
+
+WP-D2c-6 (the `N = 3` arm) is therefore **not** a Stage-B dependency. It is still needed to
+close `YFullRoute.lean:783` *as stated* (`3 ≤ N`), which is its own goal, and it stays the
+cheapest route there because both its ingredients are already axiom-verified. Recorded
+alternative for that arm, if the E3 model ever gives trouble: `Y(9) → Y(3)`,
+`(A,B) ↦ (3A,3B)`, finite étale surjective (it is `GL₂(ℤ/9) ↠ GL₂(ℤ/3)` geometrically), then
+smoothness descends because it is étale-local on the source —
+`AlgebraicGeometry.Smooth.of_precomp_etale_of_surjective` (`ForMathlib/SmoothDescent.lean`,
+already wrapped as `YFull.smooth_of_etale_surjective`, `YFullRoute.lean:765`) — and
+affineness descends because a finite surjective image of an affine is affine (Stacks 01YN).
+The `Y(3) ×_{ℳ} Y₁(4)` variant is **not** uniform over `ℤ[1/3]` (4 is not invertible in
+char 2); level 9 is the uniform choice.
+
+### C3 (THE LARGEST LOGICAL GAP — new ticket). Field-change naturality
+`GL₂(ℤ/N)` can carry one connected component of `Y(N²)` to a *different* component, so
+comparing `ζ_C` with the pullback of `ζ_D` needs the field-level pairing to be **natural
+under the induced isomorphism `K(D) → K(C)`**. `fieldWeilPairing_gl2_zmod`
+(`WeilPairing/FieldPairingDet.lean:116`) is the within-one-field determinant law and does
+**not** supply this. Proof of the missing lemma (does not use any relative pairing): base
+change both candidate morphisms to an algebraic closure of `L`; they induce the same
+Silverman pairing on geometric points, hence agree there; faithful flatness gives equality
+over `L`. The uniqueness characterisation is already in
+`exists_weilPairingHom_of_field`'s own statement (the `∀ f : … →ₐ[k] AlgebraicClosure k`
+clause), so this is a transport of that characterisation, not new mathematics.
+
+### C4 (DESCENT — the ticket was wrong). Section injectivity gives uniqueness, not existence
+WP-C1 (`WeilPairing/DescentFaithful.lean`) proves *equalities* descend; it cannot produce the
+descended morphism. Existence is fppf descent of morphisms, i.e. that a finite étale
+surjection is an effective epimorphism — **already in the tree** as
+`ModularCurves.descend_hom_of_effectiveEpi` (`Moduli/Stack.lean:99`), which
+`moduliProblem_fppf_descent` (line 218) already uses to descend exactly this kind of `ζ`.
+Use that for existence; keep `DescentFaithful` for the specification identities.
+
+### C5 (two more obligations Stage B did not have)
+* **Primitivity of the extended ζ.** The primitive-root locus `μ_N^prim ⊆ μ_N` is clopen over
+  `ℤ[1/N]`; the generic value is primitive and each component is connected, so the whole
+  section lands in it. **No primitive-root-locus machinery exists in the tree** (grepped
+  `GroupScheme/`, `WeilPairing/`) — this is a new sub-ticket, and it is what nondegeneracy
+  consumes.
+* **Nondegeneracy must not be packaged as an identity in `Γ(T, ⊤)`.** The right formulation is
+  that `E[N] ⟶ E[N]^D`, `P ↦ (Q ↦ e_N(P,Q))`, is an **isomorphism**; on the frame cover it is
+  the standard symplectic matrix, invertible precisely because ζ is primitive, and "being an
+  isomorphism" is fppf-local. The register's `weilPairingEval_nondegenerate` is stated
+  pointwise; prove the Cartier-dual form first and derive the pointwise form from it.
+
+### C6 (convention check — mandatory, cheap, and easy to get backwards)
+Fix the torsor convention. With `φ · g = φ ∘ g` and `ζ(φ) = e_N(φ e₁, φ e₂)` the law is
+`ζ(φ·g) = ζ(φ)^{det g}`, and the overlap identity works out because
+`det(g⁻¹u, g⁻¹v) = (det g)⁻¹ det(u,v)`. If the tree's convention is `φ₂ = φ₁ g⁻¹`, **every
+determinant exponent inverts.** Test on the swap matrix and on `diag(a,1)` before writing any
+spec proof.
+
+### C7 (already discharged by the measured cone — recorded for the audit trail)
+ChatGPT's last item was: *audit that none of the representability / full-level-torsor /
+smoothness results secretly depends on a Weil pairing.* The sorry-root scan settles it:
+`weilPairing` is a sorry-root, and `gammaOneNaive_representable`,
+`gammaFullNaive_rigid_and_representable`, `gammaFullDrinfeld_rigid_and_representable`,
+`naiveLevelThree_representable_by_affine` and `e3ModuliRing_isStandardSmoothOfRelativeDimension`
+all have **zero** sorry-roots, so none of them reaches `weilPairing`. ✅ No circularity.
+
+### C8 (the scope decision — CONFIRMED)
+Restricting the register to "`N` invertible on `S`" is the right call. Full generality is not
+specifically Katz–Mazur 2.8 but needs machinery of comparable strength: the canonical
+**Poincaré biextension** pairing `A[N] × A^∨[N] ⟶ μ_N` plus the canonical principal
+polarization `E ≅ E^∨` (finite-flat Cartier-duality form, works for every `N`). The divisor
+route needs relative Cartier divisors *and* rational functions, translation/pullback of
+divisors, `E ≅ Pic⁰_{E/S}`, fppf-local existence of `f_Q` and of an `N`-th root of `f_Q ∘ [N]`,
+independence of all three choices, regularity of the ratio, descent, base change, and then
+bilinearity/alternation/perfectness in Cartier-dual terms. Relative effective divisors alone
+do not make it cheap. With the `N²` trick, **no lower bound on `N` is needed** — only
+invertibility.
+
+### Stage B, corrected ticket list
+* **[WP-D3a]** `Y(N²)` over `ℤ[1/N]` is regular ⟹ normal; noetherian ⟹ finitely many clopen
+  components; normal + connected ⟹ integral; each component dominates `Spec ℤ[1/N]` so its
+  function field has char 0. (Was: `Y(N)` over ℚ. Corrected per C1 + C2.)
+* **[WP-D3b]** sections of a **finite** (étale not needed!) scheme over a normal integral base
+  extend uniquely from the generic point. ChatGPT's cleanest form, with the whole proof:
+  `B` finite over the normal domain `A`, a generic section is an `A`-algebra map `B → K`, its
+  image is integral over `A`, and normality forces it into `A`. **No** noetherian / excellent /
+  Nagata / unibranch hypothesis. Uniqueness from separatedness + density of the generic point.
+* **[WP-D3c]** field-change naturality of the field-level pairing (**C3** — the largest gap).
+* **[WP-D3d]** ζ on `Y(N²)` componentwise, extended by D3b, **primitive** by the clopen
+  primitive-locus argument (**C5**), with the det-cocycle from D3c + `fieldWeilPairing_gl2_zmod`,
+  after fixing the convention (**C6**).
+* **[WP-B5]** descend along the full-level cover using `descend_hom_of_effectiveEpi`
+  (**C4**), giving `weilPairing` + `weilPairing_over`.
+* **[WP-C2 … C7]** the specs, unchanged, except **nondegeneracy goes through the Cartier-dual
+  form** (**C5**).
+
+### Suggested alternative worth keeping in view
+Rather than extending only the *value* `ζ` on the universal basis, extend the whole generic
+morphism `E[N]²_K ⟶ μ_{N,K}` over each component: `E[N]²` is finite étale over a normal base
+hence componentwise normal, so WP-D3b applies directly and the determinant formula is never
+needed at the universal stage. Costs more Lean infrastructure; avoids C6 entirely.
