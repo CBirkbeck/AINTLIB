@@ -12783,3 +12783,53 @@ four are comments recording that a raise *used to* be needed (`WedhornCechAcycli
 `LaurentBaireSupport:19`, `FiniteJetUniformDomain:214`, `FiniteJetSheafTransfer:460`), and three
 are `set_option maxSynthPendingDepth 1 in` in `RobbaCorrespondence` — a *reduction*, explicitly
 to keep. Two more live in `Vendored/`, which is out of scope.
+
+### `locTopology_continuous_lift` 114 -> 0: the file is clear
+
+The first target this session where a single round removed it from the list outright, and it
+came from asking a different question. Instead of picking a target and looking for seams, I
+scanned all 36 for **the largest single top-level block as a share of the body** — the
+"dominant have" the decompose notes rank first. That ranking is what picked this one.
+
+`have hfull` was 69 of the 114 lines, and its body opened with
+
+    suffices haux : ∀ (U : Finset A), … ∀ x ∈ locSubring P U s, …
+      exact haux T hpow
+
+— the author had *already* written the general statement. The lemma was sitting there; `T` only
+had to stop being fixed. `S₀` was a `set`-local but a closed term in `P` and `s`, so spelling it
+cost nothing (the "spell the closed term" fix).
+
+| new lemma | lines | was |
+|---|---|---|
+| `locSubring_empty` | 4 | the `empty` branch's `have hempty` |
+| `locSubring_base_mul_mem` | 14 | `have hbase` |
+| `locSubring_mul_mem_of_forall_powerBounded` | 47 | `have hfull`, i.e. its own `haux` |
+
+Main proof: **114 -> 33**. Everything under 50, over-width back to 0, three declarations added,
+none removed. Green first try — using `decompose_common.insert_before_decl` rather than
+hand-rolling the anchor, which is what went wrong on `RestrictedPowerSeries` an hour earlier.
+
+Two follow-ups it needed: the new lemma's signature line came out at 103 characters (rewrapped),
+and the body landed at 51 — two over — which is what motivated pulling `locSubring_empty` out.
+That one is worth having anyway: `locSubring P ∅ s = P.A₀.map (algebraMap A _)` is API, not a
+proof step.
+
+### The scan that should have come first
+
+Ranking every remaining target by its dominant block, as a share of body:
+
+| share | block | target | reading |
+|---|---|---|---|
+| 100% | `refine ⟨fun` | `isOXAcyclic_interProd` (118) | the block *is* the proof — no seam |
+| 98% | `have hg_lt1` | `exists_continuous_valuation_…` (167) | same |
+| 84%/83% | `refine ⟨∑` | the two `exists_evalBI_approx_bloc` (122/123) | same |
+| 64% | `have hdecomp_ctrl` | `mem_ideal_map_of_forall_coeff_mem` (157) | lift -> 50 + 110 |
+| 59% | `have hfull` | `locTopology_continuous_lift` (114) | **done — cleared** |
+| 51% | `have hginv` | `xPresheaf_isSheafOfTopologicalRings` (90) | lift -> 44 + 49, clears it |
+| 41% | `obtain ⟨hnB1,` | `IsRestricted.mul` (68) | lift -> 42 + 28, clears it |
+| 40% | `rcases eq_or_ne` | `exists_lift_norm_le_of_closed_range` (298) | lift -> 176 + 124 |
+
+The useful band is **40–65%**. Above ~80% the "block" is the entire proof and extracting it just
+renames the problem; below ~30% no single lift moves the number enough. Three targets sit in the
+band and are not otherwise blocked.
