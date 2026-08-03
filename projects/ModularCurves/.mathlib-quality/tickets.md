@@ -35806,3 +35806,25 @@ same construction with `σ : K(D) ≃ₐ K(C)` in place of a Galois automorphism
 **Revised sizing**: no base-change API for `torsionAlgebra` / `muNAlgebra` across a general
 field *extension* is needed — only conjugation along an equivalence, for which
 `fiberIsoOfAlgEquiv` (this session) is already the fibre-functor half.
+
+### [WP-D3a-FACTOR] each factor is integrally closed — the join of D3a-DOM and D3b
+- **Status**: open · **File**: `ForMathlib/SmoothCurveComponents.lean` · **Depends on**: none
+- **Statement**: for `A` standard smooth of relative dimension 1 over a field `k` and `p` a
+  minimal prime, `A ⧸ p` is an integrally closed domain.
+- **Two routes, both measured:**
+  1. **Direct.** `(A ⧸ p)` localized at a maximal ideal `m/p` is `A_m / p A_m`, and
+     `p A_m = ⊥` by `eq_comap_bot_of_mem_minimalPrimes` (this session) — so it *is* `A_m`, a
+     DVR, hence integrally closed; conclude by `IsIntegrallyClosed.of_localization_maximal`.
+     **No standard-smoothness of the quotient needed.** Missing ingredient: the identification
+     `(A ⧸ p)_{m/p} ≅ A_m / p A_m`. Searched — mathlib has
+     `IsLocalization.localizationLocalizationAtPrimeIsoLocalization` and
+     `quotMapEquivQuotMapMaximalIdealOfIsLocalization` but **not** this one.
+  2. **Via idempotents.** CRT (`Ideal.quotientInfRingEquivPiQuotient` with
+     `pairwise_isCoprime_minimalPrimes` and `sInf_minimalPrimes_eq_bot`) makes each `A ⧸ p` a
+     localization of `A` away from an idempotent, so
+     `Algebra.IsStandardSmoothOfRelativeDimension.localization_away` (mathlib, already used in
+     `Moduli/LevelThreeSmooth.lean`) gives standard smoothness of the factor and **WP-D3b
+     applies verbatim**. Missing ingredient: extracting the idempotent from the CRT
+     equivalence.
+- **Recommendation**: route 2 — its missing ingredient is bookkeeping with lemmas that exist,
+  while route 1's is a mathlib gap.
