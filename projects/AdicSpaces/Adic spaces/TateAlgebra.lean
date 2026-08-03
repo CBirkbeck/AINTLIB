@@ -2329,7 +2329,6 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
           exfalso
           exact hq_fail_above m (by omega) hm
       · -- q ≥ 1: use hAR_ctrl at level q - 1.
-        have hq_pos : 0 < q := Nat.pos_of_ne_zero hq0
         have hq_hyp : ∀ i, (x i).val n ∈
             Subtype.val '' ((P.I ^ ((q - 1) + k₀) : Ideal P.A₀) : Set P.A₀) :=
           hq_valid (q - 1) (by omega)
@@ -2727,7 +2726,6 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
         rw [hinv, hcf_A, Finset.mul_sum]
         congr 1; ext q; ring
       · -- qn ≥ 1: use AR at level qn - 1.
-        have hqn_pos : 0 < qn := Nat.pos_of_ne_zero hq0
         obtain ⟨y, hy_mem, hy_eq⟩ := hqn_valid (qn - 1) (by omega)
         have hy_I₀ : y ∈ I₀ := show P.A₀.subtype y ∈ I by
           change (↑y : A) ∈ I; rw [hy_eq]; exact hval_mem_I n

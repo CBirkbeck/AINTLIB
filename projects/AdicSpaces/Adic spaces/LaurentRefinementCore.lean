@@ -1741,18 +1741,8 @@ theorem iteratedMinus_forwardLocHom_generators_powerBounded
     canonicalMap_mem_ringOfDef D₀ ha_A₀
   -- Key fact: in `Localization.Away (D₀.s * f)`, both `algebraMap(D₀.s)` and
   -- `algebraMap(f)` are units. Similarly in the target.
-  have hu_s_src : IsUnit (algebraMap A (Localization.Away (D₀.s * f)) D₀.s) := by
-    have := IsLocalization.Away.algebraMap_isUnit (R := A) (D₀.s * f)
-        (S := Localization.Away (D₀.s * f))
-    rw [map_mul] at this; exact isUnit_of_mul_isUnit_left this
-  have hu_f_src : IsUnit (algebraMap A (Localization.Away (D₀.s * f)) f) := by
-    have := IsLocalization.Away.algebraMap_isUnit (R := A) (D₀.s * f)
-        (S := Localization.Away (D₀.s * f))
-    rw [map_mul] at this; exact isUnit_of_mul_isUnit_right this
   have hu_s_tgt : IsUnit (algebraMap B (Localization.Away (D₀.canonicalMap f))
       (D₀.canonicalMap D₀.s)) := (isUnit_s_in_presheafValue D₀).map _
-  have hu_f_tgt : IsUnit (algebraMap B (Localization.Away (D₀.canonicalMap f))
-      (D₀.canonicalMap f)) := IsLocalization.Away.algebraMap_isUnit _
   -- `forward(algebraMap A _ x) = algebraMap B _ (canonicalMap x)`.
   have hforward_alg : ∀ x : A, iteratedMinus_forwardLocHom D₀ f
       (algebraMap A (Localization.Away (D₀.s * f)) x) =

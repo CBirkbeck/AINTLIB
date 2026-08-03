@@ -2621,8 +2621,6 @@ theorem ker_restrictionMapHom_subset_closure_algLift
       presheafValue D₀ → presheafValue D) :=
     restrictionMapHom_continuous D₀ D h
   have hW'_pre_c : (restrictionMapHom D₀ D h) ⁻¹' W' ∈ nhds c := by
-    have h_restrc : restrictionMapHom D₀ D h c ∈ W' := by
-      rw [hc]; exact mem_of_mem_nhds hW'_nhd
     exact hrestr_cont.continuousAt.preimage_mem_nhds
       (show W' ∈ nhds (restrictionMapHom D₀ D h c) by rw [hc]; exact hW'_nhd)
   have hUc' : Uc ∩ (restrictionMapHom D₀ D h) ⁻¹' W' ∈ nhds c :=

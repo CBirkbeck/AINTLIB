@@ -984,9 +984,6 @@ theorem exists_delta_teichCoeffF_sub (ϖ : PseudoUniformizer F) (n : ℕ) {ρ : 
         rw [teichCoeffF, teichCoeffF, teichCoeffF]
         simp only [pow_zero]
         exact (RingHom.map_sub WittVector.constantCoeff y x).symm
-      have hyx : y - x = -(x - y) := by ring
-      have hcoords : ∀ k, teichCoeffF p F (y - x) k = teichCoeffF p F (y - x) k :=
-        fun _ => rfl
       -- |(y−x)₀| = |(x−y)₀| : digit-0 is additive so it is exact negation
       have hneg0 : teichCoeffF p F (y - x) 0 = -(teichCoeffF p F (x - y) 0) := by
         rw [teichCoeffF, teichCoeffF]

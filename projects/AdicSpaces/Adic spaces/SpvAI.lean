@@ -130,7 +130,6 @@ theorem cofinalValue_ideal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace A]
   -- We bound v(a) ≤ max over monomials of v(monomial), and each monomial < γ.
   --
   -- Use `Submodule.span_induction` to reduce to the spanning set.
-  have h_span_eq : (S : Set P.A₀) = ↑S := rfl
   have ha' : a ∈ Ideal.span ((S ^ n₀ : Finset P.A₀) : Set P.A₀) := by
     rw [Finset.coe_pow]
     rw [show (Ideal.span ((↑S : Set P.A₀) ^ n₀) : Ideal P.A₀) =

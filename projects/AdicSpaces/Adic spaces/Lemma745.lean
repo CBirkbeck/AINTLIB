@@ -540,11 +540,6 @@ theorem exists_spa_point_via_restrictToConvex (P : PairOfDefinition A)
       exact (Valuation.mem_supp_iff v_ext a).mpr (h_ext_zero a ha_p)
     · set g_cont : WithZero H_gen.toSubgroup :=
         ((⟨u_max, hu_max_mem⟩ : H_gen.toSubgroup) : WithZero H_gen.toSubgroup) with g_cont_def
-      have hg_ne : g_cont ≠ 0 := WithZero.coe_ne_zero
-      have hg_lt : g_cont < 1 := by
-        rw [g_cont_def, show (1 : WithZero H_gen.toSubgroup) =
-          ((1 : H_gen.toSubgroup) : WithZero _) from rfl]
-        exact WithZero.coe_lt_coe.mpr (Subtype.mk_lt_mk.mpr (Units.val_lt_val.mp hu_max_lt1))
       have hg_bound : ∀ a : P.A₀, a ∈ P.I → v_ext (P.A₀.subtype a) ≤ g_cont := by
         intro a ha
         rw [h_ext_A₀ a]

@@ -11716,3 +11716,149 @@ five or more rounds, and the tractable part is the `step`/`key`/`hCNcover` clust
 the `tinv`-derived facts (`hpit*`, `hequiv*_pow`) first become section-level data so they
 stop needing to be threaded. That is the same `section` + `variable` move that unblocked
 `flat_polyToP`, and it is the right next step here.
+
+### Scan 6: dead `have`/`set` bindings across the whole residue
+
+Having found dead code in both targets it was tried on, ran it over all 43 remaining
+targets. `scratchpad/dead_scan.py`.
+
+```
+dead bindings across the 43 remaining targets: 17, 41 lines
+```
+
+One (`h_gauss_le`, 4 lines) is in `Vendored/CoramRestrictedNorm.lean` — **skipped per the
+directive**. The other 16 (37 lines) span eight files:
+
+| lines | binding | in |
+|---|---|---|
+| 8 | `hmk_pi_tendsto` | `locToQuotientOneSubfX_gen_continuous_…` |
+| 4 | `hg_lt` | `exists_spa_point_via_restrictToConvex` |
+| 4+2 | `hu_s_src`, `hu_f_src`, `hu_f_tgt` | `iteratedMinus_forwardLocHom_generators` |
+| 2 | `hprod0` | `ideal_pullback_controlled` |
+| 2 | `hM_bound`, `hG_nhds`, `hW_nhds` | `locToQuotient_…`, `…_continuous_…` |
+| 2 | `hcoords`, `hyx` | `exists_delta_teichCoeffF_sub` |
+| 1 | `hq_pos`, `hqn_pos` | `tateAlgebra_flat`, `mem_ideal_map_…` |
+
+**Two regex details that matter for correctness here:**
+
+- The word boundary must include Greek and subscripts (`Ͱ-Ͽᵢ-ᵪ₀-ₜ`). With plain
+  `[A-Za-z_0-9]`, `hpitpow` matches inside `hpitpowκ` and a live binding looks dead — the
+  failure direction that *deletes working code*.
+- `have\s` does **not** match `haveI`, which is what makes this safe: an instance-position
+  `haveI`/`letI` is used implicitly by typeclass resolution and would look "unreferenced".
+  Only named `have`/`set` of ordinary facts are considered.
+
+The build is the real check: a binding that is genuinely load-bearing fails immediately.
+
+### Scan 6 is UNSOUND as stated — and the build caught it
+
+Applying the 16 removals broke `TopologyComparison`:
+
+```
+error: TopologyComparison.lean:424:52: omega could not prove the goal
+error: TopologyComparison.lean:463:49: Tactic `assumption` failed
+error: TopologyComparison.lean:1836:48: Tactic `assumption` failed
+```
+
+Three of its four "dead" bindings were load-bearing. **The premise of the scan is wrong:
+`omega`, `assumption`, `linarith`, `simp_all`, `tauto`, `aesop` and friends consume
+hypotheses by TYPE, not by name.** A `have hM_bound : …` that is never written again is
+still essential if a later `omega` picks it out of the context. Name-based liveness
+analysis cannot see that, and no refinement of the regex will fix it — it is not a lexical
+property.
+
+So the scan's output is a **candidate list, not a verdict**, and the only adjudicator is the
+compiler. That was already how I ran it — eight module builds before the gate, precisely
+because a genuinely load-bearing binding fails immediately — and that is the only reason
+this cost one build cycle instead of a bad commit.
+
+Reverted `TopologyComparison.lean` alone (the other four failures were merely downstream of
+it) and rebuilt. Net after revert: **12 dead bindings, 25 lines**, in
+`TateAlgebra`, `SpvAI`, `Lemma745`, `PresheafTateStructure`, `LaurentRefinementCore`,
+`FJP/FiniteJetStrictLocalization`, `FarguesFontaine/WittF`.
+
+> Revised rule for scan 6: run it, then remove and **build**. Treat any file containing
+> `omega` / `assumption` / `linarith` / `simp_all` / `tauto` / `aesop` in the target as
+> high-risk and expect false positives there. Never batch its removals into a commit
+> without a per-module build.
+
+**Second false positive, exactly where predicted.** After reverting `TopologyComparison`,
+`FJP/FiniteJetStrictLocalization` failed with
+
+```
+error: FiniteJetStrictLocalization.lean:405:4: linarith failed to find a contradiction
+```
+
+— `hprod0` was being consumed by `linarith`. Reverted that file too. So **2 of the 8 files
+were false positives, and both were `omega`/`linarith`/`assumption` sites**, which is the
+risk class the revised rule names.
+
+**Final, verified result: 11 dead bindings, 23 lines, six files** — `TateAlgebra` (2),
+`SpvAI` (1), `Lemma745` (2), `PresheafTateStructure` (1), `LaurentRefinementCore` (3),
+`FarguesFontaine/WittF` (2). All six modules green, no declarations removed.
+
+The honest accounting: the scan proposed 17, one was out of scope (`Vendored/`), five were
+wrong, eleven were real. A ~65% precision heuristic is still worth running at this scale —
+it costs a dozen lines of Python and two build cycles — but only with the compiler as the
+adjudicator and never as a batch commit.
+
+### The dominant blocker in the residue, named
+
+Surveying `presheafValue_mvRestricted_fU_uniformContinuous` (Wedhorn828:2284, 169 code
+lines) makes a pattern explicit that has now appeared in four consecutive targets:
+
+| target | the local that blocks extraction |
+|---|---|
+| `flat_polyToP` | `letI : Algebra …` built from `set gB`; later `set S₀` |
+| `idealOfDef_pow_isClosed_aux` | `let π := πc.comp eRE.toRingHom` |
+| `syzygy_graph_polynomial` | `set A : Ideal … := { carrier := … }` |
+| `presheafValue_mvRestricted_fU_uniformContinuous` | `letI τQ`, `uQ`, `uU`, … (9 instances) |
+
+In each case the proof's steps are named `have`s with written-down statements — ideal axis-2
+shape — but the statements **mention a proof-local binding**, so they do not typecheck
+outside the proof. Here it is literal: the statements are written `@Continuous _ _ D.topology
+τQ ψγ`, naming the `letI`-bound `τQ` directly.
+
+**This, not proof length, is what makes the residue hard.** The fix is the one proven on
+`flat_polyToP`: promote the local to section scope — `local instance` for instances,
+`private def` for data — after which the steps lift as ordinary lemmas. `syzygy_graph_polynomial`
+confirmed it for data (`koszulReachable`), `flat_polyToP` for both (`polyBallCod`,
+`ballDenoms`, six instances).
+
+Sizing for this one: `hψγ_cont` (49), `hiU_coeff` (25), `hfUX_pb` (20) all fit under 50 as
+lemmas once `τQ`/`uQ`/`uU` are section-level; that is 94 of 169, and the 28-line instance
+preamble leaves with them, which clears the target in one round rather than three.
+
+### Wedhorn828: one instance preamble, duplicated across five targets
+
+`Wedhorn828.lean` holds **five** of the 43 remaining targets, and every one opens with
+10–15 `letI`/`haveI`. Comparing those preamble lines across the five:
+
+```
+instance lines appearing in >1 target: 20
+
+  [3] isUnit_mk_s, fU_uniformCont, surjection   TopologicalSpace (restrictedMvPowerSeriesSubring m (presheafValue D))
+  [3] "                                     "   UniformSpace  (restrictedMvPowerSeriesSubring m (presheafValue D))
+  [3] "                                     "   IsUniformAddGroup (restrictedMvPowerSeriesSubring m …)
+  [3] "                                     "   TopologicalSpace (restrictedMvPowerSeriesSubring (D.T.card + m) A)
+  [3] "                                     "   IsTopologicalRing (restrictedMvPowerSeriesSubring (D.T.card + m) A)
+  [2] isUnit_mk_s, surjection                   T2Space / T0Space / IsTopologicalRing on the same carriers
+  [2] unitDatum_ker, coUnitDatum_ker            TopologicalSpace / IsTopologicalRing ↥(restrictedMvPowerSeriesSubring 1 A)
+```
+
+The file has **no sections at all** between lines 2000 and 3300, so every one of these
+proofs re-installs the same instances from scratch.
+
+This is the instance-preamble analogue of the `posIncl` finding: the same fact written out
+repeatedly because there was no shared home for it. Two sections fix it —
+
+- one over `(D : RationalLocData A) [IsTateRing (presheafValue D)] (m : ℕ)` carrying the
+  `restrictedMvPowerSeriesSubring m (presheafValue D)` and `(D.T.card + m) A` instances,
+  serving `isUnit_mk_s` (84), `fU_uniformCont` (169), `surjection` (187);
+- one over `A` carrying the `restrictedMvPowerSeriesSubring 1 A` instances, serving
+  `unitDatum_ker_le_span` (115) and `coUnitDatum_ker_le_span` (133).
+
+Value: it removes ~20 duplicated instance lines **and** unblocks step-extraction in all
+five targets at once, because their steps' statements name those `letI`-bound instances
+(`@Continuous _ _ D.topology τQ ψγ`) and so currently cannot be stated outside the proof.
+688 code lines of the residue sit in this one file.
