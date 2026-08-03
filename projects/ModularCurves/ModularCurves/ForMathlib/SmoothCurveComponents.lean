@@ -129,4 +129,43 @@ theorem injective_pi_quotient_minimalPrimes
   rw [sInf_minimalPrimes_eq_bot hloc, Ideal.mem_bot, sub_eq_zero] at hmem
   exact hmem
 
+/-! ### Splitting off one minimal prime
+
+For the factorwise treatment one wants each `A ⧸ p` to be a *localization* of `A` (so that
+`Algebra.IsStandardSmoothOfRelativeDimension.localization_away` transports standard
+smoothness to it). The first step is to split `A` into two comaximal pieces: `p` and the
+intersection of the other minimal primes.
+-/
+
+variable (A) in
+/-- The intersection of the minimal primes other than `p`. -/
+noncomputable def cominimal [IsNoetherianRing A] (p : Ideal A) : Ideal A :=
+  ⨅ q ∈ (minimalPrimes.finite_of_isNoetherianRing A).toFinset.erase p, q
+
+/-- **(WP-D3a-FACTOR, step 1)** `p` is coprime to the intersection of the other minimal
+primes. -/
+theorem isCoprime_cominimal [IsNoetherianRing A]
+    (hloc : ∀ (m : Ideal A) [m.IsMaximal], IsDomain (Localization.AtPrime m))
+    {p : Ideal A} (hp : p ∈ minimalPrimes A) :
+    IsCoprime p (cominimal A p) :=
+  Ideal.isCoprime_biInf fun q hq =>
+    Ideal.isCoprime_iff_sup_eq.mpr
+      (sup_eq_top_of_ne_of_mem_minimalPrimes hloc hp
+        (by simpa using (Finset.mem_erase.mp hq).2)
+        (Ne.symm (Finset.mem_erase.mp hq).1))
+
+/-- **(WP-D3a-FACTOR, step 1)** …and the two meet in `⊥`: together with the intersection of
+all the minimal primes being `⊥`, this exhibits `A` as the product `A ⧸ p × A ⧸ cominimal`. -/
+theorem inf_cominimal_eq_bot [IsNoetherianRing A]
+    (hloc : ∀ (m : Ideal A) [m.IsMaximal], IsDomain (Localization.AtPrime m))
+    (p : Ideal A) :
+    p ⊓ cominimal A p = ⊥ := by
+  refine le_antisymm ?_ bot_le
+  rw [← sInf_minimalPrimes_eq_bot hloc]
+  refine le_sInf fun q hq => ?_
+  by_cases hqp : q = p
+  · exact hqp ▸ inf_le_left
+  · refine inf_le_right.trans (le_trans (le_refl _) ?_)
+    exact biInf_le _ (Finset.mem_erase.mpr ⟨hqp, by simpa using hq⟩)
+
 end ModularCurves

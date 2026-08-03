@@ -35828,3 +35828,21 @@ field *extension* is needed — only conjugation along an equivalence, for which
      equivalence.
 - **Recommendation**: route 2 — its missing ingredient is bookkeeping with lemmas that exist,
   while route 1's is a mathlib gap.
+
+## [WP-D3a-FACTOR step 1] DONE (2026-08-04) — the two-piece splitting, axiom-verified
+
+`ForMathlib/SmoothCurveComponents.lean` gains three declarations:
+
+* `cominimal A p` — the intersection of the minimal primes **other than** `p`;
+* `isCoprime_cominimal` — `p` is coprime to it (`Ideal.isCoprime_biInf` over the finite set
+  from `minimalPrimes.finite_of_isNoetherianRing`, fed by `sup_eq_top_of_ne_of_mem_minimalPrimes`);
+* `inf_cominimal_eq_bot` — the two meet in `⊥`.
+
+Together: `A ≅ A ⧸ p × A ⧸ cominimal A p`. Note `inf_cominimal_eq_bot` needs **no** hypothesis
+that `p` is minimal — for `q` minimal either `q = p` (and `p ⊓ _ ≤ p`) or `cominimal A p ≤ q`;
+the hypothesis was dropped after the linter flagged it unused.
+
+**Remaining for WP-D3a-FACTOR**: from the two-piece splitting, produce the idempotent and
+identify `A ⧸ p` with `Localization.Away e`, after which
+`Algebra.IsStandardSmoothOfRelativeDimension.localization_away` gives standard smoothness of
+the factor and WP-D3b finishes.
