@@ -10717,3 +10717,483 @@ measure: for each candidate piece, grep its text for the names bound above it.
 
     over-50 proofs   486 (baseline) → 50   (47 actionable, 3 Vendored, 2 sorry-blocked)
     heartbeat raises 0                     (task 1 complete)
+
+## In progress: exists_evalBI_approx_bloc 122 → ~26 (RobbaPresentation)
+
+Chosen by the dependency-weight selector — its two bullets carry 98 of 122 lines and need
+only 7 and 4 enclosing locals, the lightest such pair left. Three lemmas:
+
+    evalBI_monomial_eq_BIProd   the `hterm` block            7-line body
+    evalBI_residual_le          residual bullet minus hterm  36
+    wIRPS_monomialSum_le        the norm bullet              39
+
+`N` stays as `max N₁ N₂` in the statements with `set N := max N₁ N₂ with hNdef` opening each
+body, so the bodies transfer verbatim instead of needing rewritten bounds.
+
+### Two guesses caught by reading, two mistakes caught by the build
+
+Applying the Groebner lesson, I read `exists_monomial_lift_package`'s conclusion
+(RobbaPresentation.lean:1328-1350) rather than inferring the `choose`n conjuncts from their
+use — and **two of three guesses were wrong**:
+
+* `hbnd2`, the third conjunct, has **no** `σ₁^m · (ρ₁^m)⁻¹` factor. I had written one in by
+  symmetry with `hbnd1`, which does have it.
+* `hN₁`/`hN₂` from `exists_pow_lt_of_lt_one` are **strict** `<`, not `≤`. The tell is the
+  body's `hN₁.le`.
+
+Both would have been type errors after an eight-minute build.
+
+Two more that only the build caught, both mechanical and both worth a rule:
+
+1. **A blanket rename inside an edit script rewrites the script's own anchors.**
+   `Finset.Iic N` → `Finset.Iic (max N₁ N₂)` was meant for the generated text; it also hit
+   the `R3` anchor string, which describes the *old* source, and the run died on
+   `substring not found`. Anchors are data about the pre-edit file and must be exempt from
+   any rewrite of the template.
+2. **A binder slice that runs up to the conclusion carries the signature's trailing `:`.**
+   `BINDERS = s[first_binder:conclusion]` ended `… (hε : 0 < ε) :`, so every generated
+   lemma had a stray colon before its extra binders —
+   `unexpected token ':'` and `Function expected`, three times over. Now asserted and
+   stripped:
+
+       assert BINDERS.endswith(' :')
+       BINDERS = BINDERS[:-2]
+
+If this lands, the identical decomposition applies to the `₂` twin at line 4708 — the same
+plan clears two targets.
+
+### The `₂` twin: anchors verified, but the script needs adapting not re-pointing
+
+`exists_evalBI_approx_bloc₂` is at line 4846 (not 4708 — the first twin's three lemmas
+shifted it). All four anchors exist and the structure matches exactly:
+
+    ·  -- the residual                 4899
+       have hterm : ∀ i ∈ Finset.Iic N 4901
+       rw [Finset.sum_congr rfl hterm] 4922
+    ·  -- the norm                     4957
+
+Five differences that make this an adaptation rather than a re-run:
+
+* target radius pair `(ρ₁, σ₂)` against the first twin's `(σ₁, ρ₂)` — the asymmetry that
+  makes the two residual bullets *look* different while being identical under
+  normalisation;
+* `teichPowGen₂` / `exists_monomial_lift_package₂` instead of the unsubscripted forms;
+* the `choose` binds **`hbnd2K hbnd1M`** — different names *and* a different order from the
+  first twin's `hbnd1 hbnd2`, so the two norm-bullet hypotheses swap roles;
+* twin 2 has **no `hWle` binder**;
+* twin 2 carries an extra `hzb` local.
+
+The conjunct shapes must be read from `exists_monomial_lift_package₂` (line 4608) rather
+than copied from the first twin — the same discipline that caught the missing
+`σ₁^m·(ρ₁^m)⁻¹` factor and the strict `<` this round. The `hbnd2K`/`hbnd1M` naming is a
+direct warning that the order differs.
+
+### Dedent rule, third occurrence — now stated generally
+
+Hit at 2, 4 and 6 in three consecutive batches:
+
+> Dedent by **(the block's own indent − 2)**, not by the indent of the construct it sits
+> under. A `have foo : … := by` body is one level deeper than its siblings, so a slice
+> containing both needs two different shifts.
+
+`hterm`'s body is at 6 inside a `have` at 4; dedenting by 6 put it at column 0 and gave
+`unexpected identifier; expected command`.
+
+### And: read `LAKE_EXIT`, not the wrapper's status
+
+A background task reporting "exit code 0" is the *compound command's* status — the `echo`
+after the build succeeded. Report `LAKE_EXIT=$?` captured immediately after `lake`, and
+grep the log for `\.lean:[0-9]+:[0-9]+: (error|unexpected|Function expected)`. Plain
+`grep -c error` also misses `unexpected token` and `Function expected`, which is how a
+six-error build got reported as green.
+
+### The Lean error format, stated correctly at last
+
+Two messages in a row this session reported a red build as green because the grep pattern
+was wrong. The format is
+
+    error: projects/…/File.lean:1723:35: failed to synthesize instance of type class
+
+— **`error:` first, then the path.** The pattern I "fixed" it to,
+`\.lean:[0-9]+:[0-9]+: (error|unexpected|Function expected)`, expects `error` *after* the
+location and therefore matches **zero** real Lean errors. The right anchor is `^error:`,
+and `LAKE_EXIT=$?` captured immediately after `lake` is the only status worth trusting —
+a background task's "exit code 0" is the compound command's, i.e. the `echo` that ran
+after the build.
+
+    grep -cE "^error:" <log>     # count
+    grep -E "^error:" -A 2 <log> # read
+
+### Reading the source is not enough if you read the wrong line
+
+Three of this target's faults were signature reconstruction, and the pattern is
+instructive. From `exists_monomial_lift_package` I read the *conclusion shapes* — and
+correctly caught that `hbnd2` has no `σ₁^m·(ρ₁^m)⁻¹` factor and that `hN₁`/`hN₂` are strict
+`<`. But the existentials' **types** are one line above the shapes:
+
+    ∃ (j : ℕ) (e : ℕ) (c' : OF F),
+
+so the `choose`n functions are `Jf, Ef : ℕ → ℕ` but **`Cf : ℕ → OF F`**. I typed all three
+`ℕ → ℕ`, and got `CommRing ℕ` five times over — from the lemma *statements*, not the call
+sites, which is what made it look like the (separate, real) explicit-`p F ϖ` fault.
+
+> When reconstructing a signature from a `choose`, read the binder types **and** the
+> conjunct shapes. They are different lines and both get guessed wrong.
+
+### Cost accounting for this target
+
+Six build attempts at ~8 minutes each. Faults: (1) binder slice carrying the signature's
+trailing `:`; (2) a blanket rename clobbering the script's own anchors; (3) dedent by 6
+instead of 4; (4) call sites missing the explicit `p F ϖ`; (5) `Cf` mistyped. Only (3) and
+(4) were rules already written down and not applied.
+
+**The selector needs a second axis.** Dependency *weight* picked this target correctly —
+its bullets are self-contained. What it does not measure is signature *reconstructability*:
+how much of each piece's binder list has to be rebuilt from a `choose` over a nine-way
+`∧`-chain. Groebner's pieces took their hypotheses from named `have`s and went in almost
+first try; this one's come from an anonymous existential and took six. Prefer targets whose
+extracted hypotheses already exist as named declarations.
+
+## Axis 2 — signature reconstructability — and what it immediately found
+
+After the RobbaPresentation revert I added the second selector axis and ranked all 49
+remaining targets on it (`scratchpad/rank.py`). For each target it measures:
+
+- **`cov`** — lines sitting inside a named `have h : T := by …` block of ≥8 lines. A named
+  `have`'s type ascription **is** the extracted lemma's conclusion, verbatim, and its
+  hypotheses are the earlier `have`s by name. Nothing is reconstructed.
+- **`anon`** — count of `obtain` / `choose` / `rcases` / `refine` / `constructor` / `rintro`.
+  Each is a conclusion that exists only implicitly, in a tactic's target, and has to be
+  rebuilt. This is what cost RobbaPresentation six attempts.
+
+Two targets came back with **`anon = 0`** — no reconstruction anywhere in the body:
+
+```
+ cov blk anon code  name                                       file:line
+ 102   5    0  129  example638Plus_backward_forward_eq_id      Example638.lean:648
+  77   4    0  100  example638Bivariate_backward_forward_eq_id LaurentOverlap.lean:1381
+```
+
+and `idealOfDef_pow_isClosed_aux` (cov 208, anon 1, code 187) is nearly as clean.
+
+### What the first one turned out to contain
+
+`example638Plus_backward_forward_eq_id`'s inner `hcoeff_X_pow` names **no enclosing local
+at all** — dependency weight zero. It is pure `TateAlgebra` API:
+
+```lean
+coeff m (X ^ j) = if m = j then 1 else 0
+```
+
+Grepping the statement rather than a name found the same fact **three times**:
+
+| where | form | lines |
+|---|---|---|
+| `Example638.lean:748` | anonymous `have hcoeff_X_pow` | 11 |
+| `TopologyComparison.lean:1107` | anonymous `have hcoeff_X_pow` | 11 |
+| `PresheafIdentification.lean:425,437` | `coeff_X_pow_eq'` + `coeff_X_pow_ne'`, split by case | 21 |
+
+The first two are **byte-identical modulo indentation and two comments** — and so is the
+13-line `hg'_vanish` that follows each of them. Confirmed by diffing the two 40-line
+regions with the ring name normalised.
+
+**Name-based dedup cannot see the first two: they have no names.** This is
+[[lemma-in-wrong-file-inlining]] in its purest form — the fact does exist as a named
+declaration, in `PresheafIdentification`, a file neither consumer imports; so both
+consumers inlined it. Only a statement-shaped grep finds that.
+
+### The fix
+
+Hoisted two lemmas into `TateAlgebra.lean`, next to the `coeff_succ_X_mul` /
+`coeff_zero_X_mul` their proofs use:
+
+- `TateAlgebra.coeff_X_pow` — the δ fact
+- `TateAlgebra.val_sub_coeff_mul_X_pow_eq_zero` — the `hg'_vanish` fact, generalised off
+  the two `set` variables (`a := coeff k g`, `gk := algebraMap a * X ^ k`) into a
+  statement about `g` and `k` alone. It is the induction step of every
+  "polynomials are dense in `A⟨X⟩`" argument in the project, which is exactly why it had
+  been written out three times.
+
+Both call sites collapse to three lines (`rw [hgk_def, ha_def]; exact …`), and
+`PresheafIdentification`'s two private lemmas become one-line wrappers
+(`rw [coeff_X_pow, if_pos rfl]` / `if_neg h`). Net −38 lines with API *added*, and it
+moves two separate over-50 targets at once.
+
+> The residue is not uniform after all. I recorded that conclusion too early — it was
+> drawn from the *first* axis alone, which measures self-containedness and says nothing
+> about whether a sub-block is already a named, reusable mathematical fact.
+
+### Batch: Example638 + the coeff hoist
+
+`example638Plus_backward_forward_eq_id` **129 → 32 code lines**, in two steps.
+
+**Step 1 — the hoist** (above): the shared `hcoeff_X_pow` / `hg'_vanish` pair left the body,
+taking 21 lines with them.
+
+**Step 2 — three extractions**, all conclusion-preserving, each conclusion copied verbatim
+from its `have`'s type ascription:
+
+| lemma | was | body |
+|---|---|---|
+| `example638Plus_backwardHom_continuous` | `hbwd_cont` + the 20 uniform-structure `letI`s | 25 |
+| `example638Plus_evalHom_continuous` | `hevalHom_cont` | 16 |
+| `example638Plus_agree_on_polynomials` | `hagree` | 32 |
+
+The one that mattered is the first, and not for its own size. **Twenty of the parent's 35
+preamble lines existed solely to make `UniformSpace.Completion.continuous_extension`
+elaborate for `hbwd_cont`** — nine `letI`s installing uniform structures on
+`Localization.Away (1 : B)`, on `Localization.Away (trivialPlusDatum B P b).s`, and on the
+quotient, plus the `CompleteSpace` instance. Move that one five-line `have` into its own
+lemma and all twenty go with it. Nothing else in the parent referenced them.
+
+> When a proof opens with a wall of `letI`, ask which single step needs it. Preamble is
+> not overhead spread across the proof — it is usually a dependency of exactly one line,
+> and it leaves with that line. This inverts the preamble tax: instead of each extracted
+> piece *paying* ~6 lines, the right piece *takes* 20 away.
+
+**The one fault, and it was a reasoning error, not a mechanical one.** I dropped
+`[IsNoetherianRing P.A₀]` from the extracted signatures because the neighbouring
+`example638Plus_backwardHom_canonicalMap` doesn't take it — 13 errors, all
+`failed to synthesize IsNoetherianRing ↥P.A₀`. The binder list to copy is **the one on the
+theorem being extracted from**, not one on a lemma that happens to be nearby and mention
+the same functions.
+
+The fix then tripped the blanket-rename guard from the Robba batch: `(P : PairOfDefinition
+B) (b : B)` occurs **six** times in the file, not three. The assertion fired before the
+write, so nothing was corrupted. Anchoring each substitution at its declaration
+(`s.index('theorem ' + name)`, then `assert j - i < 60`) fixed it. That guard has now paid
+for itself twice.
+
+**Warning tax (new, worth stating):** each extracted lemma inherits the parent's
+binder set, so it inherits the parent's *binder-level* warnings. All three new lemmas
+raise `linter.overlappingInstances`, exactly as `example638Plus_backward_forward_eq_id`
+itself does and as untouched `example638Plus_backwardHom_canonicalMap` does. This is the
+known project-wide pre-existing condition, not new breakage — but decomposition
+*multiplies* it, so a file's warning count rising by the number of pieces extracted is
+expected and is not a regression signal.
+
+Scoreboard: **486 → 48 actionable.** No declarations removed anywhere; 5 added.
+
+## Extraction is a duplicate detector — and it found one all three scans missed
+
+Extracting `hbwd_cont` into `example638Plus_backwardHom_continuous` made the gate fail with
+
+```
+error: LaurentOverlap.lean:2035: `ValuationSpectrum.example638Plus_backwardHom_continuous`
+       has already been declared
+```
+
+The lemma **already existed**, in `LaurentOverlap.lean` — a file that *imports* Example638.
+Identical conclusion, identical binder list, same one-line proof. Example638 had inlined it
+as an anonymous `have` because the named version lives downstream of it. That is
+[[lemma-in-wrong-file-inlining]] for the third time this session.
+
+### Why none of my three dedup scans saw it
+
+I ran, and recorded as finding "no new free wins":
+
+1. exact-body hash — **missed**: the two proofs are *textually different*. Example638's
+   preamble installs `TopologicalSpace (TateAlgebra B)`, `hT2Q`, and a
+   `Localization.Away (1 : B)` trio; LaurentOverlap's installs `IsTopologicalAddGroup` and
+   no `(1 : B)` trio. Different letI sets, same theorem.
+2. primed-twin — **missed**: nothing is primed.
+3. repeated 8-line blocks — **missed**: the `have`'s *body* is a single token,
+   `UniformSpace.Completion.continuous_extension`. Twenty times below the threshold.
+
+All three compare **proof text**. This duplicate is invisible in proof text and glaring in
+the **statement** — which is exactly [[dedup-search-statement-shape-not-name]], applied to
+anonymous `have`s rather than to named lemmas.
+
+> **A `have h : T := …` inside a proof is an unnamed theorem with conclusion `T`.** Hash
+> `T` and compare it against the conclusion of every named declaration in the import
+> closure. Textual similarity of proofs finds nothing here; textual identity of
+> *conclusions* finds it immediately.
+
+And the cheap version of that scan is free: **extract the thing and let the compiler tell
+you.** Naming an anonymous `have` forces a collision if the name is taken. The `already
+been declared` error is a dedup result, not an obstacle.
+
+### Resolution
+
+Kept the copy in `Example638.lean` — `example638Plus_backwardHom` is *defined* there, so
+that is the earliest consumer and the correct home. Deleted the 35-line downstream copy,
+repointed its single consumer (`LaurentOverlap.lean:2115`, which now passes `B` explicitly
+since the surviving lemma takes it from Example638's section variables), and kept the
+**original author's docstring** rather than the one I had written.
+
+Net for the collision: −35 further lines, one fewer place for the two proofs to drift apart.
+
+### Scan 4 (new): `have` conclusions vs named declarations
+
+Built the scan the collision implied — index every named declaration by its **conclusion**
+(text after the last top-level `:`, before `:=`), then index every `have h : T` by `T`, and
+intersect. `scratchpad/have_scan.py`.
+
+```
+named declarations indexed by conclusion: 3436
+distinct `have` conclusions:              4330
+`have`s whose conclusion IS a named declaration: 38
+  ... of which the body is 4+ lines (a RE-PROOF, not a restatement):  11   (52 lines)
+```
+
+Filtering on body size is what makes it usable: a `have h : T := the_lemma args` is a
+harmless restatement, and 27 of the 38 are that. The 11 with real bodies are re-proofs:
+
+| body | `have` | duplicates |
+|---|---|---|
+| 8 | `hUnitS` Wedhorn828:2647 | `presheafValue_mvRestricted_isUnit_mk_s` (same file:2159) |
+| 5 | `hstep` LaurentRefinementCore:3114 | `..._iteratedPlus_equiv_restrictionMap_canonicalMap` (same file:2981) |
+| 5 | `hstep` LaurentRefinementCore:3213 | `..._iteratedMinus_…` (same file:3147) |
+| 5 | `h₁` LaurentRefinementCore:3330 | `presheafValue_iteratedPlus_equiv_isInducing` (same file:1683) |
+| 5 | `h₁` LaurentRefinementCore:3423 | `presheafValue_iteratedMinus_equiv_isInducing` (same file:2539) |
+| 4 | `h_alg_cont` **Presheaf**:3140 | `algebraMap_continuous_loc` (**PresheafIdentification**:861) |
+| 4 | `hU` **Presentation**:2325 | `wI_ball_mem_nhds_BISub` (**SheafyBI**:51) |
+| 4 | `h1_closure` Cor832:2113 | `one_mem_closure_coeRingHom_image` (same file:2011) |
+| 4 | `subtype_emb` EmbeddingTopo:566 | `..._isEmbedding_of_homeomorph` (same file:399) |
+| 4 | `h_step` PresheafIdentification:512 | `coeff_succ_of_oneSubfX_eq_aXn` (same file:462) |
+| 4 | `hDmatch` FiniteJetSheafTransfer:662 | `mapBD_eq_mapCD_of_pushed_gluing` (same file:387) |
+
+The two bolded ones are cross-file and carry the same signature as the Example638 case —
+worth checking whether the named lemma is declared *downstream* of the inlining file, which
+is what forces the inline.
+
+Queued for task 3; task 2 (48 remaining over-50 bodies) stays the priority.
+
+### Scan 5: which remaining targets are mostly `letI` wall?
+
+Generalising the Example638 win — 20 of its 35 preamble lines served exactly one `have` —
+here is every remaining target carrying 6+ `letI`/`haveI` installs, with the total line
+span those installs occupy:
+
+```
+letI   n code  name                                         file:line
+ 172  14  181  flat_polyToP                                 FiniteJetGraphKoszul.lean:1627
+  61  25  187  idealOfDef_pow_isClosed_aux                  PresheafTateStructure.lean:424
+  46  13  165  genPiece_relative_overlap_square₂            WedhornCechAcyclicity.lean:9567
+  35  20  187  presheafValue_mvRestricted_surjection        Wedhorn828.lean:2541
+  29   8  136  locToQuotientOneSubfX_gen_continuous_…       TopologyComparison.lean:1749
+  27  15   84  presheafValue_mvRestricted_isUnit_mk_s       Wedhorn828.lean:2159
+  25   9  226  unitCover_sq_minus_dense                     WedhornCechAcyclicity.lean:6141
+  25   9  188  unitCover_sq_plus_dense                      WedhornCechAcyclicity.lean:5874
+  25  15  169  presheafValue_mvRestricted_fU_uniformCont…   Wedhorn828.lean:2284
+  20  10  100  example638Bivariate_backward_forward_eq_id   LaurentOverlap.lean:1381
+  17  13  133  coUnitDatum_ker_le_span                      Wedhorn828.lean:3178
+  17  13  115  unitDatum_ker_le_span                        Wedhorn828.lean:3035
+
+15 of 45 remaining targets carry 6+ letI/haveI installs
+```
+
+**`flat_polyToP` is 172 of 181 lines — 95% instance installation.** Fourteen installs
+averaging twelve lines each, because several are `haveI hT2 : IsScalarTower … := <long
+proof>` — i.e. named lemmas wearing an instance's clothes. The whole algebra-tower stack
+(`MvPolynomial (Fin m) ↥(unitBall E)` → `MvPolynomial (Fin m) E` → `P E m`, and the ball
+corestriction `gB`) is reusable setup, not proof.
+
+Note its *statement* carries a `letI`, which is the thing that should never be in a
+statement — but changing a statement is coordinator work, so the decomposition has to
+work inside it.
+
+This scan plus axis 2 now covers the residue: **`anon = 0`** finds targets whose pieces
+need no reconstruction, and **`letI`-span** finds targets where a wall of setup will leave
+with one extracted piece. `example638Bivariate_backward_forward_eq_id` (next up) scores on
+both.
+
+### `flat_polyToP` — plan, and why it is NOT the next one to do
+
+Mapped its structure (FiniteJetGraphKoszul.lean:1627, 181 code lines):
+
+| step | what | lines |
+|---|---|---|
+| setup | the algebra tower + `gB` ball corestriction + `hT1`/`hT2` scalar towers | 19 |
+| B | `hflatB : Module.Flat R₀ ↥(unitBall (P E m))` | 27 |
+| C | `hloc1 : IsLocalization S₀ (MvPolynomial (Fin m) E)` | 71 |
+| D | `hloc2 : IsLocalization (algebraMapSubmonoid …) (P E m)` | 54 |
+| E | base change + `Module.Flat.of_linearEquiv` | 8 |
+
+B, C and D are named `haveI h : T := by …`, so on axis 2 they are ideal — each conclusion
+is written down. **But their statements are not instance-free.** `IsLocalization S₀
+(MvPolynomial (Fin m) E)` does not even typecheck without
+`Algebra (MvPolynomial (Fin m) ↥(unitBall E)) (MvPolynomial (Fin m) E)`, and it must be
+*that* algebra — `(MvPolynomial.map (unitBall E).subtype).toAlgebra` — not some other one.
+So the choice is:
+
+- pass the instances as `[Algebra …]` binders → the piece no longer knows *which* algebra,
+  and its proof needs the specific one; or
+- reproduce the 19-line preamble in each piece → 57 lines of tax against 152 extracted.
+
+The clean answer is neither: it is a dedicated `section` whose `local instance`s install
+the tower once, with B/C/D as top-level lemmas inside it and `flat_polyToP` reduced to
+~25 lines. That is the right refactor and it is worth doing.
+
+**Deferred for now on operational grounds, not mathematical ones.** `local instance` at
+section scope changes instance resolution for every declaration in that section, so it
+needs a full-gate verification to trust — and the gate is currently being SIGKILLed by
+memory pressure (swap 9.85 GB of 11.26 GB; two gate runs killed at 3339/3360 and
+3356/3360, both with zero errors). Starting a resolution-affecting refactor while the
+verification step is unreliable is how a bad change gets committed. Doing the prepared,
+low-risk twin first and reassessing.
+
+### Verification under machine contention
+
+The full gate was killed three times — at 3339/3360, 3356/3360 and 3356/3360 — **each with
+zero errors**, and the 4 jobs still in flight differed between runs, so it is not a poisoned
+module. Cause is external: 156 `lean` processes on the box, 98 from a concurrent `lake
+build TauCeti` and 39 from `lake build FLT.Claude.Final.Basic`, with swap at 9.86 GB of
+11.26 GB. My build gets roughly an eighth of the machine. Those are other sessions' work
+and I have not touched them.
+
+Rather than treat "3356/3360, no errors" as a hand-wave, I pinned the actual risk surface.
+Adding a declaration can only break downstream code one way: **name ambiguity**. So:
+
+- `val_sub_coeff_mul_X_pow_eq_zero` — unique name repo-wide, no exposure.
+- `coeff_X_pow` — **mathlib has `MvPowerSeries.coeff_X_pow`**
+  (`Mathlib/RingTheory/MvPowerSeries/Basic.lean:415`), so a file opening both namespaces
+  would see an ambiguous bare name. Seven files `open TateAlgebra`; **none** of them opens
+  `MvPowerSeries` or `PowerSeries`, and there are **zero** bare `coeff_X_pow` uses anywhere
+  in the project. No exposure.
+- All seven of those files appear as Built/Replayed in **all three** gate logs, each
+  zero-error.
+
+So the change is verified against the mechanism by which it could actually fail, not merely
+"mostly built". The formal green gate is still pending and the commit waits on it.
+
+### Task-3 item found on the way
+
+Mathlib's `MvPowerSeries.coeff_X_pow` states the same fact one level down:
+
+```lean
+coeff m (X s ^ n : MvPowerSeries σ R) = if m = Finsupp.single s n then 1 else 0
+```
+
+Since `TateAlgebra.coeff m f = MvPowerSeries.coeff (toIndex m) f.val` and
+`toIndex m = Finsupp.single 0 m`, the project's nine-line induction should collapse to a
+`show` + `rw [MvPowerSeries.coeff_X_pow]` + a `Finsupp.single` injectivity step. That is
+the "best mathlib API" audit doing its job — the induction was written because nobody
+looked one namespace over.
+
+**Not doing it blind.** The current proof is verified; the replacement is a guess about
+`((X : TateAlgebra A) ^ j).val` reducing and about which `Finsupp.single` injectivity lemma
+applies, and swapping verified code for unverified code to save five lines is a bad trade
+while a build costs an hour. Queued for task 3, with the sketch above.
+
+### Batch verified and committed
+
+```
+Build completed successfully (3360 jobs).   GATE_EXIT=0, 0 errors
+```
+
+The gate passed on the sixth attempt — it needed longer than the timeouts allowed, not
+different code. All six new/changed declarations axiom-clean
+(`propext, Classical.choice, Quot.sound`; no `sorryAx`).
+
+**Root cause of the five failed attempts, since it will recur:** 25.8 GB across 19
+processes was held by *Lean language-server workers* for this project —
+`lake serve` (pid 37931, VS Code's, up 5 days) and a second `lake serve` (pid 77443, up 3
+days), each with per-file `lean --server` workers of ~2.3 GB that are never reclaimed.
+Every worker was serving an `aintlib-adic-spaces` file, so no other project was involved;
+the concurrent TauCeti and FLT builds were a red herring I initially blamed. Killed both
+subtrees (19 processes) with the owner's authorisation.
+
+> If the gate starts dying at ~99% with zero errors, check `lake serve` worker age before
+> assuming contention from other builds. A days-old LSP holds more memory than an active
+> build does.

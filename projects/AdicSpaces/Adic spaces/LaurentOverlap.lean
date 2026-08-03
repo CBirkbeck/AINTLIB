@@ -2028,42 +2028,6 @@ theorem presheafValue_iteratedPlus_equiv_symm_continuous
     Continuous (presheafValue_iteratedPlus_equiv P D₀ f).symm :=
   iteratedPlus_backwardHom_continuous P D₀ f (laurentPlus_subset D₀ f)
 
-/-- `example638Plus_backwardHom` is continuous (from `presheafValue` canonical
-topology to `quotientPlusFSubXIdealTopology` on the target) —
-`UniformSpace.Completion.extensionHom` of a continuous ring hom, so continuous
-by `continuous_extension`. -/
-theorem example638Plus_backwardHom_continuous
-    {B : Type u} [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
-    [PlusSubring B] [IsHuberRing B] [HasLocLiftPowerBounded B]
-    [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
-    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
-    (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
-    (hnoeth : IsNoetherianRing
-      ↥(TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition)) :
-    @Continuous _ _
-      (inferInstance : TopologicalSpace (presheafValue (trivialPlusDatum B P b)))
-      (quotientPlusFSubXIdealTopology B b)
-      (example638Plus_backwardHom B P b hA_complete hnoeth) := by
-  letI : UniformSpace (Localization.Away (trivialPlusDatum B P b).s) :=
-    (trivialPlusDatum B P b).uniformSpace
-  letI : IsUniformAddGroup (Localization.Away (trivialPlusDatum B P b).s) :=
-    (trivialPlusDatum B P b).isUniformAddGroup
-  letI : IsTopologicalRing (Localization.Away (trivialPlusDatum B P b).s) :=
-    (trivialPlusDatum B P b).isTopologicalRing
-  letI : TopologicalSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdealTopology B b
-  letI : IsTopologicalRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdealTopology_isTopologicalRing B b
-  letI : IsTopologicalAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdealTopology_isTopologicalAddGroup B b
-  letI : UniformSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdealUniformSpace B b
-  letI : IsUniformAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdeal_isUniformAddGroup B b
-  haveI : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
-  exact UniformSpace.Completion.continuous_extension
-
 /-- `presheafValue_trivialPlus_fSubX_equiv` is continuous — its underlying
 function is `example638Plus_equiv.symm.toFun = example638Plus_backwardHom`,
 hence continuous by `example638Plus_backwardHom_continuous`. -/
@@ -2112,7 +2076,8 @@ theorem presheafValue_trivialPlus_fSubX_equiv_continuous
   haveI : IsNoetherianRing ↥P_B.A₀ := hA₀Noeth_B
   -- presheafValue_trivialPlus_fSubX_equiv = (example638Plus_equiv _ _ _ ... _).symm.
   -- Its toFun = example638Plus_backwardHom.
-  exact example638Plus_backwardHom_continuous P_B (D₀.canonicalMap f)
+  exact example638Plus_backwardHom_continuous (presheafValue D₀) P_B
+    (D₀.canonicalMap f)
     hA_complete_B hnoeth_B
 
 /-- `presheafValue_trivialPlus_fSubX_equiv.symm` is continuous — follows from

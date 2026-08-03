@@ -425,32 +425,13 @@ omit [IsTopologicalRing A] in
 private theorem coeff_X_pow_eq' (n : ℕ) :
     TateAlgebra.coeff n
       (TateAlgebra.X ^ n : ↥(TateAlgebra A)) = 1 := by
-  induction n with
-  | zero =>
-    simp only [pow_zero, TateAlgebra.coeff, TateAlgebra.toIndex_zero]
-    norm_cast
-  | succ n ih =>
-    rw [pow_succ, mul_comm, TateAlgebra.coeff_succ_X_mul]
-    exact ih
+  rw [TateAlgebra.coeff_X_pow, if_pos rfl]
 
 omit [IsTopologicalRing A] in
 private theorem coeff_X_pow_ne' {k n : ℕ} (h : k ≠ n) :
     TateAlgebra.coeff k
       (TateAlgebra.X ^ n : ↥(TateAlgebra A)) = 0 := by
-  induction n generalizing k with
-  | zero =>
-    cases k with
-    | zero => exact absurd rfl h
-    | succ k =>
-      simp only [pow_zero, TateAlgebra.coeff, TateAlgebra.toIndex]
-      norm_cast
-      rw [MvPowerSeries.coeff_one,
-        if_neg (Finsupp.single_ne_zero.mpr (by omega))]
-  | succ n ih =>
-    rw [pow_succ, mul_comm]; cases k with
-    | zero => exact TateAlgebra.coeff_zero_X_mul _
-    | succ k =>
-      rw [TateAlgebra.coeff_succ_X_mul]; exact ih (by omega)
+  rw [TateAlgebra.coeff_X_pow, if_neg h]
 
 /-- From `(1 - f·X)·q = a·Xⁿ`, the base case: the constant coefficient of `q`.
 

@@ -644,6 +644,121 @@ variable [IsTateRing B] [IsNoetherianRing B] [T2Space B] [NonarchimedeanRing B]
 
 open TateAlgebra
 
+/-- `example638Plus_backwardHom` is continuous (from `presheafValue` canonical
+topology to `quotientPlusFSubXIdealTopology` on the target) —
+`UniformSpace.Completion.extensionHom` of a continuous ring hom, so continuous
+by `continuous_extension`. -/
+theorem example638Plus_backwardHom_continuous
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
+    (hnoeth : IsNoetherianRing
+      ↥(TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition)) :
+    @Continuous _ _
+      (inferInstance : TopologicalSpace (presheafValue (trivialPlusDatum B P b)))
+      (quotientPlusFSubXIdealTopology B b)
+      (example638Plus_backwardHom B P b hA_complete hnoeth) := by
+  letI : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
+  letI : TopologicalSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+    quotientPlusFSubXIdealTopology B b
+  haveI hT2Q : @T2Space _ (quotientPlusFSubXIdealTopology B b) :=
+    quotient_plusFSubXIdeal_t2Space B hA_complete hnoeth b
+  letI : UniformSpace (Localization.Away (1 : B)) :=
+    (trivialPlusDatum B P b).uniformSpace
+  letI : IsUniformAddGroup (Localization.Away (1 : B)) :=
+    (trivialPlusDatum B P b).isUniformAddGroup
+  letI : IsTopologicalRing (Localization.Away (1 : B)) :=
+    (trivialPlusDatum B P b).isTopologicalRing
+  letI : UniformSpace (Localization.Away (trivialPlusDatum B P b).s) :=
+    (trivialPlusDatum B P b).uniformSpace
+  letI : IsUniformAddGroup (Localization.Away (trivialPlusDatum B P b).s) :=
+    (trivialPlusDatum B P b).isUniformAddGroup
+  letI : IsTopologicalRing (Localization.Away (trivialPlusDatum B P b).s) :=
+    (trivialPlusDatum B P b).isTopologicalRing
+  letI : UniformSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+    quotientPlusFSubXIdealUniformSpace B b
+  letI : IsUniformAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+    quotientPlusFSubXIdeal_isUniformAddGroup B b
+  letI : IsTopologicalRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+    quotientPlusFSubXIdealTopology_isTopologicalRing B b
+  haveI : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+    quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
+  exact UniformSpace.Completion.continuous_extension
+
+/-- The evaluation map `A⟨X⟩ → presheafValue` is continuous: it factors as the
+(continuous) forward map after the quotient projection. -/
+theorem example638Plus_evalHom_continuous
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    (hcont_forward : @Continuous _ _
+      (quotientPlusFSubXIdealTopology B b)
+      (inferInstance : TopologicalSpace (presheafValue (trivialPlusDatum B P b)))
+      (example638Plus_forwardHom B P b)) :
+    @Continuous _ _ instTopologicalSpaceTateAlgebra
+      (inferInstance : TopologicalSpace (presheafValue (trivialPlusDatum B P b)))
+      (example638Plus_evalHom B P b) := by
+  letI : TopologicalSpace ↥(TateAlgebra B) := instTopologicalSpaceTateAlgebra
+  letI : TopologicalSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
+    quotientPlusFSubXIdealTopology B b
+  have heq : (example638Plus_evalHom B P b : ↥(TateAlgebra B) → _) =
+      (example638Plus_forwardHom B P b ∘ Ideal.Quotient.mk (plusFSubXIdeal B b)) := by
+    ext y
+    change example638Plus_evalHom B P b y =
+      example638Plus_forwardHom B P b (Ideal.Quotient.mk _ y)
+    change _ = Ideal.Quotient.lift _ (example638Plus_evalHom B P b) _
+      (Ideal.Quotient.mk _ y)
+    rw [Ideal.Quotient.lift_mk]
+  rw [show (example638Plus_evalHom B P b : ↥(TateAlgebra B) → _) =
+      example638Plus_forwardHom B P b ∘
+        (Ideal.Quotient.mk (plusFSubXIdeal B b) : ↥(TateAlgebra B) → _)
+      from heq]
+  exact hcont_forward.comp continuous_quotient_mk'
+
+/-- `backward ∘ eval` agrees with the quotient projection on polynomials. Induction on
+the degree bound: subtract the leading term, apply the inductive hypothesis to the
+remainder, and evaluate the monomial through both maps. -/
+theorem example638Plus_agree_on_polynomials
+    (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
+    (hA_complete : @CompleteSpace B (IsTopologicalAddGroup.rightUniformSpace B))
+    (hnoeth : IsNoetherianRing
+      ↥(TateAlgebra.pairSubring (IsTateRing.principalPair B).toPairOfDefinition)) :
+    @Set.EqOn _ _
+      ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
+        (example638Plus_evalHom B P b))
+      (Ideal.Quotient.mk (plusFSubXIdeal B b))
+      {g | ∃ N : ℕ, ∀ n : Fin 1 →₀ ℕ, N ≤ n 0 → g.val n = 0} := by
+  intro g ⟨N, hN⟩
+  revert g
+  induction N with
+  | zero =>
+    intro g hN
+    have hg0 : g = 0 := by
+      ext n
+      exact hN (TateAlgebra.toIndex n)
+        (by simp [TateAlgebra.toIndex, Finsupp.single_eq_same])
+    simp [hg0, Function.comp]
+  | succ k ih =>
+    intro g hN
+    set a := TateAlgebra.coeff k g with ha_def
+    set gk : ↥(TateAlgebra B) := algebraMap B _ a * TateAlgebra.X ^ k with hgk_def
+    have hg'_vanish : ∀ n : Fin 1 →₀ ℕ, k ≤ n 0 → (g - gk).val n = 0 := by
+      rw [hgk_def, ha_def]
+      exact TateAlgebra.val_sub_coeff_mul_X_pow_eq_zero g k hN
+    have hg'_agree : ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
+        example638Plus_evalHom B P b) (g - gk) =
+        (Ideal.Quotient.mk (plusFSubXIdeal B b)) (g - gk) := ih hg'_vanish
+    have hgk_agree :
+        (example638Plus_backwardHom B P b hA_complete hnoeth)
+          (example638Plus_evalHom B P b gk) =
+        (Ideal.Quotient.mk (plusFSubXIdeal B b)) gk := by
+      rw [hgk_def, map_mul, map_pow, example638Plus_evalHom_algebraMap,
+        example638Plus_evalHom_X, map_mul, map_pow,
+        example638Plus_backwardHom_canonicalMap,
+        example638Plus_backwardHom_canonicalMap, map_mul, map_pow,
+        quotient_algebraMap_b_eq_X]
+    have hg_eq : g = (g - gk) + gk := by ring
+    simp only [Function.comp] at hg'_agree ⊢
+    rw [hg_eq, map_add, map_add, hg'_agree, hgk_agree, ← map_add]
+
+
 /-- `backward ∘ forward = id` on `TateAlgebra B ⧸ plusFSubXIdeal B b`. -/
 theorem example638Plus_backward_forward_eq_id
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B)
@@ -672,47 +787,8 @@ theorem example638Plus_backward_forward_eq_id
     (Ideal.Quotient.lift _ (example638Plus_evalHom B P b) _
       (Ideal.Quotient.mk _ x)) = _
   rw [Ideal.Quotient.lift_mk]
-  letI : UniformSpace (Localization.Away (1 : B)) :=
-    (trivialPlusDatum B P b).uniformSpace
-  letI : IsUniformAddGroup (Localization.Away (1 : B)) :=
-    (trivialPlusDatum B P b).isUniformAddGroup
-  letI : IsTopologicalRing (Localization.Away (1 : B)) :=
-    (trivialPlusDatum B P b).isTopologicalRing
-  letI : UniformSpace (Localization.Away (trivialPlusDatum B P b).s) :=
-    (trivialPlusDatum B P b).uniformSpace
-  letI : IsUniformAddGroup (Localization.Away (trivialPlusDatum B P b).s) :=
-    (trivialPlusDatum B P b).isUniformAddGroup
-  letI : IsTopologicalRing (Localization.Away (trivialPlusDatum B P b).s) :=
-    (trivialPlusDatum B P b).isTopologicalRing
-  letI : UniformSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdealUniformSpace B b
-  letI : IsUniformAddGroup (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdeal_isUniformAddGroup B b
-  letI : IsTopologicalRing (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotientPlusFSubXIdealTopology_isTopologicalRing B b
-  haveI : CompleteSpace (↥(TateAlgebra B) ⧸ plusFSubXIdeal B b) :=
-    quotient_plusFSubXIdeal_completeSpace B hA_complete hnoeth b
-  have hbwd_cont : @Continuous _ _
-      (inferInstance : TopologicalSpace (presheafValue (trivialPlusDatum B P b)))
-      (quotientPlusFSubXIdealTopology B b)
-      (example638Plus_backwardHom B P b hA_complete hnoeth) :=
-    UniformSpace.Completion.continuous_extension
-  have hevalHom_cont : @Continuous _ _ instTopologicalSpaceTateAlgebra
-      (inferInstance : TopologicalSpace (presheafValue (trivialPlusDatum B P b)))
-      (example638Plus_evalHom B P b) := by
-    have heq : (example638Plus_evalHom B P b : ↥(TateAlgebra B) → _) =
-        (example638Plus_forwardHom B P b ∘ Ideal.Quotient.mk (plusFSubXIdeal B b)) := by
-      ext y
-      change example638Plus_evalHom B P b y =
-        example638Plus_forwardHom B P b (Ideal.Quotient.mk _ y)
-      change _ = Ideal.Quotient.lift _ (example638Plus_evalHom B P b) _
-        (Ideal.Quotient.mk _ y)
-      rw [Ideal.Quotient.lift_mk]
-    rw [show (example638Plus_evalHom B P b : ↥(TateAlgebra B) → _) =
-        example638Plus_forwardHom B P b ∘
-          (Ideal.Quotient.mk (plusFSubXIdeal B b) : ↥(TateAlgebra B) → _)
-        from heq]
-    exact hcont_forward.comp continuous_quotient_mk'
+  have hbwd_cont := example638Plus_backwardHom_continuous B P b hA_complete hnoeth
+  have hevalHom_cont := example638Plus_evalHom_continuous B P b hcont_forward
   have hLHS_cont : @Continuous _ _ instTopologicalSpaceTateAlgebra
       (quotientPlusFSubXIdealTopology B b)
       ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
@@ -726,64 +802,7 @@ theorem example638Plus_backward_forward_eq_id
       {g : ↥(TateAlgebra B) |
         ∃ N : ℕ, ∀ n : Fin 1 →₀ ℕ, N ≤ n 0 → g.val n = 0} :=
     tateAlgebra_polynomials_dense_canonical (A := B)
-  have hagree : @Set.EqOn _ _
-      ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
-        (example638Plus_evalHom B P b))
-      (Ideal.Quotient.mk (plusFSubXIdeal B b))
-      {g | ∃ N : ℕ, ∀ n : Fin 1 →₀ ℕ, N ≤ n 0 → g.val n = 0} := by
-    intro g ⟨N, hN⟩
-    revert g
-    induction N with
-    | zero =>
-      intro g hN
-      have hg0 : g = 0 := by
-        ext n
-        exact hN (TateAlgebra.toIndex n)
-          (by simp [TateAlgebra.toIndex, Finsupp.single_eq_same])
-      simp [hg0, Function.comp]
-    | succ k ih =>
-      intro g hN
-      set a := TateAlgebra.coeff k g with ha_def
-      set gk : ↥(TateAlgebra B) := algebraMap B _ a * TateAlgebra.X ^ k with hgk_def
-      have hcoeff_X_pow : ∀ m j : ℕ,
-          TateAlgebra.coeff m (TateAlgebra.X ^ j : ↥(TateAlgebra B)) =
-          if m = j then 1 else 0 := by
-        intro m j; revert m; induction j with
-        | zero => intro m; simp [pow_zero, TateAlgebra.coeff, TateAlgebra.toIndex,
-            MvPowerSeries.coeff_one]
-        | succ j ihj =>
-          intro m; rw [pow_succ, mul_comm]
-          cases m with
-          | zero => rw [TateAlgebra.coeff_zero_X_mul, if_neg (by omega)]
-          | succ m => rw [TateAlgebra.coeff_succ_X_mul, ihj m]; simp
-      have hg'_vanish : ∀ n : Fin 1 →₀ ℕ, k ≤ n 0 → (g - gk).val n = 0 := by
-        intro n hn
-        rw [TateAlgebra.eq_toIndex n]
-        change TateAlgebra.coeff (n 0) (g - gk) = 0
-        rw [TateAlgebra.coeff_sub, hgk_def, TateAlgebra.coeff_algebraMap_mul,
-          hcoeff_X_pow (n 0) k]
-        by_cases hnk : n 0 = k
-        · rw [if_pos hnk, mul_one, ha_def, hnk, sub_self]
-        · rw [if_neg hnk, mul_zero, sub_zero]
-          have hn_gt : k + 1 ≤ n 0 := by omega
-          change (MvPowerSeries.coeff (TateAlgebra.toIndex (n 0))) g.val = 0
-          rw [MvPowerSeries.coeff_apply]
-          exact hN _ (by simp [TateAlgebra.toIndex, Finsupp.single_eq_same]; omega)
-      have hg'_agree : ((example638Plus_backwardHom B P b hA_complete hnoeth) ∘
-          example638Plus_evalHom B P b) (g - gk) =
-          (Ideal.Quotient.mk (plusFSubXIdeal B b)) (g - gk) := ih hg'_vanish
-      have hgk_agree :
-          (example638Plus_backwardHom B P b hA_complete hnoeth)
-            (example638Plus_evalHom B P b gk) =
-          (Ideal.Quotient.mk (plusFSubXIdeal B b)) gk := by
-        rw [hgk_def, map_mul, map_pow, example638Plus_evalHom_algebraMap,
-          example638Plus_evalHom_X, map_mul, map_pow,
-          example638Plus_backwardHom_canonicalMap,
-          example638Plus_backwardHom_canonicalMap, map_mul, map_pow,
-          quotient_algebraMap_b_eq_X]
-      have hg_eq : g = (g - gk) + gk := by ring
-      simp only [Function.comp] at hg'_agree ⊢
-      rw [hg_eq, map_add, map_add, hg'_agree, hgk_agree, ← map_add]
+  have hagree := example638Plus_agree_on_polynomials B P b hA_complete hnoeth
   exact congr_fun (Continuous.ext_on hS_dense hLHS_cont hRHS_cont hagree) x
 
 set_option backward.isDefEq.respectTransparency false in

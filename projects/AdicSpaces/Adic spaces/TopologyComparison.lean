@@ -1103,33 +1103,9 @@ private theorem polynomial_quotient_in_range (s : A) (g : ↥(TateAlgebra A))
         rw [map_mul, map_pow, locToQuotientOneSubfX_gen_algebraMap,
           locToQuotientOneSubfX_gen_invSelf, hgk_def, ← map_pow, ← map_mul]⟩
     -- g - gk has coefficients zero above degree k.
-    -- Helper: coeff m (X ^ j) = δ_{m,j} for TateAlgebra.
-    have hcoeff_X_pow : ∀ m j : ℕ, TateAlgebra.coeff m (TateAlgebra.X ^ j : ↥(TateAlgebra A)) =
-        if m = j then 1 else 0 := by
-      intro m j; revert m; induction j with
-      | zero => intro m; simp [pow_zero, TateAlgebra.coeff, TateAlgebra.toIndex,
-          MvPowerSeries.coeff_one]
-      | succ j ihj =>
-        intro m; rw [pow_succ, mul_comm]
-        cases m with
-        | zero => rw [TateAlgebra.coeff_zero_X_mul, if_neg (by omega)]
-        | succ m => rw [TateAlgebra.coeff_succ_X_mul, ihj m]; simp
     have hg'_vanish : ∀ n : Fin 1 →₀ ℕ, k ≤ n 0 → (g - gk).val n = 0 := by
-      -- Restate using TateAlgebra.coeff via eq_toIndex.
-      intro n hn
-      rw [TateAlgebra.eq_toIndex n]
-      change TateAlgebra.coeff (n 0) (g - gk) = 0
-      rw [TateAlgebra.coeff_sub, hgk_def, TateAlgebra.coeff_algebraMap_mul,
-        hcoeff_X_pow (n 0) k]
-      by_cases hnk : n 0 = k
-      · -- coeff k g = a and coeff k gk = a, so difference is 0.
-        rw [if_pos hnk, mul_one, ha_def, hnk, sub_self]
-      · -- coeff (n 0) g = 0 (by hN) and coeff (n 0) gk = 0.
-        rw [if_neg hnk, mul_zero, sub_zero]
-        have hn_gt : k + 1 ≤ n 0 := by omega
-        change (MvPowerSeries.coeff (TateAlgebra.toIndex (n 0))) g.val = 0
-        rw [MvPowerSeries.coeff_apply]
-        exact hN _ (by simp [TateAlgebra.toIndex, Finsupp.single_eq_same]; omega)
+      rw [hgk_def, ha_def]
+      exact TateAlgebra.val_sub_coeff_mul_X_pow_eq_zero g k hN
     -- By IH, mk(g - gk) is in the range.
     have hg'_range := ih (g - gk) hg'_vanish
     -- mk(g) = mk(g - gk) + mk(gk), both in range.

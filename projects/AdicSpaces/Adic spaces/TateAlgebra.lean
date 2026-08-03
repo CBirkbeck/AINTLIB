@@ -529,6 +529,38 @@ theorem coeff_zero_X_mul (u : ↥(TateAlgebra A)) :
     coeff 0 (X * u) = 0 := by
   have := evalZeroHom_X_mul u; simp only [evalZeroHom] at this; exact this
 
+/-- `X ^ j` has coefficient `1` in degree `j` and `0` in every other degree. -/
+theorem coeff_X_pow (m j : ℕ) :
+    coeff m (X ^ j : ↥(TateAlgebra A)) = if m = j then 1 else 0 := by
+  revert m; induction j with
+  | zero => intro m; simp [pow_zero, coeff, toIndex, MvPowerSeries.coeff_one]
+  | succ j ihj =>
+    intro m; rw [pow_succ, mul_comm]
+    cases m with
+    | zero => rw [coeff_zero_X_mul, if_neg (by omega)]
+    | succ m => rw [coeff_succ_X_mul, ihj m]; simp
+
+/-- Subtracting its degree-`k` term from `g` extends the vanishing range of the
+coefficients down by one: if those of `g` vanish above `k`, those of
+`g - algebraMap (coeff k g) * X ^ k` vanish from `k` on.
+
+This is the induction step of every "polynomials are dense" argument over `A⟨X⟩`. -/
+theorem val_sub_coeff_mul_X_pow_eq_zero (g : ↥(TateAlgebra A)) (k : ℕ)
+    (hN : ∀ n : Fin 1 →₀ ℕ, k + 1 ≤ n 0 → g.val n = 0)
+    (n : Fin 1 →₀ ℕ) (hn : k ≤ n 0) :
+    (g - algebraMap A ↥(TateAlgebra A) (coeff k g) * X ^ k).val n = 0 := by
+  rw [eq_toIndex n]
+  change coeff (n 0) (g - algebraMap A ↥(TateAlgebra A) (coeff k g) * X ^ k) = 0
+  rw [coeff_sub, coeff_algebraMap_mul, coeff_X_pow (n 0) k]
+  by_cases hnk : n 0 = k
+  · -- the degree-`k` coefficients cancel
+    rw [if_pos hnk, mul_one, hnk, sub_self]
+  · -- above `k`, both coefficients vanish separately
+    rw [if_neg hnk, mul_zero, sub_zero]
+    change (MvPowerSeries.coeff (toIndex (n 0))) g.val = 0
+    rw [MvPowerSeries.coeff_apply]
+    exact hN _ (by simp [toIndex, Finsupp.single_eq_same]; omega)
+
 /-! #### Noetherian ascending chain lemma -/
 
 omit [TopologicalSpace A] [NonarchimedeanRing A] in
