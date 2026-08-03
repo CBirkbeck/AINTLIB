@@ -11862,3 +11862,48 @@ Value: it removes ~20 duplicated instance lines **and** unblocks step-extraction
 five targets at once, because their steps' statements name those `letI`-bound instances
 (`@Continuous _ _ D.topology τQ ψγ`) and so currently cannot be stated outside the proof.
 688 code lines of the residue sit in this one file.
+
+## Consolidated status
+
+**Task 1 — complete.** Re-verified: zero heartbeat/synthPending raises outside `Vendored/`.
+The four grep hits are two historical *comments* recording raises that were removed, and two
+in `Vendored/CoramRestrictedIso.lean` (skipped per the directive). Filter note: grep emits
+`Vendored/…` with no leading `./`, so the exclusion pattern must be `^Vendored/`, not
+`/Vendored/`.
+
+**Task 2 — 486 → 43** proof bodies over 50 code lines (2 sorry-bearing, out of scope).
+
+**Task 3 — three items queued**, each with a written plan: the 11 statement-level re-proofs
+from scan 4 (52 lines), the `MvPowerSeries.coeff_X_pow` API swap, and the
+`idealOfDef_pow_isClosed_aux` `let π` → def promotion.
+
+### What the remaining 43 have in common
+
+Established over four consecutive targets and confirmed by a targeted search: **the residue
+is blocked on proof-local bindings appearing in the statements of the proof's own steps.**
+The steps are named `have`s with written-down statements — ideal shape — but they mention a
+`letI`/`let`/`set` bound inside the proof, so they do not typecheck outside it.
+
+Two fixes, both proven here:
+
+1. **Spell the term instead of the abbreviation.** Where the local is a *closed term* in the
+   theorem's binders (`τQ := mvQuotTopology (D.T.card + m) (RingHom.ker Ψ)`), the extracted
+   lemma can inline it. Zero risk — no instance-resolution change. Wedhorn828's targets are
+   all of this kind; the theorem conclusions already spell them out.
+2. **Promote to section scope** — `local instance` / `private def` — when the local is
+   shared across several steps or several theorems. Proven on `flat_polyToP`
+   (`polyBallCod`, `ballDenoms`, six instances) and `syzygy_graph_polynomial`
+   (`koszulReachable`).
+
+**The trap to avoid, hit twice and recorded:** extracting a step whose body still needs the
+25-line instance preamble produces a lemma *over* 50, trading one over-50 body for another.
+`hψγ_cont` (49 → 57 as a lemma) and `hkey` (40 → ~65) both fail this way. The preamble has
+to leave with the piece, or leave via a section, before the extraction is worth doing.
+
+### A selector for the next session
+
+`scratchpad/` now has, per target, the largest single `have` block and the resulting size if
+it were lifted. Four targets are one-extraction-clears on paper; two of those
+(`isOXAcyclic_interProd`, `xPresheaf_isSheafOfTopologicalRings`) are the ones already
+deferred with diagnoses (cumulative elaboration cost; universe wall), and the other two hit
+the preamble trap above. Cross-check any candidate against both lists before starting.
