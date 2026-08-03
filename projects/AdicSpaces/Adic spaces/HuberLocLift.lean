@@ -482,6 +482,34 @@ private theorem huber_ofValuation_mem_spa
     exact restrictIdealSingle_le_one hW1 (hW_le f hf)
 
 
+/-- If `s` and `t.comap (algebraMap R S)` are equivalent valuations and `s ≤ 1` everywhere, then
+`t` is `≤ 1` on everything in the image of `R`. Stated over an abstract `R` so the caller supplies
+the subalgebra element rather than the extracted lemma re-deriving it. -/
+private theorem valuation_le_one_of_isEquiv {S : Type*} [CommRing S] {R : Type*} [CommRing R]
+    [Algebra R S] {Γs Γt : Type*} [LinearOrderedCommGroupWithZero Γs]
+    [LinearOrderedCommGroupWithZero Γt] (s : Valuation R Γs) (t : Valuation S Γt)
+    (ht_equiv : s.IsEquiv (Valuation.comap (algebraMap R S) t))
+    (hs_le : ∀ r, s r ≤ 1) (y : S) (r : R) (hr : algebraMap R S r = y) : t y ≤ 1 := by
+  have hkey := (ht_equiv r 1).mp (by rw [map_one]; exact hs_le _)
+  rw [Valuation.comap_apply, Valuation.comap_apply, map_one, map_one, hr] at hkey
+  exact hkey
+
+/-- The strict companion: where `s` is strictly below `1`, so is `t`. -/
+private theorem valuation_lt_one_of_isEquiv {S : Type*} [CommRing S] {R : Type*} [CommRing R]
+    [Algebra R S] {Γs Γt : Type*} [LinearOrderedCommGroupWithZero Γs]
+    [LinearOrderedCommGroupWithZero Γt] (s : Valuation R Γs) (t : Valuation S Γt)
+    (ht_equiv : s.IsEquiv (Valuation.comap (algebraMap R S) t))
+    (y : S) (r : R) (hr : algebraMap R S r = y) (hs_r : s r < 1) : t y < 1 := by
+  rw [← not_le]
+  intro hge
+  have h2 : s 1 ≤ s r := by
+    refine (ht_equiv 1 r).mpr ?_
+    simp only [Valuation.comap_apply, map_one, hr]
+    exact hge
+  rw [map_one] at h2
+  exact absurd h2 (not_le.mpr hs_r)
+
+
 set_option linter.unusedSectionVars false in
 /-- **Huber [Hu2] 3.3(i)**: an element of `presheafValue D'` outside the ring of integral
 elements admits a Spa point valuing it above `1`.
@@ -531,27 +559,13 @@ theorem exists_spa_point_not_vle_one_huber
   -- ▸ Pre-extracted facts about the comap valuation `W a := t(algebraMap a)` (Huber's properties
   --   (b)(c)(d)), for the restricted-witness continuity wiring (T-SPVAI-4).
   have hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
-      t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1 := by
-    intro f hf
-    have hg_mem : algebraMap (presheafValue D') (Localization.Away x) f ∈ Radj := by
-      rw [hRadj]
-      exact (Algebra.adjoin (↥(presheafValue D')⁺)
-        {(IsLocalization.Away.invSelf x : Localization.Away x)}).algebraMap_mem ⟨f, hf⟩
-    have hkey := (ht_equiv
-      (⟨algebraMap (presheafValue D') (Localization.Away x) f, hg_mem⟩ : ↥Radj) 1).mp
-      (by rw [map_one]; exact hs_le _)
-    rw [Valuation.comap_apply, Valuation.comap_apply, map_one, map_one] at hkey
-    exact hkey
-  have ht_inv : t (IsLocalization.Away.invSelf x) < 1 := by
-    rw [← not_le]
-    intro hge
-    have h2 : s (1 : ↑Radj) ≤
-        s ⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ := by
-      refine (ht_equiv 1 _).mpr ?_
-      simp only [Valuation.comap_apply, map_one]
-      exact hge
-    rw [map_one] at h2
-    exact absurd h2 (not_le.mpr (hs_lt _ hxinv𝔪))
+      t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1 := fun f hf =>
+    valuation_le_one_of_isEquiv s t ht_equiv hs_le _
+      ⟨_, Radj.algebraMap_mem ⟨f, hf⟩⟩ rfl
+  have ht_inv : t (IsLocalization.Away.invSelf x) < 1 :=
+    valuation_lt_one_of_isEquiv s t ht_equiv _
+      ⟨IsLocalization.Away.invSelf x, Algebra.subset_adjoin (Set.mem_singleton _)⟩ rfl
+      (hs_lt _ hxinv𝔪)
   -- Huber's continuity argument (c): `v < 1` on topologically nilpotent elements.
   have hW_lt_AOO := huber_t_lt_one_of_topologicallyNilpotent D' x t hW_le ht_inv
   have hW_x := huber_one_lt_t_x D' x t ht_inv

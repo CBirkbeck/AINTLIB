@@ -13410,3 +13410,56 @@ it.**
 Also: with `idx` abstract, `none ∈ idx` stops being definitional, so it becomes a hypothesis
 `hnone` that the caller discharges with `Finset.mem_insert_self _ _`. Same shape as `hDB_one` in
 the `WedhornCechAcyclicity` round — abstract the object, pass the field-facts the proof opens up.
+
+### `exists_spa_point_not_vle_one_huber` 61 -> 45: `HuberLocLift` is clear (141 -> 45 overall)
+
+The two blocks I had recorded as **blocked on instance defeq** came out in one round, green first
+try, by inverting the approach.
+
+| new lemma | code | what it is |
+|---|---|---|
+| `valuation_le_one_of_isEquiv` | 3 | `s ≈ t.comap (algebraMap R S)` and `s ≤ 1` ⟹ `t ≤ 1` on the image of `R` |
+| `valuation_lt_one_of_isEquiv` | 9 | the strict companion |
+
+**The technique: when threading a specific instance fails, abstract the whole structure and let
+the caller build the element.** The previous attempt kept `Radj` spelled —
+`Algebra.adjoin ↑(presheafValue D')⁺ {…}` — which drags in the parent's
+`letI : Algebra ↥(presheafValue D')⁺ (presheafValue D') := …subtype.toAlgebra`. Declaring that as
+an instance binder gives an *arbitrary* algebra structure, and `Subalgebra.algebraMap_mem` then
+does not typecheck against it.
+
+Stating the lemmas over a bare `{R : Type*} [CommRing R] [Algebra R S]` removes the problem
+entirely: nothing in the statement mentions the adjoin, so no instance has to be reproduced. The
+subalgebra element and its membership proof are constructed **at the call site**, where the
+parent's `letI` is in scope and everything is definitionally right:
+
+```lean
+  have hW_le : ∀ f : presheafValue D', f ∈ (presheafValue D')⁺ →
+      t (algebraMap (presheafValue D') (Localization.Away x) f) ≤ 1 := fun f hf =>
+    valuation_le_one_of_isEquiv s t ht_equiv hs_le _ ⟨_, Radj.algebraMap_mem ⟨f, hf⟩⟩ rfl
+```
+
+The `hr : algebraMap R S r = y` parameter is what carries the connection, and at the call site it
+is just `rfl`. This generalises the earlier "pass the consequence, not the machinery" note: **when
+the machinery is an instance rather than a hypothesis, pass the *carrier* abstractly and let `rfl`
+at the call site do the identification.**
+
+Both lemmas are also genuinely reusable — they say nothing about Huber rings or adic spaces, only
+about a valuation equivalent to a comap.
+
+### Corrected verdicts from the one-line call-site model
+
+Re-ranking all 25 with one-line calls (the correction from the previous round) moved three targets
+from "~" to a definite small number:
+
+| target | old verdict | new |
+|---|---|---|
+| `exists_spa_point_not_vle_one_huber` (61) | ~ | **1 lift — done** |
+| `genPiece_relOverlap_forward_witness` (103) | ~7 | **5 lifts** |
+| `locToQuotient_mul_small_constant_mem` (124) | ~ | **6 lifts** |
+| `presheafValue_mvRestricted_surjection` (187) | ~ | **7 lifts** |
+
+The remaining `~` entries are genuinely hard for structural reasons already recorded: single-branch
+proofs (`[105]`, `[108]`, `[184]`, `[130]`, `[133]`, `[107]`, `[103]`) where the one block *is* the
+proof, and `ker_restrictionMapHom_subset_closure_algLift` whose blocks are all ≤7 lines — a merge
+job rather than a split job.
