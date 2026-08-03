@@ -35722,3 +35722,39 @@ route does not give.
 - **Then**: apply WP-D3b to each factor, and construct ζ factor by factor — which is exactly
   the componentwise treatment ChatGPT's C3 prescribes, with the finite clopen decomposition
   made explicit as a ring product.
+
+## [WP-D3a-DOM] DONE (2026-08-04) — the componentwise decomposition, axiom-verified
+
+`ForMathlib/SmoothCurveComponents.lean` (new, sorry-free, seven declarations). For a ring `A`
+all of whose localizations at maximal ideals are domains:
+
+| lemma | content |
+|---|---|
+| `comap_bot_localizationAtPrime_le` | `(A → A_m)⁻¹(⊥) ≤ r` for every prime `r ≤ m` |
+| `eq_comap_bot_of_mem_minimalPrimes` | every minimal prime below `m` **is** that contraction |
+| `eq_of_mem_minimalPrimes_of_le` | hence two minimal primes below a common `m` coincide |
+| `sup_eq_top_of_ne_of_mem_minimalPrimes` | distinct minimal primes are comaximal |
+| `pairwise_isCoprime_minimalPrimes` | the CRT hypothesis |
+| `isReduced_of_localizationAtPrime_isDomain` | `A` is reduced |
+| `sInf_minimalPrimes_eq_bot` | `⋂ pᵢ = ⊥` |
+| `injective_pi_quotient_minimalPrimes` | `A ↪ ∏ A ⧸ pᵢ` |
+
+With mathlib's `Ideal.pi_quotient_surjective` (which consumes
+`pairwise_isCoprime_minimalPrimes`) this is the decomposition `A ≅ ∏ A ⧸ pᵢ` in the two forms
+the root construction needs: a value can be **prescribed** on each component, and a value is
+**determined** by its components.
+
+**The argument is elementary** — no order isomorphism of prime spectra. If `A_m` is a domain
+then `⊥` is prime and its contraction `P₀` lies inside *every* prime `r ≤ m` (an element
+killed by some `s ∉ m` lies in `r`, since `r` is prime and `s ∉ r`); minimality of `r` forces
+`r = P₀`. That single observation gives the whole chain.
+
+**Input for the intended use**: `isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth`
+(`ForMathlib/StandardSmoothMaximalDVR.lean:41`) supplies the `IsDomain` hypothesis at every
+maximal ideal of a standard-smooth curve over **an arbitrary field** — no `IsAlgClosed`,
+unlike `isDomain_localization_atPrime_of_isMaximal`.
+
+**Stage B's base side is now complete**: standard smooth (`WP-D3a-SS`, withdrawn — already
+available), integrally closed on each factor (`WP-D3b`), and the decomposition into factors
+(`WP-D3a-DOM`). What remains is the root itself: `WP-D3c` step 2 (field-change naturality,
+now a uniqueness argument) and `WP-D3d` (ζ, primitivity, the det-cocycle).

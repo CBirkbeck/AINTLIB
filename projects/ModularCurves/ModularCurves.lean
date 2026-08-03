@@ -215,6 +215,7 @@ import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.CharZeroAssembly
 import ModularCurves.WeilPairing.DescentFaithful
 import ModularCurves.ForMathlib.StandardSmoothIntegrallyClosed
+import ModularCurves.ForMathlib.SmoothCurveComponents
 import ModularCurves.WeilPairing.DetCocycle
 import ModularCurves.WeilPairing.FieldPairingUnique
 import ModularCurves.WeilPairing.FieldPairingDet
