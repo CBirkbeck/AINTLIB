@@ -35613,3 +35613,58 @@ satisfies the characterisation clause over `L` (both sides induce the same Silve
 on `L̄`-points), so `fieldWeilPairingHom_unique` forces it to *be*
 `fieldWeilPairingHom L …`. The remaining work is the base-change bookkeeping on
 `torsionPairAlgebra`, `muNAlgebra` and `weilPairingFibreMap`, not new mathematics.
+
+# ══════════════════════════════════════════════════════════════════════════
+# SESSION STATE — 2026-08-03/04. Root green at **9644 jobs**.
+# ══════════════════════════════════════════════════════════════════════════
+
+## Landed this session (all `propext / Classical.choice / Quot.sound`)
+
+| # | result | file |
+|---|---|---|
+| 1 | **WP-D2c-3** `yFullCandidateHomEquiv_symm_natural` — the D-chain is sorry-free | `ModularCurve/YFullFromYOne.lean` + `Moduli/LevelLocusNatural.lean` |
+| 2 | **T-E9** `YFull.gammaFullNaive_representable_assembly` — `Y(N)` rigid + representable + smooth + affine for `3 ≤ N` | `ModularCurve/YFullSmoothAffine.lean` (new) |
+| 3 | **WP-D3b** `isIntegrallyClosed_of_isStandardSmoothOfRelativeDimension_one` | `ForMathlib/StandardSmoothIntegrallyClosed.lean` (new) |
+| 4 | **WP-B5b** the DS4 cocycle's mechanical half (clopen reading + glue) | `WeilPairing/DetCocycle.lean` (new) |
+| 5 | **WP-D3c step 1** the field pairing is unique, and now *named* | `WeilPairing/FieldPairingUnique.lean` (new) |
+
+**Two `sorry`s removed from the root cone** (`ModularCurve/YFullRoute.lean:783` and
+`Moduli/Representability.lean:663`), **none added**. Four new modules, all wired into
+`ModularCurves.lean`.
+
+## Tooling
+
+`scripts/sorry-roots.lean` — walks a target's value-level cone and names the sorried leaves.
+Every dependency claim in this session's entries is its output, not inference.
+
+## The critical path as it now stands
+
+```
+DS4 def + _over
+  ← WeilPairingLocalData                                    (record: ✅)
+      ← cover  fullLevelSpaceStruct_fppf                    ✅
+      ← pairing  localDetPairing                            ✅
+      ← overBase  localDetPairing_over                      ✅
+      ← cocycle
+          ← clopen reading + glue  (WP-B5b)                 ✅ this session
+          ← THE ROOT TRANSFORMS BY det   (WP-D3c/D3d)       ✘  ← the one gap
+                ← field pairing is canonical (step 1)       ✅ this session
+                ← field-change naturality (step 2, C3)      ✘  now a uniqueness argument
+                ← base integrally closed (WP-D3b)           ✅ this session
+                ← base a domain (componentwise, C3)         ✘
+                ← base standard smooth as a *ring*          ✘  (`Locally` unwrapping)
+                ← Y(N) smooth affine (T-E9)                 ✅ this session
+  → WP-C2 → the four computational specs → weilPairing_torsionMapOfEllHom → yRho_representable
+```
+
+`yRho_representable`'s seven sorry-roots are unchanged and remain exactly the Weil-pairing
+register; nothing else in its cone carries a `sorry`.
+
+## Out of scope, unchanged
+
+* **Leg 2** `yRho_geometricallyIrreducible` (`YRho.lean:8740`) — complex uniformisation or
+  monodromy; neither in mathlib nor in the tree. Stage B is designed not to need it.
+* **T-W7 wiring** — `FibrewiseElliptic.locallyWeierstrass` proved, zero consumers.
+* **The orphan sweep** — `lane:cleanup` work on `main`. (Note: the three modules added to the
+  root this session pulled in `StandardSmoothMaximalDVR`'s chain with **no** duplicate-name
+  clash, so the 77-orphan problem is not uniform — some chains wire in cleanly.)

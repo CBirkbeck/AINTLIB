@@ -214,6 +214,9 @@ import ModularCurves.Picard.UnitPullback
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.CharZeroAssembly
 import ModularCurves.WeilPairing.DescentFaithful
+import ModularCurves.ForMathlib.StandardSmoothIntegrallyClosed
+import ModularCurves.WeilPairing.DetCocycle
+import ModularCurves.WeilPairing.FieldPairingUnique
 import ModularCurves.WeilPairing.FieldPairingDet
 import ModularCurves.WeilPairing.FullLevelCover
 import ModularCurves.WeilPairing.RootSplitting
